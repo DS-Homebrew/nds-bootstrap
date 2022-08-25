@@ -53,7 +53,7 @@ const u16* generateA7InstrThumb(int arg1, int arg2) {
 	u32 offset = (u32)(arg2 - arg1 - 4);
 	//dbg_printf("generateA7InstrThumb offset\n");
 	//dbg_hexa(offset);
-	
+
 	// 1st instruction contains the upper 11 bit of the offset
 	instrs[0] = ((offset >> 12) & 0x7FF) | 0xF000;
 
@@ -61,6 +61,24 @@ const u16* generateA7InstrThumb(int arg1, int arg2) {
 	instrs[1] = ((offset >> 1) & 0x7FF) | 0xF800;
 
 	return instrs;
+}
+
+void setBLThumb(int arg1, int arg2) {
+	u16 instrs[2];
+
+	// 23 bit offset
+	u32 offset = (u32)(arg2 - arg1 - 4);
+	//dbg_printf("generateA7InstrThumb offset\n");
+	//dbg_hexa(offset);
+
+	// 1st instruction contains the upper 11 bit of the offset
+	instrs[0] = ((offset >> 12) & 0x7FF) | 0xF000;
+
+	// 2nd instruction contains the lower 11 bit of the offset
+	instrs[1] = ((offset >> 1) & 0x7FF) | 0xF800;
+
+	*(u16*)arg1 = instrs[0];
+	*(u16*)(arg1 + 2) = instrs[1];
 }
 
 u16* getOffsetFromBLThumb(u16* blOffset) {

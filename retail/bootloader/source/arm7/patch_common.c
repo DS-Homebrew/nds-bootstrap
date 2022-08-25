@@ -47,7 +47,8 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	extern u32 fatTableAddr;
 	const char* romTid = getRomTid(ndsHeader);
 	extern void patchHiHeapDSiWare(u32 addr, u32 heapEnd);
-	extern void patchHiHeapDSiWareThumb(u32 addr, u16 opCode1, u16 opCode2);
+	extern void patchHiHeapDSiWareThumbOld(u32 addr, u16 opCode1, u16 opCode2);
+	extern void patchHiHeapDSiWareThumb(u32 addr, u32 newCodeAddr, u32 heapEnd);
 
 	const u32 heapEnd = (fatTableAddr < 0x023C0000 || fatTableAddr >= CARDENGINE_ARM9_LOCATION_DLDI) ? CARDENGINE_ARM9_LOCATION_DLDI : fatTableAddr;
 
@@ -2256,8 +2257,49 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Crash-Course Domo (USA)
 	else if (strcmp(romTid, "KDCE") == 0) {
+		const u32 dsiSaveCreateT = 0x02024B0C;
+		*(u16*)dsiSaveCreateT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveCreateT + 4), ce9->patches->dsiSaveCreate, 0xC);
+
+		const u32 dsiSaveDeleteT = 0x02024B1C;
+		*(u16*)dsiSaveDeleteT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveDeleteT + 4), ce9->patches->dsiSaveDelete, 0xC);
+
+		const u32 dsiSaveOpenT = 0x02024B2C;
+		*(u16*)dsiSaveOpenT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveOpenT + 4), ce9->patches->dsiSaveOpen, 0xC);
+
+		const u32 dsiSaveCloseT = 0x02024B3C;
+		*(u16*)dsiSaveCloseT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveCloseT + 4), ce9->patches->dsiSaveClose, 0xC);
+
+		const u32 dsiSaveReadT = 0x02024B4C;
+		*(u16*)dsiSaveReadT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveReadT + 4), ce9->patches->dsiSaveRead, 0xC);
+
+		const u32 dsiSaveWriteT = 0x02024B5C;
+		*(u16*)dsiSaveWriteT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveWriteT + 4), ce9->patches->dsiSaveWrite, 0xC);
+
 		*(u16*)0x0200DF38 = 0x2001; // movs r0, #1
 		*(u16*)0x0200DF3A = 0x4770; // bx lr
+		//doubleNopT(0x0200DF8A); // dsiSaveGetArcSrc
+		doubleNopT(0x0200E1E6);
+		*(u16*)0x0200E228 = 0x2001; // movs r0, #1 (dsiSaveGetInfo)
+		*(u16*)0x0200E22A = 0x4770; // bx lr
+		setBLThumb(0x0200E28E, dsiSaveCreateT);
+		setBLThumb(0x0200E2A4, dsiSaveOpenT);
+		doubleNopT(0x0200E2C0); // dsiSaveSetLength
+		setBLThumb(0x0200E2D4, dsiSaveWriteT);
+		setBLThumb(0x0200E2E6, dsiSaveCloseT);
+		*(u16*)0x0200E30C = 0x4778; // bx pc
+		*(u32*)0x0200E310 = 0xE3A00F82; // mov r0, #0x208 (dsiSaveGetLength)
+		*(u32*)0x0200E314 = 0xE12FFF1E; // bx lr
+		setBLThumb(0x0200E33C, dsiSaveOpenT);
+		setBLThumb(0x0200E362, dsiSaveCloseT);
+		setBLThumb(0x0200E374, dsiSaveReadT);
+		setBLThumb(0x0200E37A, dsiSaveCloseT);
+		setBLThumb(0x0200E38E, dsiSaveDeleteT);
 		*(u16*)0x020153C4 = 0x4770; // bx lr (Disable NFTR loading from TWLNAND)
 		*(u16*)0x02015418 = 0x46C0; // nop
 		doubleNopT(0x02023C72);
@@ -2267,7 +2309,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		doubleNopT(0x0202A102);
 		doubleNopT(0x0202A10E);
 		doubleNopT(0x0202A1F2);
-		patchHiHeapDSiWareThumb(0x0202A230, 0x208F, 0x0480); // movs r0, #0x23C0000
+		patchHiHeapDSiWareThumb(0x0202A230, 0x02024B6C, heapEnd); // movs r0, #0x23C0000
 		doubleNopT(0x0202B2B6);
 		*(u16*)0x0202B2BA = 0x46C0; // nop
 		*(u16*)0x0202B2BC = 0x46C0; // nop
@@ -3466,8 +3508,48 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Hard-Hat Domo (USA)
 	else if (strcmp(romTid, "KDHE") == 0) {
+		const u32 dsiSaveCreateT = 0x020238C8;
+		*(u16*)dsiSaveCreateT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveCreateT + 4), ce9->patches->dsiSaveCreate, 0xC);
+
+		const u32 dsiSaveDeleteT = 0x020238D8;
+		*(u16*)dsiSaveDeleteT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveDeleteT + 4), ce9->patches->dsiSaveDelete, 0xC);
+
+		const u32 dsiSaveOpenT = 0x020238E8;
+		*(u16*)dsiSaveOpenT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveOpenT + 4), ce9->patches->dsiSaveOpen, 0xC);
+
+		const u32 dsiSaveCloseT = 0x020238F8;
+		*(u16*)dsiSaveCloseT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveCloseT + 4), ce9->patches->dsiSaveClose, 0xC);
+
+		const u32 dsiSaveReadT = 0x02023908;
+		*(u16*)dsiSaveReadT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveReadT + 4), ce9->patches->dsiSaveRead, 0xC);
+
+		const u32 dsiSaveWriteT = 0x02023918;
+		*(u16*)dsiSaveWriteT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveWriteT + 4), ce9->patches->dsiSaveWrite, 0xC);
+
 		*(u16*)0x0200D060 = 0x2001; // movs r0, #1
 		*(u16*)0x0200D062 = 0x4770; // bx lr
+		*(u16*)0x0200D350 = 0x2001; // movs r0, #1 (dsiSaveGetInfo)
+		*(u16*)0x0200D352 = 0x4770; // bx lr
+		doubleNopT(0x0200D30E);
+		setBLThumb(0x0200D3B6, dsiSaveCreateT);
+		setBLThumb(0x0200D3CC, dsiSaveOpenT);
+		doubleNopT(0x0200D3E8); // dsiSaveSetLength
+		setBLThumb(0x0200D3FC, dsiSaveWriteT);
+		setBLThumb(0x0200D40E, dsiSaveCloseT);
+		*(u16*)0x0200D434 = 0x4778; // bx pc
+		*(u32*)0x0200D438 = 0xE3A00F82; // mov r0, #0x208
+		*(u32*)0x0200D43C = 0xE12FFF1E; // bx lr
+		setBLThumb(0x0200D464, dsiSaveOpenT);
+		setBLThumb(0x0200D48A, dsiSaveCloseT);
+		setBLThumb(0x0200D49C, dsiSaveReadT);
+		setBLThumb(0x0200D4A2, dsiSaveCloseT);
+		setBLThumb(0x0200D4B6, dsiSaveDeleteT);
 		*(u16*)0x020140AC = 0x4770; // bx lr (Disable NFTR loading from TWLNAND)
 		doubleNopT(0x02024C7E);
 		doubleNopT(0x02022A2E);
@@ -3476,7 +3558,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		doubleNopT(0x02028EBE);
 		doubleNopT(0x02028ECA);
 		doubleNopT(0x02028FAE);
-		patchHiHeapDSiWareThumb(0x02028FEC, 0x208F, 0x0480); // movs r0, #0x23C0000
+		patchHiHeapDSiWareThumb(0x02028FEC, 0x02023928, heapEnd); // movs r0, #0x23C0000
 		doubleNopT(0x0202A076);
 		*(u16*)0x0202A078 = 0x46C0;
 		*(u16*)0x0202A07A = 0x46C0;
@@ -5065,8 +5147,48 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Pro-Putt Domo (USA)
 	else if (strcmp(romTid, "KDPE") == 0) {
+		const u32 dsiSaveCreateT = 0x020270FC;
+		*(u16*)dsiSaveCreateT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveCreateT + 4), ce9->patches->dsiSaveCreate, 0xC);
+
+		const u32 dsiSaveDeleteT = 0x0202710C;
+		*(u16*)dsiSaveDeleteT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveDeleteT + 4), ce9->patches->dsiSaveDelete, 0xC);
+
+		const u32 dsiSaveOpenT = 0x0202711C;
+		*(u16*)dsiSaveOpenT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveOpenT + 4), ce9->patches->dsiSaveOpen, 0xC);
+
+		const u32 dsiSaveCloseT = 0x0202712C;
+		*(u16*)dsiSaveCloseT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveCloseT + 4), ce9->patches->dsiSaveClose, 0xC);
+
+		const u32 dsiSaveReadT = 0x0202713C;
+		*(u16*)dsiSaveReadT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveReadT + 4), ce9->patches->dsiSaveRead, 0xC);
+
+		const u32 dsiSaveWriteT = 0x0202714C;
+		*(u16*)dsiSaveWriteT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveWriteT + 4), ce9->patches->dsiSaveWrite, 0xC);
+
 		*(u16*)0x020106BC = 0x2001; // movs r0, #1
 		*(u16*)0x020106BE = 0x4770; // bx lr
+		doubleNopT(0x0201096A);
+		*(u16*)0x020109AC = 0x2001; // movs r0, #1 (dsiSaveGetInfo)
+		*(u16*)0x020109AE = 0x4770; // bx lr
+		setBLThumb(0x02010A12, dsiSaveCreateT);
+		setBLThumb(0x02010A28, dsiSaveOpenT);
+		doubleNopT(0x02010A44); // dsiSaveSetLength
+		setBLThumb(0x02010A58, dsiSaveWriteT);
+		setBLThumb(0x02010A6A, dsiSaveCloseT);
+		*(u16*)0x02010A90 = 0x4778; // bx pc
+		*(u32*)0x02010A94 = 0xE3A00F82; // mov r0, #0x208 (dsiSaveGetLength)
+		*(u32*)0x02010A98 = 0xE12FFF1E; // bx lr
+		setBLThumb(0x02010AC0, dsiSaveOpenT);
+		setBLThumb(0x02010AE6, dsiSaveCloseT);
+		setBLThumb(0x02010AF8, dsiSaveReadT);
+		setBLThumb(0x02010AFE, dsiSaveCloseT);
+		setBLThumb(0x02010B12, dsiSaveDeleteT);
 		*(u16*)0x020179F4 = 0x4770; // bx lr (Disable NFTR loading from TWLNAND)
 		doubleNopT(0x02026262);
 		doubleNopT(0x020284B2);
@@ -5075,7 +5197,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		doubleNopT(0x0202C892);
 		doubleNopT(0x0202C89E);
 		doubleNopT(0x0202C982);
-		patchHiHeapDSiWareThumb(0x0202C9C0, 0x208F, 0x0480); // movs r0, #0x23C0000
+		patchHiHeapDSiWareThumb(0x0202C9C0, 0x0202715C, heapEnd); // movs r0, #0x23C0000
 		doubleNopT(0x0202DA1E);
 		*(u16*)0x0202DA22 = 0x46C0; // nop
 		*(u16*)0x0202DA24 = 0x46C0; // nop
@@ -5553,8 +5675,48 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Rock-n-Roll Domo (USA)
 	else if (strcmp(romTid, "KD6E") == 0) {
+		const u32 dsiSaveCreateT = 0x02025C20;
+		*(u16*)dsiSaveCreateT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveCreateT + 4), ce9->patches->dsiSaveCreate, 0xC);
+
+		const u32 dsiSaveDeleteT = 0x02025C30;
+		*(u16*)dsiSaveDeleteT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveDeleteT + 4), ce9->patches->dsiSaveDelete, 0xC);
+
+		const u32 dsiSaveOpenT = 0x02025C40;
+		*(u16*)dsiSaveOpenT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveOpenT + 4), ce9->patches->dsiSaveOpen, 0xC);
+
+		const u32 dsiSaveCloseT = 0x02025C50;
+		*(u16*)dsiSaveCloseT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveCloseT + 4), ce9->patches->dsiSaveClose, 0xC);
+
+		const u32 dsiSaveReadT = 0x02025C60;
+		*(u16*)dsiSaveReadT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveReadT + 4), ce9->patches->dsiSaveRead, 0xC);
+
+		const u32 dsiSaveWriteT = 0x02025C70;
+		*(u16*)dsiSaveWriteT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveWriteT + 4), ce9->patches->dsiSaveWrite, 0xC);
+
 		*(u16*)0x02010164 = 0x2001; // movs r0, #1
 		*(u16*)0x02010166 = 0x4770; // bx lr
+		doubleNopT(0x0201041A);
+		*(u16*)0x0201045C = 0x2001; // movs r0, #1 (dsiSaveGetInfo)
+		*(u16*)0x0201045E = 0x4770; // bx lr
+		setBLThumb(0x020104C2, dsiSaveCreateT);
+		setBLThumb(0x020104D8, dsiSaveOpenT);
+		doubleNopT(0x020104F4); // dsiSaveSetLength
+		setBLThumb(0x02010508, dsiSaveWriteT);
+		setBLThumb(0x0201051A, dsiSaveCloseT);
+		*(u16*)0x02010540 = 0x4778; // bx pc
+		*(u32*)0x02010544 = 0xE3A00F82; // mov r0, #0x208 (dsiSaveGetLength)
+		*(u32*)0x02010548 = 0xE12FFF1E; // bx lr
+		setBLThumb(0x02010570, dsiSaveOpenT);
+		setBLThumb(0x02010596, dsiSaveCloseT);
+		setBLThumb(0x020105A8, dsiSaveReadT);
+		setBLThumb(0x020105AE, dsiSaveCloseT);
+		setBLThumb(0x020105C2, dsiSaveDeleteT);
 		*(u16*)0x02016514 = 0x4770; // bx lr (Disable NFTR loading from TWLNAND)
 		doubleNopT(0x02024D86);
 		doubleNopT(0x02026FD6);
@@ -5563,7 +5725,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		doubleNopT(0x0202B216);
 		doubleNopT(0x0202B222);
 		doubleNopT(0x0202B306);
-		patchHiHeapDSiWareThumb(0x0202B344, 0x208F, 0x0480); // movs r0, #0x23C0000
+		patchHiHeapDSiWareThumb(0x0202B344, 0x02025C80, heapEnd); // movs r0, #0x23C0000
 		doubleNopT(0x0202C3A2);
 		*(u16*)0x0202C3A6 = 0x46C0;
 		*(u16*)0x0202C3A8 = 0x46C0;
@@ -5953,7 +6115,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		doubleNopT(0x02022556);
 		doubleNopT(0x02022562);
 		doubleNopT(0x02022646);
-		patchHiHeapDSiWareThumb(0x02022684, 0x209C, 0x0480); // movs r0, #0x2700000
+		patchHiHeapDSiWareThumbOld(0x02022684, 0x209C, 0x0480); // movs r0, #0x2700000
 		*(u16*)0x020233DE = 0x46C0; // nop
 		*(u16*)0x020233E2 = 0xBD38; // POP {R3-R5,PC}
 		doubleNopT(0x020236CC);
@@ -6012,8 +6174,48 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// White-Water Domo (USA)
 	else if (strcmp(romTid, "KDWE") == 0) {
+		const u32 dsiSaveCreateT = 0x02023258;
+		*(u16*)dsiSaveCreateT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveCreateT + 4), ce9->patches->dsiSaveCreate, 0xC);
+
+		const u32 dsiSaveDeleteT = 0x02023268;
+		*(u16*)dsiSaveDeleteT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveDeleteT + 4), ce9->patches->dsiSaveDelete, 0xC);
+
+		const u32 dsiSaveOpenT = 0x02023278;
+		*(u16*)dsiSaveOpenT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveOpenT + 4), ce9->patches->dsiSaveOpen, 0xC);
+
+		const u32 dsiSaveCloseT = 0x02023288;
+		*(u16*)dsiSaveCloseT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveCloseT + 4), ce9->patches->dsiSaveClose, 0xC);
+
+		const u32 dsiSaveReadT = 0x02023298;
+		*(u16*)dsiSaveReadT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveReadT + 4), ce9->patches->dsiSaveRead, 0xC);
+
+		const u32 dsiSaveWriteT = 0x020232A8;
+		*(u16*)dsiSaveWriteT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveWriteT + 4), ce9->patches->dsiSaveWrite, 0xC);
+
 		*(u16*)0x0200C918 = 0x2001; // movs r0, #1
 		*(u16*)0x0200C91A = 0x4770; // bx lr
+		doubleNopT(0x0200CBC6);
+		*(u16*)0x0200CC08 = 0x2001; // movs r0, #1 (dsiSaveGetInfo)
+		*(u16*)0x0200CC0A = 0x4770; // bx lr
+		setBLThumb(0x0200CC6E, dsiSaveCreateT);
+		setBLThumb(0x0200CC84, dsiSaveOpenT);
+		doubleNopT(0x0200CCA0); // dsiSaveSetLength
+		setBLThumb(0x0200CCB4, dsiSaveWriteT);
+		setBLThumb(0x0200CCC6, dsiSaveCloseT);
+		*(u16*)0x0200CCEC = 0x4778; // bx pc
+		*(u32*)0x0200CCF0 = 0xE3A00F82; // mov r0, #0x208 (dsiSaveGetLength)
+		*(u32*)0x0200CCF4 = 0xE12FFF1E; // bx lr
+		setBLThumb(0x0200CD1C, dsiSaveOpenT);
+		setBLThumb(0x0200CD42, dsiSaveCloseT);
+		setBLThumb(0x0200CD54, dsiSaveReadT);
+		setBLThumb(0x0200CD5A, dsiSaveCloseT);
+		setBLThumb(0x0200CD6E, dsiSaveDeleteT);
 		*(u16*)0x02013B10 = 0x4770; // bx lr (Disable NFTR loading from TWLNAND)
 		doubleNopT(0x020223BE);
 		doubleNopT(0x0202460E);
@@ -6022,7 +6224,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		doubleNopT(0x02028882);
 		doubleNopT(0x0202888E);
 		doubleNopT(0x02028972);
-		patchHiHeapDSiWareThumb(0x020289B0, 0x208F, 0x0480); // movs r0, #0x23C0000
+		patchHiHeapDSiWareThumb(0x020289B0, 0x020232B8, heapEnd); // movs r0, #0x23C0000
 		doubleNopT(0x02029A36);
 		*(u16*)0x02029A3A = 0x46C0;
 		*(u16*)0x02029A3C = 0x46C0;
