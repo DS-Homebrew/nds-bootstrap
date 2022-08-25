@@ -1406,6 +1406,266 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02007834, (u32)ce9->patches->dsiSaveClose);
 	}
 
+	// Quick Fill Q (USA)
+	// Quick Fill Q (Europe)
+	// A bit hard/confusing to add save support
+	else if ((strcmp(romTid, "KUME") == 0 || strcmp(romTid, "KUMP") == 0) && saveOnFlashcard) {
+		//*(u32*)0x0203EA70 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+		*(u32*)0x02040240 = 0xE1A00000; // nop (Skip Manual screen)
+	}
+
+	// Rabi Laby (USA)
+	// Rabi Laby (Europe)
+	else if ((strcmp(romTid, "KLBE") == 0 || strcmp(romTid, "KLBP") == 0) && saveOnFlashcard) {
+		*(u32*)0x020051C8 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		*(u32*)0x020053A8 = 0xE1A00000; // nop (Skip Manual screen)
+		setBL(0x0201DEF8, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x0201DF1C, (u32)ce9->patches->dsiSaveRead);
+		setBL(0x0201DF2C, (u32)ce9->patches->dsiSaveRead);
+		setBL(0x0201DF34, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0201E1E4, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x0201E354, (u32)ce9->patches->dsiSaveWrite);
+		setBL(0x0201E35C, (u32)ce9->patches->dsiSaveClose);
+		if (ndsHeader->gameCode[3] == 'E') {
+			setBL(0x02026648, (u32)ce9->patches->dsiSaveCreate);
+			setBL(0x02026704, (u32)ce9->patches->dsiSaveCreate);
+		} else {
+			setBL(0x020266D8, (u32)ce9->patches->dsiSaveCreate);
+			setBL(0x02026794, (u32)ce9->patches->dsiSaveCreate);
+		}
+	}
+
+	// Akushon Pazuru: Rabi x Rabi (Japan)
+	else if (strcmp(romTid, "KLBJ") == 0 && saveOnFlashcard) {
+		*(u32*)0x02005190 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		*(u32*)0x02005360 = 0xE1A00000; // nop (Skip Manual screen)
+		setBL(0x0201DD80, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x0201DDA4, (u32)ce9->patches->dsiSaveRead);
+		setBL(0x0201DDB4, (u32)ce9->patches->dsiSaveRead);
+		setBL(0x0201DDBC, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0201E1E4, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x0201E354, (u32)ce9->patches->dsiSaveWrite);
+		setBL(0x0201E35C, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0201E06C, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x0201E1DC, (u32)ce9->patches->dsiSaveWrite);
+		setBL(0x0201E1E4, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x02026BDC, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x02026CC0, (u32)ce9->patches->dsiSaveCreate);
+	}
+
+	// Rabi Laby 2 (USA)
+	// Rabi Laby 2 (Europe)
+	// Akushon Pazuru: Rabi x Rabi Episodo 2 (Japan)
+	else if (strncmp(romTid, "KLV", 3) == 0 && saveOnFlashcard) {
+		*(u32*)0x020051E8 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		*(u32*)0x0200540C = 0xE1A00000; // nop (Skip Manual screen)
+		*(u32*)0x0203571C = 0xE1A00000; // nop
+		*(u32*)0x02035720 = 0xE1A00000; // nop
+		*(u32*)0x02035724 = 0xE1A00000; // nop
+		// The non-save branches are patching out "crc.dat" R/Ws
+		setBL(0x02035738, (u32)ce9->patches->dsiSaveOpen);
+		*(u32*)0x0203573C = 0xE1A00000; // nop
+		*(u32*)0x02035740 = 0xE1A00000; // nop
+		*(u32*)0x02035744 = 0xE1A00000; // nop
+		*(u32*)0x02035748 = 0xE1A00000; // nop
+		*(u32*)0x0203574C = 0xE1A00000; // nop
+		*(u32*)0x02035750 = 0xE1A00000; // nop
+		*(u32*)0x02035758 = 0x028DDFA5; // addeq sp, sp, #0x294
+		*(u32*)0x0203575C = 0x08BD81F8; // ldmeqfd sp!, {r3-r8,pc}
+		*(u32*)0x02035760 = 0xE1A00000; // nop
+		*(u32*)0x02035764 = 0xE1A00000; // nop
+		*(u32*)0x02035768 = 0xE1A00000; // nop
+		*(u32*)0x0203576C = 0xE1A00000; // nop
+		setBL(0x02035784, (u32)ce9->patches->dsiSaveRead);
+		*(u32*)0x02035788 = 0xE1A00000; // nop
+		*(u32*)0x0203578C = 0xE1A00000; // nop
+		*(u32*)0x02035790 = 0xE1A00000; // nop
+		*(u32*)0x02035794 = 0xE1A00000; // nop
+		setBL(0x0203579C, (u32)ce9->patches->dsiSaveClose);
+		*(u32*)0x020357A0 = 0xE1A00000; // nop
+		*(u32*)0x020357A4 = 0xE1A00000; // nop
+		*(u32*)0x02035810 = 0xE1A00000; // nop
+		*(u32*)0x02035814 = 0xE1A00000; // nop
+		*(u32*)0x02035818 = 0xE1A00000; // nop
+		setBL(0x0203582C, (u32)ce9->patches->dsiSaveOpen);
+		*(u32*)0x020357DC = 0xE1A00000; // nop
+		*(u32*)0x020357E0 = 0xE3A04000; // mov r4, #0
+		*(u32*)0x02035840 = 0xE1A00000; // nop
+		*(u32*)0x02035844 = 0xE1A00000; // nop
+		*(u32*)0x02035848 = 0xE1A00000; // nop
+		*(u32*)0x0203584C = 0xE1A00000; // nop
+		*(u32*)0x02035850 = 0xE1A00000; // nop
+		*(u32*)0x02035854 = 0xE1A00000; // nop
+		*(u32*)0x02035858 = 0xE1A00000; // nop
+		*(u32*)0x0203585C = 0xE1A00000; // nop
+		setBL(0x020358A8, (u32)ce9->patches->dsiSaveWrite);
+		*(u32*)0x020358AC = 0xE1A00000; // nop
+		*(u32*)0x020358B0 = 0xE1A00000; // nop
+		*(u32*)0x020358B4 = 0xE1A00000; // nop
+		*(u32*)0x020358B8 = 0xE1A00000; // nop
+		setBL(0x020358C0, (u32)ce9->patches->dsiSaveClose);
+		*(u32*)0x020358C4 = 0xE1A00000; // nop
+		*(u32*)0x020358C8 = 0xE1A00000; // nop
+		setBL(0x020358F8, (u32)ce9->patches->dsiSaveCreate);
+		*(u32*)0x020358FC = 0xE1A00000; // nop
+		*(u32*)0x02035900 = 0xE1A00000; // nop
+		*(u32*)0x02035904 = 0xE1A00000; // nop
+	}
+
+	// Robot Rescue (USA)
+	else if (strcmp(romTid, "KRTE") == 0 && saveOnFlashcard) {
+		/* *(u32*)0x0200C2DC = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0200C2E0 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0200C39C = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0200C3A0 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0200C570 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0200C574 = 0xE12FFF1E; // bx lr */
+		setBL(0x0200C594, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x0200C5A8, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0200C5C8, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x0200C5E0, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x0200C5F8, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0200C600, (u32)ce9->patches->dsiSaveDelete);
+		setBL(0x0200C76C, (u32)ce9->patches->dsiSaveOpen);
+		*(u32*)0x0200C784 = 0xE1A00000; // nop (dsiSaveGetLength)
+		setBL(0x0200C7A8, (u32)ce9->patches->dsiSaveRead);
+		setBL(0x0200C7B0, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0200C838, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x0200C84C, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0200C860, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x0200C878, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x0200C894, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0200C89C, (u32)ce9->patches->dsiSaveDelete);
+		setBL(0x0200C8B0, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x0200C8C0, (u32)ce9->patches->dsiSaveOpen);
+		*(u32*)0x0200C904 = 0xE1A00000; // nop (dsiSaveSetLength)
+		setBL(0x0200C914, (u32)ce9->patches->dsiSaveWrite);
+		setBL(0x0200C91C, (u32)ce9->patches->dsiSaveClose);
+		*(u32*)0x020108A4 = 0xE1A00000; // nop (Skip Manual screen)
+	}
+
+	// Robot Rescue (Europe, Australia)
+	else if (strcmp(romTid, "KRTV") == 0 && saveOnFlashcard) {
+		/* *(u32*)0x0200C2CC = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0200C2D0 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0200C388 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0200C38C = 0xE12FFF1E; // bx lr
+		*(u32*)0x0200C550 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0200C554 = 0xE12FFF1E; // bx lr */
+		setBL(0x0200C57C, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x0200C590, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0200C5B0, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x0200C5CC, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x0200C5E4, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0200C5EC, (u32)ce9->patches->dsiSaveDelete);
+		setBL(0x0200C788, (u32)ce9->patches->dsiSaveOpen);
+		*(u32*)0x0200C7A0 = 0xE1A00000; // nop (dsiSaveGetLength)
+		setBL(0x0200C7C4, (u32)ce9->patches->dsiSaveRead);
+		setBL(0x0200C7CC, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0200C810, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x0200C824, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0200C838, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x0200C854, (u32)ce9->patches->dsiSaveOpen);
+		*(u32*)0x0200C864 = 0xE1A00000; // nop
+		setBL(0x0200C870, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0200C878, (u32)ce9->patches->dsiSaveDelete);
+		setBL(0x0200C890, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x0200C8A0, (u32)ce9->patches->dsiSaveOpen);
+		*(u32*)0x0200C8CC = 0xE1A00000; // nop (dsiSaveSetLength)
+		setBL(0x0200C8DC, (u32)ce9->patches->dsiSaveWrite);
+		setBL(0x0200C8E4, (u32)ce9->patches->dsiSaveClose);
+		*(u32*)0x02010C30 = 0xE1A00000; // nop (Skip Manual screen)
+	}
+
+	// ARC Style: Robot Rescue (Japan)
+	else if (strcmp(romTid, "KRTJ") == 0 && saveOnFlashcard) {
+		/* *(u32*)0x0200F460 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0200F464 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0200F51C = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0200F520 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0200F6E4 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0200F6E8 = 0xE12FFF1E; // bx lr */
+		setBL(0x0200F710, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x0200F724, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0200F724, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x0200F760, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x0200F778, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0200F780, (u32)ce9->patches->dsiSaveDelete);
+		setBL(0x0200F8B0, (u32)ce9->patches->dsiSaveOpen);
+		*(u32*)0x0200F8C8 = 0xE1A00000; // nop (dsiSaveGetLength)
+		setBL(0x0200F8EC, (u32)ce9->patches->dsiSaveRead);
+		setBL(0x0200F8F4, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0200F938, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x0200F94C, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0200F960, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x0200F97C, (u32)ce9->patches->dsiSaveOpen);
+		*(u32*)0x0200F98C = 0xE1A00000; // nop
+		setBL(0x0200F998, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0200F9A0, (u32)ce9->patches->dsiSaveDelete);
+		setBL(0x0200F9B8, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x0200F9C8, (u32)ce9->patches->dsiSaveOpen);
+		*(u32*)0x0200F9F4 = 0xE1A00000; // nop (dsiSaveSetLength)
+		setBL(0x0200FA04, (u32)ce9->patches->dsiSaveWrite);
+		setBL(0x0200FA0C, (u32)ce9->patches->dsiSaveClose);
+		*(u32*)0x02013BC8 = 0xE1A00000; // nop (Skip Manual screen)
+	}
+
+	// Robot Rescue 2 (USA)
+	// Robot Rescue 2 (Europe)
+	else if ((strcmp(romTid, "KRRE") == 0 || strcmp(romTid, "KRRP") == 0) && saveOnFlashcard) {
+		/* *(u32*)0x0200C2F4 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0200C2F8 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0200C3B0 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0200C3B4 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0200C578 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0200C57C = 0xE12FFF1E; // bx lr */
+		setBL(0x0200C5A4, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x0200C5B8, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0200C5D8, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x0200C5F4, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x0200C60C, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0200C614, (u32)ce9->patches->dsiSaveDelete);
+		setBL(0x0200C7B0, (u32)ce9->patches->dsiSaveOpen);
+		*(u32*)0x0200C7C8 = 0xE1A00000; // nop (dsiSaveGetLength)
+		setBL(0x0200C7EC, (u32)ce9->patches->dsiSaveRead);
+		setBL(0x0200C7F4, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0200C838, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x0200C84C, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0200C860, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x0200C87C, (u32)ce9->patches->dsiSaveOpen);
+		*(u32*)0x0200C88C = 0xE1A00000; // nop
+		setBL(0x0200C898, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0200C8A0, (u32)ce9->patches->dsiSaveDelete);
+		setBL(0x0200C8B8, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x0200C8C8, (u32)ce9->patches->dsiSaveOpen);
+		*(u32*)0x0200C8F4 = 0xE1A00000; // nop (dsiSaveSetLength)
+		setBL(0x0200C904, (u32)ce9->patches->dsiSaveWrite);
+		setBL(0x0200C90C, (u32)ce9->patches->dsiSaveClose);
+		if (ndsHeader->gameCode[3] == 'E') {
+			*(u32*)0x02010888 = 0xE1A00000; // nop (Skip Manual screen)
+		} else if (ndsHeader->gameCode[3] == 'P') {
+			*(u32*)0x02010BE4 = 0xE1A00000; // nop (Skip Manual screen)
+		}
+	}
+
+	// Space Ace (USA)
+	else if (strcmp(romTid, "KA6E") == 0 && saveOnFlashcard) {
+		*(u32*)0x020051C8 = 0xE1A00000; // nop (Skip Manual screen)
+		setBL(0x0201F8BC, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x0201F8D4, (u32)ce9->patches->dsiSaveRead);
+		setBL(0x0201F8FC, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0201F998, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x0201F9C8, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x0201F9F8, (u32)ce9->patches->dsiSaveWrite);
+		setBL(0x0201FA20, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0201FAFC, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x0201FB38, (u32)ce9->patches->dsiSaveSeek);
+		setBL(0x0201FB68, (u32)ce9->patches->dsiSaveWrite);
+		setBL(0x0201FB90, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0201FC2C, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0201FC44, (u32)ce9->patches->dsiSaveClose);
+	}
+
 	// Shantae: Risky's Revenge (USA)
 	else if (strcmp(romTid, "KS3E") == 0 && saveOnFlashcard) {
 		setBL(0x0209201C, (u32)ce9->patches->dsiSaveCreate);
@@ -1432,6 +1692,94 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0209300C, (u32)ce9->patches->dsiSaveOpen);
 		setBL(0x02093224, (u32)ce9->patches->dsiSaveWrite);
 		setBL(0x0209322C, (u32)ce9->patches->dsiSaveClose);
+	}
+
+	// Sudoku (USA)
+	// Sudoku (USA) (Rev 1)
+	else if (strcmp(romTid, "K4DE") == 0 && saveOnFlashcard) {
+		if (ndsHeader->romversion == 1) {
+			setBL(0x02037560, (u32)ce9->patches->dsiSaveOpen);
+			setBL(0x020375B0, (u32)ce9->patches->dsiSaveCreate);
+			setBL(0x020375F0, (u32)ce9->patches->dsiSaveOpen);
+			*(u32*)0x0203762C = 0xE3A00000; // mov r0, #0 (dsiSaveSetLength)
+			setBL(0x0203767C, (u32)ce9->patches->dsiSaveSeek);
+			setBL(0x0203768C, (u32)ce9->patches->dsiSaveWrite);
+			setBL(0x020376C8, (u32)ce9->patches->dsiSaveClose);
+			setBL(0x020376D8, (u32)ce9->patches->dsiSaveClose);
+			setBL(0x02037714, (u32)ce9->patches->dsiSaveOpen);
+			setBL(0x02037754, (u32)ce9->patches->dsiSaveSeek);
+			setBL(0x02037794, (u32)ce9->patches->dsiSaveRead);
+			setBL(0x020377A0, (u32)ce9->patches->dsiSaveClose);
+			setBL(0x02037810, (u32)ce9->patches->dsiSaveOpen);
+			setBL(0x02037850, (u32)ce9->patches->dsiSaveSeek);
+			setBL(0x02037890, (u32)ce9->patches->dsiSaveWrite);
+			*(u32*)0x0203789C = 0xE1A00000; // nop (dsiSaveGetLength)
+			setBL(0x020378C4, (u32)ce9->patches->dsiSaveWrite);
+		} else {
+			setBL(0x020364A4, (u32)ce9->patches->dsiSaveOpen);
+			setBL(0x020364F0, (u32)ce9->patches->dsiSaveCreate);
+			setBL(0x02036530, (u32)ce9->patches->dsiSaveOpen);
+			*(u32*)0x0203656C = 0xE3A00000; // mov r0, #0 (dsiSaveSetLength)
+			setBL(0x020365B0, (u32)ce9->patches->dsiSaveSeek);
+			setBL(0x020365C0, (u32)ce9->patches->dsiSaveWrite);
+			setBL(0x020365FC, (u32)ce9->patches->dsiSaveClose);
+			setBL(0x02036614, (u32)ce9->patches->dsiSaveClose);
+			setBL(0x0203665C, (u32)ce9->patches->dsiSaveOpen);
+			setBL(0x02036694, (u32)ce9->patches->dsiSaveSeek);
+			setBL(0x020366C8, (u32)ce9->patches->dsiSaveRead);
+			setBL(0x020366D4, (u32)ce9->patches->dsiSaveClose);
+			setBL(0x02036724, (u32)ce9->patches->dsiSaveOpen);
+			setBL(0x0203675C, (u32)ce9->patches->dsiSaveSeek);
+			setBL(0x02036790, (u32)ce9->patches->dsiSaveWrite);
+			*(u32*)0x0203679C = 0xE1A00000; // nop (dsiSaveGetLength)
+			setBL(0x020367BC, (u32)ce9->patches->dsiSaveClose);
+		}
+	}
+
+	// Sudoku (Europe, Australia) (Rev 1)
+	else if (strcmp(romTid, "K4DV") == 0 && saveOnFlashcard) {
+		//*(u32*)0x020360E8 = 0xE3A00001; // mov r0, #1
+		//*(u32*)0x020360EC = 0xE12FFF1E; // bx lr
+		setBL(0x020375AC, (u32)ce9->patches->dsiSaveOpen);
+		*(u32*)0x020375CC = 0xE1A00000; // nop
+		setBL(0x020375FC, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x0203763C, (u32)ce9->patches->dsiSaveOpen);
+		*(u32*)0x02037678 = 0xE3A00000; // mov r0, #0 (dsiSaveSetLength)
+		setBL(0x020376C8, (u32)ce9->patches->dsiSaveSeek);
+		setBL(0x020376D8, (u32)ce9->patches->dsiSaveWrite);
+		setBL(0x02037714, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x02037724, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x02037760, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x020377A0, (u32)ce9->patches->dsiSaveSeek);
+		setBL(0x020377E0, (u32)ce9->patches->dsiSaveRead);
+		setBL(0x020377EC, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0203785C, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x0203789C, (u32)ce9->patches->dsiSaveSeek);
+		setBL(0x020378DC, (u32)ce9->patches->dsiSaveWrite);
+		*(u32*)0x020378E8 = 0xE1A00000; // nop (dsiSaveGetLength)
+		setBL(0x02037910, (u32)ce9->patches->dsiSaveWrite);
+	}
+
+	// Wakugumi: Monochrome Puzzle (Europe, Australia)
+	else if (strcmp(romTid, "KK4V") == 0 && saveOnFlashcard) {
+		*(u32*)0x0204F240 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02050114 = 0xE12FFF1E; // bx lr (Skip Manual screen)
+	}
+
+	// Art Style: ZENGAGE (USA)
+	// Art Style: NEMREM (Europe, Australia)
+	else if ((strcmp(romTid, "KASE") == 0 || strcmp(romTid, "KASV") == 0) && saveOnFlashcard) {
+		setBL(0x0200E984, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x0200EA8C, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x0200EAE4, (u32)ce9->patches->dsiSaveRead);
+		setBL(0x0200EB28, (u32)ce9->patches->dsiSaveClose);
+		//*(u32*)0x0200EBC8 = 0xE3A00000; // mov r0, #0
+		//*(u32*)0x0200EBCC = 0xE12FFF1E; // bx lr
+		setBL(0x0200EBF4, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x0200EC28, (u32)ce9->patches->dsiSaveOpen);
+		*(u32*)0x0200EC48 = 0xE3A00000; // mov r0, #0 (dsiSaveSetLength)
+		setBL(0x0200EC68, (u32)ce9->patches->dsiSaveWrite);
+		setBL(0x0200EC84, (u32)ce9->patches->dsiSaveClose);
 	}
 
 	else if (dsiSD) {
@@ -1545,16 +1893,6 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020771D0 = 0xE12FFF1E; // bx lr
 		*(u32*)0x0207742C = 0xE12FFF1E; // bx lr
 		*(u32*)0x0207767C = 0xE12FFF1E; // bx lr
-	}
-
-	// CuteWitch! runner (USA)
-	// CuteWitch! runner (Europe)
-	else if (strncmp(romTid, "K32", 3) == 0) {
-		if (ndsHeader->gameCode[3] == 'E') {
-			*(u32*)0x02062068 = 0xE12FFF1E; // bx lr
-		} else if (ndsHeader->gameCode[3] == 'P') {
-			*(u32*)0x02093AA4 = 0xE12FFF1E; // bx lr
-		}
 	}
 
 	// DotMan (USA)
@@ -1748,85 +2086,6 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02056514 = 0xE12FFF1E; // bx lr
 	}
 
-	// Quick Fill Q (USA)
-	// Quick Fill Q (Europe)
-	else if (strcmp(romTid, "KUME") == 0 || strcmp(romTid, "KUMP") == 0) {
-		*(u32*)0x02040240 = 0xE1A00000; // nop (Skip Manual screen)
-	}
-
-	// Rabi Laby (USA)
-	// Rabi Laby (Europe)
-	else if (strcmp(romTid, "KLBE") == 0 || strcmp(romTid, "KLBP") == 0) {
-		*(u32*)0x020053A8 = 0xE1A00000; // nop (Skip Manual screen)
-	}
-
-	// Akushon Pazuru: Rabi x Rabi (Japan)
-	else if (strcmp(romTid, "KLBJ") == 0) {
-		*(u32*)0x02005360 = 0xE1A00000; // nop (Skip Manual screen)
-	}
-
-	// Rabi Laby 2 (USA)
-	// Rabi Laby 2 (Europe)
-	// Akushon Pazuru: Rabi x Rabi Episodo 2 (Japan)
-	else if (strncmp(romTid, "KLV", 3) == 0) {
-		*(u32*)0x0200540C = 0xE1A00000; // nop (Skip Manual screen)
-	}
-
-	// Robot Rescue (USA)
-	else if (strcmp(romTid, "KRTE") == 0) {
-		*(u32*)0x0200C2DC = 0xE3A00001; // mov r0, #1
-		*(u32*)0x0200C2E0 = 0xE12FFF1E; // bx lr
-		*(u32*)0x0200C39C = 0xE3A00001; // mov r0, #1
-		*(u32*)0x0200C3A0 = 0xE12FFF1E; // bx lr
-		*(u32*)0x0200C570 = 0xE3A00001; // mov r0, #1
-		*(u32*)0x0200C574 = 0xE12FFF1E; // bx lr
-		*(u32*)0x020108A4 = 0xE1A00000; // nop (Skip Manual screen)
-	}
-
-	// Robot Rescue (Europe, Australia)
-	else if (strcmp(romTid, "KRTV") == 0) {
-		*(u32*)0x0200C2CC = 0xE3A00001; // mov r0, #1
-		*(u32*)0x0200C2D0 = 0xE12FFF1E; // bx lr
-		*(u32*)0x0200C388 = 0xE3A00001; // mov r0, #1
-		*(u32*)0x0200C38C = 0xE12FFF1E; // bx lr
-		*(u32*)0x0200C550 = 0xE3A00001; // mov r0, #1
-		*(u32*)0x0200C554 = 0xE12FFF1E; // bx lr
-		*(u32*)0x02010C30 = 0xE1A00000; // nop (Skip Manual screen)
-	}
-
-	// ARC Style: Robot Rescue (Japan)
-	else if (strcmp(romTid, "KRTJ") == 0) {
-		*(u32*)0x0200F460 = 0xE3A00001; // mov r0, #1
-		*(u32*)0x0200F464 = 0xE12FFF1E; // bx lr
-		*(u32*)0x0200F51C = 0xE3A00001; // mov r0, #1
-		*(u32*)0x0200F520 = 0xE12FFF1E; // bx lr
-		*(u32*)0x0200F6E4 = 0xE3A00001; // mov r0, #1
-		*(u32*)0x0200F6E8 = 0xE12FFF1E; // bx lr
-		*(u32*)0x02013BC8 = 0xE1A00000; // nop (Skip Manual screen)
-	}
-
-	// Robot Rescue 2 (USA)
-	else if (strcmp(romTid, "KRRE") == 0) {
-		*(u32*)0x0200C2F4 = 0xE3A00001; // mov r0, #1
-		*(u32*)0x0200C2F8 = 0xE12FFF1E; // bx lr
-		*(u32*)0x0200C3B0 = 0xE3A00001; // mov r0, #1
-		*(u32*)0x0200C3B4 = 0xE12FFF1E; // bx lr
-		*(u32*)0x0200C578 = 0xE3A00001; // mov r0, #1
-		*(u32*)0x0200C57C = 0xE12FFF1E; // bx lr
-		*(u32*)0x02010888 = 0xE1A00000; // nop (Skip Manual screen)
-	}
-
-	// Robot Rescue 2 (Europe)
-	else if (strcmp(romTid, "KRRP") == 0) {
-		*(u32*)0x0200C2F4 = 0xE3A00001; // mov r0, #1
-		*(u32*)0x0200C2F8 = 0xE12FFF1E; // bx lr
-		*(u32*)0x0200C3B0 = 0xE3A00001; // mov r0, #1
-		*(u32*)0x0200C3B4 = 0xE12FFF1E; // bx lr
-		*(u32*)0x0200C578 = 0xE3A00001; // mov r0, #1
-		*(u32*)0x0200C57C = 0xE12FFF1E; // bx lr
-		*(u32*)0x02010BE4 = 0xE1A00000; // nop (Skip Manual screen)
-	}
-
 	// Rock-n-Roll Domo (USA)
 	else if (strcmp(romTid, "KD6E") == 0) {
 		*(u16*)0x02010164 = 0x2001; // movs r0, #1
@@ -1864,24 +2123,6 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0202DB98 = 0xE12FFF1E; // bx lr
 	}
 
-	// Sudoku (USA)
-	// Sudoku (USA) (Rev 1)
-	else if (strcmp(romTid, "K4DE") == 0) {
-		if (ndsHeader->romversion == 1) {
-			*(u32*)0x0203701C = 0xE3A00001; // mov r0, #1
-			*(u32*)0x02037020 = 0xE12FFF1E; // bx lr
-		} else {
-			*(u32*)0x0203609C = 0xE3A00001; // mov r0, #1
-			*(u32*)0x020360A0 = 0xE12FFF1E; // bx lr
-		}
-	}
-
-	// Sudoku (Europe, Australia) (Rev 1)
-	else if (strcmp(romTid, "K4DV") == 0) {
-		*(u32*)0x020360E8 = 0xE3A00001; // mov r0, #1
-		*(u32*)0x020360EC = 0xE12FFF1E; // bx lr
-	}
-
 	// Sudoku 4Pockets (USA)
 	// Sudoku 4Pockets (Europe)
 	else if (strcmp(romTid, "K4FE") == 0 || strcmp(romTid, "K4FP") == 0) {
@@ -1906,12 +2147,6 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// A Little Bit of... Nintendo Touch Golf (Europe, Australia)
 	if (strcmp(romTid, "K72E") == 0 || strcmp(romTid, "K72V") == 0) {
 		*(u32*)0x02009A84 = 0xE12FFF1E; // bx lr
-	}
-
-	// Wakugumi: Monochrome Puzzle (Europe, Australia)
-	else if (strcmp(romTid, "KK4V") == 0) {
-		*(u32*)0x0204F240 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x02050114 = 0xE12FFF1E; // bx lr (Skip Manual screen)
 	}
 
 	// White-Water Domo (USA)

@@ -802,7 +802,7 @@ bool dsiSaveOpen(void* ctx, const char* path, u32 mode) {
 	}
 
 	dsiSaveInit();
-	if (mode == 2 || mode == 3) {
+	if (mode == 2 || mode == 3 || mode == 7) {
 		dsiSaveEmpty = false;
 	}
 
