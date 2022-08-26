@@ -25,6 +25,8 @@ fileCluster:
 	.word	0x00000000
 saveCluster:
 	.word	0x00000000
+saveSize:
+	.word	0x00000000
 cardStruct0:
 	.word	0x00000000
 cacheStruct:
@@ -60,6 +62,9 @@ ndsCodeStart:
 patches:
 .word   0x0
 .word	card_irq_enable
+.word   0x0
+.word   0x0
+.word   0x0
 .word   0x0
 .word   0x0
 .word   0x0

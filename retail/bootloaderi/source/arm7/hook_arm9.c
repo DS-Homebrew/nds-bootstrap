@@ -160,9 +160,11 @@ static u32* hookInterruptHandler(const u32* start, size_t size) {
 
 int hookNdsRetailArm9(
 	cardengineArm9* ce9,
+	const tNDSHeader* ndsHeader,
 	const module_params_t* moduleParams,
 	u32 fileCluster,
 	u32 saveCluster,
+	u32 saveSize,
 	u16 saveOnFlashcard,
 	u32 cacheBlockSize,
 	u8 extendedMemory,
@@ -181,6 +183,7 @@ int hookNdsRetailArm9(
 
 	ce9->fileCluster            = fileCluster;
 	ce9->saveCluster            = saveCluster;
+	ce9->saveSize               = saveSize;
 	if (saveOnFlashcard) {
 		ce9->valueBits |= b_saveOnFlashcard;
 	}
@@ -326,7 +329,7 @@ int hookNdsRetailArm9(
 	return ERR_NONE;
 }
 
-int hookNdsRetailArm9Mini(cardengineArm9* ce9, const module_params_t* moduleParams, u8 consoleModel) {
+int hookNdsRetailArm9Mini(cardengineArm9* ce9, const tNDSHeader* ndsHeader, u8 consoleModel) {
 	ce9->consoleModel           = consoleModel;
 
 	extern u32 iUncompressedSize;

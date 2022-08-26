@@ -60,9 +60,11 @@ int hookNdsRetailArm7(
 );
 int hookNdsRetailArm9(
 	cardengineArm9* ce9,
+	const tNDSHeader* ndsHeader,
 	const module_params_t* moduleParams,
 	u32 fileCluster,
 	u32 saveCluster,
+	u32 saveSize,
 	u16 saveOnFlashcard,
 	u32 cacheBlockSize,
 	u8 extendedMemory,
@@ -72,6 +74,6 @@ int hookNdsRetailArm9(
 	u8 consoleModel,
 	bool usesCloneboot
 );
-int hookNdsRetailArm9Mini(cardengineArm9* ce9, const module_params_t* moduleParams, u8 consoleModel);
+int hookNdsRetailArm9Mini(cardengineArm9* ce9, const tNDSHeader* ndsHeader, u8 consoleModel);
 
 #endif // HOOK_H

@@ -1122,9 +1122,11 @@ int arm7_main(void) {
 
 	errorCode = hookNdsRetailArm9(
 		(cardengineArm9*)ce9Location,
+		ndsHeader,
 		moduleParams,
 		romFile.firstCluster,
 		savFile.firstCluster,
+		saveSize,
 		(u32)romFile.fatTableCache,
 		(u32)savFile.fatTableCache,
 		ramDumpCluster,

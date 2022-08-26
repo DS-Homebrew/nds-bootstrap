@@ -720,29 +720,39 @@ bool nandWrite(void* memory,void* flash,u32 len,u32 dma) {
 
 #ifdef TWLSDK
 #ifdef DLDI
-static bool dsiSaveEmpty = true;
 static bool dsiSaveInited = false;
+static bool dsiSaveExists = false;
+static bool dsiSaveAlwaysCreate = false;
 static u32 dsiSavePerms = 0;
 static s32 dsiSaveSeekPos = 0;
+static u32 dsiSaveSize = 0;
+
+typedef struct dsiSaveInfo
+{
+	u32 attributes;
+	u32 ctime[6];
+	u32 mtime[6];
+	u32 atime[6];
+	u32 filesize;
+	u32 id;
+}
+dsiSaveInfo;
 
 static void dsiSaveInit(void) {
 	if (dsiSaveInited) {
 		return;
 	}
+	u32 existByte = 0;
+
 	int oldIME = enterCriticalSection();
 	u16 exmemcnt = REG_EXMEMCNT;
 	sysSetCardOwner(true);	// Give Slot-1 access to arm9
-	fileRead((char*)0x02FFF600, *savFile, 0, 512, 0);
+	fileRead((char*)&dsiSaveSize, *savFile, ce9->saveSize-4, 4, 0);
+	fileRead((char*)&existByte, *savFile, ce9->saveSize-8, 4, 0);
 	REG_EXMEMCNT = exmemcnt;
 	leaveCriticalSection(oldIME);
-	for (int i = 0; i < 512; i++) {
-		if (*(char*)(0x02FFF600+i) != 0) {
-			toncset((char*)0x02FFF600, 0, 512);
-			dsiSaveEmpty = false;
-			dsiSaveInited = true;
-			return;
-		}
-	}
+
+	dsiSaveExists = (existByte != 0);
 	dsiSaveInited = true;
 }
 #endif
@@ -755,10 +765,20 @@ bool dsiSaveCreate(const char* path, u32 permit) {
 	}
 
 	dsiSaveInit();
-	if ((dsiSaveEmpty && permit == 1) || (!dsiSaveEmpty && permit == 2)) {
+	if ((!dsiSaveExists && permit == 1) || (dsiSaveExists && permit == 2) || (!dsiSaveAlwaysCreate && permit == 3)) {
 		return false;
 	}
 
+	u32 existByte = 1;
+
+	int oldIME = enterCriticalSection();
+	u16 exmemcnt = REG_EXMEMCNT;
+	sysSetCardOwner(true);	// Give Slot-1 access to arm9
+	fileWrite((char*)&existByte, *savFile, ce9->saveSize-8, 4, 0);
+	REG_EXMEMCNT = exmemcnt;
+	leaveCriticalSection(oldIME);
+
+	dsiSaveExists = true;
 	return true;
 #else
 	return false;
@@ -772,25 +792,68 @@ bool dsiSaveDelete(const char* path) {
 		return false;
 	}
 
-	dsiSaveInit();
-
-	if (!dsiSaveEmpty) {
-		toncset((char*)0x02FFF600, 0, 512);
+	if (dsiSaveExists) {
+		dsiSaveSize = 0;
 
 		int oldIME = enterCriticalSection();
 		u16 exmemcnt = REG_EXMEMCNT;
 		sysSetCardOwner(true);	// Give Slot-1 access to arm9
-		fileWrite((char*)0x02FFF600, *savFile, 0, 512, 0);
+		fileWrite((char*)&dsiSaveSize, *savFile, ce9->saveSize-4, 4, 0);
+		fileWrite((char*)&dsiSaveSize, *savFile, ce9->saveSize-8, 4, 0);
 		REG_EXMEMCNT = exmemcnt;
 		leaveCriticalSection(oldIME);
 
-		dsiSaveEmpty = true;
+		dsiSaveExists = false;
 		return true;
 	}
 
 	return false;
 #else
 	return false;
+#endif
+}
+
+#ifdef DLDI
+bool dsiSaveGetInfo(const char* path, dsiSaveInfo* info) {
+	dsiSaveInit();
+	toncset(info, 0, sizeof(dsiSaveInfo));
+
+	if (savFile->firstCluster == CLUSTER_FREE || savFile->firstCluster == CLUSTER_EOF || !dsiSaveExists) {
+		return false;
+	}
+
+	info->filesize = dsiSaveSize;
+	return true;
+}
+#else
+bool dsiSaveGetInfo(const char* path, u32* info) {
+	return false;
+}
+#endif
+
+u32 dsiSaveSetLength(void* ctx, s32 len) {
+#ifdef DLDI
+	dsiSaveSeekPos = 0;
+	if (savFile->firstCluster == CLUSTER_FREE || savFile->firstCluster == CLUSTER_EOF) {
+		return 1;
+	}
+
+	if (len == 0) {
+		return 0;
+	}
+
+	dsiSaveSize = len;
+
+	int oldIME = enterCriticalSection();
+	u16 exmemcnt = REG_EXMEMCNT;
+	sysSetCardOwner(true);	// Give Slot-1 access to arm9
+	bool res = fileWrite((char*)&dsiSaveSize, *savFile, ce9->saveSize-4, 4, 0);
+	REG_EXMEMCNT = exmemcnt;
+	leaveCriticalSection(oldIME);
+
+	return res ? 0 : 1;
+#else
+	return 1;
 #endif
 }
 
@@ -802,12 +865,10 @@ bool dsiSaveOpen(void* ctx, const char* path, u32 mode) {
 	}
 
 	dsiSaveInit();
-	if (mode == 2 || mode == 3 || mode == 7) {
-		dsiSaveEmpty = false;
-	}
 
 	dsiSavePerms = mode;
-	return !dsiSaveEmpty;
+	dsiSaveAlwaysCreate = true;
+	return dsiSaveExists;
 #else
 	return false;
 #endif
@@ -820,9 +881,22 @@ bool dsiSaveClose(void* ctx) {
 		return false;
 	}
 	//toncset(ctx, 0, 0x80);
-	return true;
+	return dsiSaveExists;
 #else
 	return false;
+#endif
+}
+
+u32 dsiSaveGetLength(void* ctx) {
+#ifdef DLDI
+	dsiSaveSeekPos = 0;
+	if (savFile->firstCluster == CLUSTER_FREE || savFile->firstCluster == CLUSTER_EOF) {
+		return 0;
+	}
+
+	return dsiSaveSize;
+#else
+	return 0;
 #endif
 }
 
@@ -842,6 +916,18 @@ s32 dsiSaveRead(void* ctx, void* dst, u32 len) {
 #ifdef DLDI
 	if (dsiSavePerms == 2) {
 		return -1; // Return if only write perms are set
+	}
+
+	if (dsiSaveSize == 0) {
+		return 0;
+	}
+
+	while (dsiSaveSeekPos+len > dsiSaveSize) {
+		len--;
+	}
+
+	if (len == 0) {
+		return 0;
 	}
 
 	int oldIME = enterCriticalSection();
@@ -871,6 +957,16 @@ s32 dsiSaveWrite(void* ctx, void* src, s32 len) {
 	REG_EXMEMCNT = exmemcnt;
 	leaveCriticalSection(oldIME);
 	if (res) {
+		if (dsiSaveSize < dsiSaveSeekPos+len) {
+			dsiSaveSize = dsiSaveSeekPos+len;
+
+			int oldIME = enterCriticalSection();
+			u16 exmemcnt = REG_EXMEMCNT;
+			sysSetCardOwner(true);	// Give Slot-1 access to arm9
+			fileWrite((char*)&dsiSaveSize, *savFile, ce9->saveSize-4, 4, 0);
+			REG_EXMEMCNT = exmemcnt;
+			leaveCriticalSection(oldIME);
+		}
 		dsiSaveSeekPos += len;
 		return len;
 	}

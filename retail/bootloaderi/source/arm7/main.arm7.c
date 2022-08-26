@@ -1562,7 +1562,7 @@ int arm7_main(void) {
 
 		hookNdsRetailArm9Mini(
 			(cardengineArm9*)ce9Location,
-			moduleParams,
+			ndsHeader,
 			consoleModel
 		);
 
@@ -1859,9 +1859,11 @@ int arm7_main(void) {
 
 		hookNdsRetailArm9(
 			(cardengineArm9*)ce9Location,
+			ndsHeader,
 			moduleParams,
 			romFile->firstCluster,
 			savFile->firstCluster,
+			saveSize,
 			saveOnFlashcard,
 			cacheBlockSize,
 			extendedMemoryConfirmed,

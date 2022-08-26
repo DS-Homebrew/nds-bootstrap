@@ -151,9 +151,11 @@ static u32* hookInterruptHandler(const u32* start, size_t size) {
 
 int hookNdsRetailArm9(
 	cardengineArm9* ce9,
+	const tNDSHeader* ndsHeader,
 	const module_params_t* moduleParams,
 	u32 fileCluster,
 	u32 saveCluster,
+	u32 saveSize,
 	u32 romFatTableCache,
 	u32 savFatTableCache,
 	u32 ramDumpCluster,
@@ -176,6 +178,7 @@ int hookNdsRetailArm9(
 
 	ce9->fileCluster            = fileCluster;
 	ce9->saveCluster            = saveCluster;
+	ce9->saveSize               = saveSize;
 	ce9->romFatTableCache       = romFatTableCache;
 	ce9->savFatTableCache       = savFatTableCache;
 	ce9->ramDumpCluster         = ramDumpCluster;

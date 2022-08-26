@@ -9,34 +9,37 @@
 // ARM9 cardengine patches
 //
 typedef struct cardengineArm9Patches {
-    u32* card_read_arm9;
-    u32* card_irq_enable;
-    u32* card_pull_out_arm9;
-    u32* card_id_arm9;
-    u32* card_dma_arm9;
-    u32* card_set_dma_arm9;
-    u32* nand_read_arm9;
-    u32* nand_write_arm9;
-    u32* dsiSaveCreate;
-    u32* dsiSaveDelete;
-    u32* dsiSaveOpen;
-    u32* dsiSaveOpenR;
-    u32* dsiSaveClose;
-    u32* dsiSaveSeek;
-    u32* dsiSaveRead;
-    u32* dsiSaveWrite;
-    u32* cardStructArm9;
-    u32* waitSysCycles;
-    u32* cart_read;
-    u32* cacheFlushRef;
-    u32* cardEndReadDmaRef;
-    u32* sleepRef;
-    u32* swi02;
-    u32* reset_arm9;
-    u32 needFlushDCCache;
-    u32* pdash_read;
-    u32* vblankHandlerRef;
-    u32* ipcSyncHandlerRef;
+	u32* card_read_arm9;
+	u32* card_irq_enable;
+	u32* card_pull_out_arm9;
+	u32* card_id_arm9;
+	u32* card_dma_arm9;
+	u32* card_set_dma_arm9;
+	u32* nand_read_arm9;
+	u32* nand_write_arm9;
+	u32* dsiSaveCreate;
+	u32* dsiSaveDelete;
+	u32* dsiSaveGetInfo;
+	u32* dsiSaveSetLength;
+	u32* dsiSaveOpen;
+	u32* dsiSaveOpenR;
+	u32* dsiSaveClose;
+	u32* dsiSaveGetLength;
+	u32* dsiSaveSeek;
+	u32* dsiSaveRead;
+	u32* dsiSaveWrite;
+	u32* cardStructArm9;
+	u32* waitSysCycles;
+	u32* cart_read;
+	u32* cacheFlushRef;
+	u32* cardEndReadDmaRef;
+	u32* sleepRef;
+	u32* swi02;
+	u32* reset_arm9;
+	u32 needFlushDCCache;
+	u32* pdash_read;
+	u32* vblankHandlerRef;
+	u32* ipcSyncHandlerRef;
 } __attribute__ ((__packed__)) cardengineArm9Patches;
 
 
@@ -73,6 +76,7 @@ typedef struct cardengineArm9 {
     u32 intr_ipc_orig_return;
     u32 fileCluster;
     u32 saveCluster;
+    u32 saveSize;
     u32 cardStruct0;
     u32 cacheStruct;
 	u32 valueBits;
@@ -107,30 +111,33 @@ typedef struct cardengineArm9 {
 // ARM9 cardengine patches
 //
 typedef struct cardengineArm9Patches {
-    u32* card_read_arm9;
-    u32* card_irq_enable;
-    u32* card_pull_out_arm9; // Unused
-    u32* card_id_arm9;
-    u32* card_dma_arm9;
-    u32* nand_read_arm9;
-    u32* nand_write_arm9;
-    u32* dsiSaveCreate;
-    u32* dsiSaveDelete;
-    u32* dsiSaveOpen;
-    u32* dsiSaveOpenR;
-    u32* dsiSaveClose;
-    u32* dsiSaveSeek;
-    u32* dsiSaveRead;
-    u32* dsiSaveWrite;
-    u32* cardStructArm9;
-    u32* card_pull;
-    u32* cacheFlushRef;
-    u32* readCachedRef;
-    u32* reset_arm9;
-    u32* rumble_arm9[2];
-    u32 needFlushDCCache;
-    u32* pdash_read;
-    u32* ipcSyncHandlerRef;
+	u32* card_read_arm9;
+	u32* card_irq_enable;
+	u32* card_pull_out_arm9; // Unused
+	u32* card_id_arm9;
+	u32* card_dma_arm9;
+	u32* nand_read_arm9;
+	u32* nand_write_arm9;
+	u32* dsiSaveCreate;
+	u32* dsiSaveDelete;
+	u32* dsiSaveGetInfo;
+	u32* dsiSaveSetLength;
+	u32* dsiSaveOpen;
+	u32* dsiSaveOpenR;
+	u32* dsiSaveClose;
+	u32* dsiSaveGetLength;
+	u32* dsiSaveSeek;
+	u32* dsiSaveRead;
+	u32* dsiSaveWrite;
+	u32* cardStructArm9;
+	u32* card_pull;
+	u32* cacheFlushRef;
+	u32* readCachedRef;
+	u32* reset_arm9;
+	u32* rumble_arm9[2];
+	u32 needFlushDCCache;
+	u32* pdash_read;
+	u32* ipcSyncHandlerRef;
 } __attribute__ ((__packed__)) cardengineArm9Patches;
 
 
@@ -163,6 +170,7 @@ typedef struct cardengineArm9 {
     u32 intr_ipc_orig_return;
     u32 fileCluster;
     u32 saveCluster;
+    u32 saveSize;
     u32 romFatTableCache;
     u32 savFatTableCache;
     u32 ramDumpCluster;
