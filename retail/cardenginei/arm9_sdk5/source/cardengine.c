@@ -765,7 +765,7 @@ bool dsiSaveCreate(const char* path, u32 permit) {
 	}
 
 	dsiSaveInit();
-	if ((!dsiSaveExists && permit == 1) || (dsiSaveExists && permit == 2) || (!dsiSaveAlwaysCreate && permit == 3)) {
+	if ((!dsiSaveExists && permit == 1) || (dsiSaveExists && permit == 2) || (!dsiSaveAlwaysCreate && dsiSaveExists && permit == 3)) {
 		return false;
 	}
 
