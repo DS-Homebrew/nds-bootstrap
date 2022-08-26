@@ -6172,6 +6172,141 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020754C0 = 0xE1A00000; // nop
 	}
 
+	// WarioWare: Touched! DL (USA, Australia)
+	// The sound loading code has been reworked to instead load the SDAT file all at once, so sound is disabled in order for the game to boot within RAM limitations
+	else if (strcmp(romTid, "Z2AT") == 0) {
+		*(u32*)0x02004838 = 0xE1A00000; // nop
+		*(u32*)0x0200499C = 0xE1A00000; // nop
+		*(u32*)0x020050C8 = 0xE1A00000; // nop
+		*(u32*)0x020050CC = 0xE1A00000; // nop
+		*(u32*)0x02009294 = 0xE1A00000; // nop
+		*(u32*)0x020092A8 = 0xE1A00000; // nop
+		*(u32*)0x0200937C = 0xE3A00000; // mov r0, #0 (Skip loading SDAT file)
+		*(u32*)0x02009380 = 0xE12FFF1E; // bx lr
+		setBL(0x0200BCA4, (u32)ce9->patches->dsiSaveOpen);
+		*(u32*)0x0200BCB4 = 0xE3A00A02; // mov r0, #0x2000 (dsiSaveGetLength)
+		setBL(0x0200BCD0, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0200BD0C, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x0200BD1C, (u32)ce9->patches->dsiSaveOpen);
+		*(u32*)0x0200BD30 = 0xE1A00000; // nop (dsiSaveSetLength)
+		setBL(0x0200BD38, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0200BDE0, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x0200BE10, (u32)ce9->patches->dsiSaveSeek);
+		setBL(0x0200BE20, (u32)ce9->patches->dsiSaveRead);
+		setBL(0x0200BE28, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0200BE84, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x0200BEC8, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x0200BEFC, (u32)ce9->patches->dsiSaveSeek);
+		setBL(0x0200BF0C, (u32)ce9->patches->dsiSaveWrite);
+		setBL(0x0200BF14, (u32)ce9->patches->dsiSaveClose);
+		*(u32*)0x0200BF3C = 0xE1A00000; // nop
+		setBL(0x0200BF7C, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x0200BF90, (u32)ce9->patches->dsiSaveOpen);
+		*(u32*)0x0200BFA4 = 0xE1A00000; // nop (dsiSaveSetLength)
+		setBL(0x0200BFAC, (u32)ce9->patches->dsiSaveClose);
+		*(u32*)0x020689F0 = 0xE3A00000; // mov r0, #0 (Skip playing sound file)
+		*(u32*)0x020689F4 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0206AA90 = 0xE1A00000; // nop
+		*(u32*)0x0206E500 = 0xE1A00000; // nop
+		*(u32*)0x02073B70 = 0xE1A00000; // nop
+		*(u32*)0x020758E4 = 0xE1A00000; // nop
+		*(u32*)0x020758E8 = 0xE1A00000; // nop
+		*(u32*)0x020758F4 = 0xE1A00000; // nop
+		*(u32*)0x02075A54 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x02075AB0, heapEnd); // mov r0, #0x23C0000
+		*(u32*)0x0207A224 = 0xE1A00000; // nop
+	}
+
+	// WarioWare: Touched! DL (Europe)
+	// The sound loading code has been reworked to instead load the SDAT file all at once, so sound is disabled in order for the game to boot within RAM limitations
+	else if (strcmp(romTid, "Z2AP") == 0) {
+		*(u32*)0x02004838 = 0xE1A00000; // nop
+		*(u32*)0x0200499C = 0xE1A00000; // nop
+		*(u32*)0x020050C8 = 0xE1A00000; // nop
+		*(u32*)0x020050CC = 0xE1A00000; // nop
+		*(u32*)0x020092F4 = 0xE1A00000; // nop
+		*(u32*)0x02009308 = 0xE1A00000; // nop
+		*(u32*)0x020093DC = 0xE3A00000; // mov r0, #0 (Skip loading SDAT file)
+		*(u32*)0x020093E0 = 0xE12FFF1E; // bx lr
+		setBL(0x0200BD04, (u32)ce9->patches->dsiSaveOpen);
+		*(u32*)0x0200BD14 = 0xE3A00A02; // mov r0, #0x2000 (dsiSaveGetLength)
+		setBL(0x0200BD30, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0200BD6C, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x0200BD7C, (u32)ce9->patches->dsiSaveOpen);
+		*(u32*)0x0200BD90 = 0xE1A00000; // nop (dsiSaveSetLength)
+		setBL(0x0200BD98, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0200BE40, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x0200BE70, (u32)ce9->patches->dsiSaveSeek);
+		setBL(0x0200BE80, (u32)ce9->patches->dsiSaveRead);
+		setBL(0x0200BE88, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0200BEE4, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x0200BF28, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x0200BF5C, (u32)ce9->patches->dsiSaveSeek);
+		setBL(0x0200BF6C, (u32)ce9->patches->dsiSaveWrite);
+		setBL(0x0200BF74, (u32)ce9->patches->dsiSaveClose);
+		*(u32*)0x0200BF9C = 0xE1A00000; // nop
+		setBL(0x0200BFDC, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x0200BFF0, (u32)ce9->patches->dsiSaveOpen);
+		*(u32*)0x0200C004 = 0xE1A00000; // nop (dsiSaveSetLength)
+		setBL(0x0200C00C, (u32)ce9->patches->dsiSaveClose);
+		*(u32*)0x0206A9A4 = 0xE3A00000; // mov r0, #0 (Skip playing sound file)
+		*(u32*)0x0206A9A8 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0206CA44 = 0xE1A00000; // nop
+		*(u32*)0x020704B4 = 0xE1A00000; // nop
+		*(u32*)0x02075B24 = 0xE1A00000; // nop
+		*(u32*)0x02077898 = 0xE1A00000; // nop
+		*(u32*)0x0207789C = 0xE1A00000; // nop
+		*(u32*)0x020778A8 = 0xE1A00000; // nop
+		*(u32*)0x02077A08 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x02077A64, heapEnd); // mov r0, #0x23C0000
+		*(u32*)0x0207C258 = 0xE1A00000; // nop
+	}
+
+	// Sawaru Made in Wario DL (Japan)
+	// The sound loading code has been reworked to instead load the SDAT file all at once, so sound is disabled in order for the game to boot within RAM limitations
+	else if (strcmp(romTid, "Z2AJ") == 0) {
+		*(u32*)0x02004838 = 0xE1A00000; // nop
+		*(u32*)0x0200499C = 0xE1A00000; // nop
+		*(u32*)0x020050C8 = 0xE1A00000; // nop
+		*(u32*)0x020050CC = 0xE1A00000; // nop
+		*(u32*)0x02009290 = 0xE1A00000; // nop
+		*(u32*)0x020092A4 = 0xE1A00000; // nop
+		*(u32*)0x02009378 = 0xE3A00000; // mov r0, #0 (Skip loading SDAT file)
+		*(u32*)0x0200937C = 0xE12FFF1E; // bx lr
+		setBL(0x0200BCA0, (u32)ce9->patches->dsiSaveOpen);
+		*(u32*)0x0200BCB0 = 0xE3A00A02; // mov r0, #0x2000 (dsiSaveGetLength)
+		setBL(0x0200BCCC, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0200BD08, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x0200BD18, (u32)ce9->patches->dsiSaveOpen);
+		*(u32*)0x0200BD2C = 0xE1A00000; // nop (dsiSaveSetLength)
+		setBL(0x0200BD34, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0200BDDC, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x0200BE0C, (u32)ce9->patches->dsiSaveSeek);
+		setBL(0x0200BE1C, (u32)ce9->patches->dsiSaveRead);
+		setBL(0x0200BE24, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0200BE80, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x0200BEC4, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x0200BEF8, (u32)ce9->patches->dsiSaveSeek);
+		setBL(0x0200BF08, (u32)ce9->patches->dsiSaveWrite);
+		setBL(0x0200BF10, (u32)ce9->patches->dsiSaveClose);
+		*(u32*)0x0200BF38 = 0xE1A00000; // nop
+		setBL(0x0200BF78, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x0200BF8C, (u32)ce9->patches->dsiSaveOpen);
+		*(u32*)0x0200BFA0 = 0xE1A00000; // nop (dsiSaveSetLength)
+		setBL(0x0200BFA8, (u32)ce9->patches->dsiSaveClose);
+		*(u32*)0x02068970 = 0xE3A00000; // mov r0, #0 (Skip playing sound file)
+		*(u32*)0x02068974 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0206AA10 = 0xE1A00000; // nop
+		*(u32*)0x0206E480 = 0xE1A00000; // nop
+		*(u32*)0x02073AF0 = 0xE1A00000; // nop
+		*(u32*)0x02075864 = 0xE1A00000; // nop
+		*(u32*)0x02075868 = 0xE1A00000; // nop
+		*(u32*)0x02075874 = 0xE1A00000; // nop
+		*(u32*)0x020759D4 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x02075A30, heapEnd); // mov r0, #0x23C0000
+		*(u32*)0x0207A1A4 = 0xE1A00000; // nop
+	}
+
 	// White-Water Domo (USA)
 	else if (strcmp(romTid, "KDWE") == 0) {
 		const u32 dsiSaveCreateT = 0x02023258;

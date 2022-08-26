@@ -1950,6 +1950,78 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02037910, (u32)ce9->patches->dsiSaveWrite);
 	}
 
+	// WarioWare: Touched! DL (USA, Australia)
+	else if (strcmp(romTid, "Z2AT") == 0 && saveOnFlashcard) {
+		setBL(0x0200BCA4, (u32)ce9->patches->dsiSaveOpen);
+		*(u32*)0x0200BCB4 = 0xE3A00A02; // mov r0, #0x2000 (dsiSaveGetLength)
+		setBL(0x0200BCD0, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0200BD0C, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x0200BD1C, (u32)ce9->patches->dsiSaveOpen);
+		*(u32*)0x0200BD30 = 0xE1A00000; // nop (dsiSaveSetLength)
+		setBL(0x0200BD38, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0200BDE0, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x0200BE10, (u32)ce9->patches->dsiSaveSeek);
+		setBL(0x0200BE20, (u32)ce9->patches->dsiSaveRead);
+		setBL(0x0200BE28, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0200BE84, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x0200BEC8, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x0200BEFC, (u32)ce9->patches->dsiSaveSeek);
+		setBL(0x0200BF0C, (u32)ce9->patches->dsiSaveWrite);
+		setBL(0x0200BF14, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0200BF7C, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x0200BF90, (u32)ce9->patches->dsiSaveOpen);
+		*(u32*)0x0200BFA4 = 0xE1A00000; // nop (dsiSaveSetLength)
+		setBL(0x0200BFAC, (u32)ce9->patches->dsiSaveClose);
+	}
+
+	// WarioWare: Touched! DL (Europe)
+	else if (strcmp(romTid, "Z2AP") == 0 && saveOnFlashcard) {
+		setBL(0x0200BD04, (u32)ce9->patches->dsiSaveOpen);
+		*(u32*)0x0200BD14 = 0xE3A00A02; // mov r0, #0x2000 (dsiSaveGetLength)
+		setBL(0x0200BD30, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0200BD6C, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x0200BD7C, (u32)ce9->patches->dsiSaveOpen);
+		*(u32*)0x0200BD90 = 0xE1A00000; // nop (dsiSaveSetLength)
+		setBL(0x0200BD98, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0200BE40, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x0200BE70, (u32)ce9->patches->dsiSaveSeek);
+		setBL(0x0200BE80, (u32)ce9->patches->dsiSaveRead);
+		setBL(0x0200BE88, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0200BEE4, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x0200BF28, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x0200BF5C, (u32)ce9->patches->dsiSaveSeek);
+		setBL(0x0200BF6C, (u32)ce9->patches->dsiSaveWrite);
+		setBL(0x0200BF74, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0200BFDC, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x0200BFF0, (u32)ce9->patches->dsiSaveOpen);
+		*(u32*)0x0200C004 = 0xE1A00000; // nop (dsiSaveSetLength)
+		setBL(0x0200C00C, (u32)ce9->patches->dsiSaveClose);
+	}
+
+	// Sawaru Made in Wario DL (Japan)
+	else if (strcmp(romTid, "Z2AJ") == 0 && saveOnFlashcard) {
+		setBL(0x0200BCA0, (u32)ce9->patches->dsiSaveOpen);
+		*(u32*)0x0200BCB0 = 0xE3A00A02; // mov r0, #0x2000 (dsiSaveGetLength)
+		setBL(0x0200BCCC, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0200BD08, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x0200BD18, (u32)ce9->patches->dsiSaveOpen);
+		*(u32*)0x0200BD2C = 0xE1A00000; // nop (dsiSaveSetLength)
+		setBL(0x0200BD34, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0200BDDC, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x0200BE0C, (u32)ce9->patches->dsiSaveSeek);
+		setBL(0x0200BE1C, (u32)ce9->patches->dsiSaveRead);
+		setBL(0x0200BE24, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0200BE80, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x0200BEC4, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x0200BEF8, (u32)ce9->patches->dsiSaveSeek);
+		setBL(0x0200BF08, (u32)ce9->patches->dsiSaveWrite);
+		setBL(0x0200BF10, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0200BF78, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x0200BF8C, (u32)ce9->patches->dsiSaveOpen);
+		*(u32*)0x0200BFA0 = 0xE1A00000; // nop (dsiSaveSetLength)
+		setBL(0x0200BFA8, (u32)ce9->patches->dsiSaveClose);
+	}
+
 	// Wakugumi: Monochrome Puzzle (Europe, Australia)
 	else if (strcmp(romTid, "KK4V") == 0 && saveOnFlashcard) {
 		*(u32*)0x0204F240 = 0xE3A00000; // mov r0, #0
