@@ -1330,6 +1330,8 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Itsudemo Bomberman (Japan)
 	else if (strncmp(romTid, "KBB", 3) == 0) {
 		*(u32*)0x02008988 = 0xE1A00000; // nop
+		*(u32*)0x02009670 = 0xE3A0000B; // mov r0, #0xB
+		*(u32*)0x02009674 = 0xE12FFF1E; // bx lr
 		*(u32*)0x0200C280 = 0xE1A00000; // nop
 		*(u32*)0x02012524 = 0xE1A00000; // nop
 		*(u32*)0x020146C4 = 0xE1A00000; // nop
@@ -1356,16 +1358,16 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			//*(u32*)0x02043528 = 0xE3A00000; // mov r0, #0 (Skip WiFi error screen)
 			//*(u32*)0x020437AC = 0xE3A00001; // mov r0, #1
 			//*(u32*)0x020437B0 = 0xE12FFF1E; // bx lr
-			setBL(0x02043950, (u32)ce9->patches->dsiSaveOpen);
-			setBL(0x020439D0, (u32)ce9->patches->dsiSaveCreate);
-			setBL(0x02043A5C, (u32)ce9->patches->dsiSaveWrite);
-			setBL(0x02043A70, (u32)ce9->patches->dsiSaveClose);
-			setBL(0x02043AE8, (u32)ce9->patches->dsiSaveClose);
 			*(u32*)0x020437B4 = 0xE1A00000; // nop
 			*(u32*)0x020437D0 = 0xE1A00000; // nop
 			*(u32*)0x020437D8 = 0xE1A00000; // nop
 			*(u32*)0x020437F0 = 0xE1A00000; // nop
 			*(u32*)0x02043814 = 0xE1A00000; // nop
+			setBL(0x02043950, (u32)ce9->patches->dsiSaveOpen);
+			setBL(0x020439D0, (u32)ce9->patches->dsiSaveCreate);
+			setBL(0x02043A5C, (u32)ce9->patches->dsiSaveWrite);
+			setBL(0x02043A70, (u32)ce9->patches->dsiSaveClose);
+			setBL(0x02043AE8, (u32)ce9->patches->dsiSaveClose);
 			setBL(0x02046394, (u32)ce9->patches->dsiSaveOpen);
 			setBL(0x02046428, (u32)ce9->patches->dsiSaveRead);
 			setBL(0x0204649C, (u32)ce9->patches->dsiSaveClose);
@@ -1377,16 +1379,16 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			//*(u32*)0x020435F4 = 0xE3A00000; // mov r0, #0 (Skip WiFi error screen)
 			//*(u32*)0x02043878 = 0xE3A00001; // mov r0, #1
 			//*(u32*)0x0204387C = 0xE12FFF1E; // bx lr
-			setBL(0x02043A1C, (u32)ce9->patches->dsiSaveOpen);
-			setBL(0x02043A9C, (u32)ce9->patches->dsiSaveCreate);
-			setBL(0x02043B28, (u32)ce9->patches->dsiSaveWrite);
-			setBL(0x02043B28, (u32)ce9->patches->dsiSaveClose);
-			setBL(0x02043BB4, (u32)ce9->patches->dsiSaveClose);
 			*(u32*)0x02043880 = 0xE1A00000; // nop
 			*(u32*)0x0204389C = 0xE1A00000; // nop
 			*(u32*)0x020438A4 = 0xE1A00000; // nop
 			*(u32*)0x020438BC = 0xE1A00000; // nop
 			*(u32*)0x020438E0 = 0xE1A00000; // nop
+			setBL(0x02043A1C, (u32)ce9->patches->dsiSaveOpen);
+			setBL(0x02043A9C, (u32)ce9->patches->dsiSaveCreate);
+			setBL(0x02043B28, (u32)ce9->patches->dsiSaveWrite);
+			setBL(0x02043B28, (u32)ce9->patches->dsiSaveClose);
+			setBL(0x02043BB4, (u32)ce9->patches->dsiSaveClose);
 			setBL(0x02046460, (u32)ce9->patches->dsiSaveOpen);
 			setBL(0x020464F4, (u32)ce9->patches->dsiSaveRead);
 			setBL(0x02046568, (u32)ce9->patches->dsiSaveClose);

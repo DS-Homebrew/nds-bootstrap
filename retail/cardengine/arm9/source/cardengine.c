@@ -587,7 +587,7 @@ bool dsiSaveCreate(const char* path, u32 permit) {
 	}
 
 	dsiSaveInit();
-	if ((!dsiSaveExists && permit == 1) || (!dsiSaveOpenCalled && dsiSaveExists && (permit == 2 || permit == 3))) {
+	if ((!dsiSaveExists && permit == 1) || (dsiSaveExists && permit == 2) || (!dsiSaveOpenCalled && dsiSaveExists && permit == 3)) {
 		return false;
 	}
 
@@ -666,18 +666,6 @@ bool dsiSaveOpen(void* ctx, const char* path, u32 mode) {
 
 	dsiSaveInit();
 	dsiSaveOpenCalled = true;
-	if ((mode == 2 || mode == 3 || mode == 7) && !dsiSaveExists) {
-		u32 existByte = 1;
-
-		int oldIME = enterCriticalSection();
-		u16 exmemcnt = REG_EXMEMCNT;
-		setDeviceOwner();
-		fileWrite((char*)&existByte, savFile, ce9->saveSize-8, 4);
-		REG_EXMEMCNT = exmemcnt;
-		leaveCriticalSection(oldIME);
-
-		dsiSaveExists = true;
-	}
 
 	dsiSavePerms = mode;
 	return dsiSaveExists;

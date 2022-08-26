@@ -348,6 +348,8 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Bomberman Blitz (USA)
 	else if (strcmp(romTid, "KBBE") == 0 && saveOnFlashcard) {
+		*(u32*)0x02009670 = 0xE3A0000B; // mov r0, #0xB
+		*(u32*)0x02009674 = 0xE12FFF1E; // bx lr
 		//*(u32*)0x020437AC = 0xE3A00001; // mov r0, #1
 		//*(u32*)0x020437B0 = 0xE12FFF1E; // bx lr
 		setBL(0x02043950, (u32)ce9->patches->dsiSaveOpen);
@@ -362,6 +364,8 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Bomberman Blitz (Europe, Australia)
 	else if (strcmp(romTid, "KBBV") == 0 && saveOnFlashcard) {
+		*(u32*)0x02009670 = 0xE3A0000B; // mov r0, #0xB
+		*(u32*)0x02009674 = 0xE12FFF1E; // bx lr
 		//*(u32*)0x02043878 = 0xE3A00001; // mov r0, #1
 		//*(u32*)0x0204387C = 0xE12FFF1E; // bx lr
 		setBL(0x02043A1C, (u32)ce9->patches->dsiSaveOpen);
@@ -376,6 +380,8 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Itsudemo Bomberman (Japan)
 	else if (strcmp(romTid, "KBBJ") == 0 && saveOnFlashcard) {
+		*(u32*)0x02009670 = 0xE3A0000B; // mov r0, #0xB
+		*(u32*)0x02009674 = 0xE12FFF1E; // bx lr
 		//*(u32*)0x020434D8 = 0xE3A00001; // mov r0, #1
 		//*(u32*)0x020434DC = 0xE12FFF1E; // bx lr
 		setBL(0x0204367C, (u32)ce9->patches->dsiSaveOpen);
