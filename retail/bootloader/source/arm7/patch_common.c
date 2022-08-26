@@ -1194,11 +1194,12 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x020267D4, (u32)ce9->patches->dsiSaveOpen);
 		setBL(0x020267E8, (u32)ce9->patches->dsiSaveCreate);
 		setBL(0x02026814, (u32)ce9->patches->dsiSaveOpen);
-		*(u32*)0x0202683C = 0xE3A00000; // mov r0, #0 (dsiSaveFlush)
+		//*(u32*)0x02026834 = 0xE3A01B0B; // mov r1, #0x2C00
+		setBL(0x0202683C, (u32)ce9->patches->dsiSaveSetLength);
 		setBL(0x0202684C, (u32)ce9->patches->dsiSaveClose);
 		setBL(0x02026870, (u32)ce9->patches->dsiSaveWrite);
-		*(u32*)0x0202687C = 0xE3A00B0B; // mov r0, #0x2C00 (dsiSaveGetLength)
-		*(u32*)0x02026880 = 0xE3A02B0B; // mov r2, #0x2C00
+		setBL(0x0202687C, (u32)ce9->patches->dsiSaveGetLength);
+		*(u32*)0x02026880 = 0xE1A02000; // mov r2, r0
 		*(u32*)0x02026884 = 0xE3A01000; // mov r1, #0
 		//*(u32*)0x02026888 = 0xE3A03000; // mov r3, #0
 		setBL(0x020268B8, (u32)ce9->patches->dsiSaveSeek);
