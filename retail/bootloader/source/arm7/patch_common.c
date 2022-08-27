@@ -4140,6 +4140,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		ce9->patches->rumble_arm9[0][3] = *(u32*)0x02014BDC;
 		ce9->patches->rumble_arm9[1][3] = *(u32*)0x0201A38C;
 
+		*(u32*)0x0200B040 = 0xE3A01002; // mov r1, #2 (R/W -> W perms)
 		setBL(0x0200B048, (u32)ce9->patches->dsiSaveCreate);
 		*(u32*)0x0200B080 = 0xE1A00000; // nop
 		setBL(0x0200B090, (u32)ce9->patches->dsiSaveCreate);
@@ -4177,6 +4178,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		ce9->patches->rumble_arm9[0][3] = *(u32*)0x0201528C;
 		ce9->patches->rumble_arm9[1][3] = *(u32*)0x0201AA44;
 
+		*(u32*)0x0200B048 = 0xE3A01002; // mov r1, #2 (R/W -> W perms)
 		setBL(0x0200B350, (u32)ce9->patches->dsiSaveCreate);
 		*(u32*)0x0200B388 = 0xE1A00000; // nop
 		setBL(0x0200B398, (u32)ce9->patches->dsiSaveCreate);
@@ -4216,6 +4218,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 		*(u32*)0x02004838 = 0xE1A00000; // nop
 		*(u32*)0x0200499C = 0xE1A00000; // nop
+		*(u32*)0x0200B130 = 0xE3A01002; // mov r1, #2 (R/W -> W perms)
 		setBL(0x0200B134, (u32)ce9->patches->dsiSaveCreate);
 		*(u32*)0x0200B168 = 0xE1A00000; // nop
 		setBL(0x0200B174, (u32)ce9->patches->dsiSaveCreate);
@@ -4256,6 +4259,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02004838 = 0xE1A00000; // nop
 		*(u32*)0x0200499C = 0xE1A00000; // nop
 		*(u32*)0x0200545C = 0xE1A00000; // nop
+		*(u32*)0x02005478 = 0xE3A01002; // mov r1, #2 (R/W -> W perms)
 		setBL(0x0200547C, (u32)ce9->patches->dsiSaveCreate);
 		*(u32*)0x020054B0 = 0xE1A00000; // nop
 		setBL(0x020054BC, (u32)ce9->patches->dsiSaveCreate);
@@ -5841,6 +5845,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 		*(u32*)0x0201FC20 = 0xE12FFF1E; // bx lr (Disable loading sdat file)
 		setBL(0x02026F68, (int)ce9->patches->rumble_arm9[0]); // Rumble when hair is whipped
+		*(u32*)0x02092018 = 0xE3A01002; // mov r1, #2 (R/W -> W perms)
 		setBL(0x0209201C, (u32)ce9->patches->dsiSaveCreate);
 		*(u32*)0x02092050 = 0xE1A00000; // nop
 		setBL(0x0209205C, (u32)ce9->patches->dsiSaveCreate);
@@ -5900,6 +5905,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 		*(u32*)0x0201FE98 = 0xE12FFF1E; // bx lr (Disable loading sdat file)
 		setBL(0x020271E0, (int)ce9->patches->rumble_arm9[0]); // Rumble when hair is whipped
+		*(u32*)0x0209229C = 0xE3A01002; // mov r1, #2 (R/W -> W perms)
 		setBL(0x020922A0, (u32)ce9->patches->dsiSaveCreate);
 		*(u32*)0x020922D4 = 0xE1A00000; // nop
 		setBL(0x020922E0, (u32)ce9->patches->dsiSaveCreate);

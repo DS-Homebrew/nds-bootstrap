@@ -1260,6 +1260,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Mighty Flip Champs! (USA)
 	else if (strcmp(romTid, "KMGE") == 0 && saveOnFlashcard) {
+		*(u32*)0x0200B040 = 0xE3A01002; // mov r1, #2 (R/W -> W perms)
 		setBL(0x0200B048, (u32)ce9->patches->dsiSaveCreate);
 		setBL(0x0200B090, (u32)ce9->patches->dsiSaveCreate);
 		//*(u32*)0x0200B0A0 = 0xE1A00000; // nop
@@ -1276,6 +1277,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Mighty Flip Champs! (Europe, Australia)
 	else if (strcmp(romTid, "KMGV") == 0 && saveOnFlashcard) {
+		*(u32*)0x0200B048 = 0xE3A01002; // mov r1, #2 (R/W -> W perms)
 		setBL(0x0200B350, (u32)ce9->patches->dsiSaveCreate);
 		setBL(0x0200B398, (u32)ce9->patches->dsiSaveCreate);
 		//*(u32*)0x0200B3A8 = 0xE1A00000; // nop
@@ -1292,6 +1294,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Mighty Flip Champs! (Japan)
 	else if (strcmp(romTid, "KMGJ") == 0 && saveOnFlashcard) {
+		*(u32*)0x0200B130 = 0xE3A01002; // mov r1, #2 (R/W -> W perms)
 		setBL(0x0200B134, (u32)ce9->patches->dsiSaveCreate);
 		setBL(0x0200B174, (u32)ce9->patches->dsiSaveCreate);
 		//*(u32*)0x0200B184 = 0xE1A00000; // nop
@@ -1310,6 +1313,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Mighty Milky Way (Europe)
 	// Mighty Milky Way (Japan)
 	else if (strncmp(romTid, "KWY", 3) == 0 && saveOnFlashcard) {
+		*(u32*)0x02005478 = 0xE3A01002; // mov r1, #2 (R/W -> W perms)
 		setBL(0x0200547C, (u32)ce9->patches->dsiSaveCreate);
 		setBL(0x020054BC, (u32)ce9->patches->dsiSaveCreate);
 		//*(u32*)0x020054E4 = 0xE1A00000; // nop
@@ -1895,6 +1899,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Shantae: Risky's Revenge (USA)
 	else if (strcmp(romTid, "KS3E") == 0 && saveOnFlashcard) {
+		*(u32*)0x02092018 = 0xE3A01002; // mov r1, #2 (R/W -> W perms)
 		setBL(0x0209201C, (u32)ce9->patches->dsiSaveCreate);
 		setBL(0x0209205C, (u32)ce9->patches->dsiSaveCreate);
 		setBL(0x0209291C, (u32)ce9->patches->dsiSaveOpen);
@@ -1910,6 +1915,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Shantae: Risky's Revenge (Europe)
 	else if (strcmp(romTid, "KS3P") == 0 && saveOnFlashcard) {
+		*(u32*)0x0209229C = 0xE3A01002; // mov r1, #2 (R/W -> W perms)
 		setBL(0x020922A0, (u32)ce9->patches->dsiSaveCreate);
 		setBL(0x020922E0, (u32)ce9->patches->dsiSaveCreate);
 		setBL(0x02092D4C, (u32)ce9->patches->dsiSaveOpen);
