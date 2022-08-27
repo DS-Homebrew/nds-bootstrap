@@ -631,10 +631,18 @@ bool dsiSaveDelete(const char* path) {
 }
 
 bool dsiSaveGetInfo(const char* path, dsiSaveInfo* info) {
-	dsiSaveInit();
 	toncset(info, 0, sizeof(dsiSaveInfo));
+	if (savFile.firstCluster == CLUSTER_FREE || savFile.firstCluster == CLUSTER_EOF) {
+		return false;
+	}
 
-	if (savFile.firstCluster == CLUSTER_FREE || savFile.firstCluster == CLUSTER_EOF || !dsiSaveExists) {
+	dsiSaveInit();
+
+	if (strcmp(path, "dataPub:") == 0 || strcmp(path, "dataPub:/") == 0
+	 || strcmp(path, "dataPrv:") == 0 || strcmp(path, "dataPrv:/") == 0)
+	{
+		return true;
+	} else if (!dsiSaveExists) {
 		return false;
 	}
 
