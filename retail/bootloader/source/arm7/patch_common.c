@@ -5316,19 +5316,23 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02057B34, (u32)ce9->patches->dsiSaveOpen);
 		setBL(0x02057B4C, (u32)ce9->patches->dsiSaveWrite);
 		setBL(0x02057B64, (u32)ce9->patches->dsiSaveClose);
-		*(u32*)0x02057BC4 = 0xE3A00001; // mov r0, #1 (dsiSaveCreateDir)
-		*(u32*)0x02057C08 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x02057C38 = 0xE3A00001; // mov r0, #1 (dsiSaveCreateDirAuto)
+		setBL(0x02057BB8, 0x02057C54);
+		//*(u32*)0x02057BC4 = 0xE3A00000; // mov r0, #0 (dsiSaveOpenDir)
+		//*(u32*)0x02057BFC = 0xE1A00000; // nop (dsiSaveCloseDir)
+		//*(u32*)0x02057C08 = 0xE3A00000; // mov r0, #0
+		//*(u32*)0x02057C38 = 0xE3A00001; // mov r0, #1 (dsiSaveCreateDirAuto)
 		setBL(0x02057C84, (u32)ce9->patches->dsiSaveOpen);
-		*(u32*)0x02057C94 = 0xE3A00C02; // mov r0, #0x200 (dsiSaveGetLength)
-		*(u32*)0x02057CA8 = 0xE3A00000; // mov r0, #0 (dsiSaveSetLength)
-		setBL(0x02057CC4, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x02057C94, (u32)ce9->patches->dsiSaveGetLength);
+		setBL(0x02057CA8, (u32)ce9->patches->dsiSaveSetLength);
+		setBL(0x02057CC4, (u32)ce9->patches->dsiSaveClose);
 		setBL(0x02057CF8, (u32)ce9->patches->dsiSaveCreate);
 		setBL(0x02057D10, (u32)ce9->patches->dsiSaveOpen);
-		*(u32*)0x02057D24 = 0xE3A00000; // mov r0, #0 (dsiSaveSetLength)
+		setBL(0x02057D24, (u32)ce9->patches->dsiSaveSetLength);
 		setBL(0x02057D40, (u32)ce9->patches->dsiSaveClose); */
 		*(u32*)0x02064DD0 = 0xE3A00001; // mov r0, #1 (Hide volume icon in menu)
 		*(u32*)0x020ACF54 = 0xE1A00000; // nop
+		//*(u32*)0x020ADBF4 = 0xE3A00000; // mov r0, #0
+		//*(u32*)0x020ADBF8 = 0xE12FFF1E; // bx lr
 		*(u32*)0x020B1334 = 0xE1A00000; // nop
 		*(u32*)0x020BE08C = 0xE1A00000; // nop
 		*(u32*)0x020C0004 = 0xE1A00000; // nop
