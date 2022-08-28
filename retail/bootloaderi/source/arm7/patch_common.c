@@ -236,6 +236,74 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		tonccpy((char*)0x0209D234, dataPub, strlen(dataPub));
 	}
 
+	// Anonymous Notes 1: From The Abyss (USA)
+	// Anonymous Notes 1: From The Abyss (Europe)
+	else if ((strcmp(romTid, "KVIE") == 0 || strcmp(romTid, "KVIP") == 0) && saveOnFlashcard) {
+		//*(u32*)0x02023DB0 = 0xE3A00001; // mov r0, #1
+		//*(u32*)0x02023DB4 = 0xE12FFF1E; // bx lr
+		setBL(0x02024220, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x02024258, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x02024268, (u32)ce9->patches->dsiSaveGetResultCode);
+		setBL(0x02024290, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x020242BC, (u32)ce9->patches->dsiSaveGetLength);
+		setBL(0x020242D8, (u32)ce9->patches->dsiSaveSetLength);
+		setBL(0x02024328, (u32)ce9->patches->dsiSaveWrite);
+		setBL(0x02024338, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x02024358, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x020243A0, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x020243D8, (u32)ce9->patches->dsiSaveSeek);
+		setBL(0x020243E8, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x02024400, (u32)ce9->patches->dsiSaveWrite);
+		setBL(0x02024420, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x02024460, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x0202448C, (u32)ce9->patches->dsiSaveGetLength);
+		setBL(0x020244AC, (u32)ce9->patches->dsiSaveSeek);
+		setBL(0x020244BC, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x020244D4, (u32)ce9->patches->dsiSaveRead);
+		setBL(0x020244E4, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x020244F4, (u32)ce9->patches->dsiSaveClose);
+		if (ndsHeader->gameCode[3] == 'E') {
+			*(u32*)0x0209E2CC = 0xE1A00000; // nop
+			*(u32*)0x0209E2E0 = 0xE1A00000; // nop
+			*(u32*)0x0209E2F4 = 0xE1A00000; // nop
+			*(u32*)0x020CFB78 = 0xE1A00000; // nop
+			*(u32*)0x020CFCD0 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		} else {
+			*(u32*)0x0209E0DC = 0xE1A00000; // nop
+			*(u32*)0x0209E0F0 = 0xE1A00000; // nop
+			*(u32*)0x0209E104 = 0xE1A00000; // nop
+			//*(u32*)0x020CE830 = 0xE12FFF1E; // bx lr
+			*(u32*)0x020CF988 = 0xE1A00000; // nop
+			*(u32*)0x020CFAE0 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		}
+	}
+
+	// Anonymous Notes 1: From The Abyss (Japan)
+	else if (strcmp(romTid, "KVIJ") == 0 && saveOnFlashcard) {
+		setBL(0x0202481C, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x02024854, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x02024864, (u32)ce9->patches->dsiSaveGetResultCode);
+		setBL(0x0202488C, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x020248B8, (u32)ce9->patches->dsiSaveGetLength);
+		setBL(0x020248D4, (u32)ce9->patches->dsiSaveSetLength);
+		setBL(0x02024924, (u32)ce9->patches->dsiSaveWrite);
+		setBL(0x02024934, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x02024954, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0202499C, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x020249D4, (u32)ce9->patches->dsiSaveSeek);
+		setBL(0x020249E4, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x020249FC, (u32)ce9->patches->dsiSaveWrite);
+		setBL(0x02024A1C, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x02024A5C, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x02024A88, (u32)ce9->patches->dsiSaveGetLength);
+		setBL(0x02024AA8, (u32)ce9->patches->dsiSaveSeek);
+		setBL(0x02024AB8, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x02024AD0, (u32)ce9->patches->dsiSaveRead);
+		setBL(0x02024AE0, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x02024AF0, (u32)ce9->patches->dsiSaveClose);
+		*(u32*)0x020CF970 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+	}
+
 	// Army Defender (USA)
 	// Army Defender (Europe)
 	else if (strncmp(romTid, "KAY", 3) == 0 && saveOnFlashcard) {
@@ -2227,13 +2295,6 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0201FD04 = 0xE1A00000; // nop (Skip Manual screen)
 		*(u32*)0x02029C68 = 0xE12FFF1E; // bx lr
 		*(u32*)0x02029D14 = 0xE12FFF1E; // bx lr
-	}
-
-	// Anonymous Notes 1: From The Abyss (USA)
-	else if (strcmp(romTid, "KVIE") == 0) {
-		*(u32*)0x02023DB0 = 0xE3A00001; // mov r0, #1
-		*(u32*)0x02023DB4 = 0xE12FFF1E; // bx lr
-		*(u32*)0x020CE830 = 0xE12FFF1E; // bx lr
 	}
 
 	// Everyday Soccer (USA)

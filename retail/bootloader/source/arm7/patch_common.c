@@ -785,8 +785,8 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}*/
 
 	// Anonymous Notes 1: From The Abyss (USA)
-	// Crashes on reading save data after touching START
-	/*else if (strcmp(romTid, "KVIE") == 0) {
+	// Anonymous Notes 1: From The Abyss (Europe)
+	else if (strcmp(romTid, "KVIE") == 0 || strcmp(romTid, "KVIP") == 0) {
 		*(u32*)0x02004838 = 0xE1A00000; // nop
 		*(u32*)0x0200499C = 0xE1A00000; // nop
 		*(u32*)0x0200E74C = 0xE1A00000; // nop
@@ -796,19 +796,92 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020188E4 = 0xE1A00000; // nop
 		*(u32*)0x020188F0 = 0xE1A00000; // nop
 		*(u32*)0x02018A50 = 0xE1A00000; // nop
-		*(u32*)0x02018AAC = 0xE3A0078F; // mov r0, #0x23C0000
-		*(u32*)0x02018AD0 = 0xE3500001; // cmp r0, #1
-		*(u32*)0x02018AD8 = 0x13A00627; // movne r0, #0x2700000
+		patchHiHeapDSiWare(0x02018AAC, heapEnd); // mov r0, #0x23C0000
+		*(u32*)0x02019F18 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
 		*(u32*)0x0201D5C4 = 0xE1A00000; // nop
-		*(u32*)0x02023DB0 = 0xE3A00001; // mov r0, #1
-		*(u32*)0x02023DB4 = 0xE12FFF1E; // bx lr
-		*(u32*)0x0209E2CC = 0xE1A00000; // nop
-		*(u32*)0x0209E2E0 = 0xE1A00000; // nop
-		*(u32*)0x0209E2F4 = 0xE1A00000; // nop
-		*(u32*)0x020CE830 = 0xE12FFF1E; // bx lr
-		*(u32*)0x020CFB78 = 0xE1A00000; // nop
-		*(u32*)0x020CFCD0 = 0xE1A00000; // nop
-	}*/
+		setBL(0x02024220, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x02024258, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x02024268, (u32)ce9->patches->dsiSaveGetResultCode);
+		setBL(0x02024290, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x020242BC, (u32)ce9->patches->dsiSaveGetLength);
+		setBL(0x020242D8, (u32)ce9->patches->dsiSaveSetLength);
+		setBL(0x02024328, (u32)ce9->patches->dsiSaveWrite);
+		setBL(0x02024338, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x02024358, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x020243A0, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x020243D8, (u32)ce9->patches->dsiSaveSeek);
+		setBL(0x020243E8, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x02024400, (u32)ce9->patches->dsiSaveWrite);
+		setBL(0x02024420, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x02024460, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x0202448C, (u32)ce9->patches->dsiSaveGetLength);
+		setBL(0x020244AC, (u32)ce9->patches->dsiSaveSeek);
+		setBL(0x020244BC, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x020244D4, (u32)ce9->patches->dsiSaveRead);
+		setBL(0x020244E4, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x020244F4, (u32)ce9->patches->dsiSaveClose);
+		*(u32*)0x02024510 = 0xE1A00000; // nop
+		*(u32*)0x02024530 = 0xE1A00000; // nop
+		*(u32*)0x0202457C = 0xE1A00000; // nop
+		if (ndsHeader->gameCode[3] == 'E') {
+			*(u32*)0x0209E2CC = 0xE1A00000; // nop
+			*(u32*)0x0209E2E0 = 0xE1A00000; // nop
+			*(u32*)0x0209E2F4 = 0xE1A00000; // nop
+			*(u32*)0x020CFB78 = 0xE1A00000; // nop
+			*(u32*)0x020CFCD0 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		} else {
+			*(u32*)0x0209E0DC = 0xE1A00000; // nop
+			*(u32*)0x0209E0F0 = 0xE1A00000; // nop
+			*(u32*)0x0209E104 = 0xE1A00000; // nop
+			*(u32*)0x020CF988 = 0xE1A00000; // nop
+			*(u32*)0x020CFAE0 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		}
+	}
+
+	// Anonymous Notes 1: From The Abyss (Japan)
+	else if (strcmp(romTid, "KVIJ") == 0) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x0200506C = 0xE1A00000; // nop
+		*(u32*)0x0200E6DC = 0xE1A00000; // nop
+		*(u32*)0x02011C9C = 0xE1A00000; // nop
+		*(u32*)0x02016C48 = 0xE1A00000; // nop
+		*(u32*)0x02016C4C = 0xE1A00000; // nop
+		*(u32*)0x02016C58 = 0xE1A00000; // nop
+		*(u32*)0x02016D70 = 0xE1A00000; // nop
+		*(u32*)0x02018D9C = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x02018DF8, heapEnd); // mov r0, #0x23C0000
+		*(u32*)0x0201A278 = 0xE1A00000; // nop
+		*(u32*)0x0201A280 = 0xE8BD8010; // LDMFD SP!, {R4,PC}
+		*(u32*)0x0201DB28 = 0xE1A00000; // nop
+		setBL(0x0202481C, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x02024854, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x02024864, (u32)ce9->patches->dsiSaveGetResultCode);
+		setBL(0x0202488C, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x020248B8, (u32)ce9->patches->dsiSaveGetLength);
+		setBL(0x020248D4, (u32)ce9->patches->dsiSaveSetLength);
+		setBL(0x02024924, (u32)ce9->patches->dsiSaveWrite);
+		setBL(0x02024934, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x02024954, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0202499C, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x020249D4, (u32)ce9->patches->dsiSaveSeek);
+		setBL(0x020249E4, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x020249FC, (u32)ce9->patches->dsiSaveWrite);
+		setBL(0x02024A1C, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x02024A5C, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x02024A88, (u32)ce9->patches->dsiSaveGetLength);
+		setBL(0x02024AA8, (u32)ce9->patches->dsiSaveSeek);
+		setBL(0x02024AB8, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x02024AD0, (u32)ce9->patches->dsiSaveRead);
+		setBL(0x02024AE0, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x02024AF0, (u32)ce9->patches->dsiSaveClose);
+		*(u32*)0x02024B0C = 0xE1A00000; // nop
+		*(u32*)0x02024B2C = 0xE1A00000; // nop
+		*(u32*)0x02024B78 = 0xE1A00000; // nop
+		*(u32*)0x0209E0A4 = 0xE1A00000; // nop
+		*(u32*)0x0209E0B8 = 0xE1A00000; // nop
+		*(u32*)0x0209E0CC = 0xE1A00000; // nop
+		*(u32*)0x020CF970 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+	}
 
 	// Antipole (USA)
 	// Does not boot due to lack of memory
@@ -5359,8 +5432,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02057D40, (u32)ce9->patches->dsiSaveClose); */
 		*(u32*)0x02064DD0 = 0xE3A00001; // mov r0, #1 (Hide volume icon in menu)
 		*(u32*)0x020ACF54 = 0xE1A00000; // nop
-		//*(u32*)0x020ADBF4 = 0xE3A00000; // mov r0, #0
-		//*(u32*)0x020ADBF8 = 0xE12FFF1E; // bx lr
+		//tonccpy((u32*)0x020ADBF4, ce9->patches->dsiSaveGetResultCode, 0xC);
 		*(u32*)0x020B1334 = 0xE1A00000; // nop
 		*(u32*)0x020BE08C = 0xE1A00000; // nop
 		*(u32*)0x020C0004 = 0xE1A00000; // nop
