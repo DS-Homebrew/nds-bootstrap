@@ -546,7 +546,6 @@ bool nandWrite(void* memory,void* flash,u32 len,u32 dma) {
 
 static bool dsiSaveInited = false;
 static bool dsiSaveExists = false;
-//static bool dsiSaveOpenCalled = false;
 static u32 dsiSavePerms = 0;
 static s32 dsiSaveSeekPos = 0;
 static u32 dsiSaveSize = 0;
@@ -580,6 +579,21 @@ static void dsiSaveInit(void) {
 	dsiSaveInited = true;
 }
 
+u32 dsiSaveGetResultCode(const char* path) {
+	if (savFile.firstCluster == CLUSTER_FREE || savFile.firstCluster == CLUSTER_EOF) {
+		return 0xE;
+	}
+
+	dsiSaveInit();
+
+	if (strcmp(path, "dataPub:") == 0 || strcmp(path, "dataPub:/") == 0
+	 || strcmp(path, "dataPrv:") == 0 || strcmp(path, "dataPrv:/") == 0)
+	{
+		return 8;
+	}
+	return dsiSaveExists ? 8 : 0xB;
+}
+
 bool dsiSaveCreate(const char* path, u32 permit) {
 	dsiSaveSeekPos = 0;
 	if (savFile.firstCluster == CLUSTER_FREE || savFile.firstCluster == CLUSTER_EOF) {
@@ -587,9 +601,9 @@ bool dsiSaveCreate(const char* path, u32 permit) {
 	}
 
 	dsiSaveInit();
-	if ((!dsiSaveExists && permit == 1) || (dsiSaveExists && permit == 2) /*|| (!dsiSaveOpenCalled && dsiSaveExists && permit == 3)*/) {
-		return false;
-	}
+	//if ((!dsiSaveExists && permit == 1) || (dsiSaveExists && permit == 2)) {
+	//	return false;
+	//}
 
 	if (!dsiSaveExists) {
 		u32 existByte = 1;
@@ -602,8 +616,10 @@ bool dsiSaveCreate(const char* path, u32 permit) {
 		leaveCriticalSection(oldIME);
 
 		dsiSaveExists = true;
+		return true;
 	}
-	return true;
+
+	return false;
 }
 
 bool dsiSaveDelete(const char* path) {

@@ -91,6 +91,7 @@ patches:
 .word   0x0
 .word   0x0
 .word   0x0
+.word   0x0
 .word	cardStructArm9
 .word   waitSysCycles
 .word	cart_read

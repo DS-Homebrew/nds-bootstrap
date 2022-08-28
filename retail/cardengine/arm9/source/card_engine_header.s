@@ -116,6 +116,7 @@ patches:
 .word	card_dma_arm9
 .word   nand_read_arm9
 .word   nand_write_arm9
+.word   dsiSaveGetResultCode_arm
 .word   dsiSaveCreate_arm
 .word   dsiSaveDelete_arm
 .word   dsiSaveGetInfo_arm
@@ -267,6 +268,14 @@ nand_write_arm9:
 	ldmfd   sp!, {r3-r9,pc}
 _blx_r6_stub_nand_write:
 	bx	r6	
+.pool
+@---------------------------------------------------------------------------------
+
+@---------------------------------------------------------------------------------
+dsiSaveGetResultCode_arm:
+@---------------------------------------------------------------------------------
+	ldr	r12, =dsiSaveGetResultCode
+	bx	r12
 .pool
 @---------------------------------------------------------------------------------
 

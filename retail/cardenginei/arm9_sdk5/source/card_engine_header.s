@@ -81,6 +81,7 @@ patches:
 .word   nand_read_arm9
 .word   nand_write_arm9
 #ifdef TWLSDK
+.word   dsiSaveGetResultCode_arm
 .word   dsiSaveCreate_arm
 .word   dsiSaveDelete_arm
 .word   dsiSaveGetInfo_arm
@@ -93,6 +94,7 @@ patches:
 .word   dsiSaveRead_arm
 .word   dsiSaveWrite_arm
 #else
+.word   0x0
 .word   0x0
 .word   0x0
 .word   0x0
@@ -335,6 +337,14 @@ _blx_r6_stub_nand_write:
 .pool
 @---------------------------------------------------------------------------------
 #ifdef TWLSDK
+@---------------------------------------------------------------------------------
+dsiSaveGetResultCode_arm:
+@---------------------------------------------------------------------------------
+	ldr	r12, =dsiSaveGetResultCode
+	bx	r12
+.pool
+@---------------------------------------------------------------------------------
+
 @---------------------------------------------------------------------------------
 dsiSaveCreate_arm:
 @---------------------------------------------------------------------------------
