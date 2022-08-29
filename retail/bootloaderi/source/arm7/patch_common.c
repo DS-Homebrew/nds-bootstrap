@@ -1792,7 +1792,8 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Art Style: precipice (USA)
 	// Art Style: KUBOS (Europe, Australia)
-	else if ((strcmp(romTid, "KAKE") == 0 || strcmp(romTid, "KAKV") == 0) && saveOnFlashcard) {
+	// Art Style: nalaku (Japan)
+	else if ((strncmp(romTid, "KAK", 3) == 0) && saveOnFlashcard) {
 		setBL(0x020075A8, (u32)ce9->patches->dsiSaveOpen);
 		setBL(0x02007668, (u32)ce9->patches->dsiSaveOpen);
 		setBL(0x020076AC, (u32)ce9->patches->dsiSaveRead);
@@ -2409,6 +2410,22 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0200EC48, (u32)ce9->patches->dsiSaveSetLength);
 		setBL(0x0200EC68, (u32)ce9->patches->dsiSaveWrite);
 		setBL(0x0200EC84, (u32)ce9->patches->dsiSaveClose);
+	}
+
+	// Art Style: SOMNIUM (Japan)
+	else if (strcmp(romTid, "KASJ") == 0 && saveOnFlashcard) {
+		setBL(0x0200EC4C, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x0200ED4C, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x0200EDA0, (u32)ce9->patches->dsiSaveRead);
+		setBL(0x0200EDF0, (u32)ce9->patches->dsiSaveClose);
+		//*(u32*)0x0200EE98 = 0xE3A00000; // mov r0, #0
+		//*(u32*)0x0200EE9C = 0xE12FFF1E; // bx lr
+		setBL(0x0200EEC0, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x0200EED0, (u32)ce9->patches->dsiSaveGetResultCode);
+		setBL(0x0200EEEC, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x0200EF08, (u32)ce9->patches->dsiSaveSetLength);
+		setBL(0x0200EF28, (u32)ce9->patches->dsiSaveWrite);
+		setBL(0x0200EF44, (u32)ce9->patches->dsiSaveClose);
 	}
 
 	else if (dsiSD) {
