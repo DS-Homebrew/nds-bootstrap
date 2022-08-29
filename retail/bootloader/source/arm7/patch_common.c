@@ -784,6 +784,36 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020B060C = 0xE1A00000; // nop
 	}*/
 
+	// Amakuchi! Dairoujou (Japan)
+	else if (strcmp(romTid, "KF2J") == 0) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x0200D658 = 0xE1A00000; // nop
+		*(u32*)0x02010BD8 = 0xE1A00000; // nop
+		*(u32*)0x02015CC4 = 0xE1A00000; // nop
+		*(u32*)0x02017A20 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02017AC4 = 0xE1A00000; // nop
+		*(u32*)0x02017AC8 = 0xE1A00000; // nop
+		*(u32*)0x02017AD4 = 0xE1A00000; // nop
+		*(u32*)0x02017C18 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x02017C74, heapEnd); // mov r0, #0x23C0000
+		*(u32*)0x02018ED4 = 0xE1A00000; // nop
+		*(u32*)0x02018EDC = 0xE8BD8010; // LDMFD SP!, {R4,PC}
+		*(u32*)0x0201BD08 = 0xE1A00000; // nop
+		setBL(0x0203C1C8, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x0203C1F4, (u32)ce9->patches->dsiSaveRead);
+		setBL(0x0203C204, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0203C220, (u32)ce9->patches->dsiSaveClose);
+		*(u32*)0x0203C274 = 0xE3A00001; // mov r0, #1 (OpenDirectory)
+		*(u32*)0x0203C2B0 = 0xE1A00000; // nop (CloseDirectory)
+		setBL(0x0203C2BC, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x0203C2CC, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x0203C2F8, (u32)ce9->patches->dsiSaveSetLength);
+		setBL(0x0203C308, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0203C32C, (u32)ce9->patches->dsiSaveWrite);
+		setBL(0x0203C33C, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0203C358, (u32)ce9->patches->dsiSaveClose);
+	}
+
 	// Anonymous Notes 1: From The Abyss (USA)
 	// Anonymous Notes 1: From The Abyss (Europe)
 	else if (strcmp(romTid, "KVIE") == 0 || strcmp(romTid, "KVIP") == 0) {
@@ -2297,6 +2327,39 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02045D44, (u32)ce9->patches->dsiSaveRead);
 		setBL(0x02045D4C, (u32)ce9->patches->dsiSaveClose);
 		*(u32*)0x02045D6C = 0xE1A00000; // nop
+	}
+
+	// Chuukara! Dairoujou (Japan)
+	else if (strcmp(romTid, "KQLJ") == 0) {
+		*(u32*)0x02004838 = 0xE1A00000; // nop
+		*(u32*)0x0200499C = 0xE1A00000; // nop
+		*(u32*)0x0200DDFC = 0xE1A00000; // nop
+		*(u32*)0x020115C8 = 0xE1A00000; // nop
+		*(u32*)0x0201BD1C = 0xE1A00000; // nop
+		*(u32*)0x0201DB98 = 0xE1A00000; // nop
+		*(u32*)0x0201DB9C = 0xE1A00000; // nop
+		*(u32*)0x0201DBA8 = 0xE1A00000; // nop
+		*(u32*)0x0201DD08 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x0201DD64, heapEnd); // mov r0, #0x23C0000
+		*(u32*)0x0201F008 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
+		*(u32*)0x0201F024 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0201F028 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0201F030 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0201F034 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02022518 = 0xE1A00000; // nop
+		setBL(0x020446E4, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x02044710, (u32)ce9->patches->dsiSaveRead);
+		setBL(0x02044720, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0204473C, (u32)ce9->patches->dsiSaveClose);
+		*(u32*)0x02044790 = 0xE3A00001; // mov r0, #1 (OpenDirectory)
+		*(u32*)0x020447CC = 0xE1A00000; // nop (CloseDirectory)
+		setBL(0x020447D8, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x020447E8, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x02044814, (u32)ce9->patches->dsiSaveSetLength);
+		setBL(0x02044824, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x02044848, (u32)ce9->patches->dsiSaveWrite);
+		setBL(0x02044858, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x02044874, (u32)ce9->patches->dsiSaveClose);
 	}
 
 	// Color Commando (USA)

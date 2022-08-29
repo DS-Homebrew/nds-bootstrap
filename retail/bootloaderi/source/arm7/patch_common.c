@@ -236,6 +236,23 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		tonccpy((char*)0x0209D234, dataPub, strlen(dataPub));
 	}
 
+	// Amakuchi! Dairoujou (Japan)
+	else if (strcmp(romTid, "KF2J") == 0 && saveOnFlashcard) {
+		setBL(0x0203C1C8, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x0203C1F4, (u32)ce9->patches->dsiSaveRead);
+		setBL(0x0203C204, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0203C220, (u32)ce9->patches->dsiSaveClose);
+		*(u32*)0x0203C274 = 0xE3A00001; // mov r0, #1 (OpenDirectory)
+		*(u32*)0x0203C2B0 = 0xE1A00000; // nop (CloseDirectory)
+		setBL(0x0203C2BC, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x0203C2CC, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x0203C2F8, (u32)ce9->patches->dsiSaveSetLength);
+		setBL(0x0203C308, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0203C32C, (u32)ce9->patches->dsiSaveWrite);
+		setBL(0x0203C33C, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0203C358, (u32)ce9->patches->dsiSaveClose);
+	}
+
 	// Anonymous Notes 1: From The Abyss (USA)
 	// Anonymous Notes 1: From The Abyss (Europe)
 	else if ((strcmp(romTid, "KVIE") == 0 || strcmp(romTid, "KVIP") == 0) && saveOnFlashcard) {
@@ -747,6 +764,23 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02045D34, (u32)ce9->patches->dsiSaveSeek);
 		setBL(0x02045D44, (u32)ce9->patches->dsiSaveRead);
 		setBL(0x02045D4C, (u32)ce9->patches->dsiSaveClose);
+	}
+
+	// Chuukara! Dairoujou (Japan)
+	else if (strcmp(romTid, "KQLJ") == 0 && saveOnFlashcard) {
+		setBL(0x020446E4, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x02044710, (u32)ce9->patches->dsiSaveRead);
+		setBL(0x02044720, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0204473C, (u32)ce9->patches->dsiSaveClose);
+		*(u32*)0x02044790 = 0xE3A00001; // mov r0, #1 (OpenDirectory)
+		*(u32*)0x020447CC = 0xE1A00000; // nop (CloseDirectory)
+		setBL(0x020447D8, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x020447E8, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x02044814, (u32)ce9->patches->dsiSaveSetLength);
+		setBL(0x02044824, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x02044848, (u32)ce9->patches->dsiSaveWrite);
+		setBL(0x02044858, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x02044874, (u32)ce9->patches->dsiSaveClose);
 	}
 
 	// Crash-Course Domo (USA)
