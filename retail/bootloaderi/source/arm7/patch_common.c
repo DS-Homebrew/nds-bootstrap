@@ -393,6 +393,49 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0203E5BC, (u32)ce9->patches->dsiSaveClose);
 	}
 
+	// Everyday Soccer (USA)
+	else if (strcmp(romTid, "KAZE") == 0 && saveOnFlashcard) {
+		*(u32*)0x020050A4 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		*(u32*)0x020050A8 = 0xE1A00000; // nop
+		setBL(0x02059E20, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x02059E3C, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x02059E68, (u32)ce9->patches->dsiSaveSetLength);
+		setBL(0x02059E84, (u32)ce9->patches->dsiSaveWrite);
+		setBL(0x02059E90, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x02059F2C, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x02059F9C, (u32)ce9->patches->dsiSaveRead);
+		setBL(0x02059FA8, (u32)ce9->patches->dsiSaveClose);
+	}
+
+	// ARC Style: Everyday Football (Europe, Australia)
+	else if (strcmp(romTid, "KAZV") == 0 && saveOnFlashcard) {
+		*(u32*)0x020050A4 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		*(u32*)0x020050A8 = 0xE1A00000; // nop
+		setBL(0x02059EF4, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x02059F10, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x02059F3C, (u32)ce9->patches->dsiSaveSetLength);
+		setBL(0x02059F58, (u32)ce9->patches->dsiSaveWrite);
+		setBL(0x02059F64, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0205A000, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x0205A070, (u32)ce9->patches->dsiSaveRead);
+		setBL(0x0205A07C, (u32)ce9->patches->dsiSaveClose);
+	}
+
+	// ARC Style: Soccer! (Japan)
+	// ARC Style: Soccer! (Korea)
+	else if ((strcmp(romTid, "KAZJ") == 0 || strcmp(romTid, "KAZK") == 0) && saveOnFlashcard) {
+		*(u32*)0x020050A4 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		*(u32*)0x020050A8 = 0xE1A00000; // nop
+		setBL(0x02059E04, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x02059E20, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x02059E4C, (u32)ce9->patches->dsiSaveSetLength);
+		setBL(0x02059E68, (u32)ce9->patches->dsiSaveWrite);
+		setBL(0x02059E74, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x02059F04, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x02059F74, (u32)ce9->patches->dsiSaveRead);
+		setBL(0x02059F80, (u32)ce9->patches->dsiSaveClose);
+	}
+
 	// Aura-Aura Climber (USA)
 	// Save code too advanced to patch, preventing support
 	else if (strcmp(romTid, "KSRE") == 0 && saveOnFlashcard) {
@@ -2405,14 +2448,6 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0201FD04 = 0xE1A00000; // nop (Skip Manual screen)
 		*(u32*)0x02029C68 = 0xE12FFF1E; // bx lr
 		*(u32*)0x02029D14 = 0xE12FFF1E; // bx lr
-	}
-
-	// Everyday Soccer (USA)
-	// ARC Style: Everyday Football (Europe, Australia)
-	// ARC Style: Soccer! (Japan)
-	// ARC Style: Soccer! (Korea)
-	else if (strncmp(romTid, "KAZ", 3) == 0) {
-		*(u32*)0x020050A4 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 	}
 
 	// Asphalt 4: Elite Racing (USA)

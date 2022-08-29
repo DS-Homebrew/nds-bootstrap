@@ -1123,17 +1123,19 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0200498C = 0xE1A00000; // nop
 		*(u32*)0x020050A4 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		*(u32*)0x020050A8 = 0xE1A00000; // nop
-		*(u32*)0x0200DC9C = 0xE1A00000; // nop
-		/* *(u32*)0x02059E0C = 0xE1A00000; // nop
+		//*(u32*)0x0200DC9C = 0xE1A00000; // nop
+		*(u32*)0x02059E0C = 0xE1A00000; // nop
 		*(u32*)0x02059E14 = 0xE1A00000; // nop
-		*(u32*)0x02059E20 = generateA7Instr(0x02059E20, (u32)ce9->patches->dsiSaveCreate);
-		*(u32*)0x02059E3C = generateA7Instr(0x02059E3C, (u32)ce9->patches->dsiSaveOpen);
-		*(u32*)0x02059E90 = generateA7Instr(0x02059E90, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x02059E20, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x02059E3C, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x02059E68, (u32)ce9->patches->dsiSaveSetLength);
+		setBL(0x02059E84, (u32)ce9->patches->dsiSaveWrite);
+		setBL(0x02059E90, (u32)ce9->patches->dsiSaveClose);
 		*(u32*)0x02059EB0 = 0xE1A00000; // nop
 		*(u32*)0x02059EB8 = 0xE1A00000; // nop
-		*(u32*)0x02059F2C = generateA7Instr(0x02059F2C, (u32)ce9->patches->dsiSaveOpen);
-		*(u32*)0x02059F9C = generateA7Instr(0x02059F9C, (u32)ce9->patches->dsiSaveRead);
-		*(u32*)0x02059FA8 = generateA7Instr(0x02059FA8, (u32)ce9->patches->dsiSaveClose); */
+		setBL(0x02059F2C, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x02059F9C, (u32)ce9->patches->dsiSaveRead);
+		setBL(0x02059FA8, (u32)ce9->patches->dsiSaveClose);
 		*(u32*)0x02068414 = 0xE1A00000; // nop
 		*(u32*)0x0206CA14 = 0xE1A00000; // nop
 		*(u32*)0x02078504 = 0xE1A00000; // nop
@@ -1156,7 +1158,19 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0200498C = 0xE1A00000; // nop
 		*(u32*)0x020050A4 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		*(u32*)0x020050A8 = 0xE1A00000; // nop
-		*(u32*)0x0200DD70 = 0xE1A00000; // nop
+		//*(u32*)0x0200DD70 = 0xE1A00000; // nop
+		*(u32*)0x02059EE0 = 0xE1A00000; // nop
+		*(u32*)0x02059EE8 = 0xE1A00000; // nop
+		setBL(0x02059EF4, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x02059F10, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x02059F3C, (u32)ce9->patches->dsiSaveSetLength);
+		setBL(0x02059F58, (u32)ce9->patches->dsiSaveWrite);
+		setBL(0x02059F64, (u32)ce9->patches->dsiSaveClose);
+		*(u32*)0x02059F84 = 0xE1A00000; // nop
+		*(u32*)0x02059F8C = 0xE1A00000; // nop
+		setBL(0x0205A000, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x0205A070, (u32)ce9->patches->dsiSaveRead);
+		setBL(0x0205A07C, (u32)ce9->patches->dsiSaveClose);
 		*(u32*)0x020684E8 = 0xE1A00000; // nop
 		*(u32*)0x0206CAE8 = 0xE1A00000; // nop
 		*(u32*)0x020785D8 = 0xE1A00000; // nop
@@ -1179,7 +1193,19 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0200498C = 0xE1A00000; // nop
 		*(u32*)0x020050A4 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		*(u32*)0x020050A8 = 0xE1A00000; // nop
-		*(u32*)0x0200DD70 = 0xE1A00000; // nop
+		//*(u32*)0x0200DD70 = 0xE1A00000; // nop
+		*(u32*)0x02059DF0 = 0xE1A00000; // nop
+		*(u32*)0x02059DF8 = 0xE1A00000; // nop
+		setBL(0x02059E04, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x02059E20, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x02059E4C, (u32)ce9->patches->dsiSaveSetLength);
+		setBL(0x02059E68, (u32)ce9->patches->dsiSaveWrite);
+		setBL(0x02059E74, (u32)ce9->patches->dsiSaveClose);
+		*(u32*)0x02059E88 = 0xE1A00000; // nop
+		*(u32*)0x02059E90 = 0xE1A00000; // nop
+		setBL(0x02059F04, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x02059F74, (u32)ce9->patches->dsiSaveRead);
+		setBL(0x02059F80, (u32)ce9->patches->dsiSaveClose);
 		*(u32*)0x020683C8 = 0xE1A00000; // nop
 		*(u32*)0x0206C9C8 = 0xE1A00000; // nop
 		*(u32*)0x020784B8 = 0xE1A00000; // nop
