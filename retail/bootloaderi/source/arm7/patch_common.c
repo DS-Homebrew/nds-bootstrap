@@ -1137,6 +1137,82 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// Fashion Tycoon (USA)
+	// Saving not supported due to some weirdness with the code going on
+	else if (strcmp(romTid, "KU7E") == 0 && saveOnFlashcard) {
+		/* const u32 dsiSaveCreateT = 0x020370F4;
+		*(u16*)dsiSaveCreateT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveCreateT + 4), ce9->patches->dsiSaveCreate, 0xC); // Original function overwritten, no BL setting needed
+
+		const u32 dsiSaveSetLengthT = 0x02037104;
+		*(u16*)dsiSaveSetLengthT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveSetLengthT + 4), ce9->patches->dsiSaveSetLength, 0xC);
+
+		const u32 dsiSaveOpenT = 0x02037114;
+		*(u16*)dsiSaveOpenT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveOpenT + 4), ce9->patches->dsiSaveOpen, 0xC);
+
+		const u32 dsiSaveOpenRT = 0x02037124;
+		*(u16*)dsiSaveOpenRT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveOpenRT + 4), ce9->patches->dsiSaveOpenR, 0x10);
+
+		const u32 dsiSaveCloseT = 0x02037138;
+		*(u16*)dsiSaveCloseT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveCloseT + 4), ce9->patches->dsiSaveClose, 0xC);
+
+		const u32 dsiSaveSeekT = 0x02037148;
+		*(u16*)dsiSaveSeekT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveSeekT + 4), ce9->patches->dsiSaveSeek, 0xC);
+
+		const u32 dsiSaveReadT = 0x02037300;
+		*(u16*)dsiSaveReadT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveReadT + 4), ce9->patches->dsiSaveRead, 0xC);
+
+		const u32 dsiSaveWriteT = 0x020372F0;
+		*(u16*)dsiSaveWriteT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveWriteT + 4), ce9->patches->dsiSaveWrite, 0xC); // Original function overwritten, no BL setting needed */
+
+		*(u16*)0x020271CC = 0x2001; // movs r0, #1
+		*(u16*)0x020271CE = 0x4770; // bx lr
+		*(u16*)0x02027A40 = 0x2001; // movs r0, #1
+		*(u16*)0x02027A42 = 0x4770; // bx lr
+		/* setBLThumb(0x020271F2, dsiSaveOpenRT);
+		setBLThumb(0x020271FC, 0x020274A6);
+		setBLThumb(0x020274C2, dsiSaveOpenT);
+		setBLThumb(0x020274D6, dsiSaveSeekT);
+		setBLThumb(0x020274E2, dsiSaveReadT);
+		doubleNopT(0x020274F4);
+		setBLThumb(0x02027500, dsiSaveCloseT);
+		setBLThumb(0x02027828, dsiSaveOpenT);
+		setBLThumb(0x02027838, dsiSaveSetLengthT);
+		doubleNopT(0x0202783E); // dsiSaveFlush
+		setBLThumb(0x02027844, dsiSaveCloseT);
+		setBLThumb(0x0202784E, dsiSaveCloseT);
+		setBLThumb(0x02027A6E, dsiSaveOpenRT);
+		setBLThumb(0x02027A78, 0x02027D3E);
+		setBLThumb(0x02027DF8, dsiSaveSetLengthT);
+		doubleNopT(0x02027DFE); // dsiSaveFlush
+		setBLThumb(0x02027E04, dsiSaveCloseT);
+		setBLThumb(0x02027E2C, dsiSaveSeekT);
+		setBLThumb(0x02027E36, dsiSaveReadT);
+		doubleNopT(0x02027E4C);
+		setBLThumb(0x02027E5E, dsiSaveCloseT);
+		setBLThumb(0x02028170, dsiSaveOpenT);
+		setBLThumb(0x02028198, dsiSaveSetLengthT);
+		doubleNopT(0x0202819E); // dsiSaveFlush
+		setBLThumb(0x020281A4, dsiSaveCloseT);
+		setBLThumb(0x020281C6, dsiSaveCloseT);
+		setBLThumb(0x02028200, dsiSaveOpenT);
+		setBLThumb(0x02028216, dsiSaveSeekT);
+		setBLThumb(0x02028220, dsiSaveReadT); // dsiSaveReadAsync
+		doubleNopT(0x02028230); // dsiSaveFlush
+		setBLThumb(0x02028236, dsiSaveCloseT); */
+		//*(u16*)0x0203728C = 0x2000; // movs r0, #0 (dsiSaveOpenDir)
+		//*(u16*)0x0203728E = 0x4770; // bx lr
+		//*(u16*)0x020372D8 = 0x2000; // movs r0, #0 (dsiSaveCloseDir)
+		//*(u16*)0x020372DA = 0x4770; // bx lr
+	}
+
 	// Frogger Returns (USA)
 	else if (strcmp(romTid, "KFGE") == 0 && saveOnFlashcard) {
 		tonccpy((u32*)0x0201234C, ce9->patches->dsiSaveGetResultCode, 0xC);
