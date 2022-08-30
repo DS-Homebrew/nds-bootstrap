@@ -662,9 +662,137 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Cake Ninja (USA)
-	/*else if (strcmp(romTid, "K2JE") == 0) {
-		*(u32*)0x02008918 = 0xE12FFF1E; // bx lr (NO$GBA fix)
-	}*/
+	else if (strcmp(romTid, "K2JE") == 0 && saveOnFlashcard) {
+		//*(u32*)0x02008918 = 0xE12FFF1E; // bx lr (NO$GBA fix)
+		setBL(0x0202CDF0, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x0202CE48, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x0202CE7C, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x0202CE90, (u32)ce9->patches->dsiSaveSetLength);
+		setBL(0x0202CEA0, (u32)ce9->patches->dsiSaveGetLength);
+		setBL(0x0202CEA8, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0202CEE0, (u32)ce9->patches->dsiSaveSetLength);
+		setBL(0x0202CEF0, (u32)ce9->patches->dsiSaveGetLength);
+		setBL(0x0202CEF8, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0202D100, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x0202D128, (u32)ce9->patches->dsiSaveSeek);
+		setBL(0x0202D13C, (u32)ce9->patches->dsiSaveRead);
+		setBL(0x0202D154, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0202D21C, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x0202D244, (u32)ce9->patches->dsiSaveSeek);
+		setBL(0x0202D258, (u32)ce9->patches->dsiSaveWrite);
+		setBL(0x0202D264, (u32)ce9->patches->dsiSaveClose);
+		tonccpy((u32*)0x020584CC, ce9->patches->dsiSaveGetResultCode, 0xC);
+	}
+
+	// Cake Ninja (Europe)
+	else if (strcmp(romTid, "K2JP") == 0 && saveOnFlashcard) {
+		setBL(0x0202CEC8, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x0202CF20, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x0202CF54, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x0202CF68, (u32)ce9->patches->dsiSaveSetLength);
+		setBL(0x0202CF78, (u32)ce9->patches->dsiSaveGetLength);
+		setBL(0x0202CF80, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0202CFB8, (u32)ce9->patches->dsiSaveSetLength);
+		setBL(0x0202CFC8, (u32)ce9->patches->dsiSaveGetLength);
+		setBL(0x0202CFD0, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0202D1D8, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x0202D200, (u32)ce9->patches->dsiSaveSeek);
+		setBL(0x0202D214, (u32)ce9->patches->dsiSaveRead);
+		setBL(0x0202D22C, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0202D2F4, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x0202D31C, (u32)ce9->patches->dsiSaveSeek);
+		setBL(0x0202D330, (u32)ce9->patches->dsiSaveWrite);
+		setBL(0x0202D33C, (u32)ce9->patches->dsiSaveClose);
+		tonccpy((u32*)0x020585A4, ce9->patches->dsiSaveGetResultCode, 0xC);
+	}
+
+	// Cake Ninja 2 (USA)
+	else if (strcmp(romTid, "K2NE") == 0 && saveOnFlashcard) {
+		setBL(0x0204C918, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x0204C970, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x0204C9A4, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x0204C9B8, (u32)ce9->patches->dsiSaveSetLength);
+		setBL(0x0204C9C8, (u32)ce9->patches->dsiSaveGetLength);
+		setBL(0x0204C9D0, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0204CA08, (u32)ce9->patches->dsiSaveSetLength);
+		setBL(0x0204CA18, (u32)ce9->patches->dsiSaveGetLength);
+		setBL(0x0204CA20, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0204CC28, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x0204CC50, (u32)ce9->patches->dsiSaveSeek);
+		setBL(0x0204CC64, (u32)ce9->patches->dsiSaveRead);
+		setBL(0x0204CC7C, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0204CD44, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x0204CD6C, (u32)ce9->patches->dsiSaveSeek);
+		setBL(0x0204CD80, (u32)ce9->patches->dsiSaveWrite);
+		setBL(0x0204CD8C, (u32)ce9->patches->dsiSaveClose);
+		tonccpy((u32*)0x02078040, ce9->patches->dsiSaveGetResultCode, 0xC);
+	}
+
+	// Cake Ninja 2 (Europe)
+	else if (strcmp(romTid, "K2NP") == 0 && saveOnFlashcard) {
+		setBL(0x0204C974, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x0204C9CC, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x0204CA00, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x0204CA14, (u32)ce9->patches->dsiSaveSetLength);
+		setBL(0x0204CA24, (u32)ce9->patches->dsiSaveGetLength);
+		setBL(0x0204CA2C, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0204CA64, (u32)ce9->patches->dsiSaveSetLength);
+		setBL(0x0204CA74, (u32)ce9->patches->dsiSaveGetLength);
+		setBL(0x0204CA7C, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0204CC84, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x0204CCAC, (u32)ce9->patches->dsiSaveSeek);
+		setBL(0x0204CCC0, (u32)ce9->patches->dsiSaveRead);
+		setBL(0x0204CCD8, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0204CDA0, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x0204CDC8, (u32)ce9->patches->dsiSaveSeek);
+		setBL(0x0204CDDC, (u32)ce9->patches->dsiSaveWrite);
+		setBL(0x0204CDE8, (u32)ce9->patches->dsiSaveClose);
+		tonccpy((u32*)0x0207809C, ce9->patches->dsiSaveGetResultCode, 0xC);
+	}
+
+	// Cake Ninja: XMAS (USA)
+	// Requires 8MB of RAM
+	else if (strcmp(romTid, "KYNE") == 0 && saveOnFlashcard) {
+		setBL(0x0202571C, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x02025774, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x020257A8, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x020257BC, (u32)ce9->patches->dsiSaveSetLength);
+		setBL(0x020257CC, (u32)ce9->patches->dsiSaveGetLength);
+		setBL(0x020257D4, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0202580C, (u32)ce9->patches->dsiSaveSetLength);
+		setBL(0x0202581C, (u32)ce9->patches->dsiSaveGetLength);
+		setBL(0x02025824, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x02025A2C, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x02025A54, (u32)ce9->patches->dsiSaveSeek);
+		setBL(0x02025A68, (u32)ce9->patches->dsiSaveRead);
+		setBL(0x02025A80, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x02025B48, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x02025B70, (u32)ce9->patches->dsiSaveSeek);
+		setBL(0x02025B84, (u32)ce9->patches->dsiSaveWrite);
+		setBL(0x02025B90, (u32)ce9->patches->dsiSaveClose);
+		tonccpy((u32*)0x02050EDC, ce9->patches->dsiSaveGetResultCode, 0xC);
+	}
+
+	// Cake Ninja: XMAS (Europe)
+	else if (strcmp(romTid, "KYNP") == 0 && saveOnFlashcard) {
+		setBL(0x020257A8, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x02025800, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x02025834, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x02025848, (u32)ce9->patches->dsiSaveSetLength);
+		setBL(0x02025858, (u32)ce9->patches->dsiSaveGetLength);
+		setBL(0x02025860, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x02025898, (u32)ce9->patches->dsiSaveSetLength);
+		setBL(0x020258A8, (u32)ce9->patches->dsiSaveGetLength);
+		setBL(0x020258B0, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x02025AB8, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x02025AE0, (u32)ce9->patches->dsiSaveSeek);
+		setBL(0x02025AF4, (u32)ce9->patches->dsiSaveRead);
+		setBL(0x02025B0C, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x02025BD4, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x02025BFC, (u32)ce9->patches->dsiSaveSeek);
+		setBL(0x02025C10, (u32)ce9->patches->dsiSaveWrite);
+		tonccpy((u32*)0x02050F68, ce9->patches->dsiSaveGetResultCode, 0xC);
+	}
 
 	// Castle Conqueror: Heroes (USA)
 	else if (strcmp(romTid, "KC5E") == 0 && saveOnFlashcard) {
