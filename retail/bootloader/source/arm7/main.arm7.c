@@ -1080,12 +1080,8 @@ int arm7_main(void) {
 		(cardengineArm9*)ce9Location,
 		ndsHeader,
 		moduleParams,
-		(ROMsupportsDsiMode(ndsHeader)
-		|| strncmp(romTid, "ASH", 3) == 0 // Asphalt: Urban GT
-		|| strncmp(romTid, "AMU", 3) == 0 // Big Mutha Truckers
-		|| strncmp(romTid, "ASK", 3) == 0 // Lost in Blue
+		(  (moduleParams->sdk_version < 0x4000000 && ((u32)ndsHeader->arm9executeAddress+((u32)ndsHeader->arm9destination-0x02000000)-0x02000000) >= 0x1000)
 		|| strncmp(romTid, "AKD", 3) == 0 // Trauma Center: Under the Knife
-		|| strncmp(romTid, "AUR", 3) == 0 // Urusei Yatsura: Endless Summer
 		) ? 0 : 1,
 		patchMpuSize,
 		saveFileCluster,
