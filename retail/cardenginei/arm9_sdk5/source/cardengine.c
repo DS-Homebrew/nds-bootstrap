@@ -764,6 +764,10 @@ u32 dsiSaveGetResultCode(const char* path) {
 
 	dsiSaveInit();
 
+	if (strcmp(path, "data") == 0) // Specific to EnjoyUp-developed games
+	{
+		return dsiSaveExists ? 8 : 0xE;
+	} else
 	if (strcmp(path, "dataPub:") == 0 || strcmp(path, "dataPub:/") == 0
 	 || strcmp(path, "dataPrv:") == 0 || strcmp(path, "dataPrv:/") == 0)
 	{
@@ -787,6 +791,10 @@ bool dsiSaveCreate(const char* path, u32 permit) {
 	//	return false;
 	//}
 
+	if (strcmp(path, "data") == 0) // Specific to EnjoyUp-developed games
+	{
+		return !dsiSaveExists;
+	} else
 	if (!dsiSaveExists) {
 		u32 existByte = 1;
 

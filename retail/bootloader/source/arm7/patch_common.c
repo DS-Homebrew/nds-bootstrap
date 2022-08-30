@@ -264,12 +264,12 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02013FE8 = 0xE1A00000; // nop
 		*(u32*)0x02013FEC = 0xE1A00000; // nop
 		setBL(0x02031FE8, (u32)ce9->patches->dsiSaveOpen);
-		*(u32*)0x02032000 = 0xE1A00000; // nop (dsiSaveGetLength)
+		setBL(0x02032000, (u32)ce9->patches->dsiSaveGetLength);
 		setBL(0x02032010, (u32)ce9->patches->dsiSaveSeek);
 		setBL(0x02032020, (u32)ce9->patches->dsiSaveWrite);
 		setBL(0x02032028, (u32)ce9->patches->dsiSaveClose);
 		setBL(0x02032098, (u32)ce9->patches->dsiSaveOpen);
-		*(u32*)0x020320B0 = 0xE1A00000; // nop (dsiSaveGetLength)
+		setBL(0x020320B0, (u32)ce9->patches->dsiSaveGetLength);
 		setBL(0x020320C4, (u32)ce9->patches->dsiSaveSeek);
 		setBL(0x020320D4, (u32)ce9->patches->dsiSaveRead);
 		setBL(0x020320DC, (u32)ce9->patches->dsiSaveClose);
@@ -310,12 +310,12 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02013078 = 0xE1A00000; // nop
 		*(u32*)0x0201307C = 0xE1A00000; // nop
 		setBL(0x020310C8, (u32)ce9->patches->dsiSaveOpen);
-		*(u32*)0x020310E0 = 0xE1A00000; // nop (dsiSaveGetLength)
+		setBL(0x020310E0, (u32)ce9->patches->dsiSaveGetLength);
 		setBL(0x020310F0, (u32)ce9->patches->dsiSaveSeek);
 		setBL(0x02031100, (u32)ce9->patches->dsiSaveWrite);
 		setBL(0x02031108, (u32)ce9->patches->dsiSaveClose);
 		setBL(0x02031178, (u32)ce9->patches->dsiSaveOpen);
-		*(u32*)0x02031090 = 0xE1A00000; // nop (dsiSaveGetLength)
+		setBL(0x02031090, (u32)ce9->patches->dsiSaveGetLength);
 		setBL(0x020311A4, (u32)ce9->patches->dsiSaveSeek);
 		setBL(0x020311B4, (u32)ce9->patches->dsiSaveRead);
 		setBL(0x020311BC, (u32)ce9->patches->dsiSaveClose);
@@ -352,15 +352,16 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02012EF8 = 0xE1A00000; // nop
 		*(u32*)0x02012EFC = 0xE1A00000; // nop
 		*(u32*)0x02012F00 = 0xE1A00000; // nop
+		setBL(0x02012F0C, (u32)ce9->patches->dsiSaveGetResultCode);
 		*(u32*)0x02012F28 = 0xE1A00000; // nop
 		*(u32*)0x02012F34 = 0xE3A00001; // mov r0, #1
 		setBL(0x02030FCC, (u32)ce9->patches->dsiSaveOpen);
-		*(u32*)0x02030FE4 = 0xE1A00000; // nop (dsiSaveGetLength)
+		setBL(0x02030FE4, (u32)ce9->patches->dsiSaveGetLength);
 		setBL(0x02030FF4, (u32)ce9->patches->dsiSaveSeek);
 		setBL(0x02031004, (u32)ce9->patches->dsiSaveWrite);
 		setBL(0x0203100C, (u32)ce9->patches->dsiSaveClose);
 		setBL(0x0203107C, (u32)ce9->patches->dsiSaveOpen);
-		*(u32*)0x02031094 = 0xE1A00000; // nop (dsiSaveGetLength)
+		setBL(0x02031094, (u32)ce9->patches->dsiSaveGetLength);
 		setBL(0x020310A8, (u32)ce9->patches->dsiSaveSeek);
 		setBL(0x020310B8, (u32)ce9->patches->dsiSaveRead);
 		setBL(0x020310C0, (u32)ce9->patches->dsiSaveClose);
@@ -403,16 +404,17 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02012C84 = 0xE1A00000; // nop
 		*(u32*)0x02012C88 = 0xE1A00000; // nop
 		*(u32*)0x02012C8C = 0xE1A00000; // nop
+		setBL(0x02012C98, (u32)ce9->patches->dsiSaveGetResultCode);
 		*(u32*)0x02012CB4 = 0xE1A00000; // nop
 		*(u32*)0x02012CC0 = 0xE3A00001; // mov r0, #1
 		if (ndsHeader->gameCode[3] == 'E') {
 			setBL(0x02031820, (u32)ce9->patches->dsiSaveOpen);
-			*(u32*)0x02031838 = 0xE1A00000; // nop (dsiSaveGetLength)
+			setBL(0x02031838, (u32)ce9->patches->dsiSaveGetLength);
 			setBL(0x02031848, (u32)ce9->patches->dsiSaveSeek);
 			setBL(0x02031858, (u32)ce9->patches->dsiSaveWrite);
 			setBL(0x02031860, (u32)ce9->patches->dsiSaveClose);
 			setBL(0x020318D0, (u32)ce9->patches->dsiSaveOpen);
-			*(u32*)0x020318E8 = 0xE1A00000; // nop (dsiSaveGetLength)
+			setBL(0x020318E8, (u32)ce9->patches->dsiSaveGetLength);
 			setBL(0x020318FC, (u32)ce9->patches->dsiSaveSeek);
 			setBL(0x0203190C, (u32)ce9->patches->dsiSaveRead);
 			setBL(0x02031914, (u32)ce9->patches->dsiSaveClose);
@@ -431,12 +433,12 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			*(u32*)0x0207050C = 0xE1A00000; // nop
 		} else if (ndsHeader->gameCode[3] == 'P') {
 			setBL(0x02031870, (u32)ce9->patches->dsiSaveOpen);
-			*(u32*)0x02031888 = 0xE1A00000; // nop (dsiSaveGetLength)
+			setBL(0x02031888, (u32)ce9->patches->dsiSaveGetLength);
 			setBL(0x02031898, (u32)ce9->patches->dsiSaveSeek);
 			setBL(0x020318A8, (u32)ce9->patches->dsiSaveWrite);
 			setBL(0x020318B0, (u32)ce9->patches->dsiSaveClose);
 			setBL(0x02031920, (u32)ce9->patches->dsiSaveOpen);
-			*(u32*)0x02031938 = 0xE1A00000; // nop (dsiSaveGetLength)
+			setBL(0x02031938, (u32)ce9->patches->dsiSaveGetLength);
 			setBL(0x0203196C, (u32)ce9->patches->dsiSaveSeek);
 			setBL(0x0203195C, (u32)ce9->patches->dsiSaveRead);
 			setBL(0x02031964, (u32)ce9->patches->dsiSaveClose);
@@ -482,16 +484,17 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020119CC = 0xE1A00000; // nop
 		*(u32*)0x020119D0 = 0xE1A00000; // nop
 		*(u32*)0x020119D4 = 0xE1A00000; // nop
+		setBL(0x020119E0, (u32)ce9->patches->dsiSaveGetResultCode);
 		*(u32*)0x020119FC = 0xE1A00000; // nop
 		*(u32*)0x02011A08 = 0xE3A00001; // mov r0, #1
 		if (ndsHeader->gameCode[3] == 'E') {
 			setBL(0x020302D4, (u32)ce9->patches->dsiSaveOpen);
-			*(u32*)0x020302EC = 0xE1A00000; // nop (dsiSaveGetLength)
+			setBL(0x020302EC, (u32)ce9->patches->dsiSaveGetLength);
 			setBL(0x020302FC, (u32)ce9->patches->dsiSaveSeek);
 			setBL(0x0203030C, (u32)ce9->patches->dsiSaveWrite);
 			setBL(0x02030314, (u32)ce9->patches->dsiSaveClose);
 			setBL(0x02030384, (u32)ce9->patches->dsiSaveOpen);
-			*(u32*)0x0203039C = 0xE1A00000; // nop (dsiSaveGetLength)
+			setBL(0x0203039C, (u32)ce9->patches->dsiSaveGetLength);
 			setBL(0x020303B0, (u32)ce9->patches->dsiSaveSeek);
 			setBL(0x020303C0, (u32)ce9->patches->dsiSaveRead);
 			setBL(0x020303C8, (u32)ce9->patches->dsiSaveClose);
@@ -510,12 +513,12 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			*(u32*)0x02070668 = 0xE1A00000; // nop
 		} else if (ndsHeader->gameCode[3] == 'P') {
 			setBL(0x02030324, (u32)ce9->patches->dsiSaveOpen);
-			*(u32*)0x0203033C = 0xE1A00000; // nop (dsiSaveGetLength)
+			setBL(0x0203033C, (u32)ce9->patches->dsiSaveGetLength);
 			setBL(0x0203034C, (u32)ce9->patches->dsiSaveSeek);
 			setBL(0x0203035C, (u32)ce9->patches->dsiSaveWrite);
 			setBL(0x02030364, (u32)ce9->patches->dsiSaveClose);
 			setBL(0x020303D4, (u32)ce9->patches->dsiSaveOpen);
-			*(u32*)0x020303EC = 0xE1A00000; // nop (dsiSaveGetLength)
+			setBL(0x020303EC, (u32)ce9->patches->dsiSaveGetLength);
 			setBL(0x02030400, (u32)ce9->patches->dsiSaveSeek);
 			setBL(0x02030410, (u32)ce9->patches->dsiSaveRead);
 			setBL(0x02030418, (u32)ce9->patches->dsiSaveClose);
@@ -6249,6 +6252,87 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020E9C24 = 0xE1A00000; // nop
 		*(u32*)0x020E9C30 = 0xE1A00000; // nop (Enable error exception screen)
 		*(u32*)0x020ED088 = 0xE1A00000; // nop
+	}
+
+	// SnowBoard Xtreme (USA)
+	// SnowBoard Xtreme (Europe)
+	else if (strcmp(romTid, "KX5E") == 0 || strcmp(romTid, "KX5P") == 0) {
+		*(u32*)0x02004838 = 0xE1A00000; // nop
+		*(u32*)0x0200499C = 0xE1A00000; // nop
+		*(u32*)0x020050E8 = 0xE1A00000; // nop
+		*(u32*)0x0200510C = 0xE1A00000; // nop
+		*(u32*)0x02005110 = 0xE1A00000; // nop
+		*(u32*)0x02005114 = 0xE1A00000; // nop
+		*(u32*)0x02005118 = 0xE1A00000; // nop
+		*(u32*)0x0200511C = 0xE1A00000; // nop
+		*(u32*)0x02005138 = 0xE1A00000; // nop
+		*(u32*)0x0200514C = 0xE1A00000; // nop
+		*(u32*)0x02005150 = 0xE1A00000; // nop
+		*(u32*)0x02005154 = 0xE1A00000; // nop
+		*(u32*)0x02005158 = 0xE1A00000; // nop
+		*(u32*)0x0200515C = 0xE1A00000; // nop
+		*(u32*)0x02010AB8 = 0xE1A00000; // nop
+		*(u32*)0x02010AEC = 0xE1A00000; // nop
+		setBL(0x02011B70, (u32)ce9->patches->dsiSaveCreate);
+		*(u32*)0x02011B84 = 0xE1A00000; // nop
+		*(u32*)0x02011B90 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02011C10 = 0xE1A00000; // nop
+		*(u32*)0x02011C14 = 0xE1A00000; // nop
+		*(u32*)0x02011C18 = 0xE1A00000; // nop
+		setBL(0x02011C24, (u32)ce9->patches->dsiSaveGetResultCode);
+		*(u32*)0x02011C3C = 0xE1A00000; // nop
+		*(u32*)0x02011C48 = 0xE3A00001; // mov r0, #1
+		if (ndsHeader->gameCode[3] == 'E') {
+			setBL(0x020313AC, (u32)ce9->patches->dsiSaveOpen);
+			setBL(0x020313C4, (u32)ce9->patches->dsiSaveGetLength);
+			setBL(0x020313D4, (u32)ce9->patches->dsiSaveSeek);
+			setBL(0x020313E4, (u32)ce9->patches->dsiSaveWrite);
+			setBL(0x020313EC, (u32)ce9->patches->dsiSaveClose);
+			setBL(0x0203145C, (u32)ce9->patches->dsiSaveOpen);
+			setBL(0x02031474, (u32)ce9->patches->dsiSaveGetLength);
+			setBL(0x02031488, (u32)ce9->patches->dsiSaveSeek);
+			setBL(0x02031498, (u32)ce9->patches->dsiSaveRead);
+			setBL(0x020314A0, (u32)ce9->patches->dsiSaveClose);
+			setBL(0x02031518, (u32)ce9->patches->dsiSaveCreate);
+			setBL(0x02031544, (u32)ce9->patches->dsiSaveOpen);
+			setBL(0x02031580, (u32)ce9->patches->dsiSaveWrite);
+			setBL(0x02031590, (u32)ce9->patches->dsiSaveClose);
+			*(u32*)0x0206377C = 0xE1A00000; // nop
+			*(u32*)0x0206A098 = 0xE1A00000; // nop
+			*(u32*)0x0206BF28 = 0xE1A00000; // nop
+			*(u32*)0x0206BF2C = 0xE1A00000; // nop
+			*(u32*)0x0206BF38 = 0xE1A00000; // nop
+			*(u32*)0x0206C098 = 0xE1A00000; // nop
+			patchHiHeapDSiWare(0x0206C0F4, heapEnd); // mov r0, #0x23C0000
+			*(u32*)0x0206C228 = 0x022546E0;
+			*(u32*)0x0207000C = 0xE1A00000; // nop
+			*(u32*)0x02072840 = 0xE1A00000; // nop
+		} else if (ndsHeader->gameCode[3] == 'P') {
+			setBL(0x020313FC, (u32)ce9->patches->dsiSaveOpen);
+			setBL(0x02031414, (u32)ce9->patches->dsiSaveGetLength);
+			setBL(0x02031424, (u32)ce9->patches->dsiSaveSeek);
+			setBL(0x02031434, (u32)ce9->patches->dsiSaveWrite);
+			setBL(0x0203143C, (u32)ce9->patches->dsiSaveClose);
+			setBL(0x020314AC, (u32)ce9->patches->dsiSaveOpen);
+			setBL(0x020314C4, (u32)ce9->patches->dsiSaveGetLength);
+			setBL(0x020314D8, (u32)ce9->patches->dsiSaveSeek);
+			setBL(0x020314E8, (u32)ce9->patches->dsiSaveRead);
+			setBL(0x020314F0, (u32)ce9->patches->dsiSaveClose);
+			setBL(0x02031568, (u32)ce9->patches->dsiSaveCreate);
+			setBL(0x02031594, (u32)ce9->patches->dsiSaveOpen);
+			setBL(0x020315D0, (u32)ce9->patches->dsiSaveWrite);
+			setBL(0x020315E0, (u32)ce9->patches->dsiSaveClose);
+			*(u32*)0x020637CC = 0xE1A00000; // nop
+			*(u32*)0x0206A0E8 = 0xE1A00000; // nop
+			*(u32*)0x0206BF78 = 0xE1A00000; // nop
+			*(u32*)0x0206BF7C = 0xE1A00000; // nop
+			*(u32*)0x0206BF88 = 0xE1A00000; // nop
+			*(u32*)0x0206C0E8 = 0xE1A00000; // nop
+			patchHiHeapDSiWare(0x0206C144, heapEnd); // mov r0, #0x23C0000
+			*(u32*)0x0206C278 = 0x022547C0;
+			*(u32*)0x0207005C = 0xE1A00000; // nop
+			*(u32*)0x02072890 = 0xE1A00000; // nop
+		}
 	}
 
 	// Soul of Darkness (USA)
