@@ -830,9 +830,10 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0203C358, (u32)dsiSaveClose);
 	}
 
-	// Anonymous Notes 1: From The Abyss (USA)
-	// Anonymous Notes 1: From The Abyss (Europe)
-	else if (strcmp(romTid, "KVIE") == 0 || strcmp(romTid, "KVIP") == 0) {
+	// Anonymous Notes 1: From The Abyss (USA & Europe)
+	// Anonymous Notes 2: From The Abyss (USA & Europe)
+	else if ((strncmp(romTid, "KVI", 3) == 0 || strncmp(romTid, "KV2", 3) == 0)
+	  && ndsHeader->gameCode[3] != 'J') {
 		*(u32*)0x02004838 = 0xE1A00000; // nop
 		*(u32*)0x0200499C = 0xE1A00000; // nop
 		*(u32*)0x0200E74C = 0xE1A00000; // nop
@@ -858,6 +859,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x020243D8, (u32)dsiSaveSeek);
 		setBL(0x020243E8, (u32)dsiSaveClose);
 		setBL(0x02024400, (u32)dsiSaveWrite);
+		setBL(0x02024410, (u32)dsiSaveClose);
 		setBL(0x02024420, (u32)dsiSaveClose);
 		setBL(0x02024460, (u32)dsiSaveOpen);
 		setBL(0x0202448C, (u32)dsiSaveGetLength);
@@ -869,23 +871,40 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02024510 = 0xE1A00000; // nop
 		*(u32*)0x02024530 = 0xE1A00000; // nop
 		*(u32*)0x0202457C = 0xE1A00000; // nop
-		if (ndsHeader->gameCode[3] == 'E') {
-			*(u32*)0x0209E2CC = 0xE1A00000; // nop
-			*(u32*)0x0209E2E0 = 0xE1A00000; // nop
-			*(u32*)0x0209E2F4 = 0xE1A00000; // nop
-			*(u32*)0x020CFB78 = 0xE1A00000; // nop
-			*(u32*)0x020CFCD0 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
-		} else {
-			*(u32*)0x0209E0DC = 0xE1A00000; // nop
-			*(u32*)0x0209E0F0 = 0xE1A00000; // nop
-			*(u32*)0x0209E104 = 0xE1A00000; // nop
-			*(u32*)0x020CF988 = 0xE1A00000; // nop
-			*(u32*)0x020CFAE0 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		if (ndsHeader->gameCode[2] == 'I') {
+			if (ndsHeader->gameCode[3] == 'E') {
+				*(u32*)0x0209E2CC = 0xE1A00000; // nop
+				*(u32*)0x0209E2E0 = 0xE1A00000; // nop
+				*(u32*)0x0209E2F4 = 0xE1A00000; // nop
+				*(u32*)0x020CFB78 = 0xE1A00000; // nop
+				*(u32*)0x020CFCD0 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+			} else {
+				*(u32*)0x0209E0DC = 0xE1A00000; // nop
+				*(u32*)0x0209E0F0 = 0xE1A00000; // nop
+				*(u32*)0x0209E104 = 0xE1A00000; // nop
+				*(u32*)0x020CF988 = 0xE1A00000; // nop
+				*(u32*)0x020CFAE0 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+			}
+		} else if (ndsHeader->gameCode[2] == '2') {
+			if (ndsHeader->gameCode[3] == 'E') {
+				*(u32*)0x0209E300 = 0xE1A00000; // nop
+				*(u32*)0x0209E314 = 0xE1A00000; // nop
+				*(u32*)0x0209E328 = 0xE1A00000; // nop
+				*(u32*)0x020D071C = 0xE1A00000; // nop
+				*(u32*)0x020D0874 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+			} else {
+				*(u32*)0x0209E0EC = 0xE1A00000; // nop
+				*(u32*)0x0209E100 = 0xE1A00000; // nop
+				*(u32*)0x0209E114 = 0xE1A00000; // nop
+				*(u32*)0x020D0508 = 0xE1A00000; // nop
+				*(u32*)0x020D0660 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+			}
 		}
 	}
 
 	// Anonymous Notes 1: From The Abyss (Japan)
-	else if (strcmp(romTid, "KVIJ") == 0) {
+	// Anonymous Notes 2: From The Abyss (Japan)
+	else if (strncmp(romTid, "KVI", 3) == 0 || strncmp(romTid, "KV2", 3) == 0) {
 		*(u32*)0x0200498C = 0xE1A00000; // nop
 		*(u32*)0x0200506C = 0xE1A00000; // nop
 		*(u32*)0x0200E6DC = 0xE1A00000; // nop
@@ -912,6 +931,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x020249D4, (u32)dsiSaveSeek);
 		setBL(0x020249E4, (u32)dsiSaveClose);
 		setBL(0x020249FC, (u32)dsiSaveWrite);
+		setBL(0x02024A0C, (u32)dsiSaveClose);
 		setBL(0x02024A1C, (u32)dsiSaveClose);
 		setBL(0x02024A5C, (u32)dsiSaveOpen);
 		setBL(0x02024A88, (u32)dsiSaveGetLength);
@@ -923,10 +943,89 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02024B0C = 0xE1A00000; // nop
 		*(u32*)0x02024B2C = 0xE1A00000; // nop
 		*(u32*)0x02024B78 = 0xE1A00000; // nop
-		*(u32*)0x0209E0A4 = 0xE1A00000; // nop
-		*(u32*)0x0209E0B8 = 0xE1A00000; // nop
-		*(u32*)0x0209E0CC = 0xE1A00000; // nop
-		*(u32*)0x020CF970 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		if (ndsHeader->gameCode[2] == 'I') {
+			*(u32*)0x0209E0A4 = 0xE1A00000; // nop
+			*(u32*)0x0209E0B8 = 0xE1A00000; // nop
+			*(u32*)0x0209E0CC = 0xE1A00000; // nop
+			*(u32*)0x020CF970 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		} else if (ndsHeader->gameCode[2] == '2') {
+			*(u32*)0x0209E0D0 = 0xE1A00000; // nop
+			*(u32*)0x0209E0E4 = 0xE1A00000; // nop
+			*(u32*)0x0209E0F8 = 0xE1A00000; // nop
+			*(u32*)0x020D050C = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		}
+	}
+
+	// Anonymous Notes 3: From The Abyss (USA & Japan)
+	// Anonymous Notes 4: From The Abyss (USA & Japan)
+	else if (strncmp(romTid, "KV3", 3) == 0 || strncmp(romTid, "KV4", 3) == 0) {
+		*(u32*)0x02004838 = 0xE1A00000; // nop
+		*(u32*)0x0200499C = 0xE1A00000; // nop
+		*(u32*)0x02005084 = 0xE1A00000; // nop
+		*(u32*)0x0200E778 = 0xE1A00000; // nop
+		*(u32*)0x02011C74 = 0xE1A00000; // nop
+		*(u32*)0x02016A88 = 0xE1A00000; // nop
+		*(u32*)0x0201890C = 0xE1A00000; // nop
+		*(u32*)0x02018910 = 0xE1A00000; // nop
+		*(u32*)0x0201891C = 0xE1A00000; // nop
+		*(u32*)0x02018A7C = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x02018AD8, heapEnd); // mov r0, #0x23C0000
+		*(u32*)0x02019F44 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
+		*(u32*)0x02019F60 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02019F64 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02019F6C = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02019F70 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0201D5F0 = 0xE1A00000; // nop
+		setBL(0x0202424C, (u32)dsiSaveOpen);
+		setBL(0x02024284, (u32)dsiSaveCreate);
+		setBL(0x02024294, (u32)dsiSaveGetResultCode);
+		setBL(0x020242BC, (u32)dsiSaveOpen);
+		setBL(0x020242E8, (u32)dsiSaveGetLength);
+		setBL(0x02024304, (u32)dsiSaveSetLength);
+		setBL(0x02024354, (u32)dsiSaveWrite);
+		setBL(0x02024364, (u32)dsiSaveClose);
+		setBL(0x02024384, (u32)dsiSaveClose);
+		setBL(0x020243CC, (u32)dsiSaveOpen);
+		setBL(0x02024404, (u32)dsiSaveSeek);
+		setBL(0x02024414, (u32)dsiSaveClose);
+		setBL(0x0202442C, (u32)dsiSaveWrite);
+		setBL(0x0202443C, (u32)dsiSaveClose);
+		setBL(0x0202444C, (u32)dsiSaveClose);
+		setBL(0x0202448C, (u32)dsiSaveOpen);
+		setBL(0x020244B8, (u32)dsiSaveGetLength);
+		setBL(0x020244D8, (u32)dsiSaveSeek);
+		setBL(0x020244E8, (u32)dsiSaveClose);
+		setBL(0x02024500, (u32)dsiSaveRead);
+		setBL(0x02024510, (u32)dsiSaveClose);
+		setBL(0x02024520, (u32)dsiSaveClose);
+		*(u32*)0x0202453C = 0xE1A00000; // nop
+		*(u32*)0x0202455C = 0xE1A00000; // nop
+		*(u32*)0x020245A8 = 0xE1A00000; // nop
+		if (ndsHeader->gameCode[2] == '3') {
+			if (ndsHeader->gameCode[3] == 'E') {
+				*(u32*)0x0209E250 = 0xE1A00000; // nop
+				*(u32*)0x0209E264 = 0xE1A00000; // nop
+				*(u32*)0x0209E278 = 0xE1A00000; // nop
+				*(u32*)0x020D0120 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+			} else {
+				*(u32*)0x0209DB18 = 0xE1A00000; // nop
+				*(u32*)0x0209DB2C = 0xE1A00000; // nop
+				*(u32*)0x0209DB40 = 0xE1A00000; // nop
+				*(u32*)0x020CF8AC = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+			}
+		} else if (ndsHeader->gameCode[2] == '4') {
+			if (ndsHeader->gameCode[3] == 'E') {
+				*(u32*)0x0209F72C = 0xE1A00000; // nop
+				*(u32*)0x0209F740 = 0xE1A00000; // nop
+				*(u32*)0x0209F754 = 0xE1A00000; // nop
+				*(u32*)0x020D0FFC = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+			} else {
+				*(u32*)0x0209EDEC = 0xE1A00000; // nop
+				*(u32*)0x0209EE00 = 0xE1A00000; // nop
+				*(u32*)0x0209EE14 = 0xE1A00000; // nop
+				*(u32*)0x020D0590 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+			}
+		}
 	}
 
 	// Antipole (USA)
