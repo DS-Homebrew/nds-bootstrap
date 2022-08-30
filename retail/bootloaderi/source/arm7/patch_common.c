@@ -55,6 +55,19 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	const char* dataPub = "dataPub:";
 	//const char* chnFontPath = "sdmc:/sys/CHNFontTable.dat";
 
+	const u32* dsiSaveGetResultCode = ce9->patches->dsiSaveGetResultCode;
+	const u32* dsiSaveCreate = ce9->patches->dsiSaveCreate;
+	const u32* dsiSaveDelete = ce9->patches->dsiSaveDelete;
+	const u32* dsiSaveGetInfo = ce9->patches->dsiSaveGetInfo;
+	const u32* dsiSaveSetLength = ce9->patches->dsiSaveSetLength;
+	const u32* dsiSaveOpen = ce9->patches->dsiSaveOpen;
+	const u32* dsiSaveOpenR = ce9->patches->dsiSaveOpenR;
+	const u32* dsiSaveClose = ce9->patches->dsiSaveClose;
+	const u32* dsiSaveGetLength = ce9->patches->dsiSaveGetLength;
+	const u32* dsiSaveSeek = ce9->patches->dsiSaveSeek;
+	const u32* dsiSaveRead = ce9->patches->dsiSaveRead;
+	const u32* dsiSaveWrite = ce9->patches->dsiSaveWrite;
+
 	/*if (ndsHeader->arm7binarySize == 0xF548) {
 		tonccpy((char*)0x02E929BC, chnFontPath, strlen(chnFontPath));
 	}*/
@@ -74,140 +87,140 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// 99Bullets (USA)
 	else if (strcmp(romTid, "K99E") == 0 && saveOnFlashcard) {
 		*(u32*)0x02013E8C = 0xE3A00001; // mov r0, #1
-		setBL(0x02031FE8, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x02032000, (u32)ce9->patches->dsiSaveGetLength);
-		setBL(0x02032010, (u32)ce9->patches->dsiSaveSeek);
-		setBL(0x02032020, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x02032028, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x02032098, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x020320B0, (u32)ce9->patches->dsiSaveGetLength);
-		setBL(0x020320C4, (u32)ce9->patches->dsiSaveSeek);
-		setBL(0x020320D4, (u32)ce9->patches->dsiSaveRead);
-		setBL(0x020320DC, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x02032154, (u32)ce9->patches->dsiSaveCreate);
-		setBL(0x02032180, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x020321BC, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x020321CC, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x02031FE8, (u32)dsiSaveOpen);
+		setBL(0x02032000, (u32)dsiSaveGetLength);
+		setBL(0x02032010, (u32)dsiSaveSeek);
+		setBL(0x02032020, (u32)dsiSaveWrite);
+		setBL(0x02032028, (u32)dsiSaveClose);
+		setBL(0x02032098, (u32)dsiSaveOpen);
+		setBL(0x020320B0, (u32)dsiSaveGetLength);
+		setBL(0x020320C4, (u32)dsiSaveSeek);
+		setBL(0x020320D4, (u32)dsiSaveRead);
+		setBL(0x020320DC, (u32)dsiSaveClose);
+		setBL(0x02032154, (u32)dsiSaveCreate);
+		setBL(0x02032180, (u32)dsiSaveOpen);
+		setBL(0x020321BC, (u32)dsiSaveWrite);
+		setBL(0x020321CC, (u32)dsiSaveClose);
 	}
 
 	// 99Bullets (Europe)
 	else if (strcmp(romTid, "K99P") == 0 && saveOnFlashcard) {
 		*(u32*)0x02012F1C = 0xE3A00001; // mov r0, #1
-		setBL(0x020310C8, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x020310E0, (u32)ce9->patches->dsiSaveGetLength);
-		setBL(0x020310F0, (u32)ce9->patches->dsiSaveSeek);
-		setBL(0x02031100, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x02031108, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x02031178, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x02031090, (u32)ce9->patches->dsiSaveGetLength);
-		setBL(0x020311A4, (u32)ce9->patches->dsiSaveSeek);
-		setBL(0x020311B4, (u32)ce9->patches->dsiSaveRead);
-		setBL(0x020311BC, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x02031234, (u32)ce9->patches->dsiSaveCreate);
-		setBL(0x02031260, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0203129C, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x020312AC, (u32)ce9->patches->dsiSaveClose); 
+		setBL(0x020310C8, (u32)dsiSaveOpen);
+		setBL(0x020310E0, (u32)dsiSaveGetLength);
+		setBL(0x020310F0, (u32)dsiSaveSeek);
+		setBL(0x02031100, (u32)dsiSaveWrite);
+		setBL(0x02031108, (u32)dsiSaveClose);
+		setBL(0x02031178, (u32)dsiSaveOpen);
+		setBL(0x02031090, (u32)dsiSaveGetLength);
+		setBL(0x020311A4, (u32)dsiSaveSeek);
+		setBL(0x020311B4, (u32)dsiSaveRead);
+		setBL(0x020311BC, (u32)dsiSaveClose);
+		setBL(0x02031234, (u32)dsiSaveCreate);
+		setBL(0x02031260, (u32)dsiSaveOpen);
+		setBL(0x0203129C, (u32)dsiSaveWrite);
+		setBL(0x020312AC, (u32)dsiSaveClose); 
 	}
 
 	// 99Bullets (Japan)
 	else if (strcmp(romTid, "K99J") == 0 && saveOnFlashcard) {
-		setBL(0x02012E48, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x02012E48, (u32)dsiSaveCreate);
 		*(u32*)0x02012E68 = 0xE3A00001; // mov r0, #1
-		setBL(0x02012F0C, (u32)ce9->patches->dsiSaveGetResultCode);
+		setBL(0x02012F0C, (u32)dsiSaveGetResultCode);
 		*(u32*)0x02012F34 = 0xE3A00001; // mov r0, #1
-		setBL(0x02030FCC, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x02030FE4, (u32)ce9->patches->dsiSaveGetLength);
-		setBL(0x02030FF4, (u32)ce9->patches->dsiSaveSeek);
-		setBL(0x02031004, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x0203100C, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0203107C, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x02031094, (u32)ce9->patches->dsiSaveGetLength);
-		setBL(0x020310A8, (u32)ce9->patches->dsiSaveSeek);
-		setBL(0x020310B8, (u32)ce9->patches->dsiSaveRead);
-		setBL(0x020310C0, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x020311C8, (u32)ce9->patches->dsiSaveCreate);
-		setBL(0x02031164, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x020311A0, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x020311B0, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x02030FCC, (u32)dsiSaveOpen);
+		setBL(0x02030FE4, (u32)dsiSaveGetLength);
+		setBL(0x02030FF4, (u32)dsiSaveSeek);
+		setBL(0x02031004, (u32)dsiSaveWrite);
+		setBL(0x0203100C, (u32)dsiSaveClose);
+		setBL(0x0203107C, (u32)dsiSaveOpen);
+		setBL(0x02031094, (u32)dsiSaveGetLength);
+		setBL(0x020310A8, (u32)dsiSaveSeek);
+		setBL(0x020310B8, (u32)dsiSaveRead);
+		setBL(0x020310C0, (u32)dsiSaveClose);
+		setBL(0x020311C8, (u32)dsiSaveCreate);
+		setBL(0x02031164, (u32)dsiSaveOpen);
+		setBL(0x020311A0, (u32)dsiSaveWrite);
+		setBL(0x020311B0, (u32)dsiSaveClose);
 	}
 
 	// 99Moves (USA)
 	// 99Moves (Europe)
 	else if ((strcmp(romTid, "K9WE") == 0 || strcmp(romTid, "K9WP") == 0) && saveOnFlashcard) {
-		setBL(0x02012BD4, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x02012BD4, (u32)dsiSaveCreate);
 		*(u32*)0x02012BF4 = 0xE3A00001; // mov r0, #1
-		setBL(0x02012C98, (u32)ce9->patches->dsiSaveGetResultCode);
+		setBL(0x02012C98, (u32)dsiSaveGetResultCode);
 		*(u32*)0x02012CC0 = 0xE3A00001; // mov r0, #1
 		if (ndsHeader->gameCode[3] == 'E') {
-			setBL(0x02031820, (u32)ce9->patches->dsiSaveOpen);
-			setBL(0x02031838, (u32)ce9->patches->dsiSaveGetLength);
-			setBL(0x02031848, (u32)ce9->patches->dsiSaveSeek);
-			setBL(0x02031858, (u32)ce9->patches->dsiSaveWrite);
-			setBL(0x02031860, (u32)ce9->patches->dsiSaveClose);
-			setBL(0x020318D0, (u32)ce9->patches->dsiSaveOpen);
-			setBL(0x020318E8, (u32)ce9->patches->dsiSaveGetLength);
-			setBL(0x020318FC, (u32)ce9->patches->dsiSaveSeek);
-			setBL(0x0203190C, (u32)ce9->patches->dsiSaveRead);
-			setBL(0x02031914, (u32)ce9->patches->dsiSaveClose);
-			setBL(0x0203198C, (u32)ce9->patches->dsiSaveCreate);
-			setBL(0x020319B8, (u32)ce9->patches->dsiSaveOpen);
-			setBL(0x020319F4, (u32)ce9->patches->dsiSaveWrite);
-			setBL(0x02031A04, (u32)ce9->patches->dsiSaveClose);
+			setBL(0x02031820, (u32)dsiSaveOpen);
+			setBL(0x02031838, (u32)dsiSaveGetLength);
+			setBL(0x02031848, (u32)dsiSaveSeek);
+			setBL(0x02031858, (u32)dsiSaveWrite);
+			setBL(0x02031860, (u32)dsiSaveClose);
+			setBL(0x020318D0, (u32)dsiSaveOpen);
+			setBL(0x020318E8, (u32)dsiSaveGetLength);
+			setBL(0x020318FC, (u32)dsiSaveSeek);
+			setBL(0x0203190C, (u32)dsiSaveRead);
+			setBL(0x02031914, (u32)dsiSaveClose);
+			setBL(0x0203198C, (u32)dsiSaveCreate);
+			setBL(0x020319B8, (u32)dsiSaveOpen);
+			setBL(0x020319F4, (u32)dsiSaveWrite);
+			setBL(0x02031A04, (u32)dsiSaveClose);
 		} else if (ndsHeader->gameCode[3] == 'P') {
-			setBL(0x02031870, (u32)ce9->patches->dsiSaveOpen);
-			setBL(0x02031888, (u32)ce9->patches->dsiSaveGetLength);
-			setBL(0x02031898, (u32)ce9->patches->dsiSaveSeek);
-			setBL(0x020318A8, (u32)ce9->patches->dsiSaveWrite);
-			setBL(0x020318B0, (u32)ce9->patches->dsiSaveClose);
-			setBL(0x02031920, (u32)ce9->patches->dsiSaveOpen);
-			setBL(0x02031938, (u32)ce9->patches->dsiSaveGetLength);
-			setBL(0x0203196C, (u32)ce9->patches->dsiSaveSeek);
-			setBL(0x0203195C, (u32)ce9->patches->dsiSaveRead);
-			setBL(0x02031964, (u32)ce9->patches->dsiSaveClose);
-			setBL(0x020319DC, (u32)ce9->patches->dsiSaveCreate);
-			setBL(0x02031A08, (u32)ce9->patches->dsiSaveOpen);
-			setBL(0x02031A44, (u32)ce9->patches->dsiSaveWrite);
-			setBL(0x02031A54, (u32)ce9->patches->dsiSaveClose);
+			setBL(0x02031870, (u32)dsiSaveOpen);
+			setBL(0x02031888, (u32)dsiSaveGetLength);
+			setBL(0x02031898, (u32)dsiSaveSeek);
+			setBL(0x020318A8, (u32)dsiSaveWrite);
+			setBL(0x020318B0, (u32)dsiSaveClose);
+			setBL(0x02031920, (u32)dsiSaveOpen);
+			setBL(0x02031938, (u32)dsiSaveGetLength);
+			setBL(0x0203196C, (u32)dsiSaveSeek);
+			setBL(0x0203195C, (u32)dsiSaveRead);
+			setBL(0x02031964, (u32)dsiSaveClose);
+			setBL(0x020319DC, (u32)dsiSaveCreate);
+			setBL(0x02031A08, (u32)dsiSaveOpen);
+			setBL(0x02031A44, (u32)dsiSaveWrite);
+			setBL(0x02031A54, (u32)dsiSaveClose);
 		}
 	}
 
 	// 99Seconds (USA)
 	// 99Seconds (Europe)
 	else if ((strcmp(romTid, "KXTE") == 0 || strcmp(romTid, "KXTP") == 0) && saveOnFlashcard) {
-		setBL(0x02011918, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x02011918, (u32)dsiSaveCreate);
 		*(u32*)0x02011938 = 0xE3A00001; // mov r0, #1
-		setBL(0x020119E0, (u32)ce9->patches->dsiSaveGetResultCode);
+		setBL(0x020119E0, (u32)dsiSaveGetResultCode);
 		*(u32*)0x02011A08 = 0xE3A00001; // mov r0, #1
 		if (ndsHeader->gameCode[3] == 'E') {
-			setBL(0x020302D4, (u32)ce9->patches->dsiSaveOpen);
-			setBL(0x020302EC, (u32)ce9->patches->dsiSaveGetLength);
-			setBL(0x020302FC, (u32)ce9->patches->dsiSaveSeek);
-			setBL(0x0203030C, (u32)ce9->patches->dsiSaveWrite);
-			setBL(0x02030314, (u32)ce9->patches->dsiSaveClose);
-			setBL(0x02030384, (u32)ce9->patches->dsiSaveOpen);
-			setBL(0x0203039C, (u32)ce9->patches->dsiSaveGetLength);
-			setBL(0x020303B0, (u32)ce9->patches->dsiSaveSeek);
-			setBL(0x020303C0, (u32)ce9->patches->dsiSaveRead);
-			setBL(0x020303C8, (u32)ce9->patches->dsiSaveClose);
-			setBL(0x02030440, (u32)ce9->patches->dsiSaveCreate);
-			setBL(0x0203046C, (u32)ce9->patches->dsiSaveOpen);
-			setBL(0x020304A8, (u32)ce9->patches->dsiSaveWrite);
-			setBL(0x020304B8, (u32)ce9->patches->dsiSaveClose);
+			setBL(0x020302D4, (u32)dsiSaveOpen);
+			setBL(0x020302EC, (u32)dsiSaveGetLength);
+			setBL(0x020302FC, (u32)dsiSaveSeek);
+			setBL(0x0203030C, (u32)dsiSaveWrite);
+			setBL(0x02030314, (u32)dsiSaveClose);
+			setBL(0x02030384, (u32)dsiSaveOpen);
+			setBL(0x0203039C, (u32)dsiSaveGetLength);
+			setBL(0x020303B0, (u32)dsiSaveSeek);
+			setBL(0x020303C0, (u32)dsiSaveRead);
+			setBL(0x020303C8, (u32)dsiSaveClose);
+			setBL(0x02030440, (u32)dsiSaveCreate);
+			setBL(0x0203046C, (u32)dsiSaveOpen);
+			setBL(0x020304A8, (u32)dsiSaveWrite);
+			setBL(0x020304B8, (u32)dsiSaveClose);
 		} else if (ndsHeader->gameCode[3] == 'P') {
-			setBL(0x02030324, (u32)ce9->patches->dsiSaveOpen);
-			setBL(0x0203033C, (u32)ce9->patches->dsiSaveGetLength);
-			setBL(0x0203034C, (u32)ce9->patches->dsiSaveSeek);
-			setBL(0x0203035C, (u32)ce9->patches->dsiSaveWrite);
-			setBL(0x02030364, (u32)ce9->patches->dsiSaveClose);
-			setBL(0x020303D4, (u32)ce9->patches->dsiSaveOpen);
-			setBL(0x020303EC, (u32)ce9->patches->dsiSaveGetLength);
-			setBL(0x02030400, (u32)ce9->patches->dsiSaveSeek);
-			setBL(0x02030410, (u32)ce9->patches->dsiSaveRead);
-			setBL(0x02030418, (u32)ce9->patches->dsiSaveClose);
-			setBL(0x02030490, (u32)ce9->patches->dsiSaveCreate);
-			setBL(0x020304BC, (u32)ce9->patches->dsiSaveOpen);
-			setBL(0x020304F8, (u32)ce9->patches->dsiSaveWrite);
-			setBL(0x02030508, (u32)ce9->patches->dsiSaveClose);
+			setBL(0x02030324, (u32)dsiSaveOpen);
+			setBL(0x0203033C, (u32)dsiSaveGetLength);
+			setBL(0x0203034C, (u32)dsiSaveSeek);
+			setBL(0x0203035C, (u32)dsiSaveWrite);
+			setBL(0x02030364, (u32)dsiSaveClose);
+			setBL(0x020303D4, (u32)dsiSaveOpen);
+			setBL(0x020303EC, (u32)dsiSaveGetLength);
+			setBL(0x02030400, (u32)dsiSaveSeek);
+			setBL(0x02030410, (u32)dsiSaveRead);
+			setBL(0x02030418, (u32)dsiSaveClose);
+			setBL(0x02030490, (u32)dsiSaveCreate);
+			setBL(0x020304BC, (u32)dsiSaveOpen);
+			setBL(0x020304F8, (u32)dsiSaveWrite);
+			setBL(0x02030508, (u32)dsiSaveClose);
 		}
 	}
 
@@ -247,19 +260,19 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Amakuchi! Dairoujou (Japan)
 	else if (strcmp(romTid, "KF2J") == 0 && saveOnFlashcard) {
-		setBL(0x0203C1C8, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0203C1F4, (u32)ce9->patches->dsiSaveRead);
-		setBL(0x0203C204, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0203C220, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0203C1C8, (u32)dsiSaveOpen);
+		setBL(0x0203C1F4, (u32)dsiSaveRead);
+		setBL(0x0203C204, (u32)dsiSaveClose);
+		setBL(0x0203C220, (u32)dsiSaveClose);
 		*(u32*)0x0203C274 = 0xE3A00001; // mov r0, #1 (OpenDirectory)
 		*(u32*)0x0203C2B0 = 0xE1A00000; // nop (CloseDirectory)
-		setBL(0x0203C2BC, (u32)ce9->patches->dsiSaveCreate);
-		setBL(0x0203C2CC, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0203C2F8, (u32)ce9->patches->dsiSaveSetLength);
-		setBL(0x0203C308, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0203C32C, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x0203C33C, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0203C358, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0203C2BC, (u32)dsiSaveCreate);
+		setBL(0x0203C2CC, (u32)dsiSaveOpen);
+		setBL(0x0203C2F8, (u32)dsiSaveSetLength);
+		setBL(0x0203C308, (u32)dsiSaveClose);
+		setBL(0x0203C32C, (u32)dsiSaveWrite);
+		setBL(0x0203C33C, (u32)dsiSaveClose);
+		setBL(0x0203C358, (u32)dsiSaveClose);
 	}
 
 	// Anonymous Notes 1: From The Abyss (USA)
@@ -267,27 +280,27 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	else if ((strcmp(romTid, "KVIE") == 0 || strcmp(romTid, "KVIP") == 0) && saveOnFlashcard) {
 		//*(u32*)0x02023DB0 = 0xE3A00001; // mov r0, #1
 		//*(u32*)0x02023DB4 = 0xE12FFF1E; // bx lr
-		setBL(0x02024220, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x02024258, (u32)ce9->patches->dsiSaveCreate);
-		setBL(0x02024268, (u32)ce9->patches->dsiSaveGetResultCode);
-		setBL(0x02024290, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x020242BC, (u32)ce9->patches->dsiSaveGetLength);
-		setBL(0x020242D8, (u32)ce9->patches->dsiSaveSetLength);
-		setBL(0x02024328, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x02024338, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x02024358, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x020243A0, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x020243D8, (u32)ce9->patches->dsiSaveSeek);
-		setBL(0x020243E8, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x02024400, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x02024420, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x02024460, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0202448C, (u32)ce9->patches->dsiSaveGetLength);
-		setBL(0x020244AC, (u32)ce9->patches->dsiSaveSeek);
-		setBL(0x020244BC, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x020244D4, (u32)ce9->patches->dsiSaveRead);
-		setBL(0x020244E4, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x020244F4, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x02024220, (u32)dsiSaveOpen);
+		setBL(0x02024258, (u32)dsiSaveCreate);
+		setBL(0x02024268, (u32)dsiSaveGetResultCode);
+		setBL(0x02024290, (u32)dsiSaveOpen);
+		setBL(0x020242BC, (u32)dsiSaveGetLength);
+		setBL(0x020242D8, (u32)dsiSaveSetLength);
+		setBL(0x02024328, (u32)dsiSaveWrite);
+		setBL(0x02024338, (u32)dsiSaveClose);
+		setBL(0x02024358, (u32)dsiSaveClose);
+		setBL(0x020243A0, (u32)dsiSaveOpen);
+		setBL(0x020243D8, (u32)dsiSaveSeek);
+		setBL(0x020243E8, (u32)dsiSaveClose);
+		setBL(0x02024400, (u32)dsiSaveWrite);
+		setBL(0x02024420, (u32)dsiSaveClose);
+		setBL(0x02024460, (u32)dsiSaveOpen);
+		setBL(0x0202448C, (u32)dsiSaveGetLength);
+		setBL(0x020244AC, (u32)dsiSaveSeek);
+		setBL(0x020244BC, (u32)dsiSaveClose);
+		setBL(0x020244D4, (u32)dsiSaveRead);
+		setBL(0x020244E4, (u32)dsiSaveClose);
+		setBL(0x020244F4, (u32)dsiSaveClose);
 		if (ndsHeader->gameCode[3] == 'E') {
 			*(u32*)0x0209E2CC = 0xE1A00000; // nop
 			*(u32*)0x0209E2E0 = 0xE1A00000; // nop
@@ -306,27 +319,27 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Anonymous Notes 1: From The Abyss (Japan)
 	else if (strcmp(romTid, "KVIJ") == 0 && saveOnFlashcard) {
-		setBL(0x0202481C, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x02024854, (u32)ce9->patches->dsiSaveCreate);
-		setBL(0x02024864, (u32)ce9->patches->dsiSaveGetResultCode);
-		setBL(0x0202488C, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x020248B8, (u32)ce9->patches->dsiSaveGetLength);
-		setBL(0x020248D4, (u32)ce9->patches->dsiSaveSetLength);
-		setBL(0x02024924, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x02024934, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x02024954, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0202499C, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x020249D4, (u32)ce9->patches->dsiSaveSeek);
-		setBL(0x020249E4, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x020249FC, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x02024A1C, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x02024A5C, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x02024A88, (u32)ce9->patches->dsiSaveGetLength);
-		setBL(0x02024AA8, (u32)ce9->patches->dsiSaveSeek);
-		setBL(0x02024AB8, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x02024AD0, (u32)ce9->patches->dsiSaveRead);
-		setBL(0x02024AE0, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x02024AF0, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0202481C, (u32)dsiSaveOpen);
+		setBL(0x02024854, (u32)dsiSaveCreate);
+		setBL(0x02024864, (u32)dsiSaveGetResultCode);
+		setBL(0x0202488C, (u32)dsiSaveOpen);
+		setBL(0x020248B8, (u32)dsiSaveGetLength);
+		setBL(0x020248D4, (u32)dsiSaveSetLength);
+		setBL(0x02024924, (u32)dsiSaveWrite);
+		setBL(0x02024934, (u32)dsiSaveClose);
+		setBL(0x02024954, (u32)dsiSaveClose);
+		setBL(0x0202499C, (u32)dsiSaveOpen);
+		setBL(0x020249D4, (u32)dsiSaveSeek);
+		setBL(0x020249E4, (u32)dsiSaveClose);
+		setBL(0x020249FC, (u32)dsiSaveWrite);
+		setBL(0x02024A1C, (u32)dsiSaveClose);
+		setBL(0x02024A5C, (u32)dsiSaveOpen);
+		setBL(0x02024A88, (u32)dsiSaveGetLength);
+		setBL(0x02024AA8, (u32)dsiSaveSeek);
+		setBL(0x02024AB8, (u32)dsiSaveClose);
+		setBL(0x02024AD0, (u32)dsiSaveRead);
+		setBL(0x02024AE0, (u32)dsiSaveClose);
+		setBL(0x02024AF0, (u32)dsiSaveClose);
 		*(u32*)0x020CF970 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 	}
 
@@ -337,97 +350,97 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		//*(u32*)0x020051C0 = 0xE12FFF1E; // bx lr
 		//*(u32*)0x02005204 = 0xE3A00000; // mov r0, #0
 		//*(u32*)0x02005208 = 0xE12FFF1E; // bx lr
-		setBL(0x02020A28, (u32)ce9->patches->dsiSaveCreate);
-		setBL(0x02020A38, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x02020A8C, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x02020A94, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x02020ADC, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x02020B08, (u32)ce9->patches->dsiSaveGetLength);
-		setBL(0x02020B18, (u32)ce9->patches->dsiSaveRead);
-		setBL(0x02020B20, (u32)ce9->patches->dsiSaveClose);
-		tonccpy((u32*)0x02043360, ce9->patches->dsiSaveGetResultCode, 0xC);
+		setBL(0x02020A28, (u32)dsiSaveCreate);
+		setBL(0x02020A38, (u32)dsiSaveOpen);
+		setBL(0x02020A8C, (u32)dsiSaveWrite);
+		setBL(0x02020A94, (u32)dsiSaveClose);
+		setBL(0x02020ADC, (u32)dsiSaveOpen);
+		setBL(0x02020B08, (u32)dsiSaveGetLength);
+		setBL(0x02020B18, (u32)dsiSaveRead);
+		setBL(0x02020B20, (u32)dsiSaveClose);
+		tonccpy((u32*)0x02043360, dsiSaveGetResultCode, 0xC);
 	}
 
 	// Art Style: AQUIA (USA)
 	else if (strcmp(romTid, "KAAE") == 0 && saveOnFlashcard) {
-		setBL(0x0203BBE4, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0203BC08, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0203BBE4, (u32)dsiSaveOpen);
+		setBL(0x0203BC08, (u32)dsiSaveClose);
 		*(u32*)0x0203BC4C = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
 		*(u32*)0x0203BC70 = 0xE3A00001; // mov r0, #1 (dsiSaveFreeSpaceAvailable)
-		setBL(0x0203BC90, (u32)ce9->patches->dsiSaveCreate);
-		setBL(0x0203BCA0, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0203BCC8, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x0203BCE0, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0203BD2C, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0203BD54, (u32)ce9->patches->dsiSaveRead);
-		setBL(0x0203BD80, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0203BE70, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0203BE98, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x0203BEB4, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0203BC90, (u32)dsiSaveCreate);
+		setBL(0x0203BCA0, (u32)dsiSaveOpen);
+		setBL(0x0203BCC8, (u32)dsiSaveWrite);
+		setBL(0x0203BCE0, (u32)dsiSaveClose);
+		setBL(0x0203BD2C, (u32)dsiSaveOpen);
+		setBL(0x0203BD54, (u32)dsiSaveRead);
+		setBL(0x0203BD80, (u32)dsiSaveClose);
+		setBL(0x0203BE70, (u32)dsiSaveOpen);
+		setBL(0x0203BE98, (u32)dsiSaveWrite);
+		setBL(0x0203BEB4, (u32)dsiSaveClose);
 	}
 
 	// Art Style: AQUITE (Europe, Australia)
 	else if (strcmp(romTid, "KAAV") == 0 && saveOnFlashcard) {
-		setBL(0x0203BCF4, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0203BD18, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0203BCF4, (u32)dsiSaveOpen);
+		setBL(0x0203BD18, (u32)dsiSaveClose);
 		*(u32*)0x0203BD5C = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
 		*(u32*)0x0203BD80 = 0xE3A00001; // mov r0, #1 (dsiSaveFreeSpaceAvailable)
-		setBL(0x0203BDA0, (u32)ce9->patches->dsiSaveCreate);
-		setBL(0x0203BDB0, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0203BDC8, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x0203BDF0, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0203BE3C, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0203BE64, (u32)ce9->patches->dsiSaveRead);
-		setBL(0x0203BE90, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0203BF80, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0203BFA8, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x0203BFC4, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0203BDA0, (u32)dsiSaveCreate);
+		setBL(0x0203BDB0, (u32)dsiSaveOpen);
+		setBL(0x0203BDC8, (u32)dsiSaveWrite);
+		setBL(0x0203BDF0, (u32)dsiSaveClose);
+		setBL(0x0203BE3C, (u32)dsiSaveOpen);
+		setBL(0x0203BE64, (u32)dsiSaveRead);
+		setBL(0x0203BE90, (u32)dsiSaveClose);
+		setBL(0x0203BF80, (u32)dsiSaveOpen);
+		setBL(0x0203BFA8, (u32)dsiSaveWrite);
+		setBL(0x0203BFC4, (u32)dsiSaveClose);
 	}
 
 	// Art Style: AQUARIO (Japan)
 	else if (strcmp(romTid, "KAAJ") == 0 && saveOnFlashcard) {
-		setBL(0x0203E2F0, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0203E314, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0203E2F0, (u32)dsiSaveOpen);
+		setBL(0x0203E314, (u32)dsiSaveClose);
 		*(u32*)0x0203E34C = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
 		*(u32*)0x0203E370 = 0xE3A00001; // mov r0, #1 (dsiSaveFreeSpaceAvailable)
-		setBL(0x0203E38C, (u32)ce9->patches->dsiSaveCreate);
-		setBL(0x0203E39C, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0203E3C8, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x0203E3E4, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0203E42C, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0203E458, (u32)ce9->patches->dsiSaveRead);
-		setBL(0x0203E488, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0203E574, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0203E5A0, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x0203E5BC, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0203E38C, (u32)dsiSaveCreate);
+		setBL(0x0203E39C, (u32)dsiSaveOpen);
+		setBL(0x0203E3C8, (u32)dsiSaveWrite);
+		setBL(0x0203E3E4, (u32)dsiSaveClose);
+		setBL(0x0203E42C, (u32)dsiSaveOpen);
+		setBL(0x0203E458, (u32)dsiSaveRead);
+		setBL(0x0203E488, (u32)dsiSaveClose);
+		setBL(0x0203E574, (u32)dsiSaveOpen);
+		setBL(0x0203E5A0, (u32)dsiSaveWrite);
+		setBL(0x0203E5BC, (u32)dsiSaveClose);
 	}
 
 	// Everyday Soccer (USA)
 	else if (strcmp(romTid, "KAZE") == 0 && saveOnFlashcard) {
 		*(u32*)0x020050A4 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		*(u32*)0x020050A8 = 0xE1A00000; // nop
-		setBL(0x02059E20, (u32)ce9->patches->dsiSaveCreate);
-		setBL(0x02059E3C, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x02059E68, (u32)ce9->patches->dsiSaveSetLength);
-		setBL(0x02059E84, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x02059E90, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x02059F2C, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x02059F9C, (u32)ce9->patches->dsiSaveRead);
-		setBL(0x02059FA8, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x02059E20, (u32)dsiSaveCreate);
+		setBL(0x02059E3C, (u32)dsiSaveOpen);
+		setBL(0x02059E68, (u32)dsiSaveSetLength);
+		setBL(0x02059E84, (u32)dsiSaveWrite);
+		setBL(0x02059E90, (u32)dsiSaveClose);
+		setBL(0x02059F2C, (u32)dsiSaveOpen);
+		setBL(0x02059F9C, (u32)dsiSaveRead);
+		setBL(0x02059FA8, (u32)dsiSaveClose);
 	}
 
 	// ARC Style: Everyday Football (Europe, Australia)
 	else if (strcmp(romTid, "KAZV") == 0 && saveOnFlashcard) {
 		*(u32*)0x020050A4 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		*(u32*)0x020050A8 = 0xE1A00000; // nop
-		setBL(0x02059EF4, (u32)ce9->patches->dsiSaveCreate);
-		setBL(0x02059F10, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x02059F3C, (u32)ce9->patches->dsiSaveSetLength);
-		setBL(0x02059F58, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x02059F64, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0205A000, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0205A070, (u32)ce9->patches->dsiSaveRead);
-		setBL(0x0205A07C, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x02059EF4, (u32)dsiSaveCreate);
+		setBL(0x02059F10, (u32)dsiSaveOpen);
+		setBL(0x02059F3C, (u32)dsiSaveSetLength);
+		setBL(0x02059F58, (u32)dsiSaveWrite);
+		setBL(0x02059F64, (u32)dsiSaveClose);
+		setBL(0x0205A000, (u32)dsiSaveOpen);
+		setBL(0x0205A070, (u32)dsiSaveRead);
+		setBL(0x0205A07C, (u32)dsiSaveClose);
 	}
 
 	// ARC Style: Soccer! (Japan)
@@ -435,14 +448,14 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	else if ((strcmp(romTid, "KAZJ") == 0 || strcmp(romTid, "KAZK") == 0) && saveOnFlashcard) {
 		*(u32*)0x020050A4 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		*(u32*)0x020050A8 = 0xE1A00000; // nop
-		setBL(0x02059E04, (u32)ce9->patches->dsiSaveCreate);
-		setBL(0x02059E20, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x02059E4C, (u32)ce9->patches->dsiSaveSetLength);
-		setBL(0x02059E68, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x02059E74, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x02059F04, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x02059F74, (u32)ce9->patches->dsiSaveRead);
-		setBL(0x02059F80, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x02059E04, (u32)dsiSaveCreate);
+		setBL(0x02059E20, (u32)dsiSaveOpen);
+		setBL(0x02059E4C, (u32)dsiSaveSetLength);
+		setBL(0x02059E68, (u32)dsiSaveWrite);
+		setBL(0x02059E74, (u32)dsiSaveClose);
+		setBL(0x02059F04, (u32)dsiSaveOpen);
+		setBL(0x02059F74, (u32)dsiSaveRead);
+		setBL(0x02059F80, (u32)dsiSaveClose);
 	}
 
 	// Aura-Aura Climber (USA)
@@ -450,33 +463,33 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	else if (strcmp(romTid, "KSRE") == 0 && saveOnFlashcard) {
 		*(u32*)0x02026760 = 0xE12FFF1E; // bx lr
 		/* *(u32*)0x02026788 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
-		setBL(0x020267D4, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x020267E8, (u32)ce9->patches->dsiSaveCreate);
-		setBL(0x02026814, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x020267D4, (u32)dsiSaveOpen);
+		setBL(0x020267E8, (u32)dsiSaveCreate);
+		setBL(0x02026814, (u32)dsiSaveOpen);
 		//*(u32*)0x02026834 = 0xE3A01B0B; // mov r1, #0x2C00
-		setBL(0x0202683C, (u32)ce9->patches->dsiSaveSetLength);
-		setBL(0x0202684C, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x02026870, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x0202687C, (u32)ce9->patches->dsiSaveGetLength);
+		setBL(0x0202683C, (u32)dsiSaveSetLength);
+		setBL(0x0202684C, (u32)dsiSaveClose);
+		setBL(0x02026870, (u32)dsiSaveWrite);
+		setBL(0x0202687C, (u32)dsiSaveGetLength);
 		*(u32*)0x02026880 = 0xE1A02000; // mov r2, r0
 		*(u32*)0x02026884 = 0xE3A01000; // mov r1, #0
 		//*(u32*)0x02026888 = 0xE3A03000; // mov r3, #0
-		setBL(0x020268B8, (u32)ce9->patches->dsiSaveSeek);
-		setBL(0x020268D4, (u32)ce9->patches->dsiSaveRead);
-		setBL(0x02026BDC, (u32)ce9->patches->dsiSaveSeek);
-		setBL(0x02026C00, (u32)ce9->patches->dsiSaveRead);
-		setBL(0x02026CC0, (u32)ce9->patches->dsiSaveSeek);
-		setBL(0x02026CDC, (u32)ce9->patches->dsiSaveRead);
-		setBL(0x02026F6C, (u32)ce9->patches->dsiSaveSeek);
-		setBL(0x02026F84, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x020271E4, (u32)ce9->patches->dsiSaveSeek);
-		setBL(0x020271FC, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x0202723C, (u32)ce9->patches->dsiSaveSeek);
-		setBL(0x02027258, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x020273AC, (u32)ce9->patches->dsiSaveSeek);
-		setBL(0x020273C4, (u32)ce9->patches->dsiSaveRead);
-		setBL(0x020275A4, (u32)ce9->patches->dsiSaveSeek);
-		setBL(0x020275BC, (u32)ce9->patches->dsiSaveWrite); */
+		setBL(0x020268B8, (u32)dsiSaveSeek);
+		setBL(0x020268D4, (u32)dsiSaveRead);
+		setBL(0x02026BDC, (u32)dsiSaveSeek);
+		setBL(0x02026C00, (u32)dsiSaveRead);
+		setBL(0x02026CC0, (u32)dsiSaveSeek);
+		setBL(0x02026CDC, (u32)dsiSaveRead);
+		setBL(0x02026F6C, (u32)dsiSaveSeek);
+		setBL(0x02026F84, (u32)dsiSaveWrite);
+		setBL(0x020271E4, (u32)dsiSaveSeek);
+		setBL(0x020271FC, (u32)dsiSaveWrite);
+		setBL(0x0202723C, (u32)dsiSaveSeek);
+		setBL(0x02027258, (u32)dsiSaveWrite);
+		setBL(0x020273AC, (u32)dsiSaveSeek);
+		setBL(0x020273C4, (u32)dsiSaveRead);
+		setBL(0x020275A4, (u32)dsiSaveSeek);
+		setBL(0x020275BC, (u32)dsiSaveWrite); */
 	}
 
 	// Aura-Aura Climber (Europe, Australia)
@@ -486,101 +499,101 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Bomberman Blitz (USA)
 	else if (strcmp(romTid, "KBBE") == 0 && saveOnFlashcard) {
-		tonccpy((u32*)0x02009670, ce9->patches->dsiSaveGetResultCode, 0xC);
+		tonccpy((u32*)0x02009670, dsiSaveGetResultCode, 0xC);
 		//*(u32*)0x020437AC = 0xE3A00001; // mov r0, #1
 		//*(u32*)0x020437B0 = 0xE12FFF1E; // bx lr
-		setBL(0x02043950, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x020439D0, (u32)ce9->patches->dsiSaveCreate);
-		setBL(0x02043A5C, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x02043A70, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x02043AE8, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x02046394, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x02046428, (u32)ce9->patches->dsiSaveRead);
-		setBL(0x0204649C, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x02043950, (u32)dsiSaveOpen);
+		setBL(0x020439D0, (u32)dsiSaveCreate);
+		setBL(0x02043A5C, (u32)dsiSaveWrite);
+		setBL(0x02043A70, (u32)dsiSaveClose);
+		setBL(0x02043AE8, (u32)dsiSaveClose);
+		setBL(0x02046394, (u32)dsiSaveOpen);
+		setBL(0x02046428, (u32)dsiSaveRead);
+		setBL(0x0204649C, (u32)dsiSaveClose);
 	}
 
 	// Bomberman Blitz (Europe, Australia)
 	else if (strcmp(romTid, "KBBV") == 0 && saveOnFlashcard) {
-		tonccpy((u32*)0x02009670, ce9->patches->dsiSaveGetResultCode, 0xC);
+		tonccpy((u32*)0x02009670, dsiSaveGetResultCode, 0xC);
 		//*(u32*)0x02043878 = 0xE3A00001; // mov r0, #1
 		//*(u32*)0x0204387C = 0xE12FFF1E; // bx lr
-		setBL(0x02043A1C, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x02043A9C, (u32)ce9->patches->dsiSaveCreate);
-		setBL(0x02043B28, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x02043B28, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x02043BB4, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x02046460, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x020464F4, (u32)ce9->patches->dsiSaveRead);
-		setBL(0x02046568, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x02043A1C, (u32)dsiSaveOpen);
+		setBL(0x02043A9C, (u32)dsiSaveCreate);
+		setBL(0x02043B28, (u32)dsiSaveWrite);
+		setBL(0x02043B28, (u32)dsiSaveClose);
+		setBL(0x02043BB4, (u32)dsiSaveClose);
+		setBL(0x02046460, (u32)dsiSaveOpen);
+		setBL(0x020464F4, (u32)dsiSaveRead);
+		setBL(0x02046568, (u32)dsiSaveClose);
 	}
 
 	// Itsudemo Bomberman (Japan)
 	else if (strcmp(romTid, "KBBJ") == 0 && saveOnFlashcard) {
-		tonccpy((u32*)0x02009670, ce9->patches->dsiSaveGetResultCode, 0xC);
+		tonccpy((u32*)0x02009670, dsiSaveGetResultCode, 0xC);
 		//*(u32*)0x020434D8 = 0xE3A00001; // mov r0, #1
 		//*(u32*)0x020434DC = 0xE12FFF1E; // bx lr
-		setBL(0x0204367C, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x020436FC, (u32)ce9->patches->dsiSaveCreate);
-		setBL(0x02043788, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x0204379C, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x02043814, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x020460C0, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x02046154, (u32)ce9->patches->dsiSaveRead);
-		setBL(0x020461C8, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0204367C, (u32)dsiSaveOpen);
+		setBL(0x020436FC, (u32)dsiSaveCreate);
+		setBL(0x02043788, (u32)dsiSaveWrite);
+		setBL(0x0204379C, (u32)dsiSaveClose);
+		setBL(0x02043814, (u32)dsiSaveClose);
+		setBL(0x020460C0, (u32)dsiSaveOpen);
+		setBL(0x02046154, (u32)dsiSaveRead);
+		setBL(0x020461C8, (u32)dsiSaveClose);
 	}
 
 	// Art Style: BOXLIFE (USA)
 	else if (strcmp(romTid, "KAHE") == 0 && saveOnFlashcard) {
-		setBL(0x020353B4, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x020353B4, (u32)dsiSaveOpen);
 		//*(u32*)0x020355D8 = 0xE3A00000; // mov r0, #0
 		//*(u32*)0x020355DC = 0xE12FFF1E; // bx lr
-		setBL(0x02035608, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x02035658, (u32)ce9->patches->dsiSaveRead);
-		setBL(0x0203569C, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x02035608, (u32)dsiSaveOpen);
+		setBL(0x02035658, (u32)dsiSaveRead);
+		setBL(0x0203569C, (u32)dsiSaveClose);
 		//*(u32*)0x020356C4 = 0xE3A00000; // mov r0, #0
 		//*(u32*)0x020356C8 = 0xE12FFF1E; // bx lr
-		setBL(0x020356E8, (u32)ce9->patches->dsiSaveCreate);
-		setBL(0x020356F8, (u32)ce9->patches->dsiSaveGetResultCode);
-		setBL(0x0203571C, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x02035738, (u32)ce9->patches->dsiSaveSetLength);
-		setBL(0x02035754, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x02035770, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x020356E8, (u32)dsiSaveCreate);
+		setBL(0x020356F8, (u32)dsiSaveGetResultCode);
+		setBL(0x0203571C, (u32)dsiSaveOpen);
+		setBL(0x02035738, (u32)dsiSaveSetLength);
+		setBL(0x02035754, (u32)dsiSaveWrite);
+		setBL(0x02035770, (u32)dsiSaveClose);
 	}
 
 	// Art Style: BOXLIFE (Europe, Australia)
 	else if (strcmp(romTid, "KAHV") == 0 && saveOnFlashcard) {
-		setBL(0x02034FFC, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x02034FFC, (u32)dsiSaveOpen);
 		//*(u32*)0x02035220 = 0xE3A00000; // mov r0, #0
 		//*(u32*)0x02035224 = 0xE12FFF1E; // bx lr
-		setBL(0x02035250, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x020352A0, (u32)ce9->patches->dsiSaveRead);
-		setBL(0x020352E4, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x02035250, (u32)dsiSaveOpen);
+		setBL(0x020352A0, (u32)dsiSaveRead);
+		setBL(0x020352E4, (u32)dsiSaveClose);
 		//*(u32*)0x0203530C = 0xE3A00000; // mov r0, #0
 		//*(u32*)0x02035310 = 0xE12FFF1E; // bx lr
-		setBL(0x02035330, (u32)ce9->patches->dsiSaveCreate);
-		setBL(0x02035340, (u32)ce9->patches->dsiSaveGetResultCode);
-		setBL(0x02035364, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x02035380, (u32)ce9->patches->dsiSaveSetLength);
-		setBL(0x0203539C, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x020353B8, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x02035330, (u32)dsiSaveCreate);
+		setBL(0x02035340, (u32)dsiSaveGetResultCode);
+		setBL(0x02035364, (u32)dsiSaveOpen);
+		setBL(0x02035380, (u32)dsiSaveSetLength);
+		setBL(0x0203539C, (u32)dsiSaveWrite);
+		setBL(0x020353B8, (u32)dsiSaveClose);
 	}
 
 	// Art Style: Hacolife (Japan)
 	else if (strcmp(romTid, "KAHJ") == 0 && saveOnFlashcard) {
-		setBL(0x02034348, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x02034348, (u32)dsiSaveOpen);
 		//*(u32*)0x0203456C = 0xE3A00000; // mov r0, #0
 		//*(u32*)0x02034570 = 0xE12FFF1E; // bx lr
-		setBL(0x0203459C, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x020345EC, (u32)ce9->patches->dsiSaveRead);
-		setBL(0x02034630, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0203459C, (u32)dsiSaveOpen);
+		setBL(0x020345EC, (u32)dsiSaveRead);
+		setBL(0x02034630, (u32)dsiSaveClose);
 		//*(u32*)0x02034658 = 0xE3A00000; // mov r0, #0
 		//*(u32*)0x0203465C = 0xE12FFF1E; // bx lr
-		setBL(0x0203467C, (u32)ce9->patches->dsiSaveCreate);
-		setBL(0x0203468C, (u32)ce9->patches->dsiSaveGetResultCode);
-		setBL(0x020346B0, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x020346CC, (u32)ce9->patches->dsiSaveSetLength);
-		setBL(0x020346E8, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x02034704, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0203467C, (u32)dsiSaveCreate);
+		setBL(0x0203468C, (u32)dsiSaveGetResultCode);
+		setBL(0x020346B0, (u32)dsiSaveOpen);
+		setBL(0x020346CC, (u32)dsiSaveSetLength);
+		setBL(0x020346E8, (u32)dsiSaveWrite);
+		setBL(0x02034704, (u32)dsiSaveClose);
 	}
 
 	// Bugs'N'Balls (USA)
@@ -588,7 +601,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	else if (strncmp(romTid, "KKQ", 3) == 0 && saveOnFlashcard) {
 		u32* saveFuncOffsets[22] = {NULL};
 
-		tonccpy((u32*)0x0201BEB8, ce9->patches->dsiSaveGetResultCode, 0xC);
+		tonccpy((u32*)0x0201BEB8, dsiSaveGetResultCode, 0xC);
 		if (ndsHeader->gameCode[3] == 'E') {
 			saveFuncOffsets[0] = (u32*)0x0205B148;
 			saveFuncOffsets[1] = (u32*)0x0205B160;
@@ -637,242 +650,242 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			saveFuncOffsets[21] = (u32*)0x0205C9D4; 
 		}
 
-		setBL((u32)saveFuncOffsets[0], (u32)ce9->patches->dsiSaveOpen);
-		setBL((u32)saveFuncOffsets[1], (u32)ce9->patches->dsiSaveGetLength);
-		setBL((u32)saveFuncOffsets[2], (u32)ce9->patches->dsiSaveClose);
-		setBL((u32)saveFuncOffsets[3], (u32)ce9->patches->dsiSaveSeek);
-		setBL((u32)saveFuncOffsets[4], (u32)ce9->patches->dsiSaveClose);
-		setBL((u32)saveFuncOffsets[5], (u32)ce9->patches->dsiSaveWrite);
-		setBL((u32)saveFuncOffsets[6], (u32)ce9->patches->dsiSaveClose);
-		setBL((u32)saveFuncOffsets[7], (u32)ce9->patches->dsiSaveClose);
-		setBL((u32)saveFuncOffsets[8], (u32)ce9->patches->dsiSaveOpen);
-		setBL((u32)saveFuncOffsets[9], (u32)ce9->patches->dsiSaveGetLength);
-		setBL((u32)saveFuncOffsets[10], (u32)ce9->patches->dsiSaveClose);
-		setBL((u32)saveFuncOffsets[11], (u32)ce9->patches->dsiSaveSeek);
-		setBL((u32)saveFuncOffsets[12], (u32)ce9->patches->dsiSaveClose);
-		setBL((u32)saveFuncOffsets[13], (u32)ce9->patches->dsiSaveRead);
-		setBL((u32)saveFuncOffsets[14], (u32)ce9->patches->dsiSaveClose);
-		setBL((u32)saveFuncOffsets[15], (u32)ce9->patches->dsiSaveClose);
-		setBL((u32)saveFuncOffsets[16], (u32)ce9->patches->dsiSaveCreate);
-		setBL((u32)saveFuncOffsets[17], (u32)ce9->patches->dsiSaveOpen);
-		setBL((u32)saveFuncOffsets[18], (u32)ce9->patches->dsiSaveWrite);
-		setBL((u32)saveFuncOffsets[19], (u32)ce9->patches->dsiSaveClose);
-		setBL((u32)saveFuncOffsets[20], (u32)ce9->patches->dsiSaveOpen);
-		setBL((u32)saveFuncOffsets[21], (u32)ce9->patches->dsiSaveClose);
+		setBL((u32)saveFuncOffsets[0], (u32)dsiSaveOpen);
+		setBL((u32)saveFuncOffsets[1], (u32)dsiSaveGetLength);
+		setBL((u32)saveFuncOffsets[2], (u32)dsiSaveClose);
+		setBL((u32)saveFuncOffsets[3], (u32)dsiSaveSeek);
+		setBL((u32)saveFuncOffsets[4], (u32)dsiSaveClose);
+		setBL((u32)saveFuncOffsets[5], (u32)dsiSaveWrite);
+		setBL((u32)saveFuncOffsets[6], (u32)dsiSaveClose);
+		setBL((u32)saveFuncOffsets[7], (u32)dsiSaveClose);
+		setBL((u32)saveFuncOffsets[8], (u32)dsiSaveOpen);
+		setBL((u32)saveFuncOffsets[9], (u32)dsiSaveGetLength);
+		setBL((u32)saveFuncOffsets[10], (u32)dsiSaveClose);
+		setBL((u32)saveFuncOffsets[11], (u32)dsiSaveSeek);
+		setBL((u32)saveFuncOffsets[12], (u32)dsiSaveClose);
+		setBL((u32)saveFuncOffsets[13], (u32)dsiSaveRead);
+		setBL((u32)saveFuncOffsets[14], (u32)dsiSaveClose);
+		setBL((u32)saveFuncOffsets[15], (u32)dsiSaveClose);
+		setBL((u32)saveFuncOffsets[16], (u32)dsiSaveCreate);
+		setBL((u32)saveFuncOffsets[17], (u32)dsiSaveOpen);
+		setBL((u32)saveFuncOffsets[18], (u32)dsiSaveWrite);
+		setBL((u32)saveFuncOffsets[19], (u32)dsiSaveClose);
+		setBL((u32)saveFuncOffsets[20], (u32)dsiSaveOpen);
+		setBL((u32)saveFuncOffsets[21], (u32)dsiSaveClose);
 	}
 
 	// Cake Ninja (USA)
 	else if (strcmp(romTid, "K2JE") == 0 && saveOnFlashcard) {
 		//*(u32*)0x02008918 = 0xE12FFF1E; // bx lr (NO$GBA fix)
-		setBL(0x0202CDF0, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0202CE48, (u32)ce9->patches->dsiSaveCreate);
-		setBL(0x0202CE7C, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0202CE90, (u32)ce9->patches->dsiSaveSetLength);
-		setBL(0x0202CEA0, (u32)ce9->patches->dsiSaveGetLength);
-		setBL(0x0202CEA8, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0202CEE0, (u32)ce9->patches->dsiSaveSetLength);
-		setBL(0x0202CEF0, (u32)ce9->patches->dsiSaveGetLength);
-		setBL(0x0202CEF8, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0202D100, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0202D128, (u32)ce9->patches->dsiSaveSeek);
-		setBL(0x0202D13C, (u32)ce9->patches->dsiSaveRead);
-		setBL(0x0202D154, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0202D21C, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0202D244, (u32)ce9->patches->dsiSaveSeek);
-		setBL(0x0202D258, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x0202D264, (u32)ce9->patches->dsiSaveClose);
-		tonccpy((u32*)0x020584CC, ce9->patches->dsiSaveGetResultCode, 0xC);
+		setBL(0x0202CDF0, (u32)dsiSaveOpen);
+		setBL(0x0202CE48, (u32)dsiSaveCreate);
+		setBL(0x0202CE7C, (u32)dsiSaveOpen);
+		setBL(0x0202CE90, (u32)dsiSaveSetLength);
+		setBL(0x0202CEA0, (u32)dsiSaveGetLength);
+		setBL(0x0202CEA8, (u32)dsiSaveClose);
+		setBL(0x0202CEE0, (u32)dsiSaveSetLength);
+		setBL(0x0202CEF0, (u32)dsiSaveGetLength);
+		setBL(0x0202CEF8, (u32)dsiSaveClose);
+		setBL(0x0202D100, (u32)dsiSaveOpen);
+		setBL(0x0202D128, (u32)dsiSaveSeek);
+		setBL(0x0202D13C, (u32)dsiSaveRead);
+		setBL(0x0202D154, (u32)dsiSaveClose);
+		setBL(0x0202D21C, (u32)dsiSaveOpen);
+		setBL(0x0202D244, (u32)dsiSaveSeek);
+		setBL(0x0202D258, (u32)dsiSaveWrite);
+		setBL(0x0202D264, (u32)dsiSaveClose);
+		tonccpy((u32*)0x020584CC, dsiSaveGetResultCode, 0xC);
 	}
 
 	// Cake Ninja (Europe)
 	else if (strcmp(romTid, "K2JP") == 0 && saveOnFlashcard) {
-		setBL(0x0202CEC8, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0202CF20, (u32)ce9->patches->dsiSaveCreate);
-		setBL(0x0202CF54, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0202CF68, (u32)ce9->patches->dsiSaveSetLength);
-		setBL(0x0202CF78, (u32)ce9->patches->dsiSaveGetLength);
-		setBL(0x0202CF80, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0202CFB8, (u32)ce9->patches->dsiSaveSetLength);
-		setBL(0x0202CFC8, (u32)ce9->patches->dsiSaveGetLength);
-		setBL(0x0202CFD0, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0202D1D8, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0202D200, (u32)ce9->patches->dsiSaveSeek);
-		setBL(0x0202D214, (u32)ce9->patches->dsiSaveRead);
-		setBL(0x0202D22C, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0202D2F4, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0202D31C, (u32)ce9->patches->dsiSaveSeek);
-		setBL(0x0202D330, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x0202D33C, (u32)ce9->patches->dsiSaveClose);
-		tonccpy((u32*)0x020585A4, ce9->patches->dsiSaveGetResultCode, 0xC);
+		setBL(0x0202CEC8, (u32)dsiSaveOpen);
+		setBL(0x0202CF20, (u32)dsiSaveCreate);
+		setBL(0x0202CF54, (u32)dsiSaveOpen);
+		setBL(0x0202CF68, (u32)dsiSaveSetLength);
+		setBL(0x0202CF78, (u32)dsiSaveGetLength);
+		setBL(0x0202CF80, (u32)dsiSaveClose);
+		setBL(0x0202CFB8, (u32)dsiSaveSetLength);
+		setBL(0x0202CFC8, (u32)dsiSaveGetLength);
+		setBL(0x0202CFD0, (u32)dsiSaveClose);
+		setBL(0x0202D1D8, (u32)dsiSaveOpen);
+		setBL(0x0202D200, (u32)dsiSaveSeek);
+		setBL(0x0202D214, (u32)dsiSaveRead);
+		setBL(0x0202D22C, (u32)dsiSaveClose);
+		setBL(0x0202D2F4, (u32)dsiSaveOpen);
+		setBL(0x0202D31C, (u32)dsiSaveSeek);
+		setBL(0x0202D330, (u32)dsiSaveWrite);
+		setBL(0x0202D33C, (u32)dsiSaveClose);
+		tonccpy((u32*)0x020585A4, dsiSaveGetResultCode, 0xC);
 	}
 
 	// Cake Ninja 2 (USA)
 	else if (strcmp(romTid, "K2NE") == 0 && saveOnFlashcard) {
-		setBL(0x0204C918, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0204C970, (u32)ce9->patches->dsiSaveCreate);
-		setBL(0x0204C9A4, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0204C9B8, (u32)ce9->patches->dsiSaveSetLength);
-		setBL(0x0204C9C8, (u32)ce9->patches->dsiSaveGetLength);
-		setBL(0x0204C9D0, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0204CA08, (u32)ce9->patches->dsiSaveSetLength);
-		setBL(0x0204CA18, (u32)ce9->patches->dsiSaveGetLength);
-		setBL(0x0204CA20, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0204CC28, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0204CC50, (u32)ce9->patches->dsiSaveSeek);
-		setBL(0x0204CC64, (u32)ce9->patches->dsiSaveRead);
-		setBL(0x0204CC7C, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0204CD44, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0204CD6C, (u32)ce9->patches->dsiSaveSeek);
-		setBL(0x0204CD80, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x0204CD8C, (u32)ce9->patches->dsiSaveClose);
-		tonccpy((u32*)0x02078040, ce9->patches->dsiSaveGetResultCode, 0xC);
+		setBL(0x0204C918, (u32)dsiSaveOpen);
+		setBL(0x0204C970, (u32)dsiSaveCreate);
+		setBL(0x0204C9A4, (u32)dsiSaveOpen);
+		setBL(0x0204C9B8, (u32)dsiSaveSetLength);
+		setBL(0x0204C9C8, (u32)dsiSaveGetLength);
+		setBL(0x0204C9D0, (u32)dsiSaveClose);
+		setBL(0x0204CA08, (u32)dsiSaveSetLength);
+		setBL(0x0204CA18, (u32)dsiSaveGetLength);
+		setBL(0x0204CA20, (u32)dsiSaveClose);
+		setBL(0x0204CC28, (u32)dsiSaveOpen);
+		setBL(0x0204CC50, (u32)dsiSaveSeek);
+		setBL(0x0204CC64, (u32)dsiSaveRead);
+		setBL(0x0204CC7C, (u32)dsiSaveClose);
+		setBL(0x0204CD44, (u32)dsiSaveOpen);
+		setBL(0x0204CD6C, (u32)dsiSaveSeek);
+		setBL(0x0204CD80, (u32)dsiSaveWrite);
+		setBL(0x0204CD8C, (u32)dsiSaveClose);
+		tonccpy((u32*)0x02078040, dsiSaveGetResultCode, 0xC);
 	}
 
 	// Cake Ninja 2 (Europe)
 	else if (strcmp(romTid, "K2NP") == 0 && saveOnFlashcard) {
-		setBL(0x0204C974, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0204C9CC, (u32)ce9->patches->dsiSaveCreate);
-		setBL(0x0204CA00, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0204CA14, (u32)ce9->patches->dsiSaveSetLength);
-		setBL(0x0204CA24, (u32)ce9->patches->dsiSaveGetLength);
-		setBL(0x0204CA2C, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0204CA64, (u32)ce9->patches->dsiSaveSetLength);
-		setBL(0x0204CA74, (u32)ce9->patches->dsiSaveGetLength);
-		setBL(0x0204CA7C, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0204CC84, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0204CCAC, (u32)ce9->patches->dsiSaveSeek);
-		setBL(0x0204CCC0, (u32)ce9->patches->dsiSaveRead);
-		setBL(0x0204CCD8, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0204CDA0, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0204CDC8, (u32)ce9->patches->dsiSaveSeek);
-		setBL(0x0204CDDC, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x0204CDE8, (u32)ce9->patches->dsiSaveClose);
-		tonccpy((u32*)0x0207809C, ce9->patches->dsiSaveGetResultCode, 0xC);
+		setBL(0x0204C974, (u32)dsiSaveOpen);
+		setBL(0x0204C9CC, (u32)dsiSaveCreate);
+		setBL(0x0204CA00, (u32)dsiSaveOpen);
+		setBL(0x0204CA14, (u32)dsiSaveSetLength);
+		setBL(0x0204CA24, (u32)dsiSaveGetLength);
+		setBL(0x0204CA2C, (u32)dsiSaveClose);
+		setBL(0x0204CA64, (u32)dsiSaveSetLength);
+		setBL(0x0204CA74, (u32)dsiSaveGetLength);
+		setBL(0x0204CA7C, (u32)dsiSaveClose);
+		setBL(0x0204CC84, (u32)dsiSaveOpen);
+		setBL(0x0204CCAC, (u32)dsiSaveSeek);
+		setBL(0x0204CCC0, (u32)dsiSaveRead);
+		setBL(0x0204CCD8, (u32)dsiSaveClose);
+		setBL(0x0204CDA0, (u32)dsiSaveOpen);
+		setBL(0x0204CDC8, (u32)dsiSaveSeek);
+		setBL(0x0204CDDC, (u32)dsiSaveWrite);
+		setBL(0x0204CDE8, (u32)dsiSaveClose);
+		tonccpy((u32*)0x0207809C, dsiSaveGetResultCode, 0xC);
 	}
 
 	// Cake Ninja: XMAS (USA)
 	// Requires 8MB of RAM
 	else if (strcmp(romTid, "KYNE") == 0 && saveOnFlashcard) {
-		setBL(0x0202571C, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x02025774, (u32)ce9->patches->dsiSaveCreate);
-		setBL(0x020257A8, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x020257BC, (u32)ce9->patches->dsiSaveSetLength);
-		setBL(0x020257CC, (u32)ce9->patches->dsiSaveGetLength);
-		setBL(0x020257D4, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0202580C, (u32)ce9->patches->dsiSaveSetLength);
-		setBL(0x0202581C, (u32)ce9->patches->dsiSaveGetLength);
-		setBL(0x02025824, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x02025A2C, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x02025A54, (u32)ce9->patches->dsiSaveSeek);
-		setBL(0x02025A68, (u32)ce9->patches->dsiSaveRead);
-		setBL(0x02025A80, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x02025B48, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x02025B70, (u32)ce9->patches->dsiSaveSeek);
-		setBL(0x02025B84, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x02025B90, (u32)ce9->patches->dsiSaveClose);
-		tonccpy((u32*)0x02050EDC, ce9->patches->dsiSaveGetResultCode, 0xC);
+		setBL(0x0202571C, (u32)dsiSaveOpen);
+		setBL(0x02025774, (u32)dsiSaveCreate);
+		setBL(0x020257A8, (u32)dsiSaveOpen);
+		setBL(0x020257BC, (u32)dsiSaveSetLength);
+		setBL(0x020257CC, (u32)dsiSaveGetLength);
+		setBL(0x020257D4, (u32)dsiSaveClose);
+		setBL(0x0202580C, (u32)dsiSaveSetLength);
+		setBL(0x0202581C, (u32)dsiSaveGetLength);
+		setBL(0x02025824, (u32)dsiSaveClose);
+		setBL(0x02025A2C, (u32)dsiSaveOpen);
+		setBL(0x02025A54, (u32)dsiSaveSeek);
+		setBL(0x02025A68, (u32)dsiSaveRead);
+		setBL(0x02025A80, (u32)dsiSaveClose);
+		setBL(0x02025B48, (u32)dsiSaveOpen);
+		setBL(0x02025B70, (u32)dsiSaveSeek);
+		setBL(0x02025B84, (u32)dsiSaveWrite);
+		setBL(0x02025B90, (u32)dsiSaveClose);
+		tonccpy((u32*)0x02050EDC, dsiSaveGetResultCode, 0xC);
 	}
 
 	// Cake Ninja: XMAS (Europe)
 	else if (strcmp(romTid, "KYNP") == 0 && saveOnFlashcard) {
-		setBL(0x020257A8, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x02025800, (u32)ce9->patches->dsiSaveCreate);
-		setBL(0x02025834, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x02025848, (u32)ce9->patches->dsiSaveSetLength);
-		setBL(0x02025858, (u32)ce9->patches->dsiSaveGetLength);
-		setBL(0x02025860, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x02025898, (u32)ce9->patches->dsiSaveSetLength);
-		setBL(0x020258A8, (u32)ce9->patches->dsiSaveGetLength);
-		setBL(0x020258B0, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x02025AB8, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x02025AE0, (u32)ce9->patches->dsiSaveSeek);
-		setBL(0x02025AF4, (u32)ce9->patches->dsiSaveRead);
-		setBL(0x02025B0C, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x02025BD4, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x02025BFC, (u32)ce9->patches->dsiSaveSeek);
-		setBL(0x02025C10, (u32)ce9->patches->dsiSaveWrite);
-		tonccpy((u32*)0x02050F68, ce9->patches->dsiSaveGetResultCode, 0xC);
+		setBL(0x020257A8, (u32)dsiSaveOpen);
+		setBL(0x02025800, (u32)dsiSaveCreate);
+		setBL(0x02025834, (u32)dsiSaveOpen);
+		setBL(0x02025848, (u32)dsiSaveSetLength);
+		setBL(0x02025858, (u32)dsiSaveGetLength);
+		setBL(0x02025860, (u32)dsiSaveClose);
+		setBL(0x02025898, (u32)dsiSaveSetLength);
+		setBL(0x020258A8, (u32)dsiSaveGetLength);
+		setBL(0x020258B0, (u32)dsiSaveClose);
+		setBL(0x02025AB8, (u32)dsiSaveOpen);
+		setBL(0x02025AE0, (u32)dsiSaveSeek);
+		setBL(0x02025AF4, (u32)dsiSaveRead);
+		setBL(0x02025B0C, (u32)dsiSaveClose);
+		setBL(0x02025BD4, (u32)dsiSaveOpen);
+		setBL(0x02025BFC, (u32)dsiSaveSeek);
+		setBL(0x02025C10, (u32)dsiSaveWrite);
+		tonccpy((u32*)0x02050F68, dsiSaveGetResultCode, 0xC);
 	}
 
 	// Castle Conqueror: Heroes (USA)
 	else if (strcmp(romTid, "KC5E") == 0 && saveOnFlashcard) {
-		tonccpy((u32*)0x0201831C, ce9->patches->dsiSaveGetResultCode, 0xC);
-		setBL(0x02065CA0, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x02065CB4, (u32)ce9->patches->dsiSaveCreate);
-		setBL(0x02065CC4, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x02065CF0, (u32)ce9->patches->dsiSaveCreate);
-		setBL(0x02065D00, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x02066208, (u32)ce9->patches->dsiSaveSeek);
-		setBL(0x0206621C, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x0206622C, (u32)ce9->patches->dsiSaveSeek);
-		setBL(0x0206623C, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x0206624C, (u32)ce9->patches->dsiSaveSeek);
-		setBL(0x0206625C, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x020662C0, (u32)ce9->patches->dsiSaveSeek);
-		setBL(0x020662D4, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x020662DC, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x02066330, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x02066648, (u32)ce9->patches->dsiSaveSeek);
-		setBL(0x02066658, (u32)ce9->patches->dsiSaveRead);
-		setBL(0x02066684, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x02066BE4, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x02066BF8, (u32)ce9->patches->dsiSaveSeek);
-		setBL(0x02066C08, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x02066C10, (u32)ce9->patches->dsiSaveClose);
+		tonccpy((u32*)0x0201831C, dsiSaveGetResultCode, 0xC);
+		setBL(0x02065CA0, (u32)dsiSaveOpen);
+		setBL(0x02065CB4, (u32)dsiSaveCreate);
+		setBL(0x02065CC4, (u32)dsiSaveOpen);
+		setBL(0x02065CF0, (u32)dsiSaveCreate);
+		setBL(0x02065D00, (u32)dsiSaveOpen);
+		setBL(0x02066208, (u32)dsiSaveSeek);
+		setBL(0x0206621C, (u32)dsiSaveWrite);
+		setBL(0x0206622C, (u32)dsiSaveSeek);
+		setBL(0x0206623C, (u32)dsiSaveWrite);
+		setBL(0x0206624C, (u32)dsiSaveSeek);
+		setBL(0x0206625C, (u32)dsiSaveWrite);
+		setBL(0x020662C0, (u32)dsiSaveSeek);
+		setBL(0x020662D4, (u32)dsiSaveWrite);
+		setBL(0x020662DC, (u32)dsiSaveClose);
+		setBL(0x02066330, (u32)dsiSaveOpen);
+		setBL(0x02066648, (u32)dsiSaveSeek);
+		setBL(0x02066658, (u32)dsiSaveRead);
+		setBL(0x02066684, (u32)dsiSaveClose);
+		setBL(0x02066BE4, (u32)dsiSaveOpen);
+		setBL(0x02066BF8, (u32)dsiSaveSeek);
+		setBL(0x02066C08, (u32)dsiSaveWrite);
+		setBL(0x02066C10, (u32)dsiSaveClose);
 	}
 
 	// Castle Conqueror: Heroes (Europe, Australia)
 	else if (strcmp(romTid, "KC5V") == 0 && saveOnFlashcard) {
-		tonccpy((u32*)0x02018248, ce9->patches->dsiSaveGetResultCode, 0xC);
-		setBL(0x02066110, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x02066128, (u32)ce9->patches->dsiSaveCreate);
-		setBL(0x02066138, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x02066164, (u32)ce9->patches->dsiSaveCreate);
-		setBL(0x02066174, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x02066680, (u32)ce9->patches->dsiSaveSeek);
-		setBL(0x02066694, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x020666A4, (u32)ce9->patches->dsiSaveSeek);
-		setBL(0x020666B4, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x020666C4, (u32)ce9->patches->dsiSaveSeek);
-		setBL(0x020666D4, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x02066748, (u32)ce9->patches->dsiSaveSeek);
-		setBL(0x0206675C, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x02066764, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x020667BC, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0206682C, (u32)ce9->patches->dsiSaveSeek);
-		setBL(0x0206683C, (u32)ce9->patches->dsiSaveRead);
-		setBL(0x0206686C, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x02066E90, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x02066EA4, (u32)ce9->patches->dsiSaveSeek);
-		setBL(0x02066EB4, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x02066EBC, (u32)ce9->patches->dsiSaveClose);
+		tonccpy((u32*)0x02018248, dsiSaveGetResultCode, 0xC);
+		setBL(0x02066110, (u32)dsiSaveOpen);
+		setBL(0x02066128, (u32)dsiSaveCreate);
+		setBL(0x02066138, (u32)dsiSaveOpen);
+		setBL(0x02066164, (u32)dsiSaveCreate);
+		setBL(0x02066174, (u32)dsiSaveOpen);
+		setBL(0x02066680, (u32)dsiSaveSeek);
+		setBL(0x02066694, (u32)dsiSaveWrite);
+		setBL(0x020666A4, (u32)dsiSaveSeek);
+		setBL(0x020666B4, (u32)dsiSaveWrite);
+		setBL(0x020666C4, (u32)dsiSaveSeek);
+		setBL(0x020666D4, (u32)dsiSaveWrite);
+		setBL(0x02066748, (u32)dsiSaveSeek);
+		setBL(0x0206675C, (u32)dsiSaveWrite);
+		setBL(0x02066764, (u32)dsiSaveClose);
+		setBL(0x020667BC, (u32)dsiSaveOpen);
+		setBL(0x0206682C, (u32)dsiSaveSeek);
+		setBL(0x0206683C, (u32)dsiSaveRead);
+		setBL(0x0206686C, (u32)dsiSaveClose);
+		setBL(0x02066E90, (u32)dsiSaveOpen);
+		setBL(0x02066EA4, (u32)dsiSaveSeek);
+		setBL(0x02066EB4, (u32)dsiSaveWrite);
+		setBL(0x02066EBC, (u32)dsiSaveClose);
 	}
 
 	// Castle Conqueror: Heroes (Japan)
 	else if (strcmp(romTid, "KC5J") == 0 && saveOnFlashcard) {
-		tonccpy((u32*)0x0201831C, ce9->patches->dsiSaveGetResultCode, 0xC);
-		setBL(0x02026FA8, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x02026FC0, (u32)ce9->patches->dsiSaveCreate);
-		setBL(0x02026FD0, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x02026FFC, (u32)ce9->patches->dsiSaveCreate);
-		setBL(0x0202700C, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x02027518, (u32)ce9->patches->dsiSaveSeek);
-		setBL(0x0202752C, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x0202753C, (u32)ce9->patches->dsiSaveSeek);
-		setBL(0x0202754C, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x0202755C, (u32)ce9->patches->dsiSaveSeek);
-		setBL(0x0202756C, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x020275E0, (u32)ce9->patches->dsiSaveSeek);
-		setBL(0x020275F4, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x020275FC, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x02027654, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x020276C4, (u32)ce9->patches->dsiSaveSeek);
-		setBL(0x020276D4, (u32)ce9->patches->dsiSaveRead);
-		setBL(0x02027704, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x02027D28, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x02027D3C, (u32)ce9->patches->dsiSaveSeek);
-		setBL(0x02027D4C, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x02027D54, (u32)ce9->patches->dsiSaveClose);
+		tonccpy((u32*)0x0201831C, dsiSaveGetResultCode, 0xC);
+		setBL(0x02026FA8, (u32)dsiSaveOpen);
+		setBL(0x02026FC0, (u32)dsiSaveCreate);
+		setBL(0x02026FD0, (u32)dsiSaveOpen);
+		setBL(0x02026FFC, (u32)dsiSaveCreate);
+		setBL(0x0202700C, (u32)dsiSaveOpen);
+		setBL(0x02027518, (u32)dsiSaveSeek);
+		setBL(0x0202752C, (u32)dsiSaveWrite);
+		setBL(0x0202753C, (u32)dsiSaveSeek);
+		setBL(0x0202754C, (u32)dsiSaveWrite);
+		setBL(0x0202755C, (u32)dsiSaveSeek);
+		setBL(0x0202756C, (u32)dsiSaveWrite);
+		setBL(0x020275E0, (u32)dsiSaveSeek);
+		setBL(0x020275F4, (u32)dsiSaveWrite);
+		setBL(0x020275FC, (u32)dsiSaveClose);
+		setBL(0x02027654, (u32)dsiSaveOpen);
+		setBL(0x020276C4, (u32)dsiSaveSeek);
+		setBL(0x020276D4, (u32)dsiSaveRead);
+		setBL(0x02027704, (u32)dsiSaveClose);
+		setBL(0x02027D28, (u32)dsiSaveOpen);
+		setBL(0x02027D3C, (u32)dsiSaveSeek);
+		setBL(0x02027D4C, (u32)dsiSaveWrite);
+		setBL(0x02027D54, (u32)dsiSaveClose);
 	}
 
 	// Cave Story (USA)
@@ -880,43 +893,43 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		//*(u32*)0x02005980 = 0xE12FFF1E; // bx lr
 		//*(u32*)0x02005A68 = 0xE12FFF1E; // bx lr
 		//*(u32*)0x02005B60 = 0xE12FFF1E; // bx lr
-		setBL(0x02005994, (u32)ce9->patches->dsiSaveCreate);
-		setBL(0x020059D0, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x02005A28, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x02005A40, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x02005ADC, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x02005A28, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x02005AB0, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x02005ADC, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x02005AF8, (u32)ce9->patches->dsiSaveGetLength);
-		setBL(0x02005B0C, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x02005B2C, (u32)ce9->patches->dsiSaveSeek);
-		setBL(0x02005B3C, (u32)ce9->patches->dsiSaveRead);
-		setBL(0x02005B44, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x02005BAC, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x02005BD8, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x02005BF4, (u32)ce9->patches->dsiSaveGetLength);
-		setBL(0x02005C08, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x02005C28, (u32)ce9->patches->dsiSaveSeek);
-		setBL(0x02005C38, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x02005C40, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x02005994, (u32)dsiSaveCreate);
+		setBL(0x020059D0, (u32)dsiSaveOpen);
+		setBL(0x02005A28, (u32)dsiSaveWrite);
+		setBL(0x02005A40, (u32)dsiSaveClose);
+		setBL(0x02005ADC, (u32)dsiSaveOpen);
+		setBL(0x02005A28, (u32)dsiSaveWrite);
+		setBL(0x02005AB0, (u32)dsiSaveOpen);
+		setBL(0x02005ADC, (u32)dsiSaveOpen);
+		setBL(0x02005AF8, (u32)dsiSaveGetLength);
+		setBL(0x02005B0C, (u32)dsiSaveClose);
+		setBL(0x02005B2C, (u32)dsiSaveSeek);
+		setBL(0x02005B3C, (u32)dsiSaveRead);
+		setBL(0x02005B44, (u32)dsiSaveClose);
+		setBL(0x02005BAC, (u32)dsiSaveOpen);
+		setBL(0x02005BD8, (u32)dsiSaveOpen);
+		setBL(0x02005BF4, (u32)dsiSaveGetLength);
+		setBL(0x02005C08, (u32)dsiSaveClose);
+		setBL(0x02005C28, (u32)dsiSaveSeek);
+		setBL(0x02005C38, (u32)dsiSaveWrite);
+		setBL(0x02005C40, (u32)dsiSaveClose);
 		//if (!dsiSD) {
 			*(u32*)0x0200A12C = 0xE1A00000; // nop (Skip Manual screen)
 		//}
-		tonccpy((u32*)0x02073FA4, ce9->patches->dsiSaveGetResultCode, 0xC);
+		tonccpy((u32*)0x02073FA4, dsiSaveGetResultCode, 0xC);
 	}
 
 	// Chuck E. Cheese's Alien Defense Force (USA)
 	else if (strcmp(romTid, "KUQE") == 0 && saveOnFlashcard) {
-		setBL(0x0201BBA4, (u32)ce9->patches->dsiSaveCreate);
-		setBL(0x0201BBB4, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0201BBD0, (u32)ce9->patches->dsiSaveSeek);
-		setBL(0x0201BBE0, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x0201BBE8, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0201BD10, (u32)ce9->patches->dsiSaveOpenR);
-		setBL(0x0201BD28, (u32)ce9->patches->dsiSaveSeek);
-		setBL(0x0201BD38, (u32)ce9->patches->dsiSaveRead);
-		setBL(0x0201BD40, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0201BBA4, (u32)dsiSaveCreate);
+		setBL(0x0201BBB4, (u32)dsiSaveOpen);
+		setBL(0x0201BBD0, (u32)dsiSaveSeek);
+		setBL(0x0201BBE0, (u32)dsiSaveWrite);
+		setBL(0x0201BBE8, (u32)dsiSaveClose);
+		setBL(0x0201BD10, (u32)dsiSaveOpenR);
+		setBL(0x0201BD28, (u32)dsiSaveSeek);
+		setBL(0x0201BD38, (u32)dsiSaveRead);
+		setBL(0x0201BD40, (u32)dsiSaveClose);
 
 		//if (!dsiSD) {
 			*(u32*)0x0201B9E4 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
@@ -935,63 +948,63 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			*(u32*)0x02032550 = 0xE1A00000; // nop (Skip Manual screen)
 			*(u32*)0x020459F0 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		//}
-		setBL(0x02045BAC, (u32)ce9->patches->dsiSaveCreate);
-		setBL(0x02045BBC, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x02045BD8, (u32)ce9->patches->dsiSaveSeek);
-		setBL(0x02045BE8, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x02045BF0, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x02045D1C, (u32)ce9->patches->dsiSaveOpenR);
-		setBL(0x02045D34, (u32)ce9->patches->dsiSaveSeek);
-		setBL(0x02045D44, (u32)ce9->patches->dsiSaveRead);
-		setBL(0x02045D4C, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x02045BAC, (u32)dsiSaveCreate);
+		setBL(0x02045BBC, (u32)dsiSaveOpen);
+		setBL(0x02045BD8, (u32)dsiSaveSeek);
+		setBL(0x02045BE8, (u32)dsiSaveWrite);
+		setBL(0x02045BF0, (u32)dsiSaveClose);
+		setBL(0x02045D1C, (u32)dsiSaveOpenR);
+		setBL(0x02045D34, (u32)dsiSaveSeek);
+		setBL(0x02045D44, (u32)dsiSaveRead);
+		setBL(0x02045D4C, (u32)dsiSaveClose);
 	}
 
 	// Chuukara! Dairoujou (Japan)
 	else if (strcmp(romTid, "KQLJ") == 0 && saveOnFlashcard) {
-		setBL(0x020446E4, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x02044710, (u32)ce9->patches->dsiSaveRead);
-		setBL(0x02044720, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0204473C, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x020446E4, (u32)dsiSaveOpen);
+		setBL(0x02044710, (u32)dsiSaveRead);
+		setBL(0x02044720, (u32)dsiSaveClose);
+		setBL(0x0204473C, (u32)dsiSaveClose);
 		*(u32*)0x02044790 = 0xE3A00001; // mov r0, #1 (OpenDirectory)
 		*(u32*)0x020447CC = 0xE1A00000; // nop (CloseDirectory)
-		setBL(0x020447D8, (u32)ce9->patches->dsiSaveCreate);
-		setBL(0x020447E8, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x02044814, (u32)ce9->patches->dsiSaveSetLength);
-		setBL(0x02044824, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x02044848, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x02044858, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x02044874, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x020447D8, (u32)dsiSaveCreate);
+		setBL(0x020447E8, (u32)dsiSaveOpen);
+		setBL(0x02044814, (u32)dsiSaveSetLength);
+		setBL(0x02044824, (u32)dsiSaveClose);
+		setBL(0x02044848, (u32)dsiSaveWrite);
+		setBL(0x02044858, (u32)dsiSaveClose);
+		setBL(0x02044874, (u32)dsiSaveClose);
 	}
 
 	// Crash-Course Domo (USA)
 	else if (strcmp(romTid, "KDCE") == 0 && saveOnFlashcard) {
 		const u32 dsiSaveCreateT = 0x02024B0C;
 		*(u16*)dsiSaveCreateT = 0x4778; // bx pc
-		tonccpy((u32*)(dsiSaveCreateT + 4), ce9->patches->dsiSaveCreate, 0xC);
+		tonccpy((u32*)(dsiSaveCreateT + 4), dsiSaveCreate, 0xC);
 
 		const u32 dsiSaveDeleteT = 0x02024B1C;
 		*(u16*)dsiSaveDeleteT = 0x4778; // bx pc
-		tonccpy((u32*)(dsiSaveDeleteT + 4), ce9->patches->dsiSaveDelete, 0xC);
+		tonccpy((u32*)(dsiSaveDeleteT + 4), dsiSaveDelete, 0xC);
 
 		const u32 dsiSaveSetLengthT = 0x02024B2C;
 		*(u16*)dsiSaveSetLengthT = 0x4778; // bx pc
-		tonccpy((u32*)(dsiSaveSetLengthT + 4), ce9->patches->dsiSaveSetLength, 0xC);
+		tonccpy((u32*)(dsiSaveSetLengthT + 4), dsiSaveSetLength, 0xC);
 
 		const u32 dsiSaveOpenT = 0x02024B3C;
 		*(u16*)dsiSaveOpenT = 0x4778; // bx pc
-		tonccpy((u32*)(dsiSaveOpenT + 4), ce9->patches->dsiSaveOpen, 0xC);
+		tonccpy((u32*)(dsiSaveOpenT + 4), dsiSaveOpen, 0xC);
 
 		const u32 dsiSaveCloseT = 0x02024B4C;
 		*(u16*)dsiSaveCloseT = 0x4778; // bx pc
-		tonccpy((u32*)(dsiSaveCloseT + 4), ce9->patches->dsiSaveClose, 0xC);
+		tonccpy((u32*)(dsiSaveCloseT + 4), dsiSaveClose, 0xC);
 
 		const u32 dsiSaveReadT = 0x02024B5C;
 		*(u16*)dsiSaveReadT = 0x4778; // bx pc
-		tonccpy((u32*)(dsiSaveReadT + 4), ce9->patches->dsiSaveRead, 0xC);
+		tonccpy((u32*)(dsiSaveReadT + 4), dsiSaveRead, 0xC);
 
 		const u32 dsiSaveWriteT = 0x02024B6C;
 		*(u16*)dsiSaveWriteT = 0x4778; // bx pc
-		tonccpy((u32*)(dsiSaveWriteT + 4), ce9->patches->dsiSaveWrite, 0xC);
+		tonccpy((u32*)(dsiSaveWriteT + 4), dsiSaveWrite, 0xC);
 
 		*(u16*)0x0200DF38 = 0x2001; // movs r0, #1
 		*(u16*)0x0200DF3A = 0x4770; // bx lr
@@ -1004,7 +1017,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBLThumb(0x0200E2D4, dsiSaveWriteT);
 		setBLThumb(0x0200E2E6, dsiSaveCloseT);
 		*(u16*)0x0200E30C = 0x4778; // bx pc
-		tonccpy((u32*)0x0200E310, ce9->patches->dsiSaveGetLength, 0xC);
+		tonccpy((u32*)0x0200E310, dsiSaveGetLength, 0xC);
 		setBLThumb(0x0200E33C, dsiSaveOpenT);
 		setBLThumb(0x0200E362, dsiSaveCloseT);
 		setBLThumb(0x0200E374, dsiSaveReadT);
@@ -1018,7 +1031,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	else if (strncmp(romTid, "K32", 3) == 0 && saveOnFlashcard) {
 		u32* saveFuncOffsets[22] = {NULL};
 
-		tonccpy((u32*)0x0201C450, ce9->patches->dsiSaveGetResultCode, 0xC);
+		tonccpy((u32*)0x0201C450, dsiSaveGetResultCode, 0xC);
 		if (ndsHeader->gameCode[3] == 'E') {
 			saveFuncOffsets[0] = (u32*)0x02062EA4;
 			saveFuncOffsets[1] = (u32*)0x02062EBC;
@@ -1067,78 +1080,78 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			saveFuncOffsets[21] = (u32*)0x02094BBC;
 		}
 
-		setBL((u32)saveFuncOffsets[0], (u32)ce9->patches->dsiSaveOpen);
-		setBL((u32)saveFuncOffsets[1], (u32)ce9->patches->dsiSaveGetLength);
-		setBL((u32)saveFuncOffsets[2], (u32)ce9->patches->dsiSaveClose);
-		setBL((u32)saveFuncOffsets[3], (u32)ce9->patches->dsiSaveSeek);
-		setBL((u32)saveFuncOffsets[4], (u32)ce9->patches->dsiSaveClose);
-		setBL((u32)saveFuncOffsets[5], (u32)ce9->patches->dsiSaveWrite);
-		setBL((u32)saveFuncOffsets[6], (u32)ce9->patches->dsiSaveClose);
-		setBL((u32)saveFuncOffsets[7], (u32)ce9->patches->dsiSaveClose);
-		setBL((u32)saveFuncOffsets[8], (u32)ce9->patches->dsiSaveOpen);
-		setBL((u32)saveFuncOffsets[9], (u32)ce9->patches->dsiSaveGetLength);
-		setBL((u32)saveFuncOffsets[10], (u32)ce9->patches->dsiSaveClose);
-		setBL((u32)saveFuncOffsets[11], (u32)ce9->patches->dsiSaveSeek);
-		setBL((u32)saveFuncOffsets[12], (u32)ce9->patches->dsiSaveClose);
-		setBL((u32)saveFuncOffsets[13], (u32)ce9->patches->dsiSaveRead);
-		setBL((u32)saveFuncOffsets[14], (u32)ce9->patches->dsiSaveClose);
-		setBL((u32)saveFuncOffsets[15], (u32)ce9->patches->dsiSaveClose);
-		setBL((u32)saveFuncOffsets[16], (u32)ce9->patches->dsiSaveCreate);
-		setBL((u32)saveFuncOffsets[17], (u32)ce9->patches->dsiSaveOpen);
-		setBL((u32)saveFuncOffsets[18], (u32)ce9->patches->dsiSaveWrite);
-		setBL((u32)saveFuncOffsets[19], (u32)ce9->patches->dsiSaveClose);
-		setBL((u32)saveFuncOffsets[20], (u32)ce9->patches->dsiSaveOpen);
-		setBL((u32)saveFuncOffsets[21], (u32)ce9->patches->dsiSaveClose);
+		setBL((u32)saveFuncOffsets[0], (u32)dsiSaveOpen);
+		setBL((u32)saveFuncOffsets[1], (u32)dsiSaveGetLength);
+		setBL((u32)saveFuncOffsets[2], (u32)dsiSaveClose);
+		setBL((u32)saveFuncOffsets[3], (u32)dsiSaveSeek);
+		setBL((u32)saveFuncOffsets[4], (u32)dsiSaveClose);
+		setBL((u32)saveFuncOffsets[5], (u32)dsiSaveWrite);
+		setBL((u32)saveFuncOffsets[6], (u32)dsiSaveClose);
+		setBL((u32)saveFuncOffsets[7], (u32)dsiSaveClose);
+		setBL((u32)saveFuncOffsets[8], (u32)dsiSaveOpen);
+		setBL((u32)saveFuncOffsets[9], (u32)dsiSaveGetLength);
+		setBL((u32)saveFuncOffsets[10], (u32)dsiSaveClose);
+		setBL((u32)saveFuncOffsets[11], (u32)dsiSaveSeek);
+		setBL((u32)saveFuncOffsets[12], (u32)dsiSaveClose);
+		setBL((u32)saveFuncOffsets[13], (u32)dsiSaveRead);
+		setBL((u32)saveFuncOffsets[14], (u32)dsiSaveClose);
+		setBL((u32)saveFuncOffsets[15], (u32)dsiSaveClose);
+		setBL((u32)saveFuncOffsets[16], (u32)dsiSaveCreate);
+		setBL((u32)saveFuncOffsets[17], (u32)dsiSaveOpen);
+		setBL((u32)saveFuncOffsets[18], (u32)dsiSaveWrite);
+		setBL((u32)saveFuncOffsets[19], (u32)dsiSaveClose);
+		setBL((u32)saveFuncOffsets[20], (u32)dsiSaveOpen);
+		setBL((u32)saveFuncOffsets[21], (u32)dsiSaveClose);
 	}
 
 	// Dairojo! Samurai Defenders (USA)
 	else if (strcmp(romTid, "KF3E") == 0 && saveOnFlashcard) {
-		setBL(0x02044B3C, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x02044B68, (u32)ce9->patches->dsiSaveRead);
-		setBL(0x02044B78, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x02044B94, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x02044B3C, (u32)dsiSaveOpen);
+		setBL(0x02044B68, (u32)dsiSaveRead);
+		setBL(0x02044B78, (u32)dsiSaveClose);
+		setBL(0x02044B94, (u32)dsiSaveClose);
 		*(u32*)0x02044BE8 = 0xE3A00001; // mov r0, #1 (OpenDirectory)
 		*(u32*)0x02044C24 = 0xE1A00000; // nop (CloseDirectory)
-		setBL(0x02044C30, (u32)ce9->patches->dsiSaveCreate);
-		setBL(0x02044C40, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x02044C6C, (u32)ce9->patches->dsiSaveSetLength);
-		setBL(0x02044C7C, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x02044CA0, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x02044CB0, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x02044CCC, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x02044C30, (u32)dsiSaveCreate);
+		setBL(0x02044C40, (u32)dsiSaveOpen);
+		setBL(0x02044C6C, (u32)dsiSaveSetLength);
+		setBL(0x02044C7C, (u32)dsiSaveClose);
+		setBL(0x02044CA0, (u32)dsiSaveWrite);
+		setBL(0x02044CB0, (u32)dsiSaveClose);
+		setBL(0x02044CCC, (u32)dsiSaveClose);
 	}
 
 	// Dark Void Zero (USA)
 	// Dark Void Zero (Europe, Australia)
 	else if ((strcmp(romTid, "KDVE") == 0 || strcmp(romTid, "KDVV") == 0) && saveOnFlashcard) {
-		setBL(0x0208AE90, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0208AEA4, (u32)ce9->patches->dsiSaveCreate);
-		setBL(0x0208AEC4, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0208AEE8, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x0208AF08, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x0208AF34, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x0208AF50, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x0208AF6C, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x0208AF7C, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x0208AF8C, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x0208AF9C, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x0208AFAC, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x0208AFB4, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0208B04C, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0208B0DC, (u32)ce9->patches->dsiSaveRead);
-		setBL(0x0208B134, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0208B174, (u32)ce9->patches->dsiSaveDelete);
-		setBL(0x0208B1BC, (u32)ce9->patches->dsiSaveRead);
-		setBL(0x0208B234, (u32)ce9->patches->dsiSaveRead);
-		setBL(0x0208B290, (u32)ce9->patches->dsiSaveRead);
-		setBL(0x0208B2F4, (u32)ce9->patches->dsiSaveRead);
-		setBL(0x0208B340, (u32)ce9->patches->dsiSaveRead);
-		setBL(0x0208B38C, (u32)ce9->patches->dsiSaveRead);
-		setBL(0x0208B3D8, (u32)ce9->patches->dsiSaveRead);
-		setBL(0x0208B424, (u32)ce9->patches->dsiSaveRead);
-		setBL(0x0208B488, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0208B4C8, (u32)ce9->patches->dsiSaveDelete);
-		setBL(0x0208B50C, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0208AE90, (u32)dsiSaveOpen);
+		setBL(0x0208AEA4, (u32)dsiSaveCreate);
+		setBL(0x0208AEC4, (u32)dsiSaveOpen);
+		setBL(0x0208AEE8, (u32)dsiSaveWrite);
+		setBL(0x0208AF08, (u32)dsiSaveWrite);
+		setBL(0x0208AF34, (u32)dsiSaveWrite);
+		setBL(0x0208AF50, (u32)dsiSaveWrite);
+		setBL(0x0208AF6C, (u32)dsiSaveWrite);
+		setBL(0x0208AF7C, (u32)dsiSaveWrite);
+		setBL(0x0208AF8C, (u32)dsiSaveWrite);
+		setBL(0x0208AF9C, (u32)dsiSaveWrite);
+		setBL(0x0208AFAC, (u32)dsiSaveWrite);
+		setBL(0x0208AFB4, (u32)dsiSaveClose);
+		setBL(0x0208B04C, (u32)dsiSaveOpen);
+		setBL(0x0208B0DC, (u32)dsiSaveRead);
+		setBL(0x0208B134, (u32)dsiSaveClose);
+		setBL(0x0208B174, (u32)dsiSaveDelete);
+		setBL(0x0208B1BC, (u32)dsiSaveRead);
+		setBL(0x0208B234, (u32)dsiSaveRead);
+		setBL(0x0208B290, (u32)dsiSaveRead);
+		setBL(0x0208B2F4, (u32)dsiSaveRead);
+		setBL(0x0208B340, (u32)dsiSaveRead);
+		setBL(0x0208B38C, (u32)dsiSaveRead);
+		setBL(0x0208B3D8, (u32)dsiSaveRead);
+		setBL(0x0208B424, (u32)dsiSaveRead);
+		setBL(0x0208B488, (u32)dsiSaveClose);
+		setBL(0x0208B4C8, (u32)dsiSaveDelete);
+		setBL(0x0208B50C, (u32)dsiSaveClose);
 	}
 
 	// GO Series: Defense Wars (USA)
@@ -1146,23 +1159,23 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	else if ((strcmp(romTid, "KWTE") == 0 || strcmp(romTid, "KWTP") == 0) && saveOnFlashcard) {
 		*(u32*)0x0200B350 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		//*(u32*)0x0200C584 = 0xE1A00000; // nop
-		setBL(0x0200C5C0, (u32)ce9->patches->dsiSaveCreate);
-		setBL(0x0200C5FC, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0200C634, (u32)ce9->patches->dsiSaveSetLength);
-		setBL(0x0200C644, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x0200C65C, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0200C6E4, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0200C71C, (u32)ce9->patches->dsiSaveSetLength);
-		setBL(0x0200C72C, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x0200C744, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0200C7C4, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0200C7FC, (u32)ce9->patches->dsiSaveRead);
-		setBL(0x0200C810, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0200C860, (u32)ce9->patches->dsiSaveDelete);
-		setBL(0x0200C8CC, (u32)ce9->patches->dsiSaveGetInfo);
+		setBL(0x0200C5C0, (u32)dsiSaveCreate);
+		setBL(0x0200C5FC, (u32)dsiSaveOpen);
+		setBL(0x0200C634, (u32)dsiSaveSetLength);
+		setBL(0x0200C644, (u32)dsiSaveWrite);
+		setBL(0x0200C65C, (u32)dsiSaveClose);
+		setBL(0x0200C6E4, (u32)dsiSaveOpen);
+		setBL(0x0200C71C, (u32)dsiSaveSetLength);
+		setBL(0x0200C72C, (u32)dsiSaveWrite);
+		setBL(0x0200C744, (u32)dsiSaveClose);
+		setBL(0x0200C7C4, (u32)dsiSaveOpen);
+		setBL(0x0200C7FC, (u32)dsiSaveRead);
+		setBL(0x0200C810, (u32)dsiSaveClose);
+		setBL(0x0200C860, (u32)dsiSaveDelete);
+		setBL(0x0200C8CC, (u32)dsiSaveGetInfo);
 		*(u32*)0x0200C910 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
 		*(u32*)0x0200C914 = 0xE12FFF1E; // bx lr
-		tonccpy((u32*)0x02044AEC, ce9->patches->dsiSaveGetResultCode, 0xC);
+		tonccpy((u32*)0x02044AEC, dsiSaveGetResultCode, 0xC);
 
 		// Skip Manual screen
 		for (int i = 0; i < 11; i++) {
@@ -1174,7 +1187,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Dr. Mario Express (USA)
 	// A Little Bit of... Dr. Mario (Europe, Australia)
 	else if ((strcmp(romTid, "KD9E") == 0 || strcmp(romTid, "KD9V") == 0) && saveOnFlashcard) {
-		tonccpy((u32*)0x02011160, ce9->patches->dsiSaveGetResultCode, 0xC);
+		tonccpy((u32*)0x02011160, dsiSaveGetResultCode, 0xC);
 		*(u32*)0x020248C4 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
 		*(u32*)0x02025CD4 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
 		*(u32*)0x0203D228 = 0xE3A00000; // mov r0, #0 (Skip saving to "back.dat")
@@ -1182,30 +1195,30 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		//*(u32*)0x0203D48C = 0xE12FFF1E; // bx lr
 		if (ndsHeader->gameCode[3] == 'E') {
 			//*(u32*)0x02044B00 = 0xE3A00000; // mov r0, #0
-			setBL(0x020590C0, (u32)ce9->patches->dsiSaveCreate);
-			setBL(0x02059270, (u32)ce9->patches->dsiSaveOpen);
-			setBL(0x020593CC, (u32)ce9->patches->dsiSaveClose);
-			setBL(0x020594E8, (u32)ce9->patches->dsiSaveSeek);
-			setBL(0x020594F8, (u32)ce9->patches->dsiSaveRead);
-			setBL(0x02059674, (u32)ce9->patches->dsiSaveSeek);
-			setBL(0x02059684, (u32)ce9->patches->dsiSaveWrite);
-			setBL(0x020597FC, (u32)ce9->patches->dsiSaveOpenR);
-			setBL(0x020598A0, (u32)ce9->patches->dsiSaveClose);
+			setBL(0x020590C0, (u32)dsiSaveCreate);
+			setBL(0x02059270, (u32)dsiSaveOpen);
+			setBL(0x020593CC, (u32)dsiSaveClose);
+			setBL(0x020594E8, (u32)dsiSaveSeek);
+			setBL(0x020594F8, (u32)dsiSaveRead);
+			setBL(0x02059674, (u32)dsiSaveSeek);
+			setBL(0x02059684, (u32)dsiSaveWrite);
+			setBL(0x020597FC, (u32)dsiSaveOpenR);
+			setBL(0x020598A0, (u32)dsiSaveClose);
 			*(u32*)0x02059920 = 0xE3A00000; // mov r0, #0
 			*(u32*)0x0207347C = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
 			*(u32*)0x020736DC = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
 			*(u32*)0x02074054 = 0xE1A00000; // nop (Skip NFTR file loading from TWLNAND)
 		} else {
 			//*(u32*)0x02044A9C = 0xE3A00000; // mov r0, #0
-			setBL(0x02058FB0, (u32)ce9->patches->dsiSaveCreate);
-			setBL(0x02059160, (u32)ce9->patches->dsiSaveOpen);
-			setBL(0x020592BC, (u32)ce9->patches->dsiSaveClose);
-			setBL(0x020593D8, (u32)ce9->patches->dsiSaveSeek);
-			setBL(0x020593E8, (u32)ce9->patches->dsiSaveRead);
-			setBL(0x02059564, (u32)ce9->patches->dsiSaveSeek);
-			setBL(0x02059574, (u32)ce9->patches->dsiSaveWrite);
-			setBL(0x020596EC, (u32)ce9->patches->dsiSaveOpenR);
-			setBL(0x02059790, (u32)ce9->patches->dsiSaveClose);
+			setBL(0x02058FB0, (u32)dsiSaveCreate);
+			setBL(0x02059160, (u32)dsiSaveOpen);
+			setBL(0x020592BC, (u32)dsiSaveClose);
+			setBL(0x020593D8, (u32)dsiSaveSeek);
+			setBL(0x020593E8, (u32)dsiSaveRead);
+			setBL(0x02059564, (u32)dsiSaveSeek);
+			setBL(0x02059574, (u32)dsiSaveWrite);
+			setBL(0x020596EC, (u32)dsiSaveOpenR);
+			setBL(0x02059790, (u32)dsiSaveClose);
 			*(u32*)0x02059810 = 0xE3A00000; // mov r0, #0
 			*(u32*)0x0207336C = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
 			*(u32*)0x020735CC = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
@@ -1215,7 +1228,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Chotto Dr. Mario (Japan)
 	else if (strcmp(romTid, "KD9J") == 0 && saveOnFlashcard) {
-		tonccpy((u32*)0x020118A4, ce9->patches->dsiSaveGetResultCode, 0xC);
+		tonccpy((u32*)0x020118A4, dsiSaveGetResultCode, 0xC);
 		*(u32*)0x02024CF4 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
 		*(u32*)0x02026104 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
 		*(u32*)0x0202D3B4 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
@@ -1225,93 +1238,93 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		//*(u32*)0x020584B4 = 0xE3A00000; // mov r0, #0
 		//*(u32*)0x020584B8 = 0xE12FFF1E; // bx lr
 		//*(u32*)0x0205F6F0 = 0xE3A00000; // mov r0, #0
-		setBL(0x020736C4, (u32)ce9->patches->dsiSaveCreate);
-		setBL(0x02073874, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x020739D0, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x02073AEC, (u32)ce9->patches->dsiSaveSeek);
-		setBL(0x02073AFC, (u32)ce9->patches->dsiSaveRead);
-		setBL(0x02073C78, (u32)ce9->patches->dsiSaveSeek);
-		setBL(0x02073C88, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x02073E00, (u32)ce9->patches->dsiSaveOpenR);
-		setBL(0x02073EA4, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x020736C4, (u32)dsiSaveCreate);
+		setBL(0x02073874, (u32)dsiSaveOpen);
+		setBL(0x020739D0, (u32)dsiSaveClose);
+		setBL(0x02073AEC, (u32)dsiSaveSeek);
+		setBL(0x02073AFC, (u32)dsiSaveRead);
+		setBL(0x02073C78, (u32)dsiSaveSeek);
+		setBL(0x02073C88, (u32)dsiSaveWrite);
+		setBL(0x02073E00, (u32)dsiSaveOpenR);
+		setBL(0x02073EA4, (u32)dsiSaveClose);
 		*(u32*)0x02073F24 = 0xE3A00000; // mov r0, #0
 	}
 
 	// Dragon's Lair (USA)
 	else if (strcmp(romTid, "KDLE") == 0 && saveOnFlashcard) {
 		*(u32*)0x020051E4 = 0xE1A00000; // nop (Skip Manual screen)
-		setBL(0x0201B8E8, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0201B900, (u32)ce9->patches->dsiSaveRead);
-		setBL(0x0201B928, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0201B98C, (u32)ce9->patches->dsiSaveCreate);
-		setBL(0x0201B9BC, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0201B9EC, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x0201BA14, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0201BAB4, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0201BAFC, (u32)ce9->patches->dsiSaveSeek);
-		setBL(0x0201BB2C, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x0201BB54, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0201BBAC, (u32)ce9->patches->dsiSaveGetResultCode);
-		setBL(0x0201BBE8, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0201BC00, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0201B8E8, (u32)dsiSaveOpen);
+		setBL(0x0201B900, (u32)dsiSaveRead);
+		setBL(0x0201B928, (u32)dsiSaveClose);
+		setBL(0x0201B98C, (u32)dsiSaveCreate);
+		setBL(0x0201B9BC, (u32)dsiSaveOpen);
+		setBL(0x0201B9EC, (u32)dsiSaveWrite);
+		setBL(0x0201BA14, (u32)dsiSaveClose);
+		setBL(0x0201BAB4, (u32)dsiSaveOpen);
+		setBL(0x0201BAFC, (u32)dsiSaveSeek);
+		setBL(0x0201BB2C, (u32)dsiSaveWrite);
+		setBL(0x0201BB54, (u32)dsiSaveClose);
+		setBL(0x0201BBAC, (u32)dsiSaveGetResultCode);
+		setBL(0x0201BBE8, (u32)dsiSaveClose);
+		setBL(0x0201BC00, (u32)dsiSaveClose);
 	}
 
 	// Dragon's Lair (Europe, Australia)
 	else if (strcmp(romTid, "KDLV") == 0 && saveOnFlashcard) {
 		*(u32*)0x020051E4 = 0xE1A00000; // nop (Skip Manual screen)
-		setBL(0x0201B8DC, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0201B8F4, (u32)ce9->patches->dsiSaveRead);
-		setBL(0x0201B91C, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0201B980, (u32)ce9->patches->dsiSaveCreate);
-		setBL(0x0201B9B0, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0201B9E0, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x0201BA08, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0201BAA8, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0201BAF0, (u32)ce9->patches->dsiSaveSeek);
-		setBL(0x0201BB20, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x0201BB48, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0201BBA0, (u32)ce9->patches->dsiSaveGetResultCode);
-		setBL(0x0201BBDC, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0201BBF4, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0201B8DC, (u32)dsiSaveOpen);
+		setBL(0x0201B8F4, (u32)dsiSaveRead);
+		setBL(0x0201B91C, (u32)dsiSaveClose);
+		setBL(0x0201B980, (u32)dsiSaveCreate);
+		setBL(0x0201B9B0, (u32)dsiSaveOpen);
+		setBL(0x0201B9E0, (u32)dsiSaveWrite);
+		setBL(0x0201BA08, (u32)dsiSaveClose);
+		setBL(0x0201BAA8, (u32)dsiSaveOpen);
+		setBL(0x0201BAF0, (u32)dsiSaveSeek);
+		setBL(0x0201BB20, (u32)dsiSaveWrite);
+		setBL(0x0201BB48, (u32)dsiSaveClose);
+		setBL(0x0201BBA0, (u32)dsiSaveGetResultCode);
+		setBL(0x0201BBDC, (u32)dsiSaveClose);
+		setBL(0x0201BBF4, (u32)dsiSaveClose);
 	}
 
 	// Dragon's Lair II: Time Warp (USA)
 	else if (strcmp(romTid, "KLYE") == 0 && saveOnFlashcard) {
 		*(u32*)0x020051C8 = 0xE1A00000; // nop (Skip Manual screen)
-		setBL(0x02020034, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0202004C, (u32)ce9->patches->dsiSaveRead);
-		setBL(0x02020074, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x02020110, (u32)ce9->patches->dsiSaveCreate);
-		setBL(0x02020140, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x02020170, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x02020198, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x02020274, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x020202B0, (u32)ce9->patches->dsiSaveSeek);
-		setBL(0x020202E0, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x02020308, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x02020374, (u32)ce9->patches->dsiSaveGetResultCode);
-		setBL(0x020203A4, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x020203BC, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x02020034, (u32)dsiSaveOpen);
+		setBL(0x0202004C, (u32)dsiSaveRead);
+		setBL(0x02020074, (u32)dsiSaveClose);
+		setBL(0x02020110, (u32)dsiSaveCreate);
+		setBL(0x02020140, (u32)dsiSaveOpen);
+		setBL(0x02020170, (u32)dsiSaveWrite);
+		setBL(0x02020198, (u32)dsiSaveClose);
+		setBL(0x02020274, (u32)dsiSaveOpen);
+		setBL(0x020202B0, (u32)dsiSaveSeek);
+		setBL(0x020202E0, (u32)dsiSaveWrite);
+		setBL(0x02020308, (u32)dsiSaveClose);
+		setBL(0x02020374, (u32)dsiSaveGetResultCode);
+		setBL(0x020203A4, (u32)dsiSaveClose);
+		setBL(0x020203BC, (u32)dsiSaveClose);
 	}
 
 	// Dragon's Lair II: Time Warp (Europe, Australia)
 	else if (strcmp(romTid, "KLYV") == 0 && saveOnFlashcard) {
 		*(u32*)0x020051E0 = 0xE1A00000; // nop (Skip Manual screen)
-		setBL(0x0202004C, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x02020064, (u32)ce9->patches->dsiSaveRead);
-		setBL(0x0202008C, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x02020128, (u32)ce9->patches->dsiSaveCreate);
-		setBL(0x02020158, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x02020188, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x020201B0, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0202028C, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x020202C8, (u32)ce9->patches->dsiSaveSeek);
-		setBL(0x020202F8, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x02020320, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0202038C, (u32)ce9->patches->dsiSaveGetResultCode);
-		setBL(0x020203BC, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x020203D4, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x02020424, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x0202004C, (u32)dsiSaveOpen);
+		setBL(0x02020064, (u32)dsiSaveRead);
+		setBL(0x0202008C, (u32)dsiSaveClose);
+		setBL(0x02020128, (u32)dsiSaveCreate);
+		setBL(0x02020158, (u32)dsiSaveOpen);
+		setBL(0x02020188, (u32)dsiSaveWrite);
+		setBL(0x020201B0, (u32)dsiSaveClose);
+		setBL(0x0202028C, (u32)dsiSaveOpen);
+		setBL(0x020202C8, (u32)dsiSaveSeek);
+		setBL(0x020202F8, (u32)dsiSaveWrite);
+		setBL(0x02020320, (u32)dsiSaveClose);
+		setBL(0x0202038C, (u32)dsiSaveGetResultCode);
+		setBL(0x020203BC, (u32)dsiSaveClose);
+		setBL(0x020203D4, (u32)dsiSaveClose);
+		setBL(0x02020424, (u32)dsiSaveCreate);
 	}
 
 	// DS WiFi Settings
@@ -1330,19 +1343,19 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		//*(u32*)0x02005534 = 0xE1A00000; // nop
 		*(u32*)0x0200A3D8 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		//*(u32*)0x0200A898 = 0xE12FFF1E; // bx lr
-		setBL(0x0200AC14, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0200AC50, (u32)ce9->patches->dsiSaveRead);
-		setBL(0x0200AC70, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0200AD0C, (u32)ce9->patches->dsiSaveCreate);
-		setBL(0x0200AD4C, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0200AD84, (u32)ce9->patches->dsiSaveSetLength);
-		setBL(0x0200ADA0, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x0200ADC4, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0200AE58, (u32)ce9->patches->dsiSaveGetInfo);
+		setBL(0x0200AC14, (u32)dsiSaveOpen);
+		setBL(0x0200AC50, (u32)dsiSaveRead);
+		setBL(0x0200AC70, (u32)dsiSaveClose);
+		setBL(0x0200AD0C, (u32)dsiSaveCreate);
+		setBL(0x0200AD4C, (u32)dsiSaveOpen);
+		setBL(0x0200AD84, (u32)dsiSaveSetLength);
+		setBL(0x0200ADA0, (u32)dsiSaveWrite);
+		setBL(0x0200ADC4, (u32)dsiSaveClose);
+		setBL(0x0200AE58, (u32)dsiSaveGetInfo);
 		*(u32*)0x0200B800 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
 		*(u32*)0x02014AB0 = 0xE12FFF1E; // bx lr (Skip Manual screen, Part 1)
 		*(u32*)0x02047E4C = 0xE12FFF1E; // bx lr
-		tonccpy((u32*)0x0204CB6C, ce9->patches->dsiSaveGetResultCode, 0xC);
+		tonccpy((u32*)0x0204CB6C, dsiSaveGetResultCode, 0xC);
 
 		// Skip Manual screen, Part 2
 		for (int i = 0; i < 11; i++) {
@@ -1356,35 +1369,35 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	else if (strcmp(romTid, "KU7E") == 0 && saveOnFlashcard) {
 		/* const u32 dsiSaveCreateT = 0x020370F4;
 		*(u16*)dsiSaveCreateT = 0x4778; // bx pc
-		tonccpy((u32*)(dsiSaveCreateT + 4), ce9->patches->dsiSaveCreate, 0xC); // Original function overwritten, no BL setting needed
+		tonccpy((u32*)(dsiSaveCreateT + 4), dsiSaveCreate, 0xC); // Original function overwritten, no BL setting needed
 
 		const u32 dsiSaveSetLengthT = 0x02037104;
 		*(u16*)dsiSaveSetLengthT = 0x4778; // bx pc
-		tonccpy((u32*)(dsiSaveSetLengthT + 4), ce9->patches->dsiSaveSetLength, 0xC);
+		tonccpy((u32*)(dsiSaveSetLengthT + 4), dsiSaveSetLength, 0xC);
 
 		const u32 dsiSaveOpenT = 0x02037114;
 		*(u16*)dsiSaveOpenT = 0x4778; // bx pc
-		tonccpy((u32*)(dsiSaveOpenT + 4), ce9->patches->dsiSaveOpen, 0xC);
+		tonccpy((u32*)(dsiSaveOpenT + 4), dsiSaveOpen, 0xC);
 
 		const u32 dsiSaveOpenRT = 0x02037124;
 		*(u16*)dsiSaveOpenRT = 0x4778; // bx pc
-		tonccpy((u32*)(dsiSaveOpenRT + 4), ce9->patches->dsiSaveOpenR, 0x10);
+		tonccpy((u32*)(dsiSaveOpenRT + 4), dsiSaveOpenR, 0x10);
 
 		const u32 dsiSaveCloseT = 0x02037138;
 		*(u16*)dsiSaveCloseT = 0x4778; // bx pc
-		tonccpy((u32*)(dsiSaveCloseT + 4), ce9->patches->dsiSaveClose, 0xC);
+		tonccpy((u32*)(dsiSaveCloseT + 4), dsiSaveClose, 0xC);
 
 		const u32 dsiSaveSeekT = 0x02037148;
 		*(u16*)dsiSaveSeekT = 0x4778; // bx pc
-		tonccpy((u32*)(dsiSaveSeekT + 4), ce9->patches->dsiSaveSeek, 0xC);
+		tonccpy((u32*)(dsiSaveSeekT + 4), dsiSaveSeek, 0xC);
 
 		const u32 dsiSaveReadT = 0x02037300;
 		*(u16*)dsiSaveReadT = 0x4778; // bx pc
-		tonccpy((u32*)(dsiSaveReadT + 4), ce9->patches->dsiSaveRead, 0xC);
+		tonccpy((u32*)(dsiSaveReadT + 4), dsiSaveRead, 0xC);
 
 		const u32 dsiSaveWriteT = 0x020372F0;
 		*(u16*)dsiSaveWriteT = 0x4778; // bx pc
-		tonccpy((u32*)(dsiSaveWriteT + 4), ce9->patches->dsiSaveWrite, 0xC); // Original function overwritten, no BL setting needed */
+		tonccpy((u32*)(dsiSaveWriteT + 4), dsiSaveWrite, 0xC); // Original function overwritten, no BL setting needed */
 
 		*(u16*)0x020271CC = 0x2001; // movs r0, #1
 		*(u16*)0x020271CE = 0x4770; // bx lr
@@ -1429,17 +1442,17 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Frogger Returns (USA)
 	else if (strcmp(romTid, "KFGE") == 0 && saveOnFlashcard) {
-		tonccpy((u32*)0x0201234C, ce9->patches->dsiSaveGetResultCode, 0xC);
-		setBL(0x02038250, (u32)ce9->patches->dsiSaveGetInfo);
-		setBL(0x02038294, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x020382B0, (u32)ce9->patches->dsiSaveRead);
-		setBL(0x020382BC, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x020383F0, (u32)ce9->patches->dsiSaveGetInfo);
-		setBL(0x02038418, (u32)ce9->patches->dsiSaveDelete);
-		setBL(0x02038424, (u32)ce9->patches->dsiSaveCreate); // dsiSaveCreateAuto
-		setBL(0x02038454, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x02038470, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x02038478, (u32)ce9->patches->dsiSaveClose);
+		tonccpy((u32*)0x0201234C, dsiSaveGetResultCode, 0xC);
+		setBL(0x02038250, (u32)dsiSaveGetInfo);
+		setBL(0x02038294, (u32)dsiSaveOpen);
+		setBL(0x020382B0, (u32)dsiSaveRead);
+		setBL(0x020382BC, (u32)dsiSaveClose);
+		setBL(0x020383F0, (u32)dsiSaveGetInfo);
+		setBL(0x02038418, (u32)dsiSaveDelete);
+		setBL(0x02038424, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+		setBL(0x02038454, (u32)dsiSaveOpen);
+		setBL(0x02038470, (u32)dsiSaveWrite);
+		setBL(0x02038478, (u32)dsiSaveClose);
 
 		// Skip Manual screen
 		*(u32*)0x0204B968 = 0xE1A00000; // nop
@@ -1453,31 +1466,31 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	else if (strcmp(romTid, "KDHE") == 0 && saveOnFlashcard) {
 		const u32 dsiSaveCreateT = 0x020238C8;
 		*(u16*)dsiSaveCreateT = 0x4778; // bx pc
-		tonccpy((u32*)(dsiSaveCreateT + 4), ce9->patches->dsiSaveCreate, 0xC);
+		tonccpy((u32*)(dsiSaveCreateT + 4), dsiSaveCreate, 0xC);
 
 		const u32 dsiSaveDeleteT = 0x020238D8;
 		*(u16*)dsiSaveDeleteT = 0x4778; // bx pc
-		tonccpy((u32*)(dsiSaveDeleteT + 4), ce9->patches->dsiSaveDelete, 0xC);
+		tonccpy((u32*)(dsiSaveDeleteT + 4), dsiSaveDelete, 0xC);
 
 		const u32 dsiSaveSetLengthT = 0x020238E8;
 		*(u16*)dsiSaveSetLengthT = 0x4778; // bx pc
-		tonccpy((u32*)(dsiSaveSetLengthT + 4), ce9->patches->dsiSaveSetLength, 0xC);
+		tonccpy((u32*)(dsiSaveSetLengthT + 4), dsiSaveSetLength, 0xC);
 
 		const u32 dsiSaveOpenT = 0x020238F8;
 		*(u16*)dsiSaveOpenT = 0x4778; // bx pc
-		tonccpy((u32*)(dsiSaveOpenT + 4), ce9->patches->dsiSaveOpen, 0xC);
+		tonccpy((u32*)(dsiSaveOpenT + 4), dsiSaveOpen, 0xC);
 
 		const u32 dsiSaveCloseT = 0x02023908;
 		*(u16*)dsiSaveCloseT = 0x4778; // bx pc
-		tonccpy((u32*)(dsiSaveCloseT + 4), ce9->patches->dsiSaveClose, 0xC);
+		tonccpy((u32*)(dsiSaveCloseT + 4), dsiSaveClose, 0xC);
 
 		const u32 dsiSaveReadT = 0x02023918;
 		*(u16*)dsiSaveReadT = 0x4778; // bx pc
-		tonccpy((u32*)(dsiSaveReadT + 4), ce9->patches->dsiSaveRead, 0xC);
+		tonccpy((u32*)(dsiSaveReadT + 4), dsiSaveRead, 0xC);
 
 		const u32 dsiSaveWriteT = 0x02023928;
 		*(u16*)dsiSaveWriteT = 0x4778; // bx pc
-		tonccpy((u32*)(dsiSaveWriteT + 4), ce9->patches->dsiSaveWrite, 0xC);
+		tonccpy((u32*)(dsiSaveWriteT + 4), dsiSaveWrite, 0xC);
 
 		*(u16*)0x0200D060 = 0x2001; // movs r0, #1
 		*(u16*)0x0200D062 = 0x4770; // bx lr
@@ -1490,7 +1503,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBLThumb(0x0200D3FC, dsiSaveWriteT);
 		setBLThumb(0x0200D40E, dsiSaveCloseT);
 		*(u16*)0x0200D434 = 0x4778; // bx pc
-		tonccpy((u32*)0x0200D438, ce9->patches->dsiSaveGetLength, 0xC);
+		tonccpy((u32*)0x0200D438, dsiSaveGetLength, 0xC);
 		setBLThumb(0x0200D464, dsiSaveOpenT);
 		setBLThumb(0x0200D48A, dsiSaveCloseT);
 		setBLThumb(0x0200D49C, dsiSaveReadT);
@@ -1508,21 +1521,21 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0205B604 = 0xE3A00001; // mov r0, #1
 		*(u32*)0x0205B608 = 0xE12FFF1E; // bx lr
 
-		/* setBL(0x0204BF68, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0204BF88, (u32)ce9->patches->dsiSaveCreate); // dsiSaveCreateAuto
-		setBL(0x0204BFC0, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0205F640, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0205F658, (u32)ce9->patches->dsiSaveSeek);
-		setBL(0x0205F668, (u32)ce9->patches->dsiSaveRead);
-		setBL(0x0205F680, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0205F69C, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0205F6B4, (u32)ce9->patches->dsiSaveSeek);
-		setBL(0x0205F6C4, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x0205F6CC, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0205F71C, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0205F738, (u32)ce9->patches->dsiSaveSeek);
-		setBL(0x0205F748, (u32)ce9->patches->dsiSaveRead);
-		setBL(0x0205F750, (u32)ce9->patches->dsiSaveClose); */
+		/* setBL(0x0204BF68, (u32)dsiSaveOpen);
+		setBL(0x0204BF88, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+		setBL(0x0204BFC0, (u32)dsiSaveOpen);
+		setBL(0x0205F640, (u32)dsiSaveOpen);
+		setBL(0x0205F658, (u32)dsiSaveSeek);
+		setBL(0x0205F668, (u32)dsiSaveRead);
+		setBL(0x0205F680, (u32)dsiSaveClose);
+		setBL(0x0205F69C, (u32)dsiSaveOpen);
+		setBL(0x0205F6B4, (u32)dsiSaveSeek);
+		setBL(0x0205F6C4, (u32)dsiSaveWrite);
+		setBL(0x0205F6CC, (u32)dsiSaveClose);
+		setBL(0x0205F71C, (u32)dsiSaveOpen);
+		setBL(0x0205F738, (u32)dsiSaveSeek);
+		setBL(0x0205F748, (u32)dsiSaveRead);
+		setBL(0x0205F750, (u32)dsiSaveClose); */
 	}
 
 	// Hidden Photo (Europe)
@@ -1537,38 +1550,38 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// JellyCar 2 (USA)
 	else if (strcmp(romTid, "KJYE") == 0 && saveOnFlashcard) {
-		setBL(0x020067C4, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x020067C4, (u32)dsiSaveOpen);
 		*(u32*)0x020067DC = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
 		*(u32*)0x020067F4 = 0xE3A00001; // mov r0, #1 (dsiSaveFreeSpaceAvailable)
-		setBL(0x02006810, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x020070A0, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0200710C, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0200761C, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x020076A8, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x02006810, (u32)dsiSaveClose);
+		setBL(0x020070A0, (u32)dsiSaveOpen);
+		setBL(0x0200710C, (u32)dsiSaveClose);
+		setBL(0x0200761C, (u32)dsiSaveOpen);
+		setBL(0x020076A8, (u32)dsiSaveClose);
 		*(u32*)0x02019F94 = 0xE1A00000; // nop (Skip Manual screen, Part 1)
 		for (int i = 0; i < 11; i++) { // Skip Manual screen, Part 2
 			u32* offset = (u32*)0x0201A028;
 			offset[i] = 0xE1A00000; // nop
 		}
-		setBL(0x020B2934, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x020B294C, (u32)ce9->patches->dsiSaveCreate);
-		setBL(0x020B297C, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x020B29C4, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x020B29E4, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x020B29FC, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x020B2A14, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x020B2A24, (u32)ce9->patches->dsiSaveGetLength);
-		setBL(0x020B2A64, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x020B2A9C, (u32)ce9->patches->dsiSaveSeek);
-		setBL(0x020B2AD0, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x020B2ADC, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x020B2BD0, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x020B2BF4, (u32)ce9->patches->dsiSaveGetLength);
-		setBL(0x020B2C48, (u32)ce9->patches->dsiSaveRead);
-		setBL(0x020B2C80, (u32)ce9->patches->dsiSaveSeek);
-		setBL(0x020B2CC0, (u32)ce9->patches->dsiSaveRead);
-		setBL(0x020B2CCC, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x020B2E00, (u32)ce9->patches->dsiSaveDelete);
+		setBL(0x020B2934, (u32)dsiSaveOpen);
+		setBL(0x020B294C, (u32)dsiSaveCreate);
+		setBL(0x020B297C, (u32)dsiSaveOpen);
+		setBL(0x020B29C4, (u32)dsiSaveWrite);
+		setBL(0x020B29E4, (u32)dsiSaveClose);
+		setBL(0x020B29FC, (u32)dsiSaveClose);
+		setBL(0x020B2A14, (u32)dsiSaveOpen);
+		setBL(0x020B2A24, (u32)dsiSaveGetLength);
+		setBL(0x020B2A64, (u32)dsiSaveWrite);
+		setBL(0x020B2A9C, (u32)dsiSaveSeek);
+		setBL(0x020B2AD0, (u32)dsiSaveWrite);
+		setBL(0x020B2ADC, (u32)dsiSaveClose);
+		setBL(0x020B2BD0, (u32)dsiSaveOpen);
+		setBL(0x020B2BF4, (u32)dsiSaveGetLength);
+		setBL(0x020B2C48, (u32)dsiSaveRead);
+		setBL(0x020B2C80, (u32)dsiSaveSeek);
+		setBL(0x020B2CC0, (u32)dsiSaveRead);
+		setBL(0x020B2CCC, (u32)dsiSaveClose);
+		setBL(0x020B2E00, (u32)dsiSaveDelete);
 	}
 
 	// Kung Fu Dragon (USA)
@@ -1576,134 +1589,134 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	else if ((strcmp(romTid, "KT9E") == 0 || strcmp(romTid, "KT9P") == 0) && saveOnFlashcard) {
 		*(u32*)0x02005310 = 0xE1A00000; // nop (Skip Manual screen)
 		*(u32*)0x0201D8EC = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
-		setBL(0x0201DA28, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0201DA50, (u32)ce9->patches->dsiSaveRead);
-		setBL(0x0201DA60, (u32)ce9->patches->dsiSaveRead);
-		setBL(0x0201DA68, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0201DD24, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0201DE6C, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x0201DE74, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x020249A0, (u32)ce9->patches->dsiSaveCreate);
-		setBL(0x02024A58, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x0201DA28, (u32)dsiSaveOpen);
+		setBL(0x0201DA50, (u32)dsiSaveRead);
+		setBL(0x0201DA60, (u32)dsiSaveRead);
+		setBL(0x0201DA68, (u32)dsiSaveClose);
+		setBL(0x0201DD24, (u32)dsiSaveOpen);
+		setBL(0x0201DE6C, (u32)dsiSaveWrite);
+		setBL(0x0201DE74, (u32)dsiSaveClose);
+		setBL(0x020249A0, (u32)dsiSaveCreate);
+		setBL(0x02024A58, (u32)dsiSaveCreate);
 	}
 
 	// Akushon Gemu: Tobeyo!! Dorago! (Japan)
 	else if (strcmp(romTid, "KT9J") == 0 && saveOnFlashcard) {
 		*(u32*)0x020052F0 = 0xE1A00000; // nop (Skip Manual screen)
 		*(u32*)0x0201D8C0 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
-		setBL(0x0201D9FC, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0201DA24, (u32)ce9->patches->dsiSaveRead);
-		setBL(0x0201DA34, (u32)ce9->patches->dsiSaveRead);
-		setBL(0x0201DA3C, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0201DCF8, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0201DE40, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x0201DE48, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x020248C8, (u32)ce9->patches->dsiSaveCreate);
-		setBL(0x02024980, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x0201D9FC, (u32)dsiSaveOpen);
+		setBL(0x0201DA24, (u32)dsiSaveRead);
+		setBL(0x0201DA34, (u32)dsiSaveRead);
+		setBL(0x0201DA3C, (u32)dsiSaveClose);
+		setBL(0x0201DCF8, (u32)dsiSaveOpen);
+		setBL(0x0201DE40, (u32)dsiSaveWrite);
+		setBL(0x0201DE48, (u32)dsiSaveClose);
+		setBL(0x020248C8, (u32)dsiSaveCreate);
+		setBL(0x02024980, (u32)dsiSaveCreate);
 	}
 
 	// Magical Whip (USA)
 	else if (strcmp(romTid, "KWME") == 0 && saveOnFlashcard) {
 		*(u32*)0x0201D4F8 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		*(u32*)0x02030288 = 0xE1A00000; // nop (Skip Manual screen)
-		setBL(0x0203F434, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0203F46C, (u32)ce9->patches->dsiSaveSetLength);
-		setBL(0x0203F50C, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x0203F514, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0203F584, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0203F5A8, (u32)ce9->patches->dsiSaveGetLength);
-		setBL(0x0203F5B8, (u32)ce9->patches->dsiSaveRead);
-		setBL(0x0203F5C8, (u32)ce9->patches->dsiSaveRead);
-		setBL(0x0203F5D0, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0203F920, (u32)ce9->patches->dsiSaveCreate);
-		setBL(0x0203FB34, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x0203F434, (u32)dsiSaveOpen);
+		setBL(0x0203F46C, (u32)dsiSaveSetLength);
+		setBL(0x0203F50C, (u32)dsiSaveWrite);
+		setBL(0x0203F514, (u32)dsiSaveClose);
+		setBL(0x0203F584, (u32)dsiSaveOpen);
+		setBL(0x0203F5A8, (u32)dsiSaveGetLength);
+		setBL(0x0203F5B8, (u32)dsiSaveRead);
+		setBL(0x0203F5C8, (u32)dsiSaveRead);
+		setBL(0x0203F5D0, (u32)dsiSaveClose);
+		setBL(0x0203F920, (u32)dsiSaveCreate);
+		setBL(0x0203FB34, (u32)dsiSaveCreate);
 	}
 
 	// Magical Whip (Europe)
 	else if (strcmp(romTid, "KWMP") == 0 && saveOnFlashcard) {
 		*(u32*)0x0201D5D8 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		*(u32*)0x02030368 = 0xE1A00000; // nop (Skip Manual screen)
-		setBL(0x0203F514, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0203F54C, (u32)ce9->patches->dsiSaveSetLength);
-		setBL(0x0203F5EC, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x0203F5F4, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0203F664, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0203F688, (u32)ce9->patches->dsiSaveGetLength);
-		setBL(0x0203F698, (u32)ce9->patches->dsiSaveRead);
-		setBL(0x0203F6A8, (u32)ce9->patches->dsiSaveRead);
-		setBL(0x0203F6B0, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0203FA00, (u32)ce9->patches->dsiSaveCreate);
-		setBL(0x0203FC14, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x0203F514, (u32)dsiSaveOpen);
+		setBL(0x0203F54C, (u32)dsiSaveSetLength);
+		setBL(0x0203F5EC, (u32)dsiSaveWrite);
+		setBL(0x0203F5F4, (u32)dsiSaveClose);
+		setBL(0x0203F664, (u32)dsiSaveOpen);
+		setBL(0x0203F688, (u32)dsiSaveGetLength);
+		setBL(0x0203F698, (u32)dsiSaveRead);
+		setBL(0x0203F6A8, (u32)dsiSaveRead);
+		setBL(0x0203F6B0, (u32)dsiSaveClose);
+		setBL(0x0203FA00, (u32)dsiSaveCreate);
+		setBL(0x0203FC14, (u32)dsiSaveCreate);
 	}
 
 	// Mighty Flip Champs! (USA)
 	else if (strcmp(romTid, "KMGE") == 0 && saveOnFlashcard) {
-		setBL(0x0200B048, (u32)ce9->patches->dsiSaveCreate);
-		setBL(0x0200B070, (u32)ce9->patches->dsiSaveGetResultCode);
-		setBL(0x0200B090, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x0200B048, (u32)dsiSaveCreate);
+		setBL(0x0200B070, (u32)dsiSaveGetResultCode);
+		setBL(0x0200B090, (u32)dsiSaveCreate);
 		//*(u32*)0x0200B0A0 = 0xE1A00000; // nop
-		setBL(0x0200B0E8, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0200B114, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0200B124, (u32)ce9->patches->dsiSaveRead);
-		setBL(0x0200B12C, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0200B388, (u32)ce9->patches->dsiSaveCreate);
-		setBL(0x0200B39C, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0200B5A4, (u32)ce9->patches->dsiSaveSetLength);
-		setBL(0x0200B5B4, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x0200B5BC, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0200B0E8, (u32)dsiSaveOpen);
+		setBL(0x0200B114, (u32)dsiSaveOpen);
+		setBL(0x0200B124, (u32)dsiSaveRead);
+		setBL(0x0200B12C, (u32)dsiSaveClose);
+		setBL(0x0200B388, (u32)dsiSaveCreate);
+		setBL(0x0200B39C, (u32)dsiSaveOpen);
+		setBL(0x0200B5A4, (u32)dsiSaveSetLength);
+		setBL(0x0200B5B4, (u32)dsiSaveWrite);
+		setBL(0x0200B5BC, (u32)dsiSaveClose);
 	}
 
 	// Mighty Flip Champs! (Europe, Australia)
 	else if (strcmp(romTid, "KMGV") == 0 && saveOnFlashcard) {
-		setBL(0x0200B350, (u32)ce9->patches->dsiSaveCreate);
-		setBL(0x0200B378, (u32)ce9->patches->dsiSaveGetResultCode);
-		setBL(0x0200B398, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x0200B350, (u32)dsiSaveCreate);
+		setBL(0x0200B378, (u32)dsiSaveGetResultCode);
+		setBL(0x0200B398, (u32)dsiSaveCreate);
 		//*(u32*)0x0200B3A8 = 0xE1A00000; // nop
-		setBL(0x0200B3F0, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0200B41C, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0200B42C, (u32)ce9->patches->dsiSaveRead);
-		setBL(0x0200B434, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0200B690, (u32)ce9->patches->dsiSaveCreate);
-		setBL(0x0200B6A4, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0200B8AC, (u32)ce9->patches->dsiSaveSetLength);
-		setBL(0x0200B8BC, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x0200B8C4, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0200B3F0, (u32)dsiSaveOpen);
+		setBL(0x0200B41C, (u32)dsiSaveOpen);
+		setBL(0x0200B42C, (u32)dsiSaveRead);
+		setBL(0x0200B434, (u32)dsiSaveClose);
+		setBL(0x0200B690, (u32)dsiSaveCreate);
+		setBL(0x0200B6A4, (u32)dsiSaveOpen);
+		setBL(0x0200B8AC, (u32)dsiSaveSetLength);
+		setBL(0x0200B8BC, (u32)dsiSaveWrite);
+		setBL(0x0200B8C4, (u32)dsiSaveClose);
 	}
 
 	// Mighty Flip Champs! (Japan)
 	else if (strcmp(romTid, "KMGJ") == 0 && saveOnFlashcard) {
-		setBL(0x0200B134, (u32)ce9->patches->dsiSaveCreate);
-		setBL(0x0200B158, (u32)ce9->patches->dsiSaveGetResultCode);
-		setBL(0x0200B174, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x0200B134, (u32)dsiSaveCreate);
+		setBL(0x0200B158, (u32)dsiSaveGetResultCode);
+		setBL(0x0200B174, (u32)dsiSaveCreate);
 		//*(u32*)0x0200B184 = 0xE1A00000; // nop
-		setBL(0x0200B1D4, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0200B1FC, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0200B210, (u32)ce9->patches->dsiSaveRead);
-		setBL(0x0200B218, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0200B478, (u32)ce9->patches->dsiSaveCreate);
-		setBL(0x0200B488, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0200B694, (u32)ce9->patches->dsiSaveSetLength);
-		setBL(0x0200B6A4, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x0200B6AC, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0200B1D4, (u32)dsiSaveOpen);
+		setBL(0x0200B1FC, (u32)dsiSaveOpen);
+		setBL(0x0200B210, (u32)dsiSaveRead);
+		setBL(0x0200B218, (u32)dsiSaveClose);
+		setBL(0x0200B478, (u32)dsiSaveCreate);
+		setBL(0x0200B488, (u32)dsiSaveOpen);
+		setBL(0x0200B694, (u32)dsiSaveSetLength);
+		setBL(0x0200B6A4, (u32)dsiSaveWrite);
+		setBL(0x0200B6AC, (u32)dsiSaveClose);
 	}
 
 	// Mighty Milky Way (USA)
 	// Mighty Milky Way (Europe)
 	// Mighty Milky Way (Japan)
 	else if (strncmp(romTid, "KWY", 3) == 0 && saveOnFlashcard) {
-		setBL(0x0200547C, (u32)ce9->patches->dsiSaveCreate);
-		setBL(0x020054A0, (u32)ce9->patches->dsiSaveGetResultCode);
-		setBL(0x020054BC, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x0200547C, (u32)dsiSaveCreate);
+		setBL(0x020054A0, (u32)dsiSaveGetResultCode);
+		setBL(0x020054BC, (u32)dsiSaveCreate);
 		//*(u32*)0x020054E4 = 0xE1A00000; // nop
-		setBL(0x02005534, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0200555C, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x02005570, (u32)ce9->patches->dsiSaveRead);
-		setBL(0x02005578, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x020057E4, (u32)ce9->patches->dsiSaveCreate);
-		setBL(0x020057F4, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x020059FC, (u32)ce9->patches->dsiSaveSetLength);
-		setBL(0x02005A0C, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x02005A14, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x02005534, (u32)dsiSaveOpen);
+		setBL(0x0200555C, (u32)dsiSaveOpen);
+		setBL(0x02005570, (u32)dsiSaveRead);
+		setBL(0x02005578, (u32)dsiSaveClose);
+		setBL(0x020057E4, (u32)dsiSaveCreate);
+		setBL(0x020057F4, (u32)dsiSaveOpen);
+		setBL(0x020059FC, (u32)dsiSaveSetLength);
+		setBL(0x02005A0C, (u32)dsiSaveWrite);
+		setBL(0x02005A14, (u32)dsiSaveClose);
 	}
 
 	// Monster Buster Club (USA)
@@ -1718,20 +1731,20 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0207F640 = 0xE12FFF1E; // bx lr */
 		*(u32*)0x0207F0B8 = 0xE3A00001; // mov r0, #1
 		//*(u32*)0x0207F17C = 0xE3A00001; // mov r0, #1 (dsiSaveFreeSpaceAvailable)
-		setBL(0x0207F244, (u32)ce9->patches->dsiSaveCreate);
-		setBL(0x0207F254, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0207F298, (u32)ce9->patches->dsiSaveSetLength);
-		setBL(0x0207F2B4, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x0207F2C8, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0207F494, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0207F4C4, (u32)ce9->patches->dsiSaveRead);
-		setBL(0x0207F4D8, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0207F244, (u32)dsiSaveCreate);
+		setBL(0x0207F254, (u32)dsiSaveOpen);
+		setBL(0x0207F298, (u32)dsiSaveSetLength);
+		setBL(0x0207F2B4, (u32)dsiSaveWrite);
+		setBL(0x0207F2C8, (u32)dsiSaveClose);
+		setBL(0x0207F494, (u32)dsiSaveOpen);
+		setBL(0x0207F4C4, (u32)dsiSaveRead);
+		setBL(0x0207F4D8, (u32)dsiSaveClose);
 		*(u32*)0x0207F530 = 0xE3A00001; // mov r0, #1
 		*(u32*)0x0207F560 = 0xE3A00001; // mov r0, #1
 		setBL(0x0207F584, 0x0207F5C4);
 		*(u32*)0x0207F5E8 = 0xE3A00001; // mov r0, #1
 		*(u32*)0x0207F654 = 0xE3A00001; // mov r0, #1
-		tonccpy((u32*)0x02094EAC, ce9->patches->dsiSaveGetResultCode, 0xC);
+		tonccpy((u32*)0x02094EAC, dsiSaveGetResultCode, 0xC);
 	}
 
 	// Monster Buster Club (Europe)
@@ -1746,34 +1759,34 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0207F55C = 0xE12FFF1E; // bx lr */
 		*(u32*)0x0207EFC4 = 0xE3A00001; // mov r0, #1
 		//*(u32*)0x0207F084 = 0xE3A00001; // mov r0, #1 (dsiSaveFreeSpaceAvailable)
-		setBL(0x0207F14C, (u32)ce9->patches->dsiSaveCreate);
-		setBL(0x0207F15C, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0207F1A0, (u32)ce9->patches->dsiSaveSetLength);
-		setBL(0x0207F1BC, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x0207F1D0, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0207F3AC, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0207F3E0, (u32)ce9->patches->dsiSaveRead);
-		setBL(0x0207F3F4, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0207F14C, (u32)dsiSaveCreate);
+		setBL(0x0207F15C, (u32)dsiSaveOpen);
+		setBL(0x0207F1A0, (u32)dsiSaveSetLength);
+		setBL(0x0207F1BC, (u32)dsiSaveWrite);
+		setBL(0x0207F1D0, (u32)dsiSaveClose);
+		setBL(0x0207F3AC, (u32)dsiSaveOpen);
+		setBL(0x0207F3E0, (u32)dsiSaveRead);
+		setBL(0x0207F3F4, (u32)dsiSaveClose);
 		*(u32*)0x0207F44C = 0xE3A00001; // mov r0, #1
 		*(u32*)0x0207F47C = 0xE3A00001; // mov r0, #1
 		setBL(0x0207F4A0, 0x0207F4E0);
 		*(u32*)0x0207F504 = 0xE3A00001; // mov r0, #1
 		*(u32*)0x0207F584 = 0xE3A00001; // mov r0, #1
-		tonccpy((u32*)0x02094DE0, ce9->patches->dsiSaveGetResultCode, 0xC);
+		tonccpy((u32*)0x02094DE0, dsiSaveGetResultCode, 0xC);
 	}
 
 	// Mr. Brain (Japan)
 	else if (strcmp(romTid, "KMBJ") == 0 && saveOnFlashcard) {
-		setBL(0x02005A40, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x02005A5C, (u32)ce9->patches->dsiSaveGetLength);
-		setBL(0x02005A78, (u32)ce9->patches->dsiSaveRead);
-		setBL(0x02005AA0, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x02005AF8, (u32)ce9->patches->dsiSaveCreate);
-		setBL(0x02005B08, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x02005B34, (u32)ce9->patches->dsiSaveSetLength);
-		setBL(0x02005B54, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x02005B6C, (u32)ce9->patches->dsiSaveClose);
-		tonccpy((u32*)0x02026748, ce9->patches->dsiSaveGetResultCode, 0xC);
+		setBL(0x02005A40, (u32)dsiSaveOpen);
+		setBL(0x02005A5C, (u32)dsiSaveGetLength);
+		setBL(0x02005A78, (u32)dsiSaveRead);
+		setBL(0x02005AA0, (u32)dsiSaveClose);
+		setBL(0x02005AF8, (u32)dsiSaveCreate);
+		setBL(0x02005B08, (u32)dsiSaveOpen);
+		setBL(0x02005B34, (u32)dsiSaveSetLength);
+		setBL(0x02005B54, (u32)dsiSaveWrite);
+		setBL(0x02005B6C, (u32)dsiSaveClose);
+		tonccpy((u32*)0x02026748, dsiSaveGetResultCode, 0xC);
 	}
 
 	// Nintendo DSi Camera
@@ -1794,131 +1807,131 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Paul's Shooting Adventure (USA)
 	else if (strcmp(romTid, "KPJE") == 0 && saveOnFlashcard) {
 		//*(u32*)0x0203A20C = 0xE12FFF1E; // bx lr
-		setBL(0x02048524, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0204853C, (u32)ce9->patches->dsiSaveCreate);
-		setBL(0x02048554, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x02048574, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x02048584, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x020485A0, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x020485DC, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x020485FC, (u32)ce9->patches->dsiSaveRead);
-		setBL(0x0204860C, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x02048628, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x020486D8, (u32)ce9->patches->dsiSaveCreate);
-		setBL(0x020486E8, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x02048714, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x02048740, (u32)ce9->patches->dsiSaveCreate);
-		setBL(0x02048750, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0204877C, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x02048524, (u32)dsiSaveOpen);
+		setBL(0x0204853C, (u32)dsiSaveCreate);
+		setBL(0x02048554, (u32)dsiSaveOpen);
+		setBL(0x02048574, (u32)dsiSaveWrite);
+		setBL(0x02048584, (u32)dsiSaveClose);
+		setBL(0x020485A0, (u32)dsiSaveClose);
+		setBL(0x020485DC, (u32)dsiSaveOpen);
+		setBL(0x020485FC, (u32)dsiSaveRead);
+		setBL(0x0204860C, (u32)dsiSaveClose);
+		setBL(0x02048628, (u32)dsiSaveClose);
+		setBL(0x020486D8, (u32)dsiSaveCreate);
+		setBL(0x020486E8, (u32)dsiSaveOpen);
+		setBL(0x02048714, (u32)dsiSaveClose);
+		setBL(0x02048740, (u32)dsiSaveCreate);
+		setBL(0x02048750, (u32)dsiSaveOpen);
+		setBL(0x0204877C, (u32)dsiSaveClose);
 	}
 
 	// Paul's Shooting Adventure 2 (USA)
 	else if (strcmp(romTid, "KUSE") == 0 && saveOnFlashcard) {
-		setBL(0x0202EE44, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0202EE5C, (u32)ce9->patches->dsiSaveCreate); // dsiSaveCreateAuto
-		setBL(0x0202EE74, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0202EE94, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x0202EEA4, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0202EEB4, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0202EEF4, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0202EF18, (u32)ce9->patches->dsiSaveRead);
-		setBL(0x0202EF28, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0202EF38, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0202F018, (u32)ce9->patches->dsiSaveCreate); // dsiSaveCreateAuto
-		setBL(0x0202F028, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0202F054, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0202F08C, (u32)ce9->patches->dsiSaveCreate); // dsiSaveCreateAuto
-		setBL(0x0202F09C, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0202F0C8, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0202EE44, (u32)dsiSaveOpen);
+		setBL(0x0202EE5C, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+		setBL(0x0202EE74, (u32)dsiSaveOpen);
+		setBL(0x0202EE94, (u32)dsiSaveWrite);
+		setBL(0x0202EEA4, (u32)dsiSaveClose);
+		setBL(0x0202EEB4, (u32)dsiSaveClose);
+		setBL(0x0202EEF4, (u32)dsiSaveOpen);
+		setBL(0x0202EF18, (u32)dsiSaveRead);
+		setBL(0x0202EF28, (u32)dsiSaveClose);
+		setBL(0x0202EF38, (u32)dsiSaveClose);
+		setBL(0x0202F018, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+		setBL(0x0202F028, (u32)dsiSaveOpen);
+		setBL(0x0202F054, (u32)dsiSaveClose);
+		setBL(0x0202F08C, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+		setBL(0x0202F09C, (u32)dsiSaveOpen);
+		setBL(0x0202F0C8, (u32)dsiSaveClose);
 		//*(u32*)0x0203A730 = 0xE3A00001; // mov r0, #1
 	}
 
 	// Art Style: PiCTOBiTS (USA)
 	// Art Style: PiCOPiCT (Europe, Australia)
 	else if ((strcmp(romTid, "KAPE") == 0 || strcmp(romTid, "KAPV") == 0) && saveOnFlashcard) {
-		setBL(0x02005828, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x020058E8, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x02005928, (u32)ce9->patches->dsiSaveRead);
-		setBL(0x0200595C, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x02005828, (u32)dsiSaveOpen);
+		setBL(0x020058E8, (u32)dsiSaveOpen);
+		setBL(0x02005928, (u32)dsiSaveRead);
+		setBL(0x0200595C, (u32)dsiSaveClose);
 		//*(u32*)0x020059E4 = 0xE3A00000; // mov r0, #0
 		//*(u32*)0x020059E8 = 0xE12FFF1E; // bx lr
-		setBL(0x02005A18, (u32)ce9->patches->dsiSaveCreate);
-		setBL(0x02005A28, (u32)ce9->patches->dsiSaveGetResultCode);
-		setBL(0x02005A4C, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x02005A6C, (u32)ce9->patches->dsiSaveSetLength);
-		setBL(0x02005A88, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x02005AB4, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x02005A18, (u32)dsiSaveCreate);
+		setBL(0x02005A28, (u32)dsiSaveGetResultCode);
+		setBL(0x02005A4C, (u32)dsiSaveOpen);
+		setBL(0x02005A6C, (u32)dsiSaveSetLength);
+		setBL(0x02005A88, (u32)dsiSaveWrite);
+		setBL(0x02005AB4, (u32)dsiSaveClose);
 	}
 
 	// Art Style: PiCOPiCT (Japan)
 	else if (strcmp(romTid, "KAPJ") == 0 && saveOnFlashcard) {
-		setBL(0x020058B0, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x02005968, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x020059B0, (u32)ce9->patches->dsiSaveRead);
-		setBL(0x020059F4, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x020058B0, (u32)dsiSaveOpen);
+		setBL(0x02005968, (u32)dsiSaveOpen);
+		setBL(0x020059B0, (u32)dsiSaveRead);
+		setBL(0x020059F4, (u32)dsiSaveClose);
 		//*(u32*)0x02005A8C = 0xE3A00000; // mov r0, #0
 		//*(u32*)0x02005A90 = 0xE12FFF1E; // bx lr
-		setBL(0x02005ABC, (u32)ce9->patches->dsiSaveCreate);
-		setBL(0x02005ACC, (u32)ce9->patches->dsiSaveGetResultCode);
-		setBL(0x02005AE8, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x02005B04, (u32)ce9->patches->dsiSaveSetLength);
-		setBL(0x02005B20, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x02005B4C, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x02005ABC, (u32)dsiSaveCreate);
+		setBL(0x02005ACC, (u32)dsiSaveGetResultCode);
+		setBL(0x02005AE8, (u32)dsiSaveOpen);
+		setBL(0x02005B04, (u32)dsiSaveSetLength);
+		setBL(0x02005B20, (u32)dsiSaveWrite);
+		setBL(0x02005B4C, (u32)dsiSaveClose);
 	}
 
 	// Plants vs. Zombies (USA)
 	else if (strcmp(romTid, "KZLE") == 0 && saveOnFlashcard) {
-		setBL(0x02099244, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x02099268, (u32)ce9->patches->dsiSaveGetLength);
-		setBL(0x0209927C, (u32)ce9->patches->dsiSaveRead);
-		setBL(0x020992AC, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x02099324, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x02099350, (u32)ce9->patches->dsiSaveSetLength);
-		setBL(0x02099374, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x02099390, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x02099244, (u32)dsiSaveOpen);
+		setBL(0x02099268, (u32)dsiSaveGetLength);
+		setBL(0x0209927C, (u32)dsiSaveRead);
+		setBL(0x020992AC, (u32)dsiSaveClose);
+		setBL(0x02099324, (u32)dsiSaveOpen);
+		setBL(0x02099350, (u32)dsiSaveSetLength);
+		setBL(0x02099374, (u32)dsiSaveWrite);
+		setBL(0x02099390, (u32)dsiSaveClose);
 		*(u32*)0x020993C8 = 0xE1A00000; // nop (dsiSaveCreateDirAuto)
-		setBL(0x020993D4, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x020993D4, (u32)dsiSaveCreate);
 		//*(u32*)0x020C2F94 = 0xE12FFF1E; // bx lr
-		tonccpy((u32*)0x020F8B24, ce9->patches->dsiSaveGetResultCode, 0xC);
+		tonccpy((u32*)0x020F8B24, dsiSaveGetResultCode, 0xC);
 	}
 
 	// Plants vs. Zombies (Europe, Australia)
 	else if (strcmp(romTid, "KZLV") == 0 && saveOnFlashcard) {
-		setBL(0x02099AB0, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x02099AD4, (u32)ce9->patches->dsiSaveGetLength);
-		setBL(0x02099AE8, (u32)ce9->patches->dsiSaveRead);
-		setBL(0x02099B18, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x02099B90, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x02099BBC, (u32)ce9->patches->dsiSaveSetLength);
-		setBL(0x02099BE0, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x02099BFC, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x02099AB0, (u32)dsiSaveOpen);
+		setBL(0x02099AD4, (u32)dsiSaveGetLength);
+		setBL(0x02099AE8, (u32)dsiSaveRead);
+		setBL(0x02099B18, (u32)dsiSaveClose);
+		setBL(0x02099B90, (u32)dsiSaveOpen);
+		setBL(0x02099BBC, (u32)dsiSaveSetLength);
+		setBL(0x02099BE0, (u32)dsiSaveWrite);
+		setBL(0x02099BFC, (u32)dsiSaveClose);
 		*(u32*)0x02099C34 = 0xE1A00000; // nop (dsiSaveCreateDirAuto)
-		setBL(0x02099C40, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x02099C40, (u32)dsiSaveCreate);
 		//*(u32*)0x020C41F8 = 0xE12FFF1E; // bx lr
-		tonccpy((u32*)0x020FA794, ce9->patches->dsiSaveGetResultCode, 0xC);
+		tonccpy((u32*)0x020FA794, dsiSaveGetResultCode, 0xC);
 	}
 
 	// GO Series: Portable Shrine Wars (USA)
 	// GO Series: Portable Shrine Wars (Europe)
 	else if ((strcmp(romTid, "KOQE") == 0 || strcmp(romTid, "KOQP") == 0) && saveOnFlashcard) {
-		setBL(0x0200CEC4, (u32)ce9->patches->dsiSaveCreate);
-		setBL(0x0200CF00, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0200CF38, (u32)ce9->patches->dsiSaveSetLength);
-		setBL(0x0200CF48, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x0200CF60, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0200CFE8, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0200D020, (u32)ce9->patches->dsiSaveSetLength);
-		setBL(0x0200D030, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x0200D048, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0200D0C8, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0200D100, (u32)ce9->patches->dsiSaveRead);
-		setBL(0x0200D114, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0200D164, (u32)ce9->patches->dsiSaveDelete);
-		setBL(0x0200D1D0, (u32)ce9->patches->dsiSaveGetInfo);
+		setBL(0x0200CEC4, (u32)dsiSaveCreate);
+		setBL(0x0200CF00, (u32)dsiSaveOpen);
+		setBL(0x0200CF38, (u32)dsiSaveSetLength);
+		setBL(0x0200CF48, (u32)dsiSaveWrite);
+		setBL(0x0200CF60, (u32)dsiSaveClose);
+		setBL(0x0200CFE8, (u32)dsiSaveOpen);
+		setBL(0x0200D020, (u32)dsiSaveSetLength);
+		setBL(0x0200D030, (u32)dsiSaveWrite);
+		setBL(0x0200D048, (u32)dsiSaveClose);
+		setBL(0x0200D0C8, (u32)dsiSaveOpen);
+		setBL(0x0200D100, (u32)dsiSaveRead);
+		setBL(0x0200D114, (u32)dsiSaveClose);
+		setBL(0x0200D164, (u32)dsiSaveDelete);
+		setBL(0x0200D1D0, (u32)dsiSaveGetInfo);
 		*(u32*)0x0200D214 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
 		*(u32*)0x0200D218 = 0xE12FFF1E; // bx lr
 		*(u32*)0x0200E004 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
-		tonccpy((u32*)0x0204ED3C, ce9->patches->dsiSaveGetResultCode, 0xC);
+		tonccpy((u32*)0x0204ED3C, dsiSaveGetResultCode, 0xC);
 
 		// Skip Manual screen
 		for (int i = 0; i < 11; i++) {
@@ -1931,49 +1944,49 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Art Style: KUBOS (Europe, Australia)
 	// Art Style: nalaku (Japan)
 	else if ((strncmp(romTid, "KAK", 3) == 0) && saveOnFlashcard) {
-		setBL(0x020075A8, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x02007668, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x020076AC, (u32)ce9->patches->dsiSaveRead);
-		setBL(0x020076E0, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x020075A8, (u32)dsiSaveOpen);
+		setBL(0x02007668, (u32)dsiSaveOpen);
+		setBL(0x020076AC, (u32)dsiSaveRead);
+		setBL(0x020076E0, (u32)dsiSaveClose);
 		//*(u32*)0x02007768 = 0xE3A00000; // mov r0, #0
 		//*(u32*)0x0200776C = 0xE12FFF1E; // bx lr
-		setBL(0x0200779C, (u32)ce9->patches->dsiSaveCreate);
-		setBL(0x020077AC, (u32)ce9->patches->dsiSaveGetResultCode);
-		setBL(0x020077CC, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x020077EC, (u32)ce9->patches->dsiSaveSetLength);
-		setBL(0x02007808, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x02007834, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0200779C, (u32)dsiSaveCreate);
+		setBL(0x020077AC, (u32)dsiSaveGetResultCode);
+		setBL(0x020077CC, (u32)dsiSaveOpen);
+		setBL(0x020077EC, (u32)dsiSaveSetLength);
+		setBL(0x02007808, (u32)dsiSaveWrite);
+		setBL(0x02007834, (u32)dsiSaveClose);
 	}
 
 	// Pro-Putt Domo (USA)
 	else if (strcmp(romTid, "KDPE") == 0 && saveOnFlashcard) {
 		const u32 dsiSaveCreateT = 0x020270FC;
 		*(u16*)dsiSaveCreateT = 0x4778; // bx pc
-		tonccpy((u32*)(dsiSaveCreateT + 4), ce9->patches->dsiSaveCreate, 0xC);
+		tonccpy((u32*)(dsiSaveCreateT + 4), dsiSaveCreate, 0xC);
 
 		const u32 dsiSaveDeleteT = 0x0202710C;
 		*(u16*)dsiSaveDeleteT = 0x4778; // bx pc
-		tonccpy((u32*)(dsiSaveDeleteT + 4), ce9->patches->dsiSaveDelete, 0xC);
+		tonccpy((u32*)(dsiSaveDeleteT + 4), dsiSaveDelete, 0xC);
 
 		const u32 dsiSaveSetLengthT = 0x0202711C;
 		*(u16*)dsiSaveSetLengthT = 0x4778; // bx pc
-		tonccpy((u32*)(dsiSaveSetLengthT + 4), ce9->patches->dsiSaveSetLength, 0xC);
+		tonccpy((u32*)(dsiSaveSetLengthT + 4), dsiSaveSetLength, 0xC);
 
 		const u32 dsiSaveOpenT = 0x0202712C;
 		*(u16*)dsiSaveOpenT = 0x4778; // bx pc
-		tonccpy((u32*)(dsiSaveOpenT + 4), ce9->patches->dsiSaveOpen, 0xC);
+		tonccpy((u32*)(dsiSaveOpenT + 4), dsiSaveOpen, 0xC);
 
 		const u32 dsiSaveCloseT = 0x0202713C;
 		*(u16*)dsiSaveCloseT = 0x4778; // bx pc
-		tonccpy((u32*)(dsiSaveCloseT + 4), ce9->patches->dsiSaveClose, 0xC);
+		tonccpy((u32*)(dsiSaveCloseT + 4), dsiSaveClose, 0xC);
 
 		const u32 dsiSaveReadT = 0x0202714C;
 		*(u16*)dsiSaveReadT = 0x4778; // bx pc
-		tonccpy((u32*)(dsiSaveReadT + 4), ce9->patches->dsiSaveRead, 0xC);
+		tonccpy((u32*)(dsiSaveReadT + 4), dsiSaveRead, 0xC);
 
 		const u32 dsiSaveWriteT = 0x0202715C;
 		*(u16*)dsiSaveWriteT = 0x4778; // bx pc
-		tonccpy((u32*)(dsiSaveWriteT + 4), ce9->patches->dsiSaveWrite, 0xC);
+		tonccpy((u32*)(dsiSaveWriteT + 4), dsiSaveWrite, 0xC);
 
 		*(u16*)0x020106BC = 0x2001; // movs r0, #1
 		*(u16*)0x020106BE = 0x4770; // bx lr
@@ -1985,7 +1998,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBLThumb(0x02010A58, dsiSaveWriteT);
 		setBLThumb(0x02010A6A, dsiSaveCloseT);
 		*(u16*)0x02010A90 = 0x4778; // bx pc
-		tonccpy((u32*)0x02010A90, ce9->patches->dsiSaveGetLength, 0xC);
+		tonccpy((u32*)0x02010A90, dsiSaveGetLength, 0xC);
 		setBLThumb(0x02010AC0, dsiSaveOpenT);
 		setBLThumb(0x02010AE6, dsiSaveCloseT);
 		setBLThumb(0x02010AF8, dsiSaveReadT);
@@ -2007,19 +2020,19 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	else if ((strcmp(romTid, "KLBE") == 0 || strcmp(romTid, "KLBP") == 0) && saveOnFlashcard) {
 		*(u32*)0x020051C8 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		*(u32*)0x020053A8 = 0xE1A00000; // nop (Skip Manual screen)
-		setBL(0x0201DEF8, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0201DF1C, (u32)ce9->patches->dsiSaveRead);
-		setBL(0x0201DF2C, (u32)ce9->patches->dsiSaveRead);
-		setBL(0x0201DF34, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0201E1E4, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0201E354, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x0201E35C, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0201DEF8, (u32)dsiSaveOpen);
+		setBL(0x0201DF1C, (u32)dsiSaveRead);
+		setBL(0x0201DF2C, (u32)dsiSaveRead);
+		setBL(0x0201DF34, (u32)dsiSaveClose);
+		setBL(0x0201E1E4, (u32)dsiSaveOpen);
+		setBL(0x0201E354, (u32)dsiSaveWrite);
+		setBL(0x0201E35C, (u32)dsiSaveClose);
 		if (ndsHeader->gameCode[3] == 'E') {
-			setBL(0x02026648, (u32)ce9->patches->dsiSaveCreate);
-			setBL(0x02026704, (u32)ce9->patches->dsiSaveCreate);
+			setBL(0x02026648, (u32)dsiSaveCreate);
+			setBL(0x02026704, (u32)dsiSaveCreate);
 		} else {
-			setBL(0x020266D8, (u32)ce9->patches->dsiSaveCreate);
-			setBL(0x02026794, (u32)ce9->patches->dsiSaveCreate);
+			setBL(0x020266D8, (u32)dsiSaveCreate);
+			setBL(0x02026794, (u32)dsiSaveCreate);
 		}
 	}
 
@@ -2027,18 +2040,18 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	else if (strcmp(romTid, "KLBJ") == 0 && saveOnFlashcard) {
 		*(u32*)0x02005190 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		*(u32*)0x02005360 = 0xE1A00000; // nop (Skip Manual screen)
-		setBL(0x0201DD80, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0201DDA4, (u32)ce9->patches->dsiSaveRead);
-		setBL(0x0201DDB4, (u32)ce9->patches->dsiSaveRead);
-		setBL(0x0201DDBC, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0201E1E4, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0201E354, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x0201E35C, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0201E06C, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0201E1DC, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x0201E1E4, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x02026BDC, (u32)ce9->patches->dsiSaveCreate);
-		setBL(0x02026CC0, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x0201DD80, (u32)dsiSaveOpen);
+		setBL(0x0201DDA4, (u32)dsiSaveRead);
+		setBL(0x0201DDB4, (u32)dsiSaveRead);
+		setBL(0x0201DDBC, (u32)dsiSaveClose);
+		setBL(0x0201E1E4, (u32)dsiSaveOpen);
+		setBL(0x0201E354, (u32)dsiSaveWrite);
+		setBL(0x0201E35C, (u32)dsiSaveClose);
+		setBL(0x0201E06C, (u32)dsiSaveOpen);
+		setBL(0x0201E1DC, (u32)dsiSaveWrite);
+		setBL(0x0201E1E4, (u32)dsiSaveClose);
+		setBL(0x02026BDC, (u32)dsiSaveCreate);
+		setBL(0x02026CC0, (u32)dsiSaveCreate);
 	}
 
 	// Rabi Laby 2 (USA)
@@ -2051,7 +2064,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02035720 = 0xE1A00000; // nop
 		*(u32*)0x02035724 = 0xE1A00000; // nop
 		// The non-save branches are patching out "crc.dat" R/Ws
-		setBL(0x02035738, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x02035738, (u32)dsiSaveOpen);
 		*(u32*)0x0203573C = 0xE1A00000; // nop
 		*(u32*)0x02035740 = 0xE1A00000; // nop
 		*(u32*)0x02035744 = 0xE1A00000; // nop
@@ -2064,18 +2077,18 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02035764 = 0xE1A00000; // nop
 		*(u32*)0x02035768 = 0xE1A00000; // nop
 		*(u32*)0x0203576C = 0xE1A00000; // nop
-		setBL(0x02035784, (u32)ce9->patches->dsiSaveRead);
+		setBL(0x02035784, (u32)dsiSaveRead);
 		*(u32*)0x02035788 = 0xE1A00000; // nop
 		*(u32*)0x0203578C = 0xE1A00000; // nop
 		*(u32*)0x02035790 = 0xE1A00000; // nop
 		*(u32*)0x02035794 = 0xE1A00000; // nop
-		setBL(0x0203579C, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0203579C, (u32)dsiSaveClose);
 		*(u32*)0x020357A0 = 0xE1A00000; // nop
 		*(u32*)0x020357A4 = 0xE1A00000; // nop
 		*(u32*)0x02035810 = 0xE1A00000; // nop
 		*(u32*)0x02035814 = 0xE1A00000; // nop
 		*(u32*)0x02035818 = 0xE1A00000; // nop
-		setBL(0x0203582C, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x0203582C, (u32)dsiSaveOpen);
 		*(u32*)0x020357DC = 0xE1A00000; // nop
 		*(u32*)0x020357E0 = 0xE3A04000; // mov r4, #0
 		*(u32*)0x02035840 = 0xE1A00000; // nop
@@ -2086,15 +2099,15 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02035854 = 0xE1A00000; // nop
 		*(u32*)0x02035858 = 0xE1A00000; // nop
 		*(u32*)0x0203585C = 0xE1A00000; // nop
-		setBL(0x020358A8, (u32)ce9->patches->dsiSaveWrite);
+		setBL(0x020358A8, (u32)dsiSaveWrite);
 		*(u32*)0x020358AC = 0xE1A00000; // nop
 		*(u32*)0x020358B0 = 0xE1A00000; // nop
 		*(u32*)0x020358B4 = 0xE1A00000; // nop
 		*(u32*)0x020358B8 = 0xE1A00000; // nop
-		setBL(0x020358C0, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x020358C0, (u32)dsiSaveClose);
 		*(u32*)0x020358C4 = 0xE1A00000; // nop
 		*(u32*)0x020358C8 = 0xE1A00000; // nop
-		setBL(0x020358F8, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x020358F8, (u32)dsiSaveCreate);
 		*(u32*)0x020358FC = 0xE1A00000; // nop
 		*(u32*)0x02035900 = 0xE1A00000; // nop
 		*(u32*)0x02035904 = 0xE1A00000; // nop
@@ -2108,27 +2121,27 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0200C3A0 = 0xE12FFF1E; // bx lr
 		*(u32*)0x0200C570 = 0xE3A00001; // mov r0, #1
 		*(u32*)0x0200C574 = 0xE12FFF1E; // bx lr */
-		setBL(0x0200C594, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0200C5A8, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0200C5C8, (u32)ce9->patches->dsiSaveCreate);
-		setBL(0x0200C5E0, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0200C5F8, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0200C600, (u32)ce9->patches->dsiSaveDelete);
-		setBL(0x0200C76C, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0200C784, (u32)ce9->patches->dsiSaveGetLength);
-		setBL(0x0200C7A8, (u32)ce9->patches->dsiSaveRead);
-		setBL(0x0200C7B0, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0200C838, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0200C84C, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0200C860, (u32)ce9->patches->dsiSaveCreate);
-		setBL(0x0200C878, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0200C894, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0200C89C, (u32)ce9->patches->dsiSaveDelete);
-		setBL(0x0200C8B0, (u32)ce9->patches->dsiSaveCreate);
-		setBL(0x0200C8C0, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0200C904, (u32)ce9->patches->dsiSaveSetLength);
-		setBL(0x0200C914, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x0200C91C, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0200C594, (u32)dsiSaveOpen);
+		setBL(0x0200C5A8, (u32)dsiSaveClose);
+		setBL(0x0200C5C8, (u32)dsiSaveCreate);
+		setBL(0x0200C5E0, (u32)dsiSaveOpen);
+		setBL(0x0200C5F8, (u32)dsiSaveClose);
+		setBL(0x0200C600, (u32)dsiSaveDelete);
+		setBL(0x0200C76C, (u32)dsiSaveOpen);
+		setBL(0x0200C784, (u32)dsiSaveGetLength);
+		setBL(0x0200C7A8, (u32)dsiSaveRead);
+		setBL(0x0200C7B0, (u32)dsiSaveClose);
+		setBL(0x0200C838, (u32)dsiSaveOpen);
+		setBL(0x0200C84C, (u32)dsiSaveClose);
+		setBL(0x0200C860, (u32)dsiSaveCreate);
+		setBL(0x0200C878, (u32)dsiSaveOpen);
+		setBL(0x0200C894, (u32)dsiSaveClose);
+		setBL(0x0200C89C, (u32)dsiSaveDelete);
+		setBL(0x0200C8B0, (u32)dsiSaveCreate);
+		setBL(0x0200C8C0, (u32)dsiSaveOpen);
+		setBL(0x0200C904, (u32)dsiSaveSetLength);
+		setBL(0x0200C914, (u32)dsiSaveWrite);
+		setBL(0x0200C91C, (u32)dsiSaveClose);
 		*(u32*)0x020108A4 = 0xE1A00000; // nop (Skip Manual screen)
 	}
 
@@ -2140,28 +2153,28 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0200C38C = 0xE12FFF1E; // bx lr
 		*(u32*)0x0200C550 = 0xE3A00001; // mov r0, #1
 		*(u32*)0x0200C554 = 0xE12FFF1E; // bx lr */
-		setBL(0x0200C57C, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0200C590, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0200C5B0, (u32)ce9->patches->dsiSaveCreate);
-		setBL(0x0200C5CC, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0200C5E4, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0200C5EC, (u32)ce9->patches->dsiSaveDelete);
-		setBL(0x0200C788, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0200C7A0, (u32)ce9->patches->dsiSaveGetLength);
-		setBL(0x0200C7C4, (u32)ce9->patches->dsiSaveRead);
-		setBL(0x0200C7CC, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0200C810, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0200C824, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0200C838, (u32)ce9->patches->dsiSaveCreate);
-		setBL(0x0200C854, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x0200C57C, (u32)dsiSaveOpen);
+		setBL(0x0200C590, (u32)dsiSaveClose);
+		setBL(0x0200C5B0, (u32)dsiSaveCreate);
+		setBL(0x0200C5CC, (u32)dsiSaveOpen);
+		setBL(0x0200C5E4, (u32)dsiSaveClose);
+		setBL(0x0200C5EC, (u32)dsiSaveDelete);
+		setBL(0x0200C788, (u32)dsiSaveOpen);
+		setBL(0x0200C7A0, (u32)dsiSaveGetLength);
+		setBL(0x0200C7C4, (u32)dsiSaveRead);
+		setBL(0x0200C7CC, (u32)dsiSaveClose);
+		setBL(0x0200C810, (u32)dsiSaveOpen);
+		setBL(0x0200C824, (u32)dsiSaveClose);
+		setBL(0x0200C838, (u32)dsiSaveCreate);
+		setBL(0x0200C854, (u32)dsiSaveOpen);
 		*(u32*)0x0200C864 = 0xE1A00000; // nop
-		setBL(0x0200C870, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0200C878, (u32)ce9->patches->dsiSaveDelete);
-		setBL(0x0200C890, (u32)ce9->patches->dsiSaveCreate);
-		setBL(0x0200C8A0, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x0200C870, (u32)dsiSaveClose);
+		setBL(0x0200C878, (u32)dsiSaveDelete);
+		setBL(0x0200C890, (u32)dsiSaveCreate);
+		setBL(0x0200C8A0, (u32)dsiSaveOpen);
 		*(u32*)0x0200C8CC = 0xE1A00000; // nop (dsiSaveSetLength)
-		setBL(0x0200C8DC, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x0200C8E4, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0200C8DC, (u32)dsiSaveWrite);
+		setBL(0x0200C8E4, (u32)dsiSaveClose);
 		*(u32*)0x02010C30 = 0xE1A00000; // nop (Skip Manual screen)
 	}
 
@@ -2173,28 +2186,28 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0200F520 = 0xE12FFF1E; // bx lr
 		*(u32*)0x0200F6E4 = 0xE3A00001; // mov r0, #1
 		*(u32*)0x0200F6E8 = 0xE12FFF1E; // bx lr */
-		setBL(0x0200F710, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0200F724, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0200F724, (u32)ce9->patches->dsiSaveCreate);
-		setBL(0x0200F760, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0200F778, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0200F780, (u32)ce9->patches->dsiSaveDelete);
-		setBL(0x0200F8B0, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x0200F710, (u32)dsiSaveOpen);
+		setBL(0x0200F724, (u32)dsiSaveClose);
+		setBL(0x0200F724, (u32)dsiSaveCreate);
+		setBL(0x0200F760, (u32)dsiSaveOpen);
+		setBL(0x0200F778, (u32)dsiSaveClose);
+		setBL(0x0200F780, (u32)dsiSaveDelete);
+		setBL(0x0200F8B0, (u32)dsiSaveOpen);
 		*(u32*)0x0200F8C8 = 0xE1A00000; // nop (dsiSaveGetLength)
-		setBL(0x0200F8EC, (u32)ce9->patches->dsiSaveRead);
-		setBL(0x0200F8F4, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0200F938, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0200F94C, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0200F960, (u32)ce9->patches->dsiSaveCreate);
-		setBL(0x0200F97C, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x0200F8EC, (u32)dsiSaveRead);
+		setBL(0x0200F8F4, (u32)dsiSaveClose);
+		setBL(0x0200F938, (u32)dsiSaveOpen);
+		setBL(0x0200F94C, (u32)dsiSaveClose);
+		setBL(0x0200F960, (u32)dsiSaveCreate);
+		setBL(0x0200F97C, (u32)dsiSaveOpen);
 		*(u32*)0x0200F98C = 0xE1A00000; // nop
-		setBL(0x0200F998, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0200F9A0, (u32)ce9->patches->dsiSaveDelete);
-		setBL(0x0200F9B8, (u32)ce9->patches->dsiSaveCreate);
-		setBL(0x0200F9C8, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0200C8CC, (u32)ce9->patches->dsiSaveSetLength);
-		setBL(0x0200FA04, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x0200FA0C, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0200F998, (u32)dsiSaveClose);
+		setBL(0x0200F9A0, (u32)dsiSaveDelete);
+		setBL(0x0200F9B8, (u32)dsiSaveCreate);
+		setBL(0x0200F9C8, (u32)dsiSaveOpen);
+		setBL(0x0200C8CC, (u32)dsiSaveSetLength);
+		setBL(0x0200FA04, (u32)dsiSaveWrite);
+		setBL(0x0200FA0C, (u32)dsiSaveClose);
 		*(u32*)0x02013BC8 = 0xE1A00000; // nop (Skip Manual screen)
 	}
 
@@ -2207,28 +2220,28 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0200C3B4 = 0xE12FFF1E; // bx lr
 		*(u32*)0x0200C578 = 0xE3A00001; // mov r0, #1
 		*(u32*)0x0200C57C = 0xE12FFF1E; // bx lr */
-		setBL(0x0200C5A4, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0200C5B8, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0200C5D8, (u32)ce9->patches->dsiSaveCreate);
-		setBL(0x0200C5F4, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0200C60C, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0200C614, (u32)ce9->patches->dsiSaveDelete);
-		setBL(0x0200C7B0, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0200C7C8, (u32)ce9->patches->dsiSaveGetLength);
-		setBL(0x0200C7EC, (u32)ce9->patches->dsiSaveRead);
-		setBL(0x0200C7F4, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0200C838, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0200C84C, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0200C860, (u32)ce9->patches->dsiSaveCreate);
-		setBL(0x0200C87C, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x0200C5A4, (u32)dsiSaveOpen);
+		setBL(0x0200C5B8, (u32)dsiSaveClose);
+		setBL(0x0200C5D8, (u32)dsiSaveCreate);
+		setBL(0x0200C5F4, (u32)dsiSaveOpen);
+		setBL(0x0200C60C, (u32)dsiSaveClose);
+		setBL(0x0200C614, (u32)dsiSaveDelete);
+		setBL(0x0200C7B0, (u32)dsiSaveOpen);
+		setBL(0x0200C7C8, (u32)dsiSaveGetLength);
+		setBL(0x0200C7EC, (u32)dsiSaveRead);
+		setBL(0x0200C7F4, (u32)dsiSaveClose);
+		setBL(0x0200C838, (u32)dsiSaveOpen);
+		setBL(0x0200C84C, (u32)dsiSaveClose);
+		setBL(0x0200C860, (u32)dsiSaveCreate);
+		setBL(0x0200C87C, (u32)dsiSaveOpen);
 		*(u32*)0x0200C88C = 0xE1A00000; // nop
-		setBL(0x0200C898, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0200C8A0, (u32)ce9->patches->dsiSaveDelete);
-		setBL(0x0200C8B8, (u32)ce9->patches->dsiSaveCreate);
-		setBL(0x0200C8C8, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0200C8F4, (u32)ce9->patches->dsiSaveSetLength);
-		setBL(0x0200C904, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x0200C90C, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0200C898, (u32)dsiSaveClose);
+		setBL(0x0200C8A0, (u32)dsiSaveDelete);
+		setBL(0x0200C8B8, (u32)dsiSaveCreate);
+		setBL(0x0200C8C8, (u32)dsiSaveOpen);
+		setBL(0x0200C8F4, (u32)dsiSaveSetLength);
+		setBL(0x0200C904, (u32)dsiSaveWrite);
+		setBL(0x0200C90C, (u32)dsiSaveClose);
 		if (ndsHeader->gameCode[3] == 'E') {
 			*(u32*)0x02010888 = 0xE1A00000; // nop (Skip Manual screen)
 		} else if (ndsHeader->gameCode[3] == 'P') {
@@ -2240,31 +2253,31 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	else if (strcmp(romTid, "KD6E") == 0 && saveOnFlashcard) {
 		const u32 dsiSaveCreateT = 0x02025C20;
 		*(u16*)dsiSaveCreateT = 0x4778; // bx pc
-		tonccpy((u32*)(dsiSaveCreateT + 4), ce9->patches->dsiSaveCreate, 0xC);
+		tonccpy((u32*)(dsiSaveCreateT + 4), dsiSaveCreate, 0xC);
 
 		const u32 dsiSaveDeleteT = 0x02025C30;
 		*(u16*)dsiSaveDeleteT = 0x4778; // bx pc
-		tonccpy((u32*)(dsiSaveDeleteT + 4), ce9->patches->dsiSaveDelete, 0xC);
+		tonccpy((u32*)(dsiSaveDeleteT + 4), dsiSaveDelete, 0xC);
 
 		const u32 dsiSaveSetLengthT = 0x02025C40;
 		*(u16*)dsiSaveSetLengthT = 0x4778; // bx pc
-		tonccpy((u32*)(dsiSaveSetLengthT + 4), ce9->patches->dsiSaveSetLength, 0xC);
+		tonccpy((u32*)(dsiSaveSetLengthT + 4), dsiSaveSetLength, 0xC);
 
 		const u32 dsiSaveOpenT = 0x02025C40;
 		*(u16*)dsiSaveOpenT = 0x4778; // bx pc
-		tonccpy((u32*)(dsiSaveOpenT + 4), ce9->patches->dsiSaveOpen, 0xC);
+		tonccpy((u32*)(dsiSaveOpenT + 4), dsiSaveOpen, 0xC);
 
 		const u32 dsiSaveCloseT = 0x02025C50;
 		*(u16*)dsiSaveCloseT = 0x4778; // bx pc
-		tonccpy((u32*)(dsiSaveCloseT + 4), ce9->patches->dsiSaveClose, 0xC);
+		tonccpy((u32*)(dsiSaveCloseT + 4), dsiSaveClose, 0xC);
 
 		const u32 dsiSaveReadT = 0x02025C60;
 		*(u16*)dsiSaveReadT = 0x4778; // bx pc
-		tonccpy((u32*)(dsiSaveReadT + 4), ce9->patches->dsiSaveRead, 0xC);
+		tonccpy((u32*)(dsiSaveReadT + 4), dsiSaveRead, 0xC);
 
 		const u32 dsiSaveWriteT = 0x02025C70;
 		*(u16*)dsiSaveWriteT = 0x4778; // bx pc
-		tonccpy((u32*)(dsiSaveWriteT + 4), ce9->patches->dsiSaveWrite, 0xC);
+		tonccpy((u32*)(dsiSaveWriteT + 4), dsiSaveWrite, 0xC);
 
 		*(u16*)0x02010164 = 0x2001; // movs r0, #1
 		*(u16*)0x02010166 = 0x4770; // bx lr
@@ -2276,7 +2289,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBLThumb(0x02010508, dsiSaveWriteT);
 		setBLThumb(0x0201051A, dsiSaveCloseT);
 		*(u16*)0x02010540 = 0x4778; // bx pc
-		tonccpy((u32*)0x02010544, ce9->patches->dsiSaveGetLength, 0xC);
+		tonccpy((u32*)0x02010544, dsiSaveGetLength, 0xC);
 		setBLThumb(0x02010570, dsiSaveOpenT);
 		setBLThumb(0x02010596, dsiSaveCloseT);
 		setBLThumb(0x020105A8, dsiSaveReadT);
@@ -2287,134 +2300,134 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Shantae: Risky's Revenge (USA)
 	else if (strcmp(romTid, "KS3E") == 0 && saveOnFlashcard) {
-		setBL(0x0209201C, (u32)ce9->patches->dsiSaveCreate);
-		setBL(0x02092040, (u32)ce9->patches->dsiSaveGetResultCode);
-		setBL(0x0209205C, (u32)ce9->patches->dsiSaveCreate);
-		setBL(0x0209291C, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x02092944, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x02092958, (u32)ce9->patches->dsiSaveRead);
-		setBL(0x02092960, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x02092BCC, (u32)ce9->patches->dsiSaveCreate);
-		setBL(0x02092BDC, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x02092DE4, (u32)ce9->patches->dsiSaveSetLength);
-		setBL(0x02092DF4, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x02092DFC, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0209201C, (u32)dsiSaveCreate);
+		setBL(0x02092040, (u32)dsiSaveGetResultCode);
+		setBL(0x0209205C, (u32)dsiSaveCreate);
+		setBL(0x0209291C, (u32)dsiSaveOpen);
+		setBL(0x02092944, (u32)dsiSaveOpen);
+		setBL(0x02092958, (u32)dsiSaveRead);
+		setBL(0x02092960, (u32)dsiSaveClose);
+		setBL(0x02092BCC, (u32)dsiSaveCreate);
+		setBL(0x02092BDC, (u32)dsiSaveOpen);
+		setBL(0x02092DE4, (u32)dsiSaveSetLength);
+		setBL(0x02092DF4, (u32)dsiSaveWrite);
+		setBL(0x02092DFC, (u32)dsiSaveClose);
 	}
 
 	// Shantae: Risky's Revenge (Europe)
 	else if (strcmp(romTid, "KS3P") == 0 && saveOnFlashcard) {
-		setBL(0x020922A0, (u32)ce9->patches->dsiSaveCreate);
-		setBL(0x020922C4, (u32)ce9->patches->dsiSaveGetResultCode);
-		setBL(0x020922E0, (u32)ce9->patches->dsiSaveCreate);
-		setBL(0x02092D4C, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x02092D74, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x02092D88, (u32)ce9->patches->dsiSaveRead);
-		setBL(0x02092D90, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x02092FFC, (u32)ce9->patches->dsiSaveCreate);
-		setBL(0x0209300C, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x02093214, (u32)ce9->patches->dsiSaveSetLength);
-		setBL(0x02093224, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x0209322C, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x020922A0, (u32)dsiSaveCreate);
+		setBL(0x020922C4, (u32)dsiSaveGetResultCode);
+		setBL(0x020922E0, (u32)dsiSaveCreate);
+		setBL(0x02092D4C, (u32)dsiSaveOpen);
+		setBL(0x02092D74, (u32)dsiSaveOpen);
+		setBL(0x02092D88, (u32)dsiSaveRead);
+		setBL(0x02092D90, (u32)dsiSaveClose);
+		setBL(0x02092FFC, (u32)dsiSaveCreate);
+		setBL(0x0209300C, (u32)dsiSaveOpen);
+		setBL(0x02093214, (u32)dsiSaveSetLength);
+		setBL(0x02093224, (u32)dsiSaveWrite);
+		setBL(0x0209322C, (u32)dsiSaveClose);
 	}
 
 	// SnowBoard Xtreme (USA)
 	// SnowBoard Xtreme (Europe)
 	else if ((strcmp(romTid, "KX5E") == 0 || strcmp(romTid, "KX5P") == 0) && saveOnFlashcard) {
-		setBL(0x02011B70, (u32)ce9->patches->dsiSaveCreate);
+		setBL(0x02011B70, (u32)dsiSaveCreate);
 		*(u32*)0x02011B90 = 0xE3A00001; // mov r0, #1
-		setBL(0x02011C24, (u32)ce9->patches->dsiSaveGetResultCode);
+		setBL(0x02011C24, (u32)dsiSaveGetResultCode);
 		*(u32*)0x02011C48 = 0xE3A00001; // mov r0, #1
 		if (ndsHeader->gameCode[3] == 'E') {
-			setBL(0x020313AC, (u32)ce9->patches->dsiSaveOpen);
-			setBL(0x020313C4, (u32)ce9->patches->dsiSaveGetLength);
-			setBL(0x020313D4, (u32)ce9->patches->dsiSaveSeek);
-			setBL(0x020313E4, (u32)ce9->patches->dsiSaveWrite);
-			setBL(0x020313EC, (u32)ce9->patches->dsiSaveClose);
-			setBL(0x0203145C, (u32)ce9->patches->dsiSaveOpen);
-			setBL(0x02031474, (u32)ce9->patches->dsiSaveGetLength);
-			setBL(0x02031488, (u32)ce9->patches->dsiSaveSeek);
-			setBL(0x02031498, (u32)ce9->patches->dsiSaveRead);
-			setBL(0x020314A0, (u32)ce9->patches->dsiSaveClose);
-			setBL(0x02031518, (u32)ce9->patches->dsiSaveCreate);
-			setBL(0x02031544, (u32)ce9->patches->dsiSaveOpen);
-			setBL(0x02031580, (u32)ce9->patches->dsiSaveWrite);
-			setBL(0x02031590, (u32)ce9->patches->dsiSaveClose);
+			setBL(0x020313AC, (u32)dsiSaveOpen);
+			setBL(0x020313C4, (u32)dsiSaveGetLength);
+			setBL(0x020313D4, (u32)dsiSaveSeek);
+			setBL(0x020313E4, (u32)dsiSaveWrite);
+			setBL(0x020313EC, (u32)dsiSaveClose);
+			setBL(0x0203145C, (u32)dsiSaveOpen);
+			setBL(0x02031474, (u32)dsiSaveGetLength);
+			setBL(0x02031488, (u32)dsiSaveSeek);
+			setBL(0x02031498, (u32)dsiSaveRead);
+			setBL(0x020314A0, (u32)dsiSaveClose);
+			setBL(0x02031518, (u32)dsiSaveCreate);
+			setBL(0x02031544, (u32)dsiSaveOpen);
+			setBL(0x02031580, (u32)dsiSaveWrite);
+			setBL(0x02031590, (u32)dsiSaveClose);
 		} else if (ndsHeader->gameCode[3] == 'P') {
-			setBL(0x020313FC, (u32)ce9->patches->dsiSaveOpen);
-			setBL(0x02031414, (u32)ce9->patches->dsiSaveGetLength);
-			setBL(0x02031424, (u32)ce9->patches->dsiSaveSeek);
-			setBL(0x02031434, (u32)ce9->patches->dsiSaveWrite);
-			setBL(0x0203143C, (u32)ce9->patches->dsiSaveClose);
-			setBL(0x020314AC, (u32)ce9->patches->dsiSaveOpen);
-			setBL(0x020314C4, (u32)ce9->patches->dsiSaveGetLength);
-			setBL(0x020314D8, (u32)ce9->patches->dsiSaveSeek);
-			setBL(0x020314E8, (u32)ce9->patches->dsiSaveRead);
-			setBL(0x020314F0, (u32)ce9->patches->dsiSaveClose);
-			setBL(0x02031568, (u32)ce9->patches->dsiSaveCreate);
-			setBL(0x02031594, (u32)ce9->patches->dsiSaveOpen);
-			setBL(0x020315D0, (u32)ce9->patches->dsiSaveWrite);
-			setBL(0x020315E0, (u32)ce9->patches->dsiSaveClose);
+			setBL(0x020313FC, (u32)dsiSaveOpen);
+			setBL(0x02031414, (u32)dsiSaveGetLength);
+			setBL(0x02031424, (u32)dsiSaveSeek);
+			setBL(0x02031434, (u32)dsiSaveWrite);
+			setBL(0x0203143C, (u32)dsiSaveClose);
+			setBL(0x020314AC, (u32)dsiSaveOpen);
+			setBL(0x020314C4, (u32)dsiSaveGetLength);
+			setBL(0x020314D8, (u32)dsiSaveSeek);
+			setBL(0x020314E8, (u32)dsiSaveRead);
+			setBL(0x020314F0, (u32)dsiSaveClose);
+			setBL(0x02031568, (u32)dsiSaveCreate);
+			setBL(0x02031594, (u32)dsiSaveOpen);
+			setBL(0x020315D0, (u32)dsiSaveWrite);
+			setBL(0x020315E0, (u32)dsiSaveClose);
 		}
 	}
 
 	// Space Ace (USA)
 	else if (strcmp(romTid, "KA6E") == 0 && saveOnFlashcard) {
 		*(u32*)0x020051C8 = 0xE1A00000; // nop (Skip Manual screen)
-		setBL(0x0201F8BC, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0201F8D4, (u32)ce9->patches->dsiSaveRead);
-		setBL(0x0201F8FC, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0201F998, (u32)ce9->patches->dsiSaveCreate);
-		setBL(0x0201F9C8, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0201F9F8, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x0201FA20, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0201FAFC, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0201FB38, (u32)ce9->patches->dsiSaveSeek);
-		setBL(0x0201FB68, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x0201FB90, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0201FBFC, (u32)ce9->patches->dsiSaveGetResultCode);
-		setBL(0x0201FC2C, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0201FC44, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0201F8BC, (u32)dsiSaveOpen);
+		setBL(0x0201F8D4, (u32)dsiSaveRead);
+		setBL(0x0201F8FC, (u32)dsiSaveClose);
+		setBL(0x0201F998, (u32)dsiSaveCreate);
+		setBL(0x0201F9C8, (u32)dsiSaveOpen);
+		setBL(0x0201F9F8, (u32)dsiSaveWrite);
+		setBL(0x0201FA20, (u32)dsiSaveClose);
+		setBL(0x0201FAFC, (u32)dsiSaveOpen);
+		setBL(0x0201FB38, (u32)dsiSaveSeek);
+		setBL(0x0201FB68, (u32)dsiSaveWrite);
+		setBL(0x0201FB90, (u32)dsiSaveClose);
+		setBL(0x0201FBFC, (u32)dsiSaveGetResultCode);
+		setBL(0x0201FC2C, (u32)dsiSaveClose);
+		setBL(0x0201FC44, (u32)dsiSaveClose);
 	}
 
 	// Sudoku (USA)
 	// Sudoku (USA) (Rev 1)
 	else if (strcmp(romTid, "K4DE") == 0 && saveOnFlashcard) {
 		if (ndsHeader->romversion == 1) {
-			setBL(0x02037560, (u32)ce9->patches->dsiSaveOpen);
-			setBL(0x020375B0, (u32)ce9->patches->dsiSaveCreate);
-			setBL(0x020375F0, (u32)ce9->patches->dsiSaveOpen);
-			setBL(0x0203762C, (u32)ce9->patches->dsiSaveSetLength);
-			setBL(0x0203767C, (u32)ce9->patches->dsiSaveSeek);
-			setBL(0x0203768C, (u32)ce9->patches->dsiSaveWrite);
-			setBL(0x020376C8, (u32)ce9->patches->dsiSaveClose);
-			setBL(0x020376D8, (u32)ce9->patches->dsiSaveClose);
-			setBL(0x02037714, (u32)ce9->patches->dsiSaveOpen);
-			setBL(0x02037754, (u32)ce9->patches->dsiSaveSeek);
-			setBL(0x02037794, (u32)ce9->patches->dsiSaveRead);
-			setBL(0x020377A0, (u32)ce9->patches->dsiSaveClose);
-			setBL(0x02037810, (u32)ce9->patches->dsiSaveOpen);
-			setBL(0x02037850, (u32)ce9->patches->dsiSaveSeek);
-			setBL(0x02037890, (u32)ce9->patches->dsiSaveWrite);
-			setBL(0x0203789C, (u32)ce9->patches->dsiSaveGetLength);
-			setBL(0x020378C4, (u32)ce9->patches->dsiSaveWrite);
+			setBL(0x02037560, (u32)dsiSaveOpen);
+			setBL(0x020375B0, (u32)dsiSaveCreate);
+			setBL(0x020375F0, (u32)dsiSaveOpen);
+			setBL(0x0203762C, (u32)dsiSaveSetLength);
+			setBL(0x0203767C, (u32)dsiSaveSeek);
+			setBL(0x0203768C, (u32)dsiSaveWrite);
+			setBL(0x020376C8, (u32)dsiSaveClose);
+			setBL(0x020376D8, (u32)dsiSaveClose);
+			setBL(0x02037714, (u32)dsiSaveOpen);
+			setBL(0x02037754, (u32)dsiSaveSeek);
+			setBL(0x02037794, (u32)dsiSaveRead);
+			setBL(0x020377A0, (u32)dsiSaveClose);
+			setBL(0x02037810, (u32)dsiSaveOpen);
+			setBL(0x02037850, (u32)dsiSaveSeek);
+			setBL(0x02037890, (u32)dsiSaveWrite);
+			setBL(0x0203789C, (u32)dsiSaveGetLength);
+			setBL(0x020378C4, (u32)dsiSaveWrite);
 		} else {
-			setBL(0x020364A4, (u32)ce9->patches->dsiSaveOpen);
-			setBL(0x020364F0, (u32)ce9->patches->dsiSaveCreate);
-			setBL(0x02036530, (u32)ce9->patches->dsiSaveOpen);
-			setBL(0x0203656C, (u32)ce9->patches->dsiSaveSetLength);
-			setBL(0x020365B0, (u32)ce9->patches->dsiSaveSeek);
-			setBL(0x020365C0, (u32)ce9->patches->dsiSaveWrite);
-			setBL(0x020365FC, (u32)ce9->patches->dsiSaveClose);
-			setBL(0x02036614, (u32)ce9->patches->dsiSaveClose);
-			setBL(0x0203665C, (u32)ce9->patches->dsiSaveOpen);
-			setBL(0x02036694, (u32)ce9->patches->dsiSaveSeek);
-			setBL(0x020366C8, (u32)ce9->patches->dsiSaveRead);
-			setBL(0x020366D4, (u32)ce9->patches->dsiSaveClose);
-			setBL(0x02036724, (u32)ce9->patches->dsiSaveOpen);
-			setBL(0x0203675C, (u32)ce9->patches->dsiSaveSeek);
-			setBL(0x02036790, (u32)ce9->patches->dsiSaveWrite);
-			setBL(0x0203679C, (u32)ce9->patches->dsiSaveGetLength);
-			setBL(0x020367BC, (u32)ce9->patches->dsiSaveClose);
+			setBL(0x020364A4, (u32)dsiSaveOpen);
+			setBL(0x020364F0, (u32)dsiSaveCreate);
+			setBL(0x02036530, (u32)dsiSaveOpen);
+			setBL(0x0203656C, (u32)dsiSaveSetLength);
+			setBL(0x020365B0, (u32)dsiSaveSeek);
+			setBL(0x020365C0, (u32)dsiSaveWrite);
+			setBL(0x020365FC, (u32)dsiSaveClose);
+			setBL(0x02036614, (u32)dsiSaveClose);
+			setBL(0x0203665C, (u32)dsiSaveOpen);
+			setBL(0x02036694, (u32)dsiSaveSeek);
+			setBL(0x020366C8, (u32)dsiSaveRead);
+			setBL(0x020366D4, (u32)dsiSaveClose);
+			setBL(0x02036724, (u32)dsiSaveOpen);
+			setBL(0x0203675C, (u32)dsiSaveSeek);
+			setBL(0x02036790, (u32)dsiSaveWrite);
+			setBL(0x0203679C, (u32)dsiSaveGetLength);
+			setBL(0x020367BC, (u32)dsiSaveClose);
 		}
 	}
 
@@ -2422,99 +2435,99 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	else if (strcmp(romTid, "K4DV") == 0 && saveOnFlashcard) {
 		//*(u32*)0x020360E8 = 0xE3A00001; // mov r0, #1
 		//*(u32*)0x020360EC = 0xE12FFF1E; // bx lr
-		setBL(0x020375AC, (u32)ce9->patches->dsiSaveOpen);
+		setBL(0x020375AC, (u32)dsiSaveOpen);
 		*(u32*)0x020375CC = 0xE1A00000; // nop
-		setBL(0x020375FC, (u32)ce9->patches->dsiSaveCreate);
-		setBL(0x0203763C, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x02037678, (u32)ce9->patches->dsiSaveSetLength);
-		setBL(0x020376C8, (u32)ce9->patches->dsiSaveSeek);
-		setBL(0x020376D8, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x02037714, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x02037724, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x02037760, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x020377A0, (u32)ce9->patches->dsiSaveSeek);
-		setBL(0x020377E0, (u32)ce9->patches->dsiSaveRead);
-		setBL(0x020377EC, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0203785C, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0203789C, (u32)ce9->patches->dsiSaveSeek);
-		setBL(0x020378DC, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x020378E8, (u32)ce9->patches->dsiSaveGetLength);
-		setBL(0x02037910, (u32)ce9->patches->dsiSaveWrite);
+		setBL(0x020375FC, (u32)dsiSaveCreate);
+		setBL(0x0203763C, (u32)dsiSaveOpen);
+		setBL(0x02037678, (u32)dsiSaveSetLength);
+		setBL(0x020376C8, (u32)dsiSaveSeek);
+		setBL(0x020376D8, (u32)dsiSaveWrite);
+		setBL(0x02037714, (u32)dsiSaveClose);
+		setBL(0x02037724, (u32)dsiSaveClose);
+		setBL(0x02037760, (u32)dsiSaveOpen);
+		setBL(0x020377A0, (u32)dsiSaveSeek);
+		setBL(0x020377E0, (u32)dsiSaveRead);
+		setBL(0x020377EC, (u32)dsiSaveClose);
+		setBL(0x0203785C, (u32)dsiSaveOpen);
+		setBL(0x0203789C, (u32)dsiSaveSeek);
+		setBL(0x020378DC, (u32)dsiSaveWrite);
+		setBL(0x020378E8, (u32)dsiSaveGetLength);
+		setBL(0x02037910, (u32)dsiSaveWrite);
 	}
 
 	// WarioWare: Touched! DL (USA, Australia)
 	else if (strcmp(romTid, "Z2AT") == 0 && saveOnFlashcard) {
-		setBL(0x0200BCA4, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0200BCB4, (u32)ce9->patches->dsiSaveGetLength);
-		setBL(0x0200BCC8, (u32)ce9->patches->dsiSaveSetLength);
-		setBL(0x0200BCD0, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0200BD0C, (u32)ce9->patches->dsiSaveCreate);
-		setBL(0x0200BD1C, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0200BD30, (u32)ce9->patches->dsiSaveSetLength);
-		setBL(0x0200BD38, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0200BDE0, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0200BE10, (u32)ce9->patches->dsiSaveSeek);
-		setBL(0x0200BE20, (u32)ce9->patches->dsiSaveRead);
-		setBL(0x0200BE28, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0200BE84, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0200BEC8, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0200BEFC, (u32)ce9->patches->dsiSaveSeek);
-		setBL(0x0200BF0C, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x0200BF14, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0200BF7C, (u32)ce9->patches->dsiSaveCreate);
-		setBL(0x0200BF90, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0200BFA4, (u32)ce9->patches->dsiSaveSetLength);
-		setBL(0x0200BFAC, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0200BCA4, (u32)dsiSaveOpen);
+		setBL(0x0200BCB4, (u32)dsiSaveGetLength);
+		setBL(0x0200BCC8, (u32)dsiSaveSetLength);
+		setBL(0x0200BCD0, (u32)dsiSaveClose);
+		setBL(0x0200BD0C, (u32)dsiSaveCreate);
+		setBL(0x0200BD1C, (u32)dsiSaveOpen);
+		setBL(0x0200BD30, (u32)dsiSaveSetLength);
+		setBL(0x0200BD38, (u32)dsiSaveClose);
+		setBL(0x0200BDE0, (u32)dsiSaveOpen);
+		setBL(0x0200BE10, (u32)dsiSaveSeek);
+		setBL(0x0200BE20, (u32)dsiSaveRead);
+		setBL(0x0200BE28, (u32)dsiSaveClose);
+		setBL(0x0200BE84, (u32)dsiSaveOpen);
+		setBL(0x0200BEC8, (u32)dsiSaveOpen);
+		setBL(0x0200BEFC, (u32)dsiSaveSeek);
+		setBL(0x0200BF0C, (u32)dsiSaveWrite);
+		setBL(0x0200BF14, (u32)dsiSaveClose);
+		setBL(0x0200BF7C, (u32)dsiSaveCreate);
+		setBL(0x0200BF90, (u32)dsiSaveOpen);
+		setBL(0x0200BFA4, (u32)dsiSaveSetLength);
+		setBL(0x0200BFAC, (u32)dsiSaveClose);
 	}
 
 	// WarioWare: Touched! DL (Europe)
 	else if (strcmp(romTid, "Z2AP") == 0 && saveOnFlashcard) {
-		setBL(0x0200BD04, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0200BD14, (u32)ce9->patches->dsiSaveGetLength);
-		setBL(0x0200BD28, (u32)ce9->patches->dsiSaveSetLength);
-		setBL(0x0200BD30, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0200BD6C, (u32)ce9->patches->dsiSaveCreate);
-		setBL(0x0200BD7C, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0200BD90, (u32)ce9->patches->dsiSaveSetLength);
-		setBL(0x0200BD98, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0200BE40, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0200BE70, (u32)ce9->patches->dsiSaveSeek);
-		setBL(0x0200BE80, (u32)ce9->patches->dsiSaveRead);
-		setBL(0x0200BE88, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0200BEE4, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0200BF28, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0200BF5C, (u32)ce9->patches->dsiSaveSeek);
-		setBL(0x0200BF6C, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x0200BF74, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0200BFDC, (u32)ce9->patches->dsiSaveCreate);
-		setBL(0x0200BFF0, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0200C004, (u32)ce9->patches->dsiSaveSetLength);
-		setBL(0x0200C00C, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0200BD04, (u32)dsiSaveOpen);
+		setBL(0x0200BD14, (u32)dsiSaveGetLength);
+		setBL(0x0200BD28, (u32)dsiSaveSetLength);
+		setBL(0x0200BD30, (u32)dsiSaveClose);
+		setBL(0x0200BD6C, (u32)dsiSaveCreate);
+		setBL(0x0200BD7C, (u32)dsiSaveOpen);
+		setBL(0x0200BD90, (u32)dsiSaveSetLength);
+		setBL(0x0200BD98, (u32)dsiSaveClose);
+		setBL(0x0200BE40, (u32)dsiSaveOpen);
+		setBL(0x0200BE70, (u32)dsiSaveSeek);
+		setBL(0x0200BE80, (u32)dsiSaveRead);
+		setBL(0x0200BE88, (u32)dsiSaveClose);
+		setBL(0x0200BEE4, (u32)dsiSaveOpen);
+		setBL(0x0200BF28, (u32)dsiSaveOpen);
+		setBL(0x0200BF5C, (u32)dsiSaveSeek);
+		setBL(0x0200BF6C, (u32)dsiSaveWrite);
+		setBL(0x0200BF74, (u32)dsiSaveClose);
+		setBL(0x0200BFDC, (u32)dsiSaveCreate);
+		setBL(0x0200BFF0, (u32)dsiSaveOpen);
+		setBL(0x0200C004, (u32)dsiSaveSetLength);
+		setBL(0x0200C00C, (u32)dsiSaveClose);
 	}
 
 	// Sawaru Made in Wario DL (Japan)
 	else if (strcmp(romTid, "Z2AJ") == 0 && saveOnFlashcard) {
-		setBL(0x0200BCA0, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0200BCB0, (u32)ce9->patches->dsiSaveGetLength);
-		setBL(0x0200BCC4, (u32)ce9->patches->dsiSaveSetLength);
-		setBL(0x0200BCCC, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0200BD08, (u32)ce9->patches->dsiSaveCreate);
-		setBL(0x0200BD18, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0200BD2C, (u32)ce9->patches->dsiSaveSetLength);
-		setBL(0x0200BD34, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0200BDDC, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0200BE0C, (u32)ce9->patches->dsiSaveSeek);
-		setBL(0x0200BE1C, (u32)ce9->patches->dsiSaveRead);
-		setBL(0x0200BE24, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0200BE80, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0200BEC4, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0200BEF8, (u32)ce9->patches->dsiSaveSeek);
-		setBL(0x0200BF08, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x0200BF10, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0200BF78, (u32)ce9->patches->dsiSaveCreate);
-		setBL(0x0200BF8C, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0200BFA0, (u32)ce9->patches->dsiSaveSetLength);
-		setBL(0x0200BFA8, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0200BCA0, (u32)dsiSaveOpen);
+		setBL(0x0200BCB0, (u32)dsiSaveGetLength);
+		setBL(0x0200BCC4, (u32)dsiSaveSetLength);
+		setBL(0x0200BCCC, (u32)dsiSaveClose);
+		setBL(0x0200BD08, (u32)dsiSaveCreate);
+		setBL(0x0200BD18, (u32)dsiSaveOpen);
+		setBL(0x0200BD2C, (u32)dsiSaveSetLength);
+		setBL(0x0200BD34, (u32)dsiSaveClose);
+		setBL(0x0200BDDC, (u32)dsiSaveOpen);
+		setBL(0x0200BE0C, (u32)dsiSaveSeek);
+		setBL(0x0200BE1C, (u32)dsiSaveRead);
+		setBL(0x0200BE24, (u32)dsiSaveClose);
+		setBL(0x0200BE80, (u32)dsiSaveOpen);
+		setBL(0x0200BEC4, (u32)dsiSaveOpen);
+		setBL(0x0200BEF8, (u32)dsiSaveSeek);
+		setBL(0x0200BF08, (u32)dsiSaveWrite);
+		setBL(0x0200BF10, (u32)dsiSaveClose);
+		setBL(0x0200BF78, (u32)dsiSaveCreate);
+		setBL(0x0200BF8C, (u32)dsiSaveOpen);
+		setBL(0x0200BFA0, (u32)dsiSaveSetLength);
+		setBL(0x0200BFA8, (u32)dsiSaveClose);
 	}
 
 	// Wakugumi: Monochrome Puzzle (Europe, Australia)
@@ -2527,31 +2540,31 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	else if (strcmp(romTid, "KDWE") == 0 && saveOnFlashcard) {
 		const u32 dsiSaveCreateT = 0x02023258;
 		*(u16*)dsiSaveCreateT = 0x4778; // bx pc
-		tonccpy((u32*)(dsiSaveCreateT + 4), ce9->patches->dsiSaveCreate, 0xC);
+		tonccpy((u32*)(dsiSaveCreateT + 4), dsiSaveCreate, 0xC);
 
 		const u32 dsiSaveDeleteT = 0x02023268;
 		*(u16*)dsiSaveDeleteT = 0x4778; // bx pc
-		tonccpy((u32*)(dsiSaveDeleteT + 4), ce9->patches->dsiSaveDelete, 0xC);
+		tonccpy((u32*)(dsiSaveDeleteT + 4), dsiSaveDelete, 0xC);
 
 		const u32 dsiSaveSetLengthT = 0x02023278;
 		*(u16*)dsiSaveSetLengthT = 0x4778; // bx pc
-		tonccpy((u32*)(dsiSaveSetLengthT + 4), ce9->patches->dsiSaveSetLength, 0xC);
+		tonccpy((u32*)(dsiSaveSetLengthT + 4), dsiSaveSetLength, 0xC);
 
 		const u32 dsiSaveOpenT = 0x02023288;
 		*(u16*)dsiSaveOpenT = 0x4778; // bx pc
-		tonccpy((u32*)(dsiSaveOpenT + 4), ce9->patches->dsiSaveOpen, 0xC);
+		tonccpy((u32*)(dsiSaveOpenT + 4), dsiSaveOpen, 0xC);
 
 		const u32 dsiSaveCloseT = 0x02023298;
 		*(u16*)dsiSaveCloseT = 0x4778; // bx pc
-		tonccpy((u32*)(dsiSaveCloseT + 4), ce9->patches->dsiSaveClose, 0xC);
+		tonccpy((u32*)(dsiSaveCloseT + 4), dsiSaveClose, 0xC);
 
 		const u32 dsiSaveReadT = 0x020232A8;
 		*(u16*)dsiSaveReadT = 0x4778; // bx pc
-		tonccpy((u32*)(dsiSaveReadT + 4), ce9->patches->dsiSaveRead, 0xC);
+		tonccpy((u32*)(dsiSaveReadT + 4), dsiSaveRead, 0xC);
 
 		const u32 dsiSaveWriteT = 0x020232B8;
 		*(u16*)dsiSaveWriteT = 0x4778; // bx pc
-		tonccpy((u32*)(dsiSaveWriteT + 4), ce9->patches->dsiSaveWrite, 0xC);
+		tonccpy((u32*)(dsiSaveWriteT + 4), dsiSaveWrite, 0xC);
 
 		*(u16*)0x0200C918 = 0x2001; // movs r0, #1
 		*(u16*)0x0200C91A = 0x4770; // bx lr
@@ -2563,7 +2576,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBLThumb(0x0200CCB4, dsiSaveWriteT);
 		setBLThumb(0x0200CCC6, dsiSaveCloseT);
 		*(u16*)0x0200CCEC = 0x4778; // bx pc
-		tonccpy((u32*)0x0200CCF0, ce9->patches->dsiSaveGetLength, 0xC);
+		tonccpy((u32*)0x0200CCF0, dsiSaveGetLength, 0xC);
 		setBLThumb(0x0200CD1C, dsiSaveOpenT);
 		setBLThumb(0x0200CD42, dsiSaveCloseT);
 		setBLThumb(0x0200CD54, dsiSaveReadT);
@@ -2575,34 +2588,34 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Art Style: ZENGAGE (USA)
 	// Art Style: NEMREM (Europe, Australia)
 	else if ((strcmp(romTid, "KASE") == 0 || strcmp(romTid, "KASV") == 0) && saveOnFlashcard) {
-		setBL(0x0200E984, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0200EA8C, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0200EAE4, (u32)ce9->patches->dsiSaveRead);
-		setBL(0x0200EB28, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0200E984, (u32)dsiSaveOpen);
+		setBL(0x0200EA8C, (u32)dsiSaveOpen);
+		setBL(0x0200EAE4, (u32)dsiSaveRead);
+		setBL(0x0200EB28, (u32)dsiSaveClose);
 		//*(u32*)0x0200EBC8 = 0xE3A00000; // mov r0, #0
 		//*(u32*)0x0200EBCC = 0xE12FFF1E; // bx lr
-		setBL(0x0200EBF4, (u32)ce9->patches->dsiSaveCreate);
-		setBL(0x0200EC04, (u32)ce9->patches->dsiSaveGetResultCode);
-		setBL(0x0200EC28, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0200EC48, (u32)ce9->patches->dsiSaveSetLength);
-		setBL(0x0200EC68, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x0200EC84, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0200EBF4, (u32)dsiSaveCreate);
+		setBL(0x0200EC04, (u32)dsiSaveGetResultCode);
+		setBL(0x0200EC28, (u32)dsiSaveOpen);
+		setBL(0x0200EC48, (u32)dsiSaveSetLength);
+		setBL(0x0200EC68, (u32)dsiSaveWrite);
+		setBL(0x0200EC84, (u32)dsiSaveClose);
 	}
 
 	// Art Style: SOMNIUM (Japan)
 	else if (strcmp(romTid, "KASJ") == 0 && saveOnFlashcard) {
-		setBL(0x0200EC4C, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0200ED4C, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0200EDA0, (u32)ce9->patches->dsiSaveRead);
-		setBL(0x0200EDF0, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0200EC4C, (u32)dsiSaveOpen);
+		setBL(0x0200ED4C, (u32)dsiSaveOpen);
+		setBL(0x0200EDA0, (u32)dsiSaveRead);
+		setBL(0x0200EDF0, (u32)dsiSaveClose);
 		//*(u32*)0x0200EE98 = 0xE3A00000; // mov r0, #0
 		//*(u32*)0x0200EE9C = 0xE12FFF1E; // bx lr
-		setBL(0x0200EEC0, (u32)ce9->patches->dsiSaveCreate);
-		setBL(0x0200EED0, (u32)ce9->patches->dsiSaveGetResultCode);
-		setBL(0x0200EEEC, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0200EF08, (u32)ce9->patches->dsiSaveSetLength);
-		setBL(0x0200EF28, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x0200EF44, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0200EEC0, (u32)dsiSaveCreate);
+		setBL(0x0200EED0, (u32)dsiSaveGetResultCode);
+		setBL(0x0200EEEC, (u32)dsiSaveOpen);
+		setBL(0x0200EF08, (u32)dsiSaveSetLength);
+		setBL(0x0200EF28, (u32)dsiSaveWrite);
+		setBL(0x0200EF44, (u32)dsiSaveClose);
 	}
 
 	else if (dsiSD) {
@@ -2927,6 +2940,19 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
 	}
 
 	const char* romTid = getRomTid(ndsHeader);
+
+	const u32* dsiSaveGetResultCode = ce9->patches->dsiSaveGetResultCode;
+	const u32* dsiSaveCreate = ce9->patches->dsiSaveCreate;
+	const u32* dsiSaveDelete = ce9->patches->dsiSaveDelete;
+	const u32* dsiSaveGetInfo = ce9->patches->dsiSaveGetInfo;
+	const u32* dsiSaveSetLength = ce9->patches->dsiSaveSetLength;
+	const u32* dsiSaveOpen = ce9->patches->dsiSaveOpen;
+	const u32* dsiSaveOpenR = ce9->patches->dsiSaveOpenR;
+	const u32* dsiSaveClose = ce9->patches->dsiSaveClose;
+	const u32* dsiSaveGetLength = ce9->patches->dsiSaveGetLength;
+	const u32* dsiSaveSeek = ce9->patches->dsiSaveSeek;
+	const u32* dsiSaveRead = ce9->patches->dsiSaveRead;
+	const u32* dsiSaveWrite = ce9->patches->dsiSaveWrite;
 
 	// Trauma Center: Under the Knife (USA)
 	if (strcmp(romTid, "AKDE") == 0) {
@@ -3321,58 +3347,58 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
 	// Art Style: BASE 10 (USA)
 	else if (strcmp(romTid, "KADE") == 0 && saveOnFlashcard) {
 		*(u32*)0x0202D25C = 0xEB00007C; // bl 0x0202D454 (Skip Manual screen)
-		setBL(0x0203A248, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0203A26C, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0203A248, (u32)dsiSaveOpen);
+		setBL(0x0203A26C, (u32)dsiSaveClose);
 		*(u32*)0x0203A2B8 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
 		*(u32*)0x0203A2DC = 0xE3A00001; // mov r0, #1 (dsiSaveFreeSpaceAvailable)
-		setBL(0x0203A2FC, (u32)ce9->patches->dsiSaveCreate);
-		setBL(0x0203A30C, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0203A338, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x0203A350, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0203A39C, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0203A3C4, (u32)ce9->patches->dsiSaveRead);
-		setBL(0x0203A3F0, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0203A4E0, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0203A508, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x0203A524, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0203A2FC, (u32)dsiSaveCreate);
+		setBL(0x0203A30C, (u32)dsiSaveOpen);
+		setBL(0x0203A338, (u32)dsiSaveWrite);
+		setBL(0x0203A350, (u32)dsiSaveClose);
+		setBL(0x0203A39C, (u32)dsiSaveOpen);
+		setBL(0x0203A3C4, (u32)dsiSaveRead);
+		setBL(0x0203A3F0, (u32)dsiSaveClose);
+		setBL(0x0203A4E0, (u32)dsiSaveOpen);
+		setBL(0x0203A508, (u32)dsiSaveWrite);
+		setBL(0x0203A524, (u32)dsiSaveClose);
 	}
 
 	// Art Style: CODE (Europe, Australia)
 	else if (strcmp(romTid, "KADV") == 0 && saveOnFlashcard) {
 		*(u32*)0x0202D288 = 0xEB00007C; // bl 0x0202D480 (Skip Manual screen)
-		setBL(0x0203A2D8, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0203A2FC, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0203A2D8, (u32)dsiSaveOpen);
+		setBL(0x0203A2FC, (u32)dsiSaveClose);
 		*(u32*)0x0203A348 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
 		*(u32*)0x0203A36C = 0xE3A00001; // mov r0, #1 (dsiSaveFreeSpaceAvailable)
-		setBL(0x0203A38C, (u32)ce9->patches->dsiSaveCreate);
-		setBL(0x0203A39C, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0203A3C8, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x0203A3E0, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0203A42C, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0203A454, (u32)ce9->patches->dsiSaveRead);
-		setBL(0x0203A480, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0203A570, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0203A598, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x0203A5B4, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0203A38C, (u32)dsiSaveCreate);
+		setBL(0x0203A39C, (u32)dsiSaveOpen);
+		setBL(0x0203A3C8, (u32)dsiSaveWrite);
+		setBL(0x0203A3E0, (u32)dsiSaveClose);
+		setBL(0x0203A42C, (u32)dsiSaveOpen);
+		setBL(0x0203A454, (u32)dsiSaveRead);
+		setBL(0x0203A480, (u32)dsiSaveClose);
+		setBL(0x0203A570, (u32)dsiSaveOpen);
+		setBL(0x0203A598, (u32)dsiSaveWrite);
+		setBL(0x0203A5B4, (u32)dsiSaveClose);
 	}
 
 	// Art Style: DECODE (Japan)
 	else if (strcmp(romTid, "KADJ") == 0 && saveOnFlashcard) {
 		*(u32*)0x0202E2AC = 0xEB000071; // bl 0x0202E478 (Skip Manual screen)
-		setBL(0x0203B108, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0203B12C, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0203B108, (u32)dsiSaveOpen);
+		setBL(0x0203B12C, (u32)dsiSaveClose);
 		*(u32*)0x0203B170 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
 		*(u32*)0x0203B194 = 0xE3A00001; // mov r0, #1 (dsiSaveFreeSpaceAvailable)
-		setBL(0x0203B1B0, (u32)ce9->patches->dsiSaveCreate);
-		setBL(0x0203B1C0, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0203B1EC, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x0203B208, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0203B250, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0203B27C, (u32)ce9->patches->dsiSaveRead);
-		setBL(0x0203B2AC, (u32)ce9->patches->dsiSaveClose);
-		setBL(0x0203B398, (u32)ce9->patches->dsiSaveOpen);
-		setBL(0x0203B3C4, (u32)ce9->patches->dsiSaveWrite);
-		setBL(0x0203B3E0, (u32)ce9->patches->dsiSaveClose);
+		setBL(0x0203B1B0, (u32)dsiSaveCreate);
+		setBL(0x0203B1C0, (u32)dsiSaveOpen);
+		setBL(0x0203B1EC, (u32)dsiSaveWrite);
+		setBL(0x0203B208, (u32)dsiSaveClose);
+		setBL(0x0203B250, (u32)dsiSaveOpen);
+		setBL(0x0203B27C, (u32)dsiSaveRead);
+		setBL(0x0203B2AC, (u32)dsiSaveClose);
+		setBL(0x0203B398, (u32)dsiSaveOpen);
+		setBL(0x0203B3C4, (u32)dsiSaveWrite);
+		setBL(0x0203B3E0, (u32)dsiSaveClose);
 	}
 
 	// Pop Island (USA)
