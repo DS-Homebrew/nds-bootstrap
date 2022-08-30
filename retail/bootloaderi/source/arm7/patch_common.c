@@ -354,38 +354,104 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Anonymous Notes 3: From The Abyss (USA & Japan)
 	// Anonymous Notes 4: From The Abyss (USA & Japan)
 	else if ((strncmp(romTid, "KV3", 3) == 0 || strncmp(romTid, "KV4", 3) == 0) && saveOnFlashcard) {
-		setBL(0x0202424C, (u32)dsiSaveOpen);
-		setBL(0x02024284, (u32)dsiSaveCreate);
-		setBL(0x02024294, (u32)dsiSaveGetResultCode);
-		setBL(0x020242BC, (u32)dsiSaveOpen);
-		setBL(0x020242E8, (u32)dsiSaveGetLength);
-		setBL(0x02024304, (u32)dsiSaveSetLength);
-		setBL(0x02024354, (u32)dsiSaveWrite);
-		setBL(0x02024364, (u32)dsiSaveClose);
-		setBL(0x02024384, (u32)dsiSaveClose);
-		setBL(0x020243CC, (u32)dsiSaveOpen);
-		setBL(0x02024404, (u32)dsiSaveSeek);
-		setBL(0x02024414, (u32)dsiSaveClose);
-		setBL(0x0202442C, (u32)dsiSaveWrite);
-		setBL(0x0202443C, (u32)dsiSaveClose);
-		setBL(0x0202444C, (u32)dsiSaveClose);
-		setBL(0x0202448C, (u32)dsiSaveOpen);
-		setBL(0x020244B8, (u32)dsiSaveGetLength);
-		setBL(0x020244D8, (u32)dsiSaveSeek);
-		setBL(0x020244E8, (u32)dsiSaveClose);
-		setBL(0x02024500, (u32)dsiSaveRead);
-		setBL(0x02024510, (u32)dsiSaveClose);
-		setBL(0x02024520, (u32)dsiSaveClose);
 		if (ndsHeader->gameCode[2] == '3') {
 			if (ndsHeader->gameCode[3] == 'E') {
+				setBL(0x0202424C, (u32)dsiSaveOpen);
+				setBL(0x02024284, (u32)dsiSaveCreate);
+				setBL(0x02024294, (u32)dsiSaveGetResultCode);
+				setBL(0x020242BC, (u32)dsiSaveOpen);
+				setBL(0x020242E8, (u32)dsiSaveGetLength);
+				setBL(0x02024304, (u32)dsiSaveSetLength);
+				setBL(0x02024354, (u32)dsiSaveWrite);
+				setBL(0x02024364, (u32)dsiSaveClose);
+				setBL(0x02024384, (u32)dsiSaveClose);
+				setBL(0x020243CC, (u32)dsiSaveOpen);
+				setBL(0x02024404, (u32)dsiSaveSeek);
+				setBL(0x02024414, (u32)dsiSaveClose);
+				setBL(0x0202442C, (u32)dsiSaveWrite);
+				setBL(0x0202443C, (u32)dsiSaveClose);
+				setBL(0x0202444C, (u32)dsiSaveClose);
+				setBL(0x0202448C, (u32)dsiSaveOpen);
+				setBL(0x020244B8, (u32)dsiSaveGetLength);
+				setBL(0x020244D8, (u32)dsiSaveSeek);
+				setBL(0x020244E8, (u32)dsiSaveClose);
+				setBL(0x02024500, (u32)dsiSaveRead);
+				setBL(0x02024510, (u32)dsiSaveClose);
+				setBL(0x02024520, (u32)dsiSaveClose);
 				*(u32*)0x020D0120 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 			} else {
+				setBL(0x02024270, (u32)dsiSaveOpen);
+				setBL(0x020242A8, (u32)dsiSaveCreate);
+				setBL(0x020242B8, (u32)dsiSaveGetResultCode);
+				setBL(0x020242E0, (u32)dsiSaveOpen);
+				setBL(0x0202430C, (u32)dsiSaveGetLength);
+				setBL(0x02024328, (u32)dsiSaveSetLength);
+				setBL(0x02024378, (u32)dsiSaveWrite);
+				setBL(0x02024388, (u32)dsiSaveClose);
+				setBL(0x020243A8, (u32)dsiSaveClose);
+				setBL(0x020243F0, (u32)dsiSaveOpen);
+				setBL(0x02024428, (u32)dsiSaveSeek);
+				setBL(0x02024438, (u32)dsiSaveClose);
+				setBL(0x02024450, (u32)dsiSaveWrite);
+				setBL(0x02024460, (u32)dsiSaveClose);
+				setBL(0x02024470, (u32)dsiSaveClose);
+				setBL(0x020244B0, (u32)dsiSaveOpen);
+				setBL(0x020244DC, (u32)dsiSaveGetLength);
+				setBL(0x020244FC, (u32)dsiSaveSeek);
+				setBL(0x0202450C, (u32)dsiSaveClose);
+				setBL(0x02024524, (u32)dsiSaveRead);
+				setBL(0x02024534, (u32)dsiSaveClose);
+				setBL(0x02024544, (u32)dsiSaveClose);
 				*(u32*)0x020CF8AC = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 			}
 		} else if (ndsHeader->gameCode[2] == '4') {
 			if (ndsHeader->gameCode[3] == 'E') {
+				setBL(0x0202425C, (u32)dsiSaveOpen);
+				setBL(0x02024294, (u32)dsiSaveCreate);
+				setBL(0x020242A4, (u32)dsiSaveGetResultCode);
+				setBL(0x020242CC, (u32)dsiSaveOpen);
+				setBL(0x020242F8, (u32)dsiSaveGetLength);
+				setBL(0x02024314, (u32)dsiSaveSetLength);
+				setBL(0x02024364, (u32)dsiSaveWrite);
+				setBL(0x02024374, (u32)dsiSaveClose);
+				setBL(0x02024394, (u32)dsiSaveClose);
+				setBL(0x020243DC, (u32)dsiSaveOpen);
+				setBL(0x02024414, (u32)dsiSaveSeek);
+				setBL(0x02024424, (u32)dsiSaveClose);
+				setBL(0x0202443C, (u32)dsiSaveWrite);
+				setBL(0x0202444C, (u32)dsiSaveClose);
+				setBL(0x0202445C, (u32)dsiSaveClose);
+				setBL(0x0202449C, (u32)dsiSaveOpen);
+				setBL(0x020244C8, (u32)dsiSaveGetLength);
+				setBL(0x020244E8, (u32)dsiSaveSeek);
+				setBL(0x020244F8, (u32)dsiSaveClose);
+				setBL(0x02024510, (u32)dsiSaveRead);
+				setBL(0x02024520, (u32)dsiSaveClose);
+				setBL(0x02024530, (u32)dsiSaveClose);
 				*(u32*)0x020D0FFC = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 			} else {
+				setBL(0x02024280, (u32)dsiSaveOpen);
+				setBL(0x020242B8, (u32)dsiSaveCreate);
+				setBL(0x020242C8, (u32)dsiSaveGetResultCode);
+				setBL(0x020242F0, (u32)dsiSaveOpen);
+				setBL(0x0202431C, (u32)dsiSaveGetLength);
+				setBL(0x02024338, (u32)dsiSaveSetLength);
+				setBL(0x02024388, (u32)dsiSaveWrite);
+				setBL(0x02024398, (u32)dsiSaveClose);
+				setBL(0x020243B8, (u32)dsiSaveClose);
+				setBL(0x02024400, (u32)dsiSaveOpen);
+				setBL(0x02024438, (u32)dsiSaveSeek);
+				setBL(0x02024448, (u32)dsiSaveClose);
+				setBL(0x02024460, (u32)dsiSaveWrite);
+				setBL(0x02024470, (u32)dsiSaveClose);
+				setBL(0x02024480, (u32)dsiSaveClose);
+				setBL(0x020244C0, (u32)dsiSaveOpen);
+				setBL(0x020244EC, (u32)dsiSaveGetLength);
+				setBL(0x0202450C, (u32)dsiSaveSeek);
+				setBL(0x0202451C, (u32)dsiSaveClose);
+				setBL(0x02024524, (u32)dsiSaveRead);
+				setBL(0x02024534, (u32)dsiSaveClose);
+				setBL(0x02024544, (u32)dsiSaveClose);
 				*(u32*)0x020D0590 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 			}
 		}
