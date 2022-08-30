@@ -1790,12 +1790,19 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Cake Ninja (USA)
-	// Requires 8MB of RAM
-	else if (strcmp(romTid, "K2JE") == 0 && extendedMemory2) {
+	else if (strcmp(romTid, "K2JE") == 0) {
 		*(u32*)0x02004838 = 0xE1A00000; // nop
 		*(u32*)0x0200499C = 0xE1A00000; // nop
 		*(u32*)0x02008C4C = 0xE1A00000; // nop
 		*(u32*)0x02008DE4 = 0xE1A00000; // nop
+		if (!extendedMemory2) {
+			// Make BG static to cut down RAM usage
+			setBL(0x02008400, 0x02008664);
+			*(u32*)0x0200DCC0 = 0xE1A00000; // nop
+			*(u32*)0x0200DCC4 = 0xE1A00000; // nop
+			*(u32*)0x0200DCC8 = 0xE1A00000; // nop
+			*(u32*)0x0200DCCC = 0xE1A00000; // nop
+		}
 		*(u32*)0x02057938 = 0xE1A00000; // nop
 		*(u32*)0x0205B0FC = 0xE1A00000; // nop
 		*(u32*)0x02060CAC = 0xE1A00000; // nop
@@ -1803,7 +1810,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02062CB4 = 0xE1A00000; // nop
 		*(u32*)0x02062CC0 = 0xE1A00000; // nop
 		*(u32*)0x02062E20 = 0xE1A00000; // nop
-		patchHiHeapDSiWare(0x02062E7C, 0x02700000); // mov r0, #0x2700000
+		patchHiHeapDSiWare(0x02062E7C, extendedMemory2 ? 0x02700000 : heapEnd); // mov r0, extendedMemory2 ? #0x2700000 : #0x23C0000
 		*(u32*)0x02064424 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
 		*(u32*)0x02064440 = 0xE3A00001; // mov r0, #1
 		*(u32*)0x02064444 = 0xE12FFF1E; // bx lr
@@ -1813,12 +1820,19 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Cake Ninja (Europe)
-	// Requires 8MB of RAM
-	else if (strcmp(romTid, "K2JP") == 0 && extendedMemory2) {
+	else if (strcmp(romTid, "K2JP") == 0) {
 		*(u32*)0x02004838 = 0xE1A00000; // nop
 		*(u32*)0x0200499C = 0xE1A00000; // nop
 		*(u32*)0x02008C4C = 0xE1A00000; // nop
 		*(u32*)0x02008ED4 = 0xE1A00000; // nop
+		if (!extendedMemory2) {
+			// Make BG static to cut down RAM usage
+			setBL(0x02008400, 0x02008664);
+			*(u32*)0x0200DD4C = 0xE1A00000; // nop
+			*(u32*)0x0200DD50 = 0xE1A00000; // nop
+			*(u32*)0x0200DD54 = 0xE1A00000; // nop
+			*(u32*)0x0200DD58 = 0xE1A00000; // nop
+		}
 		*(u32*)0x02057A10 = 0xE1A00000; // nop
 		*(u32*)0x0205B1D4 = 0xE1A00000; // nop
 		*(u32*)0x02060D84 = 0xE1A00000; // nop
@@ -1826,7 +1840,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02062D8C = 0xE1A00000; // nop
 		*(u32*)0x02062D90 = 0xE1A00000; // nop
 		*(u32*)0x02062EF8 = 0xE1A00000; // nop
-		patchHiHeapDSiWare(0x02062F54, 0x02700000); // mov r0, #0x2700000
+		patchHiHeapDSiWare(0x02062F54, extendedMemory2 ? 0x02700000 : heapEnd); // mov r0, extendedMemory2 ? #0x2700000 : #0x23C0000
 		*(u32*)0x020644FC = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
 		*(u32*)0x02064518 = 0xE3A00001; // mov r0, #1
 		*(u32*)0x0206451C = 0xE12FFF1E; // bx lr
