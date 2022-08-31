@@ -855,9 +855,6 @@ aFile getBootFileCluster (const char* bootName)
 		file.currentCluster = file.firstCluster;
 		file.currentOffset=0;
 		file.fatTableCached=false;
-		#ifdef TWOCARD
-		file.card2 = card2;
-		#endif
 
 		return file;
 	}
@@ -870,6 +867,9 @@ aFile getBootFileCluster (const char* bootName)
 	file.currentCluster = file.firstCluster;
 	file.currentOffset=0;
 	file.fatTableCached=false;
+	#ifdef TWOCARD
+	file.card2 = card2;
+	#endif
 	return file;
 }
 
