@@ -84,6 +84,62 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// 40-in-1: Explosive Megamix (USA)
+	else if (strcmp(romTid, "K45E") == 0 && saveOnFlashcard) {
+		/* *(u32*)0x0200DFCC = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0200DFD0 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0200E2D0 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0200E2D4 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0200E408 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0200E40C = 0xE12FFF1E; // bx lr
+		*(u32*)0x0200E54C = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0200E550 = 0xE12FFF1E; // bx lr */
+		//*(u32*)0x0200E010 = 0xE3A00001; // mov r0, #1 (dsiSaveFreeSpaceAvailable)
+		setBL(0x0200E0D4, (u32)dsiSaveCreate);
+		setBL(0x0200E0E4, (u32)dsiSaveOpen);
+		setBL(0x0200E11C, (u32)dsiSaveSetLength);
+		setBL(0x0200E138, (u32)dsiSaveWrite);
+		setBL(0x0200E14C, (u32)dsiSaveClose);
+		*(u32*)0x0200E304 = 0xE3A00001; // mov r0, #1
+		setBL(0x0200E39C, (u32)dsiSaveOpen);
+		setBL(0x0200E3D0, (u32)dsiSaveRead);
+		setBL(0x0200E3E4, (u32)dsiSaveClose);
+		*(u32*)0x0200E440 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0200E470 = 0xE3A00001; // mov r0, #1
+		setBL(0x0200E494, 0x0200E4D4);
+		*(u32*)0x0200E4F8 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0200E578 = 0xE3A00001; // mov r0, #1
+		tonccpy((u32*)0x020FDDC8, dsiSaveGetResultCode, 0xC);
+	}
+
+	// 40-in-1: Explosive Megamix (Europe)
+	else if (strcmp(romTid, "K45P") == 0 && saveOnFlashcard) {
+		/* *(u32*)0x0200DF7C = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0200DF80 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0200E280 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0200E284 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0200E3B8 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0200E3BC = 0xE12FFF1E; // bx lr
+		*(u32*)0x0200E4FC = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0200E500 = 0xE12FFF1E; // bx lr */
+		//*(u32*)0x0200DFC0 = 0xE3A00001; // mov r0, #1 (dsiSaveFreeSpaceAvailable)
+		setBL(0x0200E084, (u32)dsiSaveCreate);
+		setBL(0x0200E094, (u32)dsiSaveOpen);
+		setBL(0x0200E0CC, (u32)dsiSaveSetLength);
+		setBL(0x0200E0E8, (u32)dsiSaveWrite);
+		setBL(0x0200E0FC, (u32)dsiSaveClose);
+		*(u32*)0x0200E2B4 = 0xE3A00001; // mov r0, #1
+		setBL(0x0200E34C, (u32)dsiSaveOpen);
+		setBL(0x0200E380, (u32)dsiSaveRead);
+		setBL(0x0200E394, (u32)dsiSaveClose);
+		*(u32*)0x0200E3F0 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0200E420 = 0xE3A00001; // mov r0, #1
+		setBL(0x0200E444, 0x0200E484);
+		*(u32*)0x0200E4A8 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0200E528 = 0xE3A00001; // mov r0, #1
+		tonccpy((u32*)0x020FD438, dsiSaveGetResultCode, 0xC);
+	}
+
 	// 99Bullets (USA)
 	else if (strcmp(romTid, "K99E") == 0 && saveOnFlashcard) {
 		*(u32*)0x02013E8C = 0xE3A00001; // mov r0, #1

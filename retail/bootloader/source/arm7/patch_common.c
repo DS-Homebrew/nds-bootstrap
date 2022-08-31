@@ -254,6 +254,106 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020B08D0 = 0xE3A00001; // mov r0, #1
 	}
 
+	// 40-in-1: Explosive Megamix (USA)
+	else if (strcmp(romTid, "K45E") == 0) {
+		*(u32*)0x02004838 = 0xE1A00000; // nop
+		*(u32*)0x0200499C = 0xE1A00000; // nop
+		*(u32*)0x0200DFB8 = 0xE1A00000; // nop
+		/* *(u32*)0x0200DFCC = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0200DFD0 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0200E2D0 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0200E2D4 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0200E408 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0200E40C = 0xE12FFF1E; // bx lr
+		*(u32*)0x0200E54C = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0200E550 = 0xE12FFF1E; // bx lr */
+		//*(u32*)0x0200E010 = 0xE3A00001; // mov r0, #1 (dsiSaveFreeSpaceAvailable)
+		setBL(0x0200E0D4, (u32)dsiSaveCreate);
+		setBL(0x0200E0E4, (u32)dsiSaveOpen);
+		setBL(0x0200E11C, (u32)dsiSaveSetLength);
+		setBL(0x0200E138, (u32)dsiSaveWrite);
+		setBL(0x0200E14C, (u32)dsiSaveClose);
+		*(u32*)0x0200E304 = 0xE3A00001; // mov r0, #1
+		setBL(0x0200E39C, (u32)dsiSaveOpen);
+		setBL(0x0200E3D0, (u32)dsiSaveRead);
+		setBL(0x0200E3E4, (u32)dsiSaveClose);
+		*(u32*)0x0200E440 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0200E470 = 0xE3A00001; // mov r0, #1
+		setBL(0x0200E494, 0x0200E4D4);
+		*(u32*)0x0200E4F8 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0200E578 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x020FD244 = 0xE1A00000; // nop
+		tonccpy((u32*)0x020FDDC8, dsiSaveGetResultCode, 0xC);
+		*(u32*)0x021008F8 = 0xE1A00000; // nop
+		*(u32*)0x02103BB8 = 0xE1A00000; // nop
+		*(u32*)0x02105A3C = 0xE1A00000; // nop
+		*(u32*)0x02105A40 = 0xE1A00000; // nop
+		*(u32*)0x02105A4C = 0xE1A00000; // nop
+		*(u32*)0x02105BAC = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x02105C08, heapEnd); // mov r0, #0x23C0000
+		*(u32*)0x021070C0 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
+		*(u32*)0x021070DC = 0xE3A00001; // mov r0, #1
+		*(u32*)0x021070E0 = 0xE12FFF1E; // bx lr
+		*(u32*)0x021070E8 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x021070EC = 0xE12FFF1E; // bx lr
+		*(u32*)0x021074E0 = 0xE1A00000; // nop
+		*(u32*)0x021074E4 = 0xE1A00000; // nop
+		*(u32*)0x021074E8 = 0xE1A00000; // nop
+		*(u32*)0x021074EC = 0xE1A00000; // nop
+		*(u32*)0x0210A528 = 0xE1A00000; // nop
+		*(u32*)0x0210BEC0 = 0xE3A00003; // mov r0, #3
+	}
+
+	// 40-in-1: Explosive Megamix (Europe)
+	else if (strcmp(romTid, "K45P") == 0) {
+		*(u32*)0x02004838 = 0xE1A00000; // nop
+		*(u32*)0x0200499C = 0xE1A00000; // nop
+		*(u32*)0x0200DF68 = 0xE1A00000; // nop
+		/* *(u32*)0x0200DF7C = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0200DF80 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0200E280 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0200E284 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0200E3B8 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0200E3BC = 0xE12FFF1E; // bx lr
+		*(u32*)0x0200E4FC = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0200E500 = 0xE12FFF1E; // bx lr */
+		//*(u32*)0x0200DFC0 = 0xE3A00001; // mov r0, #1 (dsiSaveFreeSpaceAvailable)
+		setBL(0x0200E084, (u32)dsiSaveCreate);
+		setBL(0x0200E094, (u32)dsiSaveOpen);
+		setBL(0x0200E0CC, (u32)dsiSaveSetLength);
+		setBL(0x0200E0E8, (u32)dsiSaveWrite);
+		setBL(0x0200E0FC, (u32)dsiSaveClose);
+		*(u32*)0x0200E2B4 = 0xE3A00001; // mov r0, #1
+		setBL(0x0200E34C, (u32)dsiSaveOpen);
+		setBL(0x0200E380, (u32)dsiSaveRead);
+		setBL(0x0200E394, (u32)dsiSaveClose);
+		*(u32*)0x0200E3F0 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0200E420 = 0xE3A00001; // mov r0, #1
+		setBL(0x0200E444, 0x0200E484);
+		*(u32*)0x0200E4A8 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0200E528 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x020FC8B4 = 0xE1A00000; // nop
+		tonccpy((u32*)0x020FD438, dsiSaveGetResultCode, 0xC);
+		*(u32*)0x020FFF68 = 0xE1A00000; // nop
+		*(u32*)0x02103228 = 0xE1A00000; // nop
+		*(u32*)0x02105A3C = 0xE1A00000; // nop
+		*(u32*)0x02105A40 = 0xE1A00000; // nop
+		*(u32*)0x02105A4C = 0xE1A00000; // nop
+		*(u32*)0x0210521C = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x02105278, heapEnd); // mov r0, #0x23C0000
+		*(u32*)0x02106730 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
+		*(u32*)0x0210674C = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02106750 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02106758 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0210675C = 0xE12FFF1E; // bx lr
+		*(u32*)0x02106B50 = 0xE1A00000; // nop
+		*(u32*)0x02106B54 = 0xE1A00000; // nop
+		*(u32*)0x02106B58 = 0xE1A00000; // nop
+		*(u32*)0x02106B5C = 0xE1A00000; // nop
+		*(u32*)0x02109B98 = 0xE1A00000; // nop
+		*(u32*)0x0210B530 = 0xE3A00003; // mov r0, #3
+	}
+
 	// 99Bullets (USA)
 	else if (strcmp(romTid, "K99E") == 0) {
 		*(u32*)0x02004838 = 0xE1A00000; // nop
