@@ -1080,7 +1080,7 @@ int arm7_main(void) {
 		(cardengineArm9*)ce9Location,
 		ndsHeader,
 		moduleParams,
-		(  (moduleParams->sdk_version < 0x4000000 && ((u32)ndsHeader->arm9executeAddress+((u32)ndsHeader->arm9destination-0x02000000)-0x02000000) >= 0x1000)
+			(  (moduleParams->sdk_version < 0x4000000 && ((u32)ndsHeader->arm9executeAddress - (u32)ndsHeader->arm9destination) >= 0x1000)
 		|| strncmp(romTid, "AKD", 3) == 0 // Trauma Center: Under the Knife
 		) ? 0 : 1,
 		patchMpuSize,
