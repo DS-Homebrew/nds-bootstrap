@@ -80,7 +80,6 @@ patches:
 .word	card_set_dma_arm9
 .word   nand_read_arm9
 .word   nand_write_arm9
-#ifdef TWLSDK
 .word   dsiSaveGetResultCode_arm
 .word   dsiSaveCreate_arm
 .word   dsiSaveDelete_arm
@@ -93,20 +92,6 @@ patches:
 .word   dsiSaveSeek_arm
 .word   dsiSaveRead_arm
 .word   dsiSaveWrite_arm
-#else
-.word   0x0
-.word   0x0
-.word   0x0
-.word   0x0
-.word   0x0
-.word   0x0
-.word   0x0
-.word   0x0
-.word   0x0
-.word   0x0
-.word   0x0
-.word   0x0
-#endif
 .word	cardStructArm9
 .word   card_pull
 .word   0x0
@@ -336,7 +321,7 @@ _blx_r6_stub_nand_write:
 	bx	r6	
 .pool
 @---------------------------------------------------------------------------------
-#ifdef TWLSDK
+
 @---------------------------------------------------------------------------------
 dsiSaveGetResultCode_arm:
 @---------------------------------------------------------------------------------
@@ -433,7 +418,7 @@ dsiSaveWrite_arm:
 	bx	r12
 .pool
 @---------------------------------------------------------------------------------
-#endif
+
 @---------------------------------------------------------------------------------
 card_irq_enable:
 @---------------------------------------------------------------------------------
