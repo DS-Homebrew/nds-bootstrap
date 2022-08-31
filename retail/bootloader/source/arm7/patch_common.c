@@ -4487,6 +4487,24 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// Legends of Exidia (USA)
+	// Requires more than 8MB of RAM
+	/*else if (strcmp(romTid, "KLEE") == 0) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x020050F4 = 0xE1A00000; // nop
+		*(u32*)0x0201473C = 0xE1A00000; // nop
+		*(u32*)0x02017E2C = 0xE1A00000; // nop
+		*(u32*)0x0201C794 = 0xE1A00000; // nop
+		*(u32*)0x0201E624 = 0xE1A00000; // nop
+		*(u32*)0x0201E628 = 0xE1A00000; // nop
+		*(u32*)0x0201E634 = 0xE1A00000; // nop
+		*(u32*)0x0201E794 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x0201E7F0, 0x02700000); // mov r0, #0x2700000
+		*(u32*)0x0201FDA8 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
+		*(u32*)0x02023794 = 0xE1A00000; // nop
+		*(u32*)0x02026E94 = 0xE1A00000; // nop
+	}*/
+
 	// Libera Wing (Europe)
 	// Black screens
 	/*else if (strcmp(romTid, "KLWP") == 0) {
