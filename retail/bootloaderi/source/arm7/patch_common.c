@@ -1311,6 +1311,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Dark Void Zero (USA)
 	// Dark Void Zero (Europe, Australia)
 	else if ((strcmp(romTid, "KDVE") == 0 || strcmp(romTid, "KDVV") == 0) && saveOnFlashcard) {
+		tonccpy((u32*)0x02043DDC, dsiSaveGetResultCode, 0xC);
 		setBL(0x0208AE90, (u32)dsiSaveOpen);
 		setBL(0x0208AEA4, (u32)dsiSaveCreate);
 		setBL(0x0208AEC4, (u32)dsiSaveOpen);
