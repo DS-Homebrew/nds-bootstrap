@@ -1520,7 +1520,7 @@ void patchA9Mbk(const tNDSHeader* ndsHeader, const module_params_t* moduleParams
 	dbg_printf("\n\n");
 }
 
-void patchFileIoFuncs(const tNDSHeader* ndsHeader) {
+void patchRaymanFileIoFuncs(const tNDSHeader* ndsHeader) {
 	u32* offset = patchOffsetCache.fileIoFuncOffset;
 	if (!patchOffsetCache.fileIoFuncChecked) {
 		offset = findFileIoFuncOffset(ndsHeader);
@@ -2164,9 +2164,8 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 
 		patchA9Mbk(ndsHeader, moduleParams, false);
 
-		extern u8 dsiSD;
-		if (!dsiSD && isDSiWare) {
-			patchFileIoFuncs(ndsHeader);
+		if (saveOnFlashcard && strncmp(romTid, "KRM", 3) == 0) {
+			patchRaymanFileIoFuncs(ndsHeader);
 		}
 	}
 
