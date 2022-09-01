@@ -6571,7 +6571,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Shantae: Risky's Revenge (USA)
-	// Requires 8MB of RAM, crashes after first battle with 4MB of RAM
+	// Requires 8MB of RAM, crashes after first battle with 4MB of RAM, but can get past with a save file
 	// BGM is disabled to stay within RAM limitations
 	else if (strcmp(romTid, "KS3E") == 0) {
 		ce9->rumbleFrames[0] = 10;
@@ -6580,10 +6580,12 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 		*(u32*)0x0200498C = 0xE1A00000; // nop
 		if (!extendedMemory2) {
-			*(u32*)0x0201FBA0 = 0xE12FFF1E; // bx lr
-			/* *(u32*)0x0201FD3C = 0xE12FFF1E; // bx lr
+			// Disable pre-load function
+			/* *(u32*)0x0201FBA0 = 0xE12FFF1E; // bx lr
+			*(u32*)0x0201FD3C = 0xE12FFF1E; // bx lr
 			*(u32*)0x0201FDA8 = 0xE12FFF1E; // bx lr
 			*(u32*)0x0201FE14 = 0xE12FFF1E; // bx lr */
+			*(u32*)0x020BCE44 = 0xE12FFF1E; // bx lr
 		}
 		*(u32*)0x0201FC20 = 0xE12FFF1E; // bx lr (Disable loading sdat file)
 		setBL(0x02026F68, (int)ce9->patches->rumble_arm9[0]); // Rumble when hair is whipped
@@ -6630,7 +6632,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Shantae: Risky's Revenge (Europe)
-	// Requires 8MB of RAM, crashes after first battle with 4MB of RAM
+	// Requires 8MB of RAM, crashes after first battle with 4MB of RAM, but can get past with a save file
 	// BGM is disabled to stay within RAM limitations
 	else if (strcmp(romTid, "KS3P") == 0) {
 		ce9->rumbleFrames[0] = 10;
@@ -6640,10 +6642,12 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02004838 = 0xE1A00000; // nop
 		*(u32*)0x0200499C = 0xE1A00000; // nop
 		if (!extendedMemory2) {
-			*(u32*)0x0201FE18 = 0xE12FFF1E; // bx lr
-			/* *(u32*)0x0201FFB4 = 0xE12FFF1E; // bx lr
+			// Disable pre-load function
+			/* *(u32*)0x0201FE18 = 0xE12FFF1E; // bx lr
+			*(u32*)0x0201FFB4 = 0xE12FFF1E; // bx lr
 			*(u32*)0x02020020 = 0xE12FFF1E; // bx lr
 			*(u32*)0x0202008C = 0xE12FFF1E; // bx lr */
+			*(u32*)0x020BD234 = 0xE12FFF1E; // bx lr
 		}
 		*(u32*)0x0201FE98 = 0xE12FFF1E; // bx lr (Disable loading sdat file)
 		setBL(0x020271E0, (int)ce9->patches->rumble_arm9[0]); // Rumble when hair is whipped
