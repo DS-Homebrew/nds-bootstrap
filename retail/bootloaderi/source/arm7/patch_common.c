@@ -1291,6 +1291,23 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02044CCC, (u32)dsiSaveClose);
 	}
 
+	// Karakuchi! Dairoujou (Japan)
+	else if (strcmp(romTid, "KF3J") == 0 && saveOnFlashcard) {
+		setBL(0x02044680, (u32)dsiSaveOpen);
+		setBL(0x020446AC, (u32)dsiSaveRead);
+		setBL(0x020446BC, (u32)dsiSaveClose);
+		setBL(0x020446D8, (u32)dsiSaveClose);
+		*(u32*)0x0204472C = 0xE3A00001; // mov r0, #1 (OpenDirectory)
+		*(u32*)0x02044768 = 0xE1A00000; // nop (CloseDirectory)
+		setBL(0x02044774, (u32)dsiSaveCreate);
+		setBL(0x02044784, (u32)dsiSaveOpen);
+		setBL(0x020447B0, (u32)dsiSaveSetLength);
+		setBL(0x020447C0, (u32)dsiSaveClose);
+		setBL(0x020447E4, (u32)dsiSaveWrite);
+		setBL(0x020447F4, (u32)dsiSaveClose);
+		setBL(0x02044810, (u32)dsiSaveClose);
+	}
+
 	// Dark Void Zero (USA)
 	// Dark Void Zero (Europe, Australia)
 	else if ((strcmp(romTid, "KDVE") == 0 || strcmp(romTid, "KDVV") == 0) && saveOnFlashcard) {

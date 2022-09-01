@@ -3083,6 +3083,38 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02044CCC, (u32)dsiSaveClose);
 	}
 
+	// Karakuchi! Dairoujou (Japan)
+	else if (strcmp(romTid, "KF3J") == 0) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x0200DD9C = 0xE1A00000; // nop
+		*(u32*)0x020114D4 = 0xE1A00000; // nop
+		*(u32*)0x0201BBF8 = 0xE1A00000; // nop
+		*(u32*)0x0201DA6C = 0xE1A00000; // nop
+		*(u32*)0x0201DA70 = 0xE1A00000; // nop
+		*(u32*)0x0201DA7C = 0xE1A00000; // nop
+		*(u32*)0x0201DBDC = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x0201DC38, heapEnd); // mov r0, #0x23C0000
+		*(u32*)0x0201EECC = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
+		*(u32*)0x0201EEE8 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0201EEEC = 0xE12FFF1E; // bx lr
+		*(u32*)0x0201EEF4 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0201EEF8 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02022324 = 0xE1A00000; // nop
+		setBL(0x02044680, (u32)dsiSaveOpen);
+		setBL(0x020446AC, (u32)dsiSaveRead);
+		setBL(0x020446BC, (u32)dsiSaveClose);
+		setBL(0x020446D8, (u32)dsiSaveClose);
+		*(u32*)0x0204472C = 0xE3A00001; // mov r0, #1 (OpenDirectory)
+		*(u32*)0x02044768 = 0xE1A00000; // nop (CloseDirectory)
+		setBL(0x02044774, (u32)dsiSaveCreate);
+		setBL(0x02044784, (u32)dsiSaveOpen);
+		setBL(0x020447B0, (u32)dsiSaveSetLength);
+		setBL(0x020447C0, (u32)dsiSaveClose);
+		setBL(0x020447E4, (u32)dsiSaveWrite);
+		setBL(0x020447F4, (u32)dsiSaveClose);
+		setBL(0x02044810, (u32)dsiSaveClose);
+	}
+
 	// Dark Void Zero (USA)
 	// Dark Void Zero (Europe, Australia)
 	else if (strcmp(romTid, "KDVE") == 0 || strcmp(romTid, "KDVV") == 0) {
@@ -6585,6 +6617,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			*(u32*)0x0201FD3C = 0xE12FFF1E; // bx lr
 			*(u32*)0x0201FDA8 = 0xE12FFF1E; // bx lr
 			*(u32*)0x0201FE14 = 0xE12FFF1E; // bx lr */
+			//*(u32*)0x020AB800 = 0xE1A00000; // nop
 			*(u32*)0x020BCE44 = 0xE12FFF1E; // bx lr
 		}
 		*(u32*)0x0201FC20 = 0xE12FFF1E; // bx lr (Disable loading sdat file)
@@ -6620,7 +6653,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020E7F68 = 0xE1A00000; // nop
 		*(u32*)0x020E7F74 = 0xE1A00000; // nop
 		*(u32*)0x020E80D4 = 0xE1A00000; // nop
-		patchHiHeapDSiWare(0x020E8130, extendedMemory2 ? 0x02700000 : heapEnd); // mov r0, extendedMemory2 ? #0x2700000 : #0x23C0000
+		patchHiHeapDSiWare(0x020E8130, extendedMemory2 ? 0x02700000 : heapEnd); // mov r0, extendedMemory2 ? #0x2700000 : #0x23E0000
 		*(u32*)0x020E8264 = 0x02186C60;
 		*(u32*)0x020E9348 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
 		*(u32*)0x020E977C = 0xE1A00000; // nop
@@ -6647,6 +6680,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			*(u32*)0x0201FFB4 = 0xE12FFF1E; // bx lr
 			*(u32*)0x02020020 = 0xE12FFF1E; // bx lr
 			*(u32*)0x0202008C = 0xE12FFF1E; // bx lr */
+			//*(u32*)0x020ABBF0 = 0xE1A00000; // nop
 			*(u32*)0x020BD234 = 0xE12FFF1E; // bx lr
 		}
 		*(u32*)0x0201FE98 = 0xE12FFF1E; // bx lr (Disable loading sdat file)
@@ -6680,7 +6714,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020E8404 = 0xE1A00000; // nop
 		*(u32*)0x020E8410 = 0xE1A00000; // nop
 		*(u32*)0x020E8570 = 0xE1A00000; // nop
-		patchHiHeapDSiWare(0x020E85CC, extendedMemory2 ? 0x02700000 : heapEnd); // mov r0, extendedMemory2 ? #0x2700000 : #0x23C0000
+		patchHiHeapDSiWare(0x020E85CC, extendedMemory2 ? 0x02700000 : heapEnd); // mov r0, extendedMemory2 ? #0x2700000 : #0x23E0000
 		*(u32*)0x020E8700 = 0x02190100;
 		*(u32*)0x020E97E4 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
 		*(u32*)0x020E9C18 = 0xE1A00000; // nop
