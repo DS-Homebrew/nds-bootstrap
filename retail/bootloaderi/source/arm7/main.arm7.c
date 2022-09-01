@@ -1207,7 +1207,7 @@ int arm7_main(void) {
 		// Init Slot-1 card
 		if (!FAT_InitFiles(initDisc, true, 0)) {
 			nocashMessage("!FAT_InitFiles");
-			//errorOutput();
+			errorOutput();
 			//return -1;
 		}
 	}
