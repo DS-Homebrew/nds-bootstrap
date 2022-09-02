@@ -61,15 +61,19 @@ constexpr char16_t mapHebrew[] =
 	u"אבגדהוזחטיךכלםמן"
 	u"נסעףפץצקרשת";
 
-constexpr char16_t mapKanaChinese[] =
-	u"‥…　さなにのるをアクゲシジスセ"
-	u"ダットドバビプムモャュョリレロン"
-	u"ー上下主书了亮位儲关出到动動区器"
-	u"回图圖地址块增存定屏幕底度开式強"
-	u"强戏截戲戻択择擇数數时明显時書查"
-	u"模檢游率画界畫目看移端終置自至螢"
-	u"視計設說説说跳轉转返退选速遊選部"
-	u"重量鐘钟開關離面音頂頻顶项频";
+constexpr char16_t mapJapanese[] =
+	u"‥…　いぅかさどなにぬのむるをん"
+	u"アクゲシジスセダットドバビプムモ"
+	u"ャュョリレロン　　　　　　　　　"
+	u"ー上下主了動定度戻択数明書画終自"
+	u"設説速選量面音";
+
+constexpr char16_t mapChinese[] =
+	u"主书亮位儲出到动動区器回图圖地址"
+	u"块存定屏幕底度式戏截戲择擇数數时"
+	u"明显時書查模檢游率界畫目看移端置"
+	u"自至螢視計設說说跳轉转返退选遊選"
+	u"部重量鐘钟開離面音頂頻顶项频　";
 
 constexpr const char16_t *extendedMaps[] = {
 	mapArabic,
@@ -78,7 +82,8 @@ constexpr const char16_t *extendedMaps[] = {
 	mapGreek,
 	mapHangul,
 	mapHebrew,
-	mapKanaChinese
+	mapJapanese,
+	mapChinese
 };
 
 std::map<char16_t, std::array<char16_t, 3>> arabicPresentationForms = {

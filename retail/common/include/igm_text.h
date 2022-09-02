@@ -35,7 +35,8 @@ enum class IgmFont : u8 {
 	greek = 3,
 	hangul = 4,
 	hebrew = 5,
-	kanaChinese = 6
+	japanese = 6,
+	chinese = 7
 };
 #endif
 
