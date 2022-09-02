@@ -2134,6 +2134,26 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0202BF14, (u32)dsiSaveClose);
 	}
 
+	// Paul's Monster Adventure (USA)
+	else if (strcmp(romTid, "KP9E") == 0 && saveOnFlashcard) {
+		setBL(0x02047940, (u32)dsiSaveOpen);
+		setBL(0x02047958, (u32)dsiSaveCreate);
+		setBL(0x02047970, (u32)dsiSaveOpen);
+		setBL(0x02047990, (u32)dsiSaveWrite);
+		setBL(0x020479A0, (u32)dsiSaveClose);
+		setBL(0x020479BC, (u32)dsiSaveClose);
+		setBL(0x020479F8, (u32)dsiSaveOpen);
+		setBL(0x02047A18, (u32)dsiSaveRead);
+		setBL(0x02047A28, (u32)dsiSaveClose);
+		setBL(0x02047A44, (u32)dsiSaveClose);
+		setBL(0x02047AF4, (u32)dsiSaveCreate);
+		setBL(0x02047B04, (u32)dsiSaveOpen);
+		setBL(0x02047B30, (u32)dsiSaveClose);
+		setBL(0x02047B5C, (u32)dsiSaveCreate);
+		setBL(0x02047B6C, (u32)dsiSaveOpen);
+		setBL(0x02047B98, (u32)dsiSaveClose);
+	}
+
 	// Paul's Shooting Adventure (USA)
 	else if (strcmp(romTid, "KPJE") == 0 && saveOnFlashcard) {
 		//*(u32*)0x0203A20C = 0xE12FFF1E; // bx lr

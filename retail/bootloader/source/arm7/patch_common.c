@@ -5835,6 +5835,38 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0205D920 = 0xE1A00000; // nop
 	}*/
 
+	// Paul's Monster Adventure (USA)
+	else if (strcmp(romTid, "KP9E") == 0) {
+		*(u32*)0x02004838 = 0xE1A00000; // nop
+		*(u32*)0x0200499C = 0xE1A00000; // nop
+		*(u32*)0x02013828 = 0xE1A00000; // nop
+		*(u32*)0x02016F48 = 0xE1A00000; // nop
+		*(u32*)0x0201C8B8 = 0xE1A00000; // nop
+		*(u32*)0x0201E6E0 = 0xE1A00000; // nop
+		*(u32*)0x0201E6E4 = 0xE1A00000; // nop
+		*(u32*)0x0201E6F0 = 0xE1A00000; // nop
+		*(u32*)0x0201E850 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x0201E8AC, heapEnd); // mov r0, #0x23C0000
+		*(u32*)0x0201FB30 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
+		*(u32*)0x02022E50 = 0xE1A00000; // nop
+		setBL(0x02047940, (u32)dsiSaveOpen);
+		setBL(0x02047958, (u32)dsiSaveCreate);
+		setBL(0x02047970, (u32)dsiSaveOpen);
+		setBL(0x02047990, (u32)dsiSaveWrite);
+		setBL(0x020479A0, (u32)dsiSaveClose);
+		setBL(0x020479BC, (u32)dsiSaveClose);
+		setBL(0x020479F8, (u32)dsiSaveOpen);
+		setBL(0x02047A18, (u32)dsiSaveRead);
+		setBL(0x02047A28, (u32)dsiSaveClose);
+		setBL(0x02047A44, (u32)dsiSaveClose);
+		setBL(0x02047AF4, (u32)dsiSaveCreate);
+		setBL(0x02047B04, (u32)dsiSaveOpen);
+		setBL(0x02047B30, (u32)dsiSaveClose);
+		setBL(0x02047B5C, (u32)dsiSaveCreate);
+		setBL(0x02047B6C, (u32)dsiSaveOpen);
+		setBL(0x02047B98, (u32)dsiSaveClose);
+	}
+
 	// Paul's Shooting Adventure (USA)
 	else if (strcmp(romTid, "KPJE") == 0) {
 		*(u32*)0x0200498C = 0xE1A00000; // nop
