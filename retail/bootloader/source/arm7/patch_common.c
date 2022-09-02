@@ -5394,6 +5394,59 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02015DD8 = 0xE1A00000; // nop
 	}
 
+	// Nintendogs (China)
+	// Requires more than 8MB of RAM?
+	/*else if (strcmp(romTid, "KDOC") == 0 && extendedMemory2) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x0202A4FC = 0xE1A00000; // nop
+		*(u32*)0x0202A524 = 0xE1A00000; // nop
+		setBL(0x0202A6EC, (u32)dsiSaveSeek);
+		setBL(0x0202A6FC, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+		*(u32*)0x0202A788 = 0xE1A00000; // nop
+		*(u32*)0x0202A7E0 = 0xE1A00000; // nop
+		setBL(0x0202A8C8, (u32)dsiSaveSeek);
+		setBL(0x0202A8D8, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+		setBL(0x0202A95C, (u32)dsiSaveSeek);
+		setBL(0x0202A96C, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+		*(u32*)0x0202A9F8 = 0xE1A00000; // nop
+		*(u32*)0x0202AA50 = 0xE1A00000; // nop
+		setBL(0x0202AB28, (u32)dsiSaveSeek);
+		setBL(0x0202AB38, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+		setBL(0x0202BB94, (u32)dsiSaveOpen);
+		setBL(0x0202BBA8, (u32)dsiSaveCreate);
+		setBL(0x0202BBB8, (u32)dsiSaveGetResultCode);
+		setBL(0x0202BBD4, (u32)dsiSaveOpen);
+		setBL(0x0202BBFC, (u32)dsiSaveSetLength);
+		setBL(0x0202BC04, (u32)dsiSaveClose);
+		setBL(0x0202BC14, (u32)dsiSaveOpen);
+		*(u32*)0x0202BD3C = 0xE1A00000; // nop (dsiSaveFlush)
+		setBL(0x0202BD44, (u32)dsiSaveClose);
+		setBL(0x0202BE14, (u32)dsiSaveSeek);
+		setBL(0x0202BE24, (u32)dsiSaveRead); // dsiSaveReadAsync
+		setBL(0x0202BE44, (u32)dsiSaveSeek);
+		setBL(0x0202BE54, (u32)dsiSaveRead); // dsiSaveReadAsync
+		*(u32*)0x0202BCC0 = 0xE1A00000; // nop
+		*(u32*)0x0202BD60 = 0xE1A00000; // nop
+		*(u32*)0x0202BF0C = 0xE1A00000; // nop (dsiSaveFlush)
+		setBL(0x0202BF14, (u32)dsiSaveClose);
+		*(u32*)0x0202C400 = 0xE1A00000; // nop
+		*(u32*)0x0202C408 = 0xE1A00000; // nop
+		*(u32*)0x020FD6AC = 0xE1A00000; // nop
+		*(u32*)0x021024D8 = 0xE1A00000; // nop
+		*(u32*)0x0210A34C = 0xE1A00000; // nop
+		*(u32*)0x0210C1D0 = 0xE1A00000; // nop
+		*(u32*)0x0210C1D4 = 0xE1A00000; // nop
+		*(u32*)0x0210C1E0 = 0xE1A00000; // nop
+		*(u32*)0x0210C324 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x0210C380, heapEnd); // mov r0, #0x23C0000
+		*(u32*)0x0210D590 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0210D594 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0210D59C = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0210D5A0 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0210D824 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02112108 = 0xE1A00000; // nop
+	}*/
+
 	// Nintendoji (Japan)
 	// Audio does not play, requires more patches to get past the save screen
 	else if (strcmp(romTid, "K9KJ") == 0 && extendedMemory2) {

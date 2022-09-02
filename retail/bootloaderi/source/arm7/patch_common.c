@@ -1992,6 +1992,33 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// Nintendogs (China)
+	else if (strcmp(romTid, "KDOC") == 0 && saveOnFlashcard) {
+		setBL(0x0202A6EC, (u32)dsiSaveSeek);
+		setBL(0x0202A6FC, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+		setBL(0x0202A8C8, (u32)dsiSaveSeek);
+		setBL(0x0202A8D8, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+		setBL(0x0202A95C, (u32)dsiSaveSeek);
+		setBL(0x0202A96C, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+		setBL(0x0202AB28, (u32)dsiSaveSeek);
+		setBL(0x0202AB38, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+		setBL(0x0202BB94, (u32)dsiSaveOpen);
+		setBL(0x0202BBA8, (u32)dsiSaveCreate);
+		setBL(0x0202BBB8, (u32)dsiSaveGetResultCode);
+		setBL(0x0202BBD4, (u32)dsiSaveOpen);
+		setBL(0x0202BBFC, (u32)dsiSaveSetLength);
+		setBL(0x0202BC04, (u32)dsiSaveClose);
+		setBL(0x0202BC14, (u32)dsiSaveOpen);
+		*(u32*)0x0202BD3C = 0xE1A00000; // nop (dsiSaveFlush)
+		setBL(0x0202BD44, (u32)dsiSaveClose);
+		setBL(0x0202BE14, (u32)dsiSaveSeek);
+		setBL(0x0202BE24, (u32)dsiSaveRead); // dsiSaveReadAsync
+		setBL(0x0202BE44, (u32)dsiSaveSeek);
+		setBL(0x0202BE54, (u32)dsiSaveRead); // dsiSaveReadAsync
+		*(u32*)0x0202BF0C = 0xE1A00000; // nop (dsiSaveFlush)
+		setBL(0x0202BF14, (u32)dsiSaveClose);
+	}
+
 	// Paul's Shooting Adventure (USA)
 	else if (strcmp(romTid, "KPJE") == 0 && saveOnFlashcard) {
 		//*(u32*)0x0203A20C = 0xE12FFF1E; // bx lr
@@ -3056,11 +3083,6 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	else if (strcmp(romTid, "KNVJ") == 0) {
 		*(u32*)0x0203FCA4 = 0xE1A00000; // nop (Skip Manual screen)
 	}
-
-	// Nintendogs (China)
-	/*else if (strcmp(romTid, "KDOC") == 0) {
-		*(u32*)0x020AA90C = 0xE12FFF1E; // bx lr
-	}*/
 
 	// Number Battle
 	else if (strcmp(romTid, "KSUE") == 0) {
