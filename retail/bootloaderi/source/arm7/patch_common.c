@@ -2033,11 +2033,12 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Mr. Driller: Drill Till You Drop (USA)
+	// Saving not working due to weird code layout
 	else if (strcmp(romTid, "KDRE") == 0 && saveOnFlashcard) {
 		*(u32*)0x0201FEA0 = 0xE1A00000; // nop (Disable NFTR font loading)
 		*(u32*)0x0202009C = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
 		*(u32*)0x0202030C = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
-		setBL(0x02032410, (u32)dsiSaveOpen);
+		/*setBL(0x02032410, (u32)dsiSaveOpen);
 		setBL(0x02032428, (u32)dsiSaveClose);
 		*(u32*)0x02032450 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
 		setBL(0x020324A8, (u32)dsiSaveCreate);
@@ -2048,15 +2049,16 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x020327C0, (u32)dsiSaveClose);
 		setBL(0x02032858, (u32)dsiSaveOpen);
 		setBL(0x02032888, (u32)dsiSaveWrite);
-		setBL(0x02032948, (u32)dsiSaveClose);
+		setBL(0x02032948, (u32)dsiSaveClose);*/
 	}
 
 	// Mr. Driller: Drill Till You Drop (Europe, Australia)
+	// Saving not working due to weird code layout
 	else if (strcmp(romTid, "KDRV") == 0 && saveOnFlashcard) {
 		*(u32*)0x0201FEA0 = 0xE1A00000; // nop (Disable NFTR font loading)
 		*(u32*)0x0202009C = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
 		*(u32*)0x0202030C = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
-		setBL(0x02032160, (u32)dsiSaveOpen);
+		/*setBL(0x02032160, (u32)dsiSaveOpen);
 		setBL(0x02032178, (u32)dsiSaveClose);
 		*(u32*)0x020321A0 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
 		setBL(0x020321F8, (u32)dsiSaveCreate);
@@ -2067,15 +2069,16 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02032510, (u32)dsiSaveClose);
 		setBL(0x020325A8, (u32)dsiSaveOpen);
 		setBL(0x020325D8, (u32)dsiSaveWrite);
-		setBL(0x02032698, (u32)dsiSaveClose);
+		setBL(0x02032698, (u32)dsiSaveClose);*/
 	}
 
 	// Sakutto Hamareru Hori Hori Action: Mr. Driller (Japan)
+	// Saving not working due to weird code layout
 	else if (strcmp(romTid, "KDRJ") == 0 && saveOnFlashcard) {
 		*(u32*)0x0201FE10 = 0xE1A00000; // nop (Disable NFTR font loading)
 		*(u32*)0x0202000C = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
 		*(u32*)0x0202027C = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
-		setBL(0x0203204C, (u32)dsiSaveOpen);
+		/*setBL(0x0203204C, (u32)dsiSaveOpen);
 		setBL(0x02032064, (u32)dsiSaveClose);
 		*(u32*)0x0203208C = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
 		setBL(0x020320E4, (u32)dsiSaveCreate);
@@ -2086,7 +2089,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x020323FC, (u32)dsiSaveClose);
 		setBL(0x02032494, (u32)dsiSaveOpen);
 		setBL(0x020324C4, (u32)dsiSaveWrite);
-		setBL(0x02032584, (u32)dsiSaveClose);
+		setBL(0x02032584, (u32)dsiSaveClose);*/
 	}
 
 	// Nintendo DSi Camera
