@@ -4717,6 +4717,51 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020331D8 = 0xE1A00000; // nop
 	}
 
+	// Magical Drop Yurutto (Japan)
+	// Crashes at 0x0201AF4C(?)
+	/*else if (strcmp(romTid, "KMAJ") == 0) {
+		*(u32*)0x020159D4 = 0xE1A00000; // nop (Disable NFTR font loading)
+		*(u32*)0x02019350 = 0xE1A00000; // nop
+		*(u32*)0x02019360 = 0xE1A00000; // nop
+		*(u32*)0x0201936C = 0xE1A00000; // nop
+		*(u32*)0x02019378 = 0xE1A00000; // nop
+		*(u32*)0x0201943C = 0xE1A00000; // nop
+		setBL(0x020197AC, (u32)dsiSaveCreate);
+		setBL(0x02019800, (u32)dsiSaveDelete);
+		setBL(0x02019860, (u32)dsiSaveOpen);
+		setBL(0x0201988C, (u32)dsiSaveGetLength);
+		setBL(0x020198A0, (u32)dsiSaveRead);
+		setBL(0x020198BC, (u32)dsiSaveClose);
+		setBL(0x020198D0, (u32)dsiSaveClose);
+		setBL(0x02019964, (u32)dsiSaveOpen);
+		setBL(0x02019998, (u32)dsiSaveWrite);
+		setBL(0x020199B4, (u32)dsiSaveClose);
+		setBL(0x020199C8, (u32)dsiSaveClose);
+		*(u32*)0x020199FC = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0201C160 = 0xE1A00000; // nop
+		*(u32*)0x0201C85C = 0xE1A00000; // nop
+		*(u32*)0x0201C860 = 0xE1A00000; // nop
+		*(u32*)0x0201C870 = 0xE1A00000; // nop
+		*(u32*)0x0201CED4 = 0xE1A00000; // nop (Disable NFTR font loading)
+		*(u32*)0x020343E8 = 0xE1A00000; // nop
+		tonccpy((u32*)0x020350D0, dsiSaveGetResultCode, 0xC);
+		tonccpy((u32*)0x02035C7C, dsiSaveGetInfo, 0xC);
+		*(u32*)0x02037D30 = 0xE1A00000; // nop
+		*(u32*)0x0203BBFC = 0xE1A00000; // nop
+		*(u32*)0x0203D9F4 = 0xE1A00000; // nop
+		*(u32*)0x0203D9F8 = 0xE1A00000; // nop
+		*(u32*)0x0203DA04 = 0xE1A00000; // nop
+		*(u32*)0x0203DB48 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x0203DBA4, heapEnd); // mov r0, #0x23C0000
+		*(u32*)0x0203F0F0 = 0xE1A00000; // nop
+		*(u32*)0x0203F0F8 = 0xE8BD8010; // LDMFD SP!, {R4,PC}
+		*(u32*)0x0203F468 = 0xE1A00000; // nop
+		*(u32*)0x0203F46C = 0xE1A00000; // nop
+		*(u32*)0x0203F470 = 0xE1A00000; // nop
+		*(u32*)0x0203F474 = 0xE1A00000; // nop
+		*(u32*)0x02041E00 = 0xE1A00000; // nop
+	}*/
+
 	// Magical Whip (USA)
 	else if (strcmp(romTid, "KWME") == 0) {
 		*(u32*)0x0200498C = 0xE1A00000; // nop

@@ -1803,6 +1803,25 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02024980, (u32)dsiSaveCreate);
 	}
 
+	// Magical Drop Yurutto (Japan)
+	else if (strcmp(romTid, "KMAJ") == 0 && saveOnFlashcard) {
+		*(u32*)0x020159D4 = 0xE1A00000; // nop (Disable NFTR font loading)
+		setBL(0x020197AC, (u32)dsiSaveCreate);
+		setBL(0x02019800, (u32)dsiSaveDelete);
+		setBL(0x02019860, (u32)dsiSaveOpen);
+		setBL(0x0201988C, (u32)dsiSaveGetLength);
+		setBL(0x020198A0, (u32)dsiSaveRead);
+		setBL(0x020198BC, (u32)dsiSaveClose);
+		setBL(0x020198D0, (u32)dsiSaveClose);
+		setBL(0x02019964, (u32)dsiSaveOpen);
+		setBL(0x02019998, (u32)dsiSaveWrite);
+		setBL(0x020199B4, (u32)dsiSaveClose);
+		setBL(0x020199C8, (u32)dsiSaveClose);
+		*(u32*)0x0201CED4 = 0xE1A00000; // nop (Disable NFTR font loading)
+		tonccpy((u32*)0x020350D0, dsiSaveGetResultCode, 0xC);
+		tonccpy((u32*)0x02035C7C, dsiSaveGetInfo, 0xC);
+	}
+
 	// Magical Whip (USA)
 	else if (strcmp(romTid, "KWME") == 0 && saveOnFlashcard) {
 		*(u32*)0x0201D4F8 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
