@@ -7116,6 +7116,76 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		doubleNopT(0x020D515E);
 	}*/
 
+	// True Swing Golf Express (USA)
+	// A Little Bit of... Nintendo Touch Golf (Europe, Australia)
+	// Crashes on white screens when going to menu
+	/*if ((strcmp(romTid, "K72E") == 0 || strcmp(romTid, "K72V") == 0) && extendedMemory2) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		//*(u32*)0x02009A84 = 0xE12FFF1E; // bx lr
+		setBL(0x02009AC0, (u32)dsiSaveOpen);
+		setBL(0x02009AE0, (u32)dsiSaveGetLength);
+		setBL(0x02009B48, (u32)dsiSaveClose);
+		setBL(0x02009BEC, (u32)dsiSaveOpen);
+		setBL(0x02009C00, (u32)dsiSaveCreate);
+		setBL(0x02009C18, (u32)dsiSaveOpen);
+		setBL(0x02009C2C, (u32)dsiSaveSetLength);
+		setBL(0x02009C64, (u32)dsiSaveGetLength);
+		setBL(0x02009CA0, (u32)dsiSaveSeek);
+		setBL(0x02009CB8, (u32)dsiSaveWrite);
+		setBL(0x02009D34, (u32)dsiSaveOpen);
+		setBL(0x02009D4C, (u32)dsiSaveSeek);
+		setBL(0x02009D5C, (u32)dsiSaveSeek);
+		setBL(0x02009D6C, (u32)dsiSaveRead);
+		setBL(0x02009D80, (u32)dsiSaveClose);
+		setBL(0x02009E4C, (u32)dsiSaveOpen);
+		setBL(0x02009E64, (u32)dsiSaveSeek);
+		setBL(0x02009E78, (u32)dsiSaveSeek);
+		setBL(0x02009E88, (u32)dsiSaveWrite);
+		setBL(0x02009E9C, (u32)dsiSaveClose);
+		setBL(0x02009F2C, (u32)dsiSaveOpen);
+		setBL(0x02009F70, (u32)dsiSaveSeek);
+		setBL(0x02009F80, (u32)dsiSaveSeek);
+		setBL(0x02009F90, (u32)dsiSaveWrite);
+		setBL(0x02009FC4, (u32)dsiSaveClose);
+		setBL(0x0200A024, (u32)dsiSaveOpen);
+		setBL(0x0200A03C, (u32)dsiSaveSeek);
+		setBL(0x0200A04C, (u32)dsiSaveSeek);
+		setBL(0x0200A05C, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+		setBL(0x0200A0AC, (u32)dsiSaveClose);
+		setBL(0x0200A134, (u32)dsiSaveClose);
+		if (ndsHeader->gameCode[3] == 'E') {
+			*(u32*)0x02063214 = 0xE1A00000; // nop
+			*(u32*)0x02066E74 = 0xE1A00000; // nop
+			*(u32*)0x02072B10 = 0xE1A00000; // nop
+			*(u32*)0x020749D4 = 0xE1A00000; // nop
+			*(u32*)0x020749D8 = 0xE1A00000; // nop
+			*(u32*)0x020749E4 = 0xE1A00000; // nop
+			*(u32*)0x02074B44 = 0xE1A00000; // nop
+			patchHiHeapDSiWare(0x02074BA0, 0x02F00000); // mov r0, #0x2F00000
+			*(u32*)0x020760C8 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
+			*(u32*)0x020760E4 = 0xE3A00001; // mov r0, #1
+			*(u32*)0x020760E8 = 0xE12FFF1E; // bx lr
+			*(u32*)0x020760F0 = 0xE3A00000; // mov r0, #0
+			*(u32*)0x020760F4 = 0xE12FFF1E; // bx lr
+			*(u32*)0x02079700 = 0xE1A00000; // nop
+		} else {
+			*(u32*)0x02062FA8 = 0xE1A00000; // nop
+			*(u32*)0x02066C08 = 0xE1A00000; // nop
+			*(u32*)0x020728A4 = 0xE1A00000; // nop
+			*(u32*)0x02074768 = 0xE1A00000; // nop
+			*(u32*)0x0207476C = 0xE1A00000; // nop
+			*(u32*)0x02074778 = 0xE1A00000; // nop
+			*(u32*)0x020748D8 = 0xE1A00000; // nop
+			patchHiHeapDSiWare(0x02074934, 0x02F00000); // mov r0, #0x2F00000
+			*(u32*)0x02075E5C = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
+			*(u32*)0x02075E78 = 0xE3A00001; // mov r0, #1
+			*(u32*)0x02075E7C = 0xE12FFF1E; // bx lr
+			*(u32*)0x02075E84 = 0xE3A00000; // mov r0, #0
+			*(u32*)0x02075E88 = 0xE12FFF1E; // bx lr
+			*(u32*)0x02079494 = 0xE1A00000; // nop
+		}
+	}*/
+
 	// Wakugumi: Monochrome Puzzle (Europe, Australia)
 	else if (strcmp(romTid, "KK4V") == 0) {
 		*(u32*)0x02005A38 = 0xE1A00000; // nop

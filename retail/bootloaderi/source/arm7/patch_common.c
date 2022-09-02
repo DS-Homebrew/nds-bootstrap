@@ -2643,6 +2643,43 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02037910, (u32)dsiSaveWrite);
 	}
 
+	// True Swing Golf Express (USA)
+	// A Little Bit of... Nintendo Touch Golf (Europe, Australia)
+	if ((strcmp(romTid, "K72E") == 0 || strcmp(romTid, "K72V") == 0) && saveOnFlashcard) {
+		//*(u32*)0x02009A84 = 0xE12FFF1E; // bx lr
+		setBL(0x02009AC0, (u32)dsiSaveOpen);
+		setBL(0x02009AE0, (u32)dsiSaveGetLength);
+		setBL(0x02009B48, (u32)dsiSaveClose);
+		setBL(0x02009BEC, (u32)dsiSaveOpen);
+		setBL(0x02009C00, (u32)dsiSaveCreate);
+		setBL(0x02009C18, (u32)dsiSaveOpen);
+		setBL(0x02009C2C, (u32)dsiSaveSetLength);
+		setBL(0x02009C64, (u32)dsiSaveGetLength);
+		setBL(0x02009CA0, (u32)dsiSaveSeek);
+		setBL(0x02009CB8, (u32)dsiSaveWrite);
+		setBL(0x02009D34, (u32)dsiSaveOpen);
+		setBL(0x02009D4C, (u32)dsiSaveSeek);
+		setBL(0x02009D5C, (u32)dsiSaveSeek);
+		setBL(0x02009D6C, (u32)dsiSaveRead);
+		setBL(0x02009D80, (u32)dsiSaveClose);
+		setBL(0x02009E4C, (u32)dsiSaveOpen);
+		setBL(0x02009E64, (u32)dsiSaveSeek);
+		setBL(0x02009E78, (u32)dsiSaveSeek);
+		setBL(0x02009E88, (u32)dsiSaveWrite);
+		setBL(0x02009E9C, (u32)dsiSaveClose);
+		setBL(0x02009F2C, (u32)dsiSaveOpen);
+		setBL(0x02009F70, (u32)dsiSaveSeek);
+		setBL(0x02009F80, (u32)dsiSaveSeek);
+		setBL(0x02009F90, (u32)dsiSaveWrite);
+		setBL(0x02009FC4, (u32)dsiSaveClose);
+		setBL(0x0200A024, (u32)dsiSaveOpen);
+		setBL(0x0200A03C, (u32)dsiSaveSeek);
+		setBL(0x0200A04C, (u32)dsiSaveSeek);
+		setBL(0x0200A05C, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+		setBL(0x0200A0AC, (u32)dsiSaveClose);
+		setBL(0x0200A134, (u32)dsiSaveClose);
+	}
+
 	// WarioWare: Touched! DL (USA, Australia)
 	else if (strcmp(romTid, "Z2AT") == 0 && saveOnFlashcard) {
 		setBL(0x0200BCA4, (u32)dsiSaveOpen);
@@ -3112,12 +3149,6 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	else if (strcmp(romTid, "KTEV") == 0) {
 		*(u32*)0x0205A828 = 0xE12FFF1E; // bx lr
 		*(u32*)0x0205A918 = 0xE12FFF1E; // bx lr
-	}
-
-	// True Swing Golf Express (USA)
-	// A Little Bit of... Nintendo Touch Golf (Europe, Australia)
-	if (strcmp(romTid, "K72E") == 0 || strcmp(romTid, "K72V") == 0) {
-		*(u32*)0x02009A84 = 0xE12FFF1E; // bx lr
 	}
 }
 
