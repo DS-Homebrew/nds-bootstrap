@@ -5392,6 +5392,105 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02036ED0 = 0xE1A00000; // nop
 	}
 
+	// Mr. Driller: Drill Till You Drop (USA)
+	else if (strcmp(romTid, "KDRE") == 0) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x0201FEA0 = 0xE1A00000; // nop (Disable NFTR font loading)
+		*(u32*)0x0202009C = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
+		*(u32*)0x0202030C = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
+		setBL(0x02032410, (u32)dsiSaveOpen);
+		setBL(0x02032428, (u32)dsiSaveClose);
+		*(u32*)0x02032450 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+		*(u32*)0x02032470 = 0xE1A00000; // nop
+		setBL(0x020324A8, (u32)dsiSaveCreate);
+		setBL(0x020324CC, (u32)dsiSaveGetResultCode);
+		setBL(0x0203277C, (u32)dsiSaveOpen);
+		setBL(0x02032790, (u32)dsiSaveSeek);
+		setBL(0x020327A0, (u32)dsiSaveRead);
+		setBL(0x020327C0, (u32)dsiSaveClose);
+		setBL(0x02032858, (u32)dsiSaveOpen);
+		setBL(0x02032888, (u32)dsiSaveWrite);
+		setBL(0x02032948, (u32)dsiSaveClose);
+		*(u32*)0x02034DA4 = 0xE1A00000; // nop
+		*(u32*)0x02036DA4 = 0xE1A00000; // nop
+		*(u32*)0x0203B1F4 = 0xE1A00000; // nop
+		*(u32*)0x0203E32C = 0xE1A00000; // nop
+		*(u32*)0x020400D4 = 0xE1A00000; // nop
+		*(u32*)0x020400D8 = 0xE1A00000; // nop
+		*(u32*)0x020400E4 = 0xE1A00000; // nop
+		*(u32*)0x02040244 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x020402A0, heapEnd); // mov r0, #0x23C0000
+		*(u32*)0x020417B8 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
+		*(u32*)0x02044DDC = 0xE1A00000; // nop
+	}
+
+	// Mr. Driller: Drill Till You Drop (Europe, Australia)
+	else if (strcmp(romTid, "KDRV") == 0) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x0201FEA0 = 0xE1A00000; // nop (Disable NFTR font loading)
+		*(u32*)0x0202009C = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
+		*(u32*)0x0202030C = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
+		setBL(0x02032160, (u32)dsiSaveOpen);
+		setBL(0x02032178, (u32)dsiSaveClose);
+		*(u32*)0x020321A0 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+		*(u32*)0x020321C0 = 0xE1A00000; // nop
+		setBL(0x020321F8, (u32)dsiSaveCreate);
+		setBL(0x0203221C, (u32)dsiSaveGetResultCode);
+		setBL(0x020324CC, (u32)dsiSaveOpen);
+		setBL(0x020324E0, (u32)dsiSaveSeek);
+		setBL(0x020324F0, (u32)dsiSaveRead);
+		setBL(0x02032510, (u32)dsiSaveClose);
+		setBL(0x020325A8, (u32)dsiSaveOpen);
+		setBL(0x020325D8, (u32)dsiSaveWrite);
+		setBL(0x02032698, (u32)dsiSaveClose);
+		*(u32*)0x02034AF4 = 0xE1A00000; // nop
+		*(u32*)0x02036B10 = 0xE1A00000; // nop
+		*(u32*)0x0203AF60 = 0xE1A00000; // nop
+		*(u32*)0x0203E098 = 0xE1A00000; // nop
+		*(u32*)0x0203FE40 = 0xE1A00000; // nop
+		*(u32*)0x0203FE44 = 0xE1A00000; // nop
+		*(u32*)0x0203FE50 = 0xE1A00000; // nop
+		*(u32*)0x0203FFB0 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x0204000C, heapEnd); // mov r0, #0x23C0000
+		*(u32*)0x02041524 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
+		*(u32*)0x02044B48 = 0xE1A00000; // nop
+	}
+
+	// Sakutto Hamareru Hori Hori Action: Mr. Driller (Japan)
+	else if (strcmp(romTid, "KDRJ") == 0) {
+		*(u32*)0x0201FE10 = 0xE1A00000; // nop (Disable NFTR font loading)
+		*(u32*)0x0202000C = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
+		*(u32*)0x0202027C = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
+		setBL(0x0203204C, (u32)dsiSaveOpen);
+		setBL(0x02032064, (u32)dsiSaveClose);
+		*(u32*)0x0203208C = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+		*(u32*)0x020320AC = 0xE1A00000; // nop
+		setBL(0x020320E4, (u32)dsiSaveCreate);
+		setBL(0x02032108, (u32)dsiSaveGetResultCode);
+		setBL(0x020323B8, (u32)dsiSaveOpen);
+		setBL(0x020323CC, (u32)dsiSaveSeek);
+		setBL(0x020323DC, (u32)dsiSaveRead);
+		setBL(0x020323FC, (u32)dsiSaveClose);
+		setBL(0x02032494, (u32)dsiSaveOpen);
+		setBL(0x020324C4, (u32)dsiSaveWrite);
+		setBL(0x02032584, (u32)dsiSaveClose);
+		*(u32*)0x020349DC = 0xE1A00000; // nop
+		*(u32*)0x0203697C = 0xE28DD00C; // ADD   SP, SP, #0xC
+		*(u32*)0x02036980 = 0xE8BD8078; // LDMFD SP!, {R3-R6,PC}
+		*(u32*)0x0203AFAC = 0xE1A00000; // nop
+		*(u32*)0x0203F9DC = 0xE1A00000; // nop
+		*(u32*)0x02041740 = 0xE1A00000; // nop
+		*(u32*)0x02041744 = 0xE1A00000; // nop
+		*(u32*)0x02041750 = 0xE1A00000; // nop
+		*(u32*)0x02041894 = 0xE1A00000; // nop
+		*(u32*)0x02041898 = 0xE1A00000; // nop
+		*(u32*)0x0204189C = 0xE1A00000; // nop
+		*(u32*)0x020418A0 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x020418FC, heapEnd); // mov r0, #0x23C0000
+		*(u32*)0x02042E48 = 0xE1A00000; // nop
+		*(u32*)0x02042E50 = 0xE8BD8010; // LDMFD SP!, {R4,PC}
+	}
+
 	// Music on: Playing Piano (USA)
 	// Sprite graphics and font missing
 	else if (strcmp(romTid, "KICE") == 0) {
