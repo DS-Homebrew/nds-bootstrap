@@ -1515,6 +1515,24 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02020424, (u32)dsiSaveCreate);
 	}
 
+	// Dragon Quest Wars (USA)
+	// DSi save function patching not needed
+	else if (strcmp(romTid, "KDQE") == 0 && saveOnFlashcard) {
+		*(u32*)0x0201F208 = 0xE12FFF1E; // bx lr (Skip Manual screen)
+	}
+
+	// Dragon Quest Wars (Europe, Australia)
+	// DSi save function patching not needed
+	else if (strcmp(romTid, "KDQV") == 0 && saveOnFlashcard) {
+		*(u32*)0x0201F250 = 0xE12FFF1E; // bx lr (Skip Manual screen)
+	}
+
+	// Dragon Quest Wars (Japan)
+	// DSi save function patching not needed
+	else if (strcmp(romTid, "KDQJ") == 0 && saveOnFlashcard) {
+		*(u32*)0x0201EF84 = 0xE12FFF1E; // bx lr (Skip Manual screen)
+	}
+
 	// DS WiFi Settings
 	else if (strcmp(romTid, "B88A") == 0) {
 		tonccpy((void*)0x023C0000, ce9->thumbPatches->reset_arm9, 0x18);

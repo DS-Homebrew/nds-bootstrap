@@ -3615,6 +3615,73 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02041168 = 0xE1A00000; // nop
 	}
 
+	// Dragon Quest Wars (USA)
+	// DSi save function patching not needed
+	// Requires 8MB of RAM
+	else if (strcmp(romTid, "KDQE") == 0 && extendedMemory2) {
+		*(u32*)0x0201F208 = 0xE12FFF1E; // bx lr (Skip Manual screen)
+		*(u32*)0x020A82EC = 0xE1A00000; // nop
+		*(u32*)0x020AC120 = 0xE1A00000; // nop
+		*(u32*)0x020B3598 = 0xE1A00000; // nop
+		*(u32*)0x020B66CC = 0xE1A00000; // nop
+		*(u32*)0x020B66D0 = 0xE1A00000; // nop
+		*(u32*)0x020B66DC = 0xE1A00000; // nop
+		*(u32*)0x020B6820 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x020B687C, 0x02700000); // mov r0, #0x2700000
+		//*(u32*)0x020B69B0 = 0x022A83C0;
+		*(u32*)0x020B7BF0 = 0xE1A00000; // nop
+		*(u32*)0x020B7BF8 = 0xE8BD8010; // LDMFD SP!, {R4,PC}
+		*(u32*)0x020B7C18 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x020B7C1C = 0xE12FFF1E; // bx lr
+		*(u32*)0x020B7C6C = 0xE3A00000; // mov r0, #0
+		*(u32*)0x020B7C70 = 0xE12FFF1E; // bx lr
+		*(u32*)0x020BB5AC = 0xE1A00000; // nop
+	}
+
+	// Dragon Quest Wars (Europe, Australia)
+	// DSi save function patching not needed
+	// Requires 8MB of RAM
+	else if (strcmp(romTid, "KDQV") == 0 && extendedMemory2) {
+		*(u32*)0x0201F250 = 0xE12FFF1E; // bx lr (Skip Manual screen)
+		*(u32*)0x020A8334 = 0xE1A00000; // nop
+		*(u32*)0x020AC168 = 0xE1A00000; // nop
+		*(u32*)0x020B35E0 = 0xE1A00000; // nop
+		*(u32*)0x020B6714 = 0xE1A00000; // nop
+		*(u32*)0x020B6718 = 0xE1A00000; // nop
+		*(u32*)0x020B6724 = 0xE1A00000; // nop
+		*(u32*)0x020B6868 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x020B68C4, 0x02700000); // mov r0, #0x2700000
+		*(u32*)0x020B7C38 = 0xE1A00000; // nop
+		*(u32*)0x020B7C40 = 0xE8BD8010; // LDMFD SP!, {R4,PC}
+		*(u32*)0x020B7C60 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x020B7C64 = 0xE12FFF1E; // bx lr
+		*(u32*)0x020B7CB4 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x020B7CB8 = 0xE12FFF1E; // bx lr
+		*(u32*)0x020BB5F4 = 0xE1A00000; // nop
+	}
+
+	// Dragon Quest Wars (Japan)
+	// DSi save function patching not needed
+	// Requires 8MB of RAM
+	else if (strcmp(romTid, "KDQJ") == 0 && extendedMemory2) {
+		*(u32*)0x0201EF84 = 0xE12FFF1E; // bx lr (Skip Manual screen)
+		*(u32*)0x020A7CAC = 0xE1A00000; // nop
+		*(u32*)0x020ABAE0 = 0xE1A00000; // nop
+		*(u32*)0x020B2F58 = 0xE1A00000; // nop
+		*(u32*)0x020B608C = 0xE1A00000; // nop
+		*(u32*)0x020B6090 = 0xE1A00000; // nop
+		*(u32*)0x020B609C = 0xE1A00000; // nop
+		*(u32*)0x020B61E0 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x020B623C, 0x02700000); // mov r0, #0x2700000
+		*(u32*)0x020B75B0 = 0xE1A00000; // nop
+		*(u32*)0x020B75B8 = 0xE8BD8010; // LDMFD SP!, {R4,PC}
+		*(u32*)0x020B75D8 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x020B75DC = 0xE12FFF1E; // bx lr
+		*(u32*)0x020B762C = 0xE3A00000; // mov r0, #0
+		*(u32*)0x020B7630 = 0xE12FFF1E; // bx lr
+		*(u32*)0x020BAF6C = 0xE1A00000; // nop
+	}
+
 	// DS WiFi Settings
 	else if (strcmp(romTid, "B88A") == 0) {
 		const u16* branchCode = generateA7InstrThumb(0x020051F4, (int)ce9->thumbPatches->reset_arm9);
@@ -3692,6 +3759,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Famicom Wars DS: Ushinawareta Hikari (Japan)
+	// DSi save function patching not needed 
 	else if (strcmp(romTid, "Z2EJ") == 0) {
 		*(u32*)0x02004838 = 0xE1A00000; // nop
 		*(u32*)0x0200499C = 0xE1A00000; // nop
