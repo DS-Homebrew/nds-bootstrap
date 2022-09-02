@@ -5122,6 +5122,39 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02033B00 = 0xE1A00000; // nop (Skip Manual screen)
 	}
 
+	// Model Academy (Europe)
+	else if (strcmp(romTid, "K8MP") == 0) {
+		*(u32*)0x02004838 = 0xE1A00000; // nop
+		*(u32*)0x0200499C = 0xE1A00000; // nop
+		*(u32*)0x02005098 = 0xE1A00000; // nop
+		*(u32*)0x020050B4 = 0xE1A00000; // nop
+		*(u32*)0x020050E8 = 0xE1A00000; // nop
+		*(u32*)0x02011A0C = 0xE1A00000; // nop
+		*(u32*)0x02015788 = 0xE1A00000; // nop
+		*(u32*)0x0201AB14 = 0xE1A00000; // nop
+		*(u32*)0x0201C988 = 0xE1A00000; // nop
+		*(u32*)0x0201C98C = 0xE1A00000; // nop
+		*(u32*)0x0201C998 = 0xE1A00000; // nop
+		*(u32*)0x0201CAF8 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x0201CB54, heapEnd); // mov r0, #0x23C0000
+		*(u32*)0x0201E058 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
+		*(u32*)0x02020E78 = 0xE1A00000; // nop
+		setBL(0x020B19E4, (u32)dsiSaveCreate);
+		setBL(0x020B19F4, (u32)dsiSaveOpen);
+		setBL(0x020B1A04, (u32)dsiSaveGetResultCode);
+		setBL(0x020B1A40, (u32)dsiSaveSetLength);
+		setBL(0x020B1A50, (u32)dsiSaveWrite);
+		setBL(0x020B1A58, (u32)dsiSaveClose);
+		setBL(0x020B1A94, (u32)dsiSaveOpen);
+		setBL(0x020B1AA4, (u32)dsiSaveGetResultCode);
+		setBL(0x020B1ABC, (u32)dsiSaveGetLength);
+		setBL(0x020B1ACC, (u32)dsiSaveRead);
+		setBL(0x020B1AD4, (u32)dsiSaveClose);
+		setBL(0x020B1B0C, (u32)dsiSaveOpen);
+		setBL(0x020B1B1C, (u32)dsiSaveGetResultCode);
+		setBL(0x020B1B34, (u32)dsiSaveClose);
+	}
+
 	// Monster Buster Club (USA)
 	else if (strcmp(romTid, "KXBE") == 0) {
 		*(u32*)0x0200498C = 0xE1A00000; // nop

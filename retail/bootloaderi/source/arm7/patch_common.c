@@ -1907,6 +1907,24 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02005A14, (u32)dsiSaveClose);
 	}
 
+	// Model Academy (Europe)
+	else if (strcmp(romTid, "K8MP") == 0 && saveOnFlashcard) {
+		setBL(0x020B19E4, (u32)dsiSaveCreate);
+		setBL(0x020B19F4, (u32)dsiSaveOpen);
+		setBL(0x020B1A04, (u32)dsiSaveGetResultCode);
+		setBL(0x020B1A40, (u32)dsiSaveSetLength);
+		setBL(0x020B1A50, (u32)dsiSaveWrite);
+		setBL(0x020B1A58, (u32)dsiSaveClose);
+		setBL(0x020B1A94, (u32)dsiSaveOpen);
+		setBL(0x020B1AA4, (u32)dsiSaveGetResultCode);
+		setBL(0x020B1ABC, (u32)dsiSaveGetLength);
+		setBL(0x020B1ACC, (u32)dsiSaveRead);
+		setBL(0x020B1AD4, (u32)dsiSaveClose);
+		setBL(0x020B1B0C, (u32)dsiSaveOpen);
+		setBL(0x020B1B1C, (u32)dsiSaveGetResultCode);
+		setBL(0x020B1B34, (u32)dsiSaveClose);
+	}
+
 	// Monster Buster Club (USA)
 	else if (strcmp(romTid, "KXBE") == 0 && saveOnFlashcard) {
 		/* *(u32*)0x0207F058 = 0xE3A00001; // mov r0, #1
