@@ -1684,6 +1684,36 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0203AF58 = 0xE12FFF1E; // bx lr
 	}*/
 
+	// Bird & Beans (USA)
+	// Difficult to get working
+	/*else if (strcmp(romTid, "KP6E") == 0) {
+		doubleNopT(0x0200509E);
+		doubleNopT(0x020050A2);
+		doubleNopT(0x020050AC);
+		doubleNopT(0x02005254);
+		*(u16*)0x0205F52 = 0x2001; // movs r0, #1
+		*(u16*)0x0205F54 = 0x46C0; // nop
+		doubleNopT(0x02005F74);
+		*(u16*)0x0205F90 = 0x2001; // movs r0, #1
+		*(u16*)0x0205F92 = 0x46C0; // nop
+		doubleNopT(0x0200DC4E);
+		//doubleNopT(0x0200EDCE);
+		//doubleNopT(0x0200EDDE);
+		doubleNopT(0x02020A9E);
+		doubleNopT(0x02022EFA);
+		doubleNopT(0x0202640C);
+		doubleNopT(0x02027B7A);
+		doubleNopT(0x02027B7E);
+		doubleNopT(0x02027B8A);
+		doubleNopT(0x02027C6E);
+		patchHiHeapDSiWareThumb(0x02027CAC, 0x020256D8, heapEnd); // movs r0, #0x23C0000
+		*(u16*)0x02028A30 = 0xBD10; // POP {R4,PC}
+		doubleNopT(0x02028D26);
+		doubleNopT(0x02028D2A);
+		doubleNopT(0x02028D2E);
+		doubleNopT(0x0202AD82);
+	}*/
+
 	// BlayzBloo: Super Melee Brawlers Battle Royale (USA)
 	// Requires 8MB of RAM
 	else if (strcmp(romTid, "KBZE") == 0 && extendedMemory2) {
