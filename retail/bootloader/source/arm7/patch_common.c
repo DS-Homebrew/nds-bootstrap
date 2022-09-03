@@ -43,6 +43,7 @@ static inline void doubleNopT(u32 addr) {
 }
 
 void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
+	extern bool expansionPakFound;
 	extern u32 donorFileTwlCluster;	// SDK5 (TWL)
 	extern u32 fatTableAddr;
 	const char* romTid = getRomTid(ndsHeader);
@@ -4950,6 +4951,111 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0204E62C = 0xE1A00000; // nop
 		*(u32*)0x0205DAAC = 0xE3A00001; // mov r0, #1
 		*(u32*)0x0205DAB0 = 0xE12FFF1E; // bx lr
+	}
+
+	// Make Up & Style (USA)
+	else if (strcmp(romTid, "KYLE") == 0 && extendedMemory2) {
+		/*for (u32 i = 0; i < ndsHeader->arm9binarySize/4; i++) {
+			u32* addr = (u32*)0x02004000;
+			if (addr[i] >= 0x022F4000 && addr[i] < 0x02308000) {
+				addr[i] -= extendedMemory2 ? 0x100000 : 0x180000;
+			}
+		}*/
+
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x020050AC = 0xE1A00000; // nop
+		*(u32*)0x020052B8 = 0xE1A00000; // nop
+		*(u32*)0x020052BC = 0xE1A00000; // nop
+		*(u32*)0x020052E0 = 0xE1A00000; // nop
+		*(u32*)0x020052F4 = 0xE1A00000; // nop
+		*(u32*)0x02005324 = 0xE1A00000; // nop
+		*(u32*)0x02005348 = 0xE1A00000; // nop (Disable NFTR font loading)
+		*(u32*)0x0200534C = 0xE1A00000; // nop
+		/*if (!extendedMemory2 && expansionPakFound) {
+			*(u32*)0x020080DC = 0x09000000;
+			*(u32*)0x020094CC = *(u32*)0x020080DC;
+			*(u32*)0x020099CC = *(u32*)0x020080DC;
+			*(u32*)0x0200BA74 = *(u32*)0x020080DC;
+			*(u32*)0x0200C2CC = *(u32*)0x020080DC;
+			*(u32*)0x0201E650 = *(u32*)0x020080DC;
+		}*/
+		setBL(0x0202A34C, (u32)dsiSaveOpen);
+		setBL(0x0202A360, (u32)dsiSaveCreate);
+		setBL(0x0202A384, (u32)dsiSaveOpen);
+		setBL(0x0202A398, (u32)dsiSaveSetLength);
+		setBL(0x0202A3A4, (u32)dsiSaveClose);
+		setBL(0x0202A3C4, (u32)dsiSaveSetLength);
+		setBL(0x0202A3CC, (u32)dsiSaveClose);
+		*(u32*)0x0202A4E8 = 0xE1A00000; // nop
+		setBL(0x0202A5C4, (u32)dsiSaveOpen);
+		setBL(0x0202A5EC, (u32)dsiSaveSeek);
+		setBL(0x0202A600, (u32)dsiSaveRead);
+		setBL(0x0202A60C, (u32)dsiSaveClose);
+		setBL(0x0202A6D4, (u32)dsiSaveOpen);
+		setBL(0x0202A6FC, (u32)dsiSaveSeek);
+		setBL(0x0202A710, (u32)dsiSaveWrite);
+		setBL(0x0202A71C, (u32)dsiSaveClose);
+		*(u32*)0x020558D4 = 0xE1A00000; // nop
+		tonccpy((u32*)0x02056468, dsiSaveGetResultCode, 0xC);
+		*(u32*)0x02059040 = 0xE1A00000; // nop
+		*(u32*)0x0205E7C0 = 0xE1A00000; // nop
+		*(u32*)0x02060810 = 0xE1A00000; // nop
+		*(u32*)0x02060814 = 0xE1A00000; // nop
+		*(u32*)0x02060820 = 0xE1A00000; // nop
+		*(u32*)0x02060980 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x020609DC, /*extendedMemory2 ?*/ 0x02700000 /*: heapEnd*/); // mov r0, extendedMemory2 ? #0x2700000 : #0x23C0000
+		//*(u32*)0x02060B10 -= extendedMemory2 ? 0x100000 : 0x310000;
+		*(u32*)0x02061F74 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
+		*(u32*)0x0206237C = 0xE1A00000; // nop
+		*(u32*)0x02062380 = 0xE1A00000; // nop
+		*(u32*)0x02062384 = 0xE1A00000; // nop
+		*(u32*)0x02062388 = 0xE1A00000; // nop
+		*(u32*)0x020654D8 = 0xE1A00000; // nop
+	}
+
+	// Make Up & Style (Europe)
+	else if (strcmp(romTid, "KYLP") == 0 && extendedMemory2) {
+		*(u32*)0x02004838 = 0xE1A00000; // nop
+		*(u32*)0x0200499C = 0xE1A00000; // nop
+		*(u32*)0x020050C4 = 0xE1A00000; // nop
+		*(u32*)0x020052D0 = 0xE1A00000; // nop
+		*(u32*)0x020052D4 = 0xE1A00000; // nop
+		*(u32*)0x020052F8 = 0xE1A00000; // nop
+		*(u32*)0x0200530C = 0xE1A00000; // nop
+		*(u32*)0x0200533C = 0xE1A00000; // nop
+		*(u32*)0x02005360 = 0xE1A00000; // nop (Disable NFTR font loading)
+		*(u32*)0x02005364 = 0xE1A00000; // nop
+		setBL(0x0202A484, (u32)dsiSaveOpen);
+		setBL(0x0202A498, (u32)dsiSaveCreate);
+		setBL(0x0202A4BC, (u32)dsiSaveOpen);
+		setBL(0x0202A4D0, (u32)dsiSaveSetLength);
+		setBL(0x0202A4DC, (u32)dsiSaveClose);
+		setBL(0x0202A4FC, (u32)dsiSaveSetLength);
+		setBL(0x0202A504, (u32)dsiSaveClose);
+		*(u32*)0x0202A620 = 0xE1A00000; // nop
+		setBL(0x0202A6FC, (u32)dsiSaveOpen);
+		setBL(0x0202A724, (u32)dsiSaveSeek);
+		setBL(0x0202A738, (u32)dsiSaveRead);
+		setBL(0x0202A744, (u32)dsiSaveClose);
+		setBL(0x0202A80C, (u32)dsiSaveOpen);
+		setBL(0x0202A834, (u32)dsiSaveSeek);
+		setBL(0x0202A848, (u32)dsiSaveWrite);
+		setBL(0x0202A854, (u32)dsiSaveClose);
+		*(u32*)0x02055A0C = 0xE1A00000; // nop
+		tonccpy((u32*)0x020565A0, dsiSaveGetResultCode, 0xC);
+		*(u32*)0x02059200 = 0xE1A00000; // nop
+		*(u32*)0x0205E99C = 0xE1A00000; // nop
+		*(u32*)0x020609F4 = 0xE1A00000; // nop
+		*(u32*)0x020609F8 = 0xE1A00000; // nop
+		*(u32*)0x02060A04 = 0xE1A00000; // nop
+		*(u32*)0x02060B64 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x02060BC0, /*extendedMemory2 ?*/ 0x02700000 /*: heapEnd*/); // mov r0, extendedMemory2 ? #0x2700000 : #0x23C0000
+		*(u32*)0x02062158 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
+		*(u32*)0x02062560 = 0xE1A00000; // nop
+		*(u32*)0x02062564 = 0xE1A00000; // nop
+		*(u32*)0x02062568 = 0xE1A00000; // nop
+		*(u32*)0x0206256C = 0xE1A00000; // nop
+		*(u32*)0x020656BC = 0xE1A00000; // nop
 	}
 
 	// Mario Calculator (USA)

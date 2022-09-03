@@ -1874,6 +1874,50 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0203FC14, (u32)dsiSaveCreate);
 	}
 
+	// Make Up & Style (USA)
+	else if (strcmp(romTid, "KYLE") == 0 && saveOnFlashcard) {
+		*(u32*)0x02005348 = 0xE1A00000; // nop (Disable NFTR font loading)
+		*(u32*)0x0200534C = 0xE1A00000; // nop
+		setBL(0x0202A34C, (u32)dsiSaveOpen);
+		setBL(0x0202A360, (u32)dsiSaveCreate);
+		setBL(0x0202A384, (u32)dsiSaveOpen);
+		setBL(0x0202A398, (u32)dsiSaveSetLength);
+		setBL(0x0202A3A4, (u32)dsiSaveClose);
+		setBL(0x0202A3C4, (u32)dsiSaveSetLength);
+		setBL(0x0202A3CC, (u32)dsiSaveClose);
+		setBL(0x0202A5C4, (u32)dsiSaveOpen);
+		setBL(0x0202A5EC, (u32)dsiSaveSeek);
+		setBL(0x0202A600, (u32)dsiSaveRead);
+		setBL(0x0202A60C, (u32)dsiSaveClose);
+		setBL(0x0202A6D4, (u32)dsiSaveOpen);
+		setBL(0x0202A6FC, (u32)dsiSaveSeek);
+		setBL(0x0202A710, (u32)dsiSaveWrite);
+		setBL(0x0202A71C, (u32)dsiSaveClose);
+		tonccpy((u32*)0x02056468, dsiSaveGetResultCode, 0xC);
+	}
+
+	// Make Up & Style (Europe)
+	else if (strcmp(romTid, "KYLP") == 0 && saveOnFlashcard) {
+		*(u32*)0x02005360 = 0xE1A00000; // nop (Disable NFTR font loading)
+		*(u32*)0x02005364 = 0xE1A00000; // nop
+		setBL(0x0202A484, (u32)dsiSaveOpen);
+		setBL(0x0202A498, (u32)dsiSaveCreate);
+		setBL(0x0202A4BC, (u32)dsiSaveOpen);
+		setBL(0x0202A4D0, (u32)dsiSaveSetLength);
+		setBL(0x0202A4DC, (u32)dsiSaveClose);
+		setBL(0x0202A4FC, (u32)dsiSaveSetLength);
+		setBL(0x0202A504, (u32)dsiSaveClose);
+		setBL(0x0202A6FC, (u32)dsiSaveOpen);
+		setBL(0x0202A724, (u32)dsiSaveSeek);
+		setBL(0x0202A738, (u32)dsiSaveRead);
+		setBL(0x0202A744, (u32)dsiSaveClose);
+		setBL(0x0202A80C, (u32)dsiSaveOpen);
+		setBL(0x0202A834, (u32)dsiSaveSeek);
+		setBL(0x0202A848, (u32)dsiSaveWrite);
+		setBL(0x0202A854, (u32)dsiSaveClose);
+		tonccpy((u32*)0x020565A0, dsiSaveGetResultCode, 0xC);
+	}
+
 	// Mighty Flip Champs! (USA)
 	else if (strcmp(romTid, "KMGE") == 0 && saveOnFlashcard) {
 		setBL(0x0200B048, (u32)dsiSaveCreate);
