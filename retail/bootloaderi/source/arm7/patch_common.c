@@ -2200,6 +2200,42 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0202BF14, (u32)dsiSaveClose);
 	}
 
+	// Orion's Odyssey (USA)
+	// Due to our save implementation, save data is stored in both slots
+	else if (strcmp(romTid, "K6TE") == 0 && saveOnFlashcard) {
+		setBL(0x020284D0, (u32)dsiSaveDelete);
+		setBL(0x020284DC, (u32)dsiSaveCreate);
+		setBL(0x020284EC, (u32)dsiSaveOpen);
+		setBL(0x0202851C, (u32)dsiSaveSetLength);
+		setBL(0x02028538, (u32)dsiSaveDelete);
+		setBL(0x02028544, (u32)dsiSaveCreate);
+		setBL(0x02028554, (u32)dsiSaveOpen);
+		setBL(0x0202857C, (u32)dsiSaveSetLength);
+		setBL(0x0202858C, (u32)dsiSaveWrite);
+		setBL(0x02028594, (u32)dsiSaveClose);
+		*(u32*)0x02028C3C = 0xE1A00000; // nop (dsiSaveOpenDir)
+		setBL(0x02028C50, (u32)dsiSaveOpen);
+		setBL(0x02028C6C, (u32)dsiSaveOpen);
+		setBL(0x02028CB0, (u32)dsiSaveGetLength);
+		setBL(0x02028CD4, (u32)dsiSaveRead);
+		setBL(0x02028E0C, (u32)dsiSaveClose);
+		setBL(0x02028E54, (u32)dsiSaveGetLength);
+		setBL(0x02028E78, (u32)dsiSaveRead);
+		setBL(0x02028FB0, (u32)dsiSaveClose);
+		*(u32*)0x02028FC8 = 0xE1A00000; // nop (dsiSaveCloseDir)
+		*(u32*)0x02029030 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+		*(u32*)0x02029048 = 0xE3A00001; // mov r0, #1 (dsiSaveFreeSpaceAvailable)
+		*(u32*)0x02029060 = 0xE3A00001; // mov r0, #1 (dsiSaveFreeSpaceAvailable)
+		*(u32*)0x0202907C = 0xE3A00001; // mov r0, #1 (dsiSaveFreeSpaceAvailable)
+		*(u32*)0x020290DC = 0xE1A00000; // nop (dsiSaveCreateDir)
+		setBL(0x020290FC, (u32)dsiSaveCreate);
+		setBL(0x02029130, (u32)dsiSaveOpen);
+		setBL(0x02029148, (u32)dsiSaveSetLength);
+		setBL(0x02029158, (u32)dsiSaveWrite);
+		setBL(0x02029160, (u32)dsiSaveClose);
+		setBL(0x0202917C, (u32)dsiSaveSetLength);
+	}
+
 	// Paul's Monster Adventure (USA)
 	else if (strcmp(romTid, "KP9E") == 0 && saveOnFlashcard) {
 		setBL(0x02047940, (u32)dsiSaveOpen);
