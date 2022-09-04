@@ -6134,6 +6134,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0201AC8C = 0xE1A00000; // nop
 		*(u32*)0x0201ADEC = 0xE1A00000; // nop
 		patchHiHeapDSiWare(0x0201AE48, heapEnd); // mov r0, #0x23C0000
+		*(u32*)0x0201AF7C = 0x02113EA0;
 		*(u32*)0x0201C1F4 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
 		*(u32*)0x0201F084 = 0xE1A00000; // nop
 		*(u32*)0x02020B68 = 0xE1A00000; // nop
