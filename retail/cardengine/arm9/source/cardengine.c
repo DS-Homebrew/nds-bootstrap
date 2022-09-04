@@ -502,6 +502,12 @@ void cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	setDeviceOwner();
 	initialize();
 
+	/*if (isDSiWare && (ce9->valueBits & expansionPakFound)) {
+		slot2MpuFix();
+		sysSetCartOwner (BUS_OWNER_ARM9);
+		exmemcnt = REG_EXMEMCNT;
+	}*/
+
 	cardReadCount++;
 
 	enableIPC_SYNC();
@@ -829,6 +835,12 @@ u32 myIrqEnable(u32 irq) {
 
 	setDeviceOwner();
 	initialize();
+
+	/*if (isDSiWare && (ce9->valueBits & expansionPakFound)) {
+		slot2MpuFix();
+		sysSetCartOwner (BUS_OWNER_ARM9);
+		exmemcnt = REG_EXMEMCNT;
+	}*/
 
 	if (ce9->valueBits & enableExceptionHandler) {
 		setExceptionHandler2();
