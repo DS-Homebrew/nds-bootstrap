@@ -1918,6 +1918,28 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		tonccpy((u32*)0x020565A0, dsiSaveGetResultCode, 0xC);
 	}
 
+	// Metal Torrent (USA)
+	// Saving not supported due to using more than one file
+	else if (strcmp(romTid, "K59E") == 0 && saveOnFlashcard) {
+		*(u32*)0x02045F88 = 0xE12FFF1E; // bx lr (Disable NFTR font loading)
+		*(u32*)0x0206E8FC = 0xE3A07000; // mov r7, #0
+		*(u32*)0x020DDB00 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
+		*(u32*)0x020DDD60 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
+		*(u32*)0x020DDF00 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
+		*(u32*)0x020DE0A4 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
+	}
+
+	// Metal Torrent (Europe, Australia)
+	// Saving not supported due to using more than one file
+	else if (strcmp(romTid, "K59V") == 0 && saveOnFlashcard) {
+		*(u32*)0x02045FA0 = 0xE12FFF1E; // bx lr (Disable NFTR font loading)
+		*(u32*)0x0206E894 = 0xE3A07000; // mov r7, #0
+		*(u32*)0x020DD918 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
+		*(u32*)0x020DDB78 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
+		*(u32*)0x020DDD18 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
+		*(u32*)0x020DDEBC = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
+	}
+
 	// Mighty Flip Champs! (USA)
 	else if (strcmp(romTid, "KMGE") == 0 && saveOnFlashcard) {
 		setBL(0x0200B048, (u32)dsiSaveCreate);
