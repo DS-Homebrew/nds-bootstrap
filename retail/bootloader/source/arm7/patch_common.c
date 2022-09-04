@@ -6454,16 +6454,36 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Picture Perfect: Pocket Stylist (USA)
-	// Requires 8MB of RAM
-	else if (strcmp(romTid, "KHRE") == 0 && extendedMemory2) {
+	// Audio doesn't play on retail consoles
+	// Requires 8MB of RAM for full usage
+	else if (strcmp(romTid, "KHRE") == 0) {
+		/*if (!extendedMemory2) {
+			for (u32 i = 0; i < ndsHeader->arm9binarySize/4; i++) {
+				u32* addr = (u32*)0x02004000;
+				if (addr[i] >= 0x02294000 && addr[i] < 0x022B0000) {
+					addr[i] -= 0x120000;
+				}
+			}
+		}*/
+
 		*(u32*)0x02004838 = 0xE1A00000; // nop
 		*(u32*)0x0200499C = 0xE1A00000; // nop
+		if (!extendedMemory2) {
+			*(u32*)0x020050E8 = 0xE3A00901; // mov r0, #0x4000
+			*(u32*)0x0202F034 = 0xE3A00000; // mov r0, #0
+			*(u32*)0x0202F038 = 0xE12FFF1E; // bx lr
+			*(u32*)0x0202F098 = 0xE3A00000; // mov r0, #0
+			*(u32*)0x0202F09C = 0xE12FFF1E; // bx lr
+			*(u32*)0x0205837C = 0xE1A00000; // nop
+			*(u32*)0x02058608 = 0xE1A00000; // nop
+		}
 		*(u32*)0x0200511C = 0xE1A00000; // nop
 		for (int i = 0; i < 7; i++) {
 			u32* offset = (u32*)0x02005194;
 			offset[i] = 0xE1A00000; // nop
 		}
 		*(u32*)0x020051B4 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0200CF44 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x0200D14C = 0xE1A00000; // nop
 		*(u32*)0x0201300C = 0xE1A00000; // nop
 		*(u32*)0x02013144 = 0xE1A00000; // nop
@@ -6474,13 +6494,75 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0201F0E4 = 0xE1A00000; // nop
 		*(u32*)0x0201F0F0 = 0xE1A00000; // nop
 		*(u32*)0x0201F250 = 0xE1A00000; // nop
-		patchHiHeapDSiWare(0x0201F2AC, 0x02700000); // mov r0, #0x2700000
-		*(u32*)0x0201F3E0 = 0x022B3440;
+		patchHiHeapDSiWare(0x0201F2AC, extendedMemory2 ? 0x02700000 : heapEnd); // mov r0, extendedMemory2 ? #0x2700000 : #0x23C0000
+		*(u32*)0x0201F3E0 -= 0x30000;
 		*(u32*)0x02020614 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
 		*(u32*)0x02023D6C = 0xE1A00000; // nop
+		*(u32*)0x02025884 = 0xE1A00000; // nop
 		*(u32*)0x02044080 = 0xE1A00000; // nop
 		*(u32*)0x020440A0 = 0xE1A00000; // nop
+		*(u32*)0x0204D7CC = 0xE1A00000; // nop
+		*(u32*)0x0204E638 = 0xE1A00000; // nop
+		*(u32*)0x0204E644 = 0xE1A00000; // nop
+		*(u32*)0x0204E654 = 0xE1A00000; // nop
+		*(u32*)0x0204E660 = 0xE1A00000; // nop
 		*(u32*)0x0205C7A8 = 0xE1A00000; // nop
+	}
+
+	// Hair Salon: Pocket Stylist (Europe, Australia)
+	// Audio doesn't play on retail consoles
+	// Requires 8MB of RAM for full usage
+	else if (strcmp(romTid, "KHRV") == 0) {
+		/*if (!extendedMemory2) {
+			for (u32 i = 0; i < ndsHeader->arm9binarySize/4; i++) {
+				u32* addr = (u32*)0x02004000;
+				if (addr[i] >= 0x02294000 && addr[i] < 0x022B0000) {
+					addr[i] -= 0x120000;
+				}
+			}
+		}*/
+
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		if (!extendedMemory2) {
+			*(u32*)0x020050D0 = 0xE3A00901; // mov r0, #0x4000
+			*(u32*)0x0202EE50 = 0xE3A00000; // mov r0, #0
+			*(u32*)0x0202EE54 = 0xE12FFF1E; // bx lr
+			*(u32*)0x0202EEB4 = 0xE3A00000; // mov r0, #0
+			*(u32*)0x0202EEB8 = 0xE12FFF1E; // bx lr
+			*(u32*)0x0205837C = 0xE1A00000; // nop
+			*(u32*)0x02058708 = 0xE1A00000; // nop
+		}
+		*(u32*)0x02005104 = 0xE1A00000; // nop
+		for (int i = 0; i < 7; i++) {
+			u32* offset = (u32*)0x0200517C;
+			offset[i] = 0xE1A00000; // nop
+		}
+		*(u32*)0x02005198 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0200CE6C = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0200D064 = 0xE1A00000; // nop
+		*(u32*)0x02013168 = 0xE1A00000; // nop
+		*(u32*)0x020132AC = 0xE1A00000; // nop
+		*(u32*)0x020132C0 = 0xE1A00000; // nop
+		*(u32*)0x0201718C = 0xE1A00000; // nop
+		*(u32*)0x0201D6A0 = 0xE1A00000; // nop
+		*(u32*)0x0201F5FC = 0xE1A00000; // nop
+		*(u32*)0x0201F600 = 0xE1A00000; // nop
+		*(u32*)0x0201F60C = 0xE1A00000; // nop
+		*(u32*)0x0201F750 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x0201F7AC, extendedMemory2 ? 0x02700000 : heapEnd); // mov r0, extendedMemory2 ? #0x2700000 : #0x23C0000
+		*(u32*)0x0201F8E0 -= 0x30000;
+		*(u32*)0x02020B34 = 0xE1A00000; // nop
+		*(u32*)0x02020B3C = 0xE8BD8010; // LDMFD SP!, {R4,PC}
+		*(u32*)0x020244A0 = 0xE1A00000; // nop
+		*(u32*)0x02026080 = 0xE1A00000; // nop
+		*(u32*)0x02044130 = 0xE1A00000; // nop
+		*(u32*)0x02044150 = 0xE1A00000; // nop
+		*(u32*)0x0204D7CC = 0xE1A00000; // nop
+		*(u32*)0x020571C4 = 0xE1A00000; // nop
+		*(u32*)0x020571D0 = 0xE1A00000; // nop
+		*(u32*)0x020571E0 = 0xE1A00000; // nop
+		*(u32*)0x020571EC = 0xE1A00000; // nop
+		*(u32*)0x0205C898 = 0xE1A00000; // nop
 	}
 
 	// Pinball Pulse: The Ancients Beckon (USA)
