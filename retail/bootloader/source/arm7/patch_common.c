@@ -2837,6 +2837,49 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02044874, (u32)dsiSaveClose);
 	}
 
+	// Clash of Elementalists (USA)
+	// Clash of Elementalists (Europe)
+	// Requires more than 8MB of RAM
+	/*else if (strcmp(romTid, "KVLE") == 0 || strcmp(romTid, "KVLP") == 0) {
+		*(u32*)0x02004838 = 0xE1A00000; // nop
+		*(u32*)0x0200499C = 0xE1A00000; // nop
+		*(u32*)0x0200C038 = 0xE1A00000; // nop
+		*(u32*)0x0200C160 = 0xE1A00000; // nop
+		*(u32*)0x0200C174 = 0xE1A00000; // nop
+		*(u32*)0x0200F3C4 = 0xE1A00000; // nop
+		*(u32*)0x020152B0 = 0xE1A00000; // nop
+		*(u32*)0x02017208 = 0xE1A00000; // nop
+		*(u32*)0x0201720C = 0xE1A00000; // nop
+		*(u32*)0x02017218 = 0xE1A00000; // nop
+		*(u32*)0x02017378 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x020173D4, extendedMemory2 ? 0x02F80000 : heapEnd+0xC00000); // mov r0, extendedMemory2 ? #0x2F80000 (mirrors to 0x2780000 on debug DS units) : #0x2FC0000 (mirrors to 0x23C0000 on retail DS units)
+		*(u32*)0x02017508 -= 0x30000;
+		*(u32*)0x0201875C = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
+		*(u32*)0x02018778 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0201877C = 0xE12FFF1E; // bx lr
+		*(u32*)0x02018784 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02018788 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0201BB20 = 0xE1A00000; // nop
+		if (ndsHeader->gameCode[3] == 'E') {
+			*(u32*)0x0202627C = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+			*(u32*)0x02028B6C = 0xE1A00000; // nop
+			*(u32*)0x02028B70 = 0xE1A00000; // nop
+			*(u32*)0x02028B88 = 0xE1A00000; // nop
+			*(u32*)0x02028B90 = 0xE1A00000; // nop
+			*(u32*)0x02028BB0 = 0xE1A00000; // nop
+			*(u32*)0x0202B8CC = 0xE1A00000; // nop
+			*(u32*)0x0202B8E8 = 0xE1A00000; // nop
+		} else {
+			*(u32*)0x02028C58 = 0xE1A00000; // nop
+			*(u32*)0x02028C5C = 0xE1A00000; // nop
+			*(u32*)0x02028C74 = 0xE1A00000; // nop
+			*(u32*)0x02028C7C = 0xE1A00000; // nop
+			*(u32*)0x02028C9C = 0xE1A00000; // nop
+			*(u32*)0x0202BAC8 = 0xE1A00000; // nop
+			*(u32*)0x0202BAE4 = 0xE1A00000; // nop
+		}
+	}*/
+
 	// Color Commando (USA)
 	// Color Commando (Europe) (Rev 0)
 	else if (strcmp(romTid, "KXFE") == 0 || (strcmp(romTid, "KXFP") == 0 && ndsHeader->romversion == 0)) {
