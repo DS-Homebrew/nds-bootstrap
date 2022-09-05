@@ -1790,6 +1790,27 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0207D628 = 0xE3A00003; // mov r0, #3
 	}
 
+	// BlayzBloo: Baeteul x Baeteul (Korea)
+	// Requires 8MB of RAM
+	else if (strcmp(romTid, "KBZK") == 0 && extendedMemory2) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x0206B718 = 0xE1A00000; // nop
+		*(u32*)0x0206F214 = 0xE1A00000; // nop
+		*(u32*)0x020754F4 = 0xE1A00000; // nop
+		*(u32*)0x020773FC = 0xE1A00000; // nop
+		*(u32*)0x02077400 = 0xE1A00000; // nop
+		*(u32*)0x0207740C = 0xE1A00000; // nop
+		*(u32*)0x0207756C = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x020775C8, 0x02700000); // mov r0, #0x2700000
+		*(u32*)0x0207881C = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
+		*(u32*)0x02078838 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0207883C = 0xE12FFF1E; // bx lr
+		*(u32*)0x02078844 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02078848 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0207BC64 = 0xE1A00000; // nop
+		*(u32*)0x0207D540 = 0xE3A00003; // mov r0, #3
+	}
+
 	// Bloons TD 4 (USA)
 	// Unknown bug causes game to crash after popping the last bloon
 	// Requires 8MB of RAM
