@@ -7969,6 +7969,62 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}*/
 
+	// VT Tennis (USA)
+	else if (strcmp(romTid, "KVTE") == 0) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x0200509C = 0xE1A00000; // nop
+		*(u32*)0x020058EC = 0xE1A00000; // nop
+		*(u32*)0x0201AA9C = 0xE1A00000; // nop
+		tonccpy((u32*)0x0201B634, dsiSaveGetResultCode, 0xC);
+		*(u32*)0x0201E184 = 0xE1A00000; // nop
+		*(u32*)0x020246CC = 0xE1A00000; // nop
+		*(u32*)0x02026608 = 0xE1A00000; // nop
+		*(u32*)0x0202660C = 0xE1A00000; // nop
+		*(u32*)0x02026618 = 0xE1A00000; // nop
+		*(u32*)0x02026778 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x020267D4, heapEnd); // mov r0, #0x23C0000
+		*(u32*)0x02027A48 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
+		*(u32*)0x0202AFD4 = 0xE1A00000; // nop
+		*(u32*)0x0205C000 = 0xE3A00000; // mov r0, #0 (Skip Manual screen)
+		setBL(0x0209C1B0, (u32)dsiSaveCreate);
+		setBL(0x0209C1C0, (u32)dsiSaveOpen);
+		setBL(0x0209C1E8, (u32)dsiSaveSetLength);
+		setBL(0x0209C1F8, (u32)dsiSaveWrite);
+		setBL(0x0209C200, (u32)dsiSaveClose);
+		*(u32*)0x0209C21C = 0xE1A00000; // nop
+		setBL(0x0209C284, (u32)dsiSaveOpen);
+		setBL(0x0209C2B0, (u32)dsiSaveRead);
+		setBL(0x0209C2BC, (u32)dsiSaveClose);
+	}
+
+	// VT Tennis (Europe, Australia)
+	else if (strcmp(romTid, "KVTV") == 0) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x02005084 = 0xE1A00000; // nop
+		*(u32*)0x020057D0 = 0xE1A00000; // nop
+		*(u32*)0x0201A168 = 0xE1A00000; // nop
+		tonccpy((u32*)0x0201AD00, dsiSaveGetResultCode, 0xC);
+		*(u32*)0x0201D850 = 0xE1A00000; // nop
+		*(u32*)0x02023D98 = 0xE1A00000; // nop
+		*(u32*)0x02025CD4 = 0xE1A00000; // nop
+		*(u32*)0x02025CD8 = 0xE1A00000; // nop
+		*(u32*)0x02025CE4 = 0xE1A00000; // nop
+		*(u32*)0x02025E44 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x02025EA0, heapEnd); // mov r0, #0x23C0000
+		*(u32*)0x02027114 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
+		*(u32*)0x0202A6A0 = 0xE1A00000; // nop
+		*(u32*)0x0205B314 = 0xE3A00000; // mov r0, #0 (Skip Manual screen)
+		setBL(0x0209B120, (u32)dsiSaveCreate);
+		setBL(0x0209B130, (u32)dsiSaveOpen);
+		setBL(0x0209B158, (u32)dsiSaveSetLength);
+		setBL(0x0209B168, (u32)dsiSaveWrite);
+		setBL(0x0209B170, (u32)dsiSaveClose);
+		*(u32*)0x0209B18C = 0xE1A00000; // nop
+		setBL(0x0209B1F4, (u32)dsiSaveOpen);
+		setBL(0x0209B220, (u32)dsiSaveRead);
+		setBL(0x0209B22C, (u32)dsiSaveClose);
+	}
+
 	// Wakugumi: Monochrome Puzzle (Europe, Australia)
 	else if (strcmp(romTid, "KK4V") == 0) {
 		*(u32*)0x02005A38 = 0xE1A00000; // nop

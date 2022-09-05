@@ -3019,6 +3019,34 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0200BFA8, (u32)dsiSaveClose);
 	}
 
+	// VT Tennis (USA)
+	else if (strcmp(romTid, "KVTE") == 0 && saveOnFlashcard) {
+		tonccpy((u32*)0x0201B634, dsiSaveGetResultCode, 0xC);
+		*(u32*)0x0205C000 = 0xE3A00000; // mov r0, #0 (Skip Manual screen)
+		setBL(0x0209C1B0, (u32)dsiSaveCreate);
+		setBL(0x0209C1C0, (u32)dsiSaveOpen);
+		setBL(0x0209C1E8, (u32)dsiSaveSetLength);
+		setBL(0x0209C1F8, (u32)dsiSaveWrite);
+		setBL(0x0209C200, (u32)dsiSaveClose);
+		setBL(0x0209C284, (u32)dsiSaveOpen);
+		setBL(0x0209C2B0, (u32)dsiSaveRead);
+		setBL(0x0209C2BC, (u32)dsiSaveClose);
+	}
+
+	// VT Tennis (Europe, Australia)
+	else if (strcmp(romTid, "KVTV") == 0 && saveOnFlashcard) {
+		tonccpy((u32*)0x0201AD00, dsiSaveGetResultCode, 0xC);
+		*(u32*)0x0205B314 = 0xE3A00000; // mov r0, #0 (Skip Manual screen)
+		setBL(0x0209B120, (u32)dsiSaveCreate);
+		setBL(0x0209B130, (u32)dsiSaveOpen);
+		setBL(0x0209B158, (u32)dsiSaveSetLength);
+		setBL(0x0209B168, (u32)dsiSaveWrite);
+		setBL(0x0209B170, (u32)dsiSaveClose);
+		setBL(0x0209B1F4, (u32)dsiSaveOpen);
+		setBL(0x0209B220, (u32)dsiSaveRead);
+		setBL(0x0209B22C, (u32)dsiSaveClose);
+	}
+
 	// Wakugumi: Monochrome Puzzle (Europe, Australia)
 	else if (strcmp(romTid, "KK4V") == 0 && saveOnFlashcard) {
 		*(u32*)0x0204F240 = 0xE3A00000; // mov r0, #0
