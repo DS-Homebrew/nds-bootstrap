@@ -1669,6 +1669,39 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0204C5AC = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
 	}
 
+	// Beauty Academy (Europe)
+	else if (strcmp(romTid, "K8BP") == 0) {
+		*(u32*)0x02004838 = 0xE1A00000; // nop
+		*(u32*)0x0200499C = 0xE1A00000; // nop
+		*(u32*)0x02005098 = 0xE1A00000; // nop
+		*(u32*)0x020050B4 = 0xE1A00000; // nop
+		*(u32*)0x020050E8 = 0xE1A00000; // nop
+		*(u32*)0x02018B48 = 0xE1A00000; // nop
+		*(u32*)0x0201C8C4 = 0xE1A00000; // nop
+		*(u32*)0x0202187C = 0xE1A00000; // nop
+		*(u32*)0x020236F0 = 0xE1A00000; // nop
+		*(u32*)0x020236F4 = 0xE1A00000; // nop
+		*(u32*)0x02023700 = 0xE1A00000; // nop
+		*(u32*)0x02023860 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x020238BC, heapEnd); // mov r0, #0x23C0000
+		*(u32*)0x02024DC0 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
+		*(u32*)0x02027C00 = 0xE1A00000; // nop
+		setBL(0x02092D44, (u32)dsiSaveCreate);
+		setBL(0x02092D54, (u32)dsiSaveOpen);
+		setBL(0x02092D64, (u32)dsiSaveGetResultCode);
+		setBL(0x02092DA0, (u32)dsiSaveSetLength);
+		setBL(0x02092DB0, (u32)dsiSaveWrite);
+		setBL(0x02092DB8, (u32)dsiSaveClose);
+		setBL(0x02092DF4, (u32)dsiSaveOpen);
+		setBL(0x02092E04, (u32)dsiSaveGetResultCode);
+		setBL(0x02092E1C, (u32)dsiSaveGetLength);
+		setBL(0x02092E2C, (u32)dsiSaveRead);
+		setBL(0x02092E34, (u32)dsiSaveClose);
+		setBL(0x02092E6C, (u32)dsiSaveOpen);
+		setBL(0x02092E7C, (u32)dsiSaveGetResultCode);
+		setBL(0x02092E94, (u32)dsiSaveClose);
+	}
+
 	// Big Bass Arcade (USA)
 	// Locks up on the first shown logos
 	/*else if (strcmp(romTid, "K9GE") == 0) {

@@ -667,6 +667,24 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020265A8 = 0xE12FFF1E; // bx lr
 	}
 
+	// Beauty Academy (Europe)
+	else if (strcmp(romTid, "K8BP") == 0 && saveOnFlashcard) {
+		setBL(0x02092D44, (u32)dsiSaveCreate);
+		setBL(0x02092D54, (u32)dsiSaveOpen);
+		setBL(0x02092D64, (u32)dsiSaveGetResultCode);
+		setBL(0x02092DA0, (u32)dsiSaveSetLength);
+		setBL(0x02092DB0, (u32)dsiSaveWrite);
+		setBL(0x02092DB8, (u32)dsiSaveClose);
+		setBL(0x02092DF4, (u32)dsiSaveOpen);
+		setBL(0x02092E04, (u32)dsiSaveGetResultCode);
+		setBL(0x02092E1C, (u32)dsiSaveGetLength);
+		setBL(0x02092E2C, (u32)dsiSaveRead);
+		setBL(0x02092E34, (u32)dsiSaveClose);
+		setBL(0x02092E6C, (u32)dsiSaveOpen);
+		setBL(0x02092E7C, (u32)dsiSaveGetResultCode);
+		setBL(0x02092E94, (u32)dsiSaveClose);
+	}
+
 	// Bomberman Blitz (USA)
 	else if (strcmp(romTid, "KBBE") == 0 && saveOnFlashcard) {
 		tonccpy((u32*)0x02009670, dsiSaveGetResultCode, 0xC);
