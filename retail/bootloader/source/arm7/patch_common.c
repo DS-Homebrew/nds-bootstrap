@@ -7969,6 +7969,50 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}*/
 
+	// Unou to Sanougaren Sasuru: Uranoura (Japan)
+	// Unable to read saved data
+	else if (strcmp(romTid, "K6PJ") == 0) {
+		*(u32*)0x02006E84 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
+		//*(u32*)0x02007344 = 0xE1A00000; // nop (Skip directory browse)
+		*(u32*)0x020092D4 = 0xE3A00000; // mov r0, #0 (Disable NFTR loading from TWLNAND)
+		for (int i = 0; i < 11; i++) { // Skip Manual screen
+			u32* offset = (u32*)0x0200A608;
+			offset[i] = 0xE1A00000; // nop
+		}
+		/*setBL(0x02020B50, (u32)dsiSaveOpen);
+		*(u32*)0x02020B88 = 0xE1A00000; // nop
+		setBL(0x02020B94, (u32)dsiSaveGetLength);
+		setBL(0x02020BB4, (u32)dsiSaveRead);
+		*(u32*)0x02020BDC = 0xE1A00000; // nop
+		setBL(0x02020BE4, (u32)dsiSaveClose);
+		*(u32*)0x02020C40 = 0xE1A00000; // nop
+		setBL(0x02020C50, (u32)dsiSaveOpen); // dsiSaveOpenDir
+		*(u32*)0x02020C7C = 0xE1A00000; // nop
+		*(u32*)0x02020C98 = 0xE3A00000; // mov r0, #0 (dsiSaveReadDir)
+		*(u32*)0x02020D94 = 0xE1A00000; // nop
+		setBL(0x02020D9C, (u32)dsiSaveClose); // dsiSaveCloseDir
+		setBL(0x02020F58, (u32)dsiSaveCreate);
+		*(u32*)0x02020F80 = 0xE1A00000; // nop
+		setBL(0x02020F90, (u32)dsiSaveOpen);
+		*(u32*)0x02020FBC = 0xE1A00000; // nop
+		setBL(0x02020FE8, (u32)dsiSaveSetLength);
+		setBL(0x02020FF8, (u32)dsiSaveWrite);
+		*(u32*)0x02021020 = 0xE1A00000; // nop
+		setBL(0x02021028, (u32)dsiSaveClose);*/
+		*(u32*)0x02038BE0 = 0xE1A00000; // nop
+		//tonccpy((u32*)0x02039874, dsiSaveGetResultCode, 0xC);
+		*(u32*)0x0203CC30 = 0xE1A00000; // nop
+		*(u32*)0x02042AF8 = 0xE1A00000; // nop
+		*(u32*)0x02044928 = 0xE1A00000; // nop
+		*(u32*)0x0204492C = 0xE1A00000; // nop
+		*(u32*)0x02044938 = 0xE1A00000; // nop
+		*(u32*)0x02044A7C = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x02044AD8, heapEnd); // mov r0, #0x23C0000
+		*(u32*)0x02045D78 = 0xE1A00000; // nop
+		*(u32*)0x02045D80 = 0xE8BD8010; // LDMFD SP!, {R4,PC}
+		*(u32*)0x0204940C = 0xE1A00000; // nop
+	}
+
 	// VT Tennis (USA)
 	else if (strcmp(romTid, "KVTE") == 0) {
 		*(u32*)0x0200498C = 0xE1A00000; // nop

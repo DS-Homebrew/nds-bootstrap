@@ -2944,6 +2944,31 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0200A134, (u32)dsiSaveClose);
 	}
 
+	// Unou to Sanougaren Sasuru: Uranoura (Japan)
+	// Unable to read saved data
+	else if (strcmp(romTid, "K6PJ") == 0 && saveOnFlashcard) {
+		*(u32*)0x02006E84 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
+		//*(u32*)0x02007344 = 0xE1A00000; // nop (Skip directory browse)
+		*(u32*)0x020092D4 = 0xE3A00000; // mov r0, #0 (Disable NFTR loading from TWLNAND)
+		for (int i = 0; i < 11; i++) { // Skip Manual screen
+			u32* offset = (u32*)0x0200A608;
+			offset[i] = 0xE1A00000; // nop
+		}
+		/*setBL(0x02020B50, (u32)dsiSaveOpen);
+		setBL(0x02020B94, (u32)dsiSaveGetLength);
+		setBL(0x02020BB4, (u32)dsiSaveRead);
+		setBL(0x02020BE4, (u32)dsiSaveClose);
+		setBL(0x02020C50, (u32)dsiSaveOpen); // dsiSaveOpenDir
+		*(u32*)0x02020C98 = 0xE3A00000; // mov r0, #0 (dsiSaveReadDir)
+		setBL(0x02020D9C, (u32)dsiSaveClose); // dsiSaveCloseDir
+		setBL(0x02020F58, (u32)dsiSaveCreate);
+		setBL(0x02020F90, (u32)dsiSaveOpen);
+		setBL(0x02020FE8, (u32)dsiSaveSetLength);
+		setBL(0x02020FF8, (u32)dsiSaveWrite);
+		setBL(0x02021028, (u32)dsiSaveClose);
+		tonccpy((u32*)0x02039874, dsiSaveGetResultCode, 0xC);*/
+	}
+
 	// WarioWare: Touched! DL (USA, Australia)
 	else if (strcmp(romTid, "Z2AT") == 0 && saveOnFlashcard) {
 		setBL(0x0200BCA4, (u32)dsiSaveOpen);
