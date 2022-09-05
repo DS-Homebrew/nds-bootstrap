@@ -3789,6 +3789,49 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// GO Series: Earth Saver (Europe)
+	else if (strcmp(romTid, "KB8P") == 0) {
+		*(u32*)0x02004838 = 0xE1A00000; // nop
+		*(u32*)0x0200499C = 0xE1A00000; // nop
+		*(u32*)0x02005234 = 0xE1A00000; // nop
+		*(u32*)0x02005530 = 0xE1A00000; // nop
+		*(u32*)0x0200A310 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		setBL(0x0200AB24, (u32)dsiSaveOpen);
+		setBL(0x0200AB60, (u32)dsiSaveRead);
+		setBL(0x0200AB80, (u32)dsiSaveClose);
+		setBL(0x0200AC1C, (u32)dsiSaveCreate);
+		setBL(0x0200AC5C, (u32)dsiSaveOpen);
+		setBL(0x0200AC94, (u32)dsiSaveSetLength);
+		setBL(0x0200ACB0, (u32)dsiSaveWrite);
+		setBL(0x0200ACD4, (u32)dsiSaveClose);
+		setBL(0x0200AD68, (u32)dsiSaveGetInfo);
+		*(u32*)0x0200B710 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
+		*(u32*)0x020149B4 = 0xE12FFF1E; // bx lr (Skip Manual screen, Part 1)
+		*(u32*)0x02036394 = 0xE1A00000; // nop
+		*(u32*)0x02047D50 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0204BEEC = 0xE1A00000; // nop
+		tonccpy((u32*)0x0204CA70, dsiSaveGetResultCode, 0xC);
+		*(u32*)0x0204F44C = 0xE1A00000; // nop
+		*(u32*)0x02054344 = 0xE1A00000; // nop
+		*(u32*)0x0205612C = 0xE1A00000; // nop
+		*(u32*)0x02056130 = 0xE1A00000; // nop
+		*(u32*)0x0205613C = 0xE1A00000; // nop
+		*(u32*)0x0205629C = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x020562F8, heapEnd); // mov r0, #0x23C0000
+		*(u32*)0x0205757C = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
+		*(u32*)0x020579B0 = 0xE1A00000; // nop
+		*(u32*)0x020579B4 = 0xE1A00000; // nop
+		*(u32*)0x020579B8 = 0xE1A00000; // nop
+		*(u32*)0x020579BC = 0xE1A00000; // nop
+		*(u32*)0x0205AAFC = 0xE1A00000; // nop
+
+		// Skip Manual screen, Part 2
+		for (int i = 0; i < 11; i++) {
+			u32* offset = (u32*)0x02014AF0;
+			offset[i] = 0xE1A00000; // nop
+		}
+	}
+
 	// Famicom Wars DS: Ushinawareta Hikari (Japan)
 	// DSi save function patching not needed 
 	else if (strcmp(romTid, "Z2EJ") == 0) {
