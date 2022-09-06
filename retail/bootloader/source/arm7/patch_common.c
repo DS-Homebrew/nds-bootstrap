@@ -6505,6 +6505,71 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u16*)0x0209F77A = 0x46C0; // nop
 	}
 
+	// GO Series: Picdun (USA)
+	// GO Series: Picdun (Europe)
+	else if (strcmp(romTid, "KPQE") == 0 || strcmp(romTid, "KPQP") == 0) {
+		*(u32*)0x02004838 = 0xE1A00000; // nop
+		*(u32*)0x0200499C = 0xE1A00000; // nop
+		*(u32*)0x020050CC = 0xE1A00000; // nop
+		*(u32*)0x020050E4 = 0xE1A00000; // nop
+		*(u32*)0x020052A4 = 0xE1A00000; // nop
+		*(u32*)0x0200A5C4 = 0xE1A00000; // nop
+		//*(u32*)0x0200A66C = 0xE3A00000; // mov r0, #0
+		//*(u32*)0x0200A670 = 0xE12FFF1E; // bx lr
+		setBL(0x0200B038, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+		setBL(0x0200B088, (u32)dsiSaveOpen);
+		setBL(0x0200B11C, (u32)dsiSaveGetLength);
+		setBL(0x0200B138, (u32)dsiSaveRead);
+		setBL(0x0200B140, (u32)dsiSaveClose);
+		setBL(0x0200B184, (u32)dsiSaveOpen);
+		setBL(0x0200B20C, (u32)dsiSaveSeek);
+		setBL(0x0200B288, (u32)dsiSaveClose);
+		setBL(0x0200B2B0, (u32)dsiSaveWrite);
+		setBL(0x0200B2BC, (u32)dsiSaveClose);
+		*(u32*)0x020642CC = 0xE1A00000; // nop
+		tonccpy((u32*)0x02064E50, dsiSaveGetResultCode, 0xC);
+		*(u32*)0x02067E34 = 0xE1A00000; // nop
+		*(u32*)0x0206CF2C = 0xE1A00000; // nop
+		*(u32*)0x0206ED54 = 0xE1A00000; // nop
+		*(u32*)0x0206ED58 = 0xE1A00000; // nop
+		*(u32*)0x0206ED64 = 0xE1A00000; // nop
+		*(u32*)0x0206EEC4 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x0206EF20, extendedMemory2 ? 0x02F00000 : heapEnd+0xC00000); // mov r0, extendedMemory2 ? #0x2F00000 (mirrors to 0x2700000 on debug DS units) : #0x2FC0000 (mirrors to 0x23C0000 on retail DS units)
+		*(u32*)0x020701A4 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
+		*(u32*)0x02073558 = 0xE1A00000; // nop
+	}
+
+	// Danjo RPG: Picudan (Japan)
+	else if (strcmp(romTid, "KPQJ") == 0) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x020050B4 = 0xE1A00000; // nop
+		*(u32*)0x020050CC = 0xE1A00000; // nop
+		*(u32*)0x0200528C = 0xE1A00000; // nop
+		*(u32*)0x020097D8 = 0xE1A00000; // nop
+		setBL(0x02009F24, (u32)dsiSaveOpen);
+		setBL(0x02009F8C, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+		setBL(0x02009FD8, (u32)dsiSaveGetLength);
+		setBL(0x02009FF4, (u32)dsiSaveRead);
+		setBL(0x02009FFC, (u32)dsiSaveClose);
+		setBL(0x0200A040, (u32)dsiSaveOpen);
+		setBL(0x0200A0C0, (u32)dsiSaveGetLength);
+		setBL(0x0200A0D0, (u32)dsiSaveSeek);
+		setBL(0x0200A14C, (u32)dsiSaveClose);
+		setBL(0x0200A174, (u32)dsiSaveWrite);
+		setBL(0x0200A180, (u32)dsiSaveClose);
+		*(u32*)0x02061C34 = 0xE1A00000; // nop
+		tonccpy((u32*)0x020627B8, dsiSaveGetResultCode, 0xC);
+		*(u32*)0x02065714 = 0xE1A00000; // nop
+		*(u32*)0x0206A7F0 = 0xE1A00000; // nop
+		*(u32*)0x0206C610 = 0xE1A00000; // nop
+		*(u32*)0x0206C614 = 0xE1A00000; // nop
+		*(u32*)0x0206C620 = 0xE1A00000; // nop
+		*(u32*)0x0206C780 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x0206C7DC, extendedMemory2 ? 0x02F00000 : heapEnd+0xC00000); // mov r0, extendedMemory2 ? #0x2F00000 (mirrors to 0x2700000 on debug DS units) : #0x2FC0000 (mirrors to 0x23C0000 on retail DS units)
+		*(u32*)0x0206DA60 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
+		*(u32*)0x02070E14 = 0xE1A00000; // nop
+	}
+
 	// Art Style: PiCTOBiTS (USA)
 	// Art Style: PiCOPiCT (Europe, Australia)
 	else if (strcmp(romTid, "KAPE") == 0 || strcmp(romTid, "KAPV") == 0) {

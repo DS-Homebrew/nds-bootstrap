@@ -2341,6 +2341,38 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		//*(u32*)0x0203A730 = 0xE3A00001; // mov r0, #1
 	}
 
+	// GO Series: Picdun (USA)
+	// GO Series: Picdun (Europe)
+	else if ((strcmp(romTid, "KPQE") == 0 || strcmp(romTid, "KPQP") == 0) && saveOnFlashcard) {
+		setBL(0x0200B038, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+		setBL(0x0200B088, (u32)dsiSaveOpen);
+		setBL(0x0200B11C, (u32)dsiSaveGetLength);
+		setBL(0x0200B138, (u32)dsiSaveRead);
+		setBL(0x0200B140, (u32)dsiSaveClose);
+		setBL(0x0200B184, (u32)dsiSaveOpen);
+		setBL(0x0200B20C, (u32)dsiSaveSeek);
+		setBL(0x0200B288, (u32)dsiSaveClose);
+		setBL(0x0200B2B0, (u32)dsiSaveWrite);
+		setBL(0x0200B2BC, (u32)dsiSaveClose);
+		tonccpy((u32*)0x02064E50, dsiSaveGetResultCode, 0xC);
+	}
+
+	// Danjo RPG: Picudan (Japan)
+	else if (strcmp(romTid, "KPQJ") == 0 && saveOnFlashcard) {
+		setBL(0x02009F24, (u32)dsiSaveOpen);
+		setBL(0x02009F8C, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+		setBL(0x02009FD8, (u32)dsiSaveGetLength);
+		setBL(0x02009FF4, (u32)dsiSaveRead);
+		setBL(0x02009FFC, (u32)dsiSaveClose);
+		setBL(0x0200A040, (u32)dsiSaveOpen);
+		setBL(0x0200A0C0, (u32)dsiSaveGetLength);
+		setBL(0x0200A0D0, (u32)dsiSaveSeek);
+		setBL(0x0200A14C, (u32)dsiSaveClose);
+		setBL(0x0200A174, (u32)dsiSaveWrite);
+		setBL(0x0200A180, (u32)dsiSaveClose);
+		tonccpy((u32*)0x020627B8, dsiSaveGetResultCode, 0xC);
+	}
+
 	// Art Style: PiCTOBiTS (USA)
 	// Art Style: PiCOPiCT (Europe, Australia)
 	else if ((strcmp(romTid, "KAPE") == 0 || strcmp(romTid, "KAPV") == 0) && saveOnFlashcard) {
