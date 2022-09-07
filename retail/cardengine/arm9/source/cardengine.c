@@ -80,6 +80,11 @@ static aFile musicsFile;
 static aFile pageFile;
 // static aFile manualFile;
 
+void updateMusic(void);
+
+static int soundBuffer = 1;
+const u16 musicReadLen = 0x2000;
+static u32 musicPos = 0x2000;
 static u32 musicPosRev = 0;
 
 static bool cardReadInProgress = false;
@@ -344,44 +349,9 @@ void myIrqHandlerIPC(void) {
 	}
 
 	switch (IPC_GetSync()) {
-		case 0x5: if (sharedAddr[2] == 0x5953554D && !cardReadInProgress) {
-			int oldIME = enterCriticalSection();
-			u16 exmemcnt = REG_EXMEMCNT;
-			setDeviceOwner();
-
-			static int soundBuffer = 1;
-			const u16 len = 0x2000;
-			static u32 musicPos = len;
-
-			const u16 currentLen = (musicPosRev > len) ? len : musicPosRev;
-			fileRead((char*)(0x027F0000+(soundBuffer*len)), musicsFile, musicPos, currentLen);
-			musicPos += len;
-			if (musicPos > ce9->musicsSize) {
-				musicPos = 0;
-				u16 lastLenTemp = musicPosRev;
-				u16 lastLen = 0;
-				while (lastLenTemp < 0x2000) {
-					lastLenTemp++;
-					lastLen++;
-				}
-				fileRead((char*)(0x027F0000+(soundBuffer*len)+musicPosRev), musicsFile, musicPos, lastLen);
-				musicPos += lastLen;
-				musicPosRev = ce9->musicsSize-lastLen;
-			} else {
-				musicPosRev -= len;
-				if (musicPosRev == 0) {
-					musicPos = 0;
-					musicPosRev = ce9->musicsSize;
-				}
-			}
-
-			soundBuffer++;
-			if (soundBuffer == 2) soundBuffer = 0;
-
-			sharedAddr[2] = 0;
-			REG_EXMEMCNT = exmemcnt;
-			leaveCriticalSection(oldIME);
-		}	break;
+		case 0x5:
+			updateMusic();
+			break;
 		case 0x6:
 			if(mainScreen == 1)
 				REG_POWERCNT &= ~POWER_SWAP_LCDS;
@@ -482,11 +452,6 @@ static void initialize(void) {
 
 				fileRead((char*)ce9->romLocation+(arm9iromOffset-0x8000), romFile, arm9iromOffset+arm9ibinarySize, ce9->ioverlaysSize);
 			}
-		}
-
-		if (ce9->musicCluster != 0 && memcmp(ndsHeader->gameCode, "KS3", 3) == 0) {
-			musicPosRev = ce9->musicsSize-0x2000;
-			fileRead((char*)0x027F0000, musicsFile, 0, 0x2000);
 		}
 
 		initialized = true;
@@ -866,6 +831,66 @@ s32 dsiSaveWrite(void* ctx, void* src, s32 len) {
 	sharedAddr[3] = 0x52534554;
 	while (1);
 }*/
+
+void updateMusic(void) {
+	if (sharedAddr[2] == 0x5953554D && !cardReadInProgress) { // 'MUSY'
+		int oldIME = enterCriticalSection();
+		u16 exmemcnt = REG_EXMEMCNT;
+		setDeviceOwner();
+
+		const u16 currentLen = (musicPosRev > musicReadLen) ? musicReadLen : musicPosRev;
+		fileRead((char*)(0x027F0000+(soundBuffer*musicReadLen)), musicsFile, musicPos, currentLen);
+		musicPos += musicReadLen;
+		if (musicPos > ce9->musicsSize) {
+			musicPos = 0;
+			u16 lastLenTemp = musicPosRev;
+			u16 lastLen = 0;
+			while (lastLenTemp < 0x2000) {
+				lastLenTemp++;
+				lastLen++;
+			}
+			fileRead((char*)(0x027F0000+(soundBuffer*musicReadLen)+musicPosRev), musicsFile, musicPos, lastLen);
+			musicPos += lastLen;
+			musicPosRev = ce9->musicsSize-lastLen;
+		} else {
+			musicPosRev -= musicReadLen;
+			if (musicPosRev == 0) {
+				musicPos = 0;
+				musicPosRev = ce9->musicsSize;
+			}
+		}
+
+		soundBuffer++;
+		if (soundBuffer == 2) soundBuffer = 0;
+
+		sharedAddr[2] = 0;
+		REG_EXMEMCNT = exmemcnt;
+		leaveCriticalSection(oldIME);
+	}
+}
+
+void musicPlay(int id) {
+	u16 exmemcnt = REG_EXMEMCNT;
+	setDeviceOwner();
+
+	sharedAddr[2] = 0x5353554D; // 'MUSS'
+	while (sharedAddr[2] == 0x5353554D);
+	soundBuffer = 1;
+	if (ce9->musicCluster != 0) {
+		musicPos = musicReadLen;
+		musicPosRev = ce9->musicsSize - musicReadLen;
+		fileRead((char*)0x027F0000, musicsFile, 0, musicReadLen);
+	}
+	sharedAddr[2] = 0x5053554D; // 'MUSP'
+	while (sharedAddr[2] == 0x5053554D);
+
+	REG_EXMEMCNT = exmemcnt;
+}
+
+void musicStopEffect(int id) {
+	sharedAddr[2] = 0x5353554D; // 'MUSS'
+	while (sharedAddr[2] == 0x5353554D);
+}
 
 void rumble(u32 arg) {
 	sharedAddr[0] = ce9->rumbleFrames[0];

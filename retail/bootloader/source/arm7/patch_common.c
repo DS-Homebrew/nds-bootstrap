@@ -7610,6 +7610,8 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			*(u32*)0x020BCE44 = 0xE12FFF1E; // bx lr
 		}
 		*(u32*)0x0201FC20 = 0xE12FFF1E; // bx lr (Disable loading sdat file)
+		tonccpy((u32*)0x0201FC40, ce9->patches->musicPlay, 0xC);
+		tonccpy((u32*)0x0201FC78, ce9->patches->musicStopEffect, 0xC);
 		setBL(0x02026F68, (int)ce9->patches->rumble_arm9[0]); // Rumble when hair is whipped
 		setBL(0x0209201C, (u32)dsiSaveCreate);
 		setBL(0x02092040, (u32)dsiSaveGetResultCode);
@@ -7673,6 +7675,8 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			*(u32*)0x020BD234 = 0xE12FFF1E; // bx lr
 		}
 		*(u32*)0x0201FE98 = 0xE12FFF1E; // bx lr (Disable loading sdat file)
+		tonccpy((u32*)0x0201FEB8, ce9->patches->musicPlay, 0xC);
+		tonccpy((u32*)0x0201FEF0, ce9->patches->musicStopEffect, 0xC);
 		setBL(0x020271E0, (int)ce9->patches->rumble_arm9[0]); // Rumble when hair is whipped
 		setBL(0x020922A0, (u32)dsiSaveCreate);
 		setBL(0x020922C4, (u32)dsiSaveGetResultCode);

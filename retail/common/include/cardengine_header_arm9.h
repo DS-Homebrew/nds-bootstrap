@@ -131,6 +131,8 @@ typedef struct cardengineArm9Patches {
 	u32* dsiSaveSeek;
 	u32* dsiSaveRead;
 	u32* dsiSaveWrite;
+	u32* musicPlay;
+	u32* musicStopEffect;
 	u32* cardStructArm9;
 	u32* card_pull;
 	u32* cacheFlushRef;
