@@ -64,6 +64,7 @@ extern std::string ramDumpPath;
 extern std::string srParamsFilePath;
 extern std::string screenshotPath;
 extern std::string apFixOverlaysPath;
+extern std::string musicsFilePath;
 extern std::string pageFilePath;
 
 extern u8 lz77ImageBuffer[0x20000];
@@ -421,6 +422,11 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		mkdir("fat:/_nds", 0777);
 		mkdir("fat:/_nds/nds-bootstrap", 0777);
 		mkdir("fat:/_nds/nds-bootstrap/patchOffsetCache", 0777);
+	}
+
+	if (!dsiFeatures() || (conf->b4dsMode && conf->gameOnFlashcard)) {
+		musicsFilePath = "fat:/_nds/nds-bootstrap/test.raw";
+		conf->musicsSize = getFileSize(musicsFilePath.c_str());
 	}
 
 	pageFilePath = "sd:/_nds/pagefile.sys";

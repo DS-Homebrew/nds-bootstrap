@@ -76,9 +76,13 @@ static aFile romFile;
 static aFile savFile;
 static aFile ramDumpFile;
 static aFile srParamsFile;
+static aFile musicsFile;
 static aFile pageFile;
 // static aFile manualFile;
 
+static u32 musicPosRev = 0;
+
+static bool cardReadInProgress = false;
 static int cardReadCount = 0;
 
 static inline u32 getRomSizeNoArm9Bin(const tNDSHeader* ndsHeader) {
@@ -340,6 +344,44 @@ void myIrqHandlerIPC(void) {
 	}
 
 	switch (IPC_GetSync()) {
+		case 0x5: if (sharedAddr[2] == 0x5953554D && !cardReadInProgress) {
+			int oldIME = enterCriticalSection();
+			u16 exmemcnt = REG_EXMEMCNT;
+			setDeviceOwner();
+
+			static int soundBuffer = 1;
+			const u16 len = 0x2000;
+			static u32 musicPos = len;
+
+			const u16 currentLen = (musicPosRev > len) ? len : musicPosRev;
+			fileRead((char*)(0x027F0000+(soundBuffer*len)), musicsFile, musicPos, currentLen);
+			musicPos += len;
+			if (musicPos > ce9->musicsSize) {
+				musicPos = 0;
+				u16 lastLenTemp = musicPosRev;
+				u16 lastLen = 0;
+				while (lastLenTemp < 0x2000) {
+					lastLenTemp++;
+					lastLen++;
+				}
+				fileRead((char*)(0x027F0000+(soundBuffer*len)+musicPosRev), musicsFile, musicPos, lastLen);
+				musicPos += lastLen;
+				musicPosRev = ce9->musicsSize-lastLen;
+			} else {
+				musicPosRev -= len;
+				if (musicPosRev == 0) {
+					musicPos = 0;
+					musicPosRev = ce9->musicsSize;
+				}
+			}
+
+			soundBuffer++;
+			if (soundBuffer == 2) soundBuffer = 0;
+
+			sharedAddr[2] = 0;
+			REG_EXMEMCNT = exmemcnt;
+			leaveCriticalSection(oldIME);
+		}	break;
 		case 0x6:
 			if(mainScreen == 1)
 				REG_POWERCNT &= ~POWER_SWAP_LCDS;
@@ -399,6 +441,7 @@ static void initialize(void) {
 
 		romFile = getFileFromCluster(ce9->fileCluster);
 		savFile = getFileFromCluster(ce9->saveCluster);
+		musicsFile = getFileFromCluster(ce9->musicCluster);
 
 		if (ce9->romFatTableCache != 0) {
 			romFile.fatTableCache = (u32*)ce9->romFatTableCache;
@@ -407,6 +450,10 @@ static void initialize(void) {
 		if (ce9->savFatTableCache != 0) {
 			savFile.fatTableCache = (u32*)ce9->savFatTableCache;
 			savFile.fatTableCached = true;
+		}
+		if (ce9->musicFatTableCache != 0) {
+			musicsFile.fatTableCache = (u32*)ce9->musicFatTableCache;
+			musicsFile.fatTableCached = true;
 		}
 
 		ramDumpFile = getFileFromCluster(ce9->ramDumpCluster);
@@ -435,6 +482,11 @@ static void initialize(void) {
 
 				fileRead((char*)ce9->romLocation+(arm9iromOffset-0x8000), romFile, arm9iromOffset+arm9ibinarySize, ce9->ioverlaysSize);
 			}
+		}
+
+		if (ce9->musicCluster != 0 && memcmp(ndsHeader->gameCode, "KS3", 3) == 0) {
+			musicPosRev = ce9->musicsSize-0x2000;
+			fileRead((char*)0x027F0000, musicsFile, 0, 0x2000);
 		}
 
 		initialized = true;
@@ -498,6 +550,7 @@ void cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	}
 
 	u16 exmemcnt = REG_EXMEMCNT;
+	cardReadInProgress = true;
 
 	setDeviceOwner();
 	initialize();
@@ -535,6 +588,7 @@ void cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 		cardReadNormal(dst, src, len);
 	}
 
+	cardReadInProgress = false;
 	REG_EXMEMCNT = exmemcnt;
 }
 

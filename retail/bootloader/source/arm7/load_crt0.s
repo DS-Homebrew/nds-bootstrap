@@ -50,6 +50,8 @@
 	.global srParamsFileCluster
 	.global screenshotCluster
 	.global apFixOverlaysCluster
+	.global musicCluster
+	.global musicsSize
 	.global pageFileCluster
 	.global manualCluster
 	.global patchMpuSize
@@ -126,6 +128,10 @@ srParamsFileCluster:
 screenshotCluster:
 	.word	0x00000000
 apFixOverlaysCluster:
+	.word	0x00000000
+musicCluster:
+	.word	0x00000000
+musicsSize:
 	.word	0x00000000
 pageFileCluster:
 	.word	0x00000000

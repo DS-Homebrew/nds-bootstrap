@@ -29,9 +29,15 @@ romFatTableCache:
 	.word	0x00000000
 savFatTableCache:
 	.word	0x00000000
+musicFatTableCache:
+	.word	0x00000000
 ramDumpCluster:
 	.word	0x00000000
 srParamsCluster:
+	.word	0x00000000
+musicCluster:
+	.word	0x00000000
+musicsSize:
 	.word	0x00000000
 pageFileCluster:
 	.word	0x00000000

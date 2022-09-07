@@ -31,7 +31,7 @@
 extern DISC_INTERFACE __myio_dldi;
 extern NEW_DISC_INTERFACE __myio_dsisd;
 
-#if TWOCARD
+#ifdef TWOCARD
 static inline bool CARD_StartUp(bool card2) {
 	return !card2 ? __myio_dsisd.startup()
 					: __myio_dldi.startup();

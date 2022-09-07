@@ -34,6 +34,8 @@ typedef struct loadCrt0 {
 	u32 srParamsFileCluster;
 	u32 screenshotCluster;
 	u32 apFixOverlaysCluster;
+	u32 musicCluster;
+	u32 musicsSize;
 	u32 pageFileCluster;
 	u32 manualCluster;
     u32 patchMpuSize;

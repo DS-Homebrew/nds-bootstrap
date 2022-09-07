@@ -85,8 +85,10 @@ int RumbleForce = 1;
 static int swapTimer = 0;
 static int languageTimer = 0;
 static bool halfVolume = false;
+static bool customMusic = false;
 bool returnToMenu = false;
 bool isSdk5Set = false;
+bool isDSiWare = false;
 
 static const tNDSHeader* ndsHeader = NULL;
 static PERSONAL_DATA* personalData = NULL;
@@ -126,6 +128,8 @@ static void initialize(void) {
 
 	ndsHeader = (tNDSHeader*)(isSdk5Set ? NDS_HEADER_SDK5 : NDS_HEADER);
 	personalData = (PERSONAL_DATA*)(isSdk5Set ? (u8*)NDS_HEADER_SDK5-0x180 : (u8*)NDS_HEADER-0x180);
+
+	isDSiWare = (memcmp(ndsHeader->gameCode, "KS3", 3) == 0);
 
 	if (language >= 0 && language <= 7) {
 		// Change language
@@ -306,6 +310,27 @@ void myIrqHandlerVBlank(void) {
 
 	if (0 == (REG_KEYINPUT & igmHotkey) && 0 == (REG_EXTKEYINPUT & (((igmHotkey >> 10) & 3) | ((igmHotkey >> 6) & 0xC0)))) {
 		inGameMenu();
+	}
+
+	if (isDSiWare && (customMusic || *(int*)0x02FFFC3C >= 60)) {
+		if (sharedAddr[2] == 0x5953554D) {
+			IPC_SendSync(0x5);
+		}
+		if (!(SCHANNEL_CR(15) & SCHANNEL_ENABLE) && sharedAddr[2] != 0x5953554D) {
+			static int soundBuffer = 0;
+			sharedAddr[2] = 0x5953554D; // 'MUSY'
+			IPC_SendSync(0x5);
+
+			SCHANNEL_SOURCE(15) = 0x027F0000+(soundBuffer*0x2000);
+			SCHANNEL_REPEAT_POINT(15) = 0;
+			SCHANNEL_LENGTH(15) = 0x2000/4;
+			SCHANNEL_TIMER(15) = SOUND_FREQ(22050);
+			SCHANNEL_CR(15) = SCHANNEL_ENABLE | SOUND_VOL(127) | SOUND_PAN(63) | SOUND_FORMAT_8BIT | SOUND_ONE_SHOT;
+
+			soundBuffer++;
+			if (soundBuffer == 2) soundBuffer = 0;
+		}
+		customMusic = true;
 	}
 
 	if (sharedAddr[3] == 0x424D5552) { // 'RUMB'

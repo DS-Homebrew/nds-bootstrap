@@ -158,8 +158,11 @@ int hookNdsRetailArm9(
 	u32 saveSize,
 	u32 romFatTableCache,
 	u32 savFatTableCache,
+    u32 musicFatTableCache,
 	u32 ramDumpCluster,
 	u32 srParamsFileCluster,
+	u32 musicCluster,
+	u32 musicsSize,
 	u32 pageFileCluster,
 	bool expansionPakFound,
 	bool extendedMemory,
@@ -181,8 +184,11 @@ int hookNdsRetailArm9(
 	ce9->saveSize               = saveSize;
 	ce9->romFatTableCache       = romFatTableCache;
 	ce9->savFatTableCache       = savFatTableCache;
+	ce9->musicFatTableCache     = musicFatTableCache;
 	ce9->ramDumpCluster         = ramDumpCluster;
 	ce9->srParamsCluster        = srParamsFileCluster;
+	ce9->musicCluster           = musicCluster;
+	ce9->musicsSize             = musicsSize;
 	ce9->pageFileCluster        = pageFileCluster;
 	if (expansionPakFound) {
 		ce9->valueBits |= b_expansionPakFound;

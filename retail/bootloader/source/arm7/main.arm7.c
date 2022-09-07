@@ -98,6 +98,8 @@ extern u32 cheatSize;
 extern u32 patchOffsetCacheFileCluster;
 extern u32 ramDumpCluster;
 extern u32 srParamsFileCluster;
+extern u32 musicCluster;
+extern u32 musicsSize;
 extern u32 patchMpuSize;
 extern u8 patchMpuRegion;
 extern u8 language;
@@ -983,6 +985,11 @@ int arm7_main(void) {
 		errorOutput();
 	}
 
+	aFile musicsFile = getFileFromCluster(musicCluster);
+	if (musicCluster != 0 && memcmp(romTid, "KS3", 3) == 0) {
+		dbg_printf("Music file(s) found!\n");
+	}
+
 	bool wramUsed = false;
 	u32 fatTableSize = 0;
 	if (s2FlashcardId == 0x334D || s2FlashcardId == 0x3647 || s2FlashcardId == 0x4353) {
@@ -1052,6 +1059,20 @@ int arm7_main(void) {
 					}
 					tonccpy((u32*)fatTableAddr, (u32*)0x037F8000, savFile.fatTableCacheSize);
 					savFile.fatTableCache = (u32*)fatTableAddr;
+				}
+				if (musicCluster != 0 && memcmp(romTid, "KS3", 3) == 0) {
+					lastClusterCacheUsed = (u32*)0x037F8000;
+					clusterCache = 0x037F8000;
+					clusterCacheSize = (startMem ? 0x4000 : 0x1A000)-savFile.fatTableCacheSize;
+
+					buildFatTableCache(&musicsFile);
+					if (startMem) {
+						fatTableAddr += savFile.fatTableCacheSize;
+					} else {
+						fatTableAddr -= musicsFile.fatTableCacheSize;
+					}
+					tonccpy((u32*)fatTableAddr, (u32*)0x037F8000, musicsFile.fatTableCacheSize);
+					musicsFile.fatTableCache = (u32*)fatTableAddr;
 				}
 			}
 			if (!startMem) {
@@ -1125,8 +1146,11 @@ int arm7_main(void) {
 		saveSize,
 		(u32)romFile.fatTableCache,
 		(u32)savFile.fatTableCache,
+		(u32)musicsFile.fatTableCache,
 		ramDumpCluster,
 		srParamsFileCluster,
+		musicCluster,
+		musicsSize,
 		pageFileCluster,
 		expansionPakFound,
 		extendedMemory2,
