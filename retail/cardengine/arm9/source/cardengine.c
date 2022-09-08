@@ -870,21 +870,22 @@ void updateMusic(void) {
 }
 
 void musicPlay(int id) {
-	u16 exmemcnt = REG_EXMEMCNT;
-	setDeviceOwner();
-
 	sharedAddr[2] = 0x5353554D; // 'MUSS'
 	while (sharedAddr[2] == 0x5353554D);
 	soundBuffer = 1;
 	if (ce9->musicCluster != 0) {
 		musicPos = musicReadLen;
 		musicPosRev = ce9->musicsSize - musicReadLen;
-		fileRead((char*)0x027F0000, musicsFile, 0, musicReadLen);
-	}
-	sharedAddr[2] = 0x5053554D; // 'MUSP'
-	while (sharedAddr[2] == 0x5053554D);
 
-	REG_EXMEMCNT = exmemcnt;
+		u16 exmemcnt = REG_EXMEMCNT;
+		setDeviceOwner();
+
+		fileRead((char*)0x027F0000, musicsFile, 0, musicReadLen);
+
+		REG_EXMEMCNT = exmemcnt;
+		sharedAddr[2] = 0x5053554D; // 'MUSP'
+		while (sharedAddr[2] == 0x5053554D);
+	}
 }
 
 void musicStopEffect(int id) {
