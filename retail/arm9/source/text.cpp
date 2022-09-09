@@ -64,9 +64,9 @@ constexpr char16_t mapHebrew[] =
 constexpr char16_t mapJapanese[] =
 	u"‥…　いぅかさどなにぬのむるをん"
 	u"アクゲシジスセダットドバビプムモ"
-	u"ャュョリレロン　　　　　　　　　"
-	u"ー上下主了動定度戻択数明書画終自"
-	u"設説速選量面音";
+	u"ャュョリレロンー　　　　　　　　"
+	u"上下主了動定度戻択数明書画終自設"
+	u"説速選量面音";
 
 constexpr char16_t mapChinese[] =
 	u"主书亮位儲出到动動区器回图圖地址"
