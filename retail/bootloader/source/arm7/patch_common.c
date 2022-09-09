@@ -5536,14 +5536,16 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02005A3C = 0xE1A00000; // nop
 		if (!extendedMemory2) {
 			*(u32*)0x020072CC = 0xE3A00901; // mov r0, #0x4000 (Shrink sound heap from 1MB to 16KB: Disables music)
+			tonccpy((u32*)0x02008528, ce9->patches->musicPlay, 0xC);
+			tonccpy((u32*)0x02008570, ce9->patches->musicStopEffect, 0xC);
 		}
 		if (ndsHeader->gameCode[3] == 'J') {
 			ce9->patches->rumble_arm9[0][3] = *(u32*)0x0201D008;
 			ce9->patches->rumble_arm9[1][3] = *(u32*)0x020275F8;
 			if (!extendedMemory2) {
-				// Disable loading title music
-				*(u32*)0x02012930 = 0xE1A00000; // nop
-				*(u32*)0x02012934 = 0xE1A00000; // nop
+				// Replace title music
+				*(u32*)0x02012930 = 0xE3A0000A; // mov r0, #0xA
+				setBL(0x02012934, 0x02008528);
 				*(u32*)0x02012938 = 0xE1A00000; // nop
 				*(u32*)0x0201293C = 0xE1A00000; // nop
 				*(u32*)0x02012940 = 0xE1A00000; // nop
@@ -5575,9 +5577,9 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			ce9->patches->rumble_arm9[0][3] = *(u32*)0x0201CFB0;
 			ce9->patches->rumble_arm9[1][3] = *(u32*)0x0202750C;
 			if (!extendedMemory2) {
-				// Disable loading title music
-				*(u32*)0x020128E4 = 0xE1A00000; // nop
-				*(u32*)0x020128E8 = 0xE1A00000; // nop
+				// Replace title music
+				*(u32*)0x020128E4 = 0xE3A0000A; // mov r0, #0xA
+				setBL(0x020128E8, 0x02008528);
 				*(u32*)0x020128EC = 0xE1A00000; // nop
 				*(u32*)0x020128F0 = 0xE1A00000; // nop
 				*(u32*)0x020128F4 = 0xE1A00000; // nop
