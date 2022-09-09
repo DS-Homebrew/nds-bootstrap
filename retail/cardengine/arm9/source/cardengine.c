@@ -934,7 +934,7 @@ void musicPlay(int id) {
 		musicPos = musicReadLen;
 		musicPosRev = musicFileSize - musicReadLen;
 
-		fileRead((char*)0x027F0000, musicsFile, 0, musicReadLen);
+		fileRead((char*)0x027F0000, musicsFile, musicPosInFile, musicReadLen);
 
 		REG_EXMEMCNT = exmemcnt;
 		sharedAddr[2] = 0x5053554D; // 'MUSP'
