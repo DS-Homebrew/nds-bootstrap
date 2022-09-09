@@ -82,11 +82,18 @@ static aFile pageFile;
 
 void updateMusic(void);
 
+static bool musicInited = false;
+static bool musicMagicStringChecked = false;
+
+static bool musicPlaying = false;
 static int soundBuffer = 1;
+static u32 musicFileCount = 0;
 const u16 musicReadLen = 0x2000;
 static u32 musicPos = 0x2000;
 static u32 musicLoopPos = 0;
 static u32 musicPosRev = 0;
+static u32 musicPosInFile = 0x0;
+static u32 musicFileSize = 0x0;
 
 static bool cardReadInProgress = false;
 static int cardReadCount = 0;
@@ -847,15 +854,38 @@ s32 dsiSaveWrite(void* ctx, void* src, s32 len) {
 	while (1);
 }*/
 
+void musicInit(void) {
+	if (musicInited || musicMagicStringChecked || ce9->musicCluster == 0) {
+		return;
+	}
+
+	u16 exmemcnt = REG_EXMEMCNT;
+	setDeviceOwner();
+
+	musicMagicStringChecked = true;
+	u32 magic = 0;
+	fileRead((char*)&magic, musicsFile, 0, 4);
+	if (magic != 0x4B43502E) {
+		REG_EXMEMCNT = exmemcnt;
+		return;
+	}
+
+	fileRead((char*)&musicFileCount, musicsFile, 4, 4);
+
+	REG_EXMEMCNT = exmemcnt;
+
+	musicInited = true;
+}
+
 void updateMusic(void) {
 	if (sharedAddr[2] == 0x5953554D && !cardReadInProgress) { // 'MUSY'
 		u16 exmemcnt = REG_EXMEMCNT;
 		setDeviceOwner();
 
 		const u16 currentLen = (musicPosRev > musicReadLen) ? musicReadLen : musicPosRev;
-		fileRead((char*)(0x027F0000+(soundBuffer*musicReadLen)), musicsFile, musicPos, currentLen);
+		fileRead((char*)(0x027F0000+(soundBuffer*musicReadLen)), musicsFile, musicPosInFile + musicPos, currentLen);
 		musicPos += musicReadLen;
-		if (musicPos > ce9->musicsSize) {
+		if (musicPos > musicFileSize) {
 			musicPos = musicLoopPos;
 			u16 lastLenTemp = musicPosRev;
 			u16 lastLen = 0;
@@ -863,14 +893,14 @@ void updateMusic(void) {
 				lastLenTemp++;
 				lastLen++;
 			}
-			fileRead((char*)(0x027F0000+(soundBuffer*musicReadLen)+musicPosRev), musicsFile, musicPos, lastLen);
+			fileRead((char*)(0x027F0000+(soundBuffer*musicReadLen)+musicPosRev), musicsFile, musicPosInFile + musicPos, lastLen);
 			musicPos += lastLen;
-			musicPosRev = ce9->musicsSize - musicLoopPos - lastLen;
+			musicPosRev = musicFileSize - musicLoopPos - lastLen;
 		} else {
 			musicPosRev -= musicReadLen;
 			if (musicPosRev == 0) {
 				musicPos = musicLoopPos;
-				musicPosRev = ce9->musicsSize - musicLoopPos;
+				musicPosRev = musicFileSize - musicLoopPos;
 			}
 		}
 
@@ -883,27 +913,42 @@ void updateMusic(void) {
 }
 
 void musicPlay(int id) {
-	sharedAddr[2] = 0x5353554D; // 'MUSS'
-	while (sharedAddr[2] == 0x5353554D);
-	soundBuffer = 1;
-	if (ce9->musicCluster != 0) {
-		musicPos = musicReadLen;
-		musicPosRev = ce9->musicsSize - musicReadLen;
+	musicInit();
+
+	if (musicPlaying) {
+		sharedAddr[2] = 0x5353554D; // 'MUSS'
+		while (sharedAddr[2] == 0x5353554D);
+		musicPlaying = false;
+	}
+
+	if (musicInited && id < musicFileCount) {
+		soundBuffer = 1;
 
 		u16 exmemcnt = REG_EXMEMCNT;
 		setDeviceOwner();
+
+		fileRead((char*)&musicPosInFile, musicsFile, 0x10+(0x10*id), 4);
+		fileRead((char*)&musicFileSize, musicsFile, 0x14+(0x10*id), 4);
+		fileRead((char*)&musicLoopPos, musicsFile, 0x18+(0x10*id), 4);
+
+		musicPos = musicReadLen;
+		musicPosRev = musicFileSize - musicReadLen;
 
 		fileRead((char*)0x027F0000, musicsFile, 0, musicReadLen);
 
 		REG_EXMEMCNT = exmemcnt;
 		sharedAddr[2] = 0x5053554D; // 'MUSP'
 		while (sharedAddr[2] == 0x5053554D);
+		musicPlaying = true;
 	}
 }
 
 void musicStopEffect(int id) {
-	sharedAddr[2] = 0x5353554D; // 'MUSS'
-	while (sharedAddr[2] == 0x5353554D);
+	if (musicPlaying) {
+		sharedAddr[2] = 0x5353554D; // 'MUSS'
+		while (sharedAddr[2] == 0x5353554D);
+		musicPlaying = false;
+	}
 }
 
 void rumble(u32 arg) {

@@ -425,7 +425,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	}
 
 	if (!dsiFeatures() || (conf->b4dsMode && conf->gameOnFlashcard)) {
-		musicsFilePath = "fat:/_nds/nds-bootstrap/test.raw";
+		musicsFilePath = "fat:/_nds/nds-bootstrap/music.pck";
 		conf->musicsSize = getFileSize(musicsFilePath.c_str());
 	}
 

@@ -987,7 +987,7 @@ int arm7_main(void) {
 
 	aFile musicsFile = getFileFromCluster(musicCluster);
 	if (musicCluster != 0 && memcmp(romTid, "KS3", 3) == 0) {
-		dbg_printf("Music file(s) found!\n");
+		dbg_printf("Music pack found!\n");
 	}
 
 	bool wramUsed = false;
