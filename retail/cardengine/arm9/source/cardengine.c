@@ -595,9 +595,11 @@ static void dsiSaveInit(void) {
 
 	int oldIME = enterCriticalSection();
 	u16 exmemcnt = REG_EXMEMCNT;
+	cardReadInProgress = true;
 	setDeviceOwner();
 	fileRead((char*)&dsiSaveSize, savFile, ce9->saveSize-4, 4);
 	fileRead((char*)&existByte, savFile, ce9->saveSize-8, 4);
+	cardReadInProgress = false;
 	REG_EXMEMCNT = exmemcnt;
 	leaveCriticalSection(oldIME);
 
@@ -644,8 +646,10 @@ bool dsiSaveCreate(const char* path, u32 permit) {
 
 		int oldIME = enterCriticalSection();
 		u16 exmemcnt = REG_EXMEMCNT;
+		cardReadInProgress = true;
 		setDeviceOwner();
 		fileWrite((char*)&existByte, savFile, ce9->saveSize-8, 4);
+		cardReadInProgress = false;
 		REG_EXMEMCNT = exmemcnt;
 		leaveCriticalSection(oldIME);
 
@@ -667,9 +671,11 @@ bool dsiSaveDelete(const char* path) {
 
 		int oldIME = enterCriticalSection();
 		u16 exmemcnt = REG_EXMEMCNT;
+		cardReadInProgress = true;
 		setDeviceOwner();
 		fileWrite((char*)&dsiSaveSize, savFile, ce9->saveSize-4, 4);
 		fileWrite((char*)&dsiSaveSize, savFile, ce9->saveSize-8, 4);
+		cardReadInProgress = false;
 		REG_EXMEMCNT = exmemcnt;
 		leaveCriticalSection(oldIME);
 
@@ -710,8 +716,10 @@ u32 dsiSaveSetLength(void* ctx, s32 len) {
 
 	int oldIME = enterCriticalSection();
 	u16 exmemcnt = REG_EXMEMCNT;
+	cardReadInProgress = true;
 	setDeviceOwner();
 	bool res = fileWrite((char*)&dsiSaveSize, savFile, ce9->saveSize-4, 4);
+	cardReadInProgress = false;
 	REG_EXMEMCNT = exmemcnt;
 	leaveCriticalSection(oldIME);
 
@@ -776,8 +784,10 @@ s32 dsiSaveRead(void* ctx, void* dst, s32 len) {
 
 	int oldIME = enterCriticalSection();
 	u16 exmemcnt = REG_EXMEMCNT;
+	cardReadInProgress = true;
 	setDeviceOwner();
 	bool res = fileRead(dst, savFile, dsiSaveSeekPos, len);
+	cardReadInProgress = false;
 	REG_EXMEMCNT = exmemcnt;
 	leaveCriticalSection(oldIME);
 	if (res) {
@@ -794,8 +804,10 @@ s32 dsiSaveWrite(void* ctx, void* src, s32 len) {
 
 	int oldIME = enterCriticalSection();
 	u16 exmemcnt = REG_EXMEMCNT;
+	cardReadInProgress = true;
 	setDeviceOwner();
 	bool res = fileWrite(src, savFile, dsiSaveSeekPos, len);
+	cardReadInProgress = false;
 	REG_EXMEMCNT = exmemcnt;
 	leaveCriticalSection(oldIME);
 	if (res) {
@@ -805,7 +817,9 @@ s32 dsiSaveWrite(void* ctx, void* src, s32 len) {
 			int oldIME = enterCriticalSection();
 			u16 exmemcnt = REG_EXMEMCNT;
 			setDeviceOwner();
+			cardReadInProgress = true;
 			fileWrite((char*)&dsiSaveSize, savFile, ce9->saveSize-4, 4);
+			cardReadInProgress = false;
 			REG_EXMEMCNT = exmemcnt;
 			leaveCriticalSection(oldIME);
 		}
@@ -835,7 +849,6 @@ s32 dsiSaveWrite(void* ctx, void* src, s32 len) {
 
 void updateMusic(void) {
 	if (sharedAddr[2] == 0x5953554D && !cardReadInProgress) { // 'MUSY'
-		int oldIME = enterCriticalSection();
 		u16 exmemcnt = REG_EXMEMCNT;
 		setDeviceOwner();
 
@@ -866,7 +879,6 @@ void updateMusic(void) {
 
 		sharedAddr[2] = 0;
 		REG_EXMEMCNT = exmemcnt;
-		leaveCriticalSection(oldIME);
 	}
 }
 
