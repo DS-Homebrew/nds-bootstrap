@@ -85,6 +85,7 @@ void updateMusic(void);
 static int soundBuffer = 1;
 const u16 musicReadLen = 0x2000;
 static u32 musicPos = 0x2000;
+static u32 musicLoopPos = 0;
 static u32 musicPosRev = 0;
 
 static bool cardReadInProgress = false;
@@ -842,7 +843,7 @@ void updateMusic(void) {
 		fileRead((char*)(0x027F0000+(soundBuffer*musicReadLen)), musicsFile, musicPos, currentLen);
 		musicPos += musicReadLen;
 		if (musicPos > ce9->musicsSize) {
-			musicPos = 0;
+			musicPos = musicLoopPos;
 			u16 lastLenTemp = musicPosRev;
 			u16 lastLen = 0;
 			while (lastLenTemp < 0x2000) {
@@ -851,12 +852,12 @@ void updateMusic(void) {
 			}
 			fileRead((char*)(0x027F0000+(soundBuffer*musicReadLen)+musicPosRev), musicsFile, musicPos, lastLen);
 			musicPos += lastLen;
-			musicPosRev = ce9->musicsSize-lastLen;
+			musicPosRev = ce9->musicsSize - musicLoopPos - lastLen;
 		} else {
 			musicPosRev -= musicReadLen;
 			if (musicPosRev == 0) {
-				musicPos = 0;
-				musicPosRev = ce9->musicsSize;
+				musicPos = musicLoopPos;
+				musicPosRev = ce9->musicsSize - musicLoopPos;
 			}
 		}
 
