@@ -1255,12 +1255,13 @@ void myIrqHandlerIPC(void) {
 #else
 		if (ce9->valueBits & ROMinRAM) {
 			endCardReadDma();
-		} else if(ce9->patches->cardEndReadDmaRef || ce9->thumbPatches->cardEndReadDmaRef) { // new dma method
-			#ifndef TWLSDK
+		}
+		#ifndef TWLSDK
+		else if(ce9->patches->cardEndReadDmaRef || ce9->thumbPatches->cardEndReadDmaRef) { // new dma method
 			continueCardReadDmaArm7();
-			#endif
 			continueCardReadDmaArm9();
 		}
+		#endif
 #endif
 			break;
 		case 0x4:

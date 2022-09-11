@@ -394,7 +394,12 @@ void cardSetDma (u32 * params) {
 	u8* dst = (u8*)dmaParams[4];
 	u32 len = dmaParams[5];
 
-	if (!dmaOn || ce9->patches->sleepRef || ce9->thumbPatches->sleepRef) {
+	#ifdef TWLSDK
+	if (!(ce9->valueBits & ROMinRAM))
+	#else
+	if (!dmaOn || ce9->patches->sleepRef || ce9->thumbPatches->sleepRef)
+	#endif
+	{
 		cardRead(0, dst, src, len);
 		endCardReadDma();
 		return;
@@ -412,6 +417,7 @@ void cardSetDma (u32 * params) {
 		return;
 	}
 
+	#ifndef TWLSDK
 	u32 commandRead=0x025FFB0A;
 	u32 sector = (src/ce9->cacheBlockSize)*ce9->cacheBlockSize;
 	//u32 page = (src / 512) * 512;
@@ -423,10 +429,6 @@ void cardSetDma (u32 * params) {
 	#endif
 
 	if ((ce9->valueBits & cacheDisabled) && (u32)dst >= 0x02000000 && (u32)dst < 0x03000000) {
-		#ifdef TWLSDK
-		cardRead(0, dst, src, len);
-		endCardReadDma();
-		#else
 		// Write the command
 		sharedAddr[0] = (vu32)dst;
 		sharedAddr[1] = len;
@@ -436,7 +438,6 @@ void cardSetDma (u32 * params) {
 		dmaReadOnArm7 = true;
 
 		IPC_SendSync(0x4);
-		#endif
 	} else {
 		// Read via the main RAM cache
 		int slot = getSlotForSector(sector);
@@ -465,9 +466,6 @@ void cardSetDma (u32 * params) {
 				readLen = ce9->cacheBlockSize*2;
 			}*/
 
-			#ifdef TWLSDK
-			fileRead((char*)buffer, *romFile, sector, ce9->cacheBlockSize, 0);
-			#else
 			// Write the command
 			sharedAddr[0] = (vu32)buffer;
 			sharedAddr[1] = ce9->cacheBlockSize;
@@ -479,7 +477,6 @@ void cardSetDma (u32 * params) {
 			IPC_SendSync(0x4);
 
 			updateDescriptor(slot, sector);
-			#endif
 			/*if (readLen >= ce9->cacheBlockSize*2) {
 				updateDescriptor(slot+1, sector+ce9->cacheBlockSize);
 			}
@@ -490,9 +487,7 @@ void cardSetDma (u32 * params) {
 				updateDescriptor(slot+3, sector+(ce9->cacheBlockSize*3));
 			}
 			currentSlot = slot;*/
-			#ifndef TWLSDK
 			return;
-			#endif
 		} 
 		#ifdef ASYNCPF
 		if(cacheCounter[slot] == 0x0FFFFFFF) {
@@ -531,6 +526,7 @@ void cardSetDma (u32 * params) {
 
 		IPC_SendSync(0x3);
 	}
+	#endif
 }
 #else
 void cardSetDma (u32 * params) {
