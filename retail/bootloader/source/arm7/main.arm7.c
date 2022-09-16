@@ -986,7 +986,7 @@ int arm7_main(void) {
 	}
 
 	aFile musicsFile = getFileFromCluster(musicCluster);
-	if (musicCluster != 0 && memcmp(romTid, "KS3", 3) == 0) {
+	if (musicCluster != 0) {
 		dbg_printf("Music pack found!\n");
 	}
 
@@ -1060,7 +1060,7 @@ int arm7_main(void) {
 					tonccpy((u32*)fatTableAddr, (u32*)0x037F8000, savFile.fatTableCacheSize);
 					savFile.fatTableCache = (u32*)fatTableAddr;
 				}
-				if (musicCluster != 0 && memcmp(romTid, "KS3", 3) == 0) {
+				if (musicCluster != 0) {
 					lastClusterCacheUsed = (u32*)0x037F8000;
 					clusterCache = 0x037F8000;
 					clusterCacheSize = (startMem ? 0x4000 : 0x1A000)-savFile.fatTableCacheSize;

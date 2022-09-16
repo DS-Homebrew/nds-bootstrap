@@ -424,11 +424,6 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		mkdir("fat:/_nds/nds-bootstrap/patchOffsetCache", 0777);
 	}
 
-	if (!dsiFeatures() || (conf->b4dsMode && conf->gameOnFlashcard)) {
-		musicsFilePath = "fat:/_nds/nds-bootstrap/music.pck";
-		conf->musicsSize = getFileSize(musicsFilePath.c_str());
-	}
-
 	pageFilePath = "sd:/_nds/pagefile.sys";
 	if (conf->b4dsMode || !conf->sdFound) {
 		pageFilePath = "fat:/_nds/pagefile.sys";	
@@ -1340,6 +1335,11 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	} else {
 		toncset16((u16*)IMAGES_LOCATION, 0, 256*192);
 	}
+
+	sprintf(patchOffsetCacheFilePath, "fat:/_nds/nds-bootstrap/musicPacks/%s-%04X.pck", romTid, headerCRC);
+
+	musicsFilePath = patchOffsetCacheFilePath;
+	conf->musicsSize = getFileSize(patchOffsetCacheFilePath);
   }
 
 	const char *typeToReplace = ".nds";
