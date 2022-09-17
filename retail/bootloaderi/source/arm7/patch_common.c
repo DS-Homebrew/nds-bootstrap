@@ -1711,6 +1711,100 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// Go! Go! Kokopolo (USA)
+	// Go! Go! Kokopolo (Europe)
+	else if ((strcmp(romTid, "K3GE") == 0 || strcmp(romTid, "K3GP") == 0) && saveOnFlashcard) {
+		const u32 readCodeCopy = 0x02013CF4;
+
+		if (ndsHeader->romversion == 0) {
+			if (ndsHeader->gameCode[3] == 'E') {
+				tonccpy((u32*)readCodeCopy, (u32*)0x020BCB48, 0x70);
+
+				setBL(0x02043290, readCodeCopy);
+				setBL(0x02043328, readCodeCopy);
+
+				setBL(readCodeCopy+0x18, 0x02013CC8);
+				setBL(readCodeCopy+0x24, (u32)dsiSaveOpenR);
+				setBL(readCodeCopy+0x34, (u32)dsiSaveGetLength);
+				setBL(readCodeCopy+0x44, (u32)dsiSaveRead);
+				setBL(readCodeCopy+0x4C, (u32)dsiSaveClose);
+				setBL(readCodeCopy+0x54, 0x020BCA0C);
+
+				*(u32*)0x0208EB74 = 0xE3A00000; // mov r0, #0 (Skip Manual screen)
+
+				setBL(0x020BCCF4, (u32)dsiSaveCreate);
+				setBL(0x020BCD04, (u32)dsiSaveOpen);
+				setBL(0x020BCD18, (u32)dsiSaveSetLength);
+				setBL(0x020BCD28, (u32)dsiSaveWrite);
+				setBL(0x020BCD30, (u32)dsiSaveClose);
+			} else {
+				tonccpy((u32*)readCodeCopy, (u32*)0x020BCC6C, 0x70);
+
+				setBL(0x020432EC, readCodeCopy);
+				setBL(0x02043384, readCodeCopy);
+
+				setBL(readCodeCopy+0x18, 0x02013CC8);
+				setBL(readCodeCopy+0x24, (u32)dsiSaveOpenR);
+				setBL(readCodeCopy+0x34, (u32)dsiSaveGetLength);
+				setBL(readCodeCopy+0x44, (u32)dsiSaveRead);
+				setBL(readCodeCopy+0x4C, (u32)dsiSaveClose);
+				setBL(readCodeCopy+0x54, 0x020BCB20);
+
+				*(u32*)0x0208EC38 = 0xE3A00000; // mov r0, #0 (Skip Manual screen)
+
+				setBL(0x020BCE18, (u32)dsiSaveCreate);
+				setBL(0x020BCE28, (u32)dsiSaveOpen);
+				setBL(0x020BCE3C, (u32)dsiSaveSetLength);
+				setBL(0x020BCE4C, (u32)dsiSaveWrite);
+				setBL(0x020BCE54, (u32)dsiSaveClose);
+			}
+		} else {
+			tonccpy((u32*)readCodeCopy, (u32*)0x020BCDA4, 0x70);
+
+			setBL(0x020432EC, readCodeCopy);
+			setBL(0x02043384, readCodeCopy);
+
+			setBL(readCodeCopy+0x18, 0x02013CC8);
+			setBL(readCodeCopy+0x24, (u32)dsiSaveOpenR);
+			setBL(readCodeCopy+0x34, (u32)dsiSaveGetLength);
+			setBL(readCodeCopy+0x44, (u32)dsiSaveRead);
+			setBL(readCodeCopy+0x4C, (u32)dsiSaveClose);
+			setBL(readCodeCopy+0x54, 0x020BCC58);
+
+			*(u32*)0x0208EE9C = 0xE3A00000; // mov r0, #0 (Skip Manual screen)
+
+			setBL(0x020BCF50, (u32)dsiSaveCreate);
+			setBL(0x020BCF60, (u32)dsiSaveOpen);
+			setBL(0x020BCF74, (u32)dsiSaveSetLength);
+			setBL(0x020BCF84, (u32)dsiSaveWrite);
+			setBL(0x020BCF8C, (u32)dsiSaveClose);
+		}
+	}
+
+	// Go! Go! Kokopolo (Japan)
+	else if (strcmp(romTid, "K3GJ") == 0 && saveOnFlashcard) {
+		const u32 readCodeCopy = 0x02013D24;
+		tonccpy((u32*)readCodeCopy, (u32*)0x020BCD90, 0x70);
+
+		setBL(0x0204324C, readCodeCopy);
+		setBL(0x020432E4, readCodeCopy);
+
+		setBL(readCodeCopy+0x18, 0x02013CF8);
+		setBL(readCodeCopy+0x24, (u32)dsiSaveOpenR);
+		setBL(readCodeCopy+0x34, (u32)dsiSaveGetLength);
+		setBL(readCodeCopy+0x44, (u32)dsiSaveRead);
+		setBL(readCodeCopy+0x4C, (u32)dsiSaveClose);
+		setBL(readCodeCopy+0x54, 0x020BCC44);
+
+		*(u32*)0x0208EC74 = 0xE3A00000; // mov r0, #0 (Skip Manual screen)
+
+		setBL(0x020BCF3C, (u32)dsiSaveCreate);
+		setBL(0x020BCF4C, (u32)dsiSaveOpen);
+		setBL(0x020BCF60, (u32)dsiSaveSetLength);
+		setBL(0x020BCF70, (u32)dsiSaveWrite);
+		setBL(0x020BCF78, (u32)dsiSaveClose);
+	}
+
 	// Hard-Hat Domo (USA)
 	else if (strcmp(romTid, "KDHE") == 0 && saveOnFlashcard) {
 		const u32 dsiSaveCreateT = 0x020238C8;

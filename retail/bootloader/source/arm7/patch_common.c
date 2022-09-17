@@ -4450,7 +4450,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02019104 = 0xE1A00000; // nop
 		patchHiHeapDSiWare(0x02019160, heapEnd); // mov r0, #0x23C0000
 		*(u32*)0x0201D83C = 0xE1A00000; // nop
-		if (strcmp(romTid, "KGKE") == 0) {
+		if (ndsHeader->gameCode[3] == 'E') {
 			for (int i = 0; i < 12; i++) {
 				u32* offset = (u32*)0x0206710C;
 				offset[i] = 0xE1A00000; // nop
@@ -4471,6 +4471,159 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 				offset[i] = 0xE1A00000; // nop
 			}
 		}
+	}
+
+	// Go! Go! Kokopolo (USA)
+	// Go! Go! Kokopolo (Europe)
+	// Requires 8MB of RAM
+	else if ((strcmp(romTid, "K3GE") == 0 || strcmp(romTid, "K3GP") == 0) && extendedMemory2) {
+		const u32 readCodeCopy = 0x02013CF4;
+
+		*(u32*)0x02004838 = 0xE1A00000; // nop
+		*(u32*)0x0200499C = 0xE1A00000; // nop
+		*(u32*)0x02012738 = 0xE1A00000; // nop
+		*(u32*)0x02015C98 = 0xE1A00000; // nop
+		*(u32*)0x0201A10C = 0xE1A00000; // nop
+		*(u32*)0x0201C014 = 0xE1A00000; // nop
+		*(u32*)0x0201C018 = 0xE1A00000; // nop
+		*(u32*)0x0201C024 = 0xE1A00000; // nop
+		*(u32*)0x0201C184 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x0201C1E0, 0x02700000); // mov r0, #0x2700000
+		//*(u32*)0x0201C314 -= 0x30000;
+		*(u32*)0x0201D604 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
+		*(u32*)0x02021190 = 0xE1A00000; // nop
+		*(u32*)0x02022AD8 = 0xE1A00000; // nop
+		*(u32*)0x02022ADC = 0xE1A00000; // nop
+		*(u32*)0x02022B0C = 0xE1A00000; // nop
+		if (ndsHeader->romversion == 0) {
+			if (ndsHeader->gameCode[3] == 'E') {
+				*(u32*)0x02042F40 = 0xE1A00000; // nop
+				*(u32*)0x02042F5C = 0xE1A00000; // nop
+
+				tonccpy((u32*)readCodeCopy, (u32*)0x020BCB48, 0x70);
+
+				*(u32*)0x020431B0 = 0xE1A00000; // nop
+				setBL(0x02043290, readCodeCopy);
+				setBL(0x02043328, readCodeCopy);
+
+				setBL(readCodeCopy+0x18, 0x02013CC8);
+				setBL(readCodeCopy+0x24, (u32)dsiSaveOpenR);
+				setBL(readCodeCopy+0x34, (u32)dsiSaveGetLength);
+				setBL(readCodeCopy+0x44, (u32)dsiSaveRead);
+				setBL(readCodeCopy+0x4C, (u32)dsiSaveClose);
+				setBL(readCodeCopy+0x54, 0x020BCA0C);
+
+				*(u32*)0x0208EB74 = 0xE3A00000; // mov r0, #0 (Skip Manual screen)
+
+				setBL(0x020BCCF4, (u32)dsiSaveCreate);
+				setBL(0x020BCD04, (u32)dsiSaveOpen);
+				setBL(0x020BCD18, (u32)dsiSaveSetLength);
+				setBL(0x020BCD28, (u32)dsiSaveWrite);
+				setBL(0x020BCD30, (u32)dsiSaveClose);
+
+				*(u32*)0x020BE934 = 0xE3A00000; // mov r0, #0
+			} else {
+				*(u32*)0x02042F9C = 0xE1A00000; // nop
+				*(u32*)0x02042FB8 = 0xE1A00000; // nop
+
+				tonccpy((u32*)readCodeCopy, (u32*)0x020BCC6C, 0x70);
+
+				*(u32*)0x0204320C = 0xE1A00000; // nop
+				setBL(0x020432EC, readCodeCopy);
+				setBL(0x02043384, readCodeCopy);
+
+				setBL(readCodeCopy+0x18, 0x02013CC8);
+				setBL(readCodeCopy+0x24, (u32)dsiSaveOpenR);
+				setBL(readCodeCopy+0x34, (u32)dsiSaveGetLength);
+				setBL(readCodeCopy+0x44, (u32)dsiSaveRead);
+				setBL(readCodeCopy+0x4C, (u32)dsiSaveClose);
+				setBL(readCodeCopy+0x54, 0x020BCB20);
+
+				*(u32*)0x0208EC38 = 0xE3A00000; // mov r0, #0 (Skip Manual screen)
+
+				setBL(0x020BCE18, (u32)dsiSaveCreate);
+				setBL(0x020BCE28, (u32)dsiSaveOpen);
+				setBL(0x020BCE3C, (u32)dsiSaveSetLength);
+				setBL(0x020BCE4C, (u32)dsiSaveWrite);
+				setBL(0x020BCE54, (u32)dsiSaveClose);
+
+				*(u32*)0x020BEA68 = 0xE3A00000; // mov r0, #0
+			}
+		} else {
+			*(u32*)0x02042F9C = 0xE1A00000; // nop
+			*(u32*)0x02042FB8 = 0xE1A00000; // nop
+
+			tonccpy((u32*)readCodeCopy, (u32*)0x020BCDA4, 0x70);
+
+			*(u32*)0x0204320C = 0xE1A00000; // nop
+			setBL(0x020432EC, readCodeCopy);
+			setBL(0x02043384, readCodeCopy);
+
+			setBL(readCodeCopy+0x18, 0x02013CC8);
+			setBL(readCodeCopy+0x24, (u32)dsiSaveOpenR);
+			setBL(readCodeCopy+0x34, (u32)dsiSaveGetLength);
+			setBL(readCodeCopy+0x44, (u32)dsiSaveRead);
+			setBL(readCodeCopy+0x4C, (u32)dsiSaveClose);
+			setBL(readCodeCopy+0x54, 0x020BCC58);
+
+			*(u32*)0x0208EE9C = 0xE3A00000; // mov r0, #0 (Skip Manual screen)
+
+			setBL(0x020BCF50, (u32)dsiSaveCreate);
+			setBL(0x020BCF60, (u32)dsiSaveOpen);
+			setBL(0x020BCF74, (u32)dsiSaveSetLength);
+			setBL(0x020BCF84, (u32)dsiSaveWrite);
+			setBL(0x020BCF8C, (u32)dsiSaveClose);
+
+			*(u32*)0x020BEBA0 = 0xE3A00000; // mov r0, #0
+		}
+	}
+
+	// Go! Go! Kokopolo (Japan)
+	// Requires 8MB of RAM
+	else if (strcmp(romTid, "K3GJ") == 0 && extendedMemory2) {
+		*(u32*)0x02004838 = 0xE1A00000; // nop
+		*(u32*)0x0200499C = 0xE1A00000; // nop
+		*(u32*)0x02012768 = 0xE1A00000; // nop
+		*(u32*)0x02015CC8 = 0xE1A00000; // nop
+		*(u32*)0x0201A13C = 0xE1A00000; // nop
+		*(u32*)0x0201C044 = 0xE1A00000; // nop
+		*(u32*)0x0201C048 = 0xE1A00000; // nop
+		*(u32*)0x0201C054 = 0xE1A00000; // nop
+		*(u32*)0x0201C1B4 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x0201C210, 0x02700000); // mov r0, #0x2700000
+		//*(u32*)0x0201C344 -= 0x30000;
+		*(u32*)0x0201D634 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
+		*(u32*)0x020211C0 = 0xE1A00000; // nop
+		*(u32*)0x02022B08 = 0xE1A00000; // nop
+		*(u32*)0x02022B0C = 0xE1A00000; // nop
+		*(u32*)0x02022B3C = 0xE1A00000; // nop
+
+		*(u32*)0x02042EFC = 0xE1A00000; // nop
+		*(u32*)0x02042F18 = 0xE1A00000; // nop
+
+		const u32 readCodeCopy = 0x02013D24;
+		tonccpy((u32*)readCodeCopy, (u32*)0x020BCD90, 0x70);
+
+		*(u32*)0x0204316C = 0xE1A00000; // nop
+		setBL(0x0204324C, readCodeCopy);
+		setBL(0x020432E4, readCodeCopy);
+
+		setBL(readCodeCopy+0x18, 0x02013CF8);
+		setBL(readCodeCopy+0x24, (u32)dsiSaveOpenR);
+		setBL(readCodeCopy+0x34, (u32)dsiSaveGetLength);
+		setBL(readCodeCopy+0x44, (u32)dsiSaveRead);
+		setBL(readCodeCopy+0x4C, (u32)dsiSaveClose);
+		setBL(readCodeCopy+0x54, 0x020BCC44);
+
+		*(u32*)0x0208EC74 = 0xE3A00000; // mov r0, #0 (Skip Manual screen)
+
+		setBL(0x020BCF3C, (u32)dsiSaveCreate);
+		setBL(0x020BCF4C, (u32)dsiSaveOpen);
+		setBL(0x020BCF60, (u32)dsiSaveSetLength);
+		setBL(0x020BCF70, (u32)dsiSaveWrite);
+		setBL(0x020BCF78, (u32)dsiSaveClose);
+
+		*(u32*)0x020BEB8C = 0xE3A00000; // mov r0, #0
 	}
 
 	// Hard-Hat Domo (USA)
