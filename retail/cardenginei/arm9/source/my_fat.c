@@ -209,6 +209,11 @@ int prevClust = -1;
 enum {FS_UNKNOWN, FS_FAT12, FS_FAT16, FS_FAT32} discFileSystem;
 
 // Global sector buffer to save on stack space
+#ifdef TWLSDK
+unsigned char nextClusterBuffer[BYTES_PER_SECTOR];
+unsigned char lastGlobalBuffer[BYTES_PER_SECTOR];
+unsigned char globalBuffer[BYTES_PER_SECTOR];
+#else
 #ifdef DLDI
 unsigned char nextClusterBuffer[BYTES_PER_SECTOR];
 unsigned char lastGlobalBuffer[BYTES_PER_SECTOR];
@@ -217,6 +222,7 @@ unsigned char globalBuffer[BYTES_PER_SECTOR];
 unsigned char* nextClusterBuffer = (unsigned char*)CARDENGINEI_ARM9_LOCATION+0x7A00;
 unsigned char* lastGlobalBuffer = (unsigned char*)CARDENGINEI_ARM9_LOCATION+0x7C00;
 unsigned char* globalBuffer = (unsigned char*)CARDENGINEI_ARM9_LOCATION+0x7E00;
+#endif
 #endif
 
 #define CLUSTER_CACHE      0x2700000 // Main RAM

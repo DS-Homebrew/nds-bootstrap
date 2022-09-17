@@ -1744,33 +1744,20 @@ int arm7_main(void) {
 				ce9Location = CARDENGINEI_ARM9_LOCATION_DSI_WRAM;
 				tonccpy((u32*)ce9Location, (u32*)CARDENGINEI_ARM9_ROMINRAM_BUFFERED_LOCATION, ce9size);
 			}
-		} else if (isSdk5(moduleParams)) {
-			ce9Location = CARDENGINEI_ARM9_LOCATION;
+		} else if (isSdk5(moduleParams) && ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed) {
+			ce9Location = CARDENGINEI_ARM9_TWLSDK_LOCATION;
 			if (gameOnFlashcard) {
-				if (ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed) {
-					ce9Location = CARDENGINEI_ARM9_TWLSDK_LOCATION;
-					patchHiHeapPointer(moduleParams, ndsHeader, ROMinRAM);
-				} else {
-					ce9Location = CARDENGINEI_ARM9_LOCATION_DSI_WRAM;
-				}
 				ce9size = 0x7000;
 				tonccpy((u32*)ce9Location, (u32*)CARDENGINEI_ARM9_SDK5_DLDI_BUFFERED_LOCATION, ce9size);
 				if (!dldiPatchBinary((data_t*)ce9Location, ce9size)) {
 					dbg_printf("ce9 DLDI patch failed\n");
 					errorOutput();
 				}
-			} else if (ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed) {
-				ce9Location = CARDENGINEI_ARM9_TWLSDK_LOCATION;
-				ce9size = 0x5000;
-				tonccpy((u32*)ce9Location, (u32*)CARDENGINEI_ARM9_SDK5_BUFFERED_LOCATION, ce9size);
-				patchHiHeapPointer(moduleParams, ndsHeader, ROMinRAM);
 			} else {
-				if (dsiWramAccess) {
-					ce9Location = CARDENGINEI_ARM9_LOCATION_DSI_WRAM;
-				}
 				ce9size = 0x5000;
 				tonccpy((u32*)ce9Location, (u32*)CARDENGINEI_ARM9_SDK5_BUFFERED_LOCATION, ce9size);
 			}
+			patchHiHeapPointer(moduleParams, ndsHeader, ROMinRAM);
 		} else if (gameOnFlashcard) {
 			ce9Location = CARDENGINEI_ARM9_LOCATION_DSI_WRAM;
 			ce9size = 0x7000;

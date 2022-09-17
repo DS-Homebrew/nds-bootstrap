@@ -190,7 +190,7 @@ void cardSetDma(u32 * params) {
 	vu32* volatile cardStruct = ce9->cardStruct0;
 
 	u32 src = ((ce9->valueBits & isSdk5) ? params[3] : cardStruct[0]);
-	u8* dst = ((ce9->valueBits & isSdk5) ? params[4] : (u8*)(cardStruct[1]));
+	u8* dst = ((ce9->valueBits & isSdk5) ? (u8*)(params[4]) : (u8*)(cardStruct[1]));
 	u32 len = ((ce9->valueBits & isSdk5) ? params[5] : cardStruct[2]);
 
 	if (!dmaOn) {
@@ -241,7 +241,7 @@ bool isNotTcm(u32 address, u32 len) {
 
 u32 cardReadDma(u32 dma0, u8* dst0, u32 src0, u32 len0) {
 	vu32* volatile cardStruct = ce9->cardStruct0;
-    
+
 	u32 src = ((ce9->valueBits & isSdk5) ? src0 : cardStruct[0]);
 	u8* dst = ((ce9->valueBits & isSdk5) ? dst0 : (u8*)(cardStruct[1]));
 	u32 len = ((ce9->valueBits & isSdk5) ? len0 : cardStruct[2]);

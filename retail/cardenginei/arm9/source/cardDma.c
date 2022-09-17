@@ -39,6 +39,7 @@
 #include "unpatched_funcs.h"
 
 #define ROMinRAM BIT(1)
+#define isSdk5 BIT(5)
 #define cacheFlushFlag BIT(7)
 #define cardReadFix BIT(8)
 #define cacheDisabled BIT(9)
@@ -52,7 +53,6 @@ extern cardengineArm9* volatile ce9;
 
 extern vu32* volatile sharedAddr;
 
-extern tNDSHeader* ndsHeader;
 extern aFile* romFile;
 
 extern u32 cacheDescriptor[];
@@ -204,6 +204,8 @@ extern bool IPC_SYNC_hooked;
 extern void hookIPC_SYNC(void);
 extern void enableIPC_SYNC(void);
 
+#ifndef TWLSDK
+static u32 * dmaParams = NULL;
 static int currentLen = 0;
 //static int currentSlot = 0;
 
@@ -216,22 +218,28 @@ void continueCardReadDmaArm9() {
         dmaReadOnArm9 = false;
 
         vu32* volatile cardStruct = ce9->cardStruct0;
-        u32	dma = cardStruct[3]; // dma channel
+        //u32	dma = cardStruct[3]; // dma channel
 
 		u32 commandRead=0x025FFB0A;
 
-        u32 src = cardStruct[0];
-        u8* dst = (u8*)(cardStruct[1]);
-        u32 len = cardStruct[2];
+		u32 src = ((ce9->valueBits & isSdk5) ? dmaParams[3] : cardStruct[0]);
+		u8* dst = ((ce9->valueBits & isSdk5) ? (u8*)(dmaParams[4]) : (u8*)(cardStruct[1]));
+		u32 len = ((ce9->valueBits & isSdk5) ? dmaParams[5] : cardStruct[2]);
 
         // Update cardi common
-  		cardStruct[0] = src + currentLen;
-  		cardStruct[1] = (vu32)(dst + currentLen);
-  		cardStruct[2] = len - currentLen;
+		if (ce9->valueBits & isSdk5) {
+			dmaParams[3] = src + currentLen;
+			dmaParams[4] = (vu32)(dst + currentLen);
+			dmaParams[5] = len - currentLen;
+		} else {
+			cardStruct[0] = src + currentLen;
+			cardStruct[1] = (vu32)(dst + currentLen);
+			cardStruct[2] = len - currentLen;
+		}
 
-        src = cardStruct[0];
-        dst = (u8*)(cardStruct[1]);
-        len = cardStruct[2]; 
+		src = ((ce9->valueBits & isSdk5) ? dmaParams[3] : cardStruct[0]);
+		dst = ((ce9->valueBits & isSdk5) ? (u8*)(dmaParams[4]) : (u8*)(cardStruct[1]));
+		len = ((ce9->valueBits & isSdk5) ? dmaParams[5] : cardStruct[2]);
 
 		u32 sector = (src/ce9->cacheBlockSize)*ce9->cacheBlockSize;
 
@@ -348,12 +356,11 @@ void continueCardReadDmaArm7() {
 
         vu32* volatile cardStruct = ce9->cardStruct0;
 
-        u32 src = cardStruct[0];
-        u8* dst = (u8*)(cardStruct[1]);
-        u32 len = cardStruct[2];
-        u32	dma = cardStruct[3]; // dma channel
+		u32 src = ((ce9->valueBits & isSdk5) ? dmaParams[3] : cardStruct[0]);
+		u8* dst = ((ce9->valueBits & isSdk5) ? (u8*)(dmaParams[4]) : (u8*)(cardStruct[1]));
+		u32 len = ((ce9->valueBits & isSdk5) ? dmaParams[5] : cardStruct[2]);
 
-		if ((ce9->valueBits & cacheDisabled) && (u32)dst >= 0x02000000 && (u32)dst < 0x02800000) {
+		if ((ce9->valueBits & cacheDisabled) && (u32)dst >= 0x02000000 && (u32)dst < 0x03000000) {
 			endCardReadDma();
 		} else {
 			u32 sector = (src/ce9->cacheBlockSize)*ce9->cacheBlockSize;
@@ -380,22 +387,36 @@ void continueCardReadDmaArm7() {
 		}
 	}
 }
+#endif
 
-void cardSetDma(void) {
+void cardSetDma(u32 * params) {
 	isDma = true;
 
-	if (!dmaOn) {
-		cardRead(NULL);
+	#ifdef TWLSDK
+	u32 src = params[3];
+	u8* dst = (u8*)params[4];
+	u32 len = params[5];
+	#else
+	vu32* volatile cardStruct = ce9->cardStruct0;
+
+	if (ce9->valueBits & isSdk5) {
+		dmaParams = params;
+	}
+	u32 src = ((ce9->valueBits & isSdk5) ? dmaParams[3] : cardStruct[0]);
+	u8* dst = ((ce9->valueBits & isSdk5) ? (u8*)(dmaParams[4]) : (u8*)(cardStruct[1]));
+	u32 len = ((ce9->valueBits & isSdk5) ? dmaParams[5] : cardStruct[2]);
+	#endif
+
+	#ifdef TWLSDK
+	if (!(ce9->valueBits & ROMinRAM))
+	#else
+	if (!dmaOn || ce9->patches->sleepRef || ce9->thumbPatches->sleepRef)
+	#endif
+	{
+		cardRead(NULL, dst, src, len);
 		endCardReadDma();
 		return;
 	}
-
-	vu32* volatile cardStruct = ce9->cardStruct0;
-
-	u32 src = cardStruct[0];
-	u8* dst = (u8*)(cardStruct[1]);
-	u32 len = cardStruct[2];
-    u32 dma = cardStruct[3]; // dma channel     
 
     disableIrqMask(IRQ_CARD);
     disableIrqMask(IRQ_CARD_LINE);
@@ -409,6 +430,7 @@ void cardSetDma(void) {
 		return;
 	}
 
+	#ifndef TWLSDK
 	u32 commandRead=0x025FFB0A;
 	u32 sector = (src/ce9->cacheBlockSize)*ce9->cacheBlockSize;
 	//u32 page = (src / 512) * 512;
@@ -419,7 +441,7 @@ void cardSetDma(void) {
 	processAsyncCommand();
 	#endif
 
-	if ((ce9->valueBits & cacheDisabled) && (u32)dst >= 0x02000000 && (u32)dst < 0x02800000) {
+	if ((ce9->valueBits & cacheDisabled) && (u32)dst >= 0x02000000 && (u32)dst < 0x03000000) {
 		// Write the command
 		sharedAddr[0] = (vu32)dst;
 		sharedAddr[1] = len;
@@ -519,23 +541,36 @@ void cardSetDma(void) {
 
 		IPC_SendSync(0x3);
 	}
+	#endif
 }
 #else
-void cardSetDma(void) {
-	cardRead(NULL);
+void cardSetDma(u32 * params) {
+	#ifdef TWLSDK
+	u32 src = params[3];
+	u8* dst = (u8*)params[4];
+	u32 len = params[5];
+	#else
+	vu32* volatile cardStruct = ce9->cardStruct0;
+
+	u32 src = ((ce9->valueBits & isSdk5) ? params[3] : cardStruct[0]);
+	u8* dst = ((ce9->valueBits & isSdk5) ? (u8*)(params[4]) : (u8*)(cardStruct[1]));
+	u32 len = ((ce9->valueBits & isSdk5) ? params[5] : cardStruct[2]);
+	#endif
+
+	cardRead(NULL, dst, src, len);
 	endCardReadDma();
 }
 #endif
 
 extern bool isNotTcm(u32 address, u32 len);
 
-u32 cardReadDma() {
+u32 cardReadDma(u32 dma0, u8* dst0, u32 src0, u32 len0) {
 	vu32* volatile cardStruct = ce9->cardStruct0;
-    
-	u32 src = cardStruct[0];
-	u8* dst = (u8*)(cardStruct[1]);
-	u32 len = cardStruct[2];
-    u32 dma = cardStruct[3]; // dma channel
+
+	u32 src = ((ce9->valueBits & isSdk5) ? src0 : cardStruct[0]);
+	u8* dst = ((ce9->valueBits & isSdk5) ? dst0 : (u8*)(cardStruct[1]));
+	u32 len = ((ce9->valueBits & isSdk5) ? len0 : cardStruct[2]);
+	u32 dma = ((ce9->valueBits & isSdk5) ? dma0 : cardStruct[3]); // dma channel
 
     if(dma >= 0 
         && dma <= 3 
@@ -550,8 +585,12 @@ u32 cardReadDma() {
 		isDma = true;
         if (ce9->patches->cardEndReadDmaRef || ce9->thumbPatches->cardEndReadDmaRef) {
 			// new dma method
-			cacheFlush();
-			cardSetDma();
+			#ifndef TWLSDK
+			if (!(ce9->valueBits & isSdk5)) {
+				cacheFlush();
+				cardSetDma(NULL);
+			}
+			#endif
 			return true;
 		}
     } /*else {

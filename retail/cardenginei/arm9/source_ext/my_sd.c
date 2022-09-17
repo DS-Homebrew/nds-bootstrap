@@ -2,8 +2,13 @@
 #include <nds/system.h>
 #include <nds/ipc.h>
 
+#include "cardengine_header_arm9.h"
 #include "my_disc_io.h"
 #include "my_sdmmc.h"
+
+#define isSdk5 BIT(5)
+
+extern cardengineArm9* volatile ce9;
 
 extern bool isDma;
 extern bool dmaOn;
@@ -68,9 +73,13 @@ bool my_sdio_ReadSector(sec_t sector, void* buffer, u32 startOffset, u32 endOffs
 	nocashMessage("readSector internal");
 	#endif
 
-	if ((u32)buffer >= 0x02000000 && (u32)buffer < 0x03000000) {
+	#ifdef TWLSDK
+	DC_InvalidateRange(buffer, 512);
+	#else
+	if ((ce9->valueBits & isSdk5) || ((u32)buffer >= 0x02000000 && (u32)buffer < 0x03000000)) {
 		DC_InvalidateRange(buffer, 512);
 	}
+	#endif
 
 	u32 commandRead = isDma ? 0x53444D31 : 0x53445231;
 
@@ -99,9 +108,13 @@ bool my_sdio_ReadSectors(sec_t sector, sec_t numSectors, void* buffer, int ndmaS
 	nocashMessage("readSectors internal");
 	#endif
 
-	if ((u32)buffer >= 0x02000000 && (u32)buffer < 0x03000000) {
+	#ifdef TWLSDK
+	DC_InvalidateRange(buffer, numSectors * 512);
+	#else
+	if ((ce9->valueBits & isSdk5) || ((u32)buffer >= 0x02000000 && (u32)buffer < 0x03000000)) {
 		DC_InvalidateRange(buffer, numSectors * 512);
 	}
+	#endif
 
 	u32 commandRead = isDma ? 0x53444D41 : 0x53445244;
 

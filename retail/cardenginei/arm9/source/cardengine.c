@@ -27,7 +27,6 @@
 #include <nds/timers.h>
 #include <nds/fifomessages.h>
 #include <nds/memory.h> // tNDSHeader
-#include "module_params.h"
 #include "ndma.h"
 #include "tonccpy.h"
 #include "hex.h"
@@ -42,6 +41,7 @@
 #define ROMinRAM BIT(1)
 #define dsiMode BIT(3)
 #define enableExceptionHandler BIT(4)
+#define isSdk5 BIT(5)
 #define overlaysCached BIT(6)
 #define cacheFlushFlag BIT(7)
 #define cardReadFix BIT(8)
@@ -80,26 +80,42 @@ extern cardengineArm9* volatile ce9;
 
 extern void ndsCodeStart(u32* addr);
 
+#ifdef TWLSDK
+vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS_SDK5;
+#else
 vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS_SDK1;
+#endif
 
 static unpatchedFunctions* unpatchedFuncs = (unpatchedFunctions*)UNPATCHED_FUNCTION_LOCATION;
 
+#ifdef TWLSDK
+tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
+aFile* romFile = (aFile*)ROM_FILE_LOCATION_TWLSDK;
+aFile* savFile = (aFile*)SAV_FILE_LOCATION_TWLSDK;
+aFile* apFixOverlaysFile = (aFile*)OVL_FILE_LOCATION_TWLSDK;
+#else
 tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER;
 aFile* romFile = (aFile*)ROM_FILE_LOCATION_MAINMEM;
 aFile* savFile = (aFile*)SAV_FILE_LOCATION_MAINMEM;
+#endif
 //static aFile* gbaFile = (aFile*)GBA_FILE_LOCATION_MAINMEM;
 //static aFile* gbaSavFile = (aFile*)GBA_SAV_FILE_LOCATION_MAINMEM;
 #ifndef DLDI
 //static u32 sdatAddr = 0;
 //static u32 sdatSize = 0;
+#ifdef TWLSDK
+u32 cacheDescriptor[dev_CACHE_SLOTS_16KB_TWLSDK];
+int cacheCounter[dev_CACHE_SLOTS_16KB_TWLSDK];
+#else
 u32 cacheDescriptor[dev_CACHE_SLOTS_16KB];
 int cacheCounter[dev_CACHE_SLOTS_16KB];
+#endif
 int accessCounter = 0;
 #endif
-static bool flagsSet = false;
+bool flagsSet = false;
 static bool driveInitialized = false;
 static bool region0FixNeeded = false;
-static bool igmReset = false;
+bool igmReset = false;
 
 extern bool isDma;
 
@@ -111,26 +127,10 @@ s8 mainScreen = 0;
 
 void myIrqHandlerDMA(void);
 
-static void SetBrightness(u8 screen, s8 bright) {
-	u8 mode = 1;
-
-	if (bright < 0) {
-		mode = 2;
-		bright = -bright;
-	}
-	if (bright > 31) {
-		bright = 31;
-	}
-	*(vu16*)(0x0400006C + (0x1000 * screen)) = bright | (mode << 14);
-}
+extern void SetBrightness(u8 screen, s8 bright);
 
 // Alternative to swiWaitForVBlank()
-static void waitFrames(int count) {
-	for (int i = 0; i < count; i++) {
-		while (REG_VCOUNT != 191);
-		while (REG_VCOUNT == 191);
-	}
-}
+extern void waitFrames(int count);
 
 /*static void waitMs(int count) {
 	for (int i = 0; i < count; i++) {
@@ -168,6 +168,16 @@ void sleepMs(int ms) {
 		}
 	}
 }*/
+
+#ifdef TWLSDK
+void resetSlots(void) {
+	for (int i = 0; i < ce9->cacheSlots; i++) {
+		cacheDescriptor[i] = 0;
+		cacheCounter[i] = 0;
+	}
+	accessCounter = 0;
+}
+#endif
 
 int allocateCacheSlot(void) {
 	int slot = 0;
@@ -240,25 +250,13 @@ static inline bool checkArm7(void) {
 }
 #endif
 
-bool IPC_SYNC_hooked = false;
-void hookIPC_SYNC(void) {
-    if (!IPC_SYNC_hooked) {
-        u32* vblankHandler = ce9->irqTable;
-        u32* ipcSyncHandler = ce9->irqTable + 16;
-		ce9->intr_vblank_orig_return = *vblankHandler;
-		ce9->intr_ipc_orig_return = *ipcSyncHandler;
-        *vblankHandler = ce9->patches->vblankHandlerRef;
-        *ipcSyncHandler = ce9->patches->ipcSyncHandlerRef;
-        IPC_SYNC_hooked = true;
-    }
-}
+extern bool IPC_SYNC_hooked;
+extern void hookIPC_SYNC(void);
+extern void enableIPC_SYNC(void);
 
-void enableIPC_SYNC(void) {
-	if (IPC_SYNC_hooked && !(REG_IE & IRQ_IPC_SYNC)) {
-		REG_IE |= IRQ_IPC_SYNC;
-	}
-}
-
+#ifndef TWLSDK
+extern void initialize(void);
+#endif
 
 //static void clearIcache (void) {
       // Seems to have no effect
@@ -269,11 +267,50 @@ void enableIPC_SYNC(void) {
       leaveCriticalSection(oldIME);*/
 //}
 
-static inline void cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u8* dst, u32 src, u32 len) {
+#ifdef TWLSDK
+#ifndef DLDI
+// For testing with FS SDK functions
+/*static bool ctxInited = false;
+static const char* rompath = "";
+static const char* savepath = "";
+static const char* apFixOverlaysPath = "sdmc:/_nds/nds-bootstrap/apFixOverlays.bin";
+static u32 fsCtx[0x80/sizeof(u32)];*/
+
+// Face Training (EUR)
+/*volatile void (*FS_InitCtx)(u8*) = (volatile void*)0x020F1320;
+volatile void (*FS_Open)(u32*, const char*, u32) = (volatile void*)0x020F1470;
+volatile void (*FS_Close)(u32*) = (volatile void*)0x020F14F4;
+volatile void (*FS_Seek)(u32*, u32, u32) = (volatile void*)0x020F15B8;
+volatile void (*FS_Read)(u32*, u32, u32) = (volatile void*)0x020F15E4;
+volatile void (*FS_Write)(u32*, u32, u32) = (volatile void*)0x020F1638;*/
+
+// Rabbids Go Home (USA)
+/*volatile void (*FS_InitCtx)(u8*) = (volatile void*)0x0203C264;
+volatile void (*FS_Open)(u32*, const char*, u32) = (volatile void*)0x0203C3FC;
+volatile void (*FS_Close)(u32*) = (volatile void*)0x0203C480;
+volatile void (*FS_Seek)(u32*, u32, u32) = (volatile void*)0x0203C54C;
+volatile void (*FS_Read)(u32*, u32, u32) = (volatile void*)0x0203C578;
+volatile void (*FS_Write)(u32*, u32, u32) = (volatile void*)0x0203C5C8;*/
+
+static u32 newOverlayOffset = 0;
+#endif
+#endif
+
+static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
 #ifdef DLDI
 	while (sharedAddr[3]==0x444D4152);	// Wait during a RAM dump
+	#ifdef TWLSDK
+	fileRead((char*)dst, (ce9->consoleModel == 0 && (ce9->valueBits & overlaysCached) && src >= ndsHeader->arm9romOffset+ndsHeader->arm9binarySize && src < ndsHeader->arm7romOffset) ? *apFixOverlaysFile : *romFile, src, len, 0);
+	#else
 	fileRead((char*)dst, *romFile, src, len, 0);
+	#endif
 #else
+	#ifdef TWLSDK
+	if (newOverlayOffset == 0) {
+		newOverlayOffset = ((ndsHeader->arm9romOffset+ndsHeader->arm9binarySize)/ce9->cacheBlockSize)*ce9->cacheBlockSize;
+	}
+	#endif
+
 	u32 sector = (src/ce9->cacheBlockSize)*ce9->cacheBlockSize;
 
 	accessCounter++;
@@ -286,8 +323,12 @@ static inline void cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u
 	//	sleepMsEnabled = true;
 	//}
 
-	if ((ce9->valueBits & cacheDisabled) && (u32)dst >= 0x02000000 && (u32)dst < 0x02800000) {
+	if ((ce9->valueBits & cacheDisabled) && (u32)dst >= 0x02000000 && (u32)dst < 0x03000000) {
+		#ifdef TWLSDK
+		fileRead((char*)dst, (ce9->consoleModel == 0 && (ce9->valueBits & overlaysCached) && src >= newOverlayOffset && src < ndsHeader->arm7romOffset) ? *apFixOverlaysFile : *romFile, src, len, 0);
+		#else
 		fileRead((char*)dst, *romFile, src, len, 0);
+		#endif
 	} else {
 		// Read via the main RAM cache
 		//bool runSleep = true;
@@ -317,7 +358,11 @@ static inline void cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u
 					readLen = ce9->cacheBlockSize*2;
 				}*/
 
+				#ifdef TWLSDK
+				fileRead((char*)buffer, (ce9->consoleModel == 0 && (ce9->valueBits & overlaysCached) && src >= newOverlayOffset && src < ndsHeader->arm7romOffset) ? *apFixOverlaysFile : *romFile, sector, ce9->cacheBlockSize, 0);
+				#else
 				fileRead((char*)buffer, *romFile, sector, ce9->cacheBlockSize, 0);
+				#endif
 				/*updateDescriptor(slot, sector);
 				if (readLen >= ce9->cacheBlockSize*2) {
 					updateDescriptor(slot+1, sector+ce9->cacheBlockSize);
@@ -390,15 +435,10 @@ static inline void cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u
 				tonccpy(dst, (u8*)buffer+(src-sector), len2);
 			//}
 
-    		// Update cardi common
-    		cardStruct[0] = src + len2;
-    		cardStruct[1] = (vu32)(dst + len2);
-    		cardStruct[2] = len - len2;
-
-			len = cardStruct[2];
+			len -= len2;
 			if (len > 0) {
-				src = cardStruct[0];
-				dst = (u8*)cardStruct[1];
+				src = src + len2;
+				dst = (u8*)(dst + len2);
 				sector = (src/ce9->cacheBlockSize)*ce9->cacheBlockSize;
 				accessCounter++;
 				//slot = getSlotForSectorManual(slot+1, sector);
@@ -409,12 +449,14 @@ static inline void cardReadNormal(vu32* volatile cardStruct, u32* cacheStruct, u
 
 	//sleepMsEnabled = false;
 
+	#ifndef TWLSDK
 	if (ce9->valueBits & cacheFlushFlag) {
 		cacheFlush(); //workaround for some weird data-cache issue in Bowser's Inside Story.
 	}
+	#endif
 }
 
-static inline void cardReadRAM(vu32* volatile cardStruct, u32* cacheStruct, u8* dst, u32 src, u32 len) {
+static inline void cardReadRAM(u8* dst, u32 src, u32 len) {
 	#ifdef DEBUG
 	// Send a log command for debug purpose
 	// -------------------------------------
@@ -430,7 +472,15 @@ static inline void cardReadRAM(vu32* volatile cardStruct, u32* cacheStruct, u8* 
 	#endif
 
 	// Copy directly
+	#ifdef TWLSDK
+	u32 newSrc = ce9->romLocation+src;
+	if (src > *(u32*)0x02FFE1C0) {
+		newSrc -= *(u32*)0x02FFE1CC;
+	}
+	tonccpy(dst, (u8*)newSrc, len);
+	#else
 	tonccpy(dst, (u8*)ce9->romLocation+src, len);
+	#endif
 }
 
 bool isNotTcm(u32 address, u32 len) {
@@ -442,18 +492,24 @@ bool isNotTcm(u32 address, u32 len) {
     && (address+len < base || address+len> base+0x4000);
 }  
 
+#ifndef TWLSDK
 static int counter=0;
+#endif
 int cardReadPDash(u32* cacheStruct, u32 src, u8* dst, u32 len) {
+	#ifndef TWLSDK
 	vu32* volatile cardStruct = (vu32* volatile)ce9->cardStruct0;
 
     cardStruct[0] = src;
     cardStruct[1] = (vu32)dst;
     cardStruct[2] = len;
 
-    cardRead(cacheStruct);
+	cardRead(cacheStruct, dst, src, len);
 
     counter++;
 	return counter;
+	#else
+	return 0;
+	#endif
 }
 
 //extern void region2Disable();
@@ -464,15 +520,23 @@ extern void debugRamMpuFix();
 // Revert region 0 patch
 extern void region0Fix();
 
-void cardRead(u32* cacheStruct) {
+void cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	//nocashMessage("\narm9 cardRead\n");
+	#ifndef TWLSDK
+	initialize();
+	#endif
+
 	if (!flagsSet) {
-		if (region0FixNeeded) {
-			region0Fix();
+		#ifndef TWLSDK
+		if (!(ce9->valueBits & isSdk5)) {
+			if (region0FixNeeded) {
+				region0Fix();
+			}
+			if (!(ce9->valueBits & ROMinRAM)) {
+				debugRamMpuFix();
+			}
 		}
-		if (!(ce9->valueBits & ROMinRAM)) {
-			debugRamMpuFix();
-		}
+		#endif
 		if (!driveInitialized) {
 			FAT_InitFiles(false, 0);
 			driveInitialized = true;
@@ -485,11 +549,17 @@ void cardRead(u32* cacheStruct) {
 
 	enableIPC_SYNC();
 
+	#ifdef TWLSDK
+	u32 src = src0;
+	u8* dst = dst0;
+	u32 len = len0;
+	#else
 	vu32* volatile cardStruct = (vu32* volatile)ce9->cardStruct0;
 
-	u32 src = cardStruct[0];
-	u8* dst = (u8*)(cardStruct[1]);
-	u32 len = cardStruct[2];
+	u32 src = ((ce9->valueBits & isSdk5) ? src0 : cardStruct[0]);
+	u8* dst = ((ce9->valueBits & isSdk5) ? dst0 : (u8*)(cardStruct[1]));
+	u32 len = ((ce9->valueBits & isSdk5) ? len0 : cardStruct[2]);
+	#endif
 
 	#ifdef DEBUG
 	u32 commandRead;
@@ -512,22 +582,30 @@ void cardRead(u32* cacheStruct) {
 		src = 0x8000 + (src & 0x1FF);
 	}
 
-	if ((ce9->valueBits & ROMinRAM) || ((ce9->valueBits & overlaysCached) && src >= ndsHeader->arm9romOffset+ndsHeader->arm9binarySize && src < ndsHeader->arm7romOffset)) {
-		cardReadRAM(cardStruct, cacheStruct, dst, src, len);
+	#ifdef TWLSDK
+	if (ce9->consoleModel > 0 && ((ce9->valueBits & ROMinRAM) || ((ce9->valueBits & overlaysCached) && src >= ndsHeader->arm9romOffset+ndsHeader->arm9binarySize && src < ndsHeader->arm7romOffset))) {
+		cardReadRAM(dst, src, len);
 	} else {
-		cardReadNormal(cardStruct, cacheStruct, dst, src, len);
+		cardReadNormal(dst, src, len);
 	}
+	#else
+	if ((ce9->valueBits & ROMinRAM) || ((ce9->valueBits & overlaysCached) && src >= ndsHeader->arm9romOffset+ndsHeader->arm9binarySize && src < ndsHeader->arm7romOffset)) {
+		cardReadRAM(dst, src, len);
+	} else {
+		cardReadNormal(dst, src, len);
+	}
+	#endif
     isDma=false;
 }
 
-void cardPullOut(void) {
-	/*if (*(vu32*)(0x027FFB30) != 0) {
+/*void cardPullOut(void) {
+	if (*(vu32*)(0x027FFB30) != 0) {
 		/*volatile int (*terminateForPullOutRef)(u32*) = *ce9->patches->terminateForPullOutRef;
         (*terminateForPullOutRef);
 		sharedAddr[3] = 0x5245424F;
 		waitForArm7();
-	}*/
-}
+	}
+}*/
 
 bool nandRead(void* memory,void* flash,u32 len,u32 dma) {
 #ifdef DLDI
@@ -575,105 +653,361 @@ bool nandWrite(void* memory,void* flash,u32 len,u32 dma) {
     return true; 
 }
 
-u32 cartRead(u32 dma, u32 src, u8* dst, u32 len, u32 type) {
-	/*if (src >= 0x02000000 ? (gbaSavFile->firstCluster == CLUSTER_FREE) : (gbaFile->firstCluster == CLUSTER_FREE)) {
+#ifdef TWLSDK
+#ifdef DLDI
+static bool dsiSaveInited = false;
+static bool dsiSaveExists = false;
+static u32 dsiSavePerms = 0;
+static s32 dsiSaveSeekPos = 0;
+static u32 dsiSaveSize = 0;
+
+typedef struct dsiSaveInfo
+{
+	u32 attributes;
+	u32 ctime[6];
+	u32 mtime[6];
+	u32 atime[6];
+	u32 filesize;
+	u32 id;
+}
+dsiSaveInfo;
+
+static void dsiSaveInit(void) {
+	if (dsiSaveInited) {
+		return;
+	}
+	u32 existByte = 0;
+
+	int oldIME = enterCriticalSection();
+	u16 exmemcnt = REG_EXMEMCNT;
+	sysSetCardOwner(true);	// Give Slot-1 access to arm9
+	fileRead((char*)&dsiSaveSize, *savFile, ce9->saveSize-4, 4, 0);
+	fileRead((char*)&existByte, *savFile, ce9->saveSize-8, 4, 0);
+	REG_EXMEMCNT = exmemcnt;
+	leaveCriticalSection(oldIME);
+
+	dsiSaveExists = (existByte != 0);
+	dsiSaveInited = true;
+}
+#endif
+
+u32 dsiSaveGetResultCode(const char* path) {
+#ifdef DLDI
+	if (savFile->firstCluster == CLUSTER_FREE || savFile->firstCluster == CLUSTER_EOF) {
+		return 0xE;
+	}
+
+	dsiSaveInit();
+
+	if (strcmp(path, "data") == 0) // Specific to EnjoyUp-developed games
+	{
+		return dsiSaveExists ? 8 : 0xE;
+	} else
+	if (strcmp(path, "dataPub:") == 0 || strcmp(path, "dataPub:/") == 0
+	 || strcmp(path, "dataPrv:") == 0 || strcmp(path, "dataPrv:/") == 0)
+	{
+		return 8;
+	}
+	return dsiSaveExists ? 8 : 0xB;
+#else
+	return 0xB;
+#endif
+}
+
+bool dsiSaveCreate(const char* path, u32 permit) {
+#ifdef DLDI
+	dsiSaveSeekPos = 0;
+	if (savFile->firstCluster == CLUSTER_FREE || savFile->firstCluster == CLUSTER_EOF) {
+		return false;
+	}
+
+	dsiSaveInit();
+	//if ((!dsiSaveExists && permit == 1) || (dsiSaveExists && permit == 2)) {
+	//	return false;
+	//}
+
+	if (strcmp(path, "data") == 0) // Specific to EnjoyUp-developed games
+	{
+		return !dsiSaveExists;
+	} else
+	if (!dsiSaveExists) {
+		u32 existByte = 1;
+
+		int oldIME = enterCriticalSection();
+		u16 exmemcnt = REG_EXMEMCNT;
+		sysSetCardOwner(true);	// Give Slot-1 access to arm9
+		fileWrite((char*)&existByte, *savFile, ce9->saveSize-8, 4, 0);
+		REG_EXMEMCNT = exmemcnt;
+		leaveCriticalSection(oldIME);
+
+		dsiSaveExists = true;
+		return true;
+	}
+#endif
+	return false;
+}
+
+bool dsiSaveDelete(const char* path) {
+#ifdef DLDI
+	dsiSaveSeekPos = 0;
+	if (savFile->firstCluster == CLUSTER_FREE || savFile->firstCluster == CLUSTER_EOF) {
+		return false;
+	}
+
+	if (dsiSaveExists) {
+		dsiSaveSize = 0;
+
+		int oldIME = enterCriticalSection();
+		u16 exmemcnt = REG_EXMEMCNT;
+		sysSetCardOwner(true);	// Give Slot-1 access to arm9
+		fileWrite((char*)&dsiSaveSize, *savFile, ce9->saveSize-4, 4, 0);
+		fileWrite((char*)&dsiSaveSize, *savFile, ce9->saveSize-8, 4, 0);
+		REG_EXMEMCNT = exmemcnt;
+		leaveCriticalSection(oldIME);
+
+		dsiSaveExists = false;
+		return true;
+	}
+
+	return false;
+#else
+	return false;
+#endif
+}
+
+#ifdef DLDI
+bool dsiSaveGetInfo(const char* path, dsiSaveInfo* info) {
+	toncset(info, 0, sizeof(dsiSaveInfo));
+	if (savFile->firstCluster == CLUSTER_FREE || savFile->firstCluster == CLUSTER_EOF) {
+		return false;
+	}
+
+	dsiSaveInit();
+
+	if (strcmp(path, "dataPub:") == 0 || strcmp(path, "dataPub:/") == 0
+	 || strcmp(path, "dataPrv:") == 0 || strcmp(path, "dataPrv:/") == 0)
+	{
+		return true;
+	} else if (!dsiSaveExists) {
+		return false;
+	}
+
+	info->filesize = dsiSaveSize;
+	return true;
+}
+#else
+bool dsiSaveGetInfo(const char* path, u32* info) {
+	return false;
+}
+#endif
+
+u32 dsiSaveSetLength(void* ctx, s32 len) {
+#ifdef DLDI
+	dsiSaveSeekPos = 0;
+	if (savFile->firstCluster == CLUSTER_FREE || savFile->firstCluster == CLUSTER_EOF) {
+		return 1;
+	}
+
+	dsiSaveSize = len;
+
+	int oldIME = enterCriticalSection();
+	u16 exmemcnt = REG_EXMEMCNT;
+	sysSetCardOwner(true);	// Give Slot-1 access to arm9
+	bool res = fileWrite((char*)&dsiSaveSize, *savFile, ce9->saveSize-4, 4, 0);
+	REG_EXMEMCNT = exmemcnt;
+	leaveCriticalSection(oldIME);
+
+	return res ? 0 : 1;
+#else
+	return 1;
+#endif
+}
+
+bool dsiSaveOpen(void* ctx, const char* path, u32 mode) {
+#ifdef DLDI
+	dsiSaveSeekPos = 0;
+	if (savFile->firstCluster == CLUSTER_FREE || savFile->firstCluster == CLUSTER_EOF) {
+		return false;
+	}
+
+	dsiSaveInit();
+	//dsiSaveOpenCalled = true;
+
+	dsiSavePerms = mode;
+	return dsiSaveExists;
+#else
+	return false;
+#endif
+}
+
+bool dsiSaveClose(void* ctx) {
+#ifdef DLDI
+	dsiSaveSeekPos = 0;
+	if (savFile->firstCluster == CLUSTER_FREE || savFile->firstCluster == CLUSTER_EOF) {
+		return false;
+	}
+	//toncset(ctx, 0, 0x80);
+	return dsiSaveExists;
+#else
+	return false;
+#endif
+}
+
+u32 dsiSaveGetLength(void* ctx) {
+#ifdef DLDI
+	dsiSaveSeekPos = 0;
+	if (savFile->firstCluster == CLUSTER_FREE || savFile->firstCluster == CLUSTER_EOF) {
+		return 0;
+	}
+
+	return dsiSaveSize;
+#else
+	return 0;
+#endif
+}
+
+bool dsiSaveSeek(void* ctx, s32 pos, u32 mode) {
+#ifdef DLDI
+	if (savFile->firstCluster == CLUSTER_FREE || savFile->firstCluster == CLUSTER_EOF) {
+		return false;
+	}
+	dsiSaveSeekPos = pos;
+	return true;
+#else
+	return false;
+#endif
+}
+
+s32 dsiSaveRead(void* ctx, void* dst, u32 len) {
+#ifdef DLDI
+	if (dsiSavePerms == 2) {
+		return -1; // Return if only write perms are set
+	}
+
+	if (dsiSaveSize == 0) {
+		return 0;
+	}
+
+	while (dsiSaveSeekPos+len > dsiSaveSize) {
+		len--;
+	}
+
+	if (len == 0) {
+		return 0;
+	}
+
+	int oldIME = enterCriticalSection();
+	u16 exmemcnt = REG_EXMEMCNT;
+	sysSetCardOwner(true);	// Give Slot-1 access to arm9
+	bool res = fileRead(dst, *savFile, dsiSaveSeekPos, len, 0);
+	REG_EXMEMCNT = exmemcnt;
+	leaveCriticalSection(oldIME);
+	if (res) {
+		dsiSaveSeekPos += len;
+		return len;
+	}
+#endif
+	return -1;
+}
+
+s32 dsiSaveWrite(void* ctx, void* src, s32 len) {
+#ifdef DLDI
+	if (dsiSavePerms == 1) {
+		return -1; // Return if only read perms are set
+	}
+
+	int oldIME = enterCriticalSection();
+	u16 exmemcnt = REG_EXMEMCNT;
+	sysSetCardOwner(true);	// Give Slot-1 access to arm9
+	bool res = fileWrite(src, *savFile, dsiSaveSeekPos, len, 0);
+	REG_EXMEMCNT = exmemcnt;
+	leaveCriticalSection(oldIME);
+	if (res) {
+		if (dsiSaveSize < dsiSaveSeekPos+len) {
+			dsiSaveSize = dsiSaveSeekPos+len;
+
+			int oldIME = enterCriticalSection();
+			u16 exmemcnt = REG_EXMEMCNT;
+			sysSetCardOwner(true);	// Give Slot-1 access to arm9
+			fileWrite((char*)&dsiSaveSize, *savFile, ce9->saveSize-4, 4, 0);
+			REG_EXMEMCNT = exmemcnt;
+			leaveCriticalSection(oldIME);
+		}
+		dsiSaveSeekPos += len;
+		return len;
+	}
+#endif
+	return -1;
+}
+
+void initMBKARM9_dsiMode(void) {
+	*(vu32*)REG_MBK1 = *(u32*)0x02FFE180;
+	*(vu32*)REG_MBK2 = *(u32*)0x02FFE184;
+	*(vu32*)REG_MBK3 = *(u32*)0x02FFE188;
+	*(vu32*)REG_MBK4 = *(u32*)0x02FFE18C;
+	*(vu32*)REG_MBK5 = *(u32*)0x02FFE190;
+	REG_MBK6 = *(u32*)0x02FFE194;
+	REG_MBK7 = *(u32*)0x02FFE198;
+	REG_MBK8 = *(u32*)0x02FFE19C;
+	REG_MBK9 = *(u32*)0x02FFE1AC;
+}
+#else
+u32 dsiSaveGetResultCode(const char* path) {
+	return 0xB;
+}
+
+bool dsiSaveCreate(const char* path, u32 permit) {
+	return false;
+}
+
+bool dsiSaveDelete(const char* path) {
+	return false;
+}
+
+bool dsiSaveGetInfo(const char* path, u32* info) {
+	return false;
+}
+
+u32 dsiSaveSetLength(void* ctx, s32 len) {
+	return 1;
+}
+
+bool dsiSaveOpen(void* ctx, const char* path, u32 mode) {
+	return false;
+}
+
+bool dsiSaveClose(void* ctx) {
+	return false;
+}
+
+u32 dsiSaveGetLength(void* ctx) {
+	return 0;
+}
+
+bool dsiSaveSeek(void* ctx, s32 pos, u32 mode) {
+	return false;
+}
+
+s32 dsiSaveRead(void* ctx, void* dst, u32 len) {
+	return -1;
+}
+
+s32 dsiSaveWrite(void* ctx, void* src, s32 len) {
+	return -1;
+}
+#endif
+
+/*u32 cartRead(u32 dma, u32 src, u8* dst, u32 len, u32 type) {
+	if (src >= 0x02000000 ? (gbaSavFile->firstCluster == CLUSTER_FREE) : (gbaFile->firstCluster == CLUSTER_FREE)) {
 		return false;
 	}
 
 	fileRead(dst, src >= 0x02000000 ? *gbaSavFile : *gbaFile, src, len, 0);
-	return true;*/
+	return true;
 	return 0;
-}
+}*/
 
-void __attribute__((target("arm"))) resetMpu(void) {
-	asm("LDR R0,=#0x12078\n\tmcr p15, 0, r0, C1,C0,0");
-}
-
-void reset(u32 param) {
-	*(u32*)RESET_PARAM = param;
-	if (ce9->valueBits & slowSoftReset) {
-		if (ce9->consoleModel < 2) {
-			// Make screens white
-			SetBrightness(0, 31);
-			SetBrightness(1, 31);
-			waitFrames(5);	// Wait for DSi screens to stabilize
-		}
-		enterCriticalSection();
-		if (!igmReset && (ce9->valueBits & softResetMb)) {
-			*(u32*)RESET_PARAM = 0;
-			*(u32*)(RESET_PARAM+8) = 0x44414F4C; // 'LOAD'
-		}
-		cacheFlush();
-		sharedAddr[3] = 0x52534554;
-		while (1);
-	} else {
-		if (*(u32*)(RESET_PARAM+0xC) > 0) {
-			sharedAddr[1] = ce9->valueBits;
-		}
-		if (!igmReset && (ce9->valueBits & softResetMb)) {
-			*(u32*)RESET_PARAM = 0;
-			*(u32*)(RESET_PARAM+8) = 0x44414F4C; // 'LOAD'
-		}
-		sharedAddr[3] = 0x52534554;
-	}
-
- 	register int i, reg;
-
-	REG_IME = 0;
-	REG_IE = 0;
-	REG_IF = ~0;
-
-	cacheFlush();
-	resetMpu();
-
-	if (igmReset) {
-		igmReset = false;
-	} else {
-		toncset((u8*)getDtcmBase()+0x3E00, 0, 0x200);
-	}
-
-	// Clear out ARM9 DMA channels
-	for (i = 0; i < 4; i++) {
-		DMA_CR(i) = 0;
-		DMA_SRC(i) = 0;
-		DMA_DEST(i) = 0;
-		TIMER_CR(i) = 0;
-		TIMER_DATA(i) = 0;
-	}
-
-	for (i = 0; i < 4; i++) {
-		for(reg=0; reg<0x1c; reg+=4)*((vu32*)(0x04004104 + ((i*0x1c)+reg))) = 0;//Reset NDMA.
-	}
-
-	// Clear out FIFO
-	REG_IPC_SYNC = 0;
-	REG_IPC_FIFO_CR = IPC_FIFO_ENABLE | IPC_FIFO_SEND_CLEAR;
-	REG_IPC_FIFO_CR = 0;
-
-	while (sharedAddr[0] != 0x44414F4C) { // 'LOAD'
-		while (REG_VCOUNT != 191);
-		while (REG_VCOUNT == 191);
-	}
-
-	flagsSet = false;
-	IPC_SYNC_hooked = false;
-
-	if (*(u32*)(RESET_PARAM+0xC) > 0) {
-		u32 newIrqTable = sharedAddr[2];
-		ce9->valueBits = sharedAddr[1];
-		ce9->irqTable = (u32*)newIrqTable;
-		ce9->cardStruct0 = sharedAddr[4];
-		sharedAddr[4] = 0;
-	}
-
-	sharedAddr[0] = 0x544F4F42; // 'BOOT'
-	sharedAddr[3] = 0;
-	while (REG_VCOUNT != 191);
-	while (REG_VCOUNT == 191);
-
-	// Start ARM9
-	ndsCodeStart(ndsHeader->arm9executeAddress);
-}
+extern void reset(u32 param, u32 tid2);
 
 //---------------------------------------------------------------------------------
 void myIrqHandlerVBlank(void) {
@@ -682,9 +1016,11 @@ void myIrqHandlerVBlank(void) {
 	nocashMessage("myIrqHandlerVBlank");
 	#endif	
 
+	#ifndef TWLSDK
 	if (sharedAddr[4] == 0x554E454D) {
 		while (sharedAddr[4] != 0x54495845);
 	}
+	#endif
 }
 
 //---------------------------------------------------------------------------------
@@ -703,15 +1039,31 @@ void myIrqHandlerIPC(void) {
 #else
 		if (ce9->valueBits & ROMinRAM) {
 			endCardReadDma();
-		} else if (ce9->patches->cardEndReadDmaRef || ce9->thumbPatches->cardEndReadDmaRef) { // new dma method  
+		}
+		#ifndef TWLSDK
+		else if (ce9->patches->cardEndReadDmaRef || ce9->thumbPatches->cardEndReadDmaRef) { // new dma method
 			continueCardReadDmaArm7();
 			continueCardReadDmaArm9();
 		}
+		#endif
 #endif
 			break;
 		case 0x4:
 			extern bool dmaOn;
 			dmaOn = !dmaOn;
+			break;
+		case 0x5:
+			igmReset = true;
+			sharedAddr[3] = 0x54495845;
+			#ifdef TWLSDK
+			if (*(u32*)0x02FFE234 == 0x00030004 || *(u32*)0x02FFE234 == 0x00030005) {
+				reset(0, 0);
+			} else {
+				reset(0xFFFFFFFF, 0);
+			}
+			#else
+			reset(0xFFFFFFFF, 0);
+			#endif
 			break;
 		case 0x6:
 			if(mainScreen == 1)
@@ -731,18 +1083,48 @@ void myIrqHandlerIPC(void) {
 		}
 			break;
 		case 0x9: {
+			#ifdef TWLSDK
+			if (ce9->consoleModel > 0) {
+				*(u32*)(INGAME_MENU_LOCATION_DSIWARE + IGM_TEXT_SIZE_ALIGNED) = (u32)sharedAddr;
+				volatile void (*inGameMenu)(s8*, u32) = (volatile void*)INGAME_MENU_LOCATION_DSIWARE + IGM_TEXT_SIZE_ALIGNED + 0x10;
+				(*inGameMenu)(&mainScreen, ce9->consoleModel);
+			} else {
+				*(u32*)(INGAME_MENU_LOCATION_TWLSDK + IGM_TEXT_SIZE_ALIGNED) = (u32)sharedAddr;
+				volatile void (*inGameMenu)(s8*, u32) = (volatile void*)INGAME_MENU_LOCATION_TWLSDK + IGM_TEXT_SIZE_ALIGNED + 0x10;
+				(*inGameMenu)(&mainScreen, ce9->consoleModel);
+			}
+			#else
 			*(u32*)(INGAME_MENU_LOCATION + IGM_TEXT_SIZE_ALIGNED) = (u32)sharedAddr;
 			volatile void (*inGameMenu)(s8*, u32) = (volatile void*)INGAME_MENU_LOCATION + IGM_TEXT_SIZE_ALIGNED + 0x10;
 			(*inGameMenu)(&mainScreen, ce9->consoleModel);
+			#endif
+			#ifdef TWLSDK
+			if (sharedAddr[3] == 0x54495845) {
+				igmReset = true;
+				if (*(u32*)0x02FFE234 == 0x00030004 || *(u32*)0x02FFE234 == 0x00030005) {
+					reset(0, 0);
+				} else {
+					reset(0xFFFFFFFF, 0);
+				}
+			} else
+			#endif
 			if (sharedAddr[3] == 0x52534554) {
 				igmReset = true;
-				reset(0);
+			#ifdef TWLSDK
+				if (*(u32*)0x02FFE234 == 0x00030004 || *(u32*)0x02FFE234 == 0x00030005) { // If DSiWare...
+					reset(*(u32*)0x02FFE230, *(u32*)0x02FFE234);
+				} else {
+			#endif
+					reset(0, 0);
+			#ifdef TWLSDK
+				}
+			#endif
 			}
 		}
 			break;
 	}
 
-	if (sharedAddr[4] == (vu32)0x57534352){
+	if (sharedAddr[4] == (vu32)0x57534352) {
 		enterCriticalSection();
 		if (ce9->consoleModel < 2) {
 			// Make screens white
@@ -761,13 +1143,19 @@ u32 myIrqEnable(u32 irq) {
 	nocashMessage("myIrqEnable\n");
 	#endif
 
+	#ifndef TWLSDK
+	initialize();
+	#endif
+
 	if (ce9->valueBits & enableExceptionHandler) {
 		setExceptionHandler2();
 	}
 
-	if (unpatchedFuncs->mpuDataOffset) {
+	#ifndef TWLSDK
+	if (!(ce9->valueBits & isSdk5) && unpatchedFuncs->mpuDataOffset) {
 		region0FixNeeded = unpatchedFuncs->mpuInitRegionOldData == 0x4000033;
 	}
+	#endif
 
 	hookIPC_SYNC();
 

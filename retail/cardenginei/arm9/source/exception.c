@@ -15,7 +15,11 @@ extern u32 exceptionAddr;
 //---------------------------------------------------------------------------------
 void setExceptionHandler2() {
 //---------------------------------------------------------------------------------
+	#ifdef TWLSDK
+	if (EXCEPTION_VECTOR == enterException && *exceptionC == user_exception) return;
+	#else
 	if (EXCEPTION_VECTOR_SDK1 == enterException && *exceptionC == user_exception) return;
+	#endif
 
 	if (ce9->valueBits & dsiBios) {
 		exceptionAddr = 0x02FFFD90;
