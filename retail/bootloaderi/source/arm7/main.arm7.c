@@ -794,14 +794,28 @@ static void NTR_BIOS() {
 	}
 }
 
-static void loadOverlaysintoRAM(const tNDSHeader* ndsHeader, const char* romTid, const module_params_t* moduleParams, aFile file) {
+u32 dataToPreloadAddr = 0;
+u32 dataToPreloadSize = 0;
+
+static void loadROMPartIntoRAM(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, aFile file) {
+	if (dataToPreloadSize == 0 || dataToPreloadSize >= (consoleModel > 0 ? (isSdk5(moduleParams) || dsiModeConfirmed ? 0xF00000 : 0x1700000) : (ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed ? 0x400000 : 0x700000))) {
+		return;
+	}
+
+	u32 dataLocation = (u32)((consoleModel > 0 && (isSdk5(moduleParams) || dsiModeConfirmed)) ? ROM_SDK5_LOCATION : ROM_LOCATION);
+	fileRead((char*)dataLocation, file, dataToPreloadAddr, dataToPreloadSize, 0);
+	dbg_printf("Part of ROM pre-loaded into RAM\n");
+}
+
+static void loadOverlaysintoRAM(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, aFile file) {
 	if (!overlayPatch) {
 		return;
 	}
 
 	// Load overlays into RAM
-	if (overlaysSize <= (consoleModel > 0 ? (isSdk5(moduleParams) || dsiModeConfirmed ? 0xF00000 : 0x1700000) : (ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed ? 0x400000 : 0x700000))) {
-		u32 overlaysLocation = (u32)((consoleModel > 0 && (isSdk5(moduleParams) || dsiModeConfirmed)) ? ROM_SDK5_LOCATION : ROM_LOCATION);
+	u32 dataToPreloadSizeAligned = (dataToPreloadSize/cacheBlockSize)*cacheBlockSize;
+	if (overlaysSize <= (consoleModel > 0 ? (isSdk5(moduleParams) || dsiModeConfirmed ? 0xF00000 : 0x1700000) : (ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed ? 0x400000 : 0x700000))-dataToPreloadSizeAligned) {
+		u32 overlaysLocation = (u32)(((consoleModel > 0 && (isSdk5(moduleParams) || dsiModeConfirmed)) ? ROM_SDK5_LOCATION : ROM_LOCATION)+dataToPreloadSizeAligned);
 		if (consoleModel == 0 && ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed) {
 			u32 alignedOverlaysOffset = ((ndsHeader->arm9romOffset + ndsHeader->arm9binarySize)/cacheBlockSize)*cacheBlockSize;
 			u32 newOverlaysSize = 0;
@@ -1599,6 +1613,12 @@ int arm7_main(void) {
 	  }
 	 //}
 	} else {
+		// TODO: Replace with loading info from file
+		if (strcmp(romTid, "CBBE") == 0) {
+			dataToPreloadAddr = 0x1CD000;
+			dataToPreloadSize = 0x51DDA4;
+		}
+
 		if (strncmp(romTid, "UBR", 3) == 0) {
 			toncset((char*)0x0C400000, 0xFF, 0xC0);
 			toncset((u8*)0x0C4000B2, 0, 3);
@@ -1874,7 +1894,8 @@ int arm7_main(void) {
 				loadIOverlaysintoRAM(&dsiHeaderTemp, *romFile, usesCloneboot);
 			}
 		} else if ((ROMsupportsDsiMode(ndsHeader) && !isDSiWare) || strncmp(romTid, "UBR", 3) != 0) {
-			loadOverlaysintoRAM(ndsHeader, romTid, moduleParams, *romFile);
+			loadROMPartIntoRAM(ndsHeader, moduleParams, *romFile);
+			loadOverlaysintoRAM(ndsHeader, moduleParams, *romFile);
 		}
 
 		if (useApPatch) {

@@ -179,6 +179,8 @@ int hookNdsRetailArm9(
 	extern u32 iUncompressedSize;
 	extern u32 overlaysSize;
 	extern bool overlayPatch;
+	extern u32 dataToPreloadAddr;
+	extern u32 dataToPreloadSize;
 	const char* romTid = getRomTid(ndsHeader);
 
 	ce9->fileCluster            = fileCluster;
@@ -236,6 +238,7 @@ int hookNdsRetailArm9(
 	if (!ROMinRAM) {
 		//extern bool gbaRomFound;
 		bool runOverlayCheck = overlayPatch;
+		u32 dataToPreloadSizeAligned = (dataToPreloadSize/cacheBlockSize)*cacheBlockSize;
 		ce9->cacheBlockSize = cacheBlockSize;
 		if (isSdk5(moduleParams)) {
 			if (consoleModel > 0) {
@@ -272,8 +275,16 @@ int hookNdsRetailArm9(
 				}
 			}
 		}
+		if (dataToPreloadSize > 0 && dataToPreloadSize < (consoleModel>0 ? (isSdk5(moduleParams) ? 0xF00000 : 0x1700000) : (ndsHeader->unitCode > 0 && dsiModeConfirmed ? 0x400000 : 0x700000))) {
+			ce9->romPartLocation = ce9->romLocation;
+			ce9->romLocation += dataToPreloadSizeAligned;
+			ce9->cacheAddress = ce9->romLocation;
+			ce9->cacheSlots -= dataToPreloadSizeAligned/cacheBlockSize;
+			ce9->romPartSrc = dataToPreloadAddr;
+			ce9->romPartSize = dataToPreloadSize;
+		}
 		if (runOverlayCheck
-		&& overlaysSize <= (consoleModel>0 ? (isSdk5(moduleParams) ? 0xF00000 : 0x1700000) : (ndsHeader->unitCode > 0 && dsiModeConfirmed ? 0x400000 : 0x700000))) {
+		&& overlaysSize <= (consoleModel>0 ? (isSdk5(moduleParams) ? 0xF00000 : 0x1700000) : (ndsHeader->unitCode > 0 && dsiModeConfirmed ? 0x400000 : 0x700000))-dataToPreloadSizeAligned) {
 			extern u8 gameOnFlashcard;
 			if (!gameOnFlashcard && (consoleModel > 0 || !dsiModeConfirmed || (ndsHeader->unitCode == 0 && dsiModeConfirmed))) {
 				if (cacheBlockSize == 0) {
