@@ -812,9 +812,14 @@ static void loadOverlaysintoRAM(const tNDSHeader* ndsHeader, const module_params
 	}
 
 	// Load overlays into RAM
-	u32 dataToPreloadSizeAligned = (dataToPreloadSize/cacheBlockSize)*cacheBlockSize;
+	u32 dataToPreloadSizeAligned = 0;
+	if (dataToPreloadSize > 0) {
+		for (u32 i = 0; i < dataToPreloadSize; i += cacheBlockSize) {
+			dataToPreloadSizeAligned += cacheBlockSize;
+		}
+	}
 	if (overlaysSize <= (consoleModel > 0 ? (isSdk5(moduleParams) || dsiModeConfirmed ? 0xF00000 : 0x1700000) : (ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed ? 0x400000 : 0x700000))-dataToPreloadSizeAligned) {
-		u32 overlaysLocation = (u32)(((consoleModel > 0 && (isSdk5(moduleParams) || dsiModeConfirmed)) ? ROM_SDK5_LOCATION : ROM_LOCATION)+dataToPreloadSizeAligned);
+		u32 overlaysLocation = ((consoleModel > 0 && (isSdk5(moduleParams) || dsiModeConfirmed)) ? ROM_SDK5_LOCATION : ROM_LOCATION)+dataToPreloadSizeAligned;
 		if (consoleModel == 0 && ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed) {
 			u32 alignedOverlaysOffset = ((ndsHeader->arm9romOffset + ndsHeader->arm9binarySize)/cacheBlockSize)*cacheBlockSize;
 			u32 newOverlaysSize = 0;

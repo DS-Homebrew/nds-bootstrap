@@ -238,7 +238,7 @@ int hookNdsRetailArm9(
 	if (!ROMinRAM) {
 		//extern bool gbaRomFound;
 		bool runOverlayCheck = overlayPatch;
-		u32 dataToPreloadSizeAligned = (dataToPreloadSize/cacheBlockSize)*cacheBlockSize;
+		u32 dataToPreloadSizeAligned = 0;
 		ce9->cacheBlockSize = cacheBlockSize;
 		if (isSdk5(moduleParams)) {
 			if (consoleModel > 0) {
@@ -277,7 +277,10 @@ int hookNdsRetailArm9(
 		}
 		if (dataToPreloadSize > 0 && dataToPreloadSize < (consoleModel>0 ? (isSdk5(moduleParams) ? 0xF00000 : 0x1700000) : (ndsHeader->unitCode > 0 && dsiModeConfirmed ? 0x400000 : 0x700000))) {
 			ce9->romPartLocation = ce9->romLocation;
-			ce9->romLocation += dataToPreloadSizeAligned;
+			for (u32 i = 0; i < dataToPreloadSize; i += cacheBlockSize) {
+				ce9->romLocation += cacheBlockSize;
+				dataToPreloadSizeAligned += cacheBlockSize;
+			}
 			ce9->cacheAddress = ce9->romLocation;
 			ce9->cacheSlots -= dataToPreloadSizeAligned/cacheBlockSize;
 			ce9->romPartSrc = dataToPreloadAddr;
