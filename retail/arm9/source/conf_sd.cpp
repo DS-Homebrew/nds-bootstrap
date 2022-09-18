@@ -1009,7 +1009,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	}
 	fclose(cebin);
 
-	FILE *file = fopen(conf->sdFound ? "sd:/_nds/nds-bootstrap/preLoadSettings.pck" : "fat:/_nds/nds-bootstrap/preLoadSettings.pck", "rb");
+	FILE *file = fopen(conf->consoleModel > 0 ? (conf->sdFound ? "sd:/_nds/nds-bootstrap/preLoadSettings3DS.pck" : "fat:/_nds/nds-bootstrap/preLoadSettings3DS.pck") : (conf->sdFound ? "sd:/_nds/nds-bootstrap/preLoadSettingsDSi.pck" : "fat:/_nds/nds-bootstrap/preLoadSettingsDSi.pck"), "rb");
 	if (file) {
 		char buf[5] = {0};
 		fread(buf, 1, 4, file);
