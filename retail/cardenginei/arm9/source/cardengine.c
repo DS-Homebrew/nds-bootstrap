@@ -446,27 +446,7 @@ static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
 	#endif
 }
 
-static inline void cardReadRAM(u8* dst, u32 src, u32 len) {
-	// Copy directly
-	if (ce9->romPartSize > 0 && src >= ce9->romPartSrc && src < ce9->romPartSrc+ce9->romPartSize) {
-		#ifdef DEBUG
-		// Send a log command for debug purpose
-		// -------------------------------------
-		commandRead = 0x026ff800;
-
-		sharedAddr[0] = dst;
-		sharedAddr[1] = len;
-		sharedAddr[2] = (ce9->romPartLocation-ce9->romPartSrc)+src;
-		sharedAddr[3] = commandRead;
-
-		waitForArm7();
-		// -------------------------------------
-		#endif
-
-		tonccpy(dst, (u8*)(ce9->romPartLocation-ce9->romPartSrc)+src, len);
-		return;
-	}
-
+static inline void cardReadRAM(u8* dst, u32 src, u32 len, bool romPart) {
 	#ifdef DEBUG
 	// Send a log command for debug purpose
 	// -------------------------------------
@@ -481,6 +461,7 @@ static inline void cardReadRAM(u8* dst, u32 src, u32 len) {
 	// -------------------------------------
 	#endif
 
+	// Copy directly
 	#ifdef TWLSDK
 	u32 newSrc = ce9->romLocation+src;
 	if (src > *(u32*)0x02FFE1C0) {
@@ -591,8 +572,9 @@ void cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 		src = 0x8000 + (src & 0x1FF);
 	}
 
-	if ((ce9->valueBits & ROMinRAM) || (ce9->romPartSize > 0 && src >= ce9->romPartSrc && src < ce9->romPartSrc+ce9->romPartSize)) {
-		cardReadRAM(dst, src, len);
+	bool romPart = (ce9->romPartSize > 0 && src >= ce9->romPartSrc && src < ce9->romPartSrc+ce9->romPartSize);
+	if ((ce9->valueBits & ROMinRAM) || romPart) {
+		cardReadRAM(dst, src, len, romPart);
 	} else {
 		cardReadNormal(dst, src, len);
 	}
@@ -1033,12 +1015,13 @@ void myIrqHandlerIPC(void) {
 
 	switch (IPC_GetSync()) {
 		case 0x3:
+			extern bool dmaDirectRead;
 #ifdef DLDI
-		if (ce9->valueBits & ROMinRAM) {
+		if (dmaDirectRead) {
 			endCardReadDma();
 		}
 #else
-		if (ce9->valueBits & ROMinRAM) {
+		if (dmaDirectRead) {
 			endCardReadDma();
 		}
 		#ifndef TWLSDK

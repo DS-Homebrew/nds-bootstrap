@@ -107,7 +107,6 @@ typedef struct cardengineArm9 {
     u16 cacheSlots;
     u16 cacheBlockSize;
     u32 romPartSrc;
-    u32 romPartLocation;
     u32 romPartSize;
 } __attribute__ ((__packed__)) cardengineArm9;
 #else

@@ -276,12 +276,11 @@ int hookNdsRetailArm9(
 			}
 		}
 		if (dataToPreloadSize > 0 && dataToPreloadSize < (consoleModel>0 ? (isSdk5(moduleParams) ? 0xF00000 : 0x1700000) : (ndsHeader->unitCode > 0 && dsiModeConfirmed ? 0x400000 : 0x700000))) {
-			ce9->romPartLocation = ce9->romLocation;
+			ce9->romLocation -= dataToPreloadAddr;
 			for (u32 i = 0; i < dataToPreloadSize; i += cacheBlockSize) {
-				ce9->romLocation += cacheBlockSize;
+				ce9->cacheAddress += cacheBlockSize;
 				dataToPreloadSizeAligned += cacheBlockSize;
 			}
-			ce9->cacheAddress = ce9->romLocation;
 			ce9->cacheSlots -= dataToPreloadSizeAligned/cacheBlockSize;
 			ce9->romPartSrc = dataToPreloadAddr;
 			ce9->romPartSize = dataToPreloadSize;
@@ -310,8 +309,9 @@ int hookNdsRetailArm9(
 		if (strncmp(romTid, "UBR", 3) == 0 || iUncompressedSize > 0x280000) {
 			ce9->valueBits |= b_slowSoftReset;
 		}
+	} else {
+		ce9->romLocation -= usesCloneboot ? 0x8000 : (ndsHeader->arm9romOffset + ndsHeader->arm9binarySize);
 	}
-	ce9->romLocation -= (ROMinRAM && usesCloneboot) ? 0x8000 : (ndsHeader->arm9romOffset + ndsHeader->arm9binarySize);
 
     u32* tableAddr = patchOffsetCache.a9IrqHookOffset;
  	if (!tableAddr) {

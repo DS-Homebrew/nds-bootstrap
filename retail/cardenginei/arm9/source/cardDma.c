@@ -61,9 +61,10 @@ extern int accessCounter;
 
 bool isDma = false;
 bool dmaOn = true;
+bool dmaDirectRead = false;
 
 void endCardReadDma() {
-	if ((ce9->valueBits & ROMinRAM) && dmaOn && ndmaBusy(0)) {
+	if (dmaDirectRead && dmaOn && ndmaBusy(0)) {
 		IPC_SendSync(0x3);
 		return;
 	}
@@ -391,11 +392,33 @@ void continueCardReadDmaArm7() {
 
 void cardSetDma(u32 * params) {
 	isDma = true;
+	dmaDirectRead = false;
 
 	#ifdef TWLSDK
 	u32 src = params[3];
 	u8* dst = (u8*)params[4];
 	u32 len = params[5];
+
+	bool romPart = (ce9->romPartSize > 0 && src >= ce9->romPartSrc && src < ce9->romPartSrc+ce9->romPartSize);
+	if (dmaOn && ((ce9->valueBits & ROMinRAM) || romPart)) {
+		dmaDirectRead = true;
+
+		disableIrqMask(IRQ_CARD);
+		disableIrqMask(IRQ_CARD_LINE);
+
+		enableIPC_SYNC();
+
+		// Copy via dma
+		u32 newSrc = ce9->romLocation+src;
+		if (src > *(u32*)0x02FFE1C0) {
+			newSrc -= *(u32*)0x02FFE1CC;
+		}
+		ndmaCopyWordsAsynch(0, (u8*)newSrc, dst, len);
+		IPC_SendSync(0x3);
+	} else {
+		cardRead(NULL, dst, src, len);
+		endCardReadDma();
+	}
 	#else
 	vu32* volatile cardStruct = ce9->cardStruct0;
 
@@ -405,32 +428,33 @@ void cardSetDma(u32 * params) {
 	u32 src = ((ce9->valueBits & isSdk5) ? dmaParams[3] : cardStruct[0]);
 	u8* dst = ((ce9->valueBits & isSdk5) ? (u8*)(dmaParams[4]) : (u8*)(cardStruct[1]));
 	u32 len = ((ce9->valueBits & isSdk5) ? dmaParams[5] : cardStruct[2]);
-	#endif
 
-	#ifdef TWLSDK
-	if (!(ce9->valueBits & ROMinRAM))
-	#else
-	if (!dmaOn || ce9->patches->sleepRef || ce9->thumbPatches->sleepRef)
-	#endif
-	{
-		cardRead(NULL, dst, src, len);
-		endCardReadDma();
-		return;
-	}
+	bool romPart = (ce9->romPartSize > 0 && src >= ce9->romPartSrc && src < ce9->romPartSrc+ce9->romPartSize);
+	if (dmaOn && ((ce9->valueBits & ROMinRAM) || romPart)) {
+		dmaDirectRead = true;
 
-    disableIrqMask(IRQ_CARD);
-    disableIrqMask(IRQ_CARD_LINE);
+		disableIrqMask(IRQ_CARD);
+		disableIrqMask(IRQ_CARD_LINE);
 
-	enableIPC_SYNC();
+		enableIPC_SYNC();
 
-	if (ce9->valueBits & ROMinRAM) {
 		// Copy via dma
 		ndmaCopyWordsAsynch(0, (u8*)ce9->romLocation+src, dst, len);
 		IPC_SendSync(0x3);
 		return;
+	} else if (!dmaOn || ce9->patches->sleepRef || ce9->thumbPatches->sleepRef) {
+		cardRead(NULL, dst, src, len);
+		endCardReadDma();
+		return;
 	}
+	#endif
 
 	#ifndef TWLSDK
+	disableIrqMask(IRQ_CARD);
+	disableIrqMask(IRQ_CARD_LINE);
+
+	enableIPC_SYNC();
+
 	u32 commandRead=0x025FFB0A;
 	u32 sector = (src/ce9->cacheBlockSize)*ce9->cacheBlockSize;
 	//u32 page = (src / 512) * 512;

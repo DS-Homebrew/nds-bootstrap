@@ -49,8 +49,6 @@ cacheBlockSize:
 	.hword	0
 romPartSrc:
 	.word	0x00000000
-romPartLocation:
-	.word	0x00000000
 romPartSize:
 	.word	0x00000000
 
