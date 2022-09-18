@@ -1008,6 +1008,59 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		fread((u8*)ARM7_FIX_BUFFERED_LOCATION, 1, 0x140, cebin);
 	}
 	fclose(cebin);
+
+	FILE *file = fopen(conf->sdFound ? "sd:/_nds/nds-bootstrap/preLoadSettings.pck" : "fat:/_nds/nds-bootstrap/preLoadSettings.pck", "rb");
+	if (file) {
+		char buf[5] = {0};
+		fread(buf, 1, 4, file);
+	  if (strcmp(buf, ".PCK") == 0) {
+
+		u32 fileCount;
+		fread(&fileCount, 1, sizeof(fileCount), file);
+
+		u32 offset = 0, size = 0;
+
+		// Try binary search for the game
+		int left = 0;
+		int right = fileCount;
+
+		while (left <= right) {
+			int mid = left + ((right - left) / 2);
+			fseek(file, 16 + mid * 16, SEEK_SET);
+			fread(buf, 1, 4, file);
+			int cmp = strcmp(buf, romTid);
+			if (cmp == 0) { // TID matches, check CRC
+				u16 crc;
+				fread(&crc, 1, sizeof(crc), file);
+
+				if (crc == headerCRC) { // CRC matches
+					fread(&offset, 1, sizeof(offset), file);
+					fread(&size, 1, sizeof(size), file);
+					break;
+				} else if (crc < headerCRC) {
+					left = mid + 1;
+				} else {
+					right = mid - 1;
+				}
+			} else if (cmp < 0) {
+				left = mid + 1;
+			} else {
+				right = mid - 1;
+			}
+		}
+
+		if (offset > 0) {
+			fseek(file, offset, SEEK_SET);
+			u32 *buffer = new u32[size/4];
+			fread(buffer, 1, size, file);
+
+			conf->dataToPreloadAddr = buffer[0];
+			conf->dataToPreloadSize = buffer[1];
+			delete[] buffer;
+		}
+	  }
+		fclose(file);
+	}
   } else if (ndsArm7idst <= 0x02E80000) {
 	// Load ce7 binary
 	cebin = fopen("nitro:/cardenginei_arm7_dsiware.lz77", "rb");

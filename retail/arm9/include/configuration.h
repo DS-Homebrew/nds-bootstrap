@@ -29,6 +29,8 @@ typedef struct configuration {
 	u32 apPatchSize;
 	u32 cheatSize;
 	u32 musicsSize;
+	u32 dataToPreloadAddr;
+	u32 dataToPreloadSize;
 	u8 language;
 	char* guiLanguage;
 	u8 region; // SDK 5

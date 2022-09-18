@@ -98,6 +98,8 @@ extern u32 romSize;
 extern u32 saveSize;
 extern u32 gbaRomSize;
 extern u32 gbaSaveSize;
+extern u32 dataToPreloadAddr;
+extern u32 dataToPreloadSize;
 extern u32 wideCheatFileCluster;
 extern u32 wideCheatSize;
 extern u32 apPatchFileCluster;
@@ -793,9 +795,6 @@ static void NTR_BIOS() {
 		dbg_printf("Switched to NTR mode BIOS\n");
 	}
 }
-
-u32 dataToPreloadAddr = 0;
-u32 dataToPreloadSize = 0;
 
 static void loadROMPartIntoRAM(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, aFile file) {
 	if (dataToPreloadSize == 0 || dataToPreloadSize >= (consoleModel > 0 ? (isSdk5(moduleParams) || dsiModeConfirmed ? 0xF00000 : 0x1700000) : (ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed ? 0x400000 : 0x700000))) {
@@ -1613,12 +1612,6 @@ int arm7_main(void) {
 	  }
 	 //}
 	} else {
-		// TODO: Replace with loading info from file
-		if (strcmp(romTid, "CBBE") == 0) {
-			dataToPreloadAddr = 0x1CD000;
-			dataToPreloadSize = 0x51DDA4;
-		}
-
 		if (strncmp(romTid, "UBR", 3) == 0) {
 			toncset((char*)0x0C400000, 0xFF, 0xC0);
 			toncset((u8*)0x0C4000B2, 0, 3);

@@ -265,6 +265,8 @@ int runNds(u32 cluster, u32 saveCluster, u32 donorTwlCluster, u32 gbaCluster, u3
 	loader->saveSize                    = conf->saveSize;
 	loader->gbaRomSize                  = conf->gbaRomSize;
 	loader->gbaSaveSize                 = conf->gbaSaveSize;
+	loader->dataToPreloadAddr           = conf->dataToPreloadAddr;
+	loader->dataToPreloadSize           = conf->dataToPreloadSize;
 	loader->wideCheatFileCluster        = wideCheatCluster;
 	loader->wideCheatSize               = conf->wideCheatSize;
 	loader->apPatchFileCluster          = apPatchCluster;

@@ -38,6 +38,8 @@
 	.global saveSize
 	.global gbaRomSize
 	.global gbaSaveSize
+	.global dataToPreloadAddr
+	.global dataToPreloadSize
 	.global wideCheatFileCluster
 	.global wideCheatSize
 	.global apPatchFileCluster
@@ -107,6 +109,10 @@ gbaRomSize:
 	.word	0x00000000		@ .gba file size
 gbaSaveSize:
 	.word	0x00000000		@ GBA .sav file size
+dataToPreloadAddr:
+	.word	0x00000000
+dataToPreloadSize:
+	.word	0x00000000
 wideCheatFileCluster:
 	.word	0x00000000
 wideCheatSize:
