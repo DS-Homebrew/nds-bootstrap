@@ -9,7 +9,7 @@
 <!-- Is it launched via the SD card or a flashcart? Is SCFG locked or Unlocked? Please be specific and include firmwares and versions. -->
 **Launch Method:**
 
-<!-- Specify whether you used release or nightly. If you use nightly, please include the hash. Simply saying "latest" isn't helpful. -->
+<!-- Specify whether you used release or nightly. If you use nightly, please include the hash. Simply saying "latest", "release", or "nightly" isn't helpful. -->
 **Version used:**
 
 <!-- Include SHA1/MD5 hashes, Title IDs, and anything that could be used to identify it. If it's homebrew, please link said homebrew here. -->
