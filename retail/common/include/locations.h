@@ -17,6 +17,7 @@
 #define SAV_FILE_LOCATION_TWLSDK  (ROM_FILE_LOCATION_TWLSDK + 32) //+ sizeof(aFile)
 #define OVL_FILE_LOCATION         (ROM_FILE_LOCATION + 64) //+ sizeof(aFile)
 #define OVL_FILE_LOCATION_ALT     (ROM_FILE_LOCATION_ALT + 64) //+ sizeof(aFile)
+#define OVL_FILE_LOCATION_MAINMEM (ROM_FILE_LOCATION_MAINMEM + 64) //+ sizeof(aFile)
 #define OVL_FILE_LOCATION_TWLSDK  (ROM_FILE_LOCATION_TWLSDK + 64) //+ sizeof(aFile)
 /* #define GBA_FILE_LOCATION         (ROM_FILE_LOCATION + 64) //+ sizeof(aFile)
 #define GBA_FILE_LOCATION_ALT     (ROM_FILE_LOCATION_ALT + 64) //+ sizeof(aFile)

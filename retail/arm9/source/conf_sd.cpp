@@ -1484,7 +1484,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			apFixOverlaysPath = "fat:/_nds/nds-bootstrap/apFixOverlays.bin";	
 		}
 
-		if (conf->consoleModel == 0 && unitCode > 0 && conf->dsiMode && !conf->isDSiWare && access(apFixOverlaysPath.c_str(), F_OK) != 0) {
+		if (!conf->isDSiWare && access(apFixOverlaysPath.c_str(), F_OK) != 0) {
 			consoleDemoInit();
 			iprintf("Allocating space for\n");
 			iprintf("AP-fixed overlays.\n");

@@ -42,19 +42,19 @@ bool applyIpsPatch(const tNDSHeader* ndsHeader, u8* ipsbyte, const bool arm9Only
 			if (!overlaysInRam) {
 				return armPatched;
 			}
-			rombyte = (void*)(isSdk5 ? ROM_SDK5_LOCATION : ROM_LOCATION);
+			rombyte = (void*)((isSdk5 && ROMinRAM) ? ROM_SDK5_LOCATION : ROM_LOCATION);
 			if (extendedMemoryConfirmed) {
 				rombyte = (void*)ROM_LOCATION_EXT;
-			} else if (consoleModel == 0 && isSdk5) {
-				rombyte = (void*)CACHE_ADRESS_START;
 			}
-			if (ROMinRAM && usesCloneboot) {
-				rombyte -= 0x8000;
-			} else if (consoleModel == 0 && ndsHeader->unitCode > 0 && dsiModeConfirmed) {
+			if (ROMinRAM) {
+				if (usesCloneboot) {
+					rombyte -= 0x8000;
+				} else {
+					rombyte -= ndsHeader->arm9romOffset;
+					rombyte -= ndsHeader->arm9binarySize;
+				}
+			} else /*if (consoleModel == 0 && ndsHeader->unitCode > 0 && dsiModeConfirmed)*/ {
 				rombyte -= ((ndsHeader->arm9romOffset+ndsHeader->arm9binarySize)/cacheBlockSize)*cacheBlockSize;
-			} else {
-				rombyte -= ndsHeader->arm9romOffset;
-				rombyte -= ndsHeader->arm9binarySize;
 			}
 		}
 		ipson += 3;

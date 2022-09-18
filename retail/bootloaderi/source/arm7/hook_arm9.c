@@ -286,9 +286,8 @@ int hookNdsRetailArm9(
 			ce9->romPartSrc = dataToPreloadAddr;
 			ce9->romPartSize = dataToPreloadSize;
 		}
-		if (runOverlayCheck
-		&& overlaysSize <= (consoleModel>0 ? (isSdk5(moduleParams) ? 0xF00000 : 0x1700000) : (ndsHeader->unitCode > 0 && dsiModeConfirmed ? 0x400000 : 0x700000))-dataToPreloadSizeAligned) {
-			extern u8 gameOnFlashcard;
+		if (runOverlayCheck && overlaysSize <= 0x700000) {
+			/*extern u8 gameOnFlashcard;
 			if (!gameOnFlashcard && (consoleModel > 0 || !dsiModeConfirmed || (ndsHeader->unitCode == 0 && dsiModeConfirmed))) {
 				if (cacheBlockSize == 0) {
 					ce9->cacheAddress += (overlaysSize/4)*4;
@@ -297,7 +296,7 @@ int hookNdsRetailArm9(
 					ce9->cacheAddress += cacheBlockSize;
 					ce9->cacheSlots--;
 				}
-			}
+			}*/
 			ce9->valueBits |= b_overlaysCached;
 		}
 

@@ -97,6 +97,7 @@ aFile* apFixOverlaysFile = (aFile*)OVL_FILE_LOCATION_TWLSDK;
 tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER;
 aFile* romFile = (aFile*)ROM_FILE_LOCATION_MAINMEM;
 aFile* savFile = (aFile*)SAV_FILE_LOCATION_MAINMEM;
+aFile* apFixOverlaysFile = (aFile*)OVL_FILE_LOCATION_MAINMEM;
 #endif
 //static aFile* gbaFile = (aFile*)GBA_FILE_LOCATION_MAINMEM;
 //static aFile* gbaSavFile = (aFile*)GBA_SAV_FILE_LOCATION_MAINMEM;
@@ -292,24 +293,21 @@ volatile void (*FS_Seek)(u32*, u32, u32) = (volatile void*)0x0203C54C;
 volatile void (*FS_Read)(u32*, u32, u32) = (volatile void*)0x0203C578;
 volatile void (*FS_Write)(u32*, u32, u32) = (volatile void*)0x0203C5C8;*/
 
-static u32 newOverlayOffset = 0;
 #endif
+#endif
+
+#ifndef DLDI
+static u32 newOverlayOffset = 0;
 #endif
 
 static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
 #ifdef DLDI
 	while (sharedAddr[3]==0x444D4152);	// Wait during a RAM dump
-	#ifdef TWLSDK
-	fileRead((char*)dst, (ce9->consoleModel == 0 && (ce9->valueBits & overlaysCached) && src >= ndsHeader->arm9romOffset+ndsHeader->arm9binarySize && src < ndsHeader->arm7romOffset) ? *apFixOverlaysFile : *romFile, src, len, 0);
-	#else
-	fileRead((char*)dst, *romFile, src, len, 0);
-	#endif
+	fileRead((char*)dst, ((ce9->valueBits & overlaysCached) && src >= ndsHeader->arm9romOffset+ndsHeader->arm9binarySize && src < ndsHeader->arm7romOffset) ? *apFixOverlaysFile : *romFile, src, len, 0);
 #else
-	#ifdef TWLSDK
 	if (newOverlayOffset == 0) {
 		newOverlayOffset = ((ndsHeader->arm9romOffset+ndsHeader->arm9binarySize)/ce9->cacheBlockSize)*ce9->cacheBlockSize;
 	}
-	#endif
 
 	u32 sector = (src/ce9->cacheBlockSize)*ce9->cacheBlockSize;
 
@@ -324,11 +322,7 @@ static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
 	//}
 
 	if ((ce9->valueBits & cacheDisabled) && (u32)dst >= 0x02000000 && (u32)dst < 0x03000000) {
-		#ifdef TWLSDK
-		fileRead((char*)dst, (ce9->consoleModel == 0 && (ce9->valueBits & overlaysCached) && src >= newOverlayOffset && src < ndsHeader->arm7romOffset) ? *apFixOverlaysFile : *romFile, src, len, 0);
-		#else
-		fileRead((char*)dst, *romFile, src, len, 0);
-		#endif
+		fileRead((char*)dst, ((ce9->valueBits & overlaysCached) && src >= newOverlayOffset && src < ndsHeader->arm7romOffset) ? *apFixOverlaysFile : *romFile, src, len, 0);
 	} else {
 		// Read via the main RAM cache
 		//bool runSleep = true;
@@ -358,11 +352,7 @@ static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
 					readLen = ce9->cacheBlockSize*2;
 				}*/
 
-				#ifdef TWLSDK
-				fileRead((char*)buffer, (ce9->consoleModel == 0 && (ce9->valueBits & overlaysCached) && src >= newOverlayOffset && src < ndsHeader->arm7romOffset) ? *apFixOverlaysFile : *romFile, sector, ce9->cacheBlockSize, 0);
-				#else
-				fileRead((char*)buffer, *romFile, sector, ce9->cacheBlockSize, 0);
-				#endif
+				fileRead((char*)buffer, ((ce9->valueBits & overlaysCached) && src >= newOverlayOffset && src < ndsHeader->arm7romOffset) ? *apFixOverlaysFile : *romFile, sector, ce9->cacheBlockSize, 0);
 				/*updateDescriptor(slot, sector);
 				if (readLen >= ce9->cacheBlockSize*2) {
 					updateDescriptor(slot+1, sector+ce9->cacheBlockSize);
@@ -601,19 +591,11 @@ void cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 		src = 0x8000 + (src & 0x1FF);
 	}
 
-	#ifdef TWLSDK
-	if (ce9->consoleModel > 0 && ((ce9->valueBits & ROMinRAM) || (ce9->romPartSize > 0 && src >= ce9->romPartSrc && src < ce9->romPartSrc+ce9->romPartSize) || ((ce9->valueBits & overlaysCached) && src >= ndsHeader->arm9romOffset+ndsHeader->arm9binarySize && src < ndsHeader->arm7romOffset))) {
+	if ((ce9->valueBits & ROMinRAM) || (ce9->romPartSize > 0 && src >= ce9->romPartSrc && src < ce9->romPartSrc+ce9->romPartSize)) {
 		cardReadRAM(dst, src, len);
 	} else {
 		cardReadNormal(dst, src, len);
 	}
-	#else
-	if ((ce9->valueBits & ROMinRAM) || (ce9->romPartSize > 0 && src >= ce9->romPartSrc && src < ce9->romPartSrc+ce9->romPartSize) || ((ce9->valueBits & overlaysCached) && src >= ndsHeader->arm9romOffset+ndsHeader->arm9binarySize && src < ndsHeader->arm7romOffset)) {
-		cardReadRAM(dst, src, len);
-	} else {
-		cardReadNormal(dst, src, len);
-	}
-	#endif
     isDma=false;
 }
 
