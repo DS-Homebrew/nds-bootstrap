@@ -1883,26 +1883,27 @@ int arm7_main(void) {
 		if (useApPatch) {
 			if (applyIpsPatch(ndsHeader, (u8*)IPS_LOCATION, (*(u8*)(IPS_LOCATION+apPatchSize-1) == 0xA9), isSdk5(moduleParams), ROMinRAM, usesCloneboot)) {
 				dbg_printf("AP-fix applied\n");
-				if (!ROMinRAM) {
-					aFile* apFixOverlaysFile = (aFile*)((ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed) ? OVL_FILE_LOCATION_TWLSDK : OVL_FILE_LOCATION_MAINMEM);
-					*apFixOverlaysFile = getFileFromCluster(apFixOverlaysCluster, gameOnFlashcard);
-					buildFatTableCache(apFixOverlaysFile, 0);
-
-					u32 alignedOverlaysOffset = ((ndsHeader->arm9romOffset + ndsHeader->arm9binarySize)/cacheBlockSize)*cacheBlockSize;
-					u32 newOverlaysSize = 0;
-					for (u32 i = alignedOverlaysOffset; i < ndsHeader->arm7romOffset; i+= cacheBlockSize) {
-						newOverlaysSize += cacheBlockSize;
-					}
-
-					fileWrite((char*)CACHE_ADRESS_START, *apFixOverlaysFile, alignedOverlaysOffset, newOverlaysSize, -1);	// Write AP-fixed overlays to a file
-					toncset((char*)CACHE_ADRESS_START, 0, newOverlaysSize);
-
-					dbg_printf("Overlays cached to a file\n");
-				}
 			} else {
 				dbg_printf("Failed to apply AP-fix\n");
 			}
 			toncset((u32*)IPS_LOCATION, 0, apPatchSize);	// Clear IPS patch
+		}
+
+		if (!ROMinRAM && overlayPatch) {
+			aFile* apFixOverlaysFile = (aFile*)((ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed) ? OVL_FILE_LOCATION_TWLSDK : OVL_FILE_LOCATION_MAINMEM);
+			*apFixOverlaysFile = getFileFromCluster(apFixOverlaysCluster, gameOnFlashcard);
+			buildFatTableCache(apFixOverlaysFile, 0);
+
+			u32 alignedOverlaysOffset = ((ndsHeader->arm9romOffset + ndsHeader->arm9binarySize)/cacheBlockSize)*cacheBlockSize;
+			u32 newOverlaysSize = 0;
+			for (u32 i = alignedOverlaysOffset; i < ndsHeader->arm7romOffset; i+= cacheBlockSize) {
+				newOverlaysSize += cacheBlockSize;
+			}
+
+			fileWrite((char*)CACHE_ADRESS_START, *apFixOverlaysFile, alignedOverlaysOffset, newOverlaysSize, -1);	// Write AP-fixed overlays to a file
+			toncset((char*)CACHE_ADRESS_START, 0, newOverlaysSize);
+
+			dbg_printf("Overlays cached to a file\n");
 		}
 
 		if (!ROMinRAM && ((ROMsupportsDsiMode(ndsHeader) && !isDSiWare) || strncmp(romTid, "UBR", 3) != 0)) {
