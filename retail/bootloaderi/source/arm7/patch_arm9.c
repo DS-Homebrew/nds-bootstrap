@@ -2224,10 +2224,6 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 
 	patchWaitSysCycles(ce9, ndsHeader, moduleParams);
 
-	if (strcmp(romTid, "ASME") == 0 && boostCpu) {
-		*(u32*)0x0205E520 = 0x332340*2;
-	}
-
 	if (strcmp(romTid, "UBRP") == 0) {
 		operaRamPatch();
 	} /*else if (gbaRomFound) {
