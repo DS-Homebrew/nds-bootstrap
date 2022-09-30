@@ -4473,6 +4473,24 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// Goooooal America (USA)
+	// Crash cause unknown
+	/*else if (strcmp(romTid, "K9AE") == 0) {
+		*(u32*)0x02004838 = 0xE1A00000; // nop
+		*(u32*)0x0200499C = 0xE1A00000; // nop
+		*(u32*)0x0200507C = 0xE1A00000; // nop
+		*(u32*)0x0201CE24 = 0xE1A00000; // nop
+		*(u32*)0x02021154 = 0xE1A00000; // nop
+		*(u32*)0x02024C14 = 0xE1A00000; // nop
+		*(u32*)0x020269DC = 0xE1A00000; // nop
+		*(u32*)0x020269E0 = 0xE1A00000; // nop
+		*(u32*)0x020269EC = 0xE1A00000; // nop
+		*(u32*)0x02026B4C = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x02026BA8, heapEnd); // mov r0, #0x23C0000
+		*(u32*)0x02027F34 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
+		*(u32*)0x0202B42C = 0xE1A00000; // nop
+	}*/
+
 	// Go! Go! Kokopolo (USA)
 	// Go! Go! Kokopolo (Europe)
 	// Requires 8MB of RAM
