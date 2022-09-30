@@ -4626,6 +4626,30 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020BEB8C = 0xE3A00000; // mov r0, #0
 	}
 
+	// Gold Fever (USA)
+	// Requires more than 8MB of RAM
+	/*else if (strcmp(romTid, "KG7E") == 0) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x02013E80 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		*(u32*)0x02014008 = 0xE1A00000; // nop
+		*(u32*)0x020142E0 = 0xE1A00000; // nop
+		*(u32*)0x02023AA4 = 0xE1A00000; // nop
+		*(u32*)0x02031854 = 0xE1A00000; // nop
+		*(u32*)0x02032698 = 0xE1A00000; // nop
+		*(u32*)0x02032A04 = 0xE1A00000; // nop
+		*(u32*)0x020392C0 = 0xE1A00000; // nop
+		*(u32*)0x0203B2F8 = 0xE1A00000; // nop
+		*(u32*)0x0203E7B4 = 0xE1A00000; // nop
+		*(u32*)0x02041FD8 = 0xE1A00000; // nop
+		*(u32*)0x02043E5C = 0xE1A00000; // nop
+		*(u32*)0x02043E60 = 0xE1A00000; // nop
+		*(u32*)0x02043E6C = 0xE1A00000; // nop
+		*(u32*)0x02043FCC = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x02044028, heapEnd); // mov r0, #0x23C0000
+		*(u32*)0x0204546C = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
+		*(u32*)0x02048314 = 0xE1A00000; // nop
+	}*/
+
 	// Hard-Hat Domo (USA)
 	else if (strcmp(romTid, "KDHE") == 0) {
 		const u32 dsiSaveCreateT = 0x020238C8;
