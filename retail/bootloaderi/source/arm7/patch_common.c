@@ -331,6 +331,99 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0203C358, (u32)dsiSaveClose);
 	}
 
+	// Anne's Doll Studio: Antique Collection (USA)
+	// Anne's Doll Studio: Antique Collection (Europe)
+	// Anne's Doll Studio: Princess Collection (USA)
+	// Anne's Doll Studio: Princess Collection (Europe)
+	else if ((strcmp(romTid, "KY8E") == 0 || strcmp(romTid, "KY8P") == 0
+		   || strcmp(romTid, "K2SE") == 0 || strcmp(romTid, "K2SP") == 0) && saveOnFlashcard) {
+		setBL(0x0202A164, (u32)dsiSaveGetResultCode);
+		setBL(0x0202A288, (u32)dsiSaveOpen);
+		setBL(0x0202A2BC, (u32)dsiSaveRead);
+		setBL(0x0202A2E4, (u32)dsiSaveClose);
+		setBL(0x0202A344, (u32)dsiSaveOpen);
+		setBL(0x0202A38C, (u32)dsiSaveWrite);
+		setBL(0x0202A3AC, (u32)dsiSaveClose);
+		setBL(0x0202A3F0, (u32)dsiSaveCreate);
+		setBL(0x0202A44C, (u32)dsiSaveDelete);
+		if (strncmp(romTid, "KY8", 3) == 0) {
+			if (ndsHeader->gameCode[3] == 'E') {
+				*(u32*)0x0203B89C = 0xE3A00000; // mov r0, #0 (Skip pit.bin check)
+				*(u32*)0x0203BAFC = 0xE3A00000; // mov r0, #0 (Skip free space check)
+				*(u32*)0x0203BB00 = 0xE12FFF1E; // bx lr
+			} else {
+				*(u32*)0x0203B844 = 0xE3A00000; // mov r0, #0 (Skip pit.bin check)
+				*(u32*)0x0203BAA4 = 0xE3A00000; // mov r0, #0 (Skip free space check)
+				*(u32*)0x0203BAA8 = 0xE12FFF1E; // bx lr
+			}
+		} else {
+			*(u32*)0x0203B678 = 0xE3A00000; // mov r0, #0 (Skip pit.bin check)
+			*(u32*)0x0203B8D8 = 0xE3A00000; // mov r0, #0 (Skip free space check)
+			*(u32*)0x0203B8DC = 0xE12FFF1E; // bx lr
+		}
+	}
+
+	// Anne's Doll Studio: Gothic Collection (USA)
+	else if (strcmp(romTid, "K54E") == 0 && saveOnFlashcard) {
+		*(u32*)0x02033850 = 0xE3A00000; // mov r0, #0 (Skip pit.bin check)
+		*(u32*)0x02033AB0 = 0xE3A00000; // mov r0, #0 (Skip free space check)
+		*(u32*)0x02033AB4 = 0xE12FFF1E; // bx lr
+		setBL(0x02035614, (u32)dsiSaveGetResultCode);
+		setBL(0x02035738, (u32)dsiSaveOpen);
+		setBL(0x0203576C, (u32)dsiSaveRead);
+		setBL(0x02035794, (u32)dsiSaveClose);
+		setBL(0x020357F4, (u32)dsiSaveOpen);
+		setBL(0x0203583C, (u32)dsiSaveWrite);
+		setBL(0x0203585C, (u32)dsiSaveClose);
+		setBL(0x020358A0, (u32)dsiSaveCreate);
+		setBL(0x020358FC, (u32)dsiSaveDelete);
+	}
+
+	// Anne's Doll Studio: Lolita Collection (USA)
+	// Anne's Doll Studio: Lolita Collection (Europe)
+	else if ((strcmp(romTid, "KLQE") == 0 || strcmp(romTid, "KLQP") == 0) && saveOnFlashcard) {
+		*(u32*)0x020337B0 = 0xE3A00000; // mov r0, #0 (Skip pit.bin check)
+		*(u32*)0x02033A10 = 0xE3A00000; // mov r0, #0 (Skip free space check)
+		*(u32*)0x02033A14 = 0xE12FFF1E; // bx lr
+		if (ndsHeader->gameCode[3] == 'E') {
+			setBL(0x020355C4, (u32)dsiSaveGetResultCode);
+			setBL(0x020356E8, (u32)dsiSaveOpen);
+			setBL(0x0203571C, (u32)dsiSaveRead);
+			setBL(0x02035744, (u32)dsiSaveClose);
+			setBL(0x020357A4, (u32)dsiSaveOpen);
+			setBL(0x020357EC, (u32)dsiSaveWrite);
+			setBL(0x0203580C, (u32)dsiSaveClose);
+			setBL(0x02035850, (u32)dsiSaveCreate);
+			setBL(0x020358AC, (u32)dsiSaveDelete);
+		} else {
+			setBL(0x02035570, (u32)dsiSaveGetResultCode);
+			setBL(0x02035694, (u32)dsiSaveOpen);
+			setBL(0x020356C8, (u32)dsiSaveRead);
+			setBL(0x020356F0, (u32)dsiSaveClose);
+			setBL(0x02035750, (u32)dsiSaveOpen);
+			setBL(0x020357EC, (u32)dsiSaveWrite);
+			setBL(0x02035798, (u32)dsiSaveClose);
+			setBL(0x020357FC, (u32)dsiSaveCreate);
+			setBL(0x02035858, (u32)dsiSaveDelete);
+		}
+	}
+
+	// Anne's Doll Studio: Tokyo Collection (USA)
+	else if (strcmp(romTid, "KSQE") == 0 && saveOnFlashcard) {
+		setBL(0x02027F34, (u32)dsiSaveGetResultCode);
+		setBL(0x02028058, (u32)dsiSaveOpen);
+		setBL(0x0202808C, (u32)dsiSaveRead);
+		setBL(0x020280B4, (u32)dsiSaveClose);
+		setBL(0x02028114, (u32)dsiSaveOpen);
+		setBL(0x0202815C, (u32)dsiSaveWrite);
+		setBL(0x0202817C, (u32)dsiSaveClose);
+		setBL(0x020281C0, (u32)dsiSaveCreate);
+		setBL(0x0202821C, (u32)dsiSaveDelete);
+		*(u32*)0x0203A534 = 0xE3A00000; // mov r0, #0 (Skip pit.bin check)
+		*(u32*)0x0203A794 = 0xE3A00000; // mov r0, #0 (Skip free space check)
+		*(u32*)0x0203A798 = 0xE12FFF1E; // bx lr
+	}
+
 	// Anonymous Notes 1: From The Abyss (USA & Europe)
 	// Anonymous Notes 2: From The Abyss (USA & Europe)
 	else if ((strncmp(romTid, "KVI", 3) == 0 || strncmp(romTid, "KV2", 3) == 0)

@@ -931,6 +931,196 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0203C358, (u32)dsiSaveClose);
 	}
 
+	// Anne's Doll Studio: Antique Collection (USA)
+	// Anne's Doll Studio: Antique Collection (Europe)
+	// Anne's Doll Studio: Princess Collection (USA)
+	// Anne's Doll Studio: Princess Collection (Europe)
+	else if (strcmp(romTid, "KY8E") == 0 || strcmp(romTid, "KY8P") == 0
+		   || strcmp(romTid, "K2SE") == 0 || strcmp(romTid, "K2SP") == 0) {
+		/*if (!extendedMemory2) {
+			for (u32 i = 0; i < ndsHeader->arm9binarySize/4; i++) {
+				u32* addr = (u32*)ndsHeader->arm9destination;
+				if (addr[i] >= 0x022D0000 && addr[i] < 0x02360000) {
+					addr[i] -= 0x200000;
+				}
+			}
+		}*/
+
+		*(u32*)0x02004838 = 0xE1A00000; // nop
+		*(u32*)0x0200499C = 0xE1A00000; // nop
+		*(u32*)0x020050B0 = 0xE1A00000; // nop
+		*(u32*)0x020050B4 = 0xE1A00000; // nop
+		*(u32*)0x02011374 = 0xE1A00000; // nop
+		*(u32*)0x020151A0 = 0xE1A00000; // nop
+		*(u32*)0x0201A2A4 = 0xE1A00000; // nop
+		*(u32*)0x0201C040 = 0xE1A00000; // nop
+		*(u32*)0x0201C044 = 0xE1A00000; // nop
+		*(u32*)0x0201C050 = 0xE1A00000; // nop
+		*(u32*)0x0201C1B0 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x0201C20C, extendedMemory2 ? 0x02700000 : heapEnd); // mov r0, extendedMemory2 ? #0x2700000 : #0x23C0000
+		/*if (!extendedMemory2) {
+			*(u32*)0x0201C340 -= 0x240000;
+		}*/
+		*(u32*)0x0201D654 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
+		*(u32*)0x02020B1C = 0xE1A00000; // nop
+		setBL(0x0202A164, (u32)dsiSaveGetResultCode);
+		setBL(0x0202A288, (u32)dsiSaveOpen);
+		setBL(0x0202A2BC, (u32)dsiSaveRead);
+		setBL(0x0202A2E4, (u32)dsiSaveClose);
+		setBL(0x0202A344, (u32)dsiSaveOpen);
+		setBL(0x0202A38C, (u32)dsiSaveWrite);
+		setBL(0x0202A3AC, (u32)dsiSaveClose);
+		setBL(0x0202A3F0, (u32)dsiSaveCreate);
+		setBL(0x0202A44C, (u32)dsiSaveDelete);
+		*(u32*)0x0202C608 = 0xE1A00000; // nop
+		if (strncmp(romTid, "KY8", 3) == 0) {
+			*(u32*)0x0202F97C = 0xE1A00000; // nop
+			*(u32*)0x0202F998 = 0xE1A00000; // nop
+			*(u32*)0x02030018 = 0xE12FFF1E; // bx lr
+			*(u32*)0x020310D0 = 0xE1A00000; // nop
+			if (ndsHeader->gameCode[3] == 'E') {
+				*(u32*)0x0203B89C = 0xE3A00000; // mov r0, #0 (Skip pit.bin check)
+				*(u32*)0x0203BAFC = 0xE3A00000; // mov r0, #0 (Skip free space check)
+				*(u32*)0x0203BB00 = 0xE12FFF1E; // bx lr
+			} else {
+				*(u32*)0x0203B844 = 0xE3A00000; // mov r0, #0 (Skip pit.bin check)
+				*(u32*)0x0203BAA4 = 0xE3A00000; // mov r0, #0 (Skip free space check)
+				*(u32*)0x0203BAA8 = 0xE12FFF1E; // bx lr
+			}
+		} else {
+			*(u32*)0x0202F978 = 0xE1A00000; // nop
+			*(u32*)0x0202F994 = 0xE1A00000; // nop
+			*(u32*)0x02030014 = 0xE12FFF1E; // bx lr
+			*(u32*)0x020310CC = 0xE1A00000; // nop
+			*(u32*)0x0203B678 = 0xE3A00000; // mov r0, #0 (Skip pit.bin check)
+			*(u32*)0x0203B8D8 = 0xE3A00000; // mov r0, #0 (Skip free space check)
+			*(u32*)0x0203B8DC = 0xE12FFF1E; // bx lr
+		}
+	}
+
+	// Anne's Doll Studio: Gothic Collection (USA)
+	else if (strcmp(romTid, "K54E") == 0) {
+		*(u32*)0x02004838 = 0xE1A00000; // nop
+		*(u32*)0x0200499C = 0xE1A00000; // nop
+		*(u32*)0x020050B0 = 0xE1A00000; // nop
+		*(u32*)0x020050B4 = 0xE1A00000; // nop
+		*(u32*)0x02011270 = 0xE1A00000; // nop
+		*(u32*)0x0201509C = 0xE1A00000; // nop
+		*(u32*)0x0201A1A0 = 0xE1A00000; // nop
+		*(u32*)0x0201BF3C = 0xE1A00000; // nop
+		*(u32*)0x0201BF40 = 0xE1A00000; // nop
+		*(u32*)0x0201BF4C = 0xE1A00000; // nop
+		*(u32*)0x0201C0AC = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x0201C108, extendedMemory2 ? 0x02700000 : heapEnd); // mov r0, extendedMemory2 ? #0x2700000 : #0x23C0000
+		*(u32*)0x0201D550 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
+		*(u32*)0x02020A18 = 0xE1A00000; // nop
+		*(u32*)0x02033850 = 0xE3A00000; // mov r0, #0 (Skip pit.bin check)
+		*(u32*)0x02033AB0 = 0xE3A00000; // mov r0, #0 (Skip free space check)
+		*(u32*)0x02033AB4 = 0xE12FFF1E; // bx lr
+		setBL(0x02035614, (u32)dsiSaveGetResultCode);
+		setBL(0x02035738, (u32)dsiSaveOpen);
+		setBL(0x0203576C, (u32)dsiSaveRead);
+		setBL(0x02035794, (u32)dsiSaveClose);
+		setBL(0x020357F4, (u32)dsiSaveOpen);
+		setBL(0x0203583C, (u32)dsiSaveWrite);
+		setBL(0x0203585C, (u32)dsiSaveClose);
+		setBL(0x020358A0, (u32)dsiSaveCreate);
+		setBL(0x020358FC, (u32)dsiSaveDelete);
+		*(u32*)0x02037AC4 = 0xE1A00000; // nop
+		*(u32*)0x0203AE68 = 0xE1A00000; // nop
+		*(u32*)0x0203AE84 = 0xE1A00000; // nop
+		*(u32*)0x0203B69C = 0xE12FFF1E; // bx lr
+		*(u32*)0x0203C7C0 = 0xE1A00000; // nop
+	}
+
+	// Anne's Doll Studio: Lolita Collection (USA)
+	// Anne's Doll Studio: Lolita Collection (Europe)
+	else if (strcmp(romTid, "KLQE") == 0 || strcmp(romTid, "KLQP") == 0) {
+		*(u32*)0x02004838 = 0xE1A00000; // nop
+		*(u32*)0x0200499C = 0xE1A00000; // nop
+		*(u32*)0x020050B0 = 0xE1A00000; // nop
+		*(u32*)0x020050B4 = 0xE1A00000; // nop
+		*(u32*)0x020112A0 = 0xE1A00000; // nop
+		*(u32*)0x020150CC = 0xE1A00000; // nop
+		*(u32*)0x0201A1D0 = 0xE1A00000; // nop
+		*(u32*)0x0201BF6C = 0xE1A00000; // nop
+		*(u32*)0x0201BF70 = 0xE1A00000; // nop
+		*(u32*)0x0201BF7C = 0xE1A00000; // nop
+		*(u32*)0x0201C0DC = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x0201C138, extendedMemory2 ? 0x02700000 : heapEnd); // mov r0, extendedMemory2 ? #0x2700000 : #0x23C0000
+		*(u32*)0x0201D580 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
+		*(u32*)0x02020A48 = 0xE1A00000; // nop
+		*(u32*)0x020337B0 = 0xE3A00000; // mov r0, #0 (Skip pit.bin check)
+		*(u32*)0x02033A10 = 0xE3A00000; // mov r0, #0 (Skip free space check)
+		*(u32*)0x02033A14 = 0xE12FFF1E; // bx lr
+		if (ndsHeader->gameCode[3] == 'E') {
+			setBL(0x020355C4, (u32)dsiSaveGetResultCode);
+			setBL(0x020356E8, (u32)dsiSaveOpen);
+			setBL(0x0203571C, (u32)dsiSaveRead);
+			setBL(0x02035744, (u32)dsiSaveClose);
+			setBL(0x020357A4, (u32)dsiSaveOpen);
+			setBL(0x020357EC, (u32)dsiSaveWrite);
+			setBL(0x0203580C, (u32)dsiSaveClose);
+			setBL(0x02035850, (u32)dsiSaveCreate);
+			setBL(0x020358AC, (u32)dsiSaveDelete);
+			*(u32*)0x02037A74 = 0xE1A00000; // nop
+			*(u32*)0x0203AE0C = 0xE1A00000; // nop
+			*(u32*)0x0203AE28 = 0xE1A00000; // nop
+			*(u32*)0x0203B640 = 0xE12FFF1E; // bx lr
+			*(u32*)0x0203C6F4 = 0xE1A00000; // nop
+		} else {
+			setBL(0x02035570, (u32)dsiSaveGetResultCode);
+			setBL(0x02035694, (u32)dsiSaveOpen);
+			setBL(0x020356C8, (u32)dsiSaveRead);
+			setBL(0x020356F0, (u32)dsiSaveClose);
+			setBL(0x02035750, (u32)dsiSaveOpen);
+			setBL(0x020357EC, (u32)dsiSaveWrite);
+			setBL(0x02035798, (u32)dsiSaveClose);
+			setBL(0x020357FC, (u32)dsiSaveCreate);
+			setBL(0x02035858, (u32)dsiSaveDelete);
+			*(u32*)0x02037A20 = 0xE1A00000; // nop
+			*(u32*)0x0203ADB8 = 0xE1A00000; // nop
+			*(u32*)0x0203ADD4 = 0xE1A00000; // nop
+			*(u32*)0x0203B5EC = 0xE12FFF1E; // bx lr
+			*(u32*)0x0203C6A0 = 0xE1A00000; // nop
+		}
+	}
+
+	// Anne's Doll Studio: Tokyo Collection (USA)
+	else if (strcmp(romTid, "KSQE") == 0) {
+		*(u32*)0x02004838 = 0xE1A00000; // nop
+		*(u32*)0x0200499C = 0xE1A00000; // nop
+		*(u32*)0x020050B0 = 0xE1A00000; // nop
+		*(u32*)0x020050B4 = 0xE1A00000; // nop
+		*(u32*)0x02011344 = 0xE1A00000; // nop
+		*(u32*)0x02015170 = 0xE1A00000; // nop
+		*(u32*)0x0201A274 = 0xE1A00000; // nop
+		*(u32*)0x0201C010 = 0xE1A00000; // nop
+		*(u32*)0x0201C014 = 0xE1A00000; // nop
+		*(u32*)0x0201C020 = 0xE1A00000; // nop
+		*(u32*)0x0201C180 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x0201C1DC, extendedMemory2 ? 0x02700000 : heapEnd); // mov r0, extendedMemory2 ? #0x2700000 : #0x23C0000
+		*(u32*)0x0201D624 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
+		*(u32*)0x02020AEC = 0xE1A00000; // nop
+		setBL(0x02027F34, (u32)dsiSaveGetResultCode);
+		setBL(0x02028058, (u32)dsiSaveOpen);
+		setBL(0x0202808C, (u32)dsiSaveRead);
+		setBL(0x020280B4, (u32)dsiSaveClose);
+		setBL(0x02028114, (u32)dsiSaveOpen);
+		setBL(0x0202815C, (u32)dsiSaveWrite);
+		setBL(0x0202817C, (u32)dsiSaveClose);
+		setBL(0x020281C0, (u32)dsiSaveCreate);
+		setBL(0x0202821C, (u32)dsiSaveDelete);
+		*(u32*)0x0202A3E4 = 0xE1A00000; // nop
+		*(u32*)0x0202D760 = 0xE1A00000; // nop
+		*(u32*)0x0202D77C = 0xE1A00000; // nop
+		*(u32*)0x0202DF84 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0202F05C = 0xE1A00000; // nop
+		*(u32*)0x0203A534 = 0xE3A00000; // mov r0, #0 (Skip pit.bin check)
+		*(u32*)0x0203A794 = 0xE3A00000; // mov r0, #0 (Skip free space check)
+		*(u32*)0x0203A798 = 0xE12FFF1E; // bx lr
+	}
+
 	// Anonymous Notes 1: From The Abyss (USA & Europe)
 	// Anonymous Notes 2: From The Abyss (USA & Europe)
 	else if ((strncmp(romTid, "KVI", 3) == 0 || strncmp(romTid, "KV2", 3) == 0)
