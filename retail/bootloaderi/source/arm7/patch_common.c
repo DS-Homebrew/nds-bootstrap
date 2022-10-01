@@ -1483,26 +1483,6 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
-	// Dreamwalker (USA)
-	else if (strcmp(romTid, "K9EE") == 0 && saveOnFlashcard) {
-		setBL(0x0202963C, (u32)dsiSaveOpen);
-		setBL(0x02029654, (u32)dsiSaveRead);
-		setBL(0x0202967C, (u32)dsiSaveClose);
-		setBL(0x020296F4, (u32)dsiSaveCreate);
-		setBL(0x02029724, (u32)dsiSaveOpen);
-		setBL(0x02029754, (u32)dsiSaveWrite);
-		setBL(0x0202977C, (u32)dsiSaveClose);
-		setBL(0x0202983C, (u32)dsiSaveOpen);
-		setBL(0x02029878, (u32)dsiSaveSeek);
-		setBL(0x020298A8, (u32)dsiSaveWrite);
-		setBL(0x020298D0, (u32)dsiSaveClose);
-		setBL(0x02029938, (u32)dsiSaveGetResultCode);
-		setBL(0x0202996C, (u32)dsiSaveClose);
-		setBL(0x02029984, (u32)dsiSaveClose);
-		setBL(0x020299DC, (u32)dsiSaveSeek);
-		setBL(0x020299F0, (u32)dsiSaveWrite);
-	}
-
 	// Dr. Mario Express (USA)
 	// A Little Bit of... Dr. Mario (Europe, Australia)
 	else if ((strcmp(romTid, "KD9E") == 0 || strcmp(romTid, "KD9V") == 0) && saveOnFlashcard) {
@@ -1662,6 +1642,26 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// DSi save function patching not needed
 	else if (strcmp(romTid, "KDQJ") == 0 && saveOnFlashcard) {
 		*(u32*)0x0201EF84 = 0xE12FFF1E; // bx lr (Skip Manual screen)
+	}
+
+	// Dreamwalker (USA)
+	else if (strcmp(romTid, "K9EE") == 0 && saveOnFlashcard) {
+		setBL(0x0202963C, (u32)dsiSaveOpen);
+		setBL(0x02029654, (u32)dsiSaveRead);
+		setBL(0x0202967C, (u32)dsiSaveClose);
+		setBL(0x020296F4, (u32)dsiSaveCreate);
+		setBL(0x02029724, (u32)dsiSaveOpen);
+		setBL(0x02029754, (u32)dsiSaveWrite);
+		setBL(0x0202977C, (u32)dsiSaveClose);
+		setBL(0x0202983C, (u32)dsiSaveOpen);
+		setBL(0x02029878, (u32)dsiSaveSeek);
+		setBL(0x020298A8, (u32)dsiSaveWrite);
+		setBL(0x020298D0, (u32)dsiSaveClose);
+		setBL(0x02029938, (u32)dsiSaveGetResultCode);
+		setBL(0x0202996C, (u32)dsiSaveClose);
+		setBL(0x02029984, (u32)dsiSaveClose);
+		setBL(0x020299DC, (u32)dsiSaveSeek);
+		setBL(0x020299F0, (u32)dsiSaveWrite);
 	}
 
 	// DS WiFi Settings

@@ -3621,47 +3621,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
-	// Dreamwalker (USA)
-	else if (strcmp(romTid, "K9EE") == 0) {
-		*(u32*)0x0200498C = 0xE1A00000; // nop
-		*(u32*)0x02029610 = 0xE1A00000; // nop
-		setBL(0x0202963C, (u32)dsiSaveOpen);
-		setBL(0x02029654, (u32)dsiSaveRead);
-		setBL(0x0202967C, (u32)dsiSaveClose);
-		*(u32*)0x020296E0 = 0xE1A00000; // nop
-		*(u32*)0x020296E8 = 0xE1A00000; // nop
-		setBL(0x020296F4, (u32)dsiSaveCreate);
-		setBL(0x02029724, (u32)dsiSaveOpen);
-		setBL(0x02029754, (u32)dsiSaveWrite);
-		setBL(0x0202977C, (u32)dsiSaveClose);
-		*(u32*)0x020297B0 = 0xE1A00000; // nop
-		*(u32*)0x020297B8 = 0xE1A00000; // nop
-		*(u32*)0x0202981C = 0xE1A00000; // nop
-		*(u32*)0x0202982C = 0xE1A00000; // nop
-		setBL(0x0202983C, (u32)dsiSaveOpen);
-		setBL(0x02029878, (u32)dsiSaveSeek);
-		setBL(0x020298A8, (u32)dsiSaveWrite);
-		setBL(0x020298D0, (u32)dsiSaveClose);
-		*(u32*)0x02029904 = 0xE1A00000; // nop
-		*(u32*)0x0202990C = 0xE1A00000; // nop
-		setBL(0x02029938, (u32)dsiSaveGetResultCode);
-		setBL(0x0202996C, (u32)dsiSaveClose);
-		setBL(0x02029984, (u32)dsiSaveClose);
-		*(u32*)0x02029990 = 0xE1A00000; // nop
-		setBL(0x020299DC, (u32)dsiSaveSeek);
-		setBL(0x020299F0, (u32)dsiSaveWrite);
-		*(u32*)0x0207DB84 = 0xE1A00000; // nop
-		*(u32*)0x02080F88 = 0xE1A00000; // nop
-		*(u32*)0x020856D0 = 0xE1A00000; // nop
-		*(u32*)0x02087490 = 0xE1A00000; // nop
-		*(u32*)0x02087494 = 0xE1A00000; // nop
-		*(u32*)0x020874A0 = 0xE1A00000; // nop
-		*(u32*)0x02087600 = 0xE1A00000; // nop
-		patchHiHeapDSiWare(0x0208765C, heapEnd); // mov r0, #0x23C0000
-		*(u32*)0x02088988 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
-		*(u32*)0x0208BFD8 = 0xE1A00000; // nop
-	}
-
 	// Dr. Mario Express (USA)
 	// A Little Bit of... Dr. Mario (Europe, Australia)
 	else if (strcmp(romTid, "KD9E") == 0 || strcmp(romTid, "KD9V") == 0) {
@@ -4039,6 +3998,47 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020B762C = 0xE3A00000; // mov r0, #0
 		*(u32*)0x020B7630 = 0xE12FFF1E; // bx lr
 		*(u32*)0x020BAF6C = 0xE1A00000; // nop
+	}
+
+	// Dreamwalker (USA)
+	else if (strcmp(romTid, "K9EE") == 0) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x02029610 = 0xE1A00000; // nop
+		setBL(0x0202963C, (u32)dsiSaveOpen);
+		setBL(0x02029654, (u32)dsiSaveRead);
+		setBL(0x0202967C, (u32)dsiSaveClose);
+		*(u32*)0x020296E0 = 0xE1A00000; // nop
+		*(u32*)0x020296E8 = 0xE1A00000; // nop
+		setBL(0x020296F4, (u32)dsiSaveCreate);
+		setBL(0x02029724, (u32)dsiSaveOpen);
+		setBL(0x02029754, (u32)dsiSaveWrite);
+		setBL(0x0202977C, (u32)dsiSaveClose);
+		*(u32*)0x020297B0 = 0xE1A00000; // nop
+		*(u32*)0x020297B8 = 0xE1A00000; // nop
+		*(u32*)0x0202981C = 0xE1A00000; // nop
+		*(u32*)0x0202982C = 0xE1A00000; // nop
+		setBL(0x0202983C, (u32)dsiSaveOpen);
+		setBL(0x02029878, (u32)dsiSaveSeek);
+		setBL(0x020298A8, (u32)dsiSaveWrite);
+		setBL(0x020298D0, (u32)dsiSaveClose);
+		*(u32*)0x02029904 = 0xE1A00000; // nop
+		*(u32*)0x0202990C = 0xE1A00000; // nop
+		setBL(0x02029938, (u32)dsiSaveGetResultCode);
+		setBL(0x0202996C, (u32)dsiSaveClose);
+		setBL(0x02029984, (u32)dsiSaveClose);
+		*(u32*)0x02029990 = 0xE1A00000; // nop
+		setBL(0x020299DC, (u32)dsiSaveSeek);
+		setBL(0x020299F0, (u32)dsiSaveWrite);
+		*(u32*)0x0207DB84 = 0xE1A00000; // nop
+		*(u32*)0x02080F88 = 0xE1A00000; // nop
+		*(u32*)0x020856D0 = 0xE1A00000; // nop
+		*(u32*)0x02087490 = 0xE1A00000; // nop
+		*(u32*)0x02087494 = 0xE1A00000; // nop
+		*(u32*)0x020874A0 = 0xE1A00000; // nop
+		*(u32*)0x02087600 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x0208765C, heapEnd); // mov r0, #0x23C0000
+		*(u32*)0x02088988 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
+		*(u32*)0x0208BFD8 = 0xE1A00000; // nop
 	}
 
 	// DS WiFi Settings
