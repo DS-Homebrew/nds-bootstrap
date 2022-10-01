@@ -8639,7 +8639,10 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0200FED0 = 0xE1A00000; // nop
 		*(u32*)0x0200FEDC = 0xE1A00000; // nop
 		*(u32*)0x0201003C = 0xE1A00000; // nop
-		patchHiHeapDSiWare(0x02010098, heapEnd); // mov r0, #0x23C0000
+		patchHiHeapDSiWare(0x02010098, extendedMemory2 ? 0x02700000 : heapEnd); // mov r0, extendedMemory2 ? #0x2700000 : #0x23C0000
+		if (!extendedMemory2) {
+			*(u32*)0x020101CC -= 0x30000;
+		}
 		*(u32*)0x02011470 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
 		*(u32*)0x02014A7C = 0xE1A00000; // nop
 		setBL(0x0204D500, (u32)dsiSaveOpen);
