@@ -2071,6 +2071,94 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02024980, (u32)dsiSaveCreate);
 	}
 
+	// Magical Diary: Secrets Sharing (USA)
+	else if (strcmp(romTid, "K73E") == 0 && saveOnFlashcard) {
+		*(u32*)0x0201A17C = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+		*(u32*)0x0201A22C = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+		setBL(0x0201A9BC, (u32)dsiSaveOpen);
+		setBL(0x0201A9D0, (u32)dsiSaveSeek);
+		setBL(0x0201A9E4, (u32)dsiSaveRead);
+		setBL(0x0201AA18, (u32)dsiSaveClose);
+		setBL(0x0201AA34, (u32)dsiSaveRead);
+		setBL(0x0201AA70, (u32)dsiSaveClose);
+		setBL(0x0201AACC, (u32)dsiSaveRead);
+		setBL(0x0201AAFC, (u32)dsiSaveClose);
+		setBL(0x0201AB40, (u32)dsiSaveRead); // dsiSaveReadAsync
+		setBL(0x0201AB54, (u32)dsiSaveRead);
+		setBL(0x0201AB88, (u32)dsiSaveClose);
+		setBL(0x0201ABE0, (u32)dsiSaveClose);
+		setBL(0x0201ABFC, (u32)dsiSaveClose);
+		setBL(0x0201AC30, (u32)dsiSaveClose);
+		setBL(0x0201AD50, (u32)dsiSaveOpen);
+		setBL(0x0201AD60, (u32)dsiSaveRead);
+		setBL(0x0201AD8C, (u32)dsiSaveClose);
+		setBL(0x0201ADAC, (u32)dsiSaveSeek);
+		setBL(0x0201ADC0, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+		setBL(0x0201ADF0, (u32)dsiSaveClose);
+		setBL(0x0201AE28, (u32)dsiSaveOpen);
+		setBL(0x0201AE38, (u32)dsiSaveRead);
+		setBL(0x0201AE64, (u32)dsiSaveClose);
+		setBL(0x0201AE84, (u32)dsiSaveSeek);
+		setBL(0x0201AE98, (u32)dsiSaveWrite);
+		setBL(0x0201AEC0, (u32)dsiSaveClose);
+		setBL(0x0201AEE0, (u32)dsiSaveClose);
+		setBL(0x0201AF5C, (u32)dsiSaveOpen);
+		setBL(0x0201AF70, (u32)dsiSaveCreate);
+		setBL(0x0201AF90, (u32)dsiSaveCreate);
+		setBL(0x0201AFB4, (u32)dsiSaveClose);
+		setBL(0x0201B058, (u32)dsiSaveOpen);
+		setBL(0x0201B06C, (u32)dsiSaveCreate);
+		setBL(0x0201B090, (u32)dsiSaveClose);
+		setBL(0x0201B0E4, (u32)dsiSaveOpen);
+		setBL(0x0201B0F4, (u32)dsiSaveRead);
+		setBL(0x0201B118, (u32)dsiSaveClose);
+		setBL(0x0201B12C, (u32)dsiSaveClose);
+	}
+
+	// Tomodachi Tsukurou!: Mahou no Koukan Nikki (Japan)
+	// Requires 8MB of RAM
+	else if (strcmp(romTid, "K85J") == 0 && saveOnFlashcard) {
+		*(u32*)0x0201A3A8 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+		*(u32*)0x0201A420 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+		setBL(0x0201AB94, (u32)dsiSaveOpen);
+		setBL(0x0201ABA8, (u32)dsiSaveSeek);
+		setBL(0x0201ABBC, (u32)dsiSaveRead);
+		setBL(0x0201ABF0, (u32)dsiSaveClose);
+		setBL(0x0201AC0C, (u32)dsiSaveRead);
+		setBL(0x0201AC48, (u32)dsiSaveClose);
+		setBL(0x0201ACA4, (u32)dsiSaveRead);
+		setBL(0x0201ACD4, (u32)dsiSaveClose);
+		setBL(0x0201AD18, (u32)dsiSaveRead); // dsiSaveReadAsync
+		setBL(0x0201AD2C, (u32)dsiSaveRead);
+		setBL(0x0201AD60, (u32)dsiSaveClose);
+		setBL(0x0201ADB8, (u32)dsiSaveClose);
+		setBL(0x0201ADD4, (u32)dsiSaveClose);
+		setBL(0x0201AE08, (u32)dsiSaveClose);
+		setBL(0x0201AF28, (u32)dsiSaveOpen);
+		setBL(0x0201AF38, (u32)dsiSaveRead);
+		setBL(0x0201AF64, (u32)dsiSaveClose);
+		setBL(0x0201AF84, (u32)dsiSaveSeek);
+		setBL(0x0201AF98, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+		setBL(0x0201AFC8, (u32)dsiSaveClose);
+		setBL(0x0201B000, (u32)dsiSaveOpen);
+		setBL(0x0201B010, (u32)dsiSaveRead);
+		setBL(0x0201B03C, (u32)dsiSaveClose);
+		setBL(0x0201B05C, (u32)dsiSaveSeek);
+		setBL(0x0201B070, (u32)dsiSaveWrite);
+		setBL(0x0201B098, (u32)dsiSaveClose);
+		setBL(0x0201B0B8, (u32)dsiSaveClose);
+		setBL(0x0201B128, (u32)dsiSaveOpen);
+		setBL(0x0201B13C, (u32)dsiSaveCreate);
+		setBL(0x0201B15C, (u32)dsiSaveCreate);
+		setBL(0x0201B178, (u32)dsiSaveClose);
+		setBL(0x0201B1F0, (u32)dsiSaveOpen);
+		setBL(0x0201B204, (u32)dsiSaveCreate);
+		setBL(0x0201B21C, (u32)dsiSaveClose);
+		setBL(0x0201B270, (u32)dsiSaveOpen);
+		setBL(0x0201B280, (u32)dsiSaveRead);
+		setBL(0x0201B2A0, (u32)dsiSaveClose);
+	}
+
 	// Magical Drop Yurutto (Japan)
 	else if (strcmp(romTid, "KMAJ") == 0 && saveOnFlashcard) {
 		*(u32*)0x020159D4 = 0xE1A00000; // nop (Disable NFTR font loading)
