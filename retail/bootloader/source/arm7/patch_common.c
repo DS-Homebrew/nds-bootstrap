@@ -6036,6 +6036,25 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// Missy Mila Twisted Tales (Europe)
+	else if (strcmp(romTid, "KM7P") == 0) {
+		*(u32*)0x02004838 = 0xE1A00000; // nop
+		*(u32*)0x0200499C = 0xE1A00000; // nop
+		*(u32*)0x020151B8 = 0xE1A00000; // nop
+		*(u32*)0x0201874C = 0xE1A00000; // nop
+		*(u32*)0x0201BF48 = 0xE1A00000; // nop
+		*(u32*)0x0201DD10 = 0xE1A00000; // nop
+		*(u32*)0x0201DD14 = 0xE1A00000; // nop
+		*(u32*)0x0201DD20 = 0xE1A00000; // nop
+		*(u32*)0x0201DE80 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x0201DEDC, extendedMemory2 ? 0x02700000 : heapEnd); // mov r0, extendedMemory2 ? #0x2700000 : #0x23C0000
+		if (!extendedMemory2) {
+			*(u32*)0x0201E010 = 0x02095240;
+		}
+		*(u32*)0x0201F350 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
+		*(u32*)0x02022540 = 0xE1A00000; // nop
+	}
+
 	// Mixed Messages (USA)
 	// Mixed Messages (Europe, Australia)
 	// Requires 8MB of RAM
