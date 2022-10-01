@@ -8296,6 +8296,37 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020ED088 = 0xE1A00000; // nop
 	}
 
+	// Smart Girl's Playhouse Mini (USA)
+	else if (strcmp(romTid, "K2FE") == 0) {
+		*(u32*)0x02004838 = 0xE1A00000; // nop
+		*(u32*)0x0200499C = 0xE1A00000; // nop
+		*(u32*)0x02005530 = 0xE1A00000; // nop
+		*(u32*)0x02005548 = 0xE1A00000; // nop
+		*(u32*)0x0200E44C = 0xE1A00000; // nop
+		*(u32*)0x020118E8 = 0xE1A00000; // nop
+		*(u32*)0x02014C34 = 0xE1A00000; // nop
+		*(u32*)0x020169D0 = 0xE1A00000; // nop
+		*(u32*)0x020169D4 = 0xE1A00000; // nop
+		*(u32*)0x020169E0 = 0xE1A00000; // nop
+		*(u32*)0x02016B40 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x02016B9C, heapEnd); // mov r0, #0x23C0000
+		*(u32*)0x02016CD0 = 0x02114D80;
+		*(u32*)0x02017DE4 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
+		*(u32*)0x0201AB7C = 0xE1A00000; // nop
+		*(u32*)0x02026128 = 0xE1A00000; // nop (Skip Manual screen)
+		*(u32*)0x0202E6F8 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		setBL(0x0202E8B8, (u32)dsiSaveCreate);
+		setBL(0x0202E8C8, (u32)dsiSaveOpen);
+		setBL(0x0202E8E4, (u32)dsiSaveSeek);
+		setBL(0x0202E8F4, (u32)dsiSaveWrite);
+		setBL(0x0202E8FC, (u32)dsiSaveClose);
+		setBL(0x0202EA24, (u32)dsiSaveOpenR);
+		setBL(0x0202EA3C, (u32)dsiSaveSeek);
+		setBL(0x0202EA4C, (u32)dsiSaveRead);
+		setBL(0x0202EA54, (u32)dsiSaveClose);
+		*(u32*)0x0202EA74 = 0xE1A00000; // nop
+	}
+
 	// SnowBoard Xtreme (USA)
 	// SnowBoard Xtreme (Europe)
 	else if (strcmp(romTid, "KX5E") == 0 || strcmp(romTid, "KX5P") == 0) {

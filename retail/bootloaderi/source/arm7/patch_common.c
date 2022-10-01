@@ -3152,6 +3152,21 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0209322C, (u32)dsiSaveClose);
 	}
 
+	// Smart Girl's Playhouse Mini (USA)
+	else if (strcmp(romTid, "K2FE") == 0 && saveOnFlashcard) {
+		*(u32*)0x02026128 = 0xE1A00000; // nop (Skip Manual screen)
+		*(u32*)0x0202E6F8 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		setBL(0x0202E8B8, (u32)dsiSaveCreate);
+		setBL(0x0202E8C8, (u32)dsiSaveOpen);
+		setBL(0x0202E8E4, (u32)dsiSaveSeek);
+		setBL(0x0202E8F4, (u32)dsiSaveWrite);
+		setBL(0x0202E8FC, (u32)dsiSaveClose);
+		setBL(0x0202EA24, (u32)dsiSaveOpenR);
+		setBL(0x0202EA3C, (u32)dsiSaveSeek);
+		setBL(0x0202EA4C, (u32)dsiSaveRead);
+		setBL(0x0202EA54, (u32)dsiSaveClose);
+	}
+
 	// SnowBoard Xtreme (USA)
 	// SnowBoard Xtreme (Europe)
 	else if ((strcmp(romTid, "KX5E") == 0 || strcmp(romTid, "KX5P") == 0) && saveOnFlashcard) {
