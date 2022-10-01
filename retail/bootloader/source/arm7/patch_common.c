@@ -8625,6 +8625,42 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0202E88C = 0xE12FFF1E; // bx lr
 	}
 
+	// Tales to Enjoy!: Little Red Riding Hood (USA)
+	// Tales to Enjoy!: Puss in Boots (USA)
+	// Tales to Enjoy!: The Three Little Pigs (USA)
+	// Tales to Enjoy!: The Ugly Duckling (USA)
+	else if (strcmp(romTid, "KZUE") == 0 || strcmp(romTid, "KZVE") == 0 || strcmp(romTid, "KZ7E") == 0 || strcmp(romTid, "KZ8E") == 0) {
+		*(u32*)0x02004838 = 0xE1A00000; // nop
+		*(u32*)0x0200499C = 0xE1A00000; // nop
+		*(u32*)0x02006F60 = 0xE1A00000; // nop
+		*(u32*)0x0200A80C = 0xE1A00000; // nop
+		*(u32*)0x0200E0E4 = 0xE1A00000; // nop
+		*(u32*)0x0200FECC = 0xE1A00000; // nop
+		*(u32*)0x0200FED0 = 0xE1A00000; // nop
+		*(u32*)0x0200FEDC = 0xE1A00000; // nop
+		*(u32*)0x0201003C = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x02010098, heapEnd); // mov r0, #0x23C0000
+		*(u32*)0x02011470 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
+		*(u32*)0x02014A7C = 0xE1A00000; // nop
+		setBL(0x0204D500, (u32)dsiSaveOpen);
+		*(u32*)0x0204D540 = 0xE1A00000; // nop
+		setBL(0x0204D560, (u32)dsiSaveGetLength);
+		setBL(0x0204D570, (u32)dsiSaveRead);
+		setBL(0x0204D578, (u32)dsiSaveClose);
+		*(u32*)0x0204D59C = 0xE3A00000; // mov r0, #0
+		setBL(0x0204D5C8, (u32)dsiSaveOpen);
+		*(u32*)0x0204D5E0 = 0xE1A00000; // nop (dsiSaveGetArcSrc)
+		*(u32*)0x0204D5F0 = 0xE3A00001; // mov r0, #1
+		setBL(0x0204D60C, (u32)dsiSaveCreate);
+		setBL(0x0204D618, (u32)dsiSaveClose);
+		setBL(0x0204D62C, (u32)dsiSaveOpen);
+		setBL(0x0204D63C, (u32)dsiSaveGetResultCode);
+		*(u32*)0x0204D660 = 0xE1A00000; // nop
+		setBL(0x0204D684, (u32)dsiSaveSetLength);
+		setBL(0x0204D694, (u32)dsiSaveWrite);
+		setBL(0x0204D69C, (u32)dsiSaveClose);
+	}
+
 	// Tori to Mame (Japan)
 	// Does not boot: Crashes on black screens
 	/*else if (strcmp(romTid, "KP6J") == 0) {
