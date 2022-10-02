@@ -3314,6 +3314,27 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0204D69C, (u32)dsiSaveClose);
 	}
 
+	// Topoloco (USA)
+	// Topoloco (Europe)
+	/*else if (strncmp(romTid, "KT5", 3) == 0 && saveOnFlashcard) {
+		setBL(0x02051B38, (u32)dsiSaveDelete);
+		setBL(0x02051BB8, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+		setBL(0x02051CE0, (u32)dsiSaveOpen);
+		setBL(0x02051D64, (u32)dsiSaveGetLength);
+		setBL(0x02051DB4, (u32)dsiSaveClose);
+		setBL(0x02051DE0, (u32)dsiSaveSetLength);
+		setBL(0x02051E00, (u32)dsiSaveClose);
+		setBL(0x02051E80, (u32)dsiSaveRead);
+		setBL(0x02051ECC, (u32)dsiSaveClose);
+		setBL(0x02051EE4, (u32)dsiSaveRead);
+		setBL(0x02051EF4, (u32)dsiSaveClose);
+		setBL(0x02051F30, (u32)dsiSaveWrite);
+		setBL(0x02051F74, (u32)dsiSaveClose);
+		setBL(0x02051F8C, (u32)dsiSaveWrite);
+		setBL(0x02051FA0, (u32)dsiSaveClose);
+		setBL(0x02051FB8, (u32)dsiSaveClose);
+	}*/
+
 	// True Swing Golf Express (USA)
 	// A Little Bit of... Nintendo Touch Golf (Europe, Australia)
 	if ((strcmp(romTid, "K72E") == 0 || strcmp(romTid, "K72V") == 0) && saveOnFlashcard) {

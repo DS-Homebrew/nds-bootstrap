@@ -8695,6 +8695,44 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0204D69C, (u32)dsiSaveClose);
 	}
 
+	// Topoloco (USA)
+	// Topoloco (Europe)
+	// Requires 8MB of RAM
+	/*else if (strncmp(romTid, "KT5", 3) == 0 && extendedMemory2) {
+		*(u32*)0x02004838 = 0xE1A00000; // nop
+		*(u32*)0x0200499C = 0xE1A00000; // nop
+		*(u32*)0x02014F78 = 0xE1A00000; // nop
+		*(u32*)0x02018808 = 0xE1A00000; // nop
+		*(u32*)0x0201C4AC = 0xE1A00000; // nop
+		*(u32*)0x0201E334 = 0xE1A00000; // nop
+		*(u32*)0x0201E338 = 0xE1A00000; // nop
+		*(u32*)0x0201E344 = 0xE1A00000; // nop
+		*(u32*)0x0201E4A4 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x0201E500, 0x02700000); // mov r0, #0x2700000
+		*(u32*)0x0201F8A4 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
+		*(u32*)0x020227C0 = 0xE1A00000; // nop
+		*(u32*)0x020240D4 = 0xE1A00000; // nop
+		*(u32*)0x020241D8 = 0xE1A00000; // nop
+		*(u32*)0x02024200 = 0xE1A00000; // nop
+		*(u32*)0x020516A4 = 0xE1A00000; // nop
+		setBL(0x02051B38, (u32)dsiSaveDelete);
+		setBL(0x02051BB8, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+		setBL(0x02051CE0, (u32)dsiSaveOpen);
+		setBL(0x02051D64, (u32)dsiSaveGetLength);
+		setBL(0x02051DB4, (u32)dsiSaveClose);
+		setBL(0x02051DE0, (u32)dsiSaveSetLength);
+		setBL(0x02051E00, (u32)dsiSaveClose);
+		setBL(0x02051E80, (u32)dsiSaveRead);
+		setBL(0x02051ECC, (u32)dsiSaveClose);
+		setBL(0x02051EE4, (u32)dsiSaveRead);
+		setBL(0x02051EF4, (u32)dsiSaveClose);
+		setBL(0x02051F30, (u32)dsiSaveWrite);
+		setBL(0x02051F74, (u32)dsiSaveClose);
+		setBL(0x02051F8C, (u32)dsiSaveWrite);
+		setBL(0x02051FA0, (u32)dsiSaveClose);
+		setBL(0x02051FB8, (u32)dsiSaveClose);
+	}*/
+
 	// Tori to Mame (Japan)
 	// Does not boot: Crashes on black screens
 	/*else if (strcmp(romTid, "KP6J") == 0) {
