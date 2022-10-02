@@ -3314,6 +3314,31 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0204D69C, (u32)dsiSaveClose);
 	}
 
+	// Tangrams (USA)
+	else if (strcmp(romTid, "KYYE") == 0 && saveOnFlashcard) {
+		*(u32*)0x02039854 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+		*(u32*)0x0203986C = 0xE3A00001; // mov r0, #1 (dsiSaveFreeSpaceAvailable)
+		*(u32*)0x0203987C = 0xE3A00001; // mov r0, #1 (dsiSaveFreeSpaceAvailable)
+		*(u32*)0x020398F8 = 0xE1A00000; // nop (dsiSaveCreateDirAuto)
+		setBL(0x02039910, (u32)dsiSaveCreate);
+		setBL(0x02039944, (u32)dsiSaveOpen);
+		setBL(0x02039968, (u32)dsiSaveSetLength);
+		setBL(0x020399A0, (u32)dsiSaveWrite);
+		setBL(0x020399A8, (u32)dsiSaveClose);
+		*(u32*)0x02039A6C = 0xE1A00000; // nop (dsiSaveOpenDir)
+		setBL(0x02039A80, (u32)dsiSaveOpen);
+		setBL(0x02039AD4, (u32)dsiSaveGetLength);
+		setBL(0x02039AF8, (u32)dsiSaveRead);
+		*(u32*)0x02039B90 = 0xE3A00001; // mov r0, #1 (dsiSaveCloseDir)
+		setBL(0x02039BC8, (u32)dsiSaveClose);
+		setBL(0x02039C70, (u32)dsiSaveDelete);
+		setBL(0x02039C7C, (u32)dsiSaveCreate);
+		setBL(0x02039CB0, (u32)dsiSaveOpen);
+		setBL(0x02039D04, (u32)dsiSaveSetLength);
+		setBL(0x02039D3C, (u32)dsiSaveWrite);
+		setBL(0x02039D44, (u32)dsiSaveClose);
+	}
+
 	// Topoloco (USA)
 	// Topoloco (Europe)
 	/*else if (strncmp(romTid, "KT5", 3) == 0 && saveOnFlashcard) {
