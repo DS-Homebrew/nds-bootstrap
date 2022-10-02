@@ -35,6 +35,8 @@ ramDumpCluster:
 	.word	0x00000000
 srParamsCluster:
 	.word	0x00000000
+screenshotCluster:
+	.word	0x00000000
 musicCluster:
 	.word	0x00000000
 musicsSize:
@@ -59,6 +61,10 @@ rumbleFrames:
 rumbleForce:
 	.word	1
 	.word	1
+prepareScreenshotPtr:
+	.word prepareScreenshotJmp
+saveScreenshotPtr:
+	.word saveScreenshotJmp
 
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
@@ -93,6 +99,28 @@ arm9exit:
 	pop  	{lr}
 	bx  lr
 
+.pool
+
+@---------------------------------------------------------------------------------
+prepareScreenshotJmp:
+@---------------------------------------------------------------------------------
+	stmfd   sp!, {r0-r11,lr}
+
+	ldr	r3, =prepareScreenshot
+	bl	_blx_r3_stub
+
+	ldmfd   sp!, {r0-r11,pc}
+.pool
+
+@---------------------------------------------------------------------------------
+saveScreenshotJmp:
+@---------------------------------------------------------------------------------
+	stmfd   sp!, {r0-r11,lr}
+
+	ldr	r3, =saveScreenshot
+	bl	_blx_r3_stub
+
+	ldmfd   sp!, {r0-r11,pc}
 .pool
 
 ndsCodeStart:

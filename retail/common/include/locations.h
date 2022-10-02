@@ -47,6 +47,7 @@
 #define DONOR_ROM_DEVICE_LIST_LOCATION               0x026B000C
 #define ARM9_DEC_SIZE_LOCATION                       0x026B0010
 #define INGAME_MENU_EXT_LOCATION                     0x026B8000
+#define INGAME_MENU_EXT_LOCATION_B4DS                0x02380000
 #define CHEAT_ENGINE_BUFFERED_LOCATION	             0x026E0000
 #define INGAME_MENU_LOCATION                         0x026F6000
 #define INGAME_MENU_LOCATION_B4DS                    0x023E6000

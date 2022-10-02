@@ -161,6 +161,7 @@ int hookNdsRetailArm9(
     u32 musicFatTableCache,
 	u32 ramDumpCluster,
 	u32 srParamsFileCluster,
+	u32 screenshotCluster,
 	u32 musicCluster,
 	u32 musicsSize,
 	u32 pageFileCluster,
@@ -187,6 +188,7 @@ int hookNdsRetailArm9(
 	ce9->musicFatTableCache     = musicFatTableCache;
 	ce9->ramDumpCluster         = ramDumpCluster;
 	ce9->srParamsCluster        = srParamsFileCluster;
+	ce9->screenshotCluster      = screenshotCluster;
 	ce9->musicCluster           = musicCluster;
 	ce9->musicsSize             = musicsSize;
 	ce9->pageFileCluster        = pageFileCluster;

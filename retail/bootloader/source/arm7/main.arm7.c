@@ -98,6 +98,7 @@ extern u32 cheatSize;
 extern u32 patchOffsetCacheFileCluster;
 extern u32 ramDumpCluster;
 extern u32 srParamsFileCluster;
+extern u32 screenshotCluster;
 extern u32 musicCluster;
 extern u32 musicsSize;
 extern u32 patchMpuSize;
@@ -1149,6 +1150,7 @@ int arm7_main(void) {
 		(u32)musicsFile.fatTableCache,
 		ramDumpCluster,
 		srParamsFileCluster,
+		screenshotCluster,
 		musicCluster,
 		musicsSize,
 		pageFileCluster,

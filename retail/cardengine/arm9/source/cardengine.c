@@ -76,6 +76,7 @@ static aFile romFile;
 static aFile savFile;
 static aFile ramDumpFile;
 static aFile srParamsFile;
+static aFile screenshotFile;
 static aFile musicsFile;
 static aFile pageFile;
 // static aFile manualFile;
@@ -294,6 +295,26 @@ void reset(u32 param) {
 	ndsCodeStart(ndsHeader->arm9executeAddress);
 }
 
+void prepareScreenshot(void) {
+	fileWrite((char*)INGAME_MENU_EXT_LOCATION_B4DS, pageFile, 0x340000, 0x40000);
+}
+
+void saveScreenshot(void) {
+	struct IgmText *igmText = (struct IgmText *)INGAME_MENU_LOCATION_B4DS;
+	if (igmText->currentScreenshot >= 50) return;
+
+	fileWrite((char*)INGAME_MENU_EXT_LOCATION_B4DS, screenshotFile, 0x200 + (igmText->currentScreenshot * 0x18400), 0x18046);
+
+	// Skip until next blank slot
+	char magic;
+	do {
+		igmText->currentScreenshot++;
+		fileRead(&magic, screenshotFile, 0x200 + (igmText->currentScreenshot * 0x18400), 1);
+	} while(magic == 'B' && igmText->currentScreenshot < 50);
+
+	fileRead((char*)INGAME_MENU_EXT_LOCATION_B4DS, pageFile, 0x340000, 0x40000);
+}
+
 s8 mainScreen = 0;
 
 //---------------------------------------------------------------------------------
@@ -436,6 +457,7 @@ static void initialize(void) {
 
 		ramDumpFile = getFileFromCluster(ce9->ramDumpCluster);
 		srParamsFile = getFileFromCluster(ce9->srParamsCluster);
+		screenshotFile = getFileFromCluster(ce9->screenshotCluster);
 		pageFile = getFileFromCluster(ce9->pageFileCluster);
 		// manualFile = getFileFromCluster(ce9->manualCluster);
 

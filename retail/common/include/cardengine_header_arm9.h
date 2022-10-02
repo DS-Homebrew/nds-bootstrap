@@ -182,6 +182,7 @@ typedef struct cardengineArm9 {
     u32 musicFatTableCache;
     u32 ramDumpCluster;
     u32 srParamsCluster;
+	u32 screenshotCluster;
 	u32 musicCluster;
 	u32 musicsSize;
     u32 pageFileCluster;
@@ -202,6 +203,8 @@ typedef struct cardengineArm9 {
     u32 romLocation;
 	u32 rumbleFrames[2];
 	u32 rumbleForce[2];
+	u32* prepareScreenshot;
+	u32* saveScreenshot;
 } __attribute__ ((__packed__)) cardengineArm9;
 #endif
 

@@ -8,6 +8,7 @@
 
 #include "igm_text.h"
 #include "locations.h"
+#include "cardengine_header_arm9.h"
 #include "nds_header.h"
 #include "tonccpy.h"
 
@@ -63,6 +64,10 @@ static u16 igmPal[] = {
 #ifndef B4DS
 static u16* vramBak = (u16*)INGAME_MENU_EXT_LOCATION+(0x18200/sizeof(u16));
 static u16* bmpBuffer = (u16*)INGAME_MENU_EXT_LOCATION;
+#else
+static u16* vramBak = (u16*)INGAME_MENU_EXT_LOCATION_B4DS+(0x18200/sizeof(u16));
+static u16* bmpBuffer = (u16*)INGAME_MENU_EXT_LOCATION_B4DS;
+#endif
 
 // Header for a 256x192 16 bit (RGBA 565) BMP
 const static u8 bmpHeader[] = {
@@ -73,7 +78,6 @@ const static u8 bmpHeader[] = {
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xF8, 0x00, 0x00, 0xE0, 0x07,
 	0x00, 0x00, 0x1F, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 };
-#endif
 
 #define KEYS sharedAddr[5]
 
@@ -193,8 +197,14 @@ static void clearScreen(void) {
 #define VRAM_x(bank) ((u16*)(0x6800000 + (0x0020000 * (bank))))
 #define VRAM_x_CR(bank) (((vu8*)0x04000240)[bank])
 
-#ifndef B4DS
 static void screenshot(void) {
+	#ifdef B4DS
+	cardengineArm9* volatile ce9 = (cardengineArm9*)CARDENGINE_ARM9_LOCATION_DLDI_EXTMEM;
+	if (*(u32*)CARDENGINE_ARM9_LOCATION_DLDI == CARDENGINE_ARM9_LOCATION_DLDI) {
+		ce9 = (cardengineArm9*)CARDENGINE_ARM9_LOCATION_DLDI;
+	}
+	#endif
+
 	// Try to find the safest bank to capture to
 	u8 vramBank = 2;
 	if((VRAM_D_CR & 1) == 0) {
@@ -262,11 +272,16 @@ static void screenshot(void) {
 		}
 	}
 
+	#ifdef B4DS
+	volatile u32 (*prepareScreenshot)() = (volatile u32*)ce9->prepareScreenshot;
+	(*prepareScreenshot)();
+	#else
 	sharedAddr[4] = 0x50505353;
 	while (sharedAddr[4] == 0x50505353) {
 		while (REG_VCOUNT != 191) swiDelay(100);
 		while (REG_VCOUNT == 191) swiDelay(100);
 	}
+	#endif
 
 	// Backup VRAM bank
 	tonccpy(vramBak, VRAM_x(vramBank), 0x18000);
@@ -293,13 +308,17 @@ static void screenshot(void) {
 	tonccpy(VRAM_x(vramBank), vramBak, 0x18000);
 	VRAM_x_CR(vramBank) = vramCr;
 
+	#ifdef B4DS
+	volatile u32 (*saveScreenshot)() = (volatile u32*)ce9->saveScreenshot;
+	(*saveScreenshot)();
+	#else
 	sharedAddr[4] = 0x544F4853;
 	while (sharedAddr[4] == 0x544F4853) {
 		while (REG_VCOUNT != 191) swiDelay(100);
 		while (REG_VCOUNT == 191) swiDelay(100);
 	}
+	#endif
 }
-#endif
 
 static void manual(void) {
 	while(1) {
@@ -740,8 +759,8 @@ void inGameMenu(s8 *mainScreen, u32 consoleModel) {
 	int menuItemCount = 0;
 	menuItems[menuItemCount++] = MENU_EXIT;
 	menuItems[menuItemCount++] = MENU_RESET;
-#ifndef B4DS
 	menuItems[menuItemCount++] = MENU_SCREENSHOT;
+#ifndef B4DS
 	if(igmText.manualMaxLine > 0)
 		menuItems[menuItemCount++] = MENU_MANUAL;
 #endif
@@ -795,9 +814,7 @@ void inGameMenu(s8 *mainScreen, u32 consoleModel) {
 					sharedAddr[4] = 0x54455352; // RSET
 					break;
 				case MENU_SCREENSHOT:
-					#ifndef B4DS
 					screenshot();
-					#endif
 					break;
 				case MENU_MANUAL:
 					manual();
