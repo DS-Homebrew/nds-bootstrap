@@ -56,6 +56,7 @@ int hookNdsRetailArm9(
 	u32 musicCluster,
 	u32 musicsSize,
 	u32 pageFileCluster,
+	u32 manualCluster,
 	bool expansionPakFound,
 	bool extendedMemory,
 	bool ROMinRAM,
