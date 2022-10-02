@@ -24,7 +24,9 @@ extern void dumpRam(void);
 extern void returnToLoader(void);
 extern void prepareScreenshot(void);
 extern void saveScreenshot(void);
+extern void prepareManual(void);
 extern void readManual(int line);
+extern void restorePreManual(void);
 
 volatile int timeTillStatusRefresh = 7;
 
@@ -108,8 +110,14 @@ void inGameMenu(void) {
 				case 0x544F4853: // SHOT
 					saveScreenshot();
 					break;
+				case 0x4E414D50: // PMAN
+					prepareManual();
+					break;
 				case 0x554E414D: // MANU
 					readManual(sharedAddr[0]);
+					break;
+				case 0x4E414D52: // RMAN
+					restorePreManual();
 					break;
 				case 0x524D4152: // RAMR
 					tonccpy((u32*)((u32)sharedAddr[0]), (u32*)((u32)sharedAddr[1]), 0xC0);

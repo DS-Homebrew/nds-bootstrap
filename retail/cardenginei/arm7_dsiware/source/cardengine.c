@@ -544,10 +544,14 @@ void saveScreenshot(void) {
 	fileRead((char*)INGAME_MENU_EXT_LOCATION, pageFile, 0x540000, 0x40000, -1);
 }
 
+void prepareManual(void) {
+	driveInitialize();
+	fileWrite((char*)INGAME_MENU_EXT_LOCATION, pageFile, 0x540000, 32 * 24, -1);
+}
+
 void readManual(int line) {
 	static int currentManualLine = 0;
 	static int currentManualOffset = 0;
-	driveInitialize();
 	char buffer[32];
 
 	// Seek for desired line
@@ -606,6 +610,10 @@ void readManual(int line) {
 			}
 		}
 	}
+}
+
+void restorePreManual(void) {
+	fileRead((char*)INGAME_MENU_EXT_LOCATION, pageFile, 0x540000, 32 * 24, -1);
 }
 
 void myIrqHandlerVBlank(void) {

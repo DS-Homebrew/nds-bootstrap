@@ -316,7 +316,15 @@ static void screenshot(void) {
 }
 
 static void manual(void) {
-	while(1) {
+	#ifndef B4DS
+	sharedAddr[4] = 0x4E414D50; // PMAN
+	do {
+		while (REG_VCOUNT != 191) swiDelay(100);
+		while (REG_VCOUNT == 191) swiDelay(100);
+	} while (sharedAddr[4] == 0x4E414D50);
+	#endif
+
+	while (1) {
 		#ifdef B4DS
 		volatile u32 (*readManual)(int line) = (volatile u32*)ce9->readManual;
 		(*readManual)(igmText.manualLine);
@@ -353,6 +361,14 @@ static void manual(void) {
 		else if(igmText.manualLine > igmText.manualMaxLine - 23)
 			igmText.manualLine = igmText.manualMaxLine - 23 > 0 ? igmText.manualMaxLine - 23 : 0;
 	}
+
+	#ifndef B4DS
+	sharedAddr[4] = 0x4E414D52; // RMAN
+	do {
+		while (REG_VCOUNT != 191) swiDelay(100);
+		while (REG_VCOUNT == 191) swiDelay(100);
+	} while (sharedAddr[4] == 0x4E414D52);
+	#endif
 }
 
 static void drawCursor(u8 line) {

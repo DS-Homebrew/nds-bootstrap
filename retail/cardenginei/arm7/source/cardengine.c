@@ -918,6 +918,22 @@ void saveScreenshot(void) {
 #endif
 }
 
+void prepareManual(void) {
+#ifndef TWLSDK
+	if (valueBits & dsiMode) {
+#else
+	//bool doBak = ((valueBits & gameOnFlashcard) && (valueBits & b_dsiSD));
+	//if (doBak) bakSdData();
+#endif
+		//driveInitialize();
+		fileWrite((char*)INGAME_MENU_EXT_LOCATION, pageFile, 0x540000, 32 * 24, -1);
+#ifndef TWLSDK
+	}
+#else
+	//if (doBak) restoreSdBakData();
+#endif
+}
+
 void readManual(int line) {
 	static int currentManualLine = 0;
 	static int currentManualOffset = 0;
@@ -979,6 +995,22 @@ void readManual(int line) {
 			}
 		}
 	}
+}
+
+void restorePreManual(void) {
+#ifndef TWLSDK
+	if (valueBits & dsiMode) {
+#else
+	//bool doBak = ((valueBits & gameOnFlashcard) && (valueBits & b_dsiSD));
+	//if (doBak) bakSdData();
+#endif
+		//driveInitialize();
+		fileRead((char*)INGAME_MENU_EXT_LOCATION, pageFile, 0x540000, 32 * 24, -1);
+#ifndef TWLSDK
+	}
+#else
+	//if (doBak) restoreSdBakData();
+#endif
 }
 
 static void log_arm9(void) {
