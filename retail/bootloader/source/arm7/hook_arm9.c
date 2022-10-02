@@ -165,6 +165,7 @@ int hookNdsRetailArm9(
 	u32 musicCluster,
 	u32 musicsSize,
 	u32 pageFileCluster,
+	u32 manualCluster,
 	bool expansionPakFound,
 	bool extendedMemory,
 	bool ROMinRAM,
@@ -192,6 +193,7 @@ int hookNdsRetailArm9(
 	ce9->musicCluster           = musicCluster;
 	ce9->musicsSize             = musicsSize;
 	ce9->pageFileCluster        = pageFileCluster;
+	ce9->manualCluster          = manualCluster;
 	if (expansionPakFound) {
 		ce9->valueBits |= b_expansionPakFound;
 	}

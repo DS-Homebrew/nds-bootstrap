@@ -91,6 +91,7 @@ extern u32 initDisc;
 extern u32 saveFileCluster;
 extern u32 saveSize;
 extern u32 pageFileCluster;
+extern u32 manualCluster;
 extern u32 apPatchFileCluster;
 extern u32 apPatchSize;
 extern u32 cheatFileCluster;
@@ -1013,7 +1014,7 @@ int arm7_main(void) {
 		}
 	} else {
 		fatTableAddr = (moduleParams->sdk_version < 0x2008000) ? 0x023E0000 : 0x023C0000;
-		fatTableSize = (moduleParams->sdk_version < 0x2008000) ? 0x1C000 : 0x1A000;
+		fatTableSize = (moduleParams->sdk_version < 0x2008000) ? 0x1C000 : 0x19C00;
 
 		if (moduleParams->sdk_version >= 0x2008000) {
 			fatTableAddr = CARDENGINE_ARM9_LOCATION_DLDI;
@@ -1048,7 +1049,7 @@ int arm7_main(void) {
 
 			lastClusterCacheUsed = (u32*)0x037F8000;
 			clusterCache = 0x037F8000;
-			clusterCacheSize = (startMem ? 0x4000 : 0x1A000)-romFile.fatTableCacheSize;
+			clusterCacheSize = (startMem ? 0x4000 : 0x19C00)-romFile.fatTableCacheSize;
 
 			if (!startMem || (startMem && romFile.fatTableCacheSize < 0x4000)) {
 				buildFatTableCache(&savFile);
@@ -1064,7 +1065,7 @@ int arm7_main(void) {
 				if (musicCluster != 0) {
 					lastClusterCacheUsed = (u32*)0x037F8000;
 					clusterCache = 0x037F8000;
-					clusterCacheSize = (startMem ? 0x4000 : 0x1A000)-savFile.fatTableCacheSize;
+					clusterCacheSize = (startMem ? 0x4000 : 0x19C00)-savFile.fatTableCacheSize;
 
 					buildFatTableCache(&musicsFile);
 					if (startMem) {
@@ -1154,6 +1155,7 @@ int arm7_main(void) {
 		musicCluster,
 		musicsSize,
 		pageFileCluster,
+		manualCluster,
 		expansionPakFound,
 		extendedMemory2,
 		ROMinRAM,

@@ -467,9 +467,10 @@ static int runNdsFile(configuration* conf) {
 			apFixOverlaysCluster = stApFixOverlays.st_ino;
 		}
 
-		if (stat(conf->manualPath, &stManual) >= 0) {
-			clusterManual = stManual.st_ino;
-		}
+	}
+
+	if (stat(conf->manualPath, &stManual) >= 0) {
+		clusterManual = stManual.st_ino;
 	}
 
 	if (stat(screenshotPath.c_str(), &stScreenshot) >= 0) {

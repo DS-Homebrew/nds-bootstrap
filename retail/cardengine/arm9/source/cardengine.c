@@ -59,6 +59,7 @@
 #include "my_fat.h"
 
 extern cardengineArm9* volatile ce9;
+struct IgmText *igmText = (struct IgmText *)INGAME_MENU_LOCATION_B4DS;
 
 extern void ndsCodeStart(u32* addr);
 
@@ -79,7 +80,7 @@ static aFile srParamsFile;
 static aFile screenshotFile;
 static aFile musicsFile;
 static aFile pageFile;
-// static aFile manualFile;
+static aFile manualFile;
 
 void updateMusic(void);
 
@@ -300,7 +301,6 @@ void prepareScreenshot(void) {
 }
 
 void saveScreenshot(void) {
-	struct IgmText *igmText = (struct IgmText *)INGAME_MENU_LOCATION_B4DS;
 	if (igmText->currentScreenshot >= 50) return;
 
 	fileWrite((char*)INGAME_MENU_EXT_LOCATION_B4DS, screenshotFile, 0x200 + (igmText->currentScreenshot * 0x18400), 0x18046);
@@ -313,6 +313,69 @@ void saveScreenshot(void) {
 	} while(magic == 'B' && igmText->currentScreenshot < 50);
 
 	fileRead((char*)INGAME_MENU_EXT_LOCATION_B4DS, pageFile, 0x340000, 0x40000);
+}
+
+void readManual(int line) {
+	static int currentManualLine = 0;
+	static int currentManualOffset = 0;
+	char buffer[32];
+
+	// Seek for desired line
+	bool firstLoop = true;
+	while(currentManualLine != line) {
+		if(line > currentManualLine) {
+			fileRead(buffer, manualFile, currentManualOffset, 32);
+
+			for(int i = 0; i < 32; i++) {
+				if(buffer[i] == '\n') {
+					currentManualOffset += i + 1;
+					currentManualLine++;
+					break;
+				} else if(i == 31) {
+					currentManualOffset += i + 1;
+					break;
+				}
+			}
+		} else {
+			currentManualOffset -= 32;
+			fileRead(buffer, manualFile, currentManualOffset, 32);
+			int i = firstLoop ? 30 : 31;
+			firstLoop = false;
+			for(; i >= 0; i--) {
+				if((buffer[i] == '\n') || currentManualOffset + i == -1) {
+					currentManualOffset += i + 1;
+					currentManualLine--;
+					firstLoop = true;
+					break;
+				}
+			}
+		}
+	}
+
+	toncset((u8*)0x027FF200, ' ', 32 * 24);
+	((vu8*)0x027FF200)[32 * 24] = '\0';
+
+	// Read in 24 lines
+	u32 tempManualOffset = currentManualOffset;
+	bool fullLine = false;
+	for(int line = 0; line < 24 && line < igmText->manualMaxLine; line++) {
+		fileRead(buffer, manualFile, tempManualOffset, 32);
+
+		// Fix for exactly 32 char lines
+		if(fullLine && buffer[0] == '\n')
+			fileRead(buffer, manualFile, ++tempManualOffset, 32);
+
+		for(int i = 0; i <= 32; i++) {
+			if(i == 32 || buffer[i] == '\n' || buffer[i] == '\0') {
+				tempManualOffset += i;
+				if(buffer[i] == '\n')
+					tempManualOffset++;
+				fullLine = i == 32;
+				tonccpy((char*)0x027FF200 + line * 32, buffer, i);
+				break;
+			}
+		}
+	}
 }
 
 s8 mainScreen = 0;
@@ -459,7 +522,7 @@ static void initialize(void) {
 		srParamsFile = getFileFromCluster(ce9->srParamsCluster);
 		screenshotFile = getFileFromCluster(ce9->screenshotCluster);
 		pageFile = getFileFromCluster(ce9->pageFileCluster);
-		// manualFile = getFileFromCluster(ce9->manualCluster);
+		manualFile = getFileFromCluster(ce9->manualCluster);
 
 		bool cloneboot = (ce9->valueBits & isSdk5) ? *(u16*)0x02FFFC40 == 2 : *(u16*)0x027FFC40 == 2;
 

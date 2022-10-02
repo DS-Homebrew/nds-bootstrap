@@ -43,6 +43,8 @@ musicsSize:
 	.word	0x00000000
 pageFileCluster:
 	.word	0x00000000
+manualCluster:
+	.word	0x00000000
 cardStruct0:
 	.word	0x00000000
 valueBits:
@@ -65,6 +67,8 @@ prepareScreenshotPtr:
 	.word prepareScreenshotJmp
 saveScreenshotPtr:
 	.word saveScreenshotJmp
+readManualPtr:
+	.word readManualJmp
 
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
@@ -121,6 +125,17 @@ saveScreenshotJmp:
 	bl	_blx_r3_stub
 
 	ldmfd   sp!, {r0-r11,pc}
+.pool
+
+@---------------------------------------------------------------------------------
+readManualJmp:
+@---------------------------------------------------------------------------------
+	stmfd   sp!, {r1-r11,lr}
+
+	ldr	r3, =readManual
+	bl	_blx_r3_stub
+
+	ldmfd   sp!, {r1-r11,pc}
 .pool
 
 ndsCodeStart:
