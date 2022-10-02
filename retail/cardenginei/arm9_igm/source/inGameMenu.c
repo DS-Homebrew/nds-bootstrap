@@ -65,6 +65,8 @@ static u16 igmPal[] = {
 static u16* vramBak = (u16*)INGAME_MENU_EXT_LOCATION+(0x18200/sizeof(u16));
 static u16* bmpBuffer = (u16*)INGAME_MENU_EXT_LOCATION;
 #else
+cardengineArm9* volatile ce9 = (cardengineArm9*)CARDENGINE_ARM9_LOCATION_DLDI_EXTMEM;
+
 static u16* vramBak = (u16*)INGAME_MENU_EXT_LOCATION_B4DS+(0x18200/sizeof(u16));
 static u16* bmpBuffer = (u16*)INGAME_MENU_EXT_LOCATION_B4DS;
 #endif
@@ -198,13 +200,6 @@ static void clearScreen(void) {
 #define VRAM_x_CR(bank) (((vu8*)0x04000240)[bank])
 
 static void screenshot(void) {
-	#ifdef B4DS
-	cardengineArm9* volatile ce9 = (cardengineArm9*)CARDENGINE_ARM9_LOCATION_DLDI_EXTMEM;
-	if (*(u32*)CARDENGINE_ARM9_LOCATION_DLDI == CARDENGINE_ARM9_LOCATION_DLDI) {
-		ce9 = (cardengineArm9*)CARDENGINE_ARM9_LOCATION_DLDI;
-	}
-	#endif
-
 	// Try to find the safest bank to capture to
 	u8 vramBank = 2;
 	if((VRAM_D_CR & 1) == 0) {
@@ -322,6 +317,12 @@ static void screenshot(void) {
 
 static void manual(void) {
 	while(1) {
+		#ifdef B4DS
+		volatile u32 (*readManual)(int line) = (volatile u32*)ce9->readManual;
+		(*readManual)(igmText.manualLine);
+
+		print(0, 0, (unsigned char *)0x027FF200, 0);
+		#else
 		DC_InvalidateRange((unsigned char *)INGAME_MENU_EXT_LOCATION, 32 * 24);
 		sharedAddr[0] = igmText.manualLine;
 		sharedAddr[4] = 0x554E414D; // MANU
@@ -331,6 +332,7 @@ static void manual(void) {
 		} while (sharedAddr[4] == 0x554E414D);
 
 		print(0, 0, (unsigned char *)INGAME_MENU_EXT_LOCATION, 0);
+		#endif
 
 		waitKeys(KEY_UP | KEY_DOWN | KEY_LEFT | KEY_RIGHT | KEY_B);
 		if(KEYS & KEY_UP) {
@@ -701,6 +703,10 @@ void inGameMenu(s8 *mainScreen, u32 consoleModel) {
 
 	u16 exmemcnt = REG_EXMEMCNT;
 	sysSetCardOwner(false);	// Give Slot-1 access to arm7
+	#else
+	if (*(u32*)CARDENGINE_ARM9_LOCATION_DLDI == CARDENGINE_ARM9_LOCATION_DLDI) {
+		ce9 = (cardengineArm9*)CARDENGINE_ARM9_LOCATION_DLDI;
+	}
 	#endif
 
 	u32 dispcnt = REG_DISPCNT_SUB;
@@ -760,10 +766,8 @@ void inGameMenu(s8 *mainScreen, u32 consoleModel) {
 	menuItems[menuItemCount++] = MENU_EXIT;
 	menuItems[menuItemCount++] = MENU_RESET;
 	menuItems[menuItemCount++] = MENU_SCREENSHOT;
-#ifndef B4DS
 	if(igmText.manualMaxLine > 0)
 		menuItems[menuItemCount++] = MENU_MANUAL;
-#endif
 	menuItems[menuItemCount++] = MENU_RAM_DUMP;
 	menuItems[menuItemCount++] = MENU_OPTIONS;
 	menuItems[menuItemCount++] = MENU_RAM_VIEWER;
