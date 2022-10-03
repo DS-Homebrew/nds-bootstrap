@@ -2065,9 +2065,15 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBL(0x02046394, (u32)dsiSaveOpen);
 			setBL(0x02046428, (u32)dsiSaveRead);
 			setBL(0x0204649C, (u32)dsiSaveClose);
-			*(u32*)0x0208FC20 = 0xE3A00001; // mov r0, #1
-			*(u32*)0x02098818 = 0xE3A00000; // mov r0, #0
-			*(u32*)0x0209881C = 0xE12FFF1E; // bx lr
+			setBL(0x0208523C, 0x020867FC);
+			setBL(0x020852F0, 0x02086930);
+			setBL(0x020853A8, 0x0208699C);
+			setBL(0x02085624, 0x02086AA4);
+			setBL(0x02085704, 0x02086B54);
+			setBL(0x02085844, 0x02086BC0);
+			setBL(0x02085974, 0x02086D6C);
+			*(u32*)0x02086254 = 0xE1A00000; // nop
+			setBL(0x020864E0, 0x02086CA8);
 		} else if (ndsHeader->gameCode[3] == 'V') {
 			*(u32*)0x020435E8 = 0xE1A00000; // nop
 			//*(u32*)0x020435F4 = 0xE3A00000; // mov r0, #0 (Skip WiFi error screen)
@@ -2086,6 +2092,15 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBL(0x02046460, (u32)dsiSaveOpen);
 			setBL(0x020464F4, (u32)dsiSaveRead);
 			setBL(0x02046568, (u32)dsiSaveClose);
+			setBL(0x02085338, 0x020868F8);
+			setBL(0x020853EC, 0x02086A2C);
+			setBL(0x020854A4, 0x02086A98);
+			setBL(0x02085720, 0x02086BA0);
+			setBL(0x02085800, 0x02086C50);
+			setBL(0x02085940, 0x02086CBC);
+			setBL(0x02085A70, 0x02086E68);
+			*(u32*)0x02086350 = 0xE1A00000; // nop
+			setBL(0x020865DC, 0x02086DA4);
 		} else if (ndsHeader->gameCode[3] == 'J') {
 			*(u32*)0x02043248 = 0xE1A00000; // nop
 			//*(u32*)0x02043254 = 0xE3A00000; // mov r0, #0 (Skip WiFi error screen)
@@ -2104,6 +2119,15 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBL(0x020460C0, (u32)dsiSaveOpen);
 			setBL(0x02046154, (u32)dsiSaveRead);
 			setBL(0x020461C8, (u32)dsiSaveClose);
+			setBL(0x0207EFE0, 0x020805A0);
+			setBL(0x0207F094, 0x020806D4);
+			setBL(0x0207F14C, 0x02080740);
+			setBL(0x0207F3C8, 0x02080848);
+			setBL(0x0207F4A8, 0x020808F8);
+			setBL(0x0207F5E8, 0x02080964);
+			setBL(0x0207F718, 0x02080B10);
+			*(u32*)0x0207FFF8 = 0xE1A00000; // nop
+			setBL(0x02080284, 0x02080A4C);
 		}
 	}
 
@@ -2359,7 +2383,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02008DE4 = 0xE1A00000; // nop
 		if (!extendedMemory2) {
 			// Make BG static to cut down RAM usage
-			setBL(0x02008400, 0x02008664);
+			setB(0x02008400, 0x02008664);
 			*(u32*)0x0200DCC0 = 0xE1A00000; // nop
 			*(u32*)0x0200DCC4 = 0xE1A00000; // nop
 			*(u32*)0x0200DCC8 = 0xE1A00000; // nop
@@ -2408,7 +2432,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02008ED4 = 0xE1A00000; // nop
 		if (!extendedMemory2) {
 			// Make BG static to cut down RAM usage
-			setBL(0x02008400, 0x02008664);
+			setB(0x02008400, 0x02008664);
 			*(u32*)0x0200DD4C = 0xE1A00000; // nop
 			*(u32*)0x0200DD50 = 0xE1A00000; // nop
 			*(u32*)0x0200DD54 = 0xE1A00000; // nop
@@ -8732,6 +8756,88 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02039D04, (u32)dsiSaveSetLength);
 		setBL(0x02039D3C, (u32)dsiSaveWrite);
 		setBL(0x02039D44, (u32)dsiSaveClose);
+	}
+
+	// Tetris Party Live (USA)
+	// Tetris Party Live (Europe, Australia)
+	else if (strcmp(romTid, "KTEE") == 0 || strcmp(romTid, "KTEV") == 0) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x02005168 = 0xE1A00000; // nop
+		*(u32*)0x02005170 = 0xE1A00000; // nop
+		*(u32*)0x02005180 = 0xE1A00000; // nop
+		*(u32*)0x020052C0 = 0xE1A00000; // nop
+		*(u32*)0x02014828 = 0xE1A00000; // nop
+		*(u32*)0x02017C50 = 0xE1A00000; // nop
+		*(u32*)0x0201C208 = 0xE1A00000; // nop
+		*(u32*)0x0201E2C0 = 0xE1A00000; // nop
+		*(u32*)0x0201E2C4 = 0xE1A00000; // nop
+		*(u32*)0x0201E2D0 = 0xE1A00000; // nop
+		*(u32*)0x0201E430 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x0201E48C, heapEnd); // mov r0, #0x23C0000
+		*(u32*)0x0201F82C = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
+		*(u32*)0x0201F848 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0201F84C = 0xE12FFF1E; // bx lr
+		*(u32*)0x0201F854 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0201F858 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0201F878 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0201F87C = 0xE12FFF1E; // bx lr
+		*(u32*)0x0201F88C = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0201F890 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0201F89C = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0201F8A0 = 0xE12FFF1E; // bx lr
+		*(u32*)0x020235FC = 0xE1A00000; // nop
+		*(u32*)0x02054C30 = 0xE1A00000; // nop (Skip Manual screen)
+		if (ndsHeader->gameCode[3] == 'E') {
+			setBL(0x0205A768, (u32)dsiSaveOpenR);
+			setBL(0x0205A778, (u32)dsiSaveGetLength);
+			setBL(0x0205A7B0, (u32)dsiSaveRead);
+			setBL(0x0205A7CC, (u32)dsiSaveClose);
+			//*(u32*)0x0205A83C = 0xE12FFF1E; // bx lr
+			setBL(0x0205A864, (u32)dsiSaveCreate);
+			setBL(0x0205A874, (u32)dsiSaveGetResultCode);
+			setBL(0x0205A89C, (u32)dsiSaveOpen);
+			setBL(0x0205A8C0, (u32)dsiSaveWrite);
+			setBL(0x0205A8F0, (u32)dsiSaveClose);
+			//*(u32*)0x0205A92C = 0xE12FFF1E; // bx lr
+			setBL(0x0205A95C, (u32)dsiSaveOpen);
+			setBL(0x0205A99C, (u32)dsiSaveSeek);
+			setBL(0x0205A9DC, (u32)dsiSaveWrite);
+			setBL(0x0205AA54, (u32)dsiSaveSeek);
+			setBL(0x0205AA80, (u32)dsiSaveWrite);
+			setBL(0x0205AABC, (u32)dsiSaveClose);
+			*(u32*)0x0205AAEC = 0xE1A00000; // nop
+			*(u32*)0x0205B330 = 0xE1A00000; // nop
+			*(u32*)0x0205B39C = 0xE3A00000; // mov r0, #0
+		} else {
+			setBL(0x0205A754, (u32)dsiSaveOpenR);
+			setBL(0x0205A764, (u32)dsiSaveGetLength);
+			setBL(0x0205A79C, (u32)dsiSaveRead);
+			setBL(0x0205A7B8, (u32)dsiSaveClose);
+			//*(u32*)0x0205A828 = 0xE12FFF1E; // bx lr
+			setBL(0x0205A850, (u32)dsiSaveCreate);
+			setBL(0x0205A860, (u32)dsiSaveGetResultCode);
+			setBL(0x0205A888, (u32)dsiSaveOpen);
+			setBL(0x0205A8AC, (u32)dsiSaveWrite);
+			setBL(0x0205A8DC, (u32)dsiSaveClose);
+			//*(u32*)0x0205A918 = 0xE12FFF1E; // bx lr
+			setBL(0x0205A948, (u32)dsiSaveOpen);
+			setBL(0x0205A988, (u32)dsiSaveSeek);
+			setBL(0x0205A9C8, (u32)dsiSaveWrite);
+			setBL(0x0205AA40, (u32)dsiSaveSeek);
+			setBL(0x0205AA6C, (u32)dsiSaveWrite);
+			setBL(0x0205AAA8, (u32)dsiSaveClose);
+			*(u32*)0x0205AAD8 = 0xE1A00000; // nop
+			*(u32*)0x0205B31C = 0xE1A00000; // nop
+			*(u32*)0x0205B388 = 0xE3A00000; // mov r0, #0
+		}
+		setBL(0x020A32DC, 0x020A4830);
+		setBL(0x020A338C, 0x020A4968);
+		setBL(0x020A3440, 0x020A49D4);
+		setBL(0x020A36AC, 0x020A4ADC);
+		setBL(0x020A3784, 0x020A4B88);
+		setBL(0x020A38B8, 0x020A4BF4);
+		setBL(0x020A39E4, 0x020A4D94);
+		setBL(0x020A451C, 0x020A4CDC);
 	}
 
 	// Topoloco (USA)

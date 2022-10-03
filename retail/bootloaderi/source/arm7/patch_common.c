@@ -3339,6 +3339,50 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02039D44, (u32)dsiSaveClose);
 	}
 
+	// Tetris Party Live (USA)
+	else if (strcmp(romTid, "KTEE") == 0 && saveOnFlashcard) {
+		*(u32*)0x02054C30 = 0xE1A00000; // nop (Skip Manual screen)
+		setBL(0x0205A768, (u32)dsiSaveOpenR);
+		setBL(0x0205A778, (u32)dsiSaveGetLength);
+		setBL(0x0205A7B0, (u32)dsiSaveRead);
+		setBL(0x0205A7CC, (u32)dsiSaveClose);
+		//*(u32*)0x0205A83C = 0xE12FFF1E; // bx lr
+		setBL(0x0205A864, (u32)dsiSaveCreate);
+		setBL(0x0205A874, (u32)dsiSaveGetResultCode);
+		setBL(0x0205A89C, (u32)dsiSaveOpen);
+		setBL(0x0205A8C0, (u32)dsiSaveWrite);
+		setBL(0x0205A8F0, (u32)dsiSaveClose);
+		//*(u32*)0x0205A92C = 0xE12FFF1E; // bx lr
+		setBL(0x0205A95C, (u32)dsiSaveOpen);
+		setBL(0x0205A99C, (u32)dsiSaveSeek);
+		setBL(0x0205A9DC, (u32)dsiSaveWrite);
+		setBL(0x0205AA54, (u32)dsiSaveSeek);
+		setBL(0x0205AA80, (u32)dsiSaveWrite);
+		setBL(0x0205AABC, (u32)dsiSaveClose);
+	}
+
+	// Tetris Party Live (Europe, Australia)
+	else if (strcmp(romTid, "KTEV") == 0 && saveOnFlashcard) {
+		*(u32*)0x02054C30 = 0xE1A00000; // nop (Skip Manual screen)
+		setBL(0x0205A754, (u32)dsiSaveOpenR);
+		setBL(0x0205A764, (u32)dsiSaveGetLength);
+		setBL(0x0205A79C, (u32)dsiSaveRead);
+		setBL(0x0205A7B8, (u32)dsiSaveClose);
+		//*(u32*)0x0205A828 = 0xE12FFF1E; // bx lr
+		setBL(0x0205A850, (u32)dsiSaveCreate);
+		setBL(0x0205A860, (u32)dsiSaveGetResultCode);
+		setBL(0x0205A888, (u32)dsiSaveOpen);
+		setBL(0x0205A8AC, (u32)dsiSaveWrite);
+		setBL(0x0205A8DC, (u32)dsiSaveClose);
+		//*(u32*)0x0205A918 = 0xE12FFF1E; // bx lr
+		setBL(0x0205A948, (u32)dsiSaveOpen);
+		setBL(0x0205A988, (u32)dsiSaveSeek);
+		setBL(0x0205A9C8, (u32)dsiSaveWrite);
+		setBL(0x0205AA40, (u32)dsiSaveSeek);
+		setBL(0x0205AA6C, (u32)dsiSaveWrite);
+		setBL(0x0205AAA8, (u32)dsiSaveClose);
+	}
+
 	// Topoloco (USA)
 	// Topoloco (Europe)
 	/*else if (strncmp(romTid, "KT5", 3) == 0 && saveOnFlashcard) {
@@ -3902,18 +3946,6 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02004C4C = 0xE1A00000; // nop (Skip Manual screen)
 		*(u32*)0x0202E888 = 0xE3A00001; // mov r0, #1
 		*(u32*)0x0202E88C = 0xE12FFF1E; // bx lr
-	}
-
-	// Tetris Party Live (USA)
-	else if (strcmp(romTid, "KTEE") == 0) {
-		*(u32*)0x0205A83C = 0xE12FFF1E; // bx lr
-		*(u32*)0x0205A92C = 0xE12FFF1E; // bx lr
-	}
-
-	// Tetris Party Live (Europe, Australia)
-	else if (strcmp(romTid, "KTEV") == 0) {
-		*(u32*)0x0205A828 = 0xE12FFF1E; // bx lr
-		*(u32*)0x0205A918 = 0xE12FFF1E; // bx lr
 	}
 }
 
