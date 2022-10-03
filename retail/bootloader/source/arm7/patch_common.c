@@ -9161,7 +9161,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// True Swing Golf Express (USA)
 	// A Little Bit of... Nintendo Touch Golf (Europe, Australia)
 	// Crashes on white screens when going to menu
-	/*if ((strcmp(romTid, "K72E") == 0 || strcmp(romTid, "K72V") == 0) && extendedMemory2) {
+	/*else if ((strcmp(romTid, "K72E") == 0 || strcmp(romTid, "K72V") == 0) && extendedMemory2) {
 		*(u32*)0x0200498C = 0xE1A00000; // nop
 		//*(u32*)0x02009A84 = 0xE12FFF1E; // bx lr
 		setBL(0x02009AC0, (u32)dsiSaveOpen);
@@ -9227,6 +9227,29 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			*(u32*)0x02079494 = 0xE1A00000; // nop
 		}
 	}*/
+
+	// Turn: The Lost Artifact (USA)
+	// Saving is difficult to implement
+	else if (strcmp(romTid, "KTIE") == 0) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x020051F4 = 0xE1A00000; // nop
+		*(u32*)0x020128A8 = 0xE1A00000; // nop
+		*(u32*)0x02015B98 = 0xE1A00000; // nop
+		*(u32*)0x0201A2BC = 0xE1A00000; // nop
+		*(u32*)0x0201C164 = 0xE1A00000; // nop
+		*(u32*)0x0201C168 = 0xE1A00000; // nop
+		*(u32*)0x0201C174 = 0xE1A00000; // nop
+		*(u32*)0x0201C2D4 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x0201C330, heapEnd); // mov r0, #0x23C0000
+		*(u32*)0x0201D754 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
+		*(u32*)0x0201D770 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0201D774 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0201D77C = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0201D780 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02020544 = 0xE1A00000; // nop
+		*(u32*)0x0202BE5C = 0xE1A00000; // nop
+		*(u32*)0x0202BE64 = 0xE1A00000; // nop
+	}
 
 	// Unou to Sanougaren Sasuru: Uranoura (Japan)
 	// Unable to read saved data
