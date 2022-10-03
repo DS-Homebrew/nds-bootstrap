@@ -6960,7 +6960,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Number Battle
-	// Shows "WiFi connection information erased" message on boot
 	else if (strcmp(romTid, "KSUE") == 0) {
 		*(u32*)0x02005330 = 0xE1A00000; // nop
 		*(u32*)0x02005EA4 = 0xE3A00001; // mov r0, #1
@@ -6987,6 +6986,15 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02065874 = 0xE1A00000; // nop
 		*(u32*)0x0206588C = 0xE1A00000; // nop
 		*(u32*)0x020A9EAC = 0xE3A00001; // mov r0, #1
+		*(u32*)0x020ACE4C = 0xE3A02C07; // mov r2, #0x700
+		*(u32*)0x020ACE6C = 0xE2840B01; // add r0, r4, #0x400
+		*(u32*)0x020ACE74 = 0xE1A00004; // mov r0, r4
+		*(u32*)0x020ACE7C = 0xE1A00000; // nop
+		*(u32*)0x020ACE80 = 0xE1A00000; // nop
+		*(u32*)0x020ACE84 = 0xE1A00000; // nop
+		*(u32*)0x020ACE88 = 0xE1A00000; // nop
+		*(u32*)0x020ACE8C = 0xE1A00000; // nop
+		*(u32*)0x020ACEA0 = 0xE2841B01; // add r1, r4, #0x400
 		*(u32*)0x020CE79C = 0xE1A00000; // nop
 		*(u32*)0x020D2A3C = 0xE1A00000; // nop
 		*(u32*)0x020DA2B4 = 0xE1A00000; // nop
