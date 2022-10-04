@@ -8114,6 +8114,75 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02035CA8 = 0xE1A00000; // nop
 	}
 
+	// Remote Racers (USA)
+	// Remote Racers (Europe, Australia)
+	// Requires 8MB of RAM
+	else if ((strcmp(romTid, "KQRE") == 0 || strcmp(romTid, "KQRV") == 0) && extendedMemory2) {
+		*(u32*)0x02004838 = 0xE1A00000; // nop
+		*(u32*)0x0200499C = 0xE1A00000; // nop
+		*(u32*)0x020197F0 = 0xE1A00000; // nop
+		*(u32*)0x0201CDA0 = 0xE1A00000; // nop
+		*(u32*)0x02021E98 = 0xE1A00000; // nop
+		*(u32*)0x02023C50 = 0xE1A00000; // nop
+		*(u32*)0x02023C54 = 0xE1A00000; // nop
+		*(u32*)0x02023C60 = 0xE1A00000; // nop
+		*(u32*)0x02023DC0 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x02023E1C, 0x02700000); // mov r0, #0x2700000
+		*(u32*)0x020250BC = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
+		*(u32*)0x02028758 = 0xE1A00000; // nop
+		if (ndsHeader->gameCode[3] == 'E') {
+			*(u32*)0x0208DCBC = 0xE1A00000; // nop
+			*(u32*)0x0208DCC4 = 0xE1A00000; // nop
+			*(u32*)0x0208DDB8 = 0xE1A00000; // nop
+			*(u32*)0x0208E3A0 = 0xE1A00000; // nop
+			*(u32*)0x0208E56C = 0xE1A00000; // nop
+			setBL(0x0209A074, (u32)dsiSaveClose);
+			setBL(0x0209A0D0, (u32)dsiSaveClose);
+			setBL(0x0209A178, (u32)dsiSaveOpen);
+			setBL(0x0209A190, (u32)dsiSaveSeek);
+			setBL(0x0209A1A4, (u32)dsiSaveRead);
+			setBL(0x0209A244, (u32)dsiSaveCreate);
+			setBL(0x0209A274, (u32)dsiSaveOpen);
+			setBL(0x0209A2A4, (u32)dsiSaveSetLength);
+			setBL(0x0209A2CC, (u32)dsiSaveSeek);
+			setBL(0x0209A2E0, (u32)dsiSaveWrite);
+			setBL(0x0209A390, (u32)dsiSaveCreate);
+			setBL(0x0209A3C8, (u32)dsiSaveOpen);
+			setBL(0x0209A400, (u32)dsiSaveSetLength);
+			setBL(0x0209A41C, (u32)dsiSaveSeek);
+			setBL(0x0209A430, (u32)dsiSaveWrite);
+			setBL(0x0209A590, (u32)dsiSaveSeek);
+			setBL(0x0209A5A0, (u32)dsiSaveWrite);
+			setBL(0x0209A718, (u32)dsiSaveGetResultCode);
+			*(u32*)0x0209A75C = 0xE3A00000; // mov r0, #0
+		} else {
+			*(u32*)0x0208DC98 = 0xE1A00000; // nop
+			*(u32*)0x0208DCA0 = 0xE1A00000; // nop
+			*(u32*)0x0208DD94 = 0xE1A00000; // nop
+			*(u32*)0x0208E37C = 0xE1A00000; // nop
+			*(u32*)0x0208E548 = 0xE1A00000; // nop
+			setBL(0x0209A338, (u32)dsiSaveClose);
+			setBL(0x0209A394, (u32)dsiSaveClose);
+			setBL(0x0209A43C, (u32)dsiSaveOpen);
+			setBL(0x0209A454, (u32)dsiSaveSeek);
+			setBL(0x0209A468, (u32)dsiSaveRead);
+			setBL(0x0209A508, (u32)dsiSaveCreate);
+			setBL(0x0209A538, (u32)dsiSaveOpen);
+			setBL(0x0209A568, (u32)dsiSaveSetLength);
+			setBL(0x0209A590, (u32)dsiSaveSeek);
+			setBL(0x0209A5A4, (u32)dsiSaveWrite);
+			setBL(0x0209A654, (u32)dsiSaveCreate);
+			setBL(0x0209A68C, (u32)dsiSaveOpen);
+			setBL(0x0209A6C4, (u32)dsiSaveSetLength);
+			setBL(0x0209A6E0, (u32)dsiSaveSeek);
+			setBL(0x0209A6F4, (u32)dsiSaveWrite);
+			setBL(0x0209A854, (u32)dsiSaveSeek);
+			setBL(0x0209A864, (u32)dsiSaveWrite);
+			setBL(0x0209A9DC, (u32)dsiSaveGetResultCode);
+			*(u32*)0x0209AA20 = 0xE3A00000; // mov r0, #0
+		}
+	}
+
 	// Robot Rescue (USA)
 	else if (strcmp(romTid, "KRTE") == 0) {
 		/* *(u32*)0x0200C2DC = 0xE3A00001; // mov r0, #1

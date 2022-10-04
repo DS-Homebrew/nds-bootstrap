@@ -2935,6 +2935,52 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02035904 = 0xE1A00000; // nop
 	}
 
+	// Remote Racers (USA)
+	else if (strcmp(romTid, "KQRE") == 0 && saveOnFlashcard) {
+		setBL(0x0209A074, (u32)dsiSaveClose);
+		setBL(0x0209A0D0, (u32)dsiSaveClose);
+		setBL(0x0209A178, (u32)dsiSaveOpen);
+		setBL(0x0209A190, (u32)dsiSaveSeek);
+		setBL(0x0209A1A4, (u32)dsiSaveRead);
+		setBL(0x0209A244, (u32)dsiSaveCreate);
+		setBL(0x0209A274, (u32)dsiSaveOpen);
+		setBL(0x0209A2A4, (u32)dsiSaveSetLength);
+		setBL(0x0209A2CC, (u32)dsiSaveSeek);
+		setBL(0x0209A2E0, (u32)dsiSaveWrite);
+		setBL(0x0209A390, (u32)dsiSaveCreate);
+		setBL(0x0209A3C8, (u32)dsiSaveOpen);
+		setBL(0x0209A400, (u32)dsiSaveSetLength);
+		setBL(0x0209A41C, (u32)dsiSaveSeek);
+		setBL(0x0209A430, (u32)dsiSaveWrite);
+		setBL(0x0209A590, (u32)dsiSaveSeek);
+		setBL(0x0209A5A0, (u32)dsiSaveWrite);
+		setBL(0x0209A718, (u32)dsiSaveGetResultCode);
+		*(u32*)0x0209A75C = 0xE3A00000; // mov r0, #0
+	}
+
+	// Remote Racers (Europe, Australia)
+	else if (strcmp(romTid, "KQRV") == 0 && saveOnFlashcard) {
+		setBL(0x0209A338, (u32)dsiSaveClose);
+		setBL(0x0209A394, (u32)dsiSaveClose);
+		setBL(0x0209A43C, (u32)dsiSaveOpen);
+		setBL(0x0209A454, (u32)dsiSaveSeek);
+		setBL(0x0209A468, (u32)dsiSaveRead);
+		setBL(0x0209A508, (u32)dsiSaveCreate);
+		setBL(0x0209A538, (u32)dsiSaveOpen);
+		setBL(0x0209A568, (u32)dsiSaveSetLength);
+		setBL(0x0209A590, (u32)dsiSaveSeek);
+		setBL(0x0209A5A4, (u32)dsiSaveWrite);
+		setBL(0x0209A654, (u32)dsiSaveCreate);
+		setBL(0x0209A68C, (u32)dsiSaveOpen);
+		setBL(0x0209A6C4, (u32)dsiSaveSetLength);
+		setBL(0x0209A6E0, (u32)dsiSaveSeek);
+		setBL(0x0209A6F4, (u32)dsiSaveWrite);
+		setBL(0x0209A854, (u32)dsiSaveSeek);
+		setBL(0x0209A864, (u32)dsiSaveWrite);
+		setBL(0x0209A9DC, (u32)dsiSaveGetResultCode);
+		*(u32*)0x0209AA20 = 0xE3A00000; // mov r0, #0
+	}
+
 	// Robot Rescue (USA)
 	else if (strcmp(romTid, "KRTE") == 0 && saveOnFlashcard) {
 		/* *(u32*)0x0200C2DC = 0xE3A00001; // mov r0, #1
