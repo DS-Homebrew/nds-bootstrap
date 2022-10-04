@@ -3339,6 +3339,63 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02039D44, (u32)dsiSaveClose);
 	}
 
+	// Tantei Jinguuji Saburou: Tsubaki no Yukue (Japan)
+	else if (strcmp(romTid, "KJTJ") == 0 && saveOnFlashcard) {
+		setBL(0x02005F80, (u32)dsiSaveOpen);
+		setBL(0x02005F9C, (u32)dsiSaveCreate);
+		*(u32*)0x02005FE0 = 0xE3A00000; // mov r0, #0
+		setBL(0x02006008, (u32)dsiSaveCreate);
+		setBL(0x02006024, (u32)dsiSaveOpen);
+		setBL(0x02006070, (u32)dsiSaveWrite);
+		setBL(0x02006080, (u32)dsiSaveClose);
+		setBL(0x020060DC, (u32)dsiSaveOpen);
+		setBL(0x02006130, (u32)dsiSaveSeek);
+		setBL(0x02006140, (u32)dsiSaveRead);
+		setBL(0x02006150, (u32)dsiSaveClose);
+		setBL(0x020061B4, (u32)dsiSaveOpen);
+		setBL(0x02006208, (u32)dsiSaveRead);
+		setBL(0x02006238, (u32)dsiSaveClose);
+		setBL(0x02006254, (u32)dsiSaveSeek);
+		setBL(0x02006264, (u32)dsiSaveWrite);
+		setBL(0x02006294, (u32)dsiSaveSeek);
+		setBL(0x020062A4, (u32)dsiSaveWrite);
+		setBL(0x020062C0, (u32)dsiSaveClose);
+		tonccpy((u32*)0x0202E118, dsiSaveGetResultCode, 0xC);
+	}
+
+	// Tantei Jinguuji Saburou: Akenaiyoru ni (Japan)
+	// Tantei Jinguuji Saburou: Kadannoitte (Japan)
+	// Tantei Jinguuji Saburou: Rensa Suru Noroi (Japan)
+	// Tantei Jinguuji Saburou: Nakiko no Shouzou (Japan)
+	else if ((strcmp(romTid, "KJAJ") == 0 || strcmp(romTid, "KJQJ") == 0 || strcmp(romTid, "KJLJ") == 0 || strcmp(romTid, "KJ7J") == 0) && saveOnFlashcard) {
+		setBL(0x02005FD0, (u32)dsiSaveOpen);
+		setBL(0x02005FEC, (u32)dsiSaveCreate);
+		*(u32*)0x02006030 = 0xE3A00000; // mov r0, #0
+		setBL(0x02006058, (u32)dsiSaveCreate);
+		setBL(0x02006074, (u32)dsiSaveOpen);
+		setBL(0x020060C0, (u32)dsiSaveWrite);
+		setBL(0x020060D0, (u32)dsiSaveClose);
+		setBL(0x0200612C, (u32)dsiSaveOpen);
+		setBL(0x02006180, (u32)dsiSaveSeek);
+		setBL(0x02006190, (u32)dsiSaveRead);
+		setBL(0x020061A0, (u32)dsiSaveClose);
+		setBL(0x02006204, (u32)dsiSaveOpen);
+		setBL(0x02006258, (u32)dsiSaveRead);
+		setBL(0x02006288, (u32)dsiSaveClose);
+		setBL(0x020062A4, (u32)dsiSaveSeek);
+		setBL(0x020062B4, (u32)dsiSaveWrite);
+		setBL(0x020062E4, (u32)dsiSaveSeek);
+		setBL(0x020062F4, (u32)dsiSaveWrite);
+		setBL(0x02006310, (u32)dsiSaveClose);
+		if (strncmp(romTid, "KJA", 3) == 0) {
+			tonccpy((u32*)0x0202E130, dsiSaveGetResultCode, 0xC);
+		} else if (strncmp(romTid, "KJ7", 3) != 0) {
+			tonccpy((u32*)0x0202E148, dsiSaveGetResultCode, 0xC);
+		} else {
+			tonccpy((u32*)0x0202E1B0, dsiSaveGetResultCode, 0xC);
+		}
+	}
+
 	// Tetris Party Live (USA)
 	else if (strcmp(romTid, "KTEE") == 0 && saveOnFlashcard) {
 		*(u32*)0x02054C30 = 0xE1A00000; // nop (Skip Manual screen)

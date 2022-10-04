@@ -8951,6 +8951,114 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02039D44, (u32)dsiSaveClose);
 	}
 
+	// Tantei Jinguuji Saburou: Tsubaki no Yukue (Japan)
+	else if (strcmp(romTid, "KJTJ") == 0) {
+		setBL(0x02005F80, (u32)dsiSaveOpen);
+		setBL(0x02005F9C, (u32)dsiSaveCreate);
+		*(u32*)0x02005FE0 = 0xE3A00000; // mov r0, #0
+		setBL(0x02006008, (u32)dsiSaveCreate);
+		setBL(0x02006024, (u32)dsiSaveOpen);
+		setBL(0x02006070, (u32)dsiSaveWrite);
+		setBL(0x02006080, (u32)dsiSaveClose);
+		setBL(0x020060DC, (u32)dsiSaveOpen);
+		setBL(0x02006130, (u32)dsiSaveSeek);
+		setBL(0x02006140, (u32)dsiSaveRead);
+		setBL(0x02006150, (u32)dsiSaveClose);
+		setBL(0x020061B4, (u32)dsiSaveOpen);
+		setBL(0x02006208, (u32)dsiSaveRead);
+		setBL(0x02006238, (u32)dsiSaveClose);
+		setBL(0x02006254, (u32)dsiSaveSeek);
+		setBL(0x02006264, (u32)dsiSaveWrite);
+		setBL(0x02006294, (u32)dsiSaveSeek);
+		setBL(0x020062A4, (u32)dsiSaveWrite);
+		setBL(0x020062C0, (u32)dsiSaveClose);
+		*(u32*)0x0202D3A4 = 0xE28DD00C; // ADD   SP, SP, #0xC
+		*(u32*)0x0202D3A8 = 0xE8BD8078; // LDMFD SP!, {R3-R6,PC}
+		tonccpy((u32*)0x0202E118, dsiSaveGetResultCode, 0xC);
+		*(u32*)0x02031180 = 0xE1A00000; // nop
+		*(u32*)0x020378E8 = 0xE1A00000; // nop
+		*(u32*)0x02039618 = 0xE1A00000; // nop
+		*(u32*)0x0203961C = 0xE1A00000; // nop
+		*(u32*)0x02039628 = 0xE1A00000; // nop
+		*(u32*)0x0203976C = 0xE1A00000; // nop
+		*(u32*)0x02039770 = 0xE1A00000; // nop
+		*(u32*)0x02039774 = 0xE1A00000; // nop
+		*(u32*)0x02039778 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x020397D4, heapEnd); // mov r0, #0x23C0000
+	}
+
+	// Tantei Jinguuji Saburou: Akenaiyoru ni (Japan)
+	// Tantei Jinguuji Saburou: Kadannoitte (Japan)
+	// Tantei Jinguuji Saburou: Rensa Suru Noroi (Japan)
+	// Tantei Jinguuji Saburou: Nakiko no Shouzou (Japan)
+	else if (strcmp(romTid, "KJAJ") == 0 || strcmp(romTid, "KJQJ") == 0 || strcmp(romTid, "KJLJ") == 0 || strcmp(romTid, "KJ7J") == 0) {
+		setBL(0x02005FD0, (u32)dsiSaveOpen);
+		setBL(0x02005FEC, (u32)dsiSaveCreate);
+		*(u32*)0x02006030 = 0xE3A00000; // mov r0, #0
+		setBL(0x02006058, (u32)dsiSaveCreate);
+		setBL(0x02006074, (u32)dsiSaveOpen);
+		setBL(0x020060C0, (u32)dsiSaveWrite);
+		setBL(0x020060D0, (u32)dsiSaveClose);
+		setBL(0x0200612C, (u32)dsiSaveOpen);
+		setBL(0x02006180, (u32)dsiSaveSeek);
+		setBL(0x02006190, (u32)dsiSaveRead);
+		setBL(0x020061A0, (u32)dsiSaveClose);
+		setBL(0x02006204, (u32)dsiSaveOpen);
+		setBL(0x02006258, (u32)dsiSaveRead);
+		setBL(0x02006288, (u32)dsiSaveClose);
+		setBL(0x020062A4, (u32)dsiSaveSeek);
+		setBL(0x020062B4, (u32)dsiSaveWrite);
+		setBL(0x020062E4, (u32)dsiSaveSeek);
+		setBL(0x020062F4, (u32)dsiSaveWrite);
+		setBL(0x02006310, (u32)dsiSaveClose);
+		if (strncmp(romTid, "KJA", 3) == 0) {
+			*(u32*)0x0202D49C = 0xE1A00000; // nop
+			tonccpy((u32*)0x0202E130, dsiSaveGetResultCode, 0xC);
+			*(u32*)0x020311D8 = 0xE1A00000; // nop
+			*(u32*)0x020362A8 = 0xE1A00000; // nop
+			*(u32*)0x020380C0 = 0xE1A00000; // nop
+			*(u32*)0x020380C4 = 0xE1A00000; // nop
+			*(u32*)0x020380D0 = 0xE1A00000; // nop
+			*(u32*)0x02038214 = 0xE1A00000; // nop
+			patchHiHeapDSiWare(0x02038270, heapEnd); // mov r0, #0x23C0000
+			*(u32*)0x0203996C = 0xE1A00000; // nop
+			*(u32*)0x02039970 = 0xE1A00000; // nop
+			*(u32*)0x02039974 = 0xE1A00000; // nop
+			*(u32*)0x02039978 = 0xE1A00000; // nop
+			*(u32*)0x0203CD80 = 0xE1A00000; // nop
+		} else if (strncmp(romTid, "KJ7", 3) != 0) {
+			*(u32*)0x0202D4B4 = 0xE1A00000; // nop
+			tonccpy((u32*)0x0202E148, dsiSaveGetResultCode, 0xC);
+			*(u32*)0x020311F0 = 0xE1A00000; // nop
+			*(u32*)0x020362C0 = 0xE1A00000; // nop
+			*(u32*)0x020380D8 = 0xE1A00000; // nop
+			*(u32*)0x020380DC = 0xE1A00000; // nop
+			*(u32*)0x020380E8 = 0xE1A00000; // nop
+			*(u32*)0x0203822C = 0xE1A00000; // nop
+			patchHiHeapDSiWare(0x02038288, heapEnd); // mov r0, #0x23C0000
+			*(u32*)0x02039984 = 0xE1A00000; // nop
+			*(u32*)0x02039988 = 0xE1A00000; // nop
+			*(u32*)0x0203998C = 0xE1A00000; // nop
+			*(u32*)0x02039990 = 0xE1A00000; // nop
+			*(u32*)0x0203CD98 = 0xE1A00000; // nop
+		} else {
+			*(u32*)0x0202D51C = 0xE1A00000; // nop
+			tonccpy((u32*)0x0202E1B0, dsiSaveGetResultCode, 0xC);
+			*(u32*)0x02031258 = 0xE1A00000; // nop
+			*(u32*)0x02036328 = 0xE1A00000; // nop
+			*(u32*)0x02038140 = 0xE1A00000; // nop
+			*(u32*)0x02038144 = 0xE1A00000; // nop
+			*(u32*)0x02038150 = 0xE1A00000; // nop
+			*(u32*)0x02038294 = 0xE1A00000; // nop
+			patchHiHeapDSiWare(0x020382F0, heapEnd); // mov r0, #0x23C0000
+			*(u32*)0x020399EC = 0xE1A00000; // nop
+			*(u32*)0x020399F0 = 0xE1A00000; // nop
+			*(u32*)0x020399F4 = 0xE1A00000; // nop
+			*(u32*)0x020399F8 = 0xE1A00000; // nop
+			*(u32*)0x0203CE00 = 0xE1A00000; // nop
+		}
+	}
+
 	// Tetris Party Live (USA)
 	// Tetris Party Live (Europe, Australia)
 	else if (strcmp(romTid, "KTEE") == 0 || strcmp(romTid, "KTEV") == 0) {
