@@ -814,7 +814,9 @@ bool dsiSaveOpen(void* ctx, const char* path, u32 mode) {
 	}
 
 	dsiSaveInit();
-	//dsiSaveOpenCalled = true;
+	if (!dsiSaveExists) {
+		toncset32(ctx+0x14, dsiSaveGetResultCode(path), 1);
+	}
 
 	dsiSavePerms = mode;
 	return dsiSaveExists;

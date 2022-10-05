@@ -2981,6 +2981,125 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0209AA20 = 0xE3A00000; // mov r0, #0
 	}
 
+	// Renjuku Kanji: Shougaku 1 Nensei (Japan)
+	else if (strcmp(romTid, "KJZJ") == 0 && saveOnFlashcard) {
+		setBL(0x02029C0C, (u32)dsiSaveCreate);
+		*(u32*)0x02049A64 = 0xE3A00002; // mov r0, #2 (Skip Manual screen, Part 1)
+		*(u32*)0x020532B8 = 0xE3A00000; // mov r0, #0 (Skip Manual screen, Part 2)
+		setBL(0x02064ED0, (u32)dsiSaveOpen);
+		setBL(0x02064EEC, (u32)dsiSaveSeek);
+		setBL(0x02064F00, (u32)dsiSaveClose);
+		setBL(0x02064F18, (u32)dsiSaveRead);
+		setBL(0x02064F28, (u32)dsiSaveClose);
+		setBL(0x02064F34, (u32)dsiSaveClose);
+		setBL(0x02064F68, (u32)dsiSaveOpen);
+		setBL(0x02064F80, (u32)dsiSaveSeek);
+		setBL(0x02064F98, (u32)dsiSaveRead); // dsiSaveReadAsync
+		setBL(0x02064FC8, (u32)dsiSaveOpen);
+		setBL(0x02064FE0, (u32)dsiSaveSetLength);
+		setBL(0x02064FF0, (u32)dsiSaveClose);
+		setBL(0x02065004, (u32)dsiSaveSeek);
+		setBL(0x02065018, (u32)dsiSaveClose);
+		setBL(0x02065030, (u32)dsiSaveWrite);
+		setBL(0x02065040, (u32)dsiSaveClose);
+		setBL(0x0206504C, (u32)dsiSaveClose);
+		setBL(0x02065080, (u32)dsiSaveOpen);
+		setBL(0x02065094, (u32)dsiSaveSetLength);
+		setBL(0x020650AC, (u32)dsiSaveSeek);
+		setBL(0x020650C4, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+		*(u32*)0x02065150 = 0xE12FFF1E; // bx lr
+	}
+
+	// Renjuku Kanji: Shougaku 2 Nensei (Japan)
+	// Renjuku Kanji: Shougaku 3 Nensei (Japan)
+	else if ((strcmp(romTid, "KJ2J") == 0 || strcmp(romTid, "KJ3J") == 0) && saveOnFlashcard) {
+		setBL(0x02029C0C, (u32)dsiSaveCreate);
+		*(u32*)0x02049A4C = 0xE3A00002; // mov r0, #2 (Skip Manual screen, Part 1)
+		*(u32*)0x020532A0 = 0xE3A00000; // mov r0, #0 (Skip Manual screen, Part 2)
+		setBL(0x02064EB8, (u32)dsiSaveOpen);
+		setBL(0x02064ED4, (u32)dsiSaveSeek);
+		setBL(0x02064EE8, (u32)dsiSaveClose);
+		setBL(0x02064F00, (u32)dsiSaveRead);
+		setBL(0x02064F10, (u32)dsiSaveClose);
+		setBL(0x02064F1C, (u32)dsiSaveClose);
+		setBL(0x02064F50, (u32)dsiSaveOpen);
+		setBL(0x02064F68, (u32)dsiSaveSeek);
+		setBL(0x02064F80, (u32)dsiSaveRead); // dsiSaveReadAsync
+		setBL(0x02064FB0, (u32)dsiSaveOpen);
+		setBL(0x02064FC8, (u32)dsiSaveSetLength);
+		setBL(0x02064FD8, (u32)dsiSaveClose);
+		setBL(0x02064FEC, (u32)dsiSaveSeek);
+		setBL(0x02065000, (u32)dsiSaveClose);
+		setBL(0x02065018, (u32)dsiSaveWrite);
+		setBL(0x02065028, (u32)dsiSaveClose);
+		setBL(0x02065034, (u32)dsiSaveClose);
+		setBL(0x02065068, (u32)dsiSaveOpen);
+		setBL(0x0206507C, (u32)dsiSaveSetLength);
+		setBL(0x02065094, (u32)dsiSaveSeek);
+		setBL(0x020650AC, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+		*(u32*)0x02065138 = 0xE12FFF1E; // bx lr
+	}
+
+	// Renjuku Kanji: Shougaku 4 Nensei (Japan)
+	// Renjuku Kanji: Shougaku 5 Nensei (Japan)
+	// Renjuku Kanji: Shougaku 6 Nensei (Japan)
+	else if ((strcmp(romTid, "KJ4J") == 0 || strcmp(romTid, "KJ5J") == 0 || strcmp(romTid, "KJ6J") == 0) && saveOnFlashcard) {
+		setBL(0x02029C0C, (u32)dsiSaveCreate);
+		*(u32*)0x02049AE8 = 0xE3A00002; // mov r0, #2 (Skip Manual screen, Part 1)
+		*(u32*)0x0205333C = 0xE3A00000; // mov r0, #0 (Skip Manual screen, Part 2)
+		setBL(0x02064F54, (u32)dsiSaveOpen);
+		setBL(0x02064F70, (u32)dsiSaveSeek);
+		setBL(0x02064F84, (u32)dsiSaveClose);
+		setBL(0x02064F9C, (u32)dsiSaveRead);
+		setBL(0x02064FAC, (u32)dsiSaveClose);
+		setBL(0x02064FB8, (u32)dsiSaveClose);
+		setBL(0x02064FEC, (u32)dsiSaveOpen);
+		setBL(0x02065004, (u32)dsiSaveSeek);
+		setBL(0x0206501C, (u32)dsiSaveRead); // dsiSaveReadAsync
+		setBL(0x0206504C, (u32)dsiSaveOpen);
+		setBL(0x02065064, (u32)dsiSaveSetLength);
+		setBL(0x02065074, (u32)dsiSaveClose);
+		setBL(0x02065088, (u32)dsiSaveSeek);
+		setBL(0x0206509C, (u32)dsiSaveClose);
+		setBL(0x020650B4, (u32)dsiSaveWrite);
+		setBL(0x020650C4, (u32)dsiSaveClose);
+		setBL(0x020650D0, (u32)dsiSaveClose);
+		setBL(0x02065104, (u32)dsiSaveOpen);
+		setBL(0x02065118, (u32)dsiSaveSetLength);
+		setBL(0x02065130, (u32)dsiSaveSeek);
+		setBL(0x02065148, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+		*(u32*)0x020651D4 = 0xE12FFF1E; // bx lr
+	}
+
+	// Renjuku Kanji: Chuugakusei (Japan)
+	else if (strcmp(romTid, "KJ8J") == 0 && saveOnFlashcard) {
+		setBL(0x02029C0C, (u32)dsiSaveCreate);
+		*(u32*)0x02049A68 = 0xE3A00002; // mov r0, #2 (Skip Manual screen, Part 1)
+		*(u32*)0x020532BC = 0xE3A00000; // mov r0, #0 (Skip Manual screen, Part 2)
+		setBL(0x02064ED4, (u32)dsiSaveOpen);
+		setBL(0x02064EF0, (u32)dsiSaveSeek);
+		setBL(0x02064F04, (u32)dsiSaveClose);
+		setBL(0x02064F1C, (u32)dsiSaveRead);
+		setBL(0x02064F2C, (u32)dsiSaveClose);
+		setBL(0x02064F38, (u32)dsiSaveClose);
+		setBL(0x02064F6C, (u32)dsiSaveOpen);
+		setBL(0x02064F84, (u32)dsiSaveSeek);
+		setBL(0x02064F9C, (u32)dsiSaveRead); // dsiSaveReadAsync
+		setBL(0x02064FCC, (u32)dsiSaveOpen);
+		setBL(0x02064FE4, (u32)dsiSaveSetLength);
+		setBL(0x02064FF4, (u32)dsiSaveClose);
+		setBL(0x02065008, (u32)dsiSaveSeek);
+		setBL(0x0206501C, (u32)dsiSaveClose);
+		setBL(0x02065034, (u32)dsiSaveWrite);
+		setBL(0x02065044, (u32)dsiSaveClose);
+		setBL(0x02065050, (u32)dsiSaveClose);
+		setBL(0x02065084, (u32)dsiSaveOpen);
+		setBL(0x02065098, (u32)dsiSaveSetLength);
+		setBL(0x020650B0, (u32)dsiSaveSeek);
+		setBL(0x020650C8, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+		*(u32*)0x02065154 = 0xE12FFF1E; // bx lr
+	}
+
 	// Robot Rescue (USA)
 	else if (strcmp(romTid, "KRTE") == 0 && saveOnFlashcard) {
 		/* *(u32*)0x0200C2DC = 0xE3A00001; // mov r0, #1
