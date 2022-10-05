@@ -1969,29 +1969,29 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Heathcliff: Spot On (USA)
-	// Unable to add save support, due to advanced code?
 	else if (strcmp(romTid, "K6SE") == 0 && saveOnFlashcard) {
-		*(u32*)0x02005248 = 0xE3A00000; // mov r0, #0
+		/* *(u32*)0x02005248 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x02005280 = 0xE3A00001; // mov r0, #1
 		*(u32*)0x020052C8 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x0205B604 = 0xE3A00001; // mov r0, #1
-		*(u32*)0x0205B608 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0205B608 = 0xE12FFF1E; // bx lr */
 
-		/* setBL(0x0204BF68, (u32)dsiSaveOpen);
+		setBL(0x0204BF68, (u32)dsiSaveOpenR);
 		setBL(0x0204BF88, (u32)dsiSaveCreate); // dsiSaveCreateAuto
 		setBL(0x0204BFC0, (u32)dsiSaveOpen);
-		setBL(0x0205F640, (u32)dsiSaveOpen);
-		setBL(0x0205F658, (u32)dsiSaveSeek);
-		setBL(0x0205F668, (u32)dsiSaveRead);
-		setBL(0x0205F680, (u32)dsiSaveClose);
-		setBL(0x0205F69C, (u32)dsiSaveOpen);
-		setBL(0x0205F6B4, (u32)dsiSaveSeek);
-		setBL(0x0205F6C4, (u32)dsiSaveWrite);
-		setBL(0x0205F6CC, (u32)dsiSaveClose);
-		setBL(0x0205F71C, (u32)dsiSaveOpen);
-		setBL(0x0205F738, (u32)dsiSaveSeek);
-		setBL(0x0205F748, (u32)dsiSaveRead);
-		setBL(0x0205F750, (u32)dsiSaveClose); */
+		setBL(0x0204BFD4, (u32)dsiSaveGetResultCode);
+		setBL(0x0205B640, (u32)dsiSaveOpen);
+		setBL(0x0205B658, (u32)dsiSaveSeek);
+		setBL(0x0205B668, (u32)dsiSaveRead);
+		setBL(0x0205B680, (u32)dsiSaveClose);
+		setBL(0x0205B69C, (u32)dsiSaveOpen);
+		setBL(0x0205B6B4, (u32)dsiSaveSeek);
+		setBL(0x0205B6C4, (u32)dsiSaveWrite);
+		setBL(0x0205B6CC, (u32)dsiSaveClose);
+		setBL(0x0205B71C, (u32)dsiSaveOpen);
+		setBL(0x0205B738, (u32)dsiSaveSeek);
+		setBL(0x0205B748, (u32)dsiSaveRead);
+		setBL(0x0205B750, (u32)dsiSaveClose);
 	}
 
 	// Hidden Photo (Europe)
