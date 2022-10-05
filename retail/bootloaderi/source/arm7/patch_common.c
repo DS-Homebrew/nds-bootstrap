@@ -4004,6 +4004,28 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0200EF44, (u32)dsiSaveClose);
 	}
 
+
+	// Zombie Blaster (USA)
+	else if (strcmp(romTid, "K7KE") == 0 && saveOnFlashcard) {
+		/* *(u32*)0x020055B0 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x020055C4 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02005600 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02067044 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02067048 = 0xE12FFF1E; // bx lr */
+
+		setBL(0x02065568, (u32)dsiSaveOpenR);
+		setBL(0x02065584, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+		setBL(0x020655C0, (u32)dsiSaveOpen);
+		setBL(0x020655D4, (u32)dsiSaveGetResultCode);
+		setBL(0x02067068, (u32)dsiSaveOpen);
+		setBL(0x02067084, (u32)dsiSaveWrite);
+		setBL(0x02067090, (u32)dsiSaveClose);
+		setBL(0x020670E4, (u32)dsiSaveOpen);
+		setBL(0x020670F8, (u32)dsiSaveGetLength);
+		setBL(0x0206710C, (u32)dsiSaveRead);
+		setBL(0x02067118, (u32)dsiSaveClose);
+	}
+
 	else if (dsiSD) {
 		return;
 	}

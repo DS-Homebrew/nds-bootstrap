@@ -10149,6 +10149,35 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02042D50 = 0xE1A00000; // nop
 		*(u32*)0x02042D58 = 0xE8BD8010; // LDMFD SP!, {R4,PC}
 	}
+
+	// Zombie Blaster (USA)
+	else if (strcmp(romTid, "K7KE") == 0) {
+		*(u32*)0x02004838 = 0xE1A00000; // nop
+		*(u32*)0x0200499C = 0xE1A00000; // nop
+		*(u32*)0x0201A710 = 0xE1A00000; // nop
+		*(u32*)0x0201E2D0 = 0xE1A00000; // nop
+		*(u32*)0x02024888 = 0xE1A00000; // nop
+		*(u32*)0x0202682C = 0xE1A00000; // nop
+		*(u32*)0x02026830 = 0xE1A00000; // nop
+		*(u32*)0x0202683C = 0xE1A00000; // nop
+		*(u32*)0x0202699C = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x020269F8, heapEnd); // mov r0, #0x23C0000
+		*(u32*)0x0202B29C = 0xE1A00000; // nop
+		*(u32*)0x0202D5D8 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0202D5DC = 0xE12FFF1E; // bx lr
+		setBL(0x02065568, (u32)dsiSaveOpenR);
+		setBL(0x02065584, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+		setBL(0x020655C0, (u32)dsiSaveOpen);
+		setBL(0x020655D4, (u32)dsiSaveGetResultCode);
+		*(u32*)0x020655EC = 0xE1A00000; // nop
+		setBL(0x02067068, (u32)dsiSaveOpen);
+		setBL(0x02067084, (u32)dsiSaveWrite);
+		setBL(0x02067090, (u32)dsiSaveClose);
+		setBL(0x020670E4, (u32)dsiSaveOpen);
+		setBL(0x020670F8, (u32)dsiSaveGetLength);
+		setBL(0x0206710C, (u32)dsiSaveRead);
+		setBL(0x02067118, (u32)dsiSaveClose);
+	}
 }
 
 void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params_t* moduleParams) {
