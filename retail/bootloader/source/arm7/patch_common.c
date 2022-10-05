@@ -8114,6 +8114,153 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02035CA8 = 0xE1A00000; // nop
 	}
 
+	// Real Crimes: Jack the Ripper (USA)
+	else if (strcmp(romTid, "KRCE") == 0) {
+		const u32 dsiSaveCreateT = 0x020119A0;
+		*(u16*)dsiSaveCreateT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveCreateT + 4), dsiSaveCreate, 0xC);
+
+		const u32 dsiSaveOpenT = 0x020119B0;
+		*(u16*)dsiSaveOpenT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveOpenT + 4), dsiSaveOpen, 0xC);
+
+		const u32 dsiSaveCloseT = 0x020119C0;
+		*(u16*)dsiSaveCloseT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveCloseT + 4), dsiSaveClose, 0xC);
+
+		const u32 dsiSaveSeekT = 0x020119D0;
+		*(u16*)dsiSaveSeekT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveSeekT + 4), dsiSaveSeek, 0xC);
+
+		const u32 dsiSaveReadT = 0x020119E0;
+		*(u16*)dsiSaveReadT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveReadT + 4), dsiSaveRead, 0xC);
+
+		const u32 dsiSaveWriteT = 0x020119F0;
+		*(u16*)dsiSaveWriteT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveWriteT + 4), dsiSaveWrite, 0xC);
+
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x020103D8 = 0xE1A00000; // nop
+		*(u32*)0x02013974 = 0xE1A00000; // nop
+		*(u32*)0x02017B00 = 0xE1A00000; // nop
+		*(u32*)0x02019974 = 0xE1A00000; // nop
+		*(u32*)0x02019978 = 0xE1A00000; // nop
+		*(u32*)0x02019984 = 0xE1A00000; // nop
+		*(u32*)0x02019AE4 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x02019B40, heapEnd); // mov r0, #0x23C0000
+		*(u32*)0x0201AFB8 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
+		*(u32*)0x0201E390 = 0xE1A00000; // nop
+		setBLThumb(0x02026358, dsiSaveOpenT);
+		setBLThumb(0x02026370, dsiSaveSeekT);
+		setBLThumb(0x02026382, dsiSaveReadT);
+		setBLThumb(0x02026398, dsiSaveReadT);
+		setBLThumb(0x020263C0, dsiSaveCloseT);
+		doubleNopT(0x020263DA);
+		setBLThumb(0x0202642E, dsiSaveOpenT);
+		setBLThumb(0x0202644E, dsiSaveSeekT);
+		setBLThumb(0x02026460, dsiSaveReadT);
+		setBLThumb(0x02026476, dsiSaveReadT);
+		setBLThumb(0x0202649E, dsiSaveCloseT);
+		doubleNopT(0x020264B6);
+		setBLThumb(0x020264F8, dsiSaveOpenT);
+		setBLThumb(0x0202650C, dsiSaveCloseT);
+		doubleNopT(0x0202651E);
+		setBLThumb(0x02026558, dsiSaveOpenT);
+		setBLThumb(0x0202656A, dsiSaveCloseT);
+		doubleNopT(0x0202657C);
+		*(u16*)0x020265B6 = 0x2001; // movs r0, #1 (dsiSaveOpenDir)
+		*(u16*)0x020265B8 = 0x46C0; // nop
+		doubleNopT(0x020265C0); // dsiSaveCloseDir
+		setBLThumb(0x020265CC, dsiSaveOpenT);
+		setBLThumb(0x020265D6, dsiSaveCloseT);
+		setBLThumb(0x02026656, dsiSaveCreateT);
+		setBLThumb(0x02026666, dsiSaveOpenT);
+		setBLThumb(0x02026674, dsiSaveWriteT);
+		setBLThumb(0x020266DA, dsiSaveCloseT);
+		doubleNopT(0x020266EE);
+		setBLThumb(0x02026754, dsiSaveSeekT);
+		setBLThumb(0x0202675E, dsiSaveWriteT);
+		setBLThumb(0x02026774, dsiSaveWriteT);
+		setBLThumb(0x020267AA, dsiSaveSeekT);
+		setBLThumb(0x020267B4, dsiSaveWriteT);
+		setBLThumb(0x020267CA, dsiSaveWriteT);
+		*(u16*)0x020471B4 = 0x2100; // movs r1, #0 (Skip Manual screen)
+	}
+
+	// Real Crimes: Jack the Ripper (Europe, Australia)
+	else if (strcmp(romTid, "KRCV") == 0) {
+		const u32 dsiSaveCreateT = 0x020119A4;
+		*(u16*)dsiSaveCreateT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveCreateT + 4), dsiSaveCreate, 0xC);
+
+		const u32 dsiSaveOpenT = 0x020119B4;
+		*(u16*)dsiSaveOpenT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveOpenT + 4), dsiSaveOpen, 0xC);
+
+		const u32 dsiSaveCloseT = 0x020119C4;
+		*(u16*)dsiSaveCloseT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveCloseT + 4), dsiSaveClose, 0xC);
+
+		const u32 dsiSaveSeekT = 0x020119D4;
+		*(u16*)dsiSaveSeekT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveSeekT + 4), dsiSaveSeek, 0xC);
+
+		const u32 dsiSaveReadT = 0x020119E4;
+		*(u16*)dsiSaveReadT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveReadT + 4), dsiSaveRead, 0xC);
+
+		const u32 dsiSaveWriteT = 0x020119F4;
+		*(u16*)dsiSaveWriteT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveWriteT + 4), dsiSaveWrite, 0xC);
+
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x020103DC = 0xE1A00000; // nop
+		*(u32*)0x02013978 = 0xE1A00000; // nop
+		*(u32*)0x02017B04 = 0xE1A00000; // nop
+		*(u32*)0x02019978 = 0xE1A00000; // nop
+		*(u32*)0x0201997C = 0xE1A00000; // nop
+		*(u32*)0x02019988 = 0xE1A00000; // nop
+		*(u32*)0x02019AE8 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x02019B44, heapEnd); // mov r0, #0x23C0000
+		*(u32*)0x0201AFBC = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
+		*(u32*)0x0201E394 = 0xE1A00000; // nop
+		setBLThumb(0x02026338, dsiSaveOpenT);
+		setBLThumb(0x0202634E, dsiSaveSeekT);
+		setBLThumb(0x02026360, dsiSaveReadT);
+		setBLThumb(0x02026376, dsiSaveReadT);
+		setBLThumb(0x0202639E, dsiSaveCloseT);
+		doubleNopT(0x020263B8);
+		setBLThumb(0x0202640E, dsiSaveOpenT);
+		setBLThumb(0x0202642C, dsiSaveSeekT);
+		setBLThumb(0x0202643E, dsiSaveReadT);
+		setBLThumb(0x02026454, dsiSaveReadT);
+		setBLThumb(0x0202647C, dsiSaveCloseT);
+		doubleNopT(0x02026494);
+		setBLThumb(0x020264D8, dsiSaveOpenT);
+		setBLThumb(0x020264EC, dsiSaveCloseT);
+		doubleNopT(0x020264FE);
+		setBLThumb(0x02026538, dsiSaveOpenT);
+		setBLThumb(0x0202654A, dsiSaveCloseT);
+		doubleNopT(0x0202655C);
+		*(u16*)0x02026596 = 0x2001; // movs r0, #1 (dsiSaveOpenDir)
+		*(u16*)0x02026598 = 0x46C0; // nop
+		doubleNopT(0x020265A0); // dsiSaveCloseDir
+		setBLThumb(0x020265AC, dsiSaveOpenT);
+		setBLThumb(0x020265B6, dsiSaveCloseT);
+		setBLThumb(0x02026636, dsiSaveCreateT);
+		setBLThumb(0x02026646, dsiSaveOpenT);
+		setBLThumb(0x020266B0, dsiSaveCloseT);
+		doubleNopT(0x020266C4);
+		setBLThumb(0x02026726, dsiSaveSeekT);
+		setBLThumb(0x02026730, dsiSaveWriteT);
+		setBLThumb(0x02026746, dsiSaveWriteT);
+		setBLThumb(0x0202677C, dsiSaveSeekT);
+		setBLThumb(0x02026786, dsiSaveWriteT);
+		setBLThumb(0x0202679C, dsiSaveWriteT);
+		*(u16*)0x020471E4 = 0x2100; // movs r1, #0 (Skip Manual screen)
+	}
+
 	// Remote Racers (USA)
 	// Remote Racers (Europe, Australia)
 	// Requires 8MB of RAM
