@@ -823,6 +823,25 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x020461C8, (u32)dsiSaveClose);
 	}
 
+	// Bookworm (USA)
+	/*else if (strcmp(romTid, "KBKE") == 0 && saveOnFlashcard) {
+		setBL(0x0204E744, (u32)dsiSaveClose);
+		setBL(0x0204EA68, (u32)dsiSaveSeek);
+		setBL(0x0204EAA8, (u32)dsiSaveWrite);
+		setBL(0x0204EAF0, (u32)dsiSaveSeek);
+		setBL(0x0204EB18, (u32)dsiSaveWrite);
+		*(u32*)0x0204EB48 = 0xE1A00000; // nop (dsiSaveFlush)
+		setBL(0x0204EB90, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+		setBL(0x0204EBA8, (u32)dsiSaveOpen);
+		setBL(0x0204EBD8, (u32)dsiSaveSetLength);
+		setBL(0x0204EC8C, (u32)dsiSaveWrite);
+		*(u32*)0x0204ECC4 = 0xE1A00000; // nop (dsiSaveFlush)
+		setBL(0x0204ECD0, (u32)dsiSaveGetResultCode);
+		setBL(0x0204ED04, (u32)dsiSaveOpen);
+		setBL(0x0204ED30, (u32)dsiSaveGetLength);
+		setBL(0x0204ED88, (u32)dsiSaveRead);
+	}*/
+
 	// Art Style: BOXLIFE (USA)
 	else if (strcmp(romTid, "KAHE") == 0 && saveOnFlashcard) {
 		setBL(0x020353B4, (u32)dsiSaveOpen);
