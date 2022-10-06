@@ -2090,6 +2090,44 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02024980, (u32)dsiSaveCreate);
 	}
 
+	// Little Red Riding Hood's Zombie BBQ (USA)
+	else if (strcmp(romTid, "KZBE") == 0 && saveOnFlashcard) {
+		*(u32*)0x02026BFC = 0xE3A00001; // mov r0, #1
+		setBL(0x0204A7D4, (u32)dsiSaveOpen);
+		setBL(0x0204A7EC, (u32)dsiSaveGetLength);
+		setBL(0x0204A7FC, (u32)dsiSaveSeek);
+		setBL(0x0204A80C, (u32)dsiSaveWrite);
+		setBL(0x0204A814, (u32)dsiSaveClose);
+		setBL(0x0204A884, (u32)dsiSaveOpen);
+		setBL(0x0204A89C, (u32)dsiSaveGetLength);
+		setBL(0x0204A8AC, (u32)dsiSaveSeek);
+		setBL(0x0204A8BC, (u32)dsiSaveRead);
+		setBL(0x0204A8C4, (u32)dsiSaveClose);
+		setBL(0x0204A93C, (u32)dsiSaveCreate);
+		setBL(0x0204A968, (u32)dsiSaveOpen);
+		setBL(0x0204A9A4, (u32)dsiSaveWrite);
+		setBL(0x0204A9B4, (u32)dsiSaveClose);
+	}
+
+	// Little Red Riding Hood's Zombie BBQ (Europe)
+	else if (strcmp(romTid, "KZBP") == 0 && saveOnFlashcard) {
+		*(u32*)0x02031F5C = 0xE3A00001; // mov r0, #1
+		setBL(0x02055AC8, (u32)dsiSaveOpen);
+		setBL(0x02055AE0, (u32)dsiSaveGetLength);
+		setBL(0x02055AF0, (u32)dsiSaveSeek);
+		setBL(0x02055B00, (u32)dsiSaveWrite);
+		setBL(0x02055B08, (u32)dsiSaveClose);
+		setBL(0x02055B78, (u32)dsiSaveOpen);
+		setBL(0x02055B90, (u32)dsiSaveGetLength);
+		setBL(0x02055BA0, (u32)dsiSaveSeek);
+		setBL(0x02055BB0, (u32)dsiSaveRead);
+		setBL(0x02055BB8, (u32)dsiSaveClose);
+		setBL(0x02055C30, (u32)dsiSaveCreate);
+		setBL(0x02055C5C, (u32)dsiSaveOpen);
+		setBL(0x02055C98, (u32)dsiSaveWrite);
+		setBL(0x02055CA8, (u32)dsiSaveClose);
+	}
+
 	// Littlest Pet Shop (USA)
 	// Littlest Pet Shop (Europe, Australia)
 	else if ((strcmp(romTid, "KLPE") == 0 || strcmp(romTid, "KLPV") == 0) && saveOnFlashcard) {

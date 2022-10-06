@@ -5514,6 +5514,77 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020563F8 = 0xE1A00000; // nop
 	}*/
 
+	// Little Red Riding Hood's Zombie BBQ (USA)
+	else if (strcmp(romTid, "KZBE") == 0 && extendedMemory2) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x020050AC = 0xE1A00000; // nop
+		*(u32*)0x02005124 = 0xE1A00000; // nop
+		*(u32*)0x02005194 = 0xE1A00000; // nop
+		*(u32*)0x02005198 = 0xE1A00000; // nop
+		*(u32*)0x0200519C = 0xE1A00000; // nop
+		*(u32*)0x0200BFE0 = 0xE1A00000; // nop
+		*(u32*)0x0200FDB4 = 0xE1A00000; // nop
+		*(u32*)0x020172A0 = 0xE1A00000; // nop
+		*(u32*)0x02019168 = 0xE1A00000; // nop
+		*(u32*)0x0201916C = 0xE1A00000; // nop
+		*(u32*)0x02019178 = 0xE1A00000; // nop
+		*(u32*)0x020192BC = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x02019318, 0x02700000); // mov r0, #0x2700000
+		*(u32*)0x0201D3D4 = 0xE1A00000; // nop
+		*(u32*)0x0201F65C = 0xE1A00000; // nop
+		*(u32*)0x0202178C = 0xE1A00000; // nop
+		*(u32*)0x02021790 = 0xE1A00000; // nop
+		*(u32*)0x02021794 = 0xE1A00000; // nop
+		*(u32*)0x02026224 = 0xE1A00000; // nop
+		*(u32*)0x02026BFC = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02026C18 = 0xE1A00000; // nop
+		*(u32*)0x02026CB0 = 0xE1A00000; // nop
+		*(u32*)0x02026CB4 = 0xE1A00000; // nop
+		*(u32*)0x02026CB8 = 0xE1A00000; // nop
+		setBL(0x0204A7D4, (u32)dsiSaveOpen);
+		setBL(0x0204A7EC, (u32)dsiSaveGetLength);
+		setBL(0x0204A7FC, (u32)dsiSaveSeek);
+		setBL(0x0204A80C, (u32)dsiSaveWrite);
+		setBL(0x0204A814, (u32)dsiSaveClose);
+		setBL(0x0204A884, (u32)dsiSaveOpen);
+		setBL(0x0204A89C, (u32)dsiSaveGetLength);
+		setBL(0x0204A8AC, (u32)dsiSaveSeek);
+		setBL(0x0204A8BC, (u32)dsiSaveRead);
+		setBL(0x0204A8C4, (u32)dsiSaveClose);
+		setBL(0x0204A93C, (u32)dsiSaveCreate);
+		setBL(0x0204A968, (u32)dsiSaveOpen);
+		setBL(0x0204A9A4, (u32)dsiSaveWrite);
+		setBL(0x0204A9B4, (u32)dsiSaveClose);
+	}
+
+	// Little Red Riding Hood's Zombie BBQ (Europe)
+	else if (strcmp(romTid, "KZBP") == 0 && extendedMemory2) {
+		*(u32*)0x02017550 = 0xE1A00000; // nop
+		*(u32*)0x0201B324 = 0xE1A00000; // nop
+		*(u32*)0x02022810 = 0xE1A00000; // nop
+		*(u32*)0x020246CC = 0xE1A00000; // nop
+		*(u32*)0x020246D0 = 0xE1A00000; // nop
+		*(u32*)0x020246DC = 0xE1A00000; // nop
+		*(u32*)0x02024820 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x0202487C, 0x02700000); // mov r0, #0x2700000
+		*(u32*)0x02028790 = 0xE1A00000; // nop
+		*(u32*)0x02031F5C = 0xE3A00001; // mov r0, #1
+		setBL(0x02055AC8, (u32)dsiSaveOpen);
+		setBL(0x02055AE0, (u32)dsiSaveGetLength);
+		setBL(0x02055AF0, (u32)dsiSaveSeek);
+		setBL(0x02055B00, (u32)dsiSaveWrite);
+		setBL(0x02055B08, (u32)dsiSaveClose);
+		setBL(0x02055B78, (u32)dsiSaveOpen);
+		setBL(0x02055B90, (u32)dsiSaveGetLength);
+		setBL(0x02055BA0, (u32)dsiSaveSeek);
+		setBL(0x02055BB0, (u32)dsiSaveRead);
+		setBL(0x02055BB8, (u32)dsiSaveClose);
+		setBL(0x02055C30, (u32)dsiSaveCreate);
+		setBL(0x02055C5C, (u32)dsiSaveOpen);
+		setBL(0x02055C98, (u32)dsiSaveWrite);
+		setBL(0x02055CA8, (u32)dsiSaveClose);
+	}
+
 	// Littlest Pet Shop (USA)
 	// Littlest Pet Shop (Europe, Australia)
 	else if (strcmp(romTid, "KLPE") == 0 || strcmp(romTid, "KLPV") == 0) {
