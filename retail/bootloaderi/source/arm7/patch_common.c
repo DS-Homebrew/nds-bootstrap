@@ -2071,6 +2071,25 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02024980, (u32)dsiSaveCreate);
 	}
 
+	// Littlest Pet Shop (USA)
+	// Littlest Pet Shop (Europe, Australia)
+	else if ((strcmp(romTid, "KLPE") == 0 || strcmp(romTid, "KLPV") == 0) && saveOnFlashcard) {
+		*(u32*)0x0200509C = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		// Skip Manual screen
+		for (int i = 0; i < 11; i++) {
+			u32* offset = (u32*)0x020055BC;
+			offset[i] = 0xE1A00000; // nop
+		}
+		tonccpy((u32*)0x020159F0, dsiSaveGetResultCode, 0xC);
+		setBL(0x0205DE18, (u32)dsiSaveOpen);
+		setBL(0x0205DE70, (u32)dsiSaveRead);
+		setBL(0x0205DF24, (u32)dsiSaveCreate);
+		setBL(0x0205DF34, (u32)dsiSaveOpen);
+		setBL(0x0205DF7C, (u32)dsiSaveSetLength);
+		setBL(0x0205DF8C, (u32)dsiSaveWrite);
+		setBL(0x0205DF94, (u32)dsiSaveClose);
+	}
+
 	// Magical Diary: Secrets Sharing (USA)
 	else if (strcmp(romTid, "K73E") == 0 && saveOnFlashcard) {
 		*(u32*)0x0201A17C = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)

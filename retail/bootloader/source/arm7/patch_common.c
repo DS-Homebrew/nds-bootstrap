@@ -5477,6 +5477,38 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020563F8 = 0xE1A00000; // nop
 	}*/
 
+	// Littlest Pet Shop (USA)
+	// Littlest Pet Shop (Europe, Australia)
+	else if (strcmp(romTid, "KLPE") == 0 || strcmp(romTid, "KLPV") == 0) {
+		*(u32*)0x0200506C = 0xE1A00000; // nop
+		*(u32*)0x02005088 = 0xE1A00000; // nop
+		*(u32*)0x0200509C = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		// Skip Manual screen
+		for (int i = 0; i < 11; i++) {
+			u32* offset = (u32*)0x020055BC;
+			offset[i] = 0xE1A00000; // nop
+		}
+		*(u32*)0x02014D4C = 0xE1A00000; // nop
+		tonccpy((u32*)0x020159F0, dsiSaveGetResultCode, 0xC);
+		*(u32*)0x02018354 = 0xE1A00000; // nop
+		*(u32*)0x0201E8A4 = 0xE1A00000; // nop
+		*(u32*)0x020207B0 = 0xE1A00000; // nop
+		*(u32*)0x020207B4 = 0xE1A00000; // nop
+		*(u32*)0x020207C0 = 0xE1A00000; // nop
+		*(u32*)0x02020904 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x02020960, heapEnd); // mov r0, #0x23C0000
+		*(u32*)0x02021C1C = 0xE1A00000; // nop
+		*(u32*)0x02021C24 = 0xE8BD8010; // LDMFD SP!, {R4,PC}
+		*(u32*)0x02025168 = 0xE1A00000; // nop
+		setBL(0x0205DE18, (u32)dsiSaveOpen);
+		setBL(0x0205DE70, (u32)dsiSaveRead);
+		setBL(0x0205DF24, (u32)dsiSaveCreate);
+		setBL(0x0205DF34, (u32)dsiSaveOpen);
+		setBL(0x0205DF7C, (u32)dsiSaveSetLength);
+		setBL(0x0205DF8C, (u32)dsiSaveWrite);
+		setBL(0x0205DF94, (u32)dsiSaveClose);
+	}
+
 	// Little Twin Stars (Japan)
 	// Locks up(?) after confirming age and left/right hand
 	else if (strcmp(romTid, "KQ3J") == 0) {
