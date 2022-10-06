@@ -2264,7 +2264,9 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Saving is difficult to implement, preventing support
 	/*else if (strcmp(romTid, "KBKE") == 0) {
 		*(u32*)0x0200498C = 0xE1A00000; // nop
-		*(u32*)0x02017DE4 = 0x8C000;
+		if (!extendedMemory2) {
+			*(u32*)0x02017DE4 = 0x8C000;
+		}
 		setBL(0x0204E744, (u32)dsiSaveClose);
 		setBL(0x0204EA68, (u32)dsiSaveSeek);
 		setBL(0x0204EAA8, (u32)dsiSaveWrite);
@@ -2287,8 +2289,10 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02070488 = 0xE1A00000; // nop
 		*(u32*)0x02070494 = 0xE1A00000; // nop
 		*(u32*)0x020705F4 = 0xE1A00000; // nop
-		patchHiHeapDSiWare(0x02070650, heapEnd); // mov r0, #0x23C0000
-		*(u32*)0x02070784 = 0x020DE060;
+		patchHiHeapDSiWare(0x02070650, extendedMemory2 ? 0x02700000 : heapEnd); // mov r0, extendedMemory2 ? #0x2700000 : #0x23C0000
+		if (!extendedMemory2) {
+			*(u32*)0x02070784 = 0x020DE060;
+		}
 		*(u32*)0x02071E6C = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
 		*(u32*)0x0207574C = 0xE1A00000; // nop
 	}*/
