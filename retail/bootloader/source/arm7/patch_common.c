@@ -7662,8 +7662,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}*/
 
 	// Plants vs. Zombies (USA)
-	// Requires 8MB of RAM
-	else if (strcmp(romTid, "KZLE") == 0 && extendedMemory2) {
+	else if (strcmp(romTid, "KZLE") == 0) {
 		*(u32*)0x0200498C = 0xE1A00000; // nop
 		setBL(0x02099244, (u32)dsiSaveOpen);
 		setBL(0x02099268, (u32)dsiSaveGetLength);
@@ -7692,15 +7691,15 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02108714 = 0xE1A00000; // nop
 		*(u32*)0x02108720 = 0xE1A00000; // nop
 		*(u32*)0x02108880 = 0xE1A00000; // nop
-		patchHiHeapDSiWare(0x021088DC, heapEnd); // mov r0, #0x23C0000
+		patchHiHeapDSiWare(0x021088DC, extendedMemory2 ? 0x02700000 : heapEnd); // mov r0, extendedMemory2 ? #0x2700000 : #0x23C0000
+		*(u32*)0x02108A10 = 0x0226BE80;
 		*(u32*)0x02109BCC = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
 		*(u32*)0x0210DBA4 = 0xE1A00000; // nop
 		*(u32*)0x0211547C = 0xE1A00000; // nop
 	}
 
 	// Plants vs. Zombies (Europe, Australia)
-	// Requires 8MB of RAM
-	else if (strcmp(romTid, "KZLV") == 0 && extendedMemory2) {
+	else if (strcmp(romTid, "KZLV") == 0) {
 		*(u32*)0x0200498C = 0xE1A00000; // nop
 		setBL(0x02099AB0, (u32)dsiSaveOpen);
 		setBL(0x02099AD4, (u32)dsiSaveGetLength);
@@ -7728,7 +7727,8 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0210A76C = 0xE1A00000; // nop
 		*(u32*)0x0210A778 = 0xE1A00000; // nop
 		*(u32*)0x0210A8D8 = 0xE1A00000; // nop
-		patchHiHeapDSiWare(0x0210A934, heapEnd); // mov r0, #0x23C0000
+		patchHiHeapDSiWare(0x0210A934, extendedMemory2 ? 0x02700000 : heapEnd); // mov r0, extendedMemory2 ? #0x2700000 : #0x23C0000
+		*(u32*)0x0210AA68 = 0x0226F8E0;
 		*(u32*)0x0210BC24 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
 		*(u32*)0x0210FBFC = 0xE1A00000; // nop
 		*(u32*)0x021174D4 = 0xE1A00000; // nop
