@@ -10178,6 +10178,87 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0206710C, (u32)dsiSaveRead);
 		setBL(0x02067118, (u32)dsiSaveClose);
 	}
+
+	// Zombie Skape (USA)
+	// Zombie Skape (Europe)
+	else if (strcmp(romTid, "KZYE") == 0 || strcmp(romTid, "KZYP") == 0) {
+		*(u32*)0x02004838 = 0xE1A00000; // nop
+		*(u32*)0x0200499C = 0xE1A00000; // nop
+		*(u32*)0x020050E8 = 0xE1A00000; // nop
+		*(u32*)0x0200510C = 0xE1A00000; // nop
+		*(u32*)0x02005110 = 0xE1A00000; // nop
+		*(u32*)0x02005114 = 0xE1A00000; // nop
+		*(u32*)0x02005118 = 0xE1A00000; // nop
+		*(u32*)0x0200511C = 0xE1A00000; // nop
+		*(u32*)0x02005138 = 0xE1A00000; // nop
+		*(u32*)0x0200514C = 0xE1A00000; // nop
+		*(u32*)0x02005150 = 0xE1A00000; // nop
+		*(u32*)0x02005154 = 0xE1A00000; // nop
+		*(u32*)0x02005158 = 0xE1A00000; // nop
+		*(u32*)0x0200515C = 0xE1A00000; // nop
+		*(u32*)0x02010AB8 = 0xE1A00000; // nop
+		*(u32*)0x02010AEC = 0xE1A00000; // nop
+		setBL(0x02011D58, (u32)dsiSaveCreate);
+		*(u32*)0x02011D6C = 0xE1A00000; // nop
+		*(u32*)0x02011D78 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02011DF8 = 0xE1A00000; // nop
+		*(u32*)0x02011DFC = 0xE1A00000; // nop
+		*(u32*)0x02011E00 = 0xE1A00000; // nop
+		setBL(0x02011E0C, (u32)dsiSaveGetResultCode);
+		*(u32*)0x02011E24 = 0xE1A00000; // nop
+		*(u32*)0x02011E30 = 0xE3A00001; // mov r0, #1
+		if (ndsHeader->gameCode[3] == 'E') {
+			setBL(0x02032118, (u32)dsiSaveOpen);
+			setBL(0x02032130, (u32)dsiSaveGetLength);
+			setBL(0x02032140, (u32)dsiSaveSeek);
+			setBL(0x02032150, (u32)dsiSaveWrite);
+			setBL(0x02032158, (u32)dsiSaveClose);
+			setBL(0x020321C8, (u32)dsiSaveOpen);
+			setBL(0x020321E0, (u32)dsiSaveGetLength);
+			setBL(0x020321F4, (u32)dsiSaveSeek);
+			setBL(0x02032204, (u32)dsiSaveRead);
+			setBL(0x0203220C, (u32)dsiSaveClose);
+			setBL(0x02032284, (u32)dsiSaveCreate);
+			setBL(0x020322B0, (u32)dsiSaveOpen);
+			setBL(0x020322EC, (u32)dsiSaveWrite);
+			setBL(0x020322FC, (u32)dsiSaveClose);
+			*(u32*)0x020641BC = 0xE1A00000; // nop
+			*(u32*)0x0206AAD8 = 0xE1A00000; // nop
+			*(u32*)0x0206C968 = 0xE1A00000; // nop
+			*(u32*)0x0206C96C = 0xE1A00000; // nop
+			*(u32*)0x0206C978 = 0xE1A00000; // nop
+			*(u32*)0x0206CAD8 = 0xE1A00000; // nop
+			patchHiHeapDSiWare(0x0206CB34, heapEnd); // mov r0, #0x23C0000
+			*(u32*)0x0206CC68 = 0x02255080;
+			*(u32*)0x02070A4C = 0xE1A00000; // nop
+			*(u32*)0x02073280 = 0xE1A00000; // nop
+		} else if (ndsHeader->gameCode[3] == 'P') {
+			setBL(0x02032164, (u32)dsiSaveOpen);
+			setBL(0x0203217C, (u32)dsiSaveGetLength);
+			setBL(0x0203218C, (u32)dsiSaveSeek);
+			setBL(0x0203219C, (u32)dsiSaveWrite);
+			setBL(0x020321A4, (u32)dsiSaveClose);
+			setBL(0x02032214, (u32)dsiSaveOpen);
+			setBL(0x0203222C, (u32)dsiSaveGetLength);
+			setBL(0x02032240, (u32)dsiSaveSeek);
+			setBL(0x02032250, (u32)dsiSaveRead);
+			setBL(0x02032258, (u32)dsiSaveClose);
+			setBL(0x020322D0, (u32)dsiSaveCreate);
+			setBL(0x020322FC, (u32)dsiSaveOpen);
+			setBL(0x02032338, (u32)dsiSaveWrite);
+			setBL(0x02032348, (u32)dsiSaveClose);
+			*(u32*)0x02064208 = 0xE1A00000; // nop
+			*(u32*)0x0206AB24 = 0xE1A00000; // nop
+			*(u32*)0x0206C9B4 = 0xE1A00000; // nop
+			*(u32*)0x0206C9B8 = 0xE1A00000; // nop
+			*(u32*)0x0206C9C4 = 0xE1A00000; // nop
+			*(u32*)0x0206CB24 = 0xE1A00000; // nop
+			patchHiHeapDSiWare(0x0206CB80, heapEnd); // mov r0, #0x23C0000
+			*(u32*)0x0206CCB4 = 0x02255160;
+			*(u32*)0x02070A98 = 0xE1A00000; // nop
+			*(u32*)0x020732CC = 0xE1A00000; // nop
+		}
+	}
 }
 
 void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params_t* moduleParams) {

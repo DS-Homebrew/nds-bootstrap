@@ -4026,6 +4026,46 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02067118, (u32)dsiSaveClose);
 	}
 
+	// Zombie Skape (USA)
+	// Zombie Skape (Europe)
+	else if ((strcmp(romTid, "KZYE") == 0 || strcmp(romTid, "KZYP") == 0) && saveOnFlashcard) {
+		setBL(0x02011D58, (u32)dsiSaveCreate);
+		*(u32*)0x02011D78 = 0xE3A00001; // mov r0, #1
+		setBL(0x02011E0C, (u32)dsiSaveGetResultCode);
+		*(u32*)0x02011E30 = 0xE3A00001; // mov r0, #1
+		if (ndsHeader->gameCode[3] == 'E') {
+			setBL(0x02032118, (u32)dsiSaveOpen);
+			setBL(0x02032130, (u32)dsiSaveGetLength);
+			setBL(0x02032140, (u32)dsiSaveSeek);
+			setBL(0x02032150, (u32)dsiSaveWrite);
+			setBL(0x02032158, (u32)dsiSaveClose);
+			setBL(0x020321C8, (u32)dsiSaveOpen);
+			setBL(0x020321E0, (u32)dsiSaveGetLength);
+			setBL(0x020321F4, (u32)dsiSaveSeek);
+			setBL(0x02032204, (u32)dsiSaveRead);
+			setBL(0x0203220C, (u32)dsiSaveClose);
+			setBL(0x02032284, (u32)dsiSaveCreate);
+			setBL(0x020322B0, (u32)dsiSaveOpen);
+			setBL(0x020322EC, (u32)dsiSaveWrite);
+			setBL(0x020322FC, (u32)dsiSaveClose);
+		} else if (ndsHeader->gameCode[3] == 'P') {
+			setBL(0x02032164, (u32)dsiSaveOpen);
+			setBL(0x0203217C, (u32)dsiSaveGetLength);
+			setBL(0x0203218C, (u32)dsiSaveSeek);
+			setBL(0x0203219C, (u32)dsiSaveWrite);
+			setBL(0x020321A4, (u32)dsiSaveClose);
+			setBL(0x02032214, (u32)dsiSaveOpen);
+			setBL(0x0203222C, (u32)dsiSaveGetLength);
+			setBL(0x02032240, (u32)dsiSaveSeek);
+			setBL(0x02032250, (u32)dsiSaveRead);
+			setBL(0x02032258, (u32)dsiSaveClose);
+			setBL(0x020322D0, (u32)dsiSaveCreate);
+			setBL(0x020322FC, (u32)dsiSaveOpen);
+			setBL(0x02032338, (u32)dsiSaveWrite);
+			setBL(0x02032348, (u32)dsiSaveClose);
+		}
+	}
+
 	else if (dsiSD) {
 		return;
 	}
