@@ -10595,6 +10595,105 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			*(u32*)0x020732CC = 0xE1A00000; // nop
 		}
 	}
+
+	// Zuma's Revenge! (USA)
+	// Zuma's Revenge! (Europe, Australia)
+	else if (strcmp(romTid, "KZTE") == 0 || strcmp(romTid, "KZTV") == 0) {
+		*(u32*)0x02004838 = 0xE1A00000; // nop
+		*(u32*)0x0200499C = 0xE1A00000; // nop
+		*(u32*)0x0200519C = 0xE1A00000; // nop
+		setBL(0x02014134, (u32)dsiSaveOpen);
+		setBL(0x02014158, (u32)dsiSaveGetLength);
+		setBL(0x0201416C, (u32)dsiSaveRead);
+		setBL(0x0201419C, (u32)dsiSaveClose);
+		setBL(0x02014214, (u32)dsiSaveOpen);
+		setBL(0x02014240, (u32)dsiSaveSetLength);
+		setBL(0x02014264, (u32)dsiSaveWrite);
+		setBL(0x02014280, (u32)dsiSaveClose);
+		*(u32*)0x020142B8 = 0xE1A00000; // nop (dsiSaveCreateDirAuto)
+		setBL(0x020142C4, (u32)dsiSaveCreate);
+		*(u32*)0x02015334 = 0xE1A00000; // nop
+		tonccpy((u32*)0x02016E10, dsiSaveGetResultCode, 0xC);
+		*(u32*)0x02019CEC = 0xE1A00000; // nop
+		*(u32*)0x0201E0B0 = 0xE1A00000; // nop
+		*(u32*)0x0201FF90 = 0xE1A00000; // nop
+		*(u32*)0x0201FF94 = 0xE1A00000; // nop
+		*(u32*)0x0201FFA0 = 0xE1A00000; // nop
+		*(u32*)0x02020100 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x0202015C, heapEnd); // mov r0, #0x23C0000
+		*(u32*)0x02020290 -= 0x30000;
+		*(u32*)0x020213C0 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
+		*(u32*)0x02024BBC = 0xE1A00000; // nop
+		if (ndsHeader->gameCode[3] == 'E') {
+			*(u32*)0x02081270 = 0xE1A00000; // nop
+			*(u32*)0x02081278 = 0xE1A00000; // nop
+			*(u32*)0x02081324 = 0xE1A00000; // nop
+			*(u32*)0x02081338 = 0xE1A00000; // nop
+			*(u32*)0x02081340 = 0xE1A00000; // nop
+			*(u32*)0x02081418 = 0xE1A00000; // nop
+			*(u32*)0x0208142C = 0xE1A00000; // nop
+			*(u32*)0x02081434 = 0xE1A00000; // nop
+			*(u32*)0x02081620 = 0xE1A00000; // nop
+			*(u32*)0x02081628 = 0xE1A00000; // nop
+			*(u32*)0x020816C8 = 0xE1A00000; // nop
+			*(u32*)0x020816DC = 0xE1A00000; // nop
+			*(u32*)0x020816E4 = 0xE1A00000; // nop
+			*(u32*)0x02081770 = 0xE1A00000; // nop
+			*(u32*)0x02081774 = 0xE1A00000; // nop
+			*(u32*)0x02081790 = 0xE1A00000; // nop
+			*(u32*)0x020817A4 = 0xE1A00000; // nop
+			*(u32*)0x020817AC = 0xE1A00000; // nop
+			*(u32*)0x0208180C = 0xE1A00000; // nop
+			*(u32*)0x02081814 = 0xE1A00000; // nop
+			*(u32*)0x02081850 = 0xE1A00000; // nop
+			*(u32*)0x02081864 = 0xE1A00000; // nop
+			*(u32*)0x0208186C = 0xE1A00000; // nop
+			*(u32*)0x02081990 = 0xE1A00000; // nop
+			*(u32*)0x02081998 = 0xE1A00000; // nop
+			*(u32*)0x02081AF0 = 0xE1A00000; // nop
+			*(u32*)0x02081B04 = 0xE1A00000; // nop
+			*(u32*)0x02081B0C = 0xE1A00000; // nop
+			*(u32*)0x02081B84 = 0xE1A00000; // nop
+			*(u32*)0x02081B8C = 0xE1A00000; // nop
+			*(u32*)0x02081D3C = 0xE1A00000; // nop
+			*(u32*)0x02081D50 = 0xE1A00000; // nop
+			*(u32*)0x02081D58 = 0xE1A00000; // nop
+		} else {
+			*(u32*)0x020812D8 = 0xE1A00000; // nop
+			*(u32*)0x020812E0 = 0xE1A00000; // nop
+			*(u32*)0x0208138C = 0xE1A00000; // nop
+			*(u32*)0x020813A0 = 0xE1A00000; // nop
+			*(u32*)0x020813A8 = 0xE1A00000; // nop
+			*(u32*)0x02081480 = 0xE1A00000; // nop
+			*(u32*)0x02081494 = 0xE1A00000; // nop
+			*(u32*)0x0208149C = 0xE1A00000; // nop
+			*(u32*)0x02081688 = 0xE1A00000; // nop
+			*(u32*)0x02081690 = 0xE1A00000; // nop
+			*(u32*)0x02081730 = 0xE1A00000; // nop
+			*(u32*)0x02081744 = 0xE1A00000; // nop
+			*(u32*)0x0208174C = 0xE1A00000; // nop
+			*(u32*)0x020817D8 = 0xE1A00000; // nop
+			*(u32*)0x020817E0 = 0xE1A00000; // nop
+			*(u32*)0x020817F8 = 0xE1A00000; // nop
+			*(u32*)0x0208180C = 0xE1A00000; // nop
+			*(u32*)0x02081814 = 0xE1A00000; // nop
+			*(u32*)0x02081874 = 0xE1A00000; // nop
+			*(u32*)0x0208187C = 0xE1A00000; // nop
+			*(u32*)0x020818B8 = 0xE1A00000; // nop
+			*(u32*)0x020818CC = 0xE1A00000; // nop
+			*(u32*)0x020818D4 = 0xE1A00000; // nop
+			*(u32*)0x020819F8 = 0xE1A00000; // nop
+			*(u32*)0x02081A00 = 0xE1A00000; // nop
+			*(u32*)0x02081B58 = 0xE1A00000; // nop
+			*(u32*)0x02081B6C = 0xE1A00000; // nop
+			*(u32*)0x02081B74 = 0xE1A00000; // nop
+			*(u32*)0x02081BEC = 0xE1A00000; // nop
+			*(u32*)0x02081BF4 = 0xE1A00000; // nop
+			*(u32*)0x02081DA4 = 0xE1A00000; // nop
+			*(u32*)0x02081DB8 = 0xE1A00000; // nop
+			*(u32*)0x02081DC0 = 0xE1A00000; // nop
+		}
+	}
 }
 
 void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params_t* moduleParams) {

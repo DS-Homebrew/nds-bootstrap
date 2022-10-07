@@ -4303,6 +4303,23 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// Zuma's Revenge! (USA)
+	// Zuma's Revenge! (Europe, Australia)
+	else if ((strcmp(romTid, "KZTE") == 0 || strcmp(romTid, "KZTV") == 0) && saveOnFlashcard) {
+		setBL(0x02014134, (u32)dsiSaveOpen);
+		setBL(0x02014158, (u32)dsiSaveGetLength);
+		setBL(0x0201416C, (u32)dsiSaveRead);
+		setBL(0x0201419C, (u32)dsiSaveClose);
+		setBL(0x02014214, (u32)dsiSaveOpen);
+		setBL(0x02014240, (u32)dsiSaveSetLength);
+		setBL(0x02014264, (u32)dsiSaveWrite);
+		setBL(0x02014280, (u32)dsiSaveClose);
+		*(u32*)0x020142B8 = 0xE1A00000; // nop (dsiSaveCreateDirAuto)
+		setBL(0x020142C4, (u32)dsiSaveCreate);
+		tonccpy((u32*)0x02016E10, dsiSaveGetResultCode, 0xC);
+		//*(u32*)0x020815F8 = 0xE12FFF1E; // bx lr
+	}
+
 	else if (dsiSD) {
 		return;
 	}
