@@ -778,6 +778,110 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02092E94, (u32)dsiSaveClose);
 	}
 
+	// Bejeweled Twist (USA)
+	else if (strcmp(romTid, "KBEE") == 0 && saveOnFlashcard) {
+		const u32 dsiSaveCreateT = 0x02095E90;
+		*(u16*)dsiSaveCreateT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveCreateT + 4), dsiSaveCreate, 0xC);
+
+		const u32 dsiSaveOpenT = 0x02095EA0;
+		*(u16*)dsiSaveOpenT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveOpenT + 4), dsiSaveOpen, 0xC);
+
+		const u32 dsiSaveCloseT = 0x02095EB0;
+		*(u16*)dsiSaveCloseT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveCloseT + 4), dsiSaveClose, 0xC);
+
+		const u32 dsiSaveSeekT = 0x02095EC0;
+		*(u16*)dsiSaveSeekT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveSeekT + 4), dsiSaveSeek, 0xC);
+
+		const u32 dsiSaveReadT = 0x02095ED0;
+		*(u16*)dsiSaveReadT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveReadT + 4), dsiSaveRead, 0xC);
+
+		const u32 dsiSaveGetResultCodeT = 0x02095794;
+		*(u16*)dsiSaveGetResultCodeT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveGetResultCodeT + 4), dsiSaveGetResultCode, 0xC);
+
+		const u32 dsiSaveSetLengthT = 0x02096254;
+		*(u16*)dsiSaveSetLengthT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveSetLengthT + 4), dsiSaveSetLength, 0xC);
+
+		const u32 dsiSaveWriteT = 0x02096444;
+		*(u16*)dsiSaveWriteT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveWriteT + 4), dsiSaveWrite, 0xC);
+
+		doubleNopT(0x020368DE); // dsiSaveCreateDirAuto
+		setBLThumb(0x020368E6, dsiSaveCreateT); // dsiSaveCreateAuto
+		setBLThumb(0x020368F0, dsiSaveOpenT);
+		//setBLThumb(0x020368FA, dsiSaveGetResultCodeT);
+		doubleNopT(0x0203691C); // dsiSaveCreateDirAuto
+		setBLThumb(0x02036924, dsiSaveCreateT); // dsiSaveCreateAuto
+		setBLThumb(0x0203692E, dsiSaveOpenT);
+		//setBLThumb(0x02036938, dsiSaveGetResultCodeT);
+		//setBLThumb(0x0203696E, dsiSaveSetLengthT);
+		setBLThumb(0x02036978, dsiSaveSeekT);
+		//setBLThumb(0x02036982, dsiSaveWriteT);
+		setBLThumb(0x02036988, dsiSaveCloseT);
+		setBLThumb(0x020369B6, dsiSaveOpenT);
+		setBLThumb(0x020369D0, dsiSaveSeekT);
+		setBLThumb(0x020369DA, dsiSaveReadT);
+		setBLThumb(0x020369E0, dsiSaveCloseT);
+	}
+
+	// Bejeweled Twist (Europe, Australia)
+	else if (strcmp(romTid, "KBEV") == 0 && saveOnFlashcard) {
+		const u32 dsiSaveCreateT = 0x02094A78;
+		*(u16*)dsiSaveCreateT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveCreateT + 4), dsiSaveCreate, 0xC);
+
+		const u32 dsiSaveOpenT = 0x02094A88;
+		*(u16*)dsiSaveOpenT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveOpenT + 4), dsiSaveOpen, 0xC);
+
+		const u32 dsiSaveCloseT = 0x02094A98;
+		*(u16*)dsiSaveCloseT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveCloseT + 4), dsiSaveClose, 0xC);
+
+		const u32 dsiSaveSeekT = 0x02094AA8;
+		*(u16*)dsiSaveSeekT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveSeekT + 4), dsiSaveSeek, 0xC);
+
+		const u32 dsiSaveReadT = 0x02094AB8;
+		*(u16*)dsiSaveReadT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveReadT + 4), dsiSaveRead, 0xC);
+
+		const u32 dsiSaveGetResultCodeT = 0x020943F0;
+		*(u16*)dsiSaveGetResultCodeT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveGetResultCodeT + 4), dsiSaveGetResultCode, 0xC);
+
+		const u32 dsiSaveSetLengthT = 0x02094E3C;
+		*(u16*)dsiSaveSetLengthT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveSetLengthT + 4), dsiSaveSetLength, 0xC);
+
+		const u32 dsiSaveWriteT = 0x02094FF4;
+		*(u16*)dsiSaveWriteT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveWriteT + 4), dsiSaveWrite, 0xC);
+
+		doubleNopT(0x0203601E); // dsiSaveCreateDirAuto
+		setBLThumb(0x02036026, dsiSaveCreateT); // dsiSaveCreateAuto
+		setBLThumb(0x02036030, dsiSaveOpenT);
+		//setBLThumb(0x0203603A, dsiSaveGetResultCodeT);
+		doubleNopT(0x0203605C); // dsiSaveCreateDirAuto
+		setBLThumb(0x02036064, dsiSaveCreateT); // dsiSaveCreateAuto
+		setBLThumb(0x0203606E, dsiSaveOpenT);
+		//setBLThumb(0x02036078, dsiSaveGetResultCodeT);
+		//setBLThumb(0x020360AE, dsiSaveSetLengthT);
+		setBLThumb(0x020360B8, dsiSaveSeekT);
+		//setBLThumb(0x020360C2, dsiSaveWriteT);
+		setBLThumb(0x020360C8, dsiSaveCloseT);
+		setBLThumb(0x020360F6, dsiSaveOpenT);
+		setBLThumb(0x02036110, dsiSaveSeekT);
+		setBLThumb(0x0203611A, dsiSaveReadT);
+		setBLThumb(0x02036120, dsiSaveCloseT);
+	}
+
 	// Bomberman Blitz (USA)
 	else if (strcmp(romTid, "KBBE") == 0 && saveOnFlashcard) {
 		tonccpy((u32*)0x02009670, dsiSaveGetResultCode, 0xC);
@@ -2572,6 +2676,63 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02032584, (u32)dsiSaveClose);
 	}
 
+	// Need for Speed: Nitro-X (USA)
+	// Need for Speed: Nitro-X (Europe, Australia)
+	else if (strncmp(romTid, "KNP", 3) == 0 && saveOnFlashcard) {
+		/*const u32 dsiSaveCreateT = 0x0201D090;
+		*(u16*)dsiSaveCreateT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveCreateT + 4), dsiSaveCreate, 0xC);
+
+		const u32 dsiSaveGetInfoT = 0x0201D0A0;
+		*(u16*)dsiSaveGetInfoT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveGetInfoT + 4), dsiSaveGetInfo, 0xC);
+
+		const u32 dsiSaveOpenT = 0x0201D0B0;
+		*(u16*)dsiSaveOpenT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveOpenT + 4), dsiSaveOpen, 0xC);
+
+		const u32 dsiSaveCloseT = 0x0201D0C0;
+		*(u16*)dsiSaveCloseT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveCloseT + 4), dsiSaveClose, 0xC);
+
+		const u32 dsiSaveSeekT = 0x0201D0D0;
+		*(u16*)dsiSaveSeekT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveSeekT + 4), dsiSaveSeek, 0xC);
+
+		const u32 dsiSaveReadT = 0x0201D0E0;
+		*(u16*)dsiSaveReadT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveReadT + 4), dsiSaveRead, 0xC);
+
+		const u32 dsiSaveWriteT = 0x0201D0F0;
+		*(u16*)dsiSaveWriteT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveWriteT + 4), dsiSaveWrite, 0xC);*/
+
+		//tonccpy((u32*)0x0201C5A8, dsiSaveGetResultCode, 0xC);
+		//tonccpy((u32*)0x0201D178, dsiSaveSetLength, 0xC);
+		*(u16*)0x020EBFC4 = 0x4770; // bx lr
+		/*setBLThumb(0x020EBFDC, dsiSaveOpenT);
+		setBLThumb(0x020EBFEA, dsiSaveCloseT);
+		setBLThumb(0x020EBFF6, dsiSaveGetInfoT);
+		setBLThumb(0x020EC01A, dsiSaveCreateT);
+		setBLThumb(0x020EC02C, dsiSaveOpenT);
+		setBLThumb(0x020EC03C, dsiSaveCloseT);
+		setBLThumb(0x020EC05A, dsiSaveOpenT);
+		setBLThumb(0x020EC07A, dsiSaveSeekT);
+		setBLThumb(0x020EC090, dsiSaveWriteT);
+		setBLThumb(0x020EC098, dsiSaveCloseT);*/
+		*(u16*)0x020EC0C0 = 0x4770; // bx lr
+		/*setBLThumb(0x020EC0D8, dsiSaveOpenT);
+		setBLThumb(0x020EC0E6, dsiSaveCloseT);
+		setBLThumb(0x020EC0F2, dsiSaveGetInfoT);
+		setBLThumb(0x020EC118, dsiSaveCreateT);
+		setBLThumb(0x020EC126, dsiSaveOpenT);
+		setBLThumb(0x020EC136, dsiSaveCloseT);
+		setBLThumb(0x020EC14C, dsiSaveOpenT);
+		setBLThumb(0x020EC162, dsiSaveSeekT);
+		setBLThumb(0x020EC176, dsiSaveReadT);
+		setBLThumb(0x020EC17E, dsiSaveCloseT);*/
+	}
+
 	// Nintendo DSi Camera
 	else if (strncmp(romTid, "HNI", 3) == 0 && memoryPit) {
 		extern u32 iUncompressedSize;
@@ -4342,13 +4503,6 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02031A40 = 0xE3A00008; // mov r0, #8
 		*(u32*)0x02031A44 = 0xE12FFF1E; // bx lr
 		*(u32*)0x02033B00 = 0xE1A00000; // nop (Skip Manual screen)
-	}
-
-	// Need for Speed: Nitro-X (USA)
-	// Need for Speed: Nitro-X (Europe, Australia)
-	else if (strncmp(romTid, "KNP", 3) == 0) {
-		*(u16*)0x020EBFC4 = 0x4770; // bx lr
-		*(u16*)0x020EC0C0 = 0x4770; // bx lr
 	}
 
 	// Neko Reversi (Japan)
