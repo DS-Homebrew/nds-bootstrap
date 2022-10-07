@@ -3297,6 +3297,21 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u16*)0x020471E4 = 0x2100; // movs r1, #0 (Skip Manual screen)
 	}
 
+	// Redau Shirizu: Gunjin Shougi (Japan)
+	else if (strcmp(romTid, "KLXJ") == 0 && saveOnFlashcard) {
+		*(u32*)0x02005254 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		setBL(0x0203342C, (u32)dsiSaveCreate);
+		setBL(0x0203343C, (u32)dsiSaveOpen);
+		setBL(0x02033468, (u32)dsiSaveWrite);
+		setBL(0x02033478, (u32)dsiSaveClose);
+		setBL(0x02033494, (u32)dsiSaveClose);
+		setBL(0x02033500, (u32)dsiSaveOpen);
+		setBL(0x02033510, (u32)dsiSaveGetLength);
+		setBL(0x02033528, (u32)dsiSaveRead);
+		setBL(0x0203356C, (u32)dsiSaveClose);
+		setBL(0x02033588, (u32)dsiSaveClose);
+	}
+
 	// Remote Racers (USA)
 	else if (strcmp(romTid, "KQRE") == 0 && saveOnFlashcard) {
 		setBL(0x0209A074, (u32)dsiSaveClose);

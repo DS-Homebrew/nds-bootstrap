@@ -8592,6 +8592,73 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u16*)0x020471E4 = 0x2100; // movs r1, #0 (Skip Manual screen)
 	}
 
+	// Redau Shirizu: Gunjin Shougi (Japan)
+	// A sprite layer is missing (containing text font and others)
+	else if (strcmp(romTid, "KLXJ") == 0) {
+		*(u32*)0x02004838 = 0xE1A00000; // nop
+		*(u32*)0x0200499C = 0xE1A00000; // nop
+		*(u32*)0x02005254 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		*(u32*)0x0200E0F4 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0201025C = 0xE1A00000; // nop
+		*(u32*)0x020134D4 = 0xE1A00000; // nop
+		*(u32*)0x02014664 = 0xE1A00000; // nop
+		*(u32*)0x02014700 = 0xE1A00000; // nop
+		*(u32*)0x020147B4 = 0xE1A00000; // nop
+		*(u32*)0x02014868 = 0xE1A00000; // nop
+		*(u32*)0x02014908 = 0xE1A00000; // nop
+		*(u32*)0x02014988 = 0xE1A00000; // nop
+		*(u32*)0x02014A04 = 0xE1A00000; // nop
+		*(u32*)0x02014A88 = 0xE1A00000; // nop
+		*(u32*)0x02014B28 = 0xE1A00000; // nop
+		*(u32*)0x02014BE4 = 0xE1A00000; // nop
+		*(u32*)0x02014CA0 = 0xE1A00000; // nop
+		*(u32*)0x02014D5C = 0xE1A00000; // nop
+		*(u32*)0x02014E18 = 0xE1A00000; // nop
+		*(u32*)0x02014ED4 = 0xE1A00000; // nop
+		*(u32*)0x02014F90 = 0xE1A00000; // nop
+		*(u32*)0x0201504C = 0xE1A00000; // nop
+		*(u32*)0x020150F8 = 0xE1A00000; // nop
+		*(u32*)0x0201518C = 0xE1A00000; // nop
+		*(u32*)0x020152B0 = 0xE1A00000; // nop
+		*(u32*)0x02015314 = 0xE1A00000; // nop
+		*(u32*)0x020153DC = 0xE1A00000; // nop
+		*(u32*)0x0201544C = 0xE1A00000; // nop
+		*(u32*)0x020154D8 = 0xE1A00000; // nop
+		*(u32*)0x02015548 = 0xE1A00000; // nop
+		*(u32*)0x020155D0 = 0xE1A00000; // nop
+		*(u32*)0x02015640 = 0xE1A00000; // nop
+		*(u32*)0x02015754 = 0xE1A00000; // nop
+		*(u32*)0x020157BC = 0xE1A00000; // nop
+		*(u32*)0x0201583C = 0xE1A00000; // nop
+		*(u32*)0x020158A0 = 0xE1A00000; // nop
+		*(u32*)0x02015958 = 0xE1A00000; // nop
+		*(u32*)0x020159C8 = 0xE1A00000; // nop
+		*(u32*)0x02017414 = 0xE1A00000; // nop
+		*(u32*)0x02019278 = 0xE1A00000; // nop
+		*(u32*)0x0201927C = 0xE1A00000; // nop
+		*(u32*)0x02019288 = 0xE1A00000; // nop
+		*(u32*)0x020193E8 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x02019444, heapEnd); // mov r0, #0x23C0000
+		*(u32*)0x0201A89C = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
+		*(u32*)0x0201DD18 = 0xE1A00000; // nop
+		*(u32*)0x0202001C = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02020020 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0202D134 = 0xE1A00000; // nop
+		*(u32*)0x0202E338 = 0xE1A00000; // nop
+		*(u32*)0x0202E528 = 0xE1A00000; // nop
+		*(u32*)0x0202E560 = 0xE1A00000; // nop
+		setBL(0x0203342C, (u32)dsiSaveCreate);
+		setBL(0x0203343C, (u32)dsiSaveOpen);
+		setBL(0x02033468, (u32)dsiSaveWrite);
+		setBL(0x02033478, (u32)dsiSaveClose);
+		setBL(0x02033494, (u32)dsiSaveClose);
+		setBL(0x02033500, (u32)dsiSaveOpen);
+		setBL(0x02033510, (u32)dsiSaveGetLength);
+		setBL(0x02033528, (u32)dsiSaveRead);
+		setBL(0x0203356C, (u32)dsiSaveClose);
+		setBL(0x02033588, (u32)dsiSaveClose);
+	}
+
 	// Remote Racers (USA)
 	// Remote Racers (Europe, Australia)
 	// Requires 8MB of RAM
