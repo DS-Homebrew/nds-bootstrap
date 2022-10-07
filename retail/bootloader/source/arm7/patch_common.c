@@ -1996,7 +1996,8 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u16*)dsiSaveWriteT = 0x4778; // bx pc
 		tonccpy((u32*)(dsiSaveWriteT + 4), dsiSaveWrite, 0xC);
 
-		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x02004838 = 0xE1A00000; // nop
+		*(u32*)0x0200499C = 0xE1A00000; // nop
 		doubleNopT(0x0203601E); // dsiSaveCreateDirAuto
 		setBLThumb(0x02036026, dsiSaveCreateT); // dsiSaveCreateAuto
 		setBLThumb(0x02036030, dsiSaveOpenT);
