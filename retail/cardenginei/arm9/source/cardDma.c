@@ -402,16 +402,15 @@ void cardSetDma(u32 * params) {
 	bool romPart = false;
 	int romPartNo = 0;
 	if (!(ce9->valueBits & ROMinRAM)) {
-		if (ce9->romPartSize[1] > 0) {
-			for (int i = 0; i < 2; i++) {
-				romPart = (ce9->romPartSize[i] > 0 && src >= ce9->romPartSrc[i] && src < ce9->romPartSrc[i]+ce9->romPartSize[i]);
-				if (romPart) {
-					romPartNo = i;
-					break;
-				}
+		for (int i = 0; i < 2; i++) {
+			if (ce9->romPartSize[i] == 0) {
+				break;
 			}
-		} else {
-			romPart = (ce9->romPartSize[0] > 0 && src >= ce9->romPartSrc[0] && src < ce9->romPartSrc[0]+ce9->romPartSize[0]);
+			romPart = (src >= ce9->romPartSrc[i] && src < ce9->romPartSrc[i]+ce9->romPartSize[i]);
+			if (romPart) {
+				romPartNo = i;
+				break;
+			}
 		}
 	}
 	if (dmaOn && ((ce9->valueBits & ROMinRAM) || romPart)) {
@@ -446,16 +445,15 @@ void cardSetDma(u32 * params) {
 	bool romPart = false;
 	int romPartNo = 0;
 	if (!(ce9->valueBits & ROMinRAM)) {
-		if (ce9->romPartSize[1] > 0) {
-			for (int i = 0; i < 2; i++) {
-				romPart = (ce9->romPartSize[i] > 0 && src >= ce9->romPartSrc[i] && src < ce9->romPartSrc[i]+ce9->romPartSize[i]);
-				if (romPart) {
-					romPartNo = i;
-					break;
-				}
+		for (int i = 0; i < 2; i++) {
+			if (ce9->romPartSize[i] == 0) {
+				break;
 			}
-		} else {
-			romPart = (ce9->romPartSize[0] > 0 && src >= ce9->romPartSrc[0] && src < ce9->romPartSrc[0]+ce9->romPartSize[0]);
+			romPart = (src >= ce9->romPartSrc[i] && src < ce9->romPartSrc[i]+ce9->romPartSize[i]);
+			if (romPart) {
+				romPartNo = i;
+				break;
+			}
 		}
 	}
 	if (dmaOn && ((ce9->valueBits & ROMinRAM) || romPart)) {
