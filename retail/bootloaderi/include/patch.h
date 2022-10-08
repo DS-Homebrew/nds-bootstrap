@@ -151,6 +151,7 @@ extern u16 patchOffsetCacheFilePrevCrc;
 extern u16 patchOffsetCacheFileNewCrc;
 
 u32 generateA7Instr(int arg1, int arg2);
+void setB(int arg1, int arg2);
 void setBL(int arg1, int arg2);
 const u16* generateA7InstrThumb(int arg1, int arg2);
 u16* getOffsetFromBLThumb(u16* blOffset);

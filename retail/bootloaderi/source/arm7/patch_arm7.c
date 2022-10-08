@@ -32,6 +32,10 @@ u32 generateA7Instr(int arg1, int arg2) {
 	return (((u32)(arg2 - arg1 - 8) >> 2) & 0xFFFFFF) | 0xEB000000;
 }
 
+void setB(int arg1, int arg2) {
+	*(u32*)arg1 = (((u32)(arg2 - arg1 - 8) >> 2) & 0xFFFFFF) | 0xEA000000;
+}
+
 void setBL(int arg1, int arg2) {
 	*(u32*)arg1 = (((u32)(arg2 - arg1 - 8) >> 2) & 0xFFFFFF) | 0xEB000000;
 }
