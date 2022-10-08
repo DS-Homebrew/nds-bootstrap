@@ -446,7 +446,7 @@ static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
 	#endif
 }
 
-static inline void cardReadRAM(u8* dst, u32 src, u32 len, bool romPart) {
+static inline void cardReadRAM(u8* dst, u32 src, u32 len, int romPartNo) {
 	#ifdef DEBUG
 	// Send a log command for debug purpose
 	// -------------------------------------
@@ -454,7 +454,7 @@ static inline void cardReadRAM(u8* dst, u32 src, u32 len, bool romPart) {
 
 	sharedAddr[0] = dst;
 	sharedAddr[1] = len;
-	sharedAddr[2] = ce9->romLocation+src;
+	sharedAddr[2] = ce9->romLocation[romPartNo]+src;
 	sharedAddr[3] = commandRead;
 
 	waitForArm7();
@@ -463,13 +463,13 @@ static inline void cardReadRAM(u8* dst, u32 src, u32 len, bool romPart) {
 
 	// Copy directly
 	#ifdef TWLSDK
-	u32 newSrc = ce9->romLocation+src;
+	u32 newSrc = ce9->romLocation[romPartNo]+src;
 	if (src > *(u32*)0x02FFE1C0) {
 		newSrc -= *(u32*)0x02FFE1CC;
 	}
 	tonccpy(dst, (u8*)newSrc, len);
 	#else
-	tonccpy(dst, (u8*)ce9->romLocation+src, len);
+	tonccpy(dst, (u8*)ce9->romLocation[romPartNo]+src, len);
 	#endif
 }
 
@@ -572,9 +572,23 @@ void cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 		src = 0x8000 + (src & 0x1FF);
 	}
 
-	bool romPart = (ce9->romPartSize > 0 && src >= ce9->romPartSrc && src < ce9->romPartSrc+ce9->romPartSize);
+	bool romPart = false;
+	int romPartNo = 0;
+	if (!(ce9->valueBits & ROMinRAM)) {
+		if (ce9->romPartSize[1] > 0) {
+			for (int i = 0; i < 2; i++) {
+				romPart = (ce9->romPartSize[i] > 0 && src >= ce9->romPartSrc[i] && src < ce9->romPartSrc[i]+ce9->romPartSize[i]);
+				if (romPart) {
+					romPartNo = i;
+					break;
+				}
+			}
+		} else {
+			romPart = (ce9->romPartSize[0] > 0 && src >= ce9->romPartSrc[0] && src < ce9->romPartSrc[0]+ce9->romPartSize[0]);
+		}
+	}
 	if ((ce9->valueBits & ROMinRAM) || romPart) {
-		cardReadRAM(dst, src, len, romPart);
+		cardReadRAM(dst, src, len, romPartNo);
 	} else {
 		cardReadNormal(dst, src, len);
 	}

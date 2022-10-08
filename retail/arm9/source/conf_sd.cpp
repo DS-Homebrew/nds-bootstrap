@@ -1050,12 +1050,17 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		}
 
 		if (offset > 0) {
+			if (size > 0x10) {
+				size = 0x10;
+			}
 			fseek(file, offset, SEEK_SET);
 			u32 *buffer = new u32[size/4];
 			fread(buffer, 1, size, file);
 
-			conf->dataToPreloadAddr = buffer[0];
-			conf->dataToPreloadSize = buffer[1];
+			for (u32 i = 0; i < size/8; i++) {
+				conf->dataToPreloadAddr[i] = buffer[0+(i*2)];
+				conf->dataToPreloadSize[i] = buffer[1+(i*2)];
+			}
 			delete[] buffer;
 		}
 	  }

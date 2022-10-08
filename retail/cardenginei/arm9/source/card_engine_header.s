@@ -41,6 +41,7 @@ irqTable:
 	.word	0x00000000
 romLocation:
 	.word	0x00000000
+	.word	0x00000000
 cacheAddress:
 	.word	0x00000000
 cacheSlots:
@@ -49,7 +50,9 @@ cacheBlockSize:
 	.hword	0
 romPartSrc:
 	.word	0x00000000
+	.word	0x00000000
 romPartSize:
+	.word	0x00000000
 	.word	0x00000000
 
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@

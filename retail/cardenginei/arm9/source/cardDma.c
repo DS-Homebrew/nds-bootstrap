@@ -399,7 +399,21 @@ void cardSetDma(u32 * params) {
 	u8* dst = (u8*)params[4];
 	u32 len = params[5];
 
-	bool romPart = (ce9->romPartSize > 0 && src >= ce9->romPartSrc && src < ce9->romPartSrc+ce9->romPartSize);
+	bool romPart = false;
+	int romPartNo = 0;
+	if (!(ce9->valueBits & ROMinRAM)) {
+		if (ce9->romPartSize[1] > 0) {
+			for (int i = 0; i < 2; i++) {
+				romPart = (ce9->romPartSize[i] > 0 && src >= ce9->romPartSrc[i] && src < ce9->romPartSrc[i]+ce9->romPartSize[i]);
+				if (romPart) {
+					romPartNo = i;
+					break;
+				}
+			}
+		} else {
+			romPart = (ce9->romPartSize[0] > 0 && src >= ce9->romPartSrc[0] && src < ce9->romPartSrc[0]+ce9->romPartSize[0]);
+		}
+	}
 	if (dmaOn && ((ce9->valueBits & ROMinRAM) || romPart)) {
 		dmaDirectRead = true;
 
@@ -409,7 +423,7 @@ void cardSetDma(u32 * params) {
 		enableIPC_SYNC();
 
 		// Copy via dma
-		u32 newSrc = ce9->romLocation+src;
+		u32 newSrc = ce9->romLocation[romPartNo]+src;
 		if (src > *(u32*)0x02FFE1C0) {
 			newSrc -= *(u32*)0x02FFE1CC;
 		}
@@ -429,7 +443,21 @@ void cardSetDma(u32 * params) {
 	u8* dst = ((ce9->valueBits & isSdk5) ? (u8*)(dmaParams[4]) : (u8*)(cardStruct[1]));
 	u32 len = ((ce9->valueBits & isSdk5) ? dmaParams[5] : cardStruct[2]);
 
-	bool romPart = (ce9->romPartSize > 0 && src >= ce9->romPartSrc && src < ce9->romPartSrc+ce9->romPartSize);
+	bool romPart = false;
+	int romPartNo = 0;
+	if (!(ce9->valueBits & ROMinRAM)) {
+		if (ce9->romPartSize[1] > 0) {
+			for (int i = 0; i < 2; i++) {
+				romPart = (ce9->romPartSize[i] > 0 && src >= ce9->romPartSrc[i] && src < ce9->romPartSrc[i]+ce9->romPartSize[i]);
+				if (romPart) {
+					romPartNo = i;
+					break;
+				}
+			}
+		} else {
+			romPart = (ce9->romPartSize[0] > 0 && src >= ce9->romPartSrc[0] && src < ce9->romPartSrc[0]+ce9->romPartSize[0]);
+		}
+	}
 	if (dmaOn && ((ce9->valueBits & ROMinRAM) || romPart)) {
 		dmaDirectRead = true;
 
@@ -439,7 +467,7 @@ void cardSetDma(u32 * params) {
 		enableIPC_SYNC();
 
 		// Copy via dma
-		ndmaCopyWordsAsynch(0, (u8*)ce9->romLocation+src, dst, len);
+		ndmaCopyWordsAsynch(0, (u8*)ce9->romLocation[romPartNo]+src, dst, len);
 		IPC_SendSync(0x3);
 		return;
 	} else if (!dmaOn || ce9->patches->sleepRef || ce9->thumbPatches->sleepRef) {
