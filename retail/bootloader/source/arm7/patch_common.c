@@ -1890,6 +1890,12 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02092E6C, (u32)dsiSaveOpen);
 		setBL(0x02092E7C, (u32)dsiSaveGetResultCode);
 		setBL(0x02092E94, (u32)dsiSaveClose);
+
+		// Skip Manual screen (Not working)
+		//*(u32*)0x02092FDC = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		//*(u32*)0x02093070 = 0xE1A00000; // nop
+		//*(u32*)0x02093078 = 0xE1A00000; // nop
+		//*(u32*)0x02093084 = 0xE1A00000; // nop
 	}
 
 	// Bejeweled Twist (USA)
@@ -6448,6 +6454,16 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0200B5A4, (u32)dsiSaveSetLength);
 		setBL(0x0200B5B4, (u32)dsiSaveWrite);
 		setBL(0x0200B5BC, (u32)dsiSaveClose);
+
+		// Skip Manual screen
+		*(u32*)0x0200F4EC = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		*(u32*)0x0200F59C = 0xE1A00000; // nop
+		*(u32*)0x0200F5A4 = 0xE1A00000; // nop
+		*(u32*)0x0200F5B4 = 0xE1A00000; // nop
+		*(u32*)0x0200FC3C = 0xE3A00901; // mov r0, #0x4000
+		*(u32*)0x0200FC5C = 0xE3A02901; // mov r2, #0x4000
+		*(u32*)0x0200FC68 = 0xE3A01901; // mov r1, #0x4000
+
 		setBL(0x02014BDC, (int)ce9->patches->rumble_arm9[0]); // Make tick sounds when player gets shocked
 		setBL(0x0201A38C, (int)ce9->patches->rumble_arm9[1]); // Rumble when flip slam effect plays
 		*(u32*)0x0204D3C4 = 0xE1A00000; // nop
@@ -6486,6 +6502,16 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0200B8AC, (u32)dsiSaveSetLength);
 		setBL(0x0200B8BC, (u32)dsiSaveWrite);
 		setBL(0x0200B8C4, (u32)dsiSaveClose);
+
+		// Skip Manual screen
+		*(u32*)0x0200F974 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		*(u32*)0x0200FA1C = 0xE1A00000; // nop
+		*(u32*)0x0200FA24 = 0xE1A00000; // nop
+		*(u32*)0x0200FA34 = 0xE1A00000; // nop
+		*(u32*)0x02010138 = 0xE3A00901; // mov r0, #0x4000
+		*(u32*)0x02010158 = 0xE3A02901; // mov r2, #0x4000
+		*(u32*)0x02010164 = 0xE3A01901; // mov r1, #0x4000
+
 		setBL(0x0201528C, (int)ce9->patches->rumble_arm9[0]); // Make tick sounds when player gets shocked
 		setBL(0x0201AA44, (int)ce9->patches->rumble_arm9[1]); // Rumble when flip slam effect plays
 		*(u32*)0x0204D504 = 0xE1A00000; // nop
@@ -6526,6 +6552,14 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0200B694, (u32)dsiSaveSetLength);
 		setBL(0x0200B6A4, (u32)dsiSaveWrite);
 		setBL(0x0200B6AC, (u32)dsiSaveClose);
+
+		// Skip Manual screen
+		*(u32*)0x0200F31C = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		*(u32*)0x0200F3B4 = 0xE1A00000; // nop
+		*(u32*)0x0200F3BC = 0xE1A00000; // nop
+		*(u32*)0x0200F3C8 = 0xE1A00000; // nop
+		*(u32*)0x0200FAA4 = 0xE3A06901; // mov r6, #0x4000
+
 		setBL(0x02014718, (int)ce9->patches->rumble_arm9[0]); // Make tick sounds when player gets shocked
 		setBL(0x02019C54, (int)ce9->patches->rumble_arm9[1]); // Rumble when flip slam effect plays
 		*(u32*)0x0204B538 = 0xE1A00000; // nop
@@ -6600,6 +6634,16 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 				*(u32*)0x02012DC4 = 0xE1A00000; // nop
 				*(u32*)0x02012DE0 = 0xE1A00000; // nop
 			}
+			// Skip Manual screen
+			*(u32*)0x02013694 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+			*(u32*)0x02013760 = 0xE1A00000; // nop
+			*(u32*)0x02013768 = 0xE1A00000; // nop
+			*(u32*)0x02013774 = 0xE1A00000; // nop
+			if (!extendedMemory2) {
+				*(u32*)0x02013870 = 0xE3A00901; // mov r0, #0x4000 (Shrink sound heap from 1MB to 16KB: Disables music)
+			}
+			*(u32*)0x02013E58 = 0xE3A06901; // mov r6, #0x4000
+
 			setBL(0x0201D008, (int)ce9->patches->rumble_arm9[0]); // Rumble when Luna gets shocked
 			setBL(0x020275F8, (int)ce9->patches->rumble_arm9[1]); // Rumble when planet is destroyed
 			*(u32*)0x02064FB0 = 0xE1A00000; // nop
@@ -6634,6 +6678,16 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 				*(u32*)0x02012D7C = 0xE1A00000; // nop
 				*(u32*)0x02012D98 = 0xE1A00000; // nop
 			}
+			// Skip Manual screen
+			*(u32*)0x02013648 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+			*(u32*)0x02013714 = 0xE1A00000; // nop
+			*(u32*)0x0201371C = 0xE1A00000; // nop
+			*(u32*)0x02013728 = 0xE1A00000; // nop
+			if (!extendedMemory2) {
+				*(u32*)0x02013824 = 0xE3A00901; // mov r0, #0x4000 (Shrink sound heap from 1MB to 16KB: Disables music)
+			}
+			*(u32*)0x02013E04 = 0xE3A06901; // mov r6, #0x4000
+
 			setBL(0x0201CFB0, (int)ce9->patches->rumble_arm9[0]); // Rumble when Luna gets shocked
 			setBL(0x0202750C, (int)ce9->patches->rumble_arm9[1]); // Rumble when planet is destroyed
 			*(u32*)0x02064E34 = 0xE1A00000; // nop
@@ -6730,6 +6784,12 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x020B1B0C, (u32)dsiSaveOpen);
 		setBL(0x020B1B1C, (u32)dsiSaveGetResultCode);
 		setBL(0x020B1B34, (u32)dsiSaveClose);
+
+		// Skip Manual screen (Not working)
+		//*(u32*)0x020B2800 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		//*(u32*)0x020B2894 = 0xE1A00000; // nop
+		//*(u32*)0x020B289C = 0xE1A00000; // nop
+		//*(u32*)0x020B28A8 = 0xE1A00000; // nop
 	}
 
 	// Monster Buster Club (USA)
@@ -9270,6 +9330,14 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		ce9->patches->rumble_arm9[0][3] = *(u32*)0x02026F68;
 
 		*(u32*)0x0200498C = 0xE1A00000; // nop
+
+		// Skip Manual screen
+		*(u32*)0x02016130 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		*(u32*)0x020161C8 = 0xE1A00000; // nop
+		*(u32*)0x020161D0 = 0xE1A00000; // nop
+		*(u32*)0x020161DC = 0xE1A00000; // nop
+		*(u32*)0x020166C8 = 0xE3A06901; // mov r6, #0x4000
+
 		if (!extendedMemory2) {
 			// Disable pre-load function
 			/* *(u32*)0x0201FBA0 = 0xE12FFF1E; // bx lr
@@ -9335,6 +9403,14 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 		*(u32*)0x02004838 = 0xE1A00000; // nop
 		*(u32*)0x0200499C = 0xE1A00000; // nop
+
+		// Skip Manual screen
+		*(u32*)0x020163B0 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		*(u32*)0x02016448 = 0xE1A00000; // nop
+		*(u32*)0x02016450 = 0xE1A00000; // nop
+		*(u32*)0x0201645C = 0xE1A00000; // nop
+		*(u32*)0x02016940 = 0xE3A06901; // mov r6, #0x4000
+
 		if (!extendedMemory2) {
 			// Disable pre-load function
 			/* *(u32*)0x0201FE18 = 0xE12FFF1E; // bx lr
