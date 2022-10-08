@@ -2481,13 +2481,17 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0200B5BC, (u32)dsiSaveClose);
 
 		// Skip Manual screen
-		*(u32*)0x0200F4EC = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		/* *(u32*)0x0200F4EC = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		*(u32*)0x0200F59C = 0xE1A00000; // nop
 		*(u32*)0x0200F5A4 = 0xE1A00000; // nop
 		*(u32*)0x0200F5B4 = 0xE1A00000; // nop
 		*(u32*)0x0200FC3C = 0xE3A00901; // mov r0, #0x4000
 		*(u32*)0x0200FC5C = 0xE3A02901; // mov r2, #0x4000
-		*(u32*)0x0200FC68 = 0xE3A01901; // mov r1, #0x4000
+		*(u32*)0x0200FC68 = 0xE3A01901; // mov r1, #0x4000 */
+
+		// Hide help button
+		*(u32*)0x0200FAE8 = 0xE1A00000; // nop
+		*(u32*)0x0200FB08 = 0xE1A00000; // nop
 	}
 
 	// Mighty Flip Champs! (Europe, Australia)
@@ -2507,13 +2511,17 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0200B8C4, (u32)dsiSaveClose);
 
 		// Skip Manual screen
-		*(u32*)0x0200F974 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		/* *(u32*)0x0200F974 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		*(u32*)0x0200FA1C = 0xE1A00000; // nop
 		*(u32*)0x0200FA24 = 0xE1A00000; // nop
 		*(u32*)0x0200FA34 = 0xE1A00000; // nop
 		*(u32*)0x02010138 = 0xE3A00901; // mov r0, #0x4000
 		*(u32*)0x02010158 = 0xE3A02901; // mov r2, #0x4000
-		*(u32*)0x02010164 = 0xE3A01901; // mov r1, #0x4000
+		*(u32*)0x02010164 = 0xE3A01901; // mov r1, #0x4000 */
+
+		// Hide help button
+		*(u32*)0x0200FFC4 = 0xE1A00000; // nop
+		*(u32*)0x0200FFF0 = 0xE1A00000; // nop
 	}
 
 	// Mighty Flip Champs! (Japan)
@@ -2533,11 +2541,15 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0200B6AC, (u32)dsiSaveClose);
 
 		// Skip Manual screen
-		*(u32*)0x0200F31C = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		/* *(u32*)0x0200F31C = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		*(u32*)0x0200F3B4 = 0xE1A00000; // nop
 		*(u32*)0x0200F3BC = 0xE1A00000; // nop
 		*(u32*)0x0200F3C8 = 0xE1A00000; // nop
-		*(u32*)0x0200FAA4 = 0xE3A06901; // mov r6, #0x4000
+		*(u32*)0x0200FAA4 = 0xE3A06901; // mov r6, #0x4000 */
+
+		// Hide help button
+		*(u32*)0x0200F934 = 0xE1A00000; // nop
+		*(u32*)0x0200F960 = 0xE1A00000; // nop
 	}
 
 	// Mighty Milky Way (USA)
@@ -3792,11 +3804,14 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Shantae: Risky's Revenge (USA)
 	else if (strcmp(romTid, "KS3E") == 0 && saveOnFlashcard) {
 		// Skip Manual screen
-		*(u32*)0x02016130 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		/* *(u32*)0x02016130 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		*(u32*)0x020161C8 = 0xE1A00000; // nop
 		*(u32*)0x020161D0 = 0xE1A00000; // nop
 		*(u32*)0x020161DC = 0xE1A00000; // nop
-		*(u32*)0x020166C8 = 0xE3A06901; // mov r6, #0x4000
+		*(u32*)0x020166C8 = 0xE3A06901; // mov r6, #0x4000 */
+
+		// Hide help button
+		*(u32*)0x02016688 = 0xE1A00000; // nop
 
 		setBL(0x0209201C, (u32)dsiSaveCreate);
 		setBL(0x02092040, (u32)dsiSaveGetResultCode);
@@ -3815,11 +3830,14 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Shantae: Risky's Revenge (Europe)
 	else if (strcmp(romTid, "KS3P") == 0 && saveOnFlashcard) {
 		// Skip Manual screen
-		*(u32*)0x020163B0 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		/* *(u32*)0x020163B0 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		*(u32*)0x02016448 = 0xE1A00000; // nop
 		*(u32*)0x02016450 = 0xE1A00000; // nop
 		*(u32*)0x0201645C = 0xE1A00000; // nop
-		*(u32*)0x02016940 = 0xE3A06901; // mov r6, #0x4000
+		*(u32*)0x02016940 = 0xE3A06901; // mov r6, #0x4000 */
+
+		// Hide help button
+		*(u32*)0x02016904 = 0xE1A00000; // nop
 
 		setBL(0x020922A0, (u32)dsiSaveCreate);
 		setBL(0x020922C4, (u32)dsiSaveGetResultCode);
