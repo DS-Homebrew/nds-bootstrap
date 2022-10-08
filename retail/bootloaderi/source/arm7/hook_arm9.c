@@ -228,7 +228,7 @@ int hookNdsRetailArm9(
 	ce9->overlaysSize           = overlaysSize;
 	ce9->consoleModel           = consoleModel;
 	if (extendedMemory) {
-		ce9->romLocation[0] = (moduleParams->sdk_version < 0x2008000) ? ROM_LOCATION_EXT_SDK2 : ROM_LOCATION_EXT;
+		//ce9->romLocation[0] = (moduleParams->sdk_version < 0x2008000) ? ROM_LOCATION_EXT_SDK2 : ROM_LOCATION_EXT;
 	} else if (consoleModel > 0) {
 		ce9->romLocation[0] = ((dsiMode || isSdk5(moduleParams)) ? ROM_SDK5_LOCATION : ROM_LOCATION);
 	} else {
@@ -313,7 +313,7 @@ int hookNdsRetailArm9(
 		if (strncmp(romTid, "UBR", 3) == 0 || iUncompressedSize > 0x280000) {
 			ce9->valueBits |= b_slowSoftReset;
 		}
-	} else {
+	} else if (!extendedMemory) {
 		ce9->romLocation[0] -= usesCloneboot ? 0x8000 : (ndsHeader->arm9romOffset + ndsHeader->arm9binarySize);
 	}
 
