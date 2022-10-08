@@ -8285,6 +8285,131 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020C4038 = 0xE8BD8010; // LDMFD SP!, {R4,PC}
 	}
 
+	// Puzzle to Go: Baby Animals (Europe)
+	else if (strcmp(romTid, "KBYP") == 0) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x02005118 = 0xE1A00000; // nop
+		*(u32*)0x02005134 = 0xE1A00000; // nop
+		*(u32*)0x020052E4 = 0xE1A00000; // nop
+		*(u32*)0x020139E0 = 0xE1A00000; // nop
+		*(u32*)0x0201759C = 0xE1A00000; // nop
+		*(u32*)0x0201CFF4 = 0xE1A00000; // nop
+		*(u32*)0x0201ED88 = 0xE1A00000; // nop
+		*(u32*)0x0201ED8C = 0xE1A00000; // nop
+		*(u32*)0x0201ED98 = 0xE1A00000; // nop
+		*(u32*)0x0201EEF8 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x0201EF54, heapEnd); // mov r0, #0x23C0000
+		*(u32*)0x02020304 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
+		*(u32*)0x02023758 = 0xE1A00000; // nop
+		*(u32*)0x02025444 = 0xE1A00000; // nop
+		*(u32*)0x0202551C = 0xE1A00000; // nop
+
+		// Skip Manual screen
+		*(u32*)0x02032AFC = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		*(u32*)0x02032B80 = 0xE1A00000; // nop
+		*(u32*)0x02032B88 = 0xE1A00000; // nop
+		*(u32*)0x02032B94 = 0xE1A00000; // nop
+
+		*(u32*)0x02032C0C = 0xE1A00000; // nop
+		*(u32*)0x02034D08 = 0xE1A00000; // nop
+		setBL(0x02036570, (u32)dsiSaveCreate);
+		setBL(0x02036580, (u32)dsiSaveOpen);
+		setBL(0x02036590, (u32)dsiSaveGetResultCode);
+		setBL(0x020365AC, (u32)dsiSaveSetLength);
+		setBL(0x020365BC, (u32)dsiSaveWrite);
+		setBL(0x020365C4, (u32)dsiSaveClose);
+		setBL(0x020365FC, (u32)dsiSaveOpen);
+		setBL(0x0203660C, (u32)dsiSaveGetResultCode);
+		setBL(0x02036624, (u32)dsiSaveGetLength);
+		setBL(0x02036634, (u32)dsiSaveRead);
+		setBL(0x0203663C, (u32)dsiSaveClose);
+		setBL(0x02036674, (u32)dsiSaveOpen);
+		setBL(0x02036684, (u32)dsiSaveGetResultCode);
+		setBL(0x0203669C, (u32)dsiSaveClose);
+	}
+
+	// Puzzle to Go: Diddl (Europe)
+	// Puzzle to Go: Wildlife (Europe)
+	else if (strcmp(romTid, "KPUP") == 0 || strcmp(romTid, "KPDP") == 0) {
+		*(u32*)0x020138D4 = 0xE1A00000; // nop
+		*(u32*)0x020175C8 = 0xE1A00000; // nop
+		*(u32*)0x0201D2F8 = 0xE1A00000; // nop
+		*(u32*)0x0201ED88 = 0xE1A00000; // nop
+		*(u32*)0x0201ED88 = 0xE1A00000; // nop
+		*(u32*)0x0201F0EC = 0xE1A00000; // nop
+		*(u32*)0x0201F230 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x0201F28C, heapEnd); // mov r0, #0x23C0000
+		*(u32*)0x02020694 = 0xE1A00000; // nop
+		*(u32*)0x0202069C = 0xE8BD8010; // LDMFD SP!, {R4,PC}
+		*(u32*)0x02023B6C = 0xE1A00000; // nop
+		setBL(0x0203EA60, (u32)dsiSaveCreate);
+		setBL(0x0203EA7C, (u32)dsiSaveOpen);
+		setBL(0x0203EA8C, (u32)dsiSaveGetResultCode);
+		setBL(0x0203EAA8, (u32)dsiSaveSetLength);
+		setBL(0x0203EAB8, (u32)dsiSaveWrite);
+		setBL(0x0203EAC0, (u32)dsiSaveClose);
+		setBL(0x0203EAF8, (u32)dsiSaveOpen);
+		setBL(0x0203EB08, (u32)dsiSaveGetResultCode);
+		setBL(0x0203EB20, (u32)dsiSaveGetLength);
+		setBL(0x0203EB30, (u32)dsiSaveRead);
+		setBL(0x0203EB38, (u32)dsiSaveClose);
+		setBL(0x0203EB70, (u32)dsiSaveOpen);
+		setBL(0x0203EB80, (u32)dsiSaveGetResultCode);
+		setBL(0x0203EB98, (u32)dsiSaveClose);
+
+		// Skip Manual screen
+		*(u32*)0x0203ECC4 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		*(u32*)0x0203ED28 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0203ED4C = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0203ED80 = 0xE1A00000; // nop
+		*(u32*)0x0203ED8C = 0xE1A00000; // nop
+	}
+
+	// Puzzle to Go: Planets and Universe (Europe)
+	// Puzzle to Go: Sightseeing (Europe)
+	else if (strcmp(romTid, "KBXP") == 0 || strcmp(romTid, "KB3P") == 0) {
+		*(u32*)0x02004838 = 0xE1A00000; // nop
+		*(u32*)0x0200499C = 0xE1A00000; // nop
+		*(u32*)0x02005130 = 0xE1A00000; // nop
+		*(u32*)0x0200514C = 0xE1A00000; // nop
+		*(u32*)0x020052FC = 0xE1A00000; // nop
+		*(u32*)0x020139F8 = 0xE1A00000; // nop
+		*(u32*)0x02017648 = 0xE1A00000; // nop
+		*(u32*)0x0201D0D0 = 0xE1A00000; // nop
+		*(u32*)0x0201EE6C = 0xE1A00000; // nop
+		*(u32*)0x0201EE70 = 0xE1A00000; // nop
+		*(u32*)0x0201EE7C = 0xE1A00000; // nop
+		*(u32*)0x0201EFDC = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x0201F038, heapEnd); // mov r0, #0x23C0000
+		*(u32*)0x020203F8 = 0xE8BD8038; // LDMFD SP!, {R3-R5,PC}
+		*(u32*)0x0202384C = 0xE1A00000; // nop
+		*(u32*)0x02025538 = 0xE1A00000; // nop
+		*(u32*)0x02025610 = 0xE1A00000; // nop
+
+		// Skip Manual screen
+		*(u32*)0x02032BF0 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		*(u32*)0x02032C74 = 0xE1A00000; // nop
+		*(u32*)0x02032C7C = 0xE1A00000; // nop
+		*(u32*)0x02032C88 = 0xE1A00000; // nop
+
+		*(u32*)0x02032D00 = 0xE1A00000; // nop
+		*(u32*)0x02034DFC = 0xE1A00000; // nop
+		setBL(0x02036680, (u32)dsiSaveCreate);
+		setBL(0x02036690, (u32)dsiSaveOpen);
+		setBL(0x020366A0, (u32)dsiSaveGetResultCode);
+		setBL(0x020366BC, (u32)dsiSaveSetLength);
+		setBL(0x020366CC, (u32)dsiSaveWrite);
+		setBL(0x020366D4, (u32)dsiSaveClose);
+		setBL(0x0203670C, (u32)dsiSaveOpen);
+		setBL(0x0203671C, (u32)dsiSaveGetResultCode);
+		setBL(0x02036734, (u32)dsiSaveGetLength);
+		setBL(0x02036744, (u32)dsiSaveRead);
+		setBL(0x0203674C, (u32)dsiSaveClose);
+		setBL(0x02036784, (u32)dsiSaveOpen);
+		setBL(0x02036794, (u32)dsiSaveGetResultCode);
+		setBL(0x020367AC, (u32)dsiSaveClose);
+	}
+
 	// Quick Fill Q (USA)
 	// Quick Fill Q (Europe)
 	// A bit hard/confusing to add save support
