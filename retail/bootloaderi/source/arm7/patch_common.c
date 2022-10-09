@@ -4519,6 +4519,46 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// Zoonies: Escape from Makatu (USA)
+	// Due to our save implementation, save data is stored in all 3 slots
+	else if (strcmp(romTid, "KZSE") == 0 && saveOnFlashcard) {
+		*(u32*)0x02012794 = 0xE1A00000; // nop (Skip Manual screen)
+		setBL(0x02022DC4, (u32)dsiSaveOpen);
+		setBL(0x02022DE4, (u32)dsiSaveRead);
+		setBL(0x02022E04, (u32)dsiSaveClose);
+		setBL(0x02022E88, (u32)dsiSaveDelete);
+		setBL(0x02022F40, (u32)dsiSaveCreate);
+		setBL(0x020230A0, (u32)dsiSaveOpen);
+		setBL(0x020230B8, (u32)dsiSaveWrite);
+		setBL(0x020230D4, (u32)dsiSaveClose);
+		setBL(0x02023178, (u32)dsiSaveOpen);
+		setBL(0x0202318C, (u32)dsiSaveGetLength);
+		setBL(0x020231B0, (u32)dsiSaveRead);
+		setBL(0x020231E8, (u32)dsiSaveRead);
+		setBL(0x0202320C, (u32)dsiSaveRead);
+		setBL(0x020232C4, (u32)dsiSaveClose);
+	}
+
+	// Zoonies: Escape from Makatu (Europe, Australia)
+	// Due to our save implementation, save data is stored in all 3 slots
+	else if (strcmp(romTid, "KZSV") == 0 && saveOnFlashcard) {
+		*(u32*)0x02012778 = 0xE1A00000; // nop (Skip Manual screen)
+		setBL(0x02022DA8, (u32)dsiSaveOpen);
+		setBL(0x02022DC8, (u32)dsiSaveRead);
+		setBL(0x02022DE8, (u32)dsiSaveClose);
+		setBL(0x02022E6C, (u32)dsiSaveDelete);
+		setBL(0x02022F24, (u32)dsiSaveCreate);
+		setBL(0x02023084, (u32)dsiSaveOpen);
+		setBL(0x0202309C, (u32)dsiSaveWrite);
+		setBL(0x020230B8, (u32)dsiSaveClose);
+		setBL(0x0202315C, (u32)dsiSaveOpen);
+		setBL(0x02023170, (u32)dsiSaveGetLength);
+		setBL(0x02023194, (u32)dsiSaveRead);
+		setBL(0x020231C8, (u32)dsiSaveRead);
+		setBL(0x020231EC, (u32)dsiSaveRead);
+		setBL(0x020232A4, (u32)dsiSaveClose);
+	}
+
 	// Zuma's Revenge! (USA)
 	// Zuma's Revenge! (Europe, Australia)
 	else if ((strcmp(romTid, "KZTE") == 0 || strcmp(romTid, "KZTV") == 0) && saveOnFlashcard) {
