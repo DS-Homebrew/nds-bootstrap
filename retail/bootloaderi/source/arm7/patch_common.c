@@ -4721,6 +4721,17 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02005084 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 	}
 
+	// Lola's Fruit Shop Sudoku (USA)
+	// Lola's Fruit Shop Sudoku (Europe)
+	else if (strcmp(romTid, "KOFE") == 0 || strcmp(romTid, "KOFP") == 0) {
+		*(u32*)0x02005108 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		if (ndsHeader->gameCode[3] == 'E') {
+			*(u32*)0x0201CF70 = 0xE1A00000; // nop (Skip Manual screen)
+		} else {
+			*(u32*)0x0201CFCC = 0xE1A00000; // nop (Skip Manual screen)
+		}
+	}
+
 	// Magnetic Joe (USA)
 	else if (strcmp(romTid, "KJOE") == 0) {
 		*(u32*)0x02036A30 = 0xE1A00000; // nop (Skip
