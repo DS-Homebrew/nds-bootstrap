@@ -757,6 +757,21 @@ void patchHiHeapDSiWareThumb(u32 addr, u32 newCodeAddr, u32 heapEnd) {
 	*(u16*)(addr+0x22) = 0x2027; // movne r0, #0x2700000
 }
 
+void patchUserSettingsReadDSiWare(u32 addr) {
+	if (*(u32*)(addr) == 0xE594117C) { // ldr r1, [r4,#0x17C]
+		*(u32*)(addr) = 0xE5C50054; // strb r0, [r5,#0x54]
+		*(u32*)(addr+4) = 0xE1D406B4; // ldrh r0, [r4,#0x64]
+		*(u32*)(addr+8) = 0xE1A00E80; // mov r0, r0,lsl#29
+		*(u32*)(addr+0xC) = 0xE1A00EA0; // mov r0, r0,lsr#29
+	} else {
+		*(u32*)(addr) -= 4; // ldr r0, =0x2FFFC80
+		*(u32*)(addr+8) = 0xE5C41054; // strb r1, [r4,#0x54]
+		*(u32*)(addr+0xC) = 0xE1D006B4; // ldrh r0, [r0,#0x64]
+		*(u32*)(addr+0x10) = 0xE1A00E80; // mov r0, r0,lsl#29
+		*(u32*)(addr+0x14) = 0xE1A00EA0; // mov r0, r0,lsr#29
+	}
+}
+
 /*void relocate_ce9(u32 default_location, u32 current_location, u32 size) {
     dbg_printf("relocate_ce9\n");
     

@@ -50,6 +50,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	extern void patchHiHeapDSiWare(u32 addr, u32 heapEnd);
 	extern void patchHiHeapDSiWareThumbOld(u32 addr, u16 opCode1, u16 opCode2);
 	extern void patchHiHeapDSiWareThumb(u32 addr, u32 newCodeAddr, u32 heapEnd);
+	extern void patchUserSettingsReadDSiWare(u32 addr);
 
 	const u32 heapEnd = (fatTableAddr < 0x023C0000 || fatTableAddr >= CARDENGINE_ARM9_LOCATION_DLDI) ? CARDENGINE_ARM9_LOCATION_DLDI : fatTableAddr;
 
@@ -4498,6 +4499,806 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			u32* offset = (u32*)0x02014AF0;
 			offset[i] = 0xE1A00000; // nop
 		}
+	}
+
+	// Electroplankton: Beatnes (USA)
+	// Requires 8MB of RAM
+	else if (strcmp(romTid, "KEIE") == 0 && extendedMemory2) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x020050C0 = 0xE1A00000; // nop
+		*(u32*)0x020050C8 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02005244 = 0xE1A00000; // nop
+		*(u32*)0x02005258 = 0xE1A00000; // nop
+		*(u32*)0x0200526C = 0xE1A00000; // nop
+		*(u32*)0x020124F4 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02012500 = 0xE1A00000; // nop
+		*(u32*)0x0203A1F4 = 0xE1A00000; // nop
+		*(u32*)0x0203D59C = 0xE1A00000; // nop
+		*(u32*)0x020421AC = 0xE1A00000; // nop
+		*(u32*)0x02043FDC = 0xE1A00000; // nop
+		*(u32*)0x02043FE0 = 0xE1A00000; // nop
+		*(u32*)0x02043FEC = 0xE1A00000; // nop
+		*(u32*)0x0204414C = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x020441A8, 0x02700000); // mov r0, #0x2700000
+		patchUserSettingsReadDSiWare(0x02045388);
+		*(u32*)0x020457BC = 0xE1A00000; // nop
+		*(u32*)0x020457C0 = 0xE1A00000; // nop
+		*(u32*)0x020457C4 = 0xE1A00000; // nop
+		*(u32*)0x020457C8 = 0xE1A00000; // nop
+		*(u32*)0x02048EFC = 0xE1A00000; // nop
+	}
+
+	// Electroplankton: Beatnes (Europe, Australia)
+	// Requires 8MB of RAM
+	else if (strcmp(romTid, "KEIV") == 0 && extendedMemory2) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x020050BC = 0xE1A00000; // nop
+		*(u32*)0x020050C4 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02005238 = 0xE1A00000; // nop
+		*(u32*)0x0200524C = 0xE1A00000; // nop
+		*(u32*)0x02005260 = 0xE1A00000; // nop
+		*(u32*)0x02011FD8 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02011FE4 = 0xE1A00000; // nop
+		*(u32*)0x02039CF4 = 0xE1A00000; // nop
+		*(u32*)0x0203D09C = 0xE1A00000; // nop
+		*(u32*)0x02041CAC = 0xE1A00000; // nop
+		*(u32*)0x02043ADC = 0xE1A00000; // nop
+		*(u32*)0x02043AE0 = 0xE1A00000; // nop
+		*(u32*)0x02043AEC = 0xE1A00000; // nop
+		*(u32*)0x02043C4C = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x02043CA8, 0x02700000); // mov r0, #0x2700000
+		patchUserSettingsReadDSiWare(0x02044E88);
+		*(u32*)0x020452BC = 0xE1A00000; // nop
+		*(u32*)0x020452C0 = 0xE1A00000; // nop
+		*(u32*)0x020452C4 = 0xE1A00000; // nop
+		*(u32*)0x020452C8 = 0xE1A00000; // nop
+		*(u32*)0x0204886C = 0xE1A00000; // nop
+	}
+
+	// Electroplankton: Beatnes (Japan)
+	// Requires 8MB of RAM
+	else if (strcmp(romTid, "KEIJ") == 0 && extendedMemory2) {
+		*(u32*)0x020050B0 = 0xE1A00000; // nop
+		*(u32*)0x020050B8 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02005234 = 0xE1A00000; // nop
+		*(u32*)0x02005248 = 0xE1A00000; // nop
+		*(u32*)0x0200525C = 0xE1A00000; // nop
+		*(u32*)0x02011CE8 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02011CF4 = 0xE1A00000; // nop
+		*(u32*)0x02039D34 = 0xE1A00000; // nop
+		*(u32*)0x0203D09C = 0xE1A00000; // nop
+		*(u32*)0x02041FE4 = 0xE1A00000; // nop
+		*(u32*)0x02043E64 = 0xE1A00000; // nop
+		*(u32*)0x02043E68 = 0xE1A00000; // nop
+		*(u32*)0x02043E74 = 0xE1A00000; // nop
+		*(u32*)0x02043FB8 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x02044014, 0x02700000); // mov r0, #0x2700000
+		patchUserSettingsReadDSiWare(0x0204521C);
+		*(u32*)0x02045678 = 0xE1A00000; // nop
+		*(u32*)0x0204567C = 0xE1A00000; // nop
+		*(u32*)0x02045680 = 0xE1A00000; // nop
+		*(u32*)0x02045684 = 0xE1A00000; // nop
+		*(u32*)0x02048EC8 = 0xE1A00000; // nop
+	}
+
+	// Electroplankton: Hanenbow (USA)
+	else if (strcmp(romTid, "KEBE") == 0) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x020050C0 = 0xE1A00000; // nop
+		*(u32*)0x020050C8 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02005244 = 0xE1A00000; // nop
+		*(u32*)0x02005258 = 0xE1A00000; // nop
+		*(u32*)0x0200526C = 0xE1A00000; // nop
+		*(u32*)0x02012210 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0201221C = 0xE1A00000; // nop
+		*(u32*)0x0203CD94 = 0xE1A00000; // nop
+		*(u32*)0x0204013C = 0xE1A00000; // nop
+		*(u32*)0x02044F0C = 0xE1A00000; // nop
+		*(u32*)0x02046D3C = 0xE1A00000; // nop
+		*(u32*)0x02046D40 = 0xE1A00000; // nop
+		*(u32*)0x02046D4C = 0xE1A00000; // nop
+		*(u32*)0x02046EAC = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x02046F08, extendedMemory2 ? 0x02700000 : heapEnd); // mov r0, extendedMemory2 ? #0x2700000 : #0x23C0000
+		*(u32*)0x0204703C = 0x020AD860;
+		patchUserSettingsReadDSiWare(0x020480E8);
+		*(u32*)0x0204851C = 0xE1A00000; // nop
+		*(u32*)0x02048520 = 0xE1A00000; // nop
+		*(u32*)0x02048524 = 0xE1A00000; // nop
+		*(u32*)0x02048528 = 0xE1A00000; // nop
+		*(u32*)0x0204BC44 = 0xE1A00000; // nop
+	}
+
+	// Electroplankton: Hanenbow (Europe, Australia)
+	else if (strcmp(romTid, "KEBV") == 0) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x020050BC = 0xE1A00000; // nop
+		*(u32*)0x020050C4 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02005238 = 0xE1A00000; // nop
+		*(u32*)0x0200524C = 0xE1A00000; // nop
+		*(u32*)0x02005260 = 0xE1A00000; // nop
+		*(u32*)0x02011CF4 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02011D00 = 0xE1A00000; // nop
+		*(u32*)0x0203C894 = 0xE1A00000; // nop
+		*(u32*)0x0203FC3C = 0xE1A00000; // nop
+		*(u32*)0x02044A0C = 0xE1A00000; // nop
+		*(u32*)0x0204683C = 0xE1A00000; // nop
+		*(u32*)0x02046840 = 0xE1A00000; // nop
+		*(u32*)0x0204684C = 0xE1A00000; // nop
+		*(u32*)0x020469AC = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x02046A08, extendedMemory2 ? 0x02700000 : heapEnd); // mov r0, extendedMemory2 ? #0x2700000 : #0x23C0000
+		*(u32*)0x02046B3C = 0x020AD1A0;
+		patchUserSettingsReadDSiWare(0x02047BE8);
+		*(u32*)0x0204801C = 0xE1A00000; // nop
+		*(u32*)0x02048020 = 0xE1A00000; // nop
+		*(u32*)0x02048024 = 0xE1A00000; // nop
+		*(u32*)0x02048028 = 0xE1A00000; // nop
+		*(u32*)0x0204B5B4 = 0xE1A00000; // nop
+	}
+
+	// Electroplankton: Hanenbow (Japan)
+	else if (strcmp(romTid, "KEBJ") == 0) {
+		*(u32*)0x020050B0 = 0xE1A00000; // nop
+		*(u32*)0x020050B8 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02005234 = 0xE1A00000; // nop
+		*(u32*)0x02005248 = 0xE1A00000; // nop
+		*(u32*)0x0200525C = 0xE1A00000; // nop
+		*(u32*)0x02011A04 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02011A10 = 0xE1A00000; // nop
+		*(u32*)0x0203C8AC = 0xE1A00000; // nop
+		*(u32*)0x0203FD48 = 0xE1A00000; // nop
+		*(u32*)0x02044D3C = 0xE1A00000; // nop
+		*(u32*)0x02046BBC = 0xE1A00000; // nop
+		*(u32*)0x02046BC0 = 0xE1A00000; // nop
+		*(u32*)0x02046BCC = 0xE1A00000; // nop
+		*(u32*)0x02046D10 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x02046D6C, extendedMemory2 ? 0x02700000 : heapEnd); // mov r0, extendedMemory2 ? #0x2700000 : #0x23C0000
+		*(u32*)0x02046EA0 = 0x020AC440;
+		patchUserSettingsReadDSiWare(0x02047F74);
+		*(u32*)0x020483D0 = 0xE1A00000; // nop
+		*(u32*)0x020483D4 = 0xE1A00000; // nop
+		*(u32*)0x020483D8 = 0xE1A00000; // nop
+		*(u32*)0x020483DC = 0xE1A00000; // nop
+		*(u32*)0x0204BC08 = 0xE1A00000; // nop
+	}
+
+	// Electroplankton: Lumiloop (USA)
+	// Requires 8MB of RAM
+	else if (strcmp(romTid, "KEGE") == 0 && extendedMemory2) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x020050C0 = 0xE1A00000; // nop
+		*(u32*)0x020050C8 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02005244 = 0xE1A00000; // nop
+		*(u32*)0x02005258 = 0xE1A00000; // nop
+		*(u32*)0x0200526C = 0xE1A00000; // nop
+		*(u32*)0x02012214 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02012220 = 0xE1A00000; // nop
+		*(u32*)0x0203A034 = 0xE1A00000; // nop
+		*(u32*)0x0203D3DC = 0xE1A00000; // nop
+		*(u32*)0x02041FDC = 0xE1A00000; // nop
+		*(u32*)0x02043E0C = 0xE1A00000; // nop
+		*(u32*)0x02043E10 = 0xE1A00000; // nop
+		*(u32*)0x02043E1C = 0xE1A00000; // nop
+		*(u32*)0x02043F7C = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x02043FD8, 0x02700000); // mov r0, #0x2700000
+		patchUserSettingsReadDSiWare(0x020451B8);
+		*(u32*)0x020455EC = 0xE1A00000; // nop
+		*(u32*)0x020455F0 = 0xE1A00000; // nop
+		*(u32*)0x020455F4 = 0xE1A00000; // nop
+		*(u32*)0x020455F8 = 0xE1A00000; // nop
+		*(u32*)0x02048D14 = 0xE1A00000; // nop
+	}
+
+	// Electroplankton: Lumiloop (Europe, Australia)
+	// Requires 8MB of RAM
+	else if (strcmp(romTid, "KEGV") == 0 && extendedMemory2) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x020050BC = 0xE1A00000; // nop
+		*(u32*)0x020050C4 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02005238 = 0xE1A00000; // nop
+		*(u32*)0x0200524C = 0xE1A00000; // nop
+		*(u32*)0x02005260 = 0xE1A00000; // nop
+		*(u32*)0x02011CF8 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02011D04 = 0xE1A00000; // nop
+		*(u32*)0x02039B34 = 0xE1A00000; // nop
+		*(u32*)0x0203CEDC = 0xE1A00000; // nop
+		*(u32*)0x02041ADC = 0xE1A00000; // nop
+		*(u32*)0x0204390C = 0xE1A00000; // nop
+		*(u32*)0x02043910 = 0xE1A00000; // nop
+		*(u32*)0x0204391C = 0xE1A00000; // nop
+		*(u32*)0x02043A7C = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x02043AD8, 0x02700000); // mov r0, #0x2700000
+		patchUserSettingsReadDSiWare(0x02044CB8);
+		*(u32*)0x020450EC = 0xE1A00000; // nop
+		*(u32*)0x020450F0 = 0xE1A00000; // nop
+		*(u32*)0x020450F4 = 0xE1A00000; // nop
+		*(u32*)0x020450F8 = 0xE1A00000; // nop
+		*(u32*)0x02048684 = 0xE1A00000; // nop
+	}
+
+	// Electroplankton: Lumiloop (Japan)
+	// Requires 8MB of RAM
+	else if (strcmp(romTid, "KEGJ") == 0 && extendedMemory2) {
+		*(u32*)0x020050B0 = 0xE1A00000; // nop
+		*(u32*)0x020050B8 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02005234 = 0xE1A00000; // nop
+		*(u32*)0x02005248 = 0xE1A00000; // nop
+		*(u32*)0x0200525C = 0xE1A00000; // nop
+		*(u32*)0x02011A08 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02011A14 = 0xE1A00000; // nop
+		*(u32*)0x02039B60 = 0xE1A00000; // nop
+		*(u32*)0x0203CFFC = 0xE1A00000; // nop
+		*(u32*)0x02041E00 = 0xE1A00000; // nop
+		*(u32*)0x02043C80 = 0xE1A00000; // nop
+		*(u32*)0x02043C84 = 0xE1A00000; // nop
+		*(u32*)0x02043C90 = 0xE1A00000; // nop
+		*(u32*)0x02043DD4 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x02043E30, 0x02700000); // mov r0, #0x2700000
+		patchUserSettingsReadDSiWare(0x02045038);
+		*(u32*)0x02045494 = 0xE1A00000; // nop
+		*(u32*)0x02045498 = 0xE1A00000; // nop
+		*(u32*)0x0204549C = 0xE1A00000; // nop
+		*(u32*)0x020454A0 = 0xE1A00000; // nop
+		*(u32*)0x02048CCC = 0xE1A00000; // nop
+	}
+
+	// Electroplankton: Luminarrow (USA)
+	else if (strcmp(romTid, "KECE") == 0) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x020050C0 = 0xE1A00000; // nop
+		*(u32*)0x020050C8 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02005244 = 0xE1A00000; // nop
+		*(u32*)0x02005258 = 0xE1A00000; // nop
+		*(u32*)0x0200526C = 0xE1A00000; // nop
+		*(u32*)0x0201233C = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02012348 = 0xE1A00000; // nop
+		*(u32*)0x0203B3C0 = 0xE1A00000; // nop
+		*(u32*)0x0203E768 = 0xE1A00000; // nop
+		*(u32*)0x02043368 = 0xE1A00000; // nop
+		*(u32*)0x02045198 = 0xE1A00000; // nop
+		*(u32*)0x0204519C = 0xE1A00000; // nop
+		*(u32*)0x020451A8 = 0xE1A00000; // nop
+		*(u32*)0x02045308 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x02045364, extendedMemory2 ? 0x02700000 : heapEnd); // mov r0, extendedMemory2 ? #0x2700000 : #0x23C0000
+		*(u32*)0x02045498 = 0x020A93C0;
+		patchUserSettingsReadDSiWare(0x02046544);
+		*(u32*)0x02046978 = 0xE1A00000; // nop
+		*(u32*)0x0204697C = 0xE1A00000; // nop
+		*(u32*)0x02046980 = 0xE1A00000; // nop
+		*(u32*)0x02046984 = 0xE1A00000; // nop
+		*(u32*)0x0204A0A0 = 0xE1A00000; // nop
+	}
+
+	// Electroplankton: Luminarrow (Europe, Australia)
+	else if (strcmp(romTid, "KECV") == 0) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x020050BC = 0xE1A00000; // nop
+		*(u32*)0x020050C4 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02005238 = 0xE1A00000; // nop
+		*(u32*)0x0200524C = 0xE1A00000; // nop
+		*(u32*)0x02005260 = 0xE1A00000; // nop
+		*(u32*)0x02011E20 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02011E2C = 0xE1A00000; // nop
+		*(u32*)0x0203AEC0 = 0xE1A00000; // nop
+		*(u32*)0x0203E268 = 0xE1A00000; // nop
+		*(u32*)0x02042E68 = 0xE1A00000; // nop
+		*(u32*)0x02044C98 = 0xE1A00000; // nop
+		*(u32*)0x02044C9C = 0xE1A00000; // nop
+		*(u32*)0x02044CA8 = 0xE1A00000; // nop
+		*(u32*)0x02044E08 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x02044E64, extendedMemory2 ? 0x02700000 : heapEnd); // mov r0, extendedMemory2 ? #0x2700000 : #0x23C0000
+		*(u32*)0x02044F98 = 0x020A8D00;
+		patchUserSettingsReadDSiWare(0x02046044);
+		*(u32*)0x02046478 = 0xE1A00000; // nop
+		*(u32*)0x0204647C = 0xE1A00000; // nop
+		*(u32*)0x02046480 = 0xE1A00000; // nop
+		*(u32*)0x02046484 = 0xE1A00000; // nop
+		*(u32*)0x02049A10 = 0xE1A00000; // nop
+	}
+
+	// Electroplankton: Luminarrow (Japan)
+	else if (strcmp(romTid, "KECJ") == 0) {
+		*(u32*)0x020050B0 = 0xE1A00000; // nop
+		*(u32*)0x020050B8 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02005234 = 0xE1A00000; // nop
+		*(u32*)0x02005248 = 0xE1A00000; // nop
+		*(u32*)0x0200525C = 0xE1A00000; // nop
+		*(u32*)0x02011B30 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02011B3C = 0xE1A00000; // nop
+		*(u32*)0x0203AEF4 = 0xE1A00000; // nop
+		*(u32*)0x0203E390 = 0xE1A00000; // nop
+		*(u32*)0x02043194 = 0xE1A00000; // nop
+		*(u32*)0x02045014 = 0xE1A00000; // nop
+		*(u32*)0x02045018 = 0xE1A00000; // nop
+		*(u32*)0x02045024 = 0xE1A00000; // nop
+		*(u32*)0x02045168 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x020451C4, extendedMemory2 ? 0x02700000 : heapEnd); // mov r0, extendedMemory2 ? #0x2700000 : #0x23C0000
+		*(u32*)0x020452F8 = 0x020A7FC0;
+		patchUserSettingsReadDSiWare(0x020463CC);
+		*(u32*)0x02046828 = 0xE1A00000; // nop
+		*(u32*)0x0204682C = 0xE1A00000; // nop
+		*(u32*)0x02046830 = 0xE1A00000; // nop
+		*(u32*)0x02046834 = 0xE1A00000; // nop
+		*(u32*)0x0204A060 = 0xE1A00000; // nop
+	}
+
+	// Electroplankton: Marine-Crystals (USA)
+	else if (strcmp(romTid, "KEHE") == 0) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x020050C0 = 0xE1A00000; // nop
+		*(u32*)0x020050C8 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02005244 = 0xE1A00000; // nop
+		*(u32*)0x02005258 = 0xE1A00000; // nop
+		*(u32*)0x0200526C = 0xE1A00000; // nop
+		*(u32*)0x02012128 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02012134 = 0xE1A00000; // nop
+		*(u32*)0x0203A4C8 = 0xE1A00000; // nop
+		*(u32*)0x0203D870 = 0xE1A00000; // nop
+		*(u32*)0x02042470 = 0xE1A00000; // nop
+		*(u32*)0x020442A0 = 0xE1A00000; // nop
+		*(u32*)0x020442A4 = 0xE1A00000; // nop
+		*(u32*)0x020442B0 = 0xE1A00000; // nop
+		*(u32*)0x02044410 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x0204446C, extendedMemory2 ? 0x02700000 : heapEnd); // mov r0, extendedMemory2 ? #0x2700000 : #0x23C0000
+		*(u32*)0x020445A0 = 0x020A7F80;
+		patchUserSettingsReadDSiWare(0x0204564C);
+		*(u32*)0x02045A80 = 0xE1A00000; // nop
+		*(u32*)0x02045A84 = 0xE1A00000; // nop
+		*(u32*)0x02045A88 = 0xE1A00000; // nop
+		*(u32*)0x02045A8C = 0xE1A00000; // nop
+		*(u32*)0x020491A8 = 0xE1A00000; // nop
+	}
+
+	// Electroplankton: Marine-Crystals (Europe, Australia)
+	else if (strcmp(romTid, "KEHV") == 0) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x020050BC = 0xE1A00000; // nop
+		*(u32*)0x020050C4 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02005238 = 0xE1A00000; // nop
+		*(u32*)0x0200524C = 0xE1A00000; // nop
+		*(u32*)0x02005260 = 0xE1A00000; // nop
+		*(u32*)0x02011C0C = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02011C18 = 0xE1A00000; // nop
+		*(u32*)0x02039FC8 = 0xE1A00000; // nop
+		*(u32*)0x0203D370 = 0xE1A00000; // nop
+		*(u32*)0x02041F70 = 0xE1A00000; // nop
+		*(u32*)0x02043DA0 = 0xE1A00000; // nop
+		*(u32*)0x02043DA4 = 0xE1A00000; // nop
+		*(u32*)0x02043DB0 = 0xE1A00000; // nop
+		*(u32*)0x02043F10 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x02043F6C, extendedMemory2 ? 0x02700000 : heapEnd); // mov r0, extendedMemory2 ? #0x2700000 : #0x23C0000
+		*(u32*)0x020440A0 = 0x020A78A0;
+		patchUserSettingsReadDSiWare(0x0204514C);
+		*(u32*)0x02045580 = 0xE1A00000; // nop
+		*(u32*)0x02045584 = 0xE1A00000; // nop
+		*(u32*)0x02045588 = 0xE1A00000; // nop
+		*(u32*)0x0204558C = 0xE1A00000; // nop
+		*(u32*)0x02048B18 = 0xE1A00000; // nop
+	}
+
+	// Electroplankton: Marine-Crystals (Japan)
+	else if (strcmp(romTid, "KEHJ") == 0) {
+		*(u32*)0x020050B0 = 0xE1A00000; // nop
+		*(u32*)0x020050B8 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02005234 = 0xE1A00000; // nop
+		*(u32*)0x02005248 = 0xE1A00000; // nop
+		*(u32*)0x0200525C = 0xE1A00000; // nop
+		*(u32*)0x0201191C = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02011928 = 0xE1A00000; // nop
+		*(u32*)0x02039FF8 = 0xE1A00000; // nop
+		*(u32*)0x0203D494 = 0xE1A00000; // nop
+		*(u32*)0x02042298 = 0xE1A00000; // nop
+		*(u32*)0x02044118 = 0xE1A00000; // nop
+		*(u32*)0x0204411C = 0xE1A00000; // nop
+		*(u32*)0x02044128 = 0xE1A00000; // nop
+		*(u32*)0x0204426C = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x020442C8, extendedMemory2 ? 0x02700000 : heapEnd); // mov r0, extendedMemory2 ? #0x2700000 : #0x23C0000
+		*(u32*)0x020443FC = 0x020A6B80;
+		patchUserSettingsReadDSiWare(0x020454D0);
+		*(u32*)0x0204592C = 0xE1A00000; // nop
+		*(u32*)0x02045930 = 0xE1A00000; // nop
+		*(u32*)0x02045934 = 0xE1A00000; // nop
+		*(u32*)0x02045938 = 0xE1A00000; // nop
+		*(u32*)0x02049164 = 0xE1A00000; // nop
+	}
+
+	// Electroplankton: Nanocarp (USA)
+	else if (strcmp(romTid, "KEFE") == 0) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x020050C0 = 0xE1A00000; // nop
+		*(u32*)0x020050C8 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02005244 = 0xE1A00000; // nop
+		*(u32*)0x02005258 = 0xE1A00000; // nop
+		*(u32*)0x0200526C = 0xE1A00000; // nop
+		*(u32*)0x02013DA0 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02013DAC = 0xE1A00000; // nop
+		*(u32*)0x0203C54C = 0xE1A00000; // nop
+		*(u32*)0x0203F8F4 = 0xE1A00000; // nop
+		*(u32*)0x02044584 = 0xE1A00000; // nop
+		*(u32*)0x020463B4 = 0xE1A00000; // nop
+		*(u32*)0x020463B8 = 0xE1A00000; // nop
+		*(u32*)0x020463C4 = 0xE1A00000; // nop
+		*(u32*)0x02046524 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x02046580, extendedMemory2 ? 0x02700000 : heapEnd); // mov r0, extendedMemory2 ? #0x2700000 : #0x23C0000
+		*(u32*)0x020466B4 = 0x020AF0C0;
+		patchUserSettingsReadDSiWare(0x02047760);
+		*(u32*)0x02047B94 = 0xE1A00000; // nop
+		*(u32*)0x02047B98 = 0xE1A00000; // nop
+		*(u32*)0x02047B9C = 0xE1A00000; // nop
+		*(u32*)0x02047BA0 = 0xE1A00000; // nop
+		*(u32*)0x0204B2CC = 0xE1A00000; // nop
+	}
+
+	// Electroplankton: Nanocarp (Europe, Australia)
+	else if (strcmp(romTid, "KEFV") == 0) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x020050C0 = 0xE1A00000; // nop
+		*(u32*)0x020050C8 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02005244 = 0xE1A00000; // nop
+		*(u32*)0x02005258 = 0xE1A00000; // nop
+		*(u32*)0x0200526C = 0xE1A00000; // nop
+		*(u32*)0x02013898 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x020138A4 = 0xE1A00000; // nop
+		*(u32*)0x0203C060 = 0xE1A00000; // nop
+		*(u32*)0x0203F408 = 0xE1A00000; // nop
+		*(u32*)0x02044098 = 0xE1A00000; // nop
+		*(u32*)0x02045EC8 = 0xE1A00000; // nop
+		*(u32*)0x02045ECC = 0xE1A00000; // nop
+		*(u32*)0x02045ED8 = 0xE1A00000; // nop
+		*(u32*)0x02046038 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x02046094, extendedMemory2 ? 0x02700000 : heapEnd); // mov r0, extendedMemory2 ? #0x2700000 : #0x23C0000
+		*(u32*)0x020461C8 = 0x020AEB80;
+		patchUserSettingsReadDSiWare(0x02047274);
+		*(u32*)0x020476A8 = 0xE1A00000; // nop
+		*(u32*)0x020476AC = 0xE1A00000; // nop
+		*(u32*)0x020476B0 = 0xE1A00000; // nop
+		*(u32*)0x020476B4 = 0xE1A00000; // nop
+		*(u32*)0x0204ADE0 = 0xE1A00000; // nop
+	}
+
+	// Electroplankton: Nanocarp (Japan)
+	else if (strcmp(romTid, "KEFJ") == 0) {
+		*(u32*)0x020050B0 = 0xE1A00000; // nop
+		*(u32*)0x020050B8 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02005234 = 0xE1A00000; // nop
+		*(u32*)0x02005248 = 0xE1A00000; // nop
+		*(u32*)0x0200525C = 0xE1A00000; // nop
+		*(u32*)0x02013594 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x020135A0 = 0xE1A00000; // nop
+		*(u32*)0x0203C058 = 0xE1A00000; // nop
+		*(u32*)0x0203F4F4 = 0xE1A00000; // nop
+		*(u32*)0x02044388 = 0xE1A00000; // nop
+		*(u32*)0x02046208 = 0xE1A00000; // nop
+		*(u32*)0x0204620C = 0xE1A00000; // nop
+		*(u32*)0x02046218 = 0xE1A00000; // nop
+		*(u32*)0x0204635C = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x020463B8, extendedMemory2 ? 0x02700000 : heapEnd); // mov r0, extendedMemory2 ? #0x2700000 : #0x23C0000
+		*(u32*)0x020464EC = 0x020ADCA0;
+		patchUserSettingsReadDSiWare(0x020475C0);
+		*(u32*)0x02047A1C = 0xE1A00000; // nop
+		*(u32*)0x02047A20 = 0xE1A00000; // nop
+		*(u32*)0x02047A24 = 0xE1A00000; // nop
+		*(u32*)0x02047A28 = 0xE1A00000; // nop
+		*(u32*)0x0204B264 = 0xE1A00000; // nop
+	}
+
+	// Electroplankton: Rec-Rec (USA)
+	else if (strcmp(romTid, "KEEE") == 0) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x020050C0 = 0xE1A00000; // nop
+		*(u32*)0x020050C8 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02005244 = 0xE1A00000; // nop
+		*(u32*)0x02005258 = 0xE1A00000; // nop
+		*(u32*)0x0200526C = 0xE1A00000; // nop
+		*(u32*)0x02012884 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02012890 = 0xE1A00000; // nop
+		*(u32*)0x0203AA30 = 0xE1A00000; // nop
+		*(u32*)0x0203DDD8 = 0xE1A00000; // nop
+		*(u32*)0x020429D8 = 0xE1A00000; // nop
+		*(u32*)0x02044808 = 0xE1A00000; // nop
+		*(u32*)0x0204480C = 0xE1A00000; // nop
+		*(u32*)0x02044818 = 0xE1A00000; // nop
+		*(u32*)0x02044978 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x020449D4, extendedMemory2 ? 0x02700000 : heapEnd); // mov r0, extendedMemory2 ? #0x2700000 : #0x23C0000
+		*(u32*)0x02044B08 = 0x020AA2C0;
+		patchUserSettingsReadDSiWare(0x02045BB4);
+		*(u32*)0x02045FE8 = 0xE1A00000; // nop
+		*(u32*)0x02045FEC = 0xE1A00000; // nop
+		*(u32*)0x02045FF0 = 0xE1A00000; // nop
+		*(u32*)0x02045FF4 = 0xE1A00000; // nop
+		*(u32*)0x02049740 = 0xE1A00000; // nop
+	}
+
+	// Electroplankton: Rec-Rec (Europe, Australia)
+	else if (strcmp(romTid, "KEEV") == 0) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x020050C0 = 0xE1A00000; // nop
+		*(u32*)0x020050C8 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02005244 = 0xE1A00000; // nop
+		*(u32*)0x02005258 = 0xE1A00000; // nop
+		*(u32*)0x0200526C = 0xE1A00000; // nop
+		*(u32*)0x0201237C = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02012388 = 0xE1A00000; // nop
+		*(u32*)0x0203A544 = 0xE1A00000; // nop
+		*(u32*)0x0203D8EC = 0xE1A00000; // nop
+		*(u32*)0x020424EC = 0xE1A00000; // nop
+		*(u32*)0x0204431C = 0xE1A00000; // nop
+		*(u32*)0x02044320 = 0xE1A00000; // nop
+		*(u32*)0x0204432C = 0xE1A00000; // nop
+		*(u32*)0x0204448C = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x020444E8, extendedMemory2 ? 0x02700000 : heapEnd); // mov r0, extendedMemory2 ? #0x2700000 : #0x23C0000
+		*(u32*)0x0204461C = 0x020A9D80;
+		patchUserSettingsReadDSiWare(0x020456C8);
+		*(u32*)0x02045AFC = 0xE1A00000; // nop
+		*(u32*)0x02045B00 = 0xE1A00000; // nop
+		*(u32*)0x02045B04 = 0xE1A00000; // nop
+		*(u32*)0x02045B08 = 0xE1A00000; // nop
+		*(u32*)0x02049254 = 0xE1A00000; // nop
+	}
+
+	// Electroplankton: Rec-Rec (Japan)
+	else if (strcmp(romTid, "KEEJ") == 0) {
+		*(u32*)0x020050B0 = 0xE1A00000; // nop
+		*(u32*)0x020050B8 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02005234 = 0xE1A00000; // nop
+		*(u32*)0x02005248 = 0xE1A00000; // nop
+		*(u32*)0x0200525C = 0xE1A00000; // nop
+		*(u32*)0x02012078 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02012084 = 0xE1A00000; // nop
+		*(u32*)0x0203A580 = 0xE1A00000; // nop
+		*(u32*)0x0203DA1C = 0xE1A00000; // nop
+		*(u32*)0x02042820 = 0xE1A00000; // nop
+		*(u32*)0x020446A0 = 0xE1A00000; // nop
+		*(u32*)0x020446A4 = 0xE1A00000; // nop
+		*(u32*)0x020446B0 = 0xE1A00000; // nop
+		*(u32*)0x020447F4 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x02044850, extendedMemory2 ? 0x02700000 : heapEnd); // mov r0, extendedMemory2 ? #0x2700000 : #0x23C0000
+		*(u32*)0x02044984 = 0x020A8EC0;
+		patchUserSettingsReadDSiWare(0x02045A58);
+		*(u32*)0x02045EB4 = 0xE1A00000; // nop
+		*(u32*)0x02045EB8 = 0xE1A00000; // nop
+		*(u32*)0x02045EBC = 0xE1A00000; // nop
+		*(u32*)0x02045EC0 = 0xE1A00000; // nop
+		*(u32*)0x0204971C = 0xE1A00000; // nop
+	}
+
+	// Electroplankton: Sun-Animalcule (USA)
+	else if (strcmp(romTid, "KEDE") == 0) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x020050C0 = 0xE1A00000; // nop
+		*(u32*)0x020050C8 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02005244 = 0xE1A00000; // nop
+		*(u32*)0x02005258 = 0xE1A00000; // nop
+		*(u32*)0x0200526C = 0xE1A00000; // nop
+		*(u32*)0x020121C0 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x020121CC = 0xE1A00000; // nop
+		*(u32*)0x0203965C = 0xE1A00000; // nop
+		*(u32*)0x0203CA04 = 0xE1A00000; // nop
+		*(u32*)0x02041604 = 0xE1A00000; // nop
+		*(u32*)0x02043434 = 0xE1A00000; // nop
+		*(u32*)0x02043438 = 0xE1A00000; // nop
+		*(u32*)0x02043444 = 0xE1A00000; // nop
+		*(u32*)0x020435A4 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x02043600, extendedMemory2 ? 0x02700000 : heapEnd); // mov r0, extendedMemory2 ? #0x2700000 : #0x23C0000
+		*(u32*)0x02043734 = 0x020A7160;
+		patchUserSettingsReadDSiWare(0x020447E0);
+		*(u32*)0x02044C14 = 0xE1A00000; // nop
+		*(u32*)0x02044C18 = 0xE1A00000; // nop
+		*(u32*)0x02044C1C = 0xE1A00000; // nop
+		*(u32*)0x02044C20 = 0xE1A00000; // nop
+		*(u32*)0x0204833C = 0xE1A00000; // nop
+	}
+
+	// Electroplankton: Sun-Animalcule (Europe, Australia)
+	else if (strcmp(romTid, "KEDV") == 0) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x020050BC = 0xE1A00000; // nop
+		*(u32*)0x020050C4 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02005238 = 0xE1A00000; // nop
+		*(u32*)0x0200524C = 0xE1A00000; // nop
+		*(u32*)0x02005260 = 0xE1A00000; // nop
+		*(u32*)0x02011CA4 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02011CB0 = 0xE1A00000; // nop
+		*(u32*)0x0203915C = 0xE1A00000; // nop
+		*(u32*)0x0203C504 = 0xE1A00000; // nop
+		*(u32*)0x02041104 = 0xE1A00000; // nop
+		*(u32*)0x02042F34 = 0xE1A00000; // nop
+		*(u32*)0x02042F38 = 0xE1A00000; // nop
+		*(u32*)0x02042F44 = 0xE1A00000; // nop
+		*(u32*)0x020430A4 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x02043100, extendedMemory2 ? 0x02700000 : heapEnd); // mov r0, extendedMemory2 ? #0x2700000 : #0x23C0000
+		*(u32*)0x02043234 = 0x020A6A80;
+		patchUserSettingsReadDSiWare(0x020442E0);
+		*(u32*)0x02044714 = 0xE1A00000; // nop
+		*(u32*)0x02044718 = 0xE1A00000; // nop
+		*(u32*)0x0204471C = 0xE1A00000; // nop
+		*(u32*)0x02044720 = 0xE1A00000; // nop
+		*(u32*)0x02047CAC = 0xE1A00000; // nop
+	}
+
+	// Electroplankton: Sun-Animalcule (Japan)
+	else if (strcmp(romTid, "KEDJ") == 0) {
+		*(u32*)0x020050B0 = 0xE1A00000; // nop
+		*(u32*)0x020050B8 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02005234 = 0xE1A00000; // nop
+		*(u32*)0x02005248 = 0xE1A00000; // nop
+		*(u32*)0x0200525C = 0xE1A00000; // nop
+		*(u32*)0x020119B4 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x020119C0 = 0xE1A00000; // nop
+		*(u32*)0x0203919C = 0xE1A00000; // nop
+		*(u32*)0x0203C638 = 0xE1A00000; // nop
+		*(u32*)0x0204143C = 0xE1A00000; // nop
+		*(u32*)0x020432BC = 0xE1A00000; // nop
+		*(u32*)0x020432C0 = 0xE1A00000; // nop
+		*(u32*)0x020432CC = 0xE1A00000; // nop
+		*(u32*)0x02043410 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x0204346C, extendedMemory2 ? 0x02700000 : heapEnd); // mov r0, extendedMemory2 ? #0x2700000 : #0x23C0000
+		*(u32*)0x020435A0 = 0x020A5D60;
+		patchUserSettingsReadDSiWare(0x02044674);
+		*(u32*)0x02044AD0 = 0xE1A00000; // nop
+		*(u32*)0x02044AD4 = 0xE1A00000; // nop
+		*(u32*)0x02044AD8 = 0xE1A00000; // nop
+		*(u32*)0x02044ADC = 0xE1A00000; // nop
+		*(u32*)0x02048308 = 0xE1A00000; // nop
+	}
+
+	// Electroplankton: Trapy (USA)
+	// Requires 8MB of RAM
+	else if (strcmp(romTid, "KEAE") == 0 && extendedMemory2) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x020050C0 = 0xE1A00000; // nop
+		*(u32*)0x020050C8 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02005244 = 0xE1A00000; // nop
+		*(u32*)0x02005258 = 0xE1A00000; // nop
+		*(u32*)0x0200526C = 0xE1A00000; // nop
+		*(u32*)0x020123F8 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02012404 = 0xE1A00000; // nop
+		*(u32*)0x0203AAE8 = 0xE1A00000; // nop
+		*(u32*)0x0203DE90 = 0xE1A00000; // nop
+		*(u32*)0x02042C28 = 0xE1A00000; // nop
+		*(u32*)0x02044A58 = 0xE1A00000; // nop
+		*(u32*)0x02044A5C = 0xE1A00000; // nop
+		*(u32*)0x02044A68 = 0xE1A00000; // nop
+		*(u32*)0x02044BC8 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x02044C24, 0x02700000); // mov r0, #0x2700000
+		patchUserSettingsReadDSiWare(0x02045E04);
+		*(u32*)0x02046238 = 0xE1A00000; // nop
+		*(u32*)0x0204623C = 0xE1A00000; // nop
+		*(u32*)0x02046240 = 0xE1A00000; // nop
+		*(u32*)0x02046244 = 0xE1A00000; // nop
+		*(u32*)0x02049880 = 0xE1A00000; // nop
+	}
+
+	// Electroplankton: Trapy (Europe, Australia)
+	// Requires 8MB of RAM
+	else if (strcmp(romTid, "KEAV") == 0 && extendedMemory2) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x020050BC = 0xE1A00000; // nop
+		*(u32*)0x020050C4 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02005238 = 0xE1A00000; // nop
+		*(u32*)0x0200524C = 0xE1A00000; // nop
+		*(u32*)0x02005260 = 0xE1A00000; // nop
+		*(u32*)0x02011EDC = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02011EE8 = 0xE1A00000; // nop
+		*(u32*)0x0203A5E8 = 0xE1A00000; // nop
+		*(u32*)0x0203D990 = 0xE1A00000; // nop
+		*(u32*)0x02042728 = 0xE1A00000; // nop
+		*(u32*)0x02044558 = 0xE1A00000; // nop
+		*(u32*)0x0204455C = 0xE1A00000; // nop
+		*(u32*)0x02044568 = 0xE1A00000; // nop
+		*(u32*)0x020446C8 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x02044724, 0x02700000); // mov r0, #0x2700000
+		patchUserSettingsReadDSiWare(0x02045904);
+		*(u32*)0x02045D38 = 0xE1A00000; // nop
+		*(u32*)0x02045D3C = 0xE1A00000; // nop
+		*(u32*)0x02045D40 = 0xE1A00000; // nop
+		*(u32*)0x02045D44 = 0xE1A00000; // nop
+		*(u32*)0x020491F0 = 0xE1A00000; // nop
+	}
+
+	// Electroplankton: Trapy (Japan)
+	// Requires 8MB of RAM
+	else if (strcmp(romTid, "KEAJ") == 0 && extendedMemory2) {
+		*(u32*)0x020050B0 = 0xE1A00000; // nop
+		*(u32*)0x020050B8 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02005234 = 0xE1A00000; // nop
+		*(u32*)0x02005248 = 0xE1A00000; // nop
+		*(u32*)0x0200525C = 0xE1A00000; // nop
+		*(u32*)0x02011C24 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02011C30 = 0xE1A00000; // nop
+		*(u32*)0x0203A61C = 0xE1A00000; // nop
+		*(u32*)0x0203DAB8 = 0xE1A00000; // nop
+		*(u32*)0x02042A74 = 0xE1A00000; // nop
+		*(u32*)0x020448F4 = 0xE1A00000; // nop
+		*(u32*)0x020448F8 = 0xE1A00000; // nop
+		*(u32*)0x02044904 = 0xE1A00000; // nop
+		*(u32*)0x02044A48 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x02044AA4, 0x02700000); // mov r0, #0x2700000
+		patchUserSettingsReadDSiWare(0x02045CAC);
+		*(u32*)0x02046108 = 0xE1A00000; // nop
+		*(u32*)0x0204610C = 0xE1A00000; // nop
+		*(u32*)0x02046110 = 0xE1A00000; // nop
+		*(u32*)0x02046114 = 0xE1A00000; // nop
+		*(u32*)0x02049940 = 0xE1A00000; // nop
+	}
+
+	// Electroplankton: Varvoice (USA)
+	else if (strcmp(romTid, "KEJE") == 0) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x020050C0 = 0xE1A00000; // nop
+		*(u32*)0x020050C8 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02005244 = 0xE1A00000; // nop
+		*(u32*)0x02005258 = 0xE1A00000; // nop
+		*(u32*)0x0200526C = 0xE1A00000; // nop
+		*(u32*)0x020137C8 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x020137D4 = 0xE1A00000; // nop
+		*(u32*)0x0203C498 = 0xE1A00000; // nop
+		*(u32*)0x0203F840 = 0xE1A00000; // nop
+		*(u32*)0x0204447C = 0xE1A00000; // nop
+		*(u32*)0x020462AC = 0xE1A00000; // nop
+		*(u32*)0x020462B0 = 0xE1A00000; // nop
+		*(u32*)0x020462BC = 0xE1A00000; // nop
+		*(u32*)0x0204641C = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x02046478, extendedMemory2 ? 0x02700000 : heapEnd); // mov r0, extendedMemory2 ? #0x2700000 : #0x23C0000
+		*(u32*)0x020465AC = 0x020AA720;
+		patchUserSettingsReadDSiWare(0x02047658);
+		*(u32*)0x02047A8C = 0xE1A00000; // nop
+		*(u32*)0x02047A90 = 0xE1A00000; // nop
+		*(u32*)0x02047A94 = 0xE1A00000; // nop
+		*(u32*)0x02047A98 = 0xE1A00000; // nop
+		*(u32*)0x0204B1C4 = 0xE1A00000; // nop
+	}
+
+	// Electroplankton: Varvoice (Europe, Australia)
+	else if (strcmp(romTid, "KEJV") == 0) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x020050C0 = 0xE1A00000; // nop
+		*(u32*)0x020050C8 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02005244 = 0xE1A00000; // nop
+		*(u32*)0x02005258 = 0xE1A00000; // nop
+		*(u32*)0x0200526C = 0xE1A00000; // nop
+		*(u32*)0x0201330C = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02013318 = 0xE1A00000; // nop
+		*(u32*)0x0203BFF8 = 0xE1A00000; // nop
+		*(u32*)0x0203F3A0 = 0xE1A00000; // nop
+		*(u32*)0x02043FDC = 0xE1A00000; // nop
+		*(u32*)0x02045E0C = 0xE1A00000; // nop
+		*(u32*)0x02045E10 = 0xE1A00000; // nop
+		*(u32*)0x02045E1C = 0xE1A00000; // nop
+		*(u32*)0x02045F7C = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x02045FD8, extendedMemory2 ? 0x02700000 : heapEnd); // mov r0, extendedMemory2 ? #0x2700000 : #0x23C0000
+		*(u32*)0x0204610C = 0x020AA280;
+		patchUserSettingsReadDSiWare(0x020471B8);
+		*(u32*)0x020475EC = 0xE1A00000; // nop
+		*(u32*)0x020475F0 = 0xE1A00000; // nop
+		*(u32*)0x020475F4 = 0xE1A00000; // nop
+		*(u32*)0x020475F8 = 0xE1A00000; // nop
+		*(u32*)0x0204AD24 = 0xE1A00000; // nop
+	}
+
+	// Electroplankton: Varvoice (Japan)
+	else if (strcmp(romTid, "KEJJ") == 0) {
+		*(u32*)0x020050B0 = 0xE1A00000; // nop
+		*(u32*)0x020050B8 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02005234 = 0xE1A00000; // nop
+		*(u32*)0x02005248 = 0xE1A00000; // nop
+		*(u32*)0x0200525C = 0xE1A00000; // nop
+		*(u32*)0x02012F20 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02012F2C = 0xE1A00000; // nop
+		*(u32*)0x0203BF04 = 0xE1A00000; // nop
+		*(u32*)0x0203F3A0 = 0xE1A00000; // nop
+		*(u32*)0x020441E0 = 0xE1A00000; // nop
+		*(u32*)0x02046060 = 0xE1A00000; // nop
+		*(u32*)0x02046064 = 0xE1A00000; // nop
+		*(u32*)0x02046070 = 0xE1A00000; // nop
+		*(u32*)0x020461B4 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x02046210, extendedMemory2 ? 0x02700000 : heapEnd); // mov r0, extendedMemory2 ? #0x2700000 : #0x23C0000
+		*(u32*)0x02046344 = 0x020A9220;
+		patchUserSettingsReadDSiWare(0x02047418);
+		*(u32*)0x02047874 = 0xE1A00000; // nop
+		*(u32*)0x02047878 = 0xE1A00000; // nop
+		*(u32*)0x0204787C = 0xE1A00000; // nop
+		*(u32*)0x02047880 = 0xE1A00000; // nop
+		*(u32*)0x0204B0BC = 0xE1A00000; // nop
 	}
 
 	// Famicom Wars DS: Ushinawareta Hikari (Japan)
