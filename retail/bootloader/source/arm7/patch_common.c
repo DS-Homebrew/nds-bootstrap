@@ -10669,6 +10669,43 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020ED088 = 0xE1A00000; // nop
 	}
 
+	// Simple DS Series Vol. 1: The Misshitsukara no Dasshutsu (Japan)
+	// Requires more than 8MB of RAM(?)
+	/*else if (strcmp(romTid, "KM4J") == 0) {
+		*(u32*)0x020050A8 = 0xE1A00000; // nop
+		*(u32*)0x0200F91C = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		//*(u32*)0x020128BC = 0xE3A00000; // mov r0, #0
+		//*(u32*)0x020128C0 = 0xE12FFF1E; // bx lr
+		setBL(0x020132D0, (u32)dsiSaveOpen);
+		setBL(0x02013338, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+		setBL(0x02013384, (u32)dsiSaveGetLength);
+		setBL(0x020133A0, (u32)dsiSaveRead);
+		setBL(0x020133A8, (u32)dsiSaveClose);
+		setBL(0x020133EC, (u32)dsiSaveOpen);
+		setBL(0x0201346C, (u32)dsiSaveGetLength);
+		setBL(0x0201347C, (u32)dsiSaveSeek);
+		setBL(0x020134F8, (u32)dsiSaveClose);
+		setBL(0x02013520, (u32)dsiSaveWrite);
+		setBL(0x0201352C, (u32)dsiSaveClose);
+		*(u32*)0x0205E43C = 0xE1A00000; // nop
+		*(u32*)0x0205E570 = 0xE1A00000; // nop
+		*(u32*)0x0205E584 = 0xE1A00000; // nop
+		tonccpy((u32*)0x0205F0D0, dsiSaveGetResultCode, 0xC);
+		*(u32*)0x0206204C = 0xE1A00000; // nop
+		*(u32*)0x020678CC = 0xE1A00000; // nop
+		*(u32*)0x0206973C = 0xE1A00000; // nop
+		*(u32*)0x02069740 = 0xE1A00000; // nop
+		*(u32*)0x0206974C = 0xE1A00000; // nop
+		*(u32*)0x02069890 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x020698EC, extendedMemory2 ? 0x02F00000 : heapEnd+0xC00000); // mov r0, extendedMemory2 ? #0x2F00000 (mirrors to 0x2700000 on debug DS units) : #0x2FC0000 (mirrors to 0x23C0000 on retail DS units)
+		patchUserSettingsReadDSiWare(0x0206AB8C);
+		*(u32*)0x0206AFE8 = 0xE1A00000; // nop
+		*(u32*)0x0206AFEC = 0xE1A00000; // nop
+		*(u32*)0x0206AFF0 = 0xE1A00000; // nop
+		*(u32*)0x0206AFF4 = 0xE1A00000; // nop
+		*(u32*)0x0206FD54 = 0xE1A00000; // nop
+	}*/
+
 	// Smart Girl's Playhouse Mini (USA)
 	else if (strcmp(romTid, "K2FE") == 0) {
 		*(u32*)0x02004838 = 0xE1A00000; // nop

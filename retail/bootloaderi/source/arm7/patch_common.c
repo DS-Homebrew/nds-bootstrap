@@ -4059,6 +4059,110 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0209322C, (u32)dsiSaveClose);
 	}
 
+	// Simple DS Series Vol. 1: The Misshitsukara no Dasshutsu (Japan)
+	else if (strcmp(romTid, "KM4J") == 0 && saveOnFlashcard) {
+		*(u32*)0x0200F91C = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		//*(u32*)0x020128BC = 0xE3A00000; // mov r0, #0
+		//*(u32*)0x020128C0 = 0xE12FFF1E; // bx lr
+		setBL(0x020132D0, (u32)dsiSaveOpen);
+		setBL(0x02013338, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+		setBL(0x02013384, (u32)dsiSaveGetLength);
+		setBL(0x020133A0, (u32)dsiSaveRead);
+		setBL(0x020133A8, (u32)dsiSaveClose);
+		setBL(0x020133EC, (u32)dsiSaveOpen);
+		setBL(0x0201346C, (u32)dsiSaveGetLength);
+		setBL(0x0201347C, (u32)dsiSaveSeek);
+		setBL(0x020134F8, (u32)dsiSaveClose);
+		setBL(0x02013520, (u32)dsiSaveWrite);
+		setBL(0x0201352C, (u32)dsiSaveClose);
+		tonccpy((u32*)0x0205F0D0, dsiSaveGetResultCode, 0xC);
+	}
+
+	// Simple DS Series Vol. 2: The Misshitsukara no Dasshutsu (Japan)
+	else if (strcmp(romTid, "KM5J") == 0 && saveOnFlashcard) {
+		*(u32*)0x0200F9EC = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		setBL(0x02013370, (u32)dsiSaveOpen);
+		setBL(0x020133E0, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+		setBL(0x0201342C, (u32)dsiSaveGetLength);
+		setBL(0x02013448, (u32)dsiSaveRead);
+		setBL(0x02013450, (u32)dsiSaveClose);
+		setBL(0x02013494, (u32)dsiSaveOpen);
+		setBL(0x02013514, (u32)dsiSaveGetLength);
+		setBL(0x02013524, (u32)dsiSaveSeek);
+		setBL(0x020135A0, (u32)dsiSaveClose);
+		setBL(0x020135C8, (u32)dsiSaveWrite);
+		setBL(0x020135D4, (u32)dsiSaveClose);
+		tonccpy((u32*)0x0205E620, dsiSaveGetResultCode, 0xC);
+	}
+
+	// Simple DS Series Vol. 3: The Misshitsukara no Dasshutsu (Japan)
+	else if (strcmp(romTid, "K5QJ") == 0 && saveOnFlashcard) {
+		*(u32*)0x0200EE50 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		setBL(0x020118CC, (u32)dsiSaveOpen);
+		setBL(0x02011934, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+		setBL(0x02011980, (u32)dsiSaveGetLength);
+		setBL(0x0201199C, (u32)dsiSaveRead);
+		setBL(0x020119A4, (u32)dsiSaveClose);
+		setBL(0x020119E8, (u32)dsiSaveOpen);
+		setBL(0x02011A68, (u32)dsiSaveGetLength);
+		setBL(0x02011A78, (u32)dsiSaveSeek);
+		setBL(0x02011AF4, (u32)dsiSaveClose);
+		setBL(0x02011B1C, (u32)dsiSaveWrite);
+		setBL(0x02011B28, (u32)dsiSaveClose);
+		tonccpy((u32*)0x0205E16C, dsiSaveGetResultCode, 0xC);
+	}
+
+	// Simple DS Series Vol. 4: The Misshitsukara no Dasshutsu (Japan)
+	else if (strcmp(romTid, "KEYJ") == 0 && saveOnFlashcard) {
+		*(u32*)0x0200F9FC = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		setBL(0x02013410, (u32)dsiSaveOpen);
+		setBL(0x02013478, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+		setBL(0x020134C4, (u32)dsiSaveGetLength);
+		setBL(0x020134E0, (u32)dsiSaveRead);
+		setBL(0x020134E8, (u32)dsiSaveClose);
+		setBL(0x0201352C, (u32)dsiSaveOpen);
+		setBL(0x020135AC, (u32)dsiSaveGetLength);
+		setBL(0x020135BC, (u32)dsiSaveSeek);
+		setBL(0x02013638, (u32)dsiSaveClose);
+		setBL(0x02013660, (u32)dsiSaveWrite);
+		setBL(0x0201366C, (u32)dsiSaveClose);
+		tonccpy((u32*)0x0205F924, dsiSaveGetResultCode, 0xC);
+	}
+
+	// Simple DS Series Vol. 5: The Misshitsukara no Dasshutsu (Japan)
+	else if (strcmp(romTid, "K5KJ") == 0 && saveOnFlashcard) {
+		*(u32*)0x0200F990 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		setBL(0x020133C8, (u32)dsiSaveOpen);
+		setBL(0x02013430, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+		setBL(0x0201347C, (u32)dsiSaveGetLength);
+		setBL(0x02013498, (u32)dsiSaveRead);
+		setBL(0x020134A0, (u32)dsiSaveClose);
+		setBL(0x020134E4, (u32)dsiSaveOpen);
+		setBL(0x02013564, (u32)dsiSaveGetLength);
+		setBL(0x02013574, (u32)dsiSaveSeek);
+		setBL(0x020135F0, (u32)dsiSaveClose);
+		setBL(0x02013618, (u32)dsiSaveWrite);
+		setBL(0x02013624, (u32)dsiSaveClose);
+		tonccpy((u32*)0x0205F4A8, dsiSaveGetResultCode, 0xC);
+	}
+
+	// Simple DS Series Vol. 6: The Misshitsukara no Dasshutsu (Japan)
+	else if (strcmp(romTid, "KLHJ") == 0 && saveOnFlashcard) {
+		*(u32*)0x0200F9A8 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		setBL(0x02013460, (u32)dsiSaveOpen);
+		setBL(0x020134C8, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+		setBL(0x02013514, (u32)dsiSaveGetLength);
+		setBL(0x02013530, (u32)dsiSaveRead);
+		setBL(0x02013538, (u32)dsiSaveClose);
+		setBL(0x0201357C, (u32)dsiSaveOpen);
+		setBL(0x020135FC, (u32)dsiSaveGetLength);
+		setBL(0x0201360C, (u32)dsiSaveSeek);
+		setBL(0x02013688, (u32)dsiSaveClose);
+		setBL(0x020136B0, (u32)dsiSaveWrite);
+		setBL(0x020136BC, (u32)dsiSaveClose);
+		tonccpy((u32*)0x0205F574, dsiSaveGetResultCode, 0xC);
+	}
+
 	// Smart Girl's Playhouse Mini (USA)
 	else if (strcmp(romTid, "K2FE") == 0 && saveOnFlashcard) {
 		*(u32*)0x02026128 = 0xE1A00000; // nop (Skip Manual screen)
