@@ -8665,6 +8665,130 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchUserSettingsReadDSiWare(0x0204487C);
 	}
 
+	// PictureBook Games: The Royal Bluff (USA)
+	// Audio doesn't play on retail consoles
+	else if (strcmp(romTid, "KE3E") == 0) {
+		*(u32*)0x0200509C = 0xE1A00000; // nop
+		if (!extendedMemory2) {
+			// Disable audio
+			*(u32*)0x02005084 = 0xE1A00000; // nop
+			*(u32*)0x0206AC04 = 0xE3A00000; // mov r0, #0
+			*(u32*)0x0206AC08 = 0xE12FFF1E; // bx lr
+			*(u32*)0x0206AC68 = 0xE3A00000; // mov r0, #0
+			*(u32*)0x0206AC6C = 0xE12FFF1E; // bx lr
+			*(u32*)0x0206ACCC = 0xE3A00000; // mov r0, #0
+			*(u32*)0x0206ACD0 = 0xE12FFF1E; // bx lr
+			*(u32*)0x0206AD30 = 0xE3A00000; // mov r0, #0
+			*(u32*)0x0206AD34 = 0xE12FFF1E; // bx lr
+			*(u32*)0x0206AD94 = 0xE3A00000; // mov r0, #0
+			*(u32*)0x0206AD98 = 0xE12FFF1E; // bx lr
+			*(u32*)0x0206ADF8 = 0xE3A00000; // mov r0, #0
+			*(u32*)0x0206ADFC = 0xE12FFF1E; // bx lr
+			*(u32*)0x0206AE5C = 0xE3A00000; // mov r0, #0
+			*(u32*)0x0206AE60 = 0xE12FFF1E; // bx lr
+			*(u32*)0x0206AEC0 = 0xE3A00000; // mov r0, #0
+			*(u32*)0x0206AEC4 = 0xE12FFF1E; // bx lr
+		}
+		*(u32*)0x020050A4 = 0xE3A00002; // mov r0, #2
+		*(u32*)0x0201013C = 0xE1A00000; // nop
+		*(u32*)0x020136B8 = 0xE1A00000; // nop
+		*(u32*)0x0202044C = 0xE1A00000; // nop
+		*(u32*)0x02022390 = 0xE1A00000; // nop
+		*(u32*)0x02022394 = 0xE1A00000; // nop
+		*(u32*)0x020223A0 = 0xE1A00000; // nop
+		*(u32*)0x020224E4 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x02022540, extendedMemory2 ? 0x02700000 : heapEnd); // mov r0, extendedMemory2 ? #0x2700000 : #0x23E0000
+		*(u32*)0x02022674 = 0x0217A140;
+		patchUserSettingsReadDSiWare(0x02023AD0);
+		*(u32*)0x02027038 = 0xE1A00000; // nop
+		*(u32*)0x020293FC = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02029400 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0202F1F0 = 0xE3A00001; // mov r0, #1
+		setBL(0x02048408, (u32)dsiSaveClose);
+		setBL(0x02048584, (u32)dsiSaveClose);
+		setBL(0x02048604, (u32)dsiSaveClose);
+		setBL(0x020486F0, (u32)dsiSaveOpen);
+		setBL(0x02048760, (u32)dsiSaveGetLength);
+		setBL(0x0204880C, (u32)dsiSaveRead); // dsiSaveReadAsync
+		setBL(0x020488BC, (u32)dsiSaveOpen);
+		setBL(0x020488D4, (u32)dsiSaveClose);
+		setBL(0x02048958, (u32)dsiSaveCreate);
+		setBL(0x020489CC, (u32)dsiSaveOpen);
+		setBL(0x02048A2C, (u32)dsiSaveSetLength);
+		setBL(0x02048A68, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+
+		// Skip Manual screen
+		*(u32*)0x0205F0C0 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0205F0D4 = 0xE3A00000; // mov r0, #0
+
+		// Change help button (No blank file found to hide it)
+		//const char* lp0 = "1p.dt0";
+		//tonccpy((char*)0x0211281E, lp0, strlen(lp0)+1);
+		//tonccpy((char*)0x02112844, lp0, strlen(lp0)+1);
+	}
+
+	// PictureBook Games: The Royal Bluff (Europe, Australia)
+	// Audio doesn't play on retail consoles
+	else if (strcmp(romTid, "KE3V") == 0) {
+		*(u32*)0x0200509C = 0xE1A00000; // nop
+		if (!extendedMemory2) {
+			// Disable audio
+			*(u32*)0x02005084 = 0xE1A00000; // nop
+			*(u32*)0x0206B094 = 0xE3A00000; // mov r0, #0
+			*(u32*)0x0206B098 = 0xE12FFF1E; // bx lr
+			*(u32*)0x0206B0F8 = 0xE3A00000; // mov r0, #0
+			*(u32*)0x0206B0FC = 0xE12FFF1E; // bx lr
+			*(u32*)0x0206B15C = 0xE3A00000; // mov r0, #0
+			*(u32*)0x0206B160 = 0xE12FFF1E; // bx lr
+			*(u32*)0x0206B1C0 = 0xE3A00000; // mov r0, #0
+			*(u32*)0x0206B1C4 = 0xE12FFF1E; // bx lr
+			*(u32*)0x0206B224 = 0xE3A00000; // mov r0, #0
+			*(u32*)0x0206B228 = 0xE12FFF1E; // bx lr
+			*(u32*)0x0206B288 = 0xE3A00000; // mov r0, #0
+			*(u32*)0x0206B28C = 0xE12FFF1E; // bx lr
+			*(u32*)0x0206B2EC = 0xE3A00000; // mov r0, #0
+			*(u32*)0x0206B2F0 = 0xE12FFF1E; // bx lr
+			*(u32*)0x0206B350 = 0xE3A00000; // mov r0, #0
+			*(u32*)0x0206B354 = 0xE12FFF1E; // bx lr
+		}
+		*(u32*)0x020050A4 = 0xE3A00002; // mov r0, #2
+		*(u32*)0x02010150 = 0xE1A00000; // nop
+		*(u32*)0x020136CC = 0xE1A00000; // nop
+		*(u32*)0x02020460 = 0xE1A00000; // nop
+		*(u32*)0x020223A4 = 0xE1A00000; // nop
+		*(u32*)0x020223A8 = 0xE1A00000; // nop
+		*(u32*)0x020223B4 = 0xE1A00000; // nop
+		*(u32*)0x020224F8 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x02022554, extendedMemory2 ? 0x02700000 : heapEnd); // mov r0, extendedMemory2 ? #0x2700000 : #0x23E0000
+		*(u32*)0x02022688 = 0x0217FD00;
+		patchUserSettingsReadDSiWare(0x02023AE4);
+		*(u32*)0x0202704C = 0xE1A00000; // nop
+		*(u32*)0x02029410 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02029414 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0202EEE0 = 0xE3A00001; // mov r0, #1
+		setBL(0x020484B0, (u32)dsiSaveClose);
+		setBL(0x0204862C, (u32)dsiSaveClose);
+		setBL(0x020486AC, (u32)dsiSaveClose);
+		setBL(0x02048798, (u32)dsiSaveOpen);
+		setBL(0x02048808, (u32)dsiSaveGetLength);
+		setBL(0x020488B4, (u32)dsiSaveRead); // dsiSaveReadAsync
+		setBL(0x02048964, (u32)dsiSaveOpen);
+		setBL(0x0204897C, (u32)dsiSaveClose);
+		setBL(0x02048A00, (u32)dsiSaveCreate);
+		setBL(0x02048A74, (u32)dsiSaveOpen);
+		setBL(0x02048AD4, (u32)dsiSaveSetLength);
+		setBL(0x02048B10, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+
+		// Skip Manual screen
+		*(u32*)0x0205F550 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0205F564 = 0xE3A00000; // mov r0, #0
+
+		// Change help button (No blank file found to hide it)
+		//const char* lp0 = "t_1p.dt0";
+		//tonccpy((char*)0x0211ABC6, lp0, strlen(lp0)+1);
+		//tonccpy((char*)0x0211ABF0, lp0, strlen(lp0)+1);
+	}
+
 	// Picture Perfect: Pocket Stylist (USA)
 	// Audio doesn't play on retail consoles
 	// Requires 8MB of RAM for full usage

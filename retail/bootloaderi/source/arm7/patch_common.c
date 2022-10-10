@@ -3002,6 +3002,56 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02005B4C, (u32)dsiSaveClose);
 	}
 
+	// PictureBook Games: The Royal Bluff (USA)
+	else if (strcmp(romTid, "KE3E") == 0 && saveOnFlashcard) {
+		setBL(0x02048408, (u32)dsiSaveClose);
+		setBL(0x02048584, (u32)dsiSaveClose);
+		setBL(0x02048604, (u32)dsiSaveClose);
+		setBL(0x020486F0, (u32)dsiSaveOpen);
+		setBL(0x02048760, (u32)dsiSaveGetLength);
+		setBL(0x0204880C, (u32)dsiSaveRead); // dsiSaveReadAsync
+		setBL(0x020488BC, (u32)dsiSaveOpen);
+		setBL(0x020488D4, (u32)dsiSaveClose);
+		setBL(0x02048958, (u32)dsiSaveCreate);
+		setBL(0x020489CC, (u32)dsiSaveOpen);
+		setBL(0x02048A2C, (u32)dsiSaveSetLength);
+		setBL(0x02048A68, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+
+		// Skip Manual screen
+		*(u32*)0x0205F0C0 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0205F0D4 = 0xE3A00000; // mov r0, #0
+
+		// Change help button (No blank file found to hide it)
+		//const char* lp0 = "1p.dt0";
+		//tonccpy((char*)0x0211281E, lp0, strlen(lp0)+1);
+		//tonccpy((char*)0x02112844, lp0, strlen(lp0)+1);
+	}
+
+	// PictureBook Games: The Royal Bluff (Europe, Australia)
+	else if (strcmp(romTid, "KE3V") == 0 && saveOnFlashcard) {
+		setBL(0x020484B0, (u32)dsiSaveClose);
+		setBL(0x0204862C, (u32)dsiSaveClose);
+		setBL(0x020486AC, (u32)dsiSaveClose);
+		setBL(0x02048798, (u32)dsiSaveOpen);
+		setBL(0x02048808, (u32)dsiSaveGetLength);
+		setBL(0x020488B4, (u32)dsiSaveRead); // dsiSaveReadAsync
+		setBL(0x02048964, (u32)dsiSaveOpen);
+		setBL(0x0204897C, (u32)dsiSaveClose);
+		setBL(0x02048A00, (u32)dsiSaveCreate);
+		setBL(0x02048A74, (u32)dsiSaveOpen);
+		setBL(0x02048AD4, (u32)dsiSaveSetLength);
+		setBL(0x02048B10, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+
+		// Skip Manual screen
+		*(u32*)0x0205F550 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0205F564 = 0xE3A00000; // mov r0, #0
+
+		// Change help button (No blank file found to hide it)
+		//const char* lp0 = "t_1p.dt0";
+		//tonccpy((char*)0x0211ABC6, lp0, strlen(lp0)+1);
+		//tonccpy((char*)0x0211ABF0, lp0, strlen(lp0)+1);
+	}
+
 	// GO Series: Pinball Attack! (USA)
 	// GO Series: Pinball Attack! (Europe)
 	else if ((strcmp(romTid, "KPYE") == 0 || strcmp(romTid, "KPYP") == 0) && saveOnFlashcard) {
