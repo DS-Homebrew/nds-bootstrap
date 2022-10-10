@@ -32,13 +32,10 @@ extern u16 saveOnFlashcard;
 extern u8 valueBits3;
 #define memoryPit (valueBits3 & BIT(1))
 
-u16 patchOffsetCacheFileVersion = 84;	// Change when new functions are being patched, some offsets removed,
-										// the offset order changed, and/or the function signatures changed (not added)
-
-patchOffsetCacheContents patchOffsetCache;
-
 u16 patchOffsetCacheFilePrevCrc = 0;
 u16 patchOffsetCacheFileNewCrc = 0;
+
+patchOffsetCacheContents patchOffsetCache;
 
 extern bool logging;
 extern bool gbaRomFound;

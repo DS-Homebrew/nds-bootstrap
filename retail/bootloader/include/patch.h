@@ -50,6 +50,9 @@
 
 //extern bool cardReadFound; // patch_arm9.c
 
+#define patchOffsetCacheFileVersion 30	// Change when new functions are being patched, some offsets removed,
+										// the offset order changed, and/or the function signatures changed (not added)
+
 typedef struct patchOffsetCacheContents {
     u16 ver;
     u16 type;
@@ -105,11 +108,10 @@ typedef struct patchOffsetCacheContents {
 	u32 a7JumpTableType;
 } patchOffsetCacheContents;
 
-extern u16 patchOffsetCacheFileVersion;
-extern patchOffsetCacheContents patchOffsetCache;
-
 extern u16 patchOffsetCacheFilePrevCrc;
 extern u16 patchOffsetCacheFileNewCrc;
+
+extern patchOffsetCacheContents patchOffsetCache;
 
 u32 generateA7Instr(int arg1, int arg2);
 void setB(int arg1, int arg2);

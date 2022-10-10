@@ -29,13 +29,10 @@
 #include "loading_screen.h"
 #include "debug_file.h"
 
-u16 patchOffsetCacheFileVersion = 30;	// Change when new functions are being patched, some offsets removed,
-										// the offset order changed, and/or the function signatures changed (not added)
-
-patchOffsetCacheContents patchOffsetCache;
-
 u16 patchOffsetCacheFilePrevCrc = 0;
 u16 patchOffsetCacheFileNewCrc = 0;
+
+patchOffsetCacheContents patchOffsetCache;
 
 static inline void doubleNopT(u32 addr) {
 	*(u16*)(addr)   = 0x46C0;
