@@ -3002,6 +3002,71 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02005B4C, (u32)dsiSaveClose);
 	}
 
+	// GO Series: Pinball Attack! (USA)
+	// GO Series: Pinball Attack! (Europe)
+	else if ((strcmp(romTid, "KPYE") == 0 || strcmp(romTid, "KPYP") == 0) && saveOnFlashcard) {
+		// Skip Manual screen (Crashes)
+		*(u32*)0x02040264 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		*(u32*)0x0204030C = 0xE1A00000; // nop
+		*(u32*)0x02040318 = 0xE1A00000; // nop
+		*(u32*)0x02040330 = 0xE1A00000; // nop
+
+		setBL(0x02044A18, (u32)dsiSaveCreate);
+		setBL(0x02044A28, (u32)dsiSaveGetResultCode);
+		setBL(0x02044A48, (u32)dsiSaveCreate);
+		setBL(0x02044A58, (u32)dsiSaveGetResultCode);
+		setBL(0x02044A94, (u32)dsiSaveOpen);
+		setBL(0x02044AA4, (u32)dsiSaveGetResultCode);
+		setBL(0x02044AC4, (u32)dsiSaveSetLength);
+		setBL(0x02044AE4, (u32)dsiSaveWrite);
+		setBL(0x02044AF4, (u32)dsiSaveWrite);
+		setBL(0x02044B04, (u32)dsiSaveWrite);
+		setBL(0x02044B18, (u32)dsiSaveWrite);
+		setBL(0x02044B28, (u32)dsiSaveWrite);
+		setBL(0x02044B38, (u32)dsiSaveWrite);
+		setBL(0x02044B40, (u32)dsiSaveClose);
+		setBL(0x02044B88, (u32)dsiSaveOpen);
+		setBL(0x02044BB8, (u32)dsiSaveGetLength);
+		setBL(0x02044BD0, (u32)dsiSaveRead);
+		setBL(0x02044BE4, (u32)dsiSaveRead);
+		setBL(0x02044C10, (u32)dsiSaveRead);
+		setBL(0x02044C20, (u32)dsiSaveRead);
+		setBL(0x02044C30, (u32)dsiSaveRead);
+		setBL(0x02044C40, (u32)dsiSaveRead);
+		setBL(0x02044C48, (u32)dsiSaveClose);
+	}
+
+	// Pinball Attack! (Japan)
+	else if (strcmp(romTid, "KPYJ") == 0 && saveOnFlashcard) {
+		// Skip Manual screen (Crashes)
+		*(u32*)0x0203FCEC = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		*(u32*)0x0203FD34 = 0xE1A00000; // nop
+		*(u32*)0x0203FD3C = 0xE1A00000; // nop
+		*(u32*)0x0203FD50 = 0xE1A00000; // nop
+
+		setBL(0x02044410, (u32)dsiSaveCreate);
+		setBL(0x02044420, (u32)dsiSaveGetResultCode);
+		setBL(0x02044440, (u32)dsiSaveCreate);
+		setBL(0x02044450, (u32)dsiSaveGetResultCode);
+		setBL(0x0204448C, (u32)dsiSaveOpen);
+		setBL(0x0204449C, (u32)dsiSaveGetResultCode);
+		setBL(0x020444BC, (u32)dsiSaveSetLength);
+		setBL(0x020444DC, (u32)dsiSaveWrite);
+		setBL(0x020444EC, (u32)dsiSaveWrite);
+		setBL(0x020444FC, (u32)dsiSaveWrite);
+		setBL(0x02044510, (u32)dsiSaveWrite);
+		setBL(0x02044520, (u32)dsiSaveWrite);
+		setBL(0x02044528, (u32)dsiSaveClose);
+		setBL(0x02044570, (u32)dsiSaveOpen);
+		setBL(0x020445A0, (u32)dsiSaveGetLength);
+		setBL(0x020445B8, (u32)dsiSaveRead);
+		setBL(0x020445CC, (u32)dsiSaveRead);
+		setBL(0x020445F8, (u32)dsiSaveRead);
+		setBL(0x02044608, (u32)dsiSaveRead);
+		setBL(0x02044618, (u32)dsiSaveRead);
+		setBL(0x02044620, (u32)dsiSaveClose);
+	}
+
 	// Pirates Assault (USA)
 	else if (strcmp(romTid, "KXAE") == 0 && saveOnFlashcard) {
 		setBL(0x0204E8A4, (u32)dsiSaveGetInfo);

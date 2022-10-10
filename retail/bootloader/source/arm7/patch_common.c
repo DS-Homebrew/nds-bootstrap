@@ -8776,6 +8776,122 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0205C898 = 0xE1A00000; // nop
 	}
 
+	// GO Series: Pinball Attack! (USA)
+	// GO Series: Pinball Attack! (Europe)
+	else if (strcmp(romTid, "KPYE") == 0 || strcmp(romTid, "KPYP") == 0) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+
+		// Skip Manual screen (Crashes)
+		*(u32*)0x02040264 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		*(u32*)0x0204030C = 0xE1A00000; // nop
+		*(u32*)0x02040318 = 0xE1A00000; // nop
+		*(u32*)0x02040330 = 0xE1A00000; // nop
+
+		setBL(0x02044A18, (u32)dsiSaveCreate);
+		setBL(0x02044A28, (u32)dsiSaveGetResultCode);
+		*(u32*)0x02044A3C = 0xE1A00000; // nop
+		setBL(0x02044A48, (u32)dsiSaveCreate);
+		setBL(0x02044A58, (u32)dsiSaveGetResultCode);
+		setBL(0x02044A94, (u32)dsiSaveOpen);
+		setBL(0x02044AA4, (u32)dsiSaveGetResultCode);
+		setBL(0x02044AC4, (u32)dsiSaveSetLength);
+		setBL(0x02044AE4, (u32)dsiSaveWrite);
+		setBL(0x02044AF4, (u32)dsiSaveWrite);
+		setBL(0x02044B04, (u32)dsiSaveWrite);
+		setBL(0x02044B18, (u32)dsiSaveWrite);
+		setBL(0x02044B28, (u32)dsiSaveWrite);
+		setBL(0x02044B38, (u32)dsiSaveWrite);
+		setBL(0x02044B40, (u32)dsiSaveClose);
+		setBL(0x02044B88, (u32)dsiSaveOpen);
+		*(u32*)0x02044BA4 = 0xE1A00000; // nop
+		setBL(0x02044BB8, (u32)dsiSaveGetLength);
+		setBL(0x02044BD0, (u32)dsiSaveRead);
+		setBL(0x02044BE4, (u32)dsiSaveRead);
+		setBL(0x02044C10, (u32)dsiSaveRead);
+		setBL(0x02044C20, (u32)dsiSaveRead);
+		setBL(0x02044C30, (u32)dsiSaveRead);
+		setBL(0x02044C40, (u32)dsiSaveRead);
+		setBL(0x02044C48, (u32)dsiSaveClose);
+		if (!extendedMemory2) {
+			*(u32*)0x02045128 = 0xE3A02705; // mov r2, #0x140000
+		}
+
+		// Disable NFTR loading from TWLNAND
+		*(u32*)0x02045264 = 0xE1A00000; // nop
+		*(u32*)0x02045268 = 0xE1A00000; // nop 
+		*(u32*)0x02045270 = 0xE1A00000; // nop
+		*(u32*)0x0204527C = 0xE1A00000; // nop
+		*(u32*)0x02045290 = 0xE1A00000; // nop
+		*(u32*)0x0204529C = 0xE1A00000; // nop
+
+		/*if (!extendedMemory2) {
+			*(u32*)0x02045810 = 0xA2400; // Shrink sound heap from 0xE2400: Disables sound effects
+		}*/
+		*(u32*)0x020658E0 = 0xE1A00000; // nop
+		*(u32*)0x02069E4C = 0xE1A00000; // nop
+		*(u32*)0x0206F940 = 0xE1A00000; // nop
+		*(u32*)0x02071700 = 0xE1A00000; // nop
+		*(u32*)0x02071704 = 0xE1A00000; // nop
+		*(u32*)0x02071710 = 0xE1A00000; // nop
+		*(u32*)0x02071870 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x020718CC, extendedMemory2 ? 0x02700000 : heapEnd); // mov r0, extendedMemory2 ? #0x2700000 : #0x23E0000
+		if (!extendedMemory2) {
+			*(u32*)0x02071A00 -= 0x30000;
+		}
+		patchUserSettingsReadDSiWare(0x02072B28);
+		*(u32*)0x0207467C = 0xE1A00000; // nop
+	}
+
+	// Pinball Attack! (Japan)
+	else if (strcmp(romTid, "KPYJ") == 0) {
+		// Skip Manual screen (Crashes)
+		*(u32*)0x0203FCEC = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		*(u32*)0x0203FD34 = 0xE1A00000; // nop
+		*(u32*)0x0203FD3C = 0xE1A00000; // nop
+		*(u32*)0x0203FD50 = 0xE1A00000; // nop
+
+		setBL(0x02044410, (u32)dsiSaveCreate);
+		setBL(0x02044420, (u32)dsiSaveGetResultCode);
+		*(u32*)0x02044434 = 0xE1A00000; // nop
+		setBL(0x02044440, (u32)dsiSaveCreate);
+		setBL(0x02044450, (u32)dsiSaveGetResultCode);
+		setBL(0x0204448C, (u32)dsiSaveOpen);
+		setBL(0x0204449C, (u32)dsiSaveGetResultCode);
+		setBL(0x020444BC, (u32)dsiSaveGetLength);
+		setBL(0x020444DC, (u32)dsiSaveWrite);
+		setBL(0x020444EC, (u32)dsiSaveWrite);
+		setBL(0x020444FC, (u32)dsiSaveWrite);
+		setBL(0x02044510, (u32)dsiSaveWrite);
+		setBL(0x02044520, (u32)dsiSaveWrite);
+		setBL(0x02044528, (u32)dsiSaveClose);
+		setBL(0x02044570, (u32)dsiSaveOpen);
+		*(u32*)0x0204458C = 0xE1A00000; // nop
+		setBL(0x020445A0, (u32)dsiSaveSetLength);
+		setBL(0x020445B8, (u32)dsiSaveRead);
+		setBL(0x020445CC, (u32)dsiSaveRead);
+		setBL(0x020445F8, (u32)dsiSaveRead);
+		setBL(0x02044608, (u32)dsiSaveRead);
+		setBL(0x02044618, (u32)dsiSaveRead);
+		setBL(0x02044620, (u32)dsiSaveClose);
+		if (!extendedMemory2) {
+			*(u32*)0x020449FC = 0xE3A02705; // mov r2, #0x140000
+			//*(u32*)0x020450AC = 0xA2400; // Shrink sound heap from 0xE2400: Disables sound effects
+		}
+		*(u32*)0x02064F3C = 0xE1A00000; // nop
+		*(u32*)0x020696C0 = 0xE1A00000; // nop
+		*(u32*)0x0206F5C0 = 0xE1A00000; // nop
+		*(u32*)0x020713D0 = 0xE1A00000; // nop
+		*(u32*)0x020713D4 = 0xE1A00000; // nop
+		*(u32*)0x020713E0 = 0xE1A00000; // nop
+		*(u32*)0x02071524 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x02071580, extendedMemory2 ? 0x02700000 : heapEnd); // mov r0, extendedMemory2 ? #0x2700000 : #0x23E0000
+		if (!extendedMemory2) {
+			*(u32*)0x020716B4 -= 0x30000;
+		}
+		patchUserSettingsReadDSiWare(0x020727F4);
+		*(u32*)0x020742F8 = 0xE1A00000; // nop
+	}
+
 	// Pinball Pulse: The Ancients Beckon (USA)
 	// Incomplete/broken patch
 	/*else if (strcmp(romTid, "KZPE") == 0) {
