@@ -3002,6 +3002,58 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02005B4C, (u32)dsiSaveClose);
 	}
 
+	// Pirates Assault (USA)
+	else if (strcmp(romTid, "KXAE") == 0 && saveOnFlashcard) {
+		setBL(0x0204E8A4, (u32)dsiSaveGetInfo);
+		setBL(0x0204E8B8, (u32)dsiSaveOpen);
+		setBL(0x0204E8CC, (u32)dsiSaveCreate);
+		setBL(0x0204E8DC, (u32)dsiSaveOpen);
+		setBL(0x0204E8EC, (u32)dsiSaveGetResultCode);
+		setBL(0x0204E908, (u32)dsiSaveCreate);
+		setBL(0x0204E918, (u32)dsiSaveOpen);
+		setBL(0x0204E964, (u32)dsiSaveSeek);
+		setBL(0x0204E974, (u32)dsiSaveWrite);
+		setBL(0x0204E9E0, (u32)dsiSaveSeek);
+		setBL(0x0204E9F0, (u32)dsiSaveWrite);
+		setBL(0x0204E9F8, (u32)dsiSaveClose);
+		setBL(0x0204EA44, (u32)dsiSaveOpen);
+		setBL(0x0204EAA4, (u32)dsiSaveSeek);
+		setBL(0x0204EAB8, (u32)dsiSaveRead);
+		setBL(0x0204EAE0, (u32)dsiSaveClose);
+		setBL(0x0204EB7C, (u32)dsiSaveOpen);
+		setBL(0x0204EB90, (u32)dsiSaveSeek);
+		setBL(0x0204EBA0, (u32)dsiSaveWrite);
+		setBL(0x0204EBA8, (u32)dsiSaveClose);
+		setBL(0x0204EE38, (u32)dsiSaveGetInfo);
+		setBL(0x0204EE48, (u32)dsiSaveOpen);
+	}
+
+	// Pirates Assault (Europe, Australia)
+	else if (strcmp(romTid, "KXAV") == 0 && saveOnFlashcard) {
+		setBL(0x02052368, (u32)dsiSaveGetInfo);
+		setBL(0x0205237C, (u32)dsiSaveOpen);
+		setBL(0x02052390, (u32)dsiSaveCreate);
+		setBL(0x020523A0, (u32)dsiSaveOpen);
+		setBL(0x020523B0, (u32)dsiSaveGetResultCode);
+		setBL(0x020523CC, (u32)dsiSaveCreate);
+		setBL(0x020523DC, (u32)dsiSaveOpen);
+		setBL(0x02052428, (u32)dsiSaveSeek);
+		setBL(0x02052438, (u32)dsiSaveWrite);
+		setBL(0x020524A4, (u32)dsiSaveSeek);
+		setBL(0x020524B4, (u32)dsiSaveWrite);
+		setBL(0x020524BC, (u32)dsiSaveClose);
+		setBL(0x02052508, (u32)dsiSaveOpen);
+		setBL(0x02052568, (u32)dsiSaveSeek);
+		setBL(0x0205257C, (u32)dsiSaveRead);
+		setBL(0x020525A4, (u32)dsiSaveClose);
+		setBL(0x02052640, (u32)dsiSaveOpen);
+		setBL(0x02052654, (u32)dsiSaveSeek);
+		setBL(0x02052664, (u32)dsiSaveWrite);
+		setBL(0x0205266C, (u32)dsiSaveClose);
+		setBL(0x020528CC, (u32)dsiSaveGetInfo);
+		setBL(0x020528DC, (u32)dsiSaveOpen);
+	}
+
 	// Plants vs. Zombies (USA)
 	else if (strcmp(romTid, "KZLE") == 0 && saveOnFlashcard) {
 		setBL(0x02099244, (u32)dsiSaveOpen);

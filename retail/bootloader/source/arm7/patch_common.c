@@ -8808,6 +8808,92 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02091488 = 0xE1A00000; // nop
 	}*/
 
+	// Pirates Assault (USA)
+	// Requires 8MB of RAM
+	else if (strcmp(romTid, "KXAE") == 0 && extendedMemory2) {
+		*(u32*)0x02004838 = 0xE1A00000; // nop
+		*(u32*)0x0200499C = 0xE1A00000; // nop
+		*(u32*)0x02005090 = 0xE1A00000; // nop
+		*(u32*)0x020050A4 = 0xE1A00000; // nop
+		*(u32*)0x0200D1F8 = 0xE1A00000; // nop
+		*(u32*)0x0201054C = 0xE1A00000; // nop
+		*(u32*)0x020145D8 = 0xE1A00000; // nop
+		*(u32*)0x02016374 = 0xE1A00000; // nop
+		*(u32*)0x02016378 = 0xE1A00000; // nop
+		*(u32*)0x02016384 = 0xE1A00000; // nop
+		*(u32*)0x020164E4 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x02016540, 0x02700000); // mov r0, #0x2700000
+		patchUserSettingsReadDSiWare(0x020177F8);
+		*(u32*)0x0201A4C4 = 0xE1A00000; // nop
+		setBL(0x0204E8A4, (u32)dsiSaveGetInfo);
+		setBL(0x0204E8B8, (u32)dsiSaveOpen);
+		setBL(0x0204E8CC, (u32)dsiSaveCreate);
+		setBL(0x0204E8DC, (u32)dsiSaveOpen);
+		setBL(0x0204E8EC, (u32)dsiSaveGetResultCode);
+		*(u32*)0x0204E8FC = 0xE1A00000; // nop
+		setBL(0x0204E908, (u32)dsiSaveCreate);
+		setBL(0x0204E918, (u32)dsiSaveOpen);
+		setBL(0x0204E964, (u32)dsiSaveSeek);
+		setBL(0x0204E974, (u32)dsiSaveWrite);
+		setBL(0x0204E9E0, (u32)dsiSaveSeek);
+		setBL(0x0204E9F0, (u32)dsiSaveWrite);
+		setBL(0x0204E9F8, (u32)dsiSaveClose);
+		setBL(0x0204EA44, (u32)dsiSaveOpen);
+		setBL(0x0204EAA4, (u32)dsiSaveSeek);
+		setBL(0x0204EAB8, (u32)dsiSaveRead);
+		setBL(0x0204EAE0, (u32)dsiSaveClose);
+		setBL(0x0204EB7C, (u32)dsiSaveOpen);
+		setBL(0x0204EB90, (u32)dsiSaveSeek);
+		setBL(0x0204EBA0, (u32)dsiSaveWrite);
+		setBL(0x0204EBA8, (u32)dsiSaveClose);
+		setBL(0x0204EE38, (u32)dsiSaveGetInfo);
+		setBL(0x0204EE48, (u32)dsiSaveOpen);
+		*(u32*)0x0204EEB4 = 0xE1A00000; // nop
+	}
+
+	// Pirates Assault (Europe, Australia)
+	// Requires 8MB of RAM
+	else if (strcmp(romTid, "KXAV") == 0 && extendedMemory2) {
+		*(u32*)0x02004838 = 0xE1A00000; // nop
+		*(u32*)0x0200499C = 0xE1A00000; // nop
+		*(u32*)0x02005090 = 0xE1A00000; // nop
+		*(u32*)0x020050A4 = 0xE1A00000; // nop
+		*(u32*)0x0200D878 = 0xE1A00000; // nop
+		*(u32*)0x02010BCC = 0xE1A00000; // nop
+		*(u32*)0x02014C58 = 0xE1A00000; // nop
+		*(u32*)0x020169F4 = 0xE1A00000; // nop
+		*(u32*)0x020169F8 = 0xE1A00000; // nop
+		*(u32*)0x02016A04 = 0xE1A00000; // nop
+		*(u32*)0x02016B64 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x02016BC0, 0x02700000); // mov r0, #0x2700000
+		patchUserSettingsReadDSiWare(0x02017E78);
+		*(u32*)0x0201AB44 = 0xE1A00000; // nop
+		setBL(0x02052368, (u32)dsiSaveGetInfo);
+		setBL(0x0205237C, (u32)dsiSaveOpen);
+		setBL(0x02052390, (u32)dsiSaveCreate);
+		setBL(0x020523A0, (u32)dsiSaveOpen);
+		setBL(0x020523B0, (u32)dsiSaveGetResultCode);
+		*(u32*)0x020523C0 = 0xE1A00000; // nop
+		setBL(0x020523CC, (u32)dsiSaveCreate);
+		setBL(0x020523DC, (u32)dsiSaveOpen);
+		setBL(0x02052428, (u32)dsiSaveSeek);
+		setBL(0x02052438, (u32)dsiSaveWrite);
+		setBL(0x020524A4, (u32)dsiSaveSeek);
+		setBL(0x020524B4, (u32)dsiSaveWrite);
+		setBL(0x020524BC, (u32)dsiSaveClose);
+		setBL(0x02052508, (u32)dsiSaveOpen);
+		setBL(0x02052568, (u32)dsiSaveSeek);
+		setBL(0x0205257C, (u32)dsiSaveRead);
+		setBL(0x020525A4, (u32)dsiSaveClose);
+		setBL(0x02052640, (u32)dsiSaveOpen);
+		setBL(0x02052654, (u32)dsiSaveSeek);
+		setBL(0x02052664, (u32)dsiSaveWrite);
+		setBL(0x0205266C, (u32)dsiSaveClose);
+		setBL(0x020528CC, (u32)dsiSaveGetInfo);
+		setBL(0x020528DC, (u32)dsiSaveOpen);
+		*(u32*)0x02052948 = 0xE1A00000; // nop
+	}
+
 	// Plants vs. Zombies (USA)
 	else if (strcmp(romTid, "KZLE") == 0) {
 		*(u32*)0x0200498C = 0xE1A00000; // nop
