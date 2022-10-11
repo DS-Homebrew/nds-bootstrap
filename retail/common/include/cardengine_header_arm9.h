@@ -102,12 +102,12 @@ typedef struct cardengineArm9 {
 	u32 consoleModel;
     u32* irqTable;
 	// Below not used for ROM in RAM ce9 binary
-    u32 romLocation[2];
+    u32 romLocation;
     u32 cacheAddress;
     u16 cacheSlots;
     u16 cacheBlockSize;
-    u32 romPartSrc[2];
-    u32 romPartSize[2];
+    u32 romPartSrc;
+    u32 romPartSize;
 } __attribute__ ((__packed__)) cardengineArm9;
 #else
 //

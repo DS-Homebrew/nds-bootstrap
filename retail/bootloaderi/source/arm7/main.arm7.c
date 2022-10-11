@@ -797,15 +797,15 @@ static void NTR_BIOS() {
 }
 
 static void loadROMPartIntoRAM(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, aFile file) {
-	if (dataToPreloadSize[0] == 0 || (dataToPreloadSize[0]+dataToPreloadSize[1]) >= (consoleModel > 0 ? (isSdk5(moduleParams) || dsiModeConfirmed ? 0xF00000 : 0x1700000) : (ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed ? 0x400000 : 0x700000))) {
+	if (dataToPreloadSize[0] == 0 || (dataToPreloadSize[0]/*+dataToPreloadSize[1]*/) >= (consoleModel > 0 ? (isSdk5(moduleParams) || dsiModeConfirmed ? 0xF00000 : 0x1700000) : (ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed ? 0x400000 : 0x700000))) {
 		return;
 	}
 
 	u32 dataLocation = (u32)((consoleModel > 0 && (isSdk5(moduleParams) || dsiModeConfirmed)) ? ROM_SDK5_LOCATION : ROM_LOCATION);
 	fileRead((char*)dataLocation, file, dataToPreloadAddr[0], dataToPreloadSize[0], 0);
-	if (dataToPreloadSize[1] > 0) {
+	/*if (dataToPreloadSize[1] > 0) {
 		fileRead((char*)dataLocation+dataToPreloadSize[0], file, dataToPreloadAddr[1], dataToPreloadSize[1], 0);
-	}
+	}*/
 	dbg_printf("Part of ROM pre-loaded into RAM\n");
 }
 
