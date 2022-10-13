@@ -8489,6 +8489,92 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchHiHeapDSiWare(0x02092C40, heapEnd); // mov r0, #0x23E0000
 	}*/
 
+	// Petz Catz: Family (USA)
+	// Unsure if it requires 8MB of RAM
+	/*else if (strcmp(romTid, "KP5E") == 0) {
+		const u32 dsiSaveCreateT = 0x020A721C;
+		*(u16*)dsiSaveCreateT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveCreateT + 4), dsiSaveCreate, 0xC);
+
+		const u32 dsiSaveGetInfoT = 0x020A722C;
+		*(u16*)dsiSaveGetInfoT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveGetInfoT + 4), dsiSaveGetInfo, 0xC);
+
+		const u32 dsiSaveOpenT = 0x020A723C;
+		*(u16*)dsiSaveOpenT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveOpenT + 4), dsiSaveOpen, 0xC);
+
+		const u32 dsiSaveCloseT = 0x020A724C;
+		*(u16*)dsiSaveCloseT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveCloseT + 4), dsiSaveClose, 0xC);
+
+		const u32 dsiSaveSeekT = 0x020A725C;
+		*(u16*)dsiSaveSeekT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveSeekT + 4), dsiSaveSeek, 0xC);
+
+		const u32 dsiSaveReadT = 0x020A726C;
+		*(u16*)dsiSaveReadT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveReadT + 4), dsiSaveRead, 0xC);
+
+		const u32 dsiSaveWriteT = 0x020A727C;
+		*(u16*)dsiSaveWriteT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveWriteT + 4), dsiSaveWrite, 0xC);
+
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		doubleNopT(0x020191A8);
+		doubleNopT(0x0201A4E4);
+		doubleNopT(0x0201A4E8);
+		doubleNopT(0x0201A4FC);
+		doubleNopT(0x0201A50E);
+		doubleNopT(0x0201A526);
+		doubleNopT(0x02031234);
+		setBLThumb(0x0203810A, dsiSaveOpenT);
+		setBLThumb(0x02038152, dsiSaveCloseT);
+		setBLThumb(0x02038176, dsiSaveGetInfoT);
+		setBLThumb(0x0203819C, dsiSaveCreateT);
+		setBLThumb(0x020381BE, dsiSaveSeekT);
+		setBLThumb(0x020381D4, dsiSaveReadT);
+		setBLThumb(0x020381F6, dsiSaveSeekT);
+		setBLThumb(0x0203820C, dsiSaveWriteT);
+		if (!extendedMemory2) {
+			*(u32*)0x02089404 = 0xE3A00000; // mov r0, #0
+		}
+		*(u32*)0x020A5B04 = 0xE1A00000; // nop
+		tonccpy((u32*)0x020A67EC, dsiSaveGetResultCode, 0xC);
+		*(u32*)0x020A9B78 = 0xE1A00000; // nop
+		*(u32*)0x020B046C = 0xE1A00000; // nop
+		*(u32*)0x020B244C = 0xE1A00000; // nop
+		*(u32*)0x020B2450 = 0xE1A00000; // nop
+		*(u32*)0x020B245C = 0xE1A00000; // nop
+		*(u32*)0x020B25A0 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x020B25FC, heapEnd); // mov r0, #0x23E0000
+		*(u32*)0x020B2730 = 0x021CD200;
+		patchUserSettingsReadDSiWare(0x020B3A34);
+		*(u32*)0x020B7600 = 0xE1A00000; // nop
+		if (!extendedMemory2) {
+			*(u32*)0x020CEF70 = 0xE3A00000; // mov r0, #0
+			*(u32*)0x020CEF74 = 0xE12FFF1E; // bx lr
+			*(u32*)0x020CEFD4 = 0xE3A00000; // mov r0, #0
+			*(u32*)0x020CEFD8 = 0xE12FFF1E; // bx lr
+			*(u32*)0x020CF038 = 0xE3A00000; // mov r0, #0
+			*(u32*)0x020CF03C = 0xE12FFF1E; // bx lr
+			*(u32*)0x020CF09C = 0xE3A00000; // mov r0, #0
+			*(u32*)0x020CF0A0 = 0xE12FFF1E; // bx lr
+			*(u32*)0x020CF100 = 0xE3A00000; // mov r0, #0
+			*(u32*)0x020CF104 = 0xE12FFF1E; // bx lr
+			*(u32*)0x020CF164 = 0xE3A00000; // mov r0, #0
+			*(u32*)0x020CF168 = 0xE12FFF1E; // bx lr
+			*(u32*)0x020CF1C8 = 0xE3A00000; // mov r0, #0
+			*(u32*)0x020CF1CC = 0xE12FFF1E; // bx lr
+			*(u32*)0x020CF22C = 0xE3A00000; // mov r0, #0
+			*(u32*)0x020CF230 = 0xE12FFF1E; // bx lr
+			*(u32*)0x020CF290 = 0xE3A00000; // mov r0, #0
+			*(u32*)0x020CF294 = 0xE12FFF1E; // bx lr
+			*(u32*)0x020D0254 = 0xE3A00000; // mov r0, #0
+			*(u32*)0x020D0258 = 0xE12FFF1E; // bx lr
+		}
+	}*/
+
 	// Phantasy Star 0 Mini (Japan)
 	// Requires 8MB of RAM
 	else if (strcmp(romTid, "KPSJ") == 0 && extendedMemory2) {

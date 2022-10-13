@@ -2934,6 +2934,88 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		//*(u32*)0x0203A730 = 0xE3A00001; // mov r0, #1
 	}
 
+	// Petz Catz: Family (USA)
+	else if (strcmp(romTid, "KP5E") == 0 && saveOnFlashcard) {
+		const u32 dsiSaveCreateT = 0x020A721C;
+		*(u16*)dsiSaveCreateT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveCreateT + 4), dsiSaveCreate, 0xC);
+
+		const u32 dsiSaveGetInfoT = 0x020A722C;
+		*(u16*)dsiSaveGetInfoT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveGetInfoT + 4), dsiSaveGetInfo, 0xC);
+
+		const u32 dsiSaveOpenT = 0x020A723C;
+		*(u16*)dsiSaveOpenT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveOpenT + 4), dsiSaveOpen, 0xC);
+
+		const u32 dsiSaveCloseT = 0x020A724C;
+		*(u16*)dsiSaveCloseT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveCloseT + 4), dsiSaveClose, 0xC);
+
+		const u32 dsiSaveSeekT = 0x020A725C;
+		*(u16*)dsiSaveSeekT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveSeekT + 4), dsiSaveSeek, 0xC);
+
+		const u32 dsiSaveReadT = 0x020A726C;
+		*(u16*)dsiSaveReadT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveReadT + 4), dsiSaveRead, 0xC);
+
+		const u32 dsiSaveWriteT = 0x020A727C;
+		*(u16*)dsiSaveWriteT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveWriteT + 4), dsiSaveWrite, 0xC);
+
+		setBLThumb(0x0203810A, dsiSaveOpenT);
+		setBLThumb(0x02038152, dsiSaveCloseT);
+		setBLThumb(0x02038176, dsiSaveGetInfoT);
+		setBLThumb(0x0203819C, dsiSaveCreateT);
+		setBLThumb(0x020381BE, dsiSaveSeekT);
+		setBLThumb(0x020381D4, dsiSaveReadT);
+		setBLThumb(0x020381F6, dsiSaveSeekT);
+		setBLThumb(0x0203820C, dsiSaveWriteT);
+		tonccpy((u32*)0x020A67EC, dsiSaveGetResultCode, 0xC);
+	}
+
+	// Petz Cat: Superstar (Europe, Australia)
+	else if (strcmp(romTid, "KP5V") == 0 && saveOnFlashcard) {
+		const u32 dsiSaveCreateT = 0x020A7264;
+		*(u16*)dsiSaveCreateT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveCreateT + 4), dsiSaveCreate, 0xC);
+
+		const u32 dsiSaveGetInfoT = 0x020A7274;
+		*(u16*)dsiSaveGetInfoT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveGetInfoT + 4), dsiSaveGetInfo, 0xC);
+
+		const u32 dsiSaveOpenT = 0x020A7284;
+		*(u16*)dsiSaveOpenT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveOpenT + 4), dsiSaveOpen, 0xC);
+
+		const u32 dsiSaveCloseT = 0x020A7294;
+		*(u16*)dsiSaveCloseT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveCloseT + 4), dsiSaveClose, 0xC);
+
+		const u32 dsiSaveSeekT = 0x020A72A4;
+		*(u16*)dsiSaveSeekT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveSeekT + 4), dsiSaveSeek, 0xC);
+
+		const u32 dsiSaveReadT = 0x020A72B4;
+		*(u16*)dsiSaveReadT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveReadT + 4), dsiSaveRead, 0xC);
+
+		const u32 dsiSaveWriteT = 0x020A72C4;
+		*(u16*)dsiSaveWriteT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveWriteT + 4), dsiSaveWrite, 0xC);
+
+		setBLThumb(0x02038172, dsiSaveOpenT);
+		setBLThumb(0x020381BA, dsiSaveCloseT);
+		setBLThumb(0x020381DE, dsiSaveGetInfoT);
+		setBLThumb(0x02038204, dsiSaveCreateT);
+		setBLThumb(0x02038226, dsiSaveSeekT);
+		setBLThumb(0x0203823C, dsiSaveReadT);
+		setBLThumb(0x0203825E, dsiSaveSeekT);
+		setBLThumb(0x02038274, dsiSaveWriteT);
+		tonccpy((u32*)0x020A6834, dsiSaveGetResultCode, 0xC);
+	}
+
 	// GO Series: Picdun (USA)
 	// GO Series: Picdun (Europe)
 	else if ((strcmp(romTid, "KPQE") == 0 || strcmp(romTid, "KPQP") == 0) && saveOnFlashcard) {
