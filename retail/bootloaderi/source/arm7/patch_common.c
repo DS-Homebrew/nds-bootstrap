@@ -2934,6 +2934,51 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		//*(u32*)0x0203A730 = 0xE3A00001; // mov r0, #1
 	}
 
+	// Peg Solitaire (USA)
+	else if (strcmp(romTid, "KP8E") == 0 && saveOnFlashcard) {
+		*(u32*)0x0203DDA8 = 0xE1A00000; // nop (Skip Manual screen)
+		setBL(0x0204616C, (u32)dsiSaveOpen);
+		setBL(0x02046184, (u32)dsiSaveCreate);
+		setBL(0x0204618C, (u32)dsiSaveGetResultCode);
+		setBL(0x020461A0, (u32)dsiSaveOpen);
+		setBL(0x020461B0, (u32)dsiSaveGetResultCode);
+		setBL(0x020461CC, (u32)dsiSaveCreate);
+		setBL(0x020461DC, (u32)dsiSaveOpen);
+		setBL(0x020461E8, (u32)dsiSaveClose);
+		setBL(0x02046324, (u32)dsiSaveGetInfo);
+		setBL(0x02046334, (u32)dsiSaveOpen);
+		setBL(0x0204635C, (u32)dsiSaveClose);
+		setBL(0x02046394, (u32)dsiSaveSeek);
+		setBL(0x020463A4, (u32)dsiSaveWrite);
+		setBL(0x020463DC, (u32)dsiSaveOpen);
+		setBL(0x02046400, (u32)dsiSaveClose);
+		setBL(0x02046438, (u32)dsiSaveSeek);
+		setBL(0x02046448, (u32)dsiSaveRead);
+	}
+
+	// Peg Solitaire (Europe)
+	else if (strcmp(romTid, "KP8P") == 0 && saveOnFlashcard) {
+		*(u32*)0x0203E03C = 0xE1A00000; // nop (Skip Manual screen)
+		setBL(0x02046400, (u32)dsiSaveOpen);
+		setBL(0x02046410, (u32)dsiSaveGetResultCode);
+		setBL(0x0204642C, (u32)dsiSaveCreate);
+		setBL(0x02046444, (u32)dsiSaveOpen);
+		setBL(0x02046454, (u32)dsiSaveGetResultCode);
+		setBL(0x02046470, (u32)dsiSaveCreate);
+		setBL(0x02046480, (u32)dsiSaveOpen);
+		setBL(0x02046494, (u32)dsiSaveGetLength);
+		setBL(0x020464A4, (u32)dsiSaveClose);
+		setBL(0x020465E0, (u32)dsiSaveGetInfo);
+		setBL(0x020465F0, (u32)dsiSaveOpen);
+		setBL(0x02046618, (u32)dsiSaveClose);
+		setBL(0x02046650, (u32)dsiSaveSeek);
+		setBL(0x02046660, (u32)dsiSaveWrite);
+		setBL(0x02046698, (u32)dsiSaveOpen);
+		setBL(0x020466BC, (u32)dsiSaveClose);
+		setBL(0x020466F4, (u32)dsiSaveSeek);
+		setBL(0x02046704, (u32)dsiSaveRead);
+	}
+
 	// Petz Catz: Family (USA)
 	else if (strcmp(romTid, "KP5E") == 0 && saveOnFlashcard) {
 		const u32 dsiSaveCreateT = 0x020A721C;

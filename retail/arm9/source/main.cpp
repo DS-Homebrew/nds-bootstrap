@@ -22,7 +22,7 @@
 
 #define REG_SCFG_EXT7 *(u32*)0x02FFFDF0
 
-u8 lz77ImageBuffer[0x20000];
+u8 lz77ImageBuffer[0x40000];
 
 char patchOffsetCacheFilePath[64];
 std::string wideCheatFilePath;

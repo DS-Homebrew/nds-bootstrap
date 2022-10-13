@@ -45,7 +45,7 @@
 
 //#define LCDC_BANK_C (u16*)0x06840000
 
-extern u8 lz77ImageBuffer[0x20000];
+extern u8 lz77ImageBuffer[0x40000];
 void* loaderBin[0x40000];
 
 loadCrt0* lc0 = (loadCrt0*)LOAD_CRT0_LOCATION;
