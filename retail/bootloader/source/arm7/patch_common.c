@@ -12051,6 +12051,49 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		doubleNopT(0x0202BAF2);
 	}
 
+	// Wonderful Sports: Bowling (Japan)
+	// Music does not play on retail consoles
+	else if (strcmp(romTid, "KBSJ") == 0) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x02005084 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		*(u32*)0x0200C1F0 = 0xE1A00000; // nop
+		*(u32*)0x0200F634 = 0xE1A00000; // nop
+		*(u32*)0x02015670 = 0xE1A00000; // nop
+		*(u32*)0x02017490 = 0xE1A00000; // nop
+		*(u32*)0x02017494 = 0xE1A00000; // nop
+		*(u32*)0x020174A0 = 0xE1A00000; // nop
+		*(u32*)0x02017600 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x0201765C, extendedMemory2 ? 0x02700000 : heapEnd); // movs r0, extendedMemory2 ? #0x2700000 : #0x23E0000
+		if (!extendedMemory2) {
+			*(u32*)0x02017790 = 0x0219B920;
+		}
+		patchUserSettingsReadDSiWare(0x02018A58);
+		*(u32*)0x0201B7C0 = 0xE1A00000; // nop
+		setBL(0x02027AF4, (u32)dsiSaveOpen);
+		setBL(0x02027B04, (u32)dsiSaveGetLength);
+		setBL(0x02027B1C, (u32)dsiSaveRead);
+		setBL(0x02027B6C, (u32)dsiSaveClose);
+		setBL(0x02027BFC, (u32)dsiSaveCreate);
+		setBL(0x02027C0C, (u32)dsiSaveOpen);
+		setBL(0x02027C20, (u32)dsiSaveSetLength);
+		setBL(0x02027C30, (u32)dsiSaveWrite);
+		setBL(0x02027C38, (u32)dsiSaveClose);
+		if (!extendedMemory2) {
+			// Disable music
+			*(u32*)0x020283E0 = 0xE3A01702; // mov r1, #0x80000 (Shrink sound heap)
+			*(u32*)0x0202B634 = 0xE12FFF1E; // bx lr
+			*(u32*)0x0202BFE8 = 0xE12FFF1E; // bx lr
+		}
+
+		// Skip Manual screen
+		*(u32*)0x02029AF0 = 0xE1A00000; // nop
+		*(u32*)0x02029AF8 = 0xE1A00000; // nop
+
+		// Skip NFTR font rendering
+		*(u32*)0x02028C50 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02033D88 = 0xE12FFF1E; // bx lr
+	}
+
 	// Art Style: ZENGAGE (USA)
 	// Art Style: NEMREM (Europe, Australia)
 	else if (strcmp(romTid, "KASE") == 0 || strcmp(romTid, "KASV") == 0) {

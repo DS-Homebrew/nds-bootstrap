@@ -4853,6 +4853,28 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u16*)0x02013B10 = 0x4770; // bx lr (Disable NFTR loading from TWLNAND)
 	}
 
+	// Wonderful Sports: Bowling (Japan)
+	else if (strcmp(romTid, "KBSJ") == 0 && saveOnFlashcard) {
+		*(u32*)0x02005084 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		setBL(0x02027AF4, (u32)dsiSaveOpen);
+		setBL(0x02027B04, (u32)dsiSaveGetLength);
+		setBL(0x02027B1C, (u32)dsiSaveRead);
+		setBL(0x02027B6C, (u32)dsiSaveClose);
+		setBL(0x02027BFC, (u32)dsiSaveCreate);
+		setBL(0x02027C0C, (u32)dsiSaveOpen);
+		setBL(0x02027C20, (u32)dsiSaveSetLength);
+		setBL(0x02027C30, (u32)dsiSaveWrite);
+		setBL(0x02027C38, (u32)dsiSaveClose);
+
+		// Skip Manual screen
+		*(u32*)0x02029AF0 = 0xE1A00000; // nop
+		*(u32*)0x02029AF8 = 0xE1A00000; // nop
+
+		// Skip NFTR font rendering
+		*(u32*)0x02028C50 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02033D88 = 0xE12FFF1E; // bx lr
+	}
+
 	// Art Style: ZENGAGE (USA)
 	// Art Style: NEMREM (Europe, Australia)
 	else if ((strcmp(romTid, "KASE") == 0 || strcmp(romTid, "KASV") == 0) && saveOnFlashcard) {
