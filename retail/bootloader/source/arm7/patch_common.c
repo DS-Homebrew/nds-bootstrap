@@ -9101,7 +9101,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02044C40, (u32)dsiSaveRead);
 		setBL(0x02044C48, (u32)dsiSaveClose);
 		if (!extendedMemory2) {
-			*(u32*)0x02045128 = 0xE3A02705; // mov r2, #0x140000
+			*(u32*)0x02045128 = 0xE3A02816; // mov r2, #0x160000
 		}
 
 		// Disable NFTR loading from TWLNAND
@@ -9112,9 +9112,9 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02045290 = 0xE1A00000; // nop
 		*(u32*)0x0204529C = 0xE1A00000; // nop
 
-		/*if (!extendedMemory2) {
-			*(u32*)0x02045810 = 0xA2400; // Shrink sound heap from 0xE2400: Disables sound effects
-		}*/
+		if (!extendedMemory2) {
+			*(u32*)0x02045810 = 0xC2400; // Shrink sound heap from 0xE2400 by 128KB
+		}
 		*(u32*)0x020658E0 = 0xE1A00000; // nop
 		*(u32*)0x02069E4C = 0xE1A00000; // nop
 		*(u32*)0x0206F940 = 0xE1A00000; // nop
@@ -9162,8 +9162,8 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02044618, (u32)dsiSaveRead);
 		setBL(0x02044620, (u32)dsiSaveClose);
 		if (!extendedMemory2) {
-			*(u32*)0x020449FC = 0xE3A02705; // mov r2, #0x140000
-			//*(u32*)0x020450AC = 0xA2400; // Shrink sound heap from 0xE2400: Disables sound effects
+			*(u32*)0x020449FC = 0xE3A02816; // mov r2, #0x160000
+			*(u32*)0x020450AC = 0xC2400; // Shrink sound heap from 0xE2400 by 128KB
 		}
 		*(u32*)0x02064F3C = 0xE1A00000; // nop
 		*(u32*)0x020696C0 = 0xE1A00000; // nop
