@@ -145,6 +145,24 @@ static void printHex(int x, int y, u32 val, u8 bytes, int palette) {
 	}
 }
 
+static void printTime(void) {
+	while (!(sharedAddr[7] & 0x10000000)) { // Wait for time to be received
+		while (REG_VCOUNT != 191) swiDelay(100);
+		while (REG_VCOUNT == 191) swiDelay(100);
+	}
+	#ifndef B4DS
+	#define timeYpos 3
+	#else
+	#define timeYpos 2
+	#endif
+
+	u8 hours = (u8)sharedAddr[7];
+	u8 minutes = (u8)sharedAddr[8];
+	printDec(0x20 - 6, 0x18 - timeYpos, hours, 2, 3);
+	print(0x20 - 4, 0x18 - timeYpos, ":", 3);
+	printDec(0x20 - 3, 0x18 - timeYpos, minutes, 2, 3);
+}
+
 #ifndef B4DS
 static void printBattery(void) {
 	while ((u8)sharedAddr[6] == 0) { // Wait for battery level to be received
@@ -186,11 +204,13 @@ static void waitKeys(u16 keys) {
 	}
 
 	u32 status = sharedAddr[6]; // Battery, brightness, volume
+	u8 hours = (u8)sharedAddr[7];
+	u8 minutes = (u8)sharedAddr[8];
 
 	do {
 		while (REG_VCOUNT != 191) swiDelay(100);
 		while (REG_VCOUNT == 191) swiDelay(100);
-	} while(!(KEYS & keys) && sharedAddr[6] == status);
+	} while(!(KEYS & keys) && sharedAddr[6] == status && (u8)sharedAddr[7] == hours && (u8)sharedAddr[8] == minutes);
 }
 static void clearScreen(void) {
 	toncset16(BG_MAP_RAM_SUB(15), 0, 0x300);
@@ -793,6 +813,7 @@ void inGameMenu(s8 *mainScreen, u32 consoleModel) {
 	drawMainMenu(menuItems, menuItemCount);
 	drawCursor(0);
 	do {
+		printTime();
 		#ifndef B4DS
 		printBattery();
 		#endif
@@ -804,6 +825,7 @@ void inGameMenu(s8 *mainScreen, u32 consoleModel) {
 	while (sharedAddr[4] == 0x554E454D) {
 		drawMainMenu(menuItems, menuItemCount);
 		drawCursor(cursorPosition);
+		printTime();
 #ifndef B4DS
 		printBattery();
 #endif

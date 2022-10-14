@@ -3,7 +3,9 @@
 #include <nds/interrupts.h>
 #include <nds/input.h>
 #include <nds/arm7/audio.h>
+#include <nds/arm7/clock.h>
 #include <nds/arm7/i2c.h>
+#include <time.h>
 
 #include "igm_text.h"
 #include "locations.h"
@@ -68,6 +70,12 @@ void inGameMenu(void) {
 				sharedAddr[6] = i2cReadRegister(I2C_PM, I2CREGPM_BATTERY); // Battery
 				sharedAddr[6] |= (brightness + ((pmControl & 0xC) != 0)) << 8; // Brightness
 				sharedAddr[6] |= i2cReadRegister(I2C_PM, I2CREGPM_VOL) << 16; // Volume
+
+				RTCtime dstime;
+				rtcGetTimeAndDate((uint8 *)&dstime);
+				sharedAddr[7] = dstime.hours;
+				sharedAddr[8] = dstime.minutes;
+				sharedAddr[7] += 0x10000000; // Set time recieve flag
 			}
 
 			while (REG_VCOUNT != 191) swiDelay(100);

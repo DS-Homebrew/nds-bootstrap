@@ -1092,10 +1092,12 @@ int arm7_main(void) {
 		buildFatTableCache(&savFile);
 	}
 
-	tonccpy((u32*)CARDENGINE_ARM7_LOCATION, (u32*)CARDENGINE_ARM7_LOCATION_BUFFERED, 0x1000);
-	toncset((u32*)CARDENGINE_ARM7_LOCATION_BUFFERED, 0, 0x1000);
+	tonccpy((u8*)CARDENGINE_ARM7_LOCATION, (u8*)CARDENGINE_ARM7_LOCATION_BUFFERED, 0x1000);
+	toncset((u8*)CARDENGINE_ARM7_LOCATION_BUFFERED, 0, 0x1000);
+	tonccpy((u8*)CARDENGINE_ARM7_LOCATION+0x1000, (u8*)CARDENGINE_ARM7_LOCATION_BUFFERED+0x1400, 0x400);
+	toncset((u8*)CARDENGINE_ARM7_LOCATION_BUFFERED+0x1400, 0, 0x400);
 
-	toncset((u32*)0x038FF000, 0, 0x1000);
+	toncset((u8*)0x038FF400, 0, 0xC00);
 
 	patchBinary((cardengineArm9*)ce9Location, ndsHeader, moduleParams);
 	errorCode = patchCardNds(

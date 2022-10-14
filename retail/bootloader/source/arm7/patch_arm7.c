@@ -101,7 +101,7 @@ static bool patchWramClear(const tNDSHeader* ndsHeader) {
 			}
 		}
 		if (offset) {
-			*offset = 0x0380E000;
+			*offset = CARDENGINE_ARM7_LOCATION;
 			dbg_printf("WRAM end addr location : ");
 			dbg_hexa((u32)offset);
 			dbg_printf("\n\n");

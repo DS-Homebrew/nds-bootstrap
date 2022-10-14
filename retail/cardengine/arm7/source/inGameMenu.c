@@ -3,6 +3,8 @@
 #include <nds/interrupts.h>
 #include <nds/input.h>
 #include <nds/arm7/audio.h>
+#include <nds/arm7/clock.h>
+#include <time.h>
 
 #include "locations.h"
 #include "cardengine.h"
@@ -46,13 +48,20 @@ void inGameMenu(void) {
 			sharedAddr[5] |= ((~REG_EXTKEYINPUT & 0x3) << 10) | ((~REG_EXTKEYINPUT & 0xC0) << 6);
 			timeTillStatusRefresh++;
 			if (timeTillStatusRefresh >= 8) {
+				timeTillStatusRefresh = 0;
+
 				u32 pmBacklight = readPowerManagement(PM_BACKLIGHT_LEVEL);
 				if(pmBacklight & 0xF0) { // DS Lite
 					sharedAddr[6] = ((pmBacklight & 3) + ((readPowerManagement(PM_CONTROL_REG) & 0xC) != 0)) << 8; // Brightness
 				} else { // DS Phat
 					sharedAddr[6] = (((readPowerManagement(PM_CONTROL_REG) & 0xC) != 0) ? 5 : 0) << 8;
 				}
-				timeTillStatusRefresh = 0;
+
+				RTCtime dstime;
+				rtcGetTimeAndDate((uint8 *)&dstime);
+				sharedAddr[7] = dstime.hours;
+				sharedAddr[8] = dstime.minutes;
+				sharedAddr[7] += 0x10000000; // Set time recieve flag
 			}
 
 			while (REG_VCOUNT != 191) swiDelay(100);
