@@ -9101,7 +9101,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02044C40, (u32)dsiSaveRead);
 		setBL(0x02044C48, (u32)dsiSaveClose);
 		if (!extendedMemory2) {
-			*(u32*)0x02045128 = 0xE3A02816; // mov r2, #0x160000
+			*(u32*)0x02045128 = 0xE3A02702; // mov r2, #0x80000
 		}
 
 		// Disable NFTR loading from TWLNAND
@@ -9162,7 +9162,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02044618, (u32)dsiSaveRead);
 		setBL(0x02044620, (u32)dsiSaveClose);
 		if (!extendedMemory2) {
-			*(u32*)0x020449FC = 0xE3A02816; // mov r2, #0x160000
+			*(u32*)0x020449FC = 0xE3A02702; // mov r2, #0x80000
 			*(u32*)0x020450AC = 0xC2400; // Shrink sound heap from 0xE2400 by 128KB
 		}
 		*(u32*)0x02064F3C = 0xE1A00000; // nop
