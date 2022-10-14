@@ -61,7 +61,7 @@ void inGameMenu(void) {
 				rtcGetTimeAndDate((uint8 *)&dstime);
 				sharedAddr[7] = dstime.hours;
 				sharedAddr[8] = dstime.minutes;
-				sharedAddr[7] += 0x10000000; // Set time recieve flag
+				sharedAddr[7] += 0x10000000; // Set time receive flag
 			}
 
 			while (REG_VCOUNT != 191) swiDelay(100);
@@ -118,6 +118,8 @@ void inGameMenu(void) {
 	}
 
 	sharedAddr[4] = 0x54495845; // EXIT
+	sharedAddr[7] -= 0x10000000; // Clear time receive flag
+	timeTillStatusRefresh = 7;
 
 	leaveCriticalSection(oldIME);
 	REG_MASTER_VOLUME = volBak;
