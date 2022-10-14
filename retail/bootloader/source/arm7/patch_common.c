@@ -11583,9 +11583,12 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}*/
 
 	// Touch Solitaire (USA)
-	// Requires 8MB of RAM (but why?)
-	else if (strcmp(romTid, "KSLE") == 0 && extendedMemory2) {
+	// Crashes somewhere in 0x02015180
+	/*else if (strcmp(romTid, "KSLE") == 0) {
 		*(u32*)0x0200498C = 0xE1A00000; // nop
+		if (!extendedMemory2) {
+			*(u16*)0x0200D6D8 = 0x054C; // lsls r4, r1, #0x15
+		}
 		doubleNopT(0x0200D78A);
 		doubleNopT(0x0200D90A);
 		doubleNopT(0x0200D916);
@@ -11598,7 +11601,8 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		doubleNopT(0x02022556);
 		doubleNopT(0x02022562);
 		doubleNopT(0x02022646);
-		patchHiHeapDSiWareThumb(0x02022684, 0x0201FC7C, 0x02700000); // movs r0, #0x2700000
+		patchHiHeapDSiWareThumb(0x02022684, 0x0201FC7C, extendedMemory2 ? 0x02700000 : heapEnd); // movs r0, extendedMemory2 ? #0x2700000 : #0x23E0000
+		*(u32*)0x0202275C = 0x02059840;
 		*(u16*)0x020233DE = 0x46C0; // nop
 		*(u16*)0x020233E2 = 0xBD38; // POP {R3-R5,PC}
 		doubleNopT(0x020236CC);
@@ -11610,7 +11614,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u16*)0x02025698 = 0x2000; // mov r0, #0
 		*(u16*)0x0202569A = 0x4770; // bx lr
 		doubleNopT(0x02025756);
-	}
+	}*/
 
 	// Trajectile (USA)
 	// Requires 8MB of RAM
