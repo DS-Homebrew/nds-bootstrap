@@ -45,7 +45,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	extern u32 fatTableAddr;
 	const char* romTid = getRomTid(ndsHeader);
 	extern void patchHiHeapDSiWare(u32 addr, u32 heapEnd);
-	extern void patchHiHeapDSiWareThumbOld(u32 addr, u16 opCode1, u16 opCode2);
 	extern void patchHiHeapDSiWareThumb(u32 addr, u32 newCodeAddr, u32 heapEnd);
 	extern void patchUserSettingsReadDSiWare(u32 addr);
 
@@ -11599,7 +11598,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		doubleNopT(0x02022556);
 		doubleNopT(0x02022562);
 		doubleNopT(0x02022646);
-		patchHiHeapDSiWareThumbOld(0x02022684, 0x209C, 0x0480); // movs r0, #0x2700000
+		patchHiHeapDSiWareThumb(0x02022684, 0x0201FC7C, 0x02700000); // movs r0, #0x2700000
 		*(u16*)0x020233DE = 0x46C0; // nop
 		*(u16*)0x020233E2 = 0xBD38; // POP {R3-R5,PC}
 		doubleNopT(0x020236CC);

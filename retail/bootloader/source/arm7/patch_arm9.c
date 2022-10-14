@@ -739,13 +739,6 @@ void patchHiHeapDSiWare(u32 addr, u32 heapEnd) {
 	*(u32*)(addr+0x9C) = heapEnd;
 }
 
-void patchHiHeapDSiWareThumbOld(u32 addr, u16 opCode1, u16 opCode2) {
-	*(u16*)(addr) = opCode1; // movs r0, #0x????????
-	*(u16*)(addr+0x2) = opCode2;
-	*(u16*)(addr+0x1A) = 0x2801; // cmp r0, #1
-	*(u16*)(addr+0x22) = 0x2027; // movne r0, #0x2700000
-}
-
 void patchHiHeapDSiWareThumb(u32 addr, u32 newCodeAddr, u32 heapEnd) {
 	*(u16*)(newCodeAddr) = 0x4800; // movs r0, #0x????????
 	*(u16*)(newCodeAddr+2) = 0x4770; // bx lr
