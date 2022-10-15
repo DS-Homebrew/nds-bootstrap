@@ -11136,8 +11136,8 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Space Invaders Extreme Z (Japan)
-	// Requires 8MB of RAM
-	else if (strcmp(romTid, "KEVJ") == 0 && extendedMemory2) {
+	// Saving not supported due to using more than one file in filesystem
+	else if (strcmp(romTid, "KEVJ") == 0) {
 		*(u32*)0x0200498C = 0xE1A00000; // nop
 		*(u32*)0x02017904 = 0xE1A00000; // nop
 		*(u32*)0x0201B794 = 0xE1A00000; // nop
@@ -11146,10 +11146,21 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020225DC = 0xE1A00000; // nop
 		*(u32*)0x020225E8 = 0xE1A00000; // nop
 		*(u32*)0x02022748 = 0xE1A00000; // nop
-		patchHiHeapDSiWare(0x020227A4, 0x02700000); // mov r0, #0x2700000
+		patchHiHeapDSiWare(0x020227A4, extendedMemory2 ? 0x027B0000 : heapEnd); // mov r0, #0x27B0000
 		*(u32*)0x020228D8 = 0x0213CC60;
 		patchUserSettingsReadDSiWare(0x02023A9C);
 		*(u32*)0x02026EA0 = 0xE1A00000; // nop
+		if (!extendedMemory2) {
+			// Disable .ntfx file loading: Hides bottom screen background during gameplay
+			*(u32*)0x0203DFE0 = 0xE3A00000; // mov r0, #0
+			*(u32*)0x0203F3E4 = 0xE1A00000; // nop
+			*(u32*)0x0203F434 = 0xE12FFF1E; // bx lr
+			*(u32*)0x0203FD5C = 0xE12FFF1E; // bx lr
+
+			// Same as above, but causes slowdown and graphical glitches
+			//toncset32((u32*)0x02121C90, 0, 1);
+			//toncset32((u32*)0x02121C94, 0, 1);
+		}
 		*(u32*)0x020E3E4C = 0xE3A00005; // mov r0, #5
 		*(u32*)0x020E3E50 = 0xE12FFF1E; // bx lr
 		*(u32*)0x020E43A4 = 0xE3A00005; // mov r0, #5

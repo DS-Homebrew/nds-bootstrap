@@ -1005,6 +1005,7 @@ int arm7_main(void) {
 		fatTableSize = 0x80000;
 	} else if (extendedMemory2) {
 		if (strncmp(romTid, "KQ9", 3) == 0 // The Legend of Zelda: Four Swords: Anniversary Edition
+		 || strncmp(romTid, "KEV", 3) == 0 // Space Invaders Extreme Z
 		) {
 			fatTableAddr = 0x02000000;
 			fatTableSize = 0x4000;
