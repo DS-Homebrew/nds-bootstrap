@@ -4410,6 +4410,54 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0201FC44, (u32)dsiSaveClose);
 	}
 
+	// Spin Six (USA)
+	else if (strcmp(romTid, "KQ6E") == 0 && saveOnFlashcard) {
+		*(u32*)0x02013184 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		setBL(0x020137B8, (u32)dsiSaveOpen);
+		setBL(0x0201382C, (u32)dsiSaveGetLength);
+		setBL(0x0201383C, (u32)dsiSaveGetLength);
+		setBL(0x02013854, (u32)dsiSaveRead);
+		setBL(0x0201385C, (u32)dsiSaveClose);
+		setBL(0x020138D4, (u32)dsiSaveCreate);
+		setBL(0x0201390C, (u32)dsiSaveOpen);
+		setBL(0x0201393C, (u32)dsiSaveSetLength);
+		setBL(0x02013960, (u32)dsiSaveWrite);
+		setBL(0x02013968, (u32)dsiSaveClose);
+		tonccpy((u32*)0x02068398, dsiSaveGetResultCode, 0xC);
+	}
+
+	// Spin Six (Europe, Australia)
+	else if (strcmp(romTid, "KQ6V") == 0 && saveOnFlashcard) {
+		*(u32*)0x02013184 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		setBL(0x020137C4, (u32)dsiSaveOpen);
+		setBL(0x02013838, (u32)dsiSaveGetLength);
+		setBL(0x02013848, (u32)dsiSaveGetLength);
+		setBL(0x02013860, (u32)dsiSaveRead);
+		setBL(0x02013868, (u32)dsiSaveClose);
+		setBL(0x020138E0, (u32)dsiSaveCreate);
+		setBL(0x02013918, (u32)dsiSaveOpen);
+		setBL(0x02013948, (u32)dsiSaveSetLength);
+		setBL(0x0201396C, (u32)dsiSaveWrite);
+		setBL(0x02013974, (u32)dsiSaveClose);
+		tonccpy((u32*)0x020683A4, dsiSaveGetResultCode, 0xC);
+	}
+
+	// Kuru Kuru Akushon: Kuru Pachi 6 (Japan)
+	else if (strcmp(romTid, "KQ6J") == 0 && saveOnFlashcard) {
+		*(u32*)0x02013760 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		setBL(0x02013D40, (u32)dsiSaveOpen);
+		setBL(0x02013DA4, (u32)dsiSaveGetLength);
+		setBL(0x02013DB4, (u32)dsiSaveGetLength);
+		setBL(0x02013DC8, (u32)dsiSaveRead);
+		setBL(0x02013DD0, (u32)dsiSaveClose);
+		setBL(0x02013E44, (u32)dsiSaveCreate);
+		setBL(0x02013E74, (u32)dsiSaveOpen);
+		setBL(0x02013EAC, (u32)dsiSaveSetLength);
+		setBL(0x02013ECC, (u32)dsiSaveWrite);
+		setBL(0x02013ED4, (u32)dsiSaveClose);
+		tonccpy((u32*)0x0206928C, dsiSaveGetResultCode, 0xC);
+	}
+
 	// Sudoku (USA)
 	// Sudoku (USA) (Rev 1)
 	else if (strcmp(romTid, "K4DE") == 0 && saveOnFlashcard) {

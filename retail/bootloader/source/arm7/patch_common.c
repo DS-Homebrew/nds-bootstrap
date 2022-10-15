@@ -11171,6 +11171,107 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020E4858 = 0xE12FFF1E; // bx lr
 	}
 
+	// Spin Six (USA)
+	// Spin Six (Europe, Australia)
+	else if (strcmp(romTid, "KQ6E") == 0 || strcmp(romTid, "KQ6V") == 0) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x02013150 = 0xE1A00000; // nop
+		*(u32*)0x0201317C = 0xE1A00000; // nop
+		*(u32*)0x02013184 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		if (ndsHeader->gameCode[3] == 'E') {
+			setBL(0x020137B8, (u32)dsiSaveOpen);
+			*(u32*)0x02013804 = 0xE1A00000; // nop
+			*(u32*)0x02013818 = 0xE1A00000; // nop
+			setBL(0x0201382C, (u32)dsiSaveGetLength);
+			setBL(0x0201383C, (u32)dsiSaveGetLength);
+			setBL(0x02013854, (u32)dsiSaveRead);
+			setBL(0x0201385C, (u32)dsiSaveClose);
+			setBL(0x020138D4, (u32)dsiSaveCreate);
+			setBL(0x0201390C, (u32)dsiSaveOpen);
+			setBL(0x0201393C, (u32)dsiSaveSetLength);
+			setBL(0x02013960, (u32)dsiSaveWrite);
+			setBL(0x02013968, (u32)dsiSaveClose);
+			*(u32*)0x02013978 = 0xE1A00000; // nop
+			*(u32*)0x020139B4 = 0xE1A00000; // nop
+			*(u32*)0x02024D5C = 0xE3A00000; // mov r0, #0 (Show volume icon as empty)
+			*(u32*)0x02024D60 = 0xE12FFF1E; // bx lr
+			*(u32*)0x02067804 = 0xE1A00000; // nop
+			tonccpy((u32*)0x02068398, dsiSaveGetResultCode, 0xC);
+			*(u32*)0x0206AC78 = 0xE1A00000; // nop
+			*(u32*)0x020701AC = 0xE1A00000; // nop
+			*(u32*)0x02071FC4 = 0xE1A00000; // nop
+			*(u32*)0x02071FC8 = 0xE1A00000; // nop
+			*(u32*)0x02071FD4 = 0xE1A00000; // nop
+			*(u32*)0x02072134 = 0xE1A00000; // nop
+			patchHiHeapDSiWare(0x02072190, heapEnd); // mov r0, #0x23E0000
+			patchUserSettingsReadDSiWare(0x02073598);
+			*(u32*)0x02076A84 = 0xE1A00000; // nop
+		} else {
+			setBL(0x020137C4, (u32)dsiSaveOpen);
+			*(u32*)0x02013810 = 0xE1A00000; // nop
+			*(u32*)0x02013824 = 0xE1A00000; // nop
+			setBL(0x02013838, (u32)dsiSaveGetLength);
+			setBL(0x02013848, (u32)dsiSaveGetLength);
+			setBL(0x02013860, (u32)dsiSaveRead);
+			setBL(0x02013868, (u32)dsiSaveClose);
+			setBL(0x020138E0, (u32)dsiSaveCreate);
+			setBL(0x02013918, (u32)dsiSaveOpen);
+			setBL(0x02013948, (u32)dsiSaveSetLength);
+			setBL(0x0201396C, (u32)dsiSaveWrite);
+			setBL(0x02013974, (u32)dsiSaveClose);
+			*(u32*)0x02013984 = 0xE1A00000; // nop
+			*(u32*)0x020139C0 = 0xE1A00000; // nop
+			*(u32*)0x02024D68 = 0xE3A00000; // mov r0, #0 (Show volume icon as empty)
+			*(u32*)0x02024D6C = 0xE12FFF1E; // bx lr
+			*(u32*)0x02067810 = 0xE1A00000; // nop
+			tonccpy((u32*)0x020683A4, dsiSaveGetResultCode, 0xC);
+			*(u32*)0x0206AC84 = 0xE1A00000; // nop
+			*(u32*)0x020701B8 = 0xE1A00000; // nop
+			*(u32*)0x02071FD0 = 0xE1A00000; // nop
+			*(u32*)0x02071FD4 = 0xE1A00000; // nop
+			*(u32*)0x02071FE0 = 0xE1A00000; // nop
+			*(u32*)0x02072140 = 0xE1A00000; // nop
+			patchHiHeapDSiWare(0x0207219C, heapEnd); // mov r0, #0x23E0000
+			patchUserSettingsReadDSiWare(0x020735A4);
+			*(u32*)0x02076A90 = 0xE1A00000; // nop
+		}
+	}
+
+	// Kuru Kuru Akushon: Kuru Pachi 6 (Japan)
+	else if (strcmp(romTid, "KQ6J") == 0) {
+		*(u32*)0x02013730 = 0xE1A00000; // nop
+		*(u32*)0x02013758 = 0xE1A00000; // nop
+		*(u32*)0x02013760 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		setBL(0x02013D40, (u32)dsiSaveOpen);
+		*(u32*)0x02013D84 = 0xE1A00000; // nop
+		setBL(0x02013DA4, (u32)dsiSaveGetLength);
+		setBL(0x02013DB4, (u32)dsiSaveGetLength);
+		setBL(0x02013DC8, (u32)dsiSaveRead);
+		setBL(0x02013DD0, (u32)dsiSaveClose);
+		setBL(0x02013E44, (u32)dsiSaveCreate);
+		setBL(0x02013E74, (u32)dsiSaveOpen);
+		setBL(0x02013EAC, (u32)dsiSaveSetLength);
+		setBL(0x02013ECC, (u32)dsiSaveWrite);
+		setBL(0x02013ED4, (u32)dsiSaveClose);
+		*(u32*)0x02025004 = 0xE3A00000; // mov r0, #0 (Show volume icon as empty)
+		*(u32*)0x02025008 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02068508 = 0xE28DD00C; // ADD   SP, SP, #0xC
+		*(u32*)0x0206850C = 0xE8BD8078; // LDMFD SP!, {R3-R6,PC}
+		tonccpy((u32*)0x0206928C, dsiSaveGetResultCode, 0xC);
+		*(u32*)0x0206BB48 = 0xE1A00000; // nop
+		*(u32*)0x02072B2C = 0xE1A00000; // nop
+		*(u32*)0x02074888 = 0xE1A00000; // nop
+		*(u32*)0x0207488C = 0xE1A00000; // nop
+		*(u32*)0x02074898 = 0xE1A00000; // nop
+		*(u32*)0x020749DC = 0xE1A00000; // nop
+		*(u32*)0x020749E0 = 0xE1A00000; // nop
+		*(u32*)0x020749E4 = 0xE1A00000; // nop
+		*(u32*)0x020749E8 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x02074A44, heapEnd); // mov r0, #0x23E0000
+		patchUserSettingsReadDSiWare(0x02075E60);
+		*(u32*)0x02079B74 = 0xE12FFF1E; // bx lr
+	}
+
 	// Spotto! (USA)
 	// Does not boot: Issue unknown
 	/*else if (strcmp(romTid, "KSPE") == 0) {
