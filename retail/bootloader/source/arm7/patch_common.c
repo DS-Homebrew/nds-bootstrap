@@ -147,6 +147,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// 1950s Lawn Mower Kids (USA)
 	// 1950s Lawn Mower Kids (Europe, Australia)
+	// Saving not supported due to using more than one file in filesystem
 	else if (strcmp(romTid, "K95E") == 0 || strcmp(romTid, "K95V") == 0) {
 		*(u32*)0x02004838 = 0xE1A00000; // nop
 		*(u32*)0x0200499C = 0xE1A00000; // nop
@@ -6879,6 +6880,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Magnetic Joe (USA)
+	// Saving not supported due to using more than one file in filesystem
 	else if (strcmp(romTid, "KJOE") == 0) {
 		*(u32*)0x0200498C = 0xE1A00000; // nop
 		*(u32*)0x02013344 = 0xE1A00000; // nop
@@ -11015,6 +11017,47 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			*(u32*)0x0206C278 = 0x022547C0;
 			*(u32*)0x0207005C = 0xE1A00000; // nop
 			*(u32*)0x02072890 = 0xE1A00000; // nop
+		}
+	}
+
+	// Sokuren Keisa: Shougaku 1 Nensei (Japan)
+	// Sokuren Keisa: Shougaku 2 Nensei (Japan)
+	// Sokuren Keisa: Shougaku 3 Nensei (Japan)
+	// Sokuren Keisa: Shougaku 4 Nensei (Japan)
+	// Sokuren Keisa: Shougaku 5 Nensei (Japan)
+	// Sokuren Keisa: Shougaku 6 Nensei (Japan)
+	// Sokuren Keisa: Nanmon-Hen (Japan)
+	// Saving not supported due to using more than one file in filesystem
+	else if (strcmp(romTid, "KL9J") == 0 || strcmp(romTid, "KH2J") == 0 || strcmp(romTid, "KH3J") == 0 || strcmp(romTid, "KH4J") == 0
+		   || strcmp(romTid, "KO5J") == 0 || strcmp(romTid, "KO6J") == 0 || strcmp(romTid, "KO7J") == 0) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x0200E148 = 0xE1A00000; // nop
+		*(u32*)0x02011A7C = 0xE1A00000; // nop
+		*(u32*)0x02015C64 = 0xE1A00000; // nop
+		*(u32*)0x020179F8 = 0xE1A00000; // nop
+		*(u32*)0x020179FC = 0xE1A00000; // nop
+		*(u32*)0x02017A08 = 0xE1A00000; // nop
+		*(u32*)0x02017B68 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x02017BC4, heapEnd); // mov r0, #0x23E0000
+		*(u32*)0x02017CF8 -= 0x30000;
+		patchUserSettingsReadDSiWare(0x02018E48);
+		*(u32*)0x0201C3B8 = 0xE1A00000; // nop
+		if (strncmp(romTid, "KL9", 3) == 0 || strncmp(romTid, "KH2", 3) == 0) {
+			*(u32*)0x0201FAE4 = 0xE1A00000; // nop
+			*(u32*)0x02027C98 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+
+			// Skip Manual screen
+			*(u32*)0x02027EBC = 0xE1A00000; // nop
+			*(u32*)0x02027EC4 = 0xE1A00000; // nop
+			*(u32*)0x02027ED0 = 0xE1A00000; // nop
+		} else {
+			*(u32*)0x0201FB20 = 0xE1A00000; // nop
+			*(u32*)0x02027CD8 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+
+			// Skip Manual screen
+			*(u32*)0x02027EFC = 0xE1A00000; // nop
+			*(u32*)0x02027F04 = 0xE1A00000; // nop
+			*(u32*)0x02027F10 = 0xE1A00000; // nop
 		}
 	}
 

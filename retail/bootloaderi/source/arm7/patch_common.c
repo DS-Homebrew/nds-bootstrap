@@ -4363,6 +4363,34 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// Sokuren Keisa: Shougaku 1 Nensei (Japan)
+	// Sokuren Keisa: Shougaku 2 Nensei (Japan)
+	// Saving not supported due to using more than one file in filesystem
+	else if ((strcmp(romTid, "KL9J") == 0 || strcmp(romTid, "KH2J") == 0) && saveOnFlashcard) {
+		*(u32*)0x02027C98 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+
+		// Skip Manual screen
+		*(u32*)0x02027EBC = 0xE1A00000; // nop
+		*(u32*)0x02027EC4 = 0xE1A00000; // nop
+		*(u32*)0x02027ED0 = 0xE1A00000; // nop
+	}
+
+	// Sokuren Keisa: Shougaku 3 Nensei (Japan)
+	// Sokuren Keisa: Shougaku 4 Nensei (Japan)
+	// Sokuren Keisa: Shougaku 5 Nensei (Japan)
+	// Sokuren Keisa: Shougaku 6 Nensei (Japan)
+	// Sokuren Keisa: Nanmon-Hen (Japan)
+	// Saving not supported due to using more than one file in filesystem
+	else if ((strcmp(romTid, "KH3J") == 0 || strcmp(romTid, "KH4J") == 0 || strcmp(romTid, "KO5J") == 0
+		   || strcmp(romTid, "KO6J") == 0 || strcmp(romTid, "KO7J") == 0) && saveOnFlashcard) {
+		*(u32*)0x02027CD8 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+
+		// Skip Manual screen
+		*(u32*)0x02027EFC = 0xE1A00000; // nop
+		*(u32*)0x02027F04 = 0xE1A00000; // nop
+		*(u32*)0x02027F10 = 0xE1A00000; // nop
+	}
+
 	// Space Ace (USA)
 	else if (strcmp(romTid, "KA6E") == 0 && saveOnFlashcard) {
 		*(u32*)0x020051C8 = 0xE1A00000; // nop (Skip Manual screen)
