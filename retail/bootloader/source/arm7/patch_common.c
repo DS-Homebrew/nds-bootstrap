@@ -7710,6 +7710,39 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020A0B3C = 0xE1A00000; // nop
 	}
 
+	// Motto Me de Unou o Kitaeru: DS Sokudoku Jutsu Light (Japan)
+	else if (strcmp(romTid, "K9SJ") == 0) {
+		*(u32*)0x02004838 = 0xE1A00000; // nop
+		*(u32*)0x0200499C = 0xE1A00000; // nop
+		*(u32*)0x0200E824 = 0xE1A00000; // nop
+		tonccpy((u32*)0x0200F3A8, dsiSaveGetResultCode, 0xC);
+		*(u32*)0x02011D58 = 0xE1A00000; // nop
+		*(u32*)0x02015244 = 0xE1A00000; // nop
+		*(u32*)0x02016FEC = 0xE1A00000; // nop
+		*(u32*)0x02016FF0 = 0xE1A00000; // nop
+		*(u32*)0x02016FFC = 0xE1A00000; // nop
+		*(u32*)0x0201715C = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x020171B8, heapEnd); // mov r0, #0x23E0000
+		*(u32*)0x020172EC = 0x0207AE60;
+		patchUserSettingsReadDSiWare(0x02018304);
+		*(u32*)0x0201AFEC = 0xE1A00000; // nop
+		*(u32*)0x0203F378 = 0xE1A00000; // nop (Skip Manual screen)
+		setBL(0x02047350, (u32)dsiSaveOpen);
+		*(u32*)0x0204738C = 0xE1A00000; // nop
+		setBL(0x0204739C, (u32)dsiSaveCreate);
+		setBL(0x020473D0, (u32)dsiSaveGetLength);
+		setBL(0x020473E0, (u32)dsiSaveRead);
+		setBL(0x020473E8, (u32)dsiSaveClose);
+		setBL(0x02047480, (u32)dsiSaveOpen);
+		*(u32*)0x020474C0 = 0xE1A00000; // nop
+		setBL(0x020474CC, (u32)dsiSaveCreate);
+		setBL(0x02047504, (u32)dsiSaveOpen);
+		setBL(0x02047548, (u32)dsiSaveSetLength);
+		setBL(0x02047558, (u32)dsiSaveClose);
+		setBL(0x02047578, (u32)dsiSaveWrite);
+		setBL(0x02047580, (u32)dsiSaveClose);
+	}
+
 	// Mr. Brain (Japan)
 	else if (strcmp(romTid, "KMBJ") == 0) {
 		*(u32*)0x020054EC = 0xE1A00000; // nop

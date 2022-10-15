@@ -2663,6 +2663,24 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		tonccpy((u32*)0x02094DE0, dsiSaveGetResultCode, 0xC);
 	}
 
+	// Motto Me de Unou o Kitaeru: DS Sokudoku Jutsu Light (Japan)
+	else if (strcmp(romTid, "K9SJ") == 0 && saveOnFlashcard) {
+		tonccpy((u32*)0x0200F3A8, dsiSaveGetResultCode, 0xC);
+		*(u32*)0x0203F378 = 0xE1A00000; // nop (Skip Manual screen)
+		setBL(0x02047350, (u32)dsiSaveOpen);
+		setBL(0x0204739C, (u32)dsiSaveCreate);
+		setBL(0x020473D0, (u32)dsiSaveGetLength);
+		setBL(0x020473E0, (u32)dsiSaveRead);
+		setBL(0x020473E8, (u32)dsiSaveClose);
+		setBL(0x02047480, (u32)dsiSaveOpen);
+		setBL(0x020474CC, (u32)dsiSaveCreate);
+		setBL(0x02047504, (u32)dsiSaveOpen);
+		setBL(0x02047548, (u32)dsiSaveSetLength);
+		setBL(0x02047558, (u32)dsiSaveClose);
+		setBL(0x02047578, (u32)dsiSaveWrite);
+		setBL(0x02047580, (u32)dsiSaveClose);
+	}
+
 	// Mr. Brain (Japan)
 	else if (strcmp(romTid, "KMBJ") == 0 && saveOnFlashcard) {
 		setBL(0x02005A40, (u32)dsiSaveOpen);
