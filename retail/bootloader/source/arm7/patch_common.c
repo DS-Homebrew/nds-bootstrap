@@ -6360,6 +6360,44 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0205321C = 0xE1A00000; // nop
 	}*/
 
+	// Kyou Hanan no hi Hyakka: Hyakkajiten Maipedea Yori (Japan)
+	// Crashes at unknown location
+	/*else if (strcmp(romTid, "K47J") == 0 && extendedMemory2) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x0200E240 = 0xE1A00000; // nop
+		*(u32*)0x02011720 = 0xE1A00000; // nop
+		*(u32*)0x02015FD4 = 0xE1A00000; // nop
+		*(u32*)0x02017DC4 = 0xE1A00000; // nop
+		*(u32*)0x02017DC8 = 0xE1A00000; // nop
+		*(u32*)0x02017DD4 = 0xE1A00000; // nop
+		*(u32*)0x02017F18 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x02017F74, 0x02F00000); // mov r0, #0x2F00000 (mirrors to 0x2700000 on debug DS units)
+		patchUserSettingsReadDSiWare(0x02019214);
+		*(u32*)0x0201CA64 = 0xE1A00000; // nop
+		*(u32*)0x02020C78 = 0xE1A00000; // nop
+		*(u32*)0x02020C90 = 0xE1A00000; // nop
+		setBL(0x02020CD4, (u32)dsiSaveOpen);
+		setBL(0x02020CF8, (u32)dsiSaveGetLength);
+		setBL(0x02020D1C, (u32)dsiSaveRead);
+		setBL(0x02020D24, (u32)dsiSaveClose);
+		setBL(0x02020D7C, (u32)dsiSaveCreate);
+		setBL(0x02020D8C, (u32)dsiSaveOpen);
+		setBL(0x02020D9C, (u32)dsiSaveGetResultCode);
+		setBL(0x02020DBC, (u32)dsiSaveSetLength);
+		setBL(0x02020DCC, (u32)dsiSaveWrite);
+		setBL(0x02020DD4, (u32)dsiSaveClose);
+		*(u32*)0x02020E18 = 0xE3A00001; // mov r0, #1 (dsiSaveOpenDir)
+		*(u32*)0x02020E34 = 0xE3A00001; // mov r0, #1 (dsiSaveReadDir)
+		*(u32*)0x02020E60 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02020E74 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02020E9C = 0xE1A00000; // nop
+		*(u32*)0x02020EA0 = 0xE1A00000; // nop
+		*(u32*)0x02020EB4 = 0xE1A00000; // nop
+		*(u32*)0x02020EE4 = 0xE1A00000; // nop (dsiSaveCloseDir)
+		*(u32*)0x020291AC = 0xE1A00000; // nop
+		*(u32*)0x0202F3F0 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+	}*/
+
 	// The Legend of Zelda: Four Swords: Anniversary Edition (USA)
 	// The Legend of Zelda: Four Swords: Anniversary Edition (Europe, Australia)
 	// Zelda no Densetsu: 4-tsu no Tsurugi: 25th Kinen Edition (Japan)

@@ -2197,6 +2197,29 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02024980, (u32)dsiSaveCreate);
 	}
 
+	// Kyou Hanan no hi Hyakka: Hyakkajiten Maipedea Yori (Japan)
+	else if (strcmp(romTid, "K47J") == 0 && saveOnFlashcard) {
+		/*setBL(0x02020CD4, (u32)dsiSaveOpen);
+		setBL(0x02020CF8, (u32)dsiSaveGetLength);
+		setBL(0x02020D1C, (u32)dsiSaveRead);
+		setBL(0x02020D24, (u32)dsiSaveClose);
+		setBL(0x02020D7C, (u32)dsiSaveCreate);
+		setBL(0x02020D8C, (u32)dsiSaveOpen);
+		setBL(0x02020D9C, (u32)dsiSaveGetResultCode);
+		setBL(0x02020DBC, (u32)dsiSaveSetLength);
+		setBL(0x02020DCC, (u32)dsiSaveWrite);
+		setBL(0x02020DD4, (u32)dsiSaveClose);
+		*(u32*)0x02020E18 = 0xE3A00001; // mov r0, #1 (dsiSaveOpenDir)
+		*(u32*)0x02020E34 = 0xE3A00001; // mov r0, #1 (dsiSaveReadDir)
+		*(u32*)0x02020E60 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02020E74 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02020E9C = 0xE1A00000; // nop
+		*(u32*)0x02020EA0 = 0xE1A00000; // nop
+		*(u32*)0x02020EB4 = 0xE1A00000; // nop
+		*(u32*)0x02020EE4 = 0xE1A00000; // nop (dsiSaveCloseDir)*/
+		*(u32*)0x0202F3F0 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+	}
+
 	// Little Red Riding Hood's Zombie BBQ (USA)
 	else if (strcmp(romTid, "KZBE") == 0 && saveOnFlashcard) {
 		*(u32*)0x02026BFC = 0xE3A00001; // mov r0, #1
