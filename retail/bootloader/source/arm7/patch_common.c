@@ -7087,27 +7087,17 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Mario Calculator (USA)
 	// Requires 8MB of RAM
 	else if (strcmp(romTid, "KWFE") == 0 && extendedMemory2) {
-		*(u16*)0x0200504E = 0x46C0; // nop
-		*(u16*)0x02005050 = 0x46C0; // nop
+		doubleNopT(0x0200504E);
 		*(u16*)0x02010E64 = 0x7047; // bx lr
-		*(u16*)0x020117D4 = 0x7047; // bx lr
 		*(u16*)0x020346F8 = 0xB003; // ADD SP, SP, #0xC
 		*(u16*)0x020346FA = 0xBD78; // POP {R3-R6,PC}
-		*(u16*)0x020369D4 = 0x46C0; // nop
-		*(u16*)0x020369D6 = 0x46C0; // nop
-		*(u16*)0x0203B08C = 0x46C0; // nop
-		*(u16*)0x0203B08E = 0x46C0; // nop
-		*(u16*)0x0203C5DA = 0x46C0; // nop
-		*(u16*)0x0203C5DC = 0x46C0; // nop
-		*(u16*)0x0203C5DE = 0x46C0; // nop
-		*(u16*)0x0203C5E0 = 0x46C0; // nop
-		*(u16*)0x0203C5EA = 0x46C0; // nop
-		*(u16*)0x0203C5EC = 0x46C0; // nop
-		*(u16*)0x0203C6D6 = 0x46C0; // nop
-		*(u16*)0x0203C6D8 = 0x46C0; // nop
-		*(u16*)0x0203C714 = 0x209C; // movs r0, #0x2700000
-		*(u16*)0x0203C72E = 0x2801; // cmp r0, #1
-		*(u16*)0x0203C736 = 0x2027; // movs r0, #0x2700000
+		doubleNopT(0x020369D4);
+		doubleNopT(0x0203B08C);
+		doubleNopT(0x0203C5DA);
+		doubleNopT(0x0203C5DE);
+		doubleNopT(0x0203C5EA);
+		doubleNopT(0x0203C6D6);
+		patchHiHeapDSiWareThumb(0x0203C714, 0x02039A40, 0x02700000);
 		//*(u32*)0x0203C7EC = 0x02090140;
 		*(u16*)0x020474DA = 0x46C0; // nop
 		*(u16*)0x020474E6 = 0x46C0; // nop
