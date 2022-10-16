@@ -2166,6 +2166,36 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x020B2E00, (u32)dsiSaveDelete);
 	}
 
+	// A Kappa's Trail (USA)
+	else if (strcmp(romTid, "KPAE") == 0 && saveOnFlashcard) {
+		tonccpy((u32*)0x0201A020, dsiSaveGetResultCode, 0xC);
+		setBL(0x02032000, (u32)dsiSaveOpenR);
+		setBL(0x02032038, (u32)dsiSaveRead);
+		setBL(0x0203205C, (u32)dsiSaveClose);
+		setBL(0x02032070, (u32)dsiSaveClose);
+		setBL(0x020320C8, (u32)dsiSaveCreate);
+		setBL(0x020320D8, (u32)dsiSaveOpen);
+		setBL(0x0203210C, (u32)dsiSaveSetLength);
+		setBL(0x0203211C, (u32)dsiSaveWrite);
+		setBL(0x02032144, (u32)dsiSaveClose);
+		setBL(0x02032158, (u32)dsiSaveClose);
+	}
+
+	// Kappa Michi (Japan)
+	else if (strcmp(romTid, "KPAJ") == 0 && saveOnFlashcard) {
+		tonccpy((u32*)0x0201A554, dsiSaveGetResultCode, 0xC);
+		setBL(0x02032CAC, (u32)dsiSaveOpenR);
+		setBL(0x02032CE4, (u32)dsiSaveRead);
+		setBL(0x02032D08, (u32)dsiSaveClose);
+		setBL(0x02032D1C, (u32)dsiSaveClose);
+		setBL(0x02032D74, (u32)dsiSaveCreate);
+		setBL(0x02032D84, (u32)dsiSaveOpen);
+		setBL(0x02032DB8, (u32)dsiSaveSetLength);
+		setBL(0x02032DC8, (u32)dsiSaveWrite);
+		setBL(0x02032DF0, (u32)dsiSaveClose);
+		setBL(0x02032E04, (u32)dsiSaveClose);
+	}
+
 	// Kung Fu Dragon (USA)
 	// Kung Fu Dragon (Europe)
 	else if ((strcmp(romTid, "KT9E") == 0 || strcmp(romTid, "KT9P") == 0) && saveOnFlashcard) {

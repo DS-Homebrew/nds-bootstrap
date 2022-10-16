@@ -6274,6 +6274,34 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0204EFB4 = 0xE1A00000; // nop
 	}*/
 
+	// A Kappa's Trail (USA)
+	// Requires 8MB of RAM
+	// Crashes after ESRB screen
+	/*else if (strcmp(romTid, "KPAE") == 0 && extendedMemory2) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x020194A8 = 0xE1A00000; // nop
+		tonccpy((u32*)0x0201A020, dsiSaveGetResultCode, 0xC);
+		*(u32*)0x0201CFE4 = 0xE1A00000; // nop
+		*(u32*)0x020221A8 = 0xE1A00000; // nop
+		*(u32*)0x02023F3C = 0xE1A00000; // nop
+		*(u32*)0x02023F40 = 0xE1A00000; // nop
+		*(u32*)0x02023F4C = 0xE1A00000; // nop
+		*(u32*)0x020240AC = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x02024108, 0x02700000); // mov r0, #0x2700000
+		patchUserSettingsReadDSiWare(0x020253D0);
+		*(u32*)0x02028AA8 = 0xE1A00000; // nop
+		setBL(0x02032000, (u32)dsiSaveOpenR);
+		setBL(0x02032038, (u32)dsiSaveRead);
+		setBL(0x0203205C, (u32)dsiSaveClose);
+		setBL(0x02032070, (u32)dsiSaveClose);
+		setBL(0x020320C8, (u32)dsiSaveCreate);
+		setBL(0x020320D8, (u32)dsiSaveOpen);
+		setBL(0x0203210C, (u32)dsiSaveSetLength);
+		setBL(0x0203211C, (u32)dsiSaveWrite);
+		setBL(0x02032144, (u32)dsiSaveClose);
+		setBL(0x02032158, (u32)dsiSaveClose);
+	}*/
+
 	// Kung Fu Dragon (USA)
 	// Kung Fu Dragon (Europe)
 	else if (strcmp(romTid, "KT9E") == 0 || strcmp(romTid, "KT9P") == 0) {
