@@ -1238,6 +1238,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Castle Conqueror: Heroes (USA)
 	else if (strcmp(romTid, "KC5E") == 0 && saveOnFlashcard) {
 		tonccpy((u32*)0x0201831C, dsiSaveGetResultCode, 0xC);
+		setBL(0x02065C8C, (u32)dsiSaveGetInfo);
 		setBL(0x02065CA0, (u32)dsiSaveOpen);
 		setBL(0x02065CB4, (u32)dsiSaveCreate);
 		setBL(0x02065CC4, (u32)dsiSaveOpen);
@@ -1265,6 +1266,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Castle Conqueror: Heroes (Europe, Australia)
 	else if (strcmp(romTid, "KC5V") == 0 && saveOnFlashcard) {
 		tonccpy((u32*)0x02018248, dsiSaveGetResultCode, 0xC);
+		setBL(0x020660FC, (u32)dsiSaveGetInfo);
 		setBL(0x02066110, (u32)dsiSaveOpen);
 		setBL(0x02066128, (u32)dsiSaveCreate);
 		setBL(0x02066138, (u32)dsiSaveOpen);
@@ -1292,6 +1294,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Castle Conqueror: Heroes (Japan)
 	else if (strcmp(romTid, "KC5J") == 0 && saveOnFlashcard) {
 		tonccpy((u32*)0x0201831C, dsiSaveGetResultCode, 0xC);
+		setBL(0x02026F94, (u32)dsiSaveGetInfo);
 		setBL(0x02026FA8, (u32)dsiSaveOpen);
 		setBL(0x02026FC0, (u32)dsiSaveCreate);
 		setBL(0x02026FD0, (u32)dsiSaveOpen);
@@ -1314,6 +1317,93 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02027D3C, (u32)dsiSaveSeek);
 		setBL(0x02027D4C, (u32)dsiSaveWrite);
 		setBL(0x02027D54, (u32)dsiSaveClose);
+	}
+
+	// Castle Conqueror: Heroes 2 (USA)
+	else if (strcmp(romTid, "KXCE") == 0) {
+		tonccpy((u32*)0x02013CF4, dsiSaveGetResultCode, 0xC);
+		setBL(0x02035478, (u32)dsiSaveGetInfo);
+		setBL(0x0203548C, (u32)dsiSaveOpen);
+		setBL(0x020354A4, (u32)dsiSaveCreate);
+		setBL(0x020354B4, (u32)dsiSaveOpen);
+		setBL(0x020354E0, (u32)dsiSaveCreate);
+		setBL(0x020354F0, (u32)dsiSaveOpen);
+		setBL(0x02035A24, (u32)dsiSaveSeek);
+		setBL(0x02035A38, (u32)dsiSaveWrite);
+		setBL(0x02035A48, (u32)dsiSaveSeek);
+		setBL(0x02035A58, (u32)dsiSaveWrite);
+		setBL(0x02035A68, (u32)dsiSaveSeek);
+		setBL(0x02035A78, (u32)dsiSaveWrite);
+		setBL(0x02035A90, (u32)dsiSaveClose);
+		setBL(0x02035ADC, (u32)dsiSaveSeek);
+		setBL(0x02035AEC, (u32)dsiSaveWrite);
+		setBL(0x02035AF4, (u32)dsiSaveClose);
+		setBL(0x02035B44, (u32)dsiSaveOpen);
+		setBL(0x02035EB0, (u32)dsiSaveSeek);
+		setBL(0x02035EC0, (u32)dsiSaveRead);
+		setBL(0x02035EE8, (u32)dsiSaveClose);
+		setBL(0x020364B0, (u32)dsiSaveOpen);
+		setBL(0x020364C4, (u32)dsiSaveSeek);
+		setBL(0x020364D4, (u32)dsiSaveWrite);
+		setBL(0x020364DC, (u32)dsiSaveClose);
+	}
+
+	// Castle Conqueror: Heroes 2 (Europe, Australia)
+	else if (strcmp(romTid, "KXCV") == 0) {
+		tonccpy((u32*)0x02013CF4, dsiSaveGetResultCode, 0xC);
+		setBL(0x0206A44C, (u32)dsiSaveGetInfo);
+		setBL(0x0206A460, (u32)dsiSaveOpen);
+		setBL(0x0206A478, (u32)dsiSaveCreate);
+		setBL(0x0206A488, (u32)dsiSaveOpen);
+		setBL(0x0206A4B4, (u32)dsiSaveCreate);
+		setBL(0x0206A4C4, (u32)dsiSaveOpen);
+		setBL(0x0206A9F8, (u32)dsiSaveSeek);
+		setBL(0x0206AA0C, (u32)dsiSaveWrite);
+		setBL(0x0206AA1C, (u32)dsiSaveSeek);
+		setBL(0x0206AA2C, (u32)dsiSaveWrite);
+		setBL(0x0206AA3C, (u32)dsiSaveSeek);
+		setBL(0x0206AA4C, (u32)dsiSaveWrite);
+		setBL(0x0206AA64, (u32)dsiSaveClose);
+		setBL(0x0206AAB0, (u32)dsiSaveSeek);
+		setBL(0x0206AAC0, (u32)dsiSaveWrite);
+		setBL(0x0206AAC8, (u32)dsiSaveClose);
+		setBL(0x0206AB18, (u32)dsiSaveOpen);
+		setBL(0x0206AE84, (u32)dsiSaveSeek);
+		setBL(0x0206AE94, (u32)dsiSaveRead);
+		setBL(0x0206AEBC, (u32)dsiSaveClose);
+		setBL(0x0206B484, (u32)dsiSaveOpen);
+		setBL(0x0206B498, (u32)dsiSaveSeek);
+		setBL(0x0206B4A8, (u32)dsiSaveWrite);
+		setBL(0x0206B4B0, (u32)dsiSaveClose);
+	}
+
+	// Castle Conqueror: Heroes 2 (Japan)
+	else if (strcmp(romTid, "KXCJ") == 0) {
+		tonccpy((u32*)0x02013CF4, dsiSaveGetResultCode, 0xC);
+		setBL(0x02026EAC, (u32)dsiSaveGetInfo);
+		setBL(0x02026EC0, (u32)dsiSaveOpen);
+		setBL(0x02026ED8, (u32)dsiSaveCreate);
+		setBL(0x02026EE8, (u32)dsiSaveOpen);
+		setBL(0x02026F14, (u32)dsiSaveCreate);
+		setBL(0x02026F24, (u32)dsiSaveOpen);
+		setBL(0x02027458, (u32)dsiSaveSeek);
+		setBL(0x0202746C, (u32)dsiSaveWrite);
+		setBL(0x0202747C, (u32)dsiSaveSeek);
+		setBL(0x0202748C, (u32)dsiSaveWrite);
+		setBL(0x0202749C, (u32)dsiSaveSeek);
+		setBL(0x020274AC, (u32)dsiSaveWrite);
+		setBL(0x020274C4, (u32)dsiSaveClose);
+		setBL(0x02027510, (u32)dsiSaveSeek);
+		setBL(0x02027520, (u32)dsiSaveWrite);
+		setBL(0x02027528, (u32)dsiSaveClose);
+		setBL(0x02027578, (u32)dsiSaveOpen);
+		setBL(0x020278E4, (u32)dsiSaveSeek);
+		setBL(0x020278F4, (u32)dsiSaveRead);
+		setBL(0x0202791C, (u32)dsiSaveClose);
+		setBL(0x02027EE4, (u32)dsiSaveOpen);
+		setBL(0x02027EF8, (u32)dsiSaveSeek);
+		setBL(0x02027F08, (u32)dsiSaveWrite);
+		setBL(0x02027F10, (u32)dsiSaveClose);
 	}
 
 	// Cave Story (USA)

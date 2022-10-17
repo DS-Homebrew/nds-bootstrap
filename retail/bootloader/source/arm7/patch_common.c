@@ -3125,6 +3125,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchUserSettingsReadDSiWare(0x02021A68);
 		*(u32*)0x02024730 = 0xE1A00000; // nop
 		if (ndsHeader->gameCode[3] == 'E') {
+			setBL(0x02065C8C, (u32)dsiSaveGetInfo);
 			setBL(0x02065CA0, (u32)dsiSaveOpen);
 			setBL(0x02065CB4, (u32)dsiSaveCreate);
 			setBL(0x02065CC4, (u32)dsiSaveOpen);
@@ -3149,6 +3150,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBL(0x02066C08, (u32)dsiSaveWrite);
 			setBL(0x02066C10, (u32)dsiSaveClose);
 		} else if (ndsHeader->gameCode[3] == 'J') {
+			setBL(0x02026F94, (u32)dsiSaveGetInfo);
 			setBL(0x02026FA8, (u32)dsiSaveOpen);
 			setBL(0x02026FC0, (u32)dsiSaveCreate);
 			setBL(0x02026FD0, (u32)dsiSaveOpen);
@@ -3191,6 +3193,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020207FC = 0x022C9BA0;
 		patchUserSettingsReadDSiWare(0x02021994);
 		*(u32*)0x0202465C = 0xE1A00000; // nop
+		setBL(0x020660FC, (u32)dsiSaveGetInfo);
 		setBL(0x02066110, (u32)dsiSaveOpen);
 		setBL(0x02066128, (u32)dsiSaveCreate);
 		setBL(0x02066138, (u32)dsiSaveOpen);
@@ -3224,6 +3227,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02004838 = 0xE1A00000; // nop
 		*(u32*)0x0200499C = 0xE1A00000; // nop
 		*(u32*)0x02013170 = 0xE1A00000; // nop
+		tonccpy((u32*)0x02013CF4, dsiSaveGetResultCode, 0xC);
 		*(u32*)0x020164C4 = 0xE1A00000; // nop
 		*(u32*)0x0201A118 = 0xE1A00000; // nop
 		*(u32*)0x0201BEB4 = 0xE1A00000; // nop
@@ -3233,6 +3237,85 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchHiHeapDSiWare(0x0201C080, 0x02700000); // mov r0, #0x2700000
 		patchUserSettingsReadDSiWare(0x0201D2C8);
 		*(u32*)0x02020710 = 0xE1A00000; // nop
+		if (ndsHeader->gameCode[3] == 'E') {
+			setBL(0x02035478, (u32)dsiSaveGetInfo);
+			setBL(0x0203548C, (u32)dsiSaveOpen);
+			setBL(0x020354A4, (u32)dsiSaveCreate);
+			setBL(0x020354B4, (u32)dsiSaveOpen);
+			*(u32*)0x020354D4 = 0xE1A00000; // nop
+			setBL(0x020354E0, (u32)dsiSaveCreate);
+			setBL(0x020354F0, (u32)dsiSaveOpen);
+			setBL(0x02035A24, (u32)dsiSaveSeek);
+			setBL(0x02035A38, (u32)dsiSaveWrite);
+			setBL(0x02035A48, (u32)dsiSaveSeek);
+			setBL(0x02035A58, (u32)dsiSaveWrite);
+			setBL(0x02035A68, (u32)dsiSaveSeek);
+			setBL(0x02035A78, (u32)dsiSaveWrite);
+			setBL(0x02035A90, (u32)dsiSaveClose);
+			setBL(0x02035ADC, (u32)dsiSaveSeek);
+			setBL(0x02035AEC, (u32)dsiSaveWrite);
+			setBL(0x02035AF4, (u32)dsiSaveClose);
+			setBL(0x02035B44, (u32)dsiSaveOpen);
+			setBL(0x02035EB0, (u32)dsiSaveSeek);
+			setBL(0x02035EC0, (u32)dsiSaveRead);
+			setBL(0x02035EE8, (u32)dsiSaveClose);
+			setBL(0x020364B0, (u32)dsiSaveOpen);
+			setBL(0x020364C4, (u32)dsiSaveSeek);
+			setBL(0x020364D4, (u32)dsiSaveWrite);
+			setBL(0x020364DC, (u32)dsiSaveClose);
+		} else if (ndsHeader->gameCode[3] == 'V') {
+			setBL(0x0206A44C, (u32)dsiSaveGetInfo);
+			setBL(0x0206A460, (u32)dsiSaveOpen);
+			setBL(0x0206A478, (u32)dsiSaveCreate);
+			setBL(0x0206A488, (u32)dsiSaveOpen);
+			*(u32*)0x0206A4A8 = 0xE1A00000; // nop
+			setBL(0x0206A4B4, (u32)dsiSaveCreate);
+			setBL(0x0206A4C4, (u32)dsiSaveOpen);
+			setBL(0x0206A9F8, (u32)dsiSaveSeek);
+			setBL(0x0206AA0C, (u32)dsiSaveWrite);
+			setBL(0x0206AA1C, (u32)dsiSaveSeek);
+			setBL(0x0206AA2C, (u32)dsiSaveWrite);
+			setBL(0x0206AA3C, (u32)dsiSaveSeek);
+			setBL(0x0206AA4C, (u32)dsiSaveWrite);
+			setBL(0x0206AA64, (u32)dsiSaveClose);
+			setBL(0x0206AAB0, (u32)dsiSaveSeek);
+			setBL(0x0206AAC0, (u32)dsiSaveWrite);
+			setBL(0x0206AAC8, (u32)dsiSaveClose);
+			setBL(0x0206AB18, (u32)dsiSaveOpen);
+			setBL(0x0206AE84, (u32)dsiSaveSeek);
+			setBL(0x0206AE94, (u32)dsiSaveRead);
+			setBL(0x0206AEBC, (u32)dsiSaveClose);
+			setBL(0x0206B484, (u32)dsiSaveOpen);
+			setBL(0x0206B498, (u32)dsiSaveSeek);
+			setBL(0x0206B4A8, (u32)dsiSaveWrite);
+			setBL(0x0206B4B0, (u32)dsiSaveClose);
+		} else {
+			setBL(0x02026EAC, (u32)dsiSaveGetInfo);
+			setBL(0x02026EC0, (u32)dsiSaveOpen);
+			setBL(0x02026ED8, (u32)dsiSaveCreate);
+			setBL(0x02026EE8, (u32)dsiSaveOpen);
+			*(u32*)0x02026F08 = 0xE1A00000; // nop
+			setBL(0x02026F14, (u32)dsiSaveCreate);
+			setBL(0x02026F24, (u32)dsiSaveOpen);
+			setBL(0x02027458, (u32)dsiSaveSeek);
+			setBL(0x0202746C, (u32)dsiSaveWrite);
+			setBL(0x0202747C, (u32)dsiSaveSeek);
+			setBL(0x0202748C, (u32)dsiSaveWrite);
+			setBL(0x0202749C, (u32)dsiSaveSeek);
+			setBL(0x020274AC, (u32)dsiSaveWrite);
+			setBL(0x020274C4, (u32)dsiSaveClose);
+			setBL(0x02027510, (u32)dsiSaveSeek);
+			setBL(0x02027520, (u32)dsiSaveWrite);
+			setBL(0x02027528, (u32)dsiSaveClose);
+			setBL(0x02027578, (u32)dsiSaveOpen);
+			setBL(0x020278E4, (u32)dsiSaveSeek);
+			setBL(0x020278F4, (u32)dsiSaveRead);
+			setBL(0x0202791C, (u32)dsiSaveClose);
+			setBL(0x02027EE4, (u32)dsiSaveOpen);
+			setBL(0x02027EF8, (u32)dsiSaveSeek);
+			setBL(0x02027F08, (u32)dsiSaveWrite);
+			setBL(0x02027F10, (u32)dsiSaveClose);
+		}
 	}
 
 	// Castle Conqueror: Revolution (USA)
