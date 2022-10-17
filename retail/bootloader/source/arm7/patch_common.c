@@ -3222,8 +3222,10 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Castle Conqueror: Heroes 2 (USA)
 	// Castle Conqueror: Heroes 2 (Europe, Australia)
 	// Castle Conqueror: Heroes 2 (Japan)
-	// Requires 8MB of RAM
-	else if (strncmp(romTid, "KXC", 3) == 0 && extendedMemory2) {
+	// Requires either 8MB of RAM or Memory Expansion Pak
+	else if (strncmp(romTid, "KXC", 3) == 0 && (extendedMemory2 || expansionPakFound)) {
+		const u32* heapAllocCustom = ce9->patches->cch2HeapAlloc;
+
 		*(u32*)0x02004838 = 0xE1A00000; // nop
 		*(u32*)0x0200499C = 0xE1A00000; // nop
 		*(u32*)0x02013170 = 0xE1A00000; // nop
@@ -3234,10 +3236,16 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0201BEB8 = 0xE1A00000; // nop
 		*(u32*)0x0201BEC4 = 0xE1A00000; // nop
 		*(u32*)0x0201C024 = 0xE1A00000; // nop
-		patchHiHeapDSiWare(0x0201C080, 0x02700000); // mov r0, #0x2700000
+		patchHiHeapDSiWare(0x0201C080, extendedMemory2 ? 0x02700000 : heapEnd); // mov r0, extendedMemory2 ? #0x2700000 : #0x23E0000
+		*(u32*)0x0201C1B4 -= 0x30000;
 		patchUserSettingsReadDSiWare(0x0201D2C8);
 		*(u32*)0x02020710 = 0xE1A00000; // nop
 		if (ndsHeader->gameCode[3] == 'E') {
+			if (!extendedMemory2) {
+				ce9->patches->fourSwHeapOrgFunction = getOffsetFromBL((u32*)0x020719F0);
+				setBL(0x020719F0, (u32)heapAllocCustom);
+			}
+
 			setBL(0x02035478, (u32)dsiSaveGetInfo);
 			setBL(0x0203548C, (u32)dsiSaveOpen);
 			setBL(0x020354A4, (u32)dsiSaveCreate);
@@ -3264,6 +3272,11 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBL(0x020364D4, (u32)dsiSaveWrite);
 			setBL(0x020364DC, (u32)dsiSaveClose);
 		} else if (ndsHeader->gameCode[3] == 'V') {
+			if (!extendedMemory2) {
+				ce9->patches->fourSwHeapOrgFunction = getOffsetFromBL((u32*)0x0203749C);
+				setBL(0x0203749C, (u32)heapAllocCustom);
+			}
+
 			setBL(0x0206A44C, (u32)dsiSaveGetInfo);
 			setBL(0x0206A460, (u32)dsiSaveOpen);
 			setBL(0x0206A478, (u32)dsiSaveCreate);
@@ -3290,6 +3303,11 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBL(0x0206B4A8, (u32)dsiSaveWrite);
 			setBL(0x0206B4B0, (u32)dsiSaveClose);
 		} else {
+			if (!extendedMemory2) {
+				ce9->patches->fourSwHeapOrgFunction = getOffsetFromBL((u32*)0x0205DF58);
+				setBL(0x0205DF58, (u32)heapAllocCustom);
+			}
+
 			setBL(0x02026EAC, (u32)dsiSaveGetInfo);
 			setBL(0x02026EC0, (u32)dsiSaveOpen);
 			setBL(0x02026ED8, (u32)dsiSaveCreate);
@@ -6515,7 +6533,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Zelda no Densetsu: 4-tsu no Tsurugi: 25th Kinen Edition (Japan)
 	// Requires either 8MB of RAM or Memory Expansion Pak
 	// Audio is disabled on retail consoles
-	else if (strncmp(romTid, "KQ9", 3) == 0) {
+	else if (strncmp(romTid, "KQ9", 3) == 0 && (extendedMemory2 || expansionPakFound)) {
 		const u32* heapAllocCustom = ce9->patches->fourSwHeapAlloc;
 
 		*(u32*)0x02004838 = 0xE1A00000; // nop

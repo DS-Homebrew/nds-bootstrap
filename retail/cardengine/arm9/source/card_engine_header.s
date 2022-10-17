@@ -179,6 +179,7 @@ patches:
 .word   dsiSaveWrite_arm
 .word   musicPlay_arm
 .word   musicStopEffect_arm
+.word   cch2HeapAlloc_arm
 .word   fourSwHeapAlloc_arm
 fourSwOrgFunction:
 .word	0
@@ -440,46 +441,68 @@ musicStopEffect_arm:
 @---------------------------------------------------------------------------------
 
 @---------------------------------------------------------------------------------
+cch2HeapAlloc_arm:
+@---------------------------------------------------------------------------------
+	stmfd   sp!, {r5-r6,lr}
+	mov r5, #0
+
+	ldr r6, =0x8D030 @ Size of fontGBK.bin
+	cmp r0, r6
+	moveq r0, #0x4000
+	moveq r5, #1
+
+	ldr	r6, fourSwOrgFunction
+	bl	_blx_fourSwOrgFunction
+
+	cmp r5, #1
+	moveq r0, #0x09000000 @ Offset of fontGBK.bin
+
+cch2HeapAlloc_return:
+	ldmfd   sp!, {r5-r6,pc}
+.pool
+@---------------------------------------------------------------------------------
+
+@---------------------------------------------------------------------------------
 fourSwHeapAlloc_arm:
 @---------------------------------------------------------------------------------
-	stmfd   sp!, {r1-r2,lr}
+	stmfd   sp!, {r6,lr}
 
-	@ldr r2, =0x45720 @ Size of subtask.cmp
-	@cmp r0, r2
+	@ldr r6, =0x45720 @ Size of subtask.cmp
+	@cmp r0, r6
 	@beq fourSwHeapAlloc_cont
-	ldr r2, =0x128F8 @ Size of pat.bin
-	cmp r0, r2
-	moveq r1, #0
+	ldr r6, =0x128F8 @ Size of pat.bin
+	cmp r0, r6
+	moveq r6, #0
 	beq fourSwHeapAlloc_cont
-	ldr r2, =0x1AFC7C @ Size of zeldat.bin
-	cmp r0, r2
-	moveq r1, #4
+	ldr r6, =0x1AFC7C @ Size of zeldat.bin
+	cmp r0, r6
+	moveq r6, #4
 	beq fourSwHeapAlloc_cont
-	ldr r2, =0x1086DC @ Size of zelmap.bin
-	cmp r0, r2
-	moveq r1, #8
+	ldr r6, =0x1086DC @ Size of zelmap.bin
+	cmp r0, r6
+	moveq r6, #8
 	beq fourSwHeapAlloc_cont
-	@ldr r2, =0x20208 @ Size of us.kmsg
-	@cmp r0, r2
+	@ldr r6, =0x20208 @ Size of us.kmsg
+	@cmp r0, r6
 	@beq fourSwHeapAlloc_cont
-	@ldr r2, =0x33310 @ Size of eu.kmsg
-	@cmp r0, r2
+	@ldr r6, =0x33310 @ Size of eu.kmsg
+	@cmp r0, r6
 	@beq fourSwHeapAlloc_cont
-	@ldr r2, =0xF638 @ Size of jp.kmsg
-	@cmp r0, r2
+	@ldr r6, =0xF638 @ Size of jp.kmsg
+	@cmp r0, r6
 	@beq fourSwHeapAlloc_cont
-	ldr	r12, fourSwOrgFunction
+	ldr	r6, fourSwOrgFunction
 	bl	_blx_fourSwOrgFunction
 	b fourSwHeapAlloc_return
 
 fourSwHeapAlloc_cont:
 	ldr r0, =fourSwHeapAddr
-	ldr r0, [r0, r1]
+	ldr r0, [r0, r6]
 
 fourSwHeapAlloc_return:
-	ldmfd   sp!, {r1-r2,pc}
+	ldmfd   sp!, {r6,pc}
 _blx_fourSwOrgFunction:
-	bx	r12
+	bx	r6
 fourSwHeapAddr:
 @.word	0x09340000 @ Offset of subtask.cmp
 .word	0x092E0000 @ Offset of pat.bin
@@ -492,20 +515,21 @@ fourSwHeapAddr:
 @---------------------------------------------------------------------------------
 siezHeapAlloc_arm:
 @---------------------------------------------------------------------------------
-	stmfd   sp!, {r1-r3,lr}
+	stmfd   sp!, {r6,lr}
 
-	ldr r3, =0x1F1F24 @ Size of kr0000.ntfx
-	cmp r1, r3
+	ldr r6, =0x1F1F24 @ Size of kr0000.ntfx
+	cmp r1, r6
 	moveq r0, #0x09000000 @ Offset of kr0000.ntfx
 	beq siezHeapAlloc_return
-	ldr r3, =0x1F876C @ Size of kr0100.ntfx
-	cmp r1, r3
+	ldr r6, =0x1F876C @ Size of kr0100.ntfx
+	cmp r1, r6
 	moveq r0, #0x09200000 @ Offset of kr0100.ntfx
 	beq siezHeapAlloc_return
 	bl	0x020DB338
 
 siezHeapAlloc_return:
-	ldmfd   sp!, {r1-r3,pc}
+	ldmfd   sp!, {r6,pc}
+.pool
 @---------------------------------------------------------------------------------
 
 	.thumb
