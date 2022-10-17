@@ -449,12 +449,15 @@ fourSwHeapAlloc_arm:
 	@beq fourSwHeapAlloc_cont
 	ldr r2, =0x128F8 @ Size of pat.bin
 	cmp r0, r2
+	moveq r1, #0
 	beq fourSwHeapAlloc_cont
 	ldr r2, =0x1AFC7C @ Size of zeldat.bin
 	cmp r0, r2
+	moveq r1, #4
 	beq fourSwHeapAlloc_cont
 	ldr r2, =0x1086DC @ Size of zelmap.bin
 	cmp r0, r2
+	moveq r1, #8
 	beq fourSwHeapAlloc_cont
 	@ldr r2, =0x20208 @ Size of us.kmsg
 	@cmp r0, r2
@@ -470,15 +473,6 @@ fourSwHeapAlloc_arm:
 	b fourSwHeapAlloc_return
 
 fourSwHeapAlloc_cont:
-	ldr r1, fourSwHeapCounter
-	cmp r1, #3
-	beq fourSwHeapAlloc_return
-	add r1, #1
-	str r1, fourSwHeapCounter
-	sub r1, #1
-	mov r2, #4
-	mul r1, r1, r2
-
 	ldr r0, =fourSwHeapAddr
 	ldr r0, [r0, r1]
 
@@ -486,8 +480,6 @@ fourSwHeapAlloc_return:
 	ldmfd   sp!, {r1-r2,pc}
 _blx_fourSwOrgFunction:
 	bx	r12
-fourSwHeapCounter:
-.word	0
 fourSwHeapAddr:
 @.word	0x09340000 @ Offset of subtask.cmp
 .word	0x092E0000 @ Offset of pat.bin
