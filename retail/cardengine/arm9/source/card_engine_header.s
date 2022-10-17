@@ -182,6 +182,7 @@ patches:
 .word   fourSwHeapAlloc_arm
 fourSwOrgFunction:
 .word	0
+.word	siezHeapAlloc_arm
 .word	cardStructArm9
 .word   card_pull
 .word   cacheFlushRef
@@ -465,7 +466,7 @@ fourSwHeapAlloc_arm:
 	@cmp r0, r2
 	@beq fourSwHeapAlloc_cont
 	ldr	r12, fourSwOrgFunction
-	bl	_blx_fourSwOrgFunction	
+	bl	_blx_fourSwOrgFunction
 	b fourSwHeapAlloc_return
 
 fourSwHeapAlloc_cont:
@@ -493,6 +494,34 @@ fourSwHeapAddr:
 .word	0x09000000 @ Offset of zeldat.bin
 .word	0x091C0000 @ Offset of zelmap.bin
 @.word	0x09300000 @ Offset of us/eu/jp.kmsg
+.pool
+@---------------------------------------------------------------------------------
+
+@---------------------------------------------------------------------------------
+siezHeapAlloc_arm:
+@---------------------------------------------------------------------------------
+	stmfd   sp!, {r1-r3,lr}
+
+	ldr r2, =0x1F1F24 @ Size of kr0000.ntfx
+	cmp r1, r2
+	moveq r3, #0
+	beq siezHeapAlloc_cont
+	ldr r2, =0x1F876C @ Size of kr0100.ntfx
+	cmp r1, r2
+	moveq r3, #4
+	beq siezHeapAlloc_cont
+	bl	0x020DB338
+	b siezHeapAlloc_return
+
+siezHeapAlloc_cont:
+	ldr r0, =siezHeapAddr
+	ldr r0, [r0, r3]
+
+siezHeapAlloc_return:
+	ldmfd   sp!, {r1-r3,pc}
+siezHeapAddr:
+.word	0x09000000 @ Offset of kr0000.ntfx
+.word	0x09200000 @ Offset of kr0100.ntfx
 .pool
 @---------------------------------------------------------------------------------
 

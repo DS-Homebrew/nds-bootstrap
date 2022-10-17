@@ -137,6 +137,7 @@ typedef struct cardengineArm9Patches {
 	u32* musicStopEffect;
 	u32* fourSwHeapAlloc;
 	u32* fourSwHeapOrgFunction;
+	u32* siezHeapAlloc;
 	u32* cardStructArm9;
 	u32* card_pull;
 	u32* cacheFlushRef;
@@ -196,6 +197,7 @@ typedef struct cardengineArm9 {
 		1: extendedMemory
 		2: ROMinRAM
 		3: dsDebugRam
+		4: enableExceptionHandler
 		5: isSdk5
 		6: overlaysCached
 	*/
