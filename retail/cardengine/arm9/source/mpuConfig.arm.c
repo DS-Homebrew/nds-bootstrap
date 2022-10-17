@@ -1,9 +1,9 @@
 #include <nds/ndstypes.h>
 
 // Required for write access to Slot-2
-/*void slot2MpuFix() {
+void slot2MpuFix() {
 	asm("MOV R0,#0x4A\n\tmcr p15, 0, r0, C2,C0,0\n\tmcr p15, 0, r0, C2,C0,1\nMOV R0,#0xA\n\tmcr p15, 0, r0, C3,C0,0");
-}*/
+}
 
 // Revert region 0 patch
 void region0Fix() {
