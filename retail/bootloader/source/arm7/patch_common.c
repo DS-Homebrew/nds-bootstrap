@@ -10338,7 +10338,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Redau Shirizu: Gunjin Shougi (Japan)
-	// A sprite layer is missing (containing text font and others)
 	else if (strcmp(romTid, "KLXJ") == 0) {
 		*(u32*)0x02004838 = 0xE1A00000; // nop
 		*(u32*)0x0200499C = 0xE1A00000; // nop
@@ -10346,38 +10345,8 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0200E0F4 = 0xE12FFF1E; // bx lr
 		*(u32*)0x0201025C = 0xE1A00000; // nop
 		*(u32*)0x020134D4 = 0xE1A00000; // nop
-		*(u32*)0x02014664 = 0xE1A00000; // nop
-		*(u32*)0x02014700 = 0xE1A00000; // nop
-		*(u32*)0x020147B4 = 0xE1A00000; // nop
-		*(u32*)0x02014868 = 0xE1A00000; // nop
-		*(u32*)0x02014908 = 0xE1A00000; // nop
-		*(u32*)0x02014988 = 0xE1A00000; // nop
-		*(u32*)0x02014A04 = 0xE1A00000; // nop
-		*(u32*)0x02014A88 = 0xE1A00000; // nop
-		*(u32*)0x02014B28 = 0xE1A00000; // nop
-		*(u32*)0x02014BE4 = 0xE1A00000; // nop
-		*(u32*)0x02014CA0 = 0xE1A00000; // nop
-		*(u32*)0x02014D5C = 0xE1A00000; // nop
-		*(u32*)0x02014E18 = 0xE1A00000; // nop
-		*(u32*)0x02014ED4 = 0xE1A00000; // nop
-		*(u32*)0x02014F90 = 0xE1A00000; // nop
-		*(u32*)0x0201504C = 0xE1A00000; // nop
-		*(u32*)0x020150F8 = 0xE1A00000; // nop
-		*(u32*)0x0201518C = 0xE1A00000; // nop
-		*(u32*)0x020152B0 = 0xE1A00000; // nop
-		*(u32*)0x02015314 = 0xE1A00000; // nop
-		*(u32*)0x020153DC = 0xE1A00000; // nop
-		*(u32*)0x0201544C = 0xE1A00000; // nop
-		*(u32*)0x020154D8 = 0xE1A00000; // nop
-		*(u32*)0x02015548 = 0xE1A00000; // nop
-		*(u32*)0x020155D0 = 0xE1A00000; // nop
-		*(u32*)0x02015640 = 0xE1A00000; // nop
-		*(u32*)0x02015754 = 0xE1A00000; // nop
-		*(u32*)0x020157BC = 0xE1A00000; // nop
-		*(u32*)0x0201583C = 0xE1A00000; // nop
-		*(u32*)0x020158A0 = 0xE1A00000; // nop
-		*(u32*)0x02015958 = 0xE1A00000; // nop
-		*(u32*)0x020159C8 = 0xE1A00000; // nop
+		*(u32*)0x02013DF8 = 0xE1A00000; // nop
+		*(u32*)0x02013DFC = 0xE1A00000; // nop
 		*(u32*)0x02017414 = 0xE1A00000; // nop
 		*(u32*)0x02019278 = 0xE1A00000; // nop
 		*(u32*)0x0201927C = 0xE1A00000; // nop
