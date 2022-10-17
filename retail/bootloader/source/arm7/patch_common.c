@@ -11279,15 +11279,20 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchUserSettingsReadDSiWare(0x02023A9C);
 		*(u32*)0x02026EA0 = 0xE1A00000; // nop
 		if (!extendedMemory2) {
-			// Disable .ntfx file loading: Hides bottom screen background during gameplay
-			*(u32*)0x0203DFE0 = 0xE3A00000; // mov r0, #0
-			*(u32*)0x0203F3E4 = 0xE1A00000; // nop
-			*(u32*)0x0203F434 = 0xE12FFF1E; // bx lr
-			*(u32*)0x0203FD5C = 0xE12FFF1E; // bx lr
+			*(u32*)0x0203DFE0 = 0xE3A00000; // mov r0, #0 (Disable .ntfx file pre-loading)
+			if (expansionPakFound) {
+				*(u32*)0x0203D96C = 0xE3A00000; // mov r0, #0
+				setBL(0x0203DA04, (u32)ce9->patches->siezHeapAlloc);
+			} else {
+				// Disable .ntfx file loading: Hides bottom screen background during gameplay
+				*(u32*)0x0203F3E4 = 0xE1A00000; // nop
+				*(u32*)0x0203F434 = 0xE12FFF1E; // bx lr
+				*(u32*)0x0203FD5C = 0xE12FFF1E; // bx lr
 
-			// Same as above, but causes slowdown and graphical glitches
-			//toncset32((u32*)0x02121C90, 0, 1);
-			//toncset32((u32*)0x02121C94, 0, 1);
+				// Same as above, but causes slowdown and graphical glitches
+				//toncset32((u32*)0x02121C90, 0, 1);
+				//toncset32((u32*)0x02121C94, 0, 1);
+			}
 		}
 		*(u32*)0x020E3E4C = 0xE3A00005; // mov r0, #5
 		*(u32*)0x020E3E50 = 0xE12FFF1E; // bx lr
