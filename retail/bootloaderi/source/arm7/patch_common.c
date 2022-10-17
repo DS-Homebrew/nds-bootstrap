@@ -2808,6 +2808,22 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02032584, (u32)dsiSaveClose);
 	}
 
+	// Music on: Playing Piano (USA)
+	else if (strcmp(romTid, "KICE") == 0 && saveOnFlashcard) {
+		// Skip Manual screen
+		*(u32*)0x0200CC58 = 0xE1A00000; // nop
+		*(u32*)0x0200CC5C = 0xE1A00000; // nop
+		*(u32*)0x0200CC60 = 0xE1A00000; // nop
+	}
+
+	// Music on: Playing Piano (Europe)
+	else if (strcmp(romTid, "KICP") == 0 && saveOnFlashcard) {
+		// Skip Manual screen
+		*(u32*)0x0200CC7C = 0xE1A00000; // nop
+		*(u32*)0x0200CC80 = 0xE1A00000; // nop
+		*(u32*)0x0200CC84 = 0xE1A00000; // nop
+	}
+
 	// Need for Speed: Nitro-X (USA)
 	// Need for Speed: Nitro-X (Europe, Australia)
 	else if (strncmp(romTid, "KNP", 3) == 0 && saveOnFlashcard) {
