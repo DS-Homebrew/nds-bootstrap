@@ -535,6 +535,7 @@ static bool isROMLoadableInRAM(const tNDSHeader* ndsHeader, const char* romTid, 
 
 	bool res = false;
 	if ((strncmp(romTid, "UBR", 3) == 0 && isDevConsole)
+	 || (strncmp(romTid, "KQ9", 3) == 0 && s2FlashcardId != 0x5A45)
 	 || (strncmp(romTid, "UOR", 3) != 0
 	 && strncmp(romTid, "KPP", 3) != 0
 	 && strncmp(romTid, "KPF", 3) != 0)

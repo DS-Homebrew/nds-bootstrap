@@ -179,6 +179,9 @@ patches:
 .word   dsiSaveWrite_arm
 .word   musicPlay_arm
 .word   musicStopEffect_arm
+.word   fourSwHeapAlloc_arm
+fourSwOrgFunction:
+.word	0
 .word	cardStructArm9
 .word   card_pull
 .word   cacheFlushRef
@@ -432,6 +435,64 @@ musicStopEffect_arm:
 @---------------------------------------------------------------------------------
 	ldr	r12, =musicStopEffect
 	bx	r12
+.pool
+@---------------------------------------------------------------------------------
+
+@---------------------------------------------------------------------------------
+fourSwHeapAlloc_arm:
+@---------------------------------------------------------------------------------
+	stmfd   sp!, {r1-r2,lr}
+
+	@ldr r2, =0x45720 @ Size of subtask.cmp
+	@cmp r0, r2
+	@beq fourSwHeapAlloc_cont
+	ldr r2, =0x128F8 @ Size of pat.bin
+	cmp r0, r2
+	beq fourSwHeapAlloc_cont
+	ldr r2, =0x1AFC7C @ Size of zeldat.bin
+	cmp r0, r2
+	beq fourSwHeapAlloc_cont
+	ldr r2, =0x1086DC @ Size of zelmap.bin
+	cmp r0, r2
+	beq fourSwHeapAlloc_cont
+	@ldr r2, =0x20208 @ Size of us.kmsg
+	@cmp r0, r2
+	@beq fourSwHeapAlloc_cont
+	@ldr r2, =0x33310 @ Size of eu.kmsg
+	@cmp r0, r2
+	@beq fourSwHeapAlloc_cont
+	@ldr r2, =0xF638 @ Size of jp.kmsg
+	@cmp r0, r2
+	@beq fourSwHeapAlloc_cont
+	ldr	r12, fourSwOrgFunction
+	bl	_blx_fourSwOrgFunction	
+	b fourSwHeapAlloc_return
+
+fourSwHeapAlloc_cont:
+	ldr r1, fourSwHeapCounter
+	cmp r1, #3
+	beq fourSwHeapAlloc_return
+	add r1, #1
+	str r1, fourSwHeapCounter
+	sub r1, #1
+	mov r2, #4
+	mul r1, r1, r2
+
+	ldr r0, =fourSwHeapAddr
+	ldr r0, [r0, r1]
+
+fourSwHeapAlloc_return:
+	ldmfd   sp!, {r1-r2,pc}
+_blx_fourSwOrgFunction:
+	bx	r12
+fourSwHeapCounter:
+.word	0
+fourSwHeapAddr:
+@.word	0x09340000 @ Offset of subtask.cmp
+.word	0x092E0000 @ Offset of pat.bin
+.word	0x09000000 @ Offset of zeldat.bin
+.word	0x091C0000 @ Offset of zelmap.bin
+@.word	0x09300000 @ Offset of us/eu/jp.kmsg
 .pool
 @---------------------------------------------------------------------------------
 
