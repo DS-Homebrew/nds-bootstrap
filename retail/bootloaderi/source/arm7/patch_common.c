@@ -311,6 +311,27 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		tonccpy((char*)0x0209D234, dataPub, strlen(dataPub));
 	}
 
+	// Ah! Heaven (USA)
+	// Ah! Heaven (Europe)
+	else if ((strcmp(romTid, "K5HE") == 0 || strcmp(romTid, "K5HP") == 0) && saveOnFlashcard) {
+		//tonccpy((u32*)0x020102FC, dsiSaveGetResultCode, 0xC);
+		/* setBL(0x0201E3C0, (u32)dsiSaveCreate);
+		setBL(0x0201E3E8, (u32)dsiSaveOpen);
+		setBL(0x0201E428, (u32)dsiSaveCreate);
+		setBL(0x0201E438, (u32)dsiSaveOpen);
+		setBL(0x0201E468, (u32)dsiSaveOpen);
+		setBL(0x0201E540, (u32)dsiSaveRead);
+		setBL(0x0201E560, (u32)dsiSaveSeek);
+		setBL(0x0201E578, (u32)dsiSaveWrite);
+		setBL(0x0201E588, (u32)dsiSaveSeek); */
+		*(u32*)0x0201FD04 = 0xE1A00000; // nop (Skip Manual screen)
+		*(u32*)0x02029C68 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02029D14 = 0xE12FFF1E; // bx lr
+		/* setBL(0x02029CFC, (u32)dsiSaveClose);
+		setBL(0x02029DB8, (u32)dsiSaveClose);
+		setBL(0x02029DCC, (u32)dsiSaveClose); */
+	}
+
 	// Amakuchi! Dairoujou (Japan)
 	else if (strcmp(romTid, "KF2J") == 0 && saveOnFlashcard) {
 		setBL(0x0203C1C8, (u32)dsiSaveOpen);
@@ -5219,14 +5240,6 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		} else if (ndsHeader->gameCode[3] == 'V') {
 			*(u32*)0x02053FB8 = 0xE1A00000; // nop
 		}
-	}
-
-	// Ah! Heaven (USA)
-	// Ah! Heaven (Europe)
-	else if (strcmp(romTid, "K5HE") == 0 || strcmp(romTid, "K5HP") == 0) {
-		*(u32*)0x0201FD04 = 0xE1A00000; // nop (Skip Manual screen)
-		*(u32*)0x02029C68 = 0xE12FFF1E; // bx lr
-		*(u32*)0x02029D14 = 0xE12FFF1E; // bx lr
 	}
 
 	// Asphalt 4: Elite Racing (USA)
