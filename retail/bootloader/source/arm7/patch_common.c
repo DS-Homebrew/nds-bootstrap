@@ -6430,7 +6430,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// The Legend of Zelda: Four Swords: Anniversary Edition (Europe, Australia)
 	// Zelda no Densetsu: 4-tsu no Tsurugi: 25th Kinen Edition (Japan)
 	// Requires either 8MB of RAM or Memory Expansion Pak
-	// Level graphics are glitched, and audio is disabled on retail consoles
+	// Audio is disabled on retail consoles
 	else if (strncmp(romTid, "KQ9", 3) == 0) {
 		const u32* heapAllocCustom = ce9->patches->fourSwHeapAlloc;
 
@@ -6451,6 +6451,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02019974 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x02019978 = 0xE12FFF1E; // bx lr
 		*(u32*)0x0201D01C = 0xE1A00000; // nop
+		*(u32*)0x02021F40 = 0xE1A00000; // nop (Fix glitched level graphics)
 		if (ndsHeader->gameCode[3] == 'E') {
 			*(u32*)0x02082A58 = 0xE1A00000; // nop
 			if (!extendedMemory2) {
