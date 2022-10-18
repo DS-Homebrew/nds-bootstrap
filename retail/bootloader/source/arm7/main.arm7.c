@@ -74,6 +74,10 @@
 #include "value_bits.h"
 #include "loading_screen.h"
 
+#include "io_m3_common.h"
+#include "io_g6_common.h"
+#include "io_sc_common.h"
+
 typedef signed int addr_t;
 typedef unsigned char data_t;
 
@@ -139,6 +143,26 @@ bool expansionPakFound = false;
 u32 newArm7binarySize = 0;
 u32 arm7mbk = 0;
 u32 accessControl = 0;
+
+void s2RamAccess(bool open) {
+	if (open) {
+		if (s2FlashcardId == 0x334D) {
+			_M3_changeMode(M3_MODE_RAM);
+		} else if (s2FlashcardId == 0x3647) {
+			_G6_SelectOperation(G6_MODE_RAM);
+		} else if (s2FlashcardId == 0x4353) {
+			_SC_changeMode(SC_MODE_RAM);
+		}
+	} else {
+		if (s2FlashcardId == 0x334D) {
+			_M3_changeMode(M3_MODE_MEDIA);
+		} else if (s2FlashcardId == 0x3647) {
+			_G6_SelectOperation(G6_MODE_MEDIA);
+		} else if (s2FlashcardId == 0x4353) {
+			_SC_changeMode(SC_MODE_MEDIA);
+		}
+	}
+}
 
 static void initMBK(void) {
 	// arm7 is master of WRAM-A, arm9 of WRAM-B & C
@@ -682,7 +706,24 @@ static void loadOverlaysintoRAM(const tNDSHeader* ndsHeader, const module_params
 		if (ROMinRAM) {
 			overlaysLocation += (ndsHeader->arm9binarySize-ndsHeader->arm9romOffset);
 		}
-		fileRead((char*)overlaysLocation, file, ndsHeader->arm9romOffset + ndsHeader->arm9binarySize, overlaysSize);
+		if ((_io_dldi_features & FEATURE_SLOT_GBA) && s2FlashcardId != 0) {
+			const u32 buffer = 0x037F8000;
+			const u16 bufferSize = 0x8000;
+			u32 len = overlaysSize;
+			for (u32 dst = 0; dst < overlaysSize; dst += bufferSize) {
+				u32 readLen = (len > bufferSize) ? bufferSize : len;
+
+				fileRead((char*)buffer, file, (ndsHeader->arm9romOffset + ndsHeader->arm9binarySize)+dst, readLen);
+				s2RamAccess(true);
+				tonccpy((char*)overlaysLocation+dst, (char*)buffer, readLen);
+				s2RamAccess(false);
+
+				len -= bufferSize;
+			}
+			toncset((char*)buffer, 0, bufferSize);
+		} else {
+			fileRead((char*)overlaysLocation, file, ndsHeader->arm9romOffset + ndsHeader->arm9binarySize, overlaysSize);
+		}
 
 		if (!isSdk5(moduleParams) && *(u32*)((overlaysLocation-ndsHeader->arm9romOffset-ndsHeader->arm9binarySize)+0x003128AC) == 0x4B434148) {
 			*(u32*)((overlaysLocation-ndsHeader->arm9romOffset-ndsHeader->arm9binarySize)+0x3128AC) = 0xA00;	// Primary fix for Mario's Holiday
@@ -840,6 +881,9 @@ int arm7_main(void) {
 
 	arm9_macroMode = macroMode;
 
+	s2FlashcardId = *(u16*)(0x020000C0);
+	s2RamAccess(false);
+
 	// Init card
 	if (!FAT_InitFiles(initDisc)) {
 		nocashMessage("!FAT_InitFiles");
@@ -849,10 +893,6 @@ int arm7_main(void) {
 
 	if (logging) {
 		enableDebug(getBootFileCluster("NDSBTSRP.LOG"));
-	}
-
-	if (_io_dldi_features & FEATURE_SLOT_NDS) {
-		s2FlashcardId = *(u16*)(0x020000C0);
 	}
 
 	aFile srParamsFile = getFileFromCluster(srParamsFileCluster);
@@ -968,8 +1008,22 @@ int arm7_main(void) {
 		toncset((char*)0x0C4000D0, 0, 0x130);
 	}
 
+	s2RamAccess(true);
+
 	*(vu16*)0x08240000 = 1;
 	expansionPakFound = ((*(vu16*)0x08240000 == 1) && (strcmp(romTid, "UBRP") != 0));
+
+	if ((strcmp(romTid, "UBRP") == 0) && /*(_io_dldi_features & FEATURE_SLOT_NDS) &&*/ s2FlashcardId != 0 && s2FlashcardId != 0x5A45) {
+		toncset((char*)0x08000000, 0xFF, 0xC0);
+		toncset((u8*)0x080000B2, 0, 3);
+		toncset((u8*)0x080000B5, 0x24, 3);
+		*(u16*)0x080000BE = 0x7FFF;
+		toncset((char*)0x080000C0, 0, 0xE);
+		*(u16*)0x080000CE = 0x7FFF;
+		toncset((char*)0x080000D0, 0, 0x130);
+	}
+
+	s2RamAccess(false);
 
 	// If possible, set to load ROM into RAM
 	ROMinRAM = isROMLoadableInRAM(ndsHeader, romTid, moduleParams);
@@ -980,7 +1034,7 @@ int arm7_main(void) {
 	rsetPatchCache();
 
 	ce9Location = extendedMemory2 ? CARDENGINE_ARM9_LOCATION_DLDI_EXTMEM : CARDENGINE_ARM9_LOCATION_DLDI;
-	tonccpy((u32*)ce9Location, (u32*)CARDENGINE_ARM9_LOCATION_BUFFERED, 0x6000);
+	tonccpy((u32*)ce9Location, (u32*)CARDENGINE_ARM9_LOCATION_BUFFERED, 0x6C00);
 	toncset((u32*)0x023E0000, 0, 0x10000);
 
 	if (!dldiPatchBinary((data_t*)ce9Location, 0x6000)) {
@@ -997,13 +1051,13 @@ int arm7_main(void) {
 
 	bool wramUsed = false;
 	u32 fatTableSize = 0;
-	if (s2FlashcardId == 0x334D || s2FlashcardId == 0x3647 || s2FlashcardId == 0x4353) {
+	if ((_io_dldi_features & FEATURE_SLOT_NDS) && (s2FlashcardId == 0x334D || s2FlashcardId == 0x3647 || s2FlashcardId == 0x4353)) {
 		fatTableAddr = (s2FlashcardId==0x4353 ? 0x09F7FE00 : 0x09F80000);
 		fatTableSize = 0x80000;
-	} else if (s2FlashcardId == 0x5A45) {
+	} else if ((_io_dldi_features & FEATURE_SLOT_NDS) && s2FlashcardId == 0x5A45) {
 		fatTableAddr = 0x08F80000;
 		fatTableSize = 0x80000;
-	} else if (expansionPakFound) {
+	} else if ((_io_dldi_features & FEATURE_SLOT_NDS) && expansionPakFound) {
 		fatTableAddr = 0x09780000;
 		fatTableSize = 0x80000;
 	} else if (extendedMemory2) {
@@ -1238,6 +1292,8 @@ int arm7_main(void) {
 			fileWrite((char*)0x02000000, ramDumpFile, 0, 0x400000);
 		}
 	}
+
+	s2RamAccess(true);
 
 	startBinary_ARM7();
 

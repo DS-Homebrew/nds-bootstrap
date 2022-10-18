@@ -202,6 +202,8 @@ typedef struct cardengineArm9 {
 		5: isSdk5
 		6: overlaysCached
 	*/
+    u16 s2FlashcardId;
+    u16 padding;
     u32 overlaysSize;
     u32 ioverlaysSize;
     u32* irqTable;

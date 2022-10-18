@@ -180,6 +180,7 @@ int hookNdsRetailArm9(
 
 	const char* romTid = getRomTid(ndsHeader);
 	extern u32 romSizeLimit;
+	extern u16 s2FlashcardId;
 
 	ce9->fileCluster            = fileCluster;
 	ce9->saveCluster            = saveCluster;
@@ -221,6 +222,7 @@ int hookNdsRetailArm9(
 	if (patchOffsetCache.resetMb) {
 		ce9->valueBits |= b_softResetMb;
 	}
+	ce9->s2FlashcardId          = s2FlashcardId;
 	ce9->overlaysSize           = overlaysSize;
 	ce9->ioverlaysSize          = ioverlaysSize;
 	if (extendedMemory && !dsDebugRam) {

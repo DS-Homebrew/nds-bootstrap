@@ -49,6 +49,9 @@ cardStruct0:
 	.word	0x00000000
 valueBits:
 	.word	0x00000000
+s2FlashcardId:
+	.hword	0x0000
+	.hword	0x0000 @ align
 overlaysSize:
 	.word	0x00000000
 ioverlaysSize:
