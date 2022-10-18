@@ -12660,6 +12660,66 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02033D88 = 0xE12FFF1E; // bx lr
 	}
 
+	// Yummy Yummy Cooking Jam (USA)
+	// Music is disabled
+	else if (strcmp(romTid, "KYUE") == 0) {
+		*(u32*)0x0200508C = 0xE1A00000; // nop
+		*(u32*)0x0201CD5C = 0xE1A00000; // nop
+		tonccpy((u32*)0x0201DA10, dsiSaveGetResultCode, 0xC);
+		*(u32*)0x02020374 = 0xE1A00000; // nop
+		*(u32*)0x02024FB0 = 0xE1A00000; // nop
+		*(u32*)0x02026F10 = 0xE1A00000; // nop
+		*(u32*)0x02026F14 = 0xE1A00000; // nop
+		*(u32*)0x02026F20 = 0xE1A00000; // nop
+		*(u32*)0x02027064 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x020270C0, heapEnd); // mov r0, #0x23E0000
+		*(u32*)0x020271F4 = 0x020E5C00;
+		patchUserSettingsReadDSiWare(0x02028360);
+		*(u32*)0x0202B6F0 = 0xE1A00000; // nop
+		*(u32*)0x020639A4 = 0xE12FFF1E; // bx lr
+		setBL(0x02069A78, (u32)dsiSaveOpen);
+		setBL(0x02069AB4, (u32)dsiSaveRead);
+		setBL(0x02069ACC, (u32)dsiSaveRead);
+		setBL(0x02069AD4, (u32)dsiSaveClose);
+		setBL(0x02069B60, (u32)dsiSaveCreate);
+		setBL(0x02069B70, (u32)dsiSaveOpen);
+		setBL(0x02069BA8, (u32)dsiSaveSetLength);
+		setBL(0x02069BB8, (u32)dsiSaveWrite);
+		setBL(0x02069BE0, (u32)dsiSaveWrite);
+		setBL(0x02069BE8, (u32)dsiSaveClose);
+		*(u32*)0x02069F94 = 0xE1A00000; // nop
+	}
+
+	// Yummy Yummy Cooking Jam (Europe, Australia)
+	// Music is disabled
+	else if (strcmp(romTid, "KYUV") == 0) {
+		*(u32*)0x0200148C = 0xE1A00000; // nop
+		*(u32*)0x02019130 = 0xE1A00000; // nop
+		tonccpy((u32*)0x02019DE4, dsiSaveGetResultCode, 0xC);
+		*(u32*)0x0201C748 = 0xE1A00000; // nop
+		*(u32*)0x02021384 = 0xE1A00000; // nop
+		*(u32*)0x020232E4 = 0xE1A00000; // nop
+		*(u32*)0x020232E8 = 0xE1A00000; // nop
+		*(u32*)0x020232F4 = 0xE1A00000; // nop
+		*(u32*)0x02023438 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x02023494, heapEnd); // mov r0, #0x23E0000
+		*(u32*)0x020235C8 = 0x020E1FC0;
+		patchUserSettingsReadDSiWare(0x02024734);
+		*(u32*)0x02027AC4 = 0xE1A00000; // nop
+		*(u32*)0x0205FD48 = 0xE12FFF1E; // bx lr
+		setBL(0x02065E1C, (u32)dsiSaveOpen);
+		setBL(0x02065E58, (u32)dsiSaveRead);
+		setBL(0x02065E70, (u32)dsiSaveRead);
+		setBL(0x02065E78, (u32)dsiSaveClose);
+		setBL(0x02065F04, (u32)dsiSaveCreate);
+		setBL(0x02065F14, (u32)dsiSaveOpen);
+		setBL(0x02065F4C, (u32)dsiSaveSetLength);
+		setBL(0x02065F5C, (u32)dsiSaveWrite);
+		setBL(0x02065F84, (u32)dsiSaveWrite);
+		setBL(0x02065F8C, (u32)dsiSaveClose);
+		*(u32*)0x02066338 = 0xE1A00000; // nop
+	}
+
 	// Art Style: ZENGAGE (USA)
 	// Art Style: NEMREM (Europe, Australia)
 	else if (strcmp(romTid, "KASE") == 0 || strcmp(romTid, "KASV") == 0) {

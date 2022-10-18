@@ -5263,6 +5263,36 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02033D88 = 0xE12FFF1E; // bx lr
 	}
 
+	// Yummy Yummy Cooking Jam (USA)
+	else if (strcmp(romTid, "KYUE") == 0 && saveOnFlashcard) {
+		tonccpy((u32*)0x0201DA10, dsiSaveGetResultCode, 0xC);
+		setBL(0x02069A78, (u32)dsiSaveOpen);
+		setBL(0x02069AB4, (u32)dsiSaveRead);
+		setBL(0x02069ACC, (u32)dsiSaveRead);
+		setBL(0x02069AD4, (u32)dsiSaveClose);
+		setBL(0x02069B60, (u32)dsiSaveCreate);
+		setBL(0x02069B70, (u32)dsiSaveOpen);
+		setBL(0x02069BA8, (u32)dsiSaveSetLength);
+		setBL(0x02069BB8, (u32)dsiSaveWrite);
+		setBL(0x02069BE0, (u32)dsiSaveWrite);
+		setBL(0x02069BE8, (u32)dsiSaveClose);
+	}
+
+	// Yummy Yummy Cooking Jam (Europe, Australia)
+	else if (strcmp(romTid, "KYUV") == 0 && saveOnFlashcard) {
+		tonccpy((u32*)0x02019DE4, dsiSaveGetResultCode, 0xC);
+		setBL(0x02065E1C, (u32)dsiSaveOpen);
+		setBL(0x02065E58, (u32)dsiSaveRead);
+		setBL(0x02065E70, (u32)dsiSaveRead);
+		setBL(0x02065E78, (u32)dsiSaveClose);
+		setBL(0x02065F04, (u32)dsiSaveCreate);
+		setBL(0x02065F14, (u32)dsiSaveOpen);
+		setBL(0x02065F4C, (u32)dsiSaveSetLength);
+		setBL(0x02065F5C, (u32)dsiSaveWrite);
+		setBL(0x02065F84, (u32)dsiSaveWrite);
+		setBL(0x02065F8C, (u32)dsiSaveClose);
+	}
+
 	// Art Style: ZENGAGE (USA)
 	// Art Style: NEMREM (Europe, Australia)
 	else if ((strcmp(romTid, "KASE") == 0 || strcmp(romTid, "KASV") == 0) && saveOnFlashcard) {
