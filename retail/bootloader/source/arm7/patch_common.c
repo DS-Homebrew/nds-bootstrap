@@ -9959,6 +9959,38 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02062640, (u32)dsiSaveClose);
 	}
 
+	// Zekkyou Genshiji: Samu no Daibouken (Japan)
+	else if (strcmp(romTid, "KPHJ") == 0) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		setB(0x02038A68, 0x02038CFC); // Skip Manual screen
+		setBL(0x020487DC, (u32)dsiSaveOpen);
+		setBL(0x020487F8, (u32)dsiSaveGetLength);
+		setBL(0x0204880C, (u32)dsiSaveRead);
+		setBL(0x02048814, (u32)dsiSaveClose);
+		setBL(0x02048854, (u32)dsiSaveGetInfo);
+		setBL(0x02048864, (u32)dsiSaveGetResultCode);
+		*(u32*)0x02048888 = 0xE1A00000; // nop
+		setBL(0x020488B0, (u32)dsiSaveCreate);
+		setBL(0x020488B8, (u32)dsiSaveGetResultCode);
+		*(u32*)0x020488DC = 0xE1A00000; // nop
+		setBL(0x0204890C, (u32)dsiSaveOpen);
+		setBL(0x0204891C, (u32)dsiSaveGetResultCode);
+		*(u32*)0x02048934 = 0xE1A00000; // nop
+		setBL(0x02048960, (u32)dsiSaveSetLength);
+		setBL(0x02048970, (u32)dsiSaveWrite);
+		setBL(0x02048968, (u32)dsiSaveClose);
+		*(u32*)0x0205F0B0 = 0xE1A00000; // nop
+		*(u32*)0x0205F0B4 = 0xE1A00000; // nop
+		*(u32*)0x0205F0C0 = 0xE1A00000; // nop
+		*(u32*)0x0205F220 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x0205F27C, heapEnd); // mov r0, #0x23E0000
+		patchUserSettingsReadDSiWare(0x0206061C);
+		*(u32*)0x0206416C = 0xE1A00000; // nop
+		*(u32*)0x020671E4 = 0xE1A00000; // nop
+		*(u32*)0x02068FA0 = 0xE1A00000; // nop
+		*(u32*)0x0206AE54 = 0xE1A00000; // nop
+	}
+
 	// Pro-Putt Domo (USA)
 	else if (strcmp(romTid, "KDPE") == 0) {
 		const u32 dsiSaveCreateT = 0x020270FC;

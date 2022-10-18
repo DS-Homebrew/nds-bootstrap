@@ -3681,13 +3681,10 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0204D500, (u32)dsiSaveClose);
 		setBL(0x0204D540, (u32)dsiSaveGetInfo);
 		setBL(0x0204D550, (u32)dsiSaveGetResultCode);
-		*(u32*)0x0204D574 = 0xE1A00000; // nop
 		setBL(0x0204D59C, (u32)dsiSaveCreate);
 		setBL(0x0204D5A4, (u32)dsiSaveGetResultCode);
-		*(u32*)0x0204D5C8 = 0xE1A00000; // nop
 		setBL(0x0204D5F8, (u32)dsiSaveOpen);
 		setBL(0x0204D608, (u32)dsiSaveGetResultCode);
-		*(u32*)0x0204D620 = 0xE1A00000; // nop
 		setBL(0x0204D64C, (u32)dsiSaveSetLength);
 		setBL(0x0204D65C, (u32)dsiSaveWrite);
 		setBL(0x0204D664, (u32)dsiSaveClose);
@@ -3702,16 +3699,31 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x020624DC, (u32)dsiSaveClose);
 		setBL(0x0206251C, (u32)dsiSaveGetInfo);
 		setBL(0x0206252C, (u32)dsiSaveGetResultCode);
-		*(u32*)0x02062550 = 0xE1A00000; // nop
 		setBL(0x02062578, (u32)dsiSaveCreate);
 		setBL(0x02062580, (u32)dsiSaveGetResultCode);
-		*(u32*)0x020625A4 = 0xE1A00000; // nop
 		setBL(0x020625D4, (u32)dsiSaveOpen);
 		setBL(0x020625E4, (u32)dsiSaveGetResultCode);
-		*(u32*)0x020625FC = 0xE1A00000; // nop
 		setBL(0x02062628, (u32)dsiSaveSetLength);
 		setBL(0x02062638, (u32)dsiSaveWrite);
 		setBL(0x02062640, (u32)dsiSaveClose);
+	}
+
+	// Zekkyou Genshiji: Samu no Daibouken (Japan)
+	else if (strcmp(romTid, "KPHJ") == 0 && saveOnFlashcard) {
+		setB(0x02038A68, 0x02038CFC); // Skip Manual screen
+		setBL(0x020487DC, (u32)dsiSaveOpen);
+		setBL(0x020487F8, (u32)dsiSaveGetLength);
+		setBL(0x0204880C, (u32)dsiSaveRead);
+		setBL(0x02048814, (u32)dsiSaveClose);
+		setBL(0x02048854, (u32)dsiSaveGetInfo);
+		setBL(0x02048864, (u32)dsiSaveGetResultCode);
+		setBL(0x020488B0, (u32)dsiSaveCreate);
+		setBL(0x020488B8, (u32)dsiSaveGetResultCode);
+		setBL(0x0204890C, (u32)dsiSaveOpen);
+		setBL(0x0204891C, (u32)dsiSaveGetResultCode);
+		setBL(0x02048960, (u32)dsiSaveSetLength);
+		setBL(0x02048970, (u32)dsiSaveWrite);
+		setBL(0x02048968, (u32)dsiSaveClose);
 	}
 
 	// Pro-Putt Domo (USA)
