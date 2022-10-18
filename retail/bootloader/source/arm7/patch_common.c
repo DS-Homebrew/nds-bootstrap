@@ -6539,6 +6539,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02004838 = 0xE1A00000; // nop
 		*(u32*)0x0200499C = 0xE1A00000; // nop
 		*(u32*)0x020051CC = 0xE1A00000; // nop
+		tonccpy((u32*)0x0200F860, dsiSaveGetResultCode, 0xC);
 		*(u32*)0x02012AAC = 0xE1A00000; // nop
 		*(u32*)0x020166D4 = 0xE1A00000; // nop
 		*(u32*)0x020185C8 = 0xE1A00000; // nop
@@ -6554,6 +6555,19 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02019978 = 0xE12FFF1E; // bx lr
 		*(u32*)0x0201D01C = 0xE1A00000; // nop
 		*(u32*)0x02021F40 = 0xE1A00000; // nop (Fix glitched level graphics)
+		*(u32*)0x02056644 = 0xE3A00003; // mov r0, #3
+		*(u32*)0x02056744 = 0xE3A00003; // mov r0, #3
+		setBL(0x02056B9C, (u32)dsiSaveCreate);
+		setBL(0x02056BAC, (u32)dsiSaveOpen);
+		setBL(0x02056BD4, (u32)dsiSaveSetLength);
+		setBL(0x02056BE4, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+		setBL(0x02056C5C, (u32)dsiSaveClose);
+		setBL(0x02056CA8, (u32)dsiSaveOpen);
+		setBL(0x02056CC8, (u32)dsiSaveGetLength);
+		setBL(0x02056CE0, (u32)dsiSaveRead);
+		setBL(0x02056CE8, (u32)dsiSaveClose);
+		*(u32*)0x02056E38 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+		*(u32*)0x02056E58 = 0xE3A00001; // mov r0, #1 (dsiSaveFreeSpaceAvailable)
 		if (ndsHeader->gameCode[3] == 'E') {
 			*(u32*)0x02082A58 = 0xE1A00000; // nop
 			if (!extendedMemory2) {
@@ -6591,6 +6605,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			*(u32*)0x020A44F8 = 0xE1A00000; // nop
 			*(u32*)0x020A44FC = 0xE1A00000; // nop
 			*(u32*)0x020A467C = 0xE1A00000; // nop
+			*(u32*)0x020C7CC4 = 0xE3A00000; // mov r0, #0
 		} else if (ndsHeader->gameCode[3] == 'V') {
 			*(u32*)0x02082A78 = 0xE1A00000; // nop
 			if (!extendedMemory2) {
@@ -6628,6 +6643,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			*(u32*)0x020A4518 = 0xE1A00000; // nop
 			*(u32*)0x020A451C = 0xE1A00000; // nop
 			*(u32*)0x020A469C = 0xE1A00000; // nop
+			*(u32*)0x020C7CE4 = 0xE3A00000; // mov r0, #0
 		} else {
 			*(u32*)0x02082A14 = 0xE1A00000; // nop
 			if (!extendedMemory2) {
@@ -6665,6 +6681,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			*(u32*)0x020A44B4 = 0xE1A00000; // nop
 			*(u32*)0x020A44B8 = 0xE1A00000; // nop
 			*(u32*)0x020A4638 = 0xE1A00000; // nop
+			*(u32*)0x020C7D00 = 0xE3A00000; // mov r0, #0
 		}
 	}
 

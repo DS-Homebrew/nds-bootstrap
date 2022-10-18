@@ -2361,6 +2361,26 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0202F3F0 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 	}
 
+	// The Legend of Zelda: Four Swords: Anniversary Edition (USA)
+	// The Legend of Zelda: Four Swords: Anniversary Edition (Europe, Australia)
+	// Zelda no Densetsu: 4-tsu no Tsurugi: 25th Kinen Edition (Japan)
+	else if (strncmp(romTid, "KQ9", 3) == 0 && saveOnFlashcard) {
+		tonccpy((u32*)0x0200F860, dsiSaveGetResultCode, 0xC);
+		*(u32*)0x02056644 = 0xE3A00003; // mov r0, #3
+		*(u32*)0x02056744 = 0xE3A00003; // mov r0, #3
+		setBL(0x02056B9C, (u32)dsiSaveCreate);
+		setBL(0x02056BAC, (u32)dsiSaveOpen);
+		setBL(0x02056BD4, (u32)dsiSaveSetLength);
+		setBL(0x02056BE4, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+		setBL(0x02056C5C, (u32)dsiSaveClose);
+		setBL(0x02056CA8, (u32)dsiSaveOpen);
+		setBL(0x02056CC8, (u32)dsiSaveGetLength);
+		setBL(0x02056CE0, (u32)dsiSaveRead);
+		setBL(0x02056CE8, (u32)dsiSaveClose);
+		*(u32*)0x02056E38 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+		*(u32*)0x02056E58 = 0xE3A00001; // mov r0, #1 (dsiSaveFreeSpaceAvailable)
+	}
+
 	// Little Red Riding Hood's Zombie BBQ (USA)
 	else if (strcmp(romTid, "KZBE") == 0 && saveOnFlashcard) {
 		*(u32*)0x02026BFC = 0xE3A00001; // mov r0, #1
