@@ -541,6 +541,9 @@ static bool isROMLoadableInRAM(const tNDSHeader* ndsHeader, const char* romTid, 
 		} else {
 			romSizeLimit = 0x1F80000;
 		}
+		if (_io_dldi_features & FEATURE_SLOT_GBA) {
+			romSizeLimit += 0x80000; // Increase size when running from Slot-2 flashcards, as the FAT table is stored in main RAM
+		}
 	}
 	if (extendedMemory2 && !dsDebugRam) {
 		*(vu32*)(0x0DFFFE0C) = 0x4253444E;		// Check for 32MB of RAM
