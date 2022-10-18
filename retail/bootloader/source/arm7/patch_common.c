@@ -3025,45 +3025,140 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Castle Conqueror (USA)
-	// Requires 8MB of RAM
-	else if (strcmp(romTid, "KCNE") == 0 && extendedMemory2) {
+	else if (strcmp(romTid, "KCNE") == 0) {
 		*(u32*)0x0200498C = 0xE1A00000; // nop
 		*(u32*)0x0201D8B8 = 0xE1A00000; // nop
 		*(u32*)0x0201D8BC = 0xE1A00000; // nop
 		*(u32*)0x0201D8C8 = 0xE1A00000; // nop
 		*(u32*)0x0201DA28 = 0xE1A00000; // nop
-		patchHiHeapDSiWare(0x0201DA84, 0x02700000); // mov r0, #0x2700000
+		patchHiHeapDSiWare(0x0201DA84, extendedMemory2 ? 0x02700000 : heapEnd); // mov r0, extendedMemory2 ? #0x2700000 : #0x23E0000
+		*(u32*)0x0201DBB8 -= 0x30000;
 		patchUserSettingsReadDSiWare(0x0201ECBC);
 		*(u32*)0x02021FA4 = 0xE1A00000; // nop
 		*(u32*)0x02024740 = 0xE1A00000; // nop
+		tonccpy((u32*)0x020252B8, dsiSaveGetResultCode, 0xC);
 		*(u32*)0x02027A00 = 0xE1A00000; // nop
 		*(u32*)0x0202B438 = 0xE1A00000; // nop
-		*(u32*)0x0204AFD8 = 0xE12FFF1E; // bx lr
-		*(u32*)0x0204B084 = 0xE12FFF1E; // bx lr
-		*(u32*)0x0204B44C = 0xE12FFF1E; // bx lr
+		if (!extendedMemory2) {
+			*(u32*)0x0203D44C = 0x2C00C8; // Shrink sound heap from 0x3000C8
+		}
+		//*(u32*)0x0204AFD8 = 0xE12FFF1E; // bx lr
+		//*(u32*)0x0204B084 = 0xE12FFF1E; // bx lr
+		//*(u32*)0x0204B44C = 0xE12FFF1E; // bx lr
+		setBL(0x0204AFF4, (u32)dsiSaveCreate);
+		setBL(0x0204B014, (u32)dsiSaveOpen);
+		*(u32*)0x0204B034 = 0xE1A00000; // nop
+		setBL(0x0204B040, (u32)dsiSaveCreate);
+		setBL(0x0204B050, (u32)dsiSaveOpen);
+		setBL(0x0204B074, (u32)dsiSaveWrite);
+		setBL(0x0204B0AC, (u32)dsiSaveOpen);
+		setBL(0x0204B0D8, (u32)dsiSaveRead);
+		setBL(0x0204B0E0, (u32)dsiSaveClose);
+		setBL(0x0204B474, (u32)dsiSaveGetInfo);
+		setBL(0x0204B488, (u32)dsiSaveOpen);
+		setBL(0x0204B49C, (u32)dsiSaveCreate);
+		setBL(0x0204B4B8, (u32)dsiSaveOpen);
+		*(u32*)0x0204B4D8 = 0xE1A00000; // nop
+		setBL(0x0204B4E4, (u32)dsiSaveCreate);
+		setBL(0x0204B4F4, (u32)dsiSaveOpen);
+		setBL(0x0204B504, (u32)dsiSaveWrite);
+		setBL(0x0204B868, (u32)dsiSaveSeek);
+		setBL(0x0204B878, (u32)dsiSaveWrite);
+		setBL(0x0204B880, (u32)dsiSaveClose);
+		setBL(0x0204B8C0, (u32)dsiSaveOpen);
+		setBL(0x0204B8DC, (u32)dsiSaveRead);
+		setBL(0x0204BF08, (u32)dsiSaveClose);
 	}
 
 	// Castle Conqueror (Europe)
-	// Requires 8MB of RAM
-	else if (strcmp(romTid, "KCNP") == 0 && extendedMemory2) {
+	// Crashes on some file function after company logo
+	/*else if (strncmp(romTid, "KCN", 3) == 0) {
 		*(u32*)0x02004838 = 0xE1A00000; // nop
 		*(u32*)0x0200499C = 0xE1A00000; // nop
 		*(u32*)0x02016340 = 0xE1A00000; // nop
+		tonccpy((u32*)0x02016EC4, dsiSaveGetResultCode, 0xC);
 		*(u32*)0x02019694 = 0xE1A00000; // nop
 		*(u32*)0x0201D330 = 0xE1A00000; // nop
 		*(u32*)0x0201F0CC = 0xE1A00000; // nop
 		*(u32*)0x0201F0D0 = 0xE1A00000; // nop
 		*(u32*)0x0201F0DC = 0xE1A00000; // nop
 		*(u32*)0x0201F23C = 0xE1A00000; // nop
-		patchHiHeapDSiWare(0x0201F298, 0x02700000); // mov r0, #0x2700000
+		patchHiHeapDSiWare(0x0201F298, extendedMemory2 ? 0x02700000 : heapEnd); // mov r0, extendedMemory2 ? #0x2700000 : #0x23E0000
+		*(u32*)0x0201F3CC -= 0x30000;
 		patchUserSettingsReadDSiWare(0x020204E0);
 		*(u32*)0x02023960 = 0xE1A00000; // nop
-		*(u32*)0x0203A5A4 = 0xE12FFF1E; // bx lr
-		*(u32*)0x0203A7D4 = 0xE12FFF1E; // bx lr
-		*(u32*)0x0203AB6C = 0xE12FFF1E; // bx lr
-		*(u32*)0x0203B134 = 0xE12FFF1E; // bx lr
-		*(u32*)0x0203BA14 = 0xE12FFF1E; // bx lr
-	}
+		if (ndsHeader->gameCode[3] == 'E') { // English
+			if (!extendedMemory2) {
+				*(u32*)0x0202B3F8 = 0x2C00D0; // Shrink sound heap from 0x3000D0
+			}
+			//*(u32*)0x0203A5A4 = 0xE12FFF1E; // bx lr
+			//*(u32*)0x0203A7D4 = 0xE12FFF1E; // bx lr
+			//*(u32*)0x0203AB6C = 0xE12FFF1E; // bx lr
+			//*(u32*)0x0203B134 = 0xE12FFF1E; // bx lr
+			//*(u32*)0x0203BA14 = 0xE12FFF1E; // bx lr
+			setBL(0x0203A75C, (u32)dsiSaveOpen);
+			setBL(0x0203A78C, (u32)dsiSaveWrite);
+			setBL(0x0203A7AC, (u32)dsiSaveSeek);
+			setBL(0x0203A7BC, (u32)dsiSaveWrite);
+			setBL(0x0203A7C4, (u32)dsiSaveClose);
+			setBL(0x0203A7F4, (u32)dsiSaveCreate);
+			setBL(0x0203A9A0, (u32)dsiSaveOpen);
+			*(u32*)0x0203A9C0 = 0xE1A00000; // nop
+			setBL(0x0203A9CC, (u32)dsiSaveCreate);
+			setBL(0x0203A9DC, (u32)dsiSaveOpen);
+			setBL(0x0203AA0C, (u32)dsiSaveWrite);
+			setBL(0x0203AA2C, (u32)dsiSaveSeek);
+			setBL(0x0203AA3C, (u32)dsiSaveWrite);
+			setBL(0x0203AA44, (u32)dsiSaveClose);
+			setBL(0x0203ABB0, (u32)dsiSaveOpen);
+			setBL(0x0203AF14, (u32)dsiSaveSeek);
+			setBL(0x0203AF30, (u32)dsiSaveRead);
+			setBL(0x0203AF40, (u32)dsiSaveSeek);
+			setBL(0x0203AF54, (u32)dsiSaveRead);
+			setBL(0x0203AF5C, (u32)dsiSaveClose);
+			setBL(0x0203B180, (u32)dsiSaveOpen);
+			setBL(0x0203B4C8, (u32)dsiSaveSeek);
+			setBL(0x0203B4E0, (u32)dsiSaveRead);
+			setBL(0x0203B4F0, (u32)dsiSaveSeek);
+			setBL(0x0203B504, (u32)dsiSaveRead);
+			setBL(0x0203B50C, (u32)dsiSaveClose);
+			setBL(0x0203BA3C, (u32)dsiSaveGetInfo);
+			setBL(0x0203BA50, (u32)dsiSaveOpen);
+			setBL(0x0203BA64, (u32)dsiSaveCreate);
+			setBL(0x0203BC0C, (u32)dsiSaveOpen);
+			*(u32*)0x0203BC2C = 0xE1A00000; // nop
+			setBL(0x0203BC38, (u32)dsiSaveCreate);
+			setBL(0x0203BC48, (u32)dsiSaveOpen);
+			setBL(0x0203BC58, (u32)dsiSaveWrite);
+			setBL(0x0203C174, (u32)dsiSaveSeek);
+			setBL(0x0203C184, (u32)dsiSaveWrite);
+			setBL(0x0203C18C, (u32)dsiSaveClose);
+			setBL(0x0203C4F8, (u32)dsiSaveSeek);
+			setBL(0x0203C508, (u32)dsiSaveWrite);
+			setBL(0x0203C510, (u32)dsiSaveClose);
+			setBL(0x0203C554, (u32)dsiSaveOpen);
+			setBL(0x0203C704, (u32)dsiSaveRead);
+			setBL(0x0203C724, (u32)dsiSaveSeek);
+			setBL(0x0203C734, (u32)dsiSaveRead);
+			setBL(0x0203CD78, (u32)dsiSaveClose);
+		} else if (ndsHeader->gameCode[3] == 'D') { // German
+			if (!extendedMemory2) {
+				*(u32*)0x0202CE80 = 0x2C00D0; // Shrink sound heap from 0x3000D0
+			}
+		} else if (ndsHeader->gameCode[3] == 'F') { // French
+			if (!extendedMemory2) {
+				*(u32*)0x0202A80 = 0x2C00D0; // Shrink sound heap from 0x3000D0
+			}
+		} else if (ndsHeader->gameCode[3] == 'I') { // Italian
+			if (!extendedMemory2) {
+				*(u32*)0x0202CE84 = 0x2C00D0; // Shrink sound heap from 0x3000D0
+			}
+		} else if (ndsHeader->gameCode[3] == 'S') { // Spanish
+			if (!extendedMemory2) {
+				*(u32*)0x0202BB90 = 0x2C00D0; // Shrink sound heap from 0x3000D0
+			}
+		}
+	}*/
 
 	// Castle Conqueror: Against (USA)
 	// Requires 8MB of RAM
