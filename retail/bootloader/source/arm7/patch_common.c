@@ -6837,6 +6837,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02020D00 = 0xE1A00000; // nop
 		patchHiHeapDSiWare(0x02020D5C, extendedMemory2 ? 0x02F00000 : heapEnd+0xC00000); // mov r0, extendedMemory2 ? #0x2F00000 (mirrors to 0x2700000 on debug DS units) : #0x2FC0000 (mirrors to 0x23C0000 on retail DS units)
 		*(u32*)0x02020E90 = 0x020D7F40;
+		patchUserSettingsReadDSiWare(0x020221CC);
 		*(u32*)0x02024FD0 = 0xE1A00000; // nop
 		*(u32*)0x02044668 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		*(u32*)0x0204585C = 0xE3A00001; // mov r0, #1
