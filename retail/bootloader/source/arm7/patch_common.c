@@ -173,34 +173,39 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// GO Series: 10 Second Run (USA)
 	// GO Series: 10 Second Run (Europe)
-	// Sound either does not play or stop too quickly
 	else if (strcmp(romTid, "KJUE") == 0 || strcmp(romTid, "KJUP") == 0) {
 		*(u32*)0x0200498C = 0xE1A00000; // nop
-		*(u32*)0x02005888 = 0xE12FFF1E; // bx lr
-		// Real hardware fix: Disable option font
-		{
-			*(u32*)0x02005A68 = 0xE12FFF1E; // bx lr
-			*(u32*)0x02005A9C = 0xE12FFF1E; // bx lr
-			*(u32*)0x02005B74 = 0xE12FFF1E; // bx lr
-			*(u32*)0x02005BA0 = 0xE12FFF1E; // bx lr
-		}
 		*(u32*)0x020150FC = 0xE12FFF1E; // bx lr
 		*(u32*)0x0201588C = 0xE1A00000; // nop
 		*(u32*)0x0201589C = 0xE1A00000; // nop
 		*(u32*)0x020158A8 = 0xE1A00000; // nop
 		*(u32*)0x020158B4 = 0xE1A00000; // nop
+		*(u32*)0x02015948 = 0xE3A00001; // mov r0, #1
 		*(u32*)0x02015968 = 0xE1A00000; // nop
 		*(u32*)0x02015970 = 0xE1A00000; // nop
 		*(u32*)0x02015980 = 0xE1A00000; // nop
-		*(u32*)0x02015A60 = 0xE1A00000; // nop
+		*(u32*)0x02015A60 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x02015A98 = 0xE1A00000; // nop
+		// Save patch causes the game to crash on panic function?
+		/*setBL(0x02015C60, (u32)dsiSaveGetInfo);
+		setBL(0x02015C9C, (u32)dsiSaveGetInfo);
+		setBL(0x02015CFC, (u32)dsiSaveCreate);
+		setBL(0x02015D38, (u32)dsiSaveGetInfo);
+		setBL(0x02015D50, (u32)dsiSaveDelete);
+		setBL(0x02015DB0, (u32)dsiSaveOpen);
+		setBL(0x02015DDC, (u32)dsiSaveGetLength);
+		setBL(0x02015DF0, (u32)dsiSaveRead);
+		setBL(0x02015E0C, (u32)dsiSaveClose);
+		setBL(0x02015E20, (u32)dsiSaveClose);
+		setBL(0x02015EB4, (u32)dsiSaveOpen);
+		setBL(0x02015EE8, (u32)dsiSaveWrite);
+		setBL(0x02015F04, (u32)dsiSaveClose);
+		setBL(0x02015F18, (u32)dsiSaveClose);*/
 		*(u32*)0x02018B4C = 0xE1A00000; // nop
-		*(u32*)0x020193A0 = 0xE1A00000; // nop
-		*(u32*)0x020193A4 = 0xE1A00000; // nop
-		*(u32*)0x020193B4 = 0xE1A00000; // nop
 		*(u32*)0x020193E0 = 0xE12FFF1E; // bx lr (Disable NFTR loading from TWLNAND)
 		*(u32*)0x02019D20 = 0xE12FFF1E; // bx lr
 		*(u32*)0x02030A88 = 0xE1A00000; // nop
+		//tonccpy((u32*)0x02031660, dsiSaveGetResultCode, 0xC);
 		*(u32*)0x02034224 = 0xE1A00000; // nop
 		*(u32*)0x02037F24 = 0xE1A00000; // nop
 		*(u32*)0x02039CCC = 0xE1A00000; // nop
@@ -210,11 +215,10 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchHiHeapDSiWare(0x02039E98, heapEnd); // mov r0, #0x23E0000
 		//*(u32*)0x02039FCC = 0x02115860;
 		patchUserSettingsReadDSiWare(0x0203B3CC);
-		//*(u32*)0x0203B77C = 0xE12FFF1E; // bx lr
-		/* *(u32*)0x0203B7D4 = 0xE1A00000; // nop
+		*(u32*)0x0203B7D4 = 0xE1A00000; // nop
 		*(u32*)0x0203B7D8 = 0xE1A00000; // nop
 		*(u32*)0x0203B7DC = 0xE1A00000; // nop
-		*(u32*)0x0203B7E0 = 0xE1A00000; // nop */
+		*(u32*)0x0203B7E0 = 0xE1A00000; // nop
 		*(u32*)0x0203E7D0 = 0xE1A00000; // nop
 	}
 
