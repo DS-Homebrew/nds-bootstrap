@@ -3046,6 +3046,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Music on: Playing Piano (USA)
+	// Saving is difficult to implement
 	else if (strcmp(romTid, "KICE") == 0 && saveOnFlashcard) {
 		// Skip Manual screen
 		*(u32*)0x0200CC58 = 0xE1A00000; // nop
@@ -3054,11 +3055,22 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Music on: Playing Piano (Europe)
+	// Saving is difficult to implement
 	else if (strcmp(romTid, "KICP") == 0 && saveOnFlashcard) {
 		// Skip Manual screen
 		*(u32*)0x0200CC7C = 0xE1A00000; // nop
 		*(u32*)0x0200CC80 = 0xE1A00000; // nop
 		*(u32*)0x0200CC84 = 0xE1A00000; // nop
+	}
+
+	// Music on: Retro Keyboard (USA)
+	// Music on: Retro Keyboard (Europe, Australia)
+	// Saving is difficult to implement
+	else if ((strcmp(romTid, "KRHE") == 0 || strcmp(romTid, "KRHV") == 0) && saveOnFlashcard) {
+		// Skip Manual screen
+		*(u32*)0x02008CD0 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02008E50 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02008E64 = 0xE12FFF1E; // bx lr
 	}
 
 	// Need for Speed: Nitro-X (USA)

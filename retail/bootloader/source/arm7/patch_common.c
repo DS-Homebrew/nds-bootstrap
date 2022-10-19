@@ -8382,6 +8382,47 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// Music on: Retro Keyboard (USA)
+	// Music on: Retro Keyboard (Europe, Australia)
+	// Saving is difficult to implement
+	else if (strcmp(romTid, "KRHE") == 0 || strcmp(romTid, "KRHV") == 0) {
+		*(u32*)0x0200498C = 0xE1A00000; // nop
+		*(u32*)0x0200833C = 0xE1A00000; // nop
+		*(u32*)0x02008398 = 0xE1A00000; // nop
+		*(u32*)0x020083CC = 0xE1A00000; // nop
+		*(u32*)0x020083D8 = 0xE1A00000; // nop
+		*(u32*)0x0200840C = 0xE1A00000; // nop
+
+		// Skip Manual screen
+		*(u32*)0x02008CD0 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02008E50 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02008E64 = 0xE12FFF1E; // bx lr
+
+		if (ndsHeader->gameCode[3] == 'E') {
+			*(u32*)0x02018180 = 0xE1A00000; // nop
+			*(u32*)0x0201B660 = 0xE1A00000; // nop
+			*(u32*)0x0201E48C = 0xE1A00000; // nop
+			*(u32*)0x02020220 = 0xE1A00000; // nop
+			*(u32*)0x02020224 = 0xE1A00000; // nop
+			*(u32*)0x02020230 = 0xE1A00000; // nop
+			*(u32*)0x02020390 = 0xE1A00000; // nop
+			patchHiHeapDSiWare(0x020203EC, heapEnd); // mov r0, #0x23E0000
+			patchUserSettingsReadDSiWare(0x020217B8);
+			*(u32*)0x02024828 = 0xE1A00000; // nop
+		} else {
+			*(u32*)0x02018114 = 0xE1A00000; // nop
+			*(u32*)0x0201B5F4 = 0xE1A00000; // nop
+			*(u32*)0x0201E420 = 0xE1A00000; // nop
+			*(u32*)0x020201B4 = 0xE1A00000; // nop
+			*(u32*)0x020201B8 = 0xE1A00000; // nop
+			*(u32*)0x020201C4 = 0xE1A00000; // nop
+			*(u32*)0x02020324 = 0xE1A00000; // nop
+			patchHiHeapDSiWare(0x02020380, heapEnd); // mov r0, #0x23E0000
+			patchUserSettingsReadDSiWare(0x0202174C);
+			*(u32*)0x020247BC = 0xE1A00000; // nop
+		}
+	}
+
 	// Need for Speed: Nitro-X (USA)
 	// Need for Speed: Nitro-X (Europe, Australia)
 	// Requires 8MB of RAM
