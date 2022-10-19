@@ -29,6 +29,9 @@
 #include "loading_screen.h"
 #include "debug_file.h"
 
+#define FEATURE_SLOT_GBA			0x00000010
+#define FEATURE_SLOT_NDS			0x00000020
+
 u16 patchOffsetCacheFilePrevCrc = 0;
 u16 patchOffsetCacheFileNewCrc = 0;
 
@@ -40,6 +43,7 @@ static inline void doubleNopT(u32 addr) {
 }
 
 void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
+	extern u32 _io_dldi_features;
 	extern bool expansionPakFound;
 	extern u32 donorFileTwlCluster;	// SDK5 (TWL)
 	extern u32 fatTableAddr;
@@ -49,6 +53,8 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	extern void patchUserSettingsReadDSiWare(u32 addr);
 
 	const u32 heapEnd = (fatTableAddr < 0x023C0000 || fatTableAddr >= CARDENGINE_ARM9_LOCATION_DLDI) ? CARDENGINE_ARM9_LOCATION_DLDI : fatTableAddr;
+	const bool useMep = (expansionPakFound && (_io_dldi_features & FEATURE_SLOT_NDS));
+	const bool debugOrMep = (extendedMemory2 || useMep);
 
 	if (donorFileTwlCluster == 0) {
 		return;
@@ -3318,7 +3324,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Castle Conqueror: Heroes 2 (Europe, Australia)
 	// Castle Conqueror: Heroes 2 (Japan)
 	// Requires either 8MB of RAM or Memory Expansion Pak
-	else if (strncmp(romTid, "KXC", 3) == 0 && (extendedMemory2 || expansionPakFound)) {
+	else if (strncmp(romTid, "KXC", 3) == 0 && debugOrMep) {
 		const u32* heapAllocCustom = ce9->patches->cch2HeapAlloc;
 
 		*(u32*)0x02004838 = 0xE1A00000; // nop
@@ -6628,7 +6634,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Zelda no Densetsu: 4-tsu no Tsurugi: 25th Kinen Edition (Japan)
 	// Requires either 8MB of RAM or Memory Expansion Pak
 	// Audio is disabled on retail consoles
-	else if (strncmp(romTid, "KQ9", 3) == 0 && (extendedMemory2 || expansionPakFound)) {
+	else if (strncmp(romTid, "KQ9", 3) == 0 && debugOrMep) {
 		const u32* heapAllocCustom = ce9->patches->fourSwHeapAlloc;
 
 		*(u32*)0x02004838 = 0xE1A00000; // nop
@@ -7304,7 +7310,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02005324 = 0xE1A00000; // nop
 		*(u32*)0x02005348 = 0xE1A00000; // nop (Disable NFTR font loading)
 		*(u32*)0x0200534C = 0xE1A00000; // nop
-		/*if (!extendedMemory2 && expansionPakFound) {
+		/*if (!extendedMemory2 && useMep) {
 			*(u32*)0x020080DC = 0x09000000;
 			*(u32*)0x020094CC = *(u32*)0x020080DC;
 			*(u32*)0x020099CC = *(u32*)0x020080DC;
@@ -11525,7 +11531,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchUserSettingsReadDSiWare(0x02023A9C);
 		*(u32*)0x02026EA0 = 0xE1A00000; // nop
 		if (!extendedMemory2) {
-			if (expansionPakFound) {
+			if (useMep) {
 				setBL(0x020DA69C, (u32)ce9->patches->siezHeapAlloc);
 			} else {
 				// Disable .ntfx file loading: Hides bottom screen background during gameplay
