@@ -178,6 +178,7 @@ void setExceptionHandler2() {
 	*exceptionC = user_exception;
 }
 
+extern void slot2MpuFix();
 extern void region0Fix(); // Revert region 0 patch
 extern void sdk5MpuFix();
 extern void resetMpu();
@@ -713,11 +714,11 @@ void cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	setDeviceOwner();
 	initialize();
 
-	if (isDSiWare && (__myio_dldi.features & FEATURE_SLOT_NDS) && (ce9->valueBits & expansionPakFound)) {
+	/*if (isDSiWare && (__myio_dldi.features & FEATURE_SLOT_NDS) && (ce9->valueBits & expansionPakFound)) {
 		slot2MpuFix();
 		sysSetCartOwner (BUS_OWNER_ARM9);
 		exmemcnt = REG_EXMEMCNT;
-	}
+	}*/
 
 	cardReadCount++;
 
@@ -1181,11 +1182,13 @@ u32 myIrqEnable(u32 irq) {
 	setDeviceOwner();
 	initialize();
 
-	/*if (isDSiWare && (ce9->valueBits & expansionPakFound)) {
-		slot2MpuFix();
+	if (isDSiWare && (ce9->valueBits & expansionPakFound)) {
+		if (__myio_dldi.features & FEATURE_SLOT_NDS) {
+			slot2MpuFix();
+		}
 		sysSetCartOwner (BUS_OWNER_ARM9);
 		exmemcnt = REG_EXMEMCNT;
-	}*/
+	}
 
 	if (ce9->valueBits & enableExceptionHandler) {
 		setExceptionHandler2();

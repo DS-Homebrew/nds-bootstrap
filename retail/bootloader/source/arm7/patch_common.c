@@ -53,8 +53,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	extern void patchUserSettingsReadDSiWare(u32 addr);
 
 	const u32 heapEnd = (fatTableAddr < 0x023C0000 || fatTableAddr >= CARDENGINE_ARM9_LOCATION_DLDI) ? CARDENGINE_ARM9_LOCATION_DLDI : fatTableAddr;
-	const bool useMep = (expansionPakFound && (_io_dldi_features & FEATURE_SLOT_NDS));
-	const bool debugOrMep = (extendedMemory2 || useMep);
+	const bool debugOrMep = (extendedMemory2 || expansionPakFound);
 
 	if (donorFileTwlCluster == 0) {
 		return;
@@ -7310,7 +7309,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02005324 = 0xE1A00000; // nop
 		*(u32*)0x02005348 = 0xE1A00000; // nop (Disable NFTR font loading)
 		*(u32*)0x0200534C = 0xE1A00000; // nop
-		/*if (!extendedMemory2 && useMep) {
+		/*if (!extendedMemory2 && expansionPakFound) {
 			*(u32*)0x020080DC = 0x09000000;
 			*(u32*)0x020094CC = *(u32*)0x020080DC;
 			*(u32*)0x020099CC = *(u32*)0x020080DC;
@@ -11531,7 +11530,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchUserSettingsReadDSiWare(0x02023A9C);
 		*(u32*)0x02026EA0 = 0xE1A00000; // nop
 		if (!extendedMemory2) {
-			if (useMep) {
+			if (expansionPakFound) {
 				setBL(0x020DA69C, (u32)ce9->patches->siezHeapAlloc);
 			} else {
 				// Disable .ntfx file loading: Hides bottom screen background during gameplay
