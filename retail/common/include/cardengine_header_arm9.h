@@ -135,10 +135,6 @@ typedef struct cardengineArm9Patches {
 	u32* dsiSaveWrite;
 	u32* musicPlay;
 	u32* musicStopEffect;
-	u32* cch2HeapAlloc;
-	u32* fourSwHeapAlloc;
-	u32* fourSwHeapOrgFunction;
-	u32* siezHeapAlloc;
 	u32* cardStructArm9;
 	u32* card_pull;
 	u32* cacheFlushRef;

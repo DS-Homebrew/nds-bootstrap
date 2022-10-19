@@ -1037,10 +1037,10 @@ int arm7_main(void) {
 	rsetPatchCache();
 
 	ce9Location = extendedMemory2 ? CARDENGINE_ARM9_LOCATION_DLDI_EXTMEM : CARDENGINE_ARM9_LOCATION_DLDI;
-	tonccpy((u32*)ce9Location, (u32*)CARDENGINE_ARM9_LOCATION_BUFFERED, 0x6C00);
+	tonccpy((u32*)ce9Location, (u32*)CARDENGINE_ARM9_LOCATION_BUFFERED, 0x6800);
 	toncset((u32*)0x023E0000, 0, 0x10000);
 
-	if (!dldiPatchBinary((data_t*)ce9Location, 0x6000)) {
+	if (!dldiPatchBinary((data_t*)ce9Location, 0x6800)) {
 		nocashMessage("ce9 DLDI patch failed");
 		dbg_printf("ce9 DLDI patch failed");
 		dbg_printf("\n");
@@ -1075,7 +1075,7 @@ int arm7_main(void) {
 		}
 	} else {
 		fatTableAddr = (moduleParams->sdk_version < 0x2008000) ? 0x023E0000 : 0x023C0000;
-		fatTableSize = (moduleParams->sdk_version < 0x2008000) ? 0x1C000 : 0x19C00;
+		fatTableSize = (moduleParams->sdk_version < 0x2008000) ? 0x1C000 : 0x19800;
 
 		if (moduleParams->sdk_version >= 0x2008000) {
 			fatTableAddr = CARDENGINE_ARM9_LOCATION_DLDI;
@@ -1110,7 +1110,7 @@ int arm7_main(void) {
 
 			lastClusterCacheUsed = (u32*)0x037F8000;
 			clusterCache = 0x037F8000;
-			clusterCacheSize = (startMem ? 0x4000 : 0x19C00)-romFile.fatTableCacheSize;
+			clusterCacheSize = (startMem ? 0x4000 : 0x19800)-romFile.fatTableCacheSize;
 
 			if (!startMem || (startMem && romFile.fatTableCacheSize < 0x4000)) {
 				buildFatTableCache(&savFile);
@@ -1126,7 +1126,7 @@ int arm7_main(void) {
 				if (musicCluster != 0) {
 					lastClusterCacheUsed = (u32*)0x037F8000;
 					clusterCache = 0x037F8000;
-					clusterCacheSize = (startMem ? 0x4000 : 0x19C00)-savFile.fatTableCacheSize;
+					clusterCacheSize = (startMem ? 0x4000 : 0x19800)-savFile.fatTableCacheSize;
 
 					buildFatTableCache(&musicsFile);
 					if (startMem) {

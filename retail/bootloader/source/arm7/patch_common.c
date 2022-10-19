@@ -3328,12 +3328,15 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Castle Conqueror: Heroes 2 (Japan)
 	// Requires either 8MB of RAM or Memory Expansion Pak
 	else if (strncmp(romTid, "KXC", 3) == 0 && debugOrMep) {
-		const u32* heapAllocCustom = ce9->patches->cch2HeapAlloc;
+		extern u32* cch2HeapAlloc;
 
 		*(u32*)0x02004838 = 0xE1A00000; // nop
 		*(u32*)0x0200499C = 0xE1A00000; // nop
 		*(u32*)0x02013170 = 0xE1A00000; // nop
 		tonccpy((u32*)0x02013CF4, dsiSaveGetResultCode, 0xC);
+		if (!extendedMemory2) {
+			tonccpy((u32*)0x0201473C, cch2HeapAlloc, 0x70);
+		}
 		*(u32*)0x020164C4 = 0xE1A00000; // nop
 		*(u32*)0x0201A118 = 0xE1A00000; // nop
 		*(u32*)0x0201BEB4 = 0xE1A00000; // nop
@@ -3346,8 +3349,8 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02020710 = 0xE1A00000; // nop
 		if (ndsHeader->gameCode[3] == 'E') {
 			if (!extendedMemory2) {
-				ce9->patches->fourSwHeapOrgFunction = getOffsetFromBL((u32*)0x020719F0);
-				setBL(0x020719F0, (u32)heapAllocCustom);
+				*(u32*)0x02014738 = (u32)getOffsetFromBL((u32*)0x020719F0);
+				setBL(0x020719F0, 0x0201473C);
 			}
 
 			setBL(0x02035478, (u32)dsiSaveGetInfo);
@@ -3377,8 +3380,8 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBL(0x020364DC, (u32)dsiSaveClose);
 		} else if (ndsHeader->gameCode[3] == 'V') {
 			if (!extendedMemory2) {
-				ce9->patches->fourSwHeapOrgFunction = getOffsetFromBL((u32*)0x0203749C);
-				setBL(0x0203749C, (u32)heapAllocCustom);
+				*(u32*)0x02014738 = (u32)getOffsetFromBL((u32*)0x0203749C);
+				setBL(0x0203749C, 0x0201473C);
 			}
 
 			setBL(0x0206A44C, (u32)dsiSaveGetInfo);
@@ -3408,8 +3411,8 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBL(0x0206B4B0, (u32)dsiSaveClose);
 		} else {
 			if (!extendedMemory2) {
-				ce9->patches->fourSwHeapOrgFunction = getOffsetFromBL((u32*)0x0205DF58);
-				setBL(0x0205DF58, (u32)heapAllocCustom);
+				*(u32*)0x02014738 = (u32)getOffsetFromBL((u32*)0x0205DF58);
+				setBL(0x0205DF58, 0x0201473C);
 			}
 
 			setBL(0x02026EAC, (u32)dsiSaveGetInfo);
@@ -6638,7 +6641,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Requires either 8MB of RAM or Memory Expansion Pak
 	// Audio is disabled on retail consoles
 	else if (strncmp(romTid, "KQ9", 3) == 0 && debugOrMep) {
-		const u32* heapAllocCustom = ce9->patches->fourSwHeapAlloc;
+		extern u32* fourSwHeapAlloc;
 		//u32* getLengthFunc = (u32*)0;
 
 		*(u32*)0x02004838 = 0xE1A00000; // nop
@@ -6658,6 +6661,9 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0201996C = 0xE12FFF1E; // bx lr
 		*(u32*)0x02019974 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x02019978 = 0xE12FFF1E; // bx lr
+		if (!extendedMemory2) {
+			tonccpy((u32*)0x02019FA4, fourSwHeapAlloc, 0xC0);
+		}
 		*(u32*)0x0201D01C = 0xE1A00000; // nop
 		*(u32*)0x02021F40 = 0xE1A00000; // nop (Fix glitched stage graphics)
 		*(u32*)0x02056644 = 0xE3A00003; // mov r0, #3
@@ -6686,8 +6692,8 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 				*(u32*)0x0208CDE0 = 0xE1A00000; // nop
 				*(u32*)0x0208CDEC = 0xE1A00000; // nop
 				*(u32*)0x0208CDFC = 0xE3A00000; // mov r0, #0
-				ce9->patches->fourSwHeapOrgFunction = getOffsetFromBL((u32*)0x0208D9D8);
-				setBL(0x0208D9D8, (u32)heapAllocCustom);
+				*(u32*)0x02019FA0 = (u32)getOffsetFromBL((u32*)0x0208D9D8);
+				setBL(0x0208D9D8, 0x02019FA4);
 
 				// Disable sound
 				*(u32*)0x0208CF38 = 0xE1A00000; // nop
@@ -6727,8 +6733,8 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 				*(u32*)0x0208CE00 = 0xE1A00000; // nop
 				*(u32*)0x0208CE0C = 0xE1A00000; // nop
 				*(u32*)0x0208CE1C = 0xE3A00000; // mov r0, #0
-				ce9->patches->fourSwHeapOrgFunction = getOffsetFromBL((u32*)0x0208D9F8);
-				setBL(0x0208D9F8, (u32)heapAllocCustom);
+				*(u32*)0x02019FA0 = (u32)getOffsetFromBL((u32*)0x0208D9F8);
+				setBL(0x0208D9F8, 0x02019FA4);
 
 				// Disable sound
 				*(u32*)0x0208CF58 = 0xE1A00000; // nop
@@ -6768,8 +6774,8 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 				*(u32*)0x0208CD9C = 0xE1A00000; // nop
 				*(u32*)0x0208CDA8 = 0xE1A00000; // nop
 				*(u32*)0x0208CDB8 = 0xE3A00000; // mov r0, #0
-				ce9->patches->fourSwHeapOrgFunction = getOffsetFromBL((u32*)0x0208D994);
-				setBL(0x0208D994, (u32)heapAllocCustom);
+				*(u32*)0x02019FA0 = (u32)getOffsetFromBL((u32*)0x0208D994);
+				setBL(0x0208D994, 0x02019FA4);
 
 				// Disable sound
 				*(u32*)0x0208CEF4 = 0xE1A00000; // nop
@@ -11584,8 +11590,13 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Space Invaders Extreme Z (Japan)
 	// Saving not supported due to using more than one file in filesystem
 	else if (strcmp(romTid, "KEVJ") == 0) {
+		extern u32* siezHeapAlloc;
+
 		*(u32*)0x0200498C = 0xE1A00000; // nop
 		*(u32*)0x02017904 = 0xE1A00000; // nop
+		if (!extendedMemory2 && expansionPakFound) {
+			tonccpy((u32*)0x020192F4, siezHeapAlloc, 0x50);
+		}
 		*(u32*)0x0201B794 = 0xE1A00000; // nop
 		*(u32*)0x020207B0 = 0xE1A00000; // nop
 		*(u32*)0x020225D8 = 0xE1A00000; // nop
@@ -11598,7 +11609,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02026EA0 = 0xE1A00000; // nop
 		if (!extendedMemory2) {
 			if (expansionPakFound) {
-				setBL(0x020DA69C, (u32)ce9->patches->siezHeapAlloc);
+				setBL(0x020DA69C, 0x020192F4);
 			} else {
 				// Disable .ntfx file loading: Hides bottom screen background during gameplay
 				*(u32*)0x0203DFE0 = 0xE3A00000; // mov r0, #0
@@ -11611,6 +11622,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 				//toncset32((u32*)0x02121C94, 0, 1);
 			}
 		}
+		*(u32*)0x020E3E24 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x020E3E4C = 0xE3A00005; // mov r0, #5
 		*(u32*)0x020E3E50 = 0xE12FFF1E; // bx lr
 		*(u32*)0x020E43A4 = 0xE3A00005; // mov r0, #5
