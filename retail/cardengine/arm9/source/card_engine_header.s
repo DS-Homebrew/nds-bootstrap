@@ -470,65 +470,65 @@ fourSwHeapAlloc_arm:
 @---------------------------------------------------------------------------------
 	stmfd   sp!, {r6,lr}
 
-	ldr r6, =0x45720 @ Size of subtask.cmp
+	@ldr r6, =0x45720 @ Size of subtask.cmp
+	@cmp r0, r6
+	@moveq r6, #0
+	@beq fourSwHeapAlloc_cont
+	@ldr r6, =0x6C24 @ Size of subtask_us_en.cmp
+	@cmp r0, r6
+	@moveq r6, #4
+	@beq fourSwHeapAlloc_cont
+	@ldr r6, =0x7090 @ Size of subtask_us_fr.cmp & subtask_eu_fr.cmp
+	@cmp r0, r6
+	@moveq r6, #4
+	@beq fourSwHeapAlloc_cont
+	@ldr r6, =0x71F4 @ Size of subtask_us_sp.cmp
+	@cmp r0, r6
+	@moveq r6, #4
+	@beq fourSwHeapAlloc_cont
+	@ldr r6, =0x6C70 @ Size of subtask_eu_en.cmp
+	@cmp r0, r6
+	@moveq r6, #4
+	@beq fourSwHeapAlloc_cont
+	@ldr r6, =0x6E40 @ Size of subtask_eu_gr.cmp
+	@cmp r0, r6
+	@moveq r6, #4
+	@beq fourSwHeapAlloc_cont
+	@ldr r6, =0x6E20 @ Size of subtask_eu_it.cmp
+	@cmp r0, r6
+	@moveq r6, #4
+	@beq fourSwHeapAlloc_cont
+	@ldr r6, =0x7260 @ Size of subtask_eu_sp.cmp
+	@cmp r0, r6
+	@moveq r6, #4
+	@beq fourSwHeapAlloc_cont
+	@ldr r6, =0x7468 @ Size of subtask_jp.cmp
+	@cmp r0, r6
+	@moveq r6, #4
+	@beq fourSwHeapAlloc_cont
+	ldr r6, =0x128F8 @ Size of pat.bin
 	cmp r0, r6
 	moveq r6, #0
 	beq fourSwHeapAlloc_cont
-	ldr r6, =0x6C24 @ Size of subtask_us_en.cmp
-	cmp r0, r6
-	moveq r6, #4
-	beq fourSwHeapAlloc_cont
-	ldr r6, =0x7090 @ Size of subtask_us_fr.cmp & subtask_eu_fr.cmp
-	cmp r0, r6
-	moveq r6, #4
-	beq fourSwHeapAlloc_cont
-	ldr r6, =0x71F4 @ Size of subtask_us_sp.cmp
-	cmp r0, r6
-	moveq r6, #4
-	beq fourSwHeapAlloc_cont
-	ldr r6, =0x6C70 @ Size of subtask_eu_en.cmp
-	cmp r0, r6
-	moveq r6, #4
-	beq fourSwHeapAlloc_cont
-	ldr r6, =0x6E40 @ Size of subtask_eu_gr.cmp
-	cmp r0, r6
-	moveq r6, #4
-	beq fourSwHeapAlloc_cont
-	ldr r6, =0x6E20 @ Size of subtask_eu_it.cmp
-	cmp r0, r6
-	moveq r6, #4
-	beq fourSwHeapAlloc_cont
-	ldr r6, =0x7260 @ Size of subtask_eu_sp.cmp
-	cmp r0, r6
-	moveq r6, #4
-	beq fourSwHeapAlloc_cont
-	ldr r6, =0x7468 @ Size of subtask_jp.cmp
-	cmp r0, r6
-	moveq r6, #4
-	beq fourSwHeapAlloc_cont
-	ldr r6, =0x128F8 @ Size of pat.bin
-	cmp r0, r6
-	moveq r6, #8
-	beq fourSwHeapAlloc_cont
 	ldr r6, =0x1AFC7C @ Size of zeldat.bin
 	cmp r0, r6
-	moveq r6, #0xC
+	moveq r6, #4
 	beq fourSwHeapAlloc_cont
 	ldr r6, =0x1086DC @ Size of zelmap.bin
 	cmp r0, r6
-	moveq r6, #0x10
+	moveq r6, #8
 	beq fourSwHeapAlloc_cont
 	ldr r6, =0x20208 @ Size of us.kmsg
 	cmp r0, r6
-	moveq r6, #0x14
+	moveq r6, #0xC
 	beq fourSwHeapAlloc_cont
 	ldr r6, =0x33310 @ Size of eu.kmsg
 	cmp r0, r6
-	moveq r6, #0x14
+	moveq r6, #0xC
 	beq fourSwHeapAlloc_cont
 	ldr r6, =0xF638 @ Size of jp.kmsg
 	cmp r0, r6
-	moveq r6, #0x14
+	moveq r6, #0xC
 	beq fourSwHeapAlloc_cont
 	ldr	r6, fourSwOrgFunction
 	bl	_blx_fourSwOrgFunction
@@ -543,8 +543,8 @@ fourSwHeapAlloc_return:
 _blx_fourSwOrgFunction:
 	bx	r6
 fourSwHeapAddr:
-.word	0x09320000 @ Offset of subtask.cmp
-.word	0x09370000 @ Offset of subtask_??_??.cmp
+@.word	0x09320000 @ Offset of subtask.cmp
+@.word	0x09370000 @ Offset of subtask_??_??.cmp
 .word	0x092C0000 @ Offset of pat.bin
 .word	0x09000000 @ Offset of zeldat.bin
 .word	0x091B0000 @ Offset of zelmap.bin

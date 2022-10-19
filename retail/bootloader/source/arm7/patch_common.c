@@ -6632,10 +6632,10 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// The Legend of Zelda: Four Swords: Anniversary Edition (Europe, Australia)
 	// Zelda no Densetsu: 4-tsu no Tsurugi: 25th Kinen Edition (Japan)
 	// Requires either 8MB of RAM or Memory Expansion Pak
-	// Music is disabled on retail consoles
+	// Audio is disabled on retail consoles
 	else if (strncmp(romTid, "KQ9", 3) == 0 && debugOrMep) {
 		const u32* heapAllocCustom = ce9->patches->fourSwHeapAlloc;
-		u32* getLengthFunc = (u32*)0;
+		//u32* getLengthFunc = (u32*)0;
 
 		*(u32*)0x02004838 = 0xE1A00000; // nop
 		*(u32*)0x0200499C = 0xE1A00000; // nop
@@ -6648,14 +6648,14 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020185D8 = 0xE1A00000; // nop
 		*(u32*)0x02018738 = 0xE1A00000; // nop
 		patchHiHeapDSiWare(0x02018794, extendedMemory2 ? 0x027B0000 : heapEnd); // mov r0, extendedMemory2 ? #0x27B0000 : #0x23E0000
-		*(u32*)0x020188C8 -= 0x36000;
+		*(u32*)0x020188C8 -= 0x38000;
 		patchUserSettingsReadDSiWare(0x0201994C);
 		*(u32*)0x02019968 = 0xE3A00001; // mov r0, #1
 		*(u32*)0x0201996C = 0xE12FFF1E; // bx lr
 		*(u32*)0x02019974 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x02019978 = 0xE12FFF1E; // bx lr
 		*(u32*)0x0201D01C = 0xE1A00000; // nop
-		*(u32*)0x02021F40 = 0xE1A00000; // nop (Fix glitched level graphics)
+		*(u32*)0x02021F40 = 0xE1A00000; // nop (Fix glitched stage graphics)
 		*(u32*)0x02056644 = 0xE3A00003; // mov r0, #3
 		*(u32*)0x02056744 = 0xE3A00003; // mov r0, #3
 		setBL(0x02056B9C, (u32)dsiSaveCreate);
@@ -6672,8 +6672,8 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		if (ndsHeader->gameCode[3] == 'E') {
 			*(u32*)0x02082A58 = 0xE1A00000; // nop
 			if (!extendedMemory2) {
-				getLengthFunc = getOffsetFromBL((u32*)0x0208C7B0);
-				setBL(0x0208C7B0, 0x02010300);
+				//getLengthFunc = getOffsetFromBL((u32*)0x0208C7B0);
+				//setBL(0x0208C7B0, 0x02010300);
 
 				*(u32*)0x0208CDC0 = 0xE3A00000; // mov r0, #0 (Skip .wave file loading)
 				*(u32*)0x0208CDC4 = 0xE1A00000; // nop
@@ -6685,13 +6685,13 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 				ce9->patches->fourSwHeapOrgFunction = getOffsetFromBL((u32*)0x0208D9D8);
 				setBL(0x0208D9D8, (u32)heapAllocCustom);
 
-				// Disable music
+				// Disable sound
 				*(u32*)0x0208CF38 = 0xE1A00000; // nop
 				*(u32*)0x0208D038 = 0xE1A00000; // nop
-				//*(u32*)0x020C04EC = 0xE12FFF1E; // bx lr
+				*(u32*)0x020C04EC = 0xE12FFF1E; // bx lr
 				*(u32*)0x020C05CC = 0xE3A00000; // mov r0, #0
 				*(u32*)0x020C05D0 = 0xE12FFF1E; // bx lr
-				/* *(u32*)0x020C0630 = 0xE3A00000; // mov r0, #0
+				*(u32*)0x020C0630 = 0xE3A00000; // mov r0, #0
 				*(u32*)0x020C0634 = 0xE12FFF1E; // bx lr
 				*(u32*)0x020C0694 = 0xE3A00000; // mov r0, #0
 				*(u32*)0x020C0698 = 0xE12FFF1E; // bx lr
@@ -6700,7 +6700,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 				*(u32*)0x020C075C = 0xE3A00000; // mov r0, #0
 				*(u32*)0x020C0760 = 0xE12FFF1E; // bx lr
 				*(u32*)0x020C07C0 = 0xE3A00000; // mov r0, #0
-				*(u32*)0x020C07C4 = 0xE12FFF1E; // bx lr */
+				*(u32*)0x020C07C4 = 0xE12FFF1E; // bx lr
 				*(u32*)0x020C0824 = 0xE3A00000; // mov r0, #0
 				*(u32*)0x020C0828 = 0xE12FFF1E; // bx lr
 				*(u32*)0x020C26DC = 0xE12FFF1E; // bx lr
@@ -6713,8 +6713,8 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		} else if (ndsHeader->gameCode[3] == 'V') {
 			*(u32*)0x02082A78 = 0xE1A00000; // nop
 			if (!extendedMemory2) {
-				getLengthFunc = getOffsetFromBL((u32*)0x0208C7D0);
-				setBL(0x0208C7D0, 0x02010300);
+				//getLengthFunc = getOffsetFromBL((u32*)0x0208C7D0);
+				//setBL(0x0208C7D0, 0x02010300);
 
 				*(u32*)0x0208CDE0 = 0xE3A00000; // mov r0, #0 (Skip .wave file loading)
 				*(u32*)0x0208CDE4 = 0xE1A00000; // nop
@@ -6726,13 +6726,13 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 				ce9->patches->fourSwHeapOrgFunction = getOffsetFromBL((u32*)0x0208D9F8);
 				setBL(0x0208D9F8, (u32)heapAllocCustom);
 
-				// Disable music
+				// Disable sound
 				*(u32*)0x0208CF58 = 0xE1A00000; // nop
 				*(u32*)0x0208D058 = 0xE1A00000; // nop
-				//*(u32*)0x020C050C = 0xE12FFF1E; // bx lr
+				*(u32*)0x020C050C = 0xE12FFF1E; // bx lr
 				*(u32*)0x020C05EC = 0xE3A00000; // mov r0, #0
 				*(u32*)0x020C05F0 = 0xE12FFF1E; // bx lr
-				/* *(u32*)0x020C0650 = 0xE3A00000; // mov r0, #0
+				*(u32*)0x020C0650 = 0xE3A00000; // mov r0, #0
 				*(u32*)0x020C0654 = 0xE12FFF1E; // bx lr
 				*(u32*)0x020C06B4 = 0xE3A00000; // mov r0, #0
 				*(u32*)0x020C06B8 = 0xE12FFF1E; // bx lr
@@ -6741,7 +6741,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 				*(u32*)0x020C077C = 0xE3A00000; // mov r0, #0
 				*(u32*)0x020C0780 = 0xE12FFF1E; // bx lr
 				*(u32*)0x020C07E0 = 0xE3A00000; // mov r0, #0
-				*(u32*)0x020C07E4 = 0xE12FFF1E; // bx lr */
+				*(u32*)0x020C07E4 = 0xE12FFF1E; // bx lr
 				*(u32*)0x020C0844 = 0xE3A00000; // mov r0, #0
 				*(u32*)0x020C0848 = 0xE12FFF1E; // bx lr
 				*(u32*)0x020C26FC = 0xE12FFF1E; // bx lr
@@ -6754,8 +6754,8 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		} else {
 			*(u32*)0x02082A14 = 0xE1A00000; // nop
 			if (!extendedMemory2) {
-				getLengthFunc = getOffsetFromBL((u32*)0x0208C76C);
-				setBL(0x0208C76C, 0x02010300);
+				//getLengthFunc = getOffsetFromBL((u32*)0x0208C76C);
+				//setBL(0x0208C76C, 0x02010300);
 
 				*(u32*)0x0208CD7C = 0xE3A00000; // mov r0, #0 (Skip .wave file loading)
 				*(u32*)0x0208CD80 = 0xE1A00000; // nop
@@ -6767,13 +6767,13 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 				ce9->patches->fourSwHeapOrgFunction = getOffsetFromBL((u32*)0x0208D994);
 				setBL(0x0208D994, (u32)heapAllocCustom);
 
-				// Disable music
+				// Disable sound
 				*(u32*)0x0208CEF4 = 0xE1A00000; // nop
 				*(u32*)0x0208CFF4 = 0xE1A00000; // nop
-				//*(u32*)0x020C0528 = 0xE12FFF1E; // bx lr
+				*(u32*)0x020C0528 = 0xE12FFF1E; // bx lr
 				*(u32*)0x020C0608 = 0xE3A00000; // mov r0, #0
 				*(u32*)0x020C060C = 0xE12FFF1E; // bx lr
-				/* *(u32*)0x020C066C = 0xE3A00000; // mov r0, #0
+				*(u32*)0x020C066C = 0xE3A00000; // mov r0, #0
 				*(u32*)0x020C0670 = 0xE12FFF1E; // bx lr
 				*(u32*)0x020C06D0 = 0xE3A00000; // mov r0, #0
 				*(u32*)0x020C06D4 = 0xE12FFF1E; // bx lr
@@ -6782,7 +6782,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 				*(u32*)0x020C0798 = 0xE3A00000; // mov r0, #0
 				*(u32*)0x020C079C = 0xE12FFF1E; // bx lr
 				*(u32*)0x020C07FC = 0xE3A00000; // mov r0, #0
-				*(u32*)0x020C0800 = 0xE12FFF1E; // bx lr */
+				*(u32*)0x020C0800 = 0xE12FFF1E; // bx lr
 				*(u32*)0x020C0860 = 0xE3A00000; // mov r0, #0
 				*(u32*)0x020C0864 = 0xE12FFF1E; // bx lr
 				*(u32*)0x020C2718 = 0xE12FFF1E; // bx lr
@@ -6794,7 +6794,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			*(u32*)0x020C7D00 = 0xE3A00000; // mov r0, #0
 		}
 
-		if (!extendedMemory2) {
+		/*if (!extendedMemory2) {
 			*(u32*)0x02010300 = 0xE92D4038; // stmfd sp!, {r3-r5,lr}
 			setBL(0x02010304, (u32)getLengthFunc);
 			*(u32*)0x02010308 = 0xE59F3008; // ldr r3, =0x180140 (.sdat filesize)
@@ -6803,7 +6803,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			*(u32*)0x02010314 = 0xE8BD8038; // ldmfd sp!, {r3-r5,pc}
 			*(u32*)0x02010318 = 0x180140;
 			*(u32*)0x0201031C = 0xE03E0;
-		}
+		}*/
 	}
 
 	// Legends of Exidia (USA)
