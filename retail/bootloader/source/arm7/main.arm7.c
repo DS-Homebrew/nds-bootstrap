@@ -1306,11 +1306,13 @@ int arm7_main(void) {
 		toncset(ce9, 0, 0x6000);
 		toncset((u32*)0x023E8000, 0, 0x8000); // FAT table cache
 
-		u32 blFrom = 0x020008E8;
-		if (moduleParams->sdk_version > 0x3020000) {
-			blFrom = 0x020008FC;
-		} else if (moduleParams->sdk_version > 0x4020000) {
-			blFrom = 0x0200090C;
+		u32 blFrom = (u32)ndsHeader->arm9destination;
+		if (moduleParams->sdk_version > 0x4020000) {
+			blFrom += 0x90C;
+		} else if (moduleParams->sdk_version > 0x3020000) {
+			blFrom += 0x8FC;
+		} else {
+			blFrom += 0x8E8;
 		}
 
 		setBL(blFrom, 0x0237FE00);
