@@ -146,6 +146,30 @@ u32 arm7mbk = 0;
 u32 accessControl = 0;
 
 void s2RamAccess(bool open) {
+	if (_io_dldi_features & FEATURE_SLOT_NDS) return;
+
+	if (open) {
+		if (s2FlashcardId == 0x334D) {
+			_M3_changeMode(M3_MODE_RAM);
+		} else if (s2FlashcardId == 0x3647) {
+			_G6_SelectOperation(G6_MODE_RAM);
+		} else if (s2FlashcardId == 0x4353) {
+			_SC_changeMode(SC_MODE_RAM);
+		}
+	} else {
+		if (s2FlashcardId == 0x334D) {
+			_M3_changeMode(M3_MODE_MEDIA);
+		} else if (s2FlashcardId == 0x3647) {
+			_G6_SelectOperation(G6_MODE_MEDIA);
+		} else if (s2FlashcardId == 0x4353) {
+			_SC_changeMode(SC_MODE_MEDIA);
+		}
+	}
+}
+
+void s2RamAccessInit(bool open) {
+	if (_io_dldi_features & FEATURE_SLOT_GBA) return;
+
 	if (open) {
 		if (s2FlashcardId == 0x334D) {
 			_M3_changeMode(M3_MODE_RAM);
@@ -542,9 +566,6 @@ static bool isROMLoadableInRAM(const tNDSHeader* ndsHeader, const char* romTid, 
 		} else {
 			romSizeLimit = 0x1F80000;
 		}
-		if (_io_dldi_features & FEATURE_SLOT_GBA) {
-			romSizeLimit += 0x80000; // Increase size when running from Slot-2 flashcards, as the FAT table is stored in main RAM
-		}
 	}
 	if (extendedMemory2 && !dsDebugRam) {
 		*(vu32*)(0x0DFFFE0C) = 0x4253444E;		// Check for 32MB of RAM
@@ -718,9 +739,7 @@ static void loadOverlaysintoRAM(const tNDSHeader* ndsHeader, const module_params
 				u32 readLen = (len > bufferSize) ? bufferSize : len;
 
 				fileRead((char*)buffer, file, (ndsHeader->arm9romOffset + ndsHeader->arm9binarySize)+dst, readLen);
-				s2RamAccess(true);
 				tonccpy((char*)overlaysLocation+dst, (char*)buffer, readLen);
-				s2RamAccess(false);
 
 				len -= bufferSize;
 			}
@@ -886,7 +905,8 @@ int arm7_main(void) {
 	arm9_macroMode = macroMode;
 
 	s2FlashcardId = *(u16*)(0x020000C0);
-	s2RamAccess(false);
+
+	s2RamAccessInit(true);
 
 	// Init card
 	if (!FAT_InitFiles(initDisc)) {
@@ -1012,8 +1032,6 @@ int arm7_main(void) {
 		toncset((char*)0x0C4000D0, 0, 0x130);
 	}
 
-	s2RamAccess(true);
-
 	*(vu16*)0x08240000 = 1;
 	expansionPakFound = ((*(vu16*)0x08240000 == 1) && (strcmp(romTid, "UBRP") != 0));
 
@@ -1026,8 +1044,6 @@ int arm7_main(void) {
 		*(u16*)0x080000CE = 0x7FFF;
 		toncset((char*)0x080000D0, 0, 0x130);
 	}
-
-	s2RamAccess(false);
 
 	// If possible, set to load ROM into RAM
 	ROMinRAM = isROMLoadableInRAM(ndsHeader, romTid, moduleParams);
@@ -1061,13 +1077,13 @@ int arm7_main(void) {
 	if (ce9Alt && moduleParams->sdk_version >= 0x2008000) {
 		fatTableSizeNoExp = 0x8000;
 	}
-	if ((_io_dldi_features & FEATURE_SLOT_NDS) && (s2FlashcardId == 0x334D || s2FlashcardId == 0x3647 || s2FlashcardId == 0x4353)) {
+	if (s2FlashcardId == 0x334D || s2FlashcardId == 0x3647 || s2FlashcardId == 0x4353) {
 		fatTableAddr = (s2FlashcardId==0x4353 ? 0x09F7FE00 : 0x09F80000);
 		fatTableSize = 0x80000;
-	} else if ((_io_dldi_features & FEATURE_SLOT_NDS) && s2FlashcardId == 0x5A45) {
+	} else if (s2FlashcardId == 0x5A45) {
 		fatTableAddr = 0x08F80000;
 		fatTableSize = 0x80000;
-	} else if ((_io_dldi_features & FEATURE_SLOT_NDS) && expansionPakFound) {
+	} else if (expansionPakFound) {
 		fatTableAddr = 0x09780000;
 		fatTableSize = 0x80000;
 	} else if (extendedMemory2) {
@@ -1334,8 +1350,6 @@ int arm7_main(void) {
 			fileWrite((char*)0x02000000, ramDumpFile, 0, 0x400000);
 		}
 	}
-
-	s2RamAccess(true);
 
 	startBinary_ARM7();
 

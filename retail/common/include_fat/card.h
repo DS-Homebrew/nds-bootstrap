@@ -102,11 +102,56 @@ static inline bool CARD_WriteSectors(u32 sector, int count, const void *buffer, 
 	return __myio_dsisd.writeSectors(sector, count, buffer, ndmaSlot);
 }
 #endif
-
 #else
+
 // Export interface
 extern DISC_INTERFACE __myio_dldi;
 
+#ifdef B4DS
+extern void s2RamAccess(bool open);
+
+static inline bool CARD_StartUp(void) {
+	s2RamAccess(false);
+	bool res = __myio_dldi.startup();
+	s2RamAccess(true);
+	return res;
+}
+
+static inline bool CARD_IsInserted(void) {
+	s2RamAccess(false);
+	bool res = __myio_dldi.isInserted();
+	s2RamAccess(true);
+	return res;
+}
+
+static inline bool CARD_ReadSector(u32 sector, void *buffer, u32 startOffset, u32 endOffset) {
+	s2RamAccess(false);
+	bool res = __myio_dldi.readSectors(sector, 1, buffer);
+	s2RamAccess(true);
+	return res;
+}
+
+static inline bool CARD_ReadSectors(u32 sector, int count, void *buffer, int ndmaSlot) {
+	s2RamAccess(false);
+	bool res = __myio_dldi.readSectors(sector, count, buffer);
+	s2RamAccess(true);
+	return res;
+}
+
+static inline bool CARD_WriteSector(u32 sector, const void *buffer, int ndmaSlot) {
+	s2RamAccess(false);
+	bool res = __myio_dldi.writeSectors(sector, 1, buffer);
+	s2RamAccess(true);
+	return res;
+}
+
+static inline bool CARD_WriteSectors(u32 sector, int count, const void *buffer, int ndmaSlot) {
+	s2RamAccess(false);
+	bool res = __myio_dldi.writeSectors(sector, count, buffer);
+	s2RamAccess(true);
+	return res;
+}
+#else
 static inline bool CARD_StartUp(void) {
 	return __myio_dldi.startup();
 }
@@ -131,5 +176,7 @@ static inline bool CARD_WriteSectors(u32 sector, int count, const void *buffer, 
 	return __myio_dldi.writeSectors(sector, count, buffer);
 }
 #endif
+
+#endif // _NO_SDMMC
 
 #endif // CARD_H

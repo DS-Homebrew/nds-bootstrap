@@ -189,7 +189,6 @@ extern bool dldiPatchBinary (unsigned char *binData, u32 binSize);
 
 void reset(u32 param) {
 	setDeviceOwner();
-	s2RamAccess(false);
 	u32 resetParams = ((ce9->valueBits & isSdk5) ? RESET_PARAM_SDK5 : RESET_PARAM);
 	u32 iUncompressedSize = 0;
 	fileRead((char*)&iUncompressedSize, pageFile, 0x3FFFF0, sizeof(u32));
@@ -318,7 +317,6 @@ void reset(u32 param) {
 		fileRead((char*)ndsHeader->arm7destination, pageFile, 0x2C0000, newArm7binarySize);
 	}
 
-	s2RamAccess(true);
 	sharedAddr[0] = 0x544F4F42; // 'BOOT'
 	sharedAddr[3] = 0;
 	while (REG_VCOUNT != 191);
@@ -329,15 +327,12 @@ void reset(u32 param) {
 }
 
 void prepareScreenshot(void) {
-	s2RamAccess(false);
 	fileWrite((char*)INGAME_MENU_EXT_LOCATION_B4DS, pageFile, 0x340000, 0x40000);
-	s2RamAccess(true);
 }
 
 void saveScreenshot(void) {
 	if (igmText->currentScreenshot >= 50) return;
 
-	s2RamAccess(false);
 	fileWrite((char*)INGAME_MENU_EXT_LOCATION_B4DS, screenshotFile, 0x200 + (igmText->currentScreenshot * 0x18400), 0x18046);
 
 	// Skip until next blank slot
@@ -348,11 +343,9 @@ void saveScreenshot(void) {
 	} while(magic == 'B' && igmText->currentScreenshot < 50);
 
 	fileRead((char*)INGAME_MENU_EXT_LOCATION_B4DS, pageFile, 0x340000, 0x40000);
-	s2RamAccess(true);
 }
 
 void readManual(int line) {
-	s2RamAccess(false);
 	static int currentManualLine = 0;
 	static int currentManualOffset = 0;
 	char buffer[32];
@@ -413,7 +406,6 @@ void readManual(int line) {
 			}
 		}
 	}
-	s2RamAccess(true);
 }
 
 s8 mainScreen = 0;
@@ -443,9 +435,7 @@ void myIrqHandlerIPC(void) {
 			u32 src = *(vu32*)(sharedAddr);
 			u32 len = *(vu32*)(sharedAddr+1);
 
-			s2RamAccess(false);
 			fileRead((char*)dst, savFile, src, len);
-			s2RamAccess(true);
 
 			sharedAddr[3] = 0;
 			REG_EXMEMCNT = exmemcnt;
@@ -459,9 +449,7 @@ void myIrqHandlerIPC(void) {
 			u32 dst = *(vu32*)(sharedAddr);
 			u32 len = *(vu32*)(sharedAddr+1);
 
-			s2RamAccess(false);
 			fileWrite((char*)src, savFile, dst, len);
-			s2RamAccess(true);
 
 			sharedAddr[3] = 0;
 			REG_EXMEMCNT = exmemcnt;
@@ -475,9 +463,7 @@ void myIrqHandlerIPC(void) {
 			u32 src = *(vu32*)(sharedAddr);
 			u32 len = *(vu32*)(sharedAddr+1);
 
-			s2RamAccess(false);
 			fileRead((char*)dst, romFile, src, len);
-			s2RamAccess(true);
 
 			sharedAddr[3] = 0;
 			REG_EXMEMCNT = exmemcnt;
@@ -511,32 +497,26 @@ void myIrqHandlerIPC(void) {
 			int oldIME = enterCriticalSection();
 			setDeviceOwner();
 
-			s2RamAccess(false);
 			fileWrite((char*)INGAME_MENU_LOCATION_B4DS, pageFile, 0xA000, 0xA000);	// Backup part of game RAM to page file
 			fileRead((char*)INGAME_MENU_LOCATION_B4DS, pageFile, 0, 0xA000);	// Read in-game menu
-			s2RamAccess(true);
 
 			*(u32*)(INGAME_MENU_LOCATION_B4DS + IGM_TEXT_SIZE_ALIGNED) = (u32)sharedAddr;
 			volatile void (*inGameMenu)(s8*, u32) = (volatile void*)INGAME_MENU_LOCATION_B4DS + IGM_TEXT_SIZE_ALIGNED + 0x10;
 			(*inGameMenu)(&mainScreen, 0);
 
-			s2RamAccess(false);
 			fileWrite((char*)INGAME_MENU_LOCATION_B4DS, pageFile, 0, 0xA000);	// Store in-game menu
 			fileRead((char*)INGAME_MENU_LOCATION_B4DS, pageFile, 0xA000, 0xA000);	// Restore part of game RAM from page file
-			s2RamAccess(true);
 
 			if (sharedAddr[3] == 0x52534554) {
 				igmReset = true;
 				reset(0);
 			} else if (sharedAddr[3] == 0x444D4152) { // RAMD
-				s2RamAccess(false);
 				#ifdef EXTMEM
 				fileWrite((char*)0x02000000, ramDumpFile, 0, 0x7E0000);
 				fileWrite((char*)((ce9->valueBits & isSdk5) ? 0x02FE0000 : 0x027E0000), ramDumpFile, 0x7E0000, 0x20000);
 				#else
 				fileWrite((char*)0x02000000, ramDumpFile, 0, 0x400000);
 				#endif
-				s2RamAccess(true);
 				sharedAddr[3] = 0;
 			}
 
@@ -548,12 +528,10 @@ void myIrqHandlerIPC(void) {
 
 static void initialize(void) {
 	if (!initialized) {
-		s2RamAccess(false);
 		if (!FAT_InitFiles(true)) {
 			//nocashMessage("!FAT_InitFiles");
 			while (1);
 		}
-		s2RamAccess(true);
 
 		romFile = getFileFromCluster(ce9->fileCluster);
 		savFile = getFileFromCluster(ce9->saveCluster);
@@ -585,21 +563,15 @@ static void initialize(void) {
 		}
 
 		if (ndsHeader->unitCode > 0) {
-			s2RamAccess(false);
-
 			u32 buffer = 0;
 			fileRead((char*)&buffer, romFile, 0x234, sizeof(u32));
 			isDSiWare = (buffer == 0x00030004 || buffer == 0x00030005);
-
-			s2RamAccess(true);
 		}
 
 		if ((ce9->valueBits & ROMinRAM) && !cloneboot) {
 			if (ndsHeader->unitCode == 3) {
-				s2RamAccess(false);
 				fileRead((char*)&arm9iromOffset, romFile, 0x1C0, sizeof(u32));
 				fileRead((char*)&arm9ibinarySize, romFile, 0x1CC, sizeof(u32));
-				s2RamAccess(true);
 			}
 
 			if ((__myio_dldi.features & FEATURE_SLOT_GBA) && ce9->s2FlashcardId != 0) {
@@ -609,9 +581,7 @@ static void initialize(void) {
 				for (u32 dst = 0; dst < ndsHeader->arm9binarySize-ndsHeader->arm9romOffset; dst += bufferSize) {
 					u32 readLen = (len > bufferSize) ? bufferSize : len;
 
-					s2RamAccess(false);
 					fileRead((char*)buffer, romFile, 0x8000+dst, readLen);
-					s2RamAccess(true);
 					tonccpy((char*)ce9->romLocation+dst, (char*)buffer, readLen);
 
 					len -= bufferSize;
@@ -620,9 +590,7 @@ static void initialize(void) {
 				for (u32 dst = 0; dst < getRomSizeNoArm9Bin(ndsHeader)+0x88; dst += bufferSize) {
 					u32 readLen = (len > bufferSize) ? bufferSize : len;
 
-					s2RamAccess(false);
 					fileRead((char*)buffer, romFile, (u32)ndsHeader->arm7romOffset+dst, readLen);
-					s2RamAccess(true);
 					tonccpy((char*)ce9->romLocation+(ndsHeader->arm9binarySize-ndsHeader->arm9romOffset)+ce9->overlaysSize+dst, (char*)buffer, readLen);
 
 					len -= bufferSize;
@@ -632,9 +600,7 @@ static void initialize(void) {
 					for (u32 dst = 0; dst < ce9->ioverlaysSize; dst += bufferSize) {
 						u32 readLen = (len > bufferSize) ? bufferSize : len;
 
-						s2RamAccess(false);
 						fileRead((char*)buffer, romFile, arm9iromOffset+arm9ibinarySize+dst, readLen);
-						s2RamAccess(true);
 						tonccpy((char*)ce9->romLocation+(arm9iromOffset-0x8000)+dst, (char*)buffer, readLen);
 
 						len -= bufferSize;
@@ -665,9 +631,7 @@ static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
 	nocashMessage("\n");*/
 
 	//nocashMessage("aaaaaaaaaa\n");
-	s2RamAccess(false);
 	fileRead((char*)dst, romFile, src, len);
-	s2RamAccess(true);
 
 	if (!(ce9->valueBits & isSdk5) && strncmp(getRomTid(ndsHeader), "ASMP", 4)==0 && !mariosHolidayPrimaryFixApplied) {
 		for (u32 i = 0; i < len; i += 4) {
@@ -795,10 +759,8 @@ static void dsiSaveInit(void) {
 	u16 exmemcnt = REG_EXMEMCNT;
 	cardReadInProgress = true;
 	setDeviceOwner();
-	s2RamAccess(false);
 	fileRead((char*)&dsiSaveSize, savFile, ce9->saveSize-4, 4);
 	fileRead((char*)&existByte, savFile, ce9->saveSize-8, 4);
-	s2RamAccess(true);
 	cardReadInProgress = false;
 	REG_EXMEMCNT = exmemcnt;
 	leaveCriticalSection(oldIME);
@@ -854,9 +816,7 @@ bool dsiSaveCreate(const char* path, u32 permit) {
 		u16 exmemcnt = REG_EXMEMCNT;
 		cardReadInProgress = true;
 		setDeviceOwner();
-		s2RamAccess(false);
 		fileWrite((char*)&existByte, savFile, ce9->saveSize-8, 4);
-		s2RamAccess(true);
 		cardReadInProgress = false;
 		REG_EXMEMCNT = exmemcnt;
 		leaveCriticalSection(oldIME);
@@ -882,10 +842,8 @@ bool dsiSaveDelete(const char* path) {
 		u16 exmemcnt = REG_EXMEMCNT;
 		cardReadInProgress = true;
 		setDeviceOwner();
-		s2RamAccess(false);
 		fileWrite((char*)&dsiSaveSize, savFile, ce9->saveSize-4, 4);
 		fileWrite((char*)&dsiSaveSize, savFile, ce9->saveSize-8, 4);
-		s2RamAccess(true);
 		cardReadInProgress = false;
 		REG_EXMEMCNT = exmemcnt;
 		leaveCriticalSection(oldIME);
@@ -936,9 +894,7 @@ u32 dsiSaveSetLength(void* ctx, s32 len) {
 	u16 exmemcnt = REG_EXMEMCNT;
 	cardReadInProgress = true;
 	setDeviceOwner();
-	s2RamAccess(false);
 	bool res = fileWrite((char*)&dsiSaveSize, savFile, ce9->saveSize-4, 4);
-	s2RamAccess(true);
 	cardReadInProgress = false;
 	REG_EXMEMCNT = exmemcnt;
 	leaveCriticalSection(oldIME);
@@ -1028,9 +984,7 @@ s32 dsiSaveRead(void* ctx, void* dst, s32 len) {
 	u16 exmemcnt = REG_EXMEMCNT;
 	cardReadInProgress = true;
 	setDeviceOwner();
-	s2RamAccess(false);
 	bool res = fileRead(dst, savFile, dsiSaveSeekPos, len);
-	s2RamAccess(true);
 	cardReadInProgress = false;
 	REG_EXMEMCNT = exmemcnt;
 	leaveCriticalSection(oldIME);
@@ -1052,9 +1006,7 @@ s32 dsiSaveWrite(void* ctx, void* src, s32 len) {
 	u16 exmemcnt = REG_EXMEMCNT;
 	cardReadInProgress = true;
 	setDeviceOwner();
-	s2RamAccess(false);
 	bool res = fileWrite(src, savFile, dsiSaveSeekPos, len);
-	s2RamAccess(true);
 	cardReadInProgress = false;
 	REG_EXMEMCNT = exmemcnt;
 	leaveCriticalSection(oldIME);
@@ -1066,9 +1018,7 @@ s32 dsiSaveWrite(void* ctx, void* src, s32 len) {
 			u16 exmemcnt = REG_EXMEMCNT;
 			setDeviceOwner();
 			cardReadInProgress = true;
-			s2RamAccess(false);
 			fileWrite((char*)&dsiSaveSize, savFile, ce9->saveSize-4, 4);
-			s2RamAccess(true);
 			cardReadInProgress = false;
 			REG_EXMEMCNT = exmemcnt;
 			leaveCriticalSection(oldIME);
@@ -1106,7 +1056,6 @@ void musicInit(void) {
 
 	u16 exmemcnt = REG_EXMEMCNT;
 	setDeviceOwner();
-	s2RamAccess(false);
 
 	musicMagicStringChecked = true;
 	u32 magic = 0;
@@ -1118,7 +1067,6 @@ void musicInit(void) {
 
 	fileRead((char*)&musicFileCount, musicsFile, 4, 4);
 
-	s2RamAccess(true);
 	REG_EXMEMCNT = exmemcnt;
 
 	musicInited = true;
@@ -1128,7 +1076,6 @@ void updateMusic(void) {
 	if (sharedAddr[2] == 0x5953554D && !cardReadInProgress) { // 'MUSY'
 		u16 exmemcnt = REG_EXMEMCNT;
 		setDeviceOwner();
-		s2RamAccess(false);
 
 		const u16 currentLen = (musicPosRev > musicReadLen) ? musicReadLen : musicPosRev;
 		fileRead((char*)(0x027F0000+(soundBuffer*musicReadLen)), musicsFile, musicPosInFile + musicPos, currentLen);
@@ -1156,7 +1103,6 @@ void updateMusic(void) {
 		if (soundBuffer == 2) soundBuffer = 0;
 
 		sharedAddr[2] = 0;
-		s2RamAccess(true);
 		REG_EXMEMCNT = exmemcnt;
 	}
 }
@@ -1177,7 +1123,6 @@ void musicPlay(int id) {
 
 		u16 exmemcnt = REG_EXMEMCNT;
 		setDeviceOwner();
-		s2RamAccess(false);
 
 		fileRead((char*)&musicPosInFile, musicsFile, 0x10+(0x10*id), 4);
 		fileRead((char*)&musicFileSize, musicsFile, 0x14+(0x10*id), 4);
@@ -1188,7 +1133,6 @@ void musicPlay(int id) {
 
 		fileRead((char*)0x027F0000, musicsFile, musicPosInFile, musicReadLen);
 
-		s2RamAccess(true);
 		REG_EXMEMCNT = exmemcnt;
 		sharedAddr[2] = 0x5053554D; // 'MUSP'
 		while (sharedAddr[2] == 0x5053554D);
