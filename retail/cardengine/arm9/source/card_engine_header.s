@@ -481,7 +481,7 @@ card_irq_enable:
 	ldr	r3, =myIrqEnable
 
 	bl	_blx_r3_stub2
-	pop   	{r1-r12} 
+	pop   	{r1-r12}
 	pop  	{lr}
 	bx  lr
 _blx_r3_stub2:

@@ -670,12 +670,14 @@ void patchMpuChange(const tNDSHeader* ndsHeader, const module_params_t* modulePa
 }*/
 
 void patchHiHeapPointer(cardengineArm9* ce9, const module_params_t* moduleParams, const tNDSHeader* ndsHeader) {
+	extern bool ce9Alt;
 	extern u32 arm7mbk;
 	extern u32 fatTableAddr;
 	const char* romTid = getRomTid(ndsHeader);
 
 	if (extendedMemory2
 	|| moduleParams->sdk_version < 0x2008000
+	|| ce9Alt
 	|| strncmp(romTid, "VSO", 3) == 0
 	|| arm7mbk == 0x080037C0) {
 		return;

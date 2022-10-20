@@ -1343,7 +1343,19 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	if (conf->b4dsMode == 2 || (*(vu32*)(0x02800000) == 0x314D454D && *(vu32*)(0x02C00000) == 0x324D454D)) {
 		cebin = fopen("nitro:/cardengine_arm9_extmem.lz77", "rb");
 	} else {
-		cebin = fopen("nitro:/cardengine_arm9.lz77", "rb");
+		const char* ce9path = "nitro:/cardengine_arm9.lz77";
+		if (strncmp(romTid, "AQC", 3) == 0 // Crayon Shin-chan DS - Arashi o Yobu Nutte Crayoon Daisakusen!
+		 || strncmp(romTid, "YRC", 3) == 0 // Crayon Shin-chan - Arashi o Yobu Cinemaland Kachinko Gachinko Daikatsugeki!
+		 || strncmp(romTid, "CL4", 3) == 0 // Crayon Shin-Chan - Arashi o Yobu Nendororoon Daihenshin!
+		 || strncmp(romTid, "BQB", 3) == 0 // Crayon Shin-chan - Obaka Dainin Den - Susume! Kasukabe Ninja Tai!
+		 || strncmp(romTid, "AK4", 3) == 0 // Kabu Trader Shun
+		 || strncmp(romTid, "B6Z", 3) == 0 // MegaMan Zero Collection
+		 || strncmp(romTid, "ARZ", 3) == 0 // MegaMan ZX
+		 || strncmp(romTid, "YZX", 3) == 0 // MegaMan ZX Advent
+		) {
+			ce9path = "nitro:/cardengine_arm9_alt.lz77";
+		}
+		cebin = fopen(ce9path, "rb");
 	}
 	if (cebin) {
 		fread(lz77ImageBuffer, 1, 0x7000, cebin);
