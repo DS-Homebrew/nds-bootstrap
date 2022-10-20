@@ -297,8 +297,14 @@ void myIrqHandlerVBlank(void) {
 			if ((u32)unpatchedFuncs->mpuDataOffsetAlt >= (u32)ndsHeader->arm9destination && (u32)unpatchedFuncs->mpuDataOffsetAlt < (u32)ndsHeader->arm9destination+0x4000) {
 				*unpatchedFuncs->mpuDataOffsetAlt = unpatchedFuncs->mpuInitRegionOldDataAlt;
 			}
+		}
 
-			if (unpatchedFuncs->mpuDataOffset2) {
+		if (unpatchedFuncs->mpuDataOffset2) {
+			if (isSdk5Set) {
+				unpatchedFuncs->mpuDataOffset2[0] = 0xE3A0004A; // mov r0, #0x4A
+				unpatchedFuncs->mpuDataOffset2[2] = 0xE3A0004A; // mov r0, #0x4A
+				unpatchedFuncs->mpuDataOffset2[4] = 0xE3A0000A; // mov r0, #0x0A
+			} else {
 				*unpatchedFuncs->mpuDataOffset2 = unpatchedFuncs->mpuInitRegionOldData2;
 			}
 		}
