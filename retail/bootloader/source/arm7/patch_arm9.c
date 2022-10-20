@@ -9,6 +9,9 @@
 #include "debug_file.h"
 #include "tonccpy.h"
 
+#define FEATURE_SLOT_GBA			0x00000010
+#define FEATURE_SLOT_NDS			0x00000020
+
 //bool cardReadFound = false; // patch_common.c
 
 static bool patchCardRead(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool* usesThumbPtr, int* readTypePtr, int* sdk5ReadTypePtr, u32** cardReadEndOffsetPtr, u32 startOffset) {
@@ -584,6 +587,35 @@ static void patchMpu2(const tNDSHeader* ndsHeader, const module_params_t* module
 	patchOffsetCache.mpuStartOffset2 = mpuStartOffset;
 	patchOffsetCache.mpuDataOffset2 = mpuDataOffset;
 	patchOffsetCache.mpuInitOffset2 = mpuInitOffset;
+}
+
+void patchMpuFlagsSet(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+	extern u32 _io_dldi_features;
+	extern u32 arm7mbk;
+	if ((_io_dldi_features & FEATURE_SLOT_NDS) || moduleParams->sdk_version < 0x5000000 || arm7mbk == 0x080037C0) {
+		return;
+	}
+
+	u32* offset = patchOffsetCache.mpuDataOffset2;
+	if (!patchOffsetCache.mpuDataOffset2) {
+		offset = findMpuFlagsSetOffset(ndsHeader);
+		if (offset) {
+			patchOffsetCache.mpuDataOffset2 = offset;
+		}
+	}
+
+	if (!offset) {
+		return;
+	}
+
+	// Disable MPU cache and write buffer for the Slot-2 region
+	offset[0] = 0xE3A00042; // mov r0, #0x42
+	offset[2] = 0xE3A00042; // mov r0, #0x42
+	offset[4] = 0xE3A00002; // mov r0, #0x02
+
+	dbg_printf("Mpu flags set: ");
+	dbg_hexa((u32)offset);
+	dbg_printf("\n\n");
 }
 
 void patchMpuChange(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
@@ -1224,6 +1256,7 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 
 	patchMpu(ndsHeader, moduleParams, patchMpuRegion, patchMpuSize);
 	patchMpu2(ndsHeader, moduleParams);
+	patchMpuFlagsSet(ndsHeader, moduleParams);
 	patchMpuChange(ndsHeader, moduleParams);
 
 	//patchDownloadplay(ndsHeader);
