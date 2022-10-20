@@ -298,6 +298,7 @@ volatile void (*FS_Write)(u32*, u32, u32) = (volatile void*)0x0203C5C8;*/
 
 #ifndef DLDI
 static u32 newOverlayOffset = 0;
+static u32 newOverlaysSize = 0;
 #endif
 
 static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
@@ -307,6 +308,9 @@ static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
 #else
 	if (newOverlayOffset == 0) {
 		newOverlayOffset = ((ndsHeader->arm9romOffset+ndsHeader->arm9binarySize)/ce9->cacheBlockSize)*ce9->cacheBlockSize;
+		for (u32 i = newOverlayOffset; i < ndsHeader->arm7romOffset; i+= ce9->cacheBlockSize) {
+			newOverlaysSize += ce9->cacheBlockSize;
+		}
 	}
 
 	u32 sector = (src/ce9->cacheBlockSize)*ce9->cacheBlockSize;
@@ -322,7 +326,7 @@ static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
 	//}
 
 	if ((ce9->valueBits & cacheDisabled) && (u32)dst >= 0x02000000 && (u32)dst < 0x03000000) {
-		fileRead((char*)dst, ((ce9->valueBits & overlaysCached) && src >= newOverlayOffset && src < ndsHeader->arm7romOffset) ? *apFixOverlaysFile : *romFile, src, len, 0);
+		fileRead((char*)dst, ((ce9->valueBits & overlaysCached) && src >= newOverlayOffset && src < newOverlayOffset+newOverlaysSize) ? *apFixOverlaysFile : *romFile, src, len, 0);
 	} else {
 		// Read via the main RAM cache
 		//bool runSleep = true;
@@ -352,7 +356,7 @@ static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
 					readLen = ce9->cacheBlockSize*2;
 				}*/
 
-				fileRead((char*)buffer, ((ce9->valueBits & overlaysCached) && src >= newOverlayOffset && src < ndsHeader->arm7romOffset) ? *apFixOverlaysFile : *romFile, sector, ce9->cacheBlockSize, 0);
+				fileRead((char*)buffer, ((ce9->valueBits & overlaysCached) && src >= newOverlayOffset && src < newOverlayOffset+newOverlaysSize) ? *apFixOverlaysFile : *romFile, sector, ce9->cacheBlockSize, 0);
 				/*updateDescriptor(slot, sector);
 				if (readLen >= ce9->cacheBlockSize*2) {
 					updateDescriptor(slot+1, sector+ce9->cacheBlockSize);
@@ -765,11 +769,8 @@ bool dsiSaveDelete(const char* path) {
 		dsiSaveExists = false;
 		return true;
 	}
-
-	return false;
-#else
-	return false;
 #endif
+	return false;
 }
 
 #ifdef DLDI
