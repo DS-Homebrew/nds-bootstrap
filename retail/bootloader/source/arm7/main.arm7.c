@@ -1297,17 +1297,20 @@ int arm7_main(void) {
 
 	if (ce9Alt) {
 		extern u32* copyBackCe9;
-		cardengineArm9* ce9 = (cardengineArm9*)ce9Location;
+		extern u32 copyBackCe9OrgFunc;
 
-		tonccpy((u32*)0x02378000, ce9, 0x6000);
-		tonccpy((u32*)0x023D8000, (u32*)0x023E8000, 0x8000); // FAT table cache
-		tonccpy((u32*)0x0237FE00, copyBackCe9, 0x200);
+		cardengineArm9* ce9 = (cardengineArm9*)ce9Location;
+		const u32 codeBranch = 0x023FF400;
+
+		tonccpy((u32*)0x02370000, ce9, 0x6000);
+		tonccpy((u32*)0x02378000, (u32*)0x023E8000, 0x8000); // FAT table cache
+		tonccpy((u32*)codeBranch, copyBackCe9, 0x200);
 
 		toncset(ce9, 0, 0x6000);
 		toncset((u32*)0x023E8000, 0, 0x8000); // FAT table cache
 
 		u32 blFrom = (u32)ndsHeader->arm9destination;
-		if (moduleParams->sdk_version > 0x4020000) {
+		if (moduleParams->sdk_version > 0x4010000) {
 			blFrom += 0x90C;
 		} else if (moduleParams->sdk_version > 0x3020000) {
 			blFrom += 0x8FC;
@@ -1315,7 +1318,11 @@ int arm7_main(void) {
 			blFrom += 0x8E8;
 		}
 
-		setBL(blFrom, 0x0237FE00);
+		if (getOffsetFromBL((u32*)blFrom)[0] != 0xE12FFF1E) {
+			copyBackCe9OrgFunc = (u32)getOffsetFromBL((u32*)blFrom);
+		}
+
+		setBL(blFrom, codeBranch);
 	}
 
 	if (0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_DOWN | KEY_A))) {		// Dump RAM

@@ -1,5 +1,6 @@
 @---------------------------------------------------------------------------------
 	.global copyBackCe9
+	.global copyBackCe9OrgFunc
 	.align	4
 	.arm
 
@@ -12,7 +13,7 @@ copyBackCe9Func:
 @---------------------------------------------------------------------------------
 	stmfd   sp!, {r0-r4,lr}
 
-	ldr r0, =0x02378000 @ src
+	ldr r0, =0x02370000 @ src
 	ldr r1, =0x023F0000 @ dst
 	mov r2, #0x6000 @ len
 	mov r3, r0
@@ -24,10 +25,10 @@ copyBackCe9Func:
 	mov r2, r4
 	bl cpuClear32
 
-	ldr r0, =0x023D8000 @ src, Check if FAT table exists in main RAM
+	ldr r0, =0x02378000 @ src, Check if FAT table exists in main RAM
 	ldr r1, [r0]
 	cmp r1, #0
-	ldmeqfd   sp!, {r0-r4,pc}
+	beq copyBackCe9Func_cont
 	ldr r1, =0x023E8000 @ dst
 	mov r2, #0x8000 @ len
 	mov r3, r0
@@ -39,7 +40,17 @@ copyBackCe9Func:
 	mov r2, r4
 	bl cpuClear32
 
+copyBackCe9Func_cont:
+	ldr r4, copyBackCe9OrgFunc
+	cmp r4, #0
+	ldmeqfd   sp!, {r0-r4,pc}
+	bl copyBackCe9_blx_r4
+
 	ldmfd   sp!, {r0-r4,pc}
+copyBackCe9_blx_r4:
+	bx	r4
+copyBackCe9OrgFunc:
+.word	0
 .pool
 @---------------------------------------------------------------------------------
 
