@@ -577,33 +577,51 @@ static void initialize(void) {
 			if ((__myio_dldi.features & FEATURE_SLOT_GBA) && ce9->s2FlashcardId != 0) {
 				const u32 buffer = 0x02378000;
 				const u16 bufferSize = 0x8000;
-				u32 len = ndsHeader->arm9binarySize-ndsHeader->arm9romOffset;
-				for (u32 dst = 0; dst < ndsHeader->arm9binarySize-ndsHeader->arm9romOffset; dst += bufferSize) {
+				s32 len = ndsHeader->arm9binarySize-ndsHeader->arm9romOffset;
+				u32 dst = 0;
+				while (1) {
 					u32 readLen = (len > bufferSize) ? bufferSize : len;
 
 					fileRead((char*)buffer, romFile, 0x8000+dst, readLen);
 					tonccpy((char*)ce9->romLocation+dst, (char*)buffer, readLen);
 
 					len -= bufferSize;
+					dst += bufferSize;
+
+					if (len <= 0) {
+						break;
+					}
 				}
 				len = getRomSizeNoArm9Bin(ndsHeader)+0x88;
-				for (u32 dst = 0; dst < getRomSizeNoArm9Bin(ndsHeader)+0x88; dst += bufferSize) {
+				dst = 0;
+				while (1) {
 					u32 readLen = (len > bufferSize) ? bufferSize : len;
 
 					fileRead((char*)buffer, romFile, (u32)ndsHeader->arm7romOffset+dst, readLen);
 					tonccpy((char*)ce9->romLocation+(ndsHeader->arm9binarySize-ndsHeader->arm9romOffset)+ce9->overlaysSize+dst, (char*)buffer, readLen);
 
 					len -= bufferSize;
+					dst += bufferSize;
+
+					if (len <= 0) {
+						break;
+					}
 				}
 				if (ndsHeader->unitCode == 3) {
-					len = ce9->ioverlaysSize;
-					for (u32 dst = 0; dst < ce9->ioverlaysSize; dst += bufferSize) {
+					len = (s32)ce9->ioverlaysSize;
+					dst = 0;
+					while (1) {
 						u32 readLen = (len > bufferSize) ? bufferSize : len;
 
 						fileRead((char*)buffer, romFile, arm9iromOffset+arm9ibinarySize+dst, readLen);
 						tonccpy((char*)ce9->romLocation+(arm9iromOffset-0x8000)+dst, (char*)buffer, readLen);
 
 						len -= bufferSize;
+						dst += bufferSize;
+
+						if (len <= 0) {
+							break;
+						}
 					}
 				}
 				toncset((char*)buffer, 0, bufferSize);

@@ -734,14 +734,20 @@ static void loadOverlaysintoRAM(const tNDSHeader* ndsHeader, const module_params
 		if ((_io_dldi_features & FEATURE_SLOT_GBA) && s2FlashcardId != 0) {
 			const u32 buffer = 0x037F8000;
 			const u16 bufferSize = 0x8000;
-			u32 len = overlaysSize;
-			for (u32 dst = 0; dst < overlaysSize; dst += bufferSize) {
+			s32 len = (s32)overlaysSize;
+			u32 dst = 0;
+			while (1) {
 				u32 readLen = (len > bufferSize) ? bufferSize : len;
 
 				fileRead((char*)buffer, file, (ndsHeader->arm9romOffset + ndsHeader->arm9binarySize)+dst, readLen);
 				tonccpy((char*)overlaysLocation+dst, (char*)buffer, readLen);
 
 				len -= bufferSize;
+				dst += bufferSize;
+
+				if (len <= 0) {
+					break;
+				}
 			}
 			toncset((char*)buffer, 0, bufferSize);
 		} else {
