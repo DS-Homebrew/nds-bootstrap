@@ -146,12 +146,9 @@ card_read_arm9:
 	stmfd   sp!, {r4-r11,lr}
 
 	ldr		r6, =cardRead
-    
-	bl		_blx_r6_stub_card_read
+	blx		r6
 
 	ldmfd   sp!, {r4-r11,pc}
-_blx_r6_stub_card_read:
-	bx	r6
 .pool
 cardStructArm9:
 .word    0x00000000     
@@ -168,12 +165,9 @@ thumb_card_read_arm9:
 	push	{r3-r7, lr}
 
 	ldr		r6, =cardRead
-
-	bl		_blx_r6_stub_thumb_card_read	
+	blx		r6
 
 	pop	{r3-r7, pc}
-_blx_r6_stub_thumb_card_read:
-	bx	r6	
 .pool
 .align	4
  	
@@ -195,12 +189,9 @@ card_dma_arm9:
     stmfd   sp!, {r1-r11,lr}
 
 	ldr		r6, =cardReadDma
-
-	bl		_blx_r6_stub_card_read_dma	
+	blx		r6
 
 	ldmfd   sp!, {r1-r11,pc}
-_blx_r6_stub_card_read_dma:
-	bx	r6	
 .pool
 @---------------------------------------------------------------------------------
 
@@ -210,12 +201,9 @@ card_set_dma_arm9:
     stmfd   sp!, {r1-r11,lr}
 
 	ldr		r6, =cardSetDma
-
-	bl		_blx_r6_stub_card_set_dma	
+	blx		r6
 
 	ldmfd   sp!, {r1-r11,pc}
-_blx_r6_stub_card_set_dma:
-	bx	r6	
 .pool
 @---------------------------------------------------------------------------------
 
@@ -286,12 +274,9 @@ thumb_card_dma_arm9:
     push	{r1-r7, lr}
 
 	ldr		r6, =cardReadDma
-
-	bl		_blx_r6_stub_thumb_card_read_dma	
+	blx		r6
 
     pop	{r1-r7, pc}
-_blx_r6_stub_thumb_card_read_dma:
-	bx	r6	
 .pool
 .align	4
 @---------------------------------------------------------------------------------
@@ -302,12 +287,9 @@ thumb_card_set_dma_arm9:
     push	{r1-r7, lr}
 
 	ldr		r6, =cardSetDma
-
-	bl		_blx_r6_stub_thumb_card_set_dma	
+	blx		r6
 
     pop	{r1-r7, pc}
-_blx_r6_stub_thumb_card_set_dma:
-	bx	r6	
 .pool
 .align	4
 @---------------------------------------------------------------------------------
@@ -319,12 +301,9 @@ nand_read_arm9:
     stmfd   sp!, {r3-r9,lr}
 
 	ldr		r6, =nandRead
-
-	bl		_blx_r6_stub_nand_read
+	blx		r6
 
 	ldmfd   sp!, {r3-r9,pc}
-_blx_r6_stub_nand_read:
-	bx	r6	
 .pool
 @---------------------------------------------------------------------------------
 
@@ -334,8 +313,7 @@ nand_write_arm9:
     stmfd   sp!, {r3-r9,lr}
 
 	ldr		r6, =nandWrite
-
-	bl		_blx_r6_stub_nand_write
+	blx		r6
 
 	ldmfd   sp!, {r3-r9,pc}
 _blx_r6_stub_nand_write:
@@ -350,8 +328,7 @@ thumb_nand_read_arm9:
     push	{r1-r7, lr}
 
 	ldr		r6, =nandRead
-
-	bl		_blx_r6_stub_thumb_nand_read
+	blx		r6
 
 	pop	{r1-r7, pc}
 _blx_r6_stub_thumb_nand_read:
@@ -366,12 +343,9 @@ thumb_nand_write_arm9:
     push	{r1-r7, lr}
 
 	ldr		r6, =nandWrite
-
-	bl		_blx_r6_stub_thumb_nand_write
+	blx		r6
 
 	pop	{r1-r7, pc}
-_blx_r6_stub_thumb_nand_write:
-	bx	r6	
 .pool
 .align	4
 @---------------------------------------------------------------------------------
@@ -481,13 +455,11 @@ card_irq_enable:
 	push	{r1-r12}
 
 	ldr		r3, =myIrqEnable
+	blx		r3
 
-	bl	_blx_r3_stub2
 	pop   	{r1-r12} 
 	pop  	{lr}
 	bx  lr
-_blx_r3_stub2:
-	bx	r3
 .pool
 @---------------------------------------------------------------------------------
 
@@ -498,11 +470,9 @@ thumb_card_irq_enable:
     push	{r1-r7, lr}
 
 	ldr		r3, =myIrqEnable
+	blx		r3
 
-	bl	thumb_blx_r3_stub2
 	pop	{r1-r7, pc}
-thumb_blx_r3_stub2:
-	bx	r3
 .pool
 .align	4
 @---------------------------------------------------------------------------------
@@ -517,10 +487,8 @@ pdash_read:
     @mov     r3, r10 @cardStruct
     add     r0, r0, #0x2C    
     ldr		r6, =cardReadPDash
-	bl		_blx_r6_stub_pdash   
+	blx		r6
     pop	    {r1-r11, pc}
-_blx_r6_stub_pdash:
-	bx	r6	
 .pool
 
 	.thumb   
@@ -595,12 +563,9 @@ reset_arm9:
     stmfd   sp!, {r1-r11,lr}
 
 	ldr		r6, =reset
-
-	bl		_blx_r6_stub_reset	
+	blx		r6
 
 	ldmfd   sp!, {r1-r11,pc}
-_blx_r6_stub_reset:
-	bx	r6	
 .pool
 @---------------------------------------------------------------------------------
 
@@ -610,7 +575,7 @@ callEndReadDmaThumb:
     push	{r1-r11, lr}
     ldr     r6, thumbCardEndReadDmaRef
     add     r6, #1
-    bl		_blx_r6_stub_callEndReadDmaThumb
+	blx		r6
     pop	    {r1-r11, pc}
 	bx      lr
 
@@ -620,11 +585,9 @@ callSleepThumb:
     push	{r1-r11, lr}
     ldr     r6, thumbSleepRef
     add     r6, #1
-    bl		_blx_r6_stub_callEndReadDmaThumb
+	blx		r6
     pop	    {r1-r11, pc}
 	bx      lr
-_blx_r6_stub_callEndReadDmaThumb:
-	bx	r6
 .pool
 
 	.thumb
