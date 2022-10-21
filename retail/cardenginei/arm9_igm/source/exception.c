@@ -202,7 +202,7 @@ void showException(s32 *expReg) {
 	SetBrightness(0, 0);
 	REG_BLDY = 0;
 
-	clearScreen(false);
+	clearScreen(true);
 
 	toncset16(BG_PALETTE, 0, 256);
 	for(int i = 0; i < sizeof(igmPal) / sizeof(igmPal[0]); i++) {
