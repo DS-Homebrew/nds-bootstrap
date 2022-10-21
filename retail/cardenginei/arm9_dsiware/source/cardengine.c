@@ -38,6 +38,7 @@
 extern cardengineArm9* volatile ce9;
 
 extern void ndsCodeStart(u32* addr);
+extern u32 getDtcmBase(void);
 
 vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS_SDK5;
 
@@ -73,7 +74,7 @@ static void hookIPC_SYNC(void) {
 	if (!IPC_SYNC_hooked) {
 		u32* ipcSyncHandler = ce9->irqTable + 16;
 		ce9->intr_ipc_orig_return = *ipcSyncHandler;
-		*ipcSyncHandler = ce9->patches->ipcSyncHandlerRef;
+		*ipcSyncHandler = (u32)ce9->patches->ipcSyncHandlerRef;
 		IPC_SYNC_hooked = true;
 	}
 }

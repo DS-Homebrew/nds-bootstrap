@@ -323,8 +323,8 @@ void reset(void) {
 	if (consoleModel > 0) {
 		ndmaCopyWordsAsynch(0, (char*)ndsHeader->arm9destination+0xB000000, ndsHeader->arm9destination, *(u32*)0x0DFFE02C);
 		ndmaCopyWordsAsynch(1, (char*)ndsHeader->arm7destination+0xB000000, ndsHeader->arm7destination, *(u32*)0x0DFFE03C);
-		ndmaCopyWordsAsynch(2, (char*)(*(u32*)0x02FFE1C8)+0xB000000, *(u32*)0x02FFE1C8, *(u32*)0x0DFFE1CC);
-		ndmaCopyWordsAsynch(3, (char*)(*(u32*)0x02FFE1D8)+0xB000000, *(u32*)0x02FFE1D8, *(u32*)0x0DFFE1DC);
+		ndmaCopyWordsAsynch(2, (char*)(*(u32*)0x02FFE1C8)+0xB000000, (void*)(*(u32*)0x02FFE1C8), *(u32*)0x0DFFE1CC);
+		ndmaCopyWordsAsynch(3, (char*)(*(u32*)0x02FFE1D8)+0xB000000, (void*)(*(u32*)0x02FFE1D8), *(u32*)0x0DFFE1DC);
 		while (ndmaBusy(0) || ndmaBusy(1) || ndmaBusy(2) || ndmaBusy(3));
 	} else {
 		bakData();

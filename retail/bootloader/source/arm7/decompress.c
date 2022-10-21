@@ -22,7 +22,7 @@
 #include "locations.h"
 #include "tonccpy.h"
 
-static const unsigned char* encr_data = (unsigned char*)BLOWFISH_LOCATION_B4DS;
+static unsigned char* encr_data = (unsigned char*)BLOWFISH_LOCATION_B4DS;
 
 /*static void decompressLZ77Backwards(u8* addr, u32 size) {
 	u32 len = *(u32*)(addr + size - 4) + size;

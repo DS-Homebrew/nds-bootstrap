@@ -99,10 +99,6 @@ bool ipsHasOverlayPatch(const tNDSHeader* ndsHeader, u8* ipsbyte) {
 			ipson += 2;
 			totalrepeats = ipsbyte[ipson] * 256 + ipsbyte[ipson + 1];
 			ipson += 2;
-			u8 repeatbyte[totalrepeats];
-			for (int ontime = 0; ontime < totalrepeats; ontime++) {
-				repeatbyte[ontime] = ipsbyte[ipson];
-			}
 			ipson++;
 		} else {
 			totalrepeats = ipsbyte[ipson] * 256 + ipsbyte[ipson + 1];

@@ -20,6 +20,7 @@
 #include <nds/ndstypes.h>
 #include <nds/arm9/exceptions.h>
 #include <nds/arm9/cache.h>
+#include <nds/bios.h>
 #include <nds/system.h>
 #include <nds/dma.h>
 #include <nds/interrupts.h>
@@ -79,6 +80,7 @@
 extern cardengineArm9* volatile ce9;
 
 extern void ndsCodeStart(u32* addr);
+extern u32 getDtcmBase(void);
 
 #ifdef TWLSDK
 vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS_SDK5;
@@ -86,7 +88,9 @@ vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS_SDK5;
 vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS_SDK1;
 #endif
 
+#ifndef TWLSDK
 static unpatchedFunctions* unpatchedFuncs = (unpatchedFunctions*)UNPATCHED_FUNCTION_LOCATION;
+#endif
 
 #ifdef TWLSDK
 tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
@@ -115,7 +119,9 @@ int accessCounter = 0;
 #endif
 bool flagsSet = false;
 static bool driveInitialized = false;
+#ifndef TWLSDK
 static bool region0FixNeeded = false;
+#endif
 bool igmReset = false;
 
 extern bool isDma;
@@ -601,32 +607,32 @@ void cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 
 /*void cardPullOut(void) {
 	if (*(vu32*)(0x027FFB30) != 0) {
-		/*volatile int (*terminateForPullOutRef)(u32*) = *ce9->patches->terminateForPullOutRef;
-        (*terminateForPullOutRef);
-		sharedAddr[3] = 0x5245424F;
-		waitForArm7();
+		// volatile int (*terminateForPullOutRef)(u32*) = *ce9->patches->terminateForPullOutRef;
+        // (*terminateForPullOutRef);
+		// sharedAddr[3] = 0x5245424F;
+		// waitForArm7();
 	}
 }*/
 
 bool nandRead(void* memory,void* flash,u32 len,u32 dma) {
 #ifdef DLDI
 	if (ce9->valueBits & saveOnFlashcard) {
-		fileRead(memory, *savFile, flash, len, 0);
+		fileRead(memory, *savFile, (u32)flash, len, 0);
 		return true;
 	} else {
 		// Send a command to the ARM7 to read the nand save
 		u32 commandNandRead = 0x025FFC01;
 
 		// Write the command
-		sharedAddr[0] = memory;
+		sharedAddr[0] = (u32)memory;
 		sharedAddr[1] = len;
-		sharedAddr[2] = flash;
+		sharedAddr[2] = (u32)flash;
 		sharedAddr[3] = commandNandRead;
 
 		waitForArm7();
 	}
 #else
-	fileRead(memory, *savFile, flash, len, 0);
+	fileRead(memory, *savFile, (u32)flash, len, 0);
 #endif
     return true; 
 }
@@ -634,22 +640,22 @@ bool nandRead(void* memory,void* flash,u32 len,u32 dma) {
 bool nandWrite(void* memory,void* flash,u32 len,u32 dma) {
 #ifdef DLDI
 	if (ce9->valueBits & saveOnFlashcard) {
-		fileWrite(memory, *savFile, flash, len, 0);
+		fileWrite(memory, *savFile, (u32)flash, len, 0);
 		return true;
 	} else {
 		// Send a command to the ARM7 to write the nand save
 		u32 commandNandWrite = 0x025FFC02;
 
 		// Write the command
-		sharedAddr[0] = memory;
+		sharedAddr[0] = (u32)memory;
 		sharedAddr[1] = len;
-		sharedAddr[2] = flash;
+		sharedAddr[2] = (u32)flash;
 		sharedAddr[3] = commandNandWrite;
 
 		waitForArm7();
 	}
 #else
-	fileWrite(memory, *savFile, flash, len, 0);
+	fileWrite(memory, *savFile, (u32)flash, len, 0);
 #endif
     return true; 
 }

@@ -11,7 +11,7 @@ static const char *registerNames[] = {
 };
 
 static s32 *exceptionRegisters;
-static u32 __itcm_start = 0x01000000; // TODO
+static const u32 __itcm_start = 0;
 
 u32 getCPSR();
 

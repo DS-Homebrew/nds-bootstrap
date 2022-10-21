@@ -38,7 +38,7 @@ void		dsi_set_ctr( dsi_context* ctx,
 
 void		dsi_init_ctr( dsi_context* ctx, 
 						  const unsigned char key[16], 
-						  const unsigned char ctr[12] );
+						  const unsigned char ctr[16] );
 
 void dsi_crypt_ctr( dsi_context* ctx,
                     const void* in,

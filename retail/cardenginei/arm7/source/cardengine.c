@@ -1045,9 +1045,9 @@ static bool nandRead(void) {
 	u32 flash = *(vu32*)(sharedAddr+2);
 	u32 memory = *(vu32*)(sharedAddr);
 	u32 len = *(vu32*)(sharedAddr+1);
+	#ifdef DEBUG
 	u32 marker = *(vu32*)(sharedAddr+3);
 
-	#ifdef DEBUG
 	dbg_printf("\nnand read received\n");
 
 	if (calledViaIPC) {
@@ -1065,7 +1065,7 @@ static bool nandRead(void) {
 
 	//driveInitialize();
 	//cardReadLED(true, true);    // When a file is loading, turn on LED for card read indicator
-	return fileRead(memory, *savFile, flash, len, -1);
+	return fileRead((char *)memory, *savFile, flash, len, -1);
 	//cardReadLED(false, true);
 }
 
@@ -1073,9 +1073,9 @@ static bool nandWrite(void) {
 	u32 flash = *(vu32*)(sharedAddr+2);
 	u32 memory = *(vu32*)(sharedAddr);
 	u32 len = *(vu32*)(sharedAddr+1);
+	#ifdef DEBUG
 	u32 marker = *(vu32*)(sharedAddr+3);
 
-	#ifdef DEBUG
 	dbg_printf("\nnand write received\n");
 
 	if (calledViaIPC) {
@@ -1094,7 +1094,7 @@ static bool nandWrite(void) {
 	//driveInitialize();
 	saveTimer = 1;			// When we're saving, power button does nothing, in order to prevent corruption.
 	//cardReadLED(true, true);    // When a file is loading, turn on LED for card read indicator
-	return fileWrite(memory, *savFile, flash, len, -1);
+	return fileWrite((char *)memory, *savFile, flash, len, -1);
 	//cardReadLED(false, true);
 }
 

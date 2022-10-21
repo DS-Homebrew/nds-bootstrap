@@ -84,7 +84,7 @@ static const u16 cardReadDmaStartSignatureThumb3[1]  = {0xB5F8}; // SDK >= 3
 
 // Random patch
 static const u32 randomPatchSignature[4]        = {0xE3500000, 0x1597002C, 0x10406004, 0x03E06000};
-static const u32 randomPatchSignature5First[4]  = {0xE92D43F8, 0xE3A04000, 0xE1A09001, 0xE1A08002}; // SDK 5
+// static const u32 randomPatchSignature5First[4]  = {0xE92D43F8, 0xE3A04000, 0xE1A09001, 0xE1A08002}; // SDK 5
 static const u32 randomPatchSignature5Second[3] = {0xE59F003C, 0xE590001C, 0xE3500000};             // SDK 5
 
 // irq enable
@@ -248,7 +248,7 @@ u32* findCardReadEndOffsetType0(const tNDSHeader* ndsHeader, const module_params
 u32* findCardReadEndOffsetType1(const tNDSHeader* ndsHeader, u32 startOffset) {
 	dbg_printf("findCardReadEndOffsetType1:\n");
 
-	const char* romTid = getRomTid(ndsHeader);
+	// const char* romTid = getRomTid(ndsHeader);
 
 	u32* cardReadEndOffset = NULL;
 	//readType = 1;
@@ -1574,7 +1574,7 @@ u32* findRandomPatchOffset5Second(const tNDSHeader* ndsHeader) {
 
 u32* findResetOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool* softResetMb) {
 	dbg_printf("findResetOffset\n");
-    u32* resetSignature = resetSignature2;
+    const u32* resetSignature = resetSignature2;
 
     if (moduleParams->sdk_version > 0x4008000 && moduleParams->sdk_version < 0x5000000) { 
         resetSignature = resetSignature4;
@@ -1690,7 +1690,7 @@ u32* findResetOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleP
     } 
     
     while(resetOffset!=NULL) {
-    	u32* resetEndOffset = findOffsetThumb(
+    	u32* resetEndOffset = findOffset(
     		resetOffset, 0x200,
     		(isSdk5(moduleParams) ? resetConstant5 : resetConstant), 1
     	);

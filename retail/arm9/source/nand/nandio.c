@@ -33,7 +33,7 @@ void getConsoleID(u8 *consoleID){
 	
 	tonccpy(key, fifo, 16);  //receive the goods from arm7
 
-	F_XY_reverse((uint32_t*)key, (uint32_t*)key_xy); //work backwards from the normalkey to get key_x that has the consoleID
+	F_XY_reverse(key, key_xy); //work backwards from the normalkey to get key_x that has the consoleID
 
 	for(int i=0;i<16;i++){
 		key_x[i] = key_xy[i] ^ key_y[i];             //''
