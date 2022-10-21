@@ -412,6 +412,36 @@ s8 mainScreen = 0;
 	}
 }*/
 
+void inGameMenu(s32* exRegisters) {
+	int oldIME = enterCriticalSection();
+	setDeviceOwner();
+
+	fileWrite((char*)INGAME_MENU_LOCATION_B4DS, pageFile, 0xA000, 0xA000);	// Backup part of game RAM to page file
+	fileRead((char*)INGAME_MENU_LOCATION_B4DS, pageFile, 0, 0xA000);	// Read in-game menu
+
+	*(u32*)(INGAME_MENU_LOCATION_B4DS + IGM_TEXT_SIZE_ALIGNED) = (u32)sharedAddr;
+	volatile void (*inGameMenu)(s8*, u32, s32*) = (volatile void*)INGAME_MENU_LOCATION_B4DS + IGM_TEXT_SIZE_ALIGNED + 0x10;
+	(*inGameMenu)(&mainScreen, 0, exRegisters);
+
+	fileWrite((char*)INGAME_MENU_LOCATION_B4DS, pageFile, 0, 0xA000);	// Store in-game menu
+	fileRead((char*)INGAME_MENU_LOCATION_B4DS, pageFile, 0xA000, 0xA000);	// Restore part of game RAM from page file
+
+	if (sharedAddr[3] == 0x52534554) {
+		igmReset = true;
+		reset(0);
+	} else if (sharedAddr[3] == 0x444D4152) { // RAMD
+		#ifdef EXTMEM
+		fileWrite((char*)0x02000000, ramDumpFile, 0, 0x7E0000);
+		fileWrite((char*)((ce9->valueBits & isSdk5) ? 0x02FE0000 : 0x027E0000), ramDumpFile, 0x7E0000, 0x20000);
+		#else
+		fileWrite((char*)0x02000000, ramDumpFile, 0, 0x400000);
+		#endif
+		sharedAddr[3] = 0;
+	}
+
+	leaveCriticalSection(oldIME);
+}
+
 //---------------------------------------------------------------------------------
 void myIrqHandlerIPC(void) {
 //---------------------------------------------------------------------------------
@@ -483,35 +513,8 @@ void myIrqHandlerIPC(void) {
 				REG_POWERCNT |= POWER_SWAP_LCDS;
 		}
 			break;
-		case 0x9: {
-			int oldIME = enterCriticalSection();
-			setDeviceOwner();
-
-			fileWrite((char*)INGAME_MENU_LOCATION_B4DS, pageFile, 0xA000, 0xA000);	// Backup part of game RAM to page file
-			fileRead((char*)INGAME_MENU_LOCATION_B4DS, pageFile, 0, 0xA000);	// Read in-game menu
-
-			*(u32*)(INGAME_MENU_LOCATION_B4DS + IGM_TEXT_SIZE_ALIGNED) = (u32)sharedAddr;
-			volatile void (*inGameMenu)(s8*, u32, s32*) = (volatile void*)INGAME_MENU_LOCATION_B4DS + IGM_TEXT_SIZE_ALIGNED + 0x10;
-			(*inGameMenu)(&mainScreen, 0, 0);
-
-			fileWrite((char*)INGAME_MENU_LOCATION_B4DS, pageFile, 0, 0xA000);	// Store in-game menu
-			fileRead((char*)INGAME_MENU_LOCATION_B4DS, pageFile, 0xA000, 0xA000);	// Restore part of game RAM from page file
-
-			if (sharedAddr[3] == 0x52534554) {
-				igmReset = true;
-				reset(0);
-			} else if (sharedAddr[3] == 0x444D4152) { // RAMD
-				#ifdef EXTMEM
-				fileWrite((char*)0x02000000, ramDumpFile, 0, 0x7E0000);
-				fileWrite((char*)((ce9->valueBits & isSdk5) ? 0x02FE0000 : 0x027E0000), ramDumpFile, 0x7E0000, 0x20000);
-				#else
-				fileWrite((char*)0x02000000, ramDumpFile, 0, 0x400000);
-				#endif
-				sharedAddr[3] = 0;
-			}
-
-			leaveCriticalSection(oldIME);
-		}
+		case 0x9:
+			inGameMenu((s32*)0);
 			break;
 	}
 }

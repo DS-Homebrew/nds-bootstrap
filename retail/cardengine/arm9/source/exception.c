@@ -4,8 +4,6 @@
 #include "locations.h"
 #include "cardengine_header_arm9.h"
 
-#define dsiBios BIT(11)
-
 #define EXCEPTION_VECTOR_SDK1	(*(VoidFn *)(0x27FFD9C))
 
 extern cardengineArm9* volatile ce9;
@@ -18,9 +16,8 @@ extern vu32* volatile sharedAddr;
 //---------------------------------------------------------------------------------
 void userException() {
 //---------------------------------------------------------------------------------
-	*(u32*)(INGAME_MENU_LOCATION_B4DS + IGM_TEXT_SIZE_ALIGNED) = (u32)sharedAddr;
-	volatile void (*inGameMenu)(s8*, u32, s32*) = (volatile void*)INGAME_MENU_LOCATION_B4DS + IGM_TEXT_SIZE_ALIGNED + 0x10;
-	(*inGameMenu)(&mainScreen, 0, exceptionRegisters);
+	extern void inGameMenu(s32* exRegisters);
+	inGameMenu(exceptionRegisters);
 }
 
 //---------------------------------------------------------------------------------
