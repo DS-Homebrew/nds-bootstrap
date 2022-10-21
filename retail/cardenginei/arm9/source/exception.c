@@ -18,6 +18,8 @@ extern vu32* volatile sharedAddr;
 //---------------------------------------------------------------------------------
 void userException() {
 //---------------------------------------------------------------------------------
+	sharedAddr[0] = 0x524F5245; // 'EROR'
+
 #ifdef TWLSDK
 	if (ce9->consoleModel > 0) {
 		*(u32*)(INGAME_MENU_LOCATION_DSIWARE + IGM_TEXT_SIZE_ALIGNED) = (u32)sharedAddr;

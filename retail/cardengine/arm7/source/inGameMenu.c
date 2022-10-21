@@ -25,6 +25,7 @@ volatile int timeTillStatusRefresh = 7;
 void inGameMenu(void) {
 	sharedAddr[4] = 0x554E454D; // 'MENU'
 	IPC_SendSync(0x9);
+	u32 errorBak = sharedAddr[0];
 	int volBak = REG_MASTER_VOLUME;
 	REG_MASTER_VOLUME = 0;
 	int oldIME = enterCriticalSection();
@@ -117,6 +118,7 @@ void inGameMenu(void) {
 		}
 	}
 
+	sharedAddr[0] = errorBak;
 	sharedAddr[4] = 0x54495845; // EXIT
 	sharedAddr[7] -= 0x10000000; // Clear time receive flag
 	timeTillStatusRefresh = 7;

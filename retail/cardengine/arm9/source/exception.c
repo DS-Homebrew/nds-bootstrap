@@ -16,8 +16,12 @@ extern vu32* volatile sharedAddr;
 //---------------------------------------------------------------------------------
 void userException() {
 //---------------------------------------------------------------------------------
+	sharedAddr[0] = 0x524F5245; // 'EROR'
+
 	extern void inGameMenu(s32* exRegisters);
-	inGameMenu(exceptionRegisters);
+	while (1) {
+		inGameMenu(exceptionRegisters);
+	}
 }
 
 //---------------------------------------------------------------------------------

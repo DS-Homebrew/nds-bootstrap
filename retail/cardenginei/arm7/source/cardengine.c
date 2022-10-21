@@ -1382,6 +1382,7 @@ void myIrqHandlerNdma0(void) {
 
 
 void myIrqHandlerVBlank(void) {
+  while (1) {
 	#ifdef DEBUG		
 	nocashMessage("myIrqHandlerVBlank");
 	#endif	
@@ -1607,6 +1608,15 @@ void myIrqHandlerVBlank(void) {
 		}
 	}
 	swapScreens = false;
+
+	if (sharedAddr[0] == 0x524F5245) { // 'EROR'
+		REG_MASTER_VOLUME = 0;
+		while (REG_VCOUNT != 191) swiDelay(100);
+		while (REG_VCOUNT == 191) swiDelay(100);
+	} else {
+		break;
+	}
+  }
 }
 
 void i2cIRQHandler(void) {
