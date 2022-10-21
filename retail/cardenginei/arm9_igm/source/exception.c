@@ -6,8 +6,8 @@
 #include "tonccpy.h"
 
 static const char *registerNames[] = {
-	"r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7",
-	"r8 ", "r9 ", "r10", "r11", "r12", "sp ", "lr ", "pc "
+	"r0", "r1", "r2",  "r3",  "r4",  "r5", "r6", "r7",
+	"r8", "r9", "r10", "r11", "r12", "sp", "lr", "pc"
 };
 
 static s32 *exceptionRegisters;
