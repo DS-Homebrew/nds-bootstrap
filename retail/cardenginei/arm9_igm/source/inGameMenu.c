@@ -27,6 +27,10 @@ static u8 bgBak[sizeof(igmText.font) * 4];
 static u16 bgMapBak[0x300];
 static u16 palBak[256];
 
+// For RAM viewer, global so it's persistant
+vu32 *address = (vu32*)0x02000000;
+static bool arm7Ram = false;
+
 u16 igmPal[6] = {
 	0xFFFF, // White
 	0xDEF7, // Light gray
@@ -70,10 +74,6 @@ void SetBrightness(u8 screen, s8 bright) {
 	}
 	*(vu16*)(0x0400006C + (0x1000 * screen)) = bright | (mode << 14);
 }
-
-// For RAM viewer, global so it's persistant
-static vu32 *address = (vu32*)0x02000000;
-static bool arm7Ram = false;
 
 void print(int x, int y, const unsigned char *str, FontPalette palette, bool main) {
 	u16 *dst = (main ? BG_MAP_RAM(15) : BG_MAP_RAM_SUB(15)) + y * 0x20 + x;
