@@ -1087,17 +1087,17 @@ void myIrqHandlerIPC(void) {
 			#ifdef TWLSDK
 			if (ce9->consoleModel > 0) {
 				*(u32*)(INGAME_MENU_LOCATION_DSIWARE + IGM_TEXT_SIZE_ALIGNED) = (u32)sharedAddr;
-				volatile void (*inGameMenu)(s8*, u32) = (volatile void*)INGAME_MENU_LOCATION_DSIWARE + IGM_TEXT_SIZE_ALIGNED + 0x10;
-				(*inGameMenu)(&mainScreen, ce9->consoleModel);
+				volatile void (*inGameMenu)(s8*, u32, s32*) = (volatile void*)INGAME_MENU_LOCATION_DSIWARE + IGM_TEXT_SIZE_ALIGNED + 0x10;
+				(*inGameMenu)(&mainScreen, ce9->consoleModel, 0);
 			} else {
 				*(u32*)(INGAME_MENU_LOCATION_TWLSDK + IGM_TEXT_SIZE_ALIGNED) = (u32)sharedAddr;
-				volatile void (*inGameMenu)(s8*, u32) = (volatile void*)INGAME_MENU_LOCATION_TWLSDK + IGM_TEXT_SIZE_ALIGNED + 0x10;
-				(*inGameMenu)(&mainScreen, ce9->consoleModel);
+				volatile void (*inGameMenu)(s8*, u32, s32*) = (volatile void*)INGAME_MENU_LOCATION_TWLSDK + IGM_TEXT_SIZE_ALIGNED + 0x10;
+				(*inGameMenu)(&mainScreen, ce9->consoleModel, 0);
 			}
 			#else
 			*(u32*)(INGAME_MENU_LOCATION + IGM_TEXT_SIZE_ALIGNED) = (u32)sharedAddr;
-			volatile void (*inGameMenu)(s8*, u32) = (volatile void*)INGAME_MENU_LOCATION + IGM_TEXT_SIZE_ALIGNED + 0x10;
-			(*inGameMenu)(&mainScreen, ce9->consoleModel);
+			volatile void (*inGameMenu)(s8*, u32, s32*) = (volatile void*)INGAME_MENU_LOCATION + IGM_TEXT_SIZE_ALIGNED + 0x10;
+			(*inGameMenu)(&mainScreen, ce9->consoleModel, 0);
 			#endif
 			#ifdef TWLSDK
 			if (sharedAddr[3] == 0x54495845) {

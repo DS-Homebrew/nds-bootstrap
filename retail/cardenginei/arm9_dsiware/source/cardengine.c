@@ -259,8 +259,8 @@ void myIrqHandlerIPC(void) {
 			break;
 		case 0x9: {
 			*(u32*)(INGAME_MENU_LOCATION_DSIWARE + IGM_TEXT_SIZE_ALIGNED) = (u32)sharedAddr;
-			volatile void (*inGameMenu)(s8*, u32) = (volatile void*)INGAME_MENU_LOCATION_DSIWARE + IGM_TEXT_SIZE_ALIGNED + 0x10;
-			(*inGameMenu)(&mainScreen, ce9->consoleModel);
+			volatile void (*inGameMenu)(s8*, u32, s32*) = (volatile void*)INGAME_MENU_LOCATION_DSIWARE + IGM_TEXT_SIZE_ALIGNED + 0x10;
+			(*inGameMenu)(&mainScreen, ce9->consoleModel, 0);
 			if (sharedAddr[3] == 0x52534554 || sharedAddr[3] == 0x54495845) {
 				igmReset = true;
 				if (sharedAddr[3] == 0x52534554) {
