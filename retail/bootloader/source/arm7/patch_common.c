@@ -3329,13 +3329,13 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Requires either 8MB of RAM or Memory Expansion Pak
 	else if (strncmp(romTid, "KXC", 3) == 0 && debugOrMep) {
 		extern u32* cch2HeapAlloc;
-
-
+		extern u32* cch2HeapSetPatch;
 
 		*(u32*)0x02013170 = 0xE1A00000; // nop
 		tonccpy((u32*)0x02013CF4, dsiSaveGetResultCode, 0xC);
 		if (!extendedMemory2) {
-			tonccpy((u32*)0x0201473C, cch2HeapAlloc, 0x70);
+			tonccpy((u32*)0x0201473C, cch2HeapSetPatch, 0x70);
+			tonccpy((u32*)0x0201D810, cch2HeapAlloc, 0xBC);
 		}
 		*(u32*)0x020164C4 = 0xE1A00000; // nop
 		*(u32*)0x0201A118 = 0xE1A00000; // nop
@@ -3349,8 +3349,10 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02020710 = 0xE1A00000; // nop
 		if (ndsHeader->gameCode[3] == 'E') {
 			if (!extendedMemory2) {
-				*(u32*)0x02014738 = (u32)getOffsetFromBL((u32*)0x020719F0);
-				setBL(0x020719F0, 0x0201473C);
+				*(u32*)0x02014738 = (u32)getOffsetFromBL((u32*)0x02026A80);
+				setBL(0x02026A80, 0x0201473C);
+				*(u32*)0x0201D80C = (u32)getOffsetFromBL((u32*)0x020719F0);
+				setBL(0x020719F0, 0x0201D810);
 			}
 
 			setBL(0x02035478, (u32)dsiSaveGetInfo);
@@ -3380,8 +3382,10 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBL(0x020364DC, (u32)dsiSaveClose);
 		} else if (ndsHeader->gameCode[3] == 'V') {
 			if (!extendedMemory2) {
-				*(u32*)0x02014738 = (u32)getOffsetFromBL((u32*)0x0203749C);
-				setBL(0x0203749C, 0x0201473C);
+				*(u32*)0x02014738 = (u32)getOffsetFromBL((u32*)0x02026A80);
+				setBL(0x02026A80, 0x0201473C);
+				*(u32*)0x0201D80C = (u32)getOffsetFromBL((u32*)0x0203749C);
+				setBL(0x0203749C, 0x0201D810);
 			}
 
 			setBL(0x0206A44C, (u32)dsiSaveGetInfo);
@@ -3411,8 +3415,10 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBL(0x0206B4B0, (u32)dsiSaveClose);
 		} else {
 			if (!extendedMemory2) {
-				*(u32*)0x02014738 = (u32)getOffsetFromBL((u32*)0x0205DF58);
-				setBL(0x0205DF58, 0x0201473C);
+				*(u32*)0x02014738 = (u32)getOffsetFromBL((u32*)0x0206082C);
+				setBL(0x0206082C, 0x0201473C);
+				*(u32*)0x0201D80C = (u32)getOffsetFromBL((u32*)0x0205DF58);
+				setBL(0x0205DF58, 0x0201D810);
 			}
 
 			setBL(0x02026EAC, (u32)dsiSaveGetInfo);

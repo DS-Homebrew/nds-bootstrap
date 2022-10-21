@@ -1,5 +1,6 @@
 @---------------------------------------------------------------------------------
 	.global cch2HeapAlloc
+	.global cch2HeapSetPatch
 	.global fourSwHeapAlloc
 	.global siezHeapAlloc
 	.align	4
@@ -9,6 +10,8 @@
 
 cch2HeapAlloc:
 	.word cch2HeapAllocFunc
+cch2HeapSetPatch:
+	.word cch2HeapSetPatchFunc
 fourSwHeapAlloc:
 	.word fourSwHeapAllocFunc
 siezHeapAlloc:
@@ -37,6 +40,21 @@ cch2HeapAlloc_return:
 _blx_cch2OrgFunction:
 	bx	r6
 .pool
+
+cch2HeapSetOrgFunc: .word 0
+cch2HeapSetPatchFunc:
+	stmfd   sp!, {r6,lr}
+
+	cmp r3, #0x09000000
+	ldmeqfd   sp!, {r6,pc}
+
+	ldr	r6, cch2HeapSetOrgFunc
+	bl	_blx_cch2HeapSetOrgFunc
+
+	ldmfd   sp!, {r6,pc}
+_blx_cch2HeapSetOrgFunc:
+	bx	r6
+
 @---------------------------------------------------------------------------------
 
 @---------------------------------------------------------------------------------
