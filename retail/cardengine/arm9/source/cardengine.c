@@ -106,6 +106,8 @@ static u32 musicFileSize = 0x0;
 static bool cardReadInProgress = false;
 static int cardReadCount = 0;
 
+extern void setExceptionHandler2();
+
 static inline u32 getRomSizeNoArm9Bin(const tNDSHeader* ndsHeader) {
 	return ndsHeader->romSize - ndsHeader->arm7romOffset + ce9->overlaysSize;
 }
@@ -157,7 +159,7 @@ static void hookIPC_SYNC(void) {
         //ce9->intr_vblank_orig_return = *vblankHandler;
         ce9->intr_ipc_orig_return = *ipcSyncHandler;
         //*vblankHandler = ce9->patches->vblankHandlerRef;
-        *ipcSyncHandler = ce9->patches->ipcSyncHandlerRef;
+        *ipcSyncHandler = (u32)ce9->patches->ipcSyncHandlerRef;
         IPC_SYNC_hooked = true;
     }
 }
@@ -166,18 +168,6 @@ static void enableIPC_SYNC(void) {
 	if (IPC_SYNC_hooked && !(REG_IE & IRQ_IPC_SYNC)) {
 		REG_IE |= IRQ_IPC_SYNC;
 	}
-}
-
-void user_exception(void);
-
-//---------------------------------------------------------------------------------
-void setExceptionHandler2() {
-//---------------------------------------------------------------------------------
-	if (EXCEPTION_VECTOR_SDK1 == enterException && *exceptionC == user_exception) return;
-
-	exceptionStack = (u32)EXCEPTION_STACK_LOCATION_B4DS;
-	EXCEPTION_VECTOR_SDK1 = enterException;
-	*exceptionC = user_exception;
 }
 
 extern void slot2MpuFix();
@@ -501,8 +491,8 @@ void myIrqHandlerIPC(void) {
 			fileRead((char*)INGAME_MENU_LOCATION_B4DS, pageFile, 0, 0xA000);	// Read in-game menu
 
 			*(u32*)(INGAME_MENU_LOCATION_B4DS + IGM_TEXT_SIZE_ALIGNED) = (u32)sharedAddr;
-			volatile void (*inGameMenu)(s8*, u32) = (volatile void*)INGAME_MENU_LOCATION_B4DS + IGM_TEXT_SIZE_ALIGNED + 0x10;
-			(*inGameMenu)(&mainScreen, 0);
+			volatile void (*inGameMenu)(s8*, u32, s32*) = (volatile void*)INGAME_MENU_LOCATION_B4DS + IGM_TEXT_SIZE_ALIGNED + 0x10;
+			(*inGameMenu)(&mainScreen, 0, 0);
 
 			fileWrite((char*)INGAME_MENU_LOCATION_B4DS, pageFile, 0, 0xA000);	// Store in-game menu
 			fileRead((char*)INGAME_MENU_LOCATION_B4DS, pageFile, 0xA000, 0xA000);	// Restore part of game RAM from page file

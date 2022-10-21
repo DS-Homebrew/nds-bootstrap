@@ -43,8 +43,6 @@
 #define softResetMb BIT(13)
 #define cloneboot BIT(14)
 
-//extern void user_exception(void);
-
 extern cardengineArm9* volatile ce9;
 
 extern void ndsCodeStart(u32* addr);
@@ -431,17 +429,17 @@ void myIrqHandlerIPC(void) {
 				if (ndsHeader->unitCode > 0 && (ce9->valueBits & dsiMode)) {
 					if (ce9->consoleModel > 0) {
 						*(u32*)(INGAME_MENU_LOCATION_DSIWARE + IGM_TEXT_SIZE_ALIGNED) = (u32)sharedAddr;
-						volatile void (*inGameMenu)(s8*, u32) = (volatile void*)INGAME_MENU_LOCATION_DSIWARE + IGM_TEXT_SIZE_ALIGNED + 0x10;
-						(*inGameMenu)(&mainScreen, ce9->consoleModel);
+						volatile void (*inGameMenu)(s8*, u32, s32*) = (volatile void*)INGAME_MENU_LOCATION_DSIWARE + IGM_TEXT_SIZE_ALIGNED + 0x10;
+						(*inGameMenu)(&mainScreen, ce9->consoleModel, 0);
 					} else {
 						*(u32*)(INGAME_MENU_LOCATION_TWLSDK + IGM_TEXT_SIZE_ALIGNED) = (u32)sharedAddr;
-						volatile void (*inGameMenu)(s8*, u32) = (volatile void*)INGAME_MENU_LOCATION_TWLSDK + IGM_TEXT_SIZE_ALIGNED + 0x10;
-						(*inGameMenu)(&mainScreen, ce9->consoleModel);
+						volatile void (*inGameMenu)(s8*, u32, s32*) = (volatile void*)INGAME_MENU_LOCATION_TWLSDK + IGM_TEXT_SIZE_ALIGNED + 0x10;
+						(*inGameMenu)(&mainScreen, ce9->consoleModel, 0);
 					}
 				} else {
 					*(u32*)(INGAME_MENU_LOCATION + IGM_TEXT_SIZE_ALIGNED) = (u32)sharedAddr;
-					volatile void (*inGameMenu)(s8*, u32) = (volatile void*)INGAME_MENU_LOCATION + IGM_TEXT_SIZE_ALIGNED + 0x10;
-					(*inGameMenu)(&mainScreen, ce9->consoleModel);
+					volatile void (*inGameMenu)(s8*, u32, s32*) = (volatile void*)INGAME_MENU_LOCATION + IGM_TEXT_SIZE_ALIGNED + 0x10;
+					(*inGameMenu)(&mainScreen, ce9->consoleModel, 0);
 				}
 				if (sharedAddr[3] == 0x54495845 && ndsHeader->unitCode > 0 && (ce9->valueBits & dsiMode)) {
 					igmReset = true;
