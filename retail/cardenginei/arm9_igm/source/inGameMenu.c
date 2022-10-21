@@ -134,7 +134,7 @@ static void printTime(void) {
 	u8 hours = (u8)sharedAddr[7];
 	u8 minutes = (u8)sharedAddr[8];
 	printDec(0x20 - 6, 0x18 - timeYpos, hours, 2, FONT_LIGHT_BLUE, false);
-	print(0x20 - 4, 0x18 - timeYpos, ":", FONT_LIGHT_BLUE, false);
+	printChar(0x20 - 4, 0x18 - timeYpos, ':', FONT_LIGHT_BLUE, false);
 	printDec(0x20 - 3, 0x18 - timeYpos, minutes, 2, FONT_LIGHT_BLUE, false);
 }
 
@@ -264,8 +264,7 @@ static void screenshot(void) {
 	}
 
 	#ifdef B4DS
-	volatile u32 (*prepareScreenshot)() = (volatile u32*)ce9->prepareScreenshot;
-	(*prepareScreenshot)();
+	(*ce9->prepareScreenshot)();
 	#else
 	sharedAddr[4] = 0x50505353;
 	while (sharedAddr[4] == 0x50505353) {
@@ -300,8 +299,7 @@ static void screenshot(void) {
 	VRAM_x_CR(vramBank) = vramCr;
 
 	#ifdef B4DS
-	volatile u32 (*saveScreenshot)() = (volatile u32*)ce9->saveScreenshot;
-	(*saveScreenshot)();
+	(*ce9->saveScreenshot)();
 	#else
 	sharedAddr[4] = 0x544F4853;
 	while (sharedAddr[4] == 0x544F4853) {
@@ -322,8 +320,7 @@ static void manual(void) {
 
 	while (1) {
 		#ifdef B4DS
-		volatile u32 (*readManual)(int line) = (volatile u32*)ce9->readManual;
-		(*readManual)(igmText.manualLine);
+		(*ce9->readManual)(igmText.manualLine);
 
 		print(0, 0, (unsigned char *)0x027FF200, FONT_WHITE, false);
 		#else

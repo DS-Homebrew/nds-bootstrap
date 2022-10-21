@@ -1,10 +1,14 @@
 #include <stdio.h>
+#include <string.h>
 #include <nds/ndstypes.h>
 #include <nds/debug.h>
 #include "patch.h"
+#include "find.h"
 #include "hook.h"
 #include "common.h"
 #include "cardengine_header_arm9.h"
+#include "debug_file.h"
+#include "nds_header.h"
 
 #define b_expansionPakFound BIT(0)
 #define b_extendedMemory BIT(1)

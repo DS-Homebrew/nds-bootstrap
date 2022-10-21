@@ -217,7 +217,7 @@ static const u16 sleepSignatureThumb4[4]        = {0xB530, 0xB08D, 0x1C04, 0xA80
 static const u32 sleepSignature5[4]        = {0xE92D4030, 0xE24DD034, 0xE28D4008, 0xE1A05000}; // sdk5
 static const u16 sleepSignatureThumb5[4]        = {0xB578, 0xB08D, 0xAE02, 0x1C05}; // sdk5
 
-static const u16 sleepConstantValue = {0x82EA};
+static const u16 sleepConstantValue[1] = {0x82EA};
 
 // Init Heap
 static const u32 initHeapEndSignature1[2]              = {0x27FF000, 0x37F8000};
@@ -383,12 +383,12 @@ u32* findDsiModeCheck2Offset(const u32* dsiModeCheckOffset, bool usesThumb) {
 
     u32* offset = NULL;
 	if (usesThumb) {
-		offset = findOffsetThumb(
+		offset = (u32*)findOffsetThumb(
 			(u16*)dsiModeCheckOffset+16, iUncompressedSize,//ndsHeader->arm9binarySize,
 			dsiModeCheck2SignatureThumb, 4
 		);
 		if (!offset) {
-			offset = findOffsetThumb(
+			offset = (u32*)findOffsetThumb(
 				(u16*)dsiModeCheckOffset+16, iUncompressedSize,//ndsHeader->arm9binarySize,
 				dsiModeCheck2SignatureThumbAlt, 4
 			);
@@ -423,20 +423,20 @@ u32* findCardHashInitOffset(const tNDSHeader* ndsHeader, const module_params_t* 
 	u32* offset = NULL;
 	if (moduleParams->sdk_version > 0x5008000) {
 		offset = findOffset(
-			*(u32*)0x02FFE1C8, iUncompressedSizei,//ndsHeader->arm9binarySize,
+			(u32*)(*(u32*)0x02FFE1C8), iUncompressedSizei,//ndsHeader->arm9binarySize,
 			cardHashInitSignature, 3
 		);
 
 		if (!offset) {
 			offset = findOffset(
-				*(u32*)0x02FFE1C8, iUncompressedSizei,//ndsHeader->arm9binarySize,
+				(u32*)(*(u32*)0x02FFE1C8), iUncompressedSizei,//ndsHeader->arm9binarySize,
 				cardHashInitSignatureAlt, 4
 			);
 		}
 
 		if (!offset) {
 			offset = findOffset(
-				*(u32*)0x02FFE1C8, iUncompressedSizei,//ndsHeader->arm9binarySize,
+				(u32*)(*(u32*)0x02FFE1C8), iUncompressedSizei,//ndsHeader->arm9binarySize,
 				cardHashInitSignatureAlt2, 4
 			);
 		}
@@ -477,13 +477,13 @@ u16* findCardHashInitOffsetThumb(const tNDSHeader* ndsHeader, const module_param
 	u16* offset = NULL;
 	if (moduleParams->sdk_version > 0x5008000) {
 		offset = findOffsetThumb(
-			*(u32*)0x02FFE1C8, iUncompressedSizei,//ndsHeader->arm9binarySize,
+			(u16*)(*(u32*)0x02FFE1C8), iUncompressedSizei,//ndsHeader->arm9binarySize,
 			cardHashInitSignatureThumb, 3
 		);
 
 		if (!offset) {
 			offset = findOffsetThumb(
-				*(u32*)0x02FFE1C8, iUncompressedSizei,//ndsHeader->arm9binarySize,
+				(u16*)(*(u32*)0x02FFE1C8), iUncompressedSizei,//ndsHeader->arm9binarySize,
 				cardHashInitSignatureThumbAlt, 3
 			);
 		}
@@ -565,7 +565,7 @@ u32* findCardReadEndOffsetType0(const tNDSHeader* ndsHeader, const module_params
 u32* findCardReadEndOffsetType1(const tNDSHeader* ndsHeader, u32 startOffset) {
 	dbg_printf("findCardReadEndOffsetType1:\n");
 
-	const char* romTid = getRomTid(ndsHeader);
+	// const char* romTid = getRomTid(ndsHeader);
 
 	u32* cardReadEndOffset = NULL;
 	//readType = 1;
@@ -2336,8 +2336,8 @@ u32* findWaitSysCyclesOffset(const tNDSHeader* ndsHeader) {
 
 u32* findSleepOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb, u32* usesThumbPtr) {
 	dbg_printf("findSleepOffset\n");
-    u32* sleepSignature = sleepSignature2;
-    u16* sleepSignatureThumb = sleepSignatureThumb2;
+    const u32* sleepSignature = sleepSignature2;
+    const u16* sleepSignatureThumb = sleepSignatureThumb2;
           
     if (moduleParams->sdk_version > 0x3000000 && moduleParams->sdk_version < 0x5000000) { 
         sleepSignature = sleepSignature4;
@@ -2351,8 +2351,8 @@ u32* findSleepOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleP
     u32 * sleepOffset = NULL;
     
     if(usesThumb) {
-  		sleepOffset = findOffsetThumb(
-      		(u32*)ndsHeader->arm9destination, iUncompressedSize,//ndsHeader->arm9binarySize,
+  		sleepOffset = (u32*)findOffsetThumb(
+      		(u16*)ndsHeader->arm9destination, iUncompressedSize,//ndsHeader->arm9binarySize,
             sleepSignatureThumb, 4
         );
 		if (sleepOffset) {
@@ -2373,8 +2373,8 @@ u32* findSleepOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 	}
 
 	if (!sleepOffset && usesThumb && moduleParams->sdk_version > 0x5000000) {
-  		sleepOffset = findOffsetThumb(
-      		(u32*)ndsHeader->arm9destination, iUncompressedSize,//ndsHeader->arm9binarySize,
+  		sleepOffset = (u32*)findOffsetThumb(
+      		(u16*)ndsHeader->arm9destination, iUncompressedSize,//ndsHeader->arm9binarySize,
             sleepSignatureThumb4, 4
         );
 		if (sleepOffset) {
@@ -2391,8 +2391,8 @@ u32* findSleepOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 	}
 
     while(sleepOffset!=NULL) {
-    	u32* sleepEndOffset = findOffsetThumb(
-    		sleepOffset, 0x200,
+    	u16* sleepEndOffset = findOffsetThumb(
+    		(u16*)sleepOffset, 0x200,
     		sleepConstantValue, 1
     	);
         if (sleepEndOffset) {
@@ -2403,8 +2403,8 @@ u32* findSleepOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleP
         } 
         
         if(usesThumb) {
-      		sleepOffset = findOffsetThumb(
-          		sleepOffset+1, iUncompressedSize,//ndsHeader->arm9binarySize,
+      		sleepOffset = (u32*)findOffsetThumb(
+          		(u16*)(sleepOffset+1), iUncompressedSize,//ndsHeader->arm9binarySize,
                 sleepSignatureThumb, 4
             );
       	} else {
@@ -2428,14 +2428,14 @@ u32* findSleepOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 u32* findCardEndReadDmaSdk5(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
 	dbg_printf("findCardEndReadDmaSdk5\n");
 
-    u16* cardEndReadDmaSignatureThumb = cardEndReadDmaSignatureThumb5;
-    u32* cardEndReadDmaSignature = cardEndReadDmaSignature5;
+    const u16* cardEndReadDmaSignatureThumb = cardEndReadDmaSignatureThumb5;
+    const u32* cardEndReadDmaSignature = cardEndReadDmaSignature5;
 
     u32 * offset = NULL;
     
     if(usesThumb) {
-  		offset = findOffsetThumb(
-      		(u32*)ndsHeader->arm9destination, iUncompressedSize,//ndsHeader->arm9binarySize,
+  		offset = (u32*)findOffsetThumb(
+      		(u16*)ndsHeader->arm9destination, iUncompressedSize,//ndsHeader->arm9binarySize,
             cardEndReadDmaSignatureThumb, 4
         );
     } else {
@@ -2462,7 +2462,7 @@ u32* findCardEndReadDma(const tNDSHeader* ndsHeader, const module_params_t* modu
         return findCardEndReadDmaSdk5(ndsHeader,moduleParams,usesThumb);
     }     
 
-	u32* offsetDmaHandler = NULL;
+	const u32* offsetDmaHandler = NULL;
 	if (moduleParams->sdk_version < 0x4000000) {
 		offsetDmaHandler = cardReadDmaEndOffset+8;
 	}
@@ -2489,21 +2489,21 @@ u32* findCardEndReadDma(const tNDSHeader* ndsHeader, const module_params_t* modu
     u32 * offset = NULL;
 
     if (usesThumb) {
-  		offset = findOffsetThumb(
-      		((u32)*offsetDmaHandler)-1, 0x200,//ndsHeader->arm9binarySize,
+  		offset = (u32*)findOffsetThumb(
+      		(u16*)((*offsetDmaHandler)-1), 0x200,//ndsHeader->arm9binarySize,
             cardEndReadDmaSignatureThumb4, 2
         );
     } else {
   		offset = findOffset(
-      		*offsetDmaHandler, 0x200,//ndsHeader->arm9binarySize,
+      		(u32*)*offsetDmaHandler, 0x200,//ndsHeader->arm9binarySize,
             cardEndReadDmaSignature4, 1
         ); 
     } 
 
 	if (!offset) {
 		if (usesThumb) {
-			offset = findOffsetThumb(
-				((u32)*offsetDmaHandler)-1, 0x200,//ndsHeader->arm9binarySize,
+			offset = (u32*)findOffsetThumb(
+				(u16*)((*offsetDmaHandler)-1), 0x200,//ndsHeader->arm9binarySize,
 				cardEndReadDmaSignatureThumb3, 1
 			);
 		} else {
@@ -2554,8 +2554,8 @@ u32* findCardSetDmaSdk5(const tNDSHeader* ndsHeader, const module_params_t* modu
             currentOffset = cardSetDmaEndOffset+2;
              if(usesThumb) {
                   dbg_printf("cardSetDmaSignatureStartThumb used: ");
-            		startOffset = findOffsetBackwardsThumb(
-                		cardSetDmaEndOffset, 0x90,
+            		startOffset = (u32*)findOffsetBackwardsThumb(
+                		(u16*)cardSetDmaEndOffset, 0x90,
                       cardSetDmaSignatureStartThumb5, 2
                   );
               } else {
@@ -2579,10 +2579,12 @@ u32* findCardSetDmaSdk5(const tNDSHeader* ndsHeader, const module_params_t* modu
                 dbg_printf("\n");*/
                 
                 return startOffset;
-            }                          
-        }     
-    } 
-}    
+            }
+        }
+    }
+
+    return NULL;
+}
 
 u32* findCardSetDma(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
 	dbg_printf("findCardSetDma\n");
@@ -2591,8 +2593,8 @@ u32* findCardSetDma(const tNDSHeader* ndsHeader, const module_params_t* modulePa
         return findCardSetDmaSdk5(ndsHeader,moduleParams,usesThumb);
     } 
     
-    //u16* cardSetDmaSignatureStartThumb = cardSetDmaSignatureStartThumb4;
-    u32* cardSetDmaSignatureStart = cardSetDmaSignatureStart4;
+    //const u16* cardSetDmaSignatureStartThumb = cardSetDmaSignatureStartThumb4;
+    const u32* cardSetDmaSignatureStart = cardSetDmaSignatureStart4;
 	int cardSetDmaSignatureStartLen = 3;
 
     if (moduleParams->sdk_version < 0x2004000) {
@@ -2646,8 +2648,8 @@ u32* findCardSetDma(const tNDSHeader* ndsHeader, const module_params_t* modulePa
 
     if(usesThumb) {
         dbg_printf("cardSetDmaSignatureStartThumb used: ");
-  		offset = findOffsetBackwardsThumb(
-      		cardSetDmaEndOffset, 0x60,
+  		offset = (u32*)findOffsetBackwardsThumb(
+      		(u16*)cardSetDmaEndOffset, 0x60,
             cardSetDmaSignatureStartThumb4, 4
         );
     } else {
@@ -2659,8 +2661,8 @@ u32* findCardSetDma(const tNDSHeader* ndsHeader, const module_params_t* modulePa
     }
 
 	if (!offset && usesThumb) {
-  		offset = findOffsetBackwardsThumb(
-      		cardSetDmaEndOffset, 0x60,
+  		offset = (u32*)findOffsetBackwardsThumb(
+      		(u16*)cardSetDmaEndOffset, 0x60,
             cardSetDmaSignatureStartThumb3, 4
         );
 	}
@@ -2683,7 +2685,7 @@ u32* findCardSetDma(const tNDSHeader* ndsHeader, const module_params_t* modulePa
 
 u32* findResetOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool* softResetMb) {
 	dbg_printf("findResetOffset\n");
-    u32* resetSignature = resetSignature2;
+    const u32* resetSignature = resetSignature2;
 
     if (moduleParams->sdk_version > 0x4008000 && moduleParams->sdk_version < 0x5000000) { 
         resetSignature = resetSignature4;
@@ -2799,7 +2801,7 @@ u32* findResetOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleP
     } 
     
     while(resetOffset!=NULL) {
-    	u32* resetEndOffset = findOffsetThumb(
+    	u32* resetEndOffset = findOffset(
     		resetOffset, 0x200,
     		(isSdk5(moduleParams) ? resetConstant5 : resetConstant), 1
     	);
@@ -2875,7 +2877,7 @@ u32* findMbkWramBOffset(const tNDSHeader* ndsHeader, const module_params_t* modu
 	u32* offset = NULL;
 	if (moduleParams->sdk_version > 0x5008000) {
 		offset = findOffset(
-			*(u32*)0x02FFE1C8, iUncompressedSizei,//ndsHeader->arm9binarySize,
+			(u32*)(*(u32*)0x02FFE1C8), iUncompressedSizei,//ndsHeader->arm9binarySize,
 			mbkWramBConstant, 1
 		);
 	} else {
@@ -2908,7 +2910,7 @@ u16* findMbkWramBOffsetThumb(const tNDSHeader* ndsHeader, const module_params_t*
 	u16* offset = NULL;
 	if (moduleParams->sdk_version > 0x5008000) {
 		offset = (u16*)findOffset(
-			*(u32*)0x02FFE1C8, iUncompressedSizei,//ndsHeader->arm9binarySize,
+			(u32*)(*(u32*)0x02FFE1C8), iUncompressedSizei,//ndsHeader->arm9binarySize,
 			mbkWramBConstant, 1
 		);
 	} else {
@@ -2942,7 +2944,7 @@ u32* findMbkWramBOffsetBoth(const tNDSHeader* ndsHeader, const module_params_t* 
 	u32* offset = NULL;
 	if (moduleParams->sdk_version > 0x5008000) {
 		offset = findOffset(
-			*(u32*)0x02FFE1C8, iUncompressedSizei,//ndsHeader->arm9binarySize,
+			(u32*)*(u32*)0x02FFE1C8, iUncompressedSizei,//ndsHeader->arm9binarySize,
 			mbkWramBConstant, 1
 		);
 	} else {

@@ -59,6 +59,9 @@ extern u32 cacheDescriptor[];
 extern int cacheCounter[];
 extern int accessCounter;
 
+extern void callEndReadDmaThumb(void);
+extern void disableIrqMask(u32 mask);
+
 bool isDma = false;
 bool dmaOn = true;
 bool dmaDirectRead = false;
@@ -70,7 +73,7 @@ void endCardReadDma() {
 	}
 
 	if (ce9->patches->cardEndReadDmaRef) {
-		volatile void (*cardEndReadDmaRef)() = ce9->patches->cardEndReadDmaRef;
+		VoidFn cardEndReadDmaRef = (VoidFn)ce9->patches->cardEndReadDmaRef;
 		(*cardEndReadDmaRef)();
 	} else if (ce9->thumbPatches->cardEndReadDmaRef) {
 		callEndReadDmaThumb();
@@ -218,7 +221,7 @@ void continueCardReadDmaArm9() {
 		}
         dmaReadOnArm9 = false;
 
-        vu32* volatile cardStruct = ce9->cardStruct0;
+        vu32* volatile cardStruct = (vu32*)ce9->cardStruct0;
         //u32	dma = cardStruct[3]; // dma channel
 
 		u32 commandRead=0x025FFB0A;
@@ -355,7 +358,7 @@ void continueCardReadDmaArm7() {
         if(!checkArm7()) return;
         dmaReadOnArm7 = false;
 
-        vu32* volatile cardStruct = ce9->cardStruct0;
+        vu32* volatile cardStruct = (vu32*)ce9->cardStruct0;
 
 		u32 src = ((ce9->valueBits & isSdk5) ? dmaParams[3] : cardStruct[0]);
 		u8* dst = ((ce9->valueBits & isSdk5) ? (u8*)(dmaParams[4]) : (u8*)(cardStruct[1]));
@@ -434,7 +437,7 @@ void cardSetDma(u32 * params) {
 		endCardReadDma();
 	}
 	#else
-	vu32* volatile cardStruct = ce9->cardStruct0;
+	vu32* volatile cardStruct = (vu32*)ce9->cardStruct0;
 
 	if (ce9->valueBits & isSdk5) {
 		dmaParams = params;
@@ -602,7 +605,7 @@ void cardSetDma(u32 * params) {
 	u8* dst = (u8*)params[4];
 	u32 len = params[5];
 	#else
-	vu32* volatile cardStruct = ce9->cardStruct0;
+	vu32* volatile cardStruct = (vu32*)ce9->cardStruct0;
 
 	u32 src = ((ce9->valueBits & isSdk5) ? params[3] : cardStruct[0]);
 	u8* dst = ((ce9->valueBits & isSdk5) ? (u8*)(params[4]) : (u8*)(cardStruct[1]));
@@ -617,7 +620,7 @@ void cardSetDma(u32 * params) {
 extern bool isNotTcm(u32 address, u32 len);
 
 u32 cardReadDma(u32 dma0, u8* dst0, u32 src0, u32 len0) {
-	vu32* volatile cardStruct = ce9->cardStruct0;
+	vu32* volatile cardStruct = (vu32*)ce9->cardStruct0;
 
 	u32 src = ((ce9->valueBits & isSdk5) ? src0 : cardStruct[0]);
 	u8* dst = ((ce9->valueBits & isSdk5) ? dst0 : (u8*)(cardStruct[1]));
@@ -629,7 +632,7 @@ u32 cardReadDma(u32 dma0, u8* dst0, u32 src0, u32 len0) {
         //&& func != NULL
         && len > 0
         && !(((int)dst) & 3)
-        && isNotTcm(dst, len)
+        && isNotTcm((u32)dst, len)
         // check 512 bytes page alignement 
         && !(((int)len) & 511)
         && !(((int)src) & 511)

@@ -174,6 +174,7 @@ extern void slot2MpuFix();
 extern void region0Fix(); // Revert region 0 patch
 extern void sdk5MpuFix();
 extern void resetMpu();
+extern u32 getDtcmBase(void);
 
 extern bool dldiPatchBinary (unsigned char *binData, u32 binSize);
 
