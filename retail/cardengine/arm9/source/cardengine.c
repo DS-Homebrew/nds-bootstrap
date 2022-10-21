@@ -414,11 +414,18 @@ s8 mainScreen = 0;
 }*/
 
 void inGameMenu(s32* exRegisters) {
+	static bool opening = false;
+	if (opening) { // If an exception error occured while reading in-game menu...
+		while (1);
+	}
+
 	int oldIME = enterCriticalSection();
 	setDeviceOwner();
 
+	opening = true;
 	fileWrite((char*)INGAME_MENU_LOCATION_B4DS, pageFile, 0xA000, 0xA000);	// Backup part of game RAM to page file
 	fileRead((char*)INGAME_MENU_LOCATION_B4DS, pageFile, 0, 0xA000);	// Read in-game menu
+	opening = false;
 
 	*(u32*)(INGAME_MENU_LOCATION_B4DS + IGM_TEXT_SIZE_ALIGNED) = (u32)sharedAddr;
 	volatile void (*inGameMenu)(s8*, u32, s32*) = (volatile void*)INGAME_MENU_LOCATION_B4DS + IGM_TEXT_SIZE_ALIGNED + 0x10;
