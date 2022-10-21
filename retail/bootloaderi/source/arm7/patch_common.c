@@ -2729,6 +2729,58 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		tonccpy((u32*)0x020565A0, dsiSaveGetResultCode, 0xC);
 	}
 
+	// Mario vs. Donkey Kong: Minis March Again! (USA)
+	// Save code too advanced to patch, preventing support
+	else if (strcmp(romTid, "KDME") == 0 && saveOnFlashcard) {
+		*(u32*)0x02005190 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		*(u32*)0x0202BE84 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0202BE88 = 0xE12FFF1E; // bx lr
+		/* *(u32*)0x0202BDB0 = 0xE3A00001; // mov r0, #1 (dsiSaveFlush)
+		*(u32*)0x0202BEAC = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+		setBL(0x0202BEF8, (u32)dsiSaveOpen);
+		setBL(0x0202BF0C, (u32)dsiSaveCreate);
+		setBL(0x0202BF38, (u32)dsiSaveOpen);
+		setBL(0x0202BF60, (u32)dsiSaveSetLength);
+		setBL(0x0202BF70, (u32)dsiSaveClose);
+		setBL(0x0202BF94, (u32)dsiSaveWrite);
+		setBL(0x0202BFA0, (u32)dsiSaveGetLength);
+		setBL(0x0202BFDC, (u32)dsiSaveSeek);
+		setBL(0x0202BFF8, (u32)dsiSaveRead);
+		setBL(0x0202C2F0, (u32)dsiSaveSeek);
+		setBL(0x0202C314, (u32)dsiSaveRead);
+		setBL(0x0202C3DC, (u32)dsiSaveSeek);
+		setBL(0x0202C3F8, (u32)dsiSaveRead);
+		setBL(0x0202C66C, (u32)dsiSaveSeek);
+		setBL(0x0202C684, (u32)dsiSaveWrite);
+		setBL(0x0202C8F8, (u32)dsiSaveSeek);
+		setBL(0x0202C910, (u32)dsiSaveWrite);
+		setBL(0x0202C950, (u32)dsiSaveSeek);
+		setBL(0x0202C96C, (u32)dsiSaveWrite);
+		setBL(0x0202CA38, (u32)dsiSaveSeek);
+		setBL(0x0202CA50, (u32)dsiSaveRead);
+		setBL(0x0202CAE4, (u32)dsiSaveSeek);
+		setBL(0x0202CAFC, (u32)dsiSaveRead);
+		setBL(0x0202CCBC, (u32)dsiSaveSeek);
+		setBL(0x0202CCD4, (u32)dsiSaveWrite);
+		setBL(0x0202CD74, (u32)dsiSaveClose); */
+	}
+
+	// Mario vs. Donkey Kong: Minis March Again! (Europe, Australia)
+	// Save code too advanced to patch, preventing support
+	else if (strcmp(romTid, "KDMV") == 0 && saveOnFlashcard) {
+		*(u32*)0x0200519C = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		*(u32*)0x0202C6D0 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0202C6D4 = 0xE12FFF1E; // bx lr
+	}
+
+	// Mario vs. Donkey Kong: Mini Mini Sai Koushin! (Japan)
+	// Save code too advanced to patch, preventing support
+	else if (strcmp(romTid, "KDMJ") == 0 && saveOnFlashcard) {
+		*(u32*)0x0200519C = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		*(u32*)0x0202C6B0 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0202C6B4 = 0xE12FFF1E; // bx lr
+	}
+
 	// Metal Torrent (USA)
 	// Saving not supported due to using more than one file
 	else if (strcmp(romTid, "K59E") == 0 && saveOnFlashcard) {

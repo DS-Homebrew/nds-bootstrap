@@ -2,6 +2,7 @@
 	.global cch2HeapAlloc
 	.global cch2HeapSetPatch
 	.global fourSwHeapAlloc
+	.global mvdk3HeapAlloc
 	.global siezHeapAlloc
 	.align	4
 	.arm
@@ -14,6 +15,8 @@ cch2HeapSetPatch:
 	.word cch2HeapSetPatchFunc
 fourSwHeapAlloc:
 	.word fourSwHeapAllocFunc
+@mvdk3HeapAlloc:
+@	.word mvdk3HeapAllocFunc
 siezHeapAlloc:
 	.word siezHeapAllocFunc
 
@@ -143,6 +146,29 @@ fourSwHeapAddr:
 .word	0x091B0000 @ Offset of zelmap.bin
 .word	0x092E0000 @ Offset of us/eu/jp.kmsg
 .pool
+@---------------------------------------------------------------------------------
+
+@---------------------------------------------------------------------------------
+@mvdk3HeapAllocFunc:
+@---------------------------------------------------------------------------------
+@	stmfd   sp!, {r5,lr}
+@	ldr r5, =0x3456C @ Size of miniMario_anim.bin
+@	cmp r6, r5
+@	moveq r0, #0x09000000
+@	ldmeqfd   sp!, {r6,pc}
+@	ldr r5, =0x390B8 @ Size of miniPeach_anim.bin
+@	cmp r6, r5
+@	moveq r0, #0x09100000
+@	ldmeqfd   sp!, {r6,pc}
+@	ldr r5, =0x2FD2C @ Size of miniToad_anim.bin
+@	cmp r6, r5
+@	moveq r0, #0x09200000
+@	ldmeqfd   sp!, {r6,pc}
+@	@ldr r5, =0x49194 @ Size of miniDK_anim.bin
+@	@cmp r6, r5
+@	mov r0, #0x09300000
+@	ldmfd   sp!, {r5,pc}
+@.pool
 @---------------------------------------------------------------------------------
 
 @---------------------------------------------------------------------------------

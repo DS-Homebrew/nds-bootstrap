@@ -7456,17 +7456,52 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Mario vs. Donkey Kong: Minis March Again! (USA)
-	// Does not boot
-	/*else if (strcmp(romTid, "KDME") == 0) {
+	// Save code too advanced to patch, preventing support
+	// Requires 8MB of RAM
+	else if (strcmp(romTid, "KDME") == 0 && extendedMemory2) {
+		//extern u32* mvdk3HeapAlloc;
+
+		*(u32*)0x02005180 = 0xE3A01702; // mov r1, #0x80000
+		/*if (!extendedMemory2) {
+			*(u32*)0x02005188 = 0xE1A00000; // nop (Disable loading sound data)
+		}*/
+		*(u32*)0x02005190 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		*(u32*)0x0202BE84 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0202BE88 = 0xE12FFF1E; // bx lr
+		/* *(u32*)0x0202BDB0 = 0xE3A00001; // mov r0, #1 (dsiSaveFlush)
+		*(u32*)0x0202BEAC = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+		setBL(0x0202BEF8, (u32)dsiSaveOpen);
+		setBL(0x0202BF0C, (u32)dsiSaveCreate);
+		setBL(0x0202BF38, (u32)dsiSaveOpen);
+		setBL(0x0202BF60, (u32)dsiSaveSetLength);
+		setBL(0x0202BF70, (u32)dsiSaveClose);
+		setBL(0x0202BF94, (u32)dsiSaveWrite);
+		setBL(0x0202BFA0, (u32)dsiSaveGetLength);
+		setBL(0x0202BFDC, (u32)dsiSaveSeek);
+		setBL(0x0202BFF8, (u32)dsiSaveRead);
+		setBL(0x0202C2F0, (u32)dsiSaveSeek);
+		setBL(0x0202C314, (u32)dsiSaveRead);
+		setBL(0x0202C3DC, (u32)dsiSaveSeek);
+		setBL(0x0202C3F8, (u32)dsiSaveRead);
+		setBL(0x0202C66C, (u32)dsiSaveSeek);
+		setBL(0x0202C684, (u32)dsiSaveWrite);
+		setBL(0x0202C8F8, (u32)dsiSaveSeek);
+		setBL(0x0202C910, (u32)dsiSaveWrite);
+		setBL(0x0202C950, (u32)dsiSaveSeek);
+		setBL(0x0202C96C, (u32)dsiSaveWrite);
+		setBL(0x0202CA38, (u32)dsiSaveSeek);
+		setBL(0x0202CA50, (u32)dsiSaveRead);
+		setBL(0x0202CAE4, (u32)dsiSaveSeek);
+		setBL(0x0202CAFC, (u32)dsiSaveRead);
+		setBL(0x0202CCBC, (u32)dsiSaveSeek);
+		setBL(0x0202CCD4, (u32)dsiSaveWrite);
+		setBL(0x0202CD74, (u32)dsiSaveClose); */
 		*(u32*)0x0202E6F8 = 0xE1A00000; // nop
 		*(u32*)0x0202E788 = 0xE1A00000; // nop
-		*(u32*)0x020343E0 = 0xE1A00000; // nop
-		*(u32*)0x020343E4 = 0xE1A00000; // nop
-		*(u32*)0x020343F4 = 0xE1A00000; // nop
-		*(u32*)0x02034408 = 0xE1A00000; // nop
-		*(u32*)0x0203448C = 0xE1A00000; // nop
-		*(u32*)0x02059770 = 0xE1A00000; // nop
-		*(u32*)0x0205A72C = 0xE1A00000; // nop
+		/*if (!extendedMemory2) {
+			tonccpy((u32*)0x0206AAC8, mvdk3HeapAlloc, 0x1D8);
+			setBL(0x02033288, 0x0206AAC8);
+		}*/
 		*(u32*)0x020612B8 = 0xE28DD00C; // ADD   SP, SP, #0xC
 		*(u32*)0x020612BC = 0xE8BD8078; // LDMFD SP!, {R3-R6,PC}
 		*(u32*)0x02064F80 = 0xE1A00000; // nop
@@ -7478,12 +7513,75 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0206F904 = 0xE1A00000; // nop
 		*(u32*)0x0206F908 = 0xE1A00000; // nop
 		*(u32*)0x0206F90C = 0xE1A00000; // nop
-		patchHiHeapDSiWare(0x0206F968, heapEnd); // mov r0, #0x23E0000
+		patchHiHeapDSiWare(0x0206F968, /*extendedMemory2 ?*/ 0x02FB0000 /*: heapEnd+0xC00000*/); // mov r0, extendedMemory2 ? #0x2FB0000 (mirrors to 0x27B0000 on debug DS units) : #0x2FE0000 (mirrors to 0x23E0000 on retail DS units)
+		patchUserSettingsReadDSiWare(0x02070E5C);
 		*(u32*)0x02071390 = 0xE1A00000; // nop
 		*(u32*)0x02071394 = 0xE1A00000; // nop
 		*(u32*)0x02071398 = 0xE1A00000; // nop
 		*(u32*)0x0207139C = 0xE1A00000; // nop
-	}*/
+	}
+
+	// Mario vs. Donkey Kong: Minis March Again! (Europe, Australia)
+	// Save code too advanced to patch, preventing support
+	// Requires 8MB of RAM
+	// Does not boot
+	else if (strcmp(romTid, "KDMV") == 0 && extendedMemory2) {
+		*(u32*)0x0200518C = 0xE3A01702; // mov r1, #0x80000
+		/*if (!extendedMemory2) {
+			*(u32*)0x02005194 = 0xE1A00000; // nop (Disable loading sound data)
+		}*/
+		*(u32*)0x0200519C = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		*(u32*)0x0202C6D0 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0202C6D4 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0202EF08 = 0xE1A00000; // nop
+		*(u32*)0x0202EF98 = 0xE1A00000; // nop
+		*(u32*)0x02033850 = 0xE1A00000; // nop
+		*(u32*)0x02033858 = 0xE1A00000; // nop
+		*(u32*)0x020617B4 = 0xE1A00000; // nop
+		*(u32*)0x0206534C = 0xE1A00000; // nop
+		*(u32*)0x0206B458 = 0xE1A00000; // nop
+		*(u32*)0x0206E51C = 0xE1A00000; // nop
+		*(u32*)0x0206E520 = 0xE1A00000; // nop
+		*(u32*)0x0206E52C = 0xE1A00000; // nop
+		*(u32*)0x0206E670 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x0206E6CC, /*extendedMemory2 ?*/ 0x02FB0000 /*: heapEnd+0xC00000*/); // mov r0, extendedMemory2 ? #0x2FB0000 (mirrors to 0x27B0000 on debug DS units) : #0x2FE0000 (mirrors to 0x23E0000 on retail DS units)
+		patchUserSettingsReadDSiWare(0x0206FBAC);
+		*(u32*)0x020700AC = 0xE1A00000; // nop
+		*(u32*)0x020700B0 = 0xE1A00000; // nop
+		*(u32*)0x020700B4 = 0xE1A00000; // nop
+		*(u32*)0x020700B8 = 0xE1A00000; // nop
+		*(u32*)0x020739E4 = 0xE1A00000; // nop
+	}
+
+	// Mario vs. Donkey Kong: Mini Mini Sai Koushin! (Japan)
+	// Save code too advanced to patch, preventing support
+	// Requires 8MB of RAM
+	// Does not boot
+	else if (strcmp(romTid, "KDMJ") == 0 && extendedMemory2) {
+		*(u32*)0x0200518C = 0xE3A01702; // mov r1, #0x80000
+		/*if (!extendedMemory2) {
+			*(u32*)0x02005194 = 0xE1A00000; // nop (Disable loading sound data)
+		}*/
+		*(u32*)0x0200519C = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		*(u32*)0x0202C6B0 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0202C6B4 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0202EEE8 = 0xE1A00000; // nop
+		*(u32*)0x0202EF78 = 0xE1A00000; // nop
+		*(u32*)0x020617F4 = 0xE1A00000; // nop
+		*(u32*)0x0206538C = 0xE1A00000; // nop
+		*(u32*)0x0206B498 = 0xE1A00000; // nop
+		*(u32*)0x0206E55C = 0xE1A00000; // nop
+		*(u32*)0x0206E560 = 0xE1A00000; // nop
+		*(u32*)0x0206E56C = 0xE1A00000; // nop
+		*(u32*)0x0206E6B0 = 0xE1A00000; // nop
+		patchHiHeapDSiWare(0x0206E70C, /*extendedMemory2 ?*/ 0x02FB0000 /*: heapEnd+0xC00000*/); // mov r0, extendedMemory2 ? #0x2FB0000 (mirrors to 0x27B0000 on debug DS units) : #0x2FE0000 (mirrors to 0x23E0000 on retail DS units)
+		patchUserSettingsReadDSiWare(0x0206FBEC);
+		*(u32*)0x020700EC = 0xE1A00000; // nop
+		*(u32*)0x020700F0 = 0xE1A00000; // nop
+		*(u32*)0x020700F4 = 0xE1A00000; // nop
+		*(u32*)0x020700F8 = 0xE1A00000; // nop
+		*(u32*)0x02073A24 = 0xE1A00000; // nop
+	}
 
 	// Metal Torrent (USA)
 	// Saving not supported due to using more than one file
