@@ -3184,29 +3184,29 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Nintendo Countdown Calendar (USA)
 	else if (strcmp(romTid, "KAUE") == 0 && saveOnFlashcard) {
-		setBL(0x02012480, dsiSaveGetLength);
-		setBL(0x020124C0, dsiSaveRead);
-		setBL(0x0201253C, dsiSaveWrite);
-		setBL(0x02012B20, dsiSaveOpen);
-		setBL(0x02012BA0, dsiSaveClose);
-		setBL(0x02012F40, dsiSaveCreate);
-		setBL(0x02012F50, dsiSaveOpen);
-		setBL(0x02012F64, dsiSaveSetLength);
-		setBL(0x02012FAC, dsiSaveClose);
+		setBL(0x02012480, (u32)dsiSaveGetLength);
+		setBL(0x020124C0, (u32)dsiSaveRead);
+		setBL(0x0201253C, (u32)dsiSaveWrite);
+		setBL(0x02012B20, (u32)dsiSaveOpen);
+		setBL(0x02012BA0, (u32)dsiSaveClose);
+		setBL(0x02012F40, (u32)dsiSaveCreate);
+		setBL(0x02012F50, (u32)dsiSaveOpen);
+		setBL(0x02012F64, (u32)dsiSaveSetLength);
+		setBL(0x02012FAC, (u32)dsiSaveClose);
 		tonccpy((u32*)0x02086F2C, dsiSaveGetResultCode, 0xC);
 	}
 
 	// Nintendo Countdown Calendar (Europe, Australia)
 	else if (strcmp(romTid, "KAUV") == 0 && saveOnFlashcard) {
-		setBL(0x020124DC, dsiSaveGetLength);
-		setBL(0x0201251C, dsiSaveRead);
-		setBL(0x02012598, dsiSaveWrite);
-		setBL(0x02012B7C, dsiSaveOpen);
-		setBL(0x02012BFC, dsiSaveClose);
-		setBL(0x02012F9C, dsiSaveCreate);
-		setBL(0x02012FAC, dsiSaveOpen);
-		setBL(0x02012FC0, dsiSaveSetLength);
-		setBL(0x02013008, dsiSaveClose);
+		setBL(0x020124DC, (u32)dsiSaveGetLength);
+		setBL(0x0201251C, (u32)dsiSaveRead);
+		setBL(0x02012598, (u32)dsiSaveWrite);
+		setBL(0x02012B7C, (u32)dsiSaveOpen);
+		setBL(0x02012BFC, (u32)dsiSaveClose);
+		setBL(0x02012F9C, (u32)dsiSaveCreate);
+		setBL(0x02012FAC, (u32)dsiSaveOpen);
+		setBL(0x02012FC0, (u32)dsiSaveSetLength);
+		setBL(0x02013008, (u32)dsiSaveClose);
 		tonccpy((u32*)0x02087164, dsiSaveGetResultCode, 0xC);
 	}
 
