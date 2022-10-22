@@ -1,9 +1,9 @@
 @---------------------------------------------------------------------------------
 	.global mepHeapSetPatch
 	.global cch2HeapAlloc
-	.global @elePlHeapAlloc
+	@.global elePlHeapAlloc
 	.global fourSwHeapAlloc
-	.global @mvdk3HeapAlloc
+	@.global mvdk3HeapAlloc
 	.global siezHeapAlloc
 	.align	4
 	.arm
