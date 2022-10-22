@@ -493,6 +493,8 @@ static int runNdsFile(configuration* conf) {
 }
 
 int main(int argc, char** argv) {
+	fifoSendValue32(FIFO_PM, PM_REQ_SLEEP_DISABLE);
+
 	configuration* conf = (configuration*)malloc(sizeof(configuration));
 
 	int status = loadFromSD(conf, argv[0]);
