@@ -4,6 +4,7 @@
 	@.global elePlHeapAlloc
 	.global fourSwHeapAlloc
 	@.global mvdk3HeapAlloc
+	.global nintCdwnCalHeapAlloc
 	.global siezHeapAlloc
 	.align	4
 	.arm
@@ -20,6 +21,8 @@ fourSwHeapAlloc:
 	.word fourSwHeapAllocFunc
 @mvdk3HeapAlloc:
 @	.word mvdk3HeapAllocFunc
+nintCdwnCalHeapAlloc:
+	.word nintCdwnCalHeapAllocFunc
 siezHeapAlloc:
 	.word siezHeapAllocFunc
 
@@ -230,6 +233,53 @@ fourSwHeapAddr:
 @	mov r0, #0x09300000
 @	ldmfd   sp!, {r5,pc}
 @.pool
+@---------------------------------------------------------------------------------
+
+@---------------------------------------------------------------------------------
+nintCdwnCalHeapAllocFunc:
+@---------------------------------------------------------------------------------
+	stmfd   sp!, {r6,lr}
+
+	ldr r6, =0x72C0 @ Size of Font.nftr
+	cmp r0, r6
+	moveq r0, #0x09000000
+	ldmeqfd   sp!, {r6,pc}
+
+	ldr r6, =0x72B0 @ Size of FontCal.nftr
+	cmp r0, r6
+	ldreq r0, =0x09008000
+	ldmeqfd   sp!, {r6,pc}
+
+	ldr r6, =0x67D4 @ Size of FontCal2.nftr
+	cmp r0, r6
+	ldreq r0, =0x09010000
+	ldmeqfd   sp!, {r6,pc}
+
+	ldr r6, =0x7340 @ Size of FontInfo.nftr
+	cmp r0, r6
+	ldreq r0, =0x09018000
+	ldmeqfd   sp!, {r6,pc}
+
+	ldr r6, =0x733C @ Size of FontLine.nftr
+	cmp r0, r6
+	ldreq r0, =0x09020000
+	ldmeqfd   sp!, {r6,pc}
+
+	ldr r6, =0x7474 @ Size of FontPage.nftr
+	cmp r0, r6
+	ldreq r0, =0x09028000
+	ldmeqfd   sp!, {r6,pc}
+
+	ldr r6, =0xAF44 @ Size of FontRed.nftr
+	cmp r0, r6
+	ldreq r0, =0x09030000
+	ldmeqfd   sp!, {r6,pc}
+
+	@ldr r6, =0x4452C @ Size of suraTWLFont8x16.nftr
+	@cmp r0, r6
+	ldr r0, =0x0903B000
+	ldmfd   sp!, {r6,pc}
+.pool
 @---------------------------------------------------------------------------------
 
 @---------------------------------------------------------------------------------

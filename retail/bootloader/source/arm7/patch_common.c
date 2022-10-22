@@ -29,9 +29,6 @@
 #include "loading_screen.h"
 #include "debug_file.h"
 
-#define FEATURE_SLOT_GBA			0x00000010
-#define FEATURE_SLOT_NDS			0x00000020
-
 u16 patchOffsetCacheFilePrevCrc = 0;
 u16 patchOffsetCacheFileNewCrc = 0;
 
@@ -43,13 +40,13 @@ static inline void doubleNopT(u32 addr) {
 }
 
 void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
-	// extern u32 _io_dldi_features;
 	extern bool expansionPakFound;
 	extern u32 donorFileTwlCluster;	// SDK5 (TWL)
 	extern u32 fatTableAddr;
 	const char* romTid = getRomTid(ndsHeader);
 	extern void patchHiHeapDSiWare(u32 addr, u32 heapEnd);
 	extern void patchHiHeapDSiWareThumb(u32 addr, u32 newCodeAddr, u32 heapEnd);
+	extern void patchInitDSiWare(u32 addr, u32 heapEnd);
 	extern void patchUserSettingsReadDSiWare(u32 addr);
 
 	const u32 heapEnd = (fatTableAddr < 0x023C0000 || fatTableAddr >= CARDENGINE_ARM9_LOCATION_DLDI) ? CARDENGINE_ARM9_LOCATION_DLDI : fatTableAddr;
@@ -77,7 +74,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Nintendo DSi XL Demo Video (USA)
 	// Requires 8MB of RAM
 	if (strcmp(romTid, "DMEE") == 0 && extendedMemory2) {
-
 		// *(u32*)0x02004B9C = 0x0200002F;
 		*(u32*)0x02008DD8 = 0xE1A00000; // nop
 		*(u32*)0x02008EF4 = 0xE1A00000; // nop
@@ -98,7 +94,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Nintendo DSi XL Demo Video: Volume 2 (USA)
 	// Requires 8MB of RAM
 	else if (strcmp(romTid, "DMDE") == 0 && extendedMemory2) {
-
 		// *(u32*)0x02004B9C = 0x0200002F;
 		*(u32*)0x02008E04 = 0xE1A00000; // nop
 		*(u32*)0x02008F14 = 0xE1A00000; // nop
@@ -114,7 +109,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// NOE Movie Player: Volume 1 (Europe)
 	else if (strcmp(romTid, "DMPP") == 0) {
-
 		*(u32*)0x02009ED8 = 0xE1A00000; // nop
 		*(u32*)0x0200D0D8 = 0xE1A00000; // nop
 		*(u32*)0x0200EE00 = 0xE1A00000; // nop
@@ -129,7 +123,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Hair Salon (Europe/Australia)
 	// Requires 8MB of RAM
 	else if ((strcmp(romTid, "DHSE") == 0 || strcmp(romTid, "DHSV") == 0) && extendedMemory2) {
-
 		// *(u32*)0x02004B9C = 0x0200002F;
 		*(u32*)0x02005108 = 0xE1A00000; // nop
 		*(u32*)0x0200517C = 0xE1A00000; // nop
@@ -154,8 +147,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// 1950s Lawn Mower Kids (Europe, Australia)
 	// Saving not supported due to using more than one file in filesystem
 	else if (strcmp(romTid, "K95E") == 0 || strcmp(romTid, "K95V") == 0) {
-
-
 		*(u32*)0x02019608 = 0xE1A00000; // nop
 		*(u32*)0x02015A08 = 0xE1A00000; // nop
 		*(u32*)0x0201D8BC = 0xE1A00000; // nop
@@ -174,7 +165,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// GO Series: 10 Second Run (USA)
 	// GO Series: 10 Second Run (Europe)
 	else if (strcmp(romTid, "KJUE") == 0 || strcmp(romTid, "KJUP") == 0) {
-
 		*(u32*)0x020150FC = 0xE12FFF1E; // bx lr
 		*(u32*)0x0201588C = 0xE1A00000; // nop
 		*(u32*)0x0201589C = 0xE1A00000; // nop
@@ -225,8 +215,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// 101 Pinball World (USA)
 	// Requires 8MB of RAM
 	else if (strcmp(romTid, "KIIE") == 0 && extendedMemory2) {
-
-
 		*(u32*)0x02093EB0 = 0xE1A00000; // nop
 		*(u32*)0x02097220 = 0xE1A00000; // nop
 		*(u32*)0x0209B3E4 = 0xE1A00000; // nop
@@ -245,8 +233,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// 101 Pinball World (Europe)
 	// Requires 8MB of RAM
 	else if (strcmp(romTid, "KIIP") == 0 && extendedMemory2) {
-
-
 		*(u32*)0x0208DC80 = 0xE1A00000; // nop
 		*(u32*)0x02090FF0 = 0xE1A00000; // nop
 		*(u32*)0x020951B4 = 0xE1A00000; // nop
@@ -264,8 +250,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// 40-in-1: Explosive Megamix (USA)
 	else if (strcmp(romTid, "K45E") == 0) {
-
-
 		*(u32*)0x0200DFB8 = 0xE1A00000; // nop
 		/* *(u32*)0x0200DFCC = 0xE3A00001; // mov r0, #1
 		*(u32*)0x0200DFD0 = 0xE12FFF1E; // bx lr
@@ -5436,7 +5420,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Electroplankton: Varvoice (Europe, Australia)
 	else if (strcmp(romTid, "KEJV") == 0) {
-
 		*(u32*)0x020050C0 = 0xE1A00000; // nop
 		*(u32*)0x020050C8 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x02005244 = 0xE1A00000; // nop
@@ -5490,8 +5473,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Famicom Wars DS: Ushinawareta Hikari (Japan)
 	// DSi save function patching not needed 
 	else if (strcmp(romTid, "Z2EJ") == 0) {
-
-
 		*(u32*)0x02015BC4 = 0xE1A00000; // nop
 		*(u32*)0x020197B8 = 0xE1A00000; // nop
 		*(u32*)0x0201F670 = 0xE1A00000; // nop
@@ -5548,8 +5529,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		const u32 dsiSaveWriteT = 0x020372F0;
 		*(u16*)dsiSaveWriteT = 0x4778; // bx pc
 		tonccpy((u32*)(dsiSaveWriteT + 4), dsiSaveWrite, 0xC); // Original function overwritten, no BL setting needed */
-
-
 
 		*(u16*)0x020271CC = 0x2001; // movs r0, #1
 		*(u16*)0x020271CE = 0x4770; // bx lr
@@ -5626,7 +5605,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Flashlight (USA)
 	else if (strcmp(romTid, "KFSE") == 0) {
-
 		*(u32*)0x02005134 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		*(u32*)0x0201A200 = 0xE1A00000; // nop
 		*(u32*)0x0201D1F0 = 0xE1A00000; // nop
@@ -5642,7 +5620,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Flashlight (Europe)
 	else if (strcmp(romTid, "KFSP") == 0) {
-
 		*(u32*)0x0201A10C = 0xE1A00000; // nop
 		*(u32*)0x0201D0FC = 0xE1A00000; // nop
 		*(u32*)0x020200D8 = 0xE1A00000; // nop
@@ -5658,7 +5635,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Flipper (USA)
 	// Music will not play on retail consoles
 	else if (strcmp(romTid, "KFPE") == 0) {
-
 		*(u32*)0x02005168 = 0xE1A00000; // nop
 		*(u32*)0x0200DE64 = 0xE1A00000; // nop
 		*(u32*)0x02031F9C = 0xE1A00000; // nop
@@ -5676,7 +5652,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Flipper (Europe)
 	// Music will not play on retail consoles
 	else if (strcmp(romTid, "KFPP") == 0) {
-
 		*(u32*)0x02005168 = 0xE1A00000; // nop
 		*(u32*)0x0200DECC = 0xE1A00000; // nop
 		*(u32*)0x02032008 = 0xE1A00000; // nop
@@ -5694,8 +5669,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Flipper 2: Flush the Goldfish (USA)
 	// Requires 8MB of RAM
 	else if (strcmp(romTid, "KKNE") == 0 && extendedMemory2) {
-
-
 		*(u32*)0x020051EC = 0xE1A00000; // nop
 		*(u32*)0x02005208 = 0xE1A00000; // nop
 		*(u32*)0x02005220 = 0xE1A00000; // nop
@@ -5719,7 +5692,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Frogger Returns (USA)
 	else if (strcmp(romTid, "KFGE") == 0) {
-
 		*(u32*)0x020117D4 = 0xE1A00000; // nop
 		tonccpy((u32*)0x0201234C, dsiSaveGetResultCode, 0xC);
 		*(u32*)0x020152F0 = 0xE1A00000; // nop
@@ -5754,7 +5726,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Softlocks after a miss or exiting gameplay
 	// Save code seems confusing to patch, preventing support
 	else if (strcmp(romTid, "KGBO") == 0) {
-
 		*(u32*)0x0201007C = 0xE1A00000; // nop
 		*(u32*)0x020138C0 = 0xE1A00000; // nop
 		*(u32*)0x020177FC = 0xE1A00000; // nop
@@ -5798,7 +5769,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Game & Watch: Chef (USA, Europe)
 	// Softlocks after 3 misses or exiting gameplay
 	else if (strcmp(romTid, "KGCO") == 0) {
-
 		*(u32*)0x02011B84 = 0xE1A00000; // nop
 		*(u32*)0x020153C8 = 0xE1A00000; // nop
 		*(u32*)0x020194F4 = 0xE1A00000; // nop
@@ -5829,7 +5799,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Game & Watch: Donkey Kong Jr. (USA, Europe)
 	// Softlocks after 3 misses or exiting gameplay
 	else if (strcmp(romTid, "KGDO") == 0) {
-
 		*(u32*)0x0201007C = 0xE1A00000; // nop
 		*(u32*)0x020138C0 = 0xE1A00000; // nop
 		*(u32*)0x02017A78 = 0xE1A00000; // nop
@@ -5860,7 +5829,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Game & Watch: Flagman (USA, Europe)
 	// Softlocks after 3 misses or exiting gameplay
 	else if (strcmp(romTid, "KGGO") == 0) {
-
 		*(u32*)0x020104C8 = 0xE1A00000; // nop
 		*(u32*)0x02013D0C = 0xE1A00000; // nop
 		*(u32*)0x02017C48 = 0xE1A00000; // nop
@@ -5894,7 +5862,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Helmet & Manhole: Softlocks after 3 misses or exiting gameplay
 	// Judge: Softlocks after limit is reached or exiting gameplay
 	else if (strcmp(romTid, "KGHO") == 0 || strcmp(romTid, "KGJO") == 0 || strcmp(romTid, "KGMO") == 0) {
-
 		*(u32*)0x0201007C = 0xE1A00000; // nop
 		*(u32*)0x020138C0 = 0xE1A00000; // nop
 		*(u32*)0x020177FC = 0xE1A00000; // nop
@@ -5938,7 +5905,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Game & Watch: Mario's Cement Factory (USA, Europe)
 	// Softlocks after 3 misses or exiting gameplay
 	else if (strcmp(romTid, "KGFO") == 0) {
-
 		*(u32*)0x02011B84 = 0xE1A00000; // nop
 		*(u32*)0x020153C8 = 0xE1A00000; // nop
 		*(u32*)0x02019580 = 0xE1A00000; // nop
@@ -5969,7 +5935,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Game & Watch: Vermin (USA, Europe)
 	// Softlocks after 3 misses or exiting gameplay
 	else if (strcmp(romTid, "KGVO") == 0) {
-
 		*(u32*)0x0201007C = 0xE1A00000; // nop
 		*(u32*)0x020138C0 = 0xE1A00000; // nop
 		*(u32*)0x020177FC = 0xE1A00000; // nop
@@ -6000,7 +5965,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Glory Days: Tactical Defense (USA)
 	// Glory Days: Tactical Defense (Europe)
 	else if (strcmp(romTid, "KGKE") == 0 || strcmp(romTid, "KGKP") == 0) {
-
 		// *(u32*)0x02004B9C = 0x0200002F;
 		*(u32*)0x0200B488 = 0xE1A00000; // nop
 		*(u32*)0x02017128 = 0xE1A00000; // nop
@@ -6036,8 +6000,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Goooooal America (USA)
 	// Crash cause unknown
 	/*else if (strcmp(romTid, "K9AE") == 0) {
-
-
 		*(u32*)0x0200507C = 0xE1A00000; // nop
 		*(u32*)0x0201CE24 = 0xE1A00000; // nop
 		*(u32*)0x02021154 = 0xE1A00000; // nop
@@ -6056,8 +6018,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Requires 8MB of RAM
 	else if ((strcmp(romTid, "K3GE") == 0 || strcmp(romTid, "K3GP") == 0) && extendedMemory2) {
 		const u32 readCodeCopy = 0x02013CF4;
-
-
 
 		*(u32*)0x02012738 = 0xE1A00000; // nop
 		*(u32*)0x02015C98 = 0xE1A00000; // nop
@@ -6159,8 +6119,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Go! Go! Kokopolo (Japan)
 	// Requires 8MB of RAM
 	else if (strcmp(romTid, "K3GJ") == 0 && extendedMemory2) {
-
-
 		*(u32*)0x02012768 = 0xE1A00000; // nop
 		*(u32*)0x02015CC8 = 0xE1A00000; // nop
 		*(u32*)0x0201A13C = 0xE1A00000; // nop
@@ -6207,7 +6165,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Gold Fever (USA)
 	// Requires more than 8MB of RAM
 	/*else if (strcmp(romTid, "KG7E") == 0) {
-
 		*(u32*)0x02013E80 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		*(u32*)0x02014008 = 0xE1A00000; // nop
 		*(u32*)0x020142E0 = 0xE1A00000; // nop
@@ -6293,8 +6250,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Heathcliff: Spot On (USA)
 	else if (strcmp(romTid, "K6SE") == 0) {
-
-
 		*(u32*)0x0201615C = 0xE1A00000; // nop
 		*(u32*)0x02019EDC = 0xE1A00000; // nop
 		*(u32*)0x0201F084 = 0xE1A00000; // nop
@@ -6330,8 +6285,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Hellokids: Vol. 1: Coloring and Painting! (USA)
 	// Loops in some code during white screens
 	/*else if (strcmp(romTid, "KKIE") == 0) {
-
-
 		*(u32*)0x0200B888 = 0xE3A02001; // mov r2, #1
 		*(u32*)0x02028700 = 0xE1A00000; // nop
 		*(u32*)0x0202F7F4 = 0xE1A00000; // nop
@@ -6350,8 +6303,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Invasion of the Alien Blobs (USA)
 	// Branches to DSi code in ITCM?
 	/*else if (strcmp(romTid, "KBTE") == 0) {
-
-
 		*(u32*)0x0201BF84 = 0xE1A00000; // nop
 		*(u32*)0x0201BF94 = 0xE1A00000; // nop
 		*(u32*)0x0201BFB0 = 0xE1A00000; // nop
@@ -6373,7 +6324,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// JellyCar 2 (USA)
 	else if (strcmp(romTid, "KJYE") == 0) {
-
 		*(u32*)0x02006334 = 0xE1A00000; // nop
 		*(u32*)0x0200634C = 0xE1A00000; // nop
 		setBL(0x020067C4, (u32)dsiSaveOpen);
@@ -6424,8 +6374,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Jump Trials (USA)
 	// Does not work on real hardware
 	/*else if (strcmp(romTid, "KJPE") == 0) {
-
-
 		*(u32*)0x020050AC = 0xE1A00000; // nop
 		*(u32*)0x0201BD6C = 0xE1A00000; // nop
 		*(u32*)0x0201BD9C = 0xE1A00000; // nop
@@ -6452,8 +6400,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Jump Trials Extreme (USA)
 	// Does not work on real hardware
 	/*else if (strcmp(romTid, "KZCE") == 0) {
-
-
 		*(u32*)0x020050AC = 0xE1A00000; // nop
 		*(u32*)0x0201EAD0 = 0xE1A00000; // nop
 		*(u32*)0x0201EB00 = 0xE1A00000; // nop
@@ -6481,7 +6427,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Requires 8MB of RAM
 	// Crashes after ESRB screen
 	/*else if (strcmp(romTid, "KPAE") == 0 && extendedMemory2) {
-
 		*(u32*)0x020194A8 = 0xE1A00000; // nop
 		tonccpy((u32*)0x0201A020, dsiSaveGetResultCode, 0xC);
 		*(u32*)0x0201CFE4 = 0xE1A00000; // nop
@@ -6508,8 +6453,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Kung Fu Dragon (USA)
 	// Kung Fu Dragon (Europe)
 	else if (strcmp(romTid, "KT9E") == 0 || strcmp(romTid, "KT9P") == 0) {
-
-
 		*(u32*)0x02005154 = 0xE1A00000; // nop
 		*(u32*)0x020051D4 = 0xE1A00000; // nop
 		*(u32*)0x02005310 = 0xE1A00000; // nop (Skip Manual screen)
@@ -6539,8 +6482,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Akushon Gemu: Tobeyo!! Dorago! (Japan)
 	else if (strcmp(romTid, "KT9J") == 0) {
-
-
 		*(u32*)0x02005158 = 0xE1A00000; // nop
 		*(u32*)0x020051D8 = 0xE1A00000; // nop
 		*(u32*)0x020052F0 = 0xE1A00000; // nop (Skip Manual screen)
@@ -6571,8 +6512,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Kyara Pasha!: Hello Kitty (Japan)
 	// Shows Japanese error screen (Possibly related to camera)
 	/*else if (strcmp(romTid, "KYKJ") == 0) {
-
-
 		*(u32*)0x020051E4 -= 4;
 		*(u32*)0x020051EC = 0xE1A00000; // nop
 		*(u32*)0x020052CC = 0xE1A00000; // nop
@@ -6594,7 +6533,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Kyou Hanan no hi Hyakka: Hyakkajiten Maipedea Yori (Japan)
 	// Crashes at unknown location
 	/*else if (strcmp(romTid, "K47J") == 0 && extendedMemory2) {
-
 		*(u32*)0x0200E240 = 0xE1A00000; // nop
 		*(u32*)0x02011720 = 0xE1A00000; // nop
 		*(u32*)0x02015FD4 = 0xE1A00000; // nop
@@ -6637,8 +6575,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	else if (strncmp(romTid, "KQ9", 3) == 0 && debugOrMep) {
 		extern u32* fourSwHeapAlloc;
 		//u32* getLengthFunc = (u32*)0;
-
-
 
 		*(u32*)0x020051CC = 0xE1A00000; // nop
 		tonccpy((u32*)0x0200F860, dsiSaveGetResultCode, 0xC);
@@ -6813,7 +6749,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Legends of Exidia (USA)
 	// Requires more than 8MB of RAM
 	/*else if (strcmp(romTid, "KLEE") == 0) {
-
 		*(u32*)0x020050F4 = 0xE1A00000; // nop
 		*(u32*)0x0201473C = 0xE1A00000; // nop
 		*(u32*)0x02017E2C = 0xE1A00000; // nop
@@ -6831,7 +6766,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Libera Wing (Europe)
 	// Black screens
 	/*else if (strcmp(romTid, "KLWP") == 0) {
-
 		*(u32*)0x02016138 = 0xE1A00000; // nop
 		*(u32*)0x020195A8 = 0xE1A00000; // nop
 		*(u32*)0x0201ED70 = 0xE1A00000; // nop
@@ -6851,7 +6785,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Little Red Riding Hood's Zombie BBQ (USA)
 	else if (strcmp(romTid, "KZBE") == 0 && extendedMemory2) {
-
 		*(u32*)0x020050AC = 0xE1A00000; // nop
 		*(u32*)0x02005124 = 0xE1A00000; // nop
 		*(u32*)0x02005194 = 0xE1A00000; // nop
@@ -6954,8 +6887,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Little Twin Stars (Japan)
 	// Locks up(?) after confirming age and left/right hand
 	else if (strcmp(romTid, "KQ3J") == 0) {
-
-
 		*(u32*)0x020050DC = 0xE1A00000; // nop
 		*(u32*)0x020050F0 = 0xE1A00000; // nop
 		*(u32*)0x02005200 = 0xE1A00000; // nop
@@ -6976,8 +6907,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Lola's Alphabet Train (USA)
 	else if (strcmp(romTid, "KLKE") == 0) {
-
-
 		*(u32*)0x02005084 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		*(u32*)0x020050D0 = 0xE1A00000; // nop
 		*(u32*)0x02024D24 = 0xE1A00000; // nop
@@ -6994,8 +6923,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Lola's Alphabet Train (Europe)
 	else if (strcmp(romTid, "KLKP") == 0) {
-
-
 		*(u32*)0x02005084 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		*(u32*)0x020050D0 = 0xE1A00000; // nop
 		*(u32*)0x02024CE4 = 0xE1A00000; // nop
@@ -7012,8 +6939,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Lola's Fruit Shop Sudoku (USA)
 	else if (strcmp(romTid, "KOFE") == 0) {
-
-
 		*(u32*)0x02005108 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		*(u32*)0x0200BAD4 = 0xE1A00000; // nop
 		*(u32*)0x0200EB58 = 0xE1A00000; // nop
@@ -7031,8 +6956,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Lola's Fruit Shop Sudoku (Europe)
 	else if (strcmp(romTid, "KOFP") == 0) {
-
-
 		*(u32*)0x02005108 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		*(u32*)0x0200BB04 = 0xE1A00000; // nop
 		*(u32*)0x0200EB88 = 0xE1A00000; // nop
@@ -7052,8 +6975,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Requires 8MB of RAM
 	// Unable to save data
 	/*else if (strcmp(romTid, "K73E") == 0 && extendedMemory2) {
-
-
 		*(u32*)0x0201A17C = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
 		*(u32*)0x0201A22C = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
 		setBL(0x0201A9BC, (u32)dsiSaveOpen);
@@ -7119,8 +7040,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Requires 8MB of RAM
 	// Unable to save data
 	/*else if (strcmp(romTid, "K85J") == 0 && extendedMemory2) {
-
-
 		*(u32*)0x0201A3A8 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
 		*(u32*)0x0201A420 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
 		setBL(0x0201AB94, (u32)dsiSaveOpen);
@@ -7225,7 +7144,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Magical Whip (USA)
 	else if (strcmp(romTid, "KWME") == 0) {
-
 		*(u32*)0x0200E5D4 = 0xE1A00000; // nop
 		*(u32*)0x02011A18 = 0xE1A00000; // nop
 		*(u32*)0x020155B0 = 0xE1A00000; // nop
@@ -7255,8 +7173,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Magical Whip (Europe)
 	else if (strcmp(romTid, "KWMP") == 0) {
-
-
 		*(u32*)0x0200E610 = 0xE1A00000; // nop
 		*(u32*)0x02011ADC = 0xE1A00000; // nop
 		*(u32*)0x02015688 = 0xE1A00000; // nop
@@ -7287,7 +7203,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Magnetic Joe (USA)
 	// Saving not supported due to using more than one file in filesystem
 	else if (strcmp(romTid, "KJOE") == 0) {
-
 		*(u32*)0x02013344 = 0xE1A00000; // nop
 		*(u32*)0x0201705C = 0xE1A00000; // nop
 		*(u32*)0x0201B0B0 = 0xE1A00000; // nop
@@ -7325,7 +7240,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 				addr[i] -= extendedMemory2 ? 0x100000 : 0x180000;
 			}
 		}*/
-
 
 		*(u32*)0x020050AC = 0xE1A00000; // nop
 		*(u32*)0x020052B8 = 0xE1A00000; // nop
@@ -7380,8 +7294,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Make Up & Style (Europe)
 	// Requires 8MB of RAM
 	else if (strcmp(romTid, "KYLP") == 0 && extendedMemory2) {
-
-
 		*(u32*)0x020050C4 = 0xE1A00000; // nop
 		*(u32*)0x020052D0 = 0xE1A00000; // nop
 		*(u32*)0x020052D4 = 0xE1A00000; // nop
@@ -7852,8 +7764,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		ce9->patches->rumble_arm9[0][3] = *(u32*)0x02014718;
 		ce9->patches->rumble_arm9[1][3] = *(u32*)0x02019C54;
 
-
-
 		setBL(0x0200B134, (u32)dsiSaveCreate);
 		setBL(0x0200B158, (u32)dsiSaveGetResultCode);
 		*(u32*)0x0200B168 = 0xE1A00000; // nop
@@ -7903,8 +7813,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		ce9->rumbleFrames[1] = 30;
 		ce9->rumbleForce[0] = 1;
 		ce9->rumbleForce[1] = 1;
-
-
 
 		*(u32*)0x0200545C = 0xE1A00000; // nop
 		setBL(0x0200547C, (u32)dsiSaveCreate);
@@ -8074,8 +7982,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Model Academy (Europe)
 	else if (strcmp(romTid, "K8MP") == 0) {
-
-
 		*(u32*)0x02005098 = 0xE1A00000; // nop
 		*(u32*)0x020050B4 = 0xE1A00000; // nop
 		*(u32*)0x020050E8 = 0xE1A00000; // nop
@@ -8113,7 +8019,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Monster Buster Club (USA)
 	else if (strcmp(romTid, "KXBE") == 0) {
-
 		/* *(u32*)0x0207F058 = 0xE3A00001; // mov r0, #1
 		*(u32*)0x0207F05C = 0xE12FFF1E; // bx lr
 		*(u32*)0x0207F138 = 0xE3A00001; // mov r0, #1
@@ -8160,7 +8065,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Monster Buster Club (Europe)
 	else if (strcmp(romTid, "KXBP") == 0) {
-
 		/* *(u32*)0x0207EF64 = 0xE3A00001; // mov r0, #1
 		*(u32*)0x0207EF68 = 0xE12FFF1E; // bx lr
 		*(u32*)0x0207F044 = 0xE3A00001; // mov r0, #1
@@ -8207,8 +8111,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Motto Me de Unou o Kitaeru: DS Sokudoku Jutsu Light (Japan)
 	else if (strcmp(romTid, "K9SJ") == 0) {
-
-
 		*(u32*)0x0200E824 = 0xE1A00000; // nop
 		tonccpy((u32*)0x0200F3A8, dsiSaveGetResultCode, 0xC);
 		*(u32*)0x02011D58 = 0xE1A00000; // nop
@@ -8270,7 +8172,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Mr. Driller: Drill Till You Drop (USA)
 	// Saving not working due to weird code layout
 	else if (strcmp(romTid, "KDRE") == 0) {
-
 		*(u32*)0x0201FEA0 = 0xE1A00000; // nop (Disable NFTR font loading)
 		*(u32*)0x0202009C = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
 		*(u32*)0x0202030C = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
@@ -8329,7 +8230,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Mr. Driller: Drill Till You Drop (Europe, Australia)
 	// Saving not working due to weird code layout
 	else if (strcmp(romTid, "KDRV") == 0) {
-
 		*(u32*)0x0201FEA0 = 0xE1A00000; // nop (Disable NFTR font loading)
 		*(u32*)0x0202009C = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
 		*(u32*)0x0202030C = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
@@ -8429,7 +8329,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Music on: Playing Piano (Europe)
 	// Saving is difficult to implement
 	else if (strcmp(romTid, "KICE") == 0 || strcmp(romTid, "KICP") == 0) {
-
 		*(u32*)0x0200AFCC += 0xD0000000; // bne -> b
 		if (ndsHeader->gameCode[3] == 'E') {
 			// Skip Manual screen
@@ -8484,7 +8383,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Music on: Retro Keyboard (Europe, Australia)
 	// Saving is difficult to implement
 	else if (strcmp(romTid, "KRHE") == 0 || strcmp(romTid, "KRHV") == 0) {
-
 		*(u32*)0x0200833C = 0xE1A00000; // nop
 		*(u32*)0x02008398 = 0xE1A00000; // nop
 		*(u32*)0x020083CC = 0xE1A00000; // nop
@@ -8553,7 +8451,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u16*)dsiSaveWriteT = 0x4778; // bx pc
 		tonccpy((u32*)(dsiSaveWriteT + 4), dsiSaveWrite, 0xC);*/
 
-
 		doubleNopT(0x0200511E);
 		doubleNopT(0x02005124);
 		doubleNopT(0x02005272);
@@ -8602,8 +8499,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Neko Reversi (Japan)
 	// Requires 8MB of RAM
 	else if (strcmp(romTid, "KNVJ") == 0 && extendedMemory2) {
-
-
 		*(u32*)0x02010A04 = 0xE1A00000; // nop
 		*(u32*)0x020140A8 = 0xE1A00000; // nop
 		*(u32*)0x02017B64 = 0xE1A00000; // nop
@@ -8615,6 +8510,72 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchUserSettingsReadDSiWare(0x0201AE44);
 		*(u32*)0x0201E4B4 = 0xE1A00000; // nop
 		*(u32*)0x0203FCA4 = 0xE1A00000; // nop (Skip Manual screen)
+	}
+
+	// Nintendo Countdown Calendar (USA)
+	else if (strcmp(romTid, "KAUE") == 0 && debugOrMep) {
+		extern u32* nintCdwnCalHeapAlloc;
+
+		setBL(0x02012480, dsiSaveGetLength);
+		setBL(0x020124C0, dsiSaveRead);
+		setBL(0x0201253C, dsiSaveWrite);
+		setBL(0x02012B20, dsiSaveOpen);
+		setBL(0x02012BA0, dsiSaveClose);
+		setBL(0x02012F40, dsiSaveCreate);
+		setBL(0x02012F50, dsiSaveOpen);
+		setBL(0x02012F64, dsiSaveSetLength);
+		setBL(0x02012FAC, dsiSaveClose);
+		*(u32*)0x02013124 = 0xE1A00000; // nop
+		*(u32*)0x0201488C = 0xE1A00000; // nop
+		*(u32*)0x02014894 = 0xE1A00000; // nop
+		*(u32*)0x020148AC = 0xE3A00001; // mov r0, #1
+		*(u32*)0x020148BC = 0xE1A00000; // nop
+		*(u32*)0x020148D0 = 0xE1A00000; // nop
+		if (!extendedMemory2) {
+			tonccpy((u32*)0x020917D8, nintCdwnCalHeapAlloc, 0xC0);
+			setBL(0x0205AB70, 0x020917D8);
+		}
+		*(u32*)0x0205C1B4 = 0xE1A00000; // nop
+		*(u32*)0x020863A8 = 0xE1A00000; // nop
+		tonccpy((u32*)0x02086F2C, dsiSaveGetResultCode, 0xC);
+		*(u32*)0x02089BB0 = 0xE1A00000; // nop
+		patchInitDSiWare(0x0208FCB8, extendedMemory2 ? 0x02700000 : heapEnd);
+		*(u32*)0x02090044 = 0x021B5380;
+		patchUserSettingsReadDSiWare(0x02091268);
+		*(u32*)0x020946F8 = 0xE1A00000; // nop
+	}
+
+	// Nintendo Countdown Calendar (Europe, Australia)
+	else if (strcmp(romTid, "KAUV") == 0 && debugOrMep) {
+		extern u32* nintCdwnCalHeapAlloc;
+
+		setBL(0x020124DC, dsiSaveGetLength);
+		setBL(0x0201251C, dsiSaveRead);
+		setBL(0x02012598, dsiSaveWrite);
+		setBL(0x02012B7C, dsiSaveOpen);
+		setBL(0x02012BFC, dsiSaveClose);
+		setBL(0x02012F9C, dsiSaveCreate);
+		setBL(0x02012FAC, dsiSaveOpen);
+		setBL(0x02012FC0, dsiSaveSetLength);
+		setBL(0x02013008, dsiSaveClose);
+		*(u32*)0x02013180 = 0xE1A00000; // nop
+		*(u32*)0x020148E8 = 0xE1A00000; // nop
+		*(u32*)0x020148F0 = 0xE1A00000; // nop
+		*(u32*)0x02014908 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02014918 = 0xE1A00000; // nop
+		*(u32*)0x0201492C = 0xE1A00000; // nop
+		if (!extendedMemory2) {
+			tonccpy((u32*)0x02091A20, nintCdwnCalHeapAlloc, 0xC0);
+			setBL(0x0205ADA8, 0x02091A20);
+		}
+		*(u32*)0x0205C3EC = 0xE1A00000; // nop
+		*(u32*)0x020865E0 = 0xE1A00000; // nop
+		tonccpy((u32*)0x02087164, dsiSaveGetResultCode, 0xC);
+		*(u32*)0x02089DE8 = 0xE1A00000; // nop
+		patchInitDSiWare(0x0208FEF0, extendedMemory2 ? 0x02700000 : heapEnd);
+		*(u32*)0x0209027C = 0x021BA080;
+		patchUserSettingsReadDSiWare(0x020914A0);
+		*(u32*)0x02094940 = 0xE1A00000; // nop
 	}
 
 	// Nintendo DSi + Internet (Japan)
@@ -8678,7 +8639,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Nintendogs (China)
 	// Requires more than 8MB of RAM?
 	/*else if (strcmp(romTid, "KDOC") == 0 && extendedMemory2) {
-
 		*(u32*)0x0202A4FC = 0xE1A00000; // nop
 		*(u32*)0x0202A524 = 0xE1A00000; // nop
 		setBL(0x0202A6EC, (u32)dsiSaveSeek);
@@ -8731,8 +8691,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Nintendoji (Japan)
 	// Audio does not play, requires more patches to get past the save screen
 	else if (strcmp(romTid, "K9KJ") == 0 && extendedMemory2) {
-
-
 		*(u32*)0x02005160 = 0xE3A01601; // mov r1, #0x100000
 		*(u32*)0x020051C0 = 0xE1A00000; // nop
 		*(u32*)0x020051C4 = 0xE1A00000; // nop
@@ -8793,8 +8751,10 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020DD3C4 = 0xE1A00000; // nop
 		*(u32*)0x020DD3D0 = 0xE1A00000; // nop
 		*(u32*)0x020DD514 = 0xE1A00000; // nop
-		patchHiHeapDSiWare(0x020DD570, heapEnd); // mov r0, #0x23E0000
-		*(u32*)0x020DD6A4 = 0x0234F020;
+		patchHiHeapDSiWare(0x020DD570, extendedMemory2 ? 0x02700000 : heapEnd); // // mov r0, extendedMemory2 ? #0x2700000 : #0x23E0000
+		if (!extendedMemory2) {
+			*(u32*)0x020DD6A4 = 0x0234F020;
+		}
 		patchUserSettingsReadDSiWare(0x020DEA44);
 		*(u32*)0x020DEA6C = 0xE3A00001; // mov r0, #1
 		*(u32*)0x020DEA70 = 0xE12FFF1E; // bx lr
@@ -8818,7 +8778,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Black screens after company logos
 	// Seemingly not possible to fix the cause? (Fails to read or write save)
 	/*else if (strcmp(romTid, "KA7J") == 0) {
-
 		*(u32*)0x020107E8 = 0xE1A00000; // nop
 		*(u32*)0x02014350 = 0xE1A00000; // nop
 		*(u32*)0x02018864 = 0xE1A00000; // nop
@@ -8848,8 +8807,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Orion's Odyssey (USA)
 	// Due to our save implementation, save data is stored in both slots
 	else if (strcmp(romTid, "K6TE") == 0) {
-
-
 		*(u32*)0x02011FAC = 0xE1A00000; // nop
 		*(u32*)0x02015790 = 0xE1A00000; // nop
 		*(u32*)0x02018EE0 = 0xE1A00000; // nop
@@ -8900,8 +8857,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Paul's Monster Adventure (USA)
 	else if (strcmp(romTid, "KP9E") == 0) {
-
-
 		*(u32*)0x02013828 = 0xE1A00000; // nop
 		*(u32*)0x02016F48 = 0xE1A00000; // nop
 		*(u32*)0x0201C8B8 = 0xE1A00000; // nop
@@ -8932,7 +8887,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Paul's Shooting Adventure (USA)
 	else if (strcmp(romTid, "KPJE") == 0) {
-
 		*(u32*)0x0200FF94 = 0xE1A00000; // nop
 		*(u32*)0x0201362C = 0xE1A00000; // nop
 		*(u32*)0x02017F20 = 0xE1A00000; // nop
@@ -8964,8 +8918,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Paul's Shooting Adventure 2 (USA)
 	else if (strcmp(romTid, "KUSE") == 0) {
-
-
 		*(u32*)0x02016008 = 0xE1A00000; // nop
 		*(u32*)0x02019E58 = 0xE1A00000; // nop
 		*(u32*)0x0201F9B0 = 0xE1A00000; // nop
@@ -9003,7 +8955,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Peg Solitaire (USA)
 	else if (strcmp(romTid, "KP8E") == 0) {
-
 		*(u32*)0x02012FA4 = 0xE1A00000; // nop
 		*(u32*)0x02016348 = 0xE1A00000; // nop
 		*(u32*)0x02019F80 = 0xE1A00000; // nop
@@ -9043,8 +8994,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Peg Solitaire (Europe)
 	else if (strcmp(romTid, "KP8P") == 0) {
-
-
 		*(u32*)0x02012FBC = 0xE1A00000; // nop
 		*(u32*)0x020163F4 = 0xE1A00000; // nop
 		*(u32*)0x0201A05C = 0xE1A00000; // nop
@@ -9086,8 +9035,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Petit Computer (USA)
 	// Does not boot (black screens, seems to rely on code from DSi binaries)
 	/*else if (strcmp(romTid, "KNAE") == 0) {
-
-
 		*(u32*)0x0200523C = 0xE1A00000; // nop
 		*(u32*)0x0200EB90 = 0xE1A00000; // nop
 		*(u32*)0x0200EB98 = 0xE1A00000; // nop
@@ -9179,7 +9126,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u16*)dsiSaveWriteT = 0x4778; // bx pc
 		tonccpy((u32*)(dsiSaveWriteT + 4), dsiSaveWrite, 0xC);
 
-
 		doubleNopT(0x020191A8);
 		doubleNopT(0x0201A4E4);
 		doubleNopT(0x0201A4E8);
@@ -9260,8 +9206,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// GO Series: Picdun (USA)
 	// GO Series: Picdun (Europe)
 	else if (strcmp(romTid, "KPQE") == 0 || strcmp(romTid, "KPQP") == 0) {
-
-
 		*(u32*)0x020050CC = 0xE1A00000; // nop
 		*(u32*)0x020050E4 = 0xE1A00000; // nop
 		*(u32*)0x020052A4 = 0xE1A00000; // nop
@@ -9293,7 +9237,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Danjo RPG: Picudan (Japan)
 	else if (strcmp(romTid, "KPQJ") == 0) {
-
 		*(u32*)0x020050B4 = 0xE1A00000; // nop
 		*(u32*)0x020050CC = 0xE1A00000; // nop
 		*(u32*)0x0200528C = 0xE1A00000; // nop

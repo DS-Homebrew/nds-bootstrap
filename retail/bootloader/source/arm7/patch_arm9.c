@@ -799,6 +799,30 @@ void patchUserSettingsReadDSiWare(u32 addr) {
 	}
 }
 
+void patchInitDSiWare(u32 addr, u32 heapEnd) {
+	bool heapInitPatched = false;
+	u32* func = getOffsetFromBL((u32*)(addr+0x10));
+	for (int i = 0; i < 64; i++) {	
+		if (func[i] == 0xE1A00100 && !heapInitPatched) {
+			func[i-2] = 0xE1A00000; // nop
+			i += 16;
+			heapInitPatched = true;
+		}
+
+		if (func[i] == 0xE3A007BE) {
+			patchHiHeapDSiWare(((u32)func+(i*sizeof(u32))), heapEnd);
+			break;
+		}
+	}
+
+	func = getOffsetFromBL((u32*)(addr+0x20));
+	func[3] = 0xE1A00000; // nop
+
+	*(u32*)(addr+0x8C) = 0xE1A00000; // nop
+	*(u32*)(addr+0x90) = 0xE1A00000; // nop
+	*(u32*)(addr+0x90) = 0xE1A00000; // nop
+}
+
 /*void relocate_ce9(u32 default_location, u32 current_location, u32 size) {
     dbg_printf("relocate_ce9\n");
     

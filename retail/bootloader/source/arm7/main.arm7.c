@@ -566,6 +566,8 @@ static bool isROMLoadableInRAM(const tNDSHeader* ndsHeader, const char* romTid, 
 		} else {
 			romSizeLimit = 0x1F80000;
 		}
+	} else if (strncmp(romTid, "KAU", 3) == 0) { // Nintendo Cowndown Calendar
+		romLocation += 0x200000;
 	}
 	if (extendedMemory2 && !dsDebugRam) {
 		*(vu32*)(0x0DFFFE0C) = 0x4253444E;		// Check for 32MB of RAM
@@ -585,7 +587,7 @@ static bool isROMLoadableInRAM(const tNDSHeader* ndsHeader, const char* romTid, 
 	bool res = false;
 	if ((strncmp(romTid, "UBR", 3) == 0 && isDevConsole)
 	 || (strncmp(romTid, "KXC", 3) == 0 && s2FlashcardId != 0x5A45) // Castle Conqueror: Heroes 2
-	 || (strncmp(romTid, "KQ9", 3) == 0 && s2FlashcardId != 0x5A45) // The Legend of Zelda: Four Swords: Anniversary Editio
+	 || (strncmp(romTid, "KQ9", 3) == 0 && s2FlashcardId != 0x5A45) // The Legend of Zelda: Four Swords: Anniversary Edition
 	 || (strncmp(romTid, "KEV", 3) == 0 && s2FlashcardId != 0x5A45) // Space Invaders Extreme Z
 	 || (strncmp(romTid, "UOR", 3) != 0
 	 && strncmp(romTid, "KPP", 3) != 0
