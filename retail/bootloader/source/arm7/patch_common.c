@@ -8513,6 +8513,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Nintendo Countdown Calendar (USA)
+	// Requires either 8MB of RAM or Memory Expansion Pak
 	else if (strcmp(romTid, "KAUE") == 0 && debugOrMep) {
 		extern u32* nintCdwnCalHeapAlloc;
 
@@ -8546,6 +8547,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Nintendo Countdown Calendar (Europe, Australia)
+	// Requires either 8MB of RAM or Memory Expansion Pak
 	else if (strcmp(romTid, "KAUV") == 0 && debugOrMep) {
 		extern u32* nintCdwnCalHeapAlloc;
 
