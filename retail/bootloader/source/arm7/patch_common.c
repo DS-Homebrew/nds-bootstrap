@@ -3329,12 +3329,12 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Requires either 8MB of RAM or Memory Expansion Pak
 	else if (strncmp(romTid, "KXC", 3) == 0 && debugOrMep) {
 		extern u32* cch2HeapAlloc;
-		extern u32* cch2HeapSetPatch;
+		extern u32* mepHeapSetPatch;
 
 		*(u32*)0x02013170 = 0xE1A00000; // nop
 		tonccpy((u32*)0x02013CF4, dsiSaveGetResultCode, 0xC);
 		if (!extendedMemory2) {
-			tonccpy((u32*)0x0201473C, cch2HeapSetPatch, 0x70);
+			tonccpy((u32*)0x0201473C, mepHeapSetPatch, 0x70);
 			tonccpy((u32*)0x0201D810, cch2HeapAlloc, 0xBC);
 		}
 		*(u32*)0x020164C4 = 0xE1A00000; // nop
@@ -4584,8 +4584,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	else if (strcmp(romTid, "B88A") == 0) {
 		const u16* branchCode = generateA7InstrThumb(0x020051F4, (int)ce9->thumbPatches->reset_arm9);
 
-
-
 		*(u16*)0x020051F4 = branchCode[0];
 		*(u16*)0x020051F6 = branchCode[1];
 		*(u32*)0x02005224 = 0xFFFFFFFF;
@@ -4613,8 +4611,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// GO Series: Earth Saver (USA)
 	else if (strcmp(romTid, "KB8E") == 0) {
-
-
 		*(u32*)0x02005234 = 0xE1A00000; // nop
 		*(u32*)0x02005530 = 0xE1A00000; // nop
 		// *(u32*)0x02005534 = 0xE1A00000; // nop
@@ -4658,8 +4654,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// GO Series: Earth Saver (Europe)
 	else if (strcmp(romTid, "KB8P") == 0) {
-
-
 		*(u32*)0x02005234 = 0xE1A00000; // nop
 		*(u32*)0x02005530 = 0xE1A00000; // nop
 		*(u32*)0x0200A310 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
@@ -4702,7 +4696,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Electroplankton: Beatnes (USA)
 	// Requires 8MB of RAM
 	else if (strcmp(romTid, "KEIE") == 0 && extendedMemory2) {
-
 		*(u32*)0x020050C0 = 0xE1A00000; // nop
 		*(u32*)0x020050C8 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x02005244 = 0xE1A00000; // nop
@@ -4729,7 +4722,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Electroplankton: Beatnes (Europe, Australia)
 	// Requires 8MB of RAM
 	else if (strcmp(romTid, "KEIV") == 0 && extendedMemory2) {
-
 		*(u32*)0x020050BC = 0xE1A00000; // nop
 		*(u32*)0x020050C4 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x02005238 = 0xE1A00000; // nop
@@ -4781,7 +4773,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Electroplankton: Hanenbow (USA)
 	else if (strcmp(romTid, "KEBE") == 0) {
-
 		*(u32*)0x020050C0 = 0xE1A00000; // nop
 		*(u32*)0x020050C8 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x02005244 = 0xE1A00000; // nop
@@ -4808,7 +4799,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Electroplankton: Hanenbow (Europe, Australia)
 	else if (strcmp(romTid, "KEBV") == 0) {
-
 		*(u32*)0x020050BC = 0xE1A00000; // nop
 		*(u32*)0x020050C4 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x02005238 = 0xE1A00000; // nop
@@ -4862,7 +4852,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Electroplankton: Lumiloop (USA)
 	// Requires 8MB of RAM
 	else if (strcmp(romTid, "KEGE") == 0 && extendedMemory2) {
-
 		*(u32*)0x020050C0 = 0xE1A00000; // nop
 		*(u32*)0x020050C8 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x02005244 = 0xE1A00000; // nop
@@ -4889,7 +4878,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Electroplankton: Lumiloop (Europe, Australia)
 	// Requires 8MB of RAM
 	else if (strcmp(romTid, "KEGV") == 0 && extendedMemory2) {
-
 		*(u32*)0x020050BC = 0xE1A00000; // nop
 		*(u32*)0x020050C4 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x02005238 = 0xE1A00000; // nop
@@ -4941,7 +4929,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Electroplankton: Luminarrow (USA)
 	else if (strcmp(romTid, "KECE") == 0) {
-
 		*(u32*)0x020050C0 = 0xE1A00000; // nop
 		*(u32*)0x020050C8 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x02005244 = 0xE1A00000; // nop
@@ -4968,7 +4955,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Electroplankton: Luminarrow (Europe, Australia)
 	else if (strcmp(romTid, "KECV") == 0) {
-
 		*(u32*)0x020050BC = 0xE1A00000; // nop
 		*(u32*)0x020050C4 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x02005238 = 0xE1A00000; // nop
@@ -5021,7 +5007,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Electroplankton: Marine-Crystals (USA)
 	else if (strcmp(romTid, "KEHE") == 0) {
-
 		*(u32*)0x020050C0 = 0xE1A00000; // nop
 		*(u32*)0x020050C8 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x02005244 = 0xE1A00000; // nop
@@ -5048,7 +5033,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Electroplankton: Marine-Crystals (Europe, Australia)
 	else if (strcmp(romTid, "KEHV") == 0) {
-
 		*(u32*)0x020050BC = 0xE1A00000; // nop
 		*(u32*)0x020050C4 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x02005238 = 0xE1A00000; // nop
@@ -5101,7 +5085,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Electroplankton: Nanocarp (USA)
 	else if (strcmp(romTid, "KEFE") == 0) {
-
 		*(u32*)0x020050C0 = 0xE1A00000; // nop
 		*(u32*)0x020050C8 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x02005244 = 0xE1A00000; // nop
@@ -5128,7 +5111,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Electroplankton: Nanocarp (Europe, Australia)
 	else if (strcmp(romTid, "KEFV") == 0) {
-
 		*(u32*)0x020050C0 = 0xE1A00000; // nop
 		*(u32*)0x020050C8 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x02005244 = 0xE1A00000; // nop
@@ -5181,7 +5163,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Electroplankton: Rec-Rec (USA)
 	else if (strcmp(romTid, "KEEE") == 0) {
-
 		*(u32*)0x020050C0 = 0xE1A00000; // nop
 		*(u32*)0x020050C8 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x02005244 = 0xE1A00000; // nop
@@ -5208,7 +5189,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Electroplankton: Rec-Rec (Europe, Australia)
 	else if (strcmp(romTid, "KEEV") == 0) {
-
 		*(u32*)0x020050C0 = 0xE1A00000; // nop
 		*(u32*)0x020050C8 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x02005244 = 0xE1A00000; // nop
@@ -5261,7 +5241,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Electroplankton: Sun-Animalcule (USA)
 	else if (strcmp(romTid, "KEDE") == 0) {
-
 		*(u32*)0x020050C0 = 0xE1A00000; // nop
 		*(u32*)0x020050C8 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x02005244 = 0xE1A00000; // nop
@@ -5288,7 +5267,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Electroplankton: Sun-Animalcule (Europe, Australia)
 	else if (strcmp(romTid, "KEDV") == 0) {
-
 		*(u32*)0x020050BC = 0xE1A00000; // nop
 		*(u32*)0x020050C4 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x02005238 = 0xE1A00000; // nop
@@ -5342,12 +5320,24 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Electroplankton: Trapy (USA)
 	// Requires 8MB of RAM
 	else if (strcmp(romTid, "KEAE") == 0 && extendedMemory2) {
+		//extern u32* mepHeapSetPatch;
+		//extern u32* elePlHeapAlloc;
 
 		*(u32*)0x020050C0 = 0xE1A00000; // nop
 		*(u32*)0x020050C8 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x02005244 = 0xE1A00000; // nop
 		*(u32*)0x02005258 = 0xE1A00000; // nop
 		*(u32*)0x0200526C = 0xE1A00000; // nop
+		/*if (!extendedMemory2) {
+			*(u32*)0x02046374 = (u32)getOffsetFromBL((u32*)0x02005508);
+			tonccpy((u32*)0x02046378, elePlHeapAlloc, 0xBC);
+
+			*(u32*)0x02003000 = (u32)getOffsetFromBL((u32*)0x020331FC);
+			tonccpy((u32*)0x02003004, mepHeapSetPatch, 0x1C);
+
+			setBL(0x02005508, 0x02046378);
+			setBL(0x020331FC, 0x02003004);
+		}*/
 		*(u32*)0x020123F8 = 0xE3A00001; // mov r0, #1
 		*(u32*)0x02012404 = 0xE1A00000; // nop
 		*(u32*)0x0203AAE8 = 0xE1A00000; // nop
@@ -5357,7 +5347,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02044A5C = 0xE1A00000; // nop
 		*(u32*)0x02044A68 = 0xE1A00000; // nop
 		*(u32*)0x02044BC8 = 0xE1A00000; // nop
-		patchHiHeapDSiWare(0x02044C24, 0x02700000); // mov r0, #0x2700000
+		patchHiHeapDSiWare(0x02044C24, /*extendedMemory2 ?*/ 0x02700000 /*: heapEnd*/); // mov r0, extendedMemory2 ? #0x2700000 : #0x23E0000
 		patchUserSettingsReadDSiWare(0x02045E04);
 		*(u32*)0x02046238 = 0xE1A00000; // nop
 		*(u32*)0x0204623C = 0xE1A00000; // nop
@@ -5369,7 +5359,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Electroplankton: Trapy (Europe, Australia)
 	// Requires 8MB of RAM
 	else if (strcmp(romTid, "KEAV") == 0 && extendedMemory2) {
-
 		*(u32*)0x020050BC = 0xE1A00000; // nop
 		*(u32*)0x020050C4 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x02005238 = 0xE1A00000; // nop
@@ -5421,7 +5410,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Electroplankton: Varvoice (USA)
 	else if (strcmp(romTid, "KEJE") == 0) {
-
 		*(u32*)0x020050C0 = 0xE1A00000; // nop
 		*(u32*)0x020050C8 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x02005244 = 0xE1A00000; // nop

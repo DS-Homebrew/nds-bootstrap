@@ -925,6 +925,8 @@ int arm7_main(void) {
 		enableDebug(getBootFileCluster("NDSBTSRP.LOG"));
 	}
 
+	*(vu32*)(0x02000000) = 0; // Clear debug RAM check flag
+
 	aFile srParamsFile = getFileFromCluster(srParamsFileCluster);
 	fileRead((char*)&softResetParams, srParamsFile, 0, 0x10);
 	bool softResetParamsFound = (softResetParams[0] != 0xFFFFFFFF);

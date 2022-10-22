@@ -1,24 +1,44 @@
 @---------------------------------------------------------------------------------
+	.global mepHeapSetPatch
 	.global cch2HeapAlloc
-	.global cch2HeapSetPatch
+	.global @elePlHeapAlloc
 	.global fourSwHeapAlloc
-	.global mvdk3HeapAlloc
+	.global @mvdk3HeapAlloc
 	.global siezHeapAlloc
 	.align	4
 	.arm
 
 .word 0x5050454D @ 'MEPP' string
 
+mepHeapSetPatch:
+	.word mepHeapSetPatchFunc
 cch2HeapAlloc:
 	.word cch2HeapAllocFunc
-cch2HeapSetPatch:
-	.word cch2HeapSetPatchFunc
+@elePlHeapAlloc:
+@	.word elePlHeapAllocFunc
 fourSwHeapAlloc:
 	.word fourSwHeapAllocFunc
 @mvdk3HeapAlloc:
 @	.word mvdk3HeapAllocFunc
 siezHeapAlloc:
 	.word siezHeapAllocFunc
+
+@---------------------------------------------------------------------------------
+mepHeapSetOrgFunc: .word 0
+mepHeapSetPatchFunc:
+@---------------------------------------------------------------------------------
+	stmfd   sp!, {r6,lr}
+
+	cmp r3, #0x09000000
+	ldmgefd   sp!, {r6,pc}
+
+	ldr	r6, mepHeapSetOrgFunc
+	bl	_blx_mepHeapSetOrgFunc
+
+	ldmfd   sp!, {r6,pc}
+_blx_mepHeapSetOrgFunc:
+	bx	r6
+@---------------------------------------------------------------------------------
 
 @---------------------------------------------------------------------------------
 cch2OrgFunction: .word 0
@@ -43,21 +63,62 @@ cch2HeapAlloc_return:
 _blx_cch2OrgFunction:
 	bx	r6
 .pool
+@---------------------------------------------------------------------------------
 
-cch2HeapSetOrgFunc: .word 0
-cch2HeapSetPatchFunc:
-	stmfd   sp!, {r6,lr}
+@---------------------------------------------------------------------------------
+@elePlOrgFunction: .word 0
+@elePlHeapAllocFunc:
+@---------------------------------------------------------------------------------
+@	stmfd   sp!, {r3-r6,lr}
 
-	cmp r3, #0x09000000
-	ldmeqfd   sp!, {r6,pc}
+@	cmp r0, #0x100000 @ if this is a .sdat file
+@	bgt elePlRunOrgFunction @ then run the original function
 
-	ldr	r6, cch2HeapSetOrgFunc
-	bl	_blx_cch2HeapSetOrgFunc
+@	cmp r0, #0x1000 @ if file less than 8KB
+@	blt elePlRunOrgFunction @ then run the original function
 
-	ldmfd   sp!, {r6,pc}
-_blx_cch2HeapSetOrgFunc:
-	bx	r6
+@	ldr r3, =0x02060000
+@	cmp r10, r3 @ if filename is outside of arm9 binary
+@	bgt elePlRunOrgFunction @ then run the original function
 
+@	mov r6, #0
+@elePlFilenameCheck:
+@	ldr r3, =0x02000000 @ filename pointer list
+@	ldr r5, [r3, r6]
+@	cmp r5, r10
+@	beq elePlUseOldHeapPtr
+@	cmp r5, #0
+@	streq r10, [r3, r6]
+@	beq elePlLastHeapPtrUpdate
+@	add r6, #4
+@	b elePlFilenameCheck
+
+@elePlLastHeapPtrUpdate:
+@	ldr r3, =0x02003FFC @ last heap pointer
+@	ldr r4, [r3]
+@	cmp r4, #0
+@	moveq r4, #0x09000000
+@	addne r4, r0
+@	str r4, [r3]
+
+@ save heap ponter
+@	ldr r3, =0x02001000 @ heap pointers
+@	str r4, [r3, r6]
+@	mov r0, r4
+@	ldmfd   sp!, {r3-r6,pc}
+
+@elePlUseOldHeapPtr:
+@	ldr r3, =0x02001000 @ heap pointers
+@	ldr r0, [r3, r6]
+@	ldmfd   sp!, {r3-r6,pc}
+
+@elePlRunOrgFunction:
+@	ldr	r6, elePlOrgFunction
+@	bl	_blx_elePlOrgFunction
+@	ldmfd   sp!, {r3-r6,pc}
+@_blx_elePlOrgFunction:
+@	bx	r6
+@.pool
 @---------------------------------------------------------------------------------
 
 @---------------------------------------------------------------------------------
