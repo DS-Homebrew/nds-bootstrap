@@ -523,7 +523,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBL(0x020304A8, (u32)dsiSaveWrite);
 			setBL(0x020304B8, (u32)dsiSaveClose);
 			*(u32*)0x02061590 = 0xE1A00000; // nop
-			patchInitDSiWare(0x02069CC4, heapEnd);
+			patchInitDSiWare(0x02069CC4, 0x02700000);
 			*(u32*)0x0206DE34 = 0xE1A00000; // nop
 			*(u32*)0x02070668 = 0xE1A00000; // nop
 		} else if (ndsHeader->gameCode[3] == 'P') {
@@ -542,7 +542,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBL(0x020304F8, (u32)dsiSaveWrite);
 			setBL(0x02030508, (u32)dsiSaveClose);
 			*(u32*)0x020615E0 = 0xE1A00000; // nop
-			patchInitDSiWare(0x02069E14, heapEnd);
+			patchInitDSiWare(0x02069E14, 0x02700000);
 			*(u32*)0x0206DE84 = 0xE1A00000; // nop
 			*(u32*)0x020706B8 = 0xE1A00000; // nop
 		}
@@ -5154,7 +5154,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 		*(u32*)0x02012738 = 0xE1A00000; // nop
 		*(u32*)0x02015C98 = 0xE1A00000; // nop
-		patchInitDSiWare(0x0201BF88, heapEnd);
+		patchInitDSiWare(0x0201BF88, 0x02700000);
 		// *(u32*)0x0201C314 -= 0x30000;
 		patchUserSettingsReadDSiWare(0x0201D604);
 		*(u32*)0x02021190 = 0xE1A00000; // nop
