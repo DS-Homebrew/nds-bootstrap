@@ -2379,7 +2379,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02057938 = 0xE1A00000; // nop
 		tonccpy((u32*)0x020584CC, dsiSaveGetResultCode, 0xC);
 		*(u32*)0x0205B0FC = 0xE1A00000; // nop
-		patchInitDSiWare(0x02062C24, extendedMemory2 ? 0x02700000 : heapEnd); // extendedMemory2 ? #0x2700000 : #0x23E0000
+		patchInitDSiWare(0x02062C24, extendedMemory2 ? 0x02700000 : heapEnd);
 		patchUserSettingsReadDSiWare(0x02064424);
 		*(u32*)0x02064440 = 0xE3A00001; // mov r0, #1
 		*(u32*)0x02064444 = 0xE12FFF1E; // bx lr
@@ -2421,7 +2421,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02057A10 = 0xE1A00000; // nop
 		tonccpy((u32*)0x020585A4, dsiSaveGetResultCode, 0xC);
 		*(u32*)0x0205B1D4 = 0xE1A00000; // nop
-		patchInitDSiWare(0x02062CFC, extendedMemory2 ? 0x02700000 : heapEnd); // extendedMemory2 ? #0x2700000 : #0x23E0000
+		patchInitDSiWare(0x02062CFC, extendedMemory2 ? 0x02700000 : heapEnd);
 		patchUserSettingsReadDSiWare(0x020644FC);
 		*(u32*)0x02064518 = 0xE3A00001; // mov r0, #1
 		*(u32*)0x0206451C = 0xE12FFF1E; // bx lr
@@ -2431,8 +2431,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Cake Ninja 2 (USA)
-	// Requires 8MB of RAM
-	else if (strcmp(romTid, "K2NE") == 0 && extendedMemory2) {
+	else if (strcmp(romTid, "K2NE") == 0) {
 		*(u32*)0x02008880 = 0xE1A00000; // nop
 		*(u32*)0x020089F4 = 0xE1A00000; // nop
 		setBL(0x0204C918, (u32)dsiSaveOpen);
@@ -2456,7 +2455,8 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020774AC = 0xE1A00000; // nop
 		tonccpy((u32*)0x02078040, dsiSaveGetResultCode, 0xC);
 		*(u32*)0x0207AC70 = 0xE1A00000; // nop
-		patchInitDSiWare(0x020827C4, 0x02700000);
+		patchInitDSiWare(0x020827C4, extendedMemory2 ? 0x02700000 : heapEnd);
+		*(u32*)0x02082B50 = 0x0210AFE0;
 		patchUserSettingsReadDSiWare(0x02083FC4);
 		*(u32*)0x02083FE0 = 0xE3A00001; // mov r0, #1
 		*(u32*)0x02083FE4 = 0xE12FFF1E; // bx lr
@@ -2466,8 +2466,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Cake Ninja 2 (Europe)
-	// Requires 8MB of RAM
-	else if (strcmp(romTid, "K2NP") == 0 && extendedMemory2) {
+	else if (strcmp(romTid, "K2NP") == 0) {
 		*(u32*)0x02008880 = 0xE1A00000; // nop
 		*(u32*)0x02008A88 = 0xE1A00000; // nop
 		setBL(0x0204C974, (u32)dsiSaveOpen);
@@ -2491,7 +2490,8 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02077508 = 0xE1A00000; // nop
 		tonccpy((u32*)0x0207809C, dsiSaveGetResultCode, 0xC);
 		*(u32*)0x0207ACCC = 0xE1A00000; // nop
-		patchInitDSiWare(0x02082820, 0x02700000);
+		patchInitDSiWare(0x02082820, extendedMemory2 ? 0x02700000 : heapEnd);
+		*(u32*)0x02082BAC = 0x0210B040;
 		patchUserSettingsReadDSiWare(0x02084020);
 		*(u32*)0x0208403C = 0xE3A00001; // mov r0, #1
 		*(u32*)0x02084040 = 0xE12FFF1E; // bx lr
