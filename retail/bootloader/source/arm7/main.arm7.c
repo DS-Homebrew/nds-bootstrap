@@ -566,12 +566,14 @@ static bool isROMLoadableInRAM(const tNDSHeader* ndsHeader, const char* romTid, 
 		} else {
 			romSizeLimit = 0x1F80000;
 		}
-	} else if (strncmp(romTid, "KAU", 3) == 0) { // Nintendo Cowndown Calendar
-		romLocation += 0x200000;
-		romSizeLimit -= 0x200000;
-	} else if (strncmp(romTid, "KQR", 3) == 0) { // Remote Racers
-		romLocation += 0x280000;
-		romSizeLimit -= 0x280000;
+	} else if (!extendedMemory2) {
+		if (strncmp(romTid, "KAU", 3) == 0) { // Nintendo Cowndown Calendar
+			romLocation += 0x200000;
+			romSizeLimit -= 0x200000;
+		} else if (strncmp(romTid, "KQR", 3) == 0) { // Remote Racers
+			romLocation += 0x280000;
+			romSizeLimit -= 0x280000;
+		}
 	}
 	if (extendedMemory2 && !dsDebugRam) {
 		*(vu32*)(0x0DFFFE0C) = 0x4253444E;		// Check for 32MB of RAM
