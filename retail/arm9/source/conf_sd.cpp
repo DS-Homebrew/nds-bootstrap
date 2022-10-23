@@ -3,6 +3,10 @@
 //#include <stdio.h>
 #include <nds.h>
 #include <nds/arm9/dldi.h>
+#include "io_m3_common.h"
+#include "io_g6_common.h"
+#include "io_sc_common.h"
+#include "exptools.h"
 #include <string>
 #include <string.h>
 #include <limits.h> // PATH_MAX
@@ -351,6 +355,52 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		return -1;
 	}
 	
+	if (*(u16*)0x02FFFC30 == 0) {
+		sysSetCartOwner(BUS_OWNER_ARM9); // Allow arm9 to access GBA ROM
+		if (*(u16*)(0x020000C0) != 0x334D && *(u16*)(0x020000C0) != 0x3647 && *(u16*)(0x020000C0) != 0x4353 && *(u16*)(0x020000C0) != 0x5A45) {
+			*(u16*)(0x020000C0) = 0;	// Clear Slot-2 flashcard flag
+		}
+
+		if (*(u16*)(0x020000C0) == 0) {
+		  if (io_dldi_data->ioInterface.features & FEATURE_SLOT_NDS) {
+			*(vu16*)(0x08000000) = 0x4D54;	// Write test
+			if (*(vu16*)(0x08000000) != 0x4D54) {	// If not writeable
+				_M3_changeMode(M3_MODE_RAM);	// Try again with M3
+				*(u16*)(0x020000C0) = 0x334D;
+				*(vu16*)(0x08000000) = 0x4D54;
+			}
+			if (*(vu16*)(0x08000000) != 0x4D54) {
+				_G6_SelectOperation(G6_MODE_RAM);	// Try again with G6
+				*(u16*)(0x020000C0) = 0x3647;
+				*(vu16*)(0x08000000) = 0x4D54;
+			}
+			if (*(vu16*)(0x08000000) != 0x4D54) {
+				_SC_changeMode(SC_MODE_RAM);	// Try again with SuperCard
+				*(u16*)(0x020000C0) = 0x4353;
+				*(vu16*)(0x08000000) = 0x4D54;
+			}
+			if (*(vu16*)(0x08000000) != 0x4D54) {
+				cExpansion::SetRompage(381);	// Try again with EZ Flash
+				cExpansion::OpenNorWrite();
+				cExpansion::SetSerialMode();
+				*(u16*)(0x020000C0) = 0x5A45;
+				*(vu16*)(0x08000000) = 0x4D54;
+			}
+			if (*(vu16*)(0x08000000) != 0x4D54) {
+				*(u16*)(0x020000C0) = 0;
+			}
+		  } else if (io_dldi_data->ioInterface.features & FEATURE_SLOT_GBA) {
+			if (memcmp(io_dldi_data->friendlyName, "M3 Adapter", 10) == 0) {
+				*(u16*)(0x020000C0) = 0x334D;
+			} else if (memcmp(io_dldi_data->friendlyName, "G6", 2) == 0) {
+				*(u16*)(0x020000C0) = 0x3647;
+			} else if (memcmp(io_dldi_data->friendlyName, "SuperCard", 9) == 0) {
+				*(u16*)(0x020000C0) = 0x4353;
+			}
+		  }
+		}
+	}
+
 	load_conf(conf, conf->sdFound ? "sd:/_nds/nds-bootstrap.ini" : "fat:/_nds/nds-bootstrap.ini");
 
 	conf->initDisc = (REG_SCFG_EXT == 0);

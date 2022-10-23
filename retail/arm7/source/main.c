@@ -86,6 +86,8 @@ void myFIFOValue32Handler(u32 value, void* userdata) {
 }
 
 int main(void) {
+	*(u16*)0x02FFFC30 = *(vu16*)0x4004700; // SNDEXCNT (Used for checking for regular DS or DSi/3DS in DS mode)
+
 	// Grab from DS header in GBA slot
 	*(u16*)0x02FFFC36 = *(u16*)0x0800015E;	// Header CRC16
 	*(u32*)0x02FFFC38 = *(u32*)0x0800000C;	// Game Code
