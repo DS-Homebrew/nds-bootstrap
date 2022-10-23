@@ -1817,7 +1817,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0200C8CC, (u32)dsiSaveGetInfo);
 		*(u32*)0x0200C910 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
 		*(u32*)0x0200C914 = 0xE12FFF1E; // bx lr
-		tonccpy((u32*)0x02044AEC, dsiSaveGetResultCode, 0xC);
+		tonccpy((u32*)0x0204AAEC, dsiSaveGetResultCode, 0xC);
 
 		// Skip Manual screen
 		for (int i = 0; i < 11; i++) {
@@ -4872,6 +4872,9 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Sudoku (USA) (Rev 1)
 	else if (strcmp(romTid, "K4DE") == 0 && saveOnFlashcard) {
 		if (ndsHeader->romversion == 1) {
+			*(u32*)0x0200698C = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+			// *(u32*)0x0203701C = 0xE3A00001; // mov r0, #1
+			// *(u32*)0x02037020 = 0xE12FFF1E; // bx lr
 			setBL(0x02037560, (u32)dsiSaveOpen);
 			setBL(0x020375B0, (u32)dsiSaveCreate);
 			setBL(0x020375F0, (u32)dsiSaveOpen);
@@ -4890,6 +4893,9 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBL(0x0203789C, (u32)dsiSaveGetLength);
 			setBL(0x020378C4, (u32)dsiSaveWrite);
 		} else {
+			*(u32*)0x0200695C = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+			// *(u32*)0x0203609C = 0xE3A00001; // mov r0, #1
+			// *(u32*)0x020360A0 = 0xE12FFF1E; // bx lr
 			setBL(0x020364A4, (u32)dsiSaveOpen);
 			setBL(0x020364F0, (u32)dsiSaveCreate);
 			setBL(0x02036530, (u32)dsiSaveOpen);
@@ -4912,10 +4918,8 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Sudoku (Europe, Australia) (Rev 1)
 	else if (strcmp(romTid, "K4DV") == 0 && saveOnFlashcard) {
-		// *(u32*)0x020360E8 = 0xE3A00001; // mov r0, #1
-		// *(u32*)0x020360EC = 0xE12FFF1E; // bx lr
+		*(u32*)0x0200698C = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		setBL(0x020375AC, (u32)dsiSaveOpen);
-		*(u32*)0x020375CC = 0xE1A00000; // nop
 		setBL(0x020375FC, (u32)dsiSaveCreate);
 		setBL(0x0203763C, (u32)dsiSaveOpen);
 		setBL(0x02037678, (u32)dsiSaveSetLength);
