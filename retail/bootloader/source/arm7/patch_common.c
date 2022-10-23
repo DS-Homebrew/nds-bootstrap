@@ -9355,13 +9355,19 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Remote Racers (USA)
 	// Remote Racers (Europe, Australia)
-	// Requires 8MB of RAM
-	else if ((strcmp(romTid, "KQRE") == 0 || strcmp(romTid, "KQRV") == 0) && extendedMemory2) {
+	// Requires either 8MB of RAM or Memory Expansion Pak
+	else if ((strcmp(romTid, "KQRE") == 0 || strcmp(romTid, "KQRV") == 0) && debugOrMep) {
+		extern u16* rmtRacersHeapAlloc;
+
 		*(u32*)0x020197F0 = 0xE1A00000; // nop
 		*(u32*)0x0201CDA0 = 0xE1A00000; // nop
-		patchInitDSiWare(0x02023BC4, heapEnd);
+		patchInitDSiWare(0x02023BC4, extendedMemory2 ? 0x02700000 : heapEnd);
 		patchUserSettingsReadDSiWare(0x020250BC);
 		*(u32*)0x02028758 = 0xE1A00000; // nop
+		if (!extendedMemory2) {
+			tonccpy((u32*)0x020256C0, rmtRacersHeapAlloc, 0xC0);
+			setBLThumb(0x02082484, 0x020256C0);
+		}
 		if (ndsHeader->gameCode[3] == 'E') {
 			*(u32*)0x0208DCBC = 0xE1A00000; // nop
 			*(u32*)0x0208DCC4 = 0xE1A00000; // nop

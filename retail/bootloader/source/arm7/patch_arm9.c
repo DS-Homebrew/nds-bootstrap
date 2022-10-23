@@ -820,7 +820,7 @@ void patchInitDSiWare(u32 addr, u32 heapEnd) {
 
 	*(u32*)(addr+0x8C) = 0xE1A00000; // nop
 	*(u32*)(addr+0x90) = 0xE1A00000; // nop
-	*(u32*)(addr+0x90) = 0xE1A00000; // nop
+	*(u32*)(addr+0x9C) = 0xE1A00000; // nop
 }
 
 /*void relocate_ce9(u32 default_location, u32 current_location, u32 size) {

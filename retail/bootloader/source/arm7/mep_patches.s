@@ -5,6 +5,7 @@
 	.global fourSwHeapAlloc
 	@.global mvdk3HeapAlloc
 	.global nintCdwnCalHeapAlloc
+	.global rmtRacersHeapAlloc
 	.global siezHeapAlloc
 	.align	4
 	.arm
@@ -23,6 +24,8 @@ fourSwHeapAlloc:
 @	.word mvdk3HeapAllocFunc
 nintCdwnCalHeapAlloc:
 	.word nintCdwnCalHeapAllocFunc
+rmtRacersHeapAlloc:
+	.word rmtRacersHeapAllocFunc
 siezHeapAlloc:
 	.word siezHeapAllocFunc
 
@@ -281,7 +284,31 @@ nintCdwnCalHeapAllocFunc:
 	ldmfd   sp!, {r6,pc}
 .pool
 @---------------------------------------------------------------------------------
+	.thumb
+@---------------------------------------------------------------------------------
+rmtRacersHeapAllocFunc:
+@---------------------------------------------------------------------------------
+	push {r6,lr}
 
+	ldr r6, =0x13A160 @ Modified size of textures.dat (Original: 0x13ACCC)
+	cmp r0, r6
+	bne rmtRacersAllocGui
+	ldr r0, =#0x09000000
+	pop {r6,pc}
+
+rmtRacersAllocGui:
+	ldr r6, =0x111484 @ Modified size of gui.dat (Original: 0x112088)
+	cmp r0, r6
+	bne rmtRacersAllocGameDat
+	ldr r0, =0x09140000
+	pop {r6,pc}
+
+rmtRacersAllocGameDat:	@ game.dat
+	ldr r0, =0x09260000
+	pop {r6,pc}
+.pool
+@---------------------------------------------------------------------------------
+	.arm
 @---------------------------------------------------------------------------------
 siezHeapAllocFunc:
 @---------------------------------------------------------------------------------
