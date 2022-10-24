@@ -1758,18 +1758,30 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Big Bass Arcade (USA)
-	// Locks up on the first shown logos
-	/*else if (strcmp(romTid, "K9GE") == 0) {
-		*(u32*)0x02005120 = 0xE1A00000; // nop
+	// Crashes later on retail consoles
+	else if (strcmp(romTid, "K9GE") == 0) {
+		*(u32*)0x02005120 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		*(u32*)0x0200D83C = 0xE1A00000; // nop
+		tonccpy((u32*)0x0200E3C0, dsiSaveGetResultCode, 0xC);
 		*(u32*)0x02010DDC = 0xE1A00000; // nop
-		*(u32*)0x020168C0 = 0xE1A00000; // nop
-		*(u32*)0x020186E8 = 0xE1A00000; // nop
-		*(u32*)0x020186EC = 0xE1A00000; // nop
-		*(u32*)0x020186F8 = 0xE1A00000; // nop
-		*(u32*)0x02018858 = 0xE1A00000; // nop
-		*(u32*)0x0203AF58 = 0xE12FFF1E; // bx lr
-	}*/
+		patchInitDSiWare(0x0201865C, extendedMemory2 ? 0x02700000 : heapEnd);
+		*(u32*)0x020189E8 = 0x022F2220;
+		patchUserSettingsReadDSiWare(0x02019AFC);
+		*(u32*)0x0201CE20 = 0xE1A00000; // nop
+		setBL(0x0203AF74, (u32)dsiSaveCreate);
+		setBL(0x0203AF90, (u32)dsiSaveOpen);
+		setBL(0x0203AFA4, (u32)dsiSaveSetLength);
+		setBL(0x0203AFD0, (u32)dsiSaveClose);
+		setBL(0x0203B080, (u32)dsiSaveDelete);
+		setBL(0x0203B12C, (u32)dsiSaveOpen);
+		setBL(0x0203B144, (u32)dsiSaveSeek);
+		setBL(0x0203B158, (u32)dsiSaveRead);
+		setBL(0x0203B168, (u32)dsiSaveClose);
+		setBL(0x0203B250, (u32)dsiSaveOpen);
+		setBL(0x0203B268, (u32)dsiSaveSeek);
+		setBL(0x0203B27C, (u32)dsiSaveWrite);
+		setBL(0x0203B28C, (u32)dsiSaveClose);
+	}
 
 	// Bird & Beans (USA)
 	// Difficult to get working
@@ -7688,6 +7700,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Orion's Odyssey (USA)
 	// Due to our save implementation, save data is stored in both slots
+	// Crashes later on retail consoles
 	else if (strcmp(romTid, "K6TE") == 0) {
 		*(u32*)0x02011FAC = 0xE1A00000; // nop
 		*(u32*)0x02015790 = 0xE1A00000; // nop

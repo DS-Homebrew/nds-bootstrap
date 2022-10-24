@@ -930,6 +930,25 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBLThumb(0x02036120, dsiSaveCloseT);
 	}
 
+	// Big Bass Arcade (USA)
+	else if (strcmp(romTid, "K9GE") == 0 && saveOnFlashcard) {
+		*(u32*)0x02005120 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		tonccpy((u32*)0x0200E3C0, dsiSaveGetResultCode, 0xC);
+		setBL(0x0203AF74, (u32)dsiSaveCreate);
+		setBL(0x0203AF90, (u32)dsiSaveOpen);
+		setBL(0x0203AFA4, (u32)dsiSaveSetLength);
+		setBL(0x0203AFD0, (u32)dsiSaveClose);
+		setBL(0x0203B080, (u32)dsiSaveDelete);
+		setBL(0x0203B12C, (u32)dsiSaveOpen);
+		setBL(0x0203B144, (u32)dsiSaveSeek);
+		setBL(0x0203B158, (u32)dsiSaveRead);
+		setBL(0x0203B168, (u32)dsiSaveClose);
+		setBL(0x0203B250, (u32)dsiSaveOpen);
+		setBL(0x0203B268, (u32)dsiSaveSeek);
+		setBL(0x0203B27C, (u32)dsiSaveWrite);
+		setBL(0x0203B28C, (u32)dsiSaveClose);
+	}
+
 	// Bomberman Blitz (USA)
 	else if (strcmp(romTid, "KBBE") == 0 && saveOnFlashcard) {
 		tonccpy((u32*)0x02009670, dsiSaveGetResultCode, 0xC);
