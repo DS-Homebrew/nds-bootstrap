@@ -567,13 +567,18 @@ static bool isROMLoadableInRAM(const tNDSHeader* ndsHeader, const char* romTid, 
 			romSizeLimit = 0x1F80000;
 		}
 	} else if (!extendedMemory2) {
-		if (strncmp(romTid, "KAU", 3) == 0) { // Nintendo Cowndown Calendar
+		if (strncmp(romTid, "KD4", 3) == 0) { // Meikyou Kokugo: Rakubiki Jiten
+			return false;
+		} else if (strncmp(romTid, "KAU", 3) == 0) { // Nintendo Cowndown Calendar
 			romLocation += 0x200000;
 			romSizeLimit -= 0x200000;
 		} else if (strncmp(romTid, "KQR", 3) == 0) { // Remote Racers
 			romLocation += 0x280000;
 			romSizeLimit -= 0x280000;
 		}
+	}
+	if (strncmp(romTid, "KD4", 3) == 0 && s2FlashcardId == 0x5A45) { // Meikyou Kokugo: Rakubiki Jiten
+		return false;
 	}
 	if (extendedMemory2 && !dsDebugRam) {
 		*(vu32*)(0x0DFFFE0C) = 0x4253444E;		// Check for 32MB of RAM

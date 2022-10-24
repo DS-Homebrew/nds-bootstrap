@@ -41,6 +41,7 @@ static inline void doubleNopT(u32 addr) {
 
 void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	extern bool expansionPakFound;
+	extern u16 s2FlashcardId;
 	extern u32 donorFileTwlCluster;	// SDK5 (TWL)
 	extern u32 fatTableAddr;
 	const char* romTid = getRomTid(ndsHeader);
@@ -50,6 +51,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	const u32 heapEnd = (fatTableAddr < 0x023C0000 || fatTableAddr >= CARDENGINE_ARM9_LOCATION_DLDI) ? CARDENGINE_ARM9_LOCATION_DLDI : fatTableAddr;
 	const bool debugOrMep = (extendedMemory2 || expansionPakFound);
+	const bool largeS2RAM = (expansionPakFound && (s2FlashcardId != 0)); // 16MB or more
 
 	if (donorFileTwlCluster == 0) {
 		return;
@@ -6514,6 +6516,32 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020700F4 = 0xE1A00000; // nop
 		*(u32*)0x020700F8 = 0xE1A00000; // nop
 		*(u32*)0x02073A24 = 0xE1A00000; // nop
+	}
+
+	// Meikyou Kokugo: Rakubiki Jiten (Japan)
+	// Saving not supported due to using more than one file
+	// Requires Slot-2 RAM expansion up to 16MB or more (Standard Memory Expansion Pak is not enough)
+	else if (strcmp(romTid, "KD4J") == 0 && largeS2RAM) {
+		*(u32*)0x02040284 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x020402FC = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0205CD28 = 0xE1A00000; // nop
+		*(u32*)0x0205E680 = 0xE1A00000; // nop
+		*(u32*)0x0205E688 = 0xE1A00000; // nop
+		*(u32*)0x0205ECAC = 0xE1A00000; // nop (Skip Manual screen)
+		if (s2FlashcardId == 0x5A45) {
+			*(u32*)0x0206E260 = 0xE3A00408; // mov r0, #0x08000000
+		} else {
+			*(u32*)0x0206E260 = 0xE3A00409; // mov r0, #0x09000000
+		}
+		*(u32*)0x020A6664 = 0xE1A00000; // nop
+		*(u32*)0x020A8DFC = 0xE1A00000; // nop
+		*(u32*)0x020AD2A0 = 0xE1A00000; // nop
+		*(u32*)0x020B28B4 = 0xE3A00001; // mov r0, #1
+		patchInitDSiWare(0x020B28CC, extendedMemory2 ? 0x02700000 : heapEnd);
+		patchUserSettingsReadDSiWare(0x020B4130);
+		*(u32*)0x020B86E4 = 0xE1A00000; // nop
+		*(u32*)0x020BABB0 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x020BABB4 = 0xE12FFF1E; // bx lr
 	}
 
 	// Metal Torrent (USA)

@@ -2800,6 +2800,12 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0202C6B4 = 0xE12FFF1E; // bx lr
 	}
 
+	// Meikyou Kokugo: Rakubiki Jiten (Japan)
+	// Saving not supported due to using more than one file
+	else if (strcmp(romTid, "KD4J") == 0 && saveOnFlashcard) {
+		*(u32*)0x0205ECAC = 0xE1A00000; // nop (Skip Manual screen)
+	}
+
 	// Metal Torrent (USA)
 	// Saving not supported due to using more than one file
 	else if (strcmp(romTid, "K59E") == 0 && saveOnFlashcard) {
