@@ -6522,7 +6522,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Saving not supported due to using more than one file
 	// Requires Slot-2 RAM expansion up to 16MB or more (Standard Memory Expansion Pak is not enough)
 	else if (strcmp(romTid, "KD4J") == 0 && largeS2RAM) {
-		*(u32*)0x02040284 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02040284 = 0xE3A00001; // mov r0, #1 (Hide battery icon)
 		*(u32*)0x020402FC = 0xE3A00000; // mov r0, #0
 		*(u32*)0x0205CD28 = 0xE1A00000; // nop
 		*(u32*)0x0205E680 = 0xE1A00000; // nop
