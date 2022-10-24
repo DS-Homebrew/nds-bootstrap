@@ -837,6 +837,8 @@ void inGameMenu(s8 *mainScreen, u32 consoleModel, s32 *exceptionRegisters) {
 					sharedAddr[4] = 0x54495845; // EXIT
 					break;
 				case MENU_RESET:
+					extern bool exceptionPrinted;
+					exceptionPrinted = false;
 					sharedAddr[3] = 0x52534554; // TESR
 					sharedAddr[4] = 0x54455352; // RSET
 					break;
