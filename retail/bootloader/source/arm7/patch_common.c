@@ -2892,8 +2892,8 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Castle Conqueror: Heroes 2 (Japan)
 	// Requires either 8MB of RAM or Memory Expansion Pak
 	else if (strncmp(romTid, "KXC", 3) == 0 && debugOrMep) {
-		extern u32* cch2HeapAlloc;
 		extern u32* mepHeapSetPatch;
+		extern u32* cch2HeapAlloc;
 
 		*(u32*)0x02013170 = 0xE1A00000; // nop
 		tonccpy((u32*)0x02013CF4, dsiSaveGetResultCode, 0xC);
@@ -3153,27 +3153,30 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Clash of Elementalists (USA)
 	// Clash of Elementalists (Europe)
-	// Requires more than 8MB of RAM
-	/*else if (strcmp(romTid, "KVLE") == 0 || strcmp(romTid, "KVLP") == 0) {
+	// Requires Memory Expansion Pak
+	// Crashes when stage starts
+	/*else if ((strcmp(romTid, "KVLE") == 0 || strcmp(romTid, "KVLP") == 0) && expansionPakFound) {
+		extern u32* mepHeapSetPatch;
+		extern u32* elementalistsHeapAlloc;
+
+		tonccpy((u32*)0x02002004, mepHeapSetPatch, 0x1C);
+
 		*(u32*)0x0200C038 = 0xE1A00000; // nop
 		*(u32*)0x0200C160 = 0xE1A00000; // nop
 		*(u32*)0x0200C174 = 0xE1A00000; // nop
 		*(u32*)0x0200F3C4 = 0xE1A00000; // nop
-		*(u32*)0x020152B0 = 0xE1A00000; // nop
-		*(u32*)0x02017208 = 0xE1A00000; // nop
-		*(u32*)0x0201720C = 0xE1A00000; // nop
-		*(u32*)0x02017218 = 0xE1A00000; // nop
-		*(u32*)0x02017378 = 0xE1A00000; // nop
-		patchHiHeapDSiWare(0x020173D4, extendedMemory2 ? 0x02F80000 : heapEnd+0xC00000); // mov r0, extendedMemory2 ? #0x2F80000 (mirrors to 0x2780000 on debug DS units) : #0x2FC0000 (mirrors to 0x23C0000 on retail DS units)
+		patchInitDSiWare(0x0201717C, extendedMemory2 ? 0x02FB0000 : heapEnd+0xC00000); // extendedMemory2 ? #0x2FB0000 (mirrors to 0x27B0000 on debug DS units) : #0x2FE0000 (mirrors to 0x23E0000 on retail DS units)
 		*(u32*)0x02017508 -= 0x30000;
 		patchUserSettingsReadDSiWare(0x0201875C);
 		*(u32*)0x02018778 = 0xE3A00001; // mov r0, #1
 		*(u32*)0x0201877C = 0xE12FFF1E; // bx lr
 		*(u32*)0x02018784 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x02018788 = 0xE12FFF1E; // bx lr
+		tonccpy((u32*)0x02018C50, elementalistsHeapAlloc, 0xC0);
 		*(u32*)0x0201BB20 = 0xE1A00000; // nop
 		if (ndsHeader->gameCode[3] == 'E') {
 			*(u32*)0x0202627C = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+			setBL(0x02027524, 0x02018C50);
 			*(u32*)0x02028B6C = 0xE1A00000; // nop
 			*(u32*)0x02028B70 = 0xE1A00000; // nop
 			*(u32*)0x02028B88 = 0xE1A00000; // nop
@@ -3181,6 +3184,9 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			*(u32*)0x02028BB0 = 0xE1A00000; // nop
 			*(u32*)0x0202B8CC = 0xE1A00000; // nop
 			*(u32*)0x0202B8E8 = 0xE1A00000; // nop
+			*(u32*)0x02002000 = (u32)getOffsetFromBL((u32*)0x02040A5C);
+			*(u32*)0x020409AC = 0xE1A00000; // nop
+			setBL(0x02040A5C, 0x02002004);
 		} else {
 			*(u32*)0x02028C58 = 0xE1A00000; // nop
 			*(u32*)0x02028C5C = 0xE1A00000; // nop
