@@ -5,6 +5,7 @@
 	.global fourSwHeapAlloc
 	@.global mvdk3HeapAlloc
 	.global nintCdwnCalHeapAlloc
+	.global nintendojiHeapAlloc
 	.global rmtRacersHeapAlloc
 	.global siezHeapAlloc
 	.align	4
@@ -24,6 +25,8 @@ fourSwHeapAlloc:
 @	.word mvdk3HeapAllocFunc
 nintCdwnCalHeapAlloc:
 	.word nintCdwnCalHeapAllocFunc
+nintendojiHeapAlloc:
+	.word nintendojiHeapAllocFunc
 rmtRacersHeapAlloc:
 	.word rmtRacersHeapAllocFunc
 siezHeapAlloc:
@@ -293,6 +296,24 @@ nintCdwnCalHeapAllocFunc:
 	@cmp r0, r6
 	ldr r0, =0x0903B000
 	ldmfd   sp!, {r6,pc}
+.pool
+@---------------------------------------------------------------------------------
+
+@---------------------------------------------------------------------------------
+nintendojiHeapAllocFunc:
+@---------------------------------------------------------------------------------
+	stmfd   sp!, {r6,lr}
+
+	cmp r1, #0x500000 @ Size of fileHeap
+	moveq r0, #0x09100000
+	ldmeqfd   sp!, {r6,pc}
+
+	ldr r6, =0x02022E14
+	bl	_blx_nintendojiOrgFunction
+
+	ldmfd   sp!, {r6,pc}
+_blx_nintendojiOrgFunction:
+	bx	r6
 .pool
 @---------------------------------------------------------------------------------
 	.thumb

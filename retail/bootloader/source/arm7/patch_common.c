@@ -7670,9 +7670,27 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}*/
 
 	// Nintendoji (Japan)
-	// Audio does not play, requires more patches to get past the save screen
-	else if (strcmp(romTid, "K9KJ") == 0 && extendedMemory2) {
-		*(u32*)0x02005160 = 0xE3A01601; // mov r1, #0x100000
+	// Due to our save implementation, save data is stored in both slots
+	// Audio does not play
+	// Crashes when going downstairs (confirmed on retail consoles)
+	else if (strcmp(romTid, "K9KJ") == 0 && debugOrMep) {
+		extern u32* nintendojiHeapAlloc;
+		if (expansionPakFound) {
+			*(u32*)0x0201D1B0 = 0xE12FFF1E; // bx lr
+			*(u32*)0x0201D1D8 = 0xE12FFF1E; // bx lr
+			tonccpy((u32*)0x0201C038, nintendojiHeapAlloc, 0xC0);
+			setBL(0x02022FDC, 0x0201C038);
+			*(u32*)0x0203F98C = 0xE1A00000; // nop
+			*(u32*)0x020FAB1C = 0xE1A00000; // nop
+			*(u32*)0x020FAB20 = 0xE3A06000; // mov r6, #0
+			*(u32*)0x020FABB0 = 0xE1A00000; // nop
+			*(u32*)0x020FABB4 = 0xE1A00000; // nop
+			*(u32*)0x020FD8EC = 0xE1A00000; // nop
+			*(u32*)0x020FD8F0 = 0xE3A01000; // mov r1, #0
+			*(u32*)0x020FDBA8 = 0xE3A02000; // mov r2, #0
+		} else {
+			*(u32*)0x02005160 = 0xE3A01601; // mov r1, #0x100000
+		}
 		*(u32*)0x020051C0 = 0xE1A00000; // nop
 		*(u32*)0x020051C4 = 0xE1A00000; // nop
 		*(u32*)0x020051C8 = 0xE1A00000; // nop
@@ -7681,11 +7699,52 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0200554C = 0xE1A00000; // nop
 		*(u32*)0x02010FCC = 0xE1A00000; // nop
 		*(u32*)0x020141B0 = 0xE1A00000; // nop
-		patchInitDSiWare(0x0201A96C, 0x02700000);
+		patchInitDSiWare(0x0201A96C, extendedMemory2 ? 0x02700000 : heapEnd);
+		*(u32*)0x0201ACF8 = 0x021BFDE0;
 		*(u32*)0x0201E7B0 = 0xE1A00000; // nop
 		*(u32*)0x0202033C = 0xE3A00001; // mov r0, #1
 		*(u32*)0x02020340 = 0xE12FFF1E; // bx lr
 		*(u32*)0x0209EEB8 = 0xE1A00000; // nop
+		//setBL(0x0209F040, (u32)dsiSaveClose);
+		setBL(0x0209F3A8, (u32)dsiSaveOpen);
+		setBL(0x0209F400, (u32)dsiSaveGetLength);
+		setBL(0x0209F484, (u32)dsiSaveRead); // dsiSaveReadAsync
+		setBL(0x0209F4E8, (u32)dsiSaveOpen);
+		setBL(0x0209F500, (u32)dsiSaveClose);
+		setBL(0x0209F5A4, (u32)dsiSaveCreate);
+		setBL(0x0209F5B4, (u32)dsiSaveGetResultCode);
+		setBL(0x0209F6DC, (u32)dsiSaveOpen);
+		setBL(0x0209F73C, (u32)dsiSaveSetLength);
+		setBL(0x0209F754, (u32)dsiSaveClose);
+		setBL(0x0209F770, (u32)dsiSaveWrite);
+		*(u32*)0x0209F780 = 0xE1A00000; // nop
+		setBL(0x0209F790, (u32)dsiSaveClose);
+		*(u32*)0x0209F794 = 0xE1A00000; // nop
+		setBL(0x0209F7AC, (u32)dsiSaveClose);
+		setBL(0x0209F7BC, (u32)dsiSaveClose);
+
+		// Disable sound
+		*(u32*)0x02032AB8 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02032ABC = 0xE12FFF1E; // bx lr
+		*(u32*)0x02032B1C = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02032B20 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02032B80 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02032B84 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02032BE4 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02032BE8 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02032C48 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02032C4C = 0xE12FFF1E; // bx lr
+		*(u32*)0x02032CAC = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02032CB0 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02032D10 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02032D14 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02032D74 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02032D78 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02032DD8 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02032DDC = 0xE12FFF1E; // bx lr
+		*(u32*)0x02032E00 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02032E04 = 0xE12FFF1E; // bx lr
+		*(u32*)0x020FF42C = 0xE12FFF1E; // bx lr
 	}
 
 	// Number Battle

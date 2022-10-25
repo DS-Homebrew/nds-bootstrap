@@ -3300,6 +3300,26 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0202BF14, (u32)dsiSaveClose);
 	}
 
+	// Nintendoji (Japan)
+	// Due to our save implementation, save data is stored in both slots
+	else if (strcmp(romTid, "K9KJ") == 0 && saveOnFlashcard) {
+		//setBL(0x0209F040, (u32)dsiSaveClose);
+		setBL(0x0209F3A8, (u32)dsiSaveOpen);
+		setBL(0x0209F400, (u32)dsiSaveGetLength);
+		setBL(0x0209F484, (u32)dsiSaveRead); // dsiSaveReadAsync
+		setBL(0x0209F4E8, (u32)dsiSaveOpen);
+		setBL(0x0209F500, (u32)dsiSaveClose);
+		setBL(0x0209F5A4, (u32)dsiSaveCreate);
+		setBL(0x0209F5B4, (u32)dsiSaveGetResultCode);
+		setBL(0x0209F6DC, (u32)dsiSaveOpen);
+		setBL(0x0209F73C, (u32)dsiSaveSetLength);
+		setBL(0x0209F754, (u32)dsiSaveClose);
+		setBL(0x0209F770, (u32)dsiSaveWrite);
+		setBL(0x0209F790, (u32)dsiSaveClose);
+		setBL(0x0209F7AC, (u32)dsiSaveClose);
+		setBL(0x0209F7BC, (u32)dsiSaveClose);
+	}
+
 	// Orion's Odyssey (USA)
 	// Due to our save implementation, save data is stored in both slots
 	else if (strcmp(romTid, "K6TE") == 0 && saveOnFlashcard) {
