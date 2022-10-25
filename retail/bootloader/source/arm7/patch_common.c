@@ -9018,7 +9018,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02026B94, (u32)dsiSaveWrite);
 		setBL(0x02026BA8, (u32)dsiSaveClose);
 		if (!extendedMemory2) {
-			*(u32*)0x0208AA08 = 0xE3A0182B; // mov r1, #0x2B0000
+			*(u32*)0x0208AA08 = 0xE3A0170B; // mov r1, #0x2C0000
 		}
 	}
 
