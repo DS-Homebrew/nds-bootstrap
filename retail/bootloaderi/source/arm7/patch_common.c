@@ -3916,6 +3916,54 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u16*)0x020179F4 = 0x4770; // bx lr (Disable NFTR loading from TWLNAND)
 	}
 
+	// Puzzler Brain Games (USA)
+	else if (strcmp(romTid, "KYEE") == 0 && saveOnFlashcard) {
+		*(u32*)0x020050F8 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		*(u32*)0x020051BC = 0xE1A00000; // nop (Skip Manual screen)
+		tonccpy((u32*)0x02015AD4, dsiSaveGetResultCode, 0xC);
+		setBL(0x02026984, (u32)dsiSaveOpen);
+		setBL(0x020269CC, (u32)dsiSaveGetLength);
+		setBL(0x02026A14, (u32)dsiSaveRead);
+		setBL(0x02026A30, (u32)dsiSaveClose);
+		setBL(0x02026B24, (u32)dsiSaveCreate);
+		setBL(0x02026B34, (u32)dsiSaveOpen);
+		setBL(0x02026B80, (u32)dsiSaveSetLength);
+		setBL(0x02026B94, (u32)dsiSaveWrite);
+		setBL(0x02026BA8, (u32)dsiSaveClose);
+	}
+
+	// Puzzler World 2013 (USA)
+	else if (strcmp(romTid, "KYGE") == 0 && saveOnFlashcard) {
+		*(u32*)0x020050F8 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		*(u32*)0x020051BC = 0xE1A00000; // nop (Skip Manual screen)
+		tonccpy((u32*)0x0201542C, dsiSaveGetResultCode, 0xC);
+		setBL(0x0202663C, (u32)dsiSaveOpen);
+		setBL(0x02026684, (u32)dsiSaveGetLength);
+		setBL(0x020266CC, (u32)dsiSaveRead);
+		setBL(0x020266E8, (u32)dsiSaveClose);
+		setBL(0x020267DC, (u32)dsiSaveCreate);
+		setBL(0x020267EC, (u32)dsiSaveOpen);
+		setBL(0x02026838, (u32)dsiSaveSetLength);
+		setBL(0x0202684C, (u32)dsiSaveWrite);
+		setBL(0x02026860, (u32)dsiSaveClose);
+	}
+
+	// Puzzler World XL (USA)
+	else if (strcmp(romTid, "KUOE") == 0 && saveOnFlashcard) {
+		*(u32*)0x020050F8 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		*(u32*)0x020051BC = 0xE1A00000; // nop (Skip Manual screen)
+		tonccpy((u32*)0x02015AD0, dsiSaveGetResultCode, 0xC);
+		setBL(0x0202693C, (u32)dsiSaveOpen);
+		setBL(0x02026984, (u32)dsiSaveGetLength);
+		setBL(0x020269CC, (u32)dsiSaveRead);
+		setBL(0x020269E8, (u32)dsiSaveClose);
+		setBL(0x02026ADC, (u32)dsiSaveCreate);
+		setBL(0x02026AEC, (u32)dsiSaveOpen);
+		setBL(0x02026B38, (u32)dsiSaveSetLength);
+		setBL(0x02026B4C, (u32)dsiSaveWrite);
+		setBL(0x02026B60, (u32)dsiSaveClose);
+	}
+
 	// Puzzle to Go: Baby Animals (Europe)
 	else if (strcmp(romTid, "KBYP") == 0 && saveOnFlashcard) {
 		// Skip Manual screen
