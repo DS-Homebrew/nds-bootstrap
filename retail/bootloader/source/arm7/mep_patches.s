@@ -301,6 +301,13 @@ rmtRacersHeapAllocFunc:
 @---------------------------------------------------------------------------------
 	push {r6,lr}
 
+	@ldr r6, =0x1C404C @ Modified size of textures.dat (My Little Restaurant) (Original: 0x1C7BD0)
+	@cmp r0, r6
+	@bne rmtRacersAllocTextures
+	@ldr r0, =#0x09000000
+	@pop {r6,pc}
+
+rmtRacersAllocTextures:
 	ldr r6, =0x13A160 @ Modified size of textures.dat (Original: 0x13ACCC)
 	cmp r0, r6
 	bne rmtRacersAllocGui

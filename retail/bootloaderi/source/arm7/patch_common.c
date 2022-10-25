@@ -3150,6 +3150,29 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02008E64 = 0xE12FFF1E; // bx lr
 	}
 
+	// My Little Restaurant (USA)
+	else if (strcmp(romTid, "KLTE") == 0 && saveOnFlashcard) {
+		setBL(0x02018BCC, (u32)dsiSaveClose);
+		setBL(0x02018C28, (u32)dsiSaveClose);
+		setBL(0x02018CD0, (u32)dsiSaveOpen);
+		setBL(0x02018CE8, (u32)dsiSaveSeek);
+		setBL(0x02018CFC, (u32)dsiSaveRead);
+		setBL(0x02018D9C, (u32)dsiSaveCreate);
+		setBL(0x02018DCC, (u32)dsiSaveOpen);
+		setBL(0x02018DFC, (u32)dsiSaveSetLength);
+		setBL(0x02018E24, (u32)dsiSaveSeek);
+		setBL(0x02018E38, (u32)dsiSaveWrite);
+		setBL(0x02018EE8, (u32)dsiSaveCreate);
+		setBL(0x02018F20, (u32)dsiSaveOpen);
+		setBL(0x02018F58, (u32)dsiSaveSetLength);
+		setBL(0x02018F74, (u32)dsiSaveSeek);
+		setBL(0x02018F88, (u32)dsiSaveWrite);
+		setBL(0x020190E8, (u32)dsiSaveSeek);
+		setBL(0x020190F8, (u32)dsiSaveWrite);
+		setBL(0x02019290, (u32)dsiSaveGetResultCode);
+		*(u32*)0x020192D4 = 0xE3A00000; // mov r0, #0
+	}
+
 	// Need for Speed: Nitro-X (USA)
 	// Need for Speed: Nitro-X (Europe, Australia)
 	else if (strncmp(romTid, "KNP", 3) == 0 && saveOnFlashcard) {

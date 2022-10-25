@@ -692,7 +692,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// AiRace: Tunnel (USA)
 	// Requires 8MB of RAM
-	// Crashes after selecting a stage
+	// Crashes after selecting a stage due to weird bug
 	/*else if (strcmp(romTid, "KATE") == 0 && extendedMemory2) {
 		*(u16*)0x0202A3D2 = 0x46C0; // nop
 		*(u16*)0x0202A3D4 = 0x46C0; // nop
@@ -7377,6 +7377,53 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			*(u32*)0x020247BC = 0xE1A00000; // nop
 		}
 	}
+
+	// My Little Restaurant (USA)
+	// Requires either 8MB of RAM or Memory Expansion Pak
+	// Audio does not play on retail consoles
+	// Crashes after intro finishes due to weird bug
+	/*else if (strcmp(romTid, "KLTE") == 0 && debugOrMep) {
+		extern u16* rmtRacersHeapAlloc;
+
+		doubleNopT(0x0200FA6C);
+		doubleNopT(0x0200FA72);
+		*(u32*)0x0200FB34 = 0xE1A00000; // nop
+		setBL(0x02018BCC, (u32)dsiSaveClose);
+		setBL(0x02018C28, (u32)dsiSaveClose);
+		setBL(0x02018CD0, (u32)dsiSaveOpen);
+		setBL(0x02018CE8, (u32)dsiSaveSeek);
+		setBL(0x02018CFC, (u32)dsiSaveRead);
+		setBL(0x02018D9C, (u32)dsiSaveCreate);
+		setBL(0x02018DCC, (u32)dsiSaveOpen);
+		setBL(0x02018DFC, (u32)dsiSaveSetLength);
+		setBL(0x02018E24, (u32)dsiSaveSeek);
+		setBL(0x02018E38, (u32)dsiSaveWrite);
+		setBL(0x02018EE8, (u32)dsiSaveCreate);
+		setBL(0x02018F20, (u32)dsiSaveOpen);
+		setBL(0x02018F58, (u32)dsiSaveSetLength);
+		setBL(0x02018F74, (u32)dsiSaveSeek);
+		setBL(0x02018F88, (u32)dsiSaveWrite);
+		setBL(0x020190E8, (u32)dsiSaveSeek);
+		setBL(0x020190F8, (u32)dsiSaveWrite);
+		setBL(0x02019290, (u32)dsiSaveGetResultCode);
+		*(u32*)0x020192D4 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02023864 = 0xE1A00000; // nop
+		*(u32*)0x02026C18 = 0xE1A00000; // nop
+		patchInitDSiWare(0x0202D0A8, extendedMemory2 ? 0x02700000 : heapEnd);
+		*(u32*)0x0202D434 -= 0x30000;
+		patchUserSettingsReadDSiWare(0x0202E5A0);
+		*(u32*)0x02031C1C = 0xE1A00000; // nop
+		*(u32*)0x02041468 = 0xE1A00000; // nop
+		if (!extendedMemory2) {
+			// Disable audio
+			*(u32*)0x020186DC = 0xE1A00000; // bx lr
+			*(u32*)0x02041B18 = 0xE1A00000; // nop
+
+			tonccpy((u32*)0x0202EBA4, rmtRacersHeapAlloc, 0xC0);
+			setBLThumb(0x0205406C, 0x0202EBA4);
+		}
+		*(u32*)0x02041BD0 = 0xE12FFF1E; // bx lr
+	}*/
 
 	// Need for Speed: Nitro-X (USA)
 	// Need for Speed: Nitro-X (Europe, Australia)

@@ -569,7 +569,8 @@ static bool isROMLoadableInRAM(const tNDSHeader* ndsHeader, const char* romTid, 
 	} else if (!extendedMemory2) {
 		if (strncmp(romTid, "KD4", 3) == 0) { // Meikyou Kokugo: Rakubiki Jiten
 			return false;
-		} else if (strncmp(romTid, "KAU", 3) == 0) { // Nintendo Cowndown Calendar
+		} else if (// strncmp(romTid, "KLT", 3) == 0 // My Little Restaurant
+				/* || */ strncmp(romTid, "KAU", 3) == 0) { // Nintendo Cowndown Calendar
 			romLocation += 0x200000;
 			romSizeLimit -= 0x200000;
 		} else if (strncmp(romTid, "KQR", 3) == 0) { // Remote Racers
