@@ -1074,6 +1074,8 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 		tonccpy((u32*)0x0201BEB8, dsiSaveGetResultCode, 0xC);
 		if (ndsHeader->gameCode[3] == 'E') {
+			*(u32*)0x0205A598 = 0xE3A00000; // mov r0, #0
+			*(u32*)0x0205A804 = 0xE3A00000; // mov r0, #0
 			saveFuncOffsets[0] = (u32*)0x0205B148;
 			saveFuncOffsets[1] = (u32*)0x0205B160;
 			saveFuncOffsets[2] = (u32*)0x0205B174;
@@ -1097,6 +1099,8 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			saveFuncOffsets[20] = (u32*)0x0205B40C;
 			saveFuncOffsets[21] = (u32*)0x0205B424;
 		} else if (ndsHeader->gameCode[3] == 'P') {
+			*(u32*)0x0205BB7C = 0xE3A00000; // mov r0, #0
+			*(u32*)0x0205BE3C = 0xE3A00000; // mov r0, #0
 			saveFuncOffsets[0] = (u32*)0x0205C6F8;
 			saveFuncOffsets[1] = (u32*)0x0205C710;
 			saveFuncOffsets[2] = (u32*)0x0205C724;
@@ -1676,6 +1680,8 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 		tonccpy((u32*)0x0201C450, dsiSaveGetResultCode, 0xC);
 		if (ndsHeader->gameCode[3] == 'E') {
+			*(u32*)0x02062328 = 0xE3A00000; // mov r0, #0
+			*(u32*)0x02062600 = 0xE3A00000; // mov r0, #0
 			saveFuncOffsets[0] = (u32*)0x02062EA4;
 			saveFuncOffsets[1] = (u32*)0x02062EBC;
 			saveFuncOffsets[2] = (u32*)0x02062ED0;
@@ -1699,6 +1705,8 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			saveFuncOffsets[20] = (u32*)0x02063168;
 			saveFuncOffsets[21] = (u32*)0x02063180;
 		} else if (ndsHeader->gameCode[3] == 'P') {
+			*(u32*)0x02093D64 = 0xE3A00000; // mov r0, #0
+			*(u32*)0x0209403C = 0xE3A00000; // mov r0, #0
 			saveFuncOffsets[0] = (u32*)0x020948E0;
 			saveFuncOffsets[1] = (u32*)0x020948F8;
 			saveFuncOffsets[2] = (u32*)0x0209490C;
@@ -1834,7 +1842,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0200C810, (u32)dsiSaveClose);
 		setBL(0x0200C860, (u32)dsiSaveDelete);
 		setBL(0x0200C8CC, (u32)dsiSaveGetInfo);
-		*(u32*)0x0200C910 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+		*(u32*)0x0200C910 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc & dsiSaveFreeSpaceAvailable)
 		*(u32*)0x0200C914 = 0xE12FFF1E; // bx lr
 		tonccpy((u32*)0x0204AAEC, dsiSaveGetResultCode, 0xC);
 
@@ -3826,7 +3834,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0200D114, (u32)dsiSaveClose);
 		setBL(0x0200D164, (u32)dsiSaveDelete);
 		setBL(0x0200D1D0, (u32)dsiSaveGetInfo);
-		*(u32*)0x0200D214 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+		*(u32*)0x0200D214 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc & dsiSaveFreeSpaceAvailable)
 		*(u32*)0x0200D218 = 0xE12FFF1E; // bx lr
 		*(u32*)0x0200E004 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		tonccpy((u32*)0x0204ED3C, dsiSaveGetResultCode, 0xC);

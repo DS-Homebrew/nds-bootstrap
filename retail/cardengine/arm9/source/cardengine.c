@@ -799,14 +799,14 @@ u32 dsiSaveGetResultCode(const char* path) {
 
 	if (strcmp(path, "data") == 0) // Specific to EnjoyUp-developed games
 	{
-		return dsiSaveExists ? 8 : 0xE;
+		return dsiSaveExists ? 0 : 0xE;
 	} else
 	if (strcmp(path, "dataPub:") == 0 || strcmp(path, "dataPub:/") == 0
 	 || strcmp(path, "dataPrv:") == 0 || strcmp(path, "dataPrv:/") == 0)
 	{
-		return 8;
+		return 0;
 	}
-	return dsiSaveExists ? 8 : 0xB;
+	return dsiSaveExists ? 0 : 0xB;
 #else
 	return 0xB;
 #endif
@@ -907,6 +907,9 @@ u32 dsiSaveSetLength(void* ctx, s32 len) {
 		return 1;
 	}
 
+	if (dsiSaveSize == len) {
+		return 1;
+	}
 	dsiSaveSize = len;
 
 	int oldIME = enterCriticalSection();
@@ -1010,8 +1013,8 @@ s32 dsiSaveRead(void* ctx, void* dst, s32 len) {
 	if (res) {
 		dsiSaveSeekPos += len;
 		return len;
-}
-	#endif
+	}
+#endif
 	return -1;
 }
 

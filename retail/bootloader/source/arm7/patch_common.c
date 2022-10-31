@@ -2255,9 +2255,11 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			*(u32*)0x0205A550 = 0xE1A00000;
 			*(u32*)0x0205A558 = 0xE1A00000;
 			*(u32*)0x0205A588 = 0xE1A00000;
+			*(u32*)0x0205A598 = 0xE3A00000; // mov r0, #0
 			*(u32*)0x0205A600 = 0xE1A00000;
 			*(u32*)0x0205A608 = 0xE1A00000;
 			*(u32*)0x0205A740 = 0xE1A00000;
+			*(u32*)0x0205A804 = 0xE3A00000; // mov r0, #0
 			*(u32*)0x0205A83C = 0xE1A00000;
 			*(u32*)0x0205A844 = 0xE1A00000;
 			*(u32*)0x0205A8F4 = 0xE1A00000;
@@ -2296,12 +2298,14 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			*(u32*)0x0205BA38 = 0xE1A00000;
 			*(u32*)0x0205BA40 = 0xE1A00000;
 			*(u32*)0x0205BB6C = 0xE1A00000;
+			*(u32*)0x0205BB7C = 0xE3A00000; // mov r0, #0
 			*(u32*)0x0205BBE4 = 0xE1A00000;
 			*(u32*)0x0205BBEC = 0xE1A00000;
 			*(u32*)0x0205BC78 = 0xE1A00000;
 			*(u32*)0x0205BCE4 = 0xE1A00000;
 			*(u32*)0x0205BCEC = 0xE1A00000;
 			*(u32*)0x0205BD78 = 0xE1A00000;
+			*(u32*)0x0205BE3C = 0xE3A00000; // mov r0, #0
 			*(u32*)0x0205BE74 = 0xE1A00000;
 			*(u32*)0x0205BE7C = 0xE1A00000;
 			*(u32*)0x0205BF2C = 0xE1A00000;
@@ -3310,12 +3314,14 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			*(u32*)0x020621FC = 0xE1A00000; // nop
 			*(u32*)0x02062204 = 0xE1A00000; // nop
 			*(u32*)0x02062318 = 0xE1A00000; // nop
+			*(u32*)0x02062328 = 0xE3A00000; // mov r0, #0
 			*(u32*)0x02062394 = 0xE1A00000; // nop
 			*(u32*)0x0206239C = 0xE1A00000; // nop
 			*(u32*)0x02062428 = 0xE1A00000; // nop
 			*(u32*)0x0206249C = 0xE1A00000; // nop
 			*(u32*)0x020624A4 = 0xE1A00000; // nop
 			*(u32*)0x02062530 = 0xE1A00000; // nop
+			*(u32*)0x02062600 = 0xE3A00000; // mov r0, #0
 			*(u32*)0x02062638 = 0xE1A00000; // nop
 			*(u32*)0x0206263C = 0xE1A00000; // nop
 			*(u32*)0x02062640 = 0xE1A00000; // nop
@@ -3356,12 +3362,14 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			*(u32*)0x02093C38 = 0xE1A00000; // nop
 			*(u32*)0x02093C40 = 0xE1A00000; // nop
 			*(u32*)0x02093D54 = 0xE1A00000; // nop
+			*(u32*)0x02093D64 = 0xE3A00000; // mov r0, #0
 			*(u32*)0x02093DD0 = 0xE1A00000; // nop
 			*(u32*)0x02093DD8 = 0xE1A00000; // nop
 			*(u32*)0x02093E64 = 0xE1A00000; // nop
 			*(u32*)0x02093ED8 = 0xE1A00000; // nop
 			*(u32*)0x02093EE0 = 0xE1A00000; // nop
 			*(u32*)0x02093F6C = 0xE1A00000; // nop
+			*(u32*)0x0209403C = 0xE3A00000; // mov r0, #0
 			*(u32*)0x02094074 = 0xE1A00000; // nop
 			*(u32*)0x02094078 = 0xE1A00000; // nop
 			*(u32*)0x0209407C = 0xE1A00000; // nop
@@ -3547,8 +3555,9 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0200C810, (u32)dsiSaveClose);
 		setBL(0x0200C860, (u32)dsiSaveDelete);
 		setBL(0x0200C8CC, (u32)dsiSaveGetInfo);
-		*(u32*)0x0200C910 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+		*(u32*)0x0200C910 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc & dsiSaveFreeSpaceAvailable)
 		*(u32*)0x0200C914 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0200D344 = 0xE1A00000; // nop
 		*(u32*)0x02049F68 = 0xE1A00000; // nop
 		tonccpy((u32*)0x0204AAEC, dsiSaveGetResultCode, 0xC);
 		*(u32*)0x0204DC94 = 0xE1A00000; // nop
@@ -8812,7 +8821,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0200D114, (u32)dsiSaveClose);
 		setBL(0x0200D164, (u32)dsiSaveDelete);
 		setBL(0x0200D1D0, (u32)dsiSaveGetInfo);
-		*(u32*)0x0200D214 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+		*(u32*)0x0200D214 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc & dsiSaveFreeSpaceAvailable)
 		*(u32*)0x0200D218 = 0xE12FFF1E; // bx lr
 		*(u32*)0x0200E004 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		*(u32*)0x0204E1B8 = 0xE1A00000; // nop
