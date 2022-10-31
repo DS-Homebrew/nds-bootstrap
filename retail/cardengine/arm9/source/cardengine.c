@@ -756,6 +756,7 @@ static bool dsiSaveExists = false;
 static u32 dsiSavePerms = 0;
 static s32 dsiSaveSeekPos = 0;
 static u32 dsiSaveSize = 0;
+static s32 dsiSaveResultCode = 0;
 
 typedef struct dsiSaveInfo
 {
@@ -799,14 +800,14 @@ u32 dsiSaveGetResultCode(const char* path) {
 
 	if (strcmp(path, "data") == 0) // Specific to EnjoyUp-developed games
 	{
-		return dsiSaveExists ? 0 : 0xE;
+		return dsiSaveExists ? 8 : 0xE;
 	} else
 	if (strcmp(path, "dataPub:") == 0 || strcmp(path, "dataPub:/") == 0
 	 || strcmp(path, "dataPrv:") == 0 || strcmp(path, "dataPrv:/") == 0)
 	{
-		return 0;
+		return 8;
 	}
-	return dsiSaveExists ? 0 : 0xB;
+	return dsiSaveResultCode;
 #else
 	return 0xB;
 #endif
@@ -816,6 +817,7 @@ bool dsiSaveCreate(const char* path, u32 permit) {
 #ifndef NODSIWARE
 	dsiSaveSeekPos = 0;
 	if (savFile.firstCluster == CLUSTER_FREE || savFile.firstCluster == CLUSTER_EOF) {
+		dsiSaveResultCode = 0xE;
 		return false;
 	}
 
@@ -841,8 +843,10 @@ bool dsiSaveCreate(const char* path, u32 permit) {
 		leaveCriticalSection(oldIME);
 
 		dsiSaveExists = true;
+		dsiSaveResultCode = 0;
 		return true;
 	}
+	dsiSaveResultCode = 8;
 #endif
 	return false;
 }
@@ -851,6 +855,7 @@ bool dsiSaveDelete(const char* path) {
 #ifndef NODSIWARE
 	dsiSaveSeekPos = 0;
 	if (savFile.firstCluster == CLUSTER_FREE || savFile.firstCluster == CLUSTER_EOF) {
+		dsiSaveResultCode = 0xE;
 		return false;
 	}
 
@@ -868,8 +873,10 @@ bool dsiSaveDelete(const char* path) {
 		leaveCriticalSection(oldIME);
 
 		dsiSaveExists = false;
+		dsiSaveResultCode = 0;
 		return true;
 	}
+	dsiSaveResultCode = 8;
 #endif
 	return false;
 }
@@ -904,12 +911,10 @@ u32 dsiSaveSetLength(void* ctx, s32 len) {
 #ifndef NODSIWARE
 	dsiSaveSeekPos = 0;
 	if (savFile.firstCluster == CLUSTER_FREE || savFile.firstCluster == CLUSTER_EOF) {
+		dsiSaveResultCode = 1;
 		return 1;
 	}
 
-	if (dsiSaveSize == len) {
-		return 1;
-	}
 	dsiSaveSize = len;
 
 	int oldIME = enterCriticalSection();
@@ -917,11 +922,12 @@ u32 dsiSaveSetLength(void* ctx, s32 len) {
 	cardReadInProgress = true;
 	setDeviceOwner();
 	bool res = fileWrite((char*)&dsiSaveSize, savFile, ce9->saveSize-4, 4);
+	dsiSaveResultCode = res ? 0 : 1;
 	cardReadInProgress = false;
 	REG_EXMEMCNT = exmemcnt;
 	leaveCriticalSection(oldIME);
 
-	return res ? 0 : 1;
+	return dsiSaveResultCode;
 #else
 	return 1;
 #endif
@@ -931,13 +937,13 @@ bool dsiSaveOpen(void* ctx, const char* path, u32 mode) {
 #ifndef NODSIWARE
 	dsiSaveSeekPos = 0;
 	if (savFile.firstCluster == CLUSTER_FREE || savFile.firstCluster == CLUSTER_EOF) {
+		dsiSaveResultCode = 0xE;
 		return false;
 	}
 
 	dsiSaveInit();
-	if (!dsiSaveExists) {
-		toncset32(ctx+0x14, dsiSaveGetResultCode(path), 1);
-	}
+	dsiSaveResultCode = 0;
+	toncset32(ctx+0x14, dsiSaveResultCode, 1);
 
 	dsiSavePerms = mode;
 	return dsiSaveExists;
@@ -950,9 +956,11 @@ bool dsiSaveClose(void* ctx) {
 #ifndef NODSIWARE
 	dsiSaveSeekPos = 0;
 	if (savFile.firstCluster == CLUSTER_FREE || savFile.firstCluster == CLUSTER_EOF) {
+		dsiSaveResultCode = 0xE;
 		return false;
 	}
 	//toncset(ctx, 0, 0x80);
+	dsiSaveResultCode = 0;
 	return dsiSaveExists;
 #else
 	return false;
@@ -975,9 +983,11 @@ u32 dsiSaveGetLength(void* ctx) {
 bool dsiSaveSeek(void* ctx, s32 pos, u32 mode) {
 #ifndef NODSIWARE
 	if (savFile.firstCluster == CLUSTER_FREE || savFile.firstCluster == CLUSTER_EOF) {
+		dsiSaveResultCode = 0xE;
 		return false;
 	}
 	dsiSaveSeekPos = pos;
+	dsiSaveResultCode = 0;
 	return true;
 #else
 	return false;
@@ -987,10 +997,12 @@ bool dsiSaveSeek(void* ctx, s32 pos, u32 mode) {
 s32 dsiSaveRead(void* ctx, void* dst, s32 len) {
 #ifndef NODSIWARE
 	if (dsiSavePerms == 2) {
+		dsiSaveResultCode = 1;
 		return -1; // Return if only write perms are set
 	}
 
 	if (dsiSaveSize == 0) {
+		dsiSaveResultCode = 1;
 		return 0;
 	}
 
@@ -1007,6 +1019,7 @@ s32 dsiSaveRead(void* ctx, void* dst, s32 len) {
 	cardReadInProgress = true;
 	setDeviceOwner();
 	bool res = fileRead(dst, savFile, dsiSaveSeekPos, len);
+	dsiSaveResultCode = res ? 1 : 0;
 	cardReadInProgress = false;
 	REG_EXMEMCNT = exmemcnt;
 	leaveCriticalSection(oldIME);
@@ -1021,6 +1034,7 @@ s32 dsiSaveRead(void* ctx, void* dst, s32 len) {
 s32 dsiSaveWrite(void* ctx, void* src, s32 len) {
 #ifndef NODSIWARE
 	if (dsiSavePerms == 1) {
+		dsiSaveResultCode = 1;
 		return -1; // Return if only read perms are set
 	}
 
@@ -1029,6 +1043,7 @@ s32 dsiSaveWrite(void* ctx, void* src, s32 len) {
 	cardReadInProgress = true;
 	setDeviceOwner();
 	bool res = fileWrite(src, savFile, dsiSaveSeekPos, len);
+	dsiSaveResultCode = res ? 1 : 0;
 	cardReadInProgress = false;
 	REG_EXMEMCNT = exmemcnt;
 	leaveCriticalSection(oldIME);
