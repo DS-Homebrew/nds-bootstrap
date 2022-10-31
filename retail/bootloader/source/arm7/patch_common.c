@@ -240,7 +240,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020FD244 = 0xE1A00000; // nop
 		tonccpy((u32*)0x020FDDC8, dsiSaveGetResultCode, 0xC);
 		*(u32*)0x021008F8 = 0xE1A00000; // nop
-		patchInitDSiWare(0x021059A4, heapEnd);
+		patchInitDSiWare(0x021059B0, heapEnd);
 		patchUserSettingsReadDSiWare(0x021070C0);
 		*(u32*)0x021070DC = 0xE3A00001; // mov r0, #1
 		*(u32*)0x021070E0 = 0xE12FFF1E; // bx lr
