@@ -995,6 +995,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Bookworm (USA)
+	// Saving is not supported due to using more than one file
 	/*else if (strcmp(romTid, "KBKE") == 0 && saveOnFlashcard) {
 		setBL(0x0204E744, (u32)dsiSaveClose);
 		setBL(0x0204EA68, (u32)dsiSaveSeek);

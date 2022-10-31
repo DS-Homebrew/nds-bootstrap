@@ -2112,9 +2112,8 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Bookworm (USA)
-	// Saving is difficult to implement, preventing support
+	// Saving is not supported due to using more than one file
 	/*else if (strcmp(romTid, "KBKE") == 0) {
-
 		if (!extendedMemory2) {
 			*(u32*)0x02017DE4 = 0x8C000;
 		}
@@ -2135,12 +2134,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0204ED88, (u32)dsiSaveRead);
 		*(u32*)0x02065B14 = 0xE1A00000; // nop
 		*(u32*)0x020699BC = 0xE1A00000; // nop
-		*(u32*)0x0206E584 = 0xE1A00000; // nop
-		*(u32*)0x02070484 = 0xE1A00000; // nop
-		*(u32*)0x02070488 = 0xE1A00000; // nop
-		*(u32*)0x02070494 = 0xE1A00000; // nop
-		*(u32*)0x020705F4 = 0xE1A00000; // nop
-		patchHiHeapDSiWare(0x02070650, extendedMemory2 ? 0x02700000 : heapEnd); // mov r0, extendedMemory2 ? #0x2700000 : #0x23E0000
+		patchInitDSiWare(0x020703F8, extendedMemory2 ? 0x02700000 : heapEnd);
 		if (!extendedMemory2) {
 			*(u32*)0x02070784 = 0x020DE060;
 		}
