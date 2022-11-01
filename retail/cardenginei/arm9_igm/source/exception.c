@@ -187,7 +187,11 @@ u32 getExceptionAddress(u32 opcodeAddress, u32 thumbState) {
 
 
 void showException(s32 *expReg) {
-	if (exceptionPrinted) return;
+	if (exceptionPrinted) {
+		// Make the background red
+		BG_PALETTE_SUB[0] = 0x0010;
+		return;
+	}
 	exceptionPrinted = true;
 
 	exceptionRegisters = expReg;
