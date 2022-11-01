@@ -54,7 +54,7 @@ void inGameMenu(void) {
 			if ((REG_EXTKEYINPUT & BIT(7)) && (valueBits & sleepMode)) {
 				// Save current power state.
 				int power = readPowerManagement(PM_CONTROL_REG);
-				// Set sleep LED. (Does not work)
+				// Set sleep LED. (Only works on DS/DS lite?)
 				writePowerManagement(PM_CONTROL_REG, PM_LED_CONTROL(1));
 
 				// Power down till we get our interrupt.
