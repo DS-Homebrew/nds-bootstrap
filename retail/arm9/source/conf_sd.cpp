@@ -191,6 +191,9 @@ static void load_conf(configuration* conf, const char* fn) {
 	// Macro mode
 	conf->macroMode = (bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "MACRO_MODE", "0").c_str(), NULL, 0);
 
+	// Sleep mode
+	conf->sleepMode = (bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "SLEEP_MODE", "1").c_str(), NULL, 0);
+
 	// Boost CPU
 	conf->boostCpu = (bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "BOOST_CPU", "0").c_str(), NULL, 0);
 
@@ -449,6 +452,9 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	/*if (conf->cardReadDMA == 2) {
 		conf->valueBits3 |= BIT(1);
 	}*/
+	if (conf->sleepMode) {
+		conf->valueBits3 |= BIT(2);
+	}
 	if (conf->sdFound) {
 		FILE* pit = fopen("sd:/private/ds/app/484E494A/pit.bin", "rb");
 		if (pit) {

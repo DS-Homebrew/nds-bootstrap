@@ -11,7 +11,11 @@
 #include "nds_header.h"
 #include "tonccpy.h"
 
+#define sleepMode BIT(17)
+
 #define	REG_EXTKEYINPUT	(*(vuint16*)0x04000136)
+
+extern u32 valueBits;
 
 extern vu32* volatile sharedAddr;
 extern bool ipcEveryFrame;
@@ -47,6 +51,23 @@ void inGameMenu(void) {
 		while (!exitMenu) {
 			sharedAddr[5] = ~REG_KEYINPUT & 0x3FF;
 			sharedAddr[5] |= ((~REG_EXTKEYINPUT & 0x3) << 10) | ((~REG_EXTKEYINPUT & 0xC0) << 6);
+			if ((REG_EXTKEYINPUT & BIT(7)) && (valueBits & sleepMode)) {
+				// Save current power state.
+				int power = readPowerManagement(PM_CONTROL_REG);
+				// Set sleep LED. (Does not work)
+				writePowerManagement(PM_CONTROL_REG, PM_LED_CONTROL(1));
+
+				// Power down till we get our interrupt.
+				swiSleep();
+
+				while (REG_EXTKEYINPUT & BIT(7)) {
+					//100ms
+					swiDelay(838000);
+				}
+
+				// Restore power state.
+				writePowerManagement(PM_CONTROL_REG, power);
+			}
 			timeTillStatusRefresh++;
 			if (timeTillStatusRefresh >= 8) {
 				timeTillStatusRefresh = 0;

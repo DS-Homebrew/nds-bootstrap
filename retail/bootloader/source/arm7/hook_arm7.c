@@ -32,6 +32,8 @@
 #include "find.h"
 #include "hook.h"
 
+#define b_sleepMode BIT(17)
+
 extern u32 newArm7binarySize;
 
 static const u32 handlerStartSig[5] = {
@@ -213,6 +215,9 @@ int hookNdsRetailArm7(
 	ce7->intr_vblank_orig_return = *vblankHandler;
 	//ce7->intr_fifo_orig_return   = *ipcSyncHandler;
 	ce7->moduleParams            = moduleParams;
+	if (sleepMode) {
+		ce7->valueBits |= b_sleepMode;
+	}
 	ce7->language                = language;
 	if (strcmp(romTid, "AKYP") == 0) { // Etrian Odyssey (EUR)
 		ce7->languageAddr = (u32*)0x020DC5DC;

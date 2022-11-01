@@ -73,6 +73,7 @@
 //#define asyncCardRead BIT(14)
 #define twlTouch BIT(15)
 #define cloneboot BIT(16)
+#define sleepMode BIT(17)
 #define scfgLocked BIT(31)
 
 #define	REG_EXTKEYINPUT	(*(vuint16*)0x04000136)

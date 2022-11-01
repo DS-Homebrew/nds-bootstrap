@@ -63,6 +63,7 @@ typedef struct configuration {
 	bool gameOnFlashcard;
 	bool saveOnFlashcard;
 	bool macroMode;
+	bool sleepMode;
 	u16 hotkey;
 	bool specialCard;
 	char* manualPath;

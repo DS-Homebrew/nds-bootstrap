@@ -24,5 +24,6 @@ extern u8 valueBits3;
 #define useRomRegion (valueBits2 & BIT(7))
 #define boostCpu (valueBits3 & BIT(0))
 #define memoryPit (valueBits3 & BIT(1))
+#define sleepMode (valueBits3 & BIT(2))
 
 #endif
