@@ -346,6 +346,7 @@ int hookNdsRetailArm9(
 
 int hookNdsRetailArm9Mini(cardengineArm9* ce9, const tNDSHeader* ndsHeader, u8 consoleModel) {
 	ce9->consoleModel           = consoleModel;
+	ce9->valueBits |= b_enableExceptionHandler;
 
 	extern u32 iUncompressedSize;
 

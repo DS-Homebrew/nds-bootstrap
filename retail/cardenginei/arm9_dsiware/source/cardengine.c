@@ -35,6 +35,8 @@
 #include "locations.h"
 #include "cardengine_header_arm9.h"
 
+#define enableExceptionHandler BIT(4)
+
 extern cardengineArm9* volatile ce9;
 
 extern void ndsCodeStart(u32* addr);
@@ -68,6 +70,8 @@ static void SetBrightness(u8 screen, s8 bright) {
 		while (REG_VCOUNT == 191);
 	}
 }*/
+
+extern void setExceptionHandler2();
 
 static bool IPC_SYNC_hooked = false;
 static void hookIPC_SYNC(void) {
@@ -214,6 +218,20 @@ void reset(u32 tid1, u32 tid2) {
 	ndsCodeStart(ndsHeader->arm9executeAddress);
 }
 
+void inGameMenu(s32* exRegisters) {
+	*(u32*)(INGAME_MENU_LOCATION_DSIWARE + IGM_TEXT_SIZE_ALIGNED) = (u32)sharedAddr;
+	volatile void (*inGameMenu)(s8*, u32, s32*) = (volatile void*)INGAME_MENU_LOCATION_DSIWARE + IGM_TEXT_SIZE_ALIGNED + 0x10;
+	(*inGameMenu)(&mainScreen, ce9->consoleModel, exRegisters);
+	if (sharedAddr[3] == 0x52534554 || sharedAddr[3] == 0x54495845) {
+		igmReset = true;
+		if (sharedAddr[3] == 0x52534554) {
+			reset(*(u32*)0x02FFE230, *(u32*)0x02FFE234);
+		} else {
+			reset(0, 0);
+		}
+	}
+}
+
 //---------------------------------------------------------------------------------
 void myIrqHandlerVBlank(void) {
 //---------------------------------------------------------------------------------
@@ -258,19 +276,8 @@ void myIrqHandlerIPC(void) {
 				REG_POWERCNT |= POWER_SWAP_LCDS;
 		}
 			break;
-		case 0x9: {
-			*(u32*)(INGAME_MENU_LOCATION_DSIWARE + IGM_TEXT_SIZE_ALIGNED) = (u32)sharedAddr;
-			volatile void (*inGameMenu)(s8*, u32, s32*) = (volatile void*)INGAME_MENU_LOCATION_DSIWARE + IGM_TEXT_SIZE_ALIGNED + 0x10;
-			(*inGameMenu)(&mainScreen, ce9->consoleModel, 0);
-			if (sharedAddr[3] == 0x52534554 || sharedAddr[3] == 0x54495845) {
-				igmReset = true;
-				if (sharedAddr[3] == 0x52534554) {
-					reset(*(u32*)0x02FFE230, *(u32*)0x02FFE234);
-				} else {
-					reset(0, 0);
-				}
-			}
-		}
+		case 0x9:
+			inGameMenu((s32*)0);
 			break;
 	}
 
@@ -292,6 +299,10 @@ u32 myIrqEnable(u32 irq) {
 	#ifdef DEBUG
 	nocashMessage("myIrqEnable\n");
 	#endif
+
+	if (ce9->valueBits & enableExceptionHandler) {
+		setExceptionHandler2();
+	}
 
 	hookIPC_SYNC();
 
