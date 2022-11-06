@@ -6040,7 +6040,7 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
 	}
 	
 	// 0676 - Akumajou Dracula - Gallery of Labyrinth (Japan)
-	else if (strcmp(romTid, "ACBJ") == 0) {
+	else if (strcmp(romTid, "ACBJ") == 0 && ndsHeader->romversion == 0) {
 		*(u32*)0x02007910 = 0xeb0250b0;
 		*(u32*)0x02007918 = 0xea000004;
 		*(u32*)0x02007a00 = 0xeb025074;
