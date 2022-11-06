@@ -7381,6 +7381,181 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// My Farm (USA)
+	// My Exotic Farm (USA)
+	// My Exotic Farm (Europe, Australia)
+	else if (strcmp(romTid, "KMRE") == 0 || strcmp(romTid, "KMVE") == 0 || strcmp(romTid, "KMVV") == 0) {
+		*(u32*)0x02011B64 = 0xE1A00000; // nop
+		tonccpy((u32*)0x020126DC, dsiSaveGetResultCode, 0xC);
+		*(u32*)0x02014FBC = 0xE1A00000; // nop
+		patchInitDSiWare(0x0201B740, heapEnd);
+		patchUserSettingsReadDSiWare(0x0201CD38);
+		*(u32*)0x0201CD54 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0201CD58 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0201CD60 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0201CD64 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02020138 = 0xE1A00000; // nop
+		if (strcmp(romTid, "KMRE") == 0) {
+			*(u32*)0x020579FC = 0xE1A00000; // nop
+		} else {
+			*(u32*)0x02057A00 = 0xE1A00000; // nop
+		}
+		if (strcmp(romTid, "KMRE") == 0) {
+			*(u32*)0x0205D0BC = 0xE1A00000; // nop
+			*(u32*)0x0205D0DC = 0xE1A00000; // nop
+			*(u32*)0x0205D0E8 = 0xE1A00000; // nop
+			setBL(0x0207A09C, (u32)dsiSaveCreate);
+			setBL(0x0207A118, (u32)dsiSaveOpen);
+			setBL(0x0207A164, (u32)dsiSaveSetLength);
+			setBL(0x0207A178, (u32)dsiSaveClose);
+			setBL(0x0207A1A8, (u32)dsiSaveWrite);
+			setBL(0x0207A1C0, (u32)dsiSaveClose);
+			setBL(0x0207A1EC, (u32)dsiSaveClose);
+			setBL(0x0207A284, (u32)dsiSaveOpen);
+			setBL(0x0207A2CC, (u32)dsiSaveGetLength);
+			setBL(0x0207A2E0, (u32)dsiSaveClose);
+			setBL(0x0207A300, (u32)dsiSaveRead);
+			setBL(0x0207A318, (u32)dsiSaveClose);
+			setBL(0x0207A344, (u32)dsiSaveClose);
+			*(u32*)0x0207A990 = 0xE1A00000; // nop
+			*(u32*)0x0207AAA8 = 0xE1A00000; // nop
+			*(u32*)0x0207EEB4 = 0xE1A00000; // nop
+		} else if (strcmp(romTid, "KMVE") == 0) {
+			*(u32*)0x0205D0C0 = 0xE1A00000; // nop
+			*(u32*)0x0205D0E0 = 0xE1A00000; // nop
+			*(u32*)0x0205D0EC = 0xE1A00000; // nop
+			setBL(0x0207A0A4, (u32)dsiSaveCreate);
+			setBL(0x0207A120, (u32)dsiSaveOpen);
+			setBL(0x0207A16C, (u32)dsiSaveSetLength);
+			setBL(0x0207A180, (u32)dsiSaveClose);
+			setBL(0x0207A1B0, (u32)dsiSaveWrite);
+			setBL(0x0207A1C8, (u32)dsiSaveClose);
+			setBL(0x0207A1F4, (u32)dsiSaveClose);
+			setBL(0x0207A28C, (u32)dsiSaveOpen);
+			setBL(0x0207A2D4, (u32)dsiSaveGetLength);
+			setBL(0x0207A2E8, (u32)dsiSaveClose);
+			setBL(0x0207A308, (u32)dsiSaveRead);
+			setBL(0x0207A320, (u32)dsiSaveClose);
+			setBL(0x0207A34C, (u32)dsiSaveClose);
+			*(u32*)0x0207A998 = 0xE1A00000; // nop
+			*(u32*)0x0207AAB0 = 0xE1A00000; // nop
+			*(u32*)0x0207EEBC = 0xE1A00000; // nop
+		} else if (strcmp(romTid, "KMVV") == 0) {
+			*(u32*)0x0205D068 = 0xE1A00000; // nop
+			*(u32*)0x0205D088 = 0xE1A00000; // nop
+			*(u32*)0x0205D094 = 0xE1A00000; // nop
+			setBL(0x0207A07C, (u32)dsiSaveCreate);
+			setBL(0x0207A0F8, (u32)dsiSaveOpen);
+			setBL(0x0207A144, (u32)dsiSaveSetLength);
+			setBL(0x0207A158, (u32)dsiSaveClose);
+			setBL(0x0207A188, (u32)dsiSaveWrite);
+			setBL(0x0207A1A0, (u32)dsiSaveClose);
+			setBL(0x0207A1CC, (u32)dsiSaveClose);
+			setBL(0x0207A264, (u32)dsiSaveOpen);
+			setBL(0x0207A2AC, (u32)dsiSaveGetLength);
+			setBL(0x0207A2C0, (u32)dsiSaveClose);
+			setBL(0x0207A2E0, (u32)dsiSaveRead);
+			setBL(0x0207A2F8, (u32)dsiSaveClose);
+			setBL(0x0207A324, (u32)dsiSaveClose);
+			*(u32*)0x0207A970 = 0xE1A00000; // nop
+			*(u32*)0x0207AA88 = 0xE1A00000; // nop
+			*(u32*)0x0207EE94 = 0xE1A00000; // nop
+		}
+	}
+
+	// My Farm (Europe, Australia)
+	else if (strcmp(romTid, "KMRV") == 0) {
+		*(u32*)0x02011A90 = 0xE1A00000; // nop
+		tonccpy((u32*)0x02012608, dsiSaveGetResultCode, 0xC);
+		*(u32*)0x02014EE8 = 0xE1A00000; // nop
+		patchInitDSiWare(0x0201B66C, heapEnd);
+		patchUserSettingsReadDSiWare(0x0201CC64);
+		*(u32*)0x0201CC80 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0201CC84 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0201CC8C = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0201CC90 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02020064 = 0xE1A00000; // nop
+		*(u32*)0x02057928 = 0xE1A00000; // nop
+		*(u32*)0x0205CF90 = 0xE1A00000; // nop
+		*(u32*)0x0205CFB0 = 0xE1A00000; // nop
+		*(u32*)0x0205CFBC = 0xE1A00000; // nop
+		setBL(0x02079FA0, (u32)dsiSaveCreate);
+		setBL(0x0207A01C, (u32)dsiSaveOpen);
+		setBL(0x0207A068, (u32)dsiSaveSetLength);
+		setBL(0x0207A07C, (u32)dsiSaveClose);
+		setBL(0x0207A0AC, (u32)dsiSaveWrite);
+		setBL(0x0207A0C4, (u32)dsiSaveClose);
+		setBL(0x0207A0F0, (u32)dsiSaveClose);
+		setBL(0x0207A188, (u32)dsiSaveOpen);
+		setBL(0x0207A1D0, (u32)dsiSaveGetLength);
+		setBL(0x0207A1E4, (u32)dsiSaveClose);
+		setBL(0x0207A204, (u32)dsiSaveRead);
+		setBL(0x0207A21C, (u32)dsiSaveClose);
+		setBL(0x0207A248, (u32)dsiSaveClose);
+		*(u32*)0x0207A894 = 0xE1A00000; // nop
+		*(u32*)0x0207A9AC = 0xE1A00000; // nop
+		*(u32*)0x0207EDB8 = 0xE1A00000; // nop
+	}
+
+	// My Asian Farm (USA)
+	// My Asian Farm (Europe)
+	// My Australian Farm (USA)
+	// My Australian Farm (Europe)
+	else if (strcmp(romTid, "KL3E") == 0 || strcmp(romTid, "KL3P") == 0 || strcmp(romTid, "KL4E") == 0 || strcmp(romTid, "KL4P") == 0) {
+		*(u32*)0x02011B88 = 0xE1A00000; // nop
+		tonccpy((u32*)0x0201270C, dsiSaveGetResultCode, 0xC);
+		*(u32*)0x02015074 = 0xE1A00000; // nop
+		patchInitDSiWare(0x0201B830, heapEnd);
+		patchUserSettingsReadDSiWare(0x0201CE38);
+		*(u32*)0x0201CE54 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0201CE58 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0201CE60 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0201CE64 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02020238 = 0xE1A00000; // nop
+		*(u32*)0x0205421C = 0xE1A00000; // nop
+		if (ndsHeader->gameCode[3] == 'E') {
+			*(u32*)0x02059C64 = 0xE1A00000; // nop
+			*(u32*)0x02059C84 = 0xE1A00000; // nop
+			*(u32*)0x02059C90 = 0xE1A00000; // nop
+			setBL(0x02077428, (u32)dsiSaveCreate);
+			setBL(0x020774A4, (u32)dsiSaveOpen);
+			setBL(0x020774F0, (u32)dsiSaveSetLength);
+			setBL(0x02077504, (u32)dsiSaveClose);
+			setBL(0x02077534, (u32)dsiSaveWrite);
+			setBL(0x0207754C, (u32)dsiSaveClose);
+			setBL(0x02077578, (u32)dsiSaveClose);
+			setBL(0x02077610, (u32)dsiSaveOpen);
+			setBL(0x02077658, (u32)dsiSaveGetLength);
+			setBL(0x0207766C, (u32)dsiSaveClose);
+			setBL(0x0207768C, (u32)dsiSaveRead);
+			setBL(0x020776A4, (u32)dsiSaveClose);
+			setBL(0x020776D0, (u32)dsiSaveClose);
+			*(u32*)0x02077D40 = 0xE1A00000; // nop
+			*(u32*)0x02077E58 = 0xE1A00000; // nop
+			*(u32*)0x0207C244 = 0xE1A00000; // nop
+		} else {
+			*(u32*)0x02059C80 = 0xE1A00000; // nop
+			*(u32*)0x02059CA0 = 0xE1A00000; // nop
+			*(u32*)0x02059CAC = 0xE1A00000; // nop
+			setBL(0x02077474, (u32)dsiSaveCreate);
+			setBL(0x020774F0, (u32)dsiSaveOpen);
+			setBL(0x0207753C, (u32)dsiSaveSetLength);
+			setBL(0x02077550, (u32)dsiSaveClose);
+			setBL(0x02077580, (u32)dsiSaveWrite);
+			setBL(0x02077598, (u32)dsiSaveClose);
+			setBL(0x020775C4, (u32)dsiSaveClose);
+			setBL(0x0207765C, (u32)dsiSaveOpen);
+			setBL(0x020776A4, (u32)dsiSaveGetLength);
+			setBL(0x020776B8, (u32)dsiSaveClose);
+			setBL(0x020776D8, (u32)dsiSaveRead);
+			setBL(0x020776F0, (u32)dsiSaveClose);
+			setBL(0x0207771C, (u32)dsiSaveClose);
+			*(u32*)0x02077D8C = 0xE1A00000; // nop
+			*(u32*)0x02077EA4 = 0xE1A00000; // nop
+			*(u32*)0x0207C290 = 0xE1A00000; // nop
+		}
+	}
+
 	// My Little Restaurant (USA)
 	// Requires either 8MB of RAM or Memory Expansion Pak
 	// Audio does not play on retail consoles

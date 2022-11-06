@@ -3159,6 +3159,116 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02008E64 = 0xE12FFF1E; // bx lr
 	}
 
+	// My Farm (USA)
+	else if (strcmp(romTid, "KMRE") == 0 && saveOnFlashcard) {
+		tonccpy((u32*)0x020126DC, dsiSaveGetResultCode, 0xC);
+		setBL(0x0207A09C, (u32)dsiSaveCreate);
+		setBL(0x0207A118, (u32)dsiSaveOpen);
+		setBL(0x0207A164, (u32)dsiSaveSetLength);
+		setBL(0x0207A178, (u32)dsiSaveClose);
+		setBL(0x0207A1A8, (u32)dsiSaveWrite);
+		setBL(0x0207A1C0, (u32)dsiSaveClose);
+		setBL(0x0207A1EC, (u32)dsiSaveClose);
+		setBL(0x0207A284, (u32)dsiSaveOpen);
+		setBL(0x0207A2CC, (u32)dsiSaveGetLength);
+		setBL(0x0207A2E0, (u32)dsiSaveClose);
+		setBL(0x0207A300, (u32)dsiSaveRead);
+		setBL(0x0207A318, (u32)dsiSaveClose);
+		setBL(0x0207A344, (u32)dsiSaveClose);
+	}
+
+	// My Farm (Europe, Australia)
+	else if (strcmp(romTid, "KMRV") == 0 && saveOnFlashcard) {
+		tonccpy((u32*)0x02012608, dsiSaveGetResultCode, 0xC);
+		setBL(0x02079FA0, (u32)dsiSaveCreate);
+		setBL(0x0207A01C, (u32)dsiSaveOpen);
+		setBL(0x0207A068, (u32)dsiSaveSetLength);
+		setBL(0x0207A07C, (u32)dsiSaveClose);
+		setBL(0x0207A0AC, (u32)dsiSaveWrite);
+		setBL(0x0207A0C4, (u32)dsiSaveClose);
+		setBL(0x0207A0F0, (u32)dsiSaveClose);
+		setBL(0x0207A188, (u32)dsiSaveOpen);
+		setBL(0x0207A1D0, (u32)dsiSaveGetLength);
+		setBL(0x0207A1E4, (u32)dsiSaveClose);
+		setBL(0x0207A204, (u32)dsiSaveRead);
+		setBL(0x0207A21C, (u32)dsiSaveClose);
+		setBL(0x0207A248, (u32)dsiSaveClose);
+	}
+
+	// My Asian Farm (USA)
+	// My Australian Farm (USA)
+	else if ((strcmp(romTid, "KL3E") == 0 || strcmp(romTid, "KL4E") == 0) && saveOnFlashcard) {
+		tonccpy((u32*)0x0201270C, dsiSaveGetResultCode, 0xC);
+		setBL(0x02077428, (u32)dsiSaveCreate);
+		setBL(0x020774A4, (u32)dsiSaveOpen);
+		setBL(0x020774F0, (u32)dsiSaveSetLength);
+		setBL(0x02077504, (u32)dsiSaveClose);
+		setBL(0x02077534, (u32)dsiSaveWrite);
+		setBL(0x0207754C, (u32)dsiSaveClose);
+		setBL(0x02077578, (u32)dsiSaveClose);
+		setBL(0x02077610, (u32)dsiSaveOpen);
+		setBL(0x02077658, (u32)dsiSaveGetLength);
+		setBL(0x0207766C, (u32)dsiSaveClose);
+		setBL(0x0207768C, (u32)dsiSaveRead);
+		setBL(0x020776A4, (u32)dsiSaveClose);
+		setBL(0x020776D0, (u32)dsiSaveClose);
+	}
+
+	// My Asian Farm (Europe)
+	// My Australian Farm (Europe)
+	else if ((strcmp(romTid, "KL3P") == 0 || strcmp(romTid, "KL4P") == 0) && saveOnFlashcard) {
+		tonccpy((u32*)0x0201270C, dsiSaveGetResultCode, 0xC);
+		setBL(0x02077474, (u32)dsiSaveCreate);
+		setBL(0x020774F0, (u32)dsiSaveOpen);
+		setBL(0x0207753C, (u32)dsiSaveSetLength);
+		setBL(0x02077550, (u32)dsiSaveClose);
+		setBL(0x02077580, (u32)dsiSaveWrite);
+		setBL(0x02077598, (u32)dsiSaveClose);
+		setBL(0x020775C4, (u32)dsiSaveClose);
+		setBL(0x0207765C, (u32)dsiSaveOpen);
+		setBL(0x020776A4, (u32)dsiSaveGetLength);
+		setBL(0x020776B8, (u32)dsiSaveClose);
+		setBL(0x020776D8, (u32)dsiSaveRead);
+		setBL(0x020776F0, (u32)dsiSaveClose);
+		setBL(0x0207771C, (u32)dsiSaveClose);
+	}
+
+	// My Exotic Farm (USA)
+	else if (strcmp(romTid, "KMVE") == 0 && saveOnFlashcard) {
+		tonccpy((u32*)0x020126DC, dsiSaveGetResultCode, 0xC);
+		setBL(0x0207A0A4, (u32)dsiSaveCreate);
+		setBL(0x0207A120, (u32)dsiSaveOpen);
+		setBL(0x0207A16C, (u32)dsiSaveSetLength);
+		setBL(0x0207A180, (u32)dsiSaveClose);
+		setBL(0x0207A1B0, (u32)dsiSaveWrite);
+		setBL(0x0207A1C8, (u32)dsiSaveClose);
+		setBL(0x0207A1F4, (u32)dsiSaveClose);
+		setBL(0x0207A28C, (u32)dsiSaveOpen);
+		setBL(0x0207A2D4, (u32)dsiSaveGetLength);
+		setBL(0x0207A2E8, (u32)dsiSaveClose);
+		setBL(0x0207A308, (u32)dsiSaveRead);
+		setBL(0x0207A320, (u32)dsiSaveClose);
+		setBL(0x0207A34C, (u32)dsiSaveClose);
+	}
+
+	// My Exotic Farm (Europe, Australia)
+	else if (strcmp(romTid, "KMVV") == 0 && saveOnFlashcard) {
+		tonccpy((u32*)0x020126DC, dsiSaveGetResultCode, 0xC);
+		setBL(0x0207A07C, (u32)dsiSaveCreate);
+		setBL(0x0207A0F8, (u32)dsiSaveOpen);
+		setBL(0x0207A144, (u32)dsiSaveSetLength);
+		setBL(0x0207A158, (u32)dsiSaveClose);
+		setBL(0x0207A188, (u32)dsiSaveWrite);
+		setBL(0x0207A1A0, (u32)dsiSaveClose);
+		setBL(0x0207A1CC, (u32)dsiSaveClose);
+		setBL(0x0207A264, (u32)dsiSaveOpen);
+		setBL(0x0207A2AC, (u32)dsiSaveGetLength);
+		setBL(0x0207A2C0, (u32)dsiSaveClose);
+		setBL(0x0207A2E0, (u32)dsiSaveRead);
+		setBL(0x0207A2F8, (u32)dsiSaveClose);
+		setBL(0x0207A324, (u32)dsiSaveClose);
+	}
+
 	// My Little Restaurant (USA)
 	else if (strcmp(romTid, "KLTE") == 0 && saveOnFlashcard) {
 		setBL(0x02018BCC, (u32)dsiSaveClose);
