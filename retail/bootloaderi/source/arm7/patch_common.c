@@ -2098,6 +2098,12 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// Fall in the Dark (Japan)
+	// A bit hard/confusing to add save support
+	else if (strcmp(romTid, "K4EJ") == 0 && saveOnFlashcard) {
+		*(u32*)0x0203EE0C = 0xE1A00000; // nop (Skip Manual screen)
+	}
+
 	// Farm Frenzy (USA)
 	else if (strcmp(romTid, "KFKE") == 0 && saveOnFlashcard) {
 		tonccpy((u32*)0x0200F4CC, dsiSaveGetResultCode, 0xC);

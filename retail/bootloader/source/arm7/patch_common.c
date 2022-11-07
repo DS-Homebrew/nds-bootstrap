@@ -4749,6 +4749,18 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0204B0BC = 0xE1A00000; // nop
 	}
 
+	// Fall in the Dark (Japan)
+	// A bit hard/confusing to add save support
+	else if (strcmp(romTid, "K4EJ") == 0) {
+		*(u32*)0x02010284 = 0xE1A00000; // nop
+		*(u32*)0x02013894 = 0xE1A00000; // nop
+		patchInitDSiWare(0x02019000, heapEnd);
+		patchUserSettingsReadDSiWare(0x0201A5C0);
+		*(u32*)0x0201DB40 = 0xE1A00000; // nop
+		*(u32*)0x02022CA0 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0203EE0C = 0xE1A00000; // nop (Skip Manual screen)
+	}
+
 	// Famicom Wars DS: Ushinawareta Hikari (Japan)
 	// DSi save function patching not needed 
 	else if (strcmp(romTid, "Z2EJ") == 0) {
