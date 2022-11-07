@@ -986,6 +986,10 @@ bool dsiSaveSeek(void* ctx, s32 pos, u32 mode) {
 		dsiSaveResultCode = 0xE;
 		return false;
 	}
+	if (!dsiSaveExists) {
+		dsiSaveResultCode = 1;
+		return false;
+	}
 	dsiSaveSeekPos = pos;
 	dsiSaveResultCode = 0;
 	return true;
@@ -996,7 +1000,7 @@ bool dsiSaveSeek(void* ctx, s32 pos, u32 mode) {
 
 s32 dsiSaveRead(void* ctx, void* dst, s32 len) {
 #ifndef NODSIWARE
-	if (dsiSavePerms == 2) {
+	if (dsiSavePerms == 2 || !dsiSaveExists) {
 		dsiSaveResultCode = 1;
 		return -1; // Return if only write perms are set
 	}
@@ -1011,6 +1015,7 @@ s32 dsiSaveRead(void* ctx, void* dst, s32 len) {
 	}
 
 	if (len == 0) {
+		dsiSaveResultCode = 1;
 		return 0;
 	}
 
@@ -1033,9 +1038,14 @@ s32 dsiSaveRead(void* ctx, void* dst, s32 len) {
 
 s32 dsiSaveWrite(void* ctx, void* src, s32 len) {
 #ifndef NODSIWARE
-	if (dsiSavePerms == 1) {
+	if (dsiSavePerms == 1 || !dsiSaveExists) {
 		dsiSaveResultCode = 1;
 		return -1; // Return if only read perms are set
+	}
+
+	while (dsiSaveSeekPos+len > ce9->saveSize-0x200) {
+		// Do not overwrite exist flag and save file size
+		len--;
 	}
 
 	int oldIME = enterCriticalSection();

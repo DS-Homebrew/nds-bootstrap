@@ -363,8 +363,8 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0203C1F4, (u32)dsiSaveRead);
 		setBL(0x0203C204, (u32)dsiSaveClose);
 		setBL(0x0203C220, (u32)dsiSaveClose);
-		*(u32*)0x0203C274 = 0xE3A00001; // mov r0, #1 (OpenDirectory)
-		*(u32*)0x0203C2B0 = 0xE1A00000; // nop (CloseDirectory)
+		*(u32*)0x0203C274 = 0xE3A00001; // mov r0, #1 (dsiSaveOpenDir)
+		*(u32*)0x0203C2B0 = 0xE1A00000; // nop (dsiSaveCloseDir)
 		setBL(0x0203C2BC, (u32)dsiSaveCreate);
 		setBL(0x0203C2CC, (u32)dsiSaveOpen);
 		setBL(0x0203C2F8, (u32)dsiSaveSetLength);
@@ -1614,8 +1614,8 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02044710, (u32)dsiSaveRead);
 		setBL(0x02044720, (u32)dsiSaveClose);
 		setBL(0x0204473C, (u32)dsiSaveClose);
-		*(u32*)0x02044790 = 0xE3A00001; // mov r0, #1 (OpenDirectory)
-		*(u32*)0x020447CC = 0xE1A00000; // nop (CloseDirectory)
+		*(u32*)0x02044790 = 0xE3A00001; // mov r0, #1 (dsiSaveOpenDir)
+		*(u32*)0x020447CC = 0xE1A00000; // nop (dsiSaveCloseDir)
 		setBL(0x020447D8, (u32)dsiSaveCreate);
 		setBL(0x020447E8, (u32)dsiSaveOpen);
 		setBL(0x02044814, (u32)dsiSaveSetLength);
@@ -1763,8 +1763,8 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02044B68, (u32)dsiSaveRead);
 		setBL(0x02044B78, (u32)dsiSaveClose);
 		setBL(0x02044B94, (u32)dsiSaveClose);
-		*(u32*)0x02044BE8 = 0xE3A00001; // mov r0, #1 (OpenDirectory)
-		*(u32*)0x02044C24 = 0xE1A00000; // nop (CloseDirectory)
+		*(u32*)0x02044BE8 = 0xE3A00001; // mov r0, #1 (dsiSaveOpenDir)
+		*(u32*)0x02044C24 = 0xE1A00000; // nop (dsiSaveCloseDir)
 		setBL(0x02044C30, (u32)dsiSaveCreate);
 		setBL(0x02044C40, (u32)dsiSaveOpen);
 		setBL(0x02044C6C, (u32)dsiSaveSetLength);
@@ -1780,8 +1780,8 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x020446AC, (u32)dsiSaveRead);
 		setBL(0x020446BC, (u32)dsiSaveClose);
 		setBL(0x020446D8, (u32)dsiSaveClose);
-		*(u32*)0x0204472C = 0xE3A00001; // mov r0, #1 (OpenDirectory)
-		*(u32*)0x02044768 = 0xE1A00000; // nop (CloseDirectory)
+		*(u32*)0x0204472C = 0xE3A00001; // mov r0, #1 (dsiSaveOpenDir)
+		*(u32*)0x02044768 = 0xE1A00000; // nop (dsiSaveCloseDir)
 		setBL(0x02044774, (u32)dsiSaveCreate);
 		setBL(0x02044784, (u32)dsiSaveOpen);
 		setBL(0x020447B0, (u32)dsiSaveSetLength);
@@ -2098,6 +2098,37 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// Farm Frenzy (USA)
+	else if (strcmp(romTid, "KFKE") == 0 && saveOnFlashcard) {
+		tonccpy((u32*)0x0200F4CC, dsiSaveGetResultCode, 0xC);
+		setBL(0x02035B30, (u32)dsiSaveCreate);
+		setBL(0x02035B4C, (u32)dsiSaveOpen);
+		setBL(0x02035B9C, (u32)dsiSaveWrite);
+		setBL(0x02035BA4, (u32)dsiSaveClose);
+		*(u32*)0x02035C78 = 0xE3A00001; // mov r0, #1 (dsiSaveOpenDir)
+		*(u32*)0x02035C88 = 0xE1A00000; // nop (dsiSaveCloseDir)
+		setBL(0x02035C9C, (u32)dsiSaveOpen);
+		setBL(0x02035CAC, (u32)dsiSaveClose);
+		setBL(0x02036828, (u32)dsiSaveOpen);
+		setBL(0x02036848, (u32)dsiSaveClose);
+		setBL(0x02041190, (u32)dsiSaveOpen);
+		setBL(0x020411B0, (u32)dsiSaveSeek);
+		setBL(0x020411D0, (u32)dsiSaveWrite);
+		setBL(0x020411D8, (u32)dsiSaveClose);
+		setBL(0x020411F4, (u32)dsiSaveOpen);
+		setBL(0x02041214, (u32)dsiSaveSeek);
+		setBL(0x02041234, (u32)dsiSaveWrite);
+		setBL(0x0204123C, (u32)dsiSaveClose);
+		setBL(0x02041268, (u32)dsiSaveOpen);
+		setBL(0x02041288, (u32)dsiSaveSeek);
+		setBL(0x020412A8, (u32)dsiSaveRead);
+		setBL(0x020412B0, (u32)dsiSaveClose);
+		setBL(0x020412C4, (u32)dsiSaveOpen);
+		setBL(0x020412E4, (u32)dsiSaveSeek);
+		setBL(0x02041304, (u32)dsiSaveRead);
+		setBL(0x0204130C, (u32)dsiSaveClose);
+	}
+
 	// Fashion Tycoon (USA)
 	// Saving not supported due to some weirdness with the code going on
 	else if (strcmp(romTid, "KU7E") == 0 && saveOnFlashcard) {
@@ -2217,8 +2248,8 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02045498, (u32)dsiSaveRead);
 		setBL(0x020454A8, (u32)dsiSaveClose);
 		setBL(0x020454C4, (u32)dsiSaveClose);
-		*(u32*)0x0204551C = 0xE3A00001; // mov r0, #1 (OpenDirectory)
-		*(u32*)0x02045558 = 0xE1A00000; // nop (CloseDirectory)
+		*(u32*)0x0204551C = 0xE3A00001; // mov r0, #1 (dsiSaveOpenDir)
+		*(u32*)0x02045558 = 0xE1A00000; // nop (dsiSaveCloseDir)
 		setBL(0x02045564, (u32)dsiSaveCreate);
 		setBL(0x02045574, (u32)dsiSaveOpen);
 		setBL(0x020455A0, (u32)dsiSaveSetLength);
