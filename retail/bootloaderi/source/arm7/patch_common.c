@@ -2196,6 +2196,23 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// Fuuu! Dairoujou Kai (Japan)
+	else if (strcmp(romTid, "K6JJ") == 0 && saveOnFlashcard) {
+		setBL(0x02045468, (u32)dsiSaveOpen);
+		setBL(0x02045498, (u32)dsiSaveRead);
+		setBL(0x020454A8, (u32)dsiSaveClose);
+		setBL(0x020454C4, (u32)dsiSaveClose);
+		*(u32*)0x0204551C = 0xE3A00001; // mov r0, #1 (OpenDirectory)
+		*(u32*)0x02045558 = 0xE1A00000; // nop (CloseDirectory)
+		setBL(0x02045564, (u32)dsiSaveCreate);
+		setBL(0x02045574, (u32)dsiSaveOpen);
+		setBL(0x020455A0, (u32)dsiSaveSetLength);
+		setBL(0x020455B0, (u32)dsiSaveClose);
+		setBL(0x020455DC, (u32)dsiSaveWrite);
+		setBL(0x020455EC, (u32)dsiSaveClose);
+		setBL(0x02045608, (u32)dsiSaveClose);
+	}
+
 	// Go! Go! Kokopolo (USA)
 	// Go! Go! Kokopolo (Europe)
 	else if ((strcmp(romTid, "K3GE") == 0 || strcmp(romTid, "K3GP") == 0) && saveOnFlashcard) {

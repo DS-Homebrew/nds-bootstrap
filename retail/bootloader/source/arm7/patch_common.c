@@ -4961,6 +4961,32 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// Fuuu! Dairoujou Kai (Japan)
+	else if (strcmp(romTid, "K6JJ") == 0) {
+		*(u32*)0x0200DDFC = 0xE1A00000; // nop
+		*(u32*)0x020115C8 = 0xE1A00000; // nop
+		patchInitDSiWare(0x0201DB18, heapEnd);
+		patchUserSettingsReadDSiWare(0x0201F014);
+		*(u32*)0x0201F030 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0201F034 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0201F03C = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0201F040 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02022524 = 0xE1A00000; // nop
+		setBL(0x02045468, (u32)dsiSaveOpen);
+		setBL(0x02045498, (u32)dsiSaveRead);
+		setBL(0x020454A8, (u32)dsiSaveClose);
+		setBL(0x020454C4, (u32)dsiSaveClose);
+		*(u32*)0x0204551C = 0xE3A00001; // mov r0, #1 (OpenDirectory)
+		*(u32*)0x02045558 = 0xE1A00000; // nop (CloseDirectory)
+		setBL(0x02045564, (u32)dsiSaveCreate);
+		setBL(0x02045574, (u32)dsiSaveOpen);
+		setBL(0x020455A0, (u32)dsiSaveSetLength);
+		setBL(0x020455B0, (u32)dsiSaveClose);
+		setBL(0x020455DC, (u32)dsiSaveWrite);
+		setBL(0x020455EC, (u32)dsiSaveClose);
+		setBL(0x02045608, (u32)dsiSaveClose);
+	}
+
 	// Game & Watch: Ball (USA, Europe)
 	// Game & Watch: Helmet (USA, Europe)
 	// Game & Watch: Judge (USA, Europe)
