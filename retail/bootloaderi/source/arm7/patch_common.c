@@ -28,6 +28,7 @@
 #include "loading_screen.h"
 #include "debug_file.h"
 
+//extern u16 gameOnFlashcard;
 extern u16 saveOnFlashcard;
 extern u8 valueBits3;
 #define memoryPit (valueBits3 & BIT(1))
@@ -3159,6 +3160,87 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02008E64 = 0xE12FFF1E; // bx lr
 	}
 
+	// My Aquarium: Seven Oceans (USA)
+	else if (strcmp(romTid, "K7ZE") == 0 && saveOnFlashcard) {
+		setBL(0x0203DC00, (u32)dsiSaveOpen);
+		setBL(0x0203DC1C, (u32)dsiSaveCreate);
+		setBL(0x0203DC48, (u32)dsiSaveOpen);
+		setBL(0x0203DC60, (u32)dsiSaveRead);
+		setBL(0x0203DC7C, (u32)dsiSaveClose);
+		setBL(0x0203DC94, (u32)dsiSaveClose);
+		setBL(0x0203DD54, (u32)dsiSaveOpen);
+		setBL(0x0203DD6C, (u32)dsiSaveClose);
+		setBL(0x0203DD8C, (u32)dsiSaveRead);
+		setBL(0x0203DDA8, (u32)dsiSaveClose);
+		setBL(0x0203DDC4, (u32)dsiSaveSeek);
+		setBL(0x0203DDD4, (u32)dsiSaveSeek);
+		setBL(0x0203DDE8, (u32)dsiSaveWrite);
+		setBL(0x0203DE04, (u32)dsiSaveClose);
+		setBL(0x0203DE24, (u32)dsiSaveSeek);
+		setBL(0x0203DE34, (u32)dsiSaveWrite);
+		setBL(0x0203DE50, (u32)dsiSaveClose);
+		setBL(0x0203DE70, (u32)dsiSaveSeek);
+		setBL(0x0203DE84, (u32)dsiSaveWrite);
+		setBL(0x0203DEA0, (u32)dsiSaveClose);
+		setBL(0x0203DEB8, (u32)dsiSaveClose);
+		setBL(0x0203DF64, (u32)dsiSaveOpen);
+		setBL(0x0203DF7C, (u32)dsiSaveClose);
+		setBL(0x0203DFB8, (u32)dsiSaveSeek);
+		setBL(0x0203DFCC, (u32)dsiSaveRead);
+		setBL(0x0203DFF4, (u32)dsiSaveClose);
+		setBL(0x0203E034, (u32)dsiSaveClose);
+		setBL(0x0203E088, (u32)dsiSaveClose);
+		setBL(0x0203E0C0, (u32)dsiSaveClose);
+		setBL(0x0203E200, (u32)dsiSaveOpen);
+		setBL(0x0203E224, (u32)dsiSaveClose);
+		setBL(0x02045158, 0x02011384); // Branch to fixed code
+		*(u32*)0x0206DA88 = 0xE3A01001; // mov r1, #1 (Skip Manual screen)
+		*(u32*)0x0206DCFC = 0xE1A00000; // nop
+		*(u32*)0x0206DD0C = 0xE1A00000; // nop
+
+		// Fixed code with added branch to save write code
+		*(u32*)0x02011384 = 0xE92D4003; // STMFD SP!, {R0-R1,LR}
+		*(u32*)0x02011388 = 0xE5901008; // ldr r1, [r0,#8]
+		*(u32*)0x0201138C = 0xE5910004; // ldr r0, [r1,#4]
+		*(u32*)0x02011390 = 0xE3500005; // cmp r0, #5
+		*(u32*)0x02011394 = 0x13700001; // cmpne r0, #1
+		*(u32*)0x02011398 = 0x03E00001; // moveq r0, #0xFFFFFFFE
+		*(u32*)0x0201139C = 0x05810004; // streq r0, [r1,#4]
+		*(u32*)0x020113A0 = 0x18BD8003; // LDMNEFD SP!, {R0-R1,PC}
+		setBL(0x020113A4, 0x0206DCD8);
+		*(u32*)0x020113A8 = 0xE8BD8003; // LDMFD SP!, {R0-R1,PC}
+	}
+
+	// My Aquarium: Seven Oceans (Europe)
+	else if (strcmp(romTid, "K9RP") == 0 && saveOnFlashcard) {
+		setBL(0x0203DC4C, (u32)dsiSaveOpen);
+		setBL(0x0203DC68, (u32)dsiSaveCreate);
+		setBL(0x0203DC94, (u32)dsiSaveOpen);
+		setBL(0x0203DCAC, (u32)dsiSaveRead);
+		setBL(0x0203DCC8, (u32)dsiSaveClose);
+		setBL(0x0203DCE0, (u32)dsiSaveClose);
+		setBL(0x0203DDF8, (u32)dsiSaveOpen);
+		setBL(0x0203DE14, (u32)dsiSaveClose);
+		setBL(0x0203DE34, (u32)dsiSaveRead);
+		setBL(0x0203DE50, (u32)dsiSaveClose);
+		setBL(0x0203DE70, (u32)dsiSaveSeek);
+		setBL(0x0203DE80, (u32)dsiSaveWrite);
+		setBL(0x0203DE8C, (u32)dsiSaveClose);
+		setBL(0x0203DF44, (u32)dsiSaveOpen);
+		setBL(0x0203DF5C, (u32)dsiSaveClose);
+		setBL(0x0203DF98, (u32)dsiSaveSeek);
+		setBL(0x0203DFAC, (u32)dsiSaveRead);
+		setBL(0x0203DFD4, (u32)dsiSaveClose);
+		setBL(0x0203E014, (u32)dsiSaveClose);
+		setBL(0x0203E068, (u32)dsiSaveClose);
+		setBL(0x0203E0A0, (u32)dsiSaveClose);
+		setBL(0x0203E1B4, (u32)dsiSaveOpen);
+		setBL(0x0203E1CC, (u32)dsiSaveClose);
+		setBL(0x0203E1E8, (u32)dsiSaveWrite);
+		setBL(0x0203E1F0, (u32)dsiSaveClose);
+		*(u32*)0x0206DAA0 = 0xE3A01001; // mov r1, #1 (Skip Manual screen)
+	}
+
 	// My Farm (USA)
 	else if (strcmp(romTid, "KMRE") == 0 && saveOnFlashcard) {
 		tonccpy((u32*)0x020126DC, dsiSaveGetResultCode, 0xC);
@@ -5617,6 +5699,13 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02028C50 = 0xE3A00001; // mov r0, #1
 		*(u32*)0x02033D88 = 0xE12FFF1E; // bx lr
 	}
+
+	// X-Scape (USA)
+	/*else if (strcmp(romTid, "KDXE") == 0) {
+		// Speed up file loading by 0.5 seconds
+		*(u16*)0x020B13D0 = 0x2001; // movs r0, #1
+		*(u16*)0x020B13D2 = 0x46C0; // nop
+	}*/
 
 	// Yummy Yummy Cooking Jam (USA)
 	else if (strcmp(romTid, "KYUE") == 0 && saveOnFlashcard) {
