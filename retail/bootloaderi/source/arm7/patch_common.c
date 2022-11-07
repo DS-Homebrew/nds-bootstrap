@@ -2174,6 +2174,21 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		// *(u16*)0x020372DA = 0x4770; // bx lr
 	}
 
+	// Fizz (USA)
+	else if (strcmp(romTid, "KZZE") == 0 && saveOnFlashcard) {
+		tonccpy((u32*)0x02011260, dsiSaveGetResultCode, 0xC);
+		setBL(0x02029FE0, (u32)dsiSaveOpen);
+		setBL(0x0202A030, (u32)dsiSaveGetLength);
+		setBL(0x0202A044, (u32)dsiSaveRead);
+		setBL(0x0202A05C, (u32)dsiSaveClose);
+		setBL(0x0202A3A4, (u32)dsiSaveOpen);
+		setBL(0x0202A3E0, (u32)dsiSaveCreate);
+		setBL(0x0202A3F4, (u32)dsiSaveOpen);
+		setBL(0x0202A414, (u32)dsiSaveSetLength);
+		setBL(0x0202A434, (u32)dsiSaveWrite);
+		setBL(0x0202A44C, (u32)dsiSaveClose);
+	}
+
 	// Frogger Returns (USA)
 	else if (strcmp(romTid, "KFGE") == 0 && saveOnFlashcard) {
 		tonccpy((u32*)0x0201234C, dsiSaveGetResultCode, 0xC);

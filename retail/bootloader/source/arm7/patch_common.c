@@ -4872,6 +4872,27 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020663D4 = 0xE1A00000; // nop
 	}
 
+	// Fizz (USA)
+	else if (strcmp(romTid, "KZZE") == 0) {
+		*(u32*)0x020106E8 = 0xE1A00000; // nop
+		tonccpy((u32*)0x02011260, dsiSaveGetResultCode, 0xC);
+		*(u32*)0x0201391C = 0xE1A00000; // nop
+		patchInitDSiWare(0x02018BD8, extendedMemory2 ? 0x02700000 : heapEnd+0x400000); // extendedMemory2 ? #0x2700000 : #0x27E0000 (mirrors to 0x23E0000 on retail DS units)
+		*(u32*)0x02018F64 = 0x0213B440;
+		patchUserSettingsReadDSiWare(0x0201A174);
+		*(u32*)0x0201CE60 = 0xE1A00000; // nop
+		setBL(0x02029FE0, (u32)dsiSaveOpen);
+		setBL(0x0202A030, (u32)dsiSaveGetLength);
+		setBL(0x0202A044, (u32)dsiSaveRead);
+		setBL(0x0202A05C, (u32)dsiSaveClose);
+		setBL(0x0202A3A4, (u32)dsiSaveOpen);
+		setBL(0x0202A3E0, (u32)dsiSaveCreate);
+		setBL(0x0202A3F4, (u32)dsiSaveOpen);
+		setBL(0x0202A414, (u32)dsiSaveSetLength);
+		setBL(0x0202A434, (u32)dsiSaveWrite);
+		setBL(0x0202A44C, (u32)dsiSaveClose);
+	}
+
 	// Flashlight (USA)
 	else if (strcmp(romTid, "KFSE") == 0) {
 		*(u32*)0x02005134 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
