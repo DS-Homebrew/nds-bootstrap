@@ -1586,6 +1586,19 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchUserSettingsReadDSiWare(0x0204C5AC);
 	}
 
+	// Sukai Janpa Soru (Japan)
+	else if (strcmp(romTid, "KSRJ") == 0) {
+		*(u32*)0x0200515C = 0xE1A00000; // nop
+		*(u32*)0x02005164 = 0xE1A00000; // nop
+		*(u32*)0x02010498 = 0xE1A00000; // nop
+		*(u32*)0x02010500 = 0xE1A00000; // nop
+		*(u32*)0x02026848 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0203F4B0 = 0xE1A00000; // nop
+		*(u32*)0x02042EC0 = 0xE1A00000; // nop
+		patchInitDSiWare(0x0204B1A0, extendedMemory2 ? 0x02700000 : heapEnd);
+		patchUserSettingsReadDSiWare(0x0204C4DC);
+	}
+
 	// Beauty Academy (Europe)
 	else if (strcmp(romTid, "K8BP") == 0) {
 		*(u32*)0x02005098 = 0xE1A00000; // nop

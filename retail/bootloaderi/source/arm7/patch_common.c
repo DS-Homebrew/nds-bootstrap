@@ -803,6 +803,11 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020265A8 = 0xE12FFF1E; // bx lr
 	}
 
+	// Sukai Janpa Soru (Japan)
+	else if (strcmp(romTid, "KSRJ") == 0 && saveOnFlashcard) {
+		*(u32*)0x02026848 = 0xE12FFF1E; // bx lr
+	}
+
 	// Beauty Academy (Europe)
 	else if (strcmp(romTid, "K8BP") == 0 && saveOnFlashcard) {
 		setBL(0x02092D44, (u32)dsiSaveCreate);
