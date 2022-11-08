@@ -1284,6 +1284,32 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		tonccpy((u32*)0x02050F68, dsiSaveGetResultCode, 0xC);
 	}
 
+	// GO Series: Captain Sub (USA)
+	// GO Series: Captain Sub (Europe)
+	else if ((strcmp(romTid, "K3NE") == 0 || strcmp(romTid, "K3NP") == 0) && saveOnFlashcard) {
+		*(u32*)0x02005538 = 0xE1A00000; // nop
+		*(u32*)0x0200A22C = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		setBL(0x0200AA38, (u32)dsiSaveOpen);
+		setBL(0x0200AA70, (u32)dsiSaveRead);
+		setBL(0x0200AA90, (u32)dsiSaveClose);
+		setBL(0x0200AB28, (u32)dsiSaveCreate);
+		setBL(0x0200AB68, (u32)dsiSaveOpen);
+		setBL(0x0200ABA0, (u32)dsiSaveSetLength);
+		setBL(0x0200ABB8, (u32)dsiSaveWrite);
+		setBL(0x0200ABDC, (u32)dsiSaveClose);
+		setBL(0x0200AC6C, (u32)dsiSaveGetInfo);
+		*(u32*)0x0200B550 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
+		*(u32*)0x0200F1B8 = 0xE12FFF1E; // bx lr (Skip Manual screen, Part 1)
+		*(u32*)0x0204D2D8 = 0xE12FFF1E; // bx lr
+		tonccpy((u32*)0x02051FD0, dsiSaveGetResultCode, 0xC);
+
+		// Skip Manual screen, Part 2
+		for (int i = 0; i < 11; i++) {
+			u32* offset = (u32*)0x0200F2F4;
+			offset[i] = 0xE1A00000; // nop
+		}
+	}
+
 	// Castle Conqueror (USA)
 	else if (strcmp(romTid, "KCNE") == 0 && saveOnFlashcard) {
 		tonccpy((u32*)0x020252B8, dsiSaveGetResultCode, 0xC);
