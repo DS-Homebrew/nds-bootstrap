@@ -100,7 +100,7 @@ static const u32 mpuInitRegion0Data[1]      = {0x4000033};
 static const u32 mpuInitRegion1Signature[1] = {0xEE060F11};
 static const u32 mpuInitRegion1Data1[1]     = {0x200002D}; // SDK <= 4
 static const u32 mpuInitRegion1DataAlt[1]   = {0x200002B};
-//static const u32 mpuInitRegion1Data5[1]     = {0x2000031}; // SDK 5
+static const u32 mpuInitRegion1Data5[1]     = {0x2000031}; // SDK 5
 static const u32 mpuInitRegion2Signature[1] = {0xEE060F12};
 static const u32 mpuInitRegion2Data1[1]     = {0x27C0023}; // SDK <= 2
 static const u32 mpuInitRegion2Data3[1]     = {0x27E0021}; // SDK >= 2 (Late)
@@ -1291,9 +1291,9 @@ u32* findMpuDataOffset(const module_params_t* moduleParams, u32 patchMpuRegion, 
 	if (moduleParams->sdk_version >= 0x2008000) {
 		mpuInitRegion2Data = mpuInitRegion2Data3;
 	}
-	/*if (moduleParams->sdk_version > 0x5000000) {
+	if (moduleParams->sdk_version > 0x5000000) {
 		mpuInitRegion1Data = mpuInitRegion1Data5;
-	}*/
+	}
 
 	const u32* mpuInitRegionData = mpuInitRegion1Data;
 	switch (patchMpuRegion) {

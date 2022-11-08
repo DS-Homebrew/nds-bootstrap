@@ -376,7 +376,7 @@ static bool patchCardIrqEnable(cardengineArm9* ce9, const tNDSHeader* ndsHeader,
 }
 
 static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 patchMpuRegion, u32 patchMpuSize) {
-	if (!extendedMemory2 || patchMpuRegion == 2 || isSdk5(moduleParams)) {
+	if (!extendedMemory2 || patchMpuRegion == 2 || ndsHeader->unitCode > 0) {
 		return;
 	}
 
@@ -404,36 +404,38 @@ static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 		mpuDataOffset = findMpuDataOffset(moduleParams, patchMpuRegion, mpuStartOffset);
 	}
 	if (mpuDataOffset) {
-		// Change the region 1 configuration
+		if (!isSdk5(moduleParams)) {
+			// Change the region 1 configuration
 
-		u32 mpuInitRegionNewData = PAGE_32M | 0x02000000 | 1;
-		u32 mpuNewDataAccess     = 0;
-		u32 mpuNewInstrAccess    = 0;
-		int mpuAccessOffset      = 0;
-		switch (patchMpuRegion) {
-			case 0:
-				mpuInitRegionNewData = PAGE_128M | 0x00000000 | 1;
-				break;
-			case 3:
-				mpuInitRegionNewData = PAGE_32M | 0x08000000 | 1;
-				mpuNewInstrAccess    = 0x5111111;
-				mpuAccessOffset      = 5;
-				break;
-		}
-
-		unpatchedFuncs->mpuDataOffset = mpuDataOffset;
-		unpatchedFuncs->mpuInitRegionOldData = *mpuDataOffset;
-		*mpuDataOffset = mpuInitRegionNewData;
-
-		if (mpuAccessOffset) {
-			unpatchedFuncs->mpuAccessOffset = mpuAccessOffset;
-			if (mpuNewInstrAccess) {
-				unpatchedFuncs->mpuOldInstrAccess = mpuDataOffset[mpuAccessOffset];
-				mpuDataOffset[mpuAccessOffset] = mpuNewInstrAccess;
+			u32 mpuInitRegionNewData = PAGE_32M | 0x02000000 | 1;
+			u32 mpuNewDataAccess     = 0;
+			u32 mpuNewInstrAccess    = 0;
+			int mpuAccessOffset      = 0;
+			switch (patchMpuRegion) {
+				case 0:
+					mpuInitRegionNewData = PAGE_128M | 0x00000000 | 1;
+					break;
+				case 3:
+					mpuInitRegionNewData = PAGE_32M | 0x08000000 | 1;
+					mpuNewInstrAccess    = 0x5111111;
+					mpuAccessOffset      = 5;
+					break;
 			}
-			if (mpuNewDataAccess) {
-				unpatchedFuncs->mpuOldDataAccess = mpuDataOffset[mpuAccessOffset + 1];
-				mpuDataOffset[mpuAccessOffset + 1] = mpuNewDataAccess;
+
+			unpatchedFuncs->mpuDataOffset = mpuDataOffset;
+			unpatchedFuncs->mpuInitRegionOldData = *mpuDataOffset;
+			*mpuDataOffset = mpuInitRegionNewData;
+
+			if (mpuAccessOffset) {
+				unpatchedFuncs->mpuAccessOffset = mpuAccessOffset;
+				if (mpuNewInstrAccess) {
+					unpatchedFuncs->mpuOldInstrAccess = mpuDataOffset[mpuAccessOffset];
+					mpuDataOffset[mpuAccessOffset] = mpuNewInstrAccess;
+				}
+				if (mpuNewDataAccess) {
+					unpatchedFuncs->mpuOldDataAccess = mpuDataOffset[mpuAccessOffset + 1];
+					mpuDataOffset[mpuAccessOffset + 1] = mpuNewDataAccess;
+				}
 			}
 		}
 
@@ -477,7 +479,7 @@ static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 		}*/
 	}
 
-	//if (!isSdk5(moduleParams)) {
+	if (!isSdk5(moduleParams)) {
 		u32* mpuDataOffsetAlt = patchOffsetCache.mpuDataOffsetAlt;
 		if (!patchOffsetCache.mpuDataOffsetAlt) {
 			mpuDataOffsetAlt = findMpuDataOffsetAlt(ndsHeader);
@@ -495,7 +497,7 @@ static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 			dbg_hexa((u32)mpuDataOffsetAlt);
 			dbg_printf("\n\n");
 		}
-	//}
+	}
 
 	patchOffsetCache.patchMpuRegion = patchMpuRegion;
 	patchOffsetCache.mpuStartOffset = mpuStartOffset;
@@ -624,11 +626,11 @@ void patchMpuChange(const tNDSHeader* ndsHeader, const module_params_t* modulePa
 		return;
 	}
 
-	u32* offset = patchOffsetCache.mpuDataOffset;
-	if (!patchOffsetCache.mpuDataOffset) {
+	u32* offset = patchOffsetCache.mpuChangeOffset;
+	if (!patchOffsetCache.mpuChangeOffset) {
 		offset = findMpuChange(ndsHeader);
 		if (offset) {
-			patchOffsetCache.mpuDataOffset = offset;
+			patchOffsetCache.mpuChangeOffset = offset;
 		}
 	}
 
