@@ -1913,6 +1913,51 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02085000 = 0xE1A00000; // nop
 	}*/
 
+	// Bloons TD (USA)
+	// Bloons TD (Europe)
+	// A weird bug is preventing save support
+	// Audio is disabled on retail consoles
+	else if (strcmp(romTid, "KLNE") == 0 || strcmp(romTid, "KLNP") == 0) {
+		*(u32*)0x020050C8 = 0xE1A00000; // nop
+		*(u32*)0x020050E0 = 0xE1A00000; // nop
+		*(u32*)0x02005158 = 0xE1A00000; // nop (Work around save-related crash)
+		*(u32*)0x02014304 = 0xE1A00000; // nop
+		//tonccpy((u32*)0x02014E88, dsiSaveGetResultCode, 0xC);
+		*(u32*)0x02017C38 = 0xE1A00000; // nop
+		patchInitDSiWare(0x0201D718, extendedMemory2 ? 0x02700000 : heapEnd);
+		*(u32*)0x0201DAA4 -= 0x30000;
+		if (!extendedMemory2) {
+			*(u32*)0x0201DAA4 -= 0x1B3740;
+		}
+		patchUserSettingsReadDSiWare(0x0201ED00);
+		*(u32*)0x02022038 = 0xE1A00000; // nop
+		if (ndsHeader->gameCode[3] == 'E') {
+			/* *(u32*)0x0205EDAC = 0xE3A00000; // mov r0, #0
+			setBL(0x0205F3E8, (u32)dsiSaveDelete);
+			setBL(0x0205F460, (u32)dsiSaveOpen);
+			setBL(0x0205F478, (u32)dsiSaveGetLength);
+			setBL(0x0205F4A8, (u32)dsiSaveRead);
+			setBL(0x0205F4B8, (u32)dsiSaveClose);
+			setBL(0x0205F52C, (u32)dsiSaveClose);
+			setBL(0x0205F5CC, (u32)dsiSaveOpen);
+			setBL(0x0205F5EC, (u32)dsiSaveCreate);
+			setBL(0x0205F604, (u32)dsiSaveClose);
+			setBL(0x0205F710, (u32)dsiSaveOpen);
+			setBL(0x0205F734, (u32)dsiSaveSetLength);
+			setBL(0x0205F744, (u32)dsiSaveClose);
+			setBL(0x0205F774, (u32)dsiSaveWrite);
+			setBL(0x0205F788, (u32)dsiSaveClose);
+			setBL(0x0205F7A8, (u32)dsiSaveClose); */
+			if (!extendedMemory2) {
+				*(u32*)0x0205FDA0 = 0x4000; // New sound heap size (Disables audio)
+			}
+		} else {
+			if (!extendedMemory2) {
+				*(u32*)0x0205FDC0 = 0x4000; // New sound heap size (Disables audio)
+			}
+		}
+	}
+
 	// Bloons TD 4 (USA)
 	// Requires 8MB of RAM
 	// Audio is disabled

@@ -955,6 +955,30 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0203B28C, (u32)dsiSaveClose);
 	}
 
+	// Bloons TD (USA)
+	// Bloons TD (Europe)
+	// A weird bug is preventing save support
+	else if ((strcmp(romTid, "KLNE") == 0 || strcmp(romTid, "KLNP") == 0) && saveOnFlashcard) {
+		*(u32*)0x02005158 = 0xE1A00000; // nop (Work around save-related crash)
+		/* tonccpy((u32*)0x02014E88, dsiSaveGetResultCode, 0xC);
+		*(u32*)0x0205EDAC = 0xE3A00000; // mov r0, #0
+		setBL(0x0205F3E8, (u32)dsiSaveDelete);
+		setBL(0x0205F460, (u32)dsiSaveOpen);
+		setBL(0x0205F478, (u32)dsiSaveGetLength);
+		setBL(0x0205F4A8, (u32)dsiSaveRead);
+		setBL(0x0205F4B8, (u32)dsiSaveClose);
+		setBL(0x0205F52C, (u32)dsiSaveClose);
+		setBL(0x0205F5CC, (u32)dsiSaveOpen);
+		setBL(0x0205F5EC, (u32)dsiSaveCreate);
+		setBL(0x0205F604, (u32)dsiSaveClose);
+		setBL(0x0205F710, (u32)dsiSaveOpen);
+		setBL(0x0205F734, (u32)dsiSaveSetLength);
+		setBL(0x0205F744, (u32)dsiSaveClose);
+		setBL(0x0205F774, (u32)dsiSaveWrite);
+		setBL(0x0205F788, (u32)dsiSaveClose);
+		setBL(0x0205F7A8, (u32)dsiSaveClose); */
+	}
+
 	// Bloons TD 4 (USA)
 	else if (strcmp(romTid, "KUVE") == 0 && saveOnFlashcard) {
 		*(u32*)0x020AF184 = 0xE3A00001; // mov r0, #1
