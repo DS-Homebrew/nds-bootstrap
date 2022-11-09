@@ -955,6 +955,60 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0203B28C, (u32)dsiSaveClose);
 	}
 
+	// Bloons TD 4 (USA)
+	else if (strcmp(romTid, "KUVE") == 0 && saveOnFlashcard) {
+		*(u32*)0x020AF184 = 0xE3A00001; // mov r0, #1
+		setBL(0x020AF5C0, (u32)dsiSaveOpen);
+		setBL(0x020AF5E4, (u32)dsiSaveClose);
+		setBL(0x020AF69C, (u32)dsiSaveOpen);
+		setBL(0x020AF6C0, (u32)dsiSaveGetLength);
+		setBL(0x020AF6F4, (u32)dsiSaveRead);
+		setBL(0x020AF704, (u32)dsiSaveRead);
+		setBL(0x020AF728, (u32)dsiSaveClose);
+		setBL(0x020AF7C8, (u32)dsiSaveClose);
+		setBL(0x020AF7E0, (u32)dsiSaveClose);
+		setBL(0x020AFAAC, (u32)dsiSaveOpen);
+		setBL(0x020AFAD0, (u32)dsiSaveCreate);
+		setBL(0x020AFB08, (u32)dsiSaveOpen);
+		setBL(0x020AFB34, (u32)dsiSaveSetLength);
+		setBL(0x020AFB44, (u32)dsiSaveClose);
+		setBL(0x020AFB68, (u32)dsiSaveWrite);
+		setBL(0x020AFB78, (u32)dsiSaveWrite);
+		setBL(0x020AFB8C, (u32)dsiSaveClose);
+		setBL(0x020AFBA4, (u32)dsiSaveClose);
+		setBL(0x020AFC20, (u32)dsiSaveOpen);
+		setBL(0x020AFC44, (u32)dsiSaveGetLength);
+		setBL(0x020AFC50, (u32)dsiSaveClose);
+		setBL(0x020AFD40, (u32)dsiSaveDelete);
+	}
+
+	// Bloons TD 4 (Europe)
+	else if (strcmp(romTid, "KUVP") == 0 && saveOnFlashcard) {
+		*(u32*)0x020AF600 = 0xE3A00001; // mov r0, #1
+		setBL(0x020AFA3C, (u32)dsiSaveOpen);
+		setBL(0x020AFA60, (u32)dsiSaveClose);
+		setBL(0x020AFB18, (u32)dsiSaveOpen);
+		setBL(0x020AFB3C, (u32)dsiSaveGetLength);
+		setBL(0x020AFB70, (u32)dsiSaveRead);
+		setBL(0x020AFB80, (u32)dsiSaveRead);
+		setBL(0x020AFBA4, (u32)dsiSaveClose);
+		setBL(0x020AFC44, (u32)dsiSaveClose);
+		setBL(0x020AFC5C, (u32)dsiSaveClose);
+		setBL(0x020AFF28, (u32)dsiSaveOpen);
+		setBL(0x020AFF4C, (u32)dsiSaveCreate);
+		setBL(0x020AFF84, (u32)dsiSaveOpen);
+		setBL(0x020AFFB0, (u32)dsiSaveSetLength);
+		setBL(0x020AFFC0, (u32)dsiSaveClose);
+		setBL(0x020AFFE4, (u32)dsiSaveWrite);
+		setBL(0x020AFFF4, (u32)dsiSaveWrite);
+		setBL(0x020B0008, (u32)dsiSaveClose);
+		setBL(0x020B0020, (u32)dsiSaveClose);
+		setBL(0x020B009C, (u32)dsiSaveOpen);
+		setBL(0x020B00C0, (u32)dsiSaveGetLength);
+		setBL(0x020B00CC, (u32)dsiSaveClose);
+		setBL(0x020B01BC, (u32)dsiSaveDelete);
+	}
+
 	// Bomberman Blitz (USA)
 	else if (strcmp(romTid, "KBBE") == 0 && saveOnFlashcard) {
 		tonccpy((u32*)0x02009670, dsiSaveGetResultCode, 0xC);

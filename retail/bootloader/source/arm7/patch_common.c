@@ -1873,22 +1873,121 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0207D540 = 0xE3A00003; // mov r0, #3
 	}
 
+	// Bloons (USA)
+	/*else if (strcmp(romTid, "KBLE") == 0) {
+		*(u32*)0x0206A808 = 0xE1A00000; // nop
+		*(u32*)0x0206A810 = 0xE1A00000; // nop
+		*(u32*)0x0206A860 = 0xE12FFF1E; // bx lr
+		setBL(0x0206AC38, (u32)dsiSaveOpenR);
+		setBL(0x0206ACFC, (u32)dsiSaveGetLength);
+		setBL(0x0206AD68, (u32)dsiSaveClose);
+		setBL(0x0206B040, (u32)dsiSaveSeek);
+		setBL(0x0206B0A0, (u32)dsiSaveRead);
+		setBL(0x0206B104, (u32)dsiSaveRead); // dsiSaveReadAsync
+		setBL(0x0206B1BC, (u32)dsiSaveWrite);
+		setBL(0x0206B228, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+		setBL(0x0206B318, (u32)dsiSaveCreate);
+		setBL(0x0206B3C0, (u32)dsiSaveOpen);
+		setBL(0x0206B45C, (u32)dsiSaveSetLength);
+		setBL(0x0206B50C, (u32)dsiSaveOpen);
+		setBL(0x0206B5C8, (u32)dsiSaveOpen);
+		setBL(0x0206B668, (u32)dsiSaveSeek);
+		setBL(0x0206B6A8, (u32)dsiSaveOpen);
+		setBL(0x0206B748, (u32)dsiSaveSeek);
+		setBL(0x0206B784, (u32)dsiSaveOpen);
+		setBL(0x0206B824, (u32)dsiSaveSeek);
+		setBL(0x0206B840, (u32)dsiSaveGetLength);
+		setBL(0x0206B874, (u32)dsiSaveOpen);
+		setBL(0x0206B914, (u32)dsiSaveSeek);
+		setBL(0x0206B930, (u32)dsiSaveGetLength);
+		setBL(0x0206BF34, (u32)dsiSaveDelete);
+		*(u32*)0x0206C060 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+		*(u32*)0x0206C078 = 0xE3A00001; // mov r0, #1 (dsiSaveFreeSpaceAvailable)
+		*(u32*)0x0206C09C = 0xE12FFF1E; // bx lr
+		*(u32*)0x0207569C = 0xE1A00000; // nop
+		tonccpy((u32*)0x020771C0, dsiSaveGetResultCode, 0xC);
+		*(u32*)0x02079EB0 = 0xE1A00000; // nop
+		patchInitDSiWare(0x02080EC0, heapEnd);
+		*(u32*)0x0208124C = 0x020E0380;
+		patchUserSettingsReadDSiWare(0x020820F4);
+		*(u32*)0x02085000 = 0xE1A00000; // nop
+	}*/
+
 	// Bloons TD 4 (USA)
-	// Unknown bug causes game to crash after popping the last bloon
 	// Requires 8MB of RAM
-	/*else if (strcmp(romTid, "KUVE") == 0 && extendedMemory2) {
+	// Audio is disabled
+	else if (strcmp(romTid, "KUVE") == 0 && extendedMemory2) {
 		*(u32*)0x020050E4 = 0xE1A00000; // nop
 		*(u32*)0x020050FC = 0xE1A00000; // nop
 		*(u32*)0x0201C584 = 0xE1A00000; // nop
 		*(u32*)0x0201FF40 = 0xE1A00000; // nop
-		*(u32*)0x02023CF8 = 0xE1A00000; // nop
-		*(u32*)0x02025A94 = 0xE1A00000; // nop
-		*(u32*)0x02025A98 = 0xE1A00000; // nop
-		*(u32*)0x02025AA4 = 0xE1A00000; // nop
-		*(u32*)0x02025C04 = 0xE1A00000; // nop
-		patchHiHeapDSiWare(0x02025C60, 0x02700000); // mov r0, #0x2700000
+		patchInitDSiWare(0x02025A08, 0x02700000);
+		*(u32*)0x02025D94 = 0x0225F380;
+		patchUserSettingsReadDSiWare(0x0202700C);
 		*(u32*)0x0202A344 = 0xE1A00000; // nop
-	}*/
+		*(u32*)0x020AE2DC = 0x4000; // New sound heap size (Disables audio)
+		*(u32*)0x020AF184 = 0xE3A00001; // mov r0, #1
+		setBL(0x020AF5C0, (u32)dsiSaveOpen);
+		setBL(0x020AF5E4, (u32)dsiSaveClose);
+		setBL(0x020AF69C, (u32)dsiSaveOpen);
+		setBL(0x020AF6C0, (u32)dsiSaveGetLength);
+		setBL(0x020AF6F4, (u32)dsiSaveRead);
+		setBL(0x020AF704, (u32)dsiSaveRead);
+		setBL(0x020AF728, (u32)dsiSaveClose);
+		setBL(0x020AF7C8, (u32)dsiSaveClose);
+		setBL(0x020AF7E0, (u32)dsiSaveClose);
+		setBL(0x020AFAAC, (u32)dsiSaveOpen);
+		setBL(0x020AFAD0, (u32)dsiSaveCreate);
+		setBL(0x020AFB08, (u32)dsiSaveOpen);
+		setBL(0x020AFB34, (u32)dsiSaveSetLength);
+		setBL(0x020AFB44, (u32)dsiSaveClose);
+		setBL(0x020AFB68, (u32)dsiSaveWrite);
+		setBL(0x020AFB78, (u32)dsiSaveWrite);
+		setBL(0x020AFB8C, (u32)dsiSaveClose);
+		setBL(0x020AFBA4, (u32)dsiSaveClose);
+		setBL(0x020AFC20, (u32)dsiSaveOpen);
+		setBL(0x020AFC44, (u32)dsiSaveGetLength);
+		setBL(0x020AFC50, (u32)dsiSaveClose);
+		setBL(0x020AFD40, (u32)dsiSaveDelete);
+	}
+
+	// Bloons TD 4 (Europe)
+	// Requires 8MB of RAM
+	// Audio is disabled
+	else if (strcmp(romTid, "KUVP") == 0 && extendedMemory2) {
+		*(u32*)0x020050E4 = 0xE1A00000; // nop
+		*(u32*)0x020050FC = 0xE1A00000; // nop
+		*(u32*)0x0201C5B4 = 0xE1A00000; // nop
+		*(u32*)0x0201FF70 = 0xE1A00000; // nop
+		patchInitDSiWare(0x02025A38, 0x02700000);
+		*(u32*)0x02025DC4 = 0x0225F7E0;
+		patchUserSettingsReadDSiWare(0x0202703C);
+		*(u32*)0x0202A374 = 0xE1A00000; // nop
+		*(u32*)0x020AE74C = 0x4000; // New sound heap size (Disables audio)
+		*(u32*)0x020AF600 = 0xE3A00001; // mov r0, #1
+		setBL(0x020AFA3C, (u32)dsiSaveOpen);
+		setBL(0x020AFA60, (u32)dsiSaveClose);
+		setBL(0x020AFB18, (u32)dsiSaveOpen);
+		setBL(0x020AFB3C, (u32)dsiSaveGetLength);
+		setBL(0x020AFB70, (u32)dsiSaveRead);
+		setBL(0x020AFB80, (u32)dsiSaveRead);
+		setBL(0x020AFBA4, (u32)dsiSaveClose);
+		setBL(0x020AFC44, (u32)dsiSaveClose);
+		setBL(0x020AFC5C, (u32)dsiSaveClose);
+		setBL(0x020AFF28, (u32)dsiSaveOpen);
+		setBL(0x020AFF4C, (u32)dsiSaveCreate);
+		setBL(0x020AFF84, (u32)dsiSaveOpen);
+		setBL(0x020AFFB0, (u32)dsiSaveSetLength);
+		setBL(0x020AFFC0, (u32)dsiSaveClose);
+		setBL(0x020AFFE4, (u32)dsiSaveWrite);
+		setBL(0x020AFFF4, (u32)dsiSaveWrite);
+		setBL(0x020B0008, (u32)dsiSaveClose);
+		setBL(0x020B0020, (u32)dsiSaveClose);
+		setBL(0x020B009C, (u32)dsiSaveOpen);
+		setBL(0x020B00C0, (u32)dsiSaveGetLength);
+		setBL(0x020B00CC, (u32)dsiSaveClose);
+		setBL(0x020B01BC, (u32)dsiSaveDelete);
+	}
 
 	// Bomberman Blitz (USA)
 	// Bomberman Blitz (Europe, Australia)
