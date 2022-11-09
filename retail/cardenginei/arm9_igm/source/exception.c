@@ -252,7 +252,7 @@ void showException(s32 *expReg) {
 			offset = 2;
 		else
 			offset = 4;
-		printCenter(15, 1, (const u8 *)"Error: Undefined Instruction!", FONT_WHITE, true);
+		printCenter(16, 1, (const u8 *)"Error: Undefined Instruction!", FONT_WHITE, true);
 		codeAddress = exceptionRegisters[15] - offset;
 		exceptionAddress = codeAddress;
 	}
