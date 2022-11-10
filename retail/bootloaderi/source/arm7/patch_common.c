@@ -380,6 +380,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Anne's Doll Studio: Princess Collection (Europe)
 	else if ((strcmp(romTid, "KY8E") == 0 || strcmp(romTid, "KY8P") == 0
 		   || strcmp(romTid, "K2SE") == 0 || strcmp(romTid, "K2SP") == 0) && saveOnFlashcard) {
+		*(u32*)0x020050B4 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		setBL(0x0202A164, (u32)dsiSaveGetResultCode);
 		setBL(0x0202A288, (u32)dsiSaveOpen);
 		setBL(0x0202A2BC, (u32)dsiSaveRead);
@@ -408,6 +409,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Anne's Doll Studio: Gothic Collection (USA)
 	else if (strcmp(romTid, "K54E") == 0 && saveOnFlashcard) {
+		*(u32*)0x020050B4 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		*(u32*)0x02033850 = 0xE3A00000; // mov r0, #0 (Skip pit.bin check)
 		*(u32*)0x02033AB0 = 0xE3A00000; // mov r0, #0 (Skip free space check)
 		*(u32*)0x02033AB4 = 0xE12FFF1E; // bx lr
@@ -425,6 +427,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Anne's Doll Studio: Lolita Collection (USA)
 	// Anne's Doll Studio: Lolita Collection (Europe)
 	else if ((strcmp(romTid, "KLQE") == 0 || strcmp(romTid, "KLQP") == 0) && saveOnFlashcard) {
+		*(u32*)0x020050B4 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		*(u32*)0x020337B0 = 0xE3A00000; // mov r0, #0 (Skip pit.bin check)
 		*(u32*)0x02033A10 = 0xE3A00000; // mov r0, #0 (Skip free space check)
 		*(u32*)0x02033A14 = 0xE12FFF1E; // bx lr
@@ -453,6 +456,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Anne's Doll Studio: Tokyo Collection (USA)
 	else if (strcmp(romTid, "KSQE") == 0 && saveOnFlashcard) {
+		*(u32*)0x020050B4 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		setBL(0x02027F34, (u32)dsiSaveGetResultCode);
 		setBL(0x02028058, (u32)dsiSaveOpen);
 		setBL(0x0202808C, (u32)dsiSaveRead);

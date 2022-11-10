@@ -799,7 +799,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}*/
 
 		*(u32*)0x020050B0 = 0xE1A00000; // nop
-		*(u32*)0x020050B4 = 0xE1A00000; // nop
+		*(u32*)0x020050B4 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		*(u32*)0x02011374 = 0xE1A00000; // nop
 		*(u32*)0x020151A0 = 0xE1A00000; // nop
 		patchInitDSiWare(0x0201BFA8, extendedMemory2 ? 0x02700000 : heapEnd);
@@ -846,7 +846,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Anne's Doll Studio: Gothic Collection (USA)
 	else if (strcmp(romTid, "K54E") == 0) {
 		*(u32*)0x020050B0 = 0xE1A00000; // nop
-		*(u32*)0x020050B4 = 0xE1A00000; // nop
+		*(u32*)0x020050B4 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		*(u32*)0x02011270 = 0xE1A00000; // nop
 		*(u32*)0x0201509C = 0xE1A00000; // nop
 		patchInitDSiWare(0x0201BEB0, extendedMemory2 ? 0x02700000 : heapEnd);
@@ -875,7 +875,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Anne's Doll Studio: Lolita Collection (Europe)
 	else if (strcmp(romTid, "KLQE") == 0 || strcmp(romTid, "KLQP") == 0) {
 		*(u32*)0x020050B0 = 0xE1A00000; // nop
-		*(u32*)0x020050B4 = 0xE1A00000; // nop
+		*(u32*)0x020050B4 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		*(u32*)0x020112A0 = 0xE1A00000; // nop
 		*(u32*)0x020150CC = 0xE1A00000; // nop
 		patchInitDSiWare(0x0201BEE0, extendedMemory2 ? 0x02700000 : heapEnd);
@@ -920,7 +920,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Anne's Doll Studio: Tokyo Collection (USA)
 	else if (strcmp(romTid, "KSQE") == 0) {
 		*(u32*)0x020050B0 = 0xE1A00000; // nop
-		*(u32*)0x020050B4 = 0xE1A00000; // nop
+		*(u32*)0x020050B4 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		*(u32*)0x02011344 = 0xE1A00000; // nop
 		*(u32*)0x02015170 = 0xE1A00000; // nop
 		patchInitDSiWare(0x0201BF84, extendedMemory2 ? 0x02700000 : heapEnd);
