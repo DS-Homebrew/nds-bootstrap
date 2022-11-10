@@ -1873,6 +1873,80 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0207D540 = 0xE3A00003; // mov r0, #3
 	}
 
+	// Blockado: Puzzle Island (USA)
+	// Locks up on black screens (Cause unknown)
+	// Requires 8MB of RAM
+	/*else if (strcmp(romTid, "KZ4E") == 0 && extendedMemory2) {
+		const u32 dsiSaveCreateT = 0x02019C98;
+		*(u16*)dsiSaveCreateT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveCreateT + 4), dsiSaveCreate, 0xC);
+
+		const u32 dsiSaveGetInfoT = 0x02019CA8;
+		*(u16*)dsiSaveGetInfoT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveGetInfoT + 4), dsiSaveGetInfo, 0xC);
+
+		const u32 dsiSaveOpenT = 0x02019CB8;
+		*(u16*)dsiSaveOpenT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveOpenT + 4), dsiSaveOpen, 0xC);
+
+		const u32 dsiSaveCloseT = 0x02019CC8;
+		*(u16*)dsiSaveCloseT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveCloseT + 4), dsiSaveClose, 0xC);
+
+		const u32 dsiSaveGetLengthT = 0x02019CD8;
+		*(u16*)dsiSaveGetLengthT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveGetLengthT + 4), dsiSaveGetLength, 0xC);
+
+		const u32 dsiSaveSeekT = 0x02019CE8;
+		*(u16*)dsiSaveSeekT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveSeekT + 4), dsiSaveSeek, 0xC);
+
+		const u32 dsiSaveReadT = 0x02019CF8;
+		*(u16*)dsiSaveReadT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveReadT + 4), dsiSaveRead, 0xC);
+
+		const u32 dsiSaveWriteT = 0x02019D08;
+		*(u16*)dsiSaveWriteT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveWriteT + 4), dsiSaveWrite, 0xC);
+
+		*(u32*)0x02015040 = 0xE1A00000; // nop
+		*(u32*)0x020186D0 = 0xE1A00000; // nop
+		*(u32*)0x0201C5CC = 0xE1A00000; // nop
+		patchInitDSiWare(0x02024F50, 0x02700000);
+		patchUserSettingsReadDSiWare(0x020264C0);
+		*(u32*)0x02026C50 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02026C54 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02029C44 = 0xE1A00000; // nop
+		*(u32*)0x0202B608 = 0xE1A00000; // nop
+		*(u16*)0x0202DFB8 = 0x4770; // bx lr (Skip NFTR font rendering)
+		*(u16*)0x0202E1F0 = 0x4770; // bx lr (Skip NFTR font rendering)
+		*(u16*)0x0202E504 = 0x4770; // bx lr (Skip NFTR font rendering)
+		*(u16*)0x0202F928 = 0x4770; // bx lr (Disable NFTR loading from TWLNAND)
+		doubleNopT(0x0203CD5C);
+		*(u32*)0x0203DAE4 = 0xE12FFF1E; // bx lr
+		*(u16*)0x0204B0C0 = 0x2001; // movs r0, #1 (dsiSaveGetArcSrc)
+		*(u16*)0x0204B0C2 = 0x46C0; // nop
+		setBLThumb(0x0204B0E6, dsiSaveGetInfoT);
+		doubleNopT(0x0204B12E);
+		setBLThumb(0x0204B136, dsiSaveCreateT);
+		setBLThumb(0x0204B170, dsiSaveOpenT);
+		setBLThumb(0x0204B17E, dsiSaveWriteT);
+		setBLThumb(0x0204B18C, dsiSaveCloseT);
+		setBLThumb(0x0204B1A6, dsiSaveGetInfoT);
+		setBLThumb(0x0204B23A, dsiSaveOpenT);
+		setBLThumb(0x0204B248, dsiSaveReadT);
+		setBLThumb(0x0204B24E, dsiSaveCloseT);
+		setBLThumb(0x0204B358, dsiSaveOpenT);
+		setBLThumb(0x0204B368, dsiSaveGetLengthT);
+		setBLThumb(0x0204B378, dsiSaveSeekT);
+		setBLThumb(0x0204B386, dsiSaveWriteT);
+		setBLThumb(0x0204B38C, dsiSaveCloseT);
+		setBLThumb(0x0204B3AE, dsiSaveOpenT);
+		setBLThumb(0x0204B3C4, dsiSaveSeekT);
+		setBLThumb(0x0204B3D2, dsiSaveReadT);
+		setBLThumb(0x0204B3EE, dsiSaveCloseT);
+	}*/
+
 	// Bloons (USA)
 	/*else if (strcmp(romTid, "KBLE") == 0) {
 		*(u32*)0x0206A808 = 0xE1A00000; // nop
