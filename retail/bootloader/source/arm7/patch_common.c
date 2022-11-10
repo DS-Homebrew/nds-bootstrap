@@ -11840,6 +11840,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Wakugumi: Monochrome Puzzle (Europe, Australia)
+	// Saving not supported due to using more than one file in filesystem
 	else if (strcmp(romTid, "KK4V") == 0) {
 		*(u32*)0x02005A38 = 0xE1A00000; // nop
 		*(u32*)0x0204F240 = 0xE3A00000; // mov r0, #0
