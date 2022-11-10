@@ -57,7 +57,8 @@ static const u16 cardReadStartSignatureThumb5Alt[1] = {0xB5F8};                 
 
 // Card init (SDK 5)
 static const u32 cardRomInitSignatureEarly[2]      = {0xE92D4078, 0xE24DD00C};
-static const u32 cardRomInitSignature[2]           = {0xE92D4010, 0xE59F1070};
+static const u32 cardRomInitSignature[2]           = {0xE92D4010, 0xE59F1064};
+static const u32 cardRomInitSignatureAlt[2]        = {0xE92D4010, 0xE59F1070};
 static const u16 cardRomInitSignatureEarlyThumb[2] = {0xB578, 0xB083};
 
 //static const u32 instructionBHI[1] = {0x8A000001};
@@ -888,6 +889,13 @@ u32* findCardRomInitOffset(const u32* cardReadEndOffset) {
 		offset = findOffset(
 			cardReadEndOffset+(0x300/sizeof(u32)), 0x200,//ndsHeader->arm9binarySize,
 			cardRomInitSignature, 2
+		);
+	}
+
+	if (!offset) {
+		offset = findOffset(
+			cardReadEndOffset+(0x300/sizeof(u32)), 0x200,//ndsHeader->arm9binarySize,
+			cardRomInitSignatureAlt, 2
 		);
 	}
 
