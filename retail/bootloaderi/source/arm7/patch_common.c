@@ -5109,6 +5109,29 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0209322C, (u32)dsiSaveClose);
 	}
 
+	// Shawn Johnson Gymnastics (USA)
+	else if (strcmp(romTid, "KSJE") == 0 && saveOnFlashcard) {
+		setB(0x02005384, 0x020053C0); // Disable NFTR loading from TWLNAND
+		*(u32*)0x02090C7C = 0xE3A00003; // mov r0, #3
+		setBL(0x02090D84, (u32)dsiSaveCreate);
+		*(u32*)0x02090D98 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+		setBL(0x02090DC4, (u32)dsiSaveGetResultCode);
+		setBL(0x02090DE4, (u32)dsiSaveOpen);
+		setBL(0x02090E14, (u32)dsiSaveSetLength);
+		*(u32*)0x02090E24 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+		setBL(0x02090E68, (u32)dsiSaveWrite);
+		setBL(0x02090E70, (u32)dsiSaveClose);
+		setBL(0x02090F54, (u32)dsiSaveOpen);
+		setBL(0x02090F84, (u32)dsiSaveGetLength);
+		setBL(0x02090FAC, (u32)dsiSaveClose);
+		setBL(0x02090FEC, (u32)dsiSaveClose);
+		setBL(0x0209100C, (u32)dsiSaveRead);
+		setBL(0x02091020, (u32)dsiSaveClose);
+		setBL(0x02091084, (u32)dsiSaveDelete);
+		setBL(0x02091150, (u32)dsiSaveOpen);
+		setBL(0x02091160, (u32)dsiSaveClose);
+	}
+
 	// Simple DS Series Vol. 1: The Misshitsukara no Dasshutsu (Japan)
 	else if (strcmp(romTid, "KM4J") == 0 && saveOnFlashcard) {
 		*(u32*)0x0200F91C = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)

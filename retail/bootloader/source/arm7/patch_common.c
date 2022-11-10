@@ -10720,6 +10720,42 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020ED088 = 0xE1A00000; // nop
 	}
 
+	// Shawn Johnson Gymnastics (USA)
+	// Requires 8MB of RAM
+	else if (strcmp(romTid, "KSJE") == 0 && extendedMemory2) {
+		*(u32*)0x0200507C = 0xE1A00000; // nop
+		*(u32*)0x02005090 = 0xE1A00000; // nop
+		setB(0x02005380, 0x020053D4); // Disable NFTR loading from TWLNAND
+		*(u32*)0x02005400 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02005468 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02005594 = 0xE1A00000; // nop
+		*(u32*)0x02019840 = 0xE1A00000; // nop
+		*(u32*)0x0201D4E8 = 0xE1A00000; // nop
+		patchInitDSiWare(0x02023C6C, 0x02700000);
+		*(u32*)0x02023FDC = 0x02116740;
+		patchUserSettingsReadDSiWare(0x02025274);
+		*(u32*)0x02028AA4 = 0xE1A00000; // nop
+		*(u32*)0x02090C7C = 0xE3A00003; // mov r0, #3
+		setBL(0x02090D84, (u32)dsiSaveCreate);
+		*(u32*)0x02090D98 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+		setBL(0x02090DC4, (u32)dsiSaveGetResultCode);
+		setBL(0x02090DE4, (u32)dsiSaveOpen);
+		setBL(0x02090E14, (u32)dsiSaveSetLength);
+		*(u32*)0x02090E24 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+		setBL(0x02090E68, (u32)dsiSaveWrite);
+		setBL(0x02090E70, (u32)dsiSaveClose);
+		setBL(0x02090F54, (u32)dsiSaveOpen);
+		setBL(0x02090F84, (u32)dsiSaveGetLength);
+		setBL(0x02090FAC, (u32)dsiSaveClose);
+		setBL(0x02090FEC, (u32)dsiSaveClose);
+		setBL(0x0209100C, (u32)dsiSaveRead);
+		setBL(0x02091020, (u32)dsiSaveClose);
+		setBL(0x02091084, (u32)dsiSaveDelete);
+		setBL(0x02091150, (u32)dsiSaveOpen);
+		setBL(0x02091160, (u32)dsiSaveClose);
+		*(u32*)0x02091A28 = 0xE3A00000; // mov r0, #0
+	}
+
 	// Simple DS Series Vol. 1: The Misshitsukara no Dasshutsu (Japan)
 	// Requires more than 8MB of RAM(?)
 	/*else if (strcmp(romTid, "KM4J") == 0) {
