@@ -4132,6 +4132,14 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02044C30, (u32)dsiSaveRead);
 		setBL(0x02044C40, (u32)dsiSaveRead);
 		setBL(0x02044C48, (u32)dsiSaveClose);
+
+		// Disable NFTR loading from TWLNAND
+		*(u32*)0x02045264 = 0xE1A00000; // nop
+		*(u32*)0x02045268 = 0xE1A00000; // nop 
+		*(u32*)0x02045270 = 0xE1A00000; // nop
+		*(u32*)0x0204527C = 0xE1A00000; // nop
+		*(u32*)0x02045290 = 0xE1A00000; // nop
+		*(u32*)0x0204529C = 0xE1A00000; // nop
 	}
 
 	// Pinball Attack! (Japan)
