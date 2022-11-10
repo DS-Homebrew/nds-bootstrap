@@ -3706,6 +3706,16 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// Music on: Drums (USA)
+	// Music on: Drums (Europe, Australia)
+	// Saving is difficult to implement
+	else if ((strcmp(romTid, "KQDE") == 0 || strcmp(romTid, "KQDV") == 0) && (sharedFontRegion != 0 || saveOnFlashcard)) {
+		// Skip Manual screen
+		*(u32*)0x0200A158 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0200A304 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0200A318 = 0xE12FFF1E; // bx lr
+	}
+
 	// Music on: Playing Piano (USA)
 	// Saving is difficult to implement
 	else if (strcmp(romTid, "KICE") == 0 && (sharedFontRegion != 0 || saveOnFlashcard)) {

@@ -7674,6 +7674,42 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchUserSettingsReadDSiWare(0x02042E48);
 	}
 
+	// Music on: Drums (USA)
+	// Music on: Drums (Europe, Australia)
+	// Saving is difficult to implement
+	else if (strcmp(romTid, "KQDE") == 0 || strcmp(romTid, "KQDV") == 0) {
+		// Skip Manual screen
+		*(u32*)0x0200A158 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0200A304 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0200A318 = 0xE12FFF1E; // bx lr
+
+		if (ndsHeader->gameCode[3] == 'E') {
+			*(u32*)0x0200BD58 = 0xE1A00000; // nop
+			*(u32*)0x0200BDA8 = 0xE1A00000; // nop
+			*(u32*)0x0200BDC8 = 0xE1A00000; // nop
+			*(u32*)0x0200BDD8 = 0xE1A00000; // nop
+			*(u32*)0x0200BE04 = 0xE1A00000; // nop
+
+			*(u32*)0x02021C18 = 0xE1A00000; // nop
+			*(u32*)0x020253C4 = 0xE1A00000; // nop
+			patchInitDSiWare(0x0202A2B8, heapEnd);
+			patchUserSettingsReadDSiWare(0x0202B940);
+			*(u32*)0x0202EA60 = 0xE1A00000; // nop
+		} else {
+			*(u32*)0x0200BD7C = 0xE1A00000; // nop
+			*(u32*)0x0200BDCC = 0xE1A00000; // nop
+			*(u32*)0x0200BDEC = 0xE1A00000; // nop
+			*(u32*)0x0200BDFC = 0xE1A00000; // nop
+			*(u32*)0x0200BE28 = 0xE1A00000; // nop
+
+			*(u32*)0x02021B68 = 0xE1A00000; // nop
+			*(u32*)0x02025314 = 0xE1A00000; // nop
+			patchInitDSiWare(0x0202A208, heapEnd);
+			patchUserSettingsReadDSiWare(0x0202B890);
+			*(u32*)0x0202E9B0 = 0xE1A00000; // nop
+		}
+	}
+
 	// Music on: Playing Piano (USA)
 	// Music on: Playing Piano (Europe)
 	// Saving is difficult to implement
