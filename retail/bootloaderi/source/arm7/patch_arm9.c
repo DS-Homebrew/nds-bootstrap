@@ -1522,6 +1522,53 @@ void patchA9Mbk(const tNDSHeader* ndsHeader, const module_params_t* moduleParams
 	dbg_printf("\n\n");
 }
 
+void patchSharedFontPath(const tNDSHeader* ndsHeader, const bool ce9) {
+	u32* offset = patchOffsetCache.sharedFontPathOffset;
+	if (!patchOffsetCache.sharedFontPathChecked) {
+		offset = findSharedFontPathOffset(ndsHeader);
+		if (offset) {
+			patchOffsetCache.sharedFontPathOffset = offset;
+		}
+		patchOffsetCache.sharedFontPathChecked = true;
+	}
+
+	if (!offset) {
+		return;
+	}
+
+	dbg_printf("sharedFontPath location : ");
+	dbg_hexa((u32)offset);
+	dbg_printf("\n\n");
+
+	extern int sharedFontRegion;
+	if ((sharedFontRegion == 2 && ndsHeader->gameCode[3] == 'K')
+	 || (sharedFontRegion == 1 && ndsHeader->gameCode[3] == 'C')
+	 || (sharedFontRegion == 0 && ndsHeader->gameCode[3] != 'C' && ndsHeader->gameCode[3] != 'K')) {
+		return;
+	}
+
+	const char* twlFontPath = "sdmc:/_nds/nds-bootstrap/TWLFontTable.dat";
+	const char* chnFontPath = "sdmc:/_nds/nds-bootstrap/CHNFontTable.dat";
+	const char* korFontPath = "sdmc:/_nds/nds-bootstrap/KORFontTable.dat";
+	const u32 newFontPathOffset = ce9 ? 0x02F7FC00 : 0x02FFDC00;
+
+	extern u32 iUncompressedSizei;
+	u32* arm9idst = (u32*)*(u32*)0x02FFE1C8;
+	for (u32 i = 0; i < iUncompressedSizei/4; i++) {
+		if (arm9idst[i] == (u32)offset) {
+			arm9idst[i] = newFontPathOffset;
+		}
+	}
+
+	if (ndsHeader->gameCode[3] == 'K') {
+		tonccpy((u32*)newFontPathOffset, korFontPath, strlen(korFontPath));
+	} else if (ndsHeader->gameCode[3] == 'C') {
+		tonccpy((u32*)newFontPathOffset, chnFontPath, strlen(chnFontPath));
+	} else {
+		tonccpy((u32*)newFontPathOffset, twlFontPath, strlen(twlFontPath));
+	}
+}
+
 void patchRaymanFileIoFuncs(const tNDSHeader* ndsHeader) {
 	u32* offset = patchOffsetCache.fileIoFuncOffset;
 	if (!patchOffsetCache.fileIoFuncChecked) {

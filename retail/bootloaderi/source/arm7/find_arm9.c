@@ -270,6 +270,9 @@ static const u16 mbkWramBCGetSignatureThumb[1] = {0x4804};
 static const u32 mbkWramBConstant[1]           = {0x4004058};
 //static const u32 mbkWramCConstant[1]           = {0x400405C};
 
+// TWL Shared Font
+static const char* nandSharedFontSignature = "nand:/<sharedFont>";
+
 // Panic
 // TODO : could be a good idea to catch the call to Panic function and store the message somewhere
 
@@ -2987,4 +2990,27 @@ u32* findMbkWramBOffsetBoth(const tNDSHeader* ndsHeader, const module_params_t* 
 
 	dbg_printf("\n");
 	return offset;
+}
+
+u32* findSharedFontPathOffset(const tNDSHeader* ndsHeader) {
+	dbg_printf("findSharedFontPathOffset\n");
+
+	char* offset = NULL;
+
+	char* arm9dst = (char*)ndsHeader->arm9destination;
+	for (u32 i = 0; i < iUncompressedSize; i++) {
+		if (strcmp(arm9dst+i, nandSharedFontSignature) == 0) {
+			offset = arm9dst+i;
+			break;
+		}
+	}
+
+	if (offset) {
+		dbg_printf("Shared font path offset found\n");
+	} else {
+		dbg_printf("Shared font path offset not found\n");
+	}
+
+	dbg_printf("\n");
+	return (u32*)offset;
 }

@@ -467,6 +467,16 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			}
 			fclose(pit);
 		}
+
+		if (access("sd:/_nds/nds-bootstrap/TWLFontTable.dat", F_OK) == 0) {
+			conf->valueBits3 |= BIT(3);
+		}
+		if (access("sd:/_nds/nds-bootstrap/CHNFontTable.dat", F_OK) == 0) {
+			conf->valueBits3 |= BIT(4);
+		}
+		if (access("sd:/_nds/nds-bootstrap/KORFontTable.dat", F_OK) == 0) {
+			conf->valueBits3 |= BIT(5);
+		}
 	}
 
 	if (conf->sdFound) {

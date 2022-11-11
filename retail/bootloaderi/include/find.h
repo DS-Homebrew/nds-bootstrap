@@ -95,6 +95,7 @@ u32* findNandTmpJumpFuncOffset(const tNDSHeader* ndsHeader, const module_params_
 u32* findMbkWramBOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
 u16* findMbkWramBOffsetThumb(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
 u32* findMbkWramBOffsetBoth(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool* usesThumb);
+u32* findSharedFontPathOffset(const tNDSHeader* ndsHeader);
 
 // ARM7
 bool a7GetReloc(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);

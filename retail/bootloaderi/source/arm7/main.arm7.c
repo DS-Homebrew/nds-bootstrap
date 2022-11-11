@@ -1359,9 +1359,9 @@ int arm7_main(void) {
 		esrbOutput();
 	}
 
-	if (gameOnFlashcard || !isDSiWare || !dsiWramAccess) {
+	//if (gameOnFlashcard || !isDSiWare || !dsiWramAccess) {
 		ensureBinaryDecompressed(&dsiHeaderTemp.ndshdr, moduleParams, true);
-	}
+	//}
 	if (decrypt_arm9(&dsiHeaderTemp)) {
 		nocashMessage("Secure area decrypted successfully");
 	} else {
@@ -1390,6 +1390,8 @@ int arm7_main(void) {
 	const char* romTid = getRomTid(ndsHeader);
 
 	if (!gameOnFlashcard && isDSiWare) {
+		extern void patchSharedFontPath(const tNDSHeader* ndsHeader, const bool ce9);
+
 		bool twlTouch = (cdcReadReg(CDC_SOUND, 0x22) == 0xF0);
 
 		if (twlTouch && *(u8*)0x02FFE1BF & BIT(0)) {
@@ -1417,6 +1419,8 @@ int arm7_main(void) {
 		toncset((char*)INGAME_MENU_LOCATION, 0, 0xA000);
 		toncset((u32*)CARDENGINEI_ARM7_BUFFERED_LOCATION, 0, 0x8000);
 		toncset((char*)CHEAT_ENGINE_BUFFERED_LOCATION, 0, 0x400);
+
+		patchSharedFontPath(ndsHeader, false);
 
 		newArm7binarySize = ndsHeader->arm7binarySize;
 		newArm7ibinarySize = __DSiHeader->arm7ibinarySize;
@@ -1470,8 +1474,9 @@ int arm7_main(void) {
 		toncset((u32*)CARDENGINEI_ARM7_BUFFERED_LOCATION, 0, 0x8000);
 		toncset((char*)CHEAT_ENGINE_BUFFERED_LOCATION, 0, 0x400);
 
-		ensureBinaryDecompressed(&dsiHeaderTemp.ndshdr, moduleParams, false);
+		//ensureBinaryDecompressed(&dsiHeaderTemp.ndshdr, moduleParams, false);
 
+		patchSharedFontPath(ndsHeader, true);
 		dsiWarePatch((cardengineArm9*)ce9Location, ndsHeader);
 
 		if (*(u8*)0x02FFE1BF & BIT(2)) {

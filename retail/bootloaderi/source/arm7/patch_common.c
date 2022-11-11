@@ -32,6 +32,9 @@
 extern u16 saveOnFlashcard;
 extern u8 valueBits3;
 #define memoryPit (valueBits3 & BIT(1))
+#define twlSharedFont (valueBits3 & BIT(3))
+#define chnSharedFont (valueBits3 & BIT(4))
+#define korSharedFont (valueBits3 & BIT(5))
 
 u16 patchOffsetCacheFilePrevCrc = 0;
 u16 patchOffsetCacheFileNewCrc = 0;
@@ -52,7 +55,6 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	extern u8 consoleModel;
 	const char* romTid = getRomTid(ndsHeader);
 	const char* dataPub = "dataPub:";
-	//const char* chnFontPath = "sdmc:/sys/CHNFontTable.dat";
 
 	const u32* dsiSaveGetResultCode = ce9->patches->dsiSaveGetResultCode;
 	const u32* dsiSaveCreate = ce9->patches->dsiSaveCreate;
@@ -67,9 +69,9 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	const u32* dsiSaveRead = ce9->patches->dsiSaveRead;
 	const u32* dsiSaveWrite = ce9->patches->dsiSaveWrite;
 
-	/*if (ndsHeader->arm7binarySize == 0xF548) {
-		tonccpy((char*)0x02E929BC, chnFontPath, strlen(chnFontPath));
-	}*/
+	const bool twlFontFound = ((sharedFontRegion == 0 || twlSharedFont) && !saveOnFlashcard);
+	//const bool chnFontFound = ((sharedFontRegion == 1 || chnSharedFont) && !saveOnFlashcard);
+	const bool korFontFound = ((sharedFontRegion == 2 || korSharedFont) && !saveOnFlashcard);
 
 	if (ndsHeader->arm7binarySize == 0x44C) {
 		if (*(u32*)0x023803BC >= 0x02F00000 && *(u32*)0x023803BC < 0x02F80000) {
@@ -102,7 +104,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02015EE8, (u32)dsiSaveWrite);
 		setBL(0x02015F04, (u32)dsiSaveClose);
 		setBL(0x02015F18, (u32)dsiSaveClose);*/
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			*(u32*)0x020193E0 = 0xE12FFF1E; // bx lr (Disable NFTR loading from TWLNAND)
 			*(u32*)0x02019D20 = 0xE12FFF1E; // bx lr
 		}
@@ -307,7 +309,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Absolute BrickBuster (USA)
 	else if (strcmp(romTid, "K6QE") == 0) {
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			*(u32*)0x020053E4 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		}
 		if (!saveOnFlashcard) { // Redirect otherPub to dataPub
@@ -325,7 +327,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Absolute Chess (USA)
 	else if (strcmp(romTid, "KCZE") == 0) {
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			*(u32*)0x020053E4 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		}
 		if (!saveOnFlashcard) { // Redirect otherPub to dataPub
@@ -338,7 +340,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Absolute Reversi (USA)
 	else if (strcmp(romTid, "KA8E") == 0) {
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			*(u32*)0x020053E4 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		}
 		if (!saveOnFlashcard) { // Redirect otherPub to dataPub
@@ -362,7 +364,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0201E560, (u32)dsiSaveSeek);
 		setBL(0x0201E578, (u32)dsiSaveWrite);
 		setBL(0x0201E588, (u32)dsiSaveSeek); */
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			*(u32*)0x0201FD04 = 0xE1A00000; // nop (Skip Manual screen)
 		}
 		if (saveOnFlashcard) {
@@ -397,7 +399,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Anne's Doll Studio: Princess Collection (Europe)
 	else if (strcmp(romTid, "KY8E") == 0 || strcmp(romTid, "KY8P") == 0
 		   || strcmp(romTid, "K2SE") == 0 || strcmp(romTid, "K2SP") == 0) {
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			*(u32*)0x020050B4 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		}
 		if (saveOnFlashcard) {
@@ -430,7 +432,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Anne's Doll Studio: Gothic Collection (USA)
 	else if (strcmp(romTid, "K54E") == 0) {
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			*(u32*)0x020050B4 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		}
 		if (saveOnFlashcard) {
@@ -452,7 +454,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Anne's Doll Studio: Lolita Collection (USA)
 	// Anne's Doll Studio: Lolita Collection (Europe)
 	else if (strcmp(romTid, "KLQE") == 0 || strcmp(romTid, "KLQP") == 0) {
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			*(u32*)0x020050B4 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		}
 		if (saveOnFlashcard) {
@@ -485,7 +487,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Anne's Doll Studio: Tokyo Collection (USA)
 	else if (strcmp(romTid, "KSQE") == 0) {
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			*(u32*)0x020050B4 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		}
 		if (saveOnFlashcard) {
@@ -533,7 +535,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBL(0x020244E4, (u32)dsiSaveClose);
 			setBL(0x020244F4, (u32)dsiSaveClose);
 		}
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			if (ndsHeader->gameCode[2] == 'I') {
 				if (ndsHeader->gameCode[3] == 'E') {
 					// *(u32*)0x020CE830 = 0xE12FFF1E; // bx lr
@@ -578,7 +580,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBL(0x02024AE0, (u32)dsiSaveClose);
 			setBL(0x02024AF0, (u32)dsiSaveClose);
 		}
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			if (ndsHeader->gameCode[2] == 'I') {
 				*(u32*)0x020CF970 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 			} else if (ndsHeader->gameCode[2] == '2') {
@@ -616,7 +618,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 					setBL(0x02024510, (u32)dsiSaveClose);
 					setBL(0x02024520, (u32)dsiSaveClose);
 				}
-				if (sharedFontRegion != 0 || saveOnFlashcard) {
+				if (!twlFontFound) {
 					*(u32*)0x020D0120 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 				}
 			} else {
@@ -644,7 +646,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 					setBL(0x02024534, (u32)dsiSaveClose);
 					setBL(0x02024544, (u32)dsiSaveClose);
 				}
-				if (sharedFontRegion != 0 || saveOnFlashcard) {
+				if (!twlFontFound) {
 					*(u32*)0x020CF8AC = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 				}
 			}
@@ -674,7 +676,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 					setBL(0x02024520, (u32)dsiSaveClose);
 					setBL(0x02024530, (u32)dsiSaveClose);
 				}
-				if (sharedFontRegion != 0 || saveOnFlashcard) {
+				if (!twlFontFound) {
 					*(u32*)0x020D0FFC = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 				}
 			} else {
@@ -702,7 +704,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 					setBL(0x02024534, (u32)dsiSaveClose);
 					setBL(0x02024544, (u32)dsiSaveClose);
 				}
-				if (sharedFontRegion != 0 || saveOnFlashcard) {
+				if (!twlFontFound) {
 					*(u32*)0x020D0590 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 				}
 			}
@@ -783,7 +785,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Everyday Soccer (USA)
 	else if (strcmp(romTid, "KAZE") == 0) {
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			*(u32*)0x020050A4 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 			*(u32*)0x020050A8 = 0xE1A00000; // nop
 		}
@@ -801,7 +803,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// ARC Style: Everyday Football (Europe, Australia)
 	else if (strcmp(romTid, "KAZV") == 0) {
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			*(u32*)0x020050A4 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 			*(u32*)0x020050A8 = 0xE1A00000; // nop
 		}
@@ -820,7 +822,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// ARC Style: Soccer! (Japan)
 	// ARC Style: Soccer! (Korea)
 	else if (strcmp(romTid, "KAZJ") == 0 || strcmp(romTid, "KAZK") == 0) {
-		if (sharedFontRegion != (ndsHeader->gameCode[3]=='J' ? 0 : 2) || saveOnFlashcard) {
+		if (ndsHeader->gameCode[3] == 'J' ? twlFontFound : korFontFound) {
 			*(u32*)0x020050A4 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 			*(u32*)0x020050A8 = 0xE1A00000; // nop
 		}
@@ -899,7 +901,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBL(0x02092E94, (u32)dsiSaveClose);
 		}
 
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			// Skip Manual screen
 			*(u32*)0x02092FDC = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 			*(u32*)0x02093070 = 0xE1A00000; // nop
@@ -1014,7 +1016,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Big Bass Arcade (USA)
 	else if (strcmp(romTid, "K9GE") == 0) {
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			*(u32*)0x02005120 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		}
 		if (saveOnFlashcard) {
@@ -1038,7 +1040,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Blockado: Puzzle Island (USA)
 	// Locks up on black screens (Cause unknown)
 	else if (strcmp(romTid, "KZ4E") == 0) {
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			*(u16*)0x0202DFB8 = 0x4770; // bx lr (Skip NFTR font rendering)
 			*(u16*)0x0202E1F0 = 0x4770; // bx lr (Skip NFTR font rendering)
 			*(u16*)0x0202E504 = 0x4770; // bx lr (Skip NFTR font rendering)
@@ -1514,7 +1516,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Candle Route (USA)
-	else if (strcmp(romTid, "K9YE") == 0 && (sharedFontRegion != 0 || saveOnFlashcard)) {
+	else if (strcmp(romTid, "K9YE") == 0 && !twlFontFound) {
 		// Skip Manual screen
 		for (int i = 0; i < 11; i++) {
 			u32* offset = (u32*)0x020AE76C;
@@ -1523,7 +1525,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Candle Route (Europe)
-	else if (strcmp(romTid, "K9YP") == 0 && (sharedFontRegion != 0 || saveOnFlashcard)) {
+	else if (strcmp(romTid, "K9YP") == 0 && !twlFontFound) {
 		// Skip Manual screen
 		for (int i = 0; i < 11; i++) {
 			u32* offset = (u32*)0x020AE810;
@@ -1534,7 +1536,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// GO Series: Captain Sub (USA)
 	// GO Series: Captain Sub (Europe)
 	else if (strcmp(romTid, "K3NE") == 0 || strcmp(romTid, "K3NP") == 0) {
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			*(u32*)0x02005538 = 0xE1A00000; // nop
 			*(u32*)0x0200A22C = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 			*(u32*)0x0200B550 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
@@ -1842,7 +1844,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBL(0x02005C40, (u32)dsiSaveClose);
 			tonccpy((u32*)0x02073FA4, dsiSaveGetResultCode, 0xC);
 		}
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			*(u32*)0x0200A12C = 0xE1A00000; // nop (Skip Manual screen)
 		}
 	}
@@ -1860,7 +1862,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBL(0x0201BD38, (u32)dsiSaveRead);
 			setBL(0x0201BD40, (u32)dsiSaveClose);
 		}
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			*(u32*)0x0201B9E4 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 
 			// Skip Manual screen
@@ -1873,7 +1875,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Chuck E. Cheese's Arcade Room (USA)
 	else if (strcmp(romTid, "KUCE") == 0) {
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			*(u32*)0x02032550 = 0xE1A00000; // nop (Skip Manual screen)
 			*(u32*)0x020459F0 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		}
@@ -1956,7 +1958,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBLThumb(0x0200E37A, dsiSaveCloseT);
 			setBLThumb(0x0200E38E, dsiSaveDeleteT);
 		}
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			*(u16*)0x020153C4 = 0x4770; // bx lr (Disable NFTR loading from TWLNAND)
 		}
 	}
@@ -2114,7 +2116,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// GO Series: Defense Wars (USA)
 	// GO Series: Defence Wars (Europe)
 	else if (strcmp(romTid, "KWTE") == 0 || strcmp(romTid, "KWTP") == 0) {
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			*(u32*)0x0200B350 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 
 			// Skip Manual screen
@@ -2146,7 +2148,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// DotMan (USA)
-	else if (strcmp(romTid, "KHEE") == 0 && (sharedFontRegion != 0 || saveOnFlashcard)) {
+	else if (strcmp(romTid, "KHEE") == 0 && !twlFontFound) {
 		// Skip Manual screen
 		for (int i = 0; i < 11; i++) {
 			u32* offset = (u32*)0x02022600;
@@ -2155,7 +2157,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// DotMan (Europe)
-	else if (strcmp(romTid, "KHEP") == 0 && (sharedFontRegion != 0 || saveOnFlashcard)) {
+	else if (strcmp(romTid, "KHEP") == 0 && !twlFontFound) {
 		// Skip Manual screen
 		for (int i = 0; i < 11; i++) {
 			u32* offset = (u32*)0x020226DC;
@@ -2164,7 +2166,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// DotMan (Japan)
-	else if (strcmp(romTid, "KHEJ") == 0 && (sharedFontRegion != 0 || saveOnFlashcard)) {
+	else if (strcmp(romTid, "KHEJ") == 0 && !twlFontFound) {
 		// Skip Manual screen
 		for (int i = 0; i < 11; i++) {
 			u32* offset = (u32*)0x0202248C;
@@ -2181,7 +2183,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			// *(u32*)0x0203D488 = 0xE3A00000; // mov r0, #0
 			// *(u32*)0x0203D48C = 0xE12FFF1E; // bx lr
 		}
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			*(u32*)0x020248C4 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
 			*(u32*)0x02025CD4 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
 		}
@@ -2199,7 +2201,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 				setBL(0x020598A0, (u32)dsiSaveClose);
 				*(u32*)0x02059920 = 0xE3A00000; // mov r0, #0
 			}
-			if (sharedFontRegion != 0 || saveOnFlashcard) {
+			if (!twlFontFound) {
 				*(u32*)0x0207347C = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
 				*(u32*)0x020736DC = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
 				*(u32*)0x02074054 = 0xE1A00000; // nop (Skip NFTR file loading from TWLNAND)
@@ -2218,7 +2220,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 				setBL(0x02059790, (u32)dsiSaveClose);
 				*(u32*)0x02059810 = 0xE3A00000; // mov r0, #0
 			}
-			if (sharedFontRegion != 0 || saveOnFlashcard) {
+			if (!twlFontFound) {
 				*(u32*)0x0207336C = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
 				*(u32*)0x020735CC = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
 				*(u32*)0x02073F44 = 0xE1A00000; // nop (Skip NFTR file loading from TWLNAND)
@@ -2245,7 +2247,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBL(0x02073EA4, (u32)dsiSaveClose);
 			*(u32*)0x02073F24 = 0xE3A00000; // mov r0, #0
 		}
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			*(u32*)0x02024CF4 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
 			*(u32*)0x02026104 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
 			*(u32*)0x0202D3B4 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
@@ -2333,19 +2335,19 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Dragon Quest Wars (USA)
 	// DSi save function patching not needed
-	else if (strcmp(romTid, "KDQE") == 0 && (sharedFontRegion != 0 || saveOnFlashcard)) {
+	else if (strcmp(romTid, "KDQE") == 0 && !twlFontFound) {
 		*(u32*)0x0201F208 = 0xE12FFF1E; // bx lr (Skip Manual screen)
 	}
 
 	// Dragon Quest Wars (Europe, Australia)
 	// DSi save function patching not needed
-	else if (strcmp(romTid, "KDQV") == 0 && (sharedFontRegion != 0 || saveOnFlashcard)) {
+	else if (strcmp(romTid, "KDQV") == 0 && !twlFontFound) {
 		*(u32*)0x0201F250 = 0xE12FFF1E; // bx lr (Skip Manual screen)
 	}
 
 	// Dragon Quest Wars (Japan)
 	// DSi save function patching not needed
-	else if (strcmp(romTid, "KDQJ") == 0 && (sharedFontRegion != 0 || saveOnFlashcard)) {
+	else if (strcmp(romTid, "KDQJ") == 0 && !twlFontFound) {
 		*(u32*)0x0201EF84 = 0xE12FFF1E; // bx lr (Skip Manual screen)
 	}
 
@@ -2381,7 +2383,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// GO Series: Earth Saver (USA)
 	else if (strcmp(romTid, "KB8E") == 0) {
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			*(u32*)0x02005530 = 0xE1A00000; // nop
 			// *(u32*)0x02005534 = 0xE1A00000; // nop
 			*(u32*)0x0200A3D8 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
@@ -2412,7 +2414,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// GO Series: Earth Saver (Europe)
 	else if (strcmp(romTid, "KB8P") == 0) {
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			*(u32*)0x02005530 = 0xE1A00000; // nop
 			*(u32*)0x0200A310 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 			*(u32*)0x0200B710 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
@@ -2441,7 +2443,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Fall in the Dark (Japan)
 	// A bit hard/confusing to add save support
-	else if (strcmp(romTid, "K4EJ") == 0 && (sharedFontRegion != 0 || saveOnFlashcard)) {
+	else if (strcmp(romTid, "K4EJ") == 0 && !twlFontFound) {
 		*(u32*)0x0203EE0C = 0xE1A00000; // nop (Skip Manual screen)
 	}
 
@@ -2568,7 +2570,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Flashlight (USA)
-	else if (strcmp(romTid, "KFSE") == 0 && (sharedFontRegion != 0 || saveOnFlashcard)) {
+	else if (strcmp(romTid, "KFSE") == 0 && !twlFontFound) {
 		*(u32*)0x02005134 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 	}
 
@@ -2587,7 +2589,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBL(0x02038470, (u32)dsiSaveWrite);
 			setBL(0x02038478, (u32)dsiSaveClose);
 		}
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			// Skip Manual screen
 			*(u32*)0x0204B968 = 0xE1A00000; // nop
 			for (int i = 0; i < 11; i++) {
@@ -2640,7 +2642,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 					setBL(0x020BCD28, (u32)dsiSaveWrite);
 					setBL(0x020BCD30, (u32)dsiSaveClose);
 				}
-				if (sharedFontRegion != 0 || saveOnFlashcard) {
+				if (!twlFontFound) {
 					*(u32*)0x0208EB74 = 0xE3A00000; // mov r0, #0 (Skip Manual screen)
 				}
 			} else {
@@ -2663,7 +2665,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 					setBL(0x020BCE4C, (u32)dsiSaveWrite);
 					setBL(0x020BCE54, (u32)dsiSaveClose);
 				}
-				if (sharedFontRegion != 0 || saveOnFlashcard) {
+				if (!twlFontFound) {
 					*(u32*)0x0208EC38 = 0xE3A00000; // mov r0, #0 (Skip Manual screen)
 				}
 			}
@@ -2687,7 +2689,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 				setBL(0x020BCF84, (u32)dsiSaveWrite);
 				setBL(0x020BCF8C, (u32)dsiSaveClose);
 			}
-			if (sharedFontRegion != 0 || saveOnFlashcard) {
+			if (!twlFontFound) {
 				*(u32*)0x0208EE9C = 0xE3A00000; // mov r0, #0 (Skip Manual screen)
 			}
 		}
@@ -2715,7 +2717,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBL(0x020BCF70, (u32)dsiSaveWrite);
 			setBL(0x020BCF78, (u32)dsiSaveClose);
 		}
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			*(u32*)0x0208EC74 = 0xE3A00000; // mov r0, #0 (Skip Manual screen)
 		}
 	}
@@ -2769,7 +2771,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBLThumb(0x0200D4A2, dsiSaveCloseT);
 			setBLThumb(0x0200D4B6, dsiSaveDeleteT);
 		}
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			*(u16*)0x020140AC = 0x4770; // bx lr (Disable NFTR loading from TWLNAND)
 		}
 	}
@@ -2841,7 +2843,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBL(0x020B2CCC, (u32)dsiSaveClose);
 			setBL(0x020B2E00, (u32)dsiSaveDelete);
 		}
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			*(u32*)0x02019F94 = 0xE1A00000; // nop (Skip Manual screen, Part 1)
 			for (int i = 0; i < 11; i++) { // Skip Manual screen, Part 2
 				u32* offset = (u32*)0x0201A028;
@@ -2883,7 +2885,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Kung Fu Dragon (USA)
 	// Kung Fu Dragon (Europe)
 	else if (strcmp(romTid, "KT9E") == 0 || strcmp(romTid, "KT9P") == 0) {
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			*(u32*)0x02005310 = 0xE1A00000; // nop (Skip Manual screen)
 			*(u32*)0x0201D8EC = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		}
@@ -2902,7 +2904,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Akushon Gemu: Tobeyo!! Dorago! (Japan)
 	else if (strcmp(romTid, "KT9J") == 0) {
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			*(u32*)0x020052F0 = 0xE1A00000; // nop (Skip Manual screen)
 			*(u32*)0x0201D8C0 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		}
@@ -2920,7 +2922,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Kyou Hanan no hi Hyakka: Hyakkajiten Maipedea Yori (Japan)
-	else if (strcmp(romTid, "K47J") == 0 && (sharedFontRegion != 0 || saveOnFlashcard)) {
+	else if (strcmp(romTid, "K47J") == 0 && !twlFontFound) {
 		/*setBL(0x02020CD4, (u32)dsiSaveOpen);
 		setBL(0x02020CF8, (u32)dsiSaveGetLength);
 		setBL(0x02020D1C, (u32)dsiSaveRead);
@@ -2964,7 +2966,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Libera Wing (Europe)
 	else if (strcmp(romTid, "KLWP") == 0) {
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			*(u32*)0x02044668 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		}
 		if (saveOnFlashcard) {
@@ -3012,14 +3014,14 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Little Twin Stars (Japan)
-	else if (strcmp(romTid, "KQ3J") == 0 && (sharedFontRegion != 0 || saveOnFlashcard)) {
+	else if (strcmp(romTid, "KQ3J") == 0 && !twlFontFound) {
 		*(u32*)0x020162C4 = 0xE12FFF1E; // bx lr (Skip Manual screen)
 	}
 
 	// Littlest Pet Shop (USA)
 	// Littlest Pet Shop (Europe, Australia)
 	else if (strcmp(romTid, "KLPE") == 0 || strcmp(romTid, "KLPV") == 0) {
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			*(u32*)0x0200509C = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 			// Skip Manual screen
 			for (int i = 0; i < 11; i++) {
@@ -3041,13 +3043,13 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Lola's Alphabet Train (USA)
 	// Lola's Alphabet Train (Europe)
-	else if ((strcmp(romTid, "KLKE") == 0 || strcmp(romTid, "KLKP") == 0) && (sharedFontRegion != 0 || saveOnFlashcard)) {
+	else if ((strcmp(romTid, "KLKE") == 0 || strcmp(romTid, "KLKP") == 0) && !twlFontFound) {
 		*(u32*)0x02005084 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 	}
 
 	// Lola's Fruit Shop Sudoku (USA)
 	// Lola's Fruit Shop Sudoku (Europe)
-	else if ((strcmp(romTid, "KOFE") == 0 || strcmp(romTid, "KOFP") == 0) && (sharedFontRegion != 0 || saveOnFlashcard)) {
+	else if ((strcmp(romTid, "KOFE") == 0 || strcmp(romTid, "KOFP") == 0) && !twlFontFound) {
 		*(u32*)0x02005108 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		if (ndsHeader->gameCode[3] == 'E') {
 			*(u32*)0x0201CF70 = 0xE1A00000; // nop (Skip Manual screen)
@@ -3145,7 +3147,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Magical Drop Yurutto (Japan)
 	else if (strcmp(romTid, "KMAJ") == 0) {
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			*(u32*)0x020159D4 = 0xE1A00000; // nop (Disable NFTR font loading)
 			*(u32*)0x0201CED4 = 0xE1A00000; // nop (Disable NFTR font loading)
 		}
@@ -3168,7 +3170,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Magical Whip (USA)
 	else if (strcmp(romTid, "KWME") == 0) {
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			*(u32*)0x0201D4F8 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 			*(u32*)0x02030288 = 0xE1A00000; // nop (Skip Manual screen)
 		}
@@ -3189,7 +3191,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Magical Whip (Europe)
 	else if (strcmp(romTid, "KWMP") == 0) {
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			*(u32*)0x0201D5D8 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 			*(u32*)0x02030368 = 0xE1A00000; // nop (Skip Manual screen)
 		}
@@ -3210,7 +3212,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Magnetic Joe (USA)
 	else if (strcmp(romTid, "KJOE") == 0) {
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			*(u32*)0x02036A30 = 0xE1A00000; // nop (Skip
 			*(u32*)0x02036A34 = 0xE1A00000; // nop  Manual screen)
 		}
@@ -3223,7 +3225,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Make Up & Style (USA)
 	else if (strcmp(romTid, "KYLE") == 0) {
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			*(u32*)0x02005348 = 0xE1A00000; // nop (Disable NFTR font loading)
 			*(u32*)0x0200534C = 0xE1A00000; // nop
 		}
@@ -3249,7 +3251,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Make Up & Style (Europe)
 	else if (strcmp(romTid, "KYLP") == 0) {
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			*(u32*)0x02005360 = 0xE1A00000; // nop (Disable NFTR font loading)
 			*(u32*)0x02005364 = 0xE1A00000; // nop
 		}
@@ -3276,7 +3278,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Mario vs. Donkey Kong: Minis March Again! (USA)
 	// Save code too advanced to patch, preventing support
 	else if (strcmp(romTid, "KDME") == 0) {
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			*(u32*)0x02005190 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		}
 		if (saveOnFlashcard) {
@@ -3316,7 +3318,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Mario vs. Donkey Kong: Minis March Again! (Europe, Australia)
 	// Save code too advanced to patch, preventing support
 	else if (strcmp(romTid, "KDMV") == 0) {
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			*(u32*)0x0200519C = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		}
 		if (saveOnFlashcard) {
@@ -3328,7 +3330,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Mario vs. Donkey Kong: Mini Mini Sai Koushin! (Japan)
 	// Save code too advanced to patch, preventing support
 	else if (strcmp(romTid, "KDMJ") == 0) {
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			*(u32*)0x0200519C = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		}
 		if (saveOnFlashcard) {
@@ -3339,14 +3341,14 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Meikyou Kokugo: Rakubiki Jiten (Japan)
 	// Saving not supported due to using more than one file
-	else if (strcmp(romTid, "KD4J") == 0 && (sharedFontRegion != 0 || saveOnFlashcard)) {
+	else if (strcmp(romTid, "KD4J") == 0 && !twlFontFound) {
 		*(u32*)0x0205ECAC = 0xE1A00000; // nop (Skip Manual screen)
 	}
 
 	// Metal Torrent (USA)
 	// Saving not supported due to using more than one file
 	else if (strcmp(romTid, "K59E") == 0) {
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			*(u32*)0x02045F88 = 0xE12FFF1E; // bx lr (Disable NFTR font loading)
 			*(u32*)0x020DDB00 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
 			*(u32*)0x020DDD60 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
@@ -3361,7 +3363,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Metal Torrent (Europe, Australia)
 	// Saving not supported due to using more than one file
 	else if (strcmp(romTid, "K59V") == 0) {
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			*(u32*)0x02045FA0 = 0xE12FFF1E; // bx lr (Disable NFTR font loading)
 			*(u32*)0x020DD918 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
 			*(u32*)0x020DDB78 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
@@ -3389,7 +3391,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBL(0x0200B5B4, (u32)dsiSaveWrite);
 			setBL(0x0200B5BC, (u32)dsiSaveClose);
 		}
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			// Skip Manual screen
 			/* *(u32*)0x0200F4EC = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 			*(u32*)0x0200F59C = 0xE1A00000; // nop
@@ -3421,7 +3423,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBL(0x0200B8BC, (u32)dsiSaveWrite);
 			setBL(0x0200B8C4, (u32)dsiSaveClose);
 		}
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			// Skip Manual screen
 			/* *(u32*)0x0200F974 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 			*(u32*)0x0200FA1C = 0xE1A00000; // nop
@@ -3453,7 +3455,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBL(0x0200B6A4, (u32)dsiSaveWrite);
 			setBL(0x0200B6AC, (u32)dsiSaveClose);
 		}
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			// Skip Manual screen
 			/* *(u32*)0x0200F31C = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 			*(u32*)0x0200F3B4 = 0xE1A00000; // nop
@@ -3485,7 +3487,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBL(0x02005A0C, (u32)dsiSaveWrite);
 			setBL(0x02005A14, (u32)dsiSaveClose);
 		}
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			// Skip Manual screen
 			if (ndsHeader->gameCode[3] == 'J') {
 				*(u32*)0x02013694 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
@@ -3510,7 +3512,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			*(u32*)0x02031A40 = 0xE3A00008; // mov r0, #8
 			*(u32*)0x02031A44 = 0xE12FFF1E; // bx lr
 		}
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			*(u32*)0x02033B00 = 0xE1A00000; // nop (Skip Manual screen)
 		}
 	}
@@ -3533,7 +3535,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBL(0x020B1B1C, (u32)dsiSaveGetResultCode);
 			setBL(0x020B1B34, (u32)dsiSaveClose);
 		}
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			// Skip Manual screen
 			*(u32*)0x020B2800 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 			*(u32*)0x020B2894 = 0xE1A00000; // nop
@@ -3615,7 +3617,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBL(0x02047578, (u32)dsiSaveWrite);
 			setBL(0x02047580, (u32)dsiSaveClose);
 		}
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			*(u32*)0x0203F378 = 0xE1A00000; // nop (Skip Manual screen)
 		}
 	}
@@ -3637,7 +3639,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Mr. Driller: Drill Till You Drop (USA)
 	// Saving not working due to weird code layout
 	else if (strcmp(romTid, "KDRE") == 0) {
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			*(u32*)0x0201FEA0 = 0xE1A00000; // nop (Disable NFTR font loading)
 			*(u32*)0x0202009C = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
 			*(u32*)0x0202030C = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
@@ -3661,7 +3663,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Mr. Driller: Drill Till You Drop (Europe, Australia)
 	// Saving not working due to weird code layout
 	else if (strcmp(romTid, "KDRV") == 0) {
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			*(u32*)0x0201FEA0 = 0xE1A00000; // nop (Disable NFTR font loading)
 			*(u32*)0x0202009C = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
 			*(u32*)0x0202030C = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
@@ -3685,7 +3687,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Sakutto Hamareru Hori Hori Action: Mr. Driller (Japan)
 	// Saving not working due to weird code layout
 	else if (strcmp(romTid, "KDRJ") == 0) {
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			*(u32*)0x0201FE10 = 0xE1A00000; // nop (Disable NFTR font loading)
 			*(u32*)0x0202000C = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
 			*(u32*)0x0202027C = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
@@ -3709,7 +3711,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Music on: Drums (USA)
 	// Music on: Drums (Europe, Australia)
 	// Saving is difficult to implement
-	else if ((strcmp(romTid, "KQDE") == 0 || strcmp(romTid, "KQDV") == 0) && (sharedFontRegion != 0 || saveOnFlashcard)) {
+	else if ((strcmp(romTid, "KQDE") == 0 || strcmp(romTid, "KQDV") == 0) && !twlFontFound) {
 		// Skip Manual screen
 		*(u32*)0x0200A158 = 0xE12FFF1E; // bx lr
 		*(u32*)0x0200A304 = 0xE12FFF1E; // bx lr
@@ -3718,7 +3720,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Music on: Playing Piano (USA)
 	// Saving is difficult to implement
-	else if (strcmp(romTid, "KICE") == 0 && (sharedFontRegion != 0 || saveOnFlashcard)) {
+	else if (strcmp(romTid, "KICE") == 0 && !twlFontFound) {
 		// Skip Manual screen
 		*(u32*)0x0200CC58 = 0xE1A00000; // nop
 		*(u32*)0x0200CC5C = 0xE1A00000; // nop
@@ -3727,7 +3729,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Music on: Playing Piano (Europe)
 	// Saving is difficult to implement
-	else if (strcmp(romTid, "KICP") == 0 && (sharedFontRegion != 0 || saveOnFlashcard)) {
+	else if (strcmp(romTid, "KICP") == 0 && !twlFontFound) {
 		// Skip Manual screen
 		*(u32*)0x0200CC7C = 0xE1A00000; // nop
 		*(u32*)0x0200CC80 = 0xE1A00000; // nop
@@ -3737,7 +3739,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Music on: Retro Keyboard (USA)
 	// Music on: Retro Keyboard (Europe, Australia)
 	// Saving is difficult to implement
-	else if ((strcmp(romTid, "KRHE") == 0 || strcmp(romTid, "KRHV") == 0) && (sharedFontRegion != 0 || saveOnFlashcard)) {
+	else if ((strcmp(romTid, "KRHE") == 0 || strcmp(romTid, "KRHV") == 0) && !twlFontFound) {
 		// Skip Manual screen
 		*(u32*)0x02008CD0 = 0xE12FFF1E; // bx lr
 		*(u32*)0x02008E50 = 0xE12FFF1E; // bx lr
@@ -3794,7 +3796,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBL(0x020113A4, 0x0206DCD8);
 			*(u32*)0x020113A8 = 0xE8BD8003; // LDMFD SP!, {R0-R1,PC}
 		}
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			*(u32*)0x0206DA88 = 0xE3A01001; // mov r1, #1 (Skip Manual screen)
 		}
 	}
@@ -3828,7 +3830,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBL(0x0203E1E8, (u32)dsiSaveWrite);
 			setBL(0x0203E1F0, (u32)dsiSaveClose);
 		}
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			*(u32*)0x0206DAA0 = 0xE3A01001; // mov r1, #1 (Skip Manual screen)
 		}
 	}
@@ -4024,7 +4026,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Neko Reversi (Japan)
-	else if (strcmp(romTid, "KNVJ") == 0 && (sharedFontRegion != 0 || saveOnFlashcard)) {
+	else if (strcmp(romTid, "KNVJ") == 0 && !twlFontFound) {
 		*(u32*)0x0203FCA4 = 0xE1A00000; // nop (Skip Manual screen)
 	}
 
@@ -4135,7 +4137,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			*(u32*)0x020065CC = 0xE3A00001; // mov r0, #1
 			*(u32*)0x02006B68 = 0xE3A00001; // mov r0, #1
 		}
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			*(u32*)0x02021C20 = 0xE1A00000; // nop (Skip Manual screen)
 		}
 	}
@@ -4240,7 +4242,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Peg Solitaire (USA)
 	else if (strcmp(romTid, "KP8E") == 0) {
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			*(u32*)0x0203DDA8 = 0xE1A00000; // nop (Skip Manual screen)
 		}
 		if (saveOnFlashcard) {
@@ -4266,7 +4268,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Peg Solitaire (Europe)
 	else if (strcmp(romTid, "KP8P") == 0) {
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			*(u32*)0x0203E03C = 0xE1A00000; // nop (Skip Manual screen)
 		}
 		if (saveOnFlashcard) {
@@ -4491,7 +4493,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// GO Series: Pinball Attack! (USA)
 	// GO Series: Pinball Attack! (Europe)
 	else if (strcmp(romTid, "KPYE") == 0 || strcmp(romTid, "KPYP") == 0) {
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			// Skip Manual screen (Crashes)
 			*(u32*)0x02040264 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 			*(u32*)0x0204030C = 0xE1A00000; // nop
@@ -4535,7 +4537,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Pinball Attack! (Japan)
 	else if (strcmp(romTid, "KPYJ") == 0) {
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			// Skip Manual screen (Crashes)
 			*(u32*)0x0203FCEC = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 			*(u32*)0x0203FD34 = 0xE1A00000; // nop
@@ -4673,7 +4675,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			*(u32*)0x0200D218 = 0xE12FFF1E; // bx lr
 			tonccpy((u32*)0x0204ED3C, dsiSaveGetResultCode, 0xC);
 		}
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			*(u32*)0x0200E004 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 
 			// Skip Manual screen
@@ -4704,7 +4706,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Prehistorik Man (USA)
 	else if (strcmp(romTid, "KPHE") == 0) {
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			setB(0x0204A0D4, 0x0204A39C); // Skip Manual screen
 		}
 		if (saveOnFlashcard) {
@@ -4726,7 +4728,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Prehistorik Man (Europe, Australia)
 	else if (strcmp(romTid, "KPHV") == 0) {
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			setB(0x0204A100, 0x0204A398); // Skip Manual screen
 		}
 		if (saveOnFlashcard) {
@@ -4748,7 +4750,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Zekkyou Genshiji: Samu no Daibouken (Japan)
 	else if (strcmp(romTid, "KPHJ") == 0) {
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			setB(0x02038A68, 0x02038CFC); // Skip Manual screen
 		}
 		if (saveOnFlashcard) {
@@ -4816,14 +4818,14 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBLThumb(0x02010AFE, dsiSaveCloseT);
 			setBLThumb(0x02010B12, dsiSaveDeleteT);
 		}
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			*(u16*)0x020179F4 = 0x4770; // bx lr (Disable NFTR loading from TWLNAND)
 		}
 	}
 
 	// Puzzler Brain Games (USA)
 	else if (strcmp(romTid, "KYEE") == 0) {
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			*(u32*)0x020050F8 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 			*(u32*)0x020051BC = 0xE1A00000; // nop (Skip Manual screen)
 		}
@@ -4843,7 +4845,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Puzzler World 2013 (USA)
 	else if (strcmp(romTid, "KYGE") == 0) {
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			*(u32*)0x020050F8 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 			*(u32*)0x020051BC = 0xE1A00000; // nop (Skip Manual screen)
 		}
@@ -4863,7 +4865,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Puzzler World XL (USA)
 	else if (strcmp(romTid, "KUOE") == 0) {
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			*(u32*)0x020050F8 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 			*(u32*)0x020051BC = 0xE1A00000; // nop (Skip Manual screen)
 		}
@@ -4883,7 +4885,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Puzzle to Go: Baby Animals (Europe)
 	else if (strcmp(romTid, "KBYP") == 0) {
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			// Skip Manual screen
 			*(u32*)0x02032AFC = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 			*(u32*)0x02032B80 = 0xE1A00000; // nop
@@ -4927,7 +4929,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBL(0x0203EB80, (u32)dsiSaveGetResultCode);
 			setBL(0x0203EB98, (u32)dsiSaveClose);
 		}
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			// Skip Manual screen
 			*(u32*)0x0203ECC4 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 			*(u32*)0x0203ED28 = 0xE3A00000; // mov r0, #0
@@ -4940,7 +4942,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Puzzle to Go: Planets and Universe (Europe)
 	// Puzzle to Go: Sightseeing (Europe)
 	else if (strcmp(romTid, "KBXP") == 0 || strcmp(romTid, "KB3P") == 0) {
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			// Skip Manual screen
 			*(u32*)0x02032BF0 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 			*(u32*)0x02032C74 = 0xE1A00000; // nop
@@ -4968,7 +4970,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Quick Fill Q (USA)
 	// Quick Fill Q (Europe)
 	// A bit hard/confusing to add save support
-	else if ((strcmp(romTid, "KUME") == 0 || strcmp(romTid, "KUMP") == 0) && (sharedFontRegion != 0 || saveOnFlashcard)) {
+	else if ((strcmp(romTid, "KUME") == 0 || strcmp(romTid, "KUMP") == 0) && !twlFontFound) {
 		// *(u32*)0x0203EA70 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
 		*(u32*)0x02040240 = 0xE1A00000; // nop (Skip Manual screen)
 	}
@@ -4976,7 +4978,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Rabi Laby (USA)
 	// Rabi Laby (Europe)
 	else if (strcmp(romTid, "KLBE") == 0 || strcmp(romTid, "KLBP") == 0) {
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			*(u32*)0x020051C8 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 			*(u32*)0x020053A8 = 0xE1A00000; // nop (Skip Manual screen)
 		}
@@ -5000,7 +5002,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Akushon Pazuru: Rabi x Rabi (Japan)
 	else if (strcmp(romTid, "KLBJ") == 0) {
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			*(u32*)0x02005190 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 			*(u32*)0x02005360 = 0xE1A00000; // nop (Skip Manual screen)
 		}
@@ -5024,7 +5026,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Rabi Laby 2 (Europe)
 	// Akushon Pazuru: Rabi x Rabi Episodo 2 (Japan)
 	else if (strncmp(romTid, "KLV", 3) == 0) {
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			*(u32*)0x020051E8 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 			*(u32*)0x0200540C = 0xE1A00000; // nop (Skip Manual screen)
 		}
@@ -5145,7 +5147,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBLThumb(0x020267B4, dsiSaveWriteT);
 			setBLThumb(0x020267CA, dsiSaveWriteT);
 		}
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			*(u16*)0x020471B4 = 0x2100; // movs r1, #0 (Skip Manual screen)
 		}
 	}
@@ -5211,14 +5213,14 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBLThumb(0x02026786, dsiSaveWriteT);
 			setBLThumb(0x0202679C, dsiSaveWriteT);
 		}
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			*(u16*)0x020471E4 = 0x2100; // movs r1, #0 (Skip Manual screen)
 		}
 	}
 
 	// Redau Shirizu: Gunjin Shougi (Japan)
 	else if (strcmp(romTid, "KLXJ") == 0) {
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			*(u32*)0x02005254 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		}
 		if (saveOnFlashcard) {
@@ -5283,7 +5285,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Renjuku Kanji: Shougaku 1 Nensei (Japan)
 	else if (strcmp(romTid, "KJZJ") == 0) {
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			*(u32*)0x02049A64 = 0xE3A00002; // mov r0, #2 (Skip Manual screen, Part 1)
 			*(u32*)0x020532B8 = 0xE3A00000; // mov r0, #0 (Skip Manual screen, Part 2)
 		}
@@ -5317,7 +5319,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Renjuku Kanji: Shougaku 2 Nensei (Japan)
 	// Renjuku Kanji: Shougaku 3 Nensei (Japan)
 	else if (strcmp(romTid, "KJ2J") == 0 || strcmp(romTid, "KJ3J") == 0) {
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			*(u32*)0x02049A4C = 0xE3A00002; // mov r0, #2 (Skip Manual screen, Part 1)
 			*(u32*)0x020532A0 = 0xE3A00000; // mov r0, #0 (Skip Manual screen, Part 2)
 		}
@@ -5352,7 +5354,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Renjuku Kanji: Shougaku 5 Nensei (Japan)
 	// Renjuku Kanji: Shougaku 6 Nensei (Japan)
 	else if (strcmp(romTid, "KJ4J") == 0 || strcmp(romTid, "KJ5J") == 0 || strcmp(romTid, "KJ6J") == 0) {
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			*(u32*)0x02049AE8 = 0xE3A00002; // mov r0, #2 (Skip Manual screen, Part 1)
 			*(u32*)0x0205333C = 0xE3A00000; // mov r0, #0 (Skip Manual screen, Part 2)
 		}
@@ -5385,7 +5387,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Renjuku Kanji: Chuugakusei (Japan)
 	else if (strcmp(romTid, "KJ8J") == 0) {
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			*(u32*)0x02049A68 = 0xE3A00002; // mov r0, #2 (Skip Manual screen, Part 1)
 			*(u32*)0x020532BC = 0xE3A00000; // mov r0, #0 (Skip Manual screen, Part 2)
 		}
@@ -5447,7 +5449,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBL(0x0200C914, (u32)dsiSaveWrite);
 			setBL(0x0200C91C, (u32)dsiSaveClose);
 		}
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			*(u32*)0x020108A4 = 0xE1A00000; // nop (Skip Manual screen)
 		}
 	}
@@ -5484,7 +5486,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBL(0x0200C8DC, (u32)dsiSaveWrite);
 			setBL(0x0200C8E4, (u32)dsiSaveClose);
 		}
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			*(u32*)0x02010C30 = 0xE1A00000; // nop (Skip Manual screen)
 		}
 	}
@@ -5521,7 +5523,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBL(0x0200FA04, (u32)dsiSaveWrite);
 			setBL(0x0200FA0C, (u32)dsiSaveClose);
 		}
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			*(u32*)0x02013BC8 = 0xE1A00000; // nop (Skip Manual screen)
 		}
 	}
@@ -5559,7 +5561,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBL(0x0200C904, (u32)dsiSaveWrite);
 			setBL(0x0200C90C, (u32)dsiSaveClose);
 		}
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			if (ndsHeader->gameCode[3] == 'E') {
 				*(u32*)0x02010888 = 0xE1A00000; // nop (Skip Manual screen)
 			} else if (ndsHeader->gameCode[3] == 'P') {
@@ -5616,14 +5618,14 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBLThumb(0x020105AE, dsiSaveCloseT);
 			setBLThumb(0x020105C2, dsiSaveDeleteT);
 		}
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			*(u16*)0x02016514 = 0x4770; // bx lr (Disable NFTR loading from TWLNAND)
 		}
 	}
 
 	// Shantae: Risky's Revenge (USA)
 	else if (strcmp(romTid, "KS3E") == 0) {
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			// Skip Manual screen
 			/* *(u32*)0x02016130 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 			*(u32*)0x020161C8 = 0xE1A00000; // nop
@@ -5652,7 +5654,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Shantae: Risky's Revenge (Europe)
 	else if (strcmp(romTid, "KS3P") == 0) {
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			// Skip Manual screen
 			/* *(u32*)0x020163B0 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 			*(u32*)0x02016448 = 0xE1A00000; // nop
@@ -5681,7 +5683,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Shawn Johnson Gymnastics (USA)
 	else if (strcmp(romTid, "KSJE") == 0) {
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			setB(0x02005384, 0x020053C0); // Disable NFTR loading from TWLNAND
 		}
 		if (saveOnFlashcard) {
@@ -5708,7 +5710,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Simple DS Series Vol. 1: The Misshitsukara no Dasshutsu (Japan)
 	else if (strcmp(romTid, "KM4J") == 0) {
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			*(u32*)0x0200F91C = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		}
 		if (saveOnFlashcard) {
@@ -5731,7 +5733,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Simple DS Series Vol. 2: The Misshitsukara no Dasshutsu (Japan)
 	else if (strcmp(romTid, "KM5J") == 0) {
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			*(u32*)0x0200F9EC = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		}
 		if (saveOnFlashcard) {
@@ -5752,7 +5754,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Simple DS Series Vol. 3: The Misshitsukara no Dasshutsu (Japan)
 	else if (strcmp(romTid, "K5QJ") == 0) {
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			*(u32*)0x0200EE50 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		}
 		if (saveOnFlashcard) {
@@ -5773,7 +5775,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Simple DS Series Vol. 4: The Misshitsukara no Dasshutsu (Japan)
 	else if (strcmp(romTid, "KEYJ") == 0) {
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			*(u32*)0x0200F9FC = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		}
 		if (saveOnFlashcard) {
@@ -5794,7 +5796,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Simple DS Series Vol. 5: The Misshitsukara no Dasshutsu (Japan)
 	else if (strcmp(romTid, "K5KJ") == 0) {
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			*(u32*)0x0200F990 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		}
 		if (saveOnFlashcard) {
@@ -5815,7 +5817,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Simple DS Series Vol. 6: The Misshitsukara no Dasshutsu (Japan)
 	else if (strcmp(romTid, "KLHJ") == 0) {
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			*(u32*)0x0200F9A8 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		}
 		if (saveOnFlashcard) {
@@ -5836,7 +5838,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Smart Girl's Playhouse Mini (USA)
 	else if (strcmp(romTid, "K2FE") == 0) {
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			*(u32*)0x02026128 = 0xE1A00000; // nop (Skip Manual screen)
 			*(u32*)0x0202E6F8 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		}
@@ -5896,7 +5898,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Sokuren Keisa: Shougaku 1 Nensei (Japan)
 	// Sokuren Keisa: Shougaku 2 Nensei (Japan)
 	// Saving not supported due to using more than one file in filesystem
-	else if ((strcmp(romTid, "KL9J") == 0 || strcmp(romTid, "KH2J") == 0) && (sharedFontRegion != 0 || saveOnFlashcard)) {
+	else if ((strcmp(romTid, "KL9J") == 0 || strcmp(romTid, "KH2J") == 0) && !twlFontFound) {
 		*(u32*)0x02027C98 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 
 		// Skip Manual screen
@@ -5912,7 +5914,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Sokuren Keisa: Nanmon-Hen (Japan)
 	// Saving not supported due to using more than one file in filesystem
 	else if ((strcmp(romTid, "KH3J") == 0 || strcmp(romTid, "KH4J") == 0 || strcmp(romTid, "KO5J") == 0
-		   || strcmp(romTid, "KO6J") == 0 || strcmp(romTid, "KO7J") == 0) && (sharedFontRegion != 0 || saveOnFlashcard)) {
+		   || strcmp(romTid, "KO6J") == 0 || strcmp(romTid, "KO7J") == 0) && !twlFontFound) {
 		*(u32*)0x02027CD8 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 
 		// Skip Manual screen
@@ -5923,7 +5925,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Space Ace (USA)
 	else if (strcmp(romTid, "KA6E") == 0) {
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			*(u32*)0x020051C8 = 0xE1A00000; // nop (Skip Manual screen)
 		}
 		if (saveOnFlashcard) {
@@ -5946,7 +5948,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Spin Six (USA)
 	else if (strcmp(romTid, "KQ6E") == 0) {
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			*(u32*)0x02013184 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		}
 		if (saveOnFlashcard) {
@@ -5966,7 +5968,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Spin Six (Europe, Australia)
 	else if (strcmp(romTid, "KQ6V") == 0) {
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			*(u32*)0x02013184 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		}
 		if (saveOnFlashcard) {
@@ -5986,7 +5988,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Kuru Kuru Akushon: Kuru Pachi 6 (Japan)
 	else if (strcmp(romTid, "KQ6J") == 0) {
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			*(u32*)0x02013760 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		}
 		if (saveOnFlashcard) {
@@ -6008,7 +6010,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Sudoku (USA) (Rev 1)
 	else if (strcmp(romTid, "K4DE") == 0) {
 		if (ndsHeader->romversion == 1) {
-			if (sharedFontRegion != 0 || saveOnFlashcard) {
+			if (!twlFontFound) {
 				*(u32*)0x0200698C = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 			}
 			if (saveOnFlashcard) {
@@ -6033,7 +6035,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 				setBL(0x020378C4, (u32)dsiSaveWrite);
 			}
 		} else {
-			if (sharedFontRegion != 0 || saveOnFlashcard) {
+			if (!twlFontFound) {
 				*(u32*)0x0200695C = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 			}
 			if (saveOnFlashcard) {
@@ -6062,7 +6064,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Sudoku (Europe, Australia) (Rev 1)
 	else if (strcmp(romTid, "K4DV") == 0) {
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			*(u32*)0x0200698C = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		}
 		if (saveOnFlashcard) {
@@ -6089,7 +6091,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Sudoku 4Pockets (USA)
 	// Sudoku 4Pockets (Europe)
 	else if (strcmp(romTid, "K4FE") == 0 || strcmp(romTid, "K4FP") == 0) {
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			*(u32*)0x02004C4C = 0xE1A00000; // nop (Skip Manual screen)
 		}
 		if (saveOnFlashcard) {
@@ -6238,7 +6240,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Tetris Party Live (USA)
 	else if (strcmp(romTid, "KTEE") == 0) {
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			*(u32*)0x02054C30 = 0xE1A00000; // nop (Skip Manual screen)
 		}
 		if (saveOnFlashcard) {
@@ -6264,7 +6266,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Tetris Party Live (Europe, Australia)
 	else if (strcmp(romTid, "KTEV") == 0) {
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			*(u32*)0x02054C30 = 0xE1A00000; // nop (Skip Manual screen)
 		}
 		if (saveOnFlashcard) {
@@ -6348,7 +6350,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Unou to Sanougaren Sasuru: Uranoura (Japan)
 	// Unable to read saved data
-	else if (strcmp(romTid, "K6PJ") == 0 && (sharedFontRegion != 0 || saveOnFlashcard)) {
+	else if (strcmp(romTid, "K6PJ") == 0 && !twlFontFound) {
 		*(u32*)0x02006E84 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
 		// *(u32*)0x02007344 = 0xE1A00000; // nop (Skip directory browse)
 		*(u32*)0x020092D4 = 0xE3A00000; // mov r0, #0 (Disable NFTR loading from TWLNAND)
@@ -6448,7 +6450,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// VT Tennis (USA)
 	else if (strcmp(romTid, "KVTE") == 0) {
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			*(u32*)0x0205C000 = 0xE3A00000; // mov r0, #0 (Skip Manual screen)
 		}
 		if (saveOnFlashcard) {
@@ -6466,7 +6468,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// VT Tennis (Europe, Australia)
 	else if (strcmp(romTid, "KVTV") == 0) {
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			*(u32*)0x0205B314 = 0xE3A00000; // mov r0, #0 (Skip Manual screen)
 		}
 		if (saveOnFlashcard) {
@@ -6488,7 +6490,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		if (saveOnFlashcard) {
 			*(u32*)0x0204F240 = 0xE3A00000; // mov r0, #0
 		}
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			*(u32*)0x02050114 = 0xE12FFF1E; // bx lr (Skip Manual screen)
 		}
 	}
@@ -6541,14 +6543,14 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBLThumb(0x0200CD5A, dsiSaveCloseT);
 			setBLThumb(0x0200CD6E, dsiSaveDeleteT);
 		}
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			*(u16*)0x02013B10 = 0x4770; // bx lr (Disable NFTR loading from TWLNAND)
 		}
 	}
 
 	// Wonderful Sports: Bowling (Japan)
 	else if (strcmp(romTid, "KBSJ") == 0) {
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			*(u32*)0x02005084 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 
 			// Skip Manual screen
@@ -6707,7 +6709,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Zoonies: Escape from Makatu (USA)
 	// Due to our save implementation, save data is stored in all 3 slots
 	else if (strcmp(romTid, "KZSE") == 0) {
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			*(u32*)0x02012794 = 0xE1A00000; // nop (Skip Manual screen)
 		}
 		if (saveOnFlashcard) {
@@ -6731,7 +6733,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Zoonies: Escape from Makatu (Europe, Australia)
 	// Due to our save implementation, save data is stored in all 3 slots
 	else if (strcmp(romTid, "KZSV") == 0) {
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			*(u32*)0x02012778 = 0xE1A00000; // nop (Skip Manual screen)
 		}
 		if (saveOnFlashcard) {
@@ -6942,6 +6944,10 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
 	// const u32* dsiSaveSeek = ce9->patches->dsiSaveSeek;
 	const u32* dsiSaveRead = ce9->patches->dsiSaveRead;
 	const u32* dsiSaveWrite = ce9->patches->dsiSaveWrite;
+
+	const bool twlFontFound = ((sharedFontRegion == 0 || twlSharedFont) && !saveOnFlashcard);
+	//const bool chnFontFound = ((sharedFontRegion == 1 || chnSharedFont) && !saveOnFlashcard);
+	//const bool korFontFound = ((sharedFontRegion == 2 || korSharedFont) && !saveOnFlashcard);
 
 	// Trauma Center: Under the Knife (USA)
 	if (strcmp(romTid, "AKDE") == 0) {
@@ -7335,7 +7341,7 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
 
 	// Art Style: BASE 10 (USA)
 	else if (strcmp(romTid, "KADE") == 0) {
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			*(u32*)0x0202D25C = 0xEB00007C; // bl 0x0202D454 (Skip Manual screen)
 		}
 		if (saveOnFlashcard) {
@@ -7358,7 +7364,7 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
 
 	// Art Style: CODE (Europe, Australia)
 	else if (strcmp(romTid, "KADV") == 0) {
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			*(u32*)0x0202D288 = 0xEB00007C; // bl 0x0202D480 (Skip Manual screen)
 		}
 		if (saveOnFlashcard) {
@@ -7381,7 +7387,7 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
 
 	// Art Style: DECODE (Japan)
 	else if (strcmp(romTid, "KADJ") == 0) {
-		if (sharedFontRegion != 0 || saveOnFlashcard) {
+		if (!twlFontFound) {
 			*(u32*)0x0202E2AC = 0xEB000071; // bl 0x0202E478 (Skip Manual screen)
 		}
 		if (saveOnFlashcard) {
