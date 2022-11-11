@@ -8290,6 +8290,16 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02015DD8 = 0xE1A00000; // nop
 	}
 
+	// Nintendo DSi Metronome (USA)
+	// Saving not supported due to using more than one file in filesystem
+	/*else if (strcmp(romTid, "KMTE") == 0) {
+		*(u32*)0x0203C75C = 0xE1A00000; // nop
+		*(u32*)0x0203FFB8 = 0xE1A00000; // nop
+		patchInitDSiWare(0x02045FD0, heapEnd);
+		patchUserSettingsReadDSiWare(0x020475B8);
+		*(u32*)0x0204B108 = 0xE1A00000; // nop
+	}*/
+
 	// Nintendogs (China)
 	// Requires more than 8MB of RAM?
 	/*else if (strcmp(romTid, "KDOC") == 0 && extendedMemory2) {
