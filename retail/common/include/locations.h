@@ -51,8 +51,8 @@
 #define CHEAT_ENGINE_BUFFERED_LOCATION	             0x026E0000
 #define INGAME_MENU_LOCATION                         0x026F6000
 #define INGAME_MENU_LOCATION_B4DS                    0x023E6000
-#define INGAME_MENU_LOCATION_TWLSDK                  0x02ED6000
-#define INGAME_MENU_LOCATION_DSIWARE                 0x02F46000
+#define INGAME_MENU_LOCATION_TWLSDK                  0x02F46000
+#define INGAME_MENU_LOCATION_DSIWARE                 INGAME_MENU_LOCATION_TWLSDK
 #define UNPATCHED_FUNCTION_LOCATION                  0x027FFA40
 #define UNPATCHED_FUNCTION_LOCATION_SDK5             0x02FFFA40
 
@@ -109,12 +109,12 @@
 
 #define CACHE_ADRESS_START                  0x0C800000
 #define CACHE_ADRESS_START_low              0x0C480000
-#define retail_CACHE_ADRESS_START_TWLSDK    0x02EC0000
+#define retail_CACHE_ADRESS_START_TWLSDK    0x02F00000
 
 #define retail_CACHE_ADRESS_SIZE        0x800000
 #define retail_CACHE_ADRESS_SIZE_low    0x274000
 #define retail_CACHE_ADRESS_SIZE_SDK5   0x7E0000
-#define retail_CACHE_ADRESS_SIZE_TWLSDK 0x16000
+#define retail_CACHE_ADRESS_SIZE_TWLSDK 0x26000
 
 #define retail_CACHE_SLOTS_16KB      0x200
 #define retail_CACHE_SLOTS_32KB      0x100

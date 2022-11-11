@@ -1355,7 +1355,7 @@ u32* patchHiHeapPointer(const module_params_t* moduleParams, const tNDSHeader* n
 			// DSi: Hidden Photo (Europe/German) needs more heap space
 			u32 addr = (u32)heapPointer;
 
-			*(u32*)(addr) = 0xE59F0094; // ldr r0, =0x2ED6000
+			*(u32*)(addr) = 0xE59F0094; // ldr r0, =0x2F26000
 
 			*(u32*)(addr+0x40) = 0xE3A01C00; // mov r1, #*(u32*)(addr+0x9C)
 			if (*(u32*)(addr+0x9C) != 0) {
@@ -1364,19 +1364,19 @@ u32* patchHiHeapPointer(const module_params_t* moduleParams, const tNDSHeader* n
 				}
 			}
 
-			*(u32*)(addr+0x9C) = INGAME_MENU_LOCATION_TWLSDK;
+			*(u32*)(addr+0x9C) = 0x2F26000;
 		} else if (consoleModel == 0 && (gameOnFlashcard || !isDSiWare) && !dsiWramAccess) {
 			// DSi WRAM not mapped to ARM9
 			// DSi-Enhanced/Exclusive title loaded from flashcard/SD, or DSiWare loaded from flashcard, both on DSi
 			switch (*heapPointer) {
 				case 0x13A007BE:
-					*heapPointer = (u32)0x13A0062E; /* MOVNE R0, #0x2E00000 */
+					*heapPointer = (u32)0x13A007B9; /* MOVNE R0, #0x2E40000 */
 					break;
 				case 0xE3A007BE:
-					*heapPointer = (u32)0xE3A0062E; /* MOV R0, #0x2E00000 */
+					*heapPointer = (u32)0xE3A007B9; /* MOV R0, #0x2E40000 */
 					break;
 				case 0x048020BE:
-					*heapPointer = (u32)0x048020B8; /* MOVS R0, #0x2E00000 */
+					*heapPointer = (u32)0x048020B9; /* MOVS R0, #0x2E40000 */
 					break;
 			}
 		} else if (!gameOnFlashcard && (consoleModel > 0 || isDSiWare) && !dsiWramAccess) {
@@ -1397,13 +1397,13 @@ u32* patchHiHeapPointer(const module_params_t* moduleParams, const tNDSHeader* n
 			// DSi-Enhanced/Exclusive title loaded from flashcard/SD, or DSiWare loaded from flashcard, both on DSi
 			switch (*heapPointer) {
 				case 0x13A007BE:
-					*heapPointer = (u32)0x13A007BB; /* MOVNE R0, #0x2EC0000 */
+					*heapPointer = (u32)0x13A0062F; /* MOVNE R0, #0x2F00000 */
 					break;
 				case 0xE3A007BE:
-					*heapPointer = (u32)0xE3A007BB; /* MOV R0, #0x2EC0000 */
+					*heapPointer = (u32)0xE3A0062F; /* MOV R0, #0x2F00000 */
 					break;
 				case 0x048020BE:
-					*heapPointer = (u32)0x048020BB; /* MOVS R0, #0x2EC0000 */
+					*heapPointer = (u32)0x048020BC; /* MOVS R0, #0x2F00000 */
 					break;
 			}
 		} else {
@@ -1494,21 +1494,21 @@ void patchA9Mbk(const tNDSHeader* ndsHeader, const module_params_t* moduleParams
 				u16* offsetThumb = (u16*)mbkWramBOffset;
 
 				// WRAM-B
-				offsetThumb[0] = 0x20B9; // MOVS R0, #0x2E40000
+				offsetThumb[0] = 0x20BA; // MOVS R0, #0x2E80000
 				offsetThumb[1] = 0x0480;
 				offsetThumb[2] = 0x4770; // bx lr
 
 				// WRAM-C
-				offsetThumb[14] = 0x20B8; // MOVS R0, #0x2E00000
+				offsetThumb[14] = 0x20B9; // MOVS R0, #0x2E40000
 				offsetThumb[15] = 0x0480;
 				offsetThumb[16] = 0x4770; // bx lr
 			} else {
 				// WRAM-B
-				mbkWramBOffset[0]  = 0xE3A007B9; // MOV R0, #0x2E40000
+				mbkWramBOffset[0]  = 0xE3A007BA; // MOV R0, #0x2E80000
 				mbkWramBOffset[1]  = 0xE12FFF1E; // bx lr
 
 				// WRAM-C
-				mbkWramBOffset[10] = 0xE3A0062E; // MOV R0, #0x2E00000
+				mbkWramBOffset[10] = 0xE3A007B9; // MOV R0, #0x2E40000
 				mbkWramBOffset[11] = 0xE12FFF1E; // bx lr
 			}
 		}

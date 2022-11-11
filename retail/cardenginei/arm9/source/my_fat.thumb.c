@@ -586,6 +586,22 @@ aFile getFileFromCluster (u32 cluster) {
 	return file;
 }
 
+u32 getCachedCluster(aFile * file, int clusterIndex)
+{
+	if (file->fatTableCompressed) {
+		int posSub = 0;
+		for (int c = 0; c <= (int)file->fatTableCacheSize/4; c+=2) {
+			const u32 cluster = file->fatTableCache[c];
+			const u32 cachePlusIndex = cluster+(clusterIndex - posSub);
+			if (cachePlusIndex >= cluster && cachePlusIndex < (cluster + file->fatTableCache[c+1])) {
+				return cachePlusIndex;
+			}
+			posSub += file->fatTableCache[c+1];
+		}
+	}
+	return file->fatTableCache[clusterIndex];
+}
+
 #ifndef DLDI
 //static readContext context;
 
@@ -621,8 +637,8 @@ fileReadNonBLocking(buffer, cluster, startOffset, length)
         nocashMessage("fat table cached");
         #endif
 		context.clusterIndex = startOffset/discBytePerClus;
-		file->currentCluster = file->fatTableCache[context.clusterIndex];
 		file->currentOffset=context.clusterIndex*discBytePerClus;
+		file->currentCluster = getCachedCluster(file, context.clusterIndex);
 	} else {
         #ifdef DEBUG
         nocashMessage("fatTable not cached");
@@ -719,7 +735,7 @@ bool resumeFileRead()
               #endif
               context.clusterIndex+= context.curSect/discSecPerClus;
               context.curSect = context.curSect % discSecPerClus;
-              context.file->currentCluster = context.file->fatTableCache[context.clusterIndex];
+			  context.file->currentCluster = getCachedCluster(context.file, context.clusterIndex);
               context.cmd=0x33C12;
               return false;         
           } else {
@@ -764,7 +780,7 @@ bool resumeFileRead()
       			if(context.file->fatTableCached) {
                         context.clusterIndex+= context.curSect/discSecPerClus;
                         context.curSect = context.curSect % discSecPerClus;
-                        context.file->currentCluster = context.file->fatTableCache[context.clusterIndex]; 
+						context.file->currentCluster = getCachedCluster(context.file, context.clusterIndex);
                     } else {
                         context.curSect = 0;
                         context.file->currentCluster = FAT_NextCluster (context.file->currentCluster);
@@ -824,8 +840,8 @@ u32 fileRead (char* buffer, aFile file, u32 startOffset, u32 length, int ndmaSlo
         nocashMessage("fat table cached");
         #endif
 		clusterIndex = startOffset/discBytePerClus;
-		file.currentCluster = file.fatTableCache[clusterIndex];
 		file.currentOffset=clusterIndex*discBytePerClus;
+		file.currentCluster = getCachedCluster(&file, clusterIndex);
 	} else {
         #ifdef DEBUG
         nocashMessage("fatTable not cached");
@@ -878,10 +894,10 @@ u32 fileRead (char* buffer, aFile file, u32 startOffset, u32 length, int ndmaSlo
   			{
                   clusterIndex+= curSect/discSecPerClus;
                   curSect = curSect % discSecPerClus;
-                  file.currentCluster = file.fatTableCache[clusterIndex];
   				file.currentOffset+=discBytePerClus;
+                  file.currentCluster = getCachedCluster(&file, clusterIndex);
   			}
-              
+
                // Calculate how many sectors to read (try to group several cluster at a time if there is no fragmentation)
               for(int tempClusterIndex=clusterIndex; sectorsToRead<=chunks; ) {   
                   if(file.fatTableCache[tempClusterIndex]+1 == file.fatTableCache[tempClusterIndex+1]) {
@@ -925,7 +941,7 @@ u32 fileRead (char* buffer, aFile file, u32 startOffset, u32 length, int ndmaSlo
               
               clusterIndex+= curSect/discSecPerClus;
               curSect = curSect % discSecPerClus;
-              file.currentCluster = file.fatTableCache[clusterIndex];         
+				file.currentCluster = getCachedCluster(&file, clusterIndex);
           } else {
               // Move to the next cluster if necessary
   			if (curSect >= discSecPerClus)
@@ -964,7 +980,7 @@ u32 fileRead (char* buffer, aFile file, u32 startOffset, u32 length, int ndmaSlo
 			if(file.fatTableCached) {
                   clusterIndex+= curSect/discSecPerClus;
                   curSect = curSect % discSecPerClus;
-                  file.currentCluster = file.fatTableCache[clusterIndex]; 
+				file.currentCluster = getCachedCluster(&file, clusterIndex);
               } else {
                   curSect = 0;
                   file.currentCluster = FAT_NextCluster (file.currentCluster);
@@ -1021,8 +1037,8 @@ u32 fileWrite (const char* buffer, aFile file, u32 startOffset, u32 length, int 
 
 	if(file.fatTableCached) {
 		clusterIndex = startOffset/discBytePerClus;
-		file.currentCluster = file.fatTableCache[clusterIndex];
 		file.currentOffset=clusterIndex*discBytePerClus;
+		file.currentCluster = getCachedCluster(&file, clusterIndex);
 	} else {
 		if(startOffset<file.currentOffset) {
 			file.currentOffset=0;
@@ -1074,7 +1090,7 @@ u32 fileWrite (const char* buffer, aFile file, u32 startOffset, u32 length, int 
 		{
             if(file.fatTableCached) {
                 clusterIndex++;
-                file.currentCluster = file.fatTableCache[clusterIndex]; 
+                file.currentCluster = getCachedCluster(&file, clusterIndex);
             } else {
                 file.currentCluster = FAT_NextCluster (file.currentCluster);
 			    
@@ -1105,7 +1121,7 @@ u32 fileWrite (const char* buffer, aFile file, u32 startOffset, u32 length, int 
 		{
             if(file.fatTableCached) {
                 clusterIndex++;
-                file.currentCluster = file.fatTableCache[clusterIndex]; 
+                file.currentCluster = getCachedCluster(&file, clusterIndex);
             } else {
                 file.currentCluster = FAT_NextCluster (file.currentCluster);
             }
@@ -1124,41 +1140,3 @@ u32 fileWrite (const char* buffer, aFile file, u32 startOffset, u32 length, int 
 
 	return dataPos;
 }
-
-/*void buildFatTableCache (aFile * file, int ndmaSlot) {
-    #ifdef DEBUG
-	nocashMessage("buildFatTableCache");
-    #endif
-    
-	if (file->fatTableCached) return;
-
-	file->currentOffset=0;
-	file->currentCluster = file->firstCluster;
-
-	file->fatTableCache = lastClusterCacheUsed;
-
-	// Follow cluster list until desired one is found
-	while (file->currentCluster != CLUSTER_EOF && file->firstCluster != CLUSTER_FREE 
-		&& (u32)lastClusterCacheUsed<CLUSTER_CACHE+CLUSTER_CACHE_SIZE)
-	{
-		*lastClusterCacheUsed = file->currentCluster;
-		file->currentOffset+=discBytePerClus;
-		file->currentCluster = FAT_NextCluster (file->currentCluster);
-		lastClusterCacheUsed++;
-	}
-
-	if(file->currentCluster == CLUSTER_EOF) {
-        #ifdef DEBUG
-        nocashMessage("fat table cached");
-        #endif
-		file->fatTableCached = true;
-	}
-    #ifdef DEBUG 
-    else {
-      nocashMessage("fat table not cached");  
-    }
-    #endif
-
-	file->currentOffset=0;
-	file->currentCluster = file->firstCluster;
-}*/

@@ -52,7 +52,7 @@ static inline void doubleNopT(u32 addr) {
 }
 
 void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
-	extern u8 consoleModel;
+	//extern u8 consoleModel;
 	const char* romTid = getRomTid(ndsHeader);
 	const char* dataPub = "dataPub:";
 
@@ -2802,7 +2802,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0205B750, (u32)dsiSaveClose);
 	}
 
-	// Hidden Photo (Europe)
+	/* // Hidden Photo (Europe)
 	else if (strcmp(romTid, "DD3P") == 0 && consoleModel == 0) {
 		*(u32*)0x0201BC14 -= 0xD000; // Shift heap
 	}
@@ -2810,7 +2810,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Wimmelbild Creator (German)
 	else if (strcmp(romTid, "DD3D") == 0 && consoleModel == 0) {
 		*(u32*)0x0201B9E4 -= 0xD000; // Shift heap
-	}
+	} */
 
 	// JellyCar 2 (USA)
 	else if (strcmp(romTid, "KJYE") == 0) {

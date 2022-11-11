@@ -257,9 +257,8 @@ u32* lastClusterCacheUsed = (u32*) CLUSTER_CACHE;
 u32 clusterCache = CLUSTER_CACHE;
 #ifndef B4DS
 u32 currentClusterCacheSize = 0;
-#else
-u32 clusterCacheSize = CLUSTER_CACHE_SIZE;
 #endif
+u32 clusterCacheSize = CLUSTER_CACHE_SIZE;
 
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -1343,6 +1342,7 @@ u32 fileRead (char* buffer, aFile file, u32 startOffset, u32 length)
                   clusterIndex+= curSect/discSecPerClus[file.card2];
                   curSect = curSect % discSecPerClus[file.card2];
   				file.currentOffset+=discBytePerClus[file.card2];
+				file.currentCluster = getCachedCluster(&file, clusterIndex);
 			}
 				#else
               if (curSect >= discSecPerClus)
@@ -1350,9 +1350,9 @@ u32 fileRead (char* buffer, aFile file, u32 startOffset, u32 length)
                   clusterIndex+= curSect/discSecPerClus;
                   curSect = curSect % discSecPerClus;
   				file.currentOffset+=discBytePerClus;
+				file.currentCluster = getCachedCluster(&file, clusterIndex);
   			}
 			  #endif
-				file.currentCluster = getCachedCluster(&file, clusterIndex);
 
                // Calculate how many sectors to read (try to group several cluster at a time if there is no fragmentation)
               for(int tempClusterIndex=clusterIndex; sectorsToRead<=chunks; ) {   
@@ -1831,11 +1831,7 @@ void buildFatTableCache (aFile * file)
 
 	// Follow cluster list until desired one is found
 	while (file->currentCluster != CLUSTER_EOF && file->firstCluster != CLUSTER_FREE 
-#ifndef B4DS
-		&& (u32)lastClusterCacheUsed<clusterCache+CLUSTER_CACHE_SIZE)
-#else
 		&& (u32)lastClusterCacheUsed<clusterCache+clusterCacheSize)
-#endif
 	{
 		*lastClusterCacheUsed = file->currentCluster;
 #ifdef TWOCARD
@@ -1884,11 +1880,7 @@ void buildFatTableCacheCompressed (aFile * file)
 
 	// Follow cluster list until desired one is found
 	while (file->currentCluster != CLUSTER_EOF && file->firstCluster != CLUSTER_FREE 
-#ifndef B4DS
-		&& (u32)lastClusterCacheUsed<clusterCache+CLUSTER_CACHE_SIZE)
-#else
 		&& (u32)lastClusterCacheUsed<clusterCache+clusterCacheSize)
-#endif
 	{
 		u32 clusterNext = file->currentCluster;
 		int clusterCount = 1; // Adjacent cluster count

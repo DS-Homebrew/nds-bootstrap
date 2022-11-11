@@ -1271,14 +1271,6 @@ int arm7_main(void) {
 		//return -1;
 	}*/
 
-	if (gameOnFlashcard || !isDSiWare) {
-		buildFatTableCache(romFile);
-
-		if (savFile->firstCluster != CLUSTER_FREE) {
-			buildFatTableCache(savFile);
-		}
-	}
-
 	int errorCode;
 
 	tDSiHeader dsiHeaderTemp;
@@ -1296,6 +1288,19 @@ int arm7_main(void) {
 	} else {
 		dsiModeConfirmed = dsiMode && ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr);
 	}
+	if (gameOnFlashcard || !isDSiWare) {
+		if ((dsiModeConfirmed && ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr)) && consoleModel == 0) {
+			extern u32 clusterCacheSize;
+			clusterCacheSize = 0x20000;
+
+			buildFatTableCacheCompressed(romFile);
+			buildFatTableCacheCompressed(savFile);
+		} else {
+			buildFatTableCache(romFile);
+			buildFatTableCache(savFile);
+		}
+	}
+
 	if (dsiModeConfirmed) {
 		/*if (consoleModel == 0 && !isDSiWare && !gameOnFlashcard) {
 			dbg_printf("Cannot use DSi mode on DSi SD\n");
@@ -1313,11 +1318,11 @@ int arm7_main(void) {
 				clusterCache += 0xB880000;
 				tonccpy((char*)INGAME_MENU_LOCATION_DSIWARE, (char*)INGAME_MENU_LOCATION, 0xA000);
 			} else {
-				tonccpy((char*)0x02EE0000, (char*)0x02700000, 0x80000);	// Move FAT table cache elsewhere
-				romFile->fatTableCache = (u32*)((u32)romFile->fatTableCache+0x7E0000);
-				savFile->fatTableCache = (u32*)((u32)savFile->fatTableCache+0x7E0000);
-				lastClusterCacheUsed = (u32*)((u32)lastClusterCacheUsed+0x7E000);
-				clusterCache += 0x7E0000;
+				tonccpy((char*)0x02F26000, (char*)0x02700000, 0x20000);	// Move FAT table cache elsewhere
+				romFile->fatTableCache = (u32*)((u32)romFile->fatTableCache+0x826000);
+				savFile->fatTableCache = (u32*)((u32)savFile->fatTableCache+0x826000);
+				lastClusterCacheUsed = (u32*)((u32)lastClusterCacheUsed+0x826000);
+				clusterCache += 0x826000;
 				tonccpy((char*)INGAME_MENU_LOCATION_TWLSDK, (char*)INGAME_MENU_LOCATION, 0xA000);
 			}
 			toncset((char*)INGAME_MENU_LOCATION, 0, 0x8A000);
@@ -1912,7 +1917,7 @@ int arm7_main(void) {
 		if (!ROMinRAM && overlayPatch) {
 			aFile* apFixOverlaysFile = (aFile*)((ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed) ? OVL_FILE_LOCATION_TWLSDK : OVL_FILE_LOCATION_MAINMEM);
 			*apFixOverlaysFile = getFileFromCluster(apFixOverlaysCluster, gameOnFlashcard);
-			buildFatTableCache(apFixOverlaysFile);
+			buildFatTableCacheCompressed(apFixOverlaysFile);
 
 			u32 alignedOverlaysOffset = ((ndsHeader->arm9romOffset + ndsHeader->arm9binarySize)/cacheBlockSize)*cacheBlockSize;
 			u32 newOverlaysSize = 0;
