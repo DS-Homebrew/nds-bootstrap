@@ -47,9 +47,10 @@ igm_arm9:
 @---------------------------------------------------------------------------------
 changeMpu: .word changeMpu+4
 @---------------------------------------------------------------------------------
-	stmfd   sp!, {r0-r1,lr}
+	stmfd   sp!, {r0-r2,lr}
 
 	ldr r1, =mpuBits
+	ldr r2, =0x027FF017
 
 	mrc	p15,0,r0,c6,c0,0
 	str r0, [r1]
@@ -58,16 +59,19 @@ changeMpu: .word changeMpu+4
 
 	mrc	p15,0,r0,c6,c2,0
 	str r0, [r1, #4]
+	cmp r0, r2
+	beq changeMpu3
 	mov	r0, #0
 	mcr	p15,0,r0,c6,c2,0
 
+changeMpu3:
 	mrc	p15,0,r0,c6,c3,0
 	str r0, [r1, #8]
 	mov	r0, #0x08000000
 	add	r0, r0, #0x35
 	mcr	p15,0,r0,c6,c3,0
 
-	ldmfd   sp!, {r0-r1,pc}
+	ldmfd   sp!, {r0-r2,pc}
 
 @---------------------------------------------------------------------------------
 revertMpu: .word revertMpu+4
