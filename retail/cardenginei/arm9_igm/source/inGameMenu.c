@@ -566,6 +566,7 @@ static void jumpToAddress(void) {
 
 static void ramViewer(void) {
 	clearScreen(false);
+	(*changeMpu)();
 
 	u8 *arm7RamBuffer = ((u8*)sharedAddr) - 0x74C;
 	bool ramLoaded = false;
@@ -704,6 +705,7 @@ static void ramViewer(void) {
 			}
 		}
 	}
+	(*revertMpu)();
 }
 
 void inGameMenu(s8 *mainScreen, u32 consoleModel, s32 *exceptionRegisters) {

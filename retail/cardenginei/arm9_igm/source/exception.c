@@ -229,6 +229,8 @@ void showException(s32 *expReg) {
 	BG_PALETTE[0] = 0x0010;
 	BG_PALETTE_SUB[0] = 0x0010;
 
+	(*changeMpu)();
+
 	// Print out the exception
 	u32 currentMode = getCPSR() & 0x1f;
 	u32 thumbStateAddr = (u32)sharedAddr;
@@ -275,4 +277,6 @@ void showException(s32 *expReg) {
 		printHex(13, 14 + i, *(stack++), 4, FONT_WHITE, true);
 		printHex(22, 14 + i, *(stack++), 4, FONT_WHITE, true);
 	}
+
+	(*revertMpu)();
 }
