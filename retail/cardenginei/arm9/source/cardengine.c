@@ -666,7 +666,7 @@ static bool dsiSaveInited = false;
 static bool dsiSaveExists = false;
 static u32 dsiSavePerms = 0;
 static s32 dsiSaveSeekPos = 0;
-static u32 dsiSaveSize = 0;
+static s32 dsiSaveSize = 0;
 static s32 dsiSaveResultCode = 0;
 
 typedef struct dsiSaveInfo

@@ -49,6 +49,8 @@ int hookNdsRetailArm9(
 	u32 saveSize,
 	u32 romFatTableCache,
 	u32 savFatTableCache,
+	bool romFatTableCompressed,
+	bool savFatTableCompressed,
     u32 musicFatTableCache,
 	u32 ramDumpCluster,
 	u32 srParamsFileCluster,

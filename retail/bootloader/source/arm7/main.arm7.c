@@ -1140,8 +1140,14 @@ int arm7_main(void) {
 		clusterCacheSize = fatTableSize;
 	}
 
-	buildFatTableCache(&romFile);
+	if (fatTableSize <= 0x20000) {
+		buildFatTableCacheCompressed(&romFile);
+	} else {
+		buildFatTableCache(&romFile);
+	}
+
 	if (wramUsed) {
+		buildFatTableCacheCompressed(&romFile);
 		if (romFile.fatTableCached) {
 			bool startMem = (!ce9Alt && ndsHeader->unitCode > 0 && (u32)ndsHeader->arm9destination >= 0x02004000 && ((accessControl & BIT(4)) || arm7mbk == 0x080037C0) && romFile.fatTableCacheSize <= 0x4000);
 
@@ -1161,7 +1167,7 @@ int arm7_main(void) {
 			clusterCacheSize = (startMem ? 0x4000 : fatTableSizeNoExp)-romFile.fatTableCacheSize;
 
 			if (!ce9Alt && (!startMem || (startMem && romFile.fatTableCacheSize < 0x4000))) {
-				buildFatTableCache(&savFile);
+				buildFatTableCacheCompressed(&savFile);
 				if (savFile.fatTableCached) {
 					if (startMem) {
 						fatTableAddr += romFile.fatTableCacheSize;
@@ -1194,9 +1200,11 @@ int arm7_main(void) {
 			clusterCache = fatTableAddr;
 			clusterCacheSize = fatTableSize;
 
-			buildFatTableCache(&romFile);
-			buildFatTableCache(&savFile);
+			buildFatTableCacheCompressed(&romFile);
+			buildFatTableCacheCompressed(&savFile);
 		}
+	} else if (fatTableSize <= 0x20000) {
+		buildFatTableCacheCompressed(&savFile);
 	} else {
 		buildFatTableCache(&savFile);
 	}
@@ -1259,6 +1267,8 @@ int arm7_main(void) {
 		saveSize,
 		(u32)romFile.fatTableCache,
 		(u32)savFile.fatTableCache,
+		romFile.fatTableCompressed,
+		savFile.fatTableCompressed,
 		(u32)musicsFile.fatTableCache,
 		ramDumpCluster,
 		srParamsFileCluster,

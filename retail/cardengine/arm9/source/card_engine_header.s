@@ -29,6 +29,10 @@ romFatTableCache:
 	.word	0x00000000
 savFatTableCache:
 	.word	0x00000000
+romFatTableCompressed:
+	.hword	0x0000
+savFatTableCompressed:
+	.hword	0x0000
 musicFatTableCache:
 	.word	0x00000000
 ramDumpCluster:

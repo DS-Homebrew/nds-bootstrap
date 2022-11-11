@@ -1272,10 +1272,10 @@ int arm7_main(void) {
 	}*/
 
 	if (gameOnFlashcard || !isDSiWare) {
-		buildFatTableCache(romFile, 0);
+		buildFatTableCache(romFile);
 
 		if (savFile->firstCluster != CLUSTER_FREE) {
-			buildFatTableCache(savFile, 0);
+			buildFatTableCache(savFile);
 		}
 	}
 
@@ -1912,7 +1912,7 @@ int arm7_main(void) {
 		if (!ROMinRAM && overlayPatch) {
 			aFile* apFixOverlaysFile = (aFile*)((ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed) ? OVL_FILE_LOCATION_TWLSDK : OVL_FILE_LOCATION_MAINMEM);
 			*apFixOverlaysFile = getFileFromCluster(apFixOverlaysCluster, gameOnFlashcard);
-			buildFatTableCache(apFixOverlaysFile, 0);
+			buildFatTableCache(apFixOverlaysFile);
 
 			u32 alignedOverlaysOffset = ((ndsHeader->arm9romOffset + ndsHeader->arm9binarySize)/cacheBlockSize)*cacheBlockSize;
 			u32 newOverlaysSize = 0;

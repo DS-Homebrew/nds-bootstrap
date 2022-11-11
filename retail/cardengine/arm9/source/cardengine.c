@@ -541,10 +541,12 @@ static void initialize(void) {
 		if (ce9->romFatTableCache != 0) {
 			romFile.fatTableCache = (u32*)ce9->romFatTableCache;
 			romFile.fatTableCached = true;
+			romFile.fatTableCompressed = (bool)ce9->romFatTableCompressed;
 		}
 		if (ce9->savFatTableCache != 0) {
 			savFile.fatTableCache = (u32*)ce9->savFatTableCache;
 			savFile.fatTableCached = true;
+			savFile.fatTableCompressed = (bool)ce9->savFatTableCompressed;
 		}
 		if (ce9->musicFatTableCache != 0) {
 			musicsFile.fatTableCache = (u32*)ce9->musicFatTableCache;
@@ -755,7 +757,7 @@ static bool dsiSaveInited = false;
 static bool dsiSaveExists = false;
 static u32 dsiSavePerms = 0;
 static s32 dsiSaveSeekPos = 0;
-static u32 dsiSaveSize = 0;
+static s32 dsiSaveSize = 0;
 static s32 dsiSaveResultCode = 0;
 
 typedef struct dsiSaveInfo

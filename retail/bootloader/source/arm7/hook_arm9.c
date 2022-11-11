@@ -162,6 +162,8 @@ int hookNdsRetailArm9(
 	u32 saveSize,
 	u32 romFatTableCache,
 	u32 savFatTableCache,
+	bool romFatTableCompressed,
+	bool savFatTableCompressed,
     u32 musicFatTableCache,
 	u32 ramDumpCluster,
 	u32 srParamsFileCluster,
@@ -191,6 +193,8 @@ int hookNdsRetailArm9(
 	ce9->saveSize               = saveSize;
 	ce9->romFatTableCache       = romFatTableCache;
 	ce9->savFatTableCache       = savFatTableCache;
+	ce9->romFatTableCompressed  = (u16)romFatTableCompressed;
+	ce9->savFatTableCompressed  = (u16)savFatTableCompressed;
 	ce9->musicFatTableCache     = musicFatTableCache;
 	ce9->ramDumpCluster         = ramDumpCluster;
 	ce9->srParamsCluster        = srParamsFileCluster;
