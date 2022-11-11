@@ -179,6 +179,8 @@ typedef struct cardengineArm9 {
     u32 saveSize;
     u32 romFatTableCache;
     u32 savFatTableCache;
+    u16 romFatTableCompressed;
+    u16 savFatTableCompressed;
     u32 musicFatTableCache;
     u32 ramDumpCluster;
     u32 srParamsCluster;
