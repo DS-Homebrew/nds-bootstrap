@@ -1552,12 +1552,29 @@ void patchSharedFontPath(const tNDSHeader* ndsHeader, const bool ce9) {
 	const char* korFontPath = "sdmc:/_nds/nds-bootstrap/KORFontTable.dat";
 	const u32 newFontPathOffset = ce9 ? 0x02F7FC00 : 0x02FFDC00;
 
+	bool found = false;
+	extern u32 iUncompressedSize;
 	extern u32 iUncompressedSizei;
 	u32* arm9idst = (u32*)*(u32*)0x02FFE1C8;
 	for (u32 i = 0; i < iUncompressedSizei/4; i++) {
 		if (arm9idst[i] == (u32)offset) {
 			arm9idst[i] = newFontPathOffset;
+			found = true;
 		}
+	}
+
+	if (!found) {
+		u32* arm9dst = (u32*)ndsHeader->arm9destination;
+		for (u32 i = 0; i < iUncompressedSize/4; i++) {
+			if (arm9dst[i] == (u32)offset) {
+				arm9dst[i] = newFontPathOffset;
+				found = true;
+			}
+		}
+	}
+
+	if (!found) {
+		return;
 	}
 
 	if (ndsHeader->gameCode[3] == 'K') {
