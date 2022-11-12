@@ -2218,7 +2218,7 @@ u32* findFileIoReadOffset(const u32* fileIoSeekOffset, const module_params_t* mo
 		);
 	} else {
 		offset = findOffset(
-			fileIoSeekOffset, 0x80,
+			fileIoSeekOffset, 0x180,
 			fileIoReadSignature50, 4
 		);
 	}
