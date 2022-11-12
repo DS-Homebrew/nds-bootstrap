@@ -1958,7 +1958,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBLThumb(0x0200E37A, dsiSaveCloseT);
 			setBLThumb(0x0200E38E, dsiSaveDeleteT);
 		}
-		if (!twlFontFound) {
+		if (!twlFontFound || gameOnFlashcard) {
 			*(u16*)0x020153C4 = 0x4770; // bx lr (Disable NFTR loading from TWLNAND)
 		}
 	}
@@ -2771,7 +2771,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBLThumb(0x0200D4A2, dsiSaveCloseT);
 			setBLThumb(0x0200D4B6, dsiSaveDeleteT);
 		}
-		if (!twlFontFound) {
+		if (!twlFontFound || gameOnFlashcard) {
 			*(u16*)0x020140AC = 0x4770; // bx lr (Disable NFTR loading from TWLNAND)
 		}
 	}
@@ -4818,7 +4818,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBLThumb(0x02010AFE, dsiSaveCloseT);
 			setBLThumb(0x02010B12, dsiSaveDeleteT);
 		}
-		if (!twlFontFound) {
+		if (!twlFontFound || gameOnFlashcard) {
 			*(u16*)0x020179F4 = 0x4770; // bx lr (Disable NFTR loading from TWLNAND)
 		}
 	}
@@ -5618,7 +5618,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBLThumb(0x020105AE, dsiSaveCloseT);
 			setBLThumb(0x020105C2, dsiSaveDeleteT);
 		}
-		if (!twlFontFound) {
+		if (!twlFontFound || gameOnFlashcard) {
 			*(u16*)0x02016514 = 0x4770; // bx lr (Disable NFTR loading from TWLNAND)
 		}
 	}
@@ -6543,7 +6543,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBLThumb(0x0200CD5A, dsiSaveCloseT);
 			setBLThumb(0x0200CD6E, dsiSaveDeleteT);
 		}
-		if (!twlFontFound) {
+		if (!twlFontFound || gameOnFlashcard) {
 			*(u16*)0x02013B10 = 0x4770; // bx lr (Disable NFTR loading from TWLNAND)
 		}
 	}

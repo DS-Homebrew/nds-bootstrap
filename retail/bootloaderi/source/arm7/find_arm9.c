@@ -149,14 +149,19 @@ static const u32 randomPatchSignature[4]        = {0xE3500000, 0x1597002C, 0x104
 static const u32 randomPatchSignature5Second[3] = {0xE59F003C, 0xE590001C, 0xE3500000};             // SDK 5
 
 // FileIO functions (SDK 5)
-static const u32 fileIoOpenSignature50[4] = {0xE92D40F8, 0xE24DDF4A, 0xE1A04000, 0xE1A07002}; // SDK 5.0 - 5.2
-static const u32 fileIoOpenSignature[4]   = {0xE92D43F8, 0xE24DDF4A, 0xE28D4010, 0xE1A07000}; // SDK 5.3+
-static const u32 fileIoCloseSignature[4]  = {0xE59FC008, 0xE3A01008, 0xE3A02001, 0xE12FFF1C}; // SDK 5.x
-static const u32 fileIoSeekSignature50[4] = {0xE92D4008, 0xE24DD008, 0xE28D3000, 0xE5803010}; // SDK 5.0+
-static const u32 fileIoSeekSignature[4]   = {0xE92D4070, 0xE24DD008, 0xE1A06000, 0xE1A05001}; // SDK 5.3+
-static const u32 fileIoReadSignature50[4] = {0xE92D4010, 0xE24DD008, 0xE59F305C, 0xE1A04000}; // SDK 5.0
-static const u32 fileIoReadSignature51[4] = {0xE92D4010, 0xE24DD008, 0xE28D3000, 0xE1A04000}; // SDK 5.1 & 5.2
-static const u32 fileIoReadSignature[4]   = {0xE92D4038, 0xE24DD008, 0xE28D3000, 0xE1A05000}; // SDK 5.3+
+static const u32 fileIoOpenSignature50[4]      = {0xE92D40F8, 0xE24DDF4A, 0xE1A04000, 0xE1A07002}; // SDK 5.0 - 5.2
+static const u32 fileIoOpenSignature[4]        = {0xE92D43F8, 0xE24DDF4A, 0xE28D4010, 0xE1A07000}; // SDK 5.3+
+static const u16 fileIoOpenSignatureThumb[4]   = {0xB5F8, 0xB0CA, 0x1C05, 0x1C16}; // SDK 5.1+
+static const u32 fileIoCloseSignature[4]       = {0xE59FC008, 0xE3A01008, 0xE3A02001, 0xE12FFF1C}; // SDK 5.x
+static const u16 fileIoCloseSignatureThumb[4]  = {0x4B01, 0x2108, 0x2201, 0x4718}; // SDK 5.x
+static const u32 fileIoSeekSignature50[4]      = {0xE92D4008, 0xE24DD008, 0xE28D3000, 0xE5803010}; // SDK 5.0, SDK 5.1+ alt
+static const u32 fileIoSeekSignature[4]        = {0xE92D4070, 0xE24DD008, 0xE1A06000, 0xE1A05001}; // SDK 5.3+
+static const u16 fileIoSeekSignatureThumb[4]   = {0xB508, 0xB082, 0xAB00, 0x6103}; // SDK 5.x
+static const u32 fileIoReadSignature50[4]      = {0xE92D4010, 0xE24DD008, 0xE59F305C, 0xE1A04000}; // SDK 5.0
+static const u32 fileIoReadSignature51[4]      = {0xE92D4010, 0xE24DD008, 0xE28D3000, 0xE1A04000}; // SDK 5.1 & 5.2
+static const u32 fileIoReadSignature[4]        = {0xE92D4038, 0xE24DD008, 0xE28D3000, 0xE1A05000}; // SDK 5.3+
+static const u16 fileIoReadSignature51Thumb[4] = {0xB510, 0xB082, 0x1C04, 0xAB00}; // SDK 5.1
+static const u16 fileIoReadSignatureThumb[4]   = {0xB538, 0xB082, 0x1C05, 0xAB00}; // SDK 5.?
 
 // irq enable
 static const u32 irqEnableStartSignature1[4]        = {0xE59FC028, 0xE3A01000, 0xE1DC30B0, 0xE59F2020};					// SDK <= 3
@@ -2148,6 +2153,14 @@ u32* findFileIoOpenOffset(const tNDSHeader* ndsHeader, const module_params_t* mo
 		);
 	}
 
+	if (!offset) {
+		dbg_printf("FileIO open (ARM) not found. Trying thumb\n");
+		offset = (u32*)findOffsetThumb(
+			(u16*)ndsHeader->arm9destination, iUncompressedSize,
+			fileIoOpenSignatureThumb, 4
+		);
+	}
+
 	if (offset) {
 		dbg_printf("FileIO open found\n");
 	} else {
@@ -2170,6 +2183,24 @@ u32* findFileIoCloseOffset(const u32* fileIoOpenOffset) {
 		dbg_printf("FileIO close found\n");
 	} else {
 		dbg_printf("FileIO close not found\n");
+	}
+
+	dbg_printf("\n");
+	return offset;
+}
+
+u16* findFileIoCloseOffsetThumb(const u16* fileIoOpenOffset) {
+	dbg_printf("findFileIoCloseOffsetThumb:\n");
+
+	u16* offset = findOffsetThumb(
+		fileIoOpenOffset + 8, 0x60,
+		fileIoCloseSignatureThumb, 4
+	);
+
+	if (offset) {
+		dbg_printf("FileIO close THUMB found\n");
+	} else {
+		dbg_printf("FileIO close THUMB not found\n");
 	}
 
 	dbg_printf("\n");
@@ -2203,6 +2234,24 @@ u32* findFileIoSeekOffset(const u32* fileIoCloseOffset, const module_params_t* m
 	return offset;
 }
 
+u16* findFileIoSeekOffsetThumb(const u16* fileIoCloseOffset) {
+	dbg_printf("findFileIoSeekOffsetThumb:\n");
+
+	u16* offset = findOffsetThumb(
+		fileIoCloseOffset + 8, 0x100,
+		fileIoSeekSignatureThumb, 4
+	);
+
+	if (offset) {
+		dbg_printf("FileIO seek THUMB found\n");
+	} else {
+		dbg_printf("FileIO seek THUMB not found\n");
+	}
+
+	dbg_printf("\n");
+	return offset;
+}
+
 u32* findFileIoReadOffset(const u32* fileIoSeekOffset, const module_params_t* moduleParams) {
 	dbg_printf("findFileIoReadOffset:\n");
 
@@ -2228,6 +2277,32 @@ u32* findFileIoReadOffset(const u32* fileIoSeekOffset, const module_params_t* mo
 		dbg_printf("FileIO read found\n");
 	} else {
 		dbg_printf("FileIO read not found\n");
+	}
+
+	dbg_printf("\n");
+	return offset;
+}
+
+u16* findFileIoReadOffsetThumb(const u16* fileIoSeekOffset, const module_params_t* moduleParams) {
+	dbg_printf("findFileIoReadOffsetThumb:\n");
+
+	u16* offset = NULL;
+	if (moduleParams->sdk_version > 0x5030000) {
+		offset = findOffsetThumb(
+			fileIoSeekOffset, 0x40,
+			fileIoReadSignatureThumb, 4
+		);
+	} else {
+		offset = findOffsetThumb(
+			fileIoSeekOffset, 0x40,
+			fileIoReadSignature51Thumb, 4
+		);
+	}
+
+	if (offset) {
+		dbg_printf("FileIO read THUMB found\n");
+	} else {
+		dbg_printf("FileIO read THUMB not found\n");
 	}
 
 	dbg_printf("\n");
