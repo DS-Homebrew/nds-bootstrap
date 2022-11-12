@@ -1621,6 +1621,7 @@ void patchSharedFontPath(const cardengineArm9* ce9, const tNDSHeader* ndsHeader,
 		const u32* dsiSaveSeek = ce9->patches->dsiSaveSeek;
 		const u32* dsiSaveRead = ce9->patches->dsiSaveRead;
 
+		//bool armFound = false;
 		u32* arm9idst = moduleParams->static_bss_end;
 		for (u32 i = 0; i < iUncompressedSizei/4; i++) {
 			if (arm9idst[i] == (u32)offset) {
@@ -1633,28 +1634,98 @@ void patchSharedFontPath(const cardengineArm9* ce9, const tNDSHeader* ndsHeader,
 						//dbg_printf("fileIoOpen bl found : ");
 						//dbg_hexa((u32)blOffset);
 						//dbg_printf("\n\n");
+						//armFound = true;
 					} else if (fileIoPtr == fileIoClose) {
 						setBL((u32)blOffset, (u32)dsiSaveClose);
 
 						//dbg_printf("fileIoClose bl found : ");
 						//dbg_hexa((u32)blOffset);
 						//dbg_printf("\n\n");
+						//armFound = true;
 					} else if (fileIoPtr == fileIoSeek) {
 						setBL((u32)blOffset, (u32)dsiSaveSeek);
 
 						//dbg_printf("fileIoSeek bl found : ");
 						//dbg_hexa((u32)blOffset);
 						//dbg_printf("\n\n");
+						//armFound = true;
 					} else if (fileIoPtr == fileIoRead) {
 						setBL((u32)blOffset, (u32)dsiSaveRead);
 
 						//dbg_printf("fileIoRead bl found : ");
 						//dbg_hexa((u32)blOffset);
 						//dbg_printf("\n\n");
+						//armFound = true;
 					}
 				}
 			}
 		}
+		/*if (!armFound) {
+			const u32 dsiSaveOpenT = 0x02000200;
+			const u32 dsiSaveCloseT = 0x02000210;
+			const u32 dsiSaveSeekT = 0x02000220;
+			const u32 dsiSaveReadT = 0x02000230;
+
+			bool openBlFound = false;
+			bool closeBlFound = false;
+			bool seekBlFound = false;
+			bool readBlFound = false;
+
+			u16* arm9idstT = (u16*)moduleParams->static_bss_end;
+			for (u32 i = 0; i < iUncompressedSizei/4; i++) {
+				if (arm9idst[i] == (u32)offset) {
+					for (int i2 = 0; i2 < 0xC0/2; i2++) {
+						u16* blOffset = (arm9idstT + (i*2) - i2);
+						u32* fileIoPtr = (u32*)getOffsetFromBLXThumb(blOffset); // TODO: Implement getOffsetFromBLXThumb
+						if (fileIoPtr == fileIoOpen) {
+							setBLThumb((u32)blOffset, dsiSaveOpenT);
+
+							//dbg_printf("fileIoOpen bl found : ");
+							//dbg_hexa((u32)blOffset);
+							//dbg_printf("\n\n");
+							openBlFound = true;
+						} else if (fileIoPtr == fileIoClose) {
+							setBLThumb((u32)blOffset, dsiSaveCloseT);
+
+							//dbg_printf("fileIoClose bl found : ");
+							//dbg_hexa((u32)blOffset);
+							//dbg_printf("\n\n");
+							closeBlFound = true;
+						} else if (fileIoPtr == fileIoSeek) {
+							setBLThumb((u32)blOffset, dsiSaveSeekT);
+
+							//dbg_printf("fileIoSeek bl found : ");
+							//dbg_hexa((u32)blOffset);
+							//dbg_printf("\n\n");
+							seekBlFound = true;
+						} else if (fileIoPtr == fileIoRead) {
+							setBLThumb((u32)blOffset, dsiSaveReadT);
+
+							//dbg_printf("fileIoRead bl found : ");
+							//dbg_hexa((u32)blOffset);
+							//dbg_printf("\n\n");
+							readBlFound = true;
+						}
+					}
+				}
+			}
+			if (openBlFound) {
+				*(u16*)dsiSaveOpenT = 0x4778; // bx pc
+				tonccpy((u32*)(dsiSaveOpenT + 4), dsiSaveOpen, 0xC);
+			}
+			if (closeBlFound) {
+				*(u16*)dsiSaveCloseT = 0x4778; // bx pc
+				tonccpy((u32*)(dsiSaveCloseT + 4), dsiSaveClose, 0xC);
+			}
+			if (seekBlFound) {
+				*(u16*)dsiSaveSeekT = 0x4778; // bx pc
+				tonccpy((u32*)(dsiSaveSeekT + 4), dsiSaveSeek, 0xC);
+			}
+			if (readBlFound) {
+				*(u16*)dsiSaveReadT = 0x4778; // bx pc
+				tonccpy((u32*)(dsiSaveReadT + 4), dsiSaveRead, 0xC);
+			}
+		}*/
 
 		tonccpy(ltdModuleParams->arm9i_offset, moduleParams->static_bss_end, iUncompressedSizei);
 		toncset(moduleParams->static_bss_end, 0, iUncompressedSizei);

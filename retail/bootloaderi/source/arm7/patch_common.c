@@ -28,7 +28,7 @@
 #include "loading_screen.h"
 #include "debug_file.h"
 
-//extern u16 gameOnFlashcard;
+extern u16 gameOnFlashcard;
 extern u16 saveOnFlashcard;
 extern u8 valueBits3;
 #define memoryPit (valueBits3 & BIT(1))
@@ -69,9 +69,9 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	const u32* dsiSaveRead = ce9->patches->dsiSaveRead;
 	const u32* dsiSaveWrite = ce9->patches->dsiSaveWrite;
 
-	const bool twlFontFound = (sharedFontRegion == 0 || twlSharedFont);
-	//const bool chnFontFound = (sharedFontRegion == 1 || chnSharedFont);
-	const bool korFontFound = (sharedFontRegion == 2 || korSharedFont);
+	const bool twlFontFound = ((sharedFontRegion == 0 && !gameOnFlashcard) || twlSharedFont);
+	//const bool chnFontFound = ((sharedFontRegion == 1 && !gameOnFlashcard) || chnSharedFont);
+	const bool korFontFound = ((sharedFontRegion == 2 && !gameOnFlashcard) || korSharedFont);
 
 	if (ndsHeader->arm7binarySize == 0x44C) {
 		if (*(u32*)0x023803BC >= 0x02F00000 && *(u32*)0x023803BC < 0x02F80000) {
@@ -6945,9 +6945,9 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
 	const u32* dsiSaveRead = ce9->patches->dsiSaveRead;
 	const u32* dsiSaveWrite = ce9->patches->dsiSaveWrite;
 
-	const bool twlFontFound = (sharedFontRegion == 0 || twlSharedFont);
-	//const bool chnFontFound = (sharedFontRegion == 1 || chnSharedFont);
-	//const bool korFontFound = (sharedFontRegion == 2 || korSharedFont);
+	const bool twlFontFound = ((sharedFontRegion == 0 && !gameOnFlashcard) || twlSharedFont);
+	//const bool chnFontFound = ((sharedFontRegion == 1 && !gameOnFlashcard) || chnSharedFont);
+	//const bool korFontFound = ((sharedFontRegion == 2 && !gameOnFlashcard) || korSharedFont);
 
 	// Trauma Center: Under the Knife (USA)
 	if (strcmp(romTid, "AKDE") == 0) {
