@@ -37,6 +37,9 @@ void setBL(int arg1, int arg2) {
 }
 
 u32* getOffsetFromBL(u32* blOffset) {
+	if (*blOffset < 0xEB000000 && *blOffset >= 0xEC000000) {
+		return NULL;
+	}
 	u32 opCode = (*blOffset) - 0xEB000000;
 
 	if (opCode >= 0x00800000 && opCode <= 0x00FFFFFF) {

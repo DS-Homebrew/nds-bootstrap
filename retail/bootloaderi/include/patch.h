@@ -50,7 +50,7 @@
 
 //extern bool cardReadFound; // patch_arm9.c
 
-#define patchOffsetCacheFileVersion 87	// Change when new functions are being patched, some offsets removed,
+#define patchOffsetCacheFileVersion 88	// Change when new functions are being patched, some offsets removed,
 										// the offset order changed, and/or the function signatures changed (not added)
 
 typedef struct patchOffsetCacheContents {
@@ -87,10 +87,10 @@ typedef struct patchOffsetCacheContents {
     u32* cartReadOffset;
     u32 cartReadOffsetChecked;*/
 	u32* waitSysCyclesOffset;
-	u32* fileIoFuncOffset;
-	u32* fileIoFunc2Offset;
-	u32 fileIoFuncChecked;
-	u32 fileIoFunc2Checked;
+	u32* fileIoOpenOffset;
+	u32* fileIoCloseOffset;
+	u32* fileIoSeekOffset;
+	u32* fileIoReadOffset;
 	u32* a9CardIrqEnableOffset;
 	u32 a9CardIrqIsThumb;
 	u32* resetOffset;
@@ -157,6 +157,7 @@ extern patchOffsetCacheContents patchOffsetCache;
 u32 generateA7Instr(int arg1, int arg2);
 void setB(int arg1, int arg2);
 void setBL(int arg1, int arg2);
+u32* getOffsetFromBL(u32* blOffset);
 const u16* generateA7InstrThumb(int arg1, int arg2);
 u16* getOffsetFromBLThumb(u16* blOffset);
 void setBLThumb(int arg1, int arg2);
@@ -168,6 +169,7 @@ u32 patchCardNdsArm9(
 	cardengineArm9* ce9,
 	const tNDSHeader* ndsHeader,
 	const module_params_t* moduleParams,
+	const ltd_module_params_t* ltdModuleParams,
 	u32 ROMinRAM,
 	u32 patchMpuRegion,
 	bool usesCloneboot
@@ -184,6 +186,7 @@ u32 patchCardNds(
 	cardengineArm9* ce9,
 	tNDSHeader* ndsHeader,
 	const module_params_t* moduleParams,
+	const ltd_module_params_t* ltdModuleParams,
 	u32 patchMpuRegion,
 	bool usesCloneboot,
 	u32 ROMinRAM,

@@ -113,6 +113,7 @@ extern u32 screenshotCluster;
 extern u32 apFixOverlaysCluster;
 extern u32 pageFileCluster;
 extern u32 manualCluster;
+extern u32 sharedFontCluster;
 extern u8 patchMpuSize;
 extern u8 patchMpuRegion;
 extern u8 language;
@@ -1354,6 +1355,11 @@ int arm7_main(void) {
 
 	bool foundModuleParams;
 	module_params_t* moduleParams = loadModuleParams(&dsiHeaderTemp.ndshdr, &foundModuleParams);
+	ltd_module_params_t* ltdModuleParams = NULL;
+	if (ndsHeader->unitCode > 0) {
+		extern u32* findLtdModuleParamsOffset(const tNDSHeader* ndsHeader);
+		ltdModuleParams = (ltd_module_params_t*)(findLtdModuleParamsOffset(&dsiHeaderTemp.ndshdr) - 4);
+	}
     dbg_printf("sdk_version: ");
     dbg_hexa(moduleParams->sdk_version);
     dbg_printf("\n"); 
@@ -1365,7 +1371,7 @@ int arm7_main(void) {
 	}
 
 	//if (gameOnFlashcard || !isDSiWare || !dsiWramAccess) {
-		ensureBinaryDecompressed(&dsiHeaderTemp.ndshdr, moduleParams, true);
+		ensureBinaryDecompressed(&dsiHeaderTemp.ndshdr, moduleParams, ltdModuleParams, true);
 	//}
 	if (decrypt_arm9(&dsiHeaderTemp)) {
 		nocashMessage("Secure area decrypted successfully");
@@ -1395,7 +1401,7 @@ int arm7_main(void) {
 	const char* romTid = getRomTid(ndsHeader);
 
 	if (!gameOnFlashcard && isDSiWare) {
-		extern void patchSharedFontPath(const tNDSHeader* ndsHeader, const bool ce9);
+		extern void patchSharedFontPath(const cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, const ltd_module_params_t* ltdModuleParams);
 
 		bool twlTouch = (cdcReadReg(CDC_SOUND, 0x22) == 0xF0);
 
@@ -1425,7 +1431,7 @@ int arm7_main(void) {
 		toncset((u32*)CARDENGINEI_ARM7_BUFFERED_LOCATION, 0, 0x8000);
 		toncset((char*)CHEAT_ENGINE_BUFFERED_LOCATION, 0, 0x400);
 
-		patchSharedFontPath(ndsHeader, false);
+		patchSharedFontPath(NULL, ndsHeader, moduleParams, ltdModuleParams);
 
 		newArm7binarySize = ndsHeader->arm7binarySize;
 		newArm7ibinarySize = __DSiHeader->arm7ibinarySize;
@@ -1481,7 +1487,7 @@ int arm7_main(void) {
 
 		//ensureBinaryDecompressed(&dsiHeaderTemp.ndshdr, moduleParams, false);
 
-		patchSharedFontPath(ndsHeader, true);
+		patchSharedFontPath((cardengineArm9*)ce9Location, ndsHeader, moduleParams, ltdModuleParams);
 		dsiWarePatch((cardengineArm9*)ce9Location, ndsHeader);
 
 		if (*(u8*)0x02FFE1BF & BIT(2)) {
@@ -1818,6 +1824,7 @@ int arm7_main(void) {
 			(cardengineArm9*)ce9Location,
 			ndsHeader,
 			moduleParams,
+			ltdModuleParams,
 			(  (moduleParams->sdk_version < 0x4000000 && ((u32)ndsHeader->arm9executeAddress - (u32)ndsHeader->arm9destination) >= 0x1000)
 			|| strncmp(romTid, "AKD", 3) == 0 // Trauma Center: Under the Knife
 			) ? 0 : 1,
@@ -1933,6 +1940,11 @@ int arm7_main(void) {
 
 		if (!ROMinRAM && ((ROMsupportsDsiMode(ndsHeader) && !isDSiWare) || strncmp(romTid, "UBR", 3) != 0)) {
 			loadROMPartIntoRAM(ndsHeader, moduleParams, *romFile);
+		}
+
+		if (gameOnFlashcard && isDSiWare) {
+			aFile* sharedFontFile = (aFile*)FONT_FILE_LOCATION_TWLSDK;
+			*sharedFontFile = getFileFromCluster(sharedFontCluster, true);
 		}
 
 		extern u32 iUncompressedSize;

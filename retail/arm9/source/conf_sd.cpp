@@ -70,6 +70,7 @@ extern std::string screenshotPath;
 extern std::string apFixOverlaysPath;
 extern std::string musicsFilePath;
 extern std::string pageFilePath;
+extern std::string sharedFontPath;
 
 extern u8 lz77ImageBuffer[0x20000];
 
@@ -467,7 +468,9 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			}
 			fclose(pit);
 		}
+	}
 
+	if (!conf->gameOnFlashcard) {
 		if (access("sd:/_nds/nds-bootstrap/TWLFontTable.dat", F_OK) == 0) {
 			conf->valueBits3 |= BIT(3);
 		}
@@ -556,6 +559,25 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 	if (conf->isDSiWare) {
 		conf->valueBits2 |= BIT(0);
+
+		if (conf->gameOnFlashcard) {
+			if (romTid[3] == 'K') {
+				sharedFontPath = "fat:/_nds/nds-bootstrap/KORFontTable.dat";
+				if (access(sharedFontPath.c_str(), F_OK) == 0) {
+					conf->valueBits3 |= BIT(5);
+				}
+			} else if (romTid[3] == 'C') {
+				sharedFontPath = "fat:/_nds/nds-bootstrap/CHNFontTable.dat";
+				if (access(sharedFontPath.c_str(), F_OK) == 0) {
+					conf->valueBits3 |= BIT(4);
+				}
+			} else {
+				sharedFontPath = "fat:/_nds/nds-bootstrap/TWLFontTable.dat";
+				if (access(sharedFontPath.c_str(), F_OK) == 0) {
+					conf->valueBits3 |= BIT(3);
+				}
+			}
+		}
 	}
 
 	// Get region

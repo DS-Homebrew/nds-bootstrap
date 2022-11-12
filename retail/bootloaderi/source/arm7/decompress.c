@@ -243,7 +243,7 @@ static u32 decompressIBinary(unsigned char *pak_buffer, unsigned int pak_len) {
 static bool a9Decompressed = false;
 static bool a9iDecompressed = false;
 
-void ensureBinaryDecompressed(const tNDSHeader* ndsHeader, module_params_t* moduleParams, bool arm9iToo) {
+void ensureBinaryDecompressed(const tNDSHeader* ndsHeader, module_params_t* moduleParams, ltd_module_params_t* ltdModuleParams, bool arm9iToo) {
 	if (a9Decompressed) return;
 
 	const char* romTid = getRomTid(ndsHeader);
@@ -270,11 +270,7 @@ void ensureBinaryDecompressed(const tNDSHeader* ndsHeader, module_params_t* modu
 	a9Decompressed = true;
 
 	if (!arm9iToo || a9iDecompressed) return;
-	if (ndsHeader->unitCode > 0) {
-		extern u32* findLtdModuleParamsOffset(const tNDSHeader* ndsHeader);
-
-		ltd_module_params_t* ltdModuleParams = (ltd_module_params_t*)(findLtdModuleParamsOffset(ndsHeader) - 4);
-		if (dsiModeConfirmed) {
+	if (ndsHeader->unitCode > 0 && dsiModeConfirmed) {
 		if (ltdModuleParams->compressed_static_end) {
 			// Compressed
 			dbg_printf("arm9i is compressed\n");
@@ -287,7 +283,6 @@ void ensureBinaryDecompressed(const tNDSHeader* ndsHeader, module_params_t* modu
 			// Not compressed
 			dbg_printf("arm9i is not compressed\n");
 			iUncompressedSizei = *(u32*)0x02FFE1CC;
-		}
 		}
 	}
 	a9iDecompressed = true;

@@ -40,6 +40,23 @@ void setBL(int arg1, int arg2) {
 	*(u32*)arg1 = (((u32)(arg2 - arg1 - 8) >> 2) & 0xFFFFFF) | 0xEB000000;
 }
 
+u32* getOffsetFromBL(u32* blOffset) {
+	if (*blOffset < 0xEB000000 && *blOffset >= 0xEC000000) {
+		return NULL;
+	}
+	u32 opCode = (*blOffset) - 0xEB000000;
+
+	if (opCode >= 0x00800000 && opCode <= 0x00FFFFFF) {
+		u32 offset = (u32)blOffset + 8;
+		for (u32 i = opCode; i <= 0x00FFFFFF; i++) {
+			offset -= 4;
+		}
+
+		return (u32*)offset;
+	}
+	return (u32*)((u32)blOffset + (opCode*4) + 8);
+}
+
 const u16* generateA7InstrThumb(int arg1, int arg2) {
 	static u16 instrs[2];
 
@@ -146,7 +163,7 @@ void patchScfgExt(const tNDSHeader* ndsHeader) {
 		}
 	}
 	if (scfgExtOffset && dsiModeConfirmed) {
-		u32 scfgLoc = 0x2F7FFD0;
+		u32 scfgLoc = 0x2FFFD00;
 
 		*(u16*)(scfgLoc+0x00) = 0x0101;
 		//*(u16*)(scfgLoc+0x04) = 0x0187;

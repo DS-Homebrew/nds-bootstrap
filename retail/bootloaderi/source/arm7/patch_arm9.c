@@ -62,14 +62,14 @@ static void fixForDifferentBios(const cardengineArm9* ce9, const tNDSHeader* nds
 	if (dsiModeCheckOffset && ROMisDsiEnhanced) {
 		// Patch to return as DS BIOS
 		if (dsiModeConfirmed && (u8)a9ScfgRom != 1) {
-			dsiModeCheckOffset[7] = 0x2EFFFD0;
+			dsiModeCheckOffset[7] = 0x2FFFD00;
 			dbg_printf("Running DSi mode with DS BIOS\n");
 
 			if (dsiModeCheck2Offset) {
 				if (dsiModeCheck2Offset[0] == 0xE59F0014) {
-					dsiModeCheck2Offset[7] = 0x2EFFFD0;
+					dsiModeCheck2Offset[7] = 0x2FFFD00;
 				} else {
-					dsiModeCheck2Offset[usesThumb ? 22/sizeof(u16) : 18] = 0x2EFFFD0;
+					dsiModeCheck2Offset[usesThumb ? 22/sizeof(u16) : 18] = 0x2FFFD00;
 				}
 			}
 		} /*else if (!dsiModeConfirmed && extendedMemoryConfirmed && !(REG_SCFG_ROM & BIT(1))) {
@@ -1207,7 +1207,7 @@ static void patchCartRead(cardengineArm9* ce9, const tNDSHeader* ndsHeader, cons
     dbg_printf("\n\n");
 }*/
 
-static void patchWaitSysCycles(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+static void patchWaitSysCycles(const cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	u32* offset = patchOffsetCache.waitSysCyclesOffset;
 
 	if (isSdk5(moduleParams)) {
@@ -1522,7 +1522,11 @@ void patchA9Mbk(const tNDSHeader* ndsHeader, const module_params_t* moduleParams
 	dbg_printf("\n\n");
 }
 
-void patchSharedFontPath(const tNDSHeader* ndsHeader, const bool ce9) {
+void patchSharedFontPath(const cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, const ltd_module_params_t* ltdModuleParams) {
+	if (!isDSiWare) {
+		return;
+	}
+
 	u32* offset = patchOffsetCache.sharedFontPathOffset;
 	if (!patchOffsetCache.sharedFontPathChecked) {
 		offset = findSharedFontPathOffset(ndsHeader);
@@ -1540,89 +1544,165 @@ void patchSharedFontPath(const tNDSHeader* ndsHeader, const bool ce9) {
 	dbg_hexa((u32)offset);
 	dbg_printf("\n\n");
 
-	extern int sharedFontRegion;
-	if ((sharedFontRegion == 2 && ndsHeader->gameCode[3] == 'K')
-	 || (sharedFontRegion == 1 && ndsHeader->gameCode[3] == 'C')
-	 || (sharedFontRegion == 0 && ndsHeader->gameCode[3] != 'C' && ndsHeader->gameCode[3] != 'K')) {
-		return;
-	}
-
-	const char* twlFontPath = "sdmc:/_nds/nds-bootstrap/TWLFontTable.dat";
-	const char* chnFontPath = "sdmc:/_nds/nds-bootstrap/CHNFontTable.dat";
-	const char* korFontPath = "sdmc:/_nds/nds-bootstrap/KORFontTable.dat";
-	const u32 newFontPathOffset = ce9 ? 0x02F7FC00 : 0x02FFDC00;
-
-	bool found = false;
-	extern u32 iUncompressedSize;
-	extern u32 iUncompressedSizei;
-	u32* arm9idst = (u32*)*(u32*)0x02FFE1C8;
-	for (u32 i = 0; i < iUncompressedSizei/4; i++) {
-		if (arm9idst[i] == (u32)offset) {
-			arm9idst[i] = newFontPathOffset;
-			found = true;
+	if (gameOnFlashcard) {
+		u32* fileIoOpen = patchOffsetCache.fileIoOpenOffset;
+		if (!patchOffsetCache.fileIoOpenOffset) {
+			fileIoOpen = findFileIoOpenOffset(ndsHeader, moduleParams);
+			if (fileIoOpen) {
+				patchOffsetCache.fileIoOpenOffset = fileIoOpen;
+			}
 		}
-	}
+		if (!fileIoOpen) {
+			return;
+		}
 
-	if (!found) {
-		u32* arm9dst = (u32*)ndsHeader->arm9destination;
-		for (u32 i = 0; i < iUncompressedSize/4; i++) {
-			if (arm9dst[i] == (u32)offset) {
-				arm9dst[i] = newFontPathOffset;
+		dbg_printf("fileIoOpen location : ");
+		dbg_hexa((u32)fileIoOpen);
+		dbg_printf("\n\n");
+
+		u32* fileIoClose = patchOffsetCache.fileIoCloseOffset;
+		if (!patchOffsetCache.fileIoCloseOffset) {
+			fileIoClose = findFileIoCloseOffset(fileIoOpen);
+			if (fileIoClose) {
+				patchOffsetCache.fileIoCloseOffset = fileIoClose;
+			}
+		}
+		if (!fileIoClose) {
+			return;
+		}
+
+		dbg_printf("fileIoClose location : ");
+		dbg_hexa((u32)fileIoClose);
+		dbg_printf("\n\n");
+
+		u32* fileIoSeek = patchOffsetCache.fileIoSeekOffset;
+		if (!patchOffsetCache.fileIoSeekOffset) {
+			fileIoSeek = findFileIoSeekOffset(fileIoClose, moduleParams);
+			if (fileIoSeek) {
+				patchOffsetCache.fileIoSeekOffset = fileIoSeek;
+			}
+		}
+		if (!fileIoSeek) {
+			return;
+		}
+
+		dbg_printf("fileIoSeek location : ");
+		dbg_hexa((u32)fileIoSeek);
+		dbg_printf("\n\n");
+
+		u32* fileIoRead = patchOffsetCache.fileIoReadOffset;
+		if (!patchOffsetCache.fileIoReadOffset) {
+			fileIoRead = findFileIoReadOffset(fileIoSeek, moduleParams);
+			if (fileIoRead) {
+				patchOffsetCache.fileIoReadOffset = fileIoRead;
+			}
+		}
+		if (!fileIoRead) {
+			return;
+		}
+
+		dbg_printf("fileIoRead location : ");
+		dbg_hexa((u32)fileIoRead);
+		dbg_printf("\n\n");
+
+		/*dbg_printf("moduleParams->static_bss_end : ");
+		dbg_hexa((u32)moduleParams->static_bss_end);
+		dbg_printf("\n\n");
+
+		dbg_printf("ltdModuleParams->arm9i_offset : ");
+		dbg_hexa((u32)ltdModuleParams->arm9i_offset);
+		dbg_printf("\n\n");*/
+
+		extern u32 iUncompressedSizei;
+		tonccpy(moduleParams->static_bss_end, ltdModuleParams->arm9i_offset, iUncompressedSizei);
+
+		const u32* dsiSaveOpen = ce9->patches->dsiSaveOpen;
+		const u32* dsiSaveClose = ce9->patches->dsiSaveClose;
+		const u32* dsiSaveSeek = ce9->patches->dsiSaveSeek;
+		const u32* dsiSaveRead = ce9->patches->dsiSaveRead;
+
+		u32* arm9idst = moduleParams->static_bss_end;
+		for (u32 i = 0; i < iUncompressedSizei/4; i++) {
+			if (arm9idst[i] == (u32)offset) {
+				for (int i2 = 0; i2 < 0x100/4; i2++) {
+					u32* blOffset = (arm9idst + i - i2);
+					u32* fileIoPtr = getOffsetFromBL(blOffset);
+					if (fileIoPtr == fileIoOpen) {
+						setBL((u32)blOffset, (u32)dsiSaveOpen);
+
+						//dbg_printf("fileIoOpen bl found : ");
+						//dbg_hexa((u32)blOffset);
+						//dbg_printf("\n\n");
+					} else if (fileIoPtr == fileIoClose) {
+						setBL((u32)blOffset, (u32)dsiSaveClose);
+
+						//dbg_printf("fileIoClose bl found : ");
+						//dbg_hexa((u32)blOffset);
+						//dbg_printf("\n\n");
+					} else if (fileIoPtr == fileIoSeek) {
+						setBL((u32)blOffset, (u32)dsiSaveSeek);
+
+						//dbg_printf("fileIoSeek bl found : ");
+						//dbg_hexa((u32)blOffset);
+						//dbg_printf("\n\n");
+					} else if (fileIoPtr == fileIoRead) {
+						setBL((u32)blOffset, (u32)dsiSaveRead);
+
+						//dbg_printf("fileIoRead bl found : ");
+						//dbg_hexa((u32)blOffset);
+						//dbg_printf("\n\n");
+					}
+				}
+			}
+		}
+
+		tonccpy(ltdModuleParams->arm9i_offset, moduleParams->static_bss_end, iUncompressedSizei);
+		toncset(moduleParams->static_bss_end, 0, iUncompressedSizei);
+	} else {
+		extern int sharedFontRegion;
+		if ((sharedFontRegion == 2 && ndsHeader->gameCode[3] == 'K')
+		 || (sharedFontRegion == 1 && ndsHeader->gameCode[3] == 'C')
+		 || (sharedFontRegion == 0 && ndsHeader->gameCode[3] != 'C' && ndsHeader->gameCode[3] != 'K')) {
+			return;
+		}
+
+		const char* twlFontPath = "sdmc:/_nds/nds-bootstrap/TWLFontTable.dat";
+		const char* chnFontPath = "sdmc:/_nds/nds-bootstrap/CHNFontTable.dat";
+		const char* korFontPath = "sdmc:/_nds/nds-bootstrap/KORFontTable.dat";
+		const u32 newFontPathOffset = ce9 ? 0x02F7FC00 : 0x02FFDC00;
+
+		bool found = false;
+		extern u32 iUncompressedSize;
+		extern u32 iUncompressedSizei;
+		u32* arm9idst = (u32*)*(u32*)0x02FFE1C8;
+		for (u32 i = 0; i < iUncompressedSizei/4; i++) {
+			if (arm9idst[i] == (u32)offset) {
+				arm9idst[i] = newFontPathOffset;
 				found = true;
 			}
 		}
-	}
 
-	if (!found) {
-		return;
-	}
-
-	if (ndsHeader->gameCode[3] == 'K') {
-		tonccpy((u32*)newFontPathOffset, korFontPath, strlen(korFontPath));
-	} else if (ndsHeader->gameCode[3] == 'C') {
-		tonccpy((u32*)newFontPathOffset, chnFontPath, strlen(chnFontPath));
-	} else {
-		tonccpy((u32*)newFontPathOffset, twlFontPath, strlen(twlFontPath));
-	}
-}
-
-void patchRaymanFileIoFuncs(const tNDSHeader* ndsHeader) {
-	u32* offset = patchOffsetCache.fileIoFuncOffset;
-	if (!patchOffsetCache.fileIoFuncChecked) {
-		offset = findFileIoFuncOffset(ndsHeader);
-		if (offset) {
-			patchOffsetCache.fileIoFuncOffset = offset;
+		if (!found) {
+			u32* arm9dst = (u32*)ndsHeader->arm9destination;
+			for (u32 i = 0; i < iUncompressedSize/4; i++) {
+				if (arm9dst[i] == (u32)offset) {
+					arm9dst[i] = newFontPathOffset;
+					found = true;
+				}
+			}
 		}
-		patchOffsetCache.fileIoFuncChecked = true;
-	}
 
-	if (offset) {
-		offset[0] = 0xE3A00001; //mov r0, #1
-		offset[1] = 0xE12FFF1E; //bx lr
-
-		dbg_printf("fileIoFunc location : ");
-		dbg_hexa((u32)offset);
-		dbg_printf("\n\n");
-	} else {
-		return;
-	}
-
-	offset = patchOffsetCache.fileIoFunc2Offset;
-	if (!patchOffsetCache.fileIoFunc2Checked) {
-		offset = findFileIoFunc2Offset(patchOffsetCache.fileIoFuncOffset);
-		if (offset) {
-			patchOffsetCache.fileIoFunc2Offset = offset;
+		if (!found) {
+			return;
 		}
-		patchOffsetCache.fileIoFunc2Checked = true;
-	}
 
-	if (offset) {
-		offset[0] = 0xE3A00001; //mov r0, #1
-		offset[1] = 0xE12FFF1E; //bx lr
-
-		dbg_printf("fileIoFunc2 location : ");
-		dbg_hexa((u32)offset);
-		dbg_printf("\n\n");
+		if (ndsHeader->gameCode[3] == 'K') {
+			tonccpy((u32*)newFontPathOffset, korFontPath, strlen(korFontPath));
+		} else if (ndsHeader->gameCode[3] == 'C') {
+			tonccpy((u32*)newFontPathOffset, chnFontPath, strlen(chnFontPath));
+		} else {
+			tonccpy((u32*)newFontPathOffset, twlFontPath, strlen(twlFontPath));
+		}
 	}
 }
 
@@ -2187,7 +2267,7 @@ static void operaRamPatch(void) {
 	ce9->patches->needFlushDCCache = (patchMpuRegion == 1);
 }*/
 
-u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 ROMinRAM, u32 patchMpuRegion, bool usesCloneboot) {
+u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, const ltd_module_params_t* ltdModuleParams, u32 ROMinRAM, u32 patchMpuRegion, bool usesCloneboot) {
 
 	bool usesThumb;
 	//bool slot2usesThumb = false;
@@ -2229,10 +2309,7 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 		}
 
 		patchA9Mbk(ndsHeader, moduleParams, false);
-
-		if (saveOnFlashcard && strncmp(romTid, "KRM", 3) == 0) {
-			patchRaymanFileIoFuncs(ndsHeader);
-		}
+		patchSharedFontPath(ce9, ndsHeader, moduleParams, ltdModuleParams);
 	}
 
 	if (strncmp(romTid, "V2G", 3) == 0 && !dsiModeConfirmed) {

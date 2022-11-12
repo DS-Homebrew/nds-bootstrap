@@ -56,6 +56,7 @@
 	.global musicsSize
 	.global pageFileCluster
 	.global manualCluster
+	.global sharedFontCluster
 	.global patchMpuSize
 	.global patchMpuRegion
 	.global language
@@ -144,6 +145,8 @@ musicsSize:
 pageFileCluster:
 	.word	0x00000000
 manualCluster:
+	.word	0x00000000
+sharedFontCluster:
 	.word	0x00000000
 patchMpuSize:
 	.word	0x00000000

@@ -69,9 +69,9 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	const u32* dsiSaveRead = ce9->patches->dsiSaveRead;
 	const u32* dsiSaveWrite = ce9->patches->dsiSaveWrite;
 
-	const bool twlFontFound = ((sharedFontRegion == 0 || twlSharedFont) && !saveOnFlashcard);
-	//const bool chnFontFound = ((sharedFontRegion == 1 || chnSharedFont) && !saveOnFlashcard);
-	const bool korFontFound = ((sharedFontRegion == 2 || korSharedFont) && !saveOnFlashcard);
+	const bool twlFontFound = (sharedFontRegion == 0 || twlSharedFont);
+	//const bool chnFontFound = (sharedFontRegion == 1 || chnSharedFont);
+	const bool korFontFound = (sharedFontRegion == 2 || korSharedFont);
 
 	if (ndsHeader->arm7binarySize == 0x44C) {
 		if (*(u32*)0x023803BC >= 0x02F00000 && *(u32*)0x023803BC < 0x02F80000) {
@@ -6945,9 +6945,9 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
 	const u32* dsiSaveRead = ce9->patches->dsiSaveRead;
 	const u32* dsiSaveWrite = ce9->patches->dsiSaveWrite;
 
-	const bool twlFontFound = ((sharedFontRegion == 0 || twlSharedFont) && !saveOnFlashcard);
-	//const bool chnFontFound = ((sharedFontRegion == 1 || chnSharedFont) && !saveOnFlashcard);
-	//const bool korFontFound = ((sharedFontRegion == 2 || korSharedFont) && !saveOnFlashcard);
+	const bool twlFontFound = (sharedFontRegion == 0 || twlSharedFont);
+	//const bool chnFontFound = (sharedFontRegion == 1 || chnSharedFont);
+	//const bool korFontFound = (sharedFontRegion == 2 || korSharedFont);
 
 	// Trauma Center: Under the Knife (USA)
 	if (strcmp(romTid, "AKDE") == 0) {
@@ -7619,6 +7619,7 @@ u32 patchCardNds(
 	cardengineArm9* ce9,
 	tNDSHeader* ndsHeader,
 	const module_params_t* moduleParams,
+	const ltd_module_params_t* ltdModuleParams,
 	u32 patchMpuRegion,
 	bool usesCloneboot,
 	u32 ROMinRAM,
@@ -7632,7 +7633,7 @@ u32 patchCardNds(
 		dbg_printf("[SDK 5]\n\n");
 	}
 
-	u32 errorCodeArm9 = patchCardNdsArm9(ce9, ndsHeader, moduleParams, ROMinRAM, patchMpuRegion, usesCloneboot);
+	u32 errorCodeArm9 = patchCardNdsArm9(ce9, ndsHeader, moduleParams, ltdModuleParams, ROMinRAM, patchMpuRegion, usesCloneboot);
 	
 	if (errorCodeArm9 == ERR_NONE || ndsHeader->fatSize == 0) {
 		return patchCardNdsArm7(ce7, ndsHeader, moduleParams, ROMinRAM, saveFileCluster);

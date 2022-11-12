@@ -33,6 +33,7 @@ std::string screenshotPath;
 std::string apFixOverlaysPath;
 std::string musicsFilePath;
 std::string pageFilePath;
+std::string sharedFontPath;
 
 typedef struct {
 	char gameTitle[12];			//!< 12 characters for the game title.
@@ -404,6 +405,7 @@ static int runNdsFile(configuration* conf) {
 	struct stat stMusic;
 	struct stat stPage;
 	struct stat stManual;
+	struct stat stTwlFont;
 	u32 clusterSav = 0;
 	u32 clusterDonor = 0;
 	u32 clusterGba = 0;
@@ -419,6 +421,7 @@ static int runNdsFile(configuration* conf) {
 	u32 musicCluster = 0;
 	u32 clusterPageFile = 0;
 	u32 clusterManual = 0;
+	u32 clusterTwlFont = 0;
 
 	if (stat(conf->ndsPath, &st) < 0) {
 		return -2;
@@ -489,7 +492,11 @@ static int runNdsFile(configuration* conf) {
 		clusterPageFile = stPage.st_ino;
 	}
 
-	return runNds(st.st_ino, clusterSav, clusterDonor, clusterGba, clusterGbaSav, clusterWideCheat, clusterApPatch, clusterCheat, clusterPatchOffsetCache, clusterRamDump, clusterSrParams, clusterScreenshot, apFixOverlaysCluster, musicCluster, clusterPageFile, clusterManual, conf);
+	if (stat(sharedFontPath.c_str(), &stTwlFont) >= 0) {
+		clusterTwlFont = stTwlFont.st_ino;
+	}
+
+	return runNds(st.st_ino, clusterSav, clusterDonor, clusterGba, clusterGbaSav, clusterWideCheat, clusterApPatch, clusterCheat, clusterPatchOffsetCache, clusterRamDump, clusterSrParams, clusterScreenshot, apFixOverlaysCluster, musicCluster, clusterPageFile, clusterManual, clusterTwlFont, conf);
 }
 
 int main(int argc, char** argv) {
