@@ -87,6 +87,8 @@ static aFile pageFile;
 static aFile manualFile;
 
 #ifndef NODSIWARE
+static aFile sharedFontFile;
+
 void updateMusic(void);
 
 static bool musicInited = false;
@@ -558,6 +560,9 @@ static void initialize(void) {
 		screenshotFile = getFileFromCluster(ce9->screenshotCluster);
 		pageFile = getFileFromCluster(ce9->pageFileCluster);
 		manualFile = getFileFromCluster(ce9->manualCluster);
+		#ifndef NODSIWARE
+		sharedFontFile = getFileFromCluster(ce9->sharedFontCluster);
+		#endif
 
 		bool cloneboot = (ce9->valueBits & isSdk5) ? *(u16*)0x02FFFC40 == 2 : *(u16*)0x027FFC40 == 2;
 
@@ -753,6 +758,7 @@ bool nandWrite(void* memory,void* flash,u32 len,u32 dma) {
 }
 
 #ifndef NODSIWARE
+static bool sharedFontOpened = false;
 static bool dsiSaveInited = false;
 static bool dsiSaveExists = false;
 static u32 dsiSavePerms = 0;
@@ -938,6 +944,15 @@ u32 dsiSaveSetLength(void* ctx, s32 len) {
 bool dsiSaveOpen(void* ctx, const char* path, u32 mode) {
 #ifndef NODSIWARE
 	dsiSaveSeekPos = 0;
+	if (strcmp(path, "nand:/<sharedFont>") == 0) {
+		if (sharedFontFile.firstCluster == CLUSTER_FREE || sharedFontFile.firstCluster == CLUSTER_EOF) {
+			dsiSaveResultCode = 0xE;
+			return false;
+		}
+		dsiSaveResultCode = 0;
+		sharedFontOpened = true;
+		return true;
+	}
 	if (savFile.firstCluster == CLUSTER_FREE || savFile.firstCluster == CLUSTER_EOF) {
 		dsiSaveResultCode = 0xE;
 		return false;
@@ -957,6 +972,15 @@ bool dsiSaveOpen(void* ctx, const char* path, u32 mode) {
 bool dsiSaveClose(void* ctx) {
 #ifndef NODSIWARE
 	dsiSaveSeekPos = 0;
+	if (sharedFontOpened) {
+		sharedFontOpened = false;
+		if (sharedFontFile.firstCluster == CLUSTER_FREE || sharedFontFile.firstCluster == CLUSTER_EOF) {
+			dsiSaveResultCode = 0xE;
+			return false;
+		}
+		dsiSaveResultCode = 0;
+		return true;
+	}
 	if (savFile.firstCluster == CLUSTER_FREE || savFile.firstCluster == CLUSTER_EOF) {
 		dsiSaveResultCode = 0xE;
 		return false;
@@ -984,6 +1008,15 @@ u32 dsiSaveGetLength(void* ctx) {
 
 bool dsiSaveSeek(void* ctx, s32 pos, u32 mode) {
 #ifndef NODSIWARE
+	if (sharedFontOpened) {
+		if (sharedFontFile.firstCluster == CLUSTER_FREE || sharedFontFile.firstCluster == CLUSTER_EOF) {
+			dsiSaveResultCode = 0xE;
+			return false;
+		}
+		dsiSaveSeekPos = pos;
+		dsiSaveResultCode = 0;
+		return true;
+	}
 	if (savFile.firstCluster == CLUSTER_FREE || savFile.firstCluster == CLUSTER_EOF) {
 		dsiSaveResultCode = 0xE;
 		return false;
@@ -1002,30 +1035,32 @@ bool dsiSaveSeek(void* ctx, s32 pos, u32 mode) {
 
 s32 dsiSaveRead(void* ctx, void* dst, s32 len) {
 #ifndef NODSIWARE
-	if (dsiSavePerms == 2 || !dsiSaveExists) {
-		dsiSaveResultCode = 1;
-		return -1; // Return if only write perms are set
-	}
+	if (!sharedFontOpened) {
+		if (dsiSavePerms == 2 || !dsiSaveExists) {
+			dsiSaveResultCode = 1;
+			return -1; // Return if only write perms are set
+		}
 
-	if (dsiSaveSize == 0) {
-		dsiSaveResultCode = 1;
-		return 0;
-	}
+		if (dsiSaveSize == 0) {
+			dsiSaveResultCode = 1;
+			return 0;
+		}
 
-	while (dsiSaveSeekPos+len > dsiSaveSize) {
-		len--;
-	}
+		while (dsiSaveSeekPos+len > dsiSaveSize) {
+			len--;
+		}
 
-	if (len == 0) {
-		dsiSaveResultCode = 1;
-		return 0;
+		if (len == 0) {
+			dsiSaveResultCode = 1;
+			return 0;
+		}
 	}
 
 	int oldIME = enterCriticalSection();
 	u16 exmemcnt = REG_EXMEMCNT;
 	cardReadInProgress = true;
 	setDeviceOwner();
-	bool res = fileRead(dst, savFile, dsiSaveSeekPos, len);
+	bool res = fileRead(dst, sharedFontOpened ? sharedFontFile : savFile, dsiSaveSeekPos, len);
 	dsiSaveResultCode = res ? 1 : 0;
 	cardReadInProgress = false;
 	REG_EXMEMCNT = exmemcnt;

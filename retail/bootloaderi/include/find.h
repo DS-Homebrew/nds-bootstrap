@@ -82,8 +82,11 @@ u32* findRandomPatchOffset5Second(const tNDSHeader* ndsHeader); // SDK 5
 //u32* findOperaRamOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
 u32* findFileIoOpenOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
 u32* findFileIoCloseOffset(const u32* fileIoOpenOffset);
+u16* findFileIoCloseOffsetThumb(const u16* fileIoOpenOffset);
 u32* findFileIoSeekOffset(const u32* fileIoCloseOffset, const module_params_t* moduleParams);
+u16* findFileIoSeekOffsetThumb(const u16* fileIoCloseOffset);
 u32* findFileIoReadOffset(const u32* fileIoSeekOffset, const module_params_t* moduleParams);
+u16* findFileIoReadOffsetThumb(const u16* fileIoSeekOffset, const module_params_t* moduleParams);
 u32* findCartInfoInitConstantOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb);
 u32* findCartExistOffset(const tNDSHeader* ndsHeader, bool usesThumb);
 u32* findCartReadOffset(const tNDSHeader* ndsHeader, bool usesThumb);

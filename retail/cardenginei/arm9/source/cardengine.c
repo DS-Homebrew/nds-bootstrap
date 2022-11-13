@@ -856,7 +856,7 @@ bool dsiSaveOpen(void* ctx, const char* path, u32 mode) {
 
 	dsiSaveInit();
 	dsiSaveResultCode = 0;
-	toncset32(ctx+0x14, dsiSaveGetResultCode(path), 1);
+	toncset32(ctx+0x14, dsiSaveResultCode, 1);
 
 	dsiSavePerms = mode;
 	return dsiSaveExists;

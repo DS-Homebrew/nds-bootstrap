@@ -94,8 +94,6 @@ extern u32 romSize;
 extern u32 initDisc;
 extern u32 saveFileCluster;
 extern u32 saveSize;
-extern u32 pageFileCluster;
-extern u32 manualCluster;
 extern u32 apPatchFileCluster;
 extern u32 apPatchSize;
 extern u32 cheatFileCluster;
@@ -106,6 +104,9 @@ extern u32 srParamsFileCluster;
 extern u32 screenshotCluster;
 extern u32 musicCluster;
 extern u32 musicsSize;
+extern u32 pageFileCluster;
+extern u32 manualCluster;
+extern u32 sharedFontCluster;
 extern u32 patchMpuSize;
 extern u8 patchMpuRegion;
 extern u8 language;
@@ -262,7 +263,8 @@ static void resetMemory_ARM7(void) {
 
 	memset_addrs_arm7(0x03800000 - 0x8000, 0x03800000 + 0x10000);
 	memset_addrs_arm7(0x02000620, IMAGES_LOCATION);	// clear part of EWRAM - except before nds-bootstrap images
-	toncset((u32*)0x02380000, 0, 0x60000);		// clear part of EWRAM - except before 0x023DA000, which has the arm9 code
+	toncset((u32*)0x02380000, 0, 0x38000);		// clear part of EWRAM - except before 0x023DA000, which has the arm9 code
+	toncset((u32*)0x023C0000, 0, 0x20000);
 	toncset((u32*)0x023F0000, 0, 0xB000);
 	toncset((u32*)0x023FE000, 0, 0x2000);
 	if (extendedMemory2) {
@@ -1076,12 +1078,12 @@ int arm7_main(void) {
 	rsetPatchCache();
 
 	ce9Location = *(u32*)CARDENGINE_ARM9_LOCATION_BUFFERED;
-	tonccpy((u32*)ce9Location, (u32*)CARDENGINE_ARM9_LOCATION_BUFFERED, 0x6800);
+	tonccpy((u32*)ce9Location, (u32*)CARDENGINE_ARM9_LOCATION_BUFFERED, 0x6C00);
 	toncset((u32*)0x023E0000, 0, 0x10000);
 
 	ce9Alt = (ce9Location == CARDENGINE_ARM9_LOCATION_DLDI_ALT);
 
-	if (!dldiPatchBinary((data_t*)ce9Location, 0x6800)) {
+	if (!dldiPatchBinary((data_t*)ce9Location, 0x6C00)) {
 		nocashMessage("ce9 DLDI patch failed");
 		dbg_printf("ce9 DLDI patch failed");
 		dbg_printf("\n");
@@ -1095,7 +1097,7 @@ int arm7_main(void) {
 
 	bool wramUsed = false;
 	u32 fatTableSize = 0;
-	u32 fatTableSizeNoExp = (moduleParams->sdk_version < 0x2008000) ? 0x1C000 : 0x19800;
+	u32 fatTableSizeNoExp = (moduleParams->sdk_version < 0x2008000) ? 0x1C000 : 0x19400;
 	if (ce9Alt && moduleParams->sdk_version >= 0x2008000) {
 		fatTableSizeNoExp = 0x8000;
 	}
@@ -1277,6 +1279,7 @@ int arm7_main(void) {
 		musicsSize,
 		pageFileCluster,
 		manualCluster,
+		sharedFontCluster,
 		expansionPakFound,
 		extendedMemory2,
 		ROMinRAM,

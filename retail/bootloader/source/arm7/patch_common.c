@@ -29,6 +29,11 @@
 #include "loading_screen.h"
 #include "debug_file.h"
 
+extern u8 valueBits3;
+#define twlSharedFont (valueBits3 & BIT(3))
+#define chnSharedFont (valueBits3 & BIT(4))
+#define korSharedFont (valueBits3 & BIT(5))
+
 u16 patchOffsetCacheFilePrevCrc = 0;
 u16 patchOffsetCacheFileNewCrc = 0;
 
@@ -52,7 +57,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	const u32 heapEnd = (fatTableAddr < 0x023C0000 || fatTableAddr >= CARDENGINE_ARM9_LOCATION_DLDI) ? CARDENGINE_ARM9_LOCATION_DLDI : fatTableAddr;
 	const bool debugOrMep = (extendedMemory2 || expansionPakFound);
 	const bool largeS2RAM = (expansionPakFound && (s2FlashcardId != 0)); // 16MB or more
-
 	if (donorFileTwlCluster == 0) {
 		return;
 	}
@@ -69,6 +73,10 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	const u32* dsiSaveSeek = ce9->patches->dsiSaveSeek;
 	const u32* dsiSaveRead = ce9->patches->dsiSaveRead;
 	const u32* dsiSaveWrite = ce9->patches->dsiSaveWrite;
+
+	const bool twlFontFound = twlSharedFont;
+	//const bool chnFontFound = chnSharedFont;
+	//const bool korFontFound = korSharedFont;
 
 	// Patch DSi-Exclusives to run in DS mode
 
@@ -4305,8 +4313,19 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	else if (strcmp(romTid, "KB8E") == 0) {
 		*(u32*)0x02005234 = 0xE1A00000; // nop
 		*(u32*)0x02005530 = 0xE1A00000; // nop
-		// *(u32*)0x02005534 = 0xE1A00000; // nop
-		*(u32*)0x0200A3D8 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		//if (!twlFontFound) {
+			// *(u32*)0x02005534 = 0xE1A00000; // nop
+			*(u32*)0x0200A3D8 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+			*(u32*)0x0200B800 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
+			*(u32*)0x02014AB0 = 0xE12FFF1E; // bx lr (Skip Manual screen, Part 1)
+			*(u32*)0x02047E4C = 0xE12FFF1E; // bx lr
+
+			// Skip Manual screen, Part 2
+			for (int i = 0; i < 11; i++) {
+				u32* offset = (u32*)0x02014BEC;
+				offset[i] = 0xE1A00000; // nop
+			}
+		//}
 		// *(u32*)0x0200A898 = 0xE12FFF1E; // bx lr
 		setBL(0x0200AC14, (u32)dsiSaveOpen);
 		setBL(0x0200AC50, (u32)dsiSaveRead);
@@ -4317,10 +4336,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0200ADA0, (u32)dsiSaveWrite);
 		setBL(0x0200ADC4, (u32)dsiSaveClose);
 		setBL(0x0200AE58, (u32)dsiSaveGetInfo);
-		*(u32*)0x0200B800 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
-		*(u32*)0x02014AB0 = 0xE12FFF1E; // bx lr (Skip Manual screen, Part 1)
 		*(u32*)0x02036398 = 0xE1A00000; // nop
-		*(u32*)0x02047E4C = 0xE12FFF1E; // bx lr
 		*(u32*)0x0204BFE8 = 0xE1A00000; // nop
 		tonccpy((u32*)0x0204CB6C, dsiSaveGetResultCode, 0xC);
 		*(u32*)0x0204F548 = 0xE1A00000; // nop
@@ -4331,12 +4347,14 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02057AB4 = 0xE1A00000; // nop
 		*(u32*)0x02057AB8 = 0xE1A00000; // nop
 		*(u32*)0x0205ABF8 = 0xE1A00000; // nop
-
-		// Skip Manual screen, Part 2
-		for (int i = 0; i < 11; i++) {
-			u32* offset = (u32*)0x02014BEC;
-			offset[i] = 0xE1A00000; // nop
-		}
+		*(u16*)0x0205C54C = 0x2001; // movs r0, #1
+		*(u16*)0x0205C54E = 0x4770; // bx lr
+		*(u16*)0x0205C56C = 0x2001; // movs r0, #1
+		*(u16*)0x0205C56E = 0x4770; // bx lr
+		*(u16*)0x0205C5E4 = 0x2001; // movs r0, #1
+		*(u16*)0x0205C5E8 = 0x4770; // bx lr
+		*(u16*)0x0205C604 = 0x2001; // movs r0, #1
+		*(u16*)0x0205C608 = 0x4770; // bx lr
 	}
 
 	// GO Series: Earth Saver (Europe)
@@ -5215,7 +5233,9 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Flashlight (USA)
 	else if (strcmp(romTid, "KFSE") == 0) {
-		*(u32*)0x02005134 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		if (!twlFontFound) {
+			*(u32*)0x02005134 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		}
 		*(u32*)0x0201A200 = 0xE1A00000; // nop
 		*(u32*)0x0201D1F0 = 0xE1A00000; // nop
 		patchInitDSiWare(0x02021EF0, heapEnd);
@@ -12510,6 +12530,10 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
 	const u32* dsiSaveRead = ce9->patches->dsiSaveRead;
 	const u32* dsiSaveWrite = ce9->patches->dsiSaveWrite;
 
+	//const bool twlFontFound = twlSharedFont;
+	//const bool chnFontFound = chnSharedFont;
+	//const bool korFontFound = korSharedFont;
+
 	// Trauma Center: Under the Knife (USA)
 	if (strcmp(romTid, "AKDE") == 0) {
 		*(u32*)0x2007434 = 0;
@@ -12943,7 +12967,7 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
 		*(u32*)0x02066FB4 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x02067050 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x02067080 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x02067154 = 0xE3A00000; // mov r0, #0
+		// *(u32*)0x02067154 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x02067184 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x0206865C = 0xE3A00000; // mov r0, #0
 		*(u32*)0x020686B0 = 0xE3A00000; // mov r0, #0

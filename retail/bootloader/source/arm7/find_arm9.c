@@ -87,6 +87,21 @@ static const u32 randomPatchSignature[4]        = {0xE3500000, 0x1597002C, 0x104
 // static const u32 randomPatchSignature5First[4]  = {0xE92D43F8, 0xE3A04000, 0xE1A09001, 0xE1A08002}; // SDK 5
 static const u32 randomPatchSignature5Second[3] = {0xE59F003C, 0xE590001C, 0xE3500000};             // SDK 5
 
+// FileIO functions (SDK 5)
+static const u32 fileIoOpenSignature50[4]      = {0xE92D40F8, 0xE24DDF4A, 0xE1A04000, 0xE1A07002}; // SDK 5.0 - 5.2
+static const u32 fileIoOpenSignature[4]        = {0xE92D43F8, 0xE24DDF4A, 0xE28D4010, 0xE1A07000}; // SDK 5.3+
+static const u16 fileIoOpenSignatureThumb[4]   = {0xB5F8, 0xB0CA, 0x1C05, 0x1C16}; // SDK 5.1+
+static const u32 fileIoCloseSignature[4]       = {0xE59FC008, 0xE3A01008, 0xE3A02001, 0xE12FFF1C}; // SDK 5.x
+static const u16 fileIoCloseSignatureThumb[4]  = {0x4B01, 0x2108, 0x2201, 0x4718}; // SDK 5.x
+static const u32 fileIoSeekSignature50[4]      = {0xE92D4008, 0xE24DD008, 0xE28D3000, 0xE5803010}; // SDK 5.0, SDK 5.1+ alt
+static const u32 fileIoSeekSignature[4]        = {0xE92D4070, 0xE24DD008, 0xE1A06000, 0xE1A05001}; // SDK 5.3+
+static const u16 fileIoSeekSignatureThumb[4]   = {0xB508, 0xB082, 0xAB00, 0x6103}; // SDK 5.x
+static const u32 fileIoReadSignature50[4]      = {0xE92D4010, 0xE24DD008, 0xE59F305C, 0xE1A04000}; // SDK 5.0
+static const u32 fileIoReadSignature51[4]      = {0xE92D4010, 0xE24DD008, 0xE28D3000, 0xE1A04000}; // SDK 5.1 & 5.2
+static const u32 fileIoReadSignature[4]        = {0xE92D4038, 0xE24DD008, 0xE28D3000, 0xE1A05000}; // SDK 5.3+
+static const u16 fileIoReadSignature51Thumb[4] = {0xB510, 0xB082, 0x1C04, 0xAB00}; // SDK 5.1
+static const u16 fileIoReadSignatureThumb[4]   = {0xB538, 0xB082, 0x1C05, 0xAB00}; // SDK 5.?
+
 // irq enable
 static const u32 irqEnableStartSignature1[4]        = {0xE59FC028, 0xE3A01000, 0xE1DC30B0, 0xE59F2020};					// SDK <= 3
 static const u32 irqEnableStartSignature2Alt[4]     = {0xE92D000F, 0xE92D4030, 0xE24DD004, 0xEBFFFFDB};					// SDK 2
@@ -153,6 +168,9 @@ static const u32 nandTmpJumpFuncStart3[1]   = {0xE92D4008};
 static const u32 nandTmpJumpFuncStart4[1]   = {0xE92D4010};
 
 static const u32 nandTmpJumpFuncConstant[1] = {0x02FFDFC0};
+
+// TWL Shared Font
+static const char* nandSharedFontSignature = "nand:/<sharedFont>";
 
 // Panic
 // TODO : could be a good idea to catch the call to Panic function and store the message somewhere
@@ -1572,6 +1590,178 @@ u32* findRandomPatchOffset5Second(const tNDSHeader* ndsHeader) {
 	return randomPatchOffset;
 }
 
+u32* findFileIoOpenOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+	dbg_printf("findFileIoOpenOffset:\n");
+
+	u32* offset = NULL;
+	if (moduleParams->sdk_version > 0x5030000) {
+		offset = findOffset(
+			(u32*)ndsHeader->arm9destination, iUncompressedSize,
+			fileIoOpenSignature, 4
+		);
+	} else {
+		offset = findOffset(
+			(u32*)ndsHeader->arm9destination, iUncompressedSize,
+			fileIoOpenSignature50, 4
+		);
+	}
+
+	if (!offset) {
+		dbg_printf("FileIO open (ARM) not found. Trying thumb\n");
+		offset = (u32*)findOffsetThumb(
+			(u16*)ndsHeader->arm9destination, iUncompressedSize,
+			fileIoOpenSignatureThumb, 4
+		);
+	}
+
+	if (offset) {
+		dbg_printf("FileIO open found\n");
+	} else {
+		dbg_printf("FileIO open not found\n");
+	}
+
+	dbg_printf("\n");
+	return offset;
+}
+
+u32* findFileIoCloseOffset(const u32* fileIoOpenOffset) {
+	dbg_printf("findFileIoCloseOffset:\n");
+
+	u32* offset = findOffset(
+		fileIoOpenOffset + 8, 0xA0,
+		fileIoCloseSignature, 4
+	);
+
+	if (offset) {
+		dbg_printf("FileIO close found\n");
+	} else {
+		dbg_printf("FileIO close not found\n");
+	}
+
+	dbg_printf("\n");
+	return offset;
+}
+
+u16* findFileIoCloseOffsetThumb(const u16* fileIoOpenOffset) {
+	dbg_printf("findFileIoCloseOffsetThumb:\n");
+
+	u16* offset = findOffsetThumb(
+		fileIoOpenOffset + 8, 0x60,
+		fileIoCloseSignatureThumb, 4
+	);
+
+	if (offset) {
+		dbg_printf("FileIO close THUMB found\n");
+	} else {
+		dbg_printf("FileIO close THUMB not found\n");
+	}
+
+	dbg_printf("\n");
+	return offset;
+}
+
+u32* findFileIoSeekOffset(const u32* fileIoCloseOffset, const module_params_t* moduleParams) {
+	dbg_printf("findFileIoSeekOffset:\n");
+
+	u32* offset = NULL;
+	if (moduleParams->sdk_version > 0x5030000) {
+		offset = findOffset(
+			fileIoCloseOffset + 8, 0x180,
+			fileIoSeekSignature, 4
+		);
+	}
+	if (!offset) {
+		offset = findOffset(
+			fileIoCloseOffset + 8, 0x180,
+			fileIoSeekSignature50, 4
+		);
+	}
+
+	if (offset) {
+		dbg_printf("FileIO seek found\n");
+	} else {
+		dbg_printf("FileIO seek not found\n");
+	}
+
+	dbg_printf("\n");
+	return offset;
+}
+
+u16* findFileIoSeekOffsetThumb(const u16* fileIoCloseOffset) {
+	dbg_printf("findFileIoSeekOffsetThumb:\n");
+
+	u16* offset = findOffsetThumb(
+		fileIoCloseOffset + 8, 0x100,
+		fileIoSeekSignatureThumb, 4
+	);
+
+	if (offset) {
+		dbg_printf("FileIO seek THUMB found\n");
+	} else {
+		dbg_printf("FileIO seek THUMB not found\n");
+	}
+
+	dbg_printf("\n");
+	return offset;
+}
+
+u32* findFileIoReadOffset(const u32* fileIoSeekOffset, const module_params_t* moduleParams) {
+	dbg_printf("findFileIoReadOffset:\n");
+
+	u32* offset = NULL;
+	if (moduleParams->sdk_version > 0x5030000) {
+		offset = findOffset(
+			fileIoSeekOffset, 0x80,
+			fileIoReadSignature, 4
+		);
+	} else if (moduleParams->sdk_version > 0x5010000) {
+		offset = findOffset(
+			fileIoSeekOffset, 0x80,
+			fileIoReadSignature51, 4
+		);
+	} else {
+		offset = findOffset(
+			fileIoSeekOffset, 0x180,
+			fileIoReadSignature50, 4
+		);
+	}
+
+	if (offset) {
+		dbg_printf("FileIO read found\n");
+	} else {
+		dbg_printf("FileIO read not found\n");
+	}
+
+	dbg_printf("\n");
+	return offset;
+}
+
+u16* findFileIoReadOffsetThumb(const u16* fileIoSeekOffset, const module_params_t* moduleParams) {
+	dbg_printf("findFileIoReadOffsetThumb:\n");
+
+	u16* offset = NULL;
+	if (moduleParams->sdk_version > 0x5030000) {
+		offset = findOffsetThumb(
+			fileIoSeekOffset, 0x40,
+			fileIoReadSignatureThumb, 4
+		);
+	} else {
+		offset = findOffsetThumb(
+			fileIoSeekOffset, 0x40,
+			fileIoReadSignature51Thumb, 4
+		);
+	}
+
+	if (offset) {
+		dbg_printf("FileIO read THUMB found\n");
+	} else {
+		dbg_printf("FileIO read THUMB not found\n");
+	}
+
+	dbg_printf("\n");
+	return offset;
+}
+
 u32* findResetOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool* softResetMb) {
 	dbg_printf("findResetOffset\n");
     const u32* resetSignature = resetSignature2;
@@ -1758,4 +1948,27 @@ u32* findNandTmpJumpFuncOffset(const tNDSHeader* ndsHeader, const module_params_
 
 	dbg_printf("\n");
 	return offset;
+}
+
+u32* findSharedFontPathOffset(const tNDSHeader* ndsHeader) {
+	dbg_printf("findSharedFontPathOffset\n");
+
+	char* offset = NULL;
+
+	char* arm9dst = (char*)ndsHeader->arm9destination;
+	for (u32 i = 0; i < iUncompressedSize; i++) {
+		if (strcmp(arm9dst+i, nandSharedFontSignature) == 0) {
+			offset = arm9dst+i;
+			break;
+		}
+	}
+
+	if (offset) {
+		dbg_printf("Shared font path offset found\n");
+	} else {
+		dbg_printf("Shared font path offset not found\n");
+	}
+
+	dbg_printf("\n");
+	return (u32*)offset;
 }

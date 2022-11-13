@@ -560,22 +560,22 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	if (conf->isDSiWare) {
 		conf->valueBits2 |= BIT(0);
 
-		if (conf->gameOnFlashcard) {
-			if (romTid[3] == 'K') {
-				sharedFontPath = "fat:/_nds/nds-bootstrap/KORFontTable.dat";
-				if (access(sharedFontPath.c_str(), F_OK) == 0) {
-					conf->valueBits3 |= BIT(5);
-				}
-			} else if (romTid[3] == 'C') {
-				sharedFontPath = "fat:/_nds/nds-bootstrap/CHNFontTable.dat";
-				if (access(sharedFontPath.c_str(), F_OK) == 0) {
-					conf->valueBits3 |= BIT(4);
-				}
-			} else {
-				sharedFontPath = "fat:/_nds/nds-bootstrap/TWLFontTable.dat";
-				if (access(sharedFontPath.c_str(), F_OK) == 0) {
-					conf->valueBits3 |= BIT(3);
-				}
+	}
+	if (conf->gameOnFlashcard && (conf->isDSiWare || (accessControl & BIT(4)))) {
+		if (romTid[3] == 'K') {
+			sharedFontPath = "fat:/_nds/nds-bootstrap/KORFontTable.dat";
+			if (access(sharedFontPath.c_str(), F_OK) == 0) {
+				conf->valueBits3 |= BIT(5);
+			}
+		} else if (romTid[3] == 'C') {
+			sharedFontPath = "fat:/_nds/nds-bootstrap/CHNFontTable.dat";
+			if (access(sharedFontPath.c_str(), F_OK) == 0) {
+				conf->valueBits3 |= BIT(4);
+			}
+		} else {
+			sharedFontPath = "fat:/_nds/nds-bootstrap/TWLFontTable.dat";
+			if (access(sharedFontPath.c_str(), F_OK) == 0) {
+				conf->valueBits3 |= BIT(3);
 			}
 		}
 	}
@@ -1311,6 +1311,52 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	}
 
   } else {
+	if (accessControl & BIT(4)) {
+		uint8_t *target = new uint8_t[0x1000];
+		fseek(ndsFile, 0, SEEK_SET);
+		fread(target, 1, 0x1000, ndsFile);
+
+		if (ndsArm9ilen && ndsArm9ilen <= 0x8000) {
+			fseek(ndsFile, ndsArm9isrc, SEEK_SET);
+			fread((u32*)0x023B8000, 1, ndsArm9ilen, ndsFile);
+		}
+
+		if ((target[0x01C] & 2) && ndsArm9ilen <= 0x8000)
+		{
+			u8 key[16] = {0} ;
+			u8 keyp[16] = {0} ;
+			if (target[0x01C] & 4)
+			{
+				// Debug Key
+				tonccpy(key, target, 16) ;
+			} else
+			{
+				//Retail key
+				char modcrypt_shared_key[8] = {'N','i','n','t','e','n','d','o'};
+				tonccpy(keyp, modcrypt_shared_key, 8) ;
+				for (int i=0;i<4;i++)
+				{
+					keyp[8+i] = target[0x0c+i] ;
+					keyp[15-i] = target[0x0c+i] ;
+				}
+				tonccpy(key, target+0x350, 16) ;
+				
+				u128_xor(key, keyp);
+				u128_add(key, DSi_KEY_MAGIC);
+		  u128_lrot(key, 42) ;
+			}
+
+			dsi_context ctx;
+			dsi_set_key(&ctx, key);
+			dsi_set_ctr(&ctx, &target[0x300]);
+			if (modcrypt1len)
+			{
+				decrypt_modcrypt_area(&ctx, (u8*)0x023B8000, modcrypt1len);
+			}
+		}
+
+		delete[] target;
+	}
 	fclose(ndsFile);
 	fclose(donorNdsFile);
 
