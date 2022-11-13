@@ -1658,14 +1658,14 @@ void patchSharedFontPath(const cardengineArm9* ce9, const tNDSHeader* ndsHeader,
 							//dbg_hexa((u32)blOffset);
 							//dbg_printf("\n\n");
 							//armFound = true;
-						} else if ((u8)a9ScfgRom != 1
-								&& (arm9idst[i] == 0x4770DF20 || arm9idst[i] == 0x4770DF21 || arm9idst[i] == 0x4770DF22 || arm9idst[i] == 0x4770DF23
-								 || arm9idst[i] == 0x4770DF24 || arm9idst[i] == 0x4770DF25 || arm9idst[i] == 0x4770DF26 || arm9idst[i] == 0x4770DF27
-								 || arm9idst[i] == 0x4770DF28 || arm9idst[i] == 0x4770DF29)) {
-							// Stub out DSi BIOS functions
-							arm9idst[i] = 0x47702001;
-						} 
+						}
 					}
+				} else if ((u8)a9ScfgRom != 1
+						&& (arm9idst[i] == 0x4770DF20 || arm9idst[i] == 0x4770DF21 || arm9idst[i] == 0x4770DF22 || arm9idst[i] == 0x4770DF23
+						 || arm9idst[i] == 0x4770DF24 || arm9idst[i] == 0x4770DF25 || arm9idst[i] == 0x4770DF26 || arm9idst[i] == 0x4770DF27
+						 || arm9idst[i] == 0x4770DF28 || arm9idst[i] == 0x4770DF29)) {
+					// Stub out DSi BIOS functions
+					arm9idst[i] = 0x47702001;
 				}
 			}
 			/*if (!armFound) {
