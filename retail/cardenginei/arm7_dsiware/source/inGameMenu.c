@@ -161,14 +161,22 @@ void inGameMenu(void) {
 					restorePreManual();
 					break;
 				case 0x524D4152: // RAMR
-					if (sharedAddr[1] >= 0x8000) {
-						tonccpy((u32*)((u32)sharedAddr[0]), (u32*)((u32)sharedAddr[1]), 0xC0);
-					} else {
-						biosRead((u32*)((u32)sharedAddr[0]), (u32*)((u32)sharedAddr[1]), 0xC0);
+					u32* dst = (u32*)((u32)sharedAddr[0]);
+					u32* src = (u32*)((u32)sharedAddr[1]);
+					for (int i = 0; i < 0xC0/8; i++) {
+						if ((u32)src >= 0x8000) {
+							tonccpy(dst, src, 8);
+						} else {
+							biosRead(dst, src, 8);
+						}
+						dst++;
+						dst++;
+						src++;
+						src++;
 					}
 					break;
 				case 0x574D4152: // RAMW
-					if (sharedAddr[1] >= 0x8000) {
+					if (sharedAddr[1]+sharedAddr[2] >= 0x8000) {
 						tonccpy((u8*)((u32)sharedAddr[1])+sharedAddr[2], (u8*)((u32)sharedAddr[0])+sharedAddr[2], 1);
 					}
 					break;
