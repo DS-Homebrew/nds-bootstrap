@@ -24,6 +24,18 @@ extern bool returnToMenu;
 extern void rebootConsole(void);
 extern void reset(void);
 
+extern u16 biosRead16(u32 addr);
+
+void biosRead(void* dst, const void* src, u32 len)
+{
+	u16* _dst = (u16*)dst;
+	
+	for (u32 i = 0; i < len; i+=2)
+	{
+		_dst[i>>1] = biosRead16(((u32)src) + i);
+	}
+}
+
 volatile int timeTillStatusRefresh = 7;
 
 void inGameMenu(void) {
@@ -113,10 +125,16 @@ void inGameMenu(void) {
 					ipcEveryFrame = false;
 					break;
 				case 0x524D4152: // RAMR
-					tonccpy((u32*)((u32)sharedAddr[0]), (u32*)((u32)sharedAddr[1]), 0xC0);
+					if (sharedAddr[1] >= 0x8000) {
+						tonccpy((u32*)((u32)sharedAddr[0]), (u32*)((u32)sharedAddr[1]), 0xC0);
+					} else {
+						biosRead((u32*)((u32)sharedAddr[0]), (u32*)((u32)sharedAddr[1]), 0xC0);
+					}
 					break;
 				case 0x574D4152: // RAMW
-					tonccpy((u8*)((u32)sharedAddr[1])+sharedAddr[2], (u8*)((u32)sharedAddr[0])+sharedAddr[2], 1);
+					if (sharedAddr[1] >= 0x8000) {
+						tonccpy((u8*)((u32)sharedAddr[1])+sharedAddr[2], (u8*)((u32)sharedAddr[0])+sharedAddr[2], 1);
+					}
 					break;
 				case 0x4554494C: // LITE
 					if(sharedAddr[0] == 0) {
