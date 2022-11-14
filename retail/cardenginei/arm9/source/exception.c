@@ -35,9 +35,11 @@ void setExceptionHandler2() {
 	if (EXCEPTION_VECTOR_SDK1 == enterException && *exceptionC == userException) return;
 	#endif
 
-	if (ce9->valueBits & dsiBios) {
-		exceptionAddr = 0x02FFFD90;
+	#ifndef TWLSDK
+	if (!(ce9->valueBits & dsiBios)) {
+		exceptionAddr = 0x027FFD90;
 	}
+	#endif
 	exceptionStack = (u32)EXCEPTION_STACK_LOCATION;
 	#ifdef TWLSDK
 	EXCEPTION_VECTOR = enterException;

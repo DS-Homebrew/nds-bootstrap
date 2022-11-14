@@ -1393,8 +1393,8 @@ u32* patchHiHeapPointer(const module_params_t* moduleParams, const tNDSHeader* n
 					*heapPointer = (u32)0x048020BA; /* MOVS R0, #0x2E80000 */
 					break;
 			}
-		} else if (consoleModel == 0 && (gameOnFlashcard || !isDSiWare)) {
-			// DSi-Enhanced/Exclusive title loaded from flashcard/SD, or DSiWare loaded from flashcard, both on DSi
+		} else if ((consoleModel == 0 && (gameOnFlashcard || !isDSiWare)) || (u8)a9ScfgRom != 1) {
+			// DSi-Enhanced/Exclusive title loaded from flashcard/SD, or DSiWare loaded from flashcard, both on DSi (or 3DS with DS BIOS set in SCFG register)
 			switch (*heapPointer) {
 				case 0x13A007BE:
 					*heapPointer = (u32)0x13A0062F; /* MOVNE R0, #0x2F00000 */
@@ -1660,13 +1660,13 @@ void patchSharedFontPath(const cardengineArm9* ce9, const tNDSHeader* ndsHeader,
 							//armFound = true;
 						}
 					}
-				} else if ((u8)a9ScfgRom != 1
+				} /*else if ((u8)a9ScfgRom != 1
 						&& (arm9idst[i] == 0x4770DF20 || arm9idst[i] == 0x4770DF21 || arm9idst[i] == 0x4770DF22 || arm9idst[i] == 0x4770DF23
 						 || arm9idst[i] == 0x4770DF24 || arm9idst[i] == 0x4770DF25 || arm9idst[i] == 0x4770DF26 || arm9idst[i] == 0x4770DF27
 						 || arm9idst[i] == 0x4770DF28 || arm9idst[i] == 0x4770DF29)) {
 					// Stub out DSi BIOS functions
 					arm9idst[i] = 0x47702001;
-				}
+				}*/
 			}
 			/*if (!armFound) {
 				const u32 dsiSaveOpenT = 0x02000200;

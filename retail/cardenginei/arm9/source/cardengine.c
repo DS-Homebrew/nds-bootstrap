@@ -1212,7 +1212,22 @@ u32 myIrqEnable(u32 irq) {
 	nocashMessage("myIrqEnable\n");
 	#endif
 
-	#ifndef TWLSDK
+	#ifdef TWLSDK
+	#ifdef DLDI
+	if (!(ce9->valueBits & dsiBios) && *(u32*)0x02F00000 != 0) {
+		extern void setLowVectors();
+
+		u32* itcmAddr = (u32*)0x01000000;
+		u32* newVectorAddr = (u32*)0x02000000;
+		for (int i = 0; i < 8; i++) {
+			itcmAddr[i] = 0xEA7FFFFE;
+			newVectorAddr[i] = 0xEA3BFFFE;
+		}
+
+		setLowVectors();
+	}
+	#endif
+	#else
 	initialize();
 	#endif
 

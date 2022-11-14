@@ -1226,17 +1226,51 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	}
 	fclose(cebin);
 
-	/*if (!isDSiMode() && unitCode>0 && conf->dsiMode) {
-		// Load DSi ARM7 BIOS
-		cebin = fopen("sd:/_nds/bios7i.bin", "rb");
+	if (!isDSiMode() && unitCode>0 && (conf->dsiMode || conf->isDSiWare)) {
+		// Load DSi ARM9 BIOS
+		cebin = fopen("sd:/_nds/bios9i.bin", "rb");
 		if (cebin) {
-			fread((u32*)0x02EC0000, 1, 0x10000, cebin);
+			fread((u32*)0x02F00000, 1, 0x10000, cebin);
 
 			// Relocate addresses
-			*(u32*)0x02EC58A8 += 0x02EC0000;
+			*(u32*)0x02F000CC -= 0xFFFF0000;
+			*(u32*)0x02F03264 -= 0xFFFF0000;
+			*(u32*)0x02F03268 -= 0xFFFF0000;
+			*(u32*)0x02F0326C -= 0xFFFF0000;
+			*(u32*)0x02F033E0 -= 0xFFFF0000;
+			*(u32*)0x02F042C0 -= 0xFFFF0000;
+			*(u32*)0x02F04B88 -= 0xFFFF0000;
+			*(u32*)0x02F04B90 -= 0xFFFF0000;
+			*(u32*)0x02F04B9C -= 0xFFFF0000;
+			*(u32*)0x02F04BA0 -= 0xFFFF0000;
+			*(u32*)0x02F04E1C -= 0xFFFF0000;
+			*(u32*)0x02F04F18 -= 0xFFFF0000;
+
+			*(u32*)0x02F000CC += 0x02F00000;
+			*(u32*)0x02F03264 += 0x02F00000;
+			*(u32*)0x02F03268 += 0x02F00000;
+			*(u32*)0x02F0326C += 0x02F00000;
+			*(u32*)0x02F033E0 += 0x02F00000;
+			*(u32*)0x02F042C0 += 0x02F00000;
+			*(u32*)0x02F04B88 += 0x02F00000;
+			*(u32*)0x02F04B90 += 0x02F00000;
+			*(u32*)0x02F04B9C += 0x02F00000;
+			*(u32*)0x02F04BA0 += 0x02F00000;
+			*(u32*)0x02F04E1C += 0x02F00000;
+			*(u32*)0x02F04F18 += 0x02F00000;
 		}
 		fclose(cebin);
-	}*/
+
+		// Load DSi ARM7 BIOS
+		/*cebin = fopen("sd:/_nds/bios7i.bin", "rb");
+		if (cebin) {
+			fread((u32*)0x02F10000, 1, 0x10000, cebin);
+
+			// Relocate addresses
+			*(u32*)0x02F158A8 += 0x02F10000;
+		}
+		fclose(cebin);*/
+	}
 
 	if (conf->gameOnFlashcard) {
 		wideCheatFilePath = "fat:/_nds/nds-bootstrap/wideCheatData.bin";
