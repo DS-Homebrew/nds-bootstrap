@@ -121,7 +121,7 @@ u32* findRamClearOffset(const tNDSHeader* ndsHeader);
 u32* findPostBootOffset(const tNDSHeader* ndsHeader);
 u32* findCardCheckPullOutOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
 u32* findCardIrqEnableOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
-u32* findA7iStartOffset(void);
+//u32* findA7iStartOffset(void);
 u32* findSdCardResetOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
 
 #endif // FIND_H

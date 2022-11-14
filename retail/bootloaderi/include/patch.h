@@ -124,10 +124,10 @@ typedef struct patchOffsetCacheContents {
 	u32 ramClearChecked;
 	u32* swiHaltOffset;
 	u32* a7Swi12Offset;
-	u32* a7Swi24Offset;
-	u32* a7Swi25Offset;
-	u32* a7Swi26Offset;
-	u32* a7Swi27Offset;
+	u16* a7Swi24Offset;
+	u16* a7Swi25Offset;
+	u16* a7Swi26Offset;
+	u16* a7Swi27Offset;
 	u32* a7ScfgExtOffset;
 	u32* swiGetPitchTableOffset;
 	u32 swiGetPitchTableChecked;
@@ -143,7 +143,7 @@ typedef struct patchOffsetCacheContents {
 	u32 savePatchType;
 	u32 relocateStartOffset;
 	u32 relocateValidateOffset;		// aka nextFunctionOffset
-	u32 a7iStartOffset;
+	u32 a7iStartOffset; // Unused
 	u32 a7CardReadEndOffset;
 	u32 a7JumpTableFuncOffset;
 	u32 a7JumpTableType;

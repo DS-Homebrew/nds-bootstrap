@@ -101,9 +101,9 @@ static const u32 irqEnableStartSignature4Alt[4]   = {0xE92D4010, 0xE1A04000, 0xE
 static const u16 irqEnableStartSignatureThumb5[5] = {0xB510, 0x1C04, 0xF7FF, 0xFFE4, 0x4B05}; // SDK 5
 
 // ARM7i start (SDK 5)
-static const u32 a7iStartSignatureConstant[3] = {0x6F696473, 0x616C775F, 0x0000006E}; // 'sdio_wlan'
-static const u32 a7iStartSignatureType1[5] = {0xE12FFF1E, 0xE92D47F8, 0xE24DD014, 0xE1A07000, 0xE5971000};
-static const u32 a7iStartSignatureType2[5] = {0xE12FFF1E, 0xE92D4FF0, 0xE24DD014, 0xE1A0A000, 0xE59A0000};
+//static const u32 a7iStartSignatureConstant[3] = {0x6F696473, 0x616C775F, 0x0000006E}; // 'sdio_wlan'
+//static const u32 a7iStartSignatureType1[5] = {0xE12FFF1E, 0xE92D47F8, 0xE24DD014, 0xE1A07000, 0xE5971000};
+//static const u32 a7iStartSignatureType2[5] = {0xE12FFF1E, 0xE92D4FF0, 0xE24DD014, 0xE1A0A000, 0xE59A0000};
 
 // SD card reset (SDK 5)
 static const u32 sdCardResetSignatureType1[4]      = {0xEBFFFE3C, 0xEBFFFF7B, 0xEB000029, 0xE1A05000};
@@ -1149,7 +1149,7 @@ u32* findCardIrqEnableOffset(const tNDSHeader* ndsHeader, const module_params_t*
 	return cardIrqEnableOffset;
 }
 
-u32* findA7iStartOffset(void) {
+/*u32* findA7iStartOffset(void) {
 	dbg_printf("findA7iStartOffset:\n");
 
 	u32* offset = findOffset(
@@ -1188,7 +1188,7 @@ u32* findA7iStartOffset(void) {
 
 	dbg_printf("\n");
 	return offset;
-}
+}*/
 
 u32* findSdCardResetOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	dbg_printf("findSdCardResetOffset:\n");

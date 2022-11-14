@@ -1262,14 +1262,14 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		fclose(cebin);
 
 		// Load DSi ARM7 BIOS
-		/*cebin = fopen("sd:/_nds/bios7i.bin", "rb");
+		cebin = fopen("sd:/_nds/bios7i.bin", "rb");
 		if (cebin) {
 			fread((u32*)0x02F10000, 1, 0x10000, cebin);
 
-			// Relocate addresses
+			// Relocate address
 			*(u32*)0x02F158A8 += 0x02F10000;
 		}
-		fclose(cebin);*/
+		fclose(cebin);
 	}
 
 	if (conf->gameOnFlashcard) {

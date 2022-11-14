@@ -247,9 +247,9 @@ static void fixForDifferentBios(const cardengineArm7* ce7, const tNDSHeader* nds
 		dbg_printf("a7iStart location : ");
 		dbg_hexa((u32)a7iStartOffset);
 		dbg_printf("\n\n");
-	}
+	}*/
 
-	if (a7iStartOffset && (REG_SCFG_ROM & BIT(9)) && *(u32*)0x02EC0020 == 0xEA001FF6 && ndsHeader->unitCode > 0 && dsiModeConfirmed) {
+	if (/*a7iStartOffset &&*/ (REG_SCFG_ROM & BIT(9)) && *(u32*)0x02F10020 == 0xEA001FF6 && ndsHeader->unitCode > 0 && dsiModeConfirmed) {
 		u16* swi24Offset = patchOffsetCache.a7Swi24Offset;
 		u16* swi25Offset = patchOffsetCache.a7Swi25Offset;
 		u16* swi26Offset = patchOffsetCache.a7Swi26Offset;
@@ -280,47 +280,53 @@ static void fixForDifferentBios(const cardengineArm7* ce7, const tNDSHeader* nds
 		}
 
 		if (swi24Offset) {
-			u32 srcAddr = (u32)swi24Offset - a7iStartOffset + 0x2F88000;
-			const u16* swi24Patch = generateA7InstrThumb(srcAddr, ce7->patches->swi24);
-			tonccpy(swi24Offset, swi24Patch, 0x4);
+			*swi24Offset = 0xE77E;
+
+			u32 dst = ((u32)swi24Offset) - 0x100;
+			tonccpy((u32*)dst, ce7->patches->swi24, 0x8);
 		}
 		if (swi25Offset) {
-			u32 srcAddr = (u32)swi25Offset - a7iStartOffset + 0x2F88000;
-			const u16* swi25Patch = generateA7InstrThumb(srcAddr, ce7->patches->swi25);
-			tonccpy(swi25Offset, swi25Patch, 0x4);
+			*swi25Offset = 0xE780;
+
+			u32 dst = ((u32)swi25Offset) - 0xFC;
+			tonccpy((u32*)dst, ce7->patches->swi25, 0x8);
 		}
 		if (swi26Offset) {
-			u32 srcAddr = (u32)swi26Offset - a7iStartOffset + 0x2F88000;
-			const u16* swi26Patch = generateA7InstrThumb(srcAddr, ce7->patches->swi26);
-			tonccpy(swi26Offset, swi26Patch, 0x4);
+			*swi26Offset = 0xE77F;
+
+			u32 dst = ((u32)swi26Offset) - 0xFE;
+			tonccpy((u32*)dst, ce7->patches->swi26, 0x8);
 		}
 		if (swi27Offset) {
-			u32 srcAddr = (u32)swi27Offset - a7iStartOffset + 0x2F88000;
-			const u16* swi27Patch = generateA7InstrThumb(srcAddr, ce7->patches->swi27);
-			tonccpy(swi27Offset, swi27Patch, 0x4);
+			*swi27Offset = 0xE780;
+
+			u32 dst = ((u32)swi27Offset) - 0xFC;
+			tonccpy((u32*)dst, ce7->patches->swi27, 0x8);
 		}
+
+		//u32 mainMemA7iStart = (*(u32*)0x02FFE1A0 != 0x00403000) ? 0x02F88000 : 0x02F80000;
 
 		dbg_printf("swi24 location : ");
 		dbg_hexa((u32)swi24Offset);
-		dbg_printf(" ");
-		dbg_hexa((u32)swi24Offset - a7iStartOffset + 0x2F88000);
+		//dbg_printf(" ");
+		//dbg_hexa((u32)swi24Offset - a7iStartOffset + mainMemA7iStart);
 		dbg_printf("\n\n");
 		dbg_printf("swi25 location : ");
 		dbg_hexa((u32)swi25Offset);
-		dbg_printf(" ");
-		dbg_hexa((u32)swi25Offset - a7iStartOffset + 0x2F88000);
+		//dbg_printf(" ");
+		//dbg_hexa((u32)swi25Offset - a7iStartOffset + mainMemA7iStart);
 		dbg_printf("\n\n");
 		dbg_printf("swi26 location : ");
 		dbg_hexa((u32)swi26Offset);
-		dbg_printf(" ");
-		dbg_hexa((u32)swi26Offset - a7iStartOffset + 0x2F88000);
+		//dbg_printf(" ");
+		//dbg_hexa((u32)swi26Offset - a7iStartOffset + mainMemA7iStart);
 		dbg_printf("\n\n");
 		dbg_printf("swi27 location : ");
 		dbg_hexa((u32)swi27Offset);
-		dbg_printf(" ");
-		dbg_hexa((u32)swi27Offset - a7iStartOffset + 0x2F88000);
+		//dbg_printf(" ");
+		//dbg_hexa((u32)swi27Offset - a7iStartOffset + mainMemA7iStart);
 		dbg_printf("\n\n");
-	}*/
+	}
 }
 
 static void patchSleepMode(const tNDSHeader* ndsHeader) {
