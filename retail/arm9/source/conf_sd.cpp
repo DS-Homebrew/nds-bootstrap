@@ -1229,6 +1229,9 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	if (!isDSiMode() && unitCode>0 && (conf->dsiMode || conf->isDSiWare)) {
 		// Load DSi ARM9 BIOS
 		cebin = fopen("sd:/_nds/bios9i.bin", "rb");
+		if (!cebin) {
+			cebin = fopen("sd:/_nds/bios9i_part1.bin", "rb");
+		}
 		if (cebin) {
 			fread((u32*)0x02F00000, 1, 0x10000, cebin);
 
@@ -1263,6 +1266,9 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 		// Load DSi ARM7 BIOS
 		cebin = fopen("sd:/_nds/bios7i.bin", "rb");
+		if (!cebin) {
+			cebin = fopen("sd:/_nds/bios7i_part1.bin", "rb");
+		}
 		if (cebin) {
 			fread((u32*)0x02F10000, 1, 0x10000, cebin);
 
