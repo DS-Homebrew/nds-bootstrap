@@ -74,6 +74,7 @@
 #define twlTouch BIT(15)
 #define cloneboot BIT(16)
 #define sleepMode BIT(17)
+#define dsiBios BIT(18)
 #define scfgLocked BIT(31)
 
 #define	REG_EXTKEYINPUT	(*(vuint16*)0x04000136)
@@ -779,7 +780,7 @@ void returnToLoader(bool wait) {
 
 	//driveInitialize();
 
-	aFile file = getBootFileCluster("BOOT.NDS", !(valueBits & b_dsiSD));
+	aFile file = getBootFileCluster("BOOT.NDS", (!(valueBits & b_dsiSD) || !(valueBits & dsiBios)));
 	if (file.firstCluster == CLUSTER_FREE) {
 		// File not found, so reboot console instead
 		i2cWriteRegister(0x4A, 0x70, 0x01);
@@ -798,7 +799,7 @@ void returnToLoader(bool wait) {
 		initMBK_dsiMode();
 	}
 
-	if (!(valueBits & b_dsiSD)) {
+	if (!(valueBits & b_dsiSD) || !(valueBits & dsiBios)) {
 		dldiPatchBinary(ndsHeader->arm9destination, ndsHeader->arm9binarySize);
 	}
 

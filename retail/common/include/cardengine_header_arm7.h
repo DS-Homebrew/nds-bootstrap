@@ -96,6 +96,7 @@ typedef struct cardengineArm7 {
 		15: twlTouch
 		16: cloneboot
 		17: sleepMode
+		18: dsiBios
 		31: scfgLocked
 	*/
     u32* languageAddr;

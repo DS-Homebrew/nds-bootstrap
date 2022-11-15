@@ -52,6 +52,7 @@
 #define b_twlTouch BIT(15)
 #define b_cloneboot BIT(16)
 #define b_sleepMode BIT(17)
+#define b_dsiBios BIT(18)
 #define b_scfgLocked BIT(31)
 
 extern u32 newArm7binarySize;
@@ -381,6 +382,9 @@ int hookNdsRetailArm7(
 		}
 		if (sleepMode) {
 			ce7->valueBits |= b_sleepMode;
+		}
+		if (!(REG_SCFG_ROM & BIT(9))) {
+			ce7->valueBits |= b_dsiBios;
 		}
 		if (REG_SCFG_EXT == 0) {
 			ce7->valueBits |= b_scfgLocked;
