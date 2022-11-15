@@ -710,7 +710,7 @@ void returnToLoader(bool wait) {
 		tonccpy((u8*)0x02000400, (u8*)twlCfgLoc, 0x128);
 	}
 
-	if (((valueBits & twlTouch) && !(*(u8*)0x02FFE1BF & BIT(0))) || ((valueBits & b_dsiSD) && (valueBits & wideCheatUsed))) {
+	if (!(valueBits & dsiBios) || ((valueBits & twlTouch) && !(*(u8*)0x02FFE1BF & BIT(0))) || ((valueBits & b_dsiSD) && (valueBits & wideCheatUsed))) {
 		if (consoleModel >= 2) {
 			if (*(u32*)(ce7+0xF900) == 0) {
 				tonccpy((u32*)0x02000300, sr_data_srloader, 0x020);
@@ -780,7 +780,7 @@ void returnToLoader(bool wait) {
 
 	//driveInitialize();
 
-	aFile file = getBootFileCluster("BOOT.NDS", (!(valueBits & b_dsiSD) || !(valueBits & dsiBios)));
+	aFile file = getBootFileCluster("BOOT.NDS", !(valueBits & b_dsiSD));
 	if (file.firstCluster == CLUSTER_FREE) {
 		// File not found, so reboot console instead
 		i2cWriteRegister(0x4A, 0x70, 0x01);
@@ -799,7 +799,7 @@ void returnToLoader(bool wait) {
 		initMBK_dsiMode();
 	}
 
-	if (!(valueBits & b_dsiSD) || !(valueBits & dsiBios)) {
+	if (!(valueBits & b_dsiSD)) {
 		dldiPatchBinary(ndsHeader->arm9destination, ndsHeader->arm9binarySize);
 	}
 
