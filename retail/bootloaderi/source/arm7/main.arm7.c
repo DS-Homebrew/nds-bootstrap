@@ -1290,7 +1290,7 @@ int arm7_main(void) {
 		dsiModeConfirmed = dsiMode && ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr);
 	}
 	if (gameOnFlashcard || !isDSiWare) {
-		if ((dsiModeConfirmed && ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr)) && consoleModel == 0) {
+		if (dsiModeConfirmed && ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr) && consoleModel == 0) {
 			extern u32 clusterCacheSize;
 			clusterCacheSize = 0x20000;
 
@@ -1317,16 +1317,20 @@ int arm7_main(void) {
 				savFile->fatTableCache = (u32*)((u32)savFile->fatTableCache+0xB880000);
 				lastClusterCacheUsed = (u32*)((u32)lastClusterCacheUsed+0xB880000);
 				clusterCache += 0xB880000;
-				tonccpy((char*)INGAME_MENU_LOCATION_DSIWARE, (char*)INGAME_MENU_LOCATION, 0xA000);
+				tonccpy((char*)INGAME_MENU_LOCATION_DSIWARE, (char*)INGAME_MENU_LOCATION, 0x9C00);
 			} else {
-				tonccpy((char*)0x02F26000, (char*)0x02700000, 0x20000);	// Move FAT table cache elsewhere
-				romFile->fatTableCache = (u32*)((u32)romFile->fatTableCache+0x826000);
-				savFile->fatTableCache = (u32*)((u32)savFile->fatTableCache+0x826000);
-				lastClusterCacheUsed = (u32*)((u32)lastClusterCacheUsed+0x826000);
-				clusterCache += 0x826000;
-				tonccpy((char*)INGAME_MENU_LOCATION_TWLSDK, (char*)INGAME_MENU_LOCATION, 0xA000);
+				u32 add = 0x826000; // 0x02F26000
+				if ((u8)a9ScfgRom != 1) {
+					add -= 0x6000; // 0x02F20000
+				}
+				tonccpy((char*)0x02700000+add, (char*)0x02700000, 0x20000);	// Move FAT table cache elsewhere
+				romFile->fatTableCache = (u32*)((u32)romFile->fatTableCache+add);
+				savFile->fatTableCache = (u32*)((u32)savFile->fatTableCache+add);
+				lastClusterCacheUsed = (u32*)((u32)lastClusterCacheUsed+add);
+				clusterCache += add;
+				tonccpy((char*)INGAME_MENU_LOCATION_TWLSDK, (char*)INGAME_MENU_LOCATION, 0x9C00);
 			}
-			toncset((char*)INGAME_MENU_LOCATION, 0, 0x8A000);
+			toncset((char*)INGAME_MENU_LOCATION, 0, 0x89C00);
 		}
 	}
 	if (!ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr) || !dsiModeConfirmed) {

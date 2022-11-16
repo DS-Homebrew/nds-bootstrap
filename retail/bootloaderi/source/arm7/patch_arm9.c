@@ -63,7 +63,7 @@ static void fixForDifferentBios(const cardengineArm9* ce9, const tNDSHeader* nds
 		// Patch to return as DS BIOS
 		if (dsiModeConfirmed && (u8)a9ScfgRom != 1) {
 			dsiModeCheckOffset[7] = 0x2FFFD00;
-			dbg_printf("Running DSi mode with DS BIOS\n");
+			dbg_printf("Running DSi mode with DS BIOS set in REG_SCFG_ROM\n");
 
 			if (dsiModeCheck2Offset) {
 				if (dsiModeCheck2Offset[0] == 0xE59F0014) {
@@ -1351,7 +1351,7 @@ u32* patchHiHeapPointer(const module_params_t* moduleParams, const tNDSHeader* n
     dbg_printf("\n\n");
 
 	//if (ROMsupportsDsiMode) {
-		if (consoleModel == 0 && strncmp(romTid, "DD3", 3) == 0 && !isDSiWare && dsiWramAccess) {
+		if (consoleModel == 0 && strncmp(romTid, "DD3", 3) == 0 && dsiWramAccess) {
 			// DSi: Hidden Photo (Europe/German) needs more heap space
 			u32 addr = (u32)heapPointer;
 
@@ -1365,6 +1365,9 @@ u32* patchHiHeapPointer(const module_params_t* moduleParams, const tNDSHeader* n
 			}
 
 			*(u32*)(addr+0x9C) = 0x2F26000;
+			if ((u8)a9ScfgRom != 1) {
+				*(u32*)(addr+0x9C) -= 0x6000;
+			}
 		} else if (consoleModel == 0 && (gameOnFlashcard || !isDSiWare) && !dsiWramAccess) {
 			// DSi WRAM not mapped to ARM9
 			// DSi-Enhanced/Exclusive title loaded from flashcard/SD, or DSiWare loaded from flashcard, both on DSi
@@ -1393,7 +1396,7 @@ u32* patchHiHeapPointer(const module_params_t* moduleParams, const tNDSHeader* n
 					*heapPointer = (u32)0x048020BA; /* MOVS R0, #0x2E80000 */
 					break;
 			}
-		} else if ((consoleModel == 0 && (gameOnFlashcard || !isDSiWare)) || (u8)a9ScfgRom != 1) {
+		} else if (consoleModel == 0 && (gameOnFlashcard || !isDSiWare)) {
 			// DSi-Enhanced/Exclusive title loaded from flashcard/SD, or DSiWare loaded from flashcard, both on DSi (or 3DS with DS BIOS set in SCFG register)
 			switch (*heapPointer) {
 				case 0x13A007BE:

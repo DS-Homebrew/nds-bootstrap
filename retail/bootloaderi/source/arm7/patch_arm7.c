@@ -284,24 +284,36 @@ static void fixForDifferentBios(const cardengineArm7* ce7, const tNDSHeader* nds
 
 			u32 dst = ((u32)swi24Offset) - 0x100;
 			tonccpy((u32*)dst, ce7->patches->swi24, 0x8);
+			if (*(u32*)0x02FFE1A0 == 0x00403000) {
+				*(u32*)(dst+4) -= 0x1C000;
+			}
 		}
 		if (swi25Offset) {
 			*swi25Offset = 0xE780;
 
 			u32 dst = ((u32)swi25Offset) - 0xFC;
 			tonccpy((u32*)dst, ce7->patches->swi25, 0x8);
+			if (*(u32*)0x02FFE1A0 == 0x00403000) {
+				*(u32*)(dst+4) -= 0x1C000;
+			}
 		}
 		if (swi26Offset) {
 			*swi26Offset = 0xE77F;
 
 			u32 dst = ((u32)swi26Offset) - 0xFE;
 			tonccpy((u32*)dst, ce7->patches->swi26, 0x8);
+			if (*(u32*)0x02FFE1A0 == 0x00403000) {
+				*(u32*)(dst+4) -= 0x1C000;
+			}
 		}
 		if (swi27Offset) {
 			*swi27Offset = 0xE780;
 
 			u32 dst = ((u32)swi27Offset) - 0xFC;
 			tonccpy((u32*)dst, ce7->patches->swi27, 0x8);
+			if (*(u32*)0x02FFE1A0 == 0x00403000) {
+				*(u32*)(dst+4) -= 0x1C000;
+			}
 		}
 
 		//u32 mainMemA7iStart = (*(u32*)0x02FFE1A0 != 0x00403000) ? 0x02F88000 : 0x02F80000;

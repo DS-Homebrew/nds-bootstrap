@@ -1076,15 +1076,15 @@ extern void reset(u32 param, u32 tid2);
 
 void inGameMenu(s32* exRegisters) {
 	#ifdef TWLSDK
-	if (ce9->consoleModel > 0) {
+	/*if (ce9->consoleModel > 0) {
 		*(u32*)(INGAME_MENU_LOCATION_DSIWARE + IGM_TEXT_SIZE_ALIGNED) = (u32)sharedAddr;
 		volatile void (*inGameMenu)(s8*, u32, s32*) = (volatile void*)INGAME_MENU_LOCATION_DSIWARE + IGM_TEXT_SIZE_ALIGNED + 0x10;
 		(*inGameMenu)(&mainScreen, ce9->consoleModel, exRegisters);
-	} else {
+	} else {*/
 		*(u32*)(INGAME_MENU_LOCATION_TWLSDK + IGM_TEXT_SIZE_ALIGNED) = (u32)sharedAddr;
 		volatile void (*inGameMenu)(s8*, u32, s32*) = (volatile void*)INGAME_MENU_LOCATION_TWLSDK + IGM_TEXT_SIZE_ALIGNED + 0x10;
 		(*inGameMenu)(&mainScreen, ce9->consoleModel, exRegisters);
-	}
+	//}
 	#else
 	*(u32*)(INGAME_MENU_LOCATION + IGM_TEXT_SIZE_ALIGNED) = (u32)sharedAddr;
 	volatile void (*inGameMenu)(s8*, u32, s32*) = (volatile void*)INGAME_MENU_LOCATION + IGM_TEXT_SIZE_ALIGNED + 0x10;
@@ -1214,14 +1214,14 @@ u32 myIrqEnable(u32 irq) {
 
 	#ifdef TWLSDK
 	#ifdef DLDI
-	if (!(ce9->valueBits & dsiBios) && *(u32*)0x02F00000 != 0) {
+	if (!(ce9->valueBits & dsiBios) && *(u32*)0x02F40000 != 0) {
 		extern void setLowVectors();
 
 		u32* itcmAddr = (u32*)0x01000000;
 		u32* newVectorAddr = (u32*)0x02000000;
 		for (int i = 0; i < 8; i++) {
 			itcmAddr[i] = 0xEA7FFFFE;
-			newVectorAddr[i] = 0xEA3BFFFE;
+			newVectorAddr[i] = 0xEA3CFFFE;
 		}
 
 		setLowVectors();
