@@ -709,12 +709,15 @@ u8 getRumblePakType(void) {
 }
 
 static bool supportsExceptionHandler(const char* romTid) {
-	// ExceptionHandler2 (red screen) blacklist
-	return (strncmp(romTid, "ASM", 3) != 0	// SM64DS
-	&& strncmp(romTid, "SMS", 3) != 0	// SMSW
-	&& strncmp(romTid, "A2D", 3) != 0	// NSMB
-	&& strncmp(romTid, "AMC", 3) != 0	// MKDS (ROM hacks may contain their own exception handler)
-	&& strncmp(romTid, "ADM", 3) != 0);	// AC:WW
+	if (0 == (REG_KEYINPUT & KEY_B)) {
+		// ExceptionHandler2 (red screen) blacklist
+		return (strncmp(romTid, "ASM", 3) != 0	// SM64DS
+		&& strncmp(romTid, "SMS", 3) != 0	// SMSW
+		&& strncmp(romTid, "A2D", 3) != 0	// NSMB
+		&& strncmp(romTid, "AMC", 3) != 0	// MKDS (ROM hacks may contain their own exception handler)
+		&& strncmp(romTid, "ADM", 3) != 0);	// AC:WW
+	}
+	return true;
 }
 
 /*-------------------------------------------------------------------------
@@ -736,10 +739,6 @@ static void startBinary_ARM7(void) {
 }
 
 static void loadOverlaysintoRAM(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, aFile file, u32 ROMinRAM) {
-	if (memcmp(ndsHeader->gameCode, "NTRJ", 4) == 0) {
-		return;
-	}
-
 	// Load overlays into RAM
 	if (overlaysSize < romSizeLimit)
 	{
