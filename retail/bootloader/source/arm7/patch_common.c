@@ -29,6 +29,7 @@
 #include "loading_screen.h"
 #include "debug_file.h"
 
+extern bool useSharedFont;
 extern u8 valueBits3;
 #define twlSharedFont (valueBits3 & BIT(3))
 #define chnSharedFont (valueBits3 & BIT(4))
@@ -5233,7 +5234,9 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Flashlight (USA)
 	else if (strcmp(romTid, "KFSE") == 0) {
-		if (!twlFontFound) {
+		if (twlFontFound) {
+			useSharedFont = true;
+		} else {
 			*(u32*)0x02005134 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		}
 		*(u32*)0x0201A200 = 0xE1A00000; // nop
@@ -5245,6 +5248,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Flashlight (Europe)
 	else if (strcmp(romTid, "KFSP") == 0) {
+		useSharedFont = twlFontFound;
 		*(u32*)0x0201A10C = 0xE1A00000; // nop
 		*(u32*)0x0201D0FC = 0xE1A00000; // nop
 		patchInitDSiWare(0x02021DFC, heapEnd);
@@ -6435,6 +6439,62 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchUserSettingsReadDSiWare(0x02014C78);
 		*(u32*)0x020178D4 = 0xE1A00000; // nop
 		*(u32*)0x0201CFCC = 0xE1A00000; // nop (Skip Manual screen)
+	}
+
+	// Maestro! Green Groove (USA)
+	// Maestro! Green Groove (Europe, Australia)
+	// Does not save due to unknown cause
+	else if (strcmp(romTid, "KMUE") == 0 || strcmp(romTid, "KM6V") == 0) {
+		*(u32*)0x020137E4 = 0xE1A00000; // nop
+		*(u32*)0x02016C1C = 0xE1A00000; // nop
+		patchInitDSiWare(0x0201E704, heapEnd);
+		*(u32*)0x0202380C = 0xE1A00000; // nop
+		*(u32*)0x02029F34 = 0xE3A00001; // mov r0, #1
+		if (ndsHeader->gameCode[3] == 'E') {
+			*(u32*)0x020B9AE4 = 0xE1A00000; // nop
+			*(u32*)0x020B9B00 = 0xE1A00000; // nop
+			*(u32*)0x020BC568 = 0xE3A00001; // mov r0, #1
+			*(u32*)0x020BC904 = 0xE3A00001; // mov r0, #1
+			*(u32*)0x020BC908 = 0xE12FFF1E; // bx lr
+			/* setBL(0x020BC7BC, (u32)dsiSaveOpenR);
+			setBL(0x020BC7D0, (u32)dsiSaveCreate);
+			setBL(0x020BC7DC, (u32)dsiSaveClose);
+			setBL(0x020BC7F0, (u32)dsiSaveOpen);
+			*(u32*)0x020BC824 = 0xE1A00000; // nop
+			setBL(0x020BC85C, (u32)dsiSaveWrite);
+			setBL(0x020BC864, (u32)dsiSaveClose);
+			setBL(0x020BC8AC, (u32)dsiSaveCreate);
+			setBL(0x020BC8BC, (u32)dsiSaveOpen);
+			setBL(0x020BC8DC, (u32)dsiSaveSetLength);
+			setBL(0x020BC8EC, (u32)dsiSaveWrite);
+			setBL(0x020BC8F4, (u32)dsiSaveClose);
+			setBL(0x020BC930, (u32)dsiSaveOpenR);
+			setBL(0x020BC97C, (u32)dsiSaveGetLength);
+			setBL(0x020BC9B0, (u32)dsiSaveRead);
+			setBL(0x020BC9BC, (u32)dsiSaveClose); */
+		} else {
+			*(u32*)0x020B9FBC = 0xE1A00000; // nop
+			*(u32*)0x020B9FD8 = 0xE1A00000; // nop
+			*(u32*)0x020BCA40 = 0xE3A00001; // mov r0, #1
+			*(u32*)0x020BCDDC = 0xE3A00001; // mov r0, #1
+			*(u32*)0x020BCDE0 = 0xE12FFF1E; // bx lr
+			/* setBL(0x020BCC94, (u32)dsiSaveOpenR);
+			setBL(0x020BCCA8, (u32)dsiSaveCreate);
+			setBL(0x020BCCB4, (u32)dsiSaveClose);
+			setBL(0x020BCCC8, (u32)dsiSaveOpen);
+			*(u32*)0x020BCCFC = 0xE1A00000; // nop
+			setBL(0x020BCD34, (u32)dsiSaveWrite);
+			setBL(0x020BCD3C, (u32)dsiSaveClose);
+			setBL(0x020BCD84, (u32)dsiSaveCreate);
+			setBL(0x020BCD94, (u32)dsiSaveOpen);
+			setBL(0x020BCDB4, (u32)dsiSaveSetLength);
+			setBL(0x020BCDC4, (u32)dsiSaveWrite);
+			setBL(0x020BCDCC, (u32)dsiSaveClose);
+			setBL(0x020BCE08, (u32)dsiSaveOpenR);
+			setBL(0x020BCE54, (u32)dsiSaveGetLength);
+			setBL(0x020BCE88, (u32)dsiSaveRead);
+			setBL(0x020BCE94, (u32)dsiSaveClose); */
+		}
 	}
 
 	// Magical Diary: Secrets Sharing (USA)

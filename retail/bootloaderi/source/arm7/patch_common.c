@@ -3342,6 +3342,54 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// Maestro! Green Groove (USA)
+	// Does not save due to unknown cause
+	else if (strcmp(romTid, "KMUE") == 0 && saveOnFlashcard) {
+		*(u32*)0x02029F34 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x020BC568 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x020BC904 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x020BC908 = 0xE12FFF1E; // bx lr
+		/* setBL(0x020BC7BC, (u32)dsiSaveOpenR);
+		setBL(0x020BC7D0, (u32)dsiSaveCreate);
+		setBL(0x020BC7DC, (u32)dsiSaveClose);
+		setBL(0x020BC7F0, (u32)dsiSaveOpen);
+		setBL(0x020BC85C, (u32)dsiSaveWrite);
+		setBL(0x020BC864, (u32)dsiSaveClose);
+		setBL(0x020BC8AC, (u32)dsiSaveCreate);
+		setBL(0x020BC8BC, (u32)dsiSaveOpen);
+		setBL(0x020BC8DC, (u32)dsiSaveSetLength);
+		setBL(0x020BC8EC, (u32)dsiSaveWrite);
+		setBL(0x020BC8F4, (u32)dsiSaveClose);
+		setBL(0x020BC930, (u32)dsiSaveOpenR);
+		setBL(0x020BC97C, (u32)dsiSaveGetLength);
+		setBL(0x020BC9B0, (u32)dsiSaveRead);
+		setBL(0x020BC9BC, (u32)dsiSaveClose); */
+	}
+
+	// Maestro! Green Groove (Europe, Australia)
+	// Does not save due to unknown cause
+	else if (strcmp(romTid, "KM6V") == 0 && saveOnFlashcard) {
+		*(u32*)0x02029F34 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x020BCA40 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x020BCDDC = 0xE3A00001; // mov r0, #1
+		*(u32*)0x020BCDE0 = 0xE12FFF1E; // bx lr
+		/* setBL(0x020BCC94, (u32)dsiSaveOpenR);
+		setBL(0x020BCCA8, (u32)dsiSaveCreate);
+		setBL(0x020BCCB4, (u32)dsiSaveClose);
+		setBL(0x020BCCC8, (u32)dsiSaveOpen);
+		setBL(0x020BCD34, (u32)dsiSaveWrite);
+		setBL(0x020BCD3C, (u32)dsiSaveClose);
+		setBL(0x020BCD84, (u32)dsiSaveCreate);
+		setBL(0x020BCD94, (u32)dsiSaveOpen);
+		setBL(0x020BCDB4, (u32)dsiSaveSetLength);
+		setBL(0x020BCDC4, (u32)dsiSaveWrite);
+		setBL(0x020BCDCC, (u32)dsiSaveClose);
+		setBL(0x020BCE08, (u32)dsiSaveOpenR);
+		setBL(0x020BCE54, (u32)dsiSaveGetLength);
+		setBL(0x020BCE88, (u32)dsiSaveRead);
+		setBL(0x020BCE94, (u32)dsiSaveClose); */
+	}
+
 	// Meikyou Kokugo: Rakubiki Jiten (Japan)
 	// Saving not supported due to using more than one file
 	else if (strcmp(romTid, "KD4J") == 0 && !twlFontFound) {

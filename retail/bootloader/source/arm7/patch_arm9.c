@@ -825,9 +825,11 @@ void patchInitDSiWare(u32 addr, u32 heapEnd) {
 	*(u32*)(addr+0x9C) = 0xE1A00000; // nop
 }
 
+bool useSharedFont = false;
+
 void patchSharedFontPath(const cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
-	extern u32 accessControl;
-	if (!(accessControl & BIT(4)) || *(u32*)0x023B8000 != 0) {
+	//extern u32 accessControl;
+	if (/* !(accessControl & BIT(4)) || *(u32*)0x023B8000 != 0 */ !useSharedFont) {
 		toncset((u32*)0x023B8000, 0, 0x8000);
 		return;
 	}
