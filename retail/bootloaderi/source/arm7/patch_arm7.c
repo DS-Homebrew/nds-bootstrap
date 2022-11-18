@@ -11,8 +11,8 @@
 #include "cardengine_header_arm7.h"
 #include "debug_file.h"
 
-extern u16 gameOnFlashcard;
-extern u16 saveOnFlashcard;
+extern u8 gameOnFlashcard;
+extern u8 saveOnFlashcard;
 extern u16 a9ScfgRom;
 //extern u8 dsiSD;
 

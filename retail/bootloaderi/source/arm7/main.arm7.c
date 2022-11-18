@@ -87,8 +87,9 @@ extern bool moreMemory;
 //extern u32 _start;
 extern u32 storedFileCluster;
 extern u32 initDisc;
-extern u16 gameOnFlashcard;
-extern u16 saveOnFlashcard;
+extern u16 bootstrapOnFlashcard;
+extern u8 gameOnFlashcard;
+extern u8 saveOnFlashcard;
 extern u16 a9ScfgRom;
 extern u8 dsiSD;
 extern u32 saveFileCluster;
@@ -1581,6 +1582,7 @@ int arm7_main(void) {
 			apPatchSize,
 			pageFileCluster,
 			manualCluster,
+			bootstrapOnFlashcard,
 			gameOnFlashcard,
 			saveOnFlashcard,
 			language,
@@ -1863,6 +1865,7 @@ int arm7_main(void) {
 			apPatchSize,
 			pageFileCluster,
 			manualCluster,
+			bootstrapOnFlashcard,
 			gameOnFlashcard,
 			saveOnFlashcard,
 			language,

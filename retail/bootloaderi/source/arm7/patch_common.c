@@ -28,8 +28,8 @@
 #include "loading_screen.h"
 #include "debug_file.h"
 
-extern u16 gameOnFlashcard;
-extern u16 saveOnFlashcard;
+extern u8 gameOnFlashcard;
+extern u8 saveOnFlashcard;
 extern u8 valueBits3;
 #define memoryPit (valueBits3 & BIT(1))
 #define twlSharedFont (valueBits3 & BIT(3))

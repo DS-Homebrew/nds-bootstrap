@@ -165,7 +165,7 @@ int hookNdsRetailArm9(
 	u32 fileCluster,
 	u32 saveCluster,
 	u32 saveSize,
-	u16 saveOnFlashcard,
+	u8 saveOnFlashcard,
 	u32 cacheBlockSize,
 	u8 extendedMemory,
 	u8 ROMinRAM,

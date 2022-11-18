@@ -14,8 +14,8 @@
 #include "igm_text.h"
 #include "locations.h"
 
-extern u16 gameOnFlashcard;
-extern u16 saveOnFlashcard;
+extern u8 gameOnFlashcard;
+extern u8 saveOnFlashcard;
 extern u16 a9ScfgRom;
 
 extern bool gbaRomFound;

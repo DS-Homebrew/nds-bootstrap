@@ -405,7 +405,9 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		}
 	}
 
-	load_conf(conf, conf->sdFound ? "sd:/_nds/nds-bootstrap.ini" : "fat:/_nds/nds-bootstrap.ini");
+	conf->bootstrapOnFlashcard = ((bootstrapPath[0] == 'f' && bootstrapPath[1] == 'a' && bootstrapPath[2] == 't') || !conf->sdFound);
+
+	load_conf(conf, conf->bootstrapOnFlashcard ? "fat:/_nds/nds-bootstrap.ini" : "sd:/_nds/nds-bootstrap.ini");
 
 	conf->initDisc = (REG_SCFG_EXT == 0);
 
@@ -494,7 +496,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	}
 
 	pageFilePath = "sd:/_nds/pagefile.sys";
-	if (conf->b4dsMode || !conf->sdFound) {
+	if (conf->b4dsMode || conf->bootstrapOnFlashcard) {
 		pageFilePath = "fat:/_nds/pagefile.sys";	
 	}
 
@@ -1305,7 +1307,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 	if (newRegion == 1) {
 		// Read ESRB rating and descriptor(s) for current title
-		bootstrapImages = fopen(conf->sdFound ? "sd:/_nds/nds-bootstrap/esrb.bin" : "fat:/_nds/nds-bootstrap/esrb.bin", "rb");
+		bootstrapImages = fopen(conf->bootstrapOnFlashcard ? "fat:/_nds/nds-bootstrap/esrb.bin" : "sd:/_nds/nds-bootstrap/esrb.bin", "rb");
 		if (bootstrapImages) {
 			// Read width & height
 			/*fseek(bootstrapImages, 0x12, SEEK_SET);
@@ -1561,7 +1563,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 	if (newRegion == 1) {
 		// Read ESRB rating and descriptor(s) for current title
-		bootstrapImages = fopen(conf->sdFound ? "sd:/_nds/nds-bootstrap/esrb.bin" : "fat:/_nds/nds-bootstrap/esrb.bin", "rb");
+		bootstrapImages = fopen(conf->bootstrapOnFlashcard ? "fat:/_nds/nds-bootstrap/esrb.bin" : "sd:/_nds/nds-bootstrap/esrb.bin", "rb");
 		if (bootstrapImages) {
 			// Read width & height
 			/*fseek(bootstrapImages, 0x12, SEEK_SET);
@@ -1631,7 +1633,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	}
 
 	srParamsFilePath = "sd:/_nds/nds-bootstrap/softResetParams.bin";
-	if (conf->ndsPath[0] == 'f' && conf->ndsPath[1] == 'a' && conf->ndsPath[2] == 't') {
+	if (conf->gameOnFlashcard) {
 		srParamsFilePath = "fat:/_nds/nds-bootstrap/softResetParams.bin";
 	}
 	
@@ -1687,7 +1689,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 	if (dsiFeatures() && !conf->b4dsMode) {	// Not for B4DS
 		ramDumpPath = "sd:/_nds/nds-bootstrap/ramDump.bin";
-		if (!conf->sdFound) {
+		if (conf->bootstrapOnFlashcard) {
 			ramDumpPath = "fat:/_nds/nds-bootstrap/ramDump.bin";
 		}
 
@@ -1737,7 +1739,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		}
 
 		screenshotPath = "sd:/_nds/nds-bootstrap/screenshots.tar";
-		if (!conf->sdFound) {
+		if (conf->bootstrapOnFlashcard) {
 			screenshotPath = "fat:/_nds/nds-bootstrap/screenshots.tar";
 		}
 

@@ -60,6 +60,7 @@ typedef struct configuration {
 	bool logging;
 	bool initDisc;
 	bool sdFound;
+	bool bootstrapOnFlashcard;
 	bool gameOnFlashcard;
 	bool saveOnFlashcard;
 	bool macroMode;
