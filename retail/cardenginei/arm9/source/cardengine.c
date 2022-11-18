@@ -764,6 +764,7 @@ bool dsiSaveDelete(const char* path) {
 #ifdef DLDI
 	dsiSaveSeekPos = 0;
 	if (savFile->firstCluster == CLUSTER_FREE || savFile->firstCluster == CLUSTER_EOF) {
+		dsiSaveResultCode = 0xE;
 		return false;
 	}
 
@@ -828,6 +829,7 @@ u32 dsiSaveSetLength(void* ctx, s32 len) {
 	sysSetCardOwner(true);	// Give Slot-1 access to arm9
 	bool res = fileWrite((char*)&dsiSaveSize, *savFile, ce9->saveSize-4, 4, 0);
 	dsiSaveResultCode = res ? 0 : 1;
+	toncset32(ctx+0x14, dsiSaveResultCode, 1);
 	REG_EXMEMCNT = exmemcnt;
 	leaveCriticalSection(oldIME);
 
@@ -843,14 +845,17 @@ bool dsiSaveOpen(void* ctx, const char* path, u32 mode) {
 	if (strcmp(path, "nand:/<sharedFont>") == 0) {
 		if (sharedFontFile->firstCluster == CLUSTER_FREE || sharedFontFile->firstCluster == CLUSTER_EOF) {
 			dsiSaveResultCode = 0xE;
+			toncset32(ctx+0x14, dsiSaveResultCode, 1);
 			return false;
 		}
 		dsiSaveResultCode = 0;
+		toncset32(ctx+0x14, dsiSaveResultCode, 1);
 		sharedFontOpened = true;
 		return true;
 	}
 	if (savFile->firstCluster == CLUSTER_FREE || savFile->firstCluster == CLUSTER_EOF) {
 		dsiSaveResultCode = 0xE;
+		toncset32(ctx+0x14, dsiSaveResultCode, 1);
 		return false;
 	}
 
@@ -872,13 +877,16 @@ bool dsiSaveClose(void* ctx) {
 		sharedFontOpened = false;
 		if (sharedFontFile->firstCluster == CLUSTER_FREE || sharedFontFile->firstCluster == CLUSTER_EOF) {
 			dsiSaveResultCode = 0xE;
+			toncset32(ctx+0x14, dsiSaveResultCode, 1);
 			return false;
 		}
 		dsiSaveResultCode = 0;
+		toncset32(ctx+0x14, dsiSaveResultCode, 1);
 		return true;
 	}
 	if (savFile->firstCluster == CLUSTER_FREE || savFile->firstCluster == CLUSTER_EOF) {
 		dsiSaveResultCode = 0xE;
+		toncset32(ctx+0x14, dsiSaveResultCode, 1);
 		return false;
 	}
 	//toncset(ctx, 0, 0x80);
@@ -912,18 +920,22 @@ bool dsiSaveSeek(void* ctx, s32 pos, u32 mode) {
 		}
 		dsiSaveSeekPos = pos;
 		dsiSaveResultCode = 0;
+		toncset32(ctx+0x14, dsiSaveResultCode, 1);
 		return true;
 	}
 	if (savFile->firstCluster == CLUSTER_FREE || savFile->firstCluster == CLUSTER_EOF) {
 		dsiSaveResultCode = 0xE;
+		toncset32(ctx+0x14, dsiSaveResultCode, 1);
 		return false;
 	}
 	if (!dsiSaveExists) {
 		dsiSaveResultCode = 1;
+		toncset32(ctx+0x14, dsiSaveResultCode, 1);
 		return false;
 	}
 	dsiSaveSeekPos = pos;
 	dsiSaveResultCode = 0;
+	toncset32(ctx+0x14, dsiSaveResultCode, 1);
 	return true;
 #else
 	return false;
@@ -935,11 +947,13 @@ s32 dsiSaveRead(void* ctx, void* dst, u32 len) {
 	if (!sharedFontOpened) {
 		if (dsiSavePerms == 2 || !dsiSaveExists) {
 			dsiSaveResultCode = 1;
+			toncset32(ctx+0x14, dsiSaveResultCode, 1);
 			return -1; // Return if only write perms are set
 		}
 
 		if (dsiSaveSize == 0) {
 			dsiSaveResultCode = 1;
+			toncset32(ctx+0x14, dsiSaveResultCode, 1);
 			return 0;
 		}
 
@@ -949,6 +963,7 @@ s32 dsiSaveRead(void* ctx, void* dst, u32 len) {
 
 		if (len == 0) {
 			dsiSaveResultCode = 1;
+			toncset32(ctx+0x14, dsiSaveResultCode, 1);
 			return 0;
 		}
 	}
@@ -958,6 +973,7 @@ s32 dsiSaveRead(void* ctx, void* dst, u32 len) {
 	sysSetCardOwner(true);	// Give Slot-1 access to arm9
 	bool res = fileRead(dst, sharedFontOpened ? *sharedFontFile : *savFile, dsiSaveSeekPos, len, 0);
 	dsiSaveResultCode = res ? 1 : 0;
+	toncset32(ctx+0x14, dsiSaveResultCode, 1);
 	REG_EXMEMCNT = exmemcnt;
 	leaveCriticalSection(oldIME);
 	if (res) {
@@ -972,6 +988,7 @@ s32 dsiSaveWrite(void* ctx, void* src, s32 len) {
 #ifdef DLDI
 	if (dsiSavePerms == 1 || !dsiSaveExists) {
 		dsiSaveResultCode = 1;
+		toncset32(ctx+0x14, dsiSaveResultCode, 1);
 		return -1; // Return if only read perms are set
 	}
 
@@ -985,6 +1002,7 @@ s32 dsiSaveWrite(void* ctx, void* src, s32 len) {
 	sysSetCardOwner(true);	// Give Slot-1 access to arm9
 	bool res = fileWrite(src, *savFile, dsiSaveSeekPos, len, 0);
 	dsiSaveResultCode = res ? 1 : 0;
+	toncset32(ctx+0x14, dsiSaveResultCode, 1);
 	REG_EXMEMCNT = exmemcnt;
 	leaveCriticalSection(oldIME);
 	if (res) {

@@ -605,7 +605,7 @@ static void loadBinary_ARM7(const tDSiHeader* dsiHeaderTemp, aFile file) {
 	bool separateSrl = (softResetParams[2] == 0x44414F4C); // 'LOAD'
 	if (separateSrl) {
 		srlAddr = 0xFFFFFFFF;
-		aFile pageFile = getFileFromCluster(pageFileCluster, !dsiSD);
+		aFile pageFile = getFileFromCluster(pageFileCluster, bootstrapOnFlashcard);
 
 		fileRead((char*)dsiHeaderTemp, pageFile, 0x2BFE00, 0x160, 0);
 		fileRead(dsiHeaderTemp->ndshdr.arm9destination, pageFile, 0, dsiHeaderTemp->ndshdr.arm9binarySize, 0);
@@ -1236,7 +1236,7 @@ int arm7_main(void) {
 	}
 
 	if (logging) {
-		enableDebug(getBootFileCluster("NDSBTSRP.LOG", !dsiSD));
+		enableDebug(getBootFileCluster("NDSBTSRP.LOG", bootstrapOnFlashcard));
 	}
 
 	bool dsiEnhancedMbk = (*(u32*)0x02FFE1A0 == 0x00403000 && REG_SCFG_EXT == 0);
@@ -1628,7 +1628,7 @@ int arm7_main(void) {
 			*(u32*)0x0DFFE1CC = (iUncompressedSizei > 0 ? iUncompressedSizei : *(u32*)0x02FFE1CC);
 			*(u32*)0x0DFFE1DC = newArm7ibinarySize;
 		} else {
-			aFile pageFile = getFileFromCluster(pageFileCluster, !dsiSD);
+			aFile pageFile = getFileFromCluster(pageFileCluster, bootstrapOnFlashcard);
 
 			fileWrite((char*)ndsHeader->arm9destination, pageFile, 0, iUncompressedSize, -1);
 			fileWrite((char*)ndsHeader->arm7destination, pageFile, 0x2C0000, newArm7binarySize, -1);
@@ -1962,7 +1962,7 @@ int arm7_main(void) {
 			// Do nothing
 		} else if (extendedMemoryConfirmed || dsiModeConfirmed) {
 			extern u32 iUncompressedSizei;
-			aFile pageFile = getFileFromCluster(pageFileCluster, !dsiSD);
+			aFile pageFile = getFileFromCluster(pageFileCluster, bootstrapOnFlashcard);
 
 			fileWrite((char*)ndsHeader->arm9destination, pageFile, 0, iUncompressedSize, -1);
 			fileWrite((char*)ndsHeader->arm7destination, pageFile, 0x2C0000, newArm7binarySize, -1);
@@ -2017,7 +2017,7 @@ int arm7_main(void) {
     setMemoryAddress(ndsHeader, moduleParams);
 
 	if (0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_DOWN | KEY_A))) {
-		aFile ramDumpFile = getFileFromCluster(ramDumpCluster, !dsiSD);
+		aFile ramDumpFile = getFileFromCluster(ramDumpCluster, bootstrapOnFlashcard);
 
 		fileWrite((char*)0x0C000000, ramDumpFile, 0, (consoleModel==0 ? 0x01000000 : 0x02000000), -1);		// Dump RAM
 		//fileWrite((char*)dsiHeaderTemp.arm9idestination, ramDumpFile, 0, dsiHeaderTemp.arm9ibinarySize, -1);	// Dump (decrypted?) arm9 binary

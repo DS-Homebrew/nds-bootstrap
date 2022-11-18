@@ -75,6 +75,7 @@
 #define cloneboot BIT(16)
 #define sleepMode BIT(17)
 #define dsiBios BIT(18)
+#define bootstrapOnFlashcard BIT(19)
 #define scfgLocked BIT(31)
 
 #define	REG_EXTKEYINPUT	(*(vuint16*)0x04000136)
@@ -278,11 +279,11 @@ static void driveInitialize(void) {
 		FAT_InitFiles(false, true, 0);
 	}
 
-	ramDumpFile = getFileFromCluster(ramDumpCluster, !(valueBits & b_dsiSD));
-	srParamsFile = getFileFromCluster(srParamsCluster, !(valueBits & gameOnFlashcard));
-	screenshotFile = getFileFromCluster(screenshotCluster, !(valueBits & b_dsiSD));
-	pageFile = getFileFromCluster(pageFileCluster, !(valueBits & b_dsiSD));
-	manualFile = getFileFromCluster(manualCluster, !(valueBits & b_dsiSD));
+	ramDumpFile = getFileFromCluster(ramDumpCluster, (valueBits & bootstrapOnFlashcard));
+	srParamsFile = getFileFromCluster(srParamsCluster, (valueBits & gameOnFlashcard));
+	screenshotFile = getFileFromCluster(screenshotCluster, (valueBits & bootstrapOnFlashcard));
+	pageFile = getFileFromCluster(pageFileCluster, (valueBits & bootstrapOnFlashcard));
+	manualFile = getFileFromCluster(manualCluster, (valueBits & bootstrapOnFlashcard));
 
 	//romFile = getFileFromCluster(fileCluster);
 	//buildFatTableCache(&romFile, 0);
