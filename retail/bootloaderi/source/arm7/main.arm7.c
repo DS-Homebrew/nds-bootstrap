@@ -1955,6 +1955,7 @@ int arm7_main(void) {
 		if (gameOnFlashcard && isDSiWare) {
 			aFile* sharedFontFile = (aFile*)FONT_FILE_LOCATION_TWLSDK;
 			*sharedFontFile = getFileFromCluster(sharedFontCluster, true);
+			buildFatTableCacheCompressed(sharedFontFile);
 		}
 
 		extern u32 iUncompressedSize;
