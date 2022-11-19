@@ -10322,7 +10322,15 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Redau Shirizu: Gunjin Shougi (Japan)
 	else if (strcmp(romTid, "KLXJ") == 0) {
-		*(u32*)0x02005254 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		useSharedFont = (twlFontFound && debugOrMep);
+		if (useSharedFont) {
+			if (expansionPakFound) {
+				*(u32*)0x0201AE24 = clusterCache-0x200000;
+				tonccpy((u32*)0x0201AE28, twlFontHeapAlloc, 0xB0);
+			}
+		} else {
+			*(u32*)0x02005254 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		}
 		*(u32*)0x0200E0F4 = 0xE12FFF1E; // bx lr
 		*(u32*)0x0201025C = 0xE1A00000; // nop
 		*(u32*)0x020134D4 = 0xE1A00000; // nop
@@ -10347,6 +10355,9 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02033528, (u32)dsiSaveRead);
 		setBL(0x0203356C, (u32)dsiSaveClose);
 		setBL(0x02033588, (u32)dsiSaveClose);
+		if (!extendedMemory2) {
+			setBL(0x020336CC, 0x0201AE28);
+		}
 	}
 
 	// Remote Racers (USA)
