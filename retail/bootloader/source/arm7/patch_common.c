@@ -10786,6 +10786,48 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		doubleNopT(0x0202E45E);
 	}
 
+	// Sea Battle (USA)
+	// Sea Battle (Europe)
+	else if (strcmp(romTid, "KRWE") == 0 || strcmp(romTid, "KRWP") == 0) {
+		// useSharedFont = twlFontFound;
+		// if (!twlFontFound) {
+			*(u32*)0x02005248 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		// }
+		*(u32*)0x0200E834 = 0xE1A00000; // nop
+		*(u32*)0x02011AAC = 0xE1A00000; // nop
+		patchInitDSiWare(0x0201790C, heapEnd);
+		patchUserSettingsReadDSiWare(0x02018FBC);
+		*(u32*)0x0201C438 = 0xE1A00000; // nop
+		*(u32*)0x0201E73C = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0201E740 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0202B430 = 0xE1A00000; // nop
+		if (ndsHeader->gameCode[3] == 'E') {
+			setBL(0x02030F00, (u32)dsiSaveCreate);
+			setBL(0x02030F10, (u32)dsiSaveOpen);
+			setBL(0x02030F3C, (u32)dsiSaveWrite);
+			setBL(0x02030F4C, (u32)dsiSaveClose);
+			setBL(0x02030F68, (u32)dsiSaveClose);
+			setBL(0x02030FD4, (u32)dsiSaveOpen);
+			setBL(0x02030FE4, (u32)dsiSaveGetLength);
+			setBL(0x02030FFC, (u32)dsiSaveRead);
+			setBL(0x02031040, (u32)dsiSaveClose);
+			setBL(0x0203105C, (u32)dsiSaveClose);
+			// *(u32*)0x0203E340 = 0xE1A00000; // nop
+			// *(u32*)0x0203E344 = 0xE1A00000; // nop
+		} else {
+			setBL(0x02030FBC, (u32)dsiSaveCreate);
+			setBL(0x02030FCC, (u32)dsiSaveOpen);
+			setBL(0x02030FF8, (u32)dsiSaveWrite);
+			setBL(0x02031008, (u32)dsiSaveClose);
+			setBL(0x02031024, (u32)dsiSaveClose);
+			setBL(0x02031090, (u32)dsiSaveOpen);
+			setBL(0x020310A0, (u32)dsiSaveGetLength);
+			setBL(0x020310B8, (u32)dsiSaveRead);
+			setBL(0x020310FC, (u32)dsiSaveClose);
+			setBL(0x02031118, (u32)dsiSaveClose);
+		}
+	}
+
 	// Shantae: Risky's Revenge (USA)
 	// Requires 8MB of RAM, crashes after first battle with 4MB of RAM, but can get past with a save file
 	// BGM is disabled to stay within RAM limitations

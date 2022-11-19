@@ -5674,6 +5674,44 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// Sea Battle (USA)
+	else if (strcmp(romTid, "KRWE") == 0) {
+		if (!twlFontFound) {
+			*(u32*)0x02005248 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		}
+		if (saveOnFlashcard) {
+			setBL(0x02030F00, (u32)dsiSaveCreate);
+			setBL(0x02030F10, (u32)dsiSaveOpen);
+			setBL(0x02030F3C, (u32)dsiSaveWrite);
+			setBL(0x02030F4C, (u32)dsiSaveClose);
+			setBL(0x02030F68, (u32)dsiSaveClose);
+			setBL(0x02030FD4, (u32)dsiSaveOpen);
+			setBL(0x02030FE4, (u32)dsiSaveGetLength);
+			setBL(0x02030FFC, (u32)dsiSaveRead);
+			setBL(0x02031040, (u32)dsiSaveClose);
+			setBL(0x0203105C, (u32)dsiSaveClose);
+		}
+	}
+
+	// Sea Battle (Europe)
+	else if (strcmp(romTid, "KRWP") == 0) {
+		if (!twlFontFound) {
+			*(u32*)0x02005248 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		}
+		if (saveOnFlashcard) {
+			setBL(0x02030FBC, (u32)dsiSaveCreate);
+			setBL(0x02030FCC, (u32)dsiSaveOpen);
+			setBL(0x02030FF8, (u32)dsiSaveWrite);
+			setBL(0x02031008, (u32)dsiSaveClose);
+			setBL(0x02031024, (u32)dsiSaveClose);
+			setBL(0x02031090, (u32)dsiSaveOpen);
+			setBL(0x020310A0, (u32)dsiSaveGetLength);
+			setBL(0x020310B8, (u32)dsiSaveRead);
+			setBL(0x020310FC, (u32)dsiSaveClose);
+			setBL(0x02031118, (u32)dsiSaveClose);
+		}
+	}
+
 	// Shantae: Risky's Revenge (USA)
 	else if (strcmp(romTid, "KS3E") == 0) {
 		if (!twlFontFound) {
