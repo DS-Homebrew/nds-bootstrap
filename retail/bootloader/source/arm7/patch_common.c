@@ -35,6 +35,8 @@ extern u8 valueBits3;
 #define chnSharedFont (valueBits3 & BIT(4))
 #define korSharedFont (valueBits3 & BIT(5))
 
+extern u32* twlFontHeapAlloc;
+
 u16 patchOffsetCacheFilePrevCrc = 0;
 u16 patchOffsetCacheFileNewCrc = 0;
 
@@ -10789,10 +10791,13 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Sea Battle (USA)
 	// Sea Battle (Europe)
 	else if (strcmp(romTid, "KRWE") == 0 || strcmp(romTid, "KRWP") == 0) {
-		// useSharedFont = twlFontFound;
-		// if (!twlFontFound) {
+		useSharedFont = (twlFontFound && expansionPakFound);
+		if (useSharedFont) {
+			*(u32*)0x02019548 = (s2FlashcardId == 0x5A45) ? 0x08400000 : 0x09400000;
+			tonccpy((u32*)0x0201954C, twlFontHeapAlloc, 0xB0);
+		} else {
 			*(u32*)0x02005248 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
-		// }
+		}
 		*(u32*)0x0200E834 = 0xE1A00000; // nop
 		*(u32*)0x02011AAC = 0xE1A00000; // nop
 		patchInitDSiWare(0x0201790C, heapEnd);
@@ -10812,8 +10817,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBL(0x02030FFC, (u32)dsiSaveRead);
 			setBL(0x02031040, (u32)dsiSaveClose);
 			setBL(0x0203105C, (u32)dsiSaveClose);
-			// *(u32*)0x0203E340 = 0xE1A00000; // nop
-			// *(u32*)0x0203E344 = 0xE1A00000; // nop
+			setBL(0x02031158, 0x0201954C);
 		} else {
 			setBL(0x02030FBC, (u32)dsiSaveCreate);
 			setBL(0x02030FCC, (u32)dsiSaveOpen);
@@ -10825,6 +10829,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBL(0x020310B8, (u32)dsiSaveRead);
 			setBL(0x020310FC, (u32)dsiSaveClose);
 			setBL(0x02031118, (u32)dsiSaveClose);
+			setBL(0x02031214, 0x0201954C);
 		}
 	}
 

@@ -17,5 +17,8 @@ extern u8 valueBits3;
 #define logging (valueBits & BIT(7))
 #define useRomRegion (valueBits2 & BIT(7))
 #define sleepMode (valueBits3 & BIT(2))
+#define twlSharedFont (valueBits3 & BIT(3))
+#define chnSharedFont (valueBits3 & BIT(4))
+#define korSharedFont (valueBits3 & BIT(5))
 
 #endif
