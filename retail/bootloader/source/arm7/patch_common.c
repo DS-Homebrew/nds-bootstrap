@@ -310,6 +310,129 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0210B530 = 0xE3A00003; // mov r0, #3
 	}
 
+	// 505 Tangram (USA)
+	else if (strcmp(romTid, "K2OE") == 0) {
+		// useSharedFont = (twlFontFound && debugOrMep);
+		/*if (useSharedFont) {
+			if (expansionPakFound) {
+				*(u32*)0x02067044 = clusterCache-0x200000;
+				tonccpy((u32*)0x02067048, twlFontHeapAlloc, 0xB0);
+			}
+		} else {*/
+			*(u32*)0x0200E8C4 = 0xE12FFF1E; // bx lr (Skip Manual screen)
+		// }
+		/* if (!extendedMemory2) {
+			setBL(0x0200E860, 0x02067048);
+		} */
+		setBL(0x020100B8, (u32)dsiSaveOpen);
+		setBL(0x0201012C, (u32)dsiSaveGetLength);
+		setBL(0x02010140, (u32)dsiSaveClose);
+		setBL(0x02010160, (u32)dsiSaveSeek);
+		setBL(0x02010178, (u32)dsiSaveRead);
+		setBL(0x0201018C, (u32)dsiSaveClose);
+		setBL(0x020101E0, (u32)dsiSaveClose);
+		*(u32*)0x02010224 = 0xE1A00000; // nop
+		setBL(0x02010280, (u32)dsiSaveCreate);
+		setBL(0x020102D4, (u32)dsiSaveOpen);
+		setBL(0x0201033C, (u32)dsiSaveSetLength);
+		setBL(0x02010354, (u32)dsiSaveClose);
+		setBL(0x020103A8, (u32)dsiSaveGetLength);
+		setBL(0x020103BC, (u32)dsiSaveClose);
+		setBL(0x020103DC, (u32)dsiSaveSeek);
+		setBL(0x020103F4, (u32)dsiSaveWrite);
+		setBL(0x02010408, (u32)dsiSaveClose);
+		setBL(0x02010454, (u32)dsiSaveClose);
+		*(u32*)0x02059E8C = 0xE1A00000; // nop
+		*(u32*)0x0205D32C = 0xE1A00000; // nop
+		*(u32*)0x0205F120 = 0xE1A00000; // nop
+		*(u32*)0x0205F124 = 0xE1A00000; // nop
+		patchInitDSiWare(0x020654E0, heapEnd);
+		patchUserSettingsReadDSiWare(0x02066AD4);
+		*(u32*)0x0206A078 = 0xE1A00000; // nop
+	}
+
+	// 505 Tangram (Europe)
+	else if (strcmp(romTid, "K2OP") == 0) {
+		// useSharedFont = (twlFontFound && debugOrMep);
+		/*if (useSharedFont) {
+			if (expansionPakFound) {
+				*(u32*)0x02066BAC = clusterCache-0x200000;
+				tonccpy((u32*)0x02066BB0, twlFontHeapAlloc, 0xB0);
+			}
+		} else {*/
+			*(u32*)0x0200E6DC = 0xE12FFF1E; // bx lr (Skip Manual screen)
+		// }
+		/* if (!extendedMemory2) {
+			setBL(0x0200E674, 0x02066BB0);
+		} */
+		setBL(0x0200FED0, (u32)dsiSaveOpen);
+		setBL(0x0200FF44, (u32)dsiSaveGetLength);
+		setBL(0x0200FF58, (u32)dsiSaveClose);
+		setBL(0x0200FF78, (u32)dsiSaveSeek);
+		setBL(0x0200FF90, (u32)dsiSaveRead);
+		setBL(0x0200FFA4, (u32)dsiSaveClose);
+		setBL(0x0200FFF8, (u32)dsiSaveClose);
+		*(u32*)0x0201003C = 0xE1A00000; // nop
+		setBL(0x02010098, (u32)dsiSaveCreate);
+		setBL(0x020100EC, (u32)dsiSaveOpen);
+		setBL(0x02010154, (u32)dsiSaveSetLength);
+		setBL(0x0201016C, (u32)dsiSaveClose);
+		setBL(0x020101C0, (u32)dsiSaveGetLength);
+		setBL(0x020101D4, (u32)dsiSaveClose);
+		setBL(0x020101F4, (u32)dsiSaveSeek);
+		setBL(0x0201020C, (u32)dsiSaveWrite);
+		setBL(0x02010220, (u32)dsiSaveClose);
+		setBL(0x0201026C, (u32)dsiSaveClose);
+		*(u32*)0x020599F4 = 0xE1A00000; // nop
+		*(u32*)0x0205CE94 = 0xE1A00000; // nop
+		*(u32*)0x0205EC88 = 0xE1A00000; // nop
+		*(u32*)0x0205EC8C = 0xE1A00000; // nop
+		patchInitDSiWare(0x02065048, heapEnd);
+		patchUserSettingsReadDSiWare(0x0206663C);
+		*(u32*)0x02069BE0 = 0xE1A00000; // nop
+	}
+
+	// 505 Tangram (Japan)
+	else if (strcmp(romTid, "K2OJ") == 0) {
+		// useSharedFont = (twlFontFound && debugOrMep);
+		/*if (useSharedFont) {
+			if (expansionPakFound) {
+				*(u32*)0x020665AC = clusterCache-0x200000;
+				tonccpy((u32*)0x020665B0, twlFontHeapAlloc, 0xB0);
+			}
+		} else {*/
+			*(u32*)0x0200E064 = 0xE12FFF1E; // bx lr (Skip Manual screen)
+		// }
+		/* if (!extendedMemory2) {
+			setBL(0x0200E000, 0x020665B0);
+		} */
+		setBL(0x0200F858, (u32)dsiSaveOpen);
+		setBL(0x0200F8CC, (u32)dsiSaveGetLength);
+		setBL(0x0200F8E0, (u32)dsiSaveClose);
+		setBL(0x0200F900, (u32)dsiSaveSeek);
+		setBL(0x0200F918, (u32)dsiSaveRead);
+		setBL(0x0200F92C, (u32)dsiSaveClose);
+		setBL(0x0200F980, (u32)dsiSaveClose);
+		*(u32*)0x0200F9C4 = 0xE1A00000; // nop
+		setBL(0x0200FA20, (u32)dsiSaveCreate);
+		setBL(0x0200FA74, (u32)dsiSaveOpen);
+		setBL(0x0200FADC, (u32)dsiSaveSetLength);
+		setBL(0x0200FAF4, (u32)dsiSaveClose);
+		setBL(0x0200FB48, (u32)dsiSaveGetLength);
+		setBL(0x0200FB5C, (u32)dsiSaveClose);
+		setBL(0x0200FB7C, (u32)dsiSaveSeek);
+		setBL(0x0200FB94, (u32)dsiSaveWrite);
+		setBL(0x0200FBA8, (u32)dsiSaveClose);
+		setBL(0x0200FBF4, (u32)dsiSaveClose);
+		*(u32*)0x02059334 = 0xE1A00000; // nop
+		*(u32*)0x0205C85C = 0xE1A00000; // nop
+		*(u32*)0x0205E680 = 0xE1A00000; // nop
+		*(u32*)0x0205E684 = 0xE1A00000; // nop
+		patchInitDSiWare(0x02064A48, heapEnd);
+		patchUserSettingsReadDSiWare(0x0206603C);
+		*(u32*)0x020695E0 = 0xE1A00000; // nop
+	}
+
 	// 99Bullets (USA)
 	else if (strcmp(romTid, "K99E") == 0) {
 		*(u32*)0x020050E8 = 0xE1A00000; // nop

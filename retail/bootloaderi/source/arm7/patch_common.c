@@ -168,6 +168,72 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		tonccpy((u32*)0x020FD438, dsiSaveGetResultCode, 0xC);
 	}
 
+	// 505 Tangram (USA)
+	else if (strcmp(romTid, "K2OE") == 0 && saveOnFlashcard) {
+		setBL(0x020100B8, (u32)dsiSaveOpen);
+		setBL(0x0201012C, (u32)dsiSaveGetLength);
+		setBL(0x02010140, (u32)dsiSaveClose);
+		setBL(0x02010160, (u32)dsiSaveSeek);
+		setBL(0x02010178, (u32)dsiSaveRead);
+		setBL(0x0201018C, (u32)dsiSaveClose);
+		setBL(0x020101E0, (u32)dsiSaveClose);
+		*(u32*)0x02010224 = 0xE1A00000; // nop
+		setBL(0x02010280, (u32)dsiSaveCreate);
+		setBL(0x020102D4, (u32)dsiSaveOpen);
+		setBL(0x0201033C, (u32)dsiSaveSetLength);
+		setBL(0x02010354, (u32)dsiSaveClose);
+		setBL(0x020103A8, (u32)dsiSaveGetLength);
+		setBL(0x020103BC, (u32)dsiSaveClose);
+		setBL(0x020103DC, (u32)dsiSaveSeek);
+		setBL(0x020103F4, (u32)dsiSaveWrite);
+		setBL(0x02010408, (u32)dsiSaveClose);
+		setBL(0x02010454, (u32)dsiSaveClose);
+	}
+
+	// 505 Tangram (Europe)
+	else if (strcmp(romTid, "K2OP") == 0 && saveOnFlashcard) {
+		setBL(0x0200FED0, (u32)dsiSaveOpen);
+		setBL(0x0200FF44, (u32)dsiSaveGetLength);
+		setBL(0x0200FF58, (u32)dsiSaveClose);
+		setBL(0x0200FF78, (u32)dsiSaveSeek);
+		setBL(0x0200FF90, (u32)dsiSaveRead);
+		setBL(0x0200FFA4, (u32)dsiSaveClose);
+		setBL(0x0200FFF8, (u32)dsiSaveClose);
+		*(u32*)0x0201003C = 0xE1A00000; // nop
+		setBL(0x02010098, (u32)dsiSaveCreate);
+		setBL(0x020100EC, (u32)dsiSaveOpen);
+		setBL(0x02010154, (u32)dsiSaveSetLength);
+		setBL(0x0201016C, (u32)dsiSaveClose);
+		setBL(0x020101C0, (u32)dsiSaveGetLength);
+		setBL(0x020101D4, (u32)dsiSaveClose);
+		setBL(0x020101F4, (u32)dsiSaveSeek);
+		setBL(0x0201020C, (u32)dsiSaveWrite);
+		setBL(0x02010220, (u32)dsiSaveClose);
+		setBL(0x0201026C, (u32)dsiSaveClose);
+	}
+
+	// 505 Tangram (Japan)
+	else if (strcmp(romTid, "K2OJ") == 0 && saveOnFlashcard) {
+		setBL(0x0200F858, (u32)dsiSaveOpen);
+		setBL(0x0200F8CC, (u32)dsiSaveGetLength);
+		setBL(0x0200F8E0, (u32)dsiSaveClose);
+		setBL(0x0200F900, (u32)dsiSaveSeek);
+		setBL(0x0200F918, (u32)dsiSaveRead);
+		setBL(0x0200F92C, (u32)dsiSaveClose);
+		setBL(0x0200F980, (u32)dsiSaveClose);
+		*(u32*)0x0200F9C4 = 0xE1A00000; // nop
+		setBL(0x0200FA20, (u32)dsiSaveCreate);
+		setBL(0x0200FA74, (u32)dsiSaveOpen);
+		setBL(0x0200FADC, (u32)dsiSaveSetLength);
+		setBL(0x0200FAF4, (u32)dsiSaveClose);
+		setBL(0x0200FB48, (u32)dsiSaveGetLength);
+		setBL(0x0200FB5C, (u32)dsiSaveClose);
+		setBL(0x0200FB7C, (u32)dsiSaveSeek);
+		setBL(0x0200FB94, (u32)dsiSaveWrite);
+		setBL(0x0200FBA8, (u32)dsiSaveClose);
+		setBL(0x0200FBF4, (u32)dsiSaveClose);
+	}
+
 	// 99Bullets (USA)
 	else if (strcmp(romTid, "K99E") == 0 && saveOnFlashcard) {
 		*(u32*)0x02013E8C = 0xE3A00001; // mov r0, #1
