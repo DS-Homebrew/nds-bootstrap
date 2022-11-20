@@ -568,6 +568,9 @@ static bool isROMLoadableInRAM(const tNDSHeader* ndsHeader, const char* romTid, 
 		} else {
 			romSizeLimit = 0x1F80000;
 		}
+		if (ndsHeader->unitCode > 0 && ndsHeader->gameCode[0] == 'K' && ((ndsHeader->gameCode[3] == 'K') ? korSharedFont : (ndsHeader->gameCode[3] == 'C') ? chnSharedFont : twlSharedFont)) {
+			romSizeLimit -= 0x200000;
+		}
 	} else if (!extendedMemory2) {
 		if (strncmp(romTid, "KD4", 3) == 0) { // Meikyou Kokugo: Rakubiki Jiten
 			return false;
@@ -578,6 +581,9 @@ static bool isROMLoadableInRAM(const tNDSHeader* ndsHeader, const char* romTid, 
 		} else if (strncmp(romTid, "KQR", 3) == 0) { // Remote Racers
 			romLocation += 0x280000;
 			romSizeLimit -= 0x280000;
+		}
+		if (ndsHeader->unitCode > 0 && ndsHeader->gameCode[0] == 'K' && ((ndsHeader->gameCode[3] == 'K') ? korSharedFont : (ndsHeader->gameCode[3] == 'C') ? chnSharedFont : twlSharedFont)) {
+			romSizeLimit -= 0x200000;
 		}
 	}
 	if (strncmp(romTid, "KD4", 3) == 0 && s2FlashcardId == 0x5A45) { // Meikyou Kokugo: Rakubiki Jiten

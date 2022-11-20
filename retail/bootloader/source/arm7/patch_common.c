@@ -3435,6 +3435,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Cave Story (USA)
 	else if (strcmp(romTid, "KCVE") == 0) {
+		// useSharedFont = (twlFontFound && debugOrMep);
 		*(u32*)0x0200526C = 0xE1A00000; // nop
 		setBL(0x02005994, (u32)dsiSaveCreate);
 		setBL(0x020059D0, (u32)dsiSaveOpen);
@@ -3460,7 +3461,15 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02005C54 = 0xE1A00000; // nop
 		*(u32*)0x02005C60 = 0xE1A00000; // nop
 		*(u32*)0x02005C64 = 0xE1A00000; // nop
-		*(u32*)0x0200A12C = 0xE1A00000; // nop (Skip Manual screen)
+		/* if (useSharedFont) {
+			if (expansionPakFound) {
+				setBL(0x020616F0, 0x0207DCB0);
+				*(u32*)0x0207DCAC = clusterCache-0x200000;
+				tonccpy((u32*)0x0207DCB0, twlFontHeapAlloc, 0xB0);
+			}
+		} else { */
+			*(u32*)0x0200A12C = 0xE1A00000; // nop (Skip Manual screen)
+		//}
 		*(u32*)0x0207342C = 0xE1A00000; // nop
 		tonccpy((u32*)0x02073FA4, dsiSaveGetResultCode, 0xC);
 		*(u32*)0x0207654C = 0xE1A00000; // nop
@@ -3485,12 +3494,27 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Chuck E. Cheese's Alien Defense Force (USA)
 	else if (strcmp(romTid, "KUQE") == 0) {
+		useSharedFont = (twlFontFound && debugOrMep);
 		*(u32*)0x0200BB6C = 0xE1A00000; // nop
 		*(u32*)0x0200F008 = 0xE1A00000; // nop
 		patchInitDSiWare(0x02014064, heapEnd);
 		patchUserSettingsReadDSiWare(0x02015504);
 		*(u32*)0x0201829C = 0xE1A00000; // nop
-		*(u32*)0x0201B9E4 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		if (useSharedFont) {
+			if (expansionPakFound) {
+				setBL(0x0201B808, 0x02015A88);
+				*(u32*)0x02015A84 = clusterCache-0x200000;
+				tonccpy((u32*)0x02015A88, twlFontHeapAlloc, 0xB0);
+			}
+		} else {
+			*(u32*)0x0201B9E4 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+
+			// Skip Manual screen
+			for (int i = 0; i < 4; i++) {
+				u32* offset = (u32*)0x0202D43C;
+				offset[i] = 0xE1A00000; // nop
+			}
+		}
 		setBL(0x0201BBA4, (u32)dsiSaveCreate);
 		setBL(0x0201BBB4, (u32)dsiSaveOpen);
 		setBL(0x0201BBD0, (u32)dsiSaveSeek);
@@ -3501,23 +3525,26 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0201BD38, (u32)dsiSaveRead);
 		setBL(0x0201BD40, (u32)dsiSaveClose);
 		*(u32*)0x0201BD60 = 0xE1A00000; // nop
-
-		// Skip Manual screen
-		for (int i = 0; i < 4; i++) {
-			u32* offset = (u32*)0x0202D43C;
-			offset[i] = 0xE1A00000; // nop
-		}
 	}
 
 	// Chuck E. Cheese's Arcade Room (USA)
 	else if (strcmp(romTid, "KUCE") == 0) {
+		useSharedFont = (twlFontFound && debugOrMep);
 		*(u32*)0x02013978 = 0xE1A00000; // nop
 		*(u32*)0x02016E14 = 0xE1A00000; // nop
 		patchInitDSiWare(0x0201BFC0, heapEnd);
 		patchUserSettingsReadDSiWare(0x0201D460);
 		*(u32*)0x020201F8 = 0xE1A00000; // nop
-		*(u32*)0x02032550 = 0xE1A00000; // nop (Skip Manual screen)
-		*(u32*)0x020459F0 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		if (useSharedFont) {
+			if (expansionPakFound) {
+				setBL(0x02045814, 0x0201D9E4);
+				*(u32*)0x0201D9E0 = clusterCache-0x200000;
+				tonccpy((u32*)0x0201D9E4, twlFontHeapAlloc, 0xB0);
+			}
+		} else {
+			*(u32*)0x02032550 = 0xE1A00000; // nop (Skip Manual screen)
+			*(u32*)0x020459F0 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		}
 		setBL(0x02045BAC, (u32)dsiSaveCreate);
 		setBL(0x02045BBC, (u32)dsiSaveOpen);
 		setBL(0x02045BD8, (u32)dsiSaveSeek);

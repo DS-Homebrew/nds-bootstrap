@@ -920,6 +920,7 @@ u32 dsiSaveSetLength(void* ctx, s32 len) {
 	dsiSaveSeekPos = 0;
 	if (savFile.firstCluster == CLUSTER_FREE || savFile.firstCluster == CLUSTER_EOF) {
 		dsiSaveResultCode = 1;
+		toncset32(ctx+0x14, dsiSaveResultCode, 1);
 		return 1;
 	}
 
@@ -931,6 +932,7 @@ u32 dsiSaveSetLength(void* ctx, s32 len) {
 	setDeviceOwner();
 	bool res = fileWrite((char*)&dsiSaveSize, savFile, ce9->saveSize-4, 4);
 	dsiSaveResultCode = res ? 0 : 1;
+	toncset32(ctx+0x14, dsiSaveResultCode, 1);
 	cardReadInProgress = false;
 	REG_EXMEMCNT = exmemcnt;
 	leaveCriticalSection(oldIME);
@@ -947,14 +949,17 @@ bool dsiSaveOpen(void* ctx, const char* path, u32 mode) {
 	if (strcmp(path, "nand:/<sharedFont>") == 0) {
 		if (sharedFontFile.firstCluster == CLUSTER_FREE || sharedFontFile.firstCluster == CLUSTER_EOF) {
 			dsiSaveResultCode = 0xE;
+			toncset32(ctx+0x14, dsiSaveResultCode, 1);
 			return false;
 		}
 		dsiSaveResultCode = 0;
+		toncset32(ctx+0x14, dsiSaveResultCode, 1);
 		sharedFontOpened = true;
 		return true;
 	}
 	if (savFile.firstCluster == CLUSTER_FREE || savFile.firstCluster == CLUSTER_EOF) {
 		dsiSaveResultCode = 0xE;
+		toncset32(ctx+0x14, dsiSaveResultCode, 1);
 		return false;
 	}
 
@@ -976,13 +981,16 @@ bool dsiSaveClose(void* ctx) {
 		sharedFontOpened = false;
 		if (sharedFontFile.firstCluster == CLUSTER_FREE || sharedFontFile.firstCluster == CLUSTER_EOF) {
 			dsiSaveResultCode = 0xE;
+			toncset32(ctx+0x14, dsiSaveResultCode, 1);
 			return false;
 		}
 		dsiSaveResultCode = 0;
+		toncset32(ctx+0x14, dsiSaveResultCode, 1);
 		return true;
 	}
 	if (savFile.firstCluster == CLUSTER_FREE || savFile.firstCluster == CLUSTER_EOF) {
 		dsiSaveResultCode = 0xE;
+		toncset32(ctx+0x14, dsiSaveResultCode, 1);
 		return false;
 	}
 	//toncset(ctx, 0, 0x80);
@@ -1016,18 +1024,22 @@ bool dsiSaveSeek(void* ctx, s32 pos, u32 mode) {
 		}
 		dsiSaveSeekPos = pos;
 		dsiSaveResultCode = 0;
+		toncset32(ctx+0x14, dsiSaveResultCode, 1);
 		return true;
 	}
 	if (savFile.firstCluster == CLUSTER_FREE || savFile.firstCluster == CLUSTER_EOF) {
 		dsiSaveResultCode = 0xE;
+		toncset32(ctx+0x14, dsiSaveResultCode, 1);
 		return false;
 	}
 	if (!dsiSaveExists) {
 		dsiSaveResultCode = 1;
+		toncset32(ctx+0x14, dsiSaveResultCode, 1);
 		return false;
 	}
 	dsiSaveSeekPos = pos;
 	dsiSaveResultCode = 0;
+	toncset32(ctx+0x14, dsiSaveResultCode, 1);
 	return true;
 #else
 	return false;
@@ -1039,11 +1051,13 @@ s32 dsiSaveRead(void* ctx, void* dst, s32 len) {
 	if (!sharedFontOpened) {
 		if (dsiSavePerms == 2 || !dsiSaveExists) {
 			dsiSaveResultCode = 1;
+			toncset32(ctx+0x14, dsiSaveResultCode, 1);
 			return -1; // Return if only write perms are set
 		}
 
 		if (dsiSaveSize == 0) {
 			dsiSaveResultCode = 1;
+			toncset32(ctx+0x14, dsiSaveResultCode, 1);
 			return 0;
 		}
 
@@ -1053,6 +1067,7 @@ s32 dsiSaveRead(void* ctx, void* dst, s32 len) {
 
 		if (len == 0) {
 			dsiSaveResultCode = 1;
+			toncset32(ctx+0x14, dsiSaveResultCode, 1);
 			return 0;
 		}
 	}
@@ -1061,8 +1076,31 @@ s32 dsiSaveRead(void* ctx, void* dst, s32 len) {
 	u16 exmemcnt = REG_EXMEMCNT;
 	cardReadInProgress = true;
 	setDeviceOwner();
-	bool res = fileRead(dst, sharedFontOpened ? sharedFontFile : savFile, dsiSaveSeekPos, len);
+	bool res = false;
+	if (sharedFontOpened && (__myio_dldi.features & FEATURE_SLOT_GBA) && (u32)dst >= 0x08000000 && (u32)dst < 0x0A000000) {
+		s32 bufLen = len;
+		u32 dstAdd = 0;
+		while (1) {
+			u32 readLen = (bufLen > 0x800) ? 0x800 : len;
+
+			res = fileRead((char*)0x027FF200, sharedFontFile, dsiSaveSeekPos+dstAdd, readLen);
+			if (!res) {
+				break;
+			}
+			tonccpy((char*)dst+dstAdd, (char*)0x027FF200, readLen);
+
+			bufLen -= 0x800;
+			dstAdd += 0x800;
+
+			if (bufLen <= 0) {
+				break;
+			}
+		}
+	} else {
+		res = fileRead(dst, sharedFontOpened ? sharedFontFile : savFile, dsiSaveSeekPos, len);
+	}
 	dsiSaveResultCode = res ? 1 : 0;
+	toncset32(ctx+0x14, dsiSaveResultCode, 1);
 	cardReadInProgress = false;
 	REG_EXMEMCNT = exmemcnt;
 	leaveCriticalSection(oldIME);
@@ -1078,6 +1116,7 @@ s32 dsiSaveWrite(void* ctx, void* src, s32 len) {
 #ifndef NODSIWARE
 	if (dsiSavePerms == 1 || !dsiSaveExists) {
 		dsiSaveResultCode = 1;
+		toncset32(ctx+0x14, dsiSaveResultCode, 1);
 		return -1; // Return if only read perms are set
 	}
 
@@ -1092,6 +1131,7 @@ s32 dsiSaveWrite(void* ctx, void* src, s32 len) {
 	setDeviceOwner();
 	bool res = fileWrite(src, savFile, dsiSaveSeekPos, len);
 	dsiSaveResultCode = res ? 1 : 0;
+	toncset32(ctx+0x14, dsiSaveResultCode, 1);
 	cardReadInProgress = false;
 	REG_EXMEMCNT = exmemcnt;
 	leaveCriticalSection(oldIME);
