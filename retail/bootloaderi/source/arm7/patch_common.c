@@ -112,6 +112,189 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		//tonccpy((u32*)0x02031660, dsiSaveGetResultCode, 0xC);
 	}
 
+	// 4 Travellers: Play French (USA)
+	else if (strcmp(romTid, "KTFE") == 0) {
+		if (!twlFontFound) {
+			*(u32*)0x02005320 = 0xE1A00000; // nop (Skip Manual screen)
+		}
+		if (saveOnFlashcard) {
+			setBL(0x0205086C, (u32)dsiSaveCreate);
+			setBL(0x02050880, (u32)dsiSaveCreate);
+			setBL(0x0205089C, (u32)dsiSaveGetResultCode);
+			setBL(0x02050930, (u32)dsiSaveOpen);
+			setBL(0x02050980, (u32)dsiSaveSeek);
+			setBL(0x02050990, (u32)dsiSaveRead);
+			setBL(0x020509A4, (u32)dsiSaveRead);
+			setBL(0x020509B0, (u32)dsiSaveClose);
+			setBL(0x02050A10, (u32)dsiSaveOpen);
+			setBL(0x02050A28, (u32)dsiSaveSeek);
+			setBL(0x02050A38, (u32)dsiSaveRead);
+			setBL(0x02050A48, (u32)dsiSaveRead);
+			setBL(0x02050A50, (u32)dsiSaveClose);
+			setBL(0x02050B08, (u32)dsiSaveOpen);
+			setBL(0x02050B58, (u32)dsiSaveCreate);
+			setBL(0x02050B64, (u32)dsiSaveCreate);
+			setBL(0x02050B94, (u32)dsiSaveOpen);
+			setBL(0x02050C10, (u32)dsiSaveSeek);
+			setBL(0x02050C24, (u32)dsiSaveWrite);
+			setBL(0x02050C38, (u32)dsiSaveWrite);
+			setBL(0x02050C40, (u32)dsiSaveClose);
+			setBL(0x02050C50, (u32)dsiSaveOpen);
+			setBL(0x02050C88, (u32)dsiSaveSeek);
+			setBL(0x02050C98, (u32)dsiSaveWrite);
+			setBL(0x02050CAC, (u32)dsiSaveWrite);
+			setBL(0x02050CB8, (u32)dsiSaveClose);
+			setBL(0x02052874, (u32)dsiSaveCreate);
+			setBL(0x02052880, (u32)dsiSaveCreate);
+		}
+	}
+
+	// 4 Travellers: Play French (Europe)
+	// 4 Travellers: Play French (Australia)
+	else if (strcmp(romTid, "KTFP") == 0 || strcmp(romTid, "KTFU") == 0) {
+		if (!twlFontFound) {
+			*(u32*)0x020052DC = 0xE1A00000; // nop (Skip Manual screen)
+		}
+		if (saveOnFlashcard) {
+			if (ndsHeader->gameCode[3] == 'P') {
+				setBL(0x02040298, (u32)dsiSaveCreate);
+				setBL(0x020402AC, (u32)dsiSaveCreate);
+				setBL(0x020402C8, (u32)dsiSaveGetResultCode);
+				setBL(0x0204035C, (u32)dsiSaveOpen);
+				setBL(0x020403AC, (u32)dsiSaveSeek);
+				setBL(0x020403BC, (u32)dsiSaveRead);
+				setBL(0x020403D0, (u32)dsiSaveRead);
+				setBL(0x020403DC, (u32)dsiSaveClose);
+				setBL(0x0204043C, (u32)dsiSaveOpen);
+				setBL(0x02040454, (u32)dsiSaveSeek);
+				setBL(0x02040464, (u32)dsiSaveRead);
+				setBL(0x02040474, (u32)dsiSaveRead);
+				setBL(0x0204047C, (u32)dsiSaveClose);
+				setBL(0x02040534, (u32)dsiSaveOpen);
+				setBL(0x02040584, (u32)dsiSaveCreate);
+				setBL(0x02040590, (u32)dsiSaveCreate);
+				setBL(0x020405C0, (u32)dsiSaveOpen);
+				setBL(0x0204063C, (u32)dsiSaveSeek);
+				setBL(0x02040650, (u32)dsiSaveWrite);
+				setBL(0x02040664, (u32)dsiSaveWrite);
+				setBL(0x0204066C, (u32)dsiSaveClose);
+				setBL(0x0204067C, (u32)dsiSaveOpen);
+				setBL(0x020406B4, (u32)dsiSaveSeek);
+				setBL(0x020406C4, (u32)dsiSaveWrite);
+				setBL(0x020406D8, (u32)dsiSaveWrite);
+				setBL(0x020406E4, (u32)dsiSaveClose);
+				setBL(0x020422A0, (u32)dsiSaveCreate);
+				setBL(0x020422AC, (u32)dsiSaveCreate);
+			} else {
+				setBL(0x02050B18, (u32)dsiSaveCreate);
+				setBL(0x02050B2C, (u32)dsiSaveCreate);
+				setBL(0x02050B48, (u32)dsiSaveGetResultCode);
+				setBL(0x02050BDC, (u32)dsiSaveOpen);
+				setBL(0x02050C2C, (u32)dsiSaveSeek);
+				setBL(0x02050C3C, (u32)dsiSaveRead);
+				setBL(0x02050C50, (u32)dsiSaveRead);
+				setBL(0x02050C5C, (u32)dsiSaveClose);
+				setBL(0x02050CBC, (u32)dsiSaveOpen);
+				setBL(0x02050CD4, (u32)dsiSaveSeek);
+				setBL(0x02050CE4, (u32)dsiSaveRead);
+				setBL(0x02050CF4, (u32)dsiSaveRead);
+				setBL(0x02050CFC, (u32)dsiSaveClose);
+				setBL(0x02050DB4, (u32)dsiSaveOpen);
+				setBL(0x02050E04, (u32)dsiSaveCreate);
+				setBL(0x02050E10, (u32)dsiSaveCreate);
+				setBL(0x02050E40, (u32)dsiSaveOpen);
+				setBL(0x02050EBC, (u32)dsiSaveSeek);
+				setBL(0x02050ED0, (u32)dsiSaveWrite);
+				setBL(0x02050EE4, (u32)dsiSaveWrite);
+				setBL(0x02050EEC, (u32)dsiSaveClose);
+				setBL(0x02050EFC, (u32)dsiSaveOpen);
+				setBL(0x02050F34, (u32)dsiSaveSeek);
+				setBL(0x02050F44, (u32)dsiSaveWrite);
+				setBL(0x02050F58, (u32)dsiSaveWrite);
+				setBL(0x02050F64, (u32)dsiSaveClose);
+				setBL(0x02052B20, (u32)dsiSaveCreate);
+				setBL(0x02052B2C, (u32)dsiSaveCreate);
+			}
+		}
+	}
+
+	// 4 Travellers: Play Spanish (USA)
+	else if (strcmp(romTid, "KTSE") == 0) {
+		if (!twlFontFound) {
+			*(u32*)0x02004CC0 = 0xE1A00000; // nop (Skip Manual screen)
+		}
+		if (saveOnFlashcard) {
+			setBL(0x02050E8C, (u32)dsiSaveCreate);
+			setBL(0x02050EA0, (u32)dsiSaveCreate);
+			setBL(0x02050EBC, (u32)dsiSaveGetResultCode);
+			setBL(0x02050F50, (u32)dsiSaveOpen);
+			setBL(0x02050FA0, (u32)dsiSaveSeek);
+			setBL(0x02050FB0, (u32)dsiSaveRead);
+			setBL(0x02050FC4, (u32)dsiSaveRead);
+			setBL(0x02050FD0, (u32)dsiSaveClose);
+			setBL(0x02051030, (u32)dsiSaveOpen);
+			setBL(0x02051048, (u32)dsiSaveSeek);
+			setBL(0x02051058, (u32)dsiSaveRead);
+			setBL(0x02051068, (u32)dsiSaveRead);
+			setBL(0x02051070, (u32)dsiSaveClose);
+			setBL(0x02051128, (u32)dsiSaveOpen);
+			setBL(0x02051178, (u32)dsiSaveCreate);
+			setBL(0x02051184, (u32)dsiSaveCreate);
+			setBL(0x020511B4, (u32)dsiSaveOpen);
+			setBL(0x02051230, (u32)dsiSaveSeek);
+			setBL(0x02051244, (u32)dsiSaveWrite);
+			setBL(0x02051258, (u32)dsiSaveWrite);
+			setBL(0x02051260, (u32)dsiSaveClose);
+			setBL(0x02051270, (u32)dsiSaveOpen);
+			setBL(0x020512A8, (u32)dsiSaveSeek);
+			setBL(0x020512B8, (u32)dsiSaveWrite);
+			setBL(0x020512CC, (u32)dsiSaveWrite);
+			setBL(0x020512D8, (u32)dsiSaveClose);
+			setBL(0x02052E80, (u32)dsiSaveCreate);
+			setBL(0x02052E8C, (u32)dsiSaveCreate);
+		}
+	}
+
+	// 4 Travellers: Play Spanish (Europe)
+	// 4 Travellers: Play Spanish (Australia)
+	else if (strcmp(romTid, "KTSP") == 0 || strcmp(romTid, "KTSU") == 0) {
+		if (!twlFontFound) {
+			*(u32*)0x02004C7C = 0xE1A00000; // nop (Skip Manual screen)
+		}
+		if (saveOnFlashcard) {
+			u32 offsetChange = (ndsHeader->gameCode[3] == 'U') ? 0x4C : 0;
+
+			setBL(0x020511A4-offsetChange, (u32)dsiSaveCreate);
+			setBL(0x020511B8-offsetChange, (u32)dsiSaveCreate);
+			setBL(0x020511D4-offsetChange, (u32)dsiSaveGetResultCode);
+			setBL(0x02051268-offsetChange, (u32)dsiSaveOpen);
+			setBL(0x020512B8-offsetChange, (u32)dsiSaveSeek);
+			setBL(0x020512C8-offsetChange, (u32)dsiSaveRead);
+			setBL(0x020512DC-offsetChange, (u32)dsiSaveRead);
+			setBL(0x020512E8-offsetChange, (u32)dsiSaveClose);
+			setBL(0x02051348-offsetChange, (u32)dsiSaveOpen);
+			setBL(0x02051360-offsetChange, (u32)dsiSaveSeek);
+			setBL(0x02051370-offsetChange, (u32)dsiSaveRead);
+			setBL(0x02051380-offsetChange, (u32)dsiSaveRead);
+			setBL(0x02051388-offsetChange, (u32)dsiSaveClose);
+			setBL(0x02051440-offsetChange, (u32)dsiSaveOpen);
+			setBL(0x02051490-offsetChange, (u32)dsiSaveCreate);
+			setBL(0x0205149C-offsetChange, (u32)dsiSaveCreate);
+			setBL(0x020514CC-offsetChange, (u32)dsiSaveOpen);
+			setBL(0x02051548-offsetChange, (u32)dsiSaveSeek);
+			setBL(0x0205155C-offsetChange, (u32)dsiSaveWrite);
+			setBL(0x02051570-offsetChange, (u32)dsiSaveWrite);
+			setBL(0x02051578-offsetChange, (u32)dsiSaveClose);
+			setBL(0x02051588-offsetChange, (u32)dsiSaveOpen);
+			setBL(0x020515C0-offsetChange, (u32)dsiSaveSeek);
+			setBL(0x020515D0-offsetChange, (u32)dsiSaveWrite);
+			setBL(0x020515E4-offsetChange, (u32)dsiSaveWrite);
+			setBL(0x020515F0-offsetChange, (u32)dsiSaveClose);
+			setBL(0x020531AC-offsetChange, (u32)dsiSaveCreate);
+			setBL(0x020531B8-offsetChange, (u32)dsiSaveCreate);
+		}
+	}
+
 	// 40-in-1: Explosive Megamix (USA)
 	else if (strcmp(romTid, "K45E") == 0 && saveOnFlashcard) {
 		/* *(u32*)0x0200DFCC = 0xE3A00001; // mov r0, #1

@@ -89,7 +89,7 @@ static const u32 randomPatchSignature5Second[3] = {0xE59F003C, 0xE590001C, 0xE35
 
 // FileIO functions (SDK 5)
 static const u32 fileIoOpenSignature50[4]      = {0xE92D40F8, 0xE24DDF4A, 0xE1A04000, 0xE1A07002}; // SDK 5.0 - 5.2
-static const u32 fileIoOpenSignature[4]        = {0xE92D43F8, 0xE24DDF4A, 0xE28D4010, 0xE1A07000}; // SDK 5.3+
+static const u32 fileIoOpenSignature[4]        = {0xE92D43F8, 0xE24DDF4A, 0xE28D4010, 0xE1A07000}; // SDK 5.1+
 static const u16 fileIoOpenSignatureThumb[4]   = {0xB5F8, 0xB0CA, 0x1C05, 0x1C16}; // SDK 5.1+
 static const u32 fileIoCloseSignature[4]       = {0xE59FC008, 0xE3A01008, 0xE3A02001, 0xE12FFF1C}; // SDK 5.x
 static const u16 fileIoCloseSignatureThumb[4]  = {0x4B01, 0x2108, 0x2201, 0x4718}; // SDK 5.x
@@ -98,7 +98,7 @@ static const u32 fileIoSeekSignature[4]        = {0xE92D4070, 0xE24DD008, 0xE1A0
 static const u16 fileIoSeekSignatureThumb[4]   = {0xB508, 0xB082, 0xAB00, 0x6103}; // SDK 5.x
 static const u32 fileIoReadSignature50[4]      = {0xE92D4010, 0xE24DD008, 0xE59F305C, 0xE1A04000}; // SDK 5.0
 static const u32 fileIoReadSignature51[4]      = {0xE92D4010, 0xE24DD008, 0xE28D3000, 0xE1A04000}; // SDK 5.1 & 5.2
-static const u32 fileIoReadSignature[4]        = {0xE92D4038, 0xE24DD008, 0xE28D3000, 0xE1A05000}; // SDK 5.3+
+static const u32 fileIoReadSignature[4]        = {0xE92D4038, 0xE24DD008, 0xE28D3000, 0xE1A05000}; // SDK 5.1+
 static const u16 fileIoReadSignature51Thumb[4] = {0xB510, 0xB082, 0x1C04, 0xAB00}; // SDK 5.1
 static const u16 fileIoReadSignatureThumb[4]   = {0xB538, 0xB082, 0x1C05, 0xAB00}; // SDK 5.?
 
@@ -1594,12 +1594,13 @@ u32* findFileIoOpenOffset(const tNDSHeader* ndsHeader, const module_params_t* mo
 	dbg_printf("findFileIoOpenOffset:\n");
 
 	u32* offset = NULL;
-	if (moduleParams->sdk_version > 0x5030000) {
+	if (moduleParams->sdk_version > 0x5010000) {
 		offset = findOffset(
 			(u32*)ndsHeader->arm9destination, iUncompressedSize,
 			fileIoOpenSignature, 4
 		);
-	} else {
+	}
+	if (!offset) {
 		offset = findOffset(
 			(u32*)ndsHeader->arm9destination, iUncompressedSize,
 			fileIoOpenSignature50, 4
@@ -1717,8 +1718,14 @@ u32* findFileIoReadOffset(const u32* fileIoSeekOffset, const module_params_t* mo
 	} else if (moduleParams->sdk_version > 0x5010000) {
 		offset = findOffset(
 			fileIoSeekOffset, 0x80,
-			fileIoReadSignature51, 4
+			fileIoReadSignature, 4
 		);
+		if (!offset) {
+			offset = findOffset(
+				fileIoSeekOffset, 0x80,
+				fileIoReadSignature51, 4
+			);
+		}
 	} else {
 		offset = findOffset(
 			fileIoSeekOffset, 0x180,
