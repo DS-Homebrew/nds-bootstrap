@@ -4953,6 +4953,27 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		tonccpy((u32*)0x020FA794, dsiSaveGetResultCode, 0xC);
 	}
 
+	// Pop+ Solo (USA)
+	// Pop+ Solo (Europe, Australia)
+	else if (strcmp(romTid, "KPIE") == 0 || strcmp(romTid, "KPIV") == 0) {
+		if (!twlFontFound) {
+			*(u32*)0x02005184 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		}
+		if (saveOnFlashcard) {
+			setBL(0x0201C210, (u32)dsiSaveOpen);
+			setBL(0x0201C234, (u32)dsiSaveGetLength);
+			setBL(0x0201C24C, (u32)dsiSaveRead);
+			setBL(0x0201C258, (u32)dsiSaveClose);
+			*(u32*)0x0201C2B4 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+			*(u32*)0x0201C2D8 = 0xE3A00001; // mov r0, #1 (dsiSaveFreeSpaceAvailable)
+			setBL(0x0201C308, (u32)dsiSaveCreate);
+			setBL(0x0201C31C, (u32)dsiSaveOpen);
+			setBL(0x0201C350, (u32)dsiSaveSetLength);
+			setBL(0x0201C368, (u32)dsiSaveWrite);
+			setBL(0x0201C384, (u32)dsiSaveClose);
+		}
+	}
+
 	// GO Series: Portable Shrine Wars (USA)
 	// GO Series: Portable Shrine Wars (Europe)
 	else if (strcmp(romTid, "KOQE") == 0 || strcmp(romTid, "KOQP") == 0) {
