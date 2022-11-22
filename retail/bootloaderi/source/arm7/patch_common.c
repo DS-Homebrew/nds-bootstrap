@@ -3400,10 +3400,14 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Magical Drop Yurutto (Japan)
 	else if (strcmp(romTid, "KMAJ") == 0) {
 		if (!twlFontFound) {
-			*(u32*)0x020159D4 = 0xE1A00000; // nop (Disable NFTR font loading)
-			*(u32*)0x0201CED4 = 0xE1A00000; // nop (Disable NFTR font loading)
+			*(u32*)0x02005D08 = 0xE12FFF1E; // bx lr
+			*(u32*)0x0201942C = 0xE1A00000; // nop
+			*(u32*)0x0201C89C = 0xE12FFF1E; // bx lr (Disable NFTR loading from TWLNAND)
+			*(u32*)0x0202DA1C = 0xE12FFF1E; // bx lr
+			*(u32*)0x0202E65C = 0xE12FFF1E; // bx lr
+			*(u32*)0x0203DE70 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
 		}
-		if (saveOnFlashcard) {
+		/*if (saveOnFlashcard) {
 			setBL(0x020197AC, (u32)dsiSaveCreate);
 			setBL(0x02019800, (u32)dsiSaveDelete);
 			setBL(0x02019860, (u32)dsiSaveOpen);
@@ -3417,7 +3421,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBL(0x020199C8, (u32)dsiSaveClose);
 			tonccpy((u32*)0x020350D0, dsiSaveGetResultCode, 0xC);
 			tonccpy((u32*)0x02035C7C, dsiSaveGetInfo, 0xC);
-		}
+		}*/
 	}
 
 	// Magical Whip (USA)

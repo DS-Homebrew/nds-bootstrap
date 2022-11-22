@@ -6795,7 +6795,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Little Twin Stars (Japan)
 	// Locks up(?) after confirming age and left/right hand
-	else if (strcmp(romTid, "KQ3J") == 0) {
+	/*else if (strcmp(romTid, "KQ3J") == 0) {
 		*(u32*)0x020050DC = 0xE1A00000; // nop
 		*(u32*)0x020050F0 = 0xE1A00000; // nop
 		*(u32*)0x02005200 = 0xE1A00000; // nop
@@ -6807,7 +6807,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02048294 = 0x0221A980;
 		patchUserSettingsReadDSiWare(0x020495B0);
 		*(u32*)0x0204CB3C = 0xE1A00000; // nop
-	}
+	}*/
 
 	// Lola's Alphabet Train (USA)
 	else if (strcmp(romTid, "KLKE") == 0) {
@@ -7039,14 +7039,16 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}*/
 
 	// Magical Drop Yurutto (Japan)
-	// Crashes at 0x0201AF4C(?)
 	/*else if (strcmp(romTid, "KMAJ") == 0) {
-		*(u32*)0x020159D4 = 0xE1A00000; // nop (Disable NFTR font loading)
+		*(u32*)0x02005D08 = 0xE12FFF1E; // bx lr
 		*(u32*)0x02019350 = 0xE1A00000; // nop
 		*(u32*)0x02019360 = 0xE1A00000; // nop
 		*(u32*)0x0201936C = 0xE1A00000; // nop
 		*(u32*)0x02019378 = 0xE1A00000; // nop
+		*(u32*)0x0201940C = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0201942C = 0xE1A00000; // nop
 		*(u32*)0x0201943C = 0xE1A00000; // nop
+		// Save patch code causes weird crash
 		setBL(0x020197AC, (u32)dsiSaveCreate);
 		setBL(0x02019800, (u32)dsiSaveDelete);
 		setBL(0x02019860, (u32)dsiSaveOpen);
@@ -7060,20 +7062,15 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x020199C8, (u32)dsiSaveClose);
 		*(u32*)0x020199FC = 0xE3A00001; // mov r0, #1
 		*(u32*)0x0201C160 = 0xE1A00000; // nop
-		*(u32*)0x0201C85C = 0xE1A00000; // nop
-		*(u32*)0x0201C860 = 0xE1A00000; // nop
-		*(u32*)0x0201C870 = 0xE1A00000; // nop
-		*(u32*)0x0201CED4 = 0xE1A00000; // nop (Disable NFTR font loading)
+		*(u32*)0x0201C89C = 0xE12FFF1E; // bx lr (Disable NFTR loading from TWLNAND)
+		*(u32*)0x0202DA1C = 0xE12FFF1E; // bx lr
+		*(u32*)0x0202E65C = 0xE12FFF1E; // bx lr
 		*(u32*)0x020343E8 = 0xE1A00000; // nop
 		tonccpy((u32*)0x020350D0, dsiSaveGetResultCode, 0xC);
 		tonccpy((u32*)0x02035C7C, dsiSaveGetInfo, 0xC);
 		*(u32*)0x02037D30 = 0xE1A00000; // nop
-		*(u32*)0x0203BBFC = 0xE1A00000; // nop
-		*(u32*)0x0203D9F4 = 0xE1A00000; // nop
-		*(u32*)0x0203D9F8 = 0xE1A00000; // nop
-		*(u32*)0x0203DA04 = 0xE1A00000; // nop
-		*(u32*)0x0203DB48 = 0xE1A00000; // nop
-		patchHiHeapDSiWare(0x0203DBA4, heapEnd); // mov r0, #0x23E0000
+		patchInitDSiWare(0x0203D968, heapEnd);
+		*(u32*)0x0203DE70 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
 		patchUserSettingsReadDSiWare(0x0203F0F0);
 		*(u32*)0x0203F468 = 0xE1A00000; // nop
 		*(u32*)0x0203F46C = 0xE1A00000; // nop
