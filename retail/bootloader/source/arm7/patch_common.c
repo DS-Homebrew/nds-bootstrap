@@ -11470,6 +11470,187 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0206FD54 = 0xE1A00000; // nop
 	}*/
 
+	// Simply Mahjong (USA)
+	else if (strcmp(romTid, "K4JE") == 0) {
+		*(u32*)0x02014288 = 0xE12FFF1E; // bx lr (Skip NAND error checking)
+		setBL(0x02014350, (u32)dsiSaveClose);
+		setBL(0x020143AC, (u32)dsiSaveOpen);
+		*(u32*)0x02014400 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+		// setBL(0x02014410, (u32)dsiSaveGetResultCode);
+		setBL(0x0201442C, (u32)dsiSaveCreate);
+		setBL(0x02014458, (u32)dsiSaveOpen);
+		setBL(0x02014480, (u32)dsiSaveSetLength);
+		*(u32*)0x02014498 = 0xE3A00001; // mov r0, #1 (dsiSaveFlush)
+		setBL(0x020144B0, (u32)dsiSaveGetLength);
+		setBL(0x02014524, (u32)dsiSaveSeek);
+		setBL(0x02014550, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+		setBL(0x0201459C, (u32)dsiSaveSeek);
+		setBL(0x020145C8, (u32)dsiSaveRead); // dsiSaveReadAsync
+		*(u16*)0x0201FB08 = 0x2201; // movs r2, #1
+		doubleNopT(0x0202C9AA);
+		doubleNopT(0x0202C9B0);
+		*(u32*)0x02054A84 = 0xE1A00000; // nop
+		*(u32*)0x020581E8 = 0xE1A00000; // nop
+		patchInitDSiWare(0x0205E3DC, heapEnd);
+		patchUserSettingsReadDSiWare(0x0205FA24);
+		*(u32*)0x0205FE2C = 0xE1A00000; // nop
+		*(u32*)0x0205FE30 = 0xE1A00000; // nop
+		*(u32*)0x0205FE34 = 0xE1A00000; // nop
+		*(u32*)0x0205FE38 = 0xE1A00000; // nop
+		*(u32*)0x02062FA0 = 0xE1A00000; // nop
+	}
+
+	// Simply Mahjong (Europe)
+	else if (strcmp(romTid, "K4JP") == 0) {
+		*(u32*)0x02014278 = 0xE12FFF1E; // bx lr (Skip NAND error checking)
+		setBL(0x02014340, (u32)dsiSaveClose);
+		setBL(0x0201439C, (u32)dsiSaveOpen);
+		*(u32*)0x020143F0 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+		// setBL(0x02014400, (u32)dsiSaveGetResultCode);
+		setBL(0x0201441C, (u32)dsiSaveCreate);
+		setBL(0x02014448, (u32)dsiSaveOpen);
+		setBL(0x02014470, (u32)dsiSaveSetLength);
+		*(u32*)0x02014488 = 0xE3A00001; // mov r0, #1 (dsiSaveFlush)
+		setBL(0x020144A0, (u32)dsiSaveGetLength);
+		setBL(0x02014514, (u32)dsiSaveSeek);
+		setBL(0x02014540, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+		setBL(0x0201458C, (u32)dsiSaveSeek);
+		setBL(0x020145B8, (u32)dsiSaveRead); // dsiSaveReadAsync
+		*(u16*)0x0201FAF8 = 0x2201; // movs r2, #1
+		doubleNopT(0x0202C99A);
+		doubleNopT(0x0202C9A0);
+		*(u32*)0x02054A34 = 0xE1A00000; // nop
+		*(u32*)0x02058198 = 0xE1A00000; // nop
+		patchInitDSiWare(0x0205E38C, heapEnd);
+		patchUserSettingsReadDSiWare(0x0205F9D4);
+		*(u32*)0x0205FDDC = 0xE1A00000; // nop
+		*(u32*)0x0205FDE0 = 0xE1A00000; // nop
+		*(u32*)0x0205FDE4 = 0xE1A00000; // nop
+		*(u32*)0x0205FDE8 = 0xE1A00000; // nop
+		*(u32*)0x02062F50 = 0xE1A00000; // nop
+	}
+
+	// Simply Minesweeper (USA)
+	// Simply Minesweeper (Europe)
+	else if (strcmp(romTid, "KM3E") == 0 || strcmp(romTid, "KM3P") == 0) {
+		*(u32*)0x02012370 = 0xE12FFF1E; // bx lr (Skip NAND error checking)
+		setBL(0x02012438, (u32)dsiSaveClose);
+		setBL(0x02012494, (u32)dsiSaveOpen);
+		*(u32*)0x020124E8 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+		// setBL(0x020124F8, (u32)dsiSaveGetResultCode);
+		setBL(0x02012514, (u32)dsiSaveCreate);
+		setBL(0x02012540, (u32)dsiSaveOpen);
+		setBL(0x02012568, (u32)dsiSaveSetLength);
+		*(u32*)0x02012580 = 0xE3A00001; // mov r0, #1 (dsiSaveFlush)
+		setBL(0x02012598, (u32)dsiSaveGetLength);
+		setBL(0x0201260C, (u32)dsiSaveSeek);
+		setBL(0x02012638, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+		setBL(0x02012684, (u32)dsiSaveSeek);
+		setBL(0x020126B0, (u32)dsiSaveRead); // dsiSaveReadAsync
+		*(u16*)0x0201DA44 = 0x2201; // movs r2, #1
+		doubleNopT(0x0202AD46);
+		doubleNopT(0x0202AD4C);
+		*(u32*)0x0203622C = 0xE1A00000; // nop
+		if (ndsHeader->gameCode[3] == 'E') {
+			*(u32*)0x02052CE8 = 0xE1A00000; // nop
+			*(u32*)0x0205644C = 0xE1A00000; // nop
+			patchInitDSiWare(0x0205C614, heapEnd);
+			patchUserSettingsReadDSiWare(0x0205DC90);
+			*(u32*)0x0205E098 = 0xE1A00000; // nop
+			*(u32*)0x0205E09C = 0xE1A00000; // nop
+			*(u32*)0x0205E0A0 = 0xE1A00000; // nop
+			*(u32*)0x0205E0A4 = 0xE1A00000; // nop
+			*(u32*)0x0206120C = 0xE1A00000; // nop
+		} else {
+			*(u32*)0x02052CB4 = 0xE1A00000; // nop
+			*(u32*)0x02056418 = 0xE1A00000; // nop
+			patchInitDSiWare(0x0205C5E0, heapEnd);
+			patchUserSettingsReadDSiWare(0x0205DC5C);
+			*(u32*)0x0205E064 = 0xE1A00000; // nop
+			*(u32*)0x0205E068 = 0xE1A00000; // nop
+			*(u32*)0x0205E06C = 0xE1A00000; // nop
+			*(u32*)0x0205E070 = 0xE1A00000; // nop
+			*(u32*)0x020611D8 = 0xE1A00000; // nop
+		}
+	}
+
+	// Simply Solitaire (USA)
+	// Simply Solitaire (Europe)
+	else if (strcmp(romTid, "K4LE") == 0 || strcmp(romTid, "K4LP") == 0) {
+		*(u32*)0x02013504 = 0xE12FFF1E; // bx lr (Skip NAND error checking)
+		setBL(0x020135CC, (u32)dsiSaveClose);
+		setBL(0x02013628, (u32)dsiSaveOpen);
+		*(u32*)0x0201367C = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+		// setBL(0x0201368C, (u32)dsiSaveGetResultCode);
+		setBL(0x020136A8, (u32)dsiSaveCreate);
+		setBL(0x020136D4, (u32)dsiSaveOpen);
+		setBL(0x020136FC, (u32)dsiSaveSetLength);
+		*(u32*)0x02013714 = 0xE3A00001; // mov r0, #1 (dsiSaveFlush)
+		setBL(0x0201372C, (u32)dsiSaveGetLength);
+		setBL(0x020137A0, (u32)dsiSaveSeek);
+		setBL(0x020137CC, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+		setBL(0x02013818, (u32)dsiSaveSeek);
+		setBL(0x02013844, (u32)dsiSaveRead); // dsiSaveReadAsync
+		if (ndsHeader->gameCode[3] == 'E') {
+			*(u16*)0x0201EBD8 = 0x2201; // movs r2, #1
+			doubleNopT(0x0202C1A6);
+			doubleNopT(0x0202C1AC);
+			*(u32*)0x020376C4 = 0xE1A00000; // nop
+			*(u32*)0x02054364 = 0xE1A00000; // nop
+			*(u32*)0x02057AC8 = 0xE1A00000; // nop
+			patchInitDSiWare(0x0205DCD0, heapEnd);
+			patchUserSettingsReadDSiWare(0x0205F34C);
+			*(u32*)0x0205F754 = 0xE1A00000; // nop
+			*(u32*)0x0205F758 = 0xE1A00000; // nop
+			*(u32*)0x0205F75C = 0xE1A00000; // nop
+			*(u32*)0x0205F760 = 0xE1A00000; // nop
+			*(u32*)0x020628C8 = 0xE1A00000; // nop
+		} else {
+			*(u16*)0x0201EBD4 = 0x2201; // movs r2, #1
+			doubleNopT(0x0202C186);
+			doubleNopT(0x0202C18C);
+			*(u32*)0x020542F0 = 0xE1A00000; // nop
+			*(u32*)0x02057A54 = 0xE1A00000; // nop
+			patchInitDSiWare(0x0205DC5C, heapEnd);
+			patchUserSettingsReadDSiWare(0x0205F2B0);
+			*(u32*)0x0205F6B8 = 0xE1A00000; // nop
+			*(u32*)0x0205F6BC = 0xE1A00000; // nop
+			*(u32*)0x0205F6C0 = 0xE1A00000; // nop
+			*(u32*)0x0205F6C4 = 0xE1A00000; // nop
+			*(u32*)0x0206282C = 0xE1A00000; // nop
+		}
+	}
+
+	// Simply Sudoku (Europe)
+	else if (strcmp(romTid, "KS4P") == 0) {
+		*(u32*)0x02013970 = 0xE12FFF1E; // bx lr (Skip NAND error checking)
+		setBL(0x02013A38, (u32)dsiSaveClose);
+		setBL(0x02013A94, (u32)dsiSaveOpen);
+		*(u32*)0x02013AE8 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+		// setBL(0x02013AF8, (u32)dsiSaveGetResultCode);
+		setBL(0x02013B14, (u32)dsiSaveCreate);
+		setBL(0x02013B40, (u32)dsiSaveOpen);
+		setBL(0x02013B68, (u32)dsiSaveSetLength);
+		*(u32*)0x02013B80 = 0xE3A00001; // mov r0, #1 (dsiSaveFlush)
+		setBL(0x02013B98, (u32)dsiSaveGetLength);
+		setBL(0x02013C0C, (u32)dsiSaveSeek);
+		setBL(0x02013C38, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+		setBL(0x02013C84, (u32)dsiSaveSeek);
+		setBL(0x02013CB0, (u32)dsiSaveRead); // dsiSaveReadAsync
+		*(u16*)0x0201F0D0 = 0x2201; // movs r2, #1
+		doubleNopT(0x0202C696);
+		doubleNopT(0x0202C69C);
+		*(u32*)0x02054880 = 0xE1A00000; // nop
+		*(u32*)0x02057FE4 = 0xE1A00000; // nop
+		patchInitDSiWare(0x0205E1E8, heapEnd);
+		patchUserSettingsReadDSiWare(0x0205F83C);
+		*(u32*)0x0205FC44 = 0xE1A00000; // nop
+		*(u32*)0x0205FC48 = 0xE1A00000; // nop
+		*(u32*)0x0205FC4C = 0xE1A00000; // nop
+		*(u32*)0x0205FC50 = 0xE1A00000; // nop
+		*(u32*)0x02062DB8 = 0xE1A00000; // nop
+	}
+
 	// Smart Girl's Playhouse Mini (USA)
 	else if (strcmp(romTid, "K2FE") == 0) {
 		*(u32*)0x02005530 = 0xE1A00000; // nop

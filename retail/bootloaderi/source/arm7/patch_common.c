@@ -6174,6 +6174,98 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// Simply Mahjong (USA)
+	else if (strcmp(romTid, "K4JE") == 0 && saveOnFlashcard) {
+		*(u32*)0x02014288 = 0xE12FFF1E; // bx lr (Skip NAND error checking)
+		setBL(0x02014350, (u32)dsiSaveClose);
+		setBL(0x020143AC, (u32)dsiSaveOpen);
+		*(u32*)0x02014400 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+		// setBL(0x02014410, (u32)dsiSaveGetResultCode);
+		setBL(0x0201442C, (u32)dsiSaveCreate);
+		setBL(0x02014458, (u32)dsiSaveOpen);
+		setBL(0x02014480, (u32)dsiSaveSetLength);
+		*(u32*)0x02014498 = 0xE3A00001; // mov r0, #1 (dsiSaveFlush)
+		setBL(0x020144B0, (u32)dsiSaveGetLength);
+		setBL(0x02014524, (u32)dsiSaveSeek);
+		setBL(0x02014550, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+		setBL(0x0201459C, (u32)dsiSaveSeek);
+		setBL(0x020145C8, (u32)dsiSaveRead); // dsiSaveReadAsync
+	}
+
+	// Simply Mahjong (Europe)
+	else if (strcmp(romTid, "K4JP") == 0 && saveOnFlashcard) {
+		*(u32*)0x02014278 = 0xE12FFF1E; // bx lr (Skip NAND error checking)
+		setBL(0x02014340, (u32)dsiSaveClose);
+		setBL(0x0201439C, (u32)dsiSaveOpen);
+		*(u32*)0x020143F0 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+		// setBL(0x02014400, (u32)dsiSaveGetResultCode);
+		setBL(0x0201441C, (u32)dsiSaveCreate);
+		setBL(0x02014448, (u32)dsiSaveOpen);
+		setBL(0x02014470, (u32)dsiSaveSetLength);
+		*(u32*)0x02014488 = 0xE3A00001; // mov r0, #1 (dsiSaveFlush)
+		setBL(0x020144A0, (u32)dsiSaveGetLength);
+		setBL(0x02014514, (u32)dsiSaveSeek);
+		setBL(0x02014540, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+		setBL(0x0201458C, (u32)dsiSaveSeek);
+		setBL(0x020145B8, (u32)dsiSaveRead); // dsiSaveReadAsync
+	}
+
+	// Simply Minesweeper (USA)
+	// Simply Minesweeper (Europe)
+	else if ((strcmp(romTid, "KM3E") == 0 || strcmp(romTid, "KM3P") == 0) && saveOnFlashcard) {
+		*(u32*)0x02012370 = 0xE12FFF1E; // bx lr (Skip NAND error checking)
+		setBL(0x02012438, (u32)dsiSaveClose);
+		setBL(0x02012494, (u32)dsiSaveOpen);
+		*(u32*)0x020124E8 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+		// setBL(0x020124F8, (u32)dsiSaveGetResultCode);
+		setBL(0x02012514, (u32)dsiSaveCreate);
+		setBL(0x02012540, (u32)dsiSaveOpen);
+		setBL(0x02012568, (u32)dsiSaveSetLength);
+		*(u32*)0x02012580 = 0xE3A00001; // mov r0, #1 (dsiSaveFlush)
+		setBL(0x02012598, (u32)dsiSaveGetLength);
+		setBL(0x0201260C, (u32)dsiSaveSeek);
+		setBL(0x02012638, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+		setBL(0x02012684, (u32)dsiSaveSeek);
+		setBL(0x020126B0, (u32)dsiSaveRead); // dsiSaveReadAsync
+	}
+
+	// Simply Solitaire (USA)
+	// Simply Solitaire (Europe)
+	else if ((strcmp(romTid, "K4LE") == 0 || strcmp(romTid, "K4LP") == 0) && saveOnFlashcard) {
+		*(u32*)0x02013504 = 0xE12FFF1E; // bx lr (Skip NAND error checking)
+		setBL(0x020135CC, (u32)dsiSaveClose);
+		setBL(0x02013628, (u32)dsiSaveOpen);
+		*(u32*)0x0201367C = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+		// setBL(0x0201368C, (u32)dsiSaveGetResultCode);
+		setBL(0x020136A8, (u32)dsiSaveCreate);
+		setBL(0x020136D4, (u32)dsiSaveOpen);
+		setBL(0x020136FC, (u32)dsiSaveSetLength);
+		*(u32*)0x02013714 = 0xE3A00001; // mov r0, #1 (dsiSaveFlush)
+		setBL(0x0201372C, (u32)dsiSaveGetLength);
+		setBL(0x020137A0, (u32)dsiSaveSeek);
+		setBL(0x020137CC, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+		setBL(0x02013818, (u32)dsiSaveSeek);
+		setBL(0x02013844, (u32)dsiSaveRead); // dsiSaveReadAsync
+	}
+
+	// Simply Sudoku (Europe)
+	else if (strcmp(romTid, "KS4P") == 0 && saveOnFlashcard) {
+		*(u32*)0x02013970 = 0xE12FFF1E; // bx lr (Skip NAND error checking)
+		setBL(0x02013A38, (u32)dsiSaveClose);
+		setBL(0x02013A94, (u32)dsiSaveOpen);
+		*(u32*)0x02013AE8 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+		// setBL(0x02013AF8, (u32)dsiSaveGetResultCode);
+		setBL(0x02013B14, (u32)dsiSaveCreate);
+		setBL(0x02013B40, (u32)dsiSaveOpen);
+		setBL(0x02013B68, (u32)dsiSaveSetLength);
+		*(u32*)0x02013B80 = 0xE3A00001; // mov r0, #1 (dsiSaveFlush)
+		setBL(0x02013B98, (u32)dsiSaveGetLength);
+		setBL(0x02013C0C, (u32)dsiSaveSeek);
+		setBL(0x02013C38, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+		setBL(0x02013C84, (u32)dsiSaveSeek);
+		setBL(0x02013CB0, (u32)dsiSaveRead); // dsiSaveReadAsync
+	}
+
 	// Smart Girl's Playhouse Mini (USA)
 	else if (strcmp(romTid, "K2FE") == 0) {
 		if (!twlFontFound) {
