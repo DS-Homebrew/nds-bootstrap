@@ -251,6 +251,7 @@ int runNds(u32 cluster, u32 saveCluster, u32 donorTwlCluster, u32 gbaCluster, u3
 
 	loader->storedFileCluster = cluster;
 	loader->initDisc          = conf->initDisc;
+	loader->bootstrapOnFlashcard = conf->bootstrapOnFlashcard;
 	loader->gameOnFlashcard   = conf->gameOnFlashcard;
 	loader->saveOnFlashcard   = conf->saveOnFlashcard;
 	loader->a9ScfgRom         = REG_SCFG_ROM;
