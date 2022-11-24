@@ -12430,9 +12430,23 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}*/
 
 	// Tori to Mame (Japan)
-	// Does not boot: Crashes on black screens
-	/*else if (strcmp(romTid, "KP6J") == 0) {
-		*(u32*)0x020217B0 = 0xE12FFF1E; // bx lr (Skip NTFR file loading from TWLNAND)
+	// NitroFS files are unable to open for some reason
+	/*else if (strcmp(romTid, "KP6J") == 0 && twlFontFound) {
+		useSharedFont = true;
+		*(u32*)0x02001578 = 0xE1A00000; // nop
+		*(u32*)0x02015928 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x020217C8 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x020217F0 = 0xE3A00001; // mov r0, #1
+		setBL(0x02023348, (u32)dsiSaveOpen);
+		setBL(0x02023360, (u32)dsiSaveGetLength);
+		setBL(0x02023398, (u32)dsiSaveRead);
+		setBL(0x020233BC, (u32)dsiSaveClose);
+		*(u32*)0x020233FC = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+		setBL(0x02023430, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+		setBL(0x02023440, (u32)dsiSaveOpen);
+		setBL(0x02023460, (u32)dsiSaveSetLength);
+		setBL(0x02023480, (u32)dsiSaveWrite);
+		setBL(0x02023498, (u32)dsiSaveClose);
 	}*/
 
 	// Touch Solitaire (USA)

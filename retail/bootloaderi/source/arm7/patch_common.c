@@ -6903,6 +6903,20 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0200BFA8, (u32)dsiSaveClose);
 	}
 
+	// Tori to Mame (Japan)
+	else if (strcmp(romTid, "KP6J") == 0 && saveOnFlashcard) {
+		setBL(0x02023348, (u32)dsiSaveOpen);
+		setBL(0x02023360, (u32)dsiSaveGetLength);
+		setBL(0x02023398, (u32)dsiSaveRead);
+		setBL(0x020233BC, (u32)dsiSaveClose);
+		*(u32*)0x020233FC = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+		setBL(0x02023430, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+		setBL(0x02023440, (u32)dsiSaveOpen);
+		setBL(0x02023460, (u32)dsiSaveSetLength);
+		setBL(0x02023480, (u32)dsiSaveWrite);
+		setBL(0x02023498, (u32)dsiSaveClose);
+	}
+
 	// VT Tennis (USA)
 	else if (strcmp(romTid, "KVTE") == 0) {
 		if (!twlFontFound) {

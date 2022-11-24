@@ -97,7 +97,7 @@ static const u32 fileIoSeekSignature50[4]      = {0xE92D4008, 0xE24DD008, 0xE28D
 static const u32 fileIoSeekSignature[4]        = {0xE92D4070, 0xE24DD008, 0xE1A06000, 0xE1A05001}; // SDK 5.3+
 static const u16 fileIoSeekSignatureThumb[4]   = {0xB508, 0xB082, 0xAB00, 0x6103}; // SDK 5.x
 static const u32 fileIoReadSignature50[4]      = {0xE92D4010, 0xE24DD008, 0xE59F305C, 0xE1A04000}; // SDK 5.0
-static const u32 fileIoReadSignature51[4]      = {0xE92D4010, 0xE24DD008, 0xE28D3000, 0xE1A04000}; // SDK 5.1 & 5.2
+static const u32 fileIoReadSignature51[4]      = {0xE92D4010, 0xE24DD008, 0xE28D3000, 0xE1A04000}; // SDK 5.0 - 5.2
 static const u32 fileIoReadSignature[4]        = {0xE92D4038, 0xE24DD008, 0xE28D3000, 0xE1A05000}; // SDK 5.1+
 static const u16 fileIoReadSignature51Thumb[4] = {0xB510, 0xB082, 0x1C04, 0xAB00}; // SDK 5.1
 static const u16 fileIoReadSignatureThumb[4]   = {0xB538, 0xB082, 0x1C05, 0xAB00}; // SDK 5.?
@@ -1720,6 +1720,7 @@ u32* findFileIoReadOffset(const u32* fileIoSeekOffset, const module_params_t* mo
 			fileIoSeekOffset, 0x80,
 			fileIoReadSignature, 4
 		);
+
 		if (!offset) {
 			offset = findOffset(
 				fileIoSeekOffset, 0x80,
@@ -1731,6 +1732,13 @@ u32* findFileIoReadOffset(const u32* fileIoSeekOffset, const module_params_t* mo
 			fileIoSeekOffset, 0x180,
 			fileIoReadSignature50, 4
 		);
+
+		if (!offset) {
+			offset = findOffset(
+				fileIoSeekOffset, 0x80,
+				fileIoReadSignature51, 4
+			);
+		}
 	}
 
 	if (offset) {
