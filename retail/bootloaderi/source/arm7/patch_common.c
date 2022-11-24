@@ -2866,6 +2866,108 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02045608, (u32)dsiSaveClose);
 	}
 
+	// Game & Watch: Ball (USA, Europe)
+	// Game & Watch: Helmet (USA, Europe)
+	// Game & Watch: Judge (USA, Europe)
+	// Game & Watch: Manhole (USA, Europe)
+	// Game & Watch: Vermin (USA, Europe)
+	// Ball: Softlocks after a miss or exiting gameplay
+	// Helmet, Manhole & Vermin: Softlocks after 3 misses or exiting gameplay
+	// Judge: Softlocks after limit is reached or exiting gameplay
+	// Save code seems confusing to patch, preventing support
+	else if ((strcmp(romTid, "KGBO") == 0 || strcmp(romTid, "KGHO") == 0 || strcmp(romTid, "KGJO") == 0 || strcmp(romTid, "KGMO") == 0 || strcmp(romTid, "KGVO") == 0) && saveOnFlashcard) {
+		if (strncmp(romTid, "KGB", 3) == 0) {
+			/* setBL(0x02033ABC, (u32)dsiSaveCreate);
+			setBL(0x02033AF8, (u32)dsiSaveOpen);
+			setBL(0x02033B38, (u32)dsiSaveClose);
+			setBL(0x02033D60, (u32)dsiSaveOpen); */
+			*(u32*)0x02035078 = 0xE12FFF1E; // bx lr
+			/* *(u32*)0x0203E124 = 0xE1A00000; // nop
+			*(u32*)0x0203E148 = 0xE1A00000; // nop
+			*(u32*)0x0203E150 = 0xE1A00000; // nop
+			*(u32*)0x0203E180 = 0xE1A00000; // nop
+			*(u32*)0x0203E188 = 0xE1A00000; // nop
+			*(u32*)0x0203E19C = 0xE1A00000; // nop
+			setBL(0x0203E160, (u32)dsiSaveWrite);
+			setBL(0x0203E178, (u32)dsiSaveWrite);
+			setBL(0x0203E1E8, (u32)dsiSaveRead); */
+		} else if (strncmp(romTid, "KGH", 3) == 0 || strncmp(romTid, "KGM", 3) == 0) {
+			*(u32*)0x0202D5E4 = 0xE12FFF1E; // bx lr
+		} else if (strncmp(romTid, "KGJ", 3) == 0) {
+			*(u32*)0x0202D158 = 0xE12FFF1E; // bx lr
+		} else {
+			*(u32*)0x0202D0D4 = 0xE12FFF1E; // bx lr
+		}
+	}
+
+	// Game & Watch: Ball (Japan)
+	// Game & Watch: Helmet (Japan)
+	// Game & Watch: Judge (Japan)
+	// Game & Watch: Manhole (Japan)
+	// Game & Watch: Vermin (Japan)
+	// Ball: Softlocks after a miss or exiting gameplay
+	// Helmet, Manhole & Vermin: Softlocks after 3 misses or exiting gameplay
+	// Judge: Softlocks after limit is reached or exiting gameplay
+	else if ((strcmp(romTid, "KGBJ") == 0 || strcmp(romTid, "KGHJ") == 0 || strcmp(romTid, "KGJJ") == 0 || strcmp(romTid, "KGMJ") == 0 || strcmp(romTid, "KGVJ") == 0) && saveOnFlashcard) {
+		if (strncmp(romTid, "KGB", 3) == 0) {
+			*(u32*)0x02034BC8 = 0xE12FFF1E; // bx lr
+		} else if (strncmp(romTid, "KGH", 3) == 0 || strncmp(romTid, "KGM", 3) == 0) {
+			*(u32*)0x0202D384 = 0xE12FFF1E; // bx lr
+		} else if (strncmp(romTid, "KGJ", 3) == 0) {
+			*(u32*)0x0202CEF8 = 0xE12FFF1E; // bx lr
+		} else {
+			*(u32*)0x0202CE74 = 0xE12FFF1E; // bx lr
+		}
+	}
+
+	// Game & Watch: Chef (USA, Europe)
+	// Softlocks after 3 misses or exiting gameplay
+	else if (strcmp(romTid, "KGCO") == 0 && saveOnFlashcard) {
+		*(u32*)0x0202F0FC = 0xE12FFF1E; // bx lr
+	}
+
+	// Game & Watch: Chef (Japan)
+	// Softlocks after 3 misses or exiting gameplay
+	else if (strcmp(romTid, "KGCJ") == 0 && saveOnFlashcard) {
+		*(u32*)0x0202EE9C = 0xE12FFF1E; // bx lr
+	}
+
+	// Game & Watch: Donkey Kong Jr. (USA, Europe)
+	// Softlocks after 3 misses or exiting gameplay
+	else if (strcmp(romTid, "KGDO") == 0 && saveOnFlashcard) {
+		*(u32*)0x0202D860 = 0xE12FFF1E; // bx lr
+	}
+
+	// Game & Watch: Donkey Kong Jr. (Japan)
+	// Softlocks after 3 misses or exiting gameplay
+	else if (strcmp(romTid, "KGDJ") == 0 && saveOnFlashcard) {
+		*(u32*)0x0202D600 = 0xE12FFF1E; // bx lr
+	}
+
+	// Game & Watch: Flagman (USA, Europe)
+	// Softlocks after 3 misses or exiting gameplay
+	else if (strcmp(romTid, "KGGO") == 0 && saveOnFlashcard) {
+		*(u32*)0x0202D520 = 0xE12FFF1E; // bx lr
+	}
+
+	// Game & Watch: Flagman (Japan)
+	// Softlocks after 3 misses or exiting gameplay
+	else if (strcmp(romTid, "KGGJ") == 0 && saveOnFlashcard) {
+		*(u32*)0x0202D2C0 = 0xE12FFF1E; // bx lr
+	}
+
+	// Game & Watch: Mario's Cement Factory (USA, Europe)
+	// Softlocks after 3 misses or exiting gameplay
+	else if (strcmp(romTid, "KGFO") == 0 && saveOnFlashcard) {
+		*(u32*)0x0202F188 = 0xE12FFF1E; // bx lr
+	}
+
+	// Game & Watch: Mario's Cement Factory (Japan)
+	// Softlocks after 3 misses or exiting gameplay
+	else if (strcmp(romTid, "KGFJ") == 0 && saveOnFlashcard) {
+		*(u32*)0x0202EF28 = 0xE12FFF1E; // bx lr
+	}
+
 	// Go! Go! Kokopolo (USA)
 	// Go! Go! Kokopolo (Europe)
 	else if (strcmp(romTid, "K3GE") == 0 || strcmp(romTid, "K3GP") == 0) {
