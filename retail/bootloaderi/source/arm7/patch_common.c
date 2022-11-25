@@ -5250,6 +5250,58 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// Puffins: Let's Fish! (USA)
+	// Puffins: Let's Fish! (Europe)
+	// Due to our save implementation, save data is stored in all 3 slots
+	else if ((strcmp(romTid, "KLFE") == 0 || strcmp(romTid, "KLFP") == 0) && saveOnFlashcard) {
+		u32 offsetChange = (ndsHeader->gameCode[3] == 'P') ? 8 : 0;
+
+		setBL(0x0202BA80-offsetChange, (u32)dsiSaveGetLength);
+		setBL(0x0202BB78-offsetChange, (u32)dsiSaveRead);
+		setBL(0x0202BC68-offsetChange, (u32)dsiSaveSeek);
+		setBL(0x0202BD00-offsetChange, (u32)dsiSaveWrite);
+		setBL(0x0202BDBC-offsetChange, (u32)dsiSaveClose);
+		setBL(0x0202BE08-offsetChange, (u32)dsiSaveOpen);
+		setBL(0x0202BE68-offsetChange, (u32)dsiSaveCreate);
+	}
+
+	// Puffins: Let's Race! (USA)
+	// Puffins: Let's Race! (Europe)
+	// Due to our save implementation, save data is stored in all 3 slots
+	else if ((strcmp(romTid, "KLRE") == 0 || strcmp(romTid, "KLRP") == 0) && saveOnFlashcard) {
+		setBL(0x020289D0, (u32)dsiSaveGetLength);
+		setBL(0x02028AC8, (u32)dsiSaveRead);
+		setBL(0x02028BB8, (u32)dsiSaveSeek);
+		setBL(0x02028C50, (u32)dsiSaveWrite);
+		setBL(0x02028D0C, (u32)dsiSaveClose);
+		setBL(0x02028D58, (u32)dsiSaveOpen);
+		setBL(0x02028DB8, (u32)dsiSaveCreate);
+	}
+
+	// Puffins: Let's Roll! (USA)
+	// Due to our save implementation, save data is stored in all 3 slots
+	else if (strcmp(romTid, "KL2E") == 0 && saveOnFlashcard) {
+		*(u32*)0x0204BF1C = (u32)dsiSaveGetLength;
+		setBL(0x0204BFA0, (u32)dsiSaveRead);
+		setBL(0x0204C074, (u32)dsiSaveSeek);
+		setBL(0x0204C10C, (u32)dsiSaveWrite);
+		setBL(0x0204C1B4, (u32)dsiSaveClose);
+		setBL(0x0204C1E8, (u32)dsiSaveOpen);
+		setBL(0x0204C230, (u32)dsiSaveCreate);
+	}
+
+	// Puffins: Let's Roll! (Europe)
+	// Due to our save implementation, save data is stored in all 3 slots
+	else if (strcmp(romTid, "KL2P") == 0 && saveOnFlashcard) {
+		*(u32*)0x0204C4D4 = (u32)dsiSaveGetLength;
+		setBL(0x0204C558, (u32)dsiSaveRead);
+		setBL(0x0204C62C, (u32)dsiSaveSeek);
+		setBL(0x0204C6C4, (u32)dsiSaveWrite);
+		setBL(0x0204C76C, (u32)dsiSaveClose);
+		setBL(0x0204C7A0, (u32)dsiSaveOpen);
+		setBL(0x0204C7E8, (u32)dsiSaveCreate);
+	}
+
 	// Puzzler Brain Games (USA)
 	else if (strcmp(romTid, "KYEE") == 0) {
 		if (!twlFontFound) {

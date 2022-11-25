@@ -10235,6 +10235,74 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		doubleNopT(0x0202FADA);
 	}
 
+	// Puffins: Let's Fish! (USA)
+	// Puffins: Let's Fish! (Europe)
+	// Due to our save implementation, save data is stored in all 3 slots
+	else if (strcmp(romTid, "KLFE") == 0 || strcmp(romTid, "KLFP") == 0) {
+		u32 offsetChange = (ndsHeader->gameCode[3] == 'P') ? 8 : 0;
+
+		*(u32*)0x020195B4 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02019608 = 0xE12FFF1E; // bx lr
+		setBL(0x0202BA80-offsetChange, (u32)dsiSaveGetLength);
+		setBL(0x0202BB78-offsetChange, (u32)dsiSaveRead);
+		setBL(0x0202BC68-offsetChange, (u32)dsiSaveSeek);
+		setBL(0x0202BD00-offsetChange, (u32)dsiSaveWrite);
+		setBL(0x0202BDBC-offsetChange, (u32)dsiSaveClose);
+		setBL(0x0202BE08-offsetChange, (u32)dsiSaveOpen);
+		setBL(0x0202BE68-offsetChange, (u32)dsiSaveCreate);
+		*(u32*)(0x0202BED4-offsetChange) = 0xE1A00000; // nop
+		*(u32*)(0x0204AFD0-offsetChange) = 0xE1A00000; // nop
+		*(u32*)(0x02069374-offsetChange) = 0xE1A00000; // nop
+		*(u32*)(0x0206C6B4-offsetChange) = 0xE1A00000; // nop
+		patchInitDSiWare(0x02074794-offsetChange, extendedMemory2 ? heapEnd : heapEndRetail+0x400000);
+		*(u32*)(0x02074A80-offsetChange) -= 0x30000;
+		patchUserSettingsReadDSiWare(0x02075DA8-offsetChange);
+		*(u32*)(0x02078BA4-offsetChange) = 0xE1A00000; // nop
+	}
+
+	// Puffins: Let's Race! (USA)
+	// Puffins: Let's Race! (Europe)
+	// Due to our save implementation, save data is stored in all 3 slots
+	else if (strcmp(romTid, "KLRE") == 0 || strcmp(romTid, "KLRP") == 0) {
+		setBL(0x020289D0, (u32)dsiSaveGetLength);
+		setBL(0x02028AC8, (u32)dsiSaveRead);
+		setBL(0x02028BB8, (u32)dsiSaveSeek);
+		setBL(0x02028C50, (u32)dsiSaveWrite);
+		setBL(0x02028D0C, (u32)dsiSaveClose);
+		setBL(0x02028D58, (u32)dsiSaveOpen);
+		setBL(0x02028DB8, (u32)dsiSaveCreate);
+		*(u32*)0x02028E24 = 0xE1A00000; // nop
+		*(u32*)0x0202F128 = 0xE1A00000; // nop
+		*(u32*)0x020733CC = 0xE1A00000; // nop
+		*(u32*)0x02076668 = 0xE1A00000; // nop
+		patchInitDSiWare(0x0207EC3C, extendedMemory2 ? heapEnd : heapEndRetail+0x400000);
+		*(u32*)0x0207EFC8 -= 0x30000;
+		patchUserSettingsReadDSiWare(0x02080334);
+		*(u32*)0x02083860 = 0xE1A00000; // nop
+		*(u32*)0x02085B84 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02085B88 = 0xE12FFF1E; // bx lr
+	}
+
+	// Puffins: Let's Roll! (USA)
+	// Due to our save implementation, save data is stored in all 3 slots
+	// Requires more than 8MB of RAM?
+	/*else if (strcmp(romTid, "KL2E") == 0) {
+		*(u32*)0x0204BF1C = (u32)dsiSaveGetLength;
+		setBL(0x0204BFA0, (u32)dsiSaveRead);
+		setBL(0x0204C074, (u32)dsiSaveSeek);
+		setBL(0x0204C10C, (u32)dsiSaveWrite);
+		setBL(0x0204C1B4, (u32)dsiSaveClose);
+		setBL(0x0204C1E8, (u32)dsiSaveOpen);
+		setBL(0x0204C230, (u32)dsiSaveCreate);
+		*(u32*)0x0204C63C = 0xE1A00000; // nop
+		*(u32*)0x020716A0 = 0xE1A00000; // nop
+		*(u32*)0x02074884 = 0xE1A00000; // nop
+		patchInitDSiWare(0x0207C640, extendedMemory2 ? heapEnd : heapEndRetail+0x400000);
+		*(u32*)0x0207C9CC -= 0x30000;
+		patchUserSettingsReadDSiWare(0x0207DC54);
+		*(u32*)0x0208106C = 0xE1A00000; // nop
+	}*/
+
 	// Puzzle League: Express (USA)
 	// Some code seems to make save reading fail, preventing support
 	else if (strcmp(romTid, "KPNE") == 0) {
