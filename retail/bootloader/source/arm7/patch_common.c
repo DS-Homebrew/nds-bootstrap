@@ -4329,6 +4329,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Dr. Mario Express (USA)
 	// A Little Bit of... Dr. Mario (Europe, Australia)
 	else if (strcmp(romTid, "KD9E") == 0 || strcmp(romTid, "KD9V") == 0) {
+		// useSharedFont = twlFontFound;
 		*(u32*)0x020103C4 = 0xE3A00000; // mov r0, #0
 		tonccpy((u32*)0x02011160, dsiSaveGetResultCode, 0xC);
 		*(u32*)0x02013A08 = 0xE3A00000; // mov r0, #0
@@ -4346,8 +4347,10 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0201BF40 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x0201CF08 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x0201D2A8 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x020248C4 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
-		*(u32*)0x02025CD4 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
+		// if (!useSharedFont) {
+			*(u32*)0x020248C4 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
+			*(u32*)0x02025CD4 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
+		// }
 		*(u32*)0x0203D228 = 0xE3A00000; // mov r0, #0 (Skip saving to "back.dat")
 		// *(u32*)0x0203D488 = 0xE3A00000; // mov r0, #0
 		// *(u32*)0x0203D48C = 0xE12FFF1E; // bx lr
@@ -4364,10 +4367,18 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBL(0x020598A0, (u32)dsiSaveClose);
 			*(u32*)0x02059920 = 0xE3A00000; // mov r0, #0
 			*(u32*)0x0206F430 = 0xE3A00000; // mov r0, #0
-			*(u32*)0x0207347C = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
-			*(u32*)0x020736DC = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
-			*(u32*)0x0207401C = 0xE3A00000; // mov r0, #0
-			*(u32*)0x02074054 = 0xE1A00000; // nop (Skip NFTR file loading from TWLNAND)
+			/* if (useSharedFont) {
+				if (!extendedMemory2 && expansionPakFound) {
+					*(u32*)0x02018590 = clusterCache-0x200000;
+					tonccpy((u32*)0x02018594, twlFontHeapAlloc, 0xB0);
+					setBL(0x020741C8, 0x02018594);
+				}
+			} else { */
+				*(u32*)0x0207347C = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
+				*(u32*)0x020736DC = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
+				*(u32*)0x0207401C = 0xE3A00000; // mov r0, #0
+				*(u32*)0x02074054 = 0xE1A00000; // nop (Skip NFTR file loading from TWLNAND)
+			// }
 		} else {
 			// *(u32*)0x02044A9C = 0xE3A00000; // mov r0, #0
 			setBL(0x02058FB0, (u32)dsiSaveCreate);
@@ -4381,15 +4392,18 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBL(0x02059790, (u32)dsiSaveClose);
 			*(u32*)0x02059810 = 0xE3A00000; // mov r0, #0
 			*(u32*)0x0206F320 = 0xE3A00000; // mov r0, #0
-			*(u32*)0x0207336C = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
-			*(u32*)0x020735CC = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
-			*(u32*)0x02073F0C = 0xE3A00000; // mov r0, #0
-			*(u32*)0x02073F44 = 0xE1A00000; // nop (Skip NFTR file loading from TWLNAND)
+			// if (!useSharedFont) {
+				*(u32*)0x0207336C = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
+				*(u32*)0x020735CC = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
+				*(u32*)0x02073F0C = 0xE3A00000; // mov r0, #0
+				*(u32*)0x02073F44 = 0xE1A00000; // nop (Skip NFTR file loading from TWLNAND)
+			// }
 		}
 	}
 
 	// Chotto Dr. Mario (Japan)
 	else if (strcmp(romTid, "KD9J") == 0) {
+		// useSharedFont = twlFontFound;
 		*(u32*)0x020052B0 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x02010B08 = 0xE3A00000; // mov r0, #0
 		tonccpy((u32*)0x020118A4, dsiSaveGetResultCode, 0xC);
@@ -4408,12 +4422,14 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0201C390 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x0201D358 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x0201D6F8 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x02024CF4 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
-		*(u32*)0x02026104 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
-		*(u32*)0x0202D3B4 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
-		*(u32*)0x0202D644 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
-		*(u32*)0x0202DFB8 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x0202DFF0 = 0xE1A00000; // nop (Skip NFTR file loading from TWLNAND)
+		// if (!useSharedFont) {
+			*(u32*)0x02024CF4 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
+			*(u32*)0x02026104 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
+			*(u32*)0x0202D3B4 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
+			*(u32*)0x0202D644 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
+			*(u32*)0x0202DFB8 = 0xE3A00000; // mov r0, #0
+			*(u32*)0x0202DFF0 = 0xE1A00000; // nop (Skip NFTR file loading from TWLNAND)
+		// }
 		*(u32*)0x0205824C = 0xE3A00000; // mov r0, #0 (Skip saving to "back.dat")
 		// *(u32*)0x020584B4 = 0xE3A00000; // mov r0, #0
 		// *(u32*)0x020584B8 = 0xE12FFF1E; // bx lr
@@ -10840,7 +10856,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	else if (strcmp(romTid, "KLXJ") == 0) {
 		useSharedFont = (twlFontFound && debugOrMep);
 		if (useSharedFont) {
-			if (expansionPakFound) {
+			if (!extendedMemory2 && expansionPakFound) {
 				*(u32*)0x0201AE24 = clusterCache-0x200000;
 				tonccpy((u32*)0x0201AE28, twlFontHeapAlloc, 0xB0);
 			}
@@ -11322,7 +11338,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	else if (strcmp(romTid, "KRWE") == 0 || strcmp(romTid, "KRWP") == 0) {
 		useSharedFont = (twlFontFound && debugOrMep);
 		if (useSharedFont) {
-			if (expansionPakFound) {
+			if (!extendedMemory2 && expansionPakFound) {
 				*(u32*)0x02019548 = clusterCache-0x200000;
 				tonccpy((u32*)0x0201954C, twlFontHeapAlloc, 0xB0);
 			}
