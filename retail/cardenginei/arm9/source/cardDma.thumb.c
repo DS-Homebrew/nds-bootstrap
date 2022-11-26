@@ -612,6 +612,9 @@ void cardSetDma(u32 * params) {
 	u32 len = ((ce9->valueBits & isSdk5) ? params[5] : cardStruct[2]);
 	#endif
 
+	disableIrqMask(IRQ_CARD);
+	disableIrqMask(IRQ_CARD_LINE);
+
 	cardRead(NULL, dst, src, len);
 	endCardReadDma();
 }
