@@ -278,5 +278,10 @@ void showException(s32 *expReg) {
 		printHex(22, 14 + i, *(stack++), 4, FONT_WHITE, true);
 	}
 
+	// If the RAM viewer address is still on the default,
+	// move it to the pc address
+	if(address == (vu32*)0x02000000)
+		address = (vu32 *)(codeAddress & ~0x7);
+
 	(*revertMpu)();
 }
