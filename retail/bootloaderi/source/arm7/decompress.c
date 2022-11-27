@@ -163,7 +163,7 @@ static u32 decompressBinary(u8 *aMainMemory, u32 aCodeLength, u32 aMemOffset) {
 static u32 decompressIBinary(unsigned char *pak_buffer, unsigned int pak_len) {
   unsigned char *raw_buffer, *pak, *raw, *pak_end, *raw_end;
   unsigned int   raw_len, len, pos, inc_len, hdr_len, enc_len, dec_len;
-  unsigned char  flags, mask;
+  unsigned char  flags = 0, mask;
 
   inc_len = *(unsigned int *)(pak_buffer + pak_len - 4);
   if (!inc_len) {
@@ -201,7 +201,7 @@ static u32 decompressIBinary(unsigned char *pak_buffer, unsigned int pak_len) {
 
   for (len = 0; len < dec_len; len++) *raw++ = *pak++;
 
-  BLZ_Invert(pak_buffer + dec_len, pak_len);
+  BLZ_Invert((char *)pak_buffer + dec_len, pak_len);
 
   mask = 0;
 
@@ -225,11 +225,14 @@ static u32 decompressIBinary(unsigned char *pak_buffer, unsigned int pak_len) {
         len = raw_end - raw;
       }
       pos = (pos & 0xFFF) + 3;
-      while (len--) *raw++ = *(raw - pos);
+      while (len--) {
+		*raw = *(raw - pos);
+		++raw;
+	  }
     }
   }
 
-  BLZ_Invert(raw_buffer + dec_len, raw_len - dec_len);
+  BLZ_Invert((char *)raw_buffer + dec_len, raw_len - dec_len);
 
 	tonccpy(pak_buffer, raw_buffer, raw_len);
 	toncset(raw_buffer, 0, raw_len);
@@ -240,7 +243,7 @@ static u32 decompressIBinary(unsigned char *pak_buffer, unsigned int pak_len) {
 static bool a9Decompressed = false;
 static bool a9iDecompressed = false;
 
-void ensureBinaryDecompressed(const tNDSHeader* ndsHeader, module_params_t* moduleParams, bool arm9iToo) {
+void ensureBinaryDecompressed(const tNDSHeader* ndsHeader, module_params_t* moduleParams, ltd_module_params_t* ltdModuleParams, bool arm9iToo) {
 	if (a9Decompressed) return;
 
 	const char* romTid = getRomTid(ndsHeader);
@@ -267,11 +270,7 @@ void ensureBinaryDecompressed(const tNDSHeader* ndsHeader, module_params_t* modu
 	a9Decompressed = true;
 
 	if (!arm9iToo || a9iDecompressed) return;
-	if (ndsHeader->unitCode > 0) {
-		extern u32* findLtdModuleParamsOffset(const tNDSHeader* ndsHeader);
-
-		ltd_module_params_t* ltdModuleParams = (ltd_module_params_t*)(findLtdModuleParamsOffset(ndsHeader) - 4);
-		if (dsiModeConfirmed) {
+	if (ndsHeader->unitCode > 0 && dsiModeConfirmed) {
 		if (ltdModuleParams->compressed_static_end) {
 			// Compressed
 			dbg_printf("arm9i is compressed\n");
@@ -284,7 +283,6 @@ void ensureBinaryDecompressed(const tNDSHeader* ndsHeader, module_params_t* modu
 			// Not compressed
 			dbg_printf("arm9i is not compressed\n");
 			iUncompressedSizei = *(u32*)0x02FFE1CC;
-		}
 		}
 	}
 	a9iDecompressed = true;

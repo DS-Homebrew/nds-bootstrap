@@ -179,6 +179,8 @@ typedef struct cardengineArm9 {
     u32 saveSize;
     u32 romFatTableCache;
     u32 savFatTableCache;
+    u16 romFatTableCompressed;
+    u16 savFatTableCompressed;
     u32 musicFatTableCache;
     u32 ramDumpCluster;
     u32 srParamsCluster;
@@ -187,6 +189,7 @@ typedef struct cardengineArm9 {
 	u32 musicsSize;
     u32 pageFileCluster;
     u32 manualCluster;
+    u32 sharedFontCluster;
     u32 cardStruct0;
 	u32 valueBits;
 	/*
@@ -206,9 +209,9 @@ typedef struct cardengineArm9 {
     u32 romLocation;
 	u32 rumbleFrames[2];
 	u32 rumbleForce[2];
-	u32* prepareScreenshot;
-	u32* saveScreenshot;
-	u32* readManual;
+	VoidFn prepareScreenshot;
+	VoidFn saveScreenshot;
+	void (* readManual)(int);
 } __attribute__ ((__packed__)) cardengineArm9;
 #endif
 

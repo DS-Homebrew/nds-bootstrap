@@ -73,6 +73,9 @@
 //#define asyncCardRead BIT(14)
 #define twlTouch BIT(15)
 #define cloneboot BIT(16)
+#define sleepMode BIT(17)
+#define dsiBios BIT(18)
+#define bootstrapOnFlashcard BIT(19)
 #define scfgLocked BIT(31)
 
 #define	REG_EXTKEYINPUT	(*(vuint16*)0x04000136)
@@ -276,11 +279,11 @@ static void driveInitialize(void) {
 		FAT_InitFiles(false, true, 0);
 	}
 
-	ramDumpFile = getFileFromCluster(ramDumpCluster, !(valueBits & b_dsiSD));
-	srParamsFile = getFileFromCluster(srParamsCluster, !(valueBits & gameOnFlashcard));
-	screenshotFile = getFileFromCluster(screenshotCluster, !(valueBits & b_dsiSD));
-	pageFile = getFileFromCluster(pageFileCluster, !(valueBits & b_dsiSD));
-	manualFile = getFileFromCluster(manualCluster, !(valueBits & b_dsiSD));
+	ramDumpFile = getFileFromCluster(ramDumpCluster, (valueBits & bootstrapOnFlashcard));
+	srParamsFile = getFileFromCluster(srParamsCluster, (valueBits & gameOnFlashcard));
+	screenshotFile = getFileFromCluster(screenshotCluster, (valueBits & bootstrapOnFlashcard));
+	pageFile = getFileFromCluster(pageFileCluster, (valueBits & bootstrapOnFlashcard));
+	manualFile = getFileFromCluster(manualCluster, (valueBits & bootstrapOnFlashcard));
 
 	//romFile = getFileFromCluster(fileCluster);
 	//buildFatTableCache(&romFile, 0);
@@ -549,6 +552,14 @@ void reset(void) {
 	fileRead((char*)(*(u32*)0x02FFE1C8), pageFile, 0x300000, iUncompressedSizei, 0);
 	fileRead((char*)(*(u32*)0x02FFE1D8), pageFile, 0x580000, newArm7ibinarySize, 0);
 
+	if (!(valueBits & dsiBios) && *(u32*)0x02F10020 != 0xEA001FF6) {
+		u32 src = 0x02FF4000;
+		if (*(u32*)0x02FFE1A0 == 0x00403000) {
+			src -= 0x1C000;
+		}
+		tonccpy((u32*)0x02F10000, (u32*)src, 0x8000);
+	}
+
 	//if (doBak) restoreSdBakData();
 	#endif
 	toncset((char*)((valueBits & isSdk5) ? 0x02FFFD80 : 0x027FFD80), 0, 0x80);
@@ -708,7 +719,7 @@ void returnToLoader(bool wait) {
 		tonccpy((u8*)0x02000400, (u8*)twlCfgLoc, 0x128);
 	}
 
-	if (((valueBits & twlTouch) && !(*(u8*)0x02FFE1BF & BIT(0))) || ((valueBits & b_dsiSD) && (valueBits & wideCheatUsed))) {
+	if (!(valueBits & dsiBios) || ((valueBits & twlTouch) && !(*(u8*)0x02FFE1BF & BIT(0))) || ((valueBits & b_dsiSD) && (valueBits & wideCheatUsed))) {
 		if (consoleModel >= 2) {
 			if (*(u32*)(ce7+0xF900) == 0) {
 				tonccpy((u32*)0x02000300, sr_data_srloader, 0x020);
@@ -1045,9 +1056,9 @@ static bool nandRead(void) {
 	u32 flash = *(vu32*)(sharedAddr+2);
 	u32 memory = *(vu32*)(sharedAddr);
 	u32 len = *(vu32*)(sharedAddr+1);
+	#ifdef DEBUG
 	u32 marker = *(vu32*)(sharedAddr+3);
 
-	#ifdef DEBUG
 	dbg_printf("\nnand read received\n");
 
 	if (calledViaIPC) {
@@ -1065,7 +1076,7 @@ static bool nandRead(void) {
 
 	//driveInitialize();
 	//cardReadLED(true, true);    // When a file is loading, turn on LED for card read indicator
-	return fileRead(memory, *savFile, flash, len, -1);
+	return fileRead((char *)memory, *savFile, flash, len, -1);
 	//cardReadLED(false, true);
 }
 
@@ -1073,9 +1084,9 @@ static bool nandWrite(void) {
 	u32 flash = *(vu32*)(sharedAddr+2);
 	u32 memory = *(vu32*)(sharedAddr);
 	u32 len = *(vu32*)(sharedAddr+1);
+	#ifdef DEBUG
 	u32 marker = *(vu32*)(sharedAddr+3);
 
-	#ifdef DEBUG
 	dbg_printf("\nnand write received\n");
 
 	if (calledViaIPC) {
@@ -1094,7 +1105,7 @@ static bool nandWrite(void) {
 	//driveInitialize();
 	saveTimer = 1;			// When we're saving, power button does nothing, in order to prevent corruption.
 	//cardReadLED(true, true);    // When a file is loading, turn on LED for card read indicator
-	return fileWrite(memory, *savFile, flash, len, -1);
+	return fileWrite((char *)memory, *savFile, flash, len, -1);
 	//cardReadLED(false, true);
 }
 
@@ -1382,6 +1393,7 @@ void myIrqHandlerNdma0(void) {
 
 
 void myIrqHandlerVBlank(void) {
+  while (1) {
 	#ifdef DEBUG		
 	nocashMessage("myIrqHandlerVBlank");
 	#endif	
@@ -1443,6 +1455,17 @@ void myIrqHandlerVBlank(void) {
 
 		funcsUnpatched = true;
 	}
+
+	#ifdef TWLSDK
+	if (!(valueBits & dsiBios) && *(u32*)0x02F10020 == 0xEA001FF6) {
+		u32 dst = 0x02FF4000;
+		if (*(u32*)0x02FFE1A0 == 0x00403000) {
+			dst -= 0x1C000;
+		}
+		tonccpy((u32*)dst, (u32*)0x02F10000, 0x8000); // Copy bios7i from buffer
+		toncset((u32*)0x02F10000, 0, 0x8000);
+	}
+	#endif
 
 	if (!(valueBits & gameOnFlashcard) && !(valueBits & ROMinRAM) && isSdEjected()) {
 		tonccpy((u32*)0x02000300, sr_data_error, 0x020);
@@ -1607,6 +1630,15 @@ void myIrqHandlerVBlank(void) {
 		}
 	}
 	swapScreens = false;
+
+	if (sharedAddr[0] == 0x524F5245) { // 'EROR'
+		REG_MASTER_VOLUME = 0;
+		while (REG_VCOUNT != 191) swiDelay(100);
+		while (REG_VCOUNT == 191) swiDelay(100);
+	} else {
+		break;
+	}
+  }
 }
 
 void i2cIRQHandler(void) {

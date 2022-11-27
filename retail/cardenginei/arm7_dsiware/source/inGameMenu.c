@@ -13,7 +13,11 @@
 #include "nds_header.h"
 #include "tonccpy.h"
 
+#define sleepMode BIT(17)
+
 #define REG_EXTKEYINPUT (*(vuint16*)0x04000136)
+
+extern u32 valueBits;
 
 extern vu32* volatile sharedAddr;
 extern bool ipcEveryFrame;
@@ -29,6 +33,18 @@ extern void saveScreenshot(void);
 extern void prepareManual(void);
 extern void readManual(int line);
 extern void restorePreManual(void);
+
+extern u16 biosRead16(u32 addr);
+
+void biosRead(void* dst, const void* src, u32 len)
+{
+	u16* _dst = (u16*)dst;
+	
+	for (u32 i = 0; i < len; i+=2)
+	{
+		_dst[i>>1] = biosRead16(((u32)src) + i);
+	}
+}
 
 volatile int timeTillStatusRefresh = 7;
 
@@ -56,6 +72,23 @@ void inGameMenu(void) {
 		while (!exitMenu) {
 			sharedAddr[5] = ~REG_KEYINPUT & 0x3FF;
 			sharedAddr[5] |= ((~REG_EXTKEYINPUT & 0x3) << 10) | ((~REG_EXTKEYINPUT & 0xC0) << 6);
+			if ((REG_EXTKEYINPUT & BIT(7)) && (valueBits & sleepMode)) {
+				// Save current power state.
+				int power = readPowerManagement(PM_CONTROL_REG);
+				// Set sleep LED. (Does not work)
+				writePowerManagement(PM_CONTROL_REG, PM_LED_CONTROL(1));
+
+				// Power down till we get our interrupt.
+				swiSleep();
+
+				while (REG_EXTKEYINPUT & BIT(7)) {
+					//100ms
+					swiDelay(838000);
+				}
+
+				// Restore power state.
+				writePowerManagement(PM_CONTROL_REG, power);
+			}
 			timeTillStatusRefresh++;
 			if (timeTillStatusRefresh >= 8) {
 				timeTillStatusRefresh = 0;
@@ -128,10 +161,24 @@ void inGameMenu(void) {
 					restorePreManual();
 					break;
 				case 0x524D4152: // RAMR
-					tonccpy((u32*)((u32)sharedAddr[0]), (u32*)((u32)sharedAddr[1]), 0xC0);
+					u32* dst = (u32*)((u32)sharedAddr[0]);
+					u32* src = (u32*)((u32)sharedAddr[1]);
+					for (int i = 0; i < 0xC0/8; i++) {
+						if ((u32)src >= 0x8000) {
+							tonccpy(dst, src, 8);
+						} else {
+							biosRead(dst, src, 8);
+						}
+						dst++;
+						dst++;
+						src++;
+						src++;
+					}
 					break;
 				case 0x574D4152: // RAMW
-					tonccpy((u8*)((u32)sharedAddr[1])+sharedAddr[2], (u8*)((u32)sharedAddr[0])+sharedAddr[2], 1);
+					if (sharedAddr[1]+sharedAddr[2] >= 0x8000) {
+						tonccpy((u8*)((u32)sharedAddr[1])+sharedAddr[2], (u8*)((u32)sharedAddr[0])+sharedAddr[2], 1);
+					}
 					break;
 				case 0x4554494C: // LITE
 					if(sharedAddr[0] == 0) {

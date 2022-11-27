@@ -1,10 +1,14 @@
 #include <stdio.h>
+#include <string.h>
 #include <nds/ndstypes.h>
 #include <nds/debug.h>
 #include "patch.h"
+#include "find.h"
 #include "hook.h"
 #include "common.h"
 #include "cardengine_header_arm9.h"
+#include "debug_file.h"
+#include "nds_header.h"
 
 #define b_expansionPakFound BIT(0)
 #define b_extendedMemory BIT(1)
@@ -158,6 +162,8 @@ int hookNdsRetailArm9(
 	u32 saveSize,
 	u32 romFatTableCache,
 	u32 savFatTableCache,
+	bool romFatTableCompressed,
+	bool savFatTableCompressed,
     u32 musicFatTableCache,
 	u32 ramDumpCluster,
 	u32 srParamsFileCluster,
@@ -166,6 +172,7 @@ int hookNdsRetailArm9(
 	u32 musicsSize,
 	u32 pageFileCluster,
 	u32 manualCluster,
+	u32 sharedFontCluster,
 	bool expansionPakFound,
 	bool extendedMemory,
 	bool ROMinRAM,
@@ -187,6 +194,8 @@ int hookNdsRetailArm9(
 	ce9->saveSize               = saveSize;
 	ce9->romFatTableCache       = romFatTableCache;
 	ce9->savFatTableCache       = savFatTableCache;
+	ce9->romFatTableCompressed  = (u16)romFatTableCompressed;
+	ce9->savFatTableCompressed  = (u16)savFatTableCompressed;
 	ce9->musicFatTableCache     = musicFatTableCache;
 	ce9->ramDumpCluster         = ramDumpCluster;
 	ce9->srParamsCluster        = srParamsFileCluster;
@@ -195,6 +204,7 @@ int hookNdsRetailArm9(
 	ce9->musicsSize             = musicsSize;
 	ce9->pageFileCluster        = pageFileCluster;
 	ce9->manualCluster          = manualCluster;
+	ce9->sharedFontCluster      = sharedFontCluster;
 	if (expansionPakFound) {
 		ce9->valueBits |= b_expansionPakFound;
 	}

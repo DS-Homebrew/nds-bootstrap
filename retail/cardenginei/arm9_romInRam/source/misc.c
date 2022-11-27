@@ -50,6 +50,9 @@ extern tNDSHeader* ndsHeader;
 extern bool flagsSet;
 extern bool igmReset;
 
+extern u32 getDtcmBase(void);
+extern void ndsCodeStart(u32* addr);
+
 void SetBrightness(u8 screen, s8 bright) {
 	u16 mode = 1 << 14;
 
@@ -96,11 +99,11 @@ void hookIPC_SYNC(void) {
 		if (!(ce9->valueBits & isSdk5)) {
 			u32* vblankHandler = ce9->irqTable;
 			ce9->intr_vblank_orig_return = *vblankHandler;
-			*vblankHandler = ce9->patches->vblankHandlerRef;
+			*vblankHandler = (u32)ce9->patches->vblankHandlerRef;
 		}
         u32* ipcSyncHandler = ce9->irqTable + 16;
 		ce9->intr_ipc_orig_return = *ipcSyncHandler;
-        *ipcSyncHandler = ce9->patches->ipcSyncHandlerRef;
+        *ipcSyncHandler = (u32)ce9->patches->ipcSyncHandlerRef;
         IPC_SYNC_hooked = true;
     }
 }

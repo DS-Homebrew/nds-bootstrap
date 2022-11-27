@@ -44,6 +44,7 @@ typedef	struct
 	u32	currentCluster;
 	u32 currentOffset;
 	bool fatTableCached;
+	bool fatTableCompressed;
 	u32* fatTableCache;
 	u32 fatTableCacheSize;
 	#ifdef TWOCARD
@@ -91,13 +92,13 @@ u32 FAT_ClustToSect(u32 cluster, bool card2);
 #else
 u32 FAT_ClustToSect(u32 cluster);
 #endif
-void buildFatTableCache (aFile * file, int ndmaSlot);
 #else
 u32 fileRead(char* buffer, aFile file, u32 startOffset, u32 length);
 u32 fileWrite(const char* buffer, aFile file, u32 startOffset, u32 length);
 u32 FAT_ClustToSect(u32 cluster);
-void buildFatTableCache (aFile * file);
 #endif
+void buildFatTableCache (aFile * file);
+void buildFatTableCacheCompressed (aFile * file);
 
 /* ROM Header Region Information Structure */
 

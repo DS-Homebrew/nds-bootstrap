@@ -28,28 +28,30 @@ int parse_ncsd(const uint8_t sector0[SECTOR_SIZE], int verbose) {
 		if (fs_type == 0) {
 			break;
 		}
-		const char *s_fs_type;
-		switch (fs_type) {
-			case 1:
-				s_fs_type = "Normal";
-				break;
-			case 3:
-				s_fs_type = "FIRM";
-				break;
-			case 4:
-				s_fs_type = "AGB_FIRM save";
-				break;
-			default:
-				if (verbose) {
-					//iprintf("invalid partition type %d\n", fs_type);
-				}
-				return -2;
-		}
 		if (verbose) {
+			/*
+			const char *s_fs_type;
+			switch (fs_type) {
+				case 1:
+					s_fs_type = "Normal";
+					break;
+				case 3:
+					s_fs_type = "FIRM";
+					break;
+				case 4:
+					s_fs_type = "AGB_FIRM save";
+					break;
+				default:
+					if (verbose) {
+						//iprintf("invalid partition type %d\n", fs_type);
+					}
+					return -2;
+			}
 			// yes I use MB for "MiB", bite me
-			//iprintf("partition %u, %s, crypt: %" PRIu8 ", offset: 0x%08" PRIx32 ", length: 0x%08" PRIx32 "(%s MB)\n",
-				//i, s_fs_type, h->crypt_types[i],
-				//h->partitions[i].offset, h->partitions[i].length, to_mebi(h->partitions[i].length * SECTOR_SIZE));
+			iprintf("partition %u, %s, crypt: %" PRIu8 ", offset: 0x%08" PRIx32 ", length: 0x%08" PRIx32 "(%s MB)\n",
+				i, s_fs_type, h->crypt_types[i],
+				h->partitions[i].offset, h->partitions[i].length, to_mebi(h->partitions[i].length * SECTOR_SIZE));
+			*/
 		}
 	}
 	return 0;

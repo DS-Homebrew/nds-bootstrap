@@ -33,6 +33,7 @@ std::string screenshotPath;
 std::string apFixOverlaysPath;
 std::string musicsFilePath;
 std::string pageFilePath;
+std::string sharedFontPath;
 
 typedef struct {
 	char gameTitle[12];			//!< 12 characters for the game title.
@@ -44,6 +45,7 @@ typedef struct {
 
 static bool debug = false;
 static bool sdFound = false;
+static bool bootstrapOnFlashcard = false;
 
 static inline const char* btoa(bool x) {
 	return x ? "true" : "false";
@@ -55,7 +57,7 @@ static int dbg_printf(const char* format, ...) { // static int...
 	}
 
 	static FILE* debugFile;
-	debugFile = fopen(sdFound ? "sd:/NDSBTSRP.LOG" : "fat:/NDSBTSRP.LOG", "a");
+	debugFile = fopen(bootstrapOnFlashcard ? "fat:/NDSBTSRP.LOG" : "sd:/NDSBTSRP.LOG", "a");
 
 	va_list args;
 	va_start(args, format);
@@ -404,6 +406,7 @@ static int runNdsFile(configuration* conf) {
 	struct stat stMusic;
 	struct stat stPage;
 	struct stat stManual;
+	struct stat stTwlFont;
 	u32 clusterSav = 0;
 	u32 clusterDonor = 0;
 	u32 clusterGba = 0;
@@ -419,6 +422,7 @@ static int runNdsFile(configuration* conf) {
 	u32 musicCluster = 0;
 	u32 clusterPageFile = 0;
 	u32 clusterManual = 0;
+	u32 clusterTwlFont = 0;
 
 	if (stat(conf->ndsPath, &st) < 0) {
 		return -2;
@@ -489,14 +493,21 @@ static int runNdsFile(configuration* conf) {
 		clusterPageFile = stPage.st_ino;
 	}
 
-	return runNds(st.st_ino, clusterSav, clusterDonor, clusterGba, clusterGbaSav, clusterWideCheat, clusterApPatch, clusterCheat, clusterPatchOffsetCache, clusterRamDump, clusterSrParams, clusterScreenshot, apFixOverlaysCluster, musicCluster, clusterPageFile, clusterManual, conf);
+	if (stat(sharedFontPath.c_str(), &stTwlFont) >= 0) {
+		clusterTwlFont = stTwlFont.st_ino;
+	}
+
+	return runNds(st.st_ino, clusterSav, clusterDonor, clusterGba, clusterGbaSav, clusterWideCheat, clusterApPatch, clusterCheat, clusterPatchOffsetCache, clusterRamDump, clusterSrParams, clusterScreenshot, apFixOverlaysCluster, musicCluster, clusterPageFile, clusterManual, clusterTwlFont, conf);
 }
 
 int main(int argc, char** argv) {
+	fifoSendValue32(FIFO_PM, PM_REQ_SLEEP_DISABLE);
+
 	configuration* conf = (configuration*)malloc(sizeof(configuration));
 
 	int status = loadFromSD(conf, argv[0]);
 	sdFound = (conf->sdFound && !conf->b4dsMode);
+	bootstrapOnFlashcard = conf->bootstrapOnFlashcard;
 
 	if (status == 0) {
 		status = runNdsFile(conf);

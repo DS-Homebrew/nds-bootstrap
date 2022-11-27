@@ -32,6 +32,8 @@
 #include "find.h"
 #include "hook.h"
 
+#define b_sleepMode BIT(17)
+
 extern u32 newArm7binarySize;
 
 static const u32 handlerStartSig[5] = {
@@ -213,6 +215,9 @@ int hookNdsRetailArm7(
 	ce7->intr_vblank_orig_return = *vblankHandler;
 	//ce7->intr_fifo_orig_return   = *ipcSyncHandler;
 	ce7->moduleParams            = moduleParams;
+	if (sleepMode) {
+		ce7->valueBits |= b_sleepMode;
+	}
 	ce7->language                = language;
 	if (strcmp(romTid, "AKYP") == 0) { // Etrian Odyssey (EUR)
 		ce7->languageAddr = (u32*)0x020DC5DC;
@@ -221,9 +226,9 @@ int hookNdsRetailArm7(
 
 	*vblankHandler = ce7->patches->vblankHandler;
 
-	aFile cheatFile = getFileFromCluster(cheatFileCluster);
+	/*aFile cheatFile = getFileFromCluster(cheatFileCluster);
 	aFile apPatchFile = getFileFromCluster(apPatchFileCluster);
-	if (cheatSize+(apPatchIsCheat ? apPatchSize : 0) <= 0x1C00) {
+	if (newArm7binarySize != 0x29EE8 && cheatSize+(apPatchIsCheat ? apPatchSize : 0) <= 0x1C00) {
 		u32 cheatEngineOffset = CHEAT_ENGINE_LOCATION_B4DS;
 		char* cheatDataOffset = (char*)cheatEngineOffset+0x3E8;
 		if (apPatchFile.firstCluster != CLUSTER_FREE && apPatchIsCheat) {
@@ -235,7 +240,7 @@ int hookNdsRetailArm7(
 		if (cheatFile.firstCluster != CLUSTER_FREE) {
 			fileRead(cheatDataOffset, cheatFile, 0, cheatSize);
 		}
-	}
+	}*/
 
 	nocashMessage("ERR_NONE");
 	return ERR_NONE;

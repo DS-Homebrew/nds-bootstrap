@@ -579,8 +579,8 @@ void my_sdmmcValueHandler(u32 value, void* user_data) {
     switch(value) {
 
     case SDMMC_HAVE_SD:
-        result = sdmmc_read16(REG_SDSTATUS0);
-        break;
+		result = (sdmmc_read16(REG_SDSTATUS0) & BIT(5)) != 0;
+		break;
 
     case SDMMC_SD_START:
         sdflag = 1;

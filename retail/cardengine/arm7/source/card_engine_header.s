@@ -15,6 +15,7 @@
 .global patches_offset
 .global moduleParams
 .global saveCluster
+.global valueBits
 .global language
 .global languageAddr
 .global igmHotkey
@@ -35,6 +36,8 @@ intr_vblank_orig_return:
 moduleParams:
 	.word	0x00000000
 cardStruct:
+	.word	0x00000000
+valueBits:
 	.word	0x00000000
 language:
 	.word	0x00000000

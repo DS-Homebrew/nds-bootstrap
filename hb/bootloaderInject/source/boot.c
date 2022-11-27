@@ -325,7 +325,7 @@ void mpu_reset_end();*/
 int main (void) {
 	//nocashMessage("bootloader");
 
-	extern char _io_dldi;
+	extern void *_io_dldi;
 	//const char* bootName = "BOOT.NDS";
 
 	if(memcmp(_io_dldi, "RAMD", 4) == 0)

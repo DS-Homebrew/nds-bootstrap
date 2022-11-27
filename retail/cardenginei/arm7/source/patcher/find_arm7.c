@@ -10,7 +10,7 @@
 static const u32 relocateStartSignature[1] = {0x027FFFFA};
 
 static const u32 nextFunctiontSignature[1] = {0xE92D4000};
-static const u32 relocateValidateSignature[1] = {0x400010C};
+// static const u32 relocateValidateSignature[1] = {0x400010C};
 
 static const u32 swi12Signature[1] = {0x4770DF12}; // LZ77UnCompReadByCallbackWrite16bit
 

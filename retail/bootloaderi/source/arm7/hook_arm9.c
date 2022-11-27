@@ -165,7 +165,7 @@ int hookNdsRetailArm9(
 	u32 fileCluster,
 	u32 saveCluster,
 	u32 saveSize,
-	u16 saveOnFlashcard,
+	u8 saveOnFlashcard,
 	u32 cacheBlockSize,
 	u8 extendedMemory,
 	u8 ROMinRAM,
@@ -176,6 +176,7 @@ int hookNdsRetailArm9(
 ) {
 	nocashMessage("hookNdsRetailArm9");
 
+	extern u16 a9ScfgRom;
 	extern u32 iUncompressedSize;
 	extern u32 overlaysSize;
 	extern bool overlayPatch;
@@ -213,7 +214,7 @@ int hookNdsRetailArm9(
 	) {
 		ce9->valueBits |= b_cacheDisabled; // Disable card data cache for specific games
 	}
-	if (!(REG_SCFG_ROM & BIT(9))) {
+	if ((REG_SCFG_EXT == 0) ? ((u8)a9ScfgRom == 1) : !(REG_SCFG_ROM & BIT(1))) {
 		ce9->valueBits |= b_dsiBios;
 	}
 	if (asyncCardRead) {
@@ -346,6 +347,7 @@ int hookNdsRetailArm9(
 
 int hookNdsRetailArm9Mini(cardengineArm9* ce9, const tNDSHeader* ndsHeader, u8 consoleModel) {
 	ce9->consoleModel           = consoleModel;
+	ce9->valueBits |= b_enableExceptionHandler;
 
 	extern u32 iUncompressedSize;
 

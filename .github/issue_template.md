@@ -15,6 +15,9 @@
 <!-- Include SHA1/MD5 hashes, Title IDs, and anything that could be used to identify it. If it's homebrew, please link said homebrew here. -->
 **Game tested/used/applicable:**
 
+<!-- Upload your save file listed as `SAV_PATH` in `sd:/_nds/nds-bootstrap.ini`, and put in a `.zip` file -->
+**Save file:**
+
 <!-- What should have happened? -->
 **Expected Behavior:**
 
@@ -45,4 +48,7 @@ Using TWiLight Menu++? Toggle it via the 'nds-bootstrap' page instead
 
 <!-- Anything else that may be relevant to the issue. -->
 ### Other notes
+
+<!-- Type `Yes` or `No` for this one. -->
+### Will you be available for future issues and/or replies?
 

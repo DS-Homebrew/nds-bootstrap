@@ -214,6 +214,7 @@ bool extention(const std::string& filename, const char* ext) {
 }
 
 int main( int argc, char **argv) {
+	fifoSendValue32(FIFO_PM, PM_REQ_SLEEP_DISABLE);
 
     //consoleDemoInit();
 

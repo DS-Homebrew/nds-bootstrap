@@ -25,6 +25,7 @@
 	.global _start
 	.global storedFileCluster
 	.global initDisc
+	.global bootstrapOnFlashcard
 	.global gameOnFlashcard
 	.global saveOnFlashcard
 	.global a9ScfgRom
@@ -56,6 +57,7 @@
 	.global musicsSize
 	.global pageFileCluster
 	.global manualCluster
+	.global sharedFontCluster
 	.global patchMpuSize
 	.global patchMpuRegion
 	.global language
@@ -81,10 +83,12 @@ storedFileCluster:
 	.word	0x0FFFFFFF		@ default BOOT.NDS
 initDisc:
 	.word	0x00000001		@ init the disc by default
+bootstrapOnFlashcard:
+	.hword	0x0000
 gameOnFlashcard:
-	.hword	0x0000
+	.byte	0
 saveOnFlashcard:
-	.hword	0x0000
+	.byte	0
 dldiOffset:
 	.word	0x00000000
 a9ScfgRom:
@@ -144,6 +148,8 @@ musicsSize:
 pageFileCluster:
 	.word	0x00000000
 manualCluster:
+	.word	0x00000000
+sharedFontCluster:
 	.word	0x00000000
 patchMpuSize:
 	.word	0x00000000

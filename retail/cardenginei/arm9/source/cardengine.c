@@ -20,6 +20,7 @@
 #include <nds/ndstypes.h>
 #include <nds/arm9/exceptions.h>
 #include <nds/arm9/cache.h>
+#include <nds/bios.h>
 #include <nds/system.h>
 #include <nds/dma.h>
 #include <nds/interrupts.h>
@@ -79,6 +80,7 @@
 extern cardengineArm9* volatile ce9;
 
 extern void ndsCodeStart(u32* addr);
+extern u32 getDtcmBase(void);
 
 #ifdef TWLSDK
 vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS_SDK5;
@@ -86,13 +88,16 @@ vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS_SDK5;
 vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS_SDK1;
 #endif
 
+#ifndef TWLSDK
 static unpatchedFunctions* unpatchedFuncs = (unpatchedFunctions*)UNPATCHED_FUNCTION_LOCATION;
+#endif
 
 #ifdef TWLSDK
 tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
 aFile* romFile = (aFile*)ROM_FILE_LOCATION_TWLSDK;
 aFile* savFile = (aFile*)SAV_FILE_LOCATION_TWLSDK;
 aFile* apFixOverlaysFile = (aFile*)OVL_FILE_LOCATION_TWLSDK;
+aFile* sharedFontFile = (aFile*)FONT_FILE_LOCATION_TWLSDK;
 #else
 tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER;
 aFile* romFile = (aFile*)ROM_FILE_LOCATION_MAINMEM;
@@ -115,7 +120,9 @@ int accessCounter = 0;
 #endif
 bool flagsSet = false;
 static bool driveInitialized = false;
+#ifndef TWLSDK
 static bool region0FixNeeded = false;
+#endif
 bool igmReset = false;
 
 extern bool isDma;
@@ -601,32 +608,32 @@ void cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 
 /*void cardPullOut(void) {
 	if (*(vu32*)(0x027FFB30) != 0) {
-		/*volatile int (*terminateForPullOutRef)(u32*) = *ce9->patches->terminateForPullOutRef;
-        (*terminateForPullOutRef);
-		sharedAddr[3] = 0x5245424F;
-		waitForArm7();
+		// volatile int (*terminateForPullOutRef)(u32*) = *ce9->patches->terminateForPullOutRef;
+        // (*terminateForPullOutRef);
+		// sharedAddr[3] = 0x5245424F;
+		// waitForArm7();
 	}
 }*/
 
 bool nandRead(void* memory,void* flash,u32 len,u32 dma) {
 #ifdef DLDI
 	if (ce9->valueBits & saveOnFlashcard) {
-		fileRead(memory, *savFile, flash, len, 0);
+		fileRead(memory, *savFile, (u32)flash, len, 0);
 		return true;
 	} else {
 		// Send a command to the ARM7 to read the nand save
 		u32 commandNandRead = 0x025FFC01;
 
 		// Write the command
-		sharedAddr[0] = memory;
+		sharedAddr[0] = (u32)memory;
 		sharedAddr[1] = len;
-		sharedAddr[2] = flash;
+		sharedAddr[2] = (u32)flash;
 		sharedAddr[3] = commandNandRead;
 
 		waitForArm7();
 	}
 #else
-	fileRead(memory, *savFile, flash, len, 0);
+	fileRead(memory, *savFile, (u32)flash, len, 0);
 #endif
     return true; 
 }
@@ -634,33 +641,35 @@ bool nandRead(void* memory,void* flash,u32 len,u32 dma) {
 bool nandWrite(void* memory,void* flash,u32 len,u32 dma) {
 #ifdef DLDI
 	if (ce9->valueBits & saveOnFlashcard) {
-		fileWrite(memory, *savFile, flash, len, 0);
+		fileWrite(memory, *savFile, (u32)flash, len, 0);
 		return true;
 	} else {
 		// Send a command to the ARM7 to write the nand save
 		u32 commandNandWrite = 0x025FFC02;
 
 		// Write the command
-		sharedAddr[0] = memory;
+		sharedAddr[0] = (u32)memory;
 		sharedAddr[1] = len;
-		sharedAddr[2] = flash;
+		sharedAddr[2] = (u32)flash;
 		sharedAddr[3] = commandNandWrite;
 
 		waitForArm7();
 	}
 #else
-	fileWrite(memory, *savFile, flash, len, 0);
+	fileWrite(memory, *savFile, (u32)flash, len, 0);
 #endif
     return true; 
 }
 
 #ifdef TWLSDK
 #ifdef DLDI
+static bool sharedFontOpened = false;
 static bool dsiSaveInited = false;
 static bool dsiSaveExists = false;
 static u32 dsiSavePerms = 0;
 static s32 dsiSaveSeekPos = 0;
-static u32 dsiSaveSize = 0;
+static s32 dsiSaveSize = 0;
+static s32 dsiSaveResultCode = 0;
 
 typedef struct dsiSaveInfo
 {
@@ -709,7 +718,7 @@ u32 dsiSaveGetResultCode(const char* path) {
 	{
 		return 8;
 	}
-	return dsiSaveExists ? 8 : 0xB;
+	return dsiSaveResultCode;
 #else
 	return 0xB;
 #endif
@@ -719,6 +728,7 @@ bool dsiSaveCreate(const char* path, u32 permit) {
 #ifdef DLDI
 	dsiSaveSeekPos = 0;
 	if (savFile->firstCluster == CLUSTER_FREE || savFile->firstCluster == CLUSTER_EOF) {
+		dsiSaveResultCode = 0xE;
 		return false;
 	}
 
@@ -742,8 +752,10 @@ bool dsiSaveCreate(const char* path, u32 permit) {
 		leaveCriticalSection(oldIME);
 
 		dsiSaveExists = true;
+		dsiSaveResultCode = 0;
 		return true;
 	}
+	dsiSaveResultCode = 8;
 #endif
 	return false;
 }
@@ -752,6 +764,7 @@ bool dsiSaveDelete(const char* path) {
 #ifdef DLDI
 	dsiSaveSeekPos = 0;
 	if (savFile->firstCluster == CLUSTER_FREE || savFile->firstCluster == CLUSTER_EOF) {
+		dsiSaveResultCode = 0xE;
 		return false;
 	}
 
@@ -767,8 +780,10 @@ bool dsiSaveDelete(const char* path) {
 		leaveCriticalSection(oldIME);
 
 		dsiSaveExists = false;
+		dsiSaveResultCode = 0;
 		return true;
 	}
+	dsiSaveResultCode = 8;
 #endif
 	return false;
 }
@@ -803,6 +818,7 @@ u32 dsiSaveSetLength(void* ctx, s32 len) {
 #ifdef DLDI
 	dsiSaveSeekPos = 0;
 	if (savFile->firstCluster == CLUSTER_FREE || savFile->firstCluster == CLUSTER_EOF) {
+		dsiSaveResultCode = 1;
 		return 1;
 	}
 
@@ -812,10 +828,12 @@ u32 dsiSaveSetLength(void* ctx, s32 len) {
 	u16 exmemcnt = REG_EXMEMCNT;
 	sysSetCardOwner(true);	// Give Slot-1 access to arm9
 	bool res = fileWrite((char*)&dsiSaveSize, *savFile, ce9->saveSize-4, 4, 0);
+	dsiSaveResultCode = res ? 0 : 1;
+	toncset32(ctx+0x14, dsiSaveResultCode, 1);
 	REG_EXMEMCNT = exmemcnt;
 	leaveCriticalSection(oldIME);
 
-	return res ? 0 : 1;
+	return dsiSaveResultCode;
 #else
 	return 1;
 #endif
@@ -824,14 +842,26 @@ u32 dsiSaveSetLength(void* ctx, s32 len) {
 bool dsiSaveOpen(void* ctx, const char* path, u32 mode) {
 #ifdef DLDI
 	dsiSaveSeekPos = 0;
+	if (strcmp(path, "nand:/<sharedFont>") == 0) {
+		if (sharedFontFile->firstCluster == CLUSTER_FREE || sharedFontFile->firstCluster == CLUSTER_EOF) {
+			dsiSaveResultCode = 0xE;
+			toncset32(ctx+0x14, dsiSaveResultCode, 1);
+			return false;
+		}
+		dsiSaveResultCode = 0;
+		toncset32(ctx+0x14, dsiSaveResultCode, 1);
+		sharedFontOpened = true;
+		return true;
+	}
 	if (savFile->firstCluster == CLUSTER_FREE || savFile->firstCluster == CLUSTER_EOF) {
+		dsiSaveResultCode = 0xE;
+		toncset32(ctx+0x14, dsiSaveResultCode, 1);
 		return false;
 	}
 
 	dsiSaveInit();
-	if (!dsiSaveExists) {
-		toncset32(ctx+0x14, dsiSaveGetResultCode(path), 1);
-	}
+	dsiSaveResultCode = dsiSaveExists ? 0 : 0xB;
+	toncset32(ctx+0x14, dsiSaveResultCode, 1);
 
 	dsiSavePerms = mode;
 	return dsiSaveExists;
@@ -843,10 +873,25 @@ bool dsiSaveOpen(void* ctx, const char* path, u32 mode) {
 bool dsiSaveClose(void* ctx) {
 #ifdef DLDI
 	dsiSaveSeekPos = 0;
+	if (sharedFontOpened) {
+		sharedFontOpened = false;
+		if (sharedFontFile->firstCluster == CLUSTER_FREE || sharedFontFile->firstCluster == CLUSTER_EOF) {
+			dsiSaveResultCode = 0xE;
+			toncset32(ctx+0x14, dsiSaveResultCode, 1);
+			return false;
+		}
+		dsiSaveResultCode = 0;
+		toncset32(ctx+0x14, dsiSaveResultCode, 1);
+		return true;
+	}
 	if (savFile->firstCluster == CLUSTER_FREE || savFile->firstCluster == CLUSTER_EOF) {
+		dsiSaveResultCode = 0xE;
+		toncset32(ctx+0x14, dsiSaveResultCode, 1);
 		return false;
 	}
 	//toncset(ctx, 0, 0x80);
+	dsiSaveResultCode = dsiSaveExists ? 0 : 0xB;
+	toncset32(ctx+0x14, dsiSaveResultCode, 1);
 	return dsiSaveExists;
 #else
 	return false;
@@ -868,10 +913,29 @@ u32 dsiSaveGetLength(void* ctx) {
 
 bool dsiSaveSeek(void* ctx, s32 pos, u32 mode) {
 #ifdef DLDI
+	if (sharedFontOpened) {
+		if (sharedFontFile->firstCluster == CLUSTER_FREE || sharedFontFile->firstCluster == CLUSTER_EOF) {
+			dsiSaveResultCode = 0xE;
+			return false;
+		}
+		dsiSaveSeekPos = pos;
+		dsiSaveResultCode = 0;
+		toncset32(ctx+0x14, dsiSaveResultCode, 1);
+		return true;
+	}
 	if (savFile->firstCluster == CLUSTER_FREE || savFile->firstCluster == CLUSTER_EOF) {
+		dsiSaveResultCode = 0xE;
+		toncset32(ctx+0x14, dsiSaveResultCode, 1);
+		return false;
+	}
+	if (!dsiSaveExists) {
+		dsiSaveResultCode = 1;
+		toncset32(ctx+0x14, dsiSaveResultCode, 1);
 		return false;
 	}
 	dsiSaveSeekPos = pos;
+	dsiSaveResultCode = 0;
+	toncset32(ctx+0x14, dsiSaveResultCode, 1);
 	return true;
 #else
 	return false;
@@ -880,26 +944,36 @@ bool dsiSaveSeek(void* ctx, s32 pos, u32 mode) {
 
 s32 dsiSaveRead(void* ctx, void* dst, u32 len) {
 #ifdef DLDI
-	if (dsiSavePerms == 2) {
-		return -1; // Return if only write perms are set
-	}
+	if (!sharedFontOpened) {
+		if (dsiSavePerms == 2 || !dsiSaveExists) {
+			dsiSaveResultCode = 1;
+			toncset32(ctx+0x14, dsiSaveResultCode, 1);
+			return -1; // Return if only write perms are set
+		}
 
-	if (dsiSaveSize == 0) {
-		return 0;
-	}
+		if (dsiSaveSize == 0) {
+			dsiSaveResultCode = 1;
+			toncset32(ctx+0x14, dsiSaveResultCode, 1);
+			return 0;
+		}
 
-	while (dsiSaveSeekPos+len > dsiSaveSize) {
-		len--;
-	}
+		while (dsiSaveSeekPos+len > dsiSaveSize) {
+			len--;
+		}
 
-	if (len == 0) {
-		return 0;
+		if (len == 0) {
+			dsiSaveResultCode = 1;
+			toncset32(ctx+0x14, dsiSaveResultCode, 1);
+			return 0;
+		}
 	}
 
 	int oldIME = enterCriticalSection();
 	u16 exmemcnt = REG_EXMEMCNT;
 	sysSetCardOwner(true);	// Give Slot-1 access to arm9
-	bool res = fileRead(dst, *savFile, dsiSaveSeekPos, len, 0);
+	bool res = fileRead(dst, sharedFontOpened ? *sharedFontFile : *savFile, dsiSaveSeekPos, len, 0);
+	dsiSaveResultCode = res ? 1 : 0;
+	toncset32(ctx+0x14, dsiSaveResultCode, 1);
 	REG_EXMEMCNT = exmemcnt;
 	leaveCriticalSection(oldIME);
 	if (res) {
@@ -912,14 +986,23 @@ s32 dsiSaveRead(void* ctx, void* dst, u32 len) {
 
 s32 dsiSaveWrite(void* ctx, void* src, s32 len) {
 #ifdef DLDI
-	if (dsiSavePerms == 1) {
+	if (dsiSavePerms == 1 || !dsiSaveExists) {
+		dsiSaveResultCode = 1;
+		toncset32(ctx+0x14, dsiSaveResultCode, 1);
 		return -1; // Return if only read perms are set
+	}
+
+	while (dsiSaveSeekPos+len > ce9->saveSize-0x200) {
+		// Do not overwrite exist flag and save file size
+		len--;
 	}
 
 	int oldIME = enterCriticalSection();
 	u16 exmemcnt = REG_EXMEMCNT;
 	sysSetCardOwner(true);	// Give Slot-1 access to arm9
 	bool res = fileWrite(src, *savFile, dsiSaveSeekPos, len, 0);
+	dsiSaveResultCode = res ? 1 : 0;
+	toncset32(ctx+0x14, dsiSaveResultCode, 1);
 	REG_EXMEMCNT = exmemcnt;
 	leaveCriticalSection(oldIME);
 	if (res) {
@@ -1009,6 +1092,46 @@ s32 dsiSaveWrite(void* ctx, void* src, s32 len) {
 
 extern void reset(u32 param, u32 tid2);
 
+void inGameMenu(s32* exRegisters) {
+	#ifdef TWLSDK
+	/*if (ce9->consoleModel > 0) {
+		*(u32*)(INGAME_MENU_LOCATION_DSIWARE + IGM_TEXT_SIZE_ALIGNED) = (u32)sharedAddr;
+		volatile void (*inGameMenu)(s8*, u32, s32*) = (volatile void*)INGAME_MENU_LOCATION_DSIWARE + IGM_TEXT_SIZE_ALIGNED + 0x10;
+		(*inGameMenu)(&mainScreen, ce9->consoleModel, exRegisters);
+	} else {*/
+		*(u32*)(INGAME_MENU_LOCATION_TWLSDK + IGM_TEXT_SIZE_ALIGNED) = (u32)sharedAddr;
+		volatile void (*inGameMenu)(s8*, u32, s32*) = (volatile void*)INGAME_MENU_LOCATION_TWLSDK + IGM_TEXT_SIZE_ALIGNED + 0x10;
+		(*inGameMenu)(&mainScreen, ce9->consoleModel, exRegisters);
+	//}
+	#else
+	*(u32*)(INGAME_MENU_LOCATION + IGM_TEXT_SIZE_ALIGNED) = (u32)sharedAddr;
+	volatile void (*inGameMenu)(s8*, u32, s32*) = (volatile void*)INGAME_MENU_LOCATION + IGM_TEXT_SIZE_ALIGNED + 0x10;
+	(*inGameMenu)(&mainScreen, ce9->consoleModel, exRegisters);
+	#endif
+	#ifdef TWLSDK
+	if (sharedAddr[3] == 0x54495845) {
+		igmReset = true;
+		if (*(u32*)0x02FFE234 == 0x00030004 || *(u32*)0x02FFE234 == 0x00030005) {
+			reset(0, 0);
+		} else {
+			reset(0xFFFFFFFF, 0);
+		}
+	} else
+	#endif
+	if (sharedAddr[3] == 0x52534554) {
+		igmReset = true;
+	#ifdef TWLSDK
+		if (*(u32*)0x02FFE234 == 0x00030004 || *(u32*)0x02FFE234 == 0x00030005) { // If DSiWare...
+			reset(*(u32*)0x02FFE230, *(u32*)0x02FFE234);
+		} else {
+	#endif
+			reset(0, 0);
+	#ifdef TWLSDK
+		}
+	#endif
+	}
+}
+
 //---------------------------------------------------------------------------------
 void myIrqHandlerVBlank(void) {
 //---------------------------------------------------------------------------------
@@ -1083,45 +1206,8 @@ void myIrqHandlerIPC(void) {
 				REG_POWERCNT |= POWER_SWAP_LCDS;
 		}
 			break;
-		case 0x9: {
-			#ifdef TWLSDK
-			if (ce9->consoleModel > 0) {
-				*(u32*)(INGAME_MENU_LOCATION_DSIWARE + IGM_TEXT_SIZE_ALIGNED) = (u32)sharedAddr;
-				volatile void (*inGameMenu)(s8*, u32, s32*) = (volatile void*)INGAME_MENU_LOCATION_DSIWARE + IGM_TEXT_SIZE_ALIGNED + 0x10;
-				(*inGameMenu)(&mainScreen, ce9->consoleModel, 0);
-			} else {
-				*(u32*)(INGAME_MENU_LOCATION_TWLSDK + IGM_TEXT_SIZE_ALIGNED) = (u32)sharedAddr;
-				volatile void (*inGameMenu)(s8*, u32, s32*) = (volatile void*)INGAME_MENU_LOCATION_TWLSDK + IGM_TEXT_SIZE_ALIGNED + 0x10;
-				(*inGameMenu)(&mainScreen, ce9->consoleModel, 0);
-			}
-			#else
-			*(u32*)(INGAME_MENU_LOCATION + IGM_TEXT_SIZE_ALIGNED) = (u32)sharedAddr;
-			volatile void (*inGameMenu)(s8*, u32, s32*) = (volatile void*)INGAME_MENU_LOCATION + IGM_TEXT_SIZE_ALIGNED + 0x10;
-			(*inGameMenu)(&mainScreen, ce9->consoleModel, 0);
-			#endif
-			#ifdef TWLSDK
-			if (sharedAddr[3] == 0x54495845) {
-				igmReset = true;
-				if (*(u32*)0x02FFE234 == 0x00030004 || *(u32*)0x02FFE234 == 0x00030005) {
-					reset(0, 0);
-				} else {
-					reset(0xFFFFFFFF, 0);
-				}
-			} else
-			#endif
-			if (sharedAddr[3] == 0x52534554) {
-				igmReset = true;
-			#ifdef TWLSDK
-				if (*(u32*)0x02FFE234 == 0x00030004 || *(u32*)0x02FFE234 == 0x00030005) { // If DSiWare...
-					reset(*(u32*)0x02FFE230, *(u32*)0x02FFE234);
-				} else {
-			#endif
-					reset(0, 0);
-			#ifdef TWLSDK
-				}
-			#endif
-			}
-		}
+		case 0x9:
+			inGameMenu((s32*)0);
 			break;
 	}
 
@@ -1144,7 +1230,22 @@ u32 myIrqEnable(u32 irq) {
 	nocashMessage("myIrqEnable\n");
 	#endif
 
-	#ifndef TWLSDK
+	#ifdef TWLSDK
+	#ifdef DLDI
+	if (!(ce9->valueBits & dsiBios) && *(u32*)0x02F40000 != 0) {
+		extern void setLowVectors();
+
+		u32* itcmAddr = (u32*)0x01000000;
+		u32* newVectorAddr = (u32*)0x02000000;
+		for (int i = 0; i < 8; i++) {
+			itcmAddr[i] = 0xEA7FFFFE;
+			newVectorAddr[i] = 0xEA3CFFFE;
+		}
+
+		setLowVectors();
+	}
+	#endif
+	#else
 	initialize();
 	#endif
 

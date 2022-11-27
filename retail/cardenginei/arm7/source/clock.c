@@ -24,13 +24,8 @@
 
 ---------------------------------------------------------------------------------*/
 
-#include <nds/bios.h>
 #include <nds/arm7/clock.h>
-#include <nds/interrupts.h>
-#include <nds/ipc.h>
-#include <nds/system.h>
-
-#include <time.h>
+#include <nds/ndstypes.h>
 
 
 
@@ -53,18 +48,6 @@ void BCDToInteger(uint8 * data, uint32 length) {
 	u32 i;
 	for (i = 0; i < length; i++) {
 		data[i] = (data[i] & 0xF) + ((data[i] & 0xF0)>>4)*10;
-	}
-}
-
-
-//---------------------------------------------------------------------------------
-void integerToBCD(uint8 * data, uint32 length) {
-//---------------------------------------------------------------------------------
-	u32 i;
-	for (i = 0; i < length; i++) {
-		int high, low;
-		swiDivMod(data[i], 10, &high, &low);
-		data[i] = (high<<4) | low;
 	}
 }
 
@@ -147,40 +130,3 @@ void rtcGetTimeAndDate(uint8 * time) {
 	}
 	BCDToInteger(time,7);
 }
-
-//---------------------------------------------------------------------------------
-void rtcGetTime(uint8 * time) {
-//---------------------------------------------------------------------------------
-	uint8 command, status;
-
-	command = READ_TIME;
-	rtcTransaction(&command, 1, time, 3);
-
-	command = READ_STATUS_REG1;
-	rtcTransaction(&command, 1, &status, 1);
-	if ( status & STATUS_24HRS ) {
-		time[0] &= 0x3f;
-	} else {
-
-	}
-	BCDToInteger(time,3);
-
-}
-
-/* Nonzero if `y' is a leap year, else zero. */
-#define leap(y) (((y) % 4 == 0 && (y) % 100 != 0) || (y) % 400 == 0)
-
-/* Number of leap years from 1970 to `y' (not including `y' itself). */
-#define nleap(y) (((y) - 1969) / 4 - ((y) - 1901) / 100 + ((y) - 1601) / 400)
-
-/* Additional leapday in February of leap years. */
-#define leapday(m, y) ((m) == 1 && leap (y))
-
-/* Accumulated number of days from 01-Jan up to start of current month. */
-static const short ydays[] = {
-  0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334, 365
-};
-
-/* Length of month `m' (0 .. 11) */
-#define monthlen(m, y) (ydays[(m)+1] - ydays[m] + leapday (m, y))
-

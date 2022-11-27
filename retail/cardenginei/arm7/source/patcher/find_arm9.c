@@ -106,7 +106,7 @@ static const u32 sleepSignature4[4]        = {0xE92D4030, 0xE24DD034, 0xE1A04000
 static const u32 sleepSignature4Alt[4]     = {0xE92D4030, 0xE24DD034, 0xE1A05000, 0xE28D0008}; // sdk4
 static const u16 sleepSignatureThumb4[4]        = {0xB530, 0xB08D, 0x1C04, 0xA802}; // sdk4
 
-static const u16 sleepConstantValue = {0x82EA};
+static const u16 sleepConstantValue[1] = {0x82EA};
 
 // Init Heap
 static const u32 initHeapEndSignature1[2]              = {0x27FF000, 0x37F8000};
@@ -235,7 +235,7 @@ u32* findCardReadEndOffsetType0(const tNDSHeader* ndsHeader, const module_params
 u32* findCardReadEndOffsetType1(const tNDSHeader* ndsHeader, u32 startOffset) {
 	//dbg_printf("findCardReadEndOffsetType1:\n");
 
-	const char* romTid = getRomTid(ndsHeader);
+	//const char* romTid = getRomTid(ndsHeader);
 
 	u32* cardReadEndOffset = findOffset(
 		(u32*)startOffset, iUncompressedSize-(startOffset-0x02000000),//ndsHeader->arm9binarySize,
@@ -1103,10 +1103,10 @@ u32* findRandomPatchOffset(const tNDSHeader* ndsHeader) {
 	return randomPatchOffset;
 }
 
-u32* findSleepOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb, u32* usesThumbPtr) {
+u32* findSleepOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb, bool* usesThumbPtr) {
 	//dbg_printf("findSleepOffset\n");
-    u32* sleepSignature = sleepSignature2;
-    u16* sleepSignatureThumb = sleepSignatureThumb2;
+    const u32* sleepSignature = sleepSignature2;
+    const u16* sleepSignatureThumb = sleepSignatureThumb2;
 
     if (moduleParams->sdk_version > 0x3000000 && moduleParams->sdk_version < 0x5000000) { 
         sleepSignature = sleepSignature4;
@@ -1116,8 +1116,8 @@ u32* findSleepOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleP
     u32 * sleepOffset = NULL;
 
     if(usesThumb) {
-  		sleepOffset = findOffsetThumb(
-      		(u32*)ndsHeader->arm9destination, iUncompressedSize,//ndsHeader->arm9binarySize,
+  		sleepOffset = (u32*)findOffsetThumb(
+      		(u16*)ndsHeader->arm9destination, iUncompressedSize,//ndsHeader->arm9binarySize,
             sleepSignatureThumb, 4
         );
 		if (sleepOffset) {
@@ -1146,8 +1146,8 @@ u32* findSleepOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 	}
 
     while(sleepOffset!=NULL) {
-    	u32* sleepEndOffset = findOffsetThumb(
-    		sleepOffset, 0x200,
+    	u16* sleepEndOffset = findOffsetThumb(
+    		(u16*)sleepOffset, 0x200,
     		sleepConstantValue, 1
     	);
         if (sleepEndOffset) {
@@ -1158,8 +1158,8 @@ u32* findSleepOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleP
         } 
         
         if(usesThumb) {
-      		sleepOffset = findOffsetThumb(
-          		sleepOffset+1, iUncompressedSize,//ndsHeader->arm9binarySize,
+      		sleepOffset = (u32*)findOffsetThumb(
+          		(u16*)(sleepOffset+1), iUncompressedSize,//ndsHeader->arm9binarySize,
                 sleepSignatureThumb, 4
             );
       	} else {
@@ -1183,7 +1183,7 @@ u32* findSleepOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 u32* findCardEndReadDma(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb, const u32* cardReadDmaEndOffset, u32* dmaHandlerOffset) {
 	//dbg_printf("findCardEndReadDma\n");
 
-	u32* offsetDmaHandler = NULL;
+	const u32* offsetDmaHandler = NULL;
 	if (moduleParams->sdk_version < 0x4000000) {
 		offsetDmaHandler = cardReadDmaEndOffset+8;
 	}
@@ -1210,21 +1210,21 @@ u32* findCardEndReadDma(const tNDSHeader* ndsHeader, const module_params_t* modu
     u32 * offset = NULL;
 
     if (usesThumb) {
-  		offset = findOffsetThumb(
-      		((u32)*offsetDmaHandler)-1, 0x200,//ndsHeader->arm9binarySize,
+  		offset = (u32*)findOffsetThumb(
+      		(u16*)((*offsetDmaHandler)-1), 0x200,//ndsHeader->arm9binarySize,
             cardEndReadDmaSignatureThumb4, 2
         );
     } else {
   		offset = findOffset(
-      		*offsetDmaHandler, 0x200,//ndsHeader->arm9binarySize,
+      		(u32*)*offsetDmaHandler, 0x200,//ndsHeader->arm9binarySize,
             cardEndReadDmaSignature4, 1
         ); 
     } 
 
 	if (!offset) {
 		if (usesThumb) {
-			offset = findOffsetThumb(
-				((u32)*offsetDmaHandler)-1, 0x200,//ndsHeader->arm9binarySize,
+			offset = (u32*)findOffsetThumb(
+				(u16*)((*offsetDmaHandler)-1), 0x200,//ndsHeader->arm9binarySize,
 				cardEndReadDmaSignatureThumb3, 1
 			);
 		} else {
@@ -1256,7 +1256,7 @@ u32* findCardSetDma(const tNDSHeader* ndsHeader, const module_params_t* modulePa
 	//dbg_printf("findCardSetDma\n");
 
     //u16* cardSetDmaSignatureStartThumb = cardSetDmaSignatureStartThumb4;
-    u32* cardSetDmaSignatureStart = cardSetDmaSignatureStart4;
+    const u32* cardSetDmaSignatureStart = cardSetDmaSignatureStart4;
 	int cardSetDmaSignatureStartLen = 3;
 
     if (moduleParams->sdk_version < 0x2004000) {
@@ -1310,8 +1310,8 @@ u32* findCardSetDma(const tNDSHeader* ndsHeader, const module_params_t* modulePa
 
     if(usesThumb) {
         //dbg_printf("cardSetDmaSignatureStartThumb used: ");
-  		offset = findOffsetBackwardsThumb(
-      		cardSetDmaEndOffset, 0x60,
+  		offset = (u32*)findOffsetBackwardsThumb(
+      		(u16*)cardSetDmaEndOffset, 0x60,
             cardSetDmaSignatureStartThumb4, 4
         );
     } else {
@@ -1323,8 +1323,8 @@ u32* findCardSetDma(const tNDSHeader* ndsHeader, const module_params_t* modulePa
     }
 
 	if (!offset && usesThumb) {
-  		offset = findOffsetBackwardsThumb(
-      		cardSetDmaEndOffset, 0x60,
+  		offset = (u32*)findOffsetBackwardsThumb(
+      		(u16*)cardSetDmaEndOffset, 0x60,
             cardSetDmaSignatureStartThumb3, 4
         );
 	}
@@ -1347,7 +1347,7 @@ u32* findCardSetDma(const tNDSHeader* ndsHeader, const module_params_t* modulePa
 
 u32* findResetOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool* softResetMb) {
 	//dbg_printf("findResetOffset\n");
-    u32* resetSignature = resetSignature2;
+    const u32* resetSignature = resetSignature2;
 
     if (moduleParams->sdk_version > 0x4008000 && moduleParams->sdk_version < 0x5000000) { 
         resetSignature = resetSignature4;
@@ -1437,7 +1437,7 @@ u32* findResetOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleP
     } */
     
     while(resetOffset!=NULL) {
-    	u32* resetEndOffset = findOffsetThumb(
+    	u32* resetEndOffset = findOffset(
     		resetOffset, 0x200,
     		resetConstant, 1
     	);

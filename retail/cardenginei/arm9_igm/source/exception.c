@@ -5,13 +5,15 @@
 #include "igm_text.h"
 #include "tonccpy.h"
 
+bool exceptionPrinted = false;
+
 static const char *registerNames[] = {
 	"r0", "r1", "r2",  "r3",  "r4",  "r5", "r6", "r7",
 	"r8", "r9", "r10", "r11", "r12", "sp", "lr", "pc"
 };
 
 static s32 *exceptionRegisters;
-static u32 __itcm_start = 0x01000000; // TODO
+static const u32 __itcm_start = 0;
 
 u32 getCPSR();
 
@@ -185,6 +187,13 @@ u32 getExceptionAddress(u32 opcodeAddress, u32 thumbState) {
 
 
 void showException(s32 *expReg) {
+	if (exceptionPrinted) {
+		// Make the background red
+		BG_PALETTE_SUB[0] = 0x0010;
+		return;
+	}
+	exceptionPrinted = true;
+
 	exceptionRegisters = expReg;
 
 	// Take over the main screen
@@ -202,7 +211,7 @@ void showException(s32 *expReg) {
 	SetBrightness(0, 0);
 	REG_BLDY = 0;
 
-	clearScreen(false);
+	clearScreen(true);
 
 	toncset16(BG_PALETTE, 0, 256);
 	for(int i = 0; i < sizeof(igmPal) / sizeof(igmPal[0]); i++) {
@@ -220,9 +229,14 @@ void showException(s32 *expReg) {
 	BG_PALETTE[0] = 0x0010;
 	BG_PALETTE_SUB[0] = 0x0010;
 
+	(*changeMpu)();
+
 	// Print out the exception
 	u32 currentMode = getCPSR() & 0x1f;
-	u32 thumbState = ((*(u32*)0x02FFFD90) & 0x20);
+	u32 thumbStateAddr = (u32)sharedAddr;
+	thumbStateAddr += 4;
+	thumbStateAddr += 0x80;
+	u32 thumbState = ((*(u32*)thumbStateAddr) & 0x20);
 
 	u32 codeAddress, exceptionAddress = 0;
 
@@ -240,7 +254,7 @@ void showException(s32 *expReg) {
 			offset = 2;
 		else
 			offset = 4;
-		printCenter(15, 1, (const u8 *)"Error: Undefined Instruction!", FONT_WHITE, true);
+		printCenter(16, 1, (const u8 *)"Error: Undefined Instruction!", FONT_WHITE, true);
 		codeAddress = exceptionRegisters[15] - offset;
 		exceptionAddress = codeAddress;
 	}
@@ -268,4 +282,6 @@ void showException(s32 *expReg) {
 	// move it to the pc address
 	if(address == (vu32*)0x02000000)
 		address = (vu32 *)(codeAddress & ~0x7);
+
+	(*revertMpu)();
 }

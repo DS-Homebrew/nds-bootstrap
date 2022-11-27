@@ -55,4 +55,7 @@ void clearScreen(bool main);
 
 void showException(s32 *expReg);
 
+extern VoidFn changeMpu;
+extern VoidFn revertMpu;
+
 #endif // IN_GAME_MENU_H

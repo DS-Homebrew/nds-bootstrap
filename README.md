@@ -70,6 +70,7 @@ An alternative forwarder generator for 3DS users. YANBF forwarders are 3DS-mode 
 
 ## Other
 - [devkitPro](https://devkitpro.org): devkitARM and libnds
+- [Arisotura](https://github.com/Arisotura): BIOS reader from [dsibiosdumper](https://github.com/Arisotura/dsibiosdumper) used in the in-game menu
 
 ## Translators
 - Catalan: [Juan Adolfo Ortiz De Dompablo](https://crowdin.com/profile/kloido)

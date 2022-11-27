@@ -234,7 +234,7 @@ static bool dldiPatchLoader (data_t *binData, u32 binSize, bool clearBSS)
 	return true;
 }
 
-int runNds(u32 cluster, u32 saveCluster, u32 donorTwlCluster, u32 gbaCluster, u32 gbaSavCluster, u32 wideCheatCluster, u32 apPatchCluster, u32 cheatCluster, u32 patchOffsetCacheCluster, u32 ramDumpCluster, u32 srParamsCluster, u32 screenshotCluster, u32 apFixOverlaysCluster, u32 musicCluster, u32 pageFileCluster, u32 manualCluster, configuration* conf) {
+int runNds(u32 cluster, u32 saveCluster, u32 donorTwlCluster, u32 gbaCluster, u32 gbaSavCluster, u32 wideCheatCluster, u32 apPatchCluster, u32 cheatCluster, u32 patchOffsetCacheCluster, u32 ramDumpCluster, u32 srParamsCluster, u32 screenshotCluster, u32 apFixOverlaysCluster, u32 musicCluster, u32 pageFileCluster, u32 manualCluster, u32 sharedFontCluster, configuration* conf) {
 	nocashMessage("runNds");
 
 	// Load bootloader binary
@@ -251,6 +251,7 @@ int runNds(u32 cluster, u32 saveCluster, u32 donorTwlCluster, u32 gbaCluster, u3
 
 	loader->storedFileCluster = cluster;
 	loader->initDisc          = conf->initDisc;
+	loader->bootstrapOnFlashcard = conf->bootstrapOnFlashcard;
 	loader->gameOnFlashcard   = conf->gameOnFlashcard;
 	loader->saveOnFlashcard   = conf->saveOnFlashcard;
 	loader->a9ScfgRom         = REG_SCFG_ROM;
@@ -284,6 +285,7 @@ int runNds(u32 cluster, u32 saveCluster, u32 donorTwlCluster, u32 gbaCluster, u3
 	loader->musicsSize                  = conf->musicsSize;
 	loader->pageFileCluster             = pageFileCluster;
 	loader->manualCluster               = manualCluster;
+	loader->sharedFontCluster           = sharedFontCluster;
 	loader->language                    = conf->language;
 	loader->region                      = conf->region;
 	loader->dsiMode                     = conf->dsiMode; // SDK 5

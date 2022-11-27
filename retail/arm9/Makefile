@@ -33,8 +33,8 @@ endif
 # all directories are relative to this makefile
 #---------------------------------------------------------------------------------
 BUILD		:=	build
-SOURCES		:=	source source/polarssl source/twltool source/gm9i source/nand mbedtls libeasysave/source/ini ../common/source_general
-INCLUDES	:=	include include/polarssl include/twltool include/gm9i include/nand libeasysave/include ../common/include
+SOURCES		:=	source source/flashcard source/polarssl source/twltool source/gm9i source/nand mbedtls libeasysave/source/ini ../common/source_general
+INCLUDES	:=	include include/flashcard include/polarssl include/twltool include/gm9i include/nand libeasysave/include ../common/include
 
 #---------------------------------------------------------------------------------
 # options for code generation

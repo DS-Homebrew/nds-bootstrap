@@ -94,8 +94,6 @@ extern u32 romSize;
 extern u32 initDisc;
 extern u32 saveFileCluster;
 extern u32 saveSize;
-extern u32 pageFileCluster;
-extern u32 manualCluster;
 extern u32 apPatchFileCluster;
 extern u32 apPatchSize;
 extern u32 cheatFileCluster;
@@ -106,6 +104,9 @@ extern u32 srParamsFileCluster;
 extern u32 screenshotCluster;
 extern u32 musicCluster;
 extern u32 musicsSize;
+extern u32 pageFileCluster;
+extern u32 manualCluster;
+extern u32 sharedFontCluster;
 extern u32 patchMpuSize;
 extern u8 patchMpuRegion;
 extern u8 language;
@@ -262,7 +263,8 @@ static void resetMemory_ARM7(void) {
 
 	memset_addrs_arm7(0x03800000 - 0x8000, 0x03800000 + 0x10000);
 	memset_addrs_arm7(0x02000620, IMAGES_LOCATION);	// clear part of EWRAM - except before nds-bootstrap images
-	toncset((u32*)0x02380000, 0, 0x60000);		// clear part of EWRAM - except before 0x023DA000, which has the arm9 code
+	toncset((u32*)0x02380000, 0, 0x38000);		// clear part of EWRAM - except before 0x023DA000, which has the arm9 code
+	toncset((u32*)0x023C0000, 0, 0x20000);
 	toncset((u32*)0x023F0000, 0, 0xB000);
 	toncset((u32*)0x023FE000, 0, 0x2000);
 	if (extendedMemory2) {
@@ -566,6 +568,26 @@ static bool isROMLoadableInRAM(const tNDSHeader* ndsHeader, const char* romTid, 
 		} else {
 			romSizeLimit = 0x1F80000;
 		}
+		if (ndsHeader->unitCode > 0 && ndsHeader->gameCode[0] == 'K' && ((ndsHeader->gameCode[3] == 'K') ? korSharedFont : (ndsHeader->gameCode[3] == 'C') ? chnSharedFont : twlSharedFont)) {
+			romSizeLimit -= 0x200000;
+		}
+	} else if (!extendedMemory2) {
+		if (strncmp(romTid, "KD4", 3) == 0) { // Meikyou Kokugo: Rakubiki Jiten
+			return false;
+		} else if (// strncmp(romTid, "KLT", 3) == 0 // My Little Restaurant
+				/* || */ strncmp(romTid, "KAU", 3) == 0) { // Nintendo Cowndown Calendar
+			romLocation += 0x200000;
+			romSizeLimit -= 0x200000;
+		} else if (strncmp(romTid, "KQR", 3) == 0) { // Remote Racers
+			romLocation += 0x280000;
+			romSizeLimit -= 0x280000;
+		}
+		if (ndsHeader->unitCode > 0 && ndsHeader->gameCode[0] == 'K' && ((ndsHeader->gameCode[3] == 'K') ? korSharedFont : (ndsHeader->gameCode[3] == 'C') ? chnSharedFont : twlSharedFont)) {
+			romSizeLimit -= 0x200000;
+		}
+	}
+	if (strncmp(romTid, "KD4", 3) == 0 && s2FlashcardId == 0x5A45) { // Meikyou Kokugo: Rakubiki Jiten
+		return false;
 	}
 	if (extendedMemory2 && !dsDebugRam) {
 		*(vu32*)(0x0DFFFE0C) = 0x4253444E;		// Check for 32MB of RAM
@@ -585,7 +607,7 @@ static bool isROMLoadableInRAM(const tNDSHeader* ndsHeader, const char* romTid, 
 	bool res = false;
 	if ((strncmp(romTid, "UBR", 3) == 0 && isDevConsole)
 	 || (strncmp(romTid, "KXC", 3) == 0 && s2FlashcardId != 0x5A45) // Castle Conqueror: Heroes 2
-	 || (strncmp(romTid, "KQ9", 3) == 0 && s2FlashcardId != 0x5A45) // The Legend of Zelda: Four Swords: Anniversary Editio
+	 || (strncmp(romTid, "KQ9", 3) == 0 && s2FlashcardId != 0x5A45) // The Legend of Zelda: Four Swords: Anniversary Edition
 	 || (strncmp(romTid, "KEV", 3) == 0 && s2FlashcardId != 0x5A45) // Space Invaders Extreme Z
 	 || (strncmp(romTid, "UOR", 3) != 0
 	 && strncmp(romTid, "KPP", 3) != 0
@@ -693,12 +715,15 @@ u8 getRumblePakType(void) {
 }
 
 static bool supportsExceptionHandler(const char* romTid) {
-	// ExceptionHandler2 (red screen) blacklist
-	return (strncmp(romTid, "ASM", 3) != 0	// SM64DS
-	&& strncmp(romTid, "SMS", 3) != 0	// SMSW
-	&& strncmp(romTid, "A2D", 3) != 0	// NSMB
-	&& strncmp(romTid, "AMC", 3) != 0	// MKDS (ROM hacks may contain their own exception handler)
-	&& strncmp(romTid, "ADM", 3) != 0);	// AC:WW
+	if (0 == (REG_KEYINPUT & KEY_B)) {
+		// ExceptionHandler2 (red screen) blacklist
+		return (strncmp(romTid, "ASM", 3) != 0	// SM64DS
+		&& strncmp(romTid, "SMS", 3) != 0	// SMSW
+		&& strncmp(romTid, "A2D", 3) != 0	// NSMB
+		&& strncmp(romTid, "AMC", 3) != 0	// MKDS (ROM hacks may contain their own exception handler)
+		&& strncmp(romTid, "ADM", 3) != 0);	// AC:WW
+	}
+	return true;
 }
 
 /*-------------------------------------------------------------------------
@@ -720,10 +745,6 @@ static void startBinary_ARM7(void) {
 }
 
 static void loadOverlaysintoRAM(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, aFile file, u32 ROMinRAM) {
-	if (memcmp(ndsHeader->gameCode, "NTRJ", 4) == 0) {
-		return;
-	}
-
 	// Load overlays into RAM
 	if (overlaysSize < romSizeLimit)
 	{
@@ -925,6 +946,8 @@ int arm7_main(void) {
 		enableDebug(getBootFileCluster("NDSBTSRP.LOG"));
 	}
 
+	*(vu32*)(0x02000000) = 0; // Clear debug RAM check flag
+
 	aFile srParamsFile = getFileFromCluster(srParamsFileCluster);
 	fileRead((char*)&softResetParams, srParamsFile, 0, 0x10);
 	bool softResetParamsFound = (softResetParams[0] != 0xFFFFFFFF);
@@ -1060,15 +1083,17 @@ int arm7_main(void) {
 	rsetPatchCache();
 
 	ce9Location = *(u32*)CARDENGINE_ARM9_LOCATION_BUFFERED;
-	tonccpy((u32*)ce9Location, (u32*)CARDENGINE_ARM9_LOCATION_BUFFERED, 0x6800);
+	tonccpy((u32*)ce9Location, (u32*)CARDENGINE_ARM9_LOCATION_BUFFERED, 0x4C00);
 	toncset((u32*)0x023E0000, 0, 0x10000);
 
 	ce9Alt = (ce9Location == CARDENGINE_ARM9_LOCATION_DLDI_ALT);
 
-	if (!dldiPatchBinary((data_t*)ce9Location, 0x6800)) {
+	tonccpy((u8*)CARDENGINE_ARM7_LOCATION, (u8*)CARDENGINE_ARM7_LOCATION_BUFFERED, 0x1400);
+	toncset((u8*)CARDENGINE_ARM7_LOCATION_BUFFERED, 0, 0x1400);
+
+	if (!dldiPatchBinary((data_t*)ce9Location, 0x6000, (data_t*)(extendedMemory2 ? 0x027BD000 : 0x023FD000))) {
 		nocashMessage("ce9 DLDI patch failed");
-		dbg_printf("ce9 DLDI patch failed");
-		dbg_printf("\n");
+		dbg_printf("ce9 DLDI patch failed\n");
 		errorOutput();
 	}
 
@@ -1079,7 +1104,7 @@ int arm7_main(void) {
 
 	bool wramUsed = false;
 	u32 fatTableSize = 0;
-	u32 fatTableSizeNoExp = (moduleParams->sdk_version < 0x2008000) ? 0x1C000 : 0x19800;
+	u32 fatTableSizeNoExp = (moduleParams->sdk_version < 0x2008000) ? 0x1B000 : 0x1B400;
 	if (ce9Alt && moduleParams->sdk_version >= 0x2008000) {
 		fatTableSizeNoExp = 0x8000;
 	}
@@ -1094,6 +1119,7 @@ int arm7_main(void) {
 		fatTableSize = 0x80000;
 	} else if (extendedMemory2) {
 		if (strncmp(romTid, "KQ9", 3) == 0 // The Legend of Zelda: Four Swords: Anniversary Edition
+		 || strncmp(romTid, "KDM", 3) == 0 // Mario vs. Donkey Kong: Minis March Again!
 		 || strncmp(romTid, "KEV", 3) == 0 // Space Invaders Extreme Z
 		) {
 			fatTableAddr = 0x02000000;
@@ -1111,7 +1137,7 @@ int arm7_main(void) {
 
 			lastClusterCacheUsed = (u32*)0x037F8000;
 			clusterCache = 0x037F8000;
-			clusterCacheSize = 0x18000;
+			clusterCacheSize = 0x16000;
 
 			wramUsed = true;
 		}
@@ -1123,8 +1149,14 @@ int arm7_main(void) {
 		clusterCacheSize = fatTableSize;
 	}
 
-	buildFatTableCache(&romFile);
+	if (fatTableSize <= 0x20000) {
+		buildFatTableCacheCompressed(&romFile);
+	} else {
+		buildFatTableCache(&romFile);
+	}
+
 	if (wramUsed) {
+		buildFatTableCacheCompressed(&romFile);
 		if (romFile.fatTableCached) {
 			bool startMem = (!ce9Alt && ndsHeader->unitCode > 0 && (u32)ndsHeader->arm9destination >= 0x02004000 && ((accessControl & BIT(4)) || arm7mbk == 0x080037C0) && romFile.fatTableCacheSize <= 0x4000);
 
@@ -1144,7 +1176,7 @@ int arm7_main(void) {
 			clusterCacheSize = (startMem ? 0x4000 : fatTableSizeNoExp)-romFile.fatTableCacheSize;
 
 			if (!ce9Alt && (!startMem || (startMem && romFile.fatTableCacheSize < 0x4000))) {
-				buildFatTableCache(&savFile);
+				buildFatTableCacheCompressed(&savFile);
 				if (savFile.fatTableCached) {
 					if (startMem) {
 						fatTableAddr += romFile.fatTableCacheSize;
@@ -1177,19 +1209,14 @@ int arm7_main(void) {
 			clusterCache = fatTableAddr;
 			clusterCacheSize = fatTableSize;
 
-			buildFatTableCache(&romFile);
-			buildFatTableCache(&savFile);
+			buildFatTableCacheCompressed(&romFile);
+			buildFatTableCacheCompressed(&savFile);
 		}
+	} else if (fatTableSize <= 0x20000) {
+		buildFatTableCacheCompressed(&savFile);
 	} else {
 		buildFatTableCache(&savFile);
 	}
-
-	tonccpy((u8*)CARDENGINE_ARM7_LOCATION, (u8*)CARDENGINE_ARM7_LOCATION_BUFFERED, 0x1000);
-	toncset((u8*)CARDENGINE_ARM7_LOCATION_BUFFERED, 0, 0x1000);
-	tonccpy((u8*)CARDENGINE_ARM7_LOCATION+0x1000, (u8*)CARDENGINE_ARM7_LOCATION_BUFFERED+0x1400, 0x400);
-	toncset((u8*)CARDENGINE_ARM7_LOCATION_BUFFERED+0x1400, 0, 0x400);
-
-	toncset((u8*)0x038FF400, 0, 0xC00);
 
 	patchBinary((cardengineArm9*)ce9Location, ndsHeader, moduleParams);
 	errorCode = patchCardNds(
@@ -1197,7 +1224,8 @@ int arm7_main(void) {
 		(cardengineArm9*)ce9Location,
 		ndsHeader,
 		moduleParams,
-		(  (moduleParams->sdk_version < 0x4000000 && ((u32)ndsHeader->arm9executeAddress - (u32)ndsHeader->arm9destination) >= 0x1000)
+		(  (moduleParams->sdk_version < 0x4000000 && ((u32)ndsHeader->arm9executeAddress - (u32)ndsHeader->arm9destination) >= 0x1000
+		&& moduleParams->sdk_version != 0x2007533)
 		|| strncmp(romTid, "AKD", 3) == 0 // Trauma Center: Under the Knife
 		) ? 0 : 1,
 		patchMpuSize,
@@ -1210,6 +1238,12 @@ int arm7_main(void) {
 		nocashMessage("Card patch failed");
 		errorOutput();
 	}
+
+	toncset((u32*)0x0380C000, 0, 0x2000);
+	/*if (newArm7binarySize != 0x29EE8) {
+		tonccpy((u8*)CHEAT_ENGINE_LOCATION_B4DS, (u8*)CHEAT_ENGINE_LOCATION_B4DS_BUFFERED, 0x400);
+	}
+	toncset((u8*)CHEAT_ENGINE_LOCATION_B4DS_BUFFERED, 0, 0x400);*/
 
 	errorCode = hookNdsRetailArm7(
 		(cardengineArm7*)CARDENGINE_ARM7_LOCATION,
@@ -1242,6 +1276,8 @@ int arm7_main(void) {
 		saveSize,
 		(u32)romFile.fatTableCache,
 		(u32)savFile.fatTableCache,
+		romFile.fatTableCompressed,
+		savFile.fatTableCompressed,
 		(u32)musicsFile.fatTableCache,
 		ramDumpCluster,
 		srParamsFileCluster,
@@ -1250,6 +1286,7 @@ int arm7_main(void) {
 		musicsSize,
 		pageFileCluster,
 		manualCluster,
+		sharedFontCluster,
 		expansionPakFound,
 		extendedMemory2,
 		ROMinRAM,
@@ -1332,7 +1369,9 @@ int arm7_main(void) {
 		toncset((u32*)0x023E8000, 0, 0x8000); // FAT table cache
 
 		u32 blFrom = (u32)ndsHeader->arm9destination;
-		if (moduleParams->sdk_version > 0x4010000) {
+		if (moduleParams->sdk_version > 0x5000000) {
+			blFrom += (ndsHeader->unitCode > 0) ? ((moduleParams->sdk_version > 0x5050000) ? 0x9A0 : (moduleParams->sdk_version > 0x5020000) ? 0x990 : 0x980) : 0x900;
+		} else if (moduleParams->sdk_version > 0x4010000) {
 			blFrom += 0x90C;
 		} else if (moduleParams->sdk_version > 0x3020000) {
 			blFrom += 0x8FC;

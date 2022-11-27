@@ -101,7 +101,7 @@ static u32* hookInterruptHandler(const u32* start, size_t size) {
     dbg_hexa(tableAddr);
     dbg_printf("\n");*/
     
-	u32 returnAddr = addr[1];
+	// u32 returnAddr = addr[1];
     /*dbg_printf("returnAddr\n");
     dbg_hexa(returnAddr);
     dbg_printf("\n");*/

@@ -323,8 +323,8 @@ void reset(void) {
 	if (consoleModel > 0) {
 		ndmaCopyWordsAsynch(0, (char*)ndsHeader->arm9destination+0xB000000, ndsHeader->arm9destination, *(u32*)0x0DFFE02C);
 		ndmaCopyWordsAsynch(1, (char*)ndsHeader->arm7destination+0xB000000, ndsHeader->arm7destination, *(u32*)0x0DFFE03C);
-		ndmaCopyWordsAsynch(2, (char*)(*(u32*)0x02FFE1C8)+0xB000000, *(u32*)0x02FFE1C8, *(u32*)0x0DFFE1CC);
-		ndmaCopyWordsAsynch(3, (char*)(*(u32*)0x02FFE1D8)+0xB000000, *(u32*)0x02FFE1D8, *(u32*)0x0DFFE1DC);
+		ndmaCopyWordsAsynch(2, (char*)(*(u32*)0x02FFE1C8)+0xB000000, (void*)(*(u32*)0x02FFE1C8), *(u32*)0x0DFFE1CC);
+		ndmaCopyWordsAsynch(3, (char*)(*(u32*)0x02FFE1D8)+0xB000000, (void*)(*(u32*)0x02FFE1D8), *(u32*)0x0DFFE1DC);
 		while (ndmaBusy(0) || ndmaBusy(1) || ndmaBusy(2) || ndmaBusy(3));
 	} else {
 		bakData();
@@ -617,6 +617,7 @@ void restorePreManual(void) {
 }
 
 void myIrqHandlerVBlank(void) {
+  while (1) {
 	#ifdef DEBUG		
 	nocashMessage("myIrqHandlerVBlank");
 	#endif	
@@ -655,7 +656,7 @@ void myIrqHandlerVBlank(void) {
 		i2cWriteRegister(0x4A, 0x11, 0x01);		// Reboot into error screen if SD card is removed
 	}
 
-	if ((0 == (REG_KEYINPUT & igmHotkey) && 0 == (REG_EXTKEYINPUT & (((igmHotkey >> 10) & 3) | ((igmHotkey >> 6) & 0xC0)))) || returnToMenu) {
+	if ((0 == (REG_KEYINPUT & igmHotkey) && 0 == (REG_EXTKEYINPUT & (((igmHotkey >> 10) & 3) | ((igmHotkey >> 6) & 0xC0)))) || returnToMenu || sharedAddr[5] == 0x59444552 /* REDY */) {
 		bakData();
 		inGameMenu();
 		restoreBakData();
@@ -757,6 +758,15 @@ void myIrqHandlerVBlank(void) {
 		IPC_SendSync(swapScreens ? 0x7 : 0x6);
 	}
 	swapScreens = false;
+
+	if (sharedAddr[0] == 0x524F5245) { // 'EROR'
+		REG_MASTER_VOLUME = 0;
+		while (REG_VCOUNT != 191) swiDelay(100);
+		while (REG_VCOUNT == 191) swiDelay(100);
+	} else {
+		break;
+	}
+  }
 }
 
 u32 myIrqEnable(u32 irq) {	

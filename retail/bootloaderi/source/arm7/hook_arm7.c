@@ -51,6 +51,9 @@
 #define b_asyncCardRead BIT(14)
 #define b_twlTouch BIT(15)
 #define b_cloneboot BIT(16)
+#define b_sleepMode BIT(17)
+#define b_dsiBios BIT(18)
+#define b_bootstrapOnFlashcard BIT(19)
 #define b_scfgLocked BIT(31)
 
 extern u32 newArm7binarySize;
@@ -131,8 +134,9 @@ int hookNdsRetailArm7(
 	u32 apPatchSize,
 	u32 pageFileCluster,
 	u32 manualCluster,
-    u16 gameOnFlashcard,
-    u16 saveOnFlashcard,
+    u16 bootstrapOnFlashcard,
+    u8 gameOnFlashcard,
+    u8 saveOnFlashcard,
 	u8 language,
 	u8 dsiMode, // SDK 5
 	u8 dsiSD,
@@ -377,6 +381,15 @@ int hookNdsRetailArm7(
 		}
 		if (usesCloneboot) {
 			ce7->valueBits |= b_cloneboot;
+		}
+		if (sleepMode) {
+			ce7->valueBits |= b_sleepMode;
+		}
+		if (!(REG_SCFG_ROM & BIT(9))) {
+			ce7->valueBits |= b_dsiBios;
+		}
+		if (bootstrapOnFlashcard) {
+			ce7->valueBits |= b_bootstrapOnFlashcard;
 		}
 		if (REG_SCFG_EXT == 0) {
 			ce7->valueBits |= b_scfgLocked;

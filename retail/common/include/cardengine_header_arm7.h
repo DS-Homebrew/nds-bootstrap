@@ -95,6 +95,9 @@ typedef struct cardengineArm7 {
 		14: asyncCardRead
 		15: twlTouch
 		16: cloneboot
+		17: sleepMode
+		18: dsiBios
+		19: bootstrapOnFlashcard
 		31: scfgLocked
 	*/
     u32* languageAddr;
@@ -116,6 +119,10 @@ typedef struct cardengineArm7B4DS {
     u32 intr_vblank_orig_return;
     const module_params_t* moduleParams;
     u32 cardStruct;
+	u32 valueBits;
+	/*
+		17: sleepMode
+	*/
     u32 language; //u8
     u32* languageAddr;
     u16 igmHotkey;
@@ -144,6 +151,10 @@ typedef struct cardengineArm7 {
     u32 intr_vblank_orig_return;
     const module_params_t* moduleParams;
     u32 cardStruct;
+	u32 valueBits;
+	/*
+		17: sleepMode
+	*/
     u32 language; //u8
     u32* languageAddr;
     u16 igmHotkey;
