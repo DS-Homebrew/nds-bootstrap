@@ -27,7 +27,6 @@
 
 typedef signed int addr_t;
 typedef unsigned char data_t;
-bool dldiRelocate (u32 default_location, u32 current_location, u32 binSize);
-bool dldiPatchBinary (data_t *binData, u32 binSize);
+bool dldiPatchBinary (data_t *binDataSrc, u32 binSize, data_t *binData);
 
 #endif // DLDI_PATCHER_H
