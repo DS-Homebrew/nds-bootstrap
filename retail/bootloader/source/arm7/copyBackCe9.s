@@ -15,7 +15,7 @@ copyBackCe9Func:
 
 	ldr r0, =0x02370000 @ src
 	ldr r1, =0x023F0000 @ dst
-	mov r2, #0x6000 @ len
+	mov r2, #0x5000 @ len
 	mov r3, r0
 	mov r4, r2
 	bl cpuCopy32

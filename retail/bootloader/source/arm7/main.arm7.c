@@ -1108,7 +1108,7 @@ int arm7_main(void) {
 
 	bool wramUsed = false;
 	u32 fatTableSize = 0;
-	u32 fatTableSizeNoExp = (moduleParams->sdk_version < 0x2008000) ? 0x1C000 : 0x1B400;
+	u32 fatTableSizeNoExp = (moduleParams->sdk_version < 0x2008000) ? 0x1B000 : 0x1B400;
 	if (ce9Alt && moduleParams->sdk_version >= 0x2008000) {
 		fatTableSizeNoExp = 0x8000;
 	}
@@ -1367,7 +1367,9 @@ int arm7_main(void) {
 		toncset((u32*)0x023E8000, 0, 0x8000); // FAT table cache
 
 		u32 blFrom = (u32)ndsHeader->arm9destination;
-		if (moduleParams->sdk_version > 0x4010000) {
+		if (moduleParams->sdk_version > 0x5000000) {
+			blFrom += (ndsHeader->unitCode > 0) ? ((moduleParams->sdk_version > 0x5050000) ? 0x9A0 : (moduleParams->sdk_version > 0x5020000) ? 0x990 : 0x980) : 0x900;
+		} else if (moduleParams->sdk_version > 0x4010000) {
 			blFrom += 0x90C;
 		} else if (moduleParams->sdk_version > 0x3020000) {
 			blFrom += 0x8FC;
