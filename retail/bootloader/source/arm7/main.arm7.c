@@ -1083,15 +1083,21 @@ int arm7_main(void) {
 	rsetPatchCache();
 
 	ce9Location = *(u32*)CARDENGINE_ARM9_LOCATION_BUFFERED;
-	tonccpy((u32*)ce9Location, (u32*)CARDENGINE_ARM9_LOCATION_BUFFERED, 0x6C00);
+	tonccpy((u32*)ce9Location, (u32*)CARDENGINE_ARM9_LOCATION_BUFFERED, 0x4C00);
 	toncset((u32*)0x023E0000, 0, 0x10000);
 
 	ce9Alt = (ce9Location == CARDENGINE_ARM9_LOCATION_DLDI_ALT);
 
-	if (!dldiPatchBinary((data_t*)ce9Location, 0x6C00)) {
+	tonccpy((u8*)CARDENGINE_ARM7_LOCATION, (u8*)CARDENGINE_ARM7_LOCATION_BUFFERED, 0x1400);
+	toncset((u8*)CARDENGINE_ARM7_LOCATION_BUFFERED, 0, 0x1400);
+	tonccpy((u8*)CARDENGINE_ARM7_LOCATION+0x1000, (u8*)CARDENGINE_ARM7_LOCATION_BUFFERED+0x1400, 0x400);
+	toncset((u8*)CARDENGINE_ARM7_LOCATION_BUFFERED+0x1400, 0, 0x400);
+
+	toncset((u8*)0x0380F400, 0, 0xC00);
+
+	if (!dldiPatchBinary((data_t*)ce9Location, 0x6000, (data_t*)(extendedMemory2 ? 0x027BD000 : 0x023FD000))) {
 		nocashMessage("ce9 DLDI patch failed");
-		dbg_printf("ce9 DLDI patch failed");
-		dbg_printf("\n");
+		dbg_printf("ce9 DLDI patch failed\n");
 		errorOutput();
 	}
 
@@ -1102,7 +1108,7 @@ int arm7_main(void) {
 
 	bool wramUsed = false;
 	u32 fatTableSize = 0;
-	u32 fatTableSizeNoExp = (moduleParams->sdk_version < 0x2008000) ? 0x1C000 : 0x19400;
+	u32 fatTableSizeNoExp = (moduleParams->sdk_version < 0x2008000) ? 0x1C000 : 0x1B400;
 	if (ce9Alt && moduleParams->sdk_version >= 0x2008000) {
 		fatTableSizeNoExp = 0x8000;
 	}
@@ -1135,7 +1141,7 @@ int arm7_main(void) {
 
 			lastClusterCacheUsed = (u32*)0x037F8000;
 			clusterCache = 0x037F8000;
-			clusterCacheSize = 0x18000;
+			clusterCacheSize = 0x16000;
 
 			wramUsed = true;
 		}
@@ -1215,13 +1221,6 @@ int arm7_main(void) {
 	} else {
 		buildFatTableCache(&savFile);
 	}
-
-	tonccpy((u8*)CARDENGINE_ARM7_LOCATION, (u8*)CARDENGINE_ARM7_LOCATION_BUFFERED, 0x1000);
-	toncset((u8*)CARDENGINE_ARM7_LOCATION_BUFFERED, 0, 0x1000);
-	tonccpy((u8*)CARDENGINE_ARM7_LOCATION+0x1000, (u8*)CARDENGINE_ARM7_LOCATION_BUFFERED+0x1400, 0x400);
-	toncset((u8*)CARDENGINE_ARM7_LOCATION_BUFFERED+0x1400, 0, 0x400);
-
-	toncset((u8*)0x038FF400, 0, 0xC00);
 
 	patchBinary((cardengineArm9*)ce9Location, ndsHeader, moduleParams);
 	errorCode = patchCardNds(

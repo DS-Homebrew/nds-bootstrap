@@ -226,7 +226,7 @@ int hookNdsRetailArm7(
 
 	*vblankHandler = ce7->patches->vblankHandler;
 
-	aFile cheatFile = getFileFromCluster(cheatFileCluster);
+	/*aFile cheatFile = getFileFromCluster(cheatFileCluster);
 	aFile apPatchFile = getFileFromCluster(apPatchFileCluster);
 	if (cheatSize+(apPatchIsCheat ? apPatchSize : 0) <= 0x1C00) {
 		u32 cheatEngineOffset = CHEAT_ENGINE_LOCATION_B4DS;
@@ -240,7 +240,7 @@ int hookNdsRetailArm7(
 		if (cheatFile.firstCluster != CLUSTER_FREE) {
 			fileRead(cheatDataOffset, cheatFile, 0, cheatSize);
 		}
-	}
+	}*/
 
 	nocashMessage("ERR_NONE");
 	return ERR_NONE;

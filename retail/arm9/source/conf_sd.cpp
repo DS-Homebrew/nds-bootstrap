@@ -1413,11 +1413,11 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	}
 
 	// Load external cheat engine binary
-	cebin = fopen("nitro:/cardenginei_arm7_cheat.bin", "rb");
+	/*cebin = fopen("nitro:/cardenginei_arm7_cheat.bin", "rb");
 	if (cebin) {
 		fread((u8*)(conf->b4dsMode == 1 ? CHEAT_ENGINE_LOCATION_B4DS-0x400000 : CHEAT_ENGINE_LOCATION_B4DS), 1, 0x400, cebin);
 	}
-	fclose(cebin);
+	fclose(cebin);*/
 
 	// Load ce7 binary
 	cebin = fopen("nitro:/cardengine_arm7.bin", "rb");

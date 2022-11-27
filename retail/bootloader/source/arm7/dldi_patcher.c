@@ -97,7 +97,7 @@ static const data_t dldiMagicLoaderString[] = "\xEE\xA5\x8D\xBF Chishm";	// Diff
 
 extern const u32 __myio_dldi;
 
-bool dldiPatchBinary (data_t *binData, u32 binSize) {
+bool dldiPatchBinary (data_t *binDataSrc, u32 binSize, data_t *binData) {
 
 	addr_t memOffset;			// Offset of DLDI after the file is loaded into memory
 	addr_t patchOffset;			// Position of patch destination in the file
@@ -110,13 +110,29 @@ bool dldiPatchBinary (data_t *binData, u32 binSize) {
 
 	size_t dldiFileSize = 0;
 
-	// Find the DLDI reserved space in the file
-	patchOffset = quickFind (binData, dldiMagicLoaderString, binSize, sizeof(dldiMagicLoaderString));
+	patchOffset = 0;
 
-	if (patchOffset < 0) {
+	/*if (patchOffset < 0) {
 		// does not have a DLDI section
 		return false;
+	}*/
+
+	// Find the DLDI reserved space in the file
+	addr_t dldiDataSrc = quickFind (binDataSrc, dldiMagicLoaderString, binSize, sizeof(dldiMagicLoaderString));
+	dldiDataSrc += (u32)binDataSrc;
+	//dbg_printf("dldiDataSrc: ");
+	//dbg_hexa((u32)dldiDataSrc);
+	//dbg_printf("\n");
+
+	for (int i = 0x40/4; i < 0x80/4; i++) {
+		u32* addr = (u32*)dldiDataSrc;
+		if (i != 24 && i != 25) {
+			addr[i] -= dldiDataSrc;
+			addr[i] += (addr_t)binData;
+		}
 	}
+
+	tonccpy (binData, (u32*)dldiDataSrc, 0x80);
 
 	data_t *pDH = (data_t*)(((u32*)(&__myio_dldi)) - 24);
 	data_t *pAH = &(binData[patchOffset]);
@@ -201,6 +217,7 @@ bool dldiPatchBinary (data_t *binData, u32 binSize) {
 		toncset (&pAH[readAddr(pDH, DO_bss_start) - ddmemStart] , 0, readAddr(pDH, DO_bss_end) - readAddr(pDH, DO_bss_start));
 	}*/
 
+	tonccpy ((u32*)dldiDataSrc, binData, 0x80);
 	return true;
 }
 #endif
