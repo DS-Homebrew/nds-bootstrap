@@ -1090,10 +1090,6 @@ int arm7_main(void) {
 
 	tonccpy((u8*)CARDENGINE_ARM7_LOCATION, (u8*)CARDENGINE_ARM7_LOCATION_BUFFERED, 0x1400);
 	toncset((u8*)CARDENGINE_ARM7_LOCATION_BUFFERED, 0, 0x1400);
-	tonccpy((u8*)CARDENGINE_ARM7_LOCATION+0x1000, (u8*)CARDENGINE_ARM7_LOCATION_BUFFERED+0x1400, 0x400);
-	toncset((u8*)CARDENGINE_ARM7_LOCATION_BUFFERED+0x1400, 0, 0x400);
-
-	toncset((u8*)0x0380F400, 0, 0xC00);
 
 	if (!dldiPatchBinary((data_t*)ce9Location, 0x6000, (data_t*)(extendedMemory2 ? 0x027BD000 : 0x023FD000))) {
 		nocashMessage("ce9 DLDI patch failed");
@@ -1242,6 +1238,12 @@ int arm7_main(void) {
 		nocashMessage("Card patch failed");
 		errorOutput();
 	}
+
+	toncset((u32*)0x0380C000, 0, 0x2000);
+	/*if (newArm7binarySize != 0x29EE8) {
+		tonccpy((u8*)CHEAT_ENGINE_LOCATION_B4DS, (u8*)CHEAT_ENGINE_LOCATION_B4DS_BUFFERED, 0x400);
+	}
+	toncset((u8*)CHEAT_ENGINE_LOCATION_B4DS_BUFFERED, 0, 0x400);*/
 
 	errorCode = hookNdsRetailArm7(
 		(cardengineArm7*)CARDENGINE_ARM7_LOCATION,

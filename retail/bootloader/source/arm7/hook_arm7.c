@@ -228,7 +228,7 @@ int hookNdsRetailArm7(
 
 	/*aFile cheatFile = getFileFromCluster(cheatFileCluster);
 	aFile apPatchFile = getFileFromCluster(apPatchFileCluster);
-	if (cheatSize+(apPatchIsCheat ? apPatchSize : 0) <= 0x1C00) {
+	if (newArm7binarySize != 0x29EE8 && cheatSize+(apPatchIsCheat ? apPatchSize : 0) <= 0x1C00) {
 		u32 cheatEngineOffset = CHEAT_ENGINE_LOCATION_B4DS;
 		char* cheatDataOffset = (char*)cheatEngineOffset+0x3E8;
 		if (apPatchFile.firstCluster != CLUSTER_FREE && apPatchIsCheat) {
