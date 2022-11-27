@@ -311,7 +311,7 @@ static u32 newOverlaysSize = 0;
 static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
 #ifdef DLDI
 	while (sharedAddr[3]==0x444D4152);	// Wait during a RAM dump
-	fileRead((char*)dst, ((ce9->valueBits & overlaysCached) && src >= ndsHeader->arm9romOffset+ndsHeader->arm9binarySize && src < ndsHeader->arm7romOffset) ? *apFixOverlaysFile : *romFile, src, len, 0);
+	fileRead((char*)dst, ((ce9->valueBits & overlaysCached) && src >= ndsHeader->arm9romOffset+ndsHeader->arm9binarySize && src < ndsHeader->arm7romOffset) ? apFixOverlaysFile : romFile, src, len, 0);
 #else
 	if (newOverlayOffset == 0) {
 		newOverlayOffset = ((ndsHeader->arm9romOffset+ndsHeader->arm9binarySize)/ce9->cacheBlockSize)*ce9->cacheBlockSize;
@@ -333,7 +333,7 @@ static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
 	//}
 
 	if ((ce9->valueBits & cacheDisabled) && (u32)dst >= 0x02000000 && (u32)dst < 0x03000000) {
-		fileRead((char*)dst, ((ce9->valueBits & overlaysCached) && src >= newOverlayOffset && src < newOverlayOffset+newOverlaysSize) ? *apFixOverlaysFile : *romFile, src, len, 0);
+		fileRead((char*)dst, ((ce9->valueBits & overlaysCached) && src >= newOverlayOffset && src < newOverlayOffset+newOverlaysSize) ? apFixOverlaysFile : romFile, src, len, 0);
 	} else {
 		// Read via the main RAM cache
 		//bool runSleep = true;
@@ -363,7 +363,7 @@ static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
 					readLen = ce9->cacheBlockSize*2;
 				}*/
 
-				fileRead((char*)buffer, ((ce9->valueBits & overlaysCached) && src >= newOverlayOffset && src < newOverlayOffset+newOverlaysSize) ? *apFixOverlaysFile : *romFile, sector, ce9->cacheBlockSize, 0);
+				fileRead((char*)buffer, ((ce9->valueBits & overlaysCached) && src >= newOverlayOffset && src < newOverlayOffset+newOverlaysSize) ? apFixOverlaysFile : romFile, sector, ce9->cacheBlockSize, 0);
 				/*updateDescriptor(slot, sector);
 				if (readLen >= ce9->cacheBlockSize*2) {
 					updateDescriptor(slot+1, sector+ce9->cacheBlockSize);
@@ -618,7 +618,7 @@ void cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 bool nandRead(void* memory,void* flash,u32 len,u32 dma) {
 #ifdef DLDI
 	if (ce9->valueBits & saveOnFlashcard) {
-		fileRead(memory, *savFile, (u32)flash, len, 0);
+		fileRead(memory, savFile, (u32)flash, len, 0);
 		return true;
 	} else {
 		// Send a command to the ARM7 to read the nand save
@@ -633,7 +633,7 @@ bool nandRead(void* memory,void* flash,u32 len,u32 dma) {
 		waitForArm7();
 	}
 #else
-	fileRead(memory, *savFile, (u32)flash, len, 0);
+	fileRead(memory, savFile, (u32)flash, len, 0);
 #endif
     return true; 
 }
@@ -641,7 +641,7 @@ bool nandRead(void* memory,void* flash,u32 len,u32 dma) {
 bool nandWrite(void* memory,void* flash,u32 len,u32 dma) {
 #ifdef DLDI
 	if (ce9->valueBits & saveOnFlashcard) {
-		fileWrite(memory, *savFile, (u32)flash, len, 0);
+		fileWrite(memory, savFile, (u32)flash, len, 0);
 		return true;
 	} else {
 		// Send a command to the ARM7 to write the nand save
@@ -656,7 +656,7 @@ bool nandWrite(void* memory,void* flash,u32 len,u32 dma) {
 		waitForArm7();
 	}
 #else
-	fileWrite(memory, *savFile, (u32)flash, len, 0);
+	fileWrite(memory, savFile, (u32)flash, len, 0);
 #endif
     return true; 
 }
@@ -691,8 +691,8 @@ static void dsiSaveInit(void) {
 	int oldIME = enterCriticalSection();
 	u16 exmemcnt = REG_EXMEMCNT;
 	sysSetCardOwner(true);	// Give Slot-1 access to arm9
-	fileRead((char*)&dsiSaveSize, *savFile, ce9->saveSize-4, 4, 0);
-	fileRead((char*)&existByte, *savFile, ce9->saveSize-8, 4, 0);
+	fileRead((char*)&dsiSaveSize, savFile, ce9->saveSize-4, 4, 0);
+	fileRead((char*)&existByte, savFile, ce9->saveSize-8, 4, 0);
 	REG_EXMEMCNT = exmemcnt;
 	leaveCriticalSection(oldIME);
 
@@ -747,7 +747,7 @@ bool dsiSaveCreate(const char* path, u32 permit) {
 		int oldIME = enterCriticalSection();
 		u16 exmemcnt = REG_EXMEMCNT;
 		sysSetCardOwner(true);	// Give Slot-1 access to arm9
-		fileWrite((char*)&existByte, *savFile, ce9->saveSize-8, 4, 0);
+		fileWrite((char*)&existByte, savFile, ce9->saveSize-8, 4, 0);
 		REG_EXMEMCNT = exmemcnt;
 		leaveCriticalSection(oldIME);
 
@@ -774,8 +774,8 @@ bool dsiSaveDelete(const char* path) {
 		int oldIME = enterCriticalSection();
 		u16 exmemcnt = REG_EXMEMCNT;
 		sysSetCardOwner(true);	// Give Slot-1 access to arm9
-		fileWrite((char*)&dsiSaveSize, *savFile, ce9->saveSize-4, 4, 0);
-		fileWrite((char*)&dsiSaveSize, *savFile, ce9->saveSize-8, 4, 0);
+		fileWrite((char*)&dsiSaveSize, savFile, ce9->saveSize-4, 4, 0);
+		fileWrite((char*)&dsiSaveSize, savFile, ce9->saveSize-8, 4, 0);
 		REG_EXMEMCNT = exmemcnt;
 		leaveCriticalSection(oldIME);
 
@@ -827,7 +827,7 @@ u32 dsiSaveSetLength(void* ctx, s32 len) {
 	int oldIME = enterCriticalSection();
 	u16 exmemcnt = REG_EXMEMCNT;
 	sysSetCardOwner(true);	// Give Slot-1 access to arm9
-	bool res = fileWrite((char*)&dsiSaveSize, *savFile, ce9->saveSize-4, 4, 0);
+	bool res = fileWrite((char*)&dsiSaveSize, savFile, ce9->saveSize-4, 4, 0);
 	dsiSaveResultCode = res ? 0 : 1;
 	toncset32(ctx+0x14, dsiSaveResultCode, 1);
 	REG_EXMEMCNT = exmemcnt;
@@ -971,7 +971,7 @@ s32 dsiSaveRead(void* ctx, void* dst, u32 len) {
 	int oldIME = enterCriticalSection();
 	u16 exmemcnt = REG_EXMEMCNT;
 	sysSetCardOwner(true);	// Give Slot-1 access to arm9
-	bool res = fileRead(dst, sharedFontOpened ? *sharedFontFile : *savFile, dsiSaveSeekPos, len, 0);
+	bool res = fileRead(dst, sharedFontOpened ? sharedFontFile : savFile, dsiSaveSeekPos, len, 0);
 	dsiSaveResultCode = res ? 1 : 0;
 	toncset32(ctx+0x14, dsiSaveResultCode, 1);
 	REG_EXMEMCNT = exmemcnt;
@@ -1000,7 +1000,7 @@ s32 dsiSaveWrite(void* ctx, void* src, s32 len) {
 	int oldIME = enterCriticalSection();
 	u16 exmemcnt = REG_EXMEMCNT;
 	sysSetCardOwner(true);	// Give Slot-1 access to arm9
-	bool res = fileWrite(src, *savFile, dsiSaveSeekPos, len, 0);
+	bool res = fileWrite(src, savFile, dsiSaveSeekPos, len, 0);
 	dsiSaveResultCode = res ? 1 : 0;
 	toncset32(ctx+0x14, dsiSaveResultCode, 1);
 	REG_EXMEMCNT = exmemcnt;
@@ -1012,7 +1012,7 @@ s32 dsiSaveWrite(void* ctx, void* src, s32 len) {
 			int oldIME = enterCriticalSection();
 			u16 exmemcnt = REG_EXMEMCNT;
 			sysSetCardOwner(true);	// Give Slot-1 access to arm9
-			fileWrite((char*)&dsiSaveSize, *savFile, ce9->saveSize-4, 4, 0);
+			fileWrite((char*)&dsiSaveSize, savFile, ce9->saveSize-4, 4, 0);
 			REG_EXMEMCNT = exmemcnt;
 			leaveCriticalSection(oldIME);
 		}

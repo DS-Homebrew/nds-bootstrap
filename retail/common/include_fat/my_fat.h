@@ -83,22 +83,22 @@ aFile getBootFileCluster(const char* bootName);
 aFile getFileFromCluster(u32 cluster);
 #endif
 #ifndef B4DS
-u32 fileRead(char* buffer, aFile file, u32 startOffset, u32 length, int ndmaSlot);
-bool fileReadNonBLocking(char* buffer, aFile * file, u32 startOffset, u32 length, int ndmaSlot);
+u32 fileRead(char* buffer, aFile* file, u32 startOffset, u32 length, int ndmaSlot);
+bool fileReadNonBLocking(char* buffer, aFile* file, u32 startOffset, u32 length, int ndmaSlot);
 bool resumeFileRead();
-u32 fileWrite(const char* buffer, aFile file, u32 startOffset, u32 length, int ndmaSlot);
+u32 fileWrite(const char* buffer, aFile* file, u32 startOffset, u32 length, int ndmaSlot);
 #ifdef TWOCARD
 u32 FAT_ClustToSect(u32 cluster, bool card2);
 #else
 u32 FAT_ClustToSect(u32 cluster);
 #endif
 #else
-u32 fileRead(char* buffer, aFile file, u32 startOffset, u32 length);
-u32 fileWrite(const char* buffer, aFile file, u32 startOffset, u32 length);
+u32 fileRead(char* buffer, aFile* file, u32 startOffset, u32 length);
+u32 fileWrite(const char* buffer, aFile* file, u32 startOffset, u32 length);
 u32 FAT_ClustToSect(u32 cluster);
 #endif
-void buildFatTableCache (aFile * file);
-void buildFatTableCacheCompressed (aFile * file);
+void buildFatTableCache (aFile* file);
+void buildFatTableCacheCompressed (aFile* file);
 
 /* ROM Header Region Information Structure */
 

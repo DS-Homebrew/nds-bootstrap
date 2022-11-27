@@ -484,7 +484,7 @@ static bool ROMsupportsDsiMode(const tNDSHeader* ndsHeader) {
 	return (ndsHeader->unitCode > 0);
 }
 
-static void loadBinary_ARM7(const tDSiHeader* dsiHeaderTemp, aFile file) {
+static void loadBinary_ARM7(const tDSiHeader* dsiHeaderTemp, aFile* file) {
 	nocashMessage("loadBinary_ARM7");
 
 	//u32 ndsHeader[0x170 >> 2];
@@ -498,9 +498,9 @@ static void loadBinary_ARM7(const tDSiHeader* dsiHeaderTemp, aFile file) {
 		srlAddr = 0xFFFFFFFF;
 		aFile pageFile = getFileFromCluster(pageFileCluster);
 
-		fileRead((char*)dsiHeaderTemp, pageFile, 0x2BFE00, 0x160);
-		fileRead(dsiHeaderTemp->ndshdr.arm9destination, pageFile, 0x14000, dsiHeaderTemp->ndshdr.arm9binarySize);
-		fileRead(dsiHeaderTemp->ndshdr.arm7destination, pageFile, 0x2C0000, dsiHeaderTemp->ndshdr.arm7binarySize);
+		fileRead((char*)dsiHeaderTemp, &pageFile, 0x2BFE00, 0x160);
+		fileRead(dsiHeaderTemp->ndshdr.arm9destination, &pageFile, 0x14000, dsiHeaderTemp->ndshdr.arm9binarySize);
+		fileRead(dsiHeaderTemp->ndshdr.arm7destination, &pageFile, 0x2C0000, dsiHeaderTemp->ndshdr.arm7binarySize);
 	} else {
 		srlAddr = softResetParams[3];
 		fileRead((char*)dsiHeaderTemp, file, srlAddr, sizeof(*dsiHeaderTemp));
@@ -744,7 +744,7 @@ static void startBinary_ARM7(void) {
 	arm7code(ndsHeader->arm7executeAddress);
 }
 
-static void loadOverlaysintoRAM(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, aFile file, u32 ROMinRAM) {
+static void loadOverlaysintoRAM(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, aFile* file, u32 ROMinRAM) {
 	// Load overlays into RAM
 	if (overlaysSize < romSizeLimit)
 	{
@@ -816,12 +816,12 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 			configFlags |= BIT(3);
 
 			toncset32(twlCfg, configFlags, 1); // Config Flags
-			fileRead(twlCfg+0x10, romFile, 0x20E, 1); // EULA Version (0=None/CountryChanged, 1=v1)
-			fileRead(twlCfg+0x9C, romFile, 0x2F0, 1);  // Parental Controls Years of Age Rating (00h..14h)
+			fileRead(twlCfg+0x10, &romFile, 0x20E, 1); // EULA Version (0=None/CountryChanged, 1=v1)
+			fileRead(twlCfg+0x9C, &romFile, 0x2F0, 1);  // Parental Controls Years of Age Rating (00h..14h)
 		}*/
 
 		if (softResetParams[0] == 0xFFFFFFFF) {
-			fileRead((char*)0x02FFE230, romFile, 0x230, 8);
+			fileRead((char*)0x02FFE230, &romFile, 0x230, 8);
 		}
 
 		// Set region flag
@@ -949,15 +949,15 @@ int arm7_main(void) {
 	*(vu32*)(0x02000000) = 0; // Clear debug RAM check flag
 
 	aFile srParamsFile = getFileFromCluster(srParamsFileCluster);
-	fileRead((char*)&softResetParams, srParamsFile, 0, 0x10);
+	fileRead((char*)&softResetParams, &srParamsFile, 0, 0x10);
 	bool softResetParamsFound = (softResetParams[0] != 0xFFFFFFFF);
 	if (softResetParamsFound) {
 		u32 clearBuffer = 0xFFFFFFFF;
-		fileWrite((char*)&clearBuffer, srParamsFile, 0, 0x4);
+		fileWrite((char*)&clearBuffer, &srParamsFile, 0, 0x4);
 		clearBuffer = 0;
-		fileWrite((char*)&clearBuffer, srParamsFile, 0x4, 0x4);
-		fileWrite((char*)&clearBuffer, srParamsFile, 0x8, 0x4);
-		fileWrite((char*)&clearBuffer, srParamsFile, 0xC, 0x4);
+		fileWrite((char*)&clearBuffer, &srParamsFile, 0x4, 0x4);
+		fileWrite((char*)&clearBuffer, &srParamsFile, 0x8, 0x4);
+		fileWrite((char*)&clearBuffer, &srParamsFile, 0xC, 0x4);
 	}
 
 	// BOOT.NDS file
@@ -989,11 +989,11 @@ int arm7_main(void) {
 	// Load the NDS file
 	nocashMessage("Loading the NDS file...\n");
 
-	loadBinary_ARM7(&dsiHeaderTemp, romFile);
+	loadBinary_ARM7(&dsiHeaderTemp, &romFile);
 	
 	// File containing cached patch offsets
 	aFile patchOffsetCacheFile = getFileFromCluster(patchOffsetCacheFileCluster);
-	fileRead((char*)&patchOffsetCache, patchOffsetCacheFile, 0, sizeof(patchOffsetCacheContents));
+	fileRead((char*)&patchOffsetCache, &patchOffsetCacheFile, 0, sizeof(patchOffsetCacheContents));
 	patchOffsetCacheFilePrevCrc = swiCRC16(0xFFFF, &patchOffsetCache, sizeof(patchOffsetCacheContents));
 	u16 prevPatchOffsetCacheFileVersion = patchOffsetCache.ver;
 
@@ -1039,9 +1039,9 @@ int arm7_main(void) {
 		overlaysSize++;
 	}
 	if (ndsHeader->unitCode == 3) {
-		fileRead((char*)&arm9iromOffset, romFile, 0x1C0, sizeof(u32));
-		fileRead((char*)&arm9ibinarySize, romFile, 0x1CC, sizeof(u32));
-		fileRead((char*)&arm7iromOffset, romFile, 0x1D0, sizeof(u32));
+		fileRead((char*)&arm9iromOffset, &romFile, 0x1C0, sizeof(u32));
+		fileRead((char*)&arm9ibinarySize, &romFile, 0x1CC, sizeof(u32));
+		fileRead((char*)&arm7iromOffset, &romFile, 0x1D0, sizeof(u32));
 
 		// Calculate i-overlay pack size
 		for (u32 i = arm9iromOffset+arm9ibinarySize; i < arm7iromOffset; i++) {
@@ -1264,7 +1264,7 @@ int arm7_main(void) {
 	}
 
 	if (expansionPakFound || (extendedMemory2 && !dsDebugRam && strncmp(romTid, "UBRP", 4) != 0)) {
-		loadOverlaysintoRAM(ndsHeader, moduleParams, romFile, ROMinRAM);
+		loadOverlaysintoRAM(ndsHeader, moduleParams, &romFile, ROMinRAM);
 	}
 
 	errorCode = hookNdsRetailArm9(
@@ -1306,7 +1306,7 @@ int arm7_main(void) {
 
 	patchOffsetCacheFileNewCrc = swiCRC16(0xFFFF, &patchOffsetCache, sizeof(patchOffsetCacheContents));
 	if (prevPatchOffsetCacheFileVersion != patchOffsetCacheFileVersion || patchOffsetCacheFileNewCrc != patchOffsetCacheFilePrevCrc) {
-		fileWrite((char*)&patchOffsetCache, patchOffsetCacheFile, 0, sizeof(patchOffsetCacheContents));
+		fileWrite((char*)&patchOffsetCache, &patchOffsetCacheFile, 0, sizeof(patchOffsetCacheContents));
 	}
 
 	if (srlAddr == 0 && apPatchFileCluster != 0 && !apPatchIsCheat && apPatchSize > 0 && apPatchSize <= 0x40000) {
@@ -1318,7 +1318,7 @@ int arm7_main(void) {
 				while (REG_VCOUNT == 191);
 			}
 		}
-		fileRead((char*)IMAGES_LOCATION, apPatchFile, 0, apPatchSize);
+		fileRead((char*)IMAGES_LOCATION, &apPatchFile, 0, apPatchSize);
 		if (applyIpsPatch(ndsHeader, (u8*)IMAGES_LOCATION, (*(u8*)(IMAGES_LOCATION+apPatchSize-1) == 0xA9), ROMinRAM)) {
 			dbg_printf("AP-fix applied\n");
 		} else {
@@ -1329,10 +1329,10 @@ int arm7_main(void) {
 	extern u32 iUncompressedSize;
 	aFile pageFile = getFileFromCluster(pageFileCluster);
 
-	fileWrite((char*)ndsHeader->arm9destination, pageFile, 0x14000, iUncompressedSize);
-	fileWrite((char*)ndsHeader->arm7destination, pageFile, 0x2C0000, newArm7binarySize);
-	fileWrite((char*)&iUncompressedSize, pageFile, 0x3FFFF0, sizeof(u32));
-	fileWrite((char*)&newArm7binarySize, pageFile, 0x3FFFF4, sizeof(u32));
+	fileWrite((char*)ndsHeader->arm9destination, &pageFile, 0x14000, iUncompressedSize);
+	fileWrite((char*)ndsHeader->arm7destination, &pageFile, 0x2C0000, newArm7binarySize);
+	fileWrite((char*)&iUncompressedSize, &pageFile, 0x3FFFF0, sizeof(u32));
+	fileWrite((char*)&newArm7binarySize, &pageFile, 0x3FFFF4, sizeof(u32));
 
 	arm9_boostVram = boostVram;
 
@@ -1389,10 +1389,10 @@ int arm7_main(void) {
 	if (0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_DOWN | KEY_A))) {		// Dump RAM
 		aFile ramDumpFile = getFileFromCluster(ramDumpCluster);
 		if (extendedMemory2) {
-			fileWrite((char*)0x02000000, ramDumpFile, 0, 0x7E0000);
-			fileWrite((char*)(isSdk5(moduleParams) ? 0x02FE0000 : 0x027E0000), ramDumpFile, 0x7E0000, 0x20000);
+			fileWrite((char*)0x02000000, &ramDumpFile, 0, 0x7E0000);
+			fileWrite((char*)(isSdk5(moduleParams) ? 0x02FE0000 : 0x027E0000), &ramDumpFile, 0x7E0000, 0x20000);
 		} else {
-			fileWrite((char*)0x02000000, ramDumpFile, 0, 0x400000);
+			fileWrite((char*)0x02000000, &ramDumpFile, 0, 0x400000);
 		}
 	}
 

@@ -17,7 +17,7 @@ typedef struct cardengineArm7PatchesArm7Functions {
     u32 cardRead;
     u32 cardId;
     u32 saveCluster;
-} __attribute__ ((__packed__)) cardengineArm7PatchesArm7Functions;
+} cardengineArm7PatchesArm7Functions;
 
 
 //
@@ -32,7 +32,7 @@ typedef struct cardengineArm7PatchesArm7FunctionsThumb {
     u32 eepromRead;
     u32 cardRead;
     u32 cardId;
-} __attribute__ ((__packed__)) cardengineArm7PatchesArm7FunctionsThumb;
+} cardengineArm7PatchesArm7FunctionsThumb;
 
 #ifndef B4DS
 //
@@ -57,7 +57,7 @@ typedef struct cardengineArm7Patches {
     u32* j_twlGetPitchTable;
     u32* j_twlGetPitchTableThumb;
     u32* getPitchTableStub;
-} __attribute__ ((__packed__)) cardengineArm7Patches;
+} cardengineArm7Patches;
 
 //
 // ARM7 cardengine
@@ -108,7 +108,7 @@ typedef struct cardengineArm7 {
     u32* irqTable_offset;
     u16 scfgRomBak;
     u16 igmHotkey;
-} __attribute__ ((__packed__)) cardengineArm7;
+} cardengineArm7;
 
 //
 // ARM7 cardengine
@@ -126,7 +126,7 @@ typedef struct cardengineArm7B4DS {
     u32 language; //u8
     u32* languageAddr;
     u16 igmHotkey;
-} __attribute__ ((__packed__)) cardengineArm7B4DS;
+} cardengineArm7B4DS;
 #else
 //
 // ARM7 cardengine patches
@@ -140,7 +140,7 @@ typedef struct cardengineArm7Patches {
     cardengineArm7PatchesArm7FunctionsThumb* arm7FunctionsDirect;
     cardengineArm7PatchesArm7Functions* arm7Functions;
     cardengineArm7PatchesArm7FunctionsThumb* arm7FunctionsThumb;
-} __attribute__ ((__packed__)) cardengineArm7Patches;
+} cardengineArm7Patches;
 
 //
 // ARM7 cardengine
@@ -159,7 +159,7 @@ typedef struct cardengineArm7 {
     u32* languageAddr;
     u16 igmHotkey;
     u8 RumblePakType;
-} __attribute__ ((__packed__)) cardengineArm7;
+} cardengineArm7;
 #endif
 
 #endif // CARDENGINE_HEADER_ARM7_H

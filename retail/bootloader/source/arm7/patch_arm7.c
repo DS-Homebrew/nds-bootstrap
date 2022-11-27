@@ -380,9 +380,9 @@ u32 patchCardNdsArm7(
 		}
 		u32 arm7src = 0;
 		u32 arm7size = 0;
-		fileRead((char*)&arm7src, donorRomFile, 0x30, 0x4);
-		fileRead((char*)&arm7size, donorRomFile, 0x3C, 0x4);
-		fileRead(ndsHeader->arm7destination, donorRomFile, arm7src, arm7size);
+		fileRead((char*)&arm7src, &donorRomFile, 0x30, 0x4);
+		fileRead((char*)&arm7size, &donorRomFile, 0x3C, 0x4);
+		fileRead(ndsHeader->arm7destination, &donorRomFile, arm7src, arm7size);
 		newArm7binarySize = arm7size;
 	}
 

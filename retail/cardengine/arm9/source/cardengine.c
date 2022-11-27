@@ -184,7 +184,7 @@ void reset(u32 param) {
 	setDeviceOwner();
 	u32 resetParams = ((ce9->valueBits & isSdk5) ? RESET_PARAM_SDK5 : RESET_PARAM);
 	u32 iUncompressedSize = 0;
-	fileRead((char*)&iUncompressedSize, pageFile, 0x3FFFF0, sizeof(u32));
+	fileRead((char*)&iUncompressedSize, &pageFile, 0x3FFFF0, sizeof(u32));
 
 	*(u32*)resetParams = param;
 	if (isDSiWare || iUncompressedSize > 0x280000 || param == 0xFFFFFFFF || *(u32*)(resetParams+0xC) > 0) {
@@ -194,11 +194,11 @@ void reset(u32 param) {
 		} else if (param != 0xFFFFFFFF && !igmReset && (ce9->valueBits & softResetMb)) {
 			*(u32*)resetParams = 0;
 			*(u32*)(resetParams+8) = 0x44414F4C; // 'LOAD'
-			fileWrite((char*)ndsHeader, pageFile, 0x2BFE00, 0x160);
-			fileWrite((char*)ndsHeader->arm9destination, pageFile, 0x14000, ndsHeader->arm9binarySize);
-			fileWrite((char*)0x022C0000, pageFile, 0x2C0000, ndsHeader->arm7binarySize);
+			fileWrite((char*)ndsHeader, &pageFile, 0x2BFE00, 0x160);
+			fileWrite((char*)ndsHeader->arm9destination, &pageFile, 0x14000, ndsHeader->arm9binarySize);
+			fileWrite((char*)0x022C0000, &pageFile, 0x2C0000, ndsHeader->arm7binarySize);
 		}
-		fileWrite((char*)resetParams, srParamsFile, 0, 0x10);
+		fileWrite((char*)resetParams, &srParamsFile, 0, 0x10);
 		if (sharedAddr[0] == 0x57495344 || param == 0xFFFFFFFF) {
 			sharedAddr[3] = 0x52534554;
 			while (1);
@@ -293,9 +293,9 @@ void reset(u32 param) {
 		WRAM_CR = 0; // Set shared ram to ARM9
 
 		aFile bootNds = getBootFileCluster("BOOT.NDS");
-		fileRead((char*)ndsHeader, bootNds, 0, 0x170);
-		fileRead((char*)ndsHeader->arm9destination, bootNds, ndsHeader->arm9romOffset, ndsHeader->arm9binarySize);
-		fileRead((char*)ndsHeader->arm7destination, bootNds, ndsHeader->arm7romOffset, ndsHeader->arm7binarySize);
+		fileRead((char*)ndsHeader, &bootNds, 0, 0x170);
+		fileRead((char*)ndsHeader->arm9destination, &bootNds, ndsHeader->arm9romOffset, ndsHeader->arm9binarySize);
+		fileRead((char*)ndsHeader->arm7destination, &bootNds, ndsHeader->arm7romOffset, ndsHeader->arm7binarySize);
 
 		WRAM_CR = 0x03; // Set shared ram to ARM7
 		sharedAddr[1] = 0x48495344; // 'DSIH'
@@ -305,9 +305,9 @@ void reset(u32 param) {
 		}
 	} else {
 		u32 newArm7binarySize = 0;
-		fileRead((char*)&newArm7binarySize, pageFile, 0x3FFFF4, sizeof(u32));
-		fileRead((char*)ndsHeader->arm9destination, pageFile, 0x14000, iUncompressedSize);
-		fileRead((char*)ndsHeader->arm7destination, pageFile, 0x2C0000, newArm7binarySize);
+		fileRead((char*)&newArm7binarySize, &pageFile, 0x3FFFF4, sizeof(u32));
+		fileRead((char*)ndsHeader->arm9destination, &pageFile, 0x14000, iUncompressedSize);
+		fileRead((char*)ndsHeader->arm7destination, &pageFile, 0x2C0000, newArm7binarySize);
 	}
 
 	sharedAddr[0] = 0x544F4F42; // 'BOOT'
@@ -320,22 +320,22 @@ void reset(u32 param) {
 }
 
 void prepareScreenshot(void) {
-	fileWrite((char*)INGAME_MENU_EXT_LOCATION_B4DS, pageFile, 0x340000, 0x40000);
+	fileWrite((char*)INGAME_MENU_EXT_LOCATION_B4DS, &pageFile, 0x340000, 0x40000);
 }
 
 void saveScreenshot(void) {
 	if (igmText->currentScreenshot >= 50) return;
 
-	fileWrite((char*)INGAME_MENU_EXT_LOCATION_B4DS, screenshotFile, 0x200 + (igmText->currentScreenshot * 0x18400), 0x18046);
+	fileWrite((char*)INGAME_MENU_EXT_LOCATION_B4DS, &screenshotFile, 0x200 + (igmText->currentScreenshot * 0x18400), 0x18046);
 
 	// Skip until next blank slot
 	char magic;
 	do {
 		igmText->currentScreenshot++;
-		fileRead(&magic, screenshotFile, 0x200 + (igmText->currentScreenshot * 0x18400), 1);
+		fileRead(&magic, &screenshotFile, 0x200 + (igmText->currentScreenshot * 0x18400), 1);
 	} while(magic == 'B' && igmText->currentScreenshot < 50);
 
-	fileRead((char*)INGAME_MENU_EXT_LOCATION_B4DS, pageFile, 0x340000, 0x40000);
+	fileRead((char*)INGAME_MENU_EXT_LOCATION_B4DS, &pageFile, 0x340000, 0x40000);
 }
 
 void readManual(int line) {
@@ -347,7 +347,7 @@ void readManual(int line) {
 	bool firstLoop = true;
 	while(currentManualLine != line) {
 		if(line > currentManualLine) {
-			fileRead(buffer, manualFile, currentManualOffset, 32);
+			fileRead(buffer, &manualFile, currentManualOffset, 32);
 
 			for(int i = 0; i < 32; i++) {
 				if(buffer[i] == '\n') {
@@ -361,7 +361,7 @@ void readManual(int line) {
 			}
 		} else {
 			currentManualOffset -= 32;
-			fileRead(buffer, manualFile, currentManualOffset, 32);
+			fileRead(buffer, &manualFile, currentManualOffset, 32);
 			int i = firstLoop ? 30 : 31;
 			firstLoop = false;
 			for(; i >= 0; i--) {
@@ -382,11 +382,11 @@ void readManual(int line) {
 	u32 tempManualOffset = currentManualOffset;
 	bool fullLine = false;
 	for(int line = 0; line < 24 && line < igmText->manualMaxLine; line++) {
-		fileRead(buffer, manualFile, tempManualOffset, 32);
+		fileRead(buffer, &manualFile, tempManualOffset, 32);
 
 		// Fix for exactly 32 char lines
 		if(fullLine && buffer[0] == '\n')
-			fileRead(buffer, manualFile, ++tempManualOffset, 32);
+			fileRead(buffer, &manualFile, ++tempManualOffset, 32);
 
 		for(int i = 0; i <= 32; i++) {
 			if(i == 32 || buffer[i] == '\n' || buffer[i] == '\0') {
@@ -425,26 +425,26 @@ void inGameMenu(s32* exRegisters) {
 	setDeviceOwner();
 
 	opening = true;
-	fileWrite((char*)INGAME_MENU_LOCATION_B4DS, pageFile, 0xA000, 0xA000);	// Backup part of game RAM to page file
-	fileRead((char*)INGAME_MENU_LOCATION_B4DS, pageFile, 0, 0xA000);	// Read in-game menu
+	fileWrite((char*)INGAME_MENU_LOCATION_B4DS, &pageFile, 0xA000, 0xA000);	// Backup part of game RAM to page file
+	fileRead((char*)INGAME_MENU_LOCATION_B4DS, &pageFile, 0, 0xA000);	// Read in-game menu
 	opening = false;
 
 	*(u32*)(INGAME_MENU_LOCATION_B4DS + IGM_TEXT_SIZE_ALIGNED) = (u32)sharedAddr;
 	volatile void (*inGameMenu)(s8*, u32, s32*) = (volatile void*)INGAME_MENU_LOCATION_B4DS + IGM_TEXT_SIZE_ALIGNED + 0x10;
 	(*inGameMenu)(&mainScreen, 0, exRegisters);
 
-	fileWrite((char*)INGAME_MENU_LOCATION_B4DS, pageFile, 0, 0xA000);	// Store in-game menu
-	fileRead((char*)INGAME_MENU_LOCATION_B4DS, pageFile, 0xA000, 0xA000);	// Restore part of game RAM from page file
+	fileWrite((char*)INGAME_MENU_LOCATION_B4DS, &pageFile, 0, 0xA000);	// Store in-game menu
+	fileRead((char*)INGAME_MENU_LOCATION_B4DS, &pageFile, 0xA000, 0xA000);	// Restore part of game RAM from page file
 
 	if (sharedAddr[3] == 0x52534554) {
 		igmReset = true;
 		reset(0);
 	} else if (sharedAddr[3] == 0x444D4152) { // RAMD
 		#ifdef EXTMEM
-		fileWrite((char*)0x02000000, ramDumpFile, 0, 0x7E0000);
-		fileWrite((char*)((ce9->valueBits & isSdk5) ? 0x02FE0000 : 0x027E0000), ramDumpFile, 0x7E0000, 0x20000);
+		fileWrite((char*)0x02000000, &ramDumpFile, 0, 0x7E0000);
+		fileWrite((char*)((ce9->valueBits & isSdk5) ? 0x02FE0000 : 0x027E0000), &ramDumpFile, 0x7E0000, 0x20000);
 		#else
-		fileWrite((char*)0x02000000, ramDumpFile, 0, 0x400000);
+		fileWrite((char*)0x02000000, &ramDumpFile, 0, 0x400000);
 		#endif
 		sharedAddr[3] = 0;
 	}
@@ -465,7 +465,7 @@ void myIrqHandlerIPC(void) {
 			u32 src = *(vu32*)(sharedAddr);
 			u32 len = *(vu32*)(sharedAddr+1);
 
-			fileRead((char*)dst, savFile, src, len);
+			fileRead((char*)dst, &savFile, src, len);
 
 			sharedAddr[3] = 0;
 			REG_EXMEMCNT = exmemcnt;
@@ -479,7 +479,7 @@ void myIrqHandlerIPC(void) {
 			u32 dst = *(vu32*)(sharedAddr);
 			u32 len = *(vu32*)(sharedAddr+1);
 
-			fileWrite((char*)src, savFile, dst, len);
+			fileWrite((char*)src, &savFile, dst, len);
 
 			sharedAddr[3] = 0;
 			REG_EXMEMCNT = exmemcnt;
@@ -493,7 +493,7 @@ void myIrqHandlerIPC(void) {
 			u32 src = *(vu32*)(sharedAddr);
 			u32 len = *(vu32*)(sharedAddr+1);
 
-			fileRead((char*)dst, romFile, src, len);
+			fileRead((char*)dst, &romFile, src, len);
 
 			sharedAddr[3] = 0;
 			REG_EXMEMCNT = exmemcnt;
@@ -572,14 +572,14 @@ static void initialize(void) {
 
 		if (ndsHeader->unitCode > 0) {
 			u32 buffer = 0;
-			fileRead((char*)&buffer, romFile, 0x234, sizeof(u32));
+			fileRead((char*)&buffer, &romFile, 0x234, sizeof(u32));
 			isDSiWare = (buffer == 0x00030004 || buffer == 0x00030005);
 		}
 
 		if ((ce9->valueBits & ROMinRAM) && !cloneboot) {
 			if (ndsHeader->unitCode == 3) {
-				fileRead((char*)&arm9iromOffset, romFile, 0x1C0, sizeof(u32));
-				fileRead((char*)&arm9ibinarySize, romFile, 0x1CC, sizeof(u32));
+				fileRead((char*)&arm9iromOffset, &romFile, 0x1C0, sizeof(u32));
+				fileRead((char*)&arm9ibinarySize, &romFile, 0x1CC, sizeof(u32));
 			}
 
 			if ((__myio_dldi.features & FEATURE_SLOT_GBA) && ce9->s2FlashcardId != 0) {
@@ -590,7 +590,7 @@ static void initialize(void) {
 				while (1) {
 					u32 readLen = (len > bufferSize) ? bufferSize : len;
 
-					fileRead((char*)buffer, romFile, 0x8000+dst, readLen);
+					fileRead((char*)buffer, &romFile, 0x8000+dst, readLen);
 					tonccpy((char*)ce9->romLocation+dst, (char*)buffer, readLen);
 
 					len -= bufferSize;
@@ -605,7 +605,7 @@ static void initialize(void) {
 				while (1) {
 					u32 readLen = (len > bufferSize) ? bufferSize : len;
 
-					fileRead((char*)buffer, romFile, (u32)ndsHeader->arm7romOffset+dst, readLen);
+					fileRead((char*)buffer, &romFile, (u32)ndsHeader->arm7romOffset+dst, readLen);
 					tonccpy((char*)ce9->romLocation+(ndsHeader->arm9binarySize-ndsHeader->arm9romOffset)+ce9->overlaysSize+dst, (char*)buffer, readLen);
 
 					len -= bufferSize;
@@ -621,7 +621,7 @@ static void initialize(void) {
 					while (1) {
 						u32 readLen = (len > bufferSize) ? bufferSize : len;
 
-						fileRead((char*)buffer, romFile, arm9iromOffset+arm9ibinarySize+dst, readLen);
+						fileRead((char*)buffer, &romFile, arm9iromOffset+arm9ibinarySize+dst, readLen);
 						tonccpy((char*)ce9->romLocation+(arm9iromOffset-0x8000)+dst, (char*)buffer, readLen);
 
 						len -= bufferSize;
@@ -634,10 +634,10 @@ static void initialize(void) {
 				}
 				toncset((char*)buffer, 0, bufferSize);
 			} else {
-				fileRead((char*)ce9->romLocation, romFile, 0x8000, ndsHeader->arm9binarySize-ndsHeader->arm9romOffset);
-				fileRead((char*)ce9->romLocation+(ndsHeader->arm9binarySize-ndsHeader->arm9romOffset)+ce9->overlaysSize, romFile, (u32)ndsHeader->arm7romOffset, getRomSizeNoArm9Bin(ndsHeader)+0x88);
+				fileRead((char*)ce9->romLocation, &romFile, 0x8000, ndsHeader->arm9binarySize-ndsHeader->arm9romOffset);
+				fileRead((char*)ce9->romLocation+(ndsHeader->arm9binarySize-ndsHeader->arm9romOffset)+ce9->overlaysSize, &romFile, (u32)ndsHeader->arm7romOffset, getRomSizeNoArm9Bin(ndsHeader)+0x88);
 				if (ndsHeader->unitCode == 3) {
-					fileRead((char*)ce9->romLocation+(arm9iromOffset-0x8000), romFile, arm9iromOffset+arm9ibinarySize, ce9->ioverlaysSize);
+					fileRead((char*)ce9->romLocation+(arm9iromOffset-0x8000), &romFile, arm9iromOffset+arm9ibinarySize, ce9->ioverlaysSize);
 				}
 			}
 		}
@@ -657,7 +657,7 @@ static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
 	nocashMessage("\n");*/
 
 	//nocashMessage("aaaaaaaaaa\n");
-	fileRead((char*)dst, romFile, src, len);
+	fileRead((char*)dst, &romFile, src, len);
 
 	if (!(ce9->valueBits & isSdk5) && strncmp(getRomTid(ndsHeader), "ASMP", 4)==0 && !mariosHolidayPrimaryFixApplied) {
 		for (u32 i = 0; i < len; i += 4) {
@@ -747,13 +747,13 @@ void cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 
 bool nandRead(void* memory,void* flash,u32 len,u32 dma) {
 	setDeviceOwner();
-	fileRead(memory, savFile, (u32)flash, len);
+	fileRead(memory, &savFile, (u32)flash, len);
     return true; 
 }
 
 bool nandWrite(void* memory,void* flash,u32 len,u32 dma) {
 	setDeviceOwner();
-	fileWrite(memory, savFile, (u32)flash, len);
+	fileWrite(memory, &savFile, (u32)flash, len);
 	return true;
 }
 
@@ -787,8 +787,8 @@ static void dsiSaveInit(void) {
 	u16 exmemcnt = REG_EXMEMCNT;
 	cardReadInProgress = true;
 	setDeviceOwner();
-	fileRead((char*)&dsiSaveSize, savFile, ce9->saveSize-4, 4);
-	fileRead((char*)&existByte, savFile, ce9->saveSize-8, 4);
+	fileRead((char*)&dsiSaveSize, &savFile, ce9->saveSize-4, 4);
+	fileRead((char*)&existByte, &savFile, ce9->saveSize-8, 4);
 	cardReadInProgress = false;
 	REG_EXMEMCNT = exmemcnt;
 	leaveCriticalSection(oldIME);
@@ -845,7 +845,7 @@ bool dsiSaveCreate(const char* path, u32 permit) {
 		u16 exmemcnt = REG_EXMEMCNT;
 		cardReadInProgress = true;
 		setDeviceOwner();
-		fileWrite((char*)&existByte, savFile, ce9->saveSize-8, 4);
+		fileWrite((char*)&existByte, &savFile, ce9->saveSize-8, 4);
 		cardReadInProgress = false;
 		REG_EXMEMCNT = exmemcnt;
 		leaveCriticalSection(oldIME);
@@ -874,8 +874,8 @@ bool dsiSaveDelete(const char* path) {
 		u16 exmemcnt = REG_EXMEMCNT;
 		cardReadInProgress = true;
 		setDeviceOwner();
-		fileWrite((char*)&dsiSaveSize, savFile, ce9->saveSize-4, 4);
-		fileWrite((char*)&dsiSaveSize, savFile, ce9->saveSize-8, 4);
+		fileWrite((char*)&dsiSaveSize, &savFile, ce9->saveSize-4, 4);
+		fileWrite((char*)&dsiSaveSize, &savFile, ce9->saveSize-8, 4);
 		cardReadInProgress = false;
 		REG_EXMEMCNT = exmemcnt;
 		leaveCriticalSection(oldIME);
@@ -930,7 +930,7 @@ u32 dsiSaveSetLength(void* ctx, s32 len) {
 	u16 exmemcnt = REG_EXMEMCNT;
 	cardReadInProgress = true;
 	setDeviceOwner();
-	bool res = fileWrite((char*)&dsiSaveSize, savFile, ce9->saveSize-4, 4);
+	bool res = fileWrite((char*)&dsiSaveSize, &savFile, ce9->saveSize-4, 4);
 	dsiSaveResultCode = res ? 0 : 1;
 	toncset32(ctx+0x14, dsiSaveResultCode, 1);
 	cardReadInProgress = false;
@@ -1083,7 +1083,7 @@ s32 dsiSaveRead(void* ctx, void* dst, s32 len) {
 		while (1) {
 			u32 readLen = (bufLen > 0x800) ? 0x800 : len;
 
-			res = fileRead((char*)0x027FF200, sharedFontFile, dsiSaveSeekPos+dstAdd, readLen);
+			res = fileRead((char*)0x027FF200, &sharedFontFile, dsiSaveSeekPos+dstAdd, readLen);
 			if (!res) {
 				break;
 			}
@@ -1097,7 +1097,7 @@ s32 dsiSaveRead(void* ctx, void* dst, s32 len) {
 			}
 		}
 	} else {
-		res = fileRead(dst, sharedFontOpened ? sharedFontFile : savFile, dsiSaveSeekPos, len);
+		res = fileRead(dst, sharedFontOpened ? &sharedFontFile : &savFile, dsiSaveSeekPos, len);
 	}
 	dsiSaveResultCode = res ? 1 : 0;
 	toncset32(ctx+0x14, dsiSaveResultCode, 1);
@@ -1129,7 +1129,7 @@ s32 dsiSaveWrite(void* ctx, void* src, s32 len) {
 	u16 exmemcnt = REG_EXMEMCNT;
 	cardReadInProgress = true;
 	setDeviceOwner();
-	bool res = fileWrite(src, savFile, dsiSaveSeekPos, len);
+	bool res = fileWrite(src, &savFile, dsiSaveSeekPos, len);
 	dsiSaveResultCode = res ? 1 : 0;
 	toncset32(ctx+0x14, dsiSaveResultCode, 1);
 	cardReadInProgress = false;
@@ -1143,7 +1143,7 @@ s32 dsiSaveWrite(void* ctx, void* src, s32 len) {
 			u16 exmemcnt = REG_EXMEMCNT;
 			setDeviceOwner();
 			cardReadInProgress = true;
-			fileWrite((char*)&dsiSaveSize, savFile, ce9->saveSize-4, 4);
+			fileWrite((char*)&dsiSaveSize, &savFile, ce9->saveSize-4, 4);
 			cardReadInProgress = false;
 			REG_EXMEMCNT = exmemcnt;
 			leaveCriticalSection(oldIME);
@@ -1162,9 +1162,9 @@ s32 dsiSaveWrite(void* ctx, void* src, s32 len) {
 	if (ce9->valueBits & softResetMb) {
 		*(u32*)resetParams = 0;
 		*(u32*)(resetParams+8) = 0x44414F4C; // 'LOAD'
-		fileWrite(ndsHeader, pageFile, 0x2BFE00, 0x160);
-		fileWrite((char*)ndsHeader->arm9destination, pageFile, 0x14000, ndsHeader->arm9binarySize);
-		fileWrite((char*)0x022C0000, pageFile, 0x2C0000, ndsHeader->arm7binarySize);
+		fileWrite(ndsHeader, &pageFile, 0x2BFE00, 0x160);
+		fileWrite((char*)ndsHeader->arm9destination, &pageFile, 0x14000, ndsHeader->arm9binarySize);
+		fileWrite((char*)0x022C0000, &pageFile, 0x2C0000, ndsHeader->arm7binarySize);
 	} else {
 		*(u32*)resetParams = param;
 	}
@@ -1184,13 +1184,13 @@ void musicInit(void) {
 
 	musicMagicStringChecked = true;
 	u32 magic = 0;
-	fileRead((char*)&magic, musicsFile, 0, 4);
+	fileRead((char*)&magic, &musicsFile, 0, 4);
 	if (magic != 0x4B43502E) {
 		REG_EXMEMCNT = exmemcnt;
 		return;
 	}
 
-	fileRead((char*)&musicFileCount, musicsFile, 4, 4);
+	fileRead((char*)&musicFileCount, &musicsFile, 4, 4);
 
 	REG_EXMEMCNT = exmemcnt;
 
@@ -1203,7 +1203,7 @@ void updateMusic(void) {
 		setDeviceOwner();
 
 		const u16 currentLen = (musicPosRev > musicReadLen) ? musicReadLen : musicPosRev;
-		fileRead((char*)(0x027F0000+(soundBuffer*musicReadLen)), musicsFile, musicPosInFile + musicPos, currentLen);
+		fileRead((char*)(0x027F0000+(soundBuffer*musicReadLen)), &musicsFile, musicPosInFile + musicPos, currentLen);
 		musicPos += musicReadLen;
 		if (musicPos > musicFileSize) {
 			musicPos = musicLoopPos;
@@ -1213,7 +1213,7 @@ void updateMusic(void) {
 				lastLenTemp++;
 				lastLen++;
 			}
-			fileRead((char*)(0x027F0000+(soundBuffer*musicReadLen)+musicPosRev), musicsFile, musicPosInFile + musicPos, lastLen);
+			fileRead((char*)(0x027F0000+(soundBuffer*musicReadLen)+musicPosRev), &musicsFile, musicPosInFile + musicPos, lastLen);
 			musicPos += lastLen;
 			musicPosRev = musicFileSize - musicLoopPos - lastLen;
 		} else {
@@ -1249,14 +1249,14 @@ void musicPlay(int id) {
 		u16 exmemcnt = REG_EXMEMCNT;
 		setDeviceOwner();
 
-		fileRead((char*)&musicPosInFile, musicsFile, 0x10+(0x10*id), 4);
-		fileRead((char*)&musicFileSize, musicsFile, 0x14+(0x10*id), 4);
-		fileRead((char*)&musicLoopPos, musicsFile, 0x18+(0x10*id), 4);
+		fileRead((char*)&musicPosInFile, &musicsFile, 0x10+(0x10*id), 4);
+		fileRead((char*)&musicFileSize, &musicsFile, 0x14+(0x10*id), 4);
+		fileRead((char*)&musicLoopPos, &musicsFile, 0x18+(0x10*id), 4);
 
 		musicPos = musicReadLen;
 		musicPosRev = musicFileSize - musicReadLen;
 
-		fileRead((char*)0x027F0000, musicsFile, musicPosInFile, musicReadLen);
+		fileRead((char*)0x027F0000, &musicsFile, musicPosInFile, musicReadLen);
 
 		REG_EXMEMCNT = exmemcnt;
 		sharedAddr[2] = 0x5053554D; // 'MUSP'
