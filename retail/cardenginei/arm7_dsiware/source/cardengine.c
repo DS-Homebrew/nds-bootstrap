@@ -190,17 +190,18 @@ static void driveInitialize(void) {
 	FAT_InitFiles(false, 0);
 
 	#ifdef CARDSAVE
-	savFile = getFileFromCluster(saveCluster);
+	getFileFromCluster(&savFile, saveCluster);
 	#endif
-	ramDumpFile = getFileFromCluster(ramDumpCluster);
-	srParamsFile = getFileFromCluster(srParamsCluster);
-	screenshotFile = getFileFromCluster(screenshotCluster);
-	pageFile = getFileFromCluster(pageFileCluster);
-	manualFile = getFileFromCluster(manualCluster);
+	getFileFromCluster(&ramDumpFile, ramDumpCluster);
+	getFileFromCluster(&srParamsFile, srParamsCluster);
+	getFileFromCluster(&screenshotFile, screenshotCluster);
+	getFileFromCluster(&pageFile, pageFileCluster);
+	getFileFromCluster(&manualFile, manualCluster);
 
 	#ifdef DEBUG		
-	aFile myDebugFile = getBootFileCluster("NDSBTSRP.LOG", 0);
-	enableDebug(myDebugFile);
+	aFile myDebugFile;
+	getBootFileCluster(&myDebugFile, "NDSBTSRP.LOG", 0);
+	enableDebug(&myDebugFile);
 	dbg_printf("logging initialized\n");		
 	dbg_printf("sdk version :");
 	dbg_hexa(moduleParams->sdk_version);		
@@ -481,7 +482,8 @@ void returnToLoader(bool wait) {
 
 	driveInitialize();
 
-	aFile file = getBootFileCluster("BOOT.NDS");
+	aFile file;
+	getBootFileCluster(&file, "BOOT.NDS");
 	if (file.firstCluster == CLUSTER_FREE) {
 		// File not found, so reboot console instead
 		i2cWriteRegister(0x4A, 0x70, 0x01);

@@ -459,9 +459,12 @@ int hookNdsRetailArm7(
 		cheatSizeLimit -= 0x10;
 	}
 
-	aFile wideCheatFile = getFileFromCluster(wideCheatFileCluster, gameOnFlashcard);
-	aFile cheatFile = getFileFromCluster(cheatFileCluster, gameOnFlashcard);
-	aFile apPatchFile = getFileFromCluster(apPatchFileCluster, gameOnFlashcard);
+	aFile wideCheatFile;
+	getFileFromCluster(&wideCheatFile, wideCheatFileCluster, gameOnFlashcard);
+	aFile cheatFile;
+	getFileFromCluster(&cheatFile, cheatFileCluster, gameOnFlashcard);
+	aFile apPatchFile;
+	getFileFromCluster(&apPatchFile, apPatchFileCluster, gameOnFlashcard);
 	if (wideCheatSize+cheatSize+(apPatchIsCheat ? apPatchSize : 0) <= cheatSizeLimit) {
 		if (ndsHeader->unitCode < 3 && apPatchFile.firstCluster != CLUSTER_FREE && apPatchIsCheat) {
 			fileRead(cheatDataOffset, &apPatchFile, 0, apPatchSize, 0);

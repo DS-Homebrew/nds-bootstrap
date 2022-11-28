@@ -25,9 +25,9 @@ static bool _debug = false;
 static aFile _debugFileCluster;
 static u32 _currentPos = 0;
 
-void enableDebug(aFile debugFileCluster) {
+void enableDebug(const aFile* debugFileCluster) {
 	_debug = true;
-	_debugFileCluster = debugFileCluster;
+	_debugFileCluster = *debugFileCluster;
 }
 
 u32 dbg_printf(const char* message) {

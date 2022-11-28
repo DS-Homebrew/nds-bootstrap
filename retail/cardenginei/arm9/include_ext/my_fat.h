@@ -65,8 +65,8 @@ typedef	struct
 } readContext;
 
 bool FAT_InitFiles(bool initCard, int ndmaSlot);
-aFile getBootFileCluster(const char* bootName);
-aFile getFileFromCluster(u32 cluster);
+void getBootFileCluster(aFile* file, const char* bootName);
+void getFileFromCluster(aFile* file, u32 cluster);
 u32 fileRead(char* buffer, aFile* file, u32 startOffset, u32 length, int ndmaSlot);
 bool fileReadNonBLocking(char* buffer, aFile* file, u32 startOffset, u32 length, int ndmaSlot);
 bool resumeFileRead();

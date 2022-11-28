@@ -605,7 +605,8 @@ static void loadBinary_ARM7(const tDSiHeader* dsiHeaderTemp, aFile* file) {
 	bool separateSrl = (softResetParams[2] == 0x44414F4C); // 'LOAD'
 	if (separateSrl) {
 		srlAddr = 0xFFFFFFFF;
-		aFile pageFile = getFileFromCluster(pageFileCluster, bootstrapOnFlashcard);
+		aFile pageFile;
+		getFileFromCluster(&pageFile, pageFileCluster, bootstrapOnFlashcard);
 
 		fileRead((char*)dsiHeaderTemp, &pageFile, 0x2BFE00, 0x160, 0);
 		fileRead(dsiHeaderTemp->ndshdr.arm9destination, &pageFile, 0, dsiHeaderTemp->ndshdr.arm9binarySize, 0);
@@ -1236,12 +1237,15 @@ int arm7_main(void) {
 	}
 
 	if (logging) {
-		enableDebug(getBootFileCluster("NDSBTSRP.LOG", bootstrapOnFlashcard));
+		aFile logFile;
+		getBootFileCluster(&logFile, "NDSBTSRP.LOG", bootstrapOnFlashcard);
+		enableDebug(&logFile);
 	}
 
 	bool dsiEnhancedMbk = (*(u32*)0x02FFE1A0 == 0x00403000 && REG_SCFG_EXT == 0);
 
-	aFile srParamsFile = getFileFromCluster(srParamsFileCluster, gameOnFlashcard);
+	aFile srParamsFile;
+	getFileFromCluster(&srParamsFile, srParamsFileCluster, gameOnFlashcard);
 	fileRead((char*)&softResetParams, &srParamsFile, 0, 0x10, -1);
 	bool softResetParamsFound = (softResetParams[0] != 0xFFFFFFFF);
 	if (softResetParamsFound) {
@@ -1255,13 +1259,13 @@ int arm7_main(void) {
 
 	// ROM file
 	aFile* romFile = (aFile*)(dsiEnhancedMbk ? ROM_FILE_LOCATION_ALT : ROM_FILE_LOCATION);
-	*romFile = getFileFromCluster(storedFileCluster, gameOnFlashcard);
+	getFileFromCluster(romFile, storedFileCluster, gameOnFlashcard);
 
 	fileRead((char*)&oldArm7mbk, romFile, 0x1A0, sizeof(u32), -1);
 
 	// Sav file
 	aFile* savFile = (aFile*)(dsiEnhancedMbk ? SAV_FILE_LOCATION_ALT : SAV_FILE_LOCATION);
-	*savFile = getFileFromCluster(saveFileCluster, saveOnFlashcard);
+	getFileFromCluster(savFile, saveFileCluster, saveOnFlashcard);
 
 	/*const char* bootName = "BOOT.NDS";
 
@@ -1354,7 +1358,8 @@ int arm7_main(void) {
 	}*/
 
 	// File containing cached patch offsets
-	aFile patchOffsetCacheFile = getFileFromCluster(patchOffsetCacheFileCluster, gameOnFlashcard);
+	aFile patchOffsetCacheFile;
+	getFileFromCluster(&patchOffsetCacheFile, patchOffsetCacheFileCluster, gameOnFlashcard);
 	fileRead((char*)&patchOffsetCache, &patchOffsetCacheFile, 0, sizeof(patchOffsetCacheContents), -1);
 	patchOffsetCacheFilePrevCrc = swiCRC16(0xFFFF, &patchOffsetCache, sizeof(patchOffsetCacheContents));
 	u16 prevPatchOffsetCacheFileVersion = patchOffsetCache.ver;
@@ -1628,7 +1633,8 @@ int arm7_main(void) {
 			*(u32*)0x0DFFE1CC = (iUncompressedSizei > 0 ? iUncompressedSizei : *(u32*)0x02FFE1CC);
 			*(u32*)0x0DFFE1DC = newArm7ibinarySize;
 		} else {
-			aFile pageFile = getFileFromCluster(pageFileCluster, bootstrapOnFlashcard);
+			aFile pageFile;
+			getFileFromCluster(&pageFile, pageFileCluster, bootstrapOnFlashcard);
 
 			fileWrite((char*)ndsHeader->arm9destination, &pageFile, 0, iUncompressedSize, -1);
 			fileWrite((char*)ndsHeader->arm7destination, &pageFile, 0x2C0000, newArm7binarySize, -1);
@@ -1749,7 +1755,8 @@ int arm7_main(void) {
 		bool useApPatch = (srlAddr == 0 && apPatchFileCluster != 0 && !apPatchIsCheat && apPatchSize > 0 && apPatchSize <= 0x40000);
 
 		if (useApPatch) {
-			aFile apPatchFile = getFileFromCluster(apPatchFileCluster, gameOnFlashcard);
+			aFile apPatchFile;
+			getFileFromCluster(&apPatchFile, apPatchFileCluster, gameOnFlashcard);
 			dbg_printf("AP-fix found\n");
 			fileRead((char*)IPS_LOCATION, &apPatchFile, 0, apPatchSize, 0);
 			if (*(u8*)(IPS_LOCATION+apPatchSize-1) != 0xA9) {
@@ -1934,7 +1941,7 @@ int arm7_main(void) {
 
 		if (!ROMinRAM && overlayPatch) {
 			aFile* apFixOverlaysFile = (aFile*)((ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed) ? OVL_FILE_LOCATION_TWLSDK : OVL_FILE_LOCATION_MAINMEM);
-			*apFixOverlaysFile = getFileFromCluster(apFixOverlaysCluster, gameOnFlashcard);
+			getFileFromCluster(apFixOverlaysFile, apFixOverlaysCluster, gameOnFlashcard);
 			buildFatTableCacheCompressed(apFixOverlaysFile);
 
 			u32 alignedOverlaysOffset = ((ndsHeader->arm9romOffset + ndsHeader->arm9binarySize)/cacheBlockSize)*cacheBlockSize;
@@ -1955,7 +1962,7 @@ int arm7_main(void) {
 
 		if (gameOnFlashcard && isDSiWare) {
 			aFile* sharedFontFile = (aFile*)FONT_FILE_LOCATION_TWLSDK;
-			*sharedFontFile = getFileFromCluster(sharedFontCluster, true);
+			getFileFromCluster(sharedFontFile, sharedFontCluster, true);
 			buildFatTableCacheCompressed(sharedFontFile);
 		}
 
@@ -1964,7 +1971,8 @@ int arm7_main(void) {
 			// Do nothing
 		} else if (extendedMemoryConfirmed || dsiModeConfirmed) {
 			extern u32 iUncompressedSizei;
-			aFile pageFile = getFileFromCluster(pageFileCluster, bootstrapOnFlashcard);
+			aFile pageFile;
+			getFileFromCluster(&pageFile, pageFileCluster, bootstrapOnFlashcard);
 
 			fileWrite((char*)ndsHeader->arm9destination, &pageFile, 0, iUncompressedSize, -1);
 			fileWrite((char*)ndsHeader->arm7destination, &pageFile, 0x2C0000, newArm7binarySize, -1);
@@ -2019,7 +2027,8 @@ int arm7_main(void) {
     setMemoryAddress(ndsHeader, moduleParams);
 
 	if (0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_DOWN | KEY_A))) {
-		aFile ramDumpFile = getFileFromCluster(ramDumpCluster, bootstrapOnFlashcard);
+		aFile ramDumpFile;
+		getFileFromCluster(&ramDumpFile, ramDumpCluster, bootstrapOnFlashcard);
 
 		fileWrite((char*)0x0C000000, &ramDumpFile, 0, (consoleModel==0 ? 0x01000000 : 0x02000000), -1);		// Dump RAM
 		//fileWrite((char*)dsiHeaderTemp.arm9idestination, &ramDumpFile, 0, dsiHeaderTemp.arm9ibinarySize, -1);	// Dump (decrypted?) arm9 binary

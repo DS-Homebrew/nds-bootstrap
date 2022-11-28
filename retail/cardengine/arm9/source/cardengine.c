@@ -227,12 +227,17 @@ void reset(u32 param) {
 	}
 
 	// Clear out ARM9 DMA channels
+	vu32* dma = &DMA0_SRC;
+	vu16* tmr = &TIMER0_DATA;
 	for (i = 0; i < 4; i++) {
-		DMA_CR(i) = 0;
-		DMA_SRC(i) = 0;
-		DMA_DEST(i) = 0;
-		TIMER_CR(i) = 0;
-		TIMER_DATA(i) = 0;
+		dma[2] = 0; //CR
+		dma[0] = 0; //SRC
+		dma[1] = 0; //DST
+		dma += 3;
+
+		tmr[1] = 0; //CR
+		tmr[0] = 0; //DATA
+		tmr += 2;
 	}
 
 	// Clear out FIFO
@@ -255,29 +260,18 @@ void reset(u32 param) {
 		toncset((u16*)0x04000000, 0, 0x56);
 		toncset((u16*)0x04001000, 0, 0x56);
 
-		VRAM_A_CR = 0x80;
-		VRAM_B_CR = 0x80;
-		VRAM_C_CR = 0x80;
-		VRAM_D_CR = 0x80;
-		VRAM_E_CR = 0x80;
-		VRAM_F_CR = 0x80;
-		VRAM_G_CR = 0x80;
-		VRAM_H_CR = 0x80;
-		VRAM_I_CR = 0x80;
+		*(vu32*)&VRAM_A_CR = 0x80808080; //ABCD
+		*(vu16*)&VRAM_E_CR = 0x8080; //EF
+		VRAM_G_CR = 0x80; //G
+		*(vu16*)&VRAM_H_CR = 0x8080; //HI
 
-		toncset16(BG_PALETTE, 0, 256); // Clear palettes
-		toncset16(BG_PALETTE_SUB, 0, 256);
+		toncset16(BG_PALETTE, 0, 512); // Clear main and sub palettes
 		toncset(VRAM, 0, 0xC0000); // Clear VRAM
 
-		VRAM_A_CR = 0;
-		VRAM_B_CR = 0;
-		VRAM_C_CR = 0;
-		VRAM_D_CR = 0;
-		VRAM_E_CR = 0;
-		VRAM_F_CR = 0;
-		VRAM_G_CR = 0;
-		VRAM_H_CR = 0;
-		VRAM_I_CR = 0;
+		*(vu32*)&VRAM_A_CR = 0; //ABCD
+		*(vu16*)&VRAM_E_CR = 0; //EF
+		VRAM_G_CR = 0; //G
+		*(vu16*)&VRAM_H_CR = 0; //HI
 
 		sdk5MpuFix();
 		ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
@@ -292,7 +286,8 @@ void reset(u32 param) {
 
 		WRAM_CR = 0; // Set shared ram to ARM9
 
-		aFile bootNds = getBootFileCluster("BOOT.NDS");
+		aFile bootNds;
+		getBootFileCluster(&bootNds, "BOOT.NDS");
 		fileRead((char*)ndsHeader, &bootNds, 0, 0x170);
 		fileRead((char*)ndsHeader->arm9destination, &bootNds, ndsHeader->arm9romOffset, ndsHeader->arm9binarySize);
 		fileRead((char*)ndsHeader->arm7destination, &bootNds, ndsHeader->arm7romOffset, ndsHeader->arm7binarySize);
@@ -536,9 +531,9 @@ static void initialize(void) {
 			while (1);
 		}
 
-		romFile = getFileFromCluster(ce9->fileCluster);
-		savFile = getFileFromCluster(ce9->saveCluster);
-		musicsFile = getFileFromCluster(ce9->musicCluster);
+		getFileFromCluster(&romFile, ce9->fileCluster);
+		getFileFromCluster(&savFile, ce9->saveCluster);
+		getFileFromCluster(&musicsFile, ce9->musicCluster);
 
 		if (ce9->romFatTableCache != 0) {
 			romFile.fatTableCache = (u32*)ce9->romFatTableCache;
@@ -555,13 +550,13 @@ static void initialize(void) {
 			musicsFile.fatTableCached = true;
 		}
 
-		ramDumpFile = getFileFromCluster(ce9->ramDumpCluster);
-		srParamsFile = getFileFromCluster(ce9->srParamsCluster);
-		screenshotFile = getFileFromCluster(ce9->screenshotCluster);
-		pageFile = getFileFromCluster(ce9->pageFileCluster);
-		manualFile = getFileFromCluster(ce9->manualCluster);
+		getFileFromCluster(&ramDumpFile, ce9->ramDumpCluster);
+		getFileFromCluster(&srParamsFile, ce9->srParamsCluster);
+		getFileFromCluster(&screenshotFile, ce9->screenshotCluster);
+		getFileFromCluster(&pageFile, ce9->pageFileCluster);
+		getFileFromCluster(&manualFile, ce9->manualCluster);
 		#ifndef NODSIWARE
-		sharedFontFile = getFileFromCluster(ce9->sharedFontCluster);
+		getFileFromCluster(&sharedFontFile, ce9->sharedFontCluster);
 		#endif
 
 		bool cloneboot = (ce9->valueBits & isSdk5) ? *(u16*)0x02FFFC40 == 2 : *(u16*)0x027FFC40 == 2;

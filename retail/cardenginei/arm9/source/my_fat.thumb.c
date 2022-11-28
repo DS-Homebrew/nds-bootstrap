@@ -465,7 +465,7 @@ bool FAT_InitFiles (bool initCard, int ndmaSlot)
 /*-----------------------------------------------------------------
 getBootFileCluster
 -----------------------------------------------------------------*/
-aFile getBootFileCluster (const char* bootName)
+void getBootFileCluster(aFile* file, const char* bootName)
 {
 	DIR_ENT dir;
 	int firstSector = 0;
@@ -476,7 +476,6 @@ aFile getBootFileCluster (const char* bootName)
 	u32 wrkDirSector = 0;
 	int wrkDirOffset = 0;
 	int nameOffset;
-	aFile file;
 
 	dir.startCluster = CLUSTER_FREE; // default to no file found
 	dir.startClusterHigh = CLUSTER_FREE;
@@ -489,10 +488,10 @@ aFile getBootFileCluster (const char* bootName)
 		nocashMessage("getBootFileCluster  fat not initialised");
 		#endif
 
-		file.firstCluster = CLUSTER_FREE;
-		file.currentCluster = file.firstCluster;
-		file.currentOffset=0;
-		return file;
+		file->firstCluster = CLUSTER_FREE;
+		file->currentCluster = file->firstCluster;
+		file->currentOffset=0;
+		return;
 	}
 
 	char *ptr = (char*)bootName;
@@ -558,35 +557,32 @@ aFile getBootFileCluster (const char* bootName)
 		nocashMessage("getBootFileCluster  notFound");
 		#endif
 
-		file.firstCluster = CLUSTER_FREE;
-		file.currentCluster = file.firstCluster;
-		file.currentOffset=0;
-		file.fatTableCached=false;
+		file->firstCluster = CLUSTER_FREE;
+		file->currentCluster = file->firstCluster;
+		file->currentOffset = 0;
+		file->fatTableCached = false;
 
-		return file;
+		return;
 	}
 
 	#ifdef DEBUG
 	nocashMessage("getBootFileCluster  found");
 	#endif
 
-	file.firstCluster = (dir.startCluster | (dir.startClusterHigh << 16));
-	file.currentCluster = file.firstCluster;
-	file.currentOffset=0;
-	file.fatTableCached=false;
-	return file;
+	file->firstCluster = (dir.startCluster | (dir.startClusterHigh << 16));
+	file->currentCluster = file->firstCluster;
+	file->currentOffset = 0;
+	file->fatTableCached = false;
 }
 
-aFile getFileFromCluster (u32 cluster) {
-	aFile file;
-	file.firstCluster = cluster;
-	file.currentCluster = file.firstCluster;
-	file.currentOffset=0;
-	file.fatTableCached=false;
-	return file;
+void getFileFromCluster(aFile* file, u32 cluster) {
+	file->firstCluster = cluster;
+	file->currentCluster = file->firstCluster;
+	file->currentOffset = 0;
+	file->fatTableCached = false;
 }
 
-u32 getCachedCluster(aFile * file, int clusterIndex)
+u32 getCachedCluster(aFile* file, int clusterIndex)
 {
 	if (file->fatTableCompressed) {
 		int posSub = 0;

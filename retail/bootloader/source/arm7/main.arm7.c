@@ -496,7 +496,8 @@ static void loadBinary_ARM7(const tDSiHeader* dsiHeaderTemp, aFile* file) {
 	bool separateSrl = (softResetParams[2] == 0x44414F4C); // 'LOAD'
 	if (separateSrl) {
 		srlAddr = 0xFFFFFFFF;
-		aFile pageFile = getFileFromCluster(pageFileCluster);
+		aFile pageFile;
+		getFileFromCluster(&pageFile, pageFileCluster);
 
 		fileRead((char*)dsiHeaderTemp, &pageFile, 0x2BFE00, 0x160);
 		fileRead(dsiHeaderTemp->ndshdr.arm9destination, &pageFile, 0x14000, dsiHeaderTemp->ndshdr.arm9binarySize);
@@ -943,12 +944,15 @@ int arm7_main(void) {
 	}
 
 	if (logging) {
-		enableDebug(getBootFileCluster("NDSBTSRP.LOG"));
+		aFile logFile;
+		getBootFileCluster(&logFile, "NDSBTSRP.LOG");
+		enableDebug(&logFile);
 	}
 
 	*(vu32*)(0x02000000) = 0; // Clear debug RAM check flag
 
-	aFile srParamsFile = getFileFromCluster(srParamsFileCluster);
+	aFile srParamsFile;
+	getFileFromCluster(&srParamsFile, srParamsFileCluster);
 	fileRead((char*)&softResetParams, &srParamsFile, 0, 0x10);
 	bool softResetParamsFound = (softResetParams[0] != 0xFFFFFFFF);
 	if (softResetParamsFound) {
@@ -964,7 +968,8 @@ int arm7_main(void) {
 	//aFile bootNdsFile = getBootFileCluster(bootName, 0);
 
 	// ROM file
-	aFile romFile = getFileFromCluster(storedFileCluster);
+	aFile romFile;
+	getFileFromCluster(&romFile, storedFileCluster);
 
 	// Invalid file cluster specified
 	/*if ((romFile.firstCluster < CLUSTER_FIRST) || (romFile.firstCluster >= CLUSTER_EOF)) {
@@ -980,7 +985,8 @@ int arm7_main(void) {
 	//nocashMessage("status1");
 
 	// Sav file
-	aFile savFile = getFileFromCluster(saveFileCluster);
+	aFile savFile;
+	getFileFromCluster(&savFile, saveFileCluster);
 	
 	int errorCode;
 
@@ -992,7 +998,8 @@ int arm7_main(void) {
 	loadBinary_ARM7(&dsiHeaderTemp, &romFile);
 	
 	// File containing cached patch offsets
-	aFile patchOffsetCacheFile = getFileFromCluster(patchOffsetCacheFileCluster);
+	aFile patchOffsetCacheFile;
+	getFileFromCluster(&patchOffsetCacheFile, patchOffsetCacheFileCluster);
 	fileRead((char*)&patchOffsetCache, &patchOffsetCacheFile, 0, sizeof(patchOffsetCacheContents));
 	patchOffsetCacheFilePrevCrc = swiCRC16(0xFFFF, &patchOffsetCache, sizeof(patchOffsetCacheContents));
 	u16 prevPatchOffsetCacheFileVersion = patchOffsetCache.ver;
@@ -1096,7 +1103,8 @@ int arm7_main(void) {
 		errorOutput();
 	}
 
-	aFile musicsFile = getFileFromCluster(musicCluster);
+	aFile musicsFile;
+	getFileFromCluster(&musicsFile, musicCluster);
 	if (musicCluster != 0) {
 		dbg_printf("Music pack found!\n");
 	}
@@ -1309,7 +1317,8 @@ int arm7_main(void) {
 	}
 
 	if (srlAddr == 0 && apPatchFileCluster != 0 && !apPatchIsCheat && apPatchSize > 0 && apPatchSize <= 0x40000) {
-		aFile apPatchFile = getFileFromCluster(apPatchFileCluster);
+		aFile apPatchFile;
+		getFileFromCluster(&apPatchFile, apPatchFileCluster);
 		dbg_printf("AP-fix found\n");
 		if (esrbScreenPrepared) {
 			while (!esrbImageLoaded) {
@@ -1326,7 +1335,8 @@ int arm7_main(void) {
 	}
 
 	extern u32 iUncompressedSize;
-	aFile pageFile = getFileFromCluster(pageFileCluster);
+	aFile pageFile;
+	getFileFromCluster(&pageFile, pageFileCluster);
 
 	fileWrite((char*)ndsHeader->arm9destination, &pageFile, 0x14000, iUncompressedSize);
 	fileWrite((char*)ndsHeader->arm7destination, &pageFile, 0x2C0000, newArm7binarySize);
@@ -1386,7 +1396,8 @@ int arm7_main(void) {
 	}
 
 	if (0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_DOWN | KEY_A))) {		// Dump RAM
-		aFile ramDumpFile = getFileFromCluster(ramDumpCluster);
+		aFile ramDumpFile;
+		getFileFromCluster(&ramDumpFile, ramDumpCluster);
 		if (extendedMemory2) {
 			fileWrite((char*)0x02000000, &ramDumpFile, 0, 0x7E0000);
 			fileWrite((char*)(isSdk5(moduleParams) ? 0x02FE0000 : 0x027E0000), &ramDumpFile, 0x7E0000, 0x20000);

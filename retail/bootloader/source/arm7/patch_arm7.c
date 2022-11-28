@@ -373,7 +373,8 @@ u32 patchCardNdsArm7(
 	if (arm7mbk == 0x080037C0) {
 		// Replace incompatible ARM7 binary
 		extern u32 donorFileTwlCluster;	// SDK5 (TWL)
-		aFile donorRomFile = getFileFromCluster(donorFileTwlCluster);
+		aFile donorRomFile;
+		getFileFromCluster(&donorRomFile, donorFileTwlCluster);
 		if (donorRomFile.firstCluster == CLUSTER_FREE && ndsHeader->gameCode[0] != 'D') {
 			dbg_printf("ERR_LOAD_OTHR\n\n");
 			return ERR_LOAD_OTHR;

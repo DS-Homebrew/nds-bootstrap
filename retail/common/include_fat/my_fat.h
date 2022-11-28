@@ -70,17 +70,17 @@ typedef	struct
 #ifndef B4DS
 #ifdef TWOCARD
 bool FAT_InitFiles(bool initCard, bool card2, int ndmaSlot);
-aFile getBootFileCluster(const char* bootName, bool card2);
-aFile getFileFromCluster(u32 cluster, bool card2);
+void getBootFileCluster(aFile* file, const char* bootName, bool card2);
+void getFileFromCluster(aFile* file, u32 cluster, bool card2);
 #else
 bool FAT_InitFiles(bool initCard, int ndmaSlot);
-aFile getBootFileCluster(const char* bootName);
-aFile getFileFromCluster(u32 cluster);
+void getBootFileCluster(aFile* file, const char* bootName);
+void getFileFromCluster(aFile* file, u32 cluster);
 #endif
 #else
 bool FAT_InitFiles(bool initCard);
-aFile getBootFileCluster(const char* bootName);
-aFile getFileFromCluster(u32 cluster);
+void getBootFileCluster(aFile* file, const char* bootName);
+void getFileFromCluster(aFile* file, u32 cluster);
 #endif
 #ifndef B4DS
 u32 fileRead(char* buffer, aFile* file, u32 startOffset, u32 length, int ndmaSlot);

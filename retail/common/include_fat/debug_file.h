@@ -23,6 +23,6 @@
 
 u32 dbg_printf(const char* message);
 u32 dbg_hexa(u32 n);
-void enableDebug(aFile debugFileCluster);
+void enableDebug(const aFile* debugFileCluster);
 
 #endif // DEBUG_FILE_H

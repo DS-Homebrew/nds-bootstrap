@@ -279,11 +279,11 @@ static void driveInitialize(void) {
 		FAT_InitFiles(false, true, 0);
 	}
 
-	ramDumpFile = getFileFromCluster(ramDumpCluster, (valueBits & bootstrapOnFlashcard));
-	srParamsFile = getFileFromCluster(srParamsCluster, (valueBits & gameOnFlashcard));
-	screenshotFile = getFileFromCluster(screenshotCluster, (valueBits & bootstrapOnFlashcard));
-	pageFile = getFileFromCluster(pageFileCluster, (valueBits & bootstrapOnFlashcard));
-	manualFile = getFileFromCluster(manualCluster, (valueBits & bootstrapOnFlashcard));
+	getFileFromCluster(&ramDumpFile, ramDumpCluster, (valueBits & bootstrapOnFlashcard));
+	getFileFromCluster(&srParamsFile, srParamsCluster, (valueBits & gameOnFlashcard));
+	getFileFromCluster(&screenshotFile, screenshotCluster, (valueBits & bootstrapOnFlashcard));
+	getFileFromCluster(&pageFile, pageFileCluster, (valueBits & bootstrapOnFlashcard));
+	getFileFromCluster(&manualFile, manualCluster, (valueBits & bootstrapOnFlashcard));
 
 	//romFile = getFileFromCluster(fileCluster);
 	//buildFatTableCache(&romFile, 0);
@@ -302,8 +302,9 @@ static void driveInitialize(void) {
 	}*/
 
 	#ifdef DEBUG		
-	aFile myDebugFile = getBootFileCluster("NDSBTSRP.LOG", 0, !(valueBits & b_dsiSD));
-	enableDebug(myDebugFile);
+	aFile myDebugFile;
+	getBootFileCluster(&myDebugFile, "NDSBTSRP.LOG", 0, !(valueBits & b_dsiSD));
+	enableDebug(&myDebugFile);
 	dbg_printf("logging initialized\n");		
 	dbg_printf("sdk version :");
 	dbg_hexa(moduleParams->sdk_version);		
@@ -789,7 +790,8 @@ void returnToLoader(bool wait) {
 
 	//driveInitialize();
 
-	aFile file = getBootFileCluster("BOOT.NDS", !(valueBits & b_dsiSD));
+	aFile file;
+	getBootFileCluster(&file, "BOOT.NDS", !(valueBits & b_dsiSD));
 	if (file.firstCluster == CLUSTER_FREE) {
 		// File not found, so reboot console instead
 		i2cWriteRegister(0x4A, 0x70, 0x01);
