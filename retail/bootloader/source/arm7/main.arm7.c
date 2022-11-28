@@ -262,11 +262,11 @@ static void resetMemory_ARM7(void) {
 	REG_IPC_FIFO_CR = 0;
 
 	memset_addrs_arm7(0x03800000 - 0x8000, 0x03800000 + 0x10000);
-	memset_addrs_arm7(0x02000620, IMAGES_LOCATION);	// clear part of EWRAM - except before nds-bootstrap images
+	memset_addrs_arm7(0x02000620, IMAGES_LOCATION-0x1000);	// clear part of EWRAM - except before nds-bootstrap images
 	toncset((u32*)0x02380000, 0, 0x38000);		// clear part of EWRAM - except before 0x023DA000, which has the arm9 code
 	toncset((u32*)0x023C0000, 0, 0x20000);
-	toncset((u32*)0x023F0000, 0, 0xB000);
-	toncset((u32*)0x023FE000, 0, 0x2000);
+	toncset((u32*)0x023F0000, 0, 0xD000);
+	toncset((u32*)0x023FF000, 0, 0x1000);
 	if (extendedMemory2) {
 		toncset((u32*)0x02400000, 0, 0x3FC000);
 		toncset((u32*)0x027FF000, 0, dsDebugRam ? 0x1000 : 0x801000);
@@ -1083,10 +1083,9 @@ int arm7_main(void) {
 	rsetPatchCache();
 
 	ce9Location = *(u32*)CARDENGINE_ARM9_LOCATION_BUFFERED;
-	tonccpy((u32*)ce9Location, (u32*)CARDENGINE_ARM9_LOCATION_BUFFERED, 0x4C00);
-	toncset((u32*)0x023E0000, 0, 0x10000);
-
 	ce9Alt = (ce9Location == CARDENGINE_ARM9_LOCATION_DLDI_ALT);
+	tonccpy((u32*)ce9Location, (u32*)CARDENGINE_ARM9_LOCATION_BUFFERED, ce9Alt ? 0x3400 : 0x4C00);
+	toncset((u32*)0x023E0000, 0, 0x10000);
 
 	tonccpy((u8*)CARDENGINE_ARM7_LOCATION, (u8*)CARDENGINE_ARM7_LOCATION_BUFFERED, 0x1400);
 	toncset((u8*)CARDENGINE_ARM7_LOCATION_BUFFERED, 0, 0x1400);
@@ -1361,11 +1360,11 @@ int arm7_main(void) {
 		cardengineArm9* ce9 = (cardengineArm9*)ce9Location;
 		const u32 codeBranch = 0x023FF400;
 
-		tonccpy((u32*)0x02370000, ce9, 0x6000);
+		tonccpy((u32*)0x02370000, ce9, 0x3400);
 		tonccpy((u32*)0x02378000, (u32*)0x023E8000, 0x8000); // FAT table cache
 		tonccpy((u32*)codeBranch, copyBackCe9, 0x200);
 
-		toncset(ce9, 0, 0x6000);
+		toncset(ce9, 0, 0x3400);
 		toncset((u32*)0x023E8000, 0, 0x8000); // FAT table cache
 
 		u32 blFrom = (u32)ndsHeader->arm9destination;
