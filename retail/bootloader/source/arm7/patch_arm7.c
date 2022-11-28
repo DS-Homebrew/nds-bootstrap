@@ -282,8 +282,8 @@ static void patchRamClear(const tNDSHeader* ndsHeader, const module_params_t* mo
 		}
 	}
 	if (ramClearOffset) {
-		*(ramClearOffset) = 0x02FFC000;
-		*(ramClearOffset + 1) = 0x02FFD000;
+		*(ramClearOffset) = 0x02FFF000;
+		*(ramClearOffset + 1) = 0x02FFF000;
 		dbg_printf("RAM clear location : ");
 		dbg_hexa((u32)ramClearOffset);
 		dbg_printf("\n\n");
