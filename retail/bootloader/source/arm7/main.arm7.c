@@ -1114,7 +1114,7 @@ int arm7_main(void) {
 	u32 fatTableSize = 0;
 	u32 fatTableSizeNoExp = (moduleParams->sdk_version < 0x2008000) ? 0x20000 : 0x1C800;
 	if (ce9Alt && moduleParams->sdk_version >= 0x2008000) {
-		fatTableSizeNoExp = 0x800;
+		fatTableSizeNoExp = 0x600;
 	}
 	if (s2FlashcardId == 0x334D || s2FlashcardId == 0x3647 || s2FlashcardId == 0x4353) {
 		fatTableAddr = (s2FlashcardId==0x4353 ? 0x09F7FE00 : 0x09F80000);
@@ -1183,10 +1183,10 @@ int arm7_main(void) {
 			clusterCache = 0x037F8000;
 			clusterCacheSize = (startMem ? 0x4000 : fatTableSizeNoExp)-romFile.fatTableCacheSize;
 
-			if (!ce9Alt && (!startMem || (startMem && romFile.fatTableCacheSize < 0x4000))) {
+			if (!startMem || (startMem && romFile.fatTableCacheSize < 0x4000)) {
 				buildFatTableCacheCompressed(&savFile);
 				if (savFile.fatTableCached) {
-					if (startMem) {
+					if (startMem || ce9Alt) {
 						fatTableAddr += romFile.fatTableCacheSize;
 					} else {
 						fatTableAddr -= savFile.fatTableCacheSize;
@@ -1352,7 +1352,7 @@ int arm7_main(void) {
 		extern u32 copyBackCe9Len;
 
 		cardengineArm9* ce9 = (cardengineArm9*)ce9Location;
-		u32 codeBranch = patchOffsetCache.cardReadStartOffset;
+		u32 codeBranch = (u32)patchOffsetCache.cardReadStartOffset;
 		codeBranch += 0x30;
 
 		tonccpy((u32*)0x02370000, ce9, 0x2C00);
