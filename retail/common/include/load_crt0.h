@@ -55,6 +55,6 @@ typedef struct loadCrt0 {
     u8 dmaRomRead_LED;
     u8 soundFreq;
     u8 valueBits3;
-} __attribute__ ((__packed__)) loadCrt0;
+} loadCrt0;
 
 #endif // LOAD_CRT0_H

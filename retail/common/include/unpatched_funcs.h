@@ -17,6 +17,6 @@ typedef struct unpatchedFunctions {
 	int mpuAccessOffset;
 	u32 mpuOldInstrAccess;
 	u32 mpuOldDataAccess;
-} __attribute__ ((__packed__)) unpatchedFunctions;
+} unpatchedFunctions;
 
 #endif // UNPATCHED_FUNCS_ARM9_H

@@ -41,7 +41,7 @@ typedef struct cardengineArm9Patches {
 	u32* pdash_read;
 	u32* vblankHandlerRef;
 	u32* ipcSyncHandlerRef;
-} __attribute__ ((__packed__)) cardengineArm9Patches;
+} cardengineArm9Patches;
 
 
 //
@@ -63,7 +63,7 @@ typedef struct cardengineArm9ThumbPatches {
     u32* cardEndReadDmaRef;
     u32* sleepRef;
     u32* reset_arm9;
-} __attribute__ ((__packed__)) cardengineArm9ThumbPatches;
+} cardengineArm9ThumbPatches;
 
 
 //
@@ -108,7 +108,8 @@ typedef struct cardengineArm9 {
     u16 cacheBlockSize;
     u32 romPartSrc;
     u32 romPartSize;
-} __attribute__ ((__packed__)) cardengineArm9;
+} cardengineArm9;
+
 #else
 //
 // ARM9 cardengine patches
@@ -144,7 +145,7 @@ typedef struct cardengineArm9Patches {
 	u32 needFlushDCCache;
 	u32* pdash_read;
 	u32* ipcSyncHandlerRef;
-} __attribute__ ((__packed__)) cardengineArm9Patches;
+} cardengineArm9Patches;
 
 
 //
@@ -163,7 +164,7 @@ typedef struct cardengineArm9ThumbPatches {
     u32* cacheFlushRef;
     u32* readCachedRef;
     u32* reset_arm9;
-} __attribute__ ((__packed__)) cardengineArm9ThumbPatches;
+} cardengineArm9ThumbPatches;
 
 
 //
@@ -212,7 +213,7 @@ typedef struct cardengineArm9 {
 	VoidFn prepareScreenshot;
 	VoidFn saveScreenshot;
 	void (* readManual)(int);
-} __attribute__ ((__packed__)) cardengineArm9;
+} cardengineArm9;
 #endif
 
 #endif // CARDENGINE_HEADER_ARM9_H

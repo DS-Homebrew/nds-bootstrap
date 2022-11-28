@@ -437,7 +437,7 @@ void cardSetDma(u32 * params) {
 		endCardReadDma();
 	}
 	#else
-	vu32* volatile cardStruct = (vu32*)ce9->cardStruct0;
+	vu32* cardStruct = (vu32*)ce9->cardStruct0;
 
 	if (ce9->valueBits & isSdk5) {
 		dmaParams = params;
@@ -593,6 +593,10 @@ void cardSetDma(u32 * params) {
 		dmaReadOnArm9 = true;
 		currentLen = len2;
 		//currentSlot = slot;
+
+		//fixme: why is this needed to make the function work
+		//there seems to be some timing issue
+		swiDelay(1);
 
 		IPC_SendSync(0x3);
 	}

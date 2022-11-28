@@ -464,19 +464,19 @@ int hookNdsRetailArm7(
 	aFile apPatchFile = getFileFromCluster(apPatchFileCluster, gameOnFlashcard);
 	if (wideCheatSize+cheatSize+(apPatchIsCheat ? apPatchSize : 0) <= cheatSizeLimit) {
 		if (ndsHeader->unitCode < 3 && apPatchFile.firstCluster != CLUSTER_FREE && apPatchIsCheat) {
-			fileRead(cheatDataOffset, apPatchFile, 0, apPatchSize, 0);
+			fileRead(cheatDataOffset, &apPatchFile, 0, apPatchSize, 0);
 			cheatDataOffset += apPatchSize;
 			*(cheatDataOffset + 3) = 0xCF;
 			dbg_printf("AP-fix found and applied\n");
 		}
 		if (wideCheatFile.firstCluster != CLUSTER_FREE) {
-			fileRead(cheatDataOffset, wideCheatFile, 0, wideCheatSize, 0);
+			fileRead(cheatDataOffset, &wideCheatFile, 0, wideCheatSize, 0);
 			cheatDataOffset += wideCheatSize;
 			*(cheatDataOffset + 3) = 0xCF;
 			ce7->valueBits |= b_wideCheatUsed;
 		}
 		if (cheatFile.firstCluster != CLUSTER_FREE) {
-			fileRead(cheatDataOffset, cheatFile, 0, cheatSize, 0);
+			fileRead(cheatDataOffset, &cheatFile, 0, cheatSize, 0);
 		}
 		if (!gameOnFlashcard && isDSiWare) {
 			unpatchedFunctions* unpatchedFuncs = (unpatchedFunctions*)UNPATCHED_FUNCTION_LOCATION;
