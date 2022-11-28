@@ -14,8 +14,8 @@ copyBackCe9Func:
 	stmfd   sp!, {r0-r4,lr}
 
 	ldr r0, =0x02370000 @ src
-	ldr r1, =0x023FA000 @ dst
-	mov r2, #0x3000 @ len
+	ldr r1, =0x023FA400 @ dst
+	mov r2, #0x2C00 @ len
 	mov r3, r0
 	mov r4, r2
 	bl cpuCopy32

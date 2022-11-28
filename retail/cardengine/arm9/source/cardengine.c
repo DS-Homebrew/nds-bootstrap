@@ -654,7 +654,7 @@ static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
 	//nocashMessage("aaaaaaaaaa\n");
 	fileRead((char*)dst, &romFile, src, len);
 
-	if (!(ce9->valueBits & isSdk5) && strncmp(getRomTid(ndsHeader), "ASMP", 4)==0 && !mariosHolidayPrimaryFixApplied) {
+	if (!(ce9->valueBits & isSdk5) && ndsHeader->gameCode == 0x504D5341 /*ASMP*/ && !mariosHolidayPrimaryFixApplied) {
 		for (u32 i = 0; i < len; i += 4) {
 			if (*(u32*)(dst+i) == 0x4B434148) {
 				*(u32*)(dst+i) = 0xA00;

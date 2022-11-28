@@ -207,6 +207,8 @@ int prevNextClust[2] = {0};
 int prevFirstClust[2] = {-1};
 int prevSect[2] = {-1};
 int prevClust[2] = {-1};
+u8 discBytePerClusShift[2];
+u8 discSecPerClusShift[2];
 #else
 int discRootDir;
 int discRootDirClus;
@@ -217,6 +219,8 @@ int discData;
 int discBytePerSec;
 int discSecPerClus;
 int discBytePerClus;
+u8 discBytePerClusShift;
+u8 discSecPerClusShift;
 #ifdef MORECLUSTERBUFFERS
 int fatAccessCounter = 0;
 int prevNextClust[nextClusterBufferCount] = {0};
@@ -476,6 +480,13 @@ char ucase (char character)
 	return (character);
 }
 
+__attribute__((target("arm")))
+__attribute__ ((noinline))
+static u32 ctz(u32 x)
+{
+	return __builtin_ctz(x);
+}
+
 /*-----------------------------------------------------------------
 FAT_InitFiles
 Reads the FAT information from the CF card.
@@ -567,16 +578,20 @@ bool FAT_InitFiles (bool initCard)
 	discBytePerSec[card2] = BYTES_PER_SECTOR;	// Sector size is redefined to be 512 bytes
 	discSecPerClus[card2] = bootSec->bpb.sectorsPerCluster * bootSec->bpb.bytesPerSector / BYTES_PER_SECTOR;
 	discBytePerClus[card2] = discBytePerSec[card2] * discSecPerClus[card2];
+	discBytePerClusShift[card2] = ctz(discBytePerClus[card2]);
+	discSecPerClusShift[card2] = ctz(discSecPerClus[card2]);
 	discFAT[card2] = bootSector + bootSec->bpb.reservedSectors;
 
 	discRootDir[card2] = discFAT[card2] + (bootSec->bpb.numFATs * discSecPerFAT[card2]);
 	discData[card2] = discRootDir[card2] + ((bootSec->bpb.rootEntries * sizeof(DIR_ENT)) / BYTES_PER_SECTOR);
 
-	if ((discNumSec[card2] - discData[card2]) / bootSec->bpb.sectorsPerCluster < 4085)
+	u32 bpbSectorsPerClusterShift = ctz(bootSec->bpb.sectorsPerCluster);
+
+	if (((discNumSec[card2] - discData[card2]) >> bpbSectorsPerClusterShift) < 4085)
 	{
 		discFileSystem[card2] = FS_FAT12;
 	}
-	else if ((discNumSec[card2] - discData[card2]) / bootSec->bpb.sectorsPerCluster < 65525)
+	else if (((discNumSec[card2] - discData[card2]) >> bpbSectorsPerClusterShift) < 65525)
 	{
 		discFileSystem[card2] = FS_FAT16;
 	}
@@ -650,36 +665,33 @@ bool FAT_InitFiles (bool initCard)
 
 	// Store required information about the file system
 	if (bootSec->bpb.sectorsPerFAT != 0)
-	{
 		discSecPerFAT = bootSec->bpb.sectorsPerFAT;
-	}
 	else
-	{
 		discSecPerFAT = bootSec->extBlock.fat32.sectorsPerFAT32;
-	}
 
 	if (bootSec->bpb.numSectorsSmall != 0)
-	{
 		discNumSec = bootSec->bpb.numSectorsSmall;
-	}
 	else
-	{
 		discNumSec = bootSec->bpb.numSectors;
-	}
 
 	discBytePerSec = BYTES_PER_SECTOR;	// Sector size is redefined to be 512 bytes
 	discSecPerClus = bootSec->bpb.sectorsPerCluster * bootSec->bpb.bytesPerSector / BYTES_PER_SECTOR;
 	discBytePerClus = discBytePerSec * discSecPerClus;
+	discBytePerClusShift = ctz(discBytePerClus);
+	discSecPerClusShift = ctz(discSecPerClus);
+
 	discFAT = bootSector + bootSec->bpb.reservedSectors;
 
 	discRootDir = discFAT + (bootSec->bpb.numFATs * discSecPerFAT);
 	discData = discRootDir + ((bootSec->bpb.rootEntries * sizeof(DIR_ENT)) / BYTES_PER_SECTOR);
 
-	if ((discNumSec - discData) / bootSec->bpb.sectorsPerCluster < 4085)
+	u32 bpbSectorsPerClusterShift = ctz(bootSec->bpb.sectorsPerCluster);
+
+	if (((discNumSec - discData) >> bpbSectorsPerClusterShift) < 4085)
 	{
 		discFileSystem = FS_FAT12;
 	}
-	else if ((discNumSec - discData) / bootSec->bpb.sectorsPerCluster < 65525)
+	else if (((discNumSec - discData) >> bpbSectorsPerClusterShift) < 65525)
 	{
 		discFileSystem = FS_FAT16;
 	}
@@ -721,7 +733,7 @@ void getBootFileCluster(aFile* file, const char* bootName, bool card2)
 void getBootFileCluster(aFile* file, const char* bootName)
 #endif
 {
-	DIR_ENT dir;
+	const DIR_ENT* dir = 0;
 	int firstSector = 0;
 	bool notFound = false;
 	bool found = false;
@@ -734,10 +746,6 @@ void getBootFileCluster(aFile* file, const char* bootName)
 	u32 wrkDirSector = 0;
 	int wrkDirOffset = 0;
 	int nameOffset;
-
-	dir.startCluster = CLUSTER_FREE; // default to no file found
-	dir.startClusterHigh = CLUSTER_FREE;
-
 
 	// Check if fat has been initialised
 	#ifdef TWOCARD
@@ -816,27 +824,27 @@ void getBootFileCluster(aFile* file, const char* bootName)
 			#endif
 		}
 		#ifdef TWOCARD
-		dir = ((DIR_ENT*) globalBuffer[card2])[wrkDirOffset];
+		dir = &((DIR_ENT*) globalBuffer[card2])[wrkDirOffset];
 		#else
-		dir = ((DIR_ENT*) globalBuffer)[wrkDirOffset];
+		dir = &((DIR_ENT*) globalBuffer)[wrkDirOffset];
 		#endif
 		found = true;
-		if ((dir.attrib & ATTRIB_DIR) || (dir.attrib & ATTRIB_VOL))
+		if ((dir->attrib & ATTRIB_DIR) || (dir->attrib & ATTRIB_VOL))
 		{
 			found = false;
 		}
-		if(namelen<8 && dir.name[namelen]!=0x20) found = false;
+		if(namelen<8 && dir->name[namelen]!=0x20) found = false;
 		for (nameOffset = 0; nameOffset < namelen && found; nameOffset++)
 		{
-			if (ucase(dir.name[nameOffset]) != bootName[nameOffset])
+			if (ucase(dir->name[nameOffset]) != bootName[nameOffset])
 				found = false;
 		}
 		for (nameOffset = 0; nameOffset < 3 && found; nameOffset++)
 		{
-			if (ucase(dir.ext[nameOffset]) != bootName[nameOffset+namelen+1])
+			if (ucase(dir->ext[nameOffset]) != bootName[nameOffset+namelen+1])
 				found = false;
 		}
-		if (dir.name[0] == FILE_LAST)
+		if (dir->name[0] == FILE_LAST)
 		{
 			notFound = true;
 		}
@@ -861,7 +869,11 @@ void getBootFileCluster(aFile* file, const char* bootName)
 	nocashMessage("getBootFileCluster  found");
 	#endif
 
-	file->firstCluster = (dir.startCluster | (dir.startClusterHigh << 16));
+	if (dir)
+		file->firstCluster = (dir->startCluster | (dir->startClusterHigh << 16));
+	else
+		file->firstCluster = CLUSTER_FREE;
+	
 	file->currentCluster = file->firstCluster;
 	file->currentOffset = 0;
 	file->fatTableCached = false;
@@ -941,10 +953,10 @@ bool fileReadNonBLocking (char* buffer, aFile * file, u32 startOffset, u32 lengt
         nocashMessage("fat table cached");
         #endif
 		#ifdef TWOCARD
-		context.clusterIndex = startOffset/discBytePerClus[0];
+		context.clusterIndex = startOffset >> discBytePerClusShift[0];
 		file->currentOffset=context.clusterIndex*discBytePerClus[0];
 		#else
-		context.clusterIndex = startOffset/discBytePerClus;
+		context.clusterIndex = startOffset >> discBytePerClusShift;
 		file->currentOffset=context.clusterIndex*discBytePerClus;
 		#endif
 		file->currentCluster = getCachedCluster(file, context.clusterIndex);
@@ -959,16 +971,16 @@ bool fileReadNonBLocking (char* buffer, aFile * file, u32 startOffset, u32 lengt
 
 		// Follow cluster list until desired one is found
 		#ifdef TWOCARD
-		for (int chunks = (startOffset-file->currentOffset) / discBytePerClus[0]; chunks > 0; chunks--)
+		for (int chunks = (startOffset-file->currentOffset) >> discBytePerClusShift[0]; chunks > 0; chunks--)
 		{
 			file->currentCluster = FAT_NextCluster (file->currentCluster, false);
-			file->currentOffset+=discBytePerClus[0];
+			file->currentOffset += discBytePerClus[0];
 		}
 		#else
-		for (int chunks = (startOffset-file->currentOffset) / discBytePerClus; chunks > 0; chunks--)
+		for (int chunks = (startOffset-file->currentOffset) >> discBytePerClusShift; chunks > 0; chunks--)
 		{
 			file->currentCluster = FAT_NextCluster (file->currentCluster);
-			file->currentOffset+=discBytePerClus;
+			file->currentOffset += discBytePerClus;
 		}
 		#endif
 	}
@@ -976,9 +988,9 @@ bool fileReadNonBLocking (char* buffer, aFile * file, u32 startOffset, u32 lengt
 	// Calculate the sector and byte of the current position,
 	// and store them
 	#ifdef TWOCARD
-	context.curSect = (startOffset % discBytePerClus[0]) / BYTES_PER_SECTOR;
+	context.curSect = (startOffset & (discBytePerClus[0] - 1)) / BYTES_PER_SECTOR;
 	#else
-	context.curSect = (startOffset % discBytePerClus) / BYTES_PER_SECTOR;
+	context.curSect = (startOffset & (discBytePerClus - 1)) / BYTES_PER_SECTOR;
 	#endif
 	context.curByte = startOffset % BYTES_PER_SECTOR;
     context.dataPos=0;
@@ -1014,18 +1026,18 @@ bool resumeFileRead()
 			  #ifdef TWOCARD
               if (context.curSect >= discSecPerClus[0])
     			{
-				  context.clusterIndex+= context.curSect/discSecPerClus[0];
-				  context.curSect = context.curSect % discSecPerClus[0];
+				  context.clusterIndex+= context.curSect >> discSecPerClusShift[0];
+				  context.curSect = context.curSect & (discSecPerClus[0] - 1);
 				  context.file->currentCluster = context.file->fatTableCache[context.clusterIndex];
-				  context.file->currentOffset+=discBytePerClus[0];
+				  context.file->currentOffset += discBytePerClus[0];
     			}
 			  #else
               if (context.curSect >= discSecPerClus)
     			{
-				  context.clusterIndex+= context.curSect/discSecPerClus;
-				  context.curSect = context.curSect % discSecPerClus;
+				  context.clusterIndex += context.curSect >> discSecPerClusShift;
+				  context.curSect = context.curSect & (discSecPerClus - 1);
 				  context.file->currentCluster = context.file->fatTableCache[context.clusterIndex];
-				  context.file->currentOffset+=discBytePerClus;
+				  context.file->currentOffset += discBytePerClus;
     			}
 			  #endif
 
@@ -1090,11 +1102,11 @@ bool resumeFileRead()
 			  #endif
               #endif
 			  #ifdef TWOCARD
-              context.clusterIndex+= context.curSect/discSecPerClus[0];
-              context.curSect = context.curSect % discSecPerClus[0];
+              context.clusterIndex += context.curSect >> discSecPerClusShift[0];
+              context.curSect = context.curSect & (discSecPerClus[0] - 1);
 			  #else
-              context.clusterIndex+= context.curSect/discSecPerClus;
-              context.curSect = context.curSect % discSecPerClus;
+              context.clusterIndex += context.curSect >> discSecPerClusShift;
+              context.curSect = context.curSect & (discSecPerClus - 1);
 			  #endif
 			  context.file->currentCluster = getCachedCluster(context.file, context.clusterIndex);
               context.cmd=0x33C12;
@@ -1157,8 +1169,8 @@ bool resumeFileRead()
       		if (context.curSect >= discSecPerClus[0])
       		{
       			if(context.file->fatTableCached) {
-                        context.clusterIndex+= context.curSect/discSecPerClus[0];
-                        context.curSect = context.curSect % discSecPerClus[0];
+                        context.clusterIndex+= context.curSect >> discSecPerClusShift[0];
+                        context.curSect = context.curSect & (discSecPerClus[0] - 1);
 						context.file->currentCluster = getCachedCluster(context.file, context.clusterIndex);
                     } else {
                         context.curSect = 0;
@@ -1170,8 +1182,8 @@ bool resumeFileRead()
       		if (context.curSect >= discSecPerClus)
       		{
       			if(context.file->fatTableCached) {
-                        context.clusterIndex+= context.curSect/discSecPerClus;
-                        context.curSect = context.curSect % discSecPerClus;
+                        context.clusterIndex+= context.curSect >> discSecPerClusShift;
+                        context.curSect = context.curSect & (discSecPerClus - 1);
 						context.file->currentCluster = getCachedCluster(context.file, context.clusterIndex);
                     } else {
                         context.curSect = 0;
@@ -1253,10 +1265,10 @@ u32 fileRead (char* buffer, aFile* file, u32 startOffset, u32 length)
         nocashMessage("fat table cached");
         #endif
 		#ifdef TWOCARD
-		clusterIndex = startOffset/discBytePerClus[file->card2];
+		clusterIndex = startOffset >> discBytePerClusShift[file->card2];
 		file->currentOffset=clusterIndex*discBytePerClus[file->card2];
 		#else
-		clusterIndex = startOffset/discBytePerClus;
+		clusterIndex = startOffset >> discBytePerClusShift;
 		file->currentOffset=clusterIndex*discBytePerClus;
 		#endif
 		file->currentCluster = getCachedCluster(file, clusterIndex);
@@ -1271,13 +1283,13 @@ u32 fileRead (char* buffer, aFile* file, u32 startOffset, u32 length)
 
 		// Follow cluster list until desired one is found
 		#ifdef TWOCARD
-		for (chunks = (startOffset-file->currentOffset) / discBytePerClus[file->card2]; chunks > 0; chunks--)
+		for (chunks = (startOffset-file->currentOffset) >> discBytePerClusShift[file->card2]; chunks > 0; chunks--)
 		{
 			file->currentCluster = FAT_NextCluster (file->currentCluster, file->card2);
 			file->currentOffset+=discBytePerClus[file->card2];
 		}
 		#else
-		for (chunks = (startOffset-file->currentOffset) / discBytePerClus; chunks > 0; chunks--)
+		for (chunks = (startOffset-file->currentOffset) >> discBytePerClusShift; chunks > 0; chunks--)
 		{
 			file->currentCluster = FAT_NextCluster (file->currentCluster);
 			file->currentOffset+=discBytePerClus;
@@ -1288,9 +1300,9 @@ u32 fileRead (char* buffer, aFile* file, u32 startOffset, u32 length)
 	// Calculate the sector and byte of the current position,
 	// and store them
 	#ifdef TWOCARD
-	curSect = (startOffset % discBytePerClus[file->card2]) / BYTES_PER_SECTOR;
+	curSect = (startOffset & (discBytePerClus[file->card2] - 1)) / BYTES_PER_SECTOR;
 	#else
-	curSect = (startOffset % discBytePerClus) / BYTES_PER_SECTOR;
+	curSect = (startOffset & (discBytePerClus - 1)) / BYTES_PER_SECTOR;
 	#endif
 	curByte = startOffset % BYTES_PER_SECTOR;
 
@@ -1336,16 +1348,16 @@ u32 fileRead (char* buffer, aFile* file, u32 startOffset, u32 length)
 			  #ifdef TWOCARD
               if (curSect >= discSecPerClus[file->card2])
   			{
-                  clusterIndex+= curSect/discSecPerClus[file->card2];
-                  curSect = curSect % discSecPerClus[file->card2];
+                  clusterIndex+= curSect >> discSecPerClusShift[file->card2];
+                  curSect = curSect & (discSecPerClus[file->card2] - 1);
   				file->currentOffset+=discBytePerClus[file->card2];
 				file->currentCluster = getCachedCluster(file, clusterIndex);
 			}
 				#else
               if (curSect >= discSecPerClus)
   			{
-                  clusterIndex+= curSect/discSecPerClus;
-                  curSect = curSect % discSecPerClus;
+                  clusterIndex+= curSect >> discSecPerClusShift;
+                  curSect = curSect & (discSecPerClus - 1);
   				file->currentOffset+=discBytePerClus;
 				file->currentCluster = getCachedCluster(file, clusterIndex);
   			}
@@ -1418,11 +1430,11 @@ u32 fileRead (char* buffer, aFile* file, u32 startOffset, u32 length)
               #endif
 
 			  #ifdef TWOCARD
-              clusterIndex+= curSect/discSecPerClus[file->card2];
-              curSect = curSect % discSecPerClus[file->card2];
+              clusterIndex+= curSect >> discSecPerClusShift[file->card2];
+              curSect = curSect & (discSecPerClus[file->card2] - 1);
 			  #else
-              clusterIndex+= curSect/discSecPerClus;
-              curSect = curSect % discSecPerClus;
+              clusterIndex+= curSect >> discSecPerClusShift;
+              curSect = curSect & (discSecPerClus - 1);
               #endif
 				file->currentCluster = getCachedCluster(file, clusterIndex);
           } else {
@@ -1489,8 +1501,8 @@ u32 fileRead (char* buffer, aFile* file, u32 startOffset, u32 length)
 		if (curSect >= discSecPerClus[file->card2])
 		{
 			if(file->fatTableCached) {
-                  clusterIndex+= curSect/discSecPerClus[file->card2];
-                  curSect = curSect % discSecPerClus[file->card2];
+                  clusterIndex+= curSect >> discSecPerClusShift[file->card2];
+                  curSect = curSect & (discSecPerClus[file->card2] - 1);
 				file->currentCluster = getCachedCluster(file, clusterIndex);
               } else {
                   curSect = 0;
@@ -1502,8 +1514,8 @@ u32 fileRead (char* buffer, aFile* file, u32 startOffset, u32 length)
 		if (curSect >= discSecPerClus)
 		{
 			if(file->fatTableCached) {
-                  clusterIndex+= curSect/discSecPerClus;
-                  curSect = curSect % discSecPerClus;
+                  clusterIndex+= curSect >> discSecPerClusShift;
+                  curSect = curSect & (discSecPerClus - 1);
 				file->currentCluster = getCachedCluster(file, clusterIndex);
               } else {
                   curSect = 0;
@@ -1579,10 +1591,10 @@ u32 fileWrite (const char* buffer, aFile* file, u32 startOffset, u32 length)
 
 	if(file->fatTableCached) {
 		#ifdef TWOCARD
-		clusterIndex = startOffset/discBytePerClus[file->card2];
+		clusterIndex = startOffset >> discBytePerClusShift[file->card2];
 		file->currentOffset=clusterIndex*discBytePerClus[file->card2];
 		#else
-		clusterIndex = startOffset/discBytePerClus;
+		clusterIndex = startOffset >> discBytePerClusShift;
 		file->currentOffset=clusterIndex*discBytePerClus;
 		#endif
 		file->currentCluster = getCachedCluster(file, clusterIndex);
@@ -1594,13 +1606,13 @@ u32 fileWrite (const char* buffer, aFile* file, u32 startOffset, u32 length)
 
 		// Follow cluster list until desired one is found
 		#ifdef TWOCARD
-		for (chunks = (startOffset-file->currentOffset) / discBytePerClus[file->card2]; chunks > 0; chunks--)
+		for (chunks = (startOffset-file->currentOffset) >> discBytePerClusShift[file->card2]; chunks > 0; chunks--)
 		{
 			file->currentCluster = FAT_NextCluster (file->currentCluster, file->card2);
 			file->currentOffset+=discBytePerClus[file->card2];
 		}
 		#else
-		for (chunks = (startOffset-file->currentOffset) / discBytePerClus; chunks > 0; chunks--)
+		for (chunks = (startOffset-file->currentOffset) >> discBytePerClusShift; chunks > 0; chunks--)
 		{
 			file->currentCluster = FAT_NextCluster (file->currentCluster);
 			file->currentOffset+=discBytePerClus;
@@ -1611,9 +1623,9 @@ u32 fileWrite (const char* buffer, aFile* file, u32 startOffset, u32 length)
 	// Calculate the sector and byte of the current position,
 	// and store them
 	#ifdef TWOCARD
-	curSect = (startOffset % discBytePerClus[file->card2]) / BYTES_PER_SECTOR;
+	curSect = (startOffset & (discBytePerClus[file->card2] - 1)) / BYTES_PER_SECTOR;
 	#else
-	curSect = (startOffset % discBytePerClus) / BYTES_PER_SECTOR;
+	curSect = (startOffset & (discBytePerClus - 1)) / BYTES_PER_SECTOR;
 	#endif
 	curByte = startOffset % BYTES_PER_SECTOR;
 
