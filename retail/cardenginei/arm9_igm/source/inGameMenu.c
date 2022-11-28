@@ -30,6 +30,7 @@ static u16 palBak[256];
 // For RAM viewer, global so it's persistant
 vu32 *address = (vu32*)0x02000000;
 static bool arm7Ram = false;
+static u8 arm7RamBak[0xC0];
 
 u16 igmPal[6] = {
 	0xFFFF, // White
@@ -569,6 +570,7 @@ static void ramViewer(void) {
 	(*changeMpu)();
 
 	u8 *arm7RamBuffer = ((u8*)sharedAddr) - 0x74C;
+	tonccpy(arm7RamBak, arm7RamBuffer, 0xC0);
 	bool ramLoaded = false;
 	u8 cursorPosition = 0, mode = 0;
 	while(1) {
@@ -705,6 +707,7 @@ static void ramViewer(void) {
 			}
 		}
 	}
+	tonccpy(arm7RamBuffer, arm7RamBak, 0xC0);
 	(*revertMpu)();
 }
 

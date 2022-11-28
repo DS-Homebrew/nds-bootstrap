@@ -305,6 +305,10 @@ void reset(u32 param) {
 		fileRead((char*)ndsHeader->arm7destination, &pageFile, 0x2C0000, newArm7binarySize);
 	}
 
+	#ifdef NODSIWARE
+	tonccpy((u32*)0x02370000, ce9, 0x2C00);
+	#endif
+
 	sharedAddr[0] = 0x544F4F42; // 'BOOT'
 	sharedAddr[3] = 0;
 	while (REG_VCOUNT != 191);
