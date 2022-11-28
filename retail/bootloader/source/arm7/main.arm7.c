@@ -1092,11 +1092,11 @@ int arm7_main(void) {
 
 	ce9Location = *(u32*)CARDENGINE_ARM9_LOCATION_BUFFERED;
 	ce9Alt = (ce9Location == CARDENGINE_ARM9_LOCATION_DLDI_ALT);
-	tonccpy((u32*)ce9Location, (u32*)CARDENGINE_ARM9_LOCATION_BUFFERED, ce9Alt ? 0x2C00 : 0x4C00);
+	tonccpy((u32*)ce9Location, (u32*)CARDENGINE_ARM9_LOCATION_BUFFERED, ce9Alt ? 0x2C00 : 0x3800);
 	toncset((u32*)0x023E0000, 0, 0x10000);
 
-	tonccpy((u8*)CARDENGINE_ARM7_LOCATION, (u8*)CARDENGINE_ARM7_LOCATION_BUFFERED, 0x1400);
-	toncset((u8*)CARDENGINE_ARM7_LOCATION_BUFFERED, 0, 0x1400);
+	tonccpy((u8*)CARDENGINE_ARM7_LOCATION, (u8*)CARDENGINE_ARM7_LOCATION_BUFFERED, 0x1000);
+	toncset((u8*)CARDENGINE_ARM7_LOCATION_BUFFERED, 0, 0x1000);
 
 	if (!dldiPatchBinary((data_t*)ce9Location, 0x6000, (data_t*)(extendedMemory2 ? 0x027BD000 : 0x023FD000))) {
 		nocashMessage("ce9 DLDI patch failed");
@@ -1112,7 +1112,7 @@ int arm7_main(void) {
 
 	bool wramUsed = false;
 	u32 fatTableSize = 0;
-	u32 fatTableSizeNoExp = (moduleParams->sdk_version < 0x2008000) ? 0x20000 : 0x1B400;
+	u32 fatTableSizeNoExp = (moduleParams->sdk_version < 0x2008000) ? 0x20000 : 0x1C800;
 	if (ce9Alt && moduleParams->sdk_version >= 0x2008000) {
 		fatTableSizeNoExp = 0x8000;
 	}
