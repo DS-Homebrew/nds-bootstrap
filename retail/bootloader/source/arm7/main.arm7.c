@@ -73,6 +73,7 @@
 #include "locations.h"
 #include "value_bits.h"
 #include "loading_screen.h"
+#include "unpatched_funcs.h"
 
 #include "io_m3_common.h"
 #include "io_g6_common.h"
@@ -1111,7 +1112,7 @@ int arm7_main(void) {
 
 	bool wramUsed = false;
 	u32 fatTableSize = 0;
-	u32 fatTableSizeNoExp = (moduleParams->sdk_version < 0x2008000) ? 0x1B000 : 0x1B400;
+	u32 fatTableSizeNoExp = (moduleParams->sdk_version < 0x2008000) ? 0x20000 : 0x1B400;
 	if (ce9Alt && moduleParams->sdk_version >= 0x2008000) {
 		fatTableSizeNoExp = 0x8000;
 	}
@@ -1136,7 +1137,7 @@ int arm7_main(void) {
 			fatTableSize = 0x80000;
 		}
 	} else {
-		fatTableAddr = (moduleParams->sdk_version < 0x2008000) ? 0x023E0000 : 0x023C0000;
+		fatTableAddr = (moduleParams->sdk_version < 0x2008000) ? 0x023D9C00 : 0x023C0000;
 		fatTableSize = fatTableSizeNoExp;
 
 		if (moduleParams->sdk_version >= 0x2008000) {
@@ -1334,15 +1335,6 @@ int arm7_main(void) {
 		}
 	}
 
-	extern u32 iUncompressedSize;
-	aFile pageFile;
-	getFileFromCluster(&pageFile, pageFileCluster);
-
-	fileWrite((char*)ndsHeader->arm9destination, &pageFile, 0x14000, iUncompressedSize);
-	fileWrite((char*)ndsHeader->arm7destination, &pageFile, 0x2C0000, newArm7binarySize);
-	fileWrite((char*)&iUncompressedSize, &pageFile, 0x3FFFF0, sizeof(u32));
-	fileWrite((char*)&newArm7binarySize, &pageFile, 0x3FFFF4, sizeof(u32));
-
 	arm9_boostVram = boostVram;
 
 	if (esrbScreenPrepared) {
@@ -1353,19 +1345,10 @@ int arm7_main(void) {
 	}
 
 	toncset16((u32*)IMAGES_LOCATION, 0, (256*192)*3);	// Clear nds-bootstrap images and IPS patch
-	clearScreen();
-
-	REG_SCFG_EXT = 0x12A03000;
-
-	arm9_stateFlag = ARM9_SETSCFG;
-	while (arm9_stateFlag != ARM9_READY);
-
-	nocashMessage("Starting the NDS file...");
-    setMemoryAddress(ndsHeader, moduleParams, romFile);
 
 	if (ce9Alt) {
+		unpatchedFunctions* unpatchedFuncs = (unpatchedFunctions*)UNPATCHED_FUNCTION_LOCATION;
 		extern u32* copyBackCe9;
-		extern u32 copyBackCe9OrgFunc;
 
 		cardengineArm9* ce9 = (cardengineArm9*)ce9Location;
 		const u32 codeBranch = 0x023FF400;
@@ -1377,23 +1360,38 @@ int arm7_main(void) {
 		toncset(ce9, 0, 0x3400);
 		toncset((u32*)0x023E8000, 0, 0x8000); // FAT table cache
 
-		u32 blFrom = (u32)ndsHeader->arm9destination;
-		if (moduleParams->sdk_version > 0x5000000) {
-			blFrom += (ndsHeader->unitCode > 0) ? ((moduleParams->sdk_version > 0x5050000) ? 0x9A0 : (moduleParams->sdk_version > 0x5020000) ? 0x990 : 0x980) : 0x900;
-		} else if (moduleParams->sdk_version > 0x4010000) {
-			blFrom += 0x90C;
-		} else if (moduleParams->sdk_version > 0x3020000) {
-			blFrom += 0x8FC;
-		} else {
-			blFrom += 0x8E8;
+		u32 blFrom = (u32)ndsHeader->arm9executeAddress;
+		for (int i = 0; i < 0x200/4; i++) {
+			u32* addr = ndsHeader->arm9executeAddress;
+			if (addr[i] == 0xE5810000) {
+				unpatchedFuncs->exeCode = addr[i];
+				break;
+			}
+			blFrom += 4;
 		}
-
-		if (getOffsetFromBL((u32*)blFrom)[0] != 0xE12FFF1E) {
-			copyBackCe9OrgFunc = (u32)getOffsetFromBL((u32*)blFrom);
-		}
+		unpatchedFuncs->exeCodeOffset = (u32*)blFrom;
 
 		setBL(blFrom, codeBranch);
 	}
+
+	extern u32 iUncompressedSize;
+	aFile pageFile;
+	getFileFromCluster(&pageFile, pageFileCluster);
+
+	fileWrite((char*)ndsHeader->arm9destination, &pageFile, 0x14000, iUncompressedSize);
+	fileWrite((char*)ndsHeader->arm7destination, &pageFile, 0x2C0000, newArm7binarySize);
+	fileWrite((char*)&iUncompressedSize, &pageFile, 0x3FFFF0, sizeof(u32));
+	fileWrite((char*)&newArm7binarySize, &pageFile, 0x3FFFF4, sizeof(u32));
+
+	clearScreen();
+
+	REG_SCFG_EXT = 0x12A03000;
+
+	arm9_stateFlag = ARM9_SETSCFG;
+	while (arm9_stateFlag != ARM9_READY);
+
+	nocashMessage("Starting the NDS file...");
+    setMemoryAddress(ndsHeader, moduleParams, romFile);
 
 	if (0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_DOWN | KEY_A))) {		// Dump RAM
 		aFile ramDumpFile;

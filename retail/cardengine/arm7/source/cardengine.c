@@ -278,6 +278,8 @@ void myIrqHandlerVBlank(void) {
 	if (!funcsUnpatched && *(int*)(isSdk5Set ? 0x02FFFC3C : 0x027FFC3C) >= 60) {
 		unpatchedFunctions* unpatchedFuncs = (unpatchedFunctions*)UNPATCHED_FUNCTION_LOCATION;
 
+		*unpatchedFuncs->exeCodeOffset = unpatchedFuncs->exeCode;
+
 		if (unpatchedFuncs->compressed_static_end) {
 			*unpatchedFuncs->compressedFlagOffset = unpatchedFuncs->compressed_static_end;
 		}

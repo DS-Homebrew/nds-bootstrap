@@ -4,6 +4,8 @@
 #include <nds/ndstypes.h>
 
 typedef struct unpatchedFunctions {
+	u32* exeCodeOffset;
+	u32 exeCode;
 	u32* compressedFlagOffset;
 	u32* iCompressedFlagOffset;
 	u32 compressed_static_end;
