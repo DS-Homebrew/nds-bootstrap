@@ -1519,7 +1519,8 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		cebin = fopen("nitro:/cardengine_arm9_extmem.lz77", "rb");
 	} else {
 		const char* ce9path = "nitro:/cardengine_arm9_alt.lz77";
-		if (accessControl & BIT(4)) { // If it has access to TWLNAND (or uses dataPub/dataPrv)...
+		//if (accessControl & BIT(4)) { // If it has access to TWLNAND (or uses dataPub/dataPrv)...
+		if (unitCode > 0) { // If this is a TWL title...
 			ce9path = "nitro:/cardengine_arm9.lz77";
 		}
 		/*if (strncmp(romTid, "ADM", 3) == 0 // Animal Crossing: Wild World
