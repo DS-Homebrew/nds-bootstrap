@@ -1092,7 +1092,7 @@ int arm7_main(void) {
 
 	ce9Location = *(u32*)CARDENGINE_ARM9_LOCATION_BUFFERED;
 	ce9Alt = (ce9Location == CARDENGINE_ARM9_LOCATION_DLDI_ALT);
-	tonccpy((u32*)ce9Location, (u32*)CARDENGINE_ARM9_LOCATION_BUFFERED, ce9Alt ? 0x3400 : 0x4C00);
+	tonccpy((u32*)ce9Location, (u32*)CARDENGINE_ARM9_LOCATION_BUFFERED, ce9Alt ? 0x3000 : 0x4C00);
 	toncset((u32*)0x023E0000, 0, 0x10000);
 
 	tonccpy((u8*)CARDENGINE_ARM7_LOCATION, (u8*)CARDENGINE_ARM7_LOCATION_BUFFERED, 0x1400);
@@ -1353,11 +1353,11 @@ int arm7_main(void) {
 		cardengineArm9* ce9 = (cardengineArm9*)ce9Location;
 		const u32 codeBranch = 0x023FF400;
 
-		tonccpy((u32*)0x02370000, ce9, 0x3400);
+		tonccpy((u32*)0x02370000, ce9, 0x3000);
 		tonccpy((u32*)0x02378000, (u32*)0x023E8000, 0x8000); // FAT table cache
 		tonccpy((u32*)codeBranch, copyBackCe9, 0x200);
 
-		toncset(ce9, 0, 0x3400);
+		toncset(ce9, 0, 0x3000);
 		toncset((u32*)0x023E8000, 0, 0x8000); // FAT table cache
 
 		u32 blFrom = (u32)ndsHeader->arm9executeAddress;
