@@ -1114,7 +1114,7 @@ int arm7_main(void) {
 	u32 fatTableSize = 0;
 	u32 fatTableSizeNoExp = (moduleParams->sdk_version < 0x2008000) ? 0x20000 : 0x1C800;
 	if (ce9Alt && moduleParams->sdk_version >= 0x2008000) {
-		fatTableSizeNoExp = 0x600;
+		fatTableSizeNoExp = 0x400;
 	}
 	if (s2FlashcardId == 0x334D || s2FlashcardId == 0x3647 || s2FlashcardId == 0x4353) {
 		fatTableAddr = (s2FlashcardId==0x4353 ? 0x09F7FE00 : 0x09F80000);
@@ -1141,7 +1141,7 @@ int arm7_main(void) {
 		fatTableSize = fatTableSizeNoExp;
 
 		if (moduleParams->sdk_version >= 0x2008000) {
-			fatTableAddr = ce9Alt ? 0x023FF200 : CARDENGINE_ARM9_LOCATION_DLDI;
+			fatTableAddr = ce9Alt ? CARDENGINE_ARM9_LOCATION_DLDI_ALT+0x2C00 : CARDENGINE_ARM9_LOCATION_DLDI;
 
 			lastClusterCacheUsed = (u32*)0x037F8000;
 			clusterCache = 0x037F8000;
@@ -1355,10 +1355,10 @@ int arm7_main(void) {
 		u32 codeBranch = (u32)patchOffsetCache.cardReadStartOffset;
 		codeBranch += 0x30;
 
-		tonccpy((u32*)0x02370000, ce9, 0x2C00);
+		tonccpy((u32*)0x02370000, ce9, 0x3000);
 		tonccpy((u32*)codeBranch, copyBackCe9, copyBackCe9Len);
 
-		toncset(ce9, 0, 0x2C00);
+		toncset(ce9, 0, 0x3000);
 
 		u32 blFrom = (u32)ndsHeader->arm9executeAddress;
 		for (int i = 0; i < 0x200/4; i++) {

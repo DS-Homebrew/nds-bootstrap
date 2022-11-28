@@ -306,7 +306,7 @@ void reset(u32 param) {
 	}
 
 	#ifdef NODSIWARE
-	tonccpy((u32*)0x02370000, ce9, 0x2C00);
+	tonccpy((u32*)0x02370000, ce9, 0x3000);
 	#endif
 
 	sharedAddr[0] = 0x544F4F42; // 'BOOT'
