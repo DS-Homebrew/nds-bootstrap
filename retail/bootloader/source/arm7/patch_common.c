@@ -13408,7 +13408,8 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
 		u32 addrOffset = (u32)ndsHeader->arm9destination;
 		while (instancesPatched < 3) {
 			if(*(u32*)addrOffset >= 0x023FF000 && *(u32*)addrOffset < 0x023FF020) { 
-				*(u32*)addrOffset -= 0x2000;
+				//*(u32*)addrOffset -= 0x2000;
+				*(u32*)addrOffset = CARDENGINE_ARM9_LOCATION_DLDI_ALT;
 				instancesPatched++;
 			}
 			addrOffset += 4;
