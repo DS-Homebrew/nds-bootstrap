@@ -1352,8 +1352,9 @@ int arm7_main(void) {
 		extern u32 copyBackCe9Len;
 
 		cardengineArm9* ce9 = (cardengineArm9*)ce9Location;
-		u32 codeBranch = (u32)patchOffsetCache.cardReadStartOffset;
-		codeBranch += 0x30;
+		//u32 codeBranch = (u32)patchOffsetCache.cardReadStartOffset; // Breaks games which relocate arm9 code
+		//codeBranch += 0x30;
+		const u32 codeBranch = 0x023FF400;
 
 		tonccpy((u32*)0x02370000, ce9, 0x3000);
 		tonccpy((u32*)codeBranch, copyBackCe9, copyBackCe9Len);
