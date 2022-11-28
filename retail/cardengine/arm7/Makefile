@@ -26,17 +26,18 @@ DATA			:=	data
 #---------------------------------------------------------------------------------
 ARCH	:=	-mthumb -mthumb-interwork -march=armv4t
 
-CFLAGS	:=	-g -Wall -Os\
+CFLAGS	:=	-g -Wall -Oz\
 			-mcpu=arm7tdmi -mtune=arm7tdmi -fomit-frame-pointer\
 			-ffast-math \
+			-flto \
 			$(ARCH)
 
 # ADD -DDEBUG here for logging/debug
 CFLAGS	+=	$(INCLUDE) -DARM7 -DB4DS -D_NO_SDMMC -DNO_CARDID
 CXXFLAGS	:=	$(CFLAGS) -fno-rtti -fno-exceptions
 
-ASFLAGS	:=	-g $(ARCH) $(INCLUDE)
-LDFLAGS	=	-nostartfiles -T cardengine.ld -g $(ARCH) -Wl,--nmagic -Wl,-Map,$(notdir $*).map
+ASFLAGS	:=	-g $(ARCH) -flto $(INCLUDE)
+LDFLAGS	=	-nostartfiles -T cardengine.ld -g $(ARCH) -flto -Oz -Wl,--nmagic -Wl,-Map,$(notdir $*).map
 
 #---------------------------------------------------------------------------------
 # any extra libraries we wish to link with the project
