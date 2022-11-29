@@ -305,7 +305,7 @@ void reset(u32 param) {
 	}
 
 	#ifdef NODSIWARE
-	tonccpy((u32*)0x02370000, ce9, 0x3000);
+	tonccpy((u32*)0x02370000, ce9, 0x2800);
 	#endif
 
 	sharedAddr[0] = 0x544F4F42; // 'BOOT'
@@ -334,6 +334,10 @@ void saveScreenshot(void) {
 	} while(magic == 'B' && igmText->currentScreenshot < 50);
 
 	fileRead((char*)INGAME_MENU_EXT_LOCATION_B4DS, &pageFile, 0x340000, 0x40000);
+}
+
+void prepareManual(void) {
+	fileWrite((char*)0x027FF200, &pageFile, 0x3FF200, 32 * 24);
 }
 
 void readManual(int line) {
@@ -397,6 +401,10 @@ void readManual(int line) {
 			}
 		}
 	}
+}
+
+void restorePreManual(void) {
+	fileRead((char*)0x027FF200, &pageFile, 0x3FF200, 32 * 24);
 }
 
 s8 mainScreen = 0;

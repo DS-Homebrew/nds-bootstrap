@@ -213,7 +213,9 @@ typedef struct cardengineArm9 {
 	u32 rumbleForce[2];
 	VoidFn prepareScreenshot;
 	VoidFn saveScreenshot;
+	VoidFn prepareManual;
 	void (* readManual)(int);
+	VoidFn restorePreManual;
 } cardengineArm9;
 #endif
 

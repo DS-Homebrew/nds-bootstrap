@@ -311,7 +311,9 @@ static void screenshot(void) {
 }
 
 static void manual(void) {
-	#ifndef B4DS
+	#ifdef B4DS
+	(*ce9->prepareManual)();
+	#else
 	sharedAddr[4] = 0x4E414D50; // PMAN
 	do {
 		while (REG_VCOUNT != 191) swiDelay(100);
@@ -356,7 +358,9 @@ static void manual(void) {
 			igmText.manualLine = igmText.manualMaxLine - 23 > 0 ? igmText.manualMaxLine - 23 : 0;
 	}
 
-	#ifndef B4DS
+	#ifdef B4DS
+	(*ce9->restorePreManual)();
+	#else
 	sharedAddr[4] = 0x4E414D52; // RMAN
 	do {
 		while (REG_VCOUNT != 191) swiDelay(100);

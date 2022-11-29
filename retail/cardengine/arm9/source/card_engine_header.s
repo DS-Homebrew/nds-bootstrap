@@ -78,8 +78,12 @@ prepareScreenshotPtr:
 	.word prepareScreenshotJmp
 saveScreenshotPtr:
 	.word saveScreenshotJmp
+prepareManualPtr:
+	.word prepareManualJmp
 readManualPtr:
 	.word readManualJmp
+restorePreManualPtr:
+	.word restorePreManualJmp
 
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
@@ -111,9 +115,21 @@ saveScreenshotJmp:
 .pool
 
 @---------------------------------------------------------------------------------
+prepareManualJmp:
+@---------------------------------------------------------------------------------
+	ldr pc,= prepareManual
+.pool
+
+@---------------------------------------------------------------------------------
 readManualJmp:
 @---------------------------------------------------------------------------------
 	ldr pc,= readManual
+.pool
+
+@---------------------------------------------------------------------------------
+restorePreManualJmp:
+@---------------------------------------------------------------------------------
+	ldr pc,= restorePreManual
 .pool
 
 .thumb

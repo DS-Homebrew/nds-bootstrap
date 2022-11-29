@@ -1141,7 +1141,7 @@ int arm7_main(void) {
 		fatTableSize = fatTableSizeNoExp;
 
 		if (moduleParams->sdk_version >= 0x2008000) {
-			fatTableAddr = ce9Alt ? CARDENGINE_ARM9_LOCATION_DLDI_ALT+0x2800 : CARDENGINE_ARM9_LOCATION_DLDI;
+			fatTableAddr = ce9Alt ? 0x023FF400 : CARDENGINE_ARM9_LOCATION_DLDI;
 
 			lastClusterCacheUsed = (u32*)0x037F8000;
 			clusterCache = 0x037F8000;
@@ -1358,12 +1358,12 @@ int arm7_main(void) {
 		cardengineArm9* ce9 = (cardengineArm9*)ce9Location;
 		//u32 codeBranch = (u32)patchOffsetCache.cardReadStartOffset; // Breaks games which relocate arm9 code
 		//codeBranch += 0x30;
-		const u32 codeBranch = 0x023FF400;
+		const u32 codeBranch = 0x023FF200;
 
-		tonccpy((u32*)0x02370000, ce9, 0x2C00);
+		tonccpy((u32*)0x02370000, ce9, 0x2800);
 		tonccpy((u32*)codeBranch, copyBackCe9, copyBackCe9Len);
 
-		toncset(ce9, 0, 0x2C00);
+		toncset(ce9, 0, 0x2800);
 
 		u32 blFrom = (u32)ndsHeader->arm9executeAddress;
 		for (int i = 0; i < 0x200/4; i++) {
