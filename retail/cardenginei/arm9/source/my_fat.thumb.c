@@ -896,7 +896,7 @@ u32 fileRead (char* buffer, aFile* file, u32 startOffset, u32 length, int ndmaSl
 
                // Calculate how many sectors to read (try to group several cluster at a time if there is no fragmentation)
               for(int tempClusterIndex=clusterIndex; sectorsToRead<=chunks; ) {   
-                  if(file->fatTableCache[tempClusterIndex]+1 == file->fatTableCache[tempClusterIndex+1]) {
+                  if(getCachedCluster(file, tempClusterIndex)+1 == getCachedCluster(file, tempClusterIndex+1)) {
                       #ifdef DEBUG
                   	nocashMessage("contiguous read");
                   	#endif
