@@ -523,7 +523,7 @@ ipcSyncHandler:
 code_handler_start_vblank:
 	push	{r0-r12} 
     ldr		r6, =myIrqHandlerVBlank
-	bl	_blx_r6_stub_start_ipc		@ jump to myIrqHandler
+	blx	r6		@ jump to myIrqHandler
 	
 	@ exit after return
 	b	arm9exit
@@ -531,12 +531,10 @@ code_handler_start_vblank:
 code_handler_start_ipc:
 	push	{r0-r12} 
     ldr		r6, =myIrqHandlerIPC
-	bl	_blx_r6_stub_start_ipc		@ jump to myIrqHandler
+	blx	r6		@ jump to myIrqHandler
   
 	@ exit after return
 	b	arm9exit
-_blx_r6_stub_start_ipc:
-	bx	r6
 
 arm9exit:
 	pop   	{r0-r12} 

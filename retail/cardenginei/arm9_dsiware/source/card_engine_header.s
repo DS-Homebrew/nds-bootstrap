@@ -120,13 +120,11 @@ card_irq_enable:
 	push	{r1-r12}
 
 	ldr		r6, =myIrqEnable
+	blx	r6
 
-	bl	_blx_r3_stub2
 	pop   	{r1-r12} 
 	pop  	{lr}
 	bx  lr
-_blx_r3_stub2:
-	bx	r6
 .pool
 @---------------------------------------------------------------------------------
 
@@ -137,11 +135,9 @@ thumb_card_irq_enable:
     push	{r1-r7, lr}
 
 	ldr		r6, =myIrqEnable
+	blx	r6
 
-	bl	thumb_blx_r6_stub2
 	pop	{r1-r7, pc}
-thumb_blx_r6_stub2:
-	bx	r6
 .pool
 @---------------------------------------------------------------------------------
 
@@ -151,11 +147,9 @@ thumb_reset_arm9:
     push	{r2-r7, lr}
 
 	ldr	r3, =reset
+	blx	r3
 
-	bl	thumb_blx_r3_stub2
 	pop	{r2-r7, pc}
-thumb_blx_r3_stub2:
-	bx	r3
 .pool
 .align	4
 @---------------------------------------------------------------------------------
@@ -179,7 +173,7 @@ ipcSyncHandler:
 code_handler_start_vblank:
 	push	{r0-r12} 
     ldr		r6, =myIrqHandlerVBlank
-	bl	_blx_r6_stub_start_ipc		@ jump to myIrqHandler
+	blx	r6		@ jump to myIrqHandler
 	
 	@ exit after return
 	b	arm9exit
@@ -187,12 +181,10 @@ code_handler_start_vblank:
 code_handler_start_ipc:
 	push	{r0-r12} 
     ldr		r6, =myIrqHandlerIPC
-	bl	_blx_r6_stub_start_ipc		@ jump to myIrqHandler
+	blx	r6		@ jump to myIrqHandler
   
 	@ exit after return
 	b	arm9exit
-_blx_r6_stub_start_ipc:
-	bx	r6
 
 arm9exit:
 	pop   	{r0-r12} 
@@ -207,12 +199,9 @@ reset_arm9:
     stmfd   sp!, {r2-r11,lr}
 
 	ldr		r6, =reset
-
-	bl		_blx_r6_stub_reset	
+	blx	r6
 
 	ldmfd   sp!, {r2-r11,pc}
-_blx_r6_stub_reset:
-	bx	r6	
 .pool
 @---------------------------------------------------------------------------------
 
