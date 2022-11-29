@@ -201,6 +201,8 @@ int discData;
 int discBytePerSec;
 int discSecPerClus;
 int discBytePerClus;
+u8 discBytePerClusShift;
+u8 discSecPerClusShift;
 int prevNextClust = 0;
 int prevFirstClust = -1;
 int prevSect = -1;
@@ -339,6 +341,13 @@ char ucase (char character)
 	return (character);
 }
 
+__attribute__((target("arm")))
+__attribute__ ((noinline))
+static u32 ctz(u32 x)
+{
+	return __builtin_ctz(x);
+}
+
 /*-----------------------------------------------------------------
 FAT_InitFiles
 Reads the FAT information from the CF card.
@@ -421,6 +430,9 @@ bool FAT_InitFiles (bool initCard, int ndmaSlot)
 	discBytePerSec = BYTES_PER_SECTOR;	// Sector size is redefined to be 512 bytes
 	discSecPerClus = bootSec->bpb.sectorsPerCluster * bootSec->bpb.bytesPerSector / BYTES_PER_SECTOR;
 	discBytePerClus = discBytePerSec * discSecPerClus;
+	discBytePerClusShift = ctz(discBytePerClus);
+	discSecPerClusShift = ctz(discSecPerClus);
+
 	discFAT = bootSector + bootSec->bpb.reservedSectors;
 
 	discRootDir = discFAT + (bootSec->bpb.numFATs * discSecPerFAT);
@@ -582,20 +594,50 @@ void getFileFromCluster(aFile* file, u32 cluster) {
 	file->fatTableCached = false;
 }
 
-u32 getCachedCluster(aFile* file, int clusterIndex)
+u32 getCachedCluster(aFile * file, int clusterIndex)
 {
 	if (file->fatTableCompressed) {
-		int posSub = 0;
-		for (int c = 0; c <= (int)file->fatTableCacheSize/4; c+=2) {
-			const u32 cluster = file->fatTableCache[c];
-			const u32 cachePlusIndex = cluster+(clusterIndex - posSub);
-			if (cachePlusIndex >= cluster && cachePlusIndex < (cluster + file->fatTableCache[c+1])) {
-				return cachePlusIndex;
+		const u32* fatCache = file->fatTableCache;
+		u32 offset = 0;
+		while (offset <= clusterIndex) {
+			const u32 cluster = fatCache[0];
+			if (clusterIndex >= offset && clusterIndex < offset + fatCache[1]) {
+				return cluster + (clusterIndex - offset);
 			}
-			posSub += file->fatTableCache[c+1];
+			offset += fatCache[1];
+			fatCache += 2;
 		}
 	}
 	return file->fatTableCache[clusterIndex];
+}
+
+static u32 findCluster(aFile* file, u32 startOffset)
+{
+	u32 clusterIndex = 0;
+	if (file->fatTableCached) {
+    	#ifdef DEBUG
+        nocashMessage("fat table cached");
+        #endif
+		clusterIndex = startOffset >> discBytePerClusShift;
+		file->currentOffset=clusterIndex*discBytePerClus;
+		file->currentCluster = getCachedCluster(file, clusterIndex);
+	} else {
+        #ifdef DEBUG
+        nocashMessage("fatTable not cached");
+        #endif
+		if(startOffset<file->currentOffset) {
+			file->currentOffset=0;
+			file->currentCluster = file->firstCluster;
+		}
+
+		// Follow cluster list until desired one is found
+		for (int chunks = (startOffset-file->currentOffset) >> discBytePerClusShift; chunks > 0; chunks--)
+		{
+			file->currentCluster = FAT_NextCluster (file->currentCluster);
+			file->currentOffset+=discBytePerClus;
+		}
+	}
+	return clusterIndex;
 }
 
 #ifndef DLDI
@@ -831,29 +873,7 @@ u32 fileRead (char* buffer, aFile* file, u32 startOffset, u32 length, int ndmaSl
 		return 0;
 	}
 
-	if(file->fatTableCached) {
-    	#ifdef DEBUG
-        nocashMessage("fat table cached");
-        #endif
-		clusterIndex = startOffset/discBytePerClus;
-		file->currentOffset=clusterIndex*discBytePerClus;
-		file->currentCluster = getCachedCluster(file, clusterIndex);
-	} else {
-        #ifdef DEBUG
-        nocashMessage("fatTable not cached");
-        #endif
-		if(startOffset<file->currentOffset) {
-			file->currentOffset=0;
-			file->currentCluster = file->firstCluster;
-		}
-
-		// Follow cluster list until desired one is found
-		for (chunks = (startOffset-file->currentOffset) / discBytePerClus; chunks > 0; chunks--)
-		{
-			file->currentCluster = FAT_NextCluster (file->currentCluster);
-			file->currentOffset+=discBytePerClus;
-		}
-	}
+	clusterIndex = findCluster(file, startOffset);
 
 	// Calculate the sector and byte of the current position,
 	// and store them
@@ -888,8 +908,8 @@ u32 fileRead (char* buffer, aFile* file, u32 startOffset, u32 length, int ndmaSl
               // Move to the next cluster if necessary
               if (curSect >= discSecPerClus)
   			{
-                  clusterIndex+= curSect/discSecPerClus;
-                  curSect = curSect % discSecPerClus;
+                  clusterIndex+= curSect >> discSecPerClusShift;
+                  curSect = curSect & (discSecPerClus - 1);
   				file->currentOffset+=discBytePerClus;
                   file->currentCluster = getCachedCluster(file, clusterIndex);
   			}
@@ -935,8 +955,8 @@ u32 fileRead (char* buffer, aFile* file, u32 startOffset, u32 length, int ndmaSl
               dbg_hexa(curSect/discSecPerClus);
               #endif
               
-              clusterIndex+= curSect/discSecPerClus;
-              curSect = curSect % discSecPerClus;
+              clusterIndex+= curSect >> discSecPerClusShift;
+              curSect = curSect & (discSecPerClus - 1);
 				file->currentCluster = getCachedCluster(file, clusterIndex);
           } else {
               // Move to the next cluster if necessary
@@ -974,8 +994,8 @@ u32 fileRead (char* buffer, aFile* file, u32 startOffset, u32 length, int ndmaSl
 		if (curSect >= discSecPerClus)
 		{
 			if(file->fatTableCached) {
-                  clusterIndex+= curSect/discSecPerClus;
-                  curSect = curSect % discSecPerClus;
+                  clusterIndex+= curSect >> discSecPerClusShift;
+                  curSect = curSect & (discSecPerClus - 1);
 				file->currentCluster = getCachedCluster(file, clusterIndex);
               } else {
                   curSect = 0;
@@ -1031,23 +1051,7 @@ u32 fileWrite (const char* buffer, aFile* file, u32 startOffset, u32 length, int
 		return 0;
 	}
 
-	if(file->fatTableCached) {
-		clusterIndex = startOffset/discBytePerClus;
-		file->currentOffset=clusterIndex*discBytePerClus;
-		file->currentCluster = getCachedCluster(file, clusterIndex);
-	} else {
-		if(startOffset<file->currentOffset) {
-			file->currentOffset=0;
-			file->currentCluster = file->firstCluster;
-		}
-
-		// Follow cluster list until desired one is found
-		for (chunks = (startOffset-file->currentOffset) / discBytePerClus; chunks > 0; chunks--)
-		{
-			file->currentCluster = FAT_NextCluster (file->currentCluster);
-			file->currentOffset+=discBytePerClus;
-		}
-	}
+	clusterIndex = findCluster(file, startOffset);
 
 	// Calculate the sector and byte of the current position,
 	// and store them
