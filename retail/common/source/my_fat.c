@@ -903,14 +903,15 @@ void getFileFromCluster(aFile* file, u32 cluster)
 u32 getCachedCluster(aFile * file, int clusterIndex)
 {
 	if (file->fatTableCompressed) {
-		int posSub = 0;
-		for (int c = 0; c <= (int)file->fatTableCacheSize/4; c+=2) {
-			const u32 cluster = file->fatTableCache[c];
-			const u32 cachePlusIndex = cluster+(clusterIndex - posSub);
-			if (cachePlusIndex >= cluster && cachePlusIndex < (cluster + file->fatTableCache[c+1])) {
-				return cachePlusIndex;
+		const u32* fatCache = file->fatTableCache;
+		u32 offset = 0;
+		while (offset <= clusterIndex) {
+			const u32 cluster = fatCache[0];
+			if (clusterIndex >= offset && clusterIndex < offset + fatCache[1]) {
+				return cluster + (clusterIndex - offset);
 			}
-			posSub += file->fatTableCache[c+1];
+			offset += fatCache[1];
+			fatCache += 2;
 		}
 	}
 	return file->fatTableCache[clusterIndex];
