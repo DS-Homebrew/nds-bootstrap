@@ -1028,7 +1028,7 @@ bool resumeFileRead()
     			{
 				  context.clusterIndex+= context.curSect >> discSecPerClusShift[0];
 				  context.curSect = context.curSect & (discSecPerClus[0] - 1);
-				  context.file->currentCluster = context.file->fatTableCache[context.clusterIndex];
+				  context.file->currentCluster = getCachedCluster(context.file, context.clusterIndex);
 				  context.file->currentOffset += discBytePerClus[0];
     			}
 			  #else
@@ -1036,14 +1036,14 @@ bool resumeFileRead()
     			{
 				  context.clusterIndex += context.curSect >> discSecPerClusShift;
 				  context.curSect = context.curSect & (discSecPerClus - 1);
-				  context.file->currentCluster = context.file->fatTableCache[context.clusterIndex];
+				  context.file->currentCluster = getCachedCluster(context.file, context.clusterIndex);
 				  context.file->currentOffset += discBytePerClus;
     			}
 			  #endif
 
                // Calculate how many sectors to read (try to group several cluster at a time if there is no fragmentation)
               for(int tempClusterIndex=context.clusterIndex; sectorsToRead<=context.chunks; ) {   
-                  if(context.file->fatTableCache[tempClusterIndex]+1 == context.file->fatTableCache[tempClusterIndex+1]) {
+                  if(getCachedCluster(context.file, tempClusterIndex)+1 == getCachedCluster(context.file, tempClusterIndex+1)) {
                       #ifdef DEBUG
                   	nocashMessage("contiguous read");
                   	#endif
