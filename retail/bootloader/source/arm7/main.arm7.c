@@ -1275,10 +1275,14 @@ int arm7_main(void) {
 		loadOverlaysintoRAM(ndsHeader, moduleParams, &romFile, ROMinRAM);
 	}
 
+	aFile bootNds;
+	getBootFileCluster(&bootNds, "BOOT.NDS");
+
 	errorCode = hookNdsRetailArm9(
 		(cardengineArm9*)ce9Location,
 		ndsHeader,
 		moduleParams,
+		bootNds.firstCluster,
 		romFile.firstCluster,
 		savFile.firstCluster,
 		saveSize,

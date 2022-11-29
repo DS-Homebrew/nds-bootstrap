@@ -157,6 +157,7 @@ int hookNdsRetailArm9(
 	cardengineArm9* ce9,
 	const tNDSHeader* ndsHeader,
 	const module_params_t* moduleParams,
+	u32 bootNdsCluster,
 	u32 fileCluster,
 	u32 saveCluster,
 	u32 saveSize,
@@ -189,6 +190,7 @@ int hookNdsRetailArm9(
 	extern u32 romSizeLimit;
 	extern u16 s2FlashcardId;
 
+	ce9->bootNdsCluster         = bootNdsCluster;
 	ce9->fileCluster            = fileCluster;
 	ce9->saveCluster            = saveCluster;
 	ce9->saveSize               = saveSize;

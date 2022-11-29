@@ -724,6 +724,7 @@ bool FAT_InitFiles (bool initCard)
 }
 
 
+#ifndef NOGETBOOTCLUSTER
 /*-----------------------------------------------------------------
 getBootFileCluster
 -----------------------------------------------------------------*/
@@ -882,6 +883,7 @@ void getBootFileCluster(aFile* file, const char* bootName)
 	#endif
 	return;
 }
+#endif
 
 #ifdef TWOCARD
 void getFileFromCluster(aFile* file, u32 cluster, bool card2)

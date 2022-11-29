@@ -44,6 +44,7 @@ int hookNdsRetailArm9(
 	cardengineArm9* ce9,
 	const tNDSHeader* ndsHeader,
 	const module_params_t* moduleParams,
+	u32 bootNdsCluster,
 	u32 fileCluster,
 	u32 saveCluster,
 	u32 saveSize,

@@ -77,6 +77,7 @@ static tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER;
 static u32 arm9iromOffset = 0;
 static u32 arm9ibinarySize = 0;
 
+static aFile bootNds;
 static aFile romFile;
 static aFile savFile;
 static aFile ramDumpFile;
@@ -286,8 +287,6 @@ void reset(u32 param) {
 
 		WRAM_CR = 0; // Set shared ram to ARM9
 
-		aFile bootNds;
-		getBootFileCluster(&bootNds, "BOOT.NDS");
 		fileRead((char*)ndsHeader, &bootNds, 0, 0x170);
 		fileRead((char*)ndsHeader->arm9destination, &bootNds, ndsHeader->arm9romOffset, ndsHeader->arm9binarySize);
 		fileRead((char*)ndsHeader->arm7destination, &bootNds, ndsHeader->arm7romOffset, ndsHeader->arm7binarySize);
@@ -535,6 +534,7 @@ static void initialize(void) {
 			while (1);
 		}
 
+		getFileFromCluster(&bootNds, ce9->bootNdsCluster);
 		getFileFromCluster(&romFile, ce9->fileCluster);
 		getFileFromCluster(&savFile, ce9->saveCluster);
 		getFileFromCluster(&musicsFile, ce9->musicCluster);
