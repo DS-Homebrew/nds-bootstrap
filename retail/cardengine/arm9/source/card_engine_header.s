@@ -95,7 +95,7 @@ ipcSyncHandler:
 code_handler_start_ipc:
 	push	{r0-r12} 
 	ldr	r3, =myIrqHandlerIPC
-	bl	_blx_r3_stub		@ jump to myIrqHandler
+	blx	r3		@ jump to myIrqHandler
 	
 	@ exit after return
 	b	arm9exit
@@ -122,7 +122,7 @@ prepareScreenshotJmp:
 	stmfd   sp!, {r0-r11,lr}
 
 	ldr	r3, =prepareScreenshot
-	bl	_blx_r3_stub
+	blx	r3
 
 	ldmfd   sp!, {r0-r11,pc}
 .pool
@@ -133,7 +133,7 @@ saveScreenshotJmp:
 	stmfd   sp!, {r0-r11,lr}
 
 	ldr	r3, =saveScreenshot
-	bl	_blx_r3_stub
+	blx	r3
 
 	ldmfd   sp!, {r0-r11,pc}
 .pool
@@ -144,7 +144,7 @@ readManualJmp:
 	stmfd   sp!, {r1-r11,lr}
 
 	ldr	r3, =readManual
-	bl	_blx_r3_stub
+	blx	r3
 
 	ldmfd   sp!, {r1-r11,pc}
 .pool
@@ -221,12 +221,9 @@ card_read_arm9:
 	stmfd   sp!, {r4-r11,lr}
 
 	ldr		r6, =cardRead
-    
-	bl		_blx_r6_stub_card_read
+    blx	r6
 
 	ldmfd   sp!, {r4-r11,pc}
-_blx_r6_stub_card_read:
-	bx	r6
 .pool
 cardStructArm9:
 .word    0x00000000     
@@ -243,12 +240,9 @@ thumb_card_read_arm9:
 	push	{r3-r7, lr}
 
 	ldr		r6, =cardRead
-
-	bl		_blx_r6_stub_thumb_card_read	
+    blx	r6
 
 	pop	{r3-r7, pc}
-_blx_r6_stub_thumb_card_read:
-	bx	r6	
 .pool
 .align	4
 	.arm
@@ -309,12 +303,9 @@ nand_read_arm9:
     stmfd   sp!, {r3-r9,lr}
 
 	ldr		r6, =nandRead
-
-	bl		_blx_r6_stub_nand_read	
+    blx	r6
 
 	ldmfd   sp!, {r3-r9,pc}
-_blx_r6_stub_nand_read:
-	bx	r6	
 .pool
 @---------------------------------------------------------------------------------
 
@@ -324,12 +315,9 @@ nand_write_arm9:
     stmfd   sp!, {r3-r9,lr}
 
 	ldr		r6, =nandWrite
-
-	bl		_blx_r6_stub_nand_write
+    blx	r6
 
 	ldmfd   sp!, {r3-r9,pc}
-_blx_r6_stub_nand_write:
-	bx	r6	
 .pool
 @---------------------------------------------------------------------------------
 
@@ -453,12 +441,9 @@ thumb_nand_read_arm9:
     push	{r1-r7, lr}
 
 	ldr		r6, =nandRead
-
-	bl		_blx_r6_stub_thumb_nand_read	
+    blx	r6
 
 	pop	{r1-r7, pc}
-_blx_r6_stub_thumb_nand_read:
-	bx	r6	
 .pool
 .align	4
 @---------------------------------------------------------------------------------
@@ -469,12 +454,9 @@ thumb_nand_write_arm9:
     push	{r1-r7, lr}
 
 	ldr		r6, =nandWrite
-
-	bl		_blx_r6_stub_thumb_nand_write
+    blx	r6
 
 	pop	{r1-r7, pc}
-_blx_r6_stub_thumb_nand_write:
-	bx	r6	
 .pool
 .align	4
 @---------------------------------------------------------------------------------
@@ -487,13 +469,11 @@ card_irq_enable:
 	push	{r1-r12}
 
 	ldr	r3, =myIrqEnable
+    blx	r3
 
-	bl	_blx_r3_stub2
 	pop   	{r1-r12}
 	pop  	{lr}
 	bx  lr
-_blx_r3_stub2:
-	bx	r3
 .pool
 @---------------------------------------------------------------------------------
 
@@ -504,11 +484,9 @@ thumb_card_irq_enable:
     push	{r1-r7, lr}
 
 	ldr	r3, =myIrqEnable
+    blx	r3
 
-	bl	thumb_blx_r3_stub2
 	pop	{r1-r7, pc}
-thumb_blx_r3_stub2:
-	bx	r3
 .pool
 .align	4
 @---------------------------------------------------------------------------------
@@ -522,11 +500,9 @@ pdash_read:
     @mov     r3, r10 @cardStruct
     add     r0, r0, #0x2C    
     ldr		r6, =cardReadPDash
-	bl		_blx_r6_stub_pdash   
+    blx	r6
     pop	    {r1-r11, pc}
     bx      lr
-_blx_r6_stub_pdash:
-	bx	r6	
 .pool
 
 	.thumb   
@@ -536,11 +512,9 @@ thumb_reset_arm9:
     push	{r1-r7, lr}
 
 	ldr	r3, =reset
+    blx	r3
 
-	bl	thumb_blx_r3_stub3
 	pop	{r1-r7, pc}
-thumb_blx_r3_stub3:
-	bx	r3
 .pool
 @---------------------------------------------------------------------------------
 
@@ -552,12 +526,9 @@ reset_arm9:
     stmfd   sp!, {r1-r11,lr}
 
 	ldr		r6, =reset
-
-	bl		_blx_r6_stub_reset
+    blx	r6
 
 	ldmfd   sp!, {r1-r11,pc}
-_blx_r6_stub_reset:
-	bx	r6	
 .pool
 @---------------------------------------------------------------------------------
 
@@ -567,12 +538,10 @@ rumble_arm9:
     stmfd   sp!, {r1-r11,lr}
 
 	ldr		r6, =rumble
-	bl		_blx_r6_stub_rumble
+    blx	r6
 	nop
 
 	ldmfd   sp!, {r1-r11,pc}
-_blx_r6_stub_rumble:
-	bx	r6	
 .pool
 @---------------------------------------------------------------------------------
 
@@ -582,12 +551,10 @@ rumble2_arm9:
     stmfd   sp!, {r1-r11,lr}
 
 	ldr		r6, =rumble2
-	bl		_blx_r6_stub_rumble2
+    blx	r6
 	nop
 
 	ldmfd   sp!, {r1-r11,pc}
-_blx_r6_stub_rumble2:
-	bx	r6	
 .pool
 @---------------------------------------------------------------------------------
 
