@@ -105,31 +105,46 @@ code_handler_start_ipc:
 @---------------------------------------------------------------------------------
 prepareScreenshotJmp:
 @---------------------------------------------------------------------------------
-	ldr pc,= prepareScreenshot
+	stmfd   sp!, {r0-r11,lr}
+	ldr	r3, =prepareScreenshot
+	blx	r3
+	ldmfd   sp!, {r0-r11,pc}
 .pool
 
 @---------------------------------------------------------------------------------
 saveScreenshotJmp:
 @---------------------------------------------------------------------------------
-	ldr pc,= saveScreenshot
+	stmfd   sp!, {r0-r11,lr}
+	ldr	r3, =saveScreenshot
+	blx	r3
+	ldmfd   sp!, {r0-r11,pc}
 .pool
 
 @---------------------------------------------------------------------------------
 prepareManualJmp:
 @---------------------------------------------------------------------------------
-	ldr pc,= prepareManual
+	stmfd   sp!, {r0-r11,lr}
+	ldr	r3, =prepareManual
+	blx	r3
+	ldmfd   sp!, {r0-r11,pc}
 .pool
 
 @---------------------------------------------------------------------------------
 readManualJmp:
 @---------------------------------------------------------------------------------
-	ldr pc,= readManual
+	stmfd   sp!, {r1-r11,lr}
+	ldr	r3, =readManual
+	blx	r3
+	ldmfd   sp!, {r1-r11,pc}
 .pool
 
 @---------------------------------------------------------------------------------
 restorePreManualJmp:
 @---------------------------------------------------------------------------------
-	ldr pc,= restorePreManual
+	stmfd   sp!, {r0-r11,lr}
+	ldr	r3, =restorePreManual
+	blx	r3
+	ldmfd   sp!, {r0-r11,pc}
 .pool
 
 .thumb
