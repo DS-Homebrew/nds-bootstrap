@@ -725,8 +725,16 @@ void inGameMenu(s8 *mainScreen, u32 consoleModel, s32 *exceptionRegisters) {
 	u16 exmemcnt = REG_EXMEMCNT;
 	sysSetCardOwner(false);	// Give Slot-1 access to arm7
 	#else
-	if (*(u32*)CARDENGINE_ARM9_LOCATION_DLDI == CARDENGINE_ARM9_LOCATION_DLDI) {
-		ce9 = (cardengineArm9*)CARDENGINE_ARM9_LOCATION_DLDI;
+	static bool ce9Set = false;
+	if (!ce9Set) {
+		if (*(u32*)CARDENGINE_ARM9_LOCATION_DLDI == CARDENGINE_ARM9_LOCATION_DLDI) {
+			ce9 = (cardengineArm9*)CARDENGINE_ARM9_LOCATION_DLDI;
+		} else if (*(u32*)CARDENGINE_ARM9_LOCATION_DLDI_ALT == CARDENGINE_ARM9_LOCATION_DLDI_ALT) {
+			ce9 = (cardengineArm9*)CARDENGINE_ARM9_LOCATION_DLDI_ALT;
+		} else if (*(u32*)CARDENGINE_ARM9_LOCATION_DLDI_ALT2 == CARDENGINE_ARM9_LOCATION_DLDI_ALT2) {
+			ce9 = (cardengineArm9*)CARDENGINE_ARM9_LOCATION_DLDI_ALT2;
+		}
+		ce9Set = true;
 	}
 	#endif
 
