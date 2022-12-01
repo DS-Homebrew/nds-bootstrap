@@ -1413,16 +1413,16 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	}
 
 	// Load external cheat engine binary
-	/*cebin = fopen("nitro:/cardenginei_arm7_cheat.bin", "rb");
+	cebin = fopen("nitro:/cardenginei_arm7_cheat.bin", "rb");
 	if (cebin) {
 		fread((u8*)CHEAT_ENGINE_LOCATION_B4DS_BUFFERED, 1, 0x400, cebin);
 	}
-	fclose(cebin);*/
+	fclose(cebin);
 
 	// Load ce7 binary
 	cebin = fopen("nitro:/cardengine_arm7.bin", "rb");
 	if (cebin) {
-		fread((u8*)CARDENGINE_ARM7_LOCATION_BUFFERED, 1, 0x1000, cebin);
+		fread((u8*)CARDENGINE_ARM7_LOCATION_BUFFERED, 1, 0x1400, cebin);
 	}
 	fclose(cebin);
 
@@ -1521,6 +1521,8 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		const char* ce9path = "nitro:/cardengine_arm9_alt.lz77";
 		if (accessControl & BIT(4)) { // If it has access to TWLNAND (or uses dataPub/dataPrv)...
 			ce9path = "nitro:/cardengine_arm9.lz77";
+		} else if (ndsArm7Size == 0x29EE8) {
+			ce9path = "nitro:/cardengine_arm9_alt2.lz77";
 		}
 		/*if (strncmp(romTid, "ADM", 3) == 0 // Animal Crossing: Wild World
 		 || strncmp(romTid, "AQC", 3) == 0 // Crayon Shin-chan DS - Arashi o Yobu Nutte Crayoon Daisakusen!

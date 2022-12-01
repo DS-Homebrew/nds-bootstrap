@@ -31,6 +31,7 @@
 #include "patch.h"
 #include "find.h"
 #include "hook.h"
+#include "tonccpy.h"
 
 #define b_sleepMode BIT(17)
 
@@ -226,21 +227,25 @@ int hookNdsRetailArm7(
 
 	*vblankHandler = ce7->patches->vblankHandler;
 
-	/*aFile cheatFile = getFileFromCluster(cheatFileCluster);
-	aFile apPatchFile = getFileFromCluster(apPatchFileCluster);
-	if (newArm7binarySize != 0x29EE8 && cheatSize+(apPatchIsCheat ? apPatchSize : 0) <= 0x1C00) {
+	aFile cheatFile; getFileFromCluster(&cheatFile, cheatFileCluster);
+	aFile apPatchFile; getFileFromCluster(&apPatchFile, apPatchFileCluster);
+	const u32 cheatSizeTotal = cheatSize+(apPatchIsCheat ? apPatchSize : 0);
+	if (cheatSizeTotal > 4 && cheatSizeTotal <= 0x1C00) {
+		tonccpy((u8*)CHEAT_ENGINE_LOCATION_B4DS, (u8*)CHEAT_ENGINE_LOCATION_B4DS_BUFFERED, 0x400);
+
 		u32 cheatEngineOffset = CHEAT_ENGINE_LOCATION_B4DS;
 		char* cheatDataOffset = (char*)cheatEngineOffset+0x3E8;
 		if (apPatchFile.firstCluster != CLUSTER_FREE && apPatchIsCheat) {
-			fileRead(cheatDataOffset, apPatchFile, 0, apPatchSize);
+			fileRead(cheatDataOffset, &apPatchFile, 0, apPatchSize);
 			cheatDataOffset += apPatchSize;
 			*(cheatDataOffset + 3) = 0xCF;
 			dbg_printf("AP-fix found and applied\n");
 		}
 		if (cheatFile.firstCluster != CLUSTER_FREE) {
-			fileRead(cheatDataOffset, cheatFile, 0, cheatSize);
+			fileRead(cheatDataOffset, &cheatFile, 0, cheatSize);
 		}
-	}*/
+	}
+	toncset((u8*)CHEAT_ENGINE_LOCATION_B4DS_BUFFERED, 0, 0x400);
 
 	nocashMessage("ERR_NONE");
 	return ERR_NONE;

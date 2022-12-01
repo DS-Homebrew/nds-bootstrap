@@ -1091,12 +1091,12 @@ int arm7_main(void) {
 	rsetPatchCache();
 
 	ce9Location = *(u32*)CARDENGINE_ARM9_LOCATION_BUFFERED;
-	ce9Alt = (ce9Location == CARDENGINE_ARM9_LOCATION_DLDI_ALT);
+	ce9Alt = (ce9Location == CARDENGINE_ARM9_LOCATION_DLDI_ALT || ce9Location == CARDENGINE_ARM9_LOCATION_DLDI_ALT2);
 	tonccpy((u32*)ce9Location, (u32*)CARDENGINE_ARM9_LOCATION_BUFFERED, ce9Alt ? 0x2800 : 0x3800);
 	toncset((u32*)0x023E0000, 0, 0x10000);
 
-	tonccpy((u8*)CARDENGINE_ARM7_LOCATION, (u8*)CARDENGINE_ARM7_LOCATION_BUFFERED, 0x1000);
-	toncset((u8*)CARDENGINE_ARM7_LOCATION_BUFFERED, 0, 0x1000);
+	tonccpy((u8*)CARDENGINE_ARM7_LOCATION, (u8*)CARDENGINE_ARM7_LOCATION_BUFFERED, 0x1400);
+	toncset((u8*)CARDENGINE_ARM7_LOCATION_BUFFERED, 0, 0x1400);
 
 	if (!dldiPatchBinary((data_t*)ce9Location, 0x3800, (data_t*)(extendedMemory2 ? 0x027BD000 : 0x023FD000))) {
 		nocashMessage("ce9 DLDI patch failed");
@@ -1112,7 +1112,7 @@ int arm7_main(void) {
 
 	bool wramUsed = false;
 	u32 fatTableSize = 0;
-	u32 fatTableSizeNoExp = (moduleParams->sdk_version < 0x2008000) ? 0x20000 : 0x1C800;
+	u32 fatTableSizeNoExp = (moduleParams->sdk_version < 0x2008000) ? 0x19800 : 0x1C800;
 	if (ce9Alt && moduleParams->sdk_version >= 0x2008000) {
 		fatTableSizeNoExp = 0x598;
 	}
@@ -1137,7 +1137,7 @@ int arm7_main(void) {
 			fatTableSize = 0x80000;
 		}
 	} else {
-		fatTableAddr = (moduleParams->sdk_version < 0x2008000) ? CARDENGINE_ARM9_LOCATION_DLDI_ALT-0x20000 : 0x023C0000;
+		fatTableAddr = (moduleParams->sdk_version < 0x2008000) ? 0x023E0000 : 0x023C0000;
 		fatTableSize = fatTableSizeNoExp;
 
 		if (moduleParams->sdk_version >= 0x2008000) {
@@ -1248,10 +1248,6 @@ int arm7_main(void) {
 	}
 
 	toncset((u32*)0x0380C000, 0, 0x2000);
-	/*if (newArm7binarySize != 0x29EE8) {
-		tonccpy((u8*)CHEAT_ENGINE_LOCATION_B4DS, (u8*)CHEAT_ENGINE_LOCATION_B4DS_BUFFERED, 0x400);
-	}
-	toncset((u8*)CHEAT_ENGINE_LOCATION_B4DS_BUFFERED, 0, 0x400);*/
 
 	errorCode = hookNdsRetailArm7(
 		(cardengineArm7*)CARDENGINE_ARM7_LOCATION,
@@ -1362,6 +1358,13 @@ int arm7_main(void) {
 
 		tonccpy((u32*)0x02370000, ce9, 0x2800);
 		tonccpy((u32*)codeBranch, copyBackCe9, copyBackCe9Len);
+		for (int i = 0; i < copyBackCe9Len/4; i++) {
+			u32* addr = codeBranch;
+			if (addr[i] == 0x77777777) {
+				addr[i] = ce9Location;
+				break;
+			}
+		}
 
 		toncset(ce9, 0, 0x2800);
 

@@ -17,7 +17,7 @@ copyBackCe9Func:
 	stmfd   sp!, {r0-r4,lr}
 
 	ldr r0, =0x02370000 @ src
-	ldr r1, =0x023FA800 @ dst
+	ldr r1, =0x77777777 @ dst
 	mov r2, #0x2800 @ len
 	mov r3, r0
 	mov r4, r2

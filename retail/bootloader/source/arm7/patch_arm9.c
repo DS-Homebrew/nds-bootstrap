@@ -8,6 +8,7 @@
 #include "unpatched_funcs.h"
 #include "debug_file.h"
 #include "tonccpy.h"
+#include "value_bits.h"
 
 #define FEATURE_SLOT_GBA			0x00000010
 #define FEATURE_SLOT_NDS			0x00000020
@@ -709,9 +710,13 @@ void patchHiHeapPointer(cardengineArm9* ce9, const module_params_t* moduleParams
 	extern u32 fatTableAddr;
 	const char* romTid = getRomTid(ndsHeader);
 
+	extern u32 cheatSize;
+	extern u32 apPatchSize;
+	const u32 cheatSizeTotal = cheatSize+(apPatchIsCheat ? apPatchSize : 0);
+
 	if (extendedMemory2
 	|| moduleParams->sdk_version < 0x2008000
-	|| ce9Alt
+	|| (ce9Alt && cheatSizeTotal <= 4)
 	|| strncmp(romTid, "VSO", 3) == 0
 	|| arm7mbk == 0x080037C0) {
 		return;
@@ -741,7 +746,11 @@ void patchHiHeapPointer(cardengineArm9* ce9, const module_params_t* moduleParams
 	dbg_hexa((u32)oldheapPointer);
     dbg_printf("\n\n");
 
-	*heapPointer = (fatTableAddr < 0x023C0000 || fatTableAddr >= (u32)ce9) ? (u32)ce9 : fatTableAddr; // shrink heap by FAT table size + ce9 binary size
+	if (ce9Alt) {
+		*heapPointer = CHEAT_ENGINE_LOCATION_B4DS-0x400000;
+	} else {
+		*heapPointer = (fatTableAddr < 0x023C0000 || fatTableAddr >= (u32)ce9) ? (u32)ce9 : fatTableAddr; // shrink heap by FAT table size + ce9 binary size
+	}
 	if (strncmp(romTid, "K59", 3) == 0 && extendedMemory2) {
 		*heapPointer = 0x02700000;
 	}
