@@ -502,6 +502,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 	char romTid[5] = {0};
 	u8 unitCode = 0;
+	u32 ndsArm7Offset = 0;
 	u32 ndsArm7Size = 0;
 	u32 fatAddr = 0;
 	u16 headerCRC = 0;
@@ -521,6 +522,8 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		fread(&romTid, 1, 4, ndsFile);
 		fseek(ndsFile, 0x12, SEEK_SET);
 		fread(&unitCode, 1, 1, ndsFile);
+		fseek(ndsFile, 0x30, SEEK_SET);
+		fread(&ndsArm7Offset, sizeof(u32), 1, ndsFile);
 		fseek(ndsFile, 0x3C, SEEK_SET);
 		fread(&ndsArm7Size, sizeof(u32), 1, ndsFile);
 		fseek(ndsFile, 0x48, SEEK_SET);
@@ -1521,8 +1524,33 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		const char* ce9path = "nitro:/cardengine_arm9_alt.lz77";
 		if (accessControl & BIT(4)) { // If it has access to TWLNAND (or uses dataPub/dataPrv)...
 			ce9path = "nitro:/cardengine_arm9.lz77";
-		} else if (ndsArm7Size == 0x286A0 || ndsArm7Size == 0x29EE8) {
+		} else if (a7mbk6 == 0x080037C0) {
 			ce9path = "nitro:/cardengine_arm9_alt2.lz77";
+		} else {
+			FILE* ndsFile = fopen(conf->ndsPath, "rb");
+			u32 arm7allocOffset = 0;
+			u32 arm7alloc1 = 0;
+			u32 arm7alloc2 = 0;
+
+			fseek(ndsFile, (ndsArm7Offset+ndsArm7Size)-4, SEEK_SET);
+			fread(&arm7alloc2, sizeof(u32), 1, ndsFile);
+			fseek(ndsFile, (ndsArm7Offset+ndsArm7Size)-8, SEEK_SET);
+			fread(&arm7alloc1, sizeof(u32), 1, ndsFile);
+			if (arm7alloc1 > 0x20000) {
+				// TWL binary found
+				fseek(ndsFile, (ndsArm7Offset+ndsArm7Size)-0xC, SEEK_SET);
+				fread(&arm7alloc1, sizeof(u32), 1, ndsFile);
+				fseek(ndsFile, (ndsArm7Offset+ndsArm7Size)-0x10, SEEK_SET);
+			} else {
+				fseek(ndsFile, (ndsArm7Offset+ndsArm7Size)-0xC, SEEK_SET);
+			}
+			fread(&arm7allocOffset, sizeof(u32), 1, ndsFile);
+
+			if (arm7allocOffset != 0x027C0000 && (arm7alloc1+arm7alloc2) > 0x19800) {
+				ce9path = "nitro:/cardengine_arm9_alt2.lz77";
+			}
+
+			fclose(ndsFile);
 		}
 		/*if (strncmp(romTid, "ADM", 3) == 0 // Animal Crossing: Wild World
 		 || strncmp(romTid, "AQC", 3) == 0 // Crayon Shin-chan DS - Arashi o Yobu Nutte Crayoon Daisakusen!
