@@ -455,6 +455,11 @@ void inGameMenu(s32* exRegisters) {
 
 	if (sharedAddr[3] == 0x54495845) {
 		igmReset = true;
+		#ifndef NODSIWARE
+		if (isDSiWare) {
+			sharedAddr[0] = 0x57495344;
+		}
+		#endif
 		reset(0xFFFFFFFF);
 	} else if (sharedAddr[3] == 0x52534554) {
 		igmReset = true;
