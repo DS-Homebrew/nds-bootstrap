@@ -13410,7 +13410,7 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
 		while (instancesPatched < 3) {
 			if(*(u32*)addrOffset >= 0x023FF000 && *(u32*)addrOffset < 0x023FF020) { 
 				//*(u32*)addrOffset -= 0x2000;
-				*(u32*)addrOffset = CARDENGINE_ARM9_LOCATION_DLDI_ALT;
+				*(u32*)addrOffset = CARDENGINE_ARM9_LOCATION_DLDI_ALT2;
 				instancesPatched++;
 			}
 			addrOffset += 4;
@@ -13506,7 +13506,8 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
 	}
 
 	// Learn with Pokemon - Typing Adventure (Europe)
-	else if (strcmp(romTid, "UZPP") == 0) {
+	// TODO: Relocate new code to 0x023FC400
+	/*else if (strcmp(romTid, "UZPP") == 0) {
 		*(u32*)0x02000560 = 0xe92d401f;
 		*(u32*)0x02000564 = 0xe28f0024;
 		*(u32*)0x02000568 = 0xe5901000;
@@ -13631,7 +13632,7 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
 		*(u32*)0x023fc140 = 0xbd00bcff; // stclt cpc ,crb, [r0-#-3fc]
 		*(u32*)0x023fc144 = 0x00001000; // andeq r1, r0, r0
 		*(u32*)0x023fc148 = 0x020c30dc; // andeq r3, r12, #dc
-	}
+	}*/
 
 	// WarioWare: DIY (USA)
 	else if (strcmp(romTid, "UORE") == 0) {

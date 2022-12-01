@@ -1112,7 +1112,7 @@ int arm7_main(void) {
 
 	bool wramUsed = false;
 	u32 fatTableSize = 0;
-	u32 fatTableSizeNoExp = (moduleParams->sdk_version < 0x2008000) ? 0x19800 : 0x1A800;
+	u32 fatTableSizeNoExp = (moduleParams->sdk_version < 0x2008000) ? 0x19C00 : 0x1A800;
 	if (ce9Alt && moduleParams->sdk_version >= 0x2008000) {
 		fatTableSizeNoExp = 0x598;
 	}
