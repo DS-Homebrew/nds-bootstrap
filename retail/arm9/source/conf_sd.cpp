@@ -502,7 +502,6 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 	char romTid[5] = {0};
 	u8 unitCode = 0;
-	u32 ndsArm7Offset = 0;
 	u32 ndsArm7Size = 0;
 	u32 fatAddr = 0;
 	u16 headerCRC = 0;
@@ -522,8 +521,6 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		fread(&romTid, 1, 4, ndsFile);
 		fseek(ndsFile, 0x12, SEEK_SET);
 		fread(&unitCode, 1, 1, ndsFile);
-		fseek(ndsFile, 0x30, SEEK_SET);
-		fread(&ndsArm7Offset, sizeof(u32), 1, ndsFile);
 		fseek(ndsFile, 0x3C, SEEK_SET);
 		fread(&ndsArm7Size, sizeof(u32), 1, ndsFile);
 		fseek(ndsFile, 0x48, SEEK_SET);
@@ -631,7 +628,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 				}
 				donorNdsFile = fopen(dsiEnhancedMbk ? conf->donorTwl0Path : conf->donorTwlOnly0Path, "rb"); // System titles can only use an SDK 5.0 donor ROM
 			} else {
-				bool sdk50 = (
+				const bool sdk50 = (
 				   ( dsiEnhancedMbk && ndsArm7Size == 0x1511C)
 				|| ( dsiEnhancedMbk && ndsArm7Size == 0x26CC8)
 				|| ( dsiEnhancedMbk && ndsArm7Size == 0x28E54)
@@ -1524,10 +1521,28 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		const char* ce9path = "nitro:/cardengine_arm9_alt.lz77";
 		if (accessControl & BIT(4)) { // If it has access to TWLNAND (or uses dataPub/dataPrv)...
 			ce9path = "nitro:/cardengine_arm9.lz77";
-		} else if (a7mbk6 == 0x080037C0) {
-			ce9path = "nitro:/cardengine_arm9_alt2.lz77";
 		} else {
-			FILE* ndsFile = fopen(conf->ndsPath, "rb");
+			FILE* donorNdsFile = NULL;
+			if (a7mbk6 == 0x080037C0) {
+				const bool sdk50 = (ndsArm7Size == 0x1511C || ndsArm7Size == 0x26CC8 || ndsArm7Size == 0x28E54);
+				donorNdsFile = fopen(sdk50 ? conf->donorTwl0Path : conf->donorTwlPath, "rb");
+				if (!donorNdsFile) {
+					FILE* donorNdsFile2 = fopen(sdk50 ? conf->donorTwlPath : conf->donorTwl0Path, "rb");
+					if (donorNdsFile2) {
+						donorNdsFile = donorNdsFile2;
+					}
+				}
+			}
+
+			FILE* ndsFile = (donorNdsFile) ? donorNdsFile : fopen(conf->ndsPath, "rb");
+			u32 ndsArm7Offset = 0;
+			u32 ndsArm7Size = 0;
+
+			fseek(ndsFile, 0x30, SEEK_SET);
+			fread(&ndsArm7Offset, sizeof(u32), 1, ndsFile);
+			fseek(ndsFile, 0x3C, SEEK_SET);
+			fread(&ndsArm7Size, sizeof(u32), 1, ndsFile);
+
 			u32 arm7allocOffset = 0;
 
 			for (int i = 0; i < 0x80; i += 4) {
@@ -1553,7 +1568,9 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 					fread(&arm7alloc1, sizeof(u32), 1, ndsFile);
 				}
 
-				if ((arm7alloc1+arm7alloc2) > 0x19800) {
+				if ((arm7alloc1+arm7alloc2) > 0x1A800) {
+					ce9path = "nitro:/cardengine_arm9.lz77";
+				} else if ((arm7alloc1+arm7alloc2) > 0x19800) {
 					ce9path = "nitro:/cardengine_arm9_alt2.lz77";
 				}
 			}
