@@ -283,7 +283,11 @@ void reset(u32 param) {
 		}*/
 		//toncset((u32*)0x02000004, 0, 0x3DA000 - 4);
 		toncset((u32*)0x02000000, 0, 0x3DA000);
+		#ifdef NODSIWARE
+		toncset((u32*)0x02FE0000, 0, 0x19C00);
+		#else
 		toncset((u32*)0x02FE0000, 0, 0x1D000);
+		#endif
 
 		WRAM_CR = 0; // Set shared ram to ARM9
 
