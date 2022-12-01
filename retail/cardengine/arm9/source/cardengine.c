@@ -283,7 +283,7 @@ void reset(u32 param) {
 		}*/
 		//toncset((u32*)0x02000004, 0, 0x3DA000 - 4);
 		toncset((u32*)0x02000000, 0, 0x3DA000);
-		toncset((u32*)0x02FE0000, 0, 0x1F000);
+		toncset((u32*)0x02FE0000, 0, 0x1D000);
 
 		WRAM_CR = 0; // Set shared ram to ARM9
 
@@ -297,6 +297,8 @@ void reset(u32 param) {
 		if (!dldiPatchBinary(ndsHeader->arm9destination, ndsHeader->arm9binarySize)) {
 			while (1);
 		}
+
+		toncset((u32*)0x02FFD000, 0, 0x2000);
 	} else {
 		u32 newArm7binarySize = 0;
 		fileRead((char*)&newArm7binarySize, &pageFile, 0x3FFFF4, sizeof(u32));

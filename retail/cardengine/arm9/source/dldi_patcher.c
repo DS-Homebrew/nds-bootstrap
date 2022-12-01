@@ -95,8 +95,6 @@ static const data_t dldiMagicString[] = "\xED\xA5\x8D\xBF Chishm";	// Normal DLD
 //static const data_t dldiMagicLoaderString[] = "\xEE\xA5\x8D\xBF Chishm";	// Different to a normal DLDI file
 #define DEVICE_TYPE_DLDI 0x49444C44
 
-extern const u32 __myio_dldi;
-
 bool dldiPatchBinary (data_t *binData, u32 binSize) {
 
 	addr_t memOffset;			// Offset of DLDI after the file is loaded into memory
@@ -118,7 +116,13 @@ bool dldiPatchBinary (data_t *binData, u32 binSize) {
 		return false;
 	}
 
-	data_t *pDH = (data_t*)(((u32*)(&__myio_dldi)) - 24);
+	#ifdef EXTMEM
+	const u32 dldiOffset = 0x027BD000;
+	#else
+	const u32 dldiOffset = 0x023FD000;
+	#endif
+
+	data_t *pDH = (data_t*)(((u32*)(&dldiOffset)) - 24);
 	data_t *pAH = &(binData[patchOffset]);
 
 	if (*((u32*)(pDH + DO_ioType)) == DEVICE_TYPE_DLDI) {
