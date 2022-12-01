@@ -666,7 +666,7 @@ static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
 	//nocashMessage("aaaaaaaaaa\n");
 	fileRead((char*)dst, &romFile, src, len);
 
-	if (!(ce9->valueBits & isSdk5) && ndsHeader->gameCode == 0x504D5341 /*ASMP*/ && !mariosHolidayPrimaryFixApplied) {
+	if (!(ce9->valueBits & isSdk5) && (u32)ndsHeader->gameCode == 0x504D5341 /*ASMP*/ && !mariosHolidayPrimaryFixApplied) {
 		for (u32 i = 0; i < len; i += 4) {
 			if (*(u32*)(dst+i) == 0x4B434148) {
 				*(u32*)(dst+i) = 0xA00;
@@ -1285,15 +1285,19 @@ void musicStopEffect(int id) {
 }
 
 void rumble(u32 arg) {
+#ifndef NODSIWARE
 	sharedAddr[0] = ce9->rumbleFrames[0];
 	sharedAddr[1] = ce9->rumbleForce[0];
 	sharedAddr[3] = 0x424D5552; // 'RUMB'
+#endif
 }
 
 void rumble2(u32 arg) {
+#ifndef NODSIWARE
 	sharedAddr[0] = ce9->rumbleFrames[1];
 	sharedAddr[1] = ce9->rumbleForce[1];
 	sharedAddr[3] = 0x424D5552; // 'RUMB'
+#endif
 }
 
 u32 myIrqEnable(u32 irq) {	
