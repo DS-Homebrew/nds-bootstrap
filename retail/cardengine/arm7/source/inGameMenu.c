@@ -106,6 +106,7 @@ void inGameMenu(void) {
 					exitMenu = true;
 					break;
 				case 0x54455352: // RSET
+				case 0x54495551: // QUIT
 					exitMenu = true;
 					timeTillStatusRefresh = 7;
 					for (int i = 0; i < 2; i++) {
@@ -114,10 +115,9 @@ void inGameMenu(void) {
 					}
 					reset();
 					break;
-				case 0x54495551: // QUIT
-					rebootConsole();
-					exitMenu = true;
-					break;
+					//rebootConsole();
+					//exitMenu = true;
+					//break;
 				case 0x59435049: // IPCY
 					ipcEveryFrame = true;
 					break;

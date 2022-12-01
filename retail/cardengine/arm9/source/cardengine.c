@@ -188,7 +188,7 @@ void reset(u32 param) {
 	fileRead((char*)&iUncompressedSize, &pageFile, 0x3FFFF0, sizeof(u32));
 
 	*(u32*)resetParams = param;
-	if (isDSiWare || iUncompressedSize > 0x280000 || param == 0xFFFFFFFF || *(u32*)(resetParams+0xC) > 0) {
+	if (isDSiWare || iUncompressedSize > 0x280000 /*|| param == 0xFFFFFFFF*/ || *(u32*)(resetParams+0xC) > 0) {
 		enterCriticalSection();
 		if (isDSiWare || iUncompressedSize > 0x280000) {
 			sharedAddr[0] = 0x57495344; // 'DSIW'
@@ -253,7 +253,7 @@ void reset(u32 param) {
 	toncset((char*)((ce9->valueBits & isSdk5) ? 0x02FFFD80 : 0x027FFD80), 0, 0x80);
 	toncset((char*)((ce9->valueBits & isSdk5) ? 0x02FFFF80 : 0x027FFF80), 0, 0x80);
 
-	if (!igmReset && *(u32*)(resetParams+0xC) > 0) {
+	if (param == 0xFFFFFFFF || *(u32*)(resetParams+0xC) > 0) {
 		REG_DISPSTAT = 0;
 		REG_DISPCNT = 0;
 		REG_DISPCNT_SUB = 0;
@@ -282,12 +282,17 @@ void reset(u32 param) {
 			*(u32*)(0x02000000) |= BIT(2);
 		}*/
 		//toncset((u32*)0x02000004, 0, 0x3DA000 - 4);
-		toncset((u32*)0x02000000, 0, 0x3DA000);
+		toncset((u32*)0x02000000, 0, 0x3C0000);
 		#ifdef NODSIWARE
-		toncset((u32*)0x02FE0000, 0, 0x19C00);
+		toncset((u32*)0x023C4000, 0, 0x1C000);
+		toncset((u32*)0x02FE4000, 0, 0x19C00-0x4000);
 		#else
-		toncset((u32*)0x02FE0000, 0, 0x1D000);
+		toncset((u32*)0x023C4000, 0, 0x16800);
+		toncset((u32*)0x02FE4000, 0, 0x1D000-0x4000);
 		#endif
+		if (param == 0xFFFFFFFF) {
+			*(u32*)(0x02000000) = BIT(0) | BIT(1) | BIT(2);
+		}
 
 		WRAM_CR = 0; // Set shared ram to ARM9
 
@@ -299,7 +304,7 @@ void reset(u32 param) {
 		sharedAddr[1] = 0x48495344; // 'DSIH'
 
 		if (!dldiPatchBinary(ndsHeader->arm9destination, ndsHeader->arm9binarySize)) {
-			while (1);
+			sharedAddr[1] = 0x57495344;
 		}
 
 		toncset((u32*)0x02FFD000, 0, 0x2000);
@@ -308,11 +313,11 @@ void reset(u32 param) {
 		fileRead((char*)&newArm7binarySize, &pageFile, 0x3FFFF4, sizeof(u32));
 		fileRead((char*)ndsHeader->arm9destination, &pageFile, 0x14000, iUncompressedSize);
 		fileRead((char*)ndsHeader->arm7destination, &pageFile, 0x2C0000, newArm7binarySize);
-	}
 
-	#ifdef NODSIWARE
-	tonccpy((u32*)0x02370000, ce9, 0x2800);
-	#endif
+		#ifdef NODSIWARE
+		tonccpy((u32*)0x02370000, ce9, 0x2800);
+		#endif
+	}
 
 	sharedAddr[0] = 0x544F4F42; // 'BOOT'
 	sharedAddr[3] = 0;
@@ -448,7 +453,10 @@ void inGameMenu(s32* exRegisters) {
 	fileWrite((char*)INGAME_MENU_LOCATION_B4DS, &pageFile, 0, 0xA000);	// Store in-game menu
 	fileRead((char*)INGAME_MENU_LOCATION_B4DS, &pageFile, 0xA000, 0xA000);	// Restore part of game RAM from page file
 
-	if (sharedAddr[3] == 0x52534554) {
+	if (sharedAddr[3] == 0x54495845) {
+		igmReset = true;
+		reset(0xFFFFFFFF);
+	} else if (sharedAddr[3] == 0x52534554) {
 		igmReset = true;
 		reset(0);
 	} else if (sharedAddr[3] == 0x444D4152) { // RAMD
