@@ -1570,7 +1570,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 				if ((arm7alloc1+arm7alloc2) > 0x1A800) {
 					ce9path = "nitro:/cardengine_arm9.lz77";
-				} else if ((arm7alloc1+arm7alloc2) > 0x19800) {
+				} else if ((arm7alloc1+arm7alloc2) > 0x19C00) {
 					ce9path = "nitro:/cardengine_arm9_alt2.lz77";
 				}
 			}
