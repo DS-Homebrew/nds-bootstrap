@@ -1521,7 +1521,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		const char* ce9path = "nitro:/cardengine_arm9_alt.lz77";
 		if (accessControl & BIT(4)) { // If it has access to TWLNAND (or uses dataPub/dataPrv)...
 			ce9path = "nitro:/cardengine_arm9.lz77";
-		} else if (ndsArm7Size == 0x29EE8) {
+		} else if (ndsArm7Size == 0x286A0 || ndsArm7Size == 0x29EE8) {
 			ce9path = "nitro:/cardengine_arm9_alt2.lz77";
 		}
 		/*if (strncmp(romTid, "ADM", 3) == 0 // Animal Crossing: Wild World
