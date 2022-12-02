@@ -152,6 +152,12 @@ u32 savePatchUniversal(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, m
 			(u16*)ndsHeader->arm7destination, newArm7binarySize,
 			a7JumpTableSignatureUniversalThumb, 3
 		);
+		if (newArm7binarySize == 0x24DA8 || newArm7binarySize == 0x24F50) {
+			EepromReadJump = (u32*)findOffsetThumb(
+				(u16*)EepromReadJump + 2, newArm7binarySize,
+				a7JumpTableSignatureUniversalThumb, 3
+			);
+		}
 
 		if (JumpTableFuncType == 0) {
 			EepromWriteJump = (u32*)findOffsetThumb(
