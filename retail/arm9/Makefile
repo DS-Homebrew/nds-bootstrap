@@ -46,7 +46,7 @@ CFLAGS	:=	-g -Wall -O2\
 			-ffast-math \
 			$(ARCH)
 
-CFLAGS	+=	$(INCLUDE) -DARM9 -DNO_CARDID
+CFLAGS	+=	$(INCLUDE) -DARM9 -DNO_CARDID -DDEFAULT_CARD_READ_DMA
 CXXFLAGS	:=	$(CFLAGS) -fno-rtti -fno-exceptions
 
 ASFLAGS	:=	-g $(ARCH) $(INCLUDE)
