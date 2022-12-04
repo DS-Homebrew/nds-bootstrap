@@ -8723,7 +8723,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		if (!extendedMemory2) {
 			if (s2FlashcardId == 0x5A45) {
 				for (int i = 0; i < 8; i++) {
-					nintCdwnCalHeapAddrPtr[i] -= 0x01000000;
+					nintCdwnCalHeapAddrPtr[i] -= 0x800000;
 				}
 			}
 			tonccpy((u32*)0x020917D8, nintCdwnCalHeapAlloc, 0xC0);
@@ -8763,7 +8763,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		if (!extendedMemory2) {
 			if (s2FlashcardId == 0x5A45) {
 				for (int i = 0; i < 8; i++) {
-					nintCdwnCalHeapAddrPtr[i] -= 0x01000000;
+					nintCdwnCalHeapAddrPtr[i] -= 0x800000;
 				}
 			}
 			tonccpy((u32*)0x02091A20, nintCdwnCalHeapAlloc, 0xC0);
@@ -10934,7 +10934,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		if (!extendedMemory2) {
 			if (s2FlashcardId == 0x5A45) {
 				for (int i = 0; i < 3; i++) {
-					rmtRacersHeapAddrPtr[i] -= 0x01000000;
+					rmtRacersHeapAddrPtr[i] -= 0x800000;
 				}
 			}
 			tonccpy((u32*)0x020256C0, rmtRacersHeapAlloc, 0xC0);
