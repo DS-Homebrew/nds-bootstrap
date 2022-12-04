@@ -2,13 +2,19 @@
 	.global mepHeapSetPatch
 	.global twlFontHeapAlloc
 	.global cch2HeapAlloc
+	.global cch2HeapAddrPtr
 	@.global elementalistsHeapAlloc
 	.global fourSwHeapAlloc
+	.global fourSwHeapAddrPtr
 	@.global mvdk3HeapAlloc
 	.global nintCdwnCalHeapAlloc
+	.global nintCdwnCalHeapAddrPtr
 	.global nintendojiHeapAlloc
+	.global nintendojiHeapAddrPtr
 	.global rmtRacersHeapAlloc
+	.global rmtRacersHeapAddrPtr
 	.global siezHeapAlloc
+	.global siezHeapAddrPtr
 	.align	4
 	.arm
 
@@ -20,20 +26,33 @@ twlFontHeapAlloc:
 	.word twlFontHeapAllocFunc
 cch2HeapAlloc:
 	.word cch2HeapAllocFunc
+cch2HeapAddrPtr:
+	.word cch2HeapAddr
 @elementalistsHeapAlloc:
 @	.word elementalistsHeapAllocFunc
 fourSwHeapAlloc:
 	.word fourSwHeapAllocFunc
+fourSwHeapAddrPtr:
+	.word fourSwHeapAddr
 @mvdk3HeapAlloc:
 @	.word mvdk3HeapAllocFunc
 nintCdwnCalHeapAlloc:
 	.word nintCdwnCalHeapAllocFunc
+nintCdwnCalHeapAddrPtr:
+	.word nintCdwnCalHeapAddr
+@mvdk3HeapAlloc:
 nintendojiHeapAlloc:
 	.word nintendojiHeapAllocFunc
+nintendojiHeapAddrPtr:
+	.word nintendojiHeapAddr
 rmtRacersHeapAlloc:
 	.word rmtRacersHeapAllocFunc
+rmtRacersHeapAddrPtr:
+	.word rmtRacersHeapAddr
 siezHeapAlloc:
 	.word siezHeapAllocFunc
+siezHeapAddrPtr:
+	.word siezHeapAddr
 
 @---------------------------------------------------------------------------------
 mepHeapSetOrgFunc: .word 0
@@ -42,6 +61,7 @@ mepHeapSetPatchFunc:
 	stmfd   sp!, {r6,lr}
 
 	cmp r3, #0x09000000
+	cmpne r3, #0x08000000
 	ldmgefd   sp!, {r6,pc}
 
 	ldr	r6, mepHeapSetOrgFunc
@@ -110,12 +130,14 @@ cch2HeapAllocFunc:
 	bl	_blx_cch2OrgFunction
 
 	cmp r5, #1
-	moveq r0, #0x09000000 @ Offset of fontGBK.bin
+	ldreq r0, cch2HeapAddr
 
 cch2HeapAlloc_return:
 	ldmfd   sp!, {r5-r6,pc}
 _blx_cch2OrgFunction:
 	bx	r6
+cch2HeapAddr:
+.word	0x09000000 @ Offset of fontGBK.bin
 .pool
 @---------------------------------------------------------------------------------
 
@@ -304,43 +326,52 @@ nintCdwnCalHeapAllocFunc:
 
 	ldr r6, =0x72C0 @ Size of Font.nftr
 	cmp r0, r6
-	moveq r0, #0x09000000
+	ldreq r0, nintCdwnCalHeapAddr
 	ldmeqfd   sp!, {r6,pc}
 
 	ldr r6, =0x72B0 @ Size of FontCal.nftr
 	cmp r0, r6
-	ldreq r0, =0x09008000
+	ldreq r0, nintCdwnCalHeapAddr+4
 	ldmeqfd   sp!, {r6,pc}
 
 	ldr r6, =0x67D4 @ Size of FontCal2.nftr
 	cmp r0, r6
-	ldreq r0, =0x09010000
+	ldreq r0, nintCdwnCalHeapAddr+8
 	ldmeqfd   sp!, {r6,pc}
 
 	ldr r6, =0x7340 @ Size of FontInfo.nftr
 	cmp r0, r6
-	ldreq r0, =0x09018000
+	ldreq r0, nintCdwnCalHeapAddr+0xC
 	ldmeqfd   sp!, {r6,pc}
 
 	ldr r6, =0x733C @ Size of FontLine.nftr
 	cmp r0, r6
-	ldreq r0, =0x09020000
+	ldreq r0, nintCdwnCalHeapAddr+0x10
 	ldmeqfd   sp!, {r6,pc}
 
 	ldr r6, =0x7474 @ Size of FontPage.nftr
 	cmp r0, r6
-	ldreq r0, =0x09028000
+	ldreq r0, nintCdwnCalHeapAddr+0x14
 	ldmeqfd   sp!, {r6,pc}
 
 	ldr r6, =0xAF44 @ Size of FontRed.nftr
 	cmp r0, r6
-	ldreq r0, =0x09030000
+	ldreq r0, nintCdwnCalHeapAddr+0x18
 	ldmeqfd   sp!, {r6,pc}
 
 	@ldr r6, =0x4452C @ Size of suraTWLFont8x16.nftr
 	@cmp r0, r6
-	ldr r0, =0x0903B000
+	ldr r0, nintCdwnCalHeapAddr+0x1C
 	ldmfd   sp!, {r6,pc}
+nintCdwnCalHeapAddr:
+.word	0x09000000
+.word	0x09008000
+.word	0x09010000
+.word	0x09018000
+.word	0x09020000
+.word	0x09028000
+.word	0x09030000
+.word	0x0903B000
 .pool
 @---------------------------------------------------------------------------------
 
@@ -350,7 +381,7 @@ nintendojiHeapAllocFunc:
 	stmfd   sp!, {r6,lr}
 
 	cmp r1, #0x500000 @ Size of fileHeap
-	moveq r0, #0x09100000
+	ldreq r0, nintendojiHeapAddr
 	ldmeqfd   sp!, {r6,pc}
 
 	ldr r6, =0x02022E14
@@ -359,6 +390,8 @@ nintendojiHeapAllocFunc:
 	ldmfd   sp!, {r6,pc}
 _blx_nintendojiOrgFunction:
 	bx	r6
+nintendojiHeapAddr:
+.word	0x09100000
 .pool
 @---------------------------------------------------------------------------------
 	.thumb
@@ -377,19 +410,24 @@ rmtRacersAllocTextures:
 	ldr r6, =0x13A160 @ Modified size of textures.dat (Original: 0x13ACCC)
 	cmp r0, r6
 	bne rmtRacersAllocGui
-	ldr r0, =#0x09000000
+	ldr r0, rmtRacersHeapAddr
 	pop {r6,pc}
 
 rmtRacersAllocGui:
 	ldr r6, =0x111484 @ Modified size of gui.dat (Original: 0x112088)
 	cmp r0, r6
 	bne rmtRacersAllocGameDat
-	ldr r0, =0x09140000
+	ldr r0, rmtRacersHeapAddr+4
 	pop {r6,pc}
 
 rmtRacersAllocGameDat:	@ game.dat
-	ldr r0, =0x09260000
+	ldr r0, rmtRacersHeapAddr+8
 	pop {r6,pc}
+.align 4
+rmtRacersHeapAddr:
+.word	0x09000000
+.word	0x09140000
+.word	0x09260000
 .pool
 @---------------------------------------------------------------------------------
 	.arm
@@ -400,11 +438,11 @@ siezHeapAllocFunc:
 
 	ldr r6, =0x1F1F24 @ Size of kr0000.ntfx
 	cmp r1, r6
-	moveq r0, #0x09000000 @ Offset of kr0000.ntfx
+	ldreq r0, siezHeapAddr
 	beq siezHeapAlloc_return
 	ldr r6, =0x1F876C @ Size of kr0100.ntfx
 	cmp r1, r6
-	moveq r0, #0x09200000 @ Offset of kr0100.ntfx
+	ldreq r0, siezHeapAddr+4
 	beq siezHeapAlloc_return
 	ldr r6, =0x020DB338
 	bl	_blx_siezOrgFunction
@@ -413,5 +451,8 @@ siezHeapAlloc_return:
 	ldmfd   sp!, {r6,pc}
 _blx_siezOrgFunction:
 	bx	r6
+siezHeapAddr:
+.word	0x09000000 @ Offset of kr0000.ntfx
+.word	0x09200000 @ Offset of kr0100.ntfx
 .pool
 @---------------------------------------------------------------------------------

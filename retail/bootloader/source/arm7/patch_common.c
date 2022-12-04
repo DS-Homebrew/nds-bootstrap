@@ -3560,10 +3560,14 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	else if (strncmp(romTid, "KXC", 3) == 0 && debugOrMep) {
 		extern u32* mepHeapSetPatch;
 		extern u32* cch2HeapAlloc;
+		extern u32* cch2HeapAddrPtr;
 
 		*(u32*)0x02013170 = 0xE1A00000; // nop
 		tonccpy((u32*)0x02013CF4, dsiSaveGetResultCode, 0xC);
 		if (!extendedMemory2) {
+			if (s2FlashcardId == 0x5A45) {
+				cch2HeapAddrPtr[0] -= 0x01000000;
+			}
 			tonccpy((u32*)0x0201473C, mepHeapSetPatch, 0x70);
 			tonccpy((u32*)0x0201D810, cch2HeapAlloc, 0xBC);
 		}
@@ -6520,6 +6524,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Audio is disabled on retail consoles
 	else if (strncmp(romTid, "KQ9", 3) == 0 && debugOrMep) {
 		extern u32* fourSwHeapAlloc;
+		extern u32* fourSwHeapAddrPtr;
 		//u32* getLengthFunc = (u32*)0;
 
 		*(u32*)0x020051CC = 0xE1A00000; // nop
@@ -6533,6 +6538,11 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02019974 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x02019978 = 0xE12FFF1E; // bx lr
 		if (!extendedMemory2) {
+			if (s2FlashcardId == 0x5A45) {
+				for (int i = 0; i < 4; i++) {
+					fourSwHeapAddrPtr[i] -= 0x01000000;
+				}
+			}
 			tonccpy((u32*)0x02019FA4, fourSwHeapAlloc, 0xC0);
 		}
 		*(u32*)0x0201D01C = 0xE1A00000; // nop
@@ -8693,6 +8703,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Requires either 8MB of RAM or Memory Expansion Pak
 	else if (strcmp(romTid, "KAUE") == 0 && debugOrMep) {
 		extern u32* nintCdwnCalHeapAlloc;
+		extern u32* nintCdwnCalHeapAddrPtr;
 
 		setBL(0x02012480, (u32)dsiSaveGetLength);
 		setBL(0x020124C0, (u32)dsiSaveRead);
@@ -8710,6 +8721,11 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020148BC = 0xE1A00000; // nop
 		*(u32*)0x020148D0 = 0xE1A00000; // nop
 		if (!extendedMemory2) {
+			if (s2FlashcardId == 0x5A45) {
+				for (int i = 0; i < 8; i++) {
+					nintCdwnCalHeapAddrPtr[i] -= 0x01000000;
+				}
+			}
 			tonccpy((u32*)0x020917D8, nintCdwnCalHeapAlloc, 0xC0);
 			setBL(0x0205AB70, 0x020917D8);
 		}
@@ -8727,6 +8743,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Requires either 8MB of RAM or Memory Expansion Pak
 	else if (strcmp(romTid, "KAUV") == 0 && debugOrMep) {
 		extern u32* nintCdwnCalHeapAlloc;
+		extern u32* nintCdwnCalHeapAddrPtr;
 
 		setBL(0x020124DC, (u32)dsiSaveGetLength);
 		setBL(0x0201251C, (u32)dsiSaveRead);
@@ -8744,6 +8761,11 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02014918 = 0xE1A00000; // nop
 		*(u32*)0x0201492C = 0xE1A00000; // nop
 		if (!extendedMemory2) {
+			if (s2FlashcardId == 0x5A45) {
+				for (int i = 0; i < 8; i++) {
+					nintCdwnCalHeapAddrPtr[i] -= 0x01000000;
+				}
+			}
 			tonccpy((u32*)0x02091A20, nintCdwnCalHeapAlloc, 0xC0);
 			setBL(0x0205ADA8, 0x02091A20);
 		}
@@ -8867,7 +8889,11 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Crashes when going downstairs (confirmed on retail consoles)
 	else if (strcmp(romTid, "K9KJ") == 0 && debugOrMep) {
 		extern u32* nintendojiHeapAlloc;
+		extern u32* nintendojiHeapAddrPtr;
 		if (expansionPakFound) {
+			if (s2FlashcardId == 0x5A45) {
+				nintendojiHeapAddrPtr[0] -= 0x01000000;
+			}
 			*(u32*)0x0201D1B0 = 0xE12FFF1E; // bx lr
 			*(u32*)0x0201D1D8 = 0xE12FFF1E; // bx lr
 			tonccpy((u32*)0x0201C038, nintendojiHeapAlloc, 0xC0);
@@ -10898,6 +10924,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Requires either 8MB of RAM or Memory Expansion Pak
 	else if ((strcmp(romTid, "KQRE") == 0 || strcmp(romTid, "KQRV") == 0) && debugOrMep) {
 		extern u16* rmtRacersHeapAlloc;
+		extern u16* rmtRacersHeapAddrPtr;
 
 		*(u32*)0x020197F0 = 0xE1A00000; // nop
 		*(u32*)0x0201CDA0 = 0xE1A00000; // nop
@@ -10905,6 +10932,11 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchUserSettingsReadDSiWare(0x020250BC);
 		*(u32*)0x02028758 = 0xE1A00000; // nop
 		if (!extendedMemory2) {
+			if (s2FlashcardId == 0x5A45) {
+				for (int i = 0; i < 3; i++) {
+					rmtRacersHeapAddrPtr[i] -= 0x01000000;
+				}
+			}
 			tonccpy((u32*)0x020256C0, rmtRacersHeapAlloc, 0xC0);
 			setBLThumb(0x02082484, 0x020256C0);
 		}
@@ -11972,9 +12004,15 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Saving not supported due to using more than one file in filesystem
 	else if (strcmp(romTid, "KEVJ") == 0) {
 		extern u32* siezHeapAlloc;
+		extern u32* siezHeapAddrPtr;
 
 		*(u32*)0x02017904 = 0xE1A00000; // nop
 		if (!extendedMemory2 && expansionPakFound) {
+			if (s2FlashcardId == 0x5A45) {
+				for (int i = 0; i < 2; i++) {
+					siezHeapAddrPtr[i] -= 0x01000000;
+				}
+			}
 			tonccpy((u32*)0x020192F4, siezHeapAlloc, 0x50);
 		}
 		*(u32*)0x0201B794 = 0xE1A00000; // nop
