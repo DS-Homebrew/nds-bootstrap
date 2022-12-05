@@ -1524,6 +1524,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			ce9path = "nitro:/cardengine_arm9.lz77";
 		} else {
 			FILE* donorNdsFile = NULL;
+			bool standaloneDonor = false;
 			if (a7mbk6 == 0x080037C0) {
 				const bool sdk50 = (ndsArm7Size == 0x1511C || ndsArm7Size == 0x26CC8 || ndsArm7Size == 0x28E54);
 				donorNdsFile = fopen(sdk50 ? conf->donorTwl0Path : conf->donorTwlPath, "rb");
@@ -1533,16 +1534,27 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 						donorNdsFile = donorNdsFile2;
 					}
 				}
+				if (!donorNdsFile) {
+					FILE* donorNdsFile2 = fopen("fat:/_nds/nds-bootstrap/b4dsTwlDonor.bin", "rb");
+					if (donorNdsFile2) {
+						donorNdsFile = donorNdsFile2;
+						standaloneDonor = true;
+					}
+				}
 			}
 
 			FILE* ndsFile = (donorNdsFile) ? donorNdsFile : fopen(conf->ndsPath, "rb");
 			u32 ndsArm7Offset = 0;
 			u32 ndsArm7Size = 0;
 
-			fseek(ndsFile, 0x30, SEEK_SET);
-			fread(&ndsArm7Offset, sizeof(u32), 1, ndsFile);
-			fseek(ndsFile, 0x3C, SEEK_SET);
-			fread(&ndsArm7Size, sizeof(u32), 1, ndsFile);
+			if (standaloneDonor) {
+				ndsArm7Size = conf->donorFileTwlSize;
+			} else {
+				fseek(ndsFile, 0x30, SEEK_SET);
+				fread(&ndsArm7Offset, sizeof(u32), 1, ndsFile);
+				fseek(ndsFile, 0x3C, SEEK_SET);
+				fread(&ndsArm7Size, sizeof(u32), 1, ndsFile);
+			}
 
 			u32 arm7allocOffset = 0;
 
