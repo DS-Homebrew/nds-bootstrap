@@ -18,6 +18,7 @@ typedef struct loadCrt0 {
     u8 valueBits;
     u32 saveFileCluster;
 	u32 donorFileTwlCluster;
+	u32 donorFileTwlSize;
     u32 gbaFileCluster;
     u32 gbaSaveFileCluster;
     u32 romSize;

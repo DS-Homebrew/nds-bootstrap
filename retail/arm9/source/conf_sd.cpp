@@ -1283,6 +1283,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	if (conf->gameOnFlashcard) {
 		wideCheatFilePath = "fat:/_nds/nds-bootstrap/wideCheatData.bin";
 		cheatFilePath = "fat:/_nds/nds-bootstrap/cheatData.bin";
+		conf->donorFileTwlSize = getFileSize("fat:/_nds/nds-bootstrap/b4dsTwlDonor.bin");
 	} else {
 		wideCheatFilePath = "sd:/_nds/nds-bootstrap/wideCheatData.bin";
 		cheatFilePath = "sd:/_nds/nds-bootstrap/cheatData.bin";

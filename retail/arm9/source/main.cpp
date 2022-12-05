@@ -391,6 +391,7 @@ static int runNdsFile(configuration* conf) {
 
 	struct stat st;
 	struct stat stSav;
+	struct stat stDonorStandalone;
 	struct stat stDonor0;
 	struct stat stDonor;
 	struct stat stGba;
@@ -436,6 +437,8 @@ static int runNdsFile(configuration* conf) {
 		clusterDonor = stDonor.st_ino;
 	} else if (stat(conf->donorTwl0Path, &stDonor0) >= 0) {
 		clusterDonor = stDonor0.st_ino;
+	} else if (stat("fat:/_nds/nds-bootstrap/b4dsTwlDonor.bin", &stDonorStandalone) >= 0) {
+		clusterDonor = stDonorStandalone.st_ino;
 	}
 
 	if (stat(conf->apPatchPath, &stApPatch) >= 0) {

@@ -260,6 +260,7 @@ int runNds(u32 cluster, u32 saveCluster, u32 donorTwlCluster, u32 gbaCluster, u3
 
 	loader->saveFileCluster             = saveCluster;
 	loader->donorFileTwlCluster         = donorTwlCluster;
+	loader->donorFileTwlSize            = conf->donorFileTwlSize;
 	loader->gbaFileCluster              = gbaCluster;
 	loader->gbaSaveFileCluster          = gbaSavCluster;
 	loader->romSize                     = conf->romSize;

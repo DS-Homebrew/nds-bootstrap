@@ -21,6 +21,7 @@ typedef struct configuration {
 	char* gbaPath;
 	char* gbaSavPath;
 	char* apPatchPath;
+	u32 donorFileTwlSize;
 	u32 romSize;
 	u32 saveSize;
 	u32 gbaRomSize;
