@@ -1592,19 +1592,6 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 				fclose(ndsFile);
 			}
 		}
-		/*if (strncmp(romTid, "ADM", 3) == 0 // Animal Crossing: Wild World
-		 || strncmp(romTid, "AQC", 3) == 0 // Crayon Shin-chan DS - Arashi o Yobu Nutte Crayoon Daisakusen!
-		// || strncmp(romTid, "YRC", 3) == 0 // Crayon Shin-chan - Arashi o Yobu Cinemaland Kachinko Gachinko Daikatsugeki!
-		// || strncmp(romTid, "CL4", 3) == 0 // Crayon Shin-Chan - Arashi o Yobu Nendororoon Daihenshin!
-		// || strncmp(romTid, "BQB", 3) == 0 // Crayon Shin-chan - Obaka Dainin Den - Susume! Kasukabe Ninja Tai!
-		 || strncmp(romTid, "AK4", 3) == 0 // Kabu Trader Shun
-		 || strncmp(romTid, "CLJ", 3) == 0 // Mario & Luigi: Bowser's Inside Story
-		 || strncmp(romTid, "B6Z", 3) == 0 // MegaMan Zero Collection
-		 || strncmp(romTid, "ARZ", 3) == 0 // MegaMan ZX
-		 || strncmp(romTid, "YZX", 3) == 0 // MegaMan ZX Advent
-		) {
-			ce9path = "nitro:/cardengine_arm9_alt.lz77";
-		}*/
 		cebin = fopen(ce9path, "rb");
 	}
 	if (cebin) {
