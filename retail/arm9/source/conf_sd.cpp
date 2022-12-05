@@ -729,11 +729,11 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			}
 		}
 
-		if (target[0x01C] & 2)
+		if (target[0x1C] & 2)
 		{
 			u8 key[16] = {0} ;
 			u8 keyp[16] = {0} ;
-			if (target[0x01C] & 4)
+			if ((target[0x1C] & 4) || (target[0x1BF] & 0x80))
 			{
 				// Debug Key
 				tonccpy(key, target, 16) ;
@@ -773,11 +773,11 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			fseek(donorNdsFile, 0, SEEK_SET);
 			fread(target, 1, 0x1000, donorNdsFile);
 
-			if (target[0x01C] & 2)
+			if (target[0x1C] & 2)
 			{
 				u8 key[16] = {0} ;
 				u8 keyp[16] = {0} ;
-				if (target[0x01C] & 4)
+				if ((target[0x1C] & 4) || (target[0x1BF] & 0x80))
 				{
 					// Debug Key
 					tonccpy(key, target, 16) ;
@@ -1363,11 +1363,11 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			fread((u32*)0x023B8000, 1, ndsArm9ilen, ndsFile);
 		}
 
-		if ((target[0x01C] & 2) && ndsArm9ilen <= 0x8000)
+		if ((target[0x1C] & 2) && ndsArm9ilen <= 0x8000)
 		{
 			u8 key[16] = {0} ;
 			u8 keyp[16] = {0} ;
-			if (target[0x01C] & 4)
+			if ((target[0x1C] & 4) || (target[0x1BF] & 0x80))
 			{
 				// Debug Key
 				tonccpy(key, target, 16) ;
