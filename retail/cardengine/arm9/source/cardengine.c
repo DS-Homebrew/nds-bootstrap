@@ -1125,7 +1125,7 @@ s32 dsiSaveRead(void* ctx, void* dst, s32 len) {
 	} else {
 		res = fileRead(dst, sharedFontOpened ? &sharedFontFile : &savFile, dsiSaveSeekPos, len);
 	}
-	dsiSaveResultCode = res ? 1 : 0;
+	dsiSaveResultCode = res ? 0 : 1;
 	toncset32(ctx+0x14, dsiSaveResultCode, 1);
 	cardReadInProgress = false;
 	REG_EXMEMCNT = exmemcnt;
@@ -1156,7 +1156,7 @@ s32 dsiSaveWrite(void* ctx, void* src, s32 len) {
 	cardReadInProgress = true;
 	setDeviceOwner();
 	bool res = fileWrite(src, &savFile, dsiSaveSeekPos, len);
-	dsiSaveResultCode = res ? 1 : 0;
+	dsiSaveResultCode = res ? 0 : 1;
 	toncset32(ctx+0x14, dsiSaveResultCode, 1);
 	cardReadInProgress = false;
 	REG_EXMEMCNT = exmemcnt;

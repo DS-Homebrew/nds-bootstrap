@@ -972,7 +972,7 @@ s32 dsiSaveRead(void* ctx, void* dst, u32 len) {
 	u16 exmemcnt = REG_EXMEMCNT;
 	sysSetCardOwner(true);	// Give Slot-1 access to arm9
 	bool res = fileRead(dst, sharedFontOpened ? sharedFontFile : savFile, dsiSaveSeekPos, len, 0);
-	dsiSaveResultCode = res ? 1 : 0;
+	dsiSaveResultCode = res ? 0 : 1;
 	toncset32(ctx+0x14, dsiSaveResultCode, 1);
 	REG_EXMEMCNT = exmemcnt;
 	leaveCriticalSection(oldIME);
@@ -1001,7 +1001,7 @@ s32 dsiSaveWrite(void* ctx, void* src, s32 len) {
 	u16 exmemcnt = REG_EXMEMCNT;
 	sysSetCardOwner(true);	// Give Slot-1 access to arm9
 	bool res = fileWrite(src, savFile, dsiSaveSeekPos, len, 0);
-	dsiSaveResultCode = res ? 1 : 0;
+	dsiSaveResultCode = res ? 0 : 1;
 	toncset32(ctx+0x14, dsiSaveResultCode, 1);
 	REG_EXMEMCNT = exmemcnt;
 	leaveCriticalSection(oldIME);
