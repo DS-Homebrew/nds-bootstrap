@@ -1544,51 +1544,53 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			}
 
 			FILE* ndsFile = (donorNdsFile) ? donorNdsFile : fopen(conf->ndsPath, "rb");
-			u32 ndsArm7Offset = 0;
-			u32 ndsArm7Size = 0;
+			if (ndsFile) {
+				u32 ndsArm7Offset = 0;
+				u32 ndsArm7Size = 0;
 
-			if (standaloneDonor) {
-				ndsArm7Size = conf->donorFileTwlSize;
-			} else {
-				fseek(ndsFile, 0x30, SEEK_SET);
-				fread(&ndsArm7Offset, sizeof(u32), 1, ndsFile);
-				fseek(ndsFile, 0x3C, SEEK_SET);
-				fread(&ndsArm7Size, sizeof(u32), 1, ndsFile);
-			}
-
-			u32 arm7allocOffset = 0;
-
-			for (int i = 0; i < 0x80; i += 4) {
-				fseek(ndsFile, (ndsArm7Offset+(ndsArm7Size-0x80))+i, SEEK_SET);
-				fread(&arm7allocOffset, sizeof(u32), 1, ndsFile);
-				if (arm7allocOffset == 0x027C0000 || arm7allocOffset == 0x027E0000 || arm7allocOffset == 0x02FE0000) {
-					break;
+				if (standaloneDonor) {
+					ndsArm7Size = conf->donorFileTwlSize;
+				} else {
+					fseek(ndsFile, 0x30, SEEK_SET);
+					fread(&ndsArm7Offset, sizeof(u32), 1, ndsFile);
+					fseek(ndsFile, 0x3C, SEEK_SET);
+					fread(&ndsArm7Size, sizeof(u32), 1, ndsFile);
 				}
-			}
 
-			if (arm7allocOffset != 0x027C0000) {
-				// Not SDK 2.0
-				u32 arm7alloc1 = 0;
-				u32 arm7alloc2 = 0;
+				u32 arm7allocOffset = 0;
 
-				fseek(ndsFile, (ndsArm7Offset+ndsArm7Size)-4, SEEK_SET);
-				fread(&arm7alloc2, sizeof(u32), 1, ndsFile);
-				fseek(ndsFile, (ndsArm7Offset+ndsArm7Size)-8, SEEK_SET);
-				fread(&arm7alloc1, sizeof(u32), 1, ndsFile);
-				if ((arm7alloc1 > 0x02FE0000 && arm7alloc1 < 0x03000000) || (arm7alloc1 > 0x06000000 && arm7alloc1 < 0x06020000)) {
-					// TWL binary found
-					fseek(ndsFile, (ndsArm7Offset+ndsArm7Size)-0xC, SEEK_SET);
+				for (int i = 0; i < 0x80; i += 4) {
+					fseek(ndsFile, (ndsArm7Offset+(ndsArm7Size-0x80))+i, SEEK_SET);
+					fread(&arm7allocOffset, sizeof(u32), 1, ndsFile);
+					if (arm7allocOffset == 0x027C0000 || arm7allocOffset == 0x027E0000 || arm7allocOffset == 0x02FE0000) {
+						break;
+					}
+				}
+
+				if (arm7allocOffset != 0x027C0000) {
+					// Not SDK 2.0
+					u32 arm7alloc1 = 0;
+					u32 arm7alloc2 = 0;
+
+					fseek(ndsFile, (ndsArm7Offset+ndsArm7Size)-4, SEEK_SET);
+					fread(&arm7alloc2, sizeof(u32), 1, ndsFile);
+					fseek(ndsFile, (ndsArm7Offset+ndsArm7Size)-8, SEEK_SET);
 					fread(&arm7alloc1, sizeof(u32), 1, ndsFile);
+					if ((arm7alloc1 > 0x02FE0000 && arm7alloc1 < 0x03000000) || (arm7alloc1 > 0x06000000 && arm7alloc1 < 0x06020000)) {
+						// TWL binary found
+						fseek(ndsFile, (ndsArm7Offset+ndsArm7Size)-0xC, SEEK_SET);
+						fread(&arm7alloc1, sizeof(u32), 1, ndsFile);
+					}
+
+					if ((arm7alloc1+arm7alloc2) > 0x1A800) {
+						ce9path = "nitro:/cardengine_arm9.lz77";
+					} else if ((arm7alloc1+arm7alloc2) > 0x19C00) {
+						ce9path = "nitro:/cardengine_arm9_alt2.lz77";
+					}
 				}
 
-				if ((arm7alloc1+arm7alloc2) > 0x1A800) {
-					ce9path = "nitro:/cardengine_arm9.lz77";
-				} else if ((arm7alloc1+arm7alloc2) > 0x19C00) {
-					ce9path = "nitro:/cardengine_arm9_alt2.lz77";
-				}
+				fclose(ndsFile);
 			}
-
-			fclose(ndsFile);
 		}
 		/*if (strncmp(romTid, "ADM", 3) == 0 // Animal Crossing: Wild World
 		 || strncmp(romTid, "AQC", 3) == 0 // Crayon Shin-chan DS - Arashi o Yobu Nutte Crayoon Daisakusen!
