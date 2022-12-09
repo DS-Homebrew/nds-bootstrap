@@ -35,6 +35,10 @@
 #include "dsi.h"
 #include "u128_math.h"
 
+#include "asyncReadExcludeMap.h"
+#include "dmaExcludeMap.h"
+#include "twlClockExcludeMap.h"
+
 #define REG_SCFG_EXT7 *(u32*)0x02FFFDF0
 
 #define ntrPageFileSize 0x400000
@@ -174,11 +178,61 @@ static void load_conf(configuration* conf, const char* fn) {
 	// DMA ROM read LED
 	conf->dmaRomRead_LED = strtol(config_file.fetch("NDS-BOOTSTRAP", "DMA_ROMREAD_LED", "0").c_str(), NULL, 0);
 
+	// get the gamecode
+	FILE* romFile = fopen(conf->ndsPath, "rb");
+	char gameTid[5];
+	fseek(romFile, 0xC, SEEK_SET);
+	fread(gameTid, 4, 1, romFile);
+	fclose(romFile);
+
 	// Async card read
-	conf->asyncCardRead = (bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "ASYNC_CARD_READ", "0").c_str(), NULL, 0);
+	switch(strtol(config_file.fetch("NDS-BOOTSTRAP", "ASYNC_CARD_READ", "-1").c_str(), NULL, 0)) {
+		case 0:
+			conf->asyncCardRead = false;
+			break;
+		case 1:
+			conf->asyncCardRead = true;
+			break;
+		default:
+#ifdef DEFAULT_ASYNC_CARD_READ
+			// TODO: If the list gets large enough, switch to bsearch().
+			for (unsigned int i = 0; i < sizeof(asyncReadExcludeList)/sizeof(asyncReadExcludeList[0]); i++) {
+				if (memcmp(gameTid, asyncReadExcludeList[i], 3) == 0) {
+					// Found match
+					conf->asyncCardRead = false;
+				}
+			}
+			conf->asyncCardRead = true;
+#else
+			conf->asyncCardRead = false;
+#endif
+			break;
+	}
 
 	// Card read DMA
-	conf->cardReadDMA = strtol(config_file.fetch("NDS-BOOTSTRAP", "CARD_READ_DMA", "1").c_str(), NULL, 0);
+	switch(strtol(config_file.fetch("NDS-BOOTSTRAP", "CARD_READ_DMA", "-1").c_str(), NULL, 0)) {
+		case 0:
+			conf->cardReadDMA = false;
+			break;
+		case 1:
+			conf->cardReadDMA = true;
+		default:
+#ifdef DEFAULT_CARD_READ_DMA
+			// TODO: If the list gets large enough, switch to bsearch().
+			for (unsigned int i = 0; i < sizeof(cardReadDMAExcludeList)/sizeof(cardReadDMAExcludeList[0]); i++) {
+				if (memcmp(gameTid, cardReadDMAExcludeList[i], 3) == 0) {
+					// Found match
+					conf->cardReadDMA = false;
+					break;
+				}
+			}
+			// default settings if not in list
+			conf->cardReadDMA = true;
+#else
+			conf->cardReadDMA = false;
+#endif
+			break;
+	}
 
 	// Force sleep patch
 	conf->forceSleepPatch = (bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "FORCE_SLEEP_PATCH", "0").c_str(), NULL, 0);
@@ -196,7 +250,29 @@ static void load_conf(configuration* conf, const char* fn) {
 	conf->sleepMode = (bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "SLEEP_MODE", "1").c_str(), NULL, 0);
 
 	// Boost CPU
-	conf->boostCpu = (bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "BOOST_CPU", "0").c_str(), NULL, 0);
+	switch(strtol(config_file.fetch("NDS-BOOTSTRAP", "BOOST_CPU", "-1").c_str(), NULL, 0)) {
+		case 0:
+			conf->boostCpu = false;
+			break;
+		case 1:
+			conf->boostCpu = true;
+			break;
+		default:
+#ifdef DEFAULT_CPU_BOOST
+			// TODO: If the list gets large enough, switch to bsearch().
+			for (unsigned int i = 0; i < sizeof(twlClockExcludeList)/sizeof(twlClockExcludeList[0]); i++) {
+				if (memcmp(gameTid, twlClockExcludeList[i], 3) == 0) {
+					// Found match
+					if(dsiFeatures() && conf->dsiMode != 0) conf->dsiMode = 0;
+					conf->boostCpu = false;
+				}
+			}
+			conf->boostCpu = true;
+#else
+			conf->boostCpu = false;
+#endif
+			break;
+	}
 
 	// Boost VRAM
 	conf->boostVram = (bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "BOOST_VRAM", "0").c_str(), NULL, 0);
