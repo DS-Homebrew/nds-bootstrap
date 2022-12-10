@@ -1098,7 +1098,7 @@ int arm7_main(void) {
 	tonccpy((u8*)CARDENGINE_ARM7_LOCATION, (u8*)CARDENGINE_ARM7_LOCATION_BUFFERED, 0x1400);
 	toncset((u8*)CARDENGINE_ARM7_LOCATION_BUFFERED, 0, 0x1400);
 
-	if (!dldiPatchBinary((data_t*)ce9Location, 0x3800, (data_t*)(extendedMemory2 ? 0x027BD000 : 0x023FD000))) {
+	if (!dldiPatchBinary((data_t*)ce9Location, 0x3800, (data_t*)(extendedMemory2 ? 0x027BD000 : (accessControl & BIT(4)) ? 0x023FC000 : 0x023FD000))) {
 		nocashMessage("ce9 DLDI patch failed");
 		dbg_printf("ce9 DLDI patch failed\n");
 		errorOutput();
@@ -1359,7 +1359,7 @@ int arm7_main(void) {
 		tonccpy((u32*)0x02370000, ce9, 0x2800);
 		tonccpy((u32*)codeBranch, copyBackCe9, copyBackCe9Len);
 		for (int i = 0; i < copyBackCe9Len/4; i++) {
-			u32* addr = codeBranch;
+			u32* addr = (u32*)codeBranch;
 			if (addr[i] == 0x77777777) {
 				addr[i] = ce9Location;
 				break;
