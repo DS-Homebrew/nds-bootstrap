@@ -1063,6 +1063,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Ah! Heaven (USA)
 	// Ah! Heaven (Europe)
 	else if (strcmp(romTid, "K5HE") == 0 || strcmp(romTid, "K5HP") == 0) {
+		useSharedFont = (twlFontFound && debugOrMep);
 		*(u32*)0x0200F778 = 0xE1A00000; // nop
 		//tonccpy((u32*)0x020102FC, dsiSaveGetResultCode, 0xC);
 		*(u32*)0x02012A58 = 0xE1A00000; // nop
@@ -1079,7 +1080,15 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0201E560, (u32)dsiSaveSeek);
 		setBL(0x0201E578, (u32)dsiSaveWrite);
 		setBL(0x0201E588, (u32)dsiSaveSeek); */
-		*(u32*)0x0201FD04 = 0xE1A00000; // nop (Skip Manual screen)
+		if (useSharedFont) {
+			if (!extendedMemory2 && expansionPakFound) {
+				*(u32*)0x02019A7C = clusterCache-0x200000;
+				tonccpy((u32*)0x02019A80, twlFontHeapAlloc, 0xB0);
+				setBL(0x0201DDC8, 0x02019A80);
+			}
+		} else {
+			*(u32*)0x0201FD04 = 0xE1A00000; // nop (Skip Manual screen)
+		}
 		*(u32*)0x02029C68 = 0xE12FFF1E; // bx lr
 		*(u32*)0x02029D14 = 0xE12FFF1E; // bx lr
 		/* setBL(0x02029CFC, (u32)dsiSaveClose);
@@ -1346,10 +1355,15 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Anonymous Notes 2: From The Abyss (USA & Europe)
 	else if ((strncmp(romTid, "KVI", 3) == 0 || strncmp(romTid, "KV2", 3) == 0)
 	  && ndsHeader->gameCode[3] != 'J') {
+		useSharedFont = (twlFontFound && debugOrMep);
 		*(u32*)0x0200E74C = 0xE1A00000; // nop
 		*(u32*)0x02011C48 = 0xE1A00000; // nop
 		patchInitDSiWare(0x02018854, heapEnd);
 		patchUserSettingsReadDSiWare(0x02019F18);
+		if (twlFontFound && !extendedMemory2 && expansionPakFound) {
+			*(u32*)0x0201A4B0 = clusterCache-0x200000;
+			tonccpy((u32*)0x0201A4B4, twlFontHeapAlloc, 0xB0);
+		}
 		*(u32*)0x0201D5C4 = 0xE1A00000; // nop
 		setBL(0x02024220, (u32)dsiSaveOpen);
 		setBL(0x02024258, (u32)dsiSaveCreate);
@@ -1382,13 +1396,25 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 				*(u32*)0x0209E2E0 = 0xE1A00000; // nop
 				*(u32*)0x0209E2F4 = 0xE1A00000; // nop
 				*(u32*)0x020CFB78 = 0xE1A00000; // nop
-				*(u32*)0x020CFCD0 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+				if (useSharedFont) {
+					if (!extendedMemory2 && expansionPakFound) {
+						setBL(0x020D02A0, 0x0201A4B4);
+					}
+				} else {
+					*(u32*)0x020CFCD0 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+				}
 			} else {
 				*(u32*)0x0209E0DC = 0xE1A00000; // nop
 				*(u32*)0x0209E0F0 = 0xE1A00000; // nop
 				*(u32*)0x0209E104 = 0xE1A00000; // nop
 				*(u32*)0x020CF988 = 0xE1A00000; // nop
-				*(u32*)0x020CFAE0 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+				if (useSharedFont) {
+					if (!extendedMemory2 && expansionPakFound) {
+						setBL(0x020D00F4, 0x0201A4B4);
+					}
+				} else {
+					*(u32*)0x020CFAE0 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+				}
 			}
 		} else if (ndsHeader->gameCode[2] == '2') {
 			if (ndsHeader->gameCode[3] == 'E') {
@@ -1396,13 +1422,25 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 				*(u32*)0x0209E314 = 0xE1A00000; // nop
 				*(u32*)0x0209E328 = 0xE1A00000; // nop
 				*(u32*)0x020D071C = 0xE1A00000; // nop
-				*(u32*)0x020D0874 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+				if (useSharedFont) {
+					if (!extendedMemory2 && expansionPakFound) {
+						setBL(0x020D0E44, 0x0201A4B4);
+					}
+				} else {
+					*(u32*)0x020D0874 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+				}
 			} else {
 				*(u32*)0x0209E0EC = 0xE1A00000; // nop
 				*(u32*)0x0209E100 = 0xE1A00000; // nop
 				*(u32*)0x0209E114 = 0xE1A00000; // nop
 				*(u32*)0x020D0508 = 0xE1A00000; // nop
-				*(u32*)0x020D0660 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+				if (useSharedFont) {
+					if (!extendedMemory2 && expansionPakFound) {
+						setBL(0x020D0C74, 0x0201A4B4);
+					}
+				} else {
+					*(u32*)0x020D0660 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+				}
 			}
 		}
 	}
@@ -1410,11 +1448,16 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Anonymous Notes 1: From The Abyss (Japan)
 	// Anonymous Notes 2: From The Abyss (Japan)
 	else if (strncmp(romTid, "KVI", 3) == 0 || strncmp(romTid, "KV2", 3) == 0) {
+		useSharedFont = (twlFontFound && debugOrMep);
 		*(u32*)0x0200506C = 0xE1A00000; // nop
 		*(u32*)0x0200E6DC = 0xE1A00000; // nop
 		*(u32*)0x02011C9C = 0xE1A00000; // nop
 		patchInitDSiWare(0x02018BBC, heapEnd);
 		patchUserSettingsReadDSiWare(0x0201A278);
+		if (twlFontFound && !extendedMemory2 && expansionPakFound) {
+			*(u32*)0x0201A840 = clusterCache-0x200000;
+			tonccpy((u32*)0x0201A844, twlFontHeapAlloc, 0xB0);
+		}
 		*(u32*)0x0201DB28 = 0xE1A00000; // nop
 		setBL(0x0202481C, (u32)dsiSaveOpen);
 		setBL(0x02024854, (u32)dsiSaveCreate);
@@ -1445,23 +1488,40 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			*(u32*)0x0209E0A4 = 0xE1A00000; // nop
 			*(u32*)0x0209E0B8 = 0xE1A00000; // nop
 			*(u32*)0x0209E0CC = 0xE1A00000; // nop
-			*(u32*)0x020CF970 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+			if (useSharedFont) {
+				if (!extendedMemory2 && expansionPakFound) {
+					setBL(0x020CFCF0, 0x0201A844);
+				}
+			} else {
+				*(u32*)0x020CF970 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+			}
 		} else if (ndsHeader->gameCode[2] == '2') {
 			*(u32*)0x0209E0D0 = 0xE1A00000; // nop
 			*(u32*)0x0209E0E4 = 0xE1A00000; // nop
 			*(u32*)0x0209E0F8 = 0xE1A00000; // nop
-			*(u32*)0x020D050C = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+			if (useSharedFont) {
+				if (!extendedMemory2 && expansionPakFound) {
+					setBL(0x020D0930, 0x0201A844);
+				}
+			} else {
+				*(u32*)0x020D050C = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+			}
 		}
 	}
 
 	// Anonymous Notes 3: From The Abyss (USA & Japan)
 	// Anonymous Notes 4: From The Abyss (USA & Japan)
 	else if (strncmp(romTid, "KV3", 3) == 0 || strncmp(romTid, "KV4", 3) == 0) {
+		useSharedFont = (twlFontFound && debugOrMep);
 		*(u32*)0x02005084 = 0xE1A00000; // nop
 		*(u32*)0x0200E778 = 0xE1A00000; // nop
 		*(u32*)0x02011C74 = 0xE1A00000; // nop
 		patchInitDSiWare(0x02018880, heapEnd);
 		patchUserSettingsReadDSiWare(0x02019F44);
+		if (twlFontFound && !extendedMemory2 && expansionPakFound) {
+			*(u32*)0x0201A4DC = clusterCache-0x200000;
+			tonccpy((u32*)0x0201A4E0, twlFontHeapAlloc, 0xB0);
+		}
 		*(u32*)0x02019F60 = 0xE3A00001; // mov r0, #1
 		*(u32*)0x02019F64 = 0xE12FFF1E; // bx lr
 		*(u32*)0x02019F6C = 0xE3A00000; // mov r0, #0
@@ -1497,7 +1557,13 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 				*(u32*)0x0209E250 = 0xE1A00000; // nop
 				*(u32*)0x0209E264 = 0xE1A00000; // nop
 				*(u32*)0x0209E278 = 0xE1A00000; // nop
-				*(u32*)0x020D0120 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+				if (useSharedFont) {
+					if (!extendedMemory2 && expansionPakFound) {
+						setBL(0x020D06F0, 0x0201A4E0);
+					}
+				} else {
+					*(u32*)0x020D0120 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+				}
 			} else {
 				setBL(0x02024270, (u32)dsiSaveOpen);
 				setBL(0x020242A8, (u32)dsiSaveCreate);
@@ -1527,7 +1593,13 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 				*(u32*)0x0209DB18 = 0xE1A00000; // nop
 				*(u32*)0x0209DB2C = 0xE1A00000; // nop
 				*(u32*)0x0209DB40 = 0xE1A00000; // nop
-				*(u32*)0x020CF8AC = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+				if (useSharedFont) {
+					if (!extendedMemory2 && expansionPakFound) {
+						setBL(0x020CFC2C, 0x0201A4E0);
+					}
+				} else {
+					*(u32*)0x020CF8AC = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+				}
 			}
 		} else if (ndsHeader->gameCode[2] == '4') {
 			if (ndsHeader->gameCode[3] == 'E') {
@@ -1559,7 +1631,13 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 				*(u32*)0x0209F72C = 0xE1A00000; // nop
 				*(u32*)0x0209F740 = 0xE1A00000; // nop
 				*(u32*)0x0209F754 = 0xE1A00000; // nop
-				*(u32*)0x020D0FFC = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+				if (useSharedFont) {
+					if (!extendedMemory2 && expansionPakFound) {
+						setBL(0x020D1594, 0x0201A4E0);
+					}
+				} else {
+					*(u32*)0x020D0FFC = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+				}
 			} else {
 				setBL(0x02024280, (u32)dsiSaveOpen);
 				setBL(0x020242B8, (u32)dsiSaveCreate);
@@ -1589,7 +1667,13 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 				*(u32*)0x0209EDEC = 0xE1A00000; // nop
 				*(u32*)0x0209EE00 = 0xE1A00000; // nop
 				*(u32*)0x0209EE14 = 0xE1A00000; // nop
-				*(u32*)0x020D0590 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+				if (useSharedFont) {
+					if (!extendedMemory2 && expansionPakFound) {
+						setBL(0x020D0930, 0x0201A4E0);
+					}
+				} else {
+					*(u32*)0x020D0590 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+				}
 			}
 		}
 	}
@@ -7604,6 +7688,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Mighty Flip Champs! (USA)
 	else if (strcmp(romTid, "KMGE") == 0) {
+		useSharedFont = (twlFontFound && debugOrMep);
 		ce9->rumbleFrames[0] = 30;
 		ce9->rumbleFrames[1] = 30;
 		ce9->rumbleForce[0] = 2;
@@ -7626,18 +7711,30 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0200B5B4, (u32)dsiSaveWrite);
 		setBL(0x0200B5BC, (u32)dsiSaveClose);
 
-		// Skip Manual screen
-		/* *(u32*)0x0200F4EC = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
-		*(u32*)0x0200F59C = 0xE1A00000; // nop
-		*(u32*)0x0200F5A4 = 0xE1A00000; // nop
-		*(u32*)0x0200F5B4 = 0xE1A00000; // nop
-		*(u32*)0x0200FC3C = 0xE3A00901; // mov r0, #0x4000
-		*(u32*)0x0200FC5C = 0xE3A02901; // mov r2, #0x4000
-		*(u32*)0x0200FC68 = 0xE3A01901; // mov r1, #0x4000 */
+		if (useSharedFont) {
+			if (!extendedMemory2 && expansionPakFound) {
+				*(u32*)0x0200FC3C = 0xE3A00703; // mov r0, #0xC0000
+				*(u32*)0x0200FC5C = 0xE3A02703; // mov r2, #0xC0000
+				*(u32*)0x0200FC68 = 0xE3A01703; // mov r1, #0xC0000
 
-		// Hide help button
-		*(u32*)0x0200FAE8 = 0xE1A00000; // nop
-		*(u32*)0x0200FB08 = 0xE1A00000; // nop
+				*(u32*)0x0205A324 = clusterCache-0x200000;
+				tonccpy((u32*)0x0205A328, twlFontHeapAlloc, 0xB0);
+				setBL(0x0200FD00, 0x0205A328);
+			}
+		} else {
+			// Skip Manual screen
+			/* *(u32*)0x0200F4EC = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+			*(u32*)0x0200F59C = 0xE1A00000; // nop
+			*(u32*)0x0200F5A4 = 0xE1A00000; // nop
+			*(u32*)0x0200F5B4 = 0xE1A00000; // nop
+			*(u32*)0x0200FC3C = 0xE3A00901; // mov r0, #0x4000
+			*(u32*)0x0200FC5C = 0xE3A02901; // mov r2, #0x4000
+			*(u32*)0x0200FC68 = 0xE3A01901; // mov r1, #0x4000 */
+
+			// Hide help button
+			*(u32*)0x0200FAE8 = 0xE1A00000; // nop
+			*(u32*)0x0200FB08 = 0xE1A00000; // nop
+		}
 
 		setBL(0x02014BDC, (int)ce9->patches->rumble_arm9[0]); // Make tick sounds when player gets shocked
 		setBL(0x0201A38C, (int)ce9->patches->rumble_arm9[1]); // Rumble when flip slam effect plays
@@ -7650,6 +7747,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Mighty Flip Champs! (Europe, Australia)
 	else if (strcmp(romTid, "KMGV") == 0) {
+		useSharedFont = (twlFontFound && debugOrMep);
 		ce9->rumbleFrames[0] = 30;
 		ce9->rumbleFrames[1] = 30;
 		ce9->rumbleForce[0] = 2;
@@ -7672,18 +7770,30 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0200B8BC, (u32)dsiSaveWrite);
 		setBL(0x0200B8C4, (u32)dsiSaveClose);
 
-		// Skip Manual screen
-		/* *(u32*)0x0200F974 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
-		*(u32*)0x0200FA1C = 0xE1A00000; // nop
-		*(u32*)0x0200FA24 = 0xE1A00000; // nop
-		*(u32*)0x0200FA34 = 0xE1A00000; // nop
-		*(u32*)0x02010138 = 0xE3A00901; // mov r0, #0x4000
-		*(u32*)0x02010158 = 0xE3A02901; // mov r2, #0x4000
-		*(u32*)0x02010164 = 0xE3A01901; // mov r1, #0x4000 */
+		if (useSharedFont) {
+			if (!extendedMemory2 && expansionPakFound) {
+				*(u32*)0x02010138 = 0xE3A00703; // mov r0, #0xC0000
+				*(u32*)0x02010158 = 0xE3A02703; // mov r2, #0xC0000
+				*(u32*)0x02010164 = 0xE3A01703; // mov r1, #0xC0000
 
-		// Hide help button
-		*(u32*)0x0200FFC4 = 0xE1A00000; // nop
-		*(u32*)0x0200FFF0 = 0xE1A00000; // nop
+				*(u32*)0x02059D68 = clusterCache-0x200000;
+				tonccpy((u32*)0x02059D6C, twlFontHeapAlloc, 0xB0);
+				setBL(0x020101FC, 0x02059D6C);
+			}
+		} else {
+			// Skip Manual screen
+			/* *(u32*)0x0200F974 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+			*(u32*)0x0200FA1C = 0xE1A00000; // nop
+			*(u32*)0x0200FA24 = 0xE1A00000; // nop
+			*(u32*)0x0200FA34 = 0xE1A00000; // nop
+			*(u32*)0x02010138 = 0xE3A00901; // mov r0, #0x4000
+			*(u32*)0x02010158 = 0xE3A02901; // mov r2, #0x4000
+			*(u32*)0x02010164 = 0xE3A01901; // mov r1, #0x4000 */
+
+			// Hide help button
+			*(u32*)0x0200FFC4 = 0xE1A00000; // nop
+			*(u32*)0x0200FFF0 = 0xE1A00000; // nop
+		}
 
 		setBL(0x0201528C, (int)ce9->patches->rumble_arm9[0]); // Make tick sounds when player gets shocked
 		setBL(0x0201AA44, (int)ce9->patches->rumble_arm9[1]); // Rumble when flip slam effect plays
@@ -7697,6 +7807,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Mighty Flip Champs! (Japan)
 	else if (strcmp(romTid, "KMGJ") == 0) {
+		useSharedFont = (twlFontFound && debugOrMep);
 		ce9->rumbleFrames[0] = 30;
 		ce9->rumbleFrames[1] = 30;
 		ce9->rumbleForce[0] = 2;
@@ -7719,16 +7830,26 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0200B6A4, (u32)dsiSaveWrite);
 		setBL(0x0200B6AC, (u32)dsiSaveClose);
 
-		// Skip Manual screen
-		/* *(u32*)0x0200F31C = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
-		*(u32*)0x0200F3B4 = 0xE1A00000; // nop
-		*(u32*)0x0200F3BC = 0xE1A00000; // nop
-		*(u32*)0x0200F3C8 = 0xE1A00000; // nop
-		*(u32*)0x0200FAA4 = 0xE3A06901; // mov r6, #0x4000 */
+		if (useSharedFont) {
+			if (!extendedMemory2 && expansionPakFound) {
+				*(u32*)0x0200FAA4 = 0xE3A06703; // mov r6, #0xC0000
 
-		// Hide help button
-		*(u32*)0x0200F934 = 0xE1A00000; // nop
-		*(u32*)0x0200F960 = 0xE1A00000; // nop
+				*(u32*)0x02057688 = clusterCache-0x200000;
+				tonccpy((u32*)0x0205768C, twlFontHeapAlloc, 0xB0);
+				setBL(0x0200FB68, 0x0205768C);
+			}
+		} else {
+			// Skip Manual screen
+			/* *(u32*)0x0200F31C = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+			*(u32*)0x0200F3B4 = 0xE1A00000; // nop
+			*(u32*)0x0200F3BC = 0xE1A00000; // nop
+			*(u32*)0x0200F3C8 = 0xE1A00000; // nop
+			*(u32*)0x0200FAA4 = 0xE3A06901; // mov r6, #0x4000 */
+
+			// Hide help button
+			*(u32*)0x0200F934 = 0xE1A00000; // nop
+			*(u32*)0x0200F960 = 0xE1A00000; // nop
+		}
 
 		setBL(0x02014718, (int)ce9->patches->rumble_arm9[0]); // Make tick sounds when player gets shocked
 		setBL(0x02019C54, (int)ce9->patches->rumble_arm9[1]); // Rumble when flip slam effect plays
