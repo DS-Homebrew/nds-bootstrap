@@ -36,7 +36,6 @@ ARCH	:=	-mthumb -march=armv5te -mtune=arm946e-s
 CFLAGS	:=	-g -Wall -Oz\
  			-march=armv5te -mtune=arm946e-s -fomit-frame-pointer\
 			-ffast-math \
-			-flto \
 			$(ARCH)
 
 # ADD -DDEBUG here for logging/debug
@@ -45,7 +44,7 @@ CXXFLAGS	:=	$(CFLAGS) -fno-rtti -fno-exceptions
 
 ASFLAGS	:=	-g $(ARCH) -flto $(INCLUDE)
 
-LDFLAGS	=	-nostartfiles -T cardengine.ld -g $(ARCH) -flto -Oz -Wl,-Map,$(notdir $*.map),--use-blx
+LDFLAGS	=	-nostartfiles -T cardengine.ld -g $(ARCH) -Oz -Wl,-Map,$(notdir $*.map),--use-blx
 
 #---------------------------------------------------------------------------------
 # any extra libraries we wish to link with the project (order is important)
