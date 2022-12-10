@@ -44,6 +44,7 @@ CFLAGS	+=	$(INCLUDE) -DARM9 -DB4DS -D_NO_SDMMC -DNO_CARDID -DNODSIWARE -DNOGETBO
 CXXFLAGS	:=	$(CFLAGS) -fno-rtti -fno-exceptions
 
 ASFLAGS	:=	-g $(ARCH) -flto $(INCLUDE)
+ASFLAGS	+=	-DNODSIWARE
 
 LDFLAGS	=	-nostartfiles -T cardengine.ld -g $(ARCH) -flto -Oz -Wl,-Map,$(notdir $*.map),--use-blx
 

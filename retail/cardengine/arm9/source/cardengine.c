@@ -822,10 +822,8 @@ static void dsiSaveInit(void) {
 	dsiSaveExists = (existByte != 0);
 	dsiSaveInited = true;
 }
-#endif
 
 u32 dsiSaveGetResultCode(const char* path) {
-#ifndef NODSIWARE
 	if (savFile.firstCluster == CLUSTER_FREE || savFile.firstCluster == CLUSTER_EOF) {
 		return 0xE;
 	}
@@ -842,13 +840,9 @@ u32 dsiSaveGetResultCode(const char* path) {
 		return 8;
 	}
 	return dsiSaveResultCode;
-#else
-	return 0xB;
-#endif
 }
 
 bool dsiSaveCreate(const char* path, u32 permit) {
-#ifndef NODSIWARE
 	dsiSaveSeekPos = 0;
 	if (savFile.firstCluster == CLUSTER_FREE || savFile.firstCluster == CLUSTER_EOF) {
 		dsiSaveResultCode = 0xE;
@@ -881,12 +875,10 @@ bool dsiSaveCreate(const char* path, u32 permit) {
 		return true;
 	}
 	dsiSaveResultCode = 8;
-#endif
 	return false;
 }
 
 bool dsiSaveDelete(const char* path) {
-#ifndef NODSIWARE
 	dsiSaveSeekPos = 0;
 	if (savFile.firstCluster == CLUSTER_FREE || savFile.firstCluster == CLUSTER_EOF) {
 		dsiSaveResultCode = 0xE;
@@ -911,11 +903,9 @@ bool dsiSaveDelete(const char* path) {
 		return true;
 	}
 	dsiSaveResultCode = 8;
-#endif
 	return false;
 }
 
-#ifndef NODSIWARE
 bool dsiSaveGetInfo(const char* path, dsiSaveInfo* info) {
 	toncset(info, 0, sizeof(dsiSaveInfo));
 	if (savFile.firstCluster == CLUSTER_FREE || savFile.firstCluster == CLUSTER_EOF) {
@@ -935,14 +925,8 @@ bool dsiSaveGetInfo(const char* path, dsiSaveInfo* info) {
 	info->filesize = dsiSaveSize;
 	return true;
 }
-#else
-bool dsiSaveGetInfo(const char* path, u32* info) {
-	return false;
-}
-#endif
 
 u32 dsiSaveSetLength(void* ctx, s32 len) {
-#ifndef NODSIWARE
 	dsiSaveSeekPos = 0;
 	if (savFile.firstCluster == CLUSTER_FREE || savFile.firstCluster == CLUSTER_EOF) {
 		dsiSaveResultCode = 1;
@@ -964,13 +948,9 @@ u32 dsiSaveSetLength(void* ctx, s32 len) {
 	leaveCriticalSection(oldIME);
 
 	return dsiSaveResultCode;
-#else
-	return 1;
-#endif
 }
 
 bool dsiSaveOpen(void* ctx, const char* path, u32 mode) {
-#ifndef NODSIWARE
 	dsiSaveSeekPos = 0;
 	if (strcmp(path, "nand:/<sharedFont>") == 0) {
 		if (sharedFontFile.firstCluster == CLUSTER_FREE || sharedFontFile.firstCluster == CLUSTER_EOF) {
@@ -995,13 +975,9 @@ bool dsiSaveOpen(void* ctx, const char* path, u32 mode) {
 
 	dsiSavePerms = mode;
 	return dsiSaveExists;
-#else
-	return false;
-#endif
 }
 
 bool dsiSaveClose(void* ctx) {
-#ifndef NODSIWARE
 	dsiSaveSeekPos = 0;
 	if (sharedFontOpened) {
 		sharedFontOpened = false;
@@ -1023,26 +999,18 @@ bool dsiSaveClose(void* ctx) {
 	dsiSaveResultCode = dsiSaveExists ? 0 : 0xB;
 	toncset32(ctx+0x14, dsiSaveResultCode, 1);
 	return dsiSaveExists;
-#else
-	return false;
-#endif
 }
 
 u32 dsiSaveGetLength(void* ctx) {
-#ifndef NODSIWARE
 	dsiSaveSeekPos = 0;
 	if (savFile.firstCluster == CLUSTER_FREE || savFile.firstCluster == CLUSTER_EOF) {
 		return 0;
 	}
 
 	return dsiSaveSize;
-#else
-	return 0;
-#endif
 }
 
 bool dsiSaveSeek(void* ctx, s32 pos, u32 mode) {
-#ifndef NODSIWARE
 	if (sharedFontOpened) {
 		if (sharedFontFile.firstCluster == CLUSTER_FREE || sharedFontFile.firstCluster == CLUSTER_EOF) {
 			dsiSaveResultCode = 0xE;
@@ -1067,13 +1035,9 @@ bool dsiSaveSeek(void* ctx, s32 pos, u32 mode) {
 	dsiSaveResultCode = 0;
 	toncset32(ctx+0x14, dsiSaveResultCode, 1);
 	return true;
-#else
-	return false;
-#endif
 }
 
 s32 dsiSaveRead(void* ctx, void* dst, s32 len) {
-#ifndef NODSIWARE
 	if (!sharedFontOpened) {
 		if (dsiSavePerms == 2 || !dsiSaveExists) {
 			dsiSaveResultCode = 1;
@@ -1134,12 +1098,10 @@ s32 dsiSaveRead(void* ctx, void* dst, s32 len) {
 		dsiSaveSeekPos += len;
 		return len;
 	}
-#endif
 	return -1;
 }
 
 s32 dsiSaveWrite(void* ctx, void* src, s32 len) {
-#ifndef NODSIWARE
 	if (dsiSavePerms == 1 || !dsiSaveExists) {
 		dsiSaveResultCode = 1;
 		toncset32(ctx+0x14, dsiSaveResultCode, 1);
@@ -1177,9 +1139,9 @@ s32 dsiSaveWrite(void* ctx, void* src, s32 len) {
 		dsiSaveSeekPos += len;
 		return len;
 	}
-#endif
 	return -1;
 }
+#endif
 
 
 /*void reset(u32 param) {
@@ -1257,10 +1219,8 @@ void updateMusic(void) {
 		REG_EXMEMCNT = exmemcnt;
 	}
 }
-#endif
 
 void musicPlay(int id) {
-#ifndef NODSIWARE
 	musicInit();
 
 	if (musicPlaying) {
@@ -1289,35 +1249,29 @@ void musicPlay(int id) {
 		while (sharedAddr[2] == 0x5053554D);
 		musicPlaying = true;
 	}
-#endif
 }
 
 void musicStopEffect(int id) {
-#ifndef NODSIWARE
 	if (!musicPlaying) {
 		return;
 	}
 	sharedAddr[2] = 0x5353554D; // 'MUSS'
 	while (sharedAddr[2] == 0x5353554D);
 	musicPlaying = false;
-#endif
 }
 
 void rumble(u32 arg) {
-#ifndef NODSIWARE
 	sharedAddr[0] = ce9->rumbleFrames[0];
 	sharedAddr[1] = ce9->rumbleForce[0];
 	sharedAddr[3] = 0x424D5552; // 'RUMB'
-#endif
 }
 
 void rumble2(u32 arg) {
-#ifndef NODSIWARE
 	sharedAddr[0] = ce9->rumbleFrames[1];
 	sharedAddr[1] = ce9->rumbleForce[1];
 	sharedAddr[3] = 0x424D5552; // 'RUMB'
-#endif
 }
+#endif
 
 u32 myIrqEnable(u32 irq) {	
 	int oldIME = enterCriticalSection();

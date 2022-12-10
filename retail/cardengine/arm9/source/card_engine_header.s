@@ -158,6 +158,22 @@ patches:
 .word	card_dma_arm9
 .word   nand_read_arm9
 .word   nand_write_arm9
+#ifdef NODSIWARE
+.word   0x0
+.word   0x0
+.word   0x0
+.word   0x0
+.word   0x0
+.word   0x0
+.word   0x0
+.word   0x0
+.word   0x0
+.word   0x0
+.word   0x0
+.word   0x0
+.word   0x0
+.word   0x0
+#else
 .word   dsiSaveGetResultCode_arm
 .word   dsiSaveCreate_arm
 .word   dsiSaveDelete_arm
@@ -172,13 +188,19 @@ patches:
 .word   dsiSaveWrite_arm
 .word   musicPlay_arm
 .word   musicStopEffect_arm
+#endif
 .word	cardStructArm9
 .word   card_pull
 .word   cacheFlushRef
 .word   terminateForPullOutRef
 .word   reset_arm9
+#ifdef NODSIWARE
+.word   0x0
+.word   0x0
+#else
 .word   rumble_arm9
 .word   rumble2_arm9
+#endif
 needFlushDCCache:
 .word   0x0
 .word   pdash_read
@@ -286,6 +308,7 @@ nand_write_arm9:
 .pool
 @---------------------------------------------------------------------------------
 
+#ifndef NODSIWARE
 @---------------------------------------------------------------------------------
 dsiSaveGetResultCode_arm:
 @---------------------------------------------------------------------------------
@@ -384,6 +407,7 @@ musicStopEffect_arm:
 	ldr	pc, =musicStopEffect
 .pool
 @---------------------------------------------------------------------------------
+#endif
 
 	.thumb
 @---------------------------------------------------------------------------------
@@ -469,6 +493,7 @@ reset_arm9:
 .pool
 @---------------------------------------------------------------------------------
 
+#ifndef NODSIWARE
 @---------------------------------------------------------------------------------
 rumble_arm9:
 @---------------------------------------------------------------------------------
@@ -494,6 +519,7 @@ rumble2_arm9:
 	ldmfd   sp!, {r1-r11,pc}
 .pool
 @---------------------------------------------------------------------------------
+#endif
 
 //---------------------------------------------------------------------------------
 .global  getDtcmBase
