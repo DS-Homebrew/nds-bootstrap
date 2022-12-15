@@ -4261,6 +4261,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Dark Void Zero (USA)
 	// Dark Void Zero (Europe, Australia)
 	else if (strcmp(romTid, "KDVE") == 0 || strcmp(romTid, "KDVV") == 0) {
+		// useSharedFont = (twlFontFound && debugOrMep);
 		*(u32*)0x02018A3C = 0xE1A00000; // nop
 		*(u32*)0x02018A4C = 0xE1A00000; // nop
 		tonccpy((u32*)0x02043DDC, dsiSaveGetResultCode, 0xC);
@@ -4273,6 +4274,14 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02054EF8 = 0xE1A00000; // nop
 		*(u32*)0x02058A24 = 0xE1A00000; // nop
 		*(u32*)0x02059C44 = 0xE1A00000; // nop
+		/* if (useSharedFont && !extendedMemory2 && expansionPakFound) {
+			*(u32*)0x02050B78 = clusterCache-0x200000;
+			tonccpy((u32*)0x02050B7C, twlFontHeapAlloc, 0xB0);
+			setBL(0x0206D254, 0x02050B7C);
+			*(u32*)0x0206D258 = 0xE1A00000; // nop
+			*(u32*)0x0206D25C = 0xE1A00000; // nop
+			*(u32*)0x0206D260 = 0xE1A00000; // nop
+		} */
 		*(u16*)0x020851A4 = 0x46C0; // nop
 		*(u16*)0x020851A6 = 0x46C0; // nop
 		*(u32*)0x020891BC = 0xE1A00000; // nop
@@ -4432,7 +4441,9 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0201BD88 = 0xE1A00000; // nop (Leave MPU region 1 untouched)
 		*(u32*)0x0201BE0C = 0xE3A00000; // mov r0, #0
 		*(u32*)0x0201BE3C = 0xE3A00000; // mov r0, #0
-		*(u32*)0x0201BF10 = 0xE3A00000; // mov r0, #0
+		// if (!useSharedFont) {
+			*(u32*)0x0201BF10 = 0xE3A00000; // mov r0, #0
+		// }
 		*(u32*)0x0201BF40 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x0201CF08 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x0201D2A8 = 0xE3A00000; // mov r0, #0
@@ -4507,7 +4518,9 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0201C1D8 = 0xE1A00000; // nop (Leave MPU region 1 untouched)
 		*(u32*)0x0201C25C = 0xE3A00000; // mov r0, #0
 		*(u32*)0x0201C28C = 0xE3A00000; // mov r0, #0
-		*(u32*)0x0201C360 = 0xE3A00000; // mov r0, #0
+		// if (!useSharedFont) {
+			*(u32*)0x0201C360 = 0xE3A00000; // mov r0, #0
+		// }
 		*(u32*)0x0201C390 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x0201D358 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x0201D6F8 = 0xE3A00000; // mov r0, #0
@@ -6970,9 +6983,14 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Maestro! Green Groove (Europe, Australia)
 	// Does not save due to unknown cause
 	else if (strcmp(romTid, "KMUE") == 0 || strcmp(romTid, "KM6V") == 0) {
+		useSharedFont = (twlFontFound && debugOrMep);
 		*(u32*)0x020137E4 = 0xE1A00000; // nop
 		*(u32*)0x02016C1C = 0xE1A00000; // nop
 		patchInitDSiWare(0x0201E704, heapEnd);
+		if (useSharedFont && !extendedMemory2 && expansionPakFound) {
+			*(u32*)0x02020064 = clusterCache-0x200000;
+			tonccpy((u32*)0x02020068, twlFontHeapAlloc, 0xB0);
+		}
 		*(u32*)0x0202380C = 0xE1A00000; // nop
 		*(u32*)0x02029F34 = 0xE3A00001; // mov r0, #1
 		if (ndsHeader->gameCode[3] == 'E') {
@@ -6997,6 +7015,10 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBL(0x020BC97C, (u32)dsiSaveGetLength);
 			setBL(0x020BC9B0, (u32)dsiSaveRead);
 			setBL(0x020BC9BC, (u32)dsiSaveClose); */
+
+			if (useSharedFont && !extendedMemory2 && expansionPakFound) {
+				setBL(0x020C3230, 0x02020068);
+			}
 		} else {
 			*(u32*)0x020B9FBC = 0xE1A00000; // nop
 			*(u32*)0x020B9FD8 = 0xE1A00000; // nop
@@ -7019,6 +7041,10 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBL(0x020BCE54, (u32)dsiSaveGetLength);
 			setBL(0x020BCE88, (u32)dsiSaveRead);
 			setBL(0x020BCE94, (u32)dsiSaveClose); */
+
+			if (useSharedFont && !extendedMemory2 && expansionPakFound) {
+				setBL(0x020C3708, 0x02020068);
+			}
 		}
 	}
 
@@ -7494,12 +7520,15 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Saving not supported due to using more than one file
 	// Requires Slot-2 RAM expansion up to 16MB or more (Standard Memory Expansion Pak is not enough)
 	else if (strcmp(romTid, "KD4J") == 0 && largeS2RAM) {
+		useSharedFont = (twlFontFound && extendedMemory2);
 		*(u32*)0x02040284 = 0xE3A00001; // mov r0, #1 (Hide battery icon)
 		*(u32*)0x020402FC = 0xE3A00000; // mov r0, #0
 		*(u32*)0x0205CD28 = 0xE1A00000; // nop
 		*(u32*)0x0205E680 = 0xE1A00000; // nop
 		*(u32*)0x0205E688 = 0xE1A00000; // nop
-		*(u32*)0x0205ECAC = 0xE1A00000; // nop (Skip Manual screen)
+		if (!useSharedFont) {
+			*(u32*)0x0205ECAC = 0xE1A00000; // nop (Skip Manual screen)
+		}
 		if (s2FlashcardId == 0x5A45) {
 			*(u32*)0x0206E260 = 0xE3A00408; // mov r0, #0x08000000
 		} else {
@@ -8826,6 +8855,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		extern u32* nintCdwnCalHeapAlloc;
 		extern u32* nintCdwnCalHeapAddrPtr;
 
+		// useSharedFont = twlFontFound;
 		setBL(0x02012480, (u32)dsiSaveGetLength);
 		setBL(0x020124C0, (u32)dsiSaveRead);
 		setBL(0x0201253C, (u32)dsiSaveWrite);
@@ -8849,8 +8879,15 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			}
 			tonccpy((u32*)0x020917D8, nintCdwnCalHeapAlloc, 0xC0);
 			setBL(0x0205AB70, 0x020917D8);
+			/* if (twlFontFound) {
+				*(u32*)0x02092324 = clusterCache-0x200000;
+				tonccpy((u32*)0x02092328, twlFontHeapAlloc, 0xB0);
+				setBL(0x0205AC48, 0x02092328);
+			} */
 		}
-		*(u32*)0x0205C1B4 = 0xE1A00000; // nop
+		// if (!twlFontFound) {
+			*(u32*)0x0205C1B4 = 0xE1A00000; // nop
+		// }
 		*(u32*)0x020863A8 = 0xE1A00000; // nop
 		tonccpy((u32*)0x02086F2C, dsiSaveGetResultCode, 0xC);
 		*(u32*)0x02089BB0 = 0xE1A00000; // nop
@@ -12560,6 +12597,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Tetris Party Live (USA)
 	// Tetris Party Live (Europe, Australia)
 	else if (strcmp(romTid, "KTEE") == 0 || strcmp(romTid, "KTEV") == 0) {
+		// useSharedFont = (twlFontFound && debugOrMep);
 		*(u32*)0x02005168 = 0xE1A00000; // nop
 		*(u32*)0x02005170 = 0xE1A00000; // nop
 		*(u32*)0x02005180 = 0xE1A00000; // nop
@@ -12578,9 +12616,18 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0201F890 = 0xE12FFF1E; // bx lr
 		*(u32*)0x0201F89C = 0xE3A00000; // mov r0, #0
 		*(u32*)0x0201F8A0 = 0xE12FFF1E; // bx lr
+		/* if (useSharedFont && !extendedMemory2 && expansionPakFound) {
+			*(u32*)0x0201FDD0 = clusterCache-0x200000;
+			tonccpy((u32*)0x0201FDD4, twlFontHeapAlloc, 0xB0);
+		} */
 		*(u32*)0x020235FC = 0xE1A00000; // nop
-		*(u32*)0x02054C30 = 0xE1A00000; // nop (Skip Manual screen)
+		// if (!useSharedFont) {
+			*(u32*)0x02054C30 = 0xE1A00000; // nop (Skip Manual screen)
+		// }
 		if (ndsHeader->gameCode[3] == 'E') {
+			/* if (useSharedFont && !extendedMemory2 && expansionPakFound) {
+				setBL(0x02059574, 0x0201FDD4);
+			} */
 			setBL(0x0205A768, (u32)dsiSaveOpenR);
 			setBL(0x0205A778, (u32)dsiSaveGetLength);
 			setBL(0x0205A7B0, (u32)dsiSaveRead);
@@ -12602,6 +12649,9 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			*(u32*)0x0205B330 = 0xE1A00000; // nop
 			*(u32*)0x0205B39C = 0xE3A00000; // mov r0, #0
 		} else {
+			/* if (useSharedFont && !extendedMemory2 && expansionPakFound) {
+				setBL(0x02059560, 0x0201FDD4);
+			} */
 			setBL(0x0205A754, (u32)dsiSaveOpenR);
 			setBL(0x0205A764, (u32)dsiSaveGetLength);
 			setBL(0x0205A79C, (u32)dsiSaveRead);
