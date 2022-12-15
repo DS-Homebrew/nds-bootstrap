@@ -450,16 +450,17 @@ void inGameMenu(s32* exRegisters) {
 	volatile void (*inGameMenu)(s8*, u32, s32*) = (volatile void*)INGAME_MENU_LOCATION_B4DS + IGM_TEXT_SIZE_ALIGNED + 0x10;
 	(*inGameMenu)(&mainScreen, 0, exRegisters);
 
+	#ifndef NODSIWARE
+	if ((sharedAddr[3] == 0x52534554 || sharedAddr[3] == 0x54495845) && isDSiWare) {
+		sharedAddr[0] = 0x57495344;
+	}
+	#endif
+
 	fileWrite((char*)INGAME_MENU_LOCATION_B4DS, &pageFile, 0, 0xA000);	// Store in-game menu
 	fileRead((char*)INGAME_MENU_LOCATION_B4DS, &pageFile, 0xA000, 0xA000);	// Restore part of game RAM from page file
 
 	if (sharedAddr[3] == 0x54495845) {
 		igmReset = true;
-		#ifndef NODSIWARE
-		if (isDSiWare) {
-			sharedAddr[0] = 0x57495344;
-		}
-		#endif
 		reset(0xFFFFFFFF);
 	} else if (sharedAddr[3] == 0x52534554) {
 		igmReset = true;
