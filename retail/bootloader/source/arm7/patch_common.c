@@ -10071,6 +10071,42 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02052948 = 0xE1A00000; // nop
 	}
 
+	// Pirates Assault (Japan)
+	// Requires 8MB of RAM
+	else if (strcmp(romTid, "KXAJ") == 0 && extendedMemory2) {
+		*(u32*)0x02005090 = 0xE1A00000; // nop
+		*(u32*)0x020050A4 = 0xE1A00000; // nop
+		*(u32*)0x0200D878 = 0xE1A00000; // nop
+		*(u32*)0x02010BCC = 0xE1A00000; // nop
+		patchInitDSiWare(0x02016C60, heapEnd);
+		patchUserSettingsReadDSiWare(0x02018170);
+		*(u32*)0x0201AE3C = 0xE1A00000; // nop
+		setBL(0x02020BB8, (u32)dsiSaveGetInfo);
+		setBL(0x02020BCC, (u32)dsiSaveOpen);
+		setBL(0x02020BE0, (u32)dsiSaveCreate);
+		setBL(0x02020BF0, (u32)dsiSaveOpen);
+		setBL(0x02020C00, (u32)dsiSaveGetResultCode);
+		*(u32*)0x02020C10 = 0xE1A00000; // nop
+		setBL(0x02020C1C, (u32)dsiSaveCreate);
+		setBL(0x02020C2C, (u32)dsiSaveOpen);
+		setBL(0x02020C78, (u32)dsiSaveSeek);
+		setBL(0x02020C88, (u32)dsiSaveWrite);
+		setBL(0x02020CF4, (u32)dsiSaveSeek);
+		setBL(0x02020D04, (u32)dsiSaveWrite);
+		setBL(0x02020D0C, (u32)dsiSaveClose);
+		setBL(0x02020D58, (u32)dsiSaveOpen);
+		setBL(0x02020DB8, (u32)dsiSaveSeek);
+		setBL(0x02020DCC, (u32)dsiSaveRead);
+		setBL(0x02020DF4, (u32)dsiSaveClose);
+		setBL(0x02020E90, (u32)dsiSaveOpen);
+		setBL(0x02020EA4, (u32)dsiSaveSeek);
+		setBL(0x02020EB4, (u32)dsiSaveWrite);
+		setBL(0x02020EBC, (u32)dsiSaveClose);
+		setBL(0x0202114C, (u32)dsiSaveGetInfo);
+		setBL(0x0202115C, (u32)dsiSaveOpen);
+		*(u32*)0x020211C8 = 0xE1A00000; // nop
+	}
+
 	// Plants vs. Zombies (USA)
 	else if (strcmp(romTid, "KZLE") == 0) {
 		setBL(0x02099244, (u32)dsiSaveOpen);
