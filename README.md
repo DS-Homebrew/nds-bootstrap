@@ -66,7 +66,8 @@ An alternative forwarder generator for 3DS users. YANBF forwarders are 3DS-mode 
 - [Rocket Robz](https://github.com/RocketRobz): Lead developer, DSi mode and DSiWare support, B4DS mode, general maintenance and updates
 - [shutterbug2000](https://github.com/shutterbug2000): SDK5 support, help with DSi mode support, and some other implemented stuff
 - [ahezard](https://github.com/ahezard): Starting the project, former lead developer
-- [Pk11](https://github.com/Epicpkmn11): In-game menu, screenshot taking, and translation management
+- [Pk11](https://github.com/Epicpkmn11): In-game menu, screenshot taking, manual loading, and translation management
+- [Gericom](https://github.com/Gericom): Improving B4DS compatibility
 
 ## Other
 - [devkitPro](https://devkitpro.org): devkitARM and libnds
