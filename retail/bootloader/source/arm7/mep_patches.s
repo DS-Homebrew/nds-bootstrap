@@ -1,6 +1,7 @@
 @---------------------------------------------------------------------------------
 	.global mepHeapSetPatch
 	.global twlFontHeapAlloc
+	.global twlFontHeapAllocSize
 	.global cch2HeapAlloc
 	.global cch2HeapAddrPtr
 	@.global elementalistsHeapAlloc
@@ -23,7 +24,9 @@
 mepHeapSetPatch:
 	.word mepHeapSetPatchFunc
 twlFontHeapAlloc:
-	.word twlFontHeapAllocFunc
+	.word twlFontHeapPtr
+twlFontHeapAllocSize:
+	.word twlFontHeapAllocFunc_end-twlFontHeapPtr
 cch2HeapAlloc:
 	.word cch2HeapAllocFunc
 cch2HeapAddrPtr:
@@ -79,6 +82,13 @@ twlFontHeapAllocFunc:
 	stmfd   sp!, {r3-r6,lr}
 
 	mov r6, #0
+	cmp r1, #0x1000
+	movlt r1, r0
+	blt twlFontFilenameCheck
+	cmp r1, #0x02000000
+	blt twlFontFilenameCheck
+	cmpge r1, #0x02800000
+	movlt r1, r0
 twlFontFilenameCheck:
 	ldr r3, =0x02000000 @ filesize pointer list
 	ldr r5, [r3, r6]
@@ -91,7 +101,7 @@ twlFontFilenameCheck:
 	b twlFontFilenameCheck
 
 twlFontLastHeapPtrUpdate:
-	ldr r3, =0x020001FC @ last heap pointer
+	ldr r3, =0x020000FC @ last heap pointer
 	ldr r4, [r3]
 	cmp r4, #0
 	ldreq r4, twlFontHeapPtr
@@ -102,17 +112,18 @@ twlFontLastHeapPtrStr:
 	str r4, [r3]
 
 @ save heap ponter
-	ldr r3, =0x02000100 @ heap pointers
+	ldr r3, =0x02000080 @ heap pointers
 	str r4, [r3, r6]
 	mov r0, r4
 	ldmfd   sp!, {r3-r6,pc}
 
 twlFontUseOldHeapPtr:
-	ldr r3, =0x02000100 @ heap pointers
+	ldr r3, =0x02000080 @ heap pointers
 	ldr r0, [r3, r6]
 	ldmfd   sp!, {r3-r6,pc}
 .pool
 @---------------------------------------------------------------------------------
+twlFontHeapAllocFunc_end:
 
 @---------------------------------------------------------------------------------
 cch2OrgFunction: .word 0

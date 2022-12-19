@@ -1172,6 +1172,16 @@ void patchSharedFontPath(const cardengineArm9* ce9, const tNDSHeader* ndsHeader,
 	}
 }
 
+void patchTwlFontLoad(u32 heapAllocAddr, u32 newCodeAddr) {
+	extern u32 clusterCache;
+	extern u32* twlFontHeapAlloc;
+	extern u32 twlFontHeapAllocSize;
+
+	tonccpy((u32*)newCodeAddr, twlFontHeapAlloc, twlFontHeapAllocSize);
+	*(u32*)newCodeAddr = clusterCache-0x200000;
+	setBL(heapAllocAddr, newCodeAddr+4);
+}
+
 /*void relocate_ce9(u32 default_location, u32 current_location, u32 size) {
     dbg_printf("relocate_ce9\n");
     
