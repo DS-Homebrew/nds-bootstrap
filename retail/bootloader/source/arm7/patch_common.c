@@ -6072,20 +6072,60 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Goooooal America (USA)
-	// Crash cause unknown
-	/*else if (strcmp(romTid, "K9AE") == 0) {
+	// Audio does not play
+	else if (strcmp(romTid, "K9AE") == 0) {
+		useSharedFont = twlFontFound;
 		*(u32*)0x0200507C = 0xE1A00000; // nop
 		*(u32*)0x0201CE24 = 0xE1A00000; // nop
 		*(u32*)0x02021154 = 0xE1A00000; // nop
-		*(u32*)0x02024C14 = 0xE1A00000; // nop
-		*(u32*)0x020269DC = 0xE1A00000; // nop
-		*(u32*)0x020269E0 = 0xE1A00000; // nop
-		*(u32*)0x020269EC = 0xE1A00000; // nop
-		*(u32*)0x02026B4C = 0xE1A00000; // nop
-		patchHiHeapDSiWare(0x02026BA8, heapEnd); // mov r0, #0x23E0000
+		patchInitDSiWare(0x02026950, heapEnd);
 		patchUserSettingsReadDSiWare(0x02027F34);
 		*(u32*)0x0202B42C = 0xE1A00000; // nop
-	}*/
+		setBL(0x02048390, (u32)dsiSaveCreate);
+		setBL(0x020483A0, (u32)dsiSaveOpen);
+		setBL(0x020483BC, (u32)dsiSaveGetResultCode);
+		setBL(0x020483E0, (u32)dsiSaveSeek);
+		setBL(0x020483F8, (u32)dsiSaveGetResultCode);
+		setBL(0x0204841C, (u32)dsiSaveWrite);
+		setBL(0x0204843C, (u32)dsiSaveClose);
+		setBL(0x02048444, (u32)dsiSaveGetResultCode);
+		setBL(0x02048460, (u32)dsiSaveGetResultCode);
+		setBL(0x0204849C, (u32)dsiSaveOpenR);
+		setBL(0x020484AC, (u32)dsiSaveGetLength);
+		setBL(0x020484E0, (u32)dsiSaveRead);
+		setBL(0x020484F8, (u32)dsiSaveClose);
+		setBL(0x02048504, (u32)dsiSaveGetResultCode);
+		setBL(0x0204D0AC, 0x02048560);
+		*(u32*)0x02053380 = 0xE12FFF1E; // bx lr
+	}
+
+	// Goooooal Europa 2012 (Europe)
+	// Audio does not play
+	else if (strcmp(romTid, "K9AP") == 0) {
+		useSharedFont = twlFontFound;
+		*(u32*)0x0200507C = 0xE1A00000; // nop
+		*(u32*)0x020127C8 = 0xE1A00000; // nop
+		*(u32*)0x02016AF8 = 0xE1A00000; // nop
+		patchInitDSiWare(0x0201C2F4, heapEnd);
+		patchUserSettingsReadDSiWare(0x0201D8D8);
+		*(u32*)0x02020DD0 = 0xE1A00000; // nop
+		setBL(0x0203DD34, (u32)dsiSaveCreate);
+		setBL(0x0203DD44, (u32)dsiSaveOpen);
+		setBL(0x0203DD60, (u32)dsiSaveGetResultCode);
+		setBL(0x0203DD84, (u32)dsiSaveSeek);
+		setBL(0x0203DD9C, (u32)dsiSaveGetResultCode);
+		setBL(0x0203DDC0, (u32)dsiSaveWrite);
+		setBL(0x0203DDE0, (u32)dsiSaveClose);
+		setBL(0x0203DDE8, (u32)dsiSaveGetResultCode);
+		setBL(0x0203DE04, (u32)dsiSaveGetResultCode);
+		setBL(0x0203DE40, (u32)dsiSaveOpenR);
+		setBL(0x0203DE50, (u32)dsiSaveGetLength);
+		setBL(0x0203DE84, (u32)dsiSaveRead);
+		setBL(0x0203DE9C, (u32)dsiSaveClose);
+		setBL(0x0203DEA8, (u32)dsiSaveGetResultCode);
+		setBL(0x02042A50, 0x0203DF04);
+		*(u32*)0x02048CDC = 0xE12FFF1E; // bx lr
+	}
 
 	// Go! Go! Kokopolo (USA)
 	// Go! Go! Kokopolo (Europe)
