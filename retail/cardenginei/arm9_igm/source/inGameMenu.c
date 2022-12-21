@@ -265,7 +265,8 @@ static void screenshot(void) {
 	}
 
 	#ifdef B4DS
-	(*ce9->prepareScreenshot)();
+	codeJumpWord = ce9->prepareScreenshot;
+	(*codeJump)();
 	#else
 	sharedAddr[4] = 0x50505353;
 	while (sharedAddr[4] == 0x50505353) {
@@ -300,7 +301,8 @@ static void screenshot(void) {
 	VRAM_x_CR(vramBank) = vramCr;
 
 	#ifdef B4DS
-	(*ce9->saveScreenshot)();
+	codeJumpWord = ce9->saveScreenshot;
+	(*codeJump)();
 	#else
 	sharedAddr[4] = 0x544F4853;
 	while (sharedAddr[4] == 0x544F4853) {
@@ -312,7 +314,8 @@ static void screenshot(void) {
 
 static void manual(void) {
 	#ifdef B4DS
-	(*ce9->prepareManual)();
+	codeJumpWord = ce9->prepareManual;
+	(*codeJump)();
 	#else
 	sharedAddr[4] = 0x4E414D50; // PMAN
 	do {
@@ -323,7 +326,8 @@ static void manual(void) {
 
 	while (1) {
 		#ifdef B4DS
-		(*ce9->readManual)(igmText.manualLine);
+		codeJumpWord = ce9->readManual;
+		(*codeJump1)(igmText.manualLine);
 
 		print(0, 0, (unsigned char *)0x027FF200, FONT_WHITE, false);
 		#else
@@ -359,7 +363,8 @@ static void manual(void) {
 	}
 
 	#ifdef B4DS
-	(*ce9->restorePreManual)();
+	codeJumpWord = ce9->restorePreManual;
+	(*codeJump)();
 	#else
 	sharedAddr[4] = 0x4E414D52; // RMAN
 	do {

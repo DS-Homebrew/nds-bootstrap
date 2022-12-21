@@ -55,6 +55,9 @@ void clearScreen(bool main);
 
 void showException(s32 *expReg);
 
+extern VoidFn codeJump;
+extern void (* codeJump1)(int);
+extern u32 codeJumpWord;
 extern VoidFn changeMpu;
 extern VoidFn revertMpu;
 

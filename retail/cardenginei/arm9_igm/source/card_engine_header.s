@@ -7,6 +7,9 @@
 	.global waitSysCyclesLoc
 	.global scfgExtBak
 	.global scfgClkBak
+	.global codeJump
+	.global codeJump1
+	.global codeJumpWord
 	.global changeMpu
 	.global revertMpu
 	.align	4
@@ -43,6 +46,13 @@ igm_arm9:
 	bl		inGameMenu
 
 	ldmfd   sp!, {r2-r11,pc}
+
+@---------------------------------------------------------------------------------
+codeJump: codeJump1: .word codeJump+4
+@---------------------------------------------------------------------------------
+	ldr pc, codeJumpWord
+codeJumpWord:
+.word	0
 
 @---------------------------------------------------------------------------------
 changeMpu: .word changeMpu+4

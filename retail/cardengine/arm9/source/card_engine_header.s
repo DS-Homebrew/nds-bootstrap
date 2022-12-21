@@ -75,15 +75,15 @@ rumbleForce:
 	.word	1
 	.word	1
 prepareScreenshotPtr:
-	.word prepareScreenshotJmp
+	.word prepareScreenshot
 saveScreenshotPtr:
-	.word saveScreenshotJmp
+	.word saveScreenshot
 prepareManualPtr:
-	.word prepareManualJmp
+	.word prepareManual
 readManualPtr:
-	.word readManualJmp
+	.word readManual
 restorePreManualPtr:
-	.word restorePreManualJmp
+	.word restorePreManual
 
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
@@ -100,36 +100,6 @@ code_handler_start_ipc:
 	bl		myIrqHandlerIPC @ jump to myIrqHandler
 	pop   	{r0-r12,pc} 
 
-.pool
-
-@---------------------------------------------------------------------------------
-prepareScreenshotJmp:
-@---------------------------------------------------------------------------------
-	ldr pc,= prepareScreenshot
-.pool
-
-@---------------------------------------------------------------------------------
-saveScreenshotJmp:
-@---------------------------------------------------------------------------------
-	ldr pc,= saveScreenshot
-.pool
-
-@---------------------------------------------------------------------------------
-prepareManualJmp:
-@---------------------------------------------------------------------------------
-	ldr pc,= prepareManual
-.pool
-
-@---------------------------------------------------------------------------------
-readManualJmp:
-@---------------------------------------------------------------------------------
-	ldr pc,= readManual
-.pool
-
-@---------------------------------------------------------------------------------
-restorePreManualJmp:
-@---------------------------------------------------------------------------------
-	ldr pc,= restorePreManual
 .pool
 
 .thumb

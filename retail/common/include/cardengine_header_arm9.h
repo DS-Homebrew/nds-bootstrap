@@ -211,11 +211,11 @@ typedef struct cardengineArm9 {
     u32 romLocation;
 	u32 rumbleFrames[2];
 	u32 rumbleForce[2];
-	VoidFn prepareScreenshot;
-	VoidFn saveScreenshot;
-	VoidFn prepareManual;
-	void (* readManual)(int);
-	VoidFn restorePreManual;
+	u32 prepareScreenshot;
+	u32 saveScreenshot;
+	u32 prepareManual;
+	u32 readManual;
+	u32 restorePreManual;
 } cardengineArm9;
 #endif
 
