@@ -61,7 +61,7 @@ void decrypt_modcrypt_area(dsi_context* ctx, u8 *buffer, unsigned int size)
 	}
 }
 
-static const char* twlmenuResetGamePath = "sdmc:/_nds/TWiLightMenu/resetgame.srldr";
+static const char* twlmenuResetGamePath = "sdmc:/_nds/TWiLightMenu/main.srldr";
 
 extern const DISC_INTERFACE __my_io_dsisd;
 

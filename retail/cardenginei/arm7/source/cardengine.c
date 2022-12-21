@@ -53,8 +53,7 @@
 
 // TWL soft-reset
 #include "sr_data_error.h"      // For showing an error screen
-#include "sr_data_srloader.h"   // For rebooting into TWiLight Menu++
-#include "sr_data_srllastran.h" // For rebooting the game
+#include "sr_data_srloader.h"   // For rebooting into TWiLight Menu++ or the game
 
 #define gameOnFlashcard BIT(0)
 #define saveOnFlashcard BIT(1)
@@ -170,8 +169,6 @@ static int cardEgnineCommandMutex = 0;
 static int saveMutex = 0;
 
 bool returnToMenu = false;
-
-static u32 wordBak = 0;
 
 #ifdef TWLSDK
 static tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
@@ -352,8 +349,6 @@ static void initialize(void) {
 	}*/
 
 	if (!bootloaderCleared) {
-		wordBak = *(u32*)0x02000000;
-
 		toncset((u8*)0x06000000, 0, 0x40000);	// Clear bootloader
 		bootloaderCleared = true;
 	}
@@ -405,16 +400,17 @@ void reset(void) {
 			fileWrite((char*)0x022C0000, &pageFile, 0x2C0000, ndsHeader->arm7binarySize, -1);
 		}
 		fileWrite((char*)resetParam, &srParamsFile, 0, 0x10, -1);
+		toncset((u32*)0x02000000, 0, 0x400);
+		*(u32*)(0x02000000) = BIT(3);
 		if (consoleModel < 2) {
 			(*(u32*)(ce7+0x11900) == 0 && (valueBits & b_dsiSD)) ? unlaunchSetFilename(false) : unlaunchSetHiyaFilename();
 		}
 		if (*(u32*)(ce7+0x11900) == 0 && (valueBits & b_dsiSD)) {
-			tonccpy((u32*)0x02000300, sr_data_srllastran, 0x020);
+			tonccpy((u32*)0x02000300, sr_data_srloader, 0x20);
 		} else {
 			// Use different SR backend ID
 			readSrBackendId();
 		}
-		*(u32*)0x02000000 = wordBak;	// In case if soft-resetting fails in DSiWarehax
 		i2cWriteRegister(0x4A, 0x70, 0x01);
 		i2cWriteRegister(0x4A, 0x11, 0x01);			// Reboot game
 		leaveCriticalSection(oldIME);
@@ -657,7 +653,7 @@ extern void inGameMenu(void);
 
 void forceGameReboot(void) {
 	toncset((u32*)0x02000000, 0, 0x400);
-	*(u32*)(0x02000000) = 0;
+	*(u32*)(0x02000000) = BIT(3);
 	sharedAddr[4] = 0x57534352;
 	IPC_SendSync(0x8);
 	if (consoleModel < 2) {
@@ -684,7 +680,7 @@ void forceGameReboot(void) {
 	if (*(u32*)(ce7+0x11900) == 0 && (valueBits & b_dsiSD))
 	#endif
 	{
-		tonccpy((u32*)0x02000300, sr_data_srllastran, 0x020);
+		tonccpy((u32*)0x02000300, sr_data_srloader, 0x20);
 	} else {
 		// Use different SR backend ID
 		readSrBackendId();

@@ -42,8 +42,7 @@
 #include "igm_text.h"
 
 #include "sr_data_error.h"      // For showing an error screen
-#include "sr_data_srloader.h"   // For rebooting into TWiLight Menu++
-#include "sr_data_srllastran.h" // For rebooting the game
+#include "sr_data_srloader.h"   // For rebooting into TWiLight Menu++ or the game
 
 #define preciseVolumeControl BIT(6)
 #define hiyaCfwFound BIT(10)
@@ -368,7 +367,7 @@ void reset(void) {
 
 void forceGameReboot(void) {
 	toncset((u32*)0x02000000, 0, 0x400);
-	*(u32*)(0x02000000) = 0;
+	*(u32*)(0x02000000) = BIT(3);
 	sharedAddr[4] = 0x57534352;
 	IPC_SendSync(0x8);
 	if (consoleModel < 2) {
@@ -379,7 +378,7 @@ void forceGameReboot(void) {
 	driveInitialize();
 	fileWrite((char*)&clearBuffer, &srParamsFile, 0, 0x4, -1);
 	if (*(u32*)(ce7+0x8D00) == 0) {
-		tonccpy((u32*)0x02000300, sr_data_srllastran, 0x020);
+		tonccpy((u32*)0x02000300, sr_data_srloader, 0x20);
 	} else {
 		// Use different SR backend ID
 		readSrBackendId();
