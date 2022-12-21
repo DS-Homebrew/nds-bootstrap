@@ -12043,6 +12043,69 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0202EA74 = 0xE1A00000; // nop
 	}
 
+	// Snakenoid Deluxe (USA)
+	// Audio does not play, except for in the opening video
+	else if (strcmp(romTid, "K4NE") == 0) {
+		useSharedFont = (twlFontFound && debugOrMep);
+		*(u32*)0x020050A4 = 0xE1A00000; // nop
+		*(u32*)0x020186C8 = 0xE1A00000; // nop
+		*(u32*)0x0201CB54 = 0xE1A00000; // nop
+		patchInitDSiWare(0x02022454, heapEnd);
+		patchUserSettingsReadDSiWare(0x02023C10);
+		*(u32*)0x02026AA4 = 0xE1A00000; // nop
+		if (useSharedFont && !extendedMemory2 && expansionPakFound) {
+			patchTwlFontLoad(0x0203FBCC, 0x02024154);
+		}
+		setBL(0x0204D990, (u32)dsiSaveCreate);
+		setBL(0x0204D9A0, (u32)dsiSaveOpen);
+		setBL(0x0204D9BC, (u32)dsiSaveGetResultCode);
+		setBL(0x0204D9E0, (u32)dsiSaveSeek);
+		setBL(0x0204D9F8, (u32)dsiSaveGetResultCode);
+		setBL(0x0204DA1C, (u32)dsiSaveWrite);
+		setBL(0x0204DA3C, (u32)dsiSaveClose);
+		setBL(0x0204DA44, (u32)dsiSaveGetResultCode);
+		setBL(0x0204DA60, (u32)dsiSaveGetResultCode);
+		setBL(0x0204DA9C, (u32)dsiSaveOpenR);
+		setBL(0x0204DAAC, (u32)dsiSaveGetLength);
+		setBL(0x0204DAE0, (u32)dsiSaveRead);
+		setBL(0x0204DAF8, (u32)dsiSaveClose);
+		setBL(0x0204DB04, (u32)dsiSaveGetResultCode);
+		setBL(0x020545F4, 0x0204DB60);
+		*(u32*)0x020565A8 = 0xE1A00000; // nop
+		*(u32*)0x02059DAC = 0xE12FFF1E; // bx lr
+	}
+
+	// Snakenoid (Europe)
+	// Audio does not play, except for in the opening video
+	else if (strcmp(romTid, "K4NP") == 0) {
+		useSharedFont = (twlFontFound && debugOrMep);
+		*(u32*)0x0200507C = 0xE1A00000; // nop
+		*(u32*)0x0200E014 = 0xE1A00000; // nop
+		*(u32*)0x020123EC = 0xE1A00000; // nop
+		patchInitDSiWare(0x02017CA4, heapEnd);
+		patchUserSettingsReadDSiWare(0x02019450);
+		*(u32*)0x0201C14C = 0xE1A00000; // nop
+		if (useSharedFont && !extendedMemory2 && expansionPakFound) {
+			patchTwlFontLoad(0x02033608, 0x02019C10);
+		}
+		setBL(0x02040644, (u32)dsiSaveCreate);
+		setBL(0x02040654, (u32)dsiSaveOpen);
+		setBL(0x02040670, (u32)dsiSaveGetResultCode);
+		setBL(0x02040698, (u32)dsiSaveSeek);
+		setBL(0x020406B0, (u32)dsiSaveGetResultCode);
+		setBL(0x020406D8, (u32)dsiSaveWrite);
+		setBL(0x020406E0, (u32)dsiSaveClose);
+		setBL(0x020406E8, (u32)dsiSaveGetResultCode);
+		setBL(0x02040708, (u32)dsiSaveGetResultCode);
+		setBL(0x02040748, (u32)dsiSaveOpenR);
+		setBL(0x02040758, (u32)dsiSaveGetLength);
+		setBL(0x0204078C, (u32)dsiSaveRead);
+		setBL(0x020407A4, (u32)dsiSaveClose);
+		setBL(0x020471BC, 0x020407F8);
+		*(u32*)0x020490E0 = 0xE1A00000; // nop
+		*(u32*)0x0204C8F8 = 0xE12FFF1E; // bx lr
+	}
+
 	// SnowBoard Xtreme (USA)
 	// SnowBoard Xtreme (Europe)
 	else if (strcmp(romTid, "KX5E") == 0 || strcmp(romTid, "KX5P") == 0) {

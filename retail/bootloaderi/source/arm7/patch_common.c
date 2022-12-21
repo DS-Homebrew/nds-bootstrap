@@ -6538,6 +6538,43 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// Snakenoid Deluxe (USA)
+	else if (strcmp(romTid, "K4NE") == 0 && saveOnFlashcard) {
+		setBL(0x0204D990, (u32)dsiSaveCreate);
+		setBL(0x0204D9A0, (u32)dsiSaveOpen);
+		setBL(0x0204D9BC, (u32)dsiSaveGetResultCode);
+		setBL(0x0204D9E0, (u32)dsiSaveSeek);
+		setBL(0x0204D9F8, (u32)dsiSaveGetResultCode);
+		setBL(0x0204DA1C, (u32)dsiSaveWrite);
+		setBL(0x0204DA3C, (u32)dsiSaveClose);
+		setBL(0x0204DA44, (u32)dsiSaveGetResultCode);
+		setBL(0x0204DA60, (u32)dsiSaveGetResultCode);
+		setBL(0x0204DA9C, (u32)dsiSaveOpenR);
+		setBL(0x0204DAAC, (u32)dsiSaveGetLength);
+		setBL(0x0204DAE0, (u32)dsiSaveRead);
+		setBL(0x0204DAF8, (u32)dsiSaveClose);
+		setBL(0x0204DB04, (u32)dsiSaveGetResultCode);
+		setBL(0x020545F4, 0x0204DB60);
+	}
+
+	// Snakenoid (Europe)
+	else if (strcmp(romTid, "K4NP") == 0 && saveOnFlashcard) {
+		setBL(0x02040644, (u32)dsiSaveCreate);
+		setBL(0x02040654, (u32)dsiSaveOpen);
+		setBL(0x02040670, (u32)dsiSaveGetResultCode);
+		setBL(0x02040698, (u32)dsiSaveSeek);
+		setBL(0x020406B0, (u32)dsiSaveGetResultCode);
+		setBL(0x020406D8, (u32)dsiSaveWrite);
+		setBL(0x020406E0, (u32)dsiSaveClose);
+		setBL(0x020406E8, (u32)dsiSaveGetResultCode);
+		setBL(0x02040708, (u32)dsiSaveGetResultCode);
+		setBL(0x02040748, (u32)dsiSaveOpenR);
+		setBL(0x02040758, (u32)dsiSaveGetLength);
+		setBL(0x0204078C, (u32)dsiSaveRead);
+		setBL(0x020407A4, (u32)dsiSaveClose);
+		setBL(0x020471BC, 0x020407F8);
+	}
+
 	// SnowBoard Xtreme (USA)
 	// SnowBoard Xtreme (Europe)
 	else if ((strcmp(romTid, "KX5E") == 0 || strcmp(romTid, "KX5P") == 0) && saveOnFlashcard) {
