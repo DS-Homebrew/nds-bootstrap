@@ -219,12 +219,9 @@ void reset(u32 param) {
 	//toncset((u32*)0x01FF8000, 0, 0x8000);
 
 	cacheFlush();
-	resetMpu();
 
 	if (igmReset) {
 		igmReset = false;
-	} else {
-		toncset((u8*)getDtcmBase()+0x3E00, 0, 0x200);
 	}
 
 	// Clear out ARM9 DMA channels
@@ -254,6 +251,8 @@ void reset(u32 param) {
 	toncset((char*)((ce9->valueBits & isSdk5) ? 0x02FFFF80 : 0x027FFF80), 0, 0x80);
 
 	if (param == 0xFFFFFFFF || *(u32*)(resetParams+0xC) > 0) {
+		resetMpu();
+
 		REG_DISPSTAT = 0;
 		REG_DISPCNT = 0;
 		REG_DISPCNT_SUB = 0;
@@ -322,6 +321,8 @@ void reset(u32 param) {
 		#ifdef NODSIWARE
 		tonccpy((u32*)0x02370000, ce9, 0x2800);
 		#endif
+
+		resetMpu();
 	}
 
 	sharedAddr[0] = 0x544F4F42; // 'BOOT'
