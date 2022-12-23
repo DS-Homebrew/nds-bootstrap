@@ -313,6 +313,11 @@ void reset(u32 param) {
 		fileRead((char*)&newArm7binarySize, &pageFile, 0x3FFFF4, sizeof(u32));
 		fileRead((char*)ndsHeader->arm9destination, &pageFile, 0x14000, iUncompressedSize);
 		fileRead((char*)ndsHeader->arm7destination, &pageFile, 0x2C0000, newArm7binarySize);
+		#ifdef EXTMEM
+		fileRead((char*)CHEAT_ENGINE_LOCATION_B4DS, &pageFile, 0x2FE000, 0x2000);
+		#else
+		fileRead((char*)CHEAT_ENGINE_LOCATION_B4DS-0x400000, &pageFile, 0x2FE000, 0x2000);
+		#endif
 
 		#ifdef NODSIWARE
 		tonccpy((u32*)0x02370000, ce9, 0x2800);
