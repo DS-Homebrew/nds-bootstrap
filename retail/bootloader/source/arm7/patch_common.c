@@ -8368,39 +8368,291 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Music on: Drums (USA)
+	// Saving is difficult to implement
+	else if (strcmp(romTid, "KQDE") == 0) {
+		useSharedFont = twlFontFound;
+		if (useSharedFont) {
+			if (!extendedMemory2) {
+				// Skip Manual screen when past title screen
+				*(u32*)0x02017978 = 0xE1A00000; // nop
+				*(u32*)0x0201797C = 0xE1A00000; // nop
+				*(u32*)0x02017980 = 0xE1A00000; // nop
+			}
+		} else {
+			// Skip Manual screen
+			*(u32*)0x0200A158 = 0xE12FFF1E; // bx lr
+			*(u32*)0x0200A304 = 0xE12FFF1E; // bx lr
+			*(u32*)0x0200A318 = 0xE12FFF1E; // bx lr
+		}
+
+		*(u32*)0x0200BD58 = 0xE1A00000; // nop
+		*(u32*)0x0200BDA8 = 0xE1A00000; // nop
+		*(u32*)0x0200BDC8 = 0xE1A00000; // nop
+		*(u32*)0x0200BDD8 = 0xE1A00000; // nop
+		*(u32*)0x0200BE04 = 0xE1A00000; // nop
+
+		*(u32*)0x02021C18 = 0xE1A00000; // nop
+		*(u32*)0x020253C4 = 0xE1A00000; // nop
+		patchInitDSiWare(0x0202A2B8, heapEnd);
+		patchUserSettingsReadDSiWare(0x0202B940);
+		*(u32*)0x0202EA60 = 0xE1A00000; // nop
+	}
+
 	// Music on: Drums (Europe, Australia)
 	// Saving is difficult to implement
-	else if (strcmp(romTid, "KQDE") == 0 || strcmp(romTid, "KQDV") == 0) {
-		// Skip Manual screen
-		*(u32*)0x0200A158 = 0xE12FFF1E; // bx lr
-		*(u32*)0x0200A304 = 0xE12FFF1E; // bx lr
-		*(u32*)0x0200A318 = 0xE12FFF1E; // bx lr
-
-		if (ndsHeader->gameCode[3] == 'E') {
-			*(u32*)0x0200BD58 = 0xE1A00000; // nop
-			*(u32*)0x0200BDA8 = 0xE1A00000; // nop
-			*(u32*)0x0200BDC8 = 0xE1A00000; // nop
-			*(u32*)0x0200BDD8 = 0xE1A00000; // nop
-			*(u32*)0x0200BE04 = 0xE1A00000; // nop
-
-			*(u32*)0x02021C18 = 0xE1A00000; // nop
-			*(u32*)0x020253C4 = 0xE1A00000; // nop
-			patchInitDSiWare(0x0202A2B8, heapEnd);
-			patchUserSettingsReadDSiWare(0x0202B940);
-			*(u32*)0x0202EA60 = 0xE1A00000; // nop
+	else if (strcmp(romTid, "KQDV") == 0) {
+		useSharedFont = twlFontFound;
+		if (useSharedFont) {
+			if (!extendedMemory2) {
+				// Skip Manual screen when past title screen
+				*(u32*)0x020178C8 = 0xE1A00000; // nop
+				*(u32*)0x020178CC = 0xE1A00000; // nop
+				*(u32*)0x020178D0 = 0xE1A00000; // nop
+			}
 		} else {
-			*(u32*)0x0200BD7C = 0xE1A00000; // nop
-			*(u32*)0x0200BDCC = 0xE1A00000; // nop
-			*(u32*)0x0200BDEC = 0xE1A00000; // nop
-			*(u32*)0x0200BDFC = 0xE1A00000; // nop
-			*(u32*)0x0200BE28 = 0xE1A00000; // nop
-
-			*(u32*)0x02021B68 = 0xE1A00000; // nop
-			*(u32*)0x02025314 = 0xE1A00000; // nop
-			patchInitDSiWare(0x0202A208, heapEnd);
-			patchUserSettingsReadDSiWare(0x0202B890);
-			*(u32*)0x0202E9B0 = 0xE1A00000; // nop
+			// Skip Manual screen
+			*(u32*)0x0200A158 = 0xE12FFF1E; // bx lr
+			*(u32*)0x0200A328 = 0xE12FFF1E; // bx lr
+			*(u32*)0x0200A33C = 0xE12FFF1E; // bx lr
 		}
+
+		*(u32*)0x0200BD7C = 0xE1A00000; // nop
+		*(u32*)0x0200BDCC = 0xE1A00000; // nop
+		*(u32*)0x0200BDEC = 0xE1A00000; // nop
+		*(u32*)0x0200BDFC = 0xE1A00000; // nop
+		*(u32*)0x0200BE28 = 0xE1A00000; // nop
+
+		*(u32*)0x02021B68 = 0xE1A00000; // nop
+		*(u32*)0x02025314 = 0xE1A00000; // nop
+		patchInitDSiWare(0x0202A208, heapEnd);
+		patchUserSettingsReadDSiWare(0x0202B890);
+		*(u32*)0x0202E9B0 = 0xE1A00000; // nop
+	}
+
+	// Anata no Raku Raku: Doramu Mashin (Japan)
+	// Saving is difficult to implement
+	else if (strcmp(romTid, "KQDJ") == 0) {
+		useSharedFont = twlFontFound;
+		if (useSharedFont) {
+			if (!extendedMemory2) {
+				// Skip Manual screen when past title screen
+				*(u32*)0x0201754C = 0xE1A00000; // nop
+				*(u32*)0x02017550 = 0xE1A00000; // nop
+				*(u32*)0x02017554 = 0xE1A00000; // nop
+			}
+		} else {
+			// Skip Manual screen
+			*(u32*)0x0200DE78 = 0xE12FFF1E; // bx lr
+			*(u32*)0x0200E024 = 0xE12FFF1E; // bx lr
+			*(u32*)0x0200E038 = 0xE12FFF1E; // bx lr
+		}
+
+		*(u32*)0x0200F318 = 0xE1A00000; // nop
+		*(u32*)0x0200F368 = 0xE1A00000; // nop
+		*(u32*)0x0200F388 = 0xE1A00000; // nop
+		*(u32*)0x0200F398 = 0xE1A00000; // nop
+		*(u32*)0x0200F3C4 = 0xE1A00000; // nop
+
+		*(u32*)0x02021964 = 0xE1A00000; // nop
+		*(u32*)0x020251A4 = 0xE1A00000; // nop
+		patchInitDSiWare(0x0202A208, heapEnd);
+		patchUserSettingsReadDSiWare(0x0202B8A0);
+		*(u32*)0x0202E9C0 = 0xE1A00000; // nop
+	}
+
+	// Music on: Electric Guitar (USA)
+	// Saving is difficult to implement
+	else if (strcmp(romTid, "KIEE") == 0) {
+		useSharedFont = twlFontFound;
+		*(u32*)0x02008B64 += 0xD0000000; // bne -> b
+		if (useSharedFont) {
+			if (!extendedMemory2) {
+				// Skip Manual screen when past title screen
+				*(u32*)0x0201517C = 0xE1A00000; // nop
+				*(u32*)0x02015180 = 0xE1A00000; // nop
+				*(u32*)0x02015184 = 0xE1A00000; // nop
+			}
+		} else {
+			// Skip Manual screen
+			*(u32*)0x02009B20 = 0xE12FFF1E; // bx lr
+			*(u32*)0x02009CCC = 0xE12FFF1E; // bx lr
+			*(u32*)0x02009CE0 = 0xE12FFF1E; // bx lr
+		}
+
+		*(u32*)0x0200B648 = 0xE1A00000; // nop
+		*(u32*)0x0200B698 = 0xE1A00000; // nop
+		*(u32*)0x0200B6B8 = 0xE1A00000; // nop
+		*(u32*)0x0200B6C8 = 0xE1A00000; // nop
+		*(u32*)0x0200B6F4 = 0xE1A00000; // nop
+
+		*(u32*)0x0201F518 = 0xE1A00000; // nop
+		*(u32*)0x02022A58 = 0xE1A00000; // nop
+		*(u32*)0x02023014 = 0xE1A00000; // nop
+		*(u32*)0x02023018 = 0xE1A00000; // nop
+		patchInitDSiWare(0x020277D0, heapEnd);
+		patchUserSettingsReadDSiWare(0x02028E58);
+		*(u32*)0x0202BF78 = 0xE1A00000; // nop
+	}
+
+	// Music on: Electric Guitar (Europe, Australia)
+	// Saving is difficult to implement
+	else if (strcmp(romTid, "KIEV") == 0) {
+		useSharedFont = twlFontFound;
+		*(u32*)0x02008B64 += 0xD0000000; // bne -> b
+		if (useSharedFont) {
+			if (!extendedMemory2) {
+				// Skip Manual screen when past title screen
+				*(u32*)0x02015124 = 0xE1A00000; // nop
+				*(u32*)0x02015128 = 0xE1A00000; // nop
+				*(u32*)0x0201512C = 0xE1A00000; // nop
+			}
+		} else {
+			// Skip Manual screen
+			*(u32*)0x02009B20 = 0xE12FFF1E; // bx lr
+			*(u32*)0x02009CF0 = 0xE12FFF1E; // bx lr
+			*(u32*)0x02009D04 = 0xE12FFF1E; // bx lr
+		}
+
+		*(u32*)0x0200B66C = 0xE1A00000; // nop
+		*(u32*)0x0200B6BC = 0xE1A00000; // nop
+		*(u32*)0x0200B6DC = 0xE1A00000; // nop
+		*(u32*)0x0200B6EC = 0xE1A00000; // nop
+		*(u32*)0x0200B718 = 0xE1A00000; // nop
+
+		*(u32*)0x0201F4C0 = 0xE1A00000; // nop
+		*(u32*)0x02022A00 = 0xE1A00000; // nop
+		*(u32*)0x02022FBC = 0xE1A00000; // nop
+		*(u32*)0x02022FC0 = 0xE1A00000; // nop
+		patchInitDSiWare(0x02027778, heapEnd);
+		patchUserSettingsReadDSiWare(0x02028E00);
+		*(u32*)0x0202BF20 = 0xE1A00000; // nop
+	}
+
+	// Anata no Rakuraku: Erekutorikku Gita (Japan)
+	// Saving is difficult to implement
+	else if (strcmp(romTid, "KIEJ") == 0) {
+		useSharedFont = twlFontFound;
+		*(u32*)0x02008D94 += 0xD0000000; // bne -> b
+		if (useSharedFont) {
+			if (!extendedMemory2) {
+				// Skip Manual screen when past title screen
+				*(u32*)0x02015304 = 0xE1A00000; // nop
+				*(u32*)0x02015308 = 0xE1A00000; // nop
+				*(u32*)0x0201530C = 0xE1A00000; // nop
+			}
+		} else {
+			// Skip Manual screen
+			*(u32*)0x02009CC4 = 0xE12FFF1E; // bx lr
+			*(u32*)0x02009E70 = 0xE12FFF1E; // bx lr
+			*(u32*)0x02009E84 = 0xE12FFF1E; // bx lr
+		}
+
+		*(u32*)0x0200B80C = 0xE1A00000; // nop
+		*(u32*)0x0200B85C = 0xE1A00000; // nop
+		*(u32*)0x0200B87C = 0xE1A00000; // nop
+		*(u32*)0x0200B88C = 0xE1A00000; // nop
+		*(u32*)0x0200B8B8 = 0xE1A00000; // nop
+
+		*(u32*)0x0201F6A0 = 0xE1A00000; // nop
+		*(u32*)0x02022C74 = 0xE1A00000; // nop
+		*(u32*)0x02023258 = 0xE1A00000; // nop
+		*(u32*)0x0202325C = 0xE1A00000; // nop
+		patchInitDSiWare(0x02027B5C, heapEnd);
+		patchUserSettingsReadDSiWare(0x020291F4);
+		*(u32*)0x0202C314 = 0xE1A00000; // nop
+	}
+
+	// Music on: Electronic Keyboard (USA)
+	// Saving is difficult to implement
+	else if (strcmp(romTid, "KK7E") == 0) {
+		useSharedFont = twlFontFound;
+		if (useSharedFont) {
+			if (!extendedMemory2) {
+				// Skip Manual screen when past title screen
+				*(u32*)0x0200DE80 = 0xE1A00000; // nop
+				*(u32*)0x0200DE84 = 0xE1A00000; // nop
+				*(u32*)0x0200DE88 = 0xE1A00000; // nop
+			}
+		} else {
+			// Skip Manual screen
+			*(u32*)0x02008850 = 0xE12FFF1E; // bx lr
+			*(u32*)0x020089D0 = 0xE12FFF1E; // bx lr
+			*(u32*)0x020089E4 = 0xE12FFF1E; // bx lr
+		}
+
+		*(u32*)0x02007F68 = 0xE1A00000; // nop
+		*(u32*)0x02007FC4 = 0xE1A00000; // nop
+		*(u32*)0x02007FF8 = 0xE1A00000; // nop
+		*(u32*)0x02008004 = 0xE1A00000; // nop
+		*(u32*)0x02008038 = 0xE1A00000; // nop
+
+		*(u32*)0x02017CDC = 0xE1A00000; // nop
+		*(u32*)0x0201B1BC = 0xE1A00000; // nop
+		patchInitDSiWare(0x0201FCF0, heapEnd);
+		patchUserSettingsReadDSiWare(0x02021314);
+		*(u32*)0x02024384 = 0xE1A00000; // nop
+	}
+
+	// Music on: Electronic Keyboard (Europe, Australia)
+	// Saving is difficult to implement
+	else if (strcmp(romTid, "KK7V") == 0) {
+		useSharedFont = twlFontFound;
+		if (useSharedFont) {
+			if (!extendedMemory2) {
+				// Skip Manual screen when past title screen
+				*(u32*)0x0200DE08 = 0xE1A00000; // nop
+				*(u32*)0x0200DE0C = 0xE1A00000; // nop
+				*(u32*)0x0200DE10 = 0xE1A00000; // nop
+			}
+		} else {
+			// Skip Manual screen
+			*(u32*)0x02008850 = 0xE12FFF1E; // bx lr
+			*(u32*)0x020089D0 = 0xE12FFF1E; // bx lr
+			*(u32*)0x020089E4 = 0xE12FFF1E; // bx lr
+		}
+
+		*(u32*)0x02007F68 = 0xE1A00000; // nop
+		*(u32*)0x02007FC4 = 0xE1A00000; // nop
+		*(u32*)0x02007FF8 = 0xE1A00000; // nop
+		*(u32*)0x02008004 = 0xE1A00000; // nop
+		*(u32*)0x02008038 = 0xE1A00000; // nop
+
+		*(u32*)0x02017C74 = 0xE1A00000; // nop
+		*(u32*)0x0201B154 = 0xE1A00000; // nop
+		patchInitDSiWare(0x0201FC88, heapEnd);
+		patchUserSettingsReadDSiWare(0x020212AC);
+		*(u32*)0x0202431C = 0xE1A00000; // nop
+	}
+
+	// Anata no Rakuraku: Erekutoronikku Kibodo (Japan)
+	// Saving is difficult to implement
+	else if (strcmp(romTid, "KK7J") == 0) {
+		useSharedFont = twlFontFound;
+		if (useSharedFont) {
+			if (!extendedMemory2) {
+				// Skip Manual screen when past title screen
+				*(u32*)0x0200E210 = 0xE1A00000; // nop
+				*(u32*)0x0200E214 = 0xE1A00000; // nop
+				*(u32*)0x0200E218 = 0xE1A00000; // nop
+			}
+		} else {
+			// Skip Manual screen
+			*(u32*)0x02008BF8 = 0xE12FFF1E; // bx lr
+			*(u32*)0x02008D78 = 0xE12FFF1E; // bx lr
+			*(u32*)0x02008D8C = 0xE12FFF1E; // bx lr
+		}
+
+		*(u32*)0x02008080 = 0xE1A00000; // nop
+		*(u32*)0x020080DC = 0xE1A00000; // nop
+		*(u32*)0x02008110 = 0xE1A00000; // nop
+		*(u32*)0x0200811C = 0xE1A00000; // nop
+		*(u32*)0x02008150 = 0xE1A00000; // nop
+
+		*(u32*)0x02017EF8 = 0xE1A00000; // nop
+		*(u32*)0x0201B3D8 = 0xE1A00000; // nop
+		patchInitDSiWare(0x02020038, heapEnd);
+		patchUserSettingsReadDSiWare(0x0202165C);
+		*(u32*)0x020246CC = 0xE1A00000; // nop
 	}
 
 	// Music on: Playing Piano (USA)
@@ -8410,9 +8662,9 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0200AFCC += 0xD0000000; // bne -> b
 		if (ndsHeader->gameCode[3] == 'E') {
 			// Skip Manual screen
-			*(u32*)0x0200CC58 = 0xE1A00000; // nop
-			*(u32*)0x0200CC5C = 0xE1A00000; // nop
-			*(u32*)0x0200CC60 = 0xE1A00000; // nop
+			//*(u32*)0x0200CC58 = 0xE1A00000; // nop
+			//*(u32*)0x0200CC5C = 0xE1A00000; // nop
+			//*(u32*)0x0200CC60 = 0xE1A00000; // nop
 
 			*(u32*)0x0200E08C = 0xE1A00000; // nop
 			*(u32*)0x0200E0DC = 0xE1A00000; // nop
@@ -8423,14 +8675,14 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			*(u32*)0x02020EC8 = 0xE1A00000; // nop
 			*(u32*)0x020213C8 = 0xE1A00000; // nop
 			*(u32*)0x020213CC = 0xE1A00000; // nop
-			patchInitDSiWare(0x02020194, heapEnd);
+			patchInitDSiWare(0x02025F10, heapEnd);
 			patchUserSettingsReadDSiWare(0x02027574);
 			*(u32*)0x0202A754 = 0xE1A00000; // nop
 		} else {
 			// Skip Manual screen
-			*(u32*)0x0200CC7C = 0xE1A00000; // nop
-			*(u32*)0x0200CC80 = 0xE1A00000; // nop
-			*(u32*)0x0200CC84 = 0xE1A00000; // nop
+			//*(u32*)0x0200CC7C = 0xE1A00000; // nop
+			//*(u32*)0x0200CC80 = 0xE1A00000; // nop
+			//*(u32*)0x0200CC84 = 0xE1A00000; // nop
 
 			*(u32*)0x0200E0B0 = 0xE1A00000; // nop
 			*(u32*)0x0200E100 = 0xE1A00000; // nop
@@ -8451,24 +8703,39 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Music on: Retro Keyboard (Europe, Australia)
 	// Saving is difficult to implement
 	else if (strcmp(romTid, "KRHE") == 0 || strcmp(romTid, "KRHV") == 0) {
+		useSharedFont = twlFontFound;
 		*(u32*)0x0200833C = 0xE1A00000; // nop
 		*(u32*)0x02008398 = 0xE1A00000; // nop
 		*(u32*)0x020083CC = 0xE1A00000; // nop
 		*(u32*)0x020083D8 = 0xE1A00000; // nop
 		*(u32*)0x0200840C = 0xE1A00000; // nop
 
-		// Skip Manual screen
-		*(u32*)0x02008CD0 = 0xE12FFF1E; // bx lr
-		*(u32*)0x02008E50 = 0xE12FFF1E; // bx lr
-		*(u32*)0x02008E64 = 0xE12FFF1E; // bx lr
+		if (!useSharedFont) {
+			// Skip Manual screen
+			*(u32*)0x02008CD0 = 0xE12FFF1E; // bx lr
+			*(u32*)0x02008E50 = 0xE12FFF1E; // bx lr
+			*(u32*)0x02008E64 = 0xE12FFF1E; // bx lr
+		}
 
 		if (ndsHeader->gameCode[3] == 'E') {
+			if (useSharedFont && !extendedMemory2) {
+				// Skip Manual screen when past title screen
+				*(u32*)0x0200E314 = 0xE1A00000; // nop
+				*(u32*)0x0200E318 = 0xE1A00000; // nop
+				*(u32*)0x0200E31C = 0xE1A00000; // nop
+			}
 			*(u32*)0x02018180 = 0xE1A00000; // nop
 			*(u32*)0x0201B660 = 0xE1A00000; // nop
 			patchInitDSiWare(0x02020194, heapEnd);
 			patchUserSettingsReadDSiWare(0x020217B8);
 			*(u32*)0x02024828 = 0xE1A00000; // nop
 		} else {
+			if (useSharedFont && !extendedMemory2) {
+				// Skip Manual screen when past title screen
+				*(u32*)0x0200E29C = 0xE1A00000; // nop
+				*(u32*)0x0200E2A0 = 0xE1A00000; // nop
+				*(u32*)0x0200E2A4 = 0xE1A00000; // nop
+			}
 			*(u32*)0x02018114 = 0xE1A00000; // nop
 			*(u32*)0x0201B5F4 = 0xE1A00000; // nop
 			patchInitDSiWare(0x02020128, heapEnd);

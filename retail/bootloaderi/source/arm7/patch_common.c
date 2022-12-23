@@ -4153,13 +4153,84 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Music on: Drums (USA)
-	// Music on: Drums (Europe, Australia)
 	// Saving is difficult to implement
-	else if ((strcmp(romTid, "KQDE") == 0 || strcmp(romTid, "KQDV") == 0) && !twlFontFound) {
+	else if (strcmp(romTid, "KQDE") == 0 && !twlFontFound) {
 		// Skip Manual screen
 		*(u32*)0x0200A158 = 0xE12FFF1E; // bx lr
 		*(u32*)0x0200A304 = 0xE12FFF1E; // bx lr
 		*(u32*)0x0200A318 = 0xE12FFF1E; // bx lr
+	}
+
+	// Music on: Drums (Europe, Australia)
+	// Saving is difficult to implement
+	else if (strcmp(romTid, "KQDV") == 0 && !twlFontFound) {
+		// Skip Manual screen
+		*(u32*)0x0200A158 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0200A328 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0200A33C = 0xE12FFF1E; // bx lr
+	}
+
+	// Anata no Raku Raku: Doramu Mashin (Japan)
+	// Saving is difficult to implement
+	else if (strcmp(romTid, "KQDJ") == 0 && !twlFontFound) {
+		// Skip Manual screen
+		*(u32*)0x0200DE78 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0200E024 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0200E038 = 0xE12FFF1E; // bx lr
+	}
+
+	// Music on: Electric Guitar (USA)
+	// Saving is difficult to implement
+	else if (strcmp(romTid, "KIEE") == 0 && !twlFontFound) {
+		// Skip Manual screen
+		*(u32*)0x02009B20 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02009CCC = 0xE12FFF1E; // bx lr
+		*(u32*)0x02009CE0 = 0xE12FFF1E; // bx lr
+	}
+
+	// Music on: Electric Guitar (Europe, Australia)
+	// Saving is difficult to implement
+	else if (strcmp(romTid, "KIEV") == 0 && !twlFontFound) {
+		// Skip Manual screen
+		*(u32*)0x02009B20 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02009CF0 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02009D04 = 0xE12FFF1E; // bx lr
+	}
+
+	// Anata no Rakuraku: Erekutorikku Gita (Japan)
+	// Saving is difficult to implement
+	else if (strcmp(romTid, "KIEJ") == 0 && !twlFontFound) {
+		// Skip Manual screen
+		*(u32*)0x02009CC4 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02009E70 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02009E84 = 0xE12FFF1E; // bx lr
+	}
+
+	// Music on: Electronic Keyboard (USA)
+	// Saving is difficult to implement
+	else if (strcmp(romTid, "KK7E") == 0 && !twlFontFound) {
+		// Skip Manual screen
+		*(u32*)0x02008850 = 0xE12FFF1E; // bx lr
+		*(u32*)0x020089D0 = 0xE12FFF1E; // bx lr
+		*(u32*)0x020089E4 = 0xE12FFF1E; // bx lr
+	}
+
+	// Music on: Electronic Keyboard (Europe, Australia)
+	// Saving is difficult to implement
+	else if (strcmp(romTid, "KK7V") == 0 && !twlFontFound) {
+		// Skip Manual screen
+		*(u32*)0x02008850 = 0xE12FFF1E; // bx lr
+		*(u32*)0x020089D0 = 0xE12FFF1E; // bx lr
+		*(u32*)0x020089E4 = 0xE12FFF1E; // bx lr
+	}
+
+	// Anata no Rakuraku: Erekutoronikku Kibodo (Japan)
+	// Saving is difficult to implement
+	else if (strcmp(romTid, "KK7J") == 0 && !twlFontFound) {
+		// Skip Manual screen
+		*(u32*)0x02008BF8 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02008D78 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02008D8C = 0xE12FFF1E; // bx lr
 	}
 
 	// Music on: Playing Piano (USA)
