@@ -1600,7 +1600,7 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 		   || (strncmp(romTid, "DMD", 3) == 0 && extendedMemory2)
 		   || strncmp(romTid, "DMP", 3) == 0
 		   || (strncmp(romTid, "DHS", 3) == 0 && extendedMemory2)
-		)	&& arm7mbk == 0x080037C0 && donorFileTwlCluster != 0) {
+		)	&& arm7mbk == 0x080037C0 && donorFileTwlCluster != CLUSTER_FREE) {
 			if (moduleParams->sdk_version > 0x5050000) {
 				*(u32*)(startOffset+0x838) = 0xE1A00000; // nop
 				*(u32*)(startOffset+0x99C) = 0xE1A00000; // nop

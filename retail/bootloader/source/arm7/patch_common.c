@@ -61,7 +61,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	const u32 heapEnd = extendedMemory2 ? 0x02700000 : heapEndRetail;
 	const bool debugOrMep = (extendedMemory2 || expansionPakFound);
 	const bool largeS2RAM = (expansionPakFound && (s2FlashcardId != 0)); // 16MB or more
-	if (donorFileTwlCluster == 0) {
+	if (donorFileTwlCluster == CLUSTER_FREE) {
 		return;
 	}
 
