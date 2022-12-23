@@ -12,7 +12,8 @@ typedef struct configuration {
 	char* appPath;
 	char* savPath;
 	char* prvPath;
-	char* donorPath;
+	bool useSdk20Donor;
+	char* donor20Path;
 	char* donorTwl0Path;
 	char* donorTwlPath;
 	char* donorTwlOnly0Path;

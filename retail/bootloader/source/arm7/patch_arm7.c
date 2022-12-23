@@ -370,7 +370,7 @@ u32 patchCardNdsArm7(
 ) {
 	newArm7binarySize = ndsHeader->arm7binarySize;
 
-	if (arm7mbk == 0x080037C0) {
+	if ((ndsHeader->unitCode > 0) ? (arm7mbk == 0x080037C0) : (ndsHeader->arm7binarySize == 0x25F70)) {
 		// Replace incompatible ARM7 binary
 		extern u32 donorFileTwlCluster;	// SDK5 (TWL)
 		aFile donorRomFile;

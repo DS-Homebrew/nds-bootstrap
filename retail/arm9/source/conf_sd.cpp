@@ -114,6 +114,9 @@ static void load_conf(configuration* conf, const char* fn) {
 	// PRV path
 	conf->prvPath = strdup(config_file.fetch("NDS-BOOTSTRAP", "PRV_PATH").c_str());
 
+	// SDK2.0 Donor NDS path
+	conf->donor20Path = strdup(config_file.fetch("NDS-BOOTSTRAP", "DONOR20_NDS_PATH").c_str());
+
 	// SDK5.0 (TWL) DSi-Enhanced Donor NDS path
 	conf->donorTwl0Path = strdup(config_file.fetch("NDS-BOOTSTRAP", "DONORTWL0_NDS_PATH").c_str());
 
@@ -625,6 +628,8 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		fread(&modcrypt2len, sizeof(u32), 1, ndsFile);
 	}
 
+	conf->useSdk20Donor = (unitCode == 0 && ndsArm7Size == 0x25F70);
+
 	u32 donorArm7iOffset = 0;
 	u32 donorModcrypt2len = 0;
 
@@ -697,7 +702,9 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		dsiEnhancedMbk = (isDSiMode() && *(u32*)0x02FFE1A0 == 0x00403000 && REG_SCFG_EXT7 == 0);
 
 		// Load donor ROM's arm7 binary, if needed
-		if (REG_SCFG_EXT7 == 0 && (conf->dsiMode > 0 || conf->isDSiWare) && (a7mbk6 == (dsiEnhancedMbk ? 0x080037C0 : 0x00403000) || (romTid[0] == 'H' && ndsArm7Size < 0xC000 && ndsArm7idst == 0x02E80000 && (REG_MBK9 & 0x00FFFFFF) != 0x00FFFF0F))) {
+		if (conf->useSdk20Donor) {
+			donorNdsFile = fopen(conf->donor20Path, "rb");
+		} else if (REG_SCFG_EXT7 == 0 && (conf->dsiMode > 0 || conf->isDSiWare) && (a7mbk6 == (dsiEnhancedMbk ? 0x080037C0 : 0x00403000) || (romTid[0] == 'H' && ndsArm7Size < 0xC000 && ndsArm7idst == 0x02E80000 && (REG_MBK9 & 0x00FFFFFF) != 0x00FFFF0F))) {
 			if (romTid[0] == 'H' && ndsArm7Size < 0xC000 && ndsArm7idst == 0x02E80000) {
 				if (strncmp((dsiEnhancedMbk ? conf->donorTwl0Path : conf->donorTwlOnly0Path), "nand:", 5) == 0) {
 					fatMountSimple("nand", &io_dsi_nand);
@@ -1479,8 +1486,11 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	fclose(ndsFile);
 	fclose(donorNdsFile);
 
-	if (dsiFeatures() && (strncmp(conf->donorTwl0Path, "fat", 3) != 0 || strncmp(conf->donorTwlPath, "fat", 3) != 0)) {
+	if (dsiFeatures() && (strncmp(conf->donor20Path, "fat", 3) != 0 || strncmp(conf->donorTwl0Path, "fat", 3) != 0 || strncmp(conf->donorTwlPath, "fat", 3) != 0)) {
 		easysave::ini config_file_b4ds("fat:/_nds/nds-bootstrap.ini");
+
+		// SDK2.0 Donor NDS path
+		conf->donor20Path = strdup(config_file_b4ds.fetch("NDS-BOOTSTRAP", "DONOR20_NDS_PATH").c_str());
 
 		// SDK5.0 (TWL) DSi-Enhanced Donor NDS path
 		conf->donorTwl0Path = strdup(config_file_b4ds.fetch("NDS-BOOTSTRAP", "DONORTWL0_NDS_PATH").c_str());
@@ -1617,6 +1627,8 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 						standaloneDonor = true;
 					}
 				}
+			} else if (conf->useSdk20Donor) {
+				donorNdsFile = fopen(conf->donor20Path, "rb");
 			}
 
 			FILE* ndsFile = (donorNdsFile) ? donorNdsFile : fopen(conf->ndsPath, "rb");
