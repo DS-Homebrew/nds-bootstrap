@@ -1369,7 +1369,7 @@ int arm7_main(void) {
 	bool foundModuleParams;
 	module_params_t* moduleParams = loadModuleParams(&dsiHeaderTemp.ndshdr, &foundModuleParams);
 	ltd_module_params_t* ltdModuleParams = NULL;
-	if (ndsHeader->unitCode > 0) {
+	if (dsiHeaderTemp.ndshdr.unitCode > 0) {
 		extern u32* findLtdModuleParamsOffset(const tNDSHeader* ndsHeader);
 		ltdModuleParams = (ltd_module_params_t*)(findLtdModuleParamsOffset(&dsiHeaderTemp.ndshdr) - 4);
 	}
