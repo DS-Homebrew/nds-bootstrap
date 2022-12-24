@@ -2,6 +2,7 @@
 	.global mepHeapSetPatch
 	.global twlFontHeapAlloc
 	.global twlFontHeapAllocSize
+	.global twlFontHeapAllocNoMep
 	.global cch2HeapAlloc
 	.global cch2HeapAddrPtr
 	@.global elementalistsHeapAlloc
@@ -27,6 +28,8 @@ twlFontHeapAlloc:
 	.word twlFontHeapPtr
 twlFontHeapAllocSize:
 	.word twlFontHeapAllocFunc_end-twlFontHeapPtr
+twlFontHeapAllocNoMep:
+	.word twlFontHeapAllocFuncNoMep
 cch2HeapAlloc:
 	.word cch2HeapAllocFunc
 cch2HeapAddrPtr:
@@ -124,6 +127,14 @@ twlFontUseOldHeapPtr:
 .pool
 @---------------------------------------------------------------------------------
 twlFontHeapAllocFunc_end:
+
+@---------------------------------------------------------------------------------
+twlFontHeapAllocFuncNoMep:
+@---------------------------------------------------------------------------------
+	ldr r0, =0x02300000
+	bx	lr
+.pool
+@---------------------------------------------------------------------------------
 
 @---------------------------------------------------------------------------------
 cch2OrgFunction: .word 0

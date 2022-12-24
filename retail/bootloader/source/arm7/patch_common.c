@@ -77,6 +77,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	const u32* dsiSaveSeek = ce9->patches->dsiSaveSeek;
 	const u32* dsiSaveRead = ce9->patches->dsiSaveRead;
 	const u32* dsiSaveWrite = ce9->patches->dsiSaveWrite;
+	const u32* dsReset = ce9->patches->reset_arm9;
 
 	const bool twlFontFound = twlSharedFont;
 	//const bool chnFontFound = chnSharedFont;
@@ -8181,14 +8182,25 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Motto Me de Unou o Kitaeru: DS Sokudoku Jutsu Light (Japan)
 	else if (strcmp(romTid, "K9SJ") == 0) {
+		useSharedFont = twlFontFound;
 		*(u32*)0x0200E824 = 0xE1A00000; // nop
 		tonccpy((u32*)0x0200F3A8, dsiSaveGetResultCode, 0xC);
 		*(u32*)0x02011D58 = 0xE1A00000; // nop
 		patchInitDSiWare(0x02016F60, heapEnd);
-		*(u32*)0x020172EC = 0x0207AE60;
+		if (!extendedMemory2) {
+			*(u32*)0x020172EC = 0x0207AE60;
+		}
 		patchUserSettingsReadDSiWare(0x02018304);
 		*(u32*)0x0201AFEC = 0xE1A00000; // nop
-		*(u32*)0x0203F378 = 0xE1A00000; // nop (Skip Manual screen)
+		if (useSharedFont) {
+			if (!extendedMemory2) {
+				*(u32*)0x02049B48 = 0xE3A00000; // mov r0, #0 (Soft-reset parameter)
+				setBL(0x02049B4C, (u32)dsReset);
+				patchTwlFontLoad(0x02049C38, 0x02018858);
+			}
+		} else {
+			*(u32*)0x0203F378 = 0xE1A00000; // nop (Skip Manual screen)
+		}
 		setBL(0x02047350, (u32)dsiSaveOpen);
 		*(u32*)0x0204738C = 0xE1A00000; // nop
 		setBL(0x0204739C, (u32)dsiSaveCreate);
@@ -13659,7 +13671,9 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		tonccpy((u32*)0x0201DA10, dsiSaveGetResultCode, 0xC);
 		*(u32*)0x02020374 = 0xE1A00000; // nop
 		patchInitDSiWare(0x02026E84, heapEnd);
-		*(u32*)0x020271F4 = 0x020E5C00;
+		if (!extendedMemory2) {
+			*(u32*)0x020271F4 = 0x020E5C00;
+		}
 		patchUserSettingsReadDSiWare(0x02028360);
 		if (useSharedFont && !extendedMemory2 && expansionPakFound) {
 			patchTwlFontLoad(0x020829B4, 0x02029298);
@@ -13688,7 +13702,9 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		tonccpy((u32*)0x02019DE4, dsiSaveGetResultCode, 0xC);
 		*(u32*)0x0201C748 = 0xE1A00000; // nop
 		patchInitDSiWare(0x02023258, heapEnd);
-		*(u32*)0x020235C8 = 0x020E1FC0;
+		if (!extendedMemory2) {
+			*(u32*)0x020235C8 = 0x020E1FC0;
+		}
 		patchUserSettingsReadDSiWare(0x02024734);
 		if (useSharedFont && !extendedMemory2 && expansionPakFound) {
 			patchTwlFontLoad(0x0207ED58, 0x0202566C);
