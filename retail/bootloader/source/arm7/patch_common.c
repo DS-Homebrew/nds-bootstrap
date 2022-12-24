@@ -1945,9 +1945,9 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Army Defender (USA)
 	// Army Defender (Europe)
 	else if (strncmp(romTid, "KAY", 3) == 0) {
-		useSharedFont = (twlFontFound && debugOrMep);
+		useSharedFont = twlFontFound;
 		*(u32*)0x0200523C = 0xE1A00000; // nop
-		if (useSharedFont && !extendedMemory2 && expansionPakFound) {
+		if (useSharedFont && !extendedMemory2) {
 			patchTwlFontLoad(0x0201FDD8, 0x0204F5DC);
 		}
 		setBL(0x02020A28, (u32)dsiSaveCreate);
@@ -3847,14 +3847,14 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Chuck E. Cheese's Alien Defense Force (USA)
 	else if (strcmp(romTid, "KUQE") == 0) {
-		useSharedFont = (twlFontFound && debugOrMep);
+		useSharedFont = twlFontFound;
 		*(u32*)0x0200BB6C = 0xE1A00000; // nop
 		*(u32*)0x0200F008 = 0xE1A00000; // nop
 		patchInitDSiWare(0x02014064, heapEnd);
 		patchUserSettingsReadDSiWare(0x02015504);
 		*(u32*)0x0201829C = 0xE1A00000; // nop
 		if (useSharedFont) {
-			if (!extendedMemory2 && expansionPakFound) {
+			if (!extendedMemory2) {
 				patchTwlFontLoad(0x0201B808, 0x02015A84);
 			}
 		} else {
@@ -3880,14 +3880,14 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Chuck E. Cheese's Arcade Room (USA)
 	else if (strcmp(romTid, "KUCE") == 0) {
-		useSharedFont = (twlFontFound && debugOrMep);
+		useSharedFont = twlFontFound;
 		*(u32*)0x02013978 = 0xE1A00000; // nop
 		*(u32*)0x02016E14 = 0xE1A00000; // nop
 		patchInitDSiWare(0x0201BFC0, heapEnd);
 		patchUserSettingsReadDSiWare(0x0201D460);
 		*(u32*)0x020201F8 = 0xE1A00000; // nop
 		if (useSharedFont) {
-			if (!extendedMemory2 && expansionPakFound) {
+			if (!extendedMemory2) {
 				patchTwlFontLoad(0x02045814, 0x0201D9E0);
 			}
 		} else {
@@ -7019,7 +7019,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Maestro! Green Groove (Europe, Australia)
 	// Does not save due to unknown cause
 	else if (strcmp(romTid, "KMUE") == 0 || strcmp(romTid, "KM6V") == 0) {
-		useSharedFont = (twlFontFound && debugOrMep);
+		useSharedFont = twlFontFound;
 		*(u32*)0x020137E4 = 0xE1A00000; // nop
 		*(u32*)0x02016C1C = 0xE1A00000; // nop
 		patchInitDSiWare(0x0201E704, heapEnd);
@@ -7048,7 +7048,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBL(0x020BC9B0, (u32)dsiSaveRead);
 			setBL(0x020BC9BC, (u32)dsiSaveClose); */
 
-			if (useSharedFont && !extendedMemory2 && expansionPakFound) {
+			if (useSharedFont && !extendedMemory2) {
 				patchTwlFontLoad(0x020C3230, 0x02020064);
 			}
 		} else {
@@ -7074,7 +7074,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBL(0x020BCE88, (u32)dsiSaveRead);
 			setBL(0x020BCE94, (u32)dsiSaveClose); */
 
-			if (useSharedFont && !extendedMemory2 && expansionPakFound) {
+			if (useSharedFont && !extendedMemory2) {
 				patchTwlFontLoad(0x020C3708, 0x02020064);
 			}
 		}
@@ -8194,8 +8194,10 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0201AFEC = 0xE1A00000; // nop
 		if (useSharedFont) {
 			if (!extendedMemory2) {
-				*(u32*)0x02049B48 = 0xE3A00000; // mov r0, #0 (Soft-reset parameter)
-				setBL(0x02049B4C, (u32)dsReset);
+				if (expansionPakFound) {
+					*(u32*)0x02049B48 = 0xE3A00000; // mov r0, #0 (Soft-reset parameter)
+					setBL(0x02049B4C, (u32)dsReset);
+				}
 				patchTwlFontLoad(0x02049C38, 0x02018858);
 			}
 		} else {
@@ -12879,7 +12881,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02010A2C = 0xE1A00000; // nop
 		*(u32*)0x02014720 = 0xE1A00000; // nop
 		patchInitDSiWare(0x0201A04C, heapEnd);
-		if (useSharedFont && !extendedMemory2 && expansionPakFound) {
+		if (useSharedFont && !extendedMemory2) {
 			patchTwlFontLoad(0x0201FE10, 0x0201BB4C);
 		}
 		*(u32*)0x0201E434 = 0xE1A00000; // nop
@@ -13361,7 +13363,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// VT Tennis (USA)
 	else if (strcmp(romTid, "KVTE") == 0) {
-		useSharedFont = (twlFontFound && debugOrMep);
+		useSharedFont = twlFontFound;
 		*(u32*)0x0200509C = 0xE1A00000; // nop
 		*(u32*)0x020058EC = 0xE1A00000; // nop
 		*(u32*)0x0201AA9C = 0xE1A00000; // nop
@@ -13371,7 +13373,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchUserSettingsReadDSiWare(0x02027A48);
 		*(u32*)0x0202AFD4 = 0xE1A00000; // nop
 		if (useSharedFont) {
-			if (!extendedMemory2 && expansionPakFound) {
+			if (!extendedMemory2) {
 				patchTwlFontLoad(0x0209AB60, 0x02027F8C);
 			}
 		} else {
@@ -13390,7 +13392,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// VT Tennis (Europe, Australia)
 	else if (strcmp(romTid, "KVTV") == 0) {
-		useSharedFont = (twlFontFound && debugOrMep);
+		useSharedFont = twlFontFound;
 		*(u32*)0x02005084 = 0xE1A00000; // nop
 		*(u32*)0x020057D0 = 0xE1A00000; // nop
 		*(u32*)0x0201A168 = 0xE1A00000; // nop
@@ -13400,7 +13402,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchUserSettingsReadDSiWare(0x02027114);
 		*(u32*)0x0202A6A0 = 0xE1A00000; // nop
 		if (useSharedFont) {
-			if (!extendedMemory2 && expansionPakFound) {
+			if (!extendedMemory2) {
 				patchTwlFontLoad(0x0209AB60, 0x02027F8C);
 			}
 		} else {
@@ -13665,7 +13667,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Yummy Yummy Cooking Jam (USA)
 	// Music is disabled
 	else if (strcmp(romTid, "KYUE") == 0) {
-		useSharedFont = (twlFontFound && debugOrMep);
+		useSharedFont = twlFontFound;
 		*(u32*)0x0200508C = 0xE1A00000; // nop
 		*(u32*)0x0201CD5C = 0xE1A00000; // nop
 		tonccpy((u32*)0x0201DA10, dsiSaveGetResultCode, 0xC);
@@ -13675,7 +13677,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			*(u32*)0x020271F4 = 0x020E5C00;
 		}
 		patchUserSettingsReadDSiWare(0x02028360);
-		if (useSharedFont && !extendedMemory2 && expansionPakFound) {
+		if (useSharedFont && !extendedMemory2) {
 			patchTwlFontLoad(0x020829B4, 0x02029298);
 		}
 		*(u32*)0x0202B6F0 = 0xE1A00000; // nop
@@ -13696,7 +13698,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Yummy Yummy Cooking Jam (Europe, Australia)
 	// Music is disabled
 	else if (strcmp(romTid, "KYUV") == 0) {
-		useSharedFont = (twlFontFound && debugOrMep);
+		useSharedFont = twlFontFound;
 		*(u32*)0x0200148C = 0xE1A00000; // nop
 		*(u32*)0x02019130 = 0xE1A00000; // nop
 		tonccpy((u32*)0x02019DE4, dsiSaveGetResultCode, 0xC);
@@ -13706,7 +13708,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			*(u32*)0x020235C8 = 0x020E1FC0;
 		}
 		patchUserSettingsReadDSiWare(0x02024734);
-		if (useSharedFont && !extendedMemory2 && expansionPakFound) {
+		if (useSharedFont && !extendedMemory2) {
 			patchTwlFontLoad(0x0207ED58, 0x0202566C);
 		}
 		*(u32*)0x02027AC4 = 0xE1A00000; // nop
