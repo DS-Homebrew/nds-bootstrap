@@ -628,7 +628,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		fread(&modcrypt2len, sizeof(u32), 1, ndsFile);
 	}
 
-	conf->useSdk20Donor = (unitCode == 0 && ndsArm7Size == 0x25F70);
+	conf->useSdk20Donor = (memcmp(romTid, "AYI", 3) == 0 && unitCode == 0 && ndsArm7Size == 0x25F70);
 
 	u32 donorArm7iOffset = 0;
 	u32 donorModcrypt2len = 0;

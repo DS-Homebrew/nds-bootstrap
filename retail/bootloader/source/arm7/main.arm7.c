@@ -491,6 +491,9 @@ static void loadBinary_ARM7(const tDSiHeader* dsiHeaderTemp, aFile* file) {
 	//u32 ndsHeader[0x170 >> 2];
 	//u32 dsiHeader[0x2F0 >> 2]; // SDK 5
 
+	char baseTid[5] = {0};
+	fileRead((char*)&baseTid, file, 0xC, 4);
+
 	// Read DSi header (including NDS header)
 	//fileRead((char*)ndsHeader, file, 0, 0x170, 3);
 	//fileRead((char*)dsiHeader, file, 0, 0x2F0, 2); // SDK 5
@@ -517,13 +520,11 @@ static void loadBinary_ARM7(const tDSiHeader* dsiHeaderTemp, aFile* file) {
 
 		// Load binaries into memory
 		fileRead(dsiHeaderTemp->ndshdr.arm9destination, file, srlAddr+dsiHeaderTemp->ndshdr.arm9romOffset, dsiHeaderTemp->ndshdr.arm9binarySize);
-		if ((ndsHeader->unitCode > 0) ? (arm7mbk != 0x080037C0 || (arm7mbk == 0x080037C0 && donorFileTwlCluster == CLUSTER_FREE)) : (ndsHeader->arm7binarySize != 0x25F70)) {
+		if ((ndsHeader->unitCode > 0) ? (arm7mbk != 0x080037C0 || (arm7mbk == 0x080037C0 && donorFileTwlCluster == CLUSTER_FREE)) : (strncmp(baseTid, "AYI", 3) != 0 || ndsHeader->arm7binarySize != 0x25F70)) {
 			fileRead(dsiHeaderTemp->ndshdr.arm7destination, file, srlAddr+dsiHeaderTemp->ndshdr.arm7romOffset, dsiHeaderTemp->ndshdr.arm7binarySize);
 		}
 	}
 
-	char baseTid[5] = {0};
-	fileRead((char*)&baseTid, file, 0xC, 4);
 	if (
 		strncmp(baseTid, "ADA", 3) == 0    // Diamond
 		|| strncmp(baseTid, "APA", 3) == 0 // Pearl
