@@ -87,6 +87,7 @@ patches:
 .word	card_set_dma_arm9
 .word   nand_read_arm9
 .word   nand_write_arm9
+#ifdef TWLSDK
 .word   dsiSaveGetResultCode_arm
 .word   dsiSaveCreate_arm
 .word   dsiSaveDelete_arm
@@ -99,6 +100,20 @@ patches:
 .word   dsiSaveSeek_arm
 .word   dsiSaveRead_arm
 .word   dsiSaveWrite_arm
+#else
+.word   0x0
+.word   0x0
+.word   0x0
+.word   0x0
+.word   0x0
+.word   0x0
+.word   0x0
+.word   0x0
+.word   0x0
+.word   0x0
+.word   0x0
+.word   0x0
+#endif
 .word	cardStructArm9
 .word   waitSysCycles
 .word	cart_read
@@ -109,7 +124,11 @@ patches:
 .word   reset_arm9
 needFlushDCCache:
 .word   0x0
+#ifndef TWLSDK
 .word   pdash_read
+#else
+.word   0x0
+#endif
 .word   vblankHandler
 .word   ipcSyncHandler
 thumbPatches:
@@ -351,6 +370,7 @@ thumb_nand_write_arm9:
 @---------------------------------------------------------------------------------
 
 	.arm
+#ifdef TWLSDK
 @---------------------------------------------------------------------------------
 dsiSaveGetResultCode_arm:
 @---------------------------------------------------------------------------------
@@ -435,6 +455,7 @@ dsiSaveWrite_arm:
 	ldr	pc, =dsiSaveWrite
 .pool
 @---------------------------------------------------------------------------------
+#endif
 
 @---------------------------------------------------------------------------------
 card_irq_enable:
@@ -465,7 +486,7 @@ thumb_card_irq_enable:
 .align	4
 @---------------------------------------------------------------------------------
 
-
+#ifndef TWLSDK
 	.arm
 pdash_read:
     push	{r1-r11, lr}
@@ -479,7 +500,8 @@ pdash_read:
     pop	    {r1-r11, pc}
 .pool
 
-	.thumb   
+	.thumb
+#endif
 @---------------------------------------------------------------------------------
 thumb_card_pull_out_arm9:
 thumb_card_pull:

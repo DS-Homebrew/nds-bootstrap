@@ -495,9 +495,7 @@ bool isNotTcm(u32 address, u32 len) {
 
 #ifndef TWLSDK
 static int counter=0;
-#endif
 int cardReadPDash(u32* cacheStruct, u32 src, u8* dst, u32 len) {
-	#ifndef TWLSDK
 	vu32* volatile cardStruct = (vu32* volatile)ce9->cardStruct0;
 
     cardStruct[0] = src;
@@ -508,10 +506,8 @@ int cardReadPDash(u32* cacheStruct, u32 src, u8* dst, u32 len) {
 
     counter++;
 	return counter;
-	#else
-	return 0;
-	#endif
 }
+#endif
 
 //extern void region2Disable();
 
@@ -1033,50 +1029,6 @@ void initMBKARM9_dsiMode(void) {
 	REG_MBK7 = *(u32*)0x02FFE198;
 	REG_MBK8 = *(u32*)0x02FFE19C;
 	REG_MBK9 = *(u32*)0x02FFE1AC;
-}
-#else
-u32 dsiSaveGetResultCode(const char* path) {
-	return 0xB;
-}
-
-bool dsiSaveCreate(const char* path, u32 permit) {
-	return false;
-}
-
-bool dsiSaveDelete(const char* path) {
-	return false;
-}
-
-bool dsiSaveGetInfo(const char* path, u32* info) {
-	return false;
-}
-
-u32 dsiSaveSetLength(void* ctx, s32 len) {
-	return 1;
-}
-
-bool dsiSaveOpen(void* ctx, const char* path, u32 mode) {
-	return false;
-}
-
-bool dsiSaveClose(void* ctx) {
-	return false;
-}
-
-u32 dsiSaveGetLength(void* ctx) {
-	return 0;
-}
-
-bool dsiSaveSeek(void* ctx, s32 pos, u32 mode) {
-	return false;
-}
-
-s32 dsiSaveRead(void* ctx, void* dst, u32 len) {
-	return -1;
-}
-
-s32 dsiSaveWrite(void* ctx, void* src, s32 len) {
-	return -1;
 }
 #endif
 
