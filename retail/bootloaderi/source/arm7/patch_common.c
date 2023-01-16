@@ -4152,6 +4152,24 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// Music on: Acoustic Guitar (USA)
+	// Saving is difficult to implement
+	else if (strcmp(romTid, "KG6E") == 0 && !twlFontFound) {
+		// Skip Manual screen
+		*(u32*)0x02008864 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02008A10 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02008A24 = 0xE12FFF1E; // bx lr
+	}
+
+	// Music on: Acoustic Guitar (Europe, Australia)
+	// Saving is difficult to implement
+	else if (strcmp(romTid, "KG6V") == 0 && !twlFontFound) {
+		// Skip Manual screen
+		*(u32*)0x02008864 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02008A34 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02008A48 = 0xE12FFF1E; // bx lr
+	}
+
 	// Music on: Drums (USA)
 	// Saving is difficult to implement
 	else if (strcmp(romTid, "KQDE") == 0 && !twlFontFound) {

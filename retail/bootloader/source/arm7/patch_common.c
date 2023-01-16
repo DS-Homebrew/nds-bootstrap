@@ -8381,6 +8381,74 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchUserSettingsReadDSiWare(0x02042E48);
 	}
 
+	// Music on: Acoustic Guitar (USA)
+	// Saving is difficult to implement
+	else if (strcmp(romTid, "KG6E") == 0) {
+		useSharedFont = twlFontFound;
+		*(u32*)0x02007988 += 0xD0000000; // bne -> b
+		if (useSharedFont) {
+			if (!extendedMemory2) {
+				// Skip Manual screen when past title screen
+				*(u32*)0x02012A88 = 0xE1A00000; // nop
+				*(u32*)0x02012A8C = 0xE1A00000; // nop
+				*(u32*)0x02012A90 = 0xE1A00000; // nop
+			}
+		} else {
+			// Skip Manual screen
+			*(u32*)0x02008864 = 0xE12FFF1E; // bx lr
+			*(u32*)0x02008A10 = 0xE12FFF1E; // bx lr
+			*(u32*)0x02008A24 = 0xE12FFF1E; // bx lr
+		}
+
+		*(u32*)0x0200A3FC = 0xE1A00000; // nop
+		*(u32*)0x0200A44C = 0xE1A00000; // nop
+		*(u32*)0x0200A46C = 0xE1A00000; // nop
+		*(u32*)0x0200A47C = 0xE1A00000; // nop
+		*(u32*)0x0200A4A8 = 0xE1A00000; // nop
+
+		*(u32*)0x0201C654 = 0xE1A00000; // nop
+		*(u32*)0x0201FB94 = 0xE1A00000; // nop
+		*(u32*)0x0201FFBC = 0xE1A00000; // nop
+		*(u32*)0x0201FFC0 = 0xE1A00000; // nop
+		patchInitDSiWare(0x02024778, heapEnd);
+		patchUserSettingsReadDSiWare(0x02025E00);
+		*(u32*)0x02028E70 = 0xE1A00000; // nop
+	}
+
+	// Music on: Acoustic Guitar (Europe, Australia)
+	// Saving is difficult to implement
+	else if (strcmp(romTid, "KG6V") == 0) {
+		useSharedFont = twlFontFound;
+		*(u32*)0x02007988 += 0xD0000000; // bne -> b
+		if (useSharedFont) {
+			if (!extendedMemory2) {
+				// Skip Manual screen when past title screen
+				*(u32*)0x02012A0C = 0xE1A00000; // nop
+				*(u32*)0x02012A10 = 0xE1A00000; // nop
+				*(u32*)0x02012A14 = 0xE1A00000; // nop
+			}
+		} else {
+			// Skip Manual screen
+			*(u32*)0x02008864 = 0xE12FFF1E; // bx lr
+			*(u32*)0x02008A34 = 0xE12FFF1E; // bx lr
+			*(u32*)0x02008A48 = 0xE12FFF1E; // bx lr
+		}
+
+		*(u32*)0x0200A3FC = 0xE1A00000; // nop
+		*(u32*)0x0200A44C = 0xE1A00000; // nop
+		*(u32*)0x0200A46C = 0xE1A00000; // nop
+		*(u32*)0x0200A47C = 0xE1A00000; // nop
+		*(u32*)0x0200A4A8 = 0xE1A00000; // nop
+
+		*(u32*)0x0201C5D8 = 0xE1A00000; // nop
+		*(u32*)0x0201FB18 = 0xE1A00000; // nop
+		*(u32*)0x0201FF40 = 0xE1A00000; // nop
+		*(u32*)0x0201FF44 = 0xE1A00000; // nop
+		patchInitDSiWare(0x020246FC, heapEnd);
+		patchUserSettingsReadDSiWare(0x02025D84);
+		*(u32*)0x02028DF4 = 0xE1A00000; // nop
+	}
+
 	// Music on: Drums (USA)
 	// Saving is difficult to implement
 	else if (strcmp(romTid, "KQDE") == 0) {
