@@ -521,17 +521,16 @@ void cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	//nocashMessage("\narm9 cardRead\n");
 	#ifndef TWLSDK
 	initialize();
+
+	if (!(ce9->valueBits & isSdk5) && !(ce9->valueBits & ROMinRAM)) {
+		debugRamMpuFix();
+	}
 	#endif
 
 	if (!flagsSet) {
 		#ifndef TWLSDK
-		if (!(ce9->valueBits & isSdk5)) {
-			if (region0FixNeeded) {
-				region0Fix();
-			}
-			if (!(ce9->valueBits & ROMinRAM)) {
-				debugRamMpuFix();
-			}
+		if (!(ce9->valueBits & isSdk5) && region0FixNeeded) {
+			region0Fix();
 		}
 		#endif
 		if (!driveInitialized) {
