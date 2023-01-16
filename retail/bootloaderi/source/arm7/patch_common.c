@@ -626,6 +626,45 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02029DCC, (u32)dsiSaveClose); */
 	}
 
+	// Alien Puzzle Adventure (USA)
+	// Alien Puzzle Adventure (Europe, Australia)
+	else if (strcmp(romTid, "KP7E") == 0 || strcmp(romTid, "KP7V") == 0) {
+		if (saveOnFlashcard) {
+			setBL(0x0200D894, (u32)dsiSaveCreate);
+			setBL(0x0200D8A8, (u32)dsiSaveOpen);
+			setBL(0x0200D8D0, (u32)dsiSaveCreate);
+			setBL(0x0200D8E8, (u32)dsiSaveOpen);
+			setBL(0x0200D8F4, (u32)dsiSaveSetLength);
+			setBL(0x0200D90C, (u32)dsiSaveWrite);
+			setBL(0x0200D91C, (u32)dsiSaveClose);
+			setBL(0x0200D9A0, (u32)dsiSaveWrite);
+			setBL(0x0200D9A8, (u32)dsiSaveClose);
+			*(u32*)0x0200D9D8 = 0xE12FFF1E; // bx lr
+			setBL(0x0200DA24, (u32)dsiSaveOpen);
+			*(u32*)0x0200DA3C = 0xE1A00000; // nop
+			*(u32*)0x0200DA48 = 0xE3A00008; // mov r0, #8
+			setBL(0x0200DB2C, (u32)dsiSaveDelete);
+			*(u32*)0x0200DBA8 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+			*(u32*)0x0200DBC0 = 0xE3A00001; // mov r0, #1 (dsiSaveFreeSpaceAvailable)
+			setBL(0x0200DC44, (u32)dsiSaveGetLength);
+			setBL(0x0200DC64, (u32)dsiSaveRead);
+			setBL(0x0200DC6C, (u32)dsiSaveClose);
+			*(u32*)0x0200DDB4 = 0xE1A00000; // nop
+			if (ndsHeader->gameCode[3] == 'E') {
+				tonccpy((u32*)0x0203FD80, dsiSaveGetResultCode, 0xC);
+			} else {
+				tonccpy((u32*)0x0203FCD4, dsiSaveGetResultCode, 0xC);
+			}
+		}
+		if (!twlFontFound) {
+			if (ndsHeader->gameCode[3] == 'E') {
+				*(u32*)0x02017864 = 0xE1A00000; // nop (Skip Manual screen)
+			} else {
+				*(u32*)0x020177AC = 0xE1A00000; // nop (Skip Manual screen)
+			}
+		}
+	}
+
 	// Amakuchi! Dairoujou (Japan)
 	else if (strcmp(romTid, "KF2J") == 0 && saveOnFlashcard) {
 		setBL(0x0203C1C8, (u32)dsiSaveOpen);

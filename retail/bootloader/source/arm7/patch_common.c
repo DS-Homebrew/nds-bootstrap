@@ -1107,6 +1107,69 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0205D21C = 0xE1A00000; // nop
 	}*/
 
+	// Alien Puzzle Adventure (USA)
+	// Alien Puzzle Adventure (Europe, Australia)
+	else if (strcmp(romTid, "KP7E") == 0 || strcmp(romTid, "KP7V") == 0) {
+		useSharedFont = twlFontFound;
+		*(u32*)0x02005090 = 0xE1A00000; // nop
+		*(u32*)0x02005098 = 0xE1A00000; // nop
+		*(u32*)0x020053B0 = 0xE1A00000; // nop
+		*(u32*)0x020053B4 = 0xE1A00000; // nop
+		*(u32*)0x020053B8 = 0xE1A00000; // nop
+		*(u32*)0x020053BC = 0xE1A00000; // nop
+		setBL(0x0200D894, (u32)dsiSaveCreate);
+		setBL(0x0200D8A8, (u32)dsiSaveOpen);
+		setBL(0x0200D8D0, (u32)dsiSaveCreate);
+		setBL(0x0200D8E8, (u32)dsiSaveOpen);
+		setBL(0x0200D8F4, (u32)dsiSaveSetLength);
+		setBL(0x0200D90C, (u32)dsiSaveWrite);
+		setBL(0x0200D91C, (u32)dsiSaveClose);
+		setBL(0x0200D9A0, (u32)dsiSaveWrite);
+		setBL(0x0200D9A8, (u32)dsiSaveClose);
+		*(u32*)0x0200D9D8 = 0xE12FFF1E; // bx lr
+		setBL(0x0200DA24, (u32)dsiSaveOpen);
+		*(u32*)0x0200DA3C = 0xE1A00000; // nop
+		*(u32*)0x0200DA48 = 0xE3A00008; // mov r0, #8
+		setBL(0x0200DB2C, (u32)dsiSaveDelete);
+		*(u32*)0x0200DBA8 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+		*(u32*)0x0200DBC0 = 0xE3A00001; // mov r0, #1 (dsiSaveFreeSpaceAvailable)
+		setBL(0x0200DC44, (u32)dsiSaveGetLength);
+		setBL(0x0200DC64, (u32)dsiSaveRead);
+		setBL(0x0200DC6C, (u32)dsiSaveClose);
+		*(u32*)0x0200DDB4 = 0xE1A00000; // nop
+		if (ndsHeader->gameCode[3] == 'E') {
+			if (useSharedFont) {
+				*(u32*)0x02025338 = 0xE3A05703; // mov r5, 0xC0000
+				if (!extendedMemory2) {
+					patchTwlFontLoad(0x02025448, 0x02049D80);
+				}
+			} else {
+				*(u32*)0x02017864 = 0xE1A00000; // nop (Skip Manual screen)
+			}
+			*(u32*)0x0203F1EC = 0xE1A00000; // nop
+			tonccpy((u32*)0x0203FD80, dsiSaveGetResultCode, 0xC);
+			*(u32*)0x020428B8 = 0xE1A00000; // nop
+			patchInitDSiWare(0x02048244, heapEnd);
+			patchUserSettingsReadDSiWare(0x0204982C);
+			*(u32*)0x0204CE2C = 0xE1A00000; // nop
+		} else {
+			if (useSharedFont) {
+				*(u32*)0x0202526C = 0xE3A05703; // mov r5, 0xC0000
+				if (!extendedMemory2) {
+					patchTwlFontLoad(0x0202537C, 0x02049CD4);
+				}
+			} else {
+				*(u32*)0x020177AC = 0xE1A00000; // nop (Skip Manual screen)
+			}
+			*(u32*)0x0203F140 = 0xE1A00000; // nop
+			tonccpy((u32*)0x0203FCD4, dsiSaveGetResultCode, 0xC);
+			*(u32*)0x0204280C = 0xE1A00000; // nop
+			patchInitDSiWare(0x02048198, heapEnd);
+			patchUserSettingsReadDSiWare(0x02049780);
+			*(u32*)0x0204CD80 = 0xE1A00000; // nop
+		}
+	}
+
 	// G.G. Series: All Breaker (USA)
 	// G.G. Series: All Breaker (Japan)
 	// Requires 8MB of RAM
