@@ -5617,6 +5617,12 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02040240 = 0xE1A00000; // nop (Skip Manual screen)
 	}
 
+	// Anaume Pazuru Gemu Q (Japan)
+	// A bit hard/confusing to add save support
+	else if (strcmp(romTid, "KUMJ") == 0 && !twlFontFound) {
+		*(u32*)0x02040460 = 0xE1A00000; // nop (Skip Manual screen)
+	}
+
 	// Rabi Laby (USA)
 	// Rabi Laby (Europe)
 	else if (strcmp(romTid, "KLBE") == 0 || strcmp(romTid, "KLBP") == 0) {

@@ -11194,6 +11194,17 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02040240 = 0xE1A00000; // nop (Skip Manual screen)
 	}
 
+	// Anaume Pazuru Gemu Q (Japan)
+	// A bit hard/confusing to add save support
+	else if (strcmp(romTid, "KUMJ") == 0) {
+		*(u32*)0x020102DC = 0xE1A00000; // nop
+		*(u32*)0x02013980 = 0xE1A00000; // nop
+		patchInitDSiWare(0x0201914C, heapEnd);
+		patchUserSettingsReadDSiWare(0x0201A71C);
+		*(u32*)0x0201DD8C = 0xE1A00000; // nop
+		*(u32*)0x02040460 = 0xE1A00000; // nop (Skip Manual screen)
+	}
+
 	// Rabi Laby (USA)
 	// Rabi Laby (Europe)
 	else if (strcmp(romTid, "KLBE") == 0 || strcmp(romTid, "KLBP") == 0) {
