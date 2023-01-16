@@ -1130,7 +1130,8 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0200DA24, (u32)dsiSaveOpen);
 		*(u32*)0x0200DA3C = 0xE1A00000; // nop
 		*(u32*)0x0200DA48 = 0xE3A00008; // mov r0, #8
-		setBL(0x0200DB2C, (u32)dsiSaveDelete);
+		*(u32*)0x0200DB2C = 0xE1A00000; // nop (dsiSaveCreateDir)
+		*(u32*)0x0200DB34 = 0xE3A00008; // mov r0, #8
 		*(u32*)0x0200DBA8 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
 		*(u32*)0x0200DBC0 = 0xE3A00001; // mov r0, #1 (dsiSaveFreeSpaceAvailable)
 		setBL(0x0200DC44, (u32)dsiSaveGetLength);
@@ -2003,6 +2004,57 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0207BC74 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x0207BC78 = 0xE12FFF1E; // bx lr
 		*(u32*)0x0207F478 = 0xE1A00000; // nop
+	}
+
+	// Arcade Bowling (USA)
+	else if (strcmp(romTid, "K4BE") == 0) {
+		useSharedFont = twlFontFound;
+		*(u32*)0x0200B774 = 0xE1A00000; // nop
+		*(u32*)0x0200F3FC = 0xE1A00000; // nop
+		patchInitDSiWare(0x02014DA8, heapEnd);
+		patchUserSettingsReadDSiWare(0x020163A4);
+		*(u32*)0x020197AC = 0xE1A00000; // nop
+		setBL(0x0201F8EC, (u32)dsiSaveOpen);
+		setBL(0x0201F900, (u32)dsiSaveGetLength);
+		setBL(0x0201F914, (u32)dsiSaveRead);
+		setBL(0x0201F924, (u32)dsiSaveClose);
+		*(u32*)0x0201F9C4 = 0xE1A00000; // nop
+		setBL(0x0201F9D4, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+		setBL(0x0201F9F0, (u32)dsiSaveOpen);
+		setBL(0x0201FA08, (u32)dsiSaveSetLength);
+		setBL(0x0201FA18, (u32)dsiSaveWrite);
+		setBL(0x0201FA20, (u32)dsiSaveClose);
+		setBL(0x0201FAA0, (u32)dsiSaveOpen);
+		setBL(0x0201FAB8, (u32)dsiSaveSetLength);
+		setBL(0x0201FAC8, (u32)dsiSaveWrite);
+		setBL(0x0201FAD4, (u32)dsiSaveClose);
+		if (!useSharedFont) {
+			setB(0x0202036C, 0x02020A78); // Skip Manual screen
+		}
+	}
+
+	// Arcade Hoops Basketball (USA)
+	else if (strcmp(romTid, "KSAE") == 0) {
+		setBL(0x020066D0, (u32)dsiSaveOpen);
+		setBL(0x020066E4, (u32)dsiSaveGetLength);
+		setBL(0x020066F8, (u32)dsiSaveRead);
+		setBL(0x02006708, (u32)dsiSaveClose);
+		*(u32*)0x020067A8 = 0xE1A00000; // nop
+		setBL(0x020067B8, (u32)dsiSaveCreate);
+		setBL(0x020067D4, (u32)dsiSaveOpen);
+		setBL(0x020067EC, (u32)dsiSaveSetLength);
+		setBL(0x020067FC, (u32)dsiSaveWrite);
+		setBL(0x02006804, (u32)dsiSaveClose);
+		setBL(0x02006890, (u32)dsiSaveOpen);
+		setBL(0x020068A8, (u32)dsiSaveSetLength);
+		setBL(0x020068B8, (u32)dsiSaveWrite);
+		setBL(0x020068C4, (u32)dsiSaveClose);
+		setB(0x02007064, 0x02007168); // Skip Manual screen
+		*(u32*)0x020249B4 = 0xE1A00000; // nop
+		*(u32*)0x02027FAC = 0xE1A00000; // nop
+		patchInitDSiWare(0x0202E894, heapEnd);
+		patchUserSettingsReadDSiWare(0x0202FE9C);
+		*(u32*)0x020332A4 = 0xE1A00000; // nop
 	}
 
 	// Army Defender (USA)
