@@ -666,6 +666,28 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// All-Star Air Hockey (USA)
+	else if (strcmp(romTid, "KAOE") == 0) {
+		if (saveOnFlashcard) {
+			setBL(0x020056F8, (u32)dsiSaveOpen);
+			setBL(0x0200570C, (u32)dsiSaveGetLength);
+			setBL(0x02005720, (u32)dsiSaveRead);
+			setBL(0x02005730, (u32)dsiSaveClose);
+			setBL(0x020057E0, (u32)dsiSaveCreate);
+			setBL(0x020057FC, (u32)dsiSaveOpen);
+			setBL(0x02005820, (u32)dsiSaveSetLength);
+			setBL(0x02005830, (u32)dsiSaveWrite);
+			setBL(0x02005838, (u32)dsiSaveClose);
+			setBL(0x020058E0, (u32)dsiSaveOpen);
+			setBL(0x020058F8, (u32)dsiSaveSetLength);
+			setBL(0x02005908, (u32)dsiSaveWrite);
+			setBL(0x02005914, (u32)dsiSaveClose);
+		}
+		if (!twlFontFound) {
+			setB(0x020104DC, 0x020105D4); // Skip Manual screen
+		}
+	}
+
 	// Amakuchi! Dairoujou (Japan)
 	else if (strcmp(romTid, "KF2J") == 0 && saveOnFlashcard) {
 		setBL(0x0203C1C8, (u32)dsiSaveOpen);

@@ -1183,6 +1183,33 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0205FA64 = 0xE1A00000; // nop
 	}
 
+	// All-Star Air Hockey (USA)
+	else if (strcmp(romTid, "KAOE") == 0) {
+		// useSharedFont = twlFontFound;
+		setBL(0x020056F8, (u32)dsiSaveOpen);
+		setBL(0x0200570C, (u32)dsiSaveGetLength);
+		setBL(0x02005720, (u32)dsiSaveRead);
+		setBL(0x02005730, (u32)dsiSaveClose);
+		*(u32*)0x020057D0 = 0xE1A00000; // nop
+		setBL(0x020057E0, (u32)dsiSaveCreate);
+		setBL(0x020057FC, (u32)dsiSaveOpen);
+		setBL(0x02005820, (u32)dsiSaveSetLength);
+		setBL(0x02005830, (u32)dsiSaveWrite);
+		setBL(0x02005838, (u32)dsiSaveClose);
+		setBL(0x020058E0, (u32)dsiSaveOpen);
+		setBL(0x020058F8, (u32)dsiSaveSetLength);
+		setBL(0x02005908, (u32)dsiSaveWrite);
+		setBL(0x02005914, (u32)dsiSaveClose);
+		// if (!useSharedFont) {
+			setB(0x020104DC, 0x020105D4); // Skip Manual screen
+		// }
+		*(u32*)0x020272D8 = 0xE1A00000; // nop
+		*(u32*)0x0202A784 = 0xE1A00000; // nop
+		patchInitDSiWare(0x0203002C, heapEnd);
+		patchUserSettingsReadDSiWare(0x02031634);
+		*(u32*)0x020349FC = 0xE1A00000; // nop
+	}
+
 	// AlphaBounce (USA)
 	// Does not boot
 	/*else if (strcmp(romTid, "KALE") == 0) {
