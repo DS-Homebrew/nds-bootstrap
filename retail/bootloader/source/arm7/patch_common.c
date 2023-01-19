@@ -1265,6 +1265,72 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0203C358, (u32)dsiSaveClose);
 	}
 
+	// Animal Puzzle Adventure (USA)
+	else if (strcmp(romTid, "KPCE") == 0) {
+		useSharedFont = (twlFontFound && debugOrMep);
+		if (useSharedFont && !extendedMemory2 && expansionPakFound) {
+			patchTwlFontLoad(0x0201A54C, 0x02038CB4);
+		}
+		setBL(0x020265B0, (u32)dsiSaveOpen);
+		setBL(0x020265C4, (u32)dsiSaveGetLength);
+		setBL(0x020265D4, (u32)dsiSaveRead);
+		setBL(0x020265DC, (u32)dsiSaveClose);
+		*(u32*)0x0202663C = 0xE3A00001; // mov r0, #1 (dsiSaveOpenDir)
+		*(u32*)0x0202667C = 0xE1A00000; // nop (dsiSaveCloseDir)
+		setBL(0x02026708, (u32)dsiSaveGetInfo);
+		setBL(0x02026714, (u32)dsiSaveCreate);
+		setBL(0x02026724, (u32)dsiSaveOpen);
+		setBL(0x02026754, (u32)dsiSaveSetLength);
+		setBL(0x02026780, (u32)dsiSaveWrite);
+		setBL(0x02026788, (u32)dsiSaveClose);
+		setBL(0x020268FC, (u32)dsiSaveGetInfo);
+		setBL(0x02026930, (u32)dsiSaveCreate);
+		setBL(0x02026940, (u32)dsiSaveOpen);
+		*(u32*)0x02026964 = 0xE1A00000; // nop
+		setBL(0x02026988, (u32)dsiSaveSetLength);
+		setBL(0x020269D8, (u32)dsiSaveWrite);
+		setBL(0x020269E0, (u32)dsiSaveClose);
+		*(u32*)0x0202D6EC = 0xE1A00000; // nop
+		tonccpy((u32*)0x0202E838, dsiSaveGetResultCode, 0xC);
+		*(u32*)0x020312B4 = 0xE1A00000; // nop
+		patchInitDSiWare(0x02036E94, heapEnd);
+		patchUserSettingsReadDSiWare(0x02038330);
+		*(u32*)0x0203B094 = 0xE1A00000; // nop
+	}
+
+	// Animal Puzzle Adventure (Europe, Australia)
+	else if (strcmp(romTid, "KPCV") == 0) {
+		useSharedFont = (twlFontFound && debugOrMep);
+		if (useSharedFont && !extendedMemory2 && expansionPakFound) {
+			patchTwlFontLoad(0x02019610, 0x020379A4);
+		}
+		setBL(0x02025674, (u32)dsiSaveOpen);
+		setBL(0x02025688, (u32)dsiSaveGetLength);
+		setBL(0x02025698, (u32)dsiSaveRead);
+		setBL(0x020256A0, (u32)dsiSaveClose);
+		*(u32*)0x02025700 = 0xE3A00001; // mov r0, #1 (dsiSaveOpenDir)
+		*(u32*)0x02025740 = 0xE1A00000; // nop (dsiSaveCloseDir)
+		setBL(0x020257CC, (u32)dsiSaveGetInfo);
+		setBL(0x020257D8, (u32)dsiSaveCreate);
+		setBL(0x020257E8, (u32)dsiSaveOpen);
+		setBL(0x02025818, (u32)dsiSaveSetLength);
+		setBL(0x02025844, (u32)dsiSaveWrite);
+		setBL(0x0202584C, (u32)dsiSaveClose);
+		setBL(0x020259C0, (u32)dsiSaveGetInfo);
+		setBL(0x020259F4, (u32)dsiSaveCreate);
+		setBL(0x02025A04, (u32)dsiSaveOpen);
+		*(u32*)0x02025A28 = 0xE1A00000; // nop
+		setBL(0x02025A4C, (u32)dsiSaveSetLength);
+		setBL(0x02025A9C, (u32)dsiSaveWrite);
+		setBL(0x02025AA4, (u32)dsiSaveClose);
+		*(u32*)0x0202C7B0 = 0xE1A00000; // nop
+		tonccpy((u32*)0x0202D8FC, dsiSaveGetResultCode, 0xC);
+		*(u32*)0x02030378 = 0xE1A00000; // nop
+		patchInitDSiWare(0x02035F68, heapEnd);
+		patchUserSettingsReadDSiWare(0x02037404);
+		*(u32*)0x0203A254 = 0xE1A00000; // nop
+	}
+
 	// Anne's Doll Studio: Antique Collection (USA)
 	// Anne's Doll Studio: Antique Collection (Europe)
 	// Anne's Doll Studio: Princess Collection (USA)
