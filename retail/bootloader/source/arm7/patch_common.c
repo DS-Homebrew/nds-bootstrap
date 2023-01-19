@@ -4985,7 +4985,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02005234 = 0xE1A00000; // nop
 		*(u32*)0x02005530 = 0xE1A00000; // nop
 		//if (!twlFontFound) {
-			// *(u32*)0x02005534 = 0xE1A00000; // nop
 			*(u32*)0x0200A3D8 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 			*(u32*)0x0200B800 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
 			*(u32*)0x02014AB0 = 0xE12FFF1E; // bx lr (Skip Manual screen, Part 1)
@@ -5018,20 +5017,19 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02057AB4 = 0xE1A00000; // nop
 		*(u32*)0x02057AB8 = 0xE1A00000; // nop
 		*(u32*)0x0205ABF8 = 0xE1A00000; // nop
-		*(u16*)0x0205C54C = 0x2001; // movs r0, #1
+		/* *(u16*)0x0205C54C = 0x2001; // movs r0, #1
 		*(u16*)0x0205C54E = 0x4770; // bx lr
 		*(u16*)0x0205C56C = 0x2001; // movs r0, #1
 		*(u16*)0x0205C56E = 0x4770; // bx lr
 		*(u16*)0x0205C5E4 = 0x2001; // movs r0, #1
 		*(u16*)0x0205C5E8 = 0x4770; // bx lr
 		*(u16*)0x0205C604 = 0x2001; // movs r0, #1
-		*(u16*)0x0205C608 = 0x4770; // bx lr
+		*(u16*)0x0205C608 = 0x4770; // bx lr */
 	}
 
 	// GO Series: Earth Saver (Europe)
 	else if (strcmp(romTid, "KB8P") == 0) {
 		*(u32*)0x02005234 = 0xE1A00000; // nop
-		*(u32*)0x02005530 = 0xE1A00000; // nop
 		*(u32*)0x0200A310 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		setBL(0x0200AB24, (u32)dsiSaveOpen);
 		setBL(0x0200AB60, (u32)dsiSaveRead);
@@ -5060,6 +5058,75 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		// Skip Manual screen, Part 2
 		for (int i = 0; i < 11; i++) {
 			u32* offset = (u32*)0x02014AF0;
+			offset[i] = 0xE1A00000; // nop
+		}
+	}
+
+	// Earth Saver: Inseki Bakuha Dai Sakuse (Japan)
+	else if (strcmp(romTid, "KB9J") == 0) {
+		*(u32*)0x0200521C = 0xE1A00000; // nop
+		setBL(0x02009CF4, (u32)dsiSaveOpen);
+		setBL(0x02009D2C, (u32)dsiSaveRead);
+		setBL(0x02009D4C, (u32)dsiSaveClose);
+		setBL(0x02009DE4, (u32)dsiSaveCreate);
+		setBL(0x02009E24, (u32)dsiSaveOpen);
+		setBL(0x02009E5C, (u32)dsiSaveSetLength);
+		setBL(0x02009E74, (u32)dsiSaveWrite);
+		setBL(0x02009E98, (u32)dsiSaveClose);
+		setBL(0x02009F28, (u32)dsiSaveGetInfo);
+		*(u32*)0x0200B9C4 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		*(u32*)0x0200A7CC = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
+		*(u32*)0x0200FF44 = 0xE12FFF1E; // bx lr (Skip Manual screen, Part 1)
+		*(u32*)0x0203092C = 0xE12FFF1E; // bx lr
+		*(u32*)0x02034AD4 = 0xE1A00000; // nop
+		tonccpy((u32*)0x0203564C, dsiSaveGetResultCode, 0xC);
+		*(u32*)0x02037FA0 = 0xE1A00000; // nop
+		patchInitDSiWare(0x0203EBBC, heapEnd);
+		patchUserSettingsReadDSiWare(0x02040088);
+		*(u32*)0x020404BC = 0xE1A00000; // nop
+		*(u32*)0x020404C0 = 0xE1A00000; // nop
+		*(u32*)0x020404C4 = 0xE1A00000; // nop
+		*(u32*)0x020404C8 = 0xE1A00000; // nop
+		*(u32*)0x020435F0 = 0xE1A00000; // nop
+
+		// Skip Manual screen, Part 2
+		for (int i = 0; i < 11; i++) {
+			u32* offset = (u32*)0x02010080;
+			offset[i] = 0xE1A00000; // nop
+		}
+	}
+
+	// Earth Saver Plus: Inseki Bakuha Dai Sakuse (Japan)
+	else if (strcmp(romTid, "KB8J") == 0) {
+		*(u32*)0x0200521C = 0xE1A00000; // nop
+		*(u32*)0x0200A038 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		setBL(0x0200A84C, (u32)dsiSaveOpen);
+		setBL(0x0200A888, (u32)dsiSaveRead);
+		setBL(0x0200A8A8, (u32)dsiSaveClose);
+		setBL(0x0200A944, (u32)dsiSaveCreate);
+		setBL(0x0200A984, (u32)dsiSaveOpen);
+		setBL(0x0200A9BC, (u32)dsiSaveSetLength);
+		setBL(0x0200A9D8, (u32)dsiSaveWrite);
+		setBL(0x0200A9FC, (u32)dsiSaveClose);
+		setBL(0x0200AA90, (u32)dsiSaveGetInfo);
+		*(u32*)0x0200B438 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
+		*(u32*)0x02014708 = 0xE12FFF1E; // bx lr (Skip Manual screen, Part 1)
+		*(u32*)0x020360E8 = 0xE1A00000; // nop
+		*(u32*)0x02047A88 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0204BC24 = 0xE1A00000; // nop
+		tonccpy((u32*)0x0204C79C, dsiSaveGetResultCode, 0xC);
+		*(u32*)0x0204F0F0 = 0xE1A00000; // nop
+		patchInitDSiWare(0x02055D0C, heapEnd);
+		patchUserSettingsReadDSiWare(0x020571D8);
+		*(u32*)0x0205760C = 0xE1A00000; // nop
+		*(u32*)0x02057610 = 0xE1A00000; // nop
+		*(u32*)0x02057614 = 0xE1A00000; // nop
+		*(u32*)0x02057618 = 0xE1A00000; // nop
+		*(u32*)0x0205A758 = 0xE1A00000; // nop
+
+		// Skip Manual screen, Part 2
+		for (int i = 0; i < 11; i++) {
+			u32* offset = (u32*)0x02014844;
 			offset[i] = 0xE1A00000; // nop
 		}
 	}

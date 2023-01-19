@@ -2740,8 +2740,6 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// GO Series: Earth Saver (USA)
 	else if (strcmp(romTid, "KB8E") == 0) {
 		if (!twlFontFound) {
-			*(u32*)0x02005530 = 0xE1A00000; // nop
-			// *(u32*)0x02005534 = 0xE1A00000; // nop
 			*(u32*)0x0200A3D8 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 			*(u32*)0x0200B800 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
 			*(u32*)0x02014AB0 = 0xE12FFF1E; // bx lr (Skip Manual screen, Part 1)
@@ -2771,7 +2769,6 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// GO Series: Earth Saver (Europe)
 	else if (strcmp(romTid, "KB8P") == 0) {
 		if (!twlFontFound) {
-			*(u32*)0x02005530 = 0xE1A00000; // nop
 			*(u32*)0x0200A310 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 			*(u32*)0x0200B710 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
 			*(u32*)0x020149B4 = 0xE12FFF1E; // bx lr (Skip Manual screen, Part 1)
@@ -2794,6 +2791,62 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBL(0x0200ACD4, (u32)dsiSaveClose);
 			setBL(0x0200AD68, (u32)dsiSaveGetInfo);
 			tonccpy((u32*)0x0204CA70, dsiSaveGetResultCode, 0xC);
+		}
+	}
+
+	// Earth Saver: Inseki Bakuha Dai Sakuse (Japan)
+	else if (strcmp(romTid, "KB9J") == 0) {
+		if (!twlFontFound) {
+			*(u32*)0x0200B9C4 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+			*(u32*)0x0200A7CC = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
+			*(u32*)0x0200FF44 = 0xE12FFF1E; // bx lr (Skip Manual screen, Part 1)
+			*(u32*)0x0203092C = 0xE12FFF1E; // bx lr
+
+			// Skip Manual screen, Part 2
+			for (int i = 0; i < 11; i++) {
+				u32* offset = (u32*)0x02010080;
+				offset[i] = 0xE1A00000; // nop
+			}
+		}
+		if (saveOnFlashcard) {
+			setBL(0x02009CF4, (u32)dsiSaveOpen);
+			setBL(0x02009D2C, (u32)dsiSaveRead);
+			setBL(0x02009D4C, (u32)dsiSaveClose);
+			setBL(0x02009DE4, (u32)dsiSaveCreate);
+			setBL(0x02009E24, (u32)dsiSaveOpen);
+			setBL(0x02009E5C, (u32)dsiSaveSetLength);
+			setBL(0x02009E74, (u32)dsiSaveWrite);
+			setBL(0x02009E98, (u32)dsiSaveClose);
+			setBL(0x02009F28, (u32)dsiSaveGetInfo);
+			tonccpy((u32*)0x0203564C, dsiSaveGetResultCode, 0xC);
+		}
+	}
+
+	// Earth Saver Plus: Inseki Bakuha Dai Sakuse (Japan)
+	else if (strcmp(romTid, "KB8J") == 0) {
+		if (!twlFontFound) {
+			*(u32*)0x0200A038 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+			*(u32*)0x0200B438 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
+			*(u32*)0x02014708 = 0xE12FFF1E; // bx lr (Skip Manual screen, Part 1)
+			*(u32*)0x02047A88 = 0xE12FFF1E; // bx lr
+
+			// Skip Manual screen, Part 2
+			for (int i = 0; i < 11; i++) {
+				u32* offset = (u32*)0x02014844;
+				offset[i] = 0xE1A00000; // nop
+			}
+		}
+		if (saveOnFlashcard) {
+			setBL(0x0200A84C, (u32)dsiSaveOpen);
+			setBL(0x0200A888, (u32)dsiSaveRead);
+			setBL(0x0200A8A8, (u32)dsiSaveClose);
+			setBL(0x0200A944, (u32)dsiSaveCreate);
+			setBL(0x0200A984, (u32)dsiSaveOpen);
+			setBL(0x0200A9BC, (u32)dsiSaveSetLength);
+			setBL(0x0200A9D8, (u32)dsiSaveWrite);
+			setBL(0x0200A9FC, (u32)dsiSaveClose);
+			setBL(0x0200AA90, (u32)dsiSaveGetInfo);
+			tonccpy((u32*)0x0204C79C, dsiSaveGetResultCode, 0xC);
 		}
 	}
 
