@@ -1268,7 +1268,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Animal Puzzle Adventure (USA)
 	else if (strcmp(romTid, "KPCE") == 0) {
 		useSharedFont = (twlFontFound && debugOrMep);
-		if (useSharedFont && !extendedMemory2 && expansionPakFound) {
+		if (useSharedFont && !extendedMemory2) {
 			patchTwlFontLoad(0x0201A54C, 0x02038CB4);
 		}
 		setBL(0x020265B0, (u32)dsiSaveOpen);
@@ -1301,7 +1301,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Animal Puzzle Adventure (Europe, Australia)
 	else if (strcmp(romTid, "KPCV") == 0) {
 		useSharedFont = (twlFontFound && debugOrMep);
-		if (useSharedFont && !extendedMemory2 && expansionPakFound) {
+		if (useSharedFont && !extendedMemory2) {
 			patchTwlFontLoad(0x02019610, 0x020379A4);
 		}
 		setBL(0x02025674, (u32)dsiSaveOpen);
@@ -2288,6 +2288,27 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchInitDSiWare(0x0204E638, heapEnd);
 		patchUserSettingsReadDSiWare(0x0204FDE4);
 		*(u32*)0x02053548 = 0xE1A00000; // nop
+	}
+
+	// Astro (USA)
+	else if (strcmp(romTid, "K7DE") == 0) {
+		useSharedFont = twlFontFound;
+		*(u32*)0x02017498 = 0xE1A00000; // nop
+		*(u32*)0x0201AE24 = 0xE1A00000; // nop
+		patchInitDSiWare(0x02022FAC, heapEnd);
+		*(u32*)0x02027394 = 0xE1A00000; // nop
+		setBL(0x02048AA8, (u32)dsiSaveOpenR);
+		setBL(0x02048AC8, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+		setBL(0x02048CC0, (u32)dsiSaveOpen);
+		setBL(0x02048CD4, (u32)dsiSaveGetResultCode);
+		*(u32*)0x02048CF0 = 0xE1A00000; // nop
+		setBL(0x02048600, (u32)dsiSaveOpen);
+		setBL(0x0204861C, (u32)dsiSaveWrite);
+		setBL(0x02048628, (u32)dsiSaveClose);
+		setBL(0x0204867C, (u32)dsiSaveOpen);
+		setBL(0x02048690, (u32)dsiSaveGetLength);
+		setBL(0x020486A4, (u32)dsiSaveRead);
+		setBL(0x020486B0, (u32)dsiSaveClose);
 	}
 
 	// Aura-Aura Climber (USA)
@@ -6696,6 +6717,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Heathcliff: Spot On (USA)
 	else if (strcmp(romTid, "K6SE") == 0) {
+		useSharedFont = twlFontFound;
 		*(u32*)0x0201615C = 0xE1A00000; // nop
 		*(u32*)0x02019EDC = 0xE1A00000; // nop
 		patchInitDSiWare(0x02020F3C, heapEnd);
@@ -14234,6 +14256,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Zombie Blaster (USA)
 	else if (strcmp(romTid, "K7KE") == 0) {
+		useSharedFont = (twlFontFound && debugOrMep);
 		*(u32*)0x0201A710 = 0xE1A00000; // nop
 		*(u32*)0x0201E2D0 = 0xE1A00000; // nop
 		patchInitDSiWare(0x020267A0, heapEnd);
@@ -14252,6 +14275,9 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x020670F8, (u32)dsiSaveGetLength);
 		setBL(0x0206710C, (u32)dsiSaveRead);
 		setBL(0x02067118, (u32)dsiSaveClose);
+		if (useSharedFont && !extendedMemory2) {
+			patchTwlFontLoad(0x02090D50, 0x02028244);
+		}
 	}
 
 	// Zombie Skape (USA)

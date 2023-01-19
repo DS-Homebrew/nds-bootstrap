@@ -1294,6 +1294,21 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// Astro (USA)
+	else if (strcmp(romTid, "K7DE") == 0 && saveOnFlashcard) {
+		setBL(0x02048AA8, (u32)dsiSaveOpenR);
+		setBL(0x02048AC8, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+		setBL(0x02048CC0, (u32)dsiSaveOpen);
+		setBL(0x02048CD4, (u32)dsiSaveGetResultCode);
+		setBL(0x02048600, (u32)dsiSaveOpen);
+		setBL(0x0204861C, (u32)dsiSaveWrite);
+		setBL(0x02048628, (u32)dsiSaveClose);
+		setBL(0x0204867C, (u32)dsiSaveOpen);
+		setBL(0x02048690, (u32)dsiSaveGetLength);
+		setBL(0x020486A4, (u32)dsiSaveRead);
+		setBL(0x020486B0, (u32)dsiSaveClose);
+	}
+
 	// Aura-Aura Climber (USA)
 	// Save code too advanced to patch, preventing support
 	else if (strcmp(romTid, "KSRE") == 0 && saveOnFlashcard) {
