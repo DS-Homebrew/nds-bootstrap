@@ -916,16 +916,19 @@ bool dsiSaveDelete(const char* path) {
 bool dsiSaveGetInfo(const char* path, dsiSaveInfo* info) {
 	toncset(info, 0, sizeof(dsiSaveInfo));
 	if (savFile.firstCluster == CLUSTER_FREE || savFile.firstCluster == CLUSTER_EOF) {
+		dsiSaveResultCode = 0xE;
 		return false;
 	}
 
 	dsiSaveInit();
+	dsiSaveResultCode = 0;
 
 	if (strcmp(path, "dataPub:") == 0 || strcmp(path, "dataPub:/") == 0
 	 || strcmp(path, "dataPrv:") == 0 || strcmp(path, "dataPrv:/") == 0)
 	{
 		return true;
 	} else if (!dsiSaveExists) {
+		dsiSaveResultCode = 0xB;
 		return false;
 	}
 
