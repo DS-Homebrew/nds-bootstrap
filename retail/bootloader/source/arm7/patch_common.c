@@ -2150,6 +2150,40 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020332A4 = 0xE1A00000; // nop
 	}
 
+	// Armada (USA)
+	else if (strcmp(romTid, "KRDE") == 0) {
+		useSharedFont = twlFontFound;
+		*(u32*)0x02010FB0 = 0xE1A00000; // nop
+		*(u32*)0x02014074 = 0xE1A00000; // nop
+		patchInitDSiWare(0x0201B380, heapEnd);
+		patchUserSettingsReadDSiWare(0x0201C940);
+		*(u32*)0x0201F6A0 = 0xE1A00000; // nop
+		if (!extendedMemory2) {
+			*(u32*)0x02021724 = 0xE1A00000; // nop (Disable playing ingame_main.wav.adpcm)
+		}
+		*(u32*)0x0202D11C = 0xE3A00003; // mov r0, #3
+		*(u32*)0x0202D210 = 0xE3A00003; // mov r0, #3
+		*(u32*)0x0202D290 = 0xE3A00003; // mov r0, #3
+		*(u32*)0x0202E704 = 0xE3A00003; // mov r0, #3
+		*(u32*)0x020420B4 = 0xE3A00003; // mov r0, #3
+		setBL(0x020421CC, (u32)dsiSaveOpen);
+		setBL(0x020421E4, (u32)dsiSaveClose);
+		setBL(0x02042264, (u32)dsiSaveOpen);
+		setBL(0x0204227C, (u32)dsiSaveGetLength);
+		setBL(0x02042288, (u32)dsiSaveClose);
+		setBL(0x020422F8, (u32)dsiSaveOpen);
+		setBL(0x02042314, (u32)dsiSaveGetLength);
+		setBL(0x02042330, (u32)dsiSaveRead);
+		setBL(0x0204233C, (u32)dsiSaveClose);
+		setBL(0x020423BC, (u32)dsiSaveCreate);
+		setBL(0x020423D0, (u32)dsiSaveOpen);
+		setBL(0x020423F4, (u32)dsiSaveSeek);
+		setBL(0x02042404, (u32)dsiSaveWrite);
+		setBL(0x02042410, (u32)dsiSaveClose);
+		*(u32*)0x020424FC = 0xE3A00000; // mov r0, #?
+		*(u32*)0x020424FC += twlFontFound ? 3 : 1;
+	}
+
 	// Army Defender (USA)
 	// Army Defender (Europe)
 	else if (strncmp(romTid, "KAY", 3) == 0) {
