@@ -2208,6 +2208,38 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02051AB8 = 0xE1A00000; // nop
 	}
 
+	// Artillery: Knights vs. Orcs (Europe)
+	else if (strcmp(romTid, "K9ZP") == 0) {
+		*(u32*)0x020050B8 = 0xE1A00000; // nop
+		*(u32*)0x02018B48 = 0xE1A00000; // nop
+		*(u32*)0x0201C798 = 0xE1A00000; // nop
+		patchInitDSiWare(0x020236DC, heapEnd);
+		patchUserSettingsReadDSiWare(0x02024CF4);
+		*(u32*)0x02028228 = 0xE1A00000; // nop
+		*(u32*)0x0204603C = 0xE1A00000; // nop
+		*(u32*)0x02046050 = 0xE1A00000; // nop
+		setBL(0x020896DC, (u32)dsiSaveCreate);
+		setBL(0x020896EC, (u32)dsiSaveOpen);
+		setBL(0x020896FC, (u32)dsiSaveGetResultCode);
+		setBL(0x02089718, (u32)dsiSaveSetLength);
+		setBL(0x02089728, (u32)dsiSaveWrite);
+		setBL(0x02089730, (u32)dsiSaveClose);
+		setBL(0x0208976C, (u32)dsiSaveOpen);
+		setBL(0x0208977C, (u32)dsiSaveGetResultCode);
+		setBL(0x02089794, (u32)dsiSaveGetLength);
+		setBL(0x020897A4, (u32)dsiSaveRead);
+		setBL(0x020897AC, (u32)dsiSaveClose);
+		setBL(0x020897E4, (u32)dsiSaveOpen);
+		setBL(0x020897F4, (u32)dsiSaveGetResultCode);
+		setBL(0x0208980C, (u32)dsiSaveClose);
+
+		// Skip Manual screen (Not working)
+		// *(u32*)0x02073568 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		// *(u32*)0x02073614 = 0xE1A00000; // nop
+		// *(u32*)0x0207361C = 0xE1A00000; // nop
+		// *(u32*)0x02073628 = 0xE1A00000; // nop
+	}
+
 	// Asphalt 4: Elite Racing (USA)
 	// Does not boot (Black screens)
 	/*else if (strcmp(romTid, "KA4E") == 0) {
