@@ -6925,6 +6925,18 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0204EFB4 = 0xE1A00000; // nop
 	}*/
 
+	// Kami Hikouki (Japan)
+	// Saving not supported due to using more than one file
+	else if (strcmp(romTid, "KAMJ") == 0) {
+		// useSharedFont = true;
+		*(u32*)0x0200D918 = 0xE3A00001; // mov r0, #1 (Enable NitroFS reads)
+		// *(u32*)0x02015FCC = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02021E48 = 0xE12FFF1E; // bx lr (Disable NFTR font loading)
+		*(u32*)0x02021FEC = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
+		// *(u32*)0x02021E60 = 0xE3A00001; // mov r0, #1
+		// *(u32*)0x02021E9C = 0xE3A00001; // mov r0, #1
+	}
+
 	// A Kappa's Trail (USA)
 	// Requires 8MB of RAM
 	// Crashes after ESRB screen
@@ -8031,7 +8043,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		// *(u32*)0x0204DF6C = 0xE12FFF1E; // bx lr
 		// *(u32*)0x020552DC = 0xE3A00000; // mov r0, #0
 		// tonccpy((u32*)0x02057F8C, dsiSaveGetResultCode, 0xC);
-		*(u32*)0x0205A50C = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0205A50C = 0xE3A00001; // mov r0, #1 (Enable NitroFS reads)
 		*(u32*)0x0206E8FC = 0xE3A07000; // mov r7, #0
 		*(u32*)0x020DD1A0 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x020DDB00 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
@@ -8049,7 +8061,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02017D0C = 0xE1A00000; // nop
 		// *(u32*)0x0201EAA8 = 0xE3A00001; // mov r0, #1
 		*(u32*)0x02045FA0 = 0xE12FFF1E; // bx lr (Disable NFTR font loading)
-		*(u32*)0x0205A524 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0205A524 = 0xE3A00001; // mov r0, #1 (Enable NitroFS reads)
 		*(u32*)0x0206E894 = 0xE3A07000; // mov r7, #0
 		*(u32*)0x020DCFB8 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x020DD918 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
@@ -8072,7 +8084,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02042AD0 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
 		*(u32*)0x02042C74 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
 		*(u32*)0x02089E08 = 0xE12FFF1E; // bx lr (Disable NFTR font loading)
-		*(u32*)0x0209E3C4 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0209E3C4 = 0xE3A00001; // mov r0, #1 (Enable NitroFS reads)
 		*(u32*)0x0210190C = 0xE3A07000; // mov r7, #0
 	}
 
@@ -13566,13 +13578,14 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}*/
 
 	// Tori to Mame (Japan)
-	// NitroFS files are unable to open for some reason
-	/*else if (strcmp(romTid, "KP6J") == 0 && twlFontFound) {
-		useSharedFont = true;
-		*(u32*)0x02001578 = 0xE1A00000; // nop
-		*(u32*)0x02015928 = 0xE3A00001; // mov r0, #1
-		*(u32*)0x020217C8 = 0xE3A00001; // mov r0, #1
-		*(u32*)0x020217F0 = 0xE3A00001; // mov r0, #1
+	else if (strcmp(romTid, "KP6J") == 0) {
+		// useSharedFont = true;
+		*(u32*)0x0200D17C = 0xE3A00001; // mov r0, #1 (Enable NitroFS reads)
+		// *(u32*)0x02015928 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x020217B0 = 0xE12FFF1E; // bx lr (Disable NFTR font loading)
+		*(u32*)0x02021954 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
+		// *(u32*)0x020217C8 = 0xE3A00001; // mov r0, #1
+		// *(u32*)0x020217F0 = 0xE3A00001; // mov r0, #1
 		setBL(0x02023348, (u32)dsiSaveOpen);
 		setBL(0x02023360, (u32)dsiSaveGetLength);
 		setBL(0x02023398, (u32)dsiSaveRead);
@@ -13583,7 +13596,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02023460, (u32)dsiSaveSetLength);
 		setBL(0x02023480, (u32)dsiSaveWrite);
 		setBL(0x02023498, (u32)dsiSaveClose);
-	}*/
+	}
 
 	// Touch Solitaire (USA)
 	// Crashes somewhere in 0x02015180

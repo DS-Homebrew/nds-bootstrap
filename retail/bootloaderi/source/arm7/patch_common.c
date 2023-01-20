@@ -3553,6 +3553,13 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// Kami Hikouki (Japan)
+	// Saving not supported due to using more than one file
+	else if (strcmp(romTid, "KAMJ") == 0 && !twlFontFound) {
+		*(u32*)0x02021E48 = 0xE12FFF1E; // bx lr (Disable NFTR font loading)
+		*(u32*)0x02021FEC = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
+	}
+
 	// A Kappa's Trail (USA)
 	else if (strcmp(romTid, "KPAE") == 0 && saveOnFlashcard) {
 		tonccpy((u32*)0x0201A020, dsiSaveGetResultCode, 0xC);
@@ -7588,17 +7595,23 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Tori to Mame (Japan)
-	else if (strcmp(romTid, "KP6J") == 0 && saveOnFlashcard) {
-		setBL(0x02023348, (u32)dsiSaveOpen);
-		setBL(0x02023360, (u32)dsiSaveGetLength);
-		setBL(0x02023398, (u32)dsiSaveRead);
-		setBL(0x020233BC, (u32)dsiSaveClose);
-		*(u32*)0x020233FC = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
-		setBL(0x02023430, (u32)dsiSaveCreate); // dsiSaveCreateAuto
-		setBL(0x02023440, (u32)dsiSaveOpen);
-		setBL(0x02023460, (u32)dsiSaveSetLength);
-		setBL(0x02023480, (u32)dsiSaveWrite);
-		setBL(0x02023498, (u32)dsiSaveClose);
+	else if (strcmp(romTid, "KP6J") == 0) {
+		if (!twlFontFound) {
+			*(u32*)0x020217B0 = 0xE12FFF1E; // bx lr (Disable NFTR font loading)
+			*(u32*)0x02021954 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
+		}
+		if (saveOnFlashcard) {
+			setBL(0x02023348, (u32)dsiSaveOpen);
+			setBL(0x02023360, (u32)dsiSaveGetLength);
+			setBL(0x02023398, (u32)dsiSaveRead);
+			setBL(0x020233BC, (u32)dsiSaveClose);
+			*(u32*)0x020233FC = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+			setBL(0x02023430, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+			setBL(0x02023440, (u32)dsiSaveOpen);
+			setBL(0x02023460, (u32)dsiSaveSetLength);
+			setBL(0x02023480, (u32)dsiSaveWrite);
+			setBL(0x02023498, (u32)dsiSaveClose);
+		}
 	}
 
 	// VT Tennis (USA)
