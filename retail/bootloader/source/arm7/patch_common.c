@@ -6929,7 +6929,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Saving not supported due to using more than one file
 	else if (strcmp(romTid, "KAMJ") == 0) {
 		// useSharedFont = true;
-		*(u32*)0x0200D918 = 0xE3A00001; // mov r0, #1 (Enable NitroFS reads)
+		*(u32*)0x0200D908 = 0xE3A00001; // mov r0, #1 (Enable NitroFS reads)
 		// *(u32*)0x02015FCC = 0xE3A00001; // mov r0, #1
 		*(u32*)0x02021E48 = 0xE12FFF1E; // bx lr (Disable NFTR font loading)
 		*(u32*)0x02021FEC = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
