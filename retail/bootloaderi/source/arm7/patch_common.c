@@ -1069,47 +1069,38 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
-	// Arcade Bowling (USA)
-	else if (strcmp(romTid, "K4BE") == 0) {
+	// Anyohaseyo!: Kankokugo Wado Pazuru (Japan)
+	else if (strcmp(romTid, "KL8J") == 0) {
 		if (saveOnFlashcard) {
-			setBL(0x0201F8EC, (u32)dsiSaveOpen);
-			setBL(0x0201F900, (u32)dsiSaveGetLength);
-			setBL(0x0201F914, (u32)dsiSaveRead);
-			setBL(0x0201F924, (u32)dsiSaveClose);
-			setBL(0x0201F9D4, (u32)dsiSaveCreate); // dsiSaveCreateAuto
-			setBL(0x0201F9F0, (u32)dsiSaveOpen);
-			setBL(0x0201FA08, (u32)dsiSaveSetLength);
-			setBL(0x0201FA18, (u32)dsiSaveWrite);
-			setBL(0x0201FA20, (u32)dsiSaveClose);
-			setBL(0x0201FAA0, (u32)dsiSaveOpen);
-			setBL(0x0201FAB8, (u32)dsiSaveSetLength);
-			setBL(0x0201FAC8, (u32)dsiSaveWrite);
-			setBL(0x0201FAD4, (u32)dsiSaveClose);
+			setBL(0x02024128, (u32)dsiSaveClose);
+			setBL(0x0202426C, (u32)dsiSaveClose);
+			setBL(0x02024408, (u32)dsiSaveOpen);
+			setBL(0x02024430, (u32)dsiSaveSeek);
+			setBL(0x0202444C, (u32)dsiSaveClose);
+			setBL(0x02024464, (u32)dsiSaveRead);
+			setBL(0x02024484, (u32)dsiSaveClose);
+			setBL(0x02024494, (u32)dsiSaveClose);
+			setBL(0x020244D0, (u32)dsiSaveOpen);
+			setBL(0x020244E8, (u32)dsiSaveSeek);
+			setBL(0x02024500, (u32)dsiSaveRead); // dsiSaveReadAsync
+			setBL(0x02024534, (u32)dsiSaveOpen);
+			setBL(0x02024554, (u32)dsiSaveSetLength);
+			setBL(0x02024564, (u32)dsiSaveClose);
+			setBL(0x02024580, (u32)dsiSaveSeek);
+			setBL(0x0202459C, (u32)dsiSaveClose);
+			setBL(0x020245B4, (u32)dsiSaveWrite);
+			setBL(0x020245D8, (u32)dsiSaveClose);
+			setBL(0x020245E4, (u32)dsiSaveClose);
+			setBL(0x02024620, (u32)dsiSaveOpen);
+			setBL(0x02024634, (u32)dsiSaveSetLength);
+			setBL(0x0202464C, (u32)dsiSaveSeek);
+			setBL(0x02024664, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+			setBL(0x020246B8, (u32)dsiSaveCreate);
+			setBL(0x020246C0, (u32)dsiSaveGetResultCode);
 		}
 		if (!twlFontFound) {
-			setB(0x0202036C, 0x02020A78); // Skip Manual screen
-		}
-	}
-
-	// Arcade Hoops Basketball (USA)
-	else if (strcmp(romTid, "KSAE") == 0) {
-		if (saveOnFlashcard) {
-			setBL(0x020066D0, (u32)dsiSaveOpen);
-			setBL(0x020066E4, (u32)dsiSaveGetLength);
-			setBL(0x020066F8, (u32)dsiSaveRead);
-			setBL(0x02006708, (u32)dsiSaveClose);
-			setBL(0x020067B8, (u32)dsiSaveCreate);
-			setBL(0x020067D4, (u32)dsiSaveOpen);
-			setBL(0x020067EC, (u32)dsiSaveSetLength);
-			setBL(0x020067FC, (u32)dsiSaveWrite);
-			setBL(0x02006804, (u32)dsiSaveClose);
-			setBL(0x02006890, (u32)dsiSaveOpen);
-			setBL(0x020068A8, (u32)dsiSaveSetLength);
-			setBL(0x020068B8, (u32)dsiSaveWrite);
-			setBL(0x020068C4, (u32)dsiSaveClose);
-		}
-		if (!twlFontFound) {
-			setB(0x02007064, 0x02007168); // Skip Manual screen
+			*(u32*)0x020321BC = 0xE3A00002; // mov r0, #2 (Skip Manual screen, Part 1)
+			*(u32*)0x020398E4 = 0xE3A00000; // mov r0, #0 (Skip Manual screen, Part 2)
 		}
 	}
 
@@ -1219,6 +1210,50 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBL(0x02059F04, (u32)dsiSaveOpen);
 			setBL(0x02059F74, (u32)dsiSaveRead);
 			setBL(0x02059F80, (u32)dsiSaveClose);
+		}
+	}
+
+	// Arcade Bowling (USA)
+	else if (strcmp(romTid, "K4BE") == 0) {
+		if (saveOnFlashcard) {
+			setBL(0x0201F8EC, (u32)dsiSaveOpen);
+			setBL(0x0201F900, (u32)dsiSaveGetLength);
+			setBL(0x0201F914, (u32)dsiSaveRead);
+			setBL(0x0201F924, (u32)dsiSaveClose);
+			setBL(0x0201F9D4, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+			setBL(0x0201F9F0, (u32)dsiSaveOpen);
+			setBL(0x0201FA08, (u32)dsiSaveSetLength);
+			setBL(0x0201FA18, (u32)dsiSaveWrite);
+			setBL(0x0201FA20, (u32)dsiSaveClose);
+			setBL(0x0201FAA0, (u32)dsiSaveOpen);
+			setBL(0x0201FAB8, (u32)dsiSaveSetLength);
+			setBL(0x0201FAC8, (u32)dsiSaveWrite);
+			setBL(0x0201FAD4, (u32)dsiSaveClose);
+		}
+		if (!twlFontFound) {
+			setB(0x0202036C, 0x02020A78); // Skip Manual screen
+		}
+	}
+
+	// Arcade Hoops Basketball (USA)
+	else if (strcmp(romTid, "KSAE") == 0) {
+		if (saveOnFlashcard) {
+			setBL(0x020066D0, (u32)dsiSaveOpen);
+			setBL(0x020066E4, (u32)dsiSaveGetLength);
+			setBL(0x020066F8, (u32)dsiSaveRead);
+			setBL(0x02006708, (u32)dsiSaveClose);
+			setBL(0x020067B8, (u32)dsiSaveCreate);
+			setBL(0x020067D4, (u32)dsiSaveOpen);
+			setBL(0x020067EC, (u32)dsiSaveSetLength);
+			setBL(0x020067FC, (u32)dsiSaveWrite);
+			setBL(0x02006804, (u32)dsiSaveClose);
+			setBL(0x02006890, (u32)dsiSaveOpen);
+			setBL(0x020068A8, (u32)dsiSaveSetLength);
+			setBL(0x020068B8, (u32)dsiSaveWrite);
+			setBL(0x020068C4, (u32)dsiSaveClose);
+		}
+		if (!twlFontFound) {
+			setB(0x02007064, 0x02007168); // Skip Manual screen
 		}
 	}
 

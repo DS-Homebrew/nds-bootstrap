@@ -1867,6 +1867,52 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02061984 = 0xE1A00000; // nop
 	}*/
 
+	// Anyohaseyo!: Kankokugo Wado Pazuru (Japan)
+	else if (strcmp(romTid, "KL8J") == 0) {
+		// useSharedFont = (twlFontFound && debugOrMep);
+		*(u32*)0x0200BEB4 = 0xE1A00000; // nop
+		*(u32*)0x0200F4E0 = 0xE1A00000; // nop
+		patchInitDSiWare(0x02015108, heapEnd);
+		patchUserSettingsReadDSiWare(0x02016868);
+		*(u32*)0x02019EB4 = 0xE1A00000; // nop
+		*(u32*)0x02023B7C = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02023F1C = 0xE1A00000; // nop
+		setBL(0x02024128, (u32)dsiSaveClose);
+		*(u32*)0x0202418C = 0xE1A00000; // nop
+		setBL(0x0202426C, (u32)dsiSaveClose);
+		setBL(0x02024408, (u32)dsiSaveOpen);
+		setBL(0x02024430, (u32)dsiSaveSeek);
+		setBL(0x0202444C, (u32)dsiSaveClose);
+		setBL(0x02024464, (u32)dsiSaveRead);
+		setBL(0x02024484, (u32)dsiSaveClose);
+		setBL(0x02024494, (u32)dsiSaveClose);
+		setBL(0x020244D0, (u32)dsiSaveOpen);
+		setBL(0x020244E8, (u32)dsiSaveSeek);
+		setBL(0x02024500, (u32)dsiSaveRead); // dsiSaveReadAsync
+		setBL(0x02024534, (u32)dsiSaveOpen);
+		setBL(0x02024554, (u32)dsiSaveSetLength);
+		setBL(0x02024564, (u32)dsiSaveClose);
+		setBL(0x02024580, (u32)dsiSaveSeek);
+		setBL(0x0202459C, (u32)dsiSaveClose);
+		setBL(0x020245B4, (u32)dsiSaveWrite);
+		setBL(0x020245D8, (u32)dsiSaveClose);
+		setBL(0x020245E4, (u32)dsiSaveClose);
+		setBL(0x02024620, (u32)dsiSaveOpen);
+		setBL(0x02024634, (u32)dsiSaveSetLength);
+		setBL(0x0202464C, (u32)dsiSaveSeek);
+		setBL(0x02024664, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+		setBL(0x020246B8, (u32)dsiSaveCreate);
+		setBL(0x020246C0, (u32)dsiSaveGetResultCode);
+		/* if (useSharedFont) {
+			if (!extendedMemory2) {
+				patchTwlFontLoad(0x02023BE8, 0x02016DAC);
+			}
+		} else { */
+			*(u32*)0x020321BC = 0xE3A00002; // mov r0, #2 (Skip Manual screen, Part 1)
+			*(u32*)0x020398E4 = 0xE3A00000; // mov r0, #0 (Skip Manual screen, Part 2)
+		// }
+	}
+
 	// Art Style: AQUIA (USA)
 	// Audio doesn't play on retail consoles
 	else if (strcmp(romTid, "KAAE") == 0) {
