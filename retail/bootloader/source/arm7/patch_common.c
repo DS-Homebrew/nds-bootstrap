@@ -8025,68 +8025,19 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0201E494 = 0xE3A00001; // mov r0, #1
 		*(u32*)0x0201E58C = 0xE3A00001; // mov r0, #1
 		*(u32*)0x0201EA5C = 0xE3A00001; // mov r0, #1 */
-		*(u32*)0x0201EA90 = 0xE3A00000; // mov r0, #0
+		// *(u32*)0x0201EA90 = 0xE3A00001; // mov r0, #1
 		*(u32*)0x02045F88 = 0xE12FFF1E; // bx lr (Disable NFTR font loading)
-		*(u32*)0x02046070 = 0xE3A00001; // mov r0, #1
-		*(u32*)0x020460B8 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x020474D0 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x0204BA18 = 0xE3A00001; // mov r0, #1
-		*(u32*)0x0204BA1C = 0xE12FFF1E; // bx lr
-		*(u32*)0x0204C0B8 = 0xE1A00000; // nop
-		*(u32*)0x0204C0BC = 0xE3A00000; // mov r0, #0
-		*(u32*)0x0204C0D4 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x0204C238 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x0204C2C8 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x0204C2F8 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x0204C3C8 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x0204C3F8 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x0204D710 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x0204D748 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x0204D764 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x0204D7A0 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x0204D7C4 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x0204D7E4 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x0204D800 = 0xE3A00000; // mov r0, #0
 		// *(u32*)0x0204DF68 = 0xE3A00001; // mov r0, #1
 		// *(u32*)0x0204DF6C = 0xE12FFF1E; // bx lr
-		*(u32*)0x02051724 = 0xE3A00000; // mov r0, #0
 		// *(u32*)0x020552DC = 0xE3A00000; // mov r0, #0
-		*(u32*)0x02055B94 = 0xE3A00000; // mov r0, #0
-		//tonccpy((u32*)0x02057F8C, dsiSaveGetResultCode, 0xC);
-		*(u32*)0x0205A830 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x020629C0 = 0xE3A00000; // mov r0, #0
+		// tonccpy((u32*)0x02057F8C, dsiSaveGetResultCode, 0xC);
+		*(u32*)0x0205A50C = 0xE3A00001; // mov r0, #1
 		*(u32*)0x0206E8FC = 0xE3A07000; // mov r7, #0
-		*(u32*)0x02089CB8 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x02089DA4 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x02089E60 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x02089F14 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x0208A198 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x0208A27C = 0xE3A00000; // mov r0, #0
-		*(u32*)0x0208A3BC = 0xE3A00000; // mov r0, #0
-		*(u32*)0x0208A4F4 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x0208A8B4 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x0208A8F0 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x0208ADAC = 0xE3A00000; // mov r0, #0
-		*(u32*)0x0208B0BC = 0xE3A00000; // mov r0, #0
-		*(u32*)0x020929F4 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x020939B8 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x02093A94 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x02094228 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x02094440 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x020944B0 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x02094590 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x02095208 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x020959D0 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x02096D84 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x02096FEC = 0xE3A00000; // mov r0, #0
-		*(u32*)0x02097308 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x0209C0E0 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x020DD1A0 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x020DDB00 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
 		*(u32*)0x020DDD60 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
 		*(u32*)0x020DDF00 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
 		*(u32*)0x020DE0A4 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
-		*(u32*)0x021081E8 = 0xE3A00000; // mov r0, #0
 	}
 
 	// Metal Torrent (Europe, Australia)
@@ -8096,64 +8047,33 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020136EC = 0xE1A00000; // nop
 		*(u32*)0x02017CEC = 0xE12FFF1E; // bx lr
 		*(u32*)0x02017D0C = 0xE1A00000; // nop
-		*(u32*)0x0201EAA8 = 0xE3A00000; // mov r0, #0
+		// *(u32*)0x0201EAA8 = 0xE3A00001; // mov r0, #1
 		*(u32*)0x02045FA0 = 0xE12FFF1E; // bx lr (Disable NFTR font loading)
-		*(u32*)0x02046088 = 0xE3A00001; // mov r0, #1
-		*(u32*)0x020460D0 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x020474E8 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x0204BA30 = 0xE3A00001; // mov r0, #1
-		*(u32*)0x0204BA34 = 0xE12FFF1E; // bx lr
-		*(u32*)0x0204C0D0 = 0xE1A00000; // nop
-		*(u32*)0x0204C0D4 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x0204C0EC = 0xE3A00000; // mov r0, #0
-		*(u32*)0x0204C250 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x0204C2E0 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x0204C310 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x0204C3E0 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x0204C410 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x0204D728 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x0204D760 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x0204D77C = 0xE3A00000; // mov r0, #0
-		*(u32*)0x0204D7B8 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x0204D7DC = 0xE3A00000; // mov r0, #0
-		*(u32*)0x0204D7FC = 0xE3A00000; // mov r0, #0
-		*(u32*)0x0204D818 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x0205173C = 0xE3A00000; // mov r0, #0
-		*(u32*)0x02055BAC = 0xE3A00000; // mov r0, #0
-		*(u32*)0x0205A848 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x020629D8 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0205A524 = 0xE3A00001; // mov r0, #1
 		*(u32*)0x0206E894 = 0xE3A07000; // mov r7, #0
-		*(u32*)0x02089AD0 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x02089BBC = 0xE3A00000; // mov r0, #0
-		*(u32*)0x02089C78 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x02089D2C = 0xE3A00000; // mov r0, #0
-		*(u32*)0x02089FB0 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x0208A094 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x0208A1D4 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x0208A30C = 0xE3A00000; // mov r0, #0
-		*(u32*)0x0208A6CC = 0xE3A00000; // mov r0, #0
-		*(u32*)0x0208A708 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x0208ABC4 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x0208AED4 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x0209280C = 0xE3A00000; // mov r0, #0
-		*(u32*)0x020937D0 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x020938AC = 0xE3A00000; // mov r0, #0
-		*(u32*)0x02094040 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x02094258 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x020942C8 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x020943A8 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x02095020 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x020957E8 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x02096B9C = 0xE3A00000; // mov r0, #0
-		*(u32*)0x02096E04 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x02096E50 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x0209BEF8 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x020DCFB8 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x020DD918 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
 		*(u32*)0x020DDB78 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
 		*(u32*)0x020DDD18 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
 		*(u32*)0x020DDEBC = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
-		*(u32*)0x02108000 = 0xE3A00000; // mov r0, #0
+	}
+
+	// A Mujou Setsuna (Japan)
+	// Saving not supported due to using more than one file
+	// Requires 8MB of RAM
+	else if (strcmp(romTid, "K59J") == 0 && extendedMemory2) {
+		*(u32*)0x020215CC = 0xE1A00000; // nop
+		*(u32*)0x02025C50 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02025C70 = 0xE1A00000; // nop
+		// *(u32*)0x0202BE90 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02041E10 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02042684 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
+		*(u32*)0x02042930 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
+		*(u32*)0x02042AD0 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
+		*(u32*)0x02042C74 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
+		*(u32*)0x02089E08 = 0xE12FFF1E; // bx lr (Disable NFTR font loading)
+		*(u32*)0x0209E3C4 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0210190C = 0xE3A07000; // mov r7, #0
 	}
 
 	// Mighty Flip Champs! (USA)

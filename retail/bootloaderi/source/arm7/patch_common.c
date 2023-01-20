@@ -4128,6 +4128,21 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// A Mujou Setsuna (Japan)
+	// Saving not supported due to using more than one file
+	else if (strcmp(romTid, "K59J") == 0) {
+		if (!twlFontFound) {
+			*(u32*)0x02042684 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
+			*(u32*)0x02042930 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
+			*(u32*)0x02042AD0 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
+			*(u32*)0x02042C74 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
+			*(u32*)0x02089E08 = 0xE12FFF1E; // bx lr (Disable NFTR font loading)
+		}
+		if (saveOnFlashcard) {
+			*(u32*)0x0210190C = 0xE3A07000; // mov r7, #0
+		}
+	}
+
 	// Mighty Flip Champs! (USA)
 	else if (strcmp(romTid, "KMGE") == 0) {
 		if (saveOnFlashcard) {
