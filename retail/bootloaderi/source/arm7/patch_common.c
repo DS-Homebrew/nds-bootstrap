@@ -557,6 +557,26 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// Aa! Nikaku Dori (Japan)
+	else if (strcmp(romTid, "K2KJ") == 0) {
+		if (!twlFontFound) {
+			*(u32*)0x020050D4 = 0xE1A00000; // nop
+		}
+		if (saveOnFlashcard) {
+			setBL(0x02028DF0, (u32)dsiSaveOpen);
+			setBL(0x02028E0C, (u32)dsiSaveGetLength);
+			setBL(0x02028E1C, (u32)dsiSaveRead);
+			setBL(0x02028E24, (u32)dsiSaveClose);
+			setBL(0x02028EBC, (u32)dsiSaveOpen);
+			setBL(0x02028EE4, (u32)dsiSaveCreate);
+			setBL(0x02028F0C, (u32)dsiSaveOpen);
+			setBL(0x02028F38, (u32)dsiSaveSetLength);
+			setBL(0x02028F50, (u32)dsiSaveWrite);
+			setBL(0x02028F58, (u32)dsiSaveClose);
+			setBL(0x02029340, (u32)dsiSaveGetResultCode);
+		}
+	}
+
 	// Absolute BrickBuster (USA)
 	else if (strcmp(romTid, "K6QE") == 0) {
 		if (!twlFontFound) {
