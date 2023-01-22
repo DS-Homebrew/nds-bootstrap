@@ -1344,6 +1344,38 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x020486B0, (u32)dsiSaveClose);
 	}
 
+	// ATV Fever (USA)
+	else if (strcmp(romTid, "KVUE") == 0 && saveOnFlashcard) {
+		setBL(0x0205BB28, (u32)dsiSaveOpen);
+		setBL(0x0205BB38, (u32)dsiSaveGetLength);
+		setBL(0x0205BB48, (u32)dsiSaveRead);
+		setBL(0x0205BB50, (u32)dsiSaveClose);
+		setBL(0x0205BBCC, (u32)dsiSaveClose);
+		setBL(0x0205BC70, (u32)dsiSaveOpen);
+		setBL(0x0205BC88, (u32)dsiSaveWrite);
+		setBL(0x0205BC9C, (u32)dsiSaveClose);
+		setBL(0x02088A00, (u32)dsiSaveOpenR);
+		*(u32*)0x02088A24 = (u32)dsiSaveCreate; // dsiSaveCreateAuto
+		setBL(0x02088A50, (u32)dsiSaveOpen);
+		setBL(0x02088A64, (u32)dsiSaveGetResultCode);
+	}
+
+	// ATV Quad Kings (USA)
+	else if (strcmp(romTid, "K9UE") == 0 && saveOnFlashcard) {
+		setBL(0x0205D1D8, (u32)dsiSaveOpenR);
+		*(u32*)0x0205D1FC = (u32)dsiSaveCreate; // dsiSaveCreateAuto
+		setBL(0x0205D228, (u32)dsiSaveOpen);
+		setBL(0x0205D23C, (u32)dsiSaveGetResultCode);
+		setBL(0x0208A3AC, (u32)dsiSaveOpen);
+		setBL(0x0208A3BC, (u32)dsiSaveGetLength);
+		setBL(0x0208A3CC, (u32)dsiSaveRead);
+		setBL(0x0208A3D4, (u32)dsiSaveClose);
+		setBL(0x0208A450, (u32)dsiSaveClose);
+		setBL(0x0208A4F4, (u32)dsiSaveOpen);
+		setBL(0x0208A50C, (u32)dsiSaveWrite);
+		setBL(0x0208A520, (u32)dsiSaveClose);
+	}
+
 	// Aura-Aura Climber (USA)
 	// Save code too advanced to patch, preventing support
 	else if (strcmp(romTid, "KSRE") == 0 && saveOnFlashcard) {

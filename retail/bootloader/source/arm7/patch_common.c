@@ -2357,6 +2357,58 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x020486B0, (u32)dsiSaveClose);
 	}
 
+	// ATV Fever (USA)
+	else if (strcmp(romTid, "KVUE") == 0) {
+		useSharedFont = (twlFontFound && debugOrMep);
+		*(u32*)0x020151E8 = 0xE1A00000; // nop
+		*(u32*)0x0201906C = 0xE1A00000; // nop
+		patchInitDSiWare(0x02020B48, heapEnd);
+		*(u32*)0x02025628 = 0xE1A00000; // nop
+		*(u32*)0x0202AD04 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0202AD08 = 0xE12FFF1E; // bx lr
+		setBL(0x0205BB28, (u32)dsiSaveOpen);
+		setBL(0x0205BB38, (u32)dsiSaveGetLength);
+		setBL(0x0205BB48, (u32)dsiSaveRead);
+		setBL(0x0205BB50, (u32)dsiSaveClose);
+		setBL(0x0205BBCC, (u32)dsiSaveClose);
+		setBL(0x0205BC70, (u32)dsiSaveOpen);
+		setBL(0x0205BC88, (u32)dsiSaveWrite);
+		setBL(0x0205BC9C, (u32)dsiSaveClose);
+		setBL(0x02088A00, (u32)dsiSaveOpenR);
+		*(u32*)0x02088A24 = (u32)dsiSaveCreate; // dsiSaveCreateAuto
+		setBL(0x02088A50, (u32)dsiSaveOpen);
+		setBL(0x02088A64, (u32)dsiSaveGetResultCode);
+		*(u32*)0x02088A74 = 0xE1A00000; // nop
+		if (useSharedFont && !extendedMemory2) {
+			patchTwlFontLoad(0x02095E54, 0x020227F0);
+		}
+	}
+
+	// ATV Quad Kings (USA)
+	else if (strcmp(romTid, "K9UE") == 0) {
+		useSharedFont = (twlFontFound && extendedMemory2);
+		*(u32*)0x02015288 = 0xE1A00000; // nop
+		*(u32*)0x0201910C = 0xE1A00000; // nop
+		patchInitDSiWare(0x02020BE8, heapEnd);
+		patchUserSettingsReadDSiWare(0x0202237C);
+		*(u32*)0x0202574C = 0xE1A00000; // nop
+		*(u32*)0x0202AE28 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0202AE2C = 0xE12FFF1E; // bx lr
+		setBL(0x0205D1D8, (u32)dsiSaveOpenR);
+		*(u32*)0x0205D1FC = (u32)dsiSaveCreate; // dsiSaveCreateAuto
+		setBL(0x0205D228, (u32)dsiSaveOpen);
+		setBL(0x0205D23C, (u32)dsiSaveGetResultCode);
+		*(u32*)0x0205D24C = 0xE1A00000; // nop
+		setBL(0x0208A3AC, (u32)dsiSaveOpen);
+		setBL(0x0208A3BC, (u32)dsiSaveGetLength);
+		setBL(0x0208A3CC, (u32)dsiSaveRead);
+		setBL(0x0208A3D4, (u32)dsiSaveClose);
+		setBL(0x0208A450, (u32)dsiSaveClose);
+		setBL(0x0208A4F4, (u32)dsiSaveOpen);
+		setBL(0x0208A50C, (u32)dsiSaveWrite);
+		setBL(0x0208A520, (u32)dsiSaveClose);
+	}
+
 	// Aura-Aura Climber (USA)
 	// Save code too advanced to patch, preventing support
 	else if (strcmp(romTid, "KSRE") == 0) {
