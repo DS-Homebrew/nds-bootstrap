@@ -8150,16 +8150,16 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
 
 	const char* romTid = getRomTid(ndsHeader);
 
-	// const u32* dsiSaveGetResultCode = ce9->patches->dsiSaveGetResultCode;
+	const u32* dsiSaveGetResultCode = ce9->patches->dsiSaveGetResultCode;
 	const u32* dsiSaveCreate = ce9->patches->dsiSaveCreate;
 	// const u32* dsiSaveDelete = ce9->patches->dsiSaveDelete;
-	// const u32* dsiSaveGetInfo = ce9->patches->dsiSaveGetInfo;
-	// const u32* dsiSaveSetLength = ce9->patches->dsiSaveSetLength;
+	const u32* dsiSaveGetInfo = ce9->patches->dsiSaveGetInfo;
+	const u32* dsiSaveSetLength = ce9->patches->dsiSaveSetLength;
 	const u32* dsiSaveOpen = ce9->patches->dsiSaveOpen;
 	// const u32* dsiSaveOpenR = ce9->patches->dsiSaveOpenR;
 	const u32* dsiSaveClose = ce9->patches->dsiSaveClose;
-	// const u32* dsiSaveGetLength = ce9->patches->dsiSaveGetLength;
-	// const u32* dsiSaveSeek = ce9->patches->dsiSaveSeek;
+	const u32* dsiSaveGetLength = ce9->patches->dsiSaveGetLength;
+	const u32* dsiSaveSeek = ce9->patches->dsiSaveSeek;
 	const u32* dsiSaveRead = ce9->patches->dsiSaveRead;
 	const u32* dsiSaveWrite = ce9->patches->dsiSaveWrite;
 
@@ -8624,6 +8624,231 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
 			setBL(0x0203B3C4, (u32)dsiSaveWrite);
 			setBL(0x0203B3E0, (u32)dsiSaveClose);
 		}
+	}
+
+	// Clubhouse Games Express: Card Classics (USA)
+	else if (strcmp(romTid, "KTRT") == 0 && saveOnFlashcard) {
+		setBL(0x020373A8, (u32)dsiSaveGetInfo);
+		setBL(0x020373E0, (u32)dsiSaveCreate);
+		setBL(0x02037434, (u32)dsiSaveOpen);
+		setBL(0x02037480, (u32)dsiSaveGetLength);
+		setBL(0x02037494, (u32)dsiSaveSetLength);
+		setBL(0x02037528, (u32)dsiSaveSeek);
+		setBL(0x02037558, (u32)dsiSaveWrite);
+		setBL(0x02037594, (u32)dsiSaveClose);
+		setBL(0x020376A8, (u32)dsiSaveRead);
+		setBL(0x020376E4, (u32)dsiSaveClose);
+		tonccpy((u32*)0x0205D0A8, dsiSaveGetResultCode, 0xC);
+	}
+
+	// A Little Bit of... All-Time Classics: Card Classics (Europe)
+	else if (strcmp(romTid, "KTRP") == 0 && saveOnFlashcard) {
+		setBL(0x02037354, (u32)dsiSaveGetInfo);
+		setBL(0x0203738C, (u32)dsiSaveCreate);
+		setBL(0x020373E0, (u32)dsiSaveOpen);
+		setBL(0x0203742C, (u32)dsiSaveGetLength);
+		setBL(0x02037440, (u32)dsiSaveSetLength);
+		setBL(0x020374D4, (u32)dsiSaveSeek);
+		setBL(0x02037504, (u32)dsiSaveWrite);
+		setBL(0x02037540, (u32)dsiSaveClose);
+		setBL(0x02037654, (u32)dsiSaveRead);
+		setBL(0x02037690, (u32)dsiSaveClose);
+		tonccpy((u32*)0x0205D0FC, dsiSaveGetResultCode, 0xC);
+	}
+
+	// Chotto Asobi Taizen: Jikkuri Toranpu (Japan)
+	else if (strcmp(romTid, "KTRJ") == 0 && saveOnFlashcard) {
+		setBL(0x02038564, (u32)dsiSaveGetInfo);
+		setBL(0x0203859C, (u32)dsiSaveCreate);
+		setBL(0x020385F0, (u32)dsiSaveOpen);
+		setBL(0x0203863C, (u32)dsiSaveGetLength);
+		setBL(0x02038650, (u32)dsiSaveSetLength);
+		setBL(0x020386E4, (u32)dsiSaveSeek);
+		setBL(0x02038714, (u32)dsiSaveWrite);
+		setBL(0x02038750, (u32)dsiSaveClose);
+		setBL(0x02038864, (u32)dsiSaveRead);
+		setBL(0x020388A0, (u32)dsiSaveClose);
+		tonccpy((u32*)0x0205E154, dsiSaveGetResultCode, 0xC);
+	}
+
+	// Yixia Xia Ming Liu Daquan: Zhiyong Shuangquan (China)
+	else if (strcmp(romTid, "KTRC") == 0 && saveOnFlashcard) {
+		setBL(0x02036FE0, (u32)dsiSaveGetInfo);
+		setBL(0x02037014, (u32)dsiSaveCreate);
+		setBL(0x02037068, (u32)dsiSaveOpen);
+		setBL(0x020370AC, (u32)dsiSaveGetLength);
+		setBL(0x020370C0, (u32)dsiSaveSetLength);
+		setBL(0x0203715C, (u32)dsiSaveSeek);
+		setBL(0x02037180, (u32)dsiSaveWrite);
+		setBL(0x020371AC, (u32)dsiSaveClose);
+		setBL(0x020372BC, (u32)dsiSaveRead);
+		setBL(0x020372F0, (u32)dsiSaveClose);
+		tonccpy((u32*)0x0205C1FC, dsiSaveGetResultCode, 0xC);
+	}
+
+	// Clubhouse Games Express: Card Classics (Korea)
+	else if (strcmp(romTid, "KTRK") == 0 && saveOnFlashcard) {
+		setBL(0x02036E78, (u32)dsiSaveGetInfo);
+		setBL(0x02036EAC, (u32)dsiSaveCreate);
+		setBL(0x02036F00, (u32)dsiSaveOpen);
+		setBL(0x02036F44, (u32)dsiSaveGetLength);
+		setBL(0x02036F58, (u32)dsiSaveSetLength);
+		setBL(0x02036FF4, (u32)dsiSaveSeek);
+		setBL(0x02037018, (u32)dsiSaveWrite);
+		setBL(0x02037044, (u32)dsiSaveClose);
+		setBL(0x02037154, (u32)dsiSaveRead);
+		setBL(0x02037188, (u32)dsiSaveClose);
+		tonccpy((u32*)0x0205EB40, dsiSaveGetResultCode, 0xC);
+	}
+
+	// Clubhouse Games Express: Family Favorites (USA, Australia)
+	else if (strcmp(romTid, "KTCT") == 0 && saveOnFlashcard) {
+		setBL(0x020388E8, (u32)dsiSaveGetInfo);
+		setBL(0x02038920, (u32)dsiSaveCreate);
+		setBL(0x02038974, (u32)dsiSaveOpen);
+		setBL(0x020389C0, (u32)dsiSaveGetLength);
+		setBL(0x020389D4, (u32)dsiSaveSetLength);
+		setBL(0x02038A68, (u32)dsiSaveSeek);
+		setBL(0x02038A98, (u32)dsiSaveWrite);
+		setBL(0x02038AD4, (u32)dsiSaveClose);
+		setBL(0x02038BE8, (u32)dsiSaveRead);
+		setBL(0x02038C24, (u32)dsiSaveClose);
+		tonccpy((u32*)0x02060D9C, dsiSaveGetResultCode, 0xC);
+	}
+
+	// A Little Bit of... All-Time Classics: Family Games (Europe)
+	else if (strcmp(romTid, "KTPP") == 0 && saveOnFlashcard) {
+		setBL(0x020388A8, (u32)dsiSaveGetInfo);
+		setBL(0x020388E0, (u32)dsiSaveCreate);
+		setBL(0x02038934, (u32)dsiSaveOpen);
+		setBL(0x02038980, (u32)dsiSaveGetLength);
+		setBL(0x02038994, (u32)dsiSaveSetLength);
+		setBL(0x02038A28, (u32)dsiSaveSeek);
+		setBL(0x02038A58, (u32)dsiSaveWrite);
+		setBL(0x02038A94, (u32)dsiSaveClose);
+		setBL(0x02038BA8, (u32)dsiSaveRead);
+		setBL(0x02038BE4, (u32)dsiSaveClose);
+		tonccpy((u32*)0x02060CE4, dsiSaveGetResultCode, 0xC);
+	}
+
+	// Chotto Asobi Taizen: Otegaru Toranpu (Japan)
+	else if (strcmp(romTid, "KTPJ") == 0 && saveOnFlashcard) {
+		setBL(0x02037784, (u32)dsiSaveGetInfo);
+		setBL(0x020377BC, (u32)dsiSaveCreate);
+		setBL(0x02037810, (u32)dsiSaveOpen);
+		setBL(0x0203785C, (u32)dsiSaveGetLength);
+		setBL(0x02037870, (u32)dsiSaveSetLength);
+		setBL(0x02037904, (u32)dsiSaveSeek);
+		setBL(0x02037934, (u32)dsiSaveWrite);
+		setBL(0x02037970, (u32)dsiSaveClose);
+		setBL(0x02037A84, (u32)dsiSaveRead);
+		setBL(0x02037AC0, (u32)dsiSaveClose);
+		tonccpy((u32*)0x0205D388, dsiSaveGetResultCode, 0xC);
+	}
+
+	// Yixia Xia Ming Liu Daquan: Qingsong Xiuxian (China)
+	else if (strcmp(romTid, "KTPC") == 0 && saveOnFlashcard) {
+		setBL(0x02037070, (u32)dsiSaveGetInfo);
+		setBL(0x020370A4, (u32)dsiSaveCreate);
+		setBL(0x020370F8, (u32)dsiSaveOpen);
+		setBL(0x0203713C, (u32)dsiSaveGetLength);
+		setBL(0x02037150, (u32)dsiSaveSetLength);
+		setBL(0x020371EC, (u32)dsiSaveSeek);
+		setBL(0x02037210, (u32)dsiSaveWrite);
+		setBL(0x0203723C, (u32)dsiSaveClose);
+		setBL(0x0203734C, (u32)dsiSaveRead);
+		setBL(0x02037380, (u32)dsiSaveClose);
+		tonccpy((u32*)0x0205E388, dsiSaveGetResultCode, 0xC);
+	}
+
+	// Clubhouse Games Express: Family Favorites (Korea)
+	else if (strcmp(romTid, "KTPK") == 0 && saveOnFlashcard) {
+		setBL(0x02037848, (u32)dsiSaveGetInfo);
+		setBL(0x0203787C, (u32)dsiSaveCreate);
+		setBL(0x020378D0, (u32)dsiSaveOpen);
+		setBL(0x02037914, (u32)dsiSaveGetLength);
+		setBL(0x02037928, (u32)dsiSaveSetLength);
+		setBL(0x020379C4, (u32)dsiSaveSeek);
+		setBL(0x020379E8, (u32)dsiSaveWrite);
+		setBL(0x02037A14, (u32)dsiSaveClose);
+		setBL(0x02037B24, (u32)dsiSaveRead);
+		setBL(0x02037B58, (u32)dsiSaveClose);
+		tonccpy((u32*)0x0205CB04, dsiSaveGetResultCode, 0xC);
+	}
+
+	// Clubhouse Games Express: Strategy Pack (USA, Australia)
+	else if (strcmp(romTid, "KTDT") == 0 && saveOnFlashcard) {
+		setBL(0x020386E8, (u32)dsiSaveGetInfo);
+		setBL(0x02038720, (u32)dsiSaveCreate);
+		setBL(0x02038774, (u32)dsiSaveOpen);
+		setBL(0x020387C0, (u32)dsiSaveGetLength);
+		setBL(0x020387D4, (u32)dsiSaveSetLength);
+		setBL(0x02038868, (u32)dsiSaveSeek);
+		setBL(0x02038898, (u32)dsiSaveWrite);
+		setBL(0x020388D4, (u32)dsiSaveClose);
+		setBL(0x020389E8, (u32)dsiSaveRead);
+		setBL(0x02038A24, (u32)dsiSaveClose);
+		tonccpy((u32*)0x02060C24, dsiSaveGetResultCode, 0xC);
+	}
+
+	// A Little Bit of... All-Time Classics: Strategy Games (Europe)
+	else if (strcmp(romTid, "KTBP") == 0 && saveOnFlashcard) {
+		setBL(0x0203869C, (u32)dsiSaveGetInfo);
+		setBL(0x020386D4, (u32)dsiSaveCreate);
+		setBL(0x02038728, (u32)dsiSaveOpen);
+		setBL(0x02038774, (u32)dsiSaveGetLength);
+		setBL(0x02038788, (u32)dsiSaveSetLength);
+		setBL(0x0203881C, (u32)dsiSaveSeek);
+		setBL(0x0203884C, (u32)dsiSaveWrite);
+		setBL(0x02038888, (u32)dsiSaveClose);
+		setBL(0x0203899C, (u32)dsiSaveRead);
+		setBL(0x020389D8, (u32)dsiSaveClose);
+		tonccpy((u32*)0x02060B60, dsiSaveGetResultCode, 0xC);
+	}
+
+	// Chotto Asobi Taizen: Onajimi Teburu (Japan)
+	else if (strcmp(romTid, "KTBJ") == 0 && saveOnFlashcard) {
+		setBL(0x0203795C, (u32)dsiSaveGetInfo);
+		setBL(0x02037994, (u32)dsiSaveCreate);
+		setBL(0x020379E8, (u32)dsiSaveOpen);
+		setBL(0x02037A34, (u32)dsiSaveGetLength);
+		setBL(0x02037A48, (u32)dsiSaveSetLength);
+		setBL(0x02037ADC, (u32)dsiSaveSeek);
+		setBL(0x02037B0C, (u32)dsiSaveWrite);
+		setBL(0x02037B48, (u32)dsiSaveClose);
+		setBL(0x02037C5C, (u32)dsiSaveRead);
+		setBL(0x02037C98, (u32)dsiSaveClose);
+		tonccpy((u32*)0x0205D744, dsiSaveGetResultCode, 0xC);
+	}
+
+	// Yixia Xia Ming Liu Daquan: Jingdian Zhongwen (China)
+	else if (strcmp(romTid, "KTBC") == 0 && saveOnFlashcard) {
+		setBL(0x02036F00, (u32)dsiSaveGetInfo);
+		setBL(0x02036F34, (u32)dsiSaveCreate);
+		setBL(0x02036F88, (u32)dsiSaveOpen);
+		setBL(0x02036FCC, (u32)dsiSaveGetLength);
+		setBL(0x02036FE0, (u32)dsiSaveSetLength);
+		setBL(0x0203707C, (u32)dsiSaveSeek);
+		setBL(0x020370A0, (u32)dsiSaveWrite);
+		setBL(0x020370CC, (u32)dsiSaveClose);
+		setBL(0x020371DC, (u32)dsiSaveRead);
+		setBL(0x02037210, (u32)dsiSaveClose);
+		tonccpy((u32*)0x0205C078, dsiSaveGetResultCode, 0xC);
+	}
+
+	// Clubhouse Games Express: Strategy Pack (Korea)
+	else if (strcmp(romTid, "KTBK") == 0 && saveOnFlashcard) {
+		setBL(0x02036EB0, (u32)dsiSaveGetInfo);
+		setBL(0x02036EE4, (u32)dsiSaveCreate);
+		setBL(0x02036F38, (u32)dsiSaveOpen);
+		setBL(0x02036F7C, (u32)dsiSaveGetLength);
+		setBL(0x02036F90, (u32)dsiSaveSetLength);
+		setBL(0x0203702C, (u32)dsiSaveSeek);
+		setBL(0x02037050, (u32)dsiSaveWrite);
+		setBL(0x0203707C, (u32)dsiSaveClose);
+		setBL(0x0203718C, (u32)dsiSaveRead);
+		setBL(0x020371C0, (u32)dsiSaveClose);
+		tonccpy((u32*)0x0205E270, dsiSaveGetResultCode, 0xC);
 	}
 
 	// Pop Island (USA)

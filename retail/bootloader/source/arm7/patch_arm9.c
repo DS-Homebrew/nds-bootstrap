@@ -292,8 +292,9 @@ static void patchReset(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const m
 	dbg_printf("\n\n");
 }
 
-static void patchResetTwl(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {    
-	if (ndsHeader->unitCode != 3) {
+static void patchResetTwl(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+	extern u32 accessControl;
+	if (!(accessControl & BIT(4))) {
 		return;
 	}
 
