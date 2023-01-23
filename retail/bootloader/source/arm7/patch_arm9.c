@@ -708,6 +708,7 @@ void patchMpuChange(const tNDSHeader* ndsHeader, const module_params_t* modulePa
 void patchHiHeapPointer(cardengineArm9* ce9, const module_params_t* moduleParams, const tNDSHeader* ndsHeader) {
 	extern bool ce9Alt;
 	extern u32 arm7mbk;
+	extern u32 accessControl;
 	extern u32 fatTableAddr;
 	const char* romTid = getRomTid(ndsHeader);
 
@@ -752,7 +753,7 @@ void patchHiHeapPointer(cardengineArm9* ce9, const module_params_t* moduleParams
 	} else {
 		*heapPointer = (fatTableAddr < 0x023C0000 || fatTableAddr >= (u32)ce9) ? (u32)ce9 : fatTableAddr; // shrink heap by FAT table size + ce9 binary size
 	}
-	if (strncmp(romTid, "K59", 3) == 0 && extendedMemory2) {
+	if ((accessControl & BIT(4)) && extendedMemory2) {
 		*heapPointer = 0x02700000;
 	}
 
