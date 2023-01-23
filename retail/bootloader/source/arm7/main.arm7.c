@@ -832,17 +832,17 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 		// Set region flag
 		if (useRomRegion || region == 0xFF) {
 			u8 newRegion = 0;
-			if (strncmp(getRomTid(ndsHeader)+3, "J", 1) == 0) {
+			if (ndsHeader->gameCode[3] == 'J') {
 				newRegion = 0;
-			} else if (strncmp(getRomTid(ndsHeader)+3, "E", 1) == 0 || strncmp(getRomTid(ndsHeader)+3, "T", 1) == 0) {
+			} else if (ndsHeader->gameCode[3] == 'E' || ndsHeader->gameCode[3] == 'T') {
 				newRegion = 1;
-			} else if (strncmp(getRomTid(ndsHeader)+3, "P", 1) == 0 || strncmp(getRomTid(ndsHeader)+3, "V", 1) == 0) {
+			} else if (ndsHeader->gameCode[3] == 'P' || ndsHeader->gameCode[3] == 'V') {
 				newRegion = 2;
-			} else if (strncmp(getRomTid(ndsHeader)+3, "U", 1) == 0) {
+			} else if (ndsHeader->gameCode[3] == 'U') {
 				newRegion = 3;
-			} else if (strncmp(getRomTid(ndsHeader)+3, "C", 1) == 0) {
+			} else if (ndsHeader->gameCode[3] == 'C') {
 				newRegion = 4;
-			} else if (strncmp(getRomTid(ndsHeader)+3, "K", 1) == 0) {
+			} else if (ndsHeader->gameCode[3] == 'K') {
 				newRegion = 5;
 			}
 			toncset((u8*)0x02FFFD70, newRegion, 1);
