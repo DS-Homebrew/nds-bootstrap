@@ -825,7 +825,7 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 			fileRead(twlCfg+0x9C, &romFile, 0x2F0, 1);  // Parental Controls Years of Age Rating (00h..14h)
 		}*/
 
-		if (softResetParams[0] == 0xFFFFFFFF) {
+		if (softResetParams[0] == 0xFFFFFFFF && !ce9Alt) {
 			fileRead((char*)0x02FFE230, &romFile, 0x230, 8);
 		}
 
@@ -1101,7 +1101,7 @@ int arm7_main(void) {
 	tonccpy((u8*)CARDENGINE_ARM7_LOCATION, (u8*)CARDENGINE_ARM7_LOCATION_BUFFERED, 0x1400);
 	toncset((u8*)CARDENGINE_ARM7_LOCATION_BUFFERED, 0, 0x1400);
 
-	if (!dldiPatchBinary((data_t*)ce9Location, 0x3800, (data_t*)(extendedMemory2 ? 0x027BD000 : (accessControl & BIT(4)) ? 0x023FC000 : 0x023FD000))) {
+	if (!dldiPatchBinary((data_t*)ce9Location, 0x3800, (data_t*)(extendedMemory2 ? 0x027BD000 : ((accessControl & BIT(4)) && !ce9Alt) ? 0x023FC000 : 0x023FD000))) {
 		nocashMessage("ce9 DLDI patch failed");
 		dbg_printf("ce9 DLDI patch failed\n");
 		errorOutput();
