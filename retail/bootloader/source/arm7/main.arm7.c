@@ -825,7 +825,7 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 			fileRead(twlCfg+0x9C, &romFile, 0x2F0, 1);  // Parental Controls Years of Age Rating (00h..14h)
 		}*/
 
-		if (softResetParams[0] == 0xFFFFFFFF && !ce9Alt) {
+		if (softResetParams[0] == 0xFFFFFFFF && (accessControl & BIT(4)) && !ce9Alt) {
 			fileRead((char*)0x02FFE230, &romFile, 0x230, 8);
 		}
 
