@@ -8152,7 +8152,7 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
 
 	const u32* dsiSaveGetResultCode = ce9->patches->dsiSaveGetResultCode;
 	const u32* dsiSaveCreate = ce9->patches->dsiSaveCreate;
-	// const u32* dsiSaveDelete = ce9->patches->dsiSaveDelete;
+	const u32* dsiSaveDelete = ce9->patches->dsiSaveDelete;
 	const u32* dsiSaveGetInfo = ce9->patches->dsiSaveGetInfo;
 	const u32* dsiSaveSetLength = ce9->patches->dsiSaveSetLength;
 	const u32* dsiSaveOpen = ce9->patches->dsiSaveOpen;
@@ -8849,6 +8849,26 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
 		setBL(0x0203718C, (u32)dsiSaveRead);
 		setBL(0x020371C0, (u32)dsiSaveClose);
 		tonccpy((u32*)0x0205E270, dsiSaveGetResultCode, 0xC);
+	}
+
+	// Globulos Party (USA)
+	// Globulos Party (Europe)
+	else if (strncmp(romTid, "KGS", 3) == 0 && saveOnFlashcard) {
+		setBL(0x02040D0C, (u32)dsiSaveOpen);
+		setBL(0x02040D44, (u32)dsiSaveClose);
+		setBL(0x02040DA0, (u32)dsiSaveCreate);
+		setBL(0x02040E30, (u32)dsiSaveDelete);
+		setBL(0x02040EFC, (u32)dsiSaveSeek);
+		setBL(0x02040F1C, (u32)dsiSaveRead); // dsiSaveReadAsync
+		setBL(0x02040F30, (u32)dsiSaveRead);
+		setBL(0x02040F4C, (u32)dsiSaveClose);
+		setBL(0x02040F68, (u32)dsiSaveClose);
+		setBL(0x02041020, (u32)dsiSaveSeek);
+		setBL(0x02041040, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+		setBL(0x02041054, (u32)dsiSaveWrite);
+		setBL(0x02041070, (u32)dsiSaveClose);
+		setBL(0x0204108C, (u32)dsiSaveClose);
+		tonccpy((u32*)0x0205AEB4, dsiSaveGetResultCode, 0xC);
 	}
 
 	// Pop Island (USA)
