@@ -54,6 +54,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	const char* romTid = getRomTid(ndsHeader);
 	extern void patchHiHeapDSiWareThumb(u32 addr, u32 newCodeAddr, u32 heapEnd);
 	extern void patchInitDSiWare(u32 addr, u32 heapEnd);
+	extern void patchVolumeGetDSiWare(u32 addr);
 	extern void patchUserSettingsReadDSiWare(u32 addr);
 	extern void patchTwlFontLoad(u32 heapAllocAddr, u32 newCodeAddr);
 
@@ -7019,6 +7020,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			*(u32*)0x02021E48 = 0xE12FFF1E; // bx lr (Disable NFTR font loading)
 			*(u32*)0x02021FEC = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
 		// }
+		*(u32*)0x02030298 = 0xE12FFF1E; // bx lr (Hide volume icon in pause menu)
 	}
 
 	// A Kappa's Trail (USA)
@@ -13136,8 +13138,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBL(0x02013968, (u32)dsiSaveClose);
 			*(u32*)0x02013978 = 0xE1A00000; // nop
 			*(u32*)0x020139B4 = 0xE1A00000; // nop
-			*(u32*)0x02024D5C = 0xE3A00000; // mov r0, #0 (Show volume icon as empty)
-			*(u32*)0x02024D60 = 0xE12FFF1E; // bx lr
+			patchVolumeGetDSiWare(0x02024D5C);
 			*(u32*)0x02067804 = 0xE1A00000; // nop
 			tonccpy((u32*)0x02068398, dsiSaveGetResultCode, 0xC);
 			*(u32*)0x0206AC78 = 0xE1A00000; // nop
@@ -13159,8 +13160,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBL(0x02013974, (u32)dsiSaveClose);
 			*(u32*)0x02013984 = 0xE1A00000; // nop
 			*(u32*)0x020139C0 = 0xE1A00000; // nop
-			*(u32*)0x02024D68 = 0xE3A00000; // mov r0, #0 (Show volume icon as empty)
-			*(u32*)0x02024D6C = 0xE12FFF1E; // bx lr
+			patchVolumeGetDSiWare(0x02024D68);
 			*(u32*)0x02067810 = 0xE1A00000; // nop
 			tonccpy((u32*)0x020683A4, dsiSaveGetResultCode, 0xC);
 			*(u32*)0x0206AC84 = 0xE1A00000; // nop
@@ -13193,8 +13193,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02013EAC, (u32)dsiSaveSetLength);
 		setBL(0x02013ECC, (u32)dsiSaveWrite);
 		setBL(0x02013ED4, (u32)dsiSaveClose);
-		*(u32*)0x02025004 = 0xE3A00000; // mov r0, #0 (Show volume icon as empty)
-		*(u32*)0x02025008 = 0xE12FFF1E; // bx lr
+		patchVolumeGetDSiWare(0x02025004);
 		*(u32*)0x02068508 = 0xE28DD00C; // ADD   SP, SP, #0xC
 		*(u32*)0x0206850C = 0xE8BD8078; // LDMFD SP!, {R3-R6,PC}
 		tonccpy((u32*)0x0206928C, dsiSaveGetResultCode, 0xC);
@@ -13691,6 +13690,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02023460, (u32)dsiSaveSetLength);
 		setBL(0x02023480, (u32)dsiSaveWrite);
 		setBL(0x02023498, (u32)dsiSaveClose);
+		*(u32*)0x020302A0 = 0xE12FFF1E; // bx lr (Hide volume icon in pause menu)
 	}
 
 	// Touch Solitaire (USA)

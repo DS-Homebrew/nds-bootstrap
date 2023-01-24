@@ -836,6 +836,13 @@ void patchInitDSiWare(u32 addr, u32 heapEnd) {
 	*(u32*)(addr+0x9C) = 0xE1A00000; // nop
 }
 
+void patchVolumeGetDSiWare(u32 addr) {
+	*(u32*)(addr) = 0xE59F0004; // ldr r0, =0x02FFFDF0
+	*(u32*)(addr+4) = 0xE5900000; // ldr r0, [r0]
+	*(u32*)(addr+8) = 0xE12FFF1E; // bx lr
+	*(u32*)(addr+0xC) = 0x02FFFDF0;
+}
+
 bool useSharedFont = false;
 
 void patchSharedFontPath(const cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {

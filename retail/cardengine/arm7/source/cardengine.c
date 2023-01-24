@@ -84,7 +84,8 @@ int RumbleForce = 1;
 //static int saveMutex = 0;
 static int swapTimer = 0;
 static int languageTimer = 0;
-static bool halfVolume = false;
+static int volumeLevel = 3; // 0 = Off, 1 = Low, 2 = Medium, 3 = High/Max
+static int volumeLevelTimer = 0;
 static int soundBuffer = 0;
 static bool customMusic = false;
 bool returnToMenu = false;
@@ -384,7 +385,7 @@ void myIrqHandlerVBlank(void) {
 			swapScreens = true;
 		}
 		swapTimer++;
-	}else{
+	} else {
 		swapTimer = 0;
 	}
 	
@@ -402,16 +403,42 @@ void myIrqHandlerVBlank(void) {
 		softResetTimer = 0;
 	}*/
 
-	if (0 == (REG_KEYINPUT & (KEY_SELECT | KEY_UP))) {
-		halfVolume = false;
-		REG_MASTER_VOLUME = 127;
-	}
-	if (0 == (REG_KEYINPUT & (KEY_SELECT | KEY_DOWN))) {
-		halfVolume = true;
+	if ((0 == (REG_KEYINPUT & KEY_SELECT)) && ((0 == (REG_KEYINPUT & KEY_UP)) || (0 == (REG_KEYINPUT & KEY_DOWN)))) {
+		if (volumeLevelTimer == 30) {
+			if (0 == (REG_KEYINPUT & KEY_UP)) {
+				volumeLevel++;
+				if (volumeLevel > 3) volumeLevel = 3;
+				if (volumeLevel == 3) {
+					REG_MASTER_VOLUME = 127;
+				}
+			} else if (0 == (REG_KEYINPUT & KEY_DOWN)) {
+				volumeLevel--;
+				if (volumeLevel < 0) volumeLevel = 0;
+			}
+			volumeLevelTimer = 0;
+		} else {
+			volumeLevelTimer++;
+		}
+	} else {
+		volumeLevelTimer = 0;
 	}
 	
-	if (halfVolume && sharedAddr[0] != 0x524F5245) {
-		REG_MASTER_VOLUME = 63;
+	if (volumeLevel < 3 && sharedAddr[0] != 0x524F5245) {
+		switch (volumeLevel) {
+			case 0:
+				REG_MASTER_VOLUME = 0;
+				break;
+			case 1:
+				REG_MASTER_VOLUME = 31;
+				break;
+			case 2:
+				REG_MASTER_VOLUME = 63;
+				break;
+		}
+	}
+
+	if (ndsHeader->unitCode == 3) {
+		*(u32*)0x02FFFDF0 = (volumeLevel*2)+1;
 	}
 
 	// Update main screen or swap screens
