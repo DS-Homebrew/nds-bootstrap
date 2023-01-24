@@ -7008,13 +7008,17 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Kami Hikouki (Japan)
 	// Saving not supported due to using more than one file
 	else if (strcmp(romTid, "KAMJ") == 0) {
-		// useSharedFont = true;
+		// useSharedFont = twlFontFound;
 		*(u32*)0x0200D908 = 0xE3A00001; // mov r0, #1 (Enable NitroFS reads)
-		// *(u32*)0x02015FCC = 0xE3A00001; // mov r0, #1
-		*(u32*)0x02021E48 = 0xE12FFF1E; // bx lr (Disable NFTR font loading)
-		*(u32*)0x02021FEC = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
-		// *(u32*)0x02021E60 = 0xE3A00001; // mov r0, #1
-		// *(u32*)0x02021E9C = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02017D38 = 0xE3A00001; // mov r0, #1 (Enable TWL soft-reset function)
+		/* if (useSharedFont) {
+			*(u32*)0x02015FCC = 0xE3A00001; // mov r0, #1
+			*(u32*)0x02021E60 = 0xE3A00001; // mov r0, #1
+			*(u32*)0x02021E9C = 0xE3A00001; // mov r0, #1
+		} else { */
+			*(u32*)0x02021E48 = 0xE12FFF1E; // bx lr (Disable NFTR font loading)
+			*(u32*)0x02021FEC = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
+		// }
 	}
 
 	// A Kappa's Trail (USA)
@@ -13659,13 +13663,24 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Tori to Mame (Japan)
 	else if (strcmp(romTid, "KP6J") == 0) {
-		// useSharedFont = true;
+		// useSharedFont = twlFontFound;
 		*(u32*)0x0200D17C = 0xE3A00001; // mov r0, #1 (Enable NitroFS reads)
-		// *(u32*)0x02015928 = 0xE3A00001; // mov r0, #1
-		*(u32*)0x020217B0 = 0xE12FFF1E; // bx lr (Disable NFTR font loading)
-		*(u32*)0x02021954 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
-		// *(u32*)0x020217C8 = 0xE3A00001; // mov r0, #1
-		// *(u32*)0x020217F0 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02017694 = 0xE3A00001; // mov r0, #1 (Enable TWL soft-reset function)
+		/* if (useSharedFont) {
+			*(u16*)0x0200796C = 0x2001; // movs r0, #1
+			*(u16*)0x02007970 = 0x2001; // movs r0, #1
+			*(u16*)0x0200797C = 0x2001; // movs r0, #1
+			*(u16*)0x02007980 = 0x2001; // movs r0, #1
+			*(u16*)0x0200798A = 0x2001; // movs r0, #1
+			*(u16*)0x02007990 = 0x2001; // movs r0, #1
+			*(u16*)0x02007994 = 0x2001; // movs r0, #1
+			*(u32*)0x02015928 = 0xE3A00001; // mov r0, #1
+			*(u32*)0x020217C8 = 0xE3A00001; // mov r0, #1
+			*(u32*)0x020217F0 = 0xE3A00001; // mov r0, #1
+		} else { */
+			*(u32*)0x020217B0 = 0xE12FFF1E; // bx lr (Disable NFTR font loading)
+			*(u32*)0x02021954 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
+		// }
 		setBL(0x02023348, (u32)dsiSaveOpen);
 		setBL(0x02023360, (u32)dsiSaveGetLength);
 		setBL(0x02023398, (u32)dsiSaveRead);

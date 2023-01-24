@@ -936,6 +936,7 @@ void patchSharedFontPath(const cardengineArm9* ce9, const tNDSHeader* ndsHeader,
 		toncset((u32*)0x023B8000, 0, 0x8000);
 
 		//bool armFound = false;
+		//bool dsiBiosFuncsIn9i = false;
 		int zerosFound = 0;
 		u32* arm9idst = moduleParams->static_bss_end;
 		for (u32 i = 0; i < 0x7FFC/4; i++) {
@@ -980,6 +981,7 @@ void patchSharedFontPath(const cardengineArm9* ce9, const tNDSHeader* ndsHeader,
 					|| arm9idst[i] == 0x4770DF28 || arm9idst[i] == 0x4770DF29) {
 				// Stub out DSi BIOS functions
 				arm9idst[i] = 0x47702001;
+				//dsiBiosFuncsIn9i = true;
 			} else if (arm9idst[i] == 0) {
 				zerosFound++;
 				if (zerosFound == 0x200/4) {
@@ -987,6 +989,18 @@ void patchSharedFontPath(const cardengineArm9* ce9, const tNDSHeader* ndsHeader,
 				}
 			}
 		}
+		/*if (!dsiBiosFuncsIn9i) {
+			extern u32 iUncompressedSize;
+			u32* arm9dst = ndsHeader->arm9destination;
+			for (u32 i = 0; i < iUncompressedSize/4; i++) {
+				if (arm9dst[i] == 0x4770DF20 || arm9dst[i] == 0x4770DF21 || arm9dst[i] == 0x4770DF22 || arm9dst[i] == 0x4770DF23
+				 || arm9dst[i] == 0x4770DF24 || arm9dst[i] == 0x4770DF25 || arm9dst[i] == 0x4770DF26 || arm9dst[i] == 0x4770DF27
+				 || arm9dst[i] == 0x4770DF28 || arm9dst[i] == 0x4770DF29) {
+					// Stub out DSi BIOS functions
+					arm9dst[i] = 0x47702001;
+				}
+			}
+		}*/
 		/*if (!armFound) {
 			const u32 dsiSaveOpenT = 0x02000200;
 			const u32 dsiSaveCloseT = 0x02000210;
