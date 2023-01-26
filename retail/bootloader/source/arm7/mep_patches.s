@@ -8,6 +8,8 @@
 	@.global elementalistsHeapAlloc
 	.global fourSwHeapAlloc
 	.global fourSwHeapAddrPtr
+	@.global gate18HeapAlloc
+	@.global gate18HeapAddrPtr
 	@.global mvdk3HeapAlloc
 	.global nintCdwnCalHeapAlloc
 	.global nintCdwnCalHeapAddrPtr
@@ -40,6 +42,10 @@ fourSwHeapAlloc:
 	.word fourSwHeapAllocFunc
 fourSwHeapAddrPtr:
 	.word fourSwHeapAddr
+@gate18HeapAlloc:
+@	.word gate18HeapAllocFunc
+@gate18HeapAddrPtr:
+@	.word gate18HeapAddr
 @mvdk3HeapAlloc:
 @	.word mvdk3HeapAllocFunc
 nintCdwnCalHeapAlloc:
@@ -316,6 +322,28 @@ fourSwHeapAddr:
 .word	0x091B0000 @ Offset of zelmap.bin
 .word	0x092E0000 @ Offset of us/eu/jp.kmsg
 .pool
+@---------------------------------------------------------------------------------
+
+@---------------------------------------------------------------------------------
+@gate18OrgFunction: .word 0
+@gate18HeapAllocFunc:
+@---------------------------------------------------------------------------------
+@	stmfd   sp!, {r6,lr}
+
+@	ldr r6, =0x8D030 @ Size of fontGBK.bin
+@	cmp r1, r6
+@	ldreq r0, gate18HeapAddr
+@	ldmeqfd   sp!, {r6,pc}
+
+@	ldr	r6, gate18OrgFunction
+@	bl	_blx_gate18OrgFunction
+
+@	ldmfd   sp!, {r6,pc}
+@_blx_gate18OrgFunction:
+@	bx	r6
+@gate18HeapAddr:
+@.word	0x09000000 @ Offset of fontGBK.bin
+@.pool
 @---------------------------------------------------------------------------------
 
 @---------------------------------------------------------------------------------

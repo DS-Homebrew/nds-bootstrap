@@ -608,6 +608,7 @@ static bool isROMLoadableInRAM(const tNDSHeader* ndsHeader, const char* romTid, 
 
 	bool res = false;
 	if ((strncmp(romTid, "UBR", 3) == 0 && isDevConsole)
+	// || (strncmp(romTid, "KXO", 3) == 0 && s2FlashcardId != 0x5A45) // 18th Gate
 	 || (strncmp(romTid, "KXC", 3) == 0 && s2FlashcardId != 0x5A45) // Castle Conqueror: Heroes 2
 	 || (strncmp(romTid, "KQ9", 3) == 0 && s2FlashcardId != 0x5A45) // The Legend of Zelda: Four Swords: Anniversary Edition
 	 || (strncmp(romTid, "KEV", 3) == 0 && s2FlashcardId != 0x5A45) // Space Invaders Extreme Z

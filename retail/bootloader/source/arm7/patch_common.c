@@ -252,6 +252,91 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020B08D0 = 0xE3A00001; // mov r0, #1
 	}
 
+	// 18th Gate (USA)
+	// 18th Gate (Europe, Australia)
+	// Requires 8MB of RAM
+	else if ((strcmp(romTid, "KXOE") == 0 || strcmp(romTid, "KXOV") == 0) && extendedMemory2) {
+		// extern u32* mepHeapSetPatch;
+		// extern u32* gate18HeapAlloc;
+		// extern u32* gate18HeapAddrPtr;
+
+		*(u32*)0x02005090 = 0xE1A00000; // nop
+		*(u32*)0x020050A4 = 0xE1A00000; // nop
+		*(u32*)0x0200D278 = 0xE1A00000; // nop
+		*(u32*)0x020105CC = 0xE1A00000; // nop
+		patchInitDSiWare(0x020163C0, heapEnd);
+		// if (!extendedMemory2) {
+		// 	*(u32*)0x0201674C = 0x02329720;
+		// }
+		patchUserSettingsReadDSiWare(0x020178D0);
+		*(u32*)0x0201ABB8 = 0xE1A00000; // nop
+		if (ndsHeader->gameCode[3] == 'E') {
+			/* if (!extendedMemory2) {
+				if (s2FlashcardId == 0x5A45) {
+					gate18HeapAddrPtr[0] -= 0x01000000;
+				}
+				tonccpy((u32*)0x0200E844, mepHeapSetPatch, 0x70);
+				tonccpy((u32*)0x02017E18, gate18HeapAlloc, 0xBC);
+
+				*(u32*)0x0200E840 = (u32)getOffsetFromBL((u32*)0x02020740);
+				setBL(0x02020740, 0x0200E844);
+				*(u32*)0x02017E14 = (u32)getOffsetFromBL((u32*)0x020D1D04);
+				setBL(0x020D1D04, 0x02017E18);
+			} */
+			setBL(0x020D172C, (u32)dsiSaveGetInfo);
+			setBL(0x020D1740, (u32)dsiSaveOpen);
+			setBL(0x020D1754, (u32)dsiSaveCreate);
+			setBL(0x020D1764, (u32)dsiSaveOpen);
+			setBL(0x020D1774, (u32)dsiSaveGetResultCode);
+			*(u32*)0x020D1784 = 0xE1A00000; // nop
+			setBL(0x020D1790, (u32)dsiSaveCreate);
+			setBL(0x020D17A0, (u32)dsiSaveOpen);
+			setBL(0x020D187C, (u32)dsiSaveSeek);
+			setBL(0x020D1894, (u32)dsiSaveWrite);
+			setBL(0x020D18A4, (u32)dsiSaveSeek);
+			setBL(0x020D18B4, (u32)dsiSaveWrite);
+			setBL(0x020D18C4, (u32)dsiSaveSeek);
+			setBL(0x020D18D4, (u32)dsiSaveWrite);
+			setBL(0x020D1940, (u32)dsiSaveSeek);
+			setBL(0x020D1950, (u32)dsiSaveWrite);
+			setBL(0x020D1958, (u32)dsiSaveClose);
+			setBL(0x020D19A4, (u32)dsiSaveOpen);
+			setBL(0x020D1A90, (u32)dsiSaveSeek);
+			setBL(0x020D1AA4, (u32)dsiSaveRead);
+			setBL(0x020D1ACC, (u32)dsiSaveClose);
+			setBL(0x020D1BF4, (u32)dsiSaveOpen);
+			setBL(0x020D1C08, (u32)dsiSaveSeek);
+			setBL(0x020D1C18, (u32)dsiSaveWrite);
+			setBL(0x020D1C20, (u32)dsiSaveClose);
+		} else {
+			setBL(0x0209F7F8, (u32)dsiSaveGetInfo);
+			setBL(0x0209F80C, (u32)dsiSaveOpen);
+			setBL(0x0209F820, (u32)dsiSaveCreate);
+			setBL(0x0209F830, (u32)dsiSaveOpen);
+			setBL(0x0209F840, (u32)dsiSaveGetResultCode);
+			*(u32*)0x0209F850 = 0xE1A00000; // nop
+			setBL(0x0209F85C, (u32)dsiSaveCreate);
+			setBL(0x0209F86C, (u32)dsiSaveOpen);
+			setBL(0x0209F948, (u32)dsiSaveSeek);
+			setBL(0x0209F960, (u32)dsiSaveWrite);
+			setBL(0x0209F970, (u32)dsiSaveSeek);
+			setBL(0x0209F980, (u32)dsiSaveWrite);
+			setBL(0x0209F990, (u32)dsiSaveSeek);
+			setBL(0x0209F9A0, (u32)dsiSaveWrite);
+			setBL(0x0209FA0C, (u32)dsiSaveSeek);
+			setBL(0x0209FA1C, (u32)dsiSaveWrite);
+			setBL(0x0209FA24, (u32)dsiSaveClose);
+			setBL(0x0209FA70, (u32)dsiSaveOpen);
+			setBL(0x0209FB5C, (u32)dsiSaveSeek);
+			setBL(0x0209FB70, (u32)dsiSaveRead);
+			setBL(0x0209FB98, (u32)dsiSaveClose);
+			setBL(0x0209FCC0, (u32)dsiSaveOpen);
+			setBL(0x0209FCD4, (u32)dsiSaveSeek);
+			setBL(0x0209FCE4, (u32)dsiSaveWrite);
+			setBL(0x0209FCEC, (u32)dsiSaveClose);
+		}
+	}
+
 	// 4 Travellers: Play French (USA)
 	else if (strcmp(romTid, "KTFE") == 0) {
 		useSharedFont = twlFontFound;
