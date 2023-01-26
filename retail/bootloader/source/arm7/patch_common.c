@@ -199,6 +199,33 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0203E7D0 = 0xE1A00000; // nop
 	}
 
+	// 10 Byou Sou (Japan)
+	else if (strcmp(romTid, "KJUJ") == 0) {
+		*(u32*)0x02014628 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02014DC0 = 0xE1A00000; // nop
+		*(u32*)0x02014DD0 = 0xE1A00000; // nop
+		*(u32*)0x02014DDC = 0xE1A00000; // nop
+		*(u32*)0x02014DE8 = 0xE1A00000; // nop
+		*(u32*)0x02014E7C = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02014E9C = 0xE1A00000; // nop
+		*(u32*)0x02014EA4 = 0xE1A00000; // nop
+		*(u32*)0x02014EB4 = 0xE1A00000; // nop
+		*(u32*)0x02014F94 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02014FCC = 0xE1A00000; // nop
+		*(u32*)0x02018080 = 0xE1A00000; // nop
+		*(u32*)0x02018914 = 0xE12FFF1E; // bx lr (Disable NFTR loading from TWLNAND)
+		*(u32*)0x02019254 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0202FFBC = 0xE1A00000; // nop
+		*(u32*)0x02033758 = 0xE1A00000; // nop
+		patchInitDSiWare(0x02039174, heapEnd);
+		patchUserSettingsReadDSiWare(0x0203B3CC);
+		*(u32*)0x0203AD08 = 0xE1A00000; // nop
+		*(u32*)0x0203AD0C = 0xE1A00000; // nop
+		*(u32*)0x0203AD10 = 0xE1A00000; // nop
+		*(u32*)0x0203AD14 = 0xE1A00000; // nop
+		*(u32*)0x0203DD04 = 0xE1A00000; // nop
+	}
+
 	// 101 Pinball World (USA)
 	// Requires 8MB of RAM
 	else if (strcmp(romTid, "KIIE") == 0 && extendedMemory2) {

@@ -89,27 +89,40 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// GO Series: 10 Second Run (USA)
 	// GO Series: 10 Second Run (Europe)
 	else if (strcmp(romTid, "KJUE") == 0 || strcmp(romTid, "KJUP") == 0) {
-		*(u32*)0x020150FC = 0xE12FFF1E; // bx lr
-		// Save patch causes the game to crash on panic function?
-		/*setBL(0x02015C60, (u32)dsiSaveGetInfo);
-		setBL(0x02015C9C, (u32)dsiSaveGetInfo);
-		setBL(0x02015CFC, (u32)dsiSaveCreate);
-		setBL(0x02015D38, (u32)dsiSaveGetInfo);
-		setBL(0x02015D50, (u32)dsiSaveDelete);
-		setBL(0x02015DB0, (u32)dsiSaveOpen);
-		setBL(0x02015DDC, (u32)dsiSaveGetLength);
-		setBL(0x02015DF0, (u32)dsiSaveRead);
-		setBL(0x02015E0C, (u32)dsiSaveClose);
-		setBL(0x02015E20, (u32)dsiSaveClose);
-		setBL(0x02015EB4, (u32)dsiSaveOpen);
-		setBL(0x02015EE8, (u32)dsiSaveWrite);
-		setBL(0x02015F04, (u32)dsiSaveClose);
-		setBL(0x02015F18, (u32)dsiSaveClose);*/
+		if (saveOnFlashcard) {
+			*(u32*)0x020150FC = 0xE12FFF1E; // bx lr
+			// Save patch causes the game to crash on panic function?
+			/*setBL(0x02015C60, (u32)dsiSaveGetInfo);
+			setBL(0x02015C9C, (u32)dsiSaveGetInfo);
+			setBL(0x02015CFC, (u32)dsiSaveCreate);
+			setBL(0x02015D38, (u32)dsiSaveGetInfo);
+			setBL(0x02015D50, (u32)dsiSaveDelete);
+			setBL(0x02015DB0, (u32)dsiSaveOpen);
+			setBL(0x02015DDC, (u32)dsiSaveGetLength);
+			setBL(0x02015DF0, (u32)dsiSaveRead);
+			setBL(0x02015E0C, (u32)dsiSaveClose);
+			setBL(0x02015E20, (u32)dsiSaveClose);
+			setBL(0x02015EB4, (u32)dsiSaveOpen);
+			setBL(0x02015EE8, (u32)dsiSaveWrite);
+			setBL(0x02015F04, (u32)dsiSaveClose);
+			setBL(0x02015F18, (u32)dsiSaveClose);*/
+			// tonccpy((u32*)0x02031660, dsiSaveGetResultCode, 0xC);
+		}
 		if (!twlFontFound) {
 			*(u32*)0x020193E0 = 0xE12FFF1E; // bx lr (Disable NFTR loading from TWLNAND)
 			*(u32*)0x02019D20 = 0xE12FFF1E; // bx lr
 		}
-		//tonccpy((u32*)0x02031660, dsiSaveGetResultCode, 0xC);
+	}
+
+	// 10 Byou Sou (Japan)
+	else if (strcmp(romTid, "KJUJ") == 0) {
+		if (saveOnFlashcard) {
+			*(u32*)0x02014628 = 0xE12FFF1E; // bx lr
+		}
+		if (!twlFontFound) {
+			*(u32*)0x02018914 = 0xE12FFF1E; // bx lr (Disable NFTR loading from TWLNAND)
+			*(u32*)0x02019254 = 0xE12FFF1E; // bx lr
+		}
 	}
 
 	// 4 Travellers: Play French (USA)
