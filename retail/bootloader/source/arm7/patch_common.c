@@ -15187,6 +15187,52 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
 
 	// DSiWare containing Cloneboot
 
+	// 1st Class Poker & BlackJack (USA)
+	else if (strcmp(romTid, "KYPE") == 0) {
+		setBL(0x02012E50, (u32)dsiSaveOpen);
+		setBL(0x02012EC4, (u32)dsiSaveGetLength);
+		setBL(0x02012ED8, (u32)dsiSaveClose);
+		setBL(0x02012EF8, (u32)dsiSaveSeek);
+		setBL(0x02012F10, (u32)dsiSaveRead);
+		setBL(0x02012F24, (u32)dsiSaveClose);
+		setBL(0x02012F78, (u32)dsiSaveClose);
+		*(u32*)0x02012FBC = 0xE1A00000; // nop
+		setBL(0x02013028, (u32)dsiSaveCreate);
+		setBL(0x0201307C, (u32)dsiSaveOpen);
+		setBL(0x020130E4, (u32)dsiSaveSetLength);
+		setBL(0x020130FC, (u32)dsiSaveClose);
+		setBL(0x02013150, (u32)dsiSaveGetLength);
+		setBL(0x02013164, (u32)dsiSaveClose);
+		setBL(0x02013184, (u32)dsiSaveSeek);
+		setBL(0x0201319C, (u32)dsiSaveWrite);
+		setBL(0x020131B0, (u32)dsiSaveClose);
+		setBL(0x020131FC, (u32)dsiSaveClose);
+		*(u32*)0x0204A92C = 0xE3A00001; // mov r0, #1 (Enable NitroFS reads)
+	}
+
+	// 1st Class Poker & BlackJack (Europe)
+	else if (strcmp(romTid, "KYPP") == 0) {
+		setBL(0x02012E40, (u32)dsiSaveOpen);
+		setBL(0x02012EB4, (u32)dsiSaveGetLength);
+		setBL(0x02012EC8, (u32)dsiSaveClose);
+		setBL(0x02012EE8, (u32)dsiSaveSeek);
+		setBL(0x02012F00, (u32)dsiSaveRead);
+		setBL(0x02012F14, (u32)dsiSaveClose);
+		setBL(0x02012F68, (u32)dsiSaveClose);
+		*(u32*)0x02012FAC = 0xE1A00000; // nop
+		setBL(0x02013018, (u32)dsiSaveCreate);
+		setBL(0x0201306C, (u32)dsiSaveOpen);
+		setBL(0x020130D4, (u32)dsiSaveSetLength);
+		setBL(0x020130EC, (u32)dsiSaveClose);
+		setBL(0x02013140, (u32)dsiSaveGetLength);
+		setBL(0x02013154, (u32)dsiSaveClose);
+		setBL(0x02013174, (u32)dsiSaveSeek);
+		setBL(0x0201318C, (u32)dsiSaveWrite);
+		setBL(0x020131A0, (u32)dsiSaveClose);
+		setBL(0x020131EC, (u32)dsiSaveClose);
+		*(u32*)0x0204A920 = 0xE3A00001; // mov r0, #1 (Enable NitroFS reads)
+	}
+
 	// Art Style: BASE 10 (USA)
 	else if (strcmp(romTid, "KADE") == 0) {
 		*getOffsetFromBL((u32*)0x020074A8) = 0xE12FFF1E; // bx lr
