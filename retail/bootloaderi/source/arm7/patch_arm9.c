@@ -1525,6 +1525,169 @@ void patchA9Mbk(const tNDSHeader* ndsHeader, const module_params_t* moduleParams
 	dbg_printf("\n\n");
 }
 
+void getFileIoOffsets(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+	u32* fileIoOpen = patchOffsetCache.fileIoOpenOffset;
+	u32* fileIoClose = patchOffsetCache.fileIoCloseOffset;
+	u32* fileIoSeek = patchOffsetCache.fileIoSeekOffset;
+	u32* fileIoRead = patchOffsetCache.fileIoReadOffset;
+	u32* fileIoCmd = patchOffsetCache.fileIoCmdOffset;
+
+	if (!patchOffsetCache.fileIoOpenOffset) {
+		fileIoOpen = findFileIoOpenOffset(ndsHeader, moduleParams);
+		if (fileIoOpen) {
+			patchOffsetCache.fileIoOpenOffset = fileIoOpen;
+		}
+	}
+	if (!fileIoOpen) {
+		return;
+	}
+
+	dbg_printf("fileIoOpen location : ");
+	dbg_hexa((u32)fileIoOpen);
+	dbg_printf("\n\n");
+
+	if (*(u16*)fileIoOpen != 0xB5F8) { // ARM
+		if (!patchOffsetCache.fileIoCloseOffset) {
+			fileIoClose = findFileIoCloseOffset(fileIoOpen);
+			if (fileIoClose) {
+				patchOffsetCache.fileIoCloseOffset = fileIoClose;
+			}
+		}
+		if (!fileIoClose) {
+			return;
+		}
+
+		dbg_printf("fileIoClose location : ");
+		dbg_hexa((u32)fileIoClose);
+		dbg_printf("\n\n");
+
+		if (!patchOffsetCache.fileIoSeekOffset) {
+			fileIoSeek = findFileIoSeekOffset(fileIoClose, moduleParams);
+			if (fileIoSeek) {
+				patchOffsetCache.fileIoSeekOffset = fileIoSeek;
+			}
+		}
+		if (!fileIoSeek) {
+			return;
+		}
+
+		dbg_printf("fileIoSeek location : ");
+		dbg_hexa((u32)fileIoSeek);
+		dbg_printf("\n\n");
+
+		if (!patchOffsetCache.fileIoReadOffset) {
+			fileIoRead = findFileIoReadOffset(fileIoSeek, moduleParams);
+			if (fileIoRead) {
+				patchOffsetCache.fileIoReadOffset = fileIoRead;
+			}
+		}
+		if (!fileIoRead) {
+			return;
+		}
+
+		dbg_printf("fileIoRead location : ");
+		dbg_hexa((u32)fileIoRead);
+		dbg_printf("\n\n");
+
+		if (!patchOffsetCache.fileIoCmdOffset) {
+			fileIoCmd = findFileIoCmdOffset(ndsHeader, moduleParams);
+			if (fileIoCmd) {
+				patchOffsetCache.fileIoCmdOffset = fileIoCmd;
+			}
+		}
+		if (!fileIoCmd) {
+			return;
+		}
+
+		dbg_printf("fileIoCmd location : ");
+		dbg_hexa((u32)fileIoCmd);
+		dbg_printf("\n\n");
+	} else { // THUMB
+		if (!patchOffsetCache.fileIoCloseOffset) {
+			fileIoClose = (u32*)findFileIoCloseOffsetThumb((u16*)fileIoOpen);
+			if (fileIoClose) {
+				patchOffsetCache.fileIoCloseOffset = fileIoClose;
+			}
+		}
+		if (!fileIoClose) {
+			return;
+		}
+
+		dbg_printf("fileIoClose location : ");
+		dbg_hexa((u32)fileIoClose);
+		dbg_printf("\n\n");
+
+		if (!patchOffsetCache.fileIoSeekOffset) {
+			fileIoSeek = (u32*)findFileIoSeekOffsetThumb((u16*)fileIoClose);
+			if (fileIoSeek) {
+				patchOffsetCache.fileIoSeekOffset = (u32*)fileIoSeek;
+			}
+		}
+		if (!fileIoSeek) {
+			return;
+		}
+
+		dbg_printf("fileIoSeek location : ");
+		dbg_hexa((u32)fileIoSeek);
+		dbg_printf("\n\n");
+
+		if (!patchOffsetCache.fileIoReadOffset) {
+			fileIoRead = (u32*)findFileIoReadOffsetThumb((u16*)fileIoSeek, moduleParams);
+			if (fileIoRead) {
+				patchOffsetCache.fileIoReadOffset = fileIoRead;
+			}
+		}
+		if (!fileIoRead) {
+			return;
+		}
+
+		dbg_printf("fileIoRead location : ");
+		dbg_hexa((u32)fileIoRead);
+		dbg_printf("\n\n");
+
+		if (!patchOffsetCache.fileIoCmdOffset) {
+			fileIoCmd = (u32*)findFileIoCmdOffsetThumb(ndsHeader, moduleParams);
+			if (fileIoCmd) {
+				patchOffsetCache.fileIoCmdOffset = fileIoCmd;
+			}
+		}
+		if (!fileIoCmd) {
+			return;
+		}
+
+		dbg_printf("fileIoCmd location : ");
+		dbg_hexa((u32)fileIoCmd);
+		dbg_printf("\n\n");
+	}
+
+	if (isDSiWare) {
+		return;
+	}
+
+	if (*(u16*)fileIoOpen != 0xB5F8) { // ARM
+		ce9->patches->fsCmdRef = fileIoCmd;
+		ce9->patches->fsOpenRef = fileIoOpen;
+		ce9->patches->fsSeekRef = fileIoSeek;
+		ce9->patches->fsReadRef = fileIoRead;
+	} else { // THUMB
+		u32 armToThumb = (u32)fileIoCmd;
+		armToThumb++;
+		ce9->patches->fsCmdRef = (u32*)armToThumb;
+
+		armToThumb = (u32)fileIoOpen;
+		armToThumb++;
+		ce9->patches->fsOpenRef = (u32*)armToThumb;
+
+		armToThumb = (u32)fileIoSeek;
+		armToThumb++;
+		ce9->patches->fsSeekRef = (u32*)armToThumb;
+
+		armToThumb = (u32)fileIoRead;
+		armToThumb++;
+		ce9->patches->fsReadRef = (u32*)armToThumb;
+	}
+}
+
 void patchSharedFontPath(const cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, const ltd_module_params_t* ltdModuleParams) {
 	if (!isDSiWare) {
 		return;
@@ -1556,65 +1719,14 @@ void patchSharedFontPath(const cardengineArm9* ce9, const tNDSHeader* ndsHeader,
 		const u32* dsiSaveRead = ce9->patches->dsiSaveRead;
 
 		u32* fileIoOpen = patchOffsetCache.fileIoOpenOffset;
-		if (!patchOffsetCache.fileIoOpenOffset) {
-			fileIoOpen = findFileIoOpenOffset(ndsHeader, moduleParams);
-			if (fileIoOpen) {
-				patchOffsetCache.fileIoOpenOffset = fileIoOpen;
-			}
-		}
 		if (!fileIoOpen) {
 			return;
 		}
 
-		dbg_printf("fileIoOpen location : ");
-		dbg_hexa((u32)fileIoOpen);
-		dbg_printf("\n\n");
-
 		if (*(u16*)fileIoOpen != 0xB5F8) { // ARM
 			u32* fileIoClose = patchOffsetCache.fileIoCloseOffset;
-			if (!patchOffsetCache.fileIoCloseOffset) {
-				fileIoClose = findFileIoCloseOffset(fileIoOpen);
-				if (fileIoClose) {
-					patchOffsetCache.fileIoCloseOffset = fileIoClose;
-				}
-			}
-			if (!fileIoClose) {
-				return;
-			}
-
-			dbg_printf("fileIoClose location : ");
-			dbg_hexa((u32)fileIoClose);
-			dbg_printf("\n\n");
-
 			u32* fileIoSeek = patchOffsetCache.fileIoSeekOffset;
-			if (!patchOffsetCache.fileIoSeekOffset) {
-				fileIoSeek = findFileIoSeekOffset(fileIoClose, moduleParams);
-				if (fileIoSeek) {
-					patchOffsetCache.fileIoSeekOffset = fileIoSeek;
-				}
-			}
-			if (!fileIoSeek) {
-				return;
-			}
-
-			dbg_printf("fileIoSeek location : ");
-			dbg_hexa((u32)fileIoSeek);
-			dbg_printf("\n\n");
-
 			u32* fileIoRead = patchOffsetCache.fileIoReadOffset;
-			if (!patchOffsetCache.fileIoReadOffset) {
-				fileIoRead = findFileIoReadOffset(fileIoSeek, moduleParams);
-				if (fileIoRead) {
-					patchOffsetCache.fileIoReadOffset = fileIoRead;
-				}
-			}
-			if (!fileIoRead) {
-				return;
-			}
-
-			dbg_printf("fileIoRead location : ");
-			dbg_hexa((u32)fileIoRead);
-			dbg_printf("\n\n");
 
 			/*dbg_printf("moduleParams->static_bss_end : ");
 			dbg_hexa((u32)moduleParams->static_bss_end);
@@ -1738,52 +1850,11 @@ void patchSharedFontPath(const cardengineArm9* ce9, const tNDSHeader* ndsHeader,
 				}
 			}*/
 		} else { // THUMB
-			u16* fileIoClose = (u16*)patchOffsetCache.fileIoCloseOffset;
-			if (!patchOffsetCache.fileIoCloseOffset) {
-				fileIoClose = findFileIoCloseOffsetThumb((u16*)fileIoOpen);
-				if (fileIoClose) {
-					patchOffsetCache.fileIoCloseOffset = (u32*)fileIoClose;
-				}
-			}
-			if (!fileIoClose) {
-				return;
-			}
-
-			dbg_printf("fileIoClose location : ");
-			dbg_hexa((u32)fileIoClose);
-			dbg_printf("\n\n");
-
-			u16* fileIoSeek = (u16*)patchOffsetCache.fileIoSeekOffset;
-			if (!patchOffsetCache.fileIoSeekOffset) {
-				fileIoSeek = findFileIoSeekOffsetThumb(fileIoClose);
-				if (fileIoSeek) {
-					patchOffsetCache.fileIoSeekOffset = (u32*)fileIoSeek;
-				}
-			}
-			if (!fileIoSeek) {
-				return;
-			}
-
-			dbg_printf("fileIoSeek location : ");
-			dbg_hexa((u32)fileIoSeek);
-			dbg_printf("\n\n");
-
-			u16* fileIoRead = (u16*)patchOffsetCache.fileIoReadOffset;
-			if (!patchOffsetCache.fileIoReadOffset) {
-				fileIoRead = findFileIoReadOffsetThumb(fileIoSeek, moduleParams);
-				if (fileIoRead) {
-					patchOffsetCache.fileIoReadOffset = (u32*)fileIoRead;
-				}
-			}
-			if (!fileIoRead) {
-				return;
-			}
-
-			dbg_printf("fileIoRead location : ");
-			dbg_hexa((u32)fileIoRead);
-			dbg_printf("\n\n");
-
 			return; // getOffsetFromBLThumb currently doesn't get backward offsets correctly
+
+			u16* fileIoClose = (u16*)patchOffsetCache.fileIoCloseOffset;
+			u16* fileIoSeek = (u16*)patchOffsetCache.fileIoSeekOffset;
+			u16* fileIoRead = (u16*)patchOffsetCache.fileIoReadOffset;
 
 			tonccpy(moduleParams->static_bss_end, ltdModuleParams->arm9i_offset, iUncompressedSizei);
 
@@ -2507,6 +2578,7 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 		}
 
 		patchA9Mbk(ndsHeader, moduleParams, false);
+		getFileIoOffsets(ce9, ndsHeader, moduleParams);
 		patchSharedFontPath(ce9, ndsHeader, moduleParams, ltdModuleParams);
 	}
 

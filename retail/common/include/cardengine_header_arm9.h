@@ -17,6 +17,10 @@ typedef struct cardengineArm9Patches {
 	u32* card_set_dma_arm9;
 	u32* nand_read_arm9;
 	u32* nand_write_arm9;
+	u32* fsCmdRef;
+	u32* fsOpenRef;
+	u32* fsSeekRef;
+	u32* fsReadRef;
 	u32* dsiSaveGetResultCode;
 	u32* dsiSaveCreate;
 	u32* dsiSaveDelete;

@@ -149,6 +149,10 @@ static const u32 randomPatchSignature[4]        = {0xE3500000, 0x1597002C, 0x104
 static const u32 randomPatchSignature5Second[3] = {0xE59F003C, 0xE590001C, 0xE3500000};             // SDK 5
 
 // FileIO functions (SDK 5)
+static const u32 fileIoCmdSignature50[3]       = {0xE92D41F0, 0xE1A08000, 0xE598000C};
+static const u32 fileIoCmdSignature[3]         = {0xE92D43F8, 0xE1A09000, 0xE599000C};
+static const u16 fileIoCmdSignature50Thumb[4]  = {0xB5F8, 0xB082, 0x1C05, 0x68E8};
+static const u16 fileIoCmdSignatureThumb[4]    = {0xB5F0, 0xB083, 0x1C05, 0x68E8};
 static const u32 fileIoOpenSignature50[4]      = {0xE92D40F8, 0xE24DDF4A, 0xE1A04000, 0xE1A07002}; // SDK 5.0 - 5.2
 static const u32 fileIoOpenSignature[4]        = {0xE92D43F8, 0xE24DDF4A, 0xE28D4010, 0xE1A07000}; // SDK 5.1+
 static const u16 fileIoOpenSignatureThumb[4]   = {0xB5F8, 0xB0CA, 0x1C05, 0x1C16}; // SDK 5.1+
@@ -2135,6 +2139,60 @@ u32* findRandomPatchOffset5Second(const tNDSHeader* ndsHeader) {
 
 	dbg_printf("\n");
 	return randomPatchOffset;
+}
+
+u32* findFileIoCmdOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+	dbg_printf("findFileIoCmdOffset:\n");
+
+	u32* offset = NULL;
+	if (moduleParams->sdk_version > 0x5010000) {
+		offset = findOffset(
+			(u32*)ndsHeader->arm9destination, iUncompressedSize,
+			fileIoCmdSignature, 3
+		);
+	}
+	if (!offset) {
+		offset = findOffset(
+			(u32*)ndsHeader->arm9destination, iUncompressedSize,
+			fileIoCmdSignature50, 3
+		);
+	}
+
+	if (offset) {
+		dbg_printf("FileIO command found\n");
+	} else {
+		dbg_printf("FileIO command not found\n");
+	}
+
+	dbg_printf("\n");
+	return offset;
+}
+
+u16* findFileIoCmdOffsetThumb(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+	dbg_printf("findFileIoCmdOffsetThumb:\n");
+
+	u16* offset = NULL;
+	if (moduleParams->sdk_version > 0x5010000) {
+		offset = findOffsetThumb(
+			(u16*)ndsHeader->arm9destination, iUncompressedSize,
+			fileIoCmdSignatureThumb, 4
+		);
+	}
+	if (!offset) {
+		offset = findOffsetThumb(
+			(u16*)ndsHeader->arm9destination, iUncompressedSize,
+			fileIoCmdSignature50Thumb, 4
+		);
+	}
+
+	if (offset) {
+		dbg_printf("FileIO command THUMB found\n");
+	} else {
+		dbg_printf("FileIO command THUMB not found\n");
+	}
+
+	dbg_printf("\n");
+	return offset;
 }
 
 u32* findFileIoOpenOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {

@@ -1095,6 +1095,16 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 				LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINEI_ARM9_SDK5_BUFFERED_LOCATION);
 			}
 			fclose(cebin);
+
+			char sdmcText[4] = {'s','d','m','c'};
+			if (strlen(conf->appPath) < 254) {
+				tonccpy((char*)CARDENGINEI_ARM9_SDK5_BUFFERED_LOCATION+0x84+2, conf->appPath, strlen(conf->appPath));
+				tonccpy((char*)CARDENGINEI_ARM9_SDK5_BUFFERED_LOCATION+0x84, sdmcText, 4);
+			}
+			if (strlen(conf->savPath) < 254 && !conf->saveOnFlashcard) {
+				tonccpy((char*)CARDENGINEI_ARM9_SDK5_BUFFERED_LOCATION+0x188+2, conf->savPath, strlen(conf->savPath));
+				tonccpy((char*)CARDENGINEI_ARM9_SDK5_BUFFERED_LOCATION+0x188, sdmcText, 4);
+			}
 		}
 	} else {
 		// Load ce7 binary

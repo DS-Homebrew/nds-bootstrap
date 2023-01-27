@@ -87,6 +87,10 @@ patches:
 .word   0x0
 .word   0x0
 .word   0x0
+.word   0x0
+.word   0x0
+.word   0x0
+.word   0x0
 .word   reset_arm9
 needFlushDCCache:
 .word   0x0

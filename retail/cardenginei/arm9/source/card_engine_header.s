@@ -78,6 +78,15 @@ ndsCodeStart:
 
 	bx	r0
 
+#ifdef TWLSDK
+.global romPath
+romPath: .word romPath+4
+.space 256
+.global savePath
+savePath: .word savePath+4
+.space 256
+#endif
+
 patches:
 .word	card_read_arm9
 .word	card_irq_enable
@@ -88,6 +97,14 @@ patches:
 .word   nand_read_arm9
 .word   nand_write_arm9
 #ifdef TWLSDK
+fsCmdRef:
+.word	0x0
+fsOpenRef:
+.word	0x0
+fsSeekRef:
+.word	0x0
+fsReadRef:
+.word	0x0
 .word   dsiSaveGetResultCode_arm
 .word   dsiSaveCreate_arm
 .word   dsiSaveDelete_arm
@@ -101,6 +118,10 @@ patches:
 .word   dsiSaveRead_arm
 .word   dsiSaveWrite_arm
 #else
+.word   0x0
+.word   0x0
+.word   0x0
+.word   0x0
 .word   0x0
 .word   0x0
 .word   0x0
@@ -371,6 +392,83 @@ thumb_nand_write_arm9:
 
 	.arm
 #ifdef TWLSDK
+@---------------------------------------------------------------------------------
+.global FS_InitCtx
+FS_InitCtx:
+@---------------------------------------------------------------------------------
+	.thumb
+	bx	pc
+.align	4
+	.arm
+	MOV	R2, #0
+	ORR	R1, R2, #0x2300
+	STR	R2, [R0,#8]
+	STR	R2, [R0,#4]
+	STR	R2, [R0]
+	STR	R2, [R0,#0x1C]
+	STR	R2, [R0,#0x18]
+	STR	R1, [R0,#0xC]
+	STR	R2, [R0,#0x10]
+	STR	R2, [R0,#0x14]
+	BX	LR
+@---------------------------------------------------------------------------------
+
+@---------------------------------------------------------------------------------
+.global FS_Open
+FS_Open:
+@---------------------------------------------------------------------------------
+	.thumb
+	bx	pc
+.align	4
+	.arm
+	ldr pc, fsOpenRef
+@---------------------------------------------------------------------------------
+
+@---------------------------------------------------------------------------------
+.global FS_Seek
+FS_Seek:
+@---------------------------------------------------------------------------------
+	.thumb
+	bx	pc
+.align	4
+	.arm
+	ldr pc, fsSeekRef
+@---------------------------------------------------------------------------------
+
+@---------------------------------------------------------------------------------
+.global FS_Read
+FS_Read:
+@---------------------------------------------------------------------------------
+	.thumb
+	bx	pc
+.align	4
+	.arm
+	ldr pc, fsReadRef
+@---------------------------------------------------------------------------------
+
+@---------------------------------------------------------------------------------
+.global FS_CreateSectorCache
+FS_CreateSectorCache:
+@---------------------------------------------------------------------------------
+	.thumb
+	bx	pc
+.align	4
+	.arm
+	STMFD	SP!, {R3,LR}
+	SUB		SP, SP, #8
+	ADD 	R3, SP, #0
+	STR		R3, [R0,#0x10]
+	STR		R1, [SP]
+	STR		R2, [SP,#4]
+	MOV		R1, #0x22
+	MOV		R2, #1
+	LDR		R3, fsCmdRef
+	BLX		R3
+	ADD		SP, SP, #8
+	LDMFD	SP!, {R3,PC}
+.pool
+@---------------------------------------------------------------------------------
+
 @---------------------------------------------------------------------------------
 dsiSaveGetResultCode_arm:
 @---------------------------------------------------------------------------------

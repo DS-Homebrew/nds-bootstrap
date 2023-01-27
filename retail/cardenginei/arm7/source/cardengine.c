@@ -155,6 +155,9 @@ static aFile manualFile;
 
 static int saveTimer = 0;
 
+#ifdef TWLSDK
+static int sdRightsTimer = 0;
+#endif
 static int languageTimer = 0;
 static int swapTimer = 0;
 static int returnTimer = 0;
@@ -357,7 +360,7 @@ static void initialize(void) {
 }
 
 #ifdef TWLSDK
-/*u32 auxIeBak = 0;
+u32 auxIeBak = 0;
 u32 sdStatBak = 0;
 u32 sdMaskBak = 0;
 
@@ -375,7 +378,7 @@ void restoreSdBakData(void) {
 	REG_AUXIE = auxIeBak;
 	*(vu32*)0x400481C = sdStatBak;
 	*(vu32*)0x4004820 = sdMaskBak;
-}*/
+}
 #else
 static module_params_t* getModuleParams(const tNDSHeader* ndsHeader) {
 	//nocashMessage("Looking for moduleparams...\n");
@@ -1289,9 +1292,9 @@ static void runCardEngineCheck(void) {
   		}*/
 
 			if (!(valueBits & gameOnFlashcard)) {
+				#ifndef TWLSDK
 				sdmmcHandler();
 
-				#ifndef TWLSDK
 				if (/*sharedAddr[3] == (vu32)0x020FF808 || sharedAddr[3] == (vu32)0x020FF80A ||*/ sharedAddr[3] == (vu32)0x025FFB0A) {	// Card read DMA
 					if (!readOngoing ? start_cardRead_arm9() : resume_cardRead_arm9()) {
 						/*u32 src = sharedAddr[2];
@@ -1404,6 +1407,17 @@ void myIrqHandlerVBlank(void) {
 		volatile void (*cheatEngine)() = (volatile void*)ce7-0x83FC;
 		(*cheatEngine)();
 	}
+
+	#ifdef TWLSDK
+	if (sdRightsTimer == 60*3) {
+		u8* deviceListAddr = (u8*)(*(u32*)0x02FFE1D4);
+		toncset(deviceListAddr+2, 0x06, 1); // Set SD access rights
+
+		sdRightsTimer++;
+	} else if (sdRightsTimer < 60*3) {
+		sdRightsTimer++;
+	}
+	#endif
 
 	if (language >= 0 && language <= 7 && languageTimer < 60*3) {
 		// Change language
@@ -1675,14 +1689,20 @@ u32 myIrqEnable(u32 irq) {
 	initialize();
 
 	//if (!(valueBits & gameOnFlashcard) && !(valueBits & ROMinRAM)) {
-		REG_AUXIE &= ~(1UL << 8);
+	//	REG_AUXIE &= ~(1UL << 8);
 	//}
 
 	#ifdef TWLSDK
 	//bool doBak = ((valueBits & gameOnFlashcard) && (valueBits & b_dsiSD));
 	//if (doBak) bakSdData();
-	#endif
+	if (valueBits & gameOnFlashcard) {
+		REG_AUXIE &= ~(1UL << 8);
+		driveInitialize();
+	}
+	#else
+	REG_AUXIE &= ~(1UL << 8);
 	driveInitialize();
+	#endif
   	#ifdef TWLSDK
 	//if (doBak) restoreSdBakData();
 	#endif
@@ -1776,17 +1796,17 @@ bool eepromRead(u32 src, void *dst, u32 len) {
 	if (tryLockMutex(&saveMutex)) {
 		while (readOngoing) { swiDelay(100); }
 		#ifdef TWLSDK
-		//bool doBak = ((valueBits & gameOnFlashcard) && !(valueBits & saveOnFlashcard));
-		//if (doBak) bakSdData();
+		bool doBak = ((valueBits & gameOnFlashcard) && !(valueBits & saveOnFlashcard));
+		if (doBak) bakSdData();
+		driveInitialize();
 		#endif
-		//driveInitialize();
 		/*if (saveInRam) {
 			tonccpy(dst, (char*)0x02440000 + src, len);
 		} else {*/
 			fileRead(dst, savFile, src, len, -1);
 		//}
 		#ifdef TWLSDK
-		//if (doBak) restoreSdBakData();
+		if (doBak) restoreSdBakData();
 		#endif
   		unlockMutex(&saveMutex);
 	}
@@ -1812,10 +1832,10 @@ bool eepromPageWrite(u32 dst, const void *src, u32 len) {
 	if (tryLockMutex(&saveMutex)) {
 		while (readOngoing) { swiDelay(100); }
 		#ifdef TWLSDK
-		//bool doBak = ((valueBits & gameOnFlashcard) && !(valueBits & saveOnFlashcard));
-		//if (doBak) bakSdData();
+		bool doBak = ((valueBits & gameOnFlashcard) && !(valueBits & saveOnFlashcard));
+		if (doBak) bakSdData();
+		driveInitialize();
 		#endif
-		//driveInitialize();
 		saveTimer = 1;
 		//i2cWriteRegister(0x4A, 0x12, 0x01);		// When we're saving, power button does nothing, in order to prevent corruption.
 		/*if (saveInRam) {
@@ -1823,7 +1843,7 @@ bool eepromPageWrite(u32 dst, const void *src, u32 len) {
 		}*/
 		fileWrite(src, savFile, dst, len, -1);
 		#ifdef TWLSDK
-		//if (doBak) restoreSdBakData();
+		if (doBak) restoreSdBakData();
 		#endif
   		unlockMutex(&saveMutex);
 	}
@@ -1849,10 +1869,10 @@ bool eepromPageProg(u32 dst, const void *src, u32 len) {
   	if (tryLockMutex(&saveMutex)) {
 		while (readOngoing) { swiDelay(100); }
 		#ifdef TWLSDK
-		//bool doBak = ((valueBits & gameOnFlashcard) && !(valueBits & saveOnFlashcard));
-		//if (doBak) bakSdData();
+		bool doBak = ((valueBits & gameOnFlashcard) && !(valueBits & saveOnFlashcard));
+		if (doBak) bakSdData();
+		driveInitialize();
 		#endif
-		//driveInitialize();
 		saveTimer = 1;
 		//i2cWriteRegister(0x4A, 0x12, 0x01);		// When we're saving, power button does nothing, in order to prevent corruption.
 		/*if (saveInRam) {
@@ -1860,7 +1880,7 @@ bool eepromPageProg(u32 dst, const void *src, u32 len) {
 		}*/
 		fileWrite(src, savFile, dst, len, -1);
   		#ifdef TWLSDK
-		//if (doBak) restoreSdBakData();
+		if (doBak) restoreSdBakData();
 		#endif
 		unlockMutex(&saveMutex);
 	}

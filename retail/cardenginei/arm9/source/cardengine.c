@@ -278,27 +278,19 @@ extern void initialize(void);
 #ifdef TWLSDK
 #ifndef DLDI
 // For testing with FS SDK functions
-/*static bool ctxInited = false;
-static const char* rompath = "";
-static const char* savepath = "";
-static const char* apFixOverlaysPath = "sdmc:/_nds/nds-bootstrap/apFixOverlays.bin";
-static u32 fsCtx[0x80/sizeof(u32)];*/
+static bool ctxInited = false;
+extern char* romPath;
+extern char* savePath;
+//static const char* apFixOverlaysPath = "sdmc:/_nds/nds-bootstrap/apFixOverlays.bin";
+static u32 fsCtx[0x80/sizeof(u32)];
+static u32 fsSaveCtx[0x80/sizeof(u32)];
 
-// Face Training (EUR)
-/*volatile void (*FS_InitCtx)(u8*) = (volatile void*)0x020F1320;
-volatile void (*FS_Open)(u32*, const char*, u32) = (volatile void*)0x020F1470;
-volatile void (*FS_Close)(u32*) = (volatile void*)0x020F14F4;
-volatile void (*FS_Seek)(u32*, u32, u32) = (volatile void*)0x020F15B8;
-volatile void (*FS_Read)(u32*, u32, u32) = (volatile void*)0x020F15E4;
-volatile void (*FS_Write)(u32*, u32, u32) = (volatile void*)0x020F1638;*/
-
-// Rabbids Go Home (USA)
-/*volatile void (*FS_InitCtx)(u8*) = (volatile void*)0x0203C264;
-volatile void (*FS_Open)(u32*, const char*, u32) = (volatile void*)0x0203C3FC;
-volatile void (*FS_Close)(u32*) = (volatile void*)0x0203C480;
-volatile void (*FS_Seek)(u32*, u32, u32) = (volatile void*)0x0203C54C;
-volatile void (*FS_Read)(u32*, u32, u32) = (volatile void*)0x0203C578;
-volatile void (*FS_Write)(u32*, u32, u32) = (volatile void*)0x0203C5C8;*/
+extern void FS_InitCtx(u32*);
+extern void FS_Open(u32*, char*, u32);
+extern void FS_CreateSectorCache(u32*, u32*, u32);
+extern void FS_Seek(u32*, u32, u32);
+extern void FS_Read(u32*, u32, u32);
+volatile void (*FS_Write)(u32*, u32, u32) = (volatile void*)0x020F16B0; // Only for Face Training (EUR)
 
 #endif
 #endif
@@ -320,6 +312,10 @@ static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
 		}
 	}
 
+#ifdef TWLSDK
+	FS_Seek(fsCtx, src, 0);
+	FS_Read(fsCtx, (u32)dst, len);
+#else
 	u32 sector = (src/ce9->cacheBlockSize)*ce9->cacheBlockSize;
 
 	accessCounter++;
@@ -447,6 +443,7 @@ static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
 		}
 	}
 #endif
+#endif
 
 	//sleepMsEnabled = false;
 
@@ -533,10 +530,25 @@ void cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 			region0Fix();
 		}
 		#endif
+		#ifdef TWLSDK
+		#ifdef DLDI
 		if (!driveInitialized) {
 			FAT_InitFiles(false, 0);
 			driveInitialized = true;
 		}
+		#else
+		if (!(ce9->valueBits & ROMinRAM)) {
+			FS_InitCtx(fsCtx);
+			FS_Open(fsCtx, romPath, 1);
+			FS_CreateSectorCache(fsCtx, getCacheAddress(0), 0x10000);
+		}
+		#endif//DLDI
+		#else
+		if (!driveInitialized) {
+			FAT_InitFiles(false, 0);
+			driveInitialized = true;
+		}
+		#endif//TWLSDK
 		if (ce9->valueBits & enableExceptionHandler) {
 			setExceptionHandler2();
 		}
@@ -628,9 +640,21 @@ bool nandRead(void* memory,void* flash,u32 len,u32 dma) {
 		waitForArm7();
 	}
 #else
+#ifdef TWLSDK
+	if (!ctxInited) {
+		FS_InitCtx(fsSaveCtx);
+		FS_Open(fsSaveCtx, savePath, 3);
+		FS_CreateSectorCache(fsSaveCtx, (u8*)retail_CACHE_ADRESS_SIZE_TWLSDK+0x10000, 0x10000);
+		ctxInited = true;
+	}
+
+	FS_Seek(fsSaveCtx, (u32)flash, 0);
+	FS_Read(fsSaveCtx, (u32)memory, len);
+#else
 	fileRead(memory, savFile, (u32)flash, len, 0);
 #endif
-    return true; 
+#endif
+	return true; 
 }
 
 bool nandWrite(void* memory,void* flash,u32 len,u32 dma) {
@@ -651,9 +675,14 @@ bool nandWrite(void* memory,void* flash,u32 len,u32 dma) {
 		waitForArm7();
 	}
 #else
+#ifdef TWLSDK
+	FS_Seek(fsSaveCtx, (u32)flash, 0);
+	(*FS_Write)(fsSaveCtx, (u32)memory, len);
+#else
 	fileWrite(memory, savFile, (u32)flash, len, 0);
 #endif
-    return true; 
+#endif
+	return true; 
 }
 
 #ifdef TWLSDK

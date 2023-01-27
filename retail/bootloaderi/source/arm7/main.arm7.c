@@ -975,7 +975,7 @@ static void startBinary_ARM7(void) {
 
 static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	if (ROMsupportsDsiMode(ndsHeader)) {
-		if (isDSiWare && !(REG_SCFG_ROM & BIT(9))) {
+		if (/*isDSiWare &&*/ !(REG_SCFG_ROM & BIT(9))) {
 			u32* deviceListAddr = (u32*)(*(u32*)0x02FFE1D4);
 
 			dbg_printf("Device list address: ");
@@ -2034,7 +2034,7 @@ int arm7_main(void) {
 		//fileWrite((char*)dsiHeaderTemp.arm9idestination, &ramDumpFile, 0, dsiHeaderTemp.arm9ibinarySize, -1);	// Dump (decrypted?) arm9 binary
 	}
 
-	if (ROMsupportsDsiMode(ndsHeader) && isDSiWare && !gameOnFlashcard && !(REG_SCFG_ROM & BIT(9))) {
+	if (ROMsupportsDsiMode(ndsHeader) /*&& isDSiWare*/ && !gameOnFlashcard && !(REG_SCFG_ROM & BIT(9))) {
 		*(vu32*)0x400481C = 0;				// Reset SD IRQ stat register
 		*(vu32*)0x4004820 = 0x8B7F0305;	// Set SD IRQ mask register (Data won't read without the correct bytes!)
 	} /*else if (!isDSiWare) {
