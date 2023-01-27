@@ -90,60 +90,34 @@ vblankHandler:
 @ Hook the return address, then go back to the original function
 	stmdb	sp!, {lr}
 	adr 	lr, code_handler_start_vblank
-	ldr 	r0,	intr_vblank_orig_return
-	bx  	r0
+	ldr 	pc,	intr_vblank_orig_return
 
 fifoHandler:
 @ Hook the return address, then go back to the original function
 	stmdb	sp!, {lr}
 	adr 	lr, code_handler_start_fifo
-	ldr 	r0,	intr_fifo_orig_return
-	bx  	r0
+	ldr 	pc,	intr_fifo_orig_return
 
 ndma0Handler:
 @ Hook the return address, then go back to the original function
 	stmdb	sp!, {lr}
 	adr 	lr, code_handler_start_ndma0
-	ldr 	r0,	intr_ndma0_orig_return
-	bx  	r0
+	ldr 	pc,	intr_ndma0_orig_return
 
 code_handler_start_vblank:
 	push	{r0-r12} 
-	ldr	r3, =myIrqHandlerVBlank
-	bl	_blx_r3_stub		@ jump to myIrqHandler
-
-	@ exit after return
-	b	exit
+	bl	myIrqHandlerVBlank
+	pop   	{r0-r12,pc} 
 
 code_handler_start_fifo:
 	push	{r0-r12} 
-	ldr	r3, =myIrqHandlerFIFO
-	bl	_blx_r3_stub		@ jump to myIrqHandler
-
-	@ exit after return
-	b	exit
+	bl	myIrqHandlerFIFO
+	pop   	{r0-r12,pc} 
 
 code_handler_start_ndma0:
 	push	{r0-r12} 
-	ldr	r3, =myIrqHandlerNdma0
-	bl	_blx_r3_stub		@ jump to myIrqHandler
-
-	@ exit after return
-	b	exit
-
-@---------------------------------------------------------------------------------
-_blx_r3_stub:
-@---------------------------------------------------------------------------------
-	bx	r3
-
-@---------------------------------------------------------------------------------
-
-@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-
-exit:
-	pop   	{r0-r12} 
-	pop  	{lr}
-	bx  lr
+	bl	myIrqHandlerNdma0
+	pop   	{r0-r12,pc} 
 
 .pool
 
@@ -337,16 +311,14 @@ swi27:
 @---------------------------------------------------------------------------------
 j_irqHandler:
 @---------------------------------------------------------------------------------
-	ldr	r12, =irqHandler
-	bx	r12
+	ldr	pc, =irqHandler
 .pool
 @---------------------------------------------------------------------------------
 
 @---------------------------------------------------------------------------------
 j_twlGetPitchTable:
 @---------------------------------------------------------------------------------
-	ldr	r12, =twlGetPitchTable
-	bx	r12
+	ldr	pc, =twlGetPitchTable
 .pool
 @---------------------------------------------------------------------------------
 
@@ -365,14 +337,14 @@ twlGetPitchTable:
 @---------------------------------------------------------------------------------
 j_twlGetPitchTableThumb:
 @---------------------------------------------------------------------------------
-	push	{r4-r6, lr}
-	ldr	r6, =twlGetPitchTableBranch
-	bl	_blx_r6_stub
-	pop             {r4-r6}
+	push	{r4, lr}
+	ldr	r4, =twlGetPitchTableBranch
+	bl	_blx_r4_stub
+	pop             {r4}
 	pop             {r3}
 	bx  r3
-_blx_r6_stub:
-	bx	r6
+_blx_r4_stub:
+	bx	r4
 .pool
 
 	.arm

@@ -532,37 +532,24 @@ vblankHandler:
 @ Hook the return address, then go back to the original function
 	stmdb	sp!, {lr}
 	adr 	lr, code_handler_start_vblank
-	ldr 	r0,	intr_vblank_orig_return
-	bx  	r0
+	ldr 	pc,	intr_vblank_orig_return
 
 ipcSyncHandler:
 @ Hook the return address, then go back to the original function
 	stmdb	sp!, {lr}
 	adr 	lr, code_handler_start_ipc
-	ldr 	r0,	intr_ipc_orig_return
-	bx  	r0
-    
+	ldr 	pc,	intr_ipc_orig_return
+
 code_handler_start_vblank:
 	push	{r0-r12} 
-    ldr		r6, =myIrqHandlerVBlank
-	blx	r6		@ jump to myIrqHandler
-	
-	@ exit after return
-	b	arm9exit
+	bl	myIrqHandlerVBlank
+	pop   	{r0-r12,pc} 
 
 code_handler_start_ipc:
 	push	{r0-r12} 
-    ldr		r6, =myIrqHandlerIPC
-	blx	r6		@ jump to myIrqHandler
-  
-	@ exit after return
-	b	arm9exit
+	bl	myIrqHandlerIPC
+	pop   	{r0-r12,pc} 
 
-arm9exit:
-	pop   	{r0-r12} 
-	pop  	{lr}
-	bx  lr
-    
 .pool
 
 @---------------------------------------------------------------------------------
