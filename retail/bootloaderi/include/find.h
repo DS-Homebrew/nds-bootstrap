@@ -80,6 +80,8 @@ u32* findHeapPointer2Offset(const module_params_t* moduleParams, const tNDSHeade
 u32* findRandomPatchOffset(const tNDSHeader* ndsHeader);
 u32* findRandomPatchOffset5Second(const tNDSHeader* ndsHeader); // SDK 5
 //u32* findOperaRamOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
+u32* findFileIoCmdOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
+u16* findFileIoCmdOffsetThumb(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
 u32* findFileIoOpenOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
 u32* findFileIoCloseOffset(const u32* fileIoOpenOffset);
 u16* findFileIoCloseOffsetThumb(const u16* fileIoOpenOffset);
