@@ -337,6 +337,88 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// 1001 Crystal Mazes Collection (USA)
+	else if (strcmp(romTid, "KOKE") == 0) {
+		*(u32*)0x0200C294 = 0xE1A00000; // nop
+		*(u32*)0x0200C29C = 0xE1A00000; // nop
+		setBL(0x0200C78C, (u32)dsiSaveOpen);
+		setBL(0x0200C7A0, (u32)dsiSaveClose);
+		setBL(0x0200C7C0, (u32)dsiSaveCreate);
+		setBL(0x0200C7D8, (u32)dsiSaveOpen);
+		setBL(0x0200C7F0, (u32)dsiSaveClose);
+		setBL(0x0200C7F8, (u32)dsiSaveDelete);
+		setBL(0x0200C980, (u32)dsiSaveOpen);
+		setBL(0x0200C998, (u32)dsiSaveGetLength);
+		setBL(0x0200C9BC, (u32)dsiSaveRead);
+		setBL(0x0200C9C4, (u32)dsiSaveClose);
+		setBL(0x0200CA00, (u32)dsiSaveOpen);
+		setBL(0x0200CA14, (u32)dsiSaveClose);
+		setBL(0x0200CA28, (u32)dsiSaveCreate);
+		setBL(0x0200CA40, (u32)dsiSaveOpen);
+		*(u32*)0x0200CA50 = 0xE1A00000; // nop
+		setBL(0x0200CA5C, (u32)dsiSaveClose);
+		setBL(0x0200CA64, (u32)dsiSaveDelete);
+		setBL(0x0200CA78, (u32)dsiSaveCreate);
+		setBL(0x0200CA88, (u32)dsiSaveOpen);
+		setBL(0x0200CA98, (u32)dsiSaveGetResultCode);
+		setBL(0x0200CAB0, (u32)dsiSaveSetLength);
+		setBL(0x0200CAC0, (u32)dsiSaveWrite);
+		setBL(0x0200CAC8, (u32)dsiSaveClose);
+		if (!extendedMemory2) {
+			*(u32*)0x0200E250 = 0xE12FFF1E; // bx lr (Disable loading .xm music files)
+		}
+		*(u32*)0x0200EF88 = 0xE12FFF1E; // bx lr (Skip Manual screen)
+		*(u32*)0x020312C8 = 0xE1A00000; // nop
+		*(u32*)0x02034528 = 0xE1A00000; // nop
+		patchInitDSiWare(0x02039C18, extendedMemory2 ? 0x02F00000 : heapEndRetail+0xC00000); // extendedMemory2 ? #0x2F00000 (mirrors to 0x2700000 on debug DS units) : #0x2FC0000 (mirrors to 0x23C0000 on retail DS units)
+		if (!extendedMemory2) {
+			*(u32*)0x02039FA4 = 0x020B26A0;
+		}
+		patchUserSettingsReadDSiWare(0x0203B258);
+		*(u32*)0x0203E790 = 0xE1A00000; // nop
+	}
+
+	// 1001 Crystal Mazes Collection (Europe)
+	else if (strcmp(romTid, "KOKP") == 0) {
+		*(u32*)0x0200C22C = 0xE1A00000; // nop
+		*(u32*)0x0200C234 = 0xE1A00000; // nop
+		setBL(0x0200C734, (u32)dsiSaveOpen);
+		setBL(0x0200C748, (u32)dsiSaveClose);
+		setBL(0x0200C768, (u32)dsiSaveCreate);
+		setBL(0x0200C784, (u32)dsiSaveOpen);
+		setBL(0x0200C79C, (u32)dsiSaveClose);
+		setBL(0x0200C7A4, (u32)dsiSaveDelete);
+		setBL(0x0200C940, (u32)dsiSaveOpen);
+		setBL(0x0200C958, (u32)dsiSaveGetLength);
+		setBL(0x0200C97C, (u32)dsiSaveRead);
+		setBL(0x0200C984, (u32)dsiSaveClose);
+		setBL(0x0200C9C8, (u32)dsiSaveOpen);
+		setBL(0x0200C9DC, (u32)dsiSaveClose);
+		setBL(0x0200C9F0, (u32)dsiSaveCreate);
+		setBL(0x0200CA0C, (u32)dsiSaveOpen);
+		*(u32*)0x0200CA1C = 0xE1A00000; // nop
+		setBL(0x0200CA28, (u32)dsiSaveClose);
+		setBL(0x0200CA30, (u32)dsiSaveDelete);
+		setBL(0x0200CA48, (u32)dsiSaveCreate);
+		setBL(0x0200CA58, (u32)dsiSaveOpen);
+		setBL(0x0200CA68, (u32)dsiSaveGetResultCode);
+		setBL(0x0200CA84, (u32)dsiSaveSetLength);
+		setBL(0x0200CA94, (u32)dsiSaveWrite);
+		setBL(0x0200CA9C, (u32)dsiSaveClose);
+		*(u32*)0x0200CAAC = 0xE12FFF1E; // bx lr (Skip Manual screen)
+		if (!extendedMemory2) {
+			*(u32*)0x0200E08C = 0xE12FFF1E; // bx lr (Disable loading .xm music files)
+		}
+		*(u32*)0x02030584 = 0xE1A00000; // nop
+		*(u32*)0x020337E4 = 0xE1A00000; // nop
+		patchInitDSiWare(0x02038ED4, extendedMemory2 ? 0x02F00000 : heapEndRetail+0xC00000); // extendedMemory2 ? #0x2F00000 (mirrors to 0x2700000 on debug DS units) : #0x2FC0000 (mirrors to 0x23C0000 on retail DS units)
+		if (!extendedMemory2) {
+			*(u32*)0x02039260 = 0x020B14E0;
+		}
+		patchUserSettingsReadDSiWare(0x0203A514);
+		*(u32*)0x0203DA4C = 0xE1A00000; // nop
+	}
+
 	// 4 Travellers: Play French (USA)
 	else if (strcmp(romTid, "KTFE") == 0) {
 		useSharedFont = twlFontFound;
