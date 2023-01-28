@@ -56,6 +56,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	extern u16 a9ScfgRom;
 	const char* romTid = getRomTid(ndsHeader);
 	const char* dataPub = "dataPub:";
+	const char* dataPrv = "dataPrv:";
 
 	const u32* dsiSaveGetResultCode = ce9->patches->dsiSaveGetResultCode;
 	const u32* dsiSaveCreate = ce9->patches->dsiSaveCreate;
@@ -241,6 +242,36 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		if (!twlFontFound) {
 			*(u32*)0x0200CAAC = 0xE12FFF1E; // bx lr (Skip Manual screen)
 		}
+	}
+
+	// 200 Vmaja: Charen Ji Supirittsu (Japan)
+	else if (strcmp(romTid, "KVMJ") == 0) {
+		if (!twlFontFound) {
+			*(u32*)0x020053EC = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		}
+		if (saveOnFlashcard) {
+			*(u32*)0x02075390 = 0xE3A0000B; // mov r0, #0xB
+			*(u32*)0x02075FFC = 0xE3A00001; // mov r0, #1 (dsiSaveOpenDir)
+			*(u32*)0x02076018 = 0xE3A00001; // mov r0, #1 (dsiSaveReadDir)
+			*(u32*)0x02076244 = 0xE3A00000; // mov r0, #0 (dsiSaveReadDir)
+			*(u32*)0x02076254 = 0xE3A00001; // mov r0, #1 (dsiSaveCloseDir)
+			*(u32*)0x02076280 = 0xE3A00000; // mov r0, #0
+			*(u32*)0x02076284 = 0xE12FFF1E; // bx lr
+			setBL(0x020762FC, (u32)dsiSaveOpen);
+			setBL(0x02076314, (u32)dsiSaveGetLength);
+			setBL(0x02076340, (u32)dsiSaveRead);
+			setBL(0x02076348, (u32)dsiSaveClose);
+			setBL(0x02076420, (u32)dsiSaveCreate);
+			setBL(0x02076430, (u32)dsiSaveOpen);
+			setBL(0x02076440, (u32)dsiSaveGetResultCode);
+			setBL(0x02076474, (u32)dsiSaveSetLength);
+			setBL(0x020764A4, (u32)dsiSaveWrite);
+			setBL(0x020764AC, (u32)dsiSaveClose);
+		}
+		toncset((char*)0x020A05F4, 0, 9); // Redirect otherPrv to dataPrv
+		tonccpy((char*)0x020A05F4, dataPrv, strlen(dataPrv));
+		toncset((char*)0x020A0608, 0, 9);
+		tonccpy((char*)0x020A0608, dataPrv, strlen(dataPrv));
 	}
 
 	// 4 Travellers: Play French (USA)
