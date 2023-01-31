@@ -274,6 +274,87 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		tonccpy((char*)0x020A0608, dataPrv, strlen(dataPrv));
 	}
 
+	// 24/7 Solitaire (USA)
+	else if (strcmp(romTid, "K4IE") == 0) {
+		if (saveOnFlashcard) {
+			setBL(0x0200E83C, (u32)dsiSaveOpen);
+			setBL(0x0200E8B0, (u32)dsiSaveGetLength);
+			setBL(0x0200E8C4, (u32)dsiSaveClose);
+			setBL(0x0200E8E4, (u32)dsiSaveSeek);
+			setBL(0x0200E8FC, (u32)dsiSaveRead);
+			setBL(0x0200E910, (u32)dsiSaveClose);
+			setBL(0x0200E964, (u32)dsiSaveClose);
+			*(u32*)0x0200E9A8 = 0xE1A00000; // nop
+			setBL(0x0200EA04, (u32)dsiSaveCreate);
+			setBL(0x0200EA58, (u32)dsiSaveOpen);
+			setBL(0x0200EAC0, (u32)dsiSaveSetLength);
+			setBL(0x0200EAD8, (u32)dsiSaveClose);
+			setBL(0x0200EB2C, (u32)dsiSaveGetLength);
+			setBL(0x0200EB40, (u32)dsiSaveClose);
+			setBL(0x0200EB60, (u32)dsiSaveSeek);
+			setBL(0x0200EB78, (u32)dsiSaveWrite);
+			setBL(0x0200EB8C, (u32)dsiSaveClose);
+			setBL(0x0200EBD8, (u32)dsiSaveClose);
+		}
+		if (!twlFontFound) {
+			*(u32*)0x020359EC = 0xE12FFF1E; // bx lr (Skip Manual screen)
+		}
+	}
+
+	// 24/7 Solitaire (Europe)
+	else if (strcmp(romTid, "K4IP") == 0) {
+		if (saveOnFlashcard) {
+			setBL(0x0200E6D0, (u32)dsiSaveOpen);
+			setBL(0x0200E744, (u32)dsiSaveGetLength);
+			setBL(0x0200E758, (u32)dsiSaveClose);
+			setBL(0x0200E778, (u32)dsiSaveSeek);
+			setBL(0x0200E790, (u32)dsiSaveRead);
+			setBL(0x0200E7A4, (u32)dsiSaveClose);
+			setBL(0x0200E7F8, (u32)dsiSaveClose);
+			*(u32*)0x0200E7F8 = 0xE1A00000; // nop
+			setBL(0x0200E898, (u32)dsiSaveCreate);
+			setBL(0x0200E8EC, (u32)dsiSaveOpen);
+			setBL(0x0200E954, (u32)dsiSaveSetLength);
+			setBL(0x0200E96C, (u32)dsiSaveClose);
+			setBL(0x0200E9C0, (u32)dsiSaveGetLength);
+			setBL(0x0200E9D4, (u32)dsiSaveClose);
+			setBL(0x0200E9F4, (u32)dsiSaveSeek);
+			setBL(0x0200EA0C, (u32)dsiSaveWrite);
+			setBL(0x0200EA20, (u32)dsiSaveClose);
+			setBL(0x0200EA6C, (u32)dsiSaveClose);
+		}
+		if (!twlFontFound) {
+			*(u32*)0x02035880 = 0xE12FFF1E; // bx lr (Skip Manual screen)
+		}
+	}
+
+	// Soritea Korekusho (Japan)
+	else if (strcmp(romTid, "K4IJ") == 0) {
+		if (saveOnFlashcard) {
+			setBL(0x0200E7C4, (u32)dsiSaveOpen);
+			setBL(0x0200E838, (u32)dsiSaveGetLength);
+			setBL(0x0200E84C, (u32)dsiSaveClose);
+			setBL(0x0200E86C, (u32)dsiSaveSeek);
+			setBL(0x0200E884, (u32)dsiSaveRead);
+			setBL(0x0200E898, (u32)dsiSaveClose);
+			setBL(0x0200E8EC, (u32)dsiSaveClose);
+			*(u32*)0x0200E930 = 0xE1A00000; // nop
+			setBL(0x0200E98C, (u32)dsiSaveCreate);
+			setBL(0x0200E9E0, (u32)dsiSaveOpen);
+			setBL(0x0200EA48, (u32)dsiSaveSetLength);
+			setBL(0x0200EA60, (u32)dsiSaveClose);
+			setBL(0x0200EAB4, (u32)dsiSaveGetLength);
+			setBL(0x0200EAC8, (u32)dsiSaveClose);
+			setBL(0x0200EAE8, (u32)dsiSaveSeek);
+			setBL(0x0200EB00, (u32)dsiSaveWrite);
+			setBL(0x0200EB14, (u32)dsiSaveClose);
+			setBL(0x0200EB60, (u32)dsiSaveClose);
+		}
+		if (!twlFontFound) {
+			*(u32*)0x02035654 = 0xE12FFF1E; // bx lr (Skip Manual screen)
+		}
+	}
+
 	// 4 Travellers: Play French (USA)
 	else if (strcmp(romTid, "KTFE") == 0) {
 		if (!twlFontFound) {
@@ -8728,6 +8809,7 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
 		setBL(0x02012F10, (u32)dsiSaveRead);
 		setBL(0x02012F24, (u32)dsiSaveClose);
 		setBL(0x02012F78, (u32)dsiSaveClose);
+		*(u32*)0x02012FBC = 0xE1A00000; // nop
 		setBL(0x02013028, (u32)dsiSaveCreate);
 		setBL(0x0201307C, (u32)dsiSaveOpen);
 		setBL(0x020130E4, (u32)dsiSaveSetLength);
@@ -8749,6 +8831,7 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
 		setBL(0x02012F00, (u32)dsiSaveRead);
 		setBL(0x02012F14, (u32)dsiSaveClose);
 		setBL(0x02012F68, (u32)dsiSaveClose);
+		*(u32*)0x02012FAC = 0xE1A00000; // nop
 		setBL(0x02013018, (u32)dsiSaveCreate);
 		setBL(0x0201306C, (u32)dsiSaveOpen);
 		setBL(0x020130D4, (u32)dsiSaveSetLength);

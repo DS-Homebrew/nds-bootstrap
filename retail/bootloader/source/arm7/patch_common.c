@@ -454,6 +454,96 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		tonccpy((char*)0x020A0608, dataPrv, strlen(dataPrv));
 	}
 
+	// 24/7 Solitaire (USA)
+	else if (strcmp(romTid, "K4IE") == 0) {
+		*(u32*)0x02008918 = 0xE1A00000; // nop
+		*(u32*)0x0200B6C4 = 0xE3A00001; // mov r0, #1
+		setBL(0x0200E83C, (u32)dsiSaveOpen);
+		setBL(0x0200E8B0, (u32)dsiSaveGetLength);
+		setBL(0x0200E8C4, (u32)dsiSaveClose);
+		setBL(0x0200E8E4, (u32)dsiSaveSeek);
+		setBL(0x0200E8FC, (u32)dsiSaveRead);
+		setBL(0x0200E910, (u32)dsiSaveClose);
+		setBL(0x0200E964, (u32)dsiSaveClose);
+		*(u32*)0x0200E9A8 = 0xE1A00000; // nop
+		setBL(0x0200EA04, (u32)dsiSaveCreate);
+		setBL(0x0200EA58, (u32)dsiSaveOpen);
+		setBL(0x0200EAC0, (u32)dsiSaveSetLength);
+		setBL(0x0200EAD8, (u32)dsiSaveClose);
+		setBL(0x0200EB2C, (u32)dsiSaveGetLength);
+		setBL(0x0200EB40, (u32)dsiSaveClose);
+		setBL(0x0200EB60, (u32)dsiSaveSeek);
+		setBL(0x0200EB78, (u32)dsiSaveWrite);
+		setBL(0x0200EB8C, (u32)dsiSaveClose);
+		setBL(0x0200EBD8, (u32)dsiSaveClose);
+		*(u32*)0x020359EC = 0xE12FFF1E; // bx lr (Skip Manual screen)
+		*(u32*)0x020709F8 = 0xE1A00000; // nop
+		*(u32*)0x02073E8C = 0xE1A00000; // nop
+		patchInitDSiWare(0x0207C560, heapEnd);
+		patchUserSettingsReadDSiWare(0x0207DB44);
+		*(u32*)0x02081040 = 0xE1A00000; // nop
+	}
+
+	// 24/7 Solitaire (Europe)
+	else if (strcmp(romTid, "K4IP") == 0) {
+		*(u32*)0x020088C0 = 0xE1A00000; // nop
+		*(u32*)0x0200B558 = 0xE3A00001; // mov r0, #1
+		setBL(0x0200E6D0, (u32)dsiSaveOpen);
+		setBL(0x0200E744, (u32)dsiSaveGetLength);
+		setBL(0x0200E758, (u32)dsiSaveClose);
+		setBL(0x0200E778, (u32)dsiSaveSeek);
+		setBL(0x0200E790, (u32)dsiSaveRead);
+		setBL(0x0200E7A4, (u32)dsiSaveClose);
+		setBL(0x0200E7F8, (u32)dsiSaveClose);
+		*(u32*)0x0200E7F8 = 0xE1A00000; // nop
+		setBL(0x0200E898, (u32)dsiSaveCreate);
+		setBL(0x0200E8EC, (u32)dsiSaveOpen);
+		setBL(0x0200E954, (u32)dsiSaveSetLength);
+		setBL(0x0200E96C, (u32)dsiSaveClose);
+		setBL(0x0200E9C0, (u32)dsiSaveGetLength);
+		setBL(0x0200E9D4, (u32)dsiSaveClose);
+		setBL(0x0200E9F4, (u32)dsiSaveSeek);
+		setBL(0x0200EA0C, (u32)dsiSaveWrite);
+		setBL(0x0200EA20, (u32)dsiSaveClose);
+		setBL(0x0200EA6C, (u32)dsiSaveClose);
+		*(u32*)0x02035880 = 0xE12FFF1E; // bx lr (Skip Manual screen)
+		*(u32*)0x020705D4 = 0xE1A00000; // nop
+		*(u32*)0x02073A68 = 0xE1A00000; // nop
+		patchInitDSiWare(0x0207C13C, heapEnd);
+		patchUserSettingsReadDSiWare(0x0207D720);
+		*(u32*)0x02080C1C = 0xE1A00000; // nop
+	}
+
+	// Soritea Korekusho (Japan)
+	else if (strcmp(romTid, "K4IJ") == 0) {
+		*(u32*)0x020088B8 = 0xE1A00000; // nop
+		*(u32*)0x0200B650 = 0xE3A00001; // mov r0, #1
+		setBL(0x0200E7C4, (u32)dsiSaveOpen);
+		setBL(0x0200E838, (u32)dsiSaveGetLength);
+		setBL(0x0200E84C, (u32)dsiSaveClose);
+		setBL(0x0200E86C, (u32)dsiSaveSeek);
+		setBL(0x0200E884, (u32)dsiSaveRead);
+		setBL(0x0200E898, (u32)dsiSaveClose);
+		setBL(0x0200E8EC, (u32)dsiSaveClose);
+		*(u32*)0x0200E930 = 0xE1A00000; // nop
+		setBL(0x0200E98C, (u32)dsiSaveCreate);
+		setBL(0x0200E9E0, (u32)dsiSaveOpen);
+		setBL(0x0200EA48, (u32)dsiSaveSetLength);
+		setBL(0x0200EA60, (u32)dsiSaveClose);
+		setBL(0x0200EAB4, (u32)dsiSaveGetLength);
+		setBL(0x0200EAC8, (u32)dsiSaveClose);
+		setBL(0x0200EAE8, (u32)dsiSaveSeek);
+		setBL(0x0200EB00, (u32)dsiSaveWrite);
+		setBL(0x0200EB14, (u32)dsiSaveClose);
+		setBL(0x0200EB60, (u32)dsiSaveClose);
+		*(u32*)0x02035654 = 0xE12FFF1E; // bx lr (Skip Manual screen)
+		*(u32*)0x02070108 = 0xE1A00000; // nop
+		*(u32*)0x02073630 = 0xE1A00000; // nop
+		patchInitDSiWare(0x0207BD44, heapEnd);
+		patchUserSettingsReadDSiWare(0x0207D338);
+		*(u32*)0x020808F8 = 0xE1A00000; // nop
+	}
+
 	// 4 Travellers: Play French (USA)
 	else if (strcmp(romTid, "KTFE") == 0) {
 		useSharedFont = twlFontFound;
