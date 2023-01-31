@@ -355,6 +355,62 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// 3 Heroes: Crystal Soul (USA)
+	else if (strcmp(romTid, "K3YE") == 0 && saveOnFlashcard) {
+		setBL(0x02027A28, (u32)dsiSaveGetInfo);
+		setBL(0x02027A3C, (u32)dsiSaveOpen);
+		setBL(0x02027A50, (u32)dsiSaveCreate);
+		setBL(0x02027A60, (u32)dsiSaveOpen);
+		setBL(0x02027A70, (u32)dsiSaveGetResultCode);
+		setBL(0x02027A8C, (u32)dsiSaveCreate);
+		setBL(0x02027A9C, (u32)dsiSaveOpen);
+		setBL(0x02027AC8, (u32)dsiSaveSeek);
+		setBL(0x02027AE0, (u32)dsiSaveWrite);
+		setBL(0x02027AF0, (u32)dsiSaveSeek);
+		setBL(0x02027B00, (u32)dsiSaveWrite);
+		setBL(0x02027B10, (u32)dsiSaveSeek);
+		setBL(0x02027B20, (u32)dsiSaveWrite);
+		setBL(0x02027B8C, (u32)dsiSaveSeek);
+		setBL(0x02027B9C, (u32)dsiSaveWrite);
+		setBL(0x02027BA4, (u32)dsiSaveClose);
+		setBL(0x02027BF0, (u32)dsiSaveOpen);
+		setBL(0x02027C2C, (u32)dsiSaveSeek);
+		setBL(0x02027C40, (u32)dsiSaveRead);
+		setBL(0x02027C68, (u32)dsiSaveClose);
+		setBL(0x02027CE0, (u32)dsiSaveOpen);
+		setBL(0x02027CF4, (u32)dsiSaveSeek);
+		setBL(0x02027D04, (u32)dsiSaveWrite);
+		setBL(0x02027D0C, (u32)dsiSaveClose);
+	}
+
+	// 3 Heroes: Crystal Soul (Europe, Australia)
+	else if (strcmp(romTid, "K3YV") == 0 && saveOnFlashcard) {
+		setBL(0x020314EC, (u32)dsiSaveGetInfo);
+		setBL(0x02031500, (u32)dsiSaveOpen);
+		setBL(0x02031514, (u32)dsiSaveCreate);
+		setBL(0x02031524, (u32)dsiSaveOpen);
+		setBL(0x02031534, (u32)dsiSaveGetResultCode);
+		setBL(0x02031550, (u32)dsiSaveCreate);
+		setBL(0x02031560, (u32)dsiSaveOpen);
+		setBL(0x0203158C, (u32)dsiSaveSeek);
+		setBL(0x020315A4, (u32)dsiSaveWrite);
+		setBL(0x020315B4, (u32)dsiSaveSeek);
+		setBL(0x020315C4, (u32)dsiSaveWrite);
+		setBL(0x020315D4, (u32)dsiSaveSeek);
+		setBL(0x020315E4, (u32)dsiSaveWrite);
+		setBL(0x02031650, (u32)dsiSaveSeek);
+		setBL(0x02031660, (u32)dsiSaveWrite);
+		setBL(0x02031668, (u32)dsiSaveClose);
+		setBL(0x020316B4, (u32)dsiSaveOpen);
+		setBL(0x020316F0, (u32)dsiSaveSeek);
+		setBL(0x02031704, (u32)dsiSaveRead);
+		setBL(0x0203172C, (u32)dsiSaveClose);
+		setBL(0x020317A4, (u32)dsiSaveOpen);
+		setBL(0x020317B8, (u32)dsiSaveSeek);
+		setBL(0x020317C8, (u32)dsiSaveWrite);
+		setBL(0x020317D0, (u32)dsiSaveClose);
+	}
+
 	// 4 Travellers: Play French (USA)
 	else if (strcmp(romTid, "KTFE") == 0) {
 		if (!twlFontFound) {
