@@ -6775,6 +6775,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBL(0x0200C89C, (u32)dsiSaveDelete);
 			setBL(0x0200C8B0, (u32)dsiSaveCreate);
 			setBL(0x0200C8C0, (u32)dsiSaveOpen);
+			setBL(0x0200C8D0, (u32)dsiSaveGetResultCode);
 			setBL(0x0200C904, (u32)dsiSaveSetLength);
 			setBL(0x0200C914, (u32)dsiSaveWrite);
 			setBL(0x0200C91C, (u32)dsiSaveClose);
@@ -6807,12 +6808,12 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBL(0x0200C824, (u32)dsiSaveClose);
 			setBL(0x0200C838, (u32)dsiSaveCreate);
 			setBL(0x0200C854, (u32)dsiSaveOpen);
-			*(u32*)0x0200C864 = 0xE1A00000; // nop
 			setBL(0x0200C870, (u32)dsiSaveClose);
 			setBL(0x0200C878, (u32)dsiSaveDelete);
 			setBL(0x0200C890, (u32)dsiSaveCreate);
 			setBL(0x0200C8A0, (u32)dsiSaveOpen);
-			*(u32*)0x0200C8CC = 0xE1A00000; // nop (dsiSaveSetLength)
+			setBL(0x0200C8B0, (u32)dsiSaveGetResultCode);
+			setBL(0x0200C8CC, (u32)dsiSaveSetLength);
 			setBL(0x0200C8DC, (u32)dsiSaveWrite);
 			setBL(0x0200C8E4, (u32)dsiSaveClose);
 		}
@@ -6837,19 +6838,19 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBL(0x0200F778, (u32)dsiSaveClose);
 			setBL(0x0200F780, (u32)dsiSaveDelete);
 			setBL(0x0200F8B0, (u32)dsiSaveOpen);
-			*(u32*)0x0200F8C8 = 0xE1A00000; // nop (dsiSaveGetLength)
+			setBL(0x0200F8C8, (u32)dsiSaveGetLength);
 			setBL(0x0200F8EC, (u32)dsiSaveRead);
 			setBL(0x0200F8F4, (u32)dsiSaveClose);
 			setBL(0x0200F938, (u32)dsiSaveOpen);
 			setBL(0x0200F94C, (u32)dsiSaveClose);
 			setBL(0x0200F960, (u32)dsiSaveCreate);
 			setBL(0x0200F97C, (u32)dsiSaveOpen);
-			*(u32*)0x0200F98C = 0xE1A00000; // nop
 			setBL(0x0200F998, (u32)dsiSaveClose);
 			setBL(0x0200F9A0, (u32)dsiSaveDelete);
 			setBL(0x0200F9B8, (u32)dsiSaveCreate);
 			setBL(0x0200F9C8, (u32)dsiSaveOpen);
-			setBL(0x0200C8CC, (u32)dsiSaveSetLength);
+			setBL(0x0200F9D8, (u32)dsiSaveGetResultCode);
+			setBL(0x0200F9F4, (u32)dsiSaveSetLength);
 			setBL(0x0200FA04, (u32)dsiSaveWrite);
 			setBL(0x0200FA0C, (u32)dsiSaveClose);
 		}
@@ -6882,11 +6883,11 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBL(0x0200C84C, (u32)dsiSaveClose);
 			setBL(0x0200C860, (u32)dsiSaveCreate);
 			setBL(0x0200C87C, (u32)dsiSaveOpen);
-			*(u32*)0x0200C88C = 0xE1A00000; // nop
 			setBL(0x0200C898, (u32)dsiSaveClose);
 			setBL(0x0200C8A0, (u32)dsiSaveDelete);
 			setBL(0x0200C8B8, (u32)dsiSaveCreate);
 			setBL(0x0200C8C8, (u32)dsiSaveOpen);
+			setBL(0x0200C8D8, (u32)dsiSaveGetResultCode);
 			setBL(0x0200C8F4, (u32)dsiSaveSetLength);
 			setBL(0x0200C904, (u32)dsiSaveWrite);
 			setBL(0x0200C90C, (u32)dsiSaveClose);
