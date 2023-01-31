@@ -544,6 +544,20 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020808F8 = 0xE1A00000; // nop
 	}
 
+	// 2Puzzle It: Fantasy (Europe)
+	// Unknown bug making it not boot
+	/* else if (strcmp(romTid, "K2PP") == 0) {
+		*(u32*)0x0201F098 = 0xE1A00000; // nop
+		*(u32*)0x02022560 = 0xE1A00000; // nop
+		patchInitDSiWare(0x02026EB4, heapEnd);
+		patchUserSettingsReadDSiWare(0x02028770);
+		*(u32*)0x0202BEC0 = 0xE1A00000; // nop
+		if (!extendedMemory2) {
+			*(u32*)0x02027240 = 0x02163AE0;
+			*(u32*)0x020837D0 = 0x270900;
+		}
+	} */
+
 	// 4 Travellers: Play French (USA)
 	else if (strcmp(romTid, "KTFE") == 0) {
 		useSharedFont = twlFontFound;
