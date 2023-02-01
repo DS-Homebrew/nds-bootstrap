@@ -679,6 +679,31 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0202F0AC, (u32)dsiSaveClose);
 	}
 
+	// 3450 Algo (Japan)
+	else if (strcmp(romTid, "K5RJ") == 0) {
+		useSharedFont = (twlFontFound && debugOrMep);
+		*(u32*)0x020104A0 = 0xE1A00000; // nop
+		*(u32*)0x02014100 = 0xE1A00000; // nop
+		patchInitDSiWare(0x0201C190, heapEnd);
+		patchUserSettingsReadDSiWare(0x0201D868);
+		*(u32*)0x02020FE4 = 0xE1A00000; // nop
+		if (useSharedFont && !extendedMemory2) {
+			patchTwlFontLoad(0x0203CD28, 0x0201DDE8);
+		}
+		setBL(0x02041D54, (u32)dsiSaveOpen);
+		setBL(0x02041D6C, (u32)dsiSaveGetLength);
+		setBL(0x02041D98, (u32)dsiSaveRead);
+		setBL(0x02041DA0, (u32)dsiSaveClose);
+		setBL(0x02041DDC, (u32)dsiSaveCreate);
+		setBL(0x02041DEC, (u32)dsiSaveOpen);
+		setBL(0x02041DFC, (u32)dsiSaveGetResultCode);
+		*(u32*)0x02041E08 = 0xE1A00000; // nop
+		setBL(0x02041E20, (u32)dsiSaveSetLength);
+		setBL(0x02041E30, (u32)dsiSaveWrite);
+		setBL(0x02041E38, (u32)dsiSaveClose);
+		*(u32*)0x02086F54 = 0xE3A00001; // mov r0, #1 (dsiSaveOpenDir)
+	}
+
 	// 4 Travellers: Play French (USA)
 	else if (strcmp(romTid, "KTFE") == 0) {
 		useSharedFont = twlFontFound;
