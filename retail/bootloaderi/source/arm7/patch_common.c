@@ -355,6 +355,60 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// 3D Mahjong (USA)
+	else if (strcmp(romTid, "KMJE") == 0) {
+		if (!twlFontFound) {
+			*(u32*)0x020093D8 = 0xE12FFF1E; // bx lr (Skip Manual screen)
+		}
+		if (saveOnFlashcard) {
+			setBL(0x0200DA0C, (u32)dsiSaveOpen);
+			setBL(0x0200DA80, (u32)dsiSaveGetLength);
+			setBL(0x0200DA94, (u32)dsiSaveClose);
+			setBL(0x0200DAB4, (u32)dsiSaveSeek);
+			setBL(0x0200DACC, (u32)dsiSaveRead);
+			setBL(0x0200DAE0, (u32)dsiSaveClose);
+			setBL(0x0200DB34, (u32)dsiSaveClose);
+			*(u32*)0x0200DB78 = 0xE1A00000; // nop
+			setBL(0x0200DBD4, (u32)dsiSaveCreate);
+			setBL(0x0200DC28, (u32)dsiSaveOpen);
+			setBL(0x0200DC90, (u32)dsiSaveSetLength);
+			setBL(0x0200DCA8, (u32)dsiSaveClose);
+			setBL(0x0200DCFC, (u32)dsiSaveGetLength);
+			setBL(0x0200DD10, (u32)dsiSaveClose);
+			setBL(0x0200DD30, (u32)dsiSaveSeek);
+			setBL(0x0200DD48, (u32)dsiSaveWrite);
+			setBL(0x0200DD5C, (u32)dsiSaveClose);
+			setBL(0x0200DDA8, (u32)dsiSaveClose);
+		}
+	}
+
+	// 3D Mahjong (Europe)
+	else if (strcmp(romTid, "KMJP") == 0) {
+		if (!twlFontFound) {
+			*(u32*)0x0200937C = 0xE12FFF1E; // bx lr (Skip Manual screen)
+		}
+		if (saveOnFlashcard) {
+			setBL(0x0200D9B0, (u32)dsiSaveOpen);
+			setBL(0x0200DA24, (u32)dsiSaveGetLength);
+			setBL(0x0200DA38, (u32)dsiSaveClose);
+			setBL(0x0200DA58, (u32)dsiSaveSeek);
+			setBL(0x0200DA70, (u32)dsiSaveRead);
+			setBL(0x0200DA84, (u32)dsiSaveClose);
+			setBL(0x0200DAD8, (u32)dsiSaveClose);
+			*(u32*)0x0200DB1C = 0xE1A00000; // nop
+			setBL(0x0200DB78, (u32)dsiSaveCreate);
+			setBL(0x0200DBCC, (u32)dsiSaveOpen);
+			setBL(0x0200DC34, (u32)dsiSaveSetLength);
+			setBL(0x0200DC4C, (u32)dsiSaveClose);
+			setBL(0x0200DCA0, (u32)dsiSaveGetLength);
+			setBL(0x0200DCB4, (u32)dsiSaveClose);
+			setBL(0x0200DCD4, (u32)dsiSaveSeek);
+			setBL(0x0200DCEC, (u32)dsiSaveWrite);
+			setBL(0x0200DD00, (u32)dsiSaveClose);
+			setBL(0x0200DD4C, (u32)dsiSaveClose);
+		}
+	}
+
 	// 3 Heroes: Crystal Soul (USA)
 	else if (strcmp(romTid, "K3YE") == 0 && saveOnFlashcard) {
 		setBL(0x02027A28, (u32)dsiSaveGetInfo);
