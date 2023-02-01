@@ -618,6 +618,50 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0206F400 = 0xE1A00000; // nop
 	}
 
+	// 3D Twist Match (USA)
+	// Saving not supported due to using more than one file in filesystem
+	else if (strcmp(romTid, "K3CE") == 0) {
+		useSharedFont = (twlFontFound && debugOrMep);
+		*(u32*)0x0200F614 = 0xE1A00000; // nop
+		*(u32*)0x02012AE0 = 0xE1A00000; // nop
+		patchInitDSiWare(0x0201A188, heapEnd);
+		patchUserSettingsReadDSiWare(0x0201B7A4);
+		*(u32*)0x0201EC30 = 0xE1A00000; // nop
+		*(u32*)0x0203C264 = 0xE1A00000; // nop
+		*(u32*)0x0203DC14 = 0xE1A00000; // nop
+		*(u32*)0x0203FE8C = 0xE1A00000; // nop
+		if (useSharedFont && !extendedMemory2) {
+			patchTwlFontLoad(0x0203FEE8, 0x0201BCE8);
+		}
+		*(u32*)0x0203FF70 = 0xE1A00000; // nop
+		*(u32*)0x02040014 = 0xE1A00000; // nop
+		*(u32*)0x020400D4 = 0xE1A00000; // nop
+		*(u32*)0x020532B0 = 0xE1A00000; // nop
+		*(u32*)0x02054970 = 0xE1A00000; // nop
+	}
+
+	// 3D Twist Match (Europe)
+	// Saving not supported due to using more than one file in filesystem
+	else if (strcmp(romTid, "K3UP") == 0) {
+		useSharedFont = (twlFontFound && debugOrMep);
+		*(u32*)0x0200F610 = 0xE1A00000; // nop
+		*(u32*)0x02012ADC = 0xE1A00000; // nop
+		patchInitDSiWare(0x0201A184, heapEnd);
+		patchUserSettingsReadDSiWare(0x0201B7A0);
+		*(u32*)0x0201EC2C = 0xE1A00000; // nop
+		*(u32*)0x0203C260 = 0xE1A00000; // nop
+		*(u32*)0x0203DC10 = 0xE1A00000; // nop
+		*(u32*)0x0203FE18 = 0xE1A00000; // nop
+		if (useSharedFont && !extendedMemory2) {
+			patchTwlFontLoad(0x0203FE74, 0x0201BCE4);
+		}
+		*(u32*)0x0203FEFC = 0xE1A00000; // nop
+		*(u32*)0x0203FFA0 = 0xE1A00000; // nop
+		*(u32*)0x02040044 = 0xE1A00000; // nop
+		*(u32*)0x02053210 = 0xE1A00000; // nop
+		*(u32*)0x02054928 = 0xE1A00000; // nop
+	}
+
 	// 3 Heroes: Crystal Soul (USA)
 	// 3 Heroes: Crystal Soul (Europe, Australia)
 	// Requires 8MB of RAM
