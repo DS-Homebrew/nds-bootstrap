@@ -411,6 +411,43 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x020317D0, (u32)dsiSaveClose);
 	}
 
+	// 3 Punten Katou Itsu: Bakumatsu Kuizu He (Japan)
+	// `dataPub:/user.bin` is read when exists, but only `dataPub:/common.bin` is created and written, leaving `dataPub:/user.bin` unused (pretty sure)
+	else if (strcmp(romTid, "K3BJ") == 0 && saveOnFlashcard) {
+		setBL(0x0202E680, (u32)dsiSaveOpen);
+		setBL(0x0202E6A8, (u32)dsiSaveRead);
+		setBL(0x0202E6C0, (u32)dsiSaveClose);
+		setBL(0x0202E708, (u32)dsiSaveCreate);
+		setBL(0x0202E718, (u32)dsiSaveOpen);
+		setBL(0x0202E744, (u32)dsiSaveSetLength);
+		setBL(0x0202E764, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+		setBL(0x0202E7C0, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+		setBL(0x0202E7D0, (u32)dsiSaveOpen);
+		setBL(0x0202E7F8, (u32)dsiSaveSetLength);
+		setBL(0x0202E818, (u32)dsiSaveWrite);
+		setBL(0x0202E830, (u32)dsiSaveClose);
+		setBL(0x0202E880, (u32)dsiSaveClose);
+	}
+
+	// 3 Punten Katou Itsu: Higashi Nihon Sengoku Kuizu He (Japan)
+	// 3 Punten Katou Itsu: Nishinihon Sengoku Kuizu He (Japan)
+	// `dataPub:/user.bin` is read when exists, but only `dataPub:/common.bin` is created and written, leaving `dataPub:/user.bin` unused (pretty sure)
+	else if ((strcmp(romTid, "KHGJ") == 0 || strcmp(romTid, "K24J") == 0) && saveOnFlashcard) {
+		setBL(0x0202EEAC, (u32)dsiSaveOpen);
+		setBL(0x0202EED4, (u32)dsiSaveRead);
+		setBL(0x0202EEEC, (u32)dsiSaveClose);
+		setBL(0x0202EF34, (u32)dsiSaveCreate);
+		setBL(0x0202EF44, (u32)dsiSaveOpen);
+		setBL(0x0202EF70, (u32)dsiSaveSetLength);
+		setBL(0x0202EF90, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+		setBL(0x0202EFEC, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+		setBL(0x0202EFFC, (u32)dsiSaveOpen);
+		setBL(0x0202F024, (u32)dsiSaveSetLength);
+		setBL(0x0202F044, (u32)dsiSaveWrite);
+		setBL(0x0202F05C, (u32)dsiSaveClose);
+		setBL(0x0202F0AC, (u32)dsiSaveClose);
+	}
+
 	// 4 Travellers: Play French (USA)
 	else if (strcmp(romTid, "KTFE") == 0) {
 		if (!twlFontFound) {

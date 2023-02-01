@@ -624,6 +624,61 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// 3 Punten Katou Itsu: Bakumatsu Kuizu He (Japan)
+	// `dataPub:/user.bin` is read when exists, but only `dataPub:/common.bin` is created and written, leaving `dataPub:/user.bin` unused (pretty sure)
+	else if (strcmp(romTid, "K3BJ") == 0) {
+		*(u32*)0x0200D6B8 = 0xE1A00000; // nop
+		*(u32*)0x02011340 = 0xE1A00000; // nop
+		patchInitDSiWare(0x02017E78, heapEnd);
+		*(u32*)0x02018204 -= 0x30000;
+		*(u32*)0x0201C7A0 = 0xE1A00000; // nop
+		*(u32*)0x020249E4 = 0xE1A00000; // nop
+		*(u32*)0x02024A2C = 0xE3A00603; // mov r0, 0x300000
+		*(u32*)0x02024DCC -= 0x220000;
+		*(u32*)0x0202FAC8 -= 0x220000;
+		setBL(0x0202E680, (u32)dsiSaveOpen);
+		setBL(0x0202E6A8, (u32)dsiSaveRead);
+		setBL(0x0202E6C0, (u32)dsiSaveClose);
+		setBL(0x0202E708, (u32)dsiSaveCreate);
+		setBL(0x0202E718, (u32)dsiSaveOpen);
+		setBL(0x0202E744, (u32)dsiSaveSetLength);
+		setBL(0x0202E764, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+		setBL(0x0202E7C0, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+		setBL(0x0202E7D0, (u32)dsiSaveOpen);
+		setBL(0x0202E7F8, (u32)dsiSaveSetLength);
+		setBL(0x0202E818, (u32)dsiSaveWrite);
+		setBL(0x0202E830, (u32)dsiSaveClose);
+		setBL(0x0202E880, (u32)dsiSaveClose);
+	}
+
+	// 3 Punten Katou Itsu: Higashi Nihon Sengoku Kuizu He (Japan)
+	// 3 Punten Katou Itsu: Nishinihon Sengoku Kuizu He (Japan)
+	// `dataPub:/user.bin` is read when exists, but only `dataPub:/common.bin` is created and written, leaving `dataPub:/user.bin` unused (pretty sure)
+	else if (strcmp(romTid, "KHGJ") == 0 || strcmp(romTid, "K24J") == 0) {
+		*(u32*)0x0200D7CC = 0xE1A00000; // nop
+		*(u32*)0x02011448 = 0xE1A00000; // nop
+		patchInitDSiWare(0x02017F64, heapEnd);
+		*(u32*)0x020182F0 -= 0x30000;
+		*(u32*)0x0201C87C = 0xE1A00000; // nop
+		*(u32*)0x020251E0 = 0xE1A00000; // nop
+		*(u32*)0x02025228 = 0xE3A00603; // mov r0, 0x300000
+		*(u32*)0x020255C8 -= 0x220000;
+		*(u32*)0x020301F4 -= 0x220000;
+		setBL(0x0202EEAC, (u32)dsiSaveOpen);
+		setBL(0x0202EED4, (u32)dsiSaveRead);
+		setBL(0x0202EEEC, (u32)dsiSaveClose);
+		setBL(0x0202EF34, (u32)dsiSaveCreate);
+		setBL(0x0202EF44, (u32)dsiSaveOpen);
+		setBL(0x0202EF70, (u32)dsiSaveSetLength);
+		setBL(0x0202EF90, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+		setBL(0x0202EFEC, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+		setBL(0x0202EFFC, (u32)dsiSaveOpen);
+		setBL(0x0202F024, (u32)dsiSaveSetLength);
+		setBL(0x0202F044, (u32)dsiSaveWrite);
+		setBL(0x0202F05C, (u32)dsiSaveClose);
+		setBL(0x0202F0AC, (u32)dsiSaveClose);
+	}
+
 	// 4 Travellers: Play French (USA)
 	else if (strcmp(romTid, "KTFE") == 0) {
 		useSharedFont = twlFontFound;
