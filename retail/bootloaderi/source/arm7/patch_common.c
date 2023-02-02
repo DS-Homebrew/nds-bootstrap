@@ -517,6 +517,52 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02086F54 = 0xE3A00001; // mov r0, #1 (dsiSaveOpenDir)
 	}
 
+	// 4 Elements (USA)
+	else if (strcmp(romTid, "K7AE") == 0) {
+		if (saveOnFlashcard) {
+			setBL(0x0207B9E8, (u32)dsiSaveGetLength);
+			setBL(0x0207B9FC, (u32)dsiSaveSetLength);
+			setBL(0x0207BA10, (u32)dsiSaveSeek);
+			setBL(0x0207BA20, (u32)dsiSaveWrite);
+			setBL(0x0207BA28, (u32)dsiSaveClose);
+			setBL(0x0207BAFC, (u32)dsiSaveGetLength);
+			setBL(0x0207BB10, (u32)dsiSaveSetLength);
+			setBL(0x0207BB24, (u32)dsiSaveSeek);
+			setBL(0x0207BB34, (u32)dsiSaveRead);
+			setBL(0x0207BB3C, (u32)dsiSaveClose);
+			setBL(0x0207BBD8, (u32)dsiSaveOpen);
+			setBL(0x0207BC2C, (u32)dsiSaveCreate);
+			setBL(0x0207BC4C, (u32)dsiSaveGetResultCode);
+			*(u32*)0x0207BC84 = 0xE3A00001; // mov r0, #1
+		}
+		if (!twlFontFound) {
+			*(u32*)0x0207C760 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		}
+	}
+
+	// 4 Elements (Europe, Australia)
+	else if (strcmp(romTid, "K7AV") == 0) {
+		if (saveOnFlashcard) {
+			setBL(0x0207BA30, (u32)dsiSaveGetLength);
+			setBL(0x0207BA44, (u32)dsiSaveSetLength);
+			setBL(0x0207BA58, (u32)dsiSaveSeek);
+			setBL(0x0207BA68, (u32)dsiSaveWrite);
+			setBL(0x0207BA70, (u32)dsiSaveClose);
+			setBL(0x0207BB44, (u32)dsiSaveGetLength);
+			setBL(0x0207BB58, (u32)dsiSaveSetLength);
+			setBL(0x0207BB6C, (u32)dsiSaveSeek);
+			setBL(0x0207BB7C, (u32)dsiSaveRead);
+			setBL(0x0207BB84, (u32)dsiSaveClose);
+			setBL(0x0207BC20, (u32)dsiSaveOpen);
+			setBL(0x0207BC74, (u32)dsiSaveCreate);
+			setBL(0x0207BC94, (u32)dsiSaveGetResultCode);
+			*(u32*)0x0207BCCC = 0xE3A00001; // mov r0, #1
+		}
+		if (!twlFontFound) {
+			*(u32*)0x0207C7A8 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		}
+	}
+
 	// 4 Travellers: Play French (USA)
 	else if (strcmp(romTid, "KTFE") == 0) {
 		if (!twlFontFound) {

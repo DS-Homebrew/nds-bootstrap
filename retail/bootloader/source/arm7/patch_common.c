@@ -808,6 +808,64 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02086F54 = 0xE3A00001; // mov r0, #1 (dsiSaveOpenDir)
 	}
 
+	// 4 Elements (USA)
+	else if (strcmp(romTid, "K7AE") == 0) {
+		setBL(0x0207B9E8, (u32)dsiSaveGetLength);
+		setBL(0x0207B9FC, (u32)dsiSaveSetLength);
+		setBL(0x0207BA10, (u32)dsiSaveSeek);
+		setBL(0x0207BA20, (u32)dsiSaveWrite);
+		setBL(0x0207BA28, (u32)dsiSaveClose);
+		setBL(0x0207BAFC, (u32)dsiSaveGetLength);
+		setBL(0x0207BB10, (u32)dsiSaveSetLength);
+		setBL(0x0207BB24, (u32)dsiSaveSeek);
+		setBL(0x0207BB34, (u32)dsiSaveRead);
+		setBL(0x0207BB3C, (u32)dsiSaveClose);
+		setBL(0x0207BBD8, (u32)dsiSaveOpen);
+		setBL(0x0207BC2C, (u32)dsiSaveCreate);
+		setBL(0x0207BC4C, (u32)dsiSaveGetResultCode);
+		*(u32*)0x0207BC84 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0207C298 = 0xE3A05703; // mov r5, #0xC0000
+		*(u32*)0x0207C760 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		*(u32*)0x02087F64 = 0xE3A00602; // mov r0, #0x200000
+		*(u32*)0x0208A6FC = 0xE1A00000; // nop
+		*(u32*)0x0208DC40 = 0xE1A00000; // nop
+		patchInitDSiWare(0x020A7A00, heapEnd);
+		*(u32*)0x020A7D8C = 0x020F4FA0;
+		patchUserSettingsReadDSiWare(0x020A90E8);
+		*(u32*)0x020AC3F4 = 0xE1A00000; // nop
+		*(u32*)0x020ADFA0 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x020ADFA4 = 0xE12FFF1E; // bx lr
+	}
+
+	// 4 Elements (Europe, Australia)
+	else if (strcmp(romTid, "K7AV") == 0) {
+		setBL(0x0207BA30, (u32)dsiSaveGetLength);
+		setBL(0x0207BA44, (u32)dsiSaveSetLength);
+		setBL(0x0207BA58, (u32)dsiSaveSeek);
+		setBL(0x0207BA68, (u32)dsiSaveWrite);
+		setBL(0x0207BA70, (u32)dsiSaveClose);
+		setBL(0x0207BB44, (u32)dsiSaveGetLength);
+		setBL(0x0207BB58, (u32)dsiSaveSetLength);
+		setBL(0x0207BB6C, (u32)dsiSaveSeek);
+		setBL(0x0207BB7C, (u32)dsiSaveRead);
+		setBL(0x0207BB84, (u32)dsiSaveClose);
+		setBL(0x0207BC20, (u32)dsiSaveOpen);
+		setBL(0x0207BC74, (u32)dsiSaveCreate);
+		setBL(0x0207BC94, (u32)dsiSaveGetResultCode);
+		*(u32*)0x0207BCCC = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0207C2E0 = 0xE3A05703; // mov r5, #0xC0000
+		*(u32*)0x0207C7A8 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		*(u32*)0x02087FE4 = 0xE3A00602; // mov r0, #0x200000
+		*(u32*)0x0208A77C = 0xE1A00000; // nop
+		*(u32*)0x0208DCC0 = 0xE1A00000; // nop
+		patchInitDSiWare(0x020A7A80, heapEnd);
+		*(u32*)0x020A7E0C = 0x020F5020;
+		patchUserSettingsReadDSiWare(0x020A9168);
+		*(u32*)0x020AC474 = 0xE1A00000; // nop
+		*(u32*)0x020AE020 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x020AE024 = 0xE12FFF1E; // bx lr
+	}
+
 	// 4 Travellers: Play French (USA)
 	else if (strcmp(romTid, "KTFE") == 0) {
 		useSharedFont = twlFontFound;
