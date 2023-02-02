@@ -804,20 +804,25 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// 5 in 1 Mahjong (USA)
 	// 5 in 1 Mahjong (Europe)
-	else if ((strcmp(romTid, "KRJE") == 0 || strcmp(romTid, "KRJP") == 0) && saveOnFlashcard) {
-		tonccpy((u32*)0x02013098, dsiSaveGetResultCode, 0xC);
-		setBL(0x02030C18, (u32)dsiSaveOpen);
-		setBL(0x02030C28, (u32)dsiSaveClose);
-		setBL(0x0203104C, (u32)dsiSaveCreate); // dsiSaveCreateAuto
-		setBL(0x02031070, (u32)dsiSaveOpen);
-		setBL(0x02031084, (u32)dsiSaveSetLength);
-		setBL(0x02031094, (u32)dsiSaveClose);
-		setBL(0x02031118, (u32)dsiSaveOpen);
-		setBL(0x020311A8, (u32)dsiSaveClose);
-		setBL(0x02031230, (u32)dsiSaveSeek);
-		setBL(0x02031248, (u32)dsiSaveRead);
-		setBL(0x020312D0, (u32)dsiSaveSeek);
-		setBL(0x020312E8, (u32)dsiSaveWrite);
+	else if (strcmp(romTid, "KRJE") == 0 || strcmp(romTid, "KRJP") == 0) {
+		if (saveOnFlashcard) {
+			tonccpy((u32*)0x02013098, dsiSaveGetResultCode, 0xC);
+			setBL(0x02030C18, (u32)dsiSaveOpen);
+			setBL(0x02030C28, (u32)dsiSaveClose);
+			setBL(0x0203104C, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+			setBL(0x02031070, (u32)dsiSaveOpen);
+			setBL(0x02031084, (u32)dsiSaveSetLength);
+			setBL(0x02031094, (u32)dsiSaveClose);
+			setBL(0x02031118, (u32)dsiSaveOpen);
+			setBL(0x020311A8, (u32)dsiSaveClose);
+			setBL(0x02031230, (u32)dsiSaveSeek);
+			setBL(0x02031248, (u32)dsiSaveRead);
+			setBL(0x020312D0, (u32)dsiSaveSeek);
+			setBL(0x020312E8, (u32)dsiSaveWrite);
+		}
+		if (!twlFontFound) {
+			*(u32*)0x02056970 = 0xE12FFF1E; // bx lr (Skip Manual screen)
+		}
 	}
 
 	// 505 Tangram (USA)
@@ -884,6 +889,28 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0200FB94, (u32)dsiSaveWrite);
 		setBL(0x0200FBA8, (u32)dsiSaveClose);
 		setBL(0x0200FBF4, (u32)dsiSaveClose);
+	}
+
+	// 7 Card Games (USA)
+	else if (strcmp(romTid, "K7CE") == 0) {
+		if (saveOnFlashcard) {
+			tonccpy((u32*)0x020130EC, dsiSaveGetResultCode, 0xC);
+			setBL(0x02034820, (u32)dsiSaveOpen);
+			setBL(0x02034830, (u32)dsiSaveClose);
+			setBL(0x02034C24, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+			setBL(0x02034C48, (u32)dsiSaveOpen);
+			setBL(0x02034C5C, (u32)dsiSaveSetLength);
+			setBL(0x02034C6C, (u32)dsiSaveClose);
+			setBL(0x02034CF4, (u32)dsiSaveOpen);
+			setBL(0x02034D84, (u32)dsiSaveClose);
+			setBL(0x02034E0C, (u32)dsiSaveSeek);
+			setBL(0x02034E24, (u32)dsiSaveRead);
+			setBL(0x02034EAC, (u32)dsiSaveSeek);
+			setBL(0x02034EC4, (u32)dsiSaveWrite);
+		}
+		if (!twlFontFound) {
+			*(u32*)0x020417CC = 0xE12FFF1E; // bx lr (Skip Manual screen)
+		}
 	}
 
 	// 99Bullets (USA)

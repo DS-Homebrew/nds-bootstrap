@@ -1235,6 +1235,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02031248, (u32)dsiSaveRead);
 		setBL(0x020312D0, (u32)dsiSaveSeek);
 		setBL(0x020312E8, (u32)dsiSaveWrite);
+		*(u32*)0x02056970 = 0xE12FFF1E; // bx lr (Skip Manual screen)
 	}
 
 	// 505 Tangram (USA)
@@ -1346,6 +1347,31 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchInitDSiWare(0x02064A48, heapEnd);
 		patchUserSettingsReadDSiWare(0x0206603C);
 		*(u32*)0x020695E0 = 0xE1A00000; // nop
+	}
+
+	// 7 Card Games (USA)
+	else if (strcmp(romTid, "K7CE") == 0) {
+		*(u32*)0x02012574 = 0xE1A00000; // nop
+		tonccpy((u32*)0x020130EC, dsiSaveGetResultCode, 0xC);
+		*(u32*)0x02015FA4 = 0xE1A00000; // nop
+		patchInitDSiWare(0x0201CB3C, heapEnd);
+		patchUserSettingsReadDSiWare(0x0201E1F8);
+		*(u32*)0x02021688 = 0xE1A00000; // nop
+		setBL(0x02034820, (u32)dsiSaveOpen);
+		setBL(0x02034830, (u32)dsiSaveClose);
+		*(u32*)0x020348A8 = 0xE1A00000; // nop
+		setBL(0x02034C24, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+		setBL(0x02034C48, (u32)dsiSaveOpen);
+		setBL(0x02034C5C, (u32)dsiSaveSetLength);
+		setBL(0x02034C6C, (u32)dsiSaveClose);
+		setBL(0x02034CF4, (u32)dsiSaveOpen);
+		setBL(0x02034D84, (u32)dsiSaveClose);
+		setBL(0x02034E0C, (u32)dsiSaveSeek);
+		setBL(0x02034E24, (u32)dsiSaveRead);
+		setBL(0x02034EAC, (u32)dsiSaveSeek);
+		setBL(0x02034EC4, (u32)dsiSaveWrite);
+		*(u32*)0x020417CC = 0xE12FFF1E; // bx lr (Skip Manual screen)
+		*(u32*)0x02041B88 = 0xE1A00000; // nop
 	}
 
 	// 99Bullets (USA)
