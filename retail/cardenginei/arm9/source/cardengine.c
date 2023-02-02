@@ -707,11 +707,6 @@ u32 dsiSaveGetResultCode(const char* path) {
 	if (strcmp(path, "data") == 0) // Specific to EnjoyUp-developed games
 	{
 		return dsiSaveExists ? 8 : 0xE;
-	} else
-	if (strcmp(path, "dataPub:") == 0 || strcmp(path, "dataPub:/") == 0
-	 || strcmp(path, "dataPrv:") == 0 || strcmp(path, "dataPrv:/") == 0)
-	{
-		return 8;
 	}
 	return dsiSaveResultCode;
 #else

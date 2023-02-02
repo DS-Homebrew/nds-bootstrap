@@ -802,6 +802,24 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		tonccpy((u32*)0x020FD438, dsiSaveGetResultCode, 0xC);
 	}
 
+	// 5 in 1 Mahjong (USA)
+	// 5 in 1 Mahjong (Europe)
+	else if ((strcmp(romTid, "KRJE") == 0 || strcmp(romTid, "KRJP") == 0) && saveOnFlashcard) {
+		tonccpy((u32*)0x02013098, dsiSaveGetResultCode, 0xC);
+		setBL(0x02030C18, (u32)dsiSaveOpen);
+		setBL(0x02030C28, (u32)dsiSaveClose);
+		setBL(0x0203104C, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+		setBL(0x02031070, (u32)dsiSaveOpen);
+		setBL(0x02031084, (u32)dsiSaveSetLength);
+		setBL(0x02031094, (u32)dsiSaveClose);
+		setBL(0x02031118, (u32)dsiSaveOpen);
+		setBL(0x020311A8, (u32)dsiSaveClose);
+		setBL(0x02031230, (u32)dsiSaveSeek);
+		setBL(0x02031248, (u32)dsiSaveRead);
+		setBL(0x020312D0, (u32)dsiSaveSeek);
+		setBL(0x020312E8, (u32)dsiSaveWrite);
+	}
+
 	// 505 Tangram (USA)
 	else if (strcmp(romTid, "K2OE") == 0 && saveOnFlashcard) {
 		setBL(0x020100B8, (u32)dsiSaveOpen);
