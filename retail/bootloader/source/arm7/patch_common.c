@@ -1374,6 +1374,41 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02041B88 = 0xE1A00000; // nop
 	}
 
+	// 7 Wonders II (USA)
+	// Opening Scores menu causes a crash for some reason
+	else if (strcmp(romTid, "K7WE") == 0) {
+		useSharedFont = (twlFontFound && debugOrMep);
+		*(u32*)0x020549CC = 0xE3A00001; // mov r0, #1 (dsiSaveOpenDir)
+		*(u32*)0x020549DC = 0xE1A00000; // nop (dsiSaveCloseDir)
+		*(u32*)0x020549F8 = 0xE1A00000; // nop
+		setBL(0x020572A4, (u32)dsiSaveOpen);
+		setBL(0x020572BC, (u32)dsiSaveClose);
+		*(u32*)0x02057748 = (u32)dsiSaveRead;
+		setBL(0x02057754, (u32)dsiSaveSeek);
+		setBL(0x020579CC, (u32)dsiSaveOpen);
+		*(u32*)0x02057A34 = 0xE1A00000; // nop (dsiSaveFlush)
+		setBL(0x02057A3C, (u32)dsiSaveClose);
+		*(u32*)0x02057C40 = 0xE1A00000; // nop (dsiSaveFlush)
+		setBL(0x02057C48, (u32)dsiSaveClose);
+		*(u32*)0x02057E50 = (u32)dsiSaveWrite;
+		setBL(0x02057E80, (u32)dsiSaveCreate);
+		setBL(0x02057E94, (u32)dsiSaveOpen);
+		setBL(0x02057ED0, (u32)dsiSaveWrite);
+		setBL(0x02057EF8, (u32)dsiSaveClose);
+		if (useSharedFont) {
+			if (!extendedMemory2) {
+				patchTwlFontLoad(0x0205D80C, 0x020A1B54);
+			}
+		} else {
+			*(u32*)0x0205DA34 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		}
+		*(u32*)0x02097D0C = 0xE1A00000; // nop
+		*(u32*)0x0209B2C0 = 0xE1A00000; // nop
+		patchInitDSiWare(0x020A0008, heapEnd);
+		patchUserSettingsReadDSiWare(0x020A1600);
+		*(u32*)0x020A4A30 = 0xE1A00000; // nop
+	}
+
 	// 99Bullets (USA)
 	else if (strcmp(romTid, "K99E") == 0) {
 		*(u32*)0x020050E8 = 0xE1A00000; // nop
