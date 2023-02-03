@@ -938,6 +938,42 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// 90's Pool (USA)
+	else if (strcmp(romTid, "KXPE") == 0 && saveOnFlashcard) {
+		setBL(0x02035444, (u32)dsiSaveCreate);
+		setBL(0x02035454, (u32)dsiSaveOpen);
+		setBL(0x02035470, (u32)dsiSaveGetResultCode);
+		setBL(0x02035494, (u32)dsiSaveSeek);
+		setBL(0x020354AC, (u32)dsiSaveGetResultCode);
+		setBL(0x020354D0, (u32)dsiSaveWrite);
+		setBL(0x020354F0, (u32)dsiSaveClose);
+		setBL(0x020354F8, (u32)dsiSaveGetResultCode);
+		setBL(0x02035514, (u32)dsiSaveGetResultCode);
+		setBL(0x02035550, (u32)dsiSaveOpenR);
+		setBL(0x02035560, (u32)dsiSaveGetLength);
+		setBL(0x02035594, (u32)dsiSaveRead);
+		setBL(0x020355AC, (u32)dsiSaveClose);
+		setBL(0x020355B8, (u32)dsiSaveGetResultCode);
+	}
+
+	// 90's Pool (Europe)
+	else if (strcmp(romTid, "KXPP") == 0 && saveOnFlashcard) {
+		setBL(0x0202AE14, (u32)dsiSaveCreate);
+		setBL(0x0202AE24, (u32)dsiSaveOpen);
+		setBL(0x0202AE40, (u32)dsiSaveGetResultCode);
+		setBL(0x0202AE64, (u32)dsiSaveSeek);
+		setBL(0x0202AE7C, (u32)dsiSaveGetResultCode);
+		setBL(0x0202AEA0, (u32)dsiSaveWrite);
+		setBL(0x0202AEC0, (u32)dsiSaveClose);
+		setBL(0x0202AEC8, (u32)dsiSaveGetResultCode);
+		setBL(0x0202AEE4, (u32)dsiSaveGetResultCode);
+		setBL(0x0202AF20, (u32)dsiSaveOpenR);
+		setBL(0x0202AF30, (u32)dsiSaveGetLength);
+		setBL(0x0202AF64, (u32)dsiSaveRead);
+		setBL(0x0202AF7C, (u32)dsiSaveClose);
+		setBL(0x0202AF88, (u32)dsiSaveGetResultCode);
+	}
+
 	// 99Bullets (USA)
 	else if (strcmp(romTid, "K99E") == 0 && saveOnFlashcard) {
 		*(u32*)0x02013E8C = 0xE3A00001; // mov r0, #1

@@ -1409,6 +1409,64 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020A4A30 = 0xE1A00000; // nop
 	}
 
+	// 90's Pool (USA)
+	// Audio does not play on retail consoles
+	else if (strcmp(romTid, "KXPE") == 0) {
+		useSharedFont = twlFontFound;
+		*(u32*)0x0200507C = 0xE1A00000; // nop
+		*(u32*)0x0201B538 = 0xE1A00000; // nop
+		*(u32*)0x0201F868 = 0xE1A00000; // nop
+		patchInitDSiWare(0x02024E3C, heapEnd);
+		patchUserSettingsReadDSiWare(0x02026420);
+		*(u32*)0x020299F8 = 0xE1A00000; // nop
+		setBL(0x02035444, (u32)dsiSaveCreate);
+		setBL(0x02035454, (u32)dsiSaveOpen);
+		setBL(0x02035470, (u32)dsiSaveGetResultCode);
+		setBL(0x02035494, (u32)dsiSaveSeek);
+		setBL(0x020354AC, (u32)dsiSaveGetResultCode);
+		setBL(0x020354D0, (u32)dsiSaveWrite);
+		setBL(0x020354F0, (u32)dsiSaveClose);
+		setBL(0x020354F8, (u32)dsiSaveGetResultCode);
+		setBL(0x02035514, (u32)dsiSaveGetResultCode);
+		setBL(0x02035550, (u32)dsiSaveOpenR);
+		setBL(0x02035560, (u32)dsiSaveGetLength);
+		setBL(0x02035594, (u32)dsiSaveRead);
+		setBL(0x020355AC, (u32)dsiSaveClose);
+		setBL(0x020355B8, (u32)dsiSaveGetResultCode);
+		if (!extendedMemory2) {
+			*(u32*)0x0203D544 = 0xE12FFF1E; // bx lr
+		}
+	}
+
+	// 90's Pool (Europe)
+	// Audio does not play on retail consoles
+	else if (strcmp(romTid, "KXPP") == 0) {
+		useSharedFont = twlFontFound;
+		*(u32*)0x0200507C = 0xE1A00000; // nop
+		*(u32*)0x02010F08 = 0xE1A00000; // nop
+		*(u32*)0x02015238 = 0xE1A00000; // nop
+		patchInitDSiWare(0x0201A80C, heapEnd);
+		patchUserSettingsReadDSiWare(0x0201BDF0);
+		*(u32*)0x0201F3C8 = 0xE1A00000; // nop
+		setBL(0x0202AE14, (u32)dsiSaveCreate);
+		setBL(0x0202AE24, (u32)dsiSaveOpen);
+		setBL(0x0202AE40, (u32)dsiSaveGetResultCode);
+		setBL(0x0202AE64, (u32)dsiSaveSeek);
+		setBL(0x0202AE7C, (u32)dsiSaveGetResultCode);
+		setBL(0x0202AEA0, (u32)dsiSaveWrite);
+		setBL(0x0202AEC0, (u32)dsiSaveClose);
+		setBL(0x0202AEC8, (u32)dsiSaveGetResultCode);
+		setBL(0x0202AEE4, (u32)dsiSaveGetResultCode);
+		setBL(0x0202AF20, (u32)dsiSaveOpenR);
+		setBL(0x0202AF30, (u32)dsiSaveGetLength);
+		setBL(0x0202AF64, (u32)dsiSaveRead);
+		setBL(0x0202AF7C, (u32)dsiSaveClose);
+		setBL(0x0202AF88, (u32)dsiSaveGetResultCode);
+		if (!extendedMemory2) {
+			*(u32*)0x02032F10 = 0xE12FFF1E; // bx lr
+		}
+	}
+
 	// 99Bullets (USA)
 	else if (strcmp(romTid, "K99E") == 0) {
 		*(u32*)0x020050E8 = 0xE1A00000; // nop
