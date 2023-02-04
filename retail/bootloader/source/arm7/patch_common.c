@@ -8122,6 +8122,76 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}*/
 	}
 
+	// Legendary Wars: T-Rex Rumble (USA)
+	// Legendary Wars: T-Rex Rumble (Europe, Australia)
+	else if (strcmp(romTid, "KLDE") == 0 || strcmp(romTid, "KLDV") == 0) {
+		*(u32*)0x0200518C = 0xE1A00000; // nop
+		if (!extendedMemory2) {
+			*(u32*)0x02005D64 = 0x4000; // Shrink unknown heap from 0x177000
+		}
+		*(u32*)0x0201B6C8 = 0xE1A00000; // nop
+		tonccpy((u32*)0x0201C24C, dsiSaveGetResultCode, 0xC);
+		*(u32*)0x0201F188 = 0xE1A00000; // nop
+		patchInitDSiWare(0x020269E0, heapEnd);
+		*(u32*)0x02026D6C -= 0x30000;
+		patchUserSettingsReadDSiWare(0x02028098);
+		*(u32*)0x0202B4B0 = 0xE1A00000; // nop
+		if (ndsHeader->gameCode[3] == 'E') {
+			setBL(0x0205DB2C, (u32)dsiSaveOpen);
+			setBL(0x0205DBA8, (u32)dsiSaveCreate);
+			setBL(0x0205DBE4, (u32)dsiSaveGetLength);
+			setBL(0x0205DBF8, (u32)dsiSaveRead);
+			setBL(0x0205DC04, (u32)dsiSaveClose);
+			setBL(0x0205DC74, (u32)dsiSaveOpen);
+			setBL(0x0205DCF4, (u32)dsiSaveCreate);
+			setBL(0x0205DD28, (u32)dsiSaveOpen);
+			setBL(0x0205DD60, (u32)dsiSaveSetLength);
+			setBL(0x0205DD70, (u32)dsiSaveWrite);
+			setBL(0x0205DD7C, (u32)dsiSaveClose);
+			*(u32*)0x0205DDB0 = 0xE3A0000B; // mov r0, #0xB
+		} else {
+			setBL(0x0205DB90, (u32)dsiSaveOpen);
+			setBL(0x0205DC0C, (u32)dsiSaveCreate);
+			setBL(0x0205DC48, (u32)dsiSaveGetLength);
+			setBL(0x0205DC5C, (u32)dsiSaveRead);
+			setBL(0x0205DC68, (u32)dsiSaveClose);
+			setBL(0x0205DCD8, (u32)dsiSaveOpen);
+			setBL(0x0205DD58, (u32)dsiSaveCreate);
+			setBL(0x0205DD8C, (u32)dsiSaveOpen);
+			setBL(0x0205DDC4, (u32)dsiSaveSetLength);
+			setBL(0x0205DDD4, (u32)dsiSaveWrite);
+			setBL(0x0205DDE0, (u32)dsiSaveClose);
+			*(u32*)0x0205DE14 = 0xE3A0000B; // mov r0, #0xB
+		}
+	}
+
+	// ARC Style: Jurassic War (Japan)
+	else if (strcmp(romTid, "KLDJ") == 0) {
+		*(u32*)0x0200518C = 0xE1A00000; // nop
+		if (!extendedMemory2) {
+			*(u32*)0x02005CA8 = 0x4000; // Shrink unknown heap from 0x177000
+		}
+		*(u32*)0x0201B61C = 0xE1A00000; // nop
+		tonccpy((u32*)0x0201C1A0, dsiSaveGetResultCode, 0xC);
+		*(u32*)0x0201F0DC = 0xE1A00000; // nop
+		patchInitDSiWare(0x02026934, heapEnd);
+		*(u32*)0x02026CC0 -= 0x30000;
+		patchUserSettingsReadDSiWare(0x02027FEC);
+		*(u32*)0x0202B404 = 0xE1A00000; // nop
+		setBL(0x0205DCCC, (u32)dsiSaveOpen);
+		setBL(0x0205DD48, (u32)dsiSaveCreate);
+		setBL(0x0205DD84, (u32)dsiSaveGetLength);
+		setBL(0x0205DD98, (u32)dsiSaveRead);
+		setBL(0x0205DDA4, (u32)dsiSaveClose);
+		setBL(0x0205DE14, (u32)dsiSaveOpen);
+		setBL(0x0205DE94, (u32)dsiSaveCreate);
+		setBL(0x0205DEC8, (u32)dsiSaveOpen);
+		setBL(0x0205DF00, (u32)dsiSaveSetLength);
+		setBL(0x0205DF10, (u32)dsiSaveWrite);
+		setBL(0x0205DF1C, (u32)dsiSaveClose);
+		*(u32*)0x0205DF50 = 0xE3A0000B; // mov r0, #0xB
+	}
+
 	// Legends of Exidia (USA)
 	// Requires more than 8MB of RAM
 	/*else if (strcmp(romTid, "KLEE") == 0) {

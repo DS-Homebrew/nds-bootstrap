@@ -4281,6 +4281,57 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02056E58 = 0xE3A00001; // mov r0, #1 (dsiSaveFreeSpaceAvailable)
 	}
 
+	// Legendary Wars: T-Rex Rumble (USA)
+	else if (strcmp(romTid, "KLDE") == 0 && saveOnFlashcard) {
+		tonccpy((u32*)0x0201C24C, dsiSaveGetResultCode, 0xC);
+		setBL(0x0205DB2C, (u32)dsiSaveOpen);
+		setBL(0x0205DBA8, (u32)dsiSaveCreate);
+		setBL(0x0205DBE4, (u32)dsiSaveGetLength);
+		setBL(0x0205DBF8, (u32)dsiSaveRead);
+		setBL(0x0205DC04, (u32)dsiSaveClose);
+		setBL(0x0205DC74, (u32)dsiSaveOpen);
+		setBL(0x0205DCF4, (u32)dsiSaveCreate);
+		setBL(0x0205DD28, (u32)dsiSaveOpen);
+		setBL(0x0205DD60, (u32)dsiSaveSetLength);
+		setBL(0x0205DD70, (u32)dsiSaveWrite);
+		setBL(0x0205DD7C, (u32)dsiSaveClose);
+		*(u32*)0x0205DDB0 = 0xE3A0000B; // mov r0, #0xB
+	}
+
+	// Legendary Wars: T-Rex Rumble (Europe, Australia)
+	else if (strcmp(romTid, "KLDV") == 0 && saveOnFlashcard) {
+		tonccpy((u32*)0x0201C24C, dsiSaveGetResultCode, 0xC);
+		setBL(0x0205DB90, (u32)dsiSaveOpen);
+		setBL(0x0205DC0C, (u32)dsiSaveCreate);
+		setBL(0x0205DC48, (u32)dsiSaveGetLength);
+		setBL(0x0205DC5C, (u32)dsiSaveRead);
+		setBL(0x0205DC68, (u32)dsiSaveClose);
+		setBL(0x0205DCD8, (u32)dsiSaveOpen);
+		setBL(0x0205DD58, (u32)dsiSaveCreate);
+		setBL(0x0205DD8C, (u32)dsiSaveOpen);
+		setBL(0x0205DDC4, (u32)dsiSaveSetLength);
+		setBL(0x0205DDD4, (u32)dsiSaveWrite);
+		setBL(0x0205DDE0, (u32)dsiSaveClose);
+		*(u32*)0x0205DE14 = 0xE3A0000B; // mov r0, #0xB
+	}
+
+	// ARC Style: Jurassic War (Japan)
+	else if (strcmp(romTid, "KLDJ") == 0 && saveOnFlashcard) {
+		tonccpy((u32*)0x0201C1A0, dsiSaveGetResultCode, 0xC);
+		setBL(0x0205DCCC, (u32)dsiSaveOpen);
+		setBL(0x0205DD48, (u32)dsiSaveCreate);
+		setBL(0x0205DD84, (u32)dsiSaveGetLength);
+		setBL(0x0205DD98, (u32)dsiSaveRead);
+		setBL(0x0205DDA4, (u32)dsiSaveClose);
+		setBL(0x0205DE14, (u32)dsiSaveOpen);
+		setBL(0x0205DE94, (u32)dsiSaveCreate);
+		setBL(0x0205DEC8, (u32)dsiSaveOpen);
+		setBL(0x0205DF00, (u32)dsiSaveSetLength);
+		setBL(0x0205DF10, (u32)dsiSaveWrite);
+		setBL(0x0205DF1C, (u32)dsiSaveClose);
+		*(u32*)0x0205DF50 = 0xE3A0000B; // mov r0, #0xB
+	}
+
 	// Libera Wing (Europe)
 	else if (strcmp(romTid, "KLWP") == 0) {
 		if (!twlFontFound) {
