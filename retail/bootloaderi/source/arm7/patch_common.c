@@ -3767,6 +3767,26 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// ARC Style: Furo Jump!! Girutegia Gaiden! (Japan)
+	else if (strcmp(romTid, "KFVJ") == 0 && saveOnFlashcard) {
+		const u32 newFunc = 0x02066100;
+
+		setBL(0x0200D728, newFunc);
+		tonccpy((u32*)newFunc, (u32*)0x0200D878, 0xC0);
+		setBL(newFunc+0x28, (u32)dsiSaveOpen);
+		setBL(newFunc+0x40, (u32)dsiSaveGetLength);
+		setBL(newFunc+0x48, 0x020052E8);
+		setBL(newFunc+0x5C, (u32)dsiSaveRead);
+		setBL(newFunc+0x78, 0x02005358);
+		setBL(newFunc+0x8C, (u32)dsiSaveClose);
+		setBL(newFunc+0xA4, 0x02005358);
+		setBL(0x0200D960, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+		setBL(0x0200D970, (u32)dsiSaveOpen);
+		setBL(0x0200D990, (u32)dsiSaveWrite);
+		setBL(0x0200D9A8, (u32)dsiSaveWrite);
+		tonccpy((u32*)0x02065618, dsiSaveGetResultCode, 0xC);
+	}
+
 	// Fuuu! Dairoujou Kai (Japan)
 	else if (strcmp(romTid, "K6JJ") == 0 && saveOnFlashcard) {
 		setBL(0x02045468, (u32)dsiSaveOpen);
