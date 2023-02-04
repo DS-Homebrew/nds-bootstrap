@@ -1630,7 +1630,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			patchInitDSiWare(0x02069B80, heapEnd);
 			*(u32*)0x0206DCD8 = 0xE1A00000; // nop
 			*(u32*)0x0207050C = 0xE1A00000; // nop
-		} else if (ndsHeader->gameCode[3] == 'P') {
+		} else {
 			setBL(0x02031870, (u32)dsiSaveOpen);
 			setBL(0x02031888, (u32)dsiSaveGetLength);
 			setBL(0x02031898, (u32)dsiSaveSeek);
@@ -1698,7 +1698,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			patchInitDSiWare(0x02069CC4, heapEnd);
 			*(u32*)0x0206DE34 = 0xE1A00000; // nop
 			*(u32*)0x02070668 = 0xE1A00000; // nop
-		} else if (ndsHeader->gameCode[3] == 'P') {
+		} else {
 			setBL(0x02030324, (u32)dsiSaveOpen);
 			setBL(0x0203033C, (u32)dsiSaveGetLength);
 			setBL(0x0203034C, (u32)dsiSaveSeek);
@@ -1796,6 +1796,76 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0206EEFC = 0xE12FFF1E; // bx lr
 		*(u32*)0x02072668 = 0xE1A00000; // nop
 	}*/
+
+	// Abyss (USA)
+	// Abyss (Europe)
+	// Requires 8MB of RAM
+	else if ((strcmp(romTid, "KXGE") == 0 || strcmp(romTid, "KXGP") == 0) /*&& extendedMemory2*/) {
+		*(u32*)0x020050E8 = 0xE1A00000; // nop
+		*(u32*)0x0200510C = 0xE1A00000; // nop
+		*(u32*)0x02005110 = 0xE1A00000; // nop
+		*(u32*)0x02005114 = 0xE1A00000; // nop
+		*(u32*)0x02005118 = 0xE1A00000; // nop
+		*(u32*)0x0200511C = 0xE1A00000; // nop
+		*(u32*)0x02005138 = 0xE1A00000; // nop
+		*(u32*)0x0200514C = 0xE1A00000; // nop
+		*(u32*)0x02005150 = 0xE1A00000; // nop
+		*(u32*)0x02005154 = 0xE1A00000; // nop
+		*(u32*)0x02005158 = 0xE1A00000; // nop
+		*(u32*)0x0200515C = 0xE1A00000; // nop
+		*(u32*)0x02010CE8 = 0xE1A00000; // nop
+		*(u32*)0x02010D1C = 0xE1A00000; // nop
+		setBL(0x02012BBC, (u32)dsiSaveCreate);
+		*(u32*)0x02012BD0 = 0xE1A00000; // nop
+		*(u32*)0x02012BDC = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02012C6C = 0xE1A00000; // nop
+		*(u32*)0x02012C70 = 0xE1A00000; // nop
+		*(u32*)0x02012C74 = 0xE1A00000; // nop
+		setBL(0x02012C80, (u32)dsiSaveGetResultCode);
+		*(u32*)0x02012C9C = 0xE1A00000; // nop
+		*(u32*)0x02012CA8 = 0xE3A00001; // mov r0, #1
+		if (ndsHeader->gameCode[3] == 'E') {
+			setBL(0x020318E0, (u32)dsiSaveOpen);
+			setBL(0x020318F8, (u32)dsiSaveGetLength);
+			setBL(0x02031908, (u32)dsiSaveSeek);
+			setBL(0x02031918, (u32)dsiSaveWrite);
+			setBL(0x02031920, (u32)dsiSaveClose);
+			setBL(0x02031990, (u32)dsiSaveOpen);
+			setBL(0x020319A8, (u32)dsiSaveGetLength);
+			setBL(0x020319BC, (u32)dsiSaveSeek);
+			setBL(0x020319CC, (u32)dsiSaveRead);
+			setBL(0x020319D4, (u32)dsiSaveClose);
+			setBL(0x02031A4C, (u32)dsiSaveCreate);
+			setBL(0x02031A78, (u32)dsiSaveOpen);
+			setBL(0x02031AB4, (u32)dsiSaveWrite);
+			setBL(0x02031AC4, (u32)dsiSaveClose);
+			*(u32*)0x020618A4 = 0xE1A00000; // nop
+			patchInitDSiWare(0x02069F94, heapEnd);
+			*(u32*)0x0206A320 = 0x02252860;
+			*(u32*)0x0206E0EC = 0xE1A00000; // nop
+			*(u32*)0x02070920 = 0xE1A00000; // nop
+		} else {
+			setBL(0x02031930, (u32)dsiSaveOpen);
+			setBL(0x02031948, (u32)dsiSaveGetLength);
+			setBL(0x02031958, (u32)dsiSaveSeek);
+			setBL(0x02031968, (u32)dsiSaveWrite);
+			setBL(0x02031970, (u32)dsiSaveClose);
+			setBL(0x020319E0, (u32)dsiSaveOpen);
+			setBL(0x020319F8, (u32)dsiSaveGetLength);
+			setBL(0x02031A0C, (u32)dsiSaveSeek);
+			setBL(0x02031A1C, (u32)dsiSaveRead);
+			setBL(0x02031A24, (u32)dsiSaveClose);
+			setBL(0x02031A9C, (u32)dsiSaveCreate);
+			setBL(0x02031AC8, (u32)dsiSaveOpen);
+			setBL(0x02031B04, (u32)dsiSaveWrite);
+			setBL(0x02031B14, (u32)dsiSaveClose);
+			*(u32*)0x020618F4 = 0xE1A00000; // nop
+			patchInitDSiWare(0x02069FE4, heapEnd);
+			*(u32*)0x0206A370 = 0x02252920;
+			*(u32*)0x0206E13C = 0xE1A00000; // nop
+			*(u32*)0x02070970 = 0xE1A00000; // nop
+		}
+	}
 
 	// Ace Mathician (USA)
 	else if (strcmp(romTid, "KQKE") == 0) {

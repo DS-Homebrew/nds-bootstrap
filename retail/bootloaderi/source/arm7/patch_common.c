@@ -1056,7 +1056,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBL(0x020319B8, (u32)dsiSaveOpen);
 			setBL(0x020319F4, (u32)dsiSaveWrite);
 			setBL(0x02031A04, (u32)dsiSaveClose);
-		} else if (ndsHeader->gameCode[3] == 'P') {
+		} else {
 			setBL(0x02031870, (u32)dsiSaveOpen);
 			setBL(0x02031888, (u32)dsiSaveGetLength);
 			setBL(0x02031898, (u32)dsiSaveSeek);
@@ -1096,7 +1096,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBL(0x0203046C, (u32)dsiSaveOpen);
 			setBL(0x020304A8, (u32)dsiSaveWrite);
 			setBL(0x020304B8, (u32)dsiSaveClose);
-		} else if (ndsHeader->gameCode[3] == 'P') {
+		} else {
 			setBL(0x02030324, (u32)dsiSaveOpen);
 			setBL(0x0203033C, (u32)dsiSaveGetLength);
 			setBL(0x0203034C, (u32)dsiSaveSeek);
@@ -1175,6 +1175,46 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			tonccpy((char*)0x0209D220, dataPub, strlen(dataPub));
 			toncset((char*)0x0209D234, 0, 9);
 			tonccpy((char*)0x0209D234, dataPub, strlen(dataPub));
+		}
+	}
+
+	// Abyss (USA)
+	// Abyss (Europe)
+	else if ((strcmp(romTid, "KXGE") == 0 || strcmp(romTid, "KXGP") == 0)&& saveOnFlashcard) {
+		setBL(0x02012BBC, (u32)dsiSaveCreate);
+		*(u32*)0x02012BDC = 0xE3A00001; // mov r0, #1
+		setBL(0x02012C80, (u32)dsiSaveGetResultCode);
+		*(u32*)0x02012CA8 = 0xE3A00001; // mov r0, #1
+		if (ndsHeader->gameCode[3] == 'E') {
+			setBL(0x020318E0, (u32)dsiSaveOpen);
+			setBL(0x020318F8, (u32)dsiSaveGetLength);
+			setBL(0x02031908, (u32)dsiSaveSeek);
+			setBL(0x02031918, (u32)dsiSaveWrite);
+			setBL(0x02031920, (u32)dsiSaveClose);
+			setBL(0x02031990, (u32)dsiSaveOpen);
+			setBL(0x020319A8, (u32)dsiSaveGetLength);
+			setBL(0x020319BC, (u32)dsiSaveSeek);
+			setBL(0x020319CC, (u32)dsiSaveRead);
+			setBL(0x020319D4, (u32)dsiSaveClose);
+			setBL(0x02031A4C, (u32)dsiSaveCreate);
+			setBL(0x02031A78, (u32)dsiSaveOpen);
+			setBL(0x02031AB4, (u32)dsiSaveWrite);
+			setBL(0x02031AC4, (u32)dsiSaveClose);
+		} else {
+			setBL(0x02031930, (u32)dsiSaveOpen);
+			setBL(0x02031948, (u32)dsiSaveGetLength);
+			setBL(0x02031958, (u32)dsiSaveSeek);
+			setBL(0x02031968, (u32)dsiSaveWrite);
+			setBL(0x02031970, (u32)dsiSaveClose);
+			setBL(0x020319E0, (u32)dsiSaveOpen);
+			setBL(0x020319F8, (u32)dsiSaveGetLength);
+			setBL(0x02031A0C, (u32)dsiSaveSeek);
+			setBL(0x02031A1C, (u32)dsiSaveRead);
+			setBL(0x02031A24, (u32)dsiSaveClose);
+			setBL(0x02031A9C, (u32)dsiSaveCreate);
+			setBL(0x02031AC8, (u32)dsiSaveOpen);
+			setBL(0x02031B04, (u32)dsiSaveWrite);
+			setBL(0x02031B14, (u32)dsiSaveClose);
 		}
 	}
 
