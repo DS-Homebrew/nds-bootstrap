@@ -7442,7 +7442,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Go! Go! Kokopolo (USA)
 	// Go! Go! Kokopolo (Europe)
-	// Only one sound effect plays at a time on retail consoles
 	else if (strcmp(romTid, "K3GE") == 0 || strcmp(romTid, "K3GP") == 0) {
 		// extern u32* goGoKokopoloHeapAddrPtr;
 		const u32 readCodeCopy = 0x02013CF4;
@@ -7453,12 +7452,12 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 		if (!extendedMemory2) {
 			extern u32* goGoKokopoloHeapAlloc;
-			tonccpy((u32*)0x0201DB58, (u32*)goGoKokopoloHeapAlloc, 0x34);
+			tonccpy((u32*)0x0201DB58, (u32*)goGoKokopoloHeapAlloc, 0xC);
 		}
 
 		*(u32*)0x02012738 = 0xE1A00000; // nop
 		*(u32*)0x02015C98 = 0xE1A00000; // nop
-		patchInitDSiWare(0x0201BF88, extendedMemory2 ? heapEnd : 0x023A8000);
+		patchInitDSiWare(0x0201BF88, heapEnd);
 		*(u32*)0x0201C314 -= 0x30000;
 		patchUserSettingsReadDSiWare(0x0201D604);
 		*(u32*)0x02021190 = 0xE1A00000; // nop
@@ -7486,7 +7485,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 				*(u32*)0x0208EB74 = 0xE3A00000; // mov r0, #0 (Skip Manual screen)
 
 				if (!extendedMemory2) {
-					setBL(0x020B5EC4, 0x0201DB58);
+					setBL(0x020B5EA4, 0x0201DB58);
 				}
 
 				setBL(0x020BCCF4, (u32)dsiSaveCreate);
@@ -7516,7 +7515,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 				*(u32*)0x0208EC38 = 0xE3A00000; // mov r0, #0 (Skip Manual screen)
 
 				if (!extendedMemory2) {
-					setBL(0x020B5FCC, 0x0201DB58);
+					setBL(0x020B5FAC, 0x0201DB58);
 				}
 
 				setBL(0x020BCE18, (u32)dsiSaveCreate);
@@ -7547,7 +7546,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			*(u32*)0x0208EE9C = 0xE3A00000; // mov r0, #0 (Skip Manual screen)
 
 			if (!extendedMemory2) {
-				setBL(0x020B6104, 0x0201DB58);
+				setBL(0x020B60E4, 0x0201DB58);
 			}
 
 			setBL(0x020BCF50, (u32)dsiSaveCreate);
@@ -7561,16 +7560,15 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Go! Go! Kokopolo (Japan)
-	// Only one sound effect plays at a time on retail consoles
 	else if (strcmp(romTid, "K3GJ") == 0) {
 		if (!extendedMemory2) {
 			extern u32* goGoKokopoloHeapAlloc;
-			tonccpy((u32*)0x0201DB88, (u32*)goGoKokopoloHeapAlloc, 0x34);
+			tonccpy((u32*)0x0201DB88, (u32*)goGoKokopoloHeapAlloc, 0xC);
 		}
 
 		*(u32*)0x02012768 = 0xE1A00000; // nop
 		*(u32*)0x02015CC8 = 0xE1A00000; // nop
-		patchInitDSiWare(0x0201BFB8, extendedMemory2 ? heapEnd : 0x023A8000);
+		patchInitDSiWare(0x0201BFB8, heapEnd);
 		*(u32*)0x0201C344 -= 0x30000;
 		patchUserSettingsReadDSiWare(0x0201D634);
 		*(u32*)0x020211C0 = 0xE1A00000; // nop
@@ -7598,7 +7596,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0208EC74 = 0xE3A00000; // mov r0, #0 (Skip Manual screen)
 
 		if (!extendedMemory2) {
-			setBL(0x020B60F0, 0x0201DB88);
+			setBL(0x020B60D0, 0x0201DB88);
 		}
 
 		setBL(0x020BCF3C, (u32)dsiSaveCreate);
