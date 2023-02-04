@@ -10,6 +10,8 @@
 	.global fourSwHeapAddrPtr
 	@.global gate18HeapAlloc
 	@.global gate18HeapAddrPtr
+	.global goGoKokopoloHeapAlloc
+	@.global goGoKokopoloHeapAddrPtr
 	@.global mvdk3HeapAlloc
 	.global nintCdwnCalHeapAlloc
 	.global nintCdwnCalHeapAddrPtr
@@ -46,6 +48,10 @@ fourSwHeapAddrPtr:
 @	.word gate18HeapAllocFunc
 @gate18HeapAddrPtr:
 @	.word gate18HeapAddr
+goGoKokopoloHeapAlloc:
+	.word goGoKokopoloHeapAllocFunc
+@goGoKokopoloHeapAddrPtr:
+@	.word goGoKokopoloHeapAddr
 @mvdk3HeapAlloc:
 @	.word mvdk3HeapAllocFunc
 nintCdwnCalHeapAlloc:
@@ -344,6 +350,33 @@ fourSwHeapAddr:
 @gate18HeapAddr:
 @.word	0x09000000 @ Offset of fontGBK.bin
 @.pool
+@---------------------------------------------------------------------------------
+
+@---------------------------------------------------------------------------------
+goGoKokopoloHeapAllocFunc:
+@---------------------------------------------------------------------------------
+	mov r0, #0x02380000
+	add r0, #0x28000
+	bx lr
+
+@	stmfd   sp!, {r6-r7,lr}
+@	mov r7, #0
+
+@	ldr r6, goGoKokopoloHeapAddr
+@	cmp r9, #0
+@	moveq r0, r6
+@	ldmeqfd   sp!, {r6-r7,pc}
+
+@goGoKokopoloHeapAllocLoop:
+@	add r6, r0
+@	add r7, #1
+@	cmp r9, r7
+@	bne goGoKokopoloHeapAllocLoop
+
+@	mov r0, r6
+@	ldmfd   sp!, {r6-r7,pc}
+@goGoKokopoloHeapAddr:
+@.word	0x09000000
 @---------------------------------------------------------------------------------
 
 @---------------------------------------------------------------------------------
