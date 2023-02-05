@@ -5529,6 +5529,38 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02044810, (u32)dsiSaveClose);
 	}
 
+	// Dancing Academy (Europe)
+	else if (strcmp(romTid, "KINP") == 0) {
+		*(u32*)0x02005098 = 0xE1A00000; // nop
+		*(u32*)0x020050B4 = 0xE1A00000; // nop
+		*(u32*)0x020050EC = 0xE1A00000; // nop
+		*(u32*)0x02013474 = 0xE1A00000; // nop
+		*(u32*)0x020171F0 = 0xE1A00000; // nop
+		patchInitDSiWare(0x0201E004, heapEnd);
+		patchUserSettingsReadDSiWare(0x0201F7D0);
+		*(u32*)0x02022AE0 = 0xE1A00000; // nop
+		setBL(0x0208D228, (u32)dsiSaveCreate);
+		setBL(0x0208D238, (u32)dsiSaveOpen);
+		setBL(0x0208D248, (u32)dsiSaveGetResultCode);
+		setBL(0x0208D284, (u32)dsiSaveSetLength);
+		setBL(0x0208D294, (u32)dsiSaveWrite);
+		setBL(0x0208D29C, (u32)dsiSaveClose);
+		setBL(0x0208D2D8, (u32)dsiSaveOpen);
+		setBL(0x0208D2E8, (u32)dsiSaveGetResultCode);
+		setBL(0x0208D300, (u32)dsiSaveGetLength);
+		setBL(0x0208D310, (u32)dsiSaveRead);
+		setBL(0x0208D318, (u32)dsiSaveClose);
+		setBL(0x0208D350, (u32)dsiSaveOpen);
+		setBL(0x0208D360, (u32)dsiSaveGetResultCode);
+		setBL(0x0208D378, (u32)dsiSaveClose);
+
+		// Skip Manual screen (Not working)
+		// *(u32*)0x0208CFD8 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		// *(u32*)0x0208D06C = 0xE1A00000; // nop
+		// *(u32*)0x0208D074 = 0xE1A00000; // nop
+		// *(u32*)0x0208D080 = 0xE1A00000; // nop
+	}
+
 	// Dark Void Zero (USA)
 	// Dark Void Zero (Europe, Australia)
 	else if (strcmp(romTid, "KDVE") == 0 || strcmp(romTid, "KDVV") == 0) {
