@@ -5774,6 +5774,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Paul's Monster Adventure (USA)
 	else if (strcmp(romTid, "KP9E") == 0 && saveOnFlashcard) {
+		tonccpy((u32*)0x020143AC, dsiSaveGetResultCode, 0xC);
 		setBL(0x02047940, (u32)dsiSaveOpen);
 		setBL(0x02047958, (u32)dsiSaveCreate);
 		setBL(0x02047970, (u32)dsiSaveOpen);
@@ -5794,6 +5795,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Paul's Shooting Adventure (USA)
 	else if (strcmp(romTid, "KPJE") == 0 && saveOnFlashcard) {
+		tonccpy((u32*)0x02010B18, dsiSaveGetResultCode, 0xC);
 		// *(u32*)0x0203A20C = 0xE12FFF1E; // bx lr
 		setBL(0x02048524, (u32)dsiSaveOpen);
 		setBL(0x0204853C, (u32)dsiSaveCreate);
@@ -5813,8 +5815,30 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0204877C, (u32)dsiSaveClose);
 	}
 
+	// Adventure Kid: Poru no Bouken (Japan)
+	else if (strcmp(romTid, "KPJJ") == 0 && saveOnFlashcard) {
+		tonccpy((u32*)0x02010AF8, dsiSaveGetResultCode, 0xC);
+		setBL(0x02037328, (u32)dsiSaveOpen);
+		setBL(0x02037340, (u32)dsiSaveCreate);
+		setBL(0x02037358, (u32)dsiSaveOpen);
+		setBL(0x02037378, (u32)dsiSaveWrite);
+		setBL(0x02037388, (u32)dsiSaveClose);
+		setBL(0x020373A4, (u32)dsiSaveClose);
+		setBL(0x020373E0, (u32)dsiSaveOpen);
+		setBL(0x02037400, (u32)dsiSaveRead);
+		setBL(0x02037410, (u32)dsiSaveClose);
+		setBL(0x0203742C, (u32)dsiSaveClose);
+		setBL(0x020374DC, (u32)dsiSaveCreate);
+		setBL(0x020374EC, (u32)dsiSaveOpen);
+		setBL(0x02037518, (u32)dsiSaveClose);
+		setBL(0x02037544, (u32)dsiSaveCreate);
+		setBL(0x02037554, (u32)dsiSaveOpen);
+		setBL(0x02037580, (u32)dsiSaveClose);
+	}
+
 	// Paul's Shooting Adventure 2 (USA)
 	else if (strcmp(romTid, "KUSE") == 0 && saveOnFlashcard) {
+		tonccpy((u32*)0x02016B8C, dsiSaveGetResultCode, 0xC);
 		setBL(0x0202EE44, (u32)dsiSaveOpen);
 		setBL(0x0202EE5C, (u32)dsiSaveCreate); // dsiSaveCreateAuto
 		setBL(0x0202EE74, (u32)dsiSaveOpen);
@@ -5832,6 +5856,27 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0202F09C, (u32)dsiSaveOpen);
 		setBL(0x0202F0C8, (u32)dsiSaveClose);
 		// *(u32*)0x0203A730 = 0xE3A00001; // mov r0, #1
+	}
+
+	// Adventure Kid 2: Poru no Dai Bouken (Japan)
+	else if (strcmp(romTid, "KUSJ") == 0 && saveOnFlashcard) {
+		tonccpy((u32*)0x02016B8C, dsiSaveGetResultCode, 0xC);
+		setBL(0x02030C88, (u32)dsiSaveOpen);
+		setBL(0x02030CA0, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+		setBL(0x02030CB8, (u32)dsiSaveOpen);
+		setBL(0x02030CD8, (u32)dsiSaveWrite);
+		setBL(0x02030CE8, (u32)dsiSaveClose);
+		setBL(0x02030CF8, (u32)dsiSaveClose);
+		setBL(0x02030D38, (u32)dsiSaveOpen);
+		setBL(0x02030D5C, (u32)dsiSaveRead);
+		setBL(0x02030D6C, (u32)dsiSaveClose);
+		setBL(0x02030D7C, (u32)dsiSaveClose);
+		setBL(0x02030E5C, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+		setBL(0x02030E6C, (u32)dsiSaveOpen);
+		setBL(0x02030E98, (u32)dsiSaveClose);
+		setBL(0x02030ED0, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+		setBL(0x02030EE0, (u32)dsiSaveOpen);
+		setBL(0x02030F0C, (u32)dsiSaveClose);
 	}
 
 	// Peg Solitaire (USA)

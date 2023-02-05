@@ -11048,6 +11048,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Paul's Monster Adventure (USA)
 	else if (strcmp(romTid, "KP9E") == 0) {
 		*(u32*)0x02013828 = 0xE1A00000; // nop
+		tonccpy((u32*)0x020143AC, dsiSaveGetResultCode, 0xC);
 		*(u32*)0x02016F48 = 0xE1A00000; // nop
 		patchInitDSiWare(0x0201E654, heapEnd);
 		patchUserSettingsReadDSiWare(0x0201FB30);
@@ -11073,6 +11074,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Paul's Shooting Adventure (USA)
 	else if (strcmp(romTid, "KPJE") == 0) {
 		*(u32*)0x0200FF94 = 0xE1A00000; // nop
+		tonccpy((u32*)0x02010B18, dsiSaveGetResultCode, 0xC);
 		*(u32*)0x0201362C = 0xE1A00000; // nop
 		patchInitDSiWare(0x02019C28, heapEnd);
 		patchUserSettingsReadDSiWare(0x0201B104);
@@ -11096,36 +11098,83 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0204877C, (u32)dsiSaveClose);
 	}
 
+	// Adventure Kid: Poru no Bouken (Japan)
+	else if (strcmp(romTid, "KPJJ") == 0) {
+		*(u32*)0x0200FF74 = 0xE1A00000; // nop
+		tonccpy((u32*)0x02010AF8, dsiSaveGetResultCode, 0xC);
+		*(u32*)0x0201360C = 0xE1A00000; // nop
+		patchInitDSiWare(0x02019C08, heapEnd);
+		patchUserSettingsReadDSiWare(0x0201B0E4);
+		*(u32*)0x0201E3EC = 0xE1A00000; // nop
+		setBL(0x02037328, (u32)dsiSaveOpen);
+		setBL(0x02037340, (u32)dsiSaveCreate);
+		setBL(0x02037358, (u32)dsiSaveOpen);
+		setBL(0x02037378, (u32)dsiSaveWrite);
+		setBL(0x02037388, (u32)dsiSaveClose);
+		setBL(0x020373A4, (u32)dsiSaveClose);
+		setBL(0x020373E0, (u32)dsiSaveOpen);
+		setBL(0x02037400, (u32)dsiSaveRead);
+		setBL(0x02037410, (u32)dsiSaveClose);
+		setBL(0x0203742C, (u32)dsiSaveClose);
+		setBL(0x020374DC, (u32)dsiSaveCreate);
+		setBL(0x020374EC, (u32)dsiSaveOpen);
+		setBL(0x02037518, (u32)dsiSaveClose);
+		setBL(0x02037544, (u32)dsiSaveCreate);
+		setBL(0x02037554, (u32)dsiSaveOpen);
+		setBL(0x02037580, (u32)dsiSaveClose);
+	}
+
 	// Paul's Shooting Adventure 2 (USA)
-	else if (strcmp(romTid, "KUSE") == 0) {
+	// Adventure Kid 2: Poru no Dai Bouken (Japan)
+	else if (strcmp(romTid, "KUSE") == 0 || strcmp(romTid, "KUSJ") == 0) {
 		*(u32*)0x02016008 = 0xE1A00000; // nop
+		tonccpy((u32*)0x02016B8C, dsiSaveGetResultCode, 0xC);
 		*(u32*)0x02019E58 = 0xE1A00000; // nop
 		patchInitDSiWare(0x020217E8, heapEnd);
 		patchUserSettingsReadDSiWare(0x02022E98);
-		*(u32*)0x02022EB4 = 0xE3A00001; // mov r0, #1
-		*(u32*)0x02022EB8 = 0xE12FFF1E; // bx lr
-		*(u32*)0x02022EC0 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x02022EC4 = 0xE12FFF1E; // bx lr
 		*(u32*)0x02026298 = 0xE1A00000; // nop
-		*(u32*)0x0202A968 = 0xE1A00000; // nop
-		*(u32*)0x0202A980 = 0xE1A00000; // nop
-		setBL(0x0202EE44, (u32)dsiSaveOpen);
-		setBL(0x0202EE5C, (u32)dsiSaveCreate); // dsiSaveCreateAuto
-		setBL(0x0202EE74, (u32)dsiSaveOpen);
-		setBL(0x0202EE94, (u32)dsiSaveWrite);
-		setBL(0x0202EEA4, (u32)dsiSaveClose);
-		setBL(0x0202EEB4, (u32)dsiSaveClose);
-		setBL(0x0202EEF4, (u32)dsiSaveOpen);
-		setBL(0x0202EF18, (u32)dsiSaveRead);
-		setBL(0x0202EF28, (u32)dsiSaveClose);
-		setBL(0x0202EF38, (u32)dsiSaveClose);
-		setBL(0x0202F018, (u32)dsiSaveCreate); // dsiSaveCreateAuto
-		setBL(0x0202F028, (u32)dsiSaveOpen);
-		setBL(0x0202F054, (u32)dsiSaveClose);
-		setBL(0x0202F08C, (u32)dsiSaveCreate); // dsiSaveCreateAuto
-		setBL(0x0202F09C, (u32)dsiSaveOpen);
-		setBL(0x0202F0C8, (u32)dsiSaveClose);
-		// *(u32*)0x0203A730 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02028634 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02028638 = 0xE12FFF1E; // bx lr
+		if (ndsHeader->gameCode[3] == 'E') {
+			*(u32*)0x0202A968 = 0xE1A00000; // nop
+			*(u32*)0x0202A980 = 0xE1A00000; // nop
+			setBL(0x0202EE44, (u32)dsiSaveOpen);
+			setBL(0x0202EE5C, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+			setBL(0x0202EE74, (u32)dsiSaveOpen);
+			setBL(0x0202EE94, (u32)dsiSaveWrite);
+			setBL(0x0202EEA4, (u32)dsiSaveClose);
+			setBL(0x0202EEB4, (u32)dsiSaveClose);
+			setBL(0x0202EEF4, (u32)dsiSaveOpen);
+			setBL(0x0202EF18, (u32)dsiSaveRead);
+			setBL(0x0202EF28, (u32)dsiSaveClose);
+			setBL(0x0202EF38, (u32)dsiSaveClose);
+			setBL(0x0202F018, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+			setBL(0x0202F028, (u32)dsiSaveOpen);
+			setBL(0x0202F054, (u32)dsiSaveClose);
+			setBL(0x0202F08C, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+			setBL(0x0202F09C, (u32)dsiSaveOpen);
+			setBL(0x0202F0C8, (u32)dsiSaveClose);
+			// *(u32*)0x0203A730 = 0xE3A00001; // mov r0, #1
+		} else {
+			*(u32*)0x0202C7AC = 0xE1A00000; // nop
+			*(u32*)0x0202C7C4 = 0xE1A00000; // nop
+			setBL(0x02030C88, (u32)dsiSaveOpen);
+			setBL(0x02030CA0, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+			setBL(0x02030CB8, (u32)dsiSaveOpen);
+			setBL(0x02030CD8, (u32)dsiSaveWrite);
+			setBL(0x02030CE8, (u32)dsiSaveClose);
+			setBL(0x02030CF8, (u32)dsiSaveClose);
+			setBL(0x02030D38, (u32)dsiSaveOpen);
+			setBL(0x02030D5C, (u32)dsiSaveRead);
+			setBL(0x02030D6C, (u32)dsiSaveClose);
+			setBL(0x02030D7C, (u32)dsiSaveClose);
+			setBL(0x02030E5C, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+			setBL(0x02030E6C, (u32)dsiSaveOpen);
+			setBL(0x02030E98, (u32)dsiSaveClose);
+			setBL(0x02030ED0, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+			setBL(0x02030EE0, (u32)dsiSaveOpen);
+			setBL(0x02030F0C, (u32)dsiSaveClose);
+		}
 	}
 
 	// Peg Solitaire (USA)
