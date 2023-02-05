@@ -8427,6 +8427,60 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// Whack-A-Friend (USA)
+	else if (strcmp(romTid, "KWQE") == 0 && saveOnFlashcard) {
+		tonccpy((u32*)0x02015134, dsiSaveGetResultCode, 0xC);
+		for (int i = 0; i < 8; i++) {
+			u32* offset = (u32*)0x02040E3C;
+			offset[i] = 0xE1A00000;
+		}
+		*(u32*)0x02040E60 = 0xE3A01001; // mov r1, #1
+		*(u32*)0x02041E50 = 0xE1A00000; // nop (Disable custom photo support, as there's a separate file for it)
+		setBL(0x0204B4EC, (u32)dsiSaveOpen);
+		setBL(0x0204B504, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+		setBL(0x0204B51C, (u32)dsiSaveOpen);
+		setBL(0x0204B53C, (u32)dsiSaveWrite);
+		setBL(0x0204B54C, (u32)dsiSaveClose);
+		setBL(0x0204B55C, (u32)dsiSaveClose);
+		setBL(0x0204B59C, (u32)dsiSaveOpen);
+		setBL(0x0204B5C0, (u32)dsiSaveRead);
+		setBL(0x0204B5D0, (u32)dsiSaveClose);
+		setBL(0x0204B5E0, (u32)dsiSaveClose);
+		setBL(0x0204B6C0, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+		setBL(0x0204B6D0, (u32)dsiSaveOpen);
+		setBL(0x0204B6FC, (u32)dsiSaveClose);
+		setBL(0x0204B734, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+		setBL(0x0204B744, (u32)dsiSaveOpen);
+		setBL(0x0204B770, (u32)dsiSaveClose);
+	}
+
+	// Pashatto Bashitto: Whack a Friend (Japan)
+	else if (strcmp(romTid, "KWQJ") == 0 && saveOnFlashcard) {
+		tonccpy((u32*)0x02015134, dsiSaveGetResultCode, 0xC);
+		for (int i = 0; i < 8; i++) {
+			u32* offset = (u32*)0x02026A50;
+			offset[i] = 0xE1A00000;
+		}
+		*(u32*)0x02026A74 = 0xE3A01001; // mov r1, #1
+		*(u32*)0x0202CD70 = 0xE1A00000; // nop (Disable custom photo support, as there's a separate file for it)
+		setBL(0x02031580, (u32)dsiSaveOpen);
+		setBL(0x02031598, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+		setBL(0x020315B0, (u32)dsiSaveOpen);
+		setBL(0x020315D0, (u32)dsiSaveWrite);
+		setBL(0x020315E0, (u32)dsiSaveClose);
+		setBL(0x020315F0, (u32)dsiSaveClose);
+		setBL(0x02031630, (u32)dsiSaveOpen);
+		setBL(0x02031654, (u32)dsiSaveRead);
+		setBL(0x02031664, (u32)dsiSaveClose);
+		setBL(0x02031674, (u32)dsiSaveClose);
+		setBL(0x02031754, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+		setBL(0x02031764, (u32)dsiSaveOpen);
+		setBL(0x02031790, (u32)dsiSaveClose);
+		setBL(0x020317C8, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+		setBL(0x020317D8, (u32)dsiSaveOpen);
+		setBL(0x02031804, (u32)dsiSaveClose);
+	}
+
 	// White-Water Domo (USA)
 	else if (strcmp(romTid, "KDWE") == 0) {
 		if (saveOnFlashcard) {

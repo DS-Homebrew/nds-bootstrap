@@ -15111,6 +15111,69 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0207A1A4 = 0xE1A00000; // nop
 	}
 
+	// Whack-A-Friend (USA)
+	// Pashatto Bashitto: Whack a Friend (Japan)
+	// DSi Camera is disabled due to DS mode limitations
+	else if (strcmp(romTid, "KWQE") == 0 || strcmp(romTid, "KWQJ") == 0) {
+		*(u32*)0x020145B0 = 0xE1A00000; // nop
+		tonccpy((u32*)0x02015134, dsiSaveGetResultCode, 0xC);
+		*(u32*)0x0201837C = 0xE1A00000; // nop
+		patchInitDSiWare(0x0201FD04, heapEnd);
+		patchUserSettingsReadDSiWare(0x02021428);
+		*(u32*)0x02024748 = 0xE1A00000; // nop
+		if (ndsHeader->gameCode[3] == 'E') {
+			for (int i = 0; i < 8; i++) {
+				u32* offset = (u32*)0x02040E3C;
+				offset[i] = 0xE1A00000;
+			}
+			*(u32*)0x02040E60 = 0xE3A01001; // mov r1, #1
+			*(u32*)0x02041E50 = 0xE1A00000; // nop (Disable custom photo support)
+			*(u32*)0x0204802C = 0xE1A00000; // nop
+			*(u32*)0x02048044 = 0xE1A00000; // nop
+			setBL(0x0204B4EC, (u32)dsiSaveOpen);
+			setBL(0x0204B504, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+			setBL(0x0204B51C, (u32)dsiSaveOpen);
+			setBL(0x0204B53C, (u32)dsiSaveWrite);
+			setBL(0x0204B54C, (u32)dsiSaveClose);
+			setBL(0x0204B55C, (u32)dsiSaveClose);
+			setBL(0x0204B59C, (u32)dsiSaveOpen);
+			setBL(0x0204B5C0, (u32)dsiSaveRead);
+			setBL(0x0204B5D0, (u32)dsiSaveClose);
+			setBL(0x0204B5E0, (u32)dsiSaveClose);
+			setBL(0x0204B6C0, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+			setBL(0x0204B6D0, (u32)dsiSaveOpen);
+			setBL(0x0204B6FC, (u32)dsiSaveClose);
+			setBL(0x0204B734, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+			setBL(0x0204B744, (u32)dsiSaveOpen);
+			setBL(0x0204B770, (u32)dsiSaveClose);
+		} else {
+			for (int i = 0; i < 8; i++) {
+				u32* offset = (u32*)0x02026A50;
+				offset[i] = 0xE1A00000;
+			}
+			*(u32*)0x02026A74 = 0xE3A01001; // mov r1, #1
+			*(u32*)0x0202CD70 = 0xE1A00000; // nop (Disable custom photo support)
+			*(u32*)0x0202E0C0 = 0xE1A00000; // nop
+			*(u32*)0x0202E0D8 = 0xE1A00000; // nop
+			setBL(0x02031580, (u32)dsiSaveOpen);
+			setBL(0x02031598, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+			setBL(0x020315B0, (u32)dsiSaveOpen);
+			setBL(0x020315D0, (u32)dsiSaveWrite);
+			setBL(0x020315E0, (u32)dsiSaveClose);
+			setBL(0x020315F0, (u32)dsiSaveClose);
+			setBL(0x02031630, (u32)dsiSaveOpen);
+			setBL(0x02031654, (u32)dsiSaveRead);
+			setBL(0x02031664, (u32)dsiSaveClose);
+			setBL(0x02031674, (u32)dsiSaveClose);
+			setBL(0x02031754, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+			setBL(0x02031764, (u32)dsiSaveOpen);
+			setBL(0x02031790, (u32)dsiSaveClose);
+			setBL(0x020317C8, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+			setBL(0x020317D8, (u32)dsiSaveOpen);
+			setBL(0x02031804, (u32)dsiSaveClose);
+		}
+	}
+
 	// White-Water Domo (USA)
 	else if (strcmp(romTid, "KDWE") == 0) {
 		const u32 dsiSaveCreateT = 0x02023258;
