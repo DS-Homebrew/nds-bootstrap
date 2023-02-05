@@ -1799,8 +1799,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Abyss (USA)
 	// Abyss (Europe)
-	// Requires 8MB of RAM
-	else if ((strcmp(romTid, "KXGE") == 0 || strcmp(romTid, "KXGP") == 0) /*&& extendedMemory2*/) {
+	else if (strcmp(romTid, "KXGE") == 0 || strcmp(romTid, "KXGP") == 0) {
 		*(u32*)0x020050E8 = 0xE1A00000; // nop
 		*(u32*)0x0200510C = 0xE1A00000; // nop
 		*(u32*)0x02005110 = 0xE1A00000; // nop
