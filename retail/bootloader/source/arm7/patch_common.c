@@ -1775,27 +1775,22 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Absolute BrickBuster (USA)
 	// Crashes after starting a game mode
 	// Requires 8MB of RAM
-	/*else if (strcmp(romTid, "K6QE") == 0) {
+	/* else if (strcmp(romTid, "K6QE") == 0) {
 		*(u32*)0x020053E4 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		*(u32*)0x02055B74 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x02055B78 = 0xE12FFF1E; // bx lr
 		*(u32*)0x02055C48 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x02055C4C = 0xE12FFF1E; // bx lr
-		*(u32*)0x0205CD8C = 0xE1A00000; // nop
+		*(u32*)0x0205C8DC = 0xE1A00000; // nop
 		*(u32*)0x02060D94 = 0xE1A00000; // nop
-		*(u32*)0x0206BB40 = 0xE1A00000; // nop
-		*(u32*)0x0206DA58 = 0xE1A00000; // nop
-		*(u32*)0x0206DA5C = 0xE1A00000; // nop
-		*(u32*)0x0206DA68 = 0xE1A00000; // nop
-		*(u32*)0x0206DBAC = 0xE1A00000; // nop
-		patchHiHeapDSiWare(0x0206DC08, heapEnd); // mov r0, #0x2700000
+		patchInitDSiWare(0x0206D9CC, heapEnd);
 		patchUserSettingsReadDSiWare(0x0206EE64);
 		*(u32*)0x0206EEEC = 0xE3A00001; // mov r0, #1
 		*(u32*)0x0206EEF0 = 0xE12FFF1E; // bx lr
 		*(u32*)0x0206EEF8 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x0206EEFC = 0xE12FFF1E; // bx lr
 		*(u32*)0x02072668 = 0xE1A00000; // nop
-	}*/
+	} */
 
 	// Abyss (USA)
 	// Abyss (Europe)
