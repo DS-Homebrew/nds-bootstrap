@@ -5674,6 +5674,22 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}*/
 	}
 
+	// Disney Fireworks (USA)
+	// Locks up on ESRB screen
+	// Requires 8MB of RAM
+	/* else if (strcmp(romTid, "KDSE") == 0 && extendedMemory2) {
+		*(u32*)0x0201763C = 0xE1A00000; // nop (Disable .sdat loading)
+		*(u32*)0x02024C3C = 0xE1A00000; // nop
+		*(u32*)0x02076CF4 = 0xE1A00000; // nop
+		*(u32*)0x0207B974 = 0xE1A00000; // nop
+		patchInitDSiWare(0x02084034, heapEnd);
+		*(u32*)0x020843C0 = 0x020D82C0;
+		patchUserSettingsReadDSiWare(0x02085568);
+		*(u32*)0x02072A18 = 0xE1A00000; // nop
+		*(u32*)0x020745D8 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x020745DC = 0xE12FFF1E; // bx lr
+	} */
+
 	// DotMan (USA)
 	else if (strcmp(romTid, "KHEE") == 0) {
 		*(u32*)0x02005358 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
