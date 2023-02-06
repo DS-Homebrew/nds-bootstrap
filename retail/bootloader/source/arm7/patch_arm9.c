@@ -1215,6 +1215,22 @@ void patchTwlFontLoad(u32 heapAllocAddr, u32 newCodeAddr) {
 	setBL(heapAllocAddr, newCodeAddr);
 }
 
+void codeCopy(u32* dst, u32* src, u32 len) {
+	tonccpy(dst, src, len);
+
+	u32 srci = (u32)src;
+	u32 dsti = (u32)dst;
+	for (int i = 0; i < len/sizeof(u32); i++) {
+		if (*(u8*)(srci+3) == 0xEB) { // If bl instruction...
+			// then fix it
+			u32* offsetByBl = getOffsetFromBL((u32*)srci);
+			setBL(dsti, (u32)offsetByBl);
+		}
+		srci += 4;
+		dsti += 4;
+	}
+}
+
 /*void relocate_ce9(u32 default_location, u32 current_location, u32 size) {
     dbg_printf("relocate_ce9\n");
     

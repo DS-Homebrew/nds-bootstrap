@@ -5674,6 +5674,88 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}*/
 	}
 
+	// Dekisugi Tingle Pack (Japan)
+	else if (strcmp(romTid, "KCPJ") == 0) {
+		*(u32*)0x0200506C = 0xE1A00000; // nop
+		*(u32*)0x020050C0 = 0xE1A00000; // nop
+		*(u32*)0x020050FC = 0xE1A00000; // nop
+		*(u32*)0x020052A8 = 0xE1A00000; // nop
+		*(u32*)0x020055F8 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0200DC74 = 0xE1A00000; // nop (Disable photo file loading)
+		*(u32*)0x0200ED30 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x020226DC = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0202271C = 0xE1A00000; // nop
+		*(u32*)0x02023564 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02023590 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x020235D8 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02023684 = 0xE3A00000; // mov r0, #0
+
+		// *(u32*)0x020255F4 = 0xE3A00000; // mov r0, #0
+		// *(u32*)0x020255F8 = 0xE12FFF1E; // bx lr
+		setBL(0x02025604, (u32)dsiSaveCreate);
+		for (int i = 0; i < 10; i++) { // Disable creating "save2.bin"
+			u32* offset = (u32*)0x02025620;
+			offset[i] = 0xE1A00000; // nop
+		}
+		setBL(0x020256C4, 0x021AFE1C);
+		setBL(0x020256E0, 0x021AFD84);
+		setBL(0x0202571C, 0x021AFD84);
+		setBL(0x0202572C, 0x021AFEE4);
+		setBL(0x02025748, 0x021AFD84);
+		setBL(0x02025764, 0x021AFE1C);
+		setBL(0x02025780, 0x021AFD84);
+		setBL(0x020257B4, 0x021AFD84);
+		setBL(0x020257C4, 0x021AFEE4);
+		setBL(0x020257E0, 0x021AFD84);
+		setBL(0x02025830, 0x021AFD84);
+		setBL(0x02025874, 0x021AFE1C);
+		setBL(0x02025890, 0x021AFD84);
+		setBL(0x020258B4, 0x021AFE8C);
+		setBL(0x020258D0, 0x021AFD84);
+		setBL(0x020258E0, 0x021AFEE4);
+		setBL(0x020258FC, 0x021AFD84);
+		setBL(0x02025944, 0x021AFD84);
+		setBL(0x0202595C, 0x021AFE8C);
+		setBL(0x02025988, 0x021AFEE4);
+		setBL(0x020259A4, 0x021AFD84);
+		setBL(0x020259C8, 0x021AFD84);
+		setBL(0x020259F4, 0x021AFD84);
+
+		codeCopy((u32*)0x021AFF30, (u32*)0x02031F30, 0x2C);
+		codeCopy((u32*)0x021AFF78, (u32*)0x02031F78, 0x2C);
+		codeCopy((u32*)0x021AFFEC, (u32*)0x02031FEC, 0x24);
+		codeCopy((u32*)0x021AFD84, (u32*)0x02037484, 0x48);
+		codeCopy((u32*)0x021AFE1C, (u32*)0x0203751C, 0x70);
+		codeCopy((u32*)0x021AFE8C, (u32*)0x0203758C, 0x58);
+		codeCopy((u32*)0x021AFEE4, (u32*)0x020375E4, 0x20);
+		setBL(0x021AFF44, (u32)dsiSaveRead); // dsiSaveReadAsync
+		setBL(0x021AFF8C, (u32)dsiSaveOpen);
+		setBL(0x021AFFF8, (u32)dsiSaveClose);
+		setBL(0x021AFDBC, 0x021AFFEC);
+		setBL(0x021AFE68, 0x021AFF78);
+		setBL(0x021AFEA4, 0x021AFF30);
+		setBL(0x021AFEF4, 0x021AFFEC);
+
+		setBL(0x0203764C, (u32)dsiSaveWrite);
+
+		// *(u32*)0x02038818 = 0xE3A00000; // mov r0, #0 (Brings up some kind of debug menu on boot)
+		// *(u32*)0x0203881C = 0xE12FFF1E; // bx lr
+		*(u32*)0x0202666C = 0xE1A00000; // nop
+		if (!extendedMemory2) {
+			*(u32*)0x02051748 = 0xE2640601; // rsb r0,r4,0x100000 (Shrink sound heap from 0x180000)
+		}
+		*(u32*)0x0207357C = 0xE1A00000; // nop
+		*(u32*)0x02077788 = 0xE1A00000; // nop
+		patchInitDSiWare(0x02081708, heapEnd);
+		*(u32*)0x02081A78 = 0x021B0DA0;
+		patchUserSettingsReadDSiWare(0x02082D20);
+		*(u32*)0x0208317C = 0xE1A00000; // nop
+		*(u32*)0x02083180 = 0xE1A00000; // nop
+		*(u32*)0x02083184 = 0xE1A00000; // nop
+		*(u32*)0x02083188 = 0xE1A00000; // nop
+		*(u32*)0x02086FC8 = 0xE1A00000; // nop
+	}
+
 	// Disney Fireworks (USA)
 	// Locks up on ESRB screen
 	// Requires 8MB of RAM
@@ -7581,18 +7663,16 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 				*(u32*)0x02042F40 = 0xE1A00000; // nop
 				*(u32*)0x02042F5C = 0xE1A00000; // nop
 
-				tonccpy((u32*)readCodeCopy, (u32*)0x020BCB48, 0x70);
+				codeCopy((u32*)readCodeCopy, (u32*)0x020BCB48, 0x70);
 
 				*(u32*)0x020431B0 = 0xE1A00000; // nop
 				setBL(0x02043290, readCodeCopy);
 				setBL(0x02043328, readCodeCopy);
 
-				setBL(readCodeCopy+0x18, 0x02013CC8);
 				setBL(readCodeCopy+0x24, (u32)dsiSaveOpenR);
 				setBL(readCodeCopy+0x34, (u32)dsiSaveGetLength);
 				setBL(readCodeCopy+0x44, (u32)dsiSaveRead);
 				setBL(readCodeCopy+0x4C, (u32)dsiSaveClose);
-				setBL(readCodeCopy+0x54, 0x020BCA0C);
 
 				*(u32*)0x0208EB74 = 0xE3A00000; // mov r0, #0 (Skip Manual screen)
 
@@ -7611,18 +7691,16 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 				*(u32*)0x02042F9C = 0xE1A00000; // nop
 				*(u32*)0x02042FB8 = 0xE1A00000; // nop
 
-				tonccpy((u32*)readCodeCopy, (u32*)0x020BCC6C, 0x70);
+				codeCopy((u32*)readCodeCopy, (u32*)0x020BCC6C, 0x70);
 
 				*(u32*)0x0204320C = 0xE1A00000; // nop
 				setBL(0x020432EC, readCodeCopy);
 				setBL(0x02043384, readCodeCopy);
 
-				setBL(readCodeCopy+0x18, 0x02013CC8);
 				setBL(readCodeCopy+0x24, (u32)dsiSaveOpenR);
 				setBL(readCodeCopy+0x34, (u32)dsiSaveGetLength);
 				setBL(readCodeCopy+0x44, (u32)dsiSaveRead);
 				setBL(readCodeCopy+0x4C, (u32)dsiSaveClose);
-				setBL(readCodeCopy+0x54, 0x020BCB20);
 
 				*(u32*)0x0208EC38 = 0xE3A00000; // mov r0, #0 (Skip Manual screen)
 
@@ -7642,18 +7720,16 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			*(u32*)0x02042F9C = 0xE1A00000; // nop
 			*(u32*)0x02042FB8 = 0xE1A00000; // nop
 
-			tonccpy((u32*)readCodeCopy, (u32*)0x020BCDA4, 0x70);
+			codeCopy((u32*)readCodeCopy, (u32*)0x020BCDA4, 0x70);
 
 			*(u32*)0x0204320C = 0xE1A00000; // nop
 			setBL(0x020432EC, readCodeCopy);
 			setBL(0x02043384, readCodeCopy);
 
-			setBL(readCodeCopy+0x18, 0x02013CC8);
 			setBL(readCodeCopy+0x24, (u32)dsiSaveOpenR);
 			setBL(readCodeCopy+0x34, (u32)dsiSaveGetLength);
 			setBL(readCodeCopy+0x44, (u32)dsiSaveRead);
 			setBL(readCodeCopy+0x4C, (u32)dsiSaveClose);
-			setBL(readCodeCopy+0x54, 0x020BCC58);
 
 			*(u32*)0x0208EE9C = 0xE3A00000; // mov r0, #0 (Skip Manual screen)
 
@@ -7692,18 +7768,16 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02042F18 = 0xE1A00000; // nop
 
 		const u32 readCodeCopy = 0x02013D24;
-		tonccpy((u32*)readCodeCopy, (u32*)0x020BCD90, 0x70);
+		codeCopy((u32*)readCodeCopy, (u32*)0x020BCD90, 0x70);
 
 		*(u32*)0x0204316C = 0xE1A00000; // nop
 		setBL(0x0204324C, readCodeCopy);
 		setBL(0x020432E4, readCodeCopy);
 
-		setBL(readCodeCopy+0x18, 0x02013CF8);
 		setBL(readCodeCopy+0x24, (u32)dsiSaveOpenR);
 		setBL(readCodeCopy+0x34, (u32)dsiSaveGetLength);
 		setBL(readCodeCopy+0x44, (u32)dsiSaveRead);
 		setBL(readCodeCopy+0x4C, (u32)dsiSaveClose);
-		setBL(readCodeCopy+0x54, 0x020BCC44);
 
 		*(u32*)0x0208EC74 = 0xE3A00000; // mov r0, #0 (Skip Manual screen)
 
