@@ -13,7 +13,6 @@ static const char *registerNames[] = {
 };
 
 static s32 *exceptionRegisters;
-static const u32 __itcm_start = 0;
 
 u32 getCPSR();
 
@@ -245,7 +244,7 @@ void showException(s32 *expReg) {
 	if(currentMode == 0x17) {
 		printCenter(15, 1, (const u8 *)"Error: Data Abort!", FONT_WHITE, true);
 		codeAddress = exceptionRegisters[15] - offset;
-		if((codeAddress > 0x02000000 && codeAddress < 0x02400000) || (codeAddress > (u32)__itcm_start && codeAddress < (u32)(__itcm_start + 32768)))
+		if(codeAddress >= 0x01FF8000 && codeAddress < 0x04000000)
 			exceptionAddress = getExceptionAddress(codeAddress, thumbState);
 		else
 			exceptionAddress = codeAddress;
