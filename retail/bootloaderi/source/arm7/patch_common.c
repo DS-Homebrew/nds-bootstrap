@@ -3295,6 +3295,26 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0208B50C, (u32)dsiSaveClose);
 	}
 
+	// Deep Sea Creatures (USA)
+	else if (strcmp(romTid, "K6BE") == 0 && saveOnFlashcard) {
+		setBL(0x020514B8, (u32)dsiSaveOpen);
+		setBL(0x020514D8, (u32)dsiSaveCreate);
+		setBL(0x020514E8, (u32)dsiSaveOpen);
+		setBL(0x0205150C, (u32)dsiSaveSeek);
+		setBL(0x020516DC, (u32)dsiSaveSeek);
+		setBL(0x020516F0, (u32)dsiSaveRead);
+		setBL(0x020517BC, (u32)dsiSaveSeek);
+		setBL(0x020517CC, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+		setBL(0x020517DC, (u32)dsiSaveSeek);
+		setBL(0x020517F8, (u32)dsiSaveSeek);
+		setBL(0x02051808, (u32)dsiSaveRead); // dsiSaveReadAsync
+		setBL(0x02051818, (u32)dsiSaveSeek);
+		setBL(0x020518C0, (u32)dsiSaveSeek);
+		setBL(0x020518D0, (u32)dsiSaveRead);
+		setBL(0x02051904, (u32)dsiSaveSeek);
+		setBL(0x02051914, (u32)dsiSaveWrite);
+	}
+
 	// GO Series: Defense Wars (USA)
 	// GO Series: Defence Wars (Europe)
 	else if (strcmp(romTid, "KWTE") == 0 || strcmp(romTid, "KWTP") == 0) {
