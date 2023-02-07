@@ -80,7 +80,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	const u32* dsiSaveSeek = ce9->patches->dsiSaveSeek;
 	const u32* dsiSaveRead = ce9->patches->dsiSaveRead;
 	const u32* dsiSaveWrite = ce9->patches->dsiSaveWrite;
-	const u32* dsReset = ce9->patches->reset_arm9;
 
 	const bool twlFontFound = twlSharedFont;
 	//const bool chnFontFound = chnSharedFont;
@@ -2122,6 +2121,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Amakuchi! Dairoujou (Japan)
 	else if (strcmp(romTid, "KF2J") == 0) {
+		useSharedFont = (twlFontFound && debugOrMep);
 		*(u32*)0x0200D658 = 0xE1A00000; // nop
 		*(u32*)0x02010BD8 = 0xE1A00000; // nop
 		*(u32*)0x02017A20 = 0xE3A00001; // mov r0, #1
@@ -2141,6 +2141,10 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0203C32C, (u32)dsiSaveWrite);
 		setBL(0x0203C33C, (u32)dsiSaveClose);
 		setBL(0x0203C358, (u32)dsiSaveClose);
+		if (useSharedFont && !extendedMemory2) {
+			patchTwlFontLoad(0x0203E620, 0x02019458);
+			*(u32*)0x0203E6E0 = 0xE1A00000; // nop
+		}
 	}
 
 	// Animal Puzzle Adventure (USA)
@@ -5179,6 +5183,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Chuukara! Dairoujou (Japan)
 	else if (strcmp(romTid, "KQLJ") == 0) {
+		useSharedFont = (twlFontFound && debugOrMep);
 		*(u32*)0x0200DDFC = 0xE1A00000; // nop
 		*(u32*)0x020115C8 = 0xE1A00000; // nop
 		patchInitDSiWare(0x0201DB0C, heapEnd);
@@ -5201,6 +5206,10 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02044848, (u32)dsiSaveWrite);
 		setBL(0x02044858, (u32)dsiSaveClose);
 		setBL(0x02044874, (u32)dsiSaveClose);
+		if (useSharedFont && !extendedMemory2) {
+			patchTwlFontLoad(0x02047734, 0x0201F574);
+			*(u32*)0x020477F4 = 0xE1A00000; // nop
+		}
 	}
 
 	// Clash of Elementalists (USA)
@@ -5479,6 +5488,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Dairojo! Samurai Defenders (USA)
 	else if (strcmp(romTid, "KF3E") == 0) {
+		useSharedFont = (twlFontFound && debugOrMep);
 		*(u32*)0x0200DDB4 = 0xE1A00000; // nop
 		*(u32*)0x02011580 = 0xE1A00000; // nop
 		patchInitDSiWare(0x0201DAC4, heapEnd);
@@ -5501,10 +5511,15 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02044CA0, (u32)dsiSaveWrite);
 		setBL(0x02044CB0, (u32)dsiSaveClose);
 		setBL(0x02044CCC, (u32)dsiSaveClose);
+		if (useSharedFont && !extendedMemory2) {
+			patchTwlFontLoad(0x02047AB4, 0x0201F52C);
+			*(u32*)0x02047B74 = 0xE1A00000; // nop
+		}
 	}
 
 	// Karakuchi! Dairoujou (Japan)
 	else if (strcmp(romTid, "KF3J") == 0) {
+		useSharedFont = (twlFontFound && debugOrMep);
 		*(u32*)0x0200DD9C = 0xE1A00000; // nop
 		*(u32*)0x020114D4 = 0xE1A00000; // nop
 		patchInitDSiWare(0x0201D9E0, heapEnd);
@@ -5527,6 +5542,10 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x020447E4, (u32)dsiSaveWrite);
 		setBL(0x020447F4, (u32)dsiSaveClose);
 		setBL(0x02044810, (u32)dsiSaveClose);
+		if (useSharedFont && !extendedMemory2) {
+			patchTwlFontLoad(0x02047418, 0x0201F438);
+			*(u32*)0x020474D8 = 0xE1A00000; // nop
+		}
 	}
 
 	// Dancing Academy (Europe)
@@ -7362,6 +7381,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Fuuu! Dairoujou Kai (Japan)
 	else if (strcmp(romTid, "K6JJ") == 0) {
+		useSharedFont = (twlFontFound && debugOrMep);
 		*(u32*)0x0200DDFC = 0xE1A00000; // nop
 		*(u32*)0x020115C8 = 0xE1A00000; // nop
 		patchInitDSiWare(0x0201DB18, heapEnd);
@@ -7371,6 +7391,10 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0201F03C = 0xE3A00000; // mov r0, #0
 		*(u32*)0x0201F040 = 0xE12FFF1E; // bx lr
 		*(u32*)0x02022524 = 0xE1A00000; // nop
+		if (useSharedFont && !extendedMemory2) {
+			patchTwlFontLoad(0x0203A2DC, 0x0201F580);
+			*(u32*)0x0203A39C = 0xE1A00000; // nop
+		}
 		setBL(0x02045468, (u32)dsiSaveOpen);
 		setBL(0x02045498, (u32)dsiSaveRead);
 		setBL(0x020454A8, (u32)dsiSaveClose);
@@ -8545,13 +8569,20 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Littlest Pet Shop (USA)
 	// Littlest Pet Shop (Europe, Australia)
 	else if (strcmp(romTid, "KLPE") == 0 || strcmp(romTid, "KLPV") == 0) {
+		useSharedFont = (twlFontFound && debugOrMep);
 		*(u32*)0x0200506C = 0xE1A00000; // nop
 		*(u32*)0x02005088 = 0xE1A00000; // nop
-		*(u32*)0x0200509C = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
-		// Skip Manual screen
-		for (int i = 0; i < 11; i++) {
-			u32* offset = (u32*)0x020055BC;
-			offset[i] = 0xE1A00000; // nop
+		if (useSharedFont) {
+			if (!extendedMemory2) {
+				patchTwlFontLoad(0x0205F024, 0x02022C58);
+			}
+		} else {
+			*(u32*)0x0200509C = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+			// Skip Manual screen
+			for (int i = 0; i < 11; i++) {
+				u32* offset = (u32*)0x020055BC;
+				offset[i] = 0xE1A00000; // nop
+			}
 		}
 		*(u32*)0x02014D4C = 0xE1A00000; // nop
 		tonccpy((u32*)0x020159F0, dsiSaveGetResultCode, 0xC);
@@ -8665,6 +8696,9 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 			if (useSharedFont && !extendedMemory2) {
 				patchTwlFontLoad(0x020C3230, 0x02020064);
+				if (expansionPakFound) {
+					*(u32*)0x020C3298 = 0xE1A00000; // nop
+				}
 			}
 		} else {
 			*(u32*)0x020B9FBC = 0xE1A00000; // nop
@@ -8691,6 +8725,9 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 			if (useSharedFont && !extendedMemory2) {
 				patchTwlFontLoad(0x020C3708, 0x02020064);
+				if (expansionPakFound) {
+					*(u32*)0x020C3770 = 0xE1A00000; // nop
+				}
 			}
 		}
 	}
@@ -9455,6 +9492,8 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Mighty Milky Way (Japan)
 	// Music doesn't play on retail consoles
 	else if (strncmp(romTid, "KWY", 3) == 0) {
+		useSharedFont = (twlFontFound && extendedMemory2);
+
 		ce9->rumbleFrames[0] = 10;
 		ce9->rumbleFrames[1] = 30;
 		ce9->rumbleForce[0] = 1;
@@ -9509,21 +9548,25 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 				*(u32*)0x02012DE0 = 0xE1A00000; // nop
 			}
 			// Skip Manual screen
-			*(u32*)0x02013694 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
-			*(u32*)0x02013760 = 0xE1A00000; // nop
-			*(u32*)0x02013768 = 0xE1A00000; // nop
-			*(u32*)0x02013774 = 0xE1A00000; // nop
+			if (!useSharedFont) {
+				*(u32*)0x02013694 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+				*(u32*)0x02013760 = 0xE1A00000; // nop
+				*(u32*)0x02013768 = 0xE1A00000; // nop
+				*(u32*)0x02013774 = 0xE1A00000; // nop
+				*(u32*)0x02013E58 = 0xE3A06901; // mov r6, #0x4000
+			}
 			if (!extendedMemory2) {
 				*(u32*)0x02013870 = 0xE3A00901; // mov r0, #0x4000 (Shrink sound heap from 1MB to 16KB: Disables music)
 			}
-			*(u32*)0x02013E58 = 0xE3A06901; // mov r6, #0x4000
 
 			setBL(0x0201D008, (int)ce9->patches->rumble_arm9[0]); // Rumble when Luna gets shocked
 			setBL(0x020275F8, (int)ce9->patches->rumble_arm9[1]); // Rumble when planet is destroyed
 			*(u32*)0x02064FB0 = 0xE1A00000; // nop
 			*(u32*)0x02068924 = 0xE1A00000; // nop
 			patchInitDSiWare(0x0206EC5C, heapEnd);
-			*(u32*)0x0206EFE8 -= 0x30000;
+			if (!extendedMemory2) {
+				*(u32*)0x0206EFE8 -= 0x30000;
+			}
 			patchUserSettingsReadDSiWare(0x020700CC);
 			*(u32*)0x02070500 = 0xE1A00000; // nop
 			*(u32*)0x02070504 = 0xE1A00000; // nop
@@ -9548,21 +9591,25 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 				*(u32*)0x02012D98 = 0xE1A00000; // nop
 			}
 			// Skip Manual screen
-			*(u32*)0x02013648 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
-			*(u32*)0x02013714 = 0xE1A00000; // nop
-			*(u32*)0x0201371C = 0xE1A00000; // nop
-			*(u32*)0x02013728 = 0xE1A00000; // nop
+			if (!useSharedFont) {
+				*(u32*)0x02013648 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+				*(u32*)0x02013714 = 0xE1A00000; // nop
+				*(u32*)0x0201371C = 0xE1A00000; // nop
+				*(u32*)0x02013728 = 0xE1A00000; // nop
+				*(u32*)0x02013E04 = 0xE3A06901; // mov r6, #0x4000
+			}
 			if (!extendedMemory2) {
 				*(u32*)0x02013824 = 0xE3A00901; // mov r0, #0x4000 (Shrink sound heap from 1MB to 16KB: Disables music)
 			}
-			*(u32*)0x02013E04 = 0xE3A06901; // mov r6, #0x4000
 
 			setBL(0x0201CFB0, (int)ce9->patches->rumble_arm9[0]); // Rumble when Luna gets shocked
 			setBL(0x0202750C, (int)ce9->patches->rumble_arm9[1]); // Rumble when planet is destroyed
 			*(u32*)0x02064E34 = 0xE1A00000; // nop
 			*(u32*)0x020687A8 = 0xE1A00000; // nop
 			patchInitDSiWare(0x0206EAE0, heapEnd);
-			*(u32*)0x0206EE6C -= 0x30000;
+			if (!extendedMemory2) {
+				*(u32*)0x0206EE6C -= 0x30000;
+			}
 			patchUserSettingsReadDSiWare(0x0206FF50);
 			*(u32*)0x02070384 = 0xE1A00000; // nop
 			*(u32*)0x02070388 = 0xE1A00000; // nop
@@ -9730,8 +9777,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		if (useSharedFont) {
 			if (!extendedMemory2) {
 				if (expansionPakFound) {
-					*(u32*)0x02049B48 = 0xE3A00000; // mov r0, #0 (Soft-reset parameter)
-					setBL(0x02049B4C, (u32)dsReset);
+					*(u32*)0x02049B6C = 0xE1A00000; // nop
 				}
 				patchTwlFontLoad(0x02049C38, 0x02018858);
 			}
@@ -14001,8 +14047,9 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchInitDSiWare(0x02022454, heapEnd);
 		patchUserSettingsReadDSiWare(0x02023C10);
 		*(u32*)0x02026AA4 = 0xE1A00000; // nop
-		if (useSharedFont && !extendedMemory2 && expansionPakFound) {
+		if (useSharedFont && !extendedMemory2) {
 			patchTwlFontLoad(0x0203FBCC, 0x02024154);
+			*(u32*)0x0203FC18 = 0xE1A00000; // nop
 		}
 		setBL(0x0204D990, (u32)dsiSaveCreate);
 		setBL(0x0204D9A0, (u32)dsiSaveOpen);
@@ -14033,8 +14080,9 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchInitDSiWare(0x02017CA4, heapEnd);
 		patchUserSettingsReadDSiWare(0x02019450);
 		*(u32*)0x0201C14C = 0xE1A00000; // nop
-		if (useSharedFont && !extendedMemory2 && expansionPakFound) {
+		if (useSharedFont && !extendedMemory2) {
 			patchTwlFontLoad(0x02033608, 0x02019C10);
+			*(u32*)0x02033654 = 0xE1A00000; // nop
 		}
 		setBL(0x02040644, (u32)dsiSaveCreate);
 		setBL(0x02040654, (u32)dsiSaveOpen);
@@ -14989,7 +15037,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02015B98 = 0xE1A00000; // nop
 		patchInitDSiWare(0x0201C0D8, heapEnd);
 		patchUserSettingsReadDSiWare(0x0201D754);
-		if (useSharedFont && !extendedMemory2 && expansionPakFound) {
+		if (useSharedFont && !extendedMemory2) {
 			patchTwlFontLoad(0x02049E68, 0x0201DCC0);
 			*(u32*)0x02049EB0 = 0xE3A04601; // mov r4, #0x100000
 		}
@@ -15052,6 +15100,9 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		if (useSharedFont) {
 			if (!extendedMemory2) {
 				patchTwlFontLoad(0x0209AB60, 0x02027F8C);
+				if (expansionPakFound) {
+					*(u32*)0x0209ABAC = 0xE1A00000; // nop
+				}
 			}
 		} else {
 			*(u32*)0x0205C000 = 0xE3A00000; // mov r0, #0 (Skip Manual screen)
@@ -15081,6 +15132,9 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		if (useSharedFont) {
 			if (!extendedMemory2) {
 				patchTwlFontLoad(0x0209AB60, 0x02027F8C);
+				if (expansionPakFound) {
+					*(u32*)0x02099B1C = 0xE1A00000; // nop
+				}
 			}
 		} else {
 			*(u32*)0x0205B314 = 0xE3A00000; // mov r0, #0 (Skip Manual screen)
@@ -15419,6 +15473,9 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchUserSettingsReadDSiWare(0x02028360);
 		if (useSharedFont && !extendedMemory2) {
 			patchTwlFontLoad(0x020829B4, 0x02029298);
+			if (expansionPakFound) {
+				*(u32*)0x02082A00 = 0xE1A00000; // nop
+			}
 		}
 		*(u32*)0x0202B6F0 = 0xE1A00000; // nop
 		*(u32*)0x020639A4 = 0xE12FFF1E; // bx lr
@@ -15450,6 +15507,9 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchUserSettingsReadDSiWare(0x02024734);
 		if (useSharedFont && !extendedMemory2) {
 			patchTwlFontLoad(0x0207ED58, 0x0202566C);
+			if (expansionPakFound) {
+				*(u32*)0x0207EDA4 = 0xE1A00000; // nop
+			}
 		}
 		*(u32*)0x02027AC4 = 0xE1A00000; // nop
 		*(u32*)0x0205FD48 = 0xE12FFF1E; // bx lr
