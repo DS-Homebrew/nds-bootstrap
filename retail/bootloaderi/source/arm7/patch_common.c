@@ -3380,6 +3380,37 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0203764C, (u32)dsiSaveWrite);
 	}
 
+	// Delbo (USA)
+	// Save code patch not working
+	/* else if (strcmp(romTid, "KDBE") == 0) {
+		if (!twlFontFound) {
+			*(u32*)0x02005124 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		}
+		if (saveOnFlashcard) {
+			setBL(0x02038668, (u32)dsiSaveOpen);
+			setBL(0x0203869C, (u32)dsiSaveClose);
+			setBL(0x020386CC, (u32)dsiSaveGetLength);
+			setBL(0x020386F4, (u32)dsiSaveRead);
+			setBL(0x020386FC, (u32)dsiSaveClose);
+			setBL(0x02038730, (u32)dsiSaveClose);
+			*(u32*)0x0203877C = 0xE3A00001; // mov r0, #1 (dsiSaveOpenDir)
+			*(u32*)0x02038824 = 0xE1A00000; // nop
+			*(u32*)0x02038834 = 0xE3A00001; // mov r0, #1 (dsiSaveCloseDir)
+			*(u32*)0x02038954 = 0xE3A00001; // mov r0, #1 (dsiSaveOpenDir)
+			*(u32*)0x02038A70 = 0xE3A00001; // mov r0, #1 (dsiSaveOpenDir)
+			*(u32*)0x02038C60 = 0xE3A00001; // mov r0, #1 (dsiSaveOpenDir)
+			setBL(0x02038D00, (u32)dsiSaveDelete);
+			*(u32*)0x02038D10 = 0xE1A00000; // nop (dsiSaveCloseDir)
+			*(u32*)0x02038D20 = 0xE3A00001; // mov r0, #1 (dsiSaveCloseDir)
+			setBL(0x02038DB0, (u32)dsiSaveCreate);
+			setBL(0x02038DC0, (u32)dsiSaveOpen);
+			setBL(0x02038E04, (u32)dsiSaveClose);
+			setBL(0x02038E20, (u32)dsiSaveSetLength);
+			setBL(0x02038E30, (u32)dsiSaveWrite);
+			setBL(0x02038E38, (u32)dsiSaveClose);
+		}
+	} */
+
 	// DotMan (USA)
 	else if (strcmp(romTid, "KHEE") == 0 && !twlFontFound) {
 		// Skip Manual screen

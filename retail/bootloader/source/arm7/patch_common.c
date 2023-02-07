@@ -5775,6 +5775,47 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02086FC8 = 0xE1A00000; // nop
 	}
 
+	// Delbo (USA)
+	// Difficult to get working for some reason
+	/* else if (strcmp(romTid, "KDBE") == 0) {
+		useSharedFont = (twlFontFound && debugOrMep);
+		*(u32*)0x02005128 = 0xE1A00000; // nop
+		*(u32*)0x0200EA14 = 0xE1A00000; // nop
+		*(u32*)0x02012804 = 0xE1A00000; // nop
+		patchInitDSiWare(0x0201967C, heapEnd);
+		patchUserSettingsReadDSiWare(0x0201AEBC);
+		*(u32*)0x0201E56C = 0xE1A00000; // nop
+		*(u32*)0x0202D770 = 0x14E000; // Shrink sound heap from 0x2EE000
+		if (useSharedFont) {
+			if (!extendedMemory2) {
+				patchTwlFontLoad(0x0202EB0C, 0x0201B43C);
+			}
+		} else {
+			*(u32*)0x02005124 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		}
+		setBL(0x02038668, (u32)dsiSaveOpen);
+		setBL(0x0203869C, (u32)dsiSaveClose);
+		setBL(0x020386CC, (u32)dsiSaveGetLength);
+		setBL(0x020386F4, (u32)dsiSaveRead);
+		setBL(0x020386FC, (u32)dsiSaveClose);
+		setBL(0x02038730, (u32)dsiSaveClose);
+		*(u32*)0x0203877C = 0xE3A00001; // mov r0, #1 (dsiSaveOpenDir)
+		*(u32*)0x02038824 = 0xE1A00000; // nop
+		*(u32*)0x02038834 = 0xE3A00001; // mov r0, #1 (dsiSaveCloseDir)
+		*(u32*)0x02038954 = 0xE3A00001; // mov r0, #1 (dsiSaveOpenDir)
+		*(u32*)0x02038A70 = 0xE3A00001; // mov r0, #1 (dsiSaveOpenDir)
+		*(u32*)0x02038C60 = 0xE3A00001; // mov r0, #1 (dsiSaveOpenDir)
+		setBL(0x02038D00, (u32)dsiSaveDelete);
+		*(u32*)0x02038D10 = 0xE1A00000; // nop (dsiSaveCloseDir)
+		*(u32*)0x02038D20 = 0xE3A00001; // mov r0, #1 (dsiSaveCloseDir)
+		setBL(0x02038DB0, (u32)dsiSaveCreate);
+		setBL(0x02038DC0, (u32)dsiSaveOpen);
+		setBL(0x02038E04, (u32)dsiSaveClose);
+		setBL(0x02038E20, (u32)dsiSaveSetLength);
+		setBL(0x02038E30, (u32)dsiSaveWrite);
+		setBL(0x02038E38, (u32)dsiSaveClose);
+	} */
+
 	// Disney Fireworks (USA)
 	// Locks up on ESRB screen
 	// Requires 8MB of RAM
