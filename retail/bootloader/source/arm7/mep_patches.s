@@ -78,8 +78,7 @@ mepHeapSetPatchFunc:
 @---------------------------------------------------------------------------------
 	stmfd   sp!, {r6,lr}
 
-	cmp r3, #0x09000000
-	cmpne r3, #0x08000000
+	cmp r3, #0x08000000
 	ldmgefd   sp!, {r6,pc}
 
 	ldr	r6, mepHeapSetOrgFunc

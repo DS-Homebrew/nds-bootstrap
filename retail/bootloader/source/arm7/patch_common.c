@@ -5816,6 +5816,29 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02038E38, (u32)dsiSaveClose);
 	} */
 
+	// Devil Band: Rock the Underworld (USA)
+	// Devil Band: Rock the Underworld (Europe, Australia)
+	// Devil Band: Rock the Underworld (Japan)
+	// Requires 8MB of RAM
+	else if (strncmp(romTid, "KN2", 3) == 0 && extendedMemory2) {
+		*(u32*)0x02005088 = 0xE1A00000; // nop (Disable reading save data)
+		*(u32*)0x02005098 = 0xE1A00000; // nop
+		*(u32*)0x020050AC = 0xE1A00000; // nop
+		if (ndsHeader->gameCode[3] != 'J') {
+			*(u32*)0x0200FC0C = 0xE1A00000; // nop
+			*(u32*)0x02012E84 = 0xE1A00000; // nop
+			patchInitDSiWare(0x02018FA8, heapEnd);
+			patchUserSettingsReadDSiWare(0x0201A4B8);
+			*(u32*)0x0201D7EC = 0xE1A00000; // nop
+		} else {
+			*(u32*)0x0200FC08 = 0xE1A00000; // nop
+			*(u32*)0x02012E80 = 0xE1A00000; // nop
+			patchInitDSiWare(0x02018FA4, heapEnd);
+			patchUserSettingsReadDSiWare(0x0201A4B4);
+			*(u32*)0x0201D7E8 = 0xE1A00000; // nop
+		}
+	}
+
 	// Disney Fireworks (USA)
 	// Locks up on ESRB screen
 	// Requires 8MB of RAM

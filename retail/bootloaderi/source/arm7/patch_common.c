@@ -3411,6 +3411,13 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	} */
 
+	// Devil Band: Rock the Underworld (USA)
+	// Devil Band: Rock the Underworld (Europe, Australia)
+	// Devil Band: Rock the Underworld (Japan)
+	else if (strncmp(romTid, "KN2", 3) == 0 && saveOnFlashcard) {
+		*(u32*)0x02005088 = 0xE1A00000; // nop (Disable reading save data)
+	}
+
 	// DotMan (USA)
 	else if (strcmp(romTid, "KHEE") == 0 && !twlFontFound) {
 		// Skip Manual screen
