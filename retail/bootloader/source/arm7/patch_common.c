@@ -5912,6 +5912,17 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0204B97C, (u32)dsiSaveClose);
 	}
 
+	// Don't Cross the Line (USA)
+	/* else if (strcmp(romTid, "KMLE") == 0) {
+		*(u32*)0x0200B438 = 0xE1A00000; // nop
+		*(u32*)0x0200F5B4 = 0xE1A00000; // nop
+		patchInitDSiWare(0x02015AF8, heapEnd);
+		// *(u32*)0x02015E84 -= 0x39000;
+		patchUserSettingsReadDSiWare(0x020171D0);
+		*(u32*)0x0201A934 = 0xE1A00000; // nop
+		// *(u32*)0x0201C5BC = extendedMemory2 ? 0x500000 : 0x2C0000;
+	} */
+
 	// DotMan (USA)
 	else if (strcmp(romTid, "KHEE") == 0) {
 		*(u32*)0x02005358 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
