@@ -272,11 +272,14 @@ static void resetMemory_ARM7(void) {
 	twlCfgCountry = *(u8*)0x02000405;
 	twlCfgLang = *(u8*)0x02000406;
 	if (useTwlCfg) {
-		if (twlCfgCountry == 0x01 || (twlCfgCountry >= 0x08 && twlCfgCountry <= 0x34) || twlCfgCountry == 0x99 || twlCfgCountry == 0xA8 || (twlCfgCountry >= 0x40 && twlCfgCountry <= 0x70) || twlCfgCountry == 0x41 || twlCfgCountry == 0x5F) {
+		// if (twlCfgCountry == 0x01 || (twlCfgCountry >= 0x08 && twlCfgCountry <= 0x34) || twlCfgCountry == 0x99 || twlCfgCountry == 0xA8 || (twlCfgCountry >= 0x40 && twlCfgCountry <= 0x70) || twlCfgCountry == 0x41 || twlCfgCountry == 0x5F) {
+		if (twlCfgLang >= 0 && twlCfgLang < 6) {
 			sharedFontRegion = 0;	// Japan/USA/Europe/Australia
-		} else if (twlCfgCountry == 0xA0) {
+		// } else if (twlCfgCountry == 0xA0) {
+		} else if (twlCfgLang == 6) {
 			sharedFontRegion = 1;	// China
-		} else if (twlCfgCountry == 0x88) {
+		//} else if (twlCfgCountry == 0x88) {
+		} else if (twlCfgLang == 7) {
 			sharedFontRegion = 2;	// Korea
 		} else {
 			sharedFontRegion = -1;
