@@ -16847,6 +16847,52 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
 		tonccpy((u32*)0x0205AEB4, dsiSaveGetResultCode, 0xC);
 		*(u32*)0x0205D3B8 = 0xE3A00001; // mov r0, #1 (Enable NitroFS reads)
 	}
+
+	// Hearts Spades Euchre (USA)
+	else if (strcmp(romTid, "KHQE") == 0) {
+		setBL(0x020107B4, (u32)dsiSaveOpen);
+		setBL(0x02010828, (u32)dsiSaveGetLength);
+		setBL(0x0201083C, (u32)dsiSaveClose);
+		setBL(0x0201085C, (u32)dsiSaveSeek);
+		setBL(0x02010874, (u32)dsiSaveRead);
+		setBL(0x02010888, (u32)dsiSaveClose);
+		setBL(0x020108DC, (u32)dsiSaveClose);
+		*(u32*)0x0201092C = 0xE1A00000; // nop
+		setBL(0x0201098C, (u32)dsiSaveCreate);
+		setBL(0x020109E0, (u32)dsiSaveOpen);
+		setBL(0x02010A48, (u32)dsiSaveSetLength);
+		setBL(0x02010A60, (u32)dsiSaveClose);
+		setBL(0x02010AB4, (u32)dsiSaveGetLength);
+		setBL(0x02010AC8, (u32)dsiSaveClose);
+		setBL(0x02010AE8, (u32)dsiSaveSeek);
+		setBL(0x02010B00, (u32)dsiSaveWrite);
+		setBL(0x02010B14, (u32)dsiSaveClose);
+		setBL(0x02010B60, (u32)dsiSaveClose);
+		*(u32*)0x02049760 = 0xE3A00001; // mov r0, #1 (Enable NitroFS reads)
+	}
+
+	// Hearts Spades Euchre (Europe)
+	else if (strcmp(romTid, "KHQP") == 0) {
+		setBL(0x02010770, (u32)dsiSaveOpen);
+		setBL(0x020107E4, (u32)dsiSaveGetLength);
+		setBL(0x020107F8, (u32)dsiSaveClose);
+		setBL(0x02010818, (u32)dsiSaveSeek);
+		setBL(0x02010830, (u32)dsiSaveRead);
+		setBL(0x02010844, (u32)dsiSaveClose);
+		setBL(0x02010898, (u32)dsiSaveClose);
+		*(u32*)0x020108E8 = 0xE1A00000; // nop
+		setBL(0x02010948, (u32)dsiSaveCreate);
+		setBL(0x0201099C, (u32)dsiSaveOpen);
+		setBL(0x02010A04, (u32)dsiSaveSetLength);
+		setBL(0x02010A1C, (u32)dsiSaveClose);
+		setBL(0x02010A70, (u32)dsiSaveGetLength);
+		setBL(0x02010A84, (u32)dsiSaveClose);
+		setBL(0x02010AA4, (u32)dsiSaveSeek);
+		setBL(0x02010ABC, (u32)dsiSaveWrite);
+		setBL(0x02010AD0, (u32)dsiSaveClose);
+		setBL(0x02010B1C, (u32)dsiSaveClose);
+		*(u32*)0x02049748 = 0xE3A00001; // mov r0, #1 (Enable NitroFS reads)
+	}
 }
 
 static bool rsetA7CacheDone = false;
