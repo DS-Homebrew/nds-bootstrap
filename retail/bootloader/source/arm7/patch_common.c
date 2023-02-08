@@ -8064,6 +8064,26 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0205B750, (u32)dsiSaveClose);
 	}
 
+	// Hell's Kitchen VS (USA)
+	else if (strcmp(romTid, "KHLE") == 0) {
+		*(u32*)0x020A661C = 0xE1A00000; // nop
+		*(u32*)0x020A9B00 = 0xE1A00000; // nop
+		patchInitDSiWare(0x020B0C5C, heapEnd);
+		*(u32*)0x020B5CE0 = 0xE1A00000; // nop
+		*(u32*)0x020B7FC8 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x020B7FCC = 0xE12FFF1E; // bx lr
+	}
+
+	// Hell's Kitchen VS (Europe, Australia)
+	else if (strcmp(romTid, "KHLV") == 0) {
+		*(u32*)0x020A65A4 = 0xE1A00000; // nop
+		*(u32*)0x020A9A88 = 0xE1A00000; // nop
+		patchInitDSiWare(0x020B0BE4, heapEnd);
+		*(u32*)0x020B5C68 = 0xE1A00000; // nop
+		*(u32*)0x020B7F50 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x020B7F54 = 0xE12FFF1E; // bx lr
+	}
+
 	// Hellokids: Vol. 1: Coloring and Painting! (USA)
 	// Loops in some code during white screens
 	/*else if (strcmp(romTid, "KKIE") == 0) {
