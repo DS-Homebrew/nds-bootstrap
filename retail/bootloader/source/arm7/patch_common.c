@@ -5886,6 +5886,32 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020745DC = 0xE12FFF1E; // bx lr
 	} */
 
+	// Divergent Shift (USA)
+	// Divergent Shift (Europe, Australia)
+	else if (strcmp(romTid, "KRFE") == 0 || strcmp(romTid, "KRFV") == 0) {
+		*(u32*)0x02011694 = 0xE1A00000; // nop
+		*(u32*)0x02014AE0 = 0xE1A00000; // nop
+		patchInitDSiWare(0x0201A0BC, heapEnd);
+		*(u32*)0x0201A448 -= 0x39000;
+		patchUserSettingsReadDSiWare(0x0201B6D4);
+		*(u32*)0x0201E574 = 0xE1A00000; // nop
+		*(u32*)0x020391F0 = 0xE2406901; // sub r6, r0, #0x4000
+		*(u32*)0x0203BC18 = 0xE1A00000; // nop
+		*(u32*)0x02049808 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		*(u32*)0x0204B3E4 = 0xE3A00701; // mov r0, #0x40000 (Shrink sdat-specific sound heap from 0x200000)
+		setBL(0x0204B7CC, (u32)dsiSaveOpen);
+		*(u32*)0x0204B81C = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+		*(u32*)0x0204B844 = 0xE3A00001; // mov r0, #1 (dsiSaveFreeSpaceAvailable)
+		setBL(0x0204B864, (u32)dsiSaveCreate);
+		setBL(0x0204B88C, (u32)dsiSaveOpen);
+		setBL(0x0204B8B8, (u32)dsiSaveWrite);
+		*(u32*)0x0204B8C4 = 0xE1A00000; // nop (dsiSaveFlush)
+		setBL(0x0204B8CC, (u32)dsiSaveClose);
+		setBL(0x0204B914, (u32)dsiSaveOpen);
+		setBL(0x0204B970, (u32)dsiSaveRead);
+		setBL(0x0204B97C, (u32)dsiSaveClose);
+	}
+
 	// DotMan (USA)
 	else if (strcmp(romTid, "KHEE") == 0) {
 		*(u32*)0x02005358 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
