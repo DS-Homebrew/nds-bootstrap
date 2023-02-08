@@ -15035,16 +15035,17 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Touch Solitaire (USA)
-	// Crashes somewhere in 0x02015180
-	/*else if (strcmp(romTid, "KSLE") == 0) {
-		if (!extendedMemory2) {
+	// Saving not supported due to using more than one file in filesystem
+	else if (strcmp(romTid, "KSLE") == 0) {
+		// if (!extendedMemory2) {
 			*(u16*)0x0200D6D8 = 0x054C; // lsls r4, r1, #0x15
-		}
+		// }
+		*(u16*)0x0200D6F4 = 0x0424; // lsls r4, r4, #0x10
 		doubleNopT(0x0200D78A);
 		doubleNopT(0x0200D90A);
 		doubleNopT(0x0200D916);
 		doubleNopT(0x0200DA26);
-		doubleNopT(0x0200E15A);
+		doubleNopT(0x0200E15A); // Hide volume icon
 		doubleNopT(0x0201AD4A);
 		doubleNopT(0x0201D28A);
 		doubleNopT(0x02020F94);
@@ -15052,7 +15053,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		doubleNopT(0x02022556);
 		doubleNopT(0x02022562);
 		doubleNopT(0x02022646);
-		patchHiHeapDSiWareThumb(0x02022684, 0x0201FC7C, heapEnd); // movs r0, extendedMemory2 ? #0x2700000 : #0x23E0000
+		patchHiHeapDSiWareThumb(0x02022684, 0x0201FC7C, heapEnd);
 		*(u32*)0x0202275C = 0x02059840;
 		*(u16*)0x020233DE = 0x46C0; // nop
 		*(u16*)0x020233E2 = 0xBD38; // POP {R3-R5,PC}
@@ -15065,7 +15066,71 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u16*)0x02025698 = 0x2000; // mov r0, #0
 		*(u16*)0x0202569A = 0x4770; // bx lr
 		doubleNopT(0x02025756);
-	}*/
+	}
+
+	// 2-in-1 Solitaire (Europe, Australia)
+	// Saving not supported due to using more than one file in filesystem
+	else if (strcmp(romTid, "KSLV") == 0) {
+		// if (!extendedMemory2) {
+			*(u16*)0x0200DC74 = 0x054C; // lsls r4, r1, #0x15
+		// }
+		*(u16*)0x0200DC90 = 0x0424; // lsls r4, r4, #0x10
+		doubleNopT(0x0200DD26);
+		doubleNopT(0x0200DEA6);
+		doubleNopT(0x0200DEB2);
+		doubleNopT(0x0200DFC2);
+		doubleNopT(0x0200E6F6); // Hide volume icon
+		doubleNopT(0x0201B62E);
+		doubleNopT(0x0201DBEE);
+		doubleNopT(0x02021958);
+		*(u32*)0x02022ED6 = 0x2001; // mov r0, #1
+		*(u16*)0x02022ED8 = 0x46C0; // nop
+		doubleNopT(0x02022F4E);
+		doubleNopT(0x02022F52);
+		doubleNopT(0x02022F5E);
+		doubleNopT(0x02023042);
+		patchHiHeapDSiWareThumb(0x02023080, 0x0202063C, heapEnd);
+		*(u32*)0x02023158 = 0x020592C0;
+		*(u16*)0x02023E04 = 0x46C0; // nop
+		*(u16*)0x02023E08 = 0xBD10; // POP {R4,PC}
+		doubleNopT(0x020240FA);
+		*(u16*)0x020240FE = 0x46C0; // nop
+		*(u16*)0x02024100 = 0x46C0; // nop
+		doubleNopT(0x02024102);
+		*(u16*)0x02026190 = 0x2001; // mov r0, #1
+		*(u16*)0x02026192 = 0x4770; // bx lr
+		*(u16*)0x02026198 = 0x2000; // mov r0, #0
+		*(u16*)0x0202619A = 0x4770; // bx lr
+		doubleNopT(0x0202625E);
+	}
+
+	// Solitaire DSi (Japan)
+	// Saving not supported due to using more than one file in filesystem
+	// Does not boot due to save patch not implemented
+	/* else if (strcmp(romTid, "KSLJ") == 0) {
+		// if (!extendedMemory2) {
+			*(u16*)0x0200D4F8 = 0x054C; // lsls r4, r1, #0x15
+		// }
+		*(u16*)0x0200D514 = 0x0424; // lsls r4, r4, #0x10
+		doubleNopT(0x0200D5AA);
+		doubleNopT(0x0200DF6A); // Hide volume icon
+		*(u16*)0x0201AE60 = 0xB003; // ADD SP, SP, #0xC
+		*(u16*)0x0201AE62 = 0xBD78; // POP {R3-R6,PC}
+		doubleNopT(0x0201D474);
+		doubleNopT(0x02022268);
+		doubleNopT(0x0202375E);
+		doubleNopT(0x02023762);
+		doubleNopT(0x0202376E);
+		doubleNopT(0x0202385A);
+		patchHiHeapDSiWareThumb(0x02023898, 0x020206A4, heapEnd);
+		*(u32*)0x02023970 = 0x02058280;
+		*(u16*)0x0202461C = 0x46C0; // nop
+		*(u16*)0x02024620 = 0xBD10; // POP {R4,PC}
+		doubleNopT(0x02024912);
+		*(u16*)0x02024916 = 0x46C0; // nop
+		*(u16*)0x02024918 = 0x46C0; // nop
+		doubleNopT(0x0202491A);
+	} */
 
 	// Trajectile (USA)
 	// Requires 8MB of RAM
