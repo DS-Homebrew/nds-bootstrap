@@ -4239,6 +4239,34 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// Halloween Trick or Treat (USA)
+	else if (strcmp(romTid, "KZHE") == 0 && saveOnFlashcard) {
+		setBL(0x0203D11C, (u32)dsiSaveOpen);
+		setBL(0x0203D190, (u32)dsiSaveRead);
+		setBL(0x0203D198, (u32)dsiSaveClose);
+		setBL(0x0203D360, (u32)dsiSaveOpen);
+		setBL(0x0203D38C, (u32)dsiSaveCreate);
+		setBL(0x0203D39C, (u32)dsiSaveOpen);
+		setBL(0x0203D3B8, (u32)dsiSaveSetLength);
+		setBL(0x0203D3F0, (u32)dsiSaveSeek);
+		setBL(0x0203D400, (u32)dsiSaveWrite);
+		setBL(0x0203D408, (u32)dsiSaveClose);
+	}
+
+	// Halloween Trick or Treat (Europe)
+	else if (strcmp(romTid, "KZHP") == 0 && saveOnFlashcard) {
+		setBL(0x0203D1E4, (u32)dsiSaveOpen);
+		setBL(0x0203D258, (u32)dsiSaveRead);
+		setBL(0x0203D260, (u32)dsiSaveClose);
+		setBL(0x0203D42C, (u32)dsiSaveOpen);
+		setBL(0x0203D454, (u32)dsiSaveCreate);
+		setBL(0x0203D464, (u32)dsiSaveOpen);
+		setBL(0x0203D480, (u32)dsiSaveSetLength);
+		setBL(0x0203D4B8, (u32)dsiSaveSeek);
+		setBL(0x0203D4C8, (u32)dsiSaveWrite);
+		setBL(0x0203D4D0, (u32)dsiSaveClose);
+	}
+
 	// Hard-Hat Domo (USA)
 	else if (strcmp(romTid, "KDHE") == 0) {
 		if (saveOnFlashcard) {

@@ -7973,6 +7973,59 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02048314 = 0xE1A00000; // nop
 	}*/
 
+	// Halloween Trick or Treat (USA)
+	else if (strcmp(romTid, "KZHE") == 0) {
+		*(u32*)0x0200E0D0 = 0xE1A00000; // nop
+		*(u32*)0x0201159C = 0xE1A00000; // nop
+		patchInitDSiWare(0x020162C0, heapEnd);
+		patchUserSettingsReadDSiWare(0x02017770);
+		*(u32*)0x0201ADE0 = 0xE1A00000; // nop
+		if (!extendedMemory2) {
+			*(u32*)0x0201C924 = 0xE3A05901; // mov r5, #0x4000 (Disable music)
+		}
+		*(u32*)0x0201D36C = 0xE1A00000; // nop
+		*(u32*)0x0201D380 = 0xE1A00000; // nop
+		setBL(0x0203D11C, (u32)dsiSaveOpen);
+		setBL(0x0203D190, (u32)dsiSaveRead);
+		setBL(0x0203D198, (u32)dsiSaveClose);
+		*(u32*)0x0203D1D0 = 0xE1A00000; // nop
+		setBL(0x0203D364, (u32)dsiSaveOpen);
+		setBL(0x0203D38C, (u32)dsiSaveCreate);
+		setBL(0x0203D39C, (u32)dsiSaveOpen);
+		setBL(0x0203D3B8, (u32)dsiSaveSetLength);
+		setBL(0x0203D3F0, (u32)dsiSaveSeek);
+		setBL(0x0203D400, (u32)dsiSaveWrite);
+		setBL(0x0203D408, (u32)dsiSaveClose);
+		*(u32*)0x0203D478 = 0xE1A00000; // nop
+	}
+
+	// Halloween Trick or Treat (Europe)
+	else if (strcmp(romTid, "KZHP") == 0) {
+		useSharedFont = (twlFontFound && debugOrMep);
+		*(u32*)0x0200E1A4 = 0xE1A00000; // nop
+		*(u32*)0x02011670 = 0xE1A00000; // nop
+		patchInitDSiWare(0x02016394, heapEnd);
+		patchUserSettingsReadDSiWare(0x02017844);
+		*(u32*)0x0201AEB4 = 0xE1A00000; // nop
+		if (!extendedMemory2) {
+			*(u32*)0x0201C9F8 = 0xE3A05901; // mov r5, #0x4000 (Disable music)
+		}
+		*(u32*)0x0201D440 = 0xE1A00000; // nop
+		*(u32*)0x0201D454 = 0xE1A00000; // nop
+		setBL(0x0203D1E4, (u32)dsiSaveOpen);
+		setBL(0x0203D258, (u32)dsiSaveRead);
+		setBL(0x0203D260, (u32)dsiSaveClose);
+		*(u32*)0x0203D298 = 0xE1A00000; // nop
+		setBL(0x0203D42C, (u32)dsiSaveOpen);
+		setBL(0x0203D454, (u32)dsiSaveCreate);
+		setBL(0x0203D464, (u32)dsiSaveOpen);
+		setBL(0x0203D480, (u32)dsiSaveSetLength);
+		setBL(0x0203D4B8, (u32)dsiSaveSeek);
+		setBL(0x0203D4C8, (u32)dsiSaveWrite);
+		setBL(0x0203D4D0, (u32)dsiSaveClose);
+		*(u32*)0x0203D540 = 0xE1A00000; // nop
+	}
+
 	// Hard-Hat Domo (USA)
 	else if (strcmp(romTid, "KDHE") == 0) {
 		const u32 dsiSaveCreateT = 0x020238C8;
