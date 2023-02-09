@@ -4347,6 +4347,23 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0203D4D0, (u32)dsiSaveClose);
 	}
 
+	// Handy Hockey (Japan)
+	else if (strcmp(romTid, "KHOJ") == 0 && saveOnFlashcard) {
+		tonccpy((u32*)0x0200C1D4, dsiSaveGetResultCode, 0xC);
+		*(u32*)0x02031440 = 0xE1A00000; // nop (dsiSaveCreateDir)
+		*(u32*)0x020314AC = 0xE3A00001; // mov r0, #1 (dsiSaveCreateDirAuto)
+		setBL(0x0203150C, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+		setBL(0x02031530, (u32)dsiSaveOpen);
+		setBL(0x02031580, (u32)dsiSaveSetLength);
+		setBL(0x02031590, (u32)dsiSaveWrite);
+		setBL(0x02031598, (u32)dsiSaveClose);
+		setBL(0x0203162C, (u32)dsiSaveOpen);
+		setBL(0x02031674, (u32)dsiSaveGetLength);
+		setBL(0x02031694, (u32)dsiSaveClose);
+		setBL(0x020316B0, (u32)dsiSaveRead);
+		setBL(0x020316B8, (u32)dsiSaveClose);
+	}
+
 	// Hard-Hat Domo (USA)
 	else if (strcmp(romTid, "KDHE") == 0) {
 		if (saveOnFlashcard) {

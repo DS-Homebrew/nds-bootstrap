@@ -8120,6 +8120,50 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0203D540 = 0xE1A00000; // nop
 	}
 
+	// Handy Hockey (Japan)
+	else if (strcmp(romTid, "KHOJ") == 0) {
+		useSharedFont = twlFontFound;
+		*(u32*)0x0200B534 = 0xE1A00000; // nop
+		tonccpy((u32*)0x0200C1D4, dsiSaveGetResultCode, 0xC);
+		*(u32*)0x0200F0D4 = 0xE1A00000; // nop
+		patchInitDSiWare(0x0201CA9C, heapEnd);
+		patchUserSettingsReadDSiWare(0x0201E0E8);
+		*(u32*)0x0201E110 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0201E114 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0201E11C = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0201E120 = 0xE12FFF1E; // bx lr
+		*(u32*)0x020218C4 = 0xE1A00000; // nop
+		*(u32*)0x02031440 = 0xE1A00000; // nop (dsiSaveCreateDir)
+		*(u32*)0x020314AC = 0xE3A00001; // mov r0, #1 (dsiSaveCreateDirAuto)
+		setBL(0x0203150C, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+		setBL(0x02031530, (u32)dsiSaveOpen);
+		*(u32*)0x0203156C = 0xE1A00000; // nop
+		setBL(0x02031580, (u32)dsiSaveSetLength);
+		setBL(0x02031590, (u32)dsiSaveWrite);
+		setBL(0x02031598, (u32)dsiSaveClose);
+		setBL(0x0203162C, (u32)dsiSaveOpen);
+		*(u32*)0x02031660 = 0xE1A00000; // nop
+		setBL(0x02031674, (u32)dsiSaveGetLength);
+		setBL(0x02031694, (u32)dsiSaveClose);
+		setBL(0x020316B0, (u32)dsiSaveRead);
+		setBL(0x020316B8, (u32)dsiSaveClose);
+	}
+
+	// Handy Mahjong (Japan)
+	else if (strcmp(romTid, "KHMJ") == 0) {
+		useSharedFont = twlFontFound;
+		*(u32*)0x0200D5EC = 0xE1A00000; // nop
+		*(u32*)0x0201095C = 0xE1A00000; // nop
+		*(u32*)0x0201DDD0 = 0xE3A00001; // mov r0, #1
+		patchInitDSiWare(0x0201DDE8, heapEnd);
+		patchUserSettingsReadDSiWare(0x0201F424);
+		*(u32*)0x0201F44C = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0201F450 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0201F458 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0201F45C = 0xE12FFF1E; // bx lr
+		*(u32*)0x02022C18 = 0xE1A00000; // nop
+	}
+
 	// Hard-Hat Domo (USA)
 	else if (strcmp(romTid, "KDHE") == 0) {
 		const u32 dsiSaveCreateT = 0x020238C8;
