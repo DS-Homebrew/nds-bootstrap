@@ -4439,6 +4439,67 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0201B9E4 -= 0x6000; // Shift heap
 	}
 
+	// Hints Hunter (USA)
+	else if (strcmp(romTid, "KHIE") == 0) {
+		if (saveOnFlashcard) {
+			setBL(0x020472CC, (u32)dsiSaveOpen);
+			setBL(0x020472E0, (u32)dsiSaveCreate);
+			setBL(0x020472E8, (u32)dsiSaveGetResultCode);
+			setBL(0x02047354, (u32)dsiSaveOpen);
+			setBL(0x02047364, (u32)dsiSaveGetResultCode);
+			setBL(0x02047380, (u32)dsiSaveCreate);
+			setBL(0x02047390, (u32)dsiSaveOpen);
+			setBL(0x020473B8, (u32)dsiSaveWrite);
+			setBL(0x020473C8, (u32)dsiSaveWrite);
+			setBL(0x020473D8, (u32)dsiSaveWrite);
+			setBL(0x02047410, (u32)dsiSaveWrite);
+			setBL(0x02047418, (u32)dsiSaveClose);
+			setBL(0x02047558, (u32)dsiSaveGetInfo);
+			setBL(0x02047568, (u32)dsiSaveOpen);
+			setBL(0x02047588, (u32)dsiSaveSeek);
+			setBL(0x02047598, (u32)dsiSaveWrite);
+			setBL(0x020475A0, (u32)dsiSaveClose);
+			setBL(0x020475E4, (u32)dsiSaveOpen);
+			setBL(0x020475F4, (u32)dsiSaveSeek);
+			setBL(0x02047604, (u32)dsiSaveRead);
+			setBL(0x0204760C, (u32)dsiSaveClose);
+		}
+		if (!twlFontFound) {
+			*(u32*)0x020494FC = 0xE12FFF1E; // bx lr (Skip Manual screen)
+		}
+	}
+
+	// Hints Hunter (Europe)
+	else if (strcmp(romTid, "KHIP") == 0) {
+		if (saveOnFlashcard) {
+			setBL(0x02044060, (u32)dsiSaveOpen);
+			setBL(0x02044074, (u32)dsiSaveGetResultCode);
+			setBL(0x02044098, (u32)dsiSaveCreate);
+			setBL(0x020440A0, (u32)dsiSaveGetResultCode);
+			setBL(0x0204414C, (u32)dsiSaveOpen);
+			setBL(0x0204415C, (u32)dsiSaveGetResultCode);
+			setBL(0x02044178, (u32)dsiSaveCreate);
+			setBL(0x02044188, (u32)dsiSaveOpen);
+			setBL(0x020441B0, (u32)dsiSaveWrite);
+			setBL(0x020441C0, (u32)dsiSaveWrite);
+			setBL(0x020441D4, (u32)dsiSaveWrite);
+			setBL(0x02044220, (u32)dsiSaveWrite);
+			setBL(0x0204422C, (u32)dsiSaveClose);
+			setBL(0x020443E4, (u32)dsiSaveGetInfo);
+			setBL(0x020443F4, (u32)dsiSaveOpen);
+			setBL(0x02044414, (u32)dsiSaveSeek);
+			setBL(0x02044424, (u32)dsiSaveWrite);
+			setBL(0x0204442C, (u32)dsiSaveClose);
+			setBL(0x02044470, (u32)dsiSaveOpen);
+			setBL(0x02044480, (u32)dsiSaveSeek);
+			setBL(0x02044490, (u32)dsiSaveRead);
+			setBL(0x02044498, (u32)dsiSaveClose);
+		}
+		if (!twlFontFound) {
+			*(u32*)0x02046834 = 0xE12FFF1E; // bx lr (Skip Manual screen)
+		}
+	}
+
 	// JellyCar 2 (USA)
 	else if (strcmp(romTid, "KJYE") == 0) {
 		if (saveOnFlashcard) {
