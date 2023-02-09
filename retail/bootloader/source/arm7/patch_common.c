@@ -228,29 +228,123 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// 101 Pinball World (USA)
-	// Requires 8MB of RAM
-	else if (strcmp(romTid, "KIIE") == 0 && extendedMemory2) {
+	else if (strcmp(romTid, "KIIE") == 0) {
+		*(u32*)0x0204F46C = 0xE1A00000; // nop (Skip Manual screen)
 		*(u32*)0x02093EB0 = 0xE1A00000; // nop
 		*(u32*)0x02097220 = 0xE1A00000; // nop
 		patchInitDSiWare(0x0209D104, heapEnd);
+		*(u32*)0x0209D490 = *(u32*)0x02004FE8;
 		patchUserSettingsReadDSiWare(0x0209E8F0);
+		*(u32*)0x0209ED24 = 0xE1A00000; // nop
+		*(u32*)0x0209ED28 = 0xE1A00000; // nop
+		*(u32*)0x0209ED2C = 0xE1A00000; // nop
+		*(u32*)0x0209ED30 = 0xE1A00000; // nop
 		*(u32*)0x020A1D28 = 0xE1A00000; // nop
-		*(u32*)0x020B7B0C = 0xE3A00001; // mov r0, #1
+		if (!extendedMemory2) {
+			*(u32*)0x020A9BF4 = 0xE12FFF1E; // bx lr (Disable music)
+			*(u32*)0x020A9AF8 = 0xE12FFF1E; // bx lr (Disable sounds)
+		}
+		/* *(u32*)0x020B7B0C = 0xE3A00001; // mov r0, #1
 		*(u32*)0x020B7B30 = 0xE3A00001; // mov r0, #1
-		*(u32*)0x020B7B54 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x020B7B54 = 0xE3A00001; // mov r0, #1 */
+		setBL(0x020C6788, (u32)dsiSaveOpen);
+		setBL(0x020C67B8, (u32)dsiSaveRead);
+		setBL(0x020C67C0, (u32)dsiSaveClose);
+		setBL(0x020C6890, (u32)dsiSaveOpen);
+		setBL(0x020C68C0, (u32)dsiSaveRead);
+		setBL(0x020C68C8, (u32)dsiSaveClose);
+		*(u32*)0x020C69B4 = 0xE1A00000; // nop
+		*(u32*)0x020C69CC = 0xE1A00000; // nop
+		setBL(0x020C6A28, (u32)dsiSaveOpen);
+		setBL(0x020C6A58, (u32)dsiSaveRead);
+		setBL(0x020C6A60, (u32)dsiSaveClose);
+		setBL(0x020C6AEC, (u32)dsiSaveOpen);
+		setBL(0x020C6B18, (u32)dsiSaveRead);
+		setBL(0x020C6B20, (u32)dsiSaveClose);
+		*(u32*)0x020C6B8C = 0xE1A00000; // nop
+		*(u32*)0x020C6B9C = 0xE1A00000; // nop
+		setBL(0x020C6BF0, (u32)dsiSaveOpen);
+		setBL(0x020C6C04, (u32)dsiSaveClose);
+		*(u32*)0x020C6C78 = 0xE1A00000; // nop
+		*(u32*)0x020C6C90 = 0xE1A00000; // nop
+		setBL(0x020C6D04, (u32)dsiSaveOpen);
+		setBL(0x020C6D34, (u32)dsiSaveRead);
+		setBL(0x020C6D3C, (u32)dsiSaveClose);
+		setBL(0x020C6DAC, (u32)dsiSaveOpen);
+		setBL(0x020C6DD8, (u32)dsiSaveRead);
+		setBL(0x020C6DE0, (u32)dsiSaveClose);
+		setBL(0x020C6E80, (u32)dsiSaveOpen);
+		setBL(0x020C6EB0, (u32)dsiSaveRead);
+		setBL(0x020C6EB8, (u32)dsiSaveClose);
+		setBL(0x020C6F28, (u32)dsiSaveOpen);
+		setBL(0x020C6F54, (u32)dsiSaveRead);
+		setBL(0x020C6F5C, (u32)dsiSaveClose);
+		*(u32*)0x020C6FBC = 0xE1A00000; // nop
+		*(u32*)0x020C6FCC = 0xE1A00000; // nop
+		setBL(0x020C7038, (u32)dsiSaveOpen);
+		setBL(0x020C704C, (u32)dsiSaveClose);
+		setBL(0x020C7060, (u32)dsiSaveCreate);
+		setBL(0x020C707C, (u32)dsiSaveOpen);
+		*(u32*)0x020C708C = 0xE1A00000; // nop
+		setBL(0x020C7098, (u32)dsiSaveClose);
+		setBL(0x020C70A0, (u32)dsiSaveDelete);
+		setBL(0x020C70B8, (u32)dsiSaveCreate);
+		setBL(0x020C70C8, (u32)dsiSaveOpen);
+		setBL(0x020C70E4, (u32)dsiSaveSetLength);
+		setBL(0x020C70F4, (u32)dsiSaveWrite);
+		setBL(0x020C70FC, (u32)dsiSaveClose);
 	}
 
 	// 101 Pinball World (Europe)
-	// Requires 8MB of RAM
-	else if (strcmp(romTid, "KIIP") == 0 && extendedMemory2) {
+	else if (strcmp(romTid, "KIIP") == 0) {
+		*(u32*)0x02049488 = 0xE1A00000; // nop (Skip Manual screen)
 		*(u32*)0x0208DC80 = 0xE1A00000; // nop
 		*(u32*)0x02090FF0 = 0xE1A00000; // nop
 		patchInitDSiWare(0x02096ED4, heapEnd);
+		*(u32*)0x02097260 = *(u32*)0x02004FE8;
 		patchUserSettingsReadDSiWare(0x020986C0);
+		*(u32*)0x02098AF4 = 0xE1A00000; // nop
+		*(u32*)0x02098AF8 = 0xE1A00000; // nop
+		*(u32*)0x02098AFC = 0xE1A00000; // nop
+		*(u32*)0x02098B00 = 0xE1A00000; // nop
 		*(u32*)0x0209BAF8 = 0xE1A00000; // nop
-		*(u32*)0x020B0888 = 0xE3A00001; // mov r0, #1
+		if (!extendedMemory2) {
+			*(u32*)0x020A2AAC = 0xE12FFF1E; // bx lr (Disable music)
+			*(u32*)0x020A29B0 = 0xE12FFF1E; // bx lr (Disable sounds)
+		}
+		/* *(u32*)0x020B0888 = 0xE3A00001; // mov r0, #1
 		*(u32*)0x020B08AC = 0xE3A00001; // mov r0, #1
-		*(u32*)0x020B08D0 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x020B08D0 = 0xE3A00001; // mov r0, #1 */
+		setBL(0x020BC4D0, (u32)dsiSaveOpen);
+		setBL(0x020BC500, (u32)dsiSaveRead);
+		setBL(0x020BC508, (u32)dsiSaveClose);
+		setBL(0x020BC5D8, (u32)dsiSaveOpen);
+		setBL(0x020BC608, (u32)dsiSaveRead);
+		setBL(0x020BC610, (u32)dsiSaveClose);
+		*(u32*)0x020BC6FC = 0xE1A00000; // nop
+		*(u32*)0x020BC714 = 0xE1A00000; // nop
+		setBL(0x020BC770, (u32)dsiSaveOpen);
+		setBL(0x020BC7A0, (u32)dsiSaveRead);
+		setBL(0x020BC7A8, (u32)dsiSaveClose);
+		setBL(0x020BC834, (u32)dsiSaveOpen);
+		setBL(0x020BC860, (u32)dsiSaveRead);
+		setBL(0x020BC868, (u32)dsiSaveClose);
+		*(u32*)0x020BC8D4 = 0xE1A00000; // nop
+		*(u32*)0x020BC8E4 = 0xE1A00000; // nop
+		setBL(0x020BC938, (u32)dsiSaveOpen);
+		setBL(0x020BC94C, (u32)dsiSaveClose);
+		setBL(0x020BC9D0, (u32)dsiSaveOpen);
+		setBL(0x020BC9E4, (u32)dsiSaveClose);
+		setBL(0x020BC9F8, (u32)dsiSaveCreate);
+		setBL(0x020BCA14, (u32)dsiSaveOpen);
+		*(u32*)0x020BCA24 = 0xE1A00000; // nop
+		setBL(0x020BCA30, (u32)dsiSaveClose);
+		setBL(0x020BCA38, (u32)dsiSaveDelete);
+		setBL(0x020BCA50, (u32)dsiSaveCreate);
+		setBL(0x020BCA60, (u32)dsiSaveOpen);
+		setBL(0x020BCA7C, (u32)dsiSaveSetLength);
+		setBL(0x020BCA8C, (u32)dsiSaveWrite);
+		setBL(0x020BCA94, (u32)dsiSaveClose);
 	}
 
 	// 18th Gate (USA)

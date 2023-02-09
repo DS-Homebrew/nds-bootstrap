@@ -126,6 +126,86 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// 101 Pinball World (USA)
+	else if (strcmp(romTid, "KIIE") == 0) {
+		if (!twlFontFound) {
+			*(u32*)0x0204F46C = 0xE1A00000; // nop (Skip Manual screen)
+		}
+		if (saveOnFlashcard) {
+			setBL(0x020C6788, (u32)dsiSaveOpen);
+			setBL(0x020C67B8, (u32)dsiSaveRead);
+			setBL(0x020C67C0, (u32)dsiSaveClose);
+			setBL(0x020C6890, (u32)dsiSaveOpen);
+			setBL(0x020C68C0, (u32)dsiSaveRead);
+			setBL(0x020C68C8, (u32)dsiSaveClose);
+			setBL(0x020C6A28, (u32)dsiSaveOpen);
+			setBL(0x020C6A58, (u32)dsiSaveRead);
+			setBL(0x020C6A60, (u32)dsiSaveClose);
+			setBL(0x020C6AEC, (u32)dsiSaveOpen);
+			setBL(0x020C6B18, (u32)dsiSaveRead);
+			setBL(0x020C6B20, (u32)dsiSaveClose);
+			setBL(0x020C6BF0, (u32)dsiSaveOpen);
+			setBL(0x020C6C04, (u32)dsiSaveClose);
+			setBL(0x020C6D04, (u32)dsiSaveOpen);
+			setBL(0x020C6D34, (u32)dsiSaveRead);
+			setBL(0x020C6D3C, (u32)dsiSaveClose);
+			setBL(0x020C6DAC, (u32)dsiSaveOpen);
+			setBL(0x020C6DD8, (u32)dsiSaveRead);
+			setBL(0x020C6DE0, (u32)dsiSaveClose);
+			setBL(0x020C6E80, (u32)dsiSaveOpen);
+			setBL(0x020C6EB0, (u32)dsiSaveRead);
+			setBL(0x020C6EB8, (u32)dsiSaveClose);
+			setBL(0x020C6F28, (u32)dsiSaveOpen);
+			setBL(0x020C6F54, (u32)dsiSaveRead);
+			setBL(0x020C6F5C, (u32)dsiSaveClose);
+			setBL(0x020C7038, (u32)dsiSaveOpen);
+			setBL(0x020C704C, (u32)dsiSaveClose);
+			setBL(0x020C7060, (u32)dsiSaveCreate);
+			setBL(0x020C707C, (u32)dsiSaveOpen);
+			setBL(0x020C7098, (u32)dsiSaveClose);
+			setBL(0x020C70A0, (u32)dsiSaveDelete);
+			setBL(0x020C70B8, (u32)dsiSaveCreate);
+			setBL(0x020C70C8, (u32)dsiSaveOpen);
+			setBL(0x020C70E4, (u32)dsiSaveSetLength);
+			setBL(0x020C70F4, (u32)dsiSaveWrite);
+			setBL(0x020C70FC, (u32)dsiSaveClose);
+		}
+	}
+
+	// 101 Pinball World (Europe)
+	else if (strcmp(romTid, "KIIP") == 0) {
+		if (!twlFontFound) {
+			*(u32*)0x02049488 = 0xE1A00000; // nop (Skip Manual screen)
+		}
+		if (saveOnFlashcard) {
+			setBL(0x020BC4D0, (u32)dsiSaveOpen);
+			setBL(0x020BC500, (u32)dsiSaveRead);
+			setBL(0x020BC508, (u32)dsiSaveClose);
+			setBL(0x020BC5D8, (u32)dsiSaveOpen);
+			setBL(0x020BC608, (u32)dsiSaveRead);
+			setBL(0x020BC610, (u32)dsiSaveClose);
+			setBL(0x020BC770, (u32)dsiSaveOpen);
+			setBL(0x020BC7A0, (u32)dsiSaveRead);
+			setBL(0x020BC7A8, (u32)dsiSaveClose);
+			setBL(0x020BC834, (u32)dsiSaveOpen);
+			setBL(0x020BC860, (u32)dsiSaveRead);
+			setBL(0x020BC868, (u32)dsiSaveClose);
+			setBL(0x020BC938, (u32)dsiSaveOpen);
+			setBL(0x020BC94C, (u32)dsiSaveClose);
+			setBL(0x020BC9D0, (u32)dsiSaveOpen);
+			setBL(0x020BC9E4, (u32)dsiSaveClose);
+			setBL(0x020BC9F8, (u32)dsiSaveCreate);
+			setBL(0x020BCA14, (u32)dsiSaveOpen);
+			setBL(0x020BCA30, (u32)dsiSaveClose);
+			setBL(0x020BCA38, (u32)dsiSaveDelete);
+			setBL(0x020BCA50, (u32)dsiSaveCreate);
+			setBL(0x020BCA60, (u32)dsiSaveOpen);
+			setBL(0x020BCA7C, (u32)dsiSaveSetLength);
+			setBL(0x020BCA8C, (u32)dsiSaveWrite);
+			setBL(0x020BCA94, (u32)dsiSaveClose);
+		}
+	}
+
 	// 18th Gate (USA)
 	else if (strcmp(romTid, "KXOE") == 0 && saveOnFlashcard) {
 		setBL(0x020D172C, (u32)dsiSaveGetInfo);
