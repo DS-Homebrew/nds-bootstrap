@@ -6019,53 +6019,74 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// DotMan (USA)
 	else if (strcmp(romTid, "KHEE") == 0) {
-		*(u32*)0x02005358 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		useSharedFont = (twlFontFound && debugOrMep);
+		if (useSharedFont) {
+			if (!extendedMemory2) {
+				patchTwlFontLoad(0x020226E4, 0x020186A0);
+			}
+		} else {
+			*(u32*)0x02005358 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+
+			// Skip Manual screen
+			for (int i = 0; i < 11; i++) {
+				u32* offset = (u32*)0x02022600;
+				offset[i] = 0xE1A00000; // nop
+			}
+		}
 		*(u32*)0x0200E038 = 0xE1A00000; // nop
 		*(u32*)0x0201158C = 0xE1A00000; // nop
 		patchInitDSiWare(0x02016C80, heapEnd);
 		patchUserSettingsReadDSiWare(0x02018120);
 		*(u32*)0x0201ADA8 = 0xE1A00000; // nop
 		*(u32*)0x0201D1A0 = 0xE1A00000; // nop
-
-		// Skip Manual screen
-		for (int i = 0; i < 11; i++) {
-			u32* offset = (u32*)0x02022600;
-			offset[i] = 0xE1A00000; // nop
-		}
 	}
 
 	// DotMan (Europe)
 	else if (strcmp(romTid, "KHEP") == 0) {
-		*(u32*)0x02005370 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		useSharedFont = (twlFontFound && debugOrMep);
+		if (useSharedFont) {
+			if (!extendedMemory2) {
+				patchTwlFontLoad(0x020227CC, 0x02018780);
+			}
+		} else {
+			*(u32*)0x02005370 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+
+			// Skip Manual screen
+			for (int i = 0; i < 11; i++) {
+				u32* offset = (u32*)0x020226DC;
+				offset[i] = 0xE1A00000; // nop
+			}
+		}
 		*(u32*)0x0200E074 = 0xE1A00000; // nop
 		*(u32*)0x02011650 = 0xE1A00000; // nop
 		patchInitDSiWare(0x02016D60, heapEnd);
 		patchUserSettingsReadDSiWare(0x02018200);
 		*(u32*)0x0201AE88 = 0xE1A00000; // nop
 		*(u32*)0x0201D280 = 0xE1A00000; // nop
-
-		// Skip Manual screen
-		for (int i = 0; i < 11; i++) {
-			u32* offset = (u32*)0x020226DC;
-			offset[i] = 0xE1A00000; // nop
-		}
 	}
 
 	// DotMan (Japan)
 	else if (strcmp(romTid, "KHEJ") == 0) {
-		*(u32*)0x02005358 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		useSharedFont = (twlFontFound && debugOrMep);
+		if (useSharedFont) {
+			if (!extendedMemory2) {
+				patchTwlFontLoad(0x02022570, 0x0201867C);
+			}
+		} else {
+			*(u32*)0x02005358 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+
+			// Skip Manual screen
+			for (int i = 0; i < 11; i++) {
+				u32* offset = (u32*)0x0202248C;
+				offset[i] = 0xE1A00000; // nop
+			}
+		}
 		*(u32*)0x0200E014 = 0xE1A00000; // nop
 		*(u32*)0x02011568 = 0xE1A00000; // nop
 		patchInitDSiWare(0x02016C5C, heapEnd);
 		patchUserSettingsReadDSiWare(0x020180FC);
 		*(u32*)0x0201AD84 = 0xE1A00000; // nop
 		*(u32*)0x0201D080 = 0xE1A00000; // nop
-
-		// Skip Manual screen
-		for (int i = 0; i < 11; i++) {
-			u32* offset = (u32*)0x0202248C;
-			offset[i] = 0xE1A00000; // nop
-		}
 	}
 
 	// Dr. Mario Express (USA)
@@ -7281,13 +7302,16 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Fall in the Dark (Japan)
 	// A bit hard/confusing to add save support
 	else if (strcmp(romTid, "K4EJ") == 0) {
+		useSharedFont = twlFontFound;
 		*(u32*)0x02010284 = 0xE1A00000; // nop
 		*(u32*)0x02013894 = 0xE1A00000; // nop
 		patchInitDSiWare(0x02019000, heapEnd);
 		patchUserSettingsReadDSiWare(0x0201A5C0);
 		*(u32*)0x0201DB40 = 0xE1A00000; // nop
 		*(u32*)0x02022CA0 = 0xE12FFF1E; // bx lr
-		*(u32*)0x0203EE0C = 0xE1A00000; // nop (Skip Manual screen)
+		if (!twlFontFound) {
+			*(u32*)0x0203EE0C = 0xE1A00000; // nop (Skip Manual screen)
+		}
 	}
 
 	// Famicom Wars DS: Ushinawareta Hikari (Japan)
@@ -8067,6 +8091,19 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02048314 = 0xE1A00000; // nop
 	}*/
 
+	// Hachiwandaiba DS: Naru Zouku Ha Samishougi (Japan)
+	else if (strcmp(romTid, "K83J") == 0) {
+		useSharedFont = twlFontFound;
+		*(u32*)0x02010124 = 0xE1A00000; // nop
+		*(u32*)0x02013464 = 0xE1A00000; // nop
+		patchInitDSiWare(0x0201855C, heapEnd);
+		patchUserSettingsReadDSiWare(0x02019B0C);
+		*(u32*)0x0201D084 = 0xE1A00000; // nop
+		if (!twlFontFound) {
+			*(u32*)0x02043198 = 0xE1A00000; // nop (Skip Manual screen)
+		}
+	}
+
 	// Halloween Trick or Treat (USA)
 	else if (strcmp(romTid, "KZHE") == 0) {
 		*(u32*)0x0200E0D0 = 0xE1A00000; // nop
@@ -8095,7 +8132,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Halloween Trick or Treat (Europe)
 	else if (strcmp(romTid, "KZHP") == 0) {
-		useSharedFont = (twlFontFound && debugOrMep);
 		*(u32*)0x0200E1A4 = 0xE1A00000; // nop
 		*(u32*)0x02011670 = 0xE1A00000; // nop
 		patchInitDSiWare(0x02016394, heapEnd);
@@ -8533,15 +8569,22 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Kung Fu Dragon (USA)
 	// Kung Fu Dragon (Europe)
 	else if (strcmp(romTid, "KT9E") == 0 || strcmp(romTid, "KT9P") == 0) {
+		useSharedFont = (twlFontFound && debugOrMep);
 		*(u32*)0x02005154 = 0xE1A00000; // nop
 		*(u32*)0x020051D4 = 0xE1A00000; // nop
-		*(u32*)0x02005310 = 0xE1A00000; // nop (Skip Manual screen)
+		if (useSharedFont) {
+			if (!extendedMemory2) {
+				patchTwlFontLoad(0x0201F3E4, 0x02018F3C);
+			}
+		} else {
+			*(u32*)0x02005310 = 0xE1A00000; // nop (Skip Manual screen)
+			*(u32*)0x0201D8EC = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		}
 		*(u32*)0x0200E8F4 = 0xE1A00000; // nop
 		*(u32*)0x02011D90 = 0xE1A00000; // nop
 		patchInitDSiWare(0x0201751C, heapEnd);
 		patchUserSettingsReadDSiWare(0x020189BC);
 		*(u32*)0x0201BD60 = 0xE1A00000; // nop
-		*(u32*)0x0201D8EC = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		setBL(0x0201DA28, (u32)dsiSaveOpen);
 		setBL(0x0201DA50, (u32)dsiSaveRead);
 		setBL(0x0201DA60, (u32)dsiSaveRead);
@@ -8557,15 +8600,22 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Akushon Gemu: Tobeyo!! Dorago! (Japan)
 	else if (strcmp(romTid, "KT9J") == 0) {
+		useSharedFont = (twlFontFound && debugOrMep);
 		*(u32*)0x02005158 = 0xE1A00000; // nop
 		*(u32*)0x020051D8 = 0xE1A00000; // nop
-		*(u32*)0x020052F0 = 0xE1A00000; // nop (Skip Manual screen)
+		if (useSharedFont) {
+			if (!extendedMemory2) {
+				patchTwlFontLoad(0x0201F3B8, 0x02018F10);
+			}
+		} else {
+			*(u32*)0x020052F0 = 0xE1A00000; // nop (Skip Manual screen)
+			*(u32*)0x0201D8C0 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		}
 		*(u32*)0x0200E8C8 = 0xE1A00000; // nop
 		*(u32*)0x02011D64 = 0xE1A00000; // nop
 		patchInitDSiWare(0x020174F0, heapEnd);
 		patchUserSettingsReadDSiWare(0x02018990);
 		*(u32*)0x0201BD34 = 0xE1A00000; // nop
-		*(u32*)0x0201D8C0 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		setBL(0x0201D9FC, (u32)dsiSaveOpen);
 		setBL(0x0201DA24, (u32)dsiSaveRead);
 		setBL(0x0201DA34, (u32)dsiSaveRead);
@@ -9320,14 +9370,21 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Magical Whip (USA)
 	else if (strcmp(romTid, "KWME") == 0) {
+		useSharedFont = (twlFontFound && debugOrMep);
 		*(u32*)0x0200E5D4 = 0xE1A00000; // nop
 		*(u32*)0x02011A18 = 0xE1A00000; // nop
 		patchInitDSiWare(0x020172B8, heapEnd);
 		patchUserSettingsReadDSiWare(0x02018758);
 		*(u32*)0x0201BAFC = 0xE1A00000; // nop
-		*(u32*)0x0201D4F8 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		if (useSharedFont) {
+			if (!extendedMemory2) {
+				patchTwlFontLoad(0x02030914, 0x02018CD8);
+			}
+		} else {
+			*(u32*)0x0201D4F8 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+			*(u32*)0x02030288 = 0xE1A00000; // nop (Skip Manual screen)
+		}
 		*(u32*)0x02026E94 = 0xE1A00000; // nop
-		*(u32*)0x02030288 = 0xE1A00000; // nop (Skip Manual screen)
 		setBL(0x0203F434, (u32)dsiSaveOpen);
 		setBL(0x0203F46C, (u32)dsiSaveSetLength);
 		setBL(0x0203F50C, (u32)dsiSaveWrite);
@@ -9344,14 +9401,21 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Magical Whip (Europe)
 	else if (strcmp(romTid, "KWMP") == 0) {
+		useSharedFont = (twlFontFound && debugOrMep);
 		*(u32*)0x0200E610 = 0xE1A00000; // nop
 		*(u32*)0x02011ADC = 0xE1A00000; // nop
 		patchInitDSiWare(0x02017398, heapEnd);
 		patchUserSettingsReadDSiWare(0x02018838);
 		*(u32*)0x0201BBDC = 0xE1A00000; // nop
-		*(u32*)0x0201D5D8 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		if (useSharedFont) {
+			if (!extendedMemory2) {
+				patchTwlFontLoad(0x020309F4, 0x02018DB8);
+			}
+		} else {
+			*(u32*)0x0201D5D8 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+			*(u32*)0x02030368 = 0xE1A00000; // nop (Skip Manual screen)
+		}
 		*(u32*)0x02026F74 = 0xE1A00000; // nop
-		*(u32*)0x02030368 = 0xE1A00000; // nop (Skip Manual screen)
 		setBL(0x0203F514, (u32)dsiSaveOpen);
 		setBL(0x0203F54C, (u32)dsiSaveSetLength);
 		setBL(0x0203F5EC, (u32)dsiSaveWrite);
@@ -13233,31 +13297,52 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Quick Fill Q (Europe)
 	// A bit hard/confusing to add save support
 	else if (strcmp(romTid, "KUME") == 0 || strcmp(romTid, "KUMP") == 0) {
+		useSharedFont = (twlFontFound && debugOrMep);
 		*(u32*)0x02010300 = 0xE1A00000; // nop
 		*(u32*)0x020139A4 = 0xE1A00000; // nop
 		patchInitDSiWare(0x02019170, heapEnd);
 		patchUserSettingsReadDSiWare(0x0201A740);
 		*(u32*)0x0201DDB0 = 0xE1A00000; // nop
 		// *(u32*)0x0203EA70 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
-		*(u32*)0x02040240 = 0xE1A00000; // nop (Skip Manual screen)
+		if (useSharedFont) {
+			if (!extendedMemory2) {
+				patchTwlFontLoad(0x020330EC, 0x0201ACB0);
+			}
+		} else {
+			*(u32*)0x02040240 = 0xE1A00000; // nop (Skip Manual screen)
+		}
 	}
 
 	// Anaume Pazuru Gemu Q (Japan)
 	// A bit hard/confusing to add save support
 	else if (strcmp(romTid, "KUMJ") == 0) {
+		useSharedFont = (twlFontFound && debugOrMep);
 		*(u32*)0x020102DC = 0xE1A00000; // nop
 		*(u32*)0x02013980 = 0xE1A00000; // nop
 		patchInitDSiWare(0x0201914C, heapEnd);
 		patchUserSettingsReadDSiWare(0x0201A71C);
 		*(u32*)0x0201DD8C = 0xE1A00000; // nop
-		*(u32*)0x02040460 = 0xE1A00000; // nop (Skip Manual screen)
+		if (useSharedFont) {
+			if (!extendedMemory2) {
+				patchTwlFontLoad(0x020330C8, 0x0201AC8C);
+			}
+		} else {
+			*(u32*)0x02040460 = 0xE1A00000; // nop (Skip Manual screen)
+		}
 	}
 
 	// Rabi Laby (USA)
 	// Rabi Laby (Europe)
 	else if (strcmp(romTid, "KLBE") == 0 || strcmp(romTid, "KLBP") == 0) {
-		*(u32*)0x020051C8 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
-		*(u32*)0x020053A8 = 0xE1A00000; // nop (Skip Manual screen)
+		useSharedFont = (twlFontFound && debugOrMep);
+		if (useSharedFont) {
+			if (!extendedMemory2) {
+				patchTwlFontLoad(0x0201DDF0, 0x02018120);
+			}
+		} else {
+			*(u32*)0x020051C8 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+			*(u32*)0x020053A8 = 0xE1A00000; // nop (Skip Manual screen)
+		}
 		*(u32*)0x0200DC38 = 0xE1A00000; // nop
 		*(u32*)0x020110D4 = 0xE1A00000; // nop
 		patchInitDSiWare(0x02016700, heapEnd);
@@ -13285,8 +13370,15 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Akushon Pazuru: Rabi x Rabi (Japan)
 	else if (strcmp(romTid, "KLBJ") == 0) {
-		*(u32*)0x02005190 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
-		*(u32*)0x02005360 = 0xE1A00000; // nop (Skip Manual screen)
+		useSharedFont = (twlFontFound && debugOrMep);
+		if (useSharedFont) {
+			if (!extendedMemory2) {
+				patchTwlFontLoad(0x0201DC78, 0x02017FF0);
+			}
+		} else {
+			*(u32*)0x02005190 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+			*(u32*)0x02005360 = 0xE1A00000; // nop (Skip Manual screen)
+		}
 		*(u32*)0x0200DBAC = 0xE1A00000; // nop
 		*(u32*)0x02010FC0 = 0xE1A00000; // nop
 		patchInitDSiWare(0x020165D0, heapEnd);
@@ -13313,8 +13405,15 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Akushon Pazuru: Rabi x Rabi Episodo 2 (Japan)
 	// Saving does not work properly
 	else if (strncmp(romTid, "KLV", 3) == 0) {
-		*(u32*)0x020051E8 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
-		*(u32*)0x0200540C = 0xE1A00000; // nop (Skip Manual screen)
+		useSharedFont = (twlFontFound && debugOrMep);
+		if (useSharedFont) {
+			if (!extendedMemory2) {
+				patchTwlFontLoad(0x02035658, 0x02017FCC);
+			}
+		} else {
+			*(u32*)0x020051E8 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+			*(u32*)0x0200540C = 0xE1A00000; // nop (Skip Manual screen)
+		}
 		*(u32*)0x0200DAE4 = 0xE1A00000; // nop
 		*(u32*)0x02010F80 = 0xE1A00000; // nop
 		patchInitDSiWare(0x020165AC, heapEnd);
@@ -13514,7 +13613,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	else if (strcmp(romTid, "KLXJ") == 0) {
 		useSharedFont = (twlFontFound && debugOrMep);
 		if (useSharedFont) {
-			if (!extendedMemory2 && expansionPakFound) {
+			if (!extendedMemory2) {
 				patchTwlFontLoad(0x020336CC, 0x0201AE24);
 			}
 		} else {
@@ -14023,7 +14122,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBL(0x02030FFC, (u32)dsiSaveRead);
 			setBL(0x02031040, (u32)dsiSaveClose);
 			setBL(0x0203105C, (u32)dsiSaveClose);
-			if (useSharedFont && !extendedMemory2 && expansionPakFound) {
+			if (useSharedFont && !extendedMemory2) {
 				patchTwlFontLoad(0x02031158, 0x02019548);
 			}
 		} else {
@@ -14037,7 +14136,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBL(0x020310B8, (u32)dsiSaveRead);
 			setBL(0x020310FC, (u32)dsiSaveClose);
 			setBL(0x02031118, (u32)dsiSaveClose);
-			if (useSharedFont && !extendedMemory2 && expansionPakFound) {
+			if (useSharedFont && !extendedMemory2) {
 				patchTwlFontLoad(0x02031214, 0x02019548);
 			}
 		}

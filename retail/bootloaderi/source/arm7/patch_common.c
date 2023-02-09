@@ -4319,6 +4319,11 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// Hachiwandaiba DS: Naru Zouku Ha Samishougi (Japan)
+	else if (strcmp(romTid, "K83J") == 0 && !twlFontFound) {
+		*(u32*)0x02043198 = 0xE1A00000; // nop (Skip Manual screen)
+	}
+
 	// Halloween Trick or Treat (USA)
 	else if (strcmp(romTid, "KZHE") == 0 && saveOnFlashcard) {
 		setBL(0x0203D11C, (u32)dsiSaveOpen);
