@@ -2241,6 +2241,63 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// Animal Boxing (USA)
+	// Animal Boxing (Europe)
+	// Requires 8MB of RAM
+	else if ((strcmp(romTid, "KAXE") == 0 || strcmp(romTid, "KAXP") == 0) && extendedMemory2) {
+		useSharedFont = twlFontFound;
+		*(u32*)0x0201DCE4 = 0xE1A00000; // nop
+		*(u32*)0x02021764 = 0xE1A00000; // nop
+		patchInitDSiWare(0x02027B98, heapEnd);
+		patchUserSettingsReadDSiWare(0x02029080);
+		*(u32*)0x0202909C = 0xE3A00001; // mov r0, #1
+		*(u32*)0x020290A0 = 0xE12FFF1E; // bx lr
+		*(u32*)0x020290A8 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x020290AC = 0xE12FFF1E; // bx lr
+		*(u32*)0x0202C9C0 = 0xE1A00000; // nop
+		if (ndsHeader->gameCode[3] == 'E') {
+			setBL(0x020D1F18, (u32)dsiSaveOpen);
+			setBL(0x020D1F28, (u32)dsiSaveClose);
+			*(u32*)0x020D1F3C = 0xE1A00000; // nop
+			setBL(0x020D1F4C, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+			setBL(0x020D1F64, (u32)dsiSaveOpen);
+			setBL(0x020D1F88, (u32)dsiSaveSetLength);
+			setBL(0x020D1F9C, (u32)dsiSaveSeek);
+			setBL(0x020D1FDC, (u32)dsiSaveWrite);
+			setBL(0x020D1FE4, (u32)dsiSaveClose);
+			setBL(0x020D20C0, (u32)dsiSaveOpen);
+			setBL(0x020D2144, (u32)dsiSaveClose);
+			setBL(0x020D218C, (u32)dsiSaveSeek);
+			setBL(0x020D219C, (u32)dsiSaveWrite);
+			setBL(0x020D21D0, (u32)dsiSaveSeek);
+			setBL(0x020D21E0, (u32)dsiSaveRead);
+			if (!useSharedFont) {
+				*(u32*)0x020D3F38 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+			}
+			*(u32*)0x020D4070 = 0xE12FFF1E; // bx lr
+		} else {
+			setBL(0x020D1F5C, (u32)dsiSaveOpen);
+			setBL(0x020D1F6C, (u32)dsiSaveClose);
+			*(u32*)0x020D1F80 = 0xE1A00000; // nop
+			setBL(0x020D1F90, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+			setBL(0x020D1FA8, (u32)dsiSaveOpen);
+			setBL(0x020D1FCC, (u32)dsiSaveSetLength);
+			setBL(0x020D1FE0, (u32)dsiSaveSeek);
+			setBL(0x020D2020, (u32)dsiSaveWrite);
+			setBL(0x020D2028, (u32)dsiSaveClose);
+			setBL(0x020D2104, (u32)dsiSaveOpen);
+			setBL(0x020D2188, (u32)dsiSaveClose);
+			setBL(0x020D21D0, (u32)dsiSaveSeek);
+			setBL(0x020D21E0, (u32)dsiSaveWrite);
+			setBL(0x020D2214, (u32)dsiSaveSeek);
+			setBL(0x020D2224, (u32)dsiSaveRead);
+			if (!useSharedFont) {
+				*(u32*)0x020D3F7C = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+			}
+			*(u32*)0x020D40B4 = 0xE12FFF1E; // bx lr
+		}
+	}
+
 	// Animal Puzzle Adventure (USA)
 	else if (strcmp(romTid, "KPCE") == 0) {
 		useSharedFont = (twlFontFound && debugOrMep);

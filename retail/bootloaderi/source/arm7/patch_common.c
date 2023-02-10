@@ -1402,6 +1402,52 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0203C358, (u32)dsiSaveClose);
 	}
 
+	// Animal Boxing (USA)
+	else if (strcmp(romTid, "KAXE") == 0) {
+		if (saveOnFlashcard) {
+			setBL(0x020D1F18, (u32)dsiSaveOpen);
+			setBL(0x020D1F28, (u32)dsiSaveClose);
+			setBL(0x020D1F4C, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+			setBL(0x020D1F64, (u32)dsiSaveOpen);
+			setBL(0x020D1F88, (u32)dsiSaveSetLength);
+			setBL(0x020D1F9C, (u32)dsiSaveSeek);
+			setBL(0x020D1FDC, (u32)dsiSaveWrite);
+			setBL(0x020D1FE4, (u32)dsiSaveClose);
+			setBL(0x020D20C0, (u32)dsiSaveOpen);
+			setBL(0x020D2144, (u32)dsiSaveClose);
+			setBL(0x020D218C, (u32)dsiSaveSeek);
+			setBL(0x020D219C, (u32)dsiSaveWrite);
+			setBL(0x020D21D0, (u32)dsiSaveSeek);
+			setBL(0x020D21E0, (u32)dsiSaveRead);
+		}
+		if (!twlFontFound) {
+			*(u32*)0x020D3F38 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		}
+	}
+
+	// Animal Boxing (Europe)
+	else if (strcmp(romTid, "KAXP") == 0) {
+		if (saveOnFlashcard) {
+			setBL(0x020D1F5C, (u32)dsiSaveOpen);
+			setBL(0x020D1F6C, (u32)dsiSaveClose);
+			setBL(0x020D1F90, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+			setBL(0x020D1FA8, (u32)dsiSaveOpen);
+			setBL(0x020D1FCC, (u32)dsiSaveSetLength);
+			setBL(0x020D1FE0, (u32)dsiSaveSeek);
+			setBL(0x020D2020, (u32)dsiSaveWrite);
+			setBL(0x020D2028, (u32)dsiSaveClose);
+			setBL(0x020D2104, (u32)dsiSaveOpen);
+			setBL(0x020D2188, (u32)dsiSaveClose);
+			setBL(0x020D21D0, (u32)dsiSaveSeek);
+			setBL(0x020D21E0, (u32)dsiSaveWrite);
+			setBL(0x020D2214, (u32)dsiSaveSeek);
+			setBL(0x020D2224, (u32)dsiSaveRead);
+		}
+		if (!twlFontFound) {
+			*(u32*)0x020D3F7C = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		}
+	}
+
 	// Animal Puzzle Adventure (USA)
 	else if (strcmp(romTid, "KPCE") == 0 && saveOnFlashcard) {
 		setBL(0x020265B0, (u32)dsiSaveOpen);
