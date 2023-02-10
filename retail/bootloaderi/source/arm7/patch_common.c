@@ -4461,6 +4461,21 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0201B9E4 -= 0x6000; // Shift heap
 	}
 
+	// High Stakes Texas Hold'em (USA)
+	// High Stakes Texas Hold'em (Europe, Australia)
+	else if ((strcmp(romTid, "KTXE") == 0 || strcmp(romTid, "KTXV") == 0) && saveOnFlashcard) {
+		tonccpy((u32*)0x0200EE34, dsiSaveGetResultCode, 0xC);
+		setBL(0x0203A774, (u32)dsiSaveGetInfo);
+		setBL(0x0203A7E0, (u32)dsiSaveCreate);
+		setBL(0x0203A820, (u32)dsiSaveOpen);
+		setBL(0x0203A850, (u32)dsiSaveSetLength);
+		setBL(0x0203A860, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+		setBL(0x0203A8A0, (u32)dsiSaveClose);
+		setBL(0x0203A96C, (u32)dsiSaveOpen);
+		setBL(0x0203A9D0, (u32)dsiSaveRead); // dsiSaveReadAsync
+		setBL(0x0203AA0C, (u32)dsiSaveClose);
+	}
+
 	// Hints Hunter (USA)
 	else if (strcmp(romTid, "KHIE") == 0) {
 		if (saveOnFlashcard) {

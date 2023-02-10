@@ -8333,6 +8333,40 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0203B674 = 0xE1A00000; // nop
 	}*/
 
+	// High Stakes Texas Hold'em (USA)
+	// High Stakes Texas Hold'em (Europe, Australia)
+	else if (strcmp(romTid, "KTXE") == 0 || strcmp(romTid, "KTXV") == 0) {
+		*(u32*)0x0200E1A0 = 0xE1A00000; // nop
+		tonccpy((u32*)0x0200EE34, dsiSaveGetResultCode, 0xC);
+		*(u32*)0x02011F20 = 0xE1A00000; // nop
+		patchInitDSiWare(0x0201AF98, heapEnd);
+		// *(u32*)0x0201B308 = *(u32*)0x02004FC0;
+		*(u32*)0x0201B308 -= 0x30000;
+		patchUserSettingsReadDSiWare(0x0201C824);
+		*(u32*)0x0201C84C = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0201C850 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0201C858 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0201C85C = 0xE12FFF1E; // bx lr
+		*(u32*)0x0201FC68 = 0xE1A00000; // nop
+		setBL(0x0203A774, (u32)dsiSaveGetInfo);
+		*(u32*)0x0203A7B4 = 0xE1A00000; // nop
+		setBL(0x0203A7E0, (u32)dsiSaveCreate);
+		setBL(0x0203A820, (u32)dsiSaveOpen);
+		setBL(0x0203A850, (u32)dsiSaveSetLength);
+		setBL(0x0203A860, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+		setBL(0x0203A8A0, (u32)dsiSaveClose);
+		setBL(0x0203A96C, (u32)dsiSaveOpen);
+		setBL(0x0203A9D0, (u32)dsiSaveRead); // dsiSaveReadAsync
+		setBL(0x0203AA0C, (u32)dsiSaveClose);
+		if (ndsHeader->gameCode[3] == 'E') {
+			*(u32*)0x02064E50 = 0x280000;
+			*(u32*)0x02064E54 = 0x4000;
+		} else {
+			*(u32*)0x02064E70 = 0x280000;
+			*(u32*)0x02064E74 = 0x4000;
+		}
+	}
+
 	// Hints Hunter (USA)
 	else if (strcmp(romTid, "KHIE") == 0) {
 		*(u32*)0x0201672C = 0xE1A00000; // nop
