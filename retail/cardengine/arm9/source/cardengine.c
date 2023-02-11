@@ -1070,20 +1070,20 @@ s32 dsiSaveRead(void* ctx, void* dst, s32 len) {
 	cardReadInProgress = true;
 	setDeviceOwner();
 	bool res = false;
-	if (sharedFontOpened && (__myio_dldi.features & FEATURE_SLOT_GBA) && (u32)dst >= 0x08000000 && (u32)dst < 0x0A000000) {
+	if ((__myio_dldi.features & FEATURE_SLOT_GBA) && (u32)dst >= 0x08000000 && (u32)dst < 0x0A000000) {
 		s32 bufLen = len;
 		u32 dstAdd = 0;
 		while (1) {
-			u32 readLen = (bufLen > 0x800) ? 0x800 : len;
+			u32 readLen = (bufLen > 0x600) ? 0x600 : len;
 
-			res = fileRead((char*)0x027FF200, &sharedFontFile, dsiSaveSeekPos+dstAdd, readLen);
+			res = fileRead((char*)0x027FF200, sharedFontOpened ? &sharedFontFile : &savFile, dsiSaveSeekPos+dstAdd, readLen);
 			if (!res) {
 				break;
 			}
 			tonccpy((char*)dst+dstAdd, (char*)0x027FF200, readLen);
 
-			bufLen -= 0x800;
-			dstAdd += 0x800;
+			bufLen -= 0x600;
+			dstAdd += 0x600;
 
 			if (bufLen <= 0) {
 				break;
@@ -1120,7 +1120,29 @@ s32 dsiSaveWrite(void* ctx, void* src, s32 len) {
 	u16 exmemcnt = REG_EXMEMCNT;
 	cardReadInProgress = true;
 	setDeviceOwner();
-	bool res = fileWrite(src, &savFile, dsiSaveSeekPos, len);
+	bool res = false;
+	if ((__myio_dldi.features & FEATURE_SLOT_GBA) && (u32)src >= 0x08000000 && (u32)src < 0x0A000000) {
+		s32 bufLen = len;
+		u32 srcAdd = 0;
+		while (1) {
+			u32 readLen = (bufLen > 0x600) ? 0x600 : len;
+
+			tonccpy((char*)0x027FF200, (char*)src+srcAdd, readLen);
+			res = fileWrite((char*)0x027FF200, &savFile, dsiSaveSeekPos+srcAdd, readLen);
+			if (!res) {
+				break;
+			}
+
+			bufLen -= 0x600;
+			srcAdd += 0x600;
+
+			if (bufLen <= 0) {
+				break;
+			}
+		}
+	} else {
+		res = fileWrite(src, &savFile, dsiSaveSeekPos, len);
+	}
 	dsiSaveResultCode = res ? 0 : 1;
 	toncset32(ctx+0x14, dsiSaveResultCode, 1);
 	cardReadInProgress = false;

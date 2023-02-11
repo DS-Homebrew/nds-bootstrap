@@ -2153,6 +2153,26 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// Aru Seishun no Monogatari: Kouenji Joshi Sakka (Japan)
+	else if (strcmp(romTid, "KQJJ") == 0) {
+		if (!twlFontFound) {
+			*(u32*)0x020050C8 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+			*(u32*)0x02005110 = 0xE1A00000; // nop (Show white screen instead of manual screen)
+		}
+		if (saveOnFlashcard) {
+			setBL(0x02024EC0, (u32)dsiSaveGetResultCode);
+			*(u32*)0x02024FA8 = 0xE1A00000; // nop
+			setBL(0x02024FE0, (u32)dsiSaveOpen);
+			setBL(0x02025018, (u32)dsiSaveRead);
+			setBL(0x02025040, (u32)dsiSaveClose);
+			setBL(0x020250A4, (u32)dsiSaveOpen);
+			setBL(0x020250F0, (u32)dsiSaveWrite);
+			setBL(0x02025110, (u32)dsiSaveClose);
+			setBL(0x02025158, (u32)dsiSaveCreate);
+			setBL(0x020251B4, (u32)dsiSaveDelete);
+		}
+	}
+
 	// Astro (USA)
 	else if (strcmp(romTid, "K7DE") == 0 && saveOnFlashcard) {
 		setBL(0x02048AA8, (u32)dsiSaveOpenR);

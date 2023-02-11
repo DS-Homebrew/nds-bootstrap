@@ -615,6 +615,7 @@ static bool isROMLoadableInRAM(const tNDSHeader* ndsHeader, const char* romTid, 
 	 || (strncmp(romTid, "UOR", 3) != 0
 	 && strncmp(romTid, "KYP", 3) != 0 // 1st Class Poker & BlackJack
 	 && strncmp(romTid, "KXG", 3) != 0 // Abyss
+	 && (strncmp(romTid, "KQJ", 3) != 0 && s2FlashcardId != 0x5A45) // Aru Seishun no Monogatari: Kouenji Joshi Sakka
 	 && strncmp(romTid, "KTR", 3) != 0 // Clubhouse Games Express: Card Classics
 	 && strncmp(romTid, "KTC", 3) != 0 && strncmp(romTid, "KTP", 3) != 0 // Clubhouse Games Express: Family Favorites
 	 && strncmp(romTid, "KTD", 3) != 0 && strncmp(romTid, "KTB", 3) != 0 // Clubhouse Games Express: Strategy Pack

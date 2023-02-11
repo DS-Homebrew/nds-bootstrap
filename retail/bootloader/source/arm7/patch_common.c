@@ -3428,6 +3428,44 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		// *(u32*)0x02073628 = 0xE1A00000; // nop
 	}
 
+	// Aru Seishun no Monogatari: Kouenji Joshi Sakka (Japan)
+	// Requires either 8MB of RAM or Memory Expansion Pak
+	else if (strcmp(romTid, "KQJJ") == 0 && debugOrMep) {
+		const u32 mepAddr = (s2FlashcardId == 0x5A45) ? 0x08000000 : 0x09000000;
+
+		/* if (!extendedMemory2) {
+			for (u32 i = 0; i < ndsHeader->arm9binarySize/4; i++) {
+				u32* addr = (u32*)0x02004000;
+				u32 temp = *(u32*)0x02004FE8;
+				if (addr[i] >= (temp-0xA0000) && addr[i] <= temp) {
+					addr[i] -= 0xA0000;
+				}
+			}
+		} */
+
+		*(u32*)0x020050C8 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		*(u32*)0x02005110 = 0xE1A00000; // nop (Show white screen instead of manual screen)
+		*(u32*)0x0200C184 = 0xE1A00000; // nop
+		*(u32*)0x0200F86C = 0xE1A00000; // nop
+		patchInitDSiWare(0x02015BC4, extendedMemory2 ? heapEnd : mepAddr+0x700000);
+		*(u32*)0x02015F50 = extendedMemory2 ? *(u32*)0x02004FE8 : mepAddr;
+		patchUserSettingsReadDSiWare(0x0201730C);
+		*(u32*)0x0201A830 = 0xE1A00000; // nop
+		setBL(0x02024EC0, (u32)dsiSaveGetResultCode);
+		*(u32*)0x02024FA8 = 0xE1A00000; // nop
+		setBL(0x02024FE0, (u32)dsiSaveOpen);
+		setBL(0x02025018, (u32)dsiSaveRead);
+		setBL(0x02025040, (u32)dsiSaveClose);
+		setBL(0x020250A4, (u32)dsiSaveOpen);
+		setBL(0x020250F0, (u32)dsiSaveWrite);
+		setBL(0x02025110, (u32)dsiSaveClose);
+		setBL(0x02025158, (u32)dsiSaveCreate);
+		setBL(0x020251B4, (u32)dsiSaveDelete);
+		if (!extendedMemory2) {
+			*(u32*)0x0202B604 = 0xE3A00000; // mov r0, #0 (Disable MobiClip playback)
+		}
+	}
+
 	// Asphalt 4: Elite Racing (USA)
 	// Does not boot (Black screens)
 	/*else if (strcmp(romTid, "KA4E") == 0) {
