@@ -3337,6 +3337,65 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// Arrow of Laputa (Japan)
+	else if (strcmp(romTid, "KYAJ") == 0) {
+		setBL(0x02018F5C, (u32)dsiSaveCreate);
+		*(u32*)0x02018F7C = 0xE1A00000; // nop
+		setBL(0x02018F88, (u32)dsiSaveCreate);
+		setBL(0x02018FCC, (u32)dsiSaveOpen);
+		setBL(0x02018FF8, (u32)dsiSaveSetLength);
+		setBL(0x02019018, (u32)dsiSaveWrite);
+		setBL(0x02019028, (u32)dsiSaveWrite);
+		setBL(0x02019038, (u32)dsiSaveWrite);
+		setBL(0x02019048, (u32)dsiSaveWrite);
+		setBL(0x02019058, (u32)dsiSaveWrite);
+		setBL(0x02019068, (u32)dsiSaveWrite);
+		setBL(0x0201907C, (u32)dsiSaveWrite);
+		setBL(0x02019090, (u32)dsiSaveWrite);
+		setBL(0x020190A0, (u32)dsiSaveWrite);
+		setBL(0x020190B0, (u32)dsiSaveWrite);
+		setBL(0x020190C4, (u32)dsiSaveWrite);
+		setBL(0x020190CC, (u32)dsiSaveClose);
+		setBL(0x02019110, (u32)dsiSaveOpen);
+		*(u32*)0x0201912C = 0xE1A00000; // nop
+		setBL(0x0201913C, (u32)dsiSaveGetLength);
+		setBL(0x02019150, (u32)dsiSaveRead);
+		setBL(0x02019164, (u32)dsiSaveRead);
+		setBL(0x0201918C, (u32)dsiSaveRead);
+		setBL(0x0201919C, (u32)dsiSaveRead);
+		setBL(0x020191AC, (u32)dsiSaveRead);
+		setBL(0x020191BC, (u32)dsiSaveRead);
+		setBL(0x020191D0, (u32)dsiSaveRead);
+		setBL(0x020191E0, (u32)dsiSaveRead);
+		setBL(0x020191F0, (u32)dsiSaveRead);
+		setBL(0x02019200, (u32)dsiSaveRead);
+		setBL(0x02019214, (u32)dsiSaveRead);
+		setBL(0x0201921C, (u32)dsiSaveClose);
+		/* if (!extendedMemory2 && expansionPakFound) {
+			// Relocate object(?) heap to Memory Expansion Pak
+			// Not working correctly, as it crashes past the title screen
+			if (s2FlashcardId == 0x5A45) {
+				*(u32*)0x02028688 = 0xE3A00408; // mov r0, #0x08000000
+			} else {
+				*(u32*)0x02028688 = 0xE3A00409; // mov r0, #0x09000000
+			}
+		} */
+		*(u32*)0x02037120 = 0xE1A00000; // nop
+		tonccpy((u32*)0x02038D64, dsiSaveGetResultCode, 0xC);
+		*(u32*)0x0203B68C = 0xE1A00000; // nop
+		patchInitDSiWare(0x02042834, heapEnd);
+		*(u32*)0x02042BC0 = *(u32*)0x02004FD0;
+		patchUserSettingsReadDSiWare(0x02043CE8);
+		*(u32*)0x0204591C = 0xE1A00000; // nop
+		*(u32*)0x0204C978 = 0xE3A02702; // mov r2, #0x80000
+		if (!extendedMemory2) {
+			// if (!expansionPakFound) {
+				*(u32*)0x0204CEF8 = 0xE12FFF1E; // bx lr (Disable audio)
+			// }
+			// *(u32*)0x0204CF88 -= 0x20000; // Shrink sound heap from 0xE2400 to 0xC2400
+		}
+	}
+
 	// Artillery: Knights vs. Orcs (Europe)
 	else if (strcmp(romTid, "K9ZP") == 0) {
 		*(u32*)0x020050B8 = 0xE1A00000; // nop

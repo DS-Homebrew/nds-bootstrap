@@ -2091,6 +2091,41 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// Arrow of Laputa (Japan)
+	else if (strcmp(romTid, "KYAJ") == 0 && saveOnFlashcard) {
+		setBL(0x02018F5C, (u32)dsiSaveCreate);
+		setBL(0x02018F88, (u32)dsiSaveCreate);
+		setBL(0x02018FCC, (u32)dsiSaveOpen);
+		setBL(0x02018FF8, (u32)dsiSaveSetLength);
+		setBL(0x02019018, (u32)dsiSaveWrite);
+		setBL(0x02019028, (u32)dsiSaveWrite);
+		setBL(0x02019038, (u32)dsiSaveWrite);
+		setBL(0x02019048, (u32)dsiSaveWrite);
+		setBL(0x02019058, (u32)dsiSaveWrite);
+		setBL(0x02019068, (u32)dsiSaveWrite);
+		setBL(0x0201907C, (u32)dsiSaveWrite);
+		setBL(0x02019090, (u32)dsiSaveWrite);
+		setBL(0x020190A0, (u32)dsiSaveWrite);
+		setBL(0x020190B0, (u32)dsiSaveWrite);
+		setBL(0x020190C4, (u32)dsiSaveWrite);
+		setBL(0x020190CC, (u32)dsiSaveClose);
+		setBL(0x02019110, (u32)dsiSaveOpen);
+		setBL(0x0201913C, (u32)dsiSaveGetLength);
+		setBL(0x02019150, (u32)dsiSaveRead);
+		setBL(0x02019164, (u32)dsiSaveRead);
+		setBL(0x0201918C, (u32)dsiSaveRead);
+		setBL(0x0201919C, (u32)dsiSaveRead);
+		setBL(0x020191AC, (u32)dsiSaveRead);
+		setBL(0x020191BC, (u32)dsiSaveRead);
+		setBL(0x020191D0, (u32)dsiSaveRead);
+		setBL(0x020191E0, (u32)dsiSaveRead);
+		setBL(0x020191F0, (u32)dsiSaveRead);
+		setBL(0x02019200, (u32)dsiSaveRead);
+		setBL(0x02019214, (u32)dsiSaveRead);
+		setBL(0x0201921C, (u32)dsiSaveClose);
+		tonccpy((u32*)0x02038D64, dsiSaveGetResultCode, 0xC);
+	}
+
 	// Artillery: Knights vs. Orcs (Europe)
 	else if (strcmp(romTid, "K9ZP") == 0) {
 		if (!twlFontFound) {
