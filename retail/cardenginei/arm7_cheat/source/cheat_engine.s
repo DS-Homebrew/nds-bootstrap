@@ -31,7 +31,8 @@ cheat_engine_size:
 BEGIN_ASM_FUNC cheat_engine_start
 
 code_handler_start:
-	stmdb	sp!,	{r0-r12} 
+	stmdb	sp!,	{lr}
+	stmdb	sp!,	{r0-r12}
 	mov		r9,		#0x00000000		@ offset register
 	mov		r8,		#0x00000000		@ execution status. bit0: 1 = no exec, 0 = exec. allows nested ifs 32 deep
 	mov		r7,		#0x00000000		@ Dx loop start
@@ -454,11 +455,12 @@ mem_copy_code_byte_loop:
 
 exit:	
 	ldmia	sp!,	{r0-r12}
+	ldmia	sp!,	{lr}
 	bx		lr
 
 .pool
 
-	.word 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000
+	.word 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000
 
 cheat_data:
 
