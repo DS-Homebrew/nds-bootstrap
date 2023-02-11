@@ -6275,6 +6275,25 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02047B98, (u32)dsiSaveClose);
 	}
 
+	// Aru to Harapeko Monsuta (Japan)
+	else if (strcmp(romTid, "KP9J") == 0 && saveOnFlashcard) {
+		tonccpy((u32*)0x02014318, dsiSaveGetResultCode, 0xC);
+		setBL(0x020475B8, (u32)dsiSaveOpen);
+		setBL(0x020475D8, (u32)dsiSaveWrite);
+		setBL(0x020475E8, (u32)dsiSaveClose);
+		setBL(0x02047604, (u32)dsiSaveClose);
+		setBL(0x02047640, (u32)dsiSaveOpen);
+		setBL(0x02047660, (u32)dsiSaveRead);
+		setBL(0x02047670, (u32)dsiSaveClose);
+		setBL(0x0204768C, (u32)dsiSaveClose);
+		setBL(0x0204773C, (u32)dsiSaveCreate);
+		setBL(0x0204774C, (u32)dsiSaveOpen);
+		setBL(0x02047778, (u32)dsiSaveClose);
+		setBL(0x020477A4, (u32)dsiSaveCreate);
+		setBL(0x020477B4, (u32)dsiSaveOpen);
+		setBL(0x020477E0, (u32)dsiSaveClose);
+	}
+
 	// Paul's Shooting Adventure (USA)
 	else if (strcmp(romTid, "KPJE") == 0 && saveOnFlashcard) {
 		tonccpy((u32*)0x02010B18, dsiSaveGetResultCode, 0xC);
