@@ -2045,6 +2045,52 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		tonccpy((u32*)0x02043360, dsiSaveGetResultCode, 0xC);
 	}
 
+	// Around the World in 80 Days (USA)
+	else if (strcmp(romTid, "K7BE") == 0) {
+		if (saveOnFlashcard) {
+			setBL(0x02033E68, (u32)dsiSaveGetLength);
+			setBL(0x02033E7C, (u32)dsiSaveSetLength);
+			setBL(0x02033E90, (u32)dsiSaveSeek);
+			setBL(0x02033EA0, (u32)dsiSaveWrite);
+			setBL(0x02033EA8, (u32)dsiSaveClose);
+			setBL(0x020342B0, (u32)dsiSaveGetLength);
+			setBL(0x020342C4, (u32)dsiSaveSetLength);
+			setBL(0x020342D8, (u32)dsiSaveSeek);
+			setBL(0x020342E8, (u32)dsiSaveRead);
+			setBL(0x020342F0, (u32)dsiSaveClose);
+			setBL(0x0203438C, (u32)dsiSaveOpen);
+			setBL(0x020343E0, (u32)dsiSaveCreate);
+			setBL(0x02034400, (u32)dsiSaveGetResultCode);
+			*(u32*)0x02034438 = 0xE3A00001; // mov r0, #1
+		}
+		if (!twlFontFound) {
+			*(u32*)0x02036784 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		}
+	}
+
+	// Around the World in 80 Days (Europe, Australia)
+	else if (strcmp(romTid, "K7BV") == 0) {
+		if (saveOnFlashcard) {
+			setBL(0x02033E40, (u32)dsiSaveGetLength);
+			setBL(0x02033E54, (u32)dsiSaveSetLength);
+			setBL(0x02033E68, (u32)dsiSaveSeek);
+			setBL(0x02033E78, (u32)dsiSaveWrite);
+			setBL(0x02033E80, (u32)dsiSaveClose);
+			setBL(0x02034288, (u32)dsiSaveGetLength);
+			setBL(0x0203429C, (u32)dsiSaveSetLength);
+			setBL(0x020342B0, (u32)dsiSaveSeek);
+			setBL(0x020342C0, (u32)dsiSaveRead);
+			setBL(0x020342C8, (u32)dsiSaveClose);
+			setBL(0x02034364, (u32)dsiSaveOpen);
+			setBL(0x020343B8, (u32)dsiSaveCreate);
+			setBL(0x020343D8, (u32)dsiSaveGetResultCode);
+			*(u32*)0x02034410 = 0xE3A00001; // mov r0, #1
+		}
+		if (!twlFontFound) {
+			*(u32*)0x0203675C = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		}
+	}
+
 	// Artillery: Knights vs. Orcs (Europe)
 	else if (strcmp(romTid, "K9ZP") == 0) {
 		if (!twlFontFound) {

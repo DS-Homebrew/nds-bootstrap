@@ -3287,6 +3287,56 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02051AB8 = 0xE1A00000; // nop
 	}
 
+	// Around the World in 80 Days (USA)
+	// Around the World in 80 Days (Europe, Australia)
+	else if (strcmp(romTid, "K7BE") == 0 || strcmp(romTid, "K7BV") == 0) {
+		*(u32*)0x0201A0DC = 0xE1A00000; // nop
+		*(u32*)0x0201D620 = 0xE1A00000; // nop
+		patchInitDSiWare(0x020241CC, heapEnd);
+		*(u32*)0x02024558 = *(u32*)0x02004FE8;
+		patchUserSettingsReadDSiWare(0x020258E0);
+		*(u32*)0x02028AF0 = 0xE1A00000; // nop
+		*(u32*)0x0202ADF8 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0202ADFC = 0xE12FFF1E; // bx lr
+		if (ndsHeader->gameCode[3] == 'E') {
+			setBL(0x02033E68, (u32)dsiSaveGetLength);
+			setBL(0x02033E7C, (u32)dsiSaveSetLength);
+			setBL(0x02033E90, (u32)dsiSaveSeek);
+			setBL(0x02033EA0, (u32)dsiSaveWrite);
+			setBL(0x02033EA8, (u32)dsiSaveClose);
+			setBL(0x020342B0, (u32)dsiSaveGetLength);
+			setBL(0x020342C4, (u32)dsiSaveSetLength);
+			setBL(0x020342D8, (u32)dsiSaveSeek);
+			setBL(0x020342E8, (u32)dsiSaveRead);
+			setBL(0x020342F0, (u32)dsiSaveClose);
+			setBL(0x0203438C, (u32)dsiSaveOpen);
+			setBL(0x020343E0, (u32)dsiSaveCreate);
+			setBL(0x02034400, (u32)dsiSaveGetResultCode);
+			*(u32*)0x02034438 = 0xE3A00001; // mov r0, #1
+			*(u32*)0x020362BC = 0xE3A05702; // mov r5, #0x80000
+			*(u32*)0x02036784 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+			*(u32*)0x02099C38 = 0xE3A00709; // mov r0, #0x240000
+		} else {
+			setBL(0x02033E40, (u32)dsiSaveGetLength);
+			setBL(0x02033E54, (u32)dsiSaveSetLength);
+			setBL(0x02033E68, (u32)dsiSaveSeek);
+			setBL(0x02033E78, (u32)dsiSaveWrite);
+			setBL(0x02033E80, (u32)dsiSaveClose);
+			setBL(0x02034288, (u32)dsiSaveGetLength);
+			setBL(0x0203429C, (u32)dsiSaveSetLength);
+			setBL(0x020342B0, (u32)dsiSaveSeek);
+			setBL(0x020342C0, (u32)dsiSaveRead);
+			setBL(0x020342C8, (u32)dsiSaveClose);
+			setBL(0x02034364, (u32)dsiSaveOpen);
+			setBL(0x020343B8, (u32)dsiSaveCreate);
+			setBL(0x020343D8, (u32)dsiSaveGetResultCode);
+			*(u32*)0x02034410 = 0xE3A00001; // mov r0, #1
+			*(u32*)0x02036294 = 0xE3A05702; // mov r5, #0x80000
+			*(u32*)0x0203675C = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+			*(u32*)0x020990AC = 0xE3A00709; // mov r0, #0x240000
+		}
+	}
+
 	// Artillery: Knights vs. Orcs (Europe)
 	else if (strcmp(romTid, "K9ZP") == 0) {
 		*(u32*)0x020050B8 = 0xE1A00000; // nop
