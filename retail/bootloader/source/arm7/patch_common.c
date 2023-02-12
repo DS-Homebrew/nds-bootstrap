@@ -9738,8 +9738,8 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020558D4 = 0xE1A00000; // nop
 		tonccpy((u32*)0x02056468, dsiSaveGetResultCode, 0xC);
 		*(u32*)0x02059040 = 0xE1A00000; // nop
-		patchInitDSiWare(0x02060784, /*extendedMemory2 ?*/ 0x02700000 /*: heapEnd*/);
-		// *(u32*)0x02060B10 -= extendedMemory2 ? 0x100000 : 0x310000;
+		patchInitDSiWare(0x02060784, heapEnd);
+		*(u32*)0x02060B10 = *(u32*)0x02004FD0;
 		patchUserSettingsReadDSiWare(0x02061F74);
 		*(u32*)0x0206237C = 0xE1A00000; // nop
 		*(u32*)0x02062380 = 0xE1A00000; // nop
@@ -9778,7 +9778,8 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02055A0C = 0xE1A00000; // nop
 		tonccpy((u32*)0x020565A0, dsiSaveGetResultCode, 0xC);
 		*(u32*)0x02059200 = 0xE1A00000; // nop
-		patchInitDSiWare(0x02060968, /*extendedMemory2 ?*/ 0x02700000 /*: heapEnd*/);
+		patchInitDSiWare(0x02060968, heapEnd);
+		*(u32*)0x02060CF4 = *(u32*)0x02004FE8;
 		patchUserSettingsReadDSiWare(0x02062158);
 		*(u32*)0x02062560 = 0xE1A00000; // nop
 		*(u32*)0x02062564 = 0xE1A00000; // nop
