@@ -1232,6 +1232,19 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// At Enta!: Burokku Kuzushi (Japan)
+	else if (strcmp(romTid, "K6QJ") == 0) {
+		if (!twlFontFound) {
+			*(u32*)0x020053E4 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		}
+		if (!saveOnFlashcard) { // Redirect otherPub to dataPub
+			toncset((char*)0x020943B0, 0, 9);
+			tonccpy((char*)0x020943B0, dataPub, strlen(dataPub));
+			toncset((char*)0x020943C4, 0, 9);
+			tonccpy((char*)0x020943C4, dataPub, strlen(dataPub));
+		}
+	}
+
 	// Absolute Chess (USA)
 	else if (strcmp(romTid, "KCZE") == 0) {
 		if (!twlFontFound) {
@@ -1242,6 +1255,19 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			tonccpy((char*)0x0209E9C8, dataPub, strlen(dataPub));
 			toncset((char*)0x0209E9DC, 0, 9);
 			tonccpy((char*)0x0209E9DC, dataPub, strlen(dataPub));
+		}
+	}
+
+	// At Chisu: Charenji Supirittsu (Japan)
+	else if (strcmp(romTid, "KCZJ") == 0) {
+		if (!twlFontFound) {
+			*(u32*)0x020053E4 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		}
+		if (!saveOnFlashcard) { // Redirect otherPrv to dataPrv
+			toncset((char*)0x0209CCDC, 0, 9);
+			tonccpy((char*)0x0209CCDC, dataPrv, strlen(dataPrv));
+			toncset((char*)0x0209CCF0, 0, 9);
+			tonccpy((char*)0x0209CCF0, dataPrv, strlen(dataPrv));
 		}
 	}
 
@@ -1258,9 +1284,22 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// At Enta!: Taisen Ribashi (Japan)
+	else if (strcmp(romTid, "KA8J") == 0) {
+		if (!twlFontFound) {
+			*(u32*)0x020053E4 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		}
+		if (!saveOnFlashcard) { // Redirect otherPub to dataPub
+			toncset((char*)0x0209C1C0, 0, 9);
+			tonccpy((char*)0x0209C1C0, dataPub, strlen(dataPub));
+			toncset((char*)0x0209C1D4, 0, 9);
+			tonccpy((char*)0x0209C1D4, dataPub, strlen(dataPub));
+		}
+	}
+
 	// Abyss (USA)
 	// Abyss (Europe)
-	else if ((strcmp(romTid, "KXGE") == 0 || strcmp(romTid, "KXGP") == 0)&& saveOnFlashcard) {
+	else if ((strcmp(romTid, "KXGE") == 0 || strcmp(romTid, "KXGP") == 0) && saveOnFlashcard) {
 		setBL(0x02012BBC, (u32)dsiSaveCreate);
 		*(u32*)0x02012BDC = 0xE3A00001; // mov r0, #1
 		setBL(0x02012C80, (u32)dsiSaveGetResultCode);
