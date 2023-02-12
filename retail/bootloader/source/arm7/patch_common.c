@@ -7812,14 +7812,11 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0200D6C8 = 0xE1A00000; // nop
 		setBL(0x0200D728, newFunc);
 		*(u32*)0x0200D764 = 0xE1A00000; // nop
-		tonccpy((u32*)newFunc, (u32*)0x0200D878, 0xC0);
+		codeCopy((u32*)newFunc, (u32*)0x0200D878, 0xC0);
 		setBL(newFunc+0x28, (u32)dsiSaveOpen);
 		setBL(newFunc+0x40, (u32)dsiSaveGetLength);
-		setBL(newFunc+0x48, 0x020052E8);
 		setBL(newFunc+0x5C, (u32)dsiSaveRead);
-		setBL(newFunc+0x78, 0x02005358);
 		setBL(newFunc+0x8C, (u32)dsiSaveClose);
-		setBL(newFunc+0xA4, 0x02005358);
 		setBL(0x0200D960, (u32)dsiSaveCreate); // dsiSaveCreateAuto
 		setBL(0x0200D970, (u32)dsiSaveOpen);
 		setBL(0x0200D990, (u32)dsiSaveWrite);
@@ -7829,8 +7826,10 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02068D78 = 0xE1A00000; // nop
 		patchInitDSiWare(0x02070CE4, heapEnd);
 		// *(u32*)0x02071070 = 0x0224C9A0;
-		patchUserSettingsReadDSiWare(0x02027FEC);
+		patchUserSettingsReadDSiWare(0x02072394);
 		*(u32*)0x0207595C = 0xE1A00000; // nop
+		*(u32*)0x02077C78 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02077C7C = 0xE12FFF1E; // bx lr
 	}
 
 	// Fuuu! Dairoujou Kai (Japan)
