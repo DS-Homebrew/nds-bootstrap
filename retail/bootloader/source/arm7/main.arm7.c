@@ -584,7 +584,7 @@ static bool isROMLoadableInRAM(const tNDSHeader* ndsHeader, const char* romTid, 
 			romLocation += 0x280000;
 			romSizeLimit -= 0x280000;
 		}
-		if (ndsHeader->unitCode > 0 && ndsHeader->gameCode[0] == 'K' && ((ndsHeader->gameCode[3] == 'K') ? korSharedFont : (ndsHeader->gameCode[3] == 'C') ? chnSharedFont : twlSharedFont)) {
+		if (romSizeLimit > 0 && ndsHeader->unitCode > 0 && ndsHeader->gameCode[0] == 'K' && ((ndsHeader->gameCode[3] == 'K') ? korSharedFont : (ndsHeader->gameCode[3] == 'C') ? chnSharedFont : twlSharedFont)) {
 			romSizeLimit -= 0x200000;
 		}
 	}
@@ -606,16 +606,20 @@ static bool isROMLoadableInRAM(const tNDSHeader* ndsHeader, const char* romTid, 
 		}
 	}
 
+	if (romSizeLimit == 0) {
+		return false;
+	}
+
 	bool res = false;
 	if ((strncmp(romTid, "UBR", 3) == 0 && isDevConsole)
 	// || (strncmp(romTid, "KXO", 3) == 0 && s2FlashcardId != 0x5A45) // 18th Gate
+	 || (strncmp(romTid, "KQJ", 3) == 0 && s2FlashcardId != 0x5A45) // Aru Seishun no Monogatari: Kouenji Joshi Sakka
 	 || (strncmp(romTid, "KXC", 3) == 0 && s2FlashcardId != 0x5A45) // Castle Conqueror: Heroes 2
 	 || (strncmp(romTid, "KQ9", 3) == 0 && s2FlashcardId != 0x5A45) // The Legend of Zelda: Four Swords: Anniversary Edition
 	 || (strncmp(romTid, "KEV", 3) == 0 && s2FlashcardId != 0x5A45) // Space Invaders Extreme Z
 	 || (strncmp(romTid, "UOR", 3) != 0
 	 && strncmp(romTid, "KYP", 3) != 0 // 1st Class Poker & BlackJack
 	 && strncmp(romTid, "KXG", 3) != 0 // Abyss
-	 && (strncmp(romTid, "KQJ", 3) != 0 && s2FlashcardId != 0x5A45) // Aru Seishun no Monogatari: Kouenji Joshi Sakka
 	 && strncmp(romTid, "KTR", 3) != 0 // Clubhouse Games Express: Card Classics
 	 && strncmp(romTid, "KTC", 3) != 0 && strncmp(romTid, "KTP", 3) != 0 // Clubhouse Games Express: Family Favorites
 	 && strncmp(romTid, "KTD", 3) != 0 && strncmp(romTid, "KTB", 3) != 0 // Clubhouse Games Express: Strategy Pack
