@@ -15191,6 +15191,85 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02079B74 = 0xE12FFF1E; // bx lr
 	}
 
+	// Spot the Difference (USA)
+	// Spot the Difference (Europe)
+	// Requires 8MB of RAM
+	else if ((strcmp(romTid, "KYSE") == 0 || strcmp(romTid, "KYSP") == 0) && extendedMemory2) {
+		// const u32 mepAddr = (s2FlashcardId == 0x5A45) ? 0x08000000 : 0x09000000;
+		if (ndsHeader->gameCode[3] == 'E') {
+			*(u32*)0x02007170 = 0xE1A00000; // nop
+			*(u32*)0x0200A7E8 = 0xE1A00000; // nop
+			patchInitDSiWare(0x0200F9C4, heapEnd);
+			*(u32*)0x0200FD50 = *(u32*)0x02004FD0;
+			patchUserSettingsReadDSiWare(0x02011020);
+			*(u32*)0x02014474 = 0xE1A00000; // nop
+
+			/* *(u16*)0x0200CF5C = 0x4800; // movs r0, #0x????????
+			*(u16*)0x0200CF5E = 0x4770; // bx lr
+			*(u32*)0x0200CF60 = mepAddr; */
+		} else {
+			*(u32*)0x0200DECC = 0xE1A00000; // nop
+			*(u32*)0x02011544 = 0xE1A00000; // nop
+			patchInitDSiWare(0x02016720, heapEnd);
+			*(u32*)0x02016AAC = *(u32*)0x02004FD0;
+			patchUserSettingsReadDSiWare(0x02017D7C);
+			*(u32*)0x0201B1D0 = 0xE1A00000; // nop
+
+			/* *(u16*)0x02013CB8 = 0x4800; // movs r0, #0x????????
+			*(u16*)0x02013CBA = 0x4770; // bx lr
+			*(u32*)0x02013CBC = mepAddr; */
+		}
+		setBL(0x02030634, (u32)dsiSaveOpen);
+		*(u32*)0x02030674 = 0xE1A00000; // nop
+		setBL(0x02030694, (u32)dsiSaveGetLength);
+		setBL(0x020306A4, (u32)dsiSaveRead);
+		setBL(0x020306AC, (u32)dsiSaveClose);
+		*(u32*)0x020306D0 = 0xE3A00000; // mov r0, #0
+		setBL(0x020306FC, (u32)dsiSaveOpen);
+		*(u32*)0x02030714 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+		*(u32*)0x02030724 = 0xE3A00001; // mov r0, #1 (dsiSaveFreeSpaceAvailable)
+		setBL(0x02030740, (u32)dsiSaveCreate);
+		setBL(0x0203074C, (u32)dsiSaveClose);
+		setBL(0x02030760, (u32)dsiSaveOpen);
+		setBL(0x02030770, (u32)dsiSaveGetResultCode);
+		*(u32*)0x02030794 = 0xE1A00000; // nop
+		setBL(0x020307B8, (u32)dsiSaveSetLength);
+		setBL(0x020307C8, (u32)dsiSaveWrite);
+		setBL(0x020307D0, (u32)dsiSaveClose);
+		/* if (!extendedMemory2 && expansionPakFound) {
+			setBLThumb(0x02037AE0, (ndsHeader->gameCode[3] == 'E') ? 0x0200CF5C : 0x02013CB8);
+		} */
+	}
+
+	// Atamu IQ Panic (Japan)
+	// Requires 8MB of RAM
+	else if (strcmp(romTid, "KYSJ") == 0 && extendedMemory2) {
+		*(u32*)0x02007254 = 0xE1A00000; // nop
+		*(u32*)0x0200A960 = 0xE1A00000; // nop
+		patchInitDSiWare(0x0200FB74, heapEnd);
+		*(u32*)0x0200FF00 = *(u32*)0x02004FE8;
+		patchUserSettingsReadDSiWare(0x020111E0);
+		*(u32*)0x02014634 = 0xE1A00000; // nop
+		setBL(0x020309B4, (u32)dsiSaveOpen);
+		*(u32*)0x020309F4 = 0xE1A00000; // nop
+		setBL(0x02030A14, (u32)dsiSaveGetLength);
+		setBL(0x02030A24, (u32)dsiSaveRead);
+		setBL(0x02030A2C, (u32)dsiSaveClose);
+		*(u32*)0x02030A50 = 0xE3A00000; // mov r0, #0
+		setBL(0x02030A7C, (u32)dsiSaveOpen);
+		*(u32*)0x02030A94 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+		*(u32*)0x02030AA4 = 0xE3A00001; // mov r0, #1 (dsiSaveFreeSpaceAvailable)
+		setBL(0x02030AC0, (u32)dsiSaveCreate);
+		setBL(0x02030ACC, (u32)dsiSaveClose);
+		setBL(0x02030AE0, (u32)dsiSaveOpen);
+		setBL(0x02030AF0, (u32)dsiSaveGetResultCode);
+		*(u32*)0x02030B1C = 0xE1A00000; // nop
+		setBL(0x02030B40, (u32)dsiSaveSetLength);
+		setBL(0x02030B50, (u32)dsiSaveWrite);
+		setBL(0x02030B58, (u32)dsiSaveClose);
+		*(u32*)0x02037ED6 = 0x2602; // movs r6, #2
+	}
+
 	// Spotto! (USA)
 	// Does not boot: Issue unknown
 	/*else if (strcmp(romTid, "KSPE") == 0) {

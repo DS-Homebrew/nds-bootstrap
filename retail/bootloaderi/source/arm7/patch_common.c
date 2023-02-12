@@ -8475,6 +8475,45 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// Spot the Difference (USA)
+	// Spot the Difference (Europe)
+	else if ((strcmp(romTid, "KYSE") == 0 || strcmp(romTid, "KYSP") == 0) && saveOnFlashcard) {
+		setBL(0x02030634, (u32)dsiSaveOpen);
+		setBL(0x02030694, (u32)dsiSaveGetLength);
+		setBL(0x020306A4, (u32)dsiSaveRead);
+		setBL(0x020306AC, (u32)dsiSaveClose);
+		*(u32*)0x020306D0 = 0xE3A00000; // mov r0, #0
+		setBL(0x020306FC, (u32)dsiSaveOpen);
+		*(u32*)0x02030714 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+		*(u32*)0x02030724 = 0xE3A00001; // mov r0, #1 (dsiSaveFreeSpaceAvailable)
+		setBL(0x02030740, (u32)dsiSaveCreate);
+		setBL(0x0203074C, (u32)dsiSaveClose);
+		setBL(0x02030760, (u32)dsiSaveOpen);
+		setBL(0x02030770, (u32)dsiSaveGetResultCode);
+		setBL(0x020307B8, (u32)dsiSaveSetLength);
+		setBL(0x020307C8, (u32)dsiSaveWrite);
+		setBL(0x020307D0, (u32)dsiSaveClose);
+	}
+
+	// Atamu IQ Panic (Japan)
+	else if (strcmp(romTid, "KYSJ") == 0 && saveOnFlashcard) {
+		setBL(0x020309B4, (u32)dsiSaveOpen);
+		setBL(0x02030A14, (u32)dsiSaveGetLength);
+		setBL(0x02030A24, (u32)dsiSaveRead);
+		setBL(0x02030A2C, (u32)dsiSaveClose);
+		*(u32*)0x02030A50 = 0xE3A00000; // mov r0, #0
+		setBL(0x02030A7C, (u32)dsiSaveOpen);
+		*(u32*)0x02030A94 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+		*(u32*)0x02030AA4 = 0xE3A00001; // mov r0, #1 (dsiSaveFreeSpaceAvailable)
+		setBL(0x02030AC0, (u32)dsiSaveCreate);
+		setBL(0x02030ACC, (u32)dsiSaveClose);
+		setBL(0x02030AE0, (u32)dsiSaveOpen);
+		setBL(0x02030AF0, (u32)dsiSaveGetResultCode);
+		setBL(0x02030B40, (u32)dsiSaveSetLength);
+		setBL(0x02030B50, (u32)dsiSaveWrite);
+		setBL(0x02030B58, (u32)dsiSaveClose);
+	}
+
 	// Sudoku (USA)
 	// Sudoku (USA) (Rev 1)
 	else if (strcmp(romTid, "K4DE") == 0) {
