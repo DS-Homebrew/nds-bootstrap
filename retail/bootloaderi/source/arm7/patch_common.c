@@ -2424,6 +2424,68 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02026848 = 0xE12FFF1E; // bx lr
 	}
 
+	// Ball Fighter (USA)
+	else if (strcmp(romTid, "KBOE") == 0) {
+		if (saveOnFlashcard) {
+			setBL(0x0200C710, (u32)dsiSaveOpen);
+			setBL(0x0200C724, (u32)dsiSaveClose);
+			setBL(0x0200C744, (u32)dsiSaveCreate);
+			setBL(0x0200C75C, (u32)dsiSaveOpen);
+			setBL(0x0200C774, (u32)dsiSaveClose);
+			setBL(0x0200C77C, (u32)dsiSaveDelete);
+			setBL(0x0200C904, (u32)dsiSaveOpen);
+			setBL(0x0200C91C, (u32)dsiSaveGetLength);
+			setBL(0x0200C940, (u32)dsiSaveRead);
+			setBL(0x0200C948, (u32)dsiSaveClose);
+			setBL(0x0200C9D0, (u32)dsiSaveOpen);
+			setBL(0x0200C9E4, (u32)dsiSaveClose);
+			setBL(0x0200C9F8, (u32)dsiSaveCreate);
+			setBL(0x0200CA10, (u32)dsiSaveOpen);
+			setBL(0x0200CA2C, (u32)dsiSaveClose);
+			setBL(0x0200CA34, (u32)dsiSaveDelete);
+			setBL(0x0200CA48, (u32)dsiSaveCreate);
+			setBL(0x0200CA58, (u32)dsiSaveOpen);
+			setBL(0x0200CA68, (u32)dsiSaveGetResultCode);
+			setBL(0x0200CA9C, (u32)dsiSaveSetLength);
+			setBL(0x0200CAAC, (u32)dsiSaveWrite);
+			setBL(0x0200CAB4, (u32)dsiSaveClose);
+		}
+		if (!twlFontFound) {
+			*(u32*)0x0200CAEC = 0xE12FFF1E; // bx lr (Skip Manual screen)
+		}
+	}
+
+	// Ball Fighter (Europe)
+	else if (strcmp(romTid, "KBOP") == 0) {
+		if (saveOnFlashcard) {
+			setBL(0x0200C770, (u32)dsiSaveOpen);
+			setBL(0x0200C784, (u32)dsiSaveClose);
+			setBL(0x0200C7A4, (u32)dsiSaveCreate);
+			setBL(0x0200C7BC, (u32)dsiSaveOpen);
+			setBL(0x0200C7D4, (u32)dsiSaveClose);
+			setBL(0x0200C7DC, (u32)dsiSaveDelete);
+			setBL(0x0200C964, (u32)dsiSaveOpen);
+			setBL(0x0200C97C, (u32)dsiSaveGetLength);
+			setBL(0x0200C9A0, (u32)dsiSaveRead);
+			setBL(0x0200C9A8, (u32)dsiSaveClose);
+			setBL(0x0200C9E4, (u32)dsiSaveOpen);
+			setBL(0x0200C9F8, (u32)dsiSaveClose);
+			setBL(0x0200CA0C, (u32)dsiSaveCreate);
+			setBL(0x0200CA24, (u32)dsiSaveOpen);
+			setBL(0x0200CA40, (u32)dsiSaveClose);
+			setBL(0x0200CA48, (u32)dsiSaveDelete);
+			setBL(0x0200CA5C, (u32)dsiSaveCreate);
+			setBL(0x0200CA6C, (u32)dsiSaveOpen);
+			setBL(0x0200CA7C, (u32)dsiSaveGetResultCode);
+			setBL(0x0200CA94, (u32)dsiSaveSetLength);
+			setBL(0x0200CAA4, (u32)dsiSaveWrite);
+			setBL(0x0200CAAC, (u32)dsiSaveClose);
+		}
+		if (!twlFontFound) {
+			*(u32*)0x0200CABC = 0xE12FFF1E; // bx lr (Skip Manual screen)
+		}
+	}
+
 	// Beauty Academy (Europe)
 	else if (strcmp(romTid, "K8BP") == 0) {
 		if (saveOnFlashcard) {

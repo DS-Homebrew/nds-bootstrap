@@ -66,6 +66,7 @@ static const char dsiWareForBootloader1[][4] = {
 	"KVU", // ATV Fever
 	"K9U", // ATV Quad Kings
 	"KSR", // Aura-Aura Climber
+	"KBO", // Ball Fighter
 	"KAD", // Art Style: BASE 10
 	"K8B", // Beauty Academy
 	"KBE", // Bejeweled Twist

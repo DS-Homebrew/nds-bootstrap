@@ -3729,6 +3729,78 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchUserSettingsReadDSiWare(0x0204C4DC);
 	}
 
+	// Ball Fighter (USA)
+	else if (strcmp(romTid, "KBOE") == 0) {
+		setBL(0x0200C710, (u32)dsiSaveOpen);
+		setBL(0x0200C724, (u32)dsiSaveClose);
+		setBL(0x0200C744, (u32)dsiSaveCreate);
+		setBL(0x0200C75C, (u32)dsiSaveOpen);
+		setBL(0x0200C774, (u32)dsiSaveClose);
+		setBL(0x0200C77C, (u32)dsiSaveDelete);
+		setBL(0x0200C904, (u32)dsiSaveOpen);
+		setBL(0x0200C91C, (u32)dsiSaveGetLength);
+		setBL(0x0200C940, (u32)dsiSaveRead);
+		setBL(0x0200C948, (u32)dsiSaveClose);
+		*(u32*)0x0200C9AC = 0xE1A00000; // nop
+		*(u32*)0x0200C9B4 = 0xE1A00000; // nop
+		setBL(0x0200C9D0, (u32)dsiSaveOpen);
+		setBL(0x0200C9E4, (u32)dsiSaveClose);
+		setBL(0x0200C9F8, (u32)dsiSaveCreate);
+		setBL(0x0200CA10, (u32)dsiSaveOpen);
+		*(u32*)0x0200CA20 = 0xE1A00000; // nop
+		setBL(0x0200CA2C, (u32)dsiSaveClose);
+		setBL(0x0200CA34, (u32)dsiSaveDelete);
+		setBL(0x0200CA48, (u32)dsiSaveCreate);
+		setBL(0x0200CA58, (u32)dsiSaveOpen);
+		setBL(0x0200CA68, (u32)dsiSaveGetResultCode);
+		*(u32*)0x0200CA70 = 0xE1A00000; // nop
+		*(u32*)0x0200CA84 = 0xE1A00000; // nop
+		setBL(0x0200CA9C, (u32)dsiSaveSetLength);
+		setBL(0x0200CAAC, (u32)dsiSaveWrite);
+		setBL(0x0200CAB4, (u32)dsiSaveClose);
+		*(u32*)0x0200CABC = 0xE1A00000; // nop
+		*(u32*)0x0200CAD0 = 0xE1A00000; // nop
+		*(u32*)0x0200CAEC = 0xE12FFF1E; // bx lr (Skip Manual screen)
+		*(u32*)0x0203A6DC = 0xE1A00000; // nop
+		*(u32*)0x0203DA9C = 0xE1A00000; // nop
+		patchInitDSiWare(0x02043430, extendedMemory2 ? 0x02F00000 : heapEndRetail+0xC00000); // extendedMemory2 ? #0x2F00000 (mirrors to 0x2700000 on debug DS units) : #0x2FC0000 (mirrors to 0x23C0000 on retail DS units)
+		patchUserSettingsReadDSiWare(0x02044A74);
+	}
+
+	// Ball Fighter (Europe)
+	else if (strcmp(romTid, "KBOP") == 0) {
+		*(u32*)0x0200C288 = 0xE1A00000; // nop
+		*(u32*)0x0200C290 = 0xE1A00000; // nop
+		setBL(0x0200C770, (u32)dsiSaveOpen);
+		setBL(0x0200C784, (u32)dsiSaveClose);
+		setBL(0x0200C7A4, (u32)dsiSaveCreate);
+		setBL(0x0200C7BC, (u32)dsiSaveOpen);
+		setBL(0x0200C7D4, (u32)dsiSaveClose);
+		setBL(0x0200C7DC, (u32)dsiSaveDelete);
+		setBL(0x0200C964, (u32)dsiSaveOpen);
+		setBL(0x0200C97C, (u32)dsiSaveGetLength);
+		setBL(0x0200C9A0, (u32)dsiSaveRead);
+		setBL(0x0200C9A8, (u32)dsiSaveClose);
+		setBL(0x0200C9E4, (u32)dsiSaveOpen);
+		setBL(0x0200C9F8, (u32)dsiSaveClose);
+		setBL(0x0200CA0C, (u32)dsiSaveCreate);
+		setBL(0x0200CA24, (u32)dsiSaveOpen);
+		*(u32*)0x0200CA34 = 0xE1A00000; // nop
+		setBL(0x0200CA40, (u32)dsiSaveClose);
+		setBL(0x0200CA48, (u32)dsiSaveDelete);
+		setBL(0x0200CA5C, (u32)dsiSaveCreate);
+		setBL(0x0200CA6C, (u32)dsiSaveOpen);
+		setBL(0x0200CA7C, (u32)dsiSaveGetResultCode);
+		setBL(0x0200CA94, (u32)dsiSaveSetLength);
+		setBL(0x0200CAA4, (u32)dsiSaveWrite);
+		setBL(0x0200CAAC, (u32)dsiSaveClose);
+		*(u32*)0x0200CABC = 0xE12FFF1E; // bx lr (Skip Manual screen)
+		*(u32*)0x0203A82C = 0xE1A00000; // nop
+		*(u32*)0x0203DA8C = 0xE1A00000; // nop
+		patchInitDSiWare(0x0204317C, extendedMemory2 ? 0x02F00000 : heapEndRetail+0xC00000); // extendedMemory2 ? #0x2F00000 (mirrors to 0x2700000 on debug DS units) : #0x2FC0000 (mirrors to 0x23C0000 on retail DS units)
+		patchUserSettingsReadDSiWare(0x020447BC);
+	}
+
 	// Art Style: BASE 10 (USA)
 	else if (strcmp(romTid, "KADE") == 0) {
 		*getOffsetFromBL((u32*)0x020074A8) = 0xE12FFF1E; // bx lr
