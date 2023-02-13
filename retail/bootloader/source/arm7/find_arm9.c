@@ -170,6 +170,12 @@ static const u32 nandTmpJumpFuncStart4[1]   = {0xE92D4010};
 
 static const u32 nandTmpJumpFuncConstant[1] = {0x02FFDFC0};
 
+// Sleep mode trigger (TWL)
+static const u32 twlSleepModeEndSignatureEarly[4]      = {0xE2855001, 0xE3550003, 0xE286600C, 0x9AFFFFE2}; // SDK 5.1 & 5.2
+static const u32 twlSleepModeEndSignature[3]           = {0xE2866001, 0xE3560003, 0x9AFFFFDF}; // SDK 5.3+
+static const u16 twlSleepModeEndSignatureThumbEarly[7] = {0x9800, 0x1C64, 0x1D00, 0x350C, 0x9000, 0x2C03, 0xD9CE}; // SDK 5.1 & 5.2
+static const u16 twlSleepModeEndSignatureThumb[3]      = {0x1C6D, 0x2D03, 0xD9D1}; // SDK 5.3+
+
 // TWL Shared Font
 static const char* nandSharedFontSignature = "nand:/<sharedFont>";
 
@@ -1993,6 +1999,45 @@ u32* findNandTmpJumpFuncOffset(const tNDSHeader* ndsHeader, const module_params_
 		dbg_printf("nandTmpJumpFunc found\n");
 	} else {
 		dbg_printf("nandTmpJumpFunc not found\n");
+	}
+
+	dbg_printf("\n");
+	return offset;
+}
+
+u32* findTwlSleepModeEndOffset(const tNDSHeader* ndsHeader) {
+	dbg_printf("findTwlSleepModeEndOffset\n");
+	
+	u32* offset = findOffset(
+		(u32*)ndsHeader->arm9destination, iUncompressedSize,//ndsHeader->arm9binarySize,
+		twlSleepModeEndSignatureEarly, 4
+	);
+
+	if (!offset) {
+		offset = findOffset(
+			(u32*)ndsHeader->arm9destination, iUncompressedSize,//ndsHeader->arm9binarySize,
+			twlSleepModeEndSignature, 3
+		);
+	}
+
+	if (!offset) {
+		offset = (u32*)findOffsetThumb(
+			(u32*)ndsHeader->arm9destination, iUncompressedSize,//ndsHeader->arm9binarySize,
+			twlSleepModeEndSignatureThumbEarly, 7
+		);
+	}
+
+	if (!offset) {
+		offset = (u32*)findOffsetThumb(
+			(u32*)ndsHeader->arm9destination, iUncompressedSize,//ndsHeader->arm9binarySize,
+			twlSleepModeEndSignatureThumb, 3
+		);
+	}
+
+	if (offset) {
+		dbg_printf("twlSleepModeEnd found\n");
+	} else {
+		dbg_printf("twlSleepModeEnd not found\n");
 	}
 
 	dbg_printf("\n");

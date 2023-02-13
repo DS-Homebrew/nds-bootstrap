@@ -26,7 +26,7 @@ SOURCES		:=	source source/arm7 source/arm7/save_patches source/arm9 ../common/so
 INCLUDES	:=	include build ../common/include ../common/include_fat
 DATA		:=	../data
 SPECS		:=  specs
- 
+
 #---------------------------------------------------------------------------------
 # options for code generation
 #---------------------------------------------------------------------------------

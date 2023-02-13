@@ -76,6 +76,7 @@ u32* findFileIoReadOffset(const u32* fileIoSeekOffset, const module_params_t* mo
 u16* findFileIoReadOffsetThumb(const u16* fileIoSeekOffset, const module_params_t* moduleParams);
 u32* findResetOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool* softResetMb);
 u32* findNandTmpJumpFuncOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
+u32* findTwlSleepModeEndOffset(const tNDSHeader* ndsHeader);
 u32* findSharedFontPathOffset(const tNDSHeader* ndsHeader);
 
 // ARM7
