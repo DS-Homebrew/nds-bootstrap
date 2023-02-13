@@ -10236,6 +10236,50 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
 		}
 	}
 
+	// Box Pusher (USA)
+	else if (strcmp(romTid, "KQBE") == 0 && saveOnFlashcard) {
+		setBL(0x02041510, (u32)dsiSaveOpen);
+		setBL(0x02041584, (u32)dsiSaveGetLength);
+		setBL(0x02041598, (u32)dsiSaveClose);
+		setBL(0x020415B8, (u32)dsiSaveSeek);
+		setBL(0x020415D0, (u32)dsiSaveRead);
+		setBL(0x020415E4, (u32)dsiSaveClose);
+		setBL(0x02041638, (u32)dsiSaveClose);
+		*(u32*)0x02041688 = 0xE1A00000; // nop
+		setBL(0x020416E8, (u32)dsiSaveCreate);
+		setBL(0x0204173C, (u32)dsiSaveOpen);
+		setBL(0x020417A4, (u32)dsiSaveSetLength);
+		setBL(0x020417BC, (u32)dsiSaveClose);
+		setBL(0x02041810, (u32)dsiSaveGetLength);
+		setBL(0x02041824, (u32)dsiSaveClose);
+		setBL(0x02041844, (u32)dsiSaveSeek);
+		setBL(0x0204185C, (u32)dsiSaveWrite);
+		setBL(0x02041870, (u32)dsiSaveClose);
+		setBL(0x020418BC, (u32)dsiSaveClose);
+	}
+
+	// Box Pusher (Europe)
+	else if (strcmp(romTid, "KQBP") == 0 && saveOnFlashcard) {
+		setBL(0x02041B20, (u32)dsiSaveOpen);
+		setBL(0x02041B94, (u32)dsiSaveGetLength);
+		setBL(0x02041BA8, (u32)dsiSaveClose);
+		setBL(0x02041BC8, (u32)dsiSaveSeek);
+		setBL(0x02041BE0, (u32)dsiSaveRead);
+		setBL(0x02041BF4, (u32)dsiSaveClose);
+		setBL(0x02041C48, (u32)dsiSaveClose);
+		*(u32*)0x02041C98 = 0xE1A00000; // nop
+		setBL(0x02041CF8, (u32)dsiSaveCreate);
+		setBL(0x02041D4C, (u32)dsiSaveOpen);
+		setBL(0x02041DB4, (u32)dsiSaveSetLength);
+		setBL(0x02041DCC, (u32)dsiSaveClose);
+		setBL(0x02041E20, (u32)dsiSaveGetLength);
+		setBL(0x02041E34, (u32)dsiSaveClose);
+		setBL(0x02041E54, (u32)dsiSaveSeek);
+		setBL(0x02041E6C, (u32)dsiSaveWrite);
+		setBL(0x02041E80, (u32)dsiSaveClose);
+		setBL(0x02041ECC, (u32)dsiSaveClose);
+	}
+
 	// Clubhouse Games Express: Card Classics (USA)
 	else if (strcmp(romTid, "KTRT") == 0 && saveOnFlashcard) {
 		setBL(0x020373A8, (u32)dsiSaveGetInfo);

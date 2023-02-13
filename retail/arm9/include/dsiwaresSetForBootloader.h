@@ -76,6 +76,7 @@ static const char dsiWareForBootloader1[][4] = {
 	"KLN", // Bloons TD
 	"KUV", // Bloons TD 4
 	"KBB", // Bomberman Blitz
+	"KQB", // Box Pusher
 	"KAH", // Art Style: Boxlife
 	"KKQ", // Bugs'N'Balls
 	"K2J", // Cake Ninja
