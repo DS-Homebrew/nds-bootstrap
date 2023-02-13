@@ -12,6 +12,7 @@
 
 // Module params
 static const u32 moduleParamsSignature[2] = {0xDEC00621, 0x2106C0DE};
+static const u32 moduleParamsLtdSignature[2] = {0xDEC01463, 0x6314C0DE}; // SDK 5
 
 // Card read
 static const u32 cardReadEndSignature[2]            = {0x04100010, 0x040001A4}; // SDK < 4
@@ -202,6 +203,39 @@ u32* findModuleParamsOffset(const tNDSHeader* ndsHeader) {
 		}
 	} else {
 		dbg_printf("Module params offset restored: ");
+	}
+
+	if (moduleParamsOffset) {
+		dbg_hexa((u32)moduleParamsOffset);
+		dbg_printf("\n");
+	}
+
+	return moduleParamsOffset;
+}
+
+u32* findLtdModuleParamsOffset(const tNDSHeader* ndsHeader) {
+	dbg_printf("findLtdModuleParamsOffset:\n");
+
+	u32* moduleParamsOffset = NULL;
+	if (patchOffsetCache.ver != patchOffsetCacheFileVersion
+	 || patchOffsetCache.type != 1) {
+		patchOffsetCache.ltdModuleParamsOffset = 0;
+	} else {
+		moduleParamsOffset = patchOffsetCache.ltdModuleParamsOffset;
+	}
+	if (!moduleParamsOffset) {
+		moduleParamsOffset = findOffset(
+			(u32*)ndsHeader->arm9destination, ndsHeader->arm9binarySize,
+			moduleParamsLtdSignature, 2
+		);
+		if (moduleParamsOffset) {
+			dbg_printf("Ltd module params offset found: ");
+			patchOffsetCache.ltdModuleParamsOffset = moduleParamsOffset;
+		} else {
+			dbg_printf("Ltd module params offset not found\n");
+		}
+	} else {
+		dbg_printf("Ltd module params offset restored: ");
 	}
 
 	if (moduleParamsOffset) {

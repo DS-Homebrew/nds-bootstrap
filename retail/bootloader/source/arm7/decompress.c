@@ -22,6 +22,14 @@
 #include "locations.h"
 #include "tonccpy.h"
 
+#define BLZ_SHIFT     1          // bits to shift
+#define BLZ_MASK      0x80       // bits to check:
+                                 // ((((1 << BLZ_SHIFT) - 1) << (8 - BLZ_SHIFT)
+
+#define BLZ_THRESHOLD 2          // max number of bytes to not encode
+
+#define RAW_MAXIM     0x00FFFFFF // 3-bytes length, 16MB - 1
+
 static unsigned char* encr_data = (unsigned char*)BLOWFISH_LOCATION_B4DS;
 
 /*static void decompressLZ77Backwards(u8* addr, u32 size) {
@@ -67,6 +75,18 @@ static unsigned char* encr_data = (unsigned char*)BLOWFISH_LOCATION_B4DS;
 		}
 	}
 }*/
+
+void BLZ_Invert(char *buffer, int length) {
+  char *bottom, ch;
+
+  bottom = buffer + length - 1;
+
+  while (buffer < bottom) {
+    ch = *buffer;
+    *buffer++ = *bottom;
+    *bottom-- = ch;
+  }
+}
 
 u32 iUncompressedSize = 0;
 static u32 iFixedAddr = 0;
@@ -135,6 +155,86 @@ static u32 decompressBinary(u8 *aMainMemory, u32 aCodeLength, u32 aMemOffset) {
 		}
 	}
 	return uncompressEnd;
+}
+
+u32 decompressIBinary(unsigned char *pak_buffer, unsigned int pak_len) {
+  unsigned char *raw_buffer, *pak, *raw, *pak_end, *raw_end;
+  unsigned int   raw_len, len, pos, inc_len, hdr_len, enc_len, dec_len;
+  unsigned char  flags = 0, mask;
+
+  inc_len = *(unsigned int *)(pak_buffer + pak_len - 4);
+  if (!inc_len) {
+    dbg_printf("WARNING: not coded binary!\n");
+    enc_len = 0;
+    dec_len = pak_len;
+    pak_len = 0;
+    raw_len = dec_len;
+  } else {
+    hdr_len = pak_buffer[pak_len - 5];
+    if ((hdr_len < 0x08) || (hdr_len > 0x0B)) {
+		dbg_printf("Bad header length\n");
+		return pak_len;
+	}
+    if (pak_len <= hdr_len) {
+		dbg_printf("Bad length\n");
+		return pak_len;
+	}
+	enc_len = *(unsigned int *)(pak_buffer + pak_len - 8) & 0x00FFFFFF;
+    dec_len = pak_len - enc_len;
+    pak_len = enc_len - hdr_len;
+    raw_len = dec_len + enc_len + inc_len;
+    if (raw_len > RAW_MAXIM) {
+		dbg_printf("Bad decoded length\n");
+		return 0;
+	}
+  }
+
+  raw_buffer = (unsigned char *)0x037F8000;
+
+  pak = pak_buffer;
+  raw = raw_buffer;
+  pak_end = pak_buffer + dec_len + pak_len;
+  raw_end = raw_buffer + raw_len;
+
+  for (len = 0; len < dec_len; len++) *raw++ = *pak++;
+
+  BLZ_Invert((char *)pak_buffer + dec_len, pak_len);
+
+  mask = 0;
+
+  while (raw < raw_end) {
+    if (!(mask >>= BLZ_SHIFT)) {
+      if (pak == pak_end) break;
+      flags = *pak++;
+      mask = BLZ_MASK;
+    }
+
+    if (!(flags & mask)) {
+      if (pak == pak_end) break;
+      *raw++ = *pak++;
+    } else {
+      if (pak + 1 >= pak_end) break;
+      pos = *pak++ << 8;
+      pos |= *pak++;
+      len = (pos >> 12) + BLZ_THRESHOLD + 1;
+      if (raw + len > raw_end) {
+        //printf(", WARNING: wrong decoded length!");
+        len = raw_end - raw;
+      }
+      pos = (pos & 0xFFF) + 3;
+      while (len--) {
+		*raw = *(raw - pos);
+		++raw;
+	  }
+    }
+  }
+
+  BLZ_Invert((char *)raw_buffer + dec_len, raw_len - dec_len);
+
+	tonccpy(pak_buffer, raw_buffer, raw_len);
+	toncset(raw_buffer, 0, raw_len);
+
+	return raw_len;
 }
 
 void ensureBinaryDecompressed(const tNDSHeader* ndsHeader, module_params_t* moduleParams, bool foundModuleParams) {

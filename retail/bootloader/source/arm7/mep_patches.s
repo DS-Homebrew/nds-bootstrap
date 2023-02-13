@@ -436,10 +436,15 @@ nintCdwnCalHeapAllocFunc:
 	ldreq r0, nintCdwnCalHeapAddr+0x14
 	ldmeqfd   sp!, {r6,pc}
 
-	ldr r6, =0xAF44 @ Size of FontRed.nftr
+	ldr r6, =0xAF44 @ Size of FontRed.nftr (USA/EUR)
 	cmp r0, r6
 	ldreq r0, nintCdwnCalHeapAddr+0x18
 	ldmeqfd   sp!, {r6,pc}
+
+	@ldr r6, =0x4AE8 @ Size of FontRed.nftr (JAP)
+	@cmp r0, r6
+	@ldreq r0, nintCdwnCalHeapAddr+0x18
+	@ldmeqfd   sp!, {r6,pc}
 
 	@ldr r6, =0x4452C @ Size of suraTWLFont8x16.nftr
 	@cmp r0, r6

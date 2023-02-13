@@ -6190,6 +6190,25 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// Atonannichi Kazoeru: Nintendo DSi Calendar (Japan)
+	else if (strcmp(romTid, "KAUJ") == 0) {
+		if (saveOnFlashcard) {
+			setBL(0x02014EAC, (u32)dsiSaveGetLength);
+			setBL(0x02014EEC, (u32)dsiSaveRead);
+			setBL(0x02014F68, (u32)dsiSaveWrite);
+			setBL(0x0201554C, (u32)dsiSaveOpen);
+			setBL(0x020155CC, (u32)dsiSaveClose);
+			setBL(0x0201596C, (u32)dsiSaveCreate);
+			setBL(0x0201597C, (u32)dsiSaveOpen);
+			setBL(0x02015990, (u32)dsiSaveSetLength);
+			setBL(0x020159D8, (u32)dsiSaveClose);
+			tonccpy((u32*)0x0207F9E8, dsiSaveGetResultCode, 0xC);
+		}
+		if (!twlFontFound) {
+			*(u32*)0x020597A4 = 0xE1A00000; // nop
+		}
+	}
+
 	// Nintendo DSi Camera
 	else if (strncmp(romTid, "HNI", 3) == 0 && memoryPit) {
 		extern u32 iUncompressedSize;

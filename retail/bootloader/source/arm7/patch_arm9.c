@@ -847,8 +847,9 @@ bool useSharedFont = false;
 
 void patchSharedFontPath(const cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	//extern u32 accessControl;
+	extern u32 arm9ibinarySize;
 	if (/* !(accessControl & BIT(4)) || *(u32*)0x023B8000 != 0 */ !useSharedFont) {
-		toncset((u32*)0x023B8000, 0, 0x8000);
+		toncset((u32*)0x023B8000, 0, arm9ibinarySize);
 		return;
 	}
 
@@ -882,7 +883,7 @@ void patchSharedFontPath(const cardengineArm9* ce9, const tNDSHeader* ndsHeader,
 		}
 	}
 	if (!fileIoOpen) {
-		toncset((u32*)0x023B8000, 0, 0x8000);
+		toncset((u32*)0x023B8000, 0, arm9ibinarySize);
 		return;
 	}
 
@@ -899,7 +900,7 @@ void patchSharedFontPath(const cardengineArm9* ce9, const tNDSHeader* ndsHeader,
 			}
 		}
 		if (!fileIoClose) {
-			toncset((u32*)0x023B8000, 0, 0x8000);
+			toncset((u32*)0x023B8000, 0, arm9ibinarySize);
 			return;
 		}
 
@@ -915,7 +916,7 @@ void patchSharedFontPath(const cardengineArm9* ce9, const tNDSHeader* ndsHeader,
 			}
 		}
 		if (!fileIoSeek) {
-			toncset((u32*)0x023B8000, 0, 0x8000);
+			toncset((u32*)0x023B8000, 0, arm9ibinarySize);
 			return;
 		}
 
@@ -931,7 +932,7 @@ void patchSharedFontPath(const cardengineArm9* ce9, const tNDSHeader* ndsHeader,
 			}
 		}
 		if (!fileIoRead) {
-			toncset((u32*)0x023B8000, 0, 0x8000);
+			toncset((u32*)0x023B8000, 0, arm9ibinarySize);
 			return;
 		}
 
@@ -939,14 +940,28 @@ void patchSharedFontPath(const cardengineArm9* ce9, const tNDSHeader* ndsHeader,
 		dbg_hexa((u32)fileIoRead);
 		dbg_printf("\n\n");
 
-		tonccpy(moduleParams->static_bss_end, (u32*)0x023B8004, 0x7FFC);
-		toncset((u32*)0x023B8000, 0, 0x8000);
+		extern u32* findLtdModuleParamsOffset(const tNDSHeader* ndsHeader);
+		ltd_module_params_t* ltdModuleParams = (ltd_module_params_t*)(findLtdModuleParamsOffset(ndsHeader) - 4);
+
+		u32 iUncompressedSizei = arm9ibinarySize;
+
+		if (ltdModuleParams->compressed_static_end) {
+			dbg_printf("arm9i is compressed");
+			extern u32 decompressIBinary(unsigned char *pak_buffer, unsigned int pak_len);
+			iUncompressedSizei = decompressIBinary((unsigned char*)0x023B8000, arm9ibinarySize);
+		} else {
+			dbg_printf("arm9i is not compressed");
+		}
+		dbg_printf("\n\n");
+
+		tonccpy(moduleParams->static_bss_end, (u32*)0x023B8004, iUncompressedSizei-4);
+		toncset((u32*)0x023B8000, 0, iUncompressedSizei);
 
 		//bool armFound = false;
 		//bool dsiBiosFuncsIn9i = false;
 		int zerosFound = 0;
 		u32* arm9idst = moduleParams->static_bss_end;
-		for (u32 i = 0; i < 0x7FFC/4; i++) {
+		for (u32 i = 0; i < (iUncompressedSizei-4)/4; i++) {
 			if (arm9idst[i] == (u32)offset) {
 				for (int i2 = 0; i2 < 0x100/4; i2++) {
 					u32* blOffset = (arm9idst + i - i2);

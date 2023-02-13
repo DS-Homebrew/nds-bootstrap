@@ -11541,11 +11541,10 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02012F64, (u32)dsiSaveSetLength);
 		setBL(0x02012FAC, (u32)dsiSaveClose);
 		*(u32*)0x02013124 = 0xE1A00000; // nop
-		*(u32*)0x0201488C = 0xE1A00000; // nop
-		*(u32*)0x02014894 = 0xE1A00000; // nop
 		*(u32*)0x020148AC = 0xE3A00001; // mov r0, #1
 		*(u32*)0x020148BC = 0xE1A00000; // nop
 		*(u32*)0x020148D0 = 0xE1A00000; // nop
+		*(u32*)0x0204F008 = 0xE1A00000; // nop
 		if (!extendedMemory2) {
 			if (s2FlashcardId == 0x5A45) {
 				for (int i = 0; i < 8; i++) {
@@ -11565,7 +11564,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		tonccpy((u32*)0x02086F2C, dsiSaveGetResultCode, 0xC);
 		*(u32*)0x02089BB0 = 0xE1A00000; // nop
 		patchInitDSiWare(0x0208FCB8, heapEnd);
-		*(u32*)0x02090044 = 0x021B5380;
+		*(u32*)0x02090044 = *(u32*)0x02004FD0;
 		patchUserSettingsReadDSiWare(0x02091268);
 		*(u32*)0x020946F8 = 0xE1A00000; // nop
 	}
@@ -11586,11 +11585,10 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02012FC0, (u32)dsiSaveSetLength);
 		setBL(0x02013008, (u32)dsiSaveClose);
 		*(u32*)0x02013180 = 0xE1A00000; // nop
-		*(u32*)0x020148E8 = 0xE1A00000; // nop
-		*(u32*)0x020148F0 = 0xE1A00000; // nop
 		*(u32*)0x02014908 = 0xE3A00001; // mov r0, #1
 		*(u32*)0x02014918 = 0xE1A00000; // nop
 		*(u32*)0x0201492C = 0xE1A00000; // nop
+		*(u32*)0x0204F214 = 0xE1A00000; // nop
 		if (!extendedMemory2) {
 			if (s2FlashcardId == 0x5A45) {
 				for (int i = 0; i < 8; i++) {
@@ -11605,10 +11603,52 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		tonccpy((u32*)0x02087164, dsiSaveGetResultCode, 0xC);
 		*(u32*)0x02089DE8 = 0xE1A00000; // nop
 		patchInitDSiWare(0x0208FEF0, heapEnd);
-		*(u32*)0x0209027C = 0x021BA080;
+		*(u32*)0x0209027C = *(u32*)0x02004FD0;
 		patchUserSettingsReadDSiWare(0x020914A0);
 		*(u32*)0x02094940 = 0xE1A00000; // nop
 	}
+
+	// Atonannichi Kazoeru: Nintendo DSi Calendar (Japan)
+	// Requires either 8MB of RAM or Memory Expansion Pak
+	/* else if (strcmp(romTid, "KAUJ") == 0 && debugOrMep) {
+		extern u32* nintCdwnCalHeapAlloc;
+		extern u32* nintCdwnCalHeapAddrPtr;
+
+		useSharedFont = twlFontFound;
+		setBL(0x02014EAC, (u32)dsiSaveGetLength);
+		setBL(0x02014EEC, (u32)dsiSaveRead);
+		setBL(0x02014F68, (u32)dsiSaveWrite);
+		setBL(0x0201554C, (u32)dsiSaveOpen);
+		setBL(0x020155CC, (u32)dsiSaveClose);
+		setBL(0x0201596C, (u32)dsiSaveCreate);
+		setBL(0x0201597C, (u32)dsiSaveOpen);
+		setBL(0x02015990, (u32)dsiSaveSetLength);
+		setBL(0x020159D8, (u32)dsiSaveClose);
+		*(u32*)0x02015B50 = 0xE1A00000; // nop
+		*(u32*)0x02016014 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02016024 = 0xE1A00000; // nop
+		*(u32*)0x02016038 = 0xE1A00000; // nop
+		*(u32*)0x0204CD9C = 0xE1A00000; // nop
+		if (!extendedMemory2) {
+			if (s2FlashcardId == 0x5A45) {
+				for (int i = 0; i < 8; i++) {
+					nintCdwnCalHeapAddrPtr[i] -= 0x800000;
+				}
+			}
+			tonccpy((u32*)0x0208A268, nintCdwnCalHeapAlloc, 0xC0);
+			setBL(0x02058404, 0x0208A268);
+		}
+		if (!twlFontFound) {
+			*(u32*)0x020597A4 = 0xE1A00000; // nop
+		}
+		*(u32*)0x0207EE70 = 0xE1A00000; // nop
+		tonccpy((u32*)0x0207F9E8, dsiSaveGetResultCode, 0xC);
+		*(u32*)0x0208266C = 0xE1A00000; // nop
+		patchInitDSiWare(0x02088758, heapEnd);
+		// *(u32*)0x02088AE4 = *(u32*)0x02004FD0;
+		patchUserSettingsReadDSiWare(0x02089CF8);
+		*(u32*)0x0208D188 = 0xE1A00000; // nop
+	} */
 
 	// Nintendo DSi + Internet (Japan)
 	// Nintendo DSi + Internet (USA)
