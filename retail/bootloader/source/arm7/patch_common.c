@@ -2304,9 +2304,10 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Anne's Doll Studio: Antique Collection (USA)
 	// Anne's Doll Studio: Antique Collection (Europe)
+	// Atorie Decora Doll: Antique (Japan)
 	// Anne's Doll Studio: Princess Collection (USA)
 	// Anne's Doll Studio: Princess Collection (Europe)
-	else if (strcmp(romTid, "KY8E") == 0 || strcmp(romTid, "KY8P") == 0
+	else if (strcmp(romTid, "KY8E") == 0 || strcmp(romTid, "KY8P") == 0 || strcmp(romTid, "KY8J") == 0
 		   || strcmp(romTid, "K2SE") == 0 || strcmp(romTid, "K2SP") == 0) {
 		/*if (!extendedMemory2) {
 			for (u32 i = 0; i < ndsHeader->arm9binarySize/4; i++) {
@@ -2321,7 +2322,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020050B4 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		*(u32*)0x02011374 = 0xE1A00000; // nop
 		*(u32*)0x020151A0 = 0xE1A00000; // nop
-		patchInitDSiWare(0x0201BFA8, heapEnd);
+		patchInitDSiWare(0x0201BFB4, heapEnd);
 		/*if (!extendedMemory2) {
 			*(u32*)0x0201C340 -= 0x240000;
 		}*/
@@ -2345,10 +2346,14 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 				*(u32*)0x0203B89C = 0xE3A00000; // mov r0, #0 (Skip pit.bin check)
 				*(u32*)0x0203BAFC = 0xE3A00000; // mov r0, #0 (Skip free space check)
 				*(u32*)0x0203BB00 = 0xE12FFF1E; // bx lr
-			} else {
+			} else if (ndsHeader->gameCode[3] == 'P') {
 				*(u32*)0x0203B844 = 0xE3A00000; // mov r0, #0 (Skip pit.bin check)
 				*(u32*)0x0203BAA4 = 0xE3A00000; // mov r0, #0 (Skip free space check)
 				*(u32*)0x0203BAA8 = 0xE12FFF1E; // bx lr
+			} else {
+				*(u32*)0x0203B848 = 0xE3A00000; // mov r0, #0 (Skip pit.bin check)
+				*(u32*)0x0203BAA8 = 0xE3A00000; // mov r0, #0 (Skip free space check)
+				*(u32*)0x0203BAAC = 0xE12FFF1E; // bx lr
 			}
 		} else {
 			*(u32*)0x0202F978 = 0xE1A00000; // nop
@@ -2433,31 +2438,127 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// Atorie Decora Doll: Gothic (Japan)
+	// Atorie Decora Doll: Lolita (Japan)
+	else if (strcmp(romTid, "K54J") == 0 || strcmp(romTid, "KLQJ") == 0) {
+		*(u32*)0x020050B0 = 0xE1A00000; // nop
+		*(u32*)0x020050B4 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		*(u32*)0x020111A0 = 0xE1A00000; // nop
+		*(u32*)0x02014F44 = 0xE1A00000; // nop
+		patchInitDSiWare(0x0201BD3C, heapEnd);
+		patchUserSettingsReadDSiWare(0x0201D3DC);
+		if (strncmp(romTid, "K54", 3) == 0) {
+			*(u32*)0x02032A58 = 0xE3A00000; // mov r0, #0 (Skip pit.bin check)
+			*(u32*)0x02032CB8 = 0xE3A00000; // mov r0, #0 (Skip free space check)
+			*(u32*)0x02032CBC = 0xE12FFF1E; // bx lr
+			setBL(0x020347FC, (u32)dsiSaveGetResultCode);
+			setBL(0x02034920, (u32)dsiSaveOpen);
+			setBL(0x02034954, (u32)dsiSaveRead);
+			setBL(0x0203497C, (u32)dsiSaveClose);
+			setBL(0x020349DC, (u32)dsiSaveOpen);
+			setBL(0x02034A24, (u32)dsiSaveWrite);
+			setBL(0x02034A44, (u32)dsiSaveClose);
+			setBL(0x02034A88, (u32)dsiSaveCreate);
+			setBL(0x02034AE4, (u32)dsiSaveDelete);
+			*(u32*)0x02036CAC = 0xE1A00000; // nop
+			*(u32*)0x0203A050 = 0xE1A00000; // nop
+			*(u32*)0x0203A06C = 0xE1A00000; // nop
+			*(u32*)0x0203A884 = 0xE12FFF1E; // bx lr
+			*(u32*)0x0203B938 = 0xE1A00000; // nop
+		} else {
+			*(u32*)0x020329C4 = 0xE3A00000; // mov r0, #0 (Skip pit.bin check)
+			*(u32*)0x02032C24 = 0xE3A00000; // mov r0, #0 (Skip free space check)
+			*(u32*)0x02032C28 = 0xE12FFF1E; // bx lr
+			setBL(0x02034764, (u32)dsiSaveGetResultCode);
+			setBL(0x02034888, (u32)dsiSaveOpen);
+			setBL(0x020348BC, (u32)dsiSaveRead);
+			setBL(0x020348E4, (u32)dsiSaveClose);
+			setBL(0x02034944, (u32)dsiSaveOpen);
+			setBL(0x0203498C, (u32)dsiSaveWrite);
+			setBL(0x020349AC, (u32)dsiSaveClose);
+			setBL(0x020349F0, (u32)dsiSaveCreate);
+			setBL(0x02034A4C, (u32)dsiSaveDelete);
+			*(u32*)0x02036C14 = 0xE1A00000; // nop
+			*(u32*)0x02039FB4 = 0xE1A00000; // nop
+			*(u32*)0x02039FD0 = 0xE1A00000; // nop
+			*(u32*)0x0203A7E8 = 0xE12FFF1E; // bx lr
+			*(u32*)0x0203B89C = 0xE1A00000; // nop
+		}
+	}
+
 	// Anne's Doll Studio: Tokyo Collection (USA)
-	else if (strcmp(romTid, "KSQE") == 0) {
+	// Atorie Decora Doll: Princess (Japan)
+	else if (strcmp(romTid, "KSQE") == 0 || strcmp(romTid, "K2SJ") == 0) {
 		*(u32*)0x020050B0 = 0xE1A00000; // nop
 		*(u32*)0x020050B4 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		*(u32*)0x02011344 = 0xE1A00000; // nop
 		*(u32*)0x02015170 = 0xE1A00000; // nop
 		patchInitDSiWare(0x0201BF84, heapEnd);
 		patchUserSettingsReadDSiWare(0x0201D624);
-		setBL(0x02027F34, (u32)dsiSaveGetResultCode);
-		setBL(0x02028058, (u32)dsiSaveOpen);
-		setBL(0x0202808C, (u32)dsiSaveRead);
-		setBL(0x020280B4, (u32)dsiSaveClose);
-		setBL(0x02028114, (u32)dsiSaveOpen);
-		setBL(0x0202815C, (u32)dsiSaveWrite);
-		setBL(0x0202817C, (u32)dsiSaveClose);
-		setBL(0x020281C0, (u32)dsiSaveCreate);
-		setBL(0x0202821C, (u32)dsiSaveDelete);
-		*(u32*)0x0202A3E4 = 0xE1A00000; // nop
-		*(u32*)0x0202D760 = 0xE1A00000; // nop
-		*(u32*)0x0202D77C = 0xE1A00000; // nop
-		*(u32*)0x0202DF84 = 0xE12FFF1E; // bx lr
-		*(u32*)0x0202F05C = 0xE1A00000; // nop
-		*(u32*)0x0203A534 = 0xE3A00000; // mov r0, #0 (Skip pit.bin check)
-		*(u32*)0x0203A794 = 0xE3A00000; // mov r0, #0 (Skip free space check)
-		*(u32*)0x0203A798 = 0xE12FFF1E; // bx lr
+		if (ndsHeader->gameCode[3] == 'E') {
+			setBL(0x02027F34, (u32)dsiSaveGetResultCode);
+			setBL(0x02028058, (u32)dsiSaveOpen);
+			setBL(0x0202808C, (u32)dsiSaveRead);
+			setBL(0x020280B4, (u32)dsiSaveClose);
+			setBL(0x02028114, (u32)dsiSaveOpen);
+			setBL(0x0202815C, (u32)dsiSaveWrite);
+			setBL(0x0202817C, (u32)dsiSaveClose);
+			setBL(0x020281C0, (u32)dsiSaveCreate);
+			setBL(0x0202821C, (u32)dsiSaveDelete);
+			*(u32*)0x0202A3E4 = 0xE1A00000; // nop
+			*(u32*)0x0202D760 = 0xE1A00000; // nop
+			*(u32*)0x0202D77C = 0xE1A00000; // nop
+			*(u32*)0x0202DF84 = 0xE12FFF1E; // bx lr
+			*(u32*)0x0202F05C = 0xE1A00000; // nop
+			*(u32*)0x0203A534 = 0xE3A00000; // mov r0, #0 (Skip pit.bin check)
+			*(u32*)0x0203A794 = 0xE3A00000; // mov r0, #0 (Skip free space check)
+			*(u32*)0x0203A798 = 0xE12FFF1E; // bx lr
+		} else {
+			setBL(0x0202A134, (u32)dsiSaveGetResultCode);
+			setBL(0x0202A258, (u32)dsiSaveOpen);
+			setBL(0x0202A28C, (u32)dsiSaveRead);
+			setBL(0x0202A2B4, (u32)dsiSaveClose);
+			setBL(0x0202A314, (u32)dsiSaveOpen);
+			setBL(0x0202A35C, (u32)dsiSaveWrite);
+			setBL(0x0202A37C, (u32)dsiSaveClose);
+			setBL(0x0202A3C0, (u32)dsiSaveCreate);
+			setBL(0x0202A41C, (u32)dsiSaveDelete);
+			*(u32*)0x0202C5D8 = 0xE1A00000; // nop
+			*(u32*)0x0202F950 = 0xE1A00000; // nop
+			*(u32*)0x0202F96C = 0xE1A00000; // nop
+			*(u32*)0x0202FFEC = 0xE12FFF1E; // bx lr
+			*(u32*)0x020310A4 = 0xE1A00000; // nop
+			*(u32*)0x0203B650 = 0xE3A00000; // mov r0, #0 (Skip pit.bin check)
+			*(u32*)0x0203B8B0 = 0xE3A00000; // mov r0, #0 (Skip free space check)
+			*(u32*)0x0203B8B4 = 0xE12FFF1E; // bx lr
+		}
+	}
+
+	// Atorie Decora Doll (Japan)
+	else if (strcmp(romTid, "KDUJ") == 0) {
+		*(u32*)0x02005098 = 0xE1A00000; // nop
+		*(u32*)0x0200509C = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		*(u32*)0x02011218 = 0xE1A00000; // nop
+		*(u32*)0x02014FB0 = 0xE1A00000; // nop
+		patchInitDSiWare(0x0201BD8C, heapEnd);
+		patchUserSettingsReadDSiWare(0x0201D41C);
+		setBL(0x020270E4, (u32)dsiSaveGetResultCode);
+		setBL(0x02027208, (u32)dsiSaveOpen);
+		setBL(0x0202723C, (u32)dsiSaveRead);
+		setBL(0x02027264, (u32)dsiSaveClose);
+		setBL(0x020272C4, (u32)dsiSaveOpen);
+		setBL(0x0202730C, (u32)dsiSaveWrite);
+		setBL(0x0202732C, (u32)dsiSaveClose);
+		setBL(0x02027370, (u32)dsiSaveCreate);
+		setBL(0x020273CC, (u32)dsiSaveDelete);
+		*(u32*)0x02029594 = 0xE1A00000; // nop
+		*(u32*)0x0202C848 = 0xE1A00000; // nop
+		*(u32*)0x0202C864 = 0xE1A00000; // nop
+		*(u32*)0x0202D06C = 0xE12FFF1E; // bx lr
+		*(u32*)0x0202E0D4 = 0xE1A00000; // nop
+		*(u32*)0x02039428 = 0xE3A00000; // mov r0, #0 (Skip pit.bin check)
+		*(u32*)0x02039688 = 0xE3A00000; // mov r0, #0 (Skip free space check)
+		*(u32*)0x0203968C = 0xE12FFF1E; // bx lr
 	}
 
 	// Anonymous Notes 1: From The Abyss (USA & Europe)

@@ -1535,9 +1535,10 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Anne's Doll Studio: Antique Collection (USA)
 	// Anne's Doll Studio: Antique Collection (Europe)
+	// Atorie Decora Doll: Antique (Japan)
 	// Anne's Doll Studio: Princess Collection (USA)
 	// Anne's Doll Studio: Princess Collection (Europe)
-	else if (strcmp(romTid, "KY8E") == 0 || strcmp(romTid, "KY8P") == 0
+	else if (strcmp(romTid, "KY8E") == 0 || strcmp(romTid, "KY8P") == 0 || strcmp(romTid, "KY8J") == 0
 		   || strcmp(romTid, "K2SE") == 0 || strcmp(romTid, "K2SP") == 0) {
 		if (!twlFontFound) {
 			*(u32*)0x020050B4 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
@@ -1557,16 +1558,41 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 					*(u32*)0x0203B89C = 0xE3A00000; // mov r0, #0 (Skip pit.bin check)
 					*(u32*)0x0203BAFC = 0xE3A00000; // mov r0, #0 (Skip free space check)
 					*(u32*)0x0203BB00 = 0xE12FFF1E; // bx lr
-				} else {
+				} else if (ndsHeader->gameCode[3] == 'P') {
 					*(u32*)0x0203B844 = 0xE3A00000; // mov r0, #0 (Skip pit.bin check)
 					*(u32*)0x0203BAA4 = 0xE3A00000; // mov r0, #0 (Skip free space check)
 					*(u32*)0x0203BAA8 = 0xE12FFF1E; // bx lr
+				} else {
+					*(u32*)0x0203B848 = 0xE3A00000; // mov r0, #0 (Skip pit.bin check)
+					*(u32*)0x0203BAA8 = 0xE3A00000; // mov r0, #0 (Skip free space check)
+					*(u32*)0x0203BAAC = 0xE12FFF1E; // bx lr
 				}
 			} else {
 				*(u32*)0x0203B678 = 0xE3A00000; // mov r0, #0 (Skip pit.bin check)
 				*(u32*)0x0203B8D8 = 0xE3A00000; // mov r0, #0 (Skip free space check)
 				*(u32*)0x0203B8DC = 0xE12FFF1E; // bx lr
 			}
+		}
+	}
+
+	// Atorie Decora Doll: Princess (Japan)
+	else if (strcmp(romTid, "K2SJ") == 0) {
+		if (!twlFontFound) {
+			*(u32*)0x020050B4 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		}
+		if (saveOnFlashcard) {
+			setBL(0x0202A134, (u32)dsiSaveGetResultCode);
+			setBL(0x0202A258, (u32)dsiSaveOpen);
+			setBL(0x0202A28C, (u32)dsiSaveRead);
+			setBL(0x0202A2B4, (u32)dsiSaveClose);
+			setBL(0x0202A314, (u32)dsiSaveOpen);
+			setBL(0x0202A35C, (u32)dsiSaveWrite);
+			setBL(0x0202A37C, (u32)dsiSaveClose);
+			setBL(0x0202A3C0, (u32)dsiSaveCreate);
+			setBL(0x0202A41C, (u32)dsiSaveDelete);
+			*(u32*)0x0203B650 = 0xE3A00000; // mov r0, #0 (Skip pit.bin check)
+			*(u32*)0x0203B8B0 = 0xE3A00000; // mov r0, #0 (Skip free space check)
+			*(u32*)0x0203B8B4 = 0xE12FFF1E; // bx lr
 		}
 	}
 
@@ -1588,6 +1614,27 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBL(0x0203585C, (u32)dsiSaveClose);
 			setBL(0x020358A0, (u32)dsiSaveCreate);
 			setBL(0x020358FC, (u32)dsiSaveDelete);
+		}
+	}
+
+	// Atorie Decora Doll: Gothic (Japan)
+	else if (strcmp(romTid, "K54J") == 0) {
+		if (!twlFontFound) {
+			*(u32*)0x020050B4 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		}
+		if (saveOnFlashcard) {
+			*(u32*)0x02032A58 = 0xE3A00000; // mov r0, #0 (Skip pit.bin check)
+			*(u32*)0x02032CB8 = 0xE3A00000; // mov r0, #0 (Skip free space check)
+			*(u32*)0x02032CBC = 0xE12FFF1E; // bx lr
+			setBL(0x020347FC, (u32)dsiSaveGetResultCode);
+			setBL(0x02034920, (u32)dsiSaveOpen);
+			setBL(0x02034954, (u32)dsiSaveRead);
+			setBL(0x0203497C, (u32)dsiSaveClose);
+			setBL(0x020349DC, (u32)dsiSaveOpen);
+			setBL(0x02034A24, (u32)dsiSaveWrite);
+			setBL(0x02034A44, (u32)dsiSaveClose);
+			setBL(0x02034A88, (u32)dsiSaveCreate);
+			setBL(0x02034AE4, (u32)dsiSaveDelete);
 		}
 	}
 
@@ -1625,6 +1672,27 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// Atorie Decora Doll: Lolita (Japan)
+	else if (strcmp(romTid, "KLQJ") == 0) {
+		if (!twlFontFound) {
+			*(u32*)0x020050B4 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		}
+		if (saveOnFlashcard) {
+			*(u32*)0x020329C4 = 0xE3A00000; // mov r0, #0 (Skip pit.bin check)
+			*(u32*)0x02032C24 = 0xE3A00000; // mov r0, #0 (Skip free space check)
+			*(u32*)0x02032C28 = 0xE12FFF1E; // bx lr
+			setBL(0x02034764, (u32)dsiSaveGetResultCode);
+			setBL(0x02034888, (u32)dsiSaveOpen);
+			setBL(0x020348BC, (u32)dsiSaveRead);
+			setBL(0x020348E4, (u32)dsiSaveClose);
+			setBL(0x02034944, (u32)dsiSaveOpen);
+			setBL(0x0203498C, (u32)dsiSaveWrite);
+			setBL(0x020349AC, (u32)dsiSaveClose);
+			setBL(0x020349F0, (u32)dsiSaveCreate);
+			setBL(0x02034A4C, (u32)dsiSaveDelete);
+		}
+	}
+
 	// Anne's Doll Studio: Tokyo Collection (USA)
 	else if (strcmp(romTid, "KSQE") == 0) {
 		if (!twlFontFound) {
@@ -1643,6 +1711,27 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			*(u32*)0x0203A534 = 0xE3A00000; // mov r0, #0 (Skip pit.bin check)
 			*(u32*)0x0203A794 = 0xE3A00000; // mov r0, #0 (Skip free space check)
 			*(u32*)0x0203A798 = 0xE12FFF1E; // bx lr
+		}
+	}
+
+	// Atorie Decora Doll (Japan)
+	else if (strcmp(romTid, "KDUJ") == 0) {
+		if (!twlFontFound) {
+			*(u32*)0x0200509C = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		}
+		if (saveOnFlashcard) {
+			setBL(0x020270E4, (u32)dsiSaveGetResultCode);
+			setBL(0x02027208, (u32)dsiSaveOpen);
+			setBL(0x0202723C, (u32)dsiSaveRead);
+			setBL(0x02027264, (u32)dsiSaveClose);
+			setBL(0x020272C4, (u32)dsiSaveOpen);
+			setBL(0x0202730C, (u32)dsiSaveWrite);
+			setBL(0x0202732C, (u32)dsiSaveClose);
+			setBL(0x02027370, (u32)dsiSaveCreate);
+			setBL(0x020273CC, (u32)dsiSaveDelete);
+			*(u32*)0x02039428 = 0xE3A00000; // mov r0, #0 (Skip pit.bin check)
+			*(u32*)0x02039688 = 0xE3A00000; // mov r0, #0 (Skip free space check)
+			*(u32*)0x0203968C = 0xE12FFF1E; // bx lr
 		}
 	}
 
