@@ -4724,6 +4724,50 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0207574C = 0xE1A00000; // nop
 	}*/
 
+	// Bounce & Break (USA)
+	else if (strcmp(romTid, "KZEE") == 0) {
+		useSharedFont = twlFontFound;
+		*(u32*)0x0200DC8C = 0xE1A00000; // nop
+		*(u32*)0x02011430 = 0xE1A00000; // nop
+		patchInitDSiWare(0x02016820, heapEnd);
+		setBL(0x020489B0, (u32)dsiSaveOpen);
+		setBL(0x02048A04, (u32)dsiSaveGetLength);
+		setBL(0x02048A14, (u32)dsiSaveRead);
+		setBL(0x02048A1C, (u32)dsiSaveClose);
+		*(u32*)0x02048A34 = 0xE12FFF1E; // bx lr
+		setBL(0x02048A6C, (u32)dsiSaveOpen);
+		*(u32*)0x02048A84 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+		*(u32*)0x02048A94 = 0xE3A00001; // mov r0, #1 (dsiSaveFreeSpaceAvailable)
+		setBL(0x02048AB0, (u32)dsiSaveCreate);
+		setBL(0x02048AC4, (u32)dsiSaveOpen);
+		setBL(0x02048AD4, (u32)dsiSaveGetResultCode);
+		setBL(0x02048B18, (u32)dsiSaveSetLength);
+		setBL(0x02048B28, (u32)dsiSaveWrite);
+		setBL(0x02048B30, (u32)dsiSaveClose);
+	}
+
+	// Bounce & Break (Europe)
+	else if (strcmp(romTid, "KZEP") == 0) {
+		useSharedFont = twlFontFound;
+		*(u32*)0x0200DC44 = 0xE1A00000; // nop
+		*(u32*)0x0201153C = 0xE1A00000; // nop
+		patchInitDSiWare(0x02016C08, heapEnd);
+		setBL(0x02049138, (u32)dsiSaveOpen);
+		setBL(0x0204918C, (u32)dsiSaveGetLength);
+		setBL(0x0204919C, (u32)dsiSaveRead);
+		setBL(0x020491A4, (u32)dsiSaveClose);
+		*(u32*)0x020491BC = 0xE12FFF1E; // bx lr
+		setBL(0x020491F4, (u32)dsiSaveOpen);
+		*(u32*)0x0204920C = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+		*(u32*)0x0204921C = 0xE3A00001; // mov r0, #1 (dsiSaveFreeSpaceAvailable)
+		setBL(0x02049238, (u32)dsiSaveCreate);
+		setBL(0x0204924C, (u32)dsiSaveOpen);
+		setBL(0x0204925C, (u32)dsiSaveGetResultCode);
+		setBL(0x020492A0, (u32)dsiSaveSetLength);
+		setBL(0x020492B0, (u32)dsiSaveWrite);
+		setBL(0x020492B8, (u32)dsiSaveClose);
+	}
+
 	// Box Pusher (USA)
 	else if (strcmp(romTid, "KQBE") == 0) {
 		setBL(0x02041510, (u32)dsiSaveOpen);
