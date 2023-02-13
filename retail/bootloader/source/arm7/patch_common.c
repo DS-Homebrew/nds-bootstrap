@@ -3554,6 +3554,39 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x020486B0, (u32)dsiSaveClose);
 	}
 
+	// Atama o Yoku Suru Anzan DS: Zou no Hana Fuusen (Japan)
+	else if (strcmp(romTid, "KZ3J") == 0) {
+		*(u32*)0x02006FD4 = 0xE1A00000; // nop
+		*(u32*)0x0200AA08 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		setBL(0x0200AC10, (u32)dsiSaveCreate);
+		setBL(0x0200AC4C, (u32)dsiSaveOpen);
+		setBL(0x0200AC84, (u32)dsiSaveSetLength);
+		setBL(0x0200AC94, (u32)dsiSaveWrite);
+		setBL(0x0200ACAC, (u32)dsiSaveClose);
+		setBL(0x0200AD34, (u32)dsiSaveOpen);
+		setBL(0x0200AD6C, (u32)dsiSaveSetLength);
+		setBL(0x0200AD7C, (u32)dsiSaveWrite);
+		setBL(0x0200AD94, (u32)dsiSaveClose);
+		setBL(0x0200AE14, (u32)dsiSaveOpen);
+		setBL(0x0200AE4C, (u32)dsiSaveRead);
+		setBL(0x0200AE60, (u32)dsiSaveClose);
+		setBL(0x0200AEB0, (u32)dsiSaveDelete);
+		setBL(0x0200AF1C, (u32)dsiSaveGetInfo);
+		*(u32*)0x0200AF60 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc & dsiSaveFreeSpaceAvailable)
+		*(u32*)0x0200AF64 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02031CFC = 0xE1A00000; // nop
+		tonccpy((u32*)0x02032874, dsiSaveGetResultCode, 0xC);
+		*(u32*)0x02035A64 = 0xE1A00000; // nop
+		patchInitDSiWare(0x0203D044, heapEnd);
+		patchUserSettingsReadDSiWare(0x0203E510);
+
+		// Skip Manual screen
+		for (int i = 0; i < 11; i++) {
+			u32* offset = (u32*)0x0200B2C0;
+			offset[i] = 0xE1A00000; // nop
+		}
+	}
+
 	// ATV Fever (USA)
 	else if (strcmp(romTid, "KVUE") == 0) {
 		useSharedFont = (twlFontFound && debugOrMep);
