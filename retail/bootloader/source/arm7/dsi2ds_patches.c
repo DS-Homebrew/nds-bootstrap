@@ -117,6 +117,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Patch DSiWare to run in DS mode
 
+#ifndef LOADERTWO
 	// 1st Class Poker & BlackJack (USA)
 	else if (strcmp(romTid, "KYPE") == 0) {
 		setBL(0x02012E50, (u32)dsiSaveOpen);
@@ -4081,6 +4082,39 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		doubleNopT(0x02028D2E);
 		doubleNopT(0x0202AD82);
 	}*/
+
+	// Tori to Mame (Japan)
+	else if (strcmp(romTid, "KP6J") == 0) {
+		// useSharedFont = twlFontFound;
+		*(u32*)0x0200D17C = 0xE3A00001; // mov r0, #1 (Enable NitroFS reads)
+		*(u32*)0x02017694 = 0xE3A00001; // mov r0, #1 (Enable TWL soft-reset function)
+		/* if (useSharedFont) {
+			*(u16*)0x0200796C = 0x2001; // movs r0, #1
+			*(u16*)0x02007970 = 0x2001; // movs r0, #1
+			*(u16*)0x0200797C = 0x2001; // movs r0, #1
+			*(u16*)0x02007980 = 0x2001; // movs r0, #1
+			*(u16*)0x0200798A = 0x2001; // movs r0, #1
+			*(u16*)0x02007990 = 0x2001; // movs r0, #1
+			*(u16*)0x02007994 = 0x2001; // movs r0, #1
+			*(u32*)0x02015928 = 0xE3A00001; // mov r0, #1
+			*(u32*)0x020217C8 = 0xE3A00001; // mov r0, #1
+			*(u32*)0x020217F0 = 0xE3A00001; // mov r0, #1
+		} else { */
+			*(u32*)0x020217B0 = 0xE12FFF1E; // bx lr (Disable NFTR font loading)
+			*(u32*)0x02021954 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
+		// }
+		setBL(0x02023348, (u32)dsiSaveOpen);
+		setBL(0x02023360, (u32)dsiSaveGetLength);
+		setBL(0x02023398, (u32)dsiSaveRead);
+		setBL(0x020233BC, (u32)dsiSaveClose);
+		*(u32*)0x020233FC = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+		setBL(0x02023430, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+		setBL(0x02023440, (u32)dsiSaveOpen);
+		setBL(0x02023460, (u32)dsiSaveSetLength);
+		setBL(0x02023480, (u32)dsiSaveWrite);
+		setBL(0x02023498, (u32)dsiSaveClose);
+		*(u32*)0x020302A0 = 0xE12FFF1E; // bx lr (Hide volume icon in pause menu)
+	}
 
 	// BlayzBloo: Super Melee Brawlers Battle Royale (USA)
 	// Requires 8MB of RAM
@@ -9119,23 +9153,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchUserSettingsReadDSiWare(0x0204BB4C);
 	}*/
 
-	// Kami Hikouki (Japan)
-	// Saving not supported due to using more than one file
-	else if (strcmp(romTid, "KAMJ") == 0) {
-		// useSharedFont = twlFontFound;
-		*(u32*)0x0200D908 = 0xE3A00001; // mov r0, #1 (Enable NitroFS reads)
-		*(u32*)0x02017D38 = 0xE3A00001; // mov r0, #1 (Enable TWL soft-reset function)
-		/* if (useSharedFont) {
-			*(u32*)0x02015FCC = 0xE3A00001; // mov r0, #1
-			*(u32*)0x02021E60 = 0xE3A00001; // mov r0, #1
-			*(u32*)0x02021E9C = 0xE3A00001; // mov r0, #1
-		} else { */
-			*(u32*)0x02021E48 = 0xE12FFF1E; // bx lr (Disable NFTR font loading)
-			*(u32*)0x02021FEC = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
-		// }
-		*(u32*)0x02030298 = 0xE12FFF1E; // bx lr (Hide volume icon in pause menu)
-	}
-
 	// A Kappa's Trail (USA)
 	// Requires 8MB of RAM
 	// Crashes after ESRB screen
@@ -9708,7 +9725,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchUserSettingsReadDSiWare(0x02014C78);
 		*(u32*)0x0201CFCC = 0xE1A00000; // nop (Skip Manual screen)
 	}
-
+#else
 	// Maestro! Green Groove (USA)
 	// Maestro! Green Groove (Europe, Australia)
 	// Does not save due to unknown cause
@@ -12255,6 +12272,23 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02029160, (u32)dsiSaveClose);
 		setBL(0x0202917C, (u32)dsiSaveSetLength);
 		*(u32*)0x020296B0 = 0xE1A00000; // nop
+	}
+
+	// Kami Hikouki (Japan)
+	// Saving not supported due to using more than one file
+	else if (strcmp(romTid, "KAMJ") == 0) {
+		// useSharedFont = twlFontFound;
+		*(u32*)0x0200D908 = 0xE3A00001; // mov r0, #1 (Enable NitroFS reads)
+		*(u32*)0x02017D38 = 0xE3A00001; // mov r0, #1 (Enable TWL soft-reset function)
+		/* if (useSharedFont) {
+			*(u32*)0x02015FCC = 0xE3A00001; // mov r0, #1
+			*(u32*)0x02021E60 = 0xE3A00001; // mov r0, #1
+			*(u32*)0x02021E9C = 0xE3A00001; // mov r0, #1
+		} else { */
+			*(u32*)0x02021E48 = 0xE12FFF1E; // bx lr (Disable NFTR font loading)
+			*(u32*)0x02021FEC = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
+		// }
+		*(u32*)0x02030298 = 0xE12FFF1E; // bx lr (Hide volume icon in pause menu)
 	}
 
 	// Paul's Monster Adventure (USA)
@@ -15960,39 +15994,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02051FB8, (u32)dsiSaveClose);
 	}*/
 
-	// Tori to Mame (Japan)
-	else if (strcmp(romTid, "KP6J") == 0) {
-		// useSharedFont = twlFontFound;
-		*(u32*)0x0200D17C = 0xE3A00001; // mov r0, #1 (Enable NitroFS reads)
-		*(u32*)0x02017694 = 0xE3A00001; // mov r0, #1 (Enable TWL soft-reset function)
-		/* if (useSharedFont) {
-			*(u16*)0x0200796C = 0x2001; // movs r0, #1
-			*(u16*)0x02007970 = 0x2001; // movs r0, #1
-			*(u16*)0x0200797C = 0x2001; // movs r0, #1
-			*(u16*)0x02007980 = 0x2001; // movs r0, #1
-			*(u16*)0x0200798A = 0x2001; // movs r0, #1
-			*(u16*)0x02007990 = 0x2001; // movs r0, #1
-			*(u16*)0x02007994 = 0x2001; // movs r0, #1
-			*(u32*)0x02015928 = 0xE3A00001; // mov r0, #1
-			*(u32*)0x020217C8 = 0xE3A00001; // mov r0, #1
-			*(u32*)0x020217F0 = 0xE3A00001; // mov r0, #1
-		} else { */
-			*(u32*)0x020217B0 = 0xE12FFF1E; // bx lr (Disable NFTR font loading)
-			*(u32*)0x02021954 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
-		// }
-		setBL(0x02023348, (u32)dsiSaveOpen);
-		setBL(0x02023360, (u32)dsiSaveGetLength);
-		setBL(0x02023398, (u32)dsiSaveRead);
-		setBL(0x020233BC, (u32)dsiSaveClose);
-		*(u32*)0x020233FC = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
-		setBL(0x02023430, (u32)dsiSaveCreate); // dsiSaveCreateAuto
-		setBL(0x02023440, (u32)dsiSaveOpen);
-		setBL(0x02023460, (u32)dsiSaveSetLength);
-		setBL(0x02023480, (u32)dsiSaveWrite);
-		setBL(0x02023498, (u32)dsiSaveClose);
-		*(u32*)0x020302A0 = 0xE12FFF1E; // bx lr (Hide volume icon in pause menu)
-	}
-
 	// Touch Solitaire (USA)
 	// Saving not supported due to using more than one file in filesystem
 	else if (strcmp(romTid, "KSLE") == 0) {
@@ -16985,4 +16986,5 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			*(u32*)0x02081DC0 = 0xE1A00000; // nop
 		}
 	}
+#endif
 }

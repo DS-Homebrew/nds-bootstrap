@@ -238,7 +238,7 @@ int runNds(u32 cluster, u32 saveCluster, u32 donorTwlCluster, u32 gbaCluster, u3
 	nocashMessage("runNds");
 
 	// Load bootloader binary
-	FILE* bootloaderBin = fopen(dsiFeatures() && !conf->b4dsMode ? "nitro:/loadi.lz77" : "nitro:/load.lz77", "rb");
+	FILE* bootloaderBin = fopen(dsiFeatures() && !conf->b4dsMode ? "nitro:/loadi.lz77" : (conf->loader2 ? "nitro:/load2.lz77" : "nitro:/load.lz77"), "rb");
 	if (bootloaderBin) {
 		fread(lz77ImageBuffer, 1, (int)sizeof(lz77ImageBuffer), bootloaderBin);
 		LZ77_Decompress(lz77ImageBuffer, (u8*)loaderBin);
