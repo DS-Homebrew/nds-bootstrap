@@ -1608,7 +1608,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		cebin = fopen("nitro:/cardengine_arm9_extmem.lz77", "rb");
 	} else {
 		const char* ce9path = "nitro:/cardengine_arm9_alt.lz77";
-		if ((accessControl & BIT(4)) && strncmp(romTid, "Z2E", 3) != 0) { // If it has access to TWLNAND (or uses dataPub/dataPrv), and the title isn't "Famicom Wars DS: Ushinawareta Hikari"...
+		if ((accessControl & BIT(4)) && strncmp(romTid, "Z2E", 3) != 0 && strncmp(romTid, "K59", 3) != 0) { // If it has access to TWLNAND (or uses dataPub/dataPrv), and the title isn't "Famicom Wars DS: Ushinawareta Hikari" or "Metal Torrent"...
 			ce9path = "nitro:/cardengine_arm9.lz77";
 		} else {
 			FILE* donorNdsFile = NULL;
