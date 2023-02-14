@@ -75,6 +75,7 @@ static const char dsiWareForBootloader1[][4] = {
 	"KBZ", // BlayzBloo: Super Melee Brawlers Battle Royale
 	"KLN", // Bloons TD
 	"KUV", // Bloons TD 4
+	"KA5", // Boardwalk Ball Toss
 	"KBB", // Bomberman Blitz
 	"KQV", // Bookstore Dream
 	"KZE", // Bounce & Break

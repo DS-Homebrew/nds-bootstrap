@@ -4460,6 +4460,32 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x020B01BC, (u32)dsiSaveDelete);
 	}
 
+	// Boardwalk Ball Toss (USA)
+	else if (strcmp(romTid, "KA5E") == 0) {
+		*(u32*)0x020052C4 = 0xE1A00000; // nop
+		*(u32*)0x020052CC = 0xE1A00000; // nop
+		*(u32*)0x0200E250 = 0xE1A00000; // nop
+		*(u32*)0x02011DA8 = 0xE1A00000; // nop
+		patchInitDSiWare(0x02017088, heapEnd);
+		patchUserSettingsReadDSiWare(0x02018690);
+		setBL(0x02023BD4, (u32)dsiSaveOpen);
+		setBL(0x02023BF4, (u32)dsiSaveGetLength);
+		setBL(0x02023C08, (u32)dsiSaveRead);
+		setBL(0x02023C20, (u32)dsiSaveClose);
+		*(u32*)0x02023CFC = 0xE1A00000; // nop
+		setBL(0x02023D0C, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+		setBL(0x02023D2C, (u32)dsiSaveOpen);
+		setBL(0x02023D4C, (u32)dsiSaveSetLength);
+		setBL(0x02023D60, (u32)dsiSaveWrite);
+		setBL(0x02023D6C, (u32)dsiSaveClose);
+		*(u32*)0x02023DA0 = 0xE1A00000; // nop
+		setBL(0x02023E54, (u32)dsiSaveOpen);
+		setBL(0x02023E74, (u32)dsiSaveSetLength);
+		setBL(0x02023E88, (u32)dsiSaveWrite);
+		setBL(0x02023E94, (u32)dsiSaveClose);
+		setB(0x02025308, 0x02025400); // Skip Manual screen
+	}
+
 	// Bomberman Blitz (USA)
 	// Bomberman Blitz (Europe, Australia)
 	// Itsudemo Bomberman (Japan)

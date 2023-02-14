@@ -2785,6 +2785,28 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x020B01BC, (u32)dsiSaveDelete);
 	}
 
+	// Boardwalk Ball Toss (USA)
+	else if (strcmp(romTid, "KA5E") == 0) {
+		if (saveOnFlashcard) {
+			setBL(0x02023BD4, (u32)dsiSaveOpen);
+			setBL(0x02023BF4, (u32)dsiSaveGetLength);
+			setBL(0x02023C08, (u32)dsiSaveRead);
+			setBL(0x02023C20, (u32)dsiSaveClose);
+			setBL(0x02023D0C, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+			setBL(0x02023D2C, (u32)dsiSaveOpen);
+			setBL(0x02023D4C, (u32)dsiSaveSetLength);
+			setBL(0x02023D60, (u32)dsiSaveWrite);
+			setBL(0x02023D6C, (u32)dsiSaveClose);
+			setBL(0x02023E54, (u32)dsiSaveOpen);
+			setBL(0x02023E74, (u32)dsiSaveSetLength);
+			setBL(0x02023E88, (u32)dsiSaveWrite);
+			setBL(0x02023E94, (u32)dsiSaveClose);
+		}
+		if (!twlFontFound) {
+			setB(0x02025308, 0x02025400); // Skip Manual screen
+		}
+	}
+
 	// Bomberman Blitz (USA)
 	else if (strcmp(romTid, "KBBE") == 0 && saveOnFlashcard) {
 		tonccpy((u32*)0x02009670, dsiSaveGetResultCode, 0xC);
