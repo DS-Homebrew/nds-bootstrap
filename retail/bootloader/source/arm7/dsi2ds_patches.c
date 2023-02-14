@@ -4693,6 +4693,93 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// Bookstore Dream (USA)
+	// Bookstore Dream (Europe, Australia)
+	// Bookstore Dream (Japan)
+	else if (strncmp(romTid, "KQV", 3) == 0) {
+		u32 offsetChange = (ndsHeader->gameCode[3] == 'E') ? 0 : 4;
+
+		*(u32*)(0x0200FF00-offsetChange) = 0xE1A00000; // nop
+		tonccpy((u32*)(0x02010A84-offsetChange), dsiSaveGetResultCode, 0xC);
+		*(u32*)(0x02013254-offsetChange) = 0xE1A00000; // nop
+		patchInitDSiWare(0x020189F4-offsetChange, heapEnd);
+		*(u32*)(0x02018D80-offsetChange) = *(u32*)0x02004FE8;
+		patchUserSettingsReadDSiWare(0x02019E94-offsetChange);
+		if (ndsHeader->gameCode[3] == 'E') {
+			setBL(0x02052C48, (u32)dsiSaveGetInfo);
+			setBL(0x02052C5C, (u32)dsiSaveOpen);
+			setBL(0x02052C70, (u32)dsiSaveCreate);
+			setBL(0x02052C80, (u32)dsiSaveOpen);
+			*(u32*)0x02052CA0 = 0xE1A00000; // nop
+			setBL(0x02052CAC, (u32)dsiSaveCreate);
+			setBL(0x02052CBC, (u32)dsiSaveOpen);
+			setBL(0x02052D04, (u32)dsiSaveSeek);
+			setBL(0x02052D14, (u32)dsiSaveWrite);
+			setBL(0x02052D1C, (u32)dsiSaveClose);
+			setBL(0x02052D74, (u32)dsiSaveOpen);
+			setBL(0x02053364, (u32)dsiSaveSeek);
+			setBL(0x02053374, (u32)dsiSaveRead);
+			setBL(0x020533A0, (u32)dsiSaveClose);
+			setBL(0x02053468, (u32)dsiSaveOpen);
+			setBL(0x02053484, (u32)dsiSaveCreate);
+			setBL(0x02053494, (u32)dsiSaveOpen);
+			*(u32*)0x020534B4 = 0xE1A00000; // nop
+			setBL(0x020534C0, (u32)dsiSaveCreate);
+			setBL(0x020534D0, (u32)dsiSaveOpen);
+			setBL(0x020534E8, (u32)dsiSaveSeek);
+			setBL(0x02053500, (u32)dsiSaveWrite);
+			setBL(0x02053508, (u32)dsiSaveClose);
+		} else if (ndsHeader->gameCode[3] == 'V') {
+			setBL(0x02052F54, (u32)dsiSaveGetInfo);
+			setBL(0x02052F68, (u32)dsiSaveOpen);
+			setBL(0x02052F7C, (u32)dsiSaveCreate);
+			setBL(0x02052F8C, (u32)dsiSaveOpen);
+			*(u32*)0x02052FAC = 0xE1A00000; // nop
+			setBL(0x02052FB8, (u32)dsiSaveCreate);
+			setBL(0x02052FC8, (u32)dsiSaveOpen);
+			setBL(0x02053010, (u32)dsiSaveSeek);
+			setBL(0x02053020, (u32)dsiSaveWrite);
+			setBL(0x02053028, (u32)dsiSaveClose);
+			setBL(0x02053080, (u32)dsiSaveOpen);
+			setBL(0x02053670, (u32)dsiSaveSeek);
+			setBL(0x02053680, (u32)dsiSaveRead);
+			setBL(0x020536AC, (u32)dsiSaveClose);
+			setBL(0x02053774, (u32)dsiSaveOpen);
+			setBL(0x02053790, (u32)dsiSaveCreate);
+			setBL(0x020537A0, (u32)dsiSaveOpen);
+			*(u32*)0x020537C0 = 0xE1A00000; // nop
+			setBL(0x020537CC, (u32)dsiSaveCreate);
+			setBL(0x020537DC, (u32)dsiSaveOpen);
+			setBL(0x020537F4, (u32)dsiSaveSeek);
+			setBL(0x0205380C, (u32)dsiSaveWrite);
+			setBL(0x02053814, (u32)dsiSaveClose);
+		} else {
+			setBL(0x02053344, (u32)dsiSaveGetInfo);
+			setBL(0x02053358, (u32)dsiSaveOpen);
+			setBL(0x0205336C, (u32)dsiSaveCreate);
+			setBL(0x0205337C, (u32)dsiSaveOpen);
+			*(u32*)0x0205339C = 0xE1A00000; // nop
+			setBL(0x020533A8, (u32)dsiSaveCreate);
+			setBL(0x020533B8, (u32)dsiSaveOpen);
+			setBL(0x02053400, (u32)dsiSaveSeek);
+			setBL(0x02053410, (u32)dsiSaveWrite);
+			setBL(0x02053418, (u32)dsiSaveClose);
+			setBL(0x02053470, (u32)dsiSaveOpen);
+			setBL(0x02053A60, (u32)dsiSaveSeek);
+			setBL(0x02053A70, (u32)dsiSaveRead);
+			setBL(0x02053A9C, (u32)dsiSaveClose);
+			setBL(0x02053B64, (u32)dsiSaveOpen);
+			setBL(0x02053B80, (u32)dsiSaveCreate);
+			setBL(0x02053B90, (u32)dsiSaveOpen);
+			*(u32*)0x02053BB0 = 0xE1A00000; // nop
+			setBL(0x02053BBC, (u32)dsiSaveCreate);
+			setBL(0x02053BCC, (u32)dsiSaveOpen);
+			setBL(0x02053BE4, (u32)dsiSaveSeek);
+			setBL(0x02053BFC, (u32)dsiSaveWrite);
+			setBL(0x02053C04, (u32)dsiSaveClose);
+		}
+	}
+
 	// Bookworm (USA)
 	// Saving is not supported due to using more than one file
 	/*else if (strcmp(romTid, "KBKE") == 0) {

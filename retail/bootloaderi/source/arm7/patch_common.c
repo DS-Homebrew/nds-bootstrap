@@ -2830,6 +2830,84 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x020461C8, (u32)dsiSaveClose);
 	}
 
+	// Bookstore Dream (USA)
+	else if (strcmp(romTid, "KQVE") == 0 && saveOnFlashcard) {
+		tonccpy((u32*)0x02010A84, dsiSaveGetResultCode, 0xC);
+		setBL(0x02052C48, (u32)dsiSaveGetInfo);
+		setBL(0x02052C5C, (u32)dsiSaveOpen);
+		setBL(0x02052C70, (u32)dsiSaveCreate);
+		setBL(0x02052C80, (u32)dsiSaveOpen);
+		setBL(0x02052CAC, (u32)dsiSaveCreate);
+		setBL(0x02052CBC, (u32)dsiSaveOpen);
+		setBL(0x02052D04, (u32)dsiSaveSeek);
+		setBL(0x02052D14, (u32)dsiSaveWrite);
+		setBL(0x02052D1C, (u32)dsiSaveClose);
+		setBL(0x02052D74, (u32)dsiSaveOpen);
+		setBL(0x02053364, (u32)dsiSaveSeek);
+		setBL(0x02053374, (u32)dsiSaveRead);
+		setBL(0x020533A0, (u32)dsiSaveClose);
+		setBL(0x02053468, (u32)dsiSaveOpen);
+		setBL(0x02053484, (u32)dsiSaveCreate);
+		setBL(0x02053494, (u32)dsiSaveOpen);
+		setBL(0x020534C0, (u32)dsiSaveCreate);
+		setBL(0x020534D0, (u32)dsiSaveOpen);
+		setBL(0x020534E8, (u32)dsiSaveSeek);
+		setBL(0x02053500, (u32)dsiSaveWrite);
+		setBL(0x02053508, (u32)dsiSaveClose);
+	}
+
+	// Bookstore Dream (Europe, Australia)
+	else if (strcmp(romTid, "KQVV") == 0 && saveOnFlashcard) {
+		tonccpy((u32*)0x02010A80, dsiSaveGetResultCode, 0xC);
+		setBL(0x02052F54, (u32)dsiSaveGetInfo);
+		setBL(0x02052F68, (u32)dsiSaveOpen);
+		setBL(0x02052F7C, (u32)dsiSaveCreate);
+		setBL(0x02052F8C, (u32)dsiSaveOpen);
+		setBL(0x02052FB8, (u32)dsiSaveCreate);
+		setBL(0x02052FC8, (u32)dsiSaveOpen);
+		setBL(0x02053010, (u32)dsiSaveSeek);
+		setBL(0x02053020, (u32)dsiSaveWrite);
+		setBL(0x02053028, (u32)dsiSaveClose);
+		setBL(0x02053080, (u32)dsiSaveOpen);
+		setBL(0x02053670, (u32)dsiSaveSeek);
+		setBL(0x02053680, (u32)dsiSaveRead);
+		setBL(0x020536AC, (u32)dsiSaveClose);
+		setBL(0x02053774, (u32)dsiSaveOpen);
+		setBL(0x02053790, (u32)dsiSaveCreate);
+		setBL(0x020537A0, (u32)dsiSaveOpen);
+		setBL(0x020537CC, (u32)dsiSaveCreate);
+		setBL(0x020537DC, (u32)dsiSaveOpen);
+		setBL(0x020537F4, (u32)dsiSaveSeek);
+		setBL(0x0205380C, (u32)dsiSaveWrite);
+		setBL(0x02053814, (u32)dsiSaveClose);
+	}
+
+	// Bookstore Dream (Japan)
+	else if (strcmp(romTid, "KQVJ") == 0 && saveOnFlashcard) {
+		tonccpy((u32*)0x02010A80, dsiSaveGetResultCode, 0xC);
+		setBL(0x02053344, (u32)dsiSaveGetInfo);
+		setBL(0x02053358, (u32)dsiSaveOpen);
+		setBL(0x0205336C, (u32)dsiSaveCreate);
+		setBL(0x0205337C, (u32)dsiSaveOpen);
+		setBL(0x020533A8, (u32)dsiSaveCreate);
+		setBL(0x020533B8, (u32)dsiSaveOpen);
+		setBL(0x02053400, (u32)dsiSaveSeek);
+		setBL(0x02053410, (u32)dsiSaveWrite);
+		setBL(0x02053418, (u32)dsiSaveClose);
+		setBL(0x02053470, (u32)dsiSaveOpen);
+		setBL(0x02053A60, (u32)dsiSaveSeek);
+		setBL(0x02053A70, (u32)dsiSaveRead);
+		setBL(0x02053A9C, (u32)dsiSaveClose);
+		setBL(0x02053B64, (u32)dsiSaveOpen);
+		setBL(0x02053B80, (u32)dsiSaveCreate);
+		setBL(0x02053B90, (u32)dsiSaveOpen);
+		setBL(0x02053BBC, (u32)dsiSaveCreate);
+		setBL(0x02053BCC, (u32)dsiSaveOpen);
+		setBL(0x02053BE4, (u32)dsiSaveSeek);
+		setBL(0x02053BFC, (u32)dsiSaveWrite);
+		setBL(0x02053C04, (u32)dsiSaveClose);
+	}
+
 	// Bookworm (USA)
 	// Saving is not supported due to using more than one file
 	/*else if (strcmp(romTid, "KBKE") == 0 && saveOnFlashcard) {
