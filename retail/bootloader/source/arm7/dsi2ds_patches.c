@@ -10591,7 +10591,8 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		// *(u32*)0x020552DC = 0xE3A00000; // mov r0, #0
 		// tonccpy((u32*)0x02057F8C, dsiSaveGetResultCode, 0xC);
 		*(u32*)0x0205A50C = 0xE3A00001; // mov r0, #1 (Enable NitroFS reads)
-		*(u32*)0x0206E8FC = 0xE3A07000; // mov r7, #0
+		*(u32*)0x02063AA8 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02063AAC = 0xE12FFF1E; // bx lr
 		*(u32*)0x020DD1A0 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x020DDB00 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
 		*(u32*)0x020DDD60 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
@@ -10620,7 +10621,8 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		// *(u32*)0x0201EAA8 = 0xE3A00001; // mov r0, #1
 		*(u32*)0x02045FA0 = 0xE12FFF1E; // bx lr (Disable NFTR font loading)
 		*(u32*)0x0205A524 = 0xE3A00001; // mov r0, #1 (Enable NitroFS reads)
-		*(u32*)0x0206E894 = 0xE3A07000; // mov r7, #0
+		*(u32*)0x02063AC0 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02063AC4 = 0xE12FFF1E; // bx lr
 		*(u32*)0x020DCFB8 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x020DD918 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
 		*(u32*)0x020DDB78 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
@@ -10654,7 +10656,8 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02042C74 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
 		*(u32*)0x02089E08 = 0xE12FFF1E; // bx lr (Disable NFTR font loading)
 		*(u32*)0x0209E3B4 = 0xE3A00001; // mov r0, #1 (Enable NitroFS reads)
-		*(u32*)0x02101910 = 0xE3A07000; // mov r7, #0
+		*(u32*)0x020A7E44 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x020A7E48 = 0xE12FFF1E; // bx lr
 		if (!extendedMemory2) {
 			extern u32* metalTorrentSndLoad;
 

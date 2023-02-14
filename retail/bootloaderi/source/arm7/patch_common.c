@@ -5669,7 +5669,8 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			*(u32*)0x020DE0A4 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
 		}
 		if (saveOnFlashcard) {
-			*(u32*)0x0206E8FC = 0xE3A07000; // mov r7, #0
+			*(u32*)0x02063AA8 = 0xE3A00000; // mov r0, #0
+			*(u32*)0x02063AAC = 0xE12FFF1E; // bx lr
 		}
 	}
 
@@ -5684,7 +5685,8 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			*(u32*)0x020DDEBC = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
 		}
 		if (saveOnFlashcard) {
-			*(u32*)0x0206E894 = 0xE3A07000; // mov r7, #0
+			*(u32*)0x02063AC0 = 0xE3A00000; // mov r0, #0
+			*(u32*)0x02063AC4 = 0xE12FFF1E; // bx lr
 		}
 	}
 
@@ -5699,7 +5701,8 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			*(u32*)0x02089E08 = 0xE12FFF1E; // bx lr (Disable NFTR font loading)
 		}
 		if (saveOnFlashcard) {
-			*(u32*)0x02101910 = 0xE3A07000; // mov r7, #0
+			*(u32*)0x020A7E44 = 0xE3A00000; // mov r0, #0
+			*(u32*)0x020A7E48 = 0xE12FFF1E; // bx lr
 		}
 	}
 

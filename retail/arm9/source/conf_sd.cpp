@@ -1754,20 +1754,20 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			toncset16((u16*)IMAGES_LOCATION, 0, 256*192);
 		}
 		fclose(bootstrapImages);
-
-		conf->loader2 = false;
-		if (accessControl & BIT(4)) {
-			// TODO: If the list gets large enough, switch to bsearch().
-			for (unsigned int i = 0; i < sizeof(dsiWareForBootloader2)/sizeof(dsiWareForBootloader2[0]); i++) {
-				if (memcmp(romTid, dsiWareForBootloader2[i], 3) == 0) {
-					// Found match
-					conf->loader2 = true;
-					break;
-				}
-			}
-		}
 	} else {
 		toncset16((u16*)IMAGES_LOCATION, 0, 256*192);
+	}
+
+	conf->loader2 = false;
+	if (accessControl & BIT(4)) {
+		// TODO: If the list gets large enough, switch to bsearch().
+		for (unsigned int i = 0; i < sizeof(dsiWareForBootloader2)/sizeof(dsiWareForBootloader2[0]); i++) {
+			if (memcmp(romTid, dsiWareForBootloader2[i], 3) == 0) {
+				// Found match
+				conf->loader2 = true;
+				break;
+			}
+		}
 	}
 
 	sprintf(patchOffsetCacheFilePath, "fat:/_nds/nds-bootstrap/musicPacks/%s-%04X.pck", romTid, headerCRC);
