@@ -10548,8 +10548,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Metal Torrent (USA)
 	// Saving not supported due to using more than one file
-	// Requires 8MB of RAM
-	else if (strcmp(romTid, "K59E") == 0 && extendedMemory2) {
+	else if (strcmp(romTid, "K59E") == 0) {
 		*(u32*)0x020136D4 = 0xE1A00000; // nop
 		*(u32*)0x02017CD4 = 0xE12FFF1E; // bx lr
 		*(u32*)0x02017CF4 = 0xE1A00000; // nop
@@ -10598,12 +10597,23 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020DDD60 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
 		*(u32*)0x020DDF00 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
 		*(u32*)0x020DE0A4 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
+		if (!extendedMemory2) {
+			extern u32* metalTorrentSndLoad;
+
+			*(u32*)0x02041F50 = 0xE3A00000; // mov r0, #0 (Disable SSEQ playback)
+			*(u32*)0x02041F54 = 0xE12FFF1E; // bx lr
+
+			*(u32*)0x0204DD50 = 0x020FCA20;
+			tonccpy((u32*)0x0204DD54, metalTorrentSndLoad, 0x1C);
+
+			*(u32*)0x020F98BC = 0xE3A00901; // mov r0, #0x4000
+			setBL(0x020FC094, 0x0204DD54);
+		}
 	}
 
 	// Metal Torrent (Europe, Australia)
 	// Saving not supported due to using more than one file
-	// Requires 8MB of RAM
-	else if (strcmp(romTid, "K59V") == 0 && extendedMemory2) {
+	else if (strcmp(romTid, "K59V") == 0) {
 		*(u32*)0x020136EC = 0xE1A00000; // nop
 		*(u32*)0x02017CEC = 0xE12FFF1E; // bx lr
 		*(u32*)0x02017D0C = 0xE1A00000; // nop
@@ -10616,12 +10626,23 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020DDB78 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
 		*(u32*)0x020DDD18 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
 		*(u32*)0x020DDEBC = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
+		if (!extendedMemory2) {
+			extern u32* metalTorrentSndLoad;
+
+			*(u32*)0x02041F68 = 0xE3A00000; // mov r0, #0 (Disable SSEQ playback)
+			*(u32*)0x02041F6C = 0xE12FFF1E; // bx lr
+
+			*(u32*)0x0204DD68 = 0x020FC838;
+			tonccpy((u32*)0x0204DD6C, metalTorrentSndLoad, 0x1C);
+
+			*(u32*)0x020F96D4 = 0xE3A00901; // mov r0, #0x4000
+			setBL(0x020FBEAC, 0x0204DD6C);
+		}
 	}
 
 	// A Mujou Setsuna (Japan)
 	// Saving not supported due to using more than one file
-	// Requires 8MB of RAM
-	else if (strcmp(romTid, "K59J") == 0 && extendedMemory2) {
+	else if (strcmp(romTid, "K59J") == 0) {
 		*(u32*)0x020215CC = 0xE1A00000; // nop
 		*(u32*)0x02025C50 = 0xE12FFF1E; // bx lr
 		*(u32*)0x02025C70 = 0xE1A00000; // nop
@@ -10632,8 +10653,20 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02042AD0 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
 		*(u32*)0x02042C74 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
 		*(u32*)0x02089E08 = 0xE12FFF1E; // bx lr (Disable NFTR font loading)
-		*(u32*)0x0209E3C4 = 0xE3A00001; // mov r0, #1 (Enable NitroFS reads)
-		*(u32*)0x0210190C = 0xE3A07000; // mov r7, #0
+		*(u32*)0x0209E3B4 = 0xE3A00001; // mov r0, #1 (Enable NitroFS reads)
+		*(u32*)0x02101910 = 0xE3A07000; // mov r7, #0
+		if (!extendedMemory2) {
+			extern u32* metalTorrentSndLoad;
+
+			*(u32*)0x02085D60 = 0xE3A00000; // mov r0, #0 (Disable SSEQ playback)
+			*(u32*)0x02085D64 = 0xE12FFF1E; // bx lr
+
+			*(u32*)0x02091944 = 0x0205A3B8;
+			tonccpy((u32*)0x02091948, metalTorrentSndLoad, 0x1C);
+
+			*(u32*)0x0206AFA0 = 0xE3A00901; // mov r0, #0x4000
+			setBL(0x02059A2C, 0x02091948);
+		}
 	}
 
 	// Mighty Flip Champs! (USA)

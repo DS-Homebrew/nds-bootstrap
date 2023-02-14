@@ -5699,7 +5699,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			*(u32*)0x02089E08 = 0xE12FFF1E; // bx lr (Disable NFTR font loading)
 		}
 		if (saveOnFlashcard) {
-			*(u32*)0x0210190C = 0xE3A07000; // mov r7, #0
+			*(u32*)0x02101910 = 0xE3A07000; // mov r7, #0
 		}
 	}
 

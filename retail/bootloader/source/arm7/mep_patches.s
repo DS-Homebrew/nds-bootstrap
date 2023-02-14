@@ -12,6 +12,7 @@
 	@.global gate18HeapAddrPtr
 	.global goGoKokopoloHeapAlloc
 	@.global goGoKokopoloHeapAddrPtr
+	.global metalTorrentSndLoad
 	@.global mvdk3HeapAlloc
 	.global nintCdwnCalHeapAlloc
 	.global nintCdwnCalHeapAddrPtr
@@ -52,6 +53,8 @@ goGoKokopoloHeapAlloc:
 	.word goGoKokopoloHeapAllocFunc
 @goGoKokopoloHeapAddrPtr:
 @	.word goGoKokopoloHeapAddr
+metalTorrentSndLoad:
+	.word metalTorrentSndLoadFunc
 @mvdk3HeapAlloc:
 @	.word mvdk3HeapAllocFunc
 nintCdwnCalHeapAlloc:
@@ -376,6 +379,23 @@ goGoKokopoloHeapAllocFunc:
 @	ldmfd   sp!, {r6-r7,pc}
 @goGoKokopoloHeapAddr:
 @.word	0x09000000
+@---------------------------------------------------------------------------------
+
+@---------------------------------------------------------------------------------
+metalTorrentSndLoadOrgFunc: .word 0
+metalTorrentSndLoadFunc:
+@---------------------------------------------------------------------------------
+	stmfd   sp!, {r6,lr}
+
+	cmp r2, #2
+	ldmeqfd   sp!, {r6,pc}
+
+	ldr r6, metalTorrentSndLoadOrgFunc
+	bl	_blx_metalTorrentSndLoadOrgFunc
+
+	ldmfd   sp!, {r6,pc}
+_blx_metalTorrentSndLoadOrgFunc:
+	bx	r6
 @---------------------------------------------------------------------------------
 
 @---------------------------------------------------------------------------------
