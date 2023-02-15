@@ -98,5 +98,5 @@ An alternative forwarder generator for 3DS users. YANBF forwarders are 3DS-mode 
 - Spanish: [beta215](https://crowdin.com/profile/beta215), [Juan Adolfo Ortiz De Dompablo](https://crowdin.com/profile/kloido), [Nintendo R](https://crowdin.com/profile/nintendor), [nuxa17](https://twitter.com/TimeLordJean), [Radriant](https://ja.crowdin.com/profile/radriant), [SofyUchiha](https://crowdin.com/profile/sofyuchiha), [TM-47](https://crowdin.com/profile/-tm-)
 - Swedish: [TM-47](https://crowdin.com/profile/-tm-)
 - Turkish: [Egehan.TWL](https://crowdin.com/profile/egehan.twl), [rewold20](https://crowdin.com/profile/rewold20), [TM-47](https://crowdin.com/profile/-tm-)
-- Ukrainian: [MichaelBest01](https://crowdin.com/profile/michaelbest01), [TM-47](https://crowdin.com/profile/-tm-)
+- Ukrainian: [MichaelBest01](https://crowdin.com/profile/michaelbest01), [TM-47](https://crowdin.com/profile/-tm-), [вухаста гітара](https://crowdin.com/profile/earedguitr)
 - Valencian: [Juan Adolfo Ortiz De Dompablo](https://crowdin.com/profile/kloido), [tsolo](https://crowdin.com/profile/tsolo)
