@@ -369,7 +369,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		// 	*(u32*)0x0201674C = 0x02329720;
 		// }
 		patchUserSettingsReadDSiWare(0x020178D0);
-		if (ndsHeader->gameCode[3] == 'E') {
+		if (romTid[3] == 'E') {
 			/* if (!extendedMemory2) {
 				if (s2FlashcardId == 0x5A45) {
 					gate18HeapAddrPtr[0] -= 0x01000000;
@@ -771,7 +771,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0200E7E8 = 0xE1A00000; // nop
 		patchInitDSiWare(0x02013DB4, heapEnd);
 		patchUserSettingsReadDSiWare(0x020152C4);
-		if (ndsHeader->gameCode[3] == 'E') {
+		if (romTid[3] == 'E') {
 			setBL(0x02027A28, (u32)dsiSaveGetInfo);
 			setBL(0x02027A3C, (u32)dsiSaveOpen);
 			setBL(0x02027A50, (u32)dsiSaveCreate);
@@ -1021,7 +1021,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02012E34 = 0xE1A00000; // nop
 		*(u32*)0x02016024 = 0xE1A00000; // nop
 		patchInitDSiWare(0x0201AEF4, heapEnd);
-		if (ndsHeader->gameCode[3] == 'P') {
+		if (romTid[3] == 'P') {
 			*(u32*)0x02025248 = 0xE1A00000; // nop
 			*(u32*)0x0202524C = 0xE1A00000; // nop
 			setBL(0x02040298, (u32)dsiSaveCreate);
@@ -1163,7 +1163,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// 4 Travellers: Play Spanish (Europe)
 	// 4 Travellers: Play Spanish (Australia)
 	else if (strcmp(romTid, "KTSP") == 0 || strcmp(romTid, "KTSU") == 0) {
-		u32 offsetChange = (ndsHeader->gameCode[3] == 'U') ? 0x4C : 0;
+		u32 offsetChange = (romTid[3] == 'U') ? 0x4C : 0;
 
 		useSharedFont = twlFontFound;
 		if (!twlFontFound) {
@@ -1688,7 +1688,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02012C98, (u32)dsiSaveGetResultCode);
 		*(u32*)0x02012CB4 = 0xE1A00000; // nop
 		*(u32*)0x02012CC0 = 0xE3A00001; // mov r0, #1
-		if (ndsHeader->gameCode[3] == 'E') {
+		if (romTid[3] == 'E') {
 			setBL(0x02031820, (u32)dsiSaveOpen);
 			setBL(0x02031838, (u32)dsiSaveGetLength);
 			setBL(0x02031848, (u32)dsiSaveSeek);
@@ -1754,7 +1754,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x020119E0, (u32)dsiSaveGetResultCode);
 		*(u32*)0x020119FC = 0xE1A00000; // nop
 		*(u32*)0x02011A08 = 0xE3A00001; // mov r0, #1
-		if (ndsHeader->gameCode[3] == 'E') {
+		if (romTid[3] == 'E') {
 			setBL(0x020302D4, (u32)dsiSaveOpen);
 			setBL(0x020302EC, (u32)dsiSaveGetLength);
 			setBL(0x020302FC, (u32)dsiSaveSeek);
@@ -1888,7 +1888,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02012C80, (u32)dsiSaveGetResultCode);
 		*(u32*)0x02012C9C = 0xE1A00000; // nop
 		*(u32*)0x02012CA8 = 0xE3A00001; // mov r0, #1
-		if (ndsHeader->gameCode[3] == 'E') {
+		if (romTid[3] == 'E') {
 			setBL(0x020318E0, (u32)dsiSaveOpen);
 			setBL(0x020318F8, (u32)dsiSaveGetLength);
 			setBL(0x02031908, (u32)dsiSaveSeek);
@@ -1979,11 +1979,11 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchUserSettingsReadDSiWare(0x0201B758);
 		*(u32*)0x0202CDA4 = 0xE12FFF1E; // bx lr
 		*(u32*)0x0202D490 = 0xE1A00000; // nop
-		if (ndsHeader->gameCode[3] == 'E') {
+		if (romTid[3] == 'E') {
 			*(u32*)0x02053F30 = 0xE1A00000; // nop
 			*(u32*)0x02053F90 = 0xE1A00000; // nop
 			*(u32*)0x02054920 = 0xE12FFF1E; // bx lr
-		} else if (ndsHeader->gameCode[3] == 'V') {
+		} else if (romTid[3] == 'V') {
 			*(u32*)0x02053F58 = 0xE1A00000; // nop
 			*(u32*)0x02053FB8 = 0xE1A00000; // nop
 			*(u32*)0x020548C0 = 0xE12FFF1E; // bx lr
@@ -2079,7 +2079,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0200DC64, (u32)dsiSaveRead);
 		setBL(0x0200DC6C, (u32)dsiSaveClose);
 		*(u32*)0x0200DDB4 = 0xE1A00000; // nop
-		if (ndsHeader->gameCode[3] == 'E') {
+		if (romTid[3] == 'E') {
 			if (useSharedFont) {
 				*(u32*)0x02025338 = 0xE3A05703; // mov r5, 0xC0000
 				if (!extendedMemory2) {
@@ -2219,7 +2219,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020290A0 = 0xE12FFF1E; // bx lr
 		*(u32*)0x020290A8 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x020290AC = 0xE12FFF1E; // bx lr
-		if (ndsHeader->gameCode[3] == 'E') {
+		if (romTid[3] == 'E') {
 			setBL(0x020D1F18, (u32)dsiSaveOpen);
 			setBL(0x020D1F28, (u32)dsiSaveClose);
 			*(u32*)0x020D1F3C = 0xE1A00000; // nop
@@ -2366,11 +2366,11 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			*(u32*)0x0202F998 = 0xE1A00000; // nop
 			*(u32*)0x02030018 = 0xE12FFF1E; // bx lr
 			*(u32*)0x020310D0 = 0xE1A00000; // nop
-			if (ndsHeader->gameCode[3] == 'E') {
+			if (romTid[3] == 'E') {
 				*(u32*)0x0203B89C = 0xE3A00000; // mov r0, #0 (Skip pit.bin check)
 				*(u32*)0x0203BAFC = 0xE3A00000; // mov r0, #0 (Skip free space check)
 				*(u32*)0x0203BB00 = 0xE12FFF1E; // bx lr
-			} else if (ndsHeader->gameCode[3] == 'P') {
+			} else if (romTid[3] == 'P') {
 				*(u32*)0x0203B844 = 0xE3A00000; // mov r0, #0 (Skip pit.bin check)
 				*(u32*)0x0203BAA4 = 0xE3A00000; // mov r0, #0 (Skip free space check)
 				*(u32*)0x0203BAA8 = 0xE12FFF1E; // bx lr
@@ -2429,7 +2429,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020337B0 = 0xE3A00000; // mov r0, #0 (Skip pit.bin check)
 		*(u32*)0x02033A10 = 0xE3A00000; // mov r0, #0 (Skip free space check)
 		*(u32*)0x02033A14 = 0xE12FFF1E; // bx lr
-		if (ndsHeader->gameCode[3] == 'E') {
+		if (romTid[3] == 'E') {
 			setBL(0x020355C4, (u32)dsiSaveGetResultCode);
 			setBL(0x020356E8, (u32)dsiSaveOpen);
 			setBL(0x0203571C, (u32)dsiSaveRead);
@@ -2519,7 +2519,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02015170 = 0xE1A00000; // nop
 		patchInitDSiWare(0x0201BF84, heapEnd);
 		patchUserSettingsReadDSiWare(0x0201D624);
-		if (ndsHeader->gameCode[3] == 'E') {
+		if (romTid[3] == 'E') {
 			setBL(0x02027F34, (u32)dsiSaveGetResultCode);
 			setBL(0x02028058, (u32)dsiSaveOpen);
 			setBL(0x0202808C, (u32)dsiSaveRead);
@@ -2588,7 +2588,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Anonymous Notes 1: From The Abyss (USA & Europe)
 	// Anonymous Notes 2: From The Abyss (USA & Europe)
 	else if ((strncmp(romTid, "KVI", 3) == 0 || strncmp(romTid, "KV2", 3) == 0)
-	  && ndsHeader->gameCode[3] != 'J') {
+	  && romTid[3] != 'J') {
 		useSharedFont = (twlFontFound && debugOrMep);
 		const u32 newCodeAddr = 0x0201A4B0;
 		*(u32*)0x0200E74C = 0xE1A00000; // nop
@@ -2621,7 +2621,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02024530 = 0xE1A00000; // nop
 		*(u32*)0x0202457C = 0xE1A00000; // nop
 		if (ndsHeader->gameCode[2] == 'I') {
-			if (ndsHeader->gameCode[3] == 'E') {
+			if (romTid[3] == 'E') {
 				*(u32*)0x0209E2CC = 0xE1A00000; // nop
 				*(u32*)0x0209E2E0 = 0xE1A00000; // nop
 				*(u32*)0x0209E2F4 = 0xE1A00000; // nop
@@ -2647,7 +2647,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 				}
 			}
 		} else if (ndsHeader->gameCode[2] == '2') {
-			if (ndsHeader->gameCode[3] == 'E') {
+			if (romTid[3] == 'E') {
 				*(u32*)0x0209E300 = 0xE1A00000; // nop
 				*(u32*)0x0209E314 = 0xE1A00000; // nop
 				*(u32*)0x0209E328 = 0xE1A00000; // nop
@@ -2750,7 +2750,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02019F6C = 0xE3A00000; // mov r0, #0
 		*(u32*)0x02019F70 = 0xE12FFF1E; // bx lr
 		if (ndsHeader->gameCode[2] == '3') {
-			if (ndsHeader->gameCode[3] == 'E') {
+			if (romTid[3] == 'E') {
 				setBL(0x0202424C, (u32)dsiSaveOpen);
 				setBL(0x02024284, (u32)dsiSaveCreate);
 				setBL(0x02024294, (u32)dsiSaveGetResultCode);
@@ -2824,7 +2824,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 				}
 			}
 		} else if (ndsHeader->gameCode[2] == '4') {
-			if (ndsHeader->gameCode[3] == 'E') {
+			if (romTid[3] == 'E') {
 				setBL(0x0202425C, (u32)dsiSaveOpen);
 				setBL(0x02024294, (u32)dsiSaveCreate);
 				setBL(0x020242A4, (u32)dsiSaveGetResultCode);
@@ -3345,7 +3345,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchUserSettingsReadDSiWare(0x020258E0);
 		*(u32*)0x0202ADF8 = 0xE3A00001; // mov r0, #1
 		*(u32*)0x0202ADFC = 0xE12FFF1E; // bx lr
-		if (ndsHeader->gameCode[3] == 'E') {
+		if (romTid[3] == 'E') {
 			setBL(0x02033E68, (u32)dsiSaveGetLength);
 			setBL(0x02033E7C, (u32)dsiSaveSetLength);
 			setBL(0x02033E90, (u32)dsiSaveSeek);
@@ -4362,7 +4362,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			*(u32*)0x0201DAA4 -= 0x1B3740;
 		}
 		patchUserSettingsReadDSiWare(0x0201ED00);
-		if (ndsHeader->gameCode[3] == 'E') {
+		if (romTid[3] == 'E') {
 			/* *(u32*)0x0205EDAC = 0xE3A00000; // mov r0, #0
 			setBL(0x0205F3E8, (u32)dsiSaveDelete);
 			setBL(0x0205F460, (u32)dsiSaveOpen);
@@ -4509,7 +4509,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02015BDC = 0xE3A00000; // mov r0, #0
 		*(u32*)0x02015BE0 = 0xE12FFF1E; // bx lr
 		*(u32*)0x0201B8BC = 0xE3A00003; // mov r0, #3
-		if (ndsHeader->gameCode[3] == 'E') {
+		if (romTid[3] == 'E') {
 			*(u32*)0x0204351C = 0xE1A00000; // nop
 			// *(u32*)0x02043528 = 0xE3A00000; // mov r0, #0 (Skip WiFi error screen)
 			// *(u32*)0x020437AC = 0xE3A00001; // mov r0, #1
@@ -4579,7 +4579,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			*(u32*)0x020AB00C = 0xE1A00000; // nop
 			*(u32*)0x020AB010 = 0xE1A00000; // nop
 			*(u32*)0x020AB024 = 0xE2841B01; // add r1, r4, #0x400
-		} else if (ndsHeader->gameCode[3] == 'V') {
+		} else if (romTid[3] == 'V') {
 			*(u32*)0x020435E8 = 0xE1A00000; // nop
 			// *(u32*)0x020435F4 = 0xE3A00000; // mov r0, #0 (Skip WiFi error screen)
 			// *(u32*)0x02043878 = 0xE3A00001; // mov r0, #1
@@ -4649,7 +4649,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			*(u32*)0x020AB108 = 0xE1A00000; // nop
 			*(u32*)0x020AB10C = 0xE1A00000; // nop
 			*(u32*)0x020AB120 = 0xE2841B01; // add r1, r4, #0x400
-		} else if (ndsHeader->gameCode[3] == 'J') {
+		} else if (romTid[3] == 'J') {
 			*(u32*)0x02043248 = 0xE1A00000; // nop
 			// *(u32*)0x02043254 = 0xE3A00000; // mov r0, #0 (Skip WiFi error screen)
 			// *(u32*)0x020434D8 = 0xE3A00001; // mov r0, #1
@@ -4726,7 +4726,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Bookstore Dream (Europe, Australia)
 	// Bookstore Dream (Japan)
 	else if (strncmp(romTid, "KQV", 3) == 0) {
-		u32 offsetChange = (ndsHeader->gameCode[3] == 'E') ? 0 : 4;
+		u32 offsetChange = (romTid[3] == 'E') ? 0 : 4;
 
 		*(u32*)(0x0200FF00-offsetChange) = 0xE1A00000; // nop
 		tonccpy((u32*)(0x02010A84-offsetChange), dsiSaveGetResultCode, 0xC);
@@ -4734,7 +4734,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchInitDSiWare(0x020189F4-offsetChange, heapEnd);
 		*(u32*)(0x02018D80-offsetChange) = *(u32*)0x02004FE8;
 		patchUserSettingsReadDSiWare(0x02019E94-offsetChange);
-		if (ndsHeader->gameCode[3] == 'E') {
+		if (romTid[3] == 'E') {
 			setBL(0x02052C48, (u32)dsiSaveGetInfo);
 			setBL(0x02052C5C, (u32)dsiSaveOpen);
 			setBL(0x02052C70, (u32)dsiSaveCreate);
@@ -4758,7 +4758,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBL(0x020534E8, (u32)dsiSaveSeek);
 			setBL(0x02053500, (u32)dsiSaveWrite);
 			setBL(0x02053508, (u32)dsiSaveClose);
-		} else if (ndsHeader->gameCode[3] == 'V') {
+		} else if (romTid[3] == 'V') {
 			setBL(0x02052F54, (u32)dsiSaveGetInfo);
 			setBL(0x02052F68, (u32)dsiSaveOpen);
 			setBL(0x02052F7C, (u32)dsiSaveCreate);
@@ -5115,7 +5115,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0201E7B0 = 0xE1A00000; // nop
 		patchInitDSiWare(0x02024CE0, heapEnd);
 		patchUserSettingsReadDSiWare(0x0202637C);
-		if (ndsHeader->gameCode[3] == 'E') {
+		if (romTid[3] == 'E') {
 			*(u32*)0x0205A438 = 0xE1A00000;
 			*(u32*)0x0205A478 = 0xE1A00000;
 			*(u32*)0x0205A550 = 0xE1A00000;
@@ -5158,7 +5158,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			saveFuncOffsets[19] = (u32*)0x0205B3AC;
 			saveFuncOffsets[20] = (u32*)0x0205B40C;
 			saveFuncOffsets[21] = (u32*)0x0205B424;
-		} else if (ndsHeader->gameCode[3] == 'P') {
+		} else if (romTid[3] == 'P') {
 			*(u32*)0x0205B920 = 0xE1A00000;
 			*(u32*)0x0205B960 = 0xE1A00000;
 			*(u32*)0x0205BA38 = 0xE1A00000;
@@ -5230,7 +5230,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL((u32)saveFuncOffsets[21], (u32)dsiSaveClose);
 
 		if (useSharedFont && !extendedMemory2) {
-			patchTwlFontLoad((ndsHeader->gameCode[3] == 'E') ? 0x0209695C : 0x020994D8, 0x020268D0);
+			patchTwlFontLoad((romTid[3] == 'E') ? 0x0209695C : 0x020994D8, 0x020268D0);
 		}
 	}
 
@@ -5487,7 +5487,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0207DEB8 = 0xE1A00000; // nop
 		*(u32*)0x0207DEBC = 0xE1A00000; // nop
 		*(u32*)0x0207DEC0 = 0xE1A00000; // nop
-		if (ndsHeader->gameCode[3] == 'E') {
+		if (romTid[3] == 'E') {
 			*(u32*)0x020AE44C = 0xE1A00000; // nop
 
 			// Skip Manual screen
@@ -5495,7 +5495,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 				u32* offset = (u32*)0x020AE76C;
 				offset[i] = 0xE1A00000; // nop
 			}
-		} else if (ndsHeader->gameCode[3] == 'P') {
+		} else if (romTid[3] == 'P') {
 			*(u32*)0x020AE4F0 = 0xE1A00000; // nop
 
 			// Skip Manual screen
@@ -5596,7 +5596,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchHiHeapDSiWare(0x0201F298, heapEnd); // mov r0, extendedMemory2 ? #0x2700000 : #0x23E0000
 		*(u32*)0x0201F3CC -= 0x30000;
 		patchUserSettingsReadDSiWare(0x020204E0);
-		if (ndsHeader->gameCode[3] == 'E') { // English
+		if (romTid[3] == 'E') { // English
 			if (!extendedMemory2) {
 				*(u32*)0x0202B3F8 = 0x2C00D0; // Shrink sound heap from 0x3000D0
 			}
@@ -5650,19 +5650,19 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBL(0x0203C724, (u32)dsiSaveSeek);
 			setBL(0x0203C734, (u32)dsiSaveRead);
 			setBL(0x0203CD78, (u32)dsiSaveClose);
-		} else if (ndsHeader->gameCode[3] == 'D') { // German
+		} else if (romTid[3] == 'D') { // German
 			if (!extendedMemory2) {
 				*(u32*)0x0202CE80 = 0x2C00D0; // Shrink sound heap from 0x3000D0
 			}
-		} else if (ndsHeader->gameCode[3] == 'F') { // French
+		} else if (romTid[3] == 'F') { // French
 			if (!extendedMemory2) {
 				*(u32*)0x0202A80 = 0x2C00D0; // Shrink sound heap from 0x3000D0
 			}
-		} else if (ndsHeader->gameCode[3] == 'I') { // Italian
+		} else if (romTid[3] == 'I') { // Italian
 			if (!extendedMemory2) {
 				*(u32*)0x0202CE84 = 0x2C00D0; // Shrink sound heap from 0x3000D0
 			}
-		} else if (ndsHeader->gameCode[3] == 'S') { // Spanish
+		} else if (romTid[3] == 'S') { // Spanish
 			if (!extendedMemory2) {
 				*(u32*)0x0202BB90 = 0x2C00D0; // Shrink sound heap from 0x3000D0
 			}
@@ -5676,7 +5676,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02005104 = 0xE1A00000; // nop
 		*(u32*)0x02005118 = 0xE1A00000; // nop
 		*(u32*)0x02015B2C = 0xE1A00000; // nop
-		if (ndsHeader->gameCode[3] == 'E') {
+		if (romTid[3] == 'E') {
 			*(u32*)0x02018DA4 = 0xE1A00000; // nop
 			patchInitDSiWare(0x0201EBB0, heapEnd);
 			patchUserSettingsReadDSiWare(0x020200E4);
@@ -5700,7 +5700,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchInitDSiWare(0x02020544, heapEnd);
 		*(u32*)0x020208D0 -= 0x30000;
 		patchUserSettingsReadDSiWare(0x02021A68);
-		if (ndsHeader->gameCode[3] == 'E') {
+		if (romTid[3] == 'E') {
 			setBL(0x02065C8C, (u32)dsiSaveGetInfo);
 			setBL(0x02065CA0, (u32)dsiSaveOpen);
 			setBL(0x02065CB4, (u32)dsiSaveCreate);
@@ -5725,7 +5725,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBL(0x02066BF8, (u32)dsiSaveSeek);
 			setBL(0x02066C08, (u32)dsiSaveWrite);
 			setBL(0x02066C10, (u32)dsiSaveClose);
-		} else if (ndsHeader->gameCode[3] == 'J') {
+		} else if (romTid[3] == 'J') {
 			setBL(0x02026F94, (u32)dsiSaveGetInfo);
 			setBL(0x02026FA8, (u32)dsiSaveOpen);
 			setBL(0x02026FC0, (u32)dsiSaveCreate);
@@ -5809,7 +5809,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchInitDSiWare(0x0201BE28, heapEnd);
 		*(u32*)0x0201C1B4 -= 0x30000;
 		patchUserSettingsReadDSiWare(0x0201D2C8);
-		if (ndsHeader->gameCode[3] == 'E') {
+		if (romTid[3] == 'E') {
 			if (!extendedMemory2) {
 				*(u32*)0x02014738 = (u32)getOffsetFromBL((u32*)0x02026A80);
 				setBL(0x02026A80, 0x0201473C);
@@ -5842,7 +5842,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBL(0x020364C4, (u32)dsiSaveSeek);
 			setBL(0x020364D4, (u32)dsiSaveWrite);
 			setBL(0x020364DC, (u32)dsiSaveClose);
-		} else if (ndsHeader->gameCode[3] == 'V') {
+		} else if (romTid[3] == 'V') {
 			if (!extendedMemory2) {
 				*(u32*)0x02014738 = (u32)getOffsetFromBL((u32*)0x02026A80);
 				setBL(0x02026A80, 0x0201473C);
@@ -5921,10 +5921,10 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02018E2C = 0xE1A00000; // nop
 		patchInitDSiWare(0x0201EC38, heapEnd);
 		patchUserSettingsReadDSiWare(0x020201DC);
-		if (ndsHeader->gameCode[3] == 'E') {
+		if (romTid[3] == 'E') {
 			*(u32*)0x020642A4 = 0xE12FFF1E; // bx lr
 			*(u32*)0x020644BC = 0xE12FFF1E; // bx lr
-		} else if (ndsHeader->gameCode[3] == 'V') {
+		} else if (romTid[3] == 'V') {
 			*(u32*)0x02066CA8 = 0xE12FFF1E; // bx lr
 			*(u32*)0x02066EC0 = 0xE12FFF1E; // bx lr
 		}
@@ -6096,7 +6096,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02018784 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x02018788 = 0xE12FFF1E; // bx lr
 		tonccpy((u32*)0x02018C50, elementalistsHeapAlloc, 0xC0);
-		if (ndsHeader->gameCode[3] == 'E') {
+		if (romTid[3] == 'E') {
 			*(u32*)0x0202627C = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 			setBL(0x02027524, 0x02018C50);
 			*(u32*)0x02028B6C = 0xE1A00000; // nop
@@ -6463,7 +6463,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchInitDSiWare(0x02025278, heapEnd);
 		*(u32*)0x02025604 = *(u32*)0x02004FE8;
 		patchUserSettingsReadDSiWare(0x02026978);
-		if (ndsHeader->gameCode[3] == 'E') {
+		if (romTid[3] == 'E') {
 			*(u32*)0x020620D8 = 0xE1A00000; // nop
 			*(u32*)0x02062118 = 0xE1A00000; // nop
 			*(u32*)0x020621FC = 0xE1A00000; // nop
@@ -6511,7 +6511,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			saveFuncOffsets[19] = (u32*)0x02063108;
 			saveFuncOffsets[20] = (u32*)0x02063168;
 			saveFuncOffsets[21] = (u32*)0x02063180;
-		} else if (ndsHeader->gameCode[3] == 'P') {
+		} else if (romTid[3] == 'P') {
 			*(u32*)0x02093B14 = 0xE1A00000; // nop
 			*(u32*)0x02093B54 = 0xE1A00000; // nop
 			*(u32*)0x02093C38 = 0xE1A00000; // nop
@@ -6586,7 +6586,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL((u32)saveFuncOffsets[21], (u32)dsiSaveClose);
 
 		/* if (useSharedFont && !extendedMemory2) {
-			patchTwlFontLoad((ndsHeader->gameCode[3] == 'E') ? 0x02076B5C : 0x0203C09C, 0x02026ECC);
+			patchTwlFontLoad((romTid[3] == 'E') ? 0x02076B5C : 0x0203C09C, 0x02026ECC);
 		} */
 	}
 
@@ -6951,7 +6951,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02005088 = 0xE1A00000; // nop (Disable reading save data)
 		*(u32*)0x02005098 = 0xE1A00000; // nop
 		*(u32*)0x020050AC = 0xE1A00000; // nop
-		if (ndsHeader->gameCode[3] != 'J') {
+		if (romTid[3] != 'J') {
 			*(u32*)0x0200FC0C = 0xE1A00000; // nop
 			*(u32*)0x02012E84 = 0xE1A00000; // nop
 			patchInitDSiWare(0x02018FA8, heapEnd);
@@ -7114,7 +7114,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0203D228 = 0xE3A00000; // mov r0, #0 (Skip saving to "back.dat")
 		// *(u32*)0x0203D488 = 0xE3A00000; // mov r0, #0
 		// *(u32*)0x0203D48C = 0xE12FFF1E; // bx lr
-		if (ndsHeader->gameCode[3] == 'E') {
+		if (romTid[3] == 'E') {
 			// *(u32*)0x02044B00 = 0xE3A00000; // mov r0, #0
 			setBL(0x020590C0, (u32)dsiSaveCreate);
 			setBL(0x02059270, (u32)dsiSaveOpen);
@@ -8774,7 +8774,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchUserSettingsReadDSiWare(0x0201A404);
 		*(u32*)0x0201FB24 = 0xE3A00001; // mov r0, #1
 		*(u32*)0x0201FB28 = 0xE12FFF1E; // bx lr
-		if (ndsHeader->gameCode[3] == 'E') {
+		if (romTid[3] == 'E') {
 			for (int i = 0; i < 12; i++) {
 				u32* offset = (u32*)0x0206710C;
 				offset[i] = 0xE1A00000; // nop
@@ -8875,7 +8875,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02022ADC = 0xE1A00000; // nop
 		*(u32*)0x02022B0C = 0xE1A00000; // nop
 		if (ndsHeader->romversion == 0) {
-			if (ndsHeader->gameCode[3] == 'E') {
+			if (romTid[3] == 'E') {
 				*(u32*)0x02042F40 = 0xE1A00000; // nop
 				*(u32*)0x02042F5C = 0xE1A00000; // nop
 
@@ -9335,7 +9335,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0203A96C, (u32)dsiSaveOpen);
 		setBL(0x0203A9D0, (u32)dsiSaveRead); // dsiSaveReadAsync
 		setBL(0x0203AA0C, (u32)dsiSaveClose);
-		if (ndsHeader->gameCode[3] == 'E') {
+		if (romTid[3] == 'E') {
 			*(u32*)0x02064E50 = 0x280000;
 			*(u32*)0x02064E54 = 0x4000;
 		} else {
@@ -9713,7 +9713,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02056CE8, (u32)dsiSaveClose);
 		*(u32*)0x02056E38 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
 		*(u32*)0x02056E58 = 0xE3A00001; // mov r0, #1 (dsiSaveFreeSpaceAvailable)
-		if (ndsHeader->gameCode[3] == 'E') {
+		if (romTid[3] == 'E') {
 			*(u32*)0x02082A58 = 0xE1A00000; // nop
 			if (!extendedMemory2) {
 				//getLengthFunc = getOffsetFromBL((u32*)0x0208C7B0);
@@ -9754,7 +9754,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			*(u32*)0x020A44FC = 0xE1A00000; // nop
 			*(u32*)0x020A467C = 0xE1A00000; // nop
 			*(u32*)0x020C7CC4 = 0xE3A00000; // mov r0, #0
-		} else if (ndsHeader->gameCode[3] == 'V') {
+		} else if (romTid[3] == 'V') {
 			*(u32*)0x02082A78 = 0xE1A00000; // nop
 			if (!extendedMemory2) {
 				//getLengthFunc = getOffsetFromBL((u32*)0x0208C7D0);
@@ -9863,7 +9863,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchInitDSiWare(0x020269E0, heapEnd);
 		*(u32*)0x02026D6C -= 0x30000;
 		patchUserSettingsReadDSiWare(0x02028098);
-		if (ndsHeader->gameCode[3] == 'E') {
+		if (romTid[3] == 'E') {
 			setBL(0x0205DB2C, (u32)dsiSaveOpen);
 			setBL(0x0205DBA8, (u32)dsiSaveCreate);
 			setBL(0x0205DBE4, (u32)dsiSaveGetLength);
@@ -10109,7 +10109,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02016C1C = 0xE1A00000; // nop
 		patchInitDSiWare(0x0201E704, heapEnd);
 		*(u32*)0x02029F34 = 0xE3A00001; // mov r0, #1
-		if (ndsHeader->gameCode[3] == 'E') {
+		if (romTid[3] == 'E') {
 			*(u32*)0x020B9AE4 = 0xE1A00000; // nop
 			*(u32*)0x020B9B00 = 0xE1A00000; // nop
 			*(u32*)0x020BC568 = 0xE3A00001; // mov r0, #1
@@ -11006,7 +11006,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			tonccpy((u32*)0x02008528, ce9->patches->musicPlay, 0xC);
 			tonccpy((u32*)0x02008570, ce9->patches->musicStopEffect, 0xC);
 		}
-		if (ndsHeader->gameCode[3] == 'J') {
+		if (romTid[3] == 'J') {
 			ce9->patches->rumble_arm9[0][3] = *(u32*)0x0201D008;
 			ce9->patches->rumble_arm9[1][3] = *(u32*)0x020275F8;
 			if (!extendedMemory2) {
@@ -11777,7 +11777,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Saving is difficult to implement
 	else if (strcmp(romTid, "KICE") == 0 || strcmp(romTid, "KICP") == 0) {
 		*(u32*)0x0200AFCC += 0xD0000000; // bne -> b
-		if (ndsHeader->gameCode[3] == 'E') {
+		if (romTid[3] == 'E') {
 			// Skip Manual screen
 			//*(u32*)0x0200CC58 = 0xE1A00000; // nop
 			//*(u32*)0x0200CC5C = 0xE1A00000; // nop
@@ -11832,7 +11832,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			*(u32*)0x02008E64 = 0xE12FFF1E; // bx lr
 		}
 
-		if (ndsHeader->gameCode[3] == 'E') {
+		if (romTid[3] == 'E') {
 			if (useSharedFont && !extendedMemory2) {
 				// Skip Manual screen when past title screen
 				*(u32*)0x0200E314 = 0xE1A00000; // nop
@@ -11868,7 +11868,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchUserSettingsReadDSiWare(0x0201C1A0);
 		*(u32*)0x02021A88 = 0xE3A00001; // mov r0, #1
 		*(u32*)0x02021A8C = 0xE12FFF1E; // bx lr
-		if (ndsHeader->gameCode[3] == 'E') {
+		if (romTid[3] == 'E') {
 			setBL(0x0203DC00, (u32)dsiSaveOpen);
 			*(u32*)0x0203DC10 = 0xE1A00000; // nop
 			setBL(0x0203DC1C, (u32)dsiSaveCreate);
@@ -12077,7 +12077,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0201CE60 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x0201CE64 = 0xE12FFF1E; // bx lr
 		*(u32*)0x0205421C = 0xE1A00000; // nop
-		if (ndsHeader->gameCode[3] == 'E') {
+		if (romTid[3] == 'E') {
 			*(u32*)0x02059C64 = 0xE1A00000; // nop
 			*(u32*)0x02059C84 = 0xE1A00000; // nop
 			*(u32*)0x02059C90 = 0xE1A00000; // nop
@@ -12810,7 +12810,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchUserSettingsReadDSiWare(0x02022E98);
 		*(u32*)0x02028634 = 0xE3A00001; // mov r0, #1
 		*(u32*)0x02028638 = 0xE12FFF1E; // bx lr
-		if (ndsHeader->gameCode[3] == 'E') {
+		if (romTid[3] == 'E') {
 			*(u32*)0x0202A968 = 0xE1A00000; // nop
 			*(u32*)0x0202A980 = 0xE1A00000; // nop
 			setBL(0x0202EE44, (u32)dsiSaveOpen);
@@ -13151,13 +13151,13 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02005A6C, (u32)dsiSaveSetLength);
 		setBL(0x02005A88, (u32)dsiSaveWrite);
 		setBL(0x02005AB4, (u32)dsiSaveClose);
-		if (ndsHeader->gameCode[3] == 'E') {
+		if (romTid[3] == 'E') {
 			*(u32*)0x020395E0 = 0xE28DD00C; // ADD   SP, SP, #0xC
 			*(u32*)0x020395E4 = 0xE8BD8078; // LDMFD SP!, {R3-R6,PC}
 			*(u32*)0x0203CC10 = 0xE1A00000; // nop
 			patchInitDSiWare(0x02043218, heapEnd);
 			patchUserSettingsReadDSiWare(0x02044804);
-		} else if (ndsHeader->gameCode[3] == 'V') {
+		} else if (romTid[3] == 'V') {
 			*(u32*)0x02039658 = 0xE28DD00C; // ADD   SP, SP, #0xC
 			*(u32*)0x0203965C = 0xE8BD8078; // LDMFD SP!, {R3-R6,PC}
 			*(u32*)0x0203CC88 = 0xE1A00000; // nop
@@ -13716,7 +13716,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0201C350, (u32)dsiSaveSetLength);
 		setBL(0x0201C368, (u32)dsiSaveWrite);
 		setBL(0x0201C384, (u32)dsiSaveClose);
-		if (ndsHeader->gameCode[3] == 'E') {
+		if (romTid[3] == 'E') {
 			if (!extendedMemory2) {
 				*(u32*)0x02026FD0 = 0xE3A02601; // mov r2, #0x100000
 				*(u32*)0x02026FE0 = 0xE3A01601; // mov r1, #0x100000
@@ -13788,7 +13788,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x020077EC, (u32)dsiSaveSetLength);
 		setBL(0x02007808, (u32)dsiSaveWrite);
 		setBL(0x02007834, (u32)dsiSaveClose);
-		if (ndsHeader->gameCode[3] == 'E' || ndsHeader->gameCode[3] == 'V') {
+		if (romTid[3] == 'E' || romTid[3] == 'V') {
 			*(u32*)0x0200B370 = 0xE1A00000; // nop
 			*(u32*)0x0200B37C = 0xE1A00000; // nop
 			*(u32*)0x0200B3AC = 0xE1A00000; // nop
@@ -13801,7 +13801,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			*(u32*)0x0200A694 = 0xE1A00000; // nop
 			*(u32*)0x0200A69C = 0xE1A00000; // nop
 		}
-		if (ndsHeader->gameCode[3] == 'E') {
+		if (romTid[3] == 'E') {
 			/* if (useSharedFont && !extendedMemory2 && expansionPakFound) {
 				patchTwlFontLoad(0x02017E9C, 0x02049F70);
 				setBL(0x02017EAC, 0x02049F74);
@@ -13812,7 +13812,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			*(u32*)0x0203EAC0 = 0xE1A00000; // nop
 			patchInitDSiWare(0x02047980, heapEnd);
 			patchUserSettingsReadDSiWare(0x02048F2C);
-		} else if (ndsHeader->gameCode[3] == 'V') {
+		} else if (romTid[3] == 'V') {
 			*(u32*)0x0203B6A4 = 0xE28DD00C; // ADD   SP, SP, #0xC
 			*(u32*)0x0203B6A8 = 0xE8BD8078; // LDMFD SP!, {R3-R6,PC}
 			*(u32*)0x0203EAB8 = 0xE1A00000; // nop
@@ -13968,7 +13968,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Puffins: Let's Fish! (Europe)
 	// Due to our save implementation, save data is stored in all 3 slots
 	else if (strcmp(romTid, "KLFE") == 0 || strcmp(romTid, "KLFP") == 0) {
-		u32 offsetChange = (ndsHeader->gameCode[3] == 'P') ? 8 : 0;
+		u32 offsetChange = (romTid[3] == 'P') ? 8 : 0;
 
 		*(u32*)0x020195B4 = 0xE12FFF1E; // bx lr
 		*(u32*)0x02019608 = 0xE12FFF1E; // bx lr
@@ -14343,7 +14343,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0201E1E4, (u32)dsiSaveOpen);
 		setBL(0x0201E354, (u32)dsiSaveWrite);
 		setBL(0x0201E35C, (u32)dsiSaveClose);
-		if (ndsHeader->gameCode[3] == 'E') {
+		if (romTid[3] == 'E') {
 			*(u32*)0x0202663C = 0xE1A00000; // nop
 			setBL(0x02026648, (u32)dsiSaveCreate);
 			*(u32*)0x020266F8 = 0xE1A00000; // nop
@@ -14648,7 +14648,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			tonccpy((u32*)0x020256C0, rmtRacersHeapAlloc, 0xC0);
 			setBLThumb(0x02082484, 0x020256C0);
 		}
-		if (ndsHeader->gameCode[3] == 'E') {
+		if (romTid[3] == 'E') {
 			*(u32*)0x0208DCBC = 0xE1A00000; // nop
 			*(u32*)0x0208DCC4 = 0xE1A00000; // nop
 			*(u32*)0x0208DDB8 = 0xE1A00000; // nop
@@ -14992,14 +14992,14 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0200C8F4, (u32)dsiSaveSetLength);
 		setBL(0x0200C904, (u32)dsiSaveWrite);
 		setBL(0x0200C90C, (u32)dsiSaveClose);
-		if (ndsHeader->gameCode[3] == 'E') {
+		if (romTid[3] == 'E') {
 			*(u32*)0x02010888 = 0xE1A00000; // nop (Skip Manual screen)
 			*(u32*)0x02033384 = 0xE1A00000; // nop
 			*(u32*)0x02036678 = 0xE1A00000; // nop
 			patchInitDSiWare(0x0203BDA8, 0x02F00000); // #0x2F00000 (mirrors to 0x2700000 on debug DS units)
 			*(u32*)0x0203C134 = 0x020BEAA0;
 			patchUserSettingsReadDSiWare(0x0203D3F8);
-		} else if (ndsHeader->gameCode[3] == 'P') {
+		} else if (romTid[3] == 'P') {
 			*(u32*)0x02010BE4 = 0xE1A00000; // nop (Skip Manual screen)
 			*(u32*)0x02033760 = 0xE1A00000; // nop
 			*(u32*)0x02036A54 = 0xE1A00000; // nop
@@ -15085,7 +15085,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0201E73C = 0xE3A00001; // mov r0, #1
 		*(u32*)0x0201E740 = 0xE12FFF1E; // bx lr
 		*(u32*)0x0202B430 = 0xE1A00000; // nop
-		if (ndsHeader->gameCode[3] == 'E') {
+		if (romTid[3] == 'E') {
 			setBL(0x02030F00, (u32)dsiSaveCreate);
 			setBL(0x02030F10, (u32)dsiSaveOpen);
 			setBL(0x02030F3C, (u32)dsiSaveWrite);
@@ -15398,7 +15398,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		doubleNopT(0x0202AD46);
 		doubleNopT(0x0202AD4C);
 		*(u32*)0x0203622C = 0xE1A00000; // nop
-		if (ndsHeader->gameCode[3] == 'E') {
+		if (romTid[3] == 'E') {
 			*(u32*)0x02052CE8 = 0xE1A00000; // nop
 			*(u32*)0x0205644C = 0xE1A00000; // nop
 			patchInitDSiWare(0x0205C614, heapEnd);
@@ -15436,7 +15436,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x020137CC, (u32)dsiSaveWrite); // dsiSaveWriteAsync
 		setBL(0x02013818, (u32)dsiSaveSeek);
 		setBL(0x02013844, (u32)dsiSaveRead); // dsiSaveReadAsync
-		if (ndsHeader->gameCode[3] == 'E') {
+		if (romTid[3] == 'E') {
 			*(u16*)0x0201EBD8 = 0x2201; // movs r2, #1
 			doubleNopT(0x0202C1A6);
 			doubleNopT(0x0202C1AC);
@@ -15605,7 +15605,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02011C24, (u32)dsiSaveGetResultCode);
 		*(u32*)0x02011C3C = 0xE1A00000; // nop
 		*(u32*)0x02011C48 = 0xE3A00001; // mov r0, #1
-		if (ndsHeader->gameCode[3] == 'E') {
+		if (romTid[3] == 'E') {
 			setBL(0x020313AC, (u32)dsiSaveOpen);
 			setBL(0x020313C4, (u32)dsiSaveGetLength);
 			setBL(0x020313D4, (u32)dsiSaveSeek);
@@ -15624,7 +15624,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			patchInitDSiWare(0x0206BE9C, heapEnd);
 			*(u32*)0x0206C228 = 0x022546E0;
 			*(u32*)0x02072840 = 0xE1A00000; // nop
-		} else if (ndsHeader->gameCode[3] == 'P') {
+		} else if (romTid[3] == 'P') {
 			setBL(0x020313FC, (u32)dsiSaveOpen);
 			setBL(0x02031414, (u32)dsiSaveGetLength);
 			setBL(0x02031424, (u32)dsiSaveSeek);
@@ -15804,7 +15804,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		} else { */
 			*(u32*)0x02013184 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		// }
-		if (ndsHeader->gameCode[3] == 'E') {
+		if (romTid[3] == 'E') {
 			setBL(0x020137B8, (u32)dsiSaveOpen);
 			*(u32*)0x02013804 = 0xE1A00000; // nop
 			*(u32*)0x02013818 = 0xE1A00000; // nop
@@ -15887,7 +15887,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Requires 8MB of RAM
 	else if ((strcmp(romTid, "KYSE") == 0 || strcmp(romTid, "KYSP") == 0) && extendedMemory2) {
 		// const u32 mepAddr = (s2FlashcardId == 0x5A45) ? 0x08000000 : 0x09000000;
-		if (ndsHeader->gameCode[3] == 'E') {
+		if (romTid[3] == 'E') {
 			*(u32*)0x02007170 = 0xE1A00000; // nop
 			*(u32*)0x0200A7E8 = 0xE1A00000; // nop
 			patchInitDSiWare(0x0200F9C4, heapEnd);
@@ -15926,7 +15926,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x020307C8, (u32)dsiSaveWrite);
 		setBL(0x020307D0, (u32)dsiSaveClose);
 		/* if (!extendedMemory2 && expansionPakFound) {
-			setBLThumb(0x02037AE0, (ndsHeader->gameCode[3] == 'E') ? 0x0200CF5C : 0x02013CB8);
+			setBLThumb(0x02037AE0, (romTid[3] == 'E') ? 0x0200CF5C : 0x02013CB8);
 		} */
 	}
 
@@ -16270,7 +16270,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		// if (!useSharedFont) {
 			*(u32*)0x02054C30 = 0xE1A00000; // nop (Skip Manual screen)
 		// }
-		if (ndsHeader->gameCode[3] == 'E') {
+		if (romTid[3] == 'E') {
 			/* if (useSharedFont && !extendedMemory2 && expansionPakFound) {
 				patchTwlFontLoad(0x02059574, 0x0201FDD0);
 			} */
@@ -16560,7 +16560,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0200A05C, (u32)dsiSaveWrite); // dsiSaveWriteAsync
 		setBL(0x0200A0AC, (u32)dsiSaveClose);
 		setBL(0x0200A134, (u32)dsiSaveClose);
-		if (ndsHeader->gameCode[3] == 'E') {
+		if (romTid[3] == 'E') {
 			*(u32*)0x02063214 = 0xE1A00000; // nop
 			*(u32*)0x02066E74 = 0xE1A00000; // nop
 			*(u32*)0x02072B10 = 0xE1A00000; // nop
@@ -16851,7 +16851,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0201837C = 0xE1A00000; // nop
 		patchInitDSiWare(0x0201FD04, heapEnd);
 		patchUserSettingsReadDSiWare(0x02021428);
-		if (ndsHeader->gameCode[3] == 'E') {
+		if (romTid[3] == 'E') {
 			for (int i = 0; i < 8; i++) {
 				u32* offset = (u32*)0x02040E3C;
 				offset[i] = 0xE1A00000;
@@ -17095,7 +17095,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0200EC48, (u32)dsiSaveSetLength);
 		setBL(0x0200EC68, (u32)dsiSaveWrite);
 		setBL(0x0200EC84, (u32)dsiSaveClose);
-		if (ndsHeader->gameCode[3] == 'E') {
+		if (romTid[3] == 'E') {
 			*(u32*)0x0201CAAC = 0xE1A00000; // nop
 			*(u32*)0x0201CAB0 = 0xE1A00000; // nop
 			*(u32*)0x0201CAC0 = 0xE1A00000; // nop
@@ -17110,7 +17110,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			*(u32*)0x02038820 = 0xE1A00000; // nop
 			patchInitDSiWare(0x02040DF0, heapEnd);
 			patchUserSettingsReadDSiWare(0x02042388);
-		} else if (ndsHeader->gameCode[3] == 'V') {
+		} else if (romTid[3] == 'V') {
 			*(u32*)0x0201C7A0 = 0xE1A00000; // nop
 			*(u32*)0x0201C7A4 = 0xE1A00000; // nop
 			*(u32*)0x0201C7B4 = 0xE1A00000; // nop
@@ -17213,7 +17213,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02011E0C, (u32)dsiSaveGetResultCode);
 		*(u32*)0x02011E24 = 0xE1A00000; // nop
 		*(u32*)0x02011E30 = 0xE3A00001; // mov r0, #1
-		if (ndsHeader->gameCode[3] == 'E') {
+		if (romTid[3] == 'E') {
 			setBL(0x02032118, (u32)dsiSaveOpen);
 			setBL(0x02032130, (u32)dsiSaveGetLength);
 			setBL(0x02032140, (u32)dsiSaveSeek);
@@ -17232,7 +17232,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			patchInitDSiWare(0x0206C8DC, heapEnd);
 			*(u32*)0x0206CC68 = 0x02255080;
 			*(u32*)0x02073280 = 0xE1A00000; // nop
-		} else if (ndsHeader->gameCode[3] == 'P') {
+		} else if (romTid[3] == 'P') {
 			setBL(0x02032164, (u32)dsiSaveOpen);
 			setBL(0x0203217C, (u32)dsiSaveGetLength);
 			setBL(0x0203218C, (u32)dsiSaveSeek);
@@ -17326,7 +17326,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchInitDSiWare(0x0201FF04, heapEnd);
 		*(u32*)0x02020290 -= 0x30000;
 		patchUserSettingsReadDSiWare(0x020213C0);
-		if (ndsHeader->gameCode[3] == 'E') {
+		if (romTid[3] == 'E') {
 			*(u32*)0x02081270 = 0xE1A00000; // nop
 			*(u32*)0x02081278 = 0xE1A00000; // nop
 			*(u32*)0x02081324 = 0xE1A00000; // nop
