@@ -78,6 +78,7 @@ static const char dsiWareForBootloader1[][4] = {
 	"KA5", // Boardwalk Ball Toss
 	"KBB", // Bomberman Blitz
 	"KQV", // Bookstore Dream
+	"KBM", // Boom Boom Squaries
 	"KZE", // Bounce & Break
 	"KQB", // Box Pusher
 	"KAH", // Art Style: Boxlife

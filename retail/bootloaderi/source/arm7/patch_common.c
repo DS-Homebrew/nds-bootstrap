@@ -2950,6 +2950,72 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0204ED88, (u32)dsiSaveRead);
 	}*/
 
+	// Boom Boom Squaries (USA)
+	else if (strcmp(romTid, "KBME") == 0) {
+		if (!twlFontFound) {
+			*(u32*)0x02005150 = 0xE1A00000; // nop (Disable NFTR font loading from TWLNAND)
+		}
+		/* if (saveOnFlashcard) {
+			setBL(0x02007454, (u32)dsiSaveOpen);
+			setBL(0x020074E8, (u32)dsiSaveRead);
+			setBL(0x020074F8, (u32)dsiSaveClose);
+			setBL(0x02007508, (u32)dsiSaveGetLength);
+			setBL(0x0200751C, (u32)dsiSaveRead);
+			setBL(0x02007524, (u32)dsiSaveClose);
+			setBL(0x020075F8, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+			setBL(0x0200760C, (u32)dsiSaveOpen);
+			setBL(0x02007678, (u32)dsiSaveSetLength);
+			setBL(0x02007688, (u32)dsiSaveWrite);
+			setBL(0x02007698, (u32)dsiSaveWrite);
+			setBL(0x020076A0, (u32)dsiSaveClose);
+			tonccpy((u32*)0x0202D9F8, dsiSaveGetResultCode, 0xC);
+		} */
+	}
+
+	// Boom Boom Squaries (Europe, Australia)
+	else if (strcmp(romTid, "KBMV") == 0) {
+		if (!twlFontFound) {
+			*(u32*)0x02005150 = 0xE1A00000; // nop (Disable NFTR font loading from TWLNAND)
+		}
+		/* if (saveOnFlashcard) {
+			setBL(0x020073BC, (u32)dsiSaveOpen);
+			setBL(0x02007450, (u32)dsiSaveRead);
+			setBL(0x02007460, (u32)dsiSaveClose);
+			setBL(0x02007470, (u32)dsiSaveGetLength);
+			setBL(0x02007484, (u32)dsiSaveRead);
+			setBL(0x0200748C, (u32)dsiSaveClose);
+			setBL(0x02007560, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+			setBL(0x02007574, (u32)dsiSaveOpen);
+			setBL(0x020075E0, (u32)dsiSaveSetLength);
+			setBL(0x020075F0, (u32)dsiSaveWrite);
+			setBL(0x02007600, (u32)dsiSaveWrite);
+			setBL(0x02007608, (u32)dsiSaveClose);
+			tonccpy((u32*)0x0202D960, dsiSaveGetResultCode, 0xC);
+		} */
+	}
+
+	// Boom Boom Squaries (Japan)
+	else if (strcmp(romTid, "KBMJ") == 0) {
+		if (!twlFontFound) {
+			*(u32*)0x02005150 = 0xE1A00000; // nop (Disable NFTR font loading from TWLNAND)
+		}
+		/* if (saveOnFlashcard) {
+			setBL(0x020074E8, (u32)dsiSaveOpen);
+			setBL(0x0200757C, (u32)dsiSaveRead);
+			setBL(0x0200758C, (u32)dsiSaveClose);
+			setBL(0x0200759C, (u32)dsiSaveGetLength);
+			setBL(0x020075B0, (u32)dsiSaveRead);
+			setBL(0x020075B8, (u32)dsiSaveClose);
+			setBL(0x0200768C, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+			setBL(0x020076A0, (u32)dsiSaveOpen);
+			setBL(0x0200770C, (u32)dsiSaveSetLength);
+			setBL(0x0200771C, (u32)dsiSaveWrite);
+			setBL(0x0200772C, (u32)dsiSaveWrite);
+			setBL(0x02007734, (u32)dsiSaveClose);
+			tonccpy((u32*)0x0202FCFC, dsiSaveGetResultCode, 0xC);
+		} */
+	}
+
 	// Bounce & Break (USA)
 	else if (strcmp(romTid, "KZEE") == 0 && saveOnFlashcard) {
 		setBL(0x020489B0, (u32)dsiSaveOpen);

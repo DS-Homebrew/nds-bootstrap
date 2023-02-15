@@ -4840,6 +4840,90 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0207574C = 0xE1A00000; // nop
 	}*/
 
+	// Boom Boom Squaries (USA)
+	else if (strcmp(romTid, "KBME") == 0) {
+		*(u32*)0x02005150 = 0xE1A00000; // nop (Disable NFTR font loading from TWLNAND)
+		*(u32*)0x020051CC = 0xE1A00000; // nop
+		*(u32*)0x020051E4 = 0xE1A00000; // nop
+		// Somehow detects save data as corrupted
+		/* setBL(0x02007454, (u32)dsiSaveOpen);
+		*(u32*)0x020074AC = 0xE1A00000; // nop
+		setBL(0x020074E8, (u32)dsiSaveRead);
+		setBL(0x020074F8, (u32)dsiSaveClose);
+		setBL(0x02007508, (u32)dsiSaveGetLength);
+		setBL(0x0200751C, (u32)dsiSaveRead);
+		setBL(0x02007524, (u32)dsiSaveClose);
+		setBL(0x020075F8, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+		setBL(0x0200760C, (u32)dsiSaveOpen);
+		*(u32*)0x02007640 = 0xE1A00000; // nop
+		setBL(0x02007678, (u32)dsiSaveSetLength);
+		setBL(0x02007688, (u32)dsiSaveWrite);
+		setBL(0x02007698, (u32)dsiSaveWrite);
+		setBL(0x020076A0, (u32)dsiSaveClose); */
+		*(u32*)0x0202CE74 = 0xE1A00000; // nop
+		// tonccpy((u32*)0x0202D9F8, dsiSaveGetResultCode, 0xC);
+		*(u32*)0x02030830 = 0xE1A00000; // nop
+		patchInitDSiWare(0x02035BE8, heapEnd);
+		*(u32*)0x02035F74 = *(u32*)0x02004FE8;
+		patchUserSettingsReadDSiWare(0x02037088);
+	}
+
+	// Boom Boom Squaries (Europe, Australia)
+	else if (strcmp(romTid, "KBMV") == 0) {
+		*(u32*)0x02005150 = 0xE1A00000; // nop (Disable NFTR font loading from TWLNAND)
+		*(u32*)0x020051CC = 0xE1A00000; // nop
+		*(u32*)0x020051E4 = 0xE1A00000; // nop
+		// Somehow detects save data as corrupted
+		/* setBL(0x020073BC, (u32)dsiSaveOpen);
+		*(u32*)0x02007414 = 0xE1A00000; // nop
+		setBL(0x02007450, (u32)dsiSaveRead);
+		setBL(0x02007460, (u32)dsiSaveClose);
+		setBL(0x02007470, (u32)dsiSaveGetLength);
+		setBL(0x02007484, (u32)dsiSaveRead);
+		setBL(0x0200748C, (u32)dsiSaveClose);
+		setBL(0x02007560, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+		setBL(0x02007574, (u32)dsiSaveOpen);
+		*(u32*)0x020075A8 = 0xE1A00000; // nop
+		setBL(0x020075E0, (u32)dsiSaveSetLength);
+		setBL(0x020075F0, (u32)dsiSaveWrite);
+		setBL(0x02007600, (u32)dsiSaveWrite);
+		setBL(0x02007608, (u32)dsiSaveClose); */
+		*(u32*)0x0202CDDC = 0xE1A00000; // nop
+		// tonccpy((u32*)0x0202D960, dsiSaveGetResultCode, 0xC);
+		*(u32*)0x02030798 = 0xE1A00000; // nop
+		patchInitDSiWare(0x02035B50, heapEnd);
+		*(u32*)0x02035EDC = *(u32*)0x02004FE8;
+		patchUserSettingsReadDSiWare(0x02036FF0);
+	}
+
+	// Boom Boom Squaries (Japan)
+	else if (strcmp(romTid, "KBMJ") == 0) {
+		*(u32*)0x02005150 = 0xE1A00000; // nop (Disable NFTR font loading from TWLNAND)
+		*(u32*)0x020051CC = 0xE1A00000; // nop
+		*(u32*)0x020051E4 = 0xE1A00000; // nop
+		// Somehow detects save data as corrupted
+		/* setBL(0x020074E8, (u32)dsiSaveOpen);
+		*(u32*)0x02007540 = 0xE1A00000; // nop
+		setBL(0x0200757C, (u32)dsiSaveRead);
+		setBL(0x0200758C, (u32)dsiSaveClose);
+		setBL(0x0200759C, (u32)dsiSaveGetLength);
+		setBL(0x020075B0, (u32)dsiSaveRead);
+		setBL(0x020075B8, (u32)dsiSaveClose);
+		setBL(0x0200768C, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+		setBL(0x020076A0, (u32)dsiSaveOpen);
+		*(u32*)0x020076D4 = 0xE1A00000; // nop
+		setBL(0x0200770C, (u32)dsiSaveSetLength);
+		setBL(0x0200771C, (u32)dsiSaveWrite);
+		setBL(0x0200772C, (u32)dsiSaveWrite);
+		setBL(0x02007734, (u32)dsiSaveClose); */
+		*(u32*)0x0202F178 = 0xE1A00000; // nop
+		// tonccpy((u32*)0x0202FCFC, dsiSaveGetResultCode, 0xC);
+		*(u32*)0x02032B34 = 0xE1A00000; // nop
+		patchInitDSiWare(0x02037EEC, heapEnd);
+		*(u32*)0x02038278 = *(u32*)0x02004FE8;
+		patchUserSettingsReadDSiWare(0x0203938C);
+	}
+
 	// Bounce & Break (USA)
 	else if (strcmp(romTid, "KZEE") == 0) {
 		useSharedFont = twlFontFound;
