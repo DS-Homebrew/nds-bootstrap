@@ -3664,6 +3664,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Aura-Aura Climber (USA)
 	// Save code too advanced to patch, preventing support
 	else if (strcmp(romTid, "KSRE") == 0) {
+		useSharedFont = (twlFontFound && extendedMemory2);
 		*(u32*)0x0200515C = 0xE1A00000; // nop
 		*(u32*)0x02005164 = 0xE1A00000; // nop
 		*(u32*)0x020104A0 = 0xE1A00000; // nop
@@ -3705,6 +3706,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Aura-Aura Climber (Europe, Australia)
 	else if (strcmp(romTid, "KSRV") == 0) {
+		useSharedFont = (twlFontFound && extendedMemory2);
 		*(u32*)0x0200515C = 0xE1A00000; // nop
 		*(u32*)0x02005164 = 0xE1A00000; // nop
 		*(u32*)0x0201066C = 0xE1A00000; // nop
@@ -3718,6 +3720,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Sukai Janpa Soru (Japan)
 	else if (strcmp(romTid, "KSRJ") == 0) {
+		useSharedFont = (twlFontFound && extendedMemory2);
 		*(u32*)0x0200515C = 0xE1A00000; // nop
 		*(u32*)0x02005164 = 0xE1A00000; // nop
 		*(u32*)0x02010498 = 0xE1A00000; // nop
@@ -5022,6 +5025,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	else if (strncmp(romTid, "KKQ", 3) == 0) {
 		u32* saveFuncOffsets[22] = {NULL};
 
+		useSharedFont = twlFontFound;
 		*(u32*)0x0201B334 = 0xE1A00000; // nop
 		tonccpy((u32*)0x0201BEB8, dsiSaveGetResultCode, 0xC);
 		*(u32*)0x0201E7B0 = 0xE1A00000; // nop
@@ -5140,6 +5144,10 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL((u32)saveFuncOffsets[19], (u32)dsiSaveClose);
 		setBL((u32)saveFuncOffsets[20], (u32)dsiSaveOpen);
 		setBL((u32)saveFuncOffsets[21], (u32)dsiSaveClose);
+
+		if (useSharedFont && !extendedMemory2) {
+			patchTwlFontLoad((ndsHeader->gameCode[3] == 'E') ? 0x0209695C : 0x020994D8, 0x020268D0);
+		}
 	}
 
 	// Cake Ninja (USA)
@@ -6364,10 +6372,12 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	else if (strncmp(romTid, "K32", 3) == 0) {
 		u32* saveFuncOffsets[22] = {NULL};
 
+		// useSharedFont = twlFontFound;
 		*(u32*)0x0201B8CC = 0xE1A00000; // nop
 		tonccpy((u32*)0x0201C450, dsiSaveGetResultCode, 0xC);
 		*(u32*)0x0201ED48 = 0xE1A00000; // nop
-		patchInitDSiWare(0x02025278, heapEnd); // extendedMemory2 ? #0x2700000 : #0x23E0000
+		patchInitDSiWare(0x02025278, heapEnd);
+		*(u32*)0x02025604 = *(u32*)0x02004FE8;
 		patchUserSettingsReadDSiWare(0x02026978);
 		if (ndsHeader->gameCode[3] == 'E') {
 			*(u32*)0x020620D8 = 0xE1A00000; // nop
@@ -6490,6 +6500,10 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL((u32)saveFuncOffsets[19], (u32)dsiSaveClose);
 		setBL((u32)saveFuncOffsets[20], (u32)dsiSaveOpen);
 		setBL((u32)saveFuncOffsets[21], (u32)dsiSaveClose);
+
+		/* if (useSharedFont && !extendedMemory2) {
+			patchTwlFontLoad((ndsHeader->gameCode[3] == 'E') ? 0x02076B5C : 0x0203C09C, 0x02026ECC);
+		} */
 	}
 
 	// Dairojo! Samurai Defenders (USA)
@@ -7333,6 +7347,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Dreamwalker (USA)
 	else if (strcmp(romTid, "K9EE") == 0) {
+		useSharedFont = twlFontFound;
 		*(u32*)0x02029610 = 0xE1A00000; // nop
 		setBL(0x0202963C, (u32)dsiSaveOpen);
 		setBL(0x02029654, (u32)dsiSaveRead);
