@@ -5096,6 +5096,31 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchUserSettingsReadDSiWare(0x02063DE4);
 	}
 
+	// Bridge (USA)
+	// Bridge (Europe)
+	else if (strcmp(romTid, "K9FE") == 0 || strcmp(romTid, "K9FP") == 0) {
+		u32 offsetChange = (ndsHeader->gameCode[3] == 'E') ? 0 : 4;
+		setBL(0x02010450-offsetChange, (u32)dsiSaveOpen);
+		setBL(0x020104C4-offsetChange, (u32)dsiSaveGetLength);
+		setBL(0x020104D8-offsetChange, (u32)dsiSaveClose);
+		setBL(0x020104F8-offsetChange, (u32)dsiSaveSeek);
+		setBL(0x02010510-offsetChange, (u32)dsiSaveRead);
+		setBL(0x02010524-offsetChange, (u32)dsiSaveClose);
+		setBL(0x02010578-offsetChange, (u32)dsiSaveClose);
+		*(u32*)(0x020105C8-offsetChange) = 0xE1A00000; // nop
+		setBL(0x02010628-offsetChange, (u32)dsiSaveCreate);
+		setBL(0x0201067C-offsetChange, (u32)dsiSaveOpen);
+		setBL(0x020106E4-offsetChange, (u32)dsiSaveSetLength);
+		setBL(0x020106FC-offsetChange, (u32)dsiSaveClose);
+		setBL(0x02010750-offsetChange, (u32)dsiSaveGetLength);
+		setBL(0x02010764-offsetChange, (u32)dsiSaveClose);
+		setBL(0x02010784-offsetChange, (u32)dsiSaveSeek);
+		setBL(0x0201079C-offsetChange, (u32)dsiSaveWrite);
+		setBL(0x020107B0-offsetChange, (u32)dsiSaveClose);
+		setBL(0x020107FC-offsetChange, (u32)dsiSaveClose);
+		*(u32*)0x020490DC = 0xE3A00001; // mov r0, #1 (Enable NitroFS reads)
+	}
+
 	// Bugs'N'Balls (USA)
 	// Bugs'N'Balls (Europe)
 	else if (strncmp(romTid, "KKQ", 3) == 0) {

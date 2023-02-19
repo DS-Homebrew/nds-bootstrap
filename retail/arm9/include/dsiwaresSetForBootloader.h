@@ -82,6 +82,7 @@ static const char dsiWareForBootloader1[][4] = {
 	"KZE", // Bounce & Break
 	"KQB", // Box Pusher
 	"KAH", // Art Style: Boxlife
+	"K9F", // Bridge
 	"KKQ", // Bugs'N'Balls
 	"K2J", // Cake Ninja
 	"K2N", // Cake Ninja 2
