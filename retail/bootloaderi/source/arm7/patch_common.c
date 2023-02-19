@@ -3670,6 +3670,44 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// Chiri Kuizu: Shouga Kusei (Japan)
+	else if (strcmp(romTid, "KZ9J") == 0) {
+		if (!twlFontFound) {
+			*(u32*)0x0201DD98 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+
+			// Skip Manual screen
+			*(u32*)0x02037338 = 0xE1A00000; // nop
+			*(u32*)0x02037340 = 0xE1A00000; // nop
+			*(u32*)0x0203734C = 0xE1A00000; // nop
+		}
+		if (saveOnFlashcard) {
+			setBL(0x0204173C, (u32)dsiSaveOpen);
+			setBL(0x02041760, (u32)dsiSaveGetLength);
+			setBL(0x02041784, (u32)dsiSaveRead);
+			setBL(0x0204178C, (u32)dsiSaveClose);
+			setBL(0x020417D0, (u32)dsiSaveCreate);
+			setBL(0x020417E0, (u32)dsiSaveOpen);
+			setBL(0x020417F0, (u32)dsiSaveGetResultCode);
+			setBL(0x02041810, (u32)dsiSaveSetLength);
+			setBL(0x02041820, (u32)dsiSaveWrite);
+			setBL(0x02041828, (u32)dsiSaveClose);
+			*(u32*)0x02041868 = 0xE3A00001; // mov r0, #1 (dsiSaveOpenDir)
+			*(u32*)0x02041890 = 0xE3A00001; // mov r0, #1 (dsiSaveReadDir)
+			*(u32*)0x020418B8 = 0xE3A00001; // mov r0, #1
+			*(u32*)0x020418CC = 0xE3A00001; // mov r0, #1
+			*(u32*)0x02041910 = 0xE3A00000; // mov r0, #0
+			*(u32*)0x02041960 = 0xE3A00000; // mov r0, #0 (dsiSaveReadDir)
+			*(u32*)0x02041970 = 0xE1A00000; // nop (dsiSaveCloseDir)
+			*(u32*)0x020419D0 = 0xE3A00001; // mov r0, #1 (dsiSaveOpenDir)
+			*(u32*)0x020419EC = 0xE3A00001; // mov r0, #1 (dsiSaveReadDir)
+			*(u32*)0x02041A14 = 0xE3A00001; // mov r0, #1
+			*(u32*)0x02041A28 = 0xE3A00001; // mov r0, #1
+			setBL(0x02041A64, (u32)dsiSaveDelete);
+			*(u32*)0x02041A78 = 0xE3A00000; // mov r0, #0 (dsiSaveReadDir)
+			*(u32*)0x02041A88 = 0xE1A00000; // nop (dsiSaveCloseDir)
+		}
+	}
+
 	// Chuck E. Cheese's Alien Defense Force (USA)
 	else if (strcmp(romTid, "KUQE") == 0) {
 		if (saveOnFlashcard) {
