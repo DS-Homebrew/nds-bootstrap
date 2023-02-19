@@ -5099,7 +5099,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Bridge (USA)
 	// Bridge (Europe)
 	else if (strcmp(romTid, "K9FE") == 0 || strcmp(romTid, "K9FP") == 0) {
-		u32 offsetChange = (ndsHeader->gameCode[3] == 'E') ? 0 : 4;
+		u32 offsetChange = (romTid[3] == 'E') ? 0 : 4;
 		setBL(0x02010450-offsetChange, (u32)dsiSaveOpen);
 		setBL(0x020104C4-offsetChange, (u32)dsiSaveGetLength);
 		setBL(0x020104D8-offsetChange, (u32)dsiSaveClose);
@@ -5946,6 +5946,33 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			*(u32*)0x02066EC0 = 0xE12FFF1E; // bx lr
 		}
 	}
+
+	// Cat Frenzy (USA)
+	// Cat Frenzy (Europe)
+	// May require 8MB of RAM
+	/* else if (strcmp(romTid, "KVXE") == 0 || strcmp(romTid, "KVXP") == 0) {
+		*(u32*)0x020050EC = 0xE1A00000; // nop
+		*(u32*)0x020176F4 = 0xE1A00000; // nop
+		tonccpy((u32*)0x02018278, dsiSaveGetResultCode, 0xC);
+		*(u32*)0x0201AED4 = 0xE1A00000; // nop
+		patchInitDSiWare(0x02021B28, heapEnd);
+		*(u32*)0x02021EB4 = *(u32*)0x02004FE8;
+		patchUserSettingsReadDSiWare(0x0202301C);
+		*(u32*)0x02027F58 = 0xE1A00000; // nop
+		*(u32*)0x02027F60 = 0xE1A00000; // nop
+		setBL(0x020293A0, (u32)dsiSaveGetInfo);
+		setBL(0x020293D4, (u32)dsiSaveCreate);
+		setBL(0x020293FC, (u32)dsiSaveOpen);
+		setBL(0x02029424, (u32)dsiSaveSetLength);
+		setBL(0x0202943C, (u32)dsiSaveWrite);
+		setBL(0x02029444, (u32)dsiSaveClose);
+		setBL(0x020294A8, (u32)dsiSaveOpen);
+		setBL(0x020294D0, (u32)dsiSaveSetLength);
+		setBL(0x02029554, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+		setBL(0x020295AC, (u32)dsiSaveRead); // dsiSaveReadAsync
+		setBL(0x020295DC, (u32)dsiSaveClose);
+		*(u32*)0x020296D0 = 0xE1A00000; // nop
+	} */
 
 	// Cave Story (USA)
 	else if (strcmp(romTid, "KCVE") == 0) {

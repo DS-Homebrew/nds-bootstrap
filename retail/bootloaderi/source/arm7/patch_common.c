@@ -3620,6 +3620,23 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02027F10, (u32)dsiSaveClose);
 	}
 
+	// Cat Frenzy (USA)
+	// Cat Frenzy (Europe)
+	else if ((strcmp(romTid, "KVXE") == 0 || strcmp(romTid, "KVXP") == 0) && saveOnFlashcard) {
+		tonccpy((u32*)0x02018278, dsiSaveGetResultCode, 0xC);
+		setBL(0x020293A0, (u32)dsiSaveGetInfo);
+		setBL(0x020293D4, (u32)dsiSaveCreate);
+		setBL(0x020293FC, (u32)dsiSaveOpen);
+		setBL(0x02029424, (u32)dsiSaveSetLength);
+		setBL(0x0202943C, (u32)dsiSaveWrite);
+		setBL(0x02029444, (u32)dsiSaveClose);
+		setBL(0x020294A8, (u32)dsiSaveOpen);
+		setBL(0x020294D0, (u32)dsiSaveSetLength);
+		setBL(0x02029554, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+		setBL(0x020295AC, (u32)dsiSaveRead); // dsiSaveReadAsync
+		setBL(0x020295DC, (u32)dsiSaveClose);
+	}
+
 	// Cave Story (USA)
 	else if (strcmp(romTid, "KCVE") == 0) {
 		if (saveOnFlashcard) {
@@ -10486,7 +10503,7 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
 	// Bridge (USA)
 	// Bridge (Europe)
 	else if ((strcmp(romTid, "K9FE") == 0 || strcmp(romTid, "K9FP") == 0) && saveOnFlashcard) {
-		u32 offsetChange = (ndsHeader->gameCode[3] == 'E') ? 0 : 4;
+		u32 offsetChange = (romTid[3] == 'E') ? 0 : 4;
 		setBL(0x02010450-offsetChange, (u32)dsiSaveOpen);
 		setBL(0x020104C4-offsetChange, (u32)dsiSaveGetLength);
 		setBL(0x020104D8-offsetChange, (u32)dsiSaveClose);
