@@ -3708,6 +3708,14 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// Chotto DS Bun ga Kuzenshuu: Sekai no Bungaku 20 (Japan)
+	else if (strcmp(romTid, "KBGJ") == 0 && saveOnFlashcard) {
+		*(u32*)0x02005B24 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02021328 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02021DD0 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02021F08 = 0xE3A00001; // mov r0, #1
+	}
+
 	// Chuck E. Cheese's Alien Defense Force (USA)
 	else if (strcmp(romTid, "KUQE") == 0) {
 		if (saveOnFlashcard) {

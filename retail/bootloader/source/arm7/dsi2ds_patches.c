@@ -6062,6 +6062,20 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02041A88 = 0xE1A00000; // nop (dsiSaveCloseDir)
 	}
 
+	// Chotto DS Bun ga Kuzenshuu: Sekai no Bungaku 20 (Japan)
+	else if (strcmp(romTid, "KBGJ") == 0) {
+		*(u32*)0x02005B24 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02021328 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02021DD0 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02021F08 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0204D30C = 0xE28DD00C; // ADD   SP, SP, #0xC
+		*(u32*)0x0204D310 = 0xE8BD8078; // LDMFD SP!, {R3-R6,PC}
+		*(u32*)0x02050A50 = 0xE1A00000; // nop
+		patchInitDSiWare(0x02058A10, heapEnd);
+		*(u32*)0x02058D8C = *(u32*)0x02004FBC;
+		patchUserSettingsReadDSiWare(0x02059F74);
+	}
+
 	// Chronos Twins: One Hero in Two Times (USA)
 	// Overlay-related crash
 	/*else if (strcmp(romTid, "K9TE") == 0) {

@@ -96,6 +96,7 @@ static const char dsiWareForBootloader1[][4] = {
 	"KQN", // Castle Conqueror: Revolution
 	"KCV", // Cave Story
 	"KZ9", // Chiri Kuizu: Shouga Kusei
+	"KBG", // Chotto DS Bun ga Kuzenshuu: Sekai no Bungaku 20
 	"KUQ", // Chuck E. Cheese's Alien Defense Force
 	"KUC", // Chuck E. Cheese's Arcade Room
 	"KQL", // Chuukara! Dairoujou
