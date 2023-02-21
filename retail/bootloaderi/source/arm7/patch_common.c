@@ -3760,6 +3760,41 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x020379A8+offsetChange, (u32)dsiSaveClose);
 	}
 
+	// Chronicles of Vampires: Awakening (USA)
+	// Chronicles of Vampires: Origins (USA)
+	else if (strcmp(romTid, "KVVE") == 0 || strcmp(romTid, "KVWE") == 0) {
+		if (!twlFontFound) {
+			*(u32*)0x020A14A0 = 0xE1A00000; // nop (Skip Manual screen)
+		}
+		if (saveOnFlashcard) {
+			setBL(0x020ACFC4, (u32)dsiSaveOpen);
+			setBL(0x020ACFF4, (u32)dsiSaveRead);
+			setBL(0x020ACFFC, (u32)dsiSaveClose);
+			setBL(0x020AD0CC, (u32)dsiSaveOpen);
+			setBL(0x020AD0FC, (u32)dsiSaveRead);
+			setBL(0x020AD104, (u32)dsiSaveClose);
+			setBL(0x020AD264, (u32)dsiSaveOpen);
+			setBL(0x020AD294, (u32)dsiSaveRead);
+			setBL(0x020AD29C, (u32)dsiSaveClose);
+			setBL(0x020AD328, (u32)dsiSaveOpen);
+			setBL(0x020AD354, (u32)dsiSaveRead);
+			setBL(0x020AD35C, (u32)dsiSaveClose);
+			setBL(0x020AD42C, (u32)dsiSaveOpen);
+			setBL(0x020AD440, (u32)dsiSaveClose);
+			setBL(0x020AD4A8, (u32)dsiSaveOpen);
+			setBL(0x020AD4BC, (u32)dsiSaveClose);
+			setBL(0x020AD4D0, (u32)dsiSaveCreate);
+			setBL(0x020AD4EC, (u32)dsiSaveOpen);
+			setBL(0x020AD508, (u32)dsiSaveClose);
+			setBL(0x020AD510, (u32)dsiSaveDelete);
+			setBL(0x020AD528, (u32)dsiSaveCreate);
+			setBL(0x020AD538, (u32)dsiSaveOpen);
+			setBL(0x020AD554, (u32)dsiSaveSetLength);
+			setBL(0x020AD564, (u32)dsiSaveWrite);
+			setBL(0x020AD56C, (u32)dsiSaveClose);
+		}
+	}
+
 	// Chuck E. Cheese's Alien Defense Force (USA)
 	else if (strcmp(romTid, "KUQE") == 0) {
 		if (saveOnFlashcard) {

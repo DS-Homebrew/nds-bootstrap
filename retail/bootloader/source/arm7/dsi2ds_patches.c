@@ -6157,6 +6157,47 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)(0x02037A1C+offsetChange) = 0xE1A00000; // nop
 	}
 
+	// Chronicles of Vampires: Awakening (USA)
+	// Chronicles of Vampires: Origins (USA)
+	else if (strcmp(romTid, "KVVE") == 0 || strcmp(romTid, "KVWE") == 0) {
+		*(u32*)0x0207E194 = 0xE1A00000; // nop
+		*(u32*)0x02081504 = 0xE1A00000; // nop
+		patchInitDSiWare(0x020873E8, heapEnd);
+		*(u32*)0x02087774 = *(u32*)0x02004FE8;
+		patchUserSettingsReadDSiWare(0x02088BD4);
+		*(u32*)0x020A14A0 = 0xE1A00000; // nop (Skip Manual screen)
+		setBL(0x020ACFC4, (u32)dsiSaveOpen);
+		setBL(0x020ACFF4, (u32)dsiSaveRead);
+		setBL(0x020ACFFC, (u32)dsiSaveClose);
+		setBL(0x020AD0CC, (u32)dsiSaveOpen);
+		setBL(0x020AD0FC, (u32)dsiSaveRead);
+		setBL(0x020AD104, (u32)dsiSaveClose);
+		*(u32*)0x020AD1F0 = 0xE1A00000; // nop
+		*(u32*)0x020AD208 = 0xE1A00000; // nop
+		setBL(0x020AD264, (u32)dsiSaveOpen);
+		setBL(0x020AD294, (u32)dsiSaveRead);
+		setBL(0x020AD29C, (u32)dsiSaveClose);
+		setBL(0x020AD328, (u32)dsiSaveOpen);
+		setBL(0x020AD354, (u32)dsiSaveRead);
+		setBL(0x020AD35C, (u32)dsiSaveClose);
+		*(u32*)0x020AD3C8 = 0xE1A00000; // nop
+		*(u32*)0x020AD3D8 = 0xE1A00000; // nop
+		setBL(0x020AD42C, (u32)dsiSaveOpen);
+		setBL(0x020AD440, (u32)dsiSaveClose);
+		setBL(0x020AD4A8, (u32)dsiSaveOpen);
+		setBL(0x020AD4BC, (u32)dsiSaveClose);
+		setBL(0x020AD4D0, (u32)dsiSaveCreate);
+		setBL(0x020AD4EC, (u32)dsiSaveOpen);
+		*(u32*)0x020AD4FC = 0xE1A00000; // nop
+		setBL(0x020AD508, (u32)dsiSaveClose);
+		setBL(0x020AD510, (u32)dsiSaveDelete);
+		setBL(0x020AD528, (u32)dsiSaveCreate);
+		setBL(0x020AD538, (u32)dsiSaveOpen);
+		setBL(0x020AD554, (u32)dsiSaveSetLength);
+		setBL(0x020AD564, (u32)dsiSaveWrite);
+		setBL(0x020AD56C, (u32)dsiSaveClose);
+	}
+
 	// Chronos Twins: One Hero in Two Times (USA)
 	// Overlay-related crash
 	/*else if (strcmp(romTid, "K9TE") == 0) {
