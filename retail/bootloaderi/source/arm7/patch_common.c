@@ -3838,6 +3838,41 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// Chuuga Kukihon' Eitango: Wado Pazuru (Japan)
+	else if (strcmp(romTid, "KWPJ") == 0) {
+		if (!saveOnFlashcard) {
+			setBL(0x02020634, (u32)dsiSaveClose);
+			setBL(0x02020788, (u32)dsiSaveClose);
+			setBL(0x0202092C, (u32)dsiSaveOpen);
+			setBL(0x02020954, (u32)dsiSaveSeek);
+			setBL(0x02020970, (u32)dsiSaveClose);
+			setBL(0x02020988, (u32)dsiSaveRead);
+			setBL(0x020209A8, (u32)dsiSaveClose);
+			setBL(0x020209B8, (u32)dsiSaveClose);
+			setBL(0x020209F4, (u32)dsiSaveOpen);
+			setBL(0x02020A0C, (u32)dsiSaveSeek);
+			setBL(0x02020A24, (u32)dsiSaveRead); // dsiSaveReadAsync
+			setBL(0x02020A58, (u32)dsiSaveOpen);
+			setBL(0x02020A78, (u32)dsiSaveSetLength);
+			setBL(0x02020A88, (u32)dsiSaveClose);
+			setBL(0x02020AA4, (u32)dsiSaveSeek);
+			setBL(0x02020AC0, (u32)dsiSaveClose);
+			setBL(0x02020AD8, (u32)dsiSaveWrite);
+			setBL(0x02020AFC, (u32)dsiSaveClose);
+			setBL(0x02020B08, (u32)dsiSaveClose);
+			setBL(0x02020B48, (u32)dsiSaveOpen);
+			setBL(0x02020B5C, (u32)dsiSaveSetLength);
+			setBL(0x02020B74, (u32)dsiSaveSeek);
+			setBL(0x02020B8C, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+			setBL(0x02020BE4, (u32)dsiSaveCreate);
+			setBL(0x02020BEC, (u32)dsiSaveGetResultCode);
+		}
+		if (!twlFontFound) {
+			*(u32*)0x02032D10 = 0xE3A00000; // mov r0, #0 (Skip Manual screen, Part 2)
+			*(u32*)0x0203A864 = 0xE3A00002; // mov r0, #2 (Skip Manual screen, Part 1)
+		}
+	}
+
 	// Chuukara! Dairoujou (Japan)
 	else if (strcmp(romTid, "KQLJ") == 0 && saveOnFlashcard) {
 		setBL(0x020446E4, (u32)dsiSaveOpen);
