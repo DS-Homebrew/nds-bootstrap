@@ -3716,6 +3716,50 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02021F08 = 0xE3A00001; // mov r0, #1
 	}
 
+	// Christmas Wonderland (USA)
+	else if (strcmp(romTid, "KXWE") == 0 && saveOnFlashcard) {
+		setBL(0x0203D60C, (u32)dsiSaveOpen);
+		setBL(0x0203D71C, (u32)dsiSaveRead);
+		setBL(0x0203D724, (u32)dsiSaveClose);
+		setBL(0x0203D918, (u32)dsiSaveOpen);
+		setBL(0x0203D940, (u32)dsiSaveCreate);
+		setBL(0x0203D950, (u32)dsiSaveOpen);
+		setBL(0x0203D96C, (u32)dsiSaveSetLength);
+		setBL(0x0203D9A4, (u32)dsiSaveSeek);
+		setBL(0x0203D9B4, (u32)dsiSaveWrite);
+		setBL(0x0203D9BC, (u32)dsiSaveClose);
+	}
+
+	// Christmas Wonderland (Europe)
+	else if (strcmp(romTid, "KXWP") == 0 && saveOnFlashcard) {
+		setBL(0x0203D4E8, (u32)dsiSaveOpen);
+		setBL(0x0203D5F8, (u32)dsiSaveRead);
+		setBL(0x0203D600, (u32)dsiSaveClose);
+		setBL(0x0203D7F4, (u32)dsiSaveOpen);
+		setBL(0x0203D81C, (u32)dsiSaveCreate);
+		setBL(0x0203D82C, (u32)dsiSaveOpen);
+		setBL(0x0203D848, (u32)dsiSaveSetLength);
+		setBL(0x0203D880, (u32)dsiSaveSeek);
+		setBL(0x0203D890, (u32)dsiSaveWrite);
+		setBL(0x0203D898, (u32)dsiSaveClose);
+	}
+
+	// Christmas Wonderland 2 (USA)
+	// Christmas Wonderland 2 (Europe)
+	else if ((strcmp(romTid, "K2WE") == 0 || strcmp(romTid, "K2WP") == 0) && saveOnFlashcard) {
+		u8 offsetChange = (romTid[3] == 'E') ? 0 : 0x70;
+		setBL(0x020375F4+offsetChange, (u32)dsiSaveOpen);
+		setBL(0x02037708+offsetChange, (u32)dsiSaveRead);
+		setBL(0x02037710+offsetChange, (u32)dsiSaveClose);
+		setBL(0x02037904+offsetChange, (u32)dsiSaveOpen);
+		setBL(0x0203792C+offsetChange, (u32)dsiSaveCreate);
+		setBL(0x0203793C+offsetChange, (u32)dsiSaveOpen);
+		setBL(0x02037958+offsetChange, (u32)dsiSaveSetLength);
+		setBL(0x02037990+offsetChange, (u32)dsiSaveSeek);
+		setBL(0x020379A0+offsetChange, (u32)dsiSaveWrite);
+		setBL(0x020379A8+offsetChange, (u32)dsiSaveClose);
+	}
+
 	// Chuck E. Cheese's Alien Defense Force (USA)
 	else if (strcmp(romTid, "KUQE") == 0) {
 		if (saveOnFlashcard) {

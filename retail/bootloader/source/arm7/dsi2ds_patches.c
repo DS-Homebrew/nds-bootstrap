@@ -6076,6 +6076,87 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchUserSettingsReadDSiWare(0x02059F74);
 	}
 
+	// Christmas Wonderland (USA)
+	else if (strcmp(romTid, "KXWE") == 0) {
+		*(u32*)0x0200E1A4 = 0xE1A00000; // nop
+		*(u32*)0x02011670 = 0xE1A00000; // nop
+		patchInitDSiWare(0x02016394, heapEnd);
+		patchUserSettingsReadDSiWare(0x02017844);
+		if (!extendedMemory2) {
+			*(u32*)0x0201C9F8 = 0xE3A05901; // mov r5, #0x4000 (Disable music)
+			*(u32*)0x0201CA90 = 0xE1A00000; // nop (Disable sound effects)
+		}
+		*(u32*)0x0201D440 = 0xE1A00000; // nop
+		*(u32*)0x0201D454 = 0xE1A00000; // nop
+		setBL(0x0203D60C, (u32)dsiSaveOpen);
+		setBL(0x0203D71C, (u32)dsiSaveRead);
+		setBL(0x0203D724, (u32)dsiSaveClose);
+		*(u32*)0x0203D75C = 0xE1A00000; // nop
+		setBL(0x0203D918, (u32)dsiSaveOpen);
+		setBL(0x0203D940, (u32)dsiSaveCreate);
+		setBL(0x0203D950, (u32)dsiSaveOpen);
+		setBL(0x0203D96C, (u32)dsiSaveSetLength);
+		setBL(0x0203D9A4, (u32)dsiSaveSeek);
+		setBL(0x0203D9B4, (u32)dsiSaveWrite);
+		setBL(0x0203D9BC, (u32)dsiSaveClose);
+		*(u32*)0x0203DA2C = 0xE1A00000; // nop
+	}
+
+	// Christmas Wonderland (Europe)
+	else if (strcmp(romTid, "KXWP") == 0) {
+		*(u32*)0x0200E0D0 = 0xE1A00000; // nop
+		*(u32*)0x0201159C = 0xE1A00000; // nop
+		patchInitDSiWare(0x020162C0, heapEnd);
+		patchUserSettingsReadDSiWare(0x02017770);
+		if (!extendedMemory2) {
+			*(u32*)0x0201C924 = 0xE3A05901; // mov r5, #0x4000 (Disable music)
+			*(u32*)0x0201C9BC = 0xE1A00000; // nop (Disable sound effects)
+		}
+		*(u32*)0x0201D36C = 0xE1A00000; // nop
+		*(u32*)0x0201D380 = 0xE1A00000; // nop
+		setBL(0x0203D4E8, (u32)dsiSaveOpen);
+		setBL(0x0203D5F8, (u32)dsiSaveRead);
+		setBL(0x0203D600, (u32)dsiSaveClose);
+		*(u32*)0x0203D638 = 0xE1A00000; // nop
+		setBL(0x0203D7F4, (u32)dsiSaveOpen);
+		setBL(0x0203D81C, (u32)dsiSaveCreate);
+		setBL(0x0203D82C, (u32)dsiSaveOpen);
+		setBL(0x0203D848, (u32)dsiSaveSetLength);
+		setBL(0x0203D880, (u32)dsiSaveSeek);
+		setBL(0x0203D890, (u32)dsiSaveWrite);
+		setBL(0x0203D898, (u32)dsiSaveClose);
+		*(u32*)0x0203D908 = 0xE1A00000; // nop
+	}
+
+	// Christmas Wonderland 2 (USA)
+	// Christmas Wonderland 2 (Europe)
+	else if (strcmp(romTid, "K2WE") == 0 || strcmp(romTid, "K2WP") == 0) {
+		u8 offsetChange58 = (romTid[3] == 'E') ? 0 : 0x58;
+		u8 offsetChange = (romTid[3] == 'E') ? 0 : 0x70;
+
+		*(u32*)0x0200E100 = 0xE1A00000; // nop
+		*(u32*)0x020115CC = 0xE1A00000; // nop
+		patchInitDSiWare(0x02016388, heapEnd);
+		patchUserSettingsReadDSiWare(0x02017838);
+		if (!extendedMemory2) {
+			*(u32*)(0x02034A60+offsetChange58) = 0xE3A05901; // mov r5, #0x4000 (Disable music)
+		}
+		*(u32*)(0x02035C90+offsetChange58) = 0xE1A00000; // nop
+		*(u32*)(0x02035CA4+offsetChange58) = 0xE1A00000; // nop
+		setBL(0x020375F4+offsetChange, (u32)dsiSaveOpen);
+		setBL(0x02037708+offsetChange, (u32)dsiSaveRead);
+		setBL(0x02037710+offsetChange, (u32)dsiSaveClose);
+		*(u32*)(0x02037748+offsetChange) = 0xE1A00000; // nop
+		setBL(0x02037904+offsetChange, (u32)dsiSaveOpen);
+		setBL(0x0203792C+offsetChange, (u32)dsiSaveCreate);
+		setBL(0x0203793C+offsetChange, (u32)dsiSaveOpen);
+		setBL(0x02037958+offsetChange, (u32)dsiSaveSetLength);
+		setBL(0x02037990+offsetChange, (u32)dsiSaveSeek);
+		setBL(0x020379A0+offsetChange, (u32)dsiSaveWrite);
+		setBL(0x020379A8+offsetChange, (u32)dsiSaveClose);
+		*(u32*)(0x02037A1C+offsetChange) = 0xE1A00000; // nop
+	}
+
 	// Chronos Twins: One Hero in Two Times (USA)
 	// Overlay-related crash
 	/*else if (strcmp(romTid, "K9TE") == 0) {
