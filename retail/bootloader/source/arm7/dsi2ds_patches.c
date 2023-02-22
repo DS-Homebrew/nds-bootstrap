@@ -6270,6 +6270,79 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02045D6C = 0xE1A00000; // nop
 	}
 
+	// Chuugaku Eijukugo: Kiho 150 Go Master (Japan)
+	else if (strcmp(romTid, "KJCJ") == 0) {
+		*(u32*)0x02012C6C = 0xE1A00000; // nop
+		*(u32*)0x02016330 = 0xE1A00000; // nop
+		patchInitDSiWare(0x0201C2DC, heapEnd);
+		// *(u32*)0x0201C64C = *(u32*)0x020013C0;
+		patchUserSettingsReadDSiWare(0x0201DA44);
+		setBL(0x0202CAB8, (u32)dsiSaveCreate);
+		*(u32*)0x0204F20C = 0xE1A00000; // nop
+		*(u32*)0x0204F230 = 0xE1A00000; // nop
+		setBL(0x02076DD0, (u32)dsiSaveOpen);
+		setBL(0x02076DEC, (u32)dsiSaveSeek);
+		setBL(0x02076E00, (u32)dsiSaveClose);
+		setBL(0x02076E18, (u32)dsiSaveRead);
+		setBL(0x02076E28, (u32)dsiSaveClose);
+		setBL(0x02076E34, (u32)dsiSaveClose);
+		setBL(0x02076E68, (u32)dsiSaveOpen);
+		setBL(0x02076E80, (u32)dsiSaveSeek);
+		setBL(0x02076E98, (u32)dsiSaveRead); // dsiSaveReadAsync
+		setBL(0x02076EC8, (u32)dsiSaveOpen);
+		setBL(0x02076EE0, (u32)dsiSaveSetLength);
+		setBL(0x02076EF0, (u32)dsiSaveClose);
+		setBL(0x02076F04, (u32)dsiSaveSeek);
+		setBL(0x02076F18, (u32)dsiSaveClose);
+		setBL(0x02076F30, (u32)dsiSaveWrite);
+		setBL(0x02076F40, (u32)dsiSaveClose);
+		setBL(0x02076F4C, (u32)dsiSaveClose);
+		setBL(0x02076F80, (u32)dsiSaveOpen);
+		setBL(0x02076F94, (u32)dsiSaveSetLength);
+		setBL(0x02076FAC, (u32)dsiSaveSeek);
+		setBL(0x02076FC4, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+		*(u32*)0x020643A4 = 0xE3A00002; // mov r0, #2 (Skip Manual screen, Part 1)
+		*(u32*)0x02064580 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02077124 = 0xE12FFF1E; // bx lr
+	}
+
+	// Chuugaku Eitango: Kiho 400 Go Master (Japan)
+	else if (strcmp(romTid, "KETJ") == 0) {
+		*(u32*)0x02016988 = 0xE1A00000; // nop
+		*(u32*)0x02019EF0 = 0xE1A00000; // nop
+		patchInitDSiWare(0x0201FB58, heapEnd);
+		patchUserSettingsReadDSiWare(0x020212B8);
+		*(u32*)0x02026440 = 0xE1A00000; // nop
+		*(u32*)0x02026464 = 0xE1A00000; // nop
+		*(u32*)0x0202933C = 0xE12FFF1E; // bx lr
+		*(u32*)0x0202C9FC = 0xE3A00000; // mov r0, #0
+		setBL(0x02030B24, (u32)dsiSaveCreate);
+		setBL(0x020312A8, (u32)dsiSaveClose);
+		setBL(0x02031364, (u32)dsiSaveOpen);
+		setBL(0x02031380, (u32)dsiSaveSeek);
+		setBL(0x02031394, (u32)dsiSaveClose);
+		setBL(0x020313AC, (u32)dsiSaveRead);
+		setBL(0x020313BC, (u32)dsiSaveClose);
+		setBL(0x020313C8, (u32)dsiSaveClose);
+		setBL(0x020313FC, (u32)dsiSaveOpen);
+		setBL(0x02031414, (u32)dsiSaveSeek);
+		setBL(0x0203142C, (u32)dsiSaveRead); // dsiSaveReadAsync
+		setBL(0x0203145C, (u32)dsiSaveOpen);
+		setBL(0x02031474, (u32)dsiSaveSetLength);
+		setBL(0x02031484, (u32)dsiSaveClose);
+		setBL(0x02031498, (u32)dsiSaveSeek);
+		setBL(0x020314AC, (u32)dsiSaveClose);
+		setBL(0x020314C4, (u32)dsiSaveWrite);
+		setBL(0x020314D4, (u32)dsiSaveClose);
+		setBL(0x020314E0, (u32)dsiSaveClose);
+		setBL(0x02031514, (u32)dsiSaveOpen);
+		setBL(0x02031528, (u32)dsiSaveSetLength);
+		setBL(0x02031540, (u32)dsiSaveSeek);
+		setBL(0x02031558, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+		*(u32*)0x02058BB4 = 0xE3A00002; // mov r0, #2 (Skip Manual screen, Part 1)
+		*(u32*)0x0206FE0C = 0xE3A00000; // mov r0, #0 (Skip Manual screen, Part 2)
+	}
+
 	// Chuuga Kukihon' Eitango: Wado Pazuru (Japan)
 	else if (strcmp(romTid, "KWPJ") == 0) {
 		*(u32*)0x0200817C = 0xE1A00000; // nop
@@ -14979,6 +15052,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchInitDSiWare(0x020177B4, heapEnd);
 		patchUserSettingsReadDSiWare(0x02018F14);
 		setBL(0x02029C0C, (u32)dsiSaveCreate);
+		setBL(0x0202A37C, (u32)dsiSaveClose);
 		if (strncmp(romTid, "KJZ", 3) == 0) {
 			*(u32*)0x02048D68 = 0xE1A00000; // nop
 			*(u32*)0x02048D7C = 0xE1A00000; // nop

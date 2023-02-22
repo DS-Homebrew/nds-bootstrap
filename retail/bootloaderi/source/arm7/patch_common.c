@@ -3838,9 +3838,75 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// Chuugaku Eijukugo: Kiho 150 Go Master (Japan)
+	else if (strcmp(romTid, "KJCJ") == 0) {
+		if (saveOnFlashcard) {
+			setBL(0x0202CAB8, (u32)dsiSaveCreate);
+			setBL(0x02076DD0, (u32)dsiSaveOpen);
+			setBL(0x02076DEC, (u32)dsiSaveSeek);
+			setBL(0x02076E00, (u32)dsiSaveClose);
+			setBL(0x02076E18, (u32)dsiSaveRead);
+			setBL(0x02076E28, (u32)dsiSaveClose);
+			setBL(0x02076E34, (u32)dsiSaveClose);
+			setBL(0x02076E68, (u32)dsiSaveOpen);
+			setBL(0x02076E80, (u32)dsiSaveSeek);
+			setBL(0x02076E98, (u32)dsiSaveRead); // dsiSaveReadAsync
+			setBL(0x02076EC8, (u32)dsiSaveOpen);
+			setBL(0x02076EE0, (u32)dsiSaveSetLength);
+			setBL(0x02076EF0, (u32)dsiSaveClose);
+			setBL(0x02076F04, (u32)dsiSaveSeek);
+			setBL(0x02076F18, (u32)dsiSaveClose);
+			setBL(0x02076F30, (u32)dsiSaveWrite);
+			setBL(0x02076F40, (u32)dsiSaveClose);
+			setBL(0x02076F4C, (u32)dsiSaveClose);
+			setBL(0x02076F80, (u32)dsiSaveOpen);
+			setBL(0x02076F94, (u32)dsiSaveSetLength);
+			setBL(0x02076FAC, (u32)dsiSaveSeek);
+			setBL(0x02076FC4, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+			*(u32*)0x02077124 = 0xE12FFF1E; // bx lr
+		}
+		if (!twlFontFound) {
+			*(u32*)0x020643A4 = 0xE3A00002; // mov r0, #2 (Skip Manual screen, Part 1)
+		}
+	}
+
+	// Chuugaku Eitango: Kiho 400 Go Master (Japan)
+	else if (strcmp(romTid, "KETJ") == 0) {
+		if (saveOnFlashcard) {
+			*(u32*)0x0202933C = 0xE12FFF1E; // bx lr
+			setBL(0x02030B24, (u32)dsiSaveCreate);
+			setBL(0x020312A8, (u32)dsiSaveClose);
+			setBL(0x02031364, (u32)dsiSaveOpen);
+			setBL(0x02031380, (u32)dsiSaveSeek);
+			setBL(0x02031394, (u32)dsiSaveClose);
+			setBL(0x020313AC, (u32)dsiSaveRead);
+			setBL(0x020313BC, (u32)dsiSaveClose);
+			setBL(0x020313C8, (u32)dsiSaveClose);
+			setBL(0x020313FC, (u32)dsiSaveOpen);
+			setBL(0x02031414, (u32)dsiSaveSeek);
+			setBL(0x0203142C, (u32)dsiSaveRead); // dsiSaveReadAsync
+			setBL(0x0203145C, (u32)dsiSaveOpen);
+			setBL(0x02031474, (u32)dsiSaveSetLength);
+			setBL(0x02031484, (u32)dsiSaveClose);
+			setBL(0x02031498, (u32)dsiSaveSeek);
+			setBL(0x020314AC, (u32)dsiSaveClose);
+			setBL(0x020314C4, (u32)dsiSaveWrite);
+			setBL(0x020314D4, (u32)dsiSaveClose);
+			setBL(0x020314E0, (u32)dsiSaveClose);
+			setBL(0x02031514, (u32)dsiSaveOpen);
+			setBL(0x02031528, (u32)dsiSaveSetLength);
+			setBL(0x02031540, (u32)dsiSaveSeek);
+			setBL(0x02031558, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+		}
+		if (!twlFontFound) {
+			*(u32*)0x02058BB4 = 0xE3A00002; // mov r0, #2 (Skip Manual screen, Part 1)
+			*(u32*)0x0206FE0C = 0xE3A00000; // mov r0, #0 (Skip Manual screen, Part 2)
+		}
+	}
+
 	// Chuuga Kukihon' Eitango: Wado Pazuru (Japan)
 	else if (strcmp(romTid, "KWPJ") == 0) {
-		if (!saveOnFlashcard) {
+		if (saveOnFlashcard) {
 			setBL(0x02020634, (u32)dsiSaveClose);
 			setBL(0x02020788, (u32)dsiSaveClose);
 			setBL(0x0202092C, (u32)dsiSaveOpen);
@@ -8168,12 +8234,9 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Renjuku Kanji: Shougaku 1 Nensei (Japan)
 	else if (strcmp(romTid, "KJZJ") == 0) {
-		if (!twlFontFound) {
-			*(u32*)0x02049A64 = 0xE3A00002; // mov r0, #2 (Skip Manual screen, Part 1)
-			*(u32*)0x020532B8 = 0xE3A00000; // mov r0, #0 (Skip Manual screen, Part 2)
-		}
 		if (saveOnFlashcard) {
 			setBL(0x02029C0C, (u32)dsiSaveCreate);
+			setBL(0x0202A37C, (u32)dsiSaveClose);
 			setBL(0x02064ED0, (u32)dsiSaveOpen);
 			setBL(0x02064EEC, (u32)dsiSaveSeek);
 			setBL(0x02064F00, (u32)dsiSaveClose);
@@ -8197,17 +8260,18 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBL(0x020650C4, (u32)dsiSaveWrite); // dsiSaveWriteAsync
 			*(u32*)0x02065150 = 0xE12FFF1E; // bx lr
 		}
+		if (!twlFontFound) {
+			*(u32*)0x02049A64 = 0xE3A00002; // mov r0, #2 (Skip Manual screen, Part 1)
+			*(u32*)0x020532B8 = 0xE3A00000; // mov r0, #0 (Skip Manual screen, Part 2)
+		}
 	}
 
 	// Renjuku Kanji: Shougaku 2 Nensei (Japan)
 	// Renjuku Kanji: Shougaku 3 Nensei (Japan)
 	else if (strcmp(romTid, "KJ2J") == 0 || strcmp(romTid, "KJ3J") == 0) {
-		if (!twlFontFound) {
-			*(u32*)0x02049A4C = 0xE3A00002; // mov r0, #2 (Skip Manual screen, Part 1)
-			*(u32*)0x020532A0 = 0xE3A00000; // mov r0, #0 (Skip Manual screen, Part 2)
-		}
 		if (saveOnFlashcard) {
 			setBL(0x02029C0C, (u32)dsiSaveCreate);
+			setBL(0x0202A37C, (u32)dsiSaveClose);
 			setBL(0x02064EB8, (u32)dsiSaveOpen);
 			setBL(0x02064ED4, (u32)dsiSaveSeek);
 			setBL(0x02064EE8, (u32)dsiSaveClose);
@@ -8231,18 +8295,19 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBL(0x020650AC, (u32)dsiSaveWrite); // dsiSaveWriteAsync
 			*(u32*)0x02065138 = 0xE12FFF1E; // bx lr
 		}
+		if (!twlFontFound) {
+			*(u32*)0x02049A4C = 0xE3A00002; // mov r0, #2 (Skip Manual screen, Part 1)
+			*(u32*)0x020532A0 = 0xE3A00000; // mov r0, #0 (Skip Manual screen, Part 2)
+		}
 	}
 
 	// Renjuku Kanji: Shougaku 4 Nensei (Japan)
 	// Renjuku Kanji: Shougaku 5 Nensei (Japan)
 	// Renjuku Kanji: Shougaku 6 Nensei (Japan)
 	else if (strcmp(romTid, "KJ4J") == 0 || strcmp(romTid, "KJ5J") == 0 || strcmp(romTid, "KJ6J") == 0) {
-		if (!twlFontFound) {
-			*(u32*)0x02049AE8 = 0xE3A00002; // mov r0, #2 (Skip Manual screen, Part 1)
-			*(u32*)0x0205333C = 0xE3A00000; // mov r0, #0 (Skip Manual screen, Part 2)
-		}
 		if (saveOnFlashcard) {
 			setBL(0x02029C0C, (u32)dsiSaveCreate);
+			setBL(0x0202A37C, (u32)dsiSaveClose);
 			setBL(0x02064F54, (u32)dsiSaveOpen);
 			setBL(0x02064F70, (u32)dsiSaveSeek);
 			setBL(0x02064F84, (u32)dsiSaveClose);
@@ -8266,16 +8331,17 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBL(0x02065148, (u32)dsiSaveWrite); // dsiSaveWriteAsync
 			*(u32*)0x020651D4 = 0xE12FFF1E; // bx lr
 		}
+		if (!twlFontFound) {
+			*(u32*)0x02049AE8 = 0xE3A00002; // mov r0, #2 (Skip Manual screen, Part 1)
+			*(u32*)0x0205333C = 0xE3A00000; // mov r0, #0 (Skip Manual screen, Part 2)
+		}
 	}
 
 	// Renjuku Kanji: Chuugakusei (Japan)
 	else if (strcmp(romTid, "KJ8J") == 0) {
-		if (!twlFontFound) {
-			*(u32*)0x02049A68 = 0xE3A00002; // mov r0, #2 (Skip Manual screen, Part 1)
-			*(u32*)0x020532BC = 0xE3A00000; // mov r0, #0 (Skip Manual screen, Part 2)
-		}
 		if (saveOnFlashcard) {
 			setBL(0x02029C0C, (u32)dsiSaveCreate);
+			setBL(0x0202A37C, (u32)dsiSaveClose);
 			setBL(0x02064ED4, (u32)dsiSaveOpen);
 			setBL(0x02064EF0, (u32)dsiSaveSeek);
 			setBL(0x02064F04, (u32)dsiSaveClose);
@@ -8298,6 +8364,10 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBL(0x020650B0, (u32)dsiSaveSeek);
 			setBL(0x020650C8, (u32)dsiSaveWrite); // dsiSaveWriteAsync
 			*(u32*)0x02065154 = 0xE12FFF1E; // bx lr
+		}
+		if (!twlFontFound) {
+			*(u32*)0x02049A68 = 0xE3A00002; // mov r0, #2 (Skip Manual screen, Part 1)
+			*(u32*)0x020532BC = 0xE3A00000; // mov r0, #0 (Skip Manual screen, Part 2)
 		}
 	}
 

@@ -103,6 +103,8 @@ static const char dsiWareForBootloader1[][4] = {
 	"KVV", // Chronicles of Vampires: Awakening
 	"KUQ", // Chuck E. Cheese's Alien Defense Force
 	"KUC", // Chuck E. Cheese's Arcade Room
+	"KJC", // Chuugaku Eijukugo: Kiho 150 Go Master
+	"KET", // Chuugaku Eitango: Kiho 400 Go Master
 	"KWP", // Chuuga Kukihon' Eitango: Wado Pazuru
 	"KQL", // Chuukara! Dairoujou
 	"KTR", // Clubhouse Games Express: Card Classics
