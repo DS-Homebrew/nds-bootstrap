@@ -6700,27 +6700,47 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Color Commando (USA)
 	// Color Commando (Europe) (Rev 0)
-	else if (strcmp(romTid, "KXFE") == 0 || (strcmp(romTid, "KXFP") == 0 && ndsHeader->romversion == 0)) {
+	// Color Commando (Europe) (Rev 1)
+	else if (strcmp(romTid, "KXFE") == 0 || strcmp(romTid, "KXFP") == 0) {
 		*(u32*)0x020050E4 = 0xE1A00000; // nop
 		*(u32*)0x020050FC = 0xE1A00000; // nop
 		*(u32*)0x0200AD6C = 0xE12FFF1E; // bx lr
 		*(u32*)0x0200CF04 = 0xE1A00000; // nop
 		*(u32*)0x0202D958 = 0xE1A00000; // nop
 		*(u32*)0x02030BC4 = 0xE1A00000; // nop
-		patchInitDSiWare(0x02035768, heapEnd);
-		patchUserSettingsReadDSiWare(0x02036D70);
+		if (romTid[3] == 'P' && ndsHeader->romversion == 1) {
+			patchInitDSiWare(0x02035694, heapEnd);
+			patchUserSettingsReadDSiWare(0x02036C9C);
+		} else {
+			patchInitDSiWare(0x02035768, heapEnd);
+			patchUserSettingsReadDSiWare(0x02036D70);
+		}
 	}
 
-	// Color Commando (Europe) (Rev 1)
-	else if (strcmp(romTid, "KXFP") == 0 && ndsHeader->romversion == 1) {
-		*(u32*)0x020050E4 = 0xE1A00000; // nop
-		*(u32*)0x020050FC = 0xE1A00000; // nop
-		*(u32*)0x0200AD6C = 0xE12FFF1E; // bx lr
-		*(u32*)0x0200CF04 = 0xE1A00000; // nop
-		*(u32*)0x0202D884 = 0xE1A00000; // nop
-		*(u32*)0x02030AF0 = 0xE1A00000; // nop
-		patchInitDSiWare(0x02035694, heapEnd);
-		patchUserSettingsReadDSiWare(0x02036C9C);
+	// Commando: Steel Disaster (USA)
+	// Commando: Steel Disaster (Europe)
+	else if (strcmp(romTid, "KC7E") == 0 || strcmp(romTid, "KC7P") == 0) {
+		u8 offsetChange = (romTid[3] == 'E') ? 0 : 0x30;
+		u8 offsetChangeS = (romTid[3] == 'E') ? 0 : 0x1C;
+
+		*(u32*)(0x0200C394-offsetChange) = 0xE1A00000; // nop
+		tonccpy((u32*)(0x0200CF18-offsetChange), dsiSaveGetResultCode, 0xC);
+		*(u32*)(0x0200F8C8-offsetChange) = 0xE1A00000; // nop
+		patchInitDSiWare(0x0201481C-offsetChange, heapEnd);
+		*(u32*)(0x02014BA8-offsetChange) = *(u32*)0x02004FE8;
+		setBL(0x02065368+offsetChangeS, (u32)dsiSaveCreate);
+		setBL(0x0206537C+offsetChangeS, (u32)dsiSaveOpen);
+		*(u32*)(0x020653BC+offsetChangeS) = 0xE1A00000; // nop
+		setBL(0x020653D4+offsetChangeS, (u32)dsiSaveSetLength);
+		setBL(0x020653E4+offsetChangeS, (u32)dsiSaveWrite);
+		setBL(0x020653F4+offsetChangeS, (u32)dsiSaveWrite);
+		setBL(0x020653FC+offsetChangeS, (u32)dsiSaveClose);
+		setBL(0x0206543C+offsetChangeS, (u32)dsiSaveOpen);
+		*(u32*)(0x02065478+offsetChangeS) = 0xE1A00000; // nop
+		setBL(0x0206548C+offsetChangeS, (u32)dsiSaveGetLength);
+		setBL(0x020654B8+offsetChangeS, (u32)dsiSaveRead);
+		*(u32*)(0x020654EC+offsetChangeS) = 0xE1A00000; // nop
+		setBL(0x02065500+offsetChangeS, (u32)dsiSaveClose);
 	}
 
 	// Crash-Course Domo (USA)

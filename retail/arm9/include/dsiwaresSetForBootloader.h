@@ -111,6 +111,7 @@ static const char dsiWareForBootloader1[][4] = {
 	"KTC", "KTP", // Clubhouse Games Express: Family Favorites
 	"KTD", "KTB", // Clubhouse Games Express: Strategy Pack
 	"KXF", // Color Commando
+	"KC7", // Commando: Steel Disaster
 	"KDC", // Crash-Course Domo
 	"K32", // CuteWitch! runner
 	"KF3", // Dairojo! Samurai Defenders

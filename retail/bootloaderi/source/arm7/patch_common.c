@@ -3956,6 +3956,25 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02044874, (u32)dsiSaveClose);
 	}
 
+	// Commando: Steel Disaster (USA)
+	// Commando: Steel Disaster (Europe)
+	else if ((strcmp(romTid, "KC7E") == 0 || strcmp(romTid, "KC7P") == 0) && saveOnFlashcard) {
+		u8 offsetChangeS = (romTid[3] == 'E') ? 0 : 0x1C;
+		setBL(0x02065368+offsetChangeS, (u32)dsiSaveCreate);
+		setBL(0x0206537C+offsetChangeS, (u32)dsiSaveOpen);
+		*(u32*)(0x020653BC+offsetChangeS) = 0xE1A00000; // nop
+		setBL(0x020653D4+offsetChangeS, (u32)dsiSaveSetLength);
+		setBL(0x020653E4+offsetChangeS, (u32)dsiSaveWrite);
+		setBL(0x020653F4+offsetChangeS, (u32)dsiSaveWrite);
+		setBL(0x020653FC+offsetChangeS, (u32)dsiSaveClose);
+		setBL(0x0206543C+offsetChangeS, (u32)dsiSaveOpen);
+		*(u32*)(0x02065478+offsetChangeS) = 0xE1A00000; // nop
+		setBL(0x0206548C+offsetChangeS, (u32)dsiSaveGetLength);
+		setBL(0x020654B8+offsetChangeS, (u32)dsiSaveRead);
+		*(u32*)(0x020654EC+offsetChangeS) = 0xE1A00000; // nop
+		setBL(0x02065500+offsetChangeS, (u32)dsiSaveClose);
+	}
+
 	// Crash-Course Domo (USA)
 	else if (strcmp(romTid, "KDCE") == 0) {
 		if (saveOnFlashcard) {

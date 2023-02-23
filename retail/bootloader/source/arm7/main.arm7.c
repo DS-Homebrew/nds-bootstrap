@@ -966,7 +966,7 @@ int arm7_main(void) {
 	aFile srParamsFile;
 	getFileFromCluster(&srParamsFile, srParamsFileCluster);
 	fileRead((char*)&softResetParams, &srParamsFile, 0, 0x10);
-	bool softResetParamsFound = (softResetParams[0] != 0xFFFFFFFF);
+	bool softResetParamsFound = (softResetParams[0] != 0xFFFFFFFF || softResetParams[2] == 0x44414F4C);
 	if (softResetParamsFound) {
 		u32 clearBuffer = 0xFFFFFFFF;
 		fileWrite((char*)&clearBuffer, &srParamsFile, 0, 0x4);
