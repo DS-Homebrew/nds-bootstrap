@@ -156,20 +156,60 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
 		*(u32*)0x0207af40 = 0xebfe271e;
 	}
 
+#ifndef LOADERTWO
 	// Art Style: DIGIDRIVE (USA) (child.srl)
 	// Art Style: INTERSECT (Europe, Australia) (child.srl)
 	else if (strcmp(romTid, "NTRJ") == 0 && ndsHeader->headerCRC16 == 0x53E2) {
-		// Patch to run with single player
-		*(u32*)0x02011F78 = 0xE3A01000; // mov r1, #0 (Do not exit out of game mode)
-		*(u32*)0x0201F1E8 = 0xE3A00001; // mov r0, #1 (Do not wait for other console)
+		*(u32*)0x0200118C = 0x021BD754; // Boot to "mode_select" instead of "connection2"
+		for (int i = 0; i < 6; i++) { // Disable bugged description text
+			u32* offset1 = (u32*)0x02019C90;
+			u32* offset2 = (u32*)0x02021F78;
+			offset1[i] = 0xE1A00000; // nop
+			offset2[i] = 0xE1A00000; // nop
+		}
+		/* for (int i = 0; i < 4; i++) { // Disable bugged title description text
+			u32* offset1 = (u32*)0x02019D1C;
+			u32* offset2 = (u32*)0x02019D68;
+			offset1[i] = 0xE1A00000; // nop
+			offset2[i] = 0xE1A00000; // nop
+		} */
+		// *(u32*)0x0201CB80 = 0xE1A00000; // nop
+		*(u32*)0x0201EFBC = 0xE3A00000; // mov r0, #0
+		for (int i = 0; i < 11; i++) { // Disable bugged ranking code
+			u32* offset = (u32*)0x0201F050;
+			offset[i] = 0xE1A00000; // nop
+		}
+		*(u32*)0x02021338 = 0xE1A00000; // nop
+		*(u32*)0x02021498 = 0xE1A00000; // nop
+		*(u32*)0x020215F8 = 0xE1A00000; // nop
+		*(u32*)0x02021644 += 0x30000000; // blt -> b
+		*(u32*)0x0202175C = 0xE1A00000; // nop
+		*(u32*)0x020218BC = 0xE1A00000; // nop
+		*(u32*)0x02022140 = 0xE1A00000; // nop
 	}
 
 	// Art Style: DIGIDRIVE (Japan) (child.srl)
 	else if (strcmp(romTid, "NTRJ") == 0 && ndsHeader->headerCRC16 == 0x681E) {
-		// Patch to run with single player
-		*(u32*)0x02011E50 = 0xE3A01000; // mov r1, #0 (Do not exit out of game mode)
-		*(u32*)0x0201F594 = 0xE3A00001; // mov r0, #1 (Do not wait for other console)
+		*(u32*)0x02001024 = 0x021A0948; // Boot to "mode_select" instead of "connection2"
+		for (int i = 0; i < 6; i++) { // Disable bugged description text
+			u32* offset1 = (u32*)0x02019B40;
+			u32* offset2 = (u32*)0x0202230C;
+			offset1[i] = 0xE1A00000; // nop
+			offset2[i] = 0xE1A00000; // nop
+		}
+		*(u32*)0x0201F368 = 0xE3A00000; // mov r0, #0
+		for (int i = 0; i < 11; i++) { // Disable bugged ranking code
+			u32* offset = (u32*)0x0201F3FC;
+			offset[i] = 0xE1A00000; // nop
+		}
+		*(u32*)0x020216CC = 0xE1A00000; // nop
+		*(u32*)0x0202182C = 0xE1A00000; // nop
+		*(u32*)0x0202198C = 0xE1A00000; // nop
+		*(u32*)0x020219D8 += 0x30000000; // blt -> b
+		*(u32*)0x02021AF0 = 0xE1A00000; // nop
+		*(u32*)0x02021C50 = 0xE1A00000; // nop
 	}
+#endif
 
 	// Power Rangers - Samurai (USA) (En,Fr,Es)
 	else if (strcmp(romTid, "B3NE") == 0) {
