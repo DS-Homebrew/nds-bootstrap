@@ -120,6 +120,7 @@ static const char dsiWareForBootloader1[][4] = {
 	"KWT", // GO Series: Defense Wars
 	"KCP", // Dekisugi Tingle Pack
 	"KN2", // Devil Band: Rock the Underworld
+	"KAV", // Art Style: DIGIDRIVE
 	"KRF", // Divergent Shift
 	"KHE", // DotMan
 	"KD9", // Dr. Mario Express

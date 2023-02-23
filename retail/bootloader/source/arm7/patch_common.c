@@ -100,7 +100,7 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
 		// Fix not enough memory error
 		*(u32*)0x0204CDBC = 0xe1a00000; //nop
 	}
-	
+
 	// 0735 - Castlevania - Portrait of Ruin (USA)
 	else if (strcmp(romTid, "ACBE") == 0) {
 		*(u32*)0x02007910 = 0xeb02508e;
@@ -111,7 +111,7 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
 		*(u32*)0x02007a10 = 0xe0281097;
 		*(u32*)0x02007a14 = 0xea000003;
 	}
-	
+
 	// 0676 - Akumajou Dracula - Gallery of Labyrinth (Japan)
 	else if (strcmp(romTid, "ACBJ") == 0 && ndsHeader->romversion == 0) {
 		*(u32*)0x02007910 = 0xeb0250b0;
@@ -122,7 +122,7 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
 		*(u32*)0x02007a10 = 0xe0281097;
 		*(u32*)0x02007a14 = 0xea000003;
 	}
-	
+
 	// 0881 - Castlevania - Portrait of Ruin (Europe) (En,Fr,De,Es,It)
 	else if (strcmp(romTid, "ACBP") == 0) {
 		*(u32*)0x02007b00 = 0xeb025370;
@@ -155,7 +155,22 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
 		*(u32*)0x02000bd4 = 0xe8bd8ff8;
 		*(u32*)0x0207af40 = 0xebfe271e;
 	}
-	
+
+	// Art Style: DIGIDRIVE (USA) (child.srl)
+	// Art Style: INTERSECT (Europe, Australia) (child.srl)
+	else if (strcmp(romTid, "NTRJ") == 0 && ndsHeader->headerCRC16 == 0x53E2) {
+		// Patch to run with single player
+		*(u32*)0x02011F78 = 0xE3A01000; // mov r1, #0 (Do not exit out of game mode)
+		*(u32*)0x0201F1E8 = 0xE3A00001; // mov r0, #1 (Do not wait for other console)
+	}
+
+	// Art Style: DIGIDRIVE (Japan) (child.srl)
+	else if (strcmp(romTid, "NTRJ") == 0 && ndsHeader->headerCRC16 == 0x681E) {
+		// Patch to run with single player
+		*(u32*)0x02011E50 = 0xE3A01000; // mov r1, #0 (Do not exit out of game mode)
+		*(u32*)0x0201F594 = 0xE3A00001; // mov r0, #1 (Do not wait for other console)
+	}
+
 	// Power Rangers - Samurai (USA) (En,Fr,Es)
 	else if (strcmp(romTid, "B3NE") == 0) {
 		*(u32*)0x02060608 = 0xe3a00001; //mov r0, #1
