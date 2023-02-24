@@ -116,6 +116,7 @@ static const char dsiWareForBootloader1[][4] = {
 	"KDC", // Crash-Course Domo
 	"KZG", // Crazy Golf
 	"KCR", // Crazy Sudoku
+	"KQQ", // Crystal Caverns of Amon-Ra
 	"K32", // CuteWitch! runner
 	"KF3", // Dairojo! Samurai Defenders
 	"KIN", // Dancing Academy

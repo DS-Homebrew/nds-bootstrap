@@ -6912,6 +6912,65 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchUserSettingsReadDSiWare(0x0202EEE4-offsetChange);
 	}
 
+	// Crystal Caverns of Amon-Ra (USA)
+	// Crystal Caverns of Amon-Ra (Europe)
+	else if (strcmp(romTid, "KQQE") == 0 || strcmp(romTid, "KQQP") == 0) {
+		u8 offsetChange = (romTid[3] == 'E') ? 0 : 0xB0;
+
+		if (romTid[3] == 'E') {
+			*(u32*)0x02070BBC = 0xE1A00000; // nop
+			*(u32*)0x02073EA4 = 0xE1A00000; // nop
+			patchInitDSiWare(0x02079D6C, heapEnd);
+			*(u32*)0x0207A0F8 = *(u32*)0x02004FD0;
+			patchUserSettingsReadDSiWare(0x0207B558);
+			*(u32*)0x0207B98C = 0xE1A00000; // nop
+			*(u32*)0x0207B990 = 0xE1A00000; // nop
+			*(u32*)0x0207B994 = 0xE1A00000; // nop
+			*(u32*)0x0207B998 = 0xE1A00000; // nop
+		} else {
+			*(u32*)0x02070BC8 = 0xE1A00000; // nop
+			*(u32*)0x02073F38 = 0xE1A00000; // nop
+			patchInitDSiWare(0x02079E1C, heapEnd);
+			*(u32*)0x0207A1A8 = *(u32*)0x02004FE8;
+			patchUserSettingsReadDSiWare(0x0207B608);
+			*(u32*)0x0207BA3C = 0xE1A00000; // nop
+			*(u32*)0x0207BA40 = 0xE1A00000; // nop
+			*(u32*)0x0207BA44 = 0xE1A00000; // nop
+			*(u32*)0x0207BA48 = 0xE1A00000; // nop
+		}
+		*(u32*)(0x02093700+offsetChange) = 0xE1A00000; // nop (Skip Manual screen)
+		setBL(0x0209F2D8+offsetChange, (u32)dsiSaveOpen);
+		setBL(0x0209F308+offsetChange, (u32)dsiSaveRead);
+		setBL(0x0209F310+offsetChange, (u32)dsiSaveClose);
+		setBL(0x0209F3E0+offsetChange, (u32)dsiSaveOpen);
+		setBL(0x0209F410+offsetChange, (u32)dsiSaveRead);
+		setBL(0x0209F418+offsetChange, (u32)dsiSaveClose);
+		*(u32*)(0x0209F504+offsetChange) = 0xE1A00000; // nop
+		*(u32*)(0x0209F51C+offsetChange) = 0xE1A00000; // nop
+		setBL(0x0209F578+offsetChange, (u32)dsiSaveOpen);
+		setBL(0x0209F5A8+offsetChange, (u32)dsiSaveRead);
+		setBL(0x0209F5B0+offsetChange, (u32)dsiSaveClose);
+		setBL(0x0209F63C+offsetChange, (u32)dsiSaveOpen);
+		setBL(0x0209F668+offsetChange, (u32)dsiSaveRead);
+		setBL(0x0209F670+offsetChange, (u32)dsiSaveClose);
+		*(u32*)(0x0209F6DC+offsetChange) = 0xE1A00000; // nop
+		*(u32*)(0x0209F6EC+offsetChange) = 0xE1A00000; // nop
+		setBL(0x0209F740+offsetChange, (u32)dsiSaveOpen);
+		setBL(0x0209F754+offsetChange, (u32)dsiSaveClose);
+		setBL(0x0209F7D8+offsetChange, (u32)dsiSaveOpen);
+		setBL(0x0209F7EC+offsetChange, (u32)dsiSaveClose);
+		setBL(0x0209F800+offsetChange, (u32)dsiSaveCreate);
+		setBL(0x0209F81C+offsetChange, (u32)dsiSaveOpen);
+		*(u32*)(0x0209F82C+offsetChange) = 0xE1A00000; // nop
+		setBL(0x0209F838+offsetChange, (u32)dsiSaveClose);
+		setBL(0x0209F840+offsetChange, (u32)dsiSaveDelete);
+		setBL(0x0209F858+offsetChange, (u32)dsiSaveCreate);
+		setBL(0x0209F868+offsetChange, (u32)dsiSaveOpen);
+		setBL(0x0209F884+offsetChange, (u32)dsiSaveSetLength);
+		setBL(0x0209F894+offsetChange, (u32)dsiSaveWrite);
+		setBL(0x0209F89C+offsetChange, (u32)dsiSaveClose);
+	}
+
 	// CuteWitch! runner (USA)
 	// CuteWitch! runner (Europe)
 	// Stage music doesn't play on retail consoles

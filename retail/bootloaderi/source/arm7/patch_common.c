@@ -4095,6 +4095,43 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020094A4 = 0xE1A00000; // nop
 	}
 
+	// Crystal Caverns of Amon-Ra (USA)
+	// Crystal Caverns of Amon-Ra (Europe)
+	else if (strcmp(romTid, "KQQE") == 0 || strcmp(romTid, "KQQP") == 0) {
+		u8 offsetChange = (romTid[3] == 'E') ? 0 : 0xB0;
+
+		if (!twlFontFound) {
+			*(u32*)(0x02093700+offsetChange) = 0xE1A00000; // nop (Skip Manual screen)
+		}
+		if (saveOnFlashcard) {
+			setBL(0x0209F2D8+offsetChange, (u32)dsiSaveOpen);
+			setBL(0x0209F308+offsetChange, (u32)dsiSaveRead);
+			setBL(0x0209F310+offsetChange, (u32)dsiSaveClose);
+			setBL(0x0209F3E0+offsetChange, (u32)dsiSaveOpen);
+			setBL(0x0209F410+offsetChange, (u32)dsiSaveRead);
+			setBL(0x0209F418+offsetChange, (u32)dsiSaveClose);
+			setBL(0x0209F578+offsetChange, (u32)dsiSaveOpen);
+			setBL(0x0209F5A8+offsetChange, (u32)dsiSaveRead);
+			setBL(0x0209F5B0+offsetChange, (u32)dsiSaveClose);
+			setBL(0x0209F63C+offsetChange, (u32)dsiSaveOpen);
+			setBL(0x0209F668+offsetChange, (u32)dsiSaveRead);
+			setBL(0x0209F670+offsetChange, (u32)dsiSaveClose);
+			setBL(0x0209F740+offsetChange, (u32)dsiSaveOpen);
+			setBL(0x0209F754+offsetChange, (u32)dsiSaveClose);
+			setBL(0x0209F7D8+offsetChange, (u32)dsiSaveOpen);
+			setBL(0x0209F7EC+offsetChange, (u32)dsiSaveClose);
+			setBL(0x0209F800+offsetChange, (u32)dsiSaveCreate);
+			setBL(0x0209F81C+offsetChange, (u32)dsiSaveOpen);
+			setBL(0x0209F838+offsetChange, (u32)dsiSaveClose);
+			setBL(0x0209F840+offsetChange, (u32)dsiSaveDelete);
+			setBL(0x0209F858+offsetChange, (u32)dsiSaveCreate);
+			setBL(0x0209F868+offsetChange, (u32)dsiSaveOpen);
+			setBL(0x0209F884+offsetChange, (u32)dsiSaveSetLength);
+			setBL(0x0209F894+offsetChange, (u32)dsiSaveWrite);
+			setBL(0x0209F89C+offsetChange, (u32)dsiSaveClose);
+		}
+	}
+
 	// CuteWitch! runner (USA)
 	// CuteWitch! runner (Europe)
 	else if (strncmp(romTid, "K32", 3) == 0 && saveOnFlashcard) {
