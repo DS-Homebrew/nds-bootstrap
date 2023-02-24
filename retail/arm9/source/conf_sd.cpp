@@ -1809,10 +1809,10 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		fclose(srParamsFile);
 	}
 
-	if ((!dsiFeatures() || conf->b4dsMode) && strncmp(romTid, "KAV", 3) == 0) { // Art Style: DIGIDRIVE
+	if ((!dsiFeatures() || conf->b4dsMode) && (strncmp(romTid, "KCX", 3) == 0 || strncmp(romTid, "KAV", 3) == 0)) { // "Cosmo Fighters" or "Art Style: DIGIDRIVE"
 		// Load & save "child.srl" to page file for booting
 		if (romFSInit(conf->ndsPath)) {
-			FILE* ndsFile = fopen("rom:/child.srl", "rb");
+			FILE* ndsFile = fopen((strncmp(romTid, "KAV", 3) == 0) ? "rom:/child.srl" : "rom:/mb_main.srl", "rb");
 			FILE* pageFile = fopen(pageFilePath.c_str(), "rb+");
 			if (ndsFile && pageFile) {
 				char buffer[0x1000] = {0};
