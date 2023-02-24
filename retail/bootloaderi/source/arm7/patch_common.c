@@ -4095,6 +4095,35 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020094A4 = 0xE1A00000; // nop
 	}
 
+	// Crystal Adventure (USA)
+	// Crystal Adventure (Europe)
+	else if ((strcmp(romTid, "KXDE") == 0 || strcmp(romTid, "KXDP") == 0) && saveOnFlashcard) {
+		setBL(0x0201E5C0, (u32)dsiSaveGetInfo);
+		setBL(0x0201E5D4, (u32)dsiSaveOpen);
+		setBL(0x0201E5E8, (u32)dsiSaveCreate);
+		setBL(0x0201E5F8, (u32)dsiSaveOpen);
+		setBL(0x0201E608, (u32)dsiSaveGetResultCode);
+		setBL(0x0201E628, (u32)dsiSaveCreate);
+		setBL(0x0201E638, (u32)dsiSaveOpen);
+		setBL(0x0201E8C8, (u32)dsiSaveSeek);
+		setBL(0x0201E8DC, (u32)dsiSaveWrite);
+		setBL(0x0201E8EC, (u32)dsiSaveSeek);
+		setBL(0x0201E8FC, (u32)dsiSaveWrite);
+		setBL(0x0201E90C, (u32)dsiSaveSeek);
+		setBL(0x0201E91C, (u32)dsiSaveWrite);
+		setBL(0x0201E9A8, (u32)dsiSaveSeek);
+		setBL(0x0201E9B8, (u32)dsiSaveWrite);
+		setBL(0x0201E9C8, (u32)dsiSaveClose);
+		setBL(0x0201EA34, (u32)dsiSaveOpen);
+		setBL(0x0201EA5C, (u32)dsiSaveSeek);
+		setBL(0x0201EA6C, (u32)dsiSaveRead);
+		setBL(0x0201EAAC, (u32)dsiSaveClose);
+		setBL(0x0201ED7C, (u32)dsiSaveOpen);
+		setBL(0x0201ED90, (u32)dsiSaveSeek);
+		setBL(0x0201EDA0, (u32)dsiSaveWrite);
+		setBL(0x0201EDA8, (u32)dsiSaveClose);
+	}
+
 	// Crystal Caverns of Amon-Ra (USA)
 	// Crystal Caverns of Amon-Ra (Europe)
 	else if (strcmp(romTid, "KQQE") == 0 || strcmp(romTid, "KQQP") == 0) {
