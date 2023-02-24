@@ -4029,6 +4029,72 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// Crazy Golf (USA)
+	else if (strcmp(romTid, "KZGE") == 0 && saveOnFlashcard) {
+		*(u32*)0x0200B760 = 0xE12FFF1E; // bx lr
+		/* setBL(0x0200B7C4, (u32)dsiSaveCreate);
+		setBL(0x0200B7D4, (u32)dsiSaveOpen);
+		setBL(0x0200B83C, (u32)dsiSaveWrite);
+		setBL(0x0200B84C, (u32)dsiSaveClose);
+		setBL(0x0200B864, (u32)dsiSaveWrite);
+		setBL(0x0200B870, (u32)dsiSaveClose);
+		setBL(0x0200B8C4, (u32)dsiSaveGetInfo);
+		setBL(0x0200B940, (u32)dsiSaveOpen);
+		setBL(0x0200B9A0, (u32)dsiSaveGetLength);
+		setBL(0x0200B9C0, (u32)dsiSaveRead);
+		setBL(0x0200B9D0, (u32)dsiSaveClose);
+		setBL(0x0200B9E8, (u32)dsiSaveRead);
+		setBL(0x0200B9F4, (u32)dsiSaveClose); */
+		*(u32*)0x0200BA60 = 0xE1A00000; // nop
+	}
+
+	// Crazy Golf (Europe, Australia)
+	else if (strcmp(romTid, "KZGV") == 0 && saveOnFlashcard) {
+		*(u32*)0x0200B348 = 0xE12FFF1E; // bx lr
+		/* setBL(0x0200B3AC, (u32)dsiSaveCreate);
+		setBL(0x0200B3BC, (u32)dsiSaveOpen);
+		setBL(0x0200B424, (u32)dsiSaveWrite);
+		setBL(0x0200B434, (u32)dsiSaveClose);
+		setBL(0x0200B44C, (u32)dsiSaveWrite);
+		setBL(0x0200B458, (u32)dsiSaveClose);
+		setBL(0x0200B4AC, (u32)dsiSaveGetInfo);
+		setBL(0x0200B528, (u32)dsiSaveOpen);
+		setBL(0x0200B588, (u32)dsiSaveGetLength);
+		setBL(0x0200B5A8, (u32)dsiSaveRead);
+		setBL(0x0200B5B8, (u32)dsiSaveClose);
+		setBL(0x0200B5D0, (u32)dsiSaveRead);
+		setBL(0x0200B5DC, (u32)dsiSaveClose); */
+		*(u32*)0x0200B648 = 0xE1A00000; // nop
+	}
+
+	// Crazy Pinball (USA)
+	// Saving not supported due to using more than one file in filesystem
+	else if (strcmp(romTid, "KCIE") == 0 && saveOnFlashcard) {
+		*(u32*)0x020142A8 = 0xE12FFF1E; // bx lr
+		*(u32*)0x020145A8 = 0xE1A00000; // nop
+	}
+
+	// Crazy Pinball (Europe, Australia)
+	// Saving not supported due to using more than one file in filesystem
+	else if (strcmp(romTid, "KCIV") == 0 && saveOnFlashcard) {
+		*(u32*)0x02014348 = 0xE12FFF1E; // bx lr
+		*(u32*)0x020144C0 = 0xE1A00000; // nop
+	}
+
+	// Crazy Sudoku (USA)
+	// Saving not supported due to using more than one file in filesystem
+	else if (strcmp(romTid, "KCRE") == 0 && saveOnFlashcard) {
+		*(u32*)0x0200926C = 0xE12FFF1E; // bx lr
+		*(u32*)0x0200956C = 0xE1A00000; // nop
+	}
+
+	// Crazy Sudoku (Europe, Australia)
+	// Saving not supported due to using more than one file in filesystem
+	else if (strcmp(romTid, "KCRV") == 0 && saveOnFlashcard) {
+		*(u32*)0x020091A4 = 0xE12FFF1E; // bx lr
+		*(u32*)0x020094A4 = 0xE1A00000; // nop
+	}
+
 	// CuteWitch! runner (USA)
 	// CuteWitch! runner (Europe)
 	else if (strncmp(romTid, "K32", 3) == 0 && saveOnFlashcard) {

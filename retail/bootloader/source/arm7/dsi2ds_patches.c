@@ -1930,6 +1930,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Ace Mathician (USA)
+	// Saving not supported due to using more than one file in filesystem
 	else if (strcmp(romTid, "KQKE") == 0) {
 		*(u32*)0x020050E4 = 0xE1A00000; // nop
 		*(u32*)0x020050FC = 0xE1A00000; // nop
@@ -1951,6 +1952,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Ace Mathician (Europe, Australia)
+	// Saving not supported due to using more than one file in filesystem
 	else if (strcmp(romTid, "KQKV") == 0) {
 		*(u32*)0x020050E4 = 0xE1A00000; // nop
 		*(u32*)0x020050FC = 0xE1A00000; // nop
@@ -1972,6 +1974,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Advanced Circuits (USA)
 	// Advanced Circuits (Europe, Australia)
+	// Saving not supported due to using more than one file in filesystem
 	else if (strncmp(romTid, "KAC", 3) == 0) {
 		*(u32*)0x02011298 = 0xE1A00000; // nop
 		*(u32*)0x02014738 = 0xE1A00000; // nop
@@ -4802,7 +4805,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Bookworm (USA)
-	// Saving is not supported due to using more than one file
+	// Saving is not supported due to using more than one file in filesystem
 	/*else if (strcmp(romTid, "KBKE") == 0) {
 		if (!extendedMemory2) {
 			*(u32*)0x02017DE4 = 0x8C000;
@@ -6701,6 +6704,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Color Commando (USA)
 	// Color Commando (Europe) (Rev 0)
 	// Color Commando (Europe) (Rev 1)
+	// Saving not supported due to using more than one file in filesystem
 	else if (strcmp(romTid, "KXFE") == 0 || strcmp(romTid, "KXFP") == 0) {
 		*(u32*)0x020050E4 = 0xE1A00000; // nop
 		*(u32*)0x020050FC = 0xE1A00000; // nop
@@ -6805,6 +6809,107 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u16*)0x0202B2BA = 0x46C0; // nop
 		*(u16*)0x0202B2BC = 0x46C0; // nop
 		doubleNopT(0x0202B2BE);
+	}
+
+	// Crazy Golf (USA)
+	// Saving not supported due to using more than one file in filesystem
+	else if (strcmp(romTid, "KZGE") == 0) {
+		*(u32*)0x0200B760 = 0xE12FFF1E; // bx lr
+		/* setBL(0x0200B7C4, (u32)dsiSaveCreate);
+		setBL(0x0200B7D4, (u32)dsiSaveOpen);
+		setBL(0x0200B83C, (u32)dsiSaveWrite);
+		setBL(0x0200B84C, (u32)dsiSaveClose);
+		setBL(0x0200B864, (u32)dsiSaveWrite);
+		setBL(0x0200B870, (u32)dsiSaveClose);
+		setBL(0x0200B8C4, (u32)dsiSaveGetInfo);
+		setBL(0x0200B940, (u32)dsiSaveOpen);
+		setBL(0x0200B9A0, (u32)dsiSaveGetLength);
+		setBL(0x0200B9C0, (u32)dsiSaveRead);
+		setBL(0x0200B9D0, (u32)dsiSaveClose);
+		setBL(0x0200B9E8, (u32)dsiSaveRead);
+		setBL(0x0200B9F4, (u32)dsiSaveClose); */
+		*(u32*)0x0200BA60 = 0xE1A00000; // nop
+		*(u32*)0x02028390 = 0xE1A00000; // nop
+		*(u32*)0x0202C110 = 0xE1A00000; // nop
+		patchInitDSiWare(0x0203264C, heapEnd);
+		patchUserSettingsReadDSiWare(0x02033E48);
+		*(u32*)0x02038B9C = 0xE3A00003; // mov r0, #3
+		*(u32*)0x020395C4 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x020395C8 = 0xE12FFF1E; // bx lr
+	}
+
+	// Crazy Golf (Europe, Australia)
+	// Saving not supported due to using more than one file in filesystem
+	else if (strcmp(romTid, "KZGV") == 0) {
+		*(u32*)0x0200B348 = 0xE12FFF1E; // bx lr
+		/* setBL(0x0200B3AC, (u32)dsiSaveCreate);
+		setBL(0x0200B3BC, (u32)dsiSaveOpen);
+		setBL(0x0200B424, (u32)dsiSaveWrite);
+		setBL(0x0200B434, (u32)dsiSaveClose);
+		setBL(0x0200B44C, (u32)dsiSaveWrite);
+		setBL(0x0200B458, (u32)dsiSaveClose);
+		setBL(0x0200B4AC, (u32)dsiSaveGetInfo);
+		setBL(0x0200B528, (u32)dsiSaveOpen);
+		setBL(0x0200B588, (u32)dsiSaveGetLength);
+		setBL(0x0200B5A8, (u32)dsiSaveRead);
+		setBL(0x0200B5B8, (u32)dsiSaveClose);
+		setBL(0x0200B5D0, (u32)dsiSaveRead);
+		setBL(0x0200B5DC, (u32)dsiSaveClose); */
+		*(u32*)0x0200B648 = 0xE1A00000; // nop
+		*(u32*)0x02027E48 = 0xE1A00000; // nop
+		*(u32*)0x0202B710 = 0xE1A00000; // nop
+		patchInitDSiWare(0x02031938, heapEnd);
+		patchUserSettingsReadDSiWare(0x02033134);
+		*(u32*)0x02037E54 = 0xE3A00003; // mov r0, #3
+		*(u32*)0x0203887C = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02038880 = 0xE12FFF1E; // bx lr
+	}
+
+	// Crazy Pinball (USA)
+	// Saving not supported due to using more than one file in filesystem
+	/* else if (strcmp(romTid, "KCIE") == 0) {
+		*(u32*)0x02013F78 = 0xE1A00000; // nop
+		*(u32*)0x02013FC0 = 0xE1A00000; // nop
+		*(u32*)0x02013FC8 = 0xE1A00000; // nop
+		*(u32*)0x0201405C = 0xE1A00000; // nop
+		*(u32*)0x020142A8 = 0xE12FFF1E; // bx lr
+		*(u32*)0x020145A8 = 0xE1A00000; // nop
+		*(u32*)0x0204EEF4 = 0xE1A00000; // nop
+		*(u32*)0x020527BC = 0xE1A00000; // nop
+		patchInitDSiWare(0x02058630, heapEnd);
+		*(u32*)0x020589BC -= 0x30000;
+		patchUserSettingsReadDSiWare(0x02059DD0);
+	} */
+
+	// Crazy Pinball (Europe, Australia)
+	// Saving not supported due to using more than one file in filesystem
+	/* else if (strcmp(romTid, "KCIV") == 0) {
+		*(u32*)0x02014348 = 0xE12FFF1E; // bx lr
+		*(u32*)0x020144C0 = 0xE1A00000; // nop
+		*(u32*)0x0204EE0C = 0xE1A00000; // nop
+		*(u32*)0x020526D4 = 0xE1A00000; // nop
+		patchInitDSiWare(0x02058548, heapEnd);
+		*(u32*)0x020588D4 -= 0x30000;
+		patchUserSettingsReadDSiWare(0x02059CE8);
+	} */
+
+	// Crazy Sudoku (USA)
+	// Crazy Sudoku (Europe, Australia)
+	// Saving not supported due to using more than one file in filesystem
+	else if (strcmp(romTid, "KCRE") == 0 || strcmp(romTid, "KCRV") == 0) {
+		u16 offsetChange = (romTid[3] == 'E') ? 0 : 0x200;
+
+		if (romTid[3] == 'E') {
+			*(u32*)0x0200926C = 0xE12FFF1E; // bx lr
+			*(u32*)0x0200956C = 0xE1A00000; // nop
+		} else {
+			*(u32*)0x020091A4 = 0xE12FFF1E; // bx lr
+			*(u32*)0x020094A4 = 0xE1A00000; // nop
+		}
+		*(u32*)(0x02023758-offsetChange) = 0xE1A00000; // nop
+		*(u32*)(0x020274D8-offsetChange) = 0xE1A00000; // nop
+		patchInitDSiWare(0x0202D8A0-offsetChange, heapEnd);
+		patchUserSettingsReadDSiWare(0x0202EEE4-offsetChange);
 	}
 
 	// CuteWitch! runner (USA)

@@ -114,6 +114,8 @@ static const char dsiWareForBootloader1[][4] = {
 	"KC7", // Commando: Steel Disaster
 	"KCX", // Cosmo Fighters
 	"KDC", // Crash-Course Domo
+	"KZG", // Crazy Golf
+	"KCR", // Crazy Sudoku
 	"K32", // CuteWitch! runner
 	"KF3", // Dairojo! Samurai Defenders
 	"KIN", // Dancing Academy
