@@ -4887,6 +4887,22 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// Easter Eggztravaganza (USA)
+	// Easter Eggztravaganza (Europe)
+	else if ((strcmp(romTid, "K2EE") == 0 || strcmp(romTid, "K2EP") == 0) && saveOnFlashcard) {
+		u8 offsetChange = (romTid[3] == 'E') ? 0 : 0x18;
+		setBL(0x020374A0+offsetChange, (u32)dsiSaveOpen);
+		setBL(0x020375B4+offsetChange, (u32)dsiSaveRead);
+		setBL(0x020375BC+offsetChange, (u32)dsiSaveClose);
+		setBL(0x020377B0+offsetChange, (u32)dsiSaveOpen);
+		setBL(0x020377D8+offsetChange, (u32)dsiSaveCreate);
+		setBL(0x020377E8+offsetChange, (u32)dsiSaveOpen);
+		setBL(0x02037804+offsetChange, (u32)dsiSaveSetLength);
+		setBL(0x0203783C+offsetChange, (u32)dsiSaveSeek);
+		setBL(0x0203784C+offsetChange, (u32)dsiSaveWrite);
+		setBL(0x02037854+offsetChange, (u32)dsiSaveClose);
+	}
+
 	// EJ Puzzles: Hooked (USA)
 	else if (strcmp(romTid, "KHWE") == 0) {
 		if (!twlFontFound) {
