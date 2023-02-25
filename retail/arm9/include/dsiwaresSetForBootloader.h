@@ -155,6 +155,7 @@ static const char dsiWareForBootloader1[][4] = {
 	"KFK", // Farm Frenzy
 	"KU7", // Fashion Tycoon
 	"KFD", // Fieldrunners
+	"KF8", // Fire Panic
 	"KZZ", // Fizz
 	"KFS", // Flashlight
 	"KFP", // Flipper

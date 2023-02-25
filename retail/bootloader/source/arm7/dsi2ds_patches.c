@@ -9138,6 +9138,37 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0206328C = 0xE1A00000; // nop
 	}
 
+	// Fire Panic (USA)
+	// Fire Panic (Europe, Australia)
+	else if (strcmp(romTid, "KF8E") == 0 || strcmp(romTid, "KF8V") == 0) {
+		useSharedFont = (twlFontFound && debugOrMep);
+		u8 offsetChange = (romTid[3] == 'E') ? 0 : 0xD4;
+		u16 offsetChangeS = (romTid[3] == 'E') ? 0 : 0x208;
+
+		*(u32*)(0x02013690-offsetChange) = 0xE1A00000; // nop
+		*(u32*)(0x0201697C-offsetChange) = 0xE1A00000; // nop
+		patchInitDSiWare(0x0201C5E0-offsetChange, heapEnd);
+		patchUserSettingsReadDSiWare(0x0201DD3C-offsetChange);
+		*(u32*)(0x02052A30-offsetChangeS) = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+		setBL(0x02052A50-offsetChangeS, (u32)dsiSaveCreate);
+		setBL(0x02052A68-offsetChangeS, (u32)dsiSaveSetLength);
+		setBL(0x02052AA4-offsetChangeS, (u32)dsiSaveOpen);
+		setBL(0x02052ACC-offsetChangeS, (u32)dsiSaveSeek);
+		setBL(0x02052AEC-offsetChangeS, (u32)dsiSaveClose);
+		setBL(0x02052B14-offsetChangeS, (u32)dsiSaveRead);
+		setBL(0x02052B60-offsetChangeS, (u32)dsiSaveWrite);
+		setBL(0x02052BB0-offsetChangeS, (u32)dsiSaveSeek);
+		*(u32*)(0x02052BC8-offsetChangeS) = 0xE1A00000; // nop
+		if (useSharedFont) {
+			if (!extendedMemory2) {
+				patchTwlFontLoad(0x02067754-offsetChangeS, 0x0201E290-offsetChange);
+				*(u32*)(0x020678C4-offsetChangeS) = 0xE1A00000; // nop
+			}
+		} else {
+			*(u32*)(0x020677C0-offsetChangeS) = 0xE3A00000; // mov r0, #0 (Lockup when trying to manual screen)
+		}
+	}
+
 	// Fizz (USA)
 	else if (strcmp(romTid, "KZZE") == 0) {
 		*(u32*)0x020106E8 = 0xE1A00000; // nop

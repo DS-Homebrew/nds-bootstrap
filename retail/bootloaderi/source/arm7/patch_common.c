@@ -5235,6 +5235,27 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		// *(u16*)0x020372DA = 0x4770; // bx lr
 	}
 
+	// Fire Panic (USA)
+	// Fire Panic (Europe, Australia)
+	else if (strcmp(romTid, "KF8E") == 0 || strcmp(romTid, "KF8V") == 0) {
+		u16 offsetChangeS = (romTid[3] == 'E') ? 0 : 0x208;
+		if (saveOnFlashcard) {
+			*(u32*)(0x02052A30-offsetChangeS) = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+			setBL(0x02052A50-offsetChangeS, (u32)dsiSaveCreate);
+			setBL(0x02052A68-offsetChangeS, (u32)dsiSaveSetLength);
+			setBL(0x02052AA4-offsetChangeS, (u32)dsiSaveOpen);
+			setBL(0x02052ACC-offsetChangeS, (u32)dsiSaveSeek);
+			setBL(0x02052AEC-offsetChangeS, (u32)dsiSaveClose);
+			setBL(0x02052B14-offsetChangeS, (u32)dsiSaveRead);
+			setBL(0x02052B60-offsetChangeS, (u32)dsiSaveWrite);
+			setBL(0x02052BB0-offsetChangeS, (u32)dsiSaveSeek);
+			*(u32*)(0x02052BC8-offsetChangeS) = 0xE1A00000; // nop
+		}
+		if (!twlFontFound) {
+			*(u32*)(0x020677C0-offsetChangeS) = 0xE3A00000; // mov r0, #0 (Lockup when trying to manual screen)
+		}
+	}
+
 	// Fizz (USA)
 	else if (strcmp(romTid, "KZZE") == 0 && saveOnFlashcard) {
 		tonccpy((u32*)0x02011260, dsiSaveGetResultCode, 0xC);
