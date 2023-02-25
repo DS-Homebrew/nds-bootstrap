@@ -4338,6 +4338,44 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0208B50C, (u32)dsiSaveClose);
 	}
 
+	// Decathlon 2012 (USA)
+	else if (strcmp(romTid, "KUIE") == 0 && saveOnFlashcard) {
+		setBL(0x02057B48, (u32)dsiSaveCreate);
+		setBL(0x02057B58, (u32)dsiSaveOpen);
+		setBL(0x02057B74, (u32)dsiSaveGetResultCode);
+		setBL(0x02057B98, (u32)dsiSaveSeek);
+		setBL(0x02057BB0, (u32)dsiSaveGetResultCode);
+		setBL(0x02057BD4, (u32)dsiSaveWrite);
+		setBL(0x02057BF4, (u32)dsiSaveClose);
+		setBL(0x02057BFC, (u32)dsiSaveGetResultCode);
+		setBL(0x02057C18, (u32)dsiSaveGetResultCode);
+		setBL(0x02057C54, (u32)dsiSaveOpenR);
+		setBL(0x02057C64, (u32)dsiSaveGetLength);
+		setBL(0x02057C98, (u32)dsiSaveRead);
+		setBL(0x02057CB0, (u32)dsiSaveClose);
+		setBL(0x02057CBC, (u32)dsiSaveGetResultCode);
+		setBL(0x0205C47C, 0x02057D18);
+	}
+
+	// Decathlon 2012 (Europe)
+	else if (strcmp(romTid, "KUIP") == 0 && saveOnFlashcard) {
+		setBL(0x0204D4EC, (u32)dsiSaveCreate);
+		setBL(0x0204D4FC, (u32)dsiSaveOpen);
+		setBL(0x0204D518, (u32)dsiSaveGetResultCode);
+		setBL(0x0204D53C, (u32)dsiSaveSeek);
+		setBL(0x0204D554, (u32)dsiSaveGetResultCode);
+		setBL(0x0204D578, (u32)dsiSaveWrite);
+		setBL(0x0204D598, (u32)dsiSaveClose);
+		setBL(0x0204D5A0, (u32)dsiSaveGetResultCode);
+		setBL(0x0204D5BC, (u32)dsiSaveGetResultCode);
+		setBL(0x0204D5F8, (u32)dsiSaveOpenR);
+		setBL(0x0204D608, (u32)dsiSaveGetLength);
+		setBL(0x0204D63C, (u32)dsiSaveRead);
+		setBL(0x0204D654, (u32)dsiSaveClose);
+		setBL(0x0204D660, (u32)dsiSaveGetResultCode);
+		setBL(0x02051E20, 0x0204D6BC);
+	}
+
 	// Deep Sea Creatures (USA)
 	else if (strcmp(romTid, "K6BE") == 0 && saveOnFlashcard) {
 		setBL(0x020514B8, (u32)dsiSaveOpen);

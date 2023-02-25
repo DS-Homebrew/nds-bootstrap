@@ -7298,6 +7298,68 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0208B50C, (u32)dsiSaveClose);
 	}
 
+	// Decathlon 2012 (USA)
+	// Audio does not play
+	else if (strcmp(romTid, "KUIE") == 0) {
+		useSharedFont = (twlFontFound && debugOrMep);
+		*(u32*)0x0200507C = 0xE1A00000; // nop
+		*(u32*)0x0201CA88 = 0xE1A00000; // nop
+		*(u32*)0x02020DB8 = 0xE1A00000; // nop
+		patchInitDSiWare(0x020263EC, heapEnd);
+		patchUserSettingsReadDSiWare(0x020279D0);
+		if (useSharedFont && !extendedMemory2) {
+			patchTwlFontLoad(0x0204FCA4, 0x02027F14);
+			*(u32*)0x0204FCF0 = 0xE1A00000; // nop
+		}
+		setBL(0x02057B48, (u32)dsiSaveCreate);
+		setBL(0x02057B58, (u32)dsiSaveOpen);
+		setBL(0x02057B74, (u32)dsiSaveGetResultCode);
+		setBL(0x02057B98, (u32)dsiSaveSeek);
+		setBL(0x02057BB0, (u32)dsiSaveGetResultCode);
+		setBL(0x02057BD4, (u32)dsiSaveWrite);
+		setBL(0x02057BF4, (u32)dsiSaveClose);
+		setBL(0x02057BFC, (u32)dsiSaveGetResultCode);
+		setBL(0x02057C18, (u32)dsiSaveGetResultCode);
+		setBL(0x02057C54, (u32)dsiSaveOpenR);
+		setBL(0x02057C64, (u32)dsiSaveGetLength);
+		setBL(0x02057C98, (u32)dsiSaveRead);
+		setBL(0x02057CB0, (u32)dsiSaveClose);
+		setBL(0x02057CBC, (u32)dsiSaveGetResultCode);
+		setBL(0x0205C47C, 0x02057D18);
+		*(u32*)0x020626F8 = 0xE12FFF1E; // bx lr
+	}
+
+	// Decathlon 2012 (Europe)
+	// Audio does not play
+	else if (strcmp(romTid, "KUIP") == 0) {
+		useSharedFont = (twlFontFound && debugOrMep);
+		*(u32*)0x0200507C = 0xE1A00000; // nop
+		*(u32*)0x0201242C = 0xE1A00000; // nop
+		*(u32*)0x0201675C = 0xE1A00000; // nop
+		patchInitDSiWare(0x0201BD90, heapEnd);
+		patchUserSettingsReadDSiWare(0x0201D374);
+		if (useSharedFont && !extendedMemory2) {
+			patchTwlFontLoad(0x02045648, 0x0201D8B8);
+			*(u32*)0x02045694 = 0xE1A00000; // nop
+		}
+		setBL(0x0204D4EC, (u32)dsiSaveCreate);
+		setBL(0x0204D4FC, (u32)dsiSaveOpen);
+		setBL(0x0204D518, (u32)dsiSaveGetResultCode);
+		setBL(0x0204D53C, (u32)dsiSaveSeek);
+		setBL(0x0204D554, (u32)dsiSaveGetResultCode);
+		setBL(0x0204D578, (u32)dsiSaveWrite);
+		setBL(0x0204D598, (u32)dsiSaveClose);
+		setBL(0x0204D5A0, (u32)dsiSaveGetResultCode);
+		setBL(0x0204D5BC, (u32)dsiSaveGetResultCode);
+		setBL(0x0204D5F8, (u32)dsiSaveOpenR);
+		setBL(0x0204D608, (u32)dsiSaveGetLength);
+		setBL(0x0204D63C, (u32)dsiSaveRead);
+		setBL(0x0204D654, (u32)dsiSaveClose);
+		setBL(0x0204D660, (u32)dsiSaveGetResultCode);
+		setBL(0x02051E20, 0x0204D6BC);
+		*(u32*)0x0205809C = 0xE12FFF1E; // bx lr
+	}
+
 	// Deep Sea Creatures (USA)
 	// Requires 8MB of RAM
 	else if (strcmp(romTid, "K6BE") == 0 && extendedMemory2) {
