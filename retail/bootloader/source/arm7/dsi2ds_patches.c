@@ -8942,6 +8942,30 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02047880 = 0xE1A00000; // nop
 	}
 
+	// Escape Trick: The Secret of Rock City Prison (USA)
+	// Requires 8MB of RAM(?)
+	/* else if (strcmp(romTid, "K5QE") == 0) {
+		*(u32*)0x020050D4 = 0xE1A00000; // nop
+		*(u32*)0x020050EC = 0xE1A00000; // nop
+		*(u32*)0x020052B0 = 0xE1A00000; // nop
+		setBL(0x02010FD8, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+		setBL(0x02011028, (u32)dsiSaveOpen);
+		setBL(0x020110BC, (u32)dsiSaveGetLength);
+		setBL(0x020110D8, (u32)dsiSaveRead);
+		setBL(0x020110E0, (u32)dsiSaveClose);
+		setBL(0x02011124, (u32)dsiSaveOpen);
+		setBL(0x020111A4, (u32)dsiSaveGetLength);
+		setBL(0x020111B4, (u32)dsiSaveSeek);
+		setBL(0x02011230, (u32)dsiSaveClose);
+		setBL(0x02011258, (u32)dsiSaveWrite);
+		setBL(0x02011264, (u32)dsiSaveClose);
+		*(u32*)0x0205CE84 = 0xE1A00000; // nop
+		tonccpy((u32*)0x0205DA08, dsiSaveGetResultCode, 0xC);
+		*(u32*)0x020609EC = 0xE1A00000; // nop
+		patchInitDSiWare(0x020679D4, extendedMemory2 ? 0x02F00000 : heapEndRetail+0xC00000); // extendedMemory2 ? #0x2F00000 (mirrors to 0x2700000 on debug DS units) : #0x2FC0000 (mirrors to 0x23C0000 on retail DS units)
+		patchUserSettingsReadDSiWare(0x02068EB0);
+	} */
+
 	// Fall in the Dark (Japan)
 	// A bit hard/confusing to add save support
 	else if (strcmp(romTid, "K4EJ") == 0) {

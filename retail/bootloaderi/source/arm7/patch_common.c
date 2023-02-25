@@ -4933,6 +4933,195 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// Escape Trick: The Secret of Rock City Prison (USA)
+	else if (strcmp(romTid, "K5QE") == 0) {
+		if (!twlFontFound) {
+			*(u32*)0x0200F32C = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		}
+		if (saveOnFlashcard) {
+			setBL(0x02010FD8, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+			setBL(0x02011028, (u32)dsiSaveOpen);
+			setBL(0x020110BC, (u32)dsiSaveGetLength);
+			setBL(0x020110D8, (u32)dsiSaveRead);
+			setBL(0x020110E0, (u32)dsiSaveClose);
+			setBL(0x02011124, (u32)dsiSaveOpen);
+			setBL(0x020111A4, (u32)dsiSaveGetLength);
+			setBL(0x020111B4, (u32)dsiSaveSeek);
+			setBL(0x02011230, (u32)dsiSaveClose);
+			setBL(0x02011258, (u32)dsiSaveWrite);
+			setBL(0x02011264, (u32)dsiSaveClose);
+			tonccpy((u32*)0x0205DA08, dsiSaveGetResultCode, 0xC);
+		}
+	}
+
+	// Escape Trick: Rock City Prison (Europe)
+	else if (strcmp(romTid, "K5QP") == 0) {
+		if (!twlFontFound) {
+			*(u32*)0x0200F740 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		}
+		if (saveOnFlashcard) {
+			setBL(0x02011454, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+			setBL(0x020114A4, (u32)dsiSaveOpen);
+			setBL(0x02011538, (u32)dsiSaveGetLength);
+			setBL(0x02011554, (u32)dsiSaveRead);
+			setBL(0x0201155C, (u32)dsiSaveClose);
+			setBL(0x020115A0, (u32)dsiSaveOpen);
+			setBL(0x02011620, (u32)dsiSaveGetLength);
+			setBL(0x02011630, (u32)dsiSaveSeek);
+			setBL(0x020116AC, (u32)dsiSaveClose);
+			setBL(0x020116D4, (u32)dsiSaveWrite);
+			setBL(0x020116E0, (u32)dsiSaveClose);
+			tonccpy((u32*)0x0205DE84, dsiSaveGetResultCode, 0xC);
+		}
+	}
+
+	// Simple DS Series Vol. 3: The Misshitsukara no Dasshutsu (Japan)
+	else if (strcmp(romTid, "K5QJ") == 0) {
+		if (!twlFontFound) {
+			*(u32*)0x0200EE50 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		}
+		if (saveOnFlashcard) {
+			setBL(0x020118CC, (u32)dsiSaveOpen);
+			setBL(0x02011934, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+			setBL(0x02011980, (u32)dsiSaveGetLength);
+			setBL(0x0201199C, (u32)dsiSaveRead);
+			setBL(0x020119A4, (u32)dsiSaveClose);
+			setBL(0x020119E8, (u32)dsiSaveOpen);
+			setBL(0x02011A68, (u32)dsiSaveGetLength);
+			setBL(0x02011A78, (u32)dsiSaveSeek);
+			setBL(0x02011AF4, (u32)dsiSaveClose);
+			setBL(0x02011B1C, (u32)dsiSaveWrite);
+			setBL(0x02011B28, (u32)dsiSaveClose);
+			tonccpy((u32*)0x0205E16C, dsiSaveGetResultCode, 0xC);
+		}
+	}
+
+	// Escape Trick: Ninja Castle (USA)
+	else if (strcmp(romTid, "KEYE") == 0) {
+		if (!twlFontFound) {
+			*(u32*)0x02010458 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		}
+		if (saveOnFlashcard) {
+			setBL(0x02013CF4, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+			setBL(0x02013D44, (u32)dsiSaveOpen);
+			setBL(0x02013DD8, (u32)dsiSaveGetLength);
+			setBL(0x02013DF4, (u32)dsiSaveRead);
+			setBL(0x02013DFC, (u32)dsiSaveClose);
+			setBL(0x02013E40, (u32)dsiSaveOpen);
+			setBL(0x02013EC0, (u32)dsiSaveGetLength);
+			setBL(0x02013ED0, (u32)dsiSaveSeek);
+			setBL(0x02013F4C, (u32)dsiSaveClose);
+			setBL(0x02013F74, (u32)dsiSaveWrite);
+			setBL(0x02013F80, (u32)dsiSaveClose);
+			tonccpy((u32*)0x0206009C, dsiSaveGetResultCode, 0xC);
+		}
+	}
+
+	// GO Series: Escape Trick: Ninja Castle (Europe)
+	else if (strcmp(romTid, "KEYP") == 0) {
+		if (!twlFontFound) {
+			*(u32*)0x020109BC = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		}
+		if (saveOnFlashcard) {
+			setBL(0x020142B4, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+			setBL(0x02014304, (u32)dsiSaveOpen);
+			setBL(0x02014398, (u32)dsiSaveGetLength);
+			setBL(0x020143B4, (u32)dsiSaveRead);
+			setBL(0x020143BC, (u32)dsiSaveClose);
+			setBL(0x02014400, (u32)dsiSaveOpen);
+			setBL(0x02014480, (u32)dsiSaveGetLength);
+			setBL(0x02014490, (u32)dsiSaveSeek);
+			setBL(0x0201450C, (u32)dsiSaveClose);
+			setBL(0x02014534, (u32)dsiSaveWrite);
+			setBL(0x02014540, (u32)dsiSaveClose);
+			tonccpy((u32*)0x0206065C, dsiSaveGetResultCode, 0xC);
+		}
+	}
+
+	// Simple DS Series Vol. 4: The Misshitsukara no Dasshutsu (Japan)
+	else if (strcmp(romTid, "KEYJ") == 0) {
+		if (!twlFontFound) {
+			*(u32*)0x0200F9FC = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		}
+		if (saveOnFlashcard) {
+			setBL(0x02013410, (u32)dsiSaveOpen);
+			setBL(0x02013478, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+			setBL(0x020134C4, (u32)dsiSaveGetLength);
+			setBL(0x020134E0, (u32)dsiSaveRead);
+			setBL(0x020134E8, (u32)dsiSaveClose);
+			setBL(0x0201352C, (u32)dsiSaveOpen);
+			setBL(0x020135AC, (u32)dsiSaveGetLength);
+			setBL(0x020135BC, (u32)dsiSaveSeek);
+			setBL(0x02013638, (u32)dsiSaveClose);
+			setBL(0x02013660, (u32)dsiSaveWrite);
+			setBL(0x0201366C, (u32)dsiSaveClose);
+			tonccpy((u32*)0x0205F924, dsiSaveGetResultCode, 0xC);
+		}
+	}
+
+	// Escape Trick: Convenience Store (USA)
+	else if (strcmp(romTid, "K5KE") == 0) {
+		if (!twlFontFound) {
+			*(u32*)0x02010548 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		}
+		if (saveOnFlashcard) {
+			setBL(0x02013E28, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+			setBL(0x02013E78, (u32)dsiSaveOpen);
+			setBL(0x02013F0C, (u32)dsiSaveGetLength);
+			setBL(0x02013F28, (u32)dsiSaveRead);
+			setBL(0x02013F30, (u32)dsiSaveClose);
+			setBL(0x02013F74, (u32)dsiSaveOpen);
+			setBL(0x02013FF4, (u32)dsiSaveGetLength);
+			setBL(0x02014004, (u32)dsiSaveSeek);
+			setBL(0x02014080, (u32)dsiSaveClose);
+			setBL(0x020140A8, (u32)dsiSaveWrite);
+			setBL(0x020140B4, (u32)dsiSaveClose);
+			tonccpy((u32*)0x0205FD00, dsiSaveGetResultCode, 0xC);
+		}
+	}
+
+	// Escape Trick: Convenience Store (Europe)
+	else if (strcmp(romTid, "K5KP") == 0) {
+		if (!twlFontFound) {
+			*(u32*)0x020109AC = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		}
+		if (saveOnFlashcard) {
+			setBL(0x0201428C, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+			setBL(0x020142DC, (u32)dsiSaveOpen);
+			setBL(0x02014370, (u32)dsiSaveGetLength);
+			setBL(0x0201438C, (u32)dsiSaveRead);
+			setBL(0x02014394, (u32)dsiSaveClose);
+			setBL(0x020143D8, (u32)dsiSaveOpen);
+			setBL(0x02014458, (u32)dsiSaveGetLength);
+			setBL(0x02014468, (u32)dsiSaveSeek);
+			setBL(0x020144E4, (u32)dsiSaveClose);
+			setBL(0x0201450C, (u32)dsiSaveWrite);
+			setBL(0x02014518, (u32)dsiSaveClose);
+			tonccpy((u32*)0x02060164, dsiSaveGetResultCode, 0xC);
+		}
+	}
+
+	// Simple DS Series Vol. 5: The Misshitsukara no Dasshutsu (Japan)
+	else if (strcmp(romTid, "K5KJ") == 0) {
+		if (!twlFontFound) {
+			*(u32*)0x0200F990 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		}
+		if (saveOnFlashcard) {
+			setBL(0x020133C8, (u32)dsiSaveOpen);
+			setBL(0x02013430, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+			setBL(0x0201347C, (u32)dsiSaveGetLength);
+			setBL(0x02013498, (u32)dsiSaveRead);
+			setBL(0x020134A0, (u32)dsiSaveClose);
+			setBL(0x020134E4, (u32)dsiSaveOpen);
+			setBL(0x02013564, (u32)dsiSaveGetLength);
+			setBL(0x02013574, (u32)dsiSaveSeek);
+			setBL(0x020135F0, (u32)dsiSaveClose);
+			setBL(0x02013618, (u32)dsiSaveWrite);
+			setBL(0x02013624, (u32)dsiSaveClose);
+			tonccpy((u32*)0x0205F4A8, dsiSaveGetResultCode, 0xC);
+		}
+	}
+
 	// Fall in the Dark (Japan)
 	// A bit hard/confusing to add save support
 	else if (strcmp(romTid, "K4EJ") == 0 && !twlFontFound) {
@@ -8976,69 +9165,6 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBL(0x020135C8, (u32)dsiSaveWrite);
 			setBL(0x020135D4, (u32)dsiSaveClose);
 			tonccpy((u32*)0x0205E620, dsiSaveGetResultCode, 0xC);
-		}
-	}
-
-	// Simple DS Series Vol. 3: The Misshitsukara no Dasshutsu (Japan)
-	else if (strcmp(romTid, "K5QJ") == 0) {
-		if (!twlFontFound) {
-			*(u32*)0x0200EE50 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
-		}
-		if (saveOnFlashcard) {
-			setBL(0x020118CC, (u32)dsiSaveOpen);
-			setBL(0x02011934, (u32)dsiSaveCreate); // dsiSaveCreateAuto
-			setBL(0x02011980, (u32)dsiSaveGetLength);
-			setBL(0x0201199C, (u32)dsiSaveRead);
-			setBL(0x020119A4, (u32)dsiSaveClose);
-			setBL(0x020119E8, (u32)dsiSaveOpen);
-			setBL(0x02011A68, (u32)dsiSaveGetLength);
-			setBL(0x02011A78, (u32)dsiSaveSeek);
-			setBL(0x02011AF4, (u32)dsiSaveClose);
-			setBL(0x02011B1C, (u32)dsiSaveWrite);
-			setBL(0x02011B28, (u32)dsiSaveClose);
-			tonccpy((u32*)0x0205E16C, dsiSaveGetResultCode, 0xC);
-		}
-	}
-
-	// Simple DS Series Vol. 4: The Misshitsukara no Dasshutsu (Japan)
-	else if (strcmp(romTid, "KEYJ") == 0) {
-		if (!twlFontFound) {
-			*(u32*)0x0200F9FC = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
-		}
-		if (saveOnFlashcard) {
-			setBL(0x02013410, (u32)dsiSaveOpen);
-			setBL(0x02013478, (u32)dsiSaveCreate); // dsiSaveCreateAuto
-			setBL(0x020134C4, (u32)dsiSaveGetLength);
-			setBL(0x020134E0, (u32)dsiSaveRead);
-			setBL(0x020134E8, (u32)dsiSaveClose);
-			setBL(0x0201352C, (u32)dsiSaveOpen);
-			setBL(0x020135AC, (u32)dsiSaveGetLength);
-			setBL(0x020135BC, (u32)dsiSaveSeek);
-			setBL(0x02013638, (u32)dsiSaveClose);
-			setBL(0x02013660, (u32)dsiSaveWrite);
-			setBL(0x0201366C, (u32)dsiSaveClose);
-			tonccpy((u32*)0x0205F924, dsiSaveGetResultCode, 0xC);
-		}
-	}
-
-	// Simple DS Series Vol. 5: The Misshitsukara no Dasshutsu (Japan)
-	else if (strcmp(romTid, "K5KJ") == 0) {
-		if (!twlFontFound) {
-			*(u32*)0x0200F990 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
-		}
-		if (saveOnFlashcard) {
-			setBL(0x020133C8, (u32)dsiSaveOpen);
-			setBL(0x02013430, (u32)dsiSaveCreate); // dsiSaveCreateAuto
-			setBL(0x0201347C, (u32)dsiSaveGetLength);
-			setBL(0x02013498, (u32)dsiSaveRead);
-			setBL(0x020134A0, (u32)dsiSaveClose);
-			setBL(0x020134E4, (u32)dsiSaveOpen);
-			setBL(0x02013564, (u32)dsiSaveGetLength);
-			setBL(0x02013574, (u32)dsiSaveSeek);
-			setBL(0x020135F0, (u32)dsiSaveClose);
-			setBL(0x02013618, (u32)dsiSaveWrite);
-			setBL(0x02013624, (u32)dsiSaveClose);
-			tonccpy((u32*)0x0205F4A8, dsiSaveGetResultCode, 0xC);
 		}
 	}
 
