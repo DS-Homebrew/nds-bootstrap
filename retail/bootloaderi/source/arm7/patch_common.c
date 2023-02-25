@@ -4887,6 +4887,36 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// EJ Puzzles: Hooked (USA)
+	else if (strcmp(romTid, "KHWE") == 0) {
+		if (!twlFontFound) {
+			*(u32*)0x02020FBC = 0xE12FFF1E; // bx lr (Skip Manual screen)
+		}
+		if (saveOnFlashcard) {
+			*(u32*)0x020243F8 = 0xE1A00000; // nop
+			setBL(0x0202442C, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+			*(u32*)0x02024488 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+			*(u32*)0x020244A0 = 0xE3A00001; // mov r0, #1 (dsiSaveFreeSpaceAvailable)
+			setBL(0x020244C8, (u32)dsiSaveOpen);
+			setBL(0x02024524, (u32)dsiSaveSetLength);
+			setBL(0x02024564, (u32)dsiSaveClose);
+			setBL(0x02024584, (u32)dsiSaveSeek);
+			setBL(0x02024598, (u32)dsiSaveWrite);
+			setBL(0x020245DC, (u32)dsiSaveClose);
+			setBL(0x020245F4, (u32)dsiSaveClose);
+			setBL(0x020246E8, (u32)dsiSaveOpen);
+			setBL(0x02024778, (u32)dsiSaveSeek);
+			setBL(0x0202478C, (u32)dsiSaveWrite);
+			setBL(0x020247C8, (u32)dsiSaveClose);
+			setBL(0x020247E0, (u32)dsiSaveClose);
+			setBL(0x020248B8, (u32)dsiSaveOpen);
+			setBL(0x0202492C, (u32)dsiSaveSeek);
+			setBL(0x0202493C, (u32)dsiSaveRead);
+			setBL(0x02024978, (u32)dsiSaveClose);
+			setBL(0x020249A4, (u32)dsiSaveClose);
+		}
+	}
+
 	// Fall in the Dark (Japan)
 	// A bit hard/confusing to add save support
 	else if (strcmp(romTid, "K4EJ") == 0 && !twlFontFound) {

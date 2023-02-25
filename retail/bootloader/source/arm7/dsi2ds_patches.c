@@ -8260,6 +8260,48 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// EJ Puzzles: Hooked (USA)
+	// Music does not play
+	else if (strcmp(romTid, "KHWE") == 0) {
+		*(u32*)0x020243F8 = 0xE1A00000; // nop
+		setBL(0x0202442C, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+		*(u32*)0x02024488 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+		*(u32*)0x020244A0 = 0xE3A00001; // mov r0, #1 (dsiSaveFreeSpaceAvailable)
+		setBL(0x020244C8, (u32)dsiSaveOpen);
+		setBL(0x02024524, (u32)dsiSaveSetLength);
+		setBL(0x02024564, (u32)dsiSaveClose);
+		setBL(0x02024584, (u32)dsiSaveSeek);
+		setBL(0x02024598, (u32)dsiSaveWrite);
+		setBL(0x020245DC, (u32)dsiSaveClose);
+		setBL(0x020245F4, (u32)dsiSaveClose);
+		setBL(0x020246E8, (u32)dsiSaveOpen);
+		setBL(0x02024778, (u32)dsiSaveSeek);
+		setBL(0x0202478C, (u32)dsiSaveWrite);
+		setBL(0x020247C8, (u32)dsiSaveClose);
+		setBL(0x020247E0, (u32)dsiSaveClose);
+		setBL(0x020248B8, (u32)dsiSaveOpen);
+		setBL(0x0202492C, (u32)dsiSaveSeek);
+		setBL(0x0202493C, (u32)dsiSaveRead);
+		setBL(0x02024978, (u32)dsiSaveClose);
+		setBL(0x020249A4, (u32)dsiSaveClose);
+		*(u32*)0x02020FBC = 0xE12FFF1E; // bx lr (Skip Manual screen)
+		*(u32*)0x02024858 = 0xE1A00000; // nop
+		*(u32*)0x02024864 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0202487C = 0xE1A00000; // nop
+		*(u32*)0x02024A60 = 0xE1A00000; // nop
+		*(u32*)0x02024A6C = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02024A84 = 0xE1A00000; // nop
+		*(u32*)0x020259EC = 0xE3A02602; // mov r2, #0x200000
+		*(u32*)0x02025A4C = 0xE3A02702; // mov r2, #0x80000
+		*(u32*)0x02026264 = 0xE1A00000; // nop (Disable loading "Sounds/Menu.pcm")
+		*(u32*)0x0202627C = 0xE1A00000; // nop (Disable loading "Sounds/Game.pcm")
+		*(u32*)0x020262E0 = 0xE1A00000; // nop
+		*(u32*)0x02027750 = 0xE1A00000; // nop
+		*(u32*)0x0202B290 = 0xE1A00000; // nop
+		patchInitDSiWare(0x02031CB0, heapEnd);
+		*(u32*)0x0203203C = *(u32*)0x02004FD0;
+	}
+
 	// Electroplankton: Beatnes (USA)
 	// Requires 8MB of RAM
 	else if (strcmp(romTid, "KEIE") == 0 && extendedMemory2) {

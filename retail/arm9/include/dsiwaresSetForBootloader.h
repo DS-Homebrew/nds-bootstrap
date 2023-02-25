@@ -138,6 +138,7 @@ static const char dsiWareForBootloader1[][4] = {
 	"B88", // DS WiFi Settings
 	"KB8", // GO Series: Earth Saver
 	"KB9", // Earth Saver: Inseki Bakuha Dai Sakuse
+	"KHW", // EJ Puzzles: Hooked
 	"KEI", // Electroplankton: Beatnes
 	"KEB", // Electroplankton: Hanenbow
 	"KEG", // Electroplankton: Lumiloop
