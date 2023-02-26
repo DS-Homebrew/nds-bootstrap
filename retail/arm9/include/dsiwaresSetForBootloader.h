@@ -158,6 +158,7 @@ static const char dsiWareForBootloader1[][4] = {
 	"KF8", // Fire Panic
 	"KZZ", // Fizz
 	"KFS", // Flashlight
+	"KKR", // Flip the Core
 	"KFP", // Flipper
 	"KKN", // Flipper 2: Flush the Goldfish
 	"KFG", // Frogger Returns

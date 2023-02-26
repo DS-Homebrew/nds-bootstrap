@@ -798,7 +798,13 @@ void patchHiHeapDSiWareThumb(u32 addr, u32 newCodeAddr, u32 heapEnd) {
 }
 
 void patchUserSettingsReadDSiWare(u32 addr) {
-	if (*(u32*)(addr) == 0xE594117C) { // ldr r1, [r4,#0x17C]
+	if (*(u16*)(addr) == 0x4806) { // ldr r0, =0x2FFFDFC (THUMB)
+		*(u16*)(addr) = 0x46C0; // nop
+		*(u16*)(addr+4) = 0xBD38; // POP {R3-R5,PC}
+	} else if (*(u16*)(addr) == 0x4805) { // ldr r0, =0x2FFFDFC (THUMB)
+		*(u16*)(addr) = 0x46C0; // nop
+		*(u16*)(addr+4) = 0xBD10; // POP {R4,PC}
+	} else if (*(u32*)(addr) == 0xE594117C) { // ldr r1, [r4,#0x17C]
 		*(u32*)(addr) = 0xE5C50054; // strb r0, [r5,#0x54]
 		*(u32*)(addr+4) = 0xE1D406B4; // ldrh r0, [r4,#0x64]
 		*(u32*)(addr+8) = 0xE1A00E80; // mov r0, r0,lsl#29

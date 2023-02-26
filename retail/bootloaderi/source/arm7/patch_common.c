@@ -5276,6 +5276,58 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02005134 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 	}
 
+	// Flip the Core (USA)
+	// Flip the Core (Europe)
+	else if ((strcmp(romTid, "KKRE") == 0 || strcmp(romTid, "KKRP") == 0) && saveOnFlashcard) {
+		const u32 dsiSaveCreateT = 0x0209B380;
+		*(u16*)dsiSaveCreateT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveCreateT + 4), dsiSaveCreate, 0xC);
+
+		const u32 dsiSaveOpenT = 0x0209B390;
+		*(u16*)dsiSaveOpenT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveOpenT + 4), dsiSaveOpen, 0xC);
+
+		const u32 dsiSaveCloseT = 0x0209B3A0;
+		*(u16*)dsiSaveCloseT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveCloseT + 4), dsiSaveClose, 0xC);
+
+		const u32 dsiSaveGetLengthT = 0x0209B3B0;
+		*(u16*)dsiSaveGetLengthT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveGetLengthT + 4), dsiSaveGetLength, 0xC);
+
+		const u32 dsiSaveSeekT = 0x0209B3C0;
+		*(u16*)dsiSaveSeekT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveSeekT + 4), dsiSaveSeek, 0xC);
+
+		const u32 dsiSaveSetLengthT = 0x0209B408;
+		*(u16*)dsiSaveSetLengthT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveSetLengthT + 4), dsiSaveSetLength, 0xC);
+
+		const u32 dsiSaveReadAsyncT = 0x0209B5F4;
+		*(u16*)dsiSaveReadAsyncT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveReadAsyncT + 4), dsiSaveRead, 0xC);
+
+		/* const u32 dsiSaveWriteT = 0x0209B63C;
+		*(u16*)dsiSaveWriteT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveWriteT + 4), dsiSaveWrite, 0xC); */
+
+		const u32 dsiSaveWriteAsyncT = 0x0209B66C;
+		*(u16*)dsiSaveWriteAsyncT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveWriteAsyncT + 4), dsiSaveWrite, 0xC);
+
+		*(u16*)0x0204A2E8 = 0x4770; // bx lr (Skip NAND error checking)
+		setBLThumb(0x0204A2FC, dsiSaveCloseT);
+		setBLThumb(0x0204A336, dsiSaveOpenT);
+		setBLThumb(0x0204A39C, dsiSaveOpenT);
+		setBLThumb(0x0204A3D4, dsiSaveGetLengthT);
+		setBLThumb(0x0204A42C, dsiSaveSeekT);
+		setBLThumb(0x0204A478, dsiSaveSeekT);
+		*(u16*)0x0204A366 = 0x2001; // movs r0, #1 (dsiSaveGetArcSrc)
+		*(u16*)0x0204A368 = 0x46C0; // nop
+		*(u16*)0x0204A3C4 = 0x2001; // movs r0, #1 (dsiSaveFlush)
+		*(u16*)0x0204A3C6 = 0x46C0; // nop
+	}
+
 	// Frogger Returns (USA)
 	else if (strcmp(romTid, "KFGE") == 0) {
 		if (saveOnFlashcard) {
