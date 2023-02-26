@@ -937,6 +937,10 @@ u32 dsiSaveSetLength(void* ctx, s32 len) {
 		return 1;
 	}
 
+	if (len > ce9->saveSize-0x200) {
+		len = ce9->saveSize-0x200;
+	}
+
 	dsiSaveSize = len;
 
 	int oldIME = enterCriticalSection();
