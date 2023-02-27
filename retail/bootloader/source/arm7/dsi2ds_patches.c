@@ -22,6 +22,13 @@ static inline void doubleNopT(u32 addr) {
 	*(u16*)(addr+2) = 0x46C0;
 }
 
+static void patchMsg16(u32 addr, const char* msg) {
+	u8* dst = (u8*)addr;
+	for (int i = 0; i <= strlen(msg); i++) {
+		dst[i*2] = msg[i];
+	}
+}
+
 void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	extern bool ce9Alt;
 	extern bool expansionPakFound;
@@ -31,6 +38,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	const char* romTid = getRomTid(ndsHeader);
 	// const char* dataPub = "dataPub:";
 	const char* dataPrv = "dataPrv:";
+	const char* dsiRequiredMsg = "A Nintendo DSi is required to use this feature.";
 	extern void patchHiHeapDSiWareThumb(u32 addr, u32 newCodeAddr, u32 heapEnd);
 	extern void patchInitDSiWare(u32 addr, u32 heapEnd);
 	extern void patchVolumeGetDSiWare(u32 addr);
@@ -9320,6 +9328,177 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0203D5A4 = 0xE1A00000; // nop
 		patchInitDSiWare(0x02042180, heapEnd);
 		patchUserSettingsReadDSiWare(0x020437F8);
+	}
+
+	// Flips: The Bubonic Builders (USA)
+	// Flips: The Bubonic Builders (Europe, Australia)
+	// Flips: Silent But Deadly (USA)
+	// Flips: Silent But Deadly (Europe, Australia)
+	// Flips: Terror in Cubicle Four (USA)
+	// Flips: Terror in Cubicle Four (Europe, Australia)
+	else if (strcmp(romTid, "KFUE") == 0 || strcmp(romTid, "KFUV") == 0
+		   || strcmp(romTid, "KF4E") == 0 || strcmp(romTid, "KF4V") == 0
+		   || strcmp(romTid, "KF9E") == 0 || strcmp(romTid, "KF9V") == 0) {
+		u8 offsetChange = (romTid[3] == 'E') ? 0 : 0xC4;
+		u8 offsetChange2 = (romTid[3] == 'E') ? 0 : 0xD0;
+		u8 offsetChange3 = (romTid[3] == 'E') ? 0 : 0x30;
+		u8 offsetChangeS = (romTid[3] == 'E') ? 0 : 0x20;
+
+		*(u32*)0x02015604 = 0xE1A00000; // nop
+		*(u32*)0x02019390 = 0xE1A00000; // nop
+		patchInitDSiWare(0x02025E8C, heapEnd);
+		*(u32*)0x02026218 = *(u32*)0x02004FD0;
+		patchUserSettingsReadDSiWare(0x02027578);
+		*(u32*)0x0202CED0 = extendedMemory2 ? 0xE3A00001 : 0xE3A00000; // mov r0, #extendedMemory2 ? 1 : 0
+		*(u32*)0x0202CED4 = 0xE12FFF1E; // bx lr
+		*(u32*)(0x02036A7C+offsetChange2) = 0xE1A00000; // nop
+		*(u32*)(0x02040394+offsetChange) = 0xE1A00000; // nop
+		*(u32*)(0x020403AC+offsetChange) = 0xE1A00000; // nop
+		*(u32*)(0x02040424+offsetChange) = 0xE12FFF1E; // bx lr
+		*(u32*)(0x02040434+offsetChange) = 0xE12FFF1E; // bx lr
+		*(u32*)(0x02040764+offsetChange) = 0xE3A00000; // mov r0, #0
+		setBL(0x02044210-offsetChangeS, (u32)dsiSaveOpen);
+		setBL(0x02044220-offsetChangeS, (u32)dsiSaveGetLength);
+		setBL(0x02044234-offsetChangeS, (u32)dsiSaveSetLength);
+		*(u32*)(0x0204428C-offsetChangeS) = 0xE3A00000; // mov r0, #0 (dsiSaveGetArcSrc)
+		*(u32*)(0x020442D4-offsetChangeS) = 0xE3A00001; // mov r0, #1 (dsiSaveOpenDir)
+		*(u32*)(0x02044308-offsetChangeS) = 0xE1A00000; // nop (dsiSaveCloseDir)
+		setBL(0x0204431C-offsetChangeS, (u32)dsiSaveCreate);
+		setBL(0x0204432C-offsetChangeS, (u32)dsiSaveOpen);
+		setBL(0x0204433C-offsetChangeS, (u32)dsiSaveGetResultCode);
+		setBL(0x0204435C-offsetChangeS, (u32)dsiSaveSetLength);
+		setBL(0x02044378-offsetChangeS, (u32)dsiSaveWrite);
+		setBL(0x02044380-offsetChangeS, (u32)dsiSaveClose);
+		*(u32*)(0x020443D0-offsetChangeS) = 0xE1A00000; // nop
+		*(u32*)(0x020443E0-offsetChangeS) = 0xE3A00000; // mov r0, #0
+		*(u32*)(0x020443F8-offsetChangeS) = 0xE1A00000; // nop
+		if (strcmp(romTid, "KF4V") != 0 && strcmp(romTid, "KF9V") != 0) {
+			setBL(0x0204471C-offsetChangeS, (u32)dsiSaveOpen);
+			setBL(0x0204472C-offsetChangeS, (u32)dsiSaveGetResultCode);
+			setBL(0x02044750-offsetChangeS, (u32)dsiSaveSeek);
+			setBL(0x02044774-offsetChangeS, (u32)dsiSaveRead);
+			setBL(0x0204477C-offsetChangeS, (u32)dsiSaveClose);
+			setBL(0x0204483C-offsetChangeS, (u32)dsiSaveOpen);
+			setBL(0x0204484C-offsetChangeS, (u32)dsiSaveGetResultCode);
+			setBL(0x02044870-offsetChangeS, (u32)dsiSaveSeek);
+			setBL(0x02044890-offsetChangeS, (u32)dsiSaveWrite);
+			setBL(0x02044898-offsetChangeS, (u32)dsiSaveClose);
+		} else {
+			setBL(0x02044748, (u32)dsiSaveOpen);
+			setBL(0x02044758, (u32)dsiSaveGetResultCode);
+			setBL(0x0204477C, (u32)dsiSaveSeek);
+			setBL(0x020447A0, (u32)dsiSaveRead);
+			setBL(0x020447A8, (u32)dsiSaveClose);
+			setBL(0x02044868, (u32)dsiSaveOpen);
+			setBL(0x02044878, (u32)dsiSaveGetResultCode);
+			setBL(0x0204489C, (u32)dsiSaveSeek);
+			setBL(0x020448BC, (u32)dsiSaveWrite);
+			setBL(0x020448C4, (u32)dsiSaveClose);
+		}
+		if (strncmp(romTid, "KFU", 3) == 0) {
+			patchMsg16(0x020D879C-offsetChange3, dsiRequiredMsg);
+		} else if (strncmp(romTid, "KF4", 3) == 0) {
+			patchMsg16(0x020D8784-offsetChange3, dsiRequiredMsg);
+		} else {
+			patchMsg16(0x020D87A8-offsetChange3, dsiRequiredMsg);
+		}
+	}
+
+	// Flips: The Enchanted Wood (USA)
+	// Flips: The Enchanted Wood (Europe, Australia)
+	// Flips: The Folk of the Faraway Tree (USA)
+	// Flips: The Folk of the Faraway Tree (Europe, Australia)
+	// Flips: The Magic Faraway Tree (USA)
+	// Flips: The Magic Faraway Tree (Europe, Australia)
+	else if (strcmp(romTid, "KFFE") == 0 || strcmp(romTid, "KFFV") == 0
+		  || strcmp(romTid, "KF6E") == 0 || strcmp(romTid, "KF6V") == 0
+		  || strcmp(romTid, "KFTE") == 0 || strcmp(romTid, "KFTV") == 0) {
+		u8 offsetChange = (romTid[3] == 'E') ? 0 : 0x2C;
+		u8 offsetChange3 = (romTid[3] == 'E') ? 0 : 0x40;
+		u8 offsetChangeS = (romTid[3] == 'E') ? 0 : 0x44;
+
+		*(u32*)0x02015670 = 0xE1A00000; // nop
+		*(u32*)0x020193FC = 0xE1A00000; // nop
+		patchInitDSiWare(0x02025F28, heapEnd);
+		*(u32*)0x020262B4 = *(u32*)0x02004FD0;
+		patchUserSettingsReadDSiWare(0x02027614);
+		*(u32*)0x0202CF6C = extendedMemory2 ? 0xE3A00001 : 0xE3A00000; // mov r0, #extendedMemory2 ? 1 : 0
+		*(u32*)0x0202CF70 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0203B23C = 0xE1A00000; // nop
+		*(u32*)(0x020449A8-offsetChange) = 0xE1A00000; // nop
+		*(u32*)(0x020449C0-offsetChange) = 0xE1A00000; // nop
+		*(u32*)(0x02044A38-offsetChange) = 0xE12FFF1E; // bx lr
+		*(u32*)(0x02044A48-offsetChange) = 0xE12FFF1E; // bx lr
+		*(u32*)(0x02044D9C-offsetChange) = 0xE3A00000; // mov r0, #0
+		setBL(0x020487A4-offsetChangeS, (u32)dsiSaveOpen);
+		setBL(0x020487B4-offsetChangeS, (u32)dsiSaveGetLength);
+		setBL(0x020487C8-offsetChangeS, (u32)dsiSaveSetLength);
+		*(u32*)(0x02048820-offsetChangeS) = 0xE3A00000; // mov r0, #0 (dsiSaveGetArcSrc)
+		*(u32*)(0x02048868-offsetChangeS) = 0xE3A00001; // mov r0, #1 (dsiSaveOpenDir)
+		*(u32*)(0x0204889C-offsetChangeS) = 0xE1A00000; // nop (dsiSaveCloseDir)
+		setBL(0x020488B0-offsetChangeS, (u32)dsiSaveCreate);
+		setBL(0x020488C0-offsetChangeS, (u32)dsiSaveOpen);
+		setBL(0x020488D0-offsetChangeS, (u32)dsiSaveGetResultCode);
+		setBL(0x020488F0-offsetChangeS, (u32)dsiSaveSetLength);
+		setBL(0x0204890C-offsetChangeS, (u32)dsiSaveWrite);
+		setBL(0x02048914-offsetChangeS, (u32)dsiSaveClose);
+		setBL(0x020492D8-offsetChangeS, (u32)dsiSaveOpen);
+		setBL(0x020492E8-offsetChangeS, (u32)dsiSaveGetResultCode);
+		setBL(0x0204930C-offsetChangeS, (u32)dsiSaveSeek);
+		setBL(0x02049330-offsetChangeS, (u32)dsiSaveRead);
+		setBL(0x02049338-offsetChangeS, (u32)dsiSaveClose);
+		setBL(0x020493F8-offsetChangeS, (u32)dsiSaveOpen);
+		setBL(0x02049408-offsetChangeS, (u32)dsiSaveGetResultCode);
+		setBL(0x0204942C-offsetChangeS, (u32)dsiSaveSeek);
+		setBL(0x0204944C-offsetChangeS, (u32)dsiSaveWrite);
+		setBL(0x02049454-offsetChangeS, (u32)dsiSaveClose);
+		if (strncmp(romTid, "KFF", 3) == 0) {
+			patchMsg16(0x020DDAD0-offsetChange3, dsiRequiredMsg);
+		} else if (strncmp(romTid, "KFT", 3) == 0) {
+			patchMsg16(0x020DDADC-offsetChange3, dsiRequiredMsg);
+		} else {
+			patchMsg16(0x020DDAEC-offsetChange3, dsiRequiredMsg);
+		}
+	}
+
+	// Flips: More Bloody Horowitz (USA)
+	// Flips: More Bloody Horowitz (Europe, Australia)
+	else if (strcmp(romTid, "KFHE") == 0 || strcmp(romTid, "KFHV") == 0) {
+		*(u32*)0x02014768 = 0xE1A00000; // nop
+		*(u32*)0x020184B0 = 0xE1A00000; // nop
+		patchInitDSiWare(0x020246CC, heapEnd);
+		*(u32*)0x02024A58 = *(u32*)0x02004FD0;
+		patchUserSettingsReadDSiWare(0x02025D7C);
+		*(u32*)0x0202B4EC = extendedMemory2 ? 0xE3A00001 : 0xE3A00000; // mov r0, #extendedMemory2 ? 1 : 0
+		*(u32*)0x0202B4F0 = 0xE12FFF1E; // bx lr
+		*(u32*)0x020307AC = 0xE1A00000; // nop
+		*(u32*)0x02039828 = 0xE1A00000; // nop
+		*(u32*)0x02039840 = 0xE1A00000; // nop
+		*(u32*)0x020398B4 = 0xE12FFF1E; // bx lr
+		*(u32*)0x020398C4 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02039C14 = 0xE3A00000; // mov r0, #0
+		setBL(0x0203DA40, (u32)dsiSaveOpen);
+		setBL(0x0203DA50, (u32)dsiSaveGetLength);
+		setBL(0x0203DA64, (u32)dsiSaveSetLength);
+		*(u32*)0x0203DA8C = 0xE3A00000; // mov r0, #0 (dsiSaveGetArcSrc)
+		*(u32*)0x0203DAD4 = 0xE3A00001; // mov r0, #1 (dsiSaveOpenDir)
+		*(u32*)0x0203DB08 = 0xE1A00000; // nop (dsiSaveCloseDir)
+		setBL(0x0203DB1C, (u32)dsiSaveCreate);
+		setBL(0x0203DB2C, (u32)dsiSaveOpen);
+		setBL(0x0203DB3C, (u32)dsiSaveGetResultCode);
+		setBL(0x0203DB5C, (u32)dsiSaveSetLength);
+		setBL(0x0203DB88, (u32)dsiSaveWrite);
+		setBL(0x0203DB90, (u32)dsiSaveClose);
+		setBL(0x0203DEF4, (u32)dsiSaveOpen);
+		setBL(0x0203DF04, (u32)dsiSaveGetResultCode);
+		setBL(0x0203DF28, (u32)dsiSaveSeek);
+		setBL(0x0203DF4C, (u32)dsiSaveRead);
+		setBL(0x0203DF54, (u32)dsiSaveClose);
+		setBL(0x0203DFD8, (u32)dsiSaveOpen);
+		setBL(0x0203DFE8, (u32)dsiSaveGetResultCode);
+		setBL(0x0203E00C, (u32)dsiSaveSeek);
+		setBL(0x0203E02C, (u32)dsiSaveWrite);
+		setBL(0x0203E034, (u32)dsiSaveClose);
 	}
 
 	// Frogger Returns (USA)

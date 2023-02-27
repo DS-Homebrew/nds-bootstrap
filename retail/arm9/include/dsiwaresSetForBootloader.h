@@ -161,6 +161,13 @@ static const char dsiWareForBootloader1[][4] = {
 	"KKR", // Flip the Core
 	"KFP", // Flipper
 	"KKN", // Flipper 2: Flush the Goldfish
+	"KFU", // Flips: The Bubonic Builders
+	"KFF", // Flips: The Enchanted Wood
+	"KF6", // Flips: The Folk of the Faraway Tree
+	"KFT", // Flips: The Magic Faraway Tree
+	"KFH", // Flips: More Bloody Horowitz
+	"KF4", // Flips: Silent But Deadly
+	"KF9", // Flips: Terror in Cubicle Four
 	"KFG", // Frogger Returns
 	"KFV", // ARC Style: Furo Jump!! Girutegia Gaiden!
 	"K6J", // Fuuu! Dairoujou Kai
