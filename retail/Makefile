@@ -9,8 +9,7 @@ endif
 
 # These set the information text in the nds file
 GAME_TITLE     := nds-bootstrap
-GAME_SUBTITLE1 := Runs an .nds file
-GAME_SUBTITLE2 := Ahezard
+GAME_SUBTITLE1 := ahezard & Rocket Robz
 
 include $(DEVKITARM)/ds_rules
 
@@ -150,7 +149,7 @@ nightly:	$(OUTPUT)
 
 $(OUTPUT):	$(BIN) arm7/$(TARGET).elf arm9/$(TARGET).elf
 	ndstool	-c $(OUTPUT) -7 arm7/$(TARGET).elf -9 arm9/$(TARGET).elf -d $(NITRODATA) \
-			-b $(GAME_ICON) "$(GAME_TITLE);$(GAME_SUBTITLE1);$(GAME_SUBTITLE2)" \
+			-b $(GAME_ICON) "$(GAME_TITLE);$(GAME_SUBTITLE1)" \
 			-g KBSE 01 "NDSBOOTSTRAP" -z 80040000 -u 00030004 -a 00000138 -p 00000001
 
 #---------------------------------------------------------------------------------
