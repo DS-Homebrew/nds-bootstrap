@@ -4377,23 +4377,29 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Deep Sea Creatures (USA)
-	else if (strcmp(romTid, "K6BE") == 0 && saveOnFlashcard) {
-		setBL(0x020514B8, (u32)dsiSaveOpen);
-		setBL(0x020514D8, (u32)dsiSaveCreate);
-		setBL(0x020514E8, (u32)dsiSaveOpen);
-		setBL(0x0205150C, (u32)dsiSaveSeek);
-		setBL(0x020516DC, (u32)dsiSaveSeek);
-		setBL(0x020516F0, (u32)dsiSaveRead);
-		setBL(0x020517BC, (u32)dsiSaveSeek);
-		setBL(0x020517CC, (u32)dsiSaveWrite); // dsiSaveWriteAsync
-		setBL(0x020517DC, (u32)dsiSaveSeek);
-		setBL(0x020517F8, (u32)dsiSaveSeek);
-		setBL(0x02051808, (u32)dsiSaveRead); // dsiSaveReadAsync
-		setBL(0x02051818, (u32)dsiSaveSeek);
-		setBL(0x020518C0, (u32)dsiSaveSeek);
-		setBL(0x020518D0, (u32)dsiSaveRead);
-		setBL(0x02051904, (u32)dsiSaveSeek);
-		setBL(0x02051914, (u32)dsiSaveWrite);
+	else if (strcmp(romTid, "K6BE") == 0) {
+		if (saveOnFlashcard) {
+			setBL(0x020514B8, (u32)dsiSaveOpen);
+			setBL(0x020514D8, (u32)dsiSaveCreate);
+			setBL(0x020514E8, (u32)dsiSaveOpen);
+			setBL(0x0205150C, (u32)dsiSaveSeek);
+			setBL(0x020516DC, (u32)dsiSaveSeek);
+			setBL(0x020516F0, (u32)dsiSaveRead);
+			setBL(0x020517BC, (u32)dsiSaveSeek);
+			setBL(0x020517CC, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+			setBL(0x020517DC, (u32)dsiSaveSeek);
+			setBL(0x020517F8, (u32)dsiSaveSeek);
+			setBL(0x02051808, (u32)dsiSaveRead); // dsiSaveReadAsync
+			setBL(0x02051818, (u32)dsiSaveSeek);
+			setBL(0x020518C0, (u32)dsiSaveSeek);
+			setBL(0x020518D0, (u32)dsiSaveRead);
+			setBL(0x02051904, (u32)dsiSaveSeek);
+			setBL(0x02051914, (u32)dsiSaveWrite);
+		}
+		if (!twlFontFound) {
+			*(u32*)0x02072778 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+			*(u32*)0x02072780 = 0xE1A00000; // nop (Skip Manual screen)
+		}
 	}
 
 	// GO Series: Defense Wars (USA)

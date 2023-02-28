@@ -7367,15 +7367,16 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Deep Sea Creatures (USA)
-	// Requires 8MB of RAM
-	else if (strcmp(romTid, "K6BE") == 0 && extendedMemory2) {
+	else if (strcmp(romTid, "K6BE") == 0) {
 		*(u32*)0x02013174 = 0xE1A00000; // nop
 		*(u32*)0x0201652C = 0xE1A00000; // nop
 		patchInitDSiWare(0x0201D050, heapEnd);
-		*(u32*)0x0201D3DC -= 0x30000;
+		*(u32*)0x0201D3DC = *(u32*)0x02004FE8;
 		patchUserSettingsReadDSiWare(0x0201E7B0);
 		*(u32*)0x02023988 = 0xE3A00001; // mov r0, #1
 		*(u32*)0x0202398C = 0xE12FFF1E; // bx lr
+		*(u32*)0x0204D388 = 0xE1A023A9; // mov r2, r9, lsr #7
+		*(u32*)0x0204D398 = 0xE3A01601; // mov r1, #0x100000
 		*(u32*)0x0204D3A8 = 0xE1A00000; // nop
 		setBL(0x020514B8, (u32)dsiSaveOpen);
 		*(u32*)0x020514CC = 0xE1A00000; // nop
@@ -7394,6 +7395,8 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x020518D0, (u32)dsiSaveRead);
 		setBL(0x02051904, (u32)dsiSaveSeek);
 		setBL(0x02051914, (u32)dsiSaveWrite);
+		*(u32*)0x02072778 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		*(u32*)0x02072780 = 0xE1A00000; // nop (Skip Manual screen)
 	}
 
 	// GO Series: Defense Wars (USA)
