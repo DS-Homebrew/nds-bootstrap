@@ -9133,12 +9133,17 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Fieldrunners (USA)
 	// Fieldrunners (Europe, Australia)
-	// Requires 8MB of RAM
-	else if ((strcmp(romTid, "KFDE") == 0 || strcmp(romTid, "KFDV") == 0) && extendedMemory2) {
+	// Saving not supported due to using more than one file in filesystem
+	else if (strcmp(romTid, "KFDE") == 0 || strcmp(romTid, "KFDV") == 0) {
+		if (!extendedMemory2) {
+			// Disable audio
+			*(u32*)0x0200F52C = 0xE12FFF1E; // bx lr
+			*(u32*)0x020106E0 = 0xE12FFF1E; // bx lr
+		}
 		*(u32*)0x0205828C = 0xE1A00000; // nop
 		*(u32*)0x0205B838 = 0xE1A00000; // nop
 		patchInitDSiWare(0x02061654, heapEnd);
-		*(u32*)0x020619C4 -= 0x30000;
+		*(u32*)0x020619C4 = *(u32*)0x02004FC0;
 		patchUserSettingsReadDSiWare(0x02062CF0);
 		*(u32*)0x02063280 = 0xE1A00000; // nop
 		*(u32*)0x02063284 = 0xE1A00000; // nop
