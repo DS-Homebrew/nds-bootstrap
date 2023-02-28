@@ -3924,6 +3924,40 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// Gibonyeongdaneo: Wodeu Peojeul (Korea)
+	else if (strcmp(romTid, "KWPK") == 0) {
+		if (saveOnFlashcard) {
+			setBL(0x02023CA8, (u32)dsiSaveClose);
+			setBL(0x02023E4C, (u32)dsiSaveOpen);
+			setBL(0x02023E74, (u32)dsiSaveSeek);
+			setBL(0x02023E90, (u32)dsiSaveClose);
+			setBL(0x02023EA8, (u32)dsiSaveRead);
+			setBL(0x02023EC8, (u32)dsiSaveClose);
+			setBL(0x02023ED8, (u32)dsiSaveClose);
+			setBL(0x02023F14, (u32)dsiSaveOpen);
+			setBL(0x02023F2C, (u32)dsiSaveSeek);
+			setBL(0x02023F44, (u32)dsiSaveRead); // dsiSaveReadAsync
+			setBL(0x02023F78, (u32)dsiSaveOpen);
+			setBL(0x02023F98, (u32)dsiSaveSetLength);
+			setBL(0x02023FA8, (u32)dsiSaveClose);
+			setBL(0x02023FC4, (u32)dsiSaveSeek);
+			setBL(0x02023FE0, (u32)dsiSaveClose);
+			setBL(0x02023FF8, (u32)dsiSaveWrite);
+			setBL(0x0202401C, (u32)dsiSaveClose);
+			setBL(0x02024028, (u32)dsiSaveClose);
+			setBL(0x02024068, (u32)dsiSaveOpen);
+			setBL(0x0202407C, (u32)dsiSaveSetLength);
+			setBL(0x02024094, (u32)dsiSaveSeek);
+			setBL(0x020240AC, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+			setBL(0x02024104, (u32)dsiSaveCreate);
+			setBL(0x0202410C, (u32)dsiSaveGetResultCode);
+		}
+		if (!twlFontFound) {
+			*(u32*)0x02031C74 = 0xE3A00002; // mov r0, #2 (Skip Manual screen, Part 1)
+			*(u32*)0x02039390 = 0xE3A00000; // mov r0, #0 (Skip Manual screen, Part 2)
+		}
+	}
+
 	// Chuukara! Dairoujou (Japan)
 	else if (strcmp(romTid, "KQLJ") == 0 && saveOnFlashcard) {
 		setBL(0x020446E4, (u32)dsiSaveOpen);
