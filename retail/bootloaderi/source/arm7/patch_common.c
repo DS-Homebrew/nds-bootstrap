@@ -5670,6 +5670,12 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0202EF28 = 0xE12FFF1E; // bx lr
 	}
 
+	// Ginsei Tsume-Shougi (Japan)
+	// A bit hard/confusing to add save support
+	else if (strcmp(romTid, "K2MJ") == 0 && !twlFontFound) {
+		*(u32*)0x02082050 = 0xE1A00000; // nop (Skip Manual screen)
+	}
+
 	// Goooooal America (USA)
 	else if (strcmp(romTid, "K9AE") == 0 && saveOnFlashcard) {
 		setBL(0x02048390, (u32)dsiSaveCreate);

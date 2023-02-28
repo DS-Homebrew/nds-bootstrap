@@ -182,6 +182,7 @@ static const char dsiWareForBootloader1[][4] = {
 	"KGM", // Game & Watch: Manhole
 	"KGF", // Game & Watch: Mario's Cement Factory
 	"KGV", // Game & Watch: Vermin
+	"K2M", // Ginsei Tsume-Shougi
 	"KGS", // Globulos Party
 	"KGK", // Glory Days: Tactical Defense
 	"K3G", // Go! Go! Kokopolo

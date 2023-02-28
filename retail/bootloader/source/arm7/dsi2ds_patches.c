@@ -9876,6 +9876,19 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0202EF28 = 0xE12FFF1E; // bx lr
 	}
 
+	// Ginsei Tsume-Shougi (Japan)
+	// A bit hard/confusing to add save support
+	else if (strcmp(romTid, "K2MJ") == 0) {
+		useSharedFont = (twlFontFound && extendedMemory2);
+		*(u32*)0x02011288 = 0xE1A00000; // nop
+		*(u32*)0x02014E1C = 0xE1A00000; // nop
+		patchInitDSiWare(0x0201A260, heapEnd);
+		patchUserSettingsReadDSiWare(0x0201B830);
+		if (!useSharedFont) {
+			*(u32*)0x02082050 = 0xE1A00000; // nop (Skip Manual screen)
+		}
+	}
+
 	// Globulos Party (USA)
 	// Globulos Party (Europe)
 	else if (strncmp(romTid, "KGS", 3) == 0) {
