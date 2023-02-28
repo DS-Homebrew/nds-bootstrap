@@ -172,6 +172,7 @@ static const char dsiWareForBootloader1[][4] = {
 	"KFG", // Frogger Returns
 	"KFV", // ARC Style: Furo Jump!! Girutegia Gaiden!
 	"K6J", // Fuuu! Dairoujou Kai
+	"KKG", // Gaia's Moon
 	"KGB", // Game & Watch: Ball
 	"KGC", // Game & Watch: Chef
 	"KGD", // Game & Watch: Donkey Kong Jr.

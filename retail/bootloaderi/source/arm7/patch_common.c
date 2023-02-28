@@ -1300,41 +1300,26 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Abyss (USA)
 	// Abyss (Europe)
 	else if ((strcmp(romTid, "KXGE") == 0 || strcmp(romTid, "KXGP") == 0) && saveOnFlashcard) {
+		u8 offsetChange = (romTid[3] == 'E') ? 0 : 0x50;
+
 		setBL(0x02012BBC, (u32)dsiSaveCreate);
 		*(u32*)0x02012BDC = 0xE3A00001; // mov r0, #1
 		setBL(0x02012C80, (u32)dsiSaveGetResultCode);
 		*(u32*)0x02012CA8 = 0xE3A00001; // mov r0, #1
-		if (romTid[3] == 'E') {
-			setBL(0x020318E0, (u32)dsiSaveOpen);
-			setBL(0x020318F8, (u32)dsiSaveGetLength);
-			setBL(0x02031908, (u32)dsiSaveSeek);
-			setBL(0x02031918, (u32)dsiSaveWrite);
-			setBL(0x02031920, (u32)dsiSaveClose);
-			setBL(0x02031990, (u32)dsiSaveOpen);
-			setBL(0x020319A8, (u32)dsiSaveGetLength);
-			setBL(0x020319BC, (u32)dsiSaveSeek);
-			setBL(0x020319CC, (u32)dsiSaveRead);
-			setBL(0x020319D4, (u32)dsiSaveClose);
-			setBL(0x02031A4C, (u32)dsiSaveCreate);
-			setBL(0x02031A78, (u32)dsiSaveOpen);
-			setBL(0x02031AB4, (u32)dsiSaveWrite);
-			setBL(0x02031AC4, (u32)dsiSaveClose);
-		} else {
-			setBL(0x02031930, (u32)dsiSaveOpen);
-			setBL(0x02031948, (u32)dsiSaveGetLength);
-			setBL(0x02031958, (u32)dsiSaveSeek);
-			setBL(0x02031968, (u32)dsiSaveWrite);
-			setBL(0x02031970, (u32)dsiSaveClose);
-			setBL(0x020319E0, (u32)dsiSaveOpen);
-			setBL(0x020319F8, (u32)dsiSaveGetLength);
-			setBL(0x02031A0C, (u32)dsiSaveSeek);
-			setBL(0x02031A1C, (u32)dsiSaveRead);
-			setBL(0x02031A24, (u32)dsiSaveClose);
-			setBL(0x02031A9C, (u32)dsiSaveCreate);
-			setBL(0x02031AC8, (u32)dsiSaveOpen);
-			setBL(0x02031B04, (u32)dsiSaveWrite);
-			setBL(0x02031B14, (u32)dsiSaveClose);
-		}
+		setBL(0x020318E0+offsetChange, (u32)dsiSaveOpen);
+		setBL(0x020318F8+offsetChange, (u32)dsiSaveGetLength);
+		setBL(0x02031908+offsetChange, (u32)dsiSaveSeek);
+		setBL(0x02031918+offsetChange, (u32)dsiSaveWrite);
+		setBL(0x02031920+offsetChange, (u32)dsiSaveClose);
+		setBL(0x02031990+offsetChange, (u32)dsiSaveOpen);
+		setBL(0x020319A8+offsetChange, (u32)dsiSaveGetLength);
+		setBL(0x020319BC+offsetChange, (u32)dsiSaveSeek);
+		setBL(0x020319CC+offsetChange, (u32)dsiSaveRead);
+		setBL(0x020319D4+offsetChange, (u32)dsiSaveClose);
+		setBL(0x02031A4C+offsetChange, (u32)dsiSaveCreate);
+		setBL(0x02031A78+offsetChange, (u32)dsiSaveOpen);
+		setBL(0x02031AB4+offsetChange, (u32)dsiSaveWrite);
+		setBL(0x02031AC4+offsetChange, (u32)dsiSaveClose);
 	}
 
 	// Ah! Heaven (USA)
@@ -5502,6 +5487,53 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02045608, (u32)dsiSaveClose);
 	}
 
+	// Gaia's Moon (USA)
+	// Gaia's Moon (Europe)
+	else if ((strcmp(romTid, "KKGE") == 0 || strcmp(romTid, "KKGP") == 0) && saveOnFlashcard) {
+		u8 offsetChange = (romTid[3] == 'E') ? 0 : 0x4C;
+
+		setBL(0x02011E88, (u32)dsiSaveCreate);
+		*(u32*)0x02011EA8 = 0xE3A00001; // mov r0, #1
+		setBL(0x02011F50, (u32)dsiSaveGetResultCode);
+		*(u32*)0x02011F78 = 0xE3A00001; // mov r0, #1
+		setBL(0x020301E8+offsetChange, (u32)dsiSaveOpen);
+		setBL(0x02030200+offsetChange, (u32)dsiSaveGetLength);
+		setBL(0x02030210+offsetChange, (u32)dsiSaveSeek);
+		setBL(0x02030220+offsetChange, (u32)dsiSaveWrite);
+		setBL(0x02030228+offsetChange, (u32)dsiSaveClose);
+		setBL(0x02030298+offsetChange, (u32)dsiSaveOpen);
+		setBL(0x020302B0+offsetChange, (u32)dsiSaveGetLength);
+		setBL(0x020302C4+offsetChange, (u32)dsiSaveSeek);
+		setBL(0x020302D4+offsetChange, (u32)dsiSaveRead);
+		setBL(0x020302DC+offsetChange, (u32)dsiSaveClose);
+		setBL(0x02030354+offsetChange, (u32)dsiSaveCreate);
+		setBL(0x02030380+offsetChange, (u32)dsiSaveOpen);
+		setBL(0x020303BC+offsetChange, (u32)dsiSaveWrite);
+		setBL(0x020303CC+offsetChange, (u32)dsiSaveClose);
+	}
+
+	// Gaia's Moon (Japan)
+	else if (strcmp(romTid, "KKGJ") == 0 && saveOnFlashcard) {
+		setBL(0x02011A40, (u32)dsiSaveCreate);
+		*(u32*)0x02011A60 = 0xE3A00001; // mov r0, #1
+		setBL(0x02011B08, (u32)dsiSaveGetResultCode);
+		*(u32*)0x02011B30 = 0xE3A00001; // mov r0, #1
+		setBL(0x0202FD8C, (u32)dsiSaveOpen);
+		setBL(0x0202FDA4, (u32)dsiSaveGetLength);
+		setBL(0x0202FDB4, (u32)dsiSaveSeek);
+		setBL(0x0202FDC4, (u32)dsiSaveWrite);
+		setBL(0x0202FDCC, (u32)dsiSaveClose);
+		setBL(0x0202FE3C, (u32)dsiSaveOpen);
+		setBL(0x0202FE54, (u32)dsiSaveGetLength);
+		setBL(0x0202FE68, (u32)dsiSaveSeek);
+		setBL(0x0202FE78, (u32)dsiSaveRead);
+		setBL(0x0202FE80, (u32)dsiSaveClose);
+		setBL(0x0202FEF8, (u32)dsiSaveCreate);
+		setBL(0x0202FF24, (u32)dsiSaveOpen);
+		setBL(0x0202FF60, (u32)dsiSaveWrite);
+		setBL(0x0202FF70, (u32)dsiSaveClose);
+	}
+
 	// Game & Watch: Ball (USA, Europe)
 	// Game & Watch: Helmet (USA, Europe)
 	// Game & Watch: Judge (USA, Europe)
@@ -9528,41 +9560,26 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// SnowBoard Xtreme (USA)
 	// SnowBoard Xtreme (Europe)
 	else if ((strcmp(romTid, "KX5E") == 0 || strcmp(romTid, "KX5P") == 0) && saveOnFlashcard) {
+		u8 offsetChange = (romTid[3] == 'E') ? 0 : 0x50;
+
 		setBL(0x02011B70, (u32)dsiSaveCreate);
 		*(u32*)0x02011B90 = 0xE3A00001; // mov r0, #1
 		setBL(0x02011C24, (u32)dsiSaveGetResultCode);
 		*(u32*)0x02011C48 = 0xE3A00001; // mov r0, #1
-		if (romTid[3] == 'E') {
-			setBL(0x020313AC, (u32)dsiSaveOpen);
-			setBL(0x020313C4, (u32)dsiSaveGetLength);
-			setBL(0x020313D4, (u32)dsiSaveSeek);
-			setBL(0x020313E4, (u32)dsiSaveWrite);
-			setBL(0x020313EC, (u32)dsiSaveClose);
-			setBL(0x0203145C, (u32)dsiSaveOpen);
-			setBL(0x02031474, (u32)dsiSaveGetLength);
-			setBL(0x02031488, (u32)dsiSaveSeek);
-			setBL(0x02031498, (u32)dsiSaveRead);
-			setBL(0x020314A0, (u32)dsiSaveClose);
-			setBL(0x02031518, (u32)dsiSaveCreate);
-			setBL(0x02031544, (u32)dsiSaveOpen);
-			setBL(0x02031580, (u32)dsiSaveWrite);
-			setBL(0x02031590, (u32)dsiSaveClose);
-		} else if (romTid[3] == 'P') {
-			setBL(0x020313FC, (u32)dsiSaveOpen);
-			setBL(0x02031414, (u32)dsiSaveGetLength);
-			setBL(0x02031424, (u32)dsiSaveSeek);
-			setBL(0x02031434, (u32)dsiSaveWrite);
-			setBL(0x0203143C, (u32)dsiSaveClose);
-			setBL(0x020314AC, (u32)dsiSaveOpen);
-			setBL(0x020314C4, (u32)dsiSaveGetLength);
-			setBL(0x020314D8, (u32)dsiSaveSeek);
-			setBL(0x020314E8, (u32)dsiSaveRead);
-			setBL(0x020314F0, (u32)dsiSaveClose);
-			setBL(0x02031568, (u32)dsiSaveCreate);
-			setBL(0x02031594, (u32)dsiSaveOpen);
-			setBL(0x020315D0, (u32)dsiSaveWrite);
-			setBL(0x020315E0, (u32)dsiSaveClose);
-		}
+		setBL(0x020313AC+offsetChange, (u32)dsiSaveOpen);
+		setBL(0x020313C4+offsetChange, (u32)dsiSaveGetLength);
+		setBL(0x020313D4+offsetChange, (u32)dsiSaveSeek);
+		setBL(0x020313E4+offsetChange, (u32)dsiSaveWrite);
+		setBL(0x020313EC+offsetChange, (u32)dsiSaveClose);
+		setBL(0x0203145C+offsetChange, (u32)dsiSaveOpen);
+		setBL(0x02031474+offsetChange, (u32)dsiSaveGetLength);
+		setBL(0x02031488+offsetChange, (u32)dsiSaveSeek);
+		setBL(0x02031498+offsetChange, (u32)dsiSaveRead);
+		setBL(0x020314A0+offsetChange, (u32)dsiSaveClose);
+		setBL(0x02031518+offsetChange, (u32)dsiSaveCreate);
+		setBL(0x02031544+offsetChange, (u32)dsiSaveOpen);
+		setBL(0x02031580+offsetChange, (u32)dsiSaveWrite);
+		setBL(0x02031590+offsetChange, (u32)dsiSaveClose);
 	}
 
 	// Sokuren Keisa: Shougaku 1 Nensei (Japan)
@@ -10452,41 +10469,26 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Zombie Skape (USA)
 	// Zombie Skape (Europe)
 	else if ((strcmp(romTid, "KZYE") == 0 || strcmp(romTid, "KZYP") == 0) && saveOnFlashcard) {
+		u8 offsetChange = (romTid[3] == 'E') ? 0 : 0x4C;
+
 		setBL(0x02011D58, (u32)dsiSaveCreate);
 		*(u32*)0x02011D78 = 0xE3A00001; // mov r0, #1
 		setBL(0x02011E0C, (u32)dsiSaveGetResultCode);
 		*(u32*)0x02011E30 = 0xE3A00001; // mov r0, #1
-		if (romTid[3] == 'E') {
-			setBL(0x02032118, (u32)dsiSaveOpen);
-			setBL(0x02032130, (u32)dsiSaveGetLength);
-			setBL(0x02032140, (u32)dsiSaveSeek);
-			setBL(0x02032150, (u32)dsiSaveWrite);
-			setBL(0x02032158, (u32)dsiSaveClose);
-			setBL(0x020321C8, (u32)dsiSaveOpen);
-			setBL(0x020321E0, (u32)dsiSaveGetLength);
-			setBL(0x020321F4, (u32)dsiSaveSeek);
-			setBL(0x02032204, (u32)dsiSaveRead);
-			setBL(0x0203220C, (u32)dsiSaveClose);
-			setBL(0x02032284, (u32)dsiSaveCreate);
-			setBL(0x020322B0, (u32)dsiSaveOpen);
-			setBL(0x020322EC, (u32)dsiSaveWrite);
-			setBL(0x020322FC, (u32)dsiSaveClose);
-		} else if (romTid[3] == 'P') {
-			setBL(0x02032164, (u32)dsiSaveOpen);
-			setBL(0x0203217C, (u32)dsiSaveGetLength);
-			setBL(0x0203218C, (u32)dsiSaveSeek);
-			setBL(0x0203219C, (u32)dsiSaveWrite);
-			setBL(0x020321A4, (u32)dsiSaveClose);
-			setBL(0x02032214, (u32)dsiSaveOpen);
-			setBL(0x0203222C, (u32)dsiSaveGetLength);
-			setBL(0x02032240, (u32)dsiSaveSeek);
-			setBL(0x02032250, (u32)dsiSaveRead);
-			setBL(0x02032258, (u32)dsiSaveClose);
-			setBL(0x020322D0, (u32)dsiSaveCreate);
-			setBL(0x020322FC, (u32)dsiSaveOpen);
-			setBL(0x02032338, (u32)dsiSaveWrite);
-			setBL(0x02032348, (u32)dsiSaveClose);
-		}
+		setBL(0x02032118+offsetChange, (u32)dsiSaveOpen);
+		setBL(0x02032130+offsetChange, (u32)dsiSaveGetLength);
+		setBL(0x02032140+offsetChange, (u32)dsiSaveSeek);
+		setBL(0x02032150+offsetChange, (u32)dsiSaveWrite);
+		setBL(0x02032158+offsetChange, (u32)dsiSaveClose);
+		setBL(0x020321C8+offsetChange, (u32)dsiSaveOpen);
+		setBL(0x020321E0+offsetChange, (u32)dsiSaveGetLength);
+		setBL(0x020321F4+offsetChange, (u32)dsiSaveSeek);
+		setBL(0x02032204+offsetChange, (u32)dsiSaveRead);
+		setBL(0x0203220C+offsetChange, (u32)dsiSaveClose);
+		setBL(0x02032284+offsetChange, (u32)dsiSaveCreate);
+		setBL(0x020322B0+offsetChange, (u32)dsiSaveOpen);
+		setBL(0x020322EC+offsetChange, (u32)dsiSaveWrite);
+		setBL(0x020322FC+offsetChange, (u32)dsiSaveClose);
 	}
 
 	// Zoonies: Escape from Makatu (USA)
