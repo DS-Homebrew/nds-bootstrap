@@ -168,6 +168,7 @@ static const char dsiWareForBootloader1[][4] = {
 	"KFH", // Flips: More Bloody Horowitz
 	"KF4", // Flips: Silent But Deadly
 	"KF9", // Flips: Terror in Cubicle Four
+	"KFO", // Frenzic
 	"KFG", // Frogger Returns
 	"KFV", // ARC Style: Furo Jump!! Girutegia Gaiden!
 	"K6J", // Fuuu! Dairoujou Kai

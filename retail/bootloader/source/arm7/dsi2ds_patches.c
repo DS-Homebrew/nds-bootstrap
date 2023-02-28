@@ -9501,6 +9501,34 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0203E034, (u32)dsiSaveClose);
 	}
 
+	// Frenzic (USA)
+	// Frenzic (Europe)
+	// Saving not supported due to using more than one file in filesystem
+	else if (strcmp(romTid, "KFOE") == 0 || strcmp(romTid, "KFOP") == 0) {
+		u8 offsetChange = (romTid[3] == 'E') ? 0 : 0x7C;
+
+		if (romTid[3] == 'E') {
+			*(u16*)0x0202A644 += 0x1000; // beq -> b
+		} else {
+			*(u16*)0x0202A710 += 0x1000; // beq -> b
+		}
+		if (!extendedMemory2) {
+			*(u16*)(0x0206E8DC+offsetChange) = 0x4770; // bx lr (Disable loading exception textures)
+		}
+		*(u16*)(0x0206F160+offsetChange) = 0x4770; // bx lr
+
+		doubleNopT(0x02075356+offsetChange);
+		doubleNopT(0x02077C62+offsetChange);
+		doubleNopT(0x0207B31C+offsetChange);
+		doubleNopT(0x02087BD6+offsetChange);
+		doubleNopT(0x02087BDA+offsetChange);
+		doubleNopT(0x02087BE6+offsetChange);
+		doubleNopT(0x02087CCA+offsetChange);
+		patchHiHeapDSiWareThumb(0x02087D08+offsetChange, 0x0207A0EC+offsetChange, heapEnd);
+		*(u32*)(0x02087DE0+offsetChange) = *(u32*)0x02004FDC;
+		patchUserSettingsReadDSiWare(0x02088A36+offsetChange);
+	}
+
 	// Frogger Returns (USA)
 	else if (strcmp(romTid, "KFGE") == 0) {
 		*(u32*)0x020117D4 = 0xE1A00000; // nop
