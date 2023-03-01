@@ -10046,58 +10046,47 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
-	// Goooooal America (USA)
-	// Audio does not play
-	else if (strcmp(romTid, "K9AE") == 0) {
-		useSharedFont = twlFontFound;
-		*(u32*)0x0200507C = 0xE1A00000; // nop
-		*(u32*)0x0201CE24 = 0xE1A00000; // nop
-		*(u32*)0x02021154 = 0xE1A00000; // nop
-		patchInitDSiWare(0x02026950, heapEnd);
-		patchUserSettingsReadDSiWare(0x02027F34);
-		setBL(0x02048390, (u32)dsiSaveCreate);
-		setBL(0x020483A0, (u32)dsiSaveOpen);
-		setBL(0x020483BC, (u32)dsiSaveGetResultCode);
-		setBL(0x020483E0, (u32)dsiSaveSeek);
-		setBL(0x020483F8, (u32)dsiSaveGetResultCode);
-		setBL(0x0204841C, (u32)dsiSaveWrite);
-		setBL(0x0204843C, (u32)dsiSaveClose);
-		setBL(0x02048444, (u32)dsiSaveGetResultCode);
-		setBL(0x02048460, (u32)dsiSaveGetResultCode);
-		setBL(0x0204849C, (u32)dsiSaveOpenR);
-		setBL(0x020484AC, (u32)dsiSaveGetLength);
-		setBL(0x020484E0, (u32)dsiSaveRead);
-		setBL(0x020484F8, (u32)dsiSaveClose);
-		setBL(0x02048504, (u32)dsiSaveGetResultCode);
-		setBL(0x0204D0AC, 0x02048560);
-		*(u32*)0x02053380 = 0xE12FFF1E; // bx lr
-	}
+	// Go! Go! Island Rescue! (USA)
+	// Go! Go! Island Rescue! (Europe, Australia)
+	else if (strcmp(romTid, "KGQE") == 0 || strcmp(romTid, "KGQV") == 0) {
+		useSharedFont = (twlFontFound && debugOrMep);
+		u8 offsetChange = (romTid[3] == 'E') ? 0 : 0x98;
+		u8 offsetChangeS = (romTid[3] == 'E') ? 0 : 0x14;
+		u8 offsetChangeS2 = (romTid[3] == 'E') ? 0 : 0x1C;
+		u8 offsetChangeS3 = (romTid[3] == 'E') ? 0 : 0x24;
+		u16 offsetChange2 = (romTid[3] == 'E') ? 0 : 0x2AC;
 
-	// Goooooal Europa 2012 (Europe)
-	// Audio does not play
-	else if (strcmp(romTid, "K9AP") == 0) {
-		useSharedFont = twlFontFound;
-		*(u32*)0x0200507C = 0xE1A00000; // nop
-		*(u32*)0x020127C8 = 0xE1A00000; // nop
-		*(u32*)0x02016AF8 = 0xE1A00000; // nop
-		patchInitDSiWare(0x0201C2F4, heapEnd);
-		patchUserSettingsReadDSiWare(0x0201D8D8);
-		setBL(0x0203DD34, (u32)dsiSaveCreate);
-		setBL(0x0203DD44, (u32)dsiSaveOpen);
-		setBL(0x0203DD60, (u32)dsiSaveGetResultCode);
-		setBL(0x0203DD84, (u32)dsiSaveSeek);
-		setBL(0x0203DD9C, (u32)dsiSaveGetResultCode);
-		setBL(0x0203DDC0, (u32)dsiSaveWrite);
-		setBL(0x0203DDE0, (u32)dsiSaveClose);
-		setBL(0x0203DDE8, (u32)dsiSaveGetResultCode);
-		setBL(0x0203DE04, (u32)dsiSaveGetResultCode);
-		setBL(0x0203DE40, (u32)dsiSaveOpenR);
-		setBL(0x0203DE50, (u32)dsiSaveGetLength);
-		setBL(0x0203DE84, (u32)dsiSaveRead);
-		setBL(0x0203DE9C, (u32)dsiSaveClose);
-		setBL(0x0203DEA8, (u32)dsiSaveGetResultCode);
-		setBL(0x02042A50, 0x0203DF04);
-		*(u32*)0x02048CDC = 0xE12FFF1E; // bx lr
+		*(u32*)0x02005088 = 0xE1A00000; // nop
+		*(u32*)0x02005090 = 0xE1A00000; // nop
+		*(u32*)(0x02014CE0-offsetChange) = 0xE1A00000; // nop
+		tonccpy((u32*)(0x02015874-offsetChange), dsiSaveGetResultCode, 0xC);
+		*(u32*)(0x020183AC-offsetChange) = 0xE1A00000; // nop
+		patchInitDSiWare(0x0201D9C0-offsetChange, heapEnd);
+		setBL(0x0202AD60-offsetChangeS, (u32)dsiSaveCreate);
+		setBL(0x0202AD74-offsetChangeS, (u32)dsiSaveOpen);
+		setBL(0x0202AD9C-offsetChangeS, (u32)dsiSaveCreate);
+		setBL(0x0202ADB4-offsetChangeS, (u32)dsiSaveOpen);
+		setBL(0x0202ADD8-offsetChangeS, (u32)dsiSaveWrite);
+		setBL(0x0202ADE8-offsetChangeS, (u32)dsiSaveClose);
+		setBL(0x0202AE68-offsetChangeS2, (u32)dsiSaveWrite);
+		setBL(0x0202AE70-offsetChangeS2, (u32)dsiSaveClose);
+		setBL(0x0202AEDC-offsetChangeS3, (u32)dsiSaveOpen);
+		*(u32*)(0x0202AEA4-offsetChangeS3) = 0xE12FFF1E; // bx lr
+		*(u32*)(0x0202AEE8-offsetChangeS3) = 0xE1A00000; // nop
+		*(u32*)(0x0202AEF4-offsetChangeS3) = 0xE3A00003; // mov r0, #3
+		setBL(0x0202B09C-offsetChangeS3, (u32)dsiSaveGetLength);
+		setBL(0x0202B0BC-offsetChangeS3, (u32)dsiSaveRead);
+		setBL(0x0202B0C4-offsetChangeS3, (u32)dsiSaveClose);
+		if (useSharedFont) {
+			if (extendedMemory2) {
+				*(u32*)(0x0206A870+offsetChange2) = 0xE3A05603; // mov r5, #0x300000
+			} else {
+				*(u32*)(0x0206A870+offsetChange2) = 0xE3A05601; // mov r5, #0x100000
+				patchTwlFontLoad(0x0206A980+offsetChange2, 0x0201F534-offsetChange);
+			}
+		} else {
+			*(u32*)(0x0205BA38+offsetChange2) = 0xE3A00000; // mov r0, #0 (Skip Manual screen, and instead display the unused help menu)
+		}
 	}
 
 	// Go! Go! Kokopolo (USA)
@@ -10256,6 +10245,60 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x020BCF78, (u32)dsiSaveClose);
 
 		*(u32*)0x020BEB8C = 0xE3A00000; // mov r0, #0
+	}
+
+	// Goooooal America (USA)
+	// Audio does not play
+	else if (strcmp(romTid, "K9AE") == 0) {
+		useSharedFont = twlFontFound;
+		*(u32*)0x0200507C = 0xE1A00000; // nop
+		*(u32*)0x0201CE24 = 0xE1A00000; // nop
+		*(u32*)0x02021154 = 0xE1A00000; // nop
+		patchInitDSiWare(0x02026950, heapEnd);
+		patchUserSettingsReadDSiWare(0x02027F34);
+		setBL(0x02048390, (u32)dsiSaveCreate);
+		setBL(0x020483A0, (u32)dsiSaveOpen);
+		setBL(0x020483BC, (u32)dsiSaveGetResultCode);
+		setBL(0x020483E0, (u32)dsiSaveSeek);
+		setBL(0x020483F8, (u32)dsiSaveGetResultCode);
+		setBL(0x0204841C, (u32)dsiSaveWrite);
+		setBL(0x0204843C, (u32)dsiSaveClose);
+		setBL(0x02048444, (u32)dsiSaveGetResultCode);
+		setBL(0x02048460, (u32)dsiSaveGetResultCode);
+		setBL(0x0204849C, (u32)dsiSaveOpenR);
+		setBL(0x020484AC, (u32)dsiSaveGetLength);
+		setBL(0x020484E0, (u32)dsiSaveRead);
+		setBL(0x020484F8, (u32)dsiSaveClose);
+		setBL(0x02048504, (u32)dsiSaveGetResultCode);
+		setBL(0x0204D0AC, 0x02048560);
+		*(u32*)0x02053380 = 0xE12FFF1E; // bx lr
+	}
+
+	// Goooooal Europa 2012 (Europe)
+	// Audio does not play
+	else if (strcmp(romTid, "K9AP") == 0) {
+		useSharedFont = twlFontFound;
+		*(u32*)0x0200507C = 0xE1A00000; // nop
+		*(u32*)0x020127C8 = 0xE1A00000; // nop
+		*(u32*)0x02016AF8 = 0xE1A00000; // nop
+		patchInitDSiWare(0x0201C2F4, heapEnd);
+		patchUserSettingsReadDSiWare(0x0201D8D8);
+		setBL(0x0203DD34, (u32)dsiSaveCreate);
+		setBL(0x0203DD44, (u32)dsiSaveOpen);
+		setBL(0x0203DD60, (u32)dsiSaveGetResultCode);
+		setBL(0x0203DD84, (u32)dsiSaveSeek);
+		setBL(0x0203DD9C, (u32)dsiSaveGetResultCode);
+		setBL(0x0203DDC0, (u32)dsiSaveWrite);
+		setBL(0x0203DDE0, (u32)dsiSaveClose);
+		setBL(0x0203DDE8, (u32)dsiSaveGetResultCode);
+		setBL(0x0203DE04, (u32)dsiSaveGetResultCode);
+		setBL(0x0203DE40, (u32)dsiSaveOpenR);
+		setBL(0x0203DE50, (u32)dsiSaveGetLength);
+		setBL(0x0203DE84, (u32)dsiSaveRead);
+		setBL(0x0203DE9C, (u32)dsiSaveClose);
+		setBL(0x0203DEA8, (u32)dsiSaveGetResultCode);
+		setBL(0x02042A50, 0x0203DF04);
+		*(u32*)0x02048CDC = 0xE12FFF1E; // bx lr
 	}
 
 	// Gold Fever (USA)

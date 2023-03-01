@@ -187,6 +187,7 @@ static const char dsiWareForBootloader1[][4] = {
 	"KGK", // Glory Days: Tactical Defense
 	"KGX", // Go Fetch!
 	"KKF", // Go Fetch! 2
+	"KGQ", // Go! Go! Island Rescue
 	"K3G", // Go! Go! Kokopolo
 	"K9A", // Goooooal America
 	"K83", // Hachiwandaiba DS: Naru Zouku Ha Samishougi

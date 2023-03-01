@@ -5719,7 +5719,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Go Fetch! 2 (USA)
-	else if (strcmp(romTid, "KKFE") == 0) {
+	else if (strcmp(romTid, "KKFE") == 0 && saveOnFlashcard) {
 		tonccpy((u32*)0x02019338, dsiSaveGetResultCode, 0xC);
 		setBL(0x02040240, (u32)dsiSaveOpen);
 		setBL(0x02040258, (u32)dsiSaveCreate); // dsiSaveCreateAuto
@@ -5740,7 +5740,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Go Fetch! 2 (Japan)
-	else if (strcmp(romTid, "KKFJ") == 0) {
+	else if (strcmp(romTid, "KKFJ") == 0 && saveOnFlashcard) {
 		tonccpy((u32*)0x02019338, dsiSaveGetResultCode, 0xC);
 		setBL(0x0205DD14, (u32)dsiSaveOpen);
 		setBL(0x0205DD2C, (u32)dsiSaveCreate); // dsiSaveCreateAuto
@@ -5760,42 +5760,33 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0205DF98, (u32)dsiSaveClose);
 	}
 
-	// Goooooal America (USA)
-	else if (strcmp(romTid, "K9AE") == 0 && saveOnFlashcard) {
-		setBL(0x02048390, (u32)dsiSaveCreate);
-		setBL(0x020483A0, (u32)dsiSaveOpen);
-		setBL(0x020483BC, (u32)dsiSaveGetResultCode);
-		setBL(0x020483E0, (u32)dsiSaveSeek);
-		setBL(0x020483F8, (u32)dsiSaveGetResultCode);
-		setBL(0x0204841C, (u32)dsiSaveWrite);
-		setBL(0x0204843C, (u32)dsiSaveClose);
-		setBL(0x02048444, (u32)dsiSaveGetResultCode);
-		setBL(0x02048460, (u32)dsiSaveGetResultCode);
-		setBL(0x0204849C, (u32)dsiSaveOpenR);
-		setBL(0x020484AC, (u32)dsiSaveGetLength);
-		setBL(0x020484E0, (u32)dsiSaveRead);
-		setBL(0x020484F8, (u32)dsiSaveClose);
-		setBL(0x02048504, (u32)dsiSaveGetResultCode);
-		setBL(0x0204D0AC, 0x02048560);
-	}
+	// Go! Go! Island Rescue! (USA)
+	// Go! Go! Island Rescue! (Europe, Australia)
+	else if (strcmp(romTid, "KGQE") == 0 || strcmp(romTid, "KGQV") == 0) {
+		if (saveOnFlashcard) {
+			u8 offsetChangeS = (romTid[3] == 'E') ? 0 : 0x14;
+			u8 offsetChangeS2 = (romTid[3] == 'E') ? 0 : 0x1C;
+			u8 offsetChangeS3 = (romTid[3] == 'E') ? 0 : 0x24;
 
-	// Goooooal Europa 2012 (Europe)
-	else if (strcmp(romTid, "K9AP") == 0 && saveOnFlashcard) {
-		setBL(0x0203DD34, (u32)dsiSaveCreate);
-		setBL(0x0203DD44, (u32)dsiSaveOpen);
-		setBL(0x0203DD60, (u32)dsiSaveGetResultCode);
-		setBL(0x0203DD84, (u32)dsiSaveSeek);
-		setBL(0x0203DD9C, (u32)dsiSaveGetResultCode);
-		setBL(0x0203DDC0, (u32)dsiSaveWrite);
-		setBL(0x0203DDE0, (u32)dsiSaveClose);
-		setBL(0x0203DDE8, (u32)dsiSaveGetResultCode);
-		setBL(0x0203DE04, (u32)dsiSaveGetResultCode);
-		setBL(0x0203DE40, (u32)dsiSaveOpenR);
-		setBL(0x0203DE50, (u32)dsiSaveGetLength);
-		setBL(0x0203DE84, (u32)dsiSaveRead);
-		setBL(0x0203DE9C, (u32)dsiSaveClose);
-		setBL(0x0203DEA8, (u32)dsiSaveGetResultCode);
-		setBL(0x02042A50, 0x0203DF04);
+			tonccpy((u32*)0x02015874, dsiSaveGetResultCode, 0xC);
+			setBL(0x0202AD60-offsetChangeS, (u32)dsiSaveCreate);
+			setBL(0x0202AD74-offsetChangeS, (u32)dsiSaveOpen);
+			setBL(0x0202AD9C-offsetChangeS, (u32)dsiSaveCreate);
+			setBL(0x0202ADB4-offsetChangeS, (u32)dsiSaveOpen);
+			setBL(0x0202ADD8-offsetChangeS, (u32)dsiSaveWrite);
+			setBL(0x0202ADE8-offsetChangeS, (u32)dsiSaveClose);
+			setBL(0x0202AE68-offsetChangeS2, (u32)dsiSaveWrite);
+			setBL(0x0202AE70-offsetChangeS2, (u32)dsiSaveClose);
+			setBL(0x0202AEDC-offsetChangeS3, (u32)dsiSaveOpen);
+			*(u32*)(0x0202AEF4-offsetChangeS3) = 0xE3A00003; // mov r0, #3
+			setBL(0x0202B09C-offsetChangeS3, (u32)dsiSaveGetLength);
+			setBL(0x0202B0BC-offsetChangeS3, (u32)dsiSaveRead);
+			setBL(0x0202B0C4-offsetChangeS3, (u32)dsiSaveClose);
+		}
+		if (!twlFontFound) {
+			u16 offsetChange2 = (romTid[3] == 'E') ? 0 : 0x2AC;
+			*(u32*)(0x0205BA38+offsetChange2) = 0xE3A00000; // mov r0, #0 (Skip Manual screen, and instead display the unused help menu)
+		}
 	}
 
 	// Go! Go! Kokopolo (USA)
@@ -5894,6 +5885,44 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		if (!twlFontFound) {
 			*(u32*)0x0208EC74 = 0xE3A00000; // mov r0, #0 (Skip Manual screen)
 		}
+	}
+
+	// Goooooal America (USA)
+	else if (strcmp(romTid, "K9AE") == 0 && saveOnFlashcard) {
+		setBL(0x02048390, (u32)dsiSaveCreate);
+		setBL(0x020483A0, (u32)dsiSaveOpen);
+		setBL(0x020483BC, (u32)dsiSaveGetResultCode);
+		setBL(0x020483E0, (u32)dsiSaveSeek);
+		setBL(0x020483F8, (u32)dsiSaveGetResultCode);
+		setBL(0x0204841C, (u32)dsiSaveWrite);
+		setBL(0x0204843C, (u32)dsiSaveClose);
+		setBL(0x02048444, (u32)dsiSaveGetResultCode);
+		setBL(0x02048460, (u32)dsiSaveGetResultCode);
+		setBL(0x0204849C, (u32)dsiSaveOpenR);
+		setBL(0x020484AC, (u32)dsiSaveGetLength);
+		setBL(0x020484E0, (u32)dsiSaveRead);
+		setBL(0x020484F8, (u32)dsiSaveClose);
+		setBL(0x02048504, (u32)dsiSaveGetResultCode);
+		setBL(0x0204D0AC, 0x02048560);
+	}
+
+	// Goooooal Europa 2012 (Europe)
+	else if (strcmp(romTid, "K9AP") == 0 && saveOnFlashcard) {
+		setBL(0x0203DD34, (u32)dsiSaveCreate);
+		setBL(0x0203DD44, (u32)dsiSaveOpen);
+		setBL(0x0203DD60, (u32)dsiSaveGetResultCode);
+		setBL(0x0203DD84, (u32)dsiSaveSeek);
+		setBL(0x0203DD9C, (u32)dsiSaveGetResultCode);
+		setBL(0x0203DDC0, (u32)dsiSaveWrite);
+		setBL(0x0203DDE0, (u32)dsiSaveClose);
+		setBL(0x0203DDE8, (u32)dsiSaveGetResultCode);
+		setBL(0x0203DE04, (u32)dsiSaveGetResultCode);
+		setBL(0x0203DE40, (u32)dsiSaveOpenR);
+		setBL(0x0203DE50, (u32)dsiSaveGetLength);
+		setBL(0x0203DE84, (u32)dsiSaveRead);
+		setBL(0x0203DE9C, (u32)dsiSaveClose);
+		setBL(0x0203DEA8, (u32)dsiSaveGetResultCode);
+		setBL(0x02042A50, 0x0203DF04);
 	}
 
 	// Hachiwandaiba DS: Naru Zouku Ha Samishougi (Japan)
