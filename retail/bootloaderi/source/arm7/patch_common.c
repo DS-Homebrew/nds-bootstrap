@@ -6143,6 +6143,39 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// Ichi Moudaji!: Neko King (Japan)
+	// Either this uses more than one save file in filesystem, or saving is somehow just bugged
+	else if (strcmp(romTid, "KNEJ") == 0) {
+		if (!twlFontFound) {
+			*(u32*)0x02011F90 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+
+			// Skip Manual screen
+			for (int i = 0; i < 11; i++) {
+				u32* offset = (u32*)0x0201289C;
+				offset[i] = 0xE1A00000; // nop
+			}
+		}
+		/* if (saveOnFlashcard) {
+			setBL(0x02012210, (u32)dsiSaveCreate);
+			setBL(0x0201224C, (u32)dsiSaveOpen);
+			setBL(0x02012284, (u32)dsiSaveSetLength);
+			setBL(0x02012294, (u32)dsiSaveWrite);
+			setBL(0x020122AC, (u32)dsiSaveClose);
+			setBL(0x02012328, (u32)dsiSaveOpen);
+			setBL(0x02012360, (u32)dsiSaveSetLength);
+			setBL(0x02012370, (u32)dsiSaveWrite);
+			setBL(0x02012388, (u32)dsiSaveClose);
+			setBL(0x020123FC, (u32)dsiSaveOpen);
+			setBL(0x02012434, (u32)dsiSaveRead);
+			setBL(0x02012448, (u32)dsiSaveClose);
+			setBL(0x0201248C, (u32)dsiSaveDelete);
+			setBL(0x0200124F8, (u32)dsiSaveGetInfo);
+			*(u32*)0x0201253C = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc & dsiSaveFreeSpaceAvailable)
+			*(u32*)0x02012540 = 0xE12FFF1E; // bx lr
+			tonccpy((u32*)0x0202C764, dsiSaveGetResultCode, 0xC);
+		} */
+	}
+
 	// JellyCar 2 (USA)
 	else if (strcmp(romTid, "KJYE") == 0) {
 		if (saveOnFlashcard) {

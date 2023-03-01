@@ -200,6 +200,7 @@ static const char dsiWareForBootloader1[][4] = {
 	"KHL", // Hell's Kitchen VS
 	"KTX", // High Stakes Texas Hold'em
 	"KHI", // Hints Hunter
+	// "KNE", // Ichi Moudaji!: Neko King
 	"KNK", // Ideyou Sukeno: Kenkou Maja DSi
 	"KJY", // JellyCar 2
 	"KT9", // Kung Fu Dragon
