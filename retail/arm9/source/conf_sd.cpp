@@ -1809,10 +1809,17 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		fclose(srParamsFile);
 	}
 
-	if ((!dsiFeatures() || conf->b4dsMode) && (strncmp(romTid, "KCX", 3) == 0 || strncmp(romTid, "KAV", 3) == 0)) { // "Cosmo Fighters" or "Art Style: DIGIDRIVE"
-		// Load & save "child.srl" to page file for booting
+	if ((!dsiFeatures() || conf->b4dsMode) && (strncmp(romTid, "KCX", 3) == 0 || strncmp(romTid, "KAV", 3) == 0 || strncmp(romTid, "KNK", 3) == 0)) {
+		// Load & save cloneboot/multiboot SRL file to page file for booting
 		if (romFSInit(conf->ndsPath)) {
-			FILE* ndsFile = fopen((strncmp(romTid, "KAV", 3) == 0) ? "rom:/child.srl" : "rom:/mb_main.srl", "rb");
+			const char* multibootSrl = "rom:/child.srl"; // Art Style: DIGIDRIVE (strncmp(romTid, "KAV", 3) == 0)
+			if (strncmp(romTid, "KCX", 3) == 0) {
+				multibootSrl = "rom:/mb_main.srl"; // Cosmo Fighters
+			} else if (strncmp(romTid, "KNK", 3) == 0) {
+				multibootSrl = "rom:/main_rom.srl"; // Ideyou Sukeno: Kenkou Maja DSi
+			}
+
+			FILE* ndsFile = fopen(multibootSrl, "rb");
 			FILE* pageFile = fopen(pageFilePath.c_str(), "rb+");
 			if (ndsFile && pageFile) {
 				char buffer[0x1000] = {0};

@@ -132,6 +132,7 @@ static u32 ioverlaysSize = 0;
 u32 fatTableAddr = 0;
 
 static u32 softResetParams[4] = {0};
+bool srlFromPageFile = false;
 u32 srlAddr = 0;
 u16 baseHeaderCRC = 0;
 u16 baseSecureCRC = 0;
@@ -499,8 +500,7 @@ static void loadBinary_ARM7(const tDSiHeader* dsiHeaderTemp, aFile* file) {
 	// Read DSi header (including NDS header)
 	//fileRead((char*)ndsHeader, file, 0, 0x170, 3);
 	//fileRead((char*)dsiHeader, file, 0, 0x2F0, 2); // SDK 5
-	bool separateSrl = (softResetParams[2] == 0x44414F4C); // 'LOAD'
-	if (separateSrl) {
+	if (srlFromPageFile) {
 		srlAddr = (baseUnitCode > 0) ? 0 : 0xFFFFFFFF;
 		aFile pageFile;
 		getFileFromCluster(&pageFile, pageFileCluster);
@@ -910,7 +910,7 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 		u32* resetParamLoc = (u32*)(isSdk5(moduleParams) ? RESET_PARAM_SDK5 : RESET_PARAM);
 		resetParamLoc[0] = softResetParams[0];
 		resetParamLoc[1] = softResetParams[1];
-		if (softResetParams[2] != 0x44414F4C) {
+		if (!srlFromPageFile) {
 			resetParamLoc[2] = softResetParams[2];
 		}
 		resetParamLoc[3] = softResetParams[3];
@@ -922,7 +922,7 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 	if (strncmp(romTid, "KPP", 3) == 0 	// Pop Island
 	 || strncmp(romTid, "KPF", 3) == 0		// Pop Island: Paperfield
 	 || strncmp(romTid, "KGK", 3) == 0		// Glory Days: Tactical Defense
-	 || (srlAddr > 0) || (softResetParams[2] == 0x44414F4C))
+	 || (srlAddr > 0) || srlFromPageFile)
 	{
 		*((u16*)(isSdk5(moduleParams) ? 0x02fffc40 : 0x027ffc40)) = 0x2;					// Boot Indicator (Cloneboot/Multiboot)
 	}
@@ -968,7 +968,8 @@ int arm7_main(void) {
 	aFile srParamsFile;
 	getFileFromCluster(&srParamsFile, srParamsFileCluster);
 	fileRead((char*)&softResetParams, &srParamsFile, 0, 0x10);
-	bool softResetParamsFound = (softResetParams[0] != 0xFFFFFFFF || softResetParams[2] == 0x44414F4C);
+	srlFromPageFile = (softResetParams[2] == 0x44414F4C); // 'LOAD'
+	bool softResetParamsFound = (softResetParams[0] != 0xFFFFFFFF || srlFromPageFile);
 	if (softResetParamsFound) {
 		u32 clearBuffer = 0xFFFFFFFF;
 		fileWrite((char*)&clearBuffer, &srParamsFile, 0, 0x4);
@@ -1399,7 +1400,7 @@ int arm7_main(void) {
 	aFile pageFile;
 	getFileFromCluster(&pageFile, pageFileCluster);
 
-	if (softResetParams[0] == 0 || softResetParams[2] != 0x44414F4C) {
+	if (softResetParams[0] == 0 || !srlFromPageFile) {
 		fileWrite((char*)ndsHeader->arm9destination, &pageFile, 0x14000, iUncompressedSize);
 		fileWrite((char*)ndsHeader->arm7destination, &pageFile, 0x2C0000, newArm7binarySize);
 		fileWrite((char*)CHEAT_ENGINE_LOCATION_B4DS, &pageFile, 0x2FE000, 0x2000);
