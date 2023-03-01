@@ -10261,28 +10261,41 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Unou to Sanougaren Sasuru: Uranoura (Japan)
-	// Unable to read saved data
-	else if (strcmp(romTid, "K6PJ") == 0 && !twlFontFound) {
-		*(u32*)0x02006E84 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
-		// *(u32*)0x02007344 = 0xE1A00000; // nop (Skip directory browse)
-		*(u32*)0x020092D4 = 0xE3A00000; // mov r0, #0 (Disable NFTR loading from TWLNAND)
-		for (int i = 0; i < 11; i++) { // Skip Manual screen
-			u32* offset = (u32*)0x0200A608;
-			offset[i] = 0xE1A00000; // nop
+	// Unable to save data
+	else if (strcmp(romTid, "K6PJ") == 0) {
+		if (!twlFontFound) {
+			*(u32*)0x02006E84 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
+			*(u32*)0x020092D4 = 0xE3A00000; // mov r0, #0 (Disable NFTR loading from TWLNAND)
+			for (int i = 0; i < 11; i++) { // Skip Manual screen
+				u32* offset = (u32*)0x0200A608;
+				offset[i] = 0xE1A00000; // nop
+			}
 		}
-		/*setBL(0x02020B50, (u32)dsiSaveOpen);
-		setBL(0x02020B94, (u32)dsiSaveGetLength);
-		setBL(0x02020BB4, (u32)dsiSaveRead);
-		setBL(0x02020BE4, (u32)dsiSaveClose);
-		setBL(0x02020C50, (u32)dsiSaveOpen); // dsiSaveOpenDir
-		*(u32*)0x02020C98 = 0xE3A00000; // mov r0, #0 (dsiSaveReadDir)
-		setBL(0x02020D9C, (u32)dsiSaveClose); // dsiSaveCloseDir
-		setBL(0x02020F58, (u32)dsiSaveCreate);
-		setBL(0x02020F90, (u32)dsiSaveOpen);
-		setBL(0x02020FE8, (u32)dsiSaveSetLength);
-		setBL(0x02020FF8, (u32)dsiSaveWrite);
-		setBL(0x02021028, (u32)dsiSaveClose);
-		tonccpy((u32*)0x02039874, dsiSaveGetResultCode, 0xC);*/
+		/* if (saveOnFlashcard) {
+			setBL(0x02020B50, (u32)dsiSaveOpen);
+			setBL(0x02020B94, (u32)dsiSaveGetLength);
+			setBL(0x02020BB4, (u32)dsiSaveRead);
+			setBL(0x02020BE4, (u32)dsiSaveClose);
+			*(u32*)0x02020C50 = 0xE3A00001; // mov r0, #1 (dsiSaveOpenDir)
+			*(u32*)0x02020C98 = 0xE3A00001; // mov r0, #1 (dsiSaveReadDir)
+			*(u32*)0x02020CEC = 0xE3A00001; // mov r0, #1
+			*(u32*)0x02020D00 = 0xE3A00001; // mov r0, #1
+			*(u32*)0x02020D9C = 0xE3A00001; // mov r0, #1 (dsiSaveCloseDir)
+			*(u32*)0x02020DA0 = 0xE1A00000; // nop
+			*(u32*)0x02020DEC = 0xE3A00001; // mov r0, #1 (dsiSaveOpenDir)
+			*(u32*)0x02020E30 = 0xE3A00001; // mov r0, #1 (dsiSaveReadDir)
+			*(u32*)0x02020E84 = 0xE3A00001; // mov r0, #1
+			*(u32*)0x02020E98 = 0xE3A00001; // mov r0, #1
+			setBL(0x02020ED4, (u32)dsiSaveDelete);
+			*(u32*)0x02020F08 = 0xE3A00001; // mov r0, #1 (dsiSaveReadDir)
+			*(u32*)0x02020F18 = 0xE1A00000; // nop (dsiSaveCloseDir)
+			setBL(0x02020F58, (u32)dsiSaveCreate);
+			setBL(0x02020F90, (u32)dsiSaveOpen);
+			setBL(0x02020FE8, (u32)dsiSaveSetLength);
+			setBL(0x02020FF8, (u32)dsiSaveWrite);
+			setBL(0x02021028, (u32)dsiSaveClose);
+			tonccpy((u32*)0x02039874, dsiSaveGetResultCode, 0xC);
+		} */
 	}
 
 	// WarioWare: Touched! DL (USA, Australia)
