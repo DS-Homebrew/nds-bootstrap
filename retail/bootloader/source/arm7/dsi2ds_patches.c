@@ -9945,6 +9945,107 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// Go Fetch! (USA)
+	else if (strcmp(romTid, "KGXE") == 0) {
+		*(u32*)0x02010CA0 = 0xE1A00000; // nop
+		tonccpy((u32*)0x02011824, dsiSaveGetResultCode, 0xC);
+		*(u32*)0x020143C0 = 0xE1A00000; // nop
+		patchInitDSiWare(0x0201BB38, heapEnd);
+		patchUserSettingsReadDSiWare(0x0201D014);
+		setBL(0x0203BD8C, (u32)dsiSaveOpen);
+		setBL(0x0203BDA4, (u32)dsiSaveCreate);
+		setBL(0x0203BDBC, (u32)dsiSaveOpen);
+		setBL(0x0203BDDC, (u32)dsiSaveWrite);
+		setBL(0x0203BDEC, (u32)dsiSaveClose);
+		setBL(0x0203BE08, (u32)dsiSaveClose);
+		setBL(0x0203BE44, (u32)dsiSaveOpen);
+		setBL(0x0203BE64, (u32)dsiSaveRead);
+		setBL(0x0203BE74, (u32)dsiSaveClose);
+		setBL(0x0203BE90, (u32)dsiSaveClose);
+		setBL(0x0203BF40, (u32)dsiSaveCreate);
+		setBL(0x0203BF50, (u32)dsiSaveOpen);
+		setBL(0x0203BF7C, (u32)dsiSaveClose);
+		setBL(0x0203BFA8, (u32)dsiSaveCreate);
+		setBL(0x0203BFB8, (u32)dsiSaveOpen);
+		setBL(0x0203BFE4, (u32)dsiSaveClose);
+	}
+
+	// Go Fetch! (Japan)
+	else if (strcmp(romTid, "KGXJ") == 0) {
+		*(u32*)0x02010CA0 = 0xE1A00000; // nop
+		tonccpy((u32*)0x02011824, dsiSaveGetResultCode, 0xC);
+		*(u32*)0x02014A6C = 0xE1A00000; // nop
+		patchInitDSiWare(0x0201C4F8, heapEnd);
+		patchUserSettingsReadDSiWare(0x0201D9D4);
+		setBL(0x0203CAE8, (u32)dsiSaveOpen);
+		setBL(0x0203CB00, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+		setBL(0x0203CB18, (u32)dsiSaveOpen);
+		setBL(0x0203CB38, (u32)dsiSaveWrite);
+		setBL(0x0203CB48, (u32)dsiSaveClose);
+		setBL(0x0203CB58, (u32)dsiSaveClose);
+		setBL(0x0203CB98, (u32)dsiSaveOpen);
+		setBL(0x0203CBBC, (u32)dsiSaveRead);
+		setBL(0x0203CBCC, (u32)dsiSaveClose);
+		setBL(0x0203CBDC, (u32)dsiSaveClose);
+		setBL(0x0203CCBC, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+		setBL(0x0203CCCC, (u32)dsiSaveOpen);
+		setBL(0x0203CCF8, (u32)dsiSaveClose);
+		setBL(0x0203CD30, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+		setBL(0x0203CD40, (u32)dsiSaveOpen);
+		setBL(0x0203CD6C, (u32)dsiSaveClose);
+	}
+
+	// Go Fetch! 2 (USA)
+	// Go Fetch! 2 (Japan)
+	else if (strcmp(romTid, "KKFE") == 0 || strcmp(romTid, "KKFJ") == 0) {
+		*(u32*)0x020187A8 = 0xE1A00000; // nop
+		tonccpy((u32*)0x02019338, dsiSaveGetResultCode, 0xC);
+		*(u32*)0x0201C634 = 0xE1A00000; // nop
+		patchInitDSiWare(0x02028FDC, heapEnd);
+		patchUserSettingsReadDSiWare(0x0202A68C);
+		*(u32*)0x0203262C = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02032630 = 0xE12FFF1E; // bx lr
+		if (romTid[3] == 'E') {
+			*(u32*)0x0203B09C = 0xE1A00000; // nop
+			*(u32*)0x0203B0B4 = 0xE1A00000; // nop
+			setBL(0x02040240, (u32)dsiSaveOpen);
+			setBL(0x02040258, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+			setBL(0x02040270, (u32)dsiSaveOpen);
+			setBL(0x02040290, (u32)dsiSaveWrite);
+			setBL(0x020402A0, (u32)dsiSaveClose);
+			setBL(0x020402B0, (u32)dsiSaveClose);
+			setBL(0x020402F0, (u32)dsiSaveOpen);
+			setBL(0x02040314, (u32)dsiSaveRead);
+			setBL(0x02040324, (u32)dsiSaveClose);
+			setBL(0x02040334, (u32)dsiSaveClose);
+			setBL(0x02040414, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+			setBL(0x02040424, (u32)dsiSaveOpen);
+			setBL(0x02040450, (u32)dsiSaveClose);
+			setBL(0x02040488, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+			setBL(0x02040498, (u32)dsiSaveOpen);
+			setBL(0x020404C4, (u32)dsiSaveClose);
+		} else {
+			*(u32*)0x02058154 = 0xE1A00000; // nop
+			*(u32*)0x0205816C = 0xE1A00000; // nop
+			setBL(0x0205DD14, (u32)dsiSaveOpen);
+			setBL(0x0205DD2C, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+			setBL(0x0205DD44, (u32)dsiSaveOpen);
+			setBL(0x0205DD64, (u32)dsiSaveWrite);
+			setBL(0x0205DD74, (u32)dsiSaveClose);
+			setBL(0x0205DD84, (u32)dsiSaveClose);
+			setBL(0x0205DDC4, (u32)dsiSaveOpen);
+			setBL(0x0205DDE8, (u32)dsiSaveRead);
+			setBL(0x0205DDF8, (u32)dsiSaveClose);
+			setBL(0x0205DE08, (u32)dsiSaveClose);
+			setBL(0x0205DEE8, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+			setBL(0x0205DEF8, (u32)dsiSaveOpen);
+			setBL(0x0205DF24, (u32)dsiSaveClose);
+			setBL(0x0205DF5C, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+			setBL(0x0205DF6C, (u32)dsiSaveOpen);
+			setBL(0x0205DF98, (u32)dsiSaveClose);
+		}
+	}
+
 	// Goooooal America (USA)
 	// Audio does not play
 	else if (strcmp(romTid, "K9AE") == 0) {

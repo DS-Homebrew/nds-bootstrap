@@ -185,6 +185,8 @@ static const char dsiWareForBootloader1[][4] = {
 	"K2M", // Ginsei Tsume-Shougi
 	"KGS", // Globulos Party
 	"KGK", // Glory Days: Tactical Defense
+	"KGX", // Go Fetch!
+	"KKF", // Go Fetch! 2
 	"K3G", // Go! Go! Kokopolo
 	"K9A", // Goooooal America
 	"K83", // Hachiwandaiba DS: Naru Zouku Ha Samishougi
