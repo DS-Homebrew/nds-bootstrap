@@ -6176,6 +6176,29 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		} */
 	}
 
+	// Ivy the Kiwi? mini (USA)
+	// GO Series: Ivy the Kiwi? mini (Europe, Australia)
+	else if ((strcmp(romTid, "KIKX") == 0 || strcmp(romTid, "KIKV") == 0) && saveOnFlashcard) {
+		u16 offsetChangeS = (romTid[3] == 'X') ? 0 : 0x344;
+		tonccpy((u32*)0x02013058, dsiSaveGetResultCode, 0xC);
+		setBL(0x020B0AB8+offsetChangeS, (u32)dsiSaveCreate);
+		setBL(0x020B1078+offsetChangeS, (u32)dsiSaveCreate);
+		setBL(0x020B1088+offsetChangeS, (u32)dsiSaveOpen);
+		setBL(0x020B10A8+offsetChangeS, (u32)dsiSaveSetLength);
+		setBL(0x020B10E8+offsetChangeS, (u32)dsiSaveWrite);
+		setBL(0x020B10F0+offsetChangeS, (u32)dsiSaveClose);
+		setBL(0x020B11D8+offsetChangeS, (u32)dsiSaveOpen);
+		setBL(0x020B1200+offsetChangeS, (u32)dsiSaveRead);
+		setBL(0x020B1208+offsetChangeS, (u32)dsiSaveClose);
+		setBL(0x020B1324+offsetChangeS, (u32)dsiSaveCreate);
+		setBL(0x020B1334+offsetChangeS, (u32)dsiSaveOpen);
+		setBL(0x020B135C+offsetChangeS, (u32)dsiSaveSetLength);
+		setBL(0x020B13A4+offsetChangeS, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+		setBL(0x020B13E8+offsetChangeS, (u32)dsiSaveClose);
+		setBL(0x020B1448+offsetChangeS, (u32)dsiSaveClose);
+		setBL(0x020B1464+offsetChangeS, (u32)dsiSaveClose);
+	}
+
 	// JellyCar 2 (USA)
 	else if (strcmp(romTid, "KJYE") == 0) {
 		if (saveOnFlashcard) {
