@@ -6239,6 +6239,21 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// Jewel Adventures (USA)
+	else if (strcmp(romTid, "KYJE") == 0 && saveOnFlashcard) {
+		setBL(0x0203F3A4, (u32)dsiSaveOpen);
+		setBL(0x0203F3C0, (u32)dsiSaveWrite);
+		setBL(0x0203F3CC, (u32)dsiSaveClose);
+		setBL(0x0203F420, (u32)dsiSaveOpen);
+		setBL(0x0203F434, (u32)dsiSaveGetLength);
+		setBL(0x0203F448, (u32)dsiSaveRead);
+		setBL(0x0203F454, (u32)dsiSaveClose);
+		setBL(0x0206FFE8, (u32)dsiSaveOpenR);
+		setBL(0x02070044, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+		setBL(0x02070128, (u32)dsiSaveOpen);
+		setBL(0x0207013C, (u32)dsiSaveGetResultCode);
+	}
+
 	// Kami Hikouki (Japan)
 	// Saving not supported due to using more than one file
 	else if (strcmp(romTid, "KAMJ") == 0 && !twlFontFound) {
@@ -8183,7 +8198,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 		if (!twlFontFound) {
 			// Skip Manual screen
-			u8 offsetChange = (romTid == 'V') ? 0 : 4;
+			u8 offsetChange = (romTid[3] == 'V') ? 0 : 4;
 			*(u32*)(0x0205F550+offsetChange) = 0xE3A00001; // mov r0, #1
 			*(u32*)(0x0205F564+offsetChange) = 0xE3A00000; // mov r0, #0
 

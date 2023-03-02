@@ -10887,6 +10887,26 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchUserSettingsReadDSiWare(0x020BF7D0);
 	}
 
+	// Jewel Adventures (USA)
+	else if (strcmp(romTid, "KYJE") == 0) {
+		useSharedFont = twlFontFound;
+		*(u32*)0x02019D44 = 0xE1A00000; // nop
+		*(u32*)0x0201D904 = 0xE1A00000; // nop
+		patchInitDSiWare(0x02025A3C, heapEnd);
+		setBL(0x0203F3A4, (u32)dsiSaveOpen);
+		setBL(0x0203F3C0, (u32)dsiSaveWrite);
+		setBL(0x0203F3CC, (u32)dsiSaveClose);
+		setBL(0x0203F420, (u32)dsiSaveOpen);
+		setBL(0x0203F434, (u32)dsiSaveGetLength);
+		setBL(0x0203F448, (u32)dsiSaveRead);
+		setBL(0x0203F454, (u32)dsiSaveClose);
+		setBL(0x0206FFE8, (u32)dsiSaveOpenR);
+		setBL(0x02070044, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+		setBL(0x02070128, (u32)dsiSaveOpen);
+		setBL(0x0207013C, (u32)dsiSaveGetResultCode);
+		*(u32*)0x02070154 = 0xE1A00000; // nop
+	}
+
 	// Jump Trials (USA)
 	// Does not work on real hardware
 	/*else if (strcmp(romTid, "KJPE") == 0) {
@@ -14705,7 +14725,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02048B10, (u32)dsiSaveWrite); // dsiSaveWriteAsync
 
 		// Skip Manual screen
-		u8 offsetChange = (romTid == 'V') ? 0 : 4;
+		u8 offsetChange = (romTid[3] == 'V') ? 0 : 4;
 		*(u32*)(0x0205F550+offsetChange) = 0xE3A00001; // mov r0, #1
 		*(u32*)(0x0205F564+offsetChange) = 0xE3A00000; // mov r0, #0
 
