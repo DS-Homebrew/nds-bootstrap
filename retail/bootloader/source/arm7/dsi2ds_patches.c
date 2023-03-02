@@ -14660,7 +14660,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// PictureBook Games: The Royal Bluff (Europe, Australia)
 	// Audio doesn't play on retail consoles
-	else if (strcmp(romTid, "KE3V") == 0) {
+	else if (strcmp(romTid, "KE3V") == 0 || strcmp(romTid, "KE3P") == 0) {
 		*(u32*)0x0200509C = 0xE1A00000; // nop
 		if (!extendedMemory2) {
 			// Disable audio
@@ -14705,8 +14705,9 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02048B10, (u32)dsiSaveWrite); // dsiSaveWriteAsync
 
 		// Skip Manual screen
-		*(u32*)0x0205F550 = 0xE3A00001; // mov r0, #1
-		*(u32*)0x0205F564 = 0xE3A00000; // mov r0, #0
+		u8 offsetChange = (romTid == 'V') ? 0 : 4;
+		*(u32*)(0x0205F550+offsetChange) = 0xE3A00001; // mov r0, #1
+		*(u32*)(0x0205F564+offsetChange) = 0xE3A00000; // mov r0, #0
 
 		// Change help button (No blank file found to hide it)
 		//const char* lp0 = "t_1p.dt0";
