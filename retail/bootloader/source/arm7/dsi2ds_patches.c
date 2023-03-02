@@ -10798,6 +10798,52 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)(0x020B1470+offsetChangeS) = 0xE1A00000; // nop
 	}
 
+	// Jazzy Billiards (USA)
+	// Saving not supported due to code taking place in the overlays
+	else if (strcmp(romTid, "K9BE") == 0) {
+		if (!extendedMemory2) {
+			*(u32*)0x020070CC = 0xE3A06816; // mov r6, #0x160000
+		}
+		*(u32*)0x020326A8 = 0xE1A00000; // nop
+		*(u32*)0x020364BC = 0xE1A00000; // nop
+		patchInitDSiWare(0x0203F588, heapEnd);
+		*(u32*)0x0203F8F8 -= 0x30000;
+		patchUserSettingsReadDSiWare(0x02040AC8);
+		*(u32*)0x02046694 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02046698 = 0xE12FFF1E; // bx lr
+	}
+
+	// Jazzy Billiards (Europe, Australia)
+	// Jazzy Billiards (Korea)
+	// Saving not supported due to code taking place in the overlays
+	else if (strcmp(romTid, "K9BV") == 0 || strcmp(romTid, "K9BK") == 0) {
+		if (!extendedMemory2) {
+			*(u32*)0x020070DC = 0xE3A06816; // mov r6, #0x160000
+		}
+		*(u32*)0x020326E4 = 0xE1A00000; // nop
+		*(u32*)0x020363A0 = 0xE1A00000; // nop
+		patchInitDSiWare(0x0203ECFC, heapEnd);
+		*(u32*)0x0203F088 -= 0x30000;
+		patchUserSettingsReadDSiWare(0x02040298);
+		*(u32*)0x02045C90 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02045C94 = 0xE12FFF1E; // bx lr
+	}
+
+	// Jazzy Billiards (Japan)
+	// Saving not supported due to code taking place in the overlays
+	else if (strcmp(romTid, "K9BJ") == 0) {
+		if (!extendedMemory2) {
+			*(u32*)0x020070C8 = 0xE3A06816; // mov r6, #0x160000
+		}
+		*(u32*)0x020326A4 = 0xE1A00000; // nop
+		*(u32*)0x020364B8 = 0xE1A00000; // nop
+		patchInitDSiWare(0x0203F584, heapEnd);
+		*(u32*)0x0203F8F4 -= 0x30000;
+		patchUserSettingsReadDSiWare(0x02040AC4);
+		*(u32*)0x02046690 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02046694 = 0xE12FFF1E; // bx lr
+	}
+
 	// JellyCar 2 (USA)
 	else if (strcmp(romTid, "KJYE") == 0) {
 		*(u32*)0x02006334 = 0xE1A00000; // nop

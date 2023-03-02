@@ -203,6 +203,7 @@ static const char dsiWareForBootloader1[][4] = {
 	// "KNE", // Ichi Moudaji!: Neko King
 	"KNK", // Ideyou Sukeno: Kenkou Maja DSi
 	"KIK", // Ivy the Kiwi? mini
+	"K9B", // Jazzy Billiards
 	"KJY", // JellyCar 2
 	"KT9", // Kung Fu Dragon
 	"KQ9", // The Legend of Zelda: Four Swords: Anniversary Edition
