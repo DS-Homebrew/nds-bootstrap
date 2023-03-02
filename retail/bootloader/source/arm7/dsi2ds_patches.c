@@ -18130,6 +18130,18 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchUserSettingsReadDSiWare(0x02071D84);
 	}
 
+	// Kakonde Ke Shite: Wakugumi Nojika (Japan)
+	// Saving not supported due to using more than one file in filesystem
+	else if (strcmp(romTid, "KK4J") == 0) {
+		*(u32*)0x02006618 = 0xE1A00000; // nop
+		*(u32*)0x02057A84 = 0xE12FFF1E; // bx lr (Skip Manual screen)
+		*(u32*)0x02078870 = 0xE28DD00C; // ADD   SP, SP, #0xC
+		*(u32*)0x02078874 = 0xE8BD8078; // LDMFD SP!, {R3-R6,PC}
+		*(u32*)0x0207C530 = 0xE1A00000; // nop
+		patchInitDSiWare(0x02083DD4, heapEnd);
+		patchUserSettingsReadDSiWare(0x020853EC);
+	}
+
 	// WarioWare: Touched! DL (USA, Australia)
 	// The sound loading code has been reworked to instead load the SDAT file all at once, so sound is disabled in order for the game to boot within RAM limitations
 	else if (strcmp(romTid, "Z2AT") == 0) {

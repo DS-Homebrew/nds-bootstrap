@@ -10463,6 +10463,12 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// Kakonde Ke Shite: Wakugumi Nojika (Japan)
+	// Saving not supported due to using more than one file in filesystem
+	else if (strcmp(romTid, "KK4J") == 0 && !twlFontFound) {
+		*(u32*)0x02057A84 = 0xE12FFF1E; // bx lr (Skip Manual screen)
+	}
+
 	// Whack-A-Friend (USA)
 	else if (strcmp(romTid, "KWQE") == 0 && saveOnFlashcard) {
 		tonccpy((u32*)0x02015134, dsiSaveGetResultCode, 0xC);
