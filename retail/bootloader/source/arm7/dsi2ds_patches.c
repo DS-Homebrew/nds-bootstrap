@@ -9287,14 +9287,14 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u16*)0x0204A2E8 = 0x4770; // bx lr (Skip NAND error checking)
 		setBLThumb(0x0204A2FC, dsiSaveCloseT);
 		setBLThumb(0x0204A336, dsiSaveOpenT);
+		*(u16*)0x0204A366 = 0x2001; // movs r0, #1 (dsiSaveGetArcSrc)
+		*(u16*)0x0204A368 = 0x46C0; // nop
 		setBLThumb(0x0204A39C, dsiSaveOpenT);
+		*(u16*)0x0204A3C4 = 0x2001; // movs r0, #1 (dsiSaveFlush)
+		*(u16*)0x0204A3C6 = 0x46C0; // nop
 		setBLThumb(0x0204A3D4, dsiSaveGetLengthT);
 		setBLThumb(0x0204A42C, dsiSaveSeekT);
 		setBLThumb(0x0204A478, dsiSaveSeekT);
-		*(u16*)0x0204A366 = 0x2001; // movs r0, #1 (dsiSaveGetArcSrc)
-		*(u16*)0x0204A368 = 0x46C0; // nop
-		*(u16*)0x0204A3C4 = 0x2001; // movs r0, #1 (dsiSaveFlush)
-		*(u16*)0x0204A3C6 = 0x46C0; // nop
 		*(u16*)0x02053154 = 0x2301; // movs r3, #1
 		doubleNopT(0x0205F696);
 		doubleNopT(0x0205F69C);
@@ -10964,6 +10964,77 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchInitDSiWare(0x0205050C, heapEnd);
 		patchUserSettingsReadDSiWare(0x02051BA0);
 	}
+
+	// Jewel Quest 4: Heritage (USA)
+	// Jewel Quest 4: Heritage (Europe)
+	// Weird crash when saving
+	/* else if (strcmp(romTid, "K43E") == 0 || strcmp(romTid, "K43P") == 0) {
+		const u32 dsiSaveCreateT = 0x020B18B0;
+		*(u16*)dsiSaveCreateT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveCreateT + 4), dsiSaveCreate, 0xC);
+
+		const u32 dsiSaveOpenT = 0x020B18C0;
+		*(u16*)dsiSaveOpenT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveOpenT + 4), dsiSaveOpen, 0xC);
+
+		const u32 dsiSaveCloseT = 0x020B18D0;
+		*(u16*)dsiSaveCloseT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveCloseT + 4), dsiSaveClose, 0xC);
+
+		const u32 dsiSaveGetLengthT = 0x020B18E0;
+		*(u16*)dsiSaveGetLengthT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveGetLengthT + 4), dsiSaveGetLength, 0xC);
+
+		const u32 dsiSaveSeekT = 0x020B18F0;
+		*(u16*)dsiSaveSeekT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveSeekT + 4), dsiSaveSeek, 0xC);
+
+		const u32 dsiSaveSetLengthT = 0x020B1938;
+		*(u16*)dsiSaveSetLengthT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveSetLengthT + 4), dsiSaveSetLength, 0xC);
+
+		const u32 dsiSaveReadAsyncT = 0x020B1B24;
+		*(u16*)dsiSaveReadAsyncT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveReadAsyncT + 4), dsiSaveRead, 0xC);
+
+		const u32 dsiSaveWriteAsyncT = 0x020B1B9C;
+		*(u16*)dsiSaveWriteAsyncT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveWriteAsyncT + 4), dsiSaveWrite, 0xC);
+
+		*(u16*)0x0206C40C = 0x4770; // bx lr (Skip NAND error checking)
+		setBLThumb(0x0206C460, dsiSaveCloseT);
+		setBLThumb(0x0206C49C, dsiSaveOpenT);
+		doubleNopT(0x0206C4B4);
+		*(u16*)0x0206C4D8 = 0x2001; // movs r0, #1 (dsiSaveGetArcSrc)
+		*(u16*)0x0206C4DA = 0x46C0; // nop
+		setBLThumb(0x0206C50E, dsiSaveOpenT);
+		setBLThumb(0x0206C546, dsiSaveGetLengthT);
+		*(u16*)0x0206C536 = 0x2001; // movs r0, #1 (dsiSaveFlush)
+		*(u16*)0x0206C538 = 0x46C0; // nop
+		setBLThumb(0x0206C59C, dsiSaveSeekT);
+		setBLThumb(0x0206C5E8, dsiSaveSeekT);
+		*(u16*)0x020711B4 = 0x2301; // movs r3, #1
+		doubleNopT(0x0207ABC6);
+		doubleNopT(0x0207ABCC);
+
+		*(u16*)0x020B08D2 += 0x1000; // beq -> b
+		doubleNopT(0x020B0A16);
+		doubleNopT(0x020B2DA6);
+		doubleNopT(0x020B5E70);
+		doubleNopT(0x020B74E2);
+		doubleNopT(0x020B74E6);
+		doubleNopT(0x020B74F2);
+		doubleNopT(0x020B75D6);
+		patchHiHeapDSiWareThumb(0x020B7614, 0x020B5274, heapEnd);
+		*(u32*)0x020B76EC = *(u32*)0x02004FF4;
+		patchUserSettingsReadDSiWare(0x020B848A);
+		doubleNopT(0x020B8758);
+		*(u16*)0x020B875C = 0x46C0; // nop
+		*(u16*)0x020B875E = 0x46C0; // nop
+		doubleNopT(0x020B8760);
+		*(u16*)0x02122B22 = 0x46C0; // nop
+		*(u16*)0x02122B24 = 0x46C0; // nop
+	} */
 
 	// Jump Trials (USA)
 	// Does not work on real hardware
