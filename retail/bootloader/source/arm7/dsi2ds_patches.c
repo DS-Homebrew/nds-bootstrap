@@ -10941,6 +10941,30 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)(0x0203CE6C-offsetChange) = 0xE1A00000; // nop
 	}
 
+	// Jewel Legends: Tree of Life (USA)
+	else if (strcmp(romTid, "KUKE") == 0) {
+		*(u32*)0x02010848 = 0xE1A00000; // nop
+		setBL(0x0201E25C, (u32)dsiSaveOpen);
+		setBL(0x0201E26C, (u32)dsiSaveClose);
+		*(u32*)0x0201E2E4 = 0xE1A00000; // nop
+		setBL(0x0201E6D8, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+		setBL(0x0201E6FC, (u32)dsiSaveOpen);
+		setBL(0x0201E710, (u32)dsiSaveSetLength);
+		setBL(0x0201E720, (u32)dsiSaveClose);
+		setBL(0x0201E7A4, (u32)dsiSaveOpen);
+		setBL(0x0201E834, (u32)dsiSaveClose);
+		setBL(0x0201E8BC, (u32)dsiSaveSeek);
+		setBL(0x0201E8D4, (u32)dsiSaveRead);
+		setBL(0x0201E95C, (u32)dsiSaveSeek);
+		setBL(0x0201E974, (u32)dsiSaveWrite);
+		*(u32*)0x0203E324 = 0xE12FFF1E; // bx lr (Skip Manual screen)
+		*(u32*)0x02044FD8 = 0xE1A00000; // nop
+		tonccpy((u32*)0x02046AB4, dsiSaveGetResultCode, 0xC);
+		*(u32*)0x020499F4 = 0xE1A00000; // nop
+		patchInitDSiWare(0x0205050C, heapEnd);
+		patchUserSettingsReadDSiWare(0x02051BA0);
+	}
+
 	// Jump Trials (USA)
 	// Does not work on real hardware
 	/*else if (strcmp(romTid, "KJPE") == 0) {

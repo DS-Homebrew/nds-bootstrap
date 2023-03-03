@@ -6276,6 +6276,28 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		tonccpy((u32*)(0x02032A48-offsetChange), dsiSaveGetResultCode, 0xC);
 	}
 
+	// Jewel Legends: Tree of Life (USA)
+	else if (strcmp(romTid, "KUKE") == 0) {
+		if (saveOnFlashcard) {
+			tonccpy((u32*)0x02046AB4, dsiSaveGetResultCode, 0xC);
+			setBL(0x0201E25C, (u32)dsiSaveOpen);
+			setBL(0x0201E26C, (u32)dsiSaveClose);
+			setBL(0x0201E6D8, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+			setBL(0x0201E6FC, (u32)dsiSaveOpen);
+			setBL(0x0201E710, (u32)dsiSaveSetLength);
+			setBL(0x0201E720, (u32)dsiSaveClose);
+			setBL(0x0201E7A4, (u32)dsiSaveOpen);
+			setBL(0x0201E834, (u32)dsiSaveClose);
+			setBL(0x0201E8BC, (u32)dsiSaveSeek);
+			setBL(0x0201E8D4, (u32)dsiSaveRead);
+			setBL(0x0201E95C, (u32)dsiSaveSeek);
+			setBL(0x0201E974, (u32)dsiSaveWrite);
+		}
+		if (!twlFontFound) {
+			*(u32*)0x0203E324 = 0xE12FFF1E; // bx lr (Skip Manual screen)
+		}
+	}
+
 	// Kami Hikouki (Japan)
 	// Saving not supported due to using more than one file
 	else if (strcmp(romTid, "KAMJ") == 0 && !twlFontFound) {
