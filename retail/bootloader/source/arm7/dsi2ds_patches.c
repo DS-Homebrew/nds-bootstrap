@@ -10907,6 +10907,40 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02070154 = 0xE1A00000; // nop
 	}
 
+	// Jewel Keepers: Easter Island (USA)
+	// Jewel Keepers: Easter Island (Europe)
+	else if (strcmp(romTid, "KJBE") == 0 || strcmp(romTid, "KJBP") == 0) {
+		u8 offsetChange = (romTid[3] == 'E') ? 0 : 0x20;
+		*(u32*)(0x020061D4-offsetChange) = 0xE1A00000; // nop
+		*(u32*)(0x020061E8-offsetChange) = 0xE3A00001; // mov r0, #1
+		*(u32*)(0x02006808-offsetChange) = 0xE3A00000; // mov r0, #0
+		*(u32*)(0x02006824-offsetChange) = 0xE3A00000; // mov r0, #0
+		setBL(0x0200B318-offsetChange, 0x0201EBB0-offsetChange);
+		*(u32*)(0x0201E7B8-offsetChange) = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+		*(u32*)(0x0201E7E8-offsetChange) = 0xE3A00001; // mov r0, #1 (dsiSaveFreeSpaceAvailable)
+		*(u32*)(0x0201E860-offsetChange) = 0xE1A00000; // nop (dsiSaveGetArcSrc)
+		*(u32*)(0x0201E8A4-offsetChange) = 0xE1A00000; // nop
+		setBL(0x0201E8E0-offsetChange, (u32)dsiSaveCreate);
+		setBL(0x0201E8F0-offsetChange, (u32)dsiSaveOpen);
+		*(u32*)(0x0201E910-offsetChange) = 0xE1A00000; // nop
+		setBL(0x0201E928-offsetChange, (u32)dsiSaveSetLength);
+		setBL(0x0201E938-offsetChange, (u32)dsiSaveWrite);
+		setBL(0x0201E940-offsetChange, (u32)dsiSaveClose);
+		*(u32*)(0x0201E950-offsetChange) = 0xE1A00000; // nop
+		setBL(0x0201EC08-offsetChange, (u32)dsiSaveOpen);
+		setBL(0x0201EC38-offsetChange, (u32)dsiSaveRead);
+		setBL(0x0201EC40-offsetChange, (u32)dsiSaveClose);
+		*(u32*)(0x02031EC4-offsetChange) = 0xE1A00000; // nop
+		tonccpy((u32*)(0x02032A48-offsetChange), dsiSaveGetResultCode, 0xC);
+		*(u32*)(0x02035578-offsetChange) = 0xE1A00000; // nop
+		patchInitDSiWare(0x0203B404-offsetChange, heapEnd);
+		patchUserSettingsReadDSiWare(0x0203CA58-offsetChange);
+		*(u32*)(0x0203CE60-offsetChange) = 0xE1A00000; // nop
+		*(u32*)(0x0203CE64-offsetChange) = 0xE1A00000; // nop
+		*(u32*)(0x0203CE68-offsetChange) = 0xE1A00000; // nop
+		*(u32*)(0x0203CE6C-offsetChange) = 0xE1A00000; // nop
+	}
+
 	// Jump Trials (USA)
 	// Does not work on real hardware
 	/*else if (strcmp(romTid, "KJPE") == 0) {

@@ -6254,6 +6254,28 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0207013C, (u32)dsiSaveGetResultCode);
 	}
 
+	// Jewel Keepers: Easter Island (USA)
+	// Jewel Keepers: Easter Island (Europe)
+	else if ((strcmp(romTid, "KJBE") == 0 || strcmp(romTid, "KJBP") == 0) && saveOnFlashcard) {
+		u8 offsetChange = (romTid[3] == 'E') ? 0 : 0x20;
+		*(u32*)(0x020061E8-offsetChange) = 0xE3A00001; // mov r0, #1
+		*(u32*)(0x02006808-offsetChange) = 0xE3A00000; // mov r0, #0
+		*(u32*)(0x02006824-offsetChange) = 0xE3A00000; // mov r0, #0
+		setBL(0x0200B318-offsetChange, 0x0201EBB0-offsetChange);
+		*(u32*)(0x0201E7B8-offsetChange) = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+		*(u32*)(0x0201E7E8-offsetChange) = 0xE3A00001; // mov r0, #1 (dsiSaveFreeSpaceAvailable)
+		*(u32*)(0x0201E860-offsetChange) = 0xE1A00000; // nop (dsiSaveGetArcSrc)
+		setBL(0x0201E8E0-offsetChange, (u32)dsiSaveCreate);
+		setBL(0x0201E8F0-offsetChange, (u32)dsiSaveOpen);
+		setBL(0x0201E928-offsetChange, (u32)dsiSaveSetLength);
+		setBL(0x0201E938-offsetChange, (u32)dsiSaveWrite);
+		setBL(0x0201E940-offsetChange, (u32)dsiSaveClose);
+		setBL(0x0201EC08-offsetChange, (u32)dsiSaveOpen);
+		setBL(0x0201EC38-offsetChange, (u32)dsiSaveRead);
+		setBL(0x0201EC40-offsetChange, (u32)dsiSaveClose);
+		tonccpy((u32*)(0x02032A48-offsetChange), dsiSaveGetResultCode, 0xC);
+	}
+
 	// Kami Hikouki (Japan)
 	// Saving not supported due to using more than one file
 	else if (strcmp(romTid, "KAMJ") == 0 && !twlFontFound) {
