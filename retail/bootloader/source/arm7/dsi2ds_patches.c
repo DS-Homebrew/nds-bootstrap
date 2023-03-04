@@ -11036,6 +11036,54 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u16*)0x02122B24 = 0x46C0; // nop
 	} */
 
+	// Jinia Supasonaru: Eiwa Rakubiki Jiten (Japan)
+	// Saving not supported due to using more than one file in filesystem
+	// Requires Slot-2 RAM expansion up to 16MB or more (Standard Memory Expansion Pak is not enough)
+	else if (strcmp(romTid, "KD3J") == 0 && largeS2RAM) {
+		useSharedFont = (twlFontFound && extendedMemory2);
+		*(u32*)0x02040178 = 0xE3A00001; // mov r0, #1 (Hide battery icon)
+		*(u32*)0x020401F0 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0205CE84 = 0xE1A00000; // nop
+		*(u32*)0x0205E7DC = 0xE1A00000; // nop
+		*(u32*)0x0205E7E4 = 0xE1A00000; // nop
+		if (!useSharedFont) {
+			*(u32*)0x0205EE08 = 0xE1A00000; // nop (Skip Manual screen)
+		}
+		*(u32*)0x0206E828 = (s2FlashcardId == 0x5A45) ? 0xE3A00408 : 0xE3A00409; // mov r0, (s2FlashcardId == 0x5A45) ? #0x08000000 : #0x09000000
+		*(u32*)0x020A6914 = 0xE1A00000; // nop
+		*(u32*)0x020A9390 = 0xE1A00000; // nop
+		*(u32*)0x020AD834 = 0xE1A00000; // nop
+		*(u32*)0x020B2E48 = 0xE3A00001; // mov r0, #1
+		patchInitDSiWare(0x020B2E60, heapEnd);
+		patchUserSettingsReadDSiWare(0x020B46C4);
+		*(u32*)0x020BB044 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x020BB048 = 0xE12FFF1E; // bx lr
+	}
+
+	// Jinia Supasonaru: Waei Rakubiki Jiten (Japan)
+	// Saving not supported due to using more than one file in filesystem
+	// Requires Memory Expansion Pak
+	else if (strcmp(romTid, "KD5J") == 0 && expansionPakFound) {
+		useSharedFont = (twlFontFound && extendedMemory2);
+		*(u32*)0x02040214 = 0xE3A00001; // mov r0, #1 (Hide battery icon)
+		*(u32*)0x0204028C = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0205CD14 = 0xE1A00000; // nop
+		*(u32*)0x0205E66C = 0xE1A00000; // nop
+		*(u32*)0x0205E674 = 0xE1A00000; // nop
+		if (!useSharedFont) {
+			*(u32*)0x0205EC98 = 0xE1A00000; // nop (Skip Manual screen)
+		}
+		*(u32*)0x0206E6B8 = (s2FlashcardId == 0x5A45) ? 0xE3A00408 : 0xE3A00409; // mov r0, (s2FlashcardId == 0x5A45) ? #0x08000000 : #0x09000000
+		*(u32*)0x020A67A4 = 0xE1A00000; // nop
+		*(u32*)0x020A8F3C = 0xE1A00000; // nop
+		*(u32*)0x020AD3E0 = 0xE1A00000; // nop
+		*(u32*)0x020B29F4 = 0xE3A00001; // mov r0, #1
+		patchInitDSiWare(0x020B2A0C, heapEnd);
+		patchUserSettingsReadDSiWare(0x020B4270);
+		*(u32*)0x020BABF0 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x020BABF4 = 0xE12FFF1E; // bx lr
+	}
+
 	// Jump Trials (USA)
 	// Does not work on real hardware
 	/*else if (strcmp(romTid, "KJPE") == 0) {
@@ -12203,7 +12251,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Meikyou Kokugo: Rakubiki Jiten (Japan)
-	// Saving not supported due to using more than one file
+	// Saving not supported due to using more than one file in filesystem
 	// Requires Slot-2 RAM expansion up to 16MB or more (Standard Memory Expansion Pak is not enough)
 	else if (strcmp(romTid, "KD4J") == 0 && largeS2RAM) {
 		useSharedFont = (twlFontFound && extendedMemory2);
@@ -12215,11 +12263,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		if (!useSharedFont) {
 			*(u32*)0x0205ECAC = 0xE1A00000; // nop (Skip Manual screen)
 		}
-		if (s2FlashcardId == 0x5A45) {
-			*(u32*)0x0206E260 = 0xE3A00408; // mov r0, #0x08000000
-		} else {
-			*(u32*)0x0206E260 = 0xE3A00409; // mov r0, #0x09000000
-		}
+		*(u32*)0x0206E260 = (s2FlashcardId == 0x5A45) ? 0xE3A00408 : 0xE3A00409; // mov r0, (s2FlashcardId == 0x5A45) ? #0x08000000 : #0x09000000
 		*(u32*)0x020A6664 = 0xE1A00000; // nop
 		*(u32*)0x020A8DFC = 0xE1A00000; // nop
 		*(u32*)0x020AD2A0 = 0xE1A00000; // nop

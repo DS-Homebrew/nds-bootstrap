@@ -6347,6 +6347,18 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBLThumb(0x0206C5E8, dsiSaveSeekT);
 	} */
 
+	// Jinia Supasonaru: Eiwa Rakubiki Jiten (Japan)
+	// Saving not supported due to using more than one file in filesystem
+	else if (strcmp(romTid, "KD3J") == 0 && !twlFontFound) {
+		*(u32*)0x0205EE08 = 0xE1A00000; // nop (Skip Manual screen)
+	}
+
+	// Jinia Supasonaru: Waei Rakubiki Jiten (Japan)
+	// Saving not supported due to using more than one file in filesystem
+	else if (strcmp(romTid, "KD5J") == 0 && !twlFontFound) {
+		*(u32*)0x0205EC98 = 0xE1A00000; // nop (Skip Manual screen)
+	}
+
 	// Kami Hikouki (Japan)
 	// Saving not supported due to using more than one file
 	else if (strcmp(romTid, "KAMJ") == 0 && !twlFontFound) {
@@ -6945,7 +6957,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Meikyou Kokugo: Rakubiki Jiten (Japan)
-	// Saving not supported due to using more than one file
+	// Saving not supported due to using more than one file in filesystem
 	else if (strcmp(romTid, "KD4J") == 0 && !twlFontFound) {
 		*(u32*)0x0205ECAC = 0xE1A00000; // nop (Skip Manual screen)
 	}

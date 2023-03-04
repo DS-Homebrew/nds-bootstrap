@@ -576,7 +576,9 @@ static bool isROMLoadableInRAM(const tNDSHeader* ndsHeader, const char* romTid, 
 			romSizeLimit -= 0x200000;
 		}
 	} else if (!extendedMemory2) {
-		if (strncmp(romTid, "KD4", 3) == 0) { // Meikyou Kokugo: Rakubiki Jiten
+		if (strncmp(romTid, "KD3", 3) == 0 // Jinia Supasonaru: Eiwa Rakubiki Jiten
+		 || strncmp(romTid, "KD5", 3) == 0 // Jinia Supasonaru: Waei Rakubiki Jiten
+		 || strncmp(romTid, "KD4", 3) == 0) { // Meikyou Kokugo: Rakubiki Jiten
 			return false;
 		} else if (// strncmp(romTid, "KLT", 3) == 0 // My Little Restaurant
 				/* || */ strncmp(romTid, "KAU", 3) == 0) { // Nintendo Cowndown Calendar
@@ -590,7 +592,7 @@ static bool isROMLoadableInRAM(const tNDSHeader* ndsHeader, const char* romTid, 
 			romSizeLimit -= 0x200000;
 		}
 	}
-	if (strncmp(romTid, "KD4", 3) == 0 && s2FlashcardId == 0x5A45) { // Meikyou Kokugo: Rakubiki Jiten
+	if ((strncmp(romTid, "KD3", 3) == 0 || strncmp(romTid, "KD4", 3) == 0 || strncmp(romTid, "KD5", 3) == 0) && s2FlashcardId == 0x5A45) {
 		return false;
 	}
 	if (extendedMemory2 && !dsDebugRam) {

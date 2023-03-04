@@ -209,6 +209,8 @@ static const char dsiWareForBootloader1[][4] = {
 	"KJB", // Jewel Keepers: Easter Island
 	"KUK", // Jewel Legends: Tree of Life
 	// "K43", // Jewel Quest 4: Heritage
+	"KD3", // Jinia Supasonaru: Eiwa Rakubiki Jiten
+	"KD5", // Jinia Supasonaru: Waei Rakubiki Jiten
 	"KT9", // Kung Fu Dragon
 	"KQ9", // The Legend of Zelda: Four Swords: Anniversary Edition
 	"KLD", // Legendary Wars: T-Rex Rumble
