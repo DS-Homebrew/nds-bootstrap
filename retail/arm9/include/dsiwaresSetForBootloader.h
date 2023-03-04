@@ -95,7 +95,6 @@ static const char dsiWareForBootloader1[][4] = {
 	"KXC", // Castle Conqueror: Heroes 2
 	"KQN", // Castle Conqueror: Revolution
 	"KCV", // Cave Story
-	"KZ9", // Chiri Kuizu: Shouga Kusei
 	"KBG", // Chotto DS Bun ga Kuzenshuu: Sekai no Bungaku 20
 	"KXW", // Christmas Wonderland
 	"K2W", // Christmas Wonderland 2
@@ -304,6 +303,11 @@ static const char dsiWareForBootloader2[][4] = {
 	"KRW", // Sea Battle
 	"KS3", // Shantae: Risky's Revenge
 	"KSJ", // Shawn Johnson Gymnastics
+	"KK5", // Kakitori Rekishi: Shouga Kusei (01)
+	"KZ9", // Chiri Kuizu: Shouga Kusei (02)
+	"KZ3", // Koumin Kuizu: Shouga Kusei (03)
+	"K48", // Rika Kuizu Shouga Kusei: Seibutsu Chigaku He (04)
+	"K49", // Jukugo Kuizu (05)
 	"K4J", // Simply Mahjong
 	"KM3", // Simply Minesweeper
 	"K4L", // Simply Solitaire

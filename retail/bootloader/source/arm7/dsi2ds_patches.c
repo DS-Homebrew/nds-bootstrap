@@ -6006,52 +6006,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchUserSettingsReadDSiWare(0x0207D758);
 	}
 
-	// Chiri Kuizu: Shouga Kusei (Japan)
-	else if (strcmp(romTid, "KZ9J") == 0) {
-		useSharedFont = (twlFontFound && debugOrMep);
-		*(u32*)0x0200E148 = 0xE1A00000; // nop
-		*(u32*)0x02011A80 = 0xE1A00000; // nop
-		patchInitDSiWare(0x020175BC, heapEnd);
-		patchUserSettingsReadDSiWare(0x02018A98);
-		if (useSharedFont) {
-			if (!extendedMemory2) {
-				patchTwlFontLoad(0x020371A0, 0x02019008);
-			}
-		} else {
-			*(u32*)0x0201DD98 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
-
-			// Skip Manual screen
-			*(u32*)0x02037338 = 0xE1A00000; // nop
-			*(u32*)0x02037340 = 0xE1A00000; // nop
-			*(u32*)0x0203734C = 0xE1A00000; // nop
-		}
-		*(u32*)0x0201DD9C = 0xE1A00000; // nop
-		setBL(0x0204173C, (u32)dsiSaveOpen);
-		setBL(0x02041760, (u32)dsiSaveGetLength);
-		setBL(0x02041784, (u32)dsiSaveRead);
-		setBL(0x0204178C, (u32)dsiSaveClose);
-		setBL(0x020417D0, (u32)dsiSaveCreate);
-		setBL(0x020417E0, (u32)dsiSaveOpen);
-		setBL(0x020417F0, (u32)dsiSaveGetResultCode);
-		setBL(0x02041810, (u32)dsiSaveSetLength);
-		setBL(0x02041820, (u32)dsiSaveWrite);
-		setBL(0x02041828, (u32)dsiSaveClose);
-		*(u32*)0x02041868 = 0xE3A00001; // mov r0, #1 (dsiSaveOpenDir)
-		*(u32*)0x02041890 = 0xE3A00001; // mov r0, #1 (dsiSaveReadDir)
-		*(u32*)0x020418B8 = 0xE3A00001; // mov r0, #1
-		*(u32*)0x020418CC = 0xE3A00001; // mov r0, #1
-		*(u32*)0x02041910 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x02041960 = 0xE3A00000; // mov r0, #0 (dsiSaveReadDir)
-		*(u32*)0x02041970 = 0xE1A00000; // nop (dsiSaveCloseDir)
-		*(u32*)0x020419D0 = 0xE3A00001; // mov r0, #1 (dsiSaveOpenDir)
-		*(u32*)0x020419EC = 0xE3A00001; // mov r0, #1 (dsiSaveReadDir)
-		*(u32*)0x02041A14 = 0xE3A00001; // mov r0, #1
-		*(u32*)0x02041A28 = 0xE3A00001; // mov r0, #1
-		setBL(0x02041A64, (u32)dsiSaveDelete);
-		*(u32*)0x02041A78 = 0xE3A00000; // mov r0, #0 (dsiSaveReadDir)
-		*(u32*)0x02041A88 = 0xE1A00000; // nop (dsiSaveCloseDir)
-	}
-
 	// Chotto DS Bun ga Kuzenshuu: Sekai no Bungaku 20 (Japan)
 	else if (strcmp(romTid, "KBGJ") == 0) {
 		*(u32*)0x02005B24 = 0xE3A00000; // mov r0, #0
@@ -16886,6 +16840,69 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02091150, (u32)dsiSaveOpen);
 		setBL(0x02091160, (u32)dsiSaveClose);
 		*(u32*)0x02091A28 = 0xE3A00000; // mov r0, #0
+	}
+
+	// Kakitori Rekishi: Shouga Kusei (01) (Japan)
+	// Chiri Kuizu: Shouga Kusei (02) (Japan)
+	// Koumin Kuizu: Shouga Kusei (03) (Japan)
+	// Rika Kuizu Shouga Kusei: Seibutsu Chigaku He (04) (Japan)
+	// Jukugo Kuizu (05) (Japan)
+	// Saving not supported due to using more than one file in filesystem
+	else if (strcmp(romTid, "KK5J") == 0 || strcmp(romTid, "KZ9J") == 0 || strcmp(romTid, "KK3J") == 0 || strcmp(romTid, "K48J") == 0 || strcmp(romTid, "K49J") == 0) {
+		u8 offsetChange0 = (strcmp(romTid, "KZ9J") == 0 || strcmp(romTid, "KK3J") == 0 || strcmp(romTid, "K48J") == 0) ? 0 : 0x1C;
+		u8 offsetChange = 0;
+		u8 offsetChange2 = 0;
+		if (strcmp(romTid, "KK5J") == 0) {
+			offsetChange = 0x18;
+			offsetChange2 = 0x70;
+		} else if (strcmp(romTid, "K49J") == 0) {
+			offsetChange = 0x1C;
+			offsetChange2 = 0x1C;
+		}
+
+		useSharedFont = (twlFontFound && debugOrMep);
+		*(u32*)(0x0200E148+offsetChange0) = 0xE1A00000; // nop
+		*(u32*)(0x02011A80+offsetChange) = 0xE1A00000; // nop
+		patchInitDSiWare(0x020175BC+offsetChange, heapEnd);
+		patchUserSettingsReadDSiWare(0x02018A98+offsetChange);
+		/* if (useSharedFont) {
+			if (!extendedMemory2) {
+				patchTwlFontLoad(0x020371A0+offsetChange2, 0x02019008+offsetChange);
+			}
+		} else { */
+			*(u32*)(0x0201DD98+offsetChange) = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+
+			// Skip Manual screen
+			*(u32*)(0x02037338+offsetChange2) = 0xE1A00000; // nop
+			*(u32*)(0x02037340+offsetChange2) = 0xE1A00000; // nop
+			*(u32*)(0x0203734C+offsetChange2) = 0xE1A00000; // nop
+		// }
+		*(u32*)(0x0201DD9C+offsetChange) = 0xE1A00000; // nop
+		/* setBL(0x0204173C+offsetChange2, (u32)dsiSaveOpen);
+		setBL(0x02041760+offsetChange2, (u32)dsiSaveGetLength);
+		setBL(0x02041784+offsetChange2, (u32)dsiSaveRead);
+		setBL(0x0204178C+offsetChange2, (u32)dsiSaveClose);
+		setBL(0x020417D0+offsetChange2, (u32)dsiSaveCreate);
+		setBL(0x020417E0+offsetChange2, (u32)dsiSaveOpen);
+		setBL(0x020417F0+offsetChange2, (u32)dsiSaveGetResultCode);
+		setBL(0x02041810+offsetChange2, (u32)dsiSaveSetLength);
+		setBL(0x02041820+offsetChange2, (u32)dsiSaveWrite);
+		setBL(0x02041828+offsetChange2, (u32)dsiSaveClose);
+		*(u32*)(0x02041868+offsetChange2) = 0xE3A00001; // mov r0, #1 (dsiSaveOpenDir)
+		*(u32*)(0x02041890+offsetChange2) = 0xE3A00001; // mov r0, #1 (dsiSaveReadDir)
+		*(u32*)(0x020418B8+offsetChange2) = 0xE3A00001; // mov r0, #1
+		*(u32*)(0x020418CC+offsetChange2) = 0xE3A00001; // mov r0, #1
+		*(u32*)(0x02041910+offsetChange2) = 0xE3A00000; // mov r0, #0
+		// *(u32*)(0x02041948+offsetChange2) = 0xE1A00000; // nop
+		*(u32*)(0x02041960+offsetChange2) = 0xE3A00000; // mov r0, #0 (dsiSaveReadDir)
+		*(u32*)(0x02041970+offsetChange2) = 0xE1A00000; // nop (dsiSaveCloseDir)
+		*(u32*)(0x020419D0+offsetChange2) = 0xE3A00001; // mov r0, #1 (dsiSaveOpenDir)
+		*(u32*)(0x020419EC+offsetChange2) = 0xE3A00001; // mov r0, #1 (dsiSaveReadDir)
+		*(u32*)(0x02041A14+offsetChange2) = 0xE3A00001; // mov r0, #1
+		*(u32*)(0x02041A28+offsetChange2) = 0xE3A00001; // mov r0, #1
+		setBL(0x02041A64+offsetChange2, (u32)dsiSaveDelete);
+		*(u32*)(0x02041A78+offsetChange2) = 0xE3A00000; // mov r0, #0 (dsiSaveReadDir)
+		*(u32*)(0x02041A88+offsetChange2) = 0xE1A00000; // nop (dsiSaveCloseDir) */
 	}
 
 	// Simple DS Series Vol. 1: The Misshitsukara no Dasshutsu (Japan)
