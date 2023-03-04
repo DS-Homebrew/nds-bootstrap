@@ -90,19 +90,22 @@ vblankHandler:
 @ Hook the return address, then go back to the original function
 	stmdb	sp!, {lr}
 	adr 	lr, code_handler_start_vblank
-	ldr 	pc,	intr_vblank_orig_return
+	ldr 	r0,	intr_vblank_orig_return
+	bx  	r0
 
 fifoHandler:
 @ Hook the return address, then go back to the original function
 	stmdb	sp!, {lr}
 	adr 	lr, code_handler_start_fifo
-	ldr 	pc,	intr_fifo_orig_return
+	ldr 	r0,	intr_fifo_orig_return
+	bx  	r0
 
 ndma0Handler:
 @ Hook the return address, then go back to the original function
 	stmdb	sp!, {lr}
 	adr 	lr, code_handler_start_ndma0
-	ldr 	pc,	intr_ndma0_orig_return
+	ldr 	r0,	intr_ndma0_orig_return
+	bx  	r0
 
 code_handler_start_vblank:
 	push	{r0-r12} 
