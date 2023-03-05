@@ -16761,6 +16761,8 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Sea Battle (USA)
 	// Sea Battle (Europe)
 	else if (strcmp(romTid, "KRWE") == 0 || strcmp(romTid, "KRWP") == 0) {
+		u8 offsetChange = (romTid[3] == 'E') ? 0 : 0xBC;
+
 		useSharedFont = (twlFontFound && debugOrMep);
 		if (!useSharedFont) {
 			*(u32*)0x02005248 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
@@ -16772,34 +16774,57 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0201E73C = 0xE3A00001; // mov r0, #1
 		*(u32*)0x0201E740 = 0xE12FFF1E; // bx lr
 		*(u32*)0x0202B430 = 0xE1A00000; // nop
-		if (romTid[3] == 'E') {
-			setBL(0x02030F00, (u32)dsiSaveCreate);
-			setBL(0x02030F10, (u32)dsiSaveOpen);
-			setBL(0x02030F3C, (u32)dsiSaveWrite);
-			setBL(0x02030F4C, (u32)dsiSaveClose);
-			setBL(0x02030F68, (u32)dsiSaveClose);
-			setBL(0x02030FD4, (u32)dsiSaveOpen);
-			setBL(0x02030FE4, (u32)dsiSaveGetLength);
-			setBL(0x02030FFC, (u32)dsiSaveRead);
-			setBL(0x02031040, (u32)dsiSaveClose);
-			setBL(0x0203105C, (u32)dsiSaveClose);
-			if (useSharedFont && !extendedMemory2) {
-				patchTwlFontLoad(0x02031158, 0x02019548);
-			}
-		} else {
-			setBL(0x02030FBC, (u32)dsiSaveCreate);
-			setBL(0x02030FCC, (u32)dsiSaveOpen);
-			setBL(0x02030FF8, (u32)dsiSaveWrite);
-			setBL(0x02031008, (u32)dsiSaveClose);
-			setBL(0x02031024, (u32)dsiSaveClose);
-			setBL(0x02031090, (u32)dsiSaveOpen);
-			setBL(0x020310A0, (u32)dsiSaveGetLength);
-			setBL(0x020310B8, (u32)dsiSaveRead);
-			setBL(0x020310FC, (u32)dsiSaveClose);
-			setBL(0x02031118, (u32)dsiSaveClose);
-			if (useSharedFont && !extendedMemory2) {
-				patchTwlFontLoad(0x02031214, 0x02019548);
-			}
+		setBL(0x02030F00+offsetChange, (u32)dsiSaveCreate);
+		setBL(0x02030F10+offsetChange, (u32)dsiSaveOpen);
+		setBL(0x02030F3C+offsetChange, (u32)dsiSaveWrite);
+		setBL(0x02030F4C+offsetChange, (u32)dsiSaveClose);
+		setBL(0x02030F68+offsetChange, (u32)dsiSaveClose);
+		setBL(0x02030FD4+offsetChange, (u32)dsiSaveOpen);
+		setBL(0x02030FE4+offsetChange, (u32)dsiSaveGetLength);
+		setBL(0x02030FFC+offsetChange, (u32)dsiSaveRead);
+		setBL(0x02031040+offsetChange, (u32)dsiSaveClose);
+		setBL(0x0203105C+offsetChange, (u32)dsiSaveClose);
+		if (useSharedFont && !extendedMemory2) {
+			patchTwlFontLoad(0x02031158+offsetChange, 0x02019548);
+		}
+	}
+
+	// Kaisan Gemu: Radar (Japan)
+	else if (strcmp(romTid, "KRWJ") == 0) {
+		useSharedFont = (twlFontFound && debugOrMep);
+		if (!useSharedFont) {
+			*(u32*)0x02005248 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		}
+		*(u32*)0x0200E2F4 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0201045C = 0xE1A00000; // nop
+		*(u32*)0x0201364C = 0xE1A00000; // nop
+		*(u32*)0x02014D9C = 0xE1A00000; // nop
+		*(u32*)0x02014DA0 = 0xE1A00000; // nop
+		patchInitDSiWare(0x0201A864, heapEnd);
+		patchUserSettingsReadDSiWare(0x0201BF14);
+		*(u32*)0x02021694 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02021698 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0202E884 = 0xE1A00000; // nop
+		*(u32*)0x0202ECF8 = 0xE1A00000; // nop
+		*(u32*)0x02032464 = 0xE1A00000; // nop
+		*(u32*)0x020324BC = 0xE1A00000; // nop
+		*(u32*)0x02032510 = 0xE1A00000; // nop
+		*(u32*)0x02032700 = 0xE1A00000; // nop
+		*(u32*)0x02032738 = 0xE1A00000; // nop
+		*(u32*)0x02032788 = 0xE1A00000; // nop
+		*(u32*)0x020327C4 = 0xE1A00000; // nop
+		setBL(0x0203784C, (u32)dsiSaveCreate);
+		setBL(0x0203785C, (u32)dsiSaveOpen);
+		setBL(0x02037888, (u32)dsiSaveWrite);
+		setBL(0x02037898, (u32)dsiSaveClose);
+		setBL(0x020378B4, (u32)dsiSaveClose);
+		setBL(0x02037920, (u32)dsiSaveOpen);
+		setBL(0x02037930, (u32)dsiSaveGetLength);
+		setBL(0x02037948, (u32)dsiSaveRead);
+		setBL(0x0203798C, (u32)dsiSaveClose);
+		setBL(0x020379A8, (u32)dsiSaveClose);
+		if (useSharedFont && !extendedMemory2) {
+			patchTwlFontLoad(0x02037AA4, 0x0201C49C);
 		}
 	}
 

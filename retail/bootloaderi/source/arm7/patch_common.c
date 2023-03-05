@@ -9583,40 +9583,42 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Sea Battle (USA)
-	else if (strcmp(romTid, "KRWE") == 0) {
+	// Sea Battle (Europe)
+	else if (strcmp(romTid, "KRWE") == 0 || strcmp(romTid, "KRWP") == 0) {
 		if (!twlFontFound) {
 			*(u32*)0x02005248 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		}
 		if (saveOnFlashcard) {
-			setBL(0x02030F00, (u32)dsiSaveCreate);
-			setBL(0x02030F10, (u32)dsiSaveOpen);
-			setBL(0x02030F3C, (u32)dsiSaveWrite);
-			setBL(0x02030F4C, (u32)dsiSaveClose);
-			setBL(0x02030F68, (u32)dsiSaveClose);
-			setBL(0x02030FD4, (u32)dsiSaveOpen);
-			setBL(0x02030FE4, (u32)dsiSaveGetLength);
-			setBL(0x02030FFC, (u32)dsiSaveRead);
-			setBL(0x02031040, (u32)dsiSaveClose);
-			setBL(0x0203105C, (u32)dsiSaveClose);
+			u8 offsetChange = (romTid[3] == 'E') ? 0 : 0xBC;
+			setBL(0x02030F00+offsetChange, (u32)dsiSaveCreate);
+			setBL(0x02030F10+offsetChange, (u32)dsiSaveOpen);
+			setBL(0x02030F3C+offsetChange, (u32)dsiSaveWrite);
+			setBL(0x02030F4C+offsetChange, (u32)dsiSaveClose);
+			setBL(0x02030F68+offsetChange, (u32)dsiSaveClose);
+			setBL(0x02030FD4+offsetChange, (u32)dsiSaveOpen);
+			setBL(0x02030FE4+offsetChange, (u32)dsiSaveGetLength);
+			setBL(0x02030FFC+offsetChange, (u32)dsiSaveRead);
+			setBL(0x02031040+offsetChange, (u32)dsiSaveClose);
+			setBL(0x0203105C+offsetChange, (u32)dsiSaveClose);
 		}
 	}
 
-	// Sea Battle (Europe)
-	else if (strcmp(romTid, "KRWP") == 0) {
+	// Kaisan Gemu: Radar (Japan)
+	else if (strcmp(romTid, "KRWJ") == 0) {
 		if (!twlFontFound) {
 			*(u32*)0x02005248 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		}
 		if (saveOnFlashcard) {
-			setBL(0x02030FBC, (u32)dsiSaveCreate);
-			setBL(0x02030FCC, (u32)dsiSaveOpen);
-			setBL(0x02030FF8, (u32)dsiSaveWrite);
-			setBL(0x02031008, (u32)dsiSaveClose);
-			setBL(0x02031024, (u32)dsiSaveClose);
-			setBL(0x02031090, (u32)dsiSaveOpen);
-			setBL(0x020310A0, (u32)dsiSaveGetLength);
-			setBL(0x020310B8, (u32)dsiSaveRead);
-			setBL(0x020310FC, (u32)dsiSaveClose);
-			setBL(0x02031118, (u32)dsiSaveClose);
+			setBL(0x0203784C, (u32)dsiSaveCreate);
+			setBL(0x0203785C, (u32)dsiSaveOpen);
+			setBL(0x02037888, (u32)dsiSaveWrite);
+			setBL(0x02037898, (u32)dsiSaveClose);
+			setBL(0x020378B4, (u32)dsiSaveClose);
+			setBL(0x02037920, (u32)dsiSaveOpen);
+			setBL(0x02037930, (u32)dsiSaveGetLength);
+			setBL(0x02037948, (u32)dsiSaveRead);
+			setBL(0x0203798C, (u32)dsiSaveClose);
+			setBL(0x020379A8, (u32)dsiSaveClose);
 		}
 	}
 
