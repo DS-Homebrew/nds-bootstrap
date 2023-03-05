@@ -6321,6 +6321,69 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0205EC98 = 0xE1A00000; // nop (Skip Manual screen)
 	}
 
+	// Just SING! 80's (USA)
+	// Just SING! 80's (Europe)
+	else if ((strcmp(romTid, "KJFE") == 0 || strcmp(romTid, "KJFP") == 0) && saveOnFlashcard) {
+		tonccpy((u32*)0x02070968, dsiSaveCreate, 0xC);
+
+		const u32 dsiSaveOpenT = 0x02070974;
+		*(u16*)dsiSaveOpenT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveOpenT + 4), dsiSaveOpen, 0xC);
+
+		const u32 dsiSaveCloseT = 0x02070984;
+		*(u16*)dsiSaveCloseT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveCloseT + 4), dsiSaveClose, 0xC);
+
+		const u32 dsiSaveGetLengthT = 0x02070994;
+		*(u16*)dsiSaveGetLengthT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveGetLengthT + 4), dsiSaveGetLength, 0xC);
+
+		const u32 dsiSaveSeekT = 0x020709A4;
+		*(u16*)dsiSaveSeekT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveSeekT + 4), dsiSaveSeek, 0xC);
+
+		tonccpy((u32*)0x02070A58, dsiSaveSetLength, 0xC);
+
+		tonccpy((u32*)0x02070DC4, dsiSaveRead, 0xC); // dsiSaveReadAsync
+
+		tonccpy((u32*)0x02070E90, dsiSaveWrite, 0xC); // dsiSaveWriteAsync
+
+		*(u32*)0x02037CAC = 0x4770; // bx lr (Skip NAND error checking)
+		setBLThumb(0x02037D00, dsiSaveCloseT);
+		setBLThumb(0x02037D3A, dsiSaveOpenT);
+		*(u16*)0x02037D6A = 0x2001; // movs r0, #1 (dsiSaveGetArcSrc)
+		*(u16*)0x02037D6C = 0x46C0; // nop
+		setBLThumb(0x02037DA0, dsiSaveOpenT);
+		*(u16*)0x02037DC8 = 0x2001; // movs r0, #1 (dsiSaveFlush)
+		*(u16*)0x02037DCA = 0x46C0; // nop
+		setBLThumb(0x02037DD8, dsiSaveGetLengthT);
+		setBLThumb(0x02037E30, dsiSaveSeekT);
+		setBLThumb(0x02037E7C, dsiSaveSeekT);
+	}
+
+	// Just SING! Christmas Songs (USA)
+	// Just SING! Christmas Songs (Europe)
+	else if ((strcmp(romTid, "K4CE") == 0 || strcmp(romTid, "K4CP") == 0) && saveOnFlashcard) {
+		setBL(0x020428B0, (u32)dsiSaveOpen);
+		*(u32*)0x02042934 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+		// setBL(0x02042944, (u32)dsiSaveGetResultCode);
+		setBL(0x0204299C, (u32)dsiSaveClose);
+		setBL(0x020429BC, (u32)dsiSaveCreate);
+		setBL(0x02042A3C, (u32)dsiSaveClose);
+		setBL(0x02042A5C, (u32)dsiSaveOpen);
+		setBL(0x02042ADC, (u32)dsiSaveClose);
+		setBL(0x02042AF8, (u32)dsiSaveSetLength);
+		setBL(0x02042B68, (u32)dsiSaveClose);
+		*(u32*)0x02042B7C = 0xE3A00001; // mov r0, #1 (dsiSaveFlush)
+		setBL(0x02042BDC, (u32)dsiSaveClose);
+		setBL(0x02042BF0, (u32)dsiSaveGetLength);
+		setBL(0x02042C54, (u32)dsiSaveSeek);
+		setBL(0x02042CB8, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+		setBL(0x02042D50, (u32)dsiSaveSeek);
+		setBL(0x02042DB4, (u32)dsiSaveRead); // dsiSaveReadAsync
+		*(u32*)0x0205063C = 0xE12FFF1E; // bx lr (Skip NAND error checking)
+	}
+
 	// Kami Hikouki (Japan)
 	// Saving not supported due to using more than one file
 	else if (strcmp(romTid, "KAMJ") == 0 && !twlFontFound) {

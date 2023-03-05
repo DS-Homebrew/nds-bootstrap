@@ -11088,6 +11088,134 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchUserSettingsReadDSiWare(0x0204BB4C);
 	}*/
 
+	// Just SING! 80's (USA)
+	// Just SING! 80's (Europe)
+	else if (strcmp(romTid, "KJFE") == 0 || strcmp(romTid, "KJFP") == 0) {
+		tonccpy((u32*)0x02070968, dsiSaveCreate, 0xC);
+
+		const u32 dsiSaveOpenT = 0x02070974;
+		*(u16*)dsiSaveOpenT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveOpenT + 4), dsiSaveOpen, 0xC);
+
+		const u32 dsiSaveCloseT = 0x02070984;
+		*(u16*)dsiSaveCloseT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveCloseT + 4), dsiSaveClose, 0xC);
+
+		const u32 dsiSaveGetLengthT = 0x02070994;
+		*(u16*)dsiSaveGetLengthT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveGetLengthT + 4), dsiSaveGetLength, 0xC);
+
+		const u32 dsiSaveSeekT = 0x020709A4;
+		*(u16*)dsiSaveSeekT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveSeekT + 4), dsiSaveSeek, 0xC);
+
+		tonccpy((u32*)0x02070A58, dsiSaveSetLength, 0xC);
+
+		tonccpy((u32*)0x02070DC4, dsiSaveRead, 0xC); // dsiSaveReadAsync
+
+		tonccpy((u32*)0x02070E90, dsiSaveWrite, 0xC); // dsiSaveWriteAsync
+
+		doubleNopT(0x0200B7EA);
+		doubleNopT(0x0200B9B8);
+		*(u16*)0x0200B9C4 = 0x2000; // movs r0, #0
+		*(u16*)0x0200B9C6 = 0x46C0; // nop
+		*(u16*)0x0200B9D4 = 0x2000; // movs r0, #0
+		*(u16*)0x0200B9D6 = 0x46C0; // nop
+		doubleNopT(0x02013864);
+		doubleNopT(0x0201C5B0);
+		*(u32*)0x02021AC0 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02026460 = 0xE1A00000; // nop
+		*(u16*)0x02026EAC = 0x2000; // movs r0, #0
+		*(u16*)0x02026EAE = 0x46C0; // nop
+		doubleNopT(0x0202BFA6);
+		*(u32*)0x02037CAC = 0x4770; // bx lr (Skip NAND error checking)
+		setBLThumb(0x02037D00, dsiSaveCloseT);
+		setBLThumb(0x02037D3A, dsiSaveOpenT);
+		*(u16*)0x02037D6A = 0x2001; // movs r0, #1 (dsiSaveGetArcSrc)
+		*(u16*)0x02037D6C = 0x46C0; // nop
+		setBLThumb(0x02037DA0, dsiSaveOpenT);
+		*(u16*)0x02037DC8 = 0x2001; // movs r0, #1 (dsiSaveFlush)
+		*(u16*)0x02037DCA = 0x46C0; // nop
+		setBLThumb(0x02037DD8, dsiSaveGetLengthT);
+		setBLThumb(0x02037E30, dsiSaveSeekT);
+		setBLThumb(0x02037E7C, dsiSaveSeekT);
+		*(u16*)0x020382B4 = 0x46C0; // nop
+		*(u16*)0x02038354 = 0x46C0; // nop
+		*(u16*)0x020410E4 = 0x2301; // movs r3, #1
+		doubleNopT(0x0204C206);
+		doubleNopT(0x0204C20C);
+		*(u16*)0x0204C9E4 = 0x2000; // movs r0, #0
+		*(u32*)0x0206F170 += 0x60000000; // bhi -> b
+		*(u32*)0x0206F2FC = 0xE1A00000; // nop
+		*(u32*)0x02072CB0 = 0xE1A00000; // nop
+		patchInitDSiWare(0x02079E50, heapEnd);
+		*(u32*)0x0207A1DC = *(u32*)0x02004FE8;
+		patchUserSettingsReadDSiWare(0x0207B4F4);
+		*(u32*)0x0207B8FC = 0xE1A00000; // nop
+		*(u32*)0x0207B900 = 0xE1A00000; // nop
+		*(u32*)0x0207B904 = 0xE1A00000; // nop
+		*(u32*)0x0207B908 = 0xE1A00000; // nop
+		*(u32*)0x020B06BC = 0xE1A00000; // nop
+		*(u32*)0x020B06C0 = 0xE1A00000; // nop
+	}
+
+	// Just SING! Christmas Songs (USA)
+	// Just SING! Christmas Songs (Europe)
+	// Difficult to get working properly without a good debugger (Crashes after selecting a song on hardware, crashes before title screen on NO$GBA)
+	/* else if (strcmp(romTid, "K4CE") == 0 || strcmp(romTid, "K4CP") == 0) {
+		doubleNopT(0x02008A74);
+		doubleNopT(0x02008F04);
+		*(u16*)0x02008F12 = 0x2000; // movs r0, #0
+		*(u16*)0x02008F14 = 0x46C0; // nop
+		*(u16*)0x02008F22 = 0x2000; // movs r0, #0
+		*(u16*)0x02008F24 = 0x46C0; // nop
+		*(u16*)0x02008F32 = 0x2000; // movs r0, #0
+		*(u16*)0x02008F34 = 0x46C0; // nop
+		*(u16*)0x02008F42 = 0x2000; // movs r0, #0
+		*(u16*)0x02008F44 = 0x46C0; // nop
+		doubleNopT(0x02008F4C);
+		doubleNopT(0x02008F52);
+		doubleNopT(0x02008F58);
+		doubleNopT(0x02008F64);
+		*(u32*)0x02027A04 = 0xE3A00000; // mov r0, #0
+		doubleNopT(0x0202AB80);
+		doubleNopT(0x0202AB88);
+		doubleNopT(0x0202AB92);
+		doubleNopT(0x0202ABDA);
+		*(u16*)0x0202AE3A += 0x1000; // bne -> b
+		*(u16*)0x0202AE5E += 0x1000; // bne -> b
+		doubleNopT(0x0202AEA0);
+		doubleNopT(0x0202AEA8);
+		*(u32*)0x0202AF54 += 0xD0000000; // bne -> b
+		*(u32*)0x0202AF8C += 0xD0000000; // LDMNEFD -> LDMFD
+		doubleNopT(0x02033D8E);
+		setBL(0x020428B0, (u32)dsiSaveOpen);
+		*(u32*)0x02042934 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+		// setBL(0x02042944, (u32)dsiSaveGetResultCode);
+		setBL(0x0204299C, (u32)dsiSaveClose);
+		setBL(0x020429BC, (u32)dsiSaveCreate);
+		setBL(0x02042A3C, (u32)dsiSaveClose);
+		setBL(0x02042A5C, (u32)dsiSaveOpen);
+		setBL(0x02042ADC, (u32)dsiSaveClose);
+		setBL(0x02042AF8, (u32)dsiSaveSetLength);
+		setBL(0x02042B68, (u32)dsiSaveClose);
+		*(u32*)0x02042B7C = 0xE3A00001; // mov r0, #1 (dsiSaveFlush)
+		setBL(0x02042BDC, (u32)dsiSaveClose);
+		setBL(0x02042BF0, (u32)dsiSaveGetLength);
+		setBL(0x02042C54, (u32)dsiSaveSeek);
+		setBL(0x02042CB8, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+		setBL(0x02042D50, (u32)dsiSaveSeek);
+		setBL(0x02042DB4, (u32)dsiSaveRead); // dsiSaveReadAsync
+		*(u32*)0x0205063C = 0xE12FFF1E; // bx lr (Skip NAND error checking)
+		*(u16*)0x0205096C = 0x2201; // movs r2, #1
+		doubleNopT(0x020618EC);
+		doubleNopT(0x020618F2);
+		*(u32*)0x02092170 = 0xE1A00000; // nop
+		*(u32*)0x02095968 = 0xE1A00000; // nop
+		patchInitDSiWare(0x0209CC28, heapEnd);
+		patchUserSettingsReadDSiWare(0x0209E2CC);
+	} */
+
 	// A Kappa's Trail (USA)
 	// Requires 8MB of RAM
 	// Crashes after ESRB screen
