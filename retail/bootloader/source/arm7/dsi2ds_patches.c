@@ -11408,6 +11408,31 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		doubleNopT(0x0206834A);
 	}
 
+	// Kokoro no Herusumeta: Kokoron (Japan)
+	// TWLFontTable.dat required
+	else if (strcmp(romTid, "K9CJ") == 0 && twlFontFound) {
+		useSharedFont = twlFontFound;
+		*(u32*)0x020051A8 = 0xE1A00000; // nop
+		*(u32*)0x02005E68 = 0xE1A00000; // nop
+		*(u32*)0x02005FB4 = 0xE1A00000; // nop
+		*(u32*)0x02026F84 = 0xE1A00000; // nop
+		*(u32*)0x0202A4E8 = 0xE1A00000; // nop
+		patchInitDSiWare(0x0202F2B4, heapEnd);
+		patchUserSettingsReadDSiWare(0x02030754);
+		setBL(0x0200F820, (u32)dsiSaveOpen);
+		setBL(0x0200F840, (u32)dsiSaveGetLength);
+		setBL(0x0200F858, (u32)dsiSaveRead);
+		setBL(0x0200F868, (u32)dsiSaveRead);
+		setBL(0x0200F8B0, (u32)dsiSaveClose);
+		setBL(0x0200F8C8, (u32)dsiSaveClose);
+		setBL(0x0200F910, (u32)dsiSaveOpen);
+		setBL(0x0200F938, (u32)dsiSaveSetLength);
+		setBL(0x0200F980, (u32)dsiSaveWrite);
+		setBL(0x0200F990, (u32)dsiSaveWrite);
+		setBL(0x0200F998, (u32)dsiSaveClose);
+		setBL(0x0200F9C0, (u32)dsiSaveCreate);
+	}
+
 	// Kung Fu Dragon (USA)
 	// Kung Fu Dragon (Europe)
 	else if (strcmp(romTid, "KT9E") == 0 || strcmp(romTid, "KT9P") == 0) {
