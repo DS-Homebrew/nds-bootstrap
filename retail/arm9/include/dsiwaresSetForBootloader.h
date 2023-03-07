@@ -316,6 +316,7 @@ static const char dsiWareForBootloader2[][4] = {
 	"KS4", // Simply Sudoku
 	"K2F", // Smart Girl's Playhouse Mini
 	"K4N", // Snakenoid Deluxe
+	"KTY", // Snapdots
 	"KX5", // SnowBoard Xtreme
 	"KL9", // Sokuren Keisa: Shougaku 1 Nensei
 	"KH2", // Sokuren Keisa: Shougaku 2 Nensei

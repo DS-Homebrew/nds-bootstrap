@@ -17354,6 +17354,78 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0204C8F8 = 0xE12FFF1E; // bx lr
 	}
 
+	// Snapdots (USA, Australia)
+	else if (strcmp(romTid, "KTYT") == 0) {
+		useSharedFont = twlFontFound;
+		const u32 newCodeAddr = 0x02010128;
+
+		if (!twlFontFound) {
+			*(u32*)0x020052B0 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+			*(u32*)0x0201F368 = 0xE12FFF1E; // bx lr (Skip Manual screen)
+		}
+		*(u32*)0x02005064 = 0xE1A00000; // nop
+		*(u32*)0x0200EB54 = 0xE1A00000; // nop
+		tonccpy((u32*)0x0200F72C, dsiSaveGetResultCode, 0xC);
+		*(u32*)0x02011F90 = 0xE1A00000; // nop
+		patchInitDSiWare(0x02017790, heapEnd);
+		patchUserSettingsReadDSiWare(0x02018C80);
+		codeCopy((u32*)newCodeAddr, (u32*)0x0201E594, 0xF0);
+		setBL(newCodeAddr+0x34, (u32)dsiSaveOpen);
+		setBL(newCodeAddr+0x58, (u32)dsiSaveGetLength);
+		setBL(newCodeAddr+0x6C, (u32)dsiSaveClose);
+		setBL(newCodeAddr+0xA4, (u32)dsiSaveRead);
+		setBL(newCodeAddr+0xD4, (u32)dsiSaveClose);
+		*(u32*)0x0201E6B4 = 0xE3A00001; // mov r0, #1 (dsiSaveOpenDir)
+		setBL(0x0201E6F4, newCodeAddr);
+		*(u32*)0x0201E700 = 0xE1A00000; // nop (dsiSaveCloseDir)
+		setBL(0x0201E744, (u32)dsiSaveCreate);
+		setBL(0x0201E77C, (u32)dsiSaveOpen);
+		setBL(0x0201E7AC, (u32)dsiSaveSetLength);
+		setBL(0x0201E7DC, (u32)dsiSaveWrite);
+		setBL(0x0201E7EC, (u32)dsiSaveClose);
+		*(u32*)0x0202D940 = 0xE1A00000; // nop
+		*(u32*)0x0202DAEC = 0xE1A00000; // nop
+		setBL(0x0202DD8C, (u32)dsiSaveDelete);
+		setBL(0x0202DE34, (u32)dsiSaveDelete);
+		setBL(0x0202DF14, (u32)dsiSaveDelete);
+	}
+
+	// Kaiten' Irasuto Pazuru: Guru Guru Logic (Japan)
+	else if (strcmp(romTid, "KTYJ") == 0) {
+		useSharedFont = twlFontFound;
+		const u32 newCodeAddr = 0x0201007C;
+
+		if (!twlFontFound) {
+			*(u32*)0x02005294 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+			*(u32*)0x0201EB20 = 0xE12FFF1E; // bx lr (Skip Manual screen)
+		}
+		*(u32*)0x02005064 = 0xE1A00000; // nop
+		*(u32*)0x0200EAB4 = 0xE1A00000; // nop
+		tonccpy((u32*)0x0200F680, dsiSaveGetResultCode, 0xC);
+		*(u32*)0x02011EE4 = 0xE1A00000; // nop
+		patchInitDSiWare(0x020176C8, heapEnd);
+		patchUserSettingsReadDSiWare(0x02018BA8);
+		codeCopy((u32*)newCodeAddr, (u32*)0x0201DD4C, 0xF0);
+		setBL(newCodeAddr+0x34, (u32)dsiSaveOpen);
+		setBL(newCodeAddr+0x58, (u32)dsiSaveGetLength);
+		setBL(newCodeAddr+0x6C, (u32)dsiSaveClose);
+		setBL(newCodeAddr+0xA4, (u32)dsiSaveRead);
+		setBL(newCodeAddr+0xD4, (u32)dsiSaveClose);
+		*(u32*)0x0201DE6C = 0xE3A00001; // mov r0, #1 (dsiSaveOpenDir)
+		setBL(0x0201DEAC, newCodeAddr);
+		*(u32*)0x0201DEB8 = 0xE1A00000; // nop (dsiSaveCloseDir)
+		setBL(0x0201DEFC, (u32)dsiSaveCreate);
+		setBL(0x0201DF34, (u32)dsiSaveOpen);
+		setBL(0x0201DF64, (u32)dsiSaveSetLength);
+		setBL(0x0201DF94, (u32)dsiSaveWrite);
+		setBL(0x0201DFA4, (u32)dsiSaveClose);
+		*(u32*)0x0202C65C = 0xE1A00000; // nop
+		*(u32*)0x0202C808 = 0xE1A00000; // nop
+		setBL(0x0202CA8C, (u32)dsiSaveDelete);
+		setBL(0x0202CB34, (u32)dsiSaveDelete);
+		setBL(0x0202CC14, (u32)dsiSaveDelete);
+	}
+
 	// SnowBoard Xtreme (USA)
 	// SnowBoard Xtreme (Europe)
 	else if (strcmp(romTid, "KX5E") == 0 || strcmp(romTid, "KX5P") == 0) {
