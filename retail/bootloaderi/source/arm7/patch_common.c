@@ -6472,6 +6472,24 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// Keibadou Uma no Suke 2012 (Japan)
+	else if (strcmp(romTid, "KUXJ") == 0) {
+		if (!twlFontFound) {
+			*(u32*)0x02005098 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+			*(u32*)0x0200512C = 0xE1A00000; // nop (Show white screen instead of manual screen)
+		}
+		if (saveOnFlashcard) {
+			setBL(0x0202CBF0, (u32)dsiSaveGetResultCode);
+			setBL(0x0202CC9C, (u32)dsiSaveOpen);
+			setBL(0x0202CCD0, (u32)dsiSaveRead);
+			setBL(0x0202CCF8, (u32)dsiSaveClose);
+			setBL(0x0202CD64, (u32)dsiSaveCreate);
+			setBL(0x0202CDF8, (u32)dsiSaveOpen);
+			setBL(0x0202CE3C, (u32)dsiSaveWrite);
+			setBL(0x0202CE5C, (u32)dsiSaveClose);
+		}
+	}
+
 	// Kung Fu Dragon (USA)
 	// Kung Fu Dragon (Europe)
 	else if (strcmp(romTid, "KT9E") == 0 || strcmp(romTid, "KT9P") == 0) {

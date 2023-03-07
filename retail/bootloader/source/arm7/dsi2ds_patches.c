@@ -11313,6 +11313,32 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchUserSettingsReadDSiWare(0x02040314);
 	}
 
+	// Keibadou Uma no Suke 2012 (Japan)
+	else if (strcmp(romTid, "KUXJ") == 0) {
+		*(u32*)0x02005098 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		*(u32*)0x0200512C = 0xE1A00000; // nop (Show white screen instead of manual screen)
+		*(u32*)0x0200C634 = 0xE1A00000; // nop
+		*(u32*)0x0200FBD0 = 0xE1A00000; // nop
+		patchInitDSiWare(0x02016E7C, heapEnd);
+		*(u32*)0x02017208 = *(u32*)0x02004FE8;
+		patchUserSettingsReadDSiWare(0x02018494);
+		setBL(0x0202CBF0, (u32)dsiSaveGetResultCode);
+		*(u32*)0x0202CC80 = 0xE1A00000; // nop
+		setBL(0x0202CC9C, (u32)dsiSaveOpen);
+		setBL(0x0202CCD0, (u32)dsiSaveRead);
+		setBL(0x0202CCF8, (u32)dsiSaveClose);
+		*(u32*)0x0202CD1C = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0202CD34 = 0xE1A00000; // nop
+		setBL(0x0202CD64, (u32)dsiSaveCreate);
+		*(u32*)0x0202CDC4 = 0xE1A00000; // nop
+		setBL(0x0202CDF8, (u32)dsiSaveOpen);
+		setBL(0x0202CE3C, (u32)dsiSaveWrite);
+		setBL(0x0202CE5C, (u32)dsiSaveClose);
+		*(u32*)0x0202CE84 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0202CE9C = 0xE1A00000; // nop
+		*(u32*)0x0202CED0 = 0xE3A00000; // mov r0, #0
+	}
+
 	// Kung Fu Dragon (USA)
 	// Kung Fu Dragon (Europe)
 	else if (strcmp(romTid, "KT9E") == 0 || strcmp(romTid, "KT9P") == 0) {
