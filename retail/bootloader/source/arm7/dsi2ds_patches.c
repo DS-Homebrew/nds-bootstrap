@@ -11339,6 +11339,29 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0202CED0 = 0xE3A00000; // mov r0, #0
 	}
 
+	// Keisan 100 Renda (Japan)
+	else if (strcmp(romTid, "K3DJ") == 0) {
+		// useSharedFont = (twlFontFound && debugOrMep);
+		*(u32*)0x0200B698 = 0xE1A00000; // nop
+		*(u32*)0x0200EBE4 = 0xE1A00000; // nop
+		patchInitDSiWare(0x020143A8, heapEnd);
+		patchUserSettingsReadDSiWare(0x02015844);
+		*(u32*)0x0201B6DC = 0xE3A00000; // mov r0, #0
+		setBL(0x0201B768, (u32)dsiSaveOpen);
+		setBL(0x0201B77C, (u32)dsiSaveGetLength);
+		setBL(0x0201B7A0, (u32)dsiSaveRead);
+		setBL(0x0201B7AC, (u32)dsiSaveClose);
+		setBL(0x0201B868, (u32)dsiSaveCreate);
+		setBL(0x0201B87C, (u32)dsiSaveOpen);
+		setBL(0x0201B890, (u32)dsiSaveSetLength);
+		setBL(0x0201B8A8, (u32)dsiSaveWrite);
+		setBL(0x0201B8B4, (u32)dsiSaveClose);
+		*(u32*)0x0201BC40 = 0xE1A00000; // nop
+		/* if (useSharedFont && !extendedMemory2) {
+			patchTwlFontLoad(0x0202EF60, 0x02016058);
+		} */
+	}
+
 	// Kung Fu Dragon (USA)
 	// Kung Fu Dragon (Europe)
 	else if (strcmp(romTid, "KT9E") == 0 || strcmp(romTid, "KT9P") == 0) {

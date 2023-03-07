@@ -6490,6 +6490,19 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// Keisan 100 Renda (Japan)
+	else if (strcmp(romTid, "K3DJ") == 0 && saveOnFlashcard) {
+		setBL(0x0201B768, (u32)dsiSaveOpen);
+		setBL(0x0201B77C, (u32)dsiSaveGetLength);
+		setBL(0x0201B7A0, (u32)dsiSaveRead);
+		setBL(0x0201B7AC, (u32)dsiSaveClose);
+		setBL(0x0201B868, (u32)dsiSaveCreate);
+		setBL(0x0201B87C, (u32)dsiSaveOpen);
+		setBL(0x0201B890, (u32)dsiSaveSetLength);
+		setBL(0x0201B8A8, (u32)dsiSaveWrite);
+		setBL(0x0201B8B4, (u32)dsiSaveClose);
+	}
+
 	// Kung Fu Dragon (USA)
 	// Kung Fu Dragon (Europe)
 	else if (strcmp(romTid, "KT9E") == 0 || strcmp(romTid, "KT9P") == 0) {
