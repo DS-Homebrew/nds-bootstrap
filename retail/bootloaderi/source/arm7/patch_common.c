@@ -7694,6 +7694,47 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// Kiwami Birei Akuariumu: Sekai no Sakana to Kujiratachi (Japan)
+	else if (strcmp(romTid, "K9RJ") == 0) {
+		if (saveOnFlashcard) {
+			setBL(0x0203D7BC, (u32)dsiSaveOpen);
+			setBL(0x0203D7D8, (u32)dsiSaveCreate);
+			setBL(0x0203D804, (u32)dsiSaveOpen);
+			setBL(0x0203D81C, (u32)dsiSaveRead);
+			setBL(0x0203D838, (u32)dsiSaveClose);
+			setBL(0x0203D850, (u32)dsiSaveClose);
+			setBL(0x0203D8FC, (u32)dsiSaveOpen);
+			setBL(0x0203D914, (u32)dsiSaveClose);
+			setBL(0x0203D950, (u32)dsiSaveSeek);
+			setBL(0x0203D964, (u32)dsiSaveRead);
+			setBL(0x0203D98C, (u32)dsiSaveClose);
+			setBL(0x0203D9CC, (u32)dsiSaveClose);
+			setBL(0x0203DA20, (u32)dsiSaveClose);
+			setBL(0x0203DA58, (u32)dsiSaveClose);
+			setBL(0x0203DB68, (u32)dsiSaveOpen);
+			setBL(0x0203DB94, (u32)dsiSaveWrite);
+			setBL(0x0203DB9C, (u32)dsiSaveClose);
+			setBL(0x020443C0, 0x02011364); // Branch to fixed code
+			*(u32*)0x0206C0C0 = 0xE1A00000; // nop
+			*(u32*)0x0206C0D0 = 0xE1A00000; // nop
+
+			// Fixed code with added branch to save write code
+			*(u32*)0x02011364 = 0xE92D4003; // STMFD SP!, {R0-R1,LR}
+			*(u32*)0x02011368 = 0xE5901008; // ldr r1, [r0,#8]
+			*(u32*)0x0201136C = 0xE5910004; // ldr r0, [r1,#4]
+			*(u32*)0x02011370 = 0xE3500005; // cmp r0, #5
+			*(u32*)0x02011374 = 0x13700001; // cmpne r0, #1
+			*(u32*)0x02011378 = 0x03E00001; // moveq r0, #0xFFFFFFFE
+			*(u32*)0x0201137C = 0x05810004; // streq r0, [r1,#4]
+			*(u32*)0x02011380 = 0x18BD8003; // LDMNEFD SP!, {R0-R1,PC}
+			setBL(0x02011384, 0x0206C0A8);
+			*(u32*)0x02011388 = 0xE8BD8003; // LDMFD SP!, {R0-R1,PC}
+		}
+		if (!twlFontFound) {
+			*(u32*)0x0206BE58 = 0xE3A01001; // mov r1, #1 (Skip Manual screen)
+		}
+	}
+
 	// My Farm (USA)
 	else if (strcmp(romTid, "KMRE") == 0 && saveOnFlashcard) {
 		tonccpy((u32*)0x020126DC, dsiSaveGetResultCode, 0xC);

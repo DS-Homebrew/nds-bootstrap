@@ -13709,15 +13709,22 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// My Aquarium: Seven Oceans (USA)
 	// My Aquarium: Seven Oceans (Europe)
-	else if (strcmp(romTid, "K7ZE") == 0 || strcmp(romTid, "K9RP") == 0) {
-		*(u32*)0x02005094 = 0xE1A00000; // nop
-		*(u32*)0x0200FE24 = 0xE1A00000; // nop
-		*(u32*)0x0201309C = 0xE1A00000; // nop
-		patchInitDSiWare(0x0201ABFC, heapEnd);
-		*(u32*)0x0201AF88 -= 0x30000;
-		patchUserSettingsReadDSiWare(0x0201C1A0);
-		*(u32*)0x02021A88 = 0xE3A00001; // mov r0, #1
-		*(u32*)0x02021A8C = 0xE12FFF1E; // bx lr
+	// Kiwami Birei Akuariumu: Sekai no Sakana to Kujiratachi (Japan)
+	else if (strcmp(romTid, "K7ZE") == 0 || strcmp(romTid, "K9RP") == 0 || strcmp(romTid, "K9RJ") == 0) {
+		u8 offsetChange = (romTid[3] == 'J') ? 0x20 : 0;
+
+		if (romTid[3] != 'J') {
+			*(u32*)0x02005094 = 0xE1A00000; // nop
+		} else {
+			*(u32*)0x020051B0 = 0xE1A00000; // nop
+		}
+		*(u32*)(0x0200FE24-offsetChange) = 0xE1A00000; // nop
+		*(u32*)(0x0201309C-offsetChange) = 0xE1A00000; // nop
+		patchInitDSiWare(0x0201ABFC-offsetChange, heapEnd);
+		*(u32*)(0x0201AF88-offsetChange) = *(u32*)0x02004FE8;
+		patchUserSettingsReadDSiWare(0x0201C1A0-offsetChange);
+		*(u32*)(0x02021A88-offsetChange) = 0xE3A00001; // mov r0, #1
+		*(u32*)(0x02021A8C-offsetChange) = 0xE12FFF1E; // bx lr
 		if (romTid[3] == 'E') {
 			setBL(0x0203DC00, (u32)dsiSaveOpen);
 			*(u32*)0x0203DC10 = 0xE1A00000; // nop
@@ -13767,7 +13774,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			*(u32*)0x020113A0 = 0x18BD8003; // LDMNEFD SP!, {R0-R1,PC}
 			setBL(0x020113A4, 0x0206DCD8);
 			*(u32*)0x020113A8 = 0xE8BD8003; // LDMFD SP!, {R0-R1,PC}
-		} else {
+		} else if (romTid[3] == 'P') {
 			setBL(0x0203DC4C, (u32)dsiSaveOpen);
 			*(u32*)0x0203DC5C = 0xE1A00000; // nop
 			setBL(0x0203DC68, (u32)dsiSaveCreate);
@@ -13795,6 +13802,41 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBL(0x0203E1E8, (u32)dsiSaveWrite);
 			setBL(0x0203E1F0, (u32)dsiSaveClose);
 			*(u32*)0x0206DAA0 = 0xE3A01001; // mov r1, #1 (Skip Manual screen)
+		} else {
+			setBL(0x0203D7BC, (u32)dsiSaveOpen);
+			*(u32*)0x0203D7CC = 0xE1A00000; // nop
+			setBL(0x0203D7D8, (u32)dsiSaveCreate);
+			setBL(0x0203D804, (u32)dsiSaveOpen);
+			setBL(0x0203D81C, (u32)dsiSaveRead);
+			setBL(0x0203D838, (u32)dsiSaveClose);
+			setBL(0x0203D850, (u32)dsiSaveClose);
+			setBL(0x0203D8FC, (u32)dsiSaveOpen);
+			setBL(0x0203D914, (u32)dsiSaveClose);
+			setBL(0x0203D950, (u32)dsiSaveSeek);
+			setBL(0x0203D964, (u32)dsiSaveRead);
+			setBL(0x0203D98C, (u32)dsiSaveClose);
+			setBL(0x0203D9CC, (u32)dsiSaveClose);
+			setBL(0x0203DA20, (u32)dsiSaveClose);
+			setBL(0x0203DA58, (u32)dsiSaveClose);
+			setBL(0x0203DB68, (u32)dsiSaveOpen);
+			setBL(0x0203DB94, (u32)dsiSaveWrite);
+			setBL(0x0203DB9C, (u32)dsiSaveClose);
+			setBL(0x020443C0, 0x02011364); // Branch to fixed code
+			*(u32*)0x0206BE58 = 0xE3A01001; // mov r1, #1 (Skip Manual screen)
+			*(u32*)0x0206C0C0 = 0xE1A00000; // nop
+			*(u32*)0x0206C0D0 = 0xE1A00000; // nop
+
+			// Fixed code with added branch to save write code
+			*(u32*)0x02011364 = 0xE92D4003; // STMFD SP!, {R0-R1,LR}
+			*(u32*)0x02011368 = 0xE5901008; // ldr r1, [r0,#8]
+			*(u32*)0x0201136C = 0xE5910004; // ldr r0, [r1,#4]
+			*(u32*)0x02011370 = 0xE3500005; // cmp r0, #5
+			*(u32*)0x02011374 = 0x13700001; // cmpne r0, #1
+			*(u32*)0x02011378 = 0x03E00001; // moveq r0, #0xFFFFFFFE
+			*(u32*)0x0201137C = 0x05810004; // streq r0, [r1,#4]
+			*(u32*)0x02011380 = 0x18BD8003; // LDMNEFD SP!, {R0-R1,PC}
+			setBL(0x02011384, 0x0206C0A8);
+			*(u32*)0x02011388 = 0xE8BD8003; // LDMFD SP!, {R0-R1,PC}
 		}
 	}
 
