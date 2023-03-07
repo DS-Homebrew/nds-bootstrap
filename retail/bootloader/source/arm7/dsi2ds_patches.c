@@ -11243,6 +11243,38 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02032158, (u32)dsiSaveClose);
 	}*/
 
+	// Katamukusho (Japan)
+	// Crashes after title screen fades in
+	/* else if (strcmp(romTid, "K69J") == 0) {
+		*(u32*)0x02011138 = 0xE1A00000; // nop
+		tonccpy((u32*)0x02011DCC, dsiSaveGetResultCode, 0xC);
+		*(u32*)0x020147D8 = 0xE1A00000; // nop
+		patchInitDSiWare(0x0201CA60, heapEnd);
+		*(u32*)0x0201CDD0 = *(u32*)0x02004FC0;
+		patchUserSettingsReadDSiWare(0x0201DF58);
+		*(u32*)0x0201E370 = 0x77777777;
+		*(u32*)0x0202345C = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02023460 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02051B08 = 0xE1A00000; // nop
+		*(u32*)0x02051B58 = 0xE1A00000; // nop
+		*(u32*)0x02051B64 = 0xE1A00000; // nop
+		*(u32*)0x02051B98 = 0xE1A00000; // nop
+		*(u32*)0x02053F8C = 0xE3A00000; // mov r0, #0
+		setBL(0x0206AED8, (u32)dsiSaveOpen);
+		setBL(0x0206AEF0, (u32)dsiSaveGetLength);
+		setBL(0x0206AF18, (u32)dsiSaveRead);
+		setBL(0x0206AF3C, (u32)dsiSaveClose);
+		setBL(0x0206AF80, (u32)dsiSaveCreate);
+		setBL(0x0206AF90, (u32)dsiSaveOpen);
+		setBL(0x0206AFB0, (u32)dsiSaveSetLength);
+		setBL(0x0206AFD4, (u32)dsiSaveWrite);
+		setBL(0x0206AFEC, (u32)dsiSaveClose);
+		*(u32*)0x0206B0E8 = 0xE3A00001; // mov r0, #1 (dsiSaveOpenDir)
+		*(u32*)0x0206B164 = 0xE3A00001; // mov r0, #1 (dsiSaveCloseDir)
+		*(u32*)0x0206B514 = 0xE1A00000; // nop
+		*(u32*)0x0206B718 = 0xE1A00000; // nop
+	} */
+
 	// Kung Fu Dragon (USA)
 	// Kung Fu Dragon (Europe)
 	else if (strcmp(romTid, "KT9E") == 0 || strcmp(romTid, "KT9P") == 0) {

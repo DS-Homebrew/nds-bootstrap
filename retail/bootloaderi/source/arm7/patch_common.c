@@ -6421,6 +6421,22 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02032E04, (u32)dsiSaveClose);
 	}
 
+	// Katamukusho (Japan)
+	else if (strcmp(romTid, "K69J") == 0 && saveOnFlashcard) {
+		tonccpy((u32*)0x02011DCC, dsiSaveGetResultCode, 0xC);
+		setBL(0x0206AED8, (u32)dsiSaveOpen);
+		setBL(0x0206AEF0, (u32)dsiSaveGetLength);
+		setBL(0x0206AF18, (u32)dsiSaveRead);
+		setBL(0x0206AF3C, (u32)dsiSaveClose);
+		setBL(0x0206AF80, (u32)dsiSaveCreate);
+		setBL(0x0206AF90, (u32)dsiSaveOpen);
+		setBL(0x0206AFB0, (u32)dsiSaveSetLength);
+		setBL(0x0206AFD4, (u32)dsiSaveWrite);
+		setBL(0x0206AFEC, (u32)dsiSaveClose);
+		*(u32*)0x0206B0E8 = 0xE3A00001; // mov r0, #1 (dsiSaveOpenDir)
+		*(u32*)0x0206B164 = 0xE3A00001; // mov r0, #1 (dsiSaveCloseDir)
+	}
+
 	// Kung Fu Dragon (USA)
 	// Kung Fu Dragon (Europe)
 	else if (strcmp(romTid, "KT9E") == 0 || strcmp(romTid, "KT9P") == 0) {
