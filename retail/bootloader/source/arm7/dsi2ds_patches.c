@@ -11362,6 +11362,52 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		} */
 	}
 
+	// Kemonomix (Japan)
+	else if (strcmp(romTid, "KMXJ") == 0) {
+		const u32 openCodeCopy = 0x02004010;
+		const u32 readCodeCopy = openCodeCopy+0x6C;
+		const u32 closeCodeCopy = readCodeCopy+0x4C;
+		const u32 getLengthCodeCopy = closeCodeCopy+0x60;
+
+		*(u32*)0x0200548C = 0xE1A00000; // nop
+		*(u32*)0x02005600 = 0xE1A00000; // nop
+		*(u32*)0x020058A8 = 0xE1A00000; // nop
+		codeCopy((u32*)openCodeCopy, (u32*)0x0200C0E8, 0x6C);
+		codeCopy((u32*)readCodeCopy, (u32*)0x0200C1E4, 0x4C);
+		codeCopy((u32*)closeCodeCopy, (u32*)0x0200C230, 0x60);
+		codeCopy((u32*)getLengthCodeCopy, (u32*)0x0200C290, 0x18);
+		setBL(0x0200C128, (u32)dsiSaveOpen);
+		setBL(0x0200C168, (u32)dsiSaveCreate);
+		setBL(0x0200C1A0, (u32)dsiSaveGetInfo);
+		setBL(0x0200C1DC, (u32)dsiSaveWrite);
+		setBL(0x0200C1FC, (u32)dsiSaveRead);
+		setBL(0x0200C274, (u32)dsiSaveClose);
+		*(u32*)0x0200C2A4 = (u32)dsiSaveGetLength;
+		setBL(0x0200C2E8, getLengthCodeCopy);
+		setBL(0x0200C30C, readCodeCopy);
+		setBL(0x0200C31C, closeCodeCopy);
+		setBL(0x0200C360, openCodeCopy);
+		setBL(0x0200C380, getLengthCodeCopy);
+		setBL(0x0200C3A4, readCodeCopy);
+		setBL(0x0200C3B4, closeCodeCopy);
+		*(u32*)0x0200E7F8 = 0xE1A00000; // nop
+		*(u32*)0x0200E804 = 0xE1A00000; // nop
+		*(u32*)0x0200E814 = 0xE1A00000; // nop
+		*(u32*)0x02057A2C = 0xE1A00000; // nop
+		tonccpy((u32*)0x020585A4, dsiSaveGetResultCode, 0xC);
+		*(u32*)0x0205B650 = 0xE1A00000; // nop
+		patchInitDSiWare(0x02061C68, heapEnd);
+		patchUserSettingsReadDSiWare(0x020633E8);
+		doubleNopT(0x0206826E);
+		doubleNopT(0x02068292);
+		doubleNopT(0x020682AA);
+		doubleNopT(0x020682CA);
+		doubleNopT(0x020682E6);
+		doubleNopT(0x02068306);
+		doubleNopT(0x02068322);
+		doubleNopT(0x0206834A);
+	}
+
 	// Kung Fu Dragon (USA)
 	// Kung Fu Dragon (Europe)
 	else if (strcmp(romTid, "KT9E") == 0 || strcmp(romTid, "KT9P") == 0) {

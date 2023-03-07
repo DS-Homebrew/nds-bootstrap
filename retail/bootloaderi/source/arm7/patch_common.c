@@ -6503,6 +6503,34 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0201B8B4, (u32)dsiSaveClose);
 	}
 
+	// Kemonomix (Japan)
+	else if (strcmp(romTid, "KMXJ") == 0 && saveOnFlashcard) {
+		const u32 openCodeCopy = 0x02004010;
+		const u32 readCodeCopy = openCodeCopy+0x6C;
+		const u32 closeCodeCopy = readCodeCopy+0x4C;
+		const u32 getLengthCodeCopy = closeCodeCopy+0x60;
+
+		codeCopy((u32*)openCodeCopy, (u32*)0x0200C0E8, 0x6C);
+		codeCopy((u32*)readCodeCopy, (u32*)0x0200C1E4, 0x4C);
+		codeCopy((u32*)closeCodeCopy, (u32*)0x0200C230, 0x60);
+		codeCopy((u32*)getLengthCodeCopy, (u32*)0x0200C290, 0x18);
+		setBL(0x0200C128, (u32)dsiSaveOpen);
+		setBL(0x0200C168, (u32)dsiSaveCreate);
+		setBL(0x0200C1A0, (u32)dsiSaveGetInfo);
+		setBL(0x0200C1DC, (u32)dsiSaveWrite);
+		setBL(0x0200C1FC, (u32)dsiSaveRead);
+		setBL(0x0200C274, (u32)dsiSaveClose);
+		*(u32*)0x0200C2A4 = (u32)dsiSaveGetLength;
+		setBL(0x0200C2E8, getLengthCodeCopy);
+		setBL(0x0200C30C, readCodeCopy);
+		setBL(0x0200C31C, closeCodeCopy);
+		setBL(0x0200C360, openCodeCopy);
+		setBL(0x0200C380, getLengthCodeCopy);
+		setBL(0x0200C3A4, readCodeCopy);
+		setBL(0x0200C3B4, closeCodeCopy);
+		tonccpy((u32*)0x020585A4, dsiSaveGetResultCode, 0xC);
+	}
+
 	// Kung Fu Dragon (USA)
 	// Kung Fu Dragon (Europe)
 	else if (strcmp(romTid, "KT9E") == 0 || strcmp(romTid, "KT9P") == 0) {

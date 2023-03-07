@@ -215,6 +215,7 @@ static const char dsiWareForBootloader1[][4] = {
 	"K3H", // Kazu De Asobu: Mahoujin To Imeji Kei-san
 	"KUX", // Keibadou Uma no Suke 2012
 	"K3D", // Keisan 100 Renda
+	"KMX", // Kemonomix
 	"KT9", // Kung Fu Dragon
 	"KQ9", // The Legend of Zelda: Four Swords: Anniversary Edition
 	"KLD", // Legendary Wars: T-Rex Rumble
