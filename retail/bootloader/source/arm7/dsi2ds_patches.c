@@ -11275,6 +11275,44 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0206B718 = 0xE1A00000; // nop
 	} */
 
+	// Kazu De Asobu: Mahoujin To Imeji Kei-san (Japan)
+	else if (strcmp(romTid, "K3HJ") == 0) {
+		*(u32*)0x0200F4A8 = 0xE1A00000; // nop
+		setBL(0x0200F6B0, (u32)dsiSaveClose);
+		*(u32*)0x0200F714 = 0xE1A00000; // nop
+		setBL(0x0200F7F4, (u32)dsiSaveClose);
+		setBL(0x0200F994, (u32)dsiSaveOpen);
+		setBL(0x0200F9BC, (u32)dsiSaveSeek);
+		setBL(0x0200F9D8, (u32)dsiSaveClose);
+		setBL(0x0200F9F0, (u32)dsiSaveRead);
+		setBL(0x0200FA10, (u32)dsiSaveClose);
+		setBL(0x0200FA20, (u32)dsiSaveClose);
+		setBL(0x0200FA5C, (u32)dsiSaveOpen);
+		setBL(0x0200FA74, (u32)dsiSaveSeek);
+		setBL(0x0200FA8C, (u32)dsiSaveRead); // dsiSaveReadAsync
+		setBL(0x0200FAC0, (u32)dsiSaveOpen);
+		setBL(0x0200FAE0, (u32)dsiSaveSetLength);
+		setBL(0x0200FAF0, (u32)dsiSaveClose);
+		setBL(0x0200FB0C, (u32)dsiSaveSeek);
+		setBL(0x0200FB28, (u32)dsiSaveClose);
+		setBL(0x0200FB40, (u32)dsiSaveWrite);
+		setBL(0x0200FB64, (u32)dsiSaveClose);
+		setBL(0x0200FB70, (u32)dsiSaveClose);
+		setBL(0x0200FBB0, (u32)dsiSaveOpen);
+		setBL(0x0200FBC4, (u32)dsiSaveSetLength);
+		setBL(0x0200FBDC, (u32)dsiSaveSeek);
+		setBL(0x0200FBF4, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+		setBL(0x0200FC4C, (u32)dsiSaveCreate);
+		setBL(0x0200FC54, (u32)dsiSaveGetResultCode);
+		*(u32*)0x020215D0 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02021924 = 0xE3A00002; // mov r0, #2 (Skip Manual screen, Part 1)
+		*(u32*)0x0202DA30 = 0xE1A00000; // nop
+		*(u32*)0x0202DE78 = 0xE3A00000; // mov r0, #0 (Skip Manual screen, Part 2)
+		*(u32*)0x02038CCC = 0xE1A00000; // nop
+		patchInitDSiWare(0x0203EBAC, heapEnd);
+		patchUserSettingsReadDSiWare(0x02040314);
+	}
+
 	// Kung Fu Dragon (USA)
 	// Kung Fu Dragon (Europe)
 	else if (strcmp(romTid, "KT9E") == 0 || strcmp(romTid, "KT9P") == 0) {

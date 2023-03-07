@@ -212,6 +212,7 @@ static const char dsiWareForBootloader1[][4] = {
 	"KD5", // Jinia Supasonaru: Waei Rakubiki Jiten
 	"KJF", // Just SING! 80's
 	// "K4C", // Just SING! Christmas Songs
+	"K3H", // Kazu De Asobu: Mahoujin To Imeji Kei-san
 	"KT9", // Kung Fu Dragon
 	"KQ9", // The Legend of Zelda: Four Swords: Anniversary Edition
 	"KLD", // Legendary Wars: T-Rex Rumble
