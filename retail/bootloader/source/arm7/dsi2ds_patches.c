@@ -11415,10 +11415,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020051A8 = 0xE1A00000; // nop
 		*(u32*)0x02005E68 = 0xE1A00000; // nop
 		*(u32*)0x02005FB4 = 0xE1A00000; // nop
-		*(u32*)0x02026F84 = 0xE1A00000; // nop
-		*(u32*)0x0202A4E8 = 0xE1A00000; // nop
-		patchInitDSiWare(0x0202F2B4, heapEnd);
-		patchUserSettingsReadDSiWare(0x02030754);
 		setBL(0x0200F820, (u32)dsiSaveOpen);
 		setBL(0x0200F840, (u32)dsiSaveGetLength);
 		setBL(0x0200F858, (u32)dsiSaveRead);
@@ -11431,6 +11427,37 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0200F990, (u32)dsiSaveWrite);
 		setBL(0x0200F998, (u32)dsiSaveClose);
 		setBL(0x0200F9C0, (u32)dsiSaveCreate);
+		*(u32*)0x02026F84 = 0xE1A00000; // nop
+		*(u32*)0x0202A4E8 = 0xE1A00000; // nop
+		patchInitDSiWare(0x0202F2B4, heapEnd);
+		patchUserSettingsReadDSiWare(0x02030754);
+	}
+
+	// Koneko no ie: Kiri Shima Keto-San Biki no Koneko (Japan)
+	else if (strcmp(romTid, "KONJ") == 0) {
+		setBL(0x02005F00, (u32)dsiSaveOpen);
+		setBL(0x02005F1C, (u32)dsiSaveCreate);
+		*(u32*)0x02005F6C = 0xE3A00001; // mov r0, #1
+		setBL(0x02005F94, (u32)dsiSaveCreate);
+		setBL(0x02005FB0, (u32)dsiSaveOpen);
+		setBL(0x02005FFC, (u32)dsiSaveWrite);
+		setBL(0x0200600C, (u32)dsiSaveClose);
+		setBL(0x02006068, (u32)dsiSaveOpen);
+		setBL(0x020060BC, (u32)dsiSaveSeek);
+		setBL(0x020060CC, (u32)dsiSaveRead);
+		setBL(0x020060DC, (u32)dsiSaveClose);
+		setBL(0x02006140, (u32)dsiSaveOpen);
+		setBL(0x02006194, (u32)dsiSaveRead);
+		setBL(0x020061C4, (u32)dsiSaveClose);
+		setBL(0x020061E0, (u32)dsiSaveSeek);
+		setBL(0x020061F0, (u32)dsiSaveWrite);
+		setBL(0x02006220, (u32)dsiSaveSeek);
+		setBL(0x02006230, (u32)dsiSaveWrite);
+		setBL(0x0200624C, (u32)dsiSaveClose);
+		*(u32*)0x0202AC54 = 0xE1A00000; // nop
+		tonccpy((u32*)0x0202B8E8, dsiSaveGetResultCode, 0xC);
+		*(u32*)0x0202E834 = 0xE1A00000; // nop
+		patchInitDSiWare(0x020353AC, heapEnd);
 	}
 
 	// Kung Fu Dragon (USA)

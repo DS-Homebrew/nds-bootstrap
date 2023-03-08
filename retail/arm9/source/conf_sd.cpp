@@ -1758,6 +1758,12 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		toncset16((u16*)IMAGES_LOCATION, 0, 256*192);
 	}
 
+	sprintf(patchOffsetCacheFilePath, "fat:/_nds/nds-bootstrap/musicPacks/%s-%04X.pck", romTid, headerCRC);
+
+	musicsFilePath = patchOffsetCacheFilePath;
+	conf->musicsSize = getFileSize(patchOffsetCacheFilePath);
+  }
+
 	conf->loader2 = false;
 	if (accessControl & BIT(4)) {
 		// TODO: If the list gets large enough, switch to bsearch().
@@ -1769,12 +1775,6 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			}
 		}
 	}
-
-	sprintf(patchOffsetCacheFilePath, "fat:/_nds/nds-bootstrap/musicPacks/%s-%04X.pck", romTid, headerCRC);
-
-	musicsFilePath = patchOffsetCacheFilePath;
-	conf->musicsSize = getFileSize(patchOffsetCacheFilePath);
-  }
 
 	const char *typeToReplace = ".nds";
 	if (extention(conf->ndsPath, ".dsi")) {

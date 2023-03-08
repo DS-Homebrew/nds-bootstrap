@@ -128,7 +128,7 @@ export LIBPATHS	:=	$(foreach dir,$(LIBDIRS),-L$(dir)/lib)
 export GAME_ICON := $(CURDIR)/$(ASSETS)/icon.bmp
 
 #.PHONY: cardengine_arm7 cardengine_arm9 bootloader BootStrap clean
-.PHONY: all dist release nightly bootloader bootloader2 bootloaderi cardengine_arm7 cardengine_arm9_igm cardengine_arm9 cardengine_arm9_alt cardengine_arm9_alt2 cardengine_arm9_extmem cardenginei_arm7 cardenginei_arm7_alt cardenginei_arm7_twlsdk cardenginei_arm7_dsiware cardenginei_arm7_cheat cardenginei_arm9_igm cardenginei_arm9 cardenginei_arm9_alt cardenginei_arm9_dldi cardenginei_arm9_twlsdk cardenginei_arm9_twlsdk_dldi cardenginei_arm9_dsiware cardenginei_arm9_romInRam arm7/$(TARGET).elf arm9/$(TARGET).elf clean
+.PHONY: all dist release nightly bootloader bootloader2 bootloaderi bootloaderi2 cardengine_arm7 cardengine_arm9_igm cardengine_arm9 cardengine_arm9_alt cardengine_arm9_alt2 cardengine_arm9_extmem cardenginei_arm7 cardenginei_arm7_alt cardenginei_arm7_twlsdk cardenginei_arm7_dsiware cardenginei_arm7_cheat cardenginei_arm9_igm cardenginei_arm9 cardenginei_arm9_alt cardenginei_arm9_dldi cardenginei_arm9_twlsdk cardenginei_arm9_twlsdk_dldi cardenginei_arm9_dsiware cardenginei_arm9_romInRam arm7/$(TARGET).elf arm9/$(TARGET).elf clean
 
 all:	$(OUTPUT)
 
@@ -157,7 +157,7 @@ arm7/$(TARGET).elf:
 	@$(MAKE) -C arm7
 	
 #---------------------------------------------------------------------------------
-arm9/$(TARGET).elf:	bootloader bootloader2 bootloaderi
+arm9/$(TARGET).elf:	bootloader bootloader2 bootloaderi bootloaderi2
 	@$(MAKE) -C arm9
 
 #---------------------------------------------------------------------------------		
@@ -171,6 +171,10 @@ bootloader2: $(DATA)
 #---------------------------------------------------------------------------------		
 bootloaderi: $(DATA) cardenginei_arm7 cardenginei_arm7_alt cardenginei_arm7_twlsdk cardenginei_arm7_dsiware cardenginei_arm7_cheat cardenginei_arm9_igm cardenginei_arm9 cardenginei_arm9_alt cardenginei_arm9_dldi cardenginei_arm9_twlsdk cardenginei_arm9_twlsdk_dldi cardenginei_arm9_dsiware cardenginei_arm9_romInRam
 	@$(MAKE) -C bootloaderi
+
+#---------------------------------------------------------------------------------		
+bootloaderi2: $(DATA)
+	@$(MAKE) -C bootloaderi2
 
 #---------------------------------------------------------------------------------		
 cardengine_arm7: $(DATA)
@@ -282,6 +286,7 @@ clean:
 	@$(MAKE) -C bootloader clean
 	@$(MAKE) -C bootloader2 clean
 	@$(MAKE) -C bootloaderi clean
+	@$(MAKE) -C bootloaderi2 clean
 
 $(DATA):
 	@mkdir -p $(DATA)

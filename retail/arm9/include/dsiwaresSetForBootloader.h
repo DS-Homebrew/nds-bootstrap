@@ -30,6 +30,10 @@ static const char dsiWareForBootloader1[][4] = {
 	"K9W", // 99Moves
 	"KXT", // 99Seconds
 	"K2K", // Aa! Nikaku Dori
+	"KE9", // Absolute Baseball (bootloaderi-exclusive)
+	"K6Q", // Absolute BrickBuster (bootloaderi-exclusive)
+	"KCZ", // Absolute Chess (bootloaderi-exclusive)
+	"KA8", // Absolute Reversi (bootloaderi-exclusive)
 	"KXG", // Abyss
 	"KQK", // Ace Mathician
 	"KAC", // Advanced Circuits
@@ -60,6 +64,7 @@ static const char dsiWareForBootloader1[][4] = {
 	"KYA", // Arrow of Laputa
 	"K9Z", // Artillery: Knights vs. Orcs
 	"KQJ", // Aru Seishun no Monogatari: Kouenji Joshi Sakka
+	"KA4", // Asphalt 4: Elite Racing (bootloaderi-exclusive)
 	"KAB", // G.G. Series: Assault Buster
 	"K7D", // Astro
 	"KZ3", // Atama o Yoku Suru Anzan DS: Zou no Hana Fuusen
@@ -73,6 +78,7 @@ static const char dsiWareForBootloader1[][4] = {
 	"K9G", // Big Bass Arcade
 	"KP6", // Bird & Beans / Tori to Mame (Japan)
 	"KBZ", // BlayzBloo: Super Melee Brawlers Battle Royale
+	"KZ4", // Blockado: Puzzle Island (bootloaderi-exclusive)
 	"KLN", // Bloons TD
 	"KUV", // Bloons TD 4
 	"KA5", // Boardwalk Ball Toss
@@ -82,18 +88,21 @@ static const char dsiWareForBootloader1[][4] = {
 	"KZE", // Bounce & Break
 	"KQB", // Box Pusher
 	"KAH", // Art Style: Boxlife
+	"KBC", // Brain Challenge (bootloaderi-exclusive)
 	"K9F", // Bridge
 	"KKQ", // Bugs'N'Balls
 	"K2J", // Cake Ninja
 	"K2N", // Cake Ninja 2
 	"KYN", // Cake Ninja: XMAS
 	"KCY", // Calculator
+	"K9Y", // Candle Route (bootloaderi-exclusive)
 	"K3N", // GO Series: Captain Sub
 	"KCN", // Castle Conqueror
 	"KQN", // Castle Conqueror: Against
 	"KC5", // Castle Conqueror: Heroes
 	"KXC", // Castle Conqueror: Heroes 2
 	"KQN", // Castle Conqueror: Revolution
+	"KVX", // Cat Frenzy (bootloaderi-exclusive)
 	"KCV", // Cave Story
 	"KBG", // Chotto DS Bun ga Kuzenshuu: Sekai no Bungaku 20
 	"KXW", // Christmas Wonderland
@@ -113,6 +122,8 @@ static const char dsiWareForBootloader1[][4] = {
 	"KC7", // Commando: Steel Disaster
 	"KCX", // Cosmo Fighters
 	"KDC", // Crash-Course Domo
+	"KQZ", // Crazy Chicken: Director's Cut (bootloaderi-exclusive)
+	"KCV", // Crazy Chicken: Pirates (bootloaderi-exclusive)
 	"KZG", // Crazy Golf
 	"KCR", // Crazy Sudoku
 	"KXD", // Crystal Adventure
@@ -149,10 +160,15 @@ static const char dsiWareForBootloader1[][4] = {
 	"KED", // Electroplankton: Sun-Animalcule
 	"KEA", // Electroplankton: Trapy
 	"KEJ", // Electroplankton: Varvoice
+	"K5Q", // Escape Trick: The Secret of Rock City Prison (bootloaderi-exclusive)
+	"KEY", // Escape Trick: Ninja Castle (bootloaderi-exclusive)
+	"K5K", // Escape Trick: Convenience Store (bootloaderi-exclusive)
+	"KYB", // Face Pilot: Fly With Your Nintendo DSi Camera! (bootloaderi-exclusive)
 	"K4E", // Fall in the Dark
 	"Z2E", // Famicom Wars DS: Ushinawareta Hikari
 	"KFK", // Farm Frenzy
 	"KU7", // Fashion Tycoon
+	"KFR", // Ferrari GT: Evolution (bootloaderi-exclusive)
 	"KFD", // Fieldrunners
 	"KF8", // Fire Panic
 	"KZZ", // Fizz
@@ -201,6 +217,7 @@ static const char dsiWareForBootloader1[][4] = {
 	"KHI", // Hints Hunter
 	// "KNE", // Ichi Moudaji!: Neko King
 	"KNK", // Ideyou Sukeno: Kenkou Maja DSi
+	"KBT", // Invasion of the Alien Blobs (bootloaderi-exclusive)
 	"KIK", // Ivy the Kiwi? mini
 	"K9B", // Jazzy Billiards
 	"KJY", // JellyCar 2
@@ -211,22 +228,31 @@ static const char dsiWareForBootloader1[][4] = {
 	"KD3", // Jinia Supasonaru: Eiwa Rakubiki Jiten
 	"KD5", // Jinia Supasonaru: Waei Rakubiki Jiten
 	"KJF", // Just SING! 80's
-	// "K4C", // Just SING! Christmas Songs
+	"K4C", // Just SING! Christmas Songs (bootloaderi-exclusive)
+	"KJP", // Jump Trials (bootloaderi-exclusive)
+	"KZC", // Jump Trials Extreme (bootloaderi-exclusive)
+	"KPA", // A Kappa's Trail (bootloaderi-exclusive)
+	"K69", // Katamukusho (bootloaderi-exclusive)
 	"K3H", // Kazu De Asobu: Mahoujin To Imeji Kei-san
 	"KUX", // Keibadou Uma no Suke 2012
 	"K3D", // Keisan 100 Renda
 	"KMX", // Kemonomix
 	"K9C", // Kokoro no Herusumeta: Kokoron
+	"KON", // Koneko no ie: Kiri Shima Keto-San Biki no Koneko
 	"KT9", // Kung Fu Dragon
 	"KQ9", // The Legend of Zelda: Four Swords: Anniversary Edition
 	"KLD", // Legendary Wars: T-Rex Rumble
+	"KLW", // Libera Wing (bootloaderi-exclusive)
 	"KZB", // Little Red Riding Hood's Zombie BBQ
+	"KQ3", // Little Twin Stars (bootloaderi-exclusive)
 	"KLP", // Littlest Pet Shop
 	"KLK", // Lola's Alphabet Train
 	"KOF", // Lola's Fruit Shop Sudoku
 };
 static const char dsiWareForBootloader2[][4] = {
 	"KMU", "KM6", // Maestro! Green Groove
+	"K73", "K85", // Magical Diary: Secrets Sharing (bootloaderi-exclusive)
+	"KMA", // Magical Drop Yurutto (bootloaderi-exclusive)
 	"KWM", // Magical Whip
 	"KJO", // Magnetic Joe
 	"KYL", // Make Up & Style
@@ -257,6 +283,8 @@ static const char dsiWareForBootloader2[][4] = {
 	"KNV", // Neko Reversi
 	"KAU", // Nintendo Countdown Calendar
 	"K2D", // Nintendo DSi + Internet
+	"HNI", // Nintendo DSi Camera (bootloaderi-exclusive)
+	"KDO", // Nintendogs (bootloaderi-exclusive)
 	"K9K", // Nintendoji
 	"KSU", // Number Battle
 	"K6T", // Orion's Odyssey
@@ -265,6 +293,7 @@ static const char dsiWareForBootloader2[][4] = {
 	"KPJ", // Paul's Shooting Adventure
 	"KUS", // Paul's Shooting Adventure 2
 	"KP8", // Peg Solitaire
+	"KP5", // Petz Catz: Family / Superstar (bootloaderi-exclusive)
 	"KPS", // Phantasy Star 0 Mini
 	"KPQ", // GO Series: Picdun
 	"KAP", // Art Style: PiCTOBiTS
@@ -282,6 +311,7 @@ static const char dsiWareForBootloader2[][4] = {
 	"KDP", // Pro-Putt Domo
 	"KLF", // Puffins: Let's Fish!
 	"KLR", // Puffins: Let's Race!
+	"KL2", // Puffins: Let's Roll! (bootloaderi-exclusive)
 	"KPN", // Puzzle League: Express
 	"KYE", // Puzzler Brain Games
 	"KYG", // Puzzler World 2013
@@ -315,6 +345,9 @@ static const char dsiWareForBootloader2[][4] = {
 	"KZ3", // Koumin Kuizu: Shouga Kusei (03)
 	"K48", // Rika Kuizu Shouga Kusei: Seibutsu Chigaku He (04)
 	"K49", // Jukugo Kuizu (05)
+	"KM4", // Simple DS Series Vol. 1: The Misshitsukara no Dasshutsu (bootloaderi-exclusive)
+	"KM5", // Simple DS Series Vol. 2: The Misshitsukara no Dasshutsu (bootloaderi-exclusive)
+	"KLH", // Simple DS Series Vol. 6: The Misshitsukara no Dasshutsu (bootloaderi-exclusive)
 	"K4J", // Simply Mahjong
 	"KM3", // Simply Minesweeper
 	"K4L", // Simply Solitaire
@@ -334,8 +367,10 @@ static const char dsiWareForBootloader2[][4] = {
 	"KEV", // Space Invaders Extreme Z
 	"KQ6", // Spin Six
 	"KYS", // Spot the Difference
+	"KSP", // Spotto! (bootloaderi-exclusive)
 	"K4D", // Sudoku
 	"K4F", // Sudoku 4Pockets
+	"KSY", // System Flaw: Recruit (bootloaderi-exclusive)
 	"KZU", // Tales to Enjoy!: Little Red Riding Hood
 	"KZV", // Tales to Enjoy!: Puss in Boots
 	"KZ7", // Tales to Enjoy!: The Three Little Pigs
@@ -348,6 +383,7 @@ static const char dsiWareForBootloader2[][4] = {
 	"KJ7", // Tantei Jinguuji Saburou: Nakiko no Shouzou
 	"KTE", // Tetris Party Live
 	"KSL", // Touch Solitaire
+	"K72", // True Swing Golf Express (bootloaderi-exclusive)
 	"KTI", // Turn: The Lost Artifact
 	"K6P", // Unou to Sanougaren Sasuru: Uranoura
 	"KVT", // VT Tennis

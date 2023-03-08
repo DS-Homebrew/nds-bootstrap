@@ -87,6 +87,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+#ifndef LOADERTWO
 	// GO Series: 10 Second Run (USA)
 	// GO Series: 10 Second Run (Europe)
 	else if (strcmp(romTid, "KJUE") == 0 || strcmp(romTid, "KJUP") == 0) {
@@ -1214,6 +1215,12 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// Absolute Baseball (USA)
+	else if (strcmp(romTid, "KE9E") == 0 && saveOnFlashcard) {
+		*(u32*)0x0205FAD0 = 0xE1A00000; // nop
+		*(u32*)0x02072554 = 0xE3A00001; // mov r0, #1
+	}
+
 	// Absolute BrickBuster (USA)
 	else if (strcmp(romTid, "K6QE") == 0) {
 		if (!twlFontFound) {
@@ -1320,6 +1327,17 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02031A78+offsetChange, (u32)dsiSaveOpen);
 		setBL(0x02031AB4+offsetChange, (u32)dsiSaveWrite);
 		setBL(0x02031AC4+offsetChange, (u32)dsiSaveClose);
+	}
+
+	// Advanced Circuits (USA)
+	// Advanced Circuits (Europe, Australia)
+	else if (strncmp(romTid, "KAC", 3) == 0 && saveOnFlashcard) {
+		*(u32*)0x0202CDA4 = 0xE12FFF1E; // bx lr
+		if (romTid[3] == 'E') {
+			*(u32*)0x02053F90 = 0xE1A00000; // nop
+		} else if (romTid[3] == 'V') {
+			*(u32*)0x02053FB8 = 0xE1A00000; // nop
+		}
 	}
 
 	// Ah! Heaven (USA)
@@ -2286,6 +2304,16 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// Asphalt 4: Elite Racing (USA)
+	else if (strcmp(romTid, "KA4E") == 0 && saveOnFlashcard) {
+		*(u32*)0x0204FA6C = 0xE12FFF1E; // bx lr
+	}
+
+	// Asphalt 4: Elite Racing (Europe, Australia)
+	else if (strcmp(romTid, "KA4V") == 0 && saveOnFlashcard) {
+		*(u32*)0x0204FAE0 = 0xE12FFF1E; // bx lr
+	}
+
 	// Astro (USA)
 	else if (strcmp(romTid, "K7DE") == 0 && saveOnFlashcard) {
 		setBL(0x02048AA8, (u32)dsiSaveOpenR);
@@ -2623,6 +2651,26 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBL(0x0203B268, (u32)dsiSaveSeek);
 			setBL(0x0203B27C, (u32)dsiSaveWrite);
 			setBL(0x0203B28C, (u32)dsiSaveClose);
+		}
+	}
+
+	// Tori to Mame (Japan)
+	else if (strcmp(romTid, "KP6J") == 0) {
+		if (!twlFontFound) {
+			*(u32*)0x020217B0 = 0xE12FFF1E; // bx lr (Disable NFTR font loading)
+			*(u32*)0x02021954 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
+		}
+		if (saveOnFlashcard) {
+			setBL(0x02023348, (u32)dsiSaveOpen);
+			setBL(0x02023360, (u32)dsiSaveGetLength);
+			setBL(0x02023398, (u32)dsiSaveRead);
+			setBL(0x020233BC, (u32)dsiSaveClose);
+			*(u32*)0x020233FC = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+			setBL(0x02023430, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+			setBL(0x02023440, (u32)dsiSaveOpen);
+			setBL(0x02023460, (u32)dsiSaveSetLength);
+			setBL(0x02023480, (u32)dsiSaveWrite);
+			setBL(0x02023498, (u32)dsiSaveClose);
 		}
 	}
 
@@ -3087,6 +3135,16 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x020346CC, (u32)dsiSaveSetLength);
 		setBL(0x020346E8, (u32)dsiSaveWrite);
 		setBL(0x02034704, (u32)dsiSaveClose);
+	}
+
+	// Brain Challenge (USA)
+	else if (strcmp(romTid, "KBCE") == 0 && saveOnFlashcard) {
+		*(u32*)0x0200EBD8 = 0xE12FFF1E; // bx lr
+	}
+
+	// Brain Challenge (Europe, Australia)
+	else if (strcmp(romTid, "KBCV") == 0 && saveOnFlashcard) {
+		*(u32*)0x0200EBF4 = 0xE12FFF1E; // bx lr
 	}
 
 	// Bugs'N'Balls (USA)
@@ -4008,6 +4066,20 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		if (!twlFontFound || gameOnFlashcard) {
 			*(u16*)0x020153C4 = 0x4770; // bx lr (Disable NFTR loading from TWLNAND)
 		}
+	}
+
+	// Crazy Chicken: Director's Cut (Europe)
+	else if (strcmp(romTid, "KQZP") == 0 && saveOnFlashcard) {
+		*(u32*)0x0207DAC0 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0207DD1C = 0xE12FFF1E; // bx lr
+		*(u32*)0x0207DF6C = 0xE12FFF1E; // bx lr
+	}
+
+	// Crazy Chicken: Pirates (Europe)
+	else if (strcmp(romTid, "KCVP") == 0 && saveOnFlashcard) {
+		*(u32*)0x020771D0 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0207742C = 0xE12FFF1E; // bx lr
+		*(u32*)0x0207767C = 0xE12FFF1E; // bx lr
 	}
 
 	// Crazy Golf (USA)
@@ -5109,6 +5181,18 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// Face Pilot: Fly With Your Nintendo DSi Camera! (USA)
+	else if (strcmp(romTid, "KYBE") == 0 && saveOnFlashcard) {
+		*(u32*)0x0200BB54 = 0xE12FFF1E; // bx lr
+		// *(u32*)0x0203C928 = 0xE12FFF1E; // bx lr
+	}
+
+	// Face Pilot: Fly With Your Nintendo DSi Camera! (Europe, Australia)
+	else if (strcmp(romTid, "KYBV") == 0 && saveOnFlashcard) {
+		*(u32*)0x0200BB44 = 0xE12FFF1E; // bx lr
+		// *(u32*)0x0203C9E4 = 0xE12FFF1E; // bx lr
+	}
+
 	// Fall in the Dark (Japan)
 	// A bit hard/confusing to add save support
 	else if (strcmp(romTid, "K4EJ") == 0 && !twlFontFound) {
@@ -5220,6 +5304,16 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		// *(u16*)0x0203728E = 0x4770; // bx lr
 		// *(u16*)0x020372D8 = 0x2000; // movs r0, #0 (dsiSaveCloseDir)
 		// *(u16*)0x020372DA = 0x4770; // bx lr
+	}
+
+	// Ferrari GT: Evolution (USA)
+	else if (strcmp(romTid, "KFRE") == 0 && saveOnFlashcard) {
+		*(u32*)0x0205FDA8 = 0xE12FFF1E; // bx lr
+	}
+
+	// Ferrari GT: Evolution (Europe, Australia)
+	else if (strcmp(romTid, "KFRV") == 0 && saveOnFlashcard) {
+		*(u32*)0x0205FC88 = 0xE12FFF1E; // bx lr
 	}
 
 	// Fire Panic (USA)
@@ -6138,6 +6232,12 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		} */
 	}
 
+	// Invasion of the Alien Blobs (USA)
+	else if (strcmp(romTid, "KBTE") == 0 && saveOnFlashcard) {
+		*(u32*)0x020224EC = 0xE3A00000; // mov r0, #0
+		*(u32*)0x020224F0 = 0xE12FFF1E; // bx lr
+	}
+
 	// Ivy the Kiwi? mini (USA)
 	// GO Series: Ivy the Kiwi? mini (Europe, Australia)
 	else if ((strcmp(romTid, "KIKX") == 0 || strcmp(romTid, "KIKV") == 0) && saveOnFlashcard) {
@@ -6321,6 +6421,22 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0205EC98 = 0xE1A00000; // nop (Skip Manual screen)
 	}
 
+	// Jump Trials (USA)
+	else if (strcmp(romTid, "KJPE") == 0 && saveOnFlashcard) {
+		*(u32*)0x0201E88C = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0201E890 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0201EA40 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0201EA44 = 0xE12FFF1E; // bx lr
+	}
+
+	// Jump Trials Extreme (USA)
+	else if (strcmp(romTid, "KZCE") == 0 && saveOnFlashcard) {
+		*(u32*)0x020215F0 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x020215F4 = 0xE12FFF1E; // bx lr
+		*(u32*)0x020217A4 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x020217A8 = 0xE12FFF1E; // bx lr
+	}
+
 	// Just SING! 80's (USA)
 	// Just SING! 80's (Europe)
 	else if ((strcmp(romTid, "KJFE") == 0 || strcmp(romTid, "KJFP") == 0) && saveOnFlashcard) {
@@ -6382,13 +6498,6 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02042D50, (u32)dsiSaveSeek);
 		setBL(0x02042DB4, (u32)dsiSaveRead); // dsiSaveReadAsync
 		*(u32*)0x0205063C = 0xE12FFF1E; // bx lr (Skip NAND error checking)
-	}
-
-	// Kami Hikouki (Japan)
-	// Saving not supported due to using more than one file
-	else if (strcmp(romTid, "KAMJ") == 0 && !twlFontFound) {
-		*(u32*)0x02021E48 = 0xE12FFF1E; // bx lr (Disable NFTR font loading)
-		*(u32*)0x02021FEC = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
 	}
 
 	// A Kappa's Trail (USA)
@@ -6545,6 +6654,30 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0200F990, (u32)dsiSaveWrite);
 		setBL(0x0200F998, (u32)dsiSaveClose);
 		setBL(0x0200F9C0, (u32)dsiSaveCreate);
+	}
+
+	// Koneko no ie: Kiri Shima Keto-San Biki no Koneko (Japan)
+	else if (strcmp(romTid, "KONJ") == 0 && saveOnFlashcard) {
+		setBL(0x02005F00, (u32)dsiSaveOpen);
+		setBL(0x02005F1C, (u32)dsiSaveCreate);
+		*(u32*)0x02005F6C = 0xE3A00001; // mov r0, #1
+		setBL(0x02005F94, (u32)dsiSaveCreate);
+		setBL(0x02005FB0, (u32)dsiSaveOpen);
+		setBL(0x02005FFC, (u32)dsiSaveWrite);
+		setBL(0x0200600C, (u32)dsiSaveClose);
+		setBL(0x02006068, (u32)dsiSaveOpen);
+		setBL(0x020060BC, (u32)dsiSaveSeek);
+		setBL(0x020060CC, (u32)dsiSaveRead);
+		setBL(0x020060DC, (u32)dsiSaveClose);
+		setBL(0x02006140, (u32)dsiSaveOpen);
+		setBL(0x02006194, (u32)dsiSaveRead);
+		setBL(0x020061C4, (u32)dsiSaveClose);
+		setBL(0x020061E0, (u32)dsiSaveSeek);
+		setBL(0x020061F0, (u32)dsiSaveWrite);
+		setBL(0x02006220, (u32)dsiSaveSeek);
+		setBL(0x02006230, (u32)dsiSaveWrite);
+		setBL(0x0200624C, (u32)dsiSaveClose);
+		tonccpy((u32*)0x0202B8E8, dsiSaveGetResultCode, 0xC);
 	}
 
 	// Kung Fu Dragon (USA)
@@ -6773,7 +6906,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			*(u32*)0x0201CFCC = 0xE1A00000; // nop (Skip Manual screen)
 		}
 	}
-
+#else
 	// Magical Diary: Secrets Sharing (USA)
 	else if (strcmp(romTid, "K73E") == 0 && saveOnFlashcard) {
 		*(u32*)0x0201A17C = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
@@ -8123,6 +8256,13 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0202917C, (u32)dsiSaveSetLength);
 	}
 
+	// Kami Hikouki (Japan)
+	// Saving not supported due to using more than one file
+	else if (strcmp(romTid, "KAMJ") == 0 && !twlFontFound) {
+		*(u32*)0x02021E48 = 0xE12FFF1E; // bx lr (Disable NFTR font loading)
+		*(u32*)0x02021FEC = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
+	}
+
 	// Paul's Monster Adventure (USA)
 	else if (strcmp(romTid, "KP9E") == 0 && saveOnFlashcard) {
 		tonccpy((u32*)0x020143AC, dsiSaveGetResultCode, 0xC);
@@ -8936,6 +9076,27 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0204C76C, (u32)dsiSaveClose);
 		setBL(0x0204C7A0, (u32)dsiSaveOpen);
 		setBL(0x0204C7E8, (u32)dsiSaveCreate);
+	}
+
+	// Puzzle League: Express (USA)
+	else if (strcmp(romTid, "KPNE") == 0 && saveOnFlashcard) {
+		*(u32*)0x0205663C = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02056640 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02056A28 = 0xE12FFF1E; // bx lr
+	}
+
+	// A Little Bit of... Puzzle League (Europe, Australia)
+	else if (strcmp(romTid, "KPNV") == 0 && saveOnFlashcard) {
+		*(u32*)0x020575FC = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02057600 = 0xE12FFF1E; // bx lr
+		*(u32*)0x020579E8 = 0xE12FFF1E; // bx lr
+	}
+
+	// Chotto Panel de Pon (Japan)
+	else if (strcmp(romTid, "KPNJ") == 0 && saveOnFlashcard) {
+		*(u32*)0x02056128 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0205612C = 0xE12FFF1E; // bx lr
+		*(u32*)0x02056514 = 0xE12FFF1E; // bx lr
 	}
 
 	// Puzzler Brain Games (USA)
@@ -10277,6 +10438,18 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// Space Invaders Extreme Z (Japan)
+	else if (strcmp(romTid, "KEVJ") == 0 && saveOnFlashcard) {
+		*(u32*)0x020E3E4C = 0xE3A00005; // mov r0, #5
+		*(u32*)0x020E3E50 = 0xE12FFF1E; // bx lr
+		*(u32*)0x020E43A4 = 0xE3A00005; // mov r0, #5
+		*(u32*)0x020E43A8 = 0xE12FFF1E; // bx lr
+		*(u32*)0x020E4624 = 0xE3A00005; // mov r0, #5
+		*(u32*)0x020E4628 = 0xE12FFF1E; // bx lr
+		*(u32*)0x020E4854 = 0xE3A00005; // mov r0, #5
+		*(u32*)0x020E4858 = 0xE12FFF1E; // bx lr
+	}
+
 	// Spin Six (USA)
 	else if (strcmp(romTid, "KQ6E") == 0) {
 		if (!twlFontFound) {
@@ -10374,6 +10547,24 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02030B40, (u32)dsiSaveSetLength);
 		setBL(0x02030B50, (u32)dsiSaveWrite);
 		setBL(0x02030B58, (u32)dsiSaveClose);
+	}
+
+	// Spotto! (USA)
+	else if (strcmp(romTid, "KSPE") == 0 && saveOnFlashcard) {
+		*(u32*)0x0202D6B8 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0202D6BC = 0xE12FFF1E; // bx lr
+	}
+
+	// Bird & Bombs (Europe, Australia)
+	else if (strcmp(romTid, "KSPV") == 0 && saveOnFlashcard) {
+		*(u32*)0x0202D6A8 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0202D6AC = 0xE12FFF1E; // bx lr
+	}
+
+	// Neratte Supotto! (Japan)
+	else if (strcmp(romTid, "KSPJ") == 0 && saveOnFlashcard) {
+		*(u32*)0x0202DB94 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0202DB98 = 0xE12FFF1E; // bx lr
 	}
 
 	// Sudoku (USA)
@@ -10831,26 +11022,6 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0200BFA8, (u32)dsiSaveClose);
 	}
 
-	// Tori to Mame (Japan)
-	else if (strcmp(romTid, "KP6J") == 0) {
-		if (!twlFontFound) {
-			*(u32*)0x020217B0 = 0xE12FFF1E; // bx lr (Disable NFTR font loading)
-			*(u32*)0x02021954 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
-		}
-		if (saveOnFlashcard) {
-			setBL(0x02023348, (u32)dsiSaveOpen);
-			setBL(0x02023360, (u32)dsiSaveGetLength);
-			setBL(0x02023398, (u32)dsiSaveRead);
-			setBL(0x020233BC, (u32)dsiSaveClose);
-			*(u32*)0x020233FC = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
-			setBL(0x02023430, (u32)dsiSaveCreate); // dsiSaveCreateAuto
-			setBL(0x02023440, (u32)dsiSaveOpen);
-			setBL(0x02023460, (u32)dsiSaveSetLength);
-			setBL(0x02023480, (u32)dsiSaveWrite);
-			setBL(0x02023498, (u32)dsiSaveClose);
-		}
-	}
-
 	// VT Tennis (USA)
 	else if (strcmp(romTid, "KVTE") == 0) {
 		if (!twlFontFound) {
@@ -11218,158 +11389,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		tonccpy((u32*)0x02016E10, dsiSaveGetResultCode, 0xC);
 		// *(u32*)0x020815F8 = 0xE12FFF1E; // bx lr
 	}
-
-	else if (dsiSD) {
-		return;
-	}
-
-	// Stub out save functions (and some others)
-
-	// Absolute Baseball (USA)
-	else if (strcmp(romTid, "KE9E") == 0) {
-		*(u32*)0x0205FAD0 = 0xE1A00000; // nop
-		*(u32*)0x02072554 = 0xE3A00001; // mov r0, #1
-	}
-
-	// Advanced Circuits (USA)
-	// Advanced Circuits (Europe, Australia)
-	else if (strncmp(romTid, "KAC", 3) == 0) {
-		*(u32*)0x0202CDA4 = 0xE12FFF1E; // bx lr
-		if (romTid[3] == 'E') {
-			*(u32*)0x02053F90 = 0xE1A00000; // nop
-		} else if (romTid[3] == 'V') {
-			*(u32*)0x02053FB8 = 0xE1A00000; // nop
-		}
-	}
-
-	// Asphalt 4: Elite Racing (USA)
-	else if (strcmp(romTid, "KA4E") == 0) {
-		*(u32*)0x0204FA6C = 0xE12FFF1E; // bx lr
-	}
-
-	// Asphalt 4: Elite Racing (Europe, Australia)
-	else if (strcmp(romTid, "KA4V") == 0) {
-		*(u32*)0x0204FAE0 = 0xE12FFF1E; // bx lr
-	}
-
-	// Brain Challenge (USA)
-	else if (strcmp(romTid, "KBCE") == 0) {
-		*(u32*)0x0200EBD8 = 0xE12FFF1E; // bx lr
-	}
-
-	// Brain Challenge (Europe, Australia)
-	else if (strcmp(romTid, "KBCV") == 0) {
-		*(u32*)0x0200EBF4 = 0xE12FFF1E; // bx lr
-	}
-
-	// Crazy Chicken: Director's Cut (Europe)
-	else if (strcmp(romTid, "KQZP") == 0) {
-		*(u32*)0x0207DAC0 = 0xE12FFF1E; // bx lr
-		*(u32*)0x0207DD1C = 0xE12FFF1E; // bx lr
-		*(u32*)0x0207DF6C = 0xE12FFF1E; // bx lr
-	}
-
-	// Crazy Chicken: Pirates (Europe)
-	else if (strcmp(romTid, "KCVP") == 0) {
-		*(u32*)0x020771D0 = 0xE12FFF1E; // bx lr
-		*(u32*)0x0207742C = 0xE12FFF1E; // bx lr
-		*(u32*)0x0207767C = 0xE12FFF1E; // bx lr
-	}
-
-	// Face Pilot: Fly With Your Nintendo DSi Camera! (USA)
-	else if (strcmp(romTid, "KYBE") == 0) {
-		*(u32*)0x0200BB54 = 0xE12FFF1E; // bx lr
-		// *(u32*)0x0203C928 = 0xE12FFF1E; // bx lr
-	}
-
-	// Face Pilot: Fly With Your Nintendo DSi Camera! (Europe, Australia)
-	else if (strcmp(romTid, "KYBV") == 0) {
-		*(u32*)0x0200BB44 = 0xE12FFF1E; // bx lr
-		// *(u32*)0x0203C9E4 = 0xE12FFF1E; // bx lr
-	}
-
-	// Ferrari GT: Evolution (USA)
-	else if (strcmp(romTid, "KFRE") == 0) {
-		*(u32*)0x0205FDA8 = 0xE12FFF1E; // bx lr
-	}
-
-	// Ferrari GT: Evolution (Europe, Australia)
-	else if (strcmp(romTid, "KFRV") == 0) {
-		*(u32*)0x0205FC88 = 0xE12FFF1E; // bx lr
-	}
-
-	// Invasion of the Alien Blobs (USA)
-	else if (strcmp(romTid, "KBTE") == 0) {
-		*(u32*)0x020224EC = 0xE3A00000; // mov r0, #0
-		*(u32*)0x020224F0 = 0xE12FFF1E; // bx lr
-	}
-
-	// Jump Trials (USA)
-	else if (strcmp(romTid, "KJPE") == 0) {
-		*(u32*)0x0201E88C = 0xE3A00000; // mov r0, #0
-		*(u32*)0x0201E890 = 0xE12FFF1E; // bx lr
-		*(u32*)0x0201EA40 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x0201EA44 = 0xE12FFF1E; // bx lr
-	}
-
-	// Jump Trials Extreme (USA)
-	else if (strcmp(romTid, "KZCE") == 0) {
-		*(u32*)0x020215F0 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x020215F4 = 0xE12FFF1E; // bx lr
-		*(u32*)0x020217A4 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x020217A8 = 0xE12FFF1E; // bx lr
-	}
-
-	// Puzzle League: Express (USA)
-	else if (strcmp(romTid, "KPNE") == 0) {
-		*(u32*)0x0205663C = 0xE3A00001; // mov r0, #1
-		*(u32*)0x02056640 = 0xE12FFF1E; // bx lr
-		*(u32*)0x02056A28 = 0xE12FFF1E; // bx lr
-	}
-
-	// A Little Bit of... Puzzle League (Europe, Australia)
-	else if (strcmp(romTid, "KPNV") == 0) {
-		*(u32*)0x020575FC = 0xE3A00001; // mov r0, #1
-		*(u32*)0x02057600 = 0xE12FFF1E; // bx lr
-		*(u32*)0x020579E8 = 0xE12FFF1E; // bx lr
-	}
-
-	// Chotto Panel de Pon (Japan)
-	else if (strcmp(romTid, "KPNJ") == 0) {
-		*(u32*)0x02056128 = 0xE3A00001; // mov r0, #1
-		*(u32*)0x0205612C = 0xE12FFF1E; // bx lr
-		*(u32*)0x02056514 = 0xE12FFF1E; // bx lr
-	}
-
-	// Space Invaders Extreme Z (Japan)
-	else if (strcmp(romTid, "KEVJ") == 0) {
-		*(u32*)0x020E3E4C = 0xE3A00005; // mov r0, #5
-		*(u32*)0x020E3E50 = 0xE12FFF1E; // bx lr
-		*(u32*)0x020E43A4 = 0xE3A00005; // mov r0, #5
-		*(u32*)0x020E43A8 = 0xE12FFF1E; // bx lr
-		*(u32*)0x020E4624 = 0xE3A00005; // mov r0, #5
-		*(u32*)0x020E4628 = 0xE12FFF1E; // bx lr
-		*(u32*)0x020E4854 = 0xE3A00005; // mov r0, #5
-		*(u32*)0x020E4858 = 0xE12FFF1E; // bx lr
-	}
-
-	// Spotto! (USA)
-	else if (strcmp(romTid, "KSPE") == 0) {
-		*(u32*)0x0202D6B8 = 0xE3A00001; // mov r0, #1
-		*(u32*)0x0202D6BC = 0xE12FFF1E; // bx lr
-	}
-
-	// Bird & Bombs (Europe, Australia)
-	else if (strcmp(romTid, "KSPV") == 0) {
-		*(u32*)0x0202D6A8 = 0xE3A00001; // mov r0, #1
-		*(u32*)0x0202D6AC = 0xE12FFF1E; // bx lr
-	}
-
-	// Neratte Supotto! (Japan)
-	else if (strcmp(romTid, "KSPJ") == 0) {
-		*(u32*)0x0202DB94 = 0xE3A00001; // mov r0, #1
-		*(u32*)0x0202DB98 = 0xE12FFF1E; // bx lr
-	}
+#endif
 }
 
 void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params_t* moduleParams) {
