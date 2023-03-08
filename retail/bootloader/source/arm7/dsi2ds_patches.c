@@ -6726,6 +6726,39 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02065500+offsetChangeS, (u32)dsiSaveClose);
 	}
 
+	// Coropata (Japan)
+	else if (strcmp(romTid, "K56J") == 0) {
+		*(u32*)0x020110B8 = 0xE1A00000; // nop
+		tonccpy((u32*)0x02011C3C, dsiSaveGetResultCode, 0xC);
+		*(u32*)0x02014610 = 0xE1A00000; // nop
+		patchInitDSiWare(0x0201AFC4, heapEnd);
+		*(u32*)0x0201B350 = *(u32*)0x02004FE8;
+		patchUserSettingsReadDSiWare(0x0201C618);
+		*(u32*)0x020699A8 = 0xE1A00000; // nop (Soft-lock instead of displaying Manual screen)
+		setBL(0x0206E1E4, (u32)dsiSaveOpen);
+		setBL(0x0206E1F4, (u32)dsiSaveGetLength);
+		setBL(0x0206E204, (u32)dsiSaveClose);
+		setBL(0x0206E20C, (u32)dsiSaveDelete);
+		setBL(0x0206E238, (u32)dsiSaveClose);
+		setBL(0x0206E28C, (u32)dsiSaveCreate);
+		setBL(0x0206E29C, (u32)dsiSaveOpen);
+		setBL(0x0206E2C8, (u32)dsiSaveSetLength);
+		setBL(0x0206E2E4, (u32)dsiSaveClose);
+		setBL(0x0206E318, (u32)dsiSaveWrite);
+		setBL(0x0206E334, (u32)dsiSaveClose);
+		setBL(0x0206E348, (u32)dsiSaveClose);
+		*(u32*)0x0206E618 = 0xE1A00000; // nop
+		setBL(0x0206E9DC, (u32)dsiSaveOpen);
+		setBL(0x0206E9FC, (u32)dsiSaveSeek);
+		setBL(0x0206EA0C, (u32)dsiSaveRead);
+		setBL(0x0206EA14, (u32)dsiSaveClose);
+		setBL(0x0206EA54, (u32)dsiSaveOpen);
+		setBL(0x0206EA74, (u32)dsiSaveSeek);
+		setBL(0x0206EA84, (u32)dsiSaveWrite);
+		setBL(0x0206EA8C, (u32)dsiSaveClose);
+		*(u32*)0x0206FB78 = 0x61A80;
+	}
+
 	// Crash-Course Domo (USA)
 	else if (strcmp(romTid, "KDCE") == 0) {
 		const u32 dsiSaveCreateT = 0x02024B0C;

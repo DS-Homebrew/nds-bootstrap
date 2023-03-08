@@ -120,6 +120,7 @@ static const char dsiWareForBootloader1[][4] = {
 	"KTD", "KTB", // Clubhouse Games Express: Strategy Pack
 	"KXF", // Color Commando
 	"KC7", // Commando: Steel Disaster
+	"K56", // Coropata
 	"KCX", // Cosmo Fighters
 	"KDC", // Crash-Course Domo
 	"KQZ", // Crazy Chicken: Director's Cut (bootloaderi-exclusive)

@@ -4014,6 +4014,36 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02065500+offsetChangeS, (u32)dsiSaveClose);
 	}
 
+	// Coropata (Japan)
+	else if (strcmp(romTid, "K56J") == 0) {
+		if (!twlFontFound) {
+			*(u32*)0x020699A8 = 0xE1A00000; // nop (Soft-lock instead of displaying Manual screen)
+		}
+		if (saveOnFlashcard) {
+			tonccpy((u32*)0x02011C3C, dsiSaveGetResultCode, 0xC);
+			setBL(0x0206E1E4, (u32)dsiSaveOpen);
+			setBL(0x0206E1F4, (u32)dsiSaveGetLength);
+			setBL(0x0206E204, (u32)dsiSaveClose);
+			setBL(0x0206E20C, (u32)dsiSaveDelete);
+			setBL(0x0206E238, (u32)dsiSaveClose);
+			setBL(0x0206E28C, (u32)dsiSaveCreate);
+			setBL(0x0206E29C, (u32)dsiSaveOpen);
+			setBL(0x0206E2C8, (u32)dsiSaveSetLength);
+			setBL(0x0206E2E4, (u32)dsiSaveClose);
+			setBL(0x0206E318, (u32)dsiSaveWrite);
+			setBL(0x0206E334, (u32)dsiSaveClose);
+			setBL(0x0206E348, (u32)dsiSaveClose);
+			setBL(0x0206E9DC, (u32)dsiSaveOpen);
+			setBL(0x0206E9FC, (u32)dsiSaveSeek);
+			setBL(0x0206EA0C, (u32)dsiSaveRead);
+			setBL(0x0206EA14, (u32)dsiSaveClose);
+			setBL(0x0206EA54, (u32)dsiSaveOpen);
+			setBL(0x0206EA74, (u32)dsiSaveSeek);
+			setBL(0x0206EA84, (u32)dsiSaveWrite);
+			setBL(0x0206EA8C, (u32)dsiSaveClose);
+		}
+	}
+
 	// Crash-Course Domo (USA)
 	else if (strcmp(romTid, "KDCE") == 0) {
 		if (saveOnFlashcard) {
@@ -11807,6 +11837,7 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
 
 	// DSiWare containing Cloneboot
 
+#ifndef LOADERTWO
 	// 1st Class Poker & BlackJack (USA)
 	else if (strcmp(romTid, "KYPE") == 0 && saveOnFlashcard) {
 		setBL(0x02012E50, (u32)dsiSaveOpen);
@@ -12276,7 +12307,7 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
 		setBL(0x02010AD0, (u32)dsiSaveClose);
 		setBL(0x02010B1C, (u32)dsiSaveClose);
 	}
-
+#else
 	// Pop Island (USA)
     else if (strcmp(romTid, "KPPE") == 0) {
         // Show "HELP" instead of "DEMO"
@@ -12308,6 +12339,7 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
         *(u32*)0x202E69C = 0xE1A00000; //nop
         *(u32*)0x202E6A0 = 0xE1A00000; //nop
     }
+#endif
 }
 
 void bannerSavPatch(const tNDSHeader* ndsHeader) {
