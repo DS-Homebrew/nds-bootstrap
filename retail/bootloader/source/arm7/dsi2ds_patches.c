@@ -13800,6 +13800,85 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchUserSettingsReadDSiWare(0x0202165C);
 	}
 
+	// Music on: Learning Piano (USA)
+	// Music on: Learning Piano (Europe)
+	// Saving is difficult to implement
+	else if (strcmp(romTid, "K88E") == 0 || strcmp(romTid, "K88P") == 0) {
+		*(u32*)0x0200ADF8 += 0xD0000000; // bne -> b
+
+		// Skip Manual screen
+		*(u32*)0x0200C91C = 0xE1A00000; // nop
+		*(u32*)0x0200C920 = 0xE1A00000; // nop
+		*(u32*)0x0200C924 = 0xE1A00000; // nop
+
+		*(u32*)0x0200DD88 = 0xE1A00000; // nop
+		*(u32*)0x0200DDD8 = 0xE1A00000; // nop
+		*(u32*)0x0200DDF8 = 0xE1A00000; // nop
+		*(u32*)0x0200DE08 = 0xE1A00000; // nop
+		*(u32*)0x0200DE34 = 0xE1A00000; // nop
+		if (romTid[3] == 'E') {
+			*(u32*)0x0201D684 = 0xE1A00000; // nop
+			*(u32*)0x02020B58 = 0xE1A00000; // nop
+			*(u32*)0x02021058 = 0xE1A00000; // nop
+			*(u32*)0x0202105C = 0xE1A00000; // nop
+			patchInitDSiWare(0x02025BA0, heapEnd);
+			patchUserSettingsReadDSiWare(0x02027204);
+		} else {
+			*(u32*)0x0201D5A0 = 0xE1A00000; // nop
+			*(u32*)0x02020A74 = 0xE1A00000; // nop
+			*(u32*)0x02020F74 = 0xE1A00000; // nop
+			*(u32*)0x02020F78 = 0xE1A00000; // nop
+			patchInitDSiWare(0x02025ABC, heapEnd);
+			patchUserSettingsReadDSiWare(0x02027120);
+		}
+	}
+
+	// Music on: Learning Piano Vol. 2 (USA)
+	// Saving is difficult to implement
+	else if (strcmp(romTid, "KI7E") == 0) {
+		*(u32*)0x0200AEBC += 0xD0000000; // bne -> b
+
+		// Skip Manual screen
+		*(u32*)0x0200C9F8 = 0xE1A00000; // nop
+		*(u32*)0x0200C9FC = 0xE1A00000; // nop
+		*(u32*)0x0200CA00 = 0xE1A00000; // nop
+
+		*(u32*)0x0200DE64 = 0xE1A00000; // nop
+		*(u32*)0x0200DEB4 = 0xE1A00000; // nop
+		*(u32*)0x0200DED4 = 0xE1A00000; // nop
+		*(u32*)0x0200DEE4 = 0xE1A00000; // nop
+		*(u32*)0x0200DF10 = 0xE1A00000; // nop
+		*(u32*)0x0201CD5C = 0xE1A00000; // nop
+		*(u32*)0x020202C4 = 0xE1A00000; // nop
+		*(u32*)0x020207EC = 0xE1A00000; // nop
+		*(u32*)0x020207F0 = 0xE1A00000; // nop
+		patchInitDSiWare(0x02025358, heapEnd);
+		patchUserSettingsReadDSiWare(0x020269CC);
+	}
+
+	// Music on: Learning Piano Vol. 2 (Europe)
+	// Saving is difficult to implement
+	else if (strcmp(romTid, "KI7P") == 0) {
+		*(u32*)0x0200B090 += 0xD0000000; // bne -> b
+
+		// Skip Manual screen
+		*(u32*)0x0200CC40 = 0xE1A00000; // nop
+		*(u32*)0x0200CC44 = 0xE1A00000; // nop
+		*(u32*)0x0200CC48 = 0xE1A00000; // nop
+
+		*(u32*)0x0200E0AC = 0xE1A00000; // nop
+		*(u32*)0x0200E0FC = 0xE1A00000; // nop
+		*(u32*)0x0200E11C = 0xE1A00000; // nop
+		*(u32*)0x0200E12C = 0xE1A00000; // nop
+		*(u32*)0x0200E158 = 0xE1A00000; // nop
+		*(u32*)0x0201CFFC = 0xE1A00000; // nop
+		*(u32*)0x02020564 = 0xE1A00000; // nop
+		*(u32*)0x02020A8C = 0xE1A00000; // nop
+		*(u32*)0x02020A90 = 0xE1A00000; // nop
+		patchInitDSiWare(0x020255F8, heapEnd);
+		patchUserSettingsReadDSiWare(0x020269CC);
+	}
+
 	// Music on: Playing Piano (USA)
 	// Music on: Playing Piano (Europe)
 	// Saving is difficult to implement
@@ -13807,9 +13886,9 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0200AFCC += 0xD0000000; // bne -> b
 		if (romTid[3] == 'E') {
 			// Skip Manual screen
-			//*(u32*)0x0200CC58 = 0xE1A00000; // nop
-			//*(u32*)0x0200CC5C = 0xE1A00000; // nop
-			//*(u32*)0x0200CC60 = 0xE1A00000; // nop
+			*(u32*)0x0200CC58 = 0xE1A00000; // nop
+			*(u32*)0x0200CC5C = 0xE1A00000; // nop
+			*(u32*)0x0200CC60 = 0xE1A00000; // nop
 
 			*(u32*)0x0200E08C = 0xE1A00000; // nop
 			*(u32*)0x0200E0DC = 0xE1A00000; // nop
@@ -13824,9 +13903,9 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			patchUserSettingsReadDSiWare(0x02027574);
 		} else {
 			// Skip Manual screen
-			//*(u32*)0x0200CC7C = 0xE1A00000; // nop
-			//*(u32*)0x0200CC80 = 0xE1A00000; // nop
-			//*(u32*)0x0200CC84 = 0xE1A00000; // nop
+			*(u32*)0x0200CC7C = 0xE1A00000; // nop
+			*(u32*)0x0200CC80 = 0xE1A00000; // nop
+			*(u32*)0x0200CC84 = 0xE1A00000; // nop
 
 			*(u32*)0x0200E0B0 = 0xE1A00000; // nop
 			*(u32*)0x0200E100 = 0xE1A00000; // nop

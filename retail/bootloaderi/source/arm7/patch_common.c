@@ -7813,6 +7813,34 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02008D8C = 0xE12FFF1E; // bx lr
 	}
 
+	// Music on: Learning Piano (USA)
+	// Music on: Learning Piano (Europe)
+	// Saving is difficult to implement
+	else if ((strcmp(romTid, "K88E") == 0 || strcmp(romTid, "K88P") == 0) && !twlFontFound) {
+		// Skip Manual screen
+		*(u32*)0x0200C91C = 0xE1A00000; // nop
+		*(u32*)0x0200C920 = 0xE1A00000; // nop
+		*(u32*)0x0200C924 = 0xE1A00000; // nop
+	}
+
+	// Music on: Learning Piano Vol. 2 (USA)
+	// Saving is difficult to implement
+	else if (strcmp(romTid, "KI7E") == 0 && !twlFontFound) {
+		// Skip Manual screen
+		*(u32*)0x0200C9F8 = 0xE1A00000; // nop
+		*(u32*)0x0200C9FC = 0xE1A00000; // nop
+		*(u32*)0x0200CA00 = 0xE1A00000; // nop
+	}
+
+	// Music on: Learning Piano Vol. 2 (Europe)
+	// Saving is difficult to implement
+	else if (strcmp(romTid, "KI7P") == 0 && !twlFontFound) {
+		// Skip Manual screen
+		*(u32*)0x0200CC40 = 0xE1A00000; // nop
+		*(u32*)0x0200CC44 = 0xE1A00000; // nop
+		*(u32*)0x0200CC48 = 0xE1A00000; // nop
+	}
+
 	// Music on: Playing Piano (USA)
 	// Saving is difficult to implement
 	else if (strcmp(romTid, "KICE") == 0 && !twlFontFound) {

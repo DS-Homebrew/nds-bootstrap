@@ -276,6 +276,8 @@ static const char dsiWareForBootloader2[][4] = {
 	"KQD", // Music on: Drums
 	"KIE", // Music on: Electric Guitar
 	"KK7", // Music on: Electronic Keyboard
+	"K88", // Music on: Learning Piano
+	"KI7", // Music on: Learning Piano Vol. 2
 	"KIC", // Music on: Playing Piano
 	"KRH", // Music on: Retro Keyboard
 	"K7Z", "K9R", // My Aquarium: Seven Oceans
