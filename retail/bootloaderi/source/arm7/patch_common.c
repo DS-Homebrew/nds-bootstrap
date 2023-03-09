@@ -6748,6 +6748,25 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// Kuizu Ongaku Nojika (Japan)
+	else if (strcmp(romTid, "KVFJ") == 0 && saveOnFlashcard) {
+		setBL(0x020691F4, (u32)dsiSaveWrite);
+		setBL(0x0206924C, (u32)dsiSaveRead);
+		setBL(0x020693C4, (u32)dsiSaveGetInfo);
+		setBL(0x02069434, (u32)dsiSaveGetInfo);
+		*(u32*)0x02069540 = 0xE1A00000; // nop (dsiSaveCreateDir)
+		*(u32*)0x0206954C = 0xE3A0000B; // mov r0, #0xB (Result code of dsiSaveCreateDir)
+		setBL(0x0206959C, (u32)dsiSaveCreate);
+		setBL(0x020695CC, (u32)dsiSaveOpen);
+		setBL(0x020695F0, (u32)dsiSaveSetLength);
+		setBL(0x02069610, (u32)dsiSaveClose);
+		setBL(0x02069870, (u32)dsiSaveOpen);
+		setBL(0x02069920, (u32)dsiSaveClose);
+		setBL(0x02069AB8, (u32)dsiSaveOpen);
+		setBL(0x02069B84, (u32)dsiSaveClose);
+		setBL(0x02069C48, (u32)dsiSaveGetResultCode);
+	}
+
 	// Kung Fu Dragon (USA)
 	// Kung Fu Dragon (Europe)
 	else if (strcmp(romTid, "KT9E") == 0 || strcmp(romTid, "KT9P") == 0) {

@@ -11535,6 +11535,57 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0207AC30 = 0xE12FFF1E; // bx lr
 	}
 
+	// Kuizu Ongaku Nojika (Japan)
+	/* else if (strcmp(romTid, "KVFJ") == 0) {
+		// useSharedFont = twlFontFound;
+		*(u32*)0x02012BA0 = 0xE1A00000; // nop
+		*(u32*)0x0201617C = 0xE1A00000; // nop
+		patchInitDSiWare(0x0201CB3C, heapEnd);
+		patchUserSettingsReadDSiWare(0x0201E0F8);
+		*(u32*)0x0201E114 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0201E118 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0201E120 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0201E124 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0201E144 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0201E148 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0201E158 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0201E15C = 0xE12FFF1E; // bx lr
+		*(u32*)0x0201E168 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0201E16C = 0xE12FFF1E; // bx lr
+		*(u32*)0x0201E17C = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0201E180 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02069118 = 0xE1A00000; // nop
+		*(u32*)0x0206913C = 0xE1A00000; // nop
+		*(u32*)0x02069144 = 0xE1A00000; // nop
+		*(u32*)0x02069158 = 0xE1A00000; // nop
+		*(u32*)0x0206916C = 0xE1A00000; // nop
+		*(u32*)0x02069174 = 0xE1A00000; // nop
+		*(u32*)0x0206917C = 0xE1A00000; // nop
+		*(u32*)0x02069194 = 0xE1A00000; // nop
+		*(u32*)0x020691BC = 0xE1A00000; // nop
+		*(u32*)0x020691E4 = 0xE1A00000; // nop
+		*(u32*)0x020691EC = 0xE1A00000; // nop
+		setBL(0x020691F4, (u32)dsiSaveWrite);
+		*(u32*)0x020691FC = 0xE1A00000; // nop
+		*(u32*)0x02069204 = 0xE1A00000; // nop
+		*(u32*)0x02069214 = 0xE1A00000; // nop
+		setBL(0x0206924C, (u32)dsiSaveRead);
+		setBL(0x020693C4, (u32)dsiSaveGetInfo);
+		setBL(0x02069434, (u32)dsiSaveGetInfo);
+		*(u32*)0x02069540 = 0xE1A00000; // nop (dsiSaveCreateDir)
+		*(u32*)0x0206954C = 0xE3A0000B; // mov r0, #0xB (Result code of dsiSaveCreateDir)
+		setBL(0x0206959C, (u32)dsiSaveCreate);
+		setBL(0x020695CC, (u32)dsiSaveOpen);
+		setBL(0x020695F0, (u32)dsiSaveSetLength);
+		setBL(0x02069610, (u32)dsiSaveClose);
+		setBL(0x02069870, (u32)dsiSaveOpen);
+		setBL(0x02069920, (u32)dsiSaveClose);
+		setBL(0x02069AB8, (u32)dsiSaveOpen);
+		setBL(0x02069B84, (u32)dsiSaveClose);
+		setBL(0x02069C48, (u32)dsiSaveGetResultCode);
+		*(u32*)0x0209276C = 0xE3A00001; // mov r0, #1
+	} */
+
 	// Kung Fu Dragon (USA)
 	// Kung Fu Dragon (Europe)
 	else if (strcmp(romTid, "KT9E") == 0 || strcmp(romTid, "KT9P") == 0) {
