@@ -11966,6 +11966,31 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02026E94 = 0xE1A00000; // nop
 	}*/
 
+	// Letter Challenge (USA)
+	else if (strcmp(romTid, "K5CE") == 0) {
+		*(u32*)0x02017458 = 0xE1A00000; // nop
+		*(u32*)0x0201BB14 = 0xE1A00000; // nop
+		patchInitDSiWare(0x02020F18, heapEnd);
+		*(u32*)0x020212A4 = *(u32*)0x02004FE8;
+		patchUserSettingsReadDSiWare(0x02022610);
+		setBL(0x020274EC, (u32)dsiSaveOpen);
+		*(u32*)0x02027528 = 0xE1A00000; // nop
+		setBL(0x02027540, (u32)dsiSaveGetLength);
+		setBL(0x02027550, (u32)dsiSaveRead);
+		setBL(0x02027558, (u32)dsiSaveClose);
+		setBL(0x020275A8, (u32)dsiSaveOpen);
+		*(u32*)0x020275C0 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+		*(u32*)0x020275D0 = 0xE3A00001; // mov r0, #1 (dsiSaveFreeSpaceAvailable)
+		setBL(0x020275EC, (u32)dsiSaveCreate);
+		setBL(0x02027600, (u32)dsiSaveOpen);
+		setBL(0x02027610, (u32)dsiSaveGetResultCode);
+		setBL(0x0202764C, (u32)dsiSaveSetLength);
+		setBL(0x0202765C, (u32)dsiSaveWrite);
+		setBL(0x02027664, (u32)dsiSaveClose);
+		*(u16*)0x0204E788 = 0x03BF; // lsls r7, r7, #0xE
+		*(u16*)0x0204E796 = 0x2602; // movs r6, #2
+	}
+
 	// Libera Wing (Europe)
 	// Black screens
 	/*else if (strcmp(romTid, "KLWP") == 0) {

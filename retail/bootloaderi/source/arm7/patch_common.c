@@ -6900,6 +6900,23 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0205DF50 = 0xE3A0000B; // mov r0, #0xB
 	}
 
+	// Letter Challenge (USA)
+	else if (strcmp(romTid, "K5CE") == 0 && saveOnFlashcard) {
+		setBL(0x020274EC, (u32)dsiSaveOpen);
+		setBL(0x02027540, (u32)dsiSaveGetLength);
+		setBL(0x02027550, (u32)dsiSaveRead);
+		setBL(0x02027558, (u32)dsiSaveClose);
+		setBL(0x020275A8, (u32)dsiSaveOpen);
+		*(u32*)0x020275C0 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+		*(u32*)0x020275D0 = 0xE3A00001; // mov r0, #1 (dsiSaveFreeSpaceAvailable)
+		setBL(0x020275EC, (u32)dsiSaveCreate);
+		setBL(0x02027600, (u32)dsiSaveOpen);
+		setBL(0x02027610, (u32)dsiSaveGetResultCode);
+		setBL(0x0202764C, (u32)dsiSaveSetLength);
+		setBL(0x0202765C, (u32)dsiSaveWrite);
+		setBL(0x02027664, (u32)dsiSaveClose);
+	}
+
 	// Libera Wing (Europe)
 	else if (strcmp(romTid, "KLWP") == 0) {
 		if (!twlFontFound) {
