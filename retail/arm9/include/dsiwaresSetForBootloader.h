@@ -240,6 +240,8 @@ static const char dsiWareForBootloader1[][4] = {
 	"KMX", // Kemonomix
 	"K9C", // Kokoro no Herusumeta: Kokoron
 	"KON", // Koneko no ie: Kiri Shima Keto-San Biki no Koneko
+	"KJC", // Koukou Eijukugo: Kiho 200 Go Master
+	"KEK", // Koukou Eitango: Kiho 400 Go Master
 	"KT9", // Kung Fu Dragon
 	"KQ9", // The Legend of Zelda: Four Swords: Anniversary Edition
 	"KLD", // Legendary Wars: T-Rex Rumble

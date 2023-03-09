@@ -6215,39 +6215,44 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Chuugaku Eijukugo: Kiho 150 Go Master (Japan)
-	else if (strcmp(romTid, "KJCJ") == 0) {
+	// Koukou Eitango: Kiho 400 Go Master (Japan)
+	else if (strcmp(romTid, "KJCJ") == 0 || strcmp(romTid, "KEKJ") == 0) {
+		u8 offsetChange1 = (strncmp(romTid, "KJC", 3) == 0) ? 0 : 0x48;
+		u16 offsetChange2 = (strncmp(romTid, "KJC", 3) == 0) ? 0 : 0x114;
+		u16 offsetChange3 = (strncmp(romTid, "KJC", 3) == 0) ? 0 : 0x110;
+
 		*(u32*)0x02012C6C = 0xE1A00000; // nop
 		*(u32*)0x02016330 = 0xE1A00000; // nop
 		patchInitDSiWare(0x0201C2DC, heapEnd);
 		// *(u32*)0x0201C64C = *(u32*)0x020013C0;
 		patchUserSettingsReadDSiWare(0x0201DA44);
-		setBL(0x0202CAB8, (u32)dsiSaveCreate);
-		*(u32*)0x0204F20C = 0xE1A00000; // nop
-		*(u32*)0x0204F230 = 0xE1A00000; // nop
-		setBL(0x02076DD0, (u32)dsiSaveOpen);
-		setBL(0x02076DEC, (u32)dsiSaveSeek);
-		setBL(0x02076E00, (u32)dsiSaveClose);
-		setBL(0x02076E18, (u32)dsiSaveRead);
-		setBL(0x02076E28, (u32)dsiSaveClose);
-		setBL(0x02076E34, (u32)dsiSaveClose);
-		setBL(0x02076E68, (u32)dsiSaveOpen);
-		setBL(0x02076E80, (u32)dsiSaveSeek);
-		setBL(0x02076E98, (u32)dsiSaveRead); // dsiSaveReadAsync
-		setBL(0x02076EC8, (u32)dsiSaveOpen);
-		setBL(0x02076EE0, (u32)dsiSaveSetLength);
-		setBL(0x02076EF0, (u32)dsiSaveClose);
-		setBL(0x02076F04, (u32)dsiSaveSeek);
-		setBL(0x02076F18, (u32)dsiSaveClose);
-		setBL(0x02076F30, (u32)dsiSaveWrite);
-		setBL(0x02076F40, (u32)dsiSaveClose);
-		setBL(0x02076F4C, (u32)dsiSaveClose);
-		setBL(0x02076F80, (u32)dsiSaveOpen);
-		setBL(0x02076F94, (u32)dsiSaveSetLength);
-		setBL(0x02076FAC, (u32)dsiSaveSeek);
-		setBL(0x02076FC4, (u32)dsiSaveWrite); // dsiSaveWriteAsync
-		*(u32*)0x020643A4 = 0xE3A00002; // mov r0, #2 (Skip Manual screen, Part 1)
-		*(u32*)0x02064580 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x02077124 = 0xE12FFF1E; // bx lr
+		setBL(0x0202CAB8-offsetChange1, (u32)dsiSaveCreate);
+		*(u32*)(0x0204F20C-offsetChange2) = 0xE1A00000; // nop
+		*(u32*)(0x0204F230-offsetChange2) = 0xE1A00000; // nop
+		*(u32*)(0x020643A4-offsetChange2) = 0xE3A00002; // mov r0, #2 (Skip Manual screen, Part 1)
+		*(u32*)(0x02064580-offsetChange3) = 0xE3A00000; // mov r0, #0
+		setBL(0x02076DD0-offsetChange3, (u32)dsiSaveOpen);
+		setBL(0x02076DEC-offsetChange3, (u32)dsiSaveSeek);
+		setBL(0x02076E00-offsetChange3, (u32)dsiSaveClose);
+		setBL(0x02076E18-offsetChange3, (u32)dsiSaveRead);
+		setBL(0x02076E28-offsetChange3, (u32)dsiSaveClose);
+		setBL(0x02076E34-offsetChange3, (u32)dsiSaveClose);
+		setBL(0x02076E68-offsetChange3, (u32)dsiSaveOpen);
+		setBL(0x02076E80-offsetChange3, (u32)dsiSaveSeek);
+		setBL(0x02076E98-offsetChange3, (u32)dsiSaveRead); // dsiSaveReadAsync
+		setBL(0x02076EC8-offsetChange3, (u32)dsiSaveOpen);
+		setBL(0x02076EE0-offsetChange3, (u32)dsiSaveSetLength);
+		setBL(0x02076EF0-offsetChange3, (u32)dsiSaveClose);
+		setBL(0x02076F04-offsetChange3, (u32)dsiSaveSeek);
+		setBL(0x02076F18-offsetChange3, (u32)dsiSaveClose);
+		setBL(0x02076F30-offsetChange3, (u32)dsiSaveWrite);
+		setBL(0x02076F40-offsetChange3, (u32)dsiSaveClose);
+		setBL(0x02076F4C-offsetChange3, (u32)dsiSaveClose);
+		setBL(0x02076F80-offsetChange3, (u32)dsiSaveOpen);
+		setBL(0x02076F94-offsetChange3, (u32)dsiSaveSetLength);
+		setBL(0x02076FAC-offsetChange3, (u32)dsiSaveSeek);
+		setBL(0x02076FC4-offsetChange3, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+		*(u32*)(0x02077124-offsetChange3) = 0xE12FFF1E; // bx lr
 	}
 
 	// Chuugaku Eitango: Kiho 400 Go Master (Japan)
@@ -11491,6 +11496,43 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		tonccpy((u32*)0x0202B8E8, dsiSaveGetResultCode, 0xC);
 		*(u32*)0x0202E834 = 0xE1A00000; // nop
 		patchInitDSiWare(0x020353AC, heapEnd);
+	}
+
+	// Koukou Eijukugo: Kiho 200 Go Master (Japan)
+	else if (strcmp(romTid, "KJKJ") == 0) {
+		*(u32*)0x0201686C = 0xE1A00000; // nop
+		*(u32*)0x02019F30 = 0xE1A00000; // nop
+		patchInitDSiWare(0x0201FEDC, heapEnd);
+		patchUserSettingsReadDSiWare(0x02021644);
+		setBL(0x02030520, (u32)dsiSaveCreate);
+		setBL(0x02030BB4, (u32)dsiSaveClose);
+		*(u32*)0x02052D14 = 0xE1A00000; // nop
+		*(u32*)0x02052D38 = 0xE1A00000; // nop
+		*(u32*)0x02067EB0 = 0xE3A00002; // mov r0, #2 (Skip Manual screen, Part 1)
+		*(u32*)0x0206808C = 0xE3A00000; // mov r0, #0
+		*(u32*)0x020683EC = 0xE3A00000; // mov r0, #0 (Skip Manual screen, Part 2)
+		setBL(0x0207A8DC, (u32)dsiSaveOpen);
+		setBL(0x0207A8F8, (u32)dsiSaveSeek);
+		setBL(0x0207A90C, (u32)dsiSaveClose);
+		setBL(0x0207A924, (u32)dsiSaveRead);
+		setBL(0x0207A934, (u32)dsiSaveClose);
+		setBL(0x0207A940, (u32)dsiSaveClose);
+		setBL(0x0207A974, (u32)dsiSaveOpen);
+		setBL(0x0207A98C, (u32)dsiSaveSeek);
+		setBL(0x0207A9A4, (u32)dsiSaveRead); // dsiSaveReadAsync
+		setBL(0x0207A9D4, (u32)dsiSaveOpen);
+		setBL(0x0207A9EC, (u32)dsiSaveSetLength);
+		setBL(0x0207A9FC, (u32)dsiSaveClose);
+		setBL(0x0207AA10, (u32)dsiSaveSeek);
+		setBL(0x0207AA24, (u32)dsiSaveClose);
+		setBL(0x0207AA3C, (u32)dsiSaveWrite);
+		setBL(0x0207AA4C, (u32)dsiSaveClose);
+		setBL(0x0207AA58, (u32)dsiSaveClose);
+		setBL(0x0207AA8C, (u32)dsiSaveOpen);
+		setBL(0x0207AAA0, (u32)dsiSaveSetLength);
+		setBL(0x0207AAB8, (u32)dsiSaveSeek);
+		setBL(0x0207AAD0, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+		*(u32*)0x0207AC30 = 0xE12FFF1E; // bx lr
 	}
 
 	// Kung Fu Dragon (USA)
