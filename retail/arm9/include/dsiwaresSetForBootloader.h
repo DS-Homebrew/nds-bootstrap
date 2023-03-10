@@ -248,6 +248,7 @@ static const char dsiWareForBootloader1[][4] = {
 	"KLD", // Legendary Wars: T-Rex Rumble
 	"K5C", // Letter Challenge
 	"KLW", // Libera Wing (bootloaderi-exclusive)
+	"KPT", // Link 'n' Launch
 	"KZB", // Little Red Riding Hood's Zombie BBQ
 	"KQ3", // Little Twin Stars (bootloaderi-exclusive)
 	"KLP", // Littlest Pet Shop

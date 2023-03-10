@@ -6928,6 +6928,55 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// Link 'n' Launch (USA)
+	// Link 'n' Launch (Europe, Australia)
+	else if (strcmp(romTid, "KPTE") == 0 || strcmp(romTid, "KPTV") == 0) {
+		if (saveOnFlashcard) {
+			setBL(0x02005700, (u32)dsiSaveOpen);
+			setBL(0x02005798, (u32)dsiSaveClose);
+			setBL(0x02005828, (u32)dsiSaveRead);
+			setBL(0x020058AC, (u32)dsiSaveWrite);
+			setBL(0x020058E0, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+			setBL(0x02005934, (u32)dsiSaveDelete);
+			setBL(0x02005990, (u32)dsiSaveSetLength);
+			*(u32*)0x020059C4 = 0xE1A00000; // nop
+		}
+		if (!twlFontFound) {
+			u8 offsetChange2 = (romTid[3] == 'E') ? 0 : 0x8;
+			u8 offsetChange3 = (romTid[3] == 'E') ? 0 : 0x40;
+			u16 offsetChange4 = (romTid[3] == 'E') ? 0 : 0x36C;
+			u16 offsetChange5 = (romTid[3] == 'E') ? 0 : 0x3AC;
+			*(u32*)(0x02017674+offsetChange2) = 0xE3A00000; // mov r0, #0
+			*(u32*)(0x02017764+offsetChange2) = 0xE3A00000; // mov r0, #0
+			*(u32*)(0x020177A8+offsetChange2) = 0xE3A00000; // mov r0, #0
+			*(u32*)(0x02019384+offsetChange3) = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
+			*(u32*)(0x0203E068+offsetChange4) = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
+			*(u32*)(0x02051324+offsetChange5) = 0xE12FFF1E; // bx lr (Soft-lock instead of displaying Manual screen)
+		}
+	}
+
+	// Panel Renketsu: 3-Fun Rocket (Japan)
+	else if (strcmp(romTid, "KPTJ") == 0) {
+		if (saveOnFlashcard) {
+			setBL(0x0200553C, (u32)dsiSaveOpen);
+			setBL(0x020055D4, (u32)dsiSaveClose);
+			setBL(0x02005664, (u32)dsiSaveRead);
+			setBL(0x020056E8, (u32)dsiSaveWrite);
+			setBL(0x0200571C, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+			setBL(0x02005770, (u32)dsiSaveDelete);
+			setBL(0x020057CC, (u32)dsiSaveSetLength);
+			*(u32*)0x02005800 = 0xE1A00000; // nop
+		}
+		if (!twlFontFound) {
+			*(u32*)0x02017370 = 0xE3A00000; // mov r0, #0
+			*(u32*)0x02017460 = 0xE3A00000; // mov r0, #0
+			*(u32*)0x020174A4 = 0xE3A00000; // mov r0, #0
+			*(u32*)0x02019064 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
+			*(u32*)0x0203DAB0 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
+			*(u32*)0x02050CC4 = 0xE12FFF1E; // bx lr (Soft-lock instead of displaying Manual screen)
+		}
+	}
+
 	// Little Red Riding Hood's Zombie BBQ (USA)
 	else if (strcmp(romTid, "KZBE") == 0 && saveOnFlashcard) {
 		*(u32*)0x02026BFC = 0xE3A00001; // mov r0, #1

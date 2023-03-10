@@ -12010,6 +12010,83 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020563F8 = 0xE1A00000; // nop
 	}*/
 
+	// Link 'n' Launch (USA)
+	// Link 'n' Launch (Europe, Australia)
+	else if (strcmp(romTid, "KPTE") == 0 || strcmp(romTid, "KPTV") == 0) {
+		useSharedFont = (romTid[3] == 'E') ? twlFontFound : (twlFontFound && debugOrMep);
+		u8 offsetChange1 = (romTid[3] == 'E') ? 0 : 0xC0;
+		u8 offsetChange2 = (romTid[3] == 'E') ? 0 : 0x8;
+		u8 offsetChange3 = (romTid[3] == 'E') ? 0 : 0x40;
+		u16 offsetChange4 = (romTid[3] == 'E') ? 0 : 0x36C;
+		u16 offsetChange5 = (romTid[3] == 'E') ? 0 : 0x3AC;
+		u16 offsetChange6 = (romTid[3] == 'E') ? 0 : 0x348;
+
+		setBL(0x02005700, (u32)dsiSaveOpen);
+		setBL(0x02005798, (u32)dsiSaveClose);
+		setBL(0x02005828, (u32)dsiSaveRead);
+		setBL(0x020058AC, (u32)dsiSaveWrite);
+		setBL(0x020058E0, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+		setBL(0x02005934, (u32)dsiSaveDelete);
+		setBL(0x02005990, (u32)dsiSaveSetLength);
+		*(u32*)0x020059C4 = 0xE1A00000; // nop
+		*(u32*)0x020137F8 = 0xE1A00000; // nop
+		*(u32*)0x02013828 = 0xE1A00000; // nop
+		if (!extendedMemory2) {
+			*(u32*)(0x02014770+offsetChange1) = 0xE3A03601; // mov r3, #0x100000 (Shrink sound heap from 0x280000: Disables music)
+		}
+		if (useSharedFont) {
+			if (!extendedMemory2 && romTid[3] == 'V') {
+				patchTwlFontLoad(0x0201778C+offsetChange2, 0x02070EC4-offsetChange6);
+			}
+		} else {
+			*(u32*)(0x02017674+offsetChange2) = 0xE3A00000; // mov r0, #0
+			*(u32*)(0x02017764+offsetChange2) = 0xE3A00000; // mov r0, #0
+			*(u32*)(0x020177A8+offsetChange2) = 0xE3A00000; // mov r0, #0
+			*(u32*)(0x02019384+offsetChange3) = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
+			*(u32*)(0x0203E068+offsetChange4) = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
+		}
+		*(u32*)(0x02051324+offsetChange5) = 0xE12FFF1E; // bx lr (Soft-lock instead of displaying Manual screen)
+		*(u32*)(0x020663C8-offsetChange6) = 0xE1A00000; // nop
+		tonccpy((u32*)(0x02066F94-offsetChange6), dsiSaveGetResultCode, 0xC);
+		*(u32*)(0x0206A004-offsetChange6) = 0xE1A00000; // nop
+		patchInitDSiWare(0x0206F2E8-offsetChange6, heapEnd);
+		*(u32*)(0x0206F674-offsetChange6) -= 0x30000;
+		patchUserSettingsReadDSiWare(0x02070930-offsetChange6);
+	}
+
+	// Panel Renketsu: 3-Fun Rocket (Japan)
+	else if (strcmp(romTid, "KPTJ") == 0) {
+		useSharedFont = twlFontFound;
+		setBL(0x0200553C, (u32)dsiSaveOpen);
+		setBL(0x020055D4, (u32)dsiSaveClose);
+		setBL(0x02005664, (u32)dsiSaveRead);
+		setBL(0x020056E8, (u32)dsiSaveWrite);
+		setBL(0x0200571C, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+		setBL(0x02005770, (u32)dsiSaveDelete);
+		setBL(0x020057CC, (u32)dsiSaveSetLength);
+		*(u32*)0x02005800 = 0xE1A00000; // nop
+		*(u32*)0x02013610 = 0xE1A00000; // nop
+		*(u32*)0x02013640 = 0xE1A00000; // nop
+		if (!extendedMemory2) {
+			*(u32*)0x02014568 = 0xE3A03601; // mov r3, #0x100000 (Shrink sound heap from 0x280000: Disables music)
+		}
+		if (!useSharedFont) {
+			*(u32*)0x02017370 = 0xE3A00000; // mov r0, #0
+			*(u32*)0x02017460 = 0xE3A00000; // mov r0, #0
+			*(u32*)0x020174A4 = 0xE3A00000; // mov r0, #0
+			*(u32*)0x02019064 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
+			*(u32*)0x0203DAB0 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
+		}
+		*(u32*)0x02050CC4 = 0xE12FFF1E; // bx lr (Soft-lock instead of displaying Manual screen)
+		*(u32*)0x02065A9C = 0xE1A00000; // nop
+		tonccpy((u32*)0x02066F94, dsiSaveGetResultCode, 0xC);
+		*(u32*)0x02069814 = 0xE1A00000; // nop
+		*(u32*)0x0206EDD4 = 0xE3A00001; // mov r0, #1
+		patchInitDSiWare(0x0206EDEC, heapEnd);
+		*(u32*)0x0206F15C -= 0x30000;
+		patchUserSettingsReadDSiWare(0x0207043C);
+	}
+
 	// Little Red Riding Hood's Zombie BBQ (USA)
 	else if (strcmp(romTid, "KZBE") == 0 && extendedMemory2) {
 		*(u32*)0x020050AC = 0xE1A00000; // nop

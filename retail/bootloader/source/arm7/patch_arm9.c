@@ -1000,6 +1000,7 @@ void patchSharedFontPath(const cardengineArm9* ce9, const tNDSHeader* ndsHeader,
 
 		//bool armFound = false;
 		//bool dsiBiosFuncsIn9i = false;
+		bool relocOffsets = (strncmp(ndsHeader->gameCode, "KPT", 3) == 0);
 		int zerosFound = 0;
 		u32* arm9idst = moduleParams->static_bss_end;
 		for (u32 i = 0; i < (iUncompressedSizei-4)/4; i++) {
@@ -1039,6 +1040,8 @@ void patchSharedFontPath(const cardengineArm9* ce9, const tNDSHeader* ndsHeader,
 						*blOffset = 0xE3A00001; // mov r0, #1
 					}*/
 				}
+			} else if (relocOffsets && arm9idst[i] >= ((u32)moduleParams->static_bss_end)+0x30000 && arm9idst[i] < ((u32)moduleParams->static_bss_end)+0x40000) {
+				arm9idst[i] -= 0x30000;
 			} else if (arm9idst[i] == 0x4770DF20 || arm9idst[i] == 0x4770DF21 || arm9idst[i] == 0x4770DF22 || arm9idst[i] == 0x4770DF23
 					|| arm9idst[i] == 0x4770DF24 || arm9idst[i] == 0x4770DF25 || arm9idst[i] == 0x4770DF26 || arm9idst[i] == 0x4770DF27
 					|| arm9idst[i] == 0x4770DF28 || arm9idst[i] == 0x4770DF29) {
