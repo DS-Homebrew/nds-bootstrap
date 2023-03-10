@@ -7064,6 +7064,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	else if (strcmp(romTid, "K73E") == 0 && saveOnFlashcard) {
 		*(u32*)0x0201A17C = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
 		*(u32*)0x0201A22C = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+		// setBL(0x0201A6A0, (u32)dsiSaveClose);
 		setBL(0x0201A9BC, (u32)dsiSaveOpen);
 		setBL(0x0201A9D0, (u32)dsiSaveSeek);
 		setBL(0x0201A9E4, (u32)dsiSaveRead);

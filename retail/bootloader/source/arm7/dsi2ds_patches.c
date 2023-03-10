@@ -12305,11 +12305,11 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Magical Diary: Secrets Sharing (USA)
-	// Requires 8MB of RAM
-	// Unable to save data
-	/*else if (strcmp(romTid, "K73E") == 0 && extendedMemory2) {
+	// Unable to save data due to RAM limitations
+	/* else if (strcmp(romTid, "K73E") == 0) {
 		*(u32*)0x0201A17C = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
 		*(u32*)0x0201A22C = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+		// setBL(0x0201A6A0, (u32)dsiSaveClose);
 		setBL(0x0201A9BC, (u32)dsiSaveOpen);
 		setBL(0x0201A9D0, (u32)dsiSaveSeek);
 		setBL(0x0201A9E4, (u32)dsiSaveRead);
@@ -12355,22 +12355,17 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0208B124 = 0xE1A00000; // nop
 		*(u32*)0x0208B138 = 0xE1A00000; // nop
 		*(u32*)0x0208E6DC = 0xE1A00000; // nop
-		*(u32*)0x02094B20 = 0xE1A00000; // nop
-		*(u32*)0x02096CE0 = 0xE1A00000; // nop
-		*(u32*)0x02096CE4 = 0xE1A00000; // nop
-		*(u32*)0x02096CF0 = 0xE1A00000; // nop
-		*(u32*)0x02096E50 = 0xE1A00000; // nop
-		patchHiHeapDSiWare(0x02096EAC, heapEnd); // mov r0, #0x2700000
+		patchInitDSiWare(0x02096C54, heapEnd);
+		*(u32*)0x02096FE0 = *(u32*)0x02004FE8;
 		patchUserSettingsReadDSiWare(0x0209831C);
 		*(u32*)0x02098338 = 0xE3A00001; // mov r0, #1
 		*(u32*)0x0209833C = 0xE12FFF1E; // bx lr
 		*(u32*)0x02098344 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x02098348 = 0xE12FFF1E; // bx lr
-	}*/
+	}
 
 	// Tomodachi Tsukurou!: Mahou no Koukan Nikki (Japan)
-	// Requires 8MB of RAM
-	// Unable to save data
+	// Unable to save data due to RAM limitations
 	/*else if (strcmp(romTid, "K85J") == 0 && extendedMemory2) {
 		*(u32*)0x0201A3A8 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
 		*(u32*)0x0201A420 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
@@ -12417,10 +12412,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020A6620 = 0xE1A00000; // nop
 		*(u32*)0x020A9D64 = 0xE1A00000; // nop
 		*(u32*)0x020B01A8 = 0xE1A00000; // nop
-		*(u32*)0x020B2214 = 0xE1A00000; // nop
-		*(u32*)0x020B2218 = 0xE1A00000; // nop
-		*(u32*)0x020B2224 = 0xE1A00000; // nop
-		*(u32*)0x020B2384 = 0xE1A00000; // nop
 		patchHiHeapDSiWare(0x020B23E0, heapEnd); // mov r0, #0x2700000
 		patchUserSettingsReadDSiWare(0x020B37CC);
 		*(u32*)0x020B37E8 = 0xE3A00001; // mov r0, #1
