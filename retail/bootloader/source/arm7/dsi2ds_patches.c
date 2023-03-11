@@ -2383,35 +2383,43 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Anne's Doll Studio: Gothic Collection (USA)
-	else if (strcmp(romTid, "K54E") == 0) {
+	// Nae Mamdaero Peurinseseu 2: Yureop-Pyeon (Korea)
+	else if (strcmp(romTid, "K54E") == 0 || strcmp(romTid, "KLQK") == 0) {
+		u8 offsetChange = (romTid[3] == 'E') ? 0 : 0xD0;
+		u8 offsetChange2 = (romTid[3] == 'E') ? 0 : 0xD4;
+		u8 offsetChange3 = (romTid[3] == 'E') ? 0 : 0xD8;
+		u16 offsetChange4 = (romTid[3] == 'E') ? 0 : 0x148;
+
 		*(u32*)0x020050B0 = 0xE1A00000; // nop
 		*(u32*)0x020050B4 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		*(u32*)0x02011270 = 0xE1A00000; // nop
 		*(u32*)0x0201509C = 0xE1A00000; // nop
 		patchInitDSiWare(0x0201BEB0, heapEnd);
 		patchUserSettingsReadDSiWare(0x0201D550);
-		*(u32*)0x02033850 = 0xE3A00000; // mov r0, #0 (Skip pit.bin check)
-		*(u32*)0x02033AB0 = 0xE3A00000; // mov r0, #0 (Skip free space check)
-		*(u32*)0x02033AB4 = 0xE12FFF1E; // bx lr
-		setBL(0x02035614, (u32)dsiSaveGetResultCode);
-		setBL(0x02035738, (u32)dsiSaveOpen);
-		setBL(0x0203576C, (u32)dsiSaveRead);
-		setBL(0x02035794, (u32)dsiSaveClose);
-		setBL(0x020357F4, (u32)dsiSaveOpen);
-		setBL(0x0203583C, (u32)dsiSaveWrite);
-		setBL(0x0203585C, (u32)dsiSaveClose);
-		setBL(0x020358A0, (u32)dsiSaveCreate);
-		setBL(0x020358FC, (u32)dsiSaveDelete);
-		*(u32*)0x02037AC4 = 0xE1A00000; // nop
-		*(u32*)0x0203AE68 = 0xE1A00000; // nop
-		*(u32*)0x0203AE84 = 0xE1A00000; // nop
-		*(u32*)0x0203B69C = 0xE12FFF1E; // bx lr
-		*(u32*)0x0203C7C0 = 0xE1A00000; // nop
+		*(u32*)(0x02033850-offsetChange) = 0xE3A00000; // mov r0, #0 (Skip pit.bin check)
+		*(u32*)(0x02033AB0-offsetChange) = 0xE3A00000; // mov r0, #0 (Skip free space check)
+		*(u32*)(0x02033AB4-offsetChange) = 0xE12FFF1E; // bx lr
+		setBL(0x02035614-offsetChange2, (u32)dsiSaveGetResultCode);
+		setBL(0x02035738-offsetChange2, (u32)dsiSaveOpen);
+		setBL(0x0203576C-offsetChange2, (u32)dsiSaveRead);
+		setBL(0x02035794-offsetChange2, (u32)dsiSaveClose);
+		setBL(0x020357F4-offsetChange2, (u32)dsiSaveOpen);
+		setBL(0x0203583C-offsetChange2, (u32)dsiSaveWrite);
+		setBL(0x0203585C-offsetChange2, (u32)dsiSaveClose);
+		setBL(0x020358A0-offsetChange2, (u32)dsiSaveCreate);
+		setBL(0x020358FC-offsetChange2, (u32)dsiSaveDelete);
+		*(u32*)(0x02037AC4-offsetChange) = 0xE1A00000; // nop
+		*(u32*)(0x0203AE68-offsetChange3) = 0xE1A00000; // nop
+		*(u32*)(0x0203AE84-offsetChange3) = 0xE1A00000; // nop
+		*(u32*)(0x0203B69C-offsetChange3) = 0xE12FFF1E; // bx lr
+		*(u32*)(0x0203C7C0-offsetChange4) = 0xE1A00000; // nop
 	}
 
 	// Anne's Doll Studio: Lolita Collection (USA)
 	// Anne's Doll Studio: Lolita Collection (Europe)
 	else if (strcmp(romTid, "KLQE") == 0 || strcmp(romTid, "KLQP") == 0) {
+		u8 offsetChange = (romTid[3] == 'E') ? 0 : 0x54;
+
 		*(u32*)0x020050B0 = 0xE1A00000; // nop
 		*(u32*)0x020050B4 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		*(u32*)0x020112A0 = 0xE1A00000; // nop
@@ -2421,37 +2429,20 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020337B0 = 0xE3A00000; // mov r0, #0 (Skip pit.bin check)
 		*(u32*)0x02033A10 = 0xE3A00000; // mov r0, #0 (Skip free space check)
 		*(u32*)0x02033A14 = 0xE12FFF1E; // bx lr
-		if (romTid[3] == 'E') {
-			setBL(0x020355C4, (u32)dsiSaveGetResultCode);
-			setBL(0x020356E8, (u32)dsiSaveOpen);
-			setBL(0x0203571C, (u32)dsiSaveRead);
-			setBL(0x02035744, (u32)dsiSaveClose);
-			setBL(0x020357A4, (u32)dsiSaveOpen);
-			setBL(0x020357EC, (u32)dsiSaveWrite);
-			setBL(0x0203580C, (u32)dsiSaveClose);
-			setBL(0x02035850, (u32)dsiSaveCreate);
-			setBL(0x020358AC, (u32)dsiSaveDelete);
-			*(u32*)0x02037A74 = 0xE1A00000; // nop
-			*(u32*)0x0203AE0C = 0xE1A00000; // nop
-			*(u32*)0x0203AE28 = 0xE1A00000; // nop
-			*(u32*)0x0203B640 = 0xE12FFF1E; // bx lr
-			*(u32*)0x0203C6F4 = 0xE1A00000; // nop
-		} else {
-			setBL(0x02035570, (u32)dsiSaveGetResultCode);
-			setBL(0x02035694, (u32)dsiSaveOpen);
-			setBL(0x020356C8, (u32)dsiSaveRead);
-			setBL(0x020356F0, (u32)dsiSaveClose);
-			setBL(0x02035750, (u32)dsiSaveOpen);
-			setBL(0x020357EC, (u32)dsiSaveWrite);
-			setBL(0x02035798, (u32)dsiSaveClose);
-			setBL(0x020357FC, (u32)dsiSaveCreate);
-			setBL(0x02035858, (u32)dsiSaveDelete);
-			*(u32*)0x02037A20 = 0xE1A00000; // nop
-			*(u32*)0x0203ADB8 = 0xE1A00000; // nop
-			*(u32*)0x0203ADD4 = 0xE1A00000; // nop
-			*(u32*)0x0203B5EC = 0xE12FFF1E; // bx lr
-			*(u32*)0x0203C6A0 = 0xE1A00000; // nop
-		}
+		setBL(0x020355C4-offsetChange, (u32)dsiSaveGetResultCode);
+		setBL(0x020356E8-offsetChange, (u32)dsiSaveOpen);
+		setBL(0x0203571C-offsetChange, (u32)dsiSaveRead);
+		setBL(0x02035744-offsetChange, (u32)dsiSaveClose);
+		setBL(0x020357A4-offsetChange, (u32)dsiSaveOpen);
+		setBL(0x020357EC-offsetChange, (u32)dsiSaveWrite);
+		setBL(0x0203580C-offsetChange, (u32)dsiSaveClose);
+		setBL(0x02035850-offsetChange, (u32)dsiSaveCreate);
+		setBL(0x020358AC-offsetChange, (u32)dsiSaveDelete);
+		*(u32*)(0x02037A74-offsetChange) = 0xE1A00000; // nop
+		*(u32*)(0x0203AE0C-offsetChange) = 0xE1A00000; // nop
+		*(u32*)(0x0203AE28-offsetChange) = 0xE1A00000; // nop
+		*(u32*)(0x0203B640-offsetChange) = 0xE12FFF1E; // bx lr
+		*(u32*)(0x0203C6F4-offsetChange) = 0xE1A00000; // nop
 	}
 
 	// Atorie Decora Doll: Gothic (Japan)
@@ -2551,30 +2542,39 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Atorie Decora Doll (Japan)
-	else if (strcmp(romTid, "KDUJ") == 0) {
+	// Nae Mamdaero Peurinseseu (Korea)
+	else if (strcmp(romTid, "KDUJ") == 0 || strcmp(romTid, "KDUK") == 0) {
+		u8 offsetChangeInit0 = (romTid[3] == 'J') ? 0 : 0x5C;
+		u8 offsetChangeInit1 = (romTid[3] == 'J') ? 0 : 0x68;
+		u8 offsetChangeInit = (romTid[3] == 'J') ? 0 : 0x84;
+		u8 offsetChange = (romTid[3] == 'J') ? 0 : 0x94;
+		u8 offsetChange2 = (romTid[3] == 'J') ? 0 : 0xA4;
+		u16 offsetChange3 = (romTid[3] == 'J') ? 0 : 0x16C;
+		u16 offsetChange4 = (romTid[3] == 'J') ? 0 : 0x1C0;
+
 		*(u32*)0x02005098 = 0xE1A00000; // nop
 		*(u32*)0x0200509C = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
-		*(u32*)0x02011218 = 0xE1A00000; // nop
-		*(u32*)0x02014FB0 = 0xE1A00000; // nop
-		patchInitDSiWare(0x0201BD8C, heapEnd);
-		patchUserSettingsReadDSiWare(0x0201D41C);
-		setBL(0x020270E4, (u32)dsiSaveGetResultCode);
-		setBL(0x02027208, (u32)dsiSaveOpen);
-		setBL(0x0202723C, (u32)dsiSaveRead);
-		setBL(0x02027264, (u32)dsiSaveClose);
-		setBL(0x020272C4, (u32)dsiSaveOpen);
-		setBL(0x0202730C, (u32)dsiSaveWrite);
-		setBL(0x0202732C, (u32)dsiSaveClose);
-		setBL(0x02027370, (u32)dsiSaveCreate);
-		setBL(0x020273CC, (u32)dsiSaveDelete);
-		*(u32*)0x02029594 = 0xE1A00000; // nop
-		*(u32*)0x0202C848 = 0xE1A00000; // nop
-		*(u32*)0x0202C864 = 0xE1A00000; // nop
-		*(u32*)0x0202D06C = 0xE12FFF1E; // bx lr
-		*(u32*)0x0202E0D4 = 0xE1A00000; // nop
-		*(u32*)0x02039428 = 0xE3A00000; // mov r0, #0 (Skip pit.bin check)
-		*(u32*)0x02039688 = 0xE3A00000; // mov r0, #0 (Skip free space check)
-		*(u32*)0x0203968C = 0xE12FFF1E; // bx lr
+		*(u32*)(0x02011218+offsetChangeInit0) = 0xE1A00000; // nop
+		*(u32*)(0x02014FB0+offsetChangeInit1) = 0xE1A00000; // nop
+		patchInitDSiWare(0x0201BD8C+offsetChangeInit, heapEnd);
+		patchUserSettingsReadDSiWare(0x0201D41C+offsetChangeInit);
+		setBL(0x020270E4+offsetChange, (u32)dsiSaveGetResultCode);
+		setBL(0x02027208+offsetChange2, (u32)dsiSaveOpen);
+		setBL(0x0202723C+offsetChange2, (u32)dsiSaveRead);
+		setBL(0x02027264+offsetChange2, (u32)dsiSaveClose);
+		setBL(0x020272C4+offsetChange2, (u32)dsiSaveOpen);
+		setBL(0x0202730C+offsetChange2, (u32)dsiSaveWrite);
+		setBL(0x0202732C+offsetChange2, (u32)dsiSaveClose);
+		setBL(0x02027370+offsetChange2, (u32)dsiSaveCreate);
+		setBL(0x020273CC+offsetChange2, (u32)dsiSaveDelete);
+		*(u32*)(0x02029594+offsetChange2) = 0xE1A00000; // nop
+		*(u32*)(0x0202C848+offsetChange3) = 0xE1A00000; // nop
+		*(u32*)(0x0202C864+offsetChange3) = 0xE1A00000; // nop
+		*(u32*)(0x0202D06C+offsetChange3) = 0xE12FFF1E; // bx lr
+		*(u32*)(0x0202E0D4+offsetChange3) = 0xE1A00000; // nop
+		*(u32*)(0x02039428+offsetChange4) = 0xE3A00000; // mov r0, #0 (Skip pit.bin check)
+		*(u32*)(0x02039688+offsetChange4) = 0xE3A00000; // mov r0, #0 (Skip free space check)
+		*(u32*)(0x0203968C+offsetChange4) = 0xE12FFF1E; // bx lr
 	}
 
 	// Anonymous Notes 1: From The Abyss (USA & Europe)

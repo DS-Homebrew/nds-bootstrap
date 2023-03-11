@@ -1600,23 +1600,26 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Anne's Doll Studio: Gothic Collection (USA)
-	else if (strcmp(romTid, "K54E") == 0) {
-		if (!twlFontFound) {
+	// Nae Mamdaero Peurinseseu 2: Yureop-Pyeon (Korea)
+	else if (strcmp(romTid, "K54E") == 0 || strcmp(romTid, "KLQK") == 0) {
+		if ((romTid[3] == 'J') ? !twlFontFound : !korFontFound) {
 			*(u32*)0x020050B4 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		}
 		if (saveOnFlashcard) {
-			*(u32*)0x02033850 = 0xE3A00000; // mov r0, #0 (Skip pit.bin check)
-			*(u32*)0x02033AB0 = 0xE3A00000; // mov r0, #0 (Skip free space check)
-			*(u32*)0x02033AB4 = 0xE12FFF1E; // bx lr
-			setBL(0x02035614, (u32)dsiSaveGetResultCode);
-			setBL(0x02035738, (u32)dsiSaveOpen);
-			setBL(0x0203576C, (u32)dsiSaveRead);
-			setBL(0x02035794, (u32)dsiSaveClose);
-			setBL(0x020357F4, (u32)dsiSaveOpen);
-			setBL(0x0203583C, (u32)dsiSaveWrite);
-			setBL(0x0203585C, (u32)dsiSaveClose);
-			setBL(0x020358A0, (u32)dsiSaveCreate);
-			setBL(0x020358FC, (u32)dsiSaveDelete);
+			u8 offsetChange = (romTid[3] == 'E') ? 0 : 0xD0;
+			u8 offsetChange2 = (romTid[3] == 'E') ? 0 : 0xD4;
+			*(u32*)(0x02033850-offsetChange) = 0xE3A00000; // mov r0, #0 (Skip pit.bin check)
+			*(u32*)(0x02033AB0-offsetChange) = 0xE3A00000; // mov r0, #0 (Skip free space check)
+			*(u32*)(0x02033AB4-offsetChange) = 0xE12FFF1E; // bx lr
+			setBL(0x02035614-offsetChange2, (u32)dsiSaveGetResultCode);
+			setBL(0x02035738-offsetChange2, (u32)dsiSaveOpen);
+			setBL(0x0203576C-offsetChange2, (u32)dsiSaveRead);
+			setBL(0x02035794-offsetChange2, (u32)dsiSaveClose);
+			setBL(0x020357F4-offsetChange2, (u32)dsiSaveOpen);
+			setBL(0x0203583C-offsetChange2, (u32)dsiSaveWrite);
+			setBL(0x0203585C-offsetChange2, (u32)dsiSaveClose);
+			setBL(0x020358A0-offsetChange2, (u32)dsiSaveCreate);
+			setBL(0x020358FC-offsetChange2, (u32)dsiSaveDelete);
 		}
 	}
 
@@ -1648,30 +1651,20 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			*(u32*)0x020050B4 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		}
 		if (saveOnFlashcard) {
+			u8 offsetChange = (romTid[3] == 'E') ? 0 : 0x54;
+
 			*(u32*)0x020337B0 = 0xE3A00000; // mov r0, #0 (Skip pit.bin check)
 			*(u32*)0x02033A10 = 0xE3A00000; // mov r0, #0 (Skip free space check)
 			*(u32*)0x02033A14 = 0xE12FFF1E; // bx lr
-			if (romTid[3] == 'E') {
-				setBL(0x020355C4, (u32)dsiSaveGetResultCode);
-				setBL(0x020356E8, (u32)dsiSaveOpen);
-				setBL(0x0203571C, (u32)dsiSaveRead);
-				setBL(0x02035744, (u32)dsiSaveClose);
-				setBL(0x020357A4, (u32)dsiSaveOpen);
-				setBL(0x020357EC, (u32)dsiSaveWrite);
-				setBL(0x0203580C, (u32)dsiSaveClose);
-				setBL(0x02035850, (u32)dsiSaveCreate);
-				setBL(0x020358AC, (u32)dsiSaveDelete);
-			} else {
-				setBL(0x02035570, (u32)dsiSaveGetResultCode);
-				setBL(0x02035694, (u32)dsiSaveOpen);
-				setBL(0x020356C8, (u32)dsiSaveRead);
-				setBL(0x020356F0, (u32)dsiSaveClose);
-				setBL(0x02035750, (u32)dsiSaveOpen);
-				setBL(0x020357EC, (u32)dsiSaveWrite);
-				setBL(0x02035798, (u32)dsiSaveClose);
-				setBL(0x020357FC, (u32)dsiSaveCreate);
-				setBL(0x02035858, (u32)dsiSaveDelete);
-			}
+			setBL(0x020355C4-offsetChange, (u32)dsiSaveGetResultCode);
+			setBL(0x020356E8-offsetChange, (u32)dsiSaveOpen);
+			setBL(0x0203571C-offsetChange, (u32)dsiSaveRead);
+			setBL(0x02035744-offsetChange, (u32)dsiSaveClose);
+			setBL(0x020357A4-offsetChange, (u32)dsiSaveOpen);
+			setBL(0x020357EC-offsetChange, (u32)dsiSaveWrite);
+			setBL(0x0203580C-offsetChange, (u32)dsiSaveClose);
+			setBL(0x02035850-offsetChange, (u32)dsiSaveCreate);
+			setBL(0x020358AC-offsetChange, (u32)dsiSaveDelete);
 		}
 	}
 
@@ -1718,23 +1711,27 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Atorie Decora Doll (Japan)
-	else if (strcmp(romTid, "KDUJ") == 0) {
-		if (!twlFontFound) {
+	// Nae Mamdaero Peurinseseu (Korea)
+	else if (strcmp(romTid, "KDUJ") == 0 || strcmp(romTid, "KDUK") == 0) {
+		if ((romTid[3] == 'J') ? !twlFontFound : !korFontFound) {
 			*(u32*)0x0200509C = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		}
 		if (saveOnFlashcard) {
-			setBL(0x020270E4, (u32)dsiSaveGetResultCode);
-			setBL(0x02027208, (u32)dsiSaveOpen);
-			setBL(0x0202723C, (u32)dsiSaveRead);
-			setBL(0x02027264, (u32)dsiSaveClose);
-			setBL(0x020272C4, (u32)dsiSaveOpen);
-			setBL(0x0202730C, (u32)dsiSaveWrite);
-			setBL(0x0202732C, (u32)dsiSaveClose);
-			setBL(0x02027370, (u32)dsiSaveCreate);
-			setBL(0x020273CC, (u32)dsiSaveDelete);
-			*(u32*)0x02039428 = 0xE3A00000; // mov r0, #0 (Skip pit.bin check)
-			*(u32*)0x02039688 = 0xE3A00000; // mov r0, #0 (Skip free space check)
-			*(u32*)0x0203968C = 0xE12FFF1E; // bx lr
+			u8 offsetChange = (romTid[3] == 'J') ? 0 : 0x94;
+			u8 offsetChange2 = (romTid[3] == 'J') ? 0 : 0xA4;
+			u16 offsetChange4 = (romTid[3] == 'J') ? 0 : 0x1C0;
+			setBL(0x020270E4+offsetChange, (u32)dsiSaveGetResultCode);
+			setBL(0x02027208+offsetChange2, (u32)dsiSaveOpen);
+			setBL(0x0202723C+offsetChange2, (u32)dsiSaveRead);
+			setBL(0x02027264+offsetChange2, (u32)dsiSaveClose);
+			setBL(0x020272C4+offsetChange2, (u32)dsiSaveOpen);
+			setBL(0x0202730C+offsetChange2, (u32)dsiSaveWrite);
+			setBL(0x0202732C+offsetChange2, (u32)dsiSaveClose);
+			setBL(0x02027370+offsetChange2, (u32)dsiSaveCreate);
+			setBL(0x020273CC+offsetChange2, (u32)dsiSaveDelete);
+			*(u32*)(0x02039428+offsetChange4) = 0xE3A00000; // mov r0, #0 (Skip pit.bin check)
+			*(u32*)(0x02039688+offsetChange4) = 0xE3A00000; // mov r0, #0 (Skip free space check)
+			*(u32*)(0x0203968C+offsetChange4) = 0xE12FFF1E; // bx lr
 		}
 	}
 
