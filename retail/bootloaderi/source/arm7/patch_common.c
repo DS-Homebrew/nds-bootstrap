@@ -9494,7 +9494,8 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// GO Series: Portable Shrine Wars (USA)
 	// GO Series: Portable Shrine Wars (Europe)
-	else if (strcmp(romTid, "KOQE") == 0 || strcmp(romTid, "KOQP") == 0) {
+	// Omiko Shiuzu (Japan)
+	else if (strncmp(romTid, "KOQ", 3) == 0) {
 		if (saveOnFlashcard) {
 			setBL(0x0200CEC4, (u32)dsiSaveCreate);
 			setBL(0x0200CF00, (u32)dsiSaveOpen);
@@ -9512,7 +9513,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBL(0x0200D1D0, (u32)dsiSaveGetInfo);
 			*(u32*)0x0200D214 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc & dsiSaveFreeSpaceAvailable)
 			*(u32*)0x0200D218 = 0xE12FFF1E; // bx lr
-			tonccpy((u32*)0x0204ED3C, dsiSaveGetResultCode, 0xC);
+			tonccpy((u32*)((romTid[3] != 'J') ? 0x0204ED3C : 0x0204EBB0), dsiSaveGetResultCode, 0xC);
 		}
 		if (!twlFontFound) {
 			*(u32*)0x0200E004 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)

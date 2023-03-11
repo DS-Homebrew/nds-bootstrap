@@ -16522,7 +16522,8 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// GO Series: Portable Shrine Wars (USA)
 	// GO Series: Portable Shrine Wars (Europe)
-	else if (strcmp(romTid, "KOQE") == 0 || strcmp(romTid, "KOQP") == 0) {
+	// Omiko Shiuzu (Japan)
+	else if (strncmp(romTid, "KOQ", 3) == 0) {
 		*(u32*)0x020073E0 = 0xE1A00000; // nop
 		setBL(0x0200CEC4, (u32)dsiSaveCreate);
 		setBL(0x0200CF00, (u32)dsiSaveOpen);
@@ -16541,11 +16542,19 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0200D214 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc & dsiSaveFreeSpaceAvailable)
 		*(u32*)0x0200D218 = 0xE12FFF1E; // bx lr
 		*(u32*)0x0200E004 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
-		*(u32*)0x0204E1B8 = 0xE1A00000; // nop
-		tonccpy((u32*)0x0204ED3C, dsiSaveGetResultCode, 0xC);
-		*(u32*)0x02051F6C = 0xE1A00000; // nop
-		patchInitDSiWare(0x020599E0, heapEnd);
-		patchUserSettingsReadDSiWare(0x0205AEBC);
+		if (romTid[3] != 'J') {
+			*(u32*)0x0204E1B8 = 0xE1A00000; // nop
+			tonccpy((u32*)0x0204ED3C, dsiSaveGetResultCode, 0xC);
+			*(u32*)0x02051F6C = 0xE1A00000; // nop
+			patchInitDSiWare(0x020599E0, heapEnd);
+			patchUserSettingsReadDSiWare(0x0205AEBC);
+		} else {
+			*(u32*)0x0204E02C = 0xE1A00000; // nop
+			tonccpy((u32*)0x0204EBB0, dsiSaveGetResultCode, 0xC);
+			*(u32*)0x02051DE0 = 0xE1A00000; // nop
+			patchInitDSiWare(0x02059854, heapEnd);
+			patchUserSettingsReadDSiWare(0x0205AD30);
+		}
 
 		// Skip Manual screen
 		for (int i = 0; i < 11; i++) {
