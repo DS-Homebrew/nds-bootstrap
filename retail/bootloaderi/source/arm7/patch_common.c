@@ -7060,6 +7060,54 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 #else
+	// Maestro! Green Groove (USA)
+	// Does not save due to unknown cause
+	else if (strcmp(romTid, "KMUE") == 0 && saveOnFlashcard) {
+		*(u32*)0x02029F34 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x020BC568 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x020BC904 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x020BC908 = 0xE12FFF1E; // bx lr
+		/* setBL(0x020BC7BC, (u32)dsiSaveOpenR);
+		setBL(0x020BC7D0, (u32)dsiSaveCreate);
+		setBL(0x020BC7DC, (u32)dsiSaveClose);
+		setBL(0x020BC7F0, (u32)dsiSaveOpen);
+		setBL(0x020BC85C, (u32)dsiSaveWrite);
+		setBL(0x020BC864, (u32)dsiSaveClose);
+		setBL(0x020BC8AC, (u32)dsiSaveCreate);
+		setBL(0x020BC8BC, (u32)dsiSaveOpen);
+		setBL(0x020BC8DC, (u32)dsiSaveSetLength);
+		setBL(0x020BC8EC, (u32)dsiSaveWrite);
+		setBL(0x020BC8F4, (u32)dsiSaveClose);
+		setBL(0x020BC930, (u32)dsiSaveOpenR);
+		setBL(0x020BC97C, (u32)dsiSaveGetLength);
+		setBL(0x020BC9B0, (u32)dsiSaveRead);
+		setBL(0x020BC9BC, (u32)dsiSaveClose); */
+	}
+
+	// Maestro! Green Groove (Europe, Australia)
+	// Does not save due to unknown cause
+	else if (strcmp(romTid, "KM6V") == 0 && saveOnFlashcard) {
+		*(u32*)0x02029F34 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x020BCA40 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x020BCDDC = 0xE3A00001; // mov r0, #1
+		*(u32*)0x020BCDE0 = 0xE12FFF1E; // bx lr
+		/* setBL(0x020BCC94, (u32)dsiSaveOpenR);
+		setBL(0x020BCCA8, (u32)dsiSaveCreate);
+		setBL(0x020BCCB4, (u32)dsiSaveClose);
+		setBL(0x020BCCC8, (u32)dsiSaveOpen);
+		setBL(0x020BCD34, (u32)dsiSaveWrite);
+		setBL(0x020BCD3C, (u32)dsiSaveClose);
+		setBL(0x020BCD84, (u32)dsiSaveCreate);
+		setBL(0x020BCD94, (u32)dsiSaveOpen);
+		setBL(0x020BCDB4, (u32)dsiSaveSetLength);
+		setBL(0x020BCDC4, (u32)dsiSaveWrite);
+		setBL(0x020BCDCC, (u32)dsiSaveClose);
+		setBL(0x020BCE08, (u32)dsiSaveOpenR);
+		setBL(0x020BCE54, (u32)dsiSaveGetLength);
+		setBL(0x020BCE88, (u32)dsiSaveRead);
+		setBL(0x020BCE94, (u32)dsiSaveClose); */
+	}
+
 	// Magical Diary: Secrets Sharing (USA)
 	else if (strcmp(romTid, "K73E") == 0 && saveOnFlashcard) {
 		*(u32*)0x0201A17C = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
@@ -7346,52 +7394,320 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
-	// Maestro! Green Groove (USA)
-	// Does not save due to unknown cause
-	else if (strcmp(romTid, "KMUE") == 0 && saveOnFlashcard) {
-		*(u32*)0x02029F34 = 0xE3A00001; // mov r0, #1
-		*(u32*)0x020BC568 = 0xE3A00001; // mov r0, #1
-		*(u32*)0x020BC904 = 0xE3A00001; // mov r0, #1
-		*(u32*)0x020BC908 = 0xE12FFF1E; // bx lr
-		/* setBL(0x020BC7BC, (u32)dsiSaveOpenR);
-		setBL(0x020BC7D0, (u32)dsiSaveCreate);
-		setBL(0x020BC7DC, (u32)dsiSaveClose);
-		setBL(0x020BC7F0, (u32)dsiSaveOpen);
-		setBL(0x020BC85C, (u32)dsiSaveWrite);
-		setBL(0x020BC864, (u32)dsiSaveClose);
-		setBL(0x020BC8AC, (u32)dsiSaveCreate);
-		setBL(0x020BC8BC, (u32)dsiSaveOpen);
-		setBL(0x020BC8DC, (u32)dsiSaveSetLength);
-		setBL(0x020BC8EC, (u32)dsiSaveWrite);
-		setBL(0x020BC8F4, (u32)dsiSaveClose);
-		setBL(0x020BC930, (u32)dsiSaveOpenR);
-		setBL(0x020BC97C, (u32)dsiSaveGetLength);
-		setBL(0x020BC9B0, (u32)dsiSaveRead);
-		setBL(0x020BC9BC, (u32)dsiSaveClose); */
+	// Master of Illusion Express: Deep Psyche (USA, Australia)
+	else if (strcmp(romTid, "KM9T") == 0) {
+		if (!twlFontFound) {
+			*(u32*)0x02005878 = 0xE1A00000; // nop (Skip Manual screen)
+		}
+		if (saveOnFlashcard) {
+			*(u32*)0x02006B68 = 0xE3A00000; // mov r0, #0
+			setBL(0x02006D0C, (u32)dsiSaveOpen);
+			setBL(0x02006D24, (u32)dsiSaveRead);
+			setBL(0x02006DC8, (u32)dsiSaveClose);
+			*(u32*)0x02006DE4 = 0xE1A00000; // nop
+			setBL(0x02006E20, (u32)dsiSaveCreate);
+			setBL(0x02006E90, (u32)dsiSaveOpen);
+			setBL(0x02006EC0, (u32)dsiSaveSetLength);
+			setBL(0x02006ED0, (u32)dsiSaveWrite);
+			setBL(0x02006ED8, (u32)dsiSaveClose);
+			tonccpy((u32*)0x0203A10C, dsiSaveGetResultCode, 0xC);
+		}
 	}
 
-	// Maestro! Green Groove (Europe, Australia)
-	// Does not save due to unknown cause
-	else if (strcmp(romTid, "KM6V") == 0 && saveOnFlashcard) {
-		*(u32*)0x02029F34 = 0xE3A00001; // mov r0, #1
-		*(u32*)0x020BCA40 = 0xE3A00001; // mov r0, #1
-		*(u32*)0x020BCDDC = 0xE3A00001; // mov r0, #1
-		*(u32*)0x020BCDE0 = 0xE12FFF1E; // bx lr
-		/* setBL(0x020BCC94, (u32)dsiSaveOpenR);
-		setBL(0x020BCCA8, (u32)dsiSaveCreate);
-		setBL(0x020BCCB4, (u32)dsiSaveClose);
-		setBL(0x020BCCC8, (u32)dsiSaveOpen);
-		setBL(0x020BCD34, (u32)dsiSaveWrite);
-		setBL(0x020BCD3C, (u32)dsiSaveClose);
-		setBL(0x020BCD84, (u32)dsiSaveCreate);
-		setBL(0x020BCD94, (u32)dsiSaveOpen);
-		setBL(0x020BCDB4, (u32)dsiSaveSetLength);
-		setBL(0x020BCDC4, (u32)dsiSaveWrite);
-		setBL(0x020BCDCC, (u32)dsiSaveClose);
-		setBL(0x020BCE08, (u32)dsiSaveOpenR);
-		setBL(0x020BCE54, (u32)dsiSaveGetLength);
-		setBL(0x020BCE88, (u32)dsiSaveRead);
-		setBL(0x020BCE94, (u32)dsiSaveClose); */
+	// A Little Bit of... Magic Made Fun: Deep Psyche (Europe)
+	else if (strcmp(romTid, "KM9P") == 0) {
+		if (!twlFontFound) {
+			*(u32*)0x02005928 = 0xE1A00000; // nop (Skip Manual screen)
+		}
+		if (saveOnFlashcard) {
+			*(u32*)0x02006DB8 = 0xE3A00000; // mov r0, #0
+			setBL(0x02006FE4, (u32)dsiSaveOpen);
+			setBL(0x02006FFC, (u32)dsiSaveRead);
+			setBL(0x020070C8, (u32)dsiSaveClose);
+			*(u32*)0x020070E8 = 0xE1A00000; // nop
+			setBL(0x02007124, (u32)dsiSaveCreate);
+			setBL(0x02007194, (u32)dsiSaveOpen);
+			setBL(0x020071C4, (u32)dsiSaveSetLength);
+			setBL(0x020071D4, (u32)dsiSaveWrite);
+			setBL(0x020071DC, (u32)dsiSaveClose);
+			tonccpy((u32*)0x0203A450, dsiSaveGetResultCode, 0xC);
+		}
+	}
+
+	// Chotto Majikku Taizen: Osoroshii Suuji (Japan)
+	else if (strcmp(romTid, "KM9J") == 0) {
+		if (!twlFontFound) {
+			*(u32*)0x02005874 = 0xE1A00000; // nop (Skip Manual screen)
+		}
+		if (saveOnFlashcard) {
+			*(u32*)0x02006B64 = 0xE3A00000; // mov r0, #0
+			setBL(0x02006D14, (u32)dsiSaveOpen);
+			setBL(0x02006D2C, (u32)dsiSaveRead);
+			setBL(0x02006DE0, (u32)dsiSaveClose);
+			*(u32*)0x02006DFC = 0xE1A00000; // nop
+			setBL(0x02006E38, (u32)dsiSaveCreate);
+			setBL(0x02006EA8, (u32)dsiSaveOpen);
+			setBL(0x02006EE0, (u32)dsiSaveSetLength);
+			setBL(0x02006EF4, (u32)dsiSaveWrite);
+			setBL(0x02006EFC, (u32)dsiSaveClose);
+			tonccpy((u32*)0x0204A6DC, dsiSaveGetResultCode, 0xC);
+		}
+	}
+
+	// Master of Illusion Express: Funny Face (USA, Australia)
+	// A Little Bit of... Magic Made Fun: Funny Face (Europe)
+	else if (strcmp(romTid, "KMFT") == 0 || strcmp(romTid, "KMFP") == 0 || strcmp(romTid, "KMFX") == 0) {
+		u8 offsetChangeM = (romTid[3] == 'T') ? 0 : 0x50;
+		u16 offsetChange = (romTid[3] == 'T') ? 0 : 0x2A0;
+		u16 offsetChangeInit = (romTid[3] == 'T') ? 0 : 0x494;
+		if (romTid[3] == 'X') {
+			offsetChangeM = 0x54;
+			offsetChange = 0x2F0;
+			offsetChangeInit = 0x604;
+		}
+
+		if (!twlFontFound) {
+			*(u32*)(0x0200584C+offsetChangeM) = 0xE1A00000; // nop (Skip Manual screen)
+		}
+		if (saveOnFlashcard) {
+			if (romTid[3] == 'T') {
+				*(u32*)0x02006B8C = 0xE3A00000; // mov r0, #0
+				setBL(0x02006D30, (u32)dsiSaveOpen);
+				setBL(0x02006D48, (u32)dsiSaveRead);
+				setBL(0x02006DEC, (u32)dsiSaveClose);
+				*(u32*)0x02006E08 = 0xE1A00000; // nop
+				setBL(0x02006E44, (u32)dsiSaveCreate);
+				setBL(0x02006EB4, (u32)dsiSaveOpen);
+				setBL(0x02006EE4, (u32)dsiSaveSetLength);
+				setBL(0x02006EF4, (u32)dsiSaveWrite);
+				setBL(0x02006EFC, (u32)dsiSaveClose);
+			} else if (romTid[3] == 'P') {
+				*(u32*)0x02006D78 = 0xE3A00000; // mov r0, #0
+				setBL(0x02006FA4, (u32)dsiSaveOpen);
+				setBL(0x02006FBC, (u32)dsiSaveRead);
+				setBL(0x02007088, (u32)dsiSaveClose);
+				*(u32*)0x020070A8 = 0xE1A00000; // nop
+				setBL(0x020070E4, (u32)dsiSaveCreate);
+				setBL(0x02007154, (u32)dsiSaveOpen);
+				setBL(0x02007184, (u32)dsiSaveSetLength);
+				setBL(0x02007194, (u32)dsiSaveWrite);
+				setBL(0x0200719C, (u32)dsiSaveClose);
+			} else {
+				*(u32*)0x02006D80 = 0xE3A00000; // mov r0, #0
+				setBL(0x02006FDC, (u32)dsiSaveOpen);
+				setBL(0x02006FF4, (u32)dsiSaveRead);
+				setBL(0x020070D8, (u32)dsiSaveClose);
+				*(u32*)0x020070F8 = 0xE1A00000; // nop
+				setBL(0x02007134, (u32)dsiSaveCreate);
+				setBL(0x020071A4, (u32)dsiSaveOpen);
+				setBL(0x020071D4, (u32)dsiSaveSetLength);
+				setBL(0x020071E4, (u32)dsiSaveWrite);
+				setBL(0x020071EC, (u32)dsiSaveClose);
+			}
+			tonccpy((u32*)(0x0202FBD8+offsetChangeInit), dsiSaveGetResultCode, 0xC);
+		}
+	}
+
+	// Chotto Majikku Taizen: Funi Fuisu (Japan)
+	else if (strcmp(romTid, "KMFJ") == 0) {
+		if (!twlFontFound) {
+			*(u32*)0x0200588C = 0xE1A00000; // nop (Skip Manual screen)
+		}
+		if (saveOnFlashcard) {
+			*(u32*)0x02006BCC = 0xE3A00000; // mov r0, #0
+			setBL(0x02006D7C, (u32)dsiSaveOpen);
+			setBL(0x02006D94, (u32)dsiSaveRead);
+			setBL(0x02006E48, (u32)dsiSaveClose);
+			*(u32*)0x02006E64 = 0xE1A00000; // nop
+			setBL(0x02006EA0, (u32)dsiSaveCreate);
+			setBL(0x02006F10, (u32)dsiSaveOpen);
+			setBL(0x02006F48, (u32)dsiSaveSetLength);
+			setBL(0x02006F5C, (u32)dsiSaveWrite);
+			setBL(0x02006F64, (u32)dsiSaveClose);
+			tonccpy((u32*)0x0204C8F8, dsiSaveGetResultCode, 0xC);
+		}
+	}
+
+	// Master of Illusion Express: Matchmaker (USA, Australia)
+	// A Little Bit of... Magic Made Fun: Matchmaker (Europe)
+	else if (strcmp(romTid, "KMDT") == 0 || strcmp(romTid, "KMDP") == 0) {
+		if (!twlFontFound) {
+			u8 offsetChangeM = (romTid[3] == 'T') ? 0 : 0xE4;
+			*(u32*)(0x0200586C+offsetChangeM) = 0xE1A00000; // nop (Skip Manual screen)
+		}
+		if (saveOnFlashcard) {
+			u16 offsetChange = (romTid[3] == 'T') ? 0 : 0x2F4;
+			u16 offsetChangeInit = (romTid[3] == 'T') ? 0 : 0x4B8;
+			setBL(0x02006C18+offsetChange, (u32)dsiSaveOpen);
+			setBL(0x02006C30+offsetChange, (u32)dsiSaveRead);
+			setBL(0x02006CB0+offsetChange, (u32)dsiSaveClose);
+			*(u32*)(0x02006CCC+offsetChange) = 0xE1A00000; // nop
+			setBL(0x02006D08+offsetChange, (u32)dsiSaveCreate);
+			setBL(0x02006D78+offsetChange, (u32)dsiSaveOpen);
+			setBL(0x02006DA8+offsetChange, (u32)dsiSaveSetLength);
+			setBL(0x02006DB8+offsetChange, (u32)dsiSaveWrite);
+			setBL(0x02006DC0+offsetChange, (u32)dsiSaveClose);
+			tonccpy((u32*)(0x0202E080+offsetChangeInit), dsiSaveGetResultCode, 0xC);
+		}
+	}
+
+	// Chotto Majikku Taizen: Deto Uranai (Japan)
+	else if (strcmp(romTid, "KMDJ") == 0) {
+		if (!twlFontFound) {
+			*(u32*)0x020057D0 = 0xE1A00000; // nop (Skip Manual screen)
+		}
+		if (saveOnFlashcard) {
+			setBL(0x02006B68, (u32)dsiSaveOpen);
+			setBL(0x02006B80, (u32)dsiSaveRead);
+			setBL(0x02006C00, (u32)dsiSaveClose);
+			*(u32*)0x02006C1C = 0xE1A00000; // nop
+			setBL(0x02006C58, (u32)dsiSaveCreate);
+			setBL(0x02006CC8, (u32)dsiSaveOpen);
+			setBL(0x02006CF8, (u32)dsiSaveSetLength);
+			setBL(0x02006D08, (u32)dsiSaveWrite);
+			setBL(0x02006D10, (u32)dsiSaveClose);
+			tonccpy((u32*)0x0202E000, dsiSaveGetResultCode, 0xC);
+		}
+	}
+
+	// Master of Illusion Express: Mind Probe (USA, Australia)
+	// A Little Bit of... Magic Made Fun: Mind Probe (Europe)
+	else if (strcmp(romTid, "KMIT") == 0 || strcmp(romTid, "KMIP") == 0) {
+		if (!twlFontFound) {
+			u8 offsetChangeM = (romTid[3] == 'T') ? 0 : 0x60;
+			*(u32*)(0x02005814+offsetChangeM) = 0xE1A00000; // nop (Skip Manual screen)
+		}
+		if (saveOnFlashcard) {
+			u16 offsetChange = (romTid[3] == 'T') ? 0 : 0x270;
+			u16 offsetChangeInit = (romTid[3] == 'T') ? 0 : 0x368;
+			setBL(0x02006B94+offsetChange, (u32)dsiSaveOpen);
+			setBL(0x02006BAC+offsetChange, (u32)dsiSaveRead);
+			setBL(0x02006C2C+offsetChange, (u32)dsiSaveClose);
+			*(u32*)(0x02006C48+offsetChange) = 0xE1A00000; // nop
+			setBL(0x02006C84+offsetChange, (u32)dsiSaveCreate);
+			setBL(0x02006CF4+offsetChange, (u32)dsiSaveOpen);
+			setBL(0x02006D24+offsetChange, (u32)dsiSaveSetLength);
+			setBL(0x02006D34+offsetChange, (u32)dsiSaveWrite);
+			setBL(0x02006D3C+offsetChange, (u32)dsiSaveClose);
+			tonccpy((u32*)(0x0202D958+offsetChangeInit), dsiSaveGetResultCode, 0xC);
+		}
+	}
+
+	// Chotto Majikku Taizen: Suki Kirai Hakkenki (Japan)
+	else if (strcmp(romTid, "KMIJ") == 0) {
+		if (!twlFontFound) {
+			*(u32*)0x02005780 = 0xE1A00000; // nop (Skip Manual screen)
+		}
+		if (saveOnFlashcard) {
+			setBL(0x02006AEC, (u32)dsiSaveOpen);
+			setBL(0x02006B04, (u32)dsiSaveRead);
+			setBL(0x02006B84, (u32)dsiSaveClose);
+			*(u32*)0x02006BA0 = 0xE1A00000; // nop
+			setBL(0x02006BDC, (u32)dsiSaveCreate);
+			setBL(0x02006C4C, (u32)dsiSaveOpen);
+			setBL(0x02006C7C, (u32)dsiSaveSetLength);
+			setBL(0x02006C8C, (u32)dsiSaveWrite);
+			setBL(0x02006C94, (u32)dsiSaveClose);
+			tonccpy((u32*)0x0202D8C0, dsiSaveGetResultCode, 0xC);
+		}
+	}
+
+	// Master of Illusion Express: Psychic Camera (USA, Australia)
+	// A Little Bit of... Magic Made Fun: Psychic Camera (Europe)
+	else if (strcmp(romTid, "KMNT") == 0 || strcmp(romTid, "KMNP") == 0) {
+		if (!twlFontFound) {
+			u8 offsetChangeM = (romTid[3] == 'T') ? 0 : 0x60;
+			*(u32*)(0x02005828+offsetChangeM) = 0xE1A00000; // nop (Skip Manual screen)
+		}
+		if (saveOnFlashcard) {
+			u16 offsetChange = (romTid[3] == 'T') ? 0 : 0x270;
+			u16 offsetChangeInit = (romTid[3] == 'T') ? 0 : 0x3D4;
+			setBL(0x02006BA8+offsetChange, (u32)dsiSaveOpen);
+			setBL(0x02006BC0+offsetChange, (u32)dsiSaveRead);
+			setBL(0x02006C40+offsetChange, (u32)dsiSaveClose);
+			*(u32*)(0x02006C5C+offsetChange) = 0xE1A00000; // nop
+			setBL(0x02006C98+offsetChange, (u32)dsiSaveCreate);
+			setBL(0x02006D08+offsetChange, (u32)dsiSaveOpen);
+			setBL(0x02006D38+offsetChange, (u32)dsiSaveSetLength);
+			setBL(0x02006D48+offsetChange, (u32)dsiSaveWrite);
+			setBL(0x02006D50+offsetChange, (u32)dsiSaveClose);
+			tonccpy((u32*)(0x0202DD84+offsetChangeInit), dsiSaveGetResultCode, 0xC);
+		}
+	}
+
+	// Chotto Majikku Taizen: Nensha Kamera (Japan)
+	else if (strcmp(romTid, "KMNJ") == 0) {
+		if (!twlFontFound) {
+			*(u32*)0x02005794 = 0xE1A00000; // nop (Skip Manual screen)
+		}
+		if (saveOnFlashcard) {
+			setBL(0x02006B00, (u32)dsiSaveOpen);
+			setBL(0x02006B18, (u32)dsiSaveRead);
+			setBL(0x02006B98, (u32)dsiSaveClose);
+			*(u32*)0x02006BB4 = 0xE1A00000; // nop
+			setBL(0x02006BF0, (u32)dsiSaveCreate);
+			setBL(0x02006C60, (u32)dsiSaveOpen);
+			setBL(0x02006C90, (u32)dsiSaveSetLength);
+			setBL(0x02006CA0, (u32)dsiSaveWrite);
+			setBL(0x02006CA8, (u32)dsiSaveClose);
+			tonccpy((u32*)0x0202DD0C, dsiSaveGetResultCode, 0xC);
+		}
+	}
+
+	// Master of Illusion Express: Shuffle Games (USA, Australia)
+	// A Little Bit of... Magic Made Fun: Shuffle Games (Europe)
+	else if (strcmp(romTid, "KMST") == 0 || strcmp(romTid, "KMSP") == 0) {
+		if (!twlFontFound) {
+			u8 offsetChangeM = (romTid[3] == 'T') ? 0 : 0x50;
+			*(u32*)(0x0200584C+offsetChangeM) = 0xE1A00000; // nop (Skip Manual screen)
+		}
+		if (saveOnFlashcard) {
+			if (romTid[3] == 'T') {
+				*(u32*)0x02006B30 = 0xE3A00000; // mov r0, #0
+				setBL(0x02006CD4, (u32)dsiSaveOpen);
+				setBL(0x02006CEC, (u32)dsiSaveRead);
+				setBL(0x02006D90, (u32)dsiSaveClose);
+				*(u32*)0x02006DAC = 0xE1A00000; // nop
+				setBL(0x02006DE8, (u32)dsiSaveCreate);
+				setBL(0x02006E58, (u32)dsiSaveOpen);
+				setBL(0x02006E88, (u32)dsiSaveSetLength);
+				setBL(0x02006E98, (u32)dsiSaveWrite);
+				setBL(0x02006EA0, (u32)dsiSaveClose);
+			} else {
+				*(u32*)0x02006D1C = 0xE3A00000; // mov r0, #0
+				setBL(0x02006F48, (u32)dsiSaveOpen);
+				setBL(0x02006F60, (u32)dsiSaveRead);
+				setBL(0x0200702C, (u32)dsiSaveClose);
+				*(u32*)0x0200704C = 0xE1A00000; // nop
+				setBL(0x02007088, (u32)dsiSaveCreate);
+				setBL(0x020070F8, (u32)dsiSaveOpen);
+				setBL(0x02007128, (u32)dsiSaveSetLength);
+				setBL(0x02007138, (u32)dsiSaveWrite);
+				setBL(0x02007140, (u32)dsiSaveClose);
+			}
+		}
+		u16 offsetChangeInit = (romTid[3] == 'T') ? 0 : 0x340;
+		tonccpy((u32*)(0x0202D7EC+offsetChangeInit), dsiSaveGetResultCode, 0xC);
+	}
+
+	// Chotto Majikku Taizen: 3ttsu no Shaffuru Gemu (Japan)
+	else if (strcmp(romTid, "KMSJ") == 0) {
+		if (!twlFontFound) {
+			*(u32*)0x0200588C = 0xE1A00000; // nop (Skip Manual screen)
+		}
+		if (saveOnFlashcard) {
+			*(u32*)0x02006B70 = 0xE3A00000; // mov r0, #0
+			setBL(0x02006D20, (u32)dsiSaveOpen);
+			setBL(0x02006D38, (u32)dsiSaveRead);
+			setBL(0x02006DEC, (u32)dsiSaveClose);
+			*(u32*)0x02006E08 = 0xE1A00000; // nop
+			setBL(0x02006E44, (u32)dsiSaveCreate);
+			setBL(0x02006EB4, (u32)dsiSaveOpen);
+			setBL(0x02006EEC, (u32)dsiSaveSetLength);
+			setBL(0x02006F00, (u32)dsiSaveWrite);
+			setBL(0x02006F08, (u32)dsiSaveClose);
+			tonccpy((u32*)0x0204A448, dsiSaveGetResultCode, 0xC);
+		}
 	}
 
 	// Meikyou Kokugo: Rakubiki Jiten (Japan)

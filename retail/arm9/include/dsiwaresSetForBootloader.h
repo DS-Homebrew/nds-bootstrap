@@ -263,6 +263,12 @@ static const char dsiWareForBootloader2[][4] = {
 	"KJO", // Magnetic Joe
 	"KYL", // Make Up & Style
 	"KDM", // Mario vs. Donkey Kong: Minis March Again!
+	"KM9", // Master of Illusion Express: Deep Psyche
+	"KMF", // Master of Illusion Express: Funny Face
+	"KMD", // Master of Illusion Express: Matchmaker
+	"KMI", // Master of Illusion Express: Mind Probe
+	"KMN", // Master of Illusion Express: Psychic Camera (bootloaderi-exclusive)
+	"KMS", // Master of Illusion Express: Shuffle Games
 	"KD4", // Meikyou Kokugo: Rakubiki Jiten
 	"K59", // Metal Torrent
 	"KMG", // Mighty Flip Champs!

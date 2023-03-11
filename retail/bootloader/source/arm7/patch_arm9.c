@@ -890,7 +890,7 @@ void patchSharedFontPath(const cardengineArm9* ce9, const tNDSHeader* ndsHeader,
 	//extern u32 accessControl;
 	extern u32 arm9ibinarySize;
 	if (/* !(accessControl & BIT(4)) || *(u32*)0x023B8000 != 0 */ !useSharedFont) {
-		toncset((u32*)0x023B8000, 0, arm9ibinarySize);
+		toncset((u32*)0x023B8000, 0, arm9ibinarySize > 0x8000 ? 0x8000 : arm9ibinarySize);
 		return;
 	}
 
