@@ -8639,6 +8639,20 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBLThumb(0x020EC17E, dsiSaveCloseT);*/
 	}
 
+	// Neko Neko Bakery: Pan de Pazurunya! (Japan)
+	else if (strcmp(romTid, "K9NJ") == 0 && saveOnFlashcard) {
+		setBL(0x0203E844, (u32)dsiSaveOpen);
+		setBL(0x0203E858, (u32)dsiSaveGetLength);
+		setBL(0x0203E880, (u32)dsiSaveSeek);
+		setBL(0x0203E890, (u32)dsiSaveRead);
+		setBL(0x0203E89C, (u32)dsiSaveClose);
+		setBL(0x0203E95C, (u32)dsiSaveCreate);
+		setBL(0x0203E970, (u32)dsiSaveOpen);
+		setBL(0x0203E988, (u32)dsiSaveSeek);
+		setBL(0x0203E998, (u32)dsiSaveWrite);
+		setBL(0x0203E9A4, (u32)dsiSaveClose);
+	}
+
 	// Neko Reversi (Japan)
 	else if (strcmp(romTid, "KNVJ") == 0 && !twlFontFound) {
 		*(u32*)0x0203FCA4 = 0xE1A00000; // nop (Skip Manual screen)

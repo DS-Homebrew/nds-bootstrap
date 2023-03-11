@@ -14924,6 +14924,28 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBLThumb(0x020EC17E, dsiSaveCloseT);*/
 	}
 
+	// Neko Neko Bakery: Pan de Pazurunya! (Japan)
+	else if (strcmp(romTid, "K9NJ") == 0) {
+		*(u32*)0x020050C0 = 0xE1A00000; // nop
+		*(u32*)0x0200B75C = 0xE1A00000; // nop
+		*(u32*)0x0200EB6C = 0xE1A00000; // nop
+		patchInitDSiWare(0x020139E0, heapEnd);
+		patchUserSettingsReadDSiWare(0x02014EBC);
+		if (!extendedMemory2) {
+			*(u32*)0x0201A89C = 0xE3A00B65; // mov r0, #0x19400 (Do not pre-load streamed music files, disable them instead)
+		}
+		setBL(0x0203E844, (u32)dsiSaveOpen);
+		setBL(0x0203E858, (u32)dsiSaveGetLength);
+		setBL(0x0203E880, (u32)dsiSaveSeek);
+		setBL(0x0203E890, (u32)dsiSaveRead);
+		setBL(0x0203E89C, (u32)dsiSaveClose);
+		setBL(0x0203E95C, (u32)dsiSaveCreate);
+		setBL(0x0203E970, (u32)dsiSaveOpen);
+		setBL(0x0203E988, (u32)dsiSaveSeek);
+		setBL(0x0203E998, (u32)dsiSaveWrite);
+		setBL(0x0203E9A4, (u32)dsiSaveClose);
+	}
+
 	// Neko Reversi (Japan)
 	// Requires 8MB of RAM
 	else if (strcmp(romTid, "KNVJ") == 0 && extendedMemory2) {
