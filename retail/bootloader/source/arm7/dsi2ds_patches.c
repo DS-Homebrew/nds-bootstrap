@@ -2319,6 +2319,37 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchUserSettingsReadDSiWare(0x02037404);
 	}
 
+	// O Tegaru Pazuru Shirizu: Chiria no Doubutsu Goya (Japan)
+	else if (strcmp(romTid, "KPCJ") == 0) {
+		useSharedFont = (twlFontFound && debugOrMep);
+		*(u32*)0x0200E894 = 0xE1A00000; // nop
+		tonccpy((u32*)0x0200F9E0, dsiSaveGetResultCode, 0xC);
+		*(u32*)0x0201245C = 0xE1A00000; // nop
+		patchInitDSiWare(0x02018024, heapEnd);
+		patchUserSettingsReadDSiWare(0x020194B0);
+		if (useSharedFont && !extendedMemory2) {
+			patchTwlFontLoad(0x02026FB8, 0x02019D64);
+		}
+		setBL(0x02032EA4, (u32)dsiSaveOpen);
+		setBL(0x02032EB8, (u32)dsiSaveGetLength);
+		setBL(0x02032EC8, (u32)dsiSaveRead);
+		setBL(0x02032ED0, (u32)dsiSaveClose);
+		*(u32*)0x02032F30 = 0xE3A00001; // mov r0, #1 (dsiSaveOpenDir)
+		*(u32*)0x02032F70 = 0xE1A00000; // nop (dsiSaveCloseDir)
+		setBL(0x02032FFC, (u32)dsiSaveGetInfo);
+		setBL(0x02033008, (u32)dsiSaveCreate);
+		setBL(0x02033018, (u32)dsiSaveOpen);
+		setBL(0x02033048, (u32)dsiSaveSetLength);
+		setBL(0x02033074, (u32)dsiSaveWrite);
+		setBL(0x0203307C, (u32)dsiSaveClose);
+		setBL(0x020331F0, (u32)dsiSaveGetInfo);
+		setBL(0x02033224, (u32)dsiSaveCreate);
+		setBL(0x02033234, (u32)dsiSaveOpen);
+		setBL(0x02033260, (u32)dsiSaveSetLength);
+		setBL(0x020332B0, (u32)dsiSaveWrite);
+		setBL(0x020332B8, (u32)dsiSaveClose);
+	}
+
 	// Anne's Doll Studio: Antique Collection (USA)
 	// Anne's Doll Studio: Antique Collection (Europe)
 	// Atorie Decora Doll: Antique (Japan)

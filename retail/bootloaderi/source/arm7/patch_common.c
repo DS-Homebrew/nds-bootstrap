@@ -1537,6 +1537,29 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		tonccpy((u32*)0x0202D8FC, dsiSaveGetResultCode, 0xC);
 	}
 
+	// O Tegaru Pazuru Shirizu: Chiria no Doubutsu Goya (Japan)
+	else if (strcmp(romTid, "KPCJ") == 0 && saveOnFlashcard) {
+		tonccpy((u32*)0x0200F9E0, dsiSaveGetResultCode, 0xC);
+		setBL(0x02032EA4, (u32)dsiSaveOpen);
+		setBL(0x02032EB8, (u32)dsiSaveGetLength);
+		setBL(0x02032EC8, (u32)dsiSaveRead);
+		setBL(0x02032ED0, (u32)dsiSaveClose);
+		*(u32*)0x02032F30 = 0xE3A00001; // mov r0, #1 (dsiSaveOpenDir)
+		*(u32*)0x02032F70 = 0xE1A00000; // nop (dsiSaveCloseDir)
+		setBL(0x02032FFC, (u32)dsiSaveGetInfo);
+		setBL(0x02033008, (u32)dsiSaveCreate);
+		setBL(0x02033018, (u32)dsiSaveOpen);
+		setBL(0x02033048, (u32)dsiSaveSetLength);
+		setBL(0x02033074, (u32)dsiSaveWrite);
+		setBL(0x0203307C, (u32)dsiSaveClose);
+		setBL(0x020331F0, (u32)dsiSaveGetInfo);
+		setBL(0x02033224, (u32)dsiSaveCreate);
+		setBL(0x02033234, (u32)dsiSaveOpen);
+		setBL(0x02033260, (u32)dsiSaveSetLength);
+		setBL(0x020332B0, (u32)dsiSaveWrite);
+		setBL(0x020332B8, (u32)dsiSaveClose);
+	}
+
 	// Anne's Doll Studio: Antique Collection (USA)
 	// Anne's Doll Studio: Antique Collection (Europe)
 	// Atorie Decora Doll: Antique (Japan)
