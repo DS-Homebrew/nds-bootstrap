@@ -62,7 +62,7 @@ Helpful information:
 #include "locations.h"
 #include "i2c.h"
 
-#include "sr_data_srllastran.h" // For rebooting the game
+#include "sr_data_srloader.h"   // For rebooting the game
 
 void arm7clearRAM();
 
@@ -82,7 +82,7 @@ extern u32 srTid2;
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 static const char *unlaunchAutoLoadID = "AutoLoadInfo";
-static const char *resetgameSrldrPath = "sdmc:/_nds/TWiLightMenu/resetgame.srldr";
+static const char *resetgameSrldrPath = "sdmc:/_nds/TWiLightMenu/main.srldr";
 
 static void unlaunchSetFilename(void) {
 	tonccpy((u8*)0x02000800, unlaunchAutoLoadID, 12);
@@ -365,10 +365,13 @@ int main (void) {
 	if (srTid1 != 0) {
 		readSrBackendId();
 	} else if (consoleModel >= 2) {
-		tonccpy((u32*)0x02000300, sr_data_srllastran, 0x20);
+		tonccpy((u32*)0x02000300, sr_data_srloader, 0x20);
 	} else {
 		unlaunchSetFilename();
 	}
+	toncset((u32*)0x02000000, 0, 0x400);
+	*(u32*)(0x02000000) = BIT(3);
+
 	i2cWriteRegister(0x4A, 0x70, 0x01);
 	i2cWriteRegister(0x4A, 0x11, 0x01);			// Reboot game
 
