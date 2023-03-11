@@ -696,6 +696,20 @@ static void dsiSaveInit(void) {
 }
 #endif
 
+u32 dsiSaveCheckExists(void) {
+#ifdef DLDI
+	if (savFile->firstCluster == CLUSTER_FREE || savFile->firstCluster == CLUSTER_EOF) {
+		return 1;
+	}
+
+	dsiSaveInit();
+
+	return dsiSaveExists ? 0 : 1;
+#else
+	return 1;
+#endif
+}
+
 u32 dsiSaveGetResultCode(const char* path) {
 #ifdef DLDI
 	if (savFile->firstCluster == CLUSTER_FREE || savFile->firstCluster == CLUSTER_EOF) {

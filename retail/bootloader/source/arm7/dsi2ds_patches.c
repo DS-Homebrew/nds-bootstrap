@@ -53,6 +53,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		return;
 	}
 
+	const u32* dsiSaveCheckExists = ce9->patches->dsiSaveCheckExists;
 	const u32* dsiSaveGetResultCode = ce9->patches->dsiSaveGetResultCode;
 	const u32* dsiSaveCreate = ce9->patches->dsiSaveCreate;
 	const u32* dsiSaveDelete = ce9->patches->dsiSaveDelete;
@@ -14851,6 +14852,47 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x020246C8, (u32)dsiSaveGetResultCode);
 		*(u32*)0x020321C4 = 0xE3A00002; // mov r0, #2 (Skip Manual screen, Part 1)
 		*(u32*)0x020398EC = 0xE3A00000; // mov r0, #0 (Skip Manual screen, Part 2)
+	}
+
+	// Nazo no Mini Game (Japan)
+	else if (strcmp(romTid, "KN3J") == 0) {
+		*(u32*)0x020118F0 = 0xE1A00000; // nop
+		*(u32*)0x020152AC = 0xE1A00000; // nop
+		patchInitDSiWare(0x0201AE04, heapEnd);
+		*(u32*)0x0201B190 = *(u32*)0x02004FE8;
+		patchUserSettingsReadDSiWare(0x0201C2E0);
+		if (!extendedMemory2) {
+			// Disable music
+			*(u32*)0x020213A4 = 0xE3A0080F; // mov r0, #0xF0000
+			*(u32*)0x02023E28 = 0xE3A0180F; // mov r1, #0xF0000
+		}
+		*(u32*)0x020214BC = 0xE1A00000; // nop
+		*(u32*)0x020355E8 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		setBL(0x0203FBB0, (u32)dsiSaveOpen);
+		setBL(0x0203FBD4, (u32)dsiSaveGetLength);
+		setBL(0x0203FBF8, (u32)dsiSaveRead);
+		setBL(0x0203FC00, (u32)dsiSaveClose);
+		setBL(0x0203FC44, (u32)dsiSaveCreate);
+		setBL(0x0203FC54, (u32)dsiSaveOpen);
+		setBL(0x0203FC64, (u32)dsiSaveGetResultCode);
+		setBL(0x0203FC84, (u32)dsiSaveSetLength);
+		setBL(0x0203FC94, (u32)dsiSaveWrite);
+		setBL(0x0203FC9C, (u32)dsiSaveClose);
+		*(u32*)0x0203FCDC = 0xE3A00001; // mov r0, #1 (dsiSaveOpenDir)
+		*(u32*)0x0203FD04 = 0xE3A00001; // mov r0, #1 (dsiSaveReadDir)
+		*(u32*)0x0203FD2C = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0203FD40 = 0xE3A00001; // mov r0, #1
+		setBL(0x0203FD84, (u32)dsiSaveCheckExists);
+		*(u32*)0x0203FDB8 = 0xE3A00000; // mov r0, #0 (dsiSaveReadDir)
+		*(u32*)0x0203FDC8 = 0xE1A00000; // nop (dsiSaveCloseDir)
+		*(u32*)0x0203FE20 = 0xE3A00001; // mov r0, #1 (dsiSaveOpenDir)
+		*(u32*)0x0203FE3C = 0xE3A00001; // mov r0, #1 (dsiSaveReadDir)
+		*(u32*)0x0203FE64 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0203FE78 = 0xE3A00001; // mov r0, #1
+		setBL(0x0203FEB4, (u32)dsiSaveDelete);
+		*(u32*)0x0203FEC8 = 0xE3A00000; // mov r0, #0 (dsiSaveReadDir)
+		*(u32*)0x0203FED8 = 0xE1A00000; // nop (dsiSaveCloseDir)
+		*(u32*)0x02040290 = 0xE1A00000; // nop
 	}
 
 	// Need for Speed: Nitro-X (USA)

@@ -828,6 +828,16 @@ static void dsiSaveInit(void) {
 	dsiSaveInited = true;
 }
 
+u32 dsiSaveCheckExists(void) {
+	if (savFile.firstCluster == CLUSTER_FREE || savFile.firstCluster == CLUSTER_EOF) {
+		return 1;
+	}
+
+	dsiSaveInit();
+
+	return dsiSaveExists ? 0 : 1;
+}
+
 u32 dsiSaveGetResultCode(const char* path) {
 	if (savFile.firstCluster == CLUSTER_FREE || savFile.firstCluster == CLUSTER_EOF) {
 		return 0xE;

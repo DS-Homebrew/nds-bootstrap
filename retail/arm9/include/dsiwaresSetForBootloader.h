@@ -294,6 +294,7 @@ static const char dsiWareForBootloader2[][4] = {
 	"KMV", // My Exotic Farm
 	"KMR", // My Farm
 	"KJW", // Nandoku 500 Kanji: Wado Pazuru
+	"KN3", // Nazo no Mini Game
 	"KNP", // Need for Speed: Nitro-X
 	"K9N", // Neko Neko Bakery: Pan de Pazurunya!
 	"KNV", // Neko Reversi

@@ -88,6 +88,7 @@ patches:
 .word   nand_read_arm9
 .word   nand_write_arm9
 #ifdef TWLSDK
+.word   dsiSaveCheckExists_arm
 .word   dsiSaveGetResultCode_arm
 .word   dsiSaveCreate_arm
 .word   dsiSaveDelete_arm
@@ -101,6 +102,7 @@ patches:
 .word   dsiSaveRead_arm
 .word   dsiSaveWrite_arm
 #else
+.word   0x0
 .word   0x0
 .word   0x0
 .word   0x0
@@ -371,6 +373,13 @@ thumb_nand_write_arm9:
 
 	.arm
 #ifdef TWLSDK
+@---------------------------------------------------------------------------------
+dsiSaveCheckExists_arm:
+@---------------------------------------------------------------------------------
+	ldr	pc, =dsiSaveCheckExists
+.pool
+@---------------------------------------------------------------------------------
+
 @---------------------------------------------------------------------------------
 dsiSaveGetResultCode_arm:
 @---------------------------------------------------------------------------------
