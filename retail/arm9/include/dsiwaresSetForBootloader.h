@@ -293,6 +293,7 @@ static const char dsiWareForBootloader2[][4] = {
 	"KL4", // My Australian Farm
 	"KMV", // My Exotic Farm
 	"KMR", // My Farm
+	"KJW", // Nandoku 500 Kanji: Wado Pazuru
 	"KNP", // Need for Speed: Nitro-X
 	"KNV", // Neko Reversi
 	"KAU", // Nintendo Countdown Calendar

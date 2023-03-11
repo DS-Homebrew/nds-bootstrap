@@ -8512,6 +8512,76 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020192D4 = 0xE3A00000; // mov r0, #0
 	}
 
+	// Nandoku 500 Kanji: Wado Pazuru (Japan)
+	else if (strcmp(romTid, "KJWJ") == 0) {
+		if (saveOnFlashcard) {
+			setBL(0x0201200C, (u32)dsiSaveClose);
+			setBL(0x02012150, (u32)dsiSaveClose);
+			setBL(0x020122EC, (u32)dsiSaveOpen);
+			setBL(0x02012314, (u32)dsiSaveSeek);
+			setBL(0x02012330, (u32)dsiSaveClose);
+			setBL(0x02012348, (u32)dsiSaveRead);
+			setBL(0x02012368, (u32)dsiSaveClose);
+			setBL(0x02012378, (u32)dsiSaveClose);
+			setBL(0x020123B4, (u32)dsiSaveOpen);
+			setBL(0x020123CC, (u32)dsiSaveSeek);
+			setBL(0x020123E4, (u32)dsiSaveRead); // dsiSaveReadAsync
+			setBL(0x02012418, (u32)dsiSaveOpen);
+			setBL(0x02012438, (u32)dsiSaveSetLength);
+			setBL(0x02012448, (u32)dsiSaveClose);
+			setBL(0x02012464, (u32)dsiSaveSeek);
+			setBL(0x02012480, (u32)dsiSaveClose);
+			setBL(0x02012498, (u32)dsiSaveWrite);
+			setBL(0x020124BC, (u32)dsiSaveClose);
+			setBL(0x020124C8, (u32)dsiSaveClose);
+			setBL(0x02012504, (u32)dsiSaveOpen);
+			setBL(0x02012518, (u32)dsiSaveSetLength);
+			setBL(0x02012530, (u32)dsiSaveSeek);
+			setBL(0x02012548, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+			setBL(0x0201259C, (u32)dsiSaveCreate);
+			setBL(0x020125A4, (u32)dsiSaveGetResultCode);
+		}
+		if (!twlFontFound) {
+			*(u32*)0x02021FDC = 0xE3A00000; // mov r0, #0 (Skip Manual screen, Part 2)
+			*(u32*)0x020299C8 = 0xE3A00002; // mov r0, #2 (Skip Manual screen, Part 1)
+		}
+	}
+
+	// Jeulgeoun Ilboneo Wodeupeojeul (Korea)
+	else if (strcmp(romTid, "KJWK") == 0) {
+		if (saveOnFlashcard) {
+			setBL(0x02024130, (u32)dsiSaveClose);
+			setBL(0x02024274, (u32)dsiSaveClose);
+			setBL(0x02024410, (u32)dsiSaveOpen);
+			setBL(0x02024438, (u32)dsiSaveSeek);
+			setBL(0x02024454, (u32)dsiSaveClose);
+			setBL(0x0202446C, (u32)dsiSaveRead);
+			setBL(0x0202448C, (u32)dsiSaveClose);
+			setBL(0x0202449C, (u32)dsiSaveClose);
+			setBL(0x020244D8, (u32)dsiSaveOpen);
+			setBL(0x020244F0, (u32)dsiSaveSeek);
+			setBL(0x02024508, (u32)dsiSaveRead); // dsiSaveReadAsync
+			setBL(0x0202453C, (u32)dsiSaveOpen);
+			setBL(0x0202455C, (u32)dsiSaveSetLength);
+			setBL(0x0202456C, (u32)dsiSaveClose);
+			setBL(0x02024588, (u32)dsiSaveSeek);
+			setBL(0x020245A4, (u32)dsiSaveClose);
+			setBL(0x020245BC, (u32)dsiSaveWrite);
+			setBL(0x020245E0, (u32)dsiSaveClose);
+			setBL(0x020245EC, (u32)dsiSaveClose);
+			setBL(0x02024628, (u32)dsiSaveOpen);
+			setBL(0x0202463C, (u32)dsiSaveSetLength);
+			setBL(0x02024654, (u32)dsiSaveSeek);
+			setBL(0x0202466C, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+			setBL(0x020246C0, (u32)dsiSaveCreate);
+			setBL(0x020246C8, (u32)dsiSaveGetResultCode);
+		}
+		if (!twlFontFound) {
+			*(u32*)0x020321C4 = 0xE3A00002; // mov r0, #2 (Skip Manual screen, Part 1)
+			*(u32*)0x020398EC = 0xE3A00000; // mov r0, #0 (Skip Manual screen, Part 2)
+		}
+	}
+
 	// Need for Speed: Nitro-X (USA)
 	// Need for Speed: Nitro-X (Europe, Australia)
 	else if (strncmp(romTid, "KNP", 3) == 0 && saveOnFlashcard) {
