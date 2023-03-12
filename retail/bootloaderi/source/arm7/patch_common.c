@@ -8892,6 +8892,43 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0202917C, (u32)dsiSaveSetLength);
 	}
 
+	// Oscar in Toyland (USA)
+	// Oscar in Toyland (Europe)
+	// Due to our save implementation, save data is stored in all 3 slots
+	else if ((strcmp(romTid, "KOTE") == 0 || strcmp(romTid, "KOTP") == 0) && saveOnFlashcard) {
+		setBL(0x020599A8, (u32)dsiSaveOpen);
+		setBL(0x020599CC, (u32)dsiSaveGetLength);
+		setBL(0x020599F8, (u32)dsiSaveRead);
+		setBL(0x02059A00, (u32)dsiSaveClose);
+		setBL(0x02059A40, (u32)dsiSaveCreate);
+		setBL(0x02059A50, (u32)dsiSaveOpen);
+		setBL(0x02059A78, (u32)dsiSaveSetLength);
+		setBL(0x02059A8C, (u32)dsiSaveWrite);
+		setBL(0x02059A94, (u32)dsiSaveClose);
+	}
+
+	// Oscar in Toyland 2 (USA)
+	// Oscar in Toyland 2 (Europe)
+	// Due to our save implementation, save data is stored in all 3 slots
+	else if ((strcmp(romTid, "KOYE") == 0 || strcmp(romTid, "KOYP") == 0) && saveOnFlashcard) {
+		u16 offsetChange = (romTid[3] == 'E') ? 0 : 0x120;
+		u16 offsetChange2 = (romTid[3] == 'E') ? 0 : 0x16C;
+		setBL(0x02043FC0+offsetChange, (u32)dsiSaveOpen);
+		setBL(0x02043FD0+offsetChange, (u32)dsiSaveClose);
+		*(u32*)(0x0204411C+offsetChange) = 0xE3A00000; // mov r0, #0
+		*(u32*)(0x02044120+offsetChange) = 0xE12FFF1E; // bx lr
+		setBL(0x020443FC+offsetChange, (u32)dsiSaveOpen);
+		setBL(0x02044418+offsetChange, (u32)dsiSaveGetLength);
+		setBL(0x02044434+offsetChange, (u32)dsiSaveRead);
+		setBL(0x0204443C+offsetChange, (u32)dsiSaveClose);
+		setBL(0x02044490+offsetChange, (u32)dsiSaveCreate);
+		setBL(0x020444A0+offsetChange, (u32)dsiSaveOpen);
+		setBL(0x020444DC+offsetChange, (u32)dsiSaveSetLength);
+		setBL(0x020444EC+offsetChange, (u32)dsiSaveWrite);
+		setBL(0x020444F4+offsetChange, (u32)dsiSaveClose);
+		*(u32*)(0x02044B20+offsetChange2) = 0xE3A00000; // mov r0, #0
+	}
+
 	// Kami Hikouki (Japan)
 	// Saving not supported due to using more than one file
 	else if (strcmp(romTid, "KAMJ") == 0 && !twlFontFound) {

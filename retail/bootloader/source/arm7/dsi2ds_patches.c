@@ -15466,6 +15466,65 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020296B0 = 0xE1A00000; // nop
 	}
 
+	// Oscar in Toyland (USA)
+	// Oscar in Toyland (Europe)
+	// Due to our save implementation, save data is stored in all 3 slots
+	else if (strcmp(romTid, "KOTE") == 0 || strcmp(romTid, "KOTP") == 0) {
+		useSharedFont = twlFontFound;
+		*(u32*)0x0200D550 = 0xE1A00000; // nop
+		*(u32*)0x02010A9C = 0xE1A00000; // nop
+		patchInitDSiWare(0x02016510, heapEnd);
+		patchUserSettingsReadDSiWare(0x02017B20);
+		if (useSharedFont && !extendedMemory2) {
+			patchTwlFontLoad(0x02055A38, 0x02018334);
+		}
+		setBL(0x020599A8, (u32)dsiSaveOpen);
+		setBL(0x020599CC, (u32)dsiSaveGetLength);
+		setBL(0x020599F8, (u32)dsiSaveRead);
+		setBL(0x02059A00, (u32)dsiSaveClose);
+		setBL(0x02059A40, (u32)dsiSaveCreate);
+		setBL(0x02059A50, (u32)dsiSaveOpen);
+		setBL(0x02059A78, (u32)dsiSaveSetLength);
+		setBL(0x02059A8C, (u32)dsiSaveWrite);
+		setBL(0x02059A94, (u32)dsiSaveClose);
+	}
+
+	// Oscar in Toyland 2 (USA)
+	// Oscar in Toyland 2 (Europe)
+	// Due to our save implementation, save data is stored in all 3 slots
+	else if (strcmp(romTid, "KOYE") == 0 || strcmp(romTid, "KOYP") == 0) {
+		u8 offsetChangeN = (romTid[3] == 'E') ? 0 : 4;
+		u16 offsetChange = (romTid[3] == 'E') ? 0 : 0x120;
+		u16 offsetChange2 = (romTid[3] == 'E') ? 0 : 0x16C;
+
+		*(u32*)0x020053C0 = 0xFE000; // Shrink sound heap from 0x133333
+		*(u32*)0x0200F728 = 0xE1A00000; // nop
+		*(u32*)0x02012BF4 = 0xE1A00000; // nop
+		patchInitDSiWare(0x0201872C, heapEnd);
+		*(u32*)0x02018AB8 = *(u32*)0x02004FE8;
+		patchUserSettingsReadDSiWare(0x02019BDC);
+		*(u32*)(0x020353F4-offsetChangeN) = 0xE1A00000; // nop
+		*(u32*)(0x020354D8-offsetChangeN) = 0xE1A00000; // nop
+		*(u32*)(0x0203557C-offsetChangeN) = 0xE1A00000; // nop
+		*(u32*)(0x0203563C-offsetChangeN) = 0xE1A00000; // nop
+		*(u32*)(0x02043F18+offsetChange) = 0xE1A00000; // nop
+		setBL(0x02043FC0+offsetChange, (u32)dsiSaveOpen);
+		setBL(0x02043FD0+offsetChange, (u32)dsiSaveClose);
+		*(u32*)(0x0204411C+offsetChange) = 0xE3A00000; // mov r0, #0
+		*(u32*)(0x02044120+offsetChange) = 0xE12FFF1E; // bx lr
+		setBL(0x020443FC+offsetChange, (u32)dsiSaveOpen);
+		setBL(0x02044418+offsetChange, (u32)dsiSaveGetLength);
+		setBL(0x02044434+offsetChange, (u32)dsiSaveRead);
+		setBL(0x0204443C+offsetChange, (u32)dsiSaveClose);
+		setBL(0x02044490+offsetChange, (u32)dsiSaveCreate);
+		setBL(0x020444A0+offsetChange, (u32)dsiSaveOpen);
+		setBL(0x020444DC+offsetChange, (u32)dsiSaveSetLength);
+		setBL(0x020444EC+offsetChange, (u32)dsiSaveWrite);
+		setBL(0x020444F4+offsetChange, (u32)dsiSaveClose);
+		*(u32*)(0x02044B20+offsetChange2) = 0xE3A00000; // mov r0, #0
+		*(u32*)(0x02044C3C+offsetChange2) = 0xE1A00000; // nop
+	}
+
 	// Kami Hikouki (Japan)
 	// Saving not supported due to using more than one file
 	else if (strcmp(romTid, "KAMJ") == 0) {
