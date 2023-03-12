@@ -5547,7 +5547,11 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// GO Series: Captain Sub (USA)
 	// GO Series: Captain Sub (Europe)
-	else if (strcmp(romTid, "K3NE") == 0 || strcmp(romTid, "K3NP") == 0) {
+	// Otakara Hanta: Submarine Kid no Bouken (Japan)
+	else if (strncmp(romTid, "K3N", 3) == 0) {
+		u8 offsetChange = (romTid[3] != 'J') ? 0 : 0xE4;
+		u8 offsetChangeM = (romTid[3] != 'J') ? 0 : 0xB4;
+
 		*(u32*)0x02005234 = 0xE1A00000; // nop
 		*(u32*)0x02005538 = 0xE1A00000; // nop
 		*(u32*)0x0200A22C = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
@@ -5561,23 +5565,25 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0200ABDC, (u32)dsiSaveClose);
 		setBL(0x0200AC6C, (u32)dsiSaveGetInfo);
 		*(u32*)0x0200B550 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
-		*(u32*)0x0200F1B8 = 0xE12FFF1E; // bx lr (Skip Manual screen, Part 1)
-		*(u32*)0x0200F3A4 = 0xE1A00000; // nop
-		*(u32*)0x0203862C = 0xE1A00000; // nop
-		*(u32*)0x0204D2D8 = 0xE12FFF1E; // bx lr
-		*(u32*)0x0205144C = 0xE1A00000; // nop
-		tonccpy((u32*)0x02051FD0, dsiSaveGetResultCode, 0xC);
-		*(u32*)0x020549AC = 0xE1A00000; // nop
-		patchInitDSiWare(0x0205BA1C, heapEnd);
-		patchUserSettingsReadDSiWare(0x0205CEF8);
-		*(u32*)0x0205D32C = 0xE1A00000; // nop
-		*(u32*)0x0205D330 = 0xE1A00000; // nop
-		*(u32*)0x0205D334 = 0xE1A00000; // nop
-		*(u32*)0x0205D338 = 0xE1A00000; // nop
+		*(u32*)(0x0200F1B8+offsetChangeM) = 0xE12FFF1E; // bx lr (Skip Manual screen, Part 1)
+		if (romTid[3] != 'J') {
+			*(u32*)0x0200F3A4 = 0xE1A00000; // nop
+			*(u32*)0x0203862C = 0xE1A00000; // nop
+		}
+		*(u32*)(0x0204D2D8-offsetChange) = 0xE12FFF1E; // bx lr
+		*(u32*)(0x0205144C-offsetChange) = 0xE1A00000; // nop
+		tonccpy((u32*)(0x02051FD0-offsetChange), dsiSaveGetResultCode, 0xC);
+		*(u32*)(0x020549AC-offsetChange) = 0xE1A00000; // nop
+		patchInitDSiWare(0x0205BA1C-offsetChange, heapEnd);
+		patchUserSettingsReadDSiWare(0x0205CEF8-offsetChange);
+		*(u32*)(0x0205D32C-offsetChange) = 0xE1A00000; // nop
+		*(u32*)(0x0205D330-offsetChange) = 0xE1A00000; // nop
+		*(u32*)(0x0205D334-offsetChange) = 0xE1A00000; // nop
+		*(u32*)(0x0205D338-offsetChange) = 0xE1A00000; // nop
 
 		// Skip Manual screen, Part 2
 		for (int i = 0; i < 11; i++) {
-			u32* offset = (u32*)0x0200F2F4;
+			u32* offset = (u32*)(0x0200F2F4+offsetChangeM);
 			offset[i] = 0xE1A00000; // nop
 		}
 	}
