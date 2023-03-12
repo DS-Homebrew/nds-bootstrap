@@ -8932,6 +8932,34 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)(0x02044B20+offsetChange2) = 0xE3A00000; // mov r0, #0
 	}
 
+	// Otegaru Pazuru Shirizu: Yurito Fushigina Meikyuu (Japan)
+	else if (strcmp(romTid, "KTVJ") == 0) {
+		if (!twlFontFound) {
+			*(u32*)0x0202E35C = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		}
+		if (saveOnFlashcard) {
+			tonccpy((u32*)0x0200FF04, dsiSaveGetResultCode, 0xC);
+			setBL(0x020352B0, (u32)dsiSaveOpen);
+			setBL(0x020352D4, (u32)dsiSaveGetLength);
+			setBL(0x020352E4, (u32)dsiSaveRead);
+			setBL(0x020352EC, (u32)dsiSaveClose);
+			*(u32*)0x02035350 = 0xE3A00001; // mov r0, #1 (dsiSaveOpenDir)
+			*(u32*)0x02035394 = 0xE1A00000; // nop (dsiSaveCloseDir)
+			setBL(0x02035424, (u32)dsiSaveGetInfo);
+			setBL(0x02035430, (u32)dsiSaveCreate);
+			setBL(0x02035440, (u32)dsiSaveOpen);
+			setBL(0x0203547C, (u32)dsiSaveSetLength);
+			setBL(0x020354A8, (u32)dsiSaveWrite);
+			setBL(0x020354B0, (u32)dsiSaveClose);
+			setBL(0x02035630, (u32)dsiSaveGetInfo);
+			setBL(0x0203566C, (u32)dsiSaveCreate);
+			setBL(0x0203567C, (u32)dsiSaveOpen);
+			setBL(0x020356E4, (u32)dsiSaveSetLength);
+			setBL(0x02035734, (u32)dsiSaveWrite);
+			setBL(0x0203573C, (u32)dsiSaveClose);
+		}
+	}
+
 	// Othello (Japan)
 	else if (strcmp(romTid, "KOLJ") == 0 && saveOnFlashcard) {
 		tonccpy((u32*)0x0200BF94, dsiSaveGetResultCode, 0xC);
