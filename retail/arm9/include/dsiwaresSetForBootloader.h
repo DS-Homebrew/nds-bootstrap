@@ -401,6 +401,7 @@ static const char dsiWareForBootloader2[][4] = {
 	"KJQ", // Tantei Jinguuji Saburou: Kadannoitte
 	"KJL", // Tantei Jinguuji Saburou: Rensa Suru Noroi
 	"KJ7", // Tantei Jinguuji Saburou: Nakiko no Shouzou
+	"KOS", // Tell me Darling
 	"KTE", // Tetris Party Live
 	"KSL", // Touch Solitaire
 	"K72", // True Swing Golf Express (bootloaderi-exclusive)

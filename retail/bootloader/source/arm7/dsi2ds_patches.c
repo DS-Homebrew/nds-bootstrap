@@ -19270,6 +19270,51 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// Oshiete Darling (Japan)
+	else if (strcmp(romTid, "KOSJ") == 0) {
+		*(u32*)0x0200B3F4 = 0xE1A00000; // nop
+		tonccpy((u32*)0x0200BF6C, dsiSaveGetResultCode, 0xC);
+		*(u32*)0x0200E894 = 0xE1A00000; // nop
+		patchInitDSiWare(0x0201412C, heapEnd);
+		patchUserSettingsReadDSiWare(0x02015704);
+		*(u32*)0x020192FC = 0xE1A00000; // nop
+		setBL(0x0201BA8C, (u32)dsiSaveCreate);
+		setBL(0x0201BACC, (u32)dsiSaveOpen);
+		setBL(0x0201BAFC, (u32)dsiSaveSetLength);
+		setBL(0x0201BB20, (u32)dsiSaveWrite);
+		setBL(0x0201BB50, (u32)dsiSaveClose);
+		setBL(0x0201BB9C, (u32)dsiSaveOpen);
+		setBL(0x0201BBC4, (u32)dsiSaveGetLength);
+		setBL(0x0201BBD8, (u32)dsiSaveRead);
+		setBL(0x0201BC08, (u32)dsiSaveClose);
+		// Display red blank battery icon
+		*(u32*)0x02029A9C = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02029AB0 = 0xE3A00001; // mov r0, #1
+	}
+
+	// Gareuchyeojwodalling (Korea)
+	// ENG banner text: Tell me Darling
+	else if (strcmp(romTid, "KOSK") == 0) {
+		*(u32*)0x0200B40C = 0xE1A00000; // nop
+		tonccpy((u32*)0x0200BF90, dsiSaveGetResultCode, 0xC);
+		*(u32*)0x0200E940 = 0xE1A00000; // nop
+		patchInitDSiWare(0x02014210, heapEnd);
+		patchUserSettingsReadDSiWare(0x020157F8);
+		*(u32*)0x020193F0 = 0xE1A00000; // nop
+		setBL(0x0201BB60, (u32)dsiSaveCreate);
+		setBL(0x0201BBA0, (u32)dsiSaveOpen);
+		setBL(0x0201BBD0, (u32)dsiSaveSetLength);
+		setBL(0x0201BBF4, (u32)dsiSaveWrite);
+		setBL(0x0201BC24, (u32)dsiSaveClose);
+		setBL(0x0201BC70, (u32)dsiSaveOpen);
+		setBL(0x0201BC98, (u32)dsiSaveGetLength);
+		setBL(0x0201BCAC, (u32)dsiSaveRead);
+		setBL(0x0201BCDC, (u32)dsiSaveClose);
+		// Display red blank battery icon
+		*(u32*)0x02029F3C = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02029F50 = 0xE3A00001; // mov r0, #1
+	}
+
 	// Tetris Party Live (USA)
 	// Tetris Party Live (Europe, Australia)
 	else if (strcmp(romTid, "KTEE") == 0 || strcmp(romTid, "KTEV") == 0) {

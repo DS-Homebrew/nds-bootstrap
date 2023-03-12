@@ -11497,6 +11497,35 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// Oshiete Darling (Japan)
+	else if (strcmp(romTid, "KOSJ") == 0 && saveOnFlashcard) {
+		tonccpy((u32*)0x0200BF6C, dsiSaveGetResultCode, 0xC);
+		setBL(0x0201BA8C, (u32)dsiSaveCreate);
+		setBL(0x0201BACC, (u32)dsiSaveOpen);
+		setBL(0x0201BAFC, (u32)dsiSaveSetLength);
+		setBL(0x0201BB20, (u32)dsiSaveWrite);
+		setBL(0x0201BB50, (u32)dsiSaveClose);
+		setBL(0x0201BB9C, (u32)dsiSaveOpen);
+		setBL(0x0201BBC4, (u32)dsiSaveGetLength);
+		setBL(0x0201BBD8, (u32)dsiSaveRead);
+		setBL(0x0201BC08, (u32)dsiSaveClose);
+	}
+
+	// Gareuchyeojwodalling (Korea)
+	// ENG banner text: Tell me Darling
+	else if (strcmp(romTid, "KOSK") == 0 && saveOnFlashcard) {
+		tonccpy((u32*)0x0200BF90, dsiSaveGetResultCode, 0xC);
+		setBL(0x0201BB60, (u32)dsiSaveCreate);
+		setBL(0x0201BBA0, (u32)dsiSaveOpen);
+		setBL(0x0201BBD0, (u32)dsiSaveSetLength);
+		setBL(0x0201BBF4, (u32)dsiSaveWrite);
+		setBL(0x0201BC24, (u32)dsiSaveClose);
+		setBL(0x0201BC70, (u32)dsiSaveOpen);
+		setBL(0x0201BC98, (u32)dsiSaveGetLength);
+		setBL(0x0201BCAC, (u32)dsiSaveRead);
+		setBL(0x0201BCDC, (u32)dsiSaveClose);
+	}
+
 	// Tetris Party Live (USA)
 	else if (strcmp(romTid, "KTEE") == 0) {
 		if (!twlFontFound) {
