@@ -8929,6 +8929,30 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)(0x02044B20+offsetChange2) = 0xE3A00000; // mov r0, #0
 	}
 
+	// Othello (Japan)
+	else if (strcmp(romTid, "KOLJ") == 0 && saveOnFlashcard) {
+		tonccpy((u32*)0x0200BF94, dsiSaveGetResultCode, 0xC);
+		setBL(0x02038B98, (u32)dsiSaveGetInfo);
+		setBL(0x02038C0C, (u32)dsiSaveGetInfo);
+		setBL(0x02038C70, (u32)dsiSaveCreate);
+		setBL(0x02038C84, (u32)dsiSaveOpen);
+		setBL(0x02038CB0, (u32)dsiSaveSetLength);
+		setBL(0x02038D08, (u32)dsiSaveWrite);
+		setBL(0x02038D10, (u32)dsiSaveClose);
+		*(u32*)0x02038D7C = 0xE3A00001; // mov r0, #1 (dsiSaveOpenDir)
+		*(u32*)0x02038DC4 = 0xE1A00000; // nop (dsiSaveCloseDir)
+		setBL(0x02038E0C, (u32)dsiSaveOpen);
+		setBL(0x02038E2C, (u32)dsiSaveGetLength);
+		setBL(0x02038E40, (u32)dsiSaveRead);
+		setBL(0x02038E48, (u32)dsiSaveClose);
+		setBL(0x020390A0, (u32)dsiSaveGetInfo);
+		setBL(0x020390AC, (u32)dsiSaveCreate);
+		setBL(0x020390BC, (u32)dsiSaveOpen);
+		setBL(0x020390EC, (u32)dsiSaveSetLength);
+		setBL(0x02039118, (u32)dsiSaveWrite);
+		setBL(0x02039120, (u32)dsiSaveClose);
+	}
+
 	// Kami Hikouki (Japan)
 	// Saving not supported due to using more than one file
 	else if (strcmp(romTid, "KAMJ") == 0 && !twlFontFound) {

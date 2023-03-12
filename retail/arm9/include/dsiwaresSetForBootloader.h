@@ -307,6 +307,7 @@ static const char dsiWareForBootloader2[][4] = {
 	"K6T", // Orion's Odyssey
 	"KOT", // Oscar in Toyland
 	"KOY", // Oscar in Toyland 2
+	"KOL", // Othello
 	"KAM", // Paper Airplane Chase / Kami Hikouki (Japan)
 	"KP9", // Paul's Monster Adventure
 	"KPJ", // Paul's Shooting Adventure

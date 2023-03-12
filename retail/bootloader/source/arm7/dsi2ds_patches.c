@@ -15525,6 +15525,38 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)(0x02044C3C+offsetChange2) = 0xE1A00000; // nop
 	}
 
+	// Othello (Japan)
+	else if (strcmp(romTid, "KOLJ") == 0) {
+		useSharedFont = twlFontFound;
+		*(u32*)0x0200B300 = 0xE1A00000; // nop
+		tonccpy((u32*)0x0200BF94, dsiSaveGetResultCode, 0xC);
+		*(u32*)0x0200E7AC = 0xE1A00000; // nop
+		patchInitDSiWare(0x02013F6C, heapEnd);
+		if (useSharedFont && !extendedMemory2) {
+			patchTwlFontLoad(0x0202A6EC, 0x02015D14);
+		}
+		setBL(0x02038B98, (u32)dsiSaveGetInfo);
+		setBL(0x02038C0C, (u32)dsiSaveGetInfo);
+		*(u32*)0x02038C60 = 0xE1A00000; // nop
+		setBL(0x02038C70, (u32)dsiSaveCreate);
+		setBL(0x02038C84, (u32)dsiSaveOpen);
+		setBL(0x02038CB0, (u32)dsiSaveSetLength);
+		setBL(0x02038D08, (u32)dsiSaveWrite);
+		setBL(0x02038D10, (u32)dsiSaveClose);
+		*(u32*)0x02038D7C = 0xE3A00001; // mov r0, #1 (dsiSaveOpenDir)
+		*(u32*)0x02038DC4 = 0xE1A00000; // nop (dsiSaveCloseDir)
+		setBL(0x02038E0C, (u32)dsiSaveOpen);
+		setBL(0x02038E2C, (u32)dsiSaveGetLength);
+		setBL(0x02038E40, (u32)dsiSaveRead);
+		setBL(0x02038E48, (u32)dsiSaveClose);
+		setBL(0x020390A0, (u32)dsiSaveGetInfo);
+		setBL(0x020390AC, (u32)dsiSaveCreate);
+		setBL(0x020390BC, (u32)dsiSaveOpen);
+		setBL(0x020390EC, (u32)dsiSaveSetLength);
+		setBL(0x02039118, (u32)dsiSaveWrite);
+		setBL(0x02039120, (u32)dsiSaveClose);
+	}
+
 	// Kami Hikouki (Japan)
 	// Saving not supported due to using more than one file
 	else if (strcmp(romTid, "KAMJ") == 0) {
