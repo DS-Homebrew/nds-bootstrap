@@ -15647,6 +15647,80 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchUserSettingsReadDSiWare(0x02041544+offsetChange6);
 	}
 
+	// Otona no Tame no: Kei-san Training DS (Japan)
+	else if (strcmp(romTid, "K3TJ") == 0) {
+		*(u32*)0x02008808 = 0xE1A00000; // nop
+		*(u32*)0x0200BE84 = 0xE1A00000; // nop
+		patchInitDSiWare(0x02011E30, heapEnd);
+		patchUserSettingsReadDSiWare(0x02013598);
+		*(u32*)0x02018790 = 0xE1A00000; // nop
+		*(u32*)0x020187A8 = 0xE1A00000; // nop
+		*(u32*)0x02033418 = 0xE3A00002; // mov r0, #2 (Skip Manual screen, Part 1)
+		*(u32*)0x02033604 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02036A8C = 0xE3A00000; // mov r0, #0 (Skip Manual screen, Part 2)
+		setBL(0x0204599C, (u32)dsiSaveCreate);
+		setBL(0x0204611C, (u32)dsiSaveClose);
+		setBL(0x020462AC, (u32)dsiSaveOpen);
+		setBL(0x020462C8, (u32)dsiSaveSeek);
+		setBL(0x020462DC, (u32)dsiSaveClose);
+		setBL(0x020462F4, (u32)dsiSaveRead);
+		setBL(0x02046304, (u32)dsiSaveClose);
+		setBL(0x02046310, (u32)dsiSaveClose);
+		setBL(0x02046344, (u32)dsiSaveOpen);
+		setBL(0x0204635C, (u32)dsiSaveSeek);
+		setBL(0x02046374, (u32)dsiSaveRead); // dsiSaveReadAsync
+		setBL(0x020463A4, (u32)dsiSaveOpen);
+		setBL(0x020463BC, (u32)dsiSaveSetLength);
+		setBL(0x020463CC, (u32)dsiSaveClose);
+		setBL(0x020463E0, (u32)dsiSaveSeek);
+		setBL(0x020463F4, (u32)dsiSaveClose);
+		setBL(0x0204640C, (u32)dsiSaveWrite);
+		setBL(0x0204641C, (u32)dsiSaveClose);
+		setBL(0x02046428, (u32)dsiSaveClose);
+		setBL(0x0204645C, (u32)dsiSaveOpen);
+		setBL(0x02046470, (u32)dsiSaveSetLength);
+		setBL(0x02046488, (u32)dsiSaveSeek);
+		setBL(0x020464A0, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+		*(u32*)0x0204652C = 0xE12FFF1E; // bx lr
+	}
+
+	// Otona no Tame no: Renjuku Kanji (Japan)
+	else if (strcmp(romTid, "KJ9J") == 0) {
+		*(u32*)0x0200E618 = 0xE1A00000; // nop
+		*(u32*)0x02011B38 = 0xE1A00000; // nop
+		patchInitDSiWare(0x020177B4, heapEnd);
+		patchUserSettingsReadDSiWare(0x02018F14);
+		*(u32*)0x02048D60 = 0xE1A00000; // nop
+		*(u32*)0x02048D74 = 0xE1A00000; // nop
+		*(u32*)0x02049A5C = 0xE3A00002; // mov r0, #2 (Skip Manual screen, Part 1)
+		*(u32*)0x02049C48 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x020532B0 = 0xE3A00000; // mov r0, #0 (Skip Manual screen, Part 2)
+		setBL(0x02029C0C, (u32)dsiSaveCreate);
+		setBL(0x0202A37C, (u32)dsiSaveClose);
+		setBL(0x02064EC8, (u32)dsiSaveOpen);
+		setBL(0x02064EE4, (u32)dsiSaveSeek);
+		setBL(0x02064EF8, (u32)dsiSaveClose);
+		setBL(0x02064F10, (u32)dsiSaveRead);
+		setBL(0x02064F20, (u32)dsiSaveClose);
+		setBL(0x02064F2C, (u32)dsiSaveClose);
+		setBL(0x02064F60, (u32)dsiSaveOpen);
+		setBL(0x02064F78, (u32)dsiSaveSeek);
+		setBL(0x02064F90, (u32)dsiSaveRead); // dsiSaveReadAsync
+		setBL(0x02064FC0, (u32)dsiSaveOpen);
+		setBL(0x02064FD8, (u32)dsiSaveSetLength);
+		setBL(0x02064FE8, (u32)dsiSaveClose);
+		setBL(0x02064FFC, (u32)dsiSaveSeek);
+		setBL(0x02065010, (u32)dsiSaveClose);
+		setBL(0x02065028, (u32)dsiSaveWrite);
+		setBL(0x02065038, (u32)dsiSaveClose);
+		setBL(0x02065044, (u32)dsiSaveClose);
+		setBL(0x02065078, (u32)dsiSaveOpen);
+		setBL(0x0206508C, (u32)dsiSaveSetLength);
+		setBL(0x020650A4, (u32)dsiSaveSeek);
+		setBL(0x020650BC, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+		*(u32*)0x02065148 = 0xE12FFF1E; // bx lr
+	}
+
 	// Kami Hikouki (Japan)
 	// Saving not supported due to using more than one file
 	else if (strcmp(romTid, "KAMJ") == 0) {
