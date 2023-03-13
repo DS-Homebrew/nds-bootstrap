@@ -8984,6 +8984,48 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02039120, (u32)dsiSaveClose);
 	}
 
+	// Otona no Nihonshi Pazuru (Japan)
+	// Otona no Sekaishi Pazuru (Japan)
+	else if (strcmp(romTid, "KL7J") == 0 || strcmp(romTid, "KL6J") == 0) {
+		if (saveOnFlashcard) {
+			u8 offsetChange1 = (romTid[2] == '7') ? 0 : 0xA0;
+			u8 offsetChange2 = (romTid[2] == '7') ? 0 : 0xA4;
+			u8 offsetChange3 = (romTid[2] == '7') ? 0 : 0x9C;
+			u8 offsetChange4 = (romTid[2] == '7') ? 0 : 0x98;
+			u8 offsetChange5 = (romTid[2] == '7') ? 0 : 0x94;
+			setBL(0x020120DC+offsetChange2, (u32)dsiSaveClose);
+			setBL(0x02012224+offsetChange1, (u32)dsiSaveClose);
+			setBL(0x020123C4+offsetChange3, (u32)dsiSaveOpen);
+			setBL(0x020123EC+offsetChange3, (u32)dsiSaveSeek);
+			setBL(0x02012408+offsetChange3, (u32)dsiSaveClose);
+			setBL(0x02012420+offsetChange3, (u32)dsiSaveRead);
+			setBL(0x02012440+offsetChange3, (u32)dsiSaveClose);
+			setBL(0x02012450+offsetChange3, (u32)dsiSaveClose);
+			setBL(0x0201248C+offsetChange3, (u32)dsiSaveOpen);
+			setBL(0x020124A4+offsetChange3, (u32)dsiSaveSeek);
+			setBL(0x020124BC+offsetChange3, (u32)dsiSaveRead); // dsiSaveReadAsync
+			setBL(0x020124F0+offsetChange3, (u32)dsiSaveOpen);
+			setBL(0x02012510+offsetChange3, (u32)dsiSaveSetLength);
+			setBL(0x02012520+offsetChange3, (u32)dsiSaveClose);
+			setBL(0x0201253C+offsetChange3, (u32)dsiSaveSeek);
+			setBL(0x02012558+offsetChange3, (u32)dsiSaveClose);
+			setBL(0x02012570+offsetChange3, (u32)dsiSaveWrite);
+			setBL(0x02012594+offsetChange3, (u32)dsiSaveClose);
+			setBL(0x020125A0+offsetChange3, (u32)dsiSaveClose);
+			setBL(0x020125E0+offsetChange4, (u32)dsiSaveOpen);
+			setBL(0x020125F4+offsetChange4, (u32)dsiSaveSetLength);
+			setBL(0x0201260C+offsetChange4, (u32)dsiSaveSeek);
+			setBL(0x02012624+offsetChange4, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+			setBL(0x0201267C+offsetChange5, (u32)dsiSaveCreate);
+			setBL(0x02012684+offsetChange5, (u32)dsiSaveGetResultCode);
+		}
+		if (!twlFontFound) {
+			u8 offsetChange6 = (romTid[2] == '7') ? 0 : 0xB8;
+			*(u32*)(0x02022238+offsetChange6) = 0xE3A00000; // mov r0, #0 (Skip Manual screen, Part 2)
+			*(u32*)(0x02029C24+offsetChange6) = 0xE3A00002; // mov r0, #2 (Skip Manual screen, Part 1)
+		}
+	}
+
 	// Kami Hikouki (Japan)
 	// Saving not supported due to using more than one file
 	else if (strcmp(romTid, "KAMJ") == 0 && !twlFontFound) {

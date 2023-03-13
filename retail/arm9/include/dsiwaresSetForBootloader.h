@@ -309,6 +309,8 @@ static const char dsiWareForBootloader2[][4] = {
 	"KOY", // Oscar in Toyland 2
 	"KTV", // Otegaru Pazuru Shirizu: Yurito Fushigina Meikyuu
 	"KOL", // Othello
+	"KL7", // Otona no Nihonshi Pazuru
+	"KL6", // Otona no Sekaishi Pazuru
 	"KAM", // Paper Airplane Chase / Kami Hikouki (Japan)
 	"KP9", // Paul's Monster Adventure
 	"KPJ", // Paul's Shooting Adventure
