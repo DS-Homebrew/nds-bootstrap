@@ -334,6 +334,7 @@ static const char dsiWareForBootloader2[][4] = {
 	"KAK", // Art Style: precipice
 	"KPH", // Prehistorik Man
 	"KDP", // Pro-Putt Domo
+	"KXU", // Publisher Dream
 	"KLF", // Puffins: Let's Fish!
 	"KLR", // Puffins: Let's Race!
 	"KL2", // Puffins: Let's Roll! (bootloaderi-exclusive)

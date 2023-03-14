@@ -17029,11 +17029,82 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		doubleNopT(0x0202DA26);
 	}
 
+	// Publisher Dream (USA)
+	// Publisher Dream (Europe)
+	// Publisher Dream (Japan)
+	else if (strncmp(romTid, "KXU", 3) == 0) {
+		if (!extendedMemory2) {
+			// Disable audio (Part 1)
+			u32 bssEnd = *(u32*)0x02004FE8;
+			u32 sdatOffset = 0x0209377C;
+			if (romTid[3] == 'P') {
+				sdatOffset = 0x0209371C;
+			} else if (romTid[3] == 'J') {
+				sdatOffset = 0x02093B7C;
+			}
+
+			*(u32*)0x02004FE8 = bssEnd - relocateBssPart(ndsHeader, bssEnd, sdatOffset+0x200000, bssEnd, sdatOffset);
+		}
+
+		s16 offsetChange = (romTid[3] == 'E') ? 0 : -0x68;
+		if (romTid[3] == 'J') {
+			offsetChange += 0x500;
+		}
+
+		*(u32*)0x02010140 = 0xE1A00000; // nop
+		tonccpy((u32*)0x02010CC4, dsiSaveGetResultCode, 0xC);
+		*(u32*)0x02013494 = 0xE1A00000; // nop
+		patchInitDSiWare(0x02019570, heapEnd);
+		*(u32*)0x020198FC = *(u32*)0x02004FE8;
+		patchUserSettingsReadDSiWare(0x0201AA10);
+		if (!extendedMemory2) {
+			// Disable audio (Part 2)
+			*(u32*)0x0201C568 = 0xE3A00000; // mov r0, #0
+			*(u32*)0x0201C56C = 0xE12FFF1E; // bx lr
+			*(u32*)0x0201C590 = 0xE3A00000; // mov r0, #0
+			*(u32*)0x0201C594 = 0xE12FFF1E; // bx lr
+
+			*(u32*)0x0201F6B4 = 0xE1A00000; // nop
+
+			u32* offset = getOffsetFromBL((u32*)0x0201F9C0);
+			offset[0] = 0xE3A00000; // mov r0, #0
+			offset[1] = 0xE12FFF1E; // bx lr
+
+			*(u32*)(0x02064DCC+offsetChange) = 0xE3A00000; // mov r0, #0
+			*(u32*)(0x02064DD0+offsetChange) = 0xE12FFF1E; // bx lr
+			*(u32*)(0x02064E30+offsetChange) = 0xE3A00000; // mov r0, #0
+			*(u32*)(0x02064E34+offsetChange) = 0xE12FFF1E; // bx lr
+		}
+		setBL(0x0206F764+offsetChange, (u32)dsiSaveGetInfo);
+		setBL(0x0206F778+offsetChange, (u32)dsiSaveOpen);
+		setBL(0x0206F78C+offsetChange, (u32)dsiSaveCreate);
+		setBL(0x0206F79C+offsetChange, (u32)dsiSaveOpen);
+		*(u32*)(0x0206F7BC+offsetChange) = 0xE1A00000; // nop
+		setBL(0x0206F7C8+offsetChange, (u32)dsiSaveCreate);
+		setBL(0x0206F7D8+offsetChange, (u32)dsiSaveOpen);
+		setBL(0x0206F820+offsetChange, (u32)dsiSaveSeek);
+		setBL(0x0206F830+offsetChange, (u32)dsiSaveWrite);
+		setBL(0x0206F838+offsetChange, (u32)dsiSaveClose);
+		setBL(0x0206F884+offsetChange, (u32)dsiSaveOpen);
+		setBL(0x0206FD00+offsetChange, (u32)dsiSaveSeek);
+		setBL(0x0206FD10+offsetChange, (u32)dsiSaveRead);
+		setBL(0x0206FD3C+offsetChange, (u32)dsiSaveClose);
+		setBL(0x02070358+offsetChange, (u32)dsiSaveOpen);
+		setBL(0x02070374+offsetChange, (u32)dsiSaveCreate);
+		setBL(0x02070384+offsetChange, (u32)dsiSaveOpen);
+		*(u32*)(0x020703A4+offsetChange) = 0xE1A00000; // nop
+		setBL(0x020703B0+offsetChange, (u32)dsiSaveCreate);
+		setBL(0x020703C0+offsetChange, (u32)dsiSaveOpen);
+		setBL(0x020703D8+offsetChange, (u32)dsiSaveSeek);
+		setBL(0x020703F0+offsetChange, (u32)dsiSaveWrite);
+		setBL(0x020703F8+offsetChange, (u32)dsiSaveClose);
+	}
+
 	// Puffins: Let's Fish! (USA)
 	// Puffins: Let's Fish! (Europe)
 	// Due to our save implementation, save data is stored in all 3 slots
 	else if (strcmp(romTid, "KLFE") == 0 || strcmp(romTid, "KLFP") == 0) {
-		u32 offsetChange = (romTid[3] == 'P') ? 8 : 0;
+		u8 offsetChange = (romTid[3] == 'P') ? 8 : 0;
 
 		*(u32*)0x020195B4 = 0xE12FFF1E; // bx lr
 		*(u32*)0x02019608 = 0xE12FFF1E; // bx lr

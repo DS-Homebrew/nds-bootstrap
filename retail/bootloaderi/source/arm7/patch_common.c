@@ -9863,6 +9863,39 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// Publisher Dream (USA)
+	// Publisher Dream (Europe)
+	// Publisher Dream (Japan)
+	else if (strncmp(romTid, "KXU", 3) == 0 && saveOnFlashcard) {
+		s16 offsetChange = (romTid[3] == 'E') ? 0 : -0x68;
+		if (romTid[3] == 'J') {
+			offsetChange += 0x500;
+		}
+
+		tonccpy((u32*)0x02010CC4, dsiSaveGetResultCode, 0xC);
+		setBL(0x0206F764+offsetChange, (u32)dsiSaveGetInfo);
+		setBL(0x0206F778+offsetChange, (u32)dsiSaveOpen);
+		setBL(0x0206F78C+offsetChange, (u32)dsiSaveCreate);
+		setBL(0x0206F79C+offsetChange, (u32)dsiSaveOpen);
+		setBL(0x0206F7C8+offsetChange, (u32)dsiSaveCreate);
+		setBL(0x0206F7D8+offsetChange, (u32)dsiSaveOpen);
+		setBL(0x0206F820+offsetChange, (u32)dsiSaveSeek);
+		setBL(0x0206F830+offsetChange, (u32)dsiSaveWrite);
+		setBL(0x0206F838+offsetChange, (u32)dsiSaveClose);
+		setBL(0x0206F884+offsetChange, (u32)dsiSaveOpen);
+		setBL(0x0206FD00+offsetChange, (u32)dsiSaveSeek);
+		setBL(0x0206FD10+offsetChange, (u32)dsiSaveRead);
+		setBL(0x0206FD3C+offsetChange, (u32)dsiSaveClose);
+		setBL(0x02070358+offsetChange, (u32)dsiSaveOpen);
+		setBL(0x02070374+offsetChange, (u32)dsiSaveCreate);
+		setBL(0x02070384+offsetChange, (u32)dsiSaveOpen);
+		setBL(0x020703B0+offsetChange, (u32)dsiSaveCreate);
+		setBL(0x020703C0+offsetChange, (u32)dsiSaveOpen);
+		setBL(0x020703D8+offsetChange, (u32)dsiSaveSeek);
+		setBL(0x020703F0+offsetChange, (u32)dsiSaveWrite);
+		setBL(0x020703F8+offsetChange, (u32)dsiSaveClose);
+	}
+
 	// Puffins: Let's Fish! (USA)
 	// Puffins: Let's Fish! (Europe)
 	// Due to our save implementation, save data is stored in all 3 slots

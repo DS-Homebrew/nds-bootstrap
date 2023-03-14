@@ -765,6 +765,9 @@ void patchHiHeapPointer(cardengineArm9* ce9, const module_params_t* moduleParams
 
 u32 relocateBssPart(const tNDSHeader* ndsHeader, u32 bssEnd, u32 bssPartStart, u32 bssPartEnd, u32 newPartStart) {
 	u32 subtract = bssPartEnd-bssPartStart;
+	if (newPartStart < bssPartStart) {
+		subtract = bssPartStart-newPartStart;
+	}
 
 	u32* addr = (u32*)ndsHeader->arm9destination;
 	for (u32 i = 0; i < ndsHeader->arm9binarySize/4; i++) {
