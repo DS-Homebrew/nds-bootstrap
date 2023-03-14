@@ -17047,8 +17047,10 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 
 		s16 offsetChange = (romTid[3] == 'E') ? 0 : -0x68;
+		s16 offsetChangeA = (romTid[3] == 'E') ? 0 : -0x68;
 		if (romTid[3] == 'J') {
 			offsetChange += 0x500;
+			offsetChangeA -= 0x120;
 		}
 
 		*(u32*)0x02010140 = 0xE1A00000; // nop
@@ -17070,10 +17072,10 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			offset[0] = 0xE3A00000; // mov r0, #0
 			offset[1] = 0xE12FFF1E; // bx lr
 
-			*(u32*)(0x02064DCC+offsetChange) = 0xE3A00000; // mov r0, #0
-			*(u32*)(0x02064DD0+offsetChange) = 0xE12FFF1E; // bx lr
-			*(u32*)(0x02064E30+offsetChange) = 0xE3A00000; // mov r0, #0
-			*(u32*)(0x02064E34+offsetChange) = 0xE12FFF1E; // bx lr
+			*(u32*)(0x02064DCC+offsetChangeA) = 0xE3A00000; // mov r0, #0
+			*(u32*)(0x02064DD0+offsetChangeA) = 0xE12FFF1E; // bx lr
+			*(u32*)(0x02064E30+offsetChangeA) = 0xE3A00000; // mov r0, #0
+			*(u32*)(0x02064E34+offsetChangeA) = 0xE12FFF1E; // bx lr
 		}
 		setBL(0x0206F764+offsetChange, (u32)dsiSaveGetInfo);
 		setBL(0x0206F778+offsetChange, (u32)dsiSaveOpen);
