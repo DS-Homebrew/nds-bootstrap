@@ -39,6 +39,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// const char* dataPub = "dataPub:";
 	const char* dataPrv = "dataPrv:";
 	const char* dsiRequiredMsg = "A Nintendo DSi is required to use this feature.";
+	extern u32 relocateBssPart(const tNDSHeader* ndsHeader, u32 bssEnd, u32 bssPartStart, u32 bssPartEnd, u32 newPartStart);
 	extern void patchHiHeapDSiWareThumb(u32 addr, u32 newCodeAddr, u32 heapEnd);
 	extern void patchInitDSiWare(u32 addr, u32 heapEnd);
 	extern void patchVolumeGetDSiWare(u32 addr);
@@ -12584,14 +12585,14 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Make Up & Style (USA)
-	// Requires 8MB of RAM
-	else if (strcmp(romTid, "KYLE") == 0 && extendedMemory2) {
-		/*for (u32 i = 0; i < ndsHeader->arm9binarySize/4; i++) {
-			u32* addr = (u32*)0x02004000;
-			if (addr[i] >= 0x022F4000 && addr[i] < 0x02308000) {
-				addr[i] -= extendedMemory2 ? 0x100000 : 0x180000;
-			}
-		}*/
+	// Requires either 8MB of RAM or Memory Expansion Pak
+	else if (strcmp(romTid, "KYLE") == 0 && debugOrMep) {
+		if (!extendedMemory2) {
+			u32 bssEnd = *(u32*)0x02004FD0;
+
+			*(u32*)0x02004FD0 = bssEnd - relocateBssPart(ndsHeader, bssEnd, 0x0213CA60, 0x022F4A60, (s2FlashcardId == 0x5A45) ? 0x08D3CA60 : 0x0913CA60);
+			setB(0x02020930, 0x02020984); // Skip FMV playback due to a weird bug
+		}
 
 		*(u32*)0x020050AC = 0xE1A00000; // nop
 		*(u32*)0x020052B8 = 0xE1A00000; // nop
@@ -12601,14 +12602,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02005324 = 0xE1A00000; // nop
 		*(u32*)0x02005348 = 0xE1A00000; // nop (Disable NFTR font loading)
 		*(u32*)0x0200534C = 0xE1A00000; // nop
-		/*if (!extendedMemory2 && expansionPakFound) {
-			*(u32*)0x020080DC = 0x09000000;
-			*(u32*)0x020094CC = *(u32*)0x020080DC;
-			*(u32*)0x020099CC = *(u32*)0x020080DC;
-			*(u32*)0x0200BA74 = *(u32*)0x020080DC;
-			*(u32*)0x0200C2CC = *(u32*)0x020080DC;
-			*(u32*)0x0201E650 = *(u32*)0x020080DC;
-		}*/
 		setBL(0x0202A34C, (u32)dsiSaveOpen);
 		setBL(0x0202A360, (u32)dsiSaveCreate);
 		setBL(0x0202A384, (u32)dsiSaveOpen);
@@ -12638,8 +12631,15 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Make Up & Style (Europe)
-	// Requires 8MB of RAM
-	else if (strcmp(romTid, "KYLP") == 0 && extendedMemory2) {
+	// Requires either 8MB of RAM or Memory Expansion Pak
+	else if (strcmp(romTid, "KYLP") == 0 && debugOrMep) {
+		if (!extendedMemory2) {
+			u32 bssEnd = *(u32*)0x02004FE8;
+
+			*(u32*)0x02004FE8 = bssEnd - relocateBssPart(ndsHeader, bssEnd, 0x0213CC40, 0x022F4C40, (s2FlashcardId == 0x5A45) ? 0x08D3CC40 : 0x0913CC40);
+			setB(0x02020A68, 0x02020ABC); // Skip FMV playback due to a weird bug
+		}
+
 		*(u32*)0x020050C4 = 0xE1A00000; // nop
 		*(u32*)0x020052D0 = 0xE1A00000; // nop
 		*(u32*)0x020052D4 = 0xE1A00000; // nop

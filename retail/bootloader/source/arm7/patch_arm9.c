@@ -763,6 +763,22 @@ void patchHiHeapPointer(cardengineArm9* ce9, const module_params_t* moduleParams
     dbg_printf("Hi Heap Shrink Sucessfull\n\n");
 }
 
+u32 relocateBssPart(const tNDSHeader* ndsHeader, u32 bssEnd, u32 bssPartStart, u32 bssPartEnd, u32 newPartStart) {
+	u32 subtract = bssPartEnd-bssPartStart;
+
+	u32* addr = (u32*)ndsHeader->arm9destination;
+	for (u32 i = 0; i < ndsHeader->arm9binarySize/4; i++) {
+		if (addr[i] >= bssPartStart && addr[i] < bssPartEnd) {
+			addr[i] -= bssPartStart;
+			addr[i] += newPartStart;
+		} else if (addr[i] >= bssPartEnd && addr[i] < bssEnd) {
+			addr[i] -= subtract;
+		}
+	}
+
+	return subtract;
+}
+
 void patchHiHeapDSiWare(u32 addr, u32 heapEnd) {
 	//*(u32*)(addr) = opCode; // mov r0, #0x????????
 
