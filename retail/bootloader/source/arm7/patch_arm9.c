@@ -771,7 +771,7 @@ u32 relocateBssPart(const tNDSHeader* ndsHeader, u32 bssEnd, u32 bssPartStart, u
 		if (addr[i] >= bssPartStart && addr[i] < bssPartEnd) {
 			addr[i] -= bssPartStart;
 			addr[i] += newPartStart;
-		} else if (addr[i] >= bssPartEnd && addr[i] < bssEnd) {
+		} else if (bssPartEnd != bssEnd && addr[i] >= bssPartEnd && addr[i] < bssEnd) {
 			addr[i] -= subtract;
 		}
 	}
