@@ -16872,6 +16872,49 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0206C2D4 = 0xE3A00001; // mov r0, #1 (Enable NitroFS reads)
 	}
 
+	// Pomjong (Japan)
+	else if (strcmp(romTid, "KPMJ") == 0) {
+		// useSharedFont = (twlFontFound && debugOrMep);
+		const u32 newReadCodeLoc = 0x020123B0;
+		const u32 newCloseCodeLoc = 0x020127B4;
+
+		codeCopy((u32*)newReadCodeLoc, (u32*)0x0202AC78, 0x54);
+		setBL(newReadCodeLoc+0x30, (u32)dsiSaveRead); // dsiSaveReadAsync
+		setBL(newReadCodeLoc+0x38, (u32)dsiSaveRead);
+		codeCopy((u32*)newCloseCodeLoc, (u32*)0x0202AD20, 0x60);
+		setBL(newCloseCodeLoc+0x4C, (u32)dsiSaveClose);
+
+		*(u32*)0x02010D44 = 0xE1A00000; // nop
+		*(u32*)0x020143F8 = 0xE1A00000; // nop
+		patchInitDSiWare(0x0201ED44, heapEnd);
+		patchUserSettingsReadDSiWare(0x020203B0);
+		*(u32*)0x02025CA4 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02025CA8 = 0xE12FFF1E; // bx lr
+		setBL(0x0202ACFC, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+		setBL(0x0202AD04, (u32)dsiSaveWrite);
+		*(u32*)0x0202AF20 = 0xE1A00000; // nop
+		*(u32*)0x0202B09C = 0xE1A00000; // nop
+		*(u32*)0x0202B0B4 = 0xE1A00000; // nop
+		*(u32*)0x0202B0EC = 0xE1A00000; // nop
+		/* if (useSharedFont) {
+			if (!extendedMemory2) {
+				patchTwlFontLoad(0x0202B238, 0x02020948);
+			}
+		} else { */
+			*(u32*)0x0202B118 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		// }
+		setBL(0x02085F28, newCloseCodeLoc);
+		setBL(0x02085F38, (u32)dsiSaveOpen);
+		setBL(0x02085FB4, (u32)dsiSaveCreate);
+		setBL(0x02085FFC, (u32)dsiSaveGetResultCode);
+		setBL(0x020861F4, newCloseCodeLoc);
+		setBL(0x02086214, newCloseCodeLoc);
+		setBL(0x020862E0, newReadCodeLoc);
+		setBL(0x020862F0, newCloseCodeLoc);
+		setBL(0x02086310, newCloseCodeLoc);
+		*(u32*)0x020863B0 = 0xE1A00000; // nop
+	}
+
 	// Pop+ Solo (USA)
 	// Pop+ Solo (Europe, Australia)
 	else if (strcmp(romTid, "KPIE") == 0 || strcmp(romTid, "KPIV") == 0) {

@@ -9732,6 +9732,35 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0202CD2C, (u32)dsiSaveRead);
 	}
 
+	// Pomjong (Japan)
+	else if (strcmp(romTid, "KPMJ") == 0) {
+		if (saveOnFlashcard) {
+			const u32 newReadCodeLoc = 0x020123B0;
+			const u32 newCloseCodeLoc = 0x020127B4;
+
+			codeCopy((u32*)newReadCodeLoc, (u32*)0x0202AC78, 0x54);
+			setBL(newReadCodeLoc+0x30, (u32)dsiSaveRead); // dsiSaveReadAsync
+			setBL(newReadCodeLoc+0x38, (u32)dsiSaveRead);
+			codeCopy((u32*)newCloseCodeLoc, (u32*)0x0202AD20, 0x60);
+			setBL(newCloseCodeLoc+0x4C, (u32)dsiSaveClose);
+
+			setBL(0x0202ACFC, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+			setBL(0x0202AD04, (u32)dsiSaveWrite);
+			setBL(0x02085F28, newCloseCodeLoc);
+			setBL(0x02085F38, (u32)dsiSaveOpen);
+			setBL(0x02085FB4, (u32)dsiSaveCreate);
+			setBL(0x02085FFC, (u32)dsiSaveGetResultCode);
+			setBL(0x020861F4, newCloseCodeLoc);
+			setBL(0x02086214, newCloseCodeLoc);
+			setBL(0x020862E0, newReadCodeLoc);
+			setBL(0x020862F0, newCloseCodeLoc);
+			setBL(0x02086310, newCloseCodeLoc);
+		}
+		if (!twlFontFound) {
+			*(u32*)0x0202B118 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		}
+	}
+
 	// Pop+ Solo (USA)
 	// Pop+ Solo (Europe, Australia)
 	else if (strcmp(romTid, "KPIE") == 0 || strcmp(romTid, "KPIV") == 0) {
