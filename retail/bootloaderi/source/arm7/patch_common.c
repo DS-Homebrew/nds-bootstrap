@@ -3704,6 +3704,22 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x020295DC, (u32)dsiSaveClose);
 	}
 
+	// Mew Mew Chamber (Japan)
+	else if (strcmp(romTid, "KVXJ") == 0 && saveOnFlashcard) {
+		tonccpy((u32*)0x02018254, dsiSaveGetResultCode, 0xC);
+		setBL(0x0202929C, (u32)dsiSaveGetInfo);
+		setBL(0x020292D0, (u32)dsiSaveCreate);
+		setBL(0x020292F8, (u32)dsiSaveOpen);
+		setBL(0x02029320, (u32)dsiSaveSetLength);
+		setBL(0x02029338, (u32)dsiSaveWrite);
+		setBL(0x02029340, (u32)dsiSaveClose);
+		setBL(0x020293A4, (u32)dsiSaveOpen);
+		setBL(0x020293CC, (u32)dsiSaveSetLength);
+		setBL(0x02029450, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+		setBL(0x020294A8, (u32)dsiSaveRead); // dsiSaveReadAsync
+		setBL(0x020294D8, (u32)dsiSaveClose);
+	}
+
 	// Cave Story (USA)
 	else if (strcmp(romTid, "KCVE") == 0) {
 		if (saveOnFlashcard) {
