@@ -330,6 +330,8 @@ static const char dsiWareForBootloader2[][4] = {
 	"KZL", // Plants vs. Zombies
 	"KFX", // PlayLearn Chinese
 	"KFQ", // PlayLearn Spanish
+	"KSG", // Pocket Pack: Strategy Games
+	"KWN", // Pocket Pack: Words & Numbers
 	"KPP", // Pop Island
 	"KPF", // Pop Island: Paperfield
 	"KPI", // Pop+ Solo

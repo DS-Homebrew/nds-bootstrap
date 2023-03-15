@@ -16816,6 +16816,62 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		doubleNopT(strncmp(romTid, "KFX", 3) == 0 ? 0x0206D4A2 : 0x0206D48E);
 	}
 
+	// Pocket Pack: Strategy Games (Europe)
+	else if (strcmp(romTid, "KSGP") == 0) {
+		const u32 newOpenCodeLoc = 0x02068D90;
+		const u32 newReadCodeLoc = newOpenCodeLoc+0x20;
+
+		codeCopy((u32*)newOpenCodeLoc, (u32*)0x02064E08, 0x20);
+		setBL(newOpenCodeLoc+8, (u32)dsiSaveOpenR);
+		codeCopy((u32*)newReadCodeLoc, (u32*)0x02064F04, 0x20);
+		setBL(newReadCodeLoc+8, (u32)dsiSaveRead);
+
+		*(u32*)0x0203CEE8 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0203CF00 = 0xE3A00003; // mov r0, #3
+		*(u32*)0x0203CF5C += 0xE0000000; // beq -> b
+		setBL(0x0203CFD8, newReadCodeLoc);
+		setBL(0x0203CFF4, (u32)dsiSaveClose);
+		*(u32*)0x0203D034 = 0xE1A00000; // nop
+		setBL(0x0203D138, (u32)dsiSaveClose);
+		*(u32*)0x0203D174 = 0xE1A00000; // nop
+		setBL(0x02064E30, (u32)dsiSaveOpen);
+		setBL(0x02064E6C, newOpenCodeLoc);
+		setBL(0x02064E80, (u32)dsiSaveCreate);
+		setBL(0x02064E94, (u32)dsiSaveClose);
+		setBL(0x02064ECC, (u32)dsiSaveSetLength);
+		setBL(0x02064EEC, (u32)dsiSaveWrite);
+		*(u32*)0x0206ABC8 = 0xE3A00001; // mov r0, #1 (Enable NitroFS reads)
+		*(u32*)0x0208D108 = 0x02FFFE1C;
+	}
+
+	// Pocket Pack: Words & Numbers (Europe)
+	else if (strcmp(romTid, "KWNP") == 0) {
+		const u32 newOpenCodeLoc = 0x0206A49C;
+		const u32 newReadCodeLoc = newOpenCodeLoc+0x20;
+
+		codeCopy((u32*)newOpenCodeLoc, (u32*)0x020624CC, 0x20);
+		setBL(newOpenCodeLoc+8, (u32)dsiSaveOpenR);
+		codeCopy((u32*)newReadCodeLoc, (u32*)0x020625C8, 0x20);
+		setBL(newReadCodeLoc+8, (u32)dsiSaveRead);
+
+		*(u32*)0x0203CDF0 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0203CE08 = 0xE3A00003; // mov r0, #3
+		*(u32*)0x0203CE64 += 0xE0000000; // beq -> b
+		setBL(0x0203CEE0, newReadCodeLoc);
+		setBL(0x0203CEFC, (u32)dsiSaveClose);
+		*(u32*)0x0203CF3C = 0xE1A00000; // nop
+		setBL(0x0203D040, (u32)dsiSaveClose);
+		*(u32*)0x0203D07C = 0xE1A00000; // nop
+		setBL(0x020624F4, (u32)dsiSaveOpen);
+		setBL(0x02062530, newOpenCodeLoc);
+		setBL(0x02062544, (u32)dsiSaveCreate);
+		setBL(0x02062558, (u32)dsiSaveClose);
+		setBL(0x02062590, (u32)dsiSaveSetLength);
+		setBL(0x020625B0, (u32)dsiSaveWrite);
+		*(u32*)0x02065A74 = 0x02FFFE1C;
+		*(u32*)0x0206C2D4 = 0xE3A00001; // mov r0, #1 (Enable NitroFS reads)
+	}
+
 	// Pop+ Solo (USA)
 	// Pop+ Solo (Europe, Australia)
 	else if (strcmp(romTid, "KPIE") == 0 || strcmp(romTid, "KPIV") == 0) {

@@ -12366,7 +12366,7 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
 	const u32* dsiSaveGetInfo = ce9->patches->dsiSaveGetInfo;
 	const u32* dsiSaveSetLength = ce9->patches->dsiSaveSetLength;
 	const u32* dsiSaveOpen = ce9->patches->dsiSaveOpen;
-	// const u32* dsiSaveOpenR = ce9->patches->dsiSaveOpenR;
+	const u32* dsiSaveOpenR = ce9->patches->dsiSaveOpenR;
 	const u32* dsiSaveClose = ce9->patches->dsiSaveClose;
 	const u32* dsiSaveGetLength = ce9->patches->dsiSaveGetLength;
 	const u32* dsiSaveSeek = ce9->patches->dsiSaveSeek;
@@ -13238,6 +13238,52 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
 		setBL(0x02010B1C, (u32)dsiSaveClose);
 	}
 #else
+	// Pocket Pack: Strategy Games (Europe)
+	else if (strcmp(romTid, "KSGP") == 0 && saveOnFlashcard) {
+		const u32 newOpenCodeLoc = 0x02068D90;
+		const u32 newReadCodeLoc = newOpenCodeLoc+0x20;
+
+		codeCopy((u32*)newOpenCodeLoc, (u32*)0x02064E08, 0x20);
+		setBL(newOpenCodeLoc+8, (u32)dsiSaveOpenR);
+		codeCopy((u32*)newReadCodeLoc, (u32*)0x02064F04, 0x20);
+		setBL(newReadCodeLoc+8, (u32)dsiSaveRead);
+
+		*(u32*)0x0203CF00 = 0xE3A00003; // mov r0, #3
+		*(u32*)0x0203CF5C += 0xE0000000; // beq -> b
+		setBL(0x0203CFD8, newReadCodeLoc);
+		setBL(0x0203CFF4, (u32)dsiSaveClose);
+		setBL(0x0203D138, (u32)dsiSaveClose);
+		setBL(0x02064E30, (u32)dsiSaveOpen);
+		setBL(0x02064E6C, newOpenCodeLoc);
+		setBL(0x02064E80, (u32)dsiSaveCreate);
+		setBL(0x02064E94, (u32)dsiSaveClose);
+		setBL(0x02064ECC, (u32)dsiSaveSetLength);
+		setBL(0x02064EEC, (u32)dsiSaveWrite);
+	}
+
+	// Pocket Pack: Words & Numbers (Europe)
+	else if (strcmp(romTid, "KWNP") == 0 && saveOnFlashcard) {
+		const u32 newOpenCodeLoc = 0x0206A49C;
+		const u32 newReadCodeLoc = newOpenCodeLoc+0x20;
+
+		codeCopy((u32*)newOpenCodeLoc, (u32*)0x020624CC, 0x20);
+		setBL(newOpenCodeLoc+8, (u32)dsiSaveOpenR);
+		codeCopy((u32*)newReadCodeLoc, (u32*)0x020625C8, 0x20);
+		setBL(newReadCodeLoc+8, (u32)dsiSaveRead);
+
+		*(u32*)0x0203CE08 = 0xE3A00003; // mov r0, #3
+		*(u32*)0x0203CE64 += 0xE0000000; // beq -> b
+		setBL(0x0203CEE0, newReadCodeLoc);
+		setBL(0x0203CEFC, (u32)dsiSaveClose);
+		setBL(0x0203D040, (u32)dsiSaveClose);
+		setBL(0x020624F4, (u32)dsiSaveOpen);
+		setBL(0x02062530, newOpenCodeLoc);
+		setBL(0x02062544, (u32)dsiSaveCreate);
+		setBL(0x02062558, (u32)dsiSaveClose);
+		setBL(0x02062590, (u32)dsiSaveSetLength);
+		setBL(0x020625B0, (u32)dsiSaveWrite);
+	}
+
 	// Pop Island (USA)
     else if (strcmp(romTid, "KPPE") == 0) {
         // Show "HELP" instead of "DEMO"
