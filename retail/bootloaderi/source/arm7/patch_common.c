@@ -9900,6 +9900,31 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// The Price Is Right (Europe, Australia)
+	else if (strcmp(romTid, "KPRV") == 0 && saveOnFlashcard) {
+		setBL(0x02088D38, (u32)dsiSaveOpen);
+		setBL(0x02088D4C, (u32)dsiSaveGetLength);
+		setBL(0x02088D60, (u32)dsiSaveClose);
+		setBL(0x02088D68, (u32)dsiSaveDelete);
+		setBL(0x02088D80, (u32)dsiSaveCreate);
+		setBL(0x02088DA4, (u32)dsiSaveCreate);
+		setBL(0x02088DC8, (u32)dsiSaveOpen);
+		setBL(0x02088E08, (u32)dsiSaveWrite);
+		setBL(0x02088E28, (u32)dsiSaveClose);
+		setBL(0x02088E50, (u32)dsiSaveClose);
+		setBL(0x02088E94, (u32)dsiSaveOpen);
+		setBL(0x02088EB8, (u32)dsiSaveSeek);
+		setBL(0x02088EDC, (u32)dsiSaveRead);
+		setBL(0x02088EE8, (u32)dsiSaveClose);
+		setBL(0x02088F38, (u32)dsiSaveOpen);
+		setBL(0x02088F5C, (u32)dsiSaveSeek);
+		setBL(0x02088F80, (u32)dsiSaveWrite);
+		setBL(0x02088F8C, (u32)dsiSaveGetLength);
+		setBL(0x02088F98, (u32)dsiSaveClose);
+		setBL(0x02088FE0, (u32)dsiSaveOpen);
+		setBL(0x02088FF0, (u32)dsiSaveClose);
+	}
+
 	// Pro-Putt Domo (USA)
 	else if (strcmp(romTid, "KDPE") == 0) {
 		if (saveOnFlashcard) {
