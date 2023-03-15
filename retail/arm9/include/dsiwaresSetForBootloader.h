@@ -328,6 +328,8 @@ static const char dsiWareForBootloader2[][4] = {
 	"KPY", // GO Series: Pinball Attack!
 	"KXA", // Pirates Assault
 	"KZL", // Plants vs. Zombies
+	"KFX", // PlayLearn Chinese
+	"KFQ", // PlayLearn Spanish
 	"KPP", // Pop Island
 	"KPF", // Pop Island: Paperfield
 	"KPI", // Pop+ Solo

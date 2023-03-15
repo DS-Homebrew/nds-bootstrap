@@ -16784,6 +16784,38 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x021174D4 = 0xE1A00000; // nop
 	}
 
+	// PlayLearn Chinese (USA)
+	// PlayLearn Spanish (USA)
+	else if (strcmp(romTid, "KFXE") == 0 || strcmp(romTid, "KFQE") == 0) {
+		*(u32*)0x02005190 = 0xE1A00000; // nop
+		tonccpy((u32*)0x02014C94, dsiSaveGetResultCode, 0xC);
+		*(u32*)0x020176AC = 0xE1A00000; // nop
+		patchInitDSiWare(0x0201E128, heapEnd);
+		*(u32*)0x0201E4B4 = *(u32*)0x02004FD0;
+		patchUserSettingsReadDSiWare(0x0201F8C4);
+		setBL(0x0202CAA4, (u32)dsiSaveCreate);
+		setBL(0x0202CAC0, (u32)dsiSaveOpen);
+		setBL(0x0202CAF0, (u32)dsiSaveWrite);
+		setBL(0x0202CAF8, (u32)dsiSaveClose);
+		*(u32*)0x0202CB88 = 0xE3A00001; // mov r0, #1 (dsiSaveOpenDir)
+		*(u32*)0x0202CB98 = 0xE1A00000; // nop (dsiSaveCloseDir)
+		setBL(0x0202CBAC, (u32)dsiSaveOpen);
+		setBL(0x0202CBC8, (u32)dsiSaveClose);
+		*(u32*)0x0202CC68 = (u32)dsiSaveSeek;
+		*(u32*)0x0202CC84 = (u32)dsiSaveSeek;
+		setBL(0x0202CC9C, (u32)dsiSaveOpen);
+		setBL(0x0202CCC4, (u32)dsiSaveClose);
+		setBL(0x0202CCEC, (u32)dsiSaveWrite);
+		setBL(0x0202CD2C, (u32)dsiSaveRead);
+		u32 offset = (strncmp(romTid, "KFX", 3) == 0) ? 0x02055684 : 0x02055670;
+		*(u32*)(offset+0x38) = 0xE1A00000; // nop
+		*(u32*)(offset+0x254) = 0xE1A00000; // nop
+		*(u32*)(offset+0x264) = 0xE1A00000; // nop
+		*(u32*)(offset+0x2AC) = 0xE1A00000; // nop
+		*(u32*)(offset+0x2B4) = 0xE1A00000; // nop
+		doubleNopT(strncmp(romTid, "KFX", 3) == 0 ? 0x0206D4A2 : 0x0206D48E);
+	}
+
 	// Pop+ Solo (USA)
 	// Pop+ Solo (Europe, Australia)
 	else if (strcmp(romTid, "KPIE") == 0 || strcmp(romTid, "KPIV") == 0) {

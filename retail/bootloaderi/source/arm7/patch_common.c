@@ -9712,6 +9712,26 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		tonccpy((u32*)0x020FA794, dsiSaveGetResultCode, 0xC);
 	}
 
+	// PlayLearn Chinese (USA)
+	// PlayLearn Spanish (USA)
+	else if ((strcmp(romTid, "KFXE") == 0 || strcmp(romTid, "KFQE") == 0) && saveOnFlashcard) {
+		tonccpy((u32*)0x02014C94, dsiSaveGetResultCode, 0xC);
+		setBL(0x0202CAA4, (u32)dsiSaveCreate);
+		setBL(0x0202CAC0, (u32)dsiSaveOpen);
+		setBL(0x0202CAF0, (u32)dsiSaveWrite);
+		setBL(0x0202CAF8, (u32)dsiSaveClose);
+		*(u32*)0x0202CB88 = 0xE3A00001; // mov r0, #1 (dsiSaveOpenDir)
+		*(u32*)0x0202CB98 = 0xE1A00000; // nop (dsiSaveCloseDir)
+		setBL(0x0202CBAC, (u32)dsiSaveOpen);
+		setBL(0x0202CBC8, (u32)dsiSaveClose);
+		*(u32*)0x0202CC68 = (u32)dsiSaveSeek;
+		*(u32*)0x0202CC84 = (u32)dsiSaveSeek;
+		setBL(0x0202CC9C, (u32)dsiSaveOpen);
+		setBL(0x0202CCC4, (u32)dsiSaveClose);
+		setBL(0x0202CCEC, (u32)dsiSaveWrite);
+		setBL(0x0202CD2C, (u32)dsiSaveRead);
+	}
+
 	// Pop+ Solo (USA)
 	// Pop+ Solo (Europe, Australia)
 	else if (strcmp(romTid, "KPIE") == 0 || strcmp(romTid, "KPIV") == 0) {
