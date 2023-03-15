@@ -9925,6 +9925,36 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02088FF0, (u32)dsiSaveClose);
 	}
 
+	// Primrose (USA)
+	// Primrose (Europe)
+	else if (strcmp(romTid, "K2RE") == 0 || strcmp(romTid, "K2RP") == 0) {
+		if (!twlFontFound) {
+			*(u32*)0x020118CC = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		}
+		if (saveOnFlashcard) {
+			u8 offsetChange = (romTid[3] == 'E') ? 0 : 0x2C;
+			const u32 newLoadCode = 0x0203869C+offsetChange;
+
+			codeCopy((u32*)newLoadCode, (u32*)(0x02019F6C+offsetChange), 0xE0);
+			setBL(newLoadCode+0x50, (u32)dsiSaveOpenR);
+			setBL(newLoadCode+0x68, (u32)dsiSaveGetLength);
+			setBL(newLoadCode+0xA4, (u32)dsiSaveRead);
+			setBL(newLoadCode+0xD0, (u32)dsiSaveClose);
+
+			setBL(0x020053F0, newLoadCode);
+			setBL(0x0201A06C+offsetChange, (u32)dsiSaveOpenR);
+			setBL(0x0201A084+offsetChange, (u32)dsiSaveClose);
+			setBL(0x0201A0FC+offsetChange, (u32)dsiSaveOpen);
+			setBL(0x0201A114+offsetChange, (u32)dsiSaveCreate);
+			*(u32*)(0x0201A148+offsetChange) = 0xE1A00000; // nop (dsiSaveCreateDir)
+			setBL(0x0201A154+offsetChange, (u32)dsiSaveCreate);
+			setBL(0x0201A184+offsetChange, (u32)dsiSaveOpen);
+			setBL(0x0201A1A8+offsetChange, (u32)dsiSaveWrite);
+			setBL(0x0201A1B0+offsetChange, (u32)dsiSaveClose);
+			tonccpy((u32*)(0x02037CA0+offsetChange), dsiSaveGetResultCode, 0xC);
+		}
+	}
+
 	// Pro-Putt Domo (USA)
 	else if (strcmp(romTid, "KDPE") == 0) {
 		if (saveOnFlashcard) {

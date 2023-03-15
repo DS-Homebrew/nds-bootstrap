@@ -340,6 +340,7 @@ static const char dsiWareForBootloader2[][4] = {
 	"KAK", // Art Style: precipice
 	"KPH", // Prehistorik Man
 	"KPR", // The Price Is Right
+	"K2R", // Primrose
 	"KDP", // Pro-Putt Domo
 	"KXU", // Publisher Dream
 	"KLF", // Puffins: Let's Fish!
