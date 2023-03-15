@@ -9092,6 +9092,31 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// Panewa! (Japan)
+	else if (strcmp(romTid, "KPWJ") == 0) {
+		// Shrink heap size
+		*(u32*)0x02021118 -= 8;
+		*(u32*)0x02021128 -= 8;
+		*(u32*)0x02021148 -= 8;
+		if (saveOnFlashcard) {
+			setBL(0x020351EC, (u32)dsiSaveCreate);
+			setBL(0x020351FC, (u32)dsiSaveOpen);
+			setBL(0x0203521C, (u32)dsiSaveSetLength);
+			setBL(0x0203523C, (u32)dsiSaveWrite);
+			setBL(0x0203525C, (u32)dsiSaveClose);
+			*(u32*)0x0203529C = 0xE3A00001; // mov r0, #1 (dsiSaveOpenDir)
+			*(u32*)0x020352D8 = 0xE3A00001; // mov r0, #1 (dsiSaveReadDir)
+			*(u32*)0x02035300 = 0xE3A00001; // mov r0, #1
+			*(u32*)0x02035314 = 0xE3A00001; // mov r0, #1
+			*(u32*)0x02035364 = 0xE3A00000; // mov r0, #0 (dsiSaveReadDir)
+			*(u32*)0x020353A8 = 0xE3A00001; // mov r0, #1 (dsiSaveCloseDir)
+			setBL(0x020354A8, (u32)dsiSaveOpen);
+			setBL(0x020354C4, (u32)dsiSaveGetLength);
+			setBL(0x020354FC, (u32)dsiSaveRead);
+			setBL(0x02035514, (u32)dsiSaveClose);
+		}
+	}
+
 	// Kami Hikouki (Japan)
 	// Saving not supported due to using more than one file
 	else if (strcmp(romTid, "KAMJ") == 0 && !twlFontFound) {

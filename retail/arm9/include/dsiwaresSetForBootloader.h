@@ -313,6 +313,7 @@ static const char dsiWareForBootloader2[][4] = {
 	"KL6", // Otona no Sekaishi Pazuru
 	"K3T", // Otona no Tame no: Kei-san Training DS
 	"KJ9", // Otona no Tame no: Renjuku Kanji
+	"KPW", // Panewa! (bootloaderi-exclusive)
 	"KAM", // Paper Airplane Chase / Kami Hikouki (Japan)
 	"KP9", // Paul's Monster Adventure
 	"KPJ", // Paul's Shooting Adventure

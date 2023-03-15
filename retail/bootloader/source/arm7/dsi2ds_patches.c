@@ -15739,6 +15739,35 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02065148 = 0xE12FFF1E; // bx lr
 	}
 
+	// Panewa! (Japan)
+	// Requires more than 16MB of RAM
+	/* else if (strcmp(romTid, "KPWJ") == 0) {
+		*(u32*)0x0200E2C0 = 0xE1A00000; // nop
+		*(u32*)0x02012594 = 0xE1A00000; // nop
+		patchInitDSiWare(0x0201A5EC, heapEnd);
+		*(u32*)0x0201A95C -= 0x30000;
+		patchUserSettingsReadDSiWare(0x0201BCCC);
+		*(u32*)0x02021118 -= 0x2F;
+		*(u32*)0x02021128 -= 0x2F;
+		*(u32*)0x02021148 -= 0x2F;
+		*(u32*)0x02021184 += 0xE0000000; // beq -> b
+		setBL(0x020351EC, (u32)dsiSaveCreate);
+		setBL(0x020351FC, (u32)dsiSaveOpen);
+		setBL(0x0203521C, (u32)dsiSaveSetLength);
+		setBL(0x0203523C, (u32)dsiSaveWrite);
+		setBL(0x0203525C, (u32)dsiSaveClose);
+		*(u32*)0x0203529C = 0xE3A00001; // mov r0, #1 (dsiSaveOpenDir)
+		*(u32*)0x020352D8 = 0xE3A00001; // mov r0, #1 (dsiSaveReadDir)
+		*(u32*)0x02035300 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02035314 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02035364 = 0xE3A00000; // mov r0, #0 (dsiSaveReadDir)
+		*(u32*)0x020353A8 = 0xE3A00001; // mov r0, #1 (dsiSaveCloseDir)
+		setBL(0x020354A8, (u32)dsiSaveOpen);
+		setBL(0x020354C4, (u32)dsiSaveGetLength);
+		setBL(0x020354FC, (u32)dsiSaveRead);
+		setBL(0x02035514, (u32)dsiSaveClose);
+	} */
+
 	// Kami Hikouki (Japan)
 	// Saving not supported due to using more than one file
 	else if (strcmp(romTid, "KAMJ") == 0) {
