@@ -10362,6 +10362,23 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02040460 = 0xE1A00000; // nop (Skip Manual screen)
 	}
 
+	// QuickPick Farmer (USA)
+	// QuickPick Farmer (Europe)
+	else if ((strcmp(romTid, "K9PE") == 0 || strcmp(romTid, "K9PP") == 0) && saveOnFlashcard) {
+		setBL(0x0206CF08, (u32)dsiSaveOpen);
+		setBL(0x0206CF3C, (u32)dsiSaveGetLength);
+		setBL(0x0206CF7C, (u32)dsiSaveRead);
+		setBL(0x0206CFA0, (u32)dsiSaveClose);
+		*(u32*)0x0206D014 = 0xE1A00000; // nop
+		setBL(0x0206D020, (u32)dsiSaveCreate);
+		setBL(0x0206D030, (u32)dsiSaveOpen);
+		setBL(0x0206D04C, (u32)dsiSaveGetResultCode);
+		setBL(0x0206D07C, (u32)dsiSaveSetLength);
+		setBL(0x0206D0A8, (u32)dsiSaveWrite);
+		setBL(0x0206D0CC, (u32)dsiSaveClose);
+		setBL(0x0206D308, (u32)dsiSaveDelete);
+	}
+
 	// Rabi Laby (USA)
 	// Rabi Laby (Europe)
 	else if (strcmp(romTid, "KLBE") == 0 || strcmp(romTid, "KLBP") == 0) {

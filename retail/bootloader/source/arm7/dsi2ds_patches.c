@@ -17833,6 +17833,35 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// QuickPick Farmer (USA)
+	// QuickPick Farmer (Europe)
+	else if (strcmp(romTid, "K9PE") == 0 || strcmp(romTid, "K9PP") == 0) {
+		*(u32*)0x0200D850 = 0xE1A00000; // nop
+		*(u32*)0x02011458 = 0xE1A00000; // nop
+		patchInitDSiWare(0x02016ED4, heapEnd);
+		*(u32*)0x02017260 = *(u32*)0x02004FD0;
+		patchUserSettingsReadDSiWare(0x02018610);
+		*(u32*)0x0201FE80 = 0xE1A00000; // nop
+		if (!extendedMemory2) {
+			*(u32*)0x0201FE9C = 0xE3A01A2F; // mov r1, #0x2F000 (Shrink small heap from 0xAF000)
+			*(u32*)0x0202819C = 0x1B4800; // Shrink large heap from 0x1C4800
+		}
+		*(u32*)0x0201FFD8 = 0xE1A00000; // nop
+		*(u32*)0x0201FFEC = 0xE1A00000; // nop
+		setBL(0x0206CF08, (u32)dsiSaveOpen);
+		setBL(0x0206CF3C, (u32)dsiSaveGetLength);
+		setBL(0x0206CF7C, (u32)dsiSaveRead);
+		setBL(0x0206CFA0, (u32)dsiSaveClose);
+		*(u32*)0x0206D014 = 0xE1A00000; // nop
+		setBL(0x0206D020, (u32)dsiSaveCreate);
+		setBL(0x0206D030, (u32)dsiSaveOpen);
+		setBL(0x0206D04C, (u32)dsiSaveGetResultCode);
+		setBL(0x0206D07C, (u32)dsiSaveSetLength);
+		setBL(0x0206D0A8, (u32)dsiSaveWrite);
+		setBL(0x0206D0CC, (u32)dsiSaveClose);
+		setBL(0x0206D308, (u32)dsiSaveDelete);
+	}
+
 	// Rabi Laby (USA)
 	// Rabi Laby (Europe)
 	else if (strcmp(romTid, "KLBE") == 0 || strcmp(romTid, "KLBP") == 0) {

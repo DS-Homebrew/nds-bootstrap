@@ -358,6 +358,7 @@ static const char dsiWareForBootloader2[][4] = {
 	"KB3", // Puzzle to Go: Sightseeing
 	"KPD", // Puzzle to Go: Wildlife
 	"KUM", // Quick Fill Q
+	"K9P", // QuickPick Farmer
 	"KLB", // Rabi Laby
 	"KLV", // Rabi Laby 2
 	"KRC", // Real Crimes: Jack the Ripper
