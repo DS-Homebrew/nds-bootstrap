@@ -11060,6 +11060,52 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// Roller Angels (USA)
+	// Roller Angels: Pashatto Dai Sakusen (Japan)
+	else if ((strcmp(romTid, "KRLE") == 0 || strcmp(romTid, "KRLJ") == 0) && saveOnFlashcard) {
+		u8 offsetChange = (romTid[3] == 'E') ? 0 : 4;
+		tonccpy((u32*)(0x020140E4+offsetChange), dsiSaveGetResultCode, 0xC);
+		if (romTid[3] == 'E') {
+			*(u32*)0x0202E77C = 0xE1A00000; // nop
+			*(u32*)0x0202E794 = 0xE1A00000; // nop
+			setBL(0x020338F4, (u32)dsiSaveOpen);
+			setBL(0x0203390C, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+			setBL(0x02033924, (u32)dsiSaveOpen);
+			setBL(0x02033944, (u32)dsiSaveWrite);
+			setBL(0x02033954, (u32)dsiSaveClose);
+			setBL(0x02033964, (u32)dsiSaveClose);
+			setBL(0x020339A4, (u32)dsiSaveOpen);
+			setBL(0x020339C8, (u32)dsiSaveRead);
+			setBL(0x020339D8, (u32)dsiSaveClose);
+			setBL(0x020339E8, (u32)dsiSaveClose);
+			setBL(0x02033AC8, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+			setBL(0x02033AD8, (u32)dsiSaveOpen);
+			setBL(0x02033B04, (u32)dsiSaveClose);
+			setBL(0x02033B3C, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+			setBL(0x02033B4C, (u32)dsiSaveOpen);
+			setBL(0x02033B78, (u32)dsiSaveClose);
+			setB(0x02039C44, 0x02039DF8); // Skip reading photo files
+		} else {
+			setB(0x020393A8, 0x0203955C); // Skip reading photo files
+			setBL(0x0204AD90, (u32)dsiSaveOpen);
+			setBL(0x0204ADA8, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+			setBL(0x0204ADC0, (u32)dsiSaveOpen);
+			setBL(0x0204ADE0, (u32)dsiSaveWrite);
+			setBL(0x0204ADF0, (u32)dsiSaveClose);
+			setBL(0x0204AE00, (u32)dsiSaveClose);
+			setBL(0x0204AE40, (u32)dsiSaveOpen);
+			setBL(0x0204AE64, (u32)dsiSaveRead);
+			setBL(0x0204AE74, (u32)dsiSaveClose);
+			setBL(0x0204AE84, (u32)dsiSaveClose);
+			setBL(0x0204AF64, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+			setBL(0x0204AF74, (u32)dsiSaveOpen);
+			setBL(0x0204AFA0, (u32)dsiSaveClose);
+			setBL(0x0204AFD8, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+			setBL(0x0204AFE8, (u32)dsiSaveOpen);
+			setBL(0x0204B014, (u32)dsiSaveClose);
+		}
+	}
+
 	// RPG Dashutsu Game (Japan)
 	else if (strcmp(romTid, "KRPJ") == 0 && saveOnFlashcard) {
 		setBL(0x0200EC8C, (u32)dsiSaveOpen);
