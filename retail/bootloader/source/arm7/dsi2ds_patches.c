@@ -18614,6 +18614,34 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		doubleNopT(0x0202C3AA);
 	}
 
+	// RPG Dashutsu Game (Japan)
+	else if (strcmp(romTid, "KRPJ") == 0) {
+		*(u32*)0x020050BC = 0xE1A00000; // nop
+		*(u32*)0x020050D4 = 0xE1A00000; // nop
+		*(u32*)0x020052B0 = 0xE1A00000; // nop
+		if (!extendedMemory2) {
+			*(u32*)0x0200594C = 0x191000; // Shrink heap from 0x1D1000
+			*(u32*)0x0200598C = 0x191000; // Shrink heap from 0x1D1000
+		}
+		setBL(0x0200EC8C, (u32)dsiSaveOpen);
+		setBL(0x0200ECF4, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+		setBL(0x0200ED40, (u32)dsiSaveGetLength);
+		setBL(0x0200ED5C, (u32)dsiSaveRead);
+		setBL(0x0200ED64, (u32)dsiSaveClose);
+		setBL(0x0200EDA8, (u32)dsiSaveOpen);
+		setBL(0x0200EE28, (u32)dsiSaveGetLength);
+		setBL(0x0200EE38, (u32)dsiSaveSeek);
+		setBL(0x0200EEB4, (u32)dsiSaveClose);
+		setBL(0x0200EEDC, (u32)dsiSaveWrite);
+		setBL(0x0200EEE8, (u32)dsiSaveClose);
+		*(u32*)0x0203C4CC = 0xE1A00000; // nop
+		tonccpy((u32*)0x0203D050, dsiSaveGetResultCode, 0xC);
+		*(u32*)0x02040034 = 0xE1A00000; // nop
+		patchInitDSiWare(0x02045D64, heapEnd);
+		*(u32*)0x020460F0 = *(u32*)0x02004FE8;
+		patchUserSettingsReadDSiWare(0x02047240);
+	}
+
 	// Sea Battle (USA)
 	// Sea Battle (Europe)
 	else if (strcmp(romTid, "KRWE") == 0 || strcmp(romTid, "KRWP") == 0) {

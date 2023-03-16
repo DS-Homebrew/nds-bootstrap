@@ -11032,6 +11032,22 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// RPG Dashutsu Game (Japan)
+	else if (strcmp(romTid, "KRPJ") == 0 && saveOnFlashcard) {
+		setBL(0x0200EC8C, (u32)dsiSaveOpen);
+		setBL(0x0200ECF4, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+		setBL(0x0200ED40, (u32)dsiSaveGetLength);
+		setBL(0x0200ED5C, (u32)dsiSaveRead);
+		setBL(0x0200ED64, (u32)dsiSaveClose);
+		setBL(0x0200EDA8, (u32)dsiSaveOpen);
+		setBL(0x0200EE28, (u32)dsiSaveGetLength);
+		setBL(0x0200EE38, (u32)dsiSaveSeek);
+		setBL(0x0200EEB4, (u32)dsiSaveClose);
+		setBL(0x0200EEDC, (u32)dsiSaveWrite);
+		setBL(0x0200EEE8, (u32)dsiSaveClose);
+		tonccpy((u32*)0x0203D050, dsiSaveGetResultCode, 0xC);
+	}
+
 	// Sea Battle (USA)
 	// Sea Battle (Europe)
 	else if (strcmp(romTid, "KRWE") == 0 || strcmp(romTid, "KRWP") == 0) {

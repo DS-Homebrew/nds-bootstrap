@@ -374,6 +374,7 @@ static const char dsiWareForBootloader2[][4] = {
 	"KRT", // Robot Rescue
 	"KRR", // Robot Rescue 2
 	"KD6", // Rock-n-Roll Domo
+	"KRP", // RPG Dashutsu Game
 	"KRW", // Sea Battle
 	"KS3", // Shantae: Risky's Revenge
 	"KSJ", // Shawn Johnson Gymnastics
