@@ -302,6 +302,8 @@ static const char dsiWareForBootloader2[][4] = {
 	"HNI", // Nintendo DSi Camera (bootloaderi-exclusive)
 	"KDO", // Nintendogs (bootloaderi-exclusive)
 	"K9K", // Nintendoji
+	"KJI", // Noroi no Game: Chi
+	"KG9", // Noroi no Game: Oku
 	"KSU", // Number Battle
 	"K6T", // Orion's Odyssey
 	"KOT", // Oscar in Toyland

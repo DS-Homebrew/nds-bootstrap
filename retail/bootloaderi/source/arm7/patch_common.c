@@ -8836,6 +8836,34 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0209F7BC, (u32)dsiSaveClose);
 	}
 
+	// Noroi no Game: Chi (Japan)
+	// Noroi no Game: Oku (Japan)
+	else if (strcmp(romTid, "KJIJ") == 0 || strcmp(romTid, "KG9J") == 0) {
+		if (!twlFontFound) {
+			*(u32*)0x020050A4 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+
+			// Skip Manual screen
+			u8 offsetChange = (strncmp(romTid, "KJI", 3) == 0) ? 0 : 0x10;
+			*(u32*)(0x020414D4+offsetChange) = 0xE1A00000; // nop
+			*(u32*)(0x020414DC+offsetChange) = 0xE1A00000; // nop
+			*(u32*)(0x020414E8+offsetChange) = 0xE1A00000; // nop
+		}
+		if (saveOnFlashcard) {
+			u8 offsetChange = (strncmp(romTid, "KJI", 3) == 0) ? 0 : 4;
+			tonccpy((u32*)0x0200CC94, dsiSaveGetResultCode, 0xC);
+			setBL(0x02030DAC+offsetChange, (u32)dsiSaveOpen);
+			setBL(0x02030DF0+offsetChange, (u32)dsiSaveGetLength);
+			setBL(0x02030E00+offsetChange, (u32)dsiSaveRead);
+			setBL(0x02030E08+offsetChange, (u32)dsiSaveClose);
+			setBL(0x02030E44+offsetChange, (u32)dsiSaveCreate);
+			setBL(0x02030E90+offsetChange, (u32)dsiSaveCreate);
+			setBL(0x02030EC0+offsetChange, (u32)dsiSaveOpen);
+			setBL(0x02030EE0+offsetChange, (u32)dsiSaveSetLength);
+			setBL(0x02030EF0+offsetChange, (u32)dsiSaveWrite);
+			setBL(0x02030EF8+offsetChange, (u32)dsiSaveClose);
+		}
+	}
+
 	// Number Battle
 	else if (strcmp(romTid, "KSUE") == 0) {
 		if (saveOnFlashcard) {
