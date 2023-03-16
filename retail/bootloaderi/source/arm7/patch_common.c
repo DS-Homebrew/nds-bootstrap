@@ -10162,6 +10162,48 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02056514 = 0xE12FFF1E; // bx lr
 	}
 
+	// Puzzle Rocks (USA)
+	else if (strcmp(romTid, "KPLE") == 0 && saveOnFlashcard) {
+		setBL(0x02047E20, (u32)dsiSaveCreate);
+		setBL(0x02047E30, (u32)dsiSaveOpen);
+		setBL(0x02047E4C, (u32)dsiSaveGetResultCode);
+		setBL(0x02047E74, (u32)dsiSaveSeek);
+		setBL(0x02047E8C, (u32)dsiSaveGetResultCode);
+		setBL(0x02047EB4, (u32)dsiSaveWrite);
+		setBL(0x02047EBC, (u32)dsiSaveClose);
+		setBL(0x02047EC4, (u32)dsiSaveGetResultCode);
+		setBL(0x02047EE4, (u32)dsiSaveGetResultCode);
+		setBL(0x02047F24, (u32)dsiSaveOpenR);
+		setBL(0x02047F34, (u32)dsiSaveGetLength);
+		setBL(0x02047F68, (u32)dsiSaveRead);
+		setBL(0x02047F80, (u32)dsiSaveClose);
+		setBL(0x02047F88, (u32)dsiSaveGetResultCode);
+		setBL(0x02047F98, (u32)dsiSaveGetResultCode);
+		setBL(0x02047FAC, (u32)dsiSaveGetResultCode);
+		setBL(0x02047FC0, (u32)dsiSaveGetResultCode);
+	}
+
+	// Puzzle Rocks (Europe)
+	else if (strcmp(romTid, "KPLP") == 0 && saveOnFlashcard) {
+		setBL(0x0203D7C4, (u32)dsiSaveCreate);
+		setBL(0x0203D7D4, (u32)dsiSaveOpen);
+		setBL(0x0203D7F0, (u32)dsiSaveGetResultCode);
+		setBL(0x0203D818, (u32)dsiSaveSeek);
+		setBL(0x0203D830, (u32)dsiSaveGetResultCode);
+		setBL(0x0203D858, (u32)dsiSaveWrite);
+		setBL(0x0203D860, (u32)dsiSaveClose);
+		setBL(0x0203D868, (u32)dsiSaveGetResultCode);
+		setBL(0x0203D888, (u32)dsiSaveGetResultCode);
+		setBL(0x0203D8C8, (u32)dsiSaveOpenR);
+		setBL(0x0203D8D8, (u32)dsiSaveGetLength);
+		setBL(0x0203D90C, (u32)dsiSaveRead);
+		setBL(0x0203D924, (u32)dsiSaveClose);
+		setBL(0x0203D92C, (u32)dsiSaveGetResultCode);
+		setBL(0x0203D93C, (u32)dsiSaveGetResultCode);
+		setBL(0x0203D950, (u32)dsiSaveGetResultCode);
+		setBL(0x0203D964, (u32)dsiSaveGetResultCode);
+	}
+
 	// Puzzler Brain Games (USA)
 	else if (strcmp(romTid, "KYEE") == 0) {
 		if (!twlFontFound) {

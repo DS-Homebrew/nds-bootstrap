@@ -17555,6 +17555,72 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchUserSettingsReadDSiWare(0x020C4030);
 	}
 
+	// Puzzle Rocks (USA)
+	// Audio does not play
+	else if (strcmp(romTid, "KPLE") == 0) {
+		useSharedFont = (twlFontFound && debugOrMep);
+		*(u32*)0x0200507C = 0xE1A00000; // nop
+		*(u32*)0x020182D8 = 0xE1A00000; // nop
+		*(u32*)0x0201C608 = 0xE1A00000; // nop
+		patchInitDSiWare(0x02021BDC, heapEnd);
+		patchUserSettingsReadDSiWare(0x020231C0);
+		if (useSharedFont && !extendedMemory2) {
+			patchTwlFontLoad(0x02042A20, 0x02023704);
+			*(u32*)0x02042A6C = 0xE1A00000; // nop
+		}
+		setBL(0x02047E20, (u32)dsiSaveCreate);
+		setBL(0x02047E30, (u32)dsiSaveOpen);
+		setBL(0x02047E4C, (u32)dsiSaveGetResultCode);
+		setBL(0x02047E74, (u32)dsiSaveSeek);
+		setBL(0x02047E8C, (u32)dsiSaveGetResultCode);
+		setBL(0x02047EB4, (u32)dsiSaveWrite);
+		setBL(0x02047EBC, (u32)dsiSaveClose);
+		setBL(0x02047EC4, (u32)dsiSaveGetResultCode);
+		setBL(0x02047EE4, (u32)dsiSaveGetResultCode);
+		setBL(0x02047F24, (u32)dsiSaveOpenR);
+		setBL(0x02047F34, (u32)dsiSaveGetLength);
+		setBL(0x02047F68, (u32)dsiSaveRead);
+		setBL(0x02047F80, (u32)dsiSaveClose);
+		setBL(0x02047F88, (u32)dsiSaveGetResultCode);
+		setBL(0x02047F98, (u32)dsiSaveGetResultCode);
+		setBL(0x02047FAC, (u32)dsiSaveGetResultCode);
+		setBL(0x02047FC0, (u32)dsiSaveGetResultCode);
+		*(u32*)0x02051F0C = 0xE12FFF1E; // bx lr
+	}
+
+	// Puzzle Rocks (Europe)
+	// Audio does not play
+	else if (strcmp(romTid, "KPLP") == 0) {
+		useSharedFont = (twlFontFound && debugOrMep);
+		*(u32*)0x0200507C = 0xE1A00000; // nop
+		*(u32*)0x0200DC7C = 0xE1A00000; // nop
+		*(u32*)0x02011FAC = 0xE1A00000; // nop
+		patchInitDSiWare(0x02017580, heapEnd);
+		patchUserSettingsReadDSiWare(0x02018B64);
+		if (useSharedFont && !extendedMemory2) {
+			patchTwlFontLoad(0x020383C4, 0x020190A8);
+			*(u32*)0x02038410 = 0xE1A00000; // nop
+		}
+		setBL(0x0203D7C4, (u32)dsiSaveCreate);
+		setBL(0x0203D7D4, (u32)dsiSaveOpen);
+		setBL(0x0203D7F0, (u32)dsiSaveGetResultCode);
+		setBL(0x0203D818, (u32)dsiSaveSeek);
+		setBL(0x0203D830, (u32)dsiSaveGetResultCode);
+		setBL(0x0203D858, (u32)dsiSaveWrite);
+		setBL(0x0203D860, (u32)dsiSaveClose);
+		setBL(0x0203D868, (u32)dsiSaveGetResultCode);
+		setBL(0x0203D888, (u32)dsiSaveGetResultCode);
+		setBL(0x0203D8C8, (u32)dsiSaveOpenR);
+		setBL(0x0203D8D8, (u32)dsiSaveGetLength);
+		setBL(0x0203D90C, (u32)dsiSaveRead);
+		setBL(0x0203D924, (u32)dsiSaveClose);
+		setBL(0x0203D92C, (u32)dsiSaveGetResultCode);
+		setBL(0x0203D93C, (u32)dsiSaveGetResultCode);
+		setBL(0x0203D950, (u32)dsiSaveGetResultCode);
+		setBL(0x0203D964, (u32)dsiSaveGetResultCode);
+		*(u32*)0x020478B0 = 0xE12FFF1E; // bx lr
+	}
+
 	// Puzzler Brain Games (USA)
 	else if (strcmp(romTid, "KYEE") == 0) {
 		*(u32*)0x02005088 = 0xE1A00000; // nop

@@ -348,6 +348,7 @@ static const char dsiWareForBootloader2[][4] = {
 	"KLR", // Puffins: Let's Race!
 	"KL2", // Puffins: Let's Roll! (bootloaderi-exclusive)
 	"KPN", // Puzzle League: Express
+	"KPL", // Puzzle Rocks
 	"KYE", // Puzzler Brain Games
 	"KYG", // Puzzler World 2013
 	"KUO", // Puzzler World XL
