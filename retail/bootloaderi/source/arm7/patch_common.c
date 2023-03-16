@@ -5617,23 +5617,6 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
-	// ARC Style: Furo Jump!! Girutegia Gaiden! (Japan)
-	else if (strcmp(romTid, "KFVJ") == 0 && saveOnFlashcard) {
-		const u32 newFunc = 0x02066100;
-
-		setBL(0x0200D728, newFunc);
-		codeCopy((u32*)newFunc, (u32*)0x0200D878, 0xC0);
-		setBL(newFunc+0x28, (u32)dsiSaveOpen);
-		setBL(newFunc+0x40, (u32)dsiSaveGetLength);
-		setBL(newFunc+0x5C, (u32)dsiSaveRead);
-		setBL(newFunc+0x8C, (u32)dsiSaveClose);
-		setBL(0x0200D960, (u32)dsiSaveCreate); // dsiSaveCreateAuto
-		setBL(0x0200D970, (u32)dsiSaveOpen);
-		setBL(0x0200D990, (u32)dsiSaveWrite);
-		setBL(0x0200D9A8, (u32)dsiSaveWrite);
-		tonccpy((u32*)0x02065618, dsiSaveGetResultCode, 0xC);
-	}
-
 	// Fuuu! Dairoujou Kai (Japan)
 	else if (strcmp(romTid, "K6JJ") == 0 && saveOnFlashcard) {
 		setBL(0x02045468, (u32)dsiSaveOpen);
@@ -9953,6 +9936,24 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBL(0x0201A1B0+offsetChange, (u32)dsiSaveClose);
 			tonccpy((u32*)(0x02037CA0+offsetChange), dsiSaveGetResultCode, 0xC);
 		}
+	}
+
+	// Pro-Jumper! Chimaki's Hot Spring Tour! Guilty Gear Tangent!? (USA)
+	// ARC Style: Furo Jump!! Girutegia Gaiden! (Japan)
+	else if ((strcmp(romTid, "KFVE") == 0 || strcmp(romTid, "KFVJ") == 0) && saveOnFlashcard) {
+		const u32 newFunc = 0x02066100;
+
+		setBL(0x0200D728, newFunc);
+		codeCopy((u32*)newFunc, (u32*)0x0200D878, 0xC0);
+		setBL(newFunc+0x28, (u32)dsiSaveOpen);
+		setBL(newFunc+0x40, (u32)dsiSaveGetLength);
+		setBL(newFunc+0x5C, (u32)dsiSaveRead);
+		setBL(newFunc+0x8C, (u32)dsiSaveClose);
+		setBL(0x0200D960, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+		setBL(0x0200D970, (u32)dsiSaveOpen);
+		setBL(0x0200D990, (u32)dsiSaveWrite);
+		setBL(0x0200D9A8, (u32)dsiSaveWrite);
+		tonccpy((u32*)0x02065618, dsiSaveGetResultCode, 0xC);
 	}
 
 	// Pro-Putt Domo (USA)

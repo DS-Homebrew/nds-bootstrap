@@ -9631,42 +9631,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
-	// ARC Style: Furo Jump!! Girutegia Gaiden! (Japan)
-	// Requires 8MB of RAM
-	else if (strcmp(romTid, "KFVJ") == 0 && extendedMemory2) {
-		const u32 newFunc = 0x02066100;
-
-		/* if (!extendedMemory2) {
-			*(u32*)0x02005260 = 0xE1A00000; // nop
-			if (s2FlashcardId == 0x5A45) {
-				*(u32*)0x02005264 = 0xE3A00408; // mov r0, #0x08000000
-			} else {
-				*(u32*)0x02005264 = 0xE3A00409; // mov r0, #0x09000000
-			}
-			*(u32*)0x02005268 = 0xE3A01716; // mov r1, #0x580000
-		} */
-		*(u32*)0x0200D6C8 = 0xE1A00000; // nop
-		setBL(0x0200D728, newFunc);
-		*(u32*)0x0200D764 = 0xE1A00000; // nop
-		codeCopy((u32*)newFunc, (u32*)0x0200D878, 0xC0);
-		setBL(newFunc+0x28, (u32)dsiSaveOpen);
-		setBL(newFunc+0x40, (u32)dsiSaveGetLength);
-		setBL(newFunc+0x5C, (u32)dsiSaveRead);
-		setBL(newFunc+0x8C, (u32)dsiSaveClose);
-		setBL(0x0200D960, (u32)dsiSaveCreate); // dsiSaveCreateAuto
-		setBL(0x0200D970, (u32)dsiSaveOpen);
-		setBL(0x0200D990, (u32)dsiSaveWrite);
-		setBL(0x0200D9A8, (u32)dsiSaveWrite);
-		*(u32*)0x02064A94 = 0xE1A00000; // nop
-		tonccpy((u32*)0x02065618, dsiSaveGetResultCode, 0xC);
-		*(u32*)0x02068D78 = 0xE1A00000; // nop
-		patchInitDSiWare(0x02070CE4, heapEnd);
-		// *(u32*)0x02071070 = 0x0224C9A0;
-		patchUserSettingsReadDSiWare(0x02072394);
-		*(u32*)0x02077C78 = 0xE3A00001; // mov r0, #1
-		*(u32*)0x02077C7C = 0xE12FFF1E; // bx lr
-	}
-
 	// Fuuu! Dairoujou Kai (Japan)
 	else if (strcmp(romTid, "K6JJ") == 0) {
 		useSharedFont = (twlFontFound && debugOrMep);
@@ -17196,6 +17160,42 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)(0x0203A508+offsetChange) = 0xE1A00000; // nop
 		patchInitDSiWare(0x0203EF8C+offsetChange, heapEnd);
 		patchUserSettingsReadDSiWare(0x02040458+offsetChange);
+	}
+
+	// Pro-Jumper! Chimaki's Hot Spring Tour! Guilty Gear Tangent!? (USA)
+	// ARC Style: Furo Jump!! Girutegia Gaiden! (Japan)
+	// Requires 8MB of RAM
+	else if ((strcmp(romTid, "KFVE") == 0 || strcmp(romTid, "KFVJ") == 0) && extendedMemory2) {
+		const u32 newFunc = 0x02066100;
+
+		/* if (!extendedMemory2) {
+			*(u32*)0x02005260 = 0xE1A00000; // nop
+			if (s2FlashcardId == 0x5A45) {
+				*(u32*)0x02005264 = 0xE3A00408; // mov r0, #0x08000000
+			} else {
+				*(u32*)0x02005264 = 0xE3A00409; // mov r0, #0x09000000
+			}
+			*(u32*)0x02005268 = 0xE3A01716; // mov r1, #0x580000
+		} */
+		*(u32*)0x0200D6C8 = 0xE1A00000; // nop
+		setBL(0x0200D728, newFunc);
+		*(u32*)0x0200D764 = 0xE1A00000; // nop
+		codeCopy((u32*)newFunc, (u32*)0x0200D878, 0xC0);
+		setBL(newFunc+0x28, (u32)dsiSaveOpen);
+		setBL(newFunc+0x40, (u32)dsiSaveGetLength);
+		setBL(newFunc+0x5C, (u32)dsiSaveRead);
+		setBL(newFunc+0x8C, (u32)dsiSaveClose);
+		setBL(0x0200D960, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+		setBL(0x0200D970, (u32)dsiSaveOpen);
+		setBL(0x0200D990, (u32)dsiSaveWrite);
+		setBL(0x0200D9A8, (u32)dsiSaveWrite);
+		*(u32*)0x02064A94 = 0xE1A00000; // nop
+		tonccpy((u32*)0x02065618, dsiSaveGetResultCode, 0xC);
+		*(u32*)0x02068D78 = 0xE1A00000; // nop
+		patchInitDSiWare(0x02070CE4, heapEnd);
+		patchUserSettingsReadDSiWare(0x02072394);
+		*(u32*)0x02077C78 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02077C7C = 0xE12FFF1E; // bx lr
 	}
 
 	// Pro-Putt Domo (USA)

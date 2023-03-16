@@ -186,7 +186,6 @@ static const char dsiWareForBootloader1[][4] = {
 	"KF9", // Flips: Terror in Cubicle Four
 	"KFO", // Frenzic
 	"KFG", // Frogger Returns
-	"KFV", // ARC Style: Furo Jump!! Girutegia Gaiden!
 	"K6J", // Fuuu! Dairoujou Kai
 	"KKG", // Gaia's Moon
 	"KGB", // Game & Watch: Ball
@@ -341,6 +340,7 @@ static const char dsiWareForBootloader2[][4] = {
 	"KPH", // Prehistorik Man
 	"KPR", // The Price Is Right
 	"K2R", // Primrose
+	"KFV", // Pro-Jumper! Chimaki's Hot Spring Tour! Guilty Gear Tangent!?
 	"KDP", // Pro-Putt Domo
 	"KXU", // Publisher Dream
 	"KLF", // Puffins: Let's Fish!
