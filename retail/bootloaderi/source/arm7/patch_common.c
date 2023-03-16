@@ -13326,6 +13326,25 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
 		tonccpy((u32*)0x0205AEB4, dsiSaveGetResultCode, 0xC);
 	}
 
+	// Punito 20 no Asobiba (Japan)
+	else if (strcmp(romTid, "KU2J") == 0 && saveOnFlashcard) {
+		setBL(0x02040804, (u32)dsiSaveOpen);
+		setBL(0x0204083C, (u32)dsiSaveClose);
+		setBL(0x02040898, (u32)dsiSaveCreate);
+		setBL(0x02040928, (u32)dsiSaveDelete);
+		setBL(0x020409F4, (u32)dsiSaveSeek);
+		setBL(0x02040A14, (u32)dsiSaveRead); // dsiSaveReadAsync
+		setBL(0x02040A28, (u32)dsiSaveRead);
+		setBL(0x02040A44, (u32)dsiSaveClose);
+		setBL(0x02040A60, (u32)dsiSaveClose);
+		setBL(0x02040B18, (u32)dsiSaveSeek);
+		setBL(0x02040B38, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+		setBL(0x02040B4C, (u32)dsiSaveWrite);
+		setBL(0x02040B68, (u32)dsiSaveClose);
+		setBL(0x02040B84, (u32)dsiSaveClose);
+		tonccpy((u32*)0x02058E14, dsiSaveGetResultCode, 0xC);
+	}
+
 	// Hearts Spades Euchre (USA)
 	else if (strcmp(romTid, "KHQE") == 0 && saveOnFlashcard) {
 		setBL(0x020107B4, (u32)dsiSaveOpen);

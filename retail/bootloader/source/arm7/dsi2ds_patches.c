@@ -9925,6 +9925,28 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0205D3B8 = 0xE3A00001; // mov r0, #1 (Enable NitroFS reads)
 	}
 
+	// Punito 20 no Asobiba (Japan)
+	else if (strcmp(romTid, "KU2J") == 0) {
+		*(u32*)0x0201AB3C = 0xE1A00000; // nop
+		*(u32*)0x0201AB44 = 0xE1A00000; // nop
+		setBL(0x02040804, (u32)dsiSaveOpen);
+		setBL(0x0204083C, (u32)dsiSaveClose);
+		setBL(0x02040898, (u32)dsiSaveCreate);
+		setBL(0x02040928, (u32)dsiSaveDelete);
+		setBL(0x020409F4, (u32)dsiSaveSeek);
+		setBL(0x02040A14, (u32)dsiSaveRead); // dsiSaveReadAsync
+		setBL(0x02040A28, (u32)dsiSaveRead);
+		setBL(0x02040A44, (u32)dsiSaveClose);
+		setBL(0x02040A60, (u32)dsiSaveClose);
+		setBL(0x02040B18, (u32)dsiSaveSeek);
+		setBL(0x02040B38, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+		setBL(0x02040B4C, (u32)dsiSaveWrite);
+		setBL(0x02040B68, (u32)dsiSaveClose);
+		setBL(0x02040B84, (u32)dsiSaveClose);
+		tonccpy((u32*)0x02058E14, dsiSaveGetResultCode, 0xC);
+		*(u32*)0x0205B318 = 0xE3A00001; // mov r0, #1 (Enable NitroFS reads)
+	}
+
 	// Glory Days: Tactical Defense (USA)
 	// Glory Days: Tactical Defense (Europe)
 	else if (strcmp(romTid, "KGKE") == 0 || strcmp(romTid, "KGKP") == 0) {
