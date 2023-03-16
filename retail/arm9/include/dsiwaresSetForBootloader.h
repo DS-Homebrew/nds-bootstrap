@@ -343,6 +343,7 @@ static const char dsiWareForBootloader2[][4] = {
 	"KFV", // Pro-Jumper! Chimaki's Hot Spring Tour! Guilty Gear Tangent!?
 	"KDP", // Pro-Putt Domo
 	"KXU", // Publisher Dream
+	"KNU", // Pucca: Noodle Rush
 	"KLF", // Puffins: Let's Fish!
 	"KLR", // Puffins: Let's Race!
 	"KL2", // Puffins: Let's Roll! (bootloaderi-exclusive)

@@ -17333,6 +17333,62 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x020703F8+offsetChange, (u32)dsiSaveClose);
 	}
 
+	// Pucca: Noodle Rush (Europe)
+	else if (strcmp(romTid, "KNUP") == 0) {
+		const u32 dsiSaveCreateT = 0x02058F8C;
+		*(u16*)dsiSaveCreateT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveCreateT + 4), dsiSaveCreate, 0xC);
+
+		const u32 dsiSaveSetLengthT = 0x02058F9C;
+		*(u16*)dsiSaveSetLengthT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveSetLengthT + 4), dsiSaveSetLength, 0xC);
+
+		const u32 dsiSaveOpenT = 0x02058FAC;
+		*(u16*)dsiSaveOpenT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveOpenT + 4), dsiSaveOpen, 0xC);
+
+		const u32 dsiSaveCloseT = 0x02058FBC;
+		*(u16*)dsiSaveCloseT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveCloseT + 4), dsiSaveClose, 0xC);
+
+		const u32 dsiSaveSeekT = 0x02058FCC;
+		*(u16*)dsiSaveSeekT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveSeekT + 4), dsiSaveSeek, 0xC);
+
+		const u32 dsiSaveReadT = 0x02058FDC;
+		*(u16*)dsiSaveReadT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveReadT + 4), dsiSaveRead, 0xC);
+
+		const u32 dsiSaveWriteT = 0x02058FEC;
+		*(u16*)dsiSaveWriteT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveWriteT + 4), dsiSaveWrite, 0xC);
+
+		setBLThumb(0x020086EE, dsiSaveOpenT);
+		setBLThumb(0x0200870A, dsiSaveSeekT);
+		setBLThumb(0x0200871C, dsiSaveCloseT);
+		setBLThumb(0x0200872A, dsiSaveReadT);
+		setBLThumb(0x0200873C, dsiSaveCloseT);
+		setBLThumb(0x02008746, dsiSaveCloseT);
+		*(u32*)0x0200876C = 0x4770; // bx lr
+		doubleNopT(0x020087A0);
+		setBLThumb(0x020087AE, dsiSaveCreateT);
+		setBLThumb(0x020087C2, dsiSaveOpenT);
+		setBLThumb(0x020087E6, dsiSaveSetLengthT);
+		setBLThumb(0x020087F6, dsiSaveCloseT);
+		setBLThumb(0x0200880C, dsiSaveSeekT);
+		setBLThumb(0x0200881E, dsiSaveCloseT);
+		setBLThumb(0x02008830, dsiSaveWriteT);
+		setBLThumb(0x02008842, dsiSaveCloseT);
+		setBLThumb(0x02008850, dsiSaveCloseT);
+		*(u16*)0x0200AF94 = 0x2000; // movs r0, #0
+		*(u32*)0x02057A74 = 0xE1A00000; // nop
+		*(u32*)0x0205AE94 = 0xE1A00000; // nop
+		patchInitDSiWare(0x02060910, heapEnd);
+		patchUserSettingsReadDSiWare(0x02062040);
+		*(u32*)0x020677DC = 0xE3A00001; // mov r0, #1
+		*(u32*)0x020677E0 = 0xE12FFF1E; // bx lr
+	}
+
 	// Puffins: Let's Fish! (USA)
 	// Puffins: Let's Fish! (Europe)
 	// Due to our save implementation, save data is stored in all 3 slots
