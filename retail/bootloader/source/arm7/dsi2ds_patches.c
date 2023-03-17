@@ -18749,6 +18749,29 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// Sakurai Miho No Kouno: Megami Serapi Uranai (Japan)
+	else if (strcmp(romTid, "K3PJ") == 0) {
+		// useSharedFont = (twlFontFound && debugOrMep);
+		// if (!useSharedFont) {
+			*(u32*)0x020050B8 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		// }
+		*(u32*)0x0200B434 = 0xE1A00000; // nop
+		*(u32*)0x0200E6AC = 0xE1A00000; // nop
+		patchInitDSiWare(0x020153BC, heapEnd);
+		patchUserSettingsReadDSiWare(0x020169A4);
+		setBL(0x020224A0, (u32)dsiSaveCreate);
+		setBL(0x020224B0, (u32)dsiSaveOpen);
+		setBL(0x020224E0, (u32)dsiSaveWrite);
+		setBL(0x020224F8, (u32)dsiSaveClose);
+		setBL(0x02022570, (u32)dsiSaveOpen);
+		setBL(0x02022580, (u32)dsiSaveGetLength);
+		setBL(0x0202259C, (u32)dsiSaveRead);
+		setBL(0x020225D4, (u32)dsiSaveClose);
+		/* if (useSharedFont && !extendedMemory2) {
+			patchTwlFontLoad(0x0201CAA4, 0x02016F14);
+		} */
+	}
+
 	// Sea Battle (USA)
 	// Sea Battle (Europe)
 	else if (strcmp(romTid, "KRWE") == 0 || strcmp(romTid, "KRWP") == 0) {
