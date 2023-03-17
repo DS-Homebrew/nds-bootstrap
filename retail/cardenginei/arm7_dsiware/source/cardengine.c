@@ -318,7 +318,9 @@ void reset(void) {
 	languageTimer = 0;
 
 	u8* deviceListAddr = (u8*)(*(u32*)0x02FFE1D4);
-	toncset(deviceListAddr+2, 0, 1); // Clear SD access rights
+	if (deviceListAddr[4] != 'n') {
+		toncset(deviceListAddr+2, 0, 1); // Clear SD access rights
+	}
 
 	if (consoleModel > 0) {
 		ndmaCopyWordsAsynch(0, (char*)ndsHeader->arm9destination+0xB000000, ndsHeader->arm9destination, *(u32*)0x0DFFE02C);
@@ -634,7 +636,9 @@ void myIrqHandlerVBlank(void) {
 
 	if (sdRightsTimer == 60*3) {
 		u8* deviceListAddr = (u8*)(*(u32*)0x02FFE1D4);
-		toncset(deviceListAddr+2, 0x06, 1); // Set SD access rights
+		if (deviceListAddr[4] != 'n') {
+			toncset(deviceListAddr+2, 0x06, 1); // Set SD access rights
+		}
 
 		sdRightsTimer++;
 	} else if (sdRightsTimer < 60*3) {
