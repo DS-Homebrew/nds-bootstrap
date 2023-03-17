@@ -77,6 +77,7 @@ bool hasLoader;  //single global nds filehandle (is null if not in dldi/fat mode
 u16 chdirpathid[2]; //default dir path id...
 FILE *ndsFile[2];
 off_t ndsFileLastpos[2]; //Used to determine need to fseek or not
+off_t offsetOfOpenedNitroFile;
 bool bootNitro = false; //Enable to read from nds-bootstrap's NitroFS
 
 devoptab_t nitroFSdevoptab = {
@@ -464,6 +465,7 @@ int nitroFSOpen(struct _reent *r, void *fileStruct, const char *path, int flags,
         }
         if (fatStruct->start)
         {
+			offsetOfOpenedNitroFile = fatStruct->start;
             nitroSubSeek(&fatStruct->pos, fatStruct->start, SEEK_SET); //seek to start of file
             return (0);                                                //woot!
         }

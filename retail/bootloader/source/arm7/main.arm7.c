@@ -134,6 +134,7 @@ u32 fatTableAddr = 0;
 static u32 softResetParams[4] = {0};
 bool srlFromPageFile = false;
 u32 srlAddr = 0;
+u8 baseUnitCode = 0;
 u16 baseHeaderCRC = 0;
 u16 baseSecureCRC = 0;
 u32 baseRomSize = 0;
@@ -493,7 +494,6 @@ static void loadBinary_ARM7(const tDSiHeader* dsiHeaderTemp, aFile* file) {
 	//u32 dsiHeader[0x2F0 >> 2]; // SDK 5
 
 	char baseTid[5] = {0};
-	u8 baseUnitCode = 0;
 	fileRead((char*)&baseTid, file, 0xC, 4);
 	fileRead((char*)&baseUnitCode, file, 0x12, 1);
 
@@ -501,7 +501,7 @@ static void loadBinary_ARM7(const tDSiHeader* dsiHeaderTemp, aFile* file) {
 	//fileRead((char*)ndsHeader, file, 0, 0x170, 3);
 	//fileRead((char*)dsiHeader, file, 0, 0x2F0, 2); // SDK 5
 	if (srlFromPageFile) {
-		srlAddr = (baseUnitCode > 0) ? 0 : 0xFFFFFFFF;
+		srlAddr = 0xFFFFFFFF;
 		aFile pageFile;
 		getFileFromCluster(&pageFile, pageFileCluster);
 
@@ -1402,13 +1402,11 @@ int arm7_main(void) {
 	aFile pageFile;
 	getFileFromCluster(&pageFile, pageFileCluster);
 
-	if (softResetParams[0] == 0 || !srlFromPageFile) {
-		fileWrite((char*)ndsHeader->arm9destination, &pageFile, 0x14000, iUncompressedSize);
-		fileWrite((char*)ndsHeader->arm7destination, &pageFile, 0x2C0000, newArm7binarySize);
-		fileWrite((char*)CHEAT_ENGINE_LOCATION_B4DS, &pageFile, 0x2FE000, 0x2000);
-		fileWrite((char*)&iUncompressedSize, &pageFile, 0x3FFFF0, sizeof(u32));
-		fileWrite((char*)&newArm7binarySize, &pageFile, 0x3FFFF4, sizeof(u32));
-	}
+	fileWrite((char*)ndsHeader->arm9destination, &pageFile, 0x14000, iUncompressedSize);
+	fileWrite((char*)ndsHeader->arm7destination, &pageFile, 0x2C0000, newArm7binarySize);
+	fileWrite((char*)CHEAT_ENGINE_LOCATION_B4DS, &pageFile, 0x2FE000, 0x2000);
+	fileWrite((char*)&iUncompressedSize, &pageFile, 0x3FFFF0, sizeof(u32));
+	fileWrite((char*)&newArm7binarySize, &pageFile, 0x3FFFF4, sizeof(u32));
 
 	clearScreen();
 

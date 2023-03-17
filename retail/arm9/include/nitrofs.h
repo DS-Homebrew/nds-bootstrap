@@ -67,6 +67,7 @@ extern "C"
     int bootFSstat(struct _reent *r, const char *file, struct stat *st);
     int nitroFSChdir(struct _reent *r, const char *name);
     int bootFSChdir(struct _reent *r, const char *name);
+	extern off_t offsetOfOpenedNitroFile;
 #define LOADERSTR "PASS" //look for this
 #define LOADERSTROFFSET 0xac
 #define LOADEROFFSET 0x0200

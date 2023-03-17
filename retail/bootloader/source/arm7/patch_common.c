@@ -34,7 +34,7 @@ u16 patchOffsetCacheFileNewCrc = 0;
 
 patchOffsetCacheContents patchOffsetCache;
 
-extern bool srlFromPageFile;
+extern u32 srlAddr;
 
 static inline void doubleNopT(u32 addr) {
 	*(u16*)(addr)   = 0x46C0;
@@ -161,7 +161,7 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
 #ifndef LOADERTWO
 	// Art Style: DIGIDRIVE (USA) (child.srl)
 	// Art Style: INTERSECT (Europe, Australia) (child.srl)
-	else if (strcmp(romTid, "NTRJ") == 0 && ndsHeader->headerCRC16 == 0x53E2 && srlFromPageFile) {
+	else if (strcmp(romTid, "NTRJ") == 0 && ndsHeader->headerCRC16 == 0x53E2 && srlAddr > 0) {
 		*(u32*)0x0200118C = 0x021BD754; // Boot to "mode_select" instead of "connection2"
 		for (int i = 0; i < 6; i++) { // Disable bugged description text
 			u32* offset1 = (u32*)0x02019C90;
@@ -191,7 +191,7 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
 	}
 
 	// Art Style: DIGIDRIVE (Japan) (child.srl)
-	else if (strcmp(romTid, "NTRJ") == 0 && ndsHeader->headerCRC16 == 0x681E && srlFromPageFile) {
+	else if (strcmp(romTid, "NTRJ") == 0 && ndsHeader->headerCRC16 == 0x681E && srlAddr > 0) {
 		*(u32*)0x02001024 = 0x021A0948; // Boot to "mode_select" instead of "connection2"
 		for (int i = 0; i < 6; i++) { // Disable bugged description text
 			u32* offset1 = (u32*)0x02019B40;
@@ -213,7 +213,7 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
 	}
 
 	// Ideyou Sukeno: Kenkou Maja DSi (Japan) (main_rom.srl)
-	else if (strcmp(romTid, "NTRJ") == 0 && ndsHeader->headerCRC16 == 0xCD01 && srlFromPageFile) {
+	else if (strcmp(romTid, "NTRJ") == 0 && ndsHeader->headerCRC16 == 0xCD01 && srlAddr > 0) {
 		*(u32*)0x02000BEC = 0xE3A00001; // mov r0, #1 (Do not wait for other consoles to connect)
 	}
 #endif
@@ -536,11 +536,11 @@ void rsetA7Cache(void)
 
 void rsetPatchCache(void)
 {
-	extern u32 srlAddr;
+	extern u8 baseUnitCode;
 
 	if (patchOffsetCache.ver != patchOffsetCacheFileVersion
 	 || patchOffsetCache.type != 1) {
-		if (srlAddr == 0 && !esrbScreenPrepared) pleaseWaitOutput();
+		if ((baseUnitCode > 0 || srlAddr == 0) && !esrbScreenPrepared) pleaseWaitOutput();
 		u32* moduleParamsOffset = patchOffsetCache.moduleParamsOffset;
 		toncset(&patchOffsetCache, 0, sizeof(patchOffsetCacheContents));
 		patchOffsetCache.ver = patchOffsetCacheFileVersion;

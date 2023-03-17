@@ -1811,58 +1811,9 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			FILE* ndsFile = fopen(multibootSrl, "rb");
 			FILE* pageFile = fopen(pageFilePath.c_str(), "rb+");
 			if (ndsFile && pageFile) {
-				char buffer[0x1000] = {0};
-				u16 childHeaderCRC = 0;
-				fread(&buffer, 1, 0x200, ndsFile);
-				tonccpy(&childHeaderCRC, buffer+0x15E, 2);
-
-				char tempRomTid[5];
-				u16 tempHeaderCRC = 0;
-
-				fseek(pageFile, 0x2BFE0C, SEEK_SET);
-				fread(&tempRomTid, 1, 4, pageFile);
-				fseek(pageFile, 0x2BFF5E, SEEK_SET);
-				fread(&tempHeaderCRC, sizeof(u16), 1, pageFile);
-
-				if (strncmp(tempRomTid, buffer+0xC, 4) != 0 || tempHeaderCRC != childHeaderCRC) {
-					fseek(pageFile, 0x2BFE00, SEEK_SET);
-					fwrite(buffer, 1, 0x200, pageFile);
-
-					u32 childArm9Src = 0;
-					u32 childArm9Size = 0;
-					u32 childArm7Src = 0;
-					u32 childArm7Size = 0;
-
-					fseek(ndsFile, 0x20, SEEK_SET);
-					fread(&childArm9Src, sizeof(u32), 1, ndsFile);
-					fseek(ndsFile, 0x2C, SEEK_SET);
-					fread(&childArm9Size, sizeof(u32), 1, ndsFile);
-					fseek(ndsFile, 0x30, SEEK_SET);
-					fread(&childArm7Src, sizeof(u32), 1, ndsFile);
-					fseek(ndsFile, 0x3C, SEEK_SET);
-					fread(&childArm7Size, sizeof(u32), 1, ndsFile);
-
-					fseek(pageFile, 0x14000, SEEK_SET);
-					fseek(ndsFile, childArm9Src, SEEK_SET);
-					for (u32 i = 0; i < childArm9Size; i += 0x1000) {
-						fread(buffer, 1, 0x1000, ndsFile);
-						fwrite(buffer, 1, 0x1000, pageFile);
-					}
-
-					fseek(pageFile, 0x2C0000, SEEK_SET);
-					fseek(ndsFile, childArm7Src, SEEK_SET);
-					for (u32 i = 0; i < childArm7Size; i += 0x1000) {
-						fread(buffer, 1, 0x1000, ndsFile);
-						fwrite(buffer, 1, 0x1000, pageFile);
-					}
-				}
-
-				fclose(pageFile);
-
-				u32 stringBuffer = 0x44414F4C; // 'LOAD'
 				FILE* srParamsFile = fopen(srParamsFilePath.c_str(), "rb+");
-				fseek(srParamsFile, 8, SEEK_SET);
-				fwrite(&stringBuffer, sizeof(u32), 1, srParamsFile);
+				fseek(srParamsFile, 0xC, SEEK_SET);
+				fwrite(&offsetOfOpenedNitroFile, sizeof(u32), 1, srParamsFile);
 				fclose(srParamsFile);
 			}
 			fclose(ndsFile);
