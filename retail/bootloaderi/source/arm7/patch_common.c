@@ -11122,6 +11122,12 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		tonccpy((u32*)0x0203D050, dsiSaveGetResultCode, 0xC);
 	}
 
+	// Saikyou Ginsei Shougi (Japan)
+	// Saving not supported due to using more than one file in filesystem
+	else if (strcmp(romTid, "KG4J") == 0 && !twlFontFound) {
+		*(u32*)0x020455E0 = 0xE1A00000; // nop (Skip Manual screen)
+	}
+
 	// Sea Battle (USA)
 	// Sea Battle (Europe)
 	else if (strcmp(romTid, "KRWE") == 0 || strcmp(romTid, "KRWP") == 0) {

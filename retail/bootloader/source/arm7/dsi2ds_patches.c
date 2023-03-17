@@ -18725,6 +18725,30 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchUserSettingsReadDSiWare(0x02047240);
 	}
 
+	// Saikyou Ginsei Shougi (Japan)
+	// Saving not supported due to using more than one file in filesystem
+	else if (strcmp(romTid, "KG4J") == 0) {
+		useSharedFont = (twlFontFound && extendedMemory2);
+		*(u32*)0x0201125C = 0xE1A00000; // nop
+		*(u32*)0x02014F20 = 0xE1A00000; // nop
+		patchInitDSiWare(0x0201FAB4, heapEnd);
+		if (!extendedMemory2) {
+			*(u32*)0x0201FE24 = *(u32*)0x02004FC0;
+		}
+		patchUserSettingsReadDSiWare(0x020210A4);
+		*(u32*)0x020210CC = 0xE3A00001; // mov r0, #1
+		*(u32*)0x020210D0 = 0xE12FFF1E; // bx lr
+		*(u32*)0x020210D8 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x020210DC = 0xE12FFF1E; // bx lr
+		if (useSharedFont) {
+			/* if (!extendedMemory2) {
+				patchTwlFontLoad(0x02037E44, 0x020212C0);
+			} */
+		} else {
+			*(u32*)0x020455E0 = 0xE1A00000; // nop (Skip Manual screen)
+		}
+	}
+
 	// Sea Battle (USA)
 	// Sea Battle (Europe)
 	else if (strcmp(romTid, "KRWE") == 0 || strcmp(romTid, "KRWP") == 0) {
