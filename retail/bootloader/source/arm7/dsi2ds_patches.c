@@ -18772,6 +18772,53 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		} */
 	}
 
+	// Save the Turtles (USA)
+	// Save the Turtles (Europe, Australia)
+	// Due to our save implementation, save data is stored in all 3 slots
+	// Requires 8MB of RAM
+	else if ((strcmp(romTid, "K7TE") == 0 || strcmp(romTid, "K7TV") == 0) && extendedMemory2) {
+		useSharedFont = twlFontFound;
+		u8 offsetChange = (romTid[3] == 'E') ? 0 : 0x60;
+		u16 offsetChangeN = (romTid[3] == 'E') ? 0 : 0x150;
+		u16 offsetChange2 = (romTid[3] == 'E') ? 0 : 0x13C;
+		const u32 newLoadCode = 0x0204FF1C-offsetChange2;
+
+		codeCopy((u32*)newLoadCode, (u32*)(0x02031698-offsetChange2), 0xE0);
+		setBL(newLoadCode+0x50, (u32)dsiSaveOpenR);
+		setBL(newLoadCode+0x68, (u32)dsiSaveGetLength);
+		setBL(newLoadCode+0xA4, (u32)dsiSaveRead);
+		setBL(newLoadCode+0xD0, (u32)dsiSaveClose);
+
+		setBL(0x020272C0-offsetChangeN, newLoadCode);
+		if (useSharedFont) {
+			if (!extendedMemory2) {
+				patchTwlFontLoad(0x0201E474-offsetChange, 0x0205819C-offsetChange2);
+			}
+		} else {
+			*(u32*)(0x0201E3E4-offsetChange) = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		}
+		setBL(0x02031798-offsetChange2, (u32)dsiSaveOpenR);
+		setBL(0x020317B0-offsetChange2, (u32)dsiSaveClose);
+		setBL(0x02031828-offsetChange2, (u32)dsiSaveOpen);
+		setBL(0x02031840-offsetChange2, (u32)dsiSaveCreate);
+		*(u32*)(0x02031874-offsetChange2) = 0xE1A00000; // nop (dsiSaveCreateDir)
+		setBL(0x02031880-offsetChange2, (u32)dsiSaveCreate);
+		setBL(0x020318B0-offsetChange2, (u32)dsiSaveOpen);
+		setBL(0x020318D4-offsetChange2, (u32)dsiSaveWrite);
+		setBL(0x020318DC-offsetChange2, (u32)dsiSaveClose);
+		// if (!extendedMemory2) {
+			// Disable audio
+			*(u32*)(0x02032EA0-offsetChange2) = 0xE12FFF1E; // bx lr
+			*(u32*)(0x020330B8-offsetChange2) = 0xE12FFF1E; // bx lr
+			*(u32*)(0x0203319C-offsetChange2) = 0xE12FFF1E; // bx lr
+		// }
+		*(u32*)(0x0204E9A8-offsetChange2) = 0xE1A00000; // nop
+		tonccpy((u32*)(0x0204F520-offsetChange2), dsiSaveGetResultCode, 0xC);
+		*(u32*)(0x02051D88-offsetChange2) = 0xE1A00000; // nop
+		patchInitDSiWare(0x02056868-offsetChange2, heapEnd);
+		patchUserSettingsReadDSiWare(0x02057D24-offsetChange2);
+	}
+
 	// Sea Battle (USA)
 	// Sea Battle (Europe)
 	else if (strcmp(romTid, "KRWE") == 0 || strcmp(romTid, "KRWP") == 0) {

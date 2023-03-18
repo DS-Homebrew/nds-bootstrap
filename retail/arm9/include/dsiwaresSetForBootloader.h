@@ -380,6 +380,7 @@ static const char dsiWareForBootloader2[][4] = {
 	"KRP", // RPG Dashutsu Game
 	"KG4", // Saikyou Ginsei Shougi
 	"K3P", // Sakurai Miho No Kouno: Megami Serapi Uranai
+	"K7T", // Save the Turtles
 	"KRW", // Sea Battle
 	"KS3", // Shantae: Risky's Revenge
 	"KSJ", // Shawn Johnson Gymnastics
