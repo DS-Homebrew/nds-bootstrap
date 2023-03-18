@@ -382,6 +382,7 @@ static const char dsiWareForBootloader2[][4] = {
 	"K3P", // Sakurai Miho No Kouno: Megami Serapi Uranai
 	"K7T", // Save the Turtles
 	"KRW", // Sea Battle
+	"KLL", // The Seller
 	"KS3", // Shantae: Risky's Revenge
 	"KSJ", // Shawn Johnson Gymnastics
 	"KK5", // Kakitori Rekishi: Shouga Kusei (01)

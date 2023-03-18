@@ -18889,6 +18889,70 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// The Seller (USA)
+	else if (strcmp(romTid, "KLLE") == 0) {
+		*(u32*)0x02014B1C = 0xE1A00000; // nop
+		*(u32*)0x02017DDC = 0xE1A00000; // nop
+		patchInitDSiWare(0x0201D654, heapEnd);
+		*(u32*)0x0201D9E0 = *(u32*)0x02004FD0;
+		patchUserSettingsReadDSiWare(0x0201EAE4);
+		setBL(0x0202D1F4, (u32)dsiSaveOpen);
+		setBL(0x0202D204, (u32)dsiSaveWrite);
+		setBL(0x0202D20C, (u32)dsiSaveClose);
+		setBL(0x0202D26C, (u32)dsiSaveGetInfo);
+		setBL(0x0202D280, (u32)dsiSaveOpen);
+		setBL(0x0202D2B4, (u32)dsiSaveCreate);
+		setBL(0x0202D2C4, (u32)dsiSaveOpen);
+		setBL(0x0202D2D4, (u32)dsiSaveGetResultCode);
+		*(u32*)0x0202D2E4 = 0xE1A00000; // nop
+		setBL(0x0202D2F0, (u32)dsiSaveCreate);
+		setBL(0x0202D300, (u32)dsiSaveOpen);
+		setBL(0x0202D310, (u32)dsiSaveWrite);
+		setBL(0x0202D39C, (u32)dsiSaveSeek);
+		setBL(0x0202D3AC, (u32)dsiSaveWrite);
+		setBL(0x0202D3B4, (u32)dsiSaveClose);
+		setBL(0x0202D3F8, (u32)dsiSaveOpen);
+		setBL(0x0202D43C, (u32)dsiSaveRead);
+		setBL(0x0202D4A8, (u32)dsiSaveClose);
+		*(u32*)0x020312A0 = 0xE1A00000; // nop (Skip Manual screen)
+	}
+
+	// The Seller (Europe)
+	else if (strcmp(romTid, "KLLP") == 0) {
+		*(u32*)0x02014B34 = 0xE1A00000; // nop
+		*(u32*)0x02017E88 = 0xE1A00000; // nop
+		patchInitDSiWare(0x0201D738, heapEnd);
+		*(u32*)0x0201DAC4 = *(u32*)0x02004FE8;
+		patchUserSettingsReadDSiWare(0x0201EBD8);
+		setBL(0x0202D2E4, (u32)dsiSaveOpen);
+		setBL(0x0202D2F8, (u32)dsiSaveCreate);
+		setBL(0x0202D308, (u32)dsiSaveOpen);
+		setBL(0x0202D318, (u32)dsiSaveGetResultCode);
+		*(u32*)0x0202D328 = 0xE1A00000; // nop
+		setBL(0x0202D334, (u32)dsiSaveCreate);
+		setBL(0x0202D344, (u32)dsiSaveOpen);
+		setBL(0x0202D358, (u32)dsiSaveWrite);
+		setBL(0x0202D360, (u32)dsiSaveClose);
+		setBL(0x0202D3C0, (u32)dsiSaveGetInfo);
+		setBL(0x0202D3D4, (u32)dsiSaveOpen);
+		setBL(0x0202D404, (u32)dsiSaveCreate);
+		setBL(0x0202D414, (u32)dsiSaveOpen);
+		setBL(0x0202D424, (u32)dsiSaveGetResultCode);
+		*(u32*)0x0202D434 = 0xE1A00000; // nop
+		setBL(0x0202D440, (u32)dsiSaveCreate);
+		setBL(0x0202D450, (u32)dsiSaveOpen);
+		setBL(0x0202D460, (u32)dsiSaveWrite);
+		setBL(0x0202D4E4, (u32)dsiSaveSeek);
+		setBL(0x0202D4F4, (u32)dsiSaveWrite);
+		setBL(0x0202D4FC, (u32)dsiSaveClose);
+		setBL(0x0202D544, (u32)dsiSaveOpen);
+		setBL(0x0202D554, (u32)dsiSaveGetResultCode);
+		setBL(0x0202D580, (u32)dsiSaveGetLength);
+		setBL(0x0202D5D0, (u32)dsiSaveRead);
+		setBL(0x0202D630, (u32)dsiSaveClose);
+		*(u32*)0x02031428 = 0xE1A00000; // nop (Skip Manual screen)
+	}
+
 	// Shantae: Risky's Revenge (USA)
 	// Requires 8MB of RAM, crashes after first battle with 4MB of RAM, but can get past with a save file
 	// BGM is disabled to stay within RAM limitations
