@@ -397,6 +397,7 @@ static const char dsiWareForBootloader2[][4] = {
 	"KM3", // Simply Minesweeper
 	"K4L", // Simply Solitaire
 	"KS4", // Simply Sudoku
+	"K3S", // Slingo Supreme
 	"K2F", // Smart Girl's Playhouse Mini
 	"K4N", // Snakenoid Deluxe
 	"KTY", // Snapdots

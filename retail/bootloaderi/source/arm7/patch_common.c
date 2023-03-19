@@ -11571,6 +11571,36 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02013CB0, (u32)dsiSaveRead); // dsiSaveReadAsync
 	}
 
+	// Slingo Supreme (USA)
+	// Save patch does not work (only bypasses)
+	else if (strcmp(romTid, "K3SE") == 0 && saveOnFlashcard) {
+		*(u32*)0x02024E28 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02024E8C = 0xE12FFF1E; // bx lr
+		*(u32*)0x02024EF0 = 0xE12FFF1E; // bx lr
+		/* setBL(0x02024F58, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+		setBL(0x0202501C, (u32)dsiSaveOpen);
+		setBL(0x0202505C, (u32)dsiSaveSeek);
+		setBL(0x0202507C, (u32)dsiSaveWrite);
+		setBL(0x02025094, (u32)dsiSaveClose);
+		setBL(0x020250C8, (u32)dsiSaveOpen);
+		setBL(0x020250D8, (u32)dsiSaveGetLength);
+		setBL(0x020250F4, (u32)dsiSaveSeek);
+		setBL(0x02025114, (u32)dsiSaveSeek);
+		setBL(0x02025138, (u32)dsiSaveWrite);
+		setBL(0x0202516C, (u32)dsiSaveWrite);
+		setBL(0x020251CC, (u32)dsiSaveSeek);
+		setBL(0x020251EC, (u32)dsiSaveWrite);
+		setBL(0x0202534C, (u32)dsiSaveSeek);
+		setBL(0x02025370, (u32)dsiSaveWrite);
+		*(u32*)0x020253C8 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+		// setBL(0x020253DC, (u32)dsiSaveGetResultCode);
+		setBL(0x02025460, (u32)dsiSaveOpen);
+		setBL(0x02025478, (u32)dsiSaveSetLength);
+		setBL(0x02025488, (u32)dsiSaveRead);
+		setBL(0x0202552C, (u32)dsiSaveClose); */
+		*(u32*)0x02046910 = 0xE3A00000; // mov r0, #0
+	}
+
 	// Smart Girl's Playhouse Mini (USA)
 	else if (strcmp(romTid, "K2FE") == 0) {
 		if (!twlFontFound) {
