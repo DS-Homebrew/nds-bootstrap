@@ -402,6 +402,7 @@ static const char dsiWareForBootloader2[][4] = {
 	"K4N", // Snakenoid Deluxe
 	"KTY", // Snapdots
 	"KX5", // SnowBoard Xtreme
+	"KSO", // Sokomania
 	"KL9", // Sokuren Keisa: Shougaku 1 Nensei
 	"KH2", // Sokuren Keisa: Shougaku 2 Nensei
 	"KH3", // Sokuren Keisa: Shougaku 3 Nensei

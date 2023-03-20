@@ -11742,6 +11742,52 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02031590+offsetChange, (u32)dsiSaveClose);
 	}
 
+	// Sokomania (USA)
+	else if (strcmp(romTid, "KSOE") == 0 && saveOnFlashcard) {
+		const u32 newCode = *(u32*)0x02003000;
+
+		setBL(0x0201857C, (u32)dsiSaveCreate);
+		setBL(0x0201858C, (u32)dsiSaveOpen);
+		setBL(0x020185A8, (u32)dsiSaveGetResultCode);
+		setBL(0x020185D0, (u32)dsiSaveSetLength);
+		setBL(0x020185F8, (u32)dsiSaveWrite);
+		setBL(0x02018600, (u32)dsiSaveClose);
+		setBL(0x02018608, (u32)dsiSaveGetResultCode);
+
+		codeCopy((u32*)newCode, (u32*)0x02018634, 0x188);
+		setBL(newCode+0x2C, (u32)dsiSaveOpenR);
+		setBL(newCode+0x38, (u32)dsiSaveGetResultCode);
+		setBL(newCode+0x50, (u32)dsiSaveGetLength);
+		setBL(newCode+0x74, (u32)dsiSaveRead); // dsiSaveReadAsync
+		setBL(newCode+0xA4, (u32)dsiSaveRead);
+		setBL(newCode+0xBC, (u32)dsiSaveGetResultCode);
+		setBL(newCode+0xCC, (u32)dsiSaveClose);
+		setBL(0x02015294, newCode);
+	}
+
+	// Sokomania (Europe)
+	else if (strcmp(romTid, "KSOP") == 0 && saveOnFlashcard) {
+		const u32 newCode = *(u32*)0x02003000;
+
+		setBL(0x02018568, (u32)dsiSaveCreate);
+		setBL(0x02018578, (u32)dsiSaveOpen);
+		setBL(0x02018594, (u32)dsiSaveGetResultCode);
+		setBL(0x020185BC, (u32)dsiSaveSetLength);
+		setBL(0x020185E4, (u32)dsiSaveWrite);
+		setBL(0x020185EC, (u32)dsiSaveClose);
+		setBL(0x020185F4, (u32)dsiSaveGetResultCode);
+
+		codeCopy((u32*)newCode, (u32*)0x02018620, 0x188);
+		setBL(newCode+0x2C, (u32)dsiSaveOpenR);
+		setBL(newCode+0x38, (u32)dsiSaveGetResultCode);
+		setBL(newCode+0x50, (u32)dsiSaveGetLength);
+		setBL(newCode+0x74, (u32)dsiSaveRead); // dsiSaveReadAsync
+		setBL(newCode+0xA4, (u32)dsiSaveRead);
+		setBL(newCode+0xBC, (u32)dsiSaveGetResultCode);
+		setBL(newCode+0xCC, (u32)dsiSaveClose);
+		setBL(0x02015280, newCode);
+	}
+
 	// Sokuren Keisa: Shougaku 1 Nensei (Japan)
 	// Sokuren Keisa: Shougaku 2 Nensei (Japan)
 	// Saving not supported due to using more than one file in filesystem

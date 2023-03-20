@@ -19637,6 +19637,71 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)(0x02072840+offsetChange) = 0xE1A00000; // nop
 	}
 
+	// Sokomania (USA)
+	else if (strcmp(romTid, "KSOE") == 0) {
+		useSharedFont = (twlFontFound && extendedMemory2);
+		const u32 newCode = *(u32*)0x02004FD0;
+
+		*(u32*)0x02005064 = 0xE1A00000; // nop
+		setBL(0x0201857C, (u32)dsiSaveCreate);
+		setBL(0x0201858C, (u32)dsiSaveOpen);
+		setBL(0x020185A8, (u32)dsiSaveGetResultCode);
+		setBL(0x020185D0, (u32)dsiSaveSetLength);
+		setBL(0x020185F8, (u32)dsiSaveWrite);
+		setBL(0x02018600, (u32)dsiSaveClose);
+		setBL(0x02018608, (u32)dsiSaveGetResultCode);
+
+		codeCopy((u32*)newCode, (u32*)0x02018634, 0x188);
+		setBL(newCode+0x2C, (u32)dsiSaveOpenR);
+		setBL(newCode+0x38, (u32)dsiSaveGetResultCode);
+		setBL(newCode+0x50, (u32)dsiSaveGetLength);
+		setBL(newCode+0x74, (u32)dsiSaveRead); // dsiSaveReadAsync
+		setBL(newCode+0xA4, (u32)dsiSaveRead);
+		setBL(newCode+0xBC, (u32)dsiSaveGetResultCode);
+		setBL(newCode+0xCC, (u32)dsiSaveClose);
+		setBL(0x02015294, newCode);
+
+		*(u32*)0x020326D4 = 0xE1A00000; // nop
+		*(u32*)0x02036A58 = 0xE1A00000; // nop
+		patchInitDSiWare(0x0203C04C, heapEnd);
+		if (!extendedMemory2) {
+			*(u32*)0x0203C3D8 = (*(u32*)0x02004FD0) + 0x188;
+		}
+		patchUserSettingsReadDSiWare(0x0203D620);
+	}
+
+	// Sokomania (Europe)
+	else if (strcmp(romTid, "KSOP") == 0) {
+		useSharedFont = (twlFontFound && extendedMemory2);
+		const u32 newCode = *(u32*)0x02004FC0;
+
+		setBL(0x02018568, (u32)dsiSaveCreate);
+		setBL(0x02018578, (u32)dsiSaveOpen);
+		setBL(0x02018594, (u32)dsiSaveGetResultCode);
+		setBL(0x020185BC, (u32)dsiSaveSetLength);
+		setBL(0x020185E4, (u32)dsiSaveWrite);
+		setBL(0x020185EC, (u32)dsiSaveClose);
+		setBL(0x020185F4, (u32)dsiSaveGetResultCode);
+
+		codeCopy((u32*)newCode, (u32*)0x02018620, 0x188);
+		setBL(newCode+0x2C, (u32)dsiSaveOpenR);
+		setBL(newCode+0x38, (u32)dsiSaveGetResultCode);
+		setBL(newCode+0x50, (u32)dsiSaveGetLength);
+		setBL(newCode+0x74, (u32)dsiSaveRead); // dsiSaveReadAsync
+		setBL(newCode+0xA4, (u32)dsiSaveRead);
+		setBL(newCode+0xBC, (u32)dsiSaveGetResultCode);
+		setBL(newCode+0xCC, (u32)dsiSaveClose);
+		setBL(0x02015280, newCode);
+
+		*(u32*)0x02032644 = 0xE1A00000; // nop
+		*(u32*)0x020369A8 = 0xE1A00000; // nop
+		patchInitDSiWare(0x0203BF8C, heapEnd);
+		if (!extendedMemory2) {
+			*(u32*)0x0203C318 = (*(u32*)0x02004FC0) + 0x188;
+		}
+		patchUserSettingsReadDSiWare(0x0203D560);
+	}
+
 	// Sokuren Keisa: Shougaku 1 Nensei (Japan)
 	// Sokuren Keisa: Shougaku 2 Nensei (Japan)
 	// Sokuren Keisa: Shougaku 3 Nensei (Japan)
