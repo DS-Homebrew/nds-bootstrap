@@ -403,6 +403,7 @@ static const char dsiWareForBootloader2[][4] = {
 	"KTY", // Snapdots
 	"KX5", // SnowBoard Xtreme
 	"KSO", // Sokomania
+	"KSV", // Sokomania 2: Cool Job
 	"KL9", // Sokuren Keisa: Shougaku 1 Nensei
 	"KH2", // Sokuren Keisa: Shougaku 2 Nensei
 	"KH3", // Sokuren Keisa: Shougaku 3 Nensei

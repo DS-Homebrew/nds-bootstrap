@@ -11788,6 +11788,54 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02015280, newCode);
 	}
 
+	// Sokomania 2: Cool Job (USA)
+	else if (strcmp(romTid, "KSVE") == 0 && saveOnFlashcard) {
+		const u32 newCode = *(u32*)0x02003000;
+		*(u32*)0x020049E0 -= 0x1000;
+
+		setBL(0x02030480, (u32)dsiSaveCreate);
+		setBL(0x02030490, (u32)dsiSaveOpen);
+		setBL(0x020304AC, (u32)dsiSaveGetResultCode);
+		setBL(0x020304D4, (u32)dsiSaveSetLength);
+		setBL(0x020304FC, (u32)dsiSaveWrite);
+		setBL(0x02030504, (u32)dsiSaveClose);
+		setBL(0x0203050C, (u32)dsiSaveGetResultCode);
+
+		codeCopy((u32*)newCode, (u32*)0x02030538, 0x188);
+		setBL(newCode+0x2C, (u32)dsiSaveOpenR);
+		setBL(newCode+0x38, (u32)dsiSaveGetResultCode);
+		setBL(newCode+0x50, (u32)dsiSaveGetLength);
+		setBL(newCode+0x74, (u32)dsiSaveRead); // dsiSaveReadAsync
+		setBL(newCode+0xA4, (u32)dsiSaveRead);
+		setBL(newCode+0xBC, (u32)dsiSaveGetResultCode);
+		setBL(newCode+0xCC, (u32)dsiSaveClose);
+		setBL(0x0204BA50, newCode);
+	}
+
+	// Sokomania 2: Cool Job (Europe)
+	else if (strcmp(romTid, "KSVP") == 0 && saveOnFlashcard) {
+		const u32 newCode = *(u32*)0x02003000;
+		*(u32*)0x020049E0 -= 0x1000;
+
+		setBL(0x02027E88, (u32)dsiSaveCreate);
+		setBL(0x02027E98, (u32)dsiSaveOpen);
+		setBL(0x02027EB4, (u32)dsiSaveGetResultCode);
+		setBL(0x02027EDC, (u32)dsiSaveSetLength);
+		setBL(0x02027F04, (u32)dsiSaveWrite);
+		setBL(0x02027F0C, (u32)dsiSaveClose);
+		setBL(0x02027F14, (u32)dsiSaveGetResultCode);
+
+		codeCopy((u32*)newCode, (u32*)0x02027F40, 0x188);
+		setBL(newCode+0x2C, (u32)dsiSaveOpenR);
+		setBL(newCode+0x38, (u32)dsiSaveGetResultCode);
+		setBL(newCode+0x50, (u32)dsiSaveGetLength);
+		setBL(newCode+0x74, (u32)dsiSaveRead); // dsiSaveReadAsync
+		setBL(newCode+0xA4, (u32)dsiSaveRead);
+		setBL(newCode+0xBC, (u32)dsiSaveGetResultCode);
+		setBL(newCode+0xCC, (u32)dsiSaveClose);
+		setBL(0x0204DAB4, newCode);
+	}
+
 	// Sokuren Keisa: Shougaku 1 Nensei (Japan)
 	// Sokuren Keisa: Shougaku 2 Nensei (Japan)
 	// Saving not supported due to using more than one file in filesystem

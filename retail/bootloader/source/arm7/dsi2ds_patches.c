@@ -19640,7 +19640,10 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Sokomania (USA)
 	else if (strcmp(romTid, "KSOE") == 0) {
 		useSharedFont = (twlFontFound && extendedMemory2);
-		const u32 newCode = *(u32*)0x02004FD0;
+		u32 newCode = *(u32*)0x02004FD0;
+		if (extendedMemory2) {
+			newCode += 0x10000;
+		}
 
 		*(u32*)0x02005064 = 0xE1A00000; // nop
 		setBL(0x0201857C, (u32)dsiSaveCreate);
@@ -19673,7 +19676,10 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Sokomania (Europe)
 	else if (strcmp(romTid, "KSOP") == 0) {
 		useSharedFont = (twlFontFound && extendedMemory2);
-		const u32 newCode = *(u32*)0x02004FC0;
+		u32 newCode = *(u32*)0x02004FC0;
+		if (extendedMemory2) {
+			newCode += 0x10000;
+		}
 
 		setBL(0x02018568, (u32)dsiSaveCreate);
 		setBL(0x02018578, (u32)dsiSaveOpen);
@@ -19700,6 +19706,82 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			*(u32*)0x0203C318 = (*(u32*)0x02004FC0) + 0x188;
 		}
 		patchUserSettingsReadDSiWare(0x0203D560);
+	}
+
+	// Sokomania 2: Cool Job (USA)
+	// Audio does not play on retail consoles
+	else if (strcmp(romTid, "KSVE") == 0) {
+		useSharedFont = (twlFontFound && extendedMemory2);
+		const u32 newCode = (*(u32*)0x02004FE8)+0x10000;
+
+		*(u32*)0x0200507C = 0xE1A00000; // nop
+		*(u32*)0x0201A81C = 0xE1A00000; // nop
+		patchInitDSiWare(0x0201FE2C, heapEnd);
+		patchUserSettingsReadDSiWare(0x02021410);
+
+		setBL(0x02030480, (u32)dsiSaveCreate);
+		setBL(0x02030490, (u32)dsiSaveOpen);
+		setBL(0x020304AC, (u32)dsiSaveGetResultCode);
+		setBL(0x020304D4, (u32)dsiSaveSetLength);
+		setBL(0x020304FC, (u32)dsiSaveWrite);
+		setBL(0x02030504, (u32)dsiSaveClose);
+		setBL(0x0203050C, (u32)dsiSaveGetResultCode);
+
+		codeCopy((u32*)newCode, (u32*)0x02030538, 0x188);
+		setBL(newCode+0x2C, (u32)dsiSaveOpenR);
+		setBL(newCode+0x38, (u32)dsiSaveGetResultCode);
+		setBL(newCode+0x50, (u32)dsiSaveGetLength);
+		setBL(newCode+0x74, (u32)dsiSaveRead); // dsiSaveReadAsync
+		setBL(newCode+0xA4, (u32)dsiSaveRead);
+		setBL(newCode+0xBC, (u32)dsiSaveGetResultCode);
+		setBL(newCode+0xCC, (u32)dsiSaveClose);
+		setBL(0x0204BA50, newCode);
+
+		if (!extendedMemory2) {
+			*(u32*)0x0203C414 = 0xE12FFF1E; // bx lr
+		}
+
+		/* if (useSharedFont && !extendedMemory2) {
+			patchTwlFontLoad(0x0204F2C0, 0x02021954);
+			*(u32*)0x0204F31C = 0xE1A00000; // nop
+		} */
+
+		*(u32*)0x02050CB0 = 0xE1A00000; // nop
+	}
+
+	// Sokomania 2: Cool Job (Europe)
+	// Audio does not play on retail consoles
+	else if (strcmp(romTid, "KSVP") == 0) {
+		useSharedFont = (twlFontFound && extendedMemory2);
+		const u32 newCode = (*(u32*)0x02004FE8)+0x10000;
+
+		*(u32*)0x0200507C = 0xE1A00000; // nop
+		*(u32*)0x0200DDF0 = 0xE1A00000; // nop
+		*(u32*)0x02012208 = 0xE1A00000; // nop
+		patchInitDSiWare(0x02017834, heapEnd);
+		patchUserSettingsReadDSiWare(0x02018E18);
+
+		setBL(0x02027E88, (u32)dsiSaveCreate);
+		setBL(0x02027E98, (u32)dsiSaveOpen);
+		setBL(0x02027EB4, (u32)dsiSaveGetResultCode);
+		setBL(0x02027EDC, (u32)dsiSaveSetLength);
+		setBL(0x02027F04, (u32)dsiSaveWrite);
+		setBL(0x02027F0C, (u32)dsiSaveClose);
+		setBL(0x02027F14, (u32)dsiSaveGetResultCode);
+
+		codeCopy((u32*)newCode, (u32*)0x02027F40, 0x188);
+		setBL(newCode+0x2C, (u32)dsiSaveOpenR);
+		setBL(newCode+0x38, (u32)dsiSaveGetResultCode);
+		setBL(newCode+0x50, (u32)dsiSaveGetLength);
+		setBL(newCode+0x74, (u32)dsiSaveRead); // dsiSaveReadAsync
+		setBL(newCode+0xA4, (u32)dsiSaveRead);
+		setBL(newCode+0xBC, (u32)dsiSaveGetResultCode);
+		setBL(newCode+0xCC, (u32)dsiSaveClose);
+		setBL(0x0204DAB4, newCode);
+
+		if (!extendedMemory2) {
+			*(u32*)0x02033E1C = 0xE12FFF1E; // bx lr
+		}
 	}
 
 	// Sokuren Keisa: Shougaku 1 Nensei (Japan)
