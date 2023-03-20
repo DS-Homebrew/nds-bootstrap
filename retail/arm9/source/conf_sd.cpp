@@ -91,6 +91,25 @@ off_t getFileSize(const char* path) {
 	return fsize;
 }
 
+void addTwlDevice(const char letter, u8 flags, u8 accessRights, const char* name, const char* path) {
+	static char currentLetter = 'A';
+	static u8* deviceList = (u8*)0x02EFF000;
+	if (deviceList == (u8*)0x02EFF000) {
+		toncset(deviceList, 0, 0x400);
+	}
+
+	toncset(deviceList, (letter == 0) ? currentLetter : letter, 1);
+	toncset(deviceList+1, flags, 1);
+	toncset(deviceList+2, accessRights, 1);
+	tonccpy(deviceList+4, name, strlen(name));
+	tonccpy(deviceList+0x14, path, strlen(path));
+
+	deviceList += 0x54;
+	if (letter == 0) {
+		currentLetter++;
+	}
+}
+
 extern std::string ReplaceAll(std::string str, const std::string& from, const std::string& to);
 extern bool extention(const std::string& filename, const char* ext);
 
@@ -593,8 +612,11 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	u32 ndsArm7isrc = 0;
 	u32 ndsArm7idst = 0;
 	u32 ndsArm7ilen = 0;
+	u8 shared2len = 0;
 	u32 modcrypt1len = 0;
 	u32 modcrypt2len = 0;
+	u32 pubSize = 0;
+	u32 prvSize = 0;
 	FILE* ndsFile = fopen(conf->ndsPath, "rb");
 	if (ndsFile) {
 		fseek(ndsFile, 0xC, SEEK_SET);
@@ -623,10 +645,16 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		fread(&ndsArm7idst, sizeof(u32), 1, ndsFile); if (ndsArm7idst > 0x02E80000) ndsArm7idst = 0x02E80000;
 		fseek(ndsFile, 0x1DC, SEEK_SET);
 		fread(&ndsArm7ilen, sizeof(u32), 1, ndsFile);
+		fseek(ndsFile, 0x20C, SEEK_SET);
+		fread(&shared2len, sizeof(u8), 1, ndsFile);
 		fseek(ndsFile, 0x224, SEEK_SET);
 		fread(&modcrypt1len, sizeof(u32), 1, ndsFile);
 		fseek(ndsFile, 0x22C, SEEK_SET);
 		fread(&modcrypt2len, sizeof(u32), 1, ndsFile);
+		fseek(ndsFile, 0x238, SEEK_SET);
+		fread(&pubSize, sizeof(u32), 1, ndsFile);
+		fseek(ndsFile, 0x23C, SEEK_SET);
+		fread(&prvSize, sizeof(u32), 1, ndsFile);
 	}
 
 	conf->useSdk20Donor = (memcmp(romTid, "AYI", 3) == 0 && unitCode == 0 && ndsArm7Size == 0x25F70);
@@ -976,45 +1004,55 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		const bool sdNandFound = conf->sdNand && (access("sd:/shared1", F_OK) == 0);
 
 		// Load device list
-		cebin = fopen(sdNandFound ? "nitro:/deviceList_sdnand.bin" : "nitro:/deviceList.bin", "rb");
-		if (cebin) {
-			char sdmcText[4] = {'s','d','m','c'};
-			fread((u8*)0x02EFF000, 1, 0x400, cebin);
-			if (strncmp(romTid, "HNK", 3) == 0 || strncmp(romTid, "KGU", 3) == 0) {
-				const char* filePath = "nand:/shared2/0000";
-				const char* share = "share";
-				u8 cPath[3] = {'C', (sdNandFound ? (u8)0x08 : (u8)0x09), 0x06};
-				tonccpy((char*)0x02EFF2A0, cPath, 3);
-				tonccpy((char*)0x02EFF2A4, share, strlen(share));
-				tonccpy((char*)0x02EFF2B4, filePath, strlen(filePath));
+		addTwlDevice(0, (sdNandFound ? (u8)0 : 0x81), 0x06, "nand", "/");
+		if (!sdNandFound) {
+			addTwlDevice(0, (sdNandFound ? (u8)0 : 0xA1), 0x06, "nand2", "/");
+		} else {
+			addTwlDevice(0, (u8)0, 0x06, "sdmc", "/");
+		}
+		if (shared2len > 0) {
+			addTwlDevice(0, (sdNandFound ? (u8)0x08 : (u8)0x09), 0x06, "share", "nand:/shared2/0000");
+		}
+		if (romTid[0] == 'H') {
+			addTwlDevice(0, (sdNandFound ? (u8)0x10 : 0x11), 0x06, "shared1", "nand:/shared1");
+			if (shared2len == 0) {
+				addTwlDevice(0, (sdNandFound ? (u8)0x10 : 0x11), 0x06, "shared2", "nand:/shared2");
 			}
-			if (!conf->gameOnFlashcard && strlen(conf->appPath) < 62) {
-				tonccpy((char*)0x02EFF3C2, conf->appPath, strlen(conf->appPath));
-				tonccpy((char*)0x02EFF3C0, sdmcText, 4);
-			}
-			if (!conf->saveOnFlashcard) {
-				char* prvPathOffset = sdNandFound ? (char*)0x02EFF1B8 : (char*)0x02EFF20C;
-				char* pubPathOffset = sdNandFound ? (char*)0x02EFF20C : (char*)0x02EFF260;
+		}
+		addTwlDevice(0, (sdNandFound ? (u8)0x10 : (u8)0x31), 0x06, "photo", (sdNandFound ? "sdmc:/photo" : "nand2:/photo"));
+		if (!sdNandFound) {
+			addTwlDevice(0, (u8)0, 0x06, "sdmc", "/");
+		}
+		if (!conf->saveOnFlashcard) {
+			if (strlen(conf->prvPath) < 62 && prvSize > 0) {
+				if (strncasecmp(conf->prvPath, "sd:", 3) != 0) {
+					const bool isSdmc = (strncasecmp(conf->prvPath, "sdmc:", 5) == 0);
+					addTwlDevice(0, ((sdNandFound || isSdmc) ? (u8)0x08 : (u8)0x09), 0x06, "dataPrv", conf->prvPath);
+				} else {
+					char twlPath[64];
+					sprintf(twlPath, "sdmc%s", conf->prvPath+2);
 
-				if (strlen(conf->prvPath) < 62) {
-					if (strncasecmp(conf->prvPath, "sd:", 3) != 0) {
-						tonccpy(prvPathOffset, conf->prvPath, strlen(conf->prvPath));
-					} else {
-						tonccpy(prvPathOffset+2, conf->prvPath, strlen(conf->prvPath));
-						tonccpy(prvPathOffset+2, sdmcText+2, 2);
-					}
+					addTwlDevice(0, 0x08, 0x06, "dataPrv", twlPath);
 				}
-				if (strlen(conf->savPath) < 62) {
-					if (strncasecmp(conf->savPath, "sd:", 3) != 0) {
-						tonccpy(pubPathOffset, conf->savPath, strlen(conf->savPath));
-					} else {
-						tonccpy(pubPathOffset+2, conf->savPath, strlen(conf->savPath));
-						tonccpy(pubPathOffset+2, sdmcText+2, 2);
-					}
+			}
+			if (strlen(conf->savPath) < 62 && pubSize > 0) {
+				if (strncasecmp(conf->savPath, "sd:", 3) != 0) {
+					const bool isSdmc = (strncasecmp(conf->savPath, "sdmc:", 5) == 0);
+					addTwlDevice(0, ((sdNandFound || isSdmc) ? (u8)0x08 : (u8)0x09), 0x06, "dataPub", conf->savPath);
+				} else {
+					char twlPath[64];
+					sprintf(twlPath, "sdmc%s", conf->savPath+2);
+
+					addTwlDevice(0, 0x08, 0x06, "dataPub", twlPath);
 				}
 			}
 		}
-		fclose(cebin);
+
+		if (!conf->gameOnFlashcard && strlen(conf->appPath) < 62) {
+			char sdmcText[4] = {'s','d','m','c'};
+			tonccpy((char*)0x02EFF3C2, conf->appPath, strlen(conf->appPath));
+			tonccpy((char*)0x02EFF3C0, sdmcText, 4);
+		}
 	}
 
 	if (REG_SCFG_EXT7 == 0) {
@@ -1799,7 +1837,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	}
 
 	if ((!dsiFeatures() || conf->b4dsMode) && (strncmp(romTid, "KCX", 3) == 0 || strncmp(romTid, "KAV", 3) == 0 || strncmp(romTid, "KNK", 3) == 0)) {
-		// Load & save cloneboot/multiboot SRL file to page file for booting
+		// Set cloneboot/multiboot SRL file to boot instead
 		if (romFSInit(conf->ndsPath)) {
 			const char* multibootSrl = "rom:/child.srl"; // Art Style: DIGIDRIVE (strncmp(romTid, "KAV", 3) == 0)
 			if (strncmp(romTid, "KCX", 3) == 0) {

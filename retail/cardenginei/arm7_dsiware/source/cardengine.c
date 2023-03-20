@@ -318,8 +318,13 @@ void reset(void) {
 	languageTimer = 0;
 
 	u8* deviceListAddr = (u8*)(*(u32*)0x02FFE1D4);
-	if (deviceListAddr[4] != 'n') {
-		toncset(deviceListAddr+2, 0, 1); // Clear SD access rights
+	if (deviceListAddr[0x3C0] == 's' && deviceListAddr[0x3C1] == 'd') {
+		for (int i = 0; i < 0x3C0; i += 0x54) {
+			if (deviceListAddr[i+4] == 's' && deviceListAddr[i+5] == 'd') {
+				toncset(deviceListAddr+i+2, 0, 1); // Clear SD access rights
+				break;
+			}
+		}
 	}
 
 	if (consoleModel > 0) {
@@ -636,8 +641,13 @@ void myIrqHandlerVBlank(void) {
 
 	if (sdRightsTimer == 60*3) {
 		u8* deviceListAddr = (u8*)(*(u32*)0x02FFE1D4);
-		if (deviceListAddr[4] != 'n') {
-			toncset(deviceListAddr+2, 0x06, 1); // Set SD access rights
+		if (deviceListAddr[0x3C0] == 's' && deviceListAddr[0x3C1] == 'd') {
+			for (int i = 0; i < 0x3C0; i += 0x54) {
+				if (deviceListAddr[i+4] == 's' && deviceListAddr[i+5] == 'd') {
+					toncset(deviceListAddr+i+2, 0x06, 1); // Set SD access rights
+					break;
+				}
+			}
 		}
 
 		sdRightsTimer++;
