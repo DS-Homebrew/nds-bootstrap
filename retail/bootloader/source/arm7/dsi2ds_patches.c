@@ -19818,6 +19818,28 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// Sora Kake Girl: Shojo Shooting (Japan)
+	else if (strcmp(romTid, "KU4J") == 0) {
+		*(u32*)0x0200B544 = 0xE1A00000; // nop
+		tonccpy((u32*)0x0200C0BC, dsiSaveGetResultCode, 0xC);
+		*(u32*)0x0200EEBC = 0xE1A00000; // nop
+		patchInitDSiWare(0x02016C6C, heapEnd);
+		*(u32*)0x02016FF8 = *(u32*)0x02004FD0;
+		*(u32*)0x020492BC = 0xE1A00000; // nop (dsiSaveCreateDir)
+		*(u32*)0x020492C4 = 0xE3A00008; // mov r0, #8 (Result code of dsiSaveCreateDir)
+		*(u32*)0x020493A4 = 0xE3A00001; // mov r0, #1 (dsiSaveCreateDirAuto)
+		setBL(0x0204947C, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+		setBL(0x02049504, (u32)dsiSaveOpen);
+		setBL(0x020495A0, (u32)dsiSaveWrite);
+		setBL(0x020495AC, (u32)dsiSaveClose);
+		setBL(0x02049658, (u32)dsiSaveOpen);
+		setBL(0x020496E0, (u32)dsiSaveGetLength);
+		setBL(0x020496FC, (u32)dsiSaveClose);
+		setBL(0x02049714, (u32)dsiSaveRead);
+		setBL(0x02049720, (u32)dsiSaveClose);
+		*(u32*)0x0204988C = 0xE3A00000; // mov r0, #0 (Skip Manual screen)
+	}
+
 	// Soul of Darkness (USA)
 	// Does not boot: Black screens
 	/*else if (strcmp(romTid, "KSKE") == 0) {

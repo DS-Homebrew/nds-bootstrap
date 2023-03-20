@@ -411,6 +411,7 @@ static const char dsiWareForBootloader2[][4] = {
 	"KO5", // Sokuren Keisa: Shougaku 5 Nensei
 	"KO6", // Sokuren Keisa: Shougaku 6 Nensei
 	"KO7", // Sokuren Keisa: Nanmon-Hen
+	"KU4", // Sora Kake Girl: Shojo Shooting
 	"KA6", // Space Ace
 	"KEV", // Space Invaders Extreme Z
 	"KQ6", // Spin Six
