@@ -294,26 +294,26 @@ static void loadBinary_ARM7 (aFile file)
 	nocashMessage("loadBinary_ARM7");
 
 	// read NDS header
-	fileRead((char*)NDS_HEADER, file, 0, 0x170, 0);
-	fileRead((char*)&dsiFlags, file, 0x1BF, 1, -1);
+	fileRead((char*)NDS_HEADER, file, 0, 0x170);
+	fileRead((char*)&dsiFlags, file, 0x1BF, 1);
 
 	// Load binaries into memory
 	if (ndsPreloaded) {
 		if ((u32)ndsHeader->arm9destination < 0x02004000) {
-			fileRead(ndsHeader->arm9destination, file, ndsHeader->arm9romOffset, ndsHeader->arm9binarySize >= 0x4000 ? 0x4000 : ndsHeader->arm9binarySize, 0);
+			fileRead(ndsHeader->arm9destination, file, ndsHeader->arm9romOffset, ndsHeader->arm9binarySize >= 0x4000 ? 0x4000 : ndsHeader->arm9binarySize);
 		}
 		if ((u32)ndsHeader->arm9destination+ndsHeader->arm9binarySize >= 0x02200000) {
-			fileRead((char*)0x02200000, file, ndsHeader->arm9romOffset + 0x200000 + ((u32)ndsHeader->arm9destination - 0x02000000), ndsHeader->arm9binarySize-0x200000, 0);
+			fileRead((char*)0x02200000, file, ndsHeader->arm9romOffset + 0x200000 + ((u32)ndsHeader->arm9destination - 0x02000000), ndsHeader->arm9binarySize-0x200000);
 		}
 	} else {
-		fileRead(ndsHeader->arm9destination, file, ndsHeader->arm9romOffset, ndsHeader->arm9binarySize, 0);
+		fileRead(ndsHeader->arm9destination, file, ndsHeader->arm9romOffset, ndsHeader->arm9binarySize);
 	}
-	fileRead(ndsHeader->arm7destination, file, ndsHeader->arm7romOffset, ndsHeader->arm7binarySize, 0);
+	fileRead(ndsHeader->arm7destination, file, ndsHeader->arm7romOffset, ndsHeader->arm7binarySize);
 
 	if (dsiModeConfirmed && (*(u8*)(NDS_HEADER + 0x012) & BIT(1)))
 	{
 		// Read full TWL header
-		fileRead((char*)TWL_HEAD, file, 0, 0x1000, 0);
+		fileRead((char*)TWL_HEAD, file, 0, 0x1000);
 
 		u32 ARM9i_SRC = *(u32*)(TWL_HEAD+0x1C0);
 		char* ARM9i_DST = (char*)*(u32*)(TWL_HEAD+0x1C8);
@@ -323,9 +323,9 @@ static void loadBinary_ARM7 (aFile file)
 		u32 ARM7i_LEN = *(u32*)(TWL_HEAD+0x1DC);
 
 		if (ARM9i_LEN)
-			fileRead(ARM9i_DST, file, ARM9i_SRC, ARM9i_LEN, 0);
+			fileRead(ARM9i_DST, file, ARM9i_SRC, ARM9i_LEN);
 		if (ARM7i_LEN)
-			fileRead(ARM7i_DST, file, ARM7i_SRC, ARM7i_LEN, 0);
+			fileRead(ARM7i_DST, file, ARM7i_SRC, ARM7i_LEN);
 	}
 }
 
@@ -568,7 +568,7 @@ int arm7_main (void) {
 	resetMemory_ARM7();
 
 	// Init card
-	if(!FAT_InitFiles(initDisc, 0))
+	if(!FAT_InitFiles(initDisc))
 	{
 		nocashMessage("!FAT_InitFiles");
 		return -1;
@@ -578,13 +578,13 @@ int arm7_main (void) {
 
 	u32 srParams = 0xFFFFFFFF;
 	aFile srParamsFile = getFileFromCluster(srParamsFileCluster);
-	fileRead((char*)&standaloneFileCluster, srParamsFile, 0, 4, -1);
+	fileRead((char*)&standaloneFileCluster, srParamsFile, 0, 4);
 	if (standaloneFileCluster != 0xFFFFFFFF) {
-		fileWrite((char*)&srParams, srParamsFile, 0, 4, -1);
+		fileWrite((char*)&srParams, srParamsFile, 0, 4);
 		srParams = 0;
-		fileWrite((char*)&srParams, srParamsFile, 4, 4, -1);
-		fileWrite((char*)&srParams, srParamsFile, 8, 4, -1);
-		fileWrite((char*)&srParams, srParamsFile, 0xC, 4, -1);
+		fileWrite((char*)&srParams, srParamsFile, 4, 4);
+		fileWrite((char*)&srParams, srParamsFile, 8, 4);
+		fileWrite((char*)&srParams, srParamsFile, 0xC, 4);
 	}
 
 	const bool ramDiskFound = (ramDiskCluster != 0 && ramDiskSize > 0);
@@ -597,7 +597,7 @@ int arm7_main (void) {
 	//const char* bootName = "BOOT.NDS";
 
 	if ((romFile.firstCluster < CLUSTER_FIRST) || (romFile.firstCluster >= CLUSTER_EOF)) {
-		//romFile = getBootFileCluster(bootName, 0);
+		//romFile = getBootFileCluster(bootName);
 		return -1;
 	}
 
@@ -629,17 +629,17 @@ int arm7_main (void) {
 					} else {
 						*(u32*)((u8*)ramDiskLocation+RAM_DISK_MDROMSIZE) = ramDiskSize;
 					}
-					fileRead((char*)((romFileType == 1) ? ramDiskLocation+RAM_DISK_SNESROM : ramDiskLocation+RAM_DISK_MDROM), ramDiskFile, 0, ramDiskSize, 0);
+					fileRead((char*)((romFileType == 1) ? ramDiskLocation+RAM_DISK_SNESROM : ramDiskLocation+RAM_DISK_MDROM), ramDiskFile, 0, ramDiskSize);
 				}
 				if (romFileType == 1 && cfgSize > 0) {
 					// Load snemul.cfg
 					*(u32*)((u8*)ramDiskLocation+RAM_DISK_SNESCFGSIZE) = cfgSize;
 					aFile cfgFile = getFileFromCluster(cfgCluster);
-					fileRead((char*)RAM_DISK_SNESCFG, cfgFile, 0, cfgSize, 0);
+					fileRead((char*)RAM_DISK_SNESCFG, cfgFile, 0, cfgSize);
 				}
 			} else {
 				//buildFatTableCache(&ramDiskFile, 0);
-				fileRead((char*)ramDiskLocation, ramDiskFile, 0, ramDiskSize, 0);
+				fileRead((char*)ramDiskLocation, ramDiskFile, 0, ramDiskSize);
 				//toncset((u32*)0x023A0000, 0, 0x40000);
 			}
 		}
@@ -648,8 +648,8 @@ int arm7_main (void) {
 	bool isGbaR2 = false;
 	u32 bannerOffset = 0;
 	char gbaR2Text[0x20];
-	fileRead((char*)&bannerOffset, romFile, 0x48, 4, -1);
-	fileRead(gbaR2Text, romFile, bannerOffset+0x240, 0x20, -1);
+	fileRead((char*)&bannerOffset, romFile, 0x48, 4);
+	fileRead(gbaR2Text, romFile, bannerOffset+0x240, 0x20);
 	isGbaR2 = (gbaR2Text[0] == 'G' && gbaR2Text[2] == 'B' && gbaR2Text[4] == 'A' && gbaR2Text[6] == 'R' && gbaR2Text[8] == 'u' && gbaR2Text[0xA] == 'n' && gbaR2Text[0xC] == 'n' && gbaR2Text[0xE] == 'e' && gbaR2Text[0x10] == 'r');
 
 	if ((ndsHeader->arm9romOffset==0x4000 && dsiFlags==0) || !dsiMode) {
@@ -680,7 +680,7 @@ int arm7_main (void) {
 
 	// File containing cached patch offsets
 	aFile patchOffsetCacheFile = getFileFromCluster(patchOffsetCacheFileCluster);
-	fileRead((char*)&patchOffsetCache, patchOffsetCacheFile, 0, sizeof(patchOffsetCacheContents), -1);
+	fileRead((char*)&patchOffsetCache, patchOffsetCacheFile, 0, sizeof(patchOffsetCacheContents));
 	u16 prevPatchOffsetCacheFileVersion = patchOffsetCache.ver;
 
 	rsetPatchCache(ndsHeader);
@@ -743,7 +743,7 @@ int arm7_main (void) {
 	toncset((char*)0x06000000, 0, 0x8000);
 
 	if (prevPatchOffsetCacheFileVersion != patchOffsetCacheFileVersion || patchOffsetCacheChanged) {
-		fileWrite((char*)&patchOffsetCache, patchOffsetCacheFile, 0, sizeof(patchOffsetCacheContents), -1);
+		fileWrite((char*)&patchOffsetCache, patchOffsetCacheFile, 0, sizeof(patchOffsetCacheContents));
 	}
 
 	if (dsiModeConfirmed) {

@@ -272,7 +272,7 @@ void continueCardReadDmaArm9() {
 
         		buffer = getCacheAddress(slot);
 
-				//fileRead((char*)buffer, *romFile, sector, ce9->cacheBlockSize, 0);
+				//fileRead((char*)buffer, *romFile, sector, ce9->cacheBlockSize);
 
 				/*u32 len2 = (src - sector) + len;
 				u16 readLen = ce9->cacheBlockSize;
@@ -524,7 +524,7 @@ void cardSetDma(u32 * params) {
 
 			buffer = getCacheAddress(slot);
 
-			//fileRead((char*)buffer, *romFile, sector, ce9->cacheBlockSize, 0);
+			//fileRead((char*)buffer, *romFile, sector, ce9->cacheBlockSize);
 
 			/*u32 len2 = (src - sector) + len;
 			u16 readLen = ce9->cacheBlockSize;

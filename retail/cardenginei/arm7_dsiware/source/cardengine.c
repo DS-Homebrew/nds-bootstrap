@@ -186,7 +186,7 @@ static void driveInitialize(void) {
 		sdmmc_init();
 		SD_Init();
 	}
-	FAT_InitFiles(false, 0);
+	FAT_InitFiles(false);
 
 	#ifdef CARDSAVE
 	getFileFromCluster(&savFile, saveCluster);
@@ -199,7 +199,7 @@ static void driveInitialize(void) {
 
 	#ifdef DEBUG		
 	aFile myDebugFile;
-	getBootFileCluster(&myDebugFile, "NDSBTSRP.LOG", 0);
+	getBootFileCluster(&myDebugFile, "NDSBTSRP.LOG");
 	enableDebug(&myDebugFile);
 	dbg_printf("logging initialized\n");		
 	dbg_printf("sdk version :");
@@ -343,14 +343,14 @@ void reset(void) {
 		u32 newArm7binarySize = 0;
 		u32 newArm7ibinarySize = 0;
 
-		fileRead((char*)&iUncompressedSize, &pageFile, 0x5FFFF0, sizeof(u32), 0);
-		fileRead((char*)&newArm7binarySize, &pageFile, 0x5FFFF4, sizeof(u32), 0);
-		fileRead((char*)&iUncompressedSizei, &pageFile, 0x5FFFF8, sizeof(u32), 0);
-		fileRead((char*)&newArm7ibinarySize, &pageFile, 0x5FFFFC, sizeof(u32), 0);
-		fileRead((char*)ndsHeader->arm9destination, &pageFile, 0, iUncompressedSize, 0);
-		fileRead((char*)ndsHeader->arm7destination, &pageFile, 0x2C0000, newArm7binarySize, 0);
-		fileRead((char*)(*(u32*)0x02FFE1C8), &pageFile, 0x300000, iUncompressedSizei, 0);
-		fileRead((char*)(*(u32*)0x02FFE1D8), &pageFile, 0x580000, newArm7ibinarySize, 0);
+		fileRead((char*)&iUncompressedSize, &pageFile, 0x5FFFF0, sizeof(u32));
+		fileRead((char*)&newArm7binarySize, &pageFile, 0x5FFFF4, sizeof(u32));
+		fileRead((char*)&iUncompressedSizei, &pageFile, 0x5FFFF8, sizeof(u32));
+		fileRead((char*)&newArm7ibinarySize, &pageFile, 0x5FFFFC, sizeof(u32));
+		fileRead((char*)ndsHeader->arm9destination, &pageFile, 0, iUncompressedSize);
+		fileRead((char*)ndsHeader->arm7destination, &pageFile, 0x2C0000, newArm7binarySize);
+		fileRead((char*)(*(u32*)0x02FFE1C8), &pageFile, 0x300000, iUncompressedSizei);
+		fileRead((char*)(*(u32*)0x02FFE1D8), &pageFile, 0x580000, newArm7ibinarySize);
 
 		restoreBakData();
 	}
@@ -383,7 +383,7 @@ void forceGameReboot(void) {
 	}
 	u32 clearBuffer = 0;
 	driveInitialize();
-	fileWrite((char*)&clearBuffer, &srParamsFile, 0, 0x4, -1);
+	fileWrite((char*)&clearBuffer, &srParamsFile, 0, 0x4);
 	if (*(u32*)(ce7+0x8D00) == 0) {
 		tonccpy((u32*)0x02000300, sr_data_srloader, 0x20);
 	} else {
@@ -496,14 +496,14 @@ void returnToLoader(bool wait) {
 		i2cWriteRegister(0x4A, 0x11, 0x01);
 	}
 
-	fileRead((char*)__DSiHeader, &file, 0, sizeof(tDSiHeader), 0);
+	fileRead((char*)__DSiHeader, &file, 0, sizeof(tDSiHeader));
 	*ndsHeader = __DSiHeader->ndshdr;
 
-	fileRead(__DSiHeader->ndshdr.arm9destination, &file, (u32)__DSiHeader->ndshdr.arm9romOffset, __DSiHeader->ndshdr.arm9binarySize, 0);
-	fileRead(__DSiHeader->ndshdr.arm7destination, &file, (u32)__DSiHeader->ndshdr.arm7romOffset, __DSiHeader->ndshdr.arm7binarySize, 0);
+	fileRead(__DSiHeader->ndshdr.arm9destination, &file, (u32)__DSiHeader->ndshdr.arm9romOffset, __DSiHeader->ndshdr.arm9binarySize);
+	fileRead(__DSiHeader->ndshdr.arm7destination, &file, (u32)__DSiHeader->ndshdr.arm7romOffset, __DSiHeader->ndshdr.arm7binarySize);
 	if (ndsHeader->unitCode > 0) {
-		fileRead(__DSiHeader->arm9idestination, &file, (u32)__DSiHeader->arm9iromOffset, __DSiHeader->arm9ibinarySize, 0);
-		fileRead(__DSiHeader->arm7idestination, &file, (u32)__DSiHeader->arm7iromOffset, __DSiHeader->arm7ibinarySize, 0);
+		fileRead(__DSiHeader->arm9idestination, &file, (u32)__DSiHeader->arm9iromOffset, __DSiHeader->arm9ibinarySize);
+		fileRead(__DSiHeader->arm7idestination, &file, (u32)__DSiHeader->arm7iromOffset, __DSiHeader->arm7ibinarySize);
 
 		initMBK_dsiMode();
 	}
@@ -527,34 +527,34 @@ void dumpRam(void) {
 	driveInitialize();
 	sharedAddr[3] = 0x444D4152;
 	// Dump RAM
-	fileWrite((char*)0x0C000000, &ramDumpFile, 0, (consoleModel==0 ? 0x01000000 : 0x02000000), -1);
+	fileWrite((char*)0x0C000000, &ramDumpFile, 0, (consoleModel==0 ? 0x01000000 : 0x02000000));
 	sharedAddr[3] = 0;
 }
 
 void prepareScreenshot(void) {
 	driveInitialize();
-	fileWrite((char*)INGAME_MENU_EXT_LOCATION, &pageFile, 0x540000, 0x40000, -1);
+	fileWrite((char*)INGAME_MENU_EXT_LOCATION, &pageFile, 0x540000, 0x40000);
 }
 
 void saveScreenshot(void) {
 	if (igmText->currentScreenshot >= 50) return;
 
 	driveInitialize();
-	fileWrite((char*)INGAME_MENU_EXT_LOCATION, &screenshotFile, 0x200 + (igmText->currentScreenshot * 0x18400), 0x18046, -1);
+	fileWrite((char*)INGAME_MENU_EXT_LOCATION, &screenshotFile, 0x200 + (igmText->currentScreenshot * 0x18400), 0x18046);
 
 	// Skip until next blank slot
 	char magic;
 	do {
 		igmText->currentScreenshot++;
-		fileRead(&magic, &screenshotFile, 0x200 + (igmText->currentScreenshot * 0x18400), 1, -1);
+		fileRead(&magic, &screenshotFile, 0x200 + (igmText->currentScreenshot * 0x18400), 1);
 	} while(magic == 'B' && igmText->currentScreenshot < 50);
 
-	fileRead((char*)INGAME_MENU_EXT_LOCATION, &pageFile, 0x540000, 0x40000, -1);
+	fileRead((char*)INGAME_MENU_EXT_LOCATION, &pageFile, 0x540000, 0x40000);
 }
 
 void prepareManual(void) {
 	driveInitialize();
-	fileWrite((char*)INGAME_MENU_EXT_LOCATION, &pageFile, 0x540000, 32 * 24, -1);
+	fileWrite((char*)INGAME_MENU_EXT_LOCATION, &pageFile, 0x540000, 32 * 24);
 }
 
 void readManual(int line) {
@@ -566,7 +566,7 @@ void readManual(int line) {
 	bool firstLoop = true;
 	while(currentManualLine != line) {
 		if(line > currentManualLine) {
-			fileRead(buffer, &manualFile, currentManualOffset, 32, -1);
+			fileRead(buffer, &manualFile, currentManualOffset, 32);
 
 			for(int i = 0; i < 32; i++) {
 				if(buffer[i] == '\n') {
@@ -580,7 +580,7 @@ void readManual(int line) {
 			}
 		} else {
 			currentManualOffset -= 32;
-			fileRead(buffer, &manualFile, currentManualOffset, 32, -1);
+			fileRead(buffer, &manualFile, currentManualOffset, 32);
 			int i = firstLoop ? 30 : 31;
 			firstLoop = false;
 			for(; i >= 0; i--) {
@@ -601,11 +601,11 @@ void readManual(int line) {
 	u32 tempManualOffset = currentManualOffset;
 	bool fullLine = false;
 	for(int line = 0; line < 24 && line < igmText->manualMaxLine; line++) {
-		fileRead(buffer, &manualFile, tempManualOffset, 32, -1);
+		fileRead(buffer, &manualFile, tempManualOffset, 32);
 
 		// Fix for exactly 32 char lines
 		if(fullLine && buffer[0] == '\n')
-			fileRead(buffer, &manualFile, ++tempManualOffset, 32, -1);
+			fileRead(buffer, &manualFile, ++tempManualOffset, 32);
 
 		for(int i = 0; i <= 32; i++) {
 			if(i == 32 || buffer[i] == '\n' || buffer[i] == '\0') {
@@ -621,7 +621,7 @@ void readManual(int line) {
 }
 
 void restorePreManual(void) {
-	fileRead((char*)INGAME_MENU_EXT_LOCATION, &pageFile, 0x540000, 32 * 24, -1);
+	fileRead((char*)INGAME_MENU_EXT_LOCATION, &pageFile, 0x540000, 32 * 24);
 }
 
 void myIrqHandlerVBlank(void) {
@@ -826,7 +826,7 @@ bool eepromRead(u32 src, void *dst, u32 len) {
 
 	bakSdData();
 	driveInitialize();
-	fileRead(dst, savFile, src, len, -1);
+	fileRead(dst, savFile, src, len);
 	restoreSdBakData();
 
 	return true;
@@ -846,7 +846,7 @@ bool eepromPageWrite(u32 dst, const void *src, u32 len) {
 	
 	bakSdData();
 	driveInitialize();
-	fileWrite(src, savFile, dst, len, -1);
+	fileWrite(src, savFile, dst, len);
 	restoreSdBakData();
 
 	return true;
@@ -866,7 +866,7 @@ bool eepromPageProg(u32 dst, const void *src, u32 len) {
 
 	bakSdData();
 	driveInitialize();
-	fileWrite(src, savFile, dst, len, -1);
+	fileWrite(src, savFile, dst, len);
 	restoreSdBakData();
 
 	return true;

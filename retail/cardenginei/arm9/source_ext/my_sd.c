@@ -103,7 +103,7 @@ starting at "sector".
 The buffer may be unaligned, and the driver must deal with this correctly.
 return true if it was successful, false if it failed for any reason
 -----------------------------------------------------------------*/
-bool my_sdio_ReadSectors(sec_t sector, sec_t numSectors, void* buffer, int ndmaSlot) {
+bool my_sdio_ReadSectors(sec_t sector, sec_t numSectors, void* buffer) {
 	#ifdef DEBUG
 	nocashMessage("readSectors internal");
 	#endif
@@ -121,7 +121,6 @@ bool my_sdio_ReadSectors(sec_t sector, sec_t numSectors, void* buffer, int ndmaS
 	sharedAddr[0] = sector;
 	sharedAddr[1] = numSectors;
 	sharedAddr[2] = (vu32)buffer;
-	sharedAddr[3] = ndmaSlot;
 	sharedAddr[4] = commandRead;
 
 	while (sharedAddr[4] == commandRead) {
@@ -138,7 +137,7 @@ starting at "sector".
 The buffer may be unaligned, and the driver must deal with this correctly.
 return true if it was successful, false if it failed for any reason
 -----------------------------------------------------------------*/
-int my_sdio_ReadSectors_nonblocking(sec_t sector, sec_t numSectors, void* buffer, int ndmaSlot) {
+int my_sdio_ReadSectors_nonblocking(sec_t sector, sec_t numSectors, void* buffer) {
 	#ifdef DEBUG
 	nocashMessage("my_sdio_ReadSectors_nonblocking");
 	#endif
@@ -152,7 +151,6 @@ int my_sdio_ReadSectors_nonblocking(sec_t sector, sec_t numSectors, void* buffer
 	sharedAddr[0] = sector;
 	sharedAddr[1] = numSectors;
 	sharedAddr[2] = (vu32)buffer;
-	sharedAddr[3] = ndmaSlot;
 	sharedAddr[4] = commandRead;
 
 	while (sharedAddr[4] == commandRead);
@@ -160,7 +158,7 @@ int my_sdio_ReadSectors_nonblocking(sec_t sector, sec_t numSectors, void* buffer
 	return false;
 }
 
-bool  my_sdio_check_command(int cmd, int ndmaSlot) {
+bool  my_sdio_check_command(int cmd) {
 	#ifdef DEBUG
 	nocashMessage("my_sdio_check_command");
 	#endif
@@ -168,7 +166,6 @@ bool  my_sdio_check_command(int cmd, int ndmaSlot) {
 	/*u32 commandCheck = 0x53444348;
 
 	sharedAddr[0] = cmd;
-	sharedAddr[1] = ndmaSlot;
 	sharedAddr[4] = commandCheck;
 
 	while (sharedAddr[4] == commandCheck);
@@ -183,7 +180,7 @@ starting at "sector".
 The buffer may be unaligned, and the driver must deal with this correctly.
 return true if it was successful, false if it failed for any reason
 -----------------------------------------------------------------*/
-bool my_sdio_WriteSectors(sec_t sector, sec_t numSectors, const void* buffer, int ndmaSlot) {
+bool my_sdio_WriteSectors(sec_t sector, sec_t numSectors, const void* buffer) {
 	#ifdef DEBUG
 	nocashMessage("writeSectors internal");
 	#endif
@@ -193,7 +190,6 @@ bool my_sdio_WriteSectors(sec_t sector, sec_t numSectors, const void* buffer, in
 	sharedAddr[0] = sector;
 	sharedAddr[1] = numSectors;
 	sharedAddr[2] = (vu32)buffer;
-	sharedAddr[3] = 0;
 	sharedAddr[4] = commandWrite;
 
 	if (dmaOn) IPC_SendSync(0x4);
@@ -236,10 +232,10 @@ const NEW_DISC_INTERFACE __myio_dsisd = {
 	(FN_MEDIUM_STARTUP)&my_sdio_Startup,
 	(FN_MEDIUM_ISINSERTED)&my_sdio_IsInserted,
     (FN_MEDIUM_READSECTOR)&my_sdio_ReadSector,
-	(FN_MEDIUM_NEW_READSECTORS)&my_sdio_ReadSectors,
+	(FN_MEDIUM_READSECTORS)&my_sdio_ReadSectors,
     (FN_MEDIUM_READSECTORS_NONBLOCKING)&my_sdio_ReadSectors_nonblocking,
     (FN_MEDIUM_CHECK_COMMAND)&my_sdio_check_command,
-	(FN_MEDIUM_NEW_WRITESECTORS)&my_sdio_WriteSectors,
+	(FN_MEDIUM_WRITESECTORS)&my_sdio_WriteSectors,
 	(FN_MEDIUM_CLEARSTATUS)&my_sdio_ClearStatus,
 	(FN_MEDIUM_SHUTDOWN)&my_sdio_Shutdown
 };

@@ -35,6 +35,7 @@
 #define DATA32_SUPPORT
 
 
+static int ndmaSlot = 0;
 struct mmcdevice handleNAND;
 struct mmcdevice handleSD;
 
@@ -311,11 +312,8 @@ static void sdmmc_send_command(struct mmcdevice *ctx, u32 cmd, u32 args)
 	}
 }
 
-static void sdmmc_send_command_nonblocking_ndma(struct mmcdevice *ctx, u32 cmd, u32 args, int ndmaSlot)
+static void sdmmc_send_command_nonblocking_ndma(struct mmcdevice *ctx, u32 cmd, u32 args)
 {
-	if (ndmaSlot < 0) ndmaSlot = 0;
-	if (ndmaSlot > 3) ndmaSlot = 3;
-
 	*((vu32*)0x4004100) = 0x80020000; //use round robin arbitration method;
 
 	*(vu32*)((u32)0x4004104+0x1C*ndmaSlot) = 0x0400490C;
@@ -487,7 +485,7 @@ static void sdmmc_send_command_nonblocking_ndma(struct mmcdevice *ctx, u32 cmd, 
 }
 
 /* return true if the command is completed and false if it is still ongoing */
-static bool sdmmc_check_command_ndma(struct mmcdevice *ctx, u32 cmd, int ndmaSlot)
+static bool sdmmc_check_command_ndma(struct mmcdevice *ctx, u32 cmd)
 {
 	const bool getSDRESP = (cmd << 15) >> 31;
     u16 flags = (cmd << 15) >> 31;
@@ -555,7 +553,7 @@ static bool sdmmc_check_command_ndma(struct mmcdevice *ctx, u32 cmd, int ndmaSlo
 	} else return false;
 }
 
-int my_sdmmc_sdcard_writesectors(u32 sector_no, u32 numsectors, const u8 *in, int ndmaSlot)
+int my_sdmmc_sdcard_writesectors(u32 sector_no, u32 numsectors, const u8 *in)
 {
 	if(handleSD.isSDHC == 0) sector_no <<= 9;
 	set_target(&handleSD);
@@ -569,15 +567,15 @@ int my_sdmmc_sdcard_writesectors(u32 sector_no, u32 numsectors, const u8 *in, in
 	handleSD.size = numsectors << 9;
     handleSD.startOffset = 0;
     handleSD.endOffset = 0;
-	if (ndmaSlot < 0 || ndmaSlot > 3) {
+	// if (ndmaSlot < 0 || ndmaSlot > 3) {
 		sdmmc_send_command(&handleSD,0x52C19,sector_no);
-	} else {
+	/* } else { // Writes are bugged with NDMA
         //nocashMessage("my_sdmmc_sdcard_writesectors");
-        sdmmc_send_command_nonblocking_ndma(&handleSD,0x52C19,sector_no,ndmaSlot);
+        sdmmc_send_command_nonblocking_ndma(&handleSD,0x52C19,sector_no);
         //nocashMessage("command sent");
-        while(!sdmmc_check_command_ndma(&handleSD,0x52C19,ndmaSlot)) {}
+        while(!sdmmc_check_command_ndma(&handleSD,0x52C19)) {}
         //nocashMessage("command checked");
-	}
+	} */
 	return get_error(&handleSD);
 }
 
@@ -599,7 +597,7 @@ int my_sdmmc_sdcard_readsector(u32 sector_no, u8 *out, u32 startOffset, u32 endO
 	return get_error(&handleSD);
 }
 
-int my_sdmmc_sdcard_readsectors(u32 sector_no, u32 numsectors, u8 *out, int ndmaSlot)
+int my_sdmmc_sdcard_readsectors(u32 sector_no, u32 numsectors, u8 *out)
 {
 	if(handleSD.isSDHC == 0) sector_no <<= 9;
 	set_target(&handleSD);
@@ -617,20 +615,20 @@ int my_sdmmc_sdcard_readsectors(u32 sector_no, u32 numsectors, u8 *out, int ndma
 		sdmmc_send_command(&handleSD,0x33C12,sector_no);
 	} else {
         //nocashMessage("my_sdmmc_sdcard_readsectors");
-        sdmmc_send_command_nonblocking_ndma(&handleSD,0x33C12,sector_no,ndmaSlot);
+        sdmmc_send_command_nonblocking_ndma(&handleSD,0x33C12,sector_no);
         //nocashMessage("command sent");
-        while(!sdmmc_check_command_ndma(&handleSD,0x33C12,ndmaSlot)) {}
+        while(!sdmmc_check_command_ndma(&handleSD,0x33C12)) {}
         //nocashMessage("command checked");
 	}
 	return get_error(&handleSD);
 }
 
-bool my_sdmmc_sdcard_check_command(int cmd, int ndmaSlot)
+bool my_sdmmc_sdcard_check_command(int cmd)
 {
-    return sdmmc_check_command_ndma(&handleSD,cmd,ndmaSlot);
+    return sdmmc_check_command_ndma(&handleSD,cmd);
 }
 
-int my_sdmmc_sdcard_readsectors_nonblocking(u32 sector_no, u32 numsectors, u8 *out, int ndmaSlot)
+int my_sdmmc_sdcard_readsectors_nonblocking(u32 sector_no, u32 numsectors, u8 *out)
 {
 	if(handleSD.isSDHC == 0) sector_no <<= 9;
 	set_target(&handleSD);
@@ -649,9 +647,9 @@ int my_sdmmc_sdcard_readsectors_nonblocking(u32 sector_no, u32 numsectors, u8 *o
         return -1;
 	} else {
         //nocashMessage("my_sdmmc_sdcard_readsectors");
-        sdmmc_send_command_nonblocking_ndma(&handleSD,0x33C12,sector_no,ndmaSlot);
+        sdmmc_send_command_nonblocking_ndma(&handleSD,0x33C12,sector_no);
         //nocashMessage("command sent");
-        /*while(!sdmmc_check_command_ndma(&handleSD,0x33C12,ndmaSlot)) {}
+        /*while(!sdmmc_check_command_ndma(&handleSD,0x33C12)) {}
         nocashMessage("command checked");*/
 	}
 	return 0x33C12;

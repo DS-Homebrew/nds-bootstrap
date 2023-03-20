@@ -339,14 +339,14 @@ int main (void) {
 	(*(vu32*)0x02FFFE24) = (u32)TEMP_MEM;	// Make ARM9 jump to the function
 
 	// Init card
-	if(!FAT_InitFiles(true, 0))
+	if(!FAT_InitFiles(true))
 	{
 		return -1;
 	}
 	aFile file = getFileFromCluster(storedFileCluster);
 	if ((file.firstCluster < CLUSTER_FIRST) || (file.firstCluster >= CLUSTER_EOF)) 	/* Invalid file cluster specified */
 	{
-		//file = getBootFileCluster(bootName, 0);
+		//file = getBootFileCluster(bootName);
 		return -1;
 	}
 	if (file.firstCluster == CLUSTER_FREE)
@@ -355,12 +355,12 @@ int main (void) {
 	}
 
 	u8 tidCrc[6] = {0};
-	fileRead((char*)tidCrc, file, 0xC, 4, -1);
-	fileRead((char*)tidCrc+4, file, 0x15E, 2, -1);
+	fileRead((char*)tidCrc, file, 0xC, 4);
+	fileRead((char*)tidCrc+4, file, 0x15E, 2);
 
 	aFile srParamsFile = getFileFromCluster(srParamsFileCluster);
-	fileWrite((char*)&storedFileCluster, srParamsFile, 0, 4, -1);	// Write file cluster to soft-reset params file for nds-bootstrap to read after rebooting the console
-	fileWrite((char*)tidCrc, srParamsFile, 4, 6, -1);
+	fileWrite((char*)&storedFileCluster, srParamsFile, 0, 4);	// Write file cluster to soft-reset params file for nds-bootstrap to read after rebooting the console
+	fileWrite((char*)tidCrc, srParamsFile, 4, 6);
 
 	if (srTid1 != 0) {
 		readSrBackendId();

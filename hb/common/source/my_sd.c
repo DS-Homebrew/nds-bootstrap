@@ -47,11 +47,11 @@ starting at "sector".
 The buffer may be unaligned, and the driver must deal with this correctly.
 return true if it was successful, false if it failed for any reason
 -----------------------------------------------------------------*/
-bool my_sdio_ReadSectors(sec_t sector, sec_t numSectors, void* buffer, int ndmaSlot) {
+bool my_sdio_ReadSectors(sec_t sector, sec_t numSectors, void* buffer) {
 	#ifdef DEBUG
 	nocashMessage("readSectors internal");
 	#endif
-	return my_sdmmc_sdcard_readsectors(sector, numSectors, buffer, ndmaSlot) == 0;
+	return my_sdmmc_sdcard_readsectors(sector, numSectors, buffer) == 0;
 }
 
 /*-----------------------------------------------------------------
@@ -61,18 +61,18 @@ starting at "sector".
 The buffer may be unaligned, and the driver must deal with this correctly.
 return true if it was successful, false if it failed for any reason
 -----------------------------------------------------------------*/
-int my_sdio_ReadSectors_nonblocking(sec_t sector, sec_t numSectors, void* buffer, int ndmaSlot) {
+int my_sdio_ReadSectors_nonblocking(sec_t sector, sec_t numSectors, void* buffer) {
 	#ifdef DEBUG
 	nocashMessage("my_sdio_ReadSectors_nonblocking");
 	#endif
-	return my_sdmmc_sdcard_readsectors_nonblocking(sector, numSectors, buffer, ndmaSlot);
+	return my_sdmmc_sdcard_readsectors_nonblocking(sector, numSectors, buffer);
 }
 
-bool  my_sdio_check_command(int cmd, int ndmaSlot) {
+bool  my_sdio_check_command(int cmd) {
 	#ifdef DEBUG
 	nocashMessage("my_sdio_check_command");
 	#endif
-	return my_sdmmc_sdcard_check_command(cmd, ndmaSlot);
+	return my_sdmmc_sdcard_check_command(cmd);
 }
 
 /*-----------------------------------------------------------------
@@ -82,11 +82,11 @@ starting at "sector".
 The buffer may be unaligned, and the driver must deal with this correctly.
 return true if it was successful, false if it failed for any reason
 -----------------------------------------------------------------*/
-bool my_sdio_WriteSectors(sec_t sector, sec_t numSectors, const void* buffer, int ndmaSlot) {
+bool my_sdio_WriteSectors(sec_t sector, sec_t numSectors, const void* buffer) {
 	#ifdef DEBUG
 	nocashMessage("writeSectors internal");
 	#endif
-	return my_sdmmc_sdcard_writesectors(sector, numSectors, buffer, ndmaSlot) == 0;
+	return my_sdmmc_sdcard_writesectors(sector, numSectors, buffer) == 0;
 }
 
 

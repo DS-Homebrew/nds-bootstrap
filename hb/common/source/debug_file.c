@@ -39,7 +39,7 @@ u32 dbg_printf(const char* message) {
 
     nocashMessage(message);
 
-	u32 ret = fileWrite(message, _debugFileCluster, _currentPos, strlen(message), 3);
+	u32 ret = fileWrite(message, _debugFileCluster, _currentPos, strlen(message));
 
 	_currentPos += strlen(message);
 

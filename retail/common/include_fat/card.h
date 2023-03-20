@@ -47,26 +47,26 @@ static inline bool CARD_ReadSector(u32 sector, void *buffer, u32 startOffset, u3
 					: __myio_dldi.readSectors(sector, 1, buffer);
 }
 
-static inline bool CARD_ReadSectors(u32 sector, int count, void *buffer, int ndmaSlot, bool card2) {
-	return !card2 ? __myio_dsisd.readSectors(sector, count, buffer, ndmaSlot)
+static inline bool CARD_ReadSectors(u32 sector, int count, void *buffer, bool card2) {
+	return !card2 ? __myio_dsisd.readSectors(sector, count, buffer)
 					: __myio_dldi.readSectors(sector, count, buffer);
 }
 
-static inline int CARD_ReadSectorsNonBlocking(u32 sector, int count, void *buffer, int ndmaSlot) {
-	return __myio_dsisd.readSectorsNonBlocking(sector, count, buffer, ndmaSlot);
+static inline int CARD_ReadSectorsNonBlocking(u32 sector, int count, void *buffer) {
+	return __myio_dsisd.readSectorsNonBlocking(sector, count, buffer);
 }
 
-static inline int CARD_CheckCommand(int cmd, int ndmaSlot) {
-	return __myio_dsisd.checkCommand(cmd, ndmaSlot);
+static inline int CARD_CheckCommand(int cmd) {
+	return __myio_dsisd.checkCommand(cmd);
 }
 
-static inline bool CARD_WriteSector(u32 sector, const void *buffer, int ndmaSlot, bool card2) {
-	return !card2 ? __myio_dsisd.writeSectors(sector, 1, buffer, ndmaSlot)
+static inline bool CARD_WriteSector(u32 sector, const void *buffer, bool card2) {
+	return !card2 ? __myio_dsisd.writeSectors(sector, 1, buffer)
 					: __myio_dldi.writeSectors(sector, 1, buffer);
 }
 
-static inline bool CARD_WriteSectors(u32 sector, int count, const void *buffer, int ndmaSlot, bool card2) {
-	return !card2 ? __myio_dsisd.writeSectors(sector, count, buffer, ndmaSlot)
+static inline bool CARD_WriteSectors(u32 sector, int count, const void *buffer, bool card2) {
+	return !card2 ? __myio_dsisd.writeSectors(sector, count, buffer)
 					: __myio_dldi.writeSectors(sector, count, buffer);
 }
 #else
@@ -82,24 +82,24 @@ static inline bool CARD_ReadSector(u32 sector, void *buffer, u32 startOffset, u3
 	return __myio_dsisd.readSector(sector, buffer, startOffset, endOffset);
 }
 
-static inline bool CARD_ReadSectors(u32 sector, int count, void *buffer, int ndmaSlot) {
-	return __myio_dsisd.readSectors(sector, count, buffer, ndmaSlot);
+static inline bool CARD_ReadSectors(u32 sector, int count, void *buffer) {
+	return __myio_dsisd.readSectors(sector, count, buffer);
 }
 
-static inline int CARD_ReadSectorsNonBlocking(u32 sector, int count, void *buffer, int ndmaSlot) {
-	return __myio_dsisd.readSectorsNonBlocking(sector, count, buffer, ndmaSlot);
+static inline int CARD_ReadSectorsNonBlocking(u32 sector, int count, void *buffer) {
+	return __myio_dsisd.readSectorsNonBlocking(sector, count, buffer);
 }
 
-static inline int CARD_CheckCommand(int cmd, int ndmaSlot) {
-	return __myio_dsisd.checkCommand(cmd, ndmaSlot);
+static inline int CARD_CheckCommand(int cmd) {
+	return __myio_dsisd.checkCommand(cmd);
 }
 
-static inline bool CARD_WriteSector(u32 sector, const void *buffer, int ndmaSlot) {
-	return __myio_dsisd.writeSectors(sector, 1, buffer, ndmaSlot);
+static inline bool CARD_WriteSector(u32 sector, const void *buffer) {
+	return __myio_dsisd.writeSectors(sector, 1, buffer);
 }
 
-static inline bool CARD_WriteSectors(u32 sector, int count, const void *buffer, int ndmaSlot) {
-	return __myio_dsisd.writeSectors(sector, count, buffer, ndmaSlot);
+static inline bool CARD_WriteSectors(u32 sector, int count, const void *buffer) {
+	return __myio_dsisd.writeSectors(sector, count, buffer);
 }
 #endif
 #else
@@ -131,21 +131,21 @@ static inline bool CARD_ReadSector(u32 sector, void *buffer, u32 startOffset, u3
 	return res;
 }
 
-static inline bool CARD_ReadSectors(u32 sector, int count, void *buffer, int ndmaSlot) {
+static inline bool CARD_ReadSectors(u32 sector, int count, void *buffer) {
 	s2RamAccess(false);
 	bool res = __myio_dldi.readSectors(sector, count, buffer);
 	s2RamAccess(true);
 	return res;
 }
 
-static inline bool CARD_WriteSector(u32 sector, const void *buffer, int ndmaSlot) {
+static inline bool CARD_WriteSector(u32 sector, const void *buffer) {
 	s2RamAccess(false);
 	bool res = __myio_dldi.writeSectors(sector, 1, buffer);
 	s2RamAccess(true);
 	return res;
 }
 
-static inline bool CARD_WriteSectors(u32 sector, int count, const void *buffer, int ndmaSlot) {
+static inline bool CARD_WriteSectors(u32 sector, int count, const void *buffer) {
 	s2RamAccess(false);
 	bool res = __myio_dldi.writeSectors(sector, count, buffer);
 	s2RamAccess(true);
@@ -164,15 +164,15 @@ static inline bool CARD_ReadSector(u32 sector, void *buffer, u32 startOffset, u3
 	return __myio_dldi.readSectors(sector, 1, buffer);
 }
 
-static inline bool CARD_ReadSectors(u32 sector, int count, void *buffer, int ndmaSlot) {
+static inline bool CARD_ReadSectors(u32 sector, int count, void *buffer) {
 	return __myio_dldi.readSectors(sector, count, buffer);
 }
 
-static inline bool CARD_WriteSector(u32 sector, const void *buffer, int ndmaSlot) {
+static inline bool CARD_WriteSector(u32 sector, const void *buffer) {
 	return __myio_dldi.writeSectors(sector, 1, buffer);
 }
 
-static inline bool CARD_WriteSectors(u32 sector, int count, const void *buffer, int ndmaSlot) {
+static inline bool CARD_WriteSectors(u32 sector, int count, const void *buffer) {
 	return __myio_dldi.writeSectors(sector, count, buffer);
 }
 #endif

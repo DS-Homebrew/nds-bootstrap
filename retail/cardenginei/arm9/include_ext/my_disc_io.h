@@ -42,11 +42,9 @@ typedef bool (* FN_MEDIUM_STARTUP)(void) ;
 typedef bool (* FN_MEDIUM_ISINSERTED)(void) ;
 typedef bool (* FN_MEDIUM_READSECTOR)(sec_t sector, void* buffer, u32 startOffset, u32 endOffset);
 typedef bool (* FN_MEDIUM_READSECTORS)(sec_t sector, sec_t numSectors, void* buffer) ;
-typedef bool (* FN_MEDIUM_NEW_READSECTORS)(sec_t sector, sec_t numSectors, void* buffer, int ndmaSlot) ;
-typedef bool (* FN_MEDIUM_READSECTORS_NONBLOCKING)(sec_t sector, sec_t numSectors, void* buffer, int ndmaSlot) ;
-typedef bool (* FN_MEDIUM_CHECK_COMMAND)(int cmd, int ndmaSlot) ;
+typedef bool (* FN_MEDIUM_READSECTORS_NONBLOCKING)(sec_t sector, sec_t numSectors, void* buffer) ;
+typedef bool (* FN_MEDIUM_CHECK_COMMAND)(int cmd) ;
 typedef bool (* FN_MEDIUM_WRITESECTORS)(sec_t sector, sec_t numSectors, const void* buffer) ;
-typedef bool (* FN_MEDIUM_NEW_WRITESECTORS)(sec_t sector, sec_t numSectors, const void* buffer, int ndmaSlot) ;
 typedef bool (* FN_MEDIUM_CLEARSTATUS)(void) ;
 typedef bool (* FN_MEDIUM_SHUTDOWN)(void) ;
 
@@ -69,10 +67,10 @@ struct NEW_DISC_INTERFACE_STRUCT {
 	FN_MEDIUM_STARTUP					startup ;
 	FN_MEDIUM_ISINSERTED				isInserted ;
     FN_MEDIUM_READSECTOR				readSector ;
-	FN_MEDIUM_NEW_READSECTORS			readSectors ;
+	FN_MEDIUM_READSECTORS				readSectors ;
     FN_MEDIUM_READSECTORS_NONBLOCKING 	readSectorsNonBlocking;
     FN_MEDIUM_CHECK_COMMAND 			checkCommand; 
-	FN_MEDIUM_NEW_WRITESECTORS			writeSectors ;
+	FN_MEDIUM_WRITESECTORS				writeSectors ;
 	FN_MEDIUM_CLEARSTATUS				clearStatus ;
 	FN_MEDIUM_SHUTDOWN					shutdown ;
 } ;

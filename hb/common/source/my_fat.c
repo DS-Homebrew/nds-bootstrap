@@ -225,7 +225,7 @@ u32 FAT_ClustToSect (u32 cluster) {
 FAT_NextCluster
 Internal function - gets the cluster linked from input cluster
 -----------------------------------------------------------------*/
-u32 FAT_NextCluster(u32 cluster, int ndmaSlot)
+u32 FAT_NextCluster(u32 cluster)
 {
 	u32 nextCluster = CLUSTER_FREE;
 	u32 sector;
@@ -316,7 +316,7 @@ Reads the FAT information from the CF card.
 You need to call this before reading any files.
 bool return OUT: true if successful.
 -----------------------------------------------------------------*/
-bool FAT_InitFiles (bool initCard, int ndmaSlot)
+bool FAT_InitFiles (bool initCard)
 {
 	int i;
 	int bootSector;
@@ -436,7 +436,7 @@ bool FAT_InitFiles (bool initCard, int ndmaSlot)
 /*-----------------------------------------------------------------
 getBootFileCluster
 -----------------------------------------------------------------*/
-aFile getBootFileCluster (const char* bootName, int ndmaSlot)
+aFile getBootFileCluster (const char* bootName)
 {
 	DIR_ENT dir;
 	int firstSector = 0;
@@ -486,7 +486,7 @@ aFile getBootFileCluster (const char* bootName, int ndmaSlot)
 			if ((wrkDirSector == discSecPerClus) && (wrkDirCluster != FAT16_ROOT_DIR_CLUSTER))
 			{
 				wrkDirSector = 0;
-				wrkDirCluster = FAT_NextCluster(wrkDirCluster, ndmaSlot);
+				wrkDirCluster = FAT_NextCluster(wrkDirCluster);
 				if (wrkDirCluster == CLUSTER_EOF)
 				{
 					notFound = true;
@@ -562,7 +562,7 @@ static readContext context;
 /*-----------------------------------------------------------------
 fileReadNonBLocking(buffer, cluster, startOffset, length)
 -----------------------------------------------------------------*/
-bool fileReadNonBLocking (char* buffer, aFile * file, u32 startOffset, u32 length, int ndmaSlot)
+bool fileReadNonBLocking (char* buffer, aFile * file, u32 startOffset, u32 length)
 {
 	#ifdef DEBUG
 	nocashMessage("fileRead");
@@ -575,7 +575,6 @@ bool fileReadNonBLocking (char* buffer, aFile * file, u32 startOffset, u32 lengt
     context.file = file;
     context.buffer = buffer;
     context.length = length;
-    context.ndmaSlot = ndmaSlot;
 
 	int beginBytes;
 
@@ -610,7 +609,7 @@ bool fileReadNonBLocking (char* buffer, aFile * file, u32 startOffset, u32 lengt
 		// Follow cluster list until desired one is found
 		for (int chunks = (startOffset-file->currentOffset) / discBytePerClus; chunks > 0; chunks--)
 		{
-			file->currentCluster = FAT_NextCluster (file->currentCluster, ndmaSlot);
+			file->currentCluster = FAT_NextCluster (file->currentCluster);
 			file->currentOffset+=discBytePerClus;
 		}
 	}
@@ -637,7 +636,7 @@ bool fileReadNonBLocking (char* buffer, aFile * file, u32 startOffset, u32 lengt
 
 bool resumeFileRead()
 {
-    if(context.cmd == 0 || CARD_CheckCommand(context.cmd, context.ndmaSlot))
+    if(context.cmd == 0 || CARD_CheckCommand(context.cmd))
     {
         if(context.chunks>0)
         {
@@ -684,7 +683,7 @@ bool resumeFileRead()
               #endif
 
               // Read the sectors
-    			CARD_ReadSectorsNonBlocking(context.curSect + FAT_ClustToSect(context.file->currentCluster), sectorsToRead, context.buffer + context.dataPos, context.ndmaSlot);
+    			CARD_ReadSectorsNonBlocking(context.curSect + FAT_ClustToSect(context.file->currentCluster), sectorsToRead, context.buffer + context.dataPos);
     			context.chunks  -= sectorsToRead;
     			context.curSect += sectorsToRead;
     			context.dataPos += BYTES_PER_SECTOR * sectorsToRead;
@@ -702,7 +701,7 @@ bool resumeFileRead()
   			if (context.curSect >= discSecPerClus)
   			{
   				context.curSect = 0;
-                  context.file->currentCluster = FAT_NextCluster (context.file->currentCluster, context.ndmaSlot);
+                  context.file->currentCluster = FAT_NextCluster (context.file->currentCluster);
   				context.file->currentOffset+=discBytePerClus;
   			}
 
@@ -712,7 +711,7 @@ bool resumeFileRead()
       		sectorsToRead = context.chunks;
 
               // Read the sectors
-  			CARD_ReadSectorsNonBlocking(context.curSect + FAT_ClustToSect(context.file->currentCluster), sectorsToRead, context.buffer + context.dataPos, context.ndmaSlot);
+  			CARD_ReadSectorsNonBlocking(context.curSect + FAT_ClustToSect(context.file->currentCluster), sectorsToRead, context.buffer + context.dataPos);
   			context.chunks  -= sectorsToRead;
   			context.curSect += sectorsToRead;
   			context.dataPos += BYTES_PER_SECTOR * sectorsToRead;
@@ -742,7 +741,7 @@ bool resumeFileRead()
                         context.file->currentCluster = context.file->fatTableCache[context.clusterIndex];
                     } else {
                         context.curSect = 0;
-                        context.file->currentCluster = FAT_NextCluster (context.file->currentCluster, context.ndmaSlot);
+                        context.file->currentCluster = FAT_NextCluster (context.file->currentCluster);
                     }
       			context.file->currentOffset+=discBytePerClus;
       		}
@@ -771,7 +770,7 @@ bool resumeFileRead()
 /*-----------------------------------------------------------------
 fileRead(buffer, cluster, startOffset, length)
 -----------------------------------------------------------------*/
-u32 fileRead (char* buffer, aFile file, u32 startOffset, u32 length, int ndmaSlot)
+u32 fileRead (char* buffer, aFile file, u32 startOffset, u32 length)
 {
 	#ifdef DEBUG
 	nocashMessage("fileRead");
@@ -818,7 +817,7 @@ u32 fileRead (char* buffer, aFile file, u32 startOffset, u32 length, int ndmaSlo
 		// Follow cluster list until desired one is found
 		for (chunks = (startOffset-file.currentOffset) / discBytePerClus; chunks > 0; chunks--)
 		{
-			file.currentCluster = FAT_NextCluster (file.currentCluster, ndmaSlot);
+			file.currentCluster = FAT_NextCluster (file.currentCluster);
 			file.currentOffset+=discBytePerClus;
 		}
 	}
@@ -888,7 +887,7 @@ u32 fileRead (char* buffer, aFile file, u32 startOffset, u32 length, int ndmaSlo
               #endif
 
               // Read the sectors
-    			CARD_ReadSectors(curSect + FAT_ClustToSect(file.currentCluster), sectorsToRead, buffer + dataPos, ndmaSlot);
+    			CARD_ReadSectors(curSect + FAT_ClustToSect(file.currentCluster), sectorsToRead, buffer + dataPos);
     			chunks  -= sectorsToRead;
     			curSect += sectorsToRead;
     			dataPos += BYTES_PER_SECTOR * sectorsToRead;
@@ -906,7 +905,7 @@ u32 fileRead (char* buffer, aFile file, u32 startOffset, u32 length, int ndmaSlo
   			if (curSect >= discSecPerClus)
   			{
   				curSect = 0;
-                  file.currentCluster = FAT_NextCluster (file.currentCluster, ndmaSlot);
+                  file.currentCluster = FAT_NextCluster (file.currentCluster);
   				file.currentOffset+=discBytePerClus;
   			}
 
@@ -916,7 +915,7 @@ u32 fileRead (char* buffer, aFile file, u32 startOffset, u32 length, int ndmaSlo
 			sectorsToRead = chunks;
 
               // Read the sectors
-  			CARD_ReadSectors(curSect + FAT_ClustToSect(file.currentCluster), sectorsToRead, buffer + dataPos, ndmaSlot);
+  			CARD_ReadSectors(curSect + FAT_ClustToSect(file.currentCluster), sectorsToRead, buffer + dataPos);
   			chunks  -= sectorsToRead;
   			curSect += sectorsToRead;
   			dataPos += BYTES_PER_SECTOR * sectorsToRead;
@@ -943,7 +942,7 @@ u32 fileRead (char* buffer, aFile file, u32 startOffset, u32 length, int ndmaSlo
                   file.currentCluster = file.fatTableCache[clusterIndex];
               } else {
                   curSect = 0;
-                  file.currentCluster = FAT_NextCluster (file.currentCluster, ndmaSlot);
+                  file.currentCluster = FAT_NextCluster (file.currentCluster);
               }
 			file.currentOffset+=discBytePerClus;
 		}
@@ -973,7 +972,7 @@ u32 fileRead (char* buffer, aFile file, u32 startOffset, u32 length, int ndmaSlo
 /*-----------------------------------------------------------------
 fileWrite(buffer, cluster, startOffset, length)
 -----------------------------------------------------------------*/
-u32 fileWrite (const char* buffer, aFile file, u32 startOffset, u32 length, int ndmaSlot)
+u32 fileWrite (const char* buffer, aFile file, u32 startOffset, u32 length)
 {
 	#ifdef DEBUG
 	nocashMessage("fileWrite");
@@ -1008,7 +1007,7 @@ u32 fileWrite (const char* buffer, aFile file, u32 startOffset, u32 length, int 
 		// Follow cluster list until desired one is found
 		for (chunks = (startOffset-file.currentOffset) / discBytePerClus; chunks > 0; chunks--)
 		{
-			file.currentCluster = FAT_NextCluster (file.currentCluster, ndmaSlot);
+			file.currentCluster = FAT_NextCluster (file.currentCluster);
 			file.currentOffset+=discBytePerClus;
 		}
 	}
@@ -1031,7 +1030,7 @@ u32 fileWrite (const char* buffer, aFile file, u32 startOffset, u32 length, int 
     curByte+=beginBytes;
     dataPos+=beginBytes;
 
-	CARD_WriteSector(curSect + FAT_ClustToSect(file.currentCluster), globalBuffer, ndmaSlot);
+	CARD_WriteSector(curSect + FAT_ClustToSect(file.currentCluster), globalBuffer);
 
 	curSect++;
 
@@ -1047,7 +1046,7 @@ u32 fileWrite (const char* buffer, aFile file, u32 startOffset, u32 length, int 
                 clusterIndex++;
                 file.currentCluster = file.fatTableCache[clusterIndex];
             } else {
-                file.currentCluster = FAT_NextCluster (file.currentCluster, ndmaSlot);
+                file.currentCluster = FAT_NextCluster (file.currentCluster);
 
             }
             file.currentOffset+=discBytePerClus;
@@ -1061,7 +1060,7 @@ u32 fileWrite (const char* buffer, aFile file, u32 startOffset, u32 length, int 
 			sectorsToWrite = chunks;
 
 		// Read the sectors
-		CARD_WriteSectors(curSect + FAT_ClustToSect(file.currentCluster), sectorsToWrite, buffer + dataPos, ndmaSlot);
+		CARD_WriteSectors(curSect + FAT_ClustToSect(file.currentCluster), sectorsToWrite, buffer + dataPos);
 		chunks  -= sectorsToWrite;
 		curSect += sectorsToWrite;
 		dataPos += BYTES_PER_SECTOR * sectorsToWrite;
@@ -1079,7 +1078,7 @@ u32 fileWrite (const char* buffer, aFile file, u32 startOffset, u32 length, int 
                 clusterIndex++;
                 file.currentCluster = file.fatTableCache[clusterIndex];
             } else {
-                file.currentCluster = FAT_NextCluster (file.currentCluster, ndmaSlot);
+                file.currentCluster = FAT_NextCluster (file.currentCluster);
             }
 			curSect = 0;
 			file.currentOffset+=discBytePerClus;
@@ -1091,13 +1090,13 @@ u32 fileWrite (const char* buffer, aFile file, u32 startOffset, u32 length, int 
         curByte+=length;
         dataPos+=length;
 
-		CARD_WriteSector( curSect + FAT_ClustToSect(file.currentCluster), globalBuffer, ndmaSlot);
+		CARD_WriteSector( curSect + FAT_ClustToSect(file.currentCluster), globalBuffer);
 	}
 
 	return dataPos;
 }
 
-void buildFatTableCache (aFile * file, int ndmaSlot) {
+void buildFatTableCache (aFile * file) {
     #ifdef DEBUG
 	nocashMessage("buildFatTableCache");
     #endif
@@ -1113,7 +1112,7 @@ void buildFatTableCache (aFile * file, int ndmaSlot) {
 	{
 		*lastClusterCacheUsed = file->currentCluster;
 		file->currentOffset+=discBytePerClus;
-		file->currentCluster = FAT_NextCluster (file->currentCluster, ndmaSlot);
+		file->currentCluster = FAT_NextCluster (file->currentCluster);
 		lastClusterCacheUsed++;
 	}
 

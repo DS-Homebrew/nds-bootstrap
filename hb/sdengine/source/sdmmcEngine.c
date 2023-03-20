@@ -119,10 +119,10 @@ static void sdmmcCustomMsgHandler(int bytes) {
     switch (msg.type) {
 
     case SDMMC_SD_READ_SECTORS:
-        retval = my_sdmmc_sdcard_readsectors(msg.sdParams.startsector, msg.sdParams.numsectors, msg.sdParams.buffer, 0);
+        retval = my_sdmmc_sdcard_readsectors(msg.sdParams.startsector, msg.sdParams.numsectors, msg.sdParams.buffer);
         break;
     case SDMMC_SD_WRITE_SECTORS:
-        retval = my_sdmmc_sdcard_writesectors(msg.sdParams.startsector, msg.sdParams.numsectors, msg.sdParams.buffer, -1);
+        retval = my_sdmmc_sdcard_writesectors(msg.sdParams.startsector, msg.sdParams.numsectors, msg.sdParams.buffer);
         break;
     }
 
