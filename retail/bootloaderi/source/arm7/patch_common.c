@@ -12148,9 +12148,20 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Spotto! (USA)
+	// Saving not supported due to using more than one file in filesystem(?)
 	else if (strcmp(romTid, "KSPE") == 0 && saveOnFlashcard) {
 		*(u32*)0x0202D6B8 = 0xE3A00001; // mov r0, #1
 		*(u32*)0x0202D6BC = 0xE12FFF1E; // bx lr
+		/* setBL(0x0205BBB8, (u32)dsiSaveOpen);
+		setBL(0x0205BBD4, (u32)dsiSaveGetLength);
+		setBL(0x0205BBF4, (u32)dsiSaveRead);
+		setBL(0x0205BC0C, (u32)dsiSaveClose);
+		setBL(0x0205BC2C, (u32)dsiSaveClose);
+		setBL(0x0205BD08, (u32)dsiSaveCreate);
+		setBL(0x0205BD20, (u32)dsiSaveOpen);
+		setBL(0x0205BD44, (u32)dsiSaveWrite);
+		setBL(0x0205BD5C, (u32)dsiSaveClose);
+		setBL(0x0205BD64, (u32)dsiSaveClose); */
 	}
 
 	// Bird & Bombs (Europe, Australia)

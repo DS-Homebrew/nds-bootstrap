@@ -20343,27 +20343,28 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Spotto! (USA)
-	// Does not boot: Issue unknown
-	/*else if (strcmp(romTid, "KSPE") == 0) {
-		*(u32*)0x02012D80 = 0xE1A00000; // nop
+	// Requires more than 8MB of RAM
+	/* else if (strcmp(romTid, "KSPE") == 0) {
 		*(u32*)0x02022AB4 = 0xE1A00000; // nop
 		*(u32*)0x02026038 = 0xE1A00000; // nop
-		*(u32*)0x0202C280 = 0xE1A00000; // nop
-		*(u32*)0x0202D6B8 = 0xE3A00001; // mov r0, #1
-		*(u32*)0x0202D6BC = 0xE12FFF1E; // bx lr
-		*(u32*)0x0202E0E0 = 0xE1A00000; // nop
-		*(u32*)0x0202E0E4 = 0xE1A00000; // nop
-		*(u32*)0x0202E0F0 = 0xE1A00000; // nop
-		*(u32*)0x0202E250 = 0xE1A00000; // nop
-		patchHiHeapDSiWare(0x0202E2AC, heapEnd); // mov r0, #0x2700000
-		*(u32*)0x02031EB4 = 0xE1A00000; // nop
-		*(u32*)0x0204CA50 = 0xE1A00000; // nop
-		*(u32*)0x0204CA74 = 0xE1A00000; // nop
-		*(u32*)0x020558C4 = 0xE1A00000; // nop
+		patchInitDSiWare(0x0202E054, heapEnd);
+		*(u32*)0x0202E3E0 = *(u32*)0x02004FD0;
+		patchUserSettingsReadDSiWare(0x0202F530);
+		// *(u32*)0x0205504C = 0x00866402; // addeq r6, r6, r2, lsl #8
 		*(u32*)0x020558F4 = 0xE1A00000; // nop
 		*(u32*)0x020558FC = 0xE1A00000; // nop
-		*(u32*)0x02055FAC = 0xE3A00000; // mov r0, #0
-	}*/
+		*(u32*)0x02055FAC = 0xE3A00000; // mov r0, #0 (Disable NFTR loading from TWLNAND)
+		setBL(0x0205BBB8, (u32)dsiSaveOpen);
+		setBL(0x0205BBD4, (u32)dsiSaveGetLength);
+		setBL(0x0205BBF4, (u32)dsiSaveRead);
+		setBL(0x0205BC0C, (u32)dsiSaveClose);
+		setBL(0x0205BC2C, (u32)dsiSaveClose);
+		setBL(0x0205BD08, (u32)dsiSaveCreate);
+		setBL(0x0205BD20, (u32)dsiSaveOpen);
+		setBL(0x0205BD44, (u32)dsiSaveWrite);
+		setBL(0x0205BD5C, (u32)dsiSaveClose);
+		setBL(0x0205BD64, (u32)dsiSaveClose);
+	} */
 
 	// Sudoku (USA)
 	// Sudoku (USA) (Rev 1)
