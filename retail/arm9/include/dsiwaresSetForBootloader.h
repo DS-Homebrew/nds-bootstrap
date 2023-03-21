@@ -415,6 +415,8 @@ static const char dsiWareForBootloader2[][4] = {
 	"KA6", // Space Ace
 	"KEV", // Space Invaders Extreme Z
 	"KQ6", // Spin Six
+	"KIT", // Spot It! Challenge
+	"K2U", // Spot It! Challenge: Mean Machines
 	"KYS", // Spot the Difference
 	"KSP", // Spotto! (bootloaderi-exclusive)
 	"K4D", // Sudoku

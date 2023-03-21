@@ -12060,6 +12060,54 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// Spot It! Challenge (USA)
+	else if (strcmp(romTid, "KITE") == 0) {
+		if (!twlFontFound) {
+			*(u32*)0x020050F4 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		}
+		if (saveOnFlashcard) {
+			tonccpy((u32*)0x0200E4E8, dsiSaveGetResultCode, 0xC);
+			setBL(0x020394A4, (u32)dsiSaveCreate);
+			setBL(0x020394C0, (u32)dsiSaveOpen);
+			setBL(0x020394D4, (u32)dsiSaveSetLength);
+			setBL(0x02039500, (u32)dsiSaveClose);
+			setBL(0x020395B0, (u32)dsiSaveDelete);
+			*(u32*)0x020395F8 = 0xE1A00000; // nop
+			setBL(0x0203965C, (u32)dsiSaveOpen);
+			setBL(0x02039674, (u32)dsiSaveSeek);
+			setBL(0x02039688, (u32)dsiSaveRead);
+			setBL(0x02039698, (u32)dsiSaveClose);
+			setBL(0x02039780, (u32)dsiSaveOpen);
+			setBL(0x02039798, (u32)dsiSaveSeek);
+			setBL(0x020397AC, (u32)dsiSaveWrite);
+			setBL(0x020397BC, (u32)dsiSaveClose);
+		}
+	}
+
+	// Spot It! Challenge: Mean Machines (USA)
+	else if (strcmp(romTid, "K2UE") == 0) {
+		if (!twlFontFound) {
+			*(u32*)0x02005110 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		}
+		if (saveOnFlashcard) {
+			tonccpy((u32*)0x0200EA3C, dsiSaveGetResultCode, 0xC);
+			setBL(0x0203A564, (u32)dsiSaveCreate);
+			setBL(0x0203A580, (u32)dsiSaveOpen);
+			setBL(0x0203A594, (u32)dsiSaveSetLength);
+			setBL(0x0203A5C0, (u32)dsiSaveClose);
+			setBL(0x0203A670, (u32)dsiSaveDelete);
+			*(u32*)0x0203A6B8 = 0xE1A00000; // nop
+			setBL(0x0203A71C, (u32)dsiSaveOpen);
+			setBL(0x0203A734, (u32)dsiSaveSeek);
+			setBL(0x0203A748, (u32)dsiSaveRead);
+			setBL(0x0203A758, (u32)dsiSaveClose);
+			setBL(0x0203A844, (u32)dsiSaveOpen);
+			setBL(0x0203A85C, (u32)dsiSaveSeek);
+			setBL(0x0203A870, (u32)dsiSaveWrite);
+			setBL(0x0203A880, (u32)dsiSaveClose);
+		}
+	}
+
 	// Spot the Difference (USA)
 	// Spot the Difference (Europe)
 	else if ((strcmp(romTid, "KYSE") == 0 || strcmp(romTid, "KYSP") == 0) && saveOnFlashcard) {

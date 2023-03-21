@@ -20201,6 +20201,71 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02079B74 = 0xE12FFF1E; // bx lr
 	}
 
+	// Spot It! Challenge (USA)
+	else if (strcmp(romTid, "KITE") == 0) {
+		useSharedFont = (twlFontFound && debugOrMep);
+		if (useSharedFont) {
+			if (!extendedMemory2) {
+				patchTwlFontLoad(0x02039254, 0x02019DE4);
+			}
+		} else {
+			*(u32*)0x020050F4 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		}
+		*(u32*)0x0200D970 = 0xE1A00000; // nop
+		tonccpy((u32*)0x0200E4E8, dsiSaveGetResultCode, 0xC);
+		*(u32*)0x02010E7C = 0xE1A00000; // nop
+		patchInitDSiWare(0x02018410, heapEnd);
+		patchUserSettingsReadDSiWare(0x020198A0);
+		setBL(0x020394A4, (u32)dsiSaveCreate);
+		setBL(0x020394C0, (u32)dsiSaveOpen);
+		setBL(0x020394D4, (u32)dsiSaveSetLength);
+		setBL(0x02039500, (u32)dsiSaveClose);
+		setBL(0x020395B0, (u32)dsiSaveDelete);
+		*(u32*)0x020395F8 = 0xE1A00000; // nop
+		setBL(0x0203965C, (u32)dsiSaveOpen);
+		setBL(0x02039674, (u32)dsiSaveSeek);
+		setBL(0x02039688, (u32)dsiSaveRead);
+		setBL(0x02039698, (u32)dsiSaveClose);
+		setBL(0x02039780, (u32)dsiSaveOpen);
+		setBL(0x02039798, (u32)dsiSaveSeek);
+		setBL(0x020397AC, (u32)dsiSaveWrite);
+		setBL(0x020397BC, (u32)dsiSaveClose);
+	}
+
+	// Spot It! Challenge: Mean Machines (USA)
+	else if (strcmp(romTid, "K2UE") == 0) {
+		useSharedFont = (twlFontFound && debugOrMep);
+		*(u32*)0x020050CC = 0xE1A00000; // nop
+		if (useSharedFont) {
+			if (!extendedMemory2) {
+				patchTwlFontLoad(0x0203A290, 0x0201A460);
+			}
+		} else {
+			*(u32*)0x02005110 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		}
+		*(u32*)0x0200DEB8 = 0xE1A00000; // nop
+		tonccpy((u32*)0x0200EA3C, dsiSaveGetResultCode, 0xC);
+		*(u32*)0x02011458 = 0xE1A00000; // nop
+		patchInitDSiWare(0x02018A7C, heapEnd);
+		patchUserSettingsReadDSiWare(0x02019F1C);
+		*(u32*)0x0203A3A4 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0203A3E0 = 0xE12FFF1E; // bx lr
+		setBL(0x0203A564, (u32)dsiSaveCreate);
+		setBL(0x0203A580, (u32)dsiSaveOpen);
+		setBL(0x0203A594, (u32)dsiSaveSetLength);
+		setBL(0x0203A5C0, (u32)dsiSaveClose);
+		setBL(0x0203A670, (u32)dsiSaveDelete);
+		*(u32*)0x0203A6B8 = 0xE1A00000; // nop
+		setBL(0x0203A71C, (u32)dsiSaveOpen);
+		setBL(0x0203A734, (u32)dsiSaveSeek);
+		setBL(0x0203A748, (u32)dsiSaveRead);
+		setBL(0x0203A758, (u32)dsiSaveClose);
+		setBL(0x0203A844, (u32)dsiSaveOpen);
+		setBL(0x0203A85C, (u32)dsiSaveSeek);
+		setBL(0x0203A870, (u32)dsiSaveWrite);
+		setBL(0x0203A880, (u32)dsiSaveClose);
+	}
+
 	// Spot the Difference (USA)
 	// Spot the Difference (Europe)
 	// Requires 8MB of RAM
