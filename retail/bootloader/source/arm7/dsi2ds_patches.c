@@ -16776,13 +16776,20 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}*/
 
 	// Pirates Assault (USA)
-	// Requires 8MB of RAM
-	else if (strcmp(romTid, "KXAE") == 0 && extendedMemory2) {
+	else if (strcmp(romTid, "KXAE") == 0) {
+		// if (!extendedMemory2) {
+			u32 bssEnd = *(u32*)0x02004FE8;
+			u32 sdatOffset = 0x0207B3B8;
+
+			*(u32*)0x02004FE8 = bssEnd - relocateBssPart(ndsHeader, bssEnd, sdatOffset+0xF0000, bssEnd, sdatOffset);
+		// }
+
 		*(u32*)0x02005090 = 0xE1A00000; // nop
 		*(u32*)0x020050A4 = 0xE1A00000; // nop
 		*(u32*)0x0200D1F8 = 0xE1A00000; // nop
 		*(u32*)0x0201054C = 0xE1A00000; // nop
 		patchInitDSiWare(0x020162E8, heapEnd);
+		*(u32*)0x02016674 = *(u32*)0x02004FE8;
 		patchUserSettingsReadDSiWare(0x020177F8);
 		setBL(0x0204E8A4, (u32)dsiSaveGetInfo);
 		setBL(0x0204E8B8, (u32)dsiSaveOpen);
@@ -16811,13 +16818,20 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Pirates Assault (Europe, Australia)
-	// Requires 8MB of RAM
-	else if (strcmp(romTid, "KXAV") == 0 && extendedMemory2) {
+	else if (strcmp(romTid, "KXAV") == 0) {
+		// if (!extendedMemory2) {
+			u32 bssEnd = *(u32*)0x02004FE8;
+			u32 sdatOffset = 0x0207EE9C;
+
+			*(u32*)0x02004FE8 = bssEnd - relocateBssPart(ndsHeader, bssEnd, sdatOffset+0xF0000, bssEnd, sdatOffset);
+		// }
+
 		*(u32*)0x02005090 = 0xE1A00000; // nop
 		*(u32*)0x020050A4 = 0xE1A00000; // nop
 		*(u32*)0x0200D878 = 0xE1A00000; // nop
 		*(u32*)0x02010BCC = 0xE1A00000; // nop
 		patchInitDSiWare(0x02016968, heapEnd);
+		*(u32*)0x02016CF4 = *(u32*)0x02004FE8;
 		patchUserSettingsReadDSiWare(0x02017E78);
 		setBL(0x02052368, (u32)dsiSaveGetInfo);
 		setBL(0x0205237C, (u32)dsiSaveOpen);
@@ -16846,13 +16860,20 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Pirates Assault (Japan)
-	// Requires 8MB of RAM
-	else if (strcmp(romTid, "KXAJ") == 0 && extendedMemory2) {
+	else if (strcmp(romTid, "KXAJ") == 0) {
+		// if (!extendedMemory2) {
+			u32 bssEnd = *(u32*)0x02004FE8;
+			u32 sdatOffset = 0x0207CFAC;
+
+			*(u32*)0x02004FE8 = bssEnd - relocateBssPart(ndsHeader, bssEnd, sdatOffset+0xF0000, bssEnd, sdatOffset);
+		// }
+
 		*(u32*)0x02005090 = 0xE1A00000; // nop
 		*(u32*)0x020050A4 = 0xE1A00000; // nop
 		*(u32*)0x0200D878 = 0xE1A00000; // nop
 		*(u32*)0x02010BCC = 0xE1A00000; // nop
 		patchInitDSiWare(0x02016C60, heapEnd);
+		*(u32*)0x02016FEC = *(u32*)0x02004FE8;
 		patchUserSettingsReadDSiWare(0x02018170);
 		setBL(0x02020BB8, (u32)dsiSaveGetInfo);
 		setBL(0x02020BCC, (u32)dsiSaveOpen);
