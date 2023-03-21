@@ -3722,6 +3722,50 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02027F10, (u32)dsiSaveClose);
 	}
 
+	// Castle Conqueror: Revolution (USA)
+	// Castle Conqueror: Revolution (Europe, Australia)
+	else if ((strcmp(romTid, "KQNE") == 0 || strcmp(romTid, "KQNV") == 0) && saveOnFlashcard) {
+		u16 offsetChange = (romTid[3] == 'E') ? 0 : 0x2A04;
+		setBL(0x020643BC+offsetChange, (u32)dsiSaveOpen);
+		setBL(0x020643D4+offsetChange, (u32)dsiSaveCreate);
+		setBL(0x020643F0+offsetChange, (u32)dsiSaveCreate);
+		setBL(0x0206440C+offsetChange, (u32)dsiSaveClose);
+		setBL(0x02064428+offsetChange, (u32)dsiSaveOpen);
+		setBL(0x0206445C+offsetChange, (u32)dsiSaveWrite);
+		setBL(0x02064488+offsetChange, (u32)dsiSaveClose);
+		setBL(0x020644E8+offsetChange, (u32)dsiSaveOpen);
+		setBL(0x020644F8+offsetChange, (u32)dsiSaveGetResultCode);
+		setBL(0x02064564+offsetChange, (u32)dsiSaveOpen);
+		setBL(0x0206457C+offsetChange, (u32)dsiSaveCreate);
+		setBL(0x02064598+offsetChange, (u32)dsiSaveCreate);
+		setBL(0x020645A8+offsetChange, (u32)dsiSaveOpen);
+		setBL(0x020645BC+offsetChange, (u32)dsiSaveWrite);
+		setBL(0x020645C4+offsetChange, (u32)dsiSaveClose);
+		setBL(0x0206460C+offsetChange, (u32)dsiSaveRead);
+		setBL(0x02064638+offsetChange, (u32)dsiSaveClose);
+	}
+
+	// Ose Ose! Kyassuru Hirozu: Kaku Meihen (Japan)
+	else if (strcmp(romTid, "KQNJ") == 0 && saveOnFlashcard) {
+		setBL(0x02079874, (u32)dsiSaveOpen);
+		setBL(0x0207988C, (u32)dsiSaveCreate);
+		setBL(0x020798A8, (u32)dsiSaveCreate);
+		setBL(0x020798C4, (u32)dsiSaveClose);
+		setBL(0x020798E0, (u32)dsiSaveOpen);
+		setBL(0x02079914, (u32)dsiSaveWrite);
+		setBL(0x02079940, (u32)dsiSaveClose);
+		setBL(0x020799A0, (u32)dsiSaveOpen);
+		setBL(0x020799B0, (u32)dsiSaveGetResultCode);
+		setBL(0x02079A1C, (u32)dsiSaveOpen);
+		setBL(0x02079A34, (u32)dsiSaveCreate);
+		setBL(0x02079A50, (u32)dsiSaveCreate);
+		setBL(0x02079A60, (u32)dsiSaveOpen);
+		setBL(0x02079A74, (u32)dsiSaveWrite);
+		setBL(0x02079A7C, (u32)dsiSaveClose);
+		setBL(0x02079AC4, (u32)dsiSaveRead);
+		setBL(0x02079AF0, (u32)dsiSaveClose);
+	}
+
 	// Cat Frenzy (USA)
 	// Cat Frenzy (Europe)
 	else if ((strcmp(romTid, "KVXE") == 0 || strcmp(romTid, "KVXP") == 0) && saveOnFlashcard) {

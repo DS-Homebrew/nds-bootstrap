@@ -5740,7 +5740,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			u32 bssEnd = *(u32*)0x02004FE8;
 			u32 sdatOffset = (romTid[3] == 'E') ? 0x020ADE18 : 0x020ADFB8;
 
-			*(u32*)0x02004FE8 = bssEnd - relocateBssPart(ndsHeader, bssEnd, sdatOffset+0xA0000, bssEnd, sdatOffset);
+			*(u32*)0x02004FE8 = bssEnd - relocateBssPart(ndsHeader, bssEnd, sdatOffset+0xA8000, bssEnd, sdatOffset);
 		// }
 
 		u8 offsetChange = (romTid[3] == 'E') ? 0 : 0x68;
@@ -6044,21 +6044,85 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Castle Conqueror: Revolution (USA)
 	// Castle Conqueror: Revolution (Europe, Australia)
-	// Requires 8MB of RAM
-	else if (strncmp(romTid, "KQN", 3) == 0 && extendedMemory2) {
+	else if (strcmp(romTid, "KQNE") == 0 || strcmp(romTid, "KQNV") == 0) {
+		// if (!extendedMemory2) {
+			u32 bssEnd = *(u32*)0x02004FE8;
+			u32 sdatOffset = (romTid[3] == 'E') ? 0x020BB4A4 : 0x20AE4CC;
+
+			*(u32*)0x02004FE8 = bssEnd - relocateBssPart(ndsHeader, bssEnd, sdatOffset+0xD0000, bssEnd, sdatOffset);
+		// }
+
+		u16 offsetChange = (romTid[3] == 'E') ? 0 : 0x2A04;
+
 		*(u32*)0x02005104 = 0xE1A00000; // nop
 		*(u32*)0x02005118 = 0xE1A00000; // nop
 		*(u32*)0x02015B4C = 0xE1A00000; // nop
 		*(u32*)0x02018E2C = 0xE1A00000; // nop
 		patchInitDSiWare(0x0201EC38, heapEnd);
+		*(u32*)0x0201EFC4 = *(u32*)0x02004FE8;
 		patchUserSettingsReadDSiWare(0x020201DC);
-		if (romTid[3] == 'E') {
-			*(u32*)0x020642A4 = 0xE12FFF1E; // bx lr
-			*(u32*)0x020644BC = 0xE12FFF1E; // bx lr
-		} else if (romTid[3] == 'V') {
-			*(u32*)0x02066CA8 = 0xE12FFF1E; // bx lr
-			*(u32*)0x02066EC0 = 0xE12FFF1E; // bx lr
-		}
+		// *(u32*)(0x020642A4+offsetChange) = 0xE12FFF1E; // bx lr
+		// *(u32*)(0x020644BC+offsetChange) = 0xE12FFF1E; // bx lr
+		*(u32*)(0x02064294+offsetChange) = 0xE1A00000; // nop
+		setBL(0x020643BC+offsetChange, (u32)dsiSaveOpen);
+		setBL(0x020643D4+offsetChange, (u32)dsiSaveCreate);
+		*(u32*)(0x020643E4+offsetChange) = 0xE1A00000; // nop
+		setBL(0x020643F0+offsetChange, (u32)dsiSaveCreate);
+		setBL(0x0206440C+offsetChange, (u32)dsiSaveClose);
+		setBL(0x02064428+offsetChange, (u32)dsiSaveOpen);
+		setBL(0x0206445C+offsetChange, (u32)dsiSaveWrite);
+		setBL(0x02064488+offsetChange, (u32)dsiSaveClose);
+		setBL(0x020644E8+offsetChange, (u32)dsiSaveOpen);
+		setBL(0x020644F8+offsetChange, (u32)dsiSaveGetResultCode);
+		setBL(0x02064564+offsetChange, (u32)dsiSaveOpen);
+		setBL(0x0206457C+offsetChange, (u32)dsiSaveCreate);
+		*(u32*)(0x0206458C+offsetChange) = 0xE1A00000; // nop
+		setBL(0x02064598+offsetChange, (u32)dsiSaveCreate);
+		setBL(0x020645A8+offsetChange, (u32)dsiSaveOpen);
+		setBL(0x020645BC+offsetChange, (u32)dsiSaveWrite);
+		setBL(0x020645C4+offsetChange, (u32)dsiSaveClose);
+		setBL(0x0206460C+offsetChange, (u32)dsiSaveRead);
+		setBL(0x02064638+offsetChange, (u32)dsiSaveClose);
+		*(u32*)(0x020647CC+offsetChange) = 0xE1A00000; // nop
+	}
+
+	// Ose Ose! Kyassuru Hirozu: Kaku Meihen (Japan)
+	else if (strcmp(romTid, "KQNJ") == 0) {
+		// if (!extendedMemory2) {
+			u32 bssEnd = *(u32*)0x02004FE8;
+			u32 sdatOffset = 0x020B52C8;
+
+			*(u32*)0x02004FE8 = bssEnd - relocateBssPart(ndsHeader, bssEnd, sdatOffset+0xD0000, bssEnd, sdatOffset);
+		// }
+
+		*(u32*)0x02005104 = 0xE1A00000; // nop
+		*(u32*)0x02005118 = 0xE1A00000; // nop
+		*(u32*)0x02015B58 = 0xE1A00000; // nop
+		*(u32*)0x02018F48 = 0xE1A00000; // nop
+		patchInitDSiWare(0x0201F04C, heapEnd);
+		*(u32*)0x0201F3D8 = *(u32*)0x02004FE8;
+		patchUserSettingsReadDSiWare(0x020205F0);
+		*(u32*)0x0207974C = 0xE1A00000; // nop
+		setBL(0x02079874, (u32)dsiSaveOpen);
+		setBL(0x0207988C, (u32)dsiSaveCreate);
+		*(u32*)0x0207989C = 0xE1A00000; // nop
+		setBL(0x020798A8, (u32)dsiSaveCreate);
+		setBL(0x020798C4, (u32)dsiSaveClose);
+		setBL(0x020798E0, (u32)dsiSaveOpen);
+		setBL(0x02079914, (u32)dsiSaveWrite);
+		setBL(0x02079940, (u32)dsiSaveClose);
+		setBL(0x020799A0, (u32)dsiSaveOpen);
+		setBL(0x020799B0, (u32)dsiSaveGetResultCode);
+		setBL(0x02079A1C, (u32)dsiSaveOpen);
+		setBL(0x02079A34, (u32)dsiSaveCreate);
+		*(u32*)0x02079A44 = 0xE1A00000; // nop
+		setBL(0x02079A50, (u32)dsiSaveCreate);
+		setBL(0x02079A60, (u32)dsiSaveOpen);
+		setBL(0x02079A74, (u32)dsiSaveWrite);
+		setBL(0x02079A7C, (u32)dsiSaveClose);
+		setBL(0x02079AC4, (u32)dsiSaveRead);
+		setBL(0x02079AF0, (u32)dsiSaveClose);
+		*(u32*)0x02079C84 = 0xE1A00000; // nop
 	}
 
 	// Cat Frenzy (USA)
