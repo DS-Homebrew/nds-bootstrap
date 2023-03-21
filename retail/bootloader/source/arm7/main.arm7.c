@@ -470,7 +470,7 @@ static module_params_t* buildModuleParams(u32 donorSdkVer) {
 }
 
 static module_params_t* getModuleParams(const tNDSHeader* ndsHeader) {
-	nocashMessage("Looking for moduleparams...\n");
+	// nocashMessage("Looking for moduleparams...\n");
 
 	u32* moduleParamsOffset = findModuleParamsOffset(ndsHeader);
 
@@ -488,7 +488,7 @@ static bool ROMsupportsDsiMode(const tNDSHeader* ndsHeader) {
 }
 
 static void loadBinary_ARM7(const tDSiHeader* dsiHeaderTemp, aFile* file) {
-	nocashMessage("loadBinary_ARM7");
+	// nocashMessage("loadBinary_ARM7");
 
 	//u32 ndsHeader[0x170 >> 2];
 	//u32 dsiHeader[0x2F0 >> 2]; // SDK 5
@@ -551,7 +551,7 @@ static module_params_t* loadModuleParams(const tNDSHeader* ndsHeader, bool* foun
 	if (*foundPtr) {
 		// Found module params
 	} else {
-		nocashMessage("No moduleparams?\n");
+		// nocashMessage("No moduleparams?\n");
 		moduleParams = buildModuleParams(donorSdkVer);
 	}
 	return moduleParams;
@@ -562,6 +562,7 @@ u32 romSizeLimit = 0x780000;
 u32 ROMinRAM = 0;
 
 static bool isROMLoadableInRAM(const tNDSHeader* ndsHeader, const char* romTid, const module_params_t* moduleParams) {
+	extern bool useSharedFont;
 	bool isDevConsole = false;
 	if (s2FlashcardId == 0x334D || s2FlashcardId == 0x3647 || s2FlashcardId == 0x4353 || s2FlashcardId == 0x5A45) {
 		romLocation = 0x08000000;
@@ -572,7 +573,7 @@ static bool isROMLoadableInRAM(const tNDSHeader* ndsHeader, const char* romTid, 
 		} else {
 			romSizeLimit = 0x1F80000;
 		}
-		if (ndsHeader->unitCode > 0 && ndsHeader->gameCode[0] == 'K' && ((ndsHeader->gameCode[3] == 'K') ? korSharedFont : (ndsHeader->gameCode[3] == 'C') ? chnSharedFont : twlSharedFont)) {
+		if (useSharedFont) {
 			romSizeLimit -= 0x200000;
 		}
 	} else if (!extendedMemory2) {
@@ -588,7 +589,7 @@ static bool isROMLoadableInRAM(const tNDSHeader* ndsHeader, const char* romTid, 
 			romLocation += 0x280000;
 			romSizeLimit -= 0x280000;
 		}
-		if (romSizeLimit > 0 && ndsHeader->unitCode > 0 && ndsHeader->gameCode[0] == 'K' && ((ndsHeader->gameCode[3] == 'K') ? korSharedFont : (ndsHeader->gameCode[3] == 'C') ? chnSharedFont : twlSharedFont)) {
+		if (romSizeLimit > 0 && useSharedFont) {
 			romSizeLimit -= 0x200000;
 		}
 	}
@@ -935,7 +936,7 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 }
 
 int arm7_main(void) {
-	nocashMessage("bootloader");
+	// nocashMessage("bootloader");
 
 	initMBK();
 	
@@ -943,7 +944,7 @@ int arm7_main(void) {
 	while (arm9_stateFlag < ARM9_START);
 
 	// Get ARM7 to clear RAM
-	nocashMessage("Getting ARM7 to clear RAM...\n");
+	// nocashMessage("Getting ARM7 to clear RAM...\n");
 	resetMemory_ARM7();
 
 	arm9_macroMode = macroMode;
@@ -954,7 +955,7 @@ int arm7_main(void) {
 
 	// Init card
 	if (!FAT_InitFiles(initDisc)) {
-		nocashMessage("!FAT_InitFiles");
+		// nocashMessage("!FAT_InitFiles");
 		errorOutput();
 		//return -1;
 	}
@@ -994,12 +995,10 @@ int arm7_main(void) {
 	}
 
 	if (romFile.firstCluster == CLUSTER_FREE) {
-		nocashMessage("fileCluster == CLUSTER_FREE");
+		// nocashMessage("fileCluster == CLUSTER_FREE");
 		errorOutput();
 		//return -1;
 	}*/
-
-	//nocashMessage("status1");
 
 	// Sav file
 	aFile savFile;
@@ -1010,7 +1009,7 @@ int arm7_main(void) {
 	tDSiHeader dsiHeaderTemp;
 
 	// Load the NDS file
-	nocashMessage("Loading the NDS file...\n");
+	// nocashMessage("Loading the NDS file...\n");
 
 	loadBinary_ARM7(&dsiHeaderTemp, &romFile);
 	
@@ -1021,7 +1020,7 @@ int arm7_main(void) {
 	patchOffsetCacheFilePrevCrc = swiCRC16(0xFFFF, &patchOffsetCache, sizeof(patchOffsetCacheContents));
 	u16 prevPatchOffsetCacheFileVersion = patchOffsetCache.ver;
 
-	nocashMessage("Loading the header...\n");
+	// nocashMessage("Loading the header...\n");
 
 	bool foundModuleParams;
 	module_params_t* moduleParams = loadModuleParams(&dsiHeaderTemp.ndshdr, &foundModuleParams);
@@ -1032,10 +1031,10 @@ int arm7_main(void) {
 
 	ensureBinaryDecompressed(&dsiHeaderTemp.ndshdr, moduleParams, foundModuleParams);
 	if (decrypt_arm9(&dsiHeaderTemp.ndshdr)) {
-		nocashMessage("Secure area decrypted successfully");
+		// nocashMessage("Secure area decrypted successfully");
 		dbg_printf("Secure area decrypted successfully");
 	} else {
-		nocashMessage("Secure area already decrypted");
+		// nocashMessage("Secure area already decrypted");
 		dbg_printf("Secure area already decrypted");
 	}
 	dbg_printf("\n");
@@ -1098,10 +1097,7 @@ int arm7_main(void) {
 		toncset((char*)0x080000D0, 0, 0x130);
 	}
 
-	// If possible, set to load ROM into RAM
-	ROMinRAM = isROMLoadableInRAM(ndsHeader, romTid, moduleParams);
-
-	nocashMessage("Trying to patch the card...\n");
+	// nocashMessage("Trying to patch the card...\n");
 
 	extern void rsetPatchCache(void);
 	rsetPatchCache();
@@ -1115,7 +1111,7 @@ int arm7_main(void) {
 	toncset((u8*)CARDENGINE_ARM7_LOCATION_BUFFERED, 0, 0x1400);
 
 	if (!dldiPatchBinary((data_t*)ce9Location, 0x3800, (data_t*)(extendedMemory2 ? 0x027BD000 : ((accessControl & BIT(4)) && !ce9Alt) ? 0x023FC000 : 0x023FD000))) {
-		nocashMessage("ce9 DLDI patch failed");
+		// nocashMessage("ce9 DLDI patch failed");
 		dbg_printf("ce9 DLDI patch failed\n");
 		errorOutput();
 	}
@@ -1243,6 +1239,7 @@ int arm7_main(void) {
 	}
 
 	patchBinary((cardengineArm9*)ce9Location, ndsHeader, moduleParams);
+	ROMinRAM = isROMLoadableInRAM(ndsHeader, romTid, moduleParams); // If possible, set to load ROM into RAM
 	errorCode = patchCardNds(
 		(cardengineArm7*)CARDENGINE_ARM7_LOCATION,
 		(cardengineArm9*)ce9Location,
@@ -1257,9 +1254,9 @@ int arm7_main(void) {
 		saveSize
 	);
 	if (errorCode == ERR_NONE) {
-		nocashMessage("Card patch successful");
+		// nocashMessage("Card patch successful");
 	} else {
-		nocashMessage("Card patch failed");
+		// nocashMessage("Card patch failed");
 		errorOutput();
 	}
 
@@ -1277,9 +1274,9 @@ int arm7_main(void) {
 		getRumblePakType()
 	);
 	if (errorCode == ERR_NONE) {
-		nocashMessage("Card hook successful");
+		// nocashMessage("Card hook successful");
 	} else {
-		nocashMessage("Card hook failed");
+		// nocashMessage("Card hook failed");
 		errorOutput();
 	}
 
@@ -1322,9 +1319,9 @@ int arm7_main(void) {
 		fatTableAddr
 	);
 	/*if (errorCode == ERR_NONE) {
-		nocashMessage("Card hook successful");
+		// nocashMessage("Card hook successful");
 	} else {
-		nocashMessage("Card hook failed");
+		// nocashMessage("Card hook failed");
 		errorOutput();
 	}*/
 
@@ -1415,7 +1412,7 @@ int arm7_main(void) {
 	arm9_stateFlag = ARM9_SETSCFG;
 	while (arm9_stateFlag != ARM9_READY);
 
-	nocashMessage("Starting the NDS file...");
+	// nocashMessage("Starting the NDS file...");
     setMemoryAddress(ndsHeader, moduleParams, romFile);
 
 	if (0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_DOWN | KEY_A))) {		// Dump RAM
