@@ -5735,34 +5735,83 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Castle Conqueror: Against (USA)
 	// Castle Conqueror: Against (Europe, Australia)
-	// Requires 8MB of RAM
-	else if ((strcmp(romTid, "KQNE") == 0 || strcmp(romTid, "KQNV") == 0) && extendedMemory2) {
+	else if (strcmp(romTid, "KQOE") == 0 || strcmp(romTid, "KQOV") == 0) {
+		// if (!extendedMemory2) {
+			u32 bssEnd = *(u32*)0x02004FE8;
+			u32 sdatOffset = (romTid[3] == 'E') ? 0x020ADE18 : 0x020ADFB8;
+
+			*(u32*)0x02004FE8 = bssEnd - relocateBssPart(ndsHeader, bssEnd, sdatOffset+0xA0000, bssEnd, sdatOffset);
+		// }
+
+		u8 offsetChange = (romTid[3] == 'E') ? 0 : 0x68;
+
 		*(u32*)0x02005104 = 0xE1A00000; // nop
 		*(u32*)0x02005118 = 0xE1A00000; // nop
 		*(u32*)0x02015B2C = 0xE1A00000; // nop
+		*(u32*)(0x02018DA4+offsetChange) = 0xE1A00000; // nop
+		patchInitDSiWare(0x0201EBB0+offsetChange, heapEnd);
+		*(u32*)(0x0201EF3C+offsetChange) = *(u32*)0x02004FE8;
+		patchUserSettingsReadDSiWare(0x020200E4+offsetChange);
 		if (romTid[3] == 'E') {
-			*(u32*)0x02018DA4 = 0xE1A00000; // nop
-			patchInitDSiWare(0x0201EBB0, heapEnd);
-			patchUserSettingsReadDSiWare(0x020200E4);
-			*(u32*)0x0206ACC4 = 0xE12FFF1E; // bx lr
-			*(u32*)0x0206AEC8 = 0xE12FFF1E; // bx lr
+			// *(u32*)0x0206ACC4 = 0xE12FFF1E; // bx lr
+			// *(u32*)0x0206AEC8 = 0xE12FFF1E; // bx lr
+
+			*(u32*)0x0206ACB4 = 0xE1A00000; // nop
+			setBL(0x0206ADCC, (u32)dsiSaveOpen);
+			setBL(0x0206ADE4, (u32)dsiSaveCreate);
+			*(u32*)0x0206ADF4 = 0xE1A00000; // nop
+			setBL(0x0206AE00, (u32)dsiSaveCreate);
+			setBL(0x0206AE1C, (u32)dsiSaveClose);
+			setBL(0x0206AE38, (u32)dsiSaveOpen);
+			setBL(0x0206AE6C, (u32)dsiSaveWrite);
+			setBL(0x0206AE98, (u32)dsiSaveClose);
+			setBL(0x0206AEE8, (u32)dsiSaveOpen);
+			setBL(0x0206AF4C, (u32)dsiSaveRead);
+			setBL(0x0206AF78, (u32)dsiSaveClose);
+			*(u32*)0x0206B0EC = 0xE1A00000; // nop
 		} else {
-			*(u32*)0x02018E0C = 0xE1A00000; // nop
-			patchInitDSiWare(0x0201EC18, heapEnd);
-			patchUserSettingsReadDSiWare(0x0202014C);
-			*(u32*)0x02041BF8 = 0xE12FFF1E; // bx lr
-			*(u32*)0x02041DFC = 0xE12FFF1E; // bx lr
+			// *(u32*)0x02041BF8 = 0xE12FFF1E; // bx lr
+			// *(u32*)0x02041DFC = 0xE12FFF1E; // bx lr
+
+			*(u32*)0x02041BE8 = 0xE1A00000; // nop
+			setBL(0x02041D00, (u32)dsiSaveOpen);
+			setBL(0x02041D18, (u32)dsiSaveCreate);
+			*(u32*)0x02041D28 = 0xE1A00000; // nop
+			setBL(0x02041D34, (u32)dsiSaveCreate);
+			setBL(0x02041D50, (u32)dsiSaveClose);
+			setBL(0x02041D6C, (u32)dsiSaveOpen);
+			setBL(0x02041DA0, (u32)dsiSaveWrite);
+			setBL(0x02041DCC, (u32)dsiSaveClose);
+			setBL(0x02041E28, (u32)dsiSaveOpen);
+			setBL(0x02041E38, (u32)dsiSaveGetResultCode);
+			setBL(0x02041EA4, (u32)dsiSaveOpen);
+			setBL(0x02041EBC, (u32)dsiSaveCreate);
+			*(u32*)0x02041ECC = 0xE1A00000; // nop
+			setBL(0x02041ED8, (u32)dsiSaveCreate);
+			setBL(0x02041EE8, (u32)dsiSaveOpen);
+			setBL(0x02041EFC, (u32)dsiSaveWrite);
+			setBL(0x02041F04, (u32)dsiSaveClose);
+			setBL(0x02041F4C, (u32)dsiSaveRead);
+			setBL(0x02041F78, (u32)dsiSaveClose);
+			*(u32*)0x02042100 = 0xE1A00000; // nop
 		}
 	}
 
 	// Castle Conqueror: Heroes (USA)
 	// Castle Conqueror: Heroes (Japan)
 	else if (strcmp(romTid, "KC5E") == 0 || strcmp(romTid, "KC5J") == 0) {
+		// if (!extendedMemory2) {
+			u32 bssEnd = *(u32*)0x02004FE8;
+			u32 sdatOffset = (romTid[3] == 'E') ? 0x020A561C : 0x020BDF60;
+
+			*(u32*)0x02004FE8 = bssEnd - relocateBssPart(ndsHeader, bssEnd, sdatOffset+0xA0000, bssEnd, sdatOffset);
+		// }
+
 		*(u32*)0x02017744 = 0xE1A00000; // nop
 		tonccpy((u32*)0x0201831C, dsiSaveGetResultCode, 0xC);
 		*(u32*)0x0201AB7C = 0xE1A00000; // nop
 		patchInitDSiWare(0x02020544, heapEnd);
-		*(u32*)0x020208D0 -= 0x30000;
+		*(u32*)0x020208D0 = *(u32*)0x02004FE8;
 		patchUserSettingsReadDSiWare(0x02021A68);
 		if (romTid[3] == 'E') {
 			setBL(0x02065C8C, (u32)dsiSaveGetInfo);
@@ -5789,7 +5838,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBL(0x02066BF8, (u32)dsiSaveSeek);
 			setBL(0x02066C08, (u32)dsiSaveWrite);
 			setBL(0x02066C10, (u32)dsiSaveClose);
-		} else if (romTid[3] == 'J') {
+		} else {
 			setBL(0x02026F94, (u32)dsiSaveGetInfo);
 			setBL(0x02026FA8, (u32)dsiSaveOpen);
 			setBL(0x02026FC0, (u32)dsiSaveCreate);
@@ -5819,11 +5868,18 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Castle Conqueror: Heroes (Europe, Australia)
 	else if (strcmp(romTid, "KC5V") == 0) {
+		// if (!extendedMemory2) {
+			u32 bssEnd = *(u32*)0x02004FE8;
+			u32 sdatOffset = 0x020A5BDC;
+
+			*(u32*)0x02004FE8 = bssEnd - relocateBssPart(ndsHeader, bssEnd, sdatOffset+0xA0000, bssEnd, sdatOffset);
+		// }
+
 		*(u32*)0x02017670 = 0xE1A00000; // nop
 		tonccpy((u32*)0x02018248, dsiSaveGetResultCode, 0xC);
 		*(u32*)0x0201AAA8 = 0xE1A00000; // nop
 		patchInitDSiWare(0x02020470, heapEnd);
-		*(u32*)0x020207FC = 0x022C9BA0;
+		*(u32*)0x020207FC = *(u32*)0x02004FE8;
 		patchUserSettingsReadDSiWare(0x02021994);
 		setBL(0x020660FC, (u32)dsiSaveGetInfo);
 		setBL(0x02066110, (u32)dsiSaveOpen);
@@ -5854,32 +5910,43 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Castle Conqueror: Heroes 2 (USA)
 	// Castle Conqueror: Heroes 2 (Europe, Australia)
 	// Castle Conqueror: Heroes 2 (Japan)
-	// Requires either 8MB of RAM or Memory Expansion Pak
-	else if (strncmp(romTid, "KXC", 3) == 0 && debugOrMep) {
-		extern u32* mepHeapSetPatch;
+	else if (strncmp(romTid, "KXC", 3) == 0) {
+		/* extern u32* mepHeapSetPatch;
 		extern u32* cch2HeapAlloc;
-		extern u32* cch2HeapAddrPtr;
+		extern u32* cch2HeapAddrPtr; */
+
+		// if (!extendedMemory2) {
+			u32 bssEnd = *(u32*)0x02004FE8;
+			u32 sdatOffset = 0x02094AA8;
+			if (romTid[3] == 'V') {
+				sdatOffset = 0x02093848;
+			} else if (romTid[3] == 'J') {
+				sdatOffset = 0x0209124C;
+			}
+
+			*(u32*)0x02004FE8 = bssEnd - relocateBssPart(ndsHeader, bssEnd, sdatOffset+0x98000, bssEnd, sdatOffset);
+		// }
 
 		*(u32*)0x02013170 = 0xE1A00000; // nop
 		tonccpy((u32*)0x02013CF4, dsiSaveGetResultCode, 0xC);
-		if (!extendedMemory2) {
+		/* if (!extendedMemory2) {
 			if (s2FlashcardId == 0x5A45) {
 				cch2HeapAddrPtr[0] -= 0x01000000;
 			}
 			tonccpy((u32*)0x0201473C, mepHeapSetPatch, 0x70);
 			tonccpy((u32*)0x0201D810, cch2HeapAlloc, 0xBC);
-		}
+		} */
 		*(u32*)0x020164C4 = 0xE1A00000; // nop
 		patchInitDSiWare(0x0201BE28, heapEnd);
-		*(u32*)0x0201C1B4 -= 0x30000;
+		*(u32*)0x0201C1B4 = *(u32*)0x02004FE8;
 		patchUserSettingsReadDSiWare(0x0201D2C8);
 		if (romTid[3] == 'E') {
-			if (!extendedMemory2) {
+			/* if (!extendedMemory2) {
 				*(u32*)0x02014738 = (u32)getOffsetFromBL((u32*)0x02026A80);
 				setBL(0x02026A80, 0x0201473C);
 				*(u32*)0x0201D80C = (u32)getOffsetFromBL((u32*)0x020719F0);
 				setBL(0x020719F0, 0x0201D810);
-			}
+			} */
 
 			setBL(0x02035478, (u32)dsiSaveGetInfo);
 			setBL(0x0203548C, (u32)dsiSaveOpen);
@@ -5907,12 +5974,12 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBL(0x020364D4, (u32)dsiSaveWrite);
 			setBL(0x020364DC, (u32)dsiSaveClose);
 		} else if (romTid[3] == 'V') {
-			if (!extendedMemory2) {
+			/* if (!extendedMemory2) {
 				*(u32*)0x02014738 = (u32)getOffsetFromBL((u32*)0x02026A80);
 				setBL(0x02026A80, 0x0201473C);
 				*(u32*)0x0201D80C = (u32)getOffsetFromBL((u32*)0x0203749C);
 				setBL(0x0203749C, 0x0201D810);
-			}
+			} */
 
 			setBL(0x0206A44C, (u32)dsiSaveGetInfo);
 			setBL(0x0206A460, (u32)dsiSaveOpen);
@@ -5940,12 +6007,12 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBL(0x0206B4A8, (u32)dsiSaveWrite);
 			setBL(0x0206B4B0, (u32)dsiSaveClose);
 		} else {
-			if (!extendedMemory2) {
+			/* if (!extendedMemory2) {
 				*(u32*)0x02014738 = (u32)getOffsetFromBL((u32*)0x0206082C);
 				setBL(0x0206082C, 0x0201473C);
 				*(u32*)0x0201D80C = (u32)getOffsetFromBL((u32*)0x0205DF58);
 				setBL(0x0205DF58, 0x0201D810);
-			}
+			} */
 
 			setBL(0x02026EAC, (u32)dsiSaveGetInfo);
 			setBL(0x02026EC0, (u32)dsiSaveOpen);
@@ -6989,6 +7056,13 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Crystal Adventure (USA)
 	// Crystal Adventure (Europe)
 	else if (strcmp(romTid, "KXDE") == 0 || strcmp(romTid, "KXDP") == 0) {
+		// if (!extendedMemory2) {
+			u32 bssEnd = *(u32*)0x02004FE8;
+			u32 sdatOffset = 0x0206D988;
+
+			*(u32*)0x02004FE8 = bssEnd - relocateBssPart(ndsHeader, bssEnd, sdatOffset+0x140000, bssEnd, sdatOffset);
+		// }
+
 		*(u32*)0x0200C278 = 0xE1A00000; // nop
 		*(u32*)0x0200F5CC = 0xE1A00000; // nop
 		patchInitDSiWare(0x020149D4, heapEnd);

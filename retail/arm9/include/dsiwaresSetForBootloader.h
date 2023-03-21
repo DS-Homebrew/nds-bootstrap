@@ -98,7 +98,7 @@ static const char dsiWareForBootloader1[][4] = {
 	"K9Y", // Candle Route (bootloaderi-exclusive)
 	"K3N", // GO Series: Captain Sub
 	"KCN", // Castle Conqueror
-	"KQN", // Castle Conqueror: Against
+	"KQO", // Castle Conqueror: Against
 	"KC5", // Castle Conqueror: Heroes
 	"KXC", // Castle Conqueror: Heroes 2
 	"KQN", // Castle Conqueror: Revolution

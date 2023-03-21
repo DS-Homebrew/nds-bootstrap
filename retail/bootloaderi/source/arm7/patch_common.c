@@ -3516,6 +3516,41 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0203CD78, (u32)dsiSaveClose);
 	}
 
+	// Castle Conqueror: Against (USA)
+	else if (strcmp(romTid, "KQOE") == 0 && saveOnFlashcard) {
+		setBL(0x0206ADCC, (u32)dsiSaveOpen);
+		setBL(0x0206ADE4, (u32)dsiSaveCreate);
+		setBL(0x0206AE00, (u32)dsiSaveCreate);
+		setBL(0x0206AE1C, (u32)dsiSaveClose);
+		setBL(0x0206AE38, (u32)dsiSaveOpen);
+		setBL(0x0206AE6C, (u32)dsiSaveWrite);
+		setBL(0x0206AE98, (u32)dsiSaveClose);
+		setBL(0x0206AEE8, (u32)dsiSaveOpen);
+		setBL(0x0206AF4C, (u32)dsiSaveRead);
+		setBL(0x0206AF78, (u32)dsiSaveClose);
+	}
+
+	// Castle Conqueror: Against (Europe, Australia)
+	else if (strcmp(romTid, "KQOV") == 0 && saveOnFlashcard) {
+		setBL(0x02041D00, (u32)dsiSaveOpen);
+		setBL(0x02041D18, (u32)dsiSaveCreate);
+		setBL(0x02041D34, (u32)dsiSaveCreate);
+		setBL(0x02041D50, (u32)dsiSaveClose);
+		setBL(0x02041D6C, (u32)dsiSaveOpen);
+		setBL(0x02041DA0, (u32)dsiSaveWrite);
+		setBL(0x02041DCC, (u32)dsiSaveClose);
+		setBL(0x02041E28, (u32)dsiSaveOpen);
+		setBL(0x02041E38, (u32)dsiSaveGetResultCode);
+		setBL(0x02041EA4, (u32)dsiSaveOpen);
+		setBL(0x02041EBC, (u32)dsiSaveCreate);
+		setBL(0x02041ED8, (u32)dsiSaveCreate);
+		setBL(0x02041EE8, (u32)dsiSaveOpen);
+		setBL(0x02041EFC, (u32)dsiSaveWrite);
+		setBL(0x02041F04, (u32)dsiSaveClose);
+		setBL(0x02041F4C, (u32)dsiSaveRead);
+		setBL(0x02041F78, (u32)dsiSaveClose);
+	}
+
 	// Castle Conqueror: Heroes (USA)
 	else if (strcmp(romTid, "KC5E") == 0 && saveOnFlashcard) {
 		tonccpy((u32*)0x0201831C, dsiSaveGetResultCode, 0xC);
