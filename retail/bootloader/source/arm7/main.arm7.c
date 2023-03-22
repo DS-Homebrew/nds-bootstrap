@@ -1141,6 +1141,7 @@ int arm7_main(void) {
 		if (strncmp(romTid, "KQ9", 3) == 0 // The Legend of Zelda: Four Swords: Anniversary Edition
 		 || strncmp(romTid, "KDM", 3) == 0 // Mario vs. Donkey Kong: Minis March Again!
 		 || strncmp(romTid, "KEV", 3) == 0 // Space Invaders Extreme Z
+		 || strncmp(romTid, "KDZ", 3) == 0 // Trajectile
 		) {
 			fatTableAddr = 0x02000000;
 			fatTableSize = 0x4000;

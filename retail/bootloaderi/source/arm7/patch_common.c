@@ -27,28 +27,25 @@
 #include "tonccpy.h"
 #include "loading_screen.h"
 #include "debug_file.h"
+#include "value_bits.h"
 
 extern u8 gameOnFlashcard;
 extern u8 saveOnFlashcard;
-extern u8 valueBits3;
-#define memoryPit (valueBits3 & BIT(1))
-#define twlSharedFont (valueBits3 & BIT(3))
-#define chnSharedFont (valueBits3 & BIT(4))
-#define korSharedFont (valueBits3 & BIT(5))
 
 u16 patchOffsetCacheFilePrevCrc = 0;
 u16 patchOffsetCacheFileNewCrc = 0;
 
 patchOffsetCacheContents patchOffsetCache;
 
-extern bool logging;
 extern bool gbaRomFound;
 extern u8 dsiSD;
 extern int sharedFontRegion;
 
+#define nopT 0x46C0
+
 static inline void doubleNopT(u32 addr) {
-	*(u16*)(addr)   = 0x46C0;
-	*(u16*)(addr+2) = 0x46C0;
+	*(u16*)(addr)   = nopT;
+	*(u16*)(addr+2) = nopT;
 }
 
 void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
@@ -2739,7 +2736,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			tonccpy((u32*)(dsiSaveWriteT + 4), dsiSaveWrite, 0xC);
 
 			*(u16*)0x0204B0C0 = 0x2001; // movs r0, #1 (dsiSaveGetArcSrc)
-			*(u16*)0x0204B0C2 = 0x46C0; // nop
+			*(u16*)0x0204B0C2 = nopT;
 			setBLThumb(0x0204B0E6, dsiSaveGetInfoT);
 			setBLThumb(0x0204B136, dsiSaveCreateT);
 			setBLThumb(0x0204B170, dsiSaveOpenT);
@@ -5553,10 +5550,10 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBLThumb(0x0204A2FC, dsiSaveCloseT);
 		setBLThumb(0x0204A336, dsiSaveOpenT);
 		*(u16*)0x0204A366 = 0x2001; // movs r0, #1 (dsiSaveGetArcSrc)
-		*(u16*)0x0204A368 = 0x46C0; // nop
+		*(u16*)0x0204A368 = nopT;
 		setBLThumb(0x0204A39C, dsiSaveOpenT);
 		*(u16*)0x0204A3C4 = 0x2001; // movs r0, #1 (dsiSaveFlush)
-		*(u16*)0x0204A3C6 = 0x46C0; // nop
+		*(u16*)0x0204A3C6 = nopT;
 		setBLThumb(0x0204A3D4, dsiSaveGetLengthT);
 		setBLThumb(0x0204A42C, dsiSaveSeekT);
 		setBLThumb(0x0204A478, dsiSaveSeekT);
@@ -6536,11 +6533,11 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBLThumb(0x0206C460, dsiSaveCloseT);
 		setBLThumb(0x0206C49C, dsiSaveOpenT);
 		*(u16*)0x0206C4D8 = 0x2001; // movs r0, #1 (dsiSaveGetArcSrc)
-		*(u16*)0x0206C4DA = 0x46C0; // nop
+		*(u16*)0x0206C4DA = nopT;
 		setBLThumb(0x0206C50E, dsiSaveOpenT);
 		setBLThumb(0x0206C546, dsiSaveGetLengthT);
 		*(u16*)0x0206C536 = 0x2001; // movs r0, #1 (dsiSaveFlush)
-		*(u16*)0x0206C538 = 0x46C0; // nop
+		*(u16*)0x0206C538 = nopT;
 		setBLThumb(0x0206C59C, dsiSaveSeekT);
 		setBLThumb(0x0206C5E8, dsiSaveSeekT);
 	} */
@@ -6604,10 +6601,10 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBLThumb(0x02037D00, dsiSaveCloseT);
 		setBLThumb(0x02037D3A, dsiSaveOpenT);
 		*(u16*)0x02037D6A = 0x2001; // movs r0, #1 (dsiSaveGetArcSrc)
-		*(u16*)0x02037D6C = 0x46C0; // nop
+		*(u16*)0x02037D6C = nopT;
 		setBLThumb(0x02037DA0, dsiSaveOpenT);
 		*(u16*)0x02037DC8 = 0x2001; // movs r0, #1 (dsiSaveFlush)
-		*(u16*)0x02037DCA = 0x46C0; // nop
+		*(u16*)0x02037DCA = nopT;
 		setBLThumb(0x02037DD8, dsiSaveGetLengthT);
 		setBLThumb(0x02037E30, dsiSaveSeekT);
 		setBLThumb(0x02037E7C, dsiSaveSeekT);
@@ -10642,7 +10639,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBLThumb(0x0202656A, dsiSaveCloseT);
 			doubleNopT(0x0202657C);
 			*(u16*)0x020265B6 = 0x2001; // movs r0, #1 (dsiSaveOpenDir)
-			*(u16*)0x020265B8 = 0x46C0; // nop
+			*(u16*)0x020265B8 = nopT;
 			doubleNopT(0x020265C0); // dsiSaveCloseDir
 			setBLThumb(0x020265CC, dsiSaveOpenT);
 			setBLThumb(0x020265D6, dsiSaveCloseT);
@@ -10709,7 +10706,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBLThumb(0x0202654A, dsiSaveCloseT);
 			doubleNopT(0x0202655C);
 			*(u16*)0x02026596 = 0x2001; // movs r0, #1 (dsiSaveOpenDir)
-			*(u16*)0x02026598 = 0x46C0; // nop
+			*(u16*)0x02026598 = nopT;
 			doubleNopT(0x020265A0); // dsiSaveCloseDir
 			setBLThumb(0x020265AC, dsiSaveOpenT);
 			setBLThumb(0x020265B6, dsiSaveCloseT);
@@ -12510,6 +12507,18 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02051FB8, (u32)dsiSaveClose);
 	}*/
 
+	// Trajectile (USA)
+	// Reflect Missile (Europe, Australia)
+	else if ((strcmp(romTid, "KDZE") == 0 || strcmp(romTid, "KDZV") == 0) && !dsiWramAccess) {
+		toncset16((u16*)0x020B9298, nopT, 0x4A/sizeof(u16)); // Do not use DSi WRAM
+	}
+
+	// Reflect Missile (Japan)
+	// Requires 8MB of RAM
+	else if (strcmp(romTid, "KDZJ") == 0 && !dsiWramAccess) {
+		toncset16((u16*)0x020B8F88, nopT, 0x4A/sizeof(u16)); // Do not use DSi WRAM
+	}
+
 	// True Swing Golf Express (USA)
 	// A Little Bit of... Nintendo Touch Golf (Europe, Australia)
 	if ((strcmp(romTid, "K72E") == 0 || strcmp(romTid, "K72V") == 0) && saveOnFlashcard) {
@@ -12850,7 +12859,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	/*else if (strcmp(romTid, "KDXE") == 0) {
 		// Speed up file loading by 0.5 seconds
 		*(u16*)0x020B13D0 = 0x2001; // movs r0, #1
-		*(u16*)0x020B13D2 = 0x46C0; // nop
+		*(u16*)0x020B13D2 = nopT;
 	}*/
 
 	// Yummy Yummy Cooking Jam (USA)

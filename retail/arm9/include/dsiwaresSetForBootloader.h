@@ -435,6 +435,7 @@ static const char dsiWareForBootloader2[][4] = {
 	"KOS", // Tell me Darling
 	"KTE", // Tetris Party Live
 	"KSL", // Touch Solitaire
+	"KDZ", // Trajectile
 	"K72", // True Swing Golf Express (bootloaderi-exclusive)
 	"KTI", // Turn: The Lost Artifact
 	"K6P", // Unou to Sanougaren Sasuru: Uranoura
