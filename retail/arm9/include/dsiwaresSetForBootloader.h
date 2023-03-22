@@ -419,6 +419,7 @@ static const char dsiWareForBootloader2[][4] = {
 	"K2U", // Spot It! Challenge: Mean Machines
 	"KYS", // Spot the Difference
 	"KSP", // Spotto! (bootloaderi-exclusive)
+	"KDY", // Starship Defense (bootloaderi-exclusive)
 	"K4D", // Sudoku
 	"K4F", // Sudoku 4Pockets
 	"KSY", // System Flaw: Recruit (bootloaderi-exclusive)
@@ -445,6 +446,7 @@ static const char dsiWareForBootloader2[][4] = {
 	"KWQ", // Whack-A-Friend
 	"KDW", // White-Water Domo
 	"KBS", // Wonderful Sports: Bowling
+	"KDX", // X-Scape (bootloaderi-exclusive)
 	"KYU", // Yummy Yummy Cooking Jam
 	"KAS", // Art Style: ZENGAGE
 	"K7K", // Zombie Blaster

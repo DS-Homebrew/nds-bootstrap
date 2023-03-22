@@ -12173,6 +12173,17 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0202DB98 = 0xE12FFF1E; // bx lr
 	}
 
+	// Starship Defense (USA)
+	// Starship Patrol (Europe, Australia)
+	else if ((strcmp(romTid, "KDYE") == 0 || strcmp(romTid, "KDYV") == 0) && !dsiWramAccess) {
+		toncset16((u16*)0x020A76C4, nopT, 0x4A/sizeof(u16)); // Do not use DSi WRAM
+	}
+
+	// Starship Defender (Japan)
+	else if (strcmp(romTid, "KDYJ") == 0 && !dsiWramAccess) {
+		toncset16((u16*)0x020A767C, nopT, 0x4A/sizeof(u16)); // Do not use DSi WRAM
+	}
+
 	// Sudoku (USA)
 	// Sudoku (USA) (Rev 1)
 	else if (strcmp(romTid, "K4DE") == 0) {
@@ -12514,7 +12525,6 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Reflect Missile (Japan)
-	// Requires 8MB of RAM
 	else if (strcmp(romTid, "KDZJ") == 0 && !dsiWramAccess) {
 		toncset16((u16*)0x020B8F88, nopT, 0x4A/sizeof(u16)); // Do not use DSi WRAM
 	}
@@ -12856,11 +12866,15 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// X-Scape (USA)
-	/*else if (strcmp(romTid, "KDXE") == 0) {
+	// 3D Space Tank (Europe, Australia)
+	// X-Returns (Japan)
+	else if (strncmp(romTid, "KDX", 3) == 0 && !dsiWramAccess) {
+		toncset16((u16*)0x020B12A0, nopT, 0x4A/sizeof(u16)); // Do not use DSi WRAM
+
 		// Speed up file loading by 0.5 seconds
-		*(u16*)0x020B13D0 = 0x2001; // movs r0, #1
-		*(u16*)0x020B13D2 = nopT;
-	}*/
+		// *(u16*)0x020B13D0 = 0x2001; // movs r0, #1
+		// *(u16*)0x020B13D2 = nopT;
+	}
 
 	// Yummy Yummy Cooking Jam (USA)
 	else if (strcmp(romTid, "KYUE") == 0 && saveOnFlashcard) {
