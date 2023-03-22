@@ -12213,6 +12213,81 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		tonccpy((u32*)0x020DC3E0, dsiSaveGetResultCode, 0xC);
 	} */
 
+	// Successfully Learning: English, Year 2 (Europe)
+	// Successfully Learning: English, Year 3 (Europe)
+	// Successfully Learning: English, Year 4 (Europe)
+	// Successfully Learning: English, Year 5 (Europe)
+	else if (strcmp(romTid, "KEUP") == 0 || strcmp(romTid, "KEZP") == 0 || strcmp(romTid, "KE6P") == 0 || strcmp(romTid, "KE7P") == 0) {
+		u8 offsetChange = (romTid[2] == 'U' || romTid[2] == '6') ? 0 : 4;
+		if (saveOnFlashcard) {
+			setBL(0x020C1E34+offsetChange, (u32)dsiSaveOpen);
+			setBL(0x020C1E8C+offsetChange, (u32)dsiSaveClose);
+			setBL(0x020C1EB4+offsetChange, (u32)dsiSaveRead);
+			setBL(0x020C1ED0+offsetChange, (u32)dsiSaveWrite);
+			setBL(0x020C1F0C+offsetChange, (u32)dsiSaveOpen);
+			setBL(0x020C1F1C+offsetChange, (u32)dsiSaveClose);
+			setBL(0x020C1F40+offsetChange, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+			setBL(0x020C1F5C+offsetChange, (u32)dsiSaveDelete);
+			setBL(0x020C1F78+offsetChange, (u32)dsiSaveGetLength);
+		}
+		if (!twlFontFound) {
+			*(u32*)(0x020C3C6C+offsetChange) = 0xE12FFF1E; // bx lr (Skip Manual screen)
+		}
+	}
+
+	// Successfully Learning: German, Year 2 (Europe)
+	// Successfully Learning: German, Year 3 (Europe)
+	// Successfully Learning: German, Year 4 (Europe)
+	// Successfully Learning: German, Year 5 (Europe)
+	else if (strcmp(romTid, "KHUP") == 0 || strcmp(romTid, "KHVP") == 0 || strcmp(romTid, "KHYP") == 0 || strcmp(romTid, "KHZP") == 0) {
+		u8 offsetChange = (romTid[2] == 'U' || romTid[2] == 'Y') ? 0 : 4;
+		if (saveOnFlashcard) {
+			setBL(0x0208D668+offsetChange, (u32)dsiSaveOpen);
+			setBL(0x0208D6C0+offsetChange, (u32)dsiSaveClose);
+			setBL(0x0208D6E8+offsetChange, (u32)dsiSaveRead);
+			setBL(0x0208D704+offsetChange, (u32)dsiSaveWrite);
+			setBL(0x0208D740+offsetChange, (u32)dsiSaveOpen);
+			setBL(0x0208D750+offsetChange, (u32)dsiSaveClose);
+			setBL(0x0208D774+offsetChange, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+			setBL(0x0208D790+offsetChange, (u32)dsiSaveDelete);
+			setBL(0x0208D7AC+offsetChange, (u32)dsiSaveGetLength);
+		}
+		if (!twlFontFound) {
+			*(u32*)(0x0208F4CC+offsetChange) = 0xE12FFF1E; // bx lr (Skip Manual screen)
+		}
+	}
+
+	// Successfully Learning: Mathematics, Year 2 (Europe)
+	else if (strcmp(romTid, "KKUP") == 0) {
+		setBL(0x020C7B90, (u32)dsiSaveOpen);
+		setBL(0x020C7BE8, (u32)dsiSaveClose);
+		setBL(0x020C7C10, (u32)dsiSaveRead);
+		setBL(0x020C7C2C, (u32)dsiSaveWrite);
+		setBL(0x020C7C68, (u32)dsiSaveOpen);
+		setBL(0x020C7C78, (u32)dsiSaveClose);
+		setBL(0x020C7C9C, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+		setBL(0x020C7CB8, (u32)dsiSaveDelete);
+		setBL(0x020C7CD4, (u32)dsiSaveGetLength);
+		*(u32*)0x020C99F4 = 0xE12FFF1E; // bx lr (Skip Manual screen)
+	}
+
+	// Successfully Learning: Mathematics, Year 3 (Europe)
+	// Successfully Learning: Mathematics, Year 4 (Europe)
+	// Successfully Learning: Mathematics, Year 5 (Europe)
+	else if (strcmp(romTid, "KKVP") == 0 || strcmp(romTid, "KKWP") == 0 || strcmp(romTid, "KKXP") == 0) {
+		u8 offsetChange = (romTid[2] == 'X') ? 0 : 4;
+		setBL(0x0212CA9C+offsetChange, (u32)dsiSaveOpen);
+		setBL(0x0212CAF4+offsetChange, (u32)dsiSaveClose);
+		setBL(0x0212CB1C+offsetChange, (u32)dsiSaveRead);
+		setBL(0x0212CB38+offsetChange, (u32)dsiSaveWrite);
+		setBL(0x0212CB74+offsetChange, (u32)dsiSaveOpen);
+		setBL(0x0212CB84+offsetChange, (u32)dsiSaveClose);
+		setBL(0x0212CBA8+offsetChange, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+		setBL(0x0212CBC4+offsetChange, (u32)dsiSaveDelete);
+		setBL(0x0212CBE8+offsetChange, (u32)dsiSaveGetLength);
+		*(u32*)(0x0212E900+offsetChange) = 0xE12FFF1E; // bx lr (Skip Manual screen)
+	}
+
 	// Sudoku (USA)
 	// Sudoku (USA) (Rev 1)
 	else if (strcmp(romTid, "K4DE") == 0) {
