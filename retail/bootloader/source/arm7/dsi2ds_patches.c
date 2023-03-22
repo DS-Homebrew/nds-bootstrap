@@ -20368,6 +20368,42 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0205BD64, (u32)dsiSaveClose);
 	} */
 
+	// SteamWorld Tower Defense (USA)
+	// SteamWorld Tower Defense (Europe, Australia)
+	// Soft-locks in save code
+	/* else if (strcmp(romTid, "KSWE") == 0 || strcmp(romTid, "KSWV") == 0) {
+		setBL(0x02005140, (u32)dsiSaveGetInfo);
+		*(u32*)0x0200523C = 0xE3A00001; // mov r0, #1 (dsiSaveOpenDir)
+		*(u32*)0x02005270 = 0xE1A00000; // nop (dsiSaveCloseDir)
+		*(u32*)0x02005330 = 0xE3A00001; // mov r0, #1 (dsiSaveFreeSpaceAvailable)
+		*(u32*)0x02005348 += 0xD0000000; // bne -> b
+		setBL(0x020053E0, (u32)dsiSaveCreate);
+		setBL(0x02005450, (u32)dsiSaveOpen);
+		setBL(0x020054B4, (u32)dsiSaveSetLength);
+		setBL(0x02005508, (u32)dsiSaveClose);
+		setBL(0x020068D8, (u32)dsiSaveOpen);
+		setBL(0x02006930, (u32)dsiSaveOpen);
+		setBL(0x02006954, (u32)dsiSaveWrite);
+		setBL(0x02006968, (u32)dsiSaveClose);
+		setBL(0x020069D8, (u32)dsiSaveOpen);
+		setBL(0x02006A0C, (u32)dsiSaveRead);
+		setBL(0x02006AAC, (u32)dsiSaveRead);
+		setBL(0x0200704C, (u32)dsiSaveClose);
+		setBL(0x02007070, (u32)dsiSaveClose);
+		*(u32*)0x02007124 = 0xE1A00000; // nop
+		setBL(0x0200718C, (u32)dsiSaveOpen);
+		setBL(0x020071A4, (u32)dsiSaveClose);
+		setBL(0x020071E8, (u32)dsiSaveSeek);
+		setBL(0x020071F8, (u32)dsiSaveWrite);
+		*(u32*)0x0204BA50 = 0xE1A00000; // nop
+		*(u32*)0x020DB868 = 0xE1A00000; // nop
+		tonccpy((u32*)0x020DC3E0, dsiSaveGetResultCode, 0xC);
+		*(u32*)0x020DF270 = 0xE1A00000; // nop
+		patchInitDSiWare(0x020E558C, heapEnd);
+		*(u32*)0x020E5918 = *(u32*)0x02004FD0;
+		patchUserSettingsReadDSiWare(0x020E6B28);
+	} */
+
 	// Sudoku (USA)
 	// Sudoku (USA) (Rev 1)
 	else if (strcmp(romTid, "K4DE") == 0) {

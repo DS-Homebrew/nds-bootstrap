@@ -420,6 +420,7 @@ static const char dsiWareForBootloader2[][4] = {
 	"KYS", // Spot the Difference
 	"KSP", // Spotto! (bootloaderi-exclusive)
 	"KDY", // Starship Defense (bootloaderi-exclusive)
+	// "KSW", // SteamWorld Tower Defense
 	"K4D", // Sudoku
 	"K4F", // Sudoku 4Pockets
 	"KSY", // System Flaw: Recruit (bootloaderi-exclusive)
