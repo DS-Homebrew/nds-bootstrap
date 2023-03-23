@@ -563,7 +563,6 @@ u32 romSizeLimit = 0x780000;
 u32 ROMinRAM = 0;
 
 static bool isROMLoadableInRAM(const tNDSHeader* ndsHeader, const char* romTid, const module_params_t* moduleParams) {
-	extern bool useSharedFont;
 	bool isDevConsole = false;
 	if (s2FlashcardId == 0x334D || s2FlashcardId == 0x3647 || s2FlashcardId == 0x4353 || s2FlashcardId == 0x5A45) {
 		romLocation = 0x08000000;
