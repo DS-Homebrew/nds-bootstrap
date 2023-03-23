@@ -1277,6 +1277,7 @@ void patchSharedFontPath(const cardengineArm9* ce9, const tNDSHeader* ndsHeader,
 
 void patchTwlFontLoad(u32 heapAllocAddr, u32 newCodeAddr) {
 	extern bool expansionPakFound;
+	extern bool sharedFontInMep;
 	if (expansionPakFound) {
 		extern u32 clusterCache;
 		extern u32* twlFontHeapAlloc;
@@ -1286,6 +1287,7 @@ void patchTwlFontLoad(u32 heapAllocAddr, u32 newCodeAddr) {
 		*(u32*)newCodeAddr = clusterCache-0x200000;
 		setBL(heapAllocAddr, newCodeAddr+4);
 
+		sharedFontInMep = true;
 		return;
 	}
 

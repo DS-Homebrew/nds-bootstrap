@@ -144,6 +144,7 @@ bool pkmnHeader = false;
 u16 s2FlashcardId = 0;
 
 bool expansionPakFound = false;
+bool sharedFontInMep = false;
 
 u32 newArm7binarySize = 0;
 u32 arm7mbk = 0;
@@ -573,7 +574,7 @@ static bool isROMLoadableInRAM(const tNDSHeader* ndsHeader, const char* romTid, 
 		} else {
 			romSizeLimit = 0x1F80000;
 		}
-		if (useSharedFont) {
+		if (sharedFontInMep) {
 			romSizeLimit -= 0x200000;
 		}
 	} else if (!extendedMemory2) {
@@ -589,7 +590,7 @@ static bool isROMLoadableInRAM(const tNDSHeader* ndsHeader, const char* romTid, 
 			romLocation += 0x280000;
 			romSizeLimit -= 0x280000;
 		}
-		if (romSizeLimit > 0 && useSharedFont) {
+		if (romSizeLimit > 0 && sharedFontInMep) {
 			romSizeLimit -= 0x200000;
 		}
 	}
