@@ -435,6 +435,7 @@ static const char dsiWareForBootloader2[][4] = {
 	"KKX", // Successfully Learning: Mathematics, Year 5
 	"K4D", // Sudoku
 	"K4F", // Sudoku 4Pockets
+	"KWU", // Sudoku & Kakuro: Welt Edition
 	"KSY", // System Flaw: Recruit (bootloaderi-exclusive)
 	"KZU", // Tales to Enjoy!: Little Red Riding Hood
 	"KZV", // Tales to Enjoy!: Puss in Boots

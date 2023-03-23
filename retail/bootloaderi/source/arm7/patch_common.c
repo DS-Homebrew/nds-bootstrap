@@ -12382,6 +12382,31 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// Sudoku & Kakuro: Welt Edition (Germany)
+	else if (strcmp(romTid, "KWUD") == 0) {
+		if (saveOnFlashcard) {
+			tonccpy((u32*)0x02012BDC, dsiSaveGetResultCode, 0xC);
+			setBL(0x0202680C, (u32)dsiSaveCreate);
+			setBL(0x02026828, (u32)dsiSaveOpen);
+			setBL(0x0202688C, (u32)dsiSaveWrite);
+			setBL(0x02026894, (u32)dsiSaveClose);
+			*(u32*)0x020269C0 = 0xE3A00001; // mov r0, #1 (dsiSaveOpenDir)
+			*(u32*)0x020269D0 = 0xE1A00000; // nop (dsiSaveCloseDir)
+			setBL(0x020269E0, (u32)dsiSaveOpen);
+			setBL(0x02026BFC, (u32)dsiSaveOpen);
+			setBL(0x02026C14, (u32)dsiSaveSeek);
+			setBL(0x02026C48, (u32)dsiSaveWrite);
+			setBL(0x02026C50, (u32)dsiSaveClose);
+			setBL(0x02026CF0, (u32)dsiSaveOpen);
+			setBL(0x02026D08, (u32)dsiSaveSeek);
+			setBL(0x02026D1C, (u32)dsiSaveRead);
+			setBL(0x02026D24, (u32)dsiSaveClose);
+		}
+		if (!twlFontFound) {
+			*(u32*)0x0203CDF8 = 0xE1A00000; // nop (Skip Manual screen)
+		}
+	}
+
 	// System Flaw: Recruit (USA)
 	else if (strcmp(romTid, "KSYE") == 0 && saveOnFlashcard) {
 		setBL(0x02042080, (u32)dsiSaveOpen);
