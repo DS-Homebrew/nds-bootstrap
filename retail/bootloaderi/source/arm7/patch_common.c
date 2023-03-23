@@ -12440,6 +12440,68 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// Super Swap (USA)
+	else if (strcmp(romTid, "K4WE") == 0) {
+		if (saveOnFlashcard) {
+			setBL(0x0200C86C, (u32)dsiSaveOpen);
+			setBL(0x0200C884, (u32)dsiSaveClose);
+			setBL(0x0200C8A4, (u32)dsiSaveCreate);
+			setBL(0x0200C8BC, (u32)dsiSaveOpen);
+			setBL(0x0200C8D4, (u32)dsiSaveClose);
+			setBL(0x0200C8DC, (u32)dsiSaveDelete);
+			setBL(0x0200C9DC, (u32)dsiSaveOpen);
+			setBL(0x0200C9F4, (u32)dsiSaveGetLength);
+			setBL(0x0200CA18, (u32)dsiSaveRead);
+			setBL(0x0200CA20, (u32)dsiSaveClose);
+			setBL(0x0200CA5C, (u32)dsiSaveOpen);
+			setBL(0x0200CA70, (u32)dsiSaveClose);
+			setBL(0x0200CA84, (u32)dsiSaveCreate);
+			setBL(0x0200CA9C, (u32)dsiSaveOpen);
+			setBL(0x0200CAB8, (u32)dsiSaveClose);
+			setBL(0x0200CAC0, (u32)dsiSaveDelete);
+			setBL(0x0200CAD4, (u32)dsiSaveCreate);
+			setBL(0x0200CAE4, (u32)dsiSaveOpen);
+			setBL(0x0200CAF4, (u32)dsiSaveGetResultCode);
+			setBL(0x0200CB0C, (u32)dsiSaveSetLength);
+			setBL(0x0200CB1C, (u32)dsiSaveWrite);
+			setBL(0x0200CB24, (u32)dsiSaveClose);
+		}
+		if (!twlFontFound) {
+			*(u32*)0x0200EBD8 = 0xE12FFF1E; // bx lr (Skip Manual screen)
+		}
+	}
+
+	// Super Swap (Europe)
+	else if (strcmp(romTid, "K4WP") == 0) {
+		if (saveOnFlashcard) {
+			setBL(0x0200C7EC, (u32)dsiSaveOpen);
+			setBL(0x0200C800, (u32)dsiSaveClose);
+			setBL(0x0200C820, (u32)dsiSaveCreate);
+			setBL(0x0200C83C, (u32)dsiSaveOpen);
+			setBL(0x0200C854, (u32)dsiSaveClose);
+			setBL(0x0200C85C, (u32)dsiSaveDelete);
+			setBL(0x0200C968, (u32)dsiSaveOpen);
+			setBL(0x0200C980, (u32)dsiSaveGetLength);
+			setBL(0x0200C9A4, (u32)dsiSaveRead);
+			setBL(0x0200C9AC, (u32)dsiSaveClose);
+			setBL(0x0200C9F0, (u32)dsiSaveOpen);
+			setBL(0x0200CA04, (u32)dsiSaveClose);
+			setBL(0x0200CA18, (u32)dsiSaveCreate);
+			setBL(0x0200CA34, (u32)dsiSaveOpen);
+			setBL(0x0200CA50, (u32)dsiSaveClose);
+			setBL(0x0200CA58, (u32)dsiSaveDelete);
+			setBL(0x0200CA70, (u32)dsiSaveCreate);
+			setBL(0x0200CA80, (u32)dsiSaveOpen);
+			setBL(0x0200CA90, (u32)dsiSaveGetResultCode);
+			setBL(0x0200CAAC, (u32)dsiSaveSetLength);
+			setBL(0x0200CABC, (u32)dsiSaveWrite);
+			setBL(0x0200CAC4, (u32)dsiSaveClose);
+		}
+		if (!twlFontFound) {
+			*(u32*)0x0200E9FC = 0xE12FFF1E; // bx lr (Skip Manual screen)
+		}
+	}
+
 	// System Flaw: Recruit (USA)
 	else if (strcmp(romTid, "KSYE") == 0 && saveOnFlashcard) {
 		setBL(0x02042080, (u32)dsiSaveOpen);

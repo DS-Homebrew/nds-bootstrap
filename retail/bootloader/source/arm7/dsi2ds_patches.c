@@ -20674,6 +20674,90 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0203CDF8 = 0xE1A00000; // nop (Do not load Manual screen)
 	}
 
+	// Super Swap (USA)
+	// Requires 8MB of RAM
+	else if (strcmp(romTid, "K4WE") == 0 && extendedMemory2) {
+		*(u8*)0x020050C8 = 0x60;
+		*(u32*)0x02005138 = 0x60BA00;
+		*(u32*)0x0200C378 = 0xE1A00000; // nop
+		*(u32*)0x0200C380 = 0xE1A00000; // nop
+		setBL(0x0200C86C, (u32)dsiSaveOpen);
+		setBL(0x0200C884, (u32)dsiSaveClose);
+		setBL(0x0200C8A4, (u32)dsiSaveCreate);
+		setBL(0x0200C8BC, (u32)dsiSaveOpen);
+		setBL(0x0200C8D4, (u32)dsiSaveClose);
+		setBL(0x0200C8DC, (u32)dsiSaveDelete);
+		setBL(0x0200C9DC, (u32)dsiSaveOpen);
+		setBL(0x0200C9F4, (u32)dsiSaveGetLength);
+		setBL(0x0200CA18, (u32)dsiSaveRead);
+		setBL(0x0200CA20, (u32)dsiSaveClose);
+		setBL(0x0200CA5C, (u32)dsiSaveOpen);
+		setBL(0x0200CA70, (u32)dsiSaveClose);
+		setBL(0x0200CA84, (u32)dsiSaveCreate);
+		setBL(0x0200CA9C, (u32)dsiSaveOpen);
+		*(u32*)0x0200CAAC = 0xE1A00000; // nop
+		setBL(0x0200CAB8, (u32)dsiSaveClose);
+		setBL(0x0200CAC0, (u32)dsiSaveDelete);
+		setBL(0x0200CAD4, (u32)dsiSaveCreate);
+		setBL(0x0200CAE4, (u32)dsiSaveOpen);
+		setBL(0x0200CAF4, (u32)dsiSaveGetResultCode);
+		setBL(0x0200CB0C, (u32)dsiSaveSetLength);
+		setBL(0x0200CB1C, (u32)dsiSaveWrite);
+		setBL(0x0200CB24, (u32)dsiSaveClose);
+		*(u32*)0x0200EBD8 = 0xE12FFF1E; // bx lr (Skip Manual screen)
+		*(u32*)0x02042980 = 0xE1A00000; // nop
+		*(u32*)0x02045BE0 = 0xE1A00000; // nop
+		patchInitDSiWare(0x0204B2D0, heapEnd);
+		*(u32*)0x0204B65C = *(u32*)0x02004FD0;
+		patchUserSettingsReadDSiWare(0x0204C910);
+		*(u32*)0x0204CD44 = 0xE1A00000; // nop
+		*(u32*)0x0204CD48 = 0xE1A00000; // nop
+		*(u32*)0x0204CD4C = 0xE1A00000; // nop
+		*(u32*)0x0204CD50 = 0xE1A00000; // nop
+	}
+
+	// Super Swap (Europe)
+	// Requires 8MB of RAM
+	else if (strcmp(romTid, "K4WP") == 0 && extendedMemory2) {
+		*(u8*)0x020050CC = 0x60;
+		*(u32*)0x0200513C = 0x60BA00;
+		*(u32*)0x0200C304 = 0xE1A00000; // nop
+		*(u32*)0x0200C30C = 0xE1A00000; // nop
+		setBL(0x0200C7EC, (u32)dsiSaveOpen);
+		setBL(0x0200C800, (u32)dsiSaveClose);
+		setBL(0x0200C820, (u32)dsiSaveCreate);
+		setBL(0x0200C83C, (u32)dsiSaveOpen);
+		setBL(0x0200C854, (u32)dsiSaveClose);
+		setBL(0x0200C85C, (u32)dsiSaveDelete);
+		setBL(0x0200C968, (u32)dsiSaveOpen);
+		setBL(0x0200C980, (u32)dsiSaveGetLength);
+		setBL(0x0200C9A4, (u32)dsiSaveRead);
+		setBL(0x0200C9AC, (u32)dsiSaveClose);
+		setBL(0x0200C9F0, (u32)dsiSaveOpen);
+		setBL(0x0200CA04, (u32)dsiSaveClose);
+		setBL(0x0200CA18, (u32)dsiSaveCreate);
+		setBL(0x0200CA34, (u32)dsiSaveOpen);
+		*(u32*)0x0200CA44 = 0xE1A00000; // nop
+		setBL(0x0200CA50, (u32)dsiSaveClose);
+		setBL(0x0200CA58, (u32)dsiSaveDelete);
+		setBL(0x0200CA70, (u32)dsiSaveCreate);
+		setBL(0x0200CA80, (u32)dsiSaveOpen);
+		setBL(0x0200CA90, (u32)dsiSaveGetResultCode);
+		setBL(0x0200CAAC, (u32)dsiSaveSetLength);
+		setBL(0x0200CABC, (u32)dsiSaveWrite);
+		setBL(0x0200CAC4, (u32)dsiSaveClose);
+		*(u32*)0x0200E9FC = 0xE12FFF1E; // bx lr (Skip Manual screen)
+		*(u32*)0x020416D4 = 0xE1A00000; // nop
+		*(u32*)0x02044934 = 0xE1A00000; // nop
+		patchInitDSiWare(0x0204A024, heapEnd);
+		*(u32*)0x0204A3B0 = *(u32*)0x02004FD0;
+		patchUserSettingsReadDSiWare(0x0204B664);
+		*(u32*)0x0204BA98 = 0xE1A00000; // nop
+		*(u32*)0x0204BA9C = 0xE1A00000; // nop
+		*(u32*)0x0204BAA0 = 0xE1A00000; // nop
+		*(u32*)0x0204BAA4 = 0xE1A00000; // nop
+	}
+
 	// Tales to Enjoy!: Little Red Riding Hood (USA)
 	// Tales to Enjoy!: Puss in Boots (USA)
 	// Tales to Enjoy!: The Three Little Pigs (USA)
