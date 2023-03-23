@@ -15860,6 +15860,43 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0204652C = 0xE12FFF1E; // bx lr
 	}
 
+	// Sun-Ganui Gyesan!: Dunoehoejeoni Ppallajineun Gyesan Training (Korea)
+	else if (strcmp(romTid, "K3TK") == 0) {
+		*(u32*)0x0200C530 = 0xE1A00000; // nop
+		*(u32*)0x0200FA50 = 0xE1A00000; // nop
+		patchInitDSiWare(0x020156B8, heapEnd);
+		patchUserSettingsReadDSiWare(0x02016E18);
+		*(u32*)0x0201CC94 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02024C6C = 0xE3A00000; // mov r0, #0
+		setBL(0x02024E08, (u32)dsiSaveCreate);
+		setBL(0x02025588, (u32)dsiSaveClose);
+		setBL(0x02025644, (u32)dsiSaveOpen);
+		setBL(0x02025660, (u32)dsiSaveSeek);
+		setBL(0x02025674, (u32)dsiSaveClose);
+		setBL(0x0202568C, (u32)dsiSaveRead);
+		setBL(0x0202569C, (u32)dsiSaveClose);
+		setBL(0x020256A8, (u32)dsiSaveClose);
+		setBL(0x020256DC, (u32)dsiSaveOpen);
+		setBL(0x020256F4, (u32)dsiSaveSeek);
+		setBL(0x0202570C, (u32)dsiSaveRead); // dsiSaveReadAsync
+		setBL(0x0202573C, (u32)dsiSaveOpen);
+		setBL(0x02025754, (u32)dsiSaveSetLength);
+		setBL(0x02025764, (u32)dsiSaveClose);
+		setBL(0x02025778, (u32)dsiSaveSeek);
+		setBL(0x0202578C, (u32)dsiSaveClose);
+		setBL(0x020257A4, (u32)dsiSaveWrite);
+		setBL(0x020257B4, (u32)dsiSaveClose);
+		setBL(0x020257C0, (u32)dsiSaveClose);
+		setBL(0x020257F4, (u32)dsiSaveOpen);
+		setBL(0x02025808, (u32)dsiSaveSetLength);
+		setBL(0x02025820, (u32)dsiSaveSeek);
+		setBL(0x02025838, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+		*(u32*)0x02031BB8 = 0xE3A00002; // mov r0, #2 (Skip Manual screen, Part 1)
+		*(u32*)0x02036F8C = 0xE1A00000; // nop
+		*(u32*)0x02036FA4 = 0xE1A00000; // nop
+		*(u32*)0x0203A530 = 0xE3A00000; // mov r0, #0 (Skip Manual screen, Part 2)
+	}
+
 	// Otona no Tame no: Renjuku Kanji (Japan)
 	else if (strcmp(romTid, "KJ9J") == 0) {
 		*(u32*)0x0200E618 = 0xE1A00000; // nop
