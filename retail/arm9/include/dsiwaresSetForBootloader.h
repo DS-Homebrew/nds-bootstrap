@@ -23,6 +23,7 @@ static const char dsiWareForBootloader1[][4] = {
 	"KTS", // 4 Travellers: Play Spanish
 	"K45", // 40-in-1: Explosive Megamix
 	"KRJ", // 5 in 1 Mahjong
+	"K5I", // 5 in 1 Solitaire
 	"K2O", // 505 Tangram
 	"K7C", // 7 Card Games
 	"K7W", // 7 Wonders II

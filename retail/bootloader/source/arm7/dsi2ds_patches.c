@@ -1438,6 +1438,38 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02056970 = 0xE12FFF1E; // bx lr (Skip Manual screen)
 	}
 
+	// 5 in 1 Solitaire (USA)
+	// 5 in 1 Solitaire (Europe)
+	// Saving not supported due to using more than one file in filesystem
+	// Requires either 8MB of RAM or Memory Expansion Pak
+	else if ((strcmp(romTid, "K5IE") == 0 || strcmp(romTid, "K5IP") == 0) && debugOrMep) {
+		u16 offsetChange = (romTid[3] == 'E') ? 0 : 0x170;
+
+		useSharedFont = (twlFontFound && extendedMemory2);
+		if (useSharedFont) {
+			if (!extendedMemory2) {
+				patchTwlFontLoad((romTid[3] == 'E') ? 0x020056DC : 0x02005658, 0x020455D0+offsetChange);
+			}
+		} else {
+			*(u32*)0x02005098 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		}
+		if (romTid[3] == 'E') {
+			*(u32*)0x02005244 = 0xE1A00000; // nop
+			*(u32*)0x02005260 = 0xE1A00000; // nop
+		} else {
+			*(u32*)0x020051C4 = 0xE1A00000; // nop
+			*(u32*)0x020051DC = 0xE1A00000; // nop
+		}
+		if (!extendedMemory2) {
+			*(u32*)(0x0202914C+offsetChange) = (s2FlashcardId == 0x5A45) ? 0xE3A00522 : 0xE3A00409; // mov r0, (s2FlashcardId == 0x5A45) ? #0x08800000 : #0x09000000
+		}
+		*(u32*)(0x0203BD2C+offsetChange) = 0xE1A00000; // nop
+		*(u32*)(0x0203EE88+offsetChange) = 0xE1A00000; // nop
+		patchInitDSiWare(0x02043AF0+offsetChange, heapEnd);
+		*(u32*)(0x02043E7C+offsetChange) = *(u32*)0x02004FD0;
+		patchUserSettingsReadDSiWare(0x0204508C+offsetChange);
+	}
+
 	// 505 Tangram (USA)
 	else if (strcmp(romTid, "K2OE") == 0) {
 		// useSharedFont = (twlFontFound && debugOrMep);

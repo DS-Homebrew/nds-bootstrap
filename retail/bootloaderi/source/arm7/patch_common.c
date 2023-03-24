@@ -944,6 +944,13 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// 5 in 1 Solitaire (USA)
+	// 5 in 1 Solitaire (Europe)
+	// Saving not supported due to using more than one file in filesystem
+	else if ((strcmp(romTid, "K5IE") == 0 || strcmp(romTid, "K5IP") == 0) && !twlFontFound) {
+		*(u32*)0x02005098 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+	}
+
 	// 505 Tangram (USA)
 	else if (strcmp(romTid, "K2OE") == 0 && saveOnFlashcard) {
 		setBL(0x020100B8, (u32)dsiSaveOpen);
@@ -3377,7 +3384,6 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Cake Ninja: XMAS (USA)
-	// Requires 8MB of RAM
 	else if (strcmp(romTid, "KYNE") == 0 && saveOnFlashcard) {
 		setBL(0x0202571C, (u32)dsiSaveOpen);
 		setBL(0x02025774, (u32)dsiSaveCreate);
