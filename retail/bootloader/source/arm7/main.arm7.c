@@ -559,7 +559,7 @@ static module_params_t* loadModuleParams(const tNDSHeader* ndsHeader, bool* foun
 }
 
 u32 romLocation = 0x09000000;
-u32 romSizeLimit = 0x780000;
+s32 romSizeLimit = 0x780000;
 u32 ROMinRAM = 0;
 
 static bool isROMLoadableInRAM(const tNDSHeader* ndsHeader, const char* romTid, const module_params_t* moduleParams) {
@@ -573,14 +573,14 @@ static bool isROMLoadableInRAM(const tNDSHeader* ndsHeader, const char* romTid, 
 		} else {
 			romSizeLimit = 0x1F80000;
 		}
-		if (sharedFontInMep) {
-			romSizeLimit -= 0x200000;
-		}
 	} else if (!extendedMemory2) {
 		if (strncmp(romTid, "KD3", 3) == 0 // Jinia Supasonaru: Eiwa Rakubiki Jiten
 		 || strncmp(romTid, "KD5", 3) == 0 // Jinia Supasonaru: Waei Rakubiki Jiten
 		 || strncmp(romTid, "KD4", 3) == 0) { // Meikyou Kokugo: Rakubiki Jiten
 			return false;
+		} else if (strncmp(romTid, "KBJ", 3) == 0) { // 21 Blackjack
+			romLocation += 0x410000;
+			romSizeLimit -= 0x410000;
 		} else if (// strncmp(romTid, "KLT", 3) == 0 // My Little Restaurant
 				/* || */ strncmp(romTid, "KAU", 3) == 0) { // Nintendo Cowndown Calendar
 			romLocation += 0x200000;
@@ -589,9 +589,9 @@ static bool isROMLoadableInRAM(const tNDSHeader* ndsHeader, const char* romTid, 
 			romLocation += 0x280000;
 			romSizeLimit -= 0x280000;
 		}
-		if (romSizeLimit > 0 && sharedFontInMep) {
-			romSizeLimit -= 0x200000;
-		}
+	}
+	if (sharedFontInMep) {
+		romSizeLimit -= 0x200000;
 	}
 	if ((strncmp(romTid, "KD3", 3) == 0 || strncmp(romTid, "KD4", 3) == 0 || strncmp(romTid, "KD5", 3) == 0) && s2FlashcardId == 0x5A45) {
 		return false;
@@ -611,7 +611,7 @@ static bool isROMLoadableInRAM(const tNDSHeader* ndsHeader, const char* romTid, 
 		}
 	}
 
-	if (romSizeLimit == 0) {
+	if (romSizeLimit <= 0) {
 		return false;
 	}
 

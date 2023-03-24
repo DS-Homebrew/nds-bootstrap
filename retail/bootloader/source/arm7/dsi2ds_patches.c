@@ -593,6 +593,52 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		tonccpy((char*)0x020A0608, dataPrv, strlen(dataPrv));
 	}
 
+	// 21 Blackjack (USA)
+	// Saving not supported due to using more than one file in filesystem
+	// Requires either 8MB of RAM or Memory Expansion Pak
+	else if (strcmp(romTid, "KBJE") == 0 && debugOrMep) {
+		useSharedFont = twlFontFound;
+		if (useSharedFont) {
+			if (!extendedMemory2) {
+				patchTwlFontLoad(0x020053C4, 0x02034634);
+			}
+		} else {
+			*(u32*)0x02005104 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		}
+		*(u32*)0x02005170 = 0xE1A00000; // nop
+		*(u32*)0x02005190 = 0xE1A00000; // nop
+		if (!extendedMemory2) {
+			*(u32*)0x02016C60 = (s2FlashcardId == 0x5A45) ? 0xE3A00522 : 0xE3A00409; // mov r0, (s2FlashcardId == 0x5A45) ? #0x08800000 : #0x09000000
+		}
+		*(u32*)0x0202AE1C = 0xE1A00000; // nop
+		*(u32*)0x0202DF80 = 0xE1A00000; // nop
+		patchInitDSiWare(0x02032C04, heapEnd);
+		patchUserSettingsReadDSiWare(0x020340E0);
+	}
+
+	// 21 Blackjack (Europe)
+	// Saving not supported due to using more than one file in filesystem
+	// Requires either 8MB of RAM or Memory Expansion Pak
+	else if (strcmp(romTid, "KBJP") == 0 && debugOrMep) {
+		useSharedFont = twlFontFound;
+		if (useSharedFont) {
+			if (!extendedMemory2) {
+				patchTwlFontLoad(0x020053C4, 0x02034934);
+			}
+		} else {
+			*(u32*)0x0200511C = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		}
+		*(u32*)0x02005188 = 0xE1A00000; // nop
+		*(u32*)0x020051A8 = 0xE1A00000; // nop
+		if (!extendedMemory2) {
+			*(u32*)0x02016EBC = (s2FlashcardId == 0x5A45) ? 0xE3A00522 : 0xE3A00409; // mov r0, (s2FlashcardId == 0x5A45) ? #0x08800000 : #0x09000000
+		}
+		*(u32*)0x0202B078 = 0xE1A00000; // nop
+		*(u32*)0x0202E264 = 0xE1A00000; // nop
+		patchInitDSiWare(0x02032F04, heapEnd);
+		patchUserSettingsReadDSiWare(0x020343E0);
+	}
+
 	// 24/7 Solitaire (USA)
 	else if (strcmp(romTid, "K4IE") == 0) {
 		*(u32*)0x02008918 = 0xE1A00000; // nop

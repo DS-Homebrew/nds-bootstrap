@@ -9,6 +9,7 @@ static const char dsiWareForBootloader1[][4] = {
 	"KOK", // 1001 Crystal Mazes Collection
 	"K95", // 1950s Lawn Mower Kids
 	"KVM", // 200 Vmaja: Charen Ji Supirittsu
+	"KBJ", // 21 Blackjack
 	"K4I", // 24/7 Solitaire
 	"K3Y", // 3 Heroes: Crystal Soul
 	"KMJ", // 3D Mahjong

@@ -353,6 +353,18 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		tonccpy((char*)0x020A0608, dataPrv, strlen(dataPrv));
 	}
 
+	// 21 Blackjack (USA)
+	// Saving not supported due to using more than one file in filesystem
+	else if (strcmp(romTid, "KBJE") == 0 && !twlFontFound) {
+		*(u32*)0x02005104 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+	}
+
+	// 21 Blackjack (Europe)
+	// Saving not supported due to using more than one file in filesystem
+	else if (strcmp(romTid, "KBJP") == 0 && !twlFontFound) {
+		*(u32*)0x0200511C = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+	}
+
 	// 24/7 Solitaire (USA)
 	else if (strcmp(romTid, "K4IE") == 0) {
 		if (saveOnFlashcard) {
