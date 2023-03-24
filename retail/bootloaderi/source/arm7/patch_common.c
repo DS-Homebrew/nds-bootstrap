@@ -12502,6 +12502,33 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// Super Yum Yum: Puzzle Adventures (USA)
+	// Super Yum Yum: Puzzle Adventures (Europe, Australia)
+	else if ((strcmp(romTid, "K4PE") == 0 || strcmp(romTid, "K4PV") == 0) && saveOnFlashcard) {
+		u16 offsetChange = (romTid[3] == 'E') ? 0 : 0x228;
+		const u32 newCode = 0x02018518;
+
+		codeCopy((u32*)newCode, (u32*)0x02028E90, 0xB8);
+		setBL(newCode+0x2C, (u32)dsiSaveOpenR);
+		setBL(newCode+0x3C, (u32)dsiSaveGetLength);
+		setBL(newCode+0x6C, (u32)dsiSaveRead);
+		setBL(newCode+0x9C, (u32)dsiSaveClose);
+
+		tonccpy((u32*)0x02017AD4, dsiSaveGetResultCode, 0xC);
+		*(u32*)(0x02062B34+offsetChange) = 0xE3A00003; // mov r0, #3
+		setBL(0x02062B58+offsetChange, newCode);
+		*(u32*)(0x02062BE4+offsetChange) = 0xE3A00003; // mov r0, #3
+		*(u32*)(0x02062C28+offsetChange) = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+		*(u32*)(0x02062CDC+offsetChange) = 0xE3A00003; // mov r0, #3
+		*(u32*)(0x02062D3C+offsetChange) = 0xE3A00001; // mov r0, #1 (Branch to dsiSaveOpenDir)
+		*(u32*)(0x02062E7C+offsetChange) = 0xE3A00001; // mov r0, #1 (Branch to dsiSaveCreateDirAuto)
+		setBL(0x02062EA0+offsetChange, (u32)dsiSaveCreate);
+		setBL(0x02062F08+offsetChange, (u32)dsiSaveOpen);
+		setBL(0x02062F70+offsetChange, (u32)dsiSaveSetLength);
+		setBL(0x02062F88+offsetChange, (u32)dsiSaveWrite);
+		setBL(0x02062F98+offsetChange, (u32)dsiSaveClose);
+	}
+
 	// System Flaw: Recruit (USA)
 	else if (strcmp(romTid, "KSYE") == 0 && saveOnFlashcard) {
 		setBL(0x02042080, (u32)dsiSaveOpen);

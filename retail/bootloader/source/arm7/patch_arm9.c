@@ -754,7 +754,7 @@ void patchHiHeapPointer(cardengineArm9* ce9, const module_params_t* moduleParams
 		*heapPointer = (fatTableAddr < 0x023C0000 || fatTableAddr >= (u32)ce9) ? (u32)ce9 : fatTableAddr; // shrink heap by FAT table size + ce9 binary size
 	}
 	if ((accessControl & BIT(4)) && extendedMemory2) {
-		*heapPointer = 0x02700000;
+		*heapPointer = 0x027B0000;
 	}
 
     dbg_printf("new hi heap value: ");

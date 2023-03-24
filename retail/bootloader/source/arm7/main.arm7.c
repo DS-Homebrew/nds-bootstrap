@@ -1138,11 +1138,7 @@ int arm7_main(void) {
 		fatTableAddr = 0x09780000;
 		fatTableSize = 0x80000;
 	} else if (extendedMemory2) {
-		if (strncmp(romTid, "KQ9", 3) == 0 // The Legend of Zelda: Four Swords: Anniversary Edition
-		 || strncmp(romTid, "KDM", 3) == 0 // Mario vs. Donkey Kong: Minis March Again!
-		 || strncmp(romTid, "KEV", 3) == 0 // Space Invaders Extreme Z
-		 || strncmp(romTid, "KDZ", 3) == 0 // Trajectile
-		) {
+		if (ndsHeader->unitCode > 0 && (u32)ndsHeader->arm9destination >= 0x02004000 && ((accessControl & BIT(4)) || arm7mbk == 0x080037C0)) {
 			fatTableAddr = 0x02000000;
 			fatTableSize = 0x4000;
 		} else {
