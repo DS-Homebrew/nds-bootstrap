@@ -236,6 +236,7 @@ void showException(s32 *expReg) {
 	thumbStateAddr += 4;
 	thumbStateAddr += 0x80;
 	u32 thumbState = ((*(u32*)thumbStateAddr) & 0x20);
+	bool heapError = false;
 
 	u32 codeAddress, exceptionAddress = 0;
 
@@ -244,6 +245,7 @@ void showException(s32 *expReg) {
 	if(currentMode == 0x17) {
 		if (exceptionRegisters[1] == 0x45585048 || exceptionRegisters[1] == 0x46524D48) { // 'HPXE' or 'HMRF'
 			print(5, 1, (const u8 *)"Heap Allocation Error!", FONT_WHITE, true);
+			heapError = true;
 		} else {
 			printCenter(15, 1, (const u8 *)"Error: Data Abort!", FONT_WHITE, true);
 		}
@@ -264,8 +266,13 @@ void showException(s32 *expReg) {
 
 	print(2, 3, (const u8 *)"PC:", FONT_WHITE, true);
 	printHex(6, 3, codeAddress, 4, FONT_LIGHT_BLUE, true);
-	print(16, 3, (const u8 *)"ADDR:", FONT_WHITE, true);
-	printHex(22, 3, exceptionAddress, 4, FONT_LIGHT_BLUE, true);
+	if (heapError) {
+		print(17, 3, (const u8 *)"LEN:", FONT_WHITE, true);
+		printHex(22, 3, exceptionRegisters[3], 4, FONT_LIGHT_BLUE, true);
+	} else {
+		print(16, 3, (const u8 *)"ADDR:", FONT_WHITE, true);
+		printHex(22, 3, exceptionAddress, 4, FONT_LIGHT_BLUE, true);
+	}
 
 	for(int i = 0; i < 8; i++) {
 		print(2, 5 + i, (const u8 *)registerNames[i], FONT_WHITE, true);
