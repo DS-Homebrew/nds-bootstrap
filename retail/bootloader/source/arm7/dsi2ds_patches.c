@@ -858,6 +858,42 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// 3 Heroes: Crystal Soul (Japan)
+	// Requires 8MB of RAM
+	else if (strcmp(romTid, "K3YJ") == 0 && extendedMemory2) {
+		*(u32*)0x0200508C = 0xE1A00000; // nop
+		*(u32*)0x020050A0 = 0xE1A00000; // nop
+		*(u32*)0x0200B494 = 0xE1A00000; // nop
+		*(u32*)0x0200E7E8 = 0xE1A00000; // nop
+		patchInitDSiWare(0x02013FE8, heapEnd);
+		patchUserSettingsReadDSiWare(0x020154F8);
+		setBL(0x0203DDD8, (u32)dsiSaveGetInfo);
+		setBL(0x0203DDEC, (u32)dsiSaveOpen);
+		setBL(0x0203DE00, (u32)dsiSaveCreate);
+		setBL(0x0203DE10, (u32)dsiSaveOpen);
+		setBL(0x0203DE20, (u32)dsiSaveGetResultCode);
+		*(u32*)0x0203DE30 = 0xE1A00000; // nop
+		setBL(0x0203DE3C, (u32)dsiSaveCreate);
+		setBL(0x0203DE4C, (u32)dsiSaveOpen);
+		setBL(0x0203DE78, (u32)dsiSaveSeek);
+		setBL(0x0203DE90, (u32)dsiSaveWrite);
+		setBL(0x0203DEA0, (u32)dsiSaveSeek);
+		setBL(0x0203DEB0, (u32)dsiSaveWrite);
+		setBL(0x0203DEC0, (u32)dsiSaveSeek);
+		setBL(0x0203DED0, (u32)dsiSaveWrite);
+		setBL(0x0203DF3C, (u32)dsiSaveSeek);
+		setBL(0x0203DF4C, (u32)dsiSaveWrite);
+		setBL(0x0203DF54, (u32)dsiSaveClose);
+		setBL(0x0203DFA0, (u32)dsiSaveOpen);
+		setBL(0x0203DFDC, (u32)dsiSaveSeek);
+		setBL(0x0203DFF0, (u32)dsiSaveRead);
+		setBL(0x0203E018, (u32)dsiSaveClose);
+		setBL(0x0203E090, (u32)dsiSaveOpen);
+		setBL(0x0203E0A4, (u32)dsiSaveSeek);
+		setBL(0x0203E0B4, (u32)dsiSaveWrite);
+		setBL(0x0203E0BC, (u32)dsiSaveClose);
+	}
+
 	// 3 Punten Katou Itsu: Bakumatsu Kuizu He (Japan)
 	// `dataPub:/user.bin` is read when exists, but only `dataPub:/common.bin` is created and written, leaving `dataPub:/user.bin` unused (pretty sure)
 	else if (strcmp(romTid, "K3BJ") == 0) {
