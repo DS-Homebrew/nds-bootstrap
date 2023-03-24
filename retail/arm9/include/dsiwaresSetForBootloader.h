@@ -438,6 +438,7 @@ static const char dsiWareForBootloader2[][4] = {
 	"KWU", // Sudoku & Kakuro: Welt Edition
 	"K4W", // Super Swap
 	"K4P", // Super Yum Yum: Puzzle Adventures
+	"KOW", // Surfacer+
 	"KSY", // System Flaw: Recruit (bootloaderi-exclusive)
 	"KZU", // Tales to Enjoy!: Little Red Riding Hood
 	"KZV", // Tales to Enjoy!: Puss in Boots

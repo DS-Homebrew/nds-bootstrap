@@ -12504,6 +12504,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Super Yum Yum: Puzzle Adventures (USA)
 	// Super Yum Yum: Puzzle Adventures (Europe, Australia)
+	// Due to our save implementation, save data is stored in all 4 slots
 	else if ((strcmp(romTid, "K4PE") == 0 || strcmp(romTid, "K4PV") == 0) && saveOnFlashcard) {
 		u16 offsetChange = (romTid[3] == 'E') ? 0 : 0x228;
 		const u32 newCode = 0x02018518;
@@ -12527,6 +12528,56 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02062F70+offsetChange, (u32)dsiSaveSetLength);
 		setBL(0x02062F88+offsetChange, (u32)dsiSaveWrite);
 		setBL(0x02062F98+offsetChange, (u32)dsiSaveClose);
+	}
+
+	// Surfacer+ (USA)
+	// Surfacer+ (Europe)
+	else if (strcmp(romTid, "KOWE") == 0 || strcmp(romTid, "KOWP") == 0) {
+		if (saveOnFlashcard) {
+			const u32 dsiSaveGetResultCodeT = 0x0201AB18;
+			*(u16*)dsiSaveGetResultCodeT = 0x4778; // bx pc
+			tonccpy((u32*)(dsiSaveGetResultCodeT + 4), dsiSaveGetResultCode, 0xC);
+
+			const u32 dsiSaveCreateT = 0x0201B1A0;
+			*(u16*)dsiSaveCreateT = 0x4778; // bx pc
+			tonccpy((u32*)(dsiSaveCreateT + 4), dsiSaveCreate, 0xC);
+
+			const u32 dsiSaveOpenT = 0x0201B1B0;
+			*(u16*)dsiSaveOpenT = 0x4778; // bx pc
+			tonccpy((u32*)(dsiSaveOpenT + 4), dsiSaveOpen, 0xC);
+
+			const u32 dsiSaveCloseT = 0x0201B1C0;
+			*(u16*)dsiSaveCloseT = 0x4778; // bx pc
+			tonccpy((u32*)(dsiSaveCloseT + 4), dsiSaveClose, 0xC);
+
+			const u32 dsiSaveGetLengthT = 0x0201B1D0;
+			*(u16*)dsiSaveGetLengthT = 0x4778; // bx pc
+			tonccpy((u32*)(dsiSaveGetLengthT + 4), dsiSaveGetLength, 0xC);
+
+			const u32 dsiSaveSetLengthT = 0x0201B2F4;
+			*(u16*)dsiSaveSetLengthT = 0x4778; // bx pc
+			tonccpy((u32*)(dsiSaveSetLengthT + 4), dsiSaveSetLength, 0xC);
+
+			const u32 dsiSaveReadT = 0x0201B1E0;
+			*(u16*)dsiSaveReadT = 0x4778; // bx pc
+			tonccpy((u32*)(dsiSaveReadT + 4), dsiSaveRead, 0xC);
+
+			const u32 dsiSaveWriteT = 0x0201B49C;
+			*(u16*)dsiSaveWriteT = 0x4778; // bx pc
+			tonccpy((u32*)(dsiSaveWriteT + 4), dsiSaveWrite, 0xC);
+
+			*(u16*)0x02006EB2 = 0x2000; // movs r0, #0 (dsiSaveGetArcSrc)
+			*(u16*)0x02006EB4 = nopT;
+			setBLThumb(0x02006FE0, dsiSaveOpenT);
+			setBLThumb(0x02006FFA, dsiSaveGetLengthT);
+			setBLThumb(0x02007012, dsiSaveReadT);
+			setBLThumb(0x02007018, dsiSaveCloseT);
+			setBLThumb(0x0200704C, dsiSaveOpenT);
+			setBLThumb(0x02007078, dsiSaveCloseT);
+		}
+		if (!twlFontFound) {
+			*(u16*)0x020125E4 = 0x4770; // bx lr (Show white screen instead of manual screen)
+		}
 	}
 
 	// System Flaw: Recruit (USA)
