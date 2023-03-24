@@ -6742,6 +6742,41 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// Sutjarang Nolja!: Maejikseukweeowa Imijigyesan (Korea)
+	else if (strcmp(romTid, "K3HK") == 0) {
+		if (saveOnFlashcard) {
+			setBL(0x02023D84, (u32)dsiSaveClose);
+			setBL(0x02023EC8, (u32)dsiSaveClose);
+			setBL(0x02024068, (u32)dsiSaveOpen);
+			setBL(0x02024090, (u32)dsiSaveSeek);
+			setBL(0x020240AC, (u32)dsiSaveClose);
+			setBL(0x020240C4, (u32)dsiSaveRead);
+			setBL(0x020240E4, (u32)dsiSaveClose);
+			setBL(0x020240F4, (u32)dsiSaveClose);
+			setBL(0x02024130, (u32)dsiSaveOpen);
+			setBL(0x02024148, (u32)dsiSaveSeek);
+			setBL(0x02024160, (u32)dsiSaveRead); // dsiSaveReadAsync
+			setBL(0x02024194, (u32)dsiSaveOpen);
+			setBL(0x020241B4, (u32)dsiSaveSetLength);
+			setBL(0x020241C4, (u32)dsiSaveClose);
+			setBL(0x020241E0, (u32)dsiSaveSeek);
+			setBL(0x020241FC, (u32)dsiSaveClose);
+			setBL(0x02024214, (u32)dsiSaveWrite);
+			setBL(0x02024238, (u32)dsiSaveClose);
+			setBL(0x02024244, (u32)dsiSaveClose);
+			setBL(0x02024284, (u32)dsiSaveOpen);
+			setBL(0x02024298, (u32)dsiSaveSetLength);
+			setBL(0x020242B0, (u32)dsiSaveSeek);
+			setBL(0x020242C8, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+			setBL(0x02024320, (u32)dsiSaveCreate);
+			setBL(0x02024328, (u32)dsiSaveGetResultCode);
+		}
+		if (!twlFontFound) {
+			*(u32*)0x0202F7EC = 0xE3A00002; // mov r0, #2 (Skip Manual screen, Part 1)
+			*(u32*)0x0203CD38 = 0xE3A00000; // mov r0, #0 (Skip Manual screen, Part 2)
+		}
+	}
+
 	// Keibadou Uma no Suke 2012 (Japan)
 	else if (strcmp(romTid, "KUXJ") == 0) {
 		if (!twlFontFound) {
