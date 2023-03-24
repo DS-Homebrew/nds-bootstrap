@@ -242,24 +242,29 @@ void showException(s32 *expReg) {
 	int offset = 8;
 
 	if(currentMode == 0x17) {
-		printCenter(15, 1, (const u8 *)"Error: Data Abort!", FONT_WHITE, true);
+		if (exceptionRegisters[1] == 0x45585048 || exceptionRegisters[1] == 0x46524D48) { // 'HPXE' or 'HMRF'
+			print(5, 1, (const u8 *)"Heap Allocation Error!", FONT_WHITE, true);
+		} else {
+			printCenter(15, 1, (const u8 *)"Error: Data Abort!", FONT_WHITE, true);
+		}
 		codeAddress = exceptionRegisters[15] - offset;
 		if(codeAddress >= 0x01FF8000 && codeAddress < 0x04000000)
 			exceptionAddress = getExceptionAddress(codeAddress, thumbState);
 		else
 			exceptionAddress = codeAddress;
 	} else {
+		printCenter(16, 1, (const u8 *)"Error: Undefined Instruction!", FONT_WHITE, true);
 		if(thumbState)
 			offset = 2;
 		else
 			offset = 4;
-		printCenter(16, 1, (const u8 *)"Error: Undefined Instruction!", FONT_WHITE, true);
 		codeAddress = exceptionRegisters[15] - offset;
 		exceptionAddress = codeAddress;
 	}
 
-	print(2, 3, (const u8 *)"PC:           ADDR:", FONT_WHITE, true);
+	print(2, 3, (const u8 *)"PC:", FONT_WHITE, true);
 	printHex(6, 3, codeAddress, 4, FONT_LIGHT_BLUE, true);
+	print(16, 3, (const u8 *)"ADDR:", FONT_WHITE, true);
 	printHex(22, 3, exceptionAddress, 4, FONT_LIGHT_BLUE, true);
 
 	for(int i = 0; i < 8; i++) {
