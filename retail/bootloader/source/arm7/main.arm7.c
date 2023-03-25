@@ -584,7 +584,8 @@ static bool isROMLoadableInRAM(const tNDSHeader* ndsHeader, const char* romTid, 
 		} else if (strncmp(romTid, "K5I", 3) == 0) { // 5 in 1 Solitaire
 			romLocation += 0x1F0000;
 			romSizeLimit -= 0x1F0000;
-		} else if (strncmp(romTid, "KCT", 3) == 0) { // Chess Challenge!
+		} else if (strncmp(romTid, "KCT", 3) == 0 // Chess Challenge!
+				 || strncmp(romTid, "KWK", 3) == 0) { // Mega Words
 			romLocation += 0x77C000;
 			romSizeLimit -= 0x77C000;
 		} else if (strncmp(romTid, "KUP", 3) == 0) { // Match Up!

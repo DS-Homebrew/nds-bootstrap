@@ -13583,9 +13583,11 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Mega Words (USA)
 	// Saving not supported due to using more than one file in filesystem
-	// Requires 8MB of RAM
-	else if (strcmp(romTid, "KWKE") == 0 && extendedMemory2) {
-		useSharedFont = twlFontFound;
+	// Requires either 8MB of RAM or Memory Expansion Pak
+	else if (strcmp(romTid, "KWKE") == 0 && debugOrMep) {
+		const u32 mepAddr = (s2FlashcardId == 0x5A45) ? 0x08800000 : 0x09000000;
+
+		useSharedFont = (twlFontFound && extendedMemory2);
 		if (useSharedFont) {
 			/* if (!extendedMemory2) {
 				patchTwlFontLoad(0x020053A0, 0x0203A620);
@@ -13600,15 +13602,16 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020058F0 = 0xE1A00000; // nop
 		*(u32*)0x02005928 = 0xE1A00000; // nop
 		*(u32*)0x02005934 = 0xE1A00000; // nop
-		/* if (!extendedMemory2) {
-			*(u32*)0x0201D0C0 = (s2FlashcardId == 0x5A45) ? 0xE3A00522 : 0xE3A00409; // mov r0, (s2FlashcardId == 0x5A45) ? #0x08800000 : #0x09000000
-		} */
+		if (!extendedMemory2) {
+			// *(u32*)0x0201D0C0 = (s2FlashcardId == 0x5A45) ? 0xE3A00522 : 0xE3A00409; // mov r0, (s2FlashcardId == 0x5A45) ? #0x08800000 : #0x09000000
+			*(u32*)0x0201D108 = 0xE3A00622; // mov r0, #0x02200000
+		}
 		*(u32*)0x02030D44 = 0xE1A00000; // nop
 		*(u32*)0x02033E9C = 0xE1A00000; // nop
-		patchInitDSiWare(0x02038B04, heapEnd);
-		/* if (!extendedMemory2) {
-			*(u32*)0x02038E90 = *(u32*)0x02004FD0;
-		} */
+		patchInitDSiWare(0x02038B04, extendedMemory2 ? heapEnd : mepAddr+0x77C000);
+		if (!extendedMemory2) {
+			*(u32*)0x02038E90 = mepAddr;
+		}
 		patchUserSettingsReadDSiWare(0x0203A0DC);
 		*(u32*)0x0203A4E4 = 0xE1A00000; // nop
 		*(u32*)0x0203A4E8 = 0xE1A00000; // nop
@@ -13618,9 +13621,11 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Mega Words (Europe)
 	// Saving not supported due to using more than one file in filesystem
-	// Requires 8MB of RAM
-	else if (strcmp(romTid, "KWKP") == 0 && extendedMemory2) {
-		useSharedFont = twlFontFound;
+	// Requires either 8MB of RAM or Memory Expansion Pak
+	else if (strcmp(romTid, "KWKP") == 0 && debugOrMep) {
+		const u32 mepAddr = (s2FlashcardId == 0x5A45) ? 0x08800000 : 0x09000000;
+
+		useSharedFont = (twlFontFound && extendedMemory2);
 		if (useSharedFont) {
 			/* if (!extendedMemory2) {
 				patchTwlFontLoad(0x0200551C, 0x020456E8);
@@ -13635,15 +13640,16 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02005B00 = 0xE1A00000; // nop
 		*(u32*)0x02005B3C = 0xE1A00000; // nop
 		*(u32*)0x02005B48 = 0xE1A00000; // nop
-		/* if (!extendedMemory2) {
-			*(u32*)0x02028150 = (s2FlashcardId == 0x5A45) ? 0xE3A00522 : 0xE3A00409; // mov r0, (s2FlashcardId == 0x5A45) ? #0x08800000 : #0x09000000
-		} */
+		if (!extendedMemory2) {
+			// *(u32*)0x02028150 = (s2FlashcardId == 0x5A45) ? 0xE3A00522 : 0xE3A00409; // mov r0, (s2FlashcardId == 0x5A45) ? #0x08800000 : #0x09000000
+			*(u32*)0x02028198 = 0xE3A00622; // mov r0, #0x02200000
+		}
 		*(u32*)0x0203BDD4 = 0xE1A00000; // nop
 		*(u32*)0x0203EF38 = 0xE1A00000; // nop
-		patchInitDSiWare(0x02043BBC, heapEnd);
-		/* if (!extendedMemory2) {
-			*(u32*)0x02043F48 = *(u32*)0x02004FD0;
-		} */
+		patchInitDSiWare(0x02043BBC, extendedMemory2 ? heapEnd : mepAddr+0x77C000);
+		if (!extendedMemory2) {
+			*(u32*)0x02043F48 = mepAddr;
+		}
 		patchUserSettingsReadDSiWare(0x020451A4);
 		*(u32*)0x020455AC = 0xE1A00000; // nop
 		*(u32*)0x020455B0 = 0xE1A00000; // nop
