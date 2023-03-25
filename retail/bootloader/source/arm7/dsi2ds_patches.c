@@ -6316,67 +6316,81 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Chess Challenge! (USA)
 	// Saving not supported due to using more than one file in filesystem
-	// Requires 8MB of RAM
-	else if (strcmp(romTid, "KCTE") == 0 && extendedMemory2) {
-		useSharedFont = twlFontFound;
-		if (useSharedFont) {
+	// Requires either 8MB of RAM or Memory Expansion Pak
+	else if (strcmp(romTid, "KCTE") == 0 && debugOrMep) {
+		const u32 mepAddr = (s2FlashcardId == 0x5A45) ? 0x08800000 : 0x09000000;
+
+		// useSharedFont = twlFontFound;
+		// if (useSharedFont) {
 			/* if (!extendedMemory2) {
 				patchTwlFontLoad(0x02022594, 0x02067BDC);
 			} */
-		} else {
+		// } else {
 			*(u32*)0x02005104 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
-		}
+		// }
 		*(u32*)0x0200553C = 0xE1A00000; // nop
 		*(u32*)0x0200556C = 0xE1A00000; // nop
-		/* if (!extendedMemory2) {
-			*(u32*)0x02047F9C = (s2FlashcardId == 0x5A45) ? 0xE3A00522 : 0xE3A00409; // mov r0, (s2FlashcardId == 0x5A45) ? #0x08800000 : #0x09000000
-		} */
+		*(u32*)0x02022ADC = 0xE1A00000; // nop
+		*(u32*)0x02022B0C = 0xE1A00000; // nop
+		*(u32*)0x02022B18 = 0xE1A00000; // nop
+		*(u32*)0x02022B54 = 0xE1A00000; // nop
+		*(u32*)0x02022B60 = 0xE1A00000; // nop
+		*(u32*)0x020475C4 = 0xE12FFF1E; // bx lr
+		if (!extendedMemory2) {
+			// *(u32*)0x02047F9C = (s2FlashcardId == 0x5A45) ? 0xE3A00522 : 0xE3A00409; // mov r0, (s2FlashcardId == 0x5A45) ? #0x08800000 : #0x09000000
+			*(u32*)0x02047FE8 = 0xE3A0078A; // mov r0, #0x02280000
+		}
 		*(u32*)0x0205E150 = 0xE1A00000; // nop
 		*(u32*)0x020612A8 = 0xE1A00000; // nop
-		patchInitDSiWare(0x0206604C, heapEnd);
-		/* if (!extendedMemory2) {
-			*(u32*)0x020663D8 = *(u32*)0x02004FD0;
-		} */
+		patchInitDSiWare(0x0206604C, extendedMemory2 ? heapEnd : mepAddr+0x77C000);
+		*(u32*)0x020663D8 = extendedMemory2 ? *(u32*)0x02004FD0 : mepAddr;
 		patchUserSettingsReadDSiWare(0x02067680);
 		*(u32*)0x02067AA0 = 0xE1A00000; // nop
 		*(u32*)0x02067AA4 = 0xE1A00000; // nop
 		*(u32*)0x02067AA8 = 0xE1A00000; // nop
 		*(u32*)0x02067AAC = 0xE1A00000; // nop
 		*(u32*)0x0206C710 = 0xE3A00003; // mov r0, #3
-		*(u32*)0x0206D138 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0206D138 = 0xE3A00000; // mov r0, #0 (Disable wireless communications to save battery power)
 		*(u32*)0x0206D13C = 0xE12FFF1E; // bx lr
 	}
 
 	// Chess Challenge! (Europe, Australia)
 	// Saving not supported due to using more than one file in filesystem
-	// Requires 8MB of RAM
-	else if (strcmp(romTid, "KCTV") == 0 && extendedMemory2) {
-		useSharedFont = twlFontFound;
-		if (useSharedFont) {
+	// Requires either 8MB of RAM or Memory Expansion Pak
+	else if (strcmp(romTid, "KCTV") == 0 && debugOrMep) {
+		const u32 mepAddr = (s2FlashcardId == 0x5A45) ? 0x08800000 : 0x09000000;
+
+		// useSharedFont = twlFontFound;
+		// if (useSharedFont) {
 			/* if (!extendedMemory2) {
 				patchTwlFontLoad(0x02022430, 0x02067BF0);
 			} */
-		} else {
+		// } else {
 			*(u32*)0x02005104 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
-		}
+		// }
 		*(u32*)0x0200553C = 0xE1A00000; // nop
 		*(u32*)0x0200556C = 0xE1A00000; // nop
-		/* if (!extendedMemory2) {
-			*(u32*)0x02047F78 = (s2FlashcardId == 0x5A45) ? 0xE3A00522 : 0xE3A00409; // mov r0, (s2FlashcardId == 0x5A45) ? #0x08800000 : #0x09000000
-		} */
+		*(u32*)0x02022978 = 0xE1A00000; // nop
+		*(u32*)0x020229A8 = 0xE1A00000; // nop
+		*(u32*)0x020229B4 = 0xE1A00000; // nop
+		*(u32*)0x020229F0 = 0xE1A00000; // nop
+		*(u32*)0x020229FC = 0xE1A00000; // nop
+		*(u32*)0x020475A0 = 0xE12FFF1E; // bx lr
+		if (!extendedMemory2) {
+			// *(u32*)0x02047F78 = (s2FlashcardId == 0x5A45) ? 0xE3A00522 : 0xE3A00409; // mov r0, (s2FlashcardId == 0x5A45) ? #0x08800000 : #0x09000000
+			*(u32*)0x02047FC4 = 0xE3A0078A; // mov r0, #0x02280000
+		}
 		*(u32*)0x0205E12C = 0xE1A00000; // nop
 		*(u32*)0x02061290 = 0xE1A00000; // nop
-		patchInitDSiWare(0x02066050, heapEnd);
-		/* if (!extendedMemory2) {
-			*(u32*)0x020663DC = *(u32*)0x02004FD0;
-		} */
+		patchInitDSiWare(0x02066050, extendedMemory2 ? heapEnd : mepAddr+0x77C000);
+		*(u32*)0x020663DC = extendedMemory2 ? *(u32*)0x02004FD0 : mepAddr;
 		patchUserSettingsReadDSiWare(0x02067694);
 		*(u32*)0x02067A5C = 0xE1A00000; // nop
 		*(u32*)0x02067A60 = 0xE1A00000; // nop
 		*(u32*)0x02067A64 = 0xE1A00000; // nop
 		*(u32*)0x02067A68 = 0xE1A00000; // nop
 		*(u32*)0x0206C724 = 0xE3A00003; // mov r0, #3
-		*(u32*)0x0206D14C = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0206D14C = 0xE3A00000; // mov r0, #0 (Disable wireless communications to save battery power)
 		*(u32*)0x0206D150 = 0xE12FFF1E; // bx lr
 	}
 
