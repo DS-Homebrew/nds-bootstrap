@@ -106,6 +106,7 @@ static const char dsiWareForBootloader1[][4] = {
 	"KQN", // Castle Conqueror: Revolution
 	"KVX", // Cat Frenzy (bootloaderi-exclusive)
 	"KCV", // Cave Story
+	"KCT", // Chess Challenge!
 	"KBG", // Chotto DS Bun ga Kuzenshuu: Sekai no Bungaku 20
 	"KXW", // Christmas Wonderland
 	"K2W", // Christmas Wonderland 2

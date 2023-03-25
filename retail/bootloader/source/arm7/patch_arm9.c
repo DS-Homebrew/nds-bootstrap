@@ -508,7 +508,7 @@ static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 }
 
 static void patchMpu2(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
-	if (moduleParams->sdk_version < 0x2008000 || moduleParams->sdk_version > 0x5000000) {
+	if (((moduleParams->sdk_version < 0x2008000) && !extendedMemory2) || moduleParams->sdk_version > 0x5000000) {
 		return;
 	}
 
@@ -754,7 +754,7 @@ void patchHiHeapPointer(cardengineArm9* ce9, const module_params_t* moduleParams
 		*heapPointer = (fatTableAddr < 0x023C0000 || fatTableAddr >= (u32)ce9) ? (u32)ce9 : fatTableAddr; // shrink heap by FAT table size + ce9 binary size
 	}
 	if ((accessControl & BIT(4)) && extendedMemory2) {
-		*heapPointer = 0x027B0000;
+		*heapPointer = CARDENGINE_ARM9_LOCATION_DLDI_EXTMEM;
 	}
 
     dbg_printf("new hi heap value: ");

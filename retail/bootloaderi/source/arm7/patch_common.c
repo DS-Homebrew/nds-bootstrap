@@ -3875,6 +3875,13 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// Chess Challenge! (USA)
+	// Chess Challenge! (Europe, Australia)
+	// Saving not supported due to using more than one file in filesystem
+	else if ((strcmp(romTid, "KCTE") == 0 || strcmp(romTid, "KCTV") == 0) && !twlFontFound) {
+		*(u32*)0x02005104 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+	}
+
 	// Chotto DS Bun ga Kuzenshuu: Sekai no Bungaku 20 (Japan)
 	else if (strcmp(romTid, "KBGJ") == 0 && saveOnFlashcard) {
 		*(u32*)0x02005B24 = 0xE3A00000; // mov r0, #0

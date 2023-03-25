@@ -584,7 +584,10 @@ static bool isROMLoadableInRAM(const tNDSHeader* ndsHeader, const char* romTid, 
 		} else if (strncmp(romTid, "K5I", 3) == 0) { // 5 in 1 Solitaire
 			romLocation += 0x1F0000;
 			romSizeLimit -= 0x1F0000;
-		} else if (// strncmp(romTid, "KLT", 3) == 0 // My Little Restaurant
+		} else /* if (strncmp(romTid, "KCT", 3) == 0) { // Chess Challenge!
+			romLocation += 0x3B0000;
+			romSizeLimit -= 0x3B0000;
+		} else*/ if (// strncmp(romTid, "KLT", 3) == 0 // My Little Restaurant
 				/* || */ strncmp(romTid, "KAU", 3) == 0) { // Nintendo Cowndown Calendar
 			romLocation += 0x200000;
 			romSizeLimit -= 0x200000;

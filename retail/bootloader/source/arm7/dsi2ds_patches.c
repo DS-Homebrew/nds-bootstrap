@@ -49,7 +49,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	extern void patchTwlFontLoad(u32 heapAllocAddr, u32 newCodeAddr);
 
 	const u32 heapEndRetail = ce9Alt ? 0x023E0000 : ((fatTableAddr < 0x023C0000 || fatTableAddr >= CARDENGINE_ARM9_LOCATION_DLDI) ? CARDENGINE_ARM9_LOCATION_DLDI : fatTableAddr);
-	const u32 heapEnd = extendedMemory2 ? (((u32)ndsHeader->arm9destination >= 0x02004000) ? 0x027B0000 : 0x02700000) : heapEndRetail;
+	const u32 heapEnd = extendedMemory2 ? (((u32)ndsHeader->arm9destination >= 0x02004000) ? CARDENGINE_ARM9_LOCATION_DLDI_EXTMEM : 0x02700000) : heapEndRetail;
 	const u32 heapEnd8MBHack = extendedMemory2 ? heapEnd : heapEndRetail+0x400000; // extendedMemory2 ? #0x27B0000 : #0x27E0000 (mirrors to 0x23E0000 on retail DS units)
 	const u32 heapEndExceed = extendedMemory2 ? heapEnd+0x800000 : heapEndRetail+0xC00000; // extendedMemory2 ? #0x2FB0000 (mirrors to 0x27B0000 on debug DS units) : #0x2FE0000 (mirrors to 0x23E0000 on retail DS units)
 	const bool debugOrMep = (extendedMemory2 || expansionPakFound);
@@ -1447,9 +1447,9 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 		useSharedFont = (twlFontFound && extendedMemory2);
 		if (useSharedFont) {
-			if (!extendedMemory2) {
+			/* if (!extendedMemory2) {
 				patchTwlFontLoad((romTid[3] == 'E') ? 0x020056DC : 0x02005658, 0x020455D0+offsetChange);
-			}
+			} */
 		} else {
 			*(u32*)0x02005098 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		}
@@ -1466,7 +1466,9 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)(0x0203BD2C+offsetChange) = 0xE1A00000; // nop
 		*(u32*)(0x0203EE88+offsetChange) = 0xE1A00000; // nop
 		patchInitDSiWare(0x02043AF0+offsetChange, heapEnd);
-		*(u32*)(0x02043E7C+offsetChange) = *(u32*)0x02004FD0;
+		if (!extendedMemory2) {
+			*(u32*)(0x02043E7C+offsetChange) = *(u32*)0x02004FD0;
+		}
 		patchUserSettingsReadDSiWare(0x0204508C+offsetChange);
 	}
 
@@ -6310,6 +6312,72 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0207654C = 0xE1A00000; // nop
 		patchInitDSiWare(0x0207C180, heapEnd);
 		patchUserSettingsReadDSiWare(0x0207D758);
+	}
+
+	// Chess Challenge! (USA)
+	// Saving not supported due to using more than one file in filesystem
+	// Requires either 8MB of RAM or Memory Expansion Pak
+	else if (strcmp(romTid, "KCTE") == 0 && extendedMemory2) {
+		useSharedFont = twlFontFound;
+		if (useSharedFont) {
+			/* if (!extendedMemory2) {
+				patchTwlFontLoad(0x02022594, 0x02067BDC);
+			} */
+		} else {
+			*(u32*)0x02005104 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		}
+		*(u32*)0x0200553C = 0xE1A00000; // nop
+		*(u32*)0x0200556C = 0xE1A00000; // nop
+		/* if (!extendedMemory2) {
+			*(u32*)0x02047F9C = (s2FlashcardId == 0x5A45) ? 0xE3A00522 : 0xE3A00409; // mov r0, (s2FlashcardId == 0x5A45) ? #0x08800000 : #0x09000000
+		} */
+		*(u32*)0x0205E150 = 0xE1A00000; // nop
+		*(u32*)0x020612A8 = 0xE1A00000; // nop
+		patchInitDSiWare(0x0206604C, heapEnd);
+		if (!extendedMemory2) {
+			*(u32*)0x020663D8 = *(u32*)0x02004FD0;
+		}
+		patchUserSettingsReadDSiWare(0x02067680);
+		*(u32*)0x02067AA0 = 0xE1A00000; // nop
+		*(u32*)0x02067AA4 = 0xE1A00000; // nop
+		*(u32*)0x02067AA8 = 0xE1A00000; // nop
+		*(u32*)0x02067AAC = 0xE1A00000; // nop
+		*(u32*)0x0206C710 = 0xE3A00003; // mov r0, #3
+		*(u32*)0x0206D138 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0206D13C = 0xE12FFF1E; // bx lr
+	}
+
+	// Chess Challenge! (Europe, Australia)
+	// Saving not supported due to using more than one file in filesystem
+	// Requires either 8MB of RAM or Memory Expansion Pak
+	else if (strcmp(romTid, "KCTV") == 0 && extendedMemory2) {
+		useSharedFont = twlFontFound;
+		if (useSharedFont) {
+			/* if (!extendedMemory2) {
+				patchTwlFontLoad(0x02022430, 0x02067BF0);
+			} */
+		} else {
+			*(u32*)0x02005104 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		}
+		*(u32*)0x0200553C = 0xE1A00000; // nop
+		*(u32*)0x0200556C = 0xE1A00000; // nop
+		/* if (!extendedMemory2) {
+			*(u32*)0x02047F78 = (s2FlashcardId == 0x5A45) ? 0xE3A00522 : 0xE3A00409; // mov r0, (s2FlashcardId == 0x5A45) ? #0x08800000 : #0x09000000
+		} */
+		*(u32*)0x0205E12C = 0xE1A00000; // nop
+		*(u32*)0x02061290 = 0xE1A00000; // nop
+		patchInitDSiWare(0x02066050, heapEnd);
+		if (!extendedMemory2) {
+			*(u32*)0x020663DC = *(u32*)0x02004FD0;
+		}
+		patchUserSettingsReadDSiWare(0x02067694);
+		*(u32*)0x02067A5C = 0xE1A00000; // nop
+		*(u32*)0x02067A60 = 0xE1A00000; // nop
+		*(u32*)0x02067A64 = 0xE1A00000; // nop
+		*(u32*)0x02067A68 = 0xE1A00000; // nop
+		*(u32*)0x0206C724 = 0xE3A00003; // mov r0, #3
+		*(u32*)0x0206D14C = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0206D150 = 0xE12FFF1E; // bx lr
 	}
 
 	// Chotto DS Bun ga Kuzenshuu: Sekai no Bungaku 20 (Japan)
