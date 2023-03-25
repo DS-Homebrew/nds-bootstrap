@@ -633,6 +633,8 @@ static bool isROMLoadableInRAM(const tNDSHeader* ndsHeader, const char* romTid, 
 	 || (strncmp(romTid, "KXC", 3) == 0 && s2FlashcardId != 0x5A45) // Castle Conqueror: Heroes 2
 	 || (strncmp(romTid, "KQ9", 3) == 0 && s2FlashcardId != 0x5A45) // The Legend of Zelda: Four Swords: Anniversary Edition
 	 || (strncmp(romTid, "KEV", 3) == 0 && s2FlashcardId != 0x5A45) // Space Invaders Extreme Z
+	 || (strncmp(romTid, "K97", 3) == 0 && s2FlashcardId != 0x5A45) // Sutanoberuzu: Kono Hareta Sora no Shita de
+	 || (strncmp(romTid, "K98", 3) == 0 && s2FlashcardId != 0x5A45) // Sutanoberuzu: Shirogane no Torikago
 	 || (strncmp(romTid, "UOR", 3) != 0
 	 && strncmp(romTid, "KYP", 3) != 0 // 1st Class Poker & BlackJack
 	 && strncmp(romTid, "KXG", 3) != 0 // Abyss

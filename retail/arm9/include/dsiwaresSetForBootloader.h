@@ -445,6 +445,8 @@ static const char dsiWareForBootloader2[][4] = {
 	"K4W", // Super Swap
 	"K4P", // Super Yum Yum: Puzzle Adventures
 	"KOW", // Surfacer+
+	"K97", // Sutanoberuzu: Kono Hareta Sora no Shita de
+	"K98", // Sutanoberuzu: Shirogane no Torikago
 	"KSY", // System Flaw: Recruit (bootloaderi-exclusive)
 	"KZU", // Tales to Enjoy!: Little Red Riding Hood
 	"KZV", // Tales to Enjoy!: Puss in Boots

@@ -12701,6 +12701,27 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// Sutanoberuzu: Kono Hareta Sora no Shita de (Japan)
+	// Sutanoberuzu: Shirogane no Torikago (Japan)
+	else if (strcmp(romTid, "K97J") == 0 || strcmp(romTid, "K98J") == 0) {
+		if (!twlFontFound) {
+			*(u32*)0x020050C8 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+			*(u32*)0x02005110 = 0xE1A00000; // nop (Show white screen instead of manual screen)
+		}
+		if (saveOnFlashcard) {
+			setBL(0x02024EC0, (u32)dsiSaveGetResultCode);
+			*(u32*)0x02024FA8 = 0xE1A00000; // nop
+			setBL(0x02024FEC, (u32)dsiSaveOpen);
+			setBL(0x0202502C, (u32)dsiSaveRead);
+			setBL(0x0202505C, (u32)dsiSaveClose);
+			setBL(0x02025104, (u32)dsiSaveOpen);
+			setBL(0x02025158, (u32)dsiSaveWrite);
+			setBL(0x02025178, (u32)dsiSaveClose);
+			setBL(0x020251E8, (u32)dsiSaveCreate);
+			setBL(0x02025244, (u32)dsiSaveDelete);
+		}
+	}
+
 	// System Flaw: Recruit (USA)
 	else if (strcmp(romTid, "KSYE") == 0 && saveOnFlashcard) {
 		setBL(0x02042080, (u32)dsiSaveOpen);
