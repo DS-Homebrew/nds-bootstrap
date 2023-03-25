@@ -7904,6 +7904,20 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02005090 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 	}
 
+	// Mega Words (USA)
+	// Saving not supported due to using more than one file in filesystem
+	// Requires either 8MB of RAM or Memory Expansion Pak
+	else if (strcmp(romTid, "KWKE") == 0 && !twlFontFound) {
+		*(u32*)0x02005094 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+	}
+
+	// Mega Words (Europe)
+	// Saving not supported due to using more than one file in filesystem
+	// Requires either 8MB of RAM or Memory Expansion Pak
+	else if (strcmp(romTid, "KWKP") == 0 && !twlFontFound) {
+		*(u32*)0x02005104 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+	}
+
 	// Meikyou Kokugo: Rakubiki Jiten (Japan)
 	// Saving not supported due to using more than one file in filesystem
 	else if (strcmp(romTid, "KD4J") == 0 && !twlFontFound) {

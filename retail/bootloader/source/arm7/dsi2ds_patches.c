@@ -6316,7 +6316,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Chess Challenge! (USA)
 	// Saving not supported due to using more than one file in filesystem
-	// Requires either 8MB of RAM or Memory Expansion Pak
+	// Requires 8MB of RAM
 	else if (strcmp(romTid, "KCTE") == 0 && extendedMemory2) {
 		useSharedFont = twlFontFound;
 		if (useSharedFont) {
@@ -6334,9 +6334,9 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0205E150 = 0xE1A00000; // nop
 		*(u32*)0x020612A8 = 0xE1A00000; // nop
 		patchInitDSiWare(0x0206604C, heapEnd);
-		if (!extendedMemory2) {
+		/* if (!extendedMemory2) {
 			*(u32*)0x020663D8 = *(u32*)0x02004FD0;
-		}
+		} */
 		patchUserSettingsReadDSiWare(0x02067680);
 		*(u32*)0x02067AA0 = 0xE1A00000; // nop
 		*(u32*)0x02067AA4 = 0xE1A00000; // nop
@@ -6349,7 +6349,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Chess Challenge! (Europe, Australia)
 	// Saving not supported due to using more than one file in filesystem
-	// Requires either 8MB of RAM or Memory Expansion Pak
+	// Requires 8MB of RAM
 	else if (strcmp(romTid, "KCTV") == 0 && extendedMemory2) {
 		useSharedFont = twlFontFound;
 		if (useSharedFont) {
@@ -6367,9 +6367,9 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0205E12C = 0xE1A00000; // nop
 		*(u32*)0x02061290 = 0xE1A00000; // nop
 		patchInitDSiWare(0x02066050, heapEnd);
-		if (!extendedMemory2) {
+		/* if (!extendedMemory2) {
 			*(u32*)0x020663DC = *(u32*)0x02004FD0;
-		}
+		} */
 		patchUserSettingsReadDSiWare(0x02067694);
 		*(u32*)0x02067A5C = 0xE1A00000; // nop
 		*(u32*)0x02067A60 = 0xE1A00000; // nop
@@ -13565,6 +13565,76 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)(0x02029390+offsetChange) = 0xE1A00000; // nop
 		patchInitDSiWare(0x0202E068+offsetChange, heapEnd);
 		patchUserSettingsReadDSiWare(0x0202F544+offsetChange);
+	}
+
+	// Mega Words (USA)
+	// Saving not supported due to using more than one file in filesystem
+	// Requires 8MB of RAM
+	else if (strcmp(romTid, "KWKE") == 0 && extendedMemory2) {
+		useSharedFont = twlFontFound;
+		if (useSharedFont) {
+			/* if (!extendedMemory2) {
+				patchTwlFontLoad(0x020053A0, 0x0203A620);
+			} */
+		} else {
+			*(u32*)0x02005094 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		}
+		*(u32*)0x0200518C = 0xE1A00000; // nop
+		*(u32*)0x020051A0 = 0xE1A00000; // nop
+		*(u32*)0x020058B8 = 0xE1A00000; // nop
+		*(u32*)0x020058E4 = 0xE1A00000; // nop
+		*(u32*)0x020058F0 = 0xE1A00000; // nop
+		*(u32*)0x02005928 = 0xE1A00000; // nop
+		*(u32*)0x02005934 = 0xE1A00000; // nop
+		/* if (!extendedMemory2) {
+			*(u32*)0x0201D0C0 = (s2FlashcardId == 0x5A45) ? 0xE3A00522 : 0xE3A00409; // mov r0, (s2FlashcardId == 0x5A45) ? #0x08800000 : #0x09000000
+		} */
+		*(u32*)0x02030D44 = 0xE1A00000; // nop
+		*(u32*)0x02033E9C = 0xE1A00000; // nop
+		patchInitDSiWare(0x02038B04, heapEnd);
+		/* if (!extendedMemory2) {
+			*(u32*)0x02038E90 = *(u32*)0x02004FD0;
+		} */
+		patchUserSettingsReadDSiWare(0x0203A0DC);
+		*(u32*)0x0203A4E4 = 0xE1A00000; // nop
+		*(u32*)0x0203A4E8 = 0xE1A00000; // nop
+		*(u32*)0x0203A4EC = 0xE1A00000; // nop
+		*(u32*)0x0203A4F0 = 0xE1A00000; // nop
+	}
+
+	// Mega Words (Europe)
+	// Saving not supported due to using more than one file in filesystem
+	// Requires 8MB of RAM
+	else if (strcmp(romTid, "KWKP") == 0 && extendedMemory2) {
+		useSharedFont = twlFontFound;
+		if (useSharedFont) {
+			/* if (!extendedMemory2) {
+				patchTwlFontLoad(0x0200551C, 0x020456E8);
+			} */
+		} else {
+			*(u32*)0x02005104 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		}
+		*(u32*)0x020052FC = 0xE1A00000; // nop
+		*(u32*)0x0200531C = 0xE1A00000; // nop
+		*(u32*)0x02005AC4 = 0xE1A00000; // nop
+		*(u32*)0x02005AF4 = 0xE1A00000; // nop
+		*(u32*)0x02005B00 = 0xE1A00000; // nop
+		*(u32*)0x02005B3C = 0xE1A00000; // nop
+		*(u32*)0x02005B48 = 0xE1A00000; // nop
+		/* if (!extendedMemory2) {
+			*(u32*)0x02028150 = (s2FlashcardId == 0x5A45) ? 0xE3A00522 : 0xE3A00409; // mov r0, (s2FlashcardId == 0x5A45) ? #0x08800000 : #0x09000000
+		} */
+		*(u32*)0x0203BDD4 = 0xE1A00000; // nop
+		*(u32*)0x0203EF38 = 0xE1A00000; // nop
+		patchInitDSiWare(0x02043BBC, heapEnd);
+		/* if (!extendedMemory2) {
+			*(u32*)0x02043F48 = *(u32*)0x02004FD0;
+		} */
+		patchUserSettingsReadDSiWare(0x020451A4);
+		*(u32*)0x020455AC = 0xE1A00000; // nop
+		*(u32*)0x020455B0 = 0xE1A00000; // nop
+		*(u32*)0x020455B4 = 0xE1A00000; // nop
+		*(u32*)0x020455B8 = 0xE1A00000; // nop
 	}
 
 	// Meikyou Kokugo: Rakubiki Jiten (Japan)
