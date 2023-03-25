@@ -7897,6 +7897,13 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// Match Up! (USA)
+	// Match Up! (Europe)
+	// Saving not supported due to using more than one file in filesystem
+	else if ((strcmp(romTid, "KUPE") == 0 || strcmp(romTid, "KUPP") == 0) && !twlFontFound) {
+		*(u32*)0x02005090 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+	}
+
 	// Meikyou Kokugo: Rakubiki Jiten (Japan)
 	// Saving not supported due to using more than one file in filesystem
 	else if (strcmp(romTid, "KD4J") == 0 && !twlFontFound) {

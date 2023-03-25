@@ -13541,6 +13541,32 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchInitDSiWare(0x02058B84, heapEnd);
 	}
 
+	// Match Up! (USA)
+	// Match Up! (Europe)
+	// Saving not supported due to using more than one file in filesystem
+	// Requires either 8MB of RAM or Memory Expansion Pak
+	else if ((strcmp(romTid, "KUPE") == 0 || strcmp(romTid, "KUPP") == 0) && debugOrMep) {
+		u16 offsetChange = (romTid[3] == 'E') ? 0 : 0x190;
+
+		useSharedFont = twlFontFound;
+		if (useSharedFont) {
+			if (!extendedMemory2) {
+				patchTwlFontLoad((romTid[3] == 'E') ? 0x02005350 : 0x02005338, 0x0202FA88+offsetChange);
+			}
+		} else {
+			*(u32*)0x02005090 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		}
+		*(u32*)0x02005130 = 0xE1A00000; // nop
+		*(u32*)0x02005148 = 0xE1A00000; // nop
+		if (!extendedMemory2) {
+			*(u32*)(0x02011664+offsetChange) = (s2FlashcardId == 0x5A45) ? 0xE3A00522 : 0xE3A00409; // mov r0, (s2FlashcardId == 0x5A45) ? #0x08800000 : #0x09000000
+		}
+		*(u32*)(0x0202622C+offsetChange) = 0xE1A00000; // nop
+		*(u32*)(0x02029390+offsetChange) = 0xE1A00000; // nop
+		patchInitDSiWare(0x0202E068+offsetChange, heapEnd);
+		patchUserSettingsReadDSiWare(0x0202F544+offsetChange);
+	}
+
 	// Meikyou Kokugo: Rakubiki Jiten (Japan)
 	// Saving not supported due to using more than one file in filesystem
 	// Requires Slot-2 RAM expansion up to 16MB or more (Standard Memory Expansion Pak is not enough)

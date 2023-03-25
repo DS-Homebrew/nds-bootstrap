@@ -271,6 +271,7 @@ static const char dsiWareForBootloader2[][4] = {
 	"KMI", // Master of Illusion Express: Mind Probe
 	"KMN", // Master of Illusion Express: Psychic Camera (bootloaderi-exclusive)
 	"KMS", // Master of Illusion Express: Shuffle Games
+	"KUP", // Match Up!
 	"KD4", // Meikyou Kokugo: Rakubiki Jiten
 	"K59", // Metal Torrent
 	"KMG", // Mighty Flip Champs!
