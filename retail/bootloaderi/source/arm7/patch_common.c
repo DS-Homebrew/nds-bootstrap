@@ -12549,6 +12549,18 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// Sudoku Challenge! (USA)
+	// Saving not supported due to using more than one file in filesystem
+	else if (strcmp(romTid, "KSCE") == 0 && !twlFontFound) {
+		*(u32*)0x0200509C = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+	}
+
+	// Sudoku Challenge! (Europe)
+	// Saving not supported due to using more than one file in filesystem
+	else if (strcmp(romTid, "KSCP") == 0 && !twlFontFound) {
+		*(u32*)0x0200510C = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+	}
+
 	// Super Swap (USA)
 	else if (strcmp(romTid, "K4WE") == 0) {
 		if (saveOnFlashcard) {

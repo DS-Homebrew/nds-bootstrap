@@ -441,6 +441,7 @@ static const char dsiWareForBootloader2[][4] = {
 	"K4D", // Sudoku
 	"K4F", // Sudoku 4Pockets
 	"KWU", // Sudoku & Kakuro: Welt Edition
+	"KSC", // Sudoku Challenge!
 	"K4W", // Super Swap
 	"K4P", // Super Yum Yum: Puzzle Adventures
 	"KOW", // Surfacer+

@@ -607,6 +607,11 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 		*(u32*)0x02005170 = 0xE1A00000; // nop
 		*(u32*)0x02005190 = 0xE1A00000; // nop
+		*(u32*)0x02005554 = 0xE1A00000; // nop
+		*(u32*)0x02005584 = 0xE1A00000; // nop
+		*(u32*)0x02005590 = 0xE1A00000; // nop
+		*(u32*)0x020055CC = 0xE1A00000; // nop
+		*(u32*)0x020055D8 = 0xE1A00000; // nop
 		if (!extendedMemory2) {
 			*(u32*)0x02016C60 = (s2FlashcardId == 0x5A45) ? 0xE3A00522 : 0xE3A00409; // mov r0, (s2FlashcardId == 0x5A45) ? #0x08800000 : #0x09000000
 		}
@@ -630,6 +635,11 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 		*(u32*)0x02005188 = 0xE1A00000; // nop
 		*(u32*)0x020051A8 = 0xE1A00000; // nop
+		*(u32*)0x02005724 = 0xE1A00000; // nop
+		*(u32*)0x02005754 = 0xE1A00000; // nop
+		*(u32*)0x02005760 = 0xE1A00000; // nop
+		*(u32*)0x0200579C = 0xE1A00000; // nop
+		*(u32*)0x020057A8 = 0xE1A00000; // nop
 		if (!extendedMemory2) {
 			*(u32*)0x02016EBC = (s2FlashcardId == 0x5A45) ? 0xE3A00522 : 0xE3A00409; // mov r0, (s2FlashcardId == 0x5A45) ? #0x08800000 : #0x09000000
 		}
@@ -1456,9 +1466,16 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		if (romTid[3] == 'E') {
 			*(u32*)0x02005244 = 0xE1A00000; // nop
 			*(u32*)0x02005260 = 0xE1A00000; // nop
+			*(u32*)0x02005B38 = 0xE1A00000; // nop
 		} else {
 			*(u32*)0x020051C4 = 0xE1A00000; // nop
 			*(u32*)0x020051DC = 0xE1A00000; // nop
+			*(u32*)0x020056B0 = 0xE1A00000; // nop
+			*(u32*)0x020056DC = 0xE1A00000; // nop
+			*(u32*)0x020056E8 = 0xE1A00000; // nop
+			*(u32*)0x02005720 = 0xE1A00000; // nop
+			*(u32*)0x0200572C = 0xE1A00000; // nop
+			*(u32*)0x02005AF0 = 0xE1A00000; // nop
 		}
 		if (!extendedMemory2) {
 			*(u32*)(0x0202914C+offsetChange) = (s2FlashcardId == 0x5A45) ? 0xE3A00522 : 0xE3A00409; // mov r0, (s2FlashcardId == 0x5A45) ? #0x08800000 : #0x09000000
@@ -21010,6 +21027,75 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02026D24, (u32)dsiSaveClose);
 		*(u32*)0x02026D58 = 0xE1A00000; // nop
 		*(u32*)0x0203CDF8 = 0xE1A00000; // nop (Do not load Manual screen)
+	}
+
+	// Sudoku Challenge! (USA)
+	// Saving not supported due to using more than one file in filesystem
+	// Requires either 8MB of RAM or Memory Expansion Pak
+	else if (strcmp(romTid, "KSCE") == 0 && debugOrMep) {
+		const u32 mepAddr = (s2FlashcardId == 0x5A45) ? 0x08800000 : 0x09000000;
+
+		useSharedFont = (twlFontFound && extendedMemory2);
+		if (useSharedFont) {
+			/* if (!extendedMemory2) {
+				patchTwlFontLoad(0x02005458, 0x020391EC);
+			} */
+		} else {
+			*(u32*)0x0200509C = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		}
+		*(u32*)0x02005248 = 0xE1A00000; // nop
+		*(u32*)0x02005260 = 0xE1A00000; // nop
+		if (!extendedMemory2) {
+			*(u32*)0x0201C3B0 = 0xE3A00623; // mov r0, #0x02300000
+		}
+		*(u32*)0x0202F298 = 0xE1A00000; // nop
+		*(u32*)0x0203255C = 0xE1A00000; // nop
+		patchInitDSiWare(0x020376D8, extendedMemory2 ? heapEnd : mepAddr+0x77C000);
+		if (!extendedMemory2) {
+			*(u32*)0x02037A48 = mepAddr;
+		}
+		patchUserSettingsReadDSiWare(0x02038C78);
+		*(u32*)0x020390A8 = 0xE1A00000; // nop
+		*(u32*)0x020390AC = 0xE1A00000; // nop
+		*(u32*)0x020390B0 = 0xE1A00000; // nop
+		*(u32*)0x020390B4 = 0xE1A00000; // nop
+	}
+
+	// Sudoku Challenge! (Europe)
+	// Saving not supported due to using more than one file in filesystem
+	// Requires either 8MB of RAM or Memory Expansion Pak
+	else if (strcmp(romTid, "KSCP") == 0 && debugOrMep) {
+		const u32 mepAddr = (s2FlashcardId == 0x5A45) ? 0x08800000 : 0x09000000;
+
+		useSharedFont = (twlFontFound && extendedMemory2);
+		if (useSharedFont) {
+			/* if (!extendedMemory2) {
+				patchTwlFontLoad(0x0200541C, 0x020425B8);
+			} */
+		} else {
+			*(u32*)0x0200510C = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		}
+		*(u32*)0x0200526C = 0xE1A00000; // nop
+		*(u32*)0x0200528C = 0xE1A00000; // nop
+		*(u32*)0x02005498 = 0xE1A00000; // nop
+		*(u32*)0x020054D4 = 0xE1A00000; // nop
+		*(u32*)0x020054E0 = 0xE1A00000; // nop
+		*(u32*)0x02005524 = 0xE1A00000; // nop
+		*(u32*)0x02005530 = 0xE1A00000; // nop
+		if (!extendedMemory2) {
+			*(u32*)0x02025D24 = 0xE3A00623; // mov r0, #0x02300000
+		}
+		*(u32*)0x02038AD8 = 0xE1A00000; // nop
+		*(u32*)0x0203BC34 = 0xE1A00000; // nop
+		patchInitDSiWare(0x02040AD8, extendedMemory2 ? heapEnd : mepAddr+0x77C000);
+		if (!extendedMemory2) {
+			*(u32*)0x02040E64 = mepAddr;
+		}
+		patchUserSettingsReadDSiWare(0x02042074);
+		*(u32*)0x0204247C = 0xE1A00000; // nop
+		*(u32*)0x02042480 = 0xE1A00000; // nop
+		*(u32*)0x02042484 = 0xE1A00000; // nop
+		*(u32*)0x02042488 = 0xE1A00000; // nop
 	}
 
 	// Super Swap (USA)
