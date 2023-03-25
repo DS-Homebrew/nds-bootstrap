@@ -458,6 +458,8 @@ static const char dsiWareForBootloader2[][4] = {
 	"KJQ", // Tantei Jinguuji Saburou: Kadannoitte
 	"KJL", // Tantei Jinguuji Saburou: Rensa Suru Noroi
 	"KJ7", // Tantei Jinguuji Saburou: Nakiko no Shouzou
+	"KXQ", // Telegraph Crosswords
+	"KXL", // Telegraph Sudoku & Kakuro
 	"KOS", // Tell me Darling
 	"KTE", // Tetris Party Live
 	"KSL", // Touch Solitaire

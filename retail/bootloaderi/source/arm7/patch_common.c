@@ -12860,6 +12860,93 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// Telegraph Crosswords (USA)
+	// Telegraph Crosswords (Europe)
+	else if (strcmp(romTid, "KXQE") == 0 || strcmp(romTid, "KXQP") == 0) {
+		if (!twlFontFound) {
+			*(u32*)0x02029144 = 0xE1A00000; // nop (Do not load Manual screen)
+			*(u32*)0x0202B008 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		}
+		if (saveOnFlashcard) {
+			tonccpy((u32*)0x0200F968, dsiSaveGetResultCode, 0xC);
+			setBL(0x0202C6C0, (u32)dsiSaveOpen);
+			setBL(0x0202C6D8, (u32)dsiSaveSeek);
+			setBL(0x0202C6E8, (u32)dsiSaveWrite);
+			setBL(0x0202C6F0, (u32)dsiSaveClose);
+			setBL(0x0202D9B4, (u32)dsiSaveOpen);
+			setBL(0x0202D9CC, (u32)dsiSaveSeek);
+			setBL(0x0202D9DC, (u32)dsiSaveWrite);
+			setBL(0x0202D9E4, (u32)dsiSaveClose);
+			setBL(0x0202DA80, (u32)dsiSaveOpen);
+			setBL(0x0202DA98, (u32)dsiSaveSeek);
+			setBL(0x0202DAA8, (u32)dsiSaveWrite);
+			setBL(0x0202DC34, (u32)dsiSaveOpen);
+			setBL(0x0202DC4C, (u32)dsiSaveSeek);
+			setBL(0x0202DC5C, (u32)dsiSaveWrite);
+			setBL(0x0202DC64, (u32)dsiSaveClose);
+			setBL(0x0202DFF4, (u32)dsiSaveOpen);
+			setBL(0x0202E00C, (u32)dsiSaveSeek);
+			setBL(0x0202E01C, (u32)dsiSaveWrite);
+			setBL(0x0202E024, (u32)dsiSaveClose);
+			setBL(0x0202E53C, (u32)dsiSaveOpen);
+			setBL(0x0202E554, (u32)dsiSaveSeek);
+			setBL(0x0202E564, (u32)dsiSaveWrite);
+			setBL(0x0202E56C, (u32)dsiSaveClose);
+			setBL(0x0202E704, (u32)dsiSaveOpen);
+			setBL(0x0202E71C, (u32)dsiSaveSeek);
+			setBL(0x0202E72C, (u32)dsiSaveWrite);
+			setBL(0x0202E734, (u32)dsiSaveClose);
+			setBL(0x0202E990, (u32)dsiSaveOpen);
+			setBL(0x0202E9A8, (u32)dsiSaveSeek);
+			setBL(0x0202E9B8, (u32)dsiSaveWrite);
+			setBL(0x0202E9C0, (u32)dsiSaveClose);
+			*(u32*)0x0202EA3C = 0xE3A00001; // mov r0, #1 (dsiSaveOpenDir)
+			*(u32*)0x0202EA4C = 0xE1A00000; // nop (dsiSaveCloseDir)
+			setBL(0x0202EA5C, (u32)dsiSaveOpen);
+			setBL(0x0202EA74, (u32)dsiSaveSeek);
+			setBL(0x0202EA84, (u32)dsiSaveRead);
+			setBL(0x0202EA8C, (u32)dsiSaveClose);
+			setBL(0x0202EAC8, (u32)dsiSaveClose);
+			setBL(0x0202EB08, (u32)dsiSaveCreate);
+			setBL(0x0202EB20, (u32)dsiSaveOpen);
+			setBL(0x0202EB58, (u32)dsiSaveSeek);
+			setBL(0x0202EB68, (u32)dsiSaveWrite);
+			setBL(0x0202EB70, (u32)dsiSaveClose);
+			setBL(0x0202EB8C, (u32)dsiSaveClose);
+			setBL(0x0202EBEC, (u32)dsiSaveClose);
+		}
+	}
+
+	// Telegraph Sudoku & Kakuro (USA)
+	// Telegraph Sudoku & Kakuro (Europe)
+	else if (strcmp(romTid, "KXLE") == 0 || strcmp(romTid, "KXLP") == 0) {
+		if (saveOnFlashcard) {
+			tonccpy((u32*)0x02012B6C, dsiSaveGetResultCode, 0xC);
+			setBL(0x0202679C, (u32)dsiSaveCreate);
+			setBL(0x020267B8, (u32)dsiSaveOpen);
+			setBL(0x0202681C, (u32)dsiSaveWrite);
+			setBL(0x02026824, (u32)dsiSaveClose);
+			*(u32*)0x02026950 = 0xE3A00001; // mov r0, #1 (dsiSaveOpenDir)
+			*(u32*)0x02026960 = 0xE1A00000; // nop (dsiSaveCloseDir)
+			setBL(0x02026970, (u32)dsiSaveOpen);
+			setBL(0x02026B8C, (u32)dsiSaveOpen);
+			setBL(0x02026BA4, (u32)dsiSaveSeek);
+			setBL(0x02026BD8, (u32)dsiSaveWrite);
+			setBL(0x02026BE0, (u32)dsiSaveClose);
+			setBL(0x02026C80, (u32)dsiSaveOpen);
+			setBL(0x02026C98, (u32)dsiSaveSeek);
+			setBL(0x02026CAC, (u32)dsiSaveRead);
+			setBL(0x02026CB4, (u32)dsiSaveClose);
+		}
+		if (!twlFontFound) {
+			if (romTid[3] == 'E') {
+				*(u32*)0x0203CB28 = 0xE1A00000; // nop (Do not load Manual screen)
+			} else {
+				*(u32*)0x0203CB04 = 0xE1A00000; // nop (Do not load Manual screen)
+			}
+		}
+	}
+
 	// Oshiete Darling (Japan)
 	else if (strcmp(romTid, "KOSJ") == 0 && saveOnFlashcard) {
 		tonccpy((u32*)0x0200BF6C, dsiSaveGetResultCode, 0xC);
