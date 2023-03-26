@@ -21831,6 +21831,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			// Disable MobiClip playback
 			*(u32*)0x02032BFC = 0xE3A00000; // mov r0, #0
 			*(u32*)0x02041698 = 0xE12FFF1E; // bx lr
+			setBL(0x020856B8, 0x02041724); // Display non-video title logo on start
 		}
 		setBL(0x0207C824, (u32)dsiSaveCreate);
 		setBL(0x0207C840, (u32)dsiSaveOpen);
@@ -21863,6 +21864,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			// Disable MobiClip playback
 			*(u32*)0x02036C70 = 0xE3A00000; // mov r0, #0
 			*(u32*)0x02045720 = 0xE12FFF1E; // bx lr
+			setBL(0x0208F144, 0x020457AC); // Display non-video title logo on start
 		}
 		setBL(0x02084A78, (u32)dsiSaveCreate);
 		setBL(0x02084A94, (u32)dsiSaveOpen);
