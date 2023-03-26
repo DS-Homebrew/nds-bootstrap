@@ -273,6 +273,7 @@ static const char dsiWareForBootloader2[][4] = {
 	"KMS", // Master of Illusion Express: Shuffle Games
 	"KUP", // Match Up!
 	"KWK", // Mega Words
+	"KMK", // Mehr Kreuzwortratsel: Welt Edition
 	"KD4", // Meikyou Kokugo: Rakubiki Jiten
 	"K59", // Metal Torrent
 	"KMG", // Mighty Flip Champs!

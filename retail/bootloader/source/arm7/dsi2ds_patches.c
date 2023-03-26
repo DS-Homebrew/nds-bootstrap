@@ -13664,6 +13664,73 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020455B8 = 0xE1A00000; // nop
 	}
 
+	// Mehr Kreuzwortratsel: Welt Edition (Germany)
+	else if (strcmp(romTid, "KMKD") == 0) {
+		// if (!extendedMemory2) {
+			u32 bssEnd = *(u32*)0x0207EB14;
+			u32 sdatOffset = 0x020CB610;
+
+			*(u32*)0x0207EB14 = bssEnd - relocateBssPart(ndsHeader, bssEnd, sdatOffset+0x170000, bssEnd, sdatOffset);
+		// }
+
+		*(u32*)0x0200EDA4 = 0xE1A00000; // nop
+		tonccpy((u32*)0x0200F91C, dsiSaveGetResultCode, 0xC);
+		*(u32*)0x02012334 = 0xE1A00000; // nop
+		patchInitDSiWare(0x02017AD4, heapEnd);
+		*(u32*)0x02017E60 = *(u32*)0x0207EB14;
+		patchUserSettingsReadDSiWare(0x02018FD4);
+		*(u32*)0x02029258 = 0xE1A00000; // nop (Do not load Manual screen)
+		*(u32*)0x0202B0A4 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		setBL(0x0202C75C, (u32)dsiSaveOpen);
+		setBL(0x0202C774, (u32)dsiSaveSeek);
+		setBL(0x0202C784, (u32)dsiSaveWrite);
+		setBL(0x0202C78C, (u32)dsiSaveClose);
+		setBL(0x0202DA50, (u32)dsiSaveOpen);
+		setBL(0x0202DA68, (u32)dsiSaveSeek);
+		setBL(0x0202DA78, (u32)dsiSaveWrite);
+		setBL(0x0202DA80, (u32)dsiSaveClose);
+		setBL(0x0202DB1C, (u32)dsiSaveOpen);
+		setBL(0x0202DB34, (u32)dsiSaveSeek);
+		setBL(0x0202DB44, (u32)dsiSaveWrite);
+		setBL(0x0202DCD0, (u32)dsiSaveOpen);
+		setBL(0x0202DCE8, (u32)dsiSaveSeek);
+		setBL(0x0202DCF8, (u32)dsiSaveWrite);
+		setBL(0x0202DD00, (u32)dsiSaveClose);
+		setBL(0x0202E090, (u32)dsiSaveOpen);
+		setBL(0x0202E0A8, (u32)dsiSaveSeek);
+		setBL(0x0202E0B8, (u32)dsiSaveWrite);
+		setBL(0x0202E0C0, (u32)dsiSaveClose);
+		setBL(0x0202E5CC, (u32)dsiSaveOpen);
+		setBL(0x0202E5E4, (u32)dsiSaveSeek);
+		setBL(0x0202E5F4, (u32)dsiSaveWrite);
+		setBL(0x0202E5FC, (u32)dsiSaveClose);
+		setBL(0x0202E86C, (u32)dsiSaveOpen);
+		setBL(0x0202E884, (u32)dsiSaveSeek);
+		setBL(0x0202E884, (u32)dsiSaveWrite);
+		setBL(0x0202E89C, (u32)dsiSaveClose);
+		*(u32*)0x0202E91C = 0xE3A00001; // mov r0, #1 (dsiSaveOpenDir)
+		*(u32*)0x0202E92C = 0xE1A00000; // nop (dsiSaveCloseDir)
+		setBL(0x0202E93C, (u32)dsiSaveOpen);
+		setBL(0x0202E954, (u32)dsiSaveSeek);
+		setBL(0x0202E964, (u32)dsiSaveRead);
+		setBL(0x0202E96C, (u32)dsiSaveClose);
+		setBL(0x0202E9A8, (u32)dsiSaveClose);
+		setBL(0x0202E9E8, (u32)dsiSaveCreate);
+		setBL(0x0202EA00, (u32)dsiSaveOpen);
+		setBL(0x0202EA38, (u32)dsiSaveSeek);
+		setBL(0x0202EA48, (u32)dsiSaveWrite);
+		setBL(0x0202EA50, (u32)dsiSaveClose);
+		setBL(0x0202EA6C, (u32)dsiSaveClose);
+		setBL(0x0202EACC, (u32)dsiSaveClose);
+		*(u32*)0x0202F03C = 0xE1A00000; // nop
+		*(u32*)0x0202F04C = 0xE1A00000; // nop (dsiSaveCreateDir)
+		setBL(0x0202F058, (u32)dsiSaveCreate);
+		setBL(0x0202F068, (u32)dsiSaveOpen);
+		setBL(0x0202F094, (u32)dsiSaveSeek);
+		setBL(0x0202F0A4, (u32)dsiSaveWrite);
+		setBL(0x0202F0AC, (u32)dsiSaveClose);
+	}
+
 	// Meikyou Kokugo: Rakubiki Jiten (Japan)
 	// Saving not supported due to using more than one file in filesystem
 	// Requires Slot-2 RAM expansion up to 16MB or more (Standard Memory Expansion Pak is not enough)
@@ -21538,6 +21605,13 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0202EB70, (u32)dsiSaveClose);
 		setBL(0x0202EB8C, (u32)dsiSaveClose);
 		setBL(0x0202EBEC, (u32)dsiSaveClose);
+		*(u32*)0x0202F158 = 0xE1A00000; // nop
+		*(u32*)0x0202F168 = 0xE1A00000; // nop (dsiSaveCreateDir)
+		setBL(0x0202F174, (u32)dsiSaveCreate);
+		setBL(0x0202F184, (u32)dsiSaveOpen);
+		setBL(0x0202F1B0, (u32)dsiSaveSeek);
+		setBL(0x0202F1C0, (u32)dsiSaveWrite);
+		setBL(0x0202F1C8, (u32)dsiSaveClose);
 	}
 
 	// Telegraph Sudoku & Kakuro (USA)
