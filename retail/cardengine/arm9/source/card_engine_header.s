@@ -144,6 +144,7 @@ patches:
 .word   0x0
 .word   0x0
 .word   0x0
+.word   0x0
 #else
 .word   dsiSaveCheckExists_arm
 .word   dsiSaveGetResultCode_arm
@@ -155,6 +156,7 @@ patches:
 .word   dsiSaveOpenR_arm
 .word   dsiSaveClose_arm
 .word   dsiSaveGetLength_arm
+.word   dsiSaveGetPosition_arm
 .word   dsiSaveSeek_arm
 .word   dsiSaveRead_arm
 .word   dsiSaveWrite_arm
@@ -349,6 +351,13 @@ dsiSaveClose_arm:
 dsiSaveGetLength_arm:
 @---------------------------------------------------------------------------------
 	ldr	pc, =dsiSaveGetLength
+.pool
+@---------------------------------------------------------------------------------
+
+@---------------------------------------------------------------------------------
+dsiSaveGetPosition_arm:
+@---------------------------------------------------------------------------------
+	ldr	pc, =dsiSaveGetPosition
 .pool
 @---------------------------------------------------------------------------------
 

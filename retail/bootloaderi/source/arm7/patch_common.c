@@ -65,6 +65,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	const u32* dsiSaveOpenR = ce9->patches->dsiSaveOpenR;
 	const u32* dsiSaveClose = ce9->patches->dsiSaveClose;
 	const u32* dsiSaveGetLength = ce9->patches->dsiSaveGetLength;
+	const u32* dsiSaveGetPosition = ce9->patches->dsiSaveGetPosition;
 	const u32* dsiSaveSeek = ce9->patches->dsiSaveSeek;
 	const u32* dsiSaveRead = ce9->patches->dsiSaveRead;
 	const u32* dsiSaveWrite = ce9->patches->dsiSaveWrite;
@@ -13160,6 +13161,35 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02051FA0, (u32)dsiSaveClose);
 		setBL(0x02051FB8, (u32)dsiSaveClose);
 	}*/
+
+	// The Tower DS: Classic (Japan)
+	// The Tower DS: Hotel (Japan)
+	// The Tower DS: Shopping Santa (Japan)
+	else if (strcmp(romTid, "KWWJ") == 0 || strcmp(romTid, "KWVJ") == 0 || strcmp(romTid, "KW4J") == 0) {
+		if (!twlFontFound) {
+			if (romTid[2] == 'W') {
+				*(u32*)0x02001618 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+			} else {
+				*(u32*)0x0200163C = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+			}
+		}
+		if (saveOnFlashcard) {
+			u8 offsetChange = (romTid[2] == 'W') ? 0 : 0x48;
+			u8 offsetChangeS = (romTid[2] == 'W') ? 0 : 0x60;
+			tonccpy((u32*)(0x0200C3C8+offsetChange), dsiSaveGetResultCode, 0xC);
+			setBL(0x0201C5B4+offsetChangeS, (u32)dsiSaveOpen);
+			setBL(0x0201C5E4+offsetChangeS, (u32)dsiSaveGetPosition);
+			setBL(0x0201C5F8+offsetChangeS, (u32)dsiSaveWrite);
+			setBL(0x0201C608+offsetChangeS, (u32)dsiSaveClose);
+			setBL(0x0201C680+offsetChangeS, (u32)dsiSaveOpen);
+			setBL(0x0201C6AC+offsetChangeS, (u32)dsiSaveGetLength);
+			setBL(0x0201C6CC+offsetChangeS, (u32)dsiSaveClose);
+			setBL(0x0201C704+offsetChangeS, (u32)dsiSaveSeek);
+			setBL(0x0201C714+offsetChangeS, (u32)dsiSaveRead);
+			setBL(0x0201C72C+offsetChangeS, (u32)dsiSaveClose);
+			setBL(0x0201C7C0+offsetChangeS, (u32)dsiSaveCreate);
+		}
+	}
 
 	// Trajectile (USA)
 	// Reflect Missile (Europe, Australia)

@@ -465,6 +465,9 @@ static const char dsiWareForBootloader2[][4] = {
 	"KTE", // Tetris Party Live
 	"KTW", // Thorium Wars
 	"KSL", // Touch Solitaire
+	"KWW", // The Tower DS: Classic
+	"KWV", // The Tower DS: Hotel
+	"KW4", // The Tower DS: Shopping Santa
 	"KDZ", // Trajectile
 	"K72", // True Swing Golf Express (bootloaderi-exclusive)
 	"KTI", // Turn: The Lost Artifact

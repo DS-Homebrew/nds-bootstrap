@@ -1027,6 +1027,14 @@ u32 dsiSaveGetLength(void* ctx) {
 	return dsiSaveSize;
 }
 
+u32 dsiSaveGetPosition(void* ctx) {
+	if (savFile.firstCluster == CLUSTER_FREE || savFile.firstCluster == CLUSTER_EOF) {
+		return 0;
+	}
+
+	return dsiSaveSeekPos;
+}
+
 bool dsiSaveSeek(void* ctx, s32 pos, u32 mode) {
 	if (sharedFontOpened) {
 		if (sharedFontFile.firstCluster == CLUSTER_FREE || sharedFontFile.firstCluster == CLUSTER_EOF) {
@@ -1123,6 +1131,10 @@ s32 dsiSaveWrite(void* ctx, void* src, s32 len) {
 		dsiSaveResultCode = 1;
 		toncset32(ctx+0x14, dsiSaveResultCode, 1);
 		return -1; // Return if only read perms are set
+	}
+
+	if (dsiSaveSeekPos >= ce9->saveSize-0x200) {
+		return 0;
 	}
 
 	while (dsiSaveSeekPos+len > ce9->saveSize-0x200) {

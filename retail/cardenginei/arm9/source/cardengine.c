@@ -414,16 +414,16 @@ static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
     		// Send a log command for debug purpose
     		// -------------------------------------
    			commandRead = 0x026ff800;
-    
+
     		sharedAddr[0] = dst;
     		sharedAddr[1] = len2;
     		sharedAddr[2] = buffer+src-sector;
     		sharedAddr[3] = commandRead;
-    
+
     		waitForArm7();
     		// -------------------------------------
     		#endif
-    
+
     		// Copy directly
 			/*if (isDma) {
 				ndmaCopyWordsAsynch(0, (u8*)buffer+(src-sector), dst, len2);
@@ -922,6 +922,18 @@ u32 dsiSaveGetLength(void* ctx) {
 #endif
 }
 
+u32 dsiSaveGetPosition(void* ctx) {
+#ifdef DLDI
+	if (savFile->firstCluster == CLUSTER_FREE || savFile->firstCluster == CLUSTER_EOF) {
+		return 0;
+	}
+
+	return dsiSaveSeekPos;
+#else
+	return 0;
+#endif
+}
+
 bool dsiSaveSeek(void* ctx, s32 pos, u32 mode) {
 #ifdef DLDI
 	if (sharedFontOpened) {
@@ -1001,6 +1013,10 @@ s32 dsiSaveWrite(void* ctx, void* src, s32 len) {
 		dsiSaveResultCode = 1;
 		toncset32(ctx+0x14, dsiSaveResultCode, 1);
 		return -1; // Return if only read perms are set
+	}
+
+	if (dsiSaveSeekPos >= ce9->saveSize-0x200) {
+		return 0;
 	}
 
 	while (dsiSaveSeekPos+len > ce9->saveSize-0x200) {
