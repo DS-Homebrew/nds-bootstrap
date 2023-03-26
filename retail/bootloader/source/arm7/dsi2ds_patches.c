@@ -21817,6 +21817,70 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x020A451C, 0x020A4CDC);
 	}
 
+	// Thorium Wars (USA)
+	else if (strcmp(romTid, "KTWE") == 0) {
+		*(u32*)0x0200C9EC = 0xE1A00000; // nop
+		tonccpy((u32*)0x0200D680, dsiSaveGetResultCode, 0xC);
+		*(u32*)0x0201041C = 0xE1A00000; // nop
+		patchInitDSiWare(0x02017BD4, heapEnd);
+		*(u32*)0x02017F44 = *(u32*)0x020013C0;
+		patchUserSettingsReadDSiWare(0x02019370);
+		*(u32*)0x0201ED30 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0201ED34 = 0xE12FFF1E; // bx lr
+		if (!extendedMemory2) {
+			// Disable MobiClip playback
+			*(u32*)0x02032BFC = 0xE3A00000; // mov r0, #0
+			*(u32*)0x02041698 = 0xE12FFF1E; // bx lr
+		}
+		setBL(0x0207C824, (u32)dsiSaveCreate);
+		setBL(0x0207C840, (u32)dsiSaveOpen);
+		setBL(0x0207C854, (u32)dsiSaveSetLength);
+		setBL(0x0207C880, (u32)dsiSaveClose);
+		setBL(0x0207C92C, (u32)dsiSaveDelete);
+		*(u32*)0x0207C974 = 0xE1A00000; // nop
+		setBL(0x0207C9D8, (u32)dsiSaveOpen);
+		setBL(0x0207C9F0, (u32)dsiSaveSeek);
+		setBL(0x0207CA00, (u32)dsiSaveRead);
+		setBL(0x0207CA10, (u32)dsiSaveClose);
+		setBL(0x0207CAF4, (u32)dsiSaveOpen);
+		setBL(0x0207CB0C, (u32)dsiSaveSeek);
+		setBL(0x0207CB1C, (u32)dsiSaveWrite);
+		setBL(0x0207CB2C, (u32)dsiSaveClose);
+		*(u32*)0x02085678 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+	}
+
+	// Thorium Wars (Europe)
+	else if (strcmp(romTid, "KTWP") == 0) {
+		*(u32*)0x02010650 = 0xE1A00000; // nop
+		tonccpy((u32*)0x020111C8, dsiSaveGetResultCode, 0xC);
+		*(u32*)0x02013F28 = 0xE1A00000; // nop
+		patchInitDSiWare(0x0201B050, heapEnd);
+		*(u32*)0x0201B3DC = *(u32*)0x02004FD0;
+		patchUserSettingsReadDSiWare(0x0201C820);
+		*(u32*)0x020220C0 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x020220C4 = 0xE12FFF1E; // bx lr
+		if (!extendedMemory2) {
+			// Disable MobiClip playback
+			*(u32*)0x02036C70 = 0xE3A00000; // mov r0, #0
+			*(u32*)0x02045720 = 0xE12FFF1E; // bx lr
+		}
+		setBL(0x02084A78, (u32)dsiSaveCreate);
+		setBL(0x02084A94, (u32)dsiSaveOpen);
+		setBL(0x02084AA8, (u32)dsiSaveSetLength);
+		setBL(0x02084AD4, (u32)dsiSaveClose);
+		setBL(0x02084B80, (u32)dsiSaveDelete);
+		*(u32*)0x02084BC8 = 0xE1A00000; // nop
+		setBL(0x02084C2C, (u32)dsiSaveOpen);
+		setBL(0x02084C44, (u32)dsiSaveSeek);
+		setBL(0x02084C54, (u32)dsiSaveRead);
+		setBL(0x02084C64, (u32)dsiSaveClose);
+		setBL(0x02084D48, (u32)dsiSaveOpen);
+		setBL(0x02084D60, (u32)dsiSaveSeek);
+		setBL(0x02084D70, (u32)dsiSaveWrite);
+		setBL(0x02084D80, (u32)dsiSaveClose);
+		*(u32*)0x0208F104 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+	}
+
 	// Topoloco (USA)
 	// Topoloco (Europe)
 	// Requires 8MB of RAM

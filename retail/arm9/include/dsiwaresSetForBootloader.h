@@ -463,6 +463,7 @@ static const char dsiWareForBootloader2[][4] = {
 	"KXL", // Telegraph Sudoku & Kakuro
 	"KOS", // Tell me Darling
 	"KTE", // Tetris Party Live
+	"KTW", // Thorium Wars
 	"KSL", // Touch Solitaire
 	"KDZ", // Trajectile
 	"K72", // True Swing Golf Express (bootloaderi-exclusive)

@@ -13092,6 +13092,54 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// Thorium Wars (USA)
+	else if (strcmp(romTid, "KTWE") == 0) {
+		if (saveOnFlashcard) {
+			tonccpy((u32*)0x0200D680, dsiSaveGetResultCode, 0xC);
+			setBL(0x0207C824, (u32)dsiSaveCreate);
+			setBL(0x0207C840, (u32)dsiSaveOpen);
+			setBL(0x0207C854, (u32)dsiSaveSetLength);
+			setBL(0x0207C880, (u32)dsiSaveClose);
+			setBL(0x0207C92C, (u32)dsiSaveDelete);
+			*(u32*)0x0207C974 = 0xE1A00000; // nop
+			setBL(0x0207C9D8, (u32)dsiSaveOpen);
+			setBL(0x0207C9F0, (u32)dsiSaveSeek);
+			setBL(0x0207CA00, (u32)dsiSaveRead);
+			setBL(0x0207CA10, (u32)dsiSaveClose);
+			setBL(0x0207CAF4, (u32)dsiSaveOpen);
+			setBL(0x0207CB0C, (u32)dsiSaveSeek);
+			setBL(0x0207CB1C, (u32)dsiSaveWrite);
+			setBL(0x0207CB2C, (u32)dsiSaveClose);
+		}
+		if (!twlFontFound) {
+			*(u32*)0x02085678 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		}
+	}
+
+	// Thorium Wars (Europe)
+	else if (strcmp(romTid, "KTWP") == 0) {
+		if (saveOnFlashcard) {
+			tonccpy((u32*)0x020111C8, dsiSaveGetResultCode, 0xC);
+			setBL(0x02084A78, (u32)dsiSaveCreate);
+			setBL(0x02084A94, (u32)dsiSaveOpen);
+			setBL(0x02084AA8, (u32)dsiSaveSetLength);
+			setBL(0x02084AD4, (u32)dsiSaveClose);
+			setBL(0x02084B80, (u32)dsiSaveDelete);
+			*(u32*)0x02084BC8 = 0xE1A00000; // nop
+			setBL(0x02084C2C, (u32)dsiSaveOpen);
+			setBL(0x02084C44, (u32)dsiSaveSeek);
+			setBL(0x02084C54, (u32)dsiSaveRead);
+			setBL(0x02084C64, (u32)dsiSaveClose);
+			setBL(0x02084D48, (u32)dsiSaveOpen);
+			setBL(0x02084D60, (u32)dsiSaveSeek);
+			setBL(0x02084D70, (u32)dsiSaveWrite);
+			setBL(0x02084D80, (u32)dsiSaveClose);
+		}
+		if (!twlFontFound) {
+			*(u32*)0x0208F104 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		}
+	}
+
 	// Topoloco (USA)
 	// Topoloco (Europe)
 	/*else if (strncmp(romTid, "KT5", 3) == 0 && saveOnFlashcard) {
