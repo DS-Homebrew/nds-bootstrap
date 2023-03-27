@@ -22160,8 +22160,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// True Swing Golf Express (USA)
 	// A Little Bit of... Nintendo Touch Golf (Europe, Australia)
-	// Crashes on white screens when going to menu
-	/*else if ((strcmp(romTid, "K72E") == 0 || strcmp(romTid, "K72V") == 0) && extendedMemory2) {
+	else if (strcmp(romTid, "K72E") == 0 || strcmp(romTid, "K72V") == 0) {
 		// *(u32*)0x02009A84 = 0xE12FFF1E; // bx lr
 		setBL(0x02009AC0, (u32)dsiSaveOpen);
 		setBL(0x02009AE0, (u32)dsiSaveGetLength);
@@ -22195,35 +22194,37 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0200A0AC, (u32)dsiSaveClose);
 		setBL(0x0200A134, (u32)dsiSaveClose);
 		if (romTid[3] == 'E') {
+			if (extendedMemory2) {
+				*(u32*)0x0202BBD4 = 0xE3A0581E; // mov r5, #0x1E0000 (Shrink sound heap from 0x300000)
+			} else {
+				*(u32*)0x0202BBD4 = 0xE3A05901; // mov r5, #0x4000 (Disable audio)
+			}
 			*(u32*)0x02063214 = 0xE1A00000; // nop
 			*(u32*)0x02066E74 = 0xE1A00000; // nop
-			*(u32*)0x02072B10 = 0xE1A00000; // nop
-			*(u32*)0x020749D4 = 0xE1A00000; // nop
-			*(u32*)0x020749D8 = 0xE1A00000; // nop
-			*(u32*)0x020749E4 = 0xE1A00000; // nop
-			*(u32*)0x02074B44 = 0xE1A00000; // nop
-			patchHiHeapDSiWare(0x02074BA0, heapEndExceed);
+			patchInitDSiWare(0x02074948, heapEnd);
+			*(u32*)0x02074CD4 -= 0x2F0000;
 			patchUserSettingsReadDSiWare(0x020760C8);
 			*(u32*)0x020760E4 = 0xE3A00001; // mov r0, #1
 			*(u32*)0x020760E8 = 0xE12FFF1E; // bx lr
 			*(u32*)0x020760F0 = 0xE3A00000; // mov r0, #0
 			*(u32*)0x020760F4 = 0xE12FFF1E; // bx lr
 		} else {
+			if (extendedMemory2) {
+				*(u32*)0x0202BA40 = 0xE3A0581E; // mov r5, #0x1E0000 (Shrink sound heap from 0x300000)
+			} else {
+				*(u32*)0x0202BA40 = 0xE3A05901; // mov r5, #0x4000 (Disable audio)
+			}
 			*(u32*)0x02062FA8 = 0xE1A00000; // nop
 			*(u32*)0x02066C08 = 0xE1A00000; // nop
-			*(u32*)0x020728A4 = 0xE1A00000; // nop
-			*(u32*)0x02074768 = 0xE1A00000; // nop
-			*(u32*)0x0207476C = 0xE1A00000; // nop
-			*(u32*)0x02074778 = 0xE1A00000; // nop
-			*(u32*)0x020748D8 = 0xE1A00000; // nop
-			patchHiHeapDSiWare(0x02074934, heapEndExceed);
+			patchInitDSiWare(0x020746DC, heapEnd);
+			*(u32*)0x02074A68 -= 0x2F0000;
 			patchUserSettingsReadDSiWare(0x02075E5C);
 			*(u32*)0x02075E78 = 0xE3A00001; // mov r0, #1
 			*(u32*)0x02075E7C = 0xE12FFF1E; // bx lr
 			*(u32*)0x02075E84 = 0xE3A00000; // mov r0, #0
 			*(u32*)0x02075E88 = 0xE12FFF1E; // bx lr
 		}
-	}*/
+	}
 
 	// Turn: The Lost Artifact (USA)
 	// Saving is difficult to implement
