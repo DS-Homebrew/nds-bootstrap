@@ -470,6 +470,7 @@ static const char dsiWareForBootloader2[][4] = {
 	"KWV", // The Tower DS: Hotel
 	"KW4", // The Tower DS: Shopping Santa
 	"KDZ", // Trajectile
+	"KB7", // Trollboarder
 	"K72", // True Swing Golf Express (bootloaderi-exclusive)
 	"KTI", // Turn: The Lost Artifact
 	"K6P", // Unou to Sanougaren Sasuru: Uranoura

@@ -22125,6 +22125,39 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02103DF8 = 0x1E0000; // Shrink sound heap from 0x300000
 	}
 
+	// Trollboarder (USA)
+	// Trollboarder (Europe)
+	else if (strcmp(romTid, "KB7E") == 0 || strcmp(romTid, "KB7P") == 0) {
+		useSharedFont = (twlFontFound && debugOrMep);
+		*(u32*)0x0200FA58 = 0xE1A00000; // nop
+		*(u32*)0x02013164 = 0xE1A00000; // nop
+		patchInitDSiWare(0x020191E8, heapEnd);
+		patchUserSettingsReadDSiWare(0x0201A6D8);
+		*(u32*)0x0201F444 = 0xE3A00000; // mov r0, #0
+		setBL(0x0201F4A8, (u32)dsiSaveOpen);
+		*(u32*)0x0201F4E0 = 0xE1A00000; // nop
+		setBL(0x0201F4FC, (u32)dsiSaveGetLength);
+		setBL(0x0201F50C, (u32)dsiSaveRead);
+		setBL(0x0201F514, (u32)dsiSaveClose);
+		setBL(0x0201F550, (u32)dsiSaveOpen);
+		*(u32*)0x0201F568 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+		*(u32*)0x0201F578 = 0xE3A00001; // mov r0, #1 (dsiSaveFreeSpaceAvailable)
+		setBL(0x0201F594, (u32)dsiSaveCreate);
+		setBL(0x0201F5A0, (u32)dsiSaveClose);
+		setBL(0x0201F5B0, (u32)dsiSaveOpen);
+		setBL(0x0201F5C0, (u32)dsiSaveGetResultCode);
+		*(u32*)0x0201F5E4 = 0xE1A00000; // nop
+		setBL(0x0201F604, (u32)dsiSaveSetLength);
+		setBL(0x0201F614, (u32)dsiSaveWrite);
+		setBL(0x0201F61C, (u32)dsiSaveClose);
+		if (!extendedMemory2) {
+			*(u32*)((romTid[3] == 'E') ? 0x02029070 : 0x02029090) = 0xE1A00000; // nop (Disable audio)
+		}
+		if (useSharedFont && !extendedMemory2) {
+			patchTwlFontLoad((romTid[3] == 'E') ? 0x02046994 : 0x020469B0, 0x0201AC1C);
+		}
+	}
+
 	// True Swing Golf Express (USA)
 	// A Little Bit of... Nintendo Touch Golf (Europe, Australia)
 	// Crashes on white screens when going to menu

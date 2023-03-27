@@ -13202,6 +13202,26 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		toncset16((u16*)0x020B8F88, nopT, 0x4A/sizeof(u16)); // Do not use DSi WRAM
 	}
 
+	// Trollboarder (USA)
+	// Trollboarder (Europe)
+	else if ((strcmp(romTid, "KB7E") == 0 || strcmp(romTid, "KB7P") == 0) && saveOnFlashcard) {
+		*(u32*)0x0201F444 = 0xE3A00000; // mov r0, #0
+		setBL(0x0201F4A8, (u32)dsiSaveOpen);
+		setBL(0x0201F4FC, (u32)dsiSaveGetLength);
+		setBL(0x0201F50C, (u32)dsiSaveRead);
+		setBL(0x0201F514, (u32)dsiSaveClose);
+		setBL(0x0201F550, (u32)dsiSaveOpen);
+		*(u32*)0x0201F568 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+		*(u32*)0x0201F578 = 0xE3A00001; // mov r0, #1 (dsiSaveFreeSpaceAvailable)
+		setBL(0x0201F594, (u32)dsiSaveCreate);
+		setBL(0x0201F5A0, (u32)dsiSaveClose);
+		setBL(0x0201F5B0, (u32)dsiSaveOpen);
+		setBL(0x0201F5C0, (u32)dsiSaveGetResultCode);
+		setBL(0x0201F604, (u32)dsiSaveSetLength);
+		setBL(0x0201F614, (u32)dsiSaveWrite);
+		setBL(0x0201F61C, (u32)dsiSaveClose);
+	}
+
 	// True Swing Golf Express (USA)
 	// A Little Bit of... Nintendo Touch Golf (Europe, Australia)
 	if ((strcmp(romTid, "K72E") == 0 || strcmp(romTid, "K72V") == 0) && saveOnFlashcard) {
