@@ -176,6 +176,7 @@ static const char dsiWareForBootloader1[][4] = {
 	"KFD", // Fieldrunners
 	"KF8", // Fire Panic
 	"KZZ", // Fizz
+	// "K4K", // Flametail
 	"KFS", // Flashlight
 	"KKR", // Flip the Core
 	"KFP", // Flipper

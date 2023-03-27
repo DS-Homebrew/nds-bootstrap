@@ -9616,6 +9616,22 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0202A44C, (u32)dsiSaveClose);
 	}
 
+	// Flametail (USA)
+	// Cannot run properly without save patches: Shows "save data is corrupt" message
+	/* else if (strcmp(romTid, "K4KE") == 0 && extendedMemory2 && twlFontFound) {
+		useSharedFont = true;
+		*(u32*)0x0200507C = 0xE1A00000; // nop
+		*(u32*)0x02016530 = 0xE1A00000; // nop
+		*(u32*)0x02019C58 = 0xE1A00000; // nop
+		*(u32*)0x0201A088 = 0xE1A00000; // nop
+		*(u32*)0x0201A08C = 0xE1A00000; // nop
+		patchInitDSiWare(0x0201F904, heapEnd);
+		patchUserSettingsReadDSiWare(0x02020FAC);
+		setB(0x0203CE54, 0x0203CE88); // Skip DSi WRAM init
+		*(u32*)0x0203CF18 = 0xE1A00000; // nop (Disable audio)
+		*(u32*)0x02055C60 = 0xE3A00000; // mov r0, #0
+	} */
+
 	// Flashlight (USA)
 	else if (strcmp(romTid, "KFSE") == 0) {
 		if (twlFontFound) {
