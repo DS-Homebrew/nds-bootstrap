@@ -13259,6 +13259,44 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0200A134, (u32)dsiSaveClose);
 	}
 
+	// Ubongo (USA)
+	else if (strcmp(romTid, "KUBE") == 0 && saveOnFlashcard) {
+		*(u32*)0x02013278 = 0xE3A00001; // mov r0, #1
+		setBL(0x02021498, (u32)dsiSaveOpen);
+		setBL(0x020214B0, (u32)dsiSaveGetLength);
+		setBL(0x020214C0, (u32)dsiSaveSeek);
+		setBL(0x020214D0, (u32)dsiSaveWrite);
+		setBL(0x020214D8, (u32)dsiSaveClose);
+		setBL(0x02021548, (u32)dsiSaveOpen);
+		setBL(0x02021560, (u32)dsiSaveGetLength);
+		setBL(0x02021574, (u32)dsiSaveSeek);
+		setBL(0x02021584, (u32)dsiSaveRead);
+		setBL(0x0202158C, (u32)dsiSaveClose);
+		setBL(0x02021604, (u32)dsiSaveCreate);
+		setBL(0x02021630, (u32)dsiSaveOpen);
+		setBL(0x0202166C, (u32)dsiSaveWrite);
+		setBL(0x0202167C, (u32)dsiSaveClose);
+	}
+
+	// Ubongo (Europe)
+	else if (strcmp(romTid, "KUBP") == 0 && saveOnFlashcard) {
+		*(u32*)0x020134EC = 0xE3A00001; // mov r0, #1
+		setBL(0x02021758, (u32)dsiSaveOpen);
+		setBL(0x02021770, (u32)dsiSaveGetLength);
+		setBL(0x02021780, (u32)dsiSaveSeek);
+		setBL(0x02021790, (u32)dsiSaveWrite);
+		setBL(0x02021798, (u32)dsiSaveClose);
+		setBL(0x02021808, (u32)dsiSaveOpen);
+		setBL(0x02021820, (u32)dsiSaveGetLength);
+		setBL(0x02021834, (u32)dsiSaveSeek);
+		setBL(0x02021844, (u32)dsiSaveRead);
+		setBL(0x0202184C, (u32)dsiSaveClose);
+		setBL(0x020218C4, (u32)dsiSaveCreate);
+		setBL(0x020218F0, (u32)dsiSaveOpen);
+		setBL(0x0202192C, (u32)dsiSaveWrite);
+		setBL(0x0202193C, (u32)dsiSaveClose);
+	}
+
 	// Unou to Sanougaren Sasuru: Uranoura (Japan)
 	// Unable to save data
 	else if (strcmp(romTid, "K6PJ") == 0) {

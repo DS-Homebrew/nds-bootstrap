@@ -22245,6 +22245,96 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// Ubongo (USA)
+	else if (strcmp(romTid, "KUBE") == 0) {
+		*(u32*)0x02012A24 = 0xE1A00000; // nop
+		*(u32*)0x02012A94 = 0xE1A00000; // nop
+		*(u32*)0x02012AB0 = 0xE1A00000; // nop
+		*(u32*)0x02012AB8 = 0xE1A00000; // nop
+		*(u32*)0x02013278 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02013294 = 0xE1A00000; // nop
+		*(u32*)0x020132C8 = 0xE1A00000; // nop
+		*(u32*)0x020132D0 = 0xE1A00000; // nop
+		*(u32*)0x02013344 = 0xE1A00000; // nop
+		*(u32*)0x0201334C = 0xE1A00000; // nop
+		*(u32*)0x020133D0 = 0xE1A00000; // nop
+		*(u32*)0x020133D8 = 0xE1A00000; // nop
+		setBL(0x02021498, (u32)dsiSaveOpen);
+		setBL(0x020214B0, (u32)dsiSaveGetLength);
+		setBL(0x020214C0, (u32)dsiSaveSeek);
+		setBL(0x020214D0, (u32)dsiSaveWrite);
+		setBL(0x020214D8, (u32)dsiSaveClose);
+		setBL(0x02021548, (u32)dsiSaveOpen);
+		setBL(0x02021560, (u32)dsiSaveGetLength);
+		setBL(0x02021574, (u32)dsiSaveSeek);
+		setBL(0x02021584, (u32)dsiSaveRead);
+		setBL(0x0202158C, (u32)dsiSaveClose);
+		setBL(0x02021604, (u32)dsiSaveCreate);
+		setBL(0x02021630, (u32)dsiSaveOpen);
+		setBL(0x0202166C, (u32)dsiSaveWrite);
+		setBL(0x0202167C, (u32)dsiSaveClose);
+		doubleNopT(0x020216B2);
+		doubleNopT(0x020216D6);
+		doubleNopT(0x020216EE);
+		doubleNopT(0x0202170E);
+		doubleNopT(0x0202172A);
+		doubleNopT(0x0202174A);
+		doubleNopT(0x02021766);
+		doubleNopT(0x0202178E);
+		*(u32*)0x0203D054 = 0xE1A00000; // nop
+		*(u32*)0x02040E9C = 0xE1A00000; // nop
+		*(u32*)0x0204E074 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0204E078 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0204F538 = 0xE1A00000; // nop
+		*(u32*)0x0204F578 = 0xE1A00000; // nop
+		patchInitDSiWare(0x02061D98, heapEnd);
+	}
+
+	// Ubongo (Europe)
+	else if (strcmp(romTid, "KUBP") == 0) {
+		*(u32*)0x02012A24 = 0xE1A00000; // nop
+		*(u32*)0x02012A94 = 0xE1A00000; // nop
+		*(u32*)0x02012AB0 = 0xE1A00000; // nop
+		*(u32*)0x02012AB8 = 0xE1A00000; // nop
+		*(u32*)0x020134EC = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02013508 = 0xE1A00000; // nop
+		*(u32*)0x0201353C = 0xE1A00000; // nop
+		*(u32*)0x02013544 = 0xE1A00000; // nop
+		*(u32*)0x020135B8 = 0xE1A00000; // nop
+		*(u32*)0x020135C0 = 0xE1A00000; // nop
+		*(u32*)0x02013644 = 0xE1A00000; // nop
+		*(u32*)0x0201364C = 0xE1A00000; // nop
+		setBL(0x02021758, (u32)dsiSaveOpen);
+		setBL(0x02021770, (u32)dsiSaveGetLength);
+		setBL(0x02021780, (u32)dsiSaveSeek);
+		setBL(0x02021790, (u32)dsiSaveWrite);
+		setBL(0x02021798, (u32)dsiSaveClose);
+		setBL(0x02021808, (u32)dsiSaveOpen);
+		setBL(0x02021820, (u32)dsiSaveGetLength);
+		setBL(0x02021834, (u32)dsiSaveSeek);
+		setBL(0x02021844, (u32)dsiSaveRead);
+		setBL(0x0202184C, (u32)dsiSaveClose);
+		setBL(0x020218C4, (u32)dsiSaveCreate);
+		setBL(0x020218F0, (u32)dsiSaveOpen);
+		setBL(0x0202192C, (u32)dsiSaveWrite);
+		setBL(0x0202193C, (u32)dsiSaveClose);
+		doubleNopT(0x02021972);
+		doubleNopT(0x02021996);
+		doubleNopT(0x020219AE);
+		doubleNopT(0x020219CE);
+		doubleNopT(0x020219EA);
+		doubleNopT(0x02021A0A);
+		doubleNopT(0x02021A26);
+		doubleNopT(0x02021A4E);
+		*(u32*)0x0203D314 = 0xE1A00000; // nop
+		*(u32*)0x0204115C = 0xE1A00000; // nop
+		*(u32*)0x0204E334 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0204E338 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0204F7F8 = 0xE1A00000; // nop
+		*(u32*)0x0204F838 = 0xE1A00000; // nop
+		patchInitDSiWare(0x02062058, heapEnd);
+	}
+
 	// Unou to Sanougaren Sasuru: Uranoura (Japan)
 	// Unable to save data
 	else if (strcmp(romTid, "K6PJ") == 0) {

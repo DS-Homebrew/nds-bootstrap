@@ -786,6 +786,21 @@ u32 relocateBssPart(const tNDSHeader* ndsHeader, u32 bssEnd, u32 bssPartStart, u
 
 void patchHiHeapDSiWare(u32 addr, u32 heapEnd) {
 	//*(u32*)(addr) = opCode; // mov r0, #0x????????
+	if (*(u32*)(addr+4) == 0xEA000043) { // debuggerSdk
+		*(u32*)(addr) = 0xE59F0134; // ldr r0, =0x????????
+		*(u32*)(addr+0x28) = 0xE3560001; // cmp r6, #1
+		*(u32*)(addr+0x30) = 0xE3A00627; // mov r0, #0x2700000
+
+		*(u32*)(addr+0x58) = 0xE3A00C00; // mov r0, #*(u32*)(addr+0x13C)
+		if (*(u32*)(addr+0x13C) != 0) {
+			for (u32 i = 0; i < *(u32*)(addr+0x13C); i += 0x100) {
+				*(u32*)(addr+0x58) += 1;
+			}
+		}
+
+		*(u32*)(addr+0x13C) = heapEnd;
+		return;
+	}
 
 	*(u32*)(addr) = 0xE59F0094; // ldr r0, =0x????????
 	*(u32*)(addr+0x24) = 0xE3500001; // cmp r0, #1
@@ -840,27 +855,40 @@ void patchUserSettingsReadDSiWare(u32 addr) {
 }
 
 void patchInitDSiWare(u32 addr, u32 heapEnd) {
-	bool heapInitPatched = false;
+	bool debuggerSdk = false;
 	u32* func = getOffsetFromBL((u32*)(addr+0x10));
-	for (int i = 0; i < 64; i++) {	
-		if (func[i] == 0xE1A00100 && !heapInitPatched) {
-			func[i-2] = 0xE1A00000; // nop
-			i += 16;
-			heapInitPatched = true;
-		}
+	if (func[8] == 0xE92D4010) { // STMFD SP!, {R4,LR}
+		debuggerSdk = true;
+		func[6] = 0xE1A00000; // nop
+		patchHiHeapDSiWare(((u32)func+0x300), heapEnd);
+	} else {
+		bool heapInitPatched = false;
+		for (int i = 0; i < 64; i++) {	
+			if (func[i] == 0xE1A00100 && !heapInitPatched) {
+				func[i-2] = 0xE1A00000; // nop
+				i += 16;
+				heapInitPatched = true;
+			}
 
-		if (func[i] == 0xE3A007BE) {
-			patchHiHeapDSiWare(((u32)func+(i*sizeof(u32))), heapEnd);
-			break;
+			if (func[i] == 0xE3A007BE) {
+				patchHiHeapDSiWare(((u32)func+(i*sizeof(u32))), heapEnd);
+				break;
+			}
 		}
 	}
 
 	func = getOffsetFromBL((u32*)(addr+0x20));
 	func[3] = 0xE1A00000; // nop
 
-	*(u32*)(addr+0x8C) = 0xE1A00000; // nop
-	*(u32*)(addr+0x90) = 0xE1A00000; // nop
-	*(u32*)(addr+0x9C) = 0xE1A00000; // nop
+	if (debuggerSdk) {
+		*(u32*)(addr+0x3C) = 0xE1A00000; // nop
+		*(u32*)(addr+0x40) = 0xE1A00000; // nop
+		*(u32*)(addr+0x4C) = 0xE1A00000; // nop
+	} else {
+		*(u32*)(addr+0x8C) = 0xE1A00000; // nop
+		*(u32*)(addr+0x90) = 0xE1A00000; // nop
+		*(u32*)(addr+0x9C) = 0xE1A00000; // nop
+	}
 }
 
 void patchVolumeGetDSiWare(u32 addr) {

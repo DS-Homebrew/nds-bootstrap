@@ -473,6 +473,7 @@ static const char dsiWareForBootloader2[][4] = {
 	"KB7", // Trollboarder
 	"K72", // True Swing Golf Express
 	"KTI", // Turn: The Lost Artifact
+	"KUB", // Ubongo
 	"K6P", // Unou to Sanougaren Sasuru: Uranoura
 	"KVT", // VT Tennis
 	"KK4", // Wakugumi: Monochrome Puzzle
