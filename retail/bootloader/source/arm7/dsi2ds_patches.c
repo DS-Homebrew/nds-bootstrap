@@ -21845,6 +21845,15 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Thorium Wars (USA)
 	else if (strcmp(romTid, "KTWE") == 0) {
+		if (!extendedMemory2) {
+			// Disable audio
+			u32 bssEnd = *(u32*)0x020013C0;
+			u32 sdatOffset = 0x0212BE54;
+
+			*(u32*)0x020013C0 = bssEnd - relocateBssPart(ndsHeader, bssEnd, sdatOffset+0x1FC000, bssEnd, sdatOffset);
+			*(u32*)0x02082868 = 0xE3A01901; // mov r1, #0x4000
+		}
+
 		*(u32*)0x0200C9EC = 0xE1A00000; // nop
 		tonccpy((u32*)0x0200D680, dsiSaveGetResultCode, 0xC);
 		*(u32*)0x0201041C = 0xE1A00000; // nop
@@ -21878,6 +21887,15 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Thorium Wars (Europe)
 	else if (strcmp(romTid, "KTWP") == 0) {
+		if (!extendedMemory2) {
+			// Disable audio
+			u32 bssEnd = *(u32*)0x02004FD0;
+			u32 sdatOffset = 0x0213F040;
+
+			*(u32*)0x02004FD0 = bssEnd - relocateBssPart(ndsHeader, bssEnd, sdatOffset+0x1FC000, bssEnd, sdatOffset);
+			*(u32*)0x0208C300 = 0xE3A01901; // mov r1, #0x4000
+		}
+
 		*(u32*)0x02010650 = 0xE1A00000; // nop
 		tonccpy((u32*)0x020111C8, dsiSaveGetResultCode, 0xC);
 		*(u32*)0x02013F28 = 0xE1A00000; // nop
