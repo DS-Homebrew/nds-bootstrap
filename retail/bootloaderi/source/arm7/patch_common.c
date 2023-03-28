@@ -13427,6 +13427,20 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0200BFA8, (u32)dsiSaveClose);
 	}
 
+	// Viking Invasion (USA)
+	// Saving not supported due to using more than one file in filesystem
+	else if (strcmp(romTid, "KVKE") == 0 && saveOnFlashcard) {
+		*(u32*)0x0206695C = 0xE12FFF1E; // bx lr
+		*(u32*)0x02066D3C = 0xE12FFF1E; // bx lr
+	}
+
+	// Viking Invasion (Europe, Australia)
+	// Saving not supported due to using more than one file in filesystem
+	else if (strcmp(romTid, "KVKV") == 0 && saveOnFlashcard) {
+		*(u32*)0x020668DC = 0xE12FFF1E; // bx lr
+		*(u32*)0x02066CBC = 0xE12FFF1E; // bx lr
+	}
+
 	// VT Tennis (USA)
 	else if (strcmp(romTid, "KVTE") == 0) {
 		if (!twlFontFound) {

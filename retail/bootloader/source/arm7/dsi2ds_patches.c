@@ -22423,6 +22423,34 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchUserSettingsReadDSiWare(0x02045D78);
 	}
 
+	// Viking Invasion (USA)
+	// Saving not supported due to using more than one file in filesystem
+	else if (strcmp(romTid, "KVKE") == 0) {
+		*(u32*)0x02011ECC = 0xE1A00000; // nop
+		*(u32*)0x0201547C = 0xE1A00000; // nop
+		patchInitDSiWare(0x0201B434, heapEnd);
+		patchUserSettingsReadDSiWare(0x0201C9D4);
+		*(u32*)0x02035F64 = 0xE1A00000; // nop
+		*(u32*)0x02036DFC = 0xE12FFF1E; // bx lr
+		*(u32*)0x0206695C = 0xE12FFF1E; // bx lr
+		*(u32*)0x02066D3C = 0xE12FFF1E; // bx lr
+		*(u32*)0x02066F50 = 0xE1A00000; // nop
+	}
+
+	// Viking Invasion (Europe, Australia)
+	// Saving not supported due to using more than one file in filesystem
+	else if (strcmp(romTid, "KVKV") == 0) {
+		*(u32*)0x02011EB0 = 0xE1A00000; // nop
+		*(u32*)0x02015460 = 0xE1A00000; // nop
+		patchInitDSiWare(0x0201B418, heapEnd);
+		patchUserSettingsReadDSiWare(0x0201C9B8);
+		*(u32*)0x02035ECC = 0xE1A00000; // nop
+		*(u32*)0x02036CD4 = 0xE12FFF1E; // bx lr
+		*(u32*)0x020668DC = 0xE12FFF1E; // bx lr
+		*(u32*)0x02066CBC = 0xE12FFF1E; // bx lr
+		*(u32*)0x02066ED0 = 0xE1A00000; // nop
+	}
+
 	// VT Tennis (USA)
 	else if (strcmp(romTid, "KVTE") == 0) {
 		useSharedFont = twlFontFound;
