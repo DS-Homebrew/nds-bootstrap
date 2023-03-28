@@ -242,7 +242,11 @@ void showException(s32 *expReg) {
 
 	int offset = 8;
 
-	if(currentMode == 0x17) {
+	if ((u32)exceptionRegisters < 0x01FF8000 || (u32)exceptionRegisters > 0x04000000) {
+		printCenter(16, 11, (const u8 *)"Failed to get error info!", FONT_WHITE, true);
+		(*revertMpu)();
+		return;
+	} else if (currentMode == 0x17) {
 		if (exceptionRegisters[1] == 0x45585048 || exceptionRegisters[1] == 0x46524D48) { // 'HPXE' or 'HMRF'
 			print(5, 1, (const u8 *)"Heap Allocation Error!", FONT_WHITE, true);
 			heapError = true;
