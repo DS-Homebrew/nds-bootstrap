@@ -4661,7 +4661,8 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// GO Series: Defense Wars (USA)
 	// GO Series: Defence Wars (Europe)
-	else if (strcmp(romTid, "KWTE") == 0 || strcmp(romTid, "KWTP") == 0) {
+	// Uchi Makure!: Touch Pen Wars (Japan)
+	else if (strncmp(romTid, "KWT", 3) == 0) {
 		if (!twlFontFound) {
 			*(u32*)0x0200B350 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 
@@ -4689,7 +4690,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBL(0x0200C8CC, (u32)dsiSaveGetInfo);
 			*(u32*)0x0200C910 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc & dsiSaveFreeSpaceAvailable)
 			*(u32*)0x0200C914 = 0xE12FFF1E; // bx lr
-			tonccpy((u32*)0x0204AAEC, dsiSaveGetResultCode, 0xC);
+			tonccpy((u32*)((romTid[3] != 'J') ? 0x0204AAEC : 0x0204A8E8), dsiSaveGetResultCode, 0xC);
 		}
 	}
 

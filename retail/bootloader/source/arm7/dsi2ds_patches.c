@@ -7815,7 +7815,8 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// GO Series: Defense Wars (USA)
 	// GO Series: Defence Wars (Europe)
-	else if (strcmp(romTid, "KWTE") == 0 || strcmp(romTid, "KWTP") == 0) {
+	// Uchi Makure!: Touch Pen Wars (Japan)
+	else if (strncmp(romTid, "KWT", 3) == 0) {
 		*(u32*)0x0200722C = 0xE1A00000; // nop
 		*(u32*)0x0200B350 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		setBL(0x0200C5C0, (u32)dsiSaveCreate);
@@ -7835,11 +7836,19 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0200C910 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc & dsiSaveFreeSpaceAvailable)
 		*(u32*)0x0200C914 = 0xE12FFF1E; // bx lr
 		*(u32*)0x0200D344 = 0xE1A00000; // nop
-		*(u32*)0x02049F68 = 0xE1A00000; // nop
-		tonccpy((u32*)0x0204AAEC, dsiSaveGetResultCode, 0xC);
-		*(u32*)0x0204DC94 = 0xE1A00000; // nop
-		patchInitDSiWare(0x02055548, heapEnd);
-		patchUserSettingsReadDSiWare(0x02056A24);
+		if (romTid[3] != 'J') {
+			*(u32*)0x02049F68 = 0xE1A00000; // nop
+			tonccpy((u32*)0x0204AAEC, dsiSaveGetResultCode, 0xC);
+			*(u32*)0x0204DC94 = 0xE1A00000; // nop
+			patchInitDSiWare(0x02055548, heapEnd);
+			patchUserSettingsReadDSiWare(0x02056A24);
+		} else {
+			*(u32*)0x02049D70 = 0xE1A00000; // nop
+			tonccpy((u32*)0x0204A8E8, dsiSaveGetResultCode, 0xC);
+			*(u32*)0x0204DA90 = 0xE1A00000; // nop
+			patchInitDSiWare(0x02055328, heapEnd);
+			patchUserSettingsReadDSiWare(0x020567F4);
+		}
 
 		// Manual screen
 		/* *(u32*)0x0200CB0C = 0xE1A00000; // nop
