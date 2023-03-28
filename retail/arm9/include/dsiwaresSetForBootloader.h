@@ -474,6 +474,7 @@ static const char dsiWareForBootloader2[][4] = {
 	"K72", // True Swing Golf Express
 	"KTI", // Turn: The Lost Artifact
 	"KUB", // Ubongo
+	"KKM", // Uchi Makure!: Touch the Chameleon
 	"K6P", // Unou to Sanougaren Sasuru: Uranoura
 	"KVT", // VT Tennis
 	"KK4", // Wakugumi: Monochrome Puzzle

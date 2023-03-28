@@ -13297,6 +13297,22 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0202193C, (u32)dsiSaveClose);
 	}
 
+	// Uchi Makure!: Touch the Chameleon (Japan)
+	else if (strcmp(romTid, "KKMJ") == 0 && saveOnFlashcard) {
+		setBL(0x0203FB98, (u32)dsiSaveOpen);
+		setBL(0x0203FBB0, (u32)dsiSaveGetLength);
+		setBL(0x0203FBDC, (u32)dsiSaveRead);
+		setBL(0x0203FBE4, (u32)dsiSaveClose);
+		setBL(0x0203FC20, (u32)dsiSaveCreate);
+		setBL(0x0203FC30, (u32)dsiSaveOpen);
+		setBL(0x0203FC40, (u32)dsiSaveGetResultCode);
+		setBL(0x0203FC64, (u32)dsiSaveSetLength);
+		setBL(0x0203FC74, (u32)dsiSaveWrite);
+		setBL(0x0203FC7C, (u32)dsiSaveClose);
+		*(u32*)0x0203FD08 = 0xE3A00001; // mov r0, #1 (dsiSaveOpenDir)
+		*(u32*)0x0203FD20 = 0xE1A00000; // nop (dsiSaveCloseDir)
+	}
+
 	// Unou to Sanougaren Sasuru: Uranoura (Japan)
 	// Unable to save data
 	else if (strcmp(romTid, "K6PJ") == 0) {

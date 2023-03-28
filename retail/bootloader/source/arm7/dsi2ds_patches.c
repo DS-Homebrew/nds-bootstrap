@@ -22283,11 +22283,13 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		doubleNopT(0x0202178E);
 		*(u32*)0x0203D054 = 0xE1A00000; // nop
 		*(u32*)0x02040E9C = 0xE1A00000; // nop
-		*(u32*)0x0204E074 = 0xE3A00001; // mov r0, #1
-		*(u32*)0x0204E078 = 0xE12FFF1E; // bx lr
 		*(u32*)0x0204F538 = 0xE1A00000; // nop
 		*(u32*)0x0204F578 = 0xE1A00000; // nop
 		patchInitDSiWare(0x02061D98, heapEnd);
+		*(u32*)0x02064998 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0206499C = 0xE12FFF1E; // bx lr
+		*(u32*)0x020649AC = 0xE3A00000; // mov r0, #0
+		*(u32*)0x020649B0 = 0xE12FFF1E; // bx lr
 	}
 
 	// Ubongo (Europe)
@@ -22328,11 +22330,38 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		doubleNopT(0x02021A4E);
 		*(u32*)0x0203D314 = 0xE1A00000; // nop
 		*(u32*)0x0204115C = 0xE1A00000; // nop
-		*(u32*)0x0204E334 = 0xE3A00001; // mov r0, #1
-		*(u32*)0x0204E338 = 0xE12FFF1E; // bx lr
 		*(u32*)0x0204F7F8 = 0xE1A00000; // nop
 		*(u32*)0x0204F838 = 0xE1A00000; // nop
 		patchInitDSiWare(0x02062058, heapEnd);
+		*(u32*)0x02064C58 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02064C5C = 0xE12FFF1E; // bx lr
+		*(u32*)0x02064C6C = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02064C70 = 0xE12FFF1E; // bx lr
+	}
+
+	// Uchi Makure!: Touch the Chameleon (Japan)
+	else if (strcmp(romTid, "KKMJ") == 0) {
+		useSharedFont = (twlFontFound && debugOrMep);
+		*(u32*)0x0200E5F8 = 0xE1A00000; // nop
+		*(u32*)0x02012258 = 0xE1A00000; // nop
+		patchInitDSiWare(0x0201A410, heapEnd);
+		patchUserSettingsReadDSiWare(0x0201BAE8);
+		if (useSharedFont && !extendedMemory2) {
+			patchTwlFontLoad(0x0203AAD0, 0x0201C068);
+		}
+		setBL(0x0203FB98, (u32)dsiSaveOpen);
+		setBL(0x0203FBB0, (u32)dsiSaveGetLength);
+		setBL(0x0203FBDC, (u32)dsiSaveRead);
+		setBL(0x0203FBE4, (u32)dsiSaveClose);
+		setBL(0x0203FC20, (u32)dsiSaveCreate);
+		setBL(0x0203FC30, (u32)dsiSaveOpen);
+		setBL(0x0203FC40, (u32)dsiSaveGetResultCode);
+		*(u32*)0x0203FC4C = 0xE1A00000; // nop
+		setBL(0x0203FC64, (u32)dsiSaveSetLength);
+		setBL(0x0203FC74, (u32)dsiSaveWrite);
+		setBL(0x0203FC7C, (u32)dsiSaveClose);
+		*(u32*)0x0203FD08 = 0xE3A00001; // mov r0, #1 (dsiSaveOpenDir)
+		*(u32*)0x0203FD20 = 0xE1A00000; // nop (dsiSaveCloseDir)
 	}
 
 	// Unou to Sanougaren Sasuru: Uranoura (Japan)
