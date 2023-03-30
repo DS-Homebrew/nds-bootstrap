@@ -494,6 +494,7 @@ static const char dsiWareForBootloader2[][4] = {
 	"KYU", // Yummy Yummy Cooking Jam
 	"KZX", // Za Curosu
 	"KAS", // Art Style: ZENGAGE
+	"KKH", // Zimo: Mahjong Fanatic
 	"K7K", // Zombie Blaster
 	"KZY", // Zombie Skape
 	"KZS", // Zoonies: Escape from Makatu

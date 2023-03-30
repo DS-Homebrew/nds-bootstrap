@@ -13890,6 +13890,46 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0200EF44, (u32)dsiSaveClose);
 	}
 
+	// Zimo: Mahjong Fanatic (USA)
+	// Zimo: Mahjong Puzzle (Japan)
+	else if ((strcmp(romTid, "KKHE") == 0 || strcmp(romTid, "KKHJ") == 0) && saveOnFlashcard) {
+		tonccpy((u32*)0x02012F58, dsiSaveGetResultCode, 0xC);
+		if (romTid[3] == 'E') {
+			setBL(0x02026BC8, (u32)dsiSaveOpen);
+			setBL(0x02026BE0, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+			setBL(0x02026BF8, (u32)dsiSaveOpen);
+			setBL(0x02026C18, (u32)dsiSaveWrite);
+			setBL(0x02026C28, (u32)dsiSaveClose);
+			setBL(0x02026C38, (u32)dsiSaveClose);
+			setBL(0x02026C78, (u32)dsiSaveOpen);
+			setBL(0x02026C9C, (u32)dsiSaveRead);
+			setBL(0x02026CAC, (u32)dsiSaveClose);
+			setBL(0x02026CBC, (u32)dsiSaveClose);
+			setBL(0x02026D9C, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+			setBL(0x02026DAC, (u32)dsiSaveOpen);
+			setBL(0x02026DD8, (u32)dsiSaveClose);
+			setBL(0x02026E10, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+			setBL(0x02026E20, (u32)dsiSaveOpen);
+			setBL(0x02026E4C, (u32)dsiSaveClose);
+		} else {
+			setBL(0x02030918, (u32)dsiSaveOpen);
+			setBL(0x02030930, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+			setBL(0x02030948, (u32)dsiSaveOpen);
+			setBL(0x02030968, (u32)dsiSaveWrite);
+			setBL(0x02030978, (u32)dsiSaveClose);
+			setBL(0x02030988, (u32)dsiSaveClose);
+			setBL(0x020309C8, (u32)dsiSaveOpen);
+			setBL(0x020309EC, (u32)dsiSaveRead);
+			setBL(0x020309FC, (u32)dsiSaveClose);
+			setBL(0x02030A0C, (u32)dsiSaveClose);
+			setBL(0x02030AEC, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+			setBL(0x02030AFC, (u32)dsiSaveOpen);
+			setBL(0x02030B28, (u32)dsiSaveClose);
+			setBL(0x02030B60, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+			setBL(0x02030B70, (u32)dsiSaveOpen);
+			setBL(0x02030B9C, (u32)dsiSaveClose);
+		}
+	}
 
 	// Zombie Blaster (USA)
 	else if (strcmp(romTid, "K7KE") == 0 && saveOnFlashcard) {

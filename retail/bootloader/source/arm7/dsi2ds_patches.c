@@ -23297,6 +23297,55 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchUserSettingsReadDSiWare(0x02042D50);
 	}
 
+	// Zimo: Mahjong Fanatic (USA)
+	// Zimo: Mahjong Puzzle (Japan)
+	else if (strcmp(romTid, "KKHE") == 0 || strcmp(romTid, "KKHJ") == 0) {
+		*(u32*)0x020123D4 = 0xE1A00000; // nop
+		tonccpy((u32*)0x02012F58, dsiSaveGetResultCode, 0xC);
+		*(u32*)0x020161A0 = 0xE1A00000; // nop
+		patchInitDSiWare(0x0201BD98, heapEnd);
+		patchUserSettingsReadDSiWare(0x0201D3EC);
+		if (romTid[3] == 'E') {
+			*(u32*)0x020226BC = 0xE1A00000; // nop
+			*(u32*)0x020226D4 = 0xE1A00000; // nop
+			setBL(0x02026BC8, (u32)dsiSaveOpen);
+			setBL(0x02026BE0, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+			setBL(0x02026BF8, (u32)dsiSaveOpen);
+			setBL(0x02026C18, (u32)dsiSaveWrite);
+			setBL(0x02026C28, (u32)dsiSaveClose);
+			setBL(0x02026C38, (u32)dsiSaveClose);
+			setBL(0x02026C78, (u32)dsiSaveOpen);
+			setBL(0x02026C9C, (u32)dsiSaveRead);
+			setBL(0x02026CAC, (u32)dsiSaveClose);
+			setBL(0x02026CBC, (u32)dsiSaveClose);
+			setBL(0x02026D9C, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+			setBL(0x02026DAC, (u32)dsiSaveOpen);
+			setBL(0x02026DD8, (u32)dsiSaveClose);
+			setBL(0x02026E10, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+			setBL(0x02026E20, (u32)dsiSaveOpen);
+			setBL(0x02026E4C, (u32)dsiSaveClose);
+		} else {
+			*(u32*)0x0202C40C = 0xE1A00000; // nop
+			*(u32*)0x0202C424 = 0xE1A00000; // nop
+			setBL(0x02030918, (u32)dsiSaveOpen);
+			setBL(0x02030930, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+			setBL(0x02030948, (u32)dsiSaveOpen);
+			setBL(0x02030968, (u32)dsiSaveWrite);
+			setBL(0x02030978, (u32)dsiSaveClose);
+			setBL(0x02030988, (u32)dsiSaveClose);
+			setBL(0x020309C8, (u32)dsiSaveOpen);
+			setBL(0x020309EC, (u32)dsiSaveRead);
+			setBL(0x020309FC, (u32)dsiSaveClose);
+			setBL(0x02030A0C, (u32)dsiSaveClose);
+			setBL(0x02030AEC, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+			setBL(0x02030AFC, (u32)dsiSaveOpen);
+			setBL(0x02030B28, (u32)dsiSaveClose);
+			setBL(0x02030B60, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+			setBL(0x02030B70, (u32)dsiSaveOpen);
+			setBL(0x02030B9C, (u32)dsiSaveClose);
+		}
+	}
+
 	// Zombie Blaster (USA)
 	else if (strcmp(romTid, "K7KE") == 0) {
 		useSharedFont = (twlFontFound && debugOrMep);
