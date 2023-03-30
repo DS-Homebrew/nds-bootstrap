@@ -13760,6 +13760,54 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// Working Dawgs: A-maze-ing Pipes (USA)
+	else if (strcmp(romTid, "KYWE") == 0) {
+		if (saveOnFlashcard) {
+			tonccpy((u32*)0x0200E6A0, dsiSaveGetResultCode, 0xC);
+			setBL(0x02031D38, (u32)dsiSaveCreate);
+			setBL(0x02031D54, (u32)dsiSaveOpen);
+			setBL(0x02031D68, (u32)dsiSaveSetLength);
+			setBL(0x02031D94, (u32)dsiSaveClose);
+			setBL(0x02031E44, (u32)dsiSaveDelete);
+			*(u32*)0x02031E8C = 0xE1A00000; // nop
+			setBL(0x02031EF0, (u32)dsiSaveOpen);
+			setBL(0x02031F08, (u32)dsiSaveSeek);
+			setBL(0x02031F1C, (u32)dsiSaveRead);
+			setBL(0x02031F2C, (u32)dsiSaveClose);
+			setBL(0x02032018, (u32)dsiSaveOpen);
+			setBL(0x02032030, (u32)dsiSaveSeek);
+			setBL(0x02032044, (u32)dsiSaveWrite);
+			setBL(0x02032054, (u32)dsiSaveClose);
+		}
+		if (!twlFontFound) {
+			*(u32*)0x02032BE8 = 0xE12FFF1E; // bx lr (Disable NFTR loading from TWLNAND)
+		}
+	}
+
+	// Working Dawgs: Rivet Retriever (USA)
+	else if (strcmp(romTid, "KU3E") == 0) {
+		if (!twlFontFound) {
+			*(u32*)0x020055A0 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		}
+		if (saveOnFlashcard) {
+			tonccpy((u32*)0x0200E8E4, dsiSaveGetResultCode, 0xC);
+			setBL(0x02031FDC, (u32)dsiSaveCreate);
+			setBL(0x02031FF8, (u32)dsiSaveOpen);
+			setBL(0x0203200C, (u32)dsiSaveSetLength);
+			setBL(0x02032038, (u32)dsiSaveClose);
+			setBL(0x020320E4, (u32)dsiSaveDelete);
+			*(u32*)0x0203212C = 0xE1A00000; // nop
+			setBL(0x02032190, (u32)dsiSaveOpen);
+			setBL(0x020321A8, (u32)dsiSaveSeek);
+			setBL(0x020321B8, (u32)dsiSaveRead);
+			setBL(0x020321C8, (u32)dsiSaveClose);
+			setBL(0x020322AC, (u32)dsiSaveOpen);
+			setBL(0x020322C4, (u32)dsiSaveSeek);
+			setBL(0x020322D4, (u32)dsiSaveWrite);
+			setBL(0x020322E4, (u32)dsiSaveClose);
+		}
+	}
+
 	// X-Scape (USA)
 	// 3D Space Tank (Europe, Australia)
 	// X-Returns (Japan)

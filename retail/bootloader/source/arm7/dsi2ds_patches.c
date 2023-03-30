@@ -23060,6 +23060,68 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02079C48 = 0xE12FFF1E; // bx lr (Disable NFTR loading from TWLNAND)
 	}
 
+	// Working Dawgs: A-maze-ing Pipes (USA)
+	else if (strcmp(romTid, "KYWE") == 0) {
+		useSharedFont = (twlFontFound && debugOrMep);
+		*(u32*)0x0200DB1C = 0xE1A00000; // nop
+		tonccpy((u32*)0x0200E6A0, dsiSaveGetResultCode, 0xC);
+		*(u32*)0x020110BC = 0xE1A00000; // nop
+		patchInitDSiWare(0x02017830, heapEnd);
+		setBL(0x02031D38, (u32)dsiSaveCreate);
+		setBL(0x02031D54, (u32)dsiSaveOpen);
+		setBL(0x02031D68, (u32)dsiSaveSetLength);
+		setBL(0x02031D94, (u32)dsiSaveClose);
+		setBL(0x02031E44, (u32)dsiSaveDelete);
+		*(u32*)0x02031E8C = 0xE1A00000; // nop
+		setBL(0x02031EF0, (u32)dsiSaveOpen);
+		setBL(0x02031F08, (u32)dsiSaveSeek);
+		setBL(0x02031F1C, (u32)dsiSaveRead);
+		setBL(0x02031F2C, (u32)dsiSaveClose);
+		*(u32*)0x02031FF0 = 0xE1A00000; // nop
+		setBL(0x02032018, (u32)dsiSaveOpen);
+		setBL(0x02032030, (u32)dsiSaveSeek);
+		setBL(0x02032044, (u32)dsiSaveWrite);
+		setBL(0x02032054, (u32)dsiSaveClose);
+		if (useSharedFont) {
+			if (!extendedMemory2) {
+				patchTwlFontLoad(0x02032D6C, 0x02019190);
+			}
+		} else {
+			*(u32*)0x02032BE8 = 0xE12FFF1E; // bx lr (Disable NFTR loading from TWLNAND)
+		}
+	}
+
+	// Working Dawgs: Rivet Retriever (USA)
+	else if (strcmp(romTid, "KU3E") == 0) {
+		useSharedFont = (twlFontFound && debugOrMep);
+		if (useSharedFont) {
+			if (!extendedMemory2) {
+				patchTwlFontLoad(0x02033018, 0x020194B0);
+			}
+		} else {
+			*(u32*)0x020055A0 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		}
+		*(u32*)0x0200DD60 = 0xE1A00000; // nop
+		tonccpy((u32*)0x0200E8E4, dsiSaveGetResultCode, 0xC);
+		*(u32*)0x02011300 = 0xE1A00000; // nop
+		patchInitDSiWare(0x02017ACC, heapEnd);
+		patchUserSettingsReadDSiWare(0x02018F6C);
+		setBL(0x02031FDC, (u32)dsiSaveCreate);
+		setBL(0x02031FF8, (u32)dsiSaveOpen);
+		setBL(0x0203200C, (u32)dsiSaveSetLength);
+		setBL(0x02032038, (u32)dsiSaveClose);
+		setBL(0x020320E4, (u32)dsiSaveDelete);
+		*(u32*)0x0203212C = 0xE1A00000; // nop
+		setBL(0x02032190, (u32)dsiSaveOpen);
+		setBL(0x020321A8, (u32)dsiSaveSeek);
+		setBL(0x020321B8, (u32)dsiSaveRead);
+		setBL(0x020321C8, (u32)dsiSaveClose);
+		setBL(0x020322AC, (u32)dsiSaveOpen);
+		setBL(0x020322C4, (u32)dsiSaveSeek);
+		setBL(0x020322D4, (u32)dsiSaveWrite);
+		setBL(0x020322E4, (u32)dsiSaveClose);
+	}
+
 	// Yummy Yummy Cooking Jam (USA)
 	// Music is disabled
 	else if (strcmp(romTid, "KYUE") == 0) {
