@@ -13746,6 +13746,20 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// WordJong Arcade (USA)
+	// Save patch does not work (only bypasses)
+	else if (strcmp(romTid, "K2AE") == 0) {
+		if (saveOnFlashcard) {
+			*(u32*)0x020294E0 = 0xE3A00000; // mov r0, #0
+			*(u32*)0x0204C4D4 = 0xE12FFF1E; // bx lr
+			*(u32*)0x0204C538 = 0xE12FFF1E; // bx lr
+			*(u32*)0x0204C59C = 0xE12FFF1E; // bx lr
+		}
+		if (!twlFontFound) {
+			*(u32*)0x02079C48 = 0xE12FFF1E; // bx lr (Disable NFTR loading from TWLNAND)
+		}
+	}
+
 	// X-Scape (USA)
 	// 3D Space Tank (Europe, Australia)
 	// X-Returns (Japan)

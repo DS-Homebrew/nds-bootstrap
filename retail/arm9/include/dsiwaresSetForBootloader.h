@@ -487,6 +487,7 @@ static const char dsiWareForBootloader2[][4] = {
 	"KWR", // Word Searcher II
 	"KW6", // Word Searcher III
 	"KW8", // Word Searcher IV
+	"K2A", // WordJong Arcade
 	"KDX", // X-Scape (bootloaderi-exclusive)
 	"KYU", // Yummy Yummy Cooking Jam
 	"KAS", // Art Style: ZENGAGE

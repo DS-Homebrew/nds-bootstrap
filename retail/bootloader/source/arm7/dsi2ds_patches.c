@@ -23045,6 +23045,21 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)(0x0202FCEC-offsetChange) = 0xE1A00000; // nop
 	}
 
+	// WordJong Arcade (USA)
+	// Save patch does not work (only bypasses)
+	else if (strcmp(romTid, "K2AE") == 0) {
+		*(u32*)0x0200D490 = 0xE1A00000; // nop
+		*(u32*)0x02011048 = 0xE1A00000; // nop
+		patchInitDSiWare(0x020165E4, heapEnd);
+		*(u32*)0x02016970 = *(u32*)0x02004FE8;
+		patchUserSettingsReadDSiWare(0x02017D04);
+		*(u32*)0x020294E0 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0204C4D4 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0204C538 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0204C59C = 0xE12FFF1E; // bx lr
+		*(u32*)0x02079C48 = 0xE12FFF1E; // bx lr (Disable NFTR loading from TWLNAND)
+	}
+
 	// Yummy Yummy Cooking Jam (USA)
 	// Music is disabled
 	else if (strcmp(romTid, "KYUE") == 0) {
