@@ -23192,6 +23192,25 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// Za Curuso (Japan)
+	else if (strcmp(romTid, "KZXJ") == 0) {
+		// useSharedFont = (twlFontFound && debugOrMep);
+		*(u32*)0x0200E1F4 = 0xE1A00000; // nop
+		*(u32*)0x020113A4 = 0xE1A00000; // nop
+		patchInitDSiWare(0x02016F88, heapEnd);
+		patchUserSettingsReadDSiWare(0x02018454);
+		*(u32*)0x0202261C = 0xE1A00000; // nop
+		*(u32*)0x02022630 = 0xE1A00000; // nop
+		/* if (useSharedFont) {
+			if (!extendedMemory2) {
+				patchTwlFontLoad(0x02045544, 0x020188F8);
+			}
+		} else { */
+			*(u32*)0x02022634 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+			*(u32*)0x02045754 = 0xE12FFF1E; // bx lr (Show white screens instead of Manual screen)
+		// }
+	}
+
 	// Art Style: ZENGAGE (USA)
 	// Art Style: NEMREM (Europe, Australia)
 	else if (strcmp(romTid, "KASE") == 0 || strcmp(romTid, "KASV") == 0) {
