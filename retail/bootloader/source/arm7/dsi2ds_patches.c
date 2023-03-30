@@ -22842,6 +22842,209 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// Word Searcher (USA)
+	// Requires either 8MB of RAM or Memory Expansion Pak
+	else if (strcmp(romTid, "KWSE") == 0 && debugOrMep) {
+		const u32 mepAddr = (s2FlashcardId == 0x5A45) ? 0x08800000 : 0x09000000;
+
+		useSharedFont = (twlFontFound && extendedMemory2);
+		if (!useSharedFont) {
+			*(u32*)0x020050D4 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		}
+		setBL(0x020060FC, (u32)dsiSaveOpen);
+		setBL(0x0200610C, (u32)dsiSaveClose);
+		setBL(0x02006120, (u32)dsiSaveCreate);
+		setBL(0x02006130, (u32)dsiSaveOpen);
+		setBL(0x02006140, (u32)dsiSaveGetResultCode);
+		setBL(0x02006148, (u32)dsiSaveClose);
+		setBL(0x02008748, (u32)dsiSaveOpen);
+		setBL(0x02008758, (u32)dsiSaveClose);
+		setBL(0x0200899C, (u32)dsiSaveWrite);
+		setBL(0x020089A4, (u32)dsiSaveClose);
+		setBL(0x02008A7C, (u32)dsiSaveOpen);
+		*(u32*)0x02008A98 = 0xE1A00000; // nop
+		setBL(0x02008AB4, (u32)dsiSaveGetLength);
+		setBL(0x02008AC8, (u32)dsiSaveClose);
+		setBL(0x02008AE8, (u32)dsiSaveRead);
+		setBL(0x02008AF0, (u32)dsiSaveClose);
+		setBL(0x02008B04, (u32)dsiSaveDelete);
+		setBL(0x0200B900, (u32)dsiSaveOpen);
+		*(u32*)0x0200B91C = 0xE1A00000; // nop
+		setBL(0x0200B938, (u32)dsiSaveGetLength);
+		setBL(0x0200B94C, (u32)dsiSaveClose);
+		setBL(0x0200B964, (u32)dsiSaveRead);
+		setBL(0x0200B96C, (u32)dsiSaveClose);
+		setBL(0x0200B980, (u32)dsiSaveDelete);
+		*(u32*)0x02023070 = 0xE1A00000; // nop
+		*(u32*)0x02026400 = 0xE1A00000; // nop
+		patchInitDSiWare(0x0202B1F4, extendedMemory2 ? heapEnd : mepAddr+0x77C000);
+		if (!extendedMemory2) {
+			*(u32*)0x0202B564 = mepAddr;
+		}
+		patchUserSettingsReadDSiWare(0x0202C698);
+		*(u32*)0x0202CAC8 = 0xE1A00000; // nop
+		*(u32*)0x0202CACC = 0xE1A00000; // nop
+		*(u32*)0x0202CAD0 = 0xE1A00000; // nop
+		*(u32*)0x0202CAD4 = 0xE1A00000; // nop
+	}
+
+	// Word Searcher (Europe)
+	// Requires either 8MB of RAM or Memory Expansion Pak
+	else if (strcmp(romTid, "KWSP") == 0 && debugOrMep) {
+		const u32 mepAddr = (s2FlashcardId == 0x5A45) ? 0x08800000 : 0x09000000;
+
+		useSharedFont = (twlFontFound && extendedMemory2);
+		if (!useSharedFont) {
+			*(u32*)0x020050D4 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		}
+		*(u32*)0x020050E8 = 0xE1A00000; // nop
+		*(u32*)0x020050FC = 0xE1A00000; // nop
+		setBL(0x020056AC, (u32)dsiSaveOpen);
+		setBL(0x020056BC, (u32)dsiSaveClose);
+		setBL(0x020056D0, (u32)dsiSaveCreate);
+		setBL(0x020056E0, (u32)dsiSaveOpen);
+		setBL(0x020056F0, (u32)dsiSaveGetResultCode);
+		setBL(0x020056F8, (u32)dsiSaveClose);
+		setBL(0x020081C0, (u32)dsiSaveOpen);
+		setBL(0x020081D0, (u32)dsiSaveClose);
+		setBL(0x02008414, (u32)dsiSaveWrite);
+		setBL(0x0200841C, (u32)dsiSaveClose);
+		setBL(0x020084F4, (u32)dsiSaveOpen);
+		*(u32*)0x02008510 = 0xE1A00000; // nop
+		setBL(0x0200852C, (u32)dsiSaveGetLength);
+		setBL(0x02008540, (u32)dsiSaveClose);
+		setBL(0x02008560, (u32)dsiSaveRead);
+		setBL(0x02008568, (u32)dsiSaveClose);
+		setBL(0x0200857C, (u32)dsiSaveDelete);
+		setBL(0x0200B55C, (u32)dsiSaveOpen);
+		*(u32*)0x0200B578 = 0xE1A00000; // nop
+		setBL(0x0200B594, (u32)dsiSaveGetLength);
+		setBL(0x0200B5A8, (u32)dsiSaveClose);
+		setBL(0x0200B5C0, (u32)dsiSaveRead);
+		setBL(0x0200B5C8, (u32)dsiSaveClose);
+		setBL(0x0200B5DC, (u32)dsiSaveDelete);
+		if (!extendedMemory2) {
+			*(u32*)0x020119EC = 0xE3A0078A; // mov r0, #0x02280000
+		}
+		*(u32*)0x0202537C = 0xE1A00000; // nop
+		*(u32*)0x020285C0 = 0xE1A00000; // nop
+		patchInitDSiWare(0x0202D114, extendedMemory2 ? heapEnd : mepAddr+0x77C000);
+		if (!extendedMemory2) {
+			*(u32*)0x0202D4A0 = mepAddr;
+		}
+		patchUserSettingsReadDSiWare(0x0202E6C0);
+		*(u32*)0x0202EAC8 = 0xE1A00000; // nop
+		*(u32*)0x0202EACC = 0xE1A00000; // nop
+		*(u32*)0x0202EAD0 = 0xE1A00000; // nop
+		*(u32*)0x0202EAD4 = 0xE1A00000; // nop
+	}
+
+	// Word Searcher II (USA)
+	// Requires either 8MB of RAM or Memory Expansion Pak
+	else if (strcmp(romTid, "KWRE") == 0 && debugOrMep) {
+		const u32 mepAddr = (s2FlashcardId == 0x5A45) ? 0x08800000 : 0x09000000;
+
+		useSharedFont = (twlFontFound && extendedMemory2);
+		if (!useSharedFont) {
+			*(u32*)0x020050D4 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		}
+		*(u32*)0x020050E8 = 0xE1A00000; // nop
+		*(u32*)0x020050FC = 0xE1A00000; // nop
+		setBL(0x02005AF4, (u32)dsiSaveOpen);
+		setBL(0x02005B04, (u32)dsiSaveClose);
+		setBL(0x02005B18, (u32)dsiSaveCreate);
+		setBL(0x02005B28, (u32)dsiSaveOpen);
+		setBL(0x02005B38, (u32)dsiSaveGetResultCode);
+		setBL(0x02005B48, (u32)dsiSaveClose);
+		*(u32*)0x02005A08 = 0xE1A00000; // nop
+		setBL(0x02005A20, (u32)dsiSaveOpen);
+		*(u32*)0x02005A3C = 0xE1A00000; // nop
+		*(u32*)0x02005A48 = 0xE1A00000; // nop
+		setBL(0x02005A64, (u32)dsiSaveWrite);
+		setBL(0x02005A6C, (u32)dsiSaveClose);
+		*(u32*)0x02005A80 = 0xE1A00000; // nop
+		*(u32*)0x02005A8C = 0xE1A00000; // nop
+		setBL(0x02007DD4, (u32)dsiSaveOpen);
+		setBL(0x02007E10, (u32)dsiSaveGetLength);
+		setBL(0x02007E24, (u32)dsiSaveClose);
+		setBL(0x02007E44, (u32)dsiSaveRead);
+		setBL(0x02007E4C, (u32)dsiSaveClose);
+		*(u32*)0x0200AA9C = 0xE1A00000; // nop
+		setBL(0x0200AF80, (u32)dsiSaveOpen);
+		setBL(0x0200AFAC, (u32)dsiSaveGetLength);
+		setBL(0x0200AFC0, (u32)dsiSaveClose);
+		setBL(0x0200AFDC, (u32)dsiSaveRead);
+		setBL(0x0200AFE4, (u32)dsiSaveClose);
+		if (!extendedMemory2) {
+			*(u32*)0x02012BA8 = 0xE3A0078A; // mov r0, #0x02280000
+		}
+		*(u32*)0x02026668 = 0xE1A00000; // nop
+		*(u32*)0x02029840 = 0xE1A00000; // nop
+		patchInitDSiWare(0x0202E394, extendedMemory2 ? heapEnd : mepAddr+0x77C000);
+		if (!extendedMemory2) {
+			*(u32*)0x0202E720 = mepAddr;
+		}
+		patchUserSettingsReadDSiWare(0x0202F940);
+		*(u32*)0x0202FD48 = 0xE1A00000; // nop
+		*(u32*)0x0202FD4C = 0xE1A00000; // nop
+		*(u32*)0x0202FD50 = 0xE1A00000; // nop
+		*(u32*)0x0202FD54 = 0xE1A00000; // nop
+	}
+
+	// Word Searcher III (USA)
+	// Word Searcher IV (USA)
+	// Requires either 8MB of RAM or Memory Expansion Pak
+	else if ((strcmp(romTid, "KW6E") == 0 || strcmp(romTid, "KW8E") == 0) && debugOrMep) {
+		const u32 mepAddr = (s2FlashcardId == 0x5A45) ? 0x08800000 : 0x09000000;
+		u8 offsetChange = (romTid[2] == '6') ? 0 : 8;
+
+		useSharedFont = (twlFontFound && extendedMemory2);
+		if (!useSharedFont) {
+			*(u32*)0x020050D4 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		}
+		*(u32*)0x020050E8 = 0xE1A00000; // nop
+		*(u32*)0x020050FC = 0xE1A00000; // nop
+		setBL(0x02005B1C, (u32)dsiSaveOpen);
+		setBL(0x02005B2C, (u32)dsiSaveClose);
+		setBL(0x02005B40, (u32)dsiSaveCreate);
+		setBL(0x02005B50, (u32)dsiSaveOpen);
+		setBL(0x02005B60, (u32)dsiSaveGetResultCode);
+		setBL(0x02005B70, (u32)dsiSaveClose);
+		*(u32*)0x02005A30 = 0xE1A00000; // nop
+		setBL(0x02005A48, (u32)dsiSaveOpen);
+		*(u32*)0x02005A64 = 0xE1A00000; // nop
+		*(u32*)0x02005A70 = 0xE1A00000; // nop
+		setBL(0x02005A8C, (u32)dsiSaveWrite);
+		setBL(0x02005A94, (u32)dsiSaveClose);
+		*(u32*)0x02005AA8 = 0xE1A00000; // nop
+		*(u32*)0x02005AB4 = 0xE1A00000; // nop
+		setBL(0x02007D70, (u32)dsiSaveOpen);
+		setBL(0x02007DAC, (u32)dsiSaveGetLength);
+		setBL(0x02007DC0, (u32)dsiSaveClose);
+		setBL(0x02007DE0, (u32)dsiSaveRead);
+		setBL(0x02007DE8, (u32)dsiSaveClose);
+		*(u32*)0x0200AA38 = 0xE1A00000; // nop
+		setBL(0x0200AF1C, (u32)dsiSaveOpen);
+		setBL(0x0200AF48, (u32)dsiSaveGetLength);
+		setBL(0x0200AF5C, (u32)dsiSaveClose);
+		setBL(0x0200AF78, (u32)dsiSaveRead);
+		setBL(0x0200AF80, (u32)dsiSaveClose);
+		if (!extendedMemory2) {
+			*(u32*)(0x02012B40-offsetChange) = 0xE3A0078A; // mov r0, #0x02280000
+		}
+		*(u32*)(0x02026600-offsetChange) = 0xE1A00000; // nop
+		*(u32*)(0x020297D8-offsetChange) = 0xE1A00000; // nop
+		patchInitDSiWare(0x0202E32C-offsetChange, extendedMemory2 ? heapEnd : mepAddr+0x77C000);
+		if (!extendedMemory2) {
+			*(u32*)(0x0202E6B8-offsetChange) = mepAddr;
+		}
+		patchUserSettingsReadDSiWare(0x0202F8D8-offsetChange);
+		*(u32*)(0x0202FCE0-offsetChange) = 0xE1A00000; // nop
+		*(u32*)(0x0202FCE4-offsetChange) = 0xE1A00000; // nop
+		*(u32*)(0x0202FCE8-offsetChange) = 0xE1A00000; // nop
+		*(u32*)(0x0202FCEC-offsetChange) = 0xE1A00000; // nop
+	}
+
 	// Yummy Yummy Cooking Jam (USA)
 	// Music is disabled
 	else if (strcmp(romTid, "KYUE") == 0) {

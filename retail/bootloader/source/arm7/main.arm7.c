@@ -586,7 +586,11 @@ static bool isROMLoadableInRAM(const tNDSHeader* ndsHeader, const char* romTid, 
 			romSizeLimit -= 0x1F0000;
 		} else if (strncmp(romTid, "KCT", 3) == 0 // Chess Challenge!
 				 || strncmp(romTid, "KWK", 3) == 0 // Mega Words
-				 || strncmp(romTid, "KSC", 3) == 0) { // Sudoku Challenge!
+				 || strncmp(romTid, "KSC", 3) == 0 // Sudoku Challenge!
+				 || strncmp(romTid, "KWS", 3) == 0 // Word Searcher
+				 || strncmp(romTid, "KWR", 3) == 0 // Word Searcher II
+				 || strncmp(romTid, "KW6", 3) == 0 // Word Searcher III
+				 || strncmp(romTid, "KW8", 3) == 0) { // Word Searcher IV
 			romLocation += 0x77C000;
 			romSizeLimit -= 0x77C000;
 		} else if (strncmp(romTid, "KUP", 3) == 0) { // Match Up!

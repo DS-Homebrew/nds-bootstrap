@@ -483,6 +483,10 @@ static const char dsiWareForBootloader2[][4] = {
 	"KWQ", // Whack-A-Friend
 	"KDW", // White-Water Domo
 	"KBS", // Wonderful Sports: Bowling
+	"KWS", // Word Searcher
+	"KWR", // Word Searcher II
+	"KW6", // Word Searcher III
+	"KW8", // Word Searcher IV
 	"KDX", // X-Scape (bootloaderi-exclusive)
 	"KYU", // Yummy Yummy Cooking Jam
 	"KAS", // Art Style: ZENGAGE

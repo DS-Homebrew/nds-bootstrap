@@ -13627,6 +13627,125 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// Word Searcher (USA)
+	else if (strcmp(romTid, "KWSE") == 0) {
+		if (!twlFontFound) {
+			*(u32*)0x020050D4 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		}
+		if (saveOnFlashcard) {
+			setBL(0x020060FC, (u32)dsiSaveOpen);
+			setBL(0x0200610C, (u32)dsiSaveClose);
+			setBL(0x02006120, (u32)dsiSaveCreate);
+			setBL(0x02006130, (u32)dsiSaveOpen);
+			setBL(0x02006140, (u32)dsiSaveGetResultCode);
+			setBL(0x02006148, (u32)dsiSaveClose);
+			setBL(0x02008748, (u32)dsiSaveOpen);
+			setBL(0x02008758, (u32)dsiSaveClose);
+			setBL(0x0200899C, (u32)dsiSaveWrite);
+			setBL(0x020089A4, (u32)dsiSaveClose);
+			setBL(0x02008A7C, (u32)dsiSaveOpen);
+			setBL(0x02008AB4, (u32)dsiSaveGetLength);
+			setBL(0x02008AC8, (u32)dsiSaveClose);
+			setBL(0x02008AE8, (u32)dsiSaveRead);
+			setBL(0x02008AF0, (u32)dsiSaveClose);
+			setBL(0x02008B04, (u32)dsiSaveDelete);
+			setBL(0x0200B900, (u32)dsiSaveOpen);
+			setBL(0x0200B938, (u32)dsiSaveGetLength);
+			setBL(0x0200B94C, (u32)dsiSaveClose);
+			setBL(0x0200B964, (u32)dsiSaveRead);
+			setBL(0x0200B96C, (u32)dsiSaveClose);
+			setBL(0x0200B980, (u32)dsiSaveDelete);
+		}
+	}
+
+	// Word Searcher (Europe)
+	else if (strcmp(romTid, "KWSP") == 0) {
+		if (!twlFontFound) {
+			*(u32*)0x020050D4 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		}
+		if (saveOnFlashcard) {
+			setBL(0x020056AC, (u32)dsiSaveOpen);
+			setBL(0x020056BC, (u32)dsiSaveClose);
+			setBL(0x020056D0, (u32)dsiSaveCreate);
+			setBL(0x020056E0, (u32)dsiSaveOpen);
+			setBL(0x020056F0, (u32)dsiSaveGetResultCode);
+			setBL(0x020056F8, (u32)dsiSaveClose);
+			setBL(0x020081C0, (u32)dsiSaveOpen);
+			setBL(0x020081D0, (u32)dsiSaveClose);
+			setBL(0x02008414, (u32)dsiSaveWrite);
+			setBL(0x0200841C, (u32)dsiSaveClose);
+			setBL(0x020084F4, (u32)dsiSaveOpen);
+			setBL(0x0200852C, (u32)dsiSaveGetLength);
+			setBL(0x02008540, (u32)dsiSaveClose);
+			setBL(0x02008560, (u32)dsiSaveRead);
+			setBL(0x02008568, (u32)dsiSaveClose);
+			setBL(0x0200857C, (u32)dsiSaveDelete);
+			setBL(0x0200B55C, (u32)dsiSaveOpen);
+			setBL(0x0200B594, (u32)dsiSaveGetLength);
+			setBL(0x0200B5A8, (u32)dsiSaveClose);
+			setBL(0x0200B5C0, (u32)dsiSaveRead);
+			setBL(0x0200B5C8, (u32)dsiSaveClose);
+			setBL(0x0200B5DC, (u32)dsiSaveDelete);
+		}
+	}
+
+	// Word Searcher II (USA)
+	else if (strcmp(romTid, "KWRE") == 0) {
+		if (!twlFontFound) {
+			*(u32*)0x020050D4 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		}
+		if (saveOnFlashcard) {
+			setBL(0x02005AF4, (u32)dsiSaveOpen);
+			setBL(0x02005B04, (u32)dsiSaveClose);
+			setBL(0x02005B18, (u32)dsiSaveCreate);
+			setBL(0x02005B28, (u32)dsiSaveOpen);
+			setBL(0x02005B38, (u32)dsiSaveGetResultCode);
+			setBL(0x02005B48, (u32)dsiSaveClose);
+			setBL(0x02005A20, (u32)dsiSaveOpen);
+			setBL(0x02005A64, (u32)dsiSaveWrite);
+			setBL(0x02005A6C, (u32)dsiSaveClose);
+			setBL(0x02007DD4, (u32)dsiSaveOpen);
+			setBL(0x02007E10, (u32)dsiSaveGetLength);
+			setBL(0x02007E24, (u32)dsiSaveClose);
+			setBL(0x02007E44, (u32)dsiSaveRead);
+			setBL(0x02007E4C, (u32)dsiSaveClose);
+			setBL(0x0200AF80, (u32)dsiSaveOpen);
+			setBL(0x0200AFAC, (u32)dsiSaveGetLength);
+			setBL(0x0200AFC0, (u32)dsiSaveClose);
+			setBL(0x0200AFDC, (u32)dsiSaveRead);
+			setBL(0x0200AFE4, (u32)dsiSaveClose);
+		}
+	}
+
+	// Word Searcher III (USA)
+	// Word Searcher IV (USA)
+	else if (strcmp(romTid, "KW6E") == 0 || strcmp(romTid, "KW8E") == 0) {
+		if (!twlFontFound) {
+			*(u32*)0x020050D4 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		}
+		if (saveOnFlashcard) {
+			setBL(0x02005B1C, (u32)dsiSaveOpen);
+			setBL(0x02005B2C, (u32)dsiSaveClose);
+			setBL(0x02005B40, (u32)dsiSaveCreate);
+			setBL(0x02005B50, (u32)dsiSaveOpen);
+			setBL(0x02005B60, (u32)dsiSaveGetResultCode);
+			setBL(0x02005B70, (u32)dsiSaveClose);
+			setBL(0x02005A48, (u32)dsiSaveOpen);
+			setBL(0x02005A8C, (u32)dsiSaveWrite);
+			setBL(0x02005A94, (u32)dsiSaveClose);
+			setBL(0x02007D70, (u32)dsiSaveOpen);
+			setBL(0x02007DAC, (u32)dsiSaveGetLength);
+			setBL(0x02007DC0, (u32)dsiSaveClose);
+			setBL(0x02007DE0, (u32)dsiSaveRead);
+			setBL(0x02007DE8, (u32)dsiSaveClose);
+			setBL(0x0200AF1C, (u32)dsiSaveOpen);
+			setBL(0x0200AF48, (u32)dsiSaveGetLength);
+			setBL(0x0200AF5C, (u32)dsiSaveClose);
+			setBL(0x0200AF78, (u32)dsiSaveRead);
+			setBL(0x0200AF80, (u32)dsiSaveClose);
+		}
+	}
+
 	// X-Scape (USA)
 	// 3D Space Tank (Europe, Australia)
 	// X-Returns (Japan)
