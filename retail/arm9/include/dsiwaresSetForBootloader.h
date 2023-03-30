@@ -492,7 +492,7 @@ static const char dsiWareForBootloader2[][4] = {
 	"KU3", // Working Dawgs: Rivet Retriever
 	"KDX", // X-Scape (bootloaderi-exclusive)
 	"KYU", // Yummy Yummy Cooking Jam
-	"KZX", // Za Curuso
+	"KZX", // Za Curosu
 	"KAS", // Art Style: ZENGAGE
 	"K7K", // Zombie Blaster
 	"KZY", // Zombie Skape
