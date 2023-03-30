@@ -716,7 +716,9 @@ void patchHiHeapPointer(cardengineArm9* ce9, const module_params_t* moduleParams
 	extern u32 apPatchSize;
 	const u32 cheatSizeTotal = cheatSize+(apPatchIsCheat ? apPatchSize : 0);
 
-	if (extendedMemory2
+	const bool nandAccess = (accessControl & BIT(4)); // isDSiWare
+
+	if ((!nandAccess && extendedMemory2)
 	|| moduleParams->sdk_version < 0x2008000
 	|| (ce9Alt && cheatSizeTotal <= 4)
 	|| strncmp(romTid, "VSO", 3) == 0
@@ -753,7 +755,7 @@ void patchHiHeapPointer(cardengineArm9* ce9, const module_params_t* moduleParams
 	} else {
 		*heapPointer = (fatTableAddr < 0x023C0000 || fatTableAddr >= (u32)ce9) ? (u32)ce9 : fatTableAddr; // shrink heap by FAT table size + ce9 binary size
 	}
-	if ((accessControl & BIT(4)) && extendedMemory2) {
+	if (nandAccess && extendedMemory2) {
 		*heapPointer = CARDENGINE_ARM9_LOCATION_DLDI_EXTMEM;
 	}
 
