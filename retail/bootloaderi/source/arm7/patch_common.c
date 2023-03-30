@@ -11521,35 +11521,37 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// The Seller (Europe)
-	else if (strcmp(romTid, "KLLP") == 0) {
+	// The Seller (Japan)
+	else if (strcmp(romTid, "KLLP") == 0 || strcmp(romTid, "KLLJ") == 0) {
 		if (saveOnFlashcard) {
-			setBL(0x0202D2E4, (u32)dsiSaveOpen);
-			setBL(0x0202D2F8, (u32)dsiSaveCreate);
-			setBL(0x0202D308, (u32)dsiSaveOpen);
-			setBL(0x0202D318, (u32)dsiSaveGetResultCode);
-			setBL(0x0202D334, (u32)dsiSaveCreate);
-			setBL(0x0202D344, (u32)dsiSaveOpen);
-			setBL(0x0202D358, (u32)dsiSaveWrite);
-			setBL(0x0202D360, (u32)dsiSaveClose);
-			setBL(0x0202D3C0, (u32)dsiSaveGetInfo);
-			setBL(0x0202D3D4, (u32)dsiSaveOpen);
-			setBL(0x0202D404, (u32)dsiSaveCreate);
-			setBL(0x0202D414, (u32)dsiSaveOpen);
-			setBL(0x0202D424, (u32)dsiSaveGetResultCode);
-			setBL(0x0202D440, (u32)dsiSaveCreate);
-			setBL(0x0202D450, (u32)dsiSaveOpen);
-			setBL(0x0202D460, (u32)dsiSaveWrite);
-			setBL(0x0202D4E4, (u32)dsiSaveSeek);
-			setBL(0x0202D4F4, (u32)dsiSaveWrite);
-			setBL(0x0202D4FC, (u32)dsiSaveClose);
-			setBL(0x0202D544, (u32)dsiSaveOpen);
-			setBL(0x0202D554, (u32)dsiSaveGetResultCode);
-			setBL(0x0202D580, (u32)dsiSaveGetLength);
-			setBL(0x0202D5D0, (u32)dsiSaveRead);
-			setBL(0x0202D630, (u32)dsiSaveClose);
+			u16 offsetChangeS = (romTid[3] == 'P') ? 0 : 0x140;
+			setBL(0x0202D2E4+offsetChangeS, (u32)dsiSaveOpen);
+			setBL(0x0202D2F8+offsetChangeS, (u32)dsiSaveCreate);
+			setBL(0x0202D308+offsetChangeS, (u32)dsiSaveOpen);
+			setBL(0x0202D318+offsetChangeS, (u32)dsiSaveGetResultCode);
+			setBL(0x0202D334+offsetChangeS, (u32)dsiSaveCreate);
+			setBL(0x0202D344+offsetChangeS, (u32)dsiSaveOpen);
+			setBL(0x0202D358+offsetChangeS, (u32)dsiSaveWrite);
+			setBL(0x0202D360+offsetChangeS, (u32)dsiSaveClose);
+			setBL(0x0202D3C0+offsetChangeS, (u32)dsiSaveGetInfo);
+			setBL(0x0202D3D4+offsetChangeS, (u32)dsiSaveOpen);
+			setBL(0x0202D404+offsetChangeS, (u32)dsiSaveCreate);
+			setBL(0x0202D414+offsetChangeS, (u32)dsiSaveOpen);
+			setBL(0x0202D424+offsetChangeS, (u32)dsiSaveGetResultCode);
+			setBL(0x0202D440+offsetChangeS, (u32)dsiSaveCreate);
+			setBL(0x0202D450+offsetChangeS, (u32)dsiSaveOpen);
+			setBL(0x0202D460+offsetChangeS, (u32)dsiSaveWrite);
+			setBL(0x0202D4E4+offsetChangeS, (u32)dsiSaveSeek);
+			setBL(0x0202D4F4+offsetChangeS, (u32)dsiSaveWrite);
+			setBL(0x0202D4FC+offsetChangeS, (u32)dsiSaveClose);
+			setBL(0x0202D544+offsetChangeS, (u32)dsiSaveOpen);
+			setBL(0x0202D554+offsetChangeS, (u32)dsiSaveGetResultCode);
+			setBL(0x0202D580+offsetChangeS, (u32)dsiSaveGetLength);
+			setBL(0x0202D5D0+offsetChangeS, (u32)dsiSaveRead);
+			setBL(0x0202D630+offsetChangeS, (u32)dsiSaveClose);
 		}
 		if (!twlFontFound) {
-			*(u32*)0x02031428 = 0xE1A00000; // nop (Skip Manual screen)
+			*(u32*)((romTid[3] == 'P') ? 0x02031428 : 0x020315C0) = 0xE1A00000; // nop (Skip Manual screen)
 		}
 	}
 
