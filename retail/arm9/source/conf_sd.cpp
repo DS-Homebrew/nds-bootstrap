@@ -223,6 +223,7 @@ static void load_conf(configuration* conf, const char* fn) {
 				if (memcmp(gameTid, asyncReadExcludeList[i], 3) == 0) {
 					// Found match
 					conf->asyncCardRead = false;
+					break;
 				}
 			}
 			conf->asyncCardRead = true;
@@ -288,6 +289,7 @@ static void load_conf(configuration* conf, const char* fn) {
 					// Found match
 					if(dsiFeatures() && conf->dsiMode != 0) conf->dsiMode = 0;
 					conf->boostCpu = false;
+					break;
 				}
 			}
 			conf->boostCpu = true;
