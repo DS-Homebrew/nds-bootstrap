@@ -126,6 +126,7 @@ u32 arm9ibinarySize = 0;
 u32 arm7iromOffset = 0;
 
 bool ce9Alt = false;
+bool ce9AltLargeTable = false;
 static u32 ce9Location = 0;
 static u32 overlaysSize = 0;
 static u32 ioverlaysSize = 0;
@@ -1195,7 +1196,21 @@ int arm7_main(void) {
 			bool startMem = (!ce9Alt && ndsHeader->unitCode > 0 && (u32)ndsHeader->arm9destination >= 0x02004000 && ((accessControl & BIT(4)) || arm7mbk == 0x080037C0) && romFile.fatTableCacheSize <= 0x4000);
 
 			//fatTableAddr -= (romFile.fatTableCacheSize/0x200)*0x200;
-			if (!ce9Alt) {
+			if (ce9Alt) {
+				ce9AltLargeTable = ((romFile.fatTableCacheSize > fatTableSizeNoExp) && (moduleParams->sdk_version >= 0x2008000));
+				if (ce9AltLargeTable) {
+					fatTableAddr = 0x023E0000;
+					fatTableSizeNoExp = 0x1A800;
+
+					const u32 cheatSizeTotal = cheatSize+(apPatchIsCheat ? apPatchSize : 0);
+					if (cheatSizeTotal > 4) {
+						fatTableAddr -= 0x2000;
+						fatTableSizeNoExp -= 0x2000;
+					}
+
+					fatTableAddr -= romFile.fatTableCacheSize;
+				}
+			} else {
 				if (startMem) {
 					fatTableAddr = 0x02000000;
 				} else {
@@ -1212,7 +1227,7 @@ int arm7_main(void) {
 			if (!startMem || (startMem && romFile.fatTableCacheSize < 0x4000)) {
 				buildFatTableCacheCompressed(&savFile);
 				if (savFile.fatTableCached) {
-					if (startMem || ce9Alt) {
+					if (startMem || (ce9Alt && !ce9AltLargeTable)) {
 						fatTableAddr += romFile.fatTableCacheSize;
 					} else {
 						fatTableAddr -= savFile.fatTableCacheSize;
@@ -1235,7 +1250,7 @@ int arm7_main(void) {
 					musicsFile.fatTableCache = (u32*)fatTableAddr;
 				}
 			}
-			if (!startMem && !ce9Alt) {
+			if ((!startMem && !ce9Alt) || ce9AltLargeTable) {
 				fatTableAddr -= (fatTableAddr % 512); // Align end of heap to 512 bytes
 			}
 		} else {

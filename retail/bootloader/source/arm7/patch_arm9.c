@@ -707,6 +707,7 @@ void patchMpuChange(const tNDSHeader* ndsHeader, const module_params_t* modulePa
 
 void patchHiHeapPointer(cardengineArm9* ce9, const module_params_t* moduleParams, const tNDSHeader* ndsHeader) {
 	extern bool ce9Alt;
+	extern bool ce9AltLargeTable;
 	extern u32 arm7mbk;
 	extern u32 accessControl;
 	extern u32 fatTableAddr;
@@ -720,7 +721,7 @@ void patchHiHeapPointer(cardengineArm9* ce9, const module_params_t* moduleParams
 
 	if ((!nandAccess && extendedMemory2)
 	|| moduleParams->sdk_version < 0x2008000
-	|| (ce9Alt && cheatSizeTotal <= 4)
+	|| (ce9Alt && !ce9AltLargeTable && cheatSizeTotal <= 4)
 	|| strncmp(romTid, "VSO", 3) == 0
 	|| arm7mbk == 0x080037C0) {
 		return;
@@ -750,7 +751,7 @@ void patchHiHeapPointer(cardengineArm9* ce9, const module_params_t* moduleParams
 	dbg_hexa((u32)oldheapPointer);
     dbg_printf("\n\n");
 
-	if (ce9Alt) {
+	if (ce9Alt && !ce9AltLargeTable) {
 		*heapPointer = CHEAT_ENGINE_LOCATION_B4DS-0x400000;
 	} else {
 		*heapPointer = (fatTableAddr < 0x023C0000 || fatTableAddr >= (u32)ce9) ? (u32)ce9 : fatTableAddr; // shrink heap by FAT table size + ce9 binary size
