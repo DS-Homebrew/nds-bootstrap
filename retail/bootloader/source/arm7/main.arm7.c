@@ -1136,7 +1136,7 @@ int arm7_main(void) {
 
 	aFile musicsFile;
 	getFileFromCluster(&musicsFile, musicCluster);
-	if (musicCluster != 0) {
+	if ((accessControl & BIT(4)) || arm7mbk == 0x080037C0) && musicCluster != 0) {
 		dbg_printf("Music pack found!\n");
 	}
 
@@ -1199,6 +1199,16 @@ int arm7_main(void) {
 			if (ce9Alt) {
 				ce9AltLargeTable = ((romFile.fatTableCacheSize > fatTableSizeNoExp) && (moduleParams->sdk_version >= 0x2008000));
 				if (ce9AltLargeTable) {
+					dbg_printf("\n");
+					dbg_printf("Cluster cache is above 0x598 bytes!\n");
+					dbg_printf("Consider backing up and restoring the SD card contents to defragment it");
+					if (*(u16*)0x4004700 == 0) {
+						dbg_printf(",\nor insert an Expansion Pak\n");
+					} else {
+						dbg_printf("\n");
+					}
+					dbg_printf("\n");
+
 					fatTableAddr = 0x023E0000;
 					fatTableSizeNoExp = 0x1A800;
 
