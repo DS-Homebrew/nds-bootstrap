@@ -1136,7 +1136,7 @@ int arm7_main(void) {
 
 	aFile musicsFile;
 	getFileFromCluster(&musicsFile, musicCluster);
-	if ((accessControl & BIT(4)) || arm7mbk == 0x080037C0) && musicCluster != 0) {
+	if (((accessControl & BIT(4)) || arm7mbk == 0x080037C0) && musicCluster != 0) {
 		dbg_printf("Music pack found!\n");
 	}
 
