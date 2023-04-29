@@ -206,7 +206,7 @@ static void patchCacheFlush(cardengineArm9* ce9, bool usesThumb, u32* cardPullOu
 }*/
 
 static void patchCardId(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb, u32* cardReadEndOffset) {
-	if (!cardReadEndOffset) {
+	if ((memcmp(ndsHeader->gameCode, "YMU", 3) != 0) && !cardReadEndOffset) {
 		return;
 	}
 
@@ -1776,6 +1776,10 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 		patchSharedFontPath(ce9, ndsHeader, moduleParams);
 	}
 
+	if (strncmp(romTid, "YMU", 3) == 0) { // If game is "Paws & Claws: Pet Vet 2"...
+		patchCardId(ce9, ndsHeader, moduleParams, false, NULL); // Patch card ID first
+	}
+
 	if (!patchCardRead(ce9, ndsHeader, moduleParams, &usesThumb, &readType, &sdk5ReadType, &cardReadEndOffset, startOffset)) {
 		dbg_printf("ERR_LOAD_OTHR\n\n");
 		return ERR_LOAD_OTHR;
@@ -1799,7 +1803,9 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 
 	//patchForceToPowerOff(ce9, ndsHeader, usesThumb);
 
-	patchCardId(ce9, ndsHeader, moduleParams, usesThumb, cardReadEndOffset);
+	if (strncmp(romTid, "YMU", 3) != 0) {
+		patchCardId(ce9, ndsHeader, moduleParams, usesThumb, cardReadEndOffset);
+	}
 
 	patchCardReadDma(ce9, ndsHeader, moduleParams, usesThumb);
 

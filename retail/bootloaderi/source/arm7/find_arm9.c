@@ -532,7 +532,7 @@ u32* findCardReadEndOffsetType0(const tNDSHeader* ndsHeader, const module_params
 	const char* romTid = getRomTid(ndsHeader);
 
 	u32* cardReadEndOffset = NULL;
-	if (moduleParams->sdk_version > 0x3000000 && moduleParams->sdk_version < 0x4008000) {
+	if ((moduleParams->sdk_version > 0x3000000 && moduleParams->sdk_version < 0x4008000) || (memcmp(ndsHeader->gameCode, "YMU", 3) == 0)) {
 		cardReadEndOffset = findOffset(
 			(u32*)startOffset, iUncompressedSize-(startOffset-0x02000000),//ndsHeader->arm9binarySize,
 			cardReadEndSignature3Elab, 3
@@ -1054,6 +1054,18 @@ u32* findCardPullOutOffset(const tNDSHeader* ndsHeader, const module_params_t* m
 				dbg_printf("Card pull out handler SDK 4 not found\n");
 			}
 		}
+
+		if (!cardPullOutOffset && moduleParams->sdk_version > 0x4000000) {
+			cardPullOutOffset = findOffset(
+				(u32*)ndsHeader->arm9destination, iUncompressedSize,//ndsHeader->arm9binarySize,
+				cardPullOutSignature1, 4
+			);
+			if (cardPullOutOffset) {
+				dbg_printf("Card pull out handler found\n");
+			} else {
+				dbg_printf("Card pull out handler not found\n");
+			}
+		}
 	}
 
 	dbg_printf("\n");
@@ -1194,7 +1206,7 @@ u32* findCardTerminateForPullOutOffset(const tNDSHeader* ndsHeader, const module
 }*/
 
 u32* findCardIdEndOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, const u32* cardReadEndOffset) {
-	if (!cardReadEndOffset) {
+	if ((memcmp(ndsHeader->gameCode, "YMU", 3) != 0) && !cardReadEndOffset) {
 		return NULL;
 	}
 
@@ -1204,10 +1216,17 @@ u32* findCardIdEndOffset(const tNDSHeader* ndsHeader, const module_params_t* mod
 
 	if (isSdk5(moduleParams)) {
 		// SDK 5
-		cardIdEndOffset = findOffsetBackwards(
-			(u32*)cardReadEndOffset, 0x800,
-			cardIdEndSignature5, 4
-		);
+		if (cardReadEndOffset) {
+			cardIdEndOffset = findOffsetBackwards(
+				(u32*)cardReadEndOffset, 0x800,
+				cardIdEndSignature5, 4
+			);
+		} else {
+			cardIdEndOffset = findOffsetBackwards(
+				(u32*)ndsHeader->arm9destination, iUncompressedSize,
+				cardIdEndSignature5, 4
+			);
+		}
 		if (cardIdEndOffset) {
 			dbg_printf("Card ID end SDK 5 found: ");
 		} else {
@@ -1227,10 +1246,12 @@ u32* findCardIdEndOffset(const tNDSHeader* ndsHeader, const module_params_t* mod
 			}
 		}
 	} else {
-		cardIdEndOffset = findOffset(
-			(u32*)cardReadEndOffset + 0x10, iUncompressedSize,
-			cardIdEndSignature, 2
-		); //if (!usesThumb) {
+		if (cardReadEndOffset) {
+			cardIdEndOffset = findOffset(
+				(u32*)cardReadEndOffset + 0x10, iUncompressedSize,
+				cardIdEndSignature, 2
+			);
+		}
 		if (!cardIdEndOffset) {
 			cardIdEndOffset = findOffset(
 				(u32*)ndsHeader->arm9destination, iUncompressedSize,
@@ -1238,6 +1259,7 @@ u32* findCardIdEndOffset(const tNDSHeader* ndsHeader, const module_params_t* mod
 			);
 		}
 		if (cardIdEndOffset) {
+			cardIdEndOffset[0] = 0; // Prevent being searched again
 			dbg_printf("Card ID end found: ");
 		} else {
 			dbg_printf("Card ID end not found\n");
