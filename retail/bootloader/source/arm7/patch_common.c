@@ -463,48 +463,34 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
 		cardIdFunc[1] = baseChipID;
 
 		const u16* branchCode1 = generateA7InstrThumb(0x020BA666, 0x020BA670);
-
-		*(u16*)0x020BA666 = branchCode1[0];
-		*(u16*)0x020BA668 = branchCode1[1];
+		tonccpy((void*)0x020BA666, branchCode1, 0x4);
 
 		tonccpy((void*)0x020BA670, cardIdFunc, 0x8);
 
 		const u16* branchCode2 = generateA7InstrThumb(0x020BA66A, 0x020BA6C0);
+		tonccpy((void*)0x020BA66A, branchCode2, 0x4);
 
-		*(u16*)0x020BA66A = branchCode2[0];
-		*(u16*)0x020BA66C = branchCode2[1];
-
-		/*tonccpy((void*)0x020BA728, ce9->thumbPatches->card_set_dma_arm9, 0x30);
+		/* tonccpy((void*)0x020BA728, ce9->thumbPatches->card_set_dma_arm9, 0xC);
 
 		const u16* branchCode3 = generateA7InstrThumb(0x020BA70C, 0x020BA728);
-
-		*(u16*)0x020BA70C = branchCode3[0];
-		*(u16*)0x020BA70E = branchCode3[1];
-		*(u16*)0x020BA710 = 0xBDF8;*/
+		tonccpy((void*)0x020BA70C, branchCode3, 0x4);
+		*(u16*)0x020BA710 = 0xBDF8; */
 
 		const u16* branchCode4 = generateA7InstrThumb(0x020BAAA2, 0x020BAAAC);
-
-		*(u16*)0x020BAAA2 = branchCode4[0];
-		*(u16*)0x020BAAA4 = branchCode4[1];
+		tonccpy((void*)0x020BAAA2, branchCode4, 0x4);
 
 		tonccpy((void*)0x020BAAAC, cardIdFunc, 0x8);
 
 		const u16* branchCode5 = generateA7InstrThumb(0x020BAAA6, 0x020BAAFC);
-
-		*(u16*)0x020BAAA6 = branchCode5[0];
-		*(u16*)0x020BAAA8 = branchCode5[1];
+		tonccpy((void*)0x020BAAA6, branchCode5, 0x4);
 
 		const u16* branchCode6 = generateA7InstrThumb(0x020BAC5C, 0x020BAC64);
-
-		*(u16*)0x020BAC5C = branchCode6[0];
-		*(u16*)0x020BAC5E = branchCode6[1];
+		tonccpy((void*)0x020BAC5C, branchCode6, 0x4);
 
 		tonccpy((void*)0x020BAC64, cardIdFunc, 0x8);
 
 		const u16* branchCode7 = generateA7InstrThumb(0x020BAC60, 0x020BACB6);
-
-		*(u16*)0x020BAC60 = branchCode7[0];
-		*(u16*)0x020BAC62 = branchCode7[1];
+		tonccpy((void*)0x020BAC60, branchCode7, 0x4);
 	}
 }
 
