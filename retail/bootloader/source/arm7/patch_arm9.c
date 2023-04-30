@@ -15,6 +15,18 @@
 
 //bool cardReadFound = false; // patch_common.c
 
+bool isPawsAndClaws(const tNDSHeader* ndsHeader) {
+	const char* romTid = getRomTid(ndsHeader);
+
+	if (strncmp(romTid, "AQ2", 3) == 0 // Paws & Claws: Pet Resort
+	 || strncmp(romTid, "YMU", 3) == 0 // Paws & Claws: Pet Vet 2
+	) {
+		return true;
+	}
+
+	return false;
+}
+
 static bool patchCardRead(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool* usesThumbPtr, int* readTypePtr, int* sdk5ReadTypePtr, u32** cardReadEndOffsetPtr, u32 startOffset) {
 	bool usesThumb = patchOffsetCache.a9IsThumb;
 	int readType = 0;
@@ -206,7 +218,7 @@ static void patchCacheFlush(cardengineArm9* ce9, bool usesThumb, u32* cardPullOu
 }*/
 
 static void patchCardId(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb, u32* cardReadEndOffset) {
-	if ((memcmp(ndsHeader->gameCode, "YMU", 3) != 0) && !cardReadEndOffset) {
+	if (!isPawsAndClaws(ndsHeader) && !cardReadEndOffset) {
 		return;
 	}
 
@@ -1776,7 +1788,7 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 		patchSharedFontPath(ce9, ndsHeader, moduleParams);
 	}
 
-	if (strncmp(romTid, "YMU", 3) == 0) { // If game is "Paws & Claws: Pet Vet 2"...
+	if (isPawsAndClaws(ndsHeader)) {
 		patchCardId(ce9, ndsHeader, moduleParams, false, NULL); // Patch card ID first
 	}
 
@@ -1803,7 +1815,7 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 
 	//patchForceToPowerOff(ce9, ndsHeader, usesThumb);
 
-	if (strncmp(romTid, "YMU", 3) != 0) {
+	if (!isPawsAndClaws(ndsHeader)) {
 		patchCardId(ce9, ndsHeader, moduleParams, usesThumb, cardReadEndOffset);
 	}
 

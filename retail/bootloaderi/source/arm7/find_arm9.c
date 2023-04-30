@@ -291,6 +291,8 @@ static const char* nandSharedFontSignature = "nand:/<sharedFont>";
 extern u32 iUncompressedSize;
 extern u32 iUncompressedSizei;
 
+extern bool isPawsAndClaws(const tNDSHeader* ndsHeader);
+
 u32* a9_findSwi12Offset(const tNDSHeader* ndsHeader) {
 	dbg_printf("findSwi12Offset:\n");
 
@@ -532,7 +534,7 @@ u32* findCardReadEndOffsetType0(const tNDSHeader* ndsHeader, const module_params
 	const char* romTid = getRomTid(ndsHeader);
 
 	u32* cardReadEndOffset = NULL;
-	if ((moduleParams->sdk_version > 0x3000000 && moduleParams->sdk_version < 0x4008000) || (memcmp(ndsHeader->gameCode, "YMU", 3) == 0)) {
+	if ((moduleParams->sdk_version > 0x3000000 && moduleParams->sdk_version < 0x4008000) || isPawsAndClaws(ndsHeader)) {
 		cardReadEndOffset = findOffset(
 			(u32*)startOffset, iUncompressedSize-(startOffset-0x02000000),//ndsHeader->arm9binarySize,
 			cardReadEndSignature3Elab, 3
@@ -1206,7 +1208,7 @@ u32* findCardTerminateForPullOutOffset(const tNDSHeader* ndsHeader, const module
 }*/
 
 u32* findCardIdEndOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, const u32* cardReadEndOffset) {
-	if ((memcmp(ndsHeader->gameCode, "YMU", 3) != 0) && !cardReadEndOffset) {
+	if (!isPawsAndClaws(ndsHeader) && !cardReadEndOffset) {
 		return NULL;
 	}
 

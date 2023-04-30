@@ -21,6 +21,18 @@ extern u16 a9ScfgRom;
 extern bool gbaRomFound;
 extern bool dsiModeConfirmed;
 
+bool isPawsAndClaws(const tNDSHeader* ndsHeader) {
+	const char* romTid = getRomTid(ndsHeader);
+
+	if (strncmp(romTid, "AQ2", 3) == 0 // Paws & Claws: Pet Resort
+	 || strncmp(romTid, "YMU", 3) == 0 // Paws & Claws: Pet Vet 2
+	) {
+		return true;
+	}
+
+	return false;
+}
+
 static void fixForDifferentBios(const cardengineArm9* ce9, const tNDSHeader* ndsHeader, bool usesThumb, bool usesCloneboot) {
 	if (!usesCloneboot) {
 		u32* swi12Offset = patchOffsetCache.a9Swi12Offset;
@@ -388,7 +400,7 @@ static void patchCacheFlush(cardengineArm9* ce9, bool usesThumb, u32* cardPullOu
 }*/
 
 static void patchCardId(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb, u32* cardReadEndOffset) {
-	if ((memcmp(ndsHeader->gameCode, "YMU", 3) != 0) && !cardReadEndOffset) {
+	if (!isPawsAndClaws(ndsHeader) && !cardReadEndOffset) {
 		return;
 	}
 
@@ -2507,7 +2519,7 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
     dbg_hexa(startOffset);
     dbg_printf("\n\n");
 
-	if (strncmp(romTid, "YMU", 3) == 0) { // If game is "Paws & Claws: Pet Vet 2"...
+	if (isPawsAndClaws(ndsHeader)) {
 		patchCardId(ce9, ndsHeader, moduleParams, false, NULL); // Patch card ID first
 	}
 
@@ -2553,7 +2565,7 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 
 	//patchForceToPowerOff(ce9, ndsHeader, usesThumb);
 
-	if (strncmp(romTid, "YMU", 3) != 0) {
+	if (!isPawsAndClaws(ndsHeader)) {
 		patchCardId(ce9, ndsHeader, moduleParams, usesThumb, cardReadEndOffset);
 	}
 
