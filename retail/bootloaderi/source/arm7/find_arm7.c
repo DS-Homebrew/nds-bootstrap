@@ -1066,7 +1066,7 @@ u32* findCardIrqEnableOffset(const tNDSHeader* ndsHeader, const module_params_t*
 	dbg_printf("findCardIrqEnableOffset:\n");
 	
 	const u32* irqEnableStartSignature = irqEnableStartSignature1;
-	if (moduleParams->sdk_version > 0x4000000) {
+	if (ndsHeader->arm7binarySize != 0x289C0 && moduleParams->sdk_version > 0x4000000) {
 		irqEnableStartSignature = irqEnableStartSignature4;
 	}
 
