@@ -1788,6 +1788,13 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 		patchSharedFontPath(ce9, ndsHeader, moduleParams);
 	}
 
+	patchMpu(ndsHeader, moduleParams, patchMpuRegion, patchMpuSize);
+	patchMpu2(ndsHeader, moduleParams);
+	patchMpuFlagsSet(ndsHeader, moduleParams);
+	patchMpuChange(ndsHeader, moduleParams);
+
+	patchHiHeapPointer(ce9, moduleParams, ndsHeader);
+
 	if (isPawsAndClaws(ndsHeader)) {
 		patchCardId(ce9, ndsHeader, moduleParams, false, NULL); // Patch card ID first
 	}
@@ -1821,14 +1828,7 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 
 	patchCardReadDma(ce9, ndsHeader, moduleParams, usesThumb);
 
-	patchMpu(ndsHeader, moduleParams, patchMpuRegion, patchMpuSize);
-	patchMpu2(ndsHeader, moduleParams);
-	patchMpuFlagsSet(ndsHeader, moduleParams);
-	patchMpuChange(ndsHeader, moduleParams);
-
 	//patchDownloadplay(ndsHeader);
-
-	patchHiHeapPointer(ce9, moduleParams, ndsHeader);
 
 	patchReset(ce9, ndsHeader, moduleParams);
 	patchResetTwl(ce9, ndsHeader, moduleParams);

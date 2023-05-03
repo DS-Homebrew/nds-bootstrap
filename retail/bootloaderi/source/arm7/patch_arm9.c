@@ -2519,6 +2519,13 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
     dbg_hexa(startOffset);
     dbg_printf("\n\n");
 
+	patchMpu(ndsHeader, moduleParams, patchMpuRegion);
+	patchMpu2(ndsHeader, moduleParams);
+	patchMpuChange(ndsHeader, moduleParams);
+	patchMpuInitTwl(ndsHeader);
+
+	patchWaitSysCycles(ce9, ndsHeader, moduleParams);
+
 	if (isPawsAndClaws(ndsHeader)) {
 		patchCardId(ce9, ndsHeader, moduleParams, false, NULL); // Patch card ID first
 	}
@@ -2585,19 +2592,12 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 		}
 	}
 
-	patchMpu(ndsHeader, moduleParams, patchMpuRegion);
-	patchMpu2(ndsHeader, moduleParams);
-	patchMpuChange(ndsHeader, moduleParams);
-	patchMpuInitTwl(ndsHeader);
-
 	//patchDownloadplay(ndsHeader);
 
     //patchSleep(ce9, ndsHeader, moduleParams, usesThumb);
 
 	patchReset(ce9, ndsHeader, moduleParams);
 	patchResetTwl(ce9, ndsHeader, moduleParams);
-
-	patchWaitSysCycles(ce9, ndsHeader, moduleParams);
 
 	if (strcmp(romTid, "UBRP") == 0) {
 		operaRamPatch();
