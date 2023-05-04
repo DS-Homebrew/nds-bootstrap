@@ -124,6 +124,8 @@ extern "C" {
 		u32 res;
 	} mmcdevice;
 
+	void sdmmc_set_ndma_slot(int slot);
+
 	void sdmmc_init();
 	int my_sdmmc_sdcard_readsector(u32 sector_no, u8 *out, u32 startOffset, u32 endOffset);
 	int my_sdmmc_sdcard_readsectors(u32 sector_no, u32 numsectors, u8 *out);

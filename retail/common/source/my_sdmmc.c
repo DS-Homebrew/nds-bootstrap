@@ -39,6 +39,10 @@ static int ndmaSlot = 0;
 struct mmcdevice handleNAND;
 struct mmcdevice handleSD;
 
+void sdmmc_set_ndma_slot(int slot) {
+	ndmaSlot = slot;
+}
+
 mmcdevice *getMMCDevice(int drive)
 {
 	if(drive==0) return &handleNAND;
