@@ -79,7 +79,7 @@ An alternative forwarder generator for 3DS users. YANBF forwarders are 3DS-mode 
 - Chinese Traditional: [James-Makoto](https://crowdin.com/profile/VCMOD55), [R-YaTian](https://github.com/R-YaTian)
 - Danish: [Sebastian øllgaard](https://crowdin.com/profile/seba187d), [Nadia Pedersen](https://crowdin.com/profile/nadiaholmquist)
 - Dutch: [guusbuk](https://crowdin.com/profile/guusbuk), [TM-47](https://crowdin.com/profile/-tm-)
-- French: [Benjamin](https://crowdin.com/profile/sombrabsol), [Dhalian](https://crowdin.com/profile/DHALiaN3630), [Fleefie~](https://crowdin.com/profile/fleefie), [LinuxCat](https://github.com/LinUwUxCat), [TM-47](https://crowdin.com/profile/-tm-)
+- French: [Dhalian](https://crowdin.com/profile/DHALiaN3630), [Fleefie~](https://crowdin.com/profile/fleefie), [LinuxCat](https://github.com/LinUwUxCat), [SombrAbsol](https://crowdin.com/profile/sombrabsol), [TM-47](https://crowdin.com/profile/-tm-)
 - German: [TheDude](https://crowdin.com/profile/the6771), [TM-47](https://crowdin.com/profile/-tm-)
 - Greek: [TM-47](https://crowdin.com/profile/-tm-)
 - Hebrew: [Barawer](https://crowdin.com/profile/barawer), [Yaniv Levin](https://crowdin.com/profile/y4niv)
