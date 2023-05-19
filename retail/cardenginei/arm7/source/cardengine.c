@@ -1174,18 +1174,24 @@ static bool start_cardRead_arm9(void) {
 	#ifdef DEBUG
 	nocashMessage("fileRead romFile");
 	#endif
-	if(!fileReadNonBLocking((char*)dst, romFile, src, len))
-    {
-        readOngoing = true;
-        return false;    
-        //while(!resumeFileRead()){}
-    } 
-    else
-    {
-        readOngoing = false;
-        cardReadLED(false, isDma);    // After loading is done, turn off LED for card read indicator
-        return true;    
-    }
+	if ((dst % 512) == 0) {
+		if(!fileReadNonBLocking((char*)dst, romFile, src, len))
+		{
+			readOngoing = true;
+			return false;
+			//while(!resumeFileRead()){}
+		} 
+		else
+		{
+			readOngoing = false;
+			cardReadLED(false, isDma);    // After loading is done, turn off LED for card read indicator
+			return true;
+		}
+	} else {
+		fileRead((char*)dst, romFile, src, len);
+		cardReadLED(false, isDma);    // After loading is done, turn off LED for card read indicator
+		return true;
+	}
 
 	#ifdef DEBUG
 	dbg_printf("\nread \n");
@@ -1242,7 +1248,7 @@ static inline void sdmmcHandler(void) {
 			//bool isDma = sharedAddr[4]==0x53444D41;
 			ongoingIsDma = sharedAddr[4]==0x53444D41;
 			cardReadLED(true, ongoingIsDma);
-			if (wifiIrq) {
+			if (wifiIrq || (sharedAddr[2] % 512) != 0) {
 				sharedAddr[4] = my_sdmmc_sdcard_readsectors(sharedAddr[0], sharedAddr[1], (u8*)sharedAddr[2]);
 				cardReadLED(false, ongoingIsDma);
 			} else {
@@ -1783,9 +1789,7 @@ bool eepromRead(u32 src, void *dst, u32 len) {
 		/*if (saveInRam) {
 			tonccpy(dst, (char*)0x02440000 + src, len);
 		} else {*/
-			sdmmc_set_ndma_slot(-1);
 			fileRead(dst, savFile, src, len);
-			sdmmc_set_ndma_slot(0);
 		//}
 		#ifdef TWLSDK
 		//if (doBak) restoreSdBakData();
@@ -1823,9 +1827,7 @@ bool eepromPageWrite(u32 dst, const void *src, u32 len) {
 		/*if (saveInRam) {
 			tonccpy((char*)0x02440000 + dst, src, len);
 		}*/
-		sdmmc_set_ndma_slot(-1);
 		fileWrite(src, savFile, dst, len);
-		sdmmc_set_ndma_slot(0);
 		#ifdef TWLSDK
 		//if (doBak) restoreSdBakData();
 		#endif
@@ -1862,9 +1864,7 @@ bool eepromPageProg(u32 dst, const void *src, u32 len) {
 		/*if (saveInRam) {
 			tonccpy((char*)0x02440000 + dst, src, len);
 		}*/
-		sdmmc_set_ndma_slot(-1);
 		fileWrite(src, savFile, dst, len);
-		sdmmc_set_ndma_slot(0);
   		#ifdef TWLSDK
 		//if (doBak) restoreSdBakData();
 		#endif
