@@ -571,7 +571,7 @@ int my_sdmmc_sdcard_writesectors(u32 sector_no, u32 numsectors, const u8 *in)
 	handleSD.size = numsectors << 9;
     handleSD.startOffset = 0;
     handleSD.endOffset = 0;
-	// if (((u32)in % 512) != 0 || ndmaSlot < 0 || ndmaSlot > 3) {
+	// if (((u32)in % 4) != 0 || ndmaSlot < 0 || ndmaSlot > 3) {
 		sdmmc_send_command(&handleSD,0x52C19,sector_no);
 	/* } else { // Large writes cause a softlock?
         //nocashMessage("my_sdmmc_sdcard_writesectors");
@@ -615,7 +615,7 @@ int my_sdmmc_sdcard_readsectors(u32 sector_no, u32 numsectors, u8 *out)
 	handleSD.size = numsectors << 9;
     handleSD.startOffset = 0;
     handleSD.endOffset = 0;
-	if (((u32)out % 512) != 0 || ndmaSlot < 0 || ndmaSlot > 3) {
+	if (((u32)out % 4) != 0 || ndmaSlot < 0 || ndmaSlot > 3) {
 		sdmmc_send_command(&handleSD,0x33C12,sector_no);
 	} else {
         //nocashMessage("my_sdmmc_sdcard_readsectors");
@@ -646,7 +646,7 @@ int my_sdmmc_sdcard_readsectors_nonblocking(u32 sector_no, u32 numsectors, u8 *o
 	handleSD.size = numsectors << 9;
     handleSD.startOffset = 0;
     handleSD.endOffset = 0;
-	if (((u32)out % 512) != 0 || ndmaSlot < 0 || ndmaSlot > 3) {
+	if (((u32)out % 4) != 0 || ndmaSlot < 0 || ndmaSlot > 3) {
         // ndmaSlot needs to be valid
         return -1;
 	} else {
