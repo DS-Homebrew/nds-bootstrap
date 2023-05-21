@@ -1174,7 +1174,7 @@ static bool start_cardRead_arm9(void) {
 	#ifdef DEBUG
 	nocashMessage("fileRead romFile");
 	#endif
-	if ((dst % 512) == 0) {
+	if ((dst % 4) == 0) {
 		if(!fileReadNonBLocking((char*)dst, romFile, src, len))
 		{
 			readOngoing = true;
@@ -1248,7 +1248,7 @@ static inline void sdmmcHandler(void) {
 			//bool isDma = sharedAddr[4]==0x53444D41;
 			ongoingIsDma = sharedAddr[4]==0x53444D41;
 			cardReadLED(true, ongoingIsDma);
-			if (wifiIrq || (sharedAddr[2] % 512) != 0) {
+			if (wifiIrq || (sharedAddr[2] % 4) != 0) {
 				sharedAddr[4] = my_sdmmc_sdcard_readsectors(sharedAddr[0], sharedAddr[1], (u8*)sharedAddr[2]);
 				cardReadLED(false, ongoingIsDma);
 			} else {
