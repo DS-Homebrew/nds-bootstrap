@@ -20,13 +20,14 @@
 #include "decompress.h"
 //#include "debug_file.h"
 #include "locations.h"
+#include "ndma.h"
 #include "tonccpy.h"
 
 u32 iUncompressedSize = 0;
 static u32 iFixedAddr = 0;
 static u32 iFixedData = 0;
 
-static u32 decompressBinary(u8 *aMainMemory, u32 aCodeLength, u32 aMemOffset) {
+static u32 decompressBinary(u8 *aMainMemory, u32 aCodeLength, u32 aMemOffset, const u32 resetParam) {
 	u8 *ADDR1 = NULL;
 	u8 *ADDR1_END = NULL;
 	u8 *ADDR2 = NULL;
@@ -57,6 +58,9 @@ static u32 decompressBinary(u8 *aMainMemory, u32 aCodeLength, u32 aMemOffset) {
 	B &= ~0xff000000;
 	ADDR3 = ADDR1 - B;
 	u32 uncompressEnd = ((u32)ADDR1_END) - ((u32)aMainMemory);
+	if (uncompressEnd >= ((*(u32*)(resetParam+8) == 0x44414F4) ? 0x2C0000 : 0x380000)) {
+		while (ndmaBusy(1)); // Wait for ARM7 binary to finish copying
+	}
 
 	while (!(ADDR2 <= ADDR3)) {
 		u32 marku8 = *(--ADDR2 + aMemOffset);
@@ -91,7 +95,7 @@ static u32 decompressBinary(u8 *aMainMemory, u32 aCodeLength, u32 aMemOffset) {
 	return uncompressEnd;
 }
 
-void ensureBinaryDecompressed(const tNDSHeader* ndsHeader, module_params_t* moduleParams) {
+void ensureBinaryDecompressed(const tNDSHeader* ndsHeader, module_params_t* moduleParams, const u32 resetParam) {
 	unpatchedFunctions* unpatchedFuncs = (unpatchedFunctions*)UNPATCHED_FUNCTION_LOCATION;
 
 	if (moduleParams->compressed_static_end) {
@@ -100,7 +104,7 @@ void ensureBinaryDecompressed(const tNDSHeader* ndsHeader, module_params_t* modu
 		unpatchedFuncs->compressedFlagOffset = (u32*)((u32)moduleParams+0x14);
 		unpatchedFuncs->compressed_static_end = moduleParams->compressed_static_end;
 		//decompressLZ77Backwards((u8*)ndsHeader->arm9destination, ndsHeader->arm9binarySize);
-		iUncompressedSize = decompressBinary((u8*)ndsHeader->arm9destination, ndsHeader->arm9binarySize, 0);
+		iUncompressedSize = decompressBinary((u8*)ndsHeader->arm9destination, ndsHeader->arm9binarySize, 0, resetParam);
 		moduleParams->compressed_static_end = 0;
 	} else {
 		// Not compressed

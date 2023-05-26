@@ -467,21 +467,34 @@ void reset(void) {
 	if (currentSrlAddr != *(u32*)(resetParam+0xC) || *(u32*)(resetParam+8) == 0x44414F4C) {
 		currentSrlAddr = *(u32*)(resetParam+0xC);
 		if (*(u32*)(resetParam+8) == 0x44414F4C) {
-			tonccpy((char*)ndsHeader->arm7destination, (char*)0x022C0000, ndsHeader->arm7binarySize);
+			ndmaCopyWordsAsynch(1, (u32*)0x022C0000, ndsHeader->arm7destination, ndsHeader->arm7binarySize);
 			*((u16*)(/*isSdk5(moduleParams) ? 0x02fffc40 :*/ 0x027ffc40)) = 2; // Boot Indicator (Cloneboot/Multiboot)
+		} else if (valueBits & ROMinRAM) {
+			u32 newSrc = (u32)(romLocation-0x8000);
+			if (!(valueBits & cloneboot)) {
+				static u32 adjust = 0;
+				if (adjust == 0) {
+					adjust = (u32)(romLocation-ndsHeader->arm9romOffset-ndsHeader->arm9binarySize);
+				}
+				newSrc = adjust;
+			}
+			newSrc += currentSrlAddr;
+			tonccpy((char*)ndsHeader, (u8*)newSrc, 0x160);
+			ndmaCopyWordsAsynch(0, (u8*)newSrc+ndsHeader->arm9romOffset, ndsHeader->arm9destination, ndsHeader->arm9binarySize);
+			ndmaCopyWordsAsynch(1, (u8*)newSrc+ndsHeader->arm7romOffset, ndsHeader->arm7destination, ndsHeader->arm7binarySize);
+			while (ndmaBusy(0));
 		} else {
 			fileRead((char*)ndsHeader, romFile, currentSrlAddr, 0x160);
 			fileRead((char*)ndsHeader->arm9destination, romFile, currentSrlAddr+ndsHeader->arm9romOffset, ndsHeader->arm9binarySize);
 			fileRead((char*)ndsHeader->arm7destination, romFile, currentSrlAddr+ndsHeader->arm7romOffset, ndsHeader->arm7binarySize);
 		}
-		*(u32*)(resetParam+8) = 0;
 
 		moduleParams = getModuleParams(ndsHeader);
 		/*dbg_printf("sdk_version: ");
 		dbg_hexa(moduleParams->sdk_version);
 		dbg_printf("\n");*/ 
 
-		ensureBinaryDecompressed(ndsHeader, moduleParams);
+		ensureBinaryDecompressed(ndsHeader, moduleParams, resetParam);
 
 		patchCardNdsArm9(
 			(cardengineArm9*)CARDENGINEI_ARM9_LOCATION,
@@ -489,6 +502,7 @@ void reset(void) {
 			moduleParams,
 			1
 		);
+		while (ndmaBusy(1));
 		patchCardNdsArm7(
 			(cardengineArm7*)ce7,
 			ndsHeader,
@@ -514,6 +528,7 @@ void reset(void) {
 			ndmaCopyWordsAsynch(1, ndsHeader->arm7destination, (char*)DONOR_ROM_ARM7_LOCATION, ndsHeader->arm7binarySize);
 			while (ndmaBusy(0) || ndmaBusy(1));
 		}
+		*(u32*)(resetParam+8) = 0;
 	} else if ((valueBits & extendedMemory) || (valueBits & dsiMode)) {
 		//driveInitialize();
 
