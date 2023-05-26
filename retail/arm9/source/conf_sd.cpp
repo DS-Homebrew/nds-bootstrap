@@ -1074,6 +1074,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	if (conf->dsiWramAccess) {
 		if (strncmp(romTid, "ADA", 3) == 0 // Diamond
 		 || strncmp(romTid, "APA", 3) == 0 // Pearl
+		 || strncmp(romTid, "Y3E", 3) == 0 // 2006-Nen 10-Gatsu Taikenban Soft
 		 || strncmp(romTid, "CPU", 3) == 0 // Platinum
 		 || strncmp(romTid, "IPK", 3) == 0 // HG
 		 || strncmp(romTid, "IPG", 3) == 0 // SS

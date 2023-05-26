@@ -616,6 +616,9 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
     dbg_hexa(startOffset);
     dbg_printf("\n\n");*/
 
+	patchMpu(ndsHeader, moduleParams, patchMpuRegion);
+	patchMpu2(ndsHeader, moduleParams);
+
 	if (!patchCardRead(ce9, ndsHeader, moduleParams, &usesThumb, &readType, &cardReadEndOffset, startOffset)) {
 		//dbg_printf("ERR_LOAD_OTHR\n\n");
 		return ERR_LOAD_OTHR;
@@ -639,9 +642,6 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 			randomPatch(ndsHeader, moduleParams);
 		}
 	}
-
-	patchMpu(ndsHeader, moduleParams, patchMpuRegion);
-	patchMpu2(ndsHeader, moduleParams);
 
     //patchSleep(ce9, ndsHeader, moduleParams, usesThumb);
 

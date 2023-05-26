@@ -943,7 +943,7 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 	if (strncmp(romTid, "KPP", 3) == 0 	// Pop Island
 	 || strncmp(romTid, "KPF", 3) == 0		// Pop Island: Paperfield
 	 || strncmp(romTid, "KGK", 3) == 0		// Glory Days: Tactical Defense
-	 || (srlAddr > 0) || srlFromPageFile)
+	 || (strcmp(romTid, "NTRJ") == 0 && (ndsHeader->headerCRC16 == 0x53E2 || ndsHeader->headerCRC16 == 0x681E || ndsHeader->headerCRC16 == 0xCD01)) || srlFromPageFile)
 	{
 		*((u16*)(isSdk5(moduleParams) ? 0x02fffc40 : 0x027ffc40)) = 0x2;					// Boot Indicator (Cloneboot/Multiboot)
 	}

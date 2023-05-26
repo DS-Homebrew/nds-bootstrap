@@ -468,6 +468,7 @@ void reset(void) {
 		currentSrlAddr = *(u32*)(resetParam+0xC);
 		if (*(u32*)(resetParam+8) == 0x44414F4C) {
 			tonccpy((char*)ndsHeader->arm7destination, (char*)0x022C0000, ndsHeader->arm7binarySize);
+			*((u16*)(/*isSdk5(moduleParams) ? 0x02fffc40 :*/ 0x027ffc40)) = 2; // Boot Indicator (Cloneboot/Multiboot)
 		} else {
 			fileRead((char*)ndsHeader, romFile, currentSrlAddr, 0x160);
 			fileRead((char*)ndsHeader->arm9destination, romFile, currentSrlAddr+ndsHeader->arm9romOffset, ndsHeader->arm9binarySize);
@@ -513,8 +514,6 @@ void reset(void) {
 			ndmaCopyWordsAsynch(1, ndsHeader->arm7destination, (char*)DONOR_ROM_ARM7_LOCATION, ndsHeader->arm7binarySize);
 			while (ndmaBusy(0) || ndmaBusy(1));
 		}
-
-		*((u16*)(/*isSdk5(moduleParams) ? 0x02fffc40 :*/ 0x027ffc40)) = 2; // Boot Indicator (Cloneboot/Multiboot)
 	} else if ((valueBits & extendedMemory) || (valueBits & dsiMode)) {
 		//driveInitialize();
 

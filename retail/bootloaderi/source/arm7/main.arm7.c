@@ -1195,7 +1195,7 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 	if ((!dsiModeConfirmed && 
 		(strncmp(romTid, "KPP", 3) == 0 	// Pop Island
 	  || strncmp(romTid, "KPF", 3) == 0)	// Pop Island: Paperfield
-	) || (srlAddr > 0) || (softResetParams[2] == 0x44414F4C))
+	) || (softResetParams[2] == 0x44414F4C))
 	{
 		*((u16*)(isSdk5(moduleParams) ? 0x02fffc40 : 0x027ffc40)) = 2;					// Boot Indicator (Cloneboot/Multiboot)
 	}
