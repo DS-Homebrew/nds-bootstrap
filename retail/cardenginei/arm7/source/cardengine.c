@@ -469,6 +469,7 @@ void reset(void) {
 		if (*(u32*)(resetParam+8) == 0x44414F4C) {
 			ndmaCopyWordsAsynch(1, (u32*)0x022C0000, ndsHeader->arm7destination, ndsHeader->arm7binarySize);
 			*((u16*)(/*isSdk5(moduleParams) ? 0x02fffc40 :*/ 0x027ffc40)) = 2; // Boot Indicator (Cloneboot/Multiboot)
+			// tonccpy((u32*)0x027FFC40, (u32*)0x02344820, 0x40); // Multiboot info?
 		} else if (valueBits & ROMinRAM) {
 			u32 newSrc = (u32)(romLocation-0x8000);
 			if (!(valueBits & cloneboot)) {
