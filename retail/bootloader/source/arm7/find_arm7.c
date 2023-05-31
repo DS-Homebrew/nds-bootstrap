@@ -11,18 +11,6 @@ extern u32 newArm7binarySize;
 
 // WRAM clear
 static const u32 wramEndAddr[1]                = {0x0380FF00};
-static const u32 wramClearSignature1[2]        = {0xE92D4010, 0xE3A00008};
-static const u32 wramClearSignature3[3]        = {0xE92D4010, 0xE24DD008, 0xE3A00008};
-static const u32 wramClearSignature3Alt[1]     = {0xE1C507BA};
-static const u32 wramClearSignature4[1]        = {0xE1C407BA};
-static const u32 wramClearSignature5[2]        = {0xE92D4038, 0xE3A05008};
-static const u32 wramClearSignatureTwlEarly[3] = {0xE92D4070, 0xE1A06000, 0xE3560001};
-static const u32 wramClearSignatureTwl[3]      = {0xE92D40F8, 0xE1A07000, 0xE3570001};
-static const u32 wramClearSignatureTwlAlt1[3]  = {0xE92D43FE, 0xE1A04000, 0xE59F61C8};
-static const u32 wramClearSignatureTwlAlt2[4]  = {0xE92D40F8, 0xE24DD008, 0xE1A04000, 0xE3540001};
-static const u16 wramClearSignature1Thumb[2]   = {0xB510, 0x2008};
-static const u16 wramClearSignature4Thumb[1]   = {0x80E0};
-static const u16 wramClearSignatureTwlThumb[3] = {0xB570, 0x1C05, 0x2D01};
 
 // Relocate
 static const u32 relocateStartSignature[1] = {0x027FFFFA};
@@ -81,7 +69,8 @@ static const u16 sleepPatchThumb[2]    = {0xD002, 0x4831};
 static const u16 sleepPatchThumbAlt[2] = {0xD002, 0x0440};
 
 // RAM clear
-static const u32 ramClearSignature[2] = {0x02FFC000, 0x02FFF000};
+static const u32 ramClearSignature[2] = {0xE12FFF1E, 0x027FF000};
+static const u32 ramClearSignature5[2] = {0x02FFC000, 0x02FFF000};
 
 // Post-boot code
 static const u32 postBootStartSignature[1]      = {0xE92D47F0};
@@ -110,162 +99,6 @@ u32* findWramEndAddrOffset(const tNDSHeader* ndsHeader) {
 		dbg_printf("WRAM end addr offset found\n");
 	} else {
 		dbg_printf("WRAM end addr offset not found\n");
-	}
-
-	dbg_printf("\n");
-	return offset;
-}
-
-u32* findWramClearOffset(const tNDSHeader* ndsHeader) {
-	dbg_printf("findWramEndAddrOffset:\n");
-
-	u32* offset = NULL;
-	if (ndsHeader->unitCode > 0) {
-		offset = findOffset(
-			(u32*)ndsHeader->arm7destination, 0x1000,
-			wramClearSignatureTwlEarly, 3
-		);
-		if (offset) {
-			dbg_printf("WRAM clear offset (early SDK5) found\n");
-		} else {
-			dbg_printf("WRAM clear offset (early SDK5) not found\n");
-		}
-
-		if (!offset) {
-			offset = findOffset(
-				(u32*)ndsHeader->arm7destination, 0x1000,
-				wramClearSignatureTwl, 3
-			);
-			if (offset) {
-				dbg_printf("WRAM clear offset found\n");
-			} else {
-				dbg_printf("WRAM clear offset not found\n");
-			}
-		}
-
-		if (!offset) {
-			offset = findOffset(
-				(u32*)ndsHeader->arm7destination, 0x1000,
-				wramClearSignatureTwlAlt1, 3
-			);
-			if (offset) {
-				dbg_printf("WRAM clear alt 1 offset found\n");
-			} else {
-				dbg_printf("WRAM clear alt 1 offset not found\n");
-			}
-		}
-
-		if (!offset) {
-			offset = findOffset(
-				(u32*)ndsHeader->arm7destination, 0x1000,
-				wramClearSignatureTwlAlt2, 4
-			);
-			if (offset) {
-				dbg_printf("WRAM clear alt 2 offset found\n");
-			} else {
-				dbg_printf("WRAM clear alt 2 offset not found\n");
-			}
-		}
-
-		if (!offset) {
-			offset = (u32*)findOffsetThumb(
-				(u16*)ndsHeader->arm7destination, 0x1000,
-				wramClearSignatureTwlThumb, 3
-			);
-			if (offset) {
-				dbg_printf("WRAM clear offset thumb found\n");
-			} else {
-				dbg_printf("WRAM clear offset thumb not found\n");
-			}
-		}
-	} else {
-		offset = findOffset(
-			(u32*)ndsHeader->arm7destination, 0x1000,
-			wramClearSignature1, 2
-		);
-		if (offset) {
-			dbg_printf("WRAM clear offset (SDK2) found\n");
-		} else {
-			dbg_printf("WRAM clear offset (SDK2) not found\n");
-		}
-
-		if (!offset) {
-			offset = findOffset(
-				(u32*)ndsHeader->arm7destination, 0x1000,
-				wramClearSignature3, 3
-			);
-			if (offset) {
-				dbg_printf("WRAM clear offset (SDK3) found\n");
-			} else {
-				dbg_printf("WRAM clear offset (SDK3) not found\n");
-			}
-		}
-
-		if (!offset) {
-			offset = findOffset(
-				(u32*)ndsHeader->arm7destination, 0x1000,
-				wramClearSignature5, 2
-			);
-			if (offset) {
-				dbg_printf("WRAM clear offset (SDK5) found\n");
-			} else {
-				dbg_printf("WRAM clear offset (SDK5) not found\n");
-			}
-		}
-
-		if (!offset) {
-			offset = (u32*)findOffsetThumb(
-				(u16*)ndsHeader->arm7destination, 0x1000,
-				wramClearSignature1Thumb, 2
-			);
-			if (offset) {
-				dbg_printf("WRAM clear offset (SDK2) thumb found\n");
-			} else {
-				dbg_printf("WRAM clear offset (SDK2) thumb not found\n");
-			}
-		}
-
-		if (!offset) {
-			offset = findOffset(
-				(u32*)ndsHeader->arm7destination, 0x800,
-				wramClearSignature3Alt, 1
-			);
-			if (offset) {
-				dbg_printf("WRAM clear offset (SDK3) alt found\n");
-				dbg_printf("\n");
-				return offset + 3;
-			} else {
-				dbg_printf("WRAM clear offset (SDK3) alt not found\n");
-			}
-		}
-
-		if (!offset) {
-			offset = findOffset(
-				(u32*)ndsHeader->arm7destination, 0x800,
-				wramClearSignature4, 1
-			);
-			if (offset) {
-				dbg_printf("WRAM clear offset (SDK4) found\n");
-				dbg_printf("\n");
-				return offset + 2;
-			} else {
-				dbg_printf("WRAM clear offset (SDK4) not found\n");
-			}
-		}
-
-		if (!offset) {
-			offset = (u32*)findOffsetThumb(
-				(u16*)ndsHeader->arm7destination, 0x800,
-				wramClearSignature4Thumb, 1
-			);
-			if (offset) {
-				dbg_printf("WRAM clear offset (SDK4) thumb found\n");
-				dbg_printf("\n");
-				return (u32*)((u32)offset + 6);
-			} else {
-				dbg_printf("WRAM clear offset (SDK4) thumb not found\n");
-			}
-		}
 	}
 
 	dbg_printf("\n");
@@ -939,12 +772,12 @@ u16* findSleepPatchOffsetThumb(const tNDSHeader* ndsHeader) {
 	return sleepPatchOffset;
 }
 
-u32* findRamClearOffset(const tNDSHeader* ndsHeader) {
+u32* findRamClearOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	dbg_printf("findRamClearOffset:\n");
 
 	u32* ramClearOffset = findOffset(
 		(u32*)ndsHeader->arm7destination, newArm7binarySize,
-		ramClearSignature, 2
+		(isSdk5(moduleParams) && ndsHeader->unitCode > 0) ? ramClearSignature5 : ramClearSignature, 2
 	);
 	if (ramClearOffset) {
 		dbg_printf("RAM clear found: ");
