@@ -95,25 +95,71 @@ u16* getOffsetFromBLThumb(u16* blOffset) {
 }
 
 static bool patchWramClear(const tNDSHeader* ndsHeader) {
-	if (ndsHeader->unitCode != 0) {
-		return true;
-	}
-	u32* offset = patchOffsetCache.wramEndAddrOffset;
-	if (!patchOffsetCache.wramEndAddrOffset) {
-		offset = findWramEndAddrOffset(ndsHeader);
+	if (ndsHeader->unitCode == 0) {
+		u32* offset = patchOffsetCache.wramEndAddrOffset;
+		if (!patchOffsetCache.wramEndAddrOffset) {
+			offset = findWramEndAddrOffset(ndsHeader);
+			if (offset) {
+				patchOffsetCache.wramEndAddrOffset = offset;
+			}
+		}
 		if (offset) {
-			patchOffsetCache.wramEndAddrOffset = offset;
+			*offset = CARDENGINE_ARM7_LOCATION;
+			dbg_printf("WRAM end addr location : ");
+			dbg_hexa((u32)offset);
+			dbg_printf("\n\n");
+		} else {
+			return false;
 		}
 	}
-	if (!offset) {
+	if (newArm7binarySize == 0xCAB4) {
+		return true;
+	}
+	u32* offset = patchOffsetCache.wramClearOffset;
+	if (!patchOffsetCache.wramClearOffset) {
+		offset = findWramClearOffset(ndsHeader);
+		if (offset) {
+			patchOffsetCache.wramClearOffset = offset;
+		}
+	}
+	if (offset) {
+		bool notWithinSubroutine = (*(u16*)offset == 0x2008 || *((u16*)offset + 1) == 0xE3A0);
+		bool usesThumb = (notWithinSubroutine ? (*(u16*)offset == 0x2008) : (*((u16*)offset + 1) != 0xE92D));
+		if (notWithinSubroutine) {
+			if (usesThumb) {
+				*((u16*)offset + 20) = 0x2200;	// movs r2, #0
+			} else {
+				offset[13] = 0xE3A02000;	// mov r2, #0
+			}
+		} else {
+			if (usesThumb) {
+				if (ndsHeader->unitCode == 0) {
+					*((u16*)offset + 21) = 0x2200;	// movs r2, #0
+				} else {
+					*((u16*)offset + 11) = 0x2100;	// movs r1, #0
+					*((u16*)offset + 55) = 0x2100;	// movs r1, #0
+				}
+			} else {
+				if (ndsHeader->unitCode == 0) {
+					offset[*offset==0xE92D4038 ? 15 : (offset[1]==0xE24DD008 ? 18 : 17)] = 0xE3A02000;	// mov r2, #0
+				} else if (offset[1]==0xE24DD008) {
+					offset[10] = 0xE3A01000;	// mov r1, #0
+					offset[60] = 0xE3A01000;	// mov r1, #0
+				} else if (*offset==0xE92D43FE) {
+					offset[12] = 0xE3A01000;	// mov r1, #0
+					offset[61] = 0xE3A01000;	// mov r1, #0
+				} else {
+					offset[*offset==0xE92D40F8 ? 10 : 9]  = 0xE3A01000;	// mov r1, #0
+					offset[*offset==0xE92D40F8 ? 44 : 43] = 0xE3A01000;	// mov r1, #0
+				}
+			}
+		}
+		dbg_printf("WRAM clear location : ");
+		dbg_hexa((u32)offset);
+		dbg_printf("\n\n");
+	} else {
 		return false;
 	}
-
-	*offset = CARDENGINE_ARM7_LOCATION;
-	dbg_printf("WRAM end addr location : ");
-	dbg_hexa((u32)offset);
-	dbg_printf("\n\n");
-
 	return true;
 }
 
@@ -224,19 +270,20 @@ static void patchSleepMode(const tNDSHeader* ndsHeader) {
 }
 
 static void patchRamClear(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+	if (moduleParams->sdk_version < 0x5000000 || ndsHeader->unitCode == 0) {
+		return;
+	}
+
 	u32* ramClearOffset = patchOffsetCache.ramClearOffset;
 	if (!patchOffsetCache.ramClearOffset && !patchOffsetCache.ramClearChecked) {
-		ramClearOffset = findRamClearOffset(ndsHeader, moduleParams);
+		ramClearOffset = findRamClearOffset(ndsHeader);
 		if (ramClearOffset) {
 			patchOffsetCache.ramClearOffset = ramClearOffset;
 		}
 	}
 	if (ramClearOffset) {
-		if (isSdk5(moduleParams) && ndsHeader->unitCode > 0) {
-			ramClearOffset[0] = 0x02FFF000;
-			ramClearOffset[1] = 0x02FFF000;
-		}
-		ramClearOffset[3] -= 0x2000; // Shrink hi heap
+		*(ramClearOffset) = 0x02FFF000;
+		*(ramClearOffset + 1) = 0x02FFF000;
 		dbg_printf("RAM clear location : ");
 		dbg_hexa((u32)ramClearOffset);
 		dbg_printf("\n\n");

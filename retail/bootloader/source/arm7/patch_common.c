@@ -503,6 +503,7 @@ void rsetA7Cache(void)
 	patchOffsetCache.a7BinSize = 0;
 	patchOffsetCache.a7IsThumb = 0;
 	patchOffsetCache.wramEndAddrOffset = 0;
+	patchOffsetCache.wramClearOffset = 0;
 	patchOffsetCache.ramClearOffset = 0;
 	patchOffsetCache.ramClearChecked = 0;
 	patchOffsetCache.a7Swi12Offset = 0;
