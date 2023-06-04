@@ -195,18 +195,10 @@ void reset(void) {
 		rebootConsole();
 	}
 
-	register int i;
-	
 	REG_IME = 0;
 
-	for (i = 0; i < 16; i++) {
-		SCHANNEL_CR(i) = 0;
-		SCHANNEL_TIMER(i) = 0;
-		SCHANNEL_SOURCE(i) = 0;
-		SCHANNEL_LENGTH(i) = 0;
-	}
+	toncset32((u32*)0x04000400, 0, 0x104/4); // Clear sound channel & control registers
 
-	REG_SOUNDCNT = 0;
 	REG_SNDCAP0CNT = 0;
 	REG_SNDCAP1CNT = 0;
 
@@ -215,14 +207,8 @@ void reset(void) {
 	REG_SNDCAP1DAD = 0;
 	REG_SNDCAP1LEN = 0;
 
-	// Clear out ARM7 DMA channels and timers
-	for (i = 0; i < 4; i++) {
-		DMA_CR(i) = 0;
-		DMA_SRC(i) = 0;
-		DMA_DEST(i) = 0;
-		TIMER_CR(i) = 0;
-		TIMER_DATA(i) = 0;
-	}
+	toncset16((u32*)0x040000B0, 0, 0x40/2); // Clear DMA channels
+	toncset16((u32*)0x04000100, 0, 0x10/2); // Clear timers
 
 	// Clear out FIFO
 	REG_IPC_SYNC = 0;
