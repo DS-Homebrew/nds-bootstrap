@@ -1125,8 +1125,8 @@ int arm7_main(void) {
 	tonccpy((u32*)ce9Location, (u32*)CARDENGINE_ARM9_LOCATION_BUFFERED, ce9Alt ? 0x2800 : 0x3800);
 	toncset((u32*)0x023E0000, 0, 0x10000);
 
-	tonccpy((u8*)CARDENGINE_ARM7_LOCATION, (u8*)CARDENGINE_ARM7_LOCATION_BUFFERED, 0x1400);
-	toncset((u8*)CARDENGINE_ARM7_LOCATION_BUFFERED, 0, 0x1400);
+	tonccpy((u8*)CARDENGINE_ARM7_LOCATION, (u8*)CARDENGINE_ARM7_LOCATION_BUFFERED, 0x1000);
+	toncset((u8*)CARDENGINE_ARM7_LOCATION_BUFFERED, 0, 0x1000);
 
 	if (!dldiPatchBinary((data_t*)ce9Location, 0x3800, (data_t*)(extendedMemory2 ? 0x027BD000 : ((accessControl & BIT(4)) && !ce9Alt) ? 0x023FC000 : 0x023FD000))) {
 		// nocashMessage("ce9 DLDI patch failed");
