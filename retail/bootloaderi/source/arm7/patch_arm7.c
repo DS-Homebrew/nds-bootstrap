@@ -10,6 +10,7 @@
 #include "tonccpy.h"
 #include "cardengine_header_arm7.h"
 #include "debug_file.h"
+#include <nds/card.h>
 
 extern u8 gameOnFlashcard;
 extern u8 saveOnFlashcard;
@@ -544,9 +545,12 @@ u32 patchCardNdsArm7(
 		patchCardCheckPullOut(ce7, ndsHeader, moduleParams);
 	}
 
+	char headerData[0x200] = {0};// Read header of Cartridge
+	cardParamCommand (CARD_CMD_HEADER_READ, 0, CARD_ACTIVATE | CARD_nRESET | CARD_CLK_SLOW | CARD_BLK_SIZE(1) | CARD_DELAY1(0x1FFF) | CARD_DELAY2(0x3F), (u32 *)headerData , 0x200 / sizeof(u32));
 	if (a7GetReloc(ndsHeader, moduleParams)) {
 		u32 saveResult = 0;
 		
+		if (memcmp((const void*)(headerData + 0xC), romTid, 4) != 0) {//Compare gamecodes between Cartridge and Rom on SD. If match, save on Cartridge. If not, save on SD.
 		if (newArm7binarySize==0x2352C || newArm7binarySize==0x235DC || newArm7binarySize==0x23CAC || newArm7binarySize==0x245C4) {
 			saveResult = savePatchInvertedThumb(ce7, ndsHeader, moduleParams, saveFileCluster);    
 		} else if (isSdk5(moduleParams)) {
@@ -568,6 +572,7 @@ u32 patchCardNdsArm7(
 			if (!saveResult && patchOffsetCache.savePatchType == 2) {
 				saveResult = savePatchUniversal(ce7, ndsHeader, moduleParams, saveFileCluster);
 			}
+		}
 		}
 		if (!saveResult) {
 			patchOffsetCache.savePatchType = 0;

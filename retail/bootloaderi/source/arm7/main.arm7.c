@@ -1684,7 +1684,7 @@ int arm7_main(void) {
 				// Enable Slot-1 for games that use IR
 				my_enableSlot1();
 			} else {
-				my_disableSlot1();
+				my_enableSlot1();
 			}
 		}
 
