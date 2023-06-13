@@ -48,7 +48,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	extern void patchUserSettingsReadDSiWare(u32 addr);
 	extern void patchTwlFontLoad(u32 heapAllocAddr, u32 newCodeAddr);
 
-	const u32 heapEndRetail = ce9Alt ? 0x023E0000 : ((fatTableAddr < 0x023C0000 || fatTableAddr >= CARDENGINE_ARM9_LOCATION_DLDI) ? CARDENGINE_ARM9_LOCATION_DLDI : fatTableAddr);
+	const u32 heapEndRetail = ce9Alt ? 0x023E0000 : ((fatTableAddr < 0x023C0000 || fatTableAddr > CARDENGINE_ARM9_LOCATION_DLDI) ? CARDENGINE_ARM9_LOCATION_DLDI : fatTableAddr);
 	const u32 heapEnd = extendedMemory2 ? (((u32)ndsHeader->arm9destination >= 0x02004000) ? CARDENGINE_ARM9_LOCATION_DLDI_EXTMEM : 0x02700000) : heapEndRetail;
 	const u32 heapEnd8MBHack = extendedMemory2 ? heapEnd : heapEndRetail+0x400000; // extendedMemory2 ? #0x27B0000 : #0x27E0000 (mirrors to 0x23E0000 on retail DS units)
 	const u32 heapEndExceed = extendedMemory2 ? heapEnd+0x800000 : heapEndRetail+0xC00000; // extendedMemory2 ? #0x2FB0000 (mirrors to 0x27B0000 on debug DS units) : #0x2FE0000 (mirrors to 0x23E0000 on retail DS units)
@@ -9133,7 +9133,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0203AA30 = 0xE1A00000; // nop
 		*(u32*)0x0203DDD8 = 0xE1A00000; // nop
 		patchInitDSiWare(0x0204477C, heapEnd);
-		*(u32*)0x02044B08 = 0x020AA2C0;
+		*(u32*)0x02044B08 = *(u32*)0x02004FD0;
 		patchUserSettingsReadDSiWare(0x02045BB4);
 		*(u32*)0x02045FE8 = 0xE1A00000; // nop
 		*(u32*)0x02045FEC = 0xE1A00000; // nop
@@ -9153,7 +9153,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0203A544 = 0xE1A00000; // nop
 		*(u32*)0x0203D8EC = 0xE1A00000; // nop
 		patchInitDSiWare(0x02044290, heapEnd);
-		*(u32*)0x0204461C = 0x020A9D80;
+		*(u32*)0x0204461C = *(u32*)0x02004FD0;
 		patchUserSettingsReadDSiWare(0x020456C8);
 		*(u32*)0x02045AFC = 0xE1A00000; // nop
 		*(u32*)0x02045B00 = 0xE1A00000; // nop
@@ -9173,7 +9173,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0203A580 = 0xE1A00000; // nop
 		*(u32*)0x0203DA1C = 0xE1A00000; // nop
 		patchInitDSiWare(0x02044614, heapEnd);
-		*(u32*)0x02044984 = 0x020A8EC0;
+		*(u32*)0x02044984 = *(u32*)0x02004FC0;
 		patchUserSettingsReadDSiWare(0x02045A58);
 		*(u32*)0x02045EB4 = 0xE1A00000; // nop
 		*(u32*)0x02045EB8 = 0xE1A00000; // nop
