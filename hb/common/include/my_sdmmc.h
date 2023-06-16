@@ -58,11 +58,11 @@
 #define REG_SDOPT                 (0x28)
 #define REG_SDFIFO                (0x30)
 
-#define REG_DATACTL               (0xd8)
+#define REG_SDDATACTL             (0xd8)
 #define REG_SDRESET               (0xe0)
 #define REG_SDPROTECTED           (0xf6) //bit 0 determines if sd is protected or not?
 
-#define REG_DATACTL32             (0x100)
+#define REG_SDDATACTL32           (0x100)
 #define REG_SDBLKLEN32            (0x104)
 #define REG_SDBLKCOUNT32          (0x108)
 #define REG_SDFIFO32              (0x10C)

@@ -599,6 +599,8 @@ static bool ROMisDsiExclusive(const tNDSHeader* ndsHeader) {
 static void loadBinary_ARM7(const tDSiHeader* dsiHeaderTemp, aFile* file) {
 	nocashMessage("loadBinary_ARM7");
 
+	sdmmc_set_ndma_slot(0);
+
 	//u32 ndsHeader[0x170 >> 2];
 	//u32 dsiHeader[0x2F0 >> 2]; // SDK 5
 
@@ -652,6 +654,8 @@ static void loadBinary_ARM7(const tDSiHeader* dsiHeaderTemp, aFile* file) {
 	/*isGSDD = (strncmp(romTid, "BO5", 3) == 0)			// Golden Sun: Dark Dawn
         || (strncmp(romTid, "TBR", 3) == 0)			    // Disney Pixar Brave 
         ;*/
+
+	sdmmc_set_ndma_slot(4);
 }
 
 static module_params_t* loadModuleParams(const tNDSHeader* ndsHeader, bool* foundPtr) {
@@ -841,7 +845,9 @@ static void loadOverlaysintoRAM(const tNDSHeader* ndsHeader, const module_params
 			newOverlaysSize += cacheBlockSize;
 		}
 
+		sdmmc_set_ndma_slot(0);
 		fileRead((char*)overlaysLocation, file, alignedOverlaysOffset, newOverlaysSize);
+		sdmmc_set_ndma_slot(4);
 
 		if (!isSdk5(moduleParams) && *(u32*)((overlaysLocation-ndsHeader->arm9romOffset-ndsHeader->arm9binarySize)+0x003128AC) == 0x4B434148) {
 			*(u32*)((overlaysLocation-ndsHeader->arm9romOffset-ndsHeader->arm9binarySize)+0x3128AC) = 0xA00;	// Primary fix for Mario's Holiday (before Rev 11)
@@ -860,6 +866,8 @@ static void loadIOverlaysintoRAM(const tDSiHeader* dsiHeader, aFile* file, const
 }
 
 static void loadROMintoRAM(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, aFile* romFile, aFile* savFile, const bool usesCloneboot) {
+	sdmmc_set_ndma_slot(0);
+
 	// Load ROM into RAM
 	u32 romLocation = (u32)((consoleModel > 0 && (isSdk5(moduleParams) || dsiModeConfirmed)) ? ROM_SDK5_LOCATION : ROM_LOCATION);
 	if (extendedMemoryConfirmed) {
@@ -932,6 +940,7 @@ static void loadROMintoRAM(const tNDSHeader* ndsHeader, const module_params_t* m
 		}
 	}
 	overlaysInRam = true;
+	sdmmc_set_ndma_slot(4);
 
 	dbg_printf("ROM pre-loaded into RAM\n");
 	if (extendedMemoryConfirmed) {

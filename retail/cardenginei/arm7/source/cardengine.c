@@ -314,6 +314,7 @@ static void driveInitialize(void) {
 	dbg_printf("\n");
 	#endif
 	
+	sdmmc_set_ndma_slot(0);
 	driveInited = true;
 }
 
@@ -1261,7 +1262,7 @@ static inline void sdmmcHandler(void) {
 			//dbg_printf("my_sdmmc_sdcard_readsectors\n");
 			//#endif
 			//bool isDma = sharedAddr[4]==0x53444D41;
-			ongoingIsDma = sharedAddr[4]==0x53444D41;
+			ongoingIsDma = (sharedAddr[4] == 0x53444D41);
 			cardReadLED(true, ongoingIsDma);
 			if (wifiIrq || (sharedAddr[2] % 4) != 0) {
 				sharedAddr[4] = my_sdmmc_sdcard_readsectors(sharedAddr[0], sharedAddr[1], (u8*)sharedAddr[2]);
@@ -1804,7 +1805,7 @@ bool eepromRead(u32 src, void *dst, u32 len) {
 		/*if (saveInRam) {
 			tonccpy(dst, (char*)0x02440000 + src, len);
 		} else {*/
-			sdmmc_set_ndma_slot(-1);
+			sdmmc_set_ndma_slot(4);
 			fileRead(dst, savFile, src, len);
 			sdmmc_set_ndma_slot(0);
 		//}
@@ -1844,7 +1845,7 @@ bool eepromPageWrite(u32 dst, const void *src, u32 len) {
 		/*if (saveInRam) {
 			tonccpy((char*)0x02440000 + dst, src, len);
 		}*/
-		sdmmc_set_ndma_slot(-1);
+		sdmmc_set_ndma_slot(4);
 		fileWrite(src, savFile, dst, len);
 		sdmmc_set_ndma_slot(0);
 		#ifdef TWLSDK
@@ -1883,7 +1884,7 @@ bool eepromPageProg(u32 dst, const void *src, u32 len) {
 		/*if (saveInRam) {
 			tonccpy((char*)0x02440000 + dst, src, len);
 		}*/
-		sdmmc_set_ndma_slot(-1);
+		sdmmc_set_ndma_slot(4);
 		fileWrite(src, savFile, dst, len);
 		sdmmc_set_ndma_slot(0);
   		#ifdef TWLSDK
