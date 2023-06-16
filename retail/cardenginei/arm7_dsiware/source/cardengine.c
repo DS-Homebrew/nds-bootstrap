@@ -207,6 +207,7 @@ static void driveInitialize(void) {
 	dbg_printf("\n");
 	#endif
 	
+	sdmmc_set_ndma_slot(0);
 	driveInited = true;
 }
 
