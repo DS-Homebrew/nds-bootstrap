@@ -948,9 +948,9 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 		*((u16*)(isSdk5(moduleParams) ? 0x02fffc40 : 0x027ffc40)) = 0x2;					// Boot Indicator (Cloneboot/Multiboot)
 	}
 
-	/*if (softResetParams[2] == 0x44414F4C) {
-		*((u16*)(isSdk5(moduleParams) ? 0x02fffcfa : 0x027ffcfa)) = 0x1041;	// NoCash: channel ch1+7+13 (Doesn't seem to work)
-	}*/
+	if (memcmp(romTid, "HND", 3) == 0 || memcmp(romTid, "HNE", 3) == 0) {
+		*((u16*)(isSdk5(moduleParams) ? 0x02fffcfa : 0x027ffcfa)) = 0x1041;	// NoCash: channel ch1+7+13
+	}
 }
 
 int arm7_main(void) {
