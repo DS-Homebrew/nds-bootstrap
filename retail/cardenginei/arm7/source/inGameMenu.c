@@ -18,6 +18,7 @@
 #define REG_EXTKEYINPUT (*(vuint16*)0x04000136)
 
 extern u32 valueBits;
+extern u8 consoleModel;
 
 extern vu32* volatile sharedAddr;
 extern bool ipcEveryFrame;
@@ -73,7 +74,7 @@ void inGameMenu(void) {
 		while (!exitMenu) {
 			sharedAddr[5] = ~REG_KEYINPUT & 0x3FF;
 			sharedAddr[5] |= ((~REG_EXTKEYINPUT & 0x3) << 10) | ((~REG_EXTKEYINPUT & 0xC0) << 6);
-			if ((REG_EXTKEYINPUT & BIT(7)) && (valueBits & sleepMode)) {
+			if ((REG_EXTKEYINPUT & BIT(7)) && (valueBits & sleepMode) && (consoleModel < 2)) {
 				// Save current power state.
 				int power = readPowerManagement(PM_CONTROL_REG);
 				// Set sleep LED. (Does not work)
