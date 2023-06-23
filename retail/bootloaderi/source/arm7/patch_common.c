@@ -15133,12 +15133,8 @@ void bannerSavPatch(const tNDSHeader* ndsHeader) {
 	gbaRomFound = false;	// Do not load GBA ROM
 }*/
 
-static bool rsetA7CacheDone = false;
-
 void rsetA7Cache(void)
 {
-	if (rsetA7CacheDone) return;
-
 	patchOffsetCache.a7BinSize = 0;
 	patchOffsetCache.a7IsThumb = 0;
 	patchOffsetCache.swiHaltOffset = 0;
@@ -15166,26 +15162,6 @@ void rsetA7Cache(void)
 	patchOffsetCache.a7CardReadEndOffset = 0;
 	patchOffsetCache.a7JumpTableFuncOffset = 0;
 	patchOffsetCache.a7JumpTableType = 0;
-
-	rsetA7CacheDone = true;
-}
-
-void rsetPatchCache(bool dsiWare)
-{
-	extern u32 srlAddr;
-
-	if (patchOffsetCache.ver != patchOffsetCacheFileVersion
-	 || patchOffsetCache.type != 0) {
-		if (srlAddr == 0 && !dsiWare && !esrbScreenPrepared) pleaseWaitOutput();
-		u32* moduleParamsOffset = patchOffsetCache.moduleParamsOffset;
-		u32* ltdModuleParamsOffset = patchOffsetCache.ltdModuleParamsOffset;
-		toncset(&patchOffsetCache, 0, sizeof(patchOffsetCacheContents));
-		patchOffsetCache.ver = patchOffsetCacheFileVersion;
-		patchOffsetCache.type = 0;	// 0 = Regular, 1 = B4DS, 2 = HB
-		patchOffsetCache.moduleParamsOffset = moduleParamsOffset;
-		patchOffsetCache.ltdModuleParamsOffset = ltdModuleParamsOffset;
-		rsetA7CacheDone = true;
-	}
 }
 
 u32 patchCardNds(

@@ -494,12 +494,8 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
 	}
 }
 
-static bool rsetA7CacheDone = false;
-
 void rsetA7Cache(void)
 {
-	if (rsetA7CacheDone) return;
-
 	patchOffsetCache.a7BinSize = 0;
 	patchOffsetCache.a7IsThumb = 0;
 	patchOffsetCache.wramEndAddrOffset = 0;
@@ -519,24 +515,6 @@ void rsetA7Cache(void)
 	patchOffsetCache.a7CardReadEndOffset = 0;
 	patchOffsetCache.a7JumpTableFuncOffset = 0;
 	patchOffsetCache.a7JumpTableType = 0;
-
-	rsetA7CacheDone = true;
-}
-
-void rsetPatchCache(void)
-{
-	extern u8 baseUnitCode;
-
-	if (patchOffsetCache.ver != patchOffsetCacheFileVersion
-	 || patchOffsetCache.type != 1) {
-		if ((baseUnitCode > 0 || srlAddr == 0) && !esrbScreenPrepared) pleaseWaitOutput();
-		u32* moduleParamsOffset = patchOffsetCache.moduleParamsOffset;
-		toncset(&patchOffsetCache, 0, sizeof(patchOffsetCacheContents));
-		patchOffsetCache.ver = patchOffsetCacheFileVersion;
-		patchOffsetCache.type = 1;	// 0 = Regular, 1 = B4DS, 2 = HB
-		patchOffsetCache.moduleParamsOffset = moduleParamsOffset;
-		rsetA7CacheDone = true;
-	}
 }
 
 u32 patchCardNds(

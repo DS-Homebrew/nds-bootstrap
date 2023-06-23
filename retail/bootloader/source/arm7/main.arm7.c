@@ -1034,9 +1034,16 @@ int arm7_main(void) {
 	// File containing cached patch offsets
 	aFile patchOffsetCacheFile;
 	getFileFromCluster(&patchOffsetCacheFile, patchOffsetCacheFileCluster);
-	fileRead((char*)&patchOffsetCache, &patchOffsetCacheFile, 0, sizeof(patchOffsetCacheContents));
-	patchOffsetCacheFilePrevCrc = swiCRC16(0xFFFF, &patchOffsetCache, sizeof(patchOffsetCacheContents));
+	fileRead((char*)&patchOffsetCache, &patchOffsetCacheFile, 0, 4);
+	if (patchOffsetCache.ver == patchOffsetCacheFileVersion
+	 && patchOffsetCache.type == 1) {	// 0 = Regular, 1 = B4DS, 2 = HB
+		fileRead((char*)&patchOffsetCache, &patchOffsetCacheFile, 0, sizeof(patchOffsetCacheContents));
+	} else {
+		if (baseUnitCode > 0 || srlAddr == 0) pleaseWaitOutput();
+	}
+
 	u16 prevPatchOffsetCacheFileVersion = patchOffsetCache.ver;
+	patchOffsetCacheFilePrevCrc = swiCRC16(0xFFFF, &patchOffsetCache, sizeof(patchOffsetCacheContents));
 
 	// nocashMessage("Loading the header...\n");
 
@@ -1116,9 +1123,6 @@ int arm7_main(void) {
 	}
 
 	// nocashMessage("Trying to patch the card...\n");
-
-	extern void rsetPatchCache(void);
-	rsetPatchCache();
 
 	ce9Location = *(u32*)CARDENGINE_ARM9_LOCATION_BUFFERED;
 	ce9Alt = (ce9Location == CARDENGINE_ARM9_LOCATION_DLDI_ALT || ce9Location == CARDENGINE_ARM9_LOCATION_DLDI_ALT2);

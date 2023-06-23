@@ -1372,9 +1372,16 @@ int arm7_main(void) {
 	// File containing cached patch offsets
 	aFile patchOffsetCacheFile;
 	getFileFromCluster(&patchOffsetCacheFile, patchOffsetCacheFileCluster, gameOnFlashcard);
-	fileRead((char*)&patchOffsetCache, &patchOffsetCacheFile, 0, sizeof(patchOffsetCacheContents));
-	patchOffsetCacheFilePrevCrc = swiCRC16(0xFFFF, &patchOffsetCache, sizeof(patchOffsetCacheContents));
+	fileRead((char*)&patchOffsetCache, &patchOffsetCacheFile, 0, 4);
+	if (patchOffsetCache.ver == patchOffsetCacheFileVersion
+	 && patchOffsetCache.type == 0) {	// 0 = Regular, 1 = B4DS, 2 = HB
+		fileRead((char*)&patchOffsetCache, &patchOffsetCacheFile, 0, sizeof(patchOffsetCacheContents));
+	} else {
+		if (srlAddr == 0 && !isDSiWare) pleaseWaitOutput();
+	}
+
 	u16 prevPatchOffsetCacheFileVersion = patchOffsetCache.ver;
+	patchOffsetCacheFilePrevCrc = swiCRC16(0xFFFF, &patchOffsetCache, sizeof(patchOffsetCacheContents));
 
 	nocashMessage("Loading the header...\n");
 
@@ -1521,9 +1528,6 @@ int arm7_main(void) {
 
 		newArm7binarySize = ndsHeader->arm7binarySize;
 		newArm7ibinarySize = __DSiHeader->arm7ibinarySize;
-
-		extern void rsetPatchCache(bool dsiWare);
-		rsetPatchCache(true);
 
 		patchHiHeapPointer(moduleParams, ndsHeader, false);
 
@@ -1779,9 +1783,6 @@ int arm7_main(void) {
 		if (strncmp(romTid, "ASM", 3) == 0) {
 			overlayPatch = true; // Allow overlay patching for SM64DS ROM hacks (ex. Mario's Holiday)
 		}
-
-		extern void rsetPatchCache(bool dsiWare);
-		rsetPatchCache(false);
 
 		tonccpy((u32*)ce7Location, (u32*)CARDENGINEI_ARM7_BUFFERED_LOCATION, ce7Size);
 		if (gameOnFlashcard || saveOnFlashcard) {
