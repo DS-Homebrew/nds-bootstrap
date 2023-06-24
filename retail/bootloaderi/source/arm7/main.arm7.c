@@ -1389,9 +1389,10 @@ int arm7_main(void) {
 		fileRead((char*)&patchOffsetCache, &patchOffsetCacheFile, 0, sizeof(patchOffsetCacheContents));
 	} else {
 		if (srlAddr == 0 && !isDSiWare) pleaseWaitOutput();
+		patchOffsetCache.ver = patchOffsetCacheFileVersion;
+		patchOffsetCache.type = 0;
 	}
 
-	u16 prevPatchOffsetCacheFileVersion = patchOffsetCache.ver;
 	patchOffsetCacheFilePrevCrc = swiCRC16(0xFFFF, &patchOffsetCache, sizeof(patchOffsetCacheContents));
 
 	nocashMessage("Loading the header...\n");
@@ -1523,7 +1524,7 @@ int arm7_main(void) {
 		toncset((u32*)UNPATCHED_FUNCTION_LOCATION, 0, 0x40);
 
 		patchOffsetCacheFileNewCrc = swiCRC16(0xFFFF, &patchOffsetCache, sizeof(patchOffsetCacheContents));
-		if (prevPatchOffsetCacheFileVersion != patchOffsetCacheFileVersion || patchOffsetCacheFileNewCrc != patchOffsetCacheFilePrevCrc) {
+		if (patchOffsetCacheFileNewCrc != patchOffsetCacheFilePrevCrc) {
 			fileWrite((char*)&patchOffsetCache, &patchOffsetCacheFile, 0, sizeof(patchOffsetCacheContents));
 		}
 	  } else {
@@ -1655,7 +1656,7 @@ int arm7_main(void) {
 		toncset((u32*)UNPATCHED_FUNCTION_LOCATION, 0, 0x40);
 
 		patchOffsetCacheFileNewCrc = swiCRC16(0xFFFF, &patchOffsetCache, sizeof(patchOffsetCacheContents));
-		if (prevPatchOffsetCacheFileVersion != patchOffsetCacheFileVersion || patchOffsetCacheFileNewCrc != patchOffsetCacheFilePrevCrc) {
+		if (patchOffsetCacheFileNewCrc != patchOffsetCacheFilePrevCrc) {
 			fileWrite((char*)&patchOffsetCache, &patchOffsetCacheFile, 0, sizeof(patchOffsetCacheContents));
 		}
 
@@ -1947,7 +1948,7 @@ int arm7_main(void) {
 		);
 
 		patchOffsetCacheFileNewCrc = swiCRC16(0xFFFF, &patchOffsetCache, sizeof(patchOffsetCacheContents));
-		if (prevPatchOffsetCacheFileVersion != patchOffsetCacheFileVersion || patchOffsetCacheFileNewCrc != patchOffsetCacheFilePrevCrc) {
+		if (patchOffsetCacheFileNewCrc != patchOffsetCacheFilePrevCrc) {
 			fileWrite((char*)&patchOffsetCache, &patchOffsetCacheFile, 0, sizeof(patchOffsetCacheContents));
 		}
 
