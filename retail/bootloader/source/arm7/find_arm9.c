@@ -191,32 +191,14 @@ extern bool isPawsAndClaws(const tNDSHeader* ndsHeader);
 u32* findModuleParamsOffset(const tNDSHeader* ndsHeader) {
 	dbg_printf("findModuleParamsOffset:\n");
 
-	extern u32 srlAddr;
-	u32* moduleParamsOffset = NULL;
-	if (patchOffsetCache.ver != patchOffsetCacheFileVersion
-	 || patchOffsetCache.type != 1) {
-		patchOffsetCache.moduleParamsOffset = 0;
-	} else {
-		moduleParamsOffset = patchOffsetCache.moduleParamsOffset;
-	}
-	if (srlAddr > 0 || !moduleParamsOffset) {
-		moduleParamsOffset = findOffset(
-			(u32*)ndsHeader->arm9destination, ndsHeader->arm9binarySize,
-			moduleParamsSignature, 2
-		);
-		if (moduleParamsOffset) {
-			dbg_printf("Module params offset found: ");
-			patchOffsetCache.moduleParamsOffset = moduleParamsOffset;
-		} else {
-			dbg_printf("Module params offset not found\n");
-		}
-	} else {
-		dbg_printf("Module params offset restored: ");
-	}
-
+	u32* moduleParamsOffset = findOffset(
+		(u32*)ndsHeader->arm9destination, ndsHeader->arm9binarySize,
+		moduleParamsSignature, 2
+	);
 	if (moduleParamsOffset) {
-		dbg_hexa((u32)moduleParamsOffset);
-		dbg_printf("\n");
+		dbg_printf("Module params offset found\n");
+	} else {
+		dbg_printf("Module params offset not found\n");
 	}
 
 	return moduleParamsOffset;
@@ -225,31 +207,14 @@ u32* findModuleParamsOffset(const tNDSHeader* ndsHeader) {
 u32* findLtdModuleParamsOffset(const tNDSHeader* ndsHeader) {
 	dbg_printf("findLtdModuleParamsOffset:\n");
 
-	u32* moduleParamsOffset = NULL;
-	if (patchOffsetCache.ver != patchOffsetCacheFileVersion
-	 || patchOffsetCache.type != 1) {
-		patchOffsetCache.ltdModuleParamsOffset = 0;
-	} else {
-		moduleParamsOffset = patchOffsetCache.ltdModuleParamsOffset;
-	}
-	if (!moduleParamsOffset) {
-		moduleParamsOffset = findOffset(
-			(u32*)ndsHeader->arm9destination, ndsHeader->arm9binarySize,
-			moduleParamsLtdSignature, 2
-		);
-		if (moduleParamsOffset) {
-			dbg_printf("Ltd module params offset found: ");
-			patchOffsetCache.ltdModuleParamsOffset = moduleParamsOffset;
-		} else {
-			dbg_printf("Ltd module params offset not found\n");
-		}
-	} else {
-		dbg_printf("Ltd module params offset restored: ");
-	}
-
+	u32* moduleParamsOffset = findOffset(
+		(u32*)ndsHeader->arm9destination, ndsHeader->arm9binarySize,
+		moduleParamsLtdSignature, 2
+	);
 	if (moduleParamsOffset) {
-		dbg_hexa((u32)moduleParamsOffset);
-		dbg_printf("\n");
+		dbg_printf("Ltd module params offset found\n");
+	} else {
+		dbg_printf("Ltd module params offset not found\n");
 	}
 
 	return moduleParamsOffset;

@@ -1045,8 +1045,20 @@ void patchSharedFontPath(const cardengineArm9* ce9, const tNDSHeader* ndsHeader,
 		dbg_hexa((u32)fileIoRead);
 		dbg_printf("\n\n");
 
-		extern u32* findLtdModuleParamsOffset(const tNDSHeader* ndsHeader);
-		ltd_module_params_t* ltdModuleParams = (ltd_module_params_t*)(findLtdModuleParamsOffset(ndsHeader) - 4);
+		ltd_module_params_t* ltdModuleParams = (ltd_module_params_t*)patchOffsetCache.ltdModuleParamsOffset;
+		if (!ltdModuleParams) {
+			extern u32* findLtdModuleParamsOffset(const tNDSHeader* ndsHeader);
+			ltdModuleParams = (ltd_module_params_t*)(findLtdModuleParamsOffset(ndsHeader) - 4);
+			if (ltdModuleParams) {
+				patchOffsetCache.ltdModuleParamsOffset = (u32*)ltdModuleParams;
+			}
+		}
+
+		if (ltdModuleParams) {
+			dbg_printf("Ltd module params offset: ");
+			dbg_hexa((u32)ltdModuleParams);
+			dbg_printf("\n");		
+		}
 
 		u32 iUncompressedSizei = arm9ibinarySize;
 

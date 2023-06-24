@@ -472,9 +472,20 @@ static module_params_t* buildModuleParams(u32 donorSdkVer) {
 }
 
 static module_params_t* getModuleParams(const tNDSHeader* ndsHeader) {
-	// nocashMessage("Looking for moduleparams...\n");
+	u32* moduleParamsOffset = patchOffsetCache.moduleParamsOffset;
+	if (!patchOffsetCache.moduleParamsOffset) {
+		// nocashMessage("Looking for moduleparams...\n");
+		moduleParamsOffset = findModuleParamsOffset(ndsHeader);
+		if (moduleParamsOffset) {
+			patchOffsetCache.moduleParamsOffset = moduleParamsOffset;
+		}
+	}
 
-	u32* moduleParamsOffset = findModuleParamsOffset(ndsHeader);
+	if (moduleParamsOffset) {
+		dbg_printf("Module params offset: ");
+		dbg_hexa((u32)moduleParamsOffset);
+		dbg_printf("\n");
+	}
 
 	//module_params_t* moduleParams = (module_params_t*)((u32)moduleParamsOffset - 0x1C);
 	return moduleParamsOffset ? (module_params_t*)(moduleParamsOffset - 7) : NULL;

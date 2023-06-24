@@ -565,9 +565,20 @@ static module_params_t* buildModuleParams(u32 donorSdkVer) {
 }
 
 static module_params_t* getModuleParams(const tNDSHeader* ndsHeader) {
-	nocashMessage("Looking for moduleparams...\n");
+	u32* moduleParamsOffset = patchOffsetCache.moduleParamsOffset;
+	if (!patchOffsetCache.moduleParamsOffset) {
+		nocashMessage("Looking for moduleparams...\n");
+		moduleParamsOffset = findModuleParamsOffset(ndsHeader);
+		if (moduleParamsOffset) {
+			patchOffsetCache.moduleParamsOffset = moduleParamsOffset;
+		}
+	}
 
-	u32* moduleParamsOffset = findModuleParamsOffset(ndsHeader);
+	if (moduleParamsOffset) {
+		dbg_printf("Module params offset: ");
+		dbg_hexa((u32)moduleParamsOffset);
+		dbg_printf("\n");
+	}
 
 	//module_params_t* moduleParams = (module_params_t*)((u32)moduleParamsOffset - 0x1C);
 	return moduleParamsOffset ? (module_params_t*)(moduleParamsOffset - 7) : NULL;
@@ -1387,10 +1398,21 @@ int arm7_main(void) {
 
 	bool foundModuleParams;
 	module_params_t* moduleParams = loadModuleParams(&dsiHeaderTemp.ndshdr, &foundModuleParams);
-	ltd_module_params_t* ltdModuleParams = NULL;
+	ltd_module_params_t* ltdModuleParams = (ltd_module_params_t*)patchOffsetCache.ltdModuleParamsOffset;
 	if (dsiHeaderTemp.ndshdr.unitCode > 0) {
-		extern u32* findLtdModuleParamsOffset(const tNDSHeader* ndsHeader);
-		ltdModuleParams = (ltd_module_params_t*)(findLtdModuleParamsOffset(&dsiHeaderTemp.ndshdr) - 4);
+		if (!ltdModuleParams) {
+			extern u32* findLtdModuleParamsOffset(const tNDSHeader* ndsHeader);
+			ltdModuleParams = (ltd_module_params_t*)(findLtdModuleParamsOffset(&dsiHeaderTemp.ndshdr) - 4);
+			if (ltdModuleParams) {
+				patchOffsetCache.ltdModuleParamsOffset = (u32*)ltdModuleParams;
+			}
+		}
+
+		if (ltdModuleParams) {
+			dbg_printf("Ltd module params offset: ");
+			dbg_hexa((u32)ltdModuleParams);
+			dbg_printf("\n");		
+		}
 	}
     dbg_printf("sdk_version: ");
     dbg_hexa(moduleParams->sdk_version);
