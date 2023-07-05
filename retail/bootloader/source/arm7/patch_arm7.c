@@ -375,9 +375,18 @@ u32 patchCardNdsArm7(
 		extern u32 donorFileTwlCluster;	// SDK5 (TWL)
 		aFile donorRomFile;
 		getFileFromCluster(&donorRomFile, donorFileTwlCluster);
-		if (donorRomFile.firstCluster == CLUSTER_FREE && ndsHeader->gameCode[0] != 'D') {
-			dbg_printf("ERR_LOAD_OTHR\n\n");
-			return ERR_LOAD_OTHR;
+		if (donorRomFile.firstCluster == CLUSTER_FREE) {
+			if (ndsHeader->gameCode[0] == 'D') {
+				if (newArm7binarySize != patchOffsetCache.a7BinSize) {
+					rsetA7Cache(); // Reset arm7 hook offsets
+					patchOffsetCache.a7BinSize = newArm7binarySize;
+				}
+				dbg_printf("ERR_NONE\n\n");
+				return ERR_NONE;
+			} else {
+				dbg_printf("ERR_LOAD_OTHR\n\n");
+				return ERR_LOAD_OTHR;
+			}
 		}
 		u32 arm7dst = 0;
 		fileRead((char*)&arm7dst, &donorRomFile, 0x38, 0x4);
