@@ -169,6 +169,7 @@ int hookNdsRetailArm9(
 	u32 ramDumpCluster,
 	u32 srParamsFileCluster,
 	u32 screenshotCluster,
+	u32 apFixOverlaysCluster,
 	u32 musicCluster,
 	u32 musicsSize,
 	u32 pageFileCluster,
@@ -202,6 +203,7 @@ int hookNdsRetailArm9(
 	ce9->ramDumpCluster         = ramDumpCluster;
 	ce9->srParamsCluster        = srParamsFileCluster;
 	ce9->screenshotCluster      = screenshotCluster;
+	ce9->apFixOverlaysCluster   = apFixOverlaysCluster;
 	ce9->musicCluster           = musicCluster;
 	ce9->musicsSize             = musicsSize;
 	ce9->pageFileCluster        = pageFileCluster;
@@ -225,7 +227,7 @@ int hookNdsRetailArm9(
 	if (isSdk5(moduleParams)) {
 		ce9->valueBits |= b_isSdk5;
 	}
-	if (strncmp(romTid, "NTRJ", 4) != 0 && (expansionPakFound || (extendedMemory && !dsDebugRam && strncmp(romTid, "UBRP", 4) != 0)) && ce9->overlaysSize <= romSizeLimit) {
+	if ((expansionPakFound || (extendedMemory && !dsDebugRam && strncmp(romTid, "UBRP", 4) != 0)) && ce9->overlaysSize <= romSizeLimit) {
 		ce9->valueBits |= b_overlaysCached;
 	}
 	if (strncmp(romTid, "CLJ", 3) == 0) {

@@ -83,6 +83,7 @@ static aFile savFile;
 static aFile ramDumpFile;
 static aFile srParamsFile;
 static aFile screenshotFile;
+static aFile apFixOverlaysFile;
 static aFile musicsFile;
 static aFile pageFile;
 static aFile manualFile;
@@ -151,7 +152,6 @@ static bool initialized = false;
 static bool region0FixNeeded = false;
 static bool igmReset = false;
 static bool mpuSet = false;
-static bool mariosHolidayPrimaryFixApplied = false;
 static bool isDSiWare = false;
 
 static bool IPC_SYNC_hooked = false;
@@ -245,7 +245,6 @@ void reset(u32 param) {
 
 	mpuSet = false;
 	IPC_SYNC_hooked = false;
-	mariosHolidayPrimaryFixApplied = false;
 
 	toncset((char*)((ce9->valueBits & isSdk5) ? 0x02FFFD80 : 0x027FFD80), 0, 0x80);
 	toncset((char*)((ce9->valueBits & isSdk5) ? 0x02FFFF80 : 0x027FFF80), 0, 0x80);
@@ -596,6 +595,7 @@ static void initialize(void) {
 		getFileFromCluster(&ramDumpFile, ce9->ramDumpCluster);
 		getFileFromCluster(&srParamsFile, ce9->srParamsCluster);
 		getFileFromCluster(&screenshotFile, ce9->screenshotCluster);
+		getFileFromCluster(&apFixOverlaysFile, ce9->apFixOverlaysCluster);
 		getFileFromCluster(&pageFile, ce9->pageFileCluster);
 		getFileFromCluster(&manualFile, ce9->manualCluster);
 		#ifndef NODSIWARE
@@ -695,18 +695,7 @@ static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
 	nocashMessage("\n");*/
 
 	//nocashMessage("aaaaaaaaaa\n");
-	fileRead((char*)dst, &romFile, src, len);
-
-	if (!(ce9->valueBits & isSdk5) && (u32)ndsHeader->gameCode == 0x504D5341 /*ASMP*/ && !mariosHolidayPrimaryFixApplied) {
-		for (u32 i = 0; i < len; i += 4) {
-			if (*(u32*)(dst+i) == 0x4B434148) {
-				*(u32*)(dst+i) = 0xA00;
-				mariosHolidayPrimaryFixApplied = true;
-				break;
-			}
-		}
-		if (cardReadCount > 10) mariosHolidayPrimaryFixApplied = true;
-	}
+	fileRead((char*)dst, (ce9->apFixOverlaysCluster && src >= ndsHeader->arm9romOffset+ndsHeader->arm9binarySize && src < ndsHeader->arm7romOffset) ? &apFixOverlaysFile : &romFile, src, len);
 
 	//nocashMessage("end\n");
 

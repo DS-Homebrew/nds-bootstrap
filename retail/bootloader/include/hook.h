@@ -56,6 +56,7 @@ int hookNdsRetailArm9(
 	u32 ramDumpCluster,
 	u32 srParamsFileCluster,
 	u32 screenshotCluster,
+	u32 apFixOverlaysCluster,
 	u32 musicCluster,
 	u32 musicsSize,
 	u32 pageFileCluster,

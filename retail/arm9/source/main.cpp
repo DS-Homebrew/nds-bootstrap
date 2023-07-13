@@ -475,11 +475,6 @@ static int runNdsFile(configuration* conf) {
 		if (stat(wideCheatFilePath.c_str(), &stWideCheat) >= 0) {
 			clusterWideCheat = stWideCheat.st_ino;
 		}
-
-		if (stat(apFixOverlaysPath.c_str(), &stApFixOverlays) >= 0) {
-			apFixOverlaysCluster = stApFixOverlays.st_ino;
-		}
-
 	}
 
 	if (stat(conf->manualPath, &stManual) >= 0) {
@@ -488,6 +483,10 @@ static int runNdsFile(configuration* conf) {
 
 	if (stat(screenshotPath.c_str(), &stScreenshot) >= 0) {
 		clusterScreenshot = stScreenshot.st_ino;
+	}
+
+	if (stat(apFixOverlaysPath.c_str(), &stApFixOverlays) >= 0) {
+		apFixOverlaysCluster = stApFixOverlays.st_ino;
 	}
 
 	if (stat(musicsFilePath.c_str(), &stMusic) >= 0) {

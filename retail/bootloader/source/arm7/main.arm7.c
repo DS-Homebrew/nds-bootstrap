@@ -103,6 +103,7 @@ extern u32 patchOffsetCacheFileCluster;
 extern u32 ramDumpCluster;
 extern u32 srParamsFileCluster;
 extern u32 screenshotCluster;
+extern u32 apFixOverlaysCluster;
 extern u32 musicCluster;
 extern u32 musicsSize;
 extern u32 pageFileCluster;
@@ -828,6 +829,45 @@ static void loadOverlaysintoRAM(const tNDSHeader* ndsHeader, const module_params
 	}
 }
 
+static void loadOverlaysintoFile(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, aFile* file) {
+	// Load overlays into RAM
+	if (overlaysSize <= 0x700000)
+	{
+		aFile apFixOverlaysFile;
+		getFileFromCluster(&apFixOverlaysFile, apFixOverlaysCluster);
+
+		const u32 buffer = 0x037F8000;
+		const u16 bufferSize = 0x8000;
+		s32 len = (s32)overlaysSize;
+		u32 dst = 0;
+		while (1) {
+			u32 readLen = (len > bufferSize) ? bufferSize : len;
+
+			fileRead((char*)buffer, file, (ndsHeader->arm9romOffset + ndsHeader->arm9binarySize)+dst, readLen);
+			fileWrite((char*)buffer, &apFixOverlaysFile, (ndsHeader->arm9romOffset + ndsHeader->arm9binarySize)+dst, readLen);
+
+			len -= bufferSize;
+			dst += bufferSize;
+
+			if (len <= 0) {
+				break;
+			}
+		}
+		toncset((char*)buffer, 0, bufferSize);
+
+		if (!isSdk5(moduleParams)) {
+			u32 word = 0;
+			fileRead((char*)&word, &apFixOverlaysFile, 0x3128AC, sizeof(u32));
+			if (word == 0x4B434148) {
+				word = 0xA00;	// Primary fix for Mario's Holiday
+				fileWrite((char*)&word, &apFixOverlaysFile, 0x3128AC, sizeof(u32));
+			}
+		}
+	} else {
+		apFixOverlaysCluster = 0;
+	}
+}
+
 static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, aFile romFile) {
 	if (ROMsupportsDsiMode(ndsHeader)) {
 		/*if (ndsHeader->arm9destination >= 0x02000800) {
@@ -1062,7 +1102,7 @@ int arm7_main(void) {
 	bool foundModuleParams;
 	module_params_t* moduleParams = loadModuleParams(&dsiHeaderTemp.ndshdr, &foundModuleParams);
 
-	if (dsiHeaderTemp.ndshdr.unitCode < 3 && dsiHeaderTemp.ndshdr.gameCode[0] != 'K' && dsiHeaderTemp.ndshdr.gameCode[0] != 'Z' &&  srlAddr == 0 && (softResetParams[0] == 0 || softResetParams[0] == 0xFFFFFFFF)) {
+	if (dsiHeaderTemp.ndshdr.unitCode < 3 && dsiHeaderTemp.ndshdr.gameCode[0] != 'K' && dsiHeaderTemp.ndshdr.gameCode[0] != 'Z' && srlAddr == 0 && (softResetParams[0] == 0 || softResetParams[0] == 0xFFFFFFFF)) {
 		esrbOutput();
 	}
 
@@ -1335,8 +1375,11 @@ int arm7_main(void) {
 		errorOutput();
 	}
 
-	if (expansionPakFound || (extendedMemory2 && !dsDebugRam && strncmp(romTid, "UBRP", 4) != 0)) {
+	bool overlaysInRam = (expansionPakFound || (extendedMemory2 && !dsDebugRam && strncmp(romTid, "UBRP", 4) != 0));
+	if (overlaysInRam) {
 		loadOverlaysintoRAM(ndsHeader, moduleParams, &romFile, ROMinRAM);
+	} else {
+		loadOverlaysintoFile(ndsHeader, moduleParams, &romFile);
 	}
 
 	aFile bootNds;
@@ -1358,6 +1401,7 @@ int arm7_main(void) {
 		ramDumpCluster,
 		srParamsFileCluster,
 		screenshotCluster,
+		apFixOverlaysCluster,
 		musicCluster,
 		musicsSize,
 		pageFileCluster,
@@ -1396,7 +1440,7 @@ int arm7_main(void) {
 			}
 		}
 		fileRead((char*)IMAGES_LOCATION, &apPatchFile, 0, apPatchSize);
-		if (applyIpsPatch(ndsHeader, (u8*)IMAGES_LOCATION, (*(u8*)(IMAGES_LOCATION+apPatchSize-1) == 0xA9), ROMinRAM)) {
+		if (applyIpsPatch(ndsHeader, (u8*)IMAGES_LOCATION, (*(u8*)(IMAGES_LOCATION+apPatchSize-1) == 0xA9), ROMinRAM, (overlaysInRam && overlaysSize <= 0x700000))) {
 			dbg_printf("AP-fix applied\n");
 		} else {
 			dbg_printf("Failed to apply AP-fix\n");

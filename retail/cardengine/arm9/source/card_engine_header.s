@@ -43,6 +43,8 @@ srParamsCluster:
 	.word	0x00000000
 screenshotCluster:
 	.word	0x00000000
+apFixOverlaysCluster:
+	.word	0x00000000
 musicCluster:
 	.word	0x00000000
 musicsSize:

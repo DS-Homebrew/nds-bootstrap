@@ -2021,6 +2021,24 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 			consoleClear();
 		}
+
+		apFixOverlaysPath = "fat:/_nds/nds-bootstrap/apFixOverlays.bin";
+
+		if (!conf->isDSiWare && access(apFixOverlaysPath.c_str(), F_OK) != 0) {
+			consoleDemoInit();
+			iprintf("Allocating space for\n");
+			iprintf("AP-fixed overlays.\n");
+			iprintf("Please wait...\n");
+
+			FILE *apFixOverlaysFile = fopen(apFixOverlaysPath.c_str(), "wb");
+			if (apFixOverlaysFile) {
+				fseek(apFixOverlaysFile, 0x800000 - 1, SEEK_SET);
+				fputc('\0', apFixOverlaysFile);
+				fclose(apFixOverlaysFile);
+			}
+
+			consoleClear();
+		}
 	}
 
 	if (conf->gameOnFlashcard || !conf->isDSiWare) {
