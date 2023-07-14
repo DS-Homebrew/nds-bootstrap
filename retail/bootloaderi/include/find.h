@@ -11,7 +11,10 @@
 // COMMON
 //u8* memsearch(const u8* start, u32 dataSize, const u8* find, u32 findSize);
 u32* memsearch32(const u32* start, u32 dataSize, const u32* find, u32 findSize, bool forward);
+u32* memsearch32_2(const u32* start, u32 dataSize, const u32* find, const u32* find2, u32 findSize, bool forward);
+u32* memsearch32_3(const u32* start, u32 dataSize, const u32* find, const u32* find2, const u32* find3, u32 findSize, bool forward);
 u16* memsearch16(const u16* start, u32 dataSize, const u16* find, u32 findSize, bool forward);
+u16* memsearch16_4(const u16* start, u32 dataSize, const u16* find, const u16* find2, const u16* find3, const u16* find4, u32 findSize, bool forward);
 
 inline u32* findOffset(const u32* start, u32 dataSize, const u32* find, u32 findLen) {
 	return memsearch32(start, dataSize, find, findLen*sizeof(u32), true);
@@ -19,11 +22,20 @@ inline u32* findOffset(const u32* start, u32 dataSize, const u32* find, u32 find
 inline u32* findOffsetBackwards(const u32* start, u32 dataSize, const u32* find, u32 findLen) {
 	return memsearch32(start, dataSize, find, findLen*sizeof(u32), false);
 }
+inline u32* findOffsetBackwards2(const u32* start, u32 dataSize, const u32* find, const u32* find2, u32 findLen) {
+	return memsearch32_2(start, dataSize, find, find2, findLen*sizeof(u32), false);
+}
+inline u32* findOffsetBackwards3(const u32* start, u32 dataSize, const u32* find, const u32* find2, const u32* find3, u32 findLen) {
+	return memsearch32_3(start, dataSize, find, find2, find3, findLen*sizeof(u32), false);
+}
 inline u16* findOffsetThumb(const u16* start, u32 dataSize, const u16* find, u32 findLen) {
 	return memsearch16(start, dataSize, find, findLen*sizeof(u16), true);
 }
 inline u16* findOffsetBackwardsThumb(const u16* start, u32 dataSize, const u16* find, u32 findLen) {
 	return memsearch16(start, dataSize, find, findLen*sizeof(u16), false);
+}
+inline u16* findOffsetBackwardsThumb4(const u16* start, u32 dataSize, const u16* find, const u16* find2, const u16* find3, const u16* find4, u32 findLen) {
+	return memsearch16_4(start, dataSize, find, find2, find3, find4, findLen*sizeof(u16), false);
 }
 
 // ARM9
