@@ -120,7 +120,8 @@ static const u16 cardReadDmaStartSignatureThumb3[1]  = {0xB5F8}; // SDK >= 3
 
 // Card end read DMA
 static const u16 cardEndReadDmaSignatureThumb3[1]  = {0x481E};
-static const u32 cardEndReadDmaSignature4[1]  = {0xE3A00702};
+static const u32 cardEndReadDmaSignature4[1]    = {0xE3A00702};
+static const u32 cardEndReadDmaSignature4Alt[1] = {0xE3A04702};
 static const u16 cardEndReadDmaSignatureThumb4[2]  = {0x2002, 0x0480};
 static const u32 cardEndReadDmaSignature5[4]  = {0xE59F0010, 0xE3A02000, 0xE5901000, 0xE5812000};
 static const u16 cardEndReadDmaSignatureThumb5[4]  = {0x4803, 0x2200, 0x6801, 0x600A};
@@ -134,6 +135,7 @@ static const u32 cardSetDmaSignatureStart2Early[4]  = {0xE92D4000, 0xE24DD004, 0
 static const u32 cardSetDmaSignatureStart2[3]       = {0xE92D4010, 0xE59F403C, 0xE59F103C};
 static const u32 cardSetDmaSignatureStart3[3]       = {0xE92D4010, 0xE59F4038, 0xE59F1038};
 static const u32 cardSetDmaSignatureStart4[3]       = {0xE92D4038, 0xE59F4038, 0xE59F1038};
+static const u32 cardSetDmaSignatureStart4Alt[3]    = {0xE92D4038, 0xE59F5038, 0xE59F1038};
 static const u32 cardSetDmaSignatureStart5[2]       = {0xE92D4070, 0xE1A06000};
 static const u32 cardSetDmaSignatureStart5Alt[2]    = {0xE92D4038, 0xE1A05000};
 static const u16 cardSetDmaSignatureStartThumb5[2]  = {0xB570, 0x1C05};
@@ -2667,7 +2669,13 @@ u32* findCardEndReadDma(const tNDSHeader* ndsHeader, const module_params_t* modu
   		offset = findOffset(
       		(u32*)*offsetDmaHandler, 0x200,//ndsHeader->arm9binarySize,
             cardEndReadDmaSignature4, 1
-        ); 
+        );
+		if (!offset) {
+			offset = findOffset(
+				(u32*)*offsetDmaHandler, 0x200,//ndsHeader->arm9binarySize,
+				cardEndReadDmaSignature4Alt, 1
+			);
+		}
     } 
 
 	if (!offset) {
@@ -2836,11 +2844,18 @@ u32* findCardSetDma(const tNDSHeader* ndsHeader, const module_params_t* modulePa
             cardSetDmaSignatureStartThumb3, 4
         );
 	}
-	if (!offset && !usesThumb && moduleParams->sdk_version > 0x3000000 && moduleParams->sdk_version < 0x4000000) {
-  		offset = findOffsetBackwards(
-      		cardSetDmaEndOffset, 0x60,
-            cardSetDmaSignatureStart3, 3
-        );
+	if (!offset && !usesThumb) {
+		if (moduleParams->sdk_version > 0x3000000 && moduleParams->sdk_version < 0x4000000) {
+			offset = findOffsetBackwards(
+				cardSetDmaEndOffset, 0x60,
+				cardSetDmaSignatureStart3, 3
+			);
+		} else if (moduleParams->sdk_version > 0x4000000) {
+			offset = findOffsetBackwards(
+				cardSetDmaEndOffset, 0x60,
+				cardSetDmaSignatureStart4Alt, 3
+			);
+		}
 	}
 
     if (offset) {
