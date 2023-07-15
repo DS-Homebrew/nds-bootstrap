@@ -1222,6 +1222,9 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 
 	if (memcmp(romTid, "HND", 3) == 0 || memcmp(romTid, "HNE", 3) == 0) {
 		*((u16*)(isSdk5(moduleParams) ? 0x02fffcfa : 0x027ffcfa)) = 0x1041;	// NoCash: channel ch1+7+13
+		if (!(REG_SCFG_ROM & BIT(9))) {
+			*(u32*)0x03FFFFC8 = 0x7884;	// Fix sound pitch table for downloaded SDK5 SRL
+		}
 	}
 }
 

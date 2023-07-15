@@ -90,6 +90,7 @@ extern void arm7clearRAM(void);
 extern void arm7code(u32* addr);
 
 //extern u32 _start;
+extern u16 a9ScfgRom;
 extern u32 storedFileCluster;
 extern u32 romSize;
 extern u32 initDisc;
@@ -1001,6 +1002,9 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 
 	if (memcmp(romTid, "HND", 3) == 0 || memcmp(romTid, "HNE", 3) == 0) {
 		*((u16*)(isSdk5(moduleParams) ? 0x02fffcfa : 0x027ffcfa)) = 0x1041;	// NoCash: channel ch1+7+13
+		if (a9ScfgRom == 1 && REG_SCFG_ROM != 0x703) {
+			*(u32*)0x03FFFFC8 = 0x7884;	// Fix sound pitch table for downloaded SDK5 SRL
+		}
 	}
 }
 
@@ -1506,8 +1510,6 @@ int arm7_main(void) {
 
 	clearScreen();
 
-	REG_SCFG_EXT = 0x12A03000;
-
 	arm9_stateFlag = ARM9_SETSCFG;
 	while (arm9_stateFlag != ARM9_READY);
 
@@ -1524,6 +1526,8 @@ int arm7_main(void) {
 			fileWrite((char*)0x02000000, &ramDumpFile, 0, 0x400000);
 		}
 	}
+
+	REG_SCFG_EXT = 0x12A03000;
 
 	startBinary_ARM7();
 
