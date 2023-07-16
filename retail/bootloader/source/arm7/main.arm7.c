@@ -1085,7 +1085,15 @@ int arm7_main(void) {
 	// nocashMessage("Loading the NDS file...\n");
 
 	loadBinary_ARM7(&dsiHeaderTemp, &romFile);
-	
+	if (dsiHeaderTemp.ndshdr.arm9binarySize == 0) {
+		dbg_printf("ARM9 binary is empty!");
+		errorOutput();
+	}
+	if (dsiHeaderTemp.ndshdr.arm7binarySize == 0) {
+		dbg_printf("ARM7 binary is empty!");
+		errorOutput();
+	}
+
 	// File containing cached patch offsets
 	aFile patchOffsetCacheFile;
 	getFileFromCluster(&patchOffsetCacheFile, patchOffsetCacheFileCluster);

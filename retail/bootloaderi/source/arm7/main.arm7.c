@@ -1356,7 +1356,11 @@ int arm7_main(void) {
 	//bool dsiModeConfirmed;
 	loadBinary_ARM7(&dsiHeaderTemp, romFile);
 	if (dsiHeaderTemp.ndshdr.arm9binarySize == 0) {
-		dbg_printf("ARM9 binary is empty!\n");
+		dbg_printf("ARM9 binary is empty!");
+		errorOutput();
+	}
+	if (dsiHeaderTemp.ndshdr.arm7binarySize == 0) {
+		dbg_printf("ARM7 binary is empty!");
 		errorOutput();
 	}
 	if (isDSiWare)
