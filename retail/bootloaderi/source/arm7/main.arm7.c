@@ -79,6 +79,9 @@
 
 //#define resetCpu() __asm volatile("\tswi 0x000000\n");
 
+extern void sdmmc_set_ndma_slot(int slot);
+extern void sdmmc_lock_ndma_slot(void);
+
 extern void arm7clearRAM(void);
 extern void arm7code(u32* addr);
 
@@ -149,6 +152,7 @@ u16 baseSecureCRC = 0;
 u32 baseRomSize = 0;
 u32 baseChipID = 0;
 bool pkmnHeader = false;
+bool ndmaDisabled = false;
 
 u32 newArm7binarySize = 0;
 u32 newArm7ibinarySize = 0;
@@ -624,10 +628,46 @@ static void loadBinary_ARM7(const tDSiHeader* dsiHeaderTemp, aFile* file) {
 		aFile pageFile;
 		getFileFromCluster(&pageFile, pageFileCluster, bootstrapOnFlashcard);
 
+		if (!gameOnFlashcard) {
+			// Test NDMA readability
+			u32 arm9size = 0;
+			fileRead((char*)&arm9size, &pageFile, 0x2C, sizeof(u32));
+			if (arm9size == 0) {
+				// NDMA unusable, fallback to CPU SD reads
+				sdmmc_set_ndma_slot(4);
+				sdmmc_lock_ndma_slot();
+				resetPrevSect(&pageFile);
+				ndmaDisabled = true;
+
+				fileRead((char*)&arm9size, &pageFile, 0x2C, sizeof(u32));
+				if (arm9size != 0) {
+					dbg_printf("SD card is not compatible with NDMA reads!\n");
+				}
+			}
+		}
+
 		fileRead((char*)dsiHeaderTemp, &pageFile, 0x2BFE00, 0x160);
 		fileRead(dsiHeaderTemp->ndshdr.arm9destination, &pageFile, 0, dsiHeaderTemp->ndshdr.arm9binarySize);
 		fileRead(dsiHeaderTemp->ndshdr.arm7destination, &pageFile, 0x2C0000, dsiHeaderTemp->ndshdr.arm7binarySize);
 	} else {
+		if (!gameOnFlashcard) {
+			// Test NDMA readability
+			u32 arm9size = 0;
+			fileRead((char*)&arm9size, file, 0x2C, sizeof(u32));
+			if (arm9size == 0) {
+				// NDMA unusable, fallback to CPU SD reads
+				sdmmc_set_ndma_slot(4);
+				sdmmc_lock_ndma_slot();
+				resetPrevSect(file);
+				ndmaDisabled = true;
+
+				fileRead((char*)&arm9size, file, 0x2C, sizeof(u32));
+				if (arm9size != 0) {
+					dbg_printf("SD card is not compatible with NDMA reads!\n");
+				}
+			}
+		}
+
 		srlAddr = softResetParams[3];
 		fileRead((char*)dsiHeaderTemp, file, srlAddr, sizeof(*dsiHeaderTemp));
 		if (srlAddr > 0 && ((u32)dsiHeaderTemp->ndshdr.arm9destination < 0x02000000 || (u32)dsiHeaderTemp->ndshdr.arm9destination > 0x02004000)) {
@@ -1315,6 +1355,10 @@ int arm7_main(void) {
 
 	//bool dsiModeConfirmed;
 	loadBinary_ARM7(&dsiHeaderTemp, romFile);
+	if (dsiHeaderTemp.ndshdr.arm9binarySize == 0) {
+		dbg_printf("ARM9 binary is empty!\n");
+		errorOutput();
+	}
 	if (isDSiWare)
 	{
 		dsiModeConfirmed = true;
@@ -1640,6 +1684,7 @@ int arm7_main(void) {
 			consoleModel,
 			romRead_LED,
 			dmaRomRead_LED,
+			ndmaDisabled,
 			twlTouch,
 			false
 		);
@@ -1923,6 +1968,7 @@ int arm7_main(void) {
 			consoleModel,
 			romRead_LED,
 			dmaRomRead_LED,
+			ndmaDisabled,
 			twlTouch,
 			usesCloneboot
 		);

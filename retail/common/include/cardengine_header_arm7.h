@@ -98,6 +98,7 @@ typedef struct cardengineArm7 {
 		17: sleepMode
 		18: dsiBios
 		19: bootstrapOnFlashcard
+		20: ndmaDisabled
 		31: scfgLocked
 	*/
     u32* languageAddr;

@@ -75,6 +75,7 @@
 #define sleepMode BIT(17)
 #define dsiBios BIT(18)
 #define bootstrapOnFlashcard BIT(19)
+#define ndmaDisabled BIT(20)
 #define scfgLocked BIT(31)
 
 #define	REG_EXTKEYINPUT	(*(vuint16*)0x04000136)
@@ -313,7 +314,11 @@ static void driveInitialize(void) {
 	dbg_hexa(saveCluster);	
 	dbg_printf("\n");
 	#endif
-	
+
+	if (valueBits & ndmaDisabled) {
+		sdmmc_lock_ndma_slot();
+	}
+
 	sdmmc_set_ndma_slot(0);
 	driveInited = true;
 }
@@ -1264,7 +1269,7 @@ static inline void sdmmcHandler(void) {
 			//bool isDma = sharedAddr[4]==0x53444D41;
 			ongoingIsDma = (sharedAddr[4] == 0x53444D41);
 			cardReadLED(true, ongoingIsDma);
-			if (wifiIrq || (sharedAddr[2] % 4) != 0) {
+			if (wifiIrq || (sharedAddr[2] % 4) != 0 || (valueBits & ndmaDisabled)) {
 				sharedAddr[4] = my_sdmmc_sdcard_readsectors(sharedAddr[0], sharedAddr[1], (u8*)sharedAddr[2]);
 				cardReadLED(false, ongoingIsDma);
 			} else {

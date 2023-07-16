@@ -36,11 +36,17 @@
 
 
 static int ndmaSlot = 4;
+static bool ndmaSlotLocked = false;
 struct mmcdevice handleNAND;
 struct mmcdevice handleSD;
 
 void sdmmc_set_ndma_slot(int slot) {
+	if (ndmaSlotLocked) return;
 	ndmaSlot = slot;
+}
+
+void sdmmc_lock_ndma_slot(void) {
+	ndmaSlotLocked = true;
 }
 
 mmcdevice *getMMCDevice(int drive)

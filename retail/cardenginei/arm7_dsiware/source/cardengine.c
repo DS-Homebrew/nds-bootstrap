@@ -48,6 +48,7 @@
 #define hiyaCfwFound BIT(10)
 #define wideCheatUsed BIT(12)
 #define twlTouch BIT(15)
+#define ndmaDisabled BIT(20)
 #define scfgLocked BIT(31)
 
 #define	REG_EXTKEYINPUT	(*(vuint16*)0x04000136)
@@ -207,6 +208,10 @@ static void driveInitialize(void) {
 	dbg_printf("\n");
 	#endif
 	
+	if (valueBits & ndmaDisabled) {
+		sdmmc_lock_ndma_slot();
+	}
+
 	sdmmc_set_ndma_slot(0);
 	driveInited = true;
 }

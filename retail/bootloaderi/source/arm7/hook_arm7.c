@@ -54,6 +54,7 @@
 #define b_sleepMode BIT(17)
 #define b_dsiBios BIT(18)
 #define b_bootstrapOnFlashcard BIT(19)
+#define b_ndmaDisabled BIT(20)
 #define b_scfgLocked BIT(31)
 
 extern u32 newArm7binarySize;
@@ -145,6 +146,7 @@ int hookNdsRetailArm7(
 	u8 consoleModel,
 	u8 romRead_LED,
 	u8 dmaRomRead_LED,
+	bool ndmaDisabled,
 	bool twlTouch,
 	bool usesCloneboot
 ) {
@@ -390,6 +392,9 @@ int hookNdsRetailArm7(
 		}
 		if (bootstrapOnFlashcard) {
 			ce7->valueBits |= b_bootstrapOnFlashcard;
+		}
+		if (ndmaDisabled) {
+			ce7->valueBits |= b_ndmaDisabled;
 		}
 		if (REG_SCFG_EXT == 0) {
 			ce7->valueBits |= b_scfgLocked;

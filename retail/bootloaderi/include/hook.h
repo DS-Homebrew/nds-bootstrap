@@ -56,6 +56,7 @@ int hookNdsRetailArm7(
 	u8 consoleModel,
 	u8 romRead_LED,
 	u8 dmaRomRead_LED,
+	bool ndmaDisabled,
 	bool twlTouch,
 	bool usesCloneboot
 );
