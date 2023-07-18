@@ -34,6 +34,7 @@ extern void saveScreenshot(void);
 extern void prepareManual(void);
 extern void readManual(int line);
 extern void restorePreManual(void);
+extern void saveMainScreenSetting(void);
 
 extern u16 biosRead16(u32 addr);
 
@@ -135,6 +136,9 @@ void inGameMenu(void) {
 					break;
 				case 0x4E435049: // IPCN
 					ipcEveryFrame = false;
+					break;
+				case 0x53435049: // IPCS
+					saveMainScreenSetting();
 					break;
 				case 0x444D4152: // RAMD
 					dumpRam();

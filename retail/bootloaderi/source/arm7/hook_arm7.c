@@ -124,6 +124,7 @@ int hookNdsRetailArm7(
 	const tNDSHeader* ndsHeader,
 	const module_params_t* moduleParams,
 	u32 fileCluster,
+    u32 patchOffsetCacheFileCluster,
 	u32 srParamsFileCluster,
 	u32 ramDumpCluster,
 	u32 screenshotCluster,
@@ -138,6 +139,7 @@ int hookNdsRetailArm7(
     u16 bootstrapOnFlashcard,
     u8 gameOnFlashcard,
     u8 saveOnFlashcard,
+	s32 mainScreen,
 	u8 language,
 	u8 dsiMode, // SDK 5
 	u8 dsiSD,
@@ -337,6 +339,7 @@ int hookNdsRetailArm7(
 		ce7->intr_fifo_orig_return    = *ipcSyncHandler;
 		//ce7->intr_ndma0_orig_return   = *ndma0Handler;
 		ce7->fileCluster              = fileCluster;
+		ce7->patchOffsetCacheFileCluster = patchOffsetCacheFileCluster;
 		ce7->srParamsCluster          = srParamsFileCluster;
 		ce7->ramDumpCluster           = ramDumpCluster;
 		ce7->screenshotCluster        = screenshotCluster;
@@ -399,6 +402,7 @@ int hookNdsRetailArm7(
 		if (REG_SCFG_EXT == 0) {
 			ce7->valueBits |= b_scfgLocked;
 		}
+		ce7->mainScreen               = mainScreen;
 		ce7->language                 = language;
 		if (strcmp(romTid, "AKYP") == 0) { // Etrian Odyssey (EUR)
 			ce7->languageAddr = (u32*)0x020DC5DC;

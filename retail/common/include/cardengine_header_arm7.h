@@ -70,6 +70,7 @@ typedef struct cardengineArm7 {
     u32 intr_ndma0_orig_return;
     const module_params_t* moduleParams;
     u32 fileCluster;
+    u32 patchOffsetCacheFileCluster;
 	u32 srParamsCluster;
 	u32 ramDumpCluster;
 	u32 screenshotCluster;
@@ -101,6 +102,7 @@ typedef struct cardengineArm7 {
 		20: ndmaDisabled
 		31: scfgLocked
 	*/
+    s32 mainScreen;
     u32* languageAddr;
     u8 language;
     u8 consoleModel;
@@ -124,6 +126,7 @@ typedef struct cardengineArm7B4DS {
 	/*
 		17: sleepMode
 	*/
+    s32 mainScreen;
     u32 language; //u8
     u32* languageAddr;
     u16 igmHotkey;
@@ -156,6 +159,7 @@ typedef struct cardengineArm7 {
 	/*
 		17: sleepMode
 	*/
+    s32 mainScreen;
     u32 language; //u8
     u32* languageAddr;
     u16 igmHotkey;

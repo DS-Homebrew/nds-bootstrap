@@ -165,6 +165,7 @@ int hookNdsRetailArm9(
 	u32 savFatTableCache,
 	bool romFatTableCompressed,
 	bool savFatTableCompressed,
+    u32 patchOffsetCacheFileCluster,
     u32 musicFatTableCache,
 	u32 ramDumpCluster,
 	u32 srParamsFileCluster,
@@ -180,6 +181,7 @@ int hookNdsRetailArm9(
 	bool ROMinRAM,
 	bool dsDebugRam,
 	u8 enableExceptionHandler,
+	s32 mainScreen,
 	u32 overlaysSize,
 	u32 ioverlaysSize,
 	u32 maxClusterCacheSize,
@@ -199,6 +201,7 @@ int hookNdsRetailArm9(
 	ce9->savFatTableCache       = savFatTableCache;
 	ce9->romFatTableCompressed  = (u16)romFatTableCompressed;
 	ce9->savFatTableCompressed  = (u16)savFatTableCompressed;
+	ce9->patchOffsetCacheFileCluster = patchOffsetCacheFileCluster;
 	ce9->musicFatTableCache     = musicFatTableCache;
 	ce9->ramDumpCluster         = ramDumpCluster;
 	ce9->srParamsCluster        = srParamsFileCluster;
@@ -236,6 +239,7 @@ int hookNdsRetailArm9(
 	if (patchOffsetCache.resetMb) {
 		ce9->valueBits |= b_softResetMb;
 	}
+	ce9->mainScreen             = mainScreen;
 	ce9->s2FlashcardId          = s2FlashcardId;
 	ce9->overlaysSize           = overlaysSize;
 	ce9->ioverlaysSize          = ioverlaysSize;

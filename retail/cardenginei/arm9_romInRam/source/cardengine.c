@@ -81,8 +81,6 @@ bool igmReset = false;
 bool isDma = false;
 bool dmaOn = false;
 
-s8 mainScreen = 0;
-
 void myIrqHandlerDMA(void);
 
 extern void SetBrightness(u8 screen, s8 bright);
@@ -411,22 +409,22 @@ void myIrqHandlerIPC(void) {
 			}
 			break;*/
 		case 0x6:
-			if(mainScreen == 1)
+			if(ce9->mainScreen == 1)
 				REG_POWERCNT &= ~POWER_SWAP_LCDS;
-			else if(mainScreen == 2)
+			else if(ce9->mainScreen == 2)
 				REG_POWERCNT |= POWER_SWAP_LCDS;
 			break;
-		case 0x7: {
-			mainScreen++;
-			if(mainScreen > 2)
-				mainScreen = 0;
+		/* case 0x7: {
+			ce9->mainScreen++;
+			if(ce9->mainScreen > 2)
+				ce9->mainScreen = 0;
 
-			if(mainScreen == 1)
+			if(ce9->mainScreen == 1)
 				REG_POWERCNT &= ~POWER_SWAP_LCDS;
-			else if(mainScreen == 2)
+			else if(ce9->mainScreen == 2)
 				REG_POWERCNT |= POWER_SWAP_LCDS;
 		}
-			break;
+			break; */
 		/*case 0x9: {
 			if (!(ce9->valueBits & extendedMemory)) {
 				if (ndsHeader->unitCode > 0 && (ce9->valueBits & dsiMode)) {

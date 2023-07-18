@@ -80,6 +80,7 @@ static u32 arm9ibinarySize = 0;
 static aFile bootNds;
 static aFile romFile;
 static aFile savFile;
+static aFile patchOffsetCacheFile;
 static aFile ramDumpFile;
 static aFile srParamsFile;
 static aFile screenshotFile;
@@ -423,7 +424,9 @@ void restorePreManual(void) {
 	fileRead((char*)0x027FF200, &pageFile, 0x3FF200, 32 * 24);
 }
 
-s8 mainScreen = 0;
+void saveMainScreenSetting(void) {
+	fileWrite((char*)&ce9->mainScreen, &patchOffsetCacheFile, 0x1FC, sizeof(u32));
+}
 
 //---------------------------------------------------------------------------------
 /*void myIrqHandlerVBlank(void) {
@@ -457,8 +460,8 @@ void inGameMenu(s32* exRegisters) {
 	opened = true;
 
 	*(u32*)(INGAME_MENU_LOCATION_B4DS + IGM_TEXT_SIZE_ALIGNED) = (u32)sharedAddr;
-	volatile void (*inGameMenu)(s8*, u32, s32*) = (volatile void*)INGAME_MENU_LOCATION_B4DS + IGM_TEXT_SIZE_ALIGNED + 0x10;
-	(*inGameMenu)(&mainScreen, 0, exRegisters);
+	volatile void (*inGameMenu)(s32*, u32, s32*) = (volatile void*)INGAME_MENU_LOCATION_B4DS + IGM_TEXT_SIZE_ALIGNED + 0x10;
+	(*inGameMenu)(&ce9->mainScreen, 0, exRegisters);
 
 	opened = false;
 
@@ -543,22 +546,22 @@ void myIrqHandlerIPC(void) {
 			break;
 		#endif
 		case 0x6:
-			if(mainScreen == 1)
+			if(ce9->mainScreen == 1)
 				REG_POWERCNT &= ~POWER_SWAP_LCDS;
-			else if(mainScreen == 2)
+			else if(ce9->mainScreen == 2)
 				REG_POWERCNT |= POWER_SWAP_LCDS;
 			break;
-		case 0x7: {
-			mainScreen++;
-			if(mainScreen > 2)
-				mainScreen = 0;
+		/* case 0x7: {
+			ce9->mainScreen++;
+			if(ce9->mainScreen > 2)
+				ce9->mainScreen = 0;
 
-			if(mainScreen == 1)
+			if(ce9->mainScreen == 1)
 				REG_POWERCNT &= ~POWER_SWAP_LCDS;
-			else if(mainScreen == 2)
+			else if(ce9->mainScreen == 2)
 				REG_POWERCNT |= POWER_SWAP_LCDS;
 		}
-			break;
+			break; */
 		case 0x9:
 			inGameMenu((s32*)0);
 			break;
@@ -575,6 +578,7 @@ static void initialize(void) {
 		getFileFromCluster(&bootNds, ce9->bootNdsCluster);
 		getFileFromCluster(&romFile, ce9->fileCluster);
 		getFileFromCluster(&savFile, ce9->saveCluster);
+		getFileFromCluster(&patchOffsetCacheFile, ce9->patchOffsetCacheFileCluster);
 		getFileFromCluster(&musicsFile, ce9->musicCluster);
 
 		if (ce9->romFatTableCache != 0) {

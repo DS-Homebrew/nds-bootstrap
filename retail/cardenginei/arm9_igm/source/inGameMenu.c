@@ -406,7 +406,7 @@ static void drawMainMenu(MenuItem *menuItems, int menuItemCount) {
 	#endif
 }
 
-static void optionsMenu(s8 *mainScreen, u32 consoleModel) {
+static void optionsMenu(s32 *mainScreen, u32 consoleModel) {
 	OptionsItem optionsItems[8];
 	int optionsItemCount = 0;
 	optionsItems[optionsItemCount++] = OPTIONS_MAIN_SCREEN;
@@ -417,6 +417,8 @@ static void optionsMenu(s8 *mainScreen, u32 consoleModel) {
 	optionsItems[optionsItemCount++] = OPTIONS_CLOCK_SPEED;
 	optionsItems[optionsItemCount++] = OPTIONS_VRAM_MODE;
 #endif
+
+	bool mainScreenChanged = false;
 
 	u8 cursorPosition = 0;
 	while(1) {
@@ -489,6 +491,7 @@ static void optionsMenu(s8 *mainScreen, u32 consoleModel) {
 					else if(*mainScreen < 0)
 						*mainScreen = 2;
 					sharedAddr[4] = (*mainScreen == 0) ? 0x4E435049 : 0x59435049;
+					mainScreenChanged = true;
 					break;
 				case OPTIONS_BRIGHTNESS:
 				{
@@ -540,6 +543,19 @@ static void optionsMenu(s8 *mainScreen, u32 consoleModel) {
 					break;
 			}
 		} else if (KEYS & KEY_B) {
+			if (mainScreenChanged) {
+				#ifndef B4DS
+				sharedAddr[0] = *mainScreen;
+				sharedAddr[4] = 0x53435049; // IPCS
+				while(sharedAddr[4] == 0x53435049) {
+					while (REG_VCOUNT != 191) swiDelay(100);
+					while (REG_VCOUNT == 191) swiDelay(100);
+				}
+				#else
+				codeJumpWord = ce9->saveMainScreenSetting;
+				(*codeJump)();
+				#endif
+			}
 			return;
 		}
 	}
@@ -720,7 +736,7 @@ static void ramViewer(void) {
 	(*revertMpu)();
 }
 
-void inGameMenu(s8 *mainScreen, u32 consoleModel, s32 *exceptionRegisters) {
+void inGameMenu(s32 *mainScreen, u32 consoleModel, s32 *exceptionRegisters) {
 	// If we were given exception registers, then we're handling an exception
 	bool exception = (exceptionRegisters != 0);
 

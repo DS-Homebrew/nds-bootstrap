@@ -53,6 +53,7 @@ extern void ndsCodeStart(u32* addr);
 
 extern vu32* volatile cardStruct;
 extern module_params_t* moduleParams;
+extern s32 mainScreen;
 extern u32 language;
 extern u32* languageAddr;
 extern u16 igmHotkey;
@@ -82,7 +83,7 @@ int RumbleForce = 1;
 
 //static int cardEgnineCommandMutex = 0;
 //static int saveMutex = 0;
-static int swapTimer = 0;
+// static int swapTimer = 0;
 static int languageTimer = 0;
 static int volumeLevel = 3; // 0 = Off, 1 = Low, 2 = Medium, 3 = High/Max
 static int volumeLevelTimer = 0;
@@ -138,6 +139,10 @@ static void initialize(void) {
 	if (!bootloaderCleared) {
 		toncset((u32*)0x02377000, 0, 0x1000);
 		toncset((u8*)0x06000000, 0, 0x40000);	// Clear bootloader
+		if (mainScreen) {
+			swapScreens = (mainScreen == 2);
+			ipcEveryFrame = true;
+		}
 		bootloaderCleared = true;
 	}
 
@@ -362,7 +367,8 @@ void myIrqHandlerVBlank(void) {
 		reset();
 	}
 
-	if (0==(REG_KEYINPUT & (KEY_L | KEY_R | KEY_UP)) && !(REG_EXTKEYINPUT & KEY_A/*KEY_X*/)) {
+	/*KEY_X*/
+	/* if (0==(REG_KEYINPUT & (KEY_L | KEY_R | KEY_UP)) && !(REG_EXTKEYINPUT & KEY_A)) {
 		if (swapTimer == 60){
 			swapTimer = 0;
 			if (!ipcEveryFrame) {
@@ -373,7 +379,7 @@ void myIrqHandlerVBlank(void) {
 		swapTimer++;
 	} else {
 		swapTimer = 0;
-	}
+	} */
 	
 	/*if ( 0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_DOWN | KEY_B))) {
 		if ((softResetTimer == 60 * 2) && (saveTimer == 0)) {

@@ -37,6 +37,7 @@ int hookNdsRetailArm7(
 	u32 cheatSize,
 	u32 apPatchFileCluster,
 	u32 apPatchSize,
+	s32 mainScreen,
 	u32 language,
 	u8 RumblePakType
 );
@@ -52,6 +53,7 @@ int hookNdsRetailArm9(
 	u32 savFatTableCache,
 	bool romFatTableCompressed,
 	bool savFatTableCompressed,
+    u32 patchOffsetCacheFileCluster,
     u32 musicFatTableCache,
 	u32 ramDumpCluster,
 	u32 srParamsFileCluster,
@@ -67,6 +69,7 @@ int hookNdsRetailArm9(
 	bool ROMinRAM,
 	bool dsDebugRam,
 	u8 enableExceptionHandler,
+	s32 mainScreen,
 	u32 overlaysSize,
 	u32 ioverlaysSize,
 	u32 maxClusterCacheSize,

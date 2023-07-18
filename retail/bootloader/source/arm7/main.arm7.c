@@ -1107,6 +1107,9 @@ int arm7_main(void) {
 		patchOffsetCache.type = 1;
 	}
 
+	s32 mainScreen = 0;
+	fileRead((char*)&mainScreen, &patchOffsetCacheFile, 0x1FC, sizeof(u32));
+
 	patchOffsetCacheFilePrevCrc = swiCRC16(0xFFFF, &patchOffsetCache, sizeof(patchOffsetCacheContents));
 
 	// nocashMessage("Loading the header...\n");
@@ -1377,6 +1380,7 @@ int arm7_main(void) {
 		cheatSize,
 		apPatchFileCluster,
 		apPatchSize,
+		mainScreen,
 		language,
 		getRumblePakType()
 	);
@@ -1409,6 +1413,7 @@ int arm7_main(void) {
 		(u32)savFile.fatTableCache,
 		romFile.fatTableCompressed,
 		savFile.fatTableCompressed,
+		patchOffsetCacheFileCluster,
 		(u32)musicsFile.fatTableCache,
 		ramDumpCluster,
 		srParamsFileCluster,
@@ -1424,6 +1429,7 @@ int arm7_main(void) {
 		ROMinRAM,
 		dsDebugRam,
 		supportsExceptionHandler(romTid),
+		mainScreen,
 		overlaysSize,
 		ioverlaysSize,
 		fatTableSize,

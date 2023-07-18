@@ -171,6 +171,7 @@ int hookNdsRetailArm9(
 	u8 ROMinRAM,
 	u8 dsiMode, // SDK 5
 	u8 enableExceptionHandler,
+	s32 mainScreen,
 	u8 consoleModel,
 	bool usesCloneboot
 ) {
@@ -226,6 +227,7 @@ int hookNdsRetailArm9(
 	if (usesCloneboot) {
 		ce9->valueBits |= b_cloneboot;
 	}
+	ce9->mainScreen             = mainScreen;
 	ce9->overlaysSize           = overlaysSize;
 	ce9->consoleModel           = consoleModel;
 	if (!extendedMemory) {
@@ -345,7 +347,8 @@ int hookNdsRetailArm9(
 	return ERR_NONE;
 }
 
-int hookNdsRetailArm9Mini(cardengineArm9* ce9, const tNDSHeader* ndsHeader, u8 consoleModel) {
+int hookNdsRetailArm9Mini(cardengineArm9* ce9, const tNDSHeader* ndsHeader, s32 mainScreen, u8 consoleModel) {
+	ce9->mainScreen             = mainScreen;
 	ce9->consoleModel           = consoleModel;
 	ce9->valueBits |= b_enableExceptionHandler;
 

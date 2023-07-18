@@ -100,6 +100,7 @@ typedef struct cardengineArm9 {
 		13: softResetMb
 		14: cloneboot
 	*/
+    s32 mainScreen;
     u32 overlaysSize;
 	u32 consoleModel;
     u32* irqTable;
@@ -187,6 +188,7 @@ typedef struct cardengineArm9 {
     u32 savFatTableCache;
     u16 romFatTableCompressed;
     u16 savFatTableCompressed;
+    u32 patchOffsetCacheFileCluster;
     u32 musicFatTableCache;
     u32 ramDumpCluster;
     u32 srParamsCluster;
@@ -208,12 +210,13 @@ typedef struct cardengineArm9 {
 		5: isSdk5
 		6: overlaysCached
 	*/
-    u16 s2FlashcardId;
-    u16 padding;
-    u32 overlaysSize;
-    u32 ioverlaysSize;
-    u32* irqTable;
-    u32 romLocation;
+    s32 mainScreen;
+	u16 s2FlashcardId;
+	u16 padding;
+	u32 overlaysSize;
+	u32 ioverlaysSize;
+	u32* irqTable;
+	u32 romLocation;
 	u32 rumbleFrames[2];
 	u32 rumbleForce[2];
 	u32 prepareScreenshot;
@@ -221,6 +224,7 @@ typedef struct cardengineArm9 {
 	u32 prepareManual;
 	u32 readManual;
 	u32 restorePreManual;
+	u32 saveMainScreenSetting;
 } cardengineArm9;
 #endif
 

@@ -16,12 +16,14 @@
 .global moduleParams
 .global fileCluster
 .global saveCluster
+.global patchOffsetCacheFileCluster
 .global srParamsCluster
 .global ramDumpCluster
 .global screenshotCluster
 .global pageFileCluster
 .global manualCluster
 .global valueBits
+.global mainScreen
 .global language
 .global languageAddr
 .global consoleModel
@@ -50,6 +52,8 @@ moduleParams:
 	.word	0x00000000
 fileCluster:
 	.word	0x00000000
+patchOffsetCacheFileCluster:
+	.word	0x00000000
 srParamsCluster:
 	.word	0x00000000
 ramDumpCluster:
@@ -64,6 +68,8 @@ cardStruct:
 	.word	0x00000000
 valueBits:
 	.word	0x00000000
+mainScreen:
+	.word	0
 languageAddr:
 	.word	0x00000000
 language:

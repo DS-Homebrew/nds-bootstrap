@@ -1444,6 +1444,9 @@ int arm7_main(void) {
 		patchOffsetCache.type = 0;
 	}
 
+	s32 mainScreen = 0;
+	fileRead((char*)&mainScreen, &patchOffsetCacheFile, 0x1FC, sizeof(u32));
+
 	patchOffsetCacheFilePrevCrc = swiCRC16(0xFFFF, &patchOffsetCache, sizeof(patchOffsetCacheContents));
 
 	nocashMessage("Loading the header...\n");
@@ -1666,6 +1669,7 @@ int arm7_main(void) {
 			ndsHeader,
 			moduleParams,
 			romFile->firstCluster,
+			patchOffsetCacheFileCluster,
 			srParamsFileCluster,
 			ramDumpCluster,
 			screenshotCluster,
@@ -1680,6 +1684,7 @@ int arm7_main(void) {
 			bootstrapOnFlashcard,
 			gameOnFlashcard,
 			saveOnFlashcard,
+			mainScreen,
 			language,
 			dsiModeConfirmed,
 			dsiSD,
@@ -1702,6 +1707,7 @@ int arm7_main(void) {
 		hookNdsRetailArm9Mini(
 			(cardengineArm9*)ce9Location,
 			ndsHeader,
+			mainScreen,
 			consoleModel
 		);
 
@@ -1950,6 +1956,7 @@ int arm7_main(void) {
 			ndsHeader,
 			moduleParams,
 			romFile->firstCluster,
+			patchOffsetCacheFileCluster,
 			srParamsFileCluster,
 			ramDumpCluster,
 			screenshotCluster,
@@ -1964,6 +1971,7 @@ int arm7_main(void) {
 			bootstrapOnFlashcard,
 			gameOnFlashcard,
 			saveOnFlashcard,
+			mainScreen,
 			language,
 			dsiModeConfirmed,
 			dsiSD,
@@ -1996,6 +2004,7 @@ int arm7_main(void) {
 			ROMinRAM,
 			dsiModeConfirmed,
 			supportsExceptionHandler(romTid),
+			mainScreen,
 			consoleModel,
 			usesCloneboot
 		);

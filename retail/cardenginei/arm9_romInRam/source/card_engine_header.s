@@ -33,6 +33,8 @@ cacheStruct:
 	.word	0x00000000
 valueBits:
 	.word	0x00000000
+mainScreen:
+	.word	0x00000000
 overlaysSize:
 	.word	0x00000000
 consoleModel:

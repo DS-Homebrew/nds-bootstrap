@@ -94,6 +94,7 @@ extern int unlockMutex(int* addr);
 extern vu32* volatile cardStruct;
 extern u32 fileCluster;
 extern u32 saveCluster;
+extern u32 patchOffsetCacheFileCluster;
 extern u32 srParamsCluster;
 extern u32 ramDumpCluster;
 extern u32 screenshotCluster;
@@ -101,6 +102,7 @@ extern u32 pageFileCluster;
 extern u32 manualCluster;
 extern module_params_t* moduleParams;
 extern u32 valueBits;
+extern s32 mainScreen;
 extern u32* languageAddr;
 extern u8 language;
 extern u8 consoleModel;
@@ -148,6 +150,7 @@ static aFile* savFile = (aFile*)SAV_FILE_LOCATION;
 //static aFile* gbaFile = (aFile*)GBA_FILE_LOCATION;
 #endif
 #endif
+static aFile patchOffsetCacheFile;
 static aFile ramDumpFile;
 static aFile srParamsFile;
 static aFile screenshotFile;
@@ -157,7 +160,7 @@ static aFile manualFile;
 static int saveTimer = 0;
 
 static int languageTimer = 0;
-static int swapTimer = 0;
+// static int swapTimer = 0;
 static int returnTimer = 0;
 static int softResetTimer = 0;
 static int ramDumpTimer = 0;
@@ -277,6 +280,7 @@ static void driveInitialize(void) {
 		FAT_InitFiles(false, true);
 	}
 
+	getFileFromCluster(&patchOffsetCacheFile, patchOffsetCacheFileCluster, (valueBits & gameOnFlashcard));
 	getFileFromCluster(&ramDumpFile, ramDumpCluster, (valueBits & bootstrapOnFlashcard));
 	getFileFromCluster(&srParamsFile, srParamsCluster, (valueBits & gameOnFlashcard));
 	getFileFromCluster(&screenshotFile, screenshotCluster, (valueBits & bootstrapOnFlashcard));
@@ -356,6 +360,10 @@ static void initialize(void) {
 
 	if (!bootloaderCleared) {
 		toncset((u8*)0x06000000, 0, 0x40000);	// Clear bootloader
+		if (mainScreen) {
+			swapScreens = (mainScreen == 2);
+			ipcEveryFrame = true;
+		}
 		bootloaderCleared = true;
 	}
 
@@ -1043,6 +1051,10 @@ void restorePreManual(void) {
 #endif
 }
 
+void saveMainScreenSetting(void) {
+	fileWrite((char*)sharedAddr, &patchOffsetCacheFile, 0x1FC, sizeof(u32));
+}
+
 static void log_arm9(void) {
 	//driveInitialize();
 	#ifdef DEBUG
@@ -1509,7 +1521,8 @@ void myIrqHandlerVBlank(void) {
 #endif
 	}
 
-	if (0==(REG_KEYINPUT & (KEY_L | KEY_R | KEY_UP)) && !(REG_EXTKEYINPUT & KEY_A/*KEY_X*/)) {
+/*KEY_X*/
+	/* if (0==(REG_KEYINPUT & (KEY_L | KEY_R | KEY_UP)) && !(REG_EXTKEYINPUT & KEY_A)) {
 		if (tryLockMutex(&saveMutex)) {
 			if (swapTimer == 60){
 				swapTimer = 0;
@@ -1521,9 +1534,9 @@ void myIrqHandlerVBlank(void) {
 		}
 		unlockMutex(&saveMutex);
 		swapTimer++;
-	}else{
+	} else {
 		swapTimer = 0;
-	}
+	} */
 
 #ifdef TWLSDK
 	if (sharedAddr[3] == (vu32)0x54495845) {

@@ -96,6 +96,7 @@ int hookNdsRetailArm7(
 	u32 cheatSize,
 	u32 apPatchFileCluster,
 	u32 apPatchSize,
+	s32 mainScreen,
 	u32 language,
 	u8 RumblePakType
 ) {
@@ -219,6 +220,7 @@ int hookNdsRetailArm7(
 	if (sleepMode) {
 		ce7->valueBits |= b_sleepMode;
 	}
+	ce7->mainScreen              = mainScreen;
 	ce7->language                = language;
 	if (strcmp(romTid, "AKYP") == 0) { // Etrian Odyssey (EUR)
 		ce7->languageAddr = (u32*)0x020DC5DC;

@@ -131,8 +131,6 @@ extern void endCardReadDma();
 extern void continueCardReadDmaArm7();
 extern void continueCardReadDmaArm9();
 
-s8 mainScreen = 0;
-
 void myIrqHandlerDMA(void);
 
 extern void SetBrightness(u8 screen, s8 bright);
@@ -1080,16 +1078,16 @@ void inGameMenu(s32* exRegisters) {
 	/*if (ce9->consoleModel > 0) {
 		*(u32*)(INGAME_MENU_LOCATION_DSIWARE + IGM_TEXT_SIZE_ALIGNED) = (u32)sharedAddr;
 		volatile void (*inGameMenu)(s8*, u32, s32*) = (volatile void*)INGAME_MENU_LOCATION_DSIWARE + IGM_TEXT_SIZE_ALIGNED + 0x10;
-		(*inGameMenu)(&mainScreen, ce9->consoleModel, exRegisters);
+		(*inGameMenu)(&ce9->mainScreen, ce9->consoleModel, exRegisters);
 	} else {*/
 		*(u32*)(INGAME_MENU_LOCATION_TWLSDK + IGM_TEXT_SIZE_ALIGNED) = (u32)sharedAddr;
-		volatile void (*inGameMenu)(s8*, u32, s32*) = (volatile void*)INGAME_MENU_LOCATION_TWLSDK + IGM_TEXT_SIZE_ALIGNED + 0x10;
-		(*inGameMenu)(&mainScreen, ce9->consoleModel, exRegisters);
+		volatile void (*inGameMenu)(s32*, u32, s32*) = (volatile void*)INGAME_MENU_LOCATION_TWLSDK + IGM_TEXT_SIZE_ALIGNED + 0x10;
+		(*inGameMenu)(&ce9->mainScreen, ce9->consoleModel, exRegisters);
 	//}
 	#else
 	*(u32*)(INGAME_MENU_LOCATION + IGM_TEXT_SIZE_ALIGNED) = (u32)sharedAddr;
-	volatile void (*inGameMenu)(s8*, u32, s32*) = (volatile void*)INGAME_MENU_LOCATION + IGM_TEXT_SIZE_ALIGNED + 0x10;
-	(*inGameMenu)(&mainScreen, ce9->consoleModel, exRegisters);
+	volatile void (*inGameMenu)(s32*, u32, s32*) = (volatile void*)INGAME_MENU_LOCATION + IGM_TEXT_SIZE_ALIGNED + 0x10;
+	(*inGameMenu)(&ce9->mainScreen, ce9->consoleModel, exRegisters);
 	#endif
 	#ifdef TWLSDK
 	if (sharedAddr[3] == 0x54495845) {
@@ -1173,22 +1171,22 @@ void myIrqHandlerIPC(void) {
 			#endif
 			break;
 		case 0x6:
-			if(mainScreen == 1)
+			if(ce9->mainScreen == 1)
 				REG_POWERCNT &= ~POWER_SWAP_LCDS;
-			else if(mainScreen == 2)
+			else if(ce9->mainScreen == 2)
 				REG_POWERCNT |= POWER_SWAP_LCDS;
 			break;
-		case 0x7: {
-			mainScreen++;
-			if(mainScreen > 2)
-				mainScreen = 0;
+		/* case 0x7: {
+			ce9->mainScreen++;
+			if(ce9->mainScreen > 2)
+				ce9->mainScreen = 0;
 
-			if(mainScreen == 1)
+			if(ce9->mainScreen == 1)
 				REG_POWERCNT &= ~POWER_SWAP_LCDS;
-			else if(mainScreen == 2)
+			else if(ce9->mainScreen == 2)
 				REG_POWERCNT |= POWER_SWAP_LCDS;
 		}
-			break;
+			break; */
 		case 0x9:
 			inGameMenu((s32*)0);
 			break;

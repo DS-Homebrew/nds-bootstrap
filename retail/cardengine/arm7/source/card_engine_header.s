@@ -16,6 +16,7 @@
 .global moduleParams
 .global saveCluster
 .global valueBits
+.global mainScreen
 .global language
 .global languageAddr
 .global igmHotkey
@@ -38,6 +39,8 @@ moduleParams:
 cardStruct:
 	.word	0x00000000
 valueBits:
+	.word	0x00000000
+mainScreen:
 	.word	0x00000000
 language:
 	.word	0x00000000

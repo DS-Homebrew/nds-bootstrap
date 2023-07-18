@@ -35,6 +35,8 @@ romFatTableCompressed:
 	.hword	0x0000
 savFatTableCompressed:
 	.hword	0x0000
+patchOffsetCacheFileCluster:
+	.word	0x00000000
 musicFatTableCache:
 	.word	0x00000000
 ramDumpCluster:
@@ -58,6 +60,8 @@ sharedFontCluster:
 cardStruct0:
 	.word	0x00000000
 valueBits:
+	.word	0x00000000
+mainScreen:
 	.word	0x00000000
 s2FlashcardId:
 	.hword	0x0000
@@ -86,6 +90,8 @@ readManualPtr:
 	.word readManual
 restorePreManualPtr:
 	.word restorePreManual
+saveMainScreenSettingPtr:
+	.word saveMainScreenSetting
 
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
