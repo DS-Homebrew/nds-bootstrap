@@ -1255,6 +1255,15 @@ static void loadSectorBuf(aFile* file, int curSect)
 #endif
 }
 
+void resetPrevSect(aFile* file)
+{
+#ifdef TWOCARD
+	prevSect[file->card2] = -1;
+#else
+	prevSect = -1;
+#endif
+}
+
 /*-----------------------------------------------------------------
 fileRead(buffer, cluster, startOffset, length)
 -----------------------------------------------------------------*/
