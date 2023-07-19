@@ -117,19 +117,20 @@ typedef struct cardengineArm7 {
 // ARM7 cardengine
 //
 typedef struct cardengineArm7B4DS {
-    u32 ce7;
-    cardengineArm7Patches* patches;
-    u32 intr_vblank_orig_return;
-    const module_params_t* moduleParams;
-    u32 cardStruct;
+	u32 ce7;
+	cardengineArm7Patches* patches;
+	u32 intr_vblank_orig_return;
+	u32 cheatEngineAddr;
+	const module_params_t* moduleParams;
+	u32 cardStruct;
 	u32 valueBits;
 	/*
 		17: sleepMode
 	*/
-    s32 mainScreen;
-    u32 language; //u8
-    u32* languageAddr;
-    u16 igmHotkey;
+	s32 mainScreen;
+	u32 language; //u8
+	u32* languageAddr;
+	u16 igmHotkey;
 } cardengineArm7B4DS;
 #else
 //
@@ -150,20 +151,21 @@ typedef struct cardengineArm7Patches {
 // ARM7 cardengine
 //
 typedef struct cardengineArm7 {
-    u32 ce7;
-    cardengineArm7Patches* patches;
-    u32 intr_vblank_orig_return;
-    const module_params_t* moduleParams;
-    u32 cardStruct;
+	u32 ce7;
+	cardengineArm7Patches* patches;
+	u32 intr_vblank_orig_return;
+	u32 cheatEngineAddr;
+	const module_params_t* moduleParams;
+	u32 cardStruct;
 	u32 valueBits;
 	/*
 		17: sleepMode
 	*/
-    s32 mainScreen;
-    u32 language; //u8
-    u32* languageAddr;
-    u16 igmHotkey;
-    u8 RumblePakType;
+	s32 mainScreen;
+	u32 language; //u8
+	u32* languageAddr;
+	u16 igmHotkey;
+	u8 RumblePakType;
 } cardengineArm7;
 #endif
 

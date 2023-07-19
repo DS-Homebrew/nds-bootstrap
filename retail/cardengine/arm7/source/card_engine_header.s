@@ -13,6 +13,7 @@
 .global card_engine_end
 .global cardStruct
 .global patches_offset
+.global cheatEngineAddr
 .global moduleParams
 .global saveCluster
 .global valueBits
@@ -33,6 +34,8 @@ ce7 :
 patches_offset:
 	.word	patches
 intr_vblank_orig_return:
+	.word	0x00000000
+cheatEngineAddr:
 	.word	0x00000000
 moduleParams:
 	.word	0x00000000

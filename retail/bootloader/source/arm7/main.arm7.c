@@ -1278,6 +1278,10 @@ int arm7_main(void) {
 					} else {
 						dbg_printf("\n");
 					}
+					if (strncmp(romTid, "CLJ", 3) == 0) { // Mario & Luigi: Bowser's Inside Story
+						// Game's heap cannot be shrunk, so display error
+						errorOutput();
+					}
 					dbg_printf("\n");
 
 					fatTableAddr = 0x023E0000;

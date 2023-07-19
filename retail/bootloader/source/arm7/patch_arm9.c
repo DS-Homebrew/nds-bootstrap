@@ -734,7 +734,8 @@ void patchHiHeapPointer(cardengineArm9* ce9, const module_params_t* moduleParams
 	if ((!nandAccess && extendedMemory2)
 	|| moduleParams->sdk_version < 0x2008000
 	|| (ce9Alt && !ce9AltLargeTable && cheatSizeTotal <= 4)
-	|| strncmp(romTid, "VSO", 3) == 0
+	|| strncmp(romTid, "CLJ", 3) == 0 // Mario & Luigi: Bowser's Inside Story
+	|| strncmp(romTid, "VSO", 3) == 0 // Sonic Classic Collection
 	|| arm7mbk == 0x080037C0) {
 		return;
 	}

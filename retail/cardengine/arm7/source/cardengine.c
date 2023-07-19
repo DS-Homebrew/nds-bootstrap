@@ -53,6 +53,7 @@ extern void ndsCodeStart(u32* addr);
 
 extern vu32* volatile cardStruct;
 extern module_params_t* moduleParams;
+extern u32 cheatEngineAddr;
 extern s32 mainScreen;
 extern u32 language;
 extern u32* languageAddr;
@@ -256,8 +257,8 @@ void myIrqHandlerVBlank(void) {
 	nocashMessage("myIrqHandlerVBlank");
 	#endif	
 
-	if (*(u32*)CHEAT_ENGINE_LOCATION_B4DS == 0x3E4 && *(u32*)((u32)CHEAT_ENGINE_LOCATION_B4DS+0x3E8) != 0xCF000000) {
-		volatile void (*cheatEngine)() = (volatile void*)CHEAT_ENGINE_LOCATION_B4DS+4;
+	if (*(u32*)cheatEngineAddr == 0x3E4 && *(u32*)(cheatEngineAddr+0x3E8) != 0xCF000000) {
+		volatile void (*cheatEngine)() = (volatile void*)cheatEngineAddr+4;
 		(*cheatEngine)();
 	}
 

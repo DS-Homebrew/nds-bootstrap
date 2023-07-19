@@ -214,8 +214,14 @@ int hookNdsRetailArm7(
 
 	const char* romTid = getRomTid(ndsHeader);
 
+	u32 cheatEngineAddr = CHEAT_ENGINE_LOCATION_B4DS;
+	if (!extendedMemory2 && strncmp(romTid, "CLJ", 3) == 0) { // Mario & Luigi: Bowser's Inside Story
+		cheatEngineAddr = 0x02002000;
+	}
+
 	ce7->intr_vblank_orig_return = *vblankHandler;
 	//ce7->intr_fifo_orig_return   = *ipcSyncHandler;
+	ce7->cheatEngineAddr         = cheatEngineAddr;
 	ce7->moduleParams            = moduleParams;
 	if (sleepMode) {
 		ce7->valueBits |= b_sleepMode;
@@ -233,10 +239,9 @@ int hookNdsRetailArm7(
 	aFile apPatchFile; getFileFromCluster(&apPatchFile, apPatchFileCluster);
 	const u32 cheatSizeTotal = cheatSize+(apPatchIsCheat ? apPatchSize : 0);
 	if (cheatSizeTotal > 4 && cheatSizeTotal <= 0x1C00) {
-		tonccpy((u8*)CHEAT_ENGINE_LOCATION_B4DS, (u8*)CHEAT_ENGINE_LOCATION_B4DS_BUFFERED, 0x400);
+		tonccpy((u8*)cheatEngineAddr, (u8*)CHEAT_ENGINE_LOCATION_B4DS_BUFFERED, 0x400);
 
-		u32 cheatEngineOffset = CHEAT_ENGINE_LOCATION_B4DS;
-		char* cheatDataOffset = (char*)cheatEngineOffset+0x3E8;
+		char* cheatDataOffset = (char*)cheatEngineAddr+0x3E8;
 		if (apPatchFile.firstCluster != CLUSTER_FREE && apPatchIsCheat) {
 			fileRead(cheatDataOffset, &apPatchFile, 0, apPatchSize);
 			cheatDataOffset += apPatchSize;
