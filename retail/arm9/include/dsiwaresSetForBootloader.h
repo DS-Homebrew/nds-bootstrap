@@ -313,6 +313,7 @@ static const char dsiWareForBootloader2[][4] = {
 	"KG9", // Noroi no Game: Oku
 	"KSU", // Number Battle
 	"K6T", // Orion's Odyssey
+	"KO4", // Oscar in Movieland
 	"KOT", // Oscar in Toyland
 	"KOY", // Oscar in Toyland 2
 	"KTV", // Otegaru Pazuru Shirizu: Yurito Fushigina Meikyuu

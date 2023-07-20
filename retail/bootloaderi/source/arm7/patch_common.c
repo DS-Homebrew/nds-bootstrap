@@ -9167,6 +9167,28 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0202917C, (u32)dsiSaveSetLength);
 	}
 
+	// Oscar in Movieland (USA)
+	// Oscar in Movieland (Europe, Australia)
+	// Due to our save implementation, save data is stored in all 3 slots
+	else if ((strcmp(romTid, "KO4E") == 0 || strcmp(romTid, "KO4V") == 0) && saveOnFlashcard) {
+		u16 offsetChange2 = (romTid[3] == 'E') ? 0 : 0x154;
+		u16 offsetChange = (romTid[3] == 'E') ? 0 : 0x1A8;
+		*(u32*)(0x0205AD38+offsetChange2) = 0xE3A00000; // mov r0, #0
+		setBL(0x0205B18C+offsetChange, (u32)dsiSaveOpen);
+		setBL(0x0205B19C+offsetChange, (u32)dsiSaveClose);
+		*(u32*)(0x0205B2E8+offsetChange) = 0xE3A00000; // mov r0, #0
+		*(u32*)(0x0205B2EC+offsetChange) = 0xE12FFF1E; // bx lr
+		setBL(0x0205B5C8+offsetChange, (u32)dsiSaveOpen);
+		setBL(0x0205B5E4+offsetChange, (u32)dsiSaveGetLength);
+		setBL(0x0205B600+offsetChange, (u32)dsiSaveRead);
+		setBL(0x0205B608+offsetChange, (u32)dsiSaveClose);
+		setBL(0x0205B65C+offsetChange, (u32)dsiSaveCreate);
+		setBL(0x0205B66C+offsetChange, (u32)dsiSaveOpen);
+		setBL(0x0205B69C+offsetChange, (u32)dsiSaveSetLength);
+		setBL(0x0205B6AC+offsetChange, (u32)dsiSaveWrite);
+		setBL(0x0205B6B4+offsetChange, (u32)dsiSaveClose);
+	}
+
 	// Oscar in Toyland (USA)
 	// Oscar in Toyland (Europe)
 	// Due to our save implementation, save data is stored in all 3 slots

@@ -16084,6 +16084,36 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020296B0 = 0xE1A00000; // nop
 	}
 
+	// Oscar in Movieland (USA)
+	// Oscar in Movieland (Europe, Australia)
+	// Due to our save implementation, save data is stored in all 3 slots
+	else if (strcmp(romTid, "KO4E") == 0 || strcmp(romTid, "KO4V") == 0) {
+		u16 offsetChange2 = (romTid[3] == 'E') ? 0 : 0x154;
+		u16 offsetChange = (romTid[3] == 'E') ? 0 : 0x1A8;
+
+		*(u32*)0x020053A4 = 0xF5000; // Shrink sound heap from 0x133333
+		*(u32*)0x0200F70C = 0xE1A00000; // nop
+		*(u32*)0x02012B44 = 0xE1A00000; // nop
+		patchInitDSiWare(0x02018644, heapEnd);
+		*(u32*)0x020189D0 = *(u32*)0x02004FD0;
+		patchUserSettingsReadDSiWare(0x02019AE4);
+		*(u32*)(0x0205AD38+offsetChange2) = 0xE3A00000; // mov r0, #0
+		*(u32*)(0x0205AE54+offsetChange2) = 0xE1A00000; // nop
+		setBL(0x0205B18C+offsetChange, (u32)dsiSaveOpen);
+		setBL(0x0205B19C+offsetChange, (u32)dsiSaveClose);
+		*(u32*)(0x0205B2E8+offsetChange) = 0xE3A00000; // mov r0, #0
+		*(u32*)(0x0205B2EC+offsetChange) = 0xE12FFF1E; // bx lr
+		setBL(0x0205B5C8+offsetChange, (u32)dsiSaveOpen);
+		setBL(0x0205B5E4+offsetChange, (u32)dsiSaveGetLength);
+		setBL(0x0205B600+offsetChange, (u32)dsiSaveRead);
+		setBL(0x0205B608+offsetChange, (u32)dsiSaveClose);
+		setBL(0x0205B65C+offsetChange, (u32)dsiSaveCreate);
+		setBL(0x0205B66C+offsetChange, (u32)dsiSaveOpen);
+		setBL(0x0205B69C+offsetChange, (u32)dsiSaveSetLength);
+		setBL(0x0205B6AC+offsetChange, (u32)dsiSaveWrite);
+		setBL(0x0205B6B4+offsetChange, (u32)dsiSaveClose);
+	}
+
 	// Oscar in Toyland (USA)
 	// Oscar in Toyland (Europe)
 	// Due to our save implementation, save data is stored in all 3 slots
