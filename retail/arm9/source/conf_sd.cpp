@@ -927,7 +927,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 	if (!conf->gameOnFlashcard && !conf->saveOnFlashcard) {
 		// UZP and UZC are both bluetooth carts (Pokemon Typing and クルマでDS respectively)
-		if (romTid[0] != 'I' && memcmp(romTid, "UZP", 3) != 0 && memcmp(romTid, "UZC", 3) != 0)) {
+		if ((romTid[0] != 'I' && memcmp(romTid, "UZP", 3) != 0) && memcmp(romTid, "UZC", 3) != 0) {
 			disableSlot1();
 		} else {
 			// Initialize card and read header, HGSS IR doesn't work if you don't read the full header
