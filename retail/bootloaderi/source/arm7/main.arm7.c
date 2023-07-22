@@ -1474,8 +1474,9 @@ int arm7_main(void) {
     dbg_printf("\n"); 
 
 	ndsHeader = loadHeader(&dsiHeaderTemp, moduleParams, dsiModeConfirmed);
+	const char* romTid = getRomTid(ndsHeader);
 
-	if (!isDSiWare && srlAddr == 0 && (softResetParams[0] == 0 || softResetParams[0] == 0xFFFFFFFF)) {
+	if (!isDSiWare && srlAddr == 0 && memcmp(romTid, "UBR", 3) != 0 && memcmp(romTid, "HND", 3) != 0 && memcmp(romTid, "HNE", 3) != 0 && (softResetParams[0] == 0 || softResetParams[0] == 0xFFFFFFFF)) {
 		esrbOutput();
 	}
 
@@ -1506,8 +1507,6 @@ int arm7_main(void) {
 	my_readUserSettings(ndsHeader); // Header has to be loaded first
 
 	baseChipID = getChipId(pkmnHeader ? (tNDSHeader*)NDS_HEADER_POKEMON : ndsHeader, moduleParams);
-
-	const char* romTid = getRomTid(ndsHeader);
 
 	if (!gameOnFlashcard && isDSiWare) {
 		extern void patchSharedFontPath(const cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, const ltd_module_params_t* ltdModuleParams);

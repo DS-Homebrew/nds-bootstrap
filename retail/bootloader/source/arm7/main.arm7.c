@@ -1117,7 +1117,10 @@ int arm7_main(void) {
 	bool foundModuleParams;
 	module_params_t* moduleParams = loadModuleParams(&dsiHeaderTemp.ndshdr, &foundModuleParams);
 
-	if (dsiHeaderTemp.ndshdr.unitCode < 3 && dsiHeaderTemp.ndshdr.gameCode[0] != 'K' && dsiHeaderTemp.ndshdr.gameCode[0] != 'Z' && srlAddr == 0 && (softResetParams[0] == 0 || softResetParams[0] == 0xFFFFFFFF)) {
+	ndsHeader = loadHeader(&dsiHeaderTemp, moduleParams);
+	const char* romTid = getRomTid(ndsHeader);
+
+	if (dsiHeaderTemp.ndshdr.unitCode < 3 && romTid[0] != 'K' && romTid[0] != 'Z' && memcmp(romTid, "UBR", 3) != 0 && memcmp(romTid, "HND", 3) != 0 && memcmp(romTid, "HNE", 3) != 0 && srlAddr == 0 && (softResetParams[0] == 0 || softResetParams[0] == 0xFFFFFFFF)) {
 		esrbOutput();
 	}
 
@@ -1130,8 +1133,6 @@ int arm7_main(void) {
 		dbg_printf("Secure area already decrypted");
 	}
 	dbg_printf("\n");
-
-	ndsHeader = loadHeader(&dsiHeaderTemp, moduleParams);
 
 	my_readUserSettings(ndsHeader); // Header has to be loaded first
 
@@ -1163,8 +1164,6 @@ int arm7_main(void) {
 			ioverlaysSize++;
 		}
 	}
-
-	const char* romTid = getRomTid(ndsHeader);
 
 	if ((strcmp(romTid, "UBRP") == 0) && extendedMemory2 && !dsDebugRam) {
 		toncset((char*)0x0C400000, 0xFF, 0xC0);

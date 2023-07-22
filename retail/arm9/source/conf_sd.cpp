@@ -729,6 +729,8 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		newRegion = conf->region;
 	}
 
+	bool displayEsrb = (newRegion == 1 && memcmp(romTid, "UBR", 3) != 0 && memcmp(romTid, "HND", 3) != 0 && memcmp(romTid, "HNE", 3) != 0);
+
 	if (dsiFeatures() && !conf->b4dsMode) {
 		dsiEnhancedMbk = (isDSiMode() && *(u32*)0x02FFE1A0 == 0x00403000 && REG_SCFG_EXT7 == 0);
 
@@ -1418,7 +1420,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	}
 	fclose(bootstrapImages);
 
-	if (newRegion == 1) {
+	if (displayEsrb) {
 		// Read ESRB rating and descriptor(s) for current title
 		bootstrapImages = fopen(conf->bootstrapOnFlashcard ? "fat:/_nds/nds-bootstrap/esrb.bin" : "sd:/_nds/nds-bootstrap/esrb.bin", "rb");
 		if (bootstrapImages) {
@@ -1742,7 +1744,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	}
 	fclose(bootstrapImages);
 
-	if (newRegion == 1) {
+	if (displayEsrb) {
 		// Read ESRB rating and descriptor(s) for current title
 		bootstrapImages = fopen(conf->bootstrapOnFlashcard ? "fat:/_nds/nds-bootstrap/esrb.bin" : "sd:/_nds/nds-bootstrap/esrb.bin", "rb");
 		if (bootstrapImages) {
