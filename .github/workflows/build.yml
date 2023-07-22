@@ -82,7 +82,7 @@ jobs:
   publish_build:
     runs-on: ubuntu-latest
     name: Publish build to TWLBot/Builds
-    if: ${{ success() && github.event_name != "pull_request" }}
+    if: ${{ success() && github.event_name != 'pull_request' }}
     needs: build
     env:
       COMMIT_HASH: ${{ needs.build.outputs.commit_hash }}
