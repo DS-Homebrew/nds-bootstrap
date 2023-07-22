@@ -929,6 +929,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		if ((romTid[0] != 'I' && memcmp(romTid, "UZP", 3) != 0) && memcmp(romTid, "UZC", 3) != 0) {
 			disableSlot1();
 		} else {
+			printf("Special cart (IR/Bluetooth). Enabling slot1\n"); // temporary. remove later
 			// Initialize card and read header, HGSS IR doesn't work if you don't read the full header
 			sysSetCardOwner(BUS_OWNER_ARM9); // Allow arm9 to access NDS cart
 			if (isDSiMode()) {
@@ -984,11 +985,12 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			// Leave Slot-1 enabled for IR and Bluetooth cartridges.
 			conf->specialCard = ((romTid[0] == 'I' && memcmp(romTid, "UZP", 3) == 0) && memcmp(romTid, "UZC", 3) == 0);
 			if (conf->specialCard) {
+				printf("Special cart (IR/Bluetooth). Enabling special treatment.\n"); // temporary. remove later
 				conf->valueBits2 |= BIT(4);
 			} else {
 				disableSlot1();
 			}
-		}
+		
 	}
 
 	u32 srBackendId[2] = {0};
