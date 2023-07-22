@@ -982,7 +982,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			sysSetCardOwner(BUS_OWNER_ARM7);
 
 			// Leave Slot-1 enabled for IR and Bluetooth cartridges.
-			conf->specialCard = ((romTid[0] != 'I' && memcmp(romTid, "UZP", 3) != 0) && memcmp(romTid, "UZC", 3) != 0);
+			conf->specialCard = ((romTid[0] == 'I' && memcmp(romTid, "UZP", 3) == 0) && memcmp(romTid, "UZC", 3) == 0);
 			if (conf->specialCard) {
 				conf->valueBits2 |= BIT(4);
 			} else {
