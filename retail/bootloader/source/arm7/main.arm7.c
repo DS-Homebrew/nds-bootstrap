@@ -1116,6 +1116,9 @@ int arm7_main(void) {
 
 	bool foundModuleParams;
 	module_params_t* moduleParams = loadModuleParams(&dsiHeaderTemp.ndshdr, &foundModuleParams);
+    dbg_printf("sdk_version: ");
+    dbg_hexa(moduleParams->sdk_version);
+    dbg_printf("\n"); 
 
 	ndsHeader = loadHeader(&dsiHeaderTemp, moduleParams);
 	const char* romTid = getRomTid(ndsHeader);
