@@ -988,7 +988,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			} else {
 				disableSlot1();
 			}
-		
+		}
 	}
 
 	u32 srBackendId[2] = {0};
