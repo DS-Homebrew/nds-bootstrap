@@ -926,7 +926,6 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	fclose(donorNdsFile);
 
 	if (!conf->gameOnFlashcard && !conf->saveOnFlashcard) {
-		// UZP and UZC are both bluetooth carts (Pokemon Typing and クルマでDS respectively)
 		if ((romTid[0] != 'I' && memcmp(romTid, "UZP", 3) != 0) && memcmp(romTid, "UZC", 3) != 0) {
 			disableSlot1();
 		} else {
@@ -982,8 +981,8 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 			sysSetCardOwner(BUS_OWNER_ARM7);
 
-			// Leave Slot-1 enabled for IR cartridges and Battle & Get: Pokémon Typing DS
-			conf->specialCard = (headerData[0xC] == 'I' || memcmp(headerData + 0xC, "UZP", 3) == 0);
+			// Leave Slot-1 enabled for IR and Bluetooth cartridges.
+			conf->specialCard = ((romTid[0] != 'I' && memcmp(romTid, "UZP", 3) != 0) && memcmp(romTid, "UZC", 3) != 0);
 			if (conf->specialCard) {
 				conf->valueBits2 |= BIT(4);
 			} else {
