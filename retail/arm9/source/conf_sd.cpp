@@ -928,7 +928,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	if (!conf->gameOnFlashcard && !conf->saveOnFlashcard) {
 		if ((romTid[0] != 'I' && memcmp(romTid, "UZP", 3) != 0) && memcmp(romTid, "UZC", 3) != 0) {
 			printf("Slot1 disabled because:\n");
-			printf("((romTid[0] != 'I' && memcmp(romTid, \"UZP\", 3) != 0) && memcmp(romTid, \"UZC\", 3) != 0) was true")
+			printf("((romTid[0] != 'I' && memcmp(romTid, \"UZP\", 3) != 0) && memcmp(romTid, \"UZC\", 3) != 0) was true");
 			disableSlot1();
 		} else {
 			// Initialize card and read header, HGSS IR doesn't work if you don't read the full header
