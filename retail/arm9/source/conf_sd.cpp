@@ -929,7 +929,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		if ((romTid[0] != 'I' && memcmp(romTid, "UZP", 3) != 0) && memcmp(romTid, "UZC", 3) != 0) {
 			printf("Slot1 disabled because:\n");
 			printf("((romTid[0] != 'I' && memcmp(romTid, \"UZP\", 3) != 0) && memcmp(romTid, \"UZC\", 3) != 0) was true");
-			disableSlot1();
+			//disableSlot1(); // reenable this later
 		} else {
 			// Initialize card and read header, HGSS IR doesn't work if you don't read the full header
 			sysSetCardOwner(BUS_OWNER_ARM9); // Allow arm9 to access NDS cart
@@ -990,7 +990,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			} else {
 				printf("Slot1 disabled because:\n");
 				printf("conf->specialCard was false.");
-				disableSlot1();
+				//disableSlot1(); // reenable this later
 			}
 		}
 	}
