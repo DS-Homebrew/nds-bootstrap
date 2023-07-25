@@ -2009,7 +2009,7 @@ void patchCardNdsArm9Cont(const tNDSHeader* ndsHeader, const module_params_t* mo
 		if (moduleParams->sdk_version > 0x5050000) {
 			setB(startOffset+0x86C, startOffset+0x8F0);
 		} else {
-			setB(startOffset+0x85C, startOffset+0x8D8);
+			setB(startOffset+0x85C, (moduleParams->sdk_version > 0x5020000) ? startOffset+0x8E0 : startOffset+0x8D8);
 		}
 
 		patchInitLock(ndsHeader, moduleParams);
