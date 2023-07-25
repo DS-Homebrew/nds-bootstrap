@@ -1000,16 +1000,17 @@ void patchInitLock(const tNDSHeader* ndsHeader, const module_params_t* modulePar
 
 		u32 startOffset = (u32)ndsHeader->arm9destination;
 		u16* newBranchPrepOffset1 = (u16*)(startOffset+0x860);
-		u16* newBranchPrepOffset2 = (u16*)(startOffset+0x86A);
+		u16* newBranchPrepOffset2 = (u16*)(startOffset+0x86C);
 		if (moduleParams->sdk_version > 0x5050000) {
 			newBranchPrepOffset1 = (u16*)(startOffset+0x870);
-			newBranchPrepOffset2 = (u16*)(startOffset+0x87A);
+			newBranchPrepOffset2 = (u16*)(startOffset+0x87C);
 		}
 
 		newBranchPrepOffset1[0] = 0xB500; // push {lr}
-		newBranchPrepOffset1[1] = 0x2200; // movs r2, #0
-		setBLThumb(((u32)newBranchPrepOffset1 + 2*sizeof(u16)), (u32)newBranchOffset1);
-		newBranchPrepOffset1[4] = 0xBD00; // pop {pc}
+		newBranchPrepOffset1[1] = 0x207E; // movs r0, #0x7E
+		newBranchPrepOffset1[2] = 0x2200; // movs r2, #0
+		setBLThumb(((u32)newBranchPrepOffset1 + 3*sizeof(u16)), (u32)newBranchOffset1);
+		newBranchPrepOffset1[5] = 0xBD00; // pop {pc}
 
 		newBranchPrepOffset2[0] = 0xB500; // push {lr}
 		newBranchPrepOffset2[1] = 0x207F; // movs r0, #0x7F
@@ -1053,16 +1054,17 @@ void patchInitLock(const tNDSHeader* ndsHeader, const module_params_t* modulePar
 
 		u32 startOffset = (u32)ndsHeader->arm9destination;
 		u32* newBranchPrepOffset1 = (u32*)(startOffset+0x860);
-		u32* newBranchPrepOffset2 = (u32*)(startOffset+0x870);
+		u32* newBranchPrepOffset2 = (u32*)(startOffset+0x874);
 		if (moduleParams->sdk_version > 0x5050000) {
 			newBranchPrepOffset1 = (u32*)(startOffset+0x870);
-			newBranchPrepOffset2 = (u32*)(startOffset+0x880);
+			newBranchPrepOffset2 = (u32*)(startOffset+0x884);
 		}
 
 		newBranchPrepOffset1[0] = 0xE92D4000; // push {lr}
-		newBranchPrepOffset1[1] = 0xE3A02000; // mov r2, #0
-		setBL(((u32)newBranchPrepOffset1 + 2*sizeof(u32)), (u32)newBranchOffset1);
-		newBranchPrepOffset1[3] = 0xE8BD8000; // pop {pc}
+		newBranchPrepOffset1[1] = 0xE3A0007E; // mov r0, #0x7E
+		newBranchPrepOffset1[2] = 0xE3A02000; // mov r2, #0
+		setBL(((u32)newBranchPrepOffset1 + 3*sizeof(u32)), (u32)newBranchOffset1);
+		newBranchPrepOffset1[4] = 0xE8BD8000; // pop {pc}
 
 		newBranchPrepOffset2[0] = 0xE92D4000; // push {lr}
 		newBranchPrepOffset2[1] = 0xE3A0007F; // mov r0, #0x7F
