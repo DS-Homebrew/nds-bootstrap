@@ -966,7 +966,60 @@ void patchInitLock(const tNDSHeader* ndsHeader, const module_params_t* modulePar
 	dbg_hexa((u32)offset);
 	dbg_printf("\n\n");
 
-	if (offset[1] == 0xFFFF0000) { // THUMB
+	if (offset[1] == 0x02FFFFB4) { // Debug
+		u32* newBranchOffset2 = (u32*)((u32)offset + 0x160);
+
+		for (int i = 0; i < 0x100/sizeof(u32); i++) {
+			newBranchOffset2++;
+			if (newBranchOffset2[0] == 0xE92D000F && newBranchOffset2[1] == 0xE92D4008) {
+				break;
+			}
+		}
+
+		u32* newBranchOffset1 = (u32*)((u32)newBranchOffset2 + 0x80);
+
+		for (int i = 0; i < 0x100/sizeof(u32); i++) {
+			newBranchOffset1++;
+			if (newBranchOffset1[0] == 0xE92D000F && newBranchOffset1[1] == 0xE92D4008) {
+				break;
+			}
+		}
+
+		if (*newBranchOffset1 == 0xE92D000F) {
+			dbg_printf("newBranch location 1 : ");
+			dbg_hexa((u32)newBranchOffset1);
+			dbg_printf("\n\n");
+		}
+
+		if (*newBranchOffset2 == 0xE92D000F) {
+			dbg_printf("newBranch location 2 : ");
+			dbg_hexa((u32)newBranchOffset2);
+			dbg_printf("\n\n");
+		}
+
+		u32 startOffset = (u32)ndsHeader->arm9destination;
+		u32* newBranchPrepOffset1 = (u32*)(startOffset+0x860);
+		u32* newBranchPrepOffset2 = (u32*)(startOffset+0x874);
+		if (moduleParams->sdk_version > 0x5050000) {
+			newBranchPrepOffset1 = (u32*)(startOffset+0x870);
+			newBranchPrepOffset2 = (u32*)(startOffset+0x884);
+		}
+
+		newBranchPrepOffset1[0] = 0xE92D4000; // push {lr}
+		newBranchPrepOffset1[1] = 0xE3A0007E; // mov r0, #0x7E
+		newBranchPrepOffset1[2] = 0xE3A02000; // mov r2, #0
+		setBL(((u32)newBranchPrepOffset1 + 3*sizeof(u32)), (u32)newBranchOffset1);
+		newBranchPrepOffset1[4] = 0xE8BD8000; // pop {pc}
+
+		newBranchPrepOffset2[0] = 0xE92D4000; // push {lr}
+		newBranchPrepOffset2[1] = 0xE3A0007F; // mov r0, #0x7F
+		newBranchPrepOffset2[2] = 0xE3A02000; // mov r2, #0
+		setBL(((u32)newBranchPrepOffset2 + 3*sizeof(u32)), (u32)newBranchOffset2);
+		newBranchPrepOffset2[4] = 0xE8BD8000; // pop {pc}
+
+		setBL(((u32)offset - 17*sizeof(u32)), (u32)newBranchPrepOffset1);
+		setBL(((u32)offset - 14*sizeof(u32)), (u32)newBranchPrepOffset2);
+	} else if (offset[1] == 0xFFFF0000) { // THUMB
 		u16* newBranchOffset2 = (u16*)offset;
 
 		for (int i = 0; i < 32; i++) {
