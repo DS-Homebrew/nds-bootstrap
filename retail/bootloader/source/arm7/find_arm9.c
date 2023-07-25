@@ -103,6 +103,10 @@ static const u32 fileIoReadSignature[4]        = {0xE92D4038, 0xE24DD008, 0xE28D
 static const u16 fileIoReadSignature51Thumb[4] = {0xB510, 0xB082, 0x1C04, 0xAB00}; // SDK 5.1
 static const u16 fileIoReadSignatureThumb[4]   = {0xB538, 0xB082, 0x1C05, 0xAB00}; // SDK 5.?
 
+// Init Lock (SDK 5)
+static const u32 initLockEndSignature[2]      = {0x02FFFFB0, 0x04000204};
+static const u32 initLockEndSignatureThumb[3] = {0x02FFFFB0, 0xFFFF0000, 0x04000204};
+
 // irq enable
 static const u32 irqEnableStartSignature1[4]        = {0xE59FC028, 0xE3A01000, 0xE1DC30B0, 0xE59F2020};					// SDK <= 3
 static const u32 irqEnableStartSignature2Alt[4]     = {0xE92D000F, 0xE92D4030, 0xE24DD004, 0xEBFFFFDB};					// SDK 2
@@ -1161,6 +1165,34 @@ u16* findCardReadDmaStartOffsetThumb(const u16* cardReadDmaEndOffset) {
 
 	dbg_printf("\n");
 	return cardReadDmaStartOffset;
+}
+
+u32* findInitLockEndOffset(const tNDSHeader* ndsHeader) {
+	dbg_printf("findInitLockEndOffset:\n");
+
+	u32* offset = findOffset(
+		(u32*)ndsHeader->arm9destination, iUncompressedSize,
+		initLockEndSignature, 2
+	);
+	if (offset) {
+		dbg_printf("Init lock end found\n");
+	} else {
+		dbg_printf("Init lock end not found\n");
+
+		offset = findOffset(
+			(u32*)ndsHeader->arm9destination, iUncompressedSize,
+			initLockEndSignatureThumb, 3
+		);
+
+		if (offset) {
+			dbg_printf("Init lock end THUMB found\n");
+		} else {
+			dbg_printf("Init lock end THUMB not found\n");
+		}
+	}
+
+	dbg_printf("\n");
+	return offset;
 }
 
 u32* a9FindCardIrqEnableOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool* usesThumb) {

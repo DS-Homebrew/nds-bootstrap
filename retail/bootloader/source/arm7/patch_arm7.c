@@ -15,6 +15,7 @@ extern u32 _io_dldi_features;
 
 extern u16 a9ScfgRom;
 
+extern u8 arm7newUnitCode;
 extern u32 newArm7binarySize;
 extern u32 arm7mbk;
 
@@ -95,7 +96,7 @@ u16* getOffsetFromBLThumb(u16* blOffset) {
 }
 
 static bool patchWramClear(const tNDSHeader* ndsHeader) {
-	if (ndsHeader->unitCode == 0) {
+	if (arm7newUnitCode == 0) {
 		u32* offset = patchOffsetCache.wramEndAddrOffset;
 		if (!patchOffsetCache.wramEndAddrOffset) {
 			offset = findWramEndAddrOffset(ndsHeader);
@@ -133,14 +134,14 @@ static bool patchWramClear(const tNDSHeader* ndsHeader) {
 			}
 		} else {
 			if (usesThumb) {
-				if (ndsHeader->unitCode == 0) {
+				if (arm7newUnitCode == 0) {
 					*((u16*)offset + 21) = 0x2200;	// movs r2, #0
 				} else {
 					*((u16*)offset + 11) = 0x2100;	// movs r1, #0
 					*((u16*)offset + 55) = 0x2100;	// movs r1, #0
 				}
 			} else {
-				if (ndsHeader->unitCode == 0) {
+				if (arm7newUnitCode == 0) {
 					offset[*offset==0xE92D4038 ? 15 : (offset[1]==0xE24DD008 ? 18 : 17)] = 0xE3A02000;	// mov r2, #0
 				} else if (offset[1]==0xE24DD008) {
 					offset[10] = 0xE3A01000;	// mov r1, #0
@@ -270,7 +271,7 @@ static void patchSleepMode(const tNDSHeader* ndsHeader) {
 }
 
 static void patchRamClear(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
-	if (moduleParams->sdk_version < 0x5000000 || ndsHeader->unitCode == 0) {
+	if (moduleParams->sdk_version < 0x5000000 || arm7newUnitCode == 0) {
 		return;
 	}
 
@@ -292,7 +293,7 @@ static void patchRamClear(const tNDSHeader* ndsHeader, const module_params_t* mo
 }
 
 static void patchPostBoot(const tNDSHeader* ndsHeader) {
-	if (ndsHeader->unitCode == 0 || arm7mbk != 0x080037C0) {
+	if (arm7mbk != 0x080037C0) {
 		return;
 	}
 
@@ -368,6 +369,7 @@ u32 patchCardNdsArm7(
 	const module_params_t* moduleParams,
 	u32 saveFileCluster
 ) {
+	arm7newUnitCode = ndsHeader->unitCode;
 	newArm7binarySize = ndsHeader->arm7binarySize;
 
 	if ((ndsHeader->unitCode > 0) ? (arm7mbk == 0x080037C0) : (memcmp(ndsHeader->gameCode, "AYI", 3) == 0 && ndsHeader->arm7binarySize == 0x25F70)) {
@@ -394,6 +396,7 @@ u32 patchCardNdsArm7(
 			// Donor found within a ROM file
 			u32 arm7src = 0;
 			u32 arm7size = 0;
+			fileRead((char*)&arm7newUnitCode, &donorRomFile, 0x12, 1);
 			fileRead((char*)&arm7src, &donorRomFile, 0x30, 0x4);
 			fileRead((char*)&arm7size, &donorRomFile, 0x3C, 0x4);
 			fileRead(ndsHeader->arm7destination, &donorRomFile, arm7src, arm7size);

@@ -3,6 +3,7 @@
 #include "find.h"
 #include "debug_file.h"
 
+extern u8 arm7newUnitCode;
 extern u32 newArm7binarySize;
 
 //
@@ -121,7 +122,7 @@ u32* findWramClearOffset(const tNDSHeader* ndsHeader) {
 	dbg_printf("findWramEndAddrOffset:\n");
 
 	u32* offset = NULL;
-	if (ndsHeader->unitCode > 0) {
+	if (arm7newUnitCode > 0) {
 		offset = findOffset(
 			(u32*)ndsHeader->arm7destination, 0x1000,
 			wramClearSignatureTwlEarly, 3

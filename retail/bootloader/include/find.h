@@ -68,6 +68,7 @@ u32* findCardReadDmaEndOffset(const tNDSHeader* ndsHeader, const module_params_t
 u16* findCardReadDmaEndOffsetThumb(const tNDSHeader* ndsHeader);
 u32* findCardReadDmaStartOffset(const module_params_t* moduleParams, const u32* cardReadDmaEndOffset);
 u16* findCardReadDmaStartOffsetThumb(const u16* cardReadDmaEndOffset);
+u32* findInitLockEndOffset(const tNDSHeader* ndsHeader);
 u32* a9FindCardIrqEnableOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool* usesThumb);
 const u32* getMpuInitRegionSignature(u32 patchMpuRegion);
 u32* findMpuStartOffset(const tNDSHeader* ndsHeader, u32 patchMpuRegion);

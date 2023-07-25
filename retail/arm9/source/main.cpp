@@ -396,6 +396,7 @@ static int runNdsFile(configuration* conf) {
 	struct stat stDonorStandalone;
 	struct stat stDonor;
 	struct stat stDonor0;
+	struct stat stDonor5;
 	struct stat stGba;
 	struct stat stGbaSav;
 	struct stat stWideCheat;
@@ -445,6 +446,8 @@ static int runNdsFile(configuration* conf) {
 		clusterDonor = stDonor.st_ino;
 	} else if (stat(conf->donorTwl0Path, &stDonor0) >= 0) {
 		clusterDonor = stDonor0.st_ino;
+	} else if (stat(conf->donor5Path, &stDonor5) >= 0) {
+		clusterDonor = stDonor5.st_ino;
 	}
 
 	if (stat(conf->apPatchPath, &stApPatch) >= 0) {

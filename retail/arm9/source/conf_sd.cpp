@@ -137,6 +137,9 @@ static void load_conf(configuration* conf, const char* fn) {
 	// SDK2.0 Donor NDS path
 	conf->donor20Path = strdup(config_file.fetch("NDS-BOOTSTRAP", "DONOR20_NDS_PATH").c_str());
 
+	// SDK5.x (NTR) Donor NDS path
+	conf->donor5Path = strdup(config_file.fetch("NDS-BOOTSTRAP", "DONOR5_NDS_PATH").c_str());
+
 	// SDK5.0 (TWL) DSi-Enhanced Donor NDS path
 	conf->donorTwl0Path = strdup(config_file.fetch("NDS-BOOTSTRAP", "DONORTWL0_NDS_PATH").c_str());
 
@@ -1517,11 +1520,14 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	fclose(ndsFile);
 	fclose(donorNdsFile);
 
-	if (dsiFeatures() && (strncmp(conf->donor20Path, "fat", 3) != 0 || strncmp(conf->donorTwl0Path, "fat", 3) != 0 || strncmp(conf->donorTwlPath, "fat", 3) != 0)) {
+	if (dsiFeatures() && (strncmp(conf->donor20Path, "fat", 3) != 0 || strncmp(conf->donor5Path, "fat", 3) != 0 || strncmp(conf->donorTwl0Path, "fat", 3) != 0 || strncmp(conf->donorTwlPath, "fat", 3) != 0)) {
 		easysave::ini config_file_b4ds("fat:/_nds/nds-bootstrap.ini");
 
 		// SDK2.0 Donor NDS path
 		conf->donor20Path = strdup(config_file_b4ds.fetch("NDS-BOOTSTRAP", "DONOR20_NDS_PATH").c_str());
+
+		// SDK5.x (NTR) Donor NDS path
+		conf->donor5Path = strdup(config_file_b4ds.fetch("NDS-BOOTSTRAP", "DONOR5_NDS_PATH").c_str());
 
 		// SDK5.0 (TWL) DSi-Enhanced Donor NDS path
 		conf->donorTwl0Path = strdup(config_file_b4ds.fetch("NDS-BOOTSTRAP", "DONORTWL0_NDS_PATH").c_str());
@@ -1660,6 +1666,12 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 					if (donorNdsFile2) {
 						donorNdsFile = donorNdsFile2;
 						standaloneDonor = true;
+					}
+				}
+				if (!donorNdsFile) {
+					FILE* donorNdsFile2 = fopen(conf->donor5Path, "rb");
+					if (donorNdsFile2) {
+						donorNdsFile = donorNdsFile2;
 					}
 				}
 			} else if (conf->useSdk20Donor) {

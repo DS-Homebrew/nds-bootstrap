@@ -949,6 +949,132 @@ void patchTwlSleepMode(const tNDSHeader* ndsHeader, const module_params_t* modul
 	}
 }
 
+void patchInitLock(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+	u32* offset = patchOffsetCache.initLockEndOffset;
+	if (!patchOffsetCache.initLockEndOffset) {
+		offset = findInitLockEndOffset(ndsHeader);
+		if (offset) {
+			patchOffsetCache.initLockEndOffset = offset;
+		}
+	}
+
+	if (!offset) {
+		return;
+	}
+
+	dbg_printf("initLockEnd location : ");
+	dbg_hexa((u32)offset);
+	dbg_printf("\n\n");
+
+	if (offset[1] == 0xFFFF0000) { // THUMB
+		u16* newBranchOffset2 = (u16*)offset;
+
+		for (int i = 0; i < 32; i++) {
+			newBranchOffset2++;
+			if (newBranchOffset2[0] == 0xB508 && newBranchOffset2[1] == 0x2300) {
+				break;
+			}
+		}
+
+		u16* newBranchOffset1 = newBranchOffset2;
+		newBranchOffset1 += 6;
+
+		for (int i = 0; i < 40; i++) {
+			newBranchOffset1++;
+			if (newBranchOffset1[0] == 0xB508 && newBranchOffset1[1] == 0x2300) {
+				break;
+			}
+		}
+
+		if (*newBranchOffset1 == 0xB508) {
+			dbg_printf("newBranch location 1 : ");
+			dbg_hexa((u32)newBranchOffset1);
+			dbg_printf("\n\n");
+		}
+
+		if (*newBranchOffset2 == 0xB508) {
+			dbg_printf("newBranch location 2 : ");
+			dbg_hexa((u32)newBranchOffset2);
+			dbg_printf("\n\n");
+		}
+
+		u32 startOffset = (u32)ndsHeader->arm9destination;
+		u16* newBranchPrepOffset1 = (u16*)(startOffset+0x860);
+		u16* newBranchPrepOffset2 = (u16*)(startOffset+0x86A);
+		if (moduleParams->sdk_version > 0x5050000) {
+			newBranchPrepOffset1 = (u16*)(startOffset+0x870);
+			newBranchPrepOffset2 = (u16*)(startOffset+0x87A);
+		}
+
+		newBranchPrepOffset1[0] = 0xB500; // push {lr}
+		newBranchPrepOffset1[1] = 0x2200; // movs r2, #0
+		setBLThumb(((u32)newBranchPrepOffset1 + 2*sizeof(u16)), (u32)newBranchOffset1);
+		newBranchPrepOffset1[4] = 0xBD00; // pop {pc}
+
+		newBranchPrepOffset2[0] = 0xB500; // push {lr}
+		newBranchPrepOffset2[1] = 0x207F; // movs r0, #0x7F
+		newBranchPrepOffset2[2] = 0x2200; // movs r2, #0
+		setBLThumb(((u32)newBranchPrepOffset2 + 3*sizeof(u16)), (u32)newBranchOffset2);
+		newBranchPrepOffset2[5] = 0xBD00; // pop {pc}
+
+		setBLThumb(((u32)offset - 10*sizeof(u16)), (u32)newBranchPrepOffset1);
+		setBLThumb(((u32)offset - 6*sizeof(u16)), (u32)newBranchPrepOffset2);
+	} else {
+		u32* newBranchOffset2 = offset;
+
+		for (int i = 0; i < 32; i++) {
+			newBranchOffset2++;
+			if (*newBranchOffset2 == 0xE59FC004) {
+				break;
+			}
+		}
+
+		u32* newBranchOffset1 = newBranchOffset2;
+		newBranchOffset1 += 4;
+
+		for (int i = 0; i < 40; i++) {
+			newBranchOffset1++;
+			if (*newBranchOffset1 == 0xE59FC004) {
+				break;
+			}
+		}
+
+		if (*newBranchOffset1 == 0xE59FC004) {
+			dbg_printf("newBranch location 1 : ");
+			dbg_hexa((u32)newBranchOffset1);
+			dbg_printf("\n\n");
+		}
+
+		if (*newBranchOffset2 == 0xE59FC004) {
+			dbg_printf("newBranch location 2 : ");
+			dbg_hexa((u32)newBranchOffset2);
+			dbg_printf("\n\n");
+		}
+
+		u32 startOffset = (u32)ndsHeader->arm9destination;
+		u32* newBranchPrepOffset1 = (u32*)(startOffset+0x860);
+		u32* newBranchPrepOffset2 = (u32*)(startOffset+0x870);
+		if (moduleParams->sdk_version > 0x5050000) {
+			newBranchPrepOffset1 = (u32*)(startOffset+0x870);
+			newBranchPrepOffset2 = (u32*)(startOffset+0x880);
+		}
+
+		newBranchPrepOffset1[0] = 0xE92D4000; // push {lr}
+		newBranchPrepOffset1[1] = 0xE3A02000; // mov r2, #0
+		setBL(((u32)newBranchPrepOffset1 + 2*sizeof(u32)), (u32)newBranchOffset1);
+		newBranchPrepOffset1[3] = 0xE8BD8000; // pop {pc}
+
+		newBranchPrepOffset2[0] = 0xE92D4000; // push {lr}
+		newBranchPrepOffset2[1] = 0xE3A0007F; // mov r0, #0x7F
+		newBranchPrepOffset2[2] = 0xE3A02000; // mov r2, #0
+		setBL(((u32)newBranchPrepOffset2 + 3*sizeof(u32)), (u32)newBranchOffset2);
+		newBranchPrepOffset2[4] = 0xE8BD8000; // pop {pc}
+
+		setBL(((u32)offset - 6*sizeof(u32)), (u32)newBranchPrepOffset1);
+		setBL(((u32)offset - 3*sizeof(u32)), (u32)newBranchPrepOffset2);
+	}
+}
+
 bool useSharedFont = false;
 
 void patchSharedFontPath(const cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
@@ -1859,4 +1985,33 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 
 	dbg_printf("ERR_NONE\n\n");
 	return ERR_NONE;
+}
+
+void patchCardNdsArm9Cont(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+	if (ndsHeader->unitCode == 0) {
+		return;
+	}
+
+	// Further patching in order for DSiWare to boot with NTR ARM7 binary
+	extern u32 donorFileTwlCluster;
+	extern u8 arm7newUnitCode;
+	extern u32 arm7mbk;
+	extern u32 accessControl;
+
+	const char* romTid = getRomTid(ndsHeader);
+	if (((accessControl & BIT(4))
+	   || (strncmp(romTid, "DME", 3) == 0 && extendedMemory2)
+	   || (strncmp(romTid, "DMD", 3) == 0 && extendedMemory2)
+	   || strncmp(romTid, "DMP", 3) == 0
+	   || (strncmp(romTid, "DHS", 3) == 0 && extendedMemory2)
+	)	&& arm7newUnitCode == 0 && arm7mbk == 0x080037C0 && donorFileTwlCluster != CLUSTER_FREE) {
+		u32 startOffset = (u32)ndsHeader->arm9destination;
+		if (moduleParams->sdk_version > 0x5050000) {
+			setB(startOffset+0x86C, startOffset+0x8F0);
+		} else {
+			setB(startOffset+0x85C, startOffset+0x8D8);
+		}
+
+		patchInitLock(ndsHeader, moduleParams);
+	}
 }

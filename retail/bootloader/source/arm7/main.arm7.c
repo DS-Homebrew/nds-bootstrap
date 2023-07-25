@@ -149,6 +149,7 @@ u16 s2FlashcardId = 0;
 bool expansionPakFound = false;
 bool sharedFontInMep = false;
 
+u8 arm7newUnitCode = 0;
 u32 newArm7binarySize = 0;
 u32 arm7mbk = 0;
 u32 accessControl = 0;
