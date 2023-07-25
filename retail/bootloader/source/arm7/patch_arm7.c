@@ -412,6 +412,11 @@ u32 patchCardNdsArm7(
 				arm7newUnitCode = 0; // NTR ARM7 binary found
 			}
 		}
+		if (memcmp(ndsHeader->gameCode, "KUB", 3) == 0 && arm7newUnitCode == 0) {
+			dbg_printf("Donor incompatible with this ROM! Please use a DSi-Enhanced donor.\n\n");
+			dbg_printf("ERR_LOAD_OTHR\n\n");
+			return ERR_LOAD_OTHR;
+		}
 	}
 
 	if (newArm7binarySize != patchOffsetCache.a7BinSize) {
