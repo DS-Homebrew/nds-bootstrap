@@ -660,8 +660,9 @@ static bool isROMLoadableInRAM(const tNDSHeader* ndsHeader, const char* romTid, 
 	 && strncmp(romTid, "KTR", 3) != 0 // Clubhouse Games Express: Card Classics
 	 && strncmp(romTid, "KTC", 3) != 0 && strncmp(romTid, "KTP", 3) != 0 // Clubhouse Games Express: Family Favorites
 	 && strncmp(romTid, "KTD", 3) != 0 && strncmp(romTid, "KTB", 3) != 0 // Clubhouse Games Express: Strategy Pack
-	 && strncmp(romTid, "KPP", 3) != 0
-	 && strncmp(romTid, "KPF", 3) != 0)
+	 && strncmp(romTid, "KPP", 3) != 0 // Pop Island
+	 && strncmp(romTid, "KPF", 3) != 0 // Pop Island: Paperfield
+	 && strncmp(romTid, "KPH", 3) != 0) // Prehistorik Man
 	) {
 		res = ((expansionPakFound || (extendedMemory2 && !dsDebugRam)) && (ndsHeader->unitCode == 3 ? (arm9iromOffset-0x8000)+ioverlaysSize : (baseRomSize-0x8000)+0x88) <= romSizeLimit);
 		if (res) {
