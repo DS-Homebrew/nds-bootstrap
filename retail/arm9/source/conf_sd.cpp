@@ -1658,20 +1658,13 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 					standaloneDonor = true;
 				}
 				if (!donorNdsFile) {
-					const bool sdk50 = (ndsArm7Size == 0x1511C || ndsArm7Size == 0x26CC8 || ndsArm7Size == 0x28E54);
-					donorNdsFile = fopen(sdk50 ? conf->donorTwl0Path : conf->donorTwlPath, "rb");
-					if (!donorNdsFile) {
-						FILE* donorNdsFile2 = fopen(sdk50 ? conf->donorTwlPath : conf->donorTwl0Path, "rb");
-						if (donorNdsFile2) {
-							donorNdsFile = donorNdsFile2;
-						}
-					}
+					donorNdsFile = fopen(conf->donorTwlPath, "rb");
 				}
 				if (!donorNdsFile) {
-					FILE* donorNdsFile2 = fopen(conf->donor5Path, "rb");
-					if (donorNdsFile2) {
-						donorNdsFile = donorNdsFile2;
-					}
+					donorNdsFile = fopen(conf->donorTwl0Path, "rb");
+				}
+				if (!donorNdsFile) {
+					donorNdsFile = fopen(conf->donor5Path, "rb");
 				}
 			} else if (conf->useSdk20Donor) {
 				donorNdsFile = fopen(conf->donor20Path, "rb");
