@@ -1653,19 +1653,18 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			FILE* donorNdsFile = NULL;
 			bool standaloneDonor = false;
 			if (a7mbk6 == 0x080037C0) {
-				const bool sdk50 = (ndsArm7Size == 0x1511C || ndsArm7Size == 0x26CC8 || ndsArm7Size == 0x28E54);
-				donorNdsFile = fopen(sdk50 ? conf->donorTwl0Path : conf->donorTwlPath, "rb");
-				if (!donorNdsFile) {
-					FILE* donorNdsFile2 = fopen(sdk50 ? conf->donorTwlPath : conf->donorTwl0Path, "rb");
-					if (donorNdsFile2) {
-						donorNdsFile = donorNdsFile2;
-					}
+				FILE* donorNdsFile = fopen("fat:/_nds/nds-bootstrap/b4dsTwlDonor.bin", "rb");
+				if (donorNdsFile) {
+					standaloneDonor = true;
 				}
 				if (!donorNdsFile) {
-					FILE* donorNdsFile2 = fopen("fat:/_nds/nds-bootstrap/b4dsTwlDonor.bin", "rb");
-					if (donorNdsFile2) {
-						donorNdsFile = donorNdsFile2;
-						standaloneDonor = true;
+					const bool sdk50 = (ndsArm7Size == 0x1511C || ndsArm7Size == 0x26CC8 || ndsArm7Size == 0x28E54);
+					donorNdsFile = fopen(sdk50 ? conf->donorTwl0Path : conf->donorTwlPath, "rb");
+					if (!donorNdsFile) {
+						FILE* donorNdsFile2 = fopen(sdk50 ? conf->donorTwlPath : conf->donorTwl0Path, "rb");
+						if (donorNdsFile2) {
+							donorNdsFile = donorNdsFile2;
+						}
 					}
 				}
 				if (!donorNdsFile) {
