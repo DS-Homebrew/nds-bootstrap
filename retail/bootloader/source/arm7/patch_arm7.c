@@ -283,8 +283,12 @@ static void patchRamClear(const tNDSHeader* ndsHeader, const module_params_t* mo
 		}
 	}
 	if (ramClearOffset) {
-		*(ramClearOffset) = 0x02FFF000;
-		*(ramClearOffset + 1) = 0x02FFF000;
+		// if (arm7newUnitCode > 0) {
+			*(ramClearOffset) = 0x02FFF000;
+			*(ramClearOffset + 1) = 0x02FFF000;
+		// }
+		// ramClearOffset[3] -= 0x1800; // Shrink hi heap
+
 		dbg_printf("RAM clear location : ");
 		dbg_hexa((u32)ramClearOffset);
 		dbg_printf("\n\n");
