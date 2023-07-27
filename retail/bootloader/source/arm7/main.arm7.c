@@ -1378,7 +1378,7 @@ int arm7_main(void) {
 		errorOutput();
 	}
 
-	toncset((u32*)0x0380C000, 0, 0x2000);
+	toncset((u32*)0x0380C000, 0, 0x2780);
 
 	errorCode = hookNdsRetailArm7(
 		(cardengineArm7*)CARDENGINE_ARM7_LOCATION,
