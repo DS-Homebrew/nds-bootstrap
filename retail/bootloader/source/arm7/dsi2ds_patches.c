@@ -11167,6 +11167,35 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchUserSettingsReadDSiWare(0x02049894);
 	}*/
 
+	// iSpot Japan (USA)
+	// iSpot Japan (Europe)
+	// Saving not supported due to using more than one file in filesystem
+	else if (strcmp(romTid, "K3JE") == 0 || strcmp(romTid, "K3JP") == 0) {
+		useSharedFont = (twlFontFound && extendedMemory2);
+		*(u32*)0x02014DB0 = 0xE1A00000; // nop
+		*(u32*)0x02018384 = 0xE1A00000; // nop
+		patchInitDSiWare(0x0201DBC8, heapEnd);
+		if (!extendedMemory2) {
+			*(u32*)0x0201DF54 = *(u32*)0x02004FE8;
+		}
+		patchUserSettingsReadDSiWare(0x0201F20C);
+		*(u32*)0x0201F228 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0201F22C = 0xE12FFF1E; // bx lr
+		*(u32*)0x0201F234 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0201F238 = 0xE12FFF1E; // bx lr
+		if (romTid[3] == 'E') {
+			*(u32*)0x02039278 = 0xE1A00000; // nop (Skip save function)
+			if (!useSharedFont) {
+				*(u32*)0x0204F4B0 = 0xE12FFF1E; // bx lr (Skip Manual screen)
+			}
+		} else {
+			*(u32*)0x02039308 = 0xE1A00000; // nop (Skip save function)
+			if (!useSharedFont) {
+				*(u32*)0x0204F434 = 0xE12FFF1E; // bx lr (Skip Manual screen)
+			}
+		}
+	}
+
 	// Ivy the Kiwi? mini (USA)
 	// GO Series: Ivy the Kiwi? mini (Europe, Australia)
 	else if (strcmp(romTid, "KIKX") == 0 || strcmp(romTid, "KIKV") == 0) {
