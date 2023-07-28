@@ -182,6 +182,7 @@ int hookNdsRetailArm9(
 	bool dsDebugRam,
 	u8 enableExceptionHandler,
 	s32 mainScreen,
+	const bool usesCloneboot,
 	u32 overlaysSize,
 	u32 ioverlaysSize,
 	u32 maxClusterCacheSize,
@@ -249,6 +250,7 @@ int hookNdsRetailArm9(
 		extern u32 romLocation;
 		ce9->romLocation = romLocation;
 	}
+	ce9->romLocation -= (ROMinRAM && usesCloneboot) ? 0x8000 : (ndsHeader->arm9romOffset + ndsHeader->arm9binarySize);
 
 	if (strncmp(romTid, "IPK", 3) == 0 || strncmp(romTid, "IPG", 3) == 0 || strncmp(romTid, "B4T", 3) == 0) {
 		ce9->valueBits |= b_cardReadFix;

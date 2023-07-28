@@ -569,123 +569,64 @@ void myIrqHandlerIPC(void) {
 }
 
 static void initialize(void) {
-	if (!initialized) {
-		if (!FAT_InitFiles(true)) {
-			//nocashMessage("!FAT_InitFiles");
-			while (1);
-		}
-
-		getFileFromCluster(&bootNds, ce9->bootNdsCluster);
-		getFileFromCluster(&romFile, ce9->fileCluster);
-		getFileFromCluster(&savFile, ce9->saveCluster);
-		getFileFromCluster(&patchOffsetCacheFile, ce9->patchOffsetCacheFileCluster);
-		getFileFromCluster(&musicsFile, ce9->musicCluster);
-
-		if (ce9->romFatTableCache != 0) {
-			romFile.fatTableCache = (u32*)ce9->romFatTableCache;
-			romFile.fatTableCached = true;
-			romFile.fatTableCompressed = (bool)ce9->romFatTableCompressed;
-		}
-		if (ce9->savFatTableCache != 0) {
-			savFile.fatTableCache = (u32*)ce9->savFatTableCache;
-			savFile.fatTableCached = true;
-			savFile.fatTableCompressed = (bool)ce9->savFatTableCompressed;
-		}
-		if (ce9->musicFatTableCache != 0) {
-			musicsFile.fatTableCache = (u32*)ce9->musicFatTableCache;
-			musicsFile.fatTableCached = true;
-		}
-
-		getFileFromCluster(&ramDumpFile, ce9->ramDumpCluster);
-		getFileFromCluster(&srParamsFile, ce9->srParamsCluster);
-		getFileFromCluster(&screenshotFile, ce9->screenshotCluster);
-		getFileFromCluster(&apFixOverlaysFile, ce9->apFixOverlaysCluster);
-		getFileFromCluster(&pageFile, ce9->pageFileCluster);
-		getFileFromCluster(&manualFile, ce9->manualCluster);
-		#ifndef NODSIWARE
-		getFileFromCluster(&sharedFontFile, ce9->sharedFontCluster);
-		#endif
-
-		bool cloneboot = (ce9->valueBits & isSdk5) ? *(u16*)0x02FFFC40 == 2 : *(u16*)0x027FFC40 == 2;
-
-		if (ce9->valueBits & isSdk5) {
-			ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
-		}
-
-		if (ndsHeader->unitCode > 0) {
-			u32 buffer = 0;
-			fileRead((char*)&buffer, &romFile, 0x234, sizeof(u32));
-			isDSiWare = (buffer == 0x00030004 || buffer == 0x00030005);
-		}
-
-		if ((ce9->valueBits & ROMinRAM) && !cloneboot) {
-			if (ndsHeader->unitCode == 3) {
-				fileRead((char*)&arm9iromOffset, &romFile, 0x1C0, sizeof(u32));
-				fileRead((char*)&arm9ibinarySize, &romFile, 0x1CC, sizeof(u32));
-			}
-
-			if ((__myio_dldi.features & FEATURE_SLOT_GBA) && ce9->s2FlashcardId != 0) {
-				const u32 buffer = 0x02378000;
-				const u16 bufferSize = 0x8000;
-				s32 len = ndsHeader->arm9binarySize-ndsHeader->arm9romOffset;
-				u32 dst = 0;
-				while (1) {
-					u32 readLen = (len > bufferSize) ? bufferSize : len;
-
-					fileRead((char*)buffer, &romFile, 0x8000+dst, readLen);
-					tonccpy((char*)ce9->romLocation+dst, (char*)buffer, readLen);
-
-					len -= bufferSize;
-					dst += bufferSize;
-
-					if (len <= 0) {
-						break;
-					}
-				}
-				len = getRomSizeNoArm9Bin(ndsHeader)+0x88;
-				dst = 0;
-				while (1) {
-					u32 readLen = (len > bufferSize) ? bufferSize : len;
-
-					fileRead((char*)buffer, &romFile, (u32)ndsHeader->arm7romOffset+dst, readLen);
-					tonccpy((char*)ce9->romLocation+(ndsHeader->arm9binarySize-ndsHeader->arm9romOffset)+ce9->overlaysSize+dst, (char*)buffer, readLen);
-
-					len -= bufferSize;
-					dst += bufferSize;
-
-					if (len <= 0) {
-						break;
-					}
-				}
-				if (ndsHeader->unitCode == 3) {
-					len = (s32)ce9->ioverlaysSize;
-					dst = 0;
-					while (1) {
-						u32 readLen = (len > bufferSize) ? bufferSize : len;
-
-						fileRead((char*)buffer, &romFile, arm9iromOffset+arm9ibinarySize+dst, readLen);
-						tonccpy((char*)ce9->romLocation+(arm9iromOffset-0x8000)+dst, (char*)buffer, readLen);
-
-						len -= bufferSize;
-						dst += bufferSize;
-
-						if (len <= 0) {
-							break;
-						}
-					}
-				}
-				toncset((char*)buffer, 0, bufferSize);
-			} else {
-				fileRead((char*)ce9->romLocation, &romFile, 0x8000, ndsHeader->arm9binarySize-ndsHeader->arm9romOffset);
-				fileRead((char*)ce9->romLocation+(ndsHeader->arm9binarySize-ndsHeader->arm9romOffset)+ce9->overlaysSize, &romFile, (u32)ndsHeader->arm7romOffset, getRomSizeNoArm9Bin(ndsHeader)+0x88);
-				if (ndsHeader->unitCode == 3) {
-					fileRead((char*)ce9->romLocation+(arm9iromOffset-0x8000), &romFile, arm9iromOffset+arm9ibinarySize, ce9->ioverlaysSize);
-				}
-			}
-		}
-
-		initialized = true;
+	if (initialized) {
+		return;
 	}
+
+	if (!FAT_InitFiles(true)) {
+		//nocashMessage("!FAT_InitFiles");
+		while (1);
+	}
+
+	getFileFromCluster(&bootNds, ce9->bootNdsCluster);
+	getFileFromCluster(&romFile, ce9->fileCluster);
+	getFileFromCluster(&savFile, ce9->saveCluster);
+	getFileFromCluster(&patchOffsetCacheFile, ce9->patchOffsetCacheFileCluster);
+	getFileFromCluster(&musicsFile, ce9->musicCluster);
+
+	if (ce9->romFatTableCache != 0) {
+		romFile.fatTableCache = (u32*)ce9->romFatTableCache;
+		romFile.fatTableCached = true;
+		romFile.fatTableCompressed = (bool)ce9->romFatTableCompressed;
+	}
+	if (ce9->savFatTableCache != 0) {
+		savFile.fatTableCache = (u32*)ce9->savFatTableCache;
+		savFile.fatTableCached = true;
+		savFile.fatTableCompressed = (bool)ce9->savFatTableCompressed;
+	}
+	if (ce9->musicFatTableCache != 0) {
+		musicsFile.fatTableCache = (u32*)ce9->musicFatTableCache;
+		musicsFile.fatTableCached = true;
+	}
+
+	getFileFromCluster(&ramDumpFile, ce9->ramDumpCluster);
+	getFileFromCluster(&srParamsFile, ce9->srParamsCluster);
+	getFileFromCluster(&screenshotFile, ce9->screenshotCluster);
+	getFileFromCluster(&apFixOverlaysFile, ce9->apFixOverlaysCluster);
+	getFileFromCluster(&pageFile, ce9->pageFileCluster);
+	getFileFromCluster(&manualFile, ce9->manualCluster);
+	#ifndef NODSIWARE
+	getFileFromCluster(&sharedFontFile, ce9->sharedFontCluster);
+	#endif
+
+	// bool cloneboot = (ce9->valueBits & isSdk5) ? *(u16*)0x02FFFC40 == 2 : *(u16*)0x027FFC40 == 2;
+
+	if (ce9->valueBits & isSdk5) {
+		ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
+	}
+
+	if (ndsHeader->unitCode > 0) {
+		u32 buffer = 0;
+		fileRead((char*)&buffer, &romFile, 0x234, sizeof(u32));
+		isDSiWare = (buffer == 0x00030004 || buffer == 0x00030005);
+	}
+
+	if ((ce9->valueBits & ROMinRAM) && ndsHeader->unitCode == 3) {
+		fileRead((char*)&arm9iromOffset, &romFile, 0x1C0, sizeof(u32));
+		fileRead((char*)&arm9ibinarySize, &romFile, 0x1CC, sizeof(u32));
+	}
+
+	initialized = true;
 }
 
 static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
@@ -760,14 +701,12 @@ void cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 		src = 0x8000 + (src & 0x1FF);
 	}
 
-	if (ce9->valueBits & ROMinRAM) {
-		u32 newSrc = (u32)(ce9->romLocation-0x8000)+src;
+	if ((ce9->valueBits & ROMinRAM) || ((ce9->valueBits & overlaysCached) && src >= ndsHeader->arm9romOffset+ndsHeader->arm9binarySize && src < ndsHeader->arm7romOffset)) {
+		u32 newSrc = ce9->romLocation+src;
 		if (ndsHeader->unitCode == 3 && src >= arm9iromOffset) {
-			newSrc = (u32)(ce9->romLocation-0x8000-arm9ibinarySize)+src;
+			newSrc -= arm9ibinarySize;
 		}
 		tonccpy(dst, (u8*)newSrc, len);
-	} else if ((ce9->valueBits & overlaysCached) && src >= ndsHeader->arm9romOffset+ndsHeader->arm9binarySize && src < ndsHeader->arm7romOffset) {
-		tonccpy(dst, (u8*)((ce9->romLocation-ndsHeader->arm9romOffset-ndsHeader->arm9binarySize)+src),len);
 	} else {
 		cardReadNormal(dst, src, len);
 	}

@@ -123,10 +123,6 @@ extern u32* lastClusterCacheUsed;
 extern u32 clusterCache;
 extern u32 clusterCacheSize;
 
-u32 arm9iromOffset = 0;
-u32 arm9ibinarySize = 0;
-u32 arm7iromOffset = 0;
-
 bool ce9Alt = false;
 bool ce9AltLargeTable = false;
 static u32 ce9Location = 0;
@@ -141,6 +137,7 @@ u8 baseUnitCode = 0;
 u16 baseHeaderCRC = 0;
 u16 baseSecureCRC = 0;
 u32 baseRomSize = 0;
+u32 arm9ibinarySize = 0;
 u32 baseChipID = 0;
 bool pkmnHeader = false;
 
@@ -559,6 +556,7 @@ static void loadBinary_ARM7(const tDSiHeader* dsiHeaderTemp, aFile* file) {
 	fileRead((char*)&baseHeaderCRC, file, 0x15E, sizeof(u16));
 	fileRead((char*)&baseSecureCRC, file, 0x6C, sizeof(u16));
 	fileRead((char*)&baseRomSize, file, 0x80, sizeof(u32));
+	arm9ibinarySize = dsiHeaderTemp->arm9ibinarySize;
 }
 
 static module_params_t* loadModuleParams(const tNDSHeader* ndsHeader, bool* foundPtr) {
@@ -577,7 +575,7 @@ u32 romLocation = 0x09000000;
 s32 romSizeLimit = 0x780000;
 u32 ROMinRAM = 0;
 
-static bool isROMLoadableInRAM(const tNDSHeader* ndsHeader, const char* romTid, const module_params_t* moduleParams) {
+static bool isROMLoadableInRAM(const tDSiHeader* dsiHeader, const tNDSHeader* ndsHeader, const char* romTid, const module_params_t* moduleParams, const bool usesCloneboot) {
 	bool isDevConsole = false;
 	if (s2FlashcardId == 0x334D || s2FlashcardId == 0x3647 || s2FlashcardId == 0x4353 || s2FlashcardId == 0x5A45) {
 		romLocation = 0x08000000;
@@ -655,16 +653,15 @@ static bool isROMLoadableInRAM(const tNDSHeader* ndsHeader, const char* romTid, 
 	 || (strncmp(romTid, "K97", 3) == 0 && s2FlashcardId != 0x5A45) // Sutanoberuzu: Kono Hareta Sora no Shita de
 	 || (strncmp(romTid, "K98", 3) == 0 && s2FlashcardId != 0x5A45) // Sutanoberuzu: Shirogane no Torikago
 	 || (strncmp(romTid, "UOR", 3) != 0
-	 && strncmp(romTid, "KYP", 3) != 0 // 1st Class Poker & BlackJack
-	 && strncmp(romTid, "KXG", 3) != 0 // Abyss
-	 && strncmp(romTid, "KTR", 3) != 0 // Clubhouse Games Express: Card Classics
-	 && strncmp(romTid, "KTC", 3) != 0 && strncmp(romTid, "KTP", 3) != 0 // Clubhouse Games Express: Family Favorites
-	 && strncmp(romTid, "KTD", 3) != 0 && strncmp(romTid, "KTB", 3) != 0 // Clubhouse Games Express: Strategy Pack
 	 && strncmp(romTid, "KPP", 3) != 0 // Pop Island
-	 && strncmp(romTid, "KPF", 3) != 0 // Pop Island: Paperfield
-	 && strncmp(romTid, "KPH", 3) != 0) // Prehistorik Man
+	 && strncmp(romTid, "KPF", 3) != 0) // Pop Island: Paperfield
 	) {
-		res = ((expansionPakFound || (extendedMemory2 && !dsDebugRam)) && (ndsHeader->unitCode == 3 ? (arm9iromOffset-0x8000)+ioverlaysSize : (baseRomSize-0x8000)+0x88) <= romSizeLimit);
+		u32 romSize = (baseRomSize-0x8000)+0x88;
+		if (!usesCloneboot) {
+			romSize = (baseRomSize - ndsHeader->arm9binarySize);
+			romSize -= ndsHeader->arm9romOffset;
+		}
+		res = ((expansionPakFound || (extendedMemory2 && !dsDebugRam)) && (ndsHeader->unitCode == 3 ? (usesCloneboot ? ((u32)dsiHeader->arm9iromOffset-0x8000) : ((u32)dsiHeader->arm9iromOffset-ndsHeader->arm9romOffset-ndsHeader->arm9binarySize))+ioverlaysSize : romSize) <= romSizeLimit);
 		if (res) {
 			dbg_printf(expansionPakFound ? "ROM is loadable into Slot-2 RAM\n" : "ROM is loadable into RAM\n");
 		}
@@ -795,14 +792,10 @@ static void startBinary_ARM7(void) {
 	arm7code(ndsHeader->arm7executeAddress);
 }
 
-static void loadOverlaysintoRAM(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, aFile* file, u32 ROMinRAM) {
+static void loadOverlaysintoRAM(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, aFile* file) {
 	// Load overlays into RAM
 	if (overlaysSize < romSizeLimit)
 	{
-		u32 overlaysLocation = romLocation;
-		if (ROMinRAM) {
-			overlaysLocation += (ndsHeader->arm9binarySize-ndsHeader->arm9romOffset);
-		}
 		if ((_io_dldi_features & FEATURE_SLOT_GBA) && s2FlashcardId != 0) {
 			const u32 buffer = 0x037F8000;
 			const u16 bufferSize = 0x8000;
@@ -812,7 +805,7 @@ static void loadOverlaysintoRAM(const tNDSHeader* ndsHeader, const module_params
 				u32 readLen = (len > bufferSize) ? bufferSize : len;
 
 				fileRead((char*)buffer, file, (ndsHeader->arm9romOffset + ndsHeader->arm9binarySize)+dst, readLen);
-				tonccpy((char*)overlaysLocation+dst, (char*)buffer, readLen);
+				tonccpy((char*)romLocation+dst, (char*)buffer, readLen);
 
 				len -= bufferSize;
 				dst += bufferSize;
@@ -823,11 +816,11 @@ static void loadOverlaysintoRAM(const tNDSHeader* ndsHeader, const module_params
 			}
 			toncset((char*)buffer, 0, bufferSize);
 		} else {
-			fileRead((char*)overlaysLocation, file, ndsHeader->arm9romOffset + ndsHeader->arm9binarySize, overlaysSize);
+			fileRead((char*)romLocation, file, ndsHeader->arm9romOffset + ndsHeader->arm9binarySize, overlaysSize);
 		}
 
-		if (!isSdk5(moduleParams) && *(u32*)((overlaysLocation-ndsHeader->arm9romOffset-ndsHeader->arm9binarySize)+0x003128AC) == 0x4B434148) {
-			*(u32*)((overlaysLocation-ndsHeader->arm9romOffset-ndsHeader->arm9binarySize)+0x3128AC) = 0xA00;	// Primary fix for Mario's Holiday
+		if (!isSdk5(moduleParams) && *(u32*)((romLocation-ndsHeader->arm9romOffset-ndsHeader->arm9binarySize)+0x003128AC) == 0x4B434148) {
+			*(u32*)((romLocation-ndsHeader->arm9romOffset-ndsHeader->arm9binarySize)+0x3128AC) = 0xA00;	// Primary fix for Mario's Holiday
 		}
 	}
 }
@@ -868,6 +861,51 @@ static void loadOverlaysintoFile(const tNDSHeader* ndsHeader, const module_param
 		}
 	} else {
 		apFixOverlaysCluster = 0;
+	}
+}
+
+static void loadIOverlaysintoRAM(const tDSiHeader* dsiHeader, aFile* file, const bool usesCloneboot) {
+	// Load overlays into RAM
+	if (ioverlaysSize>0x700000) return;
+
+	u32 romOffset = usesCloneboot ? 0x8000 : (ndsHeader->arm9romOffset + ndsHeader->arm9binarySize);
+	fileRead((char*)romLocation+((u32)dsiHeader->arm9iromOffset-romOffset), file, (u32)dsiHeader->arm9iromOffset+dsiHeader->arm9ibinarySize, ioverlaysSize);
+}
+
+static void loadROMintoRAM(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, aFile* file, const bool usesCloneboot) {
+	u32 romOffset = 0x8000;
+	u32 romSizeEdit = (baseRomSize-0x8000)+0x88;
+	if (!usesCloneboot) {
+		romOffset = ndsHeader->arm9romOffset + ndsHeader->arm9binarySize;
+		romSizeEdit = (baseRomSize - ndsHeader->arm9binarySize);
+		romSizeEdit -= ndsHeader->arm9romOffset;
+	}
+
+	if ((_io_dldi_features & FEATURE_SLOT_GBA) && s2FlashcardId != 0) {
+		const u32 buffer = 0x037F8000;
+		const u16 bufferSize = 0x8000;
+		s32 len = (s32)romSizeEdit;
+		u32 dst = 0;
+		while (1) {
+			u32 readLen = (len > bufferSize) ? bufferSize : len;
+
+			fileRead((char*)buffer, file, romOffset+dst, readLen);
+			tonccpy((char*)romLocation+dst, (char*)buffer, readLen);
+
+			len -= bufferSize;
+			dst += bufferSize;
+
+			if (len <= 0) {
+				break;
+			}
+		}
+		toncset((char*)buffer, 0, bufferSize);
+	} else {
+		fileRead((char*)romLocation, file, romOffset, romSizeEdit);
+	}
+
+	if (!isSdk5(moduleParams) && *(u32*)((romLocation-romOffset)+0x003128AC) == 0x4B434148) {
+		*(u32*)((romLocation-romOffset)+0x3128AC) = 0xA00;	// Primary fix for Mario's Holiday
 	}
 }
 
@@ -1155,17 +1193,20 @@ int arm7_main(void) {
 	// Switch to NTR mode BIOS
 	REG_SCFG_ROM = 0x703;
 
+	u32 clonebootFlag = 0;
+	fileRead((char*)&clonebootFlag, &romFile, baseRomSize, sizeof(u32));
+	bool usesCloneboot = (clonebootFlag == 0x16361);
+	if (usesCloneboot) {
+		dbg_printf("Cloneboot detected\n");
+	}
+
 	// Calculate overlay pack size
 	for (u32 i = ndsHeader->arm9romOffset+ndsHeader->arm9binarySize; i < ndsHeader->arm7romOffset; i++) {
 		overlaysSize++;
 	}
 	if (ndsHeader->unitCode == 3) {
-		fileRead((char*)&arm9iromOffset, &romFile, 0x1C0, sizeof(u32));
-		fileRead((char*)&arm9ibinarySize, &romFile, 0x1CC, sizeof(u32));
-		fileRead((char*)&arm7iromOffset, &romFile, 0x1D0, sizeof(u32));
-
 		// Calculate i-overlay pack size
-		for (u32 i = arm9iromOffset+arm9ibinarySize; i < arm7iromOffset; i++) {
+		for (u32 i = (u32)dsiHeaderTemp.arm9iromOffset+dsiHeaderTemp.arm9ibinarySize; i < (u32)dsiHeaderTemp.arm7iromOffset; i++) {
 			ioverlaysSize++;
 		}
 	}
@@ -1357,7 +1398,7 @@ int arm7_main(void) {
 	}
 
 	patchBinary((cardengineArm9*)ce9Location, ndsHeader, moduleParams);
-	ROMinRAM = isROMLoadableInRAM(ndsHeader, romTid, moduleParams); // If possible, set to load ROM into RAM
+	ROMinRAM = isROMLoadableInRAM(&dsiHeaderTemp, &dsiHeaderTemp.ndshdr, romTid, moduleParams, usesCloneboot); // If possible, set to load ROM into RAM
 	errorCode = patchCardNds(
 		(cardengineArm7*)CARDENGINE_ARM7_LOCATION,
 		(cardengineArm9*)ce9Location,
@@ -1401,7 +1442,14 @@ int arm7_main(void) {
 
 	bool overlaysInRam = (expansionPakFound || (extendedMemory2 && !dsDebugRam && strncmp(romTid, "UBRP", 4) != 0));
 	if (overlaysInRam) {
-		loadOverlaysintoRAM(ndsHeader, moduleParams, &romFile, ROMinRAM);
+		if (ROMinRAM) {
+			loadROMintoRAM(ndsHeader, moduleParams, &romFile, usesCloneboot);
+			if (ndsHeader->unitCode == 3) {
+				loadIOverlaysintoRAM(&dsiHeaderTemp, &romFile, usesCloneboot);
+			}
+		} else {
+			loadOverlaysintoRAM(ndsHeader, moduleParams, &romFile);
+		}
 	} else {
 		loadOverlaysintoFile(ndsHeader, moduleParams, &romFile);
 	}
@@ -1438,6 +1486,7 @@ int arm7_main(void) {
 		dsDebugRam,
 		supportsExceptionHandler(romTid),
 		mainScreen,
+		usesCloneboot,
 		overlaysSize,
 		ioverlaysSize,
 		fatTableSize,
@@ -1466,7 +1515,7 @@ int arm7_main(void) {
 			}
 		}
 		fileRead((char*)IMAGES_LOCATION, &apPatchFile, 0, apPatchSize);
-		if (applyIpsPatch(ndsHeader, (u8*)IMAGES_LOCATION, (*(u8*)(IMAGES_LOCATION+apPatchSize-1) == 0xA9), ROMinRAM, (overlaysInRam && overlaysSize <= 0x700000))) {
+		if (applyIpsPatch(ndsHeader, (u8*)IMAGES_LOCATION, (*(u8*)(IMAGES_LOCATION+apPatchSize-1) == 0xA9), ROMinRAM, (overlaysInRam && overlaysSize <= 0x700000), usesCloneboot)) {
 			dbg_printf("AP-fix applied\n");
 		} else {
 			dbg_printf("Failed to apply AP-fix\n");

@@ -16,7 +16,7 @@ extern bool extendedMemory;
 extern bool dsDebugRam;
 extern u32 romLocation;
 
-bool applyIpsPatch(const tNDSHeader* ndsHeader, u8* ipsbyte, bool arm9Only, bool ROMinRAM, bool overlaysInRam) {
+bool applyIpsPatch(const tNDSHeader* ndsHeader, u8* ipsbyte, bool arm9Only, bool ROMinRAM, bool overlaysInRam, const bool usesCloneboot) {
 	if (ipsbyte[0] != 'P' && ipsbyte[1] != 'A' && ipsbyte[2] != 'T' && ipsbyte[3] != 'C' && ipsbyte[4] != 'H' && ipsbyte[5] != 0) {
 		return false;
 	}
@@ -43,7 +43,7 @@ bool applyIpsPatch(const tNDSHeader* ndsHeader, u8* ipsbyte, bool arm9Only, bool
 			// Overlays
 			overlays = true;
 			rombyte = (void*)romLocation;
-			if (ROMinRAM) {
+			if (ROMinRAM && usesCloneboot) {
 				rombyte -= 0x8000;
 			} else {
 				rombyte -= ndsHeader->arm9romOffset;

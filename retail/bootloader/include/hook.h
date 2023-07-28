@@ -70,6 +70,7 @@ int hookNdsRetailArm9(
 	bool dsDebugRam,
 	u8 enableExceptionHandler,
 	s32 mainScreen,
+	const bool usesCloneboot,
 	u32 overlaysSize,
 	u32 ioverlaysSize,
 	u32 maxClusterCacheSize,
