@@ -113,16 +113,12 @@ static int cardReadCount = 0;
 
 extern void setExceptionHandler2();
 
-static inline u32 getRomSizeNoArm9Bin(const tNDSHeader* ndsHeader) {
-	return ndsHeader->romSize - ndsHeader->arm7romOffset + ce9->overlaysSize;
-}
-
-static inline void setDeviceOwner(void) {
-	if ((ce9->valueBits & expansionPakFound) || (__myio_dldi.features & FEATURE_SLOT_GBA)) {
-		sysSetCartOwner (BUS_OWNER_ARM9);
+static void setDeviceOwner(bool cardRead) {
+	if ((cardRead && (ce9->valueBits & expansionPakFound)) || (__myio_dldi.features & FEATURE_SLOT_GBA)) {
+		sysSetCartOwner(BUS_OWNER_ARM9);
 	}
-	if (__myio_dldi.features & FEATURE_SLOT_NDS) {
-		sysSetCardOwner (BUS_OWNER_ARM9);
+	if (!cardRead && (__myio_dldi.features & FEATURE_SLOT_NDS)) {
+		sysSetCardOwner(BUS_OWNER_ARM9);
 	}
 }
 
@@ -183,7 +179,7 @@ extern u32 getDtcmBase(void);
 extern bool dldiPatchBinary (unsigned char *binData, u32 binSize);
 
 void reset(u32 param) {
-	setDeviceOwner();
+	setDeviceOwner(false);
 	u32 resetParams = ((ce9->valueBits & isSdk5) ? RESET_PARAM_SDK5 : RESET_PARAM);
 	u32 iUncompressedSize = 0;
 	fileRead((char*)&iUncompressedSize, &pageFile, 0x3FFFF0, sizeof(u32));
@@ -448,7 +444,7 @@ void inGameMenu(s32* exRegisters) {
 	}
 
 	int oldIME = enterCriticalSection();
-	setDeviceOwner();
+	setDeviceOwner(false);
 
 	if (!opened) {
 		opening = true;
@@ -498,7 +494,7 @@ void myIrqHandlerIPC(void) {
 		case 0x53415652: {
 			u16 exmemcnt = REG_EXMEMCNT;
 			// Read save
-			setDeviceOwner();
+			setDeviceOwner(false);
 
 			u32 dst = *(vu32*)(sharedAddr+2);
 			u32 src = *(vu32*)(sharedAddr);
@@ -512,7 +508,7 @@ void myIrqHandlerIPC(void) {
 		case 0x53415657: {
 			u16 exmemcnt = REG_EXMEMCNT;
 			// Write save
-			setDeviceOwner();
+			setDeviceOwner(false);
 
 			u32 src = *(vu32*)(sharedAddr+2);
 			u32 dst = *(vu32*)(sharedAddr);
@@ -526,7 +522,7 @@ void myIrqHandlerIPC(void) {
 		case 0x524F4D52: {
 			u16 exmemcnt = REG_EXMEMCNT;
 			// Read ROM (redirected from arm7)
-			setDeviceOwner();
+			setDeviceOwner(false);
 
 			u32 dst = *(vu32*)(sharedAddr+2);
 			u32 src = *(vu32*)(sharedAddr);
@@ -677,7 +673,7 @@ void cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	u16 exmemcnt = REG_EXMEMCNT;
 	cardReadInProgress = true;
 
-	setDeviceOwner();
+	setDeviceOwner(true);
 	initialize();
 
 	/*if (isDSiWare && (__myio_dldi.features & FEATURE_SLOT_NDS) && (ce9->valueBits & expansionPakFound)) {
@@ -716,13 +712,13 @@ void cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 }
 
 bool nandRead(void* memory,void* flash,u32 len,u32 dma) {
-	setDeviceOwner();
+	setDeviceOwner(false);
 	fileRead(memory, &savFile, (u32)flash, len);
     return true; 
 }
 
 bool nandWrite(void* memory,void* flash,u32 len,u32 dma) {
-	setDeviceOwner();
+	setDeviceOwner(false);
 	fileWrite(memory, &savFile, (u32)flash, len);
 	return true;
 }
@@ -756,7 +752,7 @@ static void dsiSaveInit(void) {
 	int oldIME = enterCriticalSection();
 	u16 exmemcnt = REG_EXMEMCNT;
 	cardReadInProgress = true;
-	setDeviceOwner();
+	setDeviceOwner(false);
 	fileRead((char*)&dsiSaveSize, &savFile, ce9->saveSize-4, 4);
 	fileRead((char*)&existByte, &savFile, ce9->saveSize-8, 4);
 	cardReadInProgress = false;
@@ -813,7 +809,7 @@ bool dsiSaveCreate(const char* path, u32 permit) {
 		int oldIME = enterCriticalSection();
 		u16 exmemcnt = REG_EXMEMCNT;
 		cardReadInProgress = true;
-		setDeviceOwner();
+		setDeviceOwner(false);
 		fileWrite((char*)&existByte, &savFile, ce9->saveSize-8, 4);
 		cardReadInProgress = false;
 		REG_EXMEMCNT = exmemcnt;
@@ -840,7 +836,7 @@ bool dsiSaveDelete(const char* path) {
 		int oldIME = enterCriticalSection();
 		u16 exmemcnt = REG_EXMEMCNT;
 		cardReadInProgress = true;
-		setDeviceOwner();
+		setDeviceOwner(false);
 		fileWrite((char*)&dsiSaveSize, &savFile, ce9->saveSize-4, 4);
 		fileWrite((char*)&dsiSaveSize, &savFile, ce9->saveSize-8, 4);
 		cardReadInProgress = false;
@@ -895,7 +891,7 @@ u32 dsiSaveSetLength(void* ctx, s32 len) {
 	int oldIME = enterCriticalSection();
 	u16 exmemcnt = REG_EXMEMCNT;
 	cardReadInProgress = true;
-	setDeviceOwner();
+	setDeviceOwner(false);
 	bool res = fileWrite((char*)&dsiSaveSize, &savFile, ce9->saveSize-4, 4);
 	dsiSaveResultCode = res ? 0 : 1;
 	toncset32(ctx+0x14, dsiSaveResultCode, 1);
@@ -1029,7 +1025,7 @@ s32 dsiSaveRead(void* ctx, void* dst, s32 len) {
 	int oldIME = enterCriticalSection();
 	u16 exmemcnt = REG_EXMEMCNT;
 	cardReadInProgress = true;
-	setDeviceOwner();
+	setDeviceOwner(false);
 	bool res = false;
 	if ((__myio_dldi.features & FEATURE_SLOT_GBA) && (u32)dst >= 0x08000000 && (u32)dst < 0x0A000000) {
 		s32 bufLen = len;
@@ -1084,7 +1080,7 @@ s32 dsiSaveWrite(void* ctx, void* src, s32 len) {
 	int oldIME = enterCriticalSection();
 	u16 exmemcnt = REG_EXMEMCNT;
 	cardReadInProgress = true;
-	setDeviceOwner();
+	setDeviceOwner(false);
 	bool res = false;
 	if ((__myio_dldi.features & FEATURE_SLOT_GBA) && (u32)src >= 0x08000000 && (u32)src < 0x0A000000) {
 		s32 bufLen = len;
@@ -1119,7 +1115,7 @@ s32 dsiSaveWrite(void* ctx, void* src, s32 len) {
 
 			int oldIME = enterCriticalSection();
 			u16 exmemcnt = REG_EXMEMCNT;
-			setDeviceOwner();
+			setDeviceOwner(false);
 			cardReadInProgress = true;
 			fileWrite((char*)&dsiSaveSize, &savFile, ce9->saveSize-4, 4);
 			cardReadInProgress = false;
@@ -1135,7 +1131,7 @@ s32 dsiSaveWrite(void* ctx, void* src, s32 len) {
 
 
 /*void reset(u32 param) {
-	setDeviceOwner();
+	setDeviceOwner(false);
 	u32 resetParams = ((ce9->valueBits & isSdk5) ? RESET_PARAM_SDK5 : RESET_PARAM);
 	if (ce9->valueBits & softResetMb) {
 		*(u32*)resetParams = 0;
@@ -1158,7 +1154,7 @@ void musicInit(void) {
 	}
 
 	u16 exmemcnt = REG_EXMEMCNT;
-	setDeviceOwner();
+	setDeviceOwner(false);
 
 	musicMagicStringChecked = true;
 	u32 magic = 0;
@@ -1178,7 +1174,7 @@ void musicInit(void) {
 void updateMusic(void) {
 	if (sharedAddr[2] == 0x5953554D && !cardReadInProgress) { // 'MUSY'
 		u16 exmemcnt = REG_EXMEMCNT;
-		setDeviceOwner();
+		setDeviceOwner(false);
 
 		const u16 currentLen = (musicPosRev > musicReadLen) ? musicReadLen : musicPosRev;
 		fileRead((char*)(0x027F0000+(soundBuffer*musicReadLen)), &musicsFile, musicPosInFile + musicPos, currentLen);
@@ -1223,7 +1219,7 @@ void musicPlay(int id) {
 		soundBuffer = 1;
 
 		u16 exmemcnt = REG_EXMEMCNT;
-		setDeviceOwner();
+		setDeviceOwner(false);
 
 		fileRead((char*)&musicPosInFile, &musicsFile, 0x10+(0x10*id), 4);
 		fileRead((char*)&musicFileSize, &musicsFile, 0x14+(0x10*id), 4);
@@ -1271,7 +1267,7 @@ u32 myIrqEnable(u32 irq) {
 	nocashMessage("myIrqEnable\n");
 	#endif
 
-	setDeviceOwner();
+	setDeviceOwner(false);
 	initialize();
 
 	if (isDSiWare && (ce9->valueBits & expansionPakFound)) {

@@ -586,6 +586,15 @@ static bool isROMLoadableInRAM(const tDSiHeader* dsiHeader, const tNDSHeader* nd
 		} else {
 			romSizeLimit = 0x1F80000;
 		}
+		if (strncmp(romTid, "UBR", 3) == 0) {
+			romSizeLimit = 0x800000;
+			if (s2FlashcardId == 0x5A45) {
+				romLocation += 0x200;
+				romSizeLimit -= 0x200;
+			} else {
+				romLocation += 0x800000;
+			}
+		}
 	} else if (!extendedMemory2) {
 		if (strncmp(romTid, "KD3", 3) == 0 // Jinia Supasonaru: Eiwa Rakubiki Jiten
 		 || strncmp(romTid, "KD5", 3) == 0 // Jinia Supasonaru: Waei Rakubiki Jiten
@@ -1211,7 +1220,9 @@ int arm7_main(void) {
 		}
 	}
 
-	if ((strcmp(romTid, "UBRP") == 0) && extendedMemory2 && !dsDebugRam) {
+	bool dsBrowser = (strcmp(romTid, "UBRP") == 0);
+
+	if (dsBrowser && extendedMemory2 && !dsDebugRam) {
 		toncset((char*)0x0C400000, 0xFF, 0xC0);
 		toncset((u8*)0x0C4000B2, 0, 3);
 		toncset((u8*)0x0C4000B5, 0x24, 3);
@@ -1222,9 +1233,9 @@ int arm7_main(void) {
 	}
 
 	*(vu16*)0x08240000 = 1;
-	expansionPakFound = ((*(vu16*)0x08240000 == 1) && (strcmp(romTid, "UBRP") != 0));
+	expansionPakFound = ((*(vu16*)0x08240000 == 1) && (s2FlashcardId != 0 || strcmp(romTid, "UBRP") != 0));
 
-	if ((strcmp(romTid, "UBRP") == 0) && /*(_io_dldi_features & FEATURE_SLOT_NDS) &&*/ s2FlashcardId != 0 && s2FlashcardId != 0x5A45) {
+	if (dsBrowser && s2FlashcardId != 0 && s2FlashcardId != 0x5A45) {
 		toncset((char*)0x08000000, 0xFF, 0xC0);
 		toncset((u8*)0x080000B2, 0, 3);
 		toncset((u8*)0x080000B5, 0x24, 3);
@@ -1265,10 +1276,10 @@ int arm7_main(void) {
 	if (s2FlashcardId == 0x334D || s2FlashcardId == 0x3647 || s2FlashcardId == 0x4353) {
 		fatTableAddr = (s2FlashcardId==0x4353 ? 0x09F7FE00 : 0x09F80000);
 		fatTableSize = 0x80000;
-	} else if (s2FlashcardId == 0x5A45) {
+	} else if (s2FlashcardId == 0x5A45 && !dsBrowser) {
 		fatTableAddr = 0x08F80000;
 		fatTableSize = 0x80000;
-	} else if (expansionPakFound) {
+	} else if (expansionPakFound && !dsBrowser) {
 		fatTableAddr = 0x09780000;
 		fatTableSize = 0x80000;
 	} else if (extendedMemory2) {
@@ -1440,7 +1451,7 @@ int arm7_main(void) {
 		errorOutput();
 	}
 
-	bool overlaysInRam = (expansionPakFound || (extendedMemory2 && !dsDebugRam && strncmp(romTid, "UBRP", 4) != 0));
+	bool overlaysInRam = (expansionPakFound || (extendedMemory2 && !dsDebugRam && !dsBrowser));
 	if (overlaysInRam) {
 		if (ROMinRAM) {
 			loadROMintoRAM(ndsHeader, moduleParams, &romFile, usesCloneboot);
