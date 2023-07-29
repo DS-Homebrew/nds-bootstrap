@@ -436,20 +436,22 @@ static int runNdsFile(configuration* conf) {
 		clusterSav = stSav.st_ino;
 	}
 
-	if (conf->donorFileOffset) {
-		clusterDonor = st.st_ino;
-	} else if (conf->useSdk20Donor) {
-		if (stat(conf->donor20Path, &stDonor) >= 0) {
+	if (!dsiFeatures() || conf->b4dsMode) {
+		if (conf->donorFileOffset) {
+			clusterDonor = st.st_ino;
+		} else if (conf->useSdk20Donor) {
+			if (stat(conf->donor20Path, &stDonor) >= 0) {
+				clusterDonor = stDonor.st_ino;
+			}
+		} else if (stat("fat:/_nds/nds-bootstrap/b4dsTwlDonor.bin", &stDonorStandalone) >= 0) {
+			clusterDonor = stDonorStandalone.st_ino;
+		} else if (stat(conf->donorTwlPath, &stDonor) >= 0) {
 			clusterDonor = stDonor.st_ino;
+		} else if (stat(conf->donorTwl0Path, &stDonor0) >= 0) {
+			clusterDonor = stDonor0.st_ino;
+		} else if (stat(conf->donor5Path, &stDonor5) >= 0) {
+			clusterDonor = stDonor5.st_ino;
 		}
-	} else if (stat("fat:/_nds/nds-bootstrap/b4dsTwlDonor.bin", &stDonorStandalone) >= 0) {
-		clusterDonor = stDonorStandalone.st_ino;
-	} else if (stat(conf->donorTwlPath, &stDonor) >= 0) {
-		clusterDonor = stDonor.st_ino;
-	} else if (stat(conf->donorTwl0Path, &stDonor0) >= 0) {
-		clusterDonor = stDonor0.st_ino;
-	} else if (stat(conf->donor5Path, &stDonor5) >= 0) {
-		clusterDonor = stDonor5.st_ino;
 	}
 
 	if (stat(conf->apPatchPath, &stApPatch) >= 0) {
