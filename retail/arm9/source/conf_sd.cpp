@@ -1862,7 +1862,9 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			}
 
 			FILE* ndsFile = fopen(multibootSrl, "rb");
-			conf->donorFileOffset = offsetOfOpenedNitroFile;
+			if (ndsFile) {
+				conf->donorFileOffset = offsetOfOpenedNitroFile;
+			}
 			if (strncmp(romTid, "KAV", 3) != 0 || !b4dsDebugRam) {
 				FILE* pageFile = fopen(pageFilePath.c_str(), "rb+");
 				if (ndsFile && pageFile) {
