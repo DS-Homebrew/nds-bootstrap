@@ -747,6 +747,13 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 					fatMountSimple("nand", &io_dsi_nand);
 				}
 				donorNdsFile = fopen(dsiEnhancedMbk ? conf->donorTwl0Path : conf->donorTwlOnly0Path, "rb"); // System titles can only use an SDK 5.0 donor ROM
+			} else if (strncmp(romTid, "KCX", 3) == 0 && dsiEnhancedMbk) {
+				// Set cloneboot/multiboot SRL file as Donor ROM
+				if (romFSInit(conf->ndsPath)) {
+					const char* multibootSrl = "rom:/mb_main.srl"; // Cosmo Fighters
+
+					donorNdsFile = fopen(multibootSrl, "rb");
+				}
 			} else {
 				const bool sdk50 = (
 				   ( dsiEnhancedMbk && ndsArm7Size == 0x1511C)
