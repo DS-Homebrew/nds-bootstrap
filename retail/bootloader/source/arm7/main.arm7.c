@@ -648,7 +648,7 @@ static bool isROMLoadableInRAM(const tDSiHeader* dsiHeader, const tNDSHeader* nd
 		}
 	}
 
-	if (romSizeLimit <= 0) {
+	if (romSizeLimit <= 0 || (strncmp(romTid, "UBR", 3) == 0 && extendedMemory2 && !dsDebugRam && !isDevConsole)) {
 		return false;
 	}
 
