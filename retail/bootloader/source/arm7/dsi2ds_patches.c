@@ -8016,6 +8016,52 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// Art Style: DIGIDRIVE (USA)
+	// Art Style: INTERSECT (Europe, Australia)
+	// Saving not supported due to code taking place in overlays
+	// Requires 8MB of RAM
+	else if ((strcmp(romTid, "KAVE") == 0 || strcmp(romTid, "KAVV") == 0) && extendedMemory2) {
+		doubleNopT(0x020931C0);
+		doubleNopT(0x020A8ECA);
+		doubleNopT(0x020AEAFA);
+		patchInitDSiWare(0x020A1018, heapEnd);
+		patchUserSettingsReadDSiWare(0x020A2810);
+		*(u32*)0x020A2838 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x020A283C = 0xE12FFF1E; // bx lr
+		*(u32*)0x020A2844 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x020A2848 = 0xE12FFF1E; // bx lr
+
+		*(u32*)0x020A4930 = 0xE12FFF1E; // bx lr
+		*(u32*)0x020A493C = 0xE12FFF1E; // bx lr
+		if (romTid[3] == 'E') {
+			*(u32*)0x0260C1F4 = 0xE12FFF1E; // bx lr
+			*(u32*)0x0260C258 = 0xE12FFF1E; // bx lr
+		} else {
+			*(u32*)0x0260CCB4 = 0xE12FFF1E; // bx lr
+			*(u32*)0x0260CD18 = 0xE12FFF1E; // bx lr
+		}
+	}
+
+	// Art Style: DIGIDRIVE (Japan)
+	// Saving not supported due to code taking place in overlays
+	// Requires 8MB of RAM
+	else if (strcmp(romTid, "KAVJ") == 0 && extendedMemory2) {
+		doubleNopT(0x02092EA0);
+		doubleNopT(0x020A8A76);
+		doubleNopT(0x020AE672);
+		patchInitDSiWare(0x020A0BE4, heapEnd);
+		patchUserSettingsReadDSiWare(0x020A23DC);
+		*(u32*)0x020A2404 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x020A2408 = 0xE12FFF1E; // bx lr
+		*(u32*)0x020A2410 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x020A2414 = 0xE12FFF1E; // bx lr
+
+		*(u32*)0x020A44EC = 0xE12FFF1E; // bx lr
+		*(u32*)0x020A44F8 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0260EB34 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0260EB98 = 0xE12FFF1E; // bx lr
+	}
+
 	// Disney Fireworks (USA)
 	// Locks up on ESRB screen
 	// Requires 8MB of RAM

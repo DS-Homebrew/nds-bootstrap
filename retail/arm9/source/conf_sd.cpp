@@ -673,6 +673,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	conf->isDSiWare = (dsiFeatures() && !conf->b4dsMode && ((unitCode == 3 && (accessControl & BIT(4)))
 					|| (unitCode == 2 && conf->dsiMode && romTid[0] == 'K')));
 	bool dsiEnhancedMbk = false;
+	bool b4dsDebugRam = false;
 
 	if (conf->isDSiWare) {
 		conf->valueBits2 |= BIT(0);
@@ -1640,8 +1641,10 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		*(vu32*)(0x02C00000) = 0x324D454D;
 	}
 
+	b4dsDebugRam = (conf->b4dsMode == 2 || (*(vu32*)(0x02800000) == 0x314D454D && *(vu32*)(0x02C00000) == 0x324D454D));
+
 	// Load ce9 binary
-	if (conf->b4dsMode == 2 || (*(vu32*)(0x02800000) == 0x314D454D && *(vu32*)(0x02C00000) == 0x324D454D)) {
+	if (b4dsDebugRam) {
 		cebin = fopen("nitro:/cardengine_arm9_extmem.lz77", "rb");
 	} else {
 		const char* ce9path = "nitro:/cardengine_arm9_alt.lz77";
@@ -1846,7 +1849,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		fclose(srParamsFile);
 	}
 
-	if ((!dsiFeatures() || conf->b4dsMode) && (strncmp(romTid, "KCX", 3) == 0 || strncmp(romTid, "KAV", 3) == 0 || strncmp(romTid, "KNK", 3) == 0)) {
+	if ((!dsiFeatures() || conf->b4dsMode) && (strncmp(romTid, "KCX", 3) == 0 || (strncmp(romTid, "KAV", 3) == 0 && !b4dsDebugRam) || strncmp(romTid, "KNK", 3) == 0)) {
 		// Set cloneboot/multiboot SRL file to boot instead
 		if (romFSInit(conf->ndsPath)) {
 			const char* multibootSrl = "rom:/child.srl"; // Art Style: DIGIDRIVE (strncmp(romTid, "KAV", 3) == 0)
