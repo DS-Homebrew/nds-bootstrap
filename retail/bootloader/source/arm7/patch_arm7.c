@@ -378,9 +378,10 @@ u32 patchCardNdsArm7(
 
 	if ((ndsHeader->unitCode > 0) ? (arm7mbk == 0x080037C0) : (memcmp(ndsHeader->gameCode, "AYI", 3) == 0 && ndsHeader->arm7binarySize == 0x25F70)) {
 		// Replace incompatible ARM7 binary
-		extern u32 donorFileTwlCluster;	// SDK5 (TWL)
+		extern u32 donorFileCluster;	// SDK5
+		extern u32 donorFileOffset;
 		aFile donorRomFile;
-		getFileFromCluster(&donorRomFile, donorFileTwlCluster);
+		getFileFromCluster(&donorRomFile, donorFileCluster);
 		if (donorRomFile.firstCluster == CLUSTER_FREE) {
 			if (ndsHeader->gameCode[0] == 'D') {
 				if (newArm7binarySize != patchOffsetCache.a7BinSize) {
@@ -395,21 +396,21 @@ u32 patchCardNdsArm7(
 			}
 		}
 		u32 arm7dst = 0;
-		fileRead((char*)&arm7dst, &donorRomFile, 0x38, 0x4);
+		fileRead((char*)&arm7dst, &donorRomFile, donorFileOffset+0x38, 0x4);
 		if (arm7dst == 0x02380000) {
 			// Donor found within a ROM file
 			u32 arm7src = 0;
 			u32 arm7size = 0;
-			fileRead((char*)&arm7newUnitCode, &donorRomFile, 0x12, 1);
-			fileRead((char*)&arm7src, &donorRomFile, 0x30, 0x4);
-			fileRead((char*)&arm7size, &donorRomFile, 0x3C, 0x4);
-			fileRead(ndsHeader->arm7destination, &donorRomFile, arm7src, arm7size);
+			fileRead((char*)&arm7newUnitCode, &donorRomFile, donorFileOffset+0x12, 1);
+			fileRead((char*)&arm7src, &donorRomFile, donorFileOffset+0x30, 0x4);
+			fileRead((char*)&arm7size, &donorRomFile, donorFileOffset+0x3C, 0x4);
+			fileRead(ndsHeader->arm7destination, &donorRomFile, donorFileOffset+arm7src, arm7size);
 			newArm7binarySize = arm7size;
 		} else {
 			// Standalone donor found
-			extern u32 donorFileTwlSize;
-			fileRead(ndsHeader->arm7destination, &donorRomFile, 0, donorFileTwlSize);
-			newArm7binarySize = donorFileTwlSize;
+			extern u32 donorFileSize;
+			fileRead(ndsHeader->arm7destination, &donorRomFile, 0, donorFileSize);
+			newArm7binarySize = donorFileSize;
 
 			u32 startOffset = (u32)ndsHeader->arm7destination;
 			if (*(u32*)(startOffset + newArm7binarySize - 0xC) == 0x027E0000) {

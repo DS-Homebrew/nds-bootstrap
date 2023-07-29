@@ -35,7 +35,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	extern bool ce9Alt;
 	extern bool expansionPakFound;
 	extern u16 s2FlashcardId;
-	extern u32 donorFileTwlCluster;	// SDK5 (TWL)
+	extern u32 donorFileCluster;	// SDK5
 	extern u32 fatTableAddr;
 	const char* romTid = getRomTid(ndsHeader);
 	// const char* dataPub = "dataPub:";
@@ -54,7 +54,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	const u32 heapEndExceed = extendedMemory2 ? heapEnd+0x800000 : heapEndRetail+0xC00000; // extendedMemory2 ? #0x2FB0000 (mirrors to 0x27B0000 on debug DS units) : #0x2FE0000 (mirrors to 0x23E0000 on retail DS units)
 	const bool debugOrMep = (extendedMemory2 || expansionPakFound);
 	const bool largeS2RAM = (expansionPakFound && (s2FlashcardId != 0)); // 16MB or more
-	if (donorFileTwlCluster == CLUSTER_FREE) {
+	if (donorFileCluster == CLUSTER_FREE) {
 		return;
 	}
 

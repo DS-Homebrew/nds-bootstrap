@@ -529,13 +529,13 @@ static void loadBinary_ARM7(const tDSiHeader* dsiHeaderTemp, aFile* file) {
 			srlAddr = 0;
 			fileRead((char*)dsiHeaderTemp, file, srlAddr, sizeof(*dsiHeaderTemp));
 		}
-		extern u32 donorFileTwlCluster;	// SDK5 (TWL)
+		extern u32 donorFileCluster;	// SDK5
 		fileRead((char*)&arm7mbk, file, srlAddr+0x1A0, sizeof(u32));
 		fileRead((char*)&accessControl, file, srlAddr+0x1B4, sizeof(u32));
 
 		// Load binaries into memory
 		fileRead(dsiHeaderTemp->ndshdr.arm9destination, file, srlAddr+dsiHeaderTemp->ndshdr.arm9romOffset, dsiHeaderTemp->ndshdr.arm9binarySize);
-		if ((ndsHeader->unitCode > 0) ? (arm7mbk != 0x080037C0 || (arm7mbk == 0x080037C0 && donorFileTwlCluster == CLUSTER_FREE)) : (strncmp(baseTid, "AYI", 3) != 0 || ndsHeader->arm7binarySize != 0x25F70)) {
+		if ((ndsHeader->unitCode > 0) ? (arm7mbk != 0x080037C0 || (arm7mbk == 0x080037C0 && donorFileCluster == CLUSTER_FREE)) : (strncmp(baseTid, "AYI", 3) != 0 || ndsHeader->arm7binarySize != 0x25F70)) {
 			fileRead(dsiHeaderTemp->ndshdr.arm7destination, file, srlAddr+dsiHeaderTemp->ndshdr.arm7romOffset, dsiHeaderTemp->ndshdr.arm7binarySize);
 		}
 	}

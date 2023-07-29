@@ -1959,7 +1959,7 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
     dbg_printf("\n\n");
 
 	if (ndsHeader->unitCode > 0) {
-		extern u32 donorFileTwlCluster;
+		extern u32 donorFileCluster;
 		extern u32 arm7mbk;
 		extern u32 accessControl;
 
@@ -1968,7 +1968,7 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 		   || (strncmp(romTid, "DMD", 3) == 0 && extendedMemory2)
 		   || strncmp(romTid, "DMP", 3) == 0
 		   || (strncmp(romTid, "DHS", 3) == 0 && extendedMemory2)
-		)	&& arm7mbk == 0x080037C0 && donorFileTwlCluster != CLUSTER_FREE) {
+		)	&& arm7mbk == 0x080037C0 && donorFileCluster != CLUSTER_FREE) {
 			if (moduleParams->sdk_version > 0x5050000) {
 				*(u32*)(startOffset+0x838) = 0xE1A00000; // nop
 				*(u32*)(startOffset+0x99C) = 0xE1A00000; // nop
@@ -2048,7 +2048,7 @@ void patchCardNdsArm9Cont(const tNDSHeader* ndsHeader, const module_params_t* mo
 	}
 
 	// Further patching in order for DSiWare to boot with NTR ARM7 binary
-	extern u32 donorFileTwlCluster;
+	extern u32 donorFileCluster;
 	extern u8 arm7newUnitCode;
 	extern u32 arm7mbk;
 	extern u32 accessControl;
@@ -2059,7 +2059,7 @@ void patchCardNdsArm9Cont(const tNDSHeader* ndsHeader, const module_params_t* mo
 	   || (strncmp(romTid, "DMD", 3) == 0 && extendedMemory2)
 	   || strncmp(romTid, "DMP", 3) == 0
 	   || (strncmp(romTid, "DHS", 3) == 0 && extendedMemory2)
-	)	&& arm7newUnitCode == 0 && arm7mbk == 0x080037C0 && donorFileTwlCluster != CLUSTER_FREE) {
+	)	&& arm7newUnitCode == 0 && arm7mbk == 0x080037C0 && donorFileCluster != CLUSTER_FREE) {
 		u32 startOffset = (u32)ndsHeader->arm9destination;
 		if (moduleParams->sdk_version > 0x5050000) {
 			setB(startOffset+0x86C, startOffset+0x8F0);

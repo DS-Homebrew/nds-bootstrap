@@ -32,8 +32,9 @@
 	.global dsiSD
 	.global valueBits
 	.global saveFileCluster
-	.global donorFileTwlCluster
-	.global donorFileTwlSize
+	.global donorFileCluster
+	.global donorFileSize
+	.global donorFileOffset
 	.global gbaFileCluster
 	.global gbaSaveFileCluster
 	.global romSize
@@ -100,10 +101,12 @@ valueBits:
 	.byte	0
 saveFileCluster:
 	.word	0x00000000		@ .sav file
-donorFileTwlCluster:
-	.word	0x00000000		@ SDK5 (TWL) donor .nds file
-donorFileTwlSize:
-	.word	0x00000000		@ SDK5 (TWL) donor .nds file size
+donorFileCluster:
+	.word	0x00000000		@ SDK5 donor .nds file
+donorFileSize:
+	.word	0x00000000		@ SDK5 donor .nds file size
+donorFileOffset:
+	.word	0x00000000		@ SDK5 donor .nds file offset
 gbaFileCluster:
 	.word	0x00000000		@ .gba file
 gbaSaveFileCluster:

@@ -436,7 +436,9 @@ static int runNdsFile(configuration* conf) {
 		clusterSav = stSav.st_ino;
 	}
 
-	if (conf->useSdk20Donor) {
+	if (conf->donorFileOffset) {
+		clusterDonor = st.st_ino;
+	} else if (conf->useSdk20Donor) {
 		if (stat(conf->donor20Path, &stDonor) >= 0) {
 			clusterDonor = stDonor.st_ino;
 		}

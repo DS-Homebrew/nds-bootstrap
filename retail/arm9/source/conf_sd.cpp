@@ -1537,7 +1537,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		conf->donorTwlPath = strdup(config_file_b4ds.fetch("NDS-BOOTSTRAP", "DONORTWL_NDS_PATH").c_str());
 	}
 
-	conf->donorFileTwlSize = getFileSize("fat:/_nds/nds-bootstrap/b4dsTwlDonor.bin");
+	conf->donorFileSize = getFileSize("fat:/_nds/nds-bootstrap/b4dsTwlDonor.bin");
 
 	// Load external cheat engine binary
 	cebin = fopen("nitro:/cardenginei_arm7_cheat.bin", "rb");
@@ -1679,7 +1679,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 				u32 ndsArm7Size = 0;
 
 				if (standaloneDonor) {
-					ndsArm7Size = conf->donorFileTwlSize;
+					ndsArm7Size = conf->donorFileSize;
 				} else {
 					fseek(ndsFile, 0x30, SEEK_SET);
 					fread(&ndsArm7Offset, sizeof(u32), 1, ndsFile);
@@ -1849,8 +1849,10 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		fclose(srParamsFile);
 	}
 
-	if ((!dsiFeatures() || conf->b4dsMode) && (strncmp(romTid, "KCX", 3) == 0 || (strncmp(romTid, "KAV", 3) == 0 && !b4dsDebugRam) || strncmp(romTid, "KNK", 3) == 0)) {
-		// Set cloneboot/multiboot SRL file to boot instead
+	conf->donorFileOffset = 0;
+
+	if ((!dsiFeatures() || conf->b4dsMode) && (strncmp(romTid, "KCX", 3) == 0 || strncmp(romTid, "KAV", 3) == 0 || strncmp(romTid, "KNK", 3) == 0)) {
+		// Set cloneboot/multiboot SRL file either to boot instead, or as Donor ROM
 		if (romFSInit(conf->ndsPath)) {
 			const char* multibootSrl = "rom:/child.srl"; // Art Style: DIGIDRIVE (strncmp(romTid, "KAV", 3) == 0)
 			if (strncmp(romTid, "KCX", 3) == 0) {
@@ -1860,12 +1862,15 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			}
 
 			FILE* ndsFile = fopen(multibootSrl, "rb");
-			FILE* pageFile = fopen(pageFilePath.c_str(), "rb+");
-			if (ndsFile && pageFile) {
-				FILE* srParamsFile = fopen(srParamsFilePath.c_str(), "rb+");
-				fseek(srParamsFile, 0xC, SEEK_SET);
-				fwrite(&offsetOfOpenedNitroFile, sizeof(u32), 1, srParamsFile);
-				fclose(srParamsFile);
+			conf->donorFileOffset = offsetOfOpenedNitroFile;
+			if (strncmp(romTid, "KAV", 3) != 0 || !b4dsDebugRam) {
+				FILE* pageFile = fopen(pageFilePath.c_str(), "rb+");
+				if (ndsFile && pageFile) {
+					FILE* srParamsFile = fopen(srParamsFilePath.c_str(), "rb+");
+					fseek(srParamsFile, 0xC, SEEK_SET);
+					fwrite(&offsetOfOpenedNitroFile, sizeof(u32), 1, srParamsFile);
+					fclose(srParamsFile);
+				}
 			}
 			fclose(ndsFile);
 		}
