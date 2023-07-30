@@ -317,6 +317,7 @@ static const char dsiWareForBootloader2[][4] = {
 	"KO4", // Oscar in Movieland
 	"KOT", // Oscar in Toyland
 	"KOY", // Oscar in Toyland 2
+	"KO9", // Oscar's World Tour
 	"KTV", // Otegaru Pazuru Shirizu: Yurito Fushigina Meikyuu
 	"KOL", // Othello
 	"KL7", // Otona no Nihonshi Pazuru

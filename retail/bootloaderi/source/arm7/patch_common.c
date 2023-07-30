@@ -9226,6 +9226,27 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)(0x02044B20+offsetChange2) = 0xE3A00000; // mov r0, #0
 	}
 
+	// Oscar's World Tour (USA)
+	// Oscar's World Tour (Europe)
+	// Due to our save implementation, save data is stored in all 3 slots
+	else if ((strcmp(romTid, "KO9E") == 0 || strcmp(romTid, "KO9P") == 0) && saveOnFlashcard) {
+		u8 offsetChange = (romTid[3] == 'E') ? 0 : 0x4C;
+		setBL(0x020275C4, (u32)dsiSaveOpen);
+		setBL(0x020275D4, (u32)dsiSaveClose);
+		*(u32*)0x02027720 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02027724 = 0xE12FFF1E; // bx lr
+		setBL(0x02027A00, (u32)dsiSaveOpen);
+		setBL(0x02027A1C, (u32)dsiSaveGetLength);
+		setBL(0x02027A38, (u32)dsiSaveRead);
+		setBL(0x02027A40, (u32)dsiSaveClose);
+		setBL(0x02027A94, (u32)dsiSaveCreate);
+		setBL(0x02027AA4, (u32)dsiSaveOpen);
+		setBL(0x02027AE0, (u32)dsiSaveSetLength);
+		setBL(0x02027AF0, (u32)dsiSaveWrite);
+		setBL(0x02027AF8, (u32)dsiSaveClose);
+		*(u32*)(0x02028124+offsetChange) = 0xE3A00000; // mov r0, #0
+	}
+
 	// Otegaru Pazuru Shirizu: Yurito Fushigina Meikyuu (Japan)
 	else if (strcmp(romTid, "KTVJ") == 0) {
 		if (!twlFontFound) {

@@ -16163,14 +16163,17 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Oscar in Movieland (Europe, Australia)
 	// Due to our save implementation, save data is stored in all 3 slots
 	else if (strcmp(romTid, "KO4E") == 0 || strcmp(romTid, "KO4V") == 0) {
+		useSharedFont = (twlFontFound && extendedMemory2);
 		u16 offsetChange2 = (romTid[3] == 'E') ? 0 : 0x154;
 		u16 offsetChange = (romTid[3] == 'E') ? 0 : 0x1A8;
 
-		*(u32*)0x020053A4 = 0xF5000; // Shrink sound heap from 0x133333
+		// *(u32*)0x020053A4 = 0xF5000; // Shrink sound heap from 0x133333
 		*(u32*)0x0200F70C = 0xE1A00000; // nop
 		*(u32*)0x02012B44 = 0xE1A00000; // nop
 		patchInitDSiWare(0x02018644, heapEnd);
-		*(u32*)0x020189D0 = *(u32*)0x02004FD0;
+		if (!extendedMemory2) {
+			*(u32*)0x020189D0 = *(u32*)0x02004FD0;
+		}
 		patchUserSettingsReadDSiWare(0x02019AE4);
 		*(u32*)(0x0205AD38+offsetChange2) = 0xE3A00000; // mov r0, #0
 		*(u32*)(0x0205AE54+offsetChange2) = 0xE1A00000; // nop
@@ -16216,15 +16219,18 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Oscar in Toyland 2 (Europe)
 	// Due to our save implementation, save data is stored in all 3 slots
 	else if (strcmp(romTid, "KOYE") == 0 || strcmp(romTid, "KOYP") == 0) {
+		useSharedFont = (twlFontFound && extendedMemory2);
 		u8 offsetChangeN = (romTid[3] == 'E') ? 0 : 4;
 		u16 offsetChange = (romTid[3] == 'E') ? 0 : 0x120;
 		u16 offsetChange2 = (romTid[3] == 'E') ? 0 : 0x16C;
 
-		*(u32*)0x020053C0 = 0xFE000; // Shrink sound heap from 0x133333
+		// *(u32*)0x020053C0 = 0xFE000; // Shrink sound heap from 0x133333
 		*(u32*)0x0200F728 = 0xE1A00000; // nop
 		*(u32*)0x02012BF4 = 0xE1A00000; // nop
 		patchInitDSiWare(0x0201872C, heapEnd);
-		*(u32*)0x02018AB8 = *(u32*)0x02004FE8;
+		if (!extendedMemory2) {
+			*(u32*)0x02018AB8 = *(u32*)0x02004FE8;
+		}
 		patchUserSettingsReadDSiWare(0x02019BDC);
 		*(u32*)(0x020353F4-offsetChangeN) = 0xE1A00000; // nop
 		*(u32*)(0x020354D8-offsetChangeN) = 0xE1A00000; // nop
@@ -16246,6 +16252,43 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x020444F4+offsetChange, (u32)dsiSaveClose);
 		*(u32*)(0x02044B20+offsetChange2) = 0xE3A00000; // mov r0, #0
 		*(u32*)(0x02044C3C+offsetChange2) = 0xE1A00000; // nop
+	}
+
+	// Oscar's World Tour (USA)
+	// Oscar's World Tour (Europe)
+	// Due to our save implementation, save data is stored in all 3 slots
+	// Requires 8MB of RAM
+	else if ((strcmp(romTid, "KO9E") == 0 || strcmp(romTid, "KO9P") == 0) && extendedMemory2) {
+		useSharedFont = twlFontFound;
+		u8 offsetChange = (romTid[3] == 'E') ? 0 : 0x4C;
+		u8 offsetChange2 = (romTid[3] == 'E') ? 0 : 0x70;
+
+		// *(u32*)0x020053C0 = 0x1E4000; // Shrink sound heap from 0x1EEEEE
+		*(u32*)0x0200F728 = 0xE1A00000; // nop
+		*(u32*)0x02012BF4 = 0xE1A00000; // nop
+		patchInitDSiWare(0x0201872C, heapEnd);
+		// *(u32*)0x02018AB8 = *(u32*)0x02004FE8;
+		patchUserSettingsReadDSiWare(0x02019BDC);
+		*(u32*)0x0202751C = 0xE1A00000; // nop
+		setBL(0x020275C4, (u32)dsiSaveOpen);
+		setBL(0x020275D4, (u32)dsiSaveClose);
+		*(u32*)0x02027720 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02027724 = 0xE12FFF1E; // bx lr
+		setBL(0x02027A00, (u32)dsiSaveOpen);
+		setBL(0x02027A1C, (u32)dsiSaveGetLength);
+		setBL(0x02027A38, (u32)dsiSaveRead);
+		setBL(0x02027A40, (u32)dsiSaveClose);
+		setBL(0x02027A94, (u32)dsiSaveCreate);
+		setBL(0x02027AA4, (u32)dsiSaveOpen);
+		setBL(0x02027AE0, (u32)dsiSaveSetLength);
+		setBL(0x02027AF0, (u32)dsiSaveWrite);
+		setBL(0x02027AF8, (u32)dsiSaveClose);
+		*(u32*)(0x02028124+offsetChange) = 0xE3A00000; // mov r0, #0
+		*(u32*)(0x02028240+offsetChange) = 0xE1A00000; // nop
+		*(u32*)(0x02031FDC+offsetChange2) = 0xE1A00000; // nop
+		*(u32*)(0x020320C0+offsetChange2) = 0xE1A00000; // nop
+		*(u32*)(0x02032164+offsetChange2) = 0xE1A00000; // nop
+		*(u32*)(0x02032224+offsetChange2) = 0xE1A00000; // nop
 	}
 
 	// Otegaru Pazuru Shirizu: Yurito Fushigina Meikyuu (Japan)
