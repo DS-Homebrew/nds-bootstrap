@@ -2262,13 +2262,18 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// G.G. Series: All Breaker (USA)
 	// G.G. Series: All Breaker (Japan)
-	// Requires 8MB of RAM
-	else if ((strcmp(romTid, "K27E") == 0 || strcmp(romTid, "K27J") == 0) && extendedMemory2) {
+	else if (strcmp(romTid, "K27E") == 0 || strcmp(romTid, "K27J") == 0) {
 		*(u32*)0x0200D71C = 0xE1A00000; // nop
 		*(u32*)0x0204E880 = 0xE1A00000; // nop
 		*(u32*)0x02052814 = 0xE1A00000; // nop
 		patchInitDSiWare(0x0205A9F8, heapEnd);
+		if (!extendedMemory2) {
+			*(u32*)0x0205AD84 -= 0x3B000;
+		}
 		patchUserSettingsReadDSiWare(0x0205C1B4);
+		if (!extendedMemory2) {
+			*(u32*)0x02061754 = 0x40000; // Shrink large part of heap from 0xF0000
+		}
 	}
 
 	// All-Star Air Hockey (USA)
@@ -3702,23 +3707,33 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	} */
 
 	// G.G. Series: Assault Buster (USA)
-	// Requires 8MB of RAM
-	else if (strcmp(romTid, "KABE") == 0 && extendedMemory2) {
+	else if (strcmp(romTid, "KABE") == 0) {
 		*(u32*)0x0200D83C = 0xE1A00000; // nop
 		*(u32*)0x0204F59C = 0xE1A00000; // nop
 		*(u32*)0x02053530 = 0xE1A00000; // nop
 		patchInitDSiWare(0x0205B790, heapEnd);
+		if (!extendedMemory2) {
+			*(u32*)0x0205BB1C -= 0x3B000;
+		}
 		patchUserSettingsReadDSiWare(0x0205CF4C);
+		if (!extendedMemory2) {
+			*(u32*)0x020624EC = 0x50000; // Shrink large part of heap from 0xF0000
+		}
 	}
 
 	// G.G. Series: Assault Buster (Japan)
-	// Requires 8MB of RAM
-	else if (strcmp(romTid, "KABJ") == 0 && extendedMemory2) {
+	else if (strcmp(romTid, "KABJ") == 0) {
 		*(u32*)0x0200A29C = 0xE1A00000; // nop
 		*(u32*)0x020427A0 = 0xE1A00000; // nop
 		*(u32*)0x020466A0 = 0xE1A00000; // nop
 		patchInitDSiWare(0x0204E638, heapEnd);
+		if (!extendedMemory2) {
+			*(u32*)0x0204E9C4 -= 0x3B000;
+		}
 		patchUserSettingsReadDSiWare(0x0204FDE4);
+		if (!extendedMemory2) {
+			*(u32*)0x0205E330 = 0x50000; // Shrink large part of heap from 0xF0000
+		}
 	}
 
 	// Astro (USA)
