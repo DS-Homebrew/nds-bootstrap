@@ -3687,20 +3687,20 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Asphalt 4: Elite Racing (USA)
-	// Does not boot: White screens, crash cause unknown
-	/* else if (strcmp(romTid, "KA4E") == 0) {
+	// Requires 8MB of RAM
+	// Crashes when starting a race
+	/* else if (strcmp(romTid, "KA4E") == 0 && extendedMemory2) {
 		*(u32*)0x020050E0 = 0xE1A00000; // nop
 		*(u32*)0x0200517C = 0xE1A00000; // nop
 		*(u32*)0x02031E08 = 0xE1A00000; // nop
 		*(u32*)0x0204FA6C = 0xE12FFF1E; // bx lr
-		*(u32*)0x02052C64 = 0xE3A00000; // mov r0, #0 (Disable audio)
+		// *(u32*)0x02052C64 = 0xE3A00000; // mov r0, #0 (Disable audio)
 		*(u32*)0x0207A0B0 = 0xE3A00601; // mov r0, #0x100000 (Shrink heap for bottom screen data)
 		*(u32*)0x0207ACB8 = 0xE1A00000; // nop
 		*(u32*)0x0208FCC4 = 0xE1A00000; // nop
 		*(u32*)0x02093E04 = 0xE1A00000; // nop
 		patchInitDSiWare(0x0209A558, heapEnd);
-		*(u32*)0x0209A8C8 = *(u32*)0x02004FC0 - 0x200000;
-		// *(u32*)0x0209A8C8 = 0x09000000;
+		*(u32*)0x0209A8C8 = *(u32*)0x02004FC0;
 		patchUserSettingsReadDSiWare(0x0209BCF4);
 		*(u32*)0x020A17E8 = 0xE3A00001; // mov r0, #1
 		*(u32*)0x020A17EC = 0xE12FFF1E; // bx lr
