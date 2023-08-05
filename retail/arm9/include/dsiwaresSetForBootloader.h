@@ -150,6 +150,7 @@ static const char dsiWareForBootloader1[][4] = {
 	"KDL", // Dragon's Lair
 	"KLY", // Dragon's Lair II: Time Warp
 	"K9E", // Dreamwalker
+	"KIF", // Drift Street International
 	"B88", // DS WiFi Settings
 	"KB8", // GO Series: Earth Saver
 	"KB9", // Earth Saver: Inseki Bakuha Dai Sakuse

@@ -8610,6 +8610,46 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchUserSettingsReadDSiWare(0x02088988);
 	}
 
+	// Drift Street International (USA)
+	// Drift Street International (Europe, Australia)
+	else if (strcmp(romTid, "KIFE") == 0 || strcmp(romTid, "KIFV") == 0) {
+		u8 offsetChange = (romTid[3] == 'E') ? 0 : 0xC;
+		u8 offsetChange2 = (romTid[3] == 'E') ? 0 : 0x68;
+		u8 offsetChangeInit = (romTid[3] == 'E') ? 0 : 0xE8;
+
+		setBL(0x020363BC+offsetChange, (u32)dsiSaveGetInfo);
+		setBL(0x0203640C+offsetChange, (u32)dsiSaveOpen);
+		setBL(0x02036438+offsetChange, (u32)dsiSaveCreate);
+		setBL(0x02036454+offsetChange, (u32)dsiSaveOpen);
+		setBL(0x0203649C+offsetChange, (u32)dsiSaveSetLength);
+		setBL(0x020364DC+offsetChange, (u32)dsiSaveOpen);
+		setBL(0x02036564+offsetChange, (u32)dsiSaveClose);
+		setBL(0x02036590+offsetChange, (u32)dsiSaveGetLength);
+		setBL(0x020365B8+offsetChange, (u32)dsiSaveRead);
+		setBL(0x0203661C+offsetChange, (u32)dsiSaveSetLength);
+		setBL(0x02036638+offsetChange, (u32)dsiSaveWrite);
+		*(u32*)(0x02036990+offsetChange) = 0xE3A00000; // mov r0, #0
+		for (int i = 0; i < 8; i++) {
+			u32* offset = (u32*)(0x020369B4+offsetChange);
+			offset[i] = 0xE1A00000; // nop
+		}
+		setBL(0x020369DC+offsetChange, (u32)dsiSaveCreate);
+		setBL(0x02036A14+offsetChange, (u32)dsiSaveSetLength);
+		*(u32*)(0x02036D04+offsetChange) = 0xE1A00000; // nop
+		if (!extendedMemory2) {
+			*(u32*)(0x02038F14+offsetChange) -= 0xD0000; // Shrink sound heap from 0x177000 to 0xA7000 (Disables music)
+		}
+		*(u32*)(0x020583D4+offsetChange2) = 0xE12FFF1E; // bx lr (Disable NFTR loading from TWLNAND)
+		*(u32*)(0x020A8BD8+offsetChangeInit) = 0xE1A00000; // nop
+		tonccpy((u32*)(0x020AA6B4+offsetChangeInit), dsiSaveGetResultCode, 0xC);
+		*(u32*)(0x020AD198+offsetChangeInit) = 0xE1A00000; // nop
+		patchInitDSiWare(0x020BA3A4+offsetChangeInit, heapEnd);
+		*(u32*)(0x020BA730+offsetChangeInit) = *(u32*)(0x020D7270+offsetChangeInit);
+		patchUserSettingsReadDSiWare(0x020BB7A8+offsetChangeInit);
+		*(u32*)(0x020C31E4+offsetChangeInit) = 0xE3A00001; // mov r0, #1
+		*(u32*)(0x020C31E8+offsetChangeInit) = 0xE12FFF1E; // bx lr
+	}
+
 	// DS WiFi Settings
 	else if (strcmp(romTid, "B88A") == 0) {
 		const u16* branchCode = generateA7InstrThumb(0x020051F4, (int)ce9->thumbPatches->reset_arm9);

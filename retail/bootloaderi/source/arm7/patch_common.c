@@ -5028,6 +5028,40 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x020299F0, (u32)dsiSaveWrite);
 	}
 
+	// Drift Street International (USA)
+	// Drift Street International (Europe, Australia)
+	else if (strcmp(romTid, "KIFE") == 0 || strcmp(romTid, "KIFV") == 0) {
+		if (saveOnFlashcard) {
+			u8 offsetChange = (romTid[3] == 'E') ? 0 : 0xC;
+			u8 offsetChangeInit = (romTid[3] == 'E') ? 0 : 0xE8;
+
+			setBL(0x020363BC+offsetChange, (u32)dsiSaveGetInfo);
+			setBL(0x0203640C+offsetChange, (u32)dsiSaveOpen);
+			setBL(0x02036438+offsetChange, (u32)dsiSaveCreate);
+			setBL(0x02036454+offsetChange, (u32)dsiSaveOpen);
+			setBL(0x0203649C+offsetChange, (u32)dsiSaveSetLength);
+			setBL(0x020364DC+offsetChange, (u32)dsiSaveOpen);
+			setBL(0x02036564+offsetChange, (u32)dsiSaveClose);
+			setBL(0x02036590+offsetChange, (u32)dsiSaveGetLength);
+			setBL(0x020365B8+offsetChange, (u32)dsiSaveRead);
+			setBL(0x0203661C+offsetChange, (u32)dsiSaveSetLength);
+			setBL(0x02036638+offsetChange, (u32)dsiSaveWrite);
+			*(u32*)(0x02036990+offsetChange) = 0xE3A00000; // mov r0, #0
+			for (int i = 0; i < 8; i++) {
+				u32* offset = (u32*)(0x020369B4+offsetChange);
+				offset[i] = 0xE1A00000; // nop
+			}
+			setBL(0x020369DC+offsetChange, (u32)dsiSaveCreate);
+			setBL(0x02036A14+offsetChange, (u32)dsiSaveSetLength);
+			*(u32*)(0x02036D04+offsetChange) = 0xE1A00000; // nop
+			tonccpy((u32*)(0x020AA6B4+offsetChangeInit), dsiSaveGetResultCode, 0xC);
+		}
+		if (!twlFontFound) {
+			u8 offsetChange2 = (romTid[3] == 'E') ? 0 : 0x68;
+			*(u32*)(0x020583D4+offsetChange2) = 0xE12FFF1E; // bx lr (Disable NFTR loading from TWLNAND)
+		}
+	}
+
 	// DS WiFi Settings
 	else if (strcmp(romTid, "B88A") == 0) {
 		tonccpy((void*)0x023C0000, ce9->thumbPatches->reset_arm9, 0x18);
