@@ -41,7 +41,7 @@ static const char dsiWareForBootloader1[][4] = {
 	"KAC", // Advanced Circuits
 	"K5H", // Ah! Heaven
 	"KP7", // Alien Puzzle Adventure
-	"K27", // G.G. Series: All Breaker
+	"K27", // G.G Series: All Breaker
 	"KAO", // All-Star Air Hockey
 	"KF2", // Amakuchi! Dairoujou
 	"KAX", // Animal Boxing
@@ -67,7 +67,7 @@ static const char dsiWareForBootloader1[][4] = {
 	"K9Z", // Artillery: Knights vs. Orcs
 	"KQJ", // Aru Seishun no Monogatari: Kouenji Joshi Sakka
 	"KA4", // Asphalt 4: Elite Racing (bootloaderi-exclusive)
-	"KAB", // G.G. Series: Assault Buster
+	"KAB", // G.G Series: Assault Buster
 	"K7D", // Astro
 	"KZ3", // Atama o Yoku Suru Anzan DS: Zou no Hana Fuusen
 	"KVU", // ATV Fever
@@ -79,6 +79,7 @@ static const char dsiWareForBootloader1[][4] = {
 	"KBE", // Bejeweled Twist
 	"K9G", // Big Bass Arcade
 	"KP6", // Bird & Beans / Tori to Mame (Japan)
+	"K96", // G.G Series: Black x Block
 	"KBZ", // BlayzBloo: Super Melee Brawlers Battle Royale
 	"KZ4", // Blockado: Puzzle Island (bootloaderi-exclusive)
 	"KLN", // Bloons TD

@@ -2260,8 +2260,8 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
-	// G.G. Series: All Breaker (USA)
-	// G.G. Series: All Breaker (Japan)
+	// G.G Series: All Breaker (USA)
+	// G.G Series: All Breaker (Japan)
 	else if (strcmp(romTid, "K27E") == 0 || strcmp(romTid, "K27J") == 0) {
 		*(u32*)0x0200D71C = 0xE1A00000; // nop
 		*(u32*)0x0204E880 = 0xE1A00000; // nop
@@ -3706,7 +3706,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020A17EC = 0xE12FFF1E; // bx lr
 	} */
 
-	// G.G. Series: Assault Buster (USA)
+	// G.G Series: Assault Buster (USA)
 	else if (strcmp(romTid, "KABE") == 0) {
 		*(u32*)0x0200D83C = 0xE1A00000; // nop
 		*(u32*)0x0204F59C = 0xE1A00000; // nop
@@ -3721,7 +3721,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
-	// G.G. Series: Assault Buster (Japan)
+	// G.G Series: Assault Buster (Japan)
 	else if (strcmp(romTid, "KABJ") == 0) {
 		*(u32*)0x0200A29C = 0xE1A00000; // nop
 		*(u32*)0x020427A0 = 0xE1A00000; // nop
@@ -4365,6 +4365,39 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02023480, (u32)dsiSaveWrite);
 		setBL(0x02023498, (u32)dsiSaveClose);
 		*(u32*)0x020302A0 = 0xE12FFF1E; // bx lr (Hide volume icon in pause menu)
+	}
+
+	// G.G Series: Black x Block (USA)
+	else if (strcmp(romTid, "K96E") == 0) {
+		*(u32*)0x0200D754 = 0xE1A00000; // nop
+		*(u32*)0x0204E928 = 0xE1A00000; // nop
+		*(u32*)0x020528BC = 0xE1A00000; // nop
+		patchInitDSiWare(0x0205AAA0, heapEnd);
+		if (!extendedMemory2) {
+			*(u32*)0x0205AE2C -= 0x3B000;
+		}
+		patchUserSettingsReadDSiWare(0x0205C25C);
+		if (!extendedMemory2) {
+			*(u32*)0x020617FC = 0x30000; // Shrink large part of heap from 0xF0000
+			*(u32*)0x02061884 = 0x78000; // Shrink large part of heap from 0x158000
+		}
+	}
+
+	// G.G Series: Black x Block (Japan)
+	else if (strcmp(romTid, "K96J") == 0) {
+		*(u32*)0x0200815C = 0xE1A00000; // nop
+		*(u32*)0x02040214 = 0xE1A00000; // nop
+		*(u32*)0x02044274 = 0xE1A00000; // nop
+		*(u32*)0x0204C4D8 = 0xE3A00001; // mov r0, #1
+		patchInitDSiWare(0x0204C4F0, heapEnd);
+		if (!extendedMemory2) {
+			*(u32*)0x0204C860 -= 0x3B000;
+		}
+		patchUserSettingsReadDSiWare(0x0204DCA8);
+		if (!extendedMemory2) {
+			*(u32*)0x0205C094 = 0x30000; // Shrink large part of heap from 0xF0000
+			*(u32*)0x0205C0F4 = 0x78000; // Shrink large part of heap from 0x158000
+		}
 	}
 
 	// BlayzBloo: Super Melee Brawlers Battle Royale (USA)
