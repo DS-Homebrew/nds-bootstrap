@@ -1662,27 +1662,26 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		// and the title isn't "Chotto DS Bun ga Kuzenshuu: Sekai no Bungaku 20", "Famicom Wars DS: Ushinawareta Hikari", "Metal Torrent", or "Saikyou Ginsei Shougi"...
 			ce9path = "nitro:/cardengine_arm9.lz77";
 		} else {
-			FILE* donorNdsFile = NULL;
+			const char* donorNdsPath = "";
 			bool standaloneDonor = false;
 			if (a7mbk6 == 0x080037C0) {
-				FILE* donorNdsFile = fopen("fat:/_nds/nds-bootstrap/b4dsTwlDonor.bin", "rb");
-				if (donorNdsFile) {
+				if (access("fat:/_nds/nds-bootstrap/b4dsTwlDonor.bin", F_OK) == 0) {
+					donorNdsPath = "fat:/_nds/nds-bootstrap/b4dsTwlDonor.bin";
 					standaloneDonor = true;
-				}
-				if (!donorNdsFile) {
-					donorNdsFile = fopen(conf->donorTwlPath, "rb");
-				}
-				if (!donorNdsFile) {
-					donorNdsFile = fopen(conf->donorTwl0Path, "rb");
-				}
-				if (!donorNdsFile) {
-					donorNdsFile = fopen(conf->donor5Path, "rb");
+				} else if (access(conf->donorTwlPath, F_OK) == 0) {
+					donorNdsPath = conf->donorTwlPath;
+				} else if (access(conf->donorTwl0Path, F_OK) == 0) {
+					donorNdsPath = conf->donorTwl0Path;
+				} else if (access(conf->donor5Path, F_OK) == 0) {
+					donorNdsPath = conf->donor5Path;
 				}
 			} else if (conf->useSdk20Donor) {
-				donorNdsFile = fopen(conf->donor20Path, "rb");
+				if (access(conf->donor20Path, F_OK) == 0) {
+					donorNdsPath = conf->donor20Path;
+				}
 			}
 
-			FILE* ndsFile = (donorNdsFile) ? donorNdsFile : fopen(conf->ndsPath, "rb");
+			FILE* ndsFile = (strlen(donorNdsPath) > 5) ? fopen(donorNdsPath, "rb") : fopen(conf->ndsPath, "rb");
 			if (ndsFile) {
 				u32 ndsArm7Offset = 0;
 				u32 ndsArm7Size = 0;
