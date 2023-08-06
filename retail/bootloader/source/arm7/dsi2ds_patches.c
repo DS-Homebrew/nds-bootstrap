@@ -16312,7 +16312,15 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		u16 offsetChange = (romTid[3] == 'E') ? 0 : 0x120;
 		u16 offsetChange2 = (romTid[3] == 'E') ? 0 : 0x16C;
 
-		// *(u32*)0x020053C0 = 0xFE000; // Shrink sound heap from 0x133333
+		if (!extendedMemory2) {
+			u32 bssEnd = *(u32*)0x02004FE8;
+			u32 sdatOffset = *(u32*)0x020053BC;
+
+			*(u32*)0x02004FE8 = bssEnd - relocateBssPart(ndsHeader, bssEnd, sdatOffset+0x34000, bssEnd, sdatOffset);
+
+			*(u32*)0x020053C0 = 0xFE000; // Shrink sound heap from 0x133333
+		}
+
 		*(u32*)0x0200F728 = 0xE1A00000; // nop
 		*(u32*)0x02012BF4 = 0xE1A00000; // nop
 		patchInitDSiWare(0x0201872C, heapEnd);
