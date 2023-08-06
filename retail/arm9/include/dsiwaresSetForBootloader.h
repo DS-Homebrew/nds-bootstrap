@@ -126,6 +126,7 @@ static const char dsiWareForBootloader1[][4] = {
 	"KTD", "KTB", // Clubhouse Games Express: Strategy Pack
 	"KXF", // Color Commando
 	"KC7", // Commando: Steel Disaster
+	"KH5", // G.G Series: Conveyor Toy Packing
 	"K56", // Coropata
 	"KCX", // Cosmo Fighters
 	"KDC", // Crash-Course Domo

@@ -7213,6 +7213,37 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02065500+offsetChangeS, (u32)dsiSaveClose);
 	}
 
+	// G.G Series: Conveyor Toy Packing (USA)
+	else if (strcmp(romTid, "KH5E") == 0) {
+		*(u32*)0x0200D724 = 0xE1A00000; // nop
+		*(u32*)0x0204EA2C = 0xE1A00000; // nop
+		*(u32*)0x020529C0 = 0xE1A00000; // nop
+		patchInitDSiWare(0x0205ABA4, heapEnd);
+		if (!extendedMemory2) {
+			*(u32*)0x0205AF30 -= 0x3B000;
+		}
+		patchUserSettingsReadDSiWare(0x0205C360);
+		if (!extendedMemory2) {
+			*(u32*)0x02061900 = 0x50000; // Shrink large part of heap from 0xF0000
+		}
+	}
+
+	// G.G Series: Conveyor Konpo (Japan)
+	else if (strcmp(romTid, "KH5J") == 0) {
+		*(u32*)0x02008188 = 0xE1A00000; // nop
+		*(u32*)0x0204017C = 0xE1A00000; // nop
+		*(u32*)0x020441DC = 0xE1A00000; // nop
+		*(u32*)0x0204C440 = 0xE3A00001; // mov r0, #1
+		patchInitDSiWare(0x0204C458, heapEnd);
+		if (!extendedMemory2) {
+			*(u32*)0x0204C7C8 -= 0x3B000;
+		}
+		patchUserSettingsReadDSiWare(0x0204DC10);
+		if (!extendedMemory2) {
+			*(u32*)0x0205C1D4 = 0x50000; // Shrink large part of heap from 0xF0000
+		}
+	}
+
 	// Coropata (Japan)
 	else if (strcmp(romTid, "K56J") == 0) {
 		*(u32*)0x020110B8 = 0xE1A00000; // nop
