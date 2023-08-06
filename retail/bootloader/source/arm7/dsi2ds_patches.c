@@ -52,6 +52,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	const u32 heapEnd = extendedMemory2 ? (((u32)ndsHeader->arm9destination >= 0x02004000) ? CARDENGINE_ARM9_LOCATION_DLDI_EXTMEM : 0x02700000) : heapEndRetail;
 	const u32 heapEnd8MBHack = extendedMemory2 ? heapEnd : heapEndRetail+0x400000; // extendedMemory2 ? #0x27B0000 : #0x27E0000 (mirrors to 0x23E0000 on retail DS units)
 	const u32 heapEndExceed = extendedMemory2 ? heapEnd+0x800000 : heapEndRetail+0xC00000; // extendedMemory2 ? #0x2FB0000 (mirrors to 0x27B0000 on debug DS units) : #0x2FE0000 (mirrors to 0x23E0000 on retail DS units)
+	const u32 heapEndMaxForRetail = (!extendedMemory2 && ce9Alt) ? 0x023F8000 : heapEnd;
 	const bool debugOrMep = (extendedMemory2 || expansionPakFound);
 	const bool largeS2RAM = (expansionPakFound && (s2FlashcardId != 0)); // 16MB or more
 	if (donorFileCluster == CLUSTER_FREE) {
@@ -2353,19 +2354,22 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// G.G Series: Altered Weapon (USA)
 	// G.G Series: Variable Arms (Japan)
-	// Requires 8MB of RAM
-	else if ((strcmp(romTid, "K2ZE") == 0 || strcmp(romTid, "K2ZJ") == 0) && extendedMemory2) {
+	else if (strcmp(romTid, "K2ZE") == 0 || strcmp(romTid, "K2ZJ") == 0) {
 		*(u32*)0x0200BB74 = 0xE1A00000; // nop
 		*(u32*)0x0204CFC0 = 0xE1A00000; // nop
 		*(u32*)0x02050F54 = 0xE1A00000; // nop
-		patchInitDSiWare(0x02059138, heapEnd);
-		/* if (!extendedMemory2) {
+		patchInitDSiWare(0x02059138, heapEndMaxForRetail);
+		if (!extendedMemory2) {
 			*(u32*)0x020594C4 -= 0x3B000;
-		} */
+		}
 		patchUserSettingsReadDSiWare(0x0205A8F4);
-		/* if (!extendedMemory2) {
-			*(u32*)0x0205FE94 = 0x30000; // Shrink large part of heap from 0xF0000
-		} */
+		if (!extendedMemory2) {
+			*(u32*)0x0205FE94 = 0x50000; // Shrink large part of heap from 0xF0000
+			*(u32*)0x0205FF18 = 0x20000; // Shrink alternate part of heap from 0x40000
+			*(u32*)0x0205FF20 = 0x60000; // Shrink alternate part of heap from 0xC0000
+			*(u32*)0x0205FF2C = *(u32*)0x0205FF18;
+			*(u32*)0x0205FF34 = *(u32*)0x0205FF20;
+		}
 	}
 
 	// Amakuchi! Dairoujou (Japan)

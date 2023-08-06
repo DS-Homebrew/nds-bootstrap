@@ -1657,9 +1657,9 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		cebin = fopen("nitro:/cardengine_arm9_extmem.lz77", "rb");
 	} else {
 		const char* ce9path = "nitro:/cardengine_arm9_alt.lz77";
-		if ((accessControl & BIT(4)) && strncmp(romTid, "KBG", 3) != 0 && strncmp(romTid, "Z2E", 3) != 0 && strncmp(romTid, "K59", 3) != 0 && strncmp(romTid, "KG4", 3) != 0) {
+		if ((accessControl & BIT(4)) && strncmp(romTid, "K2Z", 3) != 0 && strncmp(romTid, "KBG", 3) != 0 && strncmp(romTid, "Z2E", 3) != 0 && strncmp(romTid, "K59", 3) != 0 && strncmp(romTid, "KG4", 3) != 0) {
 		// If it has access to TWLNAND (or uses dataPub/dataPrv),
-		// and the title isn't "Chotto DS Bun ga Kuzenshuu: Sekai no Bungaku 20", "Famicom Wars DS: Ushinawareta Hikari", "Metal Torrent", or "Saikyou Ginsei Shougi"...
+		// and the title isn't "G.G Series: Altered Weapon", "Chotto DS Bun ga Kuzenshuu: Sekai no Bungaku 20", "Famicom Wars DS: Ushinawareta Hikari", "Metal Torrent", or "Saikyou Ginsei Shougi"...
 			ce9path = "nitro:/cardengine_arm9.lz77";
 		} else {
 			const char* donorNdsPath = "";
