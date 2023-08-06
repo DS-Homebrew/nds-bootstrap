@@ -40,6 +40,7 @@ static const char dsiWareForBootloader1[][4] = {
 	"KQK", // Ace Mathician
 	"KAC", // Advanced Circuits
 	"K5H", // Ah! Heaven
+	"K25", // G.G Series: Air Pinball Hockey
 	"KP7", // Alien Puzzle Adventure
 	"K27", // G.G Series: All Breaker
 	"KAO", // All-Star Air Hockey

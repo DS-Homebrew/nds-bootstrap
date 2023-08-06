@@ -2173,6 +2173,23 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02029DCC, (u32)dsiSaveClose); */
 	}
 
+	// G.G Series: Air Pinball Hockey (USA)
+	// G.G Series: Air Pinball Hockey (Japan)
+	// Requires 8MB of RAM
+	else if ((strcmp(romTid, "K25E") == 0 || strcmp(romTid, "K25J") == 0) && extendedMemory2) {
+		*(u32*)0x0200D774 = 0xE1A00000; // nop
+		*(u32*)0x0204F750 = 0xE1A00000; // nop
+		*(u32*)0x020536E4 = 0xE1A00000; // nop
+		patchInitDSiWare(0x0205B8C8, heapEnd);
+		/* if (!extendedMemory2) {
+			*(u32*)0x0205BC54 -= 0x3B000;
+		} */
+		patchUserSettingsReadDSiWare(0x0205D084);
+		/* if (!extendedMemory2) {
+			*(u32*)0x02062624 = 0x50000; // Shrink large part of heap from 0xF0000
+		} */
+	}
+
 	// AiRace: Tunnel (USA)
 	// Requires 8MB of RAM
 	// Crashes after selecting a stage due to weird bug
