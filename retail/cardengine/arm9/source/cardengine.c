@@ -436,6 +436,12 @@ void saveMainScreenSetting(void) {
 	}
 }*/
 
+#ifdef EXTMEM
+#define igmLocation INGAME_MENU_LOCATION_B4DS_EXTMEM
+#else
+#define igmLocation INGAME_MENU_LOCATION_B4DS
+#endif
+
 void inGameMenu(s32* exRegisters) {
 	static bool opening = false;
 	static bool opened = false;
@@ -448,15 +454,15 @@ void inGameMenu(s32* exRegisters) {
 
 	if (!opened) {
 		opening = true;
-		fileWrite((char*)INGAME_MENU_LOCATION_B4DS, &pageFile, 0xA000, 0xA000);	// Backup part of game RAM to page file
-		fileRead((char*)INGAME_MENU_LOCATION_B4DS, &pageFile, 0, 0xA000);	// Read in-game menu
+		fileWrite((char*)igmLocation, &pageFile, 0xA000, 0xA000);	// Backup part of game RAM to page file
+		fileRead((char*)igmLocation, &pageFile, 0, 0xA000);	// Read in-game menu
 	}
 	opening = false;
 
 	opened = true;
 
-	*(u32*)(INGAME_MENU_LOCATION_B4DS + IGM_TEXT_SIZE_ALIGNED) = (u32)sharedAddr;
-	volatile void (*inGameMenu)(s32*, u32, s32*) = (volatile void*)INGAME_MENU_LOCATION_B4DS + IGM_TEXT_SIZE_ALIGNED + 0x10;
+	*(u32*)(igmLocation + IGM_TEXT_SIZE_ALIGNED) = (u32)sharedAddr;
+	volatile void (*inGameMenu)(s32*, u32, s32*) = (volatile void*)igmLocation + IGM_TEXT_SIZE_ALIGNED + 0x10;
 	(*inGameMenu)(&ce9->mainScreen, 0, exRegisters);
 
 	opened = false;
@@ -465,8 +471,8 @@ void inGameMenu(s32* exRegisters) {
 		sharedAddr[0] = 0x57495344;
 	}
 
-	fileWrite((char*)INGAME_MENU_LOCATION_B4DS, &pageFile, 0, 0xA000);	// Store in-game menu
-	fileRead((char*)INGAME_MENU_LOCATION_B4DS, &pageFile, 0xA000, 0xA000);	// Restore part of game RAM from page file
+	fileWrite((char*)igmLocation, &pageFile, 0, 0xA000);	// Store in-game menu
+	fileRead((char*)igmLocation, &pageFile, 0xA000, 0xA000);	// Restore part of game RAM from page file
 
 	if (sharedAddr[3] == 0x54495845) {
 		igmReset = true;

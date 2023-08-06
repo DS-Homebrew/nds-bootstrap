@@ -45,7 +45,11 @@ u16 igmPal[6] = {
 static u16* vramBak = (u16*)INGAME_MENU_EXT_LOCATION+(0x18200/sizeof(u16));
 static u16* bmpBuffer = (u16*)INGAME_MENU_EXT_LOCATION;
 #else
+#ifdef EXTMEM
 cardengineArm9* volatile ce9 = (cardengineArm9*)CARDENGINE_ARM9_LOCATION_DLDI_EXTMEM;
+#else
+cardengineArm9* volatile ce9 = (cardengineArm9*)CARDENGINE_ARM9_LOCATION_DLDI;
+#endif
 
 static u16* vramBak = (u16*)INGAME_MENU_EXT_LOCATION_B4DS+(0x18200/sizeof(u16));
 static u16* bmpBuffer = (u16*)INGAME_MENU_EXT_LOCATION_B4DS;
@@ -746,17 +750,17 @@ void inGameMenu(s32 *mainScreen, u32 consoleModel, s32 *exceptionRegisters) {
 	u16 exmemcnt = REG_EXMEMCNT;
 	sysSetCardOwner(false);	// Give Slot-1 access to arm7
 	#else
+	#ifndef EXTMEM
 	static bool ce9Set = false;
 	if (!ce9Set) {
-		if (*(u32*)CARDENGINE_ARM9_LOCATION_DLDI == CARDENGINE_ARM9_LOCATION_DLDI) {
-			ce9 = (cardengineArm9*)CARDENGINE_ARM9_LOCATION_DLDI;
-		} else if (*(u32*)CARDENGINE_ARM9_LOCATION_DLDI_ALT == CARDENGINE_ARM9_LOCATION_DLDI_ALT) {
+		if (*(u32*)CARDENGINE_ARM9_LOCATION_DLDI_ALT == CARDENGINE_ARM9_LOCATION_DLDI_ALT) {
 			ce9 = (cardengineArm9*)CARDENGINE_ARM9_LOCATION_DLDI_ALT;
 		} else if (*(u32*)CARDENGINE_ARM9_LOCATION_DLDI_ALT2 == CARDENGINE_ARM9_LOCATION_DLDI_ALT2) {
 			ce9 = (cardengineArm9*)CARDENGINE_ARM9_LOCATION_DLDI_ALT2;
 		}
 		ce9Set = true;
 	}
+	#endif
 	#endif
 
 	u32 dispcnt = REG_DISPCNT_SUB;

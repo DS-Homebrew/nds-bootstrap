@@ -1576,13 +1576,22 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		consoleClear();
 	}
 
-	// Load in-game menu ce9 binary
-	cebin = fopen("nitro:/cardengine_arm9_igm.lz77", "rb");
-	if (cebin) {
-		fread(lz77ImageBuffer, 1, sizeof(lz77ImageBuffer), cebin);
-		LZ77_Decompress(lz77ImageBuffer, (u8*)INGAME_MENU_LOCATION_B4DS);
+	if (conf->b4dsMode == 0) {
+		*(vu32*)(0x02800000) = 0x314D454D;
+		*(vu32*)(0x02C00000) = 0x324D454D;
+	}
 
-		igmText = (struct IgmText *)INGAME_MENU_LOCATION_B4DS;
+	b4dsDebugRam = (conf->b4dsMode == 2 || (*(vu32*)(0x02800000) == 0x314D454D && *(vu32*)(0x02C00000) == 0x324D454D));
+
+	// Load in-game menu ce9 binary
+	cebin = fopen(b4dsDebugRam ? "nitro:/cardengine_arm9_igm_extmem.lz77" : "nitro:/cardengine_arm9_igm.lz77", "rb");
+	if (cebin) {
+		const u32 igmLocation = b4dsDebugRam ? INGAME_MENU_LOCATION_B4DS_EXTMEM : INGAME_MENU_LOCATION_B4DS;
+
+		fread(lz77ImageBuffer, 1, sizeof(lz77ImageBuffer), cebin);
+		LZ77_Decompress(lz77ImageBuffer, (u8*)igmLocation);
+
+		igmText = (struct IgmText *)igmLocation;
 
 		getIgmStrings(conf, true);
 
@@ -1638,17 +1647,10 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		}
 
 		cebin = fopen(pageFilePath.c_str(), "r+");
-		fwrite((u8*)INGAME_MENU_LOCATION_B4DS, 1, 0xA000, cebin);
+		fwrite((u8*)igmLocation, 1, 0xA000, cebin);
 		fclose(cebin);
-		toncset((u8*)INGAME_MENU_LOCATION_B4DS, 0, 0xA000);
+		toncset((u8*)igmLocation, 0, 0xA000);
 	}
-
-	if (conf->b4dsMode == 0) {
-		*(vu32*)(0x02800000) = 0x314D454D;
-		*(vu32*)(0x02C00000) = 0x324D454D;
-	}
-
-	b4dsDebugRam = (conf->b4dsMode == 2 || (*(vu32*)(0x02800000) == 0x314D454D && *(vu32*)(0x02C00000) == 0x324D454D));
 
 	// Load ce9 binary
 	if (b4dsDebugRam) {
