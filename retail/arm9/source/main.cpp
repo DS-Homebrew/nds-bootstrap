@@ -138,6 +138,11 @@ static inline void debugConfB4DS(configuration* conf) {
 	dbg_printf("debug: %s\n", btoa(conf->debug));
 	dbg_printf("ndsPath: \"%s\"\n", conf->ndsPath);
 	dbg_printf("savPath: \"%s\"\n", conf->savPath);
+	if (debug) {
+		dopause();
+	}
+	dbg_printf("donor20Path: \"%s\"\n", conf->donor20Path);
+	dbg_printf("donor5Path: \"%s\"\n", conf->donor5Path);
 	dbg_printf("donorTwlPath: \"%s\"\n", conf->donorTwlPath);
 	if (debug) {
 		dopause();
@@ -161,6 +166,9 @@ static inline void debugConf(configuration* conf) {
 	dbg_printf("debug: %s\n", btoa(conf->debug));
 	dbg_printf("ndsPath: \"%s\"\n", conf->ndsPath);
 	dbg_printf("savPath: \"%s\"\n", conf->savPath);
+	if (debug) {
+		dopause();
+	}
 	dbg_printf("prvPath: \"%s\"\n", conf->prvPath);
 	//dbg_printf("gbaPath: \"%s\"\n", conf->gbaPath);
 	if (isDSiMode() && REG_SCFG_EXT7 == 0) {
