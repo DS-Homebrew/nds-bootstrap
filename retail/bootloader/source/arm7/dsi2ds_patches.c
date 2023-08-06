@@ -2351,6 +2351,23 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020B060C = 0xE1A00000; // nop
 	}*/
 
+	// G.G Series: Altered Weapon (USA)
+	// G.G Series: Variable Arms (Japan)
+	// Requires 8MB of RAM
+	else if ((strcmp(romTid, "K2ZE") == 0 || strcmp(romTid, "K2ZJ") == 0) && extendedMemory2) {
+		*(u32*)0x0200BB74 = 0xE1A00000; // nop
+		*(u32*)0x0204CFC0 = 0xE1A00000; // nop
+		*(u32*)0x02050F54 = 0xE1A00000; // nop
+		patchInitDSiWare(0x02059138, heapEnd);
+		/* if (!extendedMemory2) {
+			*(u32*)0x020594C4 -= 0x3B000;
+		} */
+		patchUserSettingsReadDSiWare(0x0205A8F4);
+		/* if (!extendedMemory2) {
+			*(u32*)0x0205FE94 = 0x30000; // Shrink large part of heap from 0xF0000
+		} */
+	}
+
 	// Amakuchi! Dairoujou (Japan)
 	else if (strcmp(romTid, "KF2J") == 0) {
 		useSharedFont = (twlFontFound && debugOrMep);

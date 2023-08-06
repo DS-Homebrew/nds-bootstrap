@@ -44,6 +44,7 @@ static const char dsiWareForBootloader1[][4] = {
 	"KP7", // Alien Puzzle Adventure
 	"K27", // G.G Series: All Breaker
 	"KAO", // All-Star Air Hockey
+	"K2Z", // G.G Series: Altered Weapon
 	"KF2", // Amakuchi! Dairoujou
 	"KAX", // Animal Boxing
 	"KPC", // Animal Puzzle Adventure
