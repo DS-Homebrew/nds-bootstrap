@@ -2176,6 +2176,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// G.G Series: Air Pinball Hockey (USA)
 	// G.G Series: Air Pinball Hockey (Japan)
+	// Saving not supported due to code taking place in overlays
 	else if (strcmp(romTid, "K25E") == 0 || strcmp(romTid, "K25J") == 0) {
 		*(u32*)0x0200D774 = 0xE1A00000; // nop
 		*(u32*)0x0204F750 = 0xE1A00000; // nop
@@ -2280,6 +2281,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// G.G Series: All Breaker (USA)
 	// G.G Series: All Breaker (Japan)
+	// Saving not supported due to code taking place in overlays
 	else if (strcmp(romTid, "K27E") == 0 || strcmp(romTid, "K27J") == 0) {
 		*(u32*)0x0200D71C = 0xE1A00000; // nop
 		*(u32*)0x0204E880 = 0xE1A00000; // nop
@@ -2354,6 +2356,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// G.G Series: Altered Weapon (USA)
 	// G.G Series: Variable Arms (Japan)
+	// Saving not supported due to code taking place in overlays
 	else if (strcmp(romTid, "K2ZE") == 0 || strcmp(romTid, "K2ZJ") == 0) {
 		*(u32*)0x0200BB74 = 0xE1A00000; // nop
 		*(u32*)0x0204CFC0 = 0xE1A00000; // nop
@@ -3745,6 +3748,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	} */
 
 	// G.G Series: Assault Buster (USA)
+	// Saving not supported due to code taking place in overlays
 	else if (strcmp(romTid, "KABE") == 0) {
 		*(u32*)0x0200D83C = 0xE1A00000; // nop
 		*(u32*)0x0204F59C = 0xE1A00000; // nop
@@ -3760,6 +3764,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// G.G Series: Assault Buster (Japan)
+	// Saving not supported due to code taking place in overlays
 	else if (strcmp(romTid, "KABJ") == 0) {
 		*(u32*)0x0200A29C = 0xE1A00000; // nop
 		*(u32*)0x020427A0 = 0xE1A00000; // nop
@@ -4406,6 +4411,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// G.G Series: Black x Block (USA)
+	// Saving not supported due to code taking place in overlays
 	else if (strcmp(romTid, "K96E") == 0) {
 		*(u32*)0x0200D754 = 0xE1A00000; // nop
 		*(u32*)0x0204E928 = 0xE1A00000; // nop
@@ -4422,6 +4428,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// G.G Series: Black x Block (Japan)
+	// Saving not supported due to code taking place in overlays
 	else if (strcmp(romTid, "K96J") == 0) {
 		*(u32*)0x0200815C = 0xE1A00000; // nop
 		*(u32*)0x02040214 = 0xE1A00000; // nop
@@ -7214,6 +7221,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// G.G Series: Conveyor Toy Packing (USA)
+	// Saving not supported due to code taking place in overlays
 	else if (strcmp(romTid, "KH5E") == 0) {
 		*(u32*)0x0200D724 = 0xE1A00000; // nop
 		*(u32*)0x0204EA2C = 0xE1A00000; // nop
@@ -7229,6 +7237,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// G.G Series: Conveyor Konpo (Japan)
+	// Saving not supported due to code taking place in overlays
 	else if (strcmp(romTid, "KH5J") == 0) {
 		*(u32*)0x02008188 = 0xE1A00000; // nop
 		*(u32*)0x0204017C = 0xE1A00000; // nop
@@ -7275,6 +7284,25 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0206EA84, (u32)dsiSaveWrite);
 		setBL(0x0206EA8C, (u32)dsiSaveClose);
 		*(u32*)0x0206FB78 = 0x61A80;
+	}
+
+	// G.G Series: Cosmo Rally!! (USA)
+	// G.G Series: Uchu Racer!! (Japan)
+	// Saving not supported due to code taking place in overlays
+	else if (strcmp(romTid, "K5DE") == 0 || strcmp(romTid, "K5DJ") == 0) {
+		*(u32*)0x0200BD2C = 0xE1A00000; // nop
+		*(u32*)0x0204D0CC = 0xE1A00000; // nop
+		*(u32*)0x02051060 = 0xE1A00000; // nop
+		patchInitDSiWare(0x02059274, heapEnd);
+		if (!extendedMemory2) {
+			*(u32*)0x02059600 -= 0x3B000;
+		}
+		patchUserSettingsReadDSiWare(0x0205AA68);
+		if (!extendedMemory2) {
+			*(u32*)0x02060008 = 0x50000; // Shrink large part of heap from 0xF0000
+			*(u32*)0x02060090 = *(u32*)0x02060004; // Shrink large part of heap from 0x100000
+			*(u32*)0x02060094 = *(u32*)0x02060008; // Shrink part of heap from 0x60000
+		}
 	}
 
 	// Crash-Course Domo (USA)
