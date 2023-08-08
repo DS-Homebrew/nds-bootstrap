@@ -138,6 +138,7 @@ static const char dsiWareForBootloader1[][4] = {
 	"KXD", // Crystal Adventure
 	"KQQ", // Crystal Caverns of Amon-Ra
 	"K32", // CuteWitch! runner
+	"KTA", // G.G Series: D-Tank
 	"KF3", // Dairojo! Samurai Defenders
 	"KIN", // Dancing Academy
 	"KDV", // Dark Void Zero
