@@ -2176,7 +2176,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// G.G Series: Air Pinball Hockey (USA)
 	// G.G Series: Air Pinball Hockey (Japan)
-	// Saving not supported due to code taking place in overlays
+	// Saving not supported due to possible bug
 	else if (strcmp(romTid, "K25E") == 0 || strcmp(romTid, "K25J") == 0) {
 		*(u32*)0x0200D774 = 0xE1A00000; // nop
 		*(u32*)0x0204F750 = 0xE1A00000; // nop
@@ -2281,10 +2281,30 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// G.G Series: All Breaker (USA)
 	// G.G Series: All Breaker (Japan)
-	// Saving not supported due to code taking place in overlays
+	// Saving not supported due to unknown bug
 	else if (strcmp(romTid, "K27E") == 0 || strcmp(romTid, "K27J") == 0) {
+		/* *(u32*)0x02007EA8 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02007FD4 = 0xE3A00000; // mov r0, #0
+		setBL(0x02009BA4, (u32)dsiSaveGetInfo);
+		*(u32*)0x02009BBC = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+		*(u32*)0x02009BD4 = 0xE3A00001; // mov r0, #1 (dsiSaveFreeSpaceAvailable)
+		setBL(0x02009BE8, (u32)dsiSaveCreate);
+		setBL(0x02009CBC, (u32)dsiSaveGetInfo);
+		setBL(0x02009CE4, (u32)dsiSaveGetInfo);
+		setBL(0x02009D9C, (u32)dsiSaveOpen);
+		setBL(0x02009DC4, (u32)dsiSaveSetLength);
+		setBL(0x02009DE0, (u32)dsiSaveWrite);
+		setBL(0x02009DE8, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+		setBL(0x02009E2C, (u32)dsiSaveClose);
+		setBL(0x02009E84, (u32)dsiSaveOpen);
+		setBL(0x02009EA4, (u32)dsiSaveGetLength);
+		setBL(0x02009EB4, (u32)dsiSaveClose);
+		setBL(0x02009ED4, (u32)dsiSaveRead);
+		setBL(0x02009EE0, (u32)dsiSaveRead); // dsiSaveReadAsync
+		setBL(0x02009F24, (u32)dsiSaveClose); */
 		*(u32*)0x0200D71C = 0xE1A00000; // nop
 		*(u32*)0x0204E880 = 0xE1A00000; // nop
+		// tonccpy((u32*)0x0204F404, dsiSaveGetResultCode, 0xC);
 		*(u32*)0x02052814 = 0xE1A00000; // nop
 		patchInitDSiWare(0x0205A9F8, heapEnd);
 		if (!extendedMemory2) {
@@ -2356,7 +2376,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// G.G Series: Altered Weapon (USA)
 	// G.G Series: Variable Arms (Japan)
-	// Saving not supported due to code taking place in overlays
+	// Saving not supported due to possible bug
 	else if (strcmp(romTid, "K2ZE") == 0 || strcmp(romTid, "K2ZJ") == 0) {
 		*(u32*)0x0200BB74 = 0xE1A00000; // nop
 		*(u32*)0x0204CFC0 = 0xE1A00000; // nop
@@ -3748,7 +3768,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	} */
 
 	// G.G Series: Assault Buster (USA)
-	// Saving not supported due to code taking place in overlays
+	// Saving not supported due to possible bug
 	else if (strcmp(romTid, "KABE") == 0) {
 		*(u32*)0x0200D83C = 0xE1A00000; // nop
 		*(u32*)0x0204F59C = 0xE1A00000; // nop
@@ -3764,7 +3784,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// G.G Series: Assault Buster (Japan)
-	// Saving not supported due to code taking place in overlays
+	// Saving not supported due to possible bug
 	else if (strcmp(romTid, "KABJ") == 0) {
 		*(u32*)0x0200A29C = 0xE1A00000; // nop
 		*(u32*)0x020427A0 = 0xE1A00000; // nop
@@ -4411,7 +4431,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// G.G Series: Black x Block (USA)
-	// Saving not supported due to code taking place in overlays
+	// Saving not supported due to possible bug
 	else if (strcmp(romTid, "K96E") == 0) {
 		*(u32*)0x0200D754 = 0xE1A00000; // nop
 		*(u32*)0x0204E928 = 0xE1A00000; // nop
@@ -4428,7 +4448,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// G.G Series: Black x Block (Japan)
-	// Saving not supported due to code taking place in overlays
+	// Saving not supported due to possible bug
 	else if (strcmp(romTid, "K96J") == 0) {
 		*(u32*)0x0200815C = 0xE1A00000; // nop
 		*(u32*)0x02040214 = 0xE1A00000; // nop
@@ -7221,7 +7241,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// G.G Series: Conveyor Toy Packing (USA)
-	// Saving not supported due to code taking place in overlays
+	// Saving not supported due to possible bug
 	else if (strcmp(romTid, "KH5E") == 0) {
 		*(u32*)0x0200D724 = 0xE1A00000; // nop
 		*(u32*)0x0204EA2C = 0xE1A00000; // nop
@@ -7237,7 +7257,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// G.G Series: Conveyor Konpo (Japan)
-	// Saving not supported due to code taking place in overlays
+	// Saving not supported due to possible bug
 	else if (strcmp(romTid, "KH5J") == 0) {
 		*(u32*)0x02008188 = 0xE1A00000; // nop
 		*(u32*)0x0204017C = 0xE1A00000; // nop
@@ -7288,7 +7308,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// G.G Series: Cosmo Rally!! (USA)
 	// G.G Series: Uchu Racer!! (Japan)
-	// Saving not supported due to code taking place in overlays
+	// Saving not supported due to possible bug
 	else if (strcmp(romTid, "K5DE") == 0 || strcmp(romTid, "K5DJ") == 0) {
 		*(u32*)0x0200BD2C = 0xE1A00000; // nop
 		*(u32*)0x0204D0CC = 0xE1A00000; // nop
@@ -7743,6 +7763,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0200976C+offsetChange, (u32)dsiSaveOpen);
 		setBL(0x02009794+offsetChange, (u32)dsiSaveSetLength);
 		setBL(0x020097B0+offsetChange, (u32)dsiSaveWrite);
+		setBL(0x020097B8+offsetChange, (u32)dsiSaveWrite); // dsiSaveWriteAsync
 		setBL(0x020097FC+offsetChange, (u32)dsiSaveClose);
 		setBL(0x02009854+offsetChange, (u32)dsiSaveOpen);
 		setBL(0x02009874+offsetChange, (u32)dsiSaveGetLength);
@@ -7809,6 +7830,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02007454, (u32)dsiSaveOpen);
 		setBL(0x0200747C, (u32)dsiSaveSetLength);
 		setBL(0x02007498, (u32)dsiSaveWrite);
+		setBL(0x020074A0, (u32)dsiSaveWrite); // dsiSaveWriteAsync
 		setBL(0x020074E4, (u32)dsiSaveClose);
 		setBL(0x0200753C, (u32)dsiSaveOpen);
 		setBL(0x0200755C, (u32)dsiSaveGetLength);

@@ -1451,6 +1451,32 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// G.G Series: All Breaker (USA)
+	// G.G Series: All Breaker (Japan)
+	// Saving not supported due to unknown bug
+	/* else if ((strcmp(romTid, "K27E") == 0 || strcmp(romTid, "K27J") == 0) && saveOnFlashcard) {
+		*(u32*)0x02007EA8 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02007FD4 = 0xE3A00000; // mov r0, #0
+		setBL(0x02009BA4, (u32)dsiSaveGetInfo);
+		*(u32*)0x02009BBC = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+		*(u32*)0x02009BD4 = 0xE3A00001; // mov r0, #1 (dsiSaveFreeSpaceAvailable)
+		setBL(0x02009BE8, (u32)dsiSaveCreate);
+		setBL(0x02009CBC, (u32)dsiSaveGetInfo);
+		setBL(0x02009CE4, (u32)dsiSaveGetInfo);
+		setBL(0x02009D9C, (u32)dsiSaveOpen);
+		setBL(0x02009DC4, (u32)dsiSaveSetLength);
+		setBL(0x02009DE0, (u32)dsiSaveWrite);
+		setBL(0x02009DE8, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+		setBL(0x02009E2C, (u32)dsiSaveClose);
+		setBL(0x02009E84, (u32)dsiSaveOpen);
+		setBL(0x02009EA4, (u32)dsiSaveGetLength);
+		setBL(0x02009EB4, (u32)dsiSaveClose);
+		setBL(0x02009ED4, (u32)dsiSaveRead);
+		setBL(0x02009EE0, (u32)dsiSaveRead); // dsiSaveReadAsync
+		setBL(0x02009F24, (u32)dsiSaveClose);
+		tonccpy((u32*)0x0204F404, dsiSaveGetResultCode, 0xC);
+	} */
+
 	// All-Star Air Hockey (USA)
 	else if (strcmp(romTid, "KAOE") == 0) {
 		if (saveOnFlashcard) {
