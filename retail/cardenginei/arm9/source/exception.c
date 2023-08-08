@@ -40,10 +40,11 @@ void setExceptionHandler2() {
 		exceptionAddr = 0x027FFD90;
 	}
 	#endif
-	exceptionStack = (u32)EXCEPTION_STACK_LOCATION;
 	#ifdef TWLSDK
+	exceptionStack = (u32)EXCEPTION_STACK_LOCATION_SDK5;
 	EXCEPTION_VECTOR = enterException;
 	#else
+	exceptionStack = (u32)EXCEPTION_STACK_LOCATION;
 	EXCEPTION_VECTOR_SDK1 = enterException;
 	#endif
 	*exceptionC = userException;

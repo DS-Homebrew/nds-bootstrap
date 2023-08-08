@@ -27,7 +27,7 @@ void setExceptionHandler2() {
 //---------------------------------------------------------------------------------
 	if (EXCEPTION_VECTOR == enterException && *exceptionC == userException) return;
 
-	exceptionStack = (u32)EXCEPTION_STACK_LOCATION;
+	exceptionStack = (u32)EXCEPTION_STACK_LOCATION_SDK5;
 	EXCEPTION_VECTOR = enterException;
 	*exceptionC = userException;
 }
