@@ -1,4 +1,5 @@
 @---------------------------------------------------------------------------------
+	@.global lrStoreTestCode
 	.global mepHeapSetPatch
 	.global twlFontHeapAlloc
 	.global twlFontHeapAllocSize
@@ -27,6 +28,8 @@
 
 .word 0x5050454D @ 'MEPP' string
 
+@lrStoreTestCode:
+@	.word lrStoreTest
 mepHeapSetPatch:
 	.word mepHeapSetPatchFunc
 twlFontHeapAlloc:
@@ -74,6 +77,15 @@ siezHeapAlloc:
 	.word siezHeapAllocFunc
 siezHeapAddrPtr:
 	.word siezHeapAddr
+
+@---------------------------------------------------------------------------------
+@lrStoreTest:
+@---------------------------------------------------------------------------------
+@	ldr r12, =0x02000000
+@	str lr, [r12]
+@	bx lr
+@.pool
+@---------------------------------------------------------------------------------
 
 @---------------------------------------------------------------------------------
 mepHeapSetOrgFunc: .word 0
