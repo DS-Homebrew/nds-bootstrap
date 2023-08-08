@@ -209,6 +209,7 @@ typedef struct cardengineArm9 {
 		4: enableExceptionHandler
 		5: isSdk5
 		6: overlaysCached
+		13: softResetMb
 	*/
     s32 mainScreen;
 	u16 s2FlashcardId;
