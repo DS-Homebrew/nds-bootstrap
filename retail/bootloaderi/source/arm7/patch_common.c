@@ -4500,6 +4500,80 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL((u32)saveFuncOffsets[21], (u32)dsiSaveClose);
 	}
 
+	// G.G Series: D-Tank (USA)
+	// GO Series: D-Tank (Europe)
+	// G.G Series: D-Tank (Korea)
+	else if ((strcmp(romTid, "KTAE") == 0 || strcmp(romTid, "KTAP") == 0 || strcmp(romTid, "KTAK") == 0) && saveOnFlashcard) {
+		s8 offsetChange = 0;
+		if (romTid[3] == 'P') {
+			offsetChange = -0x10;
+		} else if (romTid[3] == 'K') {
+			offsetChange = 0x3C;
+		}
+
+		if (romTid[3] == 'E') {
+			*(u32*)0x02007C40 = 0xE3A00000; // mov r0, #0
+			*(u32*)0x02007D90 = 0xE3A00000; // mov r0, #0
+		} else if (romTid[3] == 'P') {
+			*(u32*)0x02007C28 = 0xE3A00000; // mov r0, #0
+			*(u32*)0x02007D9C = 0xE3A00000; // mov r0, #0
+		} else {
+			*(u32*)0x02007E60 = 0xE3A00000; // mov r0, #0
+			*(u32*)0x02007FB0 = 0xE3A00000; // mov r0, #0
+		}
+		setBL(0x02009574+offsetChange, (u32)dsiSaveGetInfo);
+		*(u32*)(0x0200958C+offsetChange) = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+		*(u32*)(0x020095A4+offsetChange) = 0xE3A00001; // mov r0, #1 (dsiSaveFreeSpaceAvailable)
+		setBL(0x020095B8+offsetChange, (u32)dsiSaveCreate);
+		setBL(0x0200968C+offsetChange, (u32)dsiSaveGetInfo);
+		setBL(0x020096B4+offsetChange, (u32)dsiSaveGetInfo);
+		setBL(0x0200976C+offsetChange, (u32)dsiSaveOpen);
+		setBL(0x02009794+offsetChange, (u32)dsiSaveSetLength);
+		setBL(0x020097B0+offsetChange, (u32)dsiSaveWrite);
+		setBL(0x020097B8+offsetChange, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+		setBL(0x020097FC+offsetChange, (u32)dsiSaveClose);
+		setBL(0x02009854+offsetChange, (u32)dsiSaveOpen);
+		setBL(0x02009874+offsetChange, (u32)dsiSaveGetLength);
+		setBL(0x02009884+offsetChange, (u32)dsiSaveClose);
+		setBL(0x020098A4+offsetChange, (u32)dsiSaveRead);
+		setBL(0x020098B0+offsetChange, (u32)dsiSaveRead); // dsiSaveReadAsync
+		setBL(0x020098F4+offsetChange, (u32)dsiSaveClose);
+
+		if (romTid[3] == 'E') {
+			tonccpy((u32*)0x02043610, dsiSaveGetResultCode, 0xC);
+		} else if (romTid[3] == 'P') {
+			tonccpy((u32*)0x0204361C, dsiSaveGetResultCode, 0xC);
+		} else {
+			tonccpy((u32*)0x020435C4, dsiSaveGetResultCode, 0xC);
+		}
+	}
+
+	// G.G Series: D-Tank (Japan)
+	else if (strcmp(romTid, "KTAJ") == 0 && saveOnFlashcard) {
+		*(u32*)0x020071F0 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x020071F4 = 0xE12FFF1E; // bx lr
+		setBL(0x0200725C, (u32)dsiSaveGetInfo);
+		*(u32*)0x02007274 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+		*(u32*)0x0200728C = 0xE3A00001; // mov r0, #1 (dsiSaveFreeSpaceAvailable)
+		setBL(0x020072A0, (u32)dsiSaveCreate);
+		setBL(0x02007374, (u32)dsiSaveGetInfo);
+		setBL(0x0200739C, (u32)dsiSaveGetInfo);
+		setBL(0x02007454, (u32)dsiSaveOpen);
+		setBL(0x0200747C, (u32)dsiSaveSetLength);
+		setBL(0x02007498, (u32)dsiSaveWrite);
+		setBL(0x020074A0, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+		setBL(0x020074E4, (u32)dsiSaveClose);
+		setBL(0x0200753C, (u32)dsiSaveOpen);
+		setBL(0x0200755C, (u32)dsiSaveGetLength);
+		setBL(0x0200756C, (u32)dsiSaveClose);
+		setBL(0x0200758C, (u32)dsiSaveRead);
+		setBL(0x02007598, (u32)dsiSaveRead); // dsiSaveReadAsync
+		setBL(0x020075DC, (u32)dsiSaveClose);
+		*(u32*)0x020078D8 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x020078DC = 0xE12FFF1E; // bx lr
+		tonccpy((u32*)0x02040DBC, dsiSaveGetResultCode, 0xC);
+	}
+
 	// Dairojo! Samurai Defenders (USA)
 	else if (strcmp(romTid, "KF3E") == 0 && saveOnFlashcard) {
 		setBL(0x02044B3C, (u32)dsiSaveOpen);
