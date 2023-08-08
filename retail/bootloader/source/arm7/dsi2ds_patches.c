@@ -7946,6 +7946,106 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		// *(u32*)0x0208D080 = 0xE1A00000; // nop
 	}
 
+	// G.G Series: Dark Spirits (USA)
+	// GO Series: Dark Spirits (Europe)
+	else if (strcmp(romTid, "KSDE") == 0 || strcmp(romTid, "KSDP") == 0) {
+		s8 offsetChange = (romTid[3] == 'E') ? 0 : -0x10;
+
+		if (romTid[3] == 'E') {
+			*(u32*)0x02007C38 = 0xE3A00000; // mov r0, #0
+			*(u32*)0x02007D88 = 0xE3A00000; // mov r0, #0
+		} else {
+			*(u32*)0x02007C20 = 0xE3A00000; // mov r0, #0
+			*(u32*)0x02007D94 = 0xE3A00000; // mov r0, #0
+		}
+		setBL(0x02009718+offsetChange, (u32)dsiSaveGetInfo);
+		*(u32*)(0x02009730+offsetChange) = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+		*(u32*)(0x02009748+offsetChange) = 0xE3A00001; // mov r0, #1 (dsiSaveFreeSpaceAvailable)
+		setBL(0x0200975C+offsetChange, (u32)dsiSaveCreate);
+		setBL(0x02009830+offsetChange, (u32)dsiSaveGetInfo);
+		setBL(0x02009858+offsetChange, (u32)dsiSaveGetInfo);
+		setBL(0x02009910+offsetChange, (u32)dsiSaveOpen);
+		setBL(0x02009938+offsetChange, (u32)dsiSaveSetLength);
+		setBL(0x02009954+offsetChange, (u32)dsiSaveWrite);
+		setBL(0x0200995C+offsetChange, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+		setBL(0x020099A0+offsetChange, (u32)dsiSaveClose);
+		setBL(0x020099F8+offsetChange, (u32)dsiSaveOpen);
+		setBL(0x02009A18+offsetChange, (u32)dsiSaveGetLength);
+		setBL(0x02009A28+offsetChange, (u32)dsiSaveClose);
+		setBL(0x02009A48+offsetChange, (u32)dsiSaveRead);
+		setBL(0x02009A54+offsetChange, (u32)dsiSaveRead); // dsiSaveReadAsync
+		setBL(0x02009A98+offsetChange, (u32)dsiSaveClose);
+		*(u32*)(0x02009FD8+offsetChange) = 0xE12FFF1E; // bx lr
+		*(u32*)(0x02009FF0+offsetChange) = 0xE12FFF1E; // bx lr
+		*(u32*)(0x0200A824+offsetChange) = 0xE1A00000; // nop
+
+		if (romTid[3] == 'E') {
+			*(u32*)0x0204303C = 0xE1A00000; // nop
+			tonccpy((u32*)0x02043BC0, dsiSaveGetResultCode, 0xC);
+			*(u32*)0x02046FD0 = 0xE1A00000; // nop
+			patchInitDSiWare(0x0204EFA8, heapEnd);
+			if (!extendedMemory2) {
+				*(u32*)0x0204F334 -= 0x3B000;
+			}
+			patchUserSettingsReadDSiWare(0x02050764);
+			if (!extendedMemory2) {
+				*(u32*)0x0205E588 = 0x50000; // Shrink large part of heap from 0xF0000
+				*(u32*)0x0205E600 = *(u32*)0x0205E588;
+			}
+		} else {
+			*(u32*)0x02043054 = 0xE1A00000; // nop
+			tonccpy((u32*)0x02043BCC, dsiSaveGetResultCode, 0xC);
+			*(u32*)0x02046F54 = 0xE1A00000; // nop
+			patchInitDSiWare(0x0204EEEC, heapEnd);
+			if (!extendedMemory2) {
+				*(u32*)0x0204F278 -= 0x3B000;
+			}
+			patchUserSettingsReadDSiWare(0x02050698);
+			if (!extendedMemory2) {
+				*(u32*)0x0205E498 = 0x50000; // Shrink large part of heap from 0xF0000
+				*(u32*)0x0205E510 = *(u32*)0x0205E498;
+			}
+		}
+	}
+
+	// G.G Series: Dark Spirits (Japan)
+	else if (strcmp(romTid, "KSDJ") == 0) {
+		*(u32*)0x020073A8 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x020073AC = 0xE12FFF1E; // bx lr
+		setBL(0x02007414, (u32)dsiSaveGetInfo);
+		*(u32*)0x0200742C = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+		*(u32*)0x02007444 = 0xE3A00001; // mov r0, #1 (dsiSaveFreeSpaceAvailable)
+		setBL(0x02007458, (u32)dsiSaveCreate);
+		setBL(0x0200752C, (u32)dsiSaveGetInfo);
+		setBL(0x02007554, (u32)dsiSaveGetInfo);
+		setBL(0x0200760C, (u32)dsiSaveOpen);
+		setBL(0x02007634, (u32)dsiSaveSetLength);
+		setBL(0x02007650, (u32)dsiSaveWrite);
+		setBL(0x02007658, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+		setBL(0x0200769C, (u32)dsiSaveClose);
+		setBL(0x020076F4, (u32)dsiSaveOpen);
+		setBL(0x02007714, (u32)dsiSaveGetLength);
+		setBL(0x02007724, (u32)dsiSaveClose);
+		setBL(0x02007744, (u32)dsiSaveRead);
+		setBL(0x02007750, (u32)dsiSaveRead); // dsiSaveReadAsync
+		setBL(0x02007794, (u32)dsiSaveClose);
+		*(u32*)0x02007A90 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02007A94 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0200831C = 0xE1A00000; // nop
+		*(u32*)0x020406C8 = 0xE1A00000; // nop
+		tonccpy((u32*)0x02040DBC, dsiSaveGetResultCode, 0xC);
+		*(u32*)0x020445C8 = 0xE1A00000; // nop
+		patchInitDSiWare(0x0204C560, heapEnd);
+		if (!extendedMemory2) {
+			*(u32*)0x0204C8EC -= 0x3B000;
+		}
+		patchUserSettingsReadDSiWare(0x0204DD0C);
+		if (!extendedMemory2) {
+			*(u32*)0x0205BAFC = 0x50000; // Shrink large part of heap from 0xF0000
+			*(u32*)0x0205BB60 = *(u32*)0x0205BAFC;
+		}
+	}
+
 	// Dark Void Zero (USA)
 	// Dark Void Zero (Europe, Australia)
 	else if (strcmp(romTid, "KDVE") == 0 || strcmp(romTid, "KDVV") == 0) {

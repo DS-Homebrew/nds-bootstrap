@@ -4661,6 +4661,69 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// G.G Series: Dark Spirits (USA)
+	// GO Series: Dark Spirits (Europe)
+	else if ((strcmp(romTid, "KSDE") == 0 || strcmp(romTid, "KSDP") == 0) && saveOnFlashcard) {
+		s8 offsetChange = (romTid[3] == 'E') ? 0 : -0x10;
+
+		if (romTid[3] == 'E') {
+			*(u32*)0x02007C38 = 0xE3A00000; // mov r0, #0
+			*(u32*)0x02007D88 = 0xE3A00000; // mov r0, #0
+		} else {
+			*(u32*)0x02007C20 = 0xE3A00000; // mov r0, #0
+			*(u32*)0x02007D94 = 0xE3A00000; // mov r0, #0
+		}
+		setBL(0x02009718+offsetChange, (u32)dsiSaveGetInfo);
+		*(u32*)(0x02009730+offsetChange) = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+		*(u32*)(0x02009748+offsetChange) = 0xE3A00001; // mov r0, #1 (dsiSaveFreeSpaceAvailable)
+		setBL(0x0200975C+offsetChange, (u32)dsiSaveCreate);
+		setBL(0x02009830+offsetChange, (u32)dsiSaveGetInfo);
+		setBL(0x02009858+offsetChange, (u32)dsiSaveGetInfo);
+		setBL(0x02009910+offsetChange, (u32)dsiSaveOpen);
+		setBL(0x02009938+offsetChange, (u32)dsiSaveSetLength);
+		setBL(0x02009954+offsetChange, (u32)dsiSaveWrite);
+		setBL(0x0200995C+offsetChange, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+		setBL(0x020099A0+offsetChange, (u32)dsiSaveClose);
+		setBL(0x020099F8+offsetChange, (u32)dsiSaveOpen);
+		setBL(0x02009A18+offsetChange, (u32)dsiSaveGetLength);
+		setBL(0x02009A28+offsetChange, (u32)dsiSaveClose);
+		setBL(0x02009A48+offsetChange, (u32)dsiSaveRead);
+		setBL(0x02009A54+offsetChange, (u32)dsiSaveRead); // dsiSaveReadAsync
+		setBL(0x02009A98+offsetChange, (u32)dsiSaveClose);
+
+		if (romTid[3] == 'E') {
+			tonccpy((u32*)0x02043BC0, dsiSaveGetResultCode, 0xC);
+		} else {
+			tonccpy((u32*)0x02043BCC, dsiSaveGetResultCode, 0xC);
+		}
+	}
+
+	// G.G Series: Dark Spirits (Japan)
+	else if (strcmp(romTid, "KSDJ") == 0 && saveOnFlashcard) {
+		*(u32*)0x020073A8 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x020073AC = 0xE12FFF1E; // bx lr
+		setBL(0x02007414, (u32)dsiSaveGetInfo);
+		*(u32*)0x0200742C = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+		*(u32*)0x02007444 = 0xE3A00001; // mov r0, #1 (dsiSaveFreeSpaceAvailable)
+		setBL(0x02007458, (u32)dsiSaveCreate);
+		setBL(0x0200752C, (u32)dsiSaveGetInfo);
+		setBL(0x02007554, (u32)dsiSaveGetInfo);
+		setBL(0x0200760C, (u32)dsiSaveOpen);
+		setBL(0x02007634, (u32)dsiSaveSetLength);
+		setBL(0x02007650, (u32)dsiSaveWrite);
+		setBL(0x02007658, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+		setBL(0x0200769C, (u32)dsiSaveClose);
+		setBL(0x020076F4, (u32)dsiSaveOpen);
+		setBL(0x02007714, (u32)dsiSaveGetLength);
+		setBL(0x02007724, (u32)dsiSaveClose);
+		setBL(0x02007744, (u32)dsiSaveRead);
+		setBL(0x02007750, (u32)dsiSaveRead); // dsiSaveReadAsync
+		setBL(0x02007794, (u32)dsiSaveClose);
+		*(u32*)0x02007A90 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02007A94 = 0xE12FFF1E; // bx lr
+		tonccpy((u32*)0x02040DBC, dsiSaveGetResultCode, 0xC);
+	}
+
 	// Dark Void Zero (USA)
 	// Dark Void Zero (Europe, Australia)
 	else if ((strcmp(romTid, "KDVE") == 0 || strcmp(romTid, "KDVV") == 0) && saveOnFlashcard) {

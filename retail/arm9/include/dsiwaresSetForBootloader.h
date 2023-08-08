@@ -141,6 +141,7 @@ static const char dsiWareForBootloader1[][4] = {
 	"KTA", // G.G Series: D-Tank
 	"KF3", // Dairojo! Samurai Defenders
 	"KIN", // Dancing Academy
+	"KSD", // G.G Series: Dark Spirits
 	"KDV", // Dark Void Zero
 	"KUI", // Decathlon 2012
 	"K6B", // Deep Sea Creatures
