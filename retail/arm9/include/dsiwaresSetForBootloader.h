@@ -159,6 +159,7 @@ static const char dsiWareForBootloader1[][4] = {
 	"K2C", // G.G Series: Drift Circuit
 	"KUG", // G.G Series: Drift Circuit 2
 	"KIF", // Drift Street International
+	"KDA", // G.G Series: Drilling Attack!!
 	"B88", // DS WiFi Settings
 	"KB8", // GO Series: Earth Saver
 	"KB9", // Earth Saver: Inseki Bakuha Dai Sakuse

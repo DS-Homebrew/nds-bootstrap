@@ -9134,6 +9134,81 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)(0x020C31E8+offsetChangeInit) = 0xE12FFF1E; // bx lr
 	}
 
+	// G.G Series: Drilling Attack!! (USA)
+	// Saving not supported due to an unknown bug
+	else if (strcmp(romTid, "KDAE") == 0) {
+		/* *(u32*)0x02006298 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x020063C4 = 0xE3A00000; // mov r0, #0
+		setBL(0x02008178, (u32)dsiSaveGetInfo);
+		*(u32*)0x02008190 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+		*(u32*)0x020081A8 = 0xE3A00001; // mov r0, #1 (dsiSaveFreeSpaceAvailable)
+		setBL(0x020081BC, (u32)dsiSaveCreate);
+		setBL(0x02008290, (u32)dsiSaveGetInfo);
+		setBL(0x020082B8, (u32)dsiSaveGetInfo);
+		setBL(0x02008370, (u32)dsiSaveOpen);
+		setBL(0x02008398, (u32)dsiSaveSetLength);
+		setBL(0x020083B4, (u32)dsiSaveWrite);
+		setBL(0x020083BC, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+		setBL(0x02008400, (u32)dsiSaveClose);
+		setBL(0x02008458, (u32)dsiSaveOpen);
+		setBL(0x02008478, (u32)dsiSaveGetLength);
+		setBL(0x02008488, (u32)dsiSaveClose);
+		setBL(0x020084A8, (u32)dsiSaveRead);
+		setBL(0x020084B4, (u32)dsiSaveRead); // dsiSaveReadAsync
+		setBL(0x020084F8, (u32)dsiSaveClose); */
+		*(u32*)0x0200BCF0 = 0xE1A00000; // nop
+		*(u32*)0x0204D480 = 0xE1A00000; // nop
+		// tonccpy((u32*)0x0204E004, dsiSaveGetResultCode, 0xC);
+		*(u32*)0x02051414 = 0xE1A00000; // nop
+		patchInitDSiWare(0x020595F8, heapEnd);
+		if (!extendedMemory2) {
+			*(u32*)0x02059984 -= 0x3B000;
+		}
+		patchUserSettingsReadDSiWare(0x0205ADB4);
+		if (!extendedMemory2) {
+			*(u32*)0x02060354 = 0x50000; // Shrink large part of heap from 0xF0000
+			*(u32*)0x020603E0 = 0x40000; // Shrink large part of heap from 0xE0000
+		}
+	}
+
+	// G.G Series: Drilling Attack!! (Japan)
+	else if (strcmp(romTid, "KDAJ") == 0) {
+		*(u32*)0x02007B90 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02007B94 = 0xE12FFF1E; // bx lr
+		setBL(0x02007BFC, (u32)dsiSaveGetInfo);
+		*(u32*)0x02007C14 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+		*(u32*)0x02007C2C = 0xE3A00001; // mov r0, #1 (dsiSaveFreeSpaceAvailable)
+		setBL(0x02007C40, (u32)dsiSaveCreate);
+		setBL(0x02007D14, (u32)dsiSaveGetInfo);
+		setBL(0x02007D3C, (u32)dsiSaveGetInfo);
+		setBL(0x02007DF4, (u32)dsiSaveOpen);
+		setBL(0x02007E1C, (u32)dsiSaveSetLength);
+		setBL(0x02007E38, (u32)dsiSaveWrite);
+		setBL(0x02007E40, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+		setBL(0x02007E84, (u32)dsiSaveClose);
+		setBL(0x02007EDC, (u32)dsiSaveOpen);
+		setBL(0x02007EFC, (u32)dsiSaveGetLength);
+		setBL(0x02007F0C, (u32)dsiSaveClose);
+		setBL(0x02007F2C, (u32)dsiSaveRead);
+		setBL(0x02007F38, (u32)dsiSaveRead); // dsiSaveReadAsync
+		setBL(0x02007F7C, (u32)dsiSaveClose);
+		*(u32*)0x02008278 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0200827C = 0xE12FFF1E; // bx lr
+		*(u32*)0x02008B04 = 0xE1A00000; // nop
+		*(u32*)0x02040F5C = 0xE1A00000; // nop
+		tonccpy((u32*)0x02041AD4, dsiSaveGetResultCode, 0xC);
+		*(u32*)0x02044E5C = 0xE1A00000; // nop
+		patchInitDSiWare(0x0204CD78, heapEnd);
+		if (!extendedMemory2) {
+			*(u32*)0x0204D104 -= 0x3B000;
+		}
+		patchUserSettingsReadDSiWare(0x0204E524);
+		if (!extendedMemory2) {
+			*(u32*)0x0205C510 = 0x50000; // Shrink large part of heap from 0xF0000
+			*(u32*)0x0205C588 = 0x40000; // Shrink large part of heap from 0xE0000
+		}
+	}
+
 	// DS WiFi Settings
 	else if (strcmp(romTid, "B88A") == 0) {
 		const u16* branchCode = generateA7InstrThumb(0x020051F4, (int)ce9->thumbPatches->reset_arm9);
