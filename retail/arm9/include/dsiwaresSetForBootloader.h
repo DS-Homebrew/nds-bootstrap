@@ -222,6 +222,7 @@ static const char dsiWareForBootloader1[][4] = {
 	"KGQ", // Go! Go! Island Rescue!
 	"K3G", // Go! Go! Kokopolo
 	"K9A", // Goooooal America
+	"KVQ", // G.G Series: Great Whip Adventure
 	"K83", // Hachiwandaiba DS: Naru Zouku Ha Samishougi
 	"KZH", // Halloween Trick or Treat
 	"KHO", // Handy Hockey

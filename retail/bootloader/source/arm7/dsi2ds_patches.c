@@ -11600,6 +11600,25 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02048314 = 0xE1A00000; // nop
 	}*/
 
+	// G.G Series: Great Whip Adventure (USA)
+	// G.G Series: Uppa no Daibouke (Japan)
+	// Saving not supported due to possible bug
+	else if (strcmp(romTid, "KVQE") == 0 || strcmp(romTid, "KVQJ") == 0) {
+		*(u32*)0x0200D750 = 0xE1A00000; // nop
+		*(u32*)0x02050678 = 0xE1A00000; // nop
+		*(u32*)0x0205460C = 0xE1A00000; // nop
+		patchInitDSiWare(0x0205C7F0, heapEnd);
+		if (!extendedMemory2) {
+			*(u32*)0x0205CB7C -= 0x3B000;
+		}
+		patchUserSettingsReadDSiWare(0x0205DFC8);
+		if (!extendedMemory2) {
+			*(u32*)0x02063540 = 0x50000; // Shrink large part of heap from 0xF0000
+			*(u32*)0x020635C8 = *(u32*)0x0206353C; // Shrink large part of heap from 0x100000
+			*(u32*)0x020635CC = *(u32*)0x02063540; // Shrink part of heap from 0x70000
+		}
+	}
+
 	// Hachiwandaiba DS: Naru Zouku Ha Samishougi (Japan)
 	else if (strcmp(romTid, "K83J") == 0) {
 		useSharedFont = twlFontFound;
