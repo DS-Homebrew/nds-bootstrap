@@ -3784,10 +3784,31 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// G.G Series: Assault Buster (Japan)
-	// Saving not supported due to possible bug
 	else if (strcmp(romTid, "KABJ") == 0) {
+		*(u32*)0x02009320 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02009324 = 0xE12FFF1E; // bx lr
+		setBL(0x0200938C, (u32)dsiSaveGetInfo);
+		*(u32*)0x020093A4 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+		*(u32*)0x020093BC = 0xE3A00001; // mov r0, #1 (dsiSaveFreeSpaceAvailable)
+		setBL(0x020093D0, (u32)dsiSaveCreate);
+		setBL(0x020094A4, (u32)dsiSaveGetInfo);
+		setBL(0x020094CC, (u32)dsiSaveGetInfo);
+		setBL(0x02009584, (u32)dsiSaveOpen);
+		setBL(0x020095AC, (u32)dsiSaveSetLength);
+		setBL(0x020095C8, (u32)dsiSaveWrite);
+		setBL(0x020095D0, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+		setBL(0x02009614, (u32)dsiSaveClose);
+		setBL(0x0200966C, (u32)dsiSaveOpen);
+		setBL(0x0200968C, (u32)dsiSaveGetLength);
+		setBL(0x0200969C, (u32)dsiSaveClose);
+		setBL(0x020096BC, (u32)dsiSaveRead);
+		setBL(0x020096C8, (u32)dsiSaveRead); // dsiSaveReadAsync
+		setBL(0x0200970C, (u32)dsiSaveClose);
+		*(u32*)0x02009A08 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02009A0C = 0xE12FFF1E; // bx lr
 		*(u32*)0x0200A29C = 0xE1A00000; // nop
 		*(u32*)0x020427A0 = 0xE1A00000; // nop
+		tonccpy((u32*)0x02043318, dsiSaveGetResultCode, 0xC);
 		*(u32*)0x020466A0 = 0xE1A00000; // nop
 		patchInitDSiWare(0x0204E638, heapEnd);
 		if (!extendedMemory2) {
@@ -4448,10 +4469,31 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// G.G Series: Black x Block (Japan)
-	// Saving not supported due to possible bug
 	else if (strcmp(romTid, "K96J") == 0) {
+		*(u32*)0x020071E8 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x020071EC = 0xE12FFF1E; // bx lr
+		setBL(0x02007254, (u32)dsiSaveGetInfo);
+		*(u32*)0x0200726C = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+		*(u32*)0x02007284 = 0xE3A00001; // mov r0, #1 (dsiSaveFreeSpaceAvailable)
+		setBL(0x02007298, (u32)dsiSaveCreate);
+		setBL(0x0200736C, (u32)dsiSaveGetInfo);
+		setBL(0x02007394, (u32)dsiSaveGetInfo);
+		setBL(0x0200744C, (u32)dsiSaveOpen);
+		setBL(0x02007474, (u32)dsiSaveSetLength);
+		setBL(0x02007490, (u32)dsiSaveWrite);
+		setBL(0x02007498, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+		setBL(0x020074DC, (u32)dsiSaveClose);
+		setBL(0x02007534, (u32)dsiSaveOpen);
+		setBL(0x02007554, (u32)dsiSaveGetLength);
+		setBL(0x02007564, (u32)dsiSaveClose);
+		setBL(0x02007584, (u32)dsiSaveRead);
+		setBL(0x02007590, (u32)dsiSaveRead); // dsiSaveReadAsync
+		setBL(0x020075D4, (u32)dsiSaveClose);
+		*(u32*)0x020078D0 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x020078D4 = 0xE12FFF1E; // bx lr
 		*(u32*)0x0200815C = 0xE1A00000; // nop
 		*(u32*)0x02040214 = 0xE1A00000; // nop
+		tonccpy((u32*)0x02040EA8, dsiSaveGetResultCode, 0xC);
 		*(u32*)0x02044274 = 0xE1A00000; // nop
 		*(u32*)0x0204C4D8 = 0xE3A00001; // mov r0, #1
 		patchInitDSiWare(0x0204C4F0, heapEnd);
@@ -7257,15 +7299,36 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// G.G Series: Conveyor Konpo (Japan)
-	// Saving not supported due to possible bug
 	else if (strcmp(romTid, "KH5J") == 0) {
+		*(u32*)0x02007214 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02007218 = 0xE12FFF1E; // bx lr
+		setBL(0x02007280, (u32)dsiSaveGetInfo);
+		*(u32*)0x02007298 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+		*(u32*)0x020072B0 = 0xE3A00001; // mov r0, #1 (dsiSaveFreeSpaceAvailable)
+		setBL(0x020072C4, (u32)dsiSaveCreate);
+		setBL(0x02007398, (u32)dsiSaveGetInfo);
+		setBL(0x020073C0, (u32)dsiSaveGetInfo);
+		setBL(0x02007478, (u32)dsiSaveOpen);
+		setBL(0x020074A0, (u32)dsiSaveSetLength);
+		setBL(0x020074BC, (u32)dsiSaveWrite);
+		setBL(0x020074C4, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+		setBL(0x02007508, (u32)dsiSaveClose);
+		setBL(0x02007560, (u32)dsiSaveOpen);
+		setBL(0x02007580, (u32)dsiSaveGetLength);
+		setBL(0x02007590, (u32)dsiSaveClose);
+		setBL(0x020075B0, (u32)dsiSaveRead);
+		setBL(0x020075BC, (u32)dsiSaveRead); // dsiSaveReadAsync
+		setBL(0x02007600, (u32)dsiSaveClose);
+		*(u32*)0x020078FC = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02007900 = 0xE12FFF1E; // bx lr
 		*(u32*)0x02008188 = 0xE1A00000; // nop
 		*(u32*)0x0204017C = 0xE1A00000; // nop
+		tonccpy((u32*)0x02040E10, dsiSaveGetResultCode, 0xC);
 		*(u32*)0x020441DC = 0xE1A00000; // nop
 		*(u32*)0x0204C440 = 0xE3A00001; // mov r0, #1
 		patchInitDSiWare(0x0204C458, heapEnd);
 		if (!extendedMemory2) {
-			*(u32*)0x0204C7C8 -= 0x3B000;
+			*(u32*)0x0204C7C8 -= 0x3A000;
 		}
 		patchUserSettingsReadDSiWare(0x0204DC10);
 		if (!extendedMemory2) {
@@ -9135,7 +9198,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// G.G Series: Drilling Attack!! (USA)
-	// Saving not supported due to an unknown bug
+	// Saving not supported due to unknown bug
 	else if (strcmp(romTid, "KDAE") == 0) {
 		/* *(u32*)0x02006298 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x020063C4 = 0xE3A00000; // mov r0, #0
