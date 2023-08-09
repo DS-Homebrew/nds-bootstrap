@@ -4498,7 +4498,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0204C4D8 = 0xE3A00001; // mov r0, #1
 		patchInitDSiWare(0x0204C4F0, heapEnd);
 		if (!extendedMemory2) {
-			*(u32*)0x0204C860 -= 0x3B000;
+			*(u32*)0x0204C860 -= 0x3A000;
 		}
 		patchUserSettingsReadDSiWare(0x0204DCA8);
 		if (!extendedMemory2) {
@@ -9249,6 +9249,8 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		if (!extendedMemory2) {
 			*(u32*)0x02060354 = 0x50000; // Shrink large part of heap from 0xF0000
 			*(u32*)0x020603E0 = 0x40000; // Shrink large part of heap from 0xE0000
+			*(u32*)0x020603F0 = *(u32*)0x020603DC; // Shrink large part of heap from 0x80000
+			*(u32*)0x020603F4 = *(u32*)0x020603E0; // Shrink large part of heap from 0xC0000
 		}
 	}
 
@@ -9287,6 +9289,8 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		if (!extendedMemory2) {
 			*(u32*)0x0205C510 = 0x50000; // Shrink large part of heap from 0xF0000
 			*(u32*)0x0205C588 = 0x40000; // Shrink large part of heap from 0xE0000
+			*(u32*)0x0205C598 = *(u32*)0x0205C584; // Shrink large part of heap from 0x80000
+			*(u32*)0x0205C59C = *(u32*)0x0205C588; // Shrink large part of heap from 0xC0000
 		}
 	}
 
