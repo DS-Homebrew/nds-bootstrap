@@ -1935,7 +1935,7 @@ int arm7_main(void) {
 			moduleParams,
 			ltdModuleParams,
 			(  (moduleParams->sdk_version < 0x4000000 && ((u32)ndsHeader->arm9executeAddress - (u32)ndsHeader->arm9destination) >= 0x1000
-			&& moduleParams->sdk_version != 0x2007533)
+			&& moduleParams->sdk_version != 0x2007533 && moduleParams->sdk_version != 0x2017530)
 			|| strncmp(romTid, "AKD", 3) == 0 // Trauma Center: Under the Knife
 			) ? 0 : 1,
 			usesCloneboot,
