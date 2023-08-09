@@ -7299,7 +7299,8 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// G.G Series: Conveyor Konpo (Japan)
-	else if (strcmp(romTid, "KH5J") == 0) {
+	// G.G Series: Energy Chain (Japan)
+	else if (strcmp(romTid, "KH5J") == 0 || strcmp(romTid, "KD7J") == 0) {
 		*(u32*)0x02007214 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x02007218 = 0xE12FFF1E; // bx lr
 		setBL(0x02007280, (u32)dsiSaveGetInfo);
@@ -7321,18 +7322,34 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02007600, (u32)dsiSaveClose);
 		*(u32*)0x020078FC = 0xE3A00000; // mov r0, #0
 		*(u32*)0x02007900 = 0xE12FFF1E; // bx lr
-		*(u32*)0x02008188 = 0xE1A00000; // nop
-		*(u32*)0x0204017C = 0xE1A00000; // nop
-		tonccpy((u32*)0x02040E10, dsiSaveGetResultCode, 0xC);
-		*(u32*)0x020441DC = 0xE1A00000; // nop
-		*(u32*)0x0204C440 = 0xE3A00001; // mov r0, #1
-		patchInitDSiWare(0x0204C458, heapEnd);
-		if (!extendedMemory2) {
-			*(u32*)0x0204C7C8 -= 0x3A000;
-		}
-		patchUserSettingsReadDSiWare(0x0204DC10);
-		if (!extendedMemory2) {
-			*(u32*)0x0205C1D4 = 0x50000; // Shrink large part of heap from 0xF0000
+		if (strcmp(romTid, "KH5J") == 0) {
+			*(u32*)0x02008188 = 0xE1A00000; // nop
+			*(u32*)0x0204017C = 0xE1A00000; // nop
+			tonccpy((u32*)0x02040E10, dsiSaveGetResultCode, 0xC);
+			*(u32*)0x020441DC = 0xE1A00000; // nop
+			*(u32*)0x0204C440 = 0xE3A00001; // mov r0, #1
+			patchInitDSiWare(0x0204C458, heapEnd);
+			if (!extendedMemory2) {
+				*(u32*)0x0204C7C8 -= 0x3A000;
+			}
+			patchUserSettingsReadDSiWare(0x0204DC10);
+			if (!extendedMemory2) {
+				*(u32*)0x0205C1D4 = 0x50000; // Shrink large part of heap from 0xF0000
+			}
+		} else {
+			*(u32*)0x0204599C = 0xE1A00000; // nop
+			tonccpy((u32*)0x02046630, dsiSaveGetResultCode, 0xC);
+			*(u32*)0x020499FC = 0xE1A00000; // nop
+			*(u32*)0x02051C60 = 0xE3A00001; // mov r0, #1
+			patchInitDSiWare(0x02051C78, heapEnd);
+			if (!extendedMemory2) {
+				*(u32*)0x02051FE8 -= 0x3A000;
+			}
+			patchUserSettingsReadDSiWare(0x02053430);
+			if (!extendedMemory2) {
+				*(u32*)0x02062054 = 0x50000; // Shrink large part of heap from 0xF0000
+				*(u32*)0x020620B8 = *(u32*)0x02062054;
+			}
 		}
 	}
 
@@ -10129,6 +10146,26 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0204787C = 0xE1A00000; // nop
 		*(u32*)0x02047880 = 0xE1A00000; // nop
 	}
+
+	// G.G Series: Energy Chain (USA)
+	// Saving not supported due to possible bug
+	else if (strcmp(romTid, "KD7E") == 0) {
+		*(u32*)0x02012F98 = 0xE1A00000; // nop
+		*(u32*)0x020548E8 = 0xE1A00000; // nop
+		*(u32*)0x0205887C = 0xE1A00000; // nop
+		patchInitDSiWare(0x02060A60, heapEnd);
+		if (!extendedMemory2) {
+			*(u32*)0x02060DEC -= 0x3B000;
+		}
+		patchUserSettingsReadDSiWare(0x0206221C);
+		if (!extendedMemory2) {
+			*(u32*)0x020677BC = 0x50000; // Shrink large part of heap from 0xF0000
+			*(u32*)0x02067848 = *(u32*)0x020677BC;
+		}
+	}
+
+	// G.G Series: Energy Chain (Japan)
+	// See "G.G Series: Conveyor Konpo (Japan)"
 
 	// Escape Trick: The Secret of Rock City Prison (USA)
 	// Requires 8MB of RAM(?)

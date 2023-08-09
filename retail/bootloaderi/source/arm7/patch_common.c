@@ -4267,7 +4267,8 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// G.G Series: Conveyor Konpo (Japan)
-	else if (strcmp(romTid, "KH5J") == 0 && saveOnFlashcard) {
+	// G.G Series: Energy Chain (Japan)
+	else if ((strcmp(romTid, "KH5J") == 0 || strcmp(romTid, "KD7J") == 0) && saveOnFlashcard) {
 		*(u32*)0x02007214 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x02007218 = 0xE12FFF1E; // bx lr
 		setBL(0x02007280, (u32)dsiSaveGetInfo);
@@ -4289,7 +4290,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02007600, (u32)dsiSaveClose);
 		*(u32*)0x020078FC = 0xE3A00000; // mov r0, #0
 		*(u32*)0x02007900 = 0xE12FFF1E; // bx lr
-		tonccpy((u32*)0x02040E10, dsiSaveGetResultCode, 0xC);
+		tonccpy((u32*)(strcmp(romTid, "KH5J") == 0 ? 0x02040E10 : 0x02046630), dsiSaveGetResultCode, 0xC);
 	}
 
 	// Coropata (Japan)
