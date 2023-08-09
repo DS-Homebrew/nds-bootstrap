@@ -4690,12 +4690,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02009A48+offsetChange, (u32)dsiSaveRead);
 		setBL(0x02009A54+offsetChange, (u32)dsiSaveRead); // dsiSaveReadAsync
 		setBL(0x02009A98+offsetChange, (u32)dsiSaveClose);
-
-		if (romTid[3] == 'E') {
-			tonccpy((u32*)0x02043BC0, dsiSaveGetResultCode, 0xC);
-		} else {
-			tonccpy((u32*)0x02043BCC, dsiSaveGetResultCode, 0xC);
-		}
+		tonccpy((u32*)((romTid[3] == 'E') ? 0x02043BC0 : 0x02043BCC), dsiSaveGetResultCode, 0xC);
 	}
 
 	// G.G Series: Dark Spirits (Japan)
@@ -5189,6 +5184,90 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02029984, (u32)dsiSaveClose);
 		setBL(0x020299DC, (u32)dsiSaveSeek);
 		setBL(0x020299F0, (u32)dsiSaveWrite);
+	}
+
+	// G.G Series: Drift Circuit (USA)
+	// G.G Series: Drift Circuit (Korea)
+	else if ((strcmp(romTid, "K2CE") == 0 || strcmp(romTid, "K2CK") == 0) && saveOnFlashcard) {
+		s8 offsetChange = (romTid[3] == 'E') ? 0 : 0x3C;
+
+		if (romTid[3] == 'E') {
+			*(u32*)0x02006A44 = 0xE3A00000; // mov r0, #0
+			*(u32*)0x02006B94 = 0xE3A00000; // mov r0, #0
+		} else {
+			*(u32*)0x02006C64 = 0xE3A00000; // mov r0, #0
+			*(u32*)0x02006DB4 = 0xE3A00000; // mov r0, #0
+		}
+		setBL(0x020084F0+offsetChange, (u32)dsiSaveGetInfo);
+		*(u32*)(0x02008508+offsetChange) = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+		*(u32*)(0x02008520+offsetChange) = 0xE3A00001; // mov r0, #1 (dsiSaveFreeSpaceAvailable)
+		setBL(0x02008534+offsetChange, (u32)dsiSaveCreate);
+		setBL(0x02008608+offsetChange, (u32)dsiSaveGetInfo);
+		setBL(0x02008630+offsetChange, (u32)dsiSaveGetInfo);
+		setBL(0x020086E8+offsetChange, (u32)dsiSaveOpen);
+		setBL(0x02008710+offsetChange, (u32)dsiSaveSetLength);
+		setBL(0x0200872C+offsetChange, (u32)dsiSaveWrite);
+		setBL(0x02008734+offsetChange, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+		setBL(0x02008778+offsetChange, (u32)dsiSaveClose);
+		setBL(0x020087D0+offsetChange, (u32)dsiSaveOpen);
+		setBL(0x020087F0+offsetChange, (u32)dsiSaveGetLength);
+		setBL(0x02008800+offsetChange, (u32)dsiSaveClose);
+		setBL(0x02008820+offsetChange, (u32)dsiSaveRead);
+		setBL(0x0200882C+offsetChange, (u32)dsiSaveRead); // dsiSaveReadAsync
+		setBL(0x02008870+offsetChange, (u32)dsiSaveClose);
+		tonccpy((u32*)((romTid[3] == 'E') ? 0x020427B0 : 0x02042764), dsiSaveGetResultCode, 0xC);
+	}
+
+	// G.G Series: Drift Circuit (Japan)
+	else if (strcmp(romTid, "K2CJ") == 0 && saveOnFlashcard) {
+		*(u32*)0x02007B74 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02007B78 = 0xE12FFF1E; // bx lr
+		setBL(0x02007BE0, (u32)dsiSaveGetInfo);
+		*(u32*)0x02007BF8 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+		*(u32*)0x02007C10 = 0xE3A00001; // mov r0, #1 (dsiSaveFreeSpaceAvailable)
+		setBL(0x02007C24, (u32)dsiSaveCreate);
+		setBL(0x02007CF8, (u32)dsiSaveGetInfo);
+		setBL(0x02007D20, (u32)dsiSaveGetInfo);
+		setBL(0x02007DD8, (u32)dsiSaveOpen);
+		setBL(0x02007E00, (u32)dsiSaveSetLength);
+		setBL(0x02007E1C, (u32)dsiSaveWrite);
+		setBL(0x02007E24, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+		setBL(0x02007E68, (u32)dsiSaveClose);
+		setBL(0x02007EC0, (u32)dsiSaveOpen);
+		setBL(0x02007EE0, (u32)dsiSaveGetLength);
+		setBL(0x02007EF0, (u32)dsiSaveClose);
+		setBL(0x02007F10, (u32)dsiSaveRead);
+		setBL(0x02007F1C, (u32)dsiSaveRead); // dsiSaveReadAsync
+		setBL(0x02007F60, (u32)dsiSaveClose);
+		*(u32*)0x0200825C = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02008260 = 0xE12FFF1E; // bx lr
+		tonccpy((u32*)0x020420DC, dsiSaveGetResultCode, 0xC);
+	}
+
+	// G.G Series: Drift Circuit 2 (Japan)
+	else if (strcmp(romTid, "KUGJ") == 0 && saveOnFlashcard) {
+		*(u32*)0x0200912C = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02009130 = 0xE12FFF1E; // bx lr
+		setBL(0x02009198, (u32)dsiSaveGetInfo);
+		*(u32*)0x020091B0 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+		*(u32*)0x020091C8 = 0xE3A00001; // mov r0, #1 (dsiSaveFreeSpaceAvailable)
+		setBL(0x020091DC, (u32)dsiSaveCreate);
+		setBL(0x020092B0, (u32)dsiSaveGetInfo);
+		setBL(0x020092D8, (u32)dsiSaveGetInfo);
+		setBL(0x02009390, (u32)dsiSaveOpen);
+		setBL(0x020093B8, (u32)dsiSaveSetLength);
+		setBL(0x020093D4, (u32)dsiSaveWrite);
+		setBL(0x020093DC, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+		setBL(0x02009420, (u32)dsiSaveClose);
+		setBL(0x02009478, (u32)dsiSaveOpen);
+		setBL(0x02009498, (u32)dsiSaveGetLength);
+		setBL(0x020094A8, (u32)dsiSaveClose);
+		setBL(0x020094C8, (u32)dsiSaveRead);
+		setBL(0x020094D4, (u32)dsiSaveRead); // dsiSaveReadAsync
+		setBL(0x02009518, (u32)dsiSaveClose);
+		*(u32*)0x02009814 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02009818 = 0xE12FFF1E; // bx lr
+		tonccpy((u32*)0x020434BC, dsiSaveGetResultCode, 0xC);
 	}
 
 	// Drift Street International (USA)
