@@ -7337,6 +7337,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 				*(u32*)0x0205C1D4 = 0x50000; // Shrink large part of heap from 0xF0000
 			}
 		} else {
+			*(u32*)0x0200D9F0 = 0xE1A00000; // nop
 			*(u32*)0x0204599C = 0xE1A00000; // nop
 			tonccpy((u32*)0x02046630, dsiSaveGetResultCode, 0xC);
 			*(u32*)0x020499FC = 0xE1A00000; // nop
