@@ -179,6 +179,7 @@ static const char dsiWareForBootloader1[][4] = {
 	"K5Q", // Escape Trick: The Secret of Rock City Prison (bootloaderi-exclusive)
 	"KEY", // Escape Trick: Ninja Castle (bootloaderi-exclusive)
 	"K5K", // Escape Trick: Convenience Store (bootloaderi-exclusive)
+	"KER", // G.G Series: Exciting River
 	"KYB", // Face Pilot: Fly With Your Nintendo DSi Camera! (bootloaderi-exclusive)
 	"K4E", // Fall in the Dark
 	"Z2E", // Famicom Wars DS: Ushinawareta Hikari

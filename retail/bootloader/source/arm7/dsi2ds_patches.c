@@ -10208,6 +10208,66 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchUserSettingsReadDSiWare(0x02068EB0);
 	} */
 
+	// G.G Series: Exciting River (USA)
+	// Saving not supported due to possible bug
+	// Requires 8MB of RAM
+	else if (strcmp(romTid, "KERE") == 0 && extendedMemory2) {
+		*(u32*)0x0200BD00 = 0xE1A00000; // nop
+		*(u32*)0x0204D5B8 = 0xE1A00000; // nop
+		*(u32*)0x0205154C = 0xE1A00000; // nop
+		patchInitDSiWare(0x02059730, heapEnd);
+		/* if (!extendedMemory2) {
+			*(u32*)0x02059ABC -= 0x3B000;
+		} */
+		patchUserSettingsReadDSiWare(0x0205AEEC);
+		/* if (!extendedMemory2) {
+			*(u32*)0x02060488 = 0x60000; // Shrink large part of heap from 0x80000
+			*(u32*)0x0206048C = 0x30000; // Shrink large part of heap from 0xF0000
+			*(u32*)0x02060500 = 0x60000; // Shrink large part of heap from 0x100000
+			*(u32*)0x02060504 = 0x20000; // Shrink large part of heap from 0x60000
+			*(u32*)0x02060514 = *(u32*)0x02060488; // Shrink large part of heap from 0xF0000
+			*(u32*)0x02060518 = *(u32*)0x0206048C; // Shrink large part of heap from 0x80000
+		} */
+	}
+
+	// G.G Series: Exciting River (Japan)
+	// Requires 8MB of RAM
+	else if (strcmp(romTid, "KERJ") == 0 && extendedMemory2) {
+		*(u32*)0x02007C4C = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02007C50 = 0xE12FFF1E; // bx lr
+		setBL(0x02007CB8, (u32)dsiSaveGetInfo);
+		*(u32*)0x02007CD0 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+		*(u32*)0x02007CE8 = 0xE3A00001; // mov r0, #1 (dsiSaveFreeSpaceAvailable)
+		setBL(0x02007CFC, (u32)dsiSaveCreate);
+		setBL(0x02007DD0, (u32)dsiSaveGetInfo);
+		setBL(0x02007DF8, (u32)dsiSaveGetInfo);
+		setBL(0x02007EB0, (u32)dsiSaveOpen);
+		setBL(0x02007ED8, (u32)dsiSaveSetLength);
+		setBL(0x02007EF4, (u32)dsiSaveWrite);
+		setBL(0x02007EFC, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+		setBL(0x02007F40, (u32)dsiSaveClose);
+		setBL(0x02007F98, (u32)dsiSaveOpen);
+		setBL(0x02007FB8, (u32)dsiSaveGetLength);
+		setBL(0x02007FC8, (u32)dsiSaveClose);
+		setBL(0x02007FE8, (u32)dsiSaveRead);
+		setBL(0x02007FF4, (u32)dsiSaveRead); // dsiSaveReadAsync
+		setBL(0x02008038, (u32)dsiSaveClose);
+		*(u32*)0x02008334 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02008338 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02008BC8 = 0xE1A00000; // nop
+		*(u32*)0x02040938 = 0xE1A00000; // nop
+		tonccpy((u32*)0x020414B0, dsiSaveGetResultCode, 0xC);
+		*(u32*)0x02044838 = 0xE1A00000; // nop
+		patchInitDSiWare(0x0204C754, heapEnd);
+		/* if (!extendedMemory2) {
+			*(u32*)0x0204CAE0 -= 0x3B000;
+		} */
+		patchUserSettingsReadDSiWare(0x0204DF00);
+		/* if (!extendedMemory2) {
+			*(u32*)0x0205C738 = 0x50000; // Shrink large part of heap from 0xF0000
+		} */
+	}
+
 	// Fall in the Dark (Japan)
 	// A bit hard/confusing to add save support
 	else if (strcmp(romTid, "K4EJ") == 0) {

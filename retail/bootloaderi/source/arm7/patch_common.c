@@ -5810,6 +5810,32 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// G.G Series: Exciting River (Japan)
+	else if (strcmp(romTid, "KERJ") == 0 && saveOnFlashcard) {
+		*(u32*)0x02007C4C = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02007C50 = 0xE12FFF1E; // bx lr
+		setBL(0x02007CB8, (u32)dsiSaveGetInfo);
+		*(u32*)0x02007CD0 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+		*(u32*)0x02007CE8 = 0xE3A00001; // mov r0, #1 (dsiSaveFreeSpaceAvailable)
+		setBL(0x02007CFC, (u32)dsiSaveCreate);
+		setBL(0x02007DD0, (u32)dsiSaveGetInfo);
+		setBL(0x02007DF8, (u32)dsiSaveGetInfo);
+		setBL(0x02007EB0, (u32)dsiSaveOpen);
+		setBL(0x02007ED8, (u32)dsiSaveSetLength);
+		setBL(0x02007EF4, (u32)dsiSaveWrite);
+		setBL(0x02007EFC, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+		setBL(0x02007F40, (u32)dsiSaveClose);
+		setBL(0x02007F98, (u32)dsiSaveOpen);
+		setBL(0x02007FB8, (u32)dsiSaveGetLength);
+		setBL(0x02007FC8, (u32)dsiSaveClose);
+		setBL(0x02007FE8, (u32)dsiSaveRead);
+		setBL(0x02007FF4, (u32)dsiSaveRead); // dsiSaveReadAsync
+		setBL(0x02008038, (u32)dsiSaveClose);
+		*(u32*)0x02008334 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02008338 = 0xE12FFF1E; // bx lr
+		tonccpy((u32*)0x020414B0, dsiSaveGetResultCode, 0xC);
+	}
+
 	// Face Pilot: Fly With Your Nintendo DSi Camera! (USA)
 	else if (strcmp(romTid, "KYBE") == 0 && saveOnFlashcard) {
 		*(u32*)0x0200BB54 = 0xE12FFF1E; // bx lr
