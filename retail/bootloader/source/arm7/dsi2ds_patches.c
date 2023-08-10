@@ -13210,6 +13210,25 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0202F3F0 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 	}*/
 
+	// G.G Series: The Last Knight (USA)
+	// G.G Series: The Last Knight (Japan)
+	// Saving not supported due to possible bug
+	else if (strcmp(romTid, "K5ME") == 0 || strcmp(romTid, "K5MJ") == 0) {
+		*(u32*)0x0200D778 = 0xE1A00000; // nop
+		*(u32*)0x0204F378 = 0xE1A00000; // nop
+		*(u32*)0x0205330C = 0xE1A00000; // nop
+		patchInitDSiWare(0x0205B4F0, heapEndMaxForRetail);
+		if (!extendedMemory2) {
+			*(u32*)0x0205B87C -= 0x3B000;
+		}
+		patchUserSettingsReadDSiWare(0x0205CCAC);
+		if (!extendedMemory2) {
+			*(u32*)0x0206224C = 0x70000; // Shrink large part of heap from 0xF0000
+			*(u32*)0x020622C0 = 0x80000; // Shrink large part of heap from 0x100000
+			*(u32*)0x020622D8 = 0x30000; // Shrink large part of heap from 0xA0000
+		}
+	}
+
 	// The Legend of Zelda: Four Swords: Anniversary Edition (USA)
 	// The Legend of Zelda: Four Swords: Anniversary Edition (Europe, Australia)
 	// Zelda no Densetsu: 4-tsu no Tsurugi: 25th Kinen Edition (Japan)
