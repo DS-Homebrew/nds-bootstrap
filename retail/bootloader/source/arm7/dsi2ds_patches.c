@@ -12020,6 +12020,107 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02046834 = 0xE12FFF1E; // bx lr (Skip Manual screen)
 	}
 
+	// G.G Series: Horizontal Bar (USA)
+	// GO Series: Let's Swing! (Europe)
+	else if (strcmp(romTid, "KT2E") == 0 || strcmp(romTid, "KT2P") == 0) {
+		s8 offsetChange = (romTid[3] == 'E') ? 0 : -0x10;
+
+		*(u32*)(0x02007C34+offsetChange) = 0xE3A00000; // mov r0, #0
+		*(u32*)(0x02007C38+offsetChange) = 0xE12FFF1E; // bx lr
+		setBL(0x02007CA0+offsetChange, (u32)dsiSaveGetInfo);
+		*(u32*)(0x02007CB8+offsetChange) = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+		*(u32*)(0x02007CD0+offsetChange) = 0xE3A00001; // mov r0, #1 (dsiSaveFreeSpaceAvailable)
+		setBL(0x02007CE4+offsetChange, (u32)dsiSaveCreate);
+		setBL(0x02007DB8+offsetChange, (u32)dsiSaveGetInfo);
+		setBL(0x02007DE0+offsetChange, (u32)dsiSaveGetInfo);
+		setBL(0x02007E98+offsetChange, (u32)dsiSaveOpen);
+		setBL(0x02007EC0+offsetChange, (u32)dsiSaveSetLength);
+		setBL(0x02007EDC+offsetChange, (u32)dsiSaveWrite);
+		setBL(0x02007EE4+offsetChange, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+		setBL(0x02007F28+offsetChange, (u32)dsiSaveClose);
+		setBL(0x02007F80+offsetChange, (u32)dsiSaveOpen);
+		setBL(0x02007FA0+offsetChange, (u32)dsiSaveGetLength);
+		setBL(0x02007FB0+offsetChange, (u32)dsiSaveClose);
+		setBL(0x02007FD0+offsetChange, (u32)dsiSaveRead);
+		setBL(0x02007FDC+offsetChange, (u32)dsiSaveRead); // dsiSaveReadAsync
+		setBL(0x02008020+offsetChange, (u32)dsiSaveClose);
+		*(u32*)(0x0200831C+offsetChange) = 0xE3A00000; // mov r0, #0
+		*(u32*)(0x02008320+offsetChange) = 0xE12FFF1E; // bx lr
+		*(u32*)(0x02008560+offsetChange) = 0xE12FFF1E; // bx lr
+		*(u32*)(0x02008578+offsetChange) = 0xE12FFF1E; // bx lr
+		*(u32*)(0x02008DAC+offsetChange) = 0xE1A00000; // nop
+
+		if (romTid[3] == 'E') {
+			*(u32*)0x020413EC = 0xE1A00000; // nop
+			tonccpy((u32*)0x02041F70, dsiSaveGetResultCode, 0xC);
+			*(u32*)0x02045380 = 0xE1A00000; // nop
+			patchInitDSiWare(0x0204D368, heapEnd);
+			if (!extendedMemory2) {
+				*(u32*)0x0204D6F4 -= 0x3B000;
+			}
+			patchUserSettingsReadDSiWare(0x0204EB24);
+			if (!extendedMemory2) {
+				*(u32*)0x0205C908 = 0x50000; // Shrink large part of heap from 0xF0000
+				*(u32*)0x0205C978 = *(u32*)0x0205C900; // Shrink part of heap from 0x40000
+				*(u32*)0x0205C980 = *(u32*)0x0205C908; // Shrink large part of heap from 0xC0000
+			}
+		} else {
+			*(u32*)0x02041404 = 0xE1A00000; // nop
+			tonccpy((u32*)0x02041F7C, dsiSaveGetResultCode, 0xC);
+			*(u32*)0x02045304 = 0xE1A00000; // nop
+			patchInitDSiWare(0x0204D2AC, heapEnd);
+			if (!extendedMemory2) {
+				*(u32*)0x0204D638 -= 0x3B000;
+			}
+			patchUserSettingsReadDSiWare(0x0204EA58);
+			if (!extendedMemory2) {
+				*(u32*)0x0205C818 = 0x50000; // Shrink large part of heap from 0xF0000
+				*(u32*)0x0205C888 = *(u32*)0x0205C810; // Shrink part of heap from 0x40000
+				*(u32*)0x0205C890 = *(u32*)0x0205C818; // Shrink large part of heap from 0xC0000
+			}
+		}
+	}
+
+	// G.G Series: Tetsubou (Japan)
+	else if (strcmp(romTid, "KT2J") == 0) {
+		*(u32*)0x02007334 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02007338 = 0xE12FFF1E; // bx lr
+		setBL(0x020073A0, (u32)dsiSaveGetInfo);
+		*(u32*)0x020073B8 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+		*(u32*)0x020073D0 = 0xE3A00001; // mov r0, #1 (dsiSaveFreeSpaceAvailable)
+		setBL(0x020073E4, (u32)dsiSaveCreate);
+		setBL(0x020074B8, (u32)dsiSaveGetInfo);
+		setBL(0x020074E0, (u32)dsiSaveGetInfo);
+		setBL(0x02007598, (u32)dsiSaveOpen);
+		setBL(0x020075C0, (u32)dsiSaveSetLength);
+		setBL(0x020075DC, (u32)dsiSaveWrite);
+		setBL(0x020075E4, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+		setBL(0x02007628, (u32)dsiSaveClose);
+		setBL(0x02007680, (u32)dsiSaveOpen);
+		setBL(0x020076A0, (u32)dsiSaveGetLength);
+		setBL(0x020076B0, (u32)dsiSaveClose);
+		setBL(0x020076D0, (u32)dsiSaveRead);
+		setBL(0x020076DC, (u32)dsiSaveRead); // dsiSaveReadAsync
+		setBL(0x02007720, (u32)dsiSaveClose);
+		*(u32*)0x02007A1C = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02007A20 = 0xE12FFF1E; // bx lr
+		*(u32*)0x020082A8 = 0xE1A00000; // nop
+		*(u32*)0x02040C18 = 0xE1A00000; // nop
+		tonccpy((u32*)0x020418AC, dsiSaveGetResultCode, 0xC);
+		*(u32*)0x02044C78 = 0xE1A00000; // nop
+		*(u32*)0x0204CF68 = 0xE3A00001; // mov r0, #1
+		patchInitDSiWare(0x0204CF80, heapEnd);
+		if (!extendedMemory2) {
+			*(u32*)0x0204D2F0 -= 0x3A000;
+		}
+		patchUserSettingsReadDSiWare(0x0204E738);
+		if (!extendedMemory2) {
+			*(u32*)0x0205C7E4 = 0x50000; // Shrink large part of heap from 0xF0000
+			*(u32*)0x0205C840 = *(u32*)0x0205C7DC; // Shrink part of heap from 0x40000
+			*(u32*)0x0205C848 = *(u32*)0x0205C7E4; // Shrink large part of heap from 0xC0000
+		}
+	}
+
 	// Ichi Moudaji!: Neko King (Japan)
 	// Either this uses more than one save file in filesystem, or saving is somehow just bugged
 	/* if (strcmp(romTid, "KNEJ") == 0) {

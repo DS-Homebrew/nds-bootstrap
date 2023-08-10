@@ -234,6 +234,7 @@ static const char dsiWareForBootloader1[][4] = {
 	"K5E", // G.G Series: Hero Puzzle
 	"KTX", // High Stakes Texas Hold'em
 	"KHI", // Hints Hunter
+	"KT2", // G.G Series: Horizontal Bar
 	// "KNE", // Ichi Moudaji!: Neko King
 	"KNK", // Ideyou Sukeno: Kenkou Maja DSi
 	"KBT", // Invasion of the Alien Blobs (bootloaderi-exclusive)
