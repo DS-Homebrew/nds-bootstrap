@@ -333,6 +333,7 @@ static const char dsiWareForBootloader2[][4] = {
 	"KJI", // Noroi no Game: Chi
 	"KG9", // Noroi no Game: Oku
 	"KSU", // Number Battle
+	"KU9", // G.G Series: Nyokki
 	"K6T", // Orion's Odyssey
 	"KO4", // Oscar in Movieland
 	"KOT", // Oscar in Toyland

@@ -17223,6 +17223,25 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020E4774 = 0xE3A00003; // mov r0, #3
 	}
 
+	// G.G Series: Nyokki (USA)
+	// G.G Series: Nyokki (Japan)
+	// Saving not supported due to possible bug
+	else if (strcmp(romTid, "KU9E") == 0 || strcmp(romTid, "KU9J") == 0) {
+		*(u32*)0x0200D71C = 0xE1A00000; // nop
+		*(u32*)0x0204E354 = 0xE1A00000; // nop
+		*(u32*)0x020522E8 = 0xE1A00000; // nop
+		patchInitDSiWare(0x0205A4CC, heapEnd);
+		if (!extendedMemory2) {
+			*(u32*)0x0205A858 -= 0x3B000;
+		}
+		patchUserSettingsReadDSiWare(0x0205BC88);
+		if (!extendedMemory2) {
+			*(u32*)0x02061228 = 0x50000; // Shrink large part of heap from 0xF0000
+			*(u32*)0x0206129C = 0x80000; // Shrink large part of heap from 0x100000
+			*(u32*)0x020612B4 = *(u32*)0x02061228; // Shrink large part of heap from 0xA0000
+		}
+	}
+
 	// Odekake! Earth Seeker (Japan)
 	// Black screens after company logos
 	// Seemingly not possible to fix the cause? (Fails to read or write save)
