@@ -232,6 +232,7 @@ static const char dsiWareForBootloader1[][4] = {
 	"K6S", // Heathcliff: Spot On
 	"KHL", // Hell's Kitchen VS
 	"K5E", // G.G Series: Hero Puzzle
+	"K5J", // G.G Series: The Hidden Ninja Kagemaru
 	"KTX", // High Stakes Texas Hold'em
 	"KHI", // Hints Hunter
 	"KT2", // G.G Series: Horizontal Bar

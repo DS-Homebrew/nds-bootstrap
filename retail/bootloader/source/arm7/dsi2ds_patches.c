@@ -11918,6 +11918,24 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// G.G Series: The Hidden Ninja Kagemaru (USA)
+	// G.G Series: The Hidden Ninja Kagemaru (Japan)
+	// Saving not supported due to possible bug
+	else if (strcmp(romTid, "K5JE") == 0 || strcmp(romTid, "K5JJ") == 0) {
+		*(u32*)0x0200D71C = 0xE1A00000; // nop
+		*(u32*)0x0204E57C = 0xE1A00000; // nop
+		*(u32*)0x02052510 = 0xE1A00000; // nop
+		patchInitDSiWare(0x0205A6F4, heapEnd);
+		if (!extendedMemory2) {
+			*(u32*)0x0205AA80 -= 0x3B000;
+		}
+		patchUserSettingsReadDSiWare(0x0205BEB0);
+		if (!extendedMemory2) {
+			*(u32*)0x02061450 = 0x50000; // Shrink large part of heap from 0xF0000
+			*(u32*)0x020614C4 = 0x80000; // Shrink large part of heap from 0x100000
+		}
+	}
+
 	// High Stakes Texas Hold'em (USA)
 	// High Stakes Texas Hold'em (Europe, Australia)
 	else if (strcmp(romTid, "KTXE") == 0 || strcmp(romTid, "KTXV") == 0) {
