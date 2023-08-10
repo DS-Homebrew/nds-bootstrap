@@ -409,6 +409,7 @@ static const char dsiWareForBootloader2[][4] = {
 	"KD6", // Rock-n-Roll Domo
 	"KRL", // Roller Angels
 	"KRP", // RPG Dashutsu Game
+	"K5F", // G.G Series: Run & Strike
 	"KG4", // Saikyou Ginsei Shougi
 	"K3P", // Sakurai Miho No Kouno: Megami Serapi Uranai
 	"K7T", // Save the Turtles

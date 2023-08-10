@@ -20672,6 +20672,25 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchUserSettingsReadDSiWare(0x02047240);
 	}
 
+	// G.G Series: Run & Strike (USA)
+	// G.G Series: Run & Strike (Japan)
+	// Saving not supported due to possible bug
+	else if (strcmp(romTid, "K5FE") == 0 || strcmp(romTid, "K5FJ") == 0) {
+		*(u32*)0x0200BB54 = 0xE1A00000; // nop
+		*(u32*)0x0204CED8 = 0xE1A00000; // nop
+		*(u32*)0x02050E6C = 0xE1A00000; // nop
+		patchInitDSiWare(0x02059050, heapEnd);
+		if (!extendedMemory2) {
+			*(u32*)0x020593DC -= 0x3B000;
+		}
+		patchUserSettingsReadDSiWare(0x0205A80C);
+		if (!extendedMemory2) {
+			*(u32*)0x0205FDAC = 0x50000; // Shrink large part of heap from 0xF0000
+			*(u32*)0x0205FE20 = 0x80000; // Shrink large part of heap from 0x100000
+			*(u32*)0x0205FE38 = *(u32*)0x0205FDAC; // Shrink large part of heap from 0xA0000
+		}
+	}
+
 	// Saikyou Ginsei Shougi (Japan)
 	// Saving not supported due to using more than one file in filesystem
 	else if (strcmp(romTid, "KG4J") == 0) {
