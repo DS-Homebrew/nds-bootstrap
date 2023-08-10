@@ -231,6 +231,7 @@ static const char dsiWareForBootloader1[][4] = {
 	"KHQ", // Hearts Spades Euchre
 	"K6S", // Heathcliff: Spot On
 	"KHL", // Hell's Kitchen VS
+	"K5E", // G.G Series: Hero Puzzle
 	"KTX", // High Stakes Texas Hold'em
 	"KHI", // Hints Hunter
 	// "KNE", // Ichi Moudaji!: Neko King

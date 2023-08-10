@@ -11898,6 +11898,26 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0203B674 = 0xE1A00000; // nop
 	}*/
 
+	// G.G Series: Hero Puzzle (USA)
+	// G.G Series: Hero Puzzle (Japan)
+	// Saving not supported due to possible bug
+	else if (strcmp(romTid, "K5EE") == 0 || strcmp(romTid, "K5EJ") == 0) {
+		*(u32*)0x0200BACC = 0xE1A00000; // nop
+		*(u32*)0x0204C8D0 = 0xE1A00000; // nop
+		*(u32*)0x02050864 = 0xE1A00000; // nop
+		patchInitDSiWare(0x02058A48, heapEnd);
+		if (!extendedMemory2) {
+			*(u32*)0x02058DD4 -= 0x3B000;
+		}
+		patchUserSettingsReadDSiWare(0x0205A204);
+		if (!extendedMemory2) {
+			*(u32*)0x0205F7A4 = 0x50000; // Shrink large part of heap from 0xF0000
+			*(u32*)0x0205F818 = *(u32*)0x0205F7A0; // Shrink large part of heap from 0x100000
+			*(u32*)0x0205F81C = *(u32*)0x0205F7A4; // Shrink part of heap from 0x70000
+			*(u32*)0x0205F830 = *(u32*)0x0205F7A4;
+		}
+	}
+
 	// High Stakes Texas Hold'em (USA)
 	// High Stakes Texas Hold'em (Europe, Australia)
 	else if (strcmp(romTid, "KTXE") == 0 || strcmp(romTid, "KTXV") == 0) {
