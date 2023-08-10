@@ -323,6 +323,8 @@ static const char dsiWareForBootloader2[][4] = {
 	"KNP", // Need for Speed: Nitro-X
 	"K9N", // Neko Neko Bakery: Pan de Pazurunya!
 	"KNV", // Neko Reversi
+	"KAQ", // G.G Series: Ninja Karakuri Den
+	"KQ2", // G.G Series: Ninja Karakuri Den 2
 	"KAU", // Nintendo Countdown Calendar
 	"K2D", // Nintendo DSi + Internet
 	"HNI", // Nintendo DSi Camera (bootloaderi-exclusive)

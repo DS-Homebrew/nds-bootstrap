@@ -16691,6 +16691,143 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0203FCA4 = 0xE1A00000; // nop (Skip Manual screen)
 	}
 
+	// G.G Series: Ninja Karakuri Den (USA)
+	// G.G Series: Ninja Karakuri Den (Korea)
+	else if (strcmp(romTid, "KAQE") == 0 || strcmp(romTid, "KAQK") == 0) {
+		u8 offsetChange = (romTid[3] == 'E') ? 0 : 0xD0;
+
+		*(u32*)(0x0200945C+offsetChange) = 0xE3A00000; // mov r0, #0
+		*(u32*)(0x02009460+offsetChange) = 0xE12FFF1E; // bx lr
+		setBL(0x020094C8+offsetChange, (u32)dsiSaveGetInfo);
+		*(u32*)(0x020094E0+offsetChange) = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+		*(u32*)(0x020094F8+offsetChange) = 0xE3A00001; // mov r0, #1 (dsiSaveFreeSpaceAvailable)
+		setBL(0x0200950C+offsetChange, (u32)dsiSaveCreate);
+		setBL(0x020095E0+offsetChange, (u32)dsiSaveGetInfo);
+		setBL(0x02009608+offsetChange, (u32)dsiSaveGetInfo);
+		setBL(0x020096C0+offsetChange, (u32)dsiSaveOpen);
+		setBL(0x020096E8+offsetChange, (u32)dsiSaveSetLength);
+		setBL(0x02009704+offsetChange, (u32)dsiSaveWrite);
+		setBL(0x0200970C+offsetChange, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+		setBL(0x02009750+offsetChange, (u32)dsiSaveClose);
+		setBL(0x020097A8+offsetChange, (u32)dsiSaveOpen);
+		setBL(0x020097C8+offsetChange, (u32)dsiSaveGetLength);
+		setBL(0x020097D8+offsetChange, (u32)dsiSaveClose);
+		setBL(0x020097F8+offsetChange, (u32)dsiSaveRead);
+		setBL(0x02009804+offsetChange, (u32)dsiSaveRead); // dsiSaveReadAsync
+		setBL(0x02009848+offsetChange, (u32)dsiSaveClose);
+		*(u32*)(0x02009B44+offsetChange) = 0xE3A00000; // mov r0, #0
+		*(u32*)(0x02009B48+offsetChange) = 0xE12FFF1E; // bx lr
+
+		if (romTid[3] == 'E') {
+			*(u32*)0x0200A3D8 = 0xE1A00000; // nop
+			*(u32*)0x02042148 = 0xE1A00000; // nop
+			tonccpy((u32*)0x02042CC0, dsiSaveGetResultCode, 0xC);
+			*(u32*)0x02046048 = 0xE1A00000; // nop
+			patchInitDSiWare(0x0204DF64, heapEnd);
+			if (!extendedMemory2) {
+				*(u32*)0x0204E2F0 -= 0x3B000;
+			}
+			patchUserSettingsReadDSiWare(0x0204F710);
+			if (!extendedMemory2) {
+				*(u32*)0x0205D9BC = 0x50000; // Shrink large part of heap from 0xF0000
+				*(u32*)0x0205DA34 = *(u32*)0x0205D9BC;
+			}
+		} else {
+			*(u32*)0x02009E58 = 0xE12FFF1E; // bx lr
+			*(u32*)0x02009E70 = 0xE12FFF1E; // bx lr
+			*(u32*)0x0200A6A4 = 0xE1A00000; // nop
+			*(u32*)0x020423B8 = 0xE1A00000; // nop
+			tonccpy((u32*)0x02042F3C, dsiSaveGetResultCode, 0xC);
+			*(u32*)0x0204634C = 0xE1A00000; // nop
+			patchInitDSiWare(0x0204E2A8, heapEnd);
+			if (!extendedMemory2) {
+				*(u32*)0x0204E634 -= 0x3B000;
+			}
+			patchUserSettingsReadDSiWare(0x0204FA64);
+			if (!extendedMemory2) {
+				*(u32*)0x0205DD44 = 0x50000; // Shrink large part of heap from 0xF0000
+				*(u32*)0x0205DDBC = *(u32*)0x0205DD44;
+			}
+		}
+	}
+
+	// G.G Series: Ninja Karakuri Den (Japan)
+	else if (strcmp(romTid, "KAQJ") == 0) {
+		*(u32*)0x02007210 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02007214 = 0xE12FFF1E; // bx lr
+		setBL(0x0200727C, (u32)dsiSaveGetInfo);
+		*(u32*)0x02007294 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+		*(u32*)0x020072AC = 0xE3A00001; // mov r0, #1 (dsiSaveFreeSpaceAvailable)
+		setBL(0x020072C0, (u32)dsiSaveCreate);
+		setBL(0x02007394, (u32)dsiSaveGetInfo);
+		setBL(0x020073BC, (u32)dsiSaveGetInfo);
+		setBL(0x02007474, (u32)dsiSaveOpen);
+		setBL(0x0200749C, (u32)dsiSaveSetLength);
+		setBL(0x020074B8, (u32)dsiSaveWrite);
+		setBL(0x020074C0, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+		setBL(0x02007504, (u32)dsiSaveClose);
+		setBL(0x0200755C, (u32)dsiSaveOpen);
+		setBL(0x0200757C, (u32)dsiSaveGetLength);
+		setBL(0x0200758C, (u32)dsiSaveClose);
+		setBL(0x020075AC, (u32)dsiSaveRead);
+		setBL(0x020075B8, (u32)dsiSaveRead); // dsiSaveReadAsync
+		setBL(0x020075FC, (u32)dsiSaveClose);
+		*(u32*)0x020078F8 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x020078FC = 0xE12FFF1E; // bx lr
+		*(u32*)0x02008184 = 0xE1A00000; // nop
+		*(u32*)0x020401F4 = 0xE1A00000; // nop
+		tonccpy((u32*)0x02040E88, dsiSaveGetResultCode, 0xC);
+		*(u32*)0x02044254 = 0xE1A00000; // nop
+		*(u32*)0x0204C4B8 = 0xE3A00001; // mov r0, #1
+		patchInitDSiWare(0x0204C4D0, heapEnd);
+		if (!extendedMemory2) {
+			*(u32*)0x0204C840 -= 0x3A000;
+		}
+		patchUserSettingsReadDSiWare(0x0204DC88);
+		if (!extendedMemory2) {
+			*(u32*)0x0205C1A4 = 0x50000; // Shrink large part of heap from 0xF0000
+			*(u32*)0x0205C208 = *(u32*)0x0205C1A4;
+		}
+	}
+
+	// G.G Series: Ninja Karakuri Den 2 (Japan)
+	else if (strcmp(romTid, "KQ2J") == 0) {
+		*(u32*)0x02008714 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02008718 = 0xE12FFF1E; // bx lr
+		setBL(0x02008780, (u32)dsiSaveGetInfo);
+		*(u32*)0x02008798 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+		*(u32*)0x020087B0 = 0xE3A00001; // mov r0, #1 (dsiSaveFreeSpaceAvailable)
+		setBL(0x020087C4, (u32)dsiSaveCreate);
+		setBL(0x02008898, (u32)dsiSaveGetInfo);
+		setBL(0x020088C0, (u32)dsiSaveGetInfo);
+		setBL(0x02008978, (u32)dsiSaveOpen);
+		setBL(0x020089A0, (u32)dsiSaveSetLength);
+		setBL(0x020089BC, (u32)dsiSaveWrite);
+		setBL(0x020089C4, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+		setBL(0x02008A08, (u32)dsiSaveClose);
+		setBL(0x02008A60, (u32)dsiSaveOpen);
+		setBL(0x02008A80, (u32)dsiSaveGetLength);
+		setBL(0x02008A90, (u32)dsiSaveClose);
+		setBL(0x02008AB0, (u32)dsiSaveRead);
+		setBL(0x02008ABC, (u32)dsiSaveRead); // dsiSaveReadAsync
+		setBL(0x02008B00, (u32)dsiSaveClose);
+		*(u32*)0x02008DFC = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02008E00 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02009690 = 0xE1A00000; // nop
+		*(u32*)0x020413F8 = 0xE1A00000; // nop
+		tonccpy((u32*)0x02041F70, dsiSaveGetResultCode, 0xC);
+		*(u32*)0x020452F8 = 0xE1A00000; // nop
+		patchInitDSiWare(0x0204D214, heapEnd);
+		if (!extendedMemory2) {
+			*(u32*)0x0204D5A0 -= 0x3B000;
+		}
+		patchUserSettingsReadDSiWare(0x0204E9C0);
+		if (!extendedMemory2) {
+			*(u32*)0x0205CE58 = 0x30000; // Shrink large part of heap from 0xF0000
+			*(u32*)0x0205CED0 = *(u32*)0x0205CE58;
+		}
+	}
+
 	// Nintendo Countdown Calendar (USA)
 	// Requires either 8MB of RAM or Memory Expansion Pak
 	else if (strcmp(romTid, "KAUE") == 0 && debugOrMep) {
