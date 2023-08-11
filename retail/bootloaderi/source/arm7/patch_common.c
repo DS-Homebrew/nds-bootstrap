@@ -13254,6 +13254,87 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0200510C = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 	}
 
+	// G.G Series: Super Hero Ogre (USA)
+	// G.G Series: Super Hero Ogre (Korea)
+	else if ((strcmp(romTid, "KOGE") == 0 || strcmp(romTid, "KOGK") == 0) && saveOnFlashcard) {
+		u8 offsetChange = (romTid[3] == 'E') ? 0 : 0xBC;
+
+		*(u32*)(0x020094C8+offsetChange) = 0xE3A00000; // mov r0, #0
+		*(u32*)(0x020094CC+offsetChange) = 0xE12FFF1E; // bx lr
+		setBL(0x02009534+offsetChange, (u32)dsiSaveGetInfo);
+		*(u32*)(0x0200954C+offsetChange) = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+		*(u32*)(0x02009564+offsetChange) = 0xE3A00001; // mov r0, #1 (dsiSaveFreeSpaceAvailable)
+		setBL(0x02009578+offsetChange, (u32)dsiSaveCreate);
+		setBL(0x0200964C+offsetChange, (u32)dsiSaveGetInfo);
+		setBL(0x02009674+offsetChange, (u32)dsiSaveGetInfo);
+		setBL(0x0200972C+offsetChange, (u32)dsiSaveOpen);
+		setBL(0x02009754+offsetChange, (u32)dsiSaveSetLength);
+		setBL(0x02009770+offsetChange, (u32)dsiSaveWrite);
+		setBL(0x02009778+offsetChange, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+		setBL(0x020097BC+offsetChange, (u32)dsiSaveClose);
+		setBL(0x02009814+offsetChange, (u32)dsiSaveOpen);
+		setBL(0x02009834+offsetChange, (u32)dsiSaveGetLength);
+		setBL(0x02009844+offsetChange, (u32)dsiSaveClose);
+		setBL(0x02009864+offsetChange, (u32)dsiSaveRead);
+		setBL(0x02009870+offsetChange, (u32)dsiSaveRead); // dsiSaveReadAsync
+		setBL(0x020098B4+offsetChange, (u32)dsiSaveClose);
+		*(u32*)(0x02009BB0+offsetChange) = 0xE3A00000; // mov r0, #0
+		*(u32*)(0x02009BB4+offsetChange) = 0xE12FFF1E; // bx lr
+		tonccpy((u32*)((romTid[3] == 'E') ? 0x02043A00 : 0x02043A18), dsiSaveGetResultCode, 0xC);
+	}
+
+	// G.G Series: Super Hero Ogre (Japan)
+	else if (strcmp(romTid, "KOGJ") == 0 && saveOnFlashcard) {
+		*(u32*)0x0200726C = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02007270 = 0xE12FFF1E; // bx lr
+		setBL(0x020072D8, (u32)dsiSaveGetInfo);
+		*(u32*)0x020072F0 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+		*(u32*)0x02007308 = 0xE3A00001; // mov r0, #1 (dsiSaveFreeSpaceAvailable)
+		setBL(0x0200731C, (u32)dsiSaveCreate);
+		setBL(0x020073F0, (u32)dsiSaveGetInfo);
+		setBL(0x02007418, (u32)dsiSaveGetInfo);
+		setBL(0x020074D0, (u32)dsiSaveOpen);
+		setBL(0x020074F8, (u32)dsiSaveSetLength);
+		setBL(0x02007514, (u32)dsiSaveWrite);
+		setBL(0x0200751C, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+		setBL(0x02007560, (u32)dsiSaveClose);
+		setBL(0x020075B8, (u32)dsiSaveOpen);
+		setBL(0x020075D8, (u32)dsiSaveGetLength);
+		setBL(0x020075E8, (u32)dsiSaveClose);
+		setBL(0x02007608, (u32)dsiSaveRead);
+		setBL(0x02007614, (u32)dsiSaveRead); // dsiSaveReadAsync
+		setBL(0x02007658, (u32)dsiSaveClose);
+		*(u32*)0x02007954 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02007958 = 0xE12FFF1E; // bx lr
+		tonccpy((u32*)0x02041610, dsiSaveGetResultCode, 0xC);
+	}
+
+	// G.G Series: Super Hero Ogre 2 (Japan)
+	else if (strcmp(romTid, "KOZJ") == 0 && saveOnFlashcard) {
+		*(u32*)0x020087E8 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x020087EC = 0xE12FFF1E; // bx lr
+		setBL(0x02008854, (u32)dsiSaveGetInfo);
+		*(u32*)0x0200886C = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+		*(u32*)0x02008884 = 0xE3A00001; // mov r0, #1 (dsiSaveFreeSpaceAvailable)
+		setBL(0x02008898, (u32)dsiSaveCreate);
+		setBL(0x0200896C, (u32)dsiSaveGetInfo);
+		setBL(0x02008994, (u32)dsiSaveGetInfo);
+		setBL(0x02008A4C, (u32)dsiSaveOpen);
+		setBL(0x02008A74, (u32)dsiSaveSetLength);
+		setBL(0x02008A90, (u32)dsiSaveWrite);
+		setBL(0x02008A98, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+		setBL(0x02008ADC, (u32)dsiSaveClose);
+		setBL(0x02008B34, (u32)dsiSaveOpen);
+		setBL(0x02008B54, (u32)dsiSaveGetLength);
+		setBL(0x02008B64, (u32)dsiSaveClose);
+		setBL(0x02008B84, (u32)dsiSaveRead);
+		setBL(0x02008B90, (u32)dsiSaveRead); // dsiSaveReadAsync
+		setBL(0x02008BD4, (u32)dsiSaveClose);
+		*(u32*)0x02008ED0 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02008ED4 = 0xE12FFF1E; // bx lr
+		tonccpy((u32*)0x02042FB4, dsiSaveGetResultCode, 0xC);
+	}
+
 	// Super Swap (USA)
 	else if (strcmp(romTid, "K4WE") == 0) {
 		if (saveOnFlashcard) {

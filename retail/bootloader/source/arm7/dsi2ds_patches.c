@@ -22620,6 +22620,126 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02042488 = 0xE1A00000; // nop
 	}
 
+	// G.G Series: Super Hero Ogre (USA)
+	// G.G Series: Super Hero Ogre (Korea)
+	// Requires 8MB of RAM
+	else if ((strcmp(romTid, "KOGE") == 0 || strcmp(romTid, "KOGK") == 0) && extendedMemory2) {
+		u8 offsetChange = (romTid[3] == 'E') ? 0 : 0xBC;
+
+		*(u32*)(0x020094C8+offsetChange) = 0xE3A00000; // mov r0, #0
+		*(u32*)(0x020094CC+offsetChange) = 0xE12FFF1E; // bx lr
+		setBL(0x02009534+offsetChange, (u32)dsiSaveGetInfo);
+		*(u32*)(0x0200954C+offsetChange) = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+		*(u32*)(0x02009564+offsetChange) = 0xE3A00001; // mov r0, #1 (dsiSaveFreeSpaceAvailable)
+		setBL(0x02009578+offsetChange, (u32)dsiSaveCreate);
+		setBL(0x0200964C+offsetChange, (u32)dsiSaveGetInfo);
+		setBL(0x02009674+offsetChange, (u32)dsiSaveGetInfo);
+		setBL(0x0200972C+offsetChange, (u32)dsiSaveOpen);
+		setBL(0x02009754+offsetChange, (u32)dsiSaveSetLength);
+		setBL(0x02009770+offsetChange, (u32)dsiSaveWrite);
+		setBL(0x02009778+offsetChange, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+		setBL(0x020097BC+offsetChange, (u32)dsiSaveClose);
+		setBL(0x02009814+offsetChange, (u32)dsiSaveOpen);
+		setBL(0x02009834+offsetChange, (u32)dsiSaveGetLength);
+		setBL(0x02009844+offsetChange, (u32)dsiSaveClose);
+		setBL(0x02009864+offsetChange, (u32)dsiSaveRead);
+		setBL(0x02009870+offsetChange, (u32)dsiSaveRead); // dsiSaveReadAsync
+		setBL(0x020098B4+offsetChange, (u32)dsiSaveClose);
+		*(u32*)(0x02009BB0+offsetChange) = 0xE3A00000; // mov r0, #0
+		*(u32*)(0x02009BB4+offsetChange) = 0xE12FFF1E; // bx lr
+		*(u32*)(0x02009DF4+offsetChange) = 0xE12FFF1E; // bx lr
+		*(u32*)(0x02009E0C+offsetChange) = 0xE12FFF1E; // bx lr
+		*(u32*)(0x0200A640+offsetChange) = 0xE1A00000; // nop
+
+		if (romTid[3] == 'E') {
+			*(u32*)0x02042E88 = 0xE1A00000; // nop
+			tonccpy((u32*)0x02043A00, dsiSaveGetResultCode, 0xC);
+			*(u32*)0x02046D88 = 0xE1A00000; // nop
+			patchInitDSiWare(0x0204ECA4, heapEnd);
+			/* if (!extendedMemory2) {
+				*(u32*)0x0204F030 -= 0x3B000;
+			} */
+			patchUserSettingsReadDSiWare(0x02050450);
+		} else {
+			*(u32*)0x02042E94 = 0xE1A00000; // nop
+			tonccpy((u32*)0x02043A18, dsiSaveGetResultCode, 0xC);
+			*(u32*)0x02046E28 = 0xE1A00000; // nop
+			patchInitDSiWare(0x0204ED84, heapEnd);
+			/* if (!extendedMemory2) {
+				*(u32*)0x0204F110 -= 0x3B000;
+			} */
+			patchUserSettingsReadDSiWare(0x02050540);
+		}
+	}
+
+	// G.G Series: Super Hero Ogre (Japan)
+	// Requires 8MB of RAM
+	else if (strcmp(romTid, "KOGJ") == 0 && extendedMemory2) {
+		*(u32*)0x0200726C = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02007270 = 0xE12FFF1E; // bx lr
+		setBL(0x020072D8, (u32)dsiSaveGetInfo);
+		*(u32*)0x020072F0 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+		*(u32*)0x02007308 = 0xE3A00001; // mov r0, #1 (dsiSaveFreeSpaceAvailable)
+		setBL(0x0200731C, (u32)dsiSaveCreate);
+		setBL(0x020073F0, (u32)dsiSaveGetInfo);
+		setBL(0x02007418, (u32)dsiSaveGetInfo);
+		setBL(0x020074D0, (u32)dsiSaveOpen);
+		setBL(0x020074F8, (u32)dsiSaveSetLength);
+		setBL(0x02007514, (u32)dsiSaveWrite);
+		setBL(0x0200751C, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+		setBL(0x02007560, (u32)dsiSaveClose);
+		setBL(0x020075B8, (u32)dsiSaveOpen);
+		setBL(0x020075D8, (u32)dsiSaveGetLength);
+		setBL(0x020075E8, (u32)dsiSaveClose);
+		setBL(0x02007608, (u32)dsiSaveRead);
+		setBL(0x02007614, (u32)dsiSaveRead); // dsiSaveReadAsync
+		setBL(0x02007658, (u32)dsiSaveClose);
+		*(u32*)0x02007954 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02007958 = 0xE12FFF1E; // bx lr
+		*(u32*)0x020081E0 = 0xE1A00000; // nop
+		*(u32*)0x0204097C = 0xE1A00000; // nop
+		tonccpy((u32*)0x02041610, dsiSaveGetResultCode, 0xC);
+		*(u32*)0x020449DC = 0xE1A00000; // nop
+		*(u32*)0x0204CC40 = 0xE3A00001; // mov r0, #1
+		patchInitDSiWare(0x0204CC58, heapEnd);
+		/* if (!extendedMemory2) {
+			*(u32*)0x0204CFC8 -= 0x3A000;
+		} */
+		patchUserSettingsReadDSiWare(0x0204E410);
+	}
+
+	// G.G Series: Super Hero Ogre 2 (Japan)
+	// Requires 8MB of RAM
+	else if (strcmp(romTid, "KOZJ") == 0 && extendedMemory2) {
+		*(u32*)0x020087E8 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x020087EC = 0xE12FFF1E; // bx lr
+		setBL(0x02008854, (u32)dsiSaveGetInfo);
+		*(u32*)0x0200886C = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+		*(u32*)0x02008884 = 0xE3A00001; // mov r0, #1 (dsiSaveFreeSpaceAvailable)
+		setBL(0x02008898, (u32)dsiSaveCreate);
+		setBL(0x0200896C, (u32)dsiSaveGetInfo);
+		setBL(0x02008994, (u32)dsiSaveGetInfo);
+		setBL(0x02008A4C, (u32)dsiSaveOpen);
+		setBL(0x02008A74, (u32)dsiSaveSetLength);
+		setBL(0x02008A90, (u32)dsiSaveWrite);
+		setBL(0x02008A98, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+		setBL(0x02008ADC, (u32)dsiSaveClose);
+		setBL(0x02008B34, (u32)dsiSaveOpen);
+		setBL(0x02008B54, (u32)dsiSaveGetLength);
+		setBL(0x02008B64, (u32)dsiSaveClose);
+		setBL(0x02008B84, (u32)dsiSaveRead);
+		setBL(0x02008B90, (u32)dsiSaveRead); // dsiSaveReadAsync
+		setBL(0x02008BD4, (u32)dsiSaveClose);
+		*(u32*)0x02008ED0 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02008ED4 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02009764 = 0xE1A00000; // nop
+		*(u32*)0x0204243C = 0xE1A00000; // nop
+		tonccpy((u32*)0x02042FB4, dsiSaveGetResultCode, 0xC);
+		*(u32*)0x0204633C = 0xE1A00000; // nop
+		patchInitDSiWare(0x0204E258, heapEnd);
+		patchUserSettingsReadDSiWare(0x0204FA04);
+	}
+
 	// Super Swap (USA)
 	// Requires 8MB of RAM
 	else if (strcmp(romTid, "K4WE") == 0 && extendedMemory2) {
