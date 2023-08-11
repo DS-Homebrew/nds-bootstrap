@@ -21961,6 +21961,25 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020E4858 = 0xE12FFF1E; // bx lr
 	}
 
+	// G.G Series: The Spiky Blowfish (USA)
+	// G.G Series: Harise Bon! (Japan)
+	// Saving not supported due to possible bug
+	else if (strcmp(romTid, "K5NE") == 0 || strcmp(romTid, "K5NJ") == 0) {
+		*(u32*)0x0200D89C = 0xE1A00000; // nop
+		*(u32*)0x0204F214 = 0xE1A00000; // nop
+		*(u32*)0x020531A8 = 0xE1A00000; // nop
+		patchInitDSiWare(0x0205B38C, heapEnd);
+		if (!extendedMemory2) {
+			*(u32*)0x0205B718 -= 0x3B000;
+		}
+		patchUserSettingsReadDSiWare(0x0205CB48);
+		if (!extendedMemory2) {
+			*(u32*)0x020620E8 = 0x50000; // Shrink large part of heap from 0xF0000
+			*(u32*)0x0206215C = 0x80000; // Shrink large part of heap from 0x100000
+			*(u32*)0x02062174 = *(u32*)0x020620E8; // Shrink part of heap from 0xA0000
+		}
+	}
+
 	// Spin Six (USA)
 	// Spin Six (Europe, Australia)
 	else if (strcmp(romTid, "KQ6E") == 0 || strcmp(romTid, "KQ6V") == 0) {

@@ -448,6 +448,7 @@ static const char dsiWareForBootloader2[][4] = {
 	"KU4", // Sora Kake Girl: Shojo Shooting
 	"KA6", // Space Ace
 	"KEV", // Space Invaders Extreme Z
+	"K5N", // G.G Series: The Spiky Blowfish
 	"KQ6", // Spin Six
 	"KIT", // Spot It! Challenge
 	"K2U", // Spot It! Challenge: Mean Machines
