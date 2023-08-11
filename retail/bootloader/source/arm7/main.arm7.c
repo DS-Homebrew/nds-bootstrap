@@ -1249,13 +1249,14 @@ int arm7_main(void) {
 
 	ce9Location = *(u32*)CARDENGINE_ARM9_LOCATION_BUFFERED;
 	ce9Alt = (ce9Location == CARDENGINE_ARM9_LOCATION_DLDI_ALT || ce9Location == CARDENGINE_ARM9_LOCATION_DLDI_ALT2);
+	// const bool ce9NotInHeap = (ce9Alt || ce9Location == CARDENGINE_ARM9_LOCATION_DLDI_START);
 	tonccpy((u32*)ce9Location, (u32*)CARDENGINE_ARM9_LOCATION_BUFFERED, ce9Alt ? 0x2800 : 0x3800);
 	toncset((u32*)0x023E0000, 0, 0x10000);
 
 	tonccpy((u8*)CARDENGINE_ARM7_LOCATION, (u8*)CARDENGINE_ARM7_LOCATION_BUFFERED, 0x1000);
 	toncset((u8*)CARDENGINE_ARM7_LOCATION_BUFFERED, 0, 0x1000);
 
-	if (!dldiPatchBinary((data_t*)ce9Location, 0x3800, (data_t*)(extendedMemory2 ? 0x027BD000 : ((accessControl & BIT(4)) && !ce9Alt) ? 0x023FC000 : 0x023FD000))) {
+	if (!dldiPatchBinary((data_t*)ce9Location, 0x3800, (data_t*)(extendedMemory2 ? 0x027FC000 : ((accessControl & BIT(4)) && !ce9Alt) ? 0x023FC000 : 0x023FD000))) {
 		// nocashMessage("ce9 DLDI patch failed");
 		dbg_printf("ce9 DLDI patch failed\n");
 		errorOutput();
@@ -1269,10 +1270,7 @@ int arm7_main(void) {
 
 	bool wramUsed = false;
 	u32 fatTableSize = 0;
-	u32 fatTableSizeNoExp = (moduleParams->sdk_version < 0x2008000) ? 0x19C00 : 0x1A800;
-	if (ce9Alt && moduleParams->sdk_version >= 0x2008000) {
-		fatTableSizeNoExp = 0x598;
-	}
+	u32 fatTableSizeNoExp = (moduleParams->sdk_version < 0x2008000) ? 0x19C00 : 0x1A400;
 	if (s2FlashcardId == 0x334D || s2FlashcardId == 0x3647 || s2FlashcardId == 0x4353) {
 		fatTableAddr = (s2FlashcardId==0x4353 ? 0x09F7FE00 : 0x09F80000);
 		fatTableSize = 0x80000;
@@ -1291,18 +1289,19 @@ int arm7_main(void) {
 			fatTableSize = 0x80000;
 		}
 	} else {
-		fatTableAddr = (moduleParams->sdk_version < 0x2008000) ? 0x023E0000 : 0x023C0000;
-		fatTableSize = fatTableSizeNoExp;
-
 		if (moduleParams->sdk_version >= 0x2008000) {
-			fatTableAddr = ce9Alt ? 0x023FF268 : CARDENGINE_ARM9_LOCATION_DLDI;
+			fatTableAddr = ce9Alt ? 0x023FF268 : 0x023FF200;
+			fatTableSizeNoExp = ce9Alt ? 0x598 : 0x600;
 
 			lastClusterCacheUsed = (u32*)0x037F8000;
 			clusterCache = 0x037F8000;
-			clusterCacheSize = 0x16000;
+			clusterCacheSize = 0x16780;
 
 			wramUsed = true;
+		} else {
+			fatTableAddr = 0x023E0000;
 		}
+		fatTableSize = fatTableSizeNoExp;
 	}
 
 	if (!wramUsed) {
@@ -1320,55 +1319,66 @@ int arm7_main(void) {
 	if (wramUsed) {
 		buildFatTableCacheCompressed(&romFile);
 		if (romFile.fatTableCached) {
-			bool startMem = (!ce9Alt && ndsHeader->unitCode > 0 && (u32)ndsHeader->arm9destination >= 0x02004000 && ((accessControl & BIT(4)) || arm7mbk == 0x080037C0) && romFile.fatTableCacheSize <= 0x4000);
+			// const bool startMem = (!ce9NotInHeap && ndsHeader->unitCode > 0 && (u32)ndsHeader->arm9destination >= 0x02004000 && ((accessControl & BIT(4)) || arm7mbk == 0x080037C0) && romFile.fatTableCacheSize <= 0x4000);
 
-			//fatTableAddr -= (romFile.fatTableCacheSize/0x200)*0x200;
-			if (ce9Alt) {
+			// if (ce9NotInHeap) {
 				ce9AltLargeTable = ((romFile.fatTableCacheSize > fatTableSizeNoExp) && (moduleParams->sdk_version >= 0x2008000));
 				if (ce9AltLargeTable) {
 					dbg_printf("\n");
-					dbg_printf("Cluster cache is above 0x598 bytes!\n");
+					dbg_printf("Cluster cache is above 0x");
+					dbg_printf(ce9Alt ? "598" : "600");
+					dbg_printf(" bytes!\n");
 					dbg_printf("Consider backing up and restoring the SD card contents to defragment it");
 					if (*(u16*)0x4004700 == 0) {
 						dbg_printf(",\nor insert an Expansion Pak\n");
 					} else {
 						dbg_printf("\n");
 					}
-					if (strncmp(romTid, "CLJ", 3) == 0) { // Mario & Luigi: Bowser's Inside Story
+					if (
+						strncmp(romTid, "KUG", 3) == 0  // G.G Series: Drift Circuit 2
+					||	strncmp(romTid, "K5M", 3) == 0  // G.G Series: The Last Knight
+					||	strncmp(romTid, "CLJ", 3) == 0  // Mario & Luigi: Bowser's Inside Story
+					||	strncmp(romTid, "VSO", 3) == 0  // Sonic Classic Collection
+					) {
 						// Game's heap cannot be shrunk, so display error
 						errorOutput();
 					}
 					dbg_printf("\n");
 
 					fatTableAddr = 0x023E0000;
-					fatTableSizeNoExp = 0x1A800;
+					fatTableSizeNoExp = 0x20000;
+					if (((u32)ndsHeader->arm9destination < 0x02004000) && ((accessControl & BIT(4)) || arm7mbk == 0x080037C0)) {
+						fatTableAddr = CARDENGINE_ARM9_LOCATION_DLDI;
+						fatTableSizeNoExp = 0x1A400;
+					}
 
 					const u32 cheatSizeTotal = cheatSize+(apPatchIsCheat ? apPatchSize : 0);
-					if (cheatSizeTotal > 4) {
+					if (fatTableAddr != CARDENGINE_ARM9_LOCATION_DLDI && cheatSizeTotal > 4) {
 						fatTableAddr -= 0x2000;
 						fatTableSizeNoExp -= 0x2000;
 					}
 
 					fatTableAddr -= romFile.fatTableCacheSize;
 				}
-			} else {
+			/* } else {
 				if (startMem) {
 					fatTableAddr = 0x02000000;
 				} else {
 					fatTableAddr -= romFile.fatTableCacheSize;
 				}
-			}
+			} */
 			tonccpy((u32*)fatTableAddr, (u32*)0x037F8000, romFile.fatTableCacheSize);
 			romFile.fatTableCache = (u32*)fatTableAddr;
 
 			lastClusterCacheUsed = (u32*)0x037F8000;
 			clusterCache = 0x037F8000;
-			clusterCacheSize = (startMem ? 0x4000 : fatTableSizeNoExp)-romFile.fatTableCacheSize;
+			clusterCacheSize = (/* startMem ? 0x4000 : */ fatTableSizeNoExp)-romFile.fatTableCacheSize;
 
-			if (!startMem || (startMem && romFile.fatTableCacheSize < 0x4000)) {
+			// if (!startMem || (startMem && romFile.fatTableCacheSize < 0x4000)) {
 				buildFatTableCacheCompressed(&savFile);
 				if (savFile.fatTableCached) {
-					if (startMem || (ce9Alt && !ce9AltLargeTable)) {
+					// if (startMem || (ce9NotInHeap && !ce9AltLargeTable)) {
+					if (!ce9AltLargeTable) {
 						fatTableAddr += romFile.fatTableCacheSize;
 					} else {
 						fatTableAddr -= savFile.fatTableCacheSize;
@@ -1376,13 +1386,14 @@ int arm7_main(void) {
 					tonccpy((u32*)fatTableAddr, (u32*)0x037F8000, savFile.fatTableCacheSize);
 					savFile.fatTableCache = (u32*)fatTableAddr;
 				}
-				if (musicCluster != 0 && !ce9Alt) {
+				if (musicCluster != 0) {
 					lastClusterCacheUsed = (u32*)0x037F8000;
 					clusterCache = 0x037F8000;
-					clusterCacheSize = (startMem ? 0x4000 : fatTableSizeNoExp)-savFile.fatTableCacheSize;
+					clusterCacheSize = (/* startMem ? 0x4000 : */ fatTableSizeNoExp)-savFile.fatTableCacheSize;
 
-					buildFatTableCache(&musicsFile);
-					if (startMem) {
+					buildFatTableCacheCompressed(&musicsFile);
+					// if (startMem || (ce9NotInHeap && !ce9AltLargeTable)) {
+					if (!ce9AltLargeTable) {
 						fatTableAddr += savFile.fatTableCacheSize;
 					} else {
 						fatTableAddr -= musicsFile.fatTableCacheSize;
@@ -1390,22 +1401,32 @@ int arm7_main(void) {
 					tonccpy((u32*)fatTableAddr, (u32*)0x037F8000, musicsFile.fatTableCacheSize);
 					musicsFile.fatTableCache = (u32*)fatTableAddr;
 				}
-			}
-			if ((!startMem && !ce9Alt) || ce9AltLargeTable) {
+			// }
+			if (/* (!startMem && !ce9NotInHeap) || */ ce9AltLargeTable) {
 				fatTableAddr -= (fatTableAddr % 512); // Align end of heap to 512 bytes
 			}
 		} else {
+			fatTableAddr = 0x023C0000;
 			lastClusterCacheUsed = (u32*)fatTableAddr;
 			clusterCache = fatTableAddr;
 			clusterCacheSize = fatTableSize;
 
 			buildFatTableCacheCompressed(&romFile);
 			buildFatTableCacheCompressed(&savFile);
+			if (musicCluster != 0) {
+				buildFatTableCacheCompressed(&musicsFile);
+			}
 		}
 	} else if (fatTableSize <= 0x20000) {
 		buildFatTableCacheCompressed(&savFile);
+		if (musicCluster != 0) {
+			buildFatTableCacheCompressed(&musicsFile);
+		}
 	} else {
 		buildFatTableCache(&savFile);
+		if (musicCluster != 0) {
+			buildFatTableCache(&musicsFile);
+		}
 	}
 
 	patchBinary((cardengineArm9*)ce9Location, ndsHeader, moduleParams);
@@ -1480,6 +1501,7 @@ int arm7_main(void) {
 		(u32)savFile.fatTableCache,
 		romFile.fatTableCompressed,
 		savFile.fatTableCompressed,
+		musicsFile.fatTableCompressed,
 		patchOffsetCacheFileCluster,
 		(u32)musicsFile.fatTableCache,
 		ramDumpCluster,

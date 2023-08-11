@@ -12,7 +12,9 @@
 #include "debug_file.h"
 
 extern bool useSharedFont;
+extern u8 valueBits;
 extern u8 valueBits3;
+#define apPatchIsCheat (valueBits & BIT(5))
 #define twlSharedFont (valueBits3 & BIT(3))
 #define chnSharedFont (valueBits3 & BIT(4))
 #define korSharedFont (valueBits3 & BIT(5))
@@ -33,6 +35,7 @@ static void patchMsg16(u32 addr, const char* msg) {
 
 void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	extern bool ce9Alt;
+	extern bool ce9AltLargeTable;
 	extern bool expansionPakFound;
 	extern u16 s2FlashcardId;
 	extern u32 donorFileCluster;	// SDK5
@@ -48,11 +51,16 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	extern void patchUserSettingsReadDSiWare(u32 addr);
 	extern void patchTwlFontLoad(u32 heapAllocAddr, u32 newCodeAddr);
 
-	const u32 heapEndRetail = ce9Alt ? 0x023E0000 : ((fatTableAddr < 0x023C0000 || fatTableAddr > CARDENGINE_ARM9_LOCATION_DLDI) ? CARDENGINE_ARM9_LOCATION_DLDI : fatTableAddr);
+	extern u32 cheatSize;
+	extern u32 apPatchSize;
+	const u32 cheatSizeTotal = cheatSize+(apPatchIsCheat ? apPatchSize : 0);
+
+	const bool ce9NotInHeap = (ce9Alt || (u32)ce9 == CARDENGINE_ARM9_LOCATION_DLDI_START);
+	const u32 heapEndRetail = (ce9NotInHeap && !ce9AltLargeTable) ? ((cheatSizeTotal <= 4) ? 0x023E0000 : CHEAT_ENGINE_LOCATION_B4DS-0x400000) : ((fatTableAddr < 0x023C0000 || fatTableAddr >= (u32)ce9) ? (u32)ce9 : fatTableAddr);
 	const u32 heapEnd = extendedMemory2 ? (((u32)ndsHeader->arm9destination >= 0x02004000) ? CARDENGINE_ARM9_LOCATION_DLDI_EXTMEM : 0x02700000) : heapEndRetail;
 	const u32 heapEnd8MBHack = extendedMemory2 ? heapEnd : heapEndRetail+0x400000; // extendedMemory2 ? #0x27B0000 : #0x27E0000 (mirrors to 0x23E0000 on retail DS units)
 	const u32 heapEndExceed = extendedMemory2 ? heapEnd+0x800000 : heapEndRetail+0xC00000; // extendedMemory2 ? #0x2FB0000 (mirrors to 0x27B0000 on debug DS units) : #0x2FE0000 (mirrors to 0x23E0000 on retail DS units)
-	const u32 heapEndMaxForRetail = (!extendedMemory2 && ce9Alt) ? 0x023F8000 : heapEnd;
+	const u32 heapEndMaxForRetail = (!extendedMemory2 && ce9NotInHeap) ? 0x023FC000 : heapEnd;
 	const bool debugOrMep = (extendedMemory2 || expansionPakFound);
 	const bool largeS2RAM = (expansionPakFound && (s2FlashcardId != 0)); // 16MB or more
 	if (donorFileCluster == CLUSTER_FREE) {
@@ -9144,35 +9152,31 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// G.G Series: Drift Circuit 2 (Japan)
-	// Saving only works with 8MB of RAM
 	else if (strcmp(romTid, "KUGJ") == 0) {
-		if (extendedMemory2) {
-			*(u32*)0x0200912C = 0xE3A00000; // mov r0, #0
-			*(u32*)0x02009130 = 0xE12FFF1E; // bx lr
-			setBL(0x02009198, (u32)dsiSaveGetInfo);
-			*(u32*)0x020091B0 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
-			*(u32*)0x020091C8 = 0xE3A00001; // mov r0, #1 (dsiSaveFreeSpaceAvailable)
-			setBL(0x020091DC, (u32)dsiSaveCreate);
-			setBL(0x020092B0, (u32)dsiSaveGetInfo);
-			setBL(0x020092D8, (u32)dsiSaveGetInfo);
-			setBL(0x02009390, (u32)dsiSaveOpen);
-			setBL(0x020093B8, (u32)dsiSaveSetLength);
-			setBL(0x020093D4, (u32)dsiSaveWrite);
-			setBL(0x020093DC, (u32)dsiSaveWrite); // dsiSaveWriteAsync
-			setBL(0x02009420, (u32)dsiSaveClose);
-			setBL(0x02009478, (u32)dsiSaveOpen);
-			setBL(0x02009498, (u32)dsiSaveGetLength);
-			setBL(0x020094A8, (u32)dsiSaveClose);
-			setBL(0x020094C8, (u32)dsiSaveRead);
-			setBL(0x020094D4, (u32)dsiSaveRead); // dsiSaveReadAsync
-			setBL(0x02009518, (u32)dsiSaveClose);
-			*(u32*)0x02009814 = 0xE3A00000; // mov r0, #0
-			*(u32*)0x02009818 = 0xE12FFF1E; // bx lr
-
-			tonccpy((u32*)0x020434BC, dsiSaveGetResultCode, 0xC);
-		}
+		*(u32*)0x0200912C = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02009130 = 0xE12FFF1E; // bx lr
+		setBL(0x02009198, (u32)dsiSaveGetInfo);
+		*(u32*)0x020091B0 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+		*(u32*)0x020091C8 = 0xE3A00001; // mov r0, #1 (dsiSaveFreeSpaceAvailable)
+		setBL(0x020091DC, (u32)dsiSaveCreate);
+		setBL(0x020092B0, (u32)dsiSaveGetInfo);
+		setBL(0x020092D8, (u32)dsiSaveGetInfo);
+		setBL(0x02009390, (u32)dsiSaveOpen);
+		setBL(0x020093B8, (u32)dsiSaveSetLength);
+		setBL(0x020093D4, (u32)dsiSaveWrite);
+		setBL(0x020093DC, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+		setBL(0x02009420, (u32)dsiSaveClose);
+		setBL(0x02009478, (u32)dsiSaveOpen);
+		setBL(0x02009498, (u32)dsiSaveGetLength);
+		setBL(0x020094A8, (u32)dsiSaveClose);
+		setBL(0x020094C8, (u32)dsiSaveRead);
+		setBL(0x020094D4, (u32)dsiSaveRead); // dsiSaveReadAsync
+		setBL(0x02009518, (u32)dsiSaveClose);
+		*(u32*)0x02009814 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02009818 = 0xE12FFF1E; // bx lr
 		*(u32*)0x0200A0A8 = 0xE1A00000; // nop
 		*(u32*)0x02042944 = 0xE1A00000; // nop
+		tonccpy((u32*)0x020434BC, dsiSaveGetResultCode, 0xC);
 		*(u32*)0x02046844 = 0xE1A00000; // nop
 		patchInitDSiWare(0x0204E7EC, heapEndMaxForRetail);
 		if (!extendedMemory2) {

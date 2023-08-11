@@ -606,6 +606,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 	char romTid[5] = {0};
 	u8 unitCode = 0;
+	u32 ndsArm9Offset = 0;
 	u32 ndsArm7Size = 0;
 	u32 fatAddr = 0;
 	u16 headerCRC = 0;
@@ -628,6 +629,8 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		fread(&romTid, 1, 4, ndsFile);
 		fseek(ndsFile, 0x12, SEEK_SET);
 		fread(&unitCode, 1, 1, ndsFile);
+		fseek(ndsFile, 0x28, SEEK_SET);
+		fread(&ndsArm9Offset, sizeof(u32), 1, ndsFile);
 		fseek(ndsFile, 0x3C, SEEK_SET);
 		fread(&ndsArm7Size, sizeof(u32), 1, ndsFile);
 		fseek(ndsFile, 0x48, SEEK_SET);
@@ -1655,80 +1658,76 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	// Load ce9 binary
 	if (b4dsDebugRam) {
 		cebin = fopen("nitro:/cardengine_arm9_extmem.lz77", "rb");
+	} else if (accessControl & BIT(4)) {
+		cebin = fopen(ndsArm9Offset >= 0x02004000 ? "nitro:/cardengine_arm9_start.lz77" : "nitro:/cardengine_arm9.lz77", "rb");
 	} else {
 		const char* ce9path = "nitro:/cardengine_arm9_alt.lz77";
-		if ((accessControl & BIT(4)) && strncmp(romTid, "K2Z", 3) != 0 && strncmp(romTid, "KBG", 3) != 0 && strncmp(romTid, "KUG", 3) != 0 && strncmp(romTid, "Z2E", 3) != 0 && strncmp(romTid, "K5M", 3) != 0 && strncmp(romTid, "K59", 3) != 0 && strncmp(romTid, "KG4", 3) != 0) {
-		// If it has access to TWLNAND (or uses dataPub/dataPrv),
-		// and the title isn't "G.G Series: Altered Weapon", "Chotto DS Bun ga Kuzenshuu: Sekai no Bungaku 20", "G.G Series: Drift Circuit 2", "Famicom Wars DS: Ushinawareta Hikari", "G.G Series: The Last Knight, "Metal Torrent", or "Saikyou Ginsei Shougi"...
-			ce9path = "nitro:/cardengine_arm9.lz77";
-		} else {
-			const char* donorNdsPath = "";
-			bool standaloneDonor = false;
-			if (a7mbk6 == 0x080037C0) {
-				if (access("fat:/_nds/nds-bootstrap/b4dsTwlDonor.bin", F_OK) == 0) {
-					donorNdsPath = "fat:/_nds/nds-bootstrap/b4dsTwlDonor.bin";
-					standaloneDonor = true;
-				} else if (access(conf->donorTwlPath, F_OK) == 0) {
-					donorNdsPath = conf->donorTwlPath;
-				} else if (access(conf->donorTwl0Path, F_OK) == 0) {
-					donorNdsPath = conf->donorTwl0Path;
-				} else if (access(conf->donor5Path, F_OK) == 0) {
-					donorNdsPath = conf->donor5Path;
-				}
-			} else if (conf->useSdk20Donor) {
-				if (access(conf->donor20Path, F_OK) == 0) {
-					donorNdsPath = conf->donor20Path;
+		const char* donorNdsPath = "";
+		bool standaloneDonor = false;
+		if (a7mbk6 == 0x080037C0) {
+			if (access("fat:/_nds/nds-bootstrap/b4dsTwlDonor.bin", F_OK) == 0) {
+				donorNdsPath = "fat:/_nds/nds-bootstrap/b4dsTwlDonor.bin";
+				standaloneDonor = true;
+			} else if (access(conf->donorTwlPath, F_OK) == 0) {
+				donorNdsPath = conf->donorTwlPath;
+			} else if (access(conf->donorTwl0Path, F_OK) == 0) {
+				donorNdsPath = conf->donorTwl0Path;
+			} else if (access(conf->donor5Path, F_OK) == 0) {
+				donorNdsPath = conf->donor5Path;
+			}
+		} else if (conf->useSdk20Donor) {
+			if (access(conf->donor20Path, F_OK) == 0) {
+				donorNdsPath = conf->donor20Path;
+			}
+		}
+
+		FILE* ndsFile = (strlen(donorNdsPath) > 5) ? fopen(donorNdsPath, "rb") : fopen(conf->ndsPath, "rb");
+		if (ndsFile) {
+			u32 ndsArm7Offset = 0;
+			u32 ndsArm7Size = 0;
+
+			if (standaloneDonor) {
+				ndsArm7Size = conf->donorFileSize;
+			} else {
+				fseek(ndsFile, 0x30, SEEK_SET);
+				fread(&ndsArm7Offset, sizeof(u32), 1, ndsFile);
+				fseek(ndsFile, 0x3C, SEEK_SET);
+				fread(&ndsArm7Size, sizeof(u32), 1, ndsFile);
+			}
+
+			u32 arm7allocOffset = 0;
+
+			for (int i = 0; i < 0x80; i += 4) {
+				fseek(ndsFile, (ndsArm7Offset+(ndsArm7Size-0x80))+i, SEEK_SET);
+				fread(&arm7allocOffset, sizeof(u32), 1, ndsFile);
+				if (arm7allocOffset == 0x027C0000 || arm7allocOffset == 0x027E0000 || arm7allocOffset == 0x02FE0000) {
+					break;
 				}
 			}
 
-			FILE* ndsFile = (strlen(donorNdsPath) > 5) ? fopen(donorNdsPath, "rb") : fopen(conf->ndsPath, "rb");
-			if (ndsFile) {
-				u32 ndsArm7Offset = 0;
-				u32 ndsArm7Size = 0;
+			if (arm7allocOffset != 0x027C0000) {
+				// Not SDK 2.0
+				u32 arm7alloc1 = 0;
+				u32 arm7alloc2 = 0;
 
-				if (standaloneDonor) {
-					ndsArm7Size = conf->donorFileSize;
-				} else {
-					fseek(ndsFile, 0x30, SEEK_SET);
-					fread(&ndsArm7Offset, sizeof(u32), 1, ndsFile);
-					fseek(ndsFile, 0x3C, SEEK_SET);
-					fread(&ndsArm7Size, sizeof(u32), 1, ndsFile);
-				}
-
-				u32 arm7allocOffset = 0;
-
-				for (int i = 0; i < 0x80; i += 4) {
-					fseek(ndsFile, (ndsArm7Offset+(ndsArm7Size-0x80))+i, SEEK_SET);
-					fread(&arm7allocOffset, sizeof(u32), 1, ndsFile);
-					if (arm7allocOffset == 0x027C0000 || arm7allocOffset == 0x027E0000 || arm7allocOffset == 0x02FE0000) {
-						break;
-					}
-				}
-
-				if (arm7allocOffset != 0x027C0000) {
-					// Not SDK 2.0
-					u32 arm7alloc1 = 0;
-					u32 arm7alloc2 = 0;
-
-					fseek(ndsFile, (ndsArm7Offset+ndsArm7Size)-4, SEEK_SET);
-					fread(&arm7alloc2, sizeof(u32), 1, ndsFile);
-					fseek(ndsFile, (ndsArm7Offset+ndsArm7Size)-8, SEEK_SET);
+				fseek(ndsFile, (ndsArm7Offset+ndsArm7Size)-4, SEEK_SET);
+				fread(&arm7alloc2, sizeof(u32), 1, ndsFile);
+				fseek(ndsFile, (ndsArm7Offset+ndsArm7Size)-8, SEEK_SET);
+				fread(&arm7alloc1, sizeof(u32), 1, ndsFile);
+				if ((arm7alloc1 > 0x02FE0000 && arm7alloc1 < 0x03000000) || (arm7alloc1 > 0x06000000 && arm7alloc1 < 0x06020000)) {
+					// TWL binary found
+					fseek(ndsFile, (ndsArm7Offset+ndsArm7Size)-0xC, SEEK_SET);
 					fread(&arm7alloc1, sizeof(u32), 1, ndsFile);
-					if ((arm7alloc1 > 0x02FE0000 && arm7alloc1 < 0x03000000) || (arm7alloc1 > 0x06000000 && arm7alloc1 < 0x06020000)) {
-						// TWL binary found
-						fseek(ndsFile, (ndsArm7Offset+ndsArm7Size)-0xC, SEEK_SET);
-						fread(&arm7alloc1, sizeof(u32), 1, ndsFile);
-					}
-
-					if ((arm7alloc1+arm7alloc2) > 0x1A800) {
-						ce9path = "nitro:/cardengine_arm9.lz77";
-					} else if ((arm7alloc1+arm7alloc2) > 0x19C00) {
-						ce9path = "nitro:/cardengine_arm9_alt2.lz77";
-					}
 				}
 
-				fclose(ndsFile);
+				if ((arm7alloc1+arm7alloc2) > 0x1A800) {
+					ce9path = (unitCode > 0 && ndsArm9Offset >= 0x02004000) ? "nitro:/cardengine_arm9_start.lz77" : "nitro:/cardengine_arm9.lz77";
+				} else if ((arm7alloc1+arm7alloc2) > 0x19C00) {
+					ce9path = "nitro:/cardengine_arm9_alt2.lz77";
+				}
 			}
+
+			fclose(ndsFile);
 		}
 		cebin = fopen(ce9path, "rb");
 	}

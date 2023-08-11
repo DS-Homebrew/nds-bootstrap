@@ -599,6 +599,7 @@ static void initialize(void) {
 	if (ce9->musicFatTableCache != 0) {
 		musicsFile.fatTableCache = (u32*)ce9->musicFatTableCache;
 		musicsFile.fatTableCached = true;
+		musicsFile.fatTableCompressed = (bool)ce9->musicsFatTableCompressed;
 	}
 
 	getFileFromCluster(&ramDumpFile, ce9->ramDumpCluster);

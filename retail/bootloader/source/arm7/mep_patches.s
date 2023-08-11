@@ -119,7 +119,7 @@ twlFontHeapAllocFunc:
 	cmpge r1, #0x02800000
 	movlt r1, r0
 twlFontFilenameCheck:
-	ldr r3, =0x02000000 @ filesize pointer list
+	ldr r3, =0x02FFF100 @ filesize pointer list
 	ldr r5, [r3, r6]
 	cmp r5, r1
 	beq twlFontUseOldHeapPtr
@@ -130,7 +130,7 @@ twlFontFilenameCheck:
 	b twlFontFilenameCheck
 
 twlFontLastHeapPtrUpdate:
-	ldr r3, =0x020000FC @ last heap pointer
+	ldr r3, =0x02FFF1FC @ last heap pointer
 	ldr r4, [r3]
 	cmp r4, #0
 	ldreq r4, twlFontHeapPtr
@@ -141,13 +141,13 @@ twlFontLastHeapPtrStr:
 	str r4, [r3]
 
 @ save heap ponter
-	ldr r3, =0x02000080 @ heap pointers
+	ldr r3, =0x02FFF180 @ heap pointers
 	str r4, [r3, r6]
 	mov r0, r4
 	ldmfd   sp!, {r3-r6,pc}
 
 twlFontUseOldHeapPtr:
-	ldr r3, =0x02000080 @ heap pointers
+	ldr r3, =0x02FFF180 @ heap pointers
 	ldr r0, [r3, r6]
 	ldmfd   sp!, {r3-r6,pc}
 .pool

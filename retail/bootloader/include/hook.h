@@ -53,6 +53,7 @@ int hookNdsRetailArm9(
 	u32 savFatTableCache,
 	bool romFatTableCompressed,
 	bool savFatTableCompressed,
+	bool musicsFatTableCompressed,
     u32 patchOffsetCacheFileCluster,
     u32 musicFatTableCache,
 	u32 ramDumpCluster,

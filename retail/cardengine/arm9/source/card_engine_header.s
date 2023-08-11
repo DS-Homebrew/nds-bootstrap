@@ -32,8 +32,10 @@ romFatTableCache:
 savFatTableCache:
 	.word	0x00000000
 romFatTableCompressed:
-	.hword	0x0000
+	.byte	0x00
 savFatTableCompressed:
+	.byte	0x00
+musicFatTableCompressed:
 	.hword	0x0000
 patchOffsetCacheFileCluster:
 	.word	0x00000000

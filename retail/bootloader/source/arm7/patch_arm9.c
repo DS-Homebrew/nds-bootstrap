@@ -730,10 +730,11 @@ void patchHiHeapPointer(cardengineArm9* ce9, const module_params_t* moduleParams
 	const u32 cheatSizeTotal = cheatSize+(apPatchIsCheat ? apPatchSize : 0);
 
 	const bool nandAccess = (accessControl & BIT(4)); // isDSiWare
+	const bool ce9NotInHeap = (ce9Alt || (u32)ce9 == CARDENGINE_ARM9_LOCATION_DLDI_START);
 
 	if ((!nandAccess && extendedMemory2)
 	|| moduleParams->sdk_version < 0x2008000
-	|| (ce9Alt && !ce9AltLargeTable && cheatSizeTotal <= 4)
+	|| (ce9NotInHeap && !ce9AltLargeTable && cheatSizeTotal <= 4)
 	|| strncmp(romTid, "CLJ", 3) == 0 // Mario & Luigi: Bowser's Inside Story
 	|| strncmp(romTid, "VSO", 3) == 0 // Sonic Classic Collection
 	|| arm7mbk == 0x080037C0) {
@@ -764,13 +765,12 @@ void patchHiHeapPointer(cardengineArm9* ce9, const module_params_t* moduleParams
 	dbg_hexa((u32)oldheapPointer);
     dbg_printf("\n\n");
 
-	if (ce9Alt && !ce9AltLargeTable) {
+	if (nandAccess && extendedMemory2) {
+		*heapPointer = CARDENGINE_ARM9_LOCATION_DLDI_EXTMEM;
+	} else if (ce9NotInHeap && !ce9AltLargeTable) {
 		*heapPointer = CHEAT_ENGINE_LOCATION_B4DS-0x400000;
 	} else {
 		*heapPointer = (fatTableAddr < 0x023C0000 || fatTableAddr >= (u32)ce9) ? (u32)ce9 : fatTableAddr; // shrink heap by FAT table size + ce9 binary size
-	}
-	if (nandAccess && extendedMemory2) {
-		*heapPointer = CARDENGINE_ARM9_LOCATION_DLDI_EXTMEM;
 	}
 
     dbg_printf("new hi heap value: ");
