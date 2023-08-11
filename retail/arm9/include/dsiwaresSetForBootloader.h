@@ -413,6 +413,7 @@ static const char dsiWareForBootloader2[][4] = {
 	"KG4", // Saikyou Ginsei Shougi
 	"K3P", // Sakurai Miho No Kouno: Megami Serapi Uranai
 	"K7T", // Save the Turtles
+	"K5G", // G.G Series: Score Attacker
 	"KRW", // Sea Battle
 	"KLL", // The Seller
 	"KS3", // Shantae: Risky's Revenge

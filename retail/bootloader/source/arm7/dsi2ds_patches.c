@@ -20785,6 +20785,26 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchUserSettingsReadDSiWare(0x02057D24-offsetChange2);
 	}
 
+	// G.G Series: Score Attacker (USA)
+	// G.G Series: Score Attacker (Japan)
+	// Saving not supported due to possible bug
+	else if (strcmp(romTid, "K5GE") == 0 || strcmp(romTid, "K5GJ") == 0) {
+		*(u32*)0x0200DEC4 = 0xE1A00000; // nop
+		*(u32*)0x0204F614 = 0xE1A00000; // nop
+		*(u32*)0x020535A8 = 0xE1A00000; // nop
+		patchInitDSiWare(0x0205B808, heapEnd);
+		if (!extendedMemory2) {
+			*(u32*)0x0205BB94 -= 0x3B000;
+		}
+		patchUserSettingsReadDSiWare(0x0205CFC4);
+		if (!extendedMemory2) {
+			*(u32*)0x02062564 = 0x50000; // Shrink large part of heap from 0xF0000
+			*(u32*)0x020625D8 = 0x80000; // Shrink large part of heap from 0x100000
+			*(u32*)0x020625F0 = *(u32*)0x02062564; // Shrink part of heap from 0x80000
+			*(u32*)0x02062600 = 0xA5000; // Shrink part of heap from 0x145000
+		}
+	}
+
 	// Sea Battle (USA)
 	// Sea Battle (Europe)
 	else if (strcmp(romTid, "KRWE") == 0 || strcmp(romTid, "KRWP") == 0) {
