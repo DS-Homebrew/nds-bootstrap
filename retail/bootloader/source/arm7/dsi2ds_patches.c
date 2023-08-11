@@ -20943,6 +20943,26 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)((romTid[3] == 'P') ? 0x02031428 : 0x020315C0) = 0xE1A00000; // nop (Skip Manual screen)
 	}
 
+	// G.G Series: Shadow Army (USA)
+	// G.G Series: Shadow Army (Japan)
+	// Saving not supported due to possible bug
+	else if (strcmp(romTid, "KZJE") == 0 || strcmp(romTid, "KZJJ") == 0) {
+		*(u32*)0x0200D788 = 0xE1A00000; // nop
+		*(u32*)0x0204F038 = 0xE1A00000; // nop
+		*(u32*)0x02052FCC = 0xE1A00000; // nop
+		patchInitDSiWare(0x0205B22C, heapEnd);
+		if (!extendedMemory2) {
+			*(u32*)0x0205B5B8 -= 0x3B000;
+		}
+		patchUserSettingsReadDSiWare(0x0205C9E8);
+		if (!extendedMemory2) {
+			*(u32*)0x02061F88 = 0x50000; // Shrink large part of heap from 0xF0000
+			*(u32*)0x02061FFC = 0x80000; // Shrink large part of heap from 0x100000
+			*(u32*)0x02062014 = *(u32*)0x02061F88; // Shrink part of heap from 0x80000
+			*(u32*)0x02062024 = 0xA5000; // Shrink part of heap from 0x145000
+		}
+	}
+
 	// Shantae: Risky's Revenge (USA)
 	// Requires 8MB of RAM, crashes after first battle with 4MB of RAM, but can get past with a save file
 	// BGM is disabled to stay within RAM limitations

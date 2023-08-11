@@ -416,6 +416,7 @@ static const char dsiWareForBootloader2[][4] = {
 	"K5G", // G.G Series: Score Attacker
 	"KRW", // Sea Battle
 	"KLL", // The Seller
+	"KZJ", // G.G Series: Shadow Army
 	"KS3", // Shantae: Risky's Revenge
 	"KSJ", // Shawn Johnson Gymnastics
 	"KK5", // Kakitori Rekishi: Shouga Kusei (01)
