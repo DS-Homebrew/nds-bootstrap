@@ -140,6 +140,9 @@ static void load_conf(configuration* conf, const char* fn) {
 	// SDK5.x (NTR) Donor NDS path
 	conf->donor5Path = strdup(config_file.fetch("NDS-BOOTSTRAP", "DONOR5_NDS_PATH").c_str());
 
+	// SDK5.x (NTR) Donor NDS path (VRAM Wireless alternative)
+	conf->donor5PathAlt = strdup(config_file.fetch("NDS-BOOTSTRAP", "DONOR5_NDS_PATH_ALT").c_str());
+
 	// SDK5.0 (TWL) DSi-Enhanced Donor NDS path
 	conf->donorTwl0Path = strdup(config_file.fetch("NDS-BOOTSTRAP", "DONORTWL0_NDS_PATH").c_str());
 
@@ -1655,32 +1658,48 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		toncset((u8*)igmLocation, 0, 0xA000);
 	}
 
-	// Load ce9 binary
-	if (b4dsDebugRam) {
-		cebin = fopen("nitro:/cardengine_arm9_extmem.lz77", "rb");
-	} else if (accessControl & BIT(4)) {
-		cebin = fopen(ndsArm9Offset >= 0x02004000 ? "nitro:/cardengine_arm9_start.lz77" : "nitro:/cardengine_arm9.lz77", "rb");
-	} else {
-		const char* ce9path = "nitro:/cardengine_arm9_alt.lz77";
-		const char* donorNdsPath = "";
-		bool standaloneDonor = false;
+	const char* donorNdsPath = "";
+	bool standaloneDonor = false;
+	if (!b4dsDebugRam) {
 		if (a7mbk6 == 0x080037C0) {
+			conf->useSdk5DonorAlt = ( // Use alternate ARM7 donor in order for below games to use more of the main RAM
+			   strncmp(romTid, "KUG", 3) == 0 // G.G Series: Drift Circuit 2
+			|| strncmp(romTid, "K5M", 3) == 0 // G.G Series: The Last Knight
+			|| strncmp(romTid, "KHR", 3) == 0 // Picture Perfect: Hair Stylist
+			);
+
 			if (access("fat:/_nds/nds-bootstrap/b4dsTwlDonor.bin", F_OK) == 0) {
 				donorNdsPath = "fat:/_nds/nds-bootstrap/b4dsTwlDonor.bin";
 				standaloneDonor = true;
-			} else if (access(conf->donorTwlPath, F_OK) == 0) {
-				donorNdsPath = conf->donorTwlPath;
-			} else if (access(conf->donorTwl0Path, F_OK) == 0) {
-				donorNdsPath = conf->donorTwl0Path;
-			} else if (access(conf->donor5Path, F_OK) == 0) {
-				donorNdsPath = conf->donor5Path;
+			} else if (conf->useSdk5DonorAlt && access(conf->donor5PathAlt, F_OK) == 0) {
+				donorNdsPath = conf->donor5PathAlt;
+			}
+			if (strlen(donorNdsPath) <= 5) {
+				if (access(conf->donorTwlPath, F_OK) == 0) {
+					donorNdsPath = conf->donorTwlPath;
+				} else if (access(conf->donorTwl0Path, F_OK) == 0) {
+					donorNdsPath = conf->donorTwl0Path;
+				} else if (access(conf->donor5Path, F_OK) == 0) {
+					donorNdsPath = conf->donor5Path;
+				} else if (!conf->donor5PathAlt && access(conf->donor5PathAlt, F_OK) == 0) {
+					donorNdsPath = conf->donor5PathAlt;
+					conf->useSdk5DonorAlt = true;
+				}
 			}
 		} else if (conf->useSdk20Donor) {
 			if (access(conf->donor20Path, F_OK) == 0) {
 				donorNdsPath = conf->donor20Path;
 			}
 		}
+	}
 
+	// Load ce9 binary
+	if (b4dsDebugRam) {
+		cebin = fopen("nitro:/cardengine_arm9_extmem.lz77", "rb");
+	} else if ((accessControl & BIT(4)) || (a7mbk6 == 0x080037C0 && ndsArm9Offset >= 0x02004000)) {
+		cebin = fopen(ndsArm9Offset >= 0x02004000 ? "nitro:/cardengine_arm9_start.lz77" : "nitro:/cardengine_arm9.lz77", "rb");
+	} else {
+		const char* ce9path = "nitro:/cardengine_arm9_alt.lz77";
 		FILE* ndsFile = (strlen(donorNdsPath) > 5) ? fopen(donorNdsPath, "rb") : fopen(conf->ndsPath, "rb");
 		if (ndsFile) {
 			u32 ndsArm7Offset = 0;

@@ -1338,6 +1338,7 @@ int arm7_main(void) {
 						strncmp(romTid, "KUG", 3) == 0  // G.G Series: Drift Circuit 2
 					||	strncmp(romTid, "K5M", 3) == 0  // G.G Series: The Last Knight
 					||	strncmp(romTid, "CLJ", 3) == 0  // Mario & Luigi: Bowser's Inside Story
+					||	strncmp(romTid, "KHR", 3) == 0  // Picture Perfect: Pocket Stylist
 					||	strncmp(romTid, "VSO", 3) == 0  // Sonic Classic Collection
 					) {
 						// Game's heap cannot be shrunk, so display error
