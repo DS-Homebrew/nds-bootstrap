@@ -1431,7 +1431,6 @@ int arm7_main(void) {
 		}
 	}
 
-	patchBinary((cardengineArm9*)ce9Location, ndsHeader, moduleParams);
 	ROMinRAM = isROMLoadableInRAM(&dsiHeaderTemp, &dsiHeaderTemp.ndshdr, romTid, moduleParams, usesCloneboot); // If possible, set to load ROM into RAM
 	errorCode = patchCardNds(
 		(cardengineArm7*)CARDENGINE_ARM7_LOCATION,
@@ -1452,6 +1451,7 @@ int arm7_main(void) {
 		// nocashMessage("Card patch failed");
 		errorOutput();
 	}
+	patchBinary((cardengineArm9*)ce9Location, ndsHeader, moduleParams);
 
 	toncset((u32*)0x0380C000, 0, 0x2780);
 

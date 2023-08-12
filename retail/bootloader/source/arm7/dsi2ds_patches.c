@@ -40,6 +40,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	extern u16 s2FlashcardId;
 	extern u32 donorFileCluster;	// SDK5
 	extern u32 fatTableAddr;
+	extern u32 newArm7binarySize;
 	const char* romTid = getRomTid(ndsHeader);
 	// const char* dataPub = "dataPub:";
 	const char* dataPrv = "dataPrv:";
@@ -60,7 +61,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	const u32 heapEnd = extendedMemory2 ? (((u32)ndsHeader->arm9destination >= 0x02004000) ? CARDENGINE_ARM9_LOCATION_DLDI_EXTMEM : 0x02700000) : heapEndRetail;
 	const u32 heapEnd8MBHack = extendedMemory2 ? heapEnd : heapEndRetail+0x400000; // extendedMemory2 ? #0x27B0000 : #0x27E0000 (mirrors to 0x23E0000 on retail DS units)
 	const u32 heapEndExceed = extendedMemory2 ? heapEnd+0x800000 : heapEndRetail+0xC00000; // extendedMemory2 ? #0x2FB0000 (mirrors to 0x27B0000 on debug DS units) : #0x2FE0000 (mirrors to 0x23E0000 on retail DS units)
-	const u32 heapEndMaxForRetail = (!extendedMemory2 && ce9NotInHeap) ? 0x023FC000 : heapEnd;
+	const u32 heapEndMaxForRetail = (!extendedMemory2 && ce9NotInHeap && *(u32*)(((u32)ndsHeader->arm7destination) + newArm7binarySize - 0x24) == 0x027E0000) ? 0x023FC000 : heapEnd;
 	const bool debugOrMep = (extendedMemory2 || expansionPakFound);
 	const bool largeS2RAM = (expansionPakFound && (s2FlashcardId != 0)); // 16MB or more
 	if (donorFileCluster == CLUSTER_FREE) {

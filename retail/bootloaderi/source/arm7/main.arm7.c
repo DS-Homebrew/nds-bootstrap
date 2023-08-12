@@ -1927,7 +1927,6 @@ int arm7_main(void) {
 			*(u32*)0x02FFE1D4 = *(u32*)DONOR_ROM_DEVICE_LIST_LOCATION;
 		}
 
-		patchBinary((cardengineArm9*)ce9Location, ndsHeader, moduleParams);
 		errorCode = patchCardNds(
 			(cardengineArm7*)ce7Location,
 			(cardengineArm9*)ce9Location,
@@ -1949,6 +1948,7 @@ int arm7_main(void) {
 			nocashMessage("Card patch failed");
 			errorOutput();
 		}
+		patchBinary((cardengineArm9*)ce9Location, ndsHeader, moduleParams);
 
 		errorCode = hookNdsRetailArm7(
 			(cardengineArm7*)ce7Location,
