@@ -1978,8 +1978,6 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 
 			patchTwlSleepMode(ndsHeader, moduleParams);
 		}
-
-		patchSharedFontPath(ce9, ndsHeader, moduleParams);
 	}
 
 	patchMpu(ndsHeader, moduleParams, patchMpuRegion, patchMpuSize);
@@ -2042,18 +2040,27 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 	return ERR_NONE;
 }
 
-void patchCardNdsArm9Cont(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+void patchCardNdsArm9Cont(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	if (ndsHeader->unitCode == 0) {
 		return;
 	}
 
-	// Further patching in order for DSiWare to boot with NTR ARM7 binary
 	extern u32 donorFileCluster;
-	extern u8 arm7newUnitCode;
 	extern u32 arm7mbk;
 	extern u32 accessControl;
-
 	const char* romTid = getRomTid(ndsHeader);
+
+	if (((accessControl & BIT(4))
+	   || (strncmp(romTid, "DME", 3) == 0 && extendedMemory2)
+	   || (strncmp(romTid, "DMD", 3) == 0 && extendedMemory2)
+	   || strncmp(romTid, "DMP", 3) == 0
+	   || (strncmp(romTid, "DHS", 3) == 0 && extendedMemory2)
+	)	&& arm7mbk == 0x080037C0 && donorFileCluster != CLUSTER_FREE) {
+		patchSharedFontPath(ce9, ndsHeader, moduleParams);
+	}
+
+	// Further patching in order for DSiWare to boot with NTR ARM7 binary
+	extern u8 arm7newUnitCode;
 	if (((accessControl & BIT(4))
 	   || (strncmp(romTid, "DME", 3) == 0 && extendedMemory2)
 	   || (strncmp(romTid, "DMD", 3) == 0 && extendedMemory2)

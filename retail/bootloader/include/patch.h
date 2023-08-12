@@ -140,7 +140,11 @@ u32 patchCardNdsArm9(
 	u32 patchMpuRegion,
 	u32 patchMpuSize
 );
-void patchCardNdsArm9Cont(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
+void patchCardNdsArm9Cont(
+	cardengineArm9* ce9,
+	const tNDSHeader* ndsHeader,
+	const module_params_t* moduleParams
+);
 u32 patchCardNdsArm7(
 	cardengineArm7* ce7,
 	tNDSHeader* ndsHeader,

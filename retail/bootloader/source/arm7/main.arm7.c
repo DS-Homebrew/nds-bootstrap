@@ -1453,6 +1453,7 @@ int arm7_main(void) {
 		errorOutput();
 	}
 	patchBinary((cardengineArm9*)ce9Location, ndsHeader, moduleParams);
+	patchCardNdsArm9Cont((cardengineArm9*)ce9Location, ndsHeader, moduleParams);
 
 	toncset((u32*)0x0380C000, 0, 0x2780);
 

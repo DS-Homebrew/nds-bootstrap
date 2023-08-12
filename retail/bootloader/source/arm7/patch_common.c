@@ -538,9 +538,7 @@ u32 patchCardNds(
 	
 	//if (cardReadFound || ndsHeader->fatSize == 0) {
 	if (errorCodeArm9 == ERR_NONE || ndsHeader->fatSize == 0) {
-		u32 errCodeArm7 = patchCardNdsArm7(ce7, ndsHeader, moduleParams, saveFileCluster);
-		patchCardNdsArm9Cont(ndsHeader, moduleParams);
-		return errCodeArm7;
+		return patchCardNdsArm7(ce7, ndsHeader, moduleParams, saveFileCluster);
 	}
 
 	dbg_printf("ERR_LOAD_OTHR");
