@@ -1663,7 +1663,8 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	if (!b4dsDebugRam) {
 		if (a7mbk6 == 0x080037C0) {
 			conf->useSdk5DonorAlt = ( // Use alternate ARM7 donor in order for below games to use more of the main RAM
-			   strncmp(romTid, "KUG", 3) == 0 // G.G Series: Drift Circuit 2
+			   strncmp(romTid, "K2Z", 3) == 0 // G.G Series: Altered Weapon
+			|| strncmp(romTid, "KUG", 3) == 0 // G.G Series: Drift Circuit 2
 			|| strncmp(romTid, "K5M", 3) == 0 // G.G Series: The Last Knight
 			|| strncmp(romTid, "KHR", 3) == 0 // Picture Perfect: Hair Stylist
 			);
