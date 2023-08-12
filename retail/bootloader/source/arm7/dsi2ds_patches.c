@@ -13255,7 +13255,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02019978 = 0xE12FFF1E; // bx lr
 		if (!extendedMemory2) {
 			if (s2FlashcardId == 0x5A45) {
-				for (int i = 0; i < 4; i++) {
+				for (int i = 0; i < 3; i++) {
 					fourSwHeapAddrPtr[i] -= 0x01000000;
 				}
 			}
