@@ -57,11 +57,12 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	const u32 cheatSizeTotal = cheatSize+(apPatchIsCheat ? apPatchSize : 0);
 
 	const bool ce9NotInHeap = (ce9Alt || (u32)ce9 == CARDENGINE_ARM9_LOCATION_DLDI_START);
+	const bool maxHeapOpen = (!extendedMemory2 && ce9NotInHeap && *(u32*)(((u32)ndsHeader->arm7destination) + newArm7binarySize - 0x24) == 0x027E0000);
 	const u32 heapEndRetail = (ce9NotInHeap && !ce9AltLargeTable) ? ((cheatSizeTotal <= 4) ? 0x023E0000 : CHEAT_ENGINE_LOCATION_B4DS-0x400000) : ((fatTableAddr < 0x023C0000 || fatTableAddr >= (u32)ce9) ? (u32)ce9 : fatTableAddr);
 	const u32 heapEnd = extendedMemory2 ? (((u32)ndsHeader->arm9destination >= 0x02004000) ? CARDENGINE_ARM9_LOCATION_DLDI_EXTMEM : 0x02700000) : heapEndRetail;
 	const u32 heapEnd8MBHack = extendedMemory2 ? heapEnd : heapEndRetail+0x400000; // extendedMemory2 ? #0x27B0000 : #0x27E0000 (mirrors to 0x23E0000 on retail DS units)
 	const u32 heapEndExceed = extendedMemory2 ? heapEnd+0x800000 : heapEndRetail+0xC00000; // extendedMemory2 ? #0x2FB0000 (mirrors to 0x27B0000 on debug DS units) : #0x2FE0000 (mirrors to 0x23E0000 on retail DS units)
-	const u32 heapEndMaxForRetail = (!extendedMemory2 && ce9NotInHeap && *(u32*)(((u32)ndsHeader->arm7destination) + newArm7binarySize - 0x24) == 0x027E0000) ? 0x023FC000 : heapEnd;
+	const u32 heapEndMaxForRetail = maxHeapOpen ? 0x023FC000 : heapEnd;
 	const bool debugOrMep = (extendedMemory2 || expansionPakFound);
 	const bool largeS2RAM = (expansionPakFound && (s2FlashcardId != 0)); // 16MB or more
 	if (donorFileCluster == CLUSTER_FREE) {
@@ -13544,7 +13545,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Link 'n' Launch (USA)
 	// Link 'n' Launch (Europe, Australia)
 	else if (strcmp(romTid, "KPTE") == 0 || strcmp(romTid, "KPTV") == 0) {
-		useSharedFont = (romTid[3] == 'E') ? twlFontFound : (twlFontFound && debugOrMep);
+		useSharedFont = (romTid[3] == 'E' || maxHeapOpen) ? twlFontFound : (twlFontFound && debugOrMep);
 		u8 offsetChange1 = (romTid[3] == 'E') ? 0 : 0xC0;
 		u8 offsetChange2 = (romTid[3] == 'E') ? 0 : 0x8;
 		u8 offsetChange3 = (romTid[3] == 'E') ? 0 : 0x40;
@@ -13566,7 +13567,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			*(u32*)(0x02014770+offsetChange1) = 0xE3A03601; // mov r3, #0x100000 (Shrink sound heap from 0x280000: Disables music)
 		}
 		if (useSharedFont) {
-			if (!extendedMemory2 && romTid[3] == 'V') {
+			if (!extendedMemory2 && !maxHeapOpen && romTid[3] == 'V') {
 				patchTwlFontLoad(0x0201778C+offsetChange2, 0x02070EC4-offsetChange6);
 			}
 		} else {
@@ -13580,7 +13581,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)(0x020663C8-offsetChange6) = 0xE1A00000; // nop
 		tonccpy((u32*)(0x02066F94-offsetChange6), dsiSaveGetResultCode, 0xC);
 		*(u32*)(0x0206A004-offsetChange6) = 0xE1A00000; // nop
-		patchInitDSiWare(0x0206F2E8-offsetChange6, heapEnd);
+		patchInitDSiWare(0x0206F2E8-offsetChange6, heapEndMaxForRetail);
 		*(u32*)(0x0206F674-offsetChange6) -= 0x30000;
 		patchUserSettingsReadDSiWare(0x02070930-offsetChange6);
 	}
@@ -13613,7 +13614,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		tonccpy((u32*)0x02066F94, dsiSaveGetResultCode, 0xC);
 		*(u32*)0x02069814 = 0xE1A00000; // nop
 		*(u32*)0x0206EDD4 = 0xE3A00001; // mov r0, #1
-		patchInitDSiWare(0x0206EDEC, heapEnd);
+		patchInitDSiWare(0x0206EDEC, heapEndMaxForRetail);
 		*(u32*)0x0206F15C -= 0x30000;
 		patchUserSettingsReadDSiWare(0x0207043C);
 	}

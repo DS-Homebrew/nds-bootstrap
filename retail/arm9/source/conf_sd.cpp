@@ -1667,6 +1667,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			||	strncmp(romTid, "KSR", 3) == 0 // Aura-Aura Climber
 			||	strncmp(romTid, "KUG", 3) == 0 // G.G Series: Drift Circuit 2
 			||	strncmp(romTid, "K5M", 3) == 0 // G.G Series: The Last Knight
+			||	strncmp(romTid, "KPT", 3) == 0 // Link 'n' Launch
 			||	strncmp(romTid, "KHR", 3) == 0 // Picture Perfect: Hair Stylist
 			);
 
