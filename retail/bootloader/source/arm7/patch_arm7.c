@@ -413,7 +413,7 @@ u32 patchCardNdsArm7(
 			newArm7binarySize = donorFileSize;
 
 			u32 startOffset = (u32)ndsHeader->arm7destination;
-			if (*(u32*)(startOffset + newArm7binarySize - 0xC) == 0x027E0000) {
+			if (*(u32*)(startOffset + newArm7binarySize - 0xC) == 0x027E0000 || *(u32*)(startOffset + newArm7binarySize - 0x24) == 0x027E0000) {
 				arm7newUnitCode = 0; // NTR ARM7 binary found
 			}
 		}
