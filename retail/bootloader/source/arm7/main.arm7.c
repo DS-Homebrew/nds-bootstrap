@@ -1336,6 +1336,7 @@ int arm7_main(void) {
 					}
 					if (
 						strncmp(romTid, "K2Z", 3) == 0 // G.G Series: Altered Weapon
+					||	strncmp(romTid, "KSR", 3) == 0 // Aura-Aura Climber
 					||	strncmp(romTid, "KUG", 3) == 0 // G.G Series: Drift Circuit 2
 					||	strncmp(romTid, "K5M", 3) == 0 // G.G Series: The Last Knight
 					||	strncmp(romTid, "CLJ", 3) == 0 // Mario & Luigi: Bowser's Inside Story

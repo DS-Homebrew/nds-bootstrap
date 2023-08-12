@@ -1663,10 +1663,11 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	if (!b4dsDebugRam) {
 		if (a7mbk6 == 0x080037C0) {
 			conf->useSdk5DonorAlt = ( // Use alternate ARM7 donor in order for below games to use more of the main RAM
-			   strncmp(romTid, "K2Z", 3) == 0 // G.G Series: Altered Weapon
-			|| strncmp(romTid, "KUG", 3) == 0 // G.G Series: Drift Circuit 2
-			|| strncmp(romTid, "K5M", 3) == 0 // G.G Series: The Last Knight
-			|| strncmp(romTid, "KHR", 3) == 0 // Picture Perfect: Hair Stylist
+				strncmp(romTid, "K2Z", 3) == 0 // G.G Series: Altered Weapon
+			||	strncmp(romTid, "KSR", 3) == 0 // Aura-Aura Climber
+			||	strncmp(romTid, "KUG", 3) == 0 // G.G Series: Drift Circuit 2
+			||	strncmp(romTid, "K5M", 3) == 0 // G.G Series: The Last Knight
+			||	strncmp(romTid, "KHR", 3) == 0 // Picture Perfect: Hair Stylist
 			);
 
 			if (access("fat:/_nds/nds-bootstrap/b4dsTwlDonor.bin", F_OK) == 0) {
@@ -1684,7 +1685,6 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 					donorNdsPath = conf->donor5Path;
 				} else if (!conf->donor5PathAlt && access(conf->donor5PathAlt, F_OK) == 0) {
 					donorNdsPath = conf->donor5PathAlt;
-					conf->useSdk5DonorAlt = true;
 				}
 			}
 		} else if (conf->useSdk20Donor) {
