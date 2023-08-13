@@ -24070,6 +24070,29 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchUserSettingsReadDSiWare(0x02045D78);
 	}
 
+	// G.G Series: Vector (USA)
+	// G.G Series: Vector (Japan)
+	// Saving not supported due to possible bug
+	else if (strcmp(romTid, "K5OE") == 0 || strcmp(romTid, "K5OJ") == 0) {
+		*(u32*)0x0200BB10 = 0xE1A00000; // nop
+		*(u32*)0x0204D20C = 0xE1A00000; // nop
+		*(u32*)0x020511A0 = 0xE1A00000; // nop
+		patchInitDSiWare(0x02059384, heapEnd);
+		if (!extendedMemory2) {
+			*(u32*)0x02059710 -= 0x3B000;
+		}
+		patchUserSettingsReadDSiWare(0x0205AB40);
+		if (!extendedMemory2) {
+			*(u32*)0x020600E0 = 0x50000; // Shrink large part of heap from 0xF0000
+			*(u32*)0x02060154 = 0xA0000; // Shrink large part of heap from 0x100000
+			*(u32*)0x02060158 = 0x20000; // Shrink part of heap from 0x60000
+			*(u32*)0x02060168 = *(u32*)0x02060154; // Shrink large part of heap from 0x100000
+			*(u32*)0x0206016C = 0x30000; // Shrink part of heap from 0x70000
+			*(u32*)0x02060180 = *(u32*)0x020600E0; // Shrink large part of heap from 0xA0000
+			*(u32*)0x02060194 = 0xB0000; // Shrink large part of heap from 0x170000
+		}
+	}
+
 	// Viking Invasion (USA)
 	// Saving not supported due to using more than one file in filesystem
 	else if (strcmp(romTid, "KVKE") == 0) {
