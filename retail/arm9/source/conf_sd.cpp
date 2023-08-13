@@ -680,6 +680,21 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 					|| (unitCode == 2 && conf->dsiMode && romTid[0] == 'K')));
 	bool dsiEnhancedMbk = false;
 	bool b4dsDebugRam = false;
+	bool romFSInited = false;
+	bool donorInsideNds = (strncmp(romTid, "KCX", 3) == 0 || strncmp(romTid, "KAV", 3) == 0 || strncmp(romTid, "KNK", 3) == 0 || strncmp(romTid, "KE3", 3) == 0); // B4DS-specific
+	bool startMultibootSrl = false; // B4DS-specific
+
+	const char* multibootSrl = "rom:/child.srl"; // Art Style: DIGIDRIVE (strncmp(romTid, "KAV", 3) == 0)
+												// PictureBook Games: The Royal Bluff (USA) (strcmp(romTid, "KE3E") == 0)
+	if (strncmp(romTid, "KCX", 3) == 0) {
+		multibootSrl = "rom:/mb_main.srl"; // Cosmo Fighters
+	} else if (strncmp(romTid, "KNK", 3) == 0) {
+		multibootSrl = "rom:/main_rom.srl"; // Ideyou Sukeno: Kenkou Maja DSi
+	} else if (strcmp(romTid, "KE3V") == 0) {
+		multibootSrl = "rom:/child_eng.srl"; // PictureBook Games: The Royal Bluff (Europe, Australia)
+	} else if (strcmp(romTid, "KE3P") == 0) {
+		multibootSrl = "rom:/child_fre.srl"; // PictureBook Games: The Royal Bluff (Europe)
+	}
 
 	if (conf->isDSiWare) {
 		conf->valueBits2 |= BIT(0);
@@ -756,8 +771,6 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			} else if (strncmp(romTid, "KCX", 3) == 0 && dsiEnhancedMbk) {
 				// Set cloneboot/multiboot SRL file as Donor ROM
 				if (romFSInit(conf->ndsPath)) {
-					const char* multibootSrl = "rom:/mb_main.srl"; // Cosmo Fighters
-
 					donorNdsFile = fopen(multibootSrl, "rb");
 				}
 			} else {
@@ -1658,9 +1671,14 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		toncset((u8*)igmLocation, 0, 0xA000);
 	}
 
+	if (accessControl & BIT(4)) {
+		romFSInited = (romFSInit(conf->ndsPath));
+		startMultibootSrl = (strncmp(romTid, "KCX", 3) == 0 || (!b4dsDebugRam && strncmp(romTid, "KAV", 3) == 0) || strncmp(romTid, "KNK", 3) == 0);
+	}
+
 	const char* donorNdsPath = "";
 	bool standaloneDonor = false;
-	if (!b4dsDebugRam) {
+	if (!b4dsDebugRam && !donorInsideNds) {
 		if (a7mbk6 == 0x080037C0) {
 			conf->useSdk5DonorAlt = ( // Use alternate ARM7 donor in order for below games to use more of the main RAM
 				strncmp(romTid, "K2Z", 3) == 0 // G.G Series: Altered Weapon
@@ -1698,10 +1716,13 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	// Load ce9 binary
 	if (b4dsDebugRam) {
 		cebin = fopen("nitro:/cardengine_arm9_extmem.lz77", "rb");
-	} else if ((accessControl & BIT(4)) || (a7mbk6 == 0x080037C0 && ndsArm9Offset >= 0x02004000)) {
+	} else if (!startMultibootSrl && ((accessControl & BIT(4)) || (a7mbk6 == 0x080037C0 && ndsArm9Offset >= 0x02004000))) {
 		cebin = fopen(ndsArm9Offset >= 0x02004000 ? "nitro:/cardengine_arm9_start.lz77" : "nitro:/cardengine_arm9.lz77", "rb");
 	} else {
 		const char* ce9path = "nitro:/cardengine_arm9_alt.lz77";
+		if (romFSInited && donorInsideNds) {
+			donorNdsPath = multibootSrl;
+		}
 		FILE* ndsFile = (strlen(donorNdsPath) > 5) ? fopen(donorNdsPath, "rb") : fopen(conf->ndsPath, "rb");
 		if (ndsFile) {
 			u32 ndsArm7Offset = 0;
@@ -1879,31 +1900,22 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 	conf->donorFileOffset = 0;
 
-	if ((!dsiFeatures() || conf->b4dsMode) && (strncmp(romTid, "KCX", 3) == 0 || strncmp(romTid, "KAV", 3) == 0 || strncmp(romTid, "KNK", 3) == 0)) {
+	if (romFSInited && (!dsiFeatures() || conf->b4dsMode) && donorInsideNds) {
 		// Set cloneboot/multiboot SRL file either to boot instead, or as Donor ROM
-		if (romFSInit(conf->ndsPath)) {
-			const char* multibootSrl = "rom:/child.srl"; // Art Style: DIGIDRIVE (strncmp(romTid, "KAV", 3) == 0)
-			if (strncmp(romTid, "KCX", 3) == 0) {
-				multibootSrl = "rom:/mb_main.srl"; // Cosmo Fighters
-			} else if (strncmp(romTid, "KNK", 3) == 0) {
-				multibootSrl = "rom:/main_rom.srl"; // Ideyou Sukeno: Kenkou Maja DSi
-			}
-
-			FILE* ndsFile = fopen(multibootSrl, "rb");
-			if (ndsFile) {
-				conf->donorFileOffset = offsetOfOpenedNitroFile;
-			}
-			if (strncmp(romTid, "KAV", 3) != 0 || !b4dsDebugRam) {
-				FILE* pageFile = fopen(pageFilePath.c_str(), "rb+");
-				if (ndsFile && pageFile) {
-					FILE* srParamsFile = fopen(srParamsFilePath.c_str(), "rb+");
-					fseek(srParamsFile, 0xC, SEEK_SET);
-					fwrite(&offsetOfOpenedNitroFile, sizeof(u32), 1, srParamsFile);
-					fclose(srParamsFile);
-				}
-			}
-			fclose(ndsFile);
+		FILE* ndsFile = fopen(multibootSrl, "rb");
+		if (ndsFile) {
+			conf->donorFileOffset = offsetOfOpenedNitroFile;
 		}
+		if (startMultibootSrl) {
+			FILE* pageFile = fopen(pageFilePath.c_str(), "rb+");
+			if (ndsFile && pageFile) {
+				FILE* srParamsFile = fopen(srParamsFilePath.c_str(), "rb+");
+				fseek(srParamsFile, 0xC, SEEK_SET);
+				fwrite(&offsetOfOpenedNitroFile, sizeof(u32), 1, srParamsFile);
+				fclose(srParamsFile);
+			}
+		}
+		fclose(ndsFile);
 	}
 
 	u32 srlAddr = 0;
