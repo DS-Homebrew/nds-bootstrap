@@ -23516,7 +23516,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// G.G Series: Throw Out (Japan)
 	// Requires 8MB of RAM
-	else if (strcmp(romTid, "K3OJ") == 0 extendedMemory2) {
+	else if (strcmp(romTid, "K3OJ") == 0 && extendedMemory2) {
 		*(u32*)0x02007C0C = 0xE3A00000; // mov r0, #0
 		*(u32*)0x02007C10 = 0xE12FFF1E; // bx lr
 		setBL(0x02007C78, (u32)dsiSaveGetInfo);
