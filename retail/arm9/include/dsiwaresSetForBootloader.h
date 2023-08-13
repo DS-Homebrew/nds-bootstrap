@@ -495,6 +495,7 @@ static const char dsiWareForBootloader2[][4] = {
 	"KOS", // Tell me Darling
 	"KTE", // Tetris Party Live
 	"KTW", // Thorium Wars
+	"K3O", // G.G Series: Throw Out
 	"KSL", // Touch Solitaire
 	"KWW", // The Tower DS: Classic
 	"KWV", // The Tower DS: Hotel

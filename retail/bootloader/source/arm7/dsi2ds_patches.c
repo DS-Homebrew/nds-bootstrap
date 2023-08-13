@@ -23492,6 +23492,70 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0208F104 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 	}
 
+	// G.G Series: Throw Out (USA)
+	// Saving not supported due to possible bug
+	// Requires 8MB of RAM
+	else if (strcmp(romTid, "K3OE") == 0 && extendedMemory2) {
+		*(u32*)0x0200BCC8 = 0xE1A00000; // nop
+		*(u32*)0x0204D22C = 0xE1A00000; // nop
+		*(u32*)0x020511C0 = 0xE1A00000; // nop
+		patchInitDSiWare(0x020593A4, heapEnd);
+		/* if (!extendedMemory2) {
+			*(u32*)0x02059730 -= 0x3B000;
+		} */
+		patchUserSettingsReadDSiWare(0x0205AB60);
+		/* if (!extendedMemory2) {
+			*(u32*)0x02060100 = 0x50000; // Shrink large part of heap from 0xF0000
+			*(u32*)0x02060174 = 0x80000; // Shrink large part of heap from 0x100000
+			*(u32*)0x02060184 = 0x20000; // Shrink part of heap from 0x40000
+			*(u32*)0x02060188 = *(u32*)0x020600FC; // Shrink large part of heap from 0xC0000
+			*(u32*)0x0206018C = *(u32*)0x02060100; // Shrink part of heap from 0x80000
+			*(u32*)0x0206019C = 0xA5000; // Shrink part of heap from 0x145000
+		} */
+	}
+
+	// G.G Series: Throw Out (Japan)
+	// Requires 8MB of RAM
+	else if (strcmp(romTid, "K3OJ") == 0 extendedMemory2) {
+		*(u32*)0x02007C0C = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02007C10 = 0xE12FFF1E; // bx lr
+		setBL(0x02007C78, (u32)dsiSaveGetInfo);
+		*(u32*)0x02007C90 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+		*(u32*)0x02007CA8 = 0xE3A00001; // mov r0, #1 (dsiSaveFreeSpaceAvailable)
+		setBL(0x02007CBC, (u32)dsiSaveCreate);
+		setBL(0x02007D90, (u32)dsiSaveGetInfo);
+		setBL(0x02007DB8, (u32)dsiSaveGetInfo);
+		setBL(0x02007E70, (u32)dsiSaveOpen);
+		setBL(0x02007E98, (u32)dsiSaveSetLength);
+		setBL(0x02007EB4, (u32)dsiSaveWrite);
+		setBL(0x02007EBC, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+		setBL(0x02007F00, (u32)dsiSaveClose);
+		setBL(0x02007F58, (u32)dsiSaveOpen);
+		setBL(0x02007F78, (u32)dsiSaveGetLength);
+		setBL(0x02007F88, (u32)dsiSaveClose);
+		setBL(0x02007FA8, (u32)dsiSaveRead);
+		setBL(0x02007FB4, (u32)dsiSaveRead); // dsiSaveReadAsync
+		setBL(0x02007FF8, (u32)dsiSaveClose);
+		*(u32*)0x020082F4 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x020082F8 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02008B88 = 0xE1A00000; // nop
+		*(u32*)0x020415A4 = 0xE1A00000; // nop
+		tonccpy((u32*)0x0204211C, dsiSaveGetResultCode, 0xC);
+		*(u32*)0x020454A4 = 0xE1A00000; // nop
+		patchInitDSiWare(0x0204D648, heapEnd);
+		/* if (!extendedMemory2) {
+			*(u32*)0x0204D9D4 -= 0x3B000;
+		} */
+		patchUserSettingsReadDSiWare(0x0204EDF4);
+		/* if (!extendedMemory2) {
+			*(u32*)0x0205CB5C = 0x50000; // Shrink large part of heap from 0xF0000
+			*(u32*)0x0205CBCC = 0x20000; // Shrink part of heap from 0x40000
+			*(u32*)0x0205CBD0 = *(u32*)0x0205CB58; // Shrink large part of heap from 0xC0000
+			*(u32*)0x0205CBD4 = *(u32*)0x0205CB5C; // Shrink part of heap from 0x80000
+			*(u32*)0x0205CBE4 = 0xA5000; // Shrink part of heap from 0x145000
+		} */
+	}
+
 	// Topoloco (USA)
 	// Topoloco (Europe)
 	// Requires 8MB of RAM

@@ -13856,6 +13856,32 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// G.G Series: Throw Out (Japan)
+	else if (strcmp(romTid, "K3OJ") == 0 && saveOnFlashcard) {
+		*(u32*)0x02007C0C = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02007C10 = 0xE12FFF1E; // bx lr
+		setBL(0x02007C78, (u32)dsiSaveGetInfo);
+		*(u32*)0x02007C90 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+		*(u32*)0x02007CA8 = 0xE3A00001; // mov r0, #1 (dsiSaveFreeSpaceAvailable)
+		setBL(0x02007CBC, (u32)dsiSaveCreate);
+		setBL(0x02007D90, (u32)dsiSaveGetInfo);
+		setBL(0x02007DB8, (u32)dsiSaveGetInfo);
+		setBL(0x02007E70, (u32)dsiSaveOpen);
+		setBL(0x02007E98, (u32)dsiSaveSetLength);
+		setBL(0x02007EB4, (u32)dsiSaveWrite);
+		setBL(0x02007EBC, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+		setBL(0x02007F00, (u32)dsiSaveClose);
+		setBL(0x02007F58, (u32)dsiSaveOpen);
+		setBL(0x02007F78, (u32)dsiSaveGetLength);
+		setBL(0x02007F88, (u32)dsiSaveClose);
+		setBL(0x02007FA8, (u32)dsiSaveRead);
+		setBL(0x02007FB4, (u32)dsiSaveRead); // dsiSaveReadAsync
+		setBL(0x02007FF8, (u32)dsiSaveClose);
+		*(u32*)0x020082F4 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x020082F8 = 0xE12FFF1E; // bx lr
+		tonccpy((u32*)0x0204211C, dsiSaveGetResultCode, 0xC);
+	}
+
 	// Topoloco (USA)
 	// Topoloco (Europe)
 	/*else if (strncmp(romTid, "KT5", 3) == 0 && saveOnFlashcard) {
