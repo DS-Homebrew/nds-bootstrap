@@ -53,6 +53,8 @@ musicCluster:
 	.word	0x00000000
 musicsSize:
 	.word	0x00000000
+musicBuffer:
+	.word	0x00000000
 pageFileCluster:
 	.word	0x00000000
 manualCluster:

@@ -213,6 +213,7 @@ int hookNdsRetailArm7(
 	}*/
 
 	const char* romTid = getRomTid(ndsHeader);
+	extern bool maxHeapOpen;
 
 	u32 cheatEngineAddr = CHEAT_ENGINE_LOCATION_B4DS;
 	if (!extendedMemory2 && strncmp(romTid, "CLJ", 3) == 0) { // Mario & Luigi: Bowser's Inside Story
@@ -222,6 +223,7 @@ int hookNdsRetailArm7(
 	ce7->intr_vblank_orig_return = *vblankHandler;
 	//ce7->intr_fifo_orig_return   = *ipcSyncHandler;
 	ce7->cheatEngineAddr         = cheatEngineAddr;
+	ce7->musicBuffer = maxHeapOpen ? 0x027F8000 : 0x027F0000;
 	ce7->moduleParams            = moduleParams;
 	if (sleepMode) {
 		ce7->valueBits |= b_sleepMode;

@@ -1687,6 +1687,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			||	strncmp(romTid, "K5M", 3) == 0 // G.G Series: The Last Knight
 			||	strncmp(romTid, "KPT", 3) == 0 // Link 'n' Launch
 			||	strncmp(romTid, "KHR", 3) == 0 // Picture Perfect: Hair Stylist
+			||	strncmp(romTid, "KS3", 3) == 0 // Shantae: Risky's Revenge
 			);
 
 			if (access("fat:/_nds/nds-bootstrap/b4dsTwlDonor.bin", F_OK) == 0) {

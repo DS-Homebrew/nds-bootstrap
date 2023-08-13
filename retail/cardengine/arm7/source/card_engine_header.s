@@ -14,6 +14,7 @@
 .global cardStruct
 .global patches_offset
 .global cheatEngineAddr
+.global musicBuffer
 .global moduleParams
 .global saveCluster
 .global valueBits
@@ -36,6 +37,8 @@ patches_offset:
 intr_vblank_orig_return:
 	.word	0x00000000
 cheatEngineAddr:
+	.word	0x00000000
+musicBuffer:
 	.word	0x00000000
 moduleParams:
 	.word	0x00000000

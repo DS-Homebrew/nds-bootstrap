@@ -54,6 +54,7 @@ extern void ndsCodeStart(u32* addr);
 extern vu32* volatile cardStruct;
 extern module_params_t* moduleParams;
 extern u32 cheatEngineAddr;
+extern u32 musicBuffer;
 extern s32 mainScreen;
 extern u32 language;
 extern u32* languageAddr;
@@ -88,7 +89,7 @@ int RumbleForce = 1;
 static int languageTimer = 0;
 static int volumeLevel = 3; // 0 = Off, 1 = Low, 2 = Medium, 3 = High/Max
 static int volumeLevelTimer = 0;
-static int soundBuffer = 0;
+static int musicBufferNo = 0;
 static bool customMusic = false;
 bool returnToMenu = false;
 bool isSdk5Set = false;
@@ -326,7 +327,7 @@ void myIrqHandlerVBlank(void) {
 
 	if (sharedAddr[2] == 0x5353554D) { // 'MUSS'
 		SCHANNEL_CR(15) &= ~SCHANNEL_ENABLE;
-		soundBuffer = 0;
+		musicBufferNo = 0;
 		customMusic = false;
 		sharedAddr[2] = 0;
 	}
@@ -339,14 +340,14 @@ void myIrqHandlerVBlank(void) {
 			sharedAddr[2] = 0x5953554D; // 'MUSY'
 			IPC_SendSync(0x5);
 
-			SCHANNEL_SOURCE(15) = 0x027F0000+(soundBuffer*0x2000);
+			SCHANNEL_SOURCE(15) = musicBuffer+(musicBufferNo*0x2000);
 			SCHANNEL_REPEAT_POINT(15) = 0;
 			SCHANNEL_LENGTH(15) = 0x2000/4;
 			SCHANNEL_TIMER(15) = SOUND_FREQ(22050);
 			SCHANNEL_CR(15) = SCHANNEL_ENABLE | SOUND_VOL(127) | SOUND_PAN(63) | SOUND_FORMAT_8BIT | SOUND_ONE_SHOT;
 
-			soundBuffer++;
-			if (soundBuffer == 2) soundBuffer = 0;
+			musicBufferNo++;
+			if (musicBufferNo == 2) musicBufferNo = 0;
 		}
 	}
 

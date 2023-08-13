@@ -98,7 +98,7 @@ static bool musicInited = false;
 static bool musicMagicStringChecked = false;
 
 static bool musicPlaying = false;
-static int soundBuffer = 1;
+static int musicBufferNo = 1;
 static u32 musicFileCount = 0;
 const u16 musicReadLen = 0x2000;
 static u32 musicPos = 0x2000;
@@ -1188,7 +1188,7 @@ void updateMusic(void) {
 		setDeviceOwner();
 
 		const u16 currentLen = (musicPosRev > musicReadLen) ? musicReadLen : musicPosRev;
-		fileRead((char*)(0x027F0000+(soundBuffer*musicReadLen)), &musicsFile, musicPosInFile + musicPos, currentLen);
+		fileRead((char*)(ce9->musicBuffer+(musicBufferNo*musicReadLen)), &musicsFile, musicPosInFile + musicPos, currentLen);
 		musicPos += musicReadLen;
 		if (musicPos > musicFileSize) {
 			musicPos = musicLoopPos;
@@ -1198,7 +1198,7 @@ void updateMusic(void) {
 				lastLenTemp++;
 				lastLen++;
 			}
-			fileRead((char*)(0x027F0000+(soundBuffer*musicReadLen)+musicPosRev), &musicsFile, musicPosInFile + musicPos, lastLen);
+			fileRead((char*)(ce9->musicBuffer+(musicBufferNo*musicReadLen)+musicPosRev), &musicsFile, musicPosInFile + musicPos, lastLen);
 			musicPos += lastLen;
 			musicPosRev = musicFileSize - musicLoopPos - lastLen;
 		} else {
@@ -1209,8 +1209,8 @@ void updateMusic(void) {
 			}
 		}
 
-		soundBuffer++;
-		if (soundBuffer == 2) soundBuffer = 0;
+		musicBufferNo++;
+		if (musicBufferNo == 2) musicBufferNo = 0;
 
 		sharedAddr[2] = 0;
 		REG_EXMEMCNT = exmemcnt;
@@ -1227,7 +1227,7 @@ void musicPlay(int id) {
 	}
 
 	if (musicInited && id < musicFileCount) {
-		soundBuffer = 1;
+		musicBufferNo = 1;
 
 		u16 exmemcnt = REG_EXMEMCNT;
 		setDeviceOwner();
@@ -1239,7 +1239,7 @@ void musicPlay(int id) {
 		musicPos = musicReadLen;
 		musicPosRev = musicFileSize - musicReadLen;
 
-		fileRead((char*)0x027F0000, &musicsFile, musicPosInFile, musicReadLen);
+		fileRead((char*)ce9->musicBuffer, &musicsFile, musicPosInFile, musicReadLen);
 
 		REG_EXMEMCNT = exmemcnt;
 		sharedAddr[2] = 0x5053554D; // 'MUSP'

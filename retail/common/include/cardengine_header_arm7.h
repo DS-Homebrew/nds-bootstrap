@@ -121,6 +121,7 @@ typedef struct cardengineArm7B4DS {
 	cardengineArm7Patches* patches;
 	u32 intr_vblank_orig_return;
 	u32 cheatEngineAddr;
+	u32 musicBuffer;
 	const module_params_t* moduleParams;
 	u32 cardStruct;
 	u32 valueBits;
@@ -155,6 +156,7 @@ typedef struct cardengineArm7 {
 	cardengineArm7Patches* patches;
 	u32 intr_vblank_orig_return;
 	u32 cheatEngineAddr;
+	u32 musicBuffer;
 	const module_params_t* moduleParams;
 	u32 cardStruct;
 	u32 valueBits;

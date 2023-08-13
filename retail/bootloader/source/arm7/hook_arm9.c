@@ -194,6 +194,7 @@ int hookNdsRetailArm9(
 	const char* romTid = getRomTid(ndsHeader);
 	extern u32 romSizeLimit;
 	extern u16 s2FlashcardId;
+	extern bool maxHeapOpen;
 
 	ce9->bootNdsCluster         = bootNdsCluster;
 	ce9->fileCluster            = fileCluster;
@@ -212,6 +213,7 @@ int hookNdsRetailArm9(
 	ce9->apFixOverlaysCluster   = apFixOverlaysCluster;
 	ce9->musicCluster           = musicCluster;
 	ce9->musicsSize             = musicsSize;
+	ce9->musicBuffer = maxHeapOpen ? 0x027F8000 : 0x027F0000;
 	ce9->pageFileCluster        = pageFileCluster;
 	ce9->manualCluster          = manualCluster;
 	ce9->sharedFontCluster      = sharedFontCluster;

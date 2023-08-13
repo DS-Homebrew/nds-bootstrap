@@ -197,6 +197,7 @@ typedef struct cardengineArm9 {
 	u32 apFixOverlaysCluster;
 	u32 musicCluster;
 	u32 musicsSize;
+	u32 musicBuffer;
     u32 pageFileCluster;
     u32 manualCluster;
     u32 sharedFontCluster;

@@ -21,6 +21,8 @@ extern u8 valueBits3;
 
 #define nopT 0x46C0
 
+bool maxHeapOpen = false;
+
 static inline void doubleNopT(u32 addr) {
 	*(u16*)(addr)   = nopT;
 	*(u16*)(addr+2) = nopT;
@@ -57,12 +59,13 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	const u32 cheatSizeTotal = cheatSize+(apPatchIsCheat ? apPatchSize : 0);
 
 	const bool ce9NotInHeap = (ce9Alt || (u32)ce9 == CARDENGINE_ARM9_LOCATION_DLDI_START);
-	const bool maxHeapOpen = (!extendedMemory2 && ce9NotInHeap && *(u32*)(((u32)ndsHeader->arm7destination) + newArm7binarySize - 0x24) == 0x027E0000);
+	maxHeapOpen = (!extendedMemory2 && ce9NotInHeap && *(u32*)(((u32)ndsHeader->arm7destination) + newArm7binarySize - 0x24) == 0x027E0000);
 	const u32 heapEndRetail = (ce9NotInHeap && !ce9AltLargeTable) ? ((cheatSizeTotal <= 4) ? 0x023E0000 : CHEAT_ENGINE_LOCATION_B4DS-0x400000) : ((fatTableAddr < 0x023C0000 || fatTableAddr >= (u32)ce9) ? (u32)ce9 : fatTableAddr);
 	const u32 heapEnd = extendedMemory2 ? (((u32)ndsHeader->arm9destination >= 0x02004000) ? CARDENGINE_ARM9_LOCATION_DLDI_EXTMEM : 0x02700000) : heapEndRetail;
 	const u32 heapEnd8MBHack = extendedMemory2 ? heapEnd : heapEndRetail+0x400000; // extendedMemory2 ? #0x27B0000 : #0x27E0000 (mirrors to 0x23E0000 on retail DS units)
 	const u32 heapEndExceed = extendedMemory2 ? heapEnd+0x800000 : heapEndRetail+0xC00000; // extendedMemory2 ? #0x2FB0000 (mirrors to 0x27B0000 on debug DS units) : #0x2FE0000 (mirrors to 0x23E0000 on retail DS units)
 	const u32 heapEndMaxForRetail = maxHeapOpen ? 0x023FC000 : heapEnd;
+	const u32 heapEndMaxForRetailMus = maxHeapOpen ? 0x023F8000 : heapEnd;
 	const bool debugOrMep = (extendedMemory2 || expansionPakFound);
 	const bool largeS2RAM = (expansionPakFound && (s2FlashcardId != 0)); // 16MB or more
 	if (donorFileCluster == CLUSTER_FREE) {
@@ -21042,7 +21045,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020DE548 = 0xE1A00000; // nop
 		*(u32*)0x020DE55C = 0xE1A00000; // nop
 		*(u32*)0x020E20C4 = 0xE1A00000; // nop
-		patchInitDSiWare(0x020E7ED8, heapEnd);
+		patchInitDSiWare(0x020E7ED8, heapEndMaxForRetailMus);
 		*(u32*)0x020E8264 = *(u32*)0x02004FD0;
 		patchUserSettingsReadDSiWare(0x020E9348);
 		*(u32*)0x020E977C = 0xE1A00000; // nop
@@ -21107,7 +21110,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020DE938 = 0xE1A00000; // nop
 		*(u32*)0x020DE94C = 0xE1A00000; // nop
 		*(u32*)0x020E253C = 0xE1A00000; // nop
-		patchInitDSiWare(0x020E8374, heapEnd);
+		patchInitDSiWare(0x020E8374, heapEndMaxForRetailMus);
 		*(u32*)0x020E8700 = *(u32*)0x02004FE8;
 		patchUserSettingsReadDSiWare(0x020E97E4);
 		*(u32*)0x020E9C18 = 0xE1A00000; // nop
