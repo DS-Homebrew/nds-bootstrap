@@ -14092,6 +14092,32 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		} */
 	}
 
+	// G.G Series: Vertex (Japan)
+	else if (strcmp(romTid, "KVEJ") == 0 && saveOnFlashcard) {
+		*(u32*)0x020071EC = 0xE3A00000; // mov r0, #0
+		*(u32*)0x020071F0 = 0xE12FFF1E; // bx lr
+		setBL(0x02007258, (u32)dsiSaveGetInfo);
+		*(u32*)0x02007270 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+		*(u32*)0x02007288 = 0xE3A00001; // mov r0, #1 (dsiSaveFreeSpaceAvailable)
+		setBL(0x0200729C, (u32)dsiSaveCreate);
+		setBL(0x02007370, (u32)dsiSaveGetInfo);
+		setBL(0x02007398, (u32)dsiSaveGetInfo);
+		setBL(0x02007450, (u32)dsiSaveOpen);
+		setBL(0x02007478, (u32)dsiSaveSetLength);
+		setBL(0x02007494, (u32)dsiSaveWrite);
+		setBL(0x0200749C, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+		setBL(0x020074E0, (u32)dsiSaveClose);
+		setBL(0x02007538, (u32)dsiSaveOpen);
+		setBL(0x02007558, (u32)dsiSaveGetLength);
+		setBL(0x02007568, (u32)dsiSaveClose);
+		setBL(0x02007588, (u32)dsiSaveRead);
+		setBL(0x02007594, (u32)dsiSaveRead); // dsiSaveReadAsync
+		setBL(0x020075D8, (u32)dsiSaveClose);
+		*(u32*)0x020078D4 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x020078D8 = 0xE12FFF1E; // bx lr
+		tonccpy((u32*)0x02040CB8, dsiSaveGetResultCode, 0xC);
+	}
+
 	// WarioWare: Touched! DL (USA, Australia)
 	else if (strcmp(romTid, "Z2AT") == 0 && saveOnFlashcard) {
 		setBL(0x0200BCA4, (u32)dsiSaveOpen);

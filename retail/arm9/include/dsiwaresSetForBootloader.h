@@ -508,6 +508,7 @@ static const char dsiWareForBootloader2[][4] = {
 	"KKM", // Uchi Makure!: Touch the Chameleon
 	"K6P", // Unou to Sanougaren Sasuru: Uranoura
 	"K5O", // G.G Series: Vector
+	"KVE", // G.G Series: Vertex
 	"KVK", // Viking Invasion
 	"KVT", // VT Tennis
 	"KK4", // Wakugumi: Monochrome Puzzle

@@ -24093,6 +24093,63 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// G.G Series: Vertex (USA)
+	// Saving not supported due to possible bug
+	else if (strcmp(romTid, "KVEE") == 0) {
+		*(u32*)0x0200D724 = 0xE1A00000; // nop
+		*(u32*)0x0204E3CC = 0xE1A00000; // nop
+		*(u32*)0x02052360 = 0xE1A00000; // nop
+		patchInitDSiWare(0x0205A544, heapEnd);
+		if (!extendedMemory2) {
+			*(u32*)0x0205A8D0 -= 0x3B000;
+		}
+		patchUserSettingsReadDSiWare(0x0205BD00);
+		if (!extendedMemory2) {
+			*(u32*)0x020612A0 = 0x50000; // Shrink large part of heap from 0xF0000
+			*(u32*)0x02061314 = 0x80000; // Shrink large part of heap from 0x100000
+			*(u32*)0x0206132C = *(u32*)0x020612A0;
+		}
+	}
+
+	// G.G Series: Vertex (Japan)
+	else if (strcmp(romTid, "KVEJ") == 0) {
+		*(u32*)0x020071EC = 0xE3A00000; // mov r0, #0
+		*(u32*)0x020071F0 = 0xE12FFF1E; // bx lr
+		setBL(0x02007258, (u32)dsiSaveGetInfo);
+		*(u32*)0x02007270 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+		*(u32*)0x02007288 = 0xE3A00001; // mov r0, #1 (dsiSaveFreeSpaceAvailable)
+		setBL(0x0200729C, (u32)dsiSaveCreate);
+		setBL(0x02007370, (u32)dsiSaveGetInfo);
+		setBL(0x02007398, (u32)dsiSaveGetInfo);
+		setBL(0x02007450, (u32)dsiSaveOpen);
+		setBL(0x02007478, (u32)dsiSaveSetLength);
+		setBL(0x02007494, (u32)dsiSaveWrite);
+		setBL(0x0200749C, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+		setBL(0x020074E0, (u32)dsiSaveClose);
+		setBL(0x02007538, (u32)dsiSaveOpen);
+		setBL(0x02007558, (u32)dsiSaveGetLength);
+		setBL(0x02007568, (u32)dsiSaveClose);
+		setBL(0x02007588, (u32)dsiSaveRead);
+		setBL(0x02007594, (u32)dsiSaveRead); // dsiSaveReadAsync
+		setBL(0x020075D8, (u32)dsiSaveClose);
+		*(u32*)0x020078D4 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x020078D8 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02008160 = 0xE1A00000; // nop
+		*(u32*)0x02040024 = 0xE1A00000; // nop
+		tonccpy((u32*)0x02040CB8, dsiSaveGetResultCode, 0xC);
+		*(u32*)0x02044084 = 0xE1A00000; // nop
+		*(u32*)0x0204C2E8 = 0xE3A00001; // mov r0, #1
+		patchInitDSiWare(0x0204C300, heapEnd);
+		if (!extendedMemory2) {
+			*(u32*)0x0204C670 -= 0x3A000;
+		}
+		patchUserSettingsReadDSiWare(0x0204DAB8);
+		if (!extendedMemory2) {
+			*(u32*)0x0205BA08 = 0x50000; // Shrink large part of heap from 0xF0000
+			*(u32*)0x0205BA6C = *(u32*)0x0205BA08;
+		}
+	}
+
 	// Viking Invasion (USA)
 	// Saving not supported due to using more than one file in filesystem
 	else if (strcmp(romTid, "KVKE") == 0) {
