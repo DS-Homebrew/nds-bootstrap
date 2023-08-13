@@ -9499,7 +9499,8 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// G.G Series: Ninja Karakuri Den (Japan)
-	else if (strcmp(romTid, "KAQJ") == 0 && saveOnFlashcard) {
+	// G.G Series: Wonder Land (Japan)
+	else if ((strcmp(romTid, "KAQJ") == 0 || strcmp(romTid, "KWLJ") == 0) && saveOnFlashcard) {
 		*(u32*)0x02007210 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x02007214 = 0xE12FFF1E; // bx lr
 		setBL(0x0200727C, (u32)dsiSaveGetInfo);
@@ -14365,6 +14366,32 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		if (!twlFontFound || gameOnFlashcard) {
 			*(u16*)0x02013B10 = 0x4770; // bx lr (Disable NFTR loading from TWLNAND)
 		}
+	}
+
+	// G.G Series: Wonder Land (Korea)
+	else if (strcmp(romTid, "KWLK") == 0 && saveOnFlashcard) {
+		*(u32*)0x020094D0 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x020094D4 = 0xE12FFF1E; // bx lr
+		setBL(0x0200953C, (u32)dsiSaveGetInfo);
+		*(u32*)0x02009554 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+		*(u32*)0x0200956C = 0xE3A00001; // mov r0, #1 (dsiSaveFreeSpaceAvailable)
+		setBL(0x02009580, (u32)dsiSaveCreate);
+		setBL(0x02009654, (u32)dsiSaveGetInfo);
+		setBL(0x0200967C, (u32)dsiSaveGetInfo);
+		setBL(0x02009734, (u32)dsiSaveOpen);
+		setBL(0x0200975C, (u32)dsiSaveSetLength);
+		setBL(0x02009778, (u32)dsiSaveWrite);
+		setBL(0x02009780, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+		setBL(0x020097C4, (u32)dsiSaveClose);
+		setBL(0x0200981C, (u32)dsiSaveOpen);
+		setBL(0x0200983C, (u32)dsiSaveGetLength);
+		setBL(0x0200984C, (u32)dsiSaveClose);
+		setBL(0x0200986C, (u32)dsiSaveRead);
+		setBL(0x02009878, (u32)dsiSaveRead); // dsiSaveReadAsync
+		setBL(0x020098BC, (u32)dsiSaveClose);
+		*(u32*)0x02009BB8 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02009BBC = 0xE12FFF1E; // bx lr
+		tonccpy((u32*)0x02042EC0, dsiSaveGetResultCode, 0xC);
 	}
 
 	// Wonderful Sports: Bowling (Japan)

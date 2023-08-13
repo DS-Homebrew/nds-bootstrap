@@ -16758,7 +16758,8 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// G.G Series: Ninja Karakuri Den (Japan)
-	else if (strcmp(romTid, "KAQJ") == 0) {
+	// G.G Series: Wonder Land (Japan)
+	else if (strcmp(romTid, "KAQJ") == 0 || strcmp(romTid, "KWLJ") == 0) {
 		*(u32*)0x02007210 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x02007214 = 0xE12FFF1E; // bx lr
 		setBL(0x0200727C, (u32)dsiSaveGetInfo);
@@ -16781,18 +16782,33 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020078F8 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x020078FC = 0xE12FFF1E; // bx lr
 		*(u32*)0x02008184 = 0xE1A00000; // nop
-		*(u32*)0x020401F4 = 0xE1A00000; // nop
-		tonccpy((u32*)0x02040E88, dsiSaveGetResultCode, 0xC);
-		*(u32*)0x02044254 = 0xE1A00000; // nop
-		*(u32*)0x0204C4B8 = 0xE3A00001; // mov r0, #1
-		patchInitDSiWare(0x0204C4D0, heapEnd);
-		if (!extendedMemory2) {
-			*(u32*)0x0204C840 -= 0x3A000;
-		}
-		patchUserSettingsReadDSiWare(0x0204DC88);
-		if (!extendedMemory2) {
-			*(u32*)0x0205C1A4 = 0x50000; // Shrink large part of heap from 0xF0000
-			*(u32*)0x0205C208 = *(u32*)0x0205C1A4;
+		if (strcmp(romTid, "KAQJ") == 0) {
+			*(u32*)0x020401F4 = 0xE1A00000; // nop
+			tonccpy((u32*)0x02040E88, dsiSaveGetResultCode, 0xC);
+			*(u32*)0x02044254 = 0xE1A00000; // nop
+			*(u32*)0x0204C4B8 = 0xE3A00001; // mov r0, #1
+			patchInitDSiWare(0x0204C4D0, heapEnd);
+			if (!extendedMemory2) {
+				*(u32*)0x0204C840 -= 0x3A000;
+			}
+			patchUserSettingsReadDSiWare(0x0204DC88);
+			if (!extendedMemory2) {
+				*(u32*)0x0205C1A4 = 0x50000; // Shrink large part of heap from 0xF0000
+				*(u32*)0x0205C208 = *(u32*)0x0205C1A4;
+			}
+		} else {
+			*(u32*)0x0204003C = 0xE1A00000; // nop
+			tonccpy((u32*)0x02040CD0, dsiSaveGetResultCode, 0xC);
+			*(u32*)0x0204409C = 0xE1A00000; // nop
+			*(u32*)0x0204C300 = 0xE3A00001; // mov r0, #1
+			patchInitDSiWare(0x0204C318, heapEnd);
+			if (!extendedMemory2) {
+				*(u32*)0x0204C688 -= 0x3A000;
+			}
+			patchUserSettingsReadDSiWare(0x0204DAD0);
+			if (!extendedMemory2) {
+				*(u32*)0x0205C110 = 0x50000; // Shrink large part of heap from 0xF0000
+			}
 		}
 	}
 
@@ -24507,6 +24523,62 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u16*)0x02029A3A = nopT;
 		*(u16*)0x02029A3C = nopT;
 		doubleNopT(0x02029A3E);
+	}
+
+	// G.G Series: Wonder Land (USA)
+	// Saving not supported due to possible bug
+	else if (strcmp(romTid, "KWLE") == 0) {
+		*(u32*)0x0200D71C = 0xE1A00000; // nop
+		*(u32*)0x0204EAC0 = 0xE1A00000; // nop
+		*(u32*)0x02052A54 = 0xE1A00000; // nop
+		patchInitDSiWare(0x0205AC38, heapEnd);
+		if (!extendedMemory2) {
+			*(u32*)0x0205AFC4 -= 0x3B000;
+		}
+		patchUserSettingsReadDSiWare(0x0205C3F4);
+		if (!extendedMemory2) {
+			*(u32*)0x02061994 = 0x50000; // Shrink large part of heap from 0xF0000
+			*(u32*)0x02061A08 = 0x80000; // Shrink large part of heap from 0x100000
+		}
+	}
+
+	// G.G Series: Wonder Land (Korea)
+	else if (strcmp(romTid, "KWLK") == 0) {
+		*(u32*)0x020094D0 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x020094D4 = 0xE12FFF1E; // bx lr
+		setBL(0x0200953C, (u32)dsiSaveGetInfo);
+		*(u32*)0x02009554 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+		*(u32*)0x0200956C = 0xE3A00001; // mov r0, #1 (dsiSaveFreeSpaceAvailable)
+		setBL(0x02009580, (u32)dsiSaveCreate);
+		setBL(0x02009654, (u32)dsiSaveGetInfo);
+		setBL(0x0200967C, (u32)dsiSaveGetInfo);
+		setBL(0x02009734, (u32)dsiSaveOpen);
+		setBL(0x0200975C, (u32)dsiSaveSetLength);
+		setBL(0x02009778, (u32)dsiSaveWrite);
+		setBL(0x02009780, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+		setBL(0x020097C4, (u32)dsiSaveClose);
+		setBL(0x0200981C, (u32)dsiSaveOpen);
+		setBL(0x0200983C, (u32)dsiSaveGetLength);
+		setBL(0x0200984C, (u32)dsiSaveClose);
+		setBL(0x0200986C, (u32)dsiSaveRead);
+		setBL(0x02009878, (u32)dsiSaveRead); // dsiSaveReadAsync
+		setBL(0x020098BC, (u32)dsiSaveClose);
+		*(u32*)0x02009BB8 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02009BBC = 0xE12FFF1E; // bx lr
+		*(u32*)0x02009DFC = 0xE12FFF1E; // bx lr
+		*(u32*)0x02009E14 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0200A648 = 0xE1A00000; // nop
+		*(u32*)0x02042348 = 0xE1A00000; // nop
+		tonccpy((u32*)0x02042EC0, dsiSaveGetResultCode, 0xC);
+		*(u32*)0x02046248 = 0xE1A00000; // nop
+		patchInitDSiWare(0x0204E164, heapEnd);
+		if (!extendedMemory2) {
+			*(u32*)0x0204E4F0 -= 0x3B000;
+		}
+		patchUserSettingsReadDSiWare(0x0204F910);
+		if (!extendedMemory2) {
+			*(u32*)0x0205DC64 = 0x50000; // Shrink large part of heap from 0xF0000
+		}
 	}
 
 	// Wonderful Sports: Bowling (Japan)

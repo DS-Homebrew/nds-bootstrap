@@ -515,6 +515,7 @@ static const char dsiWareForBootloader2[][4] = {
 	"Z2A", // WarioWare: Touched! DL
 	"KWQ", // Whack-A-Friend
 	"KDW", // White-Water Domo
+	"KWL", // G.G Series: Wonder Land
 	"KBS", // Wonderful Sports: Bowling
 	"KWS", // Word Searcher
 	"KWR", // Word Searcher II
