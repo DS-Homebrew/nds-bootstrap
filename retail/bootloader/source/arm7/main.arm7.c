@@ -1341,6 +1341,8 @@ int arm7_main(void) {
 					||	strcmp(romTid, "KBEV") == 0 // Bejeweled Twist (Europe, Australia)
 					||	strncmp(romTid, "K9G", 3) == 0 // Big Bass Arcade
 					||	strncmp(romTid, "KUG", 3) == 0 // G.G Series: Drift Circuit 2
+					||	strncmp(romTid, "KEI", 3) == 0 // Electroplankton: Beatnes
+					||	strncmp(romTid, "KEA", 3) == 0 // Electroplankton: Trapy
 					||	strncmp(romTid, "K5M", 3) == 0 // G.G Series: The Last Knight
 					||	strncmp(romTid, "KPT", 3) == 0 // Link 'n' Launch
 					||	strncmp(romTid, "CLJ", 3) == 0 // Mario & Luigi: Bowser's Inside Story
