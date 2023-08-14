@@ -19715,7 +19715,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		tonccpy((u32*)0x02015AD4, dsiSaveGetResultCode, 0xC);
 		*(u32*)0x02018134 = 0xE1A00000; // nop
 		patchInitDSiWare(0x0201D25C, heapEnd);
-		*(u32*)0x0201D5E8 = 0x020F7520;
+		*(u32*)0x0201D5E8 = *(u32*)0x02004FE8;
 		patchUserSettingsReadDSiWare(0x0201E738);
 		setBL(0x02026984, (u32)dsiSaveOpen);
 		setBL(0x020269CC, (u32)dsiSaveGetLength);
@@ -19742,6 +19742,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		tonccpy((u32*)0x0201542C, dsiSaveGetResultCode, 0xC);
 		*(u32*)0x02017A8C = 0xE1A00000; // nop
 		patchInitDSiWare(0x0201CD94, heapEnd);
+		*(u32*)0x0201D120 = *(u32*)0x02004FE8;
 		patchUserSettingsReadDSiWare(0x0201E270);
 		setBL(0x0202663C, (u32)dsiSaveOpen);
 		setBL(0x02026684, (u32)dsiSaveGetLength);
@@ -19764,8 +19765,8 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02014F4C = 0xE1A00000; // nop
 		tonccpy((u32*)0x02015AD0, dsiSaveGetResultCode, 0xC);
 		*(u32*)0x02018130 = 0xE1A00000; // nop
-		patchInitDSiWare(0x0201D258, heapEnd);
-		//*(u32*)0x0201D5E4 = 0x02133AC0;
+		patchInitDSiWare(0x0201D258, heapEndMaxForRetail);
+		*(u32*)0x0201D5E4 = *(u32*)0x02004FE8;
 		patchUserSettingsReadDSiWare(0x0201E374);
 		setBL(0x0202693C, (u32)dsiSaveOpen);
 		setBL(0x02026984, (u32)dsiSaveGetLength);
@@ -19777,6 +19778,9 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02026B38, (u32)dsiSaveSetLength);
 		setBL(0x02026B4C, (u32)dsiSaveWrite);
 		setBL(0x02026B60, (u32)dsiSaveClose);
+		/* if (!extendedMemory2) {
+			*(u32*)0x02054270 = 0xE3A019B6; // mov r1, #0x2D8000
+		} */
 	}
 
 	// Puzzle to Go: Baby Animals (Europe)
