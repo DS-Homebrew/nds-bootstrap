@@ -25053,6 +25053,142 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// G.G Series: Z-One (USA)
+	// G.G Series: Z-One (Korea)
+	else if (strcmp(romTid, "KNZE") == 0 || strcmp(romTid, "KZNK") == 0) {
+		s8 offsetChange = (romTid[3] == 'E') ? 0 : 0x24;
+
+		*(u32*)(0x02009514+offsetChange) = 0xE3A00000; // mov r0, #0
+		*(u32*)(0x02009518+offsetChange) = 0xE12FFF1E; // bx lr
+		setBL(0x02009580+offsetChange, (u32)dsiSaveGetInfo);
+		*(u32*)(0x02009598+offsetChange) = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+		*(u32*)(0x020095B0+offsetChange) = 0xE3A00001; // mov r0, #1 (dsiSaveFreeSpaceAvailable)
+		setBL(0x020095C4+offsetChange, (u32)dsiSaveCreate);
+		setBL(0x02009698+offsetChange, (u32)dsiSaveGetInfo);
+		setBL(0x020096C0+offsetChange, (u32)dsiSaveGetInfo);
+		setBL(0x02009778+offsetChange, (u32)dsiSaveOpen);
+		setBL(0x020097A0+offsetChange, (u32)dsiSaveSetLength);
+		setBL(0x020097BC+offsetChange, (u32)dsiSaveWrite);
+		setBL(0x020097C4+offsetChange, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+		setBL(0x02009808+offsetChange, (u32)dsiSaveClose);
+		setBL(0x02009860+offsetChange, (u32)dsiSaveOpen);
+		setBL(0x02009880+offsetChange, (u32)dsiSaveGetLength);
+		setBL(0x02009890+offsetChange, (u32)dsiSaveClose);
+		setBL(0x020098B0+offsetChange, (u32)dsiSaveRead);
+		setBL(0x020098BC+offsetChange, (u32)dsiSaveRead); // dsiSaveReadAsync
+		setBL(0x02009900+offsetChange, (u32)dsiSaveClose);
+		*(u32*)(0x02009BFC+offsetChange) = 0xE3A00000; // mov r0, #0
+		*(u32*)(0x02009C00+offsetChange) = 0xE12FFF1E; // bx lr
+		*(u32*)(0x02009E40+offsetChange) = 0xE12FFF1E; // bx lr
+		*(u32*)(0x02009E58+offsetChange) = 0xE12FFF1E; // bx lr
+		*(u32*)(0x0200A68C+offsetChange) = 0xE1A00000; // nop
+
+		if (romTid[3] == 'E') {
+			*(u32*)0x02042B0C = 0xE1A00000; // nop
+			tonccpy((u32*)0x02043684, dsiSaveGetResultCode, 0xC);
+			*(u32*)0x02046A0C = 0xE1A00000; // nop
+			patchInitDSiWare(0x0204E928, heapEnd);
+			if (!extendedMemory2) {
+				*(u32*)0x0204ECB4 -= 0x3B000;
+			}
+			patchUserSettingsReadDSiWare(0x020500D4);
+			if (!extendedMemory2) {
+				*(u32*)0x0205DE4C = 0x50000; // Shrink large part of heap from 0xF0000
+				*(u32*)0x0205DEC4 = 0x8C000; // Shrink large part of heap from 0x10C000
+			}
+		} else {
+			*(u32*)0x02042AA8 = 0xE1A00000; // nop
+			tonccpy((u32*)0x02043620, dsiSaveGetResultCode, 0xC);
+			*(u32*)0x020469A8 = 0xE1A00000; // nop
+			patchInitDSiWare(0x0204E8C4, heapEnd);
+			if (!extendedMemory2) {
+				*(u32*)0x0204EC50 -= 0x3B000;
+			}
+			patchUserSettingsReadDSiWare(0x02050070);
+			if (!extendedMemory2) {
+				*(u32*)0x0205DDE8 = 0x50000; // Shrink large part of heap from 0xF0000
+				*(u32*)0x0205DE60 = 0x8C000; // Shrink large part of heap from 0x10C000
+			}
+		}
+	}
+
+	// G.G Series: Z-One (Japan)
+	else if (strcmp(romTid, "KZNJ") == 0) {
+		*(u32*)0x02007288 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0200728C = 0xE12FFF1E; // bx lr
+		setBL(0x020072F4, (u32)dsiSaveGetInfo);
+		*(u32*)0x0200730C = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+		*(u32*)0x02007324 = 0xE3A00001; // mov r0, #1 (dsiSaveFreeSpaceAvailable)
+		setBL(0x02007338, (u32)dsiSaveCreate);
+		setBL(0x0200740C, (u32)dsiSaveGetInfo);
+		setBL(0x02007434, (u32)dsiSaveGetInfo);
+		setBL(0x020074EC, (u32)dsiSaveOpen);
+		setBL(0x02007514, (u32)dsiSaveSetLength);
+		setBL(0x02007530, (u32)dsiSaveWrite);
+		setBL(0x02007538, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+		setBL(0x0200757C, (u32)dsiSaveClose);
+		setBL(0x020075D4, (u32)dsiSaveOpen);
+		setBL(0x020075F4, (u32)dsiSaveGetLength);
+		setBL(0x02007604, (u32)dsiSaveClose);
+		setBL(0x02007624, (u32)dsiSaveRead);
+		setBL(0x02007630, (u32)dsiSaveRead); // dsiSaveReadAsync
+		setBL(0x02007674, (u32)dsiSaveClose);
+		*(u32*)0x02007970 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02007974 = 0xE12FFF1E; // bx lr
+		*(u32*)0x020081FC = 0xE1A00000; // nop
+		*(u32*)0x02040818 = 0xE1A00000; // nop
+		tonccpy((u32*)0x020414AC, dsiSaveGetResultCode, 0xC);
+		*(u32*)0x02044878 = 0xE1A00000; // nop
+		*(u32*)0x0204CADC = 0xE3A00001; // mov r0, #1
+		patchInitDSiWare(0x0204CAF4, heapEnd);
+		if (!extendedMemory2) {
+			*(u32*)0x0204CE64 -= 0x3A000;
+		}
+		patchUserSettingsReadDSiWare(0x0204E2AC);
+		if (!extendedMemory2) {
+			*(u32*)0x0205C310 = 0x50000; // Shrink large part of heap from 0xF0000
+			*(u32*)0x0205C374 = 0x8C000; // Shrink large part of heap from 0x10C000
+		}
+	}
+
+	// G.G Series: Z-One 2 (Japan)
+	else if (strcmp(romTid, "KZ2J") == 0) {
+		*(u32*)0x020087C0 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x020087C4 = 0xE12FFF1E; // bx lr
+		setBL(0x0200882C, (u32)dsiSaveGetInfo);
+		*(u32*)0x02008844 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+		*(u32*)0x0200885C = 0xE3A00001; // mov r0, #1 (dsiSaveFreeSpaceAvailable)
+		setBL(0x02008870, (u32)dsiSaveCreate);
+		setBL(0x02008944, (u32)dsiSaveGetInfo);
+		setBL(0x0200896C, (u32)dsiSaveGetInfo);
+		setBL(0x02008A24, (u32)dsiSaveOpen);
+		setBL(0x02008A4C, (u32)dsiSaveSetLength);
+		setBL(0x02008A68, (u32)dsiSaveWrite);
+		setBL(0x02008A70, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+		setBL(0x02008AB4, (u32)dsiSaveClose);
+		setBL(0x02008B0C, (u32)dsiSaveOpen);
+		setBL(0x02008B2C, (u32)dsiSaveGetLength);
+		setBL(0x02008B3C, (u32)dsiSaveClose);
+		setBL(0x02008B5C, (u32)dsiSaveRead);
+		setBL(0x02008B68, (u32)dsiSaveRead); // dsiSaveReadAsync
+		setBL(0x02008BAC, (u32)dsiSaveClose);
+		*(u32*)0x02008EA8 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02008EAC = 0xE12FFF1E; // bx lr
+		*(u32*)0x0200973C = 0xE1A00000; // nop
+		*(u32*)0x02041D10 = 0xE1A00000; // nop
+		tonccpy((u32*)0x02042888, dsiSaveGetResultCode, 0xC);
+		*(u32*)0x02045C10 = 0xE1A00000; // nop
+		patchInitDSiWare(0x0204DBB8, heapEnd);
+		if (!extendedMemory2) {
+			*(u32*)0x0204DF44 -= 0x3B000;
+		}
+		patchUserSettingsReadDSiWare(0x0204F364);
+		if (!extendedMemory2) {
+			*(u32*)0x0205D0DC = 0x30000; // Shrink large part of heap from 0xF0000
+			*(u32*)0x0205D154 = 0x30000; // Shrink large part of heap from 0xB8000
+		}
+	}
+
 	// Za Curosu (Japan)
 	else if (strcmp(romTid, "KZXJ") == 0) {
 		// useSharedFont = (twlFontFound && debugOrMep);

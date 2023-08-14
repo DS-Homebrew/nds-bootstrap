@@ -1355,6 +1355,7 @@ int arm7_main(void) {
 					||	strncmp(romTid, "KZV", 3) == 0 // Tales to Enjoy!: Puss in Boots
 					||	strncmp(romTid, "KZ7", 3) == 0 // Tales to Enjoy!: The Three Little Pigs
 					||	strncmp(romTid, "KZ8", 3) == 0 // Tales to Enjoy!: The Ugly Duckling
+					||	strncmp(romTid, "KZ2", 3) == 0 // G.G Series: Z-One 2
 					) {
 						// Game's heap cannot be shrunk, so display error
 						errorOutput();

@@ -9753,7 +9753,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
-	// Number Battle
+	// Number Battle (USA)
 	else if (strcmp(romTid, "KSUE") == 0) {
 		if (saveOnFlashcard) {
 			*(u32*)0x02005EA4 = 0xE3A00001; // mov r0, #1
@@ -14695,6 +14695,87 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02065F5C, (u32)dsiSaveWrite);
 		setBL(0x02065F84, (u32)dsiSaveWrite);
 		setBL(0x02065F8C, (u32)dsiSaveClose);
+	}
+
+	// G.G Series: Z-One (USA)
+	// G.G Series: Z-One (Korea)
+	else if ((strcmp(romTid, "KNZE") == 0 || strcmp(romTid, "KZNK") == 0) && saveOnFlashcard) {
+		s8 offsetChange = (romTid[3] == 'E') ? 0 : 0x24;
+
+		*(u32*)(0x02009514+offsetChange) = 0xE3A00000; // mov r0, #0
+		*(u32*)(0x02009518+offsetChange) = 0xE12FFF1E; // bx lr
+		setBL(0x02009580+offsetChange, (u32)dsiSaveGetInfo);
+		*(u32*)(0x02009598+offsetChange) = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+		*(u32*)(0x020095B0+offsetChange) = 0xE3A00001; // mov r0, #1 (dsiSaveFreeSpaceAvailable)
+		setBL(0x020095C4+offsetChange, (u32)dsiSaveCreate);
+		setBL(0x02009698+offsetChange, (u32)dsiSaveGetInfo);
+		setBL(0x020096C0+offsetChange, (u32)dsiSaveGetInfo);
+		setBL(0x02009778+offsetChange, (u32)dsiSaveOpen);
+		setBL(0x020097A0+offsetChange, (u32)dsiSaveSetLength);
+		setBL(0x020097BC+offsetChange, (u32)dsiSaveWrite);
+		setBL(0x020097C4+offsetChange, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+		setBL(0x02009808+offsetChange, (u32)dsiSaveClose);
+		setBL(0x02009860+offsetChange, (u32)dsiSaveOpen);
+		setBL(0x02009880+offsetChange, (u32)dsiSaveGetLength);
+		setBL(0x02009890+offsetChange, (u32)dsiSaveClose);
+		setBL(0x020098B0+offsetChange, (u32)dsiSaveRead);
+		setBL(0x020098BC+offsetChange, (u32)dsiSaveRead); // dsiSaveReadAsync
+		setBL(0x02009900+offsetChange, (u32)dsiSaveClose);
+		*(u32*)(0x02009BFC+offsetChange) = 0xE3A00000; // mov r0, #0
+		*(u32*)(0x02009C00+offsetChange) = 0xE12FFF1E; // bx lr
+		tonccpy((u32*)((romTid[3] == 'E') ? 0x02043684 : 0x02043620), dsiSaveGetResultCode, 0xC);
+	}
+
+	// G.G Series: Z-One (Japan)
+	else if (strcmp(romTid, "KZNJ") == 0 && saveOnFlashcard) {
+		*(u32*)0x02007288 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0200728C = 0xE12FFF1E; // bx lr
+		setBL(0x020072F4, (u32)dsiSaveGetInfo);
+		*(u32*)0x0200730C = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+		*(u32*)0x02007324 = 0xE3A00001; // mov r0, #1 (dsiSaveFreeSpaceAvailable)
+		setBL(0x02007338, (u32)dsiSaveCreate);
+		setBL(0x0200740C, (u32)dsiSaveGetInfo);
+		setBL(0x02007434, (u32)dsiSaveGetInfo);
+		setBL(0x020074EC, (u32)dsiSaveOpen);
+		setBL(0x02007514, (u32)dsiSaveSetLength);
+		setBL(0x02007530, (u32)dsiSaveWrite);
+		setBL(0x02007538, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+		setBL(0x0200757C, (u32)dsiSaveClose);
+		setBL(0x020075D4, (u32)dsiSaveOpen);
+		setBL(0x020075F4, (u32)dsiSaveGetLength);
+		setBL(0x02007604, (u32)dsiSaveClose);
+		setBL(0x02007624, (u32)dsiSaveRead);
+		setBL(0x02007630, (u32)dsiSaveRead); // dsiSaveReadAsync
+		setBL(0x02007674, (u32)dsiSaveClose);
+		*(u32*)0x02007970 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02007974 = 0xE12FFF1E; // bx lr
+		tonccpy((u32*)0x020414AC, dsiSaveGetResultCode, 0xC);
+	}
+
+	// G.G Series: Z-One 2 (Japan)
+	else if (strcmp(romTid, "KZ2J") == 0 && saveOnFlashcard) {
+		*(u32*)0x020087C0 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x020087C4 = 0xE12FFF1E; // bx lr
+		setBL(0x0200882C, (u32)dsiSaveGetInfo);
+		*(u32*)0x02008844 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+		*(u32*)0x0200885C = 0xE3A00001; // mov r0, #1 (dsiSaveFreeSpaceAvailable)
+		setBL(0x02008870, (u32)dsiSaveCreate);
+		setBL(0x02008944, (u32)dsiSaveGetInfo);
+		setBL(0x0200896C, (u32)dsiSaveGetInfo);
+		setBL(0x02008A24, (u32)dsiSaveOpen);
+		setBL(0x02008A4C, (u32)dsiSaveSetLength);
+		setBL(0x02008A68, (u32)dsiSaveWrite);
+		setBL(0x02008A70, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+		setBL(0x02008AB4, (u32)dsiSaveClose);
+		setBL(0x02008B0C, (u32)dsiSaveOpen);
+		setBL(0x02008B2C, (u32)dsiSaveGetLength);
+		setBL(0x02008B3C, (u32)dsiSaveClose);
+		setBL(0x02008B5C, (u32)dsiSaveRead);
+		setBL(0x02008B68, (u32)dsiSaveRead); // dsiSaveReadAsync
+		setBL(0x02008BAC, (u32)dsiSaveClose);
+		*(u32*)0x02008EA8 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02008EAC = 0xE12FFF1E; // bx lr
+		tonccpy((u32*)0x02042888, dsiSaveGetResultCode, 0xC);
 	}
 
 	// Za Curosu (Japan)

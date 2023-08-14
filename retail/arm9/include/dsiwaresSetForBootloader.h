@@ -526,6 +526,8 @@ static const char dsiWareForBootloader2[][4] = {
 	"KU3", // Working Dawgs: Rivet Retriever
 	"KDX", // X-Scape (bootloaderi-exclusive)
 	"KYU", // Yummy Yummy Cooking Jam
+	"KNZ", "KZN", // G.G Series: Z-One
+	"KZ2", // G.G Series: Z-One 2
 	"KZX", // Za Curosu
 	"KAS", // Art Style: ZENGAGE
 	"KKH", // Zimo: Mahjong Fanatic
