@@ -2713,6 +2713,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBLThumb(0x020368E6, dsiSaveCreateT); // dsiSaveCreateAuto
 		setBLThumb(0x020368F0, dsiSaveOpenT);
 		//setBLThumb(0x020368FA, dsiSaveGetResultCodeT);
+		doubleNopT(0x02036904);
 		doubleNopT(0x0203691C); // dsiSaveCreateDirAuto
 		setBLThumb(0x02036924, dsiSaveCreateT); // dsiSaveCreateAuto
 		setBLThumb(0x0203692E, dsiSaveOpenT);
@@ -2765,6 +2766,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBLThumb(0x02036026, dsiSaveCreateT); // dsiSaveCreateAuto
 		setBLThumb(0x02036030, dsiSaveOpenT);
 		//setBLThumb(0x0203603A, dsiSaveGetResultCodeT);
+		doubleNopT(0x02036044);
 		doubleNopT(0x0203605C); // dsiSaveCreateDirAuto
 		setBLThumb(0x02036064, dsiSaveCreateT); // dsiSaveCreateAuto
 		setBLThumb(0x0203606E, dsiSaveOpenT);
@@ -2777,6 +2779,59 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBLThumb(0x02036110, dsiSaveSeekT);
 		setBLThumb(0x0203611A, dsiSaveReadT);
 		setBLThumb(0x02036120, dsiSaveCloseT);
+	}
+
+	// Bejeweled Twist (Japan)
+	else if (strcmp(romTid, "KBEJ") == 0 && saveOnFlashcard) {
+		const u32 dsiSaveCreateT = 0x02094750;
+		*(u16*)dsiSaveCreateT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveCreateT + 4), dsiSaveCreate, 0xC);
+
+		const u32 dsiSaveOpenT = 0x02094760;
+		*(u16*)dsiSaveOpenT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveOpenT + 4), dsiSaveOpen, 0xC);
+
+		const u32 dsiSaveCloseT = 0x02094770;
+		*(u16*)dsiSaveCloseT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveCloseT + 4), dsiSaveClose, 0xC);
+
+		const u32 dsiSaveSeekT = 0x02094780;
+		*(u16*)dsiSaveSeekT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveSeekT + 4), dsiSaveSeek, 0xC);
+
+		const u32 dsiSaveReadT = 0x02094790;
+		*(u16*)dsiSaveReadT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveReadT + 4), dsiSaveRead, 0xC);
+
+		const u32 dsiSaveGetResultCodeT = 0x020940C8;
+		*(u16*)dsiSaveGetResultCodeT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveGetResultCodeT + 4), dsiSaveGetResultCode, 0xC);
+
+		const u32 dsiSaveSetLengthT = 0x02094B14;
+		*(u16*)dsiSaveSetLengthT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveSetLengthT + 4), dsiSaveSetLength, 0xC);
+
+		const u32 dsiSaveWriteT = 0x02094CCC;
+		*(u16*)dsiSaveWriteT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveWriteT + 4), dsiSaveWrite, 0xC);
+
+		doubleNopT(0x02036112); // dsiSaveCreateDirAuto
+		setBLThumb(0x0203611A, dsiSaveCreateT); // dsiSaveCreateAuto
+		setBLThumb(0x02036124, dsiSaveOpenT);
+		//setBLThumb(0x0203612E, dsiSaveGetResultCodeT);
+		doubleNopT(0x02036138);
+		doubleNopT(0x02036150); // dsiSaveCreateDirAuto
+		setBLThumb(0x02036158, dsiSaveCreateT); // dsiSaveCreateAuto
+		setBLThumb(0x02036162, dsiSaveOpenT);
+		//setBLThumb(0x0203616C, dsiSaveGetResultCodeT);
+		//setBLThumb(0x020361A2, dsiSaveSetLengthT);
+		setBLThumb(0x020361AC, dsiSaveSeekT);
+		//setBLThumb(0x020361B6, dsiSaveWriteT);
+		setBLThumb(0x020361BC, dsiSaveCloseT);
+		setBLThumb(0x020361EA, dsiSaveOpenT);
+		setBLThumb(0x02036204, dsiSaveSeekT);
+		setBLThumb(0x0203620E, dsiSaveReadT);
+		setBLThumb(0x02036214, dsiSaveCloseT);
 	}
 
 	// Big Bass Arcade (USA)

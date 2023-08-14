@@ -1683,6 +1683,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			conf->useSdk5DonorAlt = ( // Use alternate ARM7 donor in order for below games to use more of the main RAM
 				strncmp(romTid, "K2Z", 3) == 0 // G.G Series: Altered Weapon
 			||	strncmp(romTid, "KSR", 3) == 0 // Aura-Aura Climber
+			||	strcmp(romTid, "KBEV") == 0 // Bejeweled Twist (Europe, Australia)
 			||	strncmp(romTid, "KUG", 3) == 0 // G.G Series: Drift Circuit 2
 			||	strncmp(romTid, "K5M", 3) == 0 // G.G Series: The Last Knight
 			||	strncmp(romTid, "KPT", 3) == 0 // Link 'n' Launch

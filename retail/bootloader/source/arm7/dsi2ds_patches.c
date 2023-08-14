@@ -4322,7 +4322,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		doubleNopT(0x0209CA62);
 		doubleNopT(0x0209CB46);
 		patchHiHeapDSiWareThumb(0x0209CB84, 0x0209A2F0, heapEnd);
-		*(u32*)0x0209CC5C = 0x0210E1C0;
+		*(u32*)0x0209CC5C = *(u32*)0x02004FDC;
 		patchUserSettingsReadDSiWare(0x0209D80E);
 		*(u16*)0x0209D828 = 0x2001; // movs r0, #1
 		*(u16*)0x0209D82A = 0x4770; // bx lr
@@ -4331,8 +4331,8 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Bejeweled Twist (Europe, Australia)
-	// Requires 8MB of RAM
-	else if (strcmp(romTid, "KBEV") == 0 && extendedMemory2) {
+	// Local Wireless requires 8MB of RAM
+	else if (strcmp(romTid, "KBEV") == 0) {
 		const u32 dsiSaveCreateT = 0x02094A78;
 		*(u16*)dsiSaveCreateT = 0x4778; // bx pc
 		tonccpy((u32*)(dsiSaveCreateT + 4), dsiSaveCreate, 0xC);
@@ -4391,13 +4391,82 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		doubleNopT(0x0209B642);
 		doubleNopT(0x0209B64E);
 		doubleNopT(0x0209B732);
-		patchHiHeapDSiWareThumb(0x0209B770, 0x02098EC0, heapEnd); // movs r0, #0x2700000
-		*(u32*)0x0209B848 = 0x0212B7E0;
+		patchHiHeapDSiWareThumb(0x0209B770, 0x02098EC0, heapEndMaxForRetail);
+		*(u32*)0x0209B848 = *(u32*)0x02004FF4;
 		patchUserSettingsReadDSiWare(0x0209C366);
-		*(u16*)0x0209C384 = 0x2001; // movs r0, #1
+		*(u16*)0x0209C384 = extendedMemory2 ? 0x2001 : 0x2000; // movs r0, #extendedMemory2 ? 1 : 0
 		*(u16*)0x0209C386 = 0x4770; // bx lr
 		*(u16*)0x0209C38C = 0x2000; // movs r0, #0
 		*(u16*)0x0209C38E = 0x4770; // bx lr
+	}
+
+	// Bejeweled Twist (Japan)
+	else if (strcmp(romTid, "KBEJ") == 0) {
+		const u32 dsiSaveCreateT = 0x02094750;
+		*(u16*)dsiSaveCreateT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveCreateT + 4), dsiSaveCreate, 0xC);
+
+		const u32 dsiSaveOpenT = 0x02094760;
+		*(u16*)dsiSaveOpenT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveOpenT + 4), dsiSaveOpen, 0xC);
+
+		const u32 dsiSaveCloseT = 0x02094770;
+		*(u16*)dsiSaveCloseT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveCloseT + 4), dsiSaveClose, 0xC);
+
+		const u32 dsiSaveSeekT = 0x02094780;
+		*(u16*)dsiSaveSeekT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveSeekT + 4), dsiSaveSeek, 0xC);
+
+		const u32 dsiSaveReadT = 0x02094790;
+		*(u16*)dsiSaveReadT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveReadT + 4), dsiSaveRead, 0xC);
+
+		const u32 dsiSaveGetResultCodeT = 0x020940C8;
+		*(u16*)dsiSaveGetResultCodeT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveGetResultCodeT + 4), dsiSaveGetResultCode, 0xC);
+
+		const u32 dsiSaveSetLengthT = 0x02094B14;
+		*(u16*)dsiSaveSetLengthT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveSetLengthT + 4), dsiSaveSetLength, 0xC);
+
+		const u32 dsiSaveWriteT = 0x02094CCC;
+		*(u16*)dsiSaveWriteT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveWriteT + 4), dsiSaveWrite, 0xC);
+
+		doubleNopT(0x020090F8);
+		doubleNopT(0x020091DE);
+		doubleNopT(0x02036112); // dsiSaveCreateDirAuto
+		setBLThumb(0x0203611A, dsiSaveCreateT); // dsiSaveCreateAuto
+		setBLThumb(0x02036124, dsiSaveOpenT);
+		//setBLThumb(0x0203612E, dsiSaveGetResultCodeT);
+		doubleNopT(0x02036138);
+		doubleNopT(0x02036150); // dsiSaveCreateDirAuto
+		setBLThumb(0x02036158, dsiSaveCreateT); // dsiSaveCreateAuto
+		setBLThumb(0x02036162, dsiSaveOpenT);
+		//setBLThumb(0x0203616C, dsiSaveGetResultCodeT);
+		//setBLThumb(0x020361A2, dsiSaveSetLengthT);
+		setBLThumb(0x020361AC, dsiSaveSeekT);
+		//setBLThumb(0x020361B6, dsiSaveWriteT);
+		setBLThumb(0x020361BC, dsiSaveCloseT);
+		setBLThumb(0x020361EA, dsiSaveOpenT);
+		setBLThumb(0x02036204, dsiSaveSeekT);
+		setBLThumb(0x0203620E, dsiSaveReadT);
+		setBLThumb(0x02036214, dsiSaveCloseT);
+		doubleNopT(0x02092F26);
+		doubleNopT(0x02095F1E);
+		doubleNopT(0x02099C4C);
+		doubleNopT(0x0209B316);
+		doubleNopT(0x0209B31A);
+		doubleNopT(0x0209B326);
+		doubleNopT(0x0209B40A);
+		patchHiHeapDSiWareThumb(0x0209B448, 0x02098B98, heapEnd);
+		*(u32*)0x0209B520 = *(u32*)0x02004FF4;
+		patchUserSettingsReadDSiWare(0x0209C03E);
+		*(u16*)0x0209C05C = 0x2001; // movs r0, #1
+		*(u16*)0x0209C05E = 0x4770; // bx lr
+		*(u16*)0x0209C064 = 0x2000; // movs r0, #0
+		*(u16*)0x0209C066 = 0x4770; // bx lr
 	}
 
 	// Big Bass Arcade (USA)
