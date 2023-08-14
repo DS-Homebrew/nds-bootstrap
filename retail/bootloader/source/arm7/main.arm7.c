@@ -1335,16 +1335,24 @@ int arm7_main(void) {
 						dbg_printf("\n");
 					}
 					if (
-						strncmp(romTid, "K2Z", 3) == 0 // G.G Series: Altered Weapon
+						strncmp(romTid, "KII", 3) == 0 // 101 Pinball World
+					||	strncmp(romTid, "K2Z", 3) == 0 // G.G Series: Altered Weapon
 					||	strncmp(romTid, "KSR", 3) == 0 // Aura-Aura Climber
 					||	strcmp(romTid, "KBEV") == 0 // Bejeweled Twist (Europe, Australia)
+					||	strncmp(romTid, "K9G", 3) == 0 // Big Bass Arcade
 					||	strncmp(romTid, "KUG", 3) == 0 // G.G Series: Drift Circuit 2
 					||	strncmp(romTid, "K5M", 3) == 0 // G.G Series: The Last Knight
 					||	strncmp(romTid, "KPT", 3) == 0 // Link 'n' Launch
 					||	strncmp(romTid, "CLJ", 3) == 0 // Mario & Luigi: Bowser's Inside Story
+					||	strncmp(romTid, "K9K", 3) == 0 // Nintendoji
+					||	strncmp(romTid, "K6T", 3) == 0 // Orion's Odyssey
 					||	strncmp(romTid, "KHR", 3) == 0 // Picture Perfect: Pocket Stylist
 					||	strncmp(romTid, "KS3", 3) == 0 // Shantae: Risky's Revenge
 					||	strncmp(romTid, "VSO", 3) == 0 // Sonic Classic Collection
+					||	strncmp(romTid, "KZU", 3) == 0 // Tales to Enjoy!: Little Red Riding Hood
+					||	strncmp(romTid, "KZV", 3) == 0 // Tales to Enjoy!: Puss in Boots
+					||	strncmp(romTid, "KZ7", 3) == 0 // Tales to Enjoy!: The Three Little Pigs
+					||	strncmp(romTid, "KZ8", 3) == 0 // Tales to Enjoy!: The Ugly Duckling
 					) {
 						// Game's heap cannot be shrunk, so display error
 						errorOutput();
