@@ -67,6 +67,15 @@ const static u8 bmpHeader[] = {
 
 #define KEYS sharedAddr[5]
 
+bool swiDelayEnabled = true;
+void mySwiDelay(int delay) {
+	if (!swiDelayEnabled) {
+		return;
+	}
+
+	swiDelay(delay);
+}
+
 void SetBrightness(u8 screen, s8 bright) {
 	u8 mode = 1;
 
@@ -127,8 +136,8 @@ void printHex(int x, int y, u32 val, u8 bytes, FontPalette palette, bool main) {
 
 static void printTime(void) {
 	while (!(sharedAddr[7] & 0x10000000)) { // Wait for time to be received
-		while (REG_VCOUNT != 191) swiDelay(100);
-		while (REG_VCOUNT == 191) swiDelay(100);
+		while (REG_VCOUNT != 191) mySwiDelay(100);
+		while (REG_VCOUNT == 191) mySwiDelay(100);
 	}
 	#ifndef B4DS
 	#define timeYpos 3
@@ -146,8 +155,8 @@ static void printTime(void) {
 #ifndef B4DS
 static void printBattery(void) {
 	while ((u8)sharedAddr[6] == 0) { // Wait for battery level to be received
-		while (REG_VCOUNT != 191) swiDelay(100);
-		while (REG_VCOUNT == 191) swiDelay(100);
+		while (REG_VCOUNT != 191) mySwiDelay(100);
+		while (REG_VCOUNT == 191) mySwiDelay(100);
 	}
 	u8 batteryLevel = (u8)sharedAddr[6];
 	const char *bars = "\3\3";
@@ -179,8 +188,8 @@ static void printBattery(void) {
 static void waitKeys(u16 keys) {
 	// Prevent key repeat for 10 frames
 	for(int i = 0; i < 10 && (KEYS & keys); i++) {
-		while (REG_VCOUNT != 191) swiDelay(100);
-		while (REG_VCOUNT == 191) swiDelay(100);
+		while (REG_VCOUNT != 191) mySwiDelay(100);
+		while (REG_VCOUNT == 191) mySwiDelay(100);
 	}
 
 	u32 status = sharedAddr[6]; // Battery, brightness, volume
@@ -188,8 +197,8 @@ static void waitKeys(u16 keys) {
 	u8 minutes = (u8)sharedAddr[8];
 
 	do {
-		while (REG_VCOUNT != 191) swiDelay(100);
-		while (REG_VCOUNT == 191) swiDelay(100);
+		while (REG_VCOUNT != 191) mySwiDelay(100);
+		while (REG_VCOUNT == 191) mySwiDelay(100);
 	} while(!(KEYS & keys) && sharedAddr[6] == status && (u8)sharedAddr[7] == hours && (u8)sharedAddr[8] == minutes);
 }
 
@@ -274,8 +283,8 @@ static void screenshot(void) {
 	#else
 	sharedAddr[4] = 0x50505353;
 	while (sharedAddr[4] == 0x50505353) {
-		while (REG_VCOUNT != 191) swiDelay(100);
-		while (REG_VCOUNT == 191) swiDelay(100);
+		while (REG_VCOUNT != 191) mySwiDelay(100);
+		while (REG_VCOUNT == 191) mySwiDelay(100);
 	}
 	#endif
 
@@ -310,8 +319,8 @@ static void screenshot(void) {
 	#else
 	sharedAddr[4] = 0x544F4853;
 	while (sharedAddr[4] == 0x544F4853) {
-		while (REG_VCOUNT != 191) swiDelay(100);
-		while (REG_VCOUNT == 191) swiDelay(100);
+		while (REG_VCOUNT != 191) mySwiDelay(100);
+		while (REG_VCOUNT == 191) mySwiDelay(100);
 	}
 	#endif
 }
@@ -323,8 +332,8 @@ static void manual(void) {
 	#else
 	sharedAddr[4] = 0x4E414D50; // PMAN
 	do {
-		while (REG_VCOUNT != 191) swiDelay(100);
-		while (REG_VCOUNT == 191) swiDelay(100);
+		while (REG_VCOUNT != 191) mySwiDelay(100);
+		while (REG_VCOUNT == 191) mySwiDelay(100);
 	} while (sharedAddr[4] == 0x4E414D50);
 	#endif
 
@@ -339,8 +348,8 @@ static void manual(void) {
 		sharedAddr[0] = igmText.manualLine;
 		sharedAddr[4] = 0x554E414D; // MANU
 		do {
-			while (REG_VCOUNT != 191) swiDelay(100);
-			while (REG_VCOUNT == 191) swiDelay(100);
+			while (REG_VCOUNT != 191) mySwiDelay(100);
+			while (REG_VCOUNT == 191) mySwiDelay(100);
 		} while (sharedAddr[4] == 0x554E414D);
 
 		print(0, 0, (unsigned char *)INGAME_MENU_EXT_LOCATION, FONT_WHITE, false);
@@ -372,8 +381,8 @@ static void manual(void) {
 	#else
 	sharedAddr[4] = 0x4E414D52; // RMAN
 	do {
-		while (REG_VCOUNT != 191) swiDelay(100);
-		while (REG_VCOUNT == 191) swiDelay(100);
+		while (REG_VCOUNT != 191) mySwiDelay(100);
+		while (REG_VCOUNT == 191) mySwiDelay(100);
 	} while (sharedAddr[4] == 0x4E414D52);
 	#endif
 }
@@ -508,8 +517,8 @@ static void optionsMenu(s32 *mainScreen, u32 consoleModel) {
 					sharedAddr[0] = brightness;
 					sharedAddr[4] = 0x4554494C; // LITE
 					while(sharedAddr[4] == 0x4554494C) {
-						while (REG_VCOUNT != 191) swiDelay(100);
-						while (REG_VCOUNT == 191) swiDelay(100);
+						while (REG_VCOUNT != 191) mySwiDelay(100);
+						while (REG_VCOUNT == 191) mySwiDelay(100);
 					}
 					break;
 				}
@@ -524,8 +533,8 @@ static void optionsMenu(s32 *mainScreen, u32 consoleModel) {
 					sharedAddr[0] = volume;
 					sharedAddr[4] = 0x554C4F56; // VOLU
 					while(sharedAddr[4] == 0x554C4F56) {
-						while (REG_VCOUNT != 191) swiDelay(100);
-						while (REG_VCOUNT == 191) swiDelay(100);
+						while (REG_VCOUNT != 191) mySwiDelay(100);
+						while (REG_VCOUNT == 191) mySwiDelay(100);
 					}
 					break;
 				}
@@ -552,8 +561,8 @@ static void optionsMenu(s32 *mainScreen, u32 consoleModel) {
 				sharedAddr[0] = *mainScreen;
 				sharedAddr[4] = 0x53435049; // IPCS
 				while(sharedAddr[4] == 0x53435049) {
-					while (REG_VCOUNT != 191) swiDelay(100);
-					while (REG_VCOUNT == 191) swiDelay(100);
+					while (REG_VCOUNT != 191) mySwiDelay(100);
+					while (REG_VCOUNT == 191) mySwiDelay(100);
 				}
 				#else
 				codeJumpWord = ce9->saveMainScreenSetting;
@@ -615,8 +624,8 @@ static void ramViewer(void) {
 			sharedAddr[1] = (vu32)address;
 			sharedAddr[4] = 0x524D4152; // RAMR
 			while (sharedAddr[4] == 0x524D4152) {
-				while (REG_VCOUNT != 191) swiDelay(100);
-				while (REG_VCOUNT == 191) swiDelay(100);
+				while (REG_VCOUNT != 191) mySwiDelay(100);
+				while (REG_VCOUNT == 191) mySwiDelay(100);
 			}
 		}
 		ramLoaded = true;
@@ -727,8 +736,8 @@ static void ramViewer(void) {
 					sharedAddr[2] = cursorPosition;
 					sharedAddr[4] = 0x574D4152; // RAMW
 					while (sharedAddr[4] == 0x574D4152) {
-						while (REG_VCOUNT != 191) swiDelay(100);
-						while (REG_VCOUNT == 191) swiDelay(100);
+						while (REG_VCOUNT != 191) mySwiDelay(100);
+						while (REG_VCOUNT == 191) mySwiDelay(100);
 					}
 					ramLoaded = false;
 				}
@@ -841,8 +850,8 @@ void inGameMenu(s32 *mainScreen, u32 consoleModel, s32 *exceptionRegisters) {
 		#ifndef B4DS
 		printBattery();
 		#endif
-		while (REG_VCOUNT != 191) swiDelay(100);
-		while (REG_VCOUNT == 191) swiDelay(100);
+		while (REG_VCOUNT != 191) mySwiDelay(100);
+		while (REG_VCOUNT == 191) mySwiDelay(100);
 	} while(KEYS & igmText.hotkey);
 
 	u8 cursorPosition = 0;
@@ -873,8 +882,8 @@ void inGameMenu(s32 *mainScreen, u32 consoleModel, s32 *exceptionRegisters) {
 			switch(menuItems[cursorPosition]) {
 				case MENU_EXIT:
 					do {
-						while (REG_VCOUNT != 191) swiDelay(100);
-						while (REG_VCOUNT == 191) swiDelay(100);
+						while (REG_VCOUNT != 191) mySwiDelay(100);
+						while (REG_VCOUNT == 191) mySwiDelay(100);
 					} while(KEYS & KEY_A);
 					sharedAddr[4] = 0x54495845; // EXIT
 					break;
@@ -894,8 +903,8 @@ void inGameMenu(s32 *mainScreen, u32 consoleModel, s32 *exceptionRegisters) {
 					#ifndef B4DS
 					sharedAddr[4] = 0x444D4152; // RAMD
 					while (sharedAddr[4] == 0x444D4152) {
-						while (REG_VCOUNT != 191) swiDelay(100);
-						while (REG_VCOUNT == 191) swiDelay(100);
+						while (REG_VCOUNT != 191) mySwiDelay(100);
+						while (REG_VCOUNT == 191) mySwiDelay(100);
 					}
 					#else
 					sharedAddr[3] = 0x444D4152; // RAMD
@@ -917,16 +926,16 @@ void inGameMenu(s32 *mainScreen, u32 consoleModel, s32 *exceptionRegisters) {
 			}
 		} else if (KEYS & KEY_B && !exception) {
 			do {
-				while (REG_VCOUNT != 191) swiDelay(100);
-				while (REG_VCOUNT == 191) swiDelay(100);
+				while (REG_VCOUNT != 191) mySwiDelay(100);
+				while (REG_VCOUNT == 191) mySwiDelay(100);
 			} while(KEYS & KEY_B);
 			sharedAddr[4] = 0x54495845; // EXIT
 		}
 		#ifndef B4DS
 		else if (KEYS & KEY_R && !exception) {
 			do {
-				while (REG_VCOUNT != 191) swiDelay(100);
-				while (REG_VCOUNT == 191) swiDelay(100);
+				while (REG_VCOUNT != 191) mySwiDelay(100);
+				while (REG_VCOUNT == 191) mySwiDelay(100);
 			} while(KEYS & KEY_R);
 			sharedAddr[4] = 0x50455453; // STEP
 		}

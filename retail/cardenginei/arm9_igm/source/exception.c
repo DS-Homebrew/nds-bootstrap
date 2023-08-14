@@ -293,6 +293,11 @@ void showException(s32 *expReg) {
 		printHex(22, 14 + i, *(stack++), 4, FONT_WHITE, true);
 	}
 
+	// If sp isn't valid, disable SWI delay calls
+	if ((u32)stack >= 0 && (u32)stack < 0x01FF8000) {
+		swiDelayEnabled = false;
+	}
+
 	// If the RAM viewer address is still on the default, and if pc address is valid,
 	// move it to the pc address
 	if(address == (vu32*)0x02000000 && (codeAddress & ~0x7) >= 0x01FF8000 && (codeAddress & ~0x7) < 0x08000000)
