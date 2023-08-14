@@ -59,7 +59,8 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	const u32 cheatSizeTotal = cheatSize+(apPatchIsCheat ? apPatchSize : 0);
 
 	const bool ce9NotInHeap = (ce9Alt || (u32)ce9 == CARDENGINE_ARM9_LOCATION_DLDI_START);
-	maxHeapOpen = (!extendedMemory2 && ce9NotInHeap && *(u32*)(((u32)ndsHeader->arm7destination) + newArm7binarySize - 0x24) == 0x027E0000);
+	const bool wirelessCodeInVram = (*(u32*)(((u32)ndsHeader->arm7destination) + newArm7binarySize - 0x24) == 0x027E0000);
+	maxHeapOpen = (!extendedMemory2 && ce9NotInHeap && wirelessCodeInVram);
 	const u32 heapEndRetail = (ce9NotInHeap && !ce9AltLargeTable) ? ((cheatSizeTotal <= 4) ? 0x023E0000 : CHEAT_ENGINE_LOCATION_B4DS-0x400000) : ((fatTableAddr < 0x023C0000 || fatTableAddr >= (u32)ce9) ? (u32)ce9 : fatTableAddr);
 	const u32 heapEnd = extendedMemory2 ? (((u32)ndsHeader->arm9destination >= 0x02004000) ? CARDENGINE_ARM9_LOCATION_DLDI_EXTMEM : 0x02700000) : heapEndRetail;
 	const u32 heapEnd8MBHack = extendedMemory2 ? heapEnd : heapEndRetail+0x400000; // extendedMemory2 ? #0x27B0000 : #0x27E0000 (mirrors to 0x23E0000 on retail DS units)
@@ -68,6 +69,8 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	const u32 heapEndMaxForRetailMus = maxHeapOpen ? 0x023F8000 : heapEnd;
 	const bool debugOrMep = (extendedMemory2 || expansionPakFound);
 	const bool largeS2RAM = (expansionPakFound && (s2FlashcardId != 0)); // 16MB or more
+	const u32 wirelessReturnCodeArm = wirelessCodeInVram ? 0xE3A00000 : 0xE3A00001; // mov r0, #wirelessCodeInVram ? 0 : 1
+	const u16 wirelessReturnCodeThumb = wirelessCodeInVram ? 0x2000 : 0x2001; // movs r0, #wirelessCodeInVram ? 0 : 1
 	if (donorFileCluster == CLUSTER_FREE) {
 		return;
 	}
@@ -1066,7 +1069,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchInitDSiWare(0x020A7A00, heapEnd);
 		*(u32*)0x020A7D8C = 0x020F4FA0;
 		patchUserSettingsReadDSiWare(0x020A90E8);
-		*(u32*)0x020ADFA0 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x020ADFA0 = wirelessReturnCodeArm;
 		*(u32*)0x020ADFA4 = 0xE12FFF1E; // bx lr
 	}
 
@@ -1094,7 +1097,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchInitDSiWare(0x020A7A80, heapEnd);
 		*(u32*)0x020A7E0C = 0x020F5020;
 		patchUserSettingsReadDSiWare(0x020A9168);
-		*(u32*)0x020AE020 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x020AE020 = wirelessReturnCodeArm;
 		*(u32*)0x020AE024 = 0xE12FFF1E; // bx lr
 	}
 
@@ -1385,7 +1388,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x021008F8 = 0xE1A00000; // nop
 		patchInitDSiWare(0x021059B0, heapEnd);
 		patchUserSettingsReadDSiWare(0x021070C0);
-		*(u32*)0x021070DC = 0xE3A00001; // mov r0, #1
+		*(u32*)0x021070DC = wirelessReturnCodeArm;
 		*(u32*)0x021070E0 = 0xE12FFF1E; // bx lr
 		*(u32*)0x021070E8 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x021070EC = 0xE12FFF1E; // bx lr
@@ -1427,7 +1430,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020FFF68 = 0xE1A00000; // nop
 		patchInitDSiWare(0x02105020, heapEnd);
 		patchUserSettingsReadDSiWare(0x02106730);
-		*(u32*)0x0210674C = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0210674C = wirelessReturnCodeArm;
 		*(u32*)0x02106750 = 0xE12FFF1E; // bx lr
 		*(u32*)0x02106758 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x0210675C = 0xE12FFF1E; // bx lr
@@ -2468,7 +2471,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02021764 = 0xE1A00000; // nop
 		patchInitDSiWare(0x02027B98, heapEnd);
 		patchUserSettingsReadDSiWare(0x02029080);
-		*(u32*)0x0202909C = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0202909C = wirelessReturnCodeArm;
 		*(u32*)0x020290A0 = 0xE12FFF1E; // bx lr
 		*(u32*)0x020290A8 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x020290AC = 0xE12FFF1E; // bx lr
@@ -3029,7 +3032,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02011C74 = 0xE1A00000; // nop
 		patchInitDSiWare(0x02018880, heapEnd);
 		patchUserSettingsReadDSiWare(0x02019F44);
-		*(u32*)0x02019F60 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02019F60 = wirelessReturnCodeArm;
 		*(u32*)0x02019F64 = 0xE12FFF1E; // bx lr
 		*(u32*)0x02019F6C = 0xE3A00000; // mov r0, #0
 		*(u32*)0x02019F70 = 0xE12FFF1E; // bx lr
@@ -3436,7 +3439,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchInitDSiWare(0x0207A3E4, heapEnd8MBHack);
 		*(u32*)0x0207A770 = 0x02299500;
 		patchUserSettingsReadDSiWare(0x0207BC98);
-		*(u32*)0x0207BCB4 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0207BCB4 = wirelessReturnCodeArm;
 		*(u32*)0x0207BCB8 = 0xE12FFF1E; // bx lr
 		*(u32*)0x0207BCC0 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x0207BCC4 = 0xE12FFF1E; // bx lr
@@ -3472,7 +3475,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchInitDSiWare(0x0207A4B8, heapEnd8MBHack);
 		*(u32*)0x0207A844 = 0x02299500;
 		patchUserSettingsReadDSiWare(0x0207BD6C);
-		*(u32*)0x0207BD88 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0207BD88 = wirelessReturnCodeArm;
 		*(u32*)0x0207BD8C = 0xE12FFF1E; // bx lr
 		*(u32*)0x0207BD94 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x0207BD98 = 0xE12FFF1E; // bx lr
@@ -3508,7 +3511,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchInitDSiWare(0x0207A398, heapEnd8MBHack);
 		*(u32*)0x0207A724 = 0x022993E0;
 		patchUserSettingsReadDSiWare(0x0207BC4C);
-		*(u32*)0x0207BC68 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0207BC68 = wirelessReturnCodeArm;
 		*(u32*)0x0207BC6C = 0xE12FFF1E; // bx lr
 		*(u32*)0x0207BC74 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x0207BC78 = 0xE12FFF1E; // bx lr
@@ -3627,7 +3630,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchInitDSiWare(0x020241CC, heapEnd);
 		*(u32*)0x02024558 = *(u32*)0x02004FE8;
 		patchUserSettingsReadDSiWare(0x020258E0);
-		*(u32*)0x0202ADF8 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0202ADF8 = wirelessReturnCodeArm;
 		*(u32*)0x0202ADFC = 0xE12FFF1E; // bx lr
 		if (romTid[3] == 'E') {
 			setBL(0x02033E68, (u32)dsiSaveGetLength);
@@ -3916,7 +3919,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020151E8 = 0xE1A00000; // nop
 		*(u32*)0x0201906C = 0xE1A00000; // nop
 		patchInitDSiWare(0x02020B48, heapEnd);
-		*(u32*)0x0202AD04 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0202AD04 = wirelessReturnCodeArm;
 		*(u32*)0x0202AD08 = 0xE12FFF1E; // bx lr
 		setBL(0x0205BB28, (u32)dsiSaveOpen);
 		setBL(0x0205BB38, (u32)dsiSaveGetLength);
@@ -3943,7 +3946,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0201910C = 0xE1A00000; // nop
 		patchInitDSiWare(0x02020BE8, heapEnd);
 		patchUserSettingsReadDSiWare(0x0202237C);
-		*(u32*)0x0202AE28 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0202AE28 = wirelessReturnCodeArm;
 		*(u32*)0x0202AE2C = 0xE12FFF1E; // bx lr
 		setBL(0x0205D1D8, (u32)dsiSaveOpenR);
 		*(u32*)0x0205D1FC = (u32)dsiSaveCreate; // dsiSaveCreateAuto
@@ -4324,7 +4327,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchHiHeapDSiWareThumb(0x0209CB84, 0x0209A2F0, heapEnd);
 		*(u32*)0x0209CC5C = *(u32*)0x02004FDC;
 		patchUserSettingsReadDSiWare(0x0209D80E);
-		*(u16*)0x0209D828 = 0x2001; // movs r0, #1
+		*(u16*)0x0209D828 = wirelessReturnCodeThumb;
 		*(u16*)0x0209D82A = 0x4770; // bx lr
 		*(u16*)0x0209D834 = 0x2000; // movs r0, #0
 		*(u16*)0x0209D836 = 0x4770; // bx lr
@@ -4394,7 +4397,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchHiHeapDSiWareThumb(0x0209B770, 0x02098EC0, heapEndMaxForRetail);
 		*(u32*)0x0209B848 = *(u32*)0x02004FF4;
 		patchUserSettingsReadDSiWare(0x0209C366);
-		*(u16*)0x0209C384 = extendedMemory2 ? 0x2001 : 0x2000; // movs r0, #extendedMemory2 ? 1 : 0
+		*(u16*)0x0209C384 = wirelessReturnCodeThumb;
 		*(u16*)0x0209C386 = 0x4770; // bx lr
 		*(u16*)0x0209C38C = 0x2000; // movs r0, #0
 		*(u16*)0x0209C38E = 0x4770; // bx lr
@@ -4463,7 +4466,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchHiHeapDSiWareThumb(0x0209B448, 0x02098B98, heapEnd);
 		*(u32*)0x0209B520 = *(u32*)0x02004FF4;
 		patchUserSettingsReadDSiWare(0x0209C03E);
-		*(u16*)0x0209C05C = 0x2001; // movs r0, #1
+		*(u16*)0x0209C05C = wirelessReturnCodeThumb;
 		*(u16*)0x0209C05E = 0x4770; // bx lr
 		*(u16*)0x0209C064 = 0x2000; // movs r0, #0
 		*(u16*)0x0209C066 = 0x4770; // bx lr
@@ -4620,7 +4623,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0206F438 = 0xE1A00000; // nop
 		patchInitDSiWare(0x02077594, heapEnd);
 		patchUserSettingsReadDSiWare(0x02078A40);
-		*(u32*)0x02078A5C = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02078A5C = wirelessReturnCodeArm;
 		*(u32*)0x02078A60 = 0xE12FFF1E; // bx lr
 		*(u32*)0x02078A68 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x02078A6C = 0xE12FFF1E; // bx lr
@@ -4634,7 +4637,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0206F30C = 0xE1A00000; // nop
 		patchInitDSiWare(0x02077468, heapEnd);
 		patchUserSettingsReadDSiWare(0x02078914);
-		*(u32*)0x02078930 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02078930 = wirelessReturnCodeArm;
 		*(u32*)0x02078934 = 0xE12FFF1E; // bx lr
 		*(u32*)0x0207893C = 0xE3A00000; // mov r0, #0
 		*(u32*)0x02078940 = 0xE12FFF1E; // bx lr
@@ -4648,7 +4651,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0206F214 = 0xE1A00000; // nop
 		patchInitDSiWare(0x02077370, heapEnd);
 		patchUserSettingsReadDSiWare(0x0207881C);
-		*(u32*)0x02078838 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02078838 = wirelessReturnCodeArm;
 		*(u32*)0x0207883C = 0xE12FFF1E; // bx lr
 		*(u32*)0x02078844 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x02078848 = 0xE12FFF1E; // bx lr
@@ -4696,7 +4699,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0201C5CC = 0xE1A00000; // nop
 		patchInitDSiWare(0x02024F50, heapEnd);
 		patchUserSettingsReadDSiWare(0x020264C0);
-		*(u32*)0x02026C50 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02026C50 = wirelessReturnCodeArm;
 		*(u32*)0x02026C54 = 0xE12FFF1E; // bx lr
 		*(u32*)0x0202B608 = 0xE1A00000; // nop
 		*(u16*)0x0202DFB8 = 0x4770; // bx lr (Skip NFTR font rendering)
@@ -4920,7 +4923,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0200C280 = 0xE1A00000; // nop
 		patchInitDSiWare(0x02014638, heapEnd);
 		patchUserSettingsReadDSiWare(0x02015B60);
-		*(u32*)0x02015B88 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02015B88 = wirelessReturnCodeArm;
 		*(u32*)0x02015B8C = 0xE12FFF1E; // bx lr
 		*(u32*)0x02015B94 = 0xE3A00001; // mov r0, #1
 		*(u32*)0x02015B98 = 0xE12FFF1E; // bx lr
@@ -5716,7 +5719,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0205B0FC = 0xE1A00000; // nop
 		patchInitDSiWare(0x02062C24, heapEnd);
 		patchUserSettingsReadDSiWare(0x02064424);
-		*(u32*)0x02064440 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02064440 = wirelessReturnCodeArm;
 		*(u32*)0x02064444 = 0xE12FFF1E; // bx lr
 		*(u32*)0x0206444C = 0xE3A00000; // mov r0, #0
 		*(u32*)0x02064450 = 0xE12FFF1E; // bx lr
@@ -5757,7 +5760,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0205B1D4 = 0xE1A00000; // nop
 		patchInitDSiWare(0x02062CFC, heapEnd);
 		patchUserSettingsReadDSiWare(0x020644FC);
-		*(u32*)0x02064518 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02064518 = wirelessReturnCodeArm;
 		*(u32*)0x0206451C = 0xE12FFF1E; // bx lr
 		*(u32*)0x02064524 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x02064528 = 0xE12FFF1E; // bx lr
@@ -5791,7 +5794,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchInitDSiWare(0x020827C4, heapEnd);
 		*(u32*)0x02082B50 = 0x0210AFE0;
 		patchUserSettingsReadDSiWare(0x02083FC4);
-		*(u32*)0x02083FE0 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02083FE0 = wirelessReturnCodeArm;
 		*(u32*)0x02083FE4 = 0xE12FFF1E; // bx lr
 		*(u32*)0x02083FEC = 0xE3A00000; // mov r0, #0
 		*(u32*)0x02083FF0 = 0xE12FFF1E; // bx lr
@@ -5825,7 +5828,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchInitDSiWare(0x02082820, heapEnd);
 		*(u32*)0x02082BAC = 0x0210B040;
 		patchUserSettingsReadDSiWare(0x02084020);
-		*(u32*)0x0208403C = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0208403C = wirelessReturnCodeArm;
 		*(u32*)0x02084040 = 0xE12FFF1E; // bx lr
 		*(u32*)0x02084048 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x0208404C = 0xE12FFF1E; // bx lr
@@ -5859,7 +5862,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02053B0C = 0xE1A00000; // nop
 		patchInitDSiWare(0x0205B760, heapEnd);
 		patchUserSettingsReadDSiWare(0x0205CF60);
-		*(u32*)0x0205CF7C = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0205CF7C = wirelessReturnCodeArm;
 		*(u32*)0x0205CF80 = 0xE12FFF1E; // bx lr
 		*(u32*)0x0205CF88 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x0205CF8C = 0xE12FFF1E; // bx lr
@@ -5893,7 +5896,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02053B98 = 0xE1A00000; // nop
 		patchInitDSiWare(0x0205B7EC, heapEnd);
 		patchUserSettingsReadDSiWare(0x0205CFEC);
-		*(u32*)0x0205D008 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0205D008 = wirelessReturnCodeArm;
 		*(u32*)0x0205D00C = 0xE12FFF1E; // bx lr
 		*(u32*)0x0205D014 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x0205D018 = 0xE12FFF1E; // bx lr
@@ -7032,7 +7035,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020115C8 = 0xE1A00000; // nop
 		patchInitDSiWare(0x0201DB0C, heapEnd);
 		patchUserSettingsReadDSiWare(0x0201F008);
-		*(u32*)0x0201F024 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0201F024 = wirelessReturnCodeArm;
 		*(u32*)0x0201F028 = 0xE12FFF1E; // bx lr
 		*(u32*)0x0201F030 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x0201F034 = 0xE12FFF1E; // bx lr
@@ -7599,7 +7602,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchInitDSiWare(0x0203264C, heapEnd);
 		patchUserSettingsReadDSiWare(0x02033E48);
 		*(u32*)0x02038B9C = 0xE3A00003; // mov r0, #3
-		*(u32*)0x020395C4 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x020395C4 = wirelessReturnCodeArm;
 		*(u32*)0x020395C8 = 0xE12FFF1E; // bx lr
 	}
 
@@ -7626,7 +7629,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchInitDSiWare(0x02031938, heapEnd);
 		patchUserSettingsReadDSiWare(0x02033134);
 		*(u32*)0x02037E54 = 0xE3A00003; // mov r0, #3
-		*(u32*)0x0203887C = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0203887C = wirelessReturnCodeArm;
 		*(u32*)0x02038880 = 0xE12FFF1E; // bx lr
 	}
 
@@ -8043,7 +8046,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02011580 = 0xE1A00000; // nop
 		patchInitDSiWare(0x0201DAC4, heapEnd);
 		patchUserSettingsReadDSiWare(0x0201EFC0);
-		*(u32*)0x0201EFDC = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0201EFDC = wirelessReturnCodeArm;
 		*(u32*)0x0201EFE0 = 0xE12FFF1E; // bx lr
 		*(u32*)0x0201EFE8 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x0201EFEC = 0xE12FFF1E; // bx lr
@@ -8073,7 +8076,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020114D4 = 0xE1A00000; // nop
 		patchInitDSiWare(0x0201D9E0, heapEnd);
 		patchUserSettingsReadDSiWare(0x0201EECC);
-		*(u32*)0x0201EEE8 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0201EEE8 = wirelessReturnCodeArm;
 		*(u32*)0x0201EEEC = 0xE12FFF1E; // bx lr
 		*(u32*)0x0201EEF4 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x0201EEF8 = 0xE12FFF1E; // bx lr
@@ -8352,7 +8355,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchInitDSiWare(0x0201D050, heapEnd);
 		*(u32*)0x0201D3DC = *(u32*)0x02004FE8;
 		patchUserSettingsReadDSiWare(0x0201E7B0);
-		*(u32*)0x02023988 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02023988 = wirelessReturnCodeArm;
 		*(u32*)0x0202398C = 0xE12FFF1E; // bx lr
 		*(u32*)0x0204D388 = 0xE1A023A9; // mov r2, r9, lsr #7
 		*(u32*)0x0204D398 = 0xE3A01601; // mov r1, #0x100000
@@ -9056,7 +9059,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchInitDSiWare(0x020B6640, heapEnd);
 		// *(u32*)0x020B69B0 = 0x022A83C0;
 		patchUserSettingsReadDSiWare(0x020B7BF0);
-		*(u32*)0x020B7C18 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x020B7C18 = wirelessReturnCodeArm;
 		*(u32*)0x020B7C1C = 0xE12FFF1E; // bx lr
 		*(u32*)0x020B7C6C = 0xE3A00000; // mov r0, #0
 		*(u32*)0x020B7C70 = 0xE12FFF1E; // bx lr
@@ -9071,7 +9074,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020AC168 = 0xE1A00000; // nop
 		patchInitDSiWare(0x020B6688, heapEnd);
 		patchUserSettingsReadDSiWare(0x020B7C38);
-		*(u32*)0x020B7C60 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x020B7C60 = wirelessReturnCodeArm;
 		*(u32*)0x020B7C64 = 0xE12FFF1E; // bx lr
 		*(u32*)0x020B7CB4 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x020B7CB8 = 0xE12FFF1E; // bx lr
@@ -9086,7 +9089,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020ABAE0 = 0xE1A00000; // nop
 		patchInitDSiWare(0x020B6000, heapEnd);
 		patchUserSettingsReadDSiWare(0x020B75B0);
-		*(u32*)0x020B75D8 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x020B75D8 = wirelessReturnCodeArm;
 		*(u32*)0x020B75DC = 0xE12FFF1E; // bx lr
 		*(u32*)0x020B762C = 0xE3A00000; // mov r0, #0
 		*(u32*)0x020B7630 = 0xE12FFF1E; // bx lr
@@ -9301,7 +9304,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchInitDSiWare(0x020BA3A4+offsetChangeInit, heapEnd);
 		*(u32*)(0x020BA730+offsetChangeInit) = *(u32*)(0x020D7270+offsetChangeInit);
 		patchUserSettingsReadDSiWare(0x020BB7A8+offsetChangeInit);
-		*(u32*)(0x020C31E4+offsetChangeInit) = 0xE3A00001; // mov r0, #1
+		*(u32*)(0x020C31E4+offsetChangeInit) = wirelessReturnCodeArm;
 		*(u32*)(0x020C31E8+offsetChangeInit) = 0xE12FFF1E; // bx lr
 	}
 
@@ -9405,7 +9408,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u16*)0x02036544 = nopT;
 		*(u16*)0x02036626 = nopT;
 		*(u16*)0x02036628 = nopT;
-		*(u16*)0x020374D8 = 0x2001; // movs r0, #1
+		*(u16*)0x020374D8 = wirelessReturnCodeThumb;
 		*(u16*)0x020374DA = 0x4770; // bx lr
 		*(u16*)0x02037510 = 0x2000; // movs r0, #0
 		*(u16*)0x02037512 = 0x4770; // bx lr
@@ -10367,7 +10370,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020197B8 = 0xE1A00000; // nop
 		patchInitDSiWare(0x0202162C, heapEnd);
 		*(u32*)0x020219B8 = 0x02257500;
-		*(u32*)0x02022C1C = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02022C1C = wirelessReturnCodeArm;
 		*(u32*)0x02022C20 = 0xE12FFF1E; // bx lr
 		*(u32*)0x02022C28 = 0xE3A00001; // mov r0, #1
 		*(u32*)0x02022C2C = 0xE12FFF1E; // bx lr
@@ -10744,7 +10747,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchInitDSiWare(0x02025E8C, heapEnd);
 		*(u32*)0x02026218 = *(u32*)0x02004FD0;
 		patchUserSettingsReadDSiWare(0x02027578);
-		*(u32*)0x0202CED0 = extendedMemory2 ? 0xE3A00001 : 0xE3A00000; // mov r0, #extendedMemory2 ? 1 : 0
+		*(u32*)0x0202CED0 = extendedMemory2 ? wirelessReturnCodeArm : 0xE3A00000; // mov r0, #extendedMemory2 ? 1 : 0
 		*(u32*)0x0202CED4 = 0xE12FFF1E; // bx lr
 		*(u32*)(0x02036A7C+offsetChange2) = 0xE1A00000; // nop
 		*(u32*)(0x02040394+offsetChange) = 0xE1A00000; // nop
@@ -10790,12 +10793,14 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBL(0x020448BC, (u32)dsiSaveWrite);
 			setBL(0x020448C4, (u32)dsiSaveClose);
 		}
-		if (strncmp(romTid, "KFU", 3) == 0) {
-			patchMsg16(0x020D879C-offsetChange3, dsiRequiredMsg);
-		} else if (strncmp(romTid, "KF4", 3) == 0) {
-			patchMsg16(0x020D8784-offsetChange3, dsiRequiredMsg);
-		} else {
-			patchMsg16(0x020D87A8-offsetChange3, dsiRequiredMsg);
+		if (!extendedMemory2) {
+			if (strncmp(romTid, "KFU", 3) == 0) {
+				patchMsg16(0x020D879C-offsetChange3, dsiRequiredMsg);
+			} else if (strncmp(romTid, "KF4", 3) == 0) {
+				patchMsg16(0x020D8784-offsetChange3, dsiRequiredMsg);
+			} else {
+				patchMsg16(0x020D87A8-offsetChange3, dsiRequiredMsg);
+			}
 		}
 	}
 
@@ -10817,7 +10822,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchInitDSiWare(0x02025F28, heapEnd);
 		*(u32*)0x020262B4 = *(u32*)0x02004FD0;
 		patchUserSettingsReadDSiWare(0x02027614);
-		*(u32*)0x0202CF6C = extendedMemory2 ? 0xE3A00001 : 0xE3A00000; // mov r0, #extendedMemory2 ? 1 : 0
+		*(u32*)0x0202CF6C = extendedMemory2 ? wirelessReturnCodeArm : 0xE3A00000; // mov r0, #extendedMemory2 ? 1 : 0
 		*(u32*)0x0202CF70 = 0xE12FFF1E; // bx lr
 		*(u32*)0x0203B23C = 0xE1A00000; // nop
 		*(u32*)(0x020449A8-offsetChange) = 0xE1A00000; // nop
@@ -10847,12 +10852,14 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0204942C-offsetChangeS, (u32)dsiSaveSeek);
 		setBL(0x0204944C-offsetChangeS, (u32)dsiSaveWrite);
 		setBL(0x02049454-offsetChangeS, (u32)dsiSaveClose);
-		if (strncmp(romTid, "KFF", 3) == 0) {
-			patchMsg16(0x020DDAD0-offsetChange3, dsiRequiredMsg);
-		} else if (strncmp(romTid, "KFT", 3) == 0) {
-			patchMsg16(0x020DDADC-offsetChange3, dsiRequiredMsg);
-		} else {
-			patchMsg16(0x020DDAEC-offsetChange3, dsiRequiredMsg);
+		if (!extendedMemory2) {
+			if (strncmp(romTid, "KFF", 3) == 0) {
+				patchMsg16(0x020DDAD0-offsetChange3, dsiRequiredMsg);
+			} else if (strncmp(romTid, "KFT", 3) == 0) {
+				patchMsg16(0x020DDADC-offsetChange3, dsiRequiredMsg);
+			} else {
+				patchMsg16(0x020DDAEC-offsetChange3, dsiRequiredMsg);
+			}
 		}
 	}
 
@@ -10864,7 +10871,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchInitDSiWare(0x020246CC, heapEnd);
 		*(u32*)0x02024A58 = *(u32*)0x02004FD0;
 		patchUserSettingsReadDSiWare(0x02025D7C);
-		*(u32*)0x0202B4EC = extendedMemory2 ? 0xE3A00001 : 0xE3A00000; // mov r0, #extendedMemory2 ? 1 : 0
+		*(u32*)0x0202B4EC = extendedMemory2 ? wirelessReturnCodeArm : 0xE3A00000; // mov r0, #extendedMemory2 ? 1 : 0
 		*(u32*)0x0202B4F0 = 0xE12FFF1E; // bx lr
 		*(u32*)0x020307AC = 0xE1A00000; // nop
 		*(u32*)0x02039828 = 0xE1A00000; // nop
@@ -10957,7 +10964,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020115C8 = 0xE1A00000; // nop
 		patchInitDSiWare(0x0201DB18, heapEnd);
 		patchUserSettingsReadDSiWare(0x0201F014);
-		*(u32*)0x0201F030 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0201F030 = wirelessReturnCodeArm;
 		*(u32*)0x0201F034 = 0xE12FFF1E; // bx lr
 		*(u32*)0x0201F03C = 0xE3A00000; // mov r0, #0
 		*(u32*)0x0201F040 = 0xE12FFF1E; // bx lr
@@ -11274,7 +11281,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0200E7A0 = 0xE1A00000; // nop
 		patchInitDSiWare(0x02018F08, heapEnd);
 		patchUserSettingsReadDSiWare(0x0201A404);
-		*(u32*)0x0201FB24 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0201FB24 = wirelessReturnCodeArm;
 		*(u32*)0x0201FB28 = 0xE12FFF1E; // bx lr
 		if (romTid[3] == 'E') {
 			for (int i = 0; i < 12; i++) {
@@ -11357,7 +11364,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0201C634 = 0xE1A00000; // nop
 		patchInitDSiWare(0x02028FDC, heapEnd);
 		patchUserSettingsReadDSiWare(0x0202A68C);
-		*(u32*)0x0203262C = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0203262C = wirelessReturnCodeArm;
 		*(u32*)0x02032630 = 0xE12FFF1E; // bx lr
 		if (romTid[3] == 'E') {
 			*(u32*)0x0203B09C = 0xE1A00000; // nop
@@ -11767,7 +11774,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0200F0D4 = 0xE1A00000; // nop
 		patchInitDSiWare(0x0201CA9C, heapEnd);
 		patchUserSettingsReadDSiWare(0x0201E0E8);
-		*(u32*)0x0201E110 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0201E110 = wirelessReturnCodeArm;
 		*(u32*)0x0201E114 = 0xE12FFF1E; // bx lr
 		*(u32*)0x0201E11C = 0xE3A00000; // mov r0, #0
 		*(u32*)0x0201E120 = 0xE12FFF1E; // bx lr
@@ -11795,7 +11802,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0201DDD0 = 0xE3A00001; // mov r0, #1
 		patchInitDSiWare(0x0201DDE8, heapEnd);
 		patchUserSettingsReadDSiWare(0x0201F424);
-		*(u32*)0x0201F44C = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0201F44C = wirelessReturnCodeArm;
 		*(u32*)0x0201F450 = 0xE12FFF1E; // bx lr
 		*(u32*)0x0201F458 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x0201F45C = 0xE12FFF1E; // bx lr
@@ -11915,7 +11922,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0201615C = 0xE1A00000; // nop
 		*(u32*)0x02019EDC = 0xE1A00000; // nop
 		patchInitDSiWare(0x02020F3C, heapEnd);
-		*(u32*)0x02027DE4 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02027DE4 = wirelessReturnCodeArm;
 		*(u32*)0x02027DE8 = 0xE12FFF1E; // bx lr
 		setBL(0x0204BF68, (u32)dsiSaveOpenR);
 		setBL(0x0204BF88, (u32)dsiSaveCreate); // dsiSaveCreateAuto
@@ -11941,7 +11948,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020A661C = 0xE1A00000; // nop
 		*(u32*)0x020A9B00 = 0xE1A00000; // nop
 		patchInitDSiWare(0x020B0C5C, heapEnd);
-		*(u32*)0x020B21F4 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x020B21F4 = wirelessReturnCodeArm;
 		*(u32*)0x020B21F8 = 0xE12FFF1E; // bx lr
 		*(u32*)0x020B2200 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x020B2204 = 0xE12FFF1E; // bx lr
@@ -11952,7 +11959,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020A65A4 = 0xE1A00000; // nop
 		*(u32*)0x020A9A88 = 0xE1A00000; // nop
 		patchInitDSiWare(0x020B0BE4, heapEnd);
-		*(u32*)0x020B217C = 0xE3A00001; // mov r0, #1
+		*(u32*)0x020B217C = wirelessReturnCodeArm;
 		*(u32*)0x020B2180 = 0xE12FFF1E; // bx lr
 		*(u32*)0x020B2188 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x020B218C = 0xE12FFF1E; // bx lr
@@ -12024,7 +12031,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		// *(u32*)0x0201B308 = *(u32*)0x02004FC0;
 		*(u32*)0x0201B308 -= 0x30000;
 		patchUserSettingsReadDSiWare(0x0201C824);
-		*(u32*)0x0201C84C = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0201C84C = wirelessReturnCodeArm;
 		*(u32*)0x0201C850 = 0xE12FFF1E; // bx lr
 		*(u32*)0x0201C858 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x0201C85C = 0xE12FFF1E; // bx lr
@@ -12285,7 +12292,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			*(u32*)0x0201DF54 = *(u32*)0x02004FE8;
 		}
 		patchUserSettingsReadDSiWare(0x0201F20C);
-		*(u32*)0x0201F228 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0201F228 = wirelessReturnCodeArm;
 		*(u32*)0x0201F22C = 0xE12FFF1E; // bx lr
 		*(u32*)0x0201F234 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x0201F238 = 0xE12FFF1E; // bx lr
@@ -12313,7 +12320,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02015BAC = 0xE1A00000; // nop
 		patchInitDSiWare(0x02025468, heapEnd);
 		patchUserSettingsReadDSiWare(0x02026990);
-		*(u32*)0x0202C1A8 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0202C1A8 = wirelessReturnCodeArm;
 		*(u32*)0x0202C1AC = 0xE12FFF1E; // bx lr
 		*(u32*)(0x02064EC8+offsetChange) = 0xE1A00000; // nop
 		*(u32*)(0x02064EDC+offsetChange) = 0xE1A00000; // nop
@@ -12350,7 +12357,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchInitDSiWare(0x0203F588, heapEnd);
 		*(u32*)0x0203F8F8 -= 0x30000;
 		patchUserSettingsReadDSiWare(0x02040AC8);
-		*(u32*)0x02046694 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02046694 = wirelessReturnCodeArm;
 		*(u32*)0x02046698 = 0xE12FFF1E; // bx lr
 	}
 
@@ -12366,7 +12373,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchInitDSiWare(0x0203ECFC, heapEnd);
 		*(u32*)0x0203F088 -= 0x30000;
 		patchUserSettingsReadDSiWare(0x02040298);
-		*(u32*)0x02045C90 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02045C90 = wirelessReturnCodeArm;
 		*(u32*)0x02045C94 = 0xE12FFF1E; // bx lr
 	}
 
@@ -12381,7 +12388,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchInitDSiWare(0x0203F584, heapEnd);
 		*(u32*)0x0203F8F4 -= 0x30000;
 		patchUserSettingsReadDSiWare(0x02040AC4);
-		*(u32*)0x02046690 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02046690 = wirelessReturnCodeArm;
 		*(u32*)0x02046694 = 0xE12FFF1E; // bx lr
 	}
 
@@ -12597,7 +12604,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020B2E48 = 0xE3A00001; // mov r0, #1
 		patchInitDSiWare(0x020B2E60, heapEnd);
 		patchUserSettingsReadDSiWare(0x020B46C4);
-		*(u32*)0x020BB044 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x020BB044 = wirelessReturnCodeArm;
 		*(u32*)0x020BB048 = 0xE12FFF1E; // bx lr
 	}
 
@@ -12621,7 +12628,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020B29F4 = 0xE3A00001; // mov r0, #1
 		patchInitDSiWare(0x020B2A0C, heapEnd);
 		patchUserSettingsReadDSiWare(0x020B4270);
-		*(u32*)0x020BABF0 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x020BABF0 = wirelessReturnCodeArm;
 		*(u32*)0x020BABF4 = 0xE12FFF1E; // bx lr
 	}
 
@@ -12838,7 +12845,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0201CDD0 = *(u32*)0x02004FC0;
 		patchUserSettingsReadDSiWare(0x0201DF58);
 		*(u32*)0x0201E370 = 0x77777777;
-		*(u32*)0x0202345C = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0202345C = wirelessReturnCodeArm;
 		*(u32*)0x02023460 = 0xE12FFF1E; // bx lr
 		*(u32*)0x02051B08 = 0xE1A00000; // nop
 		*(u32*)0x02051B58 = 0xE1A00000; // nop
@@ -13127,7 +13134,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0201617C = 0xE1A00000; // nop
 		patchInitDSiWare(0x0201CB3C, heapEnd);
 		patchUserSettingsReadDSiWare(0x0201E0F8);
-		*(u32*)0x0201E114 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0201E114 = wirelessReturnCodeArm;
 		*(u32*)0x0201E118 = 0xE12FFF1E; // bx lr
 		*(u32*)0x0201E120 = 0xE3A00001; // mov r0, #1
 		*(u32*)0x0201E124 = 0xE12FFF1E; // bx lr
@@ -13323,7 +13330,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchInitDSiWare(0x0201853C, heapEnd);
 		*(u32*)0x020188C8 = *(u32*)0x02004FF4;
 		patchUserSettingsReadDSiWare(0x0201994C);
-		*(u32*)0x02019968 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02019968 = wirelessReturnCodeArm;
 		*(u32*)0x0201996C = 0xE12FFF1E; // bx lr
 		*(u32*)0x02019974 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x02019978 = 0xE12FFF1E; // bx lr
@@ -13962,7 +13969,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchInitDSiWare(0x02096C54, heapEnd);
 		*(u32*)0x02096FE0 = *(u32*)0x02004FE8;
 		patchUserSettingsReadDSiWare(0x0209831C);
-		*(u32*)0x02098338 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02098338 = wirelessReturnCodeArm;
 		*(u32*)0x0209833C = 0xE12FFF1E; // bx lr
 		*(u32*)0x02098344 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x02098348 = 0xE12FFF1E; // bx lr
@@ -14018,7 +14025,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020B01A8 = 0xE1A00000; // nop
 		patchHiHeapDSiWare(0x020B23E0, heapEnd); // mov r0, #0x2700000
 		patchUserSettingsReadDSiWare(0x020B37CC);
-		*(u32*)0x020B37E8 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x020B37E8 = wirelessReturnCodeArm;
 		*(u32*)0x020B37EC = 0xE12FFF1E; // bx lr
 		*(u32*)0x020B37F4 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x020B37F8 = 0xE12FFF1E; // bx lr
@@ -14131,7 +14138,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0201705C = 0xE1A00000; // nop
 		patchInitDSiWare(0x0201CEBC, heapEnd);
 		*(u32*)0x0201D248 = 0x020C5360;
-		*(u32*)0x0201E658 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0201E658 = wirelessReturnCodeArm;
 		*(u32*)0x0201E65C = 0xE12FFF1E; // bx lr
 		*(u32*)0x0201E664 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x0201E668 = 0xE12FFF1E; // bx lr
@@ -14929,7 +14936,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020B28B4 = 0xE3A00001; // mov r0, #1
 		patchInitDSiWare(0x020B28CC, heapEnd);
 		patchUserSettingsReadDSiWare(0x020B4130);
-		*(u32*)0x020BABB0 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x020BABB0 = wirelessReturnCodeArm;
 		*(u32*)0x020BABB4 = 0xE12FFF1E; // bx lr
 	}
 
@@ -16214,7 +16221,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchInitDSiWare(0x0201ABFC-offsetChange, heapEnd);
 		*(u32*)(0x0201AF88-offsetChange) = *(u32*)0x02004FE8;
 		patchUserSettingsReadDSiWare(0x0201C1A0-offsetChange);
-		*(u32*)(0x02021A88-offsetChange) = 0xE3A00001; // mov r0, #1
+		*(u32*)(0x02021A88-offsetChange) = wirelessReturnCodeArm;
 		*(u32*)(0x02021A8C-offsetChange) = 0xE12FFF1E; // bx lr
 		if (romTid[3] == 'E') {
 			setBL(0x0203DC00, (u32)dsiSaveOpen);
@@ -16340,7 +16347,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02014FBC = 0xE1A00000; // nop
 		patchInitDSiWare(0x0201B740, heapEnd);
 		patchUserSettingsReadDSiWare(0x0201CD38);
-		*(u32*)0x0201CD54 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0201CD54 = wirelessReturnCodeArm;
 		*(u32*)0x0201CD58 = 0xE12FFF1E; // bx lr
 		*(u32*)0x0201CD60 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x0201CD64 = 0xE12FFF1E; // bx lr
@@ -16419,7 +16426,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02014EE8 = 0xE1A00000; // nop
 		patchInitDSiWare(0x0201B66C, heapEnd);
 		patchUserSettingsReadDSiWare(0x0201CC64);
-		*(u32*)0x0201CC80 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0201CC80 = wirelessReturnCodeArm;
 		*(u32*)0x0201CC84 = 0xE12FFF1E; // bx lr
 		*(u32*)0x0201CC8C = 0xE3A00000; // mov r0, #0
 		*(u32*)0x0201CC90 = 0xE12FFF1E; // bx lr
@@ -16455,7 +16462,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02015074 = 0xE1A00000; // nop
 		patchInitDSiWare(0x0201B830, heapEnd);
 		patchUserSettingsReadDSiWare(0x0201CE38);
-		*(u32*)0x0201CE54 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0201CE54 = wirelessReturnCodeArm;
 		*(u32*)0x0201CE58 = 0xE12FFF1E; // bx lr
 		*(u32*)0x0201CE60 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x0201CE64 = 0xE12FFF1E; // bx lr
@@ -16707,7 +16714,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0201F744 = 0xE1A00000; // nop
 		patchInitDSiWare(0x0202EC54, heapEnd);
 		patchUserSettingsReadDSiWare(0x02030430);
-		*(u32*)0x0203044C = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0203044C = wirelessReturnCodeArm;
 		*(u32*)0x02030450 = 0xE12FFF1E; // bx lr
 		*(u32*)0x0203046C = 0xE3A00000; // mov r0, #0
 		*(u32*)0x02030470 = 0xE12FFF1E; // bx lr
@@ -17137,7 +17144,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0210C1E0 = 0xE1A00000; // nop
 		*(u32*)0x0210C324 = 0xE1A00000; // nop
 		patchHiHeapDSiWare(0x0210C380, heapEnd); // mov r0, #0x23E0000
-		*(u32*)0x0210D590 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0210D590 = wirelessReturnCodeArm;
 		*(u32*)0x0210D594 = 0xE12FFF1E; // bx lr
 		*(u32*)0x0210D59C = 0xE3A00000; // mov r0, #0
 		*(u32*)0x0210D5A0 = 0xE12FFF1E; // bx lr
@@ -17180,7 +17187,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020141B0 = 0xE1A00000; // nop
 		patchInitDSiWare(0x0201A96C, heapEndMaxForRetail);
 		*(u32*)0x0201ACF8 = *(u32*)0x02004FE8;
-		*(u32*)0x0202033C = extendedMemory2 ? 0xE3A00001 : 0xE3A00000; // mov r0, #extendedMemory2 ? 1 : 0
+		*(u32*)0x0202033C = extendedMemory2 ? wirelessReturnCodeArm : 0xE3A00000; // mov r0, #extendedMemory2 ? 1 : 0
 		*(u32*)0x02020340 = 0xE12FFF1E; // bx lr
 		*(u32*)0x0209EEB8 = 0xE1A00000; // nop
 		//setBL(0x0209F040, (u32)dsiSaveClose);
@@ -17257,7 +17264,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)(0x020414E8+offsetChange2) = 0xE1A00000; // nop
 	}
 
-	// Number Battle
+	// Number Battle (USA)
 	else if (strcmp(romTid, "KSUE") == 0) {
 		*(u32*)0x02005330 = 0xE1A00000; // nop
 		*(u32*)0x02005EA4 = 0xE3A00001; // mov r0, #1
@@ -17300,7 +17307,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			*(u32*)0x020DD6A4 = 0x0234F020;
 		}
 		patchUserSettingsReadDSiWare(0x020DEA44);
-		*(u32*)0x020DEA6C = 0xE3A00001; // mov r0, #1
+		*(u32*)0x020DEA6C = wirelessReturnCodeArm;
 		*(u32*)0x020DEA70 = 0xE12FFF1E; // bx lr
 		*(u32*)0x020DEA78 = 0xE3A00001; // mov r0, #1
 		*(u32*)0x020DEA7C = 0xE12FFF1E; // bx lr
@@ -17930,7 +17937,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02019E58 = 0xE1A00000; // nop
 		patchInitDSiWare(0x020217E8, heapEnd);
 		patchUserSettingsReadDSiWare(0x02022E98);
-		*(u32*)0x02028634 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02028634 = wirelessReturnCodeArm;
 		*(u32*)0x02028638 = 0xE12FFF1E; // bx lr
 		if (romTid[3] == 'E') {
 			*(u32*)0x0202A968 = 0xE1A00000; // nop
@@ -18197,7 +18204,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchInitDSiWare(0x0202D950, heapEnd);
 		// *(u32*)0x0202DCCC = 0x0218B0A0;
 		patchUserSettingsReadDSiWare(0x0202EE48);
-		*(u32*)0x0202EE70 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0202EE70 = wirelessReturnCodeArm;
 		*(u32*)0x0202EE74 = 0xE12FFF1E; // bx lr
 		*(u16*)0x0209F778 = nopT;
 		*(u16*)0x0209F77A = nopT;
@@ -18344,9 +18351,10 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchInitDSiWare(0x02022304, heapEnd);
 		*(u32*)0x02022674 = 0x0217A140;
 		patchUserSettingsReadDSiWare(0x02023AD0);
-		*(u32*)0x020293FC = 0xE3A00001; // mov r0, #1
-		*(u32*)0x02029400 = 0xE12FFF1E; // bx lr
-		*(u32*)0x0202F1F0 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02023AF8 = wirelessReturnCodeArm;
+		*(u32*)0x02023AFC = 0xE12FFF1E; // bx lr
+		*(u32*)0x02023B04 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02023B08 = 0xE12FFF1E; // bx lr
 		setBL(0x02048408, (u32)dsiSaveClose);
 		setBL(0x02048584, (u32)dsiSaveClose);
 		setBL(0x02048604, (u32)dsiSaveClose);
@@ -18400,9 +18408,10 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchInitDSiWare(0x02022318, heapEnd);
 		*(u32*)0x02022688 = 0x0217FD00;
 		patchUserSettingsReadDSiWare(0x02023AE4);
-		*(u32*)0x02029410 = 0xE3A00001; // mov r0, #1
-		*(u32*)0x02029414 = 0xE12FFF1E; // bx lr
-		*(u32*)0x0202EEE0 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02023B0C = wirelessReturnCodeArm;
+		*(u32*)0x02023B10 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02023B18 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02023B1C = 0xE12FFF1E; // bx lr
 		setBL(0x020484B0, (u32)dsiSaveClose);
 		setBL(0x0204862C, (u32)dsiSaveClose);
 		setBL(0x020486AC, (u32)dsiSaveClose);
@@ -18947,7 +18956,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020143F8 = 0xE1A00000; // nop
 		patchInitDSiWare(0x0201ED44, heapEnd);
 		patchUserSettingsReadDSiWare(0x020203B0);
-		*(u32*)0x02025CA4 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02025CA4 = wirelessReturnCodeArm;
 		*(u32*)0x02025CA8 = 0xE12FFF1E; // bx lr
 		setBL(0x0202ACFC, (u32)dsiSaveWrite); // dsiSaveWriteAsync
 		setBL(0x0202AD04, (u32)dsiSaveWrite);
@@ -19289,7 +19298,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02068D78 = 0xE1A00000; // nop
 		patchInitDSiWare(0x02070CE4, heapEnd);
 		patchUserSettingsReadDSiWare(0x02072394);
-		*(u32*)0x02077C78 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02077C78 = wirelessReturnCodeArm;
 		*(u32*)0x02077C7C = 0xE12FFF1E; // bx lr
 	}
 
@@ -19526,7 +19535,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchInitDSiWare(0x0207EC3C, heapEnd8MBHack);
 		*(u32*)0x0207EFC8 -= 0x30000;
 		patchUserSettingsReadDSiWare(0x02080334);
-		*(u32*)0x02085B84 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02085B84 = wirelessReturnCodeArm;
 		*(u32*)0x02085B88 = 0xE12FFF1E; // bx lr
 	}
 
@@ -20225,7 +20234,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02013DFC = 0xE1A00000; // nop
 		patchInitDSiWare(0x020191EC, heapEnd);
 		patchUserSettingsReadDSiWare(0x0201A89C);
-		*(u32*)0x0202001C = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0202001C = wirelessReturnCodeArm;
 		*(u32*)0x02020020 = 0xE12FFF1E; // bx lr
 		*(u32*)0x0202D134 = 0xE1A00000; // nop
 		*(u32*)0x0202E338 = 0xE1A00000; // nop
@@ -20796,7 +20805,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			*(u32*)0x0201FE24 = *(u32*)0x02004FC0;
 		}
 		patchUserSettingsReadDSiWare(0x020210A4);
-		*(u32*)0x020210CC = 0xE3A00001; // mov r0, #1
+		*(u32*)0x020210CC = wirelessReturnCodeArm;
 		*(u32*)0x020210D0 = 0xE12FFF1E; // bx lr
 		*(u32*)0x020210D8 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x020210DC = 0xE12FFF1E; // bx lr
@@ -20912,7 +20921,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02011AAC = 0xE1A00000; // nop
 		patchInitDSiWare(0x0201790C, heapEnd);
 		patchUserSettingsReadDSiWare(0x02018FBC);
-		*(u32*)0x0201E73C = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0201E73C = wirelessReturnCodeArm;
 		*(u32*)0x0201E740 = 0xE12FFF1E; // bx lr
 		*(u32*)0x0202B430 = 0xE1A00000; // nop
 		setBL(0x02030F00+offsetChange, (u32)dsiSaveCreate);
@@ -20943,7 +20952,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02014DA0 = 0xE1A00000; // nop
 		patchInitDSiWare(0x0201A864, heapEnd);
 		patchUserSettingsReadDSiWare(0x0201BF14);
-		*(u32*)0x02021694 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02021694 = wirelessReturnCodeArm;
 		*(u32*)0x02021698 = 0xE12FFF1E; // bx lr
 		*(u32*)0x0202E884 = 0xE1A00000; // nop
 		*(u32*)0x0202ECF8 = 0xE1A00000; // nop
@@ -22303,7 +22312,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02030B40, (u32)dsiSaveSetLength);
 		setBL(0x02030B50, (u32)dsiSaveWrite);
 		setBL(0x02030B58, (u32)dsiSaveClose);
-		*(u32*)0x02037ED6 = 0x2602; // movs r6, #2
+		// *(u16*)0x02037ED6 = 0x2602; // movs r6, #2
 	}
 
 	// Spotto! (USA)
@@ -22351,7 +22360,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchInitDSiWare(0x020BA6A4, heapEnd);
 		*(u32*)0x020BAA14 -= 0x30000;
 		patchUserSettingsReadDSiWare(0x020BBFA4);
-		*(u32*)0x020BF4DC = 0xE3A00001; // mov r0, #1
+		*(u32*)0x020BF4DC = wirelessReturnCodeArm;
 		*(u32*)0x020BF4E0 = 0xE12FFF1E; // bx lr
 		doubleNopT(0x020C257A);
 		doubleNopT(0x020C821E);
@@ -23382,7 +23391,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02017C50 = 0xE1A00000; // nop
 		patchInitDSiWare(0x0201E234, heapEnd);
 		patchUserSettingsReadDSiWare(0x0201F82C);
-		*(u32*)0x0201F848 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0201F848 = wirelessReturnCodeArm;
 		*(u32*)0x0201F84C = 0xE12FFF1E; // bx lr
 		*(u32*)0x0201F854 = 0xE3A00001; // mov r0, #1
 		*(u32*)0x0201F858 = 0xE12FFF1E; // bx lr
@@ -23511,7 +23520,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchInitDSiWare(0x02017BD4, heapEnd);
 		*(u32*)0x02017F44 = *(u32*)0x020013C0;
 		patchUserSettingsReadDSiWare(0x02019370);
-		*(u32*)0x0201ED30 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0201ED30 = wirelessReturnCodeArm;
 		*(u32*)0x0201ED34 = 0xE12FFF1E; // bx lr
 		if (!extendedMemory2) {
 			// Disable MobiClip playback
@@ -23553,7 +23562,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchInitDSiWare(0x0201B050, heapEnd);
 		*(u32*)0x0201B3DC = *(u32*)0x02004FD0;
 		patchUserSettingsReadDSiWare(0x0201C820);
-		*(u32*)0x020220C0 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x020220C0 = wirelessReturnCodeArm;
 		*(u32*)0x020220C4 = 0xE12FFF1E; // bx lr
 		if (!extendedMemory2) {
 			// Disable MobiClip playback
@@ -23817,7 +23826,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchInitDSiWare(0x020C7528, heapEnd);
 		*(u32*)0x020C7898 -= 0x30000;
 		patchUserSettingsReadDSiWare(0x020C8DDC);
-		*(u32*)0x020CC3DC = 0xE3A00001; // mov r0, #1
+		*(u32*)0x020CC3DC = wirelessReturnCodeArm;
 		*(u32*)0x020CC3E0 = 0xE12FFF1E; // bx lr
 		doubleNopT(0x020CF4BA);
 		doubleNopT(0x020D515E);
@@ -23849,7 +23858,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchInitDSiWare(0x020C7218, heapEnd);
 		*(u32*)0x020C7588 -= 0x30000;
 		patchUserSettingsReadDSiWare(0x020C8ACC);
-		*(u32*)0x020CC0CC = 0xE3A00001; // mov r0, #1
+		*(u32*)0x020CC0CC = wirelessReturnCodeArm;
 		*(u32*)0x020CC0D0 = 0xE12FFF1E; // bx lr
 		doubleNopT(0x020CF1AA);
 		doubleNopT(0x020D4E4E);
@@ -23946,7 +23955,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			patchInitDSiWare(0x02074948, heapEnd);
 			*(u32*)0x02074CD4 -= 0x2F0000;
 			patchUserSettingsReadDSiWare(0x020760C8);
-			*(u32*)0x020760E4 = 0xE3A00001; // mov r0, #1
+			*(u32*)0x020760E4 = wirelessReturnCodeArm;
 			*(u32*)0x020760E8 = 0xE12FFF1E; // bx lr
 			*(u32*)0x020760F0 = 0xE3A00000; // mov r0, #0
 			*(u32*)0x020760F4 = 0xE12FFF1E; // bx lr
@@ -23961,7 +23970,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			patchInitDSiWare(0x020746DC, heapEnd);
 			*(u32*)0x02074A68 -= 0x2F0000;
 			patchUserSettingsReadDSiWare(0x02075E5C);
-			*(u32*)0x02075E78 = 0xE3A00001; // mov r0, #1
+			*(u32*)0x02075E78 = wirelessReturnCodeArm;
 			*(u32*)0x02075E7C = 0xE12FFF1E; // bx lr
 			*(u32*)0x02075E84 = 0xE3A00000; // mov r0, #0
 			*(u32*)0x02075E88 = 0xE12FFF1E; // bx lr
@@ -23977,7 +23986,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02015B98 = 0xE1A00000; // nop
 		patchInitDSiWare(0x0201C0D8, heapEnd);
 		patchUserSettingsReadDSiWare(0x0201D754);
-		*(u32*)0x020227BC = 0xE3A00001; // mov r0, #1
+		*(u32*)0x020227BC = wirelessReturnCodeArm;
 		*(u32*)0x020227C0 = 0xE12FFF1E; // bx lr
 		*(u32*)0x0202BE5C = 0xE1A00000; // nop
 		*(u32*)0x0202BE64 = 0xE1A00000; // nop
@@ -24028,7 +24037,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0204F538 = 0xE1A00000; // nop
 		*(u32*)0x0204F578 = 0xE1A00000; // nop
 		patchInitDSiWare(0x02061D98, heapEnd);
-		*(u32*)0x02064998 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02064998 = wirelessReturnCodeArm;
 		*(u32*)0x0206499C = 0xE12FFF1E; // bx lr
 		*(u32*)0x020649AC = 0xE3A00000; // mov r0, #0
 		*(u32*)0x020649B0 = 0xE12FFF1E; // bx lr
@@ -24075,7 +24084,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0204F7F8 = 0xE1A00000; // nop
 		*(u32*)0x0204F838 = 0xE1A00000; // nop
 		patchInitDSiWare(0x02062058, heapEnd);
-		*(u32*)0x02064C58 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02064C58 = wirelessReturnCodeArm;
 		*(u32*)0x02064C5C = 0xE12FFF1E; // bx lr
 		*(u32*)0x02064C6C = 0xE3A00000; // mov r0, #0
 		*(u32*)0x02064C70 = 0xE12FFF1E; // bx lr
@@ -25201,7 +25210,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0201A710 = 0xE1A00000; // nop
 		*(u32*)0x0201E2D0 = 0xE1A00000; // nop
 		patchInitDSiWare(0x020267A0, heapEnd);
-		*(u32*)0x0202D5D8 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0202D5D8 = wirelessReturnCodeArm;
 		*(u32*)0x0202D5DC = 0xE12FFF1E; // bx lr
 		setBL(0x02065568, (u32)dsiSaveOpenR);
 		setBL(0x02065584, (u32)dsiSaveCreate); // dsiSaveCreateAuto
