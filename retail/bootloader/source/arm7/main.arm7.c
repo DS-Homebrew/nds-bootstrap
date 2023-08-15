@@ -1338,7 +1338,7 @@ int arm7_main(void) {
 						strncmp(romTid, "KII", 3) == 0 // 101 Pinball World
 					||	strncmp(romTid, "K2Z", 3) == 0 // G.G Series: Altered Weapon
 					||	strncmp(romTid, "KSR", 3) == 0 // Aura-Aura Climber
-					||	strcmp(romTid, "KBEV") == 0 // Bejeweled Twist (Europe, Australia)
+					||	strcmp(romTid, "KBEV") == 0 // Bejeweled Twist (Europe, Australia) (DSiWare)
 					||	strncmp(romTid, "K9G", 3) == 0 // Big Bass Arcade
 					||	strncmp(romTid, "KUG", 3) == 0 // G.G Series: Drift Circuit 2
 					||	strncmp(romTid, "KEI", 3) == 0 // Electroplankton: Beatnes
