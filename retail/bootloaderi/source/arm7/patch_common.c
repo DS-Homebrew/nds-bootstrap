@@ -7465,6 +7465,30 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		tonccpy((u32*)0x0202B8E8, dsiSaveGetResultCode, 0xC);
 	}
 
+	// Korogashi Pazuru: Katamari Damacy (Japan)
+	else if (strcmp(romTid, "KTMJ") == 0) {
+		if (!twlFontFound) {
+			*(u32*)0x02005034 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		}
+		if (saveOnFlashcard) {
+			tonccpy((u32*)0x0200CEA8, dsiSaveGetResultCode, 0xC);
+			setBL(0x02070238, (u32)dsiSaveCreate);
+			setBL(0x0207026C, (u32)dsiSaveOpen);
+			setBL(0x02070284, (u32)dsiSaveSetLength);
+			setBL(0x020702B0, (u32)dsiSaveWrite);
+			setBL(0x020702DC, (u32)dsiSaveClose);
+			setBL(0x020703A8, (u32)dsiSaveOpen);
+			setBL(0x020703C0, (u32)dsiSaveRead);
+			setBL(0x020703D4, (u32)dsiSaveClose);
+			*(u32*)0x02070854 = 0xE1A00000; // nop
+			*(u32*)0x02070868 = 0xE1A00000; // nop
+			*(u32*)0x020708A0 = 0xE3A00003; // mov r0, #3
+			// *(u32*)0x02070970 = 0xE3A00000; // mov r0, #0
+			// *(u32*)0x02070974 = 0xE12FFF1E; // bx lr
+			*(u32*)0x02073B94 = 0xE3A00003; // mov r0, #3
+		}
+	}
+
 	// Koukou Eijukugo: Kiho 200 Go Master (Japan)
 	else if (strcmp(romTid, "KJKJ") == 0) {
 		if (saveOnFlashcard) {

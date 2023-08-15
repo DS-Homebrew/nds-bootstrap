@@ -261,6 +261,7 @@ static const char dsiWareForBootloader1[][4] = {
 	"KMX", // Kemonomix
 	"K9C", // Kokoro no Herusumeta: Kokoron
 	"KON", // Koneko no ie: Kiri Shima Keto-San Biki no Koneko
+	"KTM", // Korogashi Pazuru: Katamari Damacy
 	"KJC", // Koukou Eijukugo: Kiho 200 Go Master
 	"KEK", // Koukou Eitango: Kiho 400 Go Master
 	"KVF", // Kuizu Ongaku Nojika (bootloaderi-exclusive)
