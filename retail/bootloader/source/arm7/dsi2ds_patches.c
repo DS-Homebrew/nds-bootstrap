@@ -13742,6 +13742,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Little Red Riding Hood's Zombie BBQ (USA)
+	// Requires 8MB of RAM
 	else if (strcmp(romTid, "KZBE") == 0 && extendedMemory2) {
 		*(u32*)0x020050AC = 0xE1A00000; // nop
 		*(u32*)0x02005124 = 0xE1A00000; // nop
@@ -13751,6 +13752,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0200BFE0 = 0xE1A00000; // nop
 		*(u32*)0x0200FDB4 = 0xE1A00000; // nop
 		patchInitDSiWare(0x020190DC, heapEnd);
+		// *(u32*)0x0201944C -= 0x30000;
 		*(u32*)0x0201F65C = 0xE1A00000; // nop
 		*(u32*)0x0202178C = 0xE1A00000; // nop
 		*(u32*)0x02021790 = 0xE1A00000; // nop
@@ -13778,10 +13780,12 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Little Red Riding Hood's Zombie BBQ (Europe)
+	// Requires 8MB of RAM
 	else if (strcmp(romTid, "KZBP") == 0 && extendedMemory2) {
 		*(u32*)0x02017550 = 0xE1A00000; // nop
 		*(u32*)0x0201B324 = 0xE1A00000; // nop
 		patchInitDSiWare(0x02024640, heapEnd);
+		// *(u32*)0x020249B0 -= 0x30000;
 		*(u32*)0x02031F5C = 0xE3A00001; // mov r0, #1
 		setBL(0x02055AC8, (u32)dsiSaveOpen);
 		setBL(0x02055AE0, (u32)dsiSaveGetLength);
