@@ -415,7 +415,8 @@ void reset(void) {
 		}
 		fileWrite((char*)resetParam, &srParamsFile, 0, 0x10);
 		toncset((u32*)0x02000000, 0, 0x400);
-		*(u32*)(0x02000000) = BIT(3);
+		*(u32*)0x02000000 = BIT(3);
+		*(u32*)0x02000004 = 0x54455352; // 'RSET'
 		if (consoleModel < 2) {
 			(*(u32*)(ce7+0x11900) == 0 && (valueBits & b_dsiSD)) ? unlaunchSetFilename(false) : unlaunchSetHiyaFilename();
 		}
@@ -682,7 +683,8 @@ extern void inGameMenu(void);
 
 void forceGameReboot(void) {
 	toncset((u32*)0x02000000, 0, 0x400);
-	*(u32*)(0x02000000) = BIT(3);
+	*(u32*)0x02000000 = BIT(3);
+	*(u32*)0x02000004 = 0x54455352; // 'RSET'
 	sharedAddr[4] = 0x57534352;
 	IPC_SendSync(0x8);
 	if (consoleModel < 2) {
@@ -737,7 +739,8 @@ extern bool dldiPatchBinary (unsigned char *binData, u32 binSize);
 
 void returnToLoader(bool wait) {
 	toncset((u32*)0x02000000, 0, 0x400);
-	*(u32*)(0x02000000) = BIT(0) | BIT(1) | BIT(2);
+	*(u32*)0x02000000 = BIT(0) | BIT(1) | BIT(2);
+	*(u32*)0x02000004 = 0x54455352; // 'RSET'
 	sharedAddr[4] = 0x57534352;
 #ifdef TWLSDK
 	u32 twlCfgLoc = *(u32*)0x02FFFDFC;

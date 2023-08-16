@@ -388,7 +388,8 @@ void reset(void) {
 
 void forceGameReboot(void) {
 	toncset((u32*)0x02000000, 0, 0x400);
-	*(u32*)(0x02000000) = BIT(3);
+	*(u32*)0x02000000 = BIT(3);
+	*(u32*)0x02000004 = 0x54455352; // 'RSET'
 	sharedAddr[4] = 0x57534352;
 	IPC_SendSync(0x8);
 	if (consoleModel < 2) {
@@ -423,7 +424,8 @@ static void initMBK_dsiMode(void) {
 
 void returnToLoader(bool wait) {
 	toncset((u32*)0x02000000, 0, 0x400);
-	*(u32*)(0x02000000) = BIT(0) | BIT(1) | BIT(2);
+	*(u32*)0x02000000 = BIT(0) | BIT(1) | BIT(2);
+	*(u32*)0x02000004 = 0x54455352; // 'RSET'
 	sharedAddr[4] = 0x57534352;
 	//IPC_SendSync(0x8);
 

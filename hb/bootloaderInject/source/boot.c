@@ -370,7 +370,8 @@ int main (void) {
 		unlaunchSetFilename();
 	}
 	toncset((u32*)0x02000000, 0, 0x400);
-	*(u32*)(0x02000000) = BIT(3);
+	*(u32*)0x02000000 = BIT(3);
+	*(u32*)0x02000004 = 0x54455352; // 'RSET'
 
 	i2cWriteRegister(0x4A, 0x70, 0x01);
 	i2cWriteRegister(0x4A, 0x11, 0x01);			// Reboot game
