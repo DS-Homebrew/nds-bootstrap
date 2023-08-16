@@ -20314,6 +20314,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020197F0 = 0xE1A00000; // nop
 		*(u32*)0x0201CDA0 = 0xE1A00000; // nop
 		patchInitDSiWare(0x02023BC4, heapEnd);
+		*(u32*)0x02023F50 = *(u32*)0x02004FE8;
 		patchUserSettingsReadDSiWare(0x020250BC);
 		if (!extendedMemory2) {
 			if (s2FlashcardId == 0x5A45) {
