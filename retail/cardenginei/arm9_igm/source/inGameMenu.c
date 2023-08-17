@@ -48,7 +48,7 @@ static u16* bmpBuffer = (u16*)INGAME_MENU_EXT_LOCATION;
 #ifdef EXTMEM
 cardengineArm9* volatile ce9 = (cardengineArm9*)CARDENGINE_ARM9_LOCATION_DLDI_EXTMEM;
 #else
-cardengineArm9* volatile ce9 = (cardengineArm9*)CARDENGINE_ARM9_LOCATION_DLDI;
+cardengineArm9* volatile ce9 = (cardengineArm9*)CARDENGINE_ARM9_LOCATION_DLDI_START;
 #endif
 
 static u16* vramBak = (u16*)INGAME_MENU_EXT_LOCATION_B4DS+(0x18200/sizeof(u16));
@@ -766,6 +766,8 @@ void inGameMenu(s32 *mainScreen, u32 consoleModel, s32 *exceptionRegisters) {
 			ce9 = (cardengineArm9*)CARDENGINE_ARM9_LOCATION_DLDI_ALT;
 		} else if (*(u32*)CARDENGINE_ARM9_LOCATION_DLDI_ALT2 == CARDENGINE_ARM9_LOCATION_DLDI_ALT2) {
 			ce9 = (cardengineArm9*)CARDENGINE_ARM9_LOCATION_DLDI_ALT2;
+		} else if (*(u32*)CARDENGINE_ARM9_LOCATION_DLDI == CARDENGINE_ARM9_LOCATION_DLDI) {
+			ce9 = (cardengineArm9*)CARDENGINE_ARM9_LOCATION_DLDI;
 		}
 		ce9Set = true;
 	}
