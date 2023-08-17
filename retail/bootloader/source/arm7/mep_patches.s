@@ -15,6 +15,8 @@
 	@.global goGoKokopoloHeapAddrPtr
 	.global metalTorrentSndLoad
 	@.global mvdk3HeapAlloc
+@	.global myLtlRestHeapAlloc
+@	.global myLtlRestHeapAddrPtr
 	.global nintCdwnCalHeapAlloc
 	.global nintCdwnCalHeapAddrPtr
 	.global nintendojiHeapAlloc
@@ -60,6 +62,10 @@ metalTorrentSndLoad:
 	.word metalTorrentSndLoadFunc
 @mvdk3HeapAlloc:
 @	.word mvdk3HeapAllocFunc
+@myLtlRestHeapAlloc:
+@	.word myLtlRestHeapAllocFunc
+@myLtlRestHeapAddrPtr:
+@	.word myLtlRestHeapAddr
 nintCdwnCalHeapAlloc:
 	.word nintCdwnCalHeapAllocFunc
 nintCdwnCalHeapAddrPtr:
@@ -500,7 +506,26 @@ _blx_metalTorrentSndLoadOrgFunc:
 @	ldmfd   sp!, {r5,pc}
 @.pool
 @---------------------------------------------------------------------------------
+@	.thumb
+@---------------------------------------------------------------------------------
+@myLtlRestHeapAllocFunc:
+@---------------------------------------------------------------------------------
+@	push {r6,lr}
 
+@	@ldr r6, =0x1C404C @ Modified size of textures.dat (Original: 0x1C7BD0)
+@	@cmp r0, r6
+@	@bne myLtlRestHeapAllocFunc_return
+@	ldr r0, myLtlRestHeapAddr
+@	@pop {r6,pc}
+
+@myLtlRestHeapAllocFunc_return:
+@	pop {r6,pc}
+@.align 4
+@myLtlRestHeapAddr:
+@.word	0x09080000
+@.pool
+@---------------------------------------------------------------------------------
+@	.arm
 @---------------------------------------------------------------------------------
 nintCdwnCalHeapAllocFunc:
 @---------------------------------------------------------------------------------
@@ -586,12 +611,6 @@ nintendojiHeapAddr:
 rmtRacersHeapAllocFunc:
 @---------------------------------------------------------------------------------
 	push {r6,lr}
-
-	@ldr r6, =0x1C404C @ Modified size of textures.dat (My Little Restaurant) (Original: 0x1C7BD0)
-	@cmp r0, r6
-	@bne rmtRacersAllocTextures
-	@ldr r0, =#0x09000000
-	@pop {r6,pc}
 
 rmtRacersAllocTextures:
 	ldr r6, =0x13A160 @ Modified size of textures.dat (Original: 0x13ACCC)

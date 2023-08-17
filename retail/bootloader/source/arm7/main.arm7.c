@@ -618,8 +618,7 @@ static bool isROMLoadableInRAM(const tDSiHeader* dsiHeader, const tNDSHeader* nd
 		} else if (strncmp(romTid, "KUP", 3) == 0) { // Match Up!
 			romLocation += 0x380000;
 			romSizeLimit -= 0x380000;
-		} else if (// strncmp(romTid, "KLT", 3) == 0 // My Little Restaurant
-				/* || */ strncmp(romTid, "KAU", 3) == 0) { // Nintendo Cowndown Calendar
+		} else if (strncmp(romTid, "KAU", 3) == 0) { // Nintendo Cowndown Calendar
 			romLocation += 0x200000;
 			romSizeLimit -= 0x200000;
 		} else if (strncmp(romTid, "KQR", 3) == 0) { // Remote Racers

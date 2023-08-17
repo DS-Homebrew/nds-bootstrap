@@ -318,6 +318,7 @@ static const char dsiWareForBootloader2[][4] = {
 	"KL3", // My Asian Farm
 	"KL4", // My Australian Farm
 	"KMV", // My Exotic Farm
+	"KLT", // My Little Restaurant
 	"KMR", // My Farm
 	"KJW", // Nandoku 500 Kanji: Wado Pazuru
 	"KN3", // Nazo no Mini Game
