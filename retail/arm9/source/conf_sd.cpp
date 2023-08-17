@@ -1682,6 +1682,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		if (a7mbk6 == 0x080037C0) {
 			conf->useSdk5DonorAlt = ( // Use alternate ARM7 donor in order for below games to use more of the main RAM
 				strncmp(romTid, "KII", 3) == 0 // 101 Pinball World
+			||	strncmp(romTid, "KAT", 3) == 0 // AiRace: Tunnel
 			||	strncmp(romTid, "K2Z", 3) == 0 // G.G Series: Altered Weapon
 			||	strncmp(romTid, "KSR", 3) == 0 // Aura-Aura Climber
 			||	strcmp(romTid, "KBEV") == 0 // Bejeweled Twist (Europe, Australia)
