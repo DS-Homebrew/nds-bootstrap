@@ -68,6 +68,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	const u32 heapEndMaxForRetail = maxHeapOpen ? 0x023FC000 : heapEnd;
 	const u32 heapEndMaxForRetailMus = maxHeapOpen ? 0x023F8000 : heapEnd;
 	const u32 heapEnd_512KBFreeForDebug = extendedMemory2 ? 0x02740000 : heapEnd;
+	const u32 heapEnd_512KBFreeForDebugAlt = extendedMemory2 ? 0x02700000 : heapEnd;
 	const bool debugOrMep = (extendedMemory2 || expansionPakFound);
 	const bool largeS2RAM = (expansionPakFound && (s2FlashcardId != 0)); // 16MB or more
 	const u32 wirelessReturnCodeArm = wirelessCodeInVram ? 0xE3A00000 : 0xE3A00001; // mov r0, #wirelessCodeInVram ? 0 : 1
@@ -2232,29 +2233,70 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// AiRace: Tunnel (USA)
-	// Requires 8MB of RAM
-	// Crashes after selecting a stage due to weird bug
-	/*else if (strcmp(romTid, "KATE") == 0 && extendedMemory2) {
-		*(u16*)0x0202A3D2 = nopT;
-		*(u16*)0x0202A3D4 = nopT;
-		*(u16*)0x0202A59C = nopT;
-		*(u16*)0x0202A59E = nopT;
-		*(u32*)0x02032AF0 = 0xE1A00000; // nop
-		*(u16*)0x02042042 = nopT;
-		*(u16*)0x02042044 = nopT;
-		*(u16*)0x02042048 = nopT;
-		*(u16*)0x0204204A = nopT;
-		*(u32*)0x020420F4 = 0xE1A00000; // nop
-		*(u32*)0x02048AC0 = 0xE1A00000; // nop
-		*(u32*)0x0204C1C8 = 0xE1A00000; // nop
-		*(u32*)0x02056798 = 0xE1A00000; // nop
-		*(u32*)0x02058628 = 0xE1A00000; // nop
-		*(u32*)0x0205862C = 0xE1A00000; // nop
-		*(u32*)0x02058638 = 0xE1A00000; // nop
-		*(u32*)0x02058798 = 0xE1A00000; // nop
-		patchHiHeapDSiWare(0x020587F4, heapEnd); // mov r0, #0x2700000
-		patchUserSettingsReadDSiWare(0x02059B68);
-	}*/
+	// AiRace: Tunnel (Europe, Australia)
+	// Audio does not play on retail consoles
+	else if (strcmp(romTid, "KATE") == 0 || strcmp(romTid, "KATV") == 0) {
+		u8 offsetChange = (romTid[3] == 'E') ? 0 : 0xF8;
+		u16 offsetChange2 = (romTid[3] == 'E') ? 0 : 0x10C;
+		u16 offsetChange3 = (romTid[3] == 'E') ? 0 : 0x176;
+		u16 offsetChange4 = (romTid[3] == 'E') ? 0 : 0x1B0;
+		u8 offsetChangeInit = (romTid[3] == 'E') ? 0 : 0xD4;
+		u16 offsetChange5 = (romTid[3] == 'E') ? 0 : 0x11C;
+		u16 offsetChangeS = (romTid[3] == 'E') ? 0 : 0x1A8;
+		u16 offsetChangeS2 = offsetChange4;
+		u16 offsetChangeS3 = (romTid[3] == 'E') ? 0 : 0x1AC;
+		u16 offsetChangeS4 = (romTid[3] == 'E') ? 0 : 0x1BC;
+
+		doubleNopT(0x0202A3D2+offsetChange);
+		doubleNopT(0x0202A59C+offsetChange);
+		*(u32*)(0x02032AF0-offsetChange2) = 0xE1A00000; // nop
+		*(u32*)(0x02032FFC-offsetChange2) = 0xE1A00000; // nop
+		if (extendedMemory2) {
+			*(u16*)(0x0203335C-offsetChange2) = 0x2127; // movs r1, #0x27
+		} else {
+			*(u16*)(0x0203335C-offsetChange2) = 0x2190; // movs r1, #0x90
+		}
+		doubleNopT(0x02042042+offsetChange3);
+		doubleNopT(0x02042048+offsetChange3);
+		*(u32*)(0x020420F4+offsetChange4) = 0xE1A00000; // nop
+		*(u32*)(0x02048AC0+offsetChangeInit) = 0xE1A00000; // nop
+		*(u32*)(0x0204C1C8+offsetChangeInit) = 0xE1A00000; // nop
+		patchInitDSiWare(0x0205859C+offsetChangeInit, heapEnd_512KBFreeForDebugAlt);
+		*(u32*)(0x02058928+offsetChangeInit) = *(u32*)0x02004FD0;
+		patchUserSettingsReadDSiWare(0x02059B68+offsetChangeInit);
+		*(u32*)(0x02059B84+offsetChangeInit) = wirelessReturnCodeArm;
+		*(u32*)(0x02059B88+offsetChangeInit) = 0xE12FFF1E; // bx lr
+		*(u32*)(0x02059B90+offsetChangeInit) = 0xE3A00000; // mov r0, #0
+		*(u32*)(0x02059B94+offsetChangeInit) = 0xE12FFF1E; // bx lr
+		if (!extendedMemory2) {
+			// Disable audio
+			doubleNopT(0x0202A4C2+offsetChange);
+
+			*(u32*)(0x02079A4C+offsetChange5) = 0xE3A00000; // mov r0, #0
+			*(u32*)(0x02079A50+offsetChange5) = 0xE12FFF1E; // bx lr
+			*(u32*)(0x02079AB0+offsetChange5) = 0xE3A00000; // mov r0, #0
+			*(u32*)(0x02079AB4+offsetChange5) = 0xE12FFF1E; // bx lr
+		}
+		setBL(0x020E474C+offsetChangeS, (u32)dsiSaveClose);
+		setBL(0x020E47A8+offsetChangeS, (u32)dsiSaveClose);
+		setBL(0x020E4848+offsetChangeS2, (u32)dsiSaveOpen);
+		setBL(0x020E4860+offsetChangeS2, (u32)dsiSaveSeek);
+		setBL(0x020E4874+offsetChangeS2, (u32)dsiSaveRead);
+		setBL(0x020E4914+offsetChangeS2, (u32)dsiSaveCreate);
+		setBL(0x020E4944+offsetChangeS2, (u32)dsiSaveOpen);
+		setBL(0x020E4974+offsetChangeS2, (u32)dsiSaveSetLength);
+		setBL(0x020E499C+offsetChangeS2, (u32)dsiSaveSeek);
+		setBL(0x020E49B0+offsetChangeS2, (u32)dsiSaveWrite);
+		setBL(0x020E4A64+offsetChangeS3, (u32)dsiSaveCreate);
+		setBL(0x020E4A9C+offsetChangeS3, (u32)dsiSaveOpen);
+		setBL(0x020E4AD4+offsetChangeS3, (u32)dsiSaveSetLength);
+		setBL(0x020E4AF0+offsetChangeS3, (u32)dsiSaveSeek);
+		setBL(0x020E4B04+offsetChangeS3, (u32)dsiSaveWrite);
+		setBL(0x020E4C60+offsetChangeS2, (u32)dsiSaveSeek);
+		setBL(0x020E4C70+offsetChangeS2, (u32)dsiSaveWrite);
+		setBL(0x020E4E18+offsetChangeS2, (u32)dsiSaveGetResultCode);
+		*(u32*)(0x020E4E50+offsetChangeS4) = 0xE3A00000; // mov r0, #0
+	}
 
 	// Alien Puzzle Adventure (USA)
 	// Alien Puzzle Adventure (Europe, Australia)

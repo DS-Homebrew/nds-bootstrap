@@ -1439,6 +1439,35 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		tonccpy((u32*)0x020502D4, dsiSaveGetResultCode, 0xC);
 	} */
 
+	// AiRace: Tunnel (USA)
+	// AiRace: Tunnel (Europe, Australia)
+	else if ((strcmp(romTid, "KATE") == 0 || strcmp(romTid, "KATV") == 0) && saveOnFlashcard) {
+		u16 offsetChangeS = (romTid[3] == 'E') ? 0 : 0x1A8;
+		u16 offsetChangeS2 = (romTid[3] == 'E') ? 0 : 0x1B0;
+		u16 offsetChangeS3 = (romTid[3] == 'E') ? 0 : 0x1AC;
+		u16 offsetChangeS4 = (romTid[3] == 'E') ? 0 : 0x1BC;
+
+		setBL(0x020E474C+offsetChangeS, (u32)dsiSaveClose);
+		setBL(0x020E47A8+offsetChangeS, (u32)dsiSaveClose);
+		setBL(0x020E4848+offsetChangeS2, (u32)dsiSaveOpen);
+		setBL(0x020E4860+offsetChangeS2, (u32)dsiSaveSeek);
+		setBL(0x020E4874+offsetChangeS2, (u32)dsiSaveRead);
+		setBL(0x020E4914+offsetChangeS2, (u32)dsiSaveCreate);
+		setBL(0x020E4944+offsetChangeS2, (u32)dsiSaveOpen);
+		setBL(0x020E4974+offsetChangeS2, (u32)dsiSaveSetLength);
+		setBL(0x020E499C+offsetChangeS2, (u32)dsiSaveSeek);
+		setBL(0x020E49B0+offsetChangeS2, (u32)dsiSaveWrite);
+		setBL(0x020E4A64+offsetChangeS3, (u32)dsiSaveCreate);
+		setBL(0x020E4A9C+offsetChangeS3, (u32)dsiSaveOpen);
+		setBL(0x020E4AD4+offsetChangeS3, (u32)dsiSaveSetLength);
+		setBL(0x020E4AF0+offsetChangeS3, (u32)dsiSaveSeek);
+		setBL(0x020E4B04+offsetChangeS3, (u32)dsiSaveWrite);
+		setBL(0x020E4C60+offsetChangeS2, (u32)dsiSaveSeek);
+		setBL(0x020E4C70+offsetChangeS2, (u32)dsiSaveWrite);
+		setBL(0x020E4E18+offsetChangeS2, (u32)dsiSaveGetResultCode);
+		*(u32*)(0x020E4E50+offsetChangeS4) = 0xE3A00000; // mov r0, #0
+	}
+
 	// Alien Puzzle Adventure (USA)
 	// Alien Puzzle Adventure (Europe, Australia)
 	else if (strcmp(romTid, "KP7E") == 0 || strcmp(romTid, "KP7V") == 0) {

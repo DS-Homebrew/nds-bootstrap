@@ -596,34 +596,35 @@ static bool isROMLoadableInRAM(const tDSiHeader* dsiHeader, const tNDSHeader* nd
 			}
 		}
 	} else if (!extendedMemory2) {
+		s32 romSizeLimitChange = 0;
 		if (strncmp(romTid, "KD3", 3) == 0 // Jinia Supasonaru: Eiwa Rakubiki Jiten
 		 || strncmp(romTid, "KD5", 3) == 0 // Jinia Supasonaru: Waei Rakubiki Jiten
 		 || strncmp(romTid, "KD4", 3) == 0) { // Meikyou Kokugo: Rakubiki Jiten
 			return false;
 		} else if (strncmp(romTid, "KBJ", 3) == 0) { // 21 Blackjack
-			romLocation += 0x410000;
-			romSizeLimit -= 0x410000;
+			romSizeLimitChange = 0x410000;
 		} else if (strncmp(romTid, "K5I", 3) == 0) { // 5 in 1 Solitaire
-			romLocation += 0x1F0000;
-			romSizeLimit -= 0x1F0000;
-		} else if (strncmp(romTid, "KCT", 3) == 0 // Chess Challenge!
+			romSizeLimitChange = 0x1F0000;
+		} /* else if (strncmp(romTid, "KAT", 3) == 0) { // AiRace: Tunnel
+			romSizeLimitChange = 0x80000;
+		} */ else if (strncmp(romTid, "KCT", 3) == 0 // Chess Challenge!
 				 || strncmp(romTid, "KWK", 3) == 0 // Mega Words
 				 || strncmp(romTid, "KSC", 3) == 0 // Sudoku Challenge!
 				 || strncmp(romTid, "KWS", 3) == 0 // Word Searcher
 				 || strncmp(romTid, "KWR", 3) == 0 // Word Searcher II
 				 || strncmp(romTid, "KW6", 3) == 0 // Word Searcher III
 				 || strncmp(romTid, "KW8", 3) == 0) { // Word Searcher IV
-			romLocation += 0x77C000;
-			romSizeLimit -= 0x77C000;
+			romSizeLimitChange = 0x77C000;
 		} else if (strncmp(romTid, "KUP", 3) == 0) { // Match Up!
-			romLocation += 0x380000;
-			romSizeLimit -= 0x380000;
+			romSizeLimitChange = 0x380000;
 		} else if (strncmp(romTid, "KAU", 3) == 0) { // Nintendo Cowndown Calendar
-			romLocation += 0x200000;
-			romSizeLimit -= 0x200000;
+			romSizeLimitChange = 0x200000;
 		} else if (strncmp(romTid, "KQR", 3) == 0) { // Remote Racers
-			romLocation += 0x280000;
-			romSizeLimit -= 0x280000;
+			romSizeLimitChange = 0x280000;
+		}
+		if (romSizeLimitChange) {
+			romLocation += romSizeLimitChange;
+			romSizeLimit -= romSizeLimitChange;
 		}
 	}
 	if (sharedFontInMep) {
