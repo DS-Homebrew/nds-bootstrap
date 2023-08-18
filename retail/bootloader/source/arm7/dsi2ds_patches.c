@@ -10750,24 +10750,26 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Flipper (USA)
-	// Music will not play on retail consoles
+	// Saving not supported due to using more than one file in filesystem
 	else if (strcmp(romTid, "KFPE") == 0) {
 		*(u32*)0x02005168 = 0xE1A00000; // nop
 		*(u32*)0x0200DE64 = 0xE1A00000; // nop
 		*(u32*)0x02031F9C = 0xE1A00000; // nop
 		*(u32*)0x020351FC = 0xE1A00000; // nop
 		patchInitDSiWare(0x0203A1EC, heapEnd);
+		*(u32*)0x0203A578 = *(u32*)0x02004FD0;
 		patchUserSettingsReadDSiWare(0x0203B7E4);
 	}
 
 	// Flipper (Europe)
-	// Music will not play on retail consoles
+	// Saving not supported due to using more than one file in filesystem
 	else if (strcmp(romTid, "KFPP") == 0) {
 		*(u32*)0x02005168 = 0xE1A00000; // nop
 		*(u32*)0x0200DECC = 0xE1A00000; // nop
 		*(u32*)0x02032008 = 0xE1A00000; // nop
 		*(u32*)0x02035268 = 0xE1A00000; // nop
 		patchInitDSiWare(0x0203A258, heapEnd);
+		*(u32*)0x0203A5E4 = *(u32*)0x02004FD0;
 		patchUserSettingsReadDSiWare(0x0203B8C0);
 	}
 
