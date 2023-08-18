@@ -870,7 +870,7 @@ static void NTR_BIOS() {
 }
 
 static void loadROMPartIntoRAM(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, aFile* file) {
-	if (dataToPreloadSize[0] == 0 || (dataToPreloadSize[0]/*+dataToPreloadSize[1]*/) >= (consoleModel > 0 ? (isSdk5(moduleParams) || dsiModeConfirmed ? 0xF00000 : 0x1700000) : (ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed ? 0x400000 : 0x700000))) {
+	if (dataToPreloadSize[0] == 0 || (dataToPreloadSize[0]/*+dataToPreloadSize[1]*/) >= (consoleModel > 0 ? (isSdk5(moduleParams) || dsiModeConfirmed ? 0xFC0000 : 0x17C0000) : (ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed ? 0x400000 : 0x7C0000))) {
 		return;
 	}
 
@@ -888,24 +888,26 @@ static void loadOverlaysintoRAM(const tNDSHeader* ndsHeader, const module_params
 	}
 
 	// Load overlays into RAM
-	if (overlaysSize <= 0x700000) {
-		u32 overlaysLocation = CACHE_ADRESS_START;
-		u32 alignedOverlaysOffset = ((ndsHeader->arm9romOffset + ndsHeader->arm9binarySize)/cacheBlockSize)*cacheBlockSize;
-		u32 newOverlaysSize = 0;
-		for (u32 i = alignedOverlaysOffset; i < ndsHeader->arm7romOffset; i+= cacheBlockSize) {
-			newOverlaysSize += cacheBlockSize;
-		}
-
-		sdmmc_set_ndma_slot(0);
-		fileRead((char*)overlaysLocation, file, alignedOverlaysOffset, newOverlaysSize);
-		sdmmc_set_ndma_slot(4);
-
-		if (!isSdk5(moduleParams) && *(u32*)((overlaysLocation-ndsHeader->arm9romOffset-ndsHeader->arm9binarySize)+0x003128AC) == 0x4B434148) {
-			*(u32*)((overlaysLocation-ndsHeader->arm9romOffset-ndsHeader->arm9binarySize)+0x3128AC) = 0xA00;	// Primary fix for Mario's Holiday (before Rev 11)
-		}
-
-		overlaysInRam = true;
+	if (overlaysSize > 0x700000) {
+		return;
 	}
+
+	u32 overlaysLocation = CACHE_ADRESS_START;
+	u32 alignedOverlaysOffset = ((ndsHeader->arm9romOffset + ndsHeader->arm9binarySize)/cacheBlockSize)*cacheBlockSize;
+	u32 newOverlaysSize = 0;
+	for (u32 i = alignedOverlaysOffset; i < ndsHeader->arm7romOffset; i+= cacheBlockSize) {
+		newOverlaysSize += cacheBlockSize;
+	}
+
+	sdmmc_set_ndma_slot(0);
+	fileRead((char*)overlaysLocation, file, alignedOverlaysOffset, newOverlaysSize);
+	sdmmc_set_ndma_slot(4);
+
+	if (!isSdk5(moduleParams) && *(u32*)((overlaysLocation-ndsHeader->arm9romOffset-ndsHeader->arm9binarySize)+0x003128AC) == 0x4B434148) {
+		*(u32*)((overlaysLocation-ndsHeader->arm9romOffset-ndsHeader->arm9binarySize)+0x3128AC) = 0xA00;	// Primary fix for Mario's Holiday (before Rev 11)
+	}
+
+	overlaysInRam = true;
 }
 
 static void loadIOverlaysintoRAM(const tDSiHeader* dsiHeader, aFile* file, const bool usesCloneboot) {

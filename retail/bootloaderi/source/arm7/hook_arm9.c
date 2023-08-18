@@ -276,7 +276,7 @@ int hookNdsRetailArm9(
 				}
 			}
 		}
-		if (dataToPreloadSize[0] > 0 && (dataToPreloadSize[0]/*+dataToPreloadSize[1]*/) < (consoleModel>0 ? (isSdk5(moduleParams) ? 0xF00000 : 0x1700000) : (ndsHeader->unitCode > 0 && dsiModeConfirmed ? 0x400000 : 0x700000))) {
+		if (dataToPreloadSize[0] > 0 && (dataToPreloadSize[0]/*+dataToPreloadSize[1]*/) < (consoleModel>0 ? (isSdk5(moduleParams) ? 0xFC0000 : 0x17C0000) : (ndsHeader->unitCode > 0 && dsiModeConfirmed ? 0x400000 : 0x7C0000))) {
 			//ce9->romLocation[1] = ce9->romLocation[0]+dataToPreloadSize[0];
 			ce9->romLocation -= dataToPreloadAddr[0];
 			//ce9->romLocation[1] -= dataToPreloadAddr[1];
