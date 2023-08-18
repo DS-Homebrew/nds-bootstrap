@@ -409,6 +409,13 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		// extern u32* gate18HeapAlloc;
 		// extern u32* gate18HeapAddrPtr;
 
+		/* if (!extendedMemory2) {
+			u32 bssEnd = *(u32*)0x02004FE8;
+			u32 sdatOffset = (romTid[3] == 'E') ? 0x02120780 : 0x0211CF7C;
+
+			*(u32*)0x02004FE8 = bssEnd - relocateBssPart(ndsHeader, bssEnd, sdatOffset+0xE0000, bssEnd, sdatOffset);
+		} */
+
 		*(u32*)0x02005090 = 0xE1A00000; // nop
 		*(u32*)0x020050A4 = 0xE1A00000; // nop
 		*(u32*)0x0200D278 = 0xE1A00000; // nop
