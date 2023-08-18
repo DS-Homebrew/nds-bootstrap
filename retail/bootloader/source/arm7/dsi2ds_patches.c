@@ -20576,6 +20576,10 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Robot Rescue (USA)
 	else if (strcmp(romTid, "KRTE") == 0) {
+		useSharedFont = (twlFontFound && extendedMemory2);
+
+		*(u32*)0x020050B8 = extendedMemory2 ? 0xE282286F : 0xE2822833; // add r2, r2, #extendedMemory2 ? 0x6F0000 : 0x330000
+		*(u32*)0x02005128 = extendedMemory2 ? 0x6FBA00 : 0x33BA00; // Shrink heap from 0xDBBA00
 		/* *(u32*)0x0200C2DC = 0xE3A00001; // mov r0, #1
 		*(u32*)0x0200C2E0 = 0xE12FFF1E; // bx lr
 		*(u32*)0x0200C39C = 0xE3A00001; // mov r0, #1
@@ -20611,16 +20615,24 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0200C91C, (u32)dsiSaveClose);
 		*(u32*)0x0200C924 = 0xE1A00000; // nop
 		*(u32*)0x0200C938 = 0xE1A00000; // nop
-		*(u32*)0x020108A4 = 0xE1A00000; // nop (Skip Manual screen)
+		if (!useSharedFont) {
+			*(u32*)0x020108A4 = 0xE1A00000; // nop (Skip Manual screen)
+		}
 		*(u32*)0x0202A484 = 0xE1A00000; // nop
 		*(u32*)0x0202D844 = 0xE1A00000; // nop
-		patchInitDSiWare(0x020331D8, heapEndExceed);
-		*(u32*)0x02033548 = 0x020A41C0;
+		patchInitDSiWare(0x020331D8, heapEnd);
+		if (!extendedMemory2) {
+			*(u32*)0x02033548 = *(u32*)0x02004FC0;
+		}
 		patchUserSettingsReadDSiWare(0x0203481C);
 	}
 
 	// Robot Rescue (Europe, Australia)
 	else if (strcmp(romTid, "KRTV") == 0) {
+		useSharedFont = (twlFontFound && extendedMemory2);
+
+		*(u32*)0x020050CC = extendedMemory2 ? 0xE282286F : 0xE2822833; // add r2, r2, #extendedMemory2 ? 0x6F0000 : 0x330000
+		*(u32*)0x0200513C = extendedMemory2 ? 0x6FBA00 : 0x33BA00; // Shrink heap from 0xDBBA00
 		*(u32*)0x0200C084 = 0xE1A00000; // nop
 		*(u32*)0x0200C08C = 0xE1A00000; // nop
 		/* *(u32*)0x0200C2CC = 0xE3A00001; // mov r0, #1
@@ -20652,16 +20664,24 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0200C8CC, (u32)dsiSaveSetLength);
 		setBL(0x0200C8DC, (u32)dsiSaveWrite);
 		setBL(0x0200C8E4, (u32)dsiSaveClose);
-		*(u32*)0x02010C30 = 0xE1A00000; // nop (Skip Manual screen)
+		if (!useSharedFont) {
+			*(u32*)0x02010C30 = 0xE1A00000; // nop (Skip Manual screen)
+		}
 		*(u32*)0x0202A56C = 0xE1A00000; // nop
 		*(u32*)0x0202D7CC = 0xE1A00000; // nop
-		patchInitDSiWare(0x02032EBC, heapEndExceed);
-		*(u32*)0x02033248 = 0x020A0160;
+		patchInitDSiWare(0x02032EBC, heapEnd);
+		if (!extendedMemory2) {
+			*(u32*)0x02033248 = *(u32*)0x02004FD0;
+		}
 		patchUserSettingsReadDSiWare(0x020344FC);
 	}
 
 	// ARC Style: Robot Rescue (Japan)
 	else if (strcmp(romTid, "KRTJ") == 0) {
+		useSharedFont = (twlFontFound && extendedMemory2);
+
+		*(u32*)0x020050CC = extendedMemory2 ? 0xE282286F : 0xE2822833; // add r2, r2, #extendedMemory2 ? 0x6F0000 : 0x330000
+		*(u32*)0x0200513C = extendedMemory2 ? 0x6FBA00 : 0x33BA00; // Shrink heap from 0xDBBA00
 		*(u32*)0x0200F218 = 0xE1A00000; // nop
 		*(u32*)0x0200F220 = 0xE1A00000; // nop
 		/* *(u32*)0x0200F460 = 0xE3A00001; // mov r0, #1
@@ -20693,11 +20713,15 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0200F9F4, (u32)dsiSaveSetLength);
 		setBL(0x0200FA04, (u32)dsiSaveWrite);
 		setBL(0x0200FA0C, (u32)dsiSaveClose);
-		*(u32*)0x02013BC8 = 0xE1A00000; // nop (Skip Manual screen)
+		if (!useSharedFont) {
+			*(u32*)0x02013BC8 = 0xE1A00000; // nop (Skip Manual screen)
+		}
 		*(u32*)0x0202D3E0 = 0xE1A00000; // nop
 		*(u32*)0x02030640 = 0xE1A00000; // nop
-		patchInitDSiWare(0x02035D30, heapEndExceed);
-		*(u32*)0x020360BC = 0x020A6580;
+		patchInitDSiWare(0x02035D30, heapEnd);
+		if (!extendedMemory2) {
+			*(u32*)0x020360BC = *(u32*)0x02004FD0;
+		}
 		patchUserSettingsReadDSiWare(0x02037370);
 	}
 
@@ -20705,6 +20729,12 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Robot Rescue 2 (Europe)
 	// Requires 8MB of RAM
 	else if ((strcmp(romTid, "KRRE") == 0 || strcmp(romTid, "KRRP") == 0) && extendedMemory2) {
+		useSharedFont = (twlFontFound && extendedMemory2);
+		u16 offsetChange = (romTid[3] == 'E') ? 0 : 0x35C;
+		u16 offsetChangeInit = (romTid[3] == 'E') ? 0 : 0x3DC;
+
+		*(u32*)0x020050E4 = 0xE282286C; // add r2, r2, #0x6C0000
+		*(u32*)0x02005154 = 0x6CBA00; // Shrink heap from 0xDBBA00
 		*(u32*)0x0200C0AC = 0xE1A00000; // nop
 		*(u32*)0x0200C0B4 = 0xE1A00000; // nop
 		/* *(u32*)0x0200C2F4 = 0xE3A00001; // mov r0, #1
@@ -20736,21 +20766,16 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0200C8F4, (u32)dsiSaveSetLength);
 		setBL(0x0200C904, (u32)dsiSaveWrite);
 		setBL(0x0200C90C, (u32)dsiSaveClose);
-		if (romTid[3] == 'E') {
-			*(u32*)0x02010888 = 0xE1A00000; // nop (Skip Manual screen)
-			*(u32*)0x02033384 = 0xE1A00000; // nop
-			*(u32*)0x02036678 = 0xE1A00000; // nop
-			patchInitDSiWare(0x0203BDA8, heapEndExceed);
-			*(u32*)0x0203C134 = 0x020BEAA0;
-			patchUserSettingsReadDSiWare(0x0203D3F8);
-		} else if (romTid[3] == 'P') {
-			*(u32*)0x02010BE4 = 0xE1A00000; // nop (Skip Manual screen)
-			*(u32*)0x02033760 = 0xE1A00000; // nop
-			*(u32*)0x02036A54 = 0xE1A00000; // nop
-			patchInitDSiWare(0x0203C184, heapEndExceed);
-			*(u32*)0x0203C510 = 0x020BF400;
-			patchUserSettingsReadDSiWare(0x0203D7D4);
+		if (useSharedFont) {
+			*(u32*)0x0200E56C = 0x210900; // Shrink heap from 0x3D0900
+		} else {
+			*(u32*)(0x02010888+offsetChange) = 0xE1A00000; // nop (Skip Manual screen)
 		}
+		*(u32*)(0x02033384+offsetChangeInit) = 0xE1A00000; // nop
+		*(u32*)(0x02036678+offsetChangeInit) = 0xE1A00000; // nop
+		patchInitDSiWare(0x0203BDA8+offsetChangeInit, heapEnd);
+		// *(u32*)(0x0203C134+offsetChangeInit) = *(u32*)0x02004FE8;
+		patchUserSettingsReadDSiWare(0x0203D3F8+offsetChangeInit);
 	}
 
 	// Rock-n-Roll Domo (USA)
