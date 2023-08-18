@@ -16791,8 +16791,8 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Need for Speed: Nitro-X (USA)
 	// Need for Speed: Nitro-X (Europe, Australia)
-	// Requires 8MB of RAM
-	else if (strncmp(romTid, "KNP", 3) == 0 && extendedMemory2) {
+	// Audio does not play on retail consoles, and crashes after a race
+	else if (strncmp(romTid, "KNP", 3) == 0) {
 		/*const u32 dsiSaveCreateT = 0x0201D090;
 		*(u16*)dsiSaveCreateT = 0x4778; // bx pc
 		tonccpy((u32*)(dsiSaveCreateT + 4), dsiSaveCreate, 0xC);
@@ -16828,12 +16828,20 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		//tonccpy((u32*)0x0201C5A8, dsiSaveGetResultCode, 0xC);
 		//tonccpy((u32*)0x0201D178, dsiSaveSetLength, 0xC);
 		*(u32*)0x0201F744 = 0xE1A00000; // nop
-		patchInitDSiWare(0x0202EC54, heapEnd);
+		patchInitDSiWare(0x0202EC54, heapEndMaxForRetail);
+		if (!extendedMemory2) {
+			*(u32*)0x0202EFE0 -= 0x3A000;
+		}
 		patchUserSettingsReadDSiWare(0x02030430);
 		*(u32*)0x0203044C = wirelessReturnCodeArm;
 		*(u32*)0x02030450 = 0xE12FFF1E; // bx lr
 		*(u32*)0x0203046C = 0xE3A00000; // mov r0, #0
 		*(u32*)0x02030470 = 0xE12FFF1E; // bx lr
+		if (!extendedMemory2) {
+			// Disable audio
+			*(u32*)0x0206B5F8 = 0xE12FFF1E; // bx lr
+			*(u32*)0x0206B6B8 = 0xE12FFF1E; // bx lr
+		}
 		*(u16*)0x020EBFC4 = 0x4770; // bx lr
 		/*setBLThumb(0x020EBFDC, dsiSaveOpenT);
 		setBLThumb(0x020EBFEA, dsiSaveCloseT);

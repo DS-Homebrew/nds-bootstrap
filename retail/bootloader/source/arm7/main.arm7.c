@@ -1347,6 +1347,7 @@ int arm7_main(void) {
 					||	strncmp(romTid, "K5M", 3) == 0 // G.G Series: The Last Knight
 					||	strncmp(romTid, "KPT", 3) == 0 // Link 'n' Launch
 					||	strncmp(romTid, "CLJ", 3) == 0 // Mario & Luigi: Bowser's Inside Story
+					||	strncmp(romTid, "KNP", 3) == 0 // Need for Speed: Nitro-X
 					||	strncmp(romTid, "K9K", 3) == 0 // Nintendoji
 					||	strncmp(romTid, "K6T", 3) == 0 // Orion's Odyssey
 					||	strncmp(romTid, "KHR", 3) == 0 // Picture Perfect: Pocket Stylist
