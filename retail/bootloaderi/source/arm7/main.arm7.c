@@ -757,6 +757,9 @@ static bool isROMLoadableInRAM(const tDSiHeader* dsiHeader, const tNDSHeader* nd
 		moreMemory = (dsiWramAccess && romSize > (consoleModel==0 ? 0x00BFE000 : 0x01BFE000));
 	  }
 	}
+	if (res) {
+		dbg_printf("ROM is loadable into RAM\n");
+	}
 	/*if ((strncmp(romTid, "HND", 3) == 0)
 	|| (strncmp(romTid, "HNE", 3) == 0))
 	{
