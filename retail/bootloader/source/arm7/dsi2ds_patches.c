@@ -18320,10 +18320,33 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}*/
 
 	// Phantasy Star 0 Mini (Japan)
+	// Save code does not work due to a weird crash caused by it
 	// Crashes after finishing a stage on retail consoles
 	else if (strcmp(romTid, "KPSJ") == 0) {
+		/* tonccpy((u32*)0x0200A75C, dsiSaveCreate, 0xC);
+
+		const u32 dsiSaveOpenT = 0x0200A76C;
+		*(u16*)dsiSaveOpenT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveOpenT + 4), dsiSaveOpen, 0xC);
+
+		const u32 dsiSaveCloseT = 0x0200A77C;
+		*(u16*)dsiSaveCloseT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveCloseT + 4), dsiSaveClose, 0xC);
+
+		const u32 dsiSaveSeekT = 0x0200A78C;
+		*(u16*)dsiSaveSeekT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveSeekT + 4), dsiSaveSeek, 0xC);
+
+		const u32 dsiSaveReadT = 0x0200A79C;
+		*(u16*)dsiSaveReadT = 0x4778; // bx pc
+		tonccpy((u32*)(dsiSaveReadT + 4), dsiSaveRead, 0xC);
+
+		tonccpy((u32*)0x0200A79C, dsiSaveWrite, 0xC);
+		tonccpy((u32*)0x0200ACD8, dsiSaveWrite, 0xC); // dsiSaveWriteAsync */
+
 		*(u32*)0x02007FA8 = 0xE28DD00C; // ADD   SP, SP, #0xC
 		*(u32*)0x02007FAC = 0xE8BD8078; // LDMFD SP!, {R3-R6,PC}
+		// tonccpy((u32*)0x02009C88, dsiSaveGetResultCode, 0xC);
 		*(u32*)0x0200CC88 = 0xE1A00000; // nop
 		patchInitDSiWare(0x0202D950, heapEndMaxForRetail);
 		*(u32*)0x0202DCCC -= 0x60000;
@@ -18339,6 +18362,21 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			*(u16*)0x0208C53E = 0x2D02; // cmp r5, #2
 		}
 		doubleNopT(0x0209F778);
+		/* // setBLThumb(0x020A9C96, dsiSaveCreateT);
+		setBLThumb(0x020A9CAA, dsiSaveOpenT);
+		setBLThumb(0x020A9CCC, dsiSaveSeekT);
+		// setBLThumb(0x020A9CDC, dsiSaveWriteT);
+		setBLThumb(0x020A9D10, dsiSaveCloseT);
+		setBLThumb(0x020A9D4E, dsiSaveOpenT);
+		setBLThumb(0x020A9E52, dsiSaveCloseT);
+		setBLThumb(0x020A9E9E, dsiSaveCloseT);
+		setBLThumb(0x020AA056, dsiSaveSeekT);
+		// setBLThumb(0x020AA066, dsiSaveWriteT); // dsiSaveWriteAsync
+		setBLThumb(0x020AA190, dsiSaveSeekT);
+		setBLThumb(0x020AA19E, dsiSaveReadT);
+		*(u16*)0x020AA1B8 = nopT;
+		setBLThumb(0x020AA1D8, dsiSaveSeekT);
+		// setBLThumb(0x020A91E6, dsiSaveWriteT); */
 	}
 
 	// GO Series: Picdun (USA)
