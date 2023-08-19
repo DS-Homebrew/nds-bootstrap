@@ -22,6 +22,7 @@
 	.global nintendojiHeapAlloc
 	.global nintendojiHeapAddrPtr
 	.global ps0MiniPatch
+	.global ps0MiniFuncHook
 	.global rmtRacersHeapAlloc
 	.global rmtRacersHeapAddrPtr
 	.global siezHeapAlloc
@@ -78,6 +79,8 @@ nintendojiHeapAddrPtr:
 	.word nintendojiHeapAddr
 ps0MiniPatch:
 	.word ps0MiniPatchFunc
+ps0MiniFuncHook:
+	.word ps0MiniFuncHookFunc
 rmtRacersHeapAlloc:
 	.word rmtRacersHeapAllocFunc
 rmtRacersHeapAddrPtr:
@@ -648,11 +651,57 @@ ps0MiniPatch_skip:
 
 	ldr pc, =0x0208C514+1
 ps0MiniLocs:
-.word	0
-.word	0
+.word	0 @ m
+.word	0 @ w
 .pool
 @---------------------------------------------------------------------------------
 	.thumb
+@---------------------------------------------------------------------------------
+ps0MiniFuncHookFunc:
+@---------------------------------------------------------------------------------
+	push {r3-r5,lr}
+	ldr r0, =0x020CCC48
+	ldr r0, [r0,r2]
+	push {r0}
+	.hword 0x4780 @ blx r0
+	pop {r0}
+	ldr r3, =0x020BA254+1
+	cmp r0, r3
+	bne ps0MiniFuncHook_ret
+	@ Load specific animation for selected character, instead of loading them all at once
+	ldr r3, =0x020E9000 @ player anim filename pointers
+	ldr r5, =0x0226D6DC
+	ldr r5, [r5]
+	cmp r5, #0
+	beq ps0MiniFuncHook_anim0
+	cmp r5, #1
+	beq ps0MiniFuncHook_anim1
+	cmp r5, #2
+	beq ps0MiniFuncHook_anim2
+ps0MiniFuncHook_cont:
+	ldr r3, =0x0208C4CC+1
+	.hword 0x4798 @ blx r3
+ps0MiniFuncHook_ret:
+	pop {r3-r5,pc}
+
+ps0MiniFuncHook_anim0:
+	ldr r4, =0x020E8D30 @ player/01_saver_m_pa00.narc
+	ldr r5, =0x020E8D4C @ player/01_saver_w_pa00.narc
+	b ps0MiniFuncHook_str
+ps0MiniFuncHook_anim1:
+	ldr r4, =0x020E8ED8 @ player/09_a_rifle_m_pa00.narc
+	ldr r5, =0x020E8EF8 @ player/09_a_rifle_w_pa00.narc
+	b ps0MiniFuncHook_str
+ps0MiniFuncHook_anim2:
+	ldr r4, =0x020E8CA4 @ player/14_rod_m_pa00.narc
+	ldr r5, =0x020E8CC0 @ player/14_rod_w_pa00.narc
+ps0MiniFuncHook_str:
+	str r4, [r3]
+	str r5, [r3,#4]
+	b ps0MiniFuncHook_cont
+.pool
+@---------------------------------------------------------------------------------
+
 @---------------------------------------------------------------------------------
 rmtRacersHeapAllocFunc:
 @---------------------------------------------------------------------------------

@@ -18356,11 +18356,20 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0202EE70 = wirelessReturnCodeArm;
 		*(u32*)0x0202EE74 = 0xE12FFF1E; // bx lr
 		if (!extendedMemory2) {
-			// Do not load any character animations other than "00_common"
-			extern u16* ps0MiniPatch;
-			tonccpy((u16*)0x020140BC, ps0MiniPatch, 0x1D4);
+			const u32 newCodeAddr = 0x020140BC;
+			const u32 newCodeAddr2 = newCodeAddr+0x78;
 
-			setBLThumb(0x0208C4F2, 0x020140BC);
+			doubleNopT(0x020439C0); // Moved to ps0MiniFuncHook
+			setBLThumb(0x0205D826, newCodeAddr2);
+			*(u16*)0x0205D82A = nopT;
+
+			extern u16* ps0MiniPatch;
+			extern u16* ps0MiniFuncHook;
+			// tonccpy((u16*)newCodeAddr, ps0MiniPatch, 0x1D4);
+			tonccpy((u16*)newCodeAddr, ps0MiniPatch, 0x78);
+			tonccpy((u16*)newCodeAddr2, ps0MiniFuncHook, 0x80);
+
+			setBLThumb(0x0208C4F2, newCodeAddr);
 			*(u16*)0x0208C53E = 0x2D02; // cmp r5, #2
 		}
 		doubleNopT(0x0209F778);
