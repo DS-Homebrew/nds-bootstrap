@@ -21,6 +21,7 @@
 	.global nintCdwnCalHeapAddrPtr
 	.global nintendojiHeapAlloc
 	.global nintendojiHeapAddrPtr
+	.global ps0MiniPatch
 	.global rmtRacersHeapAlloc
 	.global rmtRacersHeapAddrPtr
 	.global siezHeapAlloc
@@ -75,6 +76,8 @@ nintendojiHeapAlloc:
 	.word nintendojiHeapAllocFunc
 nintendojiHeapAddrPtr:
 	.word nintendojiHeapAddr
+ps0MiniPatch:
+	.word ps0MiniPatchFunc
 rmtRacersHeapAlloc:
 	.word rmtRacersHeapAllocFunc
 rmtRacersHeapAddrPtr:
@@ -607,6 +610,25 @@ nintendojiHeapAddr:
 .pool
 @---------------------------------------------------------------------------------
 	.thumb
+@---------------------------------------------------------------------------------
+ps0MiniPatchFunc:
+@---------------------------------------------------------------------------------
+	cmp r4, #1
+	bgt ps0MiniPatch_skip
+	lsl r5, r4, #2
+	ldr r0, [r6,r5]
+	bx lr
+ps0MiniPatch_skip:
+	lsl r5, r4, #2
+	str r0, [r6,r5]
+	add r4, r4, #1
+	cmp r4, #0x18
+	blt ps0MiniPatch_skip
+
+	ldr r1, =0x0208C514+1
+	bx r1
+.pool
+
 @---------------------------------------------------------------------------------
 rmtRacersHeapAllocFunc:
 @---------------------------------------------------------------------------------

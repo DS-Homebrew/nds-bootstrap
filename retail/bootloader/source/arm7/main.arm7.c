@@ -1350,6 +1350,7 @@ int arm7_main(void) {
 					||	strncmp(romTid, "KNP", 3) == 0 // Need for Speed: Nitro-X
 					||	strncmp(romTid, "K9K", 3) == 0 // Nintendoji
 					||	strncmp(romTid, "K6T", 3) == 0 // Orion's Odyssey
+					||	strncmp(romTid, "KPS", 3) == 0 // Phantasy Star 0 Mini
 					||	strncmp(romTid, "KHR", 3) == 0 // Picture Perfect: Pocket Stylist
 					||	strncmp(romTid, "KS3", 3) == 0 // Shantae: Risky's Revenge
 					||	strncmp(romTid, "VSO", 3) == 0 // Sonic Classic Collection

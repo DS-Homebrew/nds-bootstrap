@@ -18320,18 +18320,25 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}*/
 
 	// Phantasy Star 0 Mini (Japan)
-	// Requires 8MB of RAM
-	else if (strcmp(romTid, "KPSJ") == 0 && extendedMemory2) {
+	// Crashes after finishing a stage on retail consoles
+	else if (strcmp(romTid, "KPSJ") == 0) {
 		*(u32*)0x02007FA8 = 0xE28DD00C; // ADD   SP, SP, #0xC
 		*(u32*)0x02007FAC = 0xE8BD8078; // LDMFD SP!, {R3-R6,PC}
 		*(u32*)0x0200CC88 = 0xE1A00000; // nop
-		patchInitDSiWare(0x0202D950, heapEnd);
-		// *(u32*)0x0202DCCC = 0x0218B0A0;
+		patchInitDSiWare(0x0202D950, heapEndMaxForRetail);
+		*(u32*)0x0202DCCC -= 0x60000;
 		patchUserSettingsReadDSiWare(0x0202EE48);
 		*(u32*)0x0202EE70 = wirelessReturnCodeArm;
 		*(u32*)0x0202EE74 = 0xE12FFF1E; // bx lr
-		*(u16*)0x0209F778 = nopT;
-		*(u16*)0x0209F77A = nopT;
+		if (!extendedMemory2) {
+			// Do not load any character animations other than "00_common"
+			extern u16* ps0MiniPatch;
+			tonccpy((u16*)0x020140BC, ps0MiniPatch, 0x1C);
+
+			setBLThumb(0x0208C4F2, 0x020140BC);
+			*(u16*)0x0208C53E = 0x2D02; // cmp r5, #2
+		}
+		doubleNopT(0x0209F778);
 	}
 
 	// GO Series: Picdun (USA)

@@ -1696,6 +1696,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			||	strncmp(romTid, "KNP", 3) == 0 // Need for Speed: Nitro-X
 			||	strncmp(romTid, "K9K", 3) == 0 // Nintendoji
 			||	strncmp(romTid, "K6T", 3) == 0 // Orion's Odyssey
+			||	strncmp(romTid, "KPS", 3) == 0 // Phantasy Star 0 Mini
 			||	strncmp(romTid, "KHR", 3) == 0 // Picture Perfect: Hair Stylist
 			||	strncmp(romTid, "KS3", 3) == 0 // Shantae: Risky's Revenge
 			||	strncmp(romTid, "KZU", 3) == 0 // Tales to Enjoy!: Little Red Riding Hood
