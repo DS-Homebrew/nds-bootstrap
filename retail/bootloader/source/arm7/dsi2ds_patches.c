@@ -18358,7 +18358,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		if (!extendedMemory2) {
 			// Do not load any character animations other than "00_common"
 			extern u16* ps0MiniPatch;
-			tonccpy((u16*)0x020140BC, ps0MiniPatch, 0x1C);
+			tonccpy((u16*)0x020140BC, ps0MiniPatch, 0x1D4);
 
 			setBLThumb(0x0208C4F2, 0x020140BC);
 			*(u16*)0x0208C53E = 0x2D02; // cmp r5, #2

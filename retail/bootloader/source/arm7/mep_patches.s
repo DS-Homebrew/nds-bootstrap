@@ -613,22 +613,46 @@ nintendojiHeapAddr:
 @---------------------------------------------------------------------------------
 ps0MiniPatchFunc:
 @---------------------------------------------------------------------------------
+	bx pc
+	nop
+	.arm
+	adr r12, ps0MiniLocs
 	cmp r4, #1
 	bgt ps0MiniPatch_skip
 	lsl r5, r4, #2
-	ldr r0, [r6,r5]
+	push {r11}
+	mov r11, r6
+	add r11, r5
+	ldr r0, [r11]
+	cmp r4, #1
+	addeq r12, #4
+	str r11, [r12]
+	pop {r11}
 	bx lr
+
 ps0MiniPatch_skip:
 	lsl r5, r4, #2
+	ldr r0, [r12]
+	ldr r0, [r0]
 	str r0, [r6,r5]
 	add r4, r4, #1
+
+	lsl r5, r4, #2
+	ldr r0, [r12,#4]
+	ldr r0, [r0]
+	str r0, [r6,r5]
+	add r4, r4, #1
+
 	cmp r4, #0x18
 	blt ps0MiniPatch_skip
 
-	ldr r1, =0x0208C514+1
-	bx r1
+	ldr pc, =0x0208C514+1
+ps0MiniLocs:
+.word	0
+.word	0
 .pool
-
+@---------------------------------------------------------------------------------
+	.thumb
 @---------------------------------------------------------------------------------
 rmtRacersHeapAllocFunc:
 @---------------------------------------------------------------------------------
