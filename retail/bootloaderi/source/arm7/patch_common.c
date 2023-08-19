@@ -447,6 +447,11 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// 2Puzzle It: Fantasy (Europe)
+	else if (strcmp(romTid, "K2PP") == 0 && !twlFontFound) {
+		*(u32*)0x020052E0 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+	}
+
 	// 3D Mahjong (USA)
 	else if (strcmp(romTid, "KMJE") == 0) {
 		if (!twlFontFound) {

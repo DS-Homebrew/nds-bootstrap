@@ -765,17 +765,19 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// 2Puzzle It: Fantasy (Europe)
-	// Unknown bug making it not boot
-	/* else if (strcmp(romTid, "K2PP") == 0) {
+	// Requires 8MB of RAM
+	else if (strcmp(romTid, "K2PP") == 0 && extendedMemory2) {
+		*(u32*)0x020052E0 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		*(u32*)0x020052FC = 0xE1A00000; // nop
+		*(u32*)0x02005304 = 0xE1A00000; // nop
 		*(u32*)0x0201F098 = 0xE1A00000; // nop
 		*(u32*)0x02022560 = 0xE1A00000; // nop
 		patchInitDSiWare(0x02026EB4, heapEnd);
+		*(u32*)0x02027240 = *(u32*)0x02004FD0;
 		patchUserSettingsReadDSiWare(0x02028770);
-		if (!extendedMemory2) {
-			*(u32*)0x02027240 = 0x02163AE0;
-			*(u32*)0x020837D0 = 0x270900;
-		}
-	} */
+		*(u32*)0x020836FC = 0xE2800602; // add r0, r0, #0x200000
+		*(u32*)0x020837D0 = 0x900; // Shrink heap (reserved for TWL font) from 0x3D0900
+	}
 
 	// 3D Mahjong (USA)
 	else if (strcmp(romTid, "KMJE") == 0) {
