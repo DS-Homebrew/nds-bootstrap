@@ -670,7 +670,7 @@ ps0MiniFuncHookFunc:
 	bne ps0MiniFuncHook_ret
 	@ Load specific animation for selected character, instead of loading them all at once
 	ldr r3, =0x020E9000 @ player anim filename pointers
-	ldr r5, =0x0226D6DC
+	ldr r5, =0x022696DC
 	ldr r5, [r5]
 	cmp r5, #0
 	beq ps0MiniFuncHook_anim0
