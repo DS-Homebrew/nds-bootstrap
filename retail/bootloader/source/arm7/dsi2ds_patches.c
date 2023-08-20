@@ -134,22 +134,25 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Picture Perfect Hair Salon (USA)
 	// Hair Salon (Europe/Australia)
-	// Requires 8MB of RAM
-	else if ((strcmp(romTid, "DHSE") == 0 || strcmp(romTid, "DHSV") == 0) && extendedMemory2) {
+	// Audio is disabled on retail consoles
+	else if (strcmp(romTid, "DHSE") == 0 || strcmp(romTid, "DHSV") == 0) {
 		// *(u32*)0x02004B9C = 0x0200002F;
-		/* if (!extendedMemory2) {
+		if (!extendedMemory2) {
+			// Disable audio
 			*(u32*)0x020050D4 = 0xE3A00901; // mov r0, #0x4000
+			*(u32*)0x020234C4 = 0xE12FFF1E; // bx lr
+			*(u32*)0x020234E4 = 0xE12FFF1E; // bx lr
 			*(u32*)0x02024550 = 0xE3A00000; // mov r0, #0
 			*(u32*)0x02024554 = 0xE12FFF1E; // bx lr
 			*(u32*)0x020245B4 = 0xE3A00000; // mov r0, #0
 			*(u32*)0x020245B8 = 0xE12FFF1E; // bx lr
-			*(u32*)0x0202480C = 0xE3A00000; // mov r0, #0
-			*(u32*)0x02024810 = 0xE12FFF1E; // bx lr
-			*(u32*)0x0202483C = 0xE3A00000; // mov r0, #0
-			*(u32*)0x02024840 = 0xE12FFF1E; // bx lr
 			*(u32*)0x0203F1F4 = 0xE1A00000; // nop
-			*(u32*)0x0203F590 = 0xE1A00000; // nop
-		} */
+			*(u32*)0x0203F208 = 0xE12FFF1E; // bx lr
+			*(u32*)0x0203F28C = 0xE12FFF1E; // bx lr
+			*(u32*)0x0203F424 = 0xE12FFF1E; // bx lr
+			*(u32*)0x0203F480 = 0xE1A00000; // nop
+			*(u32*)0x0203F5A0 = 0xE12FFF1E; // bx lr
+		}
 		*(u32*)0x02005108 = 0xE1A00000; // nop
 		*(u32*)0x0200517C = 0xE1A00000; // nop
 		*(u32*)0x02005190 = 0xE1A00000; // nop
@@ -160,8 +163,11 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02012840 = 0xE1A00000; // nop
 		patchInitDSiWare(0x02019980, heapEnd);
 		*(u32*)0x02019CF0 = *(u32*)0x02004FD0;
-		*(u32*)0x02020B10 = 0xE3A00001; // mov r0, #1
-		*(u32*)0x02020B14 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0201AF28 = wirelessReturnCodeArm;
+		*(u32*)0x0201AF2C = 0xE12FFF1E; // bx lr
+		*(u32*)0x0201AF48 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0201AF4C = 0xE12FFF1E; // bx lr
+		*(u32*)0x02072984 += 0xE0000000; // beq -> b
 	}
 
 	// Patch DSiWare to run in DS mode
