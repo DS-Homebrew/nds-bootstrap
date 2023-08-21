@@ -85,6 +85,7 @@ static const u16 sleepPatchThumbAlt[2] = {0xD002, 0x0440};
 
 // RAM clear
 static const u32 ramClearSignature[2] = {0x02FFC000, 0x02FFF000};
+static const u32 ramClearISignature[1] = {0x02FE0000};
 
 // Post-boot code
 static const u32 postBootStartSignature[1]      = {0xE92D47F0};
@@ -1005,11 +1006,34 @@ u32* findRamClearOffset(const tNDSHeader* ndsHeader) {
 		ramClearSignature, 2
 	);
 	if (ramClearOffset) {
-		dbg_printf("RAM clear found: ");
-		dbg_hexa((u32)ramClearOffset);
-		dbg_printf("\n");
+		dbg_printf("RAM clear found\n");
 	} else {
 		dbg_printf("RAM clear not found\n");
+	}
+
+	dbg_printf("\n");
+	return ramClearOffset;
+}
+
+u32* findRamClearIOffset(const tNDSHeader* ndsHeader) {
+	dbg_printf("findRamClearIOffset:\n");
+
+	u32* ramClearOffset = NULL;
+	if (*(u32*)0x02FFE1A0 == 0x00403000) {
+		ramClearOffset = findOffset(
+			(u32*)__DSiHeader->arm7idestination, newArm7ibinarySize,
+			ramClearISignature, 1
+		);
+	} else {
+		ramClearOffset = findOffset(
+			(u32*)ndsHeader->arm7destination, newArm7binarySize,
+			ramClearSignature, 1
+		);
+	}
+	if (ramClearOffset) {
+		dbg_printf("RAM clear I found\n");
+	} else {
+		dbg_printf("RAM clear I not found\n");
 	}
 
 	dbg_printf("\n");

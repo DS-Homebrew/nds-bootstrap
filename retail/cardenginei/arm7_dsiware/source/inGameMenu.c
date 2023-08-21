@@ -35,6 +35,8 @@ extern void prepareManual(void);
 extern void readManual(int line);
 extern void restorePreManual(void);
 extern void saveMainScreenSetting(void);
+extern void loadInGameMenu(void);
+extern void unloadInGameMenu(void);
 
 extern u16 biosRead16(u32 addr);
 

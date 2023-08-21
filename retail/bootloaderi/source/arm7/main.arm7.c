@@ -72,6 +72,7 @@
 #include "locations.h"
 #include "value_bits.h"
 #include "loading_screen.h"
+#include "unpatched_funcs.h"
 
 #define cacheBlockSize 0x4000
 
@@ -138,8 +139,8 @@ u8 wifiLedState = 0;
 
 //bool gbaRomFound = false;
 
-static u32 ce7Location = CARDENGINEI_ARM7_LOCATION;
-static u32 ce9Location = CARDENGINEI_ARM9_LOCATION;
+u32 ce7Location = CARDENGINEI_ARM7_LOCATION;
+u32 ce9Location = CARDENGINEI_ARM9_LOCATION;
 u32 overlaysSize = 0;
 u32 ioverlaysSize = 0;
 bool overlayPatch = false;
@@ -1893,8 +1894,8 @@ int arm7_main(void) {
 				tonccpy((u32*)ce9Location, (u32*)CARDENGINEI_ARM9_ROMINRAM_BUFFERED_LOCATION, ce9size);
 			}
 		} else if (isSdk5(moduleParams) && ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed) {
-			ce9Location = CARDENGINEI_ARM9_TWLSDK_LOCATION;
 			if (gameOnFlashcard) {
+				ce9Location = *(u32*)CARDENGINEI_ARM9_SDK5_DLDI_BUFFERED_LOCATION;
 				ce9size = 0x7000;
 				tonccpy((u32*)ce9Location, (u32*)CARDENGINEI_ARM9_SDK5_DLDI_BUFFERED_LOCATION, ce9size);
 				if (!dldiPatchBinary((data_t*)ce9Location, ce9size)) {
@@ -1902,6 +1903,7 @@ int arm7_main(void) {
 					errorOutput();
 				}
 			} else {
+				ce9Location = *(u32*)CARDENGINEI_ARM9_SDK5_BUFFERED_LOCATION;
 				ce9size = 0x5000;
 				tonccpy((u32*)ce9Location, (u32*)CARDENGINEI_ARM9_SDK5_BUFFERED_LOCATION, ce9size);
 			}
@@ -2091,6 +2093,7 @@ int arm7_main(void) {
 			tonccpy((char*)ndsHeader->arm9destination+0x400000, ndsHeader->arm9destination, iUncompressedSize);
 			tonccpy((char*)DONOR_ROM_ARM7_LOCATION, ndsHeader->arm7destination, ndsHeader->arm7binarySize);
 		} */
+
 		if (!gameOnFlashcard && !ROMinRAM && (romRead_LED==1 || dmaRomRead_LED==1)) {
 			// Turn WiFi LED off
 			i2cWriteRegister(0x4A, 0x30, 0x12);

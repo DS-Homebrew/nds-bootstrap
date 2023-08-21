@@ -1141,9 +1141,10 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		}
 		fclose(cebin);
 
+		const bool binary3 = (REG_SCFG_EXT7 == 0 ? !dsiEnhancedMbk : (a7mbk6 != 0x00403000));
 		if (conf->gameOnFlashcard) {
 			// Load SDK5 DLDI ce9 binary
-			cebin = fopen("nitro:/cardenginei_arm9_twlsdk_dldi.lz77", "rb");
+			cebin = fopen(binary3 ? "nitro:/cardenginei_arm9_twlsdk3_dldi.lz77" : "nitro:/cardenginei_arm9_twlsdk_dldi.lz77", "rb");
 			if (cebin) {
 				fread(lz77ImageBuffer, 1, sizeof(lz77ImageBuffer), cebin);
 				LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINEI_ARM9_SDK5_DLDI_BUFFERED_LOCATION);
@@ -1151,7 +1152,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			fclose(cebin);
 		} else {
 			// Load SDK5 ce9 binary
-			cebin = fopen("nitro:/cardenginei_arm9_twlsdk.lz77", "rb");
+			cebin = fopen(binary3 ? "nitro:/cardenginei_arm9_twlsdk3.lz77" : "nitro:/cardenginei_arm9_twlsdk.lz77", "rb");
 			if (cebin) {
 				fread(lz77ImageBuffer, 1, sizeof(lz77ImageBuffer), cebin);
 				LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINEI_ARM9_SDK5_BUFFERED_LOCATION);
@@ -1369,7 +1370,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			cebin = fopen("sd:/_nds/bios9i_part1.bin", "rb");
 		}
 		if (cebin) {
-			fread((u32*)0x02F40000, 1, 0x6400, cebin);
+			fread((u32*)0x02F40000, 1, 0x8000, cebin);
 
 			// Relocate addresses
 			*(u32*)0x02F400CC -= 0xFFFF0000;
@@ -1406,10 +1407,10 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			cebin = fopen("sd:/_nds/bios7i_part1.bin", "rb");
 		}
 		if (cebin) {
-			fread((u32*)0x02F10000, 1, 0x8000, cebin);
+			fread((u32*)0x02F48000, 1, 0x8000, cebin);
 
 			// Relocate address
-			*(u32*)0x02F158A8 += (a7mbk6==0x00403000 ? 0x02FD8000 : 0x02FF4000);
+			*(u32*)0x02F158A8 += 0x02F48000;
 		}
 		fclose(cebin);
 	}

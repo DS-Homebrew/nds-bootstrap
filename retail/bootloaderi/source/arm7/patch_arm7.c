@@ -190,7 +190,6 @@ static void fixForDifferentBios(const cardengineArm7* ce7, const tNDSHeader* nds
 	u32* swi12Offset = patchOffsetCache.a7Swi12Offset;
 	bool useGetPitchTableBranch = (patchOffsetCache.a7IsThumb && !isSdk5(moduleParams));
 	u32* swiGetPitchTableOffset = patchOffsetCache.swiGetPitchTableOffset;
-	//u32 a7iStartOffset = patchOffsetCache.a7iStartOffset;
 	if (!patchOffsetCache.a7Swi12Offset) {
 		swi12Offset = a7_findSwi12Offset(ndsHeader);
 		if (swi12Offset) {
@@ -208,12 +207,6 @@ static void fixForDifferentBios(const cardengineArm7* ce7, const tNDSHeader* nds
 		}
 		patchOffsetCache.swiGetPitchTableChecked = true;
 	}
-	/*if (!patchOffsetCache.a7iStartOffset && ndsHeader->unitCode > 0 && dsiModeConfirmed) {
-		a7iStartOffset = (u32)findA7iStartOffset();
-		if (a7iStartOffset) {
-			patchOffsetCache.a7iStartOffset = a7iStartOffset;
-		}
-	}*/
 
 	// swi 0x12 call
 	if (swi12Offset && !(REG_SCFG_ROM & BIT(9))) {
@@ -243,13 +236,8 @@ static void fixForDifferentBios(const cardengineArm7* ce7, const tNDSHeader* nds
 	dbg_printf(useGetPitchTableBranch ? "swiGetPitchTableBranch location : " : "swiGetPitchTable location : ");
 	dbg_hexa((u32)swiGetPitchTableOffset);
 	dbg_printf("\n\n");
-	/*if (ndsHeader->unitCode > 0 && dsiModeConfirmed && a7iStartOffset) {
-		dbg_printf("a7iStart location : ");
-		dbg_hexa((u32)a7iStartOffset);
-		dbg_printf("\n\n");
-	}*/
 
-	if (/*a7iStartOffset &&*/ (REG_SCFG_ROM & BIT(9)) && *(u32*)0x02F10020 == 0xEA001FF6 && ndsHeader->unitCode > 0 && dsiModeConfirmed) {
+	if ((REG_SCFG_ROM & BIT(9)) && *(u32*)0x02F10020 == 0xEA001FF6 && ndsHeader->unitCode > 0 && dsiModeConfirmed) {
 		u16* swi24Offset = patchOffsetCache.a7Swi24Offset;
 		u16* swi25Offset = patchOffsetCache.a7Swi25Offset;
 		u16* swi26Offset = patchOffsetCache.a7Swi26Offset;
@@ -284,36 +272,24 @@ static void fixForDifferentBios(const cardengineArm7* ce7, const tNDSHeader* nds
 
 			u32 dst = ((u32)swi24Offset) - 0x100;
 			tonccpy((u32*)dst, ce7->patches->swi24, 0x8);
-			if (*(u32*)0x02FFE1A0 == 0x00403000) {
-				*(u32*)(dst+4) -= 0x1C000;
-			}
 		}
 		if (swi25Offset) {
 			*swi25Offset = 0xE780;
 
 			u32 dst = ((u32)swi25Offset) - 0xFC;
 			tonccpy((u32*)dst, ce7->patches->swi25, 0x8);
-			if (*(u32*)0x02FFE1A0 == 0x00403000) {
-				*(u32*)(dst+4) -= 0x1C000;
-			}
 		}
 		if (swi26Offset) {
 			*swi26Offset = 0xE77F;
 
 			u32 dst = ((u32)swi26Offset) - 0xFE;
 			tonccpy((u32*)dst, ce7->patches->swi26, 0x8);
-			if (*(u32*)0x02FFE1A0 == 0x00403000) {
-				*(u32*)(dst+4) -= 0x1C000;
-			}
 		}
 		if (swi27Offset) {
 			*swi27Offset = 0xE780;
 
 			u32 dst = ((u32)swi27Offset) - 0xFC;
 			tonccpy((u32*)dst, ce7->patches->swi27, 0x8);
-			if (*(u32*)0x02FFE1A0 == 0x00403000) {
-				*(u32*)(dst+4) -= 0x1C000;
-			}
 		}
 
 		//u32 mainMemA7iStart = (*(u32*)0x02FFE1A0 != 0x00403000) ? 0x02F88000 : 0x02F80000;
@@ -386,6 +362,29 @@ static void patchRamClear(const tNDSHeader* ndsHeader, const module_params_t* mo
 		dbg_printf("\n\n");
 	}
 	patchOffsetCache.ramClearChecked = true;
+}
+
+static void patchRamClearI(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+	if (moduleParams->sdk_version < 0x5000000 || ndsHeader->unitCode == 0 || !dsiModeConfirmed) {
+		return;
+	}
+
+	u32* ramClearOffset = patchOffsetCache.ramClearIOffset;
+	if (!patchOffsetCache.ramClearIOffset) {
+		ramClearOffset = findRamClearIOffset(ndsHeader);
+		if (ramClearOffset) {
+			patchOffsetCache.ramClearIOffset = ramClearOffset;
+		}
+	}
+	if (!ramClearOffset) {
+		return;
+	}
+
+	extern u32 ce9Location;
+	*(ramClearOffset) = ce9Location;
+	dbg_printf("RAM clear I location : ");
+	dbg_hexa((u32)ramClearOffset);
+	dbg_printf("\n\n");
 }
 
 void patchPostBoot(const tNDSHeader* ndsHeader) {
@@ -522,6 +521,7 @@ u32 patchCardNdsArm7(
 	patchSleepMode(ndsHeader);
 
 	patchRamClear(ndsHeader, moduleParams);
+	patchRamClearI(ndsHeader, moduleParams);
 
 	// Touch fix for SM64DS (U) v1.0
 	if (newArm7binarySize == 0x24B64

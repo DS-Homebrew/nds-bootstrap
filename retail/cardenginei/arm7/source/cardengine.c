@@ -576,14 +576,6 @@ void reset(void) {
 	fileRead((char*)(*(u32*)0x02FFE1C8), &pageFile, 0x300000, iUncompressedSizei);
 	fileRead((char*)(*(u32*)0x02FFE1D8), &pageFile, 0x580000, newArm7ibinarySize);
 
-	if (!(valueBits & dsiBios) && *(u32*)0x02F10020 != 0xEA001FF6) {
-		u32 src = 0x02FF4000;
-		if (*(u32*)0x02FFE1A0 == 0x00403000) {
-			src -= 0x1C000;
-		}
-		tonccpy((u32*)0x02F10000, (u32*)src, 0x8000);
-	}
-
 	//if (doBak) restoreSdBakData();
 	#endif
 	toncset((char*)((valueBits & isSdk5) ? 0x02FFFD80 : 0x027FFD80), 0, 0x80);
@@ -1500,17 +1492,6 @@ void myIrqHandlerVBlank(void) {
 
 		funcsUnpatched = true;
 	}
-
-	#ifdef TWLSDK
-	if (!(valueBits & dsiBios) && *(u32*)0x02F10020 == 0xEA001FF6) {
-		u32 dst = 0x02FF4000;
-		if (*(u32*)0x02FFE1A0 == 0x00403000) {
-			dst -= 0x1C000;
-		}
-		tonccpy((u32*)dst, (u32*)0x02F10000, 0x8000); // Copy bios7i from buffer
-		toncset((u32*)0x02F10000, 0, 0x8000);
-	}
-	#endif
 
 	if (!(valueBits & gameOnFlashcard) && !(valueBits & ROMinRAM) && isSdEjected()) {
 		tonccpy((u32*)0x02000300, sr_data_error, 0x020);
