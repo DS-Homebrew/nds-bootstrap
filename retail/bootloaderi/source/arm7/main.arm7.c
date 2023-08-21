@@ -1557,16 +1557,17 @@ int arm7_main(void) {
 				tonccpy(ndsHeader->arm7destination, (u8*)DONOR_ROM_ARM7_LOCATION, newArm7binarySize);
 			}
 
+			extern void patchGbaSlotInit_cont(const tNDSHeader* ndsHeader, bool usesThumb, bool searchAgainForThumb);
+			patchGbaSlotInit_cont(ndsHeader, false, true);
+
 			if (newArm7binarySize != patchOffsetCache.a7BinSize) {
 				extern void rsetA7Cache(void);
 				rsetA7Cache();
 				patchOffsetCache.a7BinSize = newArm7binarySize;
 			}
 
-			if (dsiEnhancedMbk && oldArm7mbk == 0x080037C0) {
-				extern void patchPostBoot(const tNDSHeader* ndsHeader);
-				patchPostBoot(ndsHeader);
-			}
+			extern void patchPostBoot(const tNDSHeader* ndsHeader);
+			patchPostBoot(ndsHeader);
 		} else if (newArm7binarySize != patchOffsetCache.a7BinSize) {
 			extern void rsetA7Cache(void);
 			rsetA7Cache();
@@ -1618,16 +1619,6 @@ int arm7_main(void) {
 		patchResetTwl((cardengineArm9*)ce9Location, ndsHeader, moduleParams);
 
 		if (REG_SCFG_EXT == 0) {
-			if (!dsiWramAccess) {
-				extern void patchA9Mbk(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool standAlone);
-				patchA9Mbk(ndsHeader, moduleParams, true);
-			}
-
-			if (!dsiEnhancedMbk && oldArm7mbk == 0x00403000) {
-				extern void patchGbaSlotInit_cont(const tNDSHeader* ndsHeader, bool usesThumb, bool searchAgainForThumb);
-				patchGbaSlotInit_cont(ndsHeader, false, true);
-			}
-
 			if (*(u32*)DONOR_ROM_ARM7_SIZE_LOCATION != 0) {
 				// Replace incompatible ARM7 binary
 				newArm7binarySize = *(u32*)DONOR_ROM_ARM7_SIZE_LOCATION;
@@ -1637,16 +1628,22 @@ int arm7_main(void) {
 				tonccpy(ndsHeader->arm7destination, (u8*)DONOR_ROM_ARM7_LOCATION, newArm7binarySize);
 			}
 
+			if (!dsiWramAccess) {
+				extern void patchA9Mbk(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool standAlone);
+				patchA9Mbk(ndsHeader, moduleParams, true);
+			}
+
+			extern void patchGbaSlotInit_cont(const tNDSHeader* ndsHeader, bool usesThumb, bool searchAgainForThumb);
+			patchGbaSlotInit_cont(ndsHeader, false, true);
+
 			if (newArm7binarySize != patchOffsetCache.a7BinSize) {
 				extern void rsetA7Cache(void);
 				rsetA7Cache();
 				patchOffsetCache.a7BinSize = newArm7binarySize;
 			}
 
-			if (dsiEnhancedMbk && oldArm7mbk == 0x080037C0) {
-				extern void patchPostBoot(const tNDSHeader* ndsHeader);
-				patchPostBoot(ndsHeader);
-			}
+			extern void patchPostBoot(const tNDSHeader* ndsHeader);
+			patchPostBoot(ndsHeader);
 		} else if (newArm7binarySize != patchOffsetCache.a7BinSize) {
 			extern void rsetA7Cache(void);
 			rsetA7Cache();

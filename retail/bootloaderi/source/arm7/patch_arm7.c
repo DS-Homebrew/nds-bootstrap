@@ -390,10 +390,7 @@ static void patchRamClearI(const tNDSHeader* ndsHeader, const module_params_t* m
 void patchPostBoot(const tNDSHeader* ndsHeader) {
 	const char* romTid = getRomTid(ndsHeader);
 
-	if (REG_SCFG_EXT != 0 || ndsHeader->unitCode == 0 || !dsiModeConfirmed
-	|| ((ndsHeader->unitCode == 2 || strncmp(romTid, "KD9", 3) == 0 || strncmp(romTid, "KP6", 3) == 0 || strncmp(romTid, "KAM", 3) == 0)
-	&& oldArm7mbk == 0x00403000)
-	|| *(u32*)0x02FFE1A0 != 0x00403000) {
+	if (REG_SCFG_EXT != 0 || ndsHeader->unitCode == 0 || !dsiModeConfirmed || (oldArm7mbk == 0x00403000 && *(u32*)0x02FFE1A0 == 0x00403000) || *(u32*)0x02FFE1A0 == 0x080037C0) {
 		return;
 	}
 
