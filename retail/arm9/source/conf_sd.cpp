@@ -1190,24 +1190,6 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		}
 	}
 
-	/*if ((conf->gameOnFlashcard || !conf->isDSiWare) && (conf->extendedMemory || conf->dsiMode)) {
-		bool found = (access(pageFilePath.c_str(), F_OK) == 0);
-		if (!found) {
-			consoleDemoInit();
-			iprintf("Creating pagefile.sys\n");
-			iprintf("Please wait...\n");
-		}
-
-		cebin = fopen(pageFilePath.c_str(), found ? "r+" : "wb");
-		fseek(cebin, twlPageFileSize - 1, SEEK_SET);
-		fputc('\0', cebin);
-		fclose(cebin);
-
-		if (!found) {
-			consoleClear();
-		}
-	}*/
-
 	// Load ROMinRAM ce9 binary
 	cebin = fopen("nitro:/cardenginei_arm9_romInRam.lz77", "rb");
 	if (cebin) {
@@ -1216,24 +1198,34 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	}
 	fclose(cebin);
 
+	bool found = (access(pageFilePath.c_str(), F_OK) == 0);
+	if (!found) {
+		consoleDemoInit();
+		iprintf("Creating pagefile.sys\n");
+		iprintf("Please wait...\n");
+	}
+
+	cebin = fopen(pageFilePath.c_str(), found ? "r+" : "wb");
+	fseek(cebin, twlPageFileSize - 1, SEEK_SET);
+	fputc('\0', cebin);
+	fclose(cebin);
+
+	if (!found) {
+		consoleClear();
+	}
+
 	// Load in-game menu ce9 binary
 	cebin = fopen("nitro:/cardenginei_arm9_igm.lz77", "rb");
 	if (cebin) {
 		fread(lz77ImageBuffer, 1, sizeof(lz77ImageBuffer), cebin);
-		LZ77_Decompress(lz77ImageBuffer, (u8*)INGAME_MENU_LOCATION);
+		LZ77_Decompress(lz77ImageBuffer, (u8*)igmText);
 
 		getIgmStrings(conf, false);
 
-		if (conf->dsiMode > 0 && unitCode > 0) {
-			// Relocate
-			u32* addr = (u32*)INGAME_MENU_LOCATION;
-			for (u16 i = 0; i < 0x4000/sizeof(u32); i++) {
-				if (addr[i] >= INGAME_MENU_LOCATION && addr[i] < INGAME_MENU_LOCATION+0x4000) {
-					addr[i] -= INGAME_MENU_LOCATION;
-					addr[i] += (conf->consoleModel > 0 ? INGAME_MENU_LOCATION_DSIWARE : INGAME_MENU_LOCATION_TWLSDK);
-				}
-			}
-		}
+		cebin = fopen(pageFilePath.c_str(), "r+");
+		fwrite((u8*)igmText, 1, 0xA000, cebin);
+		fclose(cebin);
+		toncset((u8*)igmText, 0, 0xA000);
 	}
 	fclose(cebin);
 
@@ -1330,27 +1322,6 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	}
 	fclose(cebin);
 
-	// Load in-game menu ce9 binary
-	cebin = fopen("nitro:/cardenginei_arm9_igm.lz77", "rb");
-	if (cebin) {
-		fread(lz77ImageBuffer, 1, sizeof(lz77ImageBuffer), cebin);
-		LZ77_Decompress(lz77ImageBuffer, (u8*)INGAME_MENU_LOCATION);
-
-		getIgmStrings(conf, false);
-
-		// Relocate
-		u32* addr = (u32*)INGAME_MENU_LOCATION;
-		for (u16 i = 0; i < 0x4000/sizeof(u32); i++) {
-			if (addr[i] >= INGAME_MENU_LOCATION && addr[i] < INGAME_MENU_LOCATION+0x4000) {
-				addr[i] -= INGAME_MENU_LOCATION;
-				addr[i] += INGAME_MENU_LOCATION_DSIWARE;
-			}
-		}
-	}
-	fclose(cebin);
-
-  }
-
 	bool found = (access(pageFilePath.c_str(), F_OK) == 0);
 	if (!found) {
 		consoleDemoInit();
@@ -1366,6 +1337,23 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	if (!found) {
 		consoleClear();
 	}
+
+	// Load in-game menu ce9 binary
+	cebin = fopen("nitro:/cardenginei_arm9_igm.lz77", "rb");
+	if (cebin) {
+		fread(lz77ImageBuffer, 1, sizeof(lz77ImageBuffer), cebin);
+		LZ77_Decompress(lz77ImageBuffer, (u8*)igmText);
+
+		getIgmStrings(conf, false);
+
+		cebin = fopen(pageFilePath.c_str(), "r+");
+		fwrite((u8*)igmText, 1, 0xA000, cebin);
+		fclose(cebin);
+		toncset((u8*)igmText, 0, 0xA000);
+	}
+	fclose(cebin);
+
+  }
 
 	// Load DS blowfish
 	cebin = fopen("nitro:/encr_data.bin", "rb");
@@ -1606,12 +1594,10 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	// Load in-game menu ce9 binary
 	cebin = fopen(b4dsDebugRam ? "nitro:/cardengine_arm9_igm_extmem.lz77" : "nitro:/cardengine_arm9_igm.lz77", "rb");
 	if (cebin) {
-		const u32 igmLocation = b4dsDebugRam ? INGAME_MENU_LOCATION_B4DS_EXTMEM : INGAME_MENU_LOCATION_B4DS;
+		igmText = (struct IgmText *)(b4dsDebugRam ? INGAME_MENU_LOCATION_B4DS_EXTMEM : INGAME_MENU_LOCATION_B4DS);
 
 		fread(lz77ImageBuffer, 1, sizeof(lz77ImageBuffer), cebin);
-		LZ77_Decompress(lz77ImageBuffer, (u8*)igmLocation);
-
-		igmText = (struct IgmText *)igmLocation;
+		LZ77_Decompress(lz77ImageBuffer, (u8*)igmText);
 
 		getIgmStrings(conf, true);
 
@@ -1667,9 +1653,9 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		}
 
 		cebin = fopen(pageFilePath.c_str(), "r+");
-		fwrite((u8*)igmLocation, 1, 0xA000, cebin);
+		fwrite((u8*)igmText, 1, 0xA000, cebin);
 		fclose(cebin);
-		toncset((u8*)igmLocation, 0, 0xA000);
+		toncset((u8*)igmText, 0, 0xA000);
 	}
 
 	if (accessControl & BIT(4)) {

@@ -36,6 +36,7 @@
 #include "my_fat.h"
 #include "locations.h"
 #include "module_params.h"
+#include "unpatched_funcs.h"
 #include "debug_file.h"
 #include "cardengine.h"
 #include "nds_header.h"
@@ -79,11 +80,12 @@ extern u16 igmHotkey;
 
 vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS_SDK5;
 
-struct IgmText *igmText = (struct IgmText *)INGAME_MENU_LOCATION_DSIWARE;
+struct IgmText *igmText = (struct IgmText *)INGAME_MENU_LOCATION;
 
 static bool initialized = false;
 static bool driveInited = false;
 static bool bootloaderCleared = false;
+static bool funcsUnpatched = false;
 bool ipcEveryFrame = false;
 static bool swapScreens = false;
 
@@ -329,6 +331,7 @@ void reset(void) {
 	REG_POWERCNT = 1;  // Turn off power to stuff
 
 	initialized = false;
+	funcsUnpatched = false;
 	sdRightsTimer = 0;
 	languageTimer = 0;
 
@@ -362,7 +365,7 @@ void reset(void) {
 		fileRead((char*)&newArm7binarySize, &pageFile, 0x5FFFF4, sizeof(u32));
 		fileRead((char*)&iUncompressedSizei, &pageFile, 0x5FFFF8, sizeof(u32));
 		fileRead((char*)&newArm7ibinarySize, &pageFile, 0x5FFFFC, sizeof(u32));
-		fileRead((char*)ndsHeader->arm9destination, &pageFile, 0, iUncompressedSize);
+		fileRead((char*)ndsHeader->arm9destination, &pageFile, 0x14000, iUncompressedSize);
 		fileRead((char*)ndsHeader->arm7destination, &pageFile, 0x2C0000, newArm7binarySize);
 		fileRead((char*)(*(u32*)0x02FFE1C8), &pageFile, 0x300000, iUncompressedSizei);
 		fileRead((char*)(*(u32*)0x02FFE1D8), &pageFile, 0x580000, newArm7ibinarySize);
@@ -549,14 +552,12 @@ void dumpRam(void) {
 }
 
 void prepareScreenshot(void) {
-	driveInitialize();
 	fileWrite((char*)INGAME_MENU_EXT_LOCATION, &pageFile, 0x540000, 0x40000);
 }
 
 void saveScreenshot(void) {
 	if (igmText->currentScreenshot >= 50) return;
 
-	driveInitialize();
 	fileWrite((char*)INGAME_MENU_EXT_LOCATION, &screenshotFile, 0x200 + (igmText->currentScreenshot * 0x18400), 0x18046);
 
 	// Skip until next blank slot
@@ -570,7 +571,6 @@ void saveScreenshot(void) {
 }
 
 void prepareManual(void) {
-	driveInitialize();
 	fileWrite((char*)INGAME_MENU_EXT_LOCATION, &pageFile, 0x540000, 32 * 24);
 }
 
@@ -642,8 +642,29 @@ void restorePreManual(void) {
 }
 
 void saveMainScreenSetting(void) {
-	driveInitialize();
 	fileWrite((char*)sharedAddr, &patchOffsetCacheFile, 0x1FC, sizeof(u32));
+}
+
+void loadInGameMenu(void) {
+	const u32 igmLocation = INGAME_MENU_LOCATION;
+
+	sharedAddr[5] = 0x4C4D4749; // 'IGML'
+	driveInitialize();
+	fileWrite((char*)igmLocation, &pageFile, 0xA000, 0xA000);	// Backup part of game RAM to page file
+	fileRead((char*)igmLocation, &pageFile, 0, 0xA000);	// Read in-game menu
+	sharedAddr[5] = 0;
+}
+
+void unloadInGameMenu(void) {
+	while (REG_VCOUNT != 191) swiDelay(100);
+	while (REG_VCOUNT == 191) swiDelay(100);
+
+	const u32 igmLocation = INGAME_MENU_LOCATION;
+
+	sharedAddr[5] = 0x4C4D4749; // 'IGML'
+	fileWrite((char*)igmLocation, &pageFile, 0, 0xA000);	// Store in-game menu
+	fileRead((char*)igmLocation, &pageFile, 0xA000, 0xA000);	// Restore part of game RAM from page file
+	sharedAddr[5] = 0;
 }
 
 void myIrqHandlerVBlank(void) {
@@ -685,6 +706,22 @@ void myIrqHandlerVBlank(void) {
 			*languageAddr = language;
 		}
 		languageTimer++;
+	}
+
+	if (!funcsUnpatched && *(int*)0x02FFFC3C >= 60) {
+		unpatchedFunctions* unpatchedFuncs = (unpatchedFunctions*)UNPATCHED_FUNCTION_LOCATION_SDK5;
+
+		if (unpatchedFuncs->compressed_static_end) {
+			*unpatchedFuncs->compressedFlagOffset = unpatchedFuncs->compressed_static_end;
+		}
+		if (unpatchedFuncs->ltd_compressed_static_end) {
+			*unpatchedFuncs->iCompressedFlagOffset = unpatchedFuncs->ltd_compressed_static_end;
+		}
+		if (unpatchedFuncs->mpuDataOffset2) {
+			*unpatchedFuncs->mpuDataOffset2 = unpatchedFuncs->mpuInitRegionOldData2;
+		}
+
+		funcsUnpatched = true;
 	}
 
 	if (isSdEjected()) {

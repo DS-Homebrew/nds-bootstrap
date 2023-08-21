@@ -57,6 +57,8 @@ void inGameMenu(void) {
 	REG_MASTER_VOLUME = 0;
 	int oldIME = enterCriticalSection();
 
+	loadInGameMenu();
+
 	int timeOut = 0;
 	while (sharedAddr[5] != 0x59444552) { // 'REDY'
 		while (REG_VCOUNT != 191) swiDelay(100);
@@ -123,11 +125,13 @@ void inGameMenu(void) {
 				case 0x54455352: // RSET
 					exitMenu = true;
 					timeTillStatusRefresh = 7;
+					unloadInGameMenu();
 					extern void restoreBakData(void);
 					restoreBakData();
 					reset();
 					break;
 				case 0x54495551: // QUIT
+					unloadInGameMenu();
 					returnToLoader();
 					exitMenu = true;
 					break;
@@ -211,6 +215,8 @@ void inGameMenu(void) {
 	sharedAddr[4] = 0x54495845; // EXIT
 	sharedAddr[7] -= 0x10000000; // Clear time receive flag
 	timeTillStatusRefresh = 7;
+
+	unloadInGameMenu();
 
 	leaveCriticalSection(oldIME);
 	REG_MASTER_VOLUME = 127;

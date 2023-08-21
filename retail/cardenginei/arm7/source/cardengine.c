@@ -355,10 +355,6 @@ static void initialize(void) {
 	}
 	#endif
 
-	/*if (ndsHeader->unitCode > 0 && (valueBits & dsiMode)) {
-		igmText = (struct IgmText *)INGAME_MENU_LOCATION_TWLSDK;
-	}*/
-
 	if (!bootloaderCleared) {
 		toncset((u8*)0x06000000, 0, 0x40000);	// Clear bootloader
 		if (mainScreen) {
@@ -535,7 +531,7 @@ void reset(void) {
 		extern u32 iUncompressedSize;
 
 		// if ((valueBits & extendedMemory) || (valueBits & dsiMode)) {
-			fileWrite((char*)ndsHeader->arm9destination, &pageFile, 0, iUncompressedSize);
+			fileWrite((char*)ndsHeader->arm9destination, &pageFile, 0x14000, iUncompressedSize);
 			fileWrite((char*)ndsHeader->arm7destination, &pageFile, 0x2C0000, ndsHeader->arm7binarySize);
 			fileWrite((char*)&iUncompressedSize, &pageFile, 0x5FFFF0, sizeof(u32));
 			fileWrite((char*)&ndsHeader->arm7binarySize, &pageFile, 0x5FFFF4, sizeof(u32));
@@ -553,7 +549,7 @@ void reset(void) {
 		u32 newArm7binarySize = 0;
 		fileRead((char*)&iUncompressedSize, &pageFile, 0x5FFFF0, sizeof(u32));
 		fileRead((char*)&newArm7binarySize, &pageFile, 0x5FFFF4, sizeof(u32));
-		fileRead((char*)ndsHeader->arm9destination, &pageFile, 0, iUncompressedSize);
+		fileRead((char*)ndsHeader->arm9destination, &pageFile, 0x14000, iUncompressedSize);
 		fileRead((char*)ndsHeader->arm7destination, &pageFile, 0x2C0000, newArm7binarySize);
 	} /* else {
 		ndmaCopyWordsAsynch(0, (char*)ndsHeader->arm9destination+0x400000, ndsHeader->arm9destination, *(u32*)ARM9_DEC_SIZE_LOCATION);
@@ -575,7 +571,7 @@ void reset(void) {
 	fileRead((char*)&newArm7binarySize, &pageFile, 0x5FFFF4, sizeof(u32));
 	fileRead((char*)&iUncompressedSizei, &pageFile, 0x5FFFF8, sizeof(u32));
 	fileRead((char*)&newArm7ibinarySize, &pageFile, 0x5FFFFC, sizeof(u32));
-	fileRead((char*)ndsHeader->arm9destination, &pageFile, 0, iUncompressedSize);
+	fileRead((char*)ndsHeader->arm9destination, &pageFile, 0x14000, iUncompressedSize);
 	fileRead((char*)ndsHeader->arm7destination, &pageFile, 0x2C0000, newArm7binarySize);
 	fileRead((char*)(*(u32*)0x02FFE1C8), &pageFile, 0x300000, iUncompressedSizei);
 	fileRead((char*)(*(u32*)0x02FFE1D8), &pageFile, 0x580000, newArm7ibinarySize);
@@ -917,17 +913,13 @@ void dumpRam(void) {
 }
 
 void prepareScreenshot(void) {
-#ifndef TWLSDK
-	if (valueBits & dsiMode) {
-#else
+#ifdef TWLSDK
 	//bool doBak = ((valueBits & gameOnFlashcard) && (valueBits & b_dsiSD));
 	//if (doBak) bakSdData();
 #endif
 		//driveInitialize();
 		fileWrite((char*)INGAME_MENU_EXT_LOCATION, &pageFile, 0x540000, 0x40000);
-#ifndef TWLSDK
-	}
-#else
+#ifdef TWLSDK
 	//if (doBak) restoreSdBakData();
 #endif
 }
@@ -949,29 +941,20 @@ void saveScreenshot(void) {
 		fileRead(&magic, &screenshotFile, 0x200 + (igmText->currentScreenshot * 0x18400), 1);
 	} while(magic == 'B' && igmText->currentScreenshot < 50);
 
-#ifndef TWLSDK
-	if (valueBits & dsiMode) {
-#endif
 		fileRead((char*)INGAME_MENU_EXT_LOCATION, &pageFile, 0x540000, 0x40000);
-#ifndef TWLSDK
-	}
-#else
+#ifdef TWLSDK
 	//if (doBak) restoreSdBakData();
 #endif
 }
 
 void prepareManual(void) {
-#ifndef TWLSDK
-	if (valueBits & dsiMode) {
-#else
+#ifdef TWLSDK
 	//bool doBak = ((valueBits & gameOnFlashcard) && (valueBits & b_dsiSD));
 	//if (doBak) bakSdData();
 #endif
 		//driveInitialize();
 		fileWrite((char*)INGAME_MENU_EXT_LOCATION, &pageFile, 0x540000, 32 * 24);
-#ifndef TWLSDK
-	}
-#else
+#ifdef TWLSDK
 	//if (doBak) restoreSdBakData();
 #endif
 }
@@ -1040,23 +1023,40 @@ void readManual(int line) {
 }
 
 void restorePreManual(void) {
-#ifndef TWLSDK
-	if (valueBits & dsiMode) {
-#else
+#ifdef TWLSDK
 	//bool doBak = ((valueBits & gameOnFlashcard) && (valueBits & b_dsiSD));
 	//if (doBak) bakSdData();
 #endif
 		//driveInitialize();
 		fileRead((char*)INGAME_MENU_EXT_LOCATION, &pageFile, 0x540000, 32 * 24);
-#ifndef TWLSDK
-	}
-#else
+#ifdef TWLSDK
 	//if (doBak) restoreSdBakData();
 #endif
 }
 
 void saveMainScreenSetting(void) {
 	fileWrite((char*)sharedAddr, &patchOffsetCacheFile, 0x1FC, sizeof(u32));
+}
+
+void loadInGameMenu(void) {
+	const u32 igmLocation = INGAME_MENU_LOCATION;
+
+	sharedAddr[5] = 0x4C4D4749; // 'IGML'
+	fileWrite((char*)igmLocation, &pageFile, 0xA000, 0xA000);	// Backup part of game RAM to page file
+	fileRead((char*)igmLocation, &pageFile, 0, 0xA000);	// Read in-game menu
+	sharedAddr[5] = 0;
+}
+
+void unloadInGameMenu(void) {
+	while (REG_VCOUNT != 191) swiDelay(100);
+	while (REG_VCOUNT == 191) swiDelay(100);
+
+	const u32 igmLocation = INGAME_MENU_LOCATION;
+
+	sharedAddr[5] = 0x4C4D4749; // 'IGML'
+	fileWrite((char*)igmLocation, &pageFile, 0, 0xA000);	// Store in-game menu
+	fileRead((char*)igmLocation, &pageFile, 0xA000, 0xA000);	// Restore part of game RAM from page file
+	sharedAddr[5] = 0;
 }
 
 static void log_arm9(void) {
@@ -1469,6 +1469,10 @@ void myIrqHandlerVBlank(void) {
 		if (unpatchedFuncs->ltd_compressed_static_end) {
 			*unpatchedFuncs->iCompressedFlagOffset = unpatchedFuncs->ltd_compressed_static_end;
 		}
+
+		if (unpatchedFuncs->mpuDataOffset2) {
+			*unpatchedFuncs->mpuDataOffset2 = unpatchedFuncs->mpuInitRegionOldData2;
+		}
 		#else
 		if (!(valueBits & isSdk5)) {
 			if (unpatchedFuncs->mpuDataOffset) {
@@ -1514,9 +1518,9 @@ void myIrqHandlerVBlank(void) {
 		i2cWriteRegister(0x4A, 0x11, 0x01);		// Reboot into error screen if SD card is removed
 	}
 
-	if ((0 == (REG_KEYINPUT & igmHotkey) && 0 == (REG_EXTKEYINPUT & (((igmHotkey >> 10) & 3) | ((igmHotkey >> 6) & 0xC0))) && !(valueBits & extendedMemory) && (REG_WIFIIRQ == 0)) || returnToMenu || sharedAddr[5] == 0x59444552 /* REDY */) {
+	if ((0 == (REG_KEYINPUT & igmHotkey) && 0 == (REG_EXTKEYINPUT & (((igmHotkey >> 10) & 3) | ((igmHotkey >> 6) & 0xC0))) && (REG_WIFIIRQ == 0)) || returnToMenu || sharedAddr[5] == 0x59444552 /* REDY */) {
 #ifdef TWLSDK
-		igmText = (struct IgmText *)INGAME_MENU_LOCATION_TWLSDK;
+		igmText = (struct IgmText *)INGAME_MENU_LOCATION;
 		i2cWriteRegister(0x4A, 0x12, 0x00);
 #endif
 		inGameMenu();

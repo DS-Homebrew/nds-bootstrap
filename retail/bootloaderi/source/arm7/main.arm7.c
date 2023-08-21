@@ -1404,7 +1404,6 @@ int arm7_main(void) {
 				savFile->fatTableCache = (u32*)((u32)savFile->fatTableCache+0xB880000);
 				lastClusterCacheUsed = (u32*)((u32)lastClusterCacheUsed+0xB880000);
 				clusterCache += 0xB880000;
-				tonccpy((char*)INGAME_MENU_LOCATION_DSIWARE, (char*)INGAME_MENU_LOCATION, 0x9C00);
 			} else {
 				u32 add = 0x826000; // 0x02F26000
 				if ((u8)a9ScfgRom != 1) {
@@ -1415,9 +1414,8 @@ int arm7_main(void) {
 				savFile->fatTableCache = (u32*)((u32)savFile->fatTableCache+add);
 				lastClusterCacheUsed = (u32*)((u32)lastClusterCacheUsed+add);
 				clusterCache += add;
-				tonccpy((char*)INGAME_MENU_LOCATION_TWLSDK, (char*)INGAME_MENU_LOCATION, 0x9C00);
 			}
-			toncset((char*)INGAME_MENU_LOCATION, 0, 0x89C00);
+			toncset((char*)0x02700000, 0, 0x80000);
 		}
 	}
 	if (!ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr) || !dsiModeConfirmed) {
@@ -1539,8 +1537,7 @@ int arm7_main(void) {
 	   || memcmp(romTid, "KRQ", 3) == 0 // Rytmik Rock Edition
 	   || memcmp(romTid, "KYH", 3) == 0 // Rytmik World Music
 	  ) {
-		// Skip loading in-game menu and cheat engine
-		toncset((char*)INGAME_MENU_LOCATION, 0, 0xA000);
+		// Skip loading cheat engine
 		toncset((u32*)CARDENGINEI_ARM7_BUFFERED_LOCATION, 0, 0x8000);
 		toncset((char*)CHEAT_ENGINE_BUFFERED_LOCATION, 0, 0x400);
 
@@ -1590,8 +1587,6 @@ int arm7_main(void) {
 		ce7Location = CARDENGINEI_ARM7_DSIWARE_LOCATION;
 
 		tonccpy((u32*)ce9Location, (u32*)CARDENGINEI_ARM9_BUFFERED_LOCATION, 0x6000);
-		tonccpy((char*)INGAME_MENU_LOCATION_DSIWARE, (char*)INGAME_MENU_LOCATION, 0xA000);
-		toncset((char*)INGAME_MENU_LOCATION, 0, 0xA000);
 
 		tonccpy((u32*)ce7Location, (u32*)CARDENGINEI_ARM7_BUFFERED_LOCATION, 0x9000);
 		tonccpy((char*)ce7Location-0x8400, (char*)CHEAT_ENGINE_BUFFERED_LOCATION, 0x400);
@@ -1599,6 +1594,9 @@ int arm7_main(void) {
 		toncset((char*)CHEAT_ENGINE_BUFFERED_LOCATION, 0, 0x400);
 
 		//ensureBinaryDecompressed(&dsiHeaderTemp.ndshdr, moduleParams, false);
+
+		extern void patchMpu2(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
+		patchMpu2(ndsHeader, moduleParams);
 
 		patchSharedFontPath((cardengineArm9*)ce9Location, ndsHeader, moduleParams, ltdModuleParams);
 		dsiWarePatch((cardengineArm9*)ce9Location, ndsHeader);
@@ -1715,6 +1713,7 @@ int arm7_main(void) {
 			consoleModel
 		);
 
+		tonccpy((u32*)UNPATCHED_FUNCTION_LOCATION_SDK5, (u32*)UNPATCHED_FUNCTION_LOCATION, 0x40);
 		toncset((u32*)UNPATCHED_FUNCTION_LOCATION, 0, 0x40);
 
 		patchOffsetCacheFileNewCrc = swiCRC16(0xFFFF, &patchOffsetCache, sizeof(patchOffsetCacheContents));
@@ -1724,26 +1723,27 @@ int arm7_main(void) {
 
 		extern u32 iUncompressedSize;
 		extern u32 iUncompressedSizei;
+		const u32 currentArm9ibinarySize = (iUncompressedSizei > 0 ? iUncompressedSizei : *(u32*)0x02FFE1CC);
 		if (consoleModel > 0) {
 			tonccpy((char*)ndsHeader->arm9destination+0xB000000, ndsHeader->arm9destination, iUncompressedSize);
 			tonccpy((char*)ndsHeader->arm7destination+0xB000000, ndsHeader->arm7destination, newArm7binarySize);
-			tonccpy((char*)(*(u32*)0x02FFE1C8)+0xB000000, (u32*)*(u32*)0x02FFE1C8, (iUncompressedSizei > 0 ? iUncompressedSizei : *(u32*)0x02FFE1CC));
+			tonccpy((char*)(*(u32*)0x02FFE1C8)+0xB000000, (u32*)*(u32*)0x02FFE1C8, currentArm9ibinarySize);
 			tonccpy((char*)(*(u32*)0x02FFE1D8)+0xB000000, (u32*)*(u32*)0x02FFE1D8, newArm7ibinarySize);
 			*(u32*)0x0DFFE02C = iUncompressedSize;
 			*(u32*)0x0DFFE03C = newArm7binarySize;
-			*(u32*)0x0DFFE1CC = (iUncompressedSizei > 0 ? iUncompressedSizei : *(u32*)0x02FFE1CC);
+			*(u32*)0x0DFFE1CC = currentArm9ibinarySize;
 			*(u32*)0x0DFFE1DC = newArm7ibinarySize;
 		} else {
 			aFile pageFile;
 			getFileFromCluster(&pageFile, pageFileCluster, bootstrapOnFlashcard);
 
-			fileWrite((char*)ndsHeader->arm9destination, &pageFile, 0, iUncompressedSize);
+			fileWrite((char*)ndsHeader->arm9destination, &pageFile, 0x14000, iUncompressedSize);
 			fileWrite((char*)ndsHeader->arm7destination, &pageFile, 0x2C0000, newArm7binarySize);
 			fileWrite((char*)&iUncompressedSize, &pageFile, 0x5FFFF0, sizeof(u32));
 			fileWrite((char*)&newArm7binarySize, &pageFile, 0x5FFFF4, sizeof(u32));
-			fileWrite((char*)(*(u32*)0x02FFE1C8), &pageFile, 0x300000, (iUncompressedSizei > 0 ? iUncompressedSizei : *(u32*)0x02FFE1CC));
+			fileWrite((char*)(*(u32*)0x02FFE1C8), &pageFile, 0x300000, currentArm9ibinarySize);
 			fileWrite((char*)(*(u32*)0x02FFE1D8), &pageFile, 0x580000, newArm7ibinarySize);
-			fileWrite((char*)(iUncompressedSizei > 0 ? &iUncompressedSizei : (u32*)0x02FFE1CC), &pageFile, 0x5FFFF8, sizeof(u32));
+			fileWrite((char*)&currentArm9ibinarySize, &pageFile, 0x5FFFF8, sizeof(u32));
 			fileWrite((char*)&newArm7ibinarySize, &pageFile, 0x5FFFFC, sizeof(u32));
 		}
 	  }
@@ -2076,7 +2076,7 @@ int arm7_main(void) {
 			aFile pageFile;
 			getFileFromCluster(&pageFile, pageFileCluster, bootstrapOnFlashcard);
 
-			fileWrite((char*)ndsHeader->arm9destination, &pageFile, 0, iUncompressedSize);
+			fileWrite((char*)ndsHeader->arm9destination, &pageFile, 0x14000, iUncompressedSize);
 			fileWrite((char*)ndsHeader->arm7destination, &pageFile, 0x2C0000, newArm7binarySize);
 			fileWrite((char*)&iUncompressedSize, &pageFile, 0x5FFFF0, sizeof(u32));
 			fileWrite((char*)&newArm7binarySize, &pageFile, 0x5FFFF4, sizeof(u32));

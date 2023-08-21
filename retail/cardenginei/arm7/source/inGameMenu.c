@@ -35,6 +35,8 @@ extern void prepareManual(void);
 extern void readManual(int line);
 extern void restorePreManual(void);
 extern void saveMainScreenSetting(void);
+extern void loadInGameMenu(void);
+extern void unloadInGameMenu(void);
 
 extern u16 biosRead16(u32 addr);
 
@@ -57,6 +59,8 @@ void inGameMenu(void) {
 	IPC_SendSync(0x9);
 	REG_MASTER_VOLUME = 0;
 	int oldIME = enterCriticalSection();
+
+	loadInGameMenu();
 
 	int timeOut = 0;
 	while (sharedAddr[5] != 0x59444552) { // 'REDY'
@@ -124,12 +128,14 @@ void inGameMenu(void) {
 				case 0x54455352: // RSET
 					exitMenu = true;
 					timeTillStatusRefresh = 7;
+					unloadInGameMenu();
 					#ifdef TWLSDK
 					i2cWriteRegister(0x4A, 0x12, 0x01);
 					#endif
 					reset();
 					break;
 				case 0x54495551: // QUIT
+					unloadInGameMenu();
 					returnToLoader();
 					exitMenu = true;
 					break;
@@ -214,6 +220,8 @@ void inGameMenu(void) {
 	sharedAddr[4] = 0x54495845; // EXIT
 	sharedAddr[7] -= 0x10000000; // Clear time receive flag
 	timeTillStatusRefresh = 7;
+
+	unloadInGameMenu();
 
 	leaveCriticalSection(oldIME);
 	REG_MASTER_VOLUME = 127;

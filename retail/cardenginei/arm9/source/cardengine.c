@@ -1074,21 +1074,26 @@ void initMBKARM9_dsiMode(void) {
 extern void reset(u32 param, u32 tid2);
 
 void inGameMenu(s32* exRegisters) {
-	#ifdef TWLSDK
-	/*if (ce9->consoleModel > 0) {
-		*(u32*)(INGAME_MENU_LOCATION_DSIWARE + IGM_TEXT_SIZE_ALIGNED) = (u32)sharedAddr;
-		volatile void (*inGameMenu)(s8*, u32, s32*) = (volatile void*)INGAME_MENU_LOCATION_DSIWARE + IGM_TEXT_SIZE_ALIGNED + 0x10;
-		(*inGameMenu)(&ce9->mainScreen, ce9->consoleModel, exRegisters);
-	} else {*/
-		*(u32*)(INGAME_MENU_LOCATION_TWLSDK + IGM_TEXT_SIZE_ALIGNED) = (u32)sharedAddr;
-		volatile void (*inGameMenu)(s32*, u32, s32*) = (volatile void*)INGAME_MENU_LOCATION_TWLSDK + IGM_TEXT_SIZE_ALIGNED + 0x10;
-		(*inGameMenu)(&ce9->mainScreen, ce9->consoleModel, exRegisters);
-	//}
-	#else
+	int oldIME = enterCriticalSection();
+
+	while (sharedAddr[5] == 0x4C4D4749) { // 'IGML'
+		while (REG_VCOUNT != 191) swiDelay(100);
+		while (REG_VCOUNT == 191) swiDelay(100);
+	}
+
 	*(u32*)(INGAME_MENU_LOCATION + IGM_TEXT_SIZE_ALIGNED) = (u32)sharedAddr;
 	volatile void (*inGameMenu)(s32*, u32, s32*) = (volatile void*)INGAME_MENU_LOCATION + IGM_TEXT_SIZE_ALIGNED + 0x10;
 	(*inGameMenu)(&ce9->mainScreen, ce9->consoleModel, exRegisters);
-	#endif
+
+	while (sharedAddr[5] != 0x4C4D4749) { // 'IGML'
+		while (REG_VCOUNT != 191) swiDelay(100);
+		while (REG_VCOUNT == 191) swiDelay(100);
+	}
+	while (sharedAddr[5] == 0x4C4D4749) { // 'IGML'
+		while (REG_VCOUNT != 191) swiDelay(100);
+		while (REG_VCOUNT == 191) swiDelay(100);
+	}
+
 	#ifdef TWLSDK
 	if (sharedAddr[3] == 0x54495845) {
 		igmReset = true;
@@ -1111,6 +1116,8 @@ void inGameMenu(s32* exRegisters) {
 		}
 	#endif
 	}
+
+	leaveCriticalSection(oldIME);
 }
 
 //---------------------------------------------------------------------------------

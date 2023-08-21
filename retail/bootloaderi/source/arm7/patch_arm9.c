@@ -969,8 +969,8 @@ static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 	patchOffsetCache.mpuInitOffset = mpuInitOffset;
 }
 
-static void patchMpu2(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
-	if (moduleParams->sdk_version < 0x2008000 || moduleParams->sdk_version > 0x5000000) {
+void patchMpu2(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+	if (moduleParams->sdk_version < 0x2008000 || (moduleParams->sdk_version > 0x5000000 && (ndsHeader->unitCode == 0 || !dsiModeConfirmed))) {
 		return;
 	}
 
@@ -1018,7 +1018,7 @@ static void patchMpu2(const tNDSHeader* ndsHeader, const module_params_t* module
 		} else {*/
 			unpatchedFuncs->mpuDataOffset2 = mpuDataOffset;
 			unpatchedFuncs->mpuInitRegionOldData2 = *mpuDataOffset;
-			*mpuDataOffset = PAGE_128K | 0x027E0000 | 1;
+			*mpuDataOffset = (ndsHeader->unitCode > 0 && dsiModeConfirmed) ? 0 : (PAGE_128K | 0x027E0000 | 1);
 		//}
 
 		/*u32 mpuInitRegionNewData = PAGE_32M | 0x02000000 | 1;

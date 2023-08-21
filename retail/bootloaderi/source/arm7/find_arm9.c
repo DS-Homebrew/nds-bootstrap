@@ -184,7 +184,7 @@ static const u32 mpuInitRegion2Signature[1] = {0xEE060F12};
 static const u32 mpuInitRegion2SignatureElab[2] = {0xEE060F12, 0xE59F00B4};
 static const u32 mpuInitRegion2Data1[1]     = {0x27C0023}; // SDK <= 2
 static const u32 mpuInitRegion2Data3[1]     = {0x27E0021}; // SDK >= 2 (Late)
-//static const u32 mpuInitRegion2Data5[1]     = {0x2F80025}; // SDK 5
+static const u32 mpuInitRegion2Data5[1]     = {0x2F80025}; // SDK 5 (TWL)
 static const u32 mpuInitRegion3Signature[1] = {0xEE060F13};
 static const u32 mpuInitRegion3Data[1]      = {0x8000035};
 static const u32 mpuChangeRegion1Signature[3]         = {0xE3A00001, 0xE3A01402, 0xE3A0202A};
@@ -1719,7 +1719,7 @@ u32* findMpuStartOffset(const tNDSHeader* ndsHeader, u32 patchMpuRegion) {
 	const u32* mpuInitRegionSignature = getMpuInitRegionSignature(patchMpuRegion);
 
 	u32* mpuStartOffset = NULL;
-	if (patchMpuRegion == 2 && ndsHeader->unitCode == 3) {
+	if (patchMpuRegion == 2 && ndsHeader->unitCode > 0) {
 		mpuStartOffset = findOffset(
 			(u32*)ndsHeader->arm9destination, iUncompressedSize,
 			mpuInitRegion2SignatureElab, 2
@@ -1753,11 +1753,9 @@ u32* findMpuDataOffset(const module_params_t* moduleParams, u32 patchMpuRegion, 
 	if (moduleParams->sdk_version >= 0x2008000) {
 		mpuInitRegion2Data = mpuInitRegion2Data3;
 	}
-	/*if (moduleParams->sdk_version > 0x5000000) {
-		mpuInitRegion2Data = mpuInitRegion2Data5;
-	}*/
 	if (moduleParams->sdk_version > 0x5000000) {
 		mpuInitRegion1Data = mpuInitRegion1Data5;
+		mpuInitRegion2Data = mpuInitRegion2Data5;
 	}
 
 	const u32* mpuInitRegionData = mpuInitRegion1Data;

@@ -753,12 +753,7 @@ void inGameMenu(s32 *mainScreen, u32 consoleModel, s32 *exceptionRegisters) {
 	// If we were given exception registers, then we're handling an exception
 	bool exception = (exceptionRegisters != 0);
 
-	#ifndef B4DS
-	int oldIME = enterCriticalSection();
-
-	u16 exmemcnt = REG_EXMEMCNT;
-	sysSetCardOwner(false);	// Give Slot-1 access to arm7
-	#else
+	#ifdef B4DS
 	#ifndef EXTMEM
 	static bool ce9Set = false;
 	if (!ce9Set) {
@@ -965,10 +960,4 @@ void inGameMenu(s32 *mainScreen, u32 consoleModel, s32 *exceptionRegisters) {
 		REG_POWERCNT &= ~POWER_SWAP_LCDS;
 	else if(*mainScreen == 2)
 		REG_POWERCNT |= POWER_SWAP_LCDS;
-
-	#ifndef B4DS
-	REG_EXMEMCNT = exmemcnt;
-
-	leaveCriticalSection(oldIME);
-	#endif
 }

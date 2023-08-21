@@ -490,25 +490,6 @@ int hookNdsRetailArm7(
 		if (cheatFile.firstCluster != CLUSTER_FREE) {
 			fileRead(cheatDataOffset, &cheatFile, 0, cheatSize);
 		}
-		if (!gameOnFlashcard && isDSiWare) {
-			unpatchedFunctions* unpatchedFuncs = (unpatchedFunctions*)UNPATCHED_FUNCTION_LOCATION;
-
-			if (unpatchedFuncs->compressed_static_end) {
-				*(u32*)((u32)cheatDataOffset) = (u32)unpatchedFuncs->compressedFlagOffset;
-				cheatDataOffset += 4;
-				*(u32*)((u32)cheatDataOffset) = unpatchedFuncs->compressed_static_end;
-				cheatDataOffset += 4;
-				cheatSizeLimit -= 8;
-			}
-			if (unpatchedFuncs->ltd_compressed_static_end) {
-				*(u32*)((u32)cheatDataOffset) = (u32)unpatchedFuncs->iCompressedFlagOffset;
-				cheatDataOffset += 4;
-				*(u32*)((u32)cheatDataOffset) = unpatchedFuncs->ltd_compressed_static_end;
-				cheatDataOffset += 4;
-				cheatSizeLimit -= 8;
-			}
-			*(cheatDataOffset + 3) = 0xCF;
-		}
 	}
 
 	dbg_printf("ERR_NONE\n");

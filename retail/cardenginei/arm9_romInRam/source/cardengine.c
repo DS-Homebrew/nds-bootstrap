@@ -18,6 +18,7 @@
 
 #include <string.h>
 #include <nds/ndstypes.h>
+#include <nds/bios.h>
 #include <nds/system.h>
 #include <nds/interrupts.h>
 #include <nds/ipc.h>
@@ -373,6 +374,35 @@ u32 cartRead(u32 dma, u32 src, u8* dst, u32 len, u32 type) {
 
 extern void reset(u32 param);
 
+void inGameMenu(s32* exRegisters) {
+	int oldIME = enterCriticalSection();
+
+	while (sharedAddr[5] == 0x4C4D4749) { // 'IGML'
+		while (REG_VCOUNT != 191) swiDelay(100);
+		while (REG_VCOUNT == 191) swiDelay(100);
+	}
+
+	*(u32*)(INGAME_MENU_LOCATION + IGM_TEXT_SIZE_ALIGNED) = (u32)sharedAddr;
+	volatile void (*inGameMenu)(s32*, u32, s32*) = (volatile void*)INGAME_MENU_LOCATION + IGM_TEXT_SIZE_ALIGNED + 0x10;
+	(*inGameMenu)(&ce9->mainScreen, ce9->consoleModel, exRegisters);
+
+	while (sharedAddr[5] != 0x4C4D4749) { // 'IGML'
+		while (REG_VCOUNT != 191) swiDelay(100);
+		while (REG_VCOUNT == 191) swiDelay(100);
+	}
+	while (sharedAddr[5] == 0x4C4D4749) { // 'IGML'
+		while (REG_VCOUNT != 191) swiDelay(100);
+		while (REG_VCOUNT == 191) swiDelay(100);
+	}
+
+	if (sharedAddr[3] == 0x52534554) {
+		igmReset = true;
+		reset(0);
+	}
+
+	leaveCriticalSection(oldIME);
+}
+
 //---------------------------------------------------------------------------------
 void myIrqHandlerVBlank(void) {
 //---------------------------------------------------------------------------------
@@ -402,11 +432,7 @@ void myIrqHandlerIPC(void) {
 		/*case 0x5:
 			igmReset = true;
 			sharedAddr[3] = 0x54495845;
-			if (*(u32*)0x02FFE234 == 0x00030004 || *(u32*)0x02FFE234 == 0x00030005) {
-				reset(0, 0);
-			} else {
-				reset(0xFFFFFFFF);
-			}
+			reset(0xFFFFFFFF);
 			break;*/
 		case 0x6:
 			if(ce9->mainScreen == 1)
@@ -425,41 +451,9 @@ void myIrqHandlerIPC(void) {
 				REG_POWERCNT |= POWER_SWAP_LCDS;
 		}
 			break; */
-		/*case 0x9: {
-			if (!(ce9->valueBits & extendedMemory)) {
-				if (ndsHeader->unitCode > 0 && (ce9->valueBits & dsiMode)) {
-					if (ce9->consoleModel > 0) {
-						*(u32*)(INGAME_MENU_LOCATION_DSIWARE + IGM_TEXT_SIZE_ALIGNED) = (u32)sharedAddr;
-						volatile void (*inGameMenu)(s8*, u32, s32*) = (volatile void*)INGAME_MENU_LOCATION_DSIWARE + IGM_TEXT_SIZE_ALIGNED + 0x10;
-						(*inGameMenu)(&mainScreen, ce9->consoleModel, 0);
-					} else {
-						*(u32*)(INGAME_MENU_LOCATION_TWLSDK + IGM_TEXT_SIZE_ALIGNED) = (u32)sharedAddr;
-						volatile void (*inGameMenu)(s8*, u32, s32*) = (volatile void*)INGAME_MENU_LOCATION_TWLSDK + IGM_TEXT_SIZE_ALIGNED + 0x10;
-						(*inGameMenu)(&mainScreen, ce9->consoleModel, 0);
-					}
-				} else {
-					*(u32*)(INGAME_MENU_LOCATION + IGM_TEXT_SIZE_ALIGNED) = (u32)sharedAddr;
-					volatile void (*inGameMenu)(s8*, u32, s32*) = (volatile void*)INGAME_MENU_LOCATION + IGM_TEXT_SIZE_ALIGNED + 0x10;
-					(*inGameMenu)(&mainScreen, ce9->consoleModel, 0);
-				}
-				if (sharedAddr[3] == 0x54495845 && ndsHeader->unitCode > 0 && (ce9->valueBits & dsiMode)) {
-					igmReset = true;
-					if (*(u32*)0x02FFE234 == 0x00030004 || *(u32*)0x02FFE234 == 0x00030005) {
-						reset(0, 0);
-					} else {
-						reset(0xFFFFFFFF, 0);
-					}
-				} else if (sharedAddr[3] == 0x52534554) {
-					igmReset = true;
-					if (*(u32*)0x02FFE234 == 0x00030004 || *(u32*)0x02FFE234 == 0x00030005) { // If DSiWare...
-						reset(*(u32*)0x02FFE230, *(u32*)0x02FFE234);
-					} else {
-						reset(0, 0);
-					}
-				}
-			
-		}
-			break;}*/
+		case 0x9:
+			inGameMenu((s32*)0);
+			break;
 	}
 
 	if (sharedAddr[4] == 0x57534352) {

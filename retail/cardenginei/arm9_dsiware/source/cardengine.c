@@ -19,6 +19,7 @@
 #include <string.h>
 #include <nds/ndstypes.h>
 #include <nds/arm9/video.h>
+#include <nds/bios.h>
 #include <nds/system.h>
 #include <nds/dma.h>
 #include <nds/interrupts.h>
@@ -217,9 +218,26 @@ void reset(u32 tid1, u32 tid2) {
 }
 
 void inGameMenu(s32* exRegisters) {
-	*(u32*)(INGAME_MENU_LOCATION_DSIWARE + IGM_TEXT_SIZE_ALIGNED) = (u32)sharedAddr;
-	volatile void (*inGameMenu)(s32*, u32, s32*) = (volatile void*)INGAME_MENU_LOCATION_DSIWARE + IGM_TEXT_SIZE_ALIGNED + 0x10;
+	int oldIME = enterCriticalSection();
+
+	while (sharedAddr[5] == 0x4C4D4749) { // 'IGML'
+		while (REG_VCOUNT != 191) swiDelay(100);
+		while (REG_VCOUNT == 191) swiDelay(100);
+	}
+
+	*(u32*)(INGAME_MENU_LOCATION + IGM_TEXT_SIZE_ALIGNED) = (u32)sharedAddr;
+	volatile void (*inGameMenu)(s32*, u32, s32*) = (volatile void*)INGAME_MENU_LOCATION + IGM_TEXT_SIZE_ALIGNED + 0x10;
 	(*inGameMenu)(&ce9->mainScreen, ce9->consoleModel, exRegisters);
+
+	while (sharedAddr[5] != 0x4C4D4749) { // 'IGML'
+		while (REG_VCOUNT != 191) swiDelay(100);
+		while (REG_VCOUNT == 191) swiDelay(100);
+	}
+	while (sharedAddr[5] == 0x4C4D4749) { // 'IGML'
+		while (REG_VCOUNT != 191) swiDelay(100);
+		while (REG_VCOUNT == 191) swiDelay(100);
+	}
+
 	if (sharedAddr[3] == 0x52534554 || sharedAddr[3] == 0x54495845) {
 		igmReset = true;
 		if (sharedAddr[3] == 0x52534554) {
@@ -228,6 +246,8 @@ void inGameMenu(s32* exRegisters) {
 			reset(0, 0);
 		}
 	}
+
+	leaveCriticalSection(oldIME);
 }
 
 //---------------------------------------------------------------------------------
