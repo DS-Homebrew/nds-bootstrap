@@ -16145,7 +16145,6 @@ void rsetA7Cache(void)
 	patchOffsetCache.savePatchType = 0;
 	patchOffsetCache.relocateStartOffset = 0;
 	patchOffsetCache.relocateValidateOffset = 0;
-	patchOffsetCache.a7iStartOffset = 0;
 	patchOffsetCache.a7CardReadEndOffset = 0;
 	patchOffsetCache.a7JumpTableFuncOffset = 0;
 	patchOffsetCache.a7JumpTableType = 0;

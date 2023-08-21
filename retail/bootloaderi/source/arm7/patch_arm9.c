@@ -1086,11 +1086,11 @@ void patchMpuChange(const tNDSHeader* ndsHeader, const module_params_t* modulePa
 		return;
 	}
 
-	u32* offset = patchOffsetCache.mpuDataOffset2;
-	if (!patchOffsetCache.mpuDataOffset2) {
+	u32* offset = patchOffsetCache.mpuChangeOffset;
+	if (!patchOffsetCache.mpuChangeOffset) {
 		offset = findMpuChange(ndsHeader);
 		if (offset) {
-			patchOffsetCache.mpuDataOffset2 = offset;
+			patchOffsetCache.mpuChangeOffset = offset;
 		}
 	}
 
