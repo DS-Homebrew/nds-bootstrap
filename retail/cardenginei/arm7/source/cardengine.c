@@ -79,6 +79,7 @@
 #define scfgLocked BIT(31)
 
 #define	REG_EXTKEYINPUT	(*(vuint16*)0x04000136)
+#define	REG_WIFIIRQ	(*(vuint16*)0x04808012)
 
 extern u32 ce7;
 
@@ -1513,7 +1514,7 @@ void myIrqHandlerVBlank(void) {
 		i2cWriteRegister(0x4A, 0x11, 0x01);		// Reboot into error screen if SD card is removed
 	}
 
-	if ((0 == (REG_KEYINPUT & igmHotkey) && 0 == (REG_EXTKEYINPUT & (((igmHotkey >> 10) & 3) | ((igmHotkey >> 6) & 0xC0))) && !(valueBits & extendedMemory) && (*(vu16*)0x04808012 == 0)) || returnToMenu || sharedAddr[5] == 0x59444552 /* REDY */) {
+	if ((0 == (REG_KEYINPUT & igmHotkey) && 0 == (REG_EXTKEYINPUT & (((igmHotkey >> 10) & 3) | ((igmHotkey >> 6) & 0xC0))) && !(valueBits & extendedMemory) && (REG_WIFIIRQ == 0)) || returnToMenu || sharedAddr[5] == 0x59444552 /* REDY */) {
 #ifdef TWLSDK
 		igmText = (struct IgmText *)INGAME_MENU_LOCATION_TWLSDK;
 		i2cWriteRegister(0x4A, 0x12, 0x00);
@@ -1639,7 +1640,7 @@ void myIrqHandlerVBlank(void) {
 		REG_IE &= ~IRQ_NETWORK; // DSi RTC fix
 	}
 
-	bool wifiIrqCheck = (*(vu16*)0x04808012 != 0);
+	bool wifiIrqCheck = (REG_WIFIIRQ != 0);
 	if (wifiIrq != wifiIrqCheck) {
 		// Turn off card read DMA if WiFi is used, and back on when not in use
 		if (wifiIrq) {

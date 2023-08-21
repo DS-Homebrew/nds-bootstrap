@@ -41,6 +41,7 @@
 #define WARIOWARE_PAK		(*(vuint16 *)0x080000C4)
 
 #define	REG_EXTKEYINPUT	(*(vuint16*)0x04000136)
+#define	REG_WIFIIRQ	(*(vuint16*)0x04808012)
 
 extern u32 ce7;
 
@@ -316,7 +317,7 @@ void myIrqHandlerVBlank(void) {
 		funcsUnpatched = true;
 	}
 
-	if ((0 == (REG_KEYINPUT & igmHotkey) && 0 == (REG_EXTKEYINPUT & (((igmHotkey >> 10) & 3) | ((igmHotkey >> 6) & 0xC0))) && (*(vu16*)0x04808012 == 0)) || sharedAddr[5] == 0x59444552 /* REDY */) {
+	if ((0 == (REG_KEYINPUT & igmHotkey) && 0 == (REG_EXTKEYINPUT & (((igmHotkey >> 10) & 3) | ((igmHotkey >> 6) & 0xC0))) && (REG_WIFIIRQ == 0)) || sharedAddr[5] == 0x59444552 /* REDY */) {
 		inGameMenu();
 	}
 
