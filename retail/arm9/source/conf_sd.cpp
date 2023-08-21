@@ -1147,7 +1147,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			cebin = fopen(binary3 ? "nitro:/cardenginei_arm9_twlsdk3_dldi.lz77" : "nitro:/cardenginei_arm9_twlsdk_dldi.lz77", "rb");
 			if (cebin) {
 				fread(lz77ImageBuffer, 1, sizeof(lz77ImageBuffer), cebin);
-				LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINEI_ARM9_SDK5_DLDI_BUFFERED_LOCATION);
+				LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINEI_ARM9_SDK5_BUFFERED_LOCATION);
 			}
 			fclose(cebin);
 		} else {
@@ -1177,7 +1177,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			cebin = fopen("nitro:/cardenginei_arm9_dldi.lz77", "rb");
 			if (cebin) {
 				fread(lz77ImageBuffer, 1, sizeof(lz77ImageBuffer), cebin);
-				LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINEI_ARM9_DLDI_BUFFERED_LOCATION);
+				LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINEI_ARM9_BUFFERED_LOCATION);
 			}
 			fclose(cebin);
 		} else {
@@ -1188,6 +1188,16 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 				LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINEI_ARM9_BUFFERED_LOCATION);
 			}
 			fclose(cebin);
+
+			if (!conf->dsiWramAccess) {
+				// Load ce9 binary (alt 2)
+				cebin = fopen("nitro:/cardenginei_arm9_alt2.lz77", "rb");
+				if (cebin) {
+					fread(lz77ImageBuffer, 1, sizeof(lz77ImageBuffer), cebin);
+					LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINEI_ARM9_BUFFERED_LOCATION2);
+				}
+				fclose(cebin);
+			}
 		}
 	}
 
