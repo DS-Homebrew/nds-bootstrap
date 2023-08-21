@@ -2071,7 +2071,7 @@ int arm7_main(void) {
 		extern u32 iUncompressedSize;
 		if (strncmp(romTid, "UBR", 3) == 0) {
 			// Do nothing
-		} else if (extendedMemoryConfirmed || dsiModeConfirmed) {
+		} else /* if (extendedMemoryConfirmed || dsiModeConfirmed) */ {
 			extern u32 iUncompressedSizei;
 			aFile pageFile;
 			getFileFromCluster(&pageFile, pageFileCluster, bootstrapOnFlashcard);
@@ -2086,11 +2086,11 @@ int arm7_main(void) {
 				fileWrite((char*)&iUncompressedSizei, &pageFile, 0x5FFFF8, sizeof(u32));
 				fileWrite((char*)&newArm7ibinarySize, &pageFile, 0x5FFFFC, sizeof(u32));
 			}
-		} else {
+		} /* else {
 			*(u32*)ARM9_DEC_SIZE_LOCATION = iUncompressedSize;
 			tonccpy((char*)ndsHeader->arm9destination+0x400000, ndsHeader->arm9destination, iUncompressedSize);
 			tonccpy((char*)DONOR_ROM_ARM7_LOCATION, ndsHeader->arm7destination, ndsHeader->arm7binarySize);
-		}
+		} */
 		if (!gameOnFlashcard && !ROMinRAM && (romRead_LED==1 || dmaRomRead_LED==1)) {
 			// Turn WiFi LED off
 			i2cWriteRegister(0x4A, 0x30, 0x12);

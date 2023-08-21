@@ -533,19 +533,19 @@ void reset(void) {
 
 		extern u32 iUncompressedSize;
 
-		if ((valueBits & extendedMemory) || (valueBits & dsiMode)) {
+		// if ((valueBits & extendedMemory) || (valueBits & dsiMode)) {
 			fileWrite((char*)ndsHeader->arm9destination, &pageFile, 0, iUncompressedSize);
 			fileWrite((char*)ndsHeader->arm7destination, &pageFile, 0x2C0000, ndsHeader->arm7binarySize);
 			fileWrite((char*)&iUncompressedSize, &pageFile, 0x5FFFF0, sizeof(u32));
 			fileWrite((char*)&ndsHeader->arm7binarySize, &pageFile, 0x5FFFF4, sizeof(u32));
-		} else {
+		/* } else {
 			*(u32*)ARM9_DEC_SIZE_LOCATION = iUncompressedSize;
 			ndmaCopyWordsAsynch(0, ndsHeader->arm9destination, (char*)ndsHeader->arm9destination+0x400000, *(u32*)ARM9_DEC_SIZE_LOCATION);
 			ndmaCopyWordsAsynch(1, ndsHeader->arm7destination, (char*)DONOR_ROM_ARM7_LOCATION, ndsHeader->arm7binarySize);
 			while (ndmaBusy(0) || ndmaBusy(1));
-		}
+		} */
 		*(u32*)(resetParam+8) = 0;
-	} else if ((valueBits & extendedMemory) || (valueBits & dsiMode)) {
+	} else /* if ((valueBits & extendedMemory) || (valueBits & dsiMode)) */ {
 		//driveInitialize();
 
 		u32 iUncompressedSize = 0;
@@ -554,11 +554,11 @@ void reset(void) {
 		fileRead((char*)&newArm7binarySize, &pageFile, 0x5FFFF4, sizeof(u32));
 		fileRead((char*)ndsHeader->arm9destination, &pageFile, 0, iUncompressedSize);
 		fileRead((char*)ndsHeader->arm7destination, &pageFile, 0x2C0000, newArm7binarySize);
-	} else {
+	} /* else {
 		ndmaCopyWordsAsynch(0, (char*)ndsHeader->arm9destination+0x400000, ndsHeader->arm9destination, *(u32*)ARM9_DEC_SIZE_LOCATION);
 		ndmaCopyWordsAsynch(1, (char*)DONOR_ROM_ARM7_LOCATION, ndsHeader->arm7destination, ndsHeader->arm7binarySize);
 		while (ndmaBusy(0) || ndmaBusy(1));
-	}
+	} */
 	#else
 	//bool doBak = ((valueBits & gameOnFlashcard) && (valueBits & b_dsiSD));
 	//if (doBak) bakSdData();
