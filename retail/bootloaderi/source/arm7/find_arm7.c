@@ -1029,6 +1029,12 @@ u32* findRamClearIOffset(const tNDSHeader* ndsHeader) {
 			(u32*)ndsHeader->arm7destination, newArm7binarySize,
 			ramClearSignature, 1
 		);
+		if (!ramClearOffset) {
+			ramClearOffset = findOffset(
+				(u32*)__DSiHeader->arm7idestination, newArm7ibinarySize,
+				ramClearSignature, 1
+			);
+		}
 	}
 	if (ramClearOffset) {
 		dbg_printf("RAM clear I found\n");
