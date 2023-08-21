@@ -388,8 +388,6 @@ static void patchRamClearI(const tNDSHeader* ndsHeader, const module_params_t* m
 }
 
 void patchPostBoot(const tNDSHeader* ndsHeader) {
-	const char* romTid = getRomTid(ndsHeader);
-
 	if (REG_SCFG_EXT != 0 || ndsHeader->unitCode == 0 || !dsiModeConfirmed || (oldArm7mbk == 0x00403000 && *(u32*)0x02FFE1A0 == 0x00403000) || *(u32*)0x02FFE1A0 == 0x080037C0) {
 		return;
 	}

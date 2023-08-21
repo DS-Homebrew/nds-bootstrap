@@ -248,13 +248,8 @@ int hookNdsRetailArm9(
 				ce9->cacheSlots = ((ndsHeader->unitCode > 0 && dsiModeConfirmed) ? dev_CACHE_ADRESS_SIZE_TWLSDK : dev_CACHE_ADRESS_SIZE_SDK5)/cacheBlockSize;
 			} else if (ndsHeader->unitCode > 0 && dsiModeConfirmed) {
 				ce9->romLocation = retail_CACHE_ADRESS_START_TWLSDK;
-				if (strncmp(romTid, "DD3", 3) == 0) {
-					ce9->cacheAddress = 0x02000000;
-					ce9->cacheSlots = 0x4000/cacheBlockSize;
-				} else {
-					ce9->cacheAddress = retail_CACHE_ADRESS_START_TWLSDK;
-					ce9->cacheSlots = retail_CACHE_ADRESS_SIZE_TWLSDK/cacheBlockSize;
-				}
+				ce9->cacheAddress = retail_CACHE_ADRESS_START_TWLSDK;
+				ce9->cacheSlots = retail_CACHE_ADRESS_SIZE_TWLSDK/cacheBlockSize;
 			} else {
 				ce9->romLocation = CACHE_ADRESS_START;
 				ce9->cacheAddress = CACHE_ADRESS_START;

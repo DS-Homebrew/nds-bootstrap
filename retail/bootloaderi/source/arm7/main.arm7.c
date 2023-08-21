@@ -1126,10 +1126,7 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 		tonccpy(twlCfg+0x10, (u8*)0x02FFE20E, 1); // EULA Version (0=None/CountryChanged, 1=v1)
 		tonccpy(twlCfg+0x9C, (u8*)0x02FFE2F0, 1); // Parental Controls Years of Age Rating (00h..14h)
 
-		if (consoleModel == 0 && memcmp(ndsHeader->gameCode, "DD3", 3) == 0) {
-			// Relocate TWLCFG for Hidden Photo
-			*(u32*)0x02FFFDFC = 0x02FFD400;
-		} else if (*(u32*)0x02FFFDFC != 0x02FFD400) {
+		if (*(u32*)0x02FFFDFC != 0x02FFD400) {
 			toncset((u32*)0x02FFD400, 0, 0x128);
 		}
 
@@ -1380,7 +1377,7 @@ int arm7_main(void) {
 	if (gameOnFlashcard || !isDSiWare) {
 		if (dsiModeConfirmed && ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr) && consoleModel == 0) {
 			extern u32 clusterCacheSize;
-			clusterCacheSize = 0x20000;
+			clusterCacheSize = 0x10000;
 
 			buildFatTableCacheCompressed(romFile);
 			buildFatTableCacheCompressed(savFile);
@@ -1405,18 +1402,16 @@ int arm7_main(void) {
 				savFile->fatTableCache = (u32*)((u32)savFile->fatTableCache+0xB880000);
 				lastClusterCacheUsed = (u32*)((u32)lastClusterCacheUsed+0xB880000);
 				clusterCache += 0xB880000;
+				toncset((char*)0x02700000, 0, 0x80000);
 			} else {
-				u32 add = 0x826000; // 0x02F26000
-				if ((u8)a9ScfgRom != 1) {
-					add -= 0x6000; // 0x02F20000
-				}
-				tonccpy((char*)0x02700000+add, (char*)0x02700000, 0x20000);	// Move FAT table cache elsewhere
+				u32 add = 0x858000; // 0x02F58000
+				tonccpy((char*)0x02700000+add, (char*)0x02700000, 0x10000);	// Move FAT table cache elsewhere
 				romFile->fatTableCache = (u32*)((u32)romFile->fatTableCache+add);
 				savFile->fatTableCache = (u32*)((u32)savFile->fatTableCache+add);
 				lastClusterCacheUsed = (u32*)((u32)lastClusterCacheUsed+add);
 				clusterCache += add;
+				toncset((char*)0x02700000, 0, 0x10000);
 			}
-			toncset((char*)0x02700000, 0, 0x80000);
 		}
 	}
 	if (!ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr) || !dsiModeConfirmed) {
@@ -1840,7 +1835,7 @@ int arm7_main(void) {
 
 		if (useSdk5ce7) {
 			ce7Location = CARDENGINEI_ARM7_SDK5_LOCATION;
-			ce7Size = 0xFC00;
+			ce7Size = 0xF800;
 		}
 
 		if (ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr) && dsiModeConfirmed) {

@@ -49,8 +49,6 @@ static inline void doubleNopT(u32 addr) {
 }
 
 void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
-	extern u8 consoleModel;
-	extern u16 a9ScfgRom;
 	const char* romTid = getRomTid(ndsHeader);
 	const char* dataPub = "dataPub:";
 	const char* dataPrv = "dataPrv:";
@@ -6836,18 +6834,6 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0205B738, (u32)dsiSaveSeek);
 		setBL(0x0205B748, (u32)dsiSaveRead);
 		setBL(0x0205B750, (u32)dsiSaveClose);
-	}
-
-	// Hidden Photo (Europe)
-	else if (strcmp(romTid, "DD3P") == 0 && consoleModel == 0 && (u8)a9ScfgRom != 1) {
-		//*(u32*)0x0201BC14 -= 0xD000; // Shift heap
-		*(u32*)0x0201BC14 -= 0x6000; // Shift heap
-	}
-
-	// Wimmelbild Creator (German)
-	else if (strcmp(romTid, "DD3D") == 0 && consoleModel == 0 && (u8)a9ScfgRom != 1) {
-		//*(u32*)0x0201B9E4 -= 0xD000; // Shift heap
-		*(u32*)0x0201B9E4 -= 0x6000; // Shift heap
 	}
 
 	// High Stakes Texas Hold'em (USA)
