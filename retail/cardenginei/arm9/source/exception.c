@@ -19,6 +19,7 @@ extern vu32* volatile sharedAddr;
 void userException() {
 //---------------------------------------------------------------------------------
 	sharedAddr[0] = 0x524F5245; // 'EROR'
+	sharedAddr[5] = 0x4C4D4749; // 'IGML'
 
 	extern void inGameMenu(s32* exRegisters);
 	while (1) {

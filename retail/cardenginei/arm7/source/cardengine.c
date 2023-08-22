@@ -1499,7 +1499,7 @@ void myIrqHandlerVBlank(void) {
 		i2cWriteRegister(0x4A, 0x11, 0x01);		// Reboot into error screen if SD card is removed
 	}
 
-	if ((0 == (REG_KEYINPUT & igmHotkey) && 0 == (REG_EXTKEYINPUT & (((igmHotkey >> 10) & 3) | ((igmHotkey >> 6) & 0xC0))) && (REG_WIFIIRQ == 0)) || returnToMenu || sharedAddr[5] == 0x59444552 /* REDY */) {
+	if ((0 == (REG_KEYINPUT & igmHotkey) && 0 == (REG_EXTKEYINPUT & (((igmHotkey >> 10) & 3) | ((igmHotkey >> 6) & 0xC0))) && (REG_WIFIIRQ == 0)) || returnToMenu || sharedAddr[5] == 0x4C4D4749 /* IGML */) {
 #ifdef TWLSDK
 		igmText = (struct IgmText *)INGAME_MENU_LOCATION;
 		i2cWriteRegister(0x4A, 0x12, 0x00);
