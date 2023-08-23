@@ -29,7 +29,7 @@ igmText:
 sharedAddr:
 .word 0
 waitSysCyclesLocPtr:
-.word 0x027FEFF4
+.word 0
 scfgExtBak:
 .word 0x027FEFF8
 scfgClkBak:
