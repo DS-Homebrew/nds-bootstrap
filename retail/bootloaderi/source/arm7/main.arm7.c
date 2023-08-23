@@ -647,7 +647,7 @@ static void loadBinary_ARM7(const tDSiHeader* dsiHeaderTemp, aFile* file) {
 		}
 
 		fileRead((char*)dsiHeaderTemp, &pageFile, 0x2BFE00, 0x160);
-		fileRead(dsiHeaderTemp->ndshdr.arm9destination, &pageFile, 0, dsiHeaderTemp->ndshdr.arm9binarySize);
+		fileRead(dsiHeaderTemp->ndshdr.arm9destination, &pageFile, 0x14000, dsiHeaderTemp->ndshdr.arm9binarySize);
 		fileRead(dsiHeaderTemp->ndshdr.arm7destination, &pageFile, 0x2C0000, dsiHeaderTemp->ndshdr.arm7binarySize);
 	} else {
 		if (!gameOnFlashcard) {
