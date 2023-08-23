@@ -202,8 +202,7 @@ u32* patchLoHeapPointer(
 );
 u32* patchHiHeapPointer(
     const module_params_t* moduleParams,
-    const tNDSHeader* ndsHeader,
-	bool ROMinRAM
+    const tNDSHeader* ndsHeader
 );
 void relocate_ce9(
     u32 default_location, 
