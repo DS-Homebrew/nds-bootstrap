@@ -111,6 +111,9 @@ typedef struct cardengineArm7 {
     u32* irqTable_offset;
     u16 scfgRomBak;
     u16 igmHotkey;
+	u32 romLocation;
+	u32 romMapLines;
+	u32 romMap[4][3]; // 0: ROM part start, 1: ROM part start in RAM, 2: ROM part end in RAM
 } cardengineArm7;
 
 //

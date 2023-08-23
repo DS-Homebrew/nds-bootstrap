@@ -158,6 +158,15 @@ u32 newArm7binarySize = 0;
 u32 newArm7ibinarySize = 0;
 u32 oldArm7mbk = 0;
 
+u32 romMapLines = 0;
+// 0: ROM part start, 1: ROM part start in RAM, 2: ROM part end in RAM
+u32 romMap[4][3] = {
+	{0, 0, 0},
+	{0, 0, 0},
+	{0, 0, 0},
+	{0, 0, 0}
+};
+
 static void initMBK(void) {
 	// Give all DSi WRAM to ARM7 at boot
 	// This function has no effect with ARM7 SCFG locked

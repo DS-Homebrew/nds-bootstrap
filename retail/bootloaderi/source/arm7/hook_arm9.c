@@ -171,82 +171,91 @@ void configureRomMap(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const u32
 	}
 
 	// 0: ROM part start, 1: ROM part start in RAM, 2: ROM part end in RAM
-	ce9->romMap[0][0] = romStart;
-	ce9->romMap[0][1] = romLocation;
+	extern u32 romMapLines;
+	extern u32 romMap[4][3];
+	romMap[0][0] = romStart;
+	romMap[0][1] = romLocation;
 
 	if (dsiMode) {
-		ce9->romMapLines = 1;
+		romMapLines = 1;
 
 		if (ce9->valueBits & b_isSdk5) {
-			ce9->romMap[0][2] = romLocation+0x4000;
+			romMap[0][2] = romLocation+0x4000;
 
-			ce9->romMapLines++;
+			romMapLines++;
 
-			ce9->romMap[1][0] = ce9->romMap[0][0]+0x4000;
-			ce9->romMap[1][1] = romLocation+(ndsHeader->unitCode > 0 ? 0x20000 : 0x40000);
-			ce9->romMap[1][2] = ce9->romMap[1][1]+(ndsHeader->unitCode > 0 ? 0x1C000 : 0x7FC000);
+			romMap[1][0] = romMap[0][0]+0x4000;
+			romMap[1][1] = romLocation+(ndsHeader->unitCode > 0 ? 0x20000 : 0x40000);
+			romMap[1][2] = romMap[1][1]+(ndsHeader->unitCode > 0 ? 0x1C000 : 0x7FC000);
 
 			if (ndsHeader->unitCode > 0) {
-				ce9->romMap[2][0] = ce9->romMap[1][0]+0x1C000;
-				ce9->romMap[2][1] = ce9->romMap[1][1]+0x20000;
-				ce9->romMap[2][2] = ce9->romMap[2][1]+0x7E0000;
+				romMap[2][0] = romMap[1][0]+0x1C000;
+				romMap[2][1] = romMap[1][1]+0x20000;
+				romMap[2][2] = romMap[2][1]+0x7E0000;
 
-				ce9->romMapLines++;
+				romMapLines++;
 
 				if (consoleModel > 0) {
-					ce9->romMap[3][0] = ce9->romMap[2][0]+0x7E0000;
-					ce9->romMap[3][1] = ce9->romMap[2][1]+0x800000;
-					ce9->romMap[3][2] = ce9->romMap[3][1]+0x1000000;
+					romMap[3][0] = romMap[2][0]+0x7E0000;
+					romMap[3][1] = romMap[2][1]+0x800000;
+					romMap[3][2] = romMap[3][1]+0x1000000;
 
-					ce9->romMapLines++;
+					romMapLines++;
 				}
 			} else if (consoleModel > 0) {
-				ce9->romMap[2][0] = ce9->romMap[1][0]+0x7FC000;
-				ce9->romMap[2][1] = ce9->romMap[1][1]+0x800000;
-				ce9->romMap[2][2] = ce9->romMap[2][1]+0x1000000;
+				romMap[2][0] = romMap[1][0]+0x7FC000;
+				romMap[2][1] = romMap[1][1]+0x800000;
+				romMap[2][2] = romMap[2][1]+0x1000000;
 
-				ce9->romMapLines++;
+				romMapLines++;
 			}
 		} else {
-			ce9->romMap[0][2] = ce9->romMap[0][1]+(consoleModel > 0 ? 0x1800000 : 0x800000);
+			romMap[0][2] = romMap[0][1]+(consoleModel > 0 ? 0x1800000 : 0x800000);
 		}
 	} else {
-		ce9->romMapLines = 2;
+		romMapLines = 2;
 
 		if (ce9->valueBits & b_isSdk5) {
-			ce9->romMap[0][2] = romLocation+0x3C4000;
+			romMap[0][2] = romLocation+0x3C4000;
 
-			ce9->romMap[1][0] = ce9->romMap[0][0]+0x3C4000;
-			ce9->romMap[1][1] = romLocation+(ndsHeader->unitCode > 0 ? 0x3E0000 : 0x400000);
-			ce9->romMap[1][2] = ce9->romMap[1][1]+(ndsHeader->unitCode > 0 ? 0x1C000 : 0x7FC000);
+			romMap[1][0] = romMap[0][0]+0x3C4000;
+			romMap[1][1] = romLocation+(ndsHeader->unitCode > 0 ? 0x3E0000 : 0x400000);
+			romMap[1][2] = romMap[1][1]+(ndsHeader->unitCode > 0 ? 0x1C000 : 0x7FC000);
 
 			if (ndsHeader->unitCode > 0) {
-				ce9->romMap[2][0] = ce9->romMap[1][0]+0x1C000;
-				ce9->romMap[2][1] = ce9->romMap[1][1]+0x20000;
-				ce9->romMap[2][2] = ce9->romMap[2][1]+0x7E0000;
+				romMap[2][0] = romMap[1][0]+0x1C000;
+				romMap[2][1] = romMap[1][1]+0x20000;
+				romMap[2][2] = romMap[2][1]+0x7E0000;
 
-				ce9->romMapLines++;
+				romMapLines++;
 
 				if (consoleModel > 0) {
-					ce9->romMap[3][0] = ce9->romMap[2][0]+0x7E0000;
-					ce9->romMap[3][1] = ce9->romMap[2][1]+0x800000;
-					ce9->romMap[3][2] = ce9->romMap[3][1]+0x1000000;
+					romMap[3][0] = romMap[2][0]+0x7E0000;
+					romMap[3][1] = romMap[2][1]+0x800000;
+					romMap[3][2] = romMap[3][1]+0x1000000;
 
-					ce9->romMapLines++;
+					romMapLines++;
 				}
 			} else if (consoleModel > 0) {
-				ce9->romMap[2][0] = ce9->romMap[1][0]+0x7FC000;
-				ce9->romMap[2][1] = ce9->romMap[1][1]+0x800000;
-				ce9->romMap[2][2] = ce9->romMap[2][1]+0x1000000;
+				romMap[2][0] = romMap[1][0]+0x7FC000;
+				romMap[2][1] = romMap[1][1]+0x800000;
+				romMap[2][2] = romMap[2][1]+0x1000000;
 
-				ce9->romMapLines++;
+				romMapLines++;
 			}
 		} else {
-			ce9->romMap[0][2] = romLocation+0x3C0000;
+			romMap[0][2] = romLocation+0x3C0000;
 
-			ce9->romMap[1][0] = ce9->romMap[0][0]+0x3C0000;
-			ce9->romMap[1][1] = romLocation+0x400000;
-			ce9->romMap[1][2] = ce9->romMap[1][1]+(consoleModel > 0 ? 0x1800000 : 0x800000);
+			romMap[1][0] = romMap[0][0]+0x3C0000;
+			romMap[1][1] = romLocation+0x400000;
+			romMap[1][2] = romMap[1][1]+(consoleModel > 0 ? 0x1800000 : 0x800000);
+		}
+	}
+
+	ce9->romMapLines = romMapLines;
+	for (int i = 0; i < 4; i++) {
+		for (int i2 = 0; i2 < 3; i2++) {
+			ce9->romMap[i][i2] = romMap[i][i2];
 		}
 	}
 }

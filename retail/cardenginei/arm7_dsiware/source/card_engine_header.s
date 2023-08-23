@@ -32,6 +32,9 @@
 .global scfgRomBak
 .global igmHotkey
 .global ndsCodeStart
+.global romLocation
+.global romMapLines
+.global romMap
 
 #define ICACHE_SIZE	0x2000
 #define DCACHE_SIZE	0x1000
@@ -86,6 +89,26 @@ scfgRomBak:
 	.hword	0
 igmHotkey:
 	.hword	0
+romLocation:
+	.word	0x00000000
+romMapLines:
+	.word	0x00000000
+romMap:
+	.word	0x00000000
+	.word	0x00000000
+	.word	0x00000000
+
+	.word	0x00000000
+	.word	0x00000000
+	.word	0x00000000
+
+	.word	0x00000000
+	.word	0x00000000
+	.word	0x00000000
+
+	.word	0x00000000
+	.word	0x00000000
+	.word	0x00000000
 .align	4
 
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@

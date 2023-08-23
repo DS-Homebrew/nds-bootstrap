@@ -407,6 +407,22 @@ int hookNdsRetailArm7(
 		ce7->dmaRomRead_LED           = dmaRomRead_LED;
 		ce7->scfgRomBak               = REG_SCFG_ROM;
 
+		extern u32 getRomLocation(const tNDSHeader* ndsHeader, const bool isSdk5);
+		u32 romLocation = getRomLocation(ndsHeader, (ce7->valueBits & b_isSdk5));
+		ce7->romLocation = romLocation;
+		ce7->romLocation -= (usesCloneboot ? 0x4000 : (ndsHeader->arm9romOffset + ndsHeader->arm9binarySize));
+
+		// 0: ROM part start, 1: ROM part start in RAM, 2: ROM part end in RAM
+		extern u32 romMapLines;
+		extern u32 romMap[4][3];
+
+		ce7->romMapLines = romMapLines;
+		for (int i = 0; i < 4; i++) {
+			for (int i2 = 0; i2 < 3; i2++) {
+				ce7->romMap[i][i2] = romMap[i][i2];
+			}
+		}
+
 		*vblankHandler = ce7->patches->vblankHandler;
 		if (ce7->patches->fifoHandler) {
 		*ipcSyncHandler = ce7->patches->fifoHandler;
