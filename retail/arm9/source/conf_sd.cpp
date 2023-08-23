@@ -192,9 +192,6 @@ static void load_conf(configuration* conf, const char* fn) {
 	// Patch MPU size
 	conf->patchMpuSize = strtol(config_file.fetch("NDS-BOOTSTRAP", "PATCH_MPU_SIZE", "0").c_str(), NULL, 0);
 
-	// Extended memory
-	conf->extendedMemory = strtol(config_file.fetch("NDS-BOOTSTRAP", "EXTENDED_MEMORY", "0").c_str(), NULL, 0);
-
 	// Console model
 	conf->consoleModel = strtol(config_file.fetch("NDS-BOOTSTRAP", "CONSOLE_MODEL", "0").c_str(), NULL, 0);
 
@@ -1200,14 +1197,6 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			}
 		}
 	}
-
-	// Load ROMinRAM ce9 binary
-	cebin = fopen("nitro:/cardenginei_arm9_romInRam.lz77", "rb");
-	if (cebin) {
-		fread(lz77ImageBuffer, 1, sizeof(lz77ImageBuffer), cebin);
-		LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINEI_ARM9_ROMINRAM_BUFFERED_LOCATION);
-	}
-	fclose(cebin);
 
 	bool found = (access(pageFilePath.c_str(), F_OK) == 0);
 	if (!found) {

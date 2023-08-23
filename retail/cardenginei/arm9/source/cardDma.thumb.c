@@ -59,6 +59,9 @@ extern u32 cacheDescriptor[];
 extern int cacheCounter[];
 extern int accessCounter;
 
+extern int romMapLines;
+extern u32 romMap[4][3];
+
 extern void callEndReadDmaThumb(void);
 extern void disableIrqMask(u32 mask);
 
@@ -470,7 +473,28 @@ void cardSetDma(u32 * params) {
 		enableIPC_SYNC();
 
 		// Copy via dma
-		ndmaCopyWordsAsynch(0, (u8*)ce9->romLocation/*[romPartNo]*/+src, dst, len);
+		// ndmaCopyWordsAsynch(0, (u8*)ce9->romLocation/*[romPartNo]*/+src, dst, len);
+
+		u32 len2 = 0;
+		for (int i = 0; i < ce9->romMapLines; i++) {
+			if (!(src >= ce9->romMap[i][0] && (i == ce9->romMapLines-1 || src < ce9->romMap[i+1][0])))
+				continue;
+
+			u32 newSrc = (ce9->romMap[i][1]-ce9->romMap[i][0])+src;
+			if (newSrc+len > ce9->romMap[i][2]) {
+				do {
+					len--;
+					len2++;
+				} while (newSrc+len != ce9->romMap[i][2]);
+				tonccpy(dst, (u8*)newSrc, len);
+				src += len;
+				dst += len;
+			} else {
+				ndmaCopyWordsAsynch(0, (u8*)newSrc, dst, len2==0 ? len : len2);
+				break;
+			}
+		}
+
 		IPC_SendSync(0x3);
 		return;
 	} else if (!dmaOn || ce9->patches->sleepRef || ce9->thumbPatches->sleepRef) {

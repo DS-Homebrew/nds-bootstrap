@@ -36,7 +36,6 @@
 
 #define b_gameOnFlashcard BIT(0)
 #define b_saveOnFlashcard BIT(1)
-#define b_extendedMemory BIT(2)
 #define b_ROMinRAM BIT(3)
 #define b_dsiMode BIT(4)
 #define b_dsiSD BIT(5)
@@ -143,7 +142,6 @@ int hookNdsRetailArm7(
 	u8 language,
 	u8 dsiMode, // SDK 5
 	u8 dsiSD,
-	u8 extendedMemory,
 	u8 ROMinRAM,
 	u8 consoleModel,
 	u8 romRead_LED,
@@ -350,9 +348,6 @@ int hookNdsRetailArm7(
 		}
 		if (saveOnFlashcard) {
 			ce7->valueBits |= b_saveOnFlashcard;
-		}
-		if (extendedMemory) {
-			ce7->valueBits |= b_extendedMemory;
 		}
 		if (ROMinRAM) {
 			ce7->valueBits |= b_ROMinRAM;

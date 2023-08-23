@@ -53,7 +53,6 @@ int hookNdsRetailArm7(
 	u8 language,
 	u8 dsiMode, // SDK5
 	u8 dsiSD,
-	u8 extendedMemory,
 	u8 ROMinRAM,
 	u8 consoleModel,
 	u8 romRead_LED,
@@ -71,7 +70,6 @@ int hookNdsRetailArm9(
 	u32 saveSize,
 	u8 saveOnFlashcard,
 	u32 cacheBlockSize,
-	u8 extendedMemory,
 	u8 ROMinRAM,
 	u8 dsiMode, // SDK5
 	u8 enableExceptionHandler,

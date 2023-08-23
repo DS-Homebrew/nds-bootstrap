@@ -67,7 +67,6 @@
 	.global dsiMode
 	.global valueBits2
 	.global donorSdkVer
-	.global extendedMemory
 	.global consoleModel
 	.global romRead_LED
 	.global dmaRomRead_LED
@@ -171,8 +170,6 @@ valueBits2:
 	.byte	0
 donorSdkVer:
 	.byte	0		@ donor SDK version
-extendedMemory:
-	.byte	0
 consoleModel:
 	.byte	0
 romRead_LED:

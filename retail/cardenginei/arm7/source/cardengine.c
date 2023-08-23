@@ -57,7 +57,6 @@
 
 #define gameOnFlashcard BIT(0)
 #define saveOnFlashcard BIT(1)
-#define extendedMemory BIT(2)
 #define ROMinRAM BIT(3)
 #define dsiMode BIT(4)
 #define b_dsiSD BIT(5)
@@ -182,7 +181,7 @@ static PERSONAL_DATA* personalData = (PERSONAL_DATA*)((u8*)NDS_HEADER_SDK5-0x180
 static tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER;
 static PERSONAL_DATA* personalData = (PERSONAL_DATA*)((u8*)NDS_HEADER-0x180);
 #endif
-static const char* romLocation = NULL;
+// static const char* romLocation = NULL;
 u32 currentSrlAddr = 0;
 
 void i2cIRQHandler(void);
@@ -346,15 +345,6 @@ static void initialize(void) {
 		personalData->language = language;
 	}
 
-	#ifdef TWLSDK
-	romLocation = (char*)ROM_SDK5_LOCATION;
-	#else
-	romLocation = (char*)((consoleModel > 0 && (valueBits & isSdk5)) ? ROM_SDK5_LOCATION : ROM_LOCATION);
-	if (valueBits & extendedMemory) {
-		romLocation = (char*)((moduleParams->sdk_version < 0x2008000) ? ROM_LOCATION_EXT_SDK2 : ROM_LOCATION_EXT);
-	}
-	#endif
-
 	if (!bootloaderCleared) {
 		toncset((u8*)0x06000000, 0, 0x40000);	// Clear bootloader
 		if (mainScreen) {
@@ -401,7 +391,7 @@ static module_params_t* getModuleParams(const tNDSHeader* ndsHeader) {
 void reset(void) {
 #ifndef TWLSDK
 	u32 resetParam = ((valueBits & isSdk5) ? RESET_PARAM_SDK5 : RESET_PARAM);
-	if ((valueBits & slowSoftReset) || (*(u32*)(resetParam+0xC) > 0 && (*(u32*)CARDENGINEI_ARM9_LOCATION == 0 || (valueBits & isSdk5))) || (valueBits & extendedMemory)) {
+	if ((valueBits & slowSoftReset) || (*(u32*)(resetParam+0xC) > 0 && (*(u32*)CARDENGINEI_ARM9_LOCATION == 0 || (valueBits & isSdk5)))) {
 		REG_MASTER_VOLUME = 0;
 		int oldIME = enterCriticalSection();
 		//driveInitialize();
@@ -482,7 +472,7 @@ void reset(void) {
 			ndmaCopyWordsAsynch(1, (u32*)0x022C0000, ndsHeader->arm7destination, ndsHeader->arm7binarySize);
 			*((u16*)(/*isSdk5(moduleParams) ? 0x02fffc40 :*/ 0x027ffc40)) = 2; // Boot Indicator (Cloneboot/Multiboot)
 			// tonccpy((u32*)0x027FFC40, (u32*)0x02344820, 0x40); // Multiboot info?
-		} else if (valueBits & ROMinRAM) {
+		} /* else if (valueBits & ROMinRAM) {
 			u32 newSrc = (u32)(romLocation-0x8000);
 			if (!(valueBits & cloneboot)) {
 				static u32 adjust = 0;
@@ -496,7 +486,7 @@ void reset(void) {
 			ndmaCopyWordsAsynch(0, (u8*)newSrc+ndsHeader->arm9romOffset, ndsHeader->arm9destination, ndsHeader->arm9binarySize);
 			ndmaCopyWordsAsynch(1, (u8*)newSrc+ndsHeader->arm7romOffset, ndsHeader->arm7destination, ndsHeader->arm7binarySize);
 			while (ndmaBusy(0));
-		} else {
+		} */ else {
 			fileRead((char*)ndsHeader, romFile, currentSrlAddr, 0x160);
 			fileRead((char*)ndsHeader->arm9destination, romFile, currentSrlAddr+ndsHeader->arm9romOffset, ndsHeader->arm9binarySize);
 			fileRead((char*)ndsHeader->arm7destination, romFile, currentSrlAddr+ndsHeader->arm7romOffset, ndsHeader->arm7binarySize);
@@ -530,11 +520,10 @@ void reset(void) {
 
 		extern u32 iUncompressedSize;
 
-		// if ((valueBits & extendedMemory) || (valueBits & dsiMode)) {
-			fileWrite((char*)ndsHeader->arm9destination, &pageFile, 0x14000, iUncompressedSize);
-			fileWrite((char*)ndsHeader->arm7destination, &pageFile, 0x2C0000, ndsHeader->arm7binarySize);
-			fileWrite((char*)&iUncompressedSize, &pageFile, 0x5FFFF0, sizeof(u32));
-			fileWrite((char*)&ndsHeader->arm7binarySize, &pageFile, 0x5FFFF4, sizeof(u32));
+		fileWrite((char*)ndsHeader->arm9destination, &pageFile, 0x14000, iUncompressedSize);
+		fileWrite((char*)ndsHeader->arm7destination, &pageFile, 0x2C0000, ndsHeader->arm7binarySize);
+		fileWrite((char*)&iUncompressedSize, &pageFile, 0x5FFFF0, sizeof(u32));
+		fileWrite((char*)&ndsHeader->arm7binarySize, &pageFile, 0x5FFFF4, sizeof(u32));
 		/* } else {
 			*(u32*)ARM9_DEC_SIZE_LOCATION = iUncompressedSize;
 			ndmaCopyWordsAsynch(0, ndsHeader->arm9destination, (char*)ndsHeader->arm9destination+0x400000, *(u32*)ARM9_DEC_SIZE_LOCATION);
@@ -542,7 +531,7 @@ void reset(void) {
 			while (ndmaBusy(0) || ndmaBusy(1));
 		} */
 		*(u32*)(resetParam+8) = 0;
-	} else /* if ((valueBits & extendedMemory) || (valueBits & dsiMode)) */ {
+	} else {
 		//driveInitialize();
 
 		u32 iUncompressedSize = 0;
@@ -2025,7 +2014,7 @@ bool cardRead(u32 dma, u32 src, void *dst, u32 len) {
 	dbg_hexa(len);
 	#endif	
 	
-	if (valueBits & ROMinRAM) {
+	/* if (valueBits & ROMinRAM) {
 		u32 newSrc = (u32)(romLocation-0x8000)+src;
 		if (!(valueBits & cloneboot)) {
 			newSrc = (u32)(romLocation-ndsHeader->arm9romOffset-ndsHeader->arm9binarySize)+src;
@@ -2036,7 +2025,7 @@ bool cardRead(u32 dma, u32 src, void *dst, u32 len) {
 		}
 		#endif
 		tonccpy(dst, (u8*)newSrc, len);
-	} else {
+	} else { */
 		while (readOngoing) { swiDelay(100); }
 		//driveInitialize();
 		cardReadLED(true, false);    // When a file is loading, turn on LED for card read indicator
@@ -2047,7 +2036,7 @@ bool cardRead(u32 dma, u32 src, void *dst, u32 len) {
 		fileRead(dst, romFile, src, len);
 		//ndmaUsed = true;
 		cardReadLED(false, false);    // After loading is done, turn off LED for card read indicator
-	}
+	// }
 	
 	return true;
 }

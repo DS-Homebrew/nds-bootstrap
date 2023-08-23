@@ -216,7 +216,7 @@ int hookNdsRetailArm7(
 	extern bool maxHeapOpen;
 
 	u32 cheatEngineAddr = CHEAT_ENGINE_LOCATION_B4DS;
-	if (!extendedMemory2 && strncmp(romTid, "CLJ", 3) == 0) { // Mario & Luigi: Bowser's Inside Story
+	if (!extendedMemory && strncmp(romTid, "CLJ", 3) == 0) { // Mario & Luigi: Bowser's Inside Story
 		cheatEngineAddr = 0x02002000;
 	}
 

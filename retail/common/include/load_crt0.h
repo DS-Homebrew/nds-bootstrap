@@ -51,7 +51,6 @@ typedef struct loadCrt0 {
     u8 dsiMode; // SDK 5
     u8 valueBits2;
     u8 donorSdkVer;
-    u8 extendedMemory;
     u8 consoleModel;
     u8 romRead_LED;
     u8 dmaRomRead_LED;

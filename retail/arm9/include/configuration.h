@@ -51,7 +51,6 @@ typedef struct configuration {
 	u8 donorSdkVer;
 	u8 patchMpuRegion;
 	u32 patchMpuSize;
-	int extendedMemory;
 	u8 consoleModel;
 	//int colorMode;
 	u8 romRead_LED;

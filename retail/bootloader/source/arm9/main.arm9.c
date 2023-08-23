@@ -46,7 +46,7 @@ extern void arm9code(u32* addr);
 
 tNDSHeader* ndsHeader = NULL;
 bool arm9_boostVram = false;
-bool extendedMemory2 = false;
+bool extendedMemory = false;
 bool dsDebugRam = false;
 volatile bool esrbScreenPrepared = false;
 volatile bool esrbScreenDisplayed = false;
@@ -132,7 +132,7 @@ void __attribute__((target("arm"))) arm9_main(void) {
 	*(vu32*)(0x02000000) = 0x314D454D;
 	*(vu32*)(0x02400000) = 0x324D454D;
 	if ((*(vu32*)(0x02000000) == 0x314D454D) && (*(vu32*)(0x02400000) == 0x324D454D)) {
-		extendedMemory2 = true;
+		extendedMemory = true;
 		dsDebugRam = ((vu8)((vu32)REG_SCFG_EXT+3) == 0);
 	}
 

@@ -41,11 +41,17 @@
 #define softResetMb BIT(13)
 #define cloneboot BIT(14)
 
+#include "my_fat.h"
+
 extern cardengineArm9* volatile ce9;
 
 extern vu32* volatile sharedAddr;
 
 extern tNDSHeader* ndsHeader;
+extern aFile* romFile;
+extern aFile* savFile;
+extern aFile* apFixOverlaysFile;
+extern u32* cacheAddressTable;
 
 extern bool flagsSet;
 extern bool igmReset;
@@ -126,6 +132,14 @@ void initialize(void) {
 		if (ce9->valueBits & isSdk5) {
 			sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS_SDK5;
 			ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
+			if (ndsHeader->unitCode > 0) {
+				romFile = (aFile*)ROM_FILE_LOCATION_MAINMEM5;
+				savFile = (aFile*)SAV_FILE_LOCATION_MAINMEM5;
+				apFixOverlaysFile = (aFile*)OVL_FILE_LOCATION_MAINMEM5;
+				#ifndef DLDI
+				cacheAddressTable = (u32*)CACHE_ADDRESS_TABLE_LOCATION_TWLSDK;
+				#endif
+			}
 		}
 		initialized = true;
 	}

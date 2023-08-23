@@ -272,7 +272,7 @@ static void resetMemory_ARM7(void) {
 	toncset((u32*)0x023C0000, 0, 0x20000);
 	toncset((u32*)0x023F0000, 0, 0xD000);
 	toncset((u32*)0x023FF000, 0, 0x1000);
-	if (extendedMemory2) {
+	if (extendedMemory) {
 		toncset((u32*)0x02400000, 0, 0x3FC000);
 		toncset((u32*)0x027FF000, 0, dsDebugRam ? 0x1000 : 0x801000);
 	}
@@ -595,7 +595,7 @@ static bool isROMLoadableInRAM(const tDSiHeader* dsiHeader, const tNDSHeader* nd
 				romLocation += 0x800000;
 			}
 		}
-	} else if (!extendedMemory2) {
+	} else if (!extendedMemory) {
 		s32 romSizeLimitChange = 0;
 		if (strncmp(romTid, "KD3", 3) == 0 // Jinia Supasonaru: Eiwa Rakubiki Jiten
 		 || strncmp(romTid, "KD5", 3) == 0 // Jinia Supasonaru: Waei Rakubiki Jiten
@@ -633,7 +633,7 @@ static bool isROMLoadableInRAM(const tDSiHeader* dsiHeader, const tNDSHeader* nd
 	if ((strncmp(romTid, "KD3", 3) == 0 || strncmp(romTid, "KD4", 3) == 0 || strncmp(romTid, "KD5", 3) == 0) && s2FlashcardId == 0x5A45) {
 		return false;
 	}
-	if (extendedMemory2 && !dsDebugRam) {
+	if (extendedMemory && !dsDebugRam) {
 		*(vu32*)(0x0DFFFE0C) = 0x4253444E;		// Check for 32MB of RAM
 		isDevConsole = (*(vu32*)(0x0DFFFE0C) == 0x4253444E);
 
@@ -648,7 +648,7 @@ static bool isROMLoadableInRAM(const tDSiHeader* dsiHeader, const tNDSHeader* nd
 		}
 	}
 
-	if (romSizeLimit <= 0 || (strncmp(romTid, "UBR", 3) == 0 && extendedMemory2 && !dsDebugRam && !isDevConsole)) {
+	if (romSizeLimit <= 0 || (strncmp(romTid, "UBR", 3) == 0 && extendedMemory && !dsDebugRam && !isDevConsole)) {
 		return false;
 	}
 
@@ -670,7 +670,7 @@ static bool isROMLoadableInRAM(const tDSiHeader* dsiHeader, const tNDSHeader* nd
 			romSize = (baseRomSize - ndsHeader->arm9binarySize);
 			romSize -= ndsHeader->arm9romOffset;
 		}
-		res = ((expansionPakFound || (extendedMemory2 && !dsDebugRam)) && (ndsHeader->unitCode == 3 ? (usesCloneboot ? ((u32)dsiHeader->arm9iromOffset-0x8000) : ((u32)dsiHeader->arm9iromOffset-ndsHeader->arm9romOffset-ndsHeader->arm9binarySize))+ioverlaysSize : romSize) <= romSizeLimit);
+		res = ((expansionPakFound || (extendedMemory && !dsDebugRam)) && (ndsHeader->unitCode == 3 ? (usesCloneboot ? ((u32)dsiHeader->arm9iromOffset-0x8000) : ((u32)dsiHeader->arm9iromOffset-ndsHeader->arm9romOffset-ndsHeader->arm9binarySize))+ioverlaysSize : romSize) <= romSizeLimit);
 		if (res) {
 			dbg_printf(expansionPakFound ? "ROM is loadable into Slot-2 RAM\n" : "ROM is loadable into RAM\n");
 		}
@@ -1222,7 +1222,7 @@ int arm7_main(void) {
 
 	bool dsBrowser = (strcmp(romTid, "UBRP") == 0);
 
-	if (dsBrowser && extendedMemory2 && !dsDebugRam) {
+	if (dsBrowser && extendedMemory && !dsDebugRam) {
 		toncset((char*)0x0C400000, 0xFF, 0xC0);
 		toncset((u8*)0x0C4000B2, 0, 3);
 		toncset((u8*)0x0C4000B5, 0x24, 3);
@@ -1256,7 +1256,7 @@ int arm7_main(void) {
 	tonccpy((u8*)CARDENGINE_ARM7_LOCATION, (u8*)CARDENGINE_ARM7_LOCATION_BUFFERED, 0x1000);
 	toncset((u8*)CARDENGINE_ARM7_LOCATION_BUFFERED, 0, 0x1000);
 
-	if (!dldiPatchBinary((data_t*)ce9Location, 0x3800, (data_t*)(extendedMemory2 ? 0x027FC000 : ((accessControl & BIT(4)) && !ce9Alt) ? 0x023FC000 : 0x023FD000))) {
+	if (!dldiPatchBinary((data_t*)ce9Location, 0x3800, (data_t*)(extendedMemory ? 0x027FC000 : ((accessControl & BIT(4)) && !ce9Alt) ? 0x023FC000 : 0x023FD000))) {
 		// nocashMessage("ce9 DLDI patch failed");
 		dbg_printf("ce9 DLDI patch failed\n");
 		errorOutput();
@@ -1280,7 +1280,7 @@ int arm7_main(void) {
 	} else if (expansionPakFound && !dsBrowser) {
 		fatTableAddr = 0x09780000;
 		fatTableSize = 0x80000;
-	} else if (extendedMemory2) {
+	} else if (extendedMemory) {
 		if (ndsHeader->unitCode > 0 && (u32)ndsHeader->arm9destination >= 0x02004000 && ((accessControl & BIT(4)) || arm7mbk == 0x080037C0)) {
 			fatTableAddr = 0x02000000;
 			fatTableSize = 0x4000;
@@ -1493,7 +1493,7 @@ int arm7_main(void) {
 		errorOutput();
 	}
 
-	bool overlaysInRam = (expansionPakFound || (extendedMemory2 && !dsDebugRam && !dsBrowser));
+	bool overlaysInRam = (expansionPakFound || (extendedMemory && !dsDebugRam && !dsBrowser));
 	if (overlaysInRam) {
 		if (ROMinRAM) {
 			loadROMintoRAM(ndsHeader, moduleParams, &romFile, usesCloneboot);
@@ -1535,7 +1535,7 @@ int arm7_main(void) {
 		manualCluster,
 		sharedFontCluster,
 		expansionPakFound,
-		extendedMemory2,
+		extendedMemory,
 		ROMinRAM,
 		dsDebugRam,
 		supportsExceptionHandler(romTid),
@@ -1644,7 +1644,7 @@ int arm7_main(void) {
 	if (0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_DOWN | KEY_A))) {		// Dump RAM
 		aFile ramDumpFile;
 		getFileFromCluster(&ramDumpFile, ramDumpCluster);
-		if (extendedMemory2) {
+		if (extendedMemory) {
 			fileWrite((char*)0x02000000, &ramDumpFile, 0, 0x7E0000);
 			fileWrite((char*)(isSdk5(moduleParams) ? 0x02FE0000 : 0x027E0000), &ramDumpFile, 0x7E0000, 0x20000);
 		} else {

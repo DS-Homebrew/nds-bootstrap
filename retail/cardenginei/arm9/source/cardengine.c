@@ -79,6 +79,7 @@
 
 extern cardengineArm9* volatile ce9;
 
+
 extern void ndsCodeStart(u32* addr);
 extern u32 getDtcmBase(void);
 
@@ -113,6 +114,7 @@ aFile* apFixOverlaysFile = (aFile*)OVL_FILE_LOCATION_MAINMEM;
 u32 cacheDescriptor[dev_CACHE_SLOTS_16KB_TWLSDK];
 int cacheCounter[dev_CACHE_SLOTS_16KB_TWLSDK];
 #else
+u32* cacheAddressTable = (u32*)CACHE_ADDRESS_TABLE_LOCATION;
 u32 cacheDescriptor[dev_CACHE_SLOTS_16KB];
 int cacheCounter[dev_CACHE_SLOTS_16KB];
 #endif
@@ -220,8 +222,11 @@ int getSlotForSector(u32 sector) {
 }*/
 
 vu8* getCacheAddress(int slot) {
-	//return (vu32*)(ce9->cacheAddress + slot*ce9->cacheBlockSize);
+	#ifdef TWLSDK
 	return (vu8*)(ce9->cacheAddress + slot*ce9->cacheBlockSize);
+	#else
+	return (vu8*)(cacheAddressTable[slot]);
+	#endif
 }
 
 void updateDescriptor(int slot, u32 sector) {
@@ -478,7 +483,26 @@ static inline void cardReadRAM(u8* dst, u32 src, u32 len/*, int romPartNo*/) {
 	}
 	tonccpy(dst, (u8*)newSrc, len);
 	#else
-	tonccpy(dst, (u8*)ce9->romLocation/*[romPartNo]*/+src, len);
+	// tonccpy(dst, (u8*)ce9->romLocation/*[romPartNo]*/+src, len);
+	u32 len2 = 0;
+	for (int i = 0; i < ce9->romMapLines; i++) {
+		if (!(src >= ce9->romMap[i][0] && (i == ce9->romMapLines-1 || src < ce9->romMap[i+1][0])))
+			continue;
+
+		u32 newSrc = (ce9->romMap[i][1]-ce9->romMap[i][0])+src;
+		if (newSrc+len > ce9->romMap[i][2]) {
+			do {
+				len--;
+				len2++;
+			} while (newSrc+len != ce9->romMap[i][2]);
+			tonccpy(dst, (u8*)newSrc, len);
+			src += len;
+			dst += len;
+		} else {
+			tonccpy(dst, (u8*)newSrc, len2==0 ? len : len2);
+			break;
+		}
+	}
 	#endif
 }
 

@@ -72,16 +72,16 @@ typedef struct cardengineArm9ThumbPatches {
 // ARM9 cardengine
 //
 typedef struct cardengineArm9 {
-    u32 ce9;
-    cardengineArm9Patches* patches;
-    cardengineArm9ThumbPatches* thumbPatches;
-    u32 intr_vblank_orig_return;
-    u32 intr_ipc_orig_return;
-    u32 fileCluster;
-    u32 saveCluster;
-    u32 saveSize;
-    u32 cardStruct0;
-    u32 cacheStruct;
+	u32 ce9;
+	cardengineArm9Patches* patches;
+	cardengineArm9ThumbPatches* thumbPatches;
+	u32 intr_vblank_orig_return;
+	u32 intr_ipc_orig_return;
+	u32 fileCluster;
+	u32 saveCluster;
+	u32 saveSize;
+	u32 cardStruct0;
+	u32 cacheStruct;
 	u32 valueBits;
 	/*
 		0: saveOnFlashcard
@@ -100,17 +100,19 @@ typedef struct cardengineArm9 {
 		13: softResetMb
 		14: cloneboot
 	*/
-    s32 mainScreen;
-    u32 overlaysSize;
+	s32 mainScreen;
+	u32 overlaysSize;
 	u32 consoleModel;
-    u32* irqTable;
-	// Below not used for ROM in RAM ce9 binary
-    u32 romLocation;
-    u32 cacheAddress;
-    u16 cacheSlots;
-    u16 cacheBlockSize;
-    u32 romPartSrc;
-    u32 romPartSize;
+	u32* irqTable;
+	// Below not used for DSiWare ce9 binary
+	u32 romLocation;
+	u32 cacheAddress;
+	u16 cacheSlots;
+	u16 cacheBlockSize;
+	u32 romPartSrc;
+	u32 romPartSize;
+	u32 romMapLines;
+	u32 romMap[4][3]; // 0: ROM part start, 1: ROM part start in RAM, 2: ROM part end in RAM
 } cardengineArm9;
 
 #else

@@ -390,7 +390,7 @@ static bool patchCardIrqEnable(cardengineArm9* ce9, const tNDSHeader* ndsHeader,
 }
 
 static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 patchMpuRegion, u32 patchMpuSize) {
-	if (!extendedMemory2 || patchMpuRegion == 2 || ndsHeader->unitCode > 0) {
+	if (!extendedMemory || patchMpuRegion == 2 || ndsHeader->unitCode > 0) {
 		return;
 	}
 
@@ -520,7 +520,7 @@ static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 }
 
 static void patchMpu2(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
-	if (((moduleParams->sdk_version < 0x2008000) && !extendedMemory2) || moduleParams->sdk_version > 0x5000000) {
+	if (((moduleParams->sdk_version < 0x2008000) && !extendedMemory) || moduleParams->sdk_version > 0x5000000) {
 		return;
 	}
 
@@ -636,7 +636,7 @@ void patchMpuFlagsSet(const tNDSHeader* ndsHeader, const module_params_t* module
 
 void patchMpuChange(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	extern u32 arm7mbk;
-	if (!extendedMemory2 || moduleParams->sdk_version < 0x5000000 || arm7mbk == 0x080037C0) {
+	if (!extendedMemory || moduleParams->sdk_version < 0x5000000 || arm7mbk == 0x080037C0) {
 		return;
 	}
 
@@ -732,7 +732,7 @@ void patchHiHeapPointer(cardengineArm9* ce9, const module_params_t* moduleParams
 	const bool nandAccess = (accessControl & BIT(4)); // isDSiWare
 	const bool ce9NotInHeap = (ce9Alt || (u32)ce9 == CARDENGINE_ARM9_LOCATION_DLDI_START);
 
-	if ((!nandAccess && extendedMemory2)
+	if ((!nandAccess && extendedMemory)
 	|| moduleParams->sdk_version < 0x2008000
 	|| (ce9NotInHeap && !ce9AltLargeTable && cheatSizeTotal <= 4)
 	|| strncmp(romTid, "CLJ", 3) == 0 // Mario & Luigi: Bowser's Inside Story
@@ -765,7 +765,7 @@ void patchHiHeapPointer(cardengineArm9* ce9, const module_params_t* moduleParams
 	dbg_hexa((u32)oldheapPointer);
     dbg_printf("\n\n");
 
-	if (nandAccess && extendedMemory2) {
+	if (nandAccess && extendedMemory) {
 		*heapPointer = CARDENGINE_ARM9_LOCATION_DLDI_EXTMEM;
 	} else if (ce9NotInHeap && !ce9AltLargeTable) {
 		*heapPointer = CHEAT_ENGINE_LOCATION_B4DS-0x400000;
@@ -1890,7 +1890,7 @@ static void patchCardReadPdash(cardengineArm9* ce9, const tNDSHeader* ndsHeader)
 }
 
 static void operaRamPatch(void) {
-	if (dsDebugRam || !extendedMemory2) {
+	if (dsDebugRam || !extendedMemory) {
 		return;
 	}
 
@@ -1964,8 +1964,8 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 		extern u32 accessControl;
 
 		if (((accessControl & BIT(4))
-		   || (strncmp(romTid, "DME", 3) == 0 && extendedMemory2)
-		   || (strncmp(romTid, "DMD", 3) == 0 && extendedMemory2)
+		   || (strncmp(romTid, "DME", 3) == 0 && extendedMemory)
+		   || (strncmp(romTid, "DMD", 3) == 0 && extendedMemory)
 		   || strncmp(romTid, "DMP", 3) == 0
 		   || strncmp(romTid, "DHS", 3) == 0
 		)	&& arm7mbk == 0x080037C0 && donorFileCluster != CLUSTER_FREE) {
