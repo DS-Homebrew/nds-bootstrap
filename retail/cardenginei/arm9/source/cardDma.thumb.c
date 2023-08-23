@@ -20,6 +20,7 @@
 #include <nds/ndstypes.h>
 #include <nds/arm9/exceptions.h>
 #include <nds/arm9/cache.h>
+#include <nds/bios.h>
 #include <nds/system.h>
 #include <nds/dma.h>
 #include <nds/interrupts.h>
@@ -68,9 +69,17 @@ extern void disableIrqMask(u32 mask);
 bool isDma = false;
 bool dmaOn = true;
 bool dmaDirectRead = false;
+#ifndef TWLSDK
+static bool dataSplit = false;
+#endif
 
 void endCardReadDma() {
-	if (dmaDirectRead && dmaOn && (ndmaBusy(0) || ndmaBusy(1))) {
+#ifdef TWLSDK
+	if (dmaDirectRead && dmaOn && (ndmaBusy(0)))
+#else
+	if (dmaDirectRead && dmaOn && (ndmaBusy(0) || (dataSplit && ndmaBusy(1))))
+#endif
+	{
 		IPC_SendSync(0x3);
 		return;
 	}
@@ -449,6 +458,9 @@ void cardSetDma(u32 * params) {
 	u8* dst = ((ce9->valueBits & isSdk5) ? (u8*)(dmaParams[4]) : (u8*)(cardStruct[1]));
 	u32 len = ((ce9->valueBits & isSdk5) ? dmaParams[5] : cardStruct[2]);
 
+	#ifndef TWLSDK
+	dataSplit = false;
+	#endif
 	bool romPart = false;
 	//int romPartNo = 0;
 	if (!(ce9->valueBits & ROMinRAM)) {
@@ -489,6 +501,9 @@ void cardSetDma(u32 * params) {
 				ndmaCopyWordsAsynch(1, (u8*)newSrc, dst, len);
 				src += len;
 				dst += len;
+				#ifndef TWLSDK
+				dataSplit = true;
+				#endif
 			} else {
 				ndmaCopyWordsAsynch(0, (u8*)newSrc, dst, len2==0 ? len : len2);
 				break;
