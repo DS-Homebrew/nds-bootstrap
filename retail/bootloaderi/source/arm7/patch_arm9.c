@@ -1258,7 +1258,7 @@ static void patchWaitSysCycles(const cardengineArm9* ce9, const tNDSHeader* ndsH
 			}
 
 			if (dsiModeConfirmed) {	
-				*(u32*)((u32)INGAME_MENU_LOCATION + IGM_TEXT_SIZE_ALIGNED + 4) = (u32)offset;
+				*(u32*)0x027FEFF4 = (u32)offset;
 			}
 		}
 
