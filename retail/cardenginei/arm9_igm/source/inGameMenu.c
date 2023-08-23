@@ -540,7 +540,7 @@ static void optionsMenu(s32 *mainScreen, u32 consoleModel) {
 				}
 				case OPTIONS_CLOCK_SPEED:
 					REG_SCFG_CLK ^= 1;
-					u32* waitSysCyclesLoc = (u32*)(*waitSysCyclesLocPtr);
+					u32* waitSysCyclesLoc = (u32*)(waitSysCyclesLocPtr ? *waitSysCyclesLocPtr : 0);
 					if (waitSysCyclesLoc) {
 						if (waitSysCyclesLoc[0] == 0xE92D4008) {
 							waitSysCyclesLoc[1] = (REG_SCFG_CLK & BIT(1)) ? 0xE1A00100 : 0xE1A00080;
