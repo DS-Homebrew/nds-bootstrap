@@ -776,7 +776,7 @@ void patchHiHeapPointer(cardengineArm9* ce9, const module_params_t* moduleParams
     dbg_printf("new hi heap value: ");
 	dbg_hexa((u32)*heapPointer);
     dbg_printf("\n\n");
-    dbg_printf("Hi Heap Shrink Sucessfull\n\n");
+    dbg_printf(!(nandAccess && extendedMemory) ? "Hi Heap Shrink Successful\n\n" : "Hi Heap Grow Successful\n\n");
 }
 
 u32 relocateBssPart(const tNDSHeader* ndsHeader, u32 bssEnd, u32 bssPartStart, u32 bssPartEnd, u32 newPartStart) {
