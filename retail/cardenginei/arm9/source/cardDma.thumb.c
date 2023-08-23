@@ -70,7 +70,7 @@ bool dmaOn = true;
 bool dmaDirectRead = false;
 
 void endCardReadDma() {
-	if (dmaDirectRead && dmaOn && ndmaBusy(0)) {
+	if (dmaDirectRead && dmaOn && (ndmaBusy(0) || ndmaBusy(1))) {
 		IPC_SendSync(0x3);
 		return;
 	}
@@ -486,7 +486,7 @@ void cardSetDma(u32 * params) {
 					len--;
 					len2++;
 				} while (newSrc+len != ce9->romMap[i][2]);
-				tonccpy(dst, (u8*)newSrc, len);
+				ndmaCopyWordsAsynch(1, (u8*)newSrc, dst, len);
 				src += len;
 				dst += len;
 			} else {
