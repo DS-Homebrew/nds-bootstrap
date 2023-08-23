@@ -1609,7 +1609,7 @@ int arm7_main(void) {
 		newArm7binarySize = ndsHeader->arm7binarySize;
 		newArm7ibinarySize = __DSiHeader->arm7ibinarySize;
 
-		patchHiHeapPointer(moduleParams, ndsHeader, false);
+		patchHiHeapPointer(moduleParams, ndsHeader);
 
 		extern bool a9PatchCardIrqEnable(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
 		a9PatchCardIrqEnable((cardengineArm9*)ce9Location, ndsHeader, moduleParams);
@@ -1893,7 +1893,6 @@ int arm7_main(void) {
 				ce9size = 0x5000;
 				tonccpy((u32*)ce9Location, (u32*)CARDENGINEI_ARM9_SDK5_BUFFERED_LOCATION, ce9size);
 			}
-			patchHiHeapPointer(moduleParams, ndsHeader, ROMinRAM);
 		} else if (gameOnFlashcard) {
 			ce9Location = CARDENGINEI_ARM9_LOCATION_DSI_WRAM;
 			ce9size = 0x7000;
@@ -1907,6 +1906,7 @@ int arm7_main(void) {
 			ce9size = 0x5000;
 			tonccpy((u32*)ce9Location, (u32*)((!dsiWramAccess && moduleParams->sdk_version < 0x2008000) ? CARDENGINEI_ARM9_BUFFERED_LOCATION2 : CARDENGINEI_ARM9_BUFFERED_LOCATION), ce9size);
 		}
+		patchHiHeapPointer(moduleParams, ndsHeader);
 
 		toncset((u32*)CARDENGINEI_ARM9_BUFFERED_LOCATION, 0, 0x10000);
 		toncset((u32*)CARDENGINEI_ARM7_BUFFERED_LOCATION, 0, 0x11C00);

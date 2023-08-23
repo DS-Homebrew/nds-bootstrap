@@ -1328,12 +1328,12 @@ static void patchWaitSysCycles(const cardengineArm9* ce9, const tNDSHeader* ndsH
     return oldheapPointer;
 }*/
 
-u32* patchHiHeapPointer(const module_params_t* moduleParams, const tNDSHeader* ndsHeader, bool ROMinRAM) {
-	bool ROMsupportsDsiMode = (ndsHeader->unitCode>0 && dsiModeConfirmed);
-	if (!ROMsupportsDsiMode) {
+u32* patchHiHeapPointer(const module_params_t* moduleParams, const tNDSHeader* ndsHeader) {
+	if (moduleParams->sdk_version < 0x2008000 || !dsiModeConfirmed) {
 		return NULL;
 	}
 
+	bool ROMsupportsDsiMode = (ndsHeader->unitCode > 0 && dsiModeConfirmed);
 	u32* heapPointer = patchOffsetCache.heapPointerOffset;
 	if (*patchOffsetCache.heapPointerOffset != (ROMsupportsDsiMode ? 0x13A007BE : 0x023E0000)
 	 && *patchOffsetCache.heapPointerOffset != (ROMsupportsDsiMode ? 0xE3A007BE : 0x023E0000)
@@ -1360,7 +1360,7 @@ u32* patchHiHeapPointer(const module_params_t* moduleParams, const tNDSHeader* n
 	dbg_hexa((u32)oldheapPointer);
     dbg_printf("\n\n");
 
-	//if (ROMsupportsDsiMode) {
+	if (ROMsupportsDsiMode) {
 		if (!dsiWramAccess) {
 			// DSi WRAM not mapped to ARM9
 			// DSi mode title loaded on DSi/3DS
@@ -1389,14 +1389,14 @@ u32* patchHiHeapPointer(const module_params_t* moduleParams, const tNDSHeader* n
 					break;
 			}
 		}
-	/*} else {
-		*heapPointer = (u32)CARDENGINEI_ARM9_CACHED_LOCATION2_ROMINRAM;
-	}*/
+	} else {
+		*heapPointer = 0x027C0000;
+	}
 
     dbg_printf("new hi heap value: ");
 	dbg_hexa((u32)*heapPointer);
     dbg_printf("\n\n");
-    dbg_printf("Hi Heap Shrink Sucessfull\n\n");
+    dbg_printf(ROMsupportsDsiMode ? "Hi Heap Shrink Successful\n\n" : "Hi Heap Grow Successful\n\n");
 
     return (u32*)*heapPointer;
 }
