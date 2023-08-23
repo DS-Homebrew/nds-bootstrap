@@ -364,7 +364,7 @@ int hookNdsRetailArm7(
 		if (hiyaCfwFound) {
 			ce7->valueBits |= b_hiyaCfwFound;
 		}
-		if (strncmp(romTid, "UBR", 3) == 0 || iUncompressedSize > 0x280000) {
+		if (strncmp(romTid, "UBR", 3) == 0 || iUncompressedSize > 0x26C000) {
 			ce7->valueBits |= b_slowSoftReset;
 		}
 		if (cardReadDMA) {

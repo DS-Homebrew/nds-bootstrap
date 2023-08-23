@@ -402,7 +402,7 @@ int hookNdsRetailArm9(
 		if (strncmp(romTid, "IPK", 3) == 0 || strncmp(romTid, "IPG", 3) == 0) {
 			ce9->valueBits |= b_cardReadFix;
 		}
-		if (strncmp(romTid, "UBR", 3) == 0 || iUncompressedSize > 0x280000) {
+		if (strncmp(romTid, "UBR", 3) == 0 || iUncompressedSize > 0x26C000) {
 			ce9->valueBits |= b_slowSoftReset;
 		}
 
