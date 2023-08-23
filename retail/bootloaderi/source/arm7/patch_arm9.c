@@ -1329,7 +1329,7 @@ static void patchWaitSysCycles(const cardengineArm9* ce9, const tNDSHeader* ndsH
 }*/
 
 u32* patchHiHeapPointer(const module_params_t* moduleParams, const tNDSHeader* ndsHeader) {
-	if (moduleParams->sdk_version < 0x2008000 || !dsiModeConfirmed) {
+	if (moduleParams->sdk_version < 0x2008000 || !dsiModeConfirmed || strncmp(ndsHeader->gameCode, "UBR", 3) == 0) {
 		return NULL;
 	}
 
@@ -2375,16 +2375,16 @@ static void operaRamPatch(void) {
 	extern u8 consoleModel;
 
 	// Opera RAM patch (ARM9)
-	*(u32*)0x02003D48 = 0xC400000;
-	*(u32*)0x02003D4C = 0xC400004;
+	*(u32*)0x02003D48 = 0xC3E0000;
+	*(u32*)0x02003D4C = 0xC3E0004;
 
-	*(u32*)0x02010FF0 = 0xC400000;
-	*(u32*)0x02010FF4 = 0xC4000CE;
+	*(u32*)0x02010FF0 = 0xC3E0000;
+	*(u32*)0x02010FF4 = 0xC3E00CE;
 
-	*(u32*)0x020112AC = 0xC400080;
+	*(u32*)0x020112AC = 0xC3E0080;
 
-	*(u32*)0x020402BC = 0xC4000C2;
-	*(u32*)0x020402C0 = 0xC4000C0;
+	*(u32*)0x020402BC = 0xC3E00C2;
+	*(u32*)0x020402C0 = 0xC3E00C0;
 	if (consoleModel > 0) {
 		*(u32*)0x020402CC = 0xD7FFFFE;
 		*(u32*)0x020402D0 = 0xD000000;

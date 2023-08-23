@@ -165,7 +165,9 @@ void configureRomMap(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const u32
 	ce9->romLocation = romLocation;
 	ce9->romLocation -= romStart;
 
-	if (ndsHeader->unitCode > 0 && dsiMode) {
+	const bool dsBrowser = (strncmp(ndsHeader->gameCode, "UBR", 3) == 0);
+
+	if ((ndsHeader->unitCode > 0 && dsiMode) || (consoleModel == 0 && dsBrowser)) {
 		// ROM map is not used for TWL games in DSi mode
 		return;
 	}
@@ -176,7 +178,7 @@ void configureRomMap(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const u32
 	romMap[0][0] = romStart;
 	romMap[0][1] = romLocation;
 
-	if (dsiMode) {
+	if (dsiMode || dsBrowser) {
 		romMapLines = 1;
 
 		if (ce9->valueBits & b_isSdk5) {
@@ -331,9 +333,9 @@ int hookNdsRetailArm9(
 		} else {
 			if (strncmp(romTid, "UBR", 3) == 0) {
 				runOverlayCheck = false;
-				ce9->romLocation = CACHE_ADRESS_START_low;
-				ce9->cacheAddress = ce9->romLocation;
-				ce9->cacheSlots = retail_CACHE_ADRESS_SIZE_low/cacheBlockSize;
+				ce9->cacheAddress = CACHE_ADRESS_START;
+				ce9->romLocation = ce9->romLocation;
+				ce9->cacheSlots = retail_CACHE_ADRESS_SIZE_BROWSER/cacheBlockSize;
 			} else {
 				ce9->cacheAddress = (dsiMode ? CACHE_ADRESS_START_DSIMODE : CACHE_ADRESS_START);
 				ce9->romLocation = ce9->romLocation;

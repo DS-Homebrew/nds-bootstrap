@@ -478,10 +478,10 @@ static void patchSdCardReset(const tNDSHeader* ndsHeader, const module_params_t*
 
 static void operaRamPatch(void) {
 	// Opera RAM patch (ARM7)
-	*(u32*)0x0238C7BC = 0xC400000;
-	*(u32*)0x0238C7C0 = 0xC4000CE;
+	*(u32*)0x0238C7BC = 0xC3E0000;
+	*(u32*)0x0238C7C0 = 0xC3E00CE;
 
-	//*(u32*)0x0238C950 = 0xC400000;
+	//*(u32*)0x0238C950 = 0xC3E0000;
 }
 
 extern void rsetA7Cache(void);

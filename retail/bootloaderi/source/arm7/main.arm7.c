@@ -731,6 +731,9 @@ static module_params_t* loadModuleParams(const tNDSHeader* ndsHeader, bool* foun
 }
 
 u32 getRomLocation(const tNDSHeader* ndsHeader, const bool isSdk5) {
+	if (strncmp(ndsHeader->gameCode, "UBR", 3) == 0) {
+		return ROM_LOCATION_DSIMODE;
+	}
 	if (ndsHeader->unitCode > 0 && dsiModeConfirmed) {
 		return ROM_LOCATION_TWLSDK;
 	}
@@ -1746,13 +1749,13 @@ int arm7_main(void) {
 	 //}
 	} else {
 		if (strncmp(romTid, "UBR", 3) == 0) {
-			toncset((char*)0x0C400000, 0xFF, 0xC0);
-			toncset((u8*)0x0C4000B2, 0, 3);
-			toncset((u8*)0x0C4000B5, 0x24, 3);
-			*(u16*)0x0C4000BE = 0x7FFF;
-			toncset((char*)0x0C4000C0, 0, 0xE);
-			*(u16*)0x0C4000CE = 0x7FFF;
-			toncset((char*)0x0C4000D0, 0, 0x130);
+			toncset((char*)0x0C3E0000, 0xFF, 0xC0);
+			toncset((u8*)0x0C3E00B2, 0, 3);
+			toncset((u8*)0x0C3E00B5, 0x24, 3);
+			*(u16*)0x0C3E00BE = 0x7FFF;
+			toncset((char*)0x0C3E00C0, 0, 0xE);
+			*(u16*)0x0C3E00CE = 0x7FFF;
+			toncset((char*)0x0C3E00D0, 0, 0x130);
 		} /*else // GBA file
 		if (!dsiModeConfirmed && !isSdk5(moduleParams)) {
 			aFile* gbaFile = (aFile*)(dsiEnhancedMbk ? GBA_FILE_LOCATION_ALT : GBA_FILE_LOCATION);
