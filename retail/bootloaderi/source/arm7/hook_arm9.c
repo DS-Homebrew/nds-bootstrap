@@ -418,7 +418,7 @@ int hookNdsRetailArm9(
 					} else {
 						if (addr == 0x0C7FC000) {
 							addr += 0x4000;
-						} else if (ce9->cacheAddress == 0x0CFE0000) {
+						} else if (addr == 0x0CFE0000) {
 							addr += 0x20000;
 						}
 					}
