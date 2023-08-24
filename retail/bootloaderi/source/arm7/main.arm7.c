@@ -1390,14 +1390,14 @@ int arm7_main(void) {
 		extern u32 clusterCache;
 		if ((u32)dsiHeaderTemp.arm7idestination > 0x02E80000) dsiHeaderTemp.arm7idestination = (u32*)0x02E80000;
 		if (ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr) && (gameOnFlashcard || !isDSiWare)) {
-			if (consoleModel > 0) {
+			/* if (consoleModel > 0) {
 				tonccpy((char*)0x0DF80000, (char*)0x02700000, 0x80000);	// Move FAT table cache to debug RAM
 				romFile->fatTableCache = (u32*)((u32)romFile->fatTableCache+0xB880000);
 				savFile->fatTableCache = (u32*)((u32)savFile->fatTableCache+0xB880000);
 				lastClusterCacheUsed = (u32*)((u32)lastClusterCacheUsed+0xB880000);
 				clusterCache += 0xB880000;
 				toncset((char*)0x02700000, 0, 0x80000);
-			} else {
+			} else { */
 				u32 add = 0x858000; // 0x02F58000
 				tonccpy((char*)0x02700000+add, (char*)0x02700000, 0x10000);	// Move FAT table cache elsewhere
 				romFile->fatTableCache = (u32*)((u32)romFile->fatTableCache+add);
@@ -1405,7 +1405,7 @@ int arm7_main(void) {
 				lastClusterCacheUsed = (u32*)((u32)lastClusterCacheUsed+add);
 				clusterCache += add;
 				toncset((char*)0x02700000, 0, 0x10000);
-			}
+			// }
 		}
 	}
 	if (!ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr) || !dsiModeConfirmed) {
