@@ -6,7 +6,7 @@ OUTPUT_ARCH(arm)
 
 MEMORY {
 
-	vram	: ORIGIN = CARDENGINEI_ARM7_SDK5_LOCATION, LENGTH = 61K /* Main RAM */
+	vram	: ORIGIN = CARDENGINEI_ARM7_SDK5_LOCATION, LENGTH = 42K /* Main RAM */
 }
 
 __vram_start	=	ORIGIN(vram);

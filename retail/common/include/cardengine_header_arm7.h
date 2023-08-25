@@ -47,6 +47,7 @@ typedef struct cardengineArm7Patches {
     u32 fifoHandler;
     u32 ndma0Handler;
     u32 card_pull;
+    cardengineArm7PatchesArm7FunctionsThumb* arm7FunctionsDirect;
     cardengineArm7PatchesArm7Functions* arm7Functions;
     cardengineArm7PatchesArm7FunctionsThumb* arm7FunctionsThumb;
     u32* swi02;

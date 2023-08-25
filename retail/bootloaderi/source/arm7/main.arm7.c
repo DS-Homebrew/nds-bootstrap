@@ -1398,7 +1398,7 @@ int arm7_main(void) {
 				clusterCache += 0xB880000;
 				toncset((char*)0x02700000, 0, 0x80000);
 			} else { */
-				u32 add = 0x858000; // 0x02F58000
+				u32 add = 0x85C000; // 0x02F5C000
 				tonccpy((char*)0x02700000+add, (char*)0x02700000, 0x10000);	// Move FAT table cache elsewhere
 				romFile->fatTableCache = (u32*)((u32)romFile->fatTableCache+add);
 				savFile->fatTableCache = (u32*)((u32)savFile->fatTableCache+add);
@@ -1841,7 +1841,7 @@ int arm7_main(void) {
 
 		if (useSdk5ce7) {
 			ce7Location = CARDENGINEI_ARM7_SDK5_LOCATION;
-			ce7Size = 0xF800;
+			ce7Size = 0xAC00;
 		}
 
 		if (ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr)) {

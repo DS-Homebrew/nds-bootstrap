@@ -286,6 +286,7 @@ patches:
 .word	fifoHandler
 .word	ndma0Handler
 .word   card_pull
+.word   arm7FunctionsDirect
 .word   arm7Functions
 .word   arm7FunctionsThumb
 .word   swi02
@@ -542,7 +543,7 @@ card_pull:
 @---------------------------------------------------------------------------------
 	bx lr
 
-arm7Functions:
+arm7FunctionsDirect:
 .word    eepromProtect
 .word    eepromPageErase
 .word    eepromPageVerify
@@ -551,8 +552,83 @@ arm7Functions:
 .word    eepromRead
 .word    cardRead
 .word    cardId
+
+arm7Functions:
+.word    eepromProtectStub
+.word    eepromPageEraseStub
+.word    eepromPageVerifyStub
+.word    eepromPageWriteStub
+.word    eepromPageProgStub
+.word    eepromReadStub
+.word    cardReadStub
+.word    cardIdStub
 saveCluster:
 .word    0x00000000
+
+eepromProtectStub:
+	stmfd   sp!, {r3-r11,lr}
+	ldr	r4, =eepromProtect
+	bl	_blx_r4_stub1
+	ldmfd   sp!, {r3-r11,pc}
+_blx_r4_stub1:
+	bx	r4
+.pool
+eepromPageEraseStub:
+	stmfd   sp!, {r3-r11,lr}
+	ldr	r4, =eepromPageErase
+	bl	_blx_r4_stub2
+	ldmfd   sp!, {r3-r11,pc}
+_blx_r4_stub2:
+	bx	r4
+.pool
+eepromPageVerifyStub:
+	stmfd   sp!, {r3-r11,lr}
+	ldr	r4, =eepromPageVerify
+	bl	_blx_r4_stub3
+	ldmfd   sp!, {r3-r11,pc}
+_blx_r4_stub3:
+	bx	r4
+.pool
+eepromPageWriteStub:
+	stmfd   sp!, {r4-r11,lr}
+	ldr	r4, =eepromPageWrite
+	bl	_blx_r4_stub4
+	ldmfd   sp!, {r4-r11,pc}
+_blx_r4_stub4:
+	bx	r4
+.pool
+eepromPageProgStub:
+	stmfd   sp!, {r4-r11,lr}
+	ldr	r4, =eepromPageProg
+	bl	_blx_r4_stub5
+	ldmfd   sp!, {r4-r11,pc}
+_blx_r4_stub5:
+	bx	r4
+.pool
+cardReadStub:
+	stmfd   sp!, {r4-r11,lr}
+	ldr	r4, =cardRead
+	bl	_blx_r4_stub6
+	ldmfd   sp!, {r4-r11,pc}
+_blx_r4_stub6:
+	bx	r4
+.pool
+eepromReadStub:
+	stmfd   sp!, {r4-r11,lr}
+	ldr	r4, =eepromRead
+	bl	_blx_r4_stub7
+	ldmfd   sp!, {r4-r11,pc}
+_blx_r4_stub7:
+	bx	r4
+.pool
+cardIdStub:
+	stmfd   sp!, {r4-r11,lr}
+	ldr	r4, =cardId
+	bl	_blx_r4_stub8
+	ldmfd   sp!, {r4-r11,pc}
+_blx_r4_stub8:
+	bx	r4
+.pool
 
 arm7FunctionsThumb:
 .word    eepromProtectThumbStub
