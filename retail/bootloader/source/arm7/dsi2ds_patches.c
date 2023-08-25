@@ -5014,42 +5014,23 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBL(0x02046394, (u32)dsiSaveOpen);
 			setBL(0x02046428, (u32)dsiSaveRead);
 			setBL(0x0204649C, (u32)dsiSaveClose);
-			*(u32*)0x02085158 = 0xE3A00000; // mov r0, #0
-			setBL(0x0208523C, 0x020867FC);
-			setBL(0x020852F0, 0x02086930);
-			setBL(0x020853A8, 0x0208699C);
-			setBL(0x02085624, 0x02086AA4);
-			setBL(0x02085704, 0x02086B54);
-			setBL(0x02085844, 0x02086BC0);
-			setBL(0x02085974, 0x02086D6C);
+
+			// WiFi code patch
 			*(u32*)0x02085D40 = 0xE3A00001; // mov r0, #1
-			*(u32*)0x02085D70 = 0xE3A00000; // mov r0, #0
-			setBL(0x020864E0, 0x02086CA8);
-			*(u32*)0x0208DF10 = 0xE1A00000; // nop
+			setB(0x02085D70, 0x02085D8C);
 			*(u32*)0x0208DF18 = 0xE3A00001; // mov r0, #1
 			setB(0x0208EF04, 0x0208EFEC);
 			*(u32*)0x0208EFEC = 0xE1A00000; // nop
 			*(u32*)0x0208EFF0 = 0xE1A00000; // nop
-			*(u32*)0x0208EFF8 = 0xE1A00000; // nop
-			*(u32*)0x0208EFFC = 0xE1A00000; // nop
-			*(u32*)0x0208F000 = 0xE1A00000; // nop
-			*(u32*)0x0208F004 = 0xE1A00000; // nop
+			setB(0x0208EFF8, 0x0208F008);
 			setB(0x0208F828, 0x0208F8C8);
-			*(u32*)0x0208FA34 = 0xE3A00001; // mov r0, #1
+			*(u32*)0x0208FA34 = wirelessReturnCodeArm;
 			*(u32*)0x0208FA38 = 0xE12FFF1E; // bx lr
-			*(u32*)0x0208FA90 = 0xE3A00001; // mov r0, #1
+			*(u32*)0x0208FA90 = wirelessReturnCodeArm;
 			*(u32*)0x0208FA94 = 0xE12FFF1E; // bx lr
 			*(u32*)0x0208FB94 = 0xE1A00000; // nop
 			setB(0x02090938, 0x02090AE4);
-			*(u32*)0x020911B8 = 0xE1A00000; // nop
-			*(u32*)0x020911BC = 0xE1A00000; // nop
-			*(u32*)0x020911C0 = 0xE1A00000; // nop
-			*(u32*)0x020911C4 = 0xE1A00000; // nop
-			*(u32*)0x020911C8 = 0xE1A00000; // nop
-			*(u32*)0x020911CC = 0xE1A00000; // nop
-			*(u32*)0x020911D0 = 0xE1A00000; // nop
-			*(u32*)0x020911D4 = 0xE1A00000; // nop
-			*(u32*)0x020911D8 = 0xE1A00000; // nop
+			setB(0x020911B8, 0x020911DC);
 			setB(0x02092560, 0x0209257C);
 			setB(0x020927CC, 0x020927F4);
 			*(u32*)0x020927F4 += 0xB0000000; // movcc r0, #0x240 -> mov r0, #0x240
@@ -5060,12 +5041,9 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			*(u32*)0x020AAFD0 = 0xE3A02C07; // mov r2, #0x700
 			*(u32*)0x020AAFF0 = 0xE2840B01; // add r0, r4, #0x400
 			*(u32*)0x020AAFF8 = 0xE1A00004; // mov r0, r4
-			*(u32*)0x020AB000 = 0xE1A00000; // nop
-			*(u32*)0x020AB004 = 0xE1A00000; // nop
-			*(u32*)0x020AB008 = 0xE1A00000; // nop
-			*(u32*)0x020AB00C = 0xE1A00000; // nop
-			*(u32*)0x020AB010 = 0xE1A00000; // nop
+			setB(0x020AB00C, 0x020AB020);
 			*(u32*)0x020AB024 = 0xE2841B01; // add r1, r4, #0x400
+			setBL(0x020AB028, 0x020AB038);
 		} else if (romTid[3] == 'V') {
 			*(u32*)0x020435E8 = 0xE1A00000; // nop
 			// *(u32*)0x020435F4 = 0xE3A00000; // mov r0, #0 (Skip WiFi error screen)
@@ -5092,34 +5070,23 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBL(0x02085800, 0x02086C50);
 			setBL(0x02085940, 0x02086CBC);
 			setBL(0x02085A70, 0x02086E68);
+
+			// WiFi code patch
 			*(u32*)0x02085E3C = 0xE3A00001; // mov r0, #1
-			*(u32*)0x02085E6C = 0xE3A00000; // mov r0, #0
-			setBL(0x020865DC, 0x02086DA4);
-			*(u32*)0x0208E00C = 0xE1A00000; // nop
+			setB(0x02085E6C, 0x02085E88);
 			*(u32*)0x0208E014 = 0xE3A00001; // mov r0, #1
 			setB(0x0208F000, 0x0208F0E8);
 			*(u32*)0x0208F0E8 = 0xE1A00000; // nop
 			*(u32*)0x0208F0EC = 0xE1A00000; // nop
-			*(u32*)0x0208F0F4 = 0xE1A00000; // nop
-			*(u32*)0x0208F0F8 = 0xE1A00000; // nop
-			*(u32*)0x0208F0FC = 0xE1A00000; // nop
-			*(u32*)0x0208F100 = 0xE1A00000; // nop
+			setB(0x0208F0F4, 0x0208F104);
 			setB(0x0208F924, 0x0208F9C4);
-			*(u32*)0x0208FB30 = 0xE3A00001; // mov r0, #1
+			*(u32*)0x0208FB30 = wirelessReturnCodeArm;
 			*(u32*)0x0208FB34 = 0xE12FFF1E; // bx lr
-			*(u32*)0x0208FB8C = 0xE3A00001; // mov r0, #1
+			*(u32*)0x0208FB8C = wirelessReturnCodeArm;
 			*(u32*)0x0208FB90 = 0xE12FFF1E; // bx lr
 			*(u32*)0x0208FC90 = 0xE1A00000; // nop
 			setB(0x02090A34, 0x02090BE0);
-			*(u32*)0x020912B4 = 0xE1A00000; // nop
-			*(u32*)0x020912B8 = 0xE1A00000; // nop
-			*(u32*)0x020912BC = 0xE1A00000; // nop
-			*(u32*)0x020912C0 = 0xE1A00000; // nop
-			*(u32*)0x020912C4 = 0xE1A00000; // nop
-			*(u32*)0x020912C8 = 0xE1A00000; // nop
-			*(u32*)0x020912CC = 0xE1A00000; // nop
-			*(u32*)0x020912D0 = 0xE1A00000; // nop
-			*(u32*)0x020912D4 = 0xE1A00000; // nop
+			setB(0x020912B4, 0x020912D8);
 			setB(0x0209265C, 0x02092678);
 			setB(0x020928C8, 0x020928F0);
 			*(u32*)0x020928F0 += 0xB0000000; // movcc r0, #0x240 -> mov r0, #0x240
@@ -5130,12 +5097,9 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			*(u32*)0x020AB0CC = 0xE3A02C07; // mov r2, #0x700
 			*(u32*)0x020AB0EC = 0xE2840B01; // add r0, r4, #0x400
 			*(u32*)0x020AB0F4 = 0xE1A00004; // mov r0, r4
-			*(u32*)0x020AB0FC = 0xE1A00000; // nop
-			*(u32*)0x020AB100 = 0xE1A00000; // nop
-			*(u32*)0x020AB104 = 0xE1A00000; // nop
-			*(u32*)0x020AB108 = 0xE1A00000; // nop
-			*(u32*)0x020AB10C = 0xE1A00000; // nop
+			setB(0x020AB108, 0x020AB11C);
 			*(u32*)0x020AB120 = 0xE2841B01; // add r1, r4, #0x400
+			setBL(0x020AB124, 0x020AB134);
 		} else if (romTid[3] == 'J') {
 			*(u32*)0x02043248 = 0xE1A00000; // nop
 			// *(u32*)0x02043254 = 0xE3A00000; // mov r0, #0 (Skip WiFi error screen)
@@ -5162,34 +5126,23 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBL(0x0207F4A8, 0x020808F8);
 			setBL(0x0207F5E8, 0x02080964);
 			setBL(0x0207F718, 0x02080B10);
+
+			// WiFi code patch
 			*(u32*)0x0207FAE4 = 0xE3A00001; // mov r0, #1
-			*(u32*)0x0207FB14 = 0xE3A00000; // mov r0, #0
-			setBL(0x02080284, 0x02080A4C);
-			*(u32*)0x02087CB4 = 0xE1A00000; // nop
+			setB(0x0207FB14, 0x0207FB30);
 			*(u32*)0x02087CBC = 0xE3A00001; // mov r0, #1
 			setB(0x02088CA8, 0x02088D90);
 			*(u32*)0x02088D90 = 0xE1A00000; // nop
 			*(u32*)0x02088D94 = 0xE1A00000; // nop
-			*(u32*)0x02088D9C = 0xE1A00000; // nop
-			*(u32*)0x02088DA0 = 0xE1A00000; // nop
-			*(u32*)0x02088DA4 = 0xE1A00000; // nop
-			*(u32*)0x02088DA8 = 0xE1A00000; // nop
+			setB(0x02088D9C, 0x02088DAC);
 			setB(0x020895CC, 0x0208966C);
-			*(u32*)0x020897D8 = 0xE3A00001; // mov r0, #1
+			*(u32*)0x020897D8 = wirelessReturnCodeArm;
 			*(u32*)0x020897DC = 0xE12FFF1E; // bx lr
-			*(u32*)0x02089834 = 0xE3A00001; // mov r0, #1
+			*(u32*)0x02089834 = wirelessReturnCodeArm;
 			*(u32*)0x02089838 = 0xE12FFF1E; // bx lr
 			*(u32*)0x02089938 = 0xE1A00000; // nop
 			setB(0x0208A6DC, 0x0208A888);
-			*(u32*)0x0208AF5C = 0xE1A00000; // nop
-			*(u32*)0x0208AF60 = 0xE1A00000; // nop
-			*(u32*)0x0208AF64 = 0xE1A00000; // nop
-			*(u32*)0x0208AF68 = 0xE1A00000; // nop
-			*(u32*)0x0208AF6C = 0xE1A00000; // nop
-			*(u32*)0x0208AF70 = 0xE1A00000; // nop
-			*(u32*)0x0208AF74 = 0xE1A00000; // nop
-			*(u32*)0x0208AF78 = 0xE1A00000; // nop
-			*(u32*)0x0208AF7C = 0xE1A00000; // nop
+			setB(0x0208AF5C, 0x0208AF80);
 			setB(0x0208C304, 0x0208C320);
 			setB(0x0208C570, 0x0208C598);
 			*(u32*)0x0208C598 += 0xB0000000; // movcc r0, #0x240 -> mov r0, #0x240
@@ -5200,12 +5153,9 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			*(u32*)0x020A4D74 = 0xE3A02C07; // mov r2, #0x700
 			*(u32*)0x020A4D94 = 0xE2840B01; // add r0, r4, #0x400
 			*(u32*)0x020A4D9C = 0xE1A00004; // mov r0, r4
-			*(u32*)0x020A4DA4 = 0xE1A00000; // nop
-			*(u32*)0x020A4DA8 = 0xE1A00000; // nop
-			*(u32*)0x020A4DAC = 0xE1A00000; // nop
-			*(u32*)0x020A4DB0 = 0xE1A00000; // nop
-			*(u32*)0x020A4DB4 = 0xE1A00000; // nop
+			setB(0x020A4DB0, 0x020A4DC4);
 			*(u32*)0x020A4DC8 = 0xE2841B01; // add r1, r4, #0x400
+			setBL(0x020A4DCC, 0x020A4DDC);
 		}
 	}
 
