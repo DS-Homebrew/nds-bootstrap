@@ -5057,7 +5057,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBL(0x02043A1C, (u32)dsiSaveOpen);
 			setBL(0x02043A9C, (u32)dsiSaveCreate);
 			setBL(0x02043B28, (u32)dsiSaveWrite);
-			setBL(0x02043B28, (u32)dsiSaveClose);
+			setBL(0x02043B3C, (u32)dsiSaveClose);
 			setBL(0x02043BB4, (u32)dsiSaveClose);
 			setBL(0x02046460, (u32)dsiSaveOpen);
 			setBL(0x020464F4, (u32)dsiSaveRead);
