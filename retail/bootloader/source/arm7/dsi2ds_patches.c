@@ -5062,14 +5062,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBL(0x02046460, (u32)dsiSaveOpen);
 			setBL(0x020464F4, (u32)dsiSaveRead);
 			setBL(0x02046568, (u32)dsiSaveClose);
-			*(u32*)0x02085254 = 0xE3A00000; // mov r0, #0
-			setBL(0x02085338, 0x020868F8);
-			setBL(0x020853EC, 0x02086A2C);
-			setBL(0x020854A4, 0x02086A98);
-			setBL(0x02085720, 0x02086BA0);
-			setBL(0x02085800, 0x02086C50);
-			setBL(0x02085940, 0x02086CBC);
-			setBL(0x02085A70, 0x02086E68);
 
 			// WiFi code patch
 			*(u32*)0x02085E3C = 0xE3A00001; // mov r0, #1
@@ -5118,14 +5110,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBL(0x020460C0, (u32)dsiSaveOpen);
 			setBL(0x02046154, (u32)dsiSaveRead);
 			setBL(0x020461C8, (u32)dsiSaveClose);
-			*(u32*)0x0207EEFC = 0xE3A00000; // mov r0, #0
-			setBL(0x0207EFE0, 0x020805A0);
-			setBL(0x0207F094, 0x020806D4);
-			setBL(0x0207F14C, 0x02080740);
-			setBL(0x0207F3C8, 0x02080848);
-			setBL(0x0207F4A8, 0x020808F8);
-			setBL(0x0207F5E8, 0x02080964);
-			setBL(0x0207F718, 0x02080B10);
 
 			// WiFi code patch
 			*(u32*)0x0207FAE4 = 0xE3A00001; // mov r0, #1
