@@ -23618,19 +23618,17 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			*(u32*)0x0205B31C = 0xE1A00000; // nop
 			*(u32*)0x0205B388 = 0xE3A00000; // mov r0, #0
 		}
-		*(u32*)0x0207AD18 = 0xE1A00000; // nop
+
+		// WiFi code patch
 		*(u32*)0x0207AD20 = 0xE3A00001; // mov r0, #1
 		setB(0x0207BCD0, 0x0207BDA0);
 		*(u32*)0x0207BDA0 = 0xE1A00000; // nop
 		*(u32*)0x0207BDA4 = 0xE1A00000; // nop
-		*(u32*)0x0207BDAC = 0xE1A00000; // nop
-		*(u32*)0x0207BDB0 = 0xE1A00000; // nop
-		*(u32*)0x0207BDB4 = 0xE1A00000; // nop
-		*(u32*)0x0207BDB8 = 0xE1A00000; // nop
+		setB(0x0207BDAC, 0x0207BDBC);
 		setB(0x0207C52C, 0x0207C5D0);
-		*(u32*)0x0207C734 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0207C734 = wirelessReturnCodeArm;
 		*(u32*)0x0207C738 = 0xE12FFF1E; // bx lr
-		*(u32*)0x0207C790 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0207C790 = wirelessReturnCodeArm;
 		*(u32*)0x0207C794 = 0xE12FFF1E; // bx lr
 		*(u32*)0x0207C850 = 0xE1A00000; // nop
 		*(u32*)0x0207C854 = 0xE1A00000; // nop
@@ -23649,23 +23647,11 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0209A674 = 0xE3A02C07; // mov r2, #0x700
 		*(u32*)0x0209A694 = 0xE2840B01; // add r0, r4, #0x400
 		*(u32*)0x0209A69C = 0xE1A00004; // mov r0, r4
-		*(u32*)0x0209A6A4 = 0xE1A00000; // nop
-		*(u32*)0x0209A6A8 = 0xE1A00000; // nop
-		*(u32*)0x0209A6AC = 0xE1A00000; // nop
-		*(u32*)0x0209A6B0 = 0xE1A00000; // nop
-		*(u32*)0x0209A6B4 = 0xE1A00000; // nop
+		setB(0x0209A6B0, 0x0209A6C4);
 		*(u32*)0x0209A6C8 = 0xE2841B01; // add r1, r4, #0x400
-		*(u32*)0x020A3200 = 0xE3A00000; // mov r0, #0
-		setBL(0x020A32DC, 0x020A4830);
-		setBL(0x020A338C, 0x020A4968);
-		setBL(0x020A3440, 0x020A49D4);
-		setBL(0x020A36AC, 0x020A4ADC);
-		setBL(0x020A3784, 0x020A4B88);
-		setBL(0x020A38B8, 0x020A4BF4);
-		setBL(0x020A39E4, 0x020A4D94);
+		setBL(0x0209A6CC, 0x0209A6DC);
 		*(u32*)0x020A3D94 = 0xE3A00001; // mov r0, #1
-		*(u32*)0x020A3DC4 = 0xE3A00000; // mov r0, #0
-		setBL(0x020A451C, 0x020A4CDC);
+		setB(0x020A3DC4, 0x020A3DE0);
 	}
 
 	// Thorium Wars (USA)
