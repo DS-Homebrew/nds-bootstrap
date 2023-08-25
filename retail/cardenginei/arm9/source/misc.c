@@ -294,11 +294,11 @@ void reset(u32 param, u32 tid2) {
 		VRAM_I_CR = 0;
 	}
 
-	#ifndef DLDI
+	/* #ifndef DLDI
 	if (ce9->consoleModel == 0) {
 		resetSlots();
 	}
-	#endif
+	#endif */
 
 	while (sharedAddr[0] != 0x44414F4C) { // 'LOAD'
 		while (REG_VCOUNT != 191);
