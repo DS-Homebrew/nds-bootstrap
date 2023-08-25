@@ -9800,6 +9800,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Number Battle (USA)
+	// Saving not supported due to using more than one file in filesystem
 	else if (strcmp(romTid, "KSUE") == 0) {
 		if (saveOnFlashcard) {
 			*(u32*)0x02005EA4 = 0xE3A00001; // mov r0, #1

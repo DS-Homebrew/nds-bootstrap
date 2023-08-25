@@ -17331,6 +17331,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Number Battle (USA)
+	// Saving not supported due to using more than one file in filesystem
 	else if (strcmp(romTid, "KSUE") == 0) {
 		*(u32*)0x02005330 = 0xE1A00000; // nop
 		*(u32*)0x02005EA4 = 0xE3A00001; // mov r0, #1
@@ -17356,21 +17357,35 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02065870 = 0xE1A00000; // nop
 		*(u32*)0x02065874 = 0xE1A00000; // nop
 		*(u32*)0x0206588C = 0xE1A00000; // nop
-		*(u32*)0x020A9EAC = 0xE3A00001; // mov r0, #1
+
+		// WiFi code patch (Incomplete?)
+		setB(0x0207A9DC, 0x0207AAC4);
+		*(u32*)0x0207AAC4 = 0xE1A00000; // nop
+		*(u32*)0x0207AAC8 = 0xE1A00000; // nop
+		setB(0x0207AAD0, 0x0207AAE0);
+		setB(0x0207B28C, 0x0207B32C);
+		*(u32*)0x0207B498 = wirelessReturnCodeArm;
+		*(u32*)0x0207B49C = 0xE12FFF1E; // bx lr
+		*(u32*)0x0207B4F4 = wirelessReturnCodeArm;
+		*(u32*)0x0207B4F8 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0207B758 = 0xE3A00001; // mov r0, #1
+		setB(0x0207CB40, 0x0207CCEC);
+		setB(0x0207CF04, 0x0207CF28);
+		setB(0x0207DCF8, 0x0207DD14);
+		setB(0x0207DF64, 0x0207DF90);
+		*(u32*)0x020AA9D4 = 0xE3A00001; // mov r0, #1
 		*(u32*)0x020ACE4C = 0xE3A02C07; // mov r2, #0x700
 		*(u32*)0x020ACE6C = 0xE2840B01; // add r0, r4, #0x400
 		*(u32*)0x020ACE74 = 0xE1A00004; // mov r0, r4
-		*(u32*)0x020ACE7C = 0xE1A00000; // nop
-		*(u32*)0x020ACE80 = 0xE1A00000; // nop
-		*(u32*)0x020ACE84 = 0xE1A00000; // nop
-		*(u32*)0x020ACE88 = 0xE1A00000; // nop
-		*(u32*)0x020ACE8C = 0xE1A00000; // nop
+		setB(0x020ACE88, 0x020ACE9C);
 		*(u32*)0x020ACEA0 = 0xE2841B01; // add r1, r4, #0x400
+		setBL(0x020ACEA4, 0x020ACEB4);
+
 		*(u32*)0x020CE79C = 0xE1A00000; // nop
 		*(u32*)0x020D2A3C = 0xE1A00000; // nop
 		patchInitDSiWare(0x020DD334, heapEnd);
 		if (!extendedMemory) {
-			*(u32*)0x020DD6A4 = 0x0234F020;
+			*(u32*)0x020DD6A4 -= 0x3A000;
 		}
 		patchUserSettingsReadDSiWare(0x020DEA44);
 		*(u32*)0x020DEA6C = wirelessReturnCodeArm;
