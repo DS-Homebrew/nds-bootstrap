@@ -154,10 +154,10 @@ code_handler_start_ndma0:
 .pool
 
 ndsCodeStart:
-@	.thumb
-@	bx	pc
-@.align	4
-@	.arm
+	.thumb
+	bx	pc
+.align	4
+	.arm
 	mov r1, #0
 	mov r2, #0
 	mov r3, #0
