@@ -10372,7 +10372,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02015BC4 = 0xE1A00000; // nop
 		*(u32*)0x020197B8 = 0xE1A00000; // nop
 		patchInitDSiWare(0x0202162C, heapEnd);
-		*(u32*)0x020219B8 = 0x02257500;
+		*(u32*)0x020219B8 -= 0x38000;
 		*(u32*)0x02022C1C = wirelessReturnCodeArm;
 		*(u32*)0x02022C20 = 0xE12FFF1E; // bx lr
 		*(u32*)0x02022C28 = 0xE3A00001; // mov r0, #1
@@ -10383,6 +10383,39 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02022C64 = 0xE12FFF1E; // bx lr
 		*(u32*)0x02022C70 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x02022C74 = 0xE12FFF1E; // bx lr
+
+		// WiFi code patch
+		*(u32*)0x02037858 = 0xE3A00001; // mov r0, #1
+		setB(0x02038808, 0x020388D8);
+		*(u32*)0x020388D8 = 0xE1A00000; // nop
+		*(u32*)0x020388DC = 0xE1A00000; // nop
+		setB(0x020388E4, 0x020388F4);
+		*(u32*)0x02039318 = wirelessReturnCodeArm;
+		*(u32*)0x0203931C = 0xE12FFF1E; // bx lr
+		*(u32*)0x02039374 = wirelessReturnCodeArm;
+		*(u32*)0x02039378 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02039434 = 0xE1A00000; // nop
+		*(u32*)0x02039438 = 0xE1A00000; // nop
+		setB(0x0203A174, 0x0203A318);
+		*(u32*)0x0203A930 = 0xE1A00000; // nop
+		*(u32*)0x0203A934 = 0xE1A00000; // nop
+		*(u32*)0x0203A938 = 0xE1A00000; // nop
+		*(u32*)0x0203A93C = 0xE3A01001; // mov r1, #1
+		setB(0x0203BCC0, 0x0203BCDC);
+		setB(0x0203BF20, 0x0203BF48);
+		*(u32*)0x0203BF48 += 0xB0000000; // movcc r0, #0x240 -> mov r0, #0x240
+		*(u32*)0x0203BF4C += 0xB0000000; // strcc r0, [r5,#0x2C] -> str r0, [r5,#0x2C]
+		*(u32*)0x0203BF50 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0203BF54 = 0xE5850030; // str r0, [r5,#0x30]
+		*(u32*)0x0203BF58 = 0xE8BD8078; // LDMFD SP!, {R4-R6,PC}
+		*(u32*)0x02054D8C = 0xE3A02C07; // mov r2, #0x700
+		*(u32*)0x02054DAC = 0xE2840B01; // add r0, r4, #0x400
+		*(u32*)0x02054DB4 = 0xE1A00004; // mov r0, r4
+		setB(0x02054DC8, 0x02054DDC);
+		*(u32*)0x02054DE0 = 0xE2841B01; // add r1, r4, #0x400
+		setBL(0x02054DE4, 0x02054DF4);
+		*(u32*)0x0205E784 = 0xE3A00001; // mov r0, #1
+		setB(0x0205E7B4, 0x0205E7D0);
 	}
 
 	// Farm Frenzy (USA)
