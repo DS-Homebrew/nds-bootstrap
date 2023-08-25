@@ -9054,6 +9054,37 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Requires 8MB of RAM
 	else if (strcmp(romTid, "KDQE") == 0 && extendedMemory) {
 		*(u32*)0x0201F208 = 0xE12FFF1E; // bx lr (Skip Manual screen)
+
+		// WiFi code patch
+		*(u32*)0x02067428 = 0xE3A00001; // mov r0, #1
+		setB(0x02068414, 0x020684FC);
+		*(u32*)0x020684FC = 0xE1A00000; // nop
+		*(u32*)0x02068500 = 0xE1A00000; // nop
+		setB(0x02068508, 0x02068518);
+		setB(0x02068D38, 0x02068DD8);
+		*(u32*)0x02068F44 = wirelessReturnCodeArm;
+		*(u32*)0x02068F48 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02068FA0 = wirelessReturnCodeArm;
+		*(u32*)0x02068FA4 = 0xE12FFF1E; // bx lr
+		*(u32*)0x020690BC = 0xE1A00000; // nop
+		setB(0x02069E60, 0x0206A00C);
+		setB(0x0206A6E0, 0x0206A704);
+		setB(0x0206BA88, 0x0206BAA4);
+		setB(0x0206BCF4, 0x0206BD1C);
+		*(u32*)0x0206BD1C += 0xB0000000; // movcc r0, #0x240 -> mov r0, #0x240
+		*(u32*)0x0206BD20 += 0xB0000000; // strcc r0, [r5,#0x2C] -> str r0, [r5,#0x2C]
+		*(u32*)0x0206BD24 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0206BD28 = 0xE5850030; // str r0, [r5,#0x30]
+		*(u32*)0x0206BD2C = 0xE8BD8078; // LDMFD SP!, {R4-R6,PC}
+		*(u32*)0x02083BB0 = 0xE3A00001; // mov r0, #1
+		setB(0x02083BE0, 0x02083BFC);
+		*(u32*)0x020860F8 = 0xE3A02C07; // mov r2, #0x700
+		*(u32*)0x02086118 = 0xE2840B01; // add r0, r4, #0x400
+		*(u32*)0x02086120 = 0xE1A00004; // mov r0, r4
+		setB(0x02086134, 0x02086148);
+		*(u32*)0x0208614C = 0xE2841B01; // add r1, r4, #0x400
+		setBL(0x02086150, 0x02086160);
+
 		*(u32*)0x020A82EC = 0xE1A00000; // nop
 		*(u32*)0x020AC120 = 0xE1A00000; // nop
 		patchInitDSiWare(0x020B6640, heapEnd);
@@ -9061,6 +9092,12 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchUserSettingsReadDSiWare(0x020B7BF0);
 		*(u32*)0x020B7C18 = wirelessReturnCodeArm;
 		*(u32*)0x020B7C1C = 0xE12FFF1E; // bx lr
+		*(u32*)0x020B7C24 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x020B7C28 = 0xE12FFF1E; // bx lr
+		*(u32*)0x020B7C48 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x020B7C4C = 0xE12FFF1E; // bx lr
+		*(u32*)0x020B7C5C = 0xE3A00001; // mov r0, #1
+		*(u32*)0x020B7C60 = 0xE12FFF1E; // bx lr
 		*(u32*)0x020B7C6C = 0xE3A00000; // mov r0, #0
 		*(u32*)0x020B7C70 = 0xE12FFF1E; // bx lr
 	}
@@ -9070,12 +9107,49 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Requires 8MB of RAM
 	else if (strcmp(romTid, "KDQV") == 0 && extendedMemory) {
 		*(u32*)0x0201F250 = 0xE12FFF1E; // bx lr (Skip Manual screen)
+
+		// WiFi code patch
+		*(u32*)0x02067470 = 0xE3A00001; // mov r0, #1
+		setB(0x0206845C, 0x02068544);
+		*(u32*)0x02068544 = 0xE1A00000; // nop
+		*(u32*)0x02068548 = 0xE1A00000; // nop
+		setB(0x02068550, 0x02068560);
+		setB(0x02068D80, 0x02068E20);
+		*(u32*)0x02068F8C = wirelessReturnCodeArm;
+		*(u32*)0x02068F90 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02068FE8 = wirelessReturnCodeArm;
+		*(u32*)0x02068FEC = 0xE12FFF1E; // bx lr
+		*(u32*)0x02069104 = 0xE1A00000; // nop
+		setB(0x02069EA8, 0x0206A054);
+		setB(0x0206A728, 0x0206A74C);
+		setB(0x0206BAD0, 0x0206BAEC);
+		setB(0x0206BD3C, 0x0206BD64);
+		*(u32*)0x0206BD64 += 0xB0000000; // movcc r0, #0x240 -> mov r0, #0x240
+		*(u32*)0x0206BD68 += 0xB0000000; // strcc r0, [r5,#0x2C] -> str r0, [r5,#0x2C]
+		*(u32*)0x0206BD6C = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0206BD70 = 0xE5850030; // str r0, [r5,#0x30]
+		*(u32*)0x0206BD74 = 0xE8BD8078; // LDMFD SP!, {R4-R6,PC}
+		*(u32*)0x02083BF8 = 0xE3A00001; // mov r0, #1
+		setB(0x02083C28, 0x02083C44);
+		*(u32*)0x02086140 = 0xE3A02C07; // mov r2, #0x700
+		*(u32*)0x02086160 = 0xE2840B01; // add r0, r4, #0x400
+		*(u32*)0x02086168 = 0xE1A00004; // mov r0, r4
+		setB(0x0208617C, 0x02086190);
+		*(u32*)0x02086194 = 0xE2841B01; // add r1, r4, #0x400
+		setBL(0x02086198, 0x020861A8);
+
 		*(u32*)0x020A8334 = 0xE1A00000; // nop
 		*(u32*)0x020AC168 = 0xE1A00000; // nop
 		patchInitDSiWare(0x020B6688, heapEnd);
 		patchUserSettingsReadDSiWare(0x020B7C38);
 		*(u32*)0x020B7C60 = wirelessReturnCodeArm;
 		*(u32*)0x020B7C64 = 0xE12FFF1E; // bx lr
+		*(u32*)0x020B7C6C = 0xE3A00001; // mov r0, #1
+		*(u32*)0x020B7C70 = 0xE12FFF1E; // bx lr
+		*(u32*)0x020B7C90 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x020B7C94 = 0xE12FFF1E; // bx lr
+		*(u32*)0x020B7CA4 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x020B7CA8 = 0xE12FFF1E; // bx lr
 		*(u32*)0x020B7CB4 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x020B7CB8 = 0xE12FFF1E; // bx lr
 	}
@@ -9085,12 +9159,49 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Requires 8MB of RAM
 	else if (strcmp(romTid, "KDQJ") == 0 && extendedMemory) {
 		*(u32*)0x0201EF84 = 0xE12FFF1E; // bx lr (Skip Manual screen)
+
+		// WiFi code patch
+		*(u32*)0x02066DE8 = 0xE3A00001; // mov r0, #1
+		setB(0x02067DD4, 0x02067EBC);
+		*(u32*)0x02067EBC = 0xE1A00000; // nop
+		*(u32*)0x02067EC0 = 0xE1A00000; // nop
+		setB(0x02067EC8, 0x02067ED8);
+		setB(0x020686F8, 0x02068798);
+		*(u32*)0x02068904 = wirelessReturnCodeArm;
+		*(u32*)0x02068908 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02068960 = wirelessReturnCodeArm;
+		*(u32*)0x02068964 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02068A7C = 0xE1A00000; // nop
+		setB(0x02069820, 0x020699CC);
+		setB(0x0206A0A0, 0x0206A0C4);
+		setB(0x0206B448, 0x0206B464);
+		setB(0x0206B6B4, 0x0206BD1C);
+		*(u32*)0x0206B6DC += 0xB0000000; // movcc r0, #0x240 -> mov r0, #0x240
+		*(u32*)0x0206B6E0 += 0xB0000000; // strcc r0, [r5,#0x2C] -> str r0, [r5,#0x2C]
+		*(u32*)0x0206B6E4 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0206B6E8 = 0xE5850030; // str r0, [r5,#0x30]
+		*(u32*)0x0206B6EC = 0xE8BD8078; // LDMFD SP!, {R4-R6,PC}
+		*(u32*)0x02083570 = 0xE3A00001; // mov r0, #1
+		setB(0x020835A0, 0x020835BC);
+		*(u32*)0x02085AB8 = 0xE3A02C07; // mov r2, #0x700
+		*(u32*)0x02085AD8 = 0xE2840B01; // add r0, r4, #0x400
+		*(u32*)0x02085AE0 = 0xE1A00004; // mov r0, r4
+		setB(0x02085AF4, 0x02085B08);
+		*(u32*)0x02085B0C = 0xE2841B01; // add r1, r4, #0x400
+		setBL(0x02085B10, 0x02085B20);
+
 		*(u32*)0x020A7CAC = 0xE1A00000; // nop
 		*(u32*)0x020ABAE0 = 0xE1A00000; // nop
 		patchInitDSiWare(0x020B6000, heapEnd);
 		patchUserSettingsReadDSiWare(0x020B75B0);
 		*(u32*)0x020B75D8 = wirelessReturnCodeArm;
 		*(u32*)0x020B75DC = 0xE12FFF1E; // bx lr
+		*(u32*)0x020B75E4 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x020B75E8 = 0xE12FFF1E; // bx lr
+		*(u32*)0x020B7608 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x020B760C = 0xE12FFF1E; // bx lr
+		*(u32*)0x020B761C = 0xE3A00001; // mov r0, #1
+		*(u32*)0x020B7620 = 0xE12FFF1E; // bx lr
 		*(u32*)0x020B762C = 0xE3A00000; // mov r0, #0
 		*(u32*)0x020B7630 = 0xE12FFF1E; // bx lr
 	}
