@@ -88,6 +88,8 @@ static bool bootloaderCleared = false;
 static bool funcsUnpatched = false;
 bool ipcEveryFrame = false;
 static bool swapScreens = false;
+static bool wifiIrq = false;
+static int wifiIrqTimer = 0;
 
 #ifdef CARDSAVE
 static aFile savFile;
@@ -730,7 +732,7 @@ void myIrqHandlerVBlank(void) {
 		i2cWriteRegister(0x4A, 0x11, 0x01);		// Reboot into error screen if SD card is removed
 	}
 
-	if ((0 == (REG_KEYINPUT & igmHotkey) && 0 == (REG_EXTKEYINPUT & (((igmHotkey >> 10) & 3) | ((igmHotkey >> 6) & 0xC0))) && (REG_WIFIIRQ == 0)) || returnToMenu || sharedAddr[5] == 0x4C4D4749 /* IGML */) {
+	if ((0 == (REG_KEYINPUT & igmHotkey) && 0 == (REG_EXTKEYINPUT & (((igmHotkey >> 10) & 3) | ((igmHotkey >> 6) & 0xC0))) && !wifiIrq) || returnToMenu || sharedAddr[5] == 0x4C4D4749 /* IGML */) {
 		bakData();
 		inGameMenu();
 		restoreBakData();
@@ -827,6 +829,20 @@ void myIrqHandlerVBlank(void) {
 	/*if (REG_IE & IRQ_NETWORK) {
 		REG_IE &= ~IRQ_NETWORK; // DSi RTC fix (Not needed for DSiWare)
 	}*/
+
+	bool wifiIrqCheck = (REG_WIFIIRQ != 0);
+	if (wifiIrq != wifiIrqCheck) {
+		if (wifiIrq) {
+			wifiIrqTimer++;
+			if (wifiIrqTimer == 30) {
+				wifiIrq = wifiIrqCheck;
+			}
+		} else {
+			wifiIrq = wifiIrqCheck;
+		}
+	} else {
+		wifiIrqTimer = 0;
+	}
 
 	// Update main screen or swap screens
 	if (ipcEveryFrame) {
