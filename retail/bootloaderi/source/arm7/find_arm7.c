@@ -501,6 +501,18 @@ u32* findSwiGetPitchTableOffset(const tNDSHeader* ndsHeader, const module_params
 		} else {
 			dbg_printf("swiGetPitchTable call SDK 5 not found\n");
 		}
+
+		if (!swiGetPitchTableOffset && dsiModeConfirmed && ndsHeader->unitCode > 0 && *(u32*)0x02FFE1A0 != 0x00403000) {
+			swiGetPitchTableOffset = findOffset(
+				(u32*)__DSiHeader->arm7idestination, newArm7ibinarySize > 0x10000 ? 0x10000 : newArm7ibinarySize,
+				swiGetPitchTableSignature5, 4
+			);
+			if (swiGetPitchTableOffset) {
+				dbg_printf("swiGetPitchTable call SDK 5 (ARM7i) found\n");
+			} else {
+				dbg_printf("swiGetPitchTable call SDK 5 (ARM7i) not found\n");
+			}
+		}
 	}
 
 	if (!swiGetPitchTableOffset) {
