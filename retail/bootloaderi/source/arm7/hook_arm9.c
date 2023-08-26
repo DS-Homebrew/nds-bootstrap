@@ -327,9 +327,12 @@ int hookNdsRetailArm9(
 		u32 dataToPreloadSizeAligned = 0;
 		ce9->cacheBlockSize = cacheBlockSize;
 		if (ndsHeader->unitCode > 0 && dsiModeConfirmed) {
+			extern u32 cheatSizeTotal;
+			const bool cheatsEnabled = (cheatSizeTotal > 4 && cheatSizeTotal <= 0x8000);
+
 			ce9->cacheAddress = (consoleModel > 0 ? dev_CACHE_ADRESS_START_TWLSDK : retail_CACHE_ADRESS_START_TWLSDK);
 			ce9->romLocation = ce9->romLocation;
-			ce9->cacheSlots = (consoleModel > 0 ? dev_CACHE_ADRESS_SIZE_TWLSDK : retail_CACHE_ADRESS_SIZE_TWLSDK)/cacheBlockSize;
+			ce9->cacheSlots = (consoleModel > 0 ? (cheatsEnabled ? dev_CACHE_ADRESS_SIZE_TWLSDK_CHEAT : dev_CACHE_ADRESS_SIZE_TWLSDK) : (cheatsEnabled ? retail_CACHE_ADRESS_SIZE_TWLSDK_CHEAT : retail_CACHE_ADRESS_SIZE_TWLSDK))/cacheBlockSize;
 		} else {
 			if (strncmp(romTid, "UBR", 3) == 0) {
 				runOverlayCheck = false;

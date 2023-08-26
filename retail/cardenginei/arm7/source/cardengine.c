@@ -135,6 +135,18 @@ static bool wifiIrq = false;
 static int wifiIrqTimer = 0;
 //static bool saveInRam = false;
 
+u32 cheatEngineAddr = 
+#ifdef TWLSDK
+CHEAT_ENGINE_TWLSDK_LOCATION
+#else
+#ifdef ALTERNATIVE
+CHEAT_ENGINE_LOCATION_ALT
+#else
+CHEAT_ENGINE_LOCATION
+#endif
+#endif
+;
+
 #ifdef TWLSDK
 static aFile* romFile = (aFile*)ROM_FILE_LOCATION_TWLSDK;
 static aFile* savFile = (aFile*)SAV_FILE_LOCATION_TWLSDK;
@@ -338,7 +350,11 @@ static void initialize(void) {
 		return;
 	}
 
-	#ifndef TWLSDK
+	#ifdef TWLSDK
+	if (consoleModel > 0) {
+		cheatEngineAddr = CHEAT_ENGINE_TWLSDK_LOCATION_3DS;
+	}
+	#else
 	if (valueBits & isSdk5) {
 		sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS_SDK5;
 		ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
@@ -727,7 +743,7 @@ void forceGameReboot(void) {
 }
 
 #ifdef TWLSDK
-static void initMBK_dsiMode(void) {
+/* static void initMBK_dsiMode(void) {
 	// This function has no effect with ARM7 SCFG locked
 	*(vu32*)REG_MBK1 = *(u32*)0x02FFE180;
 	*(vu32*)REG_MBK2 = *(u32*)0x02FFE184;
@@ -738,7 +754,7 @@ static void initMBK_dsiMode(void) {
 	REG_MBK7 = *(u32*)0x02FFE1A4;
 	REG_MBK8 = *(u32*)0x02FFE1A8;
 	REG_MBK9 = *(u32*)0x02FFE1AC;
-}
+} */
 
 extern bool dldiPatchBinary (unsigned char *binData, u32 binSize);
 #endif
@@ -841,7 +857,8 @@ void returnToLoader(bool wait) {
 		fileRead(__DSiHeader->arm9idestination, &file, (u32)__DSiHeader->arm9iromOffset, __DSiHeader->arm9ibinarySize);
 		fileRead(__DSiHeader->arm7idestination, &file, (u32)__DSiHeader->arm7iromOffset, __DSiHeader->arm7ibinarySize);
 
-		initMBK_dsiMode();
+		// Disabled due to ce7 code taking place in DSi WRAM
+		// initMBK_dsiMode();
 	}
 
 	if (!(valueBits & b_dsiSD)) {
@@ -1452,8 +1469,8 @@ void myIrqHandlerVBlank(void) {
 	nocashMessage("cheat_engine_start\n");
 	#endif
 
-	if (*(u32*)((u32)ce7-(0x8400+0x3E8)) != 0xCF000000) {
-		volatile void (*cheatEngine)() = (volatile void*)ce7-0x83FC;
+	if (*(u32*)cheatEngineAddr == 0x3E4 && *(u32*)(cheatEngineAddr+0x3E8) != 0xCF000000) {
+		volatile void (*cheatEngine)() = (volatile void*)cheatEngineAddr+4;
 		(*cheatEngine)();
 	}
 

@@ -1329,11 +1329,16 @@ static void patchWaitSysCycles(const cardengineArm9* ce9, const tNDSHeader* ndsH
 }*/
 
 u32* patchHiHeapPointer(const module_params_t* moduleParams, const tNDSHeader* ndsHeader) {
-	if (moduleParams->sdk_version < 0x2008000 || !dsiModeConfirmed || strncmp(ndsHeader->gameCode, "UBR", 3) == 0) {
+	extern u8 consoleModel;
+	extern u32 cheatSizeTotal;
+	bool ROMsupportsDsiMode = (ndsHeader->unitCode > 0 && dsiModeConfirmed);
+	const bool cheatsEnabled = (cheatSizeTotal > 4 && cheatSizeTotal <= 0x8000);
+
+	if (moduleParams->sdk_version < 0x2008000 || !dsiModeConfirmed || strncmp(ndsHeader->gameCode, "UBR", 3) == 0
+	|| (ROMsupportsDsiMode && ((gameOnFlashcard && consoleModel == 0 && !cheatsEnabled) || consoleModel > 0) && (u8)a9ScfgRom == 1)) {
 		return NULL;
 	}
 
-	bool ROMsupportsDsiMode = (ndsHeader->unitCode > 0 && dsiModeConfirmed);
 	u32* heapPointer = patchOffsetCache.heapPointerOffset;
 	if (*patchOffsetCache.heapPointerOffset != (ROMsupportsDsiMode ? 0x13A007BE : 0x023E0000)
 	 && *patchOffsetCache.heapPointerOffset != (ROMsupportsDsiMode ? 0xE3A007BE : 0x023E0000)
@@ -1361,34 +1366,34 @@ u32* patchHiHeapPointer(const module_params_t* moduleParams, const tNDSHeader* n
     dbg_printf("\n\n");
 
 	if (ROMsupportsDsiMode) {
-		if (!dsiWramAccess) {
+		/* if (!dsiWramAccess) {
 			// DSi WRAM not mapped to ARM9
 			// DSi mode title loaded on DSi/3DS
 			switch (*heapPointer) {
 				case 0x13A007BE:
-					*heapPointer = (u32)0x13A007BA; /* MOVNE R0, #0x2E80000 */
+					*heapPointer = (u32)0x13A007BA; // MOVNE R0, #0x2E80000
 					break;
 				case 0xE3A007BE:
-					*heapPointer = (u32)0xE3A007BA; /* MOV R0, #0x2E80000 */
+					*heapPointer = (u32)0xE3A007BA; // MOV R0, #0x2E80000
 					break;
 				case 0x048020BE:
-					*heapPointer = (u32)0x048020BA; /* MOVS R0, #0x2E80000 */
+					*heapPointer = (u32)0x048020BA; // MOVS R0, #0x2E80000
 					break;
 			}
-		} else {
-			// DSi mode title loaded on DSi/3DS
+		} else { */
+			// DSi mode title loaded on DSi from SD card, or DSi/3DS with external DSi BIOS files loaded
 			switch (*heapPointer) {
 				case 0x13A007BE:
-					*heapPointer = (u32)0x13A007BD; /* MOVNE R0, #0x2F40000 */
+					*heapPointer = (u32)0x13A007BD; // MOVNE R0, #0x2F40000
 					break;
 				case 0xE3A007BE:
-					*heapPointer = (u32)0xE3A007BD; /* MOV R0, #0x2F40000 */
+					*heapPointer = (u32)0xE3A007BD; // MOV R0, #0x2F40000
 					break;
 				case 0x048020BE:
-					*heapPointer = (u32)0x048020BD; /* MOVS R0, #0x2F40000 */
+					*heapPointer = (u32)0x048020BD; // MOVS R0, #0x2F40000
 					break;
 			}
-		}
+		// }
 	} else {
 		*heapPointer = 0x027C0000;
 	}
@@ -1401,7 +1406,7 @@ u32* patchHiHeapPointer(const module_params_t* moduleParams, const tNDSHeader* n
     return (u32*)*heapPointer;
 }
 
-void patchA9Mbk(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool standAlone) {
+/* void patchA9Mbk(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool standAlone) {
 	if (dsiWramAccess) {
 		return;
 	}
@@ -1451,7 +1456,7 @@ void patchA9Mbk(const tNDSHeader* ndsHeader, const module_params_t* moduleParams
 	dbg_printf("mbkWramBCGet location : ");
 	dbg_hexa((u32)mbkWramBOffset);
 	dbg_printf("\n\n");
-}
+} */
 
 void patchSharedFontPath(const cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, const ltd_module_params_t* ltdModuleParams) {
 	if (!isDSiWare) {
@@ -1795,7 +1800,7 @@ void patchSharedFontPath(const cardengineArm9* ce9, const tNDSHeader* ndsHeader,
 		const char* twlFontPath = "sdmc:/_nds/nds-bootstrap/TWLFontTable.dat";
 		const char* chnFontPath = "sdmc:/_nds/nds-bootstrap/CHNFontTable.dat";
 		const char* korFontPath = "sdmc:/_nds/nds-bootstrap/KORFontTable.dat";
-		const u32 newFontPathOffset = ce9 ? 0x02F7FC00 : 0x02FFDC00;
+		const u32 newFontPathOffset = 0x02FFDC00;
 
 		bool found = false;
 		extern u32 iUncompressedSize;
@@ -2461,7 +2466,7 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 			return ERR_LOAD_OTHR;
 		}
 
-		patchA9Mbk(ndsHeader, moduleParams, false);
+		// patchA9Mbk(ndsHeader, moduleParams, false);
 		patchSharedFontPath(ce9, ndsHeader, moduleParams, ltdModuleParams);
 	}
 

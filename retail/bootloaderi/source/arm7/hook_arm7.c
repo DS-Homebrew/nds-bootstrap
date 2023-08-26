@@ -446,8 +446,10 @@ int hookNdsRetailArm7(
 		}*/
 	}
 
-	u32 cheatEngineOffset = (u32)ce7-0x8400;
-	u16 cheatSizeLimit = (ce7NotFound ? 0x1BF0 : 0x8000);
+	extern u32 cheatSizeTotal;
+	extern u32 cheatEngineOffset;
+	extern char cheatEngineBuffer[0x400];
+	u16 cheatSizeLimit = (ce7NotFound ? 0x1C00 : 0x8000);
 	char* cheatDataOffset = (char*)cheatEngineOffset+0x3E8;
 	/*if (ce7NotFound) {
 		cheatEngineOffset = 0x2FFC000;
@@ -474,18 +476,21 @@ int hookNdsRetailArm7(
 			cheatSizeLimit -= 8;
 		}
 		*(cheatDataOffset + 3) = 0xCF;
-	}*/
+	}
 	if (!gameOnFlashcard && isDSiWare) {
 		cheatSizeLimit -= 0x10;
-	}
+	}*/
 
-	aFile wideCheatFile;
-	getFileFromCluster(&wideCheatFile, wideCheatFileCluster, gameOnFlashcard);
-	aFile cheatFile;
-	getFileFromCluster(&cheatFile, cheatFileCluster, gameOnFlashcard);
-	aFile apPatchFile;
-	getFileFromCluster(&apPatchFile, apPatchFileCluster, gameOnFlashcard);
-	if (wideCheatSize+cheatSize+(apPatchIsCheat ? apPatchSize : 0) <= cheatSizeLimit) {
+	if (cheatSizeTotal > 4 && cheatSizeTotal <= cheatSizeLimit) {
+		aFile wideCheatFile;
+		getFileFromCluster(&wideCheatFile, wideCheatFileCluster, gameOnFlashcard);
+		aFile cheatFile;
+		getFileFromCluster(&cheatFile, cheatFileCluster, gameOnFlashcard);
+		aFile apPatchFile;
+		getFileFromCluster(&apPatchFile, apPatchFileCluster, gameOnFlashcard);
+
+		tonccpy((u8*)cheatEngineOffset, cheatEngineBuffer, 0x400);
+
 		if (ndsHeader->unitCode < 3 && apPatchFile.firstCluster != CLUSTER_FREE && apPatchIsCheat) {
 			fileRead(cheatDataOffset, &apPatchFile, 0, apPatchSize);
 			cheatDataOffset += apPatchSize;

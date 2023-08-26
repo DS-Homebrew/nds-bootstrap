@@ -364,7 +364,7 @@ static void patchRamClear(const tNDSHeader* ndsHeader, const module_params_t* mo
 	patchOffsetCache.ramClearChecked = true;
 }
 
-static void patchRamClearI(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+void patchRamClearI(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	if (moduleParams->sdk_version < 0x5000000 || ndsHeader->unitCode == 0 || !dsiModeConfirmed) {
 		return;
 	}
@@ -381,8 +381,38 @@ static void patchRamClearI(const tNDSHeader* ndsHeader, const module_params_t* m
 	}
 
 	extern u32 ce9Location;
-	*(ramClearOffset) = ce9Location;
+	extern u32 ce7Location;
+	ramClearOffset[0] = ce9Location;
+	if (*(u32*)0x02FFE1A0 != 0x00403000) {
+		ramClearOffset[2] = ce7Location;
+	}
 	dbg_printf("RAM clear I location : ");
+	dbg_hexa((u32)ramClearOffset);
+	dbg_printf("\n\n");
+
+	if (*(u32*)0x02FFE1A0 != 0x00403000) {
+		return;
+	}
+
+	ramClearOffset = patchOffsetCache.ramClearI2Offset;
+	if (!patchOffsetCache.ramClearI2Offset) {
+		ramClearOffset = findRamClearI2Offset(patchOffsetCache.ramClearIOffset);
+		if (ramClearOffset) {
+			patchOffsetCache.ramClearI2Offset = ramClearOffset;
+		}
+	}
+	if (!ramClearOffset) {
+		return;
+	}
+
+	if (*(u16*)ramClearOffset == 0x27C1) { // THUMB
+		u16* offset = (u16*)ramClearOffset;
+		offset[0] = 0x2700; // movs r7, #0
+		offset[1] = 0x46C0; // nop
+	} else {
+		*ramClearOffset = 0xE3A01000; // mov r1, #0
+	}
+	dbg_printf("RAM clear I 2 location : ");
 	dbg_hexa((u32)ramClearOffset);
 	dbg_printf("\n\n");
 }
@@ -496,7 +526,7 @@ u32 patchCardNdsArm7(
 	newArm7binarySize = ndsHeader->arm7binarySize;
 	newArm7ibinarySize = __DSiHeader->arm7ibinarySize;
 
-	if (*(u32*)DONOR_ROM_ARM7_SIZE_LOCATION != 0) {
+	if (REG_SCFG_EXT == 0 && *(u32*)DONOR_ROM_ARM7_SIZE_LOCATION != 0) {
 		// Replace incompatible ARM7 binary
 		newArm7binarySize = *(u32*)DONOR_ROM_ARM7_SIZE_LOCATION;
 		newArm7ibinarySize = *(u32*)DONOR_ROM_ARM7I_SIZE_LOCATION;

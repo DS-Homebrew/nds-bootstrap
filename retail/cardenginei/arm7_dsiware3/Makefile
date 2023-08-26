@@ -24,8 +24,8 @@ endif
 # all directories are relative to this makefile
 #---------------------------------------------------------------------------------
 BUILD			:=	build
-SOURCES			:=	source ../../common/source ../../common/source_general
-INCLUDES		:=	include ../../common/include ../../common/include_fat
+SOURCES			:=	../arm7_dsiware/source ../../common/source ../../common/source_general
+INCLUDES		:=	../arm7_dsiware/include ../../common/include ../../common/include_fat
 DATA			:=	data
 
 
@@ -40,7 +40,7 @@ CFLAGS	:=	-g -Wall -O2\
 			$(ARCH)
 
 # ADD -DDEBUG here for logging/debug
-CFLAGS	+=	$(INCLUDE) -DARM7 -DNO_DLDI
+CFLAGS	+=	$(INCLUDE) -DARM7 -DUNITTWL -DNO_DLDI
 CXXFLAGS	:=	$(CFLAGS) -fno-rtti -fno-exceptions
 
 ASFLAGS	:=	-g $(ARCH) $(INCLUDE)
@@ -65,7 +65,7 @@ LIBDIRS	:=	$(LIBNDS)
 ifneq ($(BUILD),$(notdir $(CURDIR)))
 #---------------------------------------------------------------------------------
 
-export TARGET	:=	cardenginei_arm7_dsiware
+export TARGET	:=	cardenginei_arm7_dsiware3
 export OUTPUT	:=	$(CURDIR)/../../nitrofiles_dec/$(TARGET)
 export OUTPUT_CMP	:=	$(CURDIR)/../../nitrofiles/$(TARGET)
 export DEPSDIR	:=	$(CURDIR)/$(BUILD)

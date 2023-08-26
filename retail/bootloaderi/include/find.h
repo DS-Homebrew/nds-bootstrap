@@ -131,6 +131,7 @@ u32* findSleepPatchOffset(const tNDSHeader* ndsHeader);
 u16* findSleepPatchOffsetThumb(const tNDSHeader* ndsHeader);
 u32* findRamClearOffset(const tNDSHeader* ndsHeader);
 u32* findRamClearIOffset(const tNDSHeader* ndsHeader);
+u32* findRamClearI2Offset(const u32* ramClearIOffset);
 u32* findPostBootOffset(const tNDSHeader* ndsHeader);
 u32* findCardCheckPullOutOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
 u32* findCardIrqEnableOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);

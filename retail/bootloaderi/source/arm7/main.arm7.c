@@ -140,6 +140,9 @@ u8 wifiLedState = 0;
 
 u32 ce7Location = CARDENGINEI_ARM7_LOCATION;
 u32 ce9Location = CARDENGINEI_ARM9_LOCATION;
+u32 cheatSizeTotal = 0;
+u32 cheatEngineOffset = 0;
+char cheatEngineBuffer[0x400];
 u32 overlaysSize = 0;
 u32 ioverlaysSize = 0;
 bool overlayPatch = false;
@@ -755,12 +758,14 @@ static bool isROMLoadableInRAM(const tDSiHeader* dsiHeader, const tNDSHeader* nd
 	 && strncmp(romTid, "KPP", 3) != 0
 	 && strncmp(romTid, "KPF", 3) != 0)
 	) {
+		const bool cheatsEnabled = (cheatSizeTotal > 4 && cheatSizeTotal <= 0x8000);
+
 		u32 romSize = (baseRomSize-0x4000)+0x88;
 		if (!usesCloneboot) {
 			romSize = (baseRomSize - ndsHeader->arm9binarySize);
 			romSize -= ndsHeader->arm9romOffset;
 		}
-		res = ((dsiModeConfirmed && consoleModel>0 && ROMsupportsDsiMode(ndsHeader) && (usesCloneboot ? ((u32)dsiHeader->arm9iromOffset-0x4000) : ((u32)dsiHeader->arm9iromOffset-ndsHeader->arm9romOffset-ndsHeader->arm9binarySize))+ioverlaysSize <= 0x01000000)
+		res = ((dsiModeConfirmed && consoleModel>0 && ROMsupportsDsiMode(ndsHeader) && (usesCloneboot ? ((u32)dsiHeader->arm9iromOffset-0x4000) : ((u32)dsiHeader->arm9iromOffset-ndsHeader->arm9romOffset-ndsHeader->arm9binarySize))+ioverlaysSize <= (cheatsEnabled ? dev_CACHE_ADRESS_SIZE_TWLSDK_CHEAT : dev_CACHE_ADRESS_SIZE_TWLSDK))
 			|| (consoleModel> 0 && romSize <= (dsiModeConfirmed ? 0x01800000 : 0x01BC0000))
 			|| (consoleModel==0 && romSize <= (dsiModeConfirmed ? 0x00800000 : 0x00BC0000)));
 
@@ -784,7 +789,7 @@ static tNDSHeader* loadHeader(tDSiHeader* dsiHeaderTemp, const module_params_t* 
 	if (ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed) {
 		//dmaCopyWords(3, &dsiHeaderTemp, ndsHeader, sizeof(dsiHeaderTemp));
 		//*(tDSiHeader*)ndsHeader = *dsiHeaderTemp;
-		tDSiHeader* dsiHeader = (tDSiHeader*)(isSdk5(moduleParams) ? DSI_HEADER_SDK5 : DSI_HEADER); // __DSiHeader
+		tDSiHeader* dsiHeader = (tDSiHeader*)DSI_HEADER_SDK5; // __DSiHeader
 		*dsiHeader = *dsiHeaderTemp;
 
 		//*(u32*)(dsiHeader+0x1B8) |= BIT(18);	// SD access
@@ -1071,10 +1076,12 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 		*(u32*)(0x02FFF010) = 0x550E25B8;
 		*(u32*)(0x02FFF014) = 0x02FF4000; */
 
+		const bool relocateTwlCfg = ((u32)ndsHeader->arm9destination < 0x02000800);
+
 		if (!useTwlCfg) {
 			// Reconstruct TWLCFG
 			u8* twlCfg = (u8*)0x02000400;
-			if ((u32)ndsHeader->arm9destination < 0x02000800) {
+			if (relocateTwlCfg) {
 				twlCfg = (u8*)0x02FFD400;
 			}
 			u8* personalData = (u8*)0x02FFFC80;
@@ -1107,7 +1114,7 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 		}
 
 		u8* twlCfg = (u8*)0x02000400;
-		if ((u32)ndsHeader->arm9destination < 0x02000800) {
+		if (relocateTwlCfg) {
 			twlCfg = (u8*)0x02FFD400;
 			*(u32*)0x02FFFDFC = 0x02FFD400;
 		}
@@ -1372,6 +1379,9 @@ int arm7_main(void) {
 		// if (dsiModeConfirmed && ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr) && consoleModel == 0) {
 			extern u32 clusterCacheSize;
 			clusterCacheSize = 0x10000;
+			if (dsiModeConfirmed && ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr)) {
+				clusterCacheSize = 0x2000;
+			}
 
 			buildFatTableCacheCompressed(romFile);
 			buildFatTableCacheCompressed(savFile);
@@ -1381,48 +1391,9 @@ int arm7_main(void) {
 		} */
 	}
 
-	if (dsiModeConfirmed) {
-		/*if (consoleModel == 0 && !isDSiWare && !gameOnFlashcard) {
-			dbg_printf("Cannot use DSi mode on DSi SD\n");
-			errorOutput();
-		}*/
-		extern u32* lastClusterCacheUsed;
-		extern u32 clusterCache;
-		if ((u32)dsiHeaderTemp.arm7idestination > 0x02E80000) dsiHeaderTemp.arm7idestination = (u32*)0x02E80000;
-		if (ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr) && (gameOnFlashcard || !isDSiWare)) {
-			/* if (consoleModel > 0) {
-				tonccpy((char*)0x0DF80000, (char*)0x02700000, 0x80000);	// Move FAT table cache to debug RAM
-				romFile->fatTableCache = (u32*)((u32)romFile->fatTableCache+0xB880000);
-				savFile->fatTableCache = (u32*)((u32)savFile->fatTableCache+0xB880000);
-				lastClusterCacheUsed = (u32*)((u32)lastClusterCacheUsed+0xB880000);
-				clusterCache += 0xB880000;
-				toncset((char*)0x02700000, 0, 0x80000);
-			} else { */
-				u32 add = 0x85C000; // 0x02F5C000
-				tonccpy((char*)0x02700000+add, (char*)0x02700000, 0x10000);	// Move FAT table cache elsewhere
-				romFile->fatTableCache = (u32*)((u32)romFile->fatTableCache+add);
-				savFile->fatTableCache = (u32*)((u32)savFile->fatTableCache+add);
-				lastClusterCacheUsed = (u32*)((u32)lastClusterCacheUsed+add);
-				clusterCache += add;
-				toncset((char*)0x02700000, 0, 0x10000);
-			// }
-		}
+	if (dsiModeConfirmed && (u32)dsiHeaderTemp.arm7idestination > 0x02E80000) {
+		dsiHeaderTemp.arm7idestination = (u32*)0x02E80000;
 	}
-	if (!ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr) || !dsiModeConfirmed) {
-		toncset((u32*)0x02400000, 0, 0x20);
-		toncset((u32*)0x02500000, 0, 0x100000);	// clear part of EWRAM - except before in-game menu data
-		toncset((u32*)0x02E80000, 0, 0x800);
-		memset_addrs_arm7(0x02F00000, 0x02F80000);
-		memset_addrs_arm7(0x02FFE000, 0x02FFF000); // clear DSi header
-	} /*else if (!gameOnFlashcard) {
-		*(u32*)0x03708000 = 0x54455354;
-		if (*(u32*)0x03700000 != 0x54455354) {	// If DSi WRAM isn't mirrored by 32KB...
-			tonccpy((char*)0x03700000, (char*)0x02700000, 0x80000);	// Copy FAT table cache to DSi WRAM
-			toncset((char*)0x02700000, 0, 0x80000);
-			romFile->fatTableCache = (u32)romFile->fatTableCache+0x01000000;
-			savFile->fatTableCache = (u32)savFile->fatTableCache+0x01000000;
-		}
-	}*/
 
 	// File containing cached patch offsets
 	aFile patchOffsetCacheFile;
@@ -1467,13 +1438,61 @@ int arm7_main(void) {
     dbg_printf("\n"); 
 
 	ndsHeader = loadHeader(&dsiHeaderTemp, moduleParams, dsiModeConfirmed);
+
 	const char* romTid = getRomTid(ndsHeader);
 
 	if (!isDSiWare && srlAddr == 0 && memcmp(romTid, "UBR", 3) != 0 && memcmp(romTid, "HND", 3) != 0 && memcmp(romTid, "HNE", 3) != 0 && (softResetParams[0] == 0 || softResetParams[0] == 0xFFFFFFFF)) {
 		esrbOutput();
 	}
 
-	if (!ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr) || !dsiModeConfirmed) {
+	if (ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed) {
+		extern u32* lastClusterCacheUsed;
+		extern u32 clusterCache;
+		if (REG_SCFG_EXT == 0 && *(u32*)DONOR_ROM_ARM7_SIZE_LOCATION != 0) {
+			*(u32*)0x02FFE1A0 = *(u32*)DONOR_ROM_MBK6_LOCATION;
+			*(u32*)0x02FFE1D4 = *(u32*)DONOR_ROM_DEVICE_LIST_LOCATION;
+		}
+		if (gameOnFlashcard || !isDSiWare) {
+			/* if (consoleModel > 0) {
+				tonccpy((char*)0x0DF80000, (char*)0x02700000, 0x80000);	// Move FAT table cache to debug RAM
+				romFile->fatTableCache = (u32*)((u32)romFile->fatTableCache+0xB880000);
+				savFile->fatTableCache = (u32*)((u32)savFile->fatTableCache+0xB880000);
+				lastClusterCacheUsed = (u32*)((u32)lastClusterCacheUsed+0xB880000);
+				clusterCache += 0xB880000;
+				toncset((char*)0x02700000, 0, 0x80000);
+			} else { */
+				u32 add = (*(u32*)0x02FFE1A0 == 0x00403000) ? 0x8DE000 : 0x8FA000; // 0x02FDE000 : 0x02FFA000
+				tonccpy((char*)0x02700000+add, (char*)0x02700000, 0x2000);	// Move FAT table cache elsewhere
+				romFile->fatTableCache = (u32*)((u32)romFile->fatTableCache+add);
+				savFile->fatTableCache = (u32*)((u32)savFile->fatTableCache+add);
+				lastClusterCacheUsed = (u32*)((u32)lastClusterCacheUsed+add);
+				clusterCache += add;
+				toncset((char*)0x02700000, 0, 0x10000);
+			// }
+		}
+
+		aFile romFileBak;
+		aFile savFileBak;
+
+		tonccpy(&romFileBak, romFile, sizeof(aFile));
+		tonccpy(&savFileBak, savFile, sizeof(aFile));
+
+		initMBK_dsiMode();
+		arm9_stateFlag = ARM9_INITMBK;
+		while (arm9_stateFlag != ARM9_READY);
+
+		tonccpy(romFile, &romFileBak, sizeof(aFile));
+		tonccpy(savFile, &savFileBak, sizeof(aFile));
+
+		REG_SCFG_EXT = 0x93FFFB06;
+		REG_SCFG_CLK = 0x187;
+	} else {
+		toncset((u32*)0x02400000, 0, 0x20);
+		toncset((u32*)0x02500000, 0, 0x100000);	// clear part of EWRAM - except before in-game menu data
+		toncset((u32*)0x02E80000, 0, 0x800);
+		memset_addrs_arm7(0x02F00000, 0x02F80000);
+		memset_addrs_arm7(0x02FFE000, 0x02FFF000); // clear DSi header
+
 		extern u32* lastClusterCacheUsed;
 		extern u32 clusterCache;
 
@@ -1514,6 +1533,10 @@ int arm7_main(void) {
 
 	baseChipID = getChipId(pkmnHeader ? (tNDSHeader*)NDS_HEADER_POKEMON : ndsHeader, moduleParams);
 
+	cheatSizeTotal = wideCheatSize+cheatSize+(apPatchIsCheat ? apPatchSize : 0);
+	tonccpy(cheatEngineBuffer, (char*)CHEAT_ENGINE_BUFFERED_LOCATION, 0x400);
+	toncset((char*)CHEAT_ENGINE_BUFFERED_LOCATION, 0, 0x400);
+
 	if (!gameOnFlashcard && isDSiWare) {
 		extern void patchSharedFontPath(const cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, const ltd_module_params_t* ltdModuleParams);
 
@@ -1535,16 +1558,9 @@ int arm7_main(void) {
 
 	 //if (*(u32*)0x02FFE1D8 <= 0x02E80000) {
 		memset_addrs_arm7(0x02F00000, 0x02F80000);
-	  if (memcmp(romTid, "KRV", 3) == 0 // Hip Hop King: Rytmik Edition
-	   || memcmp(romTid, "KYR", 3) == 0 // Rytmik Retrobits
-	   || memcmp(romTid, "KRQ", 3) == 0 // Rytmik Rock Edition
-	   || memcmp(romTid, "KYH", 3) == 0 // Rytmik World Music
-	  ) {
-		// Skip loading cheat engine
-		toncset((u32*)CARDENGINEI_ARM7_BUFFERED_LOCATION, 0, 0x8000);
-		toncset((char*)CHEAT_ENGINE_BUFFERED_LOCATION, 0, 0x400);
-
+	  /* if (ndsHeader->arm7binarySize < 0x8000) {
 		patchSharedFontPath(NULL, ndsHeader, moduleParams, ltdModuleParams);
+		dsiWarePatch((cardengineArm9*)ce9Location, ndsHeader);
 
 		newArm7binarySize = ndsHeader->arm7binarySize;
 		newArm7ibinarySize = __DSiHeader->arm7ibinarySize;
@@ -1554,8 +1570,6 @@ int arm7_main(void) {
 				// Replace incompatible ARM7 binary
 				newArm7binarySize = *(u32*)DONOR_ROM_ARM7_SIZE_LOCATION;
 				newArm7ibinarySize = *(u32*)DONOR_ROM_ARM7I_SIZE_LOCATION;
-				*(u32*)0x02FFE1A0 = *(u32*)DONOR_ROM_MBK6_LOCATION;
-				*(u32*)0x02FFE1D4 = *(u32*)DONOR_ROM_DEVICE_LIST_LOCATION;
 				tonccpy(ndsHeader->arm7destination, (u8*)DONOR_ROM_ARM7_LOCATION, newArm7binarySize);
 			}
 
@@ -1586,16 +1600,15 @@ int arm7_main(void) {
 		if (patchOffsetCacheFileNewCrc != patchOffsetCacheFilePrevCrc) {
 			fileWrite((char*)&patchOffsetCache, &patchOffsetCacheFile, 0, sizeof(patchOffsetCacheContents));
 		}
-	  } else {
-		ce9Location = CARDENGINEI_ARM9_DSIWARE_LOCATION;
-		ce7Location = CARDENGINEI_ARM7_DSIWARE_LOCATION;
+	  } else { */
+		ce9Location = *(u32*)CARDENGINEI_ARM9_BUFFERED_LOCATION;
+		ce7Location = *(u32*)CARDENGINEI_ARM7_BUFFERED_LOCATION;
 
-		tonccpy((u32*)ce9Location, (u32*)CARDENGINEI_ARM9_BUFFERED_LOCATION, 0x6000);
+		tonccpy((u32*)ce9Location, (u32*)CARDENGINEI_ARM9_BUFFERED_LOCATION, 0x1400);
 
-		tonccpy((u32*)ce7Location, (u32*)CARDENGINEI_ARM7_BUFFERED_LOCATION, 0x9000);
-		tonccpy((char*)ce7Location-0x8400, (char*)CHEAT_ENGINE_BUFFERED_LOCATION, 0x400);
-		toncset((u32*)CARDENGINEI_ARM7_BUFFERED_LOCATION, 0, 0x8000);
-		toncset((char*)CHEAT_ENGINE_BUFFERED_LOCATION, 0, 0x400);
+		tonccpy((u32*)ce7Location, (u32*)CARDENGINEI_ARM7_BUFFERED_LOCATION, 0x8400);
+		cheatEngineOffset = ((ce7Location == CARDENGINEI_ARM7_DSIWARE_LOCATION3) ? CHEAT_ENGINE_DSIWARE_LOCATION3 : CHEAT_ENGINE_DSIWARE_LOCATION);
+		toncset((u32*)CARDENGINEI_ARM7_BUFFERED_LOCATION, 0, 0x8400);
 
 		//ensureBinaryDecompressed(&dsiHeaderTemp.ndshdr, moduleParams, false);
 
@@ -1612,7 +1625,9 @@ int arm7_main(void) {
 		newArm7binarySize = ndsHeader->arm7binarySize;
 		newArm7ibinarySize = __DSiHeader->arm7ibinarySize;
 
-		patchHiHeapPointer(moduleParams, ndsHeader);
+		/* if (!dsiWramAccess) {
+			patchHiHeapPointer(moduleParams, ndsHeader);
+		} */
 
 		extern bool a9PatchCardIrqEnable(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
 		a9PatchCardIrqEnable((cardengineArm9*)ce9Location, ndsHeader, moduleParams);
@@ -1625,15 +1640,13 @@ int arm7_main(void) {
 				// Replace incompatible ARM7 binary
 				newArm7binarySize = *(u32*)DONOR_ROM_ARM7_SIZE_LOCATION;
 				newArm7ibinarySize = *(u32*)DONOR_ROM_ARM7I_SIZE_LOCATION;
-				*(u32*)0x02FFE1A0 = *(u32*)DONOR_ROM_MBK6_LOCATION;
-				*(u32*)0x02FFE1D4 = *(u32*)DONOR_ROM_DEVICE_LIST_LOCATION;
 				tonccpy(ndsHeader->arm7destination, (u8*)DONOR_ROM_ARM7_LOCATION, newArm7binarySize);
 			}
 
-			if (!dsiWramAccess) {
+			/* if (!dsiWramAccess) {
 				extern void patchA9Mbk(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool standAlone);
 				patchA9Mbk(ndsHeader, moduleParams, true);
-			}
+			} */
 
 			extern void patchGbaSlotInit_cont(const tNDSHeader* ndsHeader, bool usesThumb, bool searchAgainForThumb);
 			patchGbaSlotInit_cont(ndsHeader, false, true);
@@ -1654,6 +1667,9 @@ int arm7_main(void) {
 
 		extern void patchScfgExt(const tNDSHeader* ndsHeader);
 		patchScfgExt(ndsHeader);
+
+		extern void patchRamClearI(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
+		patchRamClearI(ndsHeader, moduleParams);
 
 		extern bool a7PatchCardIrqEnable(cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
 		if (!a7PatchCardIrqEnable((cardengineArm7*)ce7Location, ndsHeader, moduleParams)) {
@@ -1745,8 +1761,8 @@ int arm7_main(void) {
 			fileWrite((char*)&currentArm9ibinarySize, &pageFile, 0x5FFFF8, sizeof(u32));
 			fileWrite((char*)&newArm7ibinarySize, &pageFile, 0x5FFFFC, sizeof(u32));
 		}
-	  }
-	 //}
+	  // }
+	 // }
 	} else {
 		if (strncmp(romTid, "UBR", 3) == 0) {
 			toncset((char*)0x0C3E0000, 0xFF, 0xC0);
@@ -1832,15 +1848,12 @@ int arm7_main(void) {
 		nocashMessage("Trying to patch the card...\n");
 
 		u16 ce9size = 0;
+		ce7Location = *(u32*)CARDENGINEI_ARM7_BUFFERED_LOCATION;
 		u32 ce7Size = 0x11C00;
-		if (dsiEnhancedMbk) {
-			ce7Location = CARDENGINEI_ARM7_LOCATION_ALT;
-		}
 
 		bool useSdk5ce7 = (isSdk5(moduleParams) && ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr) && dsiModeConfirmed);
 
 		if (useSdk5ce7) {
-			ce7Location = CARDENGINEI_ARM7_SDK5_LOCATION;
 			ce7Size = 0xAC00;
 		}
 
@@ -1880,21 +1893,21 @@ int arm7_main(void) {
 				errorOutput();
 			}
 		}
-		tonccpy((char*)ce7Location-0x8400, (char*)CHEAT_ENGINE_BUFFERED_LOCATION, 0x400);
-		toncset((char*)CHEAT_ENGINE_BUFFERED_LOCATION, 0, 0x400);
+		if (ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed) {
+			cheatEngineOffset = (consoleModel > 0) ? CHEAT_ENGINE_TWLSDK_LOCATION_3DS : CHEAT_ENGINE_TWLSDK_LOCATION;
+		} else {
+			cheatEngineOffset = (ce7Location == CARDENGINEI_ARM7_LOCATION_ALT) ? CHEAT_ENGINE_LOCATION_ALT : CHEAT_ENGINE_LOCATION;
+		}
 
-		if (isSdk5(moduleParams) && ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed) {
+		if (ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed) {
 			ce9Location = *(u32*)CARDENGINEI_ARM9_SDK5_BUFFERED_LOCATION;
+			ce9size = 0x7400;
+			tonccpy((u32*)ce9Location, (u32*)CARDENGINEI_ARM9_SDK5_BUFFERED_LOCATION, ce9size);
 			if (gameOnFlashcard) {
-				ce9size = 0x7000;
-				tonccpy((u32*)ce9Location, (u32*)CARDENGINEI_ARM9_SDK5_BUFFERED_LOCATION, ce9size);
 				if (!dldiPatchBinary((data_t*)ce9Location, ce9size)) {
 					dbg_printf("ce9 DLDI patch failed\n");
 					errorOutput();
 				}
-			} else {
-				ce9size = 0x5000;
-				tonccpy((u32*)ce9Location, (u32*)CARDENGINEI_ARM9_SDK5_BUFFERED_LOCATION, ce9size);
 			}
 		} else if (gameOnFlashcard) {
 			ce9Location = CARDENGINEI_ARM9_LOCATION_DSI_WRAM;
@@ -1913,11 +1926,6 @@ int arm7_main(void) {
 
 		toncset((u32*)CARDENGINEI_ARM9_BUFFERED_LOCATION, 0, 0x10000);
 		toncset((u32*)CARDENGINEI_ARM7_BUFFERED_LOCATION, 0, 0x11C00);
-
-		if (*(u32*)DONOR_ROM_ARM7_SIZE_LOCATION != 0 && ndsHeader->unitCode > 0 && dsiModeConfirmed) {
-			*(u32*)0x02FFE1A0 = *(u32*)DONOR_ROM_MBK6_LOCATION;
-			*(u32*)0x02FFE1D4 = *(u32*)DONOR_ROM_DEVICE_LIST_LOCATION;
-		}
 
 		errorCode = patchCardNds(
 			(cardengineArm7*)ce7Location,
@@ -2089,12 +2097,6 @@ int arm7_main(void) {
     /*if (isGSDD) {
 	   *(vu32*)REG_MBK1 = 0x8185898C; // WRAM-A slot 0 mapped to ARM9
 	}*/
-
-	if (isSdk5(moduleParams) && ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed) {
-		initMBK_dsiMode();
-		REG_SCFG_EXT = 0x93FFFB06;
-		REG_SCFG_CLK = 0x187;
-	}
 
 	if (esrbScreenPrepared) {
 		while (!esrbImageLoaded) {

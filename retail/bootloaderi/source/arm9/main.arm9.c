@@ -312,11 +312,12 @@ void __attribute__((target("arm"))) arm9_main(void) {
 			}
 			arm9_stateFlag = ARM9_READY;
 		}
+		if (arm9_stateFlag == ARM9_INITMBK) {
+			initMBKARM9_dsiMode();
+			arm9_stateFlag = ARM9_READY;
+		}
 		if (arm9_stateFlag == ARM9_SETSCFG) {
 			if (dsiModeConfirmed) {
-				if (arm9_isSdk5 && ROMsupportsDsiMode(ndsHeader)) {
-					initMBKARM9_dsiMode();
-				}
 				REG_SCFG_EXT = 0x8307F100;
 				REG_SCFG_CLK = 0x87;
 				REG_SCFG_RST = 1;

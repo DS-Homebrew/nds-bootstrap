@@ -91,6 +91,14 @@ static bool swapScreens = false;
 static bool wifiIrq = false;
 static int wifiIrqTimer = 0;
 
+const u32 cheatEngineAddr = 
+#ifdef UNITTWL
+CHEAT_ENGINE_DSIWARE_LOCATION3
+#else
+CHEAT_ENGINE_DSIWARE_LOCATION
+#endif
+;
+
 #ifdef CARDSAVE
 static aFile savFile;
 #endif
@@ -132,7 +140,7 @@ static void unlaunchSetFilename(bool boot) {
 		}
 	} else {
 		for (int i = 0; i < 256; i++) {
-			*(u8*)(0x02000838+i2) = *(u8*)(ce7+0x8C00+i);		// Unlaunch Device:/Path/Filename.ext (16bit Unicode,end by 0000h)
+			*(u8*)(0x02000838+i2) = *(u8*)(ce7+0x8000+i);		// Unlaunch Device:/Path/Filename.ext (16bit Unicode,end by 0000h)
 			i2 += 2;
 		}
 	}
@@ -164,8 +172,8 @@ static void readSrBackendId(void) {
 	*(u16*)(0x02000304) = 0x1801;
 	*(u32*)(0x02000308) = 0;
 	*(u32*)(0x0200030C) = 0;
-	*(u32*)(0x02000310) = *(u32*)(ce7+0x8D00);
-	*(u32*)(0x02000314) = *(u32*)(ce7+0x8D04);
+	*(u32*)(0x02000310) = *(u32*)(ce7+0x8100);
+	*(u32*)(0x02000314) = *(u32*)(ce7+0x8104);
 	*(u32*)(0x02000318) = 0x17;
 	*(u32*)(0x0200031C) = 0;
 	*(u16*)(0x02000306) = swiCRC16(0xFFFF, (void*)0x02000308, 0x18);
@@ -399,13 +407,13 @@ void forceGameReboot(void) {
 	sharedAddr[4] = 0x57534352;
 	IPC_SendSync(0x8);
 	if (consoleModel < 2) {
-		(*(u32*)(ce7+0x8D00) == 0) ? unlaunchSetFilename(false) : unlaunchSetHiyaFilename();
+		(*(u32*)(ce7+0x8100) == 0) ? unlaunchSetFilename(false) : unlaunchSetHiyaFilename();
 		waitFrames(5);							// Wait for DSi screens to stabilize
 	}
 	u32 clearBuffer = 0;
 	driveInitialize();
 	fileWrite((char*)&clearBuffer, &srParamsFile, 0, 0x4);
-	if (*(u32*)(ce7+0x8D00) == 0) {
+	if (*(u32*)(ce7+0x8100) == 0) {
 		tonccpy((u32*)0x02000300, sr_data_srloader, 0x20);
 	} else {
 		// Use different SR backend ID
@@ -415,7 +423,7 @@ void forceGameReboot(void) {
 	i2cWriteRegister(0x4A, 0x11, 0x01);		// Force-reboot game
 }
 
-static void initMBK_dsiMode(void) {
+/* static void initMBK_dsiMode(void) {
 	// This function has no effect with ARM7 SCFG locked
 	*(vu32*)REG_MBK1 = *(u32*)0x02FFE180;
 	*(vu32*)REG_MBK2 = *(u32*)0x02FFE184;
@@ -426,7 +434,7 @@ static void initMBK_dsiMode(void) {
 	REG_MBK7 = *(u32*)0x02FFE1A4;
 	REG_MBK8 = *(u32*)0x02FFE1A8;
 	REG_MBK9 = *(u32*)0x02FFE1AC;
-}
+} */
 
 void returnToLoader(bool wait) {
 	toncset((u32*)0x02000000, 0, 0x400);
@@ -442,15 +450,15 @@ void returnToLoader(bool wait) {
 
 	if (((valueBits & twlTouch) && !(*(u8*)0x02FFE1BF & BIT(0))) || (valueBits & wideCheatUsed)) {
 		if (consoleModel >= 2) {
-			if (*(u32*)(ce7+0x8D00) == 0) {
+			if (*(u32*)(ce7+0x8100) == 0) {
 				tonccpy((u32*)0x02000300, sr_data_srloader, 0x020);
-			} else if (*(char*)(ce7+0x8D03) == 'H' || *(char*)(ce7+0x8D03) == 'K') {
+			} else if (*(char*)(ce7+0x8103) == 'H' || *(char*)(ce7+0x8103) == 'K') {
 				// Use different SR backend ID
 				readSrBackendId();
 			}
 			//waitFrames(1);
 		} else {
-			if (*(u32*)(ce7+0x8D00) == 0) {
+			if (*(u32*)(ce7+0x8100) == 0) {
 				unlaunchSetFilename(true);
 			} else {
 				// Use different SR backend ID
@@ -527,7 +535,8 @@ void returnToLoader(bool wait) {
 		fileRead(__DSiHeader->arm9idestination, &file, (u32)__DSiHeader->arm9iromOffset, __DSiHeader->arm9ibinarySize);
 		fileRead(__DSiHeader->arm7idestination, &file, (u32)__DSiHeader->arm7iromOffset, __DSiHeader->arm7ibinarySize);
 
-		initMBK_dsiMode();
+		// Disabled due to ce7 code taking place in DSi WRAM
+		// initMBK_dsiMode();
 	}
 
 	sharedAddr[0] = 0x44414F4C; // 'LOAD'
@@ -679,8 +688,8 @@ void myIrqHandlerVBlank(void) {
 	nocashMessage("cheat_engine_start\n");
 	#endif
 
-	if (*(u32*)((u32)ce7-(0x8400+0x3E8)) != 0xCF000000) {
-		volatile void (*cheatEngine)() = (volatile void*)ce7-0x83FC;
+	if (*(u32*)cheatEngineAddr == 0x3E4 && *(u32*)(cheatEngineAddr+0x3E8) != 0xCF000000) {
+		volatile void (*cheatEngine)() = (volatile void*)cheatEngineAddr+4;
 		(*cheatEngine)();
 	}
 

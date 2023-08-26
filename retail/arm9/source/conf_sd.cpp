@@ -1126,8 +1126,10 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	fclose(cebin);
 
 	if ((unitCode > 0 && conf->dsiMode) || conf->isDSiWare) {
+		const bool binary3 = (REG_SCFG_EXT7 == 0 ? !dsiEnhancedMbk : (a7mbk6 != 0x00403000));
+
 		// Load SDK5 ce7 binary
-		cebin = fopen("nitro:/cardenginei_arm7_twlsdk.lz77", "rb");
+		cebin = fopen(binary3 ? "nitro:/cardenginei_arm7_twlsdk3.lz77" : "nitro:/cardenginei_arm7_twlsdk.lz77", "rb");
 		if (cebin) {
 			fread(lz77ImageBuffer, 1, sizeof(lz77ImageBuffer), cebin);
 			LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINEI_ARM7_BUFFERED_LOCATION);
@@ -1138,7 +1140,6 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		}
 		fclose(cebin);
 
-		const bool binary3 = (REG_SCFG_EXT7 == 0 ? !dsiEnhancedMbk : (a7mbk6 != 0x00403000));
 		if (conf->gameOnFlashcard) {
 			// Load SDK5 DLDI ce9 binary
 			cebin = fopen(binary3 ? "nitro:/cardenginei_arm9_twlsdk3_dldi.lz77" : "nitro:/cardenginei_arm9_twlsdk_dldi.lz77", "rb");
@@ -1295,8 +1296,10 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		fclose(file);
 	}
   } else if (ndsArm7idst <= 0x02E80000) {
+	const bool binary3 = (REG_SCFG_EXT7 == 0 ? !dsiEnhancedMbk : (a7mbk6 != 0x00403000));
+
 	// Load ce7 binary
-	cebin = fopen("nitro:/cardenginei_arm7_dsiware.lz77", "rb");
+	cebin = fopen(binary3 ? "nitro:/cardenginei_arm7_dsiware3.lz77" : "nitro:/cardenginei_arm7_dsiware.lz77", "rb");
 	if (cebin) {
 		fread(lz77ImageBuffer, 1, sizeof(lz77ImageBuffer), cebin);
 		LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINEI_ARM7_BUFFERED_LOCATION);
@@ -1315,7 +1318,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	fclose(cebin);
 
 	// Load ce9 binary
-	cebin = fopen("nitro:/cardenginei_arm9_dsiware.lz77", "rb");
+	cebin = fopen(binary3 ? "nitro:/cardenginei_arm9_dsiware3.lz77" : "nitro:/cardenginei_arm9_dsiware.lz77", "rb");
 	if (cebin) {
 		fread(lz77ImageBuffer, 1, sizeof(lz77ImageBuffer), cebin);
 		LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINEI_ARM9_BUFFERED_LOCATION);

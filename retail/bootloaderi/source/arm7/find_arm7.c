@@ -84,8 +84,11 @@ static const u16 sleepPatchThumb[2]    = {0xD002, 0x4831};
 static const u16 sleepPatchThumbAlt[2] = {0xD002, 0x0440};
 
 // RAM clear
-static const u32 ramClearSignature[2] = {0x02FFC000, 0x02FFF000};
-static const u32 ramClearISignature[1] = {0x02FE0000};
+static const u32 ramClearSignature[2]        = {0x02FFC000, 0x02FFF000};
+static const u32 ramClearISignature[1]       = {0x02FE0000};
+static const u32 ramClearI2Signature[1]      = {0xE26617C1};
+static const u32 ramClearI2SignatureAlt[1]   = {0xE26717C1};
+static const u16 ramClearI2SignatureThumb[2] = {0x27C1, 0x04BF};
 
 // Post-boot code
 static const u32 postBootStartSignature[1]      = {0xE92D47F0};
@@ -1040,6 +1043,47 @@ u32* findRamClearIOffset(const tNDSHeader* ndsHeader) {
 		dbg_printf("RAM clear I found\n");
 	} else {
 		dbg_printf("RAM clear I not found\n");
+	}
+
+	dbg_printf("\n");
+	return ramClearOffset;
+}
+
+u32* findRamClearI2Offset(const u32* ramClearIOffset) {
+	dbg_printf("findRamClearI2Offset:\n");
+
+	u32* ramClearOffset = findOffsetBackwards(
+		ramClearIOffset, 0x200,
+		ramClearI2Signature, 1
+	);
+	if (ramClearOffset) {
+		dbg_printf("RAM clear I 2 found\n");
+	} else {
+		dbg_printf("RAM clear I 2 not found\n");
+	}
+
+	if (!ramClearOffset) {
+		ramClearOffset = findOffsetBackwards(
+			ramClearIOffset, 0x200,
+			ramClearI2SignatureAlt, 1
+		);
+		if (ramClearOffset) {
+			dbg_printf("RAM clear I 2 alt found\n");
+		} else {
+			dbg_printf("RAM clear I 2 alt not found\n");
+		}
+	}
+
+	if (!ramClearOffset) {
+		ramClearOffset = (u32*)findOffsetBackwardsThumb(
+			(u16*)ramClearIOffset, 0x100,
+			ramClearI2SignatureThumb, 2
+		);
+		if (ramClearOffset) {
+			dbg_printf("RAM clear I 2 THUMB found\n");
+		} else {
+			dbg_printf("RAM clear I 2 THUMB not found\n");
+		}
 	}
 
 	dbg_printf("\n");
