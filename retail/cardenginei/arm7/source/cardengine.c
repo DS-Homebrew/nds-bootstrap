@@ -120,6 +120,9 @@ struct IgmText *igmText = (struct IgmText *)INGAME_MENU_LOCATION;
 
 static bool initialized = false;
 static bool driveInited = false;
+#ifdef TWLSDK
+static bool sixInHeader = false;
+#endif
 static bool bootloaderCleared = false;
 static bool funcsUnpatched = false;
 //static bool initializedIRQ = false;
@@ -353,6 +356,7 @@ static void initialize(void) {
 	#ifdef TWLSDK
 	if (*(u8*)(DSI_HEADER_SDK5+0x234) == 6) {
 		*(u8*)(DSI_HEADER_SDK5+0x234) = 0;
+		sixInHeader = true;
 	}
 	if (consoleModel > 0) {
 		cheatEngineAddr = CHEAT_ENGINE_TWLSDK_LOCATION_3DS;
@@ -612,6 +616,9 @@ void reset(void) {
 	fileRead((char*)(*(u32*)0x02FFE1C8), &pageFile, 0x300000, iUncompressedSizei);
 	fileRead((char*)(*(u32*)0x02FFE1D8), &pageFile, 0x580000, newArm7ibinarySize);
 
+	if (sixInHeader) {
+		*(u8*)(DSI_HEADER_SDK5+0x234) = 6;
+	}
 	//if (doBak) restoreSdBakData();
 	#endif
 	toncset((char*)((valueBits & isSdk5) ? 0x02FFFD80 : 0x027FFD80), 0, 0x80);
