@@ -62,7 +62,7 @@ bool applyIpsPatch(const tNDSHeader* ndsHeader, u8* ipsbyte, bool arm9Only, bool
 			if (!overlays || overlaysInRam) {
 				tonccpy(rombyte+offset, repeatbyte, totalrepeats);
 			} else {
-				fileWrite(repeatbyte, &apFixOverlaysFile, offset, totalrepeats);
+				fileWrite((char*)&repeatbyte, &apFixOverlaysFile, offset, totalrepeats);
 			}
 			ipson++;
 		} else {
@@ -71,7 +71,7 @@ bool applyIpsPatch(const tNDSHeader* ndsHeader, u8* ipsbyte, bool arm9Only, bool
 			if (!overlays || overlaysInRam) {
 				tonccpy(rombyte+offset, ipsbyte+ipson, totalrepeats);
 			} else {
-				fileWrite(ipsbyte+ipson, &apFixOverlaysFile, offset, totalrepeats);
+				fileWrite((char*)ipsbyte+ipson, &apFixOverlaysFile, offset, totalrepeats);
 			}
 			ipson += totalrepeats;
 		}
