@@ -220,13 +220,15 @@ static void fixForDifferentBios(const cardengineArm7* ce7, const tNDSHeader* nds
 		// Patch
 		if (useGetPitchTableBranch) {
 			tonccpy(swiGetPitchTableOffset, ce7->patches->j_twlGetPitchTableThumb, 0x40);
-		} else if (!patchOffsetCache.a7IsThumb || isSdk5(moduleParams)) {
-			u32* swiGetPitchTablePatch = (isSdk5(moduleParams) ? ce7->patches->getPitchTableStub : ce7->patches->j_twlGetPitchTable);
-			tonccpy(swiGetPitchTableOffset, swiGetPitchTablePatch, 0xC);
-			if (isSdk5(moduleParams) && (REG_SCFG_ROM & BIT(9)) && dsiModeConfirmed) {
+		} else if (isSdk5(moduleParams)) {
+			toncset16(swiGetPitchTableOffset, 0x46C0, 6);
+			if ((REG_SCFG_ROM & BIT(9)) && dsiModeConfirmed) {
 				u16* swiGetPitchTableOffsetThumb = (u16*)patchOffsetCache.swiGetPitchTableOffset;
-				tonccpy(swiGetPitchTableOffsetThumb+2, swiGetPitchTablePatch, 0xC);
+				toncset16(swiGetPitchTableOffsetThumb+2, 0x46C0, 6);
 			}
+		} else if (!patchOffsetCache.a7IsThumb) {
+			u32* swiGetPitchTablePatch = ce7->patches->j_twlGetPitchTable;
+			tonccpy(swiGetPitchTableOffset, swiGetPitchTablePatch, 0xC);
 		}
 	}
 
@@ -380,11 +382,13 @@ void patchRamClearI(const tNDSHeader* ndsHeader, const module_params_t* modulePa
 		return;
 	}
 
-	extern u32 ce9Location;
-	extern u32 ce7Location;
-	ramClearOffset[0] = ce9Location;
 	if (*(u32*)0x02FFE1A0 != 0x00403000) {
+		extern u32 ce7Location;
+		ramClearOffset[0] = 0x02FFA000;
 		ramClearOffset[2] = ce7Location;
+	} else {
+		extern u32 ce9Location;
+		ramClearOffset[0] = ce9Location;
 	}
 	dbg_printf("RAM clear I location : ");
 	dbg_hexa((u32)ramClearOffset);

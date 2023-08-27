@@ -222,7 +222,7 @@ static void unlaunchSetFilename(bool boot) {
 	} else {
 		for (int i = 0; i < 256; i++) {
 			#ifdef TWLSDK
-			*(u8*)(0x02000838+i2) = *(u8*)(ce7+0xA800+i);		// Unlaunch Device:/Path/Filename.ext (16bit Unicode,end by 0000h)
+			*(u8*)(0x02000838+i2) = *(u8*)(ce7+0x8800+i);		// Unlaunch Device:/Path/Filename.ext (16bit Unicode,end by 0000h)
 			#else
 			*(u8*)(0x02000838+i2) = *(u8*)(ce7+0x11800+i);	// Unlaunch Device:/Path/Filename.ext (16bit Unicode,end by 0000h)
 			#endif
@@ -258,9 +258,9 @@ static void readSrBackendId(void) {
 	*(u32*)(0x02000308) = 0;
 	*(u32*)(0x0200030C) = 0;
 	#ifdef TWLSDK
-	*(u32*)(0x02000310) = *(u32*)(ce7+0xA900);
-	*(u32*)(0x02000314) = *(u32*)(ce7+0xA904);
-	*(u32*)(0x02000318) = /* *(u32*)(ce7+0xA904) == 0x00030000 ? 0x13 : */ 0x17;
+	*(u32*)(0x02000310) = *(u32*)(ce7+0x8900);
+	*(u32*)(0x02000314) = *(u32*)(ce7+0x8904);
+	*(u32*)(0x02000318) = /* *(u32*)(ce7+0x8904) == 0x00030000 ? 0x13 : */ 0x17;
 	#else
 	*(u32*)(0x02000310) = *(u32*)(ce7+0x11900);
 	*(u32*)(0x02000314) = *(u32*)(ce7+0x11904);
@@ -351,6 +351,9 @@ static void initialize(void) {
 	}
 
 	#ifdef TWLSDK
+	if (*(u8*)(DSI_HEADER_SDK5+0x234) == 6) {
+		*(u8*)(DSI_HEADER_SDK5+0x234) = 0;
+	}
 	if (consoleModel > 0) {
 		cheatEngineAddr = CHEAT_ENGINE_TWLSDK_LOCATION_3DS;
 	}
@@ -712,7 +715,7 @@ void forceGameReboot(void) {
 	if (consoleModel < 2) {
 		if (valueBits & b_dsiSD) {
 			#ifdef TWLSDK
-			(*(u32*)(ce7+0xA900) == 0) ? unlaunchSetFilename(false) : unlaunchSetHiyaFilename();
+			(*(u32*)(ce7+0x8900) == 0) ? unlaunchSetFilename(false) : unlaunchSetHiyaFilename();
 			#else
 			(*(u32*)(ce7+0x11900) == 0) ? unlaunchSetFilename(false) : unlaunchSetHiyaFilename();
 			#endif
@@ -728,7 +731,7 @@ void forceGameReboot(void) {
 	fileWrite((char*)&clearBuffer, &srParamsFile, 0, 0x4);
   	#ifdef TWLSDK
 	//if (doBak) restoreSdBakData();
-	if (*(u32*)(ce7+0xA900) == 0 && (valueBits & b_dsiSD))
+	if (*(u32*)(ce7+0x8900) == 0 && (valueBits & b_dsiSD))
 	#else
 	if (*(u32*)(ce7+0x11900) == 0 && (valueBits & b_dsiSD))
 	#endif
@@ -772,15 +775,15 @@ void returnToLoader(bool wait) {
 
 	if (!(valueBits & dsiBios) || ((valueBits & twlTouch) && !(*(u8*)0x02FFE1BF & BIT(0))) || ((valueBits & b_dsiSD) && (valueBits & wideCheatUsed))) {
 		if (consoleModel >= 2) {
-			if (*(u32*)(ce7+0xA900) == 0) {
+			if (*(u32*)(ce7+0x8900) == 0) {
 				tonccpy((u32*)0x02000300, sr_data_srloader, 0x020);
-			} else if (*(char*)(ce7+0xA903) == 'H' || *(char*)(ce7+0xA903) == 'K') {
+			} else if (*(char*)(ce7+0x8903) == 'H' || *(char*)(ce7+0x8903) == 'K') {
 				// Use different SR backend ID
 				readSrBackendId();
 			}
 			waitFrames(1);
 		} else {
-			if (*(u32*)(ce7+0xA900) == 0) {
+			if (*(u32*)(ce7+0x8900) == 0) {
 				unlaunchSetFilename(true);
 			} else {
 				// Use different SR backend ID
@@ -1615,9 +1618,11 @@ void myIrqHandlerVBlank(void) {
 		softResetTimer = 0;
 	}
 
+	#ifndef TWLSDK
 	if (valueBits & powerCodeOnVBlank) {
 		i2cIRQHandler();
 	}
+	#endif
 
 	if (valueBits & preciseVolumeControl) {
 		// Precise volume adjustment (for DSi)
@@ -1702,6 +1707,7 @@ void myIrqHandlerVBlank(void) {
   }
 }
 
+#ifndef TWLSDK
 void i2cIRQHandler(void) {
 	int cause = (i2cReadRegister(I2C_PM, I2CREGPM_PWRIF) & 0x3) | (i2cReadRegister(I2C_GPIO, 0x02)<<2);
 
@@ -1727,6 +1733,7 @@ void i2cIRQHandler(void) {
 		break;
 	}
 }
+#endif
 
 u32 myIrqEnable(u32 irq) {	
 	int oldIME = enterCriticalSection();
@@ -1913,7 +1920,7 @@ bool eepromPageProg(u32 dst, const void *src, u32 len) {
 		return false;
 	}
 
-  	if (tryLockMutex(&saveMutex)) {
+ 	if (tryLockMutex(&saveMutex)) {
 		while (readOngoing) { swiDelay(100); }
 		#ifdef TWLSDK
 		//bool doBak = ((valueBits & gameOnFlashcard) && !(valueBits & saveOnFlashcard));

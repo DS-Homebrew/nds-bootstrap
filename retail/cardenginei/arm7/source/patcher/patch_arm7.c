@@ -81,8 +81,10 @@ static void fixForDifferentBios(const cardengineArm7* ce7, const tNDSHeader* nds
 		// Patch
 		if (useGetPitchTableBranch) {
 			tonccpy(swiGetPitchTableOffset, ce7->patches->j_twlGetPitchTableThumb, 0x40);
+		} else if (isSdk5(moduleParams)) {
+			toncset16(swiGetPitchTableOffset, 0x46C0, 6);
 		} else if (!a7IsThumb) {
-			u32* swiGetPitchTablePatch = (isSdk5(moduleParams) ? ce7->patches->getPitchTableStub : ce7->patches->j_twlGetPitchTable);
+			u32* swiGetPitchTablePatch = ce7->patches->j_twlGetPitchTable;
 			tonccpy(swiGetPitchTableOffset, swiGetPitchTablePatch, 0xC);
 		}
 	}

@@ -1064,6 +1064,10 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 
 		tonccpy((u32*)0x02FFC000, (u32*)DSI_HEADER_SDK5, 0x1000);	// Make a duplicate of DSi header
 
+		if (*(u32*)(DSI_HEADER_SDK5+0x1A0) != 0x00403000 && *(u8*)(DSI_HEADER_SDK5+0x234) < 4) {
+			*(u8*)(DSI_HEADER_SDK5+0x234) = 6; // Workaround to not overwrite 0x02F80000-0x02F88000
+		}
+
 		if (gameOnFlashcard || !isDSiWare) {
 			tonccpy((u32*)0x02FFFA80, (u32*)NDS_HEADER_SDK5, 0x160);	// Make a duplicate of DS header
 		}
@@ -1680,6 +1684,10 @@ int arm7_main(void) {
 		/*extern u32 savePatchV5(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, u32 saveFileCluster); // SDK 5
 		savePatchV5((cardengineArm7*)ce7Location, ndsHeader, saveFileCluster);*/
 
+		if (consoleModel > 0 && newArm7binarySize == 0x28E54) {
+			cheatEngineOffset = CHEAT_ENGINE_TWLSDK_LOCATION_3DS;
+		}
+
 		toncset((u32*)0x02680000, 0, 0x100000);
 
 		errorCode = hookNdsRetailArm7(
@@ -1744,10 +1752,10 @@ int arm7_main(void) {
 			tonccpy((char*)ndsHeader->arm7destination+0xB000000, ndsHeader->arm7destination, newArm7binarySize);
 			tonccpy((char*)(*(u32*)0x02FFE1C8)+0xB000000, (u32*)*(u32*)0x02FFE1C8, currentArm9ibinarySize);
 			tonccpy((char*)(*(u32*)0x02FFE1D8)+0xB000000, (u32*)*(u32*)0x02FFE1D8, newArm7ibinarySize);
-			*(u32*)0x0DFFE02C = iUncompressedSize;
-			*(u32*)0x0DFFE03C = newArm7binarySize;
-			*(u32*)0x0DFFE1CC = currentArm9ibinarySize;
-			*(u32*)0x0DFFE1DC = newArm7ibinarySize;
+			*(u32*)0x0DFEE02C = iUncompressedSize;
+			*(u32*)0x0DFEE03C = newArm7binarySize;
+			*(u32*)0x0DFEE1CC = currentArm9ibinarySize;
+			*(u32*)0x0DFEE1DC = newArm7ibinarySize;
 		} else {
 			aFile pageFile;
 			getFileFromCluster(&pageFile, pageFileCluster, bootstrapOnFlashcard);
@@ -1854,7 +1862,7 @@ int arm7_main(void) {
 		bool useSdk5ce7 = (isSdk5(moduleParams) && ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr) && dsiModeConfirmed);
 
 		if (useSdk5ce7) {
-			ce7Size = 0xAC00;
+			ce7Size = 0x8C00;
 		}
 
 		if (ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr)) {
