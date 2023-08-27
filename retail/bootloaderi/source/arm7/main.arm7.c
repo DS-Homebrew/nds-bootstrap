@@ -1672,8 +1672,8 @@ int arm7_main(void) {
 		extern void patchScfgExt(const tNDSHeader* ndsHeader);
 		patchScfgExt(ndsHeader);
 
-		extern void patchRamClearI(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
-		patchRamClearI(ndsHeader, moduleParams);
+		extern void patchRamClearI(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, const bool _isDSiWare);
+		patchRamClearI(ndsHeader, moduleParams, true);
 
 		extern bool a7PatchCardIrqEnable(cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
 		if (!a7PatchCardIrqEnable((cardengineArm7*)ce7Location, ndsHeader, moduleParams)) {

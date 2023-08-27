@@ -366,7 +366,7 @@ static void patchRamClear(const tNDSHeader* ndsHeader, const module_params_t* mo
 	patchOffsetCache.ramClearChecked = true;
 }
 
-void patchRamClearI(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+void patchRamClearI(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, const bool _isDSiWare) {
 	if (moduleParams->sdk_version < 0x5000000 || ndsHeader->unitCode == 0 || !dsiModeConfirmed) {
 		return;
 	}
@@ -383,8 +383,12 @@ void patchRamClearI(const tNDSHeader* ndsHeader, const module_params_t* modulePa
 	}
 
 	if (*(u32*)0x02FFE1A0 != 0x00403000) {
+		extern u8 consoleModel;
 		extern u32 ce7Location;
-		ramClearOffset[0] = 0x02FFA000;
+		extern u32 cheatSizeTotal;
+		const bool cheatsEnabled = (cheatSizeTotal > 4 && cheatSizeTotal <= 0x8000);
+
+		ramClearOffset[0] = (consoleModel == 0 && _isDSiWare && cheatsEnabled && newArm7binarySize != 0x28E54) ? CHEAT_ENGINE_DSIWARE_LOCATION3 : 0x02FFA000;
 		ramClearOffset[2] = ce7Location;
 	} else {
 		extern u32 ce9Location;
@@ -550,7 +554,7 @@ u32 patchCardNdsArm7(
 	patchSleepMode(ndsHeader);
 
 	patchRamClear(ndsHeader, moduleParams);
-	patchRamClearI(ndsHeader, moduleParams);
+	patchRamClearI(ndsHeader, moduleParams, false);
 
 	// Touch fix for SM64DS (U) v1.0
 	if (newArm7binarySize == 0x24B64
