@@ -1334,8 +1334,7 @@ u32* patchHiHeapPointer(const module_params_t* moduleParams, const tNDSHeader* n
 	bool ROMsupportsDsiMode = (ndsHeader->unitCode > 0 && dsiModeConfirmed);
 	const bool cheatsEnabled = (cheatSizeTotal > 4 && cheatSizeTotal <= 0x8000);
 
-	if (moduleParams->sdk_version < 0x2008000 || !dsiModeConfirmed || strncmp(ndsHeader->gameCode, "UBR", 3) == 0
-	|| (ROMsupportsDsiMode && ((gameOnFlashcard && consoleModel == 0 && !cheatsEnabled) || consoleModel > 0) && (u8)a9ScfgRom == 1)) {
+	if (moduleParams->sdk_version < 0x2008000 || !dsiModeConfirmed || strncmp(ndsHeader->gameCode, "UBR", 3) == 0) {
 		return NULL;
 	}
 
@@ -1359,11 +1358,15 @@ u32* patchHiHeapPointer(const module_params_t* moduleParams, const tNDSHeader* n
 	dbg_hexa((u32)heapPointer);
     dbg_printf("\n\n");
 
-    u32* oldheapPointer = (u32*)*heapPointer;
+	if (ROMsupportsDsiMode && ((gameOnFlashcard && consoleModel == 0 && !cheatsEnabled) || consoleModel > 0) && (u8)a9ScfgRom == 1) {
+		return NULL;
+	}
 
-    dbg_printf("old hi heap value: ");
+	u32* oldheapPointer = (u32*)*heapPointer;
+
+	dbg_printf("old hi heap value: ");
 	dbg_hexa((u32)oldheapPointer);
-    dbg_printf("\n\n");
+	dbg_printf("\n\n");
 
 	if (ROMsupportsDsiMode) {
 		/* if (!dsiWramAccess) {
