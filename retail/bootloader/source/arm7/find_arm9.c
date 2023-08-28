@@ -1338,7 +1338,7 @@ u32* findMpuDataOffset(const module_params_t* moduleParams, u32 patchMpuRegion, 
 
 	const u32* mpuInitRegion1Data = mpuInitRegion1Data1;
 	const u32* mpuInitRegion2Data = mpuInitRegion2Data1;
-	if (moduleParams->sdk_version >= 0x2008000) {
+	if (moduleParams->sdk_version > 0x4000000) {
 		mpuInitRegion2Data = mpuInitRegion2Data3;
 	}
 	if (moduleParams->sdk_version > 0x5000000) {
@@ -1349,9 +1349,6 @@ u32* findMpuDataOffset(const module_params_t* moduleParams, u32 patchMpuRegion, 
 	switch (patchMpuRegion) {
 		case 0:
 			mpuInitRegionData = mpuInitRegion0Data;
-			break;
-		case 1:
-			mpuInitRegionData = mpuInitRegion1Data;
 			break;
 		case 2:
 			mpuInitRegionData = mpuInitRegion2Data;
@@ -1365,6 +1362,12 @@ u32* findMpuDataOffset(const module_params_t* moduleParams, u32 patchMpuRegion, 
 		mpuStartOffset, 0x100,
 		mpuInitRegionData, 1
 	);
+	if (!mpuDataOffset && patchMpuRegion == 2 && moduleParams->sdk_version >= 0x2008000 && moduleParams->sdk_version < 0x4000000) {
+		mpuDataOffset = findOffset(
+			mpuStartOffset, 0x100,
+			mpuInitRegion2Data3, 1
+		);
+	}
 	if (!mpuDataOffset) {
 		// Try to find it
 		for (int i = 0; i < 0x100; i++) {
