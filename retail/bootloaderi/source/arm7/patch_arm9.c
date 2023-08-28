@@ -717,7 +717,7 @@ static void patchReset(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const m
 }
 
 void patchResetTwl(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {    
-	if (!isDSiWare) {
+	if (ndsHeader->unitCode == 0 || !dsiModeConfirmed || (patchOffsetCache.resetOffset && !isDSiWare)) {
 		return;
 	}
 
