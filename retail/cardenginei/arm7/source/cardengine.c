@@ -1679,14 +1679,10 @@ void myIrqHandlerVBlank(void) {
 			if (wifiIrqTimer == 30) {
 				IPC_SendSync(0x4);
 				wifiIrq = wifiIrqCheck;
-				REG_IE |= IRQ_IPC_SYNC;
-				REG_IPC_SYNC |= IPC_SYNC_IRQ_ENABLE;
 			}
 		} else {
 			IPC_SendSync(0x4);
 			wifiIrq = wifiIrqCheck;
-			REG_IE &= ~IRQ_IPC_SYNC;
-			REG_IPC_SYNC &= ~IPC_SYNC_IRQ_ENABLE;
 		}
 	} else {
 		wifiIrqTimer = 0;
