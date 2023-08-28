@@ -769,7 +769,7 @@ void forceGameReboot(void) {
 extern bool dldiPatchBinary (unsigned char *binData, u32 binSize);
 #endif
 
-void returnToLoader(bool wait) {
+void returnToLoader(bool reboot) {
 	toncset((u32*)0x02000000, 0, 0x400);
 	*(u32*)0x02000000 = BIT(0) | BIT(1) | BIT(2);
 	*(u32*)0x02000004 = 0x54455352; // 'RSET'
@@ -780,7 +780,7 @@ void returnToLoader(bool wait) {
 		tonccpy((u8*)0x02000400, (u8*)twlCfgLoc, 0x128);
 	}
 
-	if (!(valueBits & dsiBios) || ((valueBits & twlTouch) && !(*(u8*)0x02FFE1BF & BIT(0))) || ((valueBits & b_dsiSD) && (valueBits & wideCheatUsed))) {
+	if (reboot || !(valueBits & dsiBios) || ((valueBits & twlTouch) && !(*(u8*)0x02FFE1BF & BIT(0))) || ((valueBits & b_dsiSD) && (valueBits & wideCheatUsed))) {
 		if (consoleModel >= 2) {
 			if (*(u32*)(ce7+0x8300) == 0) {
 				tonccpy((u32*)0x02000300, sr_data_srloader, 0x020);
@@ -1582,7 +1582,7 @@ void myIrqHandlerVBlank(void) {
 #ifdef TWLSDK
 			IPC_SendSync(0x5);
 #else
-			returnToLoader(true);
+			returnToLoader(false);
 #endif
 		}
 		returnTimer++;
