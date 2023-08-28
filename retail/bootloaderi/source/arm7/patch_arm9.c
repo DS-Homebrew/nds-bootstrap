@@ -1328,14 +1328,14 @@ static void patchWaitSysCycles(const cardengineArm9* ce9, const tNDSHeader* ndsH
     return oldheapPointer;
 }*/
 
-u32* patchHiHeapPointer(const module_params_t* moduleParams, const tNDSHeader* ndsHeader) {
+void patchHiHeapPointer(const module_params_t* moduleParams, const tNDSHeader* ndsHeader) {
 	extern u8 consoleModel;
 	extern u32 cheatSizeTotal;
 	bool ROMsupportsDsiMode = (ndsHeader->unitCode > 0 && dsiModeConfirmed);
 	const bool cheatsEnabled = (cheatSizeTotal > 4 && cheatSizeTotal <= 0x8000);
 
 	if (moduleParams->sdk_version < 0x2008000 || !dsiModeConfirmed || strncmp(ndsHeader->gameCode, "UBR", 3) == 0) {
-		return NULL;
+		return;
 	}
 
 	u32* heapPointer = patchOffsetCache.heapPointerOffset;
@@ -1351,7 +1351,7 @@ u32* patchHiHeapPointer(const module_params_t* moduleParams, const tNDSHeader* n
 		patchOffsetCache.heapPointerOffset = heapPointer;
 	} else {
 		dbg_printf("Heap pointer not found\n");
-		return NULL;
+		return;
 	}
 
     dbg_printf("hi heap end: ");
@@ -1359,7 +1359,7 @@ u32* patchHiHeapPointer(const module_params_t* moduleParams, const tNDSHeader* n
     dbg_printf("\n\n");
 
 	if (ROMsupportsDsiMode && ((gameOnFlashcard && consoleModel == 0 && !cheatsEnabled) || consoleModel > 0) && (u8)a9ScfgRom == 1) {
-		return NULL;
+		return;
 	}
 
 	u32* oldheapPointer = (u32*)*heapPointer;
@@ -1367,6 +1367,8 @@ u32* patchHiHeapPointer(const module_params_t* moduleParams, const tNDSHeader* n
 	dbg_printf("old hi heap value: ");
 	dbg_hexa((u32)oldheapPointer);
 	dbg_printf("\n\n");
+
+	bool newHiHeapReported = false;
 
 	if (ROMsupportsDsiMode) {
 		/* if (!dsiWramAccess) {
@@ -1386,27 +1388,98 @@ u32* patchHiHeapPointer(const module_params_t* moduleParams, const tNDSHeader* n
 		} else { */
 			// DSi mode title loaded on DSi from SD card, or DSi/3DS with external DSi BIOS files loaded
 			switch (*heapPointer) {
-				case 0x13A007BE:
-					*heapPointer = (u32)0x13A007BD; // MOVNE R0, #0x2F40000
-					break;
-				case 0xE3A007BE:
-					*heapPointer = (u32)0xE3A007BD; // MOV R0, #0x2F40000
-					break;
-				case 0x048020BE:
-					*heapPointer = (u32)0x048020BD; // MOVS R0, #0x2F40000
-					break;
+				case 0x13A007BE: {
+					// *heapPointer = (u32)0x13A007BD; // MOVNE R0, #0x2F40000
+					heapPointer[-1] = 0xE3500001; // cmp r0, #1
+					for (int i = 0xA0/sizeof(u32); i < 0xE0/sizeof(u32); i++) {
+						if (heapPointer[i] == 0x023E0000) {
+							dbg_printf("hi heap end: ");
+							dbg_hexa((u32)heapPointer+(i*sizeof(u32)));
+							dbg_printf("\n\n");
+
+							heapPointer[i] = retail_CACHE_ADRESS_START_TWLSDK;
+
+							dbg_printf("new hi heap value: ");
+							dbg_hexa(heapPointer[i]);
+							dbg_printf("\n\n");
+
+							newHiHeapReported = true;
+							break;
+						}
+					}
+				}	break;
+				case 0xE3A007BE: {
+					// *heapPointer = (u32)0xE3A007BD; // MOV R0, #0x2F40000
+					const bool debuggerSdk = (heapPointer[1] == 0xEA000043);
+					u32 addr = (u32)heapPointer;
+
+					if (debuggerSdk) { // debuggerSdk
+						*(u32*)(addr) = 0xE59F0134; // ldr r0, =0x????????
+						*(u32*)(addr+0x28) = 0xE3560001; // cmp r6, #1
+						*(u32*)(addr+0x30) = 0xE3A00627; // mov r0, #0x2700000
+
+						*(u32*)(addr+0x58) = 0xE3A00C00; // mov r0, #*(u32*)(addr+0x13C)
+						if (*(u32*)(addr+0x13C) != 0) {
+							for (u32 i = 0; i < *(u32*)(addr+0x13C); i += 0x100) {
+								*(u32*)(addr+0x58) += 1;
+							}
+						}
+
+						*(u32*)(addr+0x13C) = retail_CACHE_ADRESS_START_TWLSDK;
+					} else {
+						*(u32*)(addr) = 0xE59F0094; // ldr r0, =0x2F60000
+
+						*(u32*)(addr+0x40) = 0xE3A01C00; // mov r1, #*(u32*)(addr+0x9C)
+						if (*(u32*)(addr+0x9C) != 0) {
+							for (u32 i = 0; i < *(u32*)(addr+0x9C); i += 0x100) {
+								*(u32*)(addr+0x40) += 1;
+							}
+						}
+
+						*(u32*)(addr+0x9C) = retail_CACHE_ADRESS_START_TWLSDK;
+					}
+					dbg_printf("new hi heap value: ");
+					dbg_hexa(*(u32*)(addr+(debuggerSdk ? 0x13C : 0x9C)));
+					dbg_printf("\n\n");
+
+					newHiHeapReported = true;
+				}	break;
+				case 0x048020BE: {
+					u16* offsetThumb = (u16*)heapPointer;
+					if (offsetThumb[-2] == 0x2800) { // cmp r0, #0
+						offsetThumb[-2] = 0x2801; // cmp r0, #1
+						for (int i = 0x60/sizeof(u32); i < 0xA0/sizeof(u32); i++) {
+							if (heapPointer[i] == 0x023E0000) {
+								dbg_printf("hi heap end: ");
+								dbg_hexa((u32)heapPointer+(i*sizeof(u32)));
+								dbg_printf("\n\n");
+
+								heapPointer[i] = retail_CACHE_ADRESS_START_TWLSDK;
+
+								dbg_printf("new hi heap value: ");
+								dbg_hexa(heapPointer[i]);
+								dbg_printf("\n\n");
+
+								newHiHeapReported = true;
+								break;
+							}
+						}
+					} else {
+						*heapPointer = (u32)0x048020BD; // MOVS R0, #0x2F40000
+					}
+				}	break;
 			}
 		// }
 	} else {
 		*heapPointer = 0x027C0000;
 	}
 
-    dbg_printf("new hi heap value: ");
-	dbg_hexa((u32)*heapPointer);
-    dbg_printf("\n\n");
+	if (!newHiHeapReported) {
+		dbg_printf("new hi heap value: ");
+		dbg_hexa((u32)*heapPointer);
+		dbg_printf("\n\n");
+	}
     dbg_printf(ROMsupportsDsiMode ? "Hi Heap Shrink Successful\n\n" : "Hi Heap Grow Successful\n\n");
-
-    return (u32*)*heapPointer;
 }
 
 /* void patchA9Mbk(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool standAlone) {

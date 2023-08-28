@@ -249,6 +249,7 @@ static const u32 initHeapEndFunc2SignatureThumbAlt2[2] = {0xBD082010, 0x023E0000
 static const u32 initHeapEndFunc2SignatureThumbAlt3[2] = {0xBD102000, 0x023E0000};
 static const u32 initHeapEndFuncISignatureEnhanced[2]  = {0xE3500000, 0x13A007BE};
 static const u32 initHeapEndFuncISignature[2]          = {0xE3A007BE, 0xE8BD8008};
+static const u32 initHeapEndFuncISignatureDebug[2]     = {0xE3A007BE, 0xEA000043};
 static const u32 initHeapEndFuncISignatureThumb[1]     = {0x048020BE};
 
 // Reset
@@ -1968,6 +1969,12 @@ u32* findHeapPointer2Offset(const module_params_t* moduleParams, const tNDSHeade
 			initEndFunc = findOffset(
 				(u32*)ndsHeader->arm9destination, iUncompressedSize,
 				initHeapEndFuncISignature, 2
+			);
+		}
+		if (!initEndFunc) {
+			initEndFunc = findOffset(
+				(u32*)ndsHeader->arm9destination, iUncompressedSize,
+				initHeapEndFuncISignatureDebug, 2
 			);
 		}
 		if (!initEndFunc) {

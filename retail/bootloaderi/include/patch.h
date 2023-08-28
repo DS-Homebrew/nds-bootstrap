@@ -201,7 +201,7 @@ u32* patchLoHeapPointer(
     const tNDSHeader* ndsHeader,
 	bool ROMinRAM
 );
-u32* patchHiHeapPointer(
+void patchHiHeapPointer(
     const module_params_t* moduleParams,
     const tNDSHeader* ndsHeader
 );

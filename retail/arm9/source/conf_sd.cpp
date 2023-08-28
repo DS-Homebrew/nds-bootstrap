@@ -1414,52 +1414,34 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 	if (!isDSiMode() && unitCode>0 && (conf->dsiMode || conf->isDSiWare)) {
 		// Load DSi ARM9 BIOS
+		const u32 relocAddr9 = 0x02F60000;
 		cebin = fopen("sd:/_nds/bios9i.bin", "rb");
 		if (!cebin) {
 			cebin = fopen("sd:/_nds/bios9i_part1.bin", "rb");
 		}
 		if (cebin) {
-			fread((u32*)0x02F40000, 1, 0x8000, cebin);
+			fread((u32*)relocAddr9, 1, 0x8000, cebin);
 
+			u16 biosAddrs[12] = {0x00CC, 0x3264, 0x3268, 0x326C, 0x33E0, 0x42C0, 0x4B88, 0x4B90, 0x4B9C, 0x4BA0, 0x4E1C, 0x4F18};
 			// Relocate addresses
-			*(u32*)0x02F400CC -= 0xFFFF0000;
-			*(u32*)0x02F43264 -= 0xFFFF0000;
-			*(u32*)0x02F43268 -= 0xFFFF0000;
-			*(u32*)0x02F4326C -= 0xFFFF0000;
-			*(u32*)0x02F433E0 -= 0xFFFF0000;
-			*(u32*)0x02F442C0 -= 0xFFFF0000;
-			*(u32*)0x02F44B88 -= 0xFFFF0000;
-			*(u32*)0x02F44B90 -= 0xFFFF0000;
-			*(u32*)0x02F44B9C -= 0xFFFF0000;
-			*(u32*)0x02F44BA0 -= 0xFFFF0000;
-			*(u32*)0x02F44E1C -= 0xFFFF0000;
-			*(u32*)0x02F44F18 -= 0xFFFF0000;
-
-			*(u32*)0x02F400CC += 0x02F40000;
-			*(u32*)0x02F43264 += 0x02F40000;
-			*(u32*)0x02F43268 += 0x02F40000;
-			*(u32*)0x02F4326C += 0x02F40000;
-			*(u32*)0x02F433E0 += 0x02F40000;
-			*(u32*)0x02F442C0 += 0x02F40000;
-			*(u32*)0x02F44B88 += 0x02F40000;
-			*(u32*)0x02F44B90 += 0x02F40000;
-			*(u32*)0x02F44B9C += 0x02F40000;
-			*(u32*)0x02F44BA0 += 0x02F40000;
-			*(u32*)0x02F44E1C += 0x02F40000;
-			*(u32*)0x02F44F18 += 0x02F40000;
+			for (int i = 0; i < 12; i++) {
+				*(u32*)(relocAddr9+biosAddrs[i]) -= 0xFFFF0000;
+				*(u32*)(relocAddr9+biosAddrs[i]) += relocAddr9;
+			}
 		}
 		fclose(cebin);
 
 		// Load DSi ARM7 BIOS
+		const u32 relocAddr7 = relocAddr9+0x8000;
 		cebin = fopen("sd:/_nds/bios7i.bin", "rb");
 		if (!cebin) {
 			cebin = fopen("sd:/_nds/bios7i_part1.bin", "rb");
 		}
 		if (cebin) {
-			fread((u32*)0x02F48000, 1, 0x8000, cebin);
+			fread((u8*)relocAddr7, 1, 0x8000, cebin);
 
 			// Relocate address
-			*(u32*)0x02F158A8 += 0x02F48000;
+			*(u32*)(relocAddr7+0x58A8) += relocAddr7;
 		}
 		fclose(cebin);
 	}
