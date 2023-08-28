@@ -28,7 +28,7 @@ extern struct IgmText *igmText;
 
 extern void reset(void);
 extern void dumpRam(void);
-extern void returnToLoader(void);
+extern void returnToLoader(bool reboot);
 extern void prepareScreenshot(void);
 extern void saveScreenshot(void);
 extern void prepareManual(void);
@@ -68,7 +68,7 @@ void inGameMenu(void) {
 
 		timeOut++;
 		if (timeOut == 60*2) {
-			returnToLoader();
+			returnToLoader(true);
 			timeOut = 0;
 		}
 	}
@@ -134,7 +134,7 @@ void inGameMenu(void) {
 					break;
 				case 0x54495551: // QUIT
 					unloadInGameMenu();
-					returnToLoader();
+					returnToLoader(false);
 					exitMenu = true;
 					break;
 				case 0x59435049: // IPCY
