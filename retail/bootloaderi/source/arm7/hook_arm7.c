@@ -410,7 +410,16 @@ int hookNdsRetailArm7(
 		extern u32 getRomLocation(const tNDSHeader* ndsHeader, const bool isSdk5);
 		u32 romLocation = getRomLocation(ndsHeader, (ce7->valueBits & b_isSdk5));
 		ce7->romLocation = romLocation;
-		ce7->romLocation -= (usesCloneboot ? 0x4000 : (ndsHeader->arm9romOffset + ndsHeader->arm9binarySize));
+
+		u32 romOffset = 0;
+		if (usesCloneboot) {
+			romOffset = 0x4000;
+		} else if (ndsHeader->arm9overlaySource == 0 || ndsHeader->arm9overlaySize == 0) {
+			romOffset = (ndsHeader->arm7romOffset + ndsHeader->arm7binarySize);
+		} else {
+			romOffset = (ndsHeader->arm9romOffset + ndsHeader->arm9binarySize);
+		}
+		ce7->romLocation -= romOffset;
 
 		// 0: ROM part start, 1: ROM part start in RAM, 2: ROM part end in RAM
 		extern u32 romMapLines;
