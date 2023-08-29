@@ -761,10 +761,16 @@ static bool isROMLoadableInRAM(const tDSiHeader* dsiHeader, const tNDSHeader* nd
 		const bool twlType = (ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed);
 		const bool cheatsEnabled = (cheatSizeTotal > 4 && cheatSizeTotal <= 0x8000);
 
-		u32 romSize = (baseRomSize-0x4000)+0x88;
-		if (!usesCloneboot) {
-			romSize = (baseRomSize - ndsHeader->arm9binarySize);
+		u32 romSize = baseRomSize;
+		if (usesCloneboot) {
+			romSize -= 0x4000;
+			romSize += 0x88;
+		} else if (ndsHeader->arm9overlaySource == 0 || ndsHeader->arm9overlaySize == 0) {
+			romSize -= ndsHeader->arm7romOffset;
+			romSize -= ndsHeader->arm7binarySize;
+		} else {
 			romSize -= ndsHeader->arm9romOffset;
+			romSize -= ndsHeader->arm9binarySize;
 		}
 		res = ((consoleModel>0 && twlType && (usesCloneboot ? ((u32)dsiHeader->arm9iromOffset-0x4000) : ((u32)dsiHeader->arm9iromOffset-ndsHeader->arm9romOffset-ndsHeader->arm9binarySize))+ioverlaysSize <= (cheatsEnabled ? dev_CACHE_ADRESS_SIZE_TWLSDK_CHEAT : dev_CACHE_ADRESS_SIZE_TWLSDK))
 			|| (consoleModel> 0 && !twlType && romSize <= (dsiModeConfirmed ? 0x01800000 : 0x01BC0000))
@@ -959,7 +965,14 @@ static void loadIOverlaysintoRAM(const tDSiHeader* dsiHeader, aFile* file, const
 	// Load overlays into RAM
 	if (ioverlaysSize>0x700000) return;
 
-	u32 romOffset = usesCloneboot ? 0x4000 : (ndsHeader->arm9romOffset + ndsHeader->arm9binarySize);
+	u32 romOffset = 0;
+	if (usesCloneboot) {
+		romOffset = 0x4000;
+	} else if (ndsHeader->arm9overlaySource == 0 || ndsHeader->arm9overlaySize == 0) {
+		romOffset = (ndsHeader->arm7romOffset + ndsHeader->arm7binarySize);
+	} else {
+		romOffset = (ndsHeader->arm9romOffset + ndsHeader->arm9binarySize);
+	}
 	fileRead((char*)ROM_LOCATION_TWLSDK+((u32)dsiHeader->arm9iromOffset-romOffset), file, (u32)dsiHeader->arm9iromOffset+dsiHeader->arm9ibinarySize, ioverlaysSize);
 }
 
@@ -969,14 +982,21 @@ static void loadROMintoRAM(const tNDSHeader* ndsHeader, const module_params_t* m
 	// Load ROM into RAM
 	u32 romLocation = getRomLocation(ndsHeader, isSdk5(moduleParams));
 
-	u32 romOffset = 0x4000;
-	s32 romSizeEdit = (baseRomSize-0x4000)+0x88;
-	if (!usesCloneboot) {
-		romOffset = ndsHeader->arm9romOffset + ndsHeader->arm9binarySize;
-		romSizeEdit = (baseRomSize - ndsHeader->arm9binarySize);
+	u32 romOffset = 0;
+	s32 romSizeEdit = baseRomSize;
+	if (usesCloneboot) {
+		romOffset = 0x4000;
+		romSizeEdit -= 0x4000;
+		romSizeEdit += 0x88;
+	} else if (ndsHeader->arm9overlaySource == 0 || ndsHeader->arm9overlaySize == 0) {
+		romOffset = (ndsHeader->arm7romOffset + ndsHeader->arm7binarySize);
+		romSizeEdit -= ndsHeader->arm7romOffset;
+		romSizeEdit -= ndsHeader->arm7binarySize;
+	} else {
+		romOffset = (ndsHeader->arm9romOffset + ndsHeader->arm9binarySize);
 		romSizeEdit -= ndsHeader->arm9romOffset;
+		romSizeEdit -= ndsHeader->arm9binarySize;
 	}
-	// u32 romSizeLimit = (consoleModel==0 ? 0x00BC0000 : 0x01BC0000);
 
 	u32 romLocationChange = romLocation;
 	u32 romOffsetChange = romOffset;

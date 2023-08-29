@@ -192,6 +192,7 @@ int hookNdsRetailArm9(
 	nocashMessage("hookNdsRetailArm9");
 
 	const char* romTid = getRomTid(ndsHeader);
+	extern u32 romLocation;
 	extern u32 romSizeLimit;
 	extern u16 s2FlashcardId;
 	extern bool maxHeapOpen;
@@ -248,13 +249,17 @@ int hookNdsRetailArm9(
 	ce9->s2FlashcardId          = s2FlashcardId;
 	ce9->overlaysSize           = overlaysSize;
 	ce9->ioverlaysSize          = ioverlaysSize;
-	if (extendedMemory && !dsDebugRam) {
-		ce9->romLocation = 0x0C800000;
+	ce9->romLocation = romLocation;
+
+	u32 romOffset = 0;
+	if (usesCloneboot) {
+		romOffset = 0x8000;
+	} else if (ndsHeader->arm9overlaySource == 0 || ndsHeader->arm9overlaySize == 0) {
+		romOffset = (ndsHeader->arm7romOffset + ndsHeader->arm7binarySize);
 	} else {
-		extern u32 romLocation;
-		ce9->romLocation = romLocation;
+		romOffset = (ndsHeader->arm9romOffset + ndsHeader->arm9binarySize);
 	}
-	ce9->romLocation -= (ROMinRAM && usesCloneboot) ? 0x8000 : (ndsHeader->arm9romOffset + ndsHeader->arm9binarySize);
+	ce9->romLocation -= romOffset;
 
 	if (strncmp(romTid, "IPK", 3) == 0 || strncmp(romTid, "IPG", 3) == 0 || strncmp(romTid, "B4T", 3) == 0) {
 		ce9->valueBits |= b_cardReadFix;

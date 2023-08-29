@@ -665,10 +665,16 @@ static bool isROMLoadableInRAM(const tDSiHeader* dsiHeader, const tNDSHeader* nd
 	 && strncmp(romTid, "KPP", 3) != 0 // Pop Island
 	 && strncmp(romTid, "KPF", 3) != 0) // Pop Island: Paperfield
 	) {
-		u32 romSize = (baseRomSize-0x8000)+0x88;
-		if (!usesCloneboot) {
-			romSize = (baseRomSize - ndsHeader->arm9binarySize);
+		u32 romSize = baseRomSize;
+		if (usesCloneboot) {
+			romSize -= 0x8000;
+			romSize += 0x88;
+		} else if (ndsHeader->arm9overlaySource == 0 || ndsHeader->arm9overlaySize == 0) {
+			romSize -= ndsHeader->arm7romOffset;
+			romSize -= ndsHeader->arm7binarySize;
+		} else {
 			romSize -= ndsHeader->arm9romOffset;
+			romSize -= ndsHeader->arm9binarySize;
 		}
 		res = ((expansionPakFound || (extendedMemory && !dsDebugRam)) && (ndsHeader->unitCode == 3 ? (usesCloneboot ? ((u32)dsiHeader->arm9iromOffset-0x8000) : ((u32)dsiHeader->arm9iromOffset-ndsHeader->arm9romOffset-ndsHeader->arm9binarySize))+ioverlaysSize : romSize) <= romSizeLimit);
 		if (res) {
@@ -882,18 +888,26 @@ static void loadIOverlaysintoRAM(const tDSiHeader* dsiHeader, aFile* file, const
 }
 
 static void loadROMintoRAM(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, aFile* file, const bool usesCloneboot) {
-	u32 romOffset = 0x8000;
-	u32 romSizeEdit = (baseRomSize-0x8000)+0x88;
-	if (!usesCloneboot) {
-		romOffset = ndsHeader->arm9romOffset + ndsHeader->arm9binarySize;
-		romSizeEdit = (baseRomSize - ndsHeader->arm9binarySize);
+	u32 romOffset = 0;
+	s32 romSizeEdit = baseRomSize;
+	if (usesCloneboot) {
+		romOffset = 0x8000;
+		romSizeEdit -= 0x8000;
+		romSizeEdit += 0x88;
+	} else if (ndsHeader->arm9overlaySource == 0 || ndsHeader->arm9overlaySize == 0) {
+		romOffset = (ndsHeader->arm7romOffset + ndsHeader->arm7binarySize);
+		romSizeEdit -= ndsHeader->arm7romOffset;
+		romSizeEdit -= ndsHeader->arm7binarySize;
+	} else {
+		romOffset = (ndsHeader->arm9romOffset + ndsHeader->arm9binarySize);
 		romSizeEdit -= ndsHeader->arm9romOffset;
+		romSizeEdit -= ndsHeader->arm9binarySize;
 	}
 
 	if ((_io_dldi_features & FEATURE_SLOT_GBA) && s2FlashcardId != 0) {
 		const u32 buffer = 0x037F8000;
 		const u16 bufferSize = 0x8000;
-		s32 len = (s32)romSizeEdit;
+		s32 len = romSizeEdit;
 		u32 dst = 0;
 		while (1) {
 			u32 readLen = (len > bufferSize) ? bufferSize : len;
