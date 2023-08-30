@@ -69,7 +69,7 @@ extern void ndsCodeStart(u32* addr);
 
 vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS_SDK1;
 
-static unpatchedFunctions* unpatchedFuncs = (unpatchedFunctions*)UNPATCHED_FUNCTION_LOCATION;
+// static unpatchedFunctions* unpatchedFuncs = (unpatchedFunctions*)UNPATCHED_FUNCTION_LOCATION;
 
 extern vu32* volatile cardStruct0;
 
@@ -146,7 +146,7 @@ void s2RamAccess(bool open) {
 }
 
 static bool initialized = false;
-static bool region0FixNeeded = false;
+// static bool region0FixNeeded = false;
 static bool igmReset = false;
 static bool mpuSet = false;
 static bool isDSiWare = false;
@@ -171,7 +171,7 @@ static void enableIPC_SYNC(void) {
 }
 
 extern void slot2MpuFix();
-extern void region0Fix(); // Revert region 0 patch
+// extern void region0Fix(); // Revert region 0 patch
 extern void sdk5MpuFix();
 extern void resetMpu();
 extern u32 getDtcmBase(void);
@@ -668,9 +668,9 @@ int cardReadPDash(u32* cacheStruct, u32 src, u8* dst, u32 len) {
 
 void cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	if (!mpuSet) {
-		if (region0FixNeeded) {
+		/* if (region0FixNeeded) {
 			region0Fix();
-		}
+		} */
 		if (ce9->valueBits & enableExceptionHandler) {
 			setExceptionHandler2();
 		}
@@ -1293,9 +1293,9 @@ u32 myIrqEnable(u32 irq) {
 		setExceptionHandler2();
 	}
 
-	if (unpatchedFuncs->mpuDataOffset) {
+	/* if (unpatchedFuncs->mpuDataOffset) {
 		region0FixNeeded = unpatchedFuncs->mpuInitRegionOldData == 0x4000033;
-	}
+	} */
 
 	hookIPC_SYNC();
 

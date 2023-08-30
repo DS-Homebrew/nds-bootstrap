@@ -51,23 +51,8 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
 
 	const char* romTid = getRomTid(ndsHeader);
 
-	// Trauma Center: Under the Knife (USA)
-	if (strcmp(romTid, "AKDE") == 0) {
-		*(u32*)0x2007434 = 0;
-	}
-
-	// Trauma Center: Under the Knife (Europe)
-	else if (strcmp(romTid, "AKDP") == 0) {
-		*(u32*)0x20A6B90 = 0;
-	}
-
-	// Chou Shittou Caduceus (Japan)
-	else if (strcmp(romTid, "AKDJ") == 0 && ndsHeader->romversion == 1) {
-		*(u32*)0x20CCB18 = 0;
-	}
-
 	// Animal Crossing: Wild World
-	else if ((strncmp(romTid, "ADM", 3) == 0 || strncmp(romTid, "A62", 3) == 0) && !extendedMemory) {
+	if ((strncmp(romTid, "ADM", 3) == 0 || strncmp(romTid, "A62", 3) == 0) && !extendedMemory) {
 		int instancesPatched = 0;
 		u32 addrOffset = (u32)ndsHeader->arm9destination;
 		while (instancesPatched < 3) {

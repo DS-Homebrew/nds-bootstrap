@@ -89,9 +89,9 @@ vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS_SDK5;
 vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS_SDK1;
 #endif
 
-#ifndef TWLSDK
+/* #ifndef TWLSDK
 static unpatchedFunctions* unpatchedFuncs = (unpatchedFunctions*)UNPATCHED_FUNCTION_LOCATION;
-#endif
+#endif */
 
 #ifdef TWLSDK
 tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
@@ -122,9 +122,9 @@ int accessCounter = 0;
 #endif
 bool flagsSet = false;
 static bool driveInitialized = false;
-#ifndef TWLSDK
+/* #ifndef TWLSDK
 static bool region0FixNeeded = false;
-#endif
+#endif */
 bool igmReset = false;
 
 extern bool isDma;
@@ -550,11 +550,11 @@ void cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	#endif
 
 	if (!flagsSet) {
-		#ifndef TWLSDK
+		/* #ifndef TWLSDK
 		if (!(ce9->valueBits & isSdk5) && region0FixNeeded) {
 			region0Fix();
 		}
-		#endif
+		#endif */
 		if (!driveInitialized) {
 			FAT_InitFiles(false);
 			driveInitialized = true;
@@ -1268,11 +1268,11 @@ u32 myIrqEnable(u32 irq) {
 		setExceptionHandler2();
 	}
 
-	#ifndef TWLSDK
+	/* #ifndef TWLSDK
 	if (!(ce9->valueBits & isSdk5) && unpatchedFuncs->mpuDataOffset) {
 		region0FixNeeded = unpatchedFuncs->mpuInitRegionOldData == 0x4000033;
 	}
-	#endif
+	#endif */
 
 	hookIPC_SYNC();
 

@@ -1726,6 +1726,12 @@ u32* findMpuStartOffset(const tNDSHeader* ndsHeader, u32 patchMpuRegion) {
 			mpuInitRegion2SignatureElab, 2
 		);
 	}
+	if (!mpuStartOffset && ((u32)ndsHeader->arm9executeAddress - (u32)ndsHeader->arm9destination) >= 0x1000) {
+		mpuStartOffset = findOffset(
+			(u32*)ndsHeader->arm9executeAddress, 0x400,
+			mpuInitRegionSignature, 1
+		);
+	}
 	if (!mpuStartOffset) {
 		mpuStartOffset = findOffset(
 			(u32*)ndsHeader->arm9destination, iUncompressedSize,
