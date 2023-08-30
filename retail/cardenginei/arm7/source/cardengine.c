@@ -1677,11 +1677,11 @@ void myIrqHandlerVBlank(void) {
 		if (wifiIrq) {
 			wifiIrqTimer++;
 			if (wifiIrqTimer == 30) {
-				IPC_SendSync(0x4);
+				// IPC_SendSync(0x4);
 				wifiIrq = wifiIrqCheck;
 			}
 		} else {
-			IPC_SendSync(0x4);
+			// IPC_SendSync(0x4);
 			wifiIrq = wifiIrqCheck;
 		}
 	} else {
