@@ -930,6 +930,11 @@ static void loadROMintoRAM(const tNDSHeader* ndsHeader, const module_params_t* m
 	if (!isSdk5(moduleParams) && *(u32*)((romLocation-romOffset)+0x003128AC) == 0x4B434148) {
 		*(u32*)((romLocation-romOffset)+0x3128AC) = 0xA00;	// Primary fix for Mario's Holiday
 	}
+
+	dbg_printf("ROM pre-loaded into RAM at ");
+	dbg_hexa(romLocation);
+	dbg_printf("\n");
+	dbg_printf("\n");
 }
 
 static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, aFile romFile) {

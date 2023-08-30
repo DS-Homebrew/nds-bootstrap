@@ -1036,7 +1036,9 @@ static void loadROMintoRAM(const tNDSHeader* ndsHeader, const module_params_t* m
 	overlaysInRam = true;
 	sdmmc_set_ndma_slot(4);
 
-	dbg_printf("ROM pre-loaded into RAM\n");
+	dbg_printf("ROM pre-loaded into RAM at ");
+	dbg_hexa(romLocation);
+	dbg_printf("\n");
 	dbg_printf("\n");
 }
 
