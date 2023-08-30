@@ -761,18 +761,22 @@ static bool isROMLoadableInRAM(const tDSiHeader* dsiHeader, const tNDSHeader* nd
 		const bool twlType = (ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed);
 		const bool cheatsEnabled = (cheatSizeTotal > 4 && cheatSizeTotal <= 0x8000);
 
+		u32 romOffset = 0;
 		u32 romSize = baseRomSize;
 		if (usesCloneboot) {
+			romOffset = 0x4000;
 			romSize -= 0x4000;
 			romSize += 0x88;
 		} else if (ndsHeader->arm9overlaySource == 0 || ndsHeader->arm9overlaySize == 0) {
+			romOffset = (ndsHeader->arm7romOffset + ndsHeader->arm7binarySize);
 			romSize -= ndsHeader->arm7romOffset;
 			romSize -= ndsHeader->arm7binarySize;
 		} else {
+			romOffset = (ndsHeader->arm9romOffset + ndsHeader->arm9binarySize);
 			romSize -= ndsHeader->arm9romOffset;
 			romSize -= ndsHeader->arm9binarySize;
 		}
-		res = ((consoleModel>0 && twlType && (usesCloneboot ? ((u32)dsiHeader->arm9iromOffset-0x4000) : ((u32)dsiHeader->arm9iromOffset-ndsHeader->arm9romOffset-ndsHeader->arm9binarySize))+ioverlaysSize <= (cheatsEnabled ? dev_CACHE_ADRESS_SIZE_TWLSDK_CHEAT : dev_CACHE_ADRESS_SIZE_TWLSDK))
+		res = ((consoleModel> 0 && twlType && ((u32)dsiHeader->arm9iromOffset - romOffset)+ioverlaysSize <= (cheatsEnabled ? dev_CACHE_ADRESS_SIZE_TWLSDK_CHEAT : dev_CACHE_ADRESS_SIZE_TWLSDK))
 			|| (consoleModel> 0 && !twlType && romSize <= (dsiModeConfirmed ? 0x01800000 : 0x01BC0000))
 			|| (consoleModel==0 && !twlType && romSize <= (dsiModeConfirmed ? 0x00800000 : 0x00BC0000)));
 
