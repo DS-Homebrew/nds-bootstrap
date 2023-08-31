@@ -1078,7 +1078,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		fclose(cebin);
 	}
 
-	if (isDSiMode() && unitCode > 0 && (REG_SCFG_EXT7 == 0 ? !conf->gameOnFlashcard : conf->sdFound)) {
+	if (isDSiMode() && unitCode > 0 && !conf->gameOnFlashcard) {
 		const bool sdNandFound = conf->sdNand && (access("sd:/shared1", F_OK) == 0);
 		const bool sdPhotoFound = conf->sdNand && (access("sd:/photo", F_OK) == 0);
 
