@@ -1247,7 +1247,7 @@ u32 myIrqEnable(u32 irq) {
 
 	#ifdef TWLSDK
 	#ifdef DLDI
-	if (!(ce9->valueBits & dsiBios) && *(u32*)0x02F70000 != 0) {
+	if (!(ce9->valueBits & dsiBios) && *(u32*)0x02F70000 == 0xEA00002E) {
 		extern void setLowVectors();
 
 		u32* itcmAddr = (u32*)0x01000000;
