@@ -1502,18 +1502,15 @@ int arm7_main(void) {
 			// }
 		}
 
-		aFile romFileBak;
-		aFile savFileBak;
+		tonccpy((char*)ROM_FILE_LOCATION_TWLSDK, romFile, sizeof(aFile));
+		tonccpy((char*)SAV_FILE_LOCATION_TWLSDK, savFile, sizeof(aFile));
 
-		tonccpy(&romFileBak, romFile, sizeof(aFile));
-		tonccpy(&savFileBak, savFile, sizeof(aFile));
+		romFile = (aFile*)ROM_FILE_LOCATION_TWLSDK;
+		savFile = (aFile*)SAV_FILE_LOCATION_TWLSDK;
 
 		initMBK_dsiMode();
 		arm9_stateFlag = ARM9_INITMBK;
 		while (arm9_stateFlag != ARM9_READY);
-
-		tonccpy(romFile, &romFileBak, sizeof(aFile));
-		tonccpy(savFile, &savFileBak, sizeof(aFile));
 
 		REG_SCFG_EXT = 0x93FFFB06;
 		REG_SCFG_CLK = 0x187;
@@ -1893,10 +1890,7 @@ int arm7_main(void) {
 		}
 
 		if (ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr)) {
-			if (dsiModeConfirmed) {
-				tonccpy((char*)ROM_FILE_LOCATION_TWLSDK, romFile, sizeof(aFile));
-				tonccpy((char*)SAV_FILE_LOCATION_TWLSDK, savFile, sizeof(aFile));
-			} else {
+			if (!dsiModeConfirmed) {
 				tonccpy((char*)ROM_FILE_LOCATION_MAINMEM5, romFile, sizeof(aFile));
 				tonccpy((char*)SAV_FILE_LOCATION_MAINMEM5, savFile, sizeof(aFile));
 			}
