@@ -1254,7 +1254,7 @@ u32 myIrqEnable(u32 irq) {
 		u32* newVectorAddr = (u32*)0x02000000;
 		for (int i = 0; i < 8; i++) {
 			itcmAddr[i] = 0xEA7FFFFE;
-			newVectorAddr[i] = 0xEAD7FFFE;
+			newVectorAddr[i] = 0xEA3D7FFE;
 		}
 
 		setLowVectors();
