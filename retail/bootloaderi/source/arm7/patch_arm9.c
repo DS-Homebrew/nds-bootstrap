@@ -1368,6 +1368,7 @@ void patchHiHeapPointer(const module_params_t* moduleParams, const tNDSHeader* n
 	dbg_hexa((u32)oldheapPointer);
 	dbg_printf("\n\n");
 
+	const u32 dsiHiHeap = ((gameOnFlashcard && consoleModel == 0 && !cheatsEnabled) || consoleModel > 0) ? 0x02F70000 : retail_CACHE_ADRESS_START_TWLSDK;
 	bool newHiHeapReported = false;
 
 	if (ROMsupportsDsiMode) {
@@ -1397,7 +1398,7 @@ void patchHiHeapPointer(const module_params_t* moduleParams, const tNDSHeader* n
 							dbg_hexa((u32)heapPointer+(i*sizeof(u32)));
 							dbg_printf("\n\n");
 
-							heapPointer[i] = retail_CACHE_ADRESS_START_TWLSDK;
+							heapPointer[i] = dsiHiHeap;
 
 							dbg_printf("new hi heap value: ");
 							dbg_hexa(heapPointer[i]);
@@ -1425,7 +1426,7 @@ void patchHiHeapPointer(const module_params_t* moduleParams, const tNDSHeader* n
 							}
 						}
 
-						*(u32*)(addr+0x13C) = retail_CACHE_ADRESS_START_TWLSDK;
+						*(u32*)(addr+0x13C) = dsiHiHeap;
 					} else {
 						*(u32*)(addr) = 0xE59F0094; // ldr r0, =0x2F60000
 
@@ -1436,7 +1437,7 @@ void patchHiHeapPointer(const module_params_t* moduleParams, const tNDSHeader* n
 							}
 						}
 
-						*(u32*)(addr+0x9C) = retail_CACHE_ADRESS_START_TWLSDK;
+						*(u32*)(addr+0x9C) = dsiHiHeap;
 					}
 					dbg_printf("new hi heap value: ");
 					dbg_hexa(*(u32*)(addr+(debuggerSdk ? 0x13C : 0x9C)));
@@ -1454,7 +1455,7 @@ void patchHiHeapPointer(const module_params_t* moduleParams, const tNDSHeader* n
 								dbg_hexa((u32)heapPointer+(i*sizeof(u32)));
 								dbg_printf("\n\n");
 
-								heapPointer[i] = retail_CACHE_ADRESS_START_TWLSDK;
+								heapPointer[i] = dsiHiHeap;
 
 								dbg_printf("new hi heap value: ");
 								dbg_hexa(heapPointer[i]);

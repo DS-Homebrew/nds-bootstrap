@@ -1414,7 +1414,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 	if (!isDSiMode() && unitCode>0 && (conf->dsiMode || conf->isDSiWare)) {
 		// Load DSi ARM9 BIOS
-		const u32 relocAddr9 = 0x02F60000;
+		const u32 relocAddr9 = 0x02F70000;
 		cebin = fopen("sd:/_nds/bios9i.bin", "rb");
 		if (!cebin) {
 			cebin = fopen("sd:/_nds/bios9i_part1.bin", "rb");
