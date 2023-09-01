@@ -263,8 +263,7 @@ static void resetMemory_ARM7(void) {
 	REG_IPC_FIFO_CR = 0;
 
 	//if(dsiMode) {
-		memset_addrs_arm7(0x03000000, 0x0380FFC0);
-		memset_addrs_arm7(0x0380FFD0, 0x03800000 + 0x10000);
+		memset_addrs_arm7(0x03000000, 0x03800000 + 0x10000);
 	/*} else {
 		memset_addrs_arm7(0x03800000 - 0x8000, 0x03800000 + 0x10000);
 	}*/
