@@ -174,6 +174,10 @@ static void initMBK(void) {
 	// Give all DSi WRAM to ARM7 at boot
 	// This function has no effect with ARM7 SCFG locked
 
+	if (strncmp((const char*)0x04FFFA00, "no$gba", 6) == 0) {
+		return;
+	}
+
 	// ARM7 is master of WRAM-A, arm9 of WRAM-B & C
 	REG_MBK9 = 0x3000000F;
 
@@ -1343,7 +1347,7 @@ int arm7_main(void) {
 		enableDebug(&logFile);
 	}
 
-	bool dsiEnhancedMbk = (*(u32*)0x02FFE1A0 == 0x00403000 && REG_SCFG_EXT == 0);
+	bool dsiEnhancedMbk = (*(u32*)0x02FFE1A0 == 0x00403000 && ((REG_SCFG_EXT == 0) || (strncmp((const char*)0x04FFFA00, "no$gba", 6) == 0)));
 
 	aFile srParamsFile;
 	getFileFromCluster(&srParamsFile, srParamsFileCluster, gameOnFlashcard);

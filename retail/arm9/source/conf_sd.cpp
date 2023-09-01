@@ -802,7 +802,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	bool displayEsrb = (newRegion == 1 && memcmp(romTid, "UBR", 3) != 0 && memcmp(romTid, "HND", 3) != 0 && memcmp(romTid, "HNE", 3) != 0);
 
 	if (dsiFeatures() && !conf->b4dsMode) {
-		dsiEnhancedMbk = (isDSiMode() && *(u32*)0x02FFE1A0 == 0x00403000 && REG_SCFG_EXT7 == 0);
+		dsiEnhancedMbk = (isDSiMode() && *(u32*)0x02FFE1A0 == 0x00403000 && ((REG_SCFG_EXT7 == 0) || (strncmp((const char*)0x04FFFA00, "no$gba", 6) == 0)));
 
 		// Load donor ROM's arm7 binary, if needed
 		if (conf->useSdk20Donor) {
