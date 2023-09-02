@@ -15351,12 +15351,26 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
         *(u32*)0x20DE16C = 0xE1A00000; //nop
 	}*/
 
-    // Golden Sun
-    /*else if (strcmp(romTid, "BO5E") == 0) {
-        // patch "refresh" function
-        *(u32*)0x204995C = 0xe12fff1e; //bx lr
-        *(u32*)0x20499C4 = 0xe12fff1e; //bx lr
-    }*/
+    // Golden Sun: Dark Dawn (USA, Australia)
+    else if (strcmp(romTid, "BO5E") == 0) {
+		*(u32*)0x02003EC4 = 0xF1DA95E1; // New checksum for overlay 334
+		setBL(0x0200AC08, (u32)ce9->patches->gsdd_fix);
+		*(u32*)0x02FFF000 = 0x021F7720;
+    }
+
+    // Golden Sun: Dark Dawn (Europe)
+    else if (strcmp(romTid, "BO5P") == 0) {
+		*(u32*)0x02003F00 = 0xF1DA95E1; // New checksum for overlay 334
+		setBL(0x0200AC44, (u32)ce9->patches->gsdd_fix);
+		*(u32*)0x02FFF000 = 0x021F78C0;
+    }
+
+    // Ougon no Taiyou: Shikkoku Naru Yoake (Japan)
+    else if (strcmp(romTid, "BO5J") == 0) {
+		*(u32*)0x02003EA0 = 0xF1DA95E1; // New checksum for overlay 334
+		setBL(0x0200ABE4, (u32)ce9->patches->gsdd_fix);
+		*(u32*)0x02FFF000 = 0x021F7500;
+    }
 
 	// Tropix! Your Island Getaway
     else if (strcmp(romTid, "CTXE") == 0) {

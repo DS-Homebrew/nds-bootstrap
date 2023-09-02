@@ -152,7 +152,9 @@ needFlushDCCache:
 .word   0x0
 #ifndef TWLSDK
 .word   pdash_read
+.word   gsdd_fix
 #else
+.word   0x0
 .word   0x0
 #endif
 .word   vblankHandler
@@ -537,6 +539,15 @@ pdash_read:
     ldr		r6, =cardReadPDash
 	blx		r6
     pop	    {r1-r11, pc}
+.pool
+
+gsdd_fix:
+	push {lr}
+	mov r0, #0
+	ldr r12, =gsddFix
+	blx r12
+	mov r0, #1
+	pop {pc}
 .pool
 
 	.thumb

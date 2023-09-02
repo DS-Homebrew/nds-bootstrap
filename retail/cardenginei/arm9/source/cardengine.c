@@ -121,6 +121,9 @@ int cacheCounter[dev_CACHE_SLOTS_16KB];
 int accessCounter = 0;
 #endif
 bool flagsSet = false;
+#ifndef TWLSDK
+bool gsdd = false;
+#endif
 static bool driveInitialized = false;
 /* #ifndef TWLSDK
 static bool region0FixNeeded = false;
@@ -529,6 +532,33 @@ int cardReadPDash(u32* cacheStruct, u32 src, u8* dst, u32 len) {
     counter++;
 	return counter;
 }
+
+void gsddFix(bool overlay335) {
+	const u32 gsddOverlayOffset = *(u32*)0x02FFF000;
+
+	if (overlay335) {
+		// Patch overlay 335
+		if (*(u32*)gsddOverlayOffset == 0xE163F679)
+		{
+			*(u32*)(gsddOverlayOffset+0xB64) += 0xE0000000; // beq -> b
+			*(u32*)(gsddOverlayOffset+0xBB8) = 0xE3A01000; // mov r1, #0
+			*(u32*)(gsddOverlayOffset+0xBBC) = 0xE3A00000; // mov r0, #0
+			*(u32*)(gsddOverlayOffset+0xBC4) = 0xE1A00000; // nop
+			*(u32*)(gsddOverlayOffset+0xBC8) = 0xE1A00000; // nop
+		}
+		return;
+	}
+
+	// Patch overlay 334
+	if (*(u32*)gsddOverlayOffset == 0xE544AA7C)
+	{
+		*(u32*)(gsddOverlayOffset+0x1120) = 0xE12FFF1E; // bx lr
+		*(u32*)(gsddOverlayOffset+0x115C) = 0xE12FFF1E; // bx lr
+		*(u32*)(gsddOverlayOffset+0x1198) = 0xE12FFF1E; // bx lr
+		*(u32*)(gsddOverlayOffset+0x11D4) = 0xE12FFF1E; // bx lr
+		*(u32*)(gsddOverlayOffset+0x1210) = 0xE12FFF1E; // bx lr
+	}
+}
 #endif
 
 //extern void region2Disable();
@@ -555,6 +585,9 @@ void cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 			region0Fix();
 		}
 		#endif */
+		#ifndef TWLSDK
+		gsdd = (memcmp(ndsHeader->gameCode, "BO5", 3) == 0);
+		#endif
 		if (!driveInitialized) {
 			FAT_InitFiles(false);
 			driveInitialized = true;
@@ -593,6 +626,12 @@ void cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 
 	waitForArm7();
 	// -------------------------------------*/
+	#endif
+
+	#ifndef TWLSDK
+	if (gsdd) {
+		gsddFix(true);
+	}
 	#endif
 
 	if ((ce9->valueBits & cardReadFix) && src < 0x8000) {

@@ -128,21 +128,23 @@ void enableIPC_SYNC(void) {
 void initialize(void) {
 	static bool initialized = false;
 
-	if (!initialized) {
-		if (ce9->valueBits & isSdk5) {
-			sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS_SDK5;
-			ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
-			if (ndsHeader->unitCode > 0) {
-				romFile = (aFile*)ROM_FILE_LOCATION_MAINMEM5;
-				savFile = (aFile*)SAV_FILE_LOCATION_MAINMEM5;
-				apFixOverlaysFile = (aFile*)OVL_FILE_LOCATION_MAINMEM5;
-				#ifndef DLDI
-				cacheAddressTable = (u32*)CACHE_ADDRESS_TABLE_LOCATION_TWLSDK;
-				#endif
-			}
-		}
-		initialized = true;
+	if (initialized) {
+		return;
 	}
+
+	if (ce9->valueBits & isSdk5) {
+		sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS_SDK5;
+		ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
+		if (ndsHeader->unitCode > 0) {
+			romFile = (aFile*)ROM_FILE_LOCATION_MAINMEM5;
+			savFile = (aFile*)SAV_FILE_LOCATION_MAINMEM5;
+			apFixOverlaysFile = (aFile*)OVL_FILE_LOCATION_MAINMEM5;
+			#ifndef DLDI
+			cacheAddressTable = (u32*)CACHE_ADDRESS_TABLE_LOCATION_TWLSDK;
+			#endif
+		}
+	}
+	initialized = true;
 }
 #endif
 
