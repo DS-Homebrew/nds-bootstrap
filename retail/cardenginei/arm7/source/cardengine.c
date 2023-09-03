@@ -1290,6 +1290,43 @@ static bool resume_cardRead_arm9(void) {
         return false;    
     }
 }
+
+static bool gsddFix(void) {
+	if (sharedAddr[4] != 0x44445347) {
+        return false;
+    }
+
+	const u32 gsddOverlayOffset = *(u32*)0x02FFF000;
+
+	// Patch overlay 334
+	if (*(u32*)gsddOverlayOffset == 0xE544AA7C)
+	{
+		tonccpy((u32*)(gsddOverlayOffset+0x1120), (u32*)0x02FFF004, 0x18);
+		tonccpy((u32*)(gsddOverlayOffset+0x115C), (u32*)0x02FFF004, 0x18);
+		tonccpy((u32*)(gsddOverlayOffset+0x1198), (u32*)0x02FFF004, 0x18);
+		tonccpy((u32*)(gsddOverlayOffset+0x11D4), (u32*)0x02FFF004, 0x18);
+		tonccpy((u32*)(gsddOverlayOffset+0x1210), (u32*)0x02FFF004, 0x18);
+
+		/* *(u32*)(gsddOverlayOffset+0x1120) = 0xE12FFF1E; // bx lr
+		*(u32*)(gsddOverlayOffset+0x115C) = 0xE12FFF1E; // bx lr
+		*(u32*)(gsddOverlayOffset+0x1198) = 0xE12FFF1E; // bx lr
+		*(u32*)(gsddOverlayOffset+0x11D4) = 0xE12FFF1E; // bx lr
+		*(u32*)(gsddOverlayOffset+0x1210) = 0xE12FFF1E; // bx lr */
+	}
+
+	/* const u32 gsddOverlayChecksumOffset = *(u32*)0x02FFF004;
+	// const u32 gsddOverlayFuncOffset = *(u32*)0x02FFF008;
+	const u32 oldChecksum = 0x2FBB82E1;
+	const u32 newChecksum = *(u32*)0x02FFF17C;
+
+	if (*(u32*)gsddOverlayChecksumOffset == oldChecksum) {
+		*(u32*)gsddOverlayChecksumOffset = newChecksum;
+		// *(u32*)gsddOverlayFuncOffset = 0xE1A00000; // nop (Start the game past name setting)
+	} */
+
+	sharedAddr[4] = 0;
+	return true;
+}
 #endif
 
 static inline void sdmmcHandler(void) {
@@ -1430,6 +1467,11 @@ void myIrqHandlerFIFO(void) {
 	calledViaIPC = true;
 
     if (IPC_GetSync() == 0x3) {
+		#ifndef TWLSDK
+		if (gsddFix()) {
+			return;
+		}
+		#endif
 		swiDelay(100);
 		IPC_SendSync(0x3);
 		return;

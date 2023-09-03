@@ -42,6 +42,8 @@ typedef struct cardengineArm9Patches {
 	u32 needFlushDCCache;
 	u32* pdash_read;
 	u32* gsdd_fix;
+	u32* gsdd_return;
+	u32* gsddChecksumPatch;
 	u32* vblankHandlerRef;
 	u32* ipcSyncHandlerRef;
 } cardengineArm9Patches;

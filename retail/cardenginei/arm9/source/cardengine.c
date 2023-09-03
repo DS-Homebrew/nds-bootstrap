@@ -533,31 +533,39 @@ int cardReadPDash(u32* cacheStruct, u32 src, u8* dst, u32 len) {
 	return counter;
 }
 
-void gsddFix(bool overlay335) {
+void gsddFix335(void) {
 	const u32 gsddOverlayOffset = *(u32*)0x02FFF000;
 
-	if (overlay335) {
-		// Patch overlay 335
-		if (*(u32*)gsddOverlayOffset == 0xE163F679)
-		{
-			*(u32*)(gsddOverlayOffset+0xB64) += 0xE0000000; // beq -> b
-			*(u32*)(gsddOverlayOffset+0xBB8) = 0xE3A01000; // mov r1, #0
-			*(u32*)(gsddOverlayOffset+0xBBC) = 0xE3A00000; // mov r0, #0
-			*(u32*)(gsddOverlayOffset+0xBC4) = 0xE1A00000; // nop
-			*(u32*)(gsddOverlayOffset+0xBC8) = 0xE1A00000; // nop
+	// Patch overlay 335
+	if (*(u32*)gsddOverlayOffset == 0xE163F679)
+	{
+		*(u32*)(gsddOverlayOffset+0xB64) += 0xE0000000; // beq -> b
+		*(u32*)(gsddOverlayOffset+0xBB8) = 0xE3A01000; // mov r1, #0
+		*(u32*)(gsddOverlayOffset+0xBBC) = 0xE3A00000; // mov r0, #0
+		*(u32*)(gsddOverlayOffset+0xBC4) = 0xE1A00000; // nop
+		*(u32*)(gsddOverlayOffset+0xBC8) = 0xE1A00000; // nop
+
+		tonccpy((u32*)0x02FFF004, ce9->patches->gsdd_return, 0x18);
+		*(u32*)0x02FFF180 = (u32)ce9->patches->gsddChecksumPatch;
+	}
+}
+
+void gsddFix(void) {
+	sharedAddr[4] = 0x44445347; // 'GSDD'
+	IPC_SendSync(0x3);
+	while (sharedAddr[4] == 0x44445347) { swiDelay(100); }
+}
+
+u32 gsddChecksumPatch(u32* lr, u32 ret) {
+	// for (int i = 0; i < 0x400/sizeof(u32); i++)
+	for (int i = 0; i < 0x800/sizeof(u32); i++) {
+		if (lr[i] == 0x2FBB82E1) {
+			lr[i] = *(u32*)0x02FFF17C;
+			break;
 		}
-		return;
 	}
 
-	// Patch overlay 334
-	if (*(u32*)gsddOverlayOffset == 0xE544AA7C)
-	{
-		*(u32*)(gsddOverlayOffset+0x1120) = 0xE12FFF1E; // bx lr
-		*(u32*)(gsddOverlayOffset+0x115C) = 0xE12FFF1E; // bx lr
-		*(u32*)(gsddOverlayOffset+0x1198) = 0xE12FFF1E; // bx lr
-		*(u32*)(gsddOverlayOffset+0x11D4) = 0xE12FFF1E; // bx lr
-		*(u32*)(gsddOverlayOffset+0x1210) = 0xE12FFF1E; // bx lr
-	}
+	return ret;
 }
 #endif
 
@@ -630,7 +638,7 @@ void cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 
 	#ifndef TWLSDK
 	if (gsdd) {
-		gsddFix(true);
+		gsddFix335();
 	}
 	#endif
 

@@ -15353,23 +15353,32 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
 
     // Golden Sun: Dark Dawn (USA, Australia)
     else if (strcmp(romTid, "BO5E") == 0) {
-		*(u32*)0x02003EC4 = 0xF1DA95E1; // New checksum for overlay 334
+		*(u32*)0x02FFF17C = 0x9291B671; // New checksum for overlay 334
+		// *(u32*)0x02003EC4 = *(u32*)0x02FFF17C;
 		setBL(0x0200AC08, (u32)ce9->patches->gsdd_fix);
 		*(u32*)0x02FFF000 = 0x021F7720;
+		// *(u32*)0x02FFF004 = 0x021EE7A0;
+		// *(u32*)0x02FFF008 = 0x021EE5A0;
     }
 
     // Golden Sun: Dark Dawn (Europe)
     else if (strcmp(romTid, "BO5P") == 0) {
-		*(u32*)0x02003F00 = 0xF1DA95E1; // New checksum for overlay 334
+		*(u32*)0x02FFF17C = 0x9291B671; // New checksum for overlay 334
+		// *(u32*)0x02003F00 = *(u32*)0x02FFF17C;
 		setBL(0x0200AC44, (u32)ce9->patches->gsdd_fix);
 		*(u32*)0x02FFF000 = 0x021F78C0;
-    }
+ 		// *(u32*)0x02FFF004 = 0x021EE944;
+		// *(u32*)0x02FFF008 = 0x021EE740;
+   }
 
     // Ougon no Taiyou: Shikkoku Naru Yoake (Japan)
     else if (strcmp(romTid, "BO5J") == 0) {
-		*(u32*)0x02003EA0 = 0xF1DA95E1; // New checksum for overlay 334
+		*(u32*)0x02FFF17C = 0x9291B671; // New checksum for overlay 334
+		// *(u32*)0x02003EA0 = *(u32*)0x02FFF17C;
 		setBL(0x0200ABE4, (u32)ce9->patches->gsdd_fix);
 		*(u32*)0x02FFF000 = 0x021F7500;
+ 		// *(u32*)0x02FFF004 = 0x021EE580;
+		// *(u32*)0x02FFF008 = 0x021EE380;
     }
 
 	// Tropix! Your Island Getaway
