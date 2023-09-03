@@ -1301,11 +1301,11 @@ static bool gsddFix(void) {
 	// Patch overlay 334
 	if (*(u32*)gsddOverlayOffset == 0xE544AA7C)
 	{
-		tonccpy((u32*)(gsddOverlayOffset+0x1120), (u32*)0x02FFF004, 0x18);
-		tonccpy((u32*)(gsddOverlayOffset+0x115C), (u32*)0x02FFF004, 0x18);
-		tonccpy((u32*)(gsddOverlayOffset+0x1198), (u32*)0x02FFF004, 0x18);
-		tonccpy((u32*)(gsddOverlayOffset+0x11D4), (u32*)0x02FFF004, 0x18);
-		tonccpy((u32*)(gsddOverlayOffset+0x1210), (u32*)0x02FFF004, 0x18);
+		tonccpy((u32*)(gsddOverlayOffset+0x1120), (u32*)0x02FFF004, 0x10);
+		tonccpy((u32*)(gsddOverlayOffset+0x115C), (u32*)0x02FFF004, 0x10);
+		tonccpy((u32*)(gsddOverlayOffset+0x1198), (u32*)0x02FFF004, 0x10);
+		tonccpy((u32*)(gsddOverlayOffset+0x11D4), (u32*)0x02FFF004, 0x10);
+		tonccpy((u32*)(gsddOverlayOffset+0x1210), (u32*)0x02FFF004, 0x10);
 
 		/* *(u32*)(gsddOverlayOffset+0x1120) = 0xE12FFF1E; // bx lr
 		*(u32*)(gsddOverlayOffset+0x115C) = 0xE12FFF1E; // bx lr

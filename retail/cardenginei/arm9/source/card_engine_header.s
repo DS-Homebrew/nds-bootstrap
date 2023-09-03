@@ -515,7 +515,6 @@ gsdd_fix:
 	pop {pc}
 
 gsdd_return:
-	ldr r1, =0x11F
 	mov r0, lr
 	ldr r12, =0x02FFF180
 	ldr pc, [r12]

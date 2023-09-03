@@ -545,7 +545,7 @@ void gsddFix335(void) {
 		*(u32*)(gsddOverlayOffset+0xBC4) = 0xE1A00000; // nop
 		*(u32*)(gsddOverlayOffset+0xBC8) = 0xE1A00000; // nop
 
-		tonccpy((u32*)0x02FFF004, ce9->patches->gsdd_return, 0x18);
+		tonccpy((u32*)0x02FFF004, ce9->patches->gsdd_return, 0x10);
 		*(u32*)0x02FFF180 = (u32)ce9->patches->gsddChecksumPatch;
 	}
 }
@@ -565,7 +565,7 @@ u32 gsddChecksumPatch(u32* lr, u32 ret) {
 		}
 	}
 
-	return ret;
+	return (ret == 0x11F) ? ret : 0;
 }
 #endif
 
