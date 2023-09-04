@@ -544,16 +544,30 @@ void gsddFix335(void) {
 		*(u32*)(gsddOverlayOffset+0xBBC) = 0xE3A00000; // mov r0, #0
 		*(u32*)(gsddOverlayOffset+0xBC4) = 0xE1A00000; // nop
 		*(u32*)(gsddOverlayOffset+0xBC8) = 0xE1A00000; // nop
-
-		tonccpy((u32*)0x02FFF004, ce9->patches->gsdd_return, 0x10);
-		*(u32*)0x02FFF180 = (u32)ce9->patches->gsddChecksumPatch;
 	}
 }
 
 void gsddFix(void) {
-	sharedAddr[4] = 0x44445347; // 'GSDD'
+	const u32 gsddOverlayOffset = *(u32*)0x02FFF000;
+
+	// Patch overlay 334
+	if (*(u32*)gsddOverlayOffset == 0xE544AA7C)
+	{
+		tonccpy((u32*)(gsddOverlayOffset+0x1120), (u32*)0x02FFF004, 0x10);
+		tonccpy((u32*)(gsddOverlayOffset+0x115C), (u32*)0x02FFF004, 0x10);
+		tonccpy((u32*)(gsddOverlayOffset+0x1198), (u32*)0x02FFF004, 0x10);
+		tonccpy((u32*)(gsddOverlayOffset+0x11D4), (u32*)0x02FFF004, 0x10);
+		tonccpy((u32*)(gsddOverlayOffset+0x1210), (u32*)0x02FFF004, 0x10);
+
+		/* *(u32*)(gsddOverlayOffset+0x1120) = 0xE12FFF1E; // bx lr
+		*(u32*)(gsddOverlayOffset+0x115C) = 0xE12FFF1E; // bx lr
+		*(u32*)(gsddOverlayOffset+0x1198) = 0xE12FFF1E; // bx lr
+		*(u32*)(gsddOverlayOffset+0x11D4) = 0xE12FFF1E; // bx lr
+		*(u32*)(gsddOverlayOffset+0x1210) = 0xE12FFF1E; // bx lr */
+	}
+	/* sharedAddr[4] = 0x44445347; // 'GSDD'
 	IPC_SendSync(0x3);
-	while (sharedAddr[4] == 0x44445347) { swiDelay(100); }
+	while (sharedAddr[4] == 0x44445347) { swiDelay(100); } */
 }
 
 u32 gsddChecksumPatch(u32* lr, u32 ret) {

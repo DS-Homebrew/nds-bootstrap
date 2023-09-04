@@ -1467,11 +1467,11 @@ void myIrqHandlerFIFO(void) {
 	calledViaIPC = true;
 
     if (IPC_GetSync() == 0x3) {
-		#ifndef TWLSDK
+		/* #ifndef TWLSDK
 		if (gsddFix()) {
 			return;
 		}
-		#endif
+		#endif */
 		swiDelay(100);
 		IPC_SendSync(0x3);
 		return;
