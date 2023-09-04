@@ -548,26 +548,10 @@ void gsddFix335(void) {
 }
 
 void gsddFix(void) {
-	const u32 gsddOverlayOffset = *(u32*)0x02FFF000;
-
-	// Patch overlay 334
-	if (*(u32*)gsddOverlayOffset == 0xE544AA7C)
-	{
-		tonccpy((u32*)(gsddOverlayOffset+0x1120), (u32*)0x02FFF004, 0x10);
-		tonccpy((u32*)(gsddOverlayOffset+0x115C), (u32*)0x02FFF004, 0x10);
-		tonccpy((u32*)(gsddOverlayOffset+0x1198), (u32*)0x02FFF004, 0x10);
-		tonccpy((u32*)(gsddOverlayOffset+0x11D4), (u32*)0x02FFF004, 0x10);
-		tonccpy((u32*)(gsddOverlayOffset+0x1210), (u32*)0x02FFF004, 0x10);
-
-		/* *(u32*)(gsddOverlayOffset+0x1120) = 0xE12FFF1E; // bx lr
-		*(u32*)(gsddOverlayOffset+0x115C) = 0xE12FFF1E; // bx lr
-		*(u32*)(gsddOverlayOffset+0x1198) = 0xE12FFF1E; // bx lr
-		*(u32*)(gsddOverlayOffset+0x11D4) = 0xE12FFF1E; // bx lr
-		*(u32*)(gsddOverlayOffset+0x1210) = 0xE12FFF1E; // bx lr */
-	}
-	/* sharedAddr[4] = 0x44445347; // 'GSDD'
+	sharedAddr[4] = 0x44445347; // 'GSDD'
 	IPC_SendSync(0x3);
-	while (sharedAddr[4] == 0x44445347) { swiDelay(100); } */
+	while (sharedAddr[4] == 0x44445347) { swiDelay(100); }
+	cacheFlush();
 }
 
 u32 gsddChecksumPatch(u32* lr, u32 ret) {
@@ -579,7 +563,7 @@ u32 gsddChecksumPatch(u32* lr, u32 ret) {
 		}
 	}
 
-	return (ret == 0x11F) ? ret : 0;
+	return (ret == 0x7B || ret == 0xCD || ret == 0x11F) ? ret : 0;
 }
 #endif
 
