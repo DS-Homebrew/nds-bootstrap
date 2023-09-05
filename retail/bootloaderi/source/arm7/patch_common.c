@@ -15351,7 +15351,7 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
         *(u32*)0x20DE16C = 0xE1A00000; //nop
 	}*/
 
-	#define gsddChecksum	0x02A27782	// New checksum for overlay 334 (DSProtect v2.01)
+	#define gsddChecksum	0x7AA27782	// New checksum for overlay 334 (DSProtect v2.01)
 
 	// Golden Sun: Dark Dawn (USA, Australia)
 	else if (strcmp(romTid, "BO5E") == 0) {

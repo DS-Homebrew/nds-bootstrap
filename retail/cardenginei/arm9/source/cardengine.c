@@ -548,7 +548,7 @@ void gsddGetOverlayOffset(u32* overlayOffset) {
 void gsddFix(void) {
 }
 
-u32 gsddReturn(void* unused, u32 ret) {
+u32 gsddReturn(u32 ret) {
 	return 0;
 }
 #else
@@ -619,7 +619,7 @@ void gsddFix(void) {
 	}
 }
 
-u32 gsddReturn(void* unused, u32 ret) {
+u32 gsddReturn(u32 ret) {
 	return (ret == 0x7B || ret == 0xCD || ret == 0x11F) ? ret : 0;
 }
 #endif

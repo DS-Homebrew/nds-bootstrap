@@ -523,7 +523,7 @@ gsdd_fix:
 	pop {pc}
 
 gsdd_return:
-	mov r0, lr
+	mov r0, r1
 	ldr r12, =0x02FFF180
 	ldr pc, [r12]
 .pool
