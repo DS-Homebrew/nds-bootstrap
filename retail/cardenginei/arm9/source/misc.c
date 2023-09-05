@@ -105,6 +105,7 @@ static void waitForArm7(void) {
 
 bool IPC_SYNC_hooked = false;
 void hookIPC_SYNC(void) {
+	#ifndef GSDD
     if (!IPC_SYNC_hooked) {
 		#ifndef TWLSDK
 		if (!(ce9->valueBits & isSdk5)) {
@@ -118,12 +119,15 @@ void hookIPC_SYNC(void) {
 		*ipcSyncHandler = (u32)ce9->patches->ipcSyncHandlerRef;
 		IPC_SYNC_hooked = true;
     }
+	#endif
 }
 
 void enableIPC_SYNC(void) {
+	#ifndef GSDD
 	if (IPC_SYNC_hooked && !(REG_IE & IRQ_IPC_SYNC)) {
 		REG_IE |= IRQ_IPC_SYNC;
 	}
+	#endif
 }
 
 #ifndef TWLSDK
