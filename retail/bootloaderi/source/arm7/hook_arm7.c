@@ -42,7 +42,7 @@
 #define b_preciseVolumeControl BIT(6)
 #define b_powerCodeOnVBlank BIT(7)
 #define b_runCardEngineCheck BIT(8)
-#define b_cardReadDma BIT(9)
+#define b_igmAccessible BIT(9)
 #define b_hiyaCfwFound BIT(10)
 #define b_slowSoftReset BIT(11)
 #define b_wideCheatUsed BIT(12)
@@ -58,6 +58,7 @@
 
 extern u32 newArm7binarySize;
 extern u32 newArm7ibinarySize;
+bool igmAccessible = true;
 
 static const int MAX_HANDLER_LEN = 50;
 
@@ -367,8 +368,8 @@ int hookNdsRetailArm7(
 		if (strncmp(romTid, "UBR", 3) == 0 || iUncompressedSize > 0x26C000) {
 			ce7->valueBits |= b_slowSoftReset;
 		}
-		if (cardReadDMA) {
-			ce7->valueBits |= b_cardReadDma;
+		if (igmAccessible) {
+			ce7->valueBits |= b_igmAccessible;
 		}
 		if (isSdk5(moduleParams)) {
 			ce7->valueBits |= b_isSdk5;
