@@ -461,10 +461,14 @@ static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
 
 	//sleepMsEnabled = false;
 
+	#ifdef GSDD
+	cacheFlush(); //workaround for some weird data-cache issue in Golden Sun: Dark Dawn
+	#else
 	#ifndef TWLSDK
 	if (ce9->valueBits & cacheFlushFlag) {
 		cacheFlush(); //workaround for some weird data-cache issue in Bowser's Inside Story.
 	}
+	#endif
 	#endif
 }
 
