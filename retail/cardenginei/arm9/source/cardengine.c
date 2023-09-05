@@ -1344,11 +1344,15 @@ void myIrqHandlerIPC(void) {
 }
 
 u32 myIrqEnable(u32 irq) {	
-	int oldIME = enterCriticalSection();
-
 	#ifdef DEBUG
 	nocashMessage("myIrqEnable\n");
 	#endif
+
+	#ifdef GSDD
+	return irq;
+	#else
+
+	int oldIME = enterCriticalSection();
 
 	#ifdef TWLSDK
 	#ifdef DLDI
@@ -1388,4 +1392,6 @@ u32 myIrqEnable(u32 irq) {
 	REG_IE |= irq;
 	leaveCriticalSection(oldIME);
 	return irq_before;
+
+	#endif
 }
