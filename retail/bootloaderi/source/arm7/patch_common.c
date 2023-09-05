@@ -15351,12 +15351,13 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
         *(u32*)0x20DE16C = 0xE1A00000; //nop
 	}*/
 
-	#define gsddChecksum	0x02A27782
+	#define gsddChecksum	0x02A27782	// New checksum for overlay 334 (DSProtect v2.01)
 
 	// Golden Sun: Dark Dawn (USA, Australia)
 	else if (strcmp(romTid, "BO5E") == 0) {
-		*(u32*)0x02FFF17C = gsddChecksum; // New checksum for overlay 334
+		*(u32*)0x02FFF17C = gsddChecksum;
 
+		setBEQ(0x02003CA0, 0x02003C30); // Skip a block of DSProtect code branches
 		*(u32*)0x02003EC4 = *(u32*)0x02FFF17C;
 		setBL(0x0200AC00, (u32)ce9->patches->gsdd_get_offset);
 		setBL(0x0200AC08, (u32)ce9->patches->gsdd_fix);
@@ -15371,8 +15372,9 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
 
 	// Golden Sun: Dark Dawn (Europe)
 	else if (strcmp(romTid, "BO5P") == 0) {
-		*(u32*)0x02FFF17C = gsddChecksum; // New checksum for overlay 334
+		*(u32*)0x02FFF17C = gsddChecksum;
 
+		setBEQ(0x02003CDC, 0x02003C6C); // Skip a block of DSProtect code branches
 		*(u32*)0x02003F00 = *(u32*)0x02FFF17C;
 		setBL(0x0200AC3C, (u32)ce9->patches->gsdd_get_offset);
 		setBL(0x0200AC44, (u32)ce9->patches->gsdd_fix);
@@ -15387,8 +15389,9 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
 
 	// Ougon no Taiyou: Shikkoku Naru Yoake (Japan)
 	else if (strcmp(romTid, "BO5J") == 0) {
-		*(u32*)0x02FFF17C = gsddChecksum; // New checksum for overlay 334
+		*(u32*)0x02FFF17C = gsddChecksum;
 
+		setBEQ(0x02003C7C, 0x02003C0C); // Skip a block of DSProtect code branches
 		*(u32*)0x02003EA0 = *(u32*)0x02FFF17C;
 		setBL(0x0200ABDC, (u32)ce9->patches->gsdd_get_offset);
 		setBL(0x0200ABE4, (u32)ce9->patches->gsdd_fix);

@@ -961,7 +961,7 @@ static void loadOverlaysintoRAM(const tNDSHeader* ndsHeader, const module_params
 	fileRead((char*)overlaysLocation, file, alignedOverlaysOffset, newOverlaysSize);
 	sdmmc_set_ndma_slot(4);
 
-	const char* romTid = getRomTid(ndsHeader);
+	// const char* romTid = getRomTid(ndsHeader);
 	overlaysLocation -= alignedOverlaysOffset;
 
 	/* if (strncmp(romTid, "BO5", 3) == 0) {

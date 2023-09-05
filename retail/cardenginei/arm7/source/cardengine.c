@@ -1298,7 +1298,7 @@ static bool gsddFix(void) {
 
 	const u32 gsddOverlayOffset = *(u32*)0x02FFF000;
 
-	// Patch overlay 334
+	// Patch overlay 334 (DSProtect v2.01)
 	if (*(u32*)gsddOverlayOffset == 0xE544AA7C)
 	{
 		tonccpy((u32*)(gsddOverlayOffset+0x1120), (u32*)0x02FFF100, 0x10);

@@ -536,7 +536,7 @@ int cardReadPDash(u32* cacheStruct, u32 src, u8* dst, u32 len) {
 void gsddFix335(void) {
 	const u32 gsddOverlayOffset = *(u32*)0x02FFF000;
 
-	// Patch overlay 335
+	// Patch overlay 335 (DSProtect v2.01s)
 	if (*(u32*)gsddOverlayOffset == 0xE163F679)
 	{
 		*(u32*)(gsddOverlayOffset+0xB64) += 0xE0000000; // beq -> b
@@ -559,7 +559,7 @@ void gsddFix(void) {
 	while (sharedAddr[4] == 0x44445347) { swiDelay(100); }
 	cacheFlush();
 
-	if ((u32)gsddCurrentOverlayOffset == *(u32*)0x02FFF000) {
+	if (gsddCurrentOverlayOffset[0] == 0xE163F679 || gsddCurrentOverlayOffset[0] == 0xE544AA7C) {
 		return;
 	}
 

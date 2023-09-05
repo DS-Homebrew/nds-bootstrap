@@ -158,6 +158,7 @@ extern patchOffsetCacheContents patchOffsetCache;
 
 u32 generateA7Instr(int arg1, int arg2);
 void setB(int arg1, int arg2);
+void setBEQ(int arg1, int arg2);
 void setBL(int arg1, int arg2);
 u32* getOffsetFromBL(u32* blOffset);
 const u16* generateA7InstrThumb(int arg1, int arg2);

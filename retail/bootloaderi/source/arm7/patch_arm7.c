@@ -36,6 +36,10 @@ void setB(int arg1, int arg2) {
 	*(u32*)arg1 = (((u32)(arg2 - arg1 - 8) >> 2) & 0xFFFFFF) | 0xEA000000;
 }
 
+void setBEQ(int arg1, int arg2) {
+	*(u32*)arg1 = (((u32)(arg2 - arg1 - 8) >> 2) & 0xFFFFFF) | 0x0A000000;
+}
+
 void setBL(int arg1, int arg2) {
 	*(u32*)arg1 = (((u32)(arg2 - arg1 - 8) >> 2) & 0xFFFFFF) | 0xEB000000;
 }
