@@ -1217,24 +1217,36 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		}
 		fclose(cebin);
 
+		const bool gsdd = (memcmp(romTid, "BO5", 3) == 0);
+
 		if (conf->gameOnFlashcard) {
+			const char* ce9Path = "nitro:/cardenginei_arm9_dldi.lz77";
+			if (gsdd) {
+				ce9Path = "nitro:/cardenginei_arm9_gsdd_dldi.lz77";
+			}
+
 			// Load DLDI ce9 binary
-			cebin = fopen("nitro:/cardenginei_arm9_dldi.lz77", "rb");
+			cebin = fopen(ce9Path, "rb");
 			if (cebin) {
 				fread(lz77ImageBuffer, 1, sizeof(lz77ImageBuffer), cebin);
 				LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINEI_ARM9_BUFFERED_LOCATION);
 			}
 			fclose(cebin);
 		} else {
+			const char* ce9Path = conf->dsiWramAccess ? "nitro:/cardenginei_arm9.lz77" : "nitro:/cardenginei_arm9_alt.lz77";
+			if (gsdd) {
+				ce9Path = conf->dsiWramAccess ? "nitro:/cardenginei_arm9_gsdd.lz77" : "nitro:/cardenginei_arm9_gsdd_alt.lz77";
+			}
+
 			// Load ce9 binary
-			cebin = fopen(conf->dsiWramAccess ? "nitro:/cardenginei_arm9.lz77" : "nitro:/cardenginei_arm9_alt.lz77", "rb");
+			cebin = fopen(ce9Path, "rb");
 			if (cebin) {
 				fread(lz77ImageBuffer, 1, sizeof(lz77ImageBuffer), cebin);
 				LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINEI_ARM9_BUFFERED_LOCATION);
 			}
 			fclose(cebin);
 
-			if (!conf->dsiWramAccess) {
+			if (!conf->dsiWramAccess && !gsdd) {
 				// Load ce9 binary (alt 2)
 				cebin = fopen("nitro:/cardenginei_arm9_alt2.lz77", "rb");
 				if (cebin) {

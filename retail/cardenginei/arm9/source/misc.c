@@ -61,6 +61,7 @@ extern void ndsCodeStart(u32* addr);
 void resetSlots(void);
 void initMBKARM9_dsiMode(void);
 
+#ifndef GSDD
 void SetBrightness(u8 screen, s8 bright) {
 	u16 mode = 1 << 14;
 
@@ -81,6 +82,7 @@ void waitFrames(int count) {
 		while (REG_VCOUNT == 191);
 	}
 }
+#endif
 
 /*void sleepMs(int ms) {
 	if (REG_IME == 0 || REG_IF == 0) {
@@ -132,6 +134,7 @@ void initialize(void) {
 		return;
 	}
 
+	#ifndef GSDD
 	if (ce9->valueBits & isSdk5) {
 		sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS_SDK5;
 		ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
@@ -144,6 +147,7 @@ void initialize(void) {
 			#endif
 		}
 	}
+	#endif
 	initialized = true;
 }
 #endif
@@ -164,6 +168,7 @@ void reset(u32 param, u32 tid2) {
 #ifndef TWLSDK
 	u32 resetParams = ((ce9->valueBits & isSdk5) ? RESET_PARAM_SDK5 : RESET_PARAM);
 	*(u32*)resetParams = param;
+	#ifndef GSDD
 	if (ce9->valueBits & slowSoftReset) {
 		if (ce9->consoleModel < 2) {
 			// Make screens white
@@ -189,6 +194,7 @@ void reset(u32 param, u32 tid2) {
 		}
 		sharedAddr[3] = 0x52534554;
 	}
+	#endif
 #else
 	#ifdef DLDI
 	sysSetCardOwner(false);	// Give Slot-1 access to arm7

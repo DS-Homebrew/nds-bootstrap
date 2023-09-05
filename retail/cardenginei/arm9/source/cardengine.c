@@ -86,7 +86,11 @@ extern u32 getDtcmBase(void);
 #ifdef TWLSDK
 vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS_SDK5;
 #else
+#ifdef GSDD
+vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS_SDK5;
+#else
 vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS_SDK1;
+#endif
 #endif
 
 /* #ifndef TWLSDK
@@ -100,7 +104,11 @@ aFile* savFile = (aFile*)SAV_FILE_LOCATION_TWLSDK;
 aFile* apFixOverlaysFile = (aFile*)OVL_FILE_LOCATION_TWLSDK;
 aFile* sharedFontFile = (aFile*)FONT_FILE_LOCATION_TWLSDK;
 #else
+#ifdef GSDD
+tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
+#else
 tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER;
+#endif
 aFile* romFile = (aFile*)ROM_FILE_LOCATION_MAINMEM;
 aFile* savFile = (aFile*)SAV_FILE_LOCATION_MAINMEM;
 aFile* apFixOverlaysFile = (aFile*)OVL_FILE_LOCATION_MAINMEM;
@@ -121,9 +129,6 @@ int cacheCounter[dev_CACHE_SLOTS_16KB];
 int accessCounter = 0;
 #endif
 bool flagsSet = false;
-#ifndef TWLSDK
-bool gsdd = false;
-#endif
 static bool driveInitialized = false;
 /* #ifndef TWLSDK
 static bool region0FixNeeded = false;
@@ -519,6 +524,7 @@ bool isNotTcm(u32 address, u32 len) {
 }  
 
 #ifndef TWLSDK
+#ifndef GSDD
 static int counter=0;
 int cardReadPDash(u32* cacheStruct, u32 src, u8* dst, u32 len) {
 	vu32* volatile cardStruct = (vu32* volatile)ce9->cardStruct0;
@@ -531,6 +537,23 @@ int cardReadPDash(u32* cacheStruct, u32 src, u8* dst, u32 len) {
 
     counter++;
 	return counter;
+}
+
+void gsddFix335(void) {
+}
+
+void gsddGetOverlayOffset(u32* overlayOffset) {
+}
+
+void gsddFix(void) {
+}
+
+u32 gsddReturn(void* unused, u32 ret) {
+	return 0;
+}
+#else
+int cardReadPDash(u32* cacheStruct, u32 src, u8* dst, u32 len) {
+	return 0;
 }
 
 void gsddFix335(void) {
@@ -554,19 +577,44 @@ void gsddGetOverlayOffset(u32* overlayOffset) {
 }
 
 void gsddFix(void) {
-	sharedAddr[4] = 0x44445347; // 'GSDD'
+	/* sharedAddr[4] = 0x44445347; // 'GSDD'
 	IPC_SendSync(0x3);
 	while (sharedAddr[4] == 0x44445347) { swiDelay(100); }
-	cacheFlush();
+	cacheFlush(); */
+
+	const u32 gsddOverlayOffset = *(u32*)0x02FFF000;
+
+	// Patch overlay 334 (DSProtect v2.01)
+	if (*(u32*)gsddOverlayOffset == 0xE544AA7C)
+	{
+		tonccpy((u32*)(gsddOverlayOffset+0x1120), (u32*)0x02FFF100, 0x10);
+		tonccpy((u32*)(gsddOverlayOffset+0x115C), (u32*)0x02FFF100, 0x10);
+		tonccpy((u32*)(gsddOverlayOffset+0x1198), (u32*)0x02FFF100, 0x10);
+		tonccpy((u32*)(gsddOverlayOffset+0x11D4), (u32*)0x02FFF100, 0x10);
+		tonccpy((u32*)(gsddOverlayOffset+0x1210), (u32*)0x02FFF100, 0x10);
+
+		/* *(u32*)(gsddOverlayOffset+0x1120) = 0xE12FFF1E; // bx lr
+		*(u32*)(gsddOverlayOffset+0x115C) = 0xE12FFF1E; // bx lr
+		*(u32*)(gsddOverlayOffset+0x1198) = 0xE12FFF1E; // bx lr
+		*(u32*)(gsddOverlayOffset+0x11D4) = 0xE12FFF1E; // bx lr
+		*(u32*)(gsddOverlayOffset+0x1210) = 0xE12FFF1E; // bx lr */
+	}
 
 	if (gsddCurrentOverlayOffset[0] == 0xE163F679 || gsddCurrentOverlayOffset[0] == 0xE544AA7C) {
 		return;
 	}
 
-	for (int i = 0; i < 0x80000/sizeof(u32); i++) {
+	u32 searchLen = 0x10000;
+	if ((u32)gsddCurrentOverlayOffset >= 0x02100000 && (u32)gsddCurrentOverlayOffset < 0x02120000) {
+		searchLen = 0x80000;
+	} else if ((u32)gsddCurrentOverlayOffset >= 0x02160000 && (u32)gsddCurrentOverlayOffset < 0x02170000) {
+		searchLen = 0x20000;
+	}
+
+	for (int i = 0; i < (int)searchLen/sizeof(u32); i++) {
 		if (gsddCurrentOverlayOffset[i] == 0x2FBB82E1) {
 			gsddCurrentOverlayOffset[i] = *(u32*)0x02FFF17C;
-			break;
+			// break;
 		}
 	}
 }
@@ -574,6 +622,7 @@ void gsddFix(void) {
 u32 gsddReturn(void* unused, u32 ret) {
 	return (ret == 0x7B || ret == 0xCD || ret == 0x11F) ? ret : 0;
 }
+#endif
 #endif
 
 //extern void region2Disable();
@@ -600,9 +649,6 @@ void cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 			region0Fix();
 		}
 		#endif */
-		#ifndef TWLSDK
-		gsdd = (memcmp(ndsHeader->gameCode, "BO5", 3) == 0);
-		#endif
 		if (!driveInitialized) {
 			FAT_InitFiles(false);
 			driveInitialized = true;
@@ -643,16 +689,19 @@ void cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	// -------------------------------------*/
 	#endif
 
-	#ifndef TWLSDK
-	if (gsdd) {
-		gsddFix335();
-	}
-	#endif
+	#ifdef GSDD
+	gsddFix335();
 
+	if (src < 0x8000) {
+		// Fix reads below 0x8000
+		src = 0x8000 + (src & 0x1FF);
+	}
+	#else
 	if ((ce9->valueBits & cardReadFix) && src < 0x8000) {
 		// Fix reads below 0x8000
 		src = 0x8000 + (src & 0x1FF);
 	}
+	#endif
 
 	bool romPart = false;
 	//int romPartNo = 0;
@@ -1222,6 +1271,7 @@ void myIrqHandlerIPC(void) {
 	nocashMessage("myIrqHandlerIPC");
 	#endif
 
+#ifndef GSDD
 	switch (IPC_GetSync()) {
 		case 0x3:
 			extern bool dmaDirectRead;
@@ -1290,6 +1340,7 @@ void myIrqHandlerIPC(void) {
 		cacheFlush();
 		while (1);
 	}
+#endif
 }
 
 u32 myIrqEnable(u32 irq) {	
