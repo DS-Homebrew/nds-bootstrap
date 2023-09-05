@@ -98,6 +98,7 @@ needFlushDCCache:
 .word   0x0
 .word   0x0
 .word   0x0
+.word   0x0
 .word   vblankHandler
 .word   ipcSyncHandler
 thumbPatches:

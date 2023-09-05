@@ -77,7 +77,7 @@ bool applyIpsPatch(const tNDSHeader* ndsHeader, u8* ipsbyte, const bool arm9Only
 				}
 			} else {
 				rombyte = (void*)CACHE_ADRESS_START_DSIMODE;
-				rombyte -= ((ndsHeader->arm9romOffset+ndsHeader->arm9binarySize)/cacheBlockSize)*cacheBlockSize;
+				rombyte -= ((ndsHeader->arm9romOffset + ndsHeader->arm9binarySize)/cacheBlockSize)*cacheBlockSize;
 			}
 		}
 		ipson += 3;

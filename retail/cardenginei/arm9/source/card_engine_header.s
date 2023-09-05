@@ -152,10 +152,12 @@ needFlushDCCache:
 .word   0x0
 #ifndef TWLSDK
 .word   pdash_read
+.word   gsdd_get_offset
 .word   gsdd_fix
 .word   gsdd_return
-.word   gsddChecksumPatch
+.word   gsddReturn
 #else
+.word   0x0
 .word   0x0
 .word   0x0
 .word   0x0
@@ -507,6 +509,12 @@ pdash_read:
 	blx		r6
     pop	    {r1-r11, pc}
 .pool
+
+gsdd_get_offset:
+	push {lr}
+	bl gsddGetOverlayOffset
+	mov r0, r6
+	pop {pc}
 
 gsdd_fix:
 	push {lr}

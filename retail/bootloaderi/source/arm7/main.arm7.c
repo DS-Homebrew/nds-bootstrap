@@ -961,8 +961,24 @@ static void loadOverlaysintoRAM(const tNDSHeader* ndsHeader, const module_params
 	fileRead((char*)overlaysLocation, file, alignedOverlaysOffset, newOverlaysSize);
 	sdmmc_set_ndma_slot(4);
 
-	if (!isSdk5(moduleParams) && *(u32*)((overlaysLocation-ndsHeader->arm9romOffset-ndsHeader->arm9binarySize)+0x003128AC) == 0x4B434148) {
-		*(u32*)((overlaysLocation-ndsHeader->arm9romOffset-ndsHeader->arm9binarySize)+0x3128AC) = 0xA00;	// Primary fix for Mario's Holiday (before Rev 11)
+	const char* romTid = getRomTid(ndsHeader);
+	overlaysLocation -= alignedOverlaysOffset;
+
+	/* if (strncmp(romTid, "BO5", 3) == 0) {
+		if (romTid[3] == 'E') {
+			tonccpy((u8*)(overlaysLocation+0xDBDBF), (u8*)0x02FFF17C, 4);
+			tonccpy((u8*)(overlaysLocation+0x270085), (u8*)0x02FFF17C, 4);
+		} else if (romTid[3] == 'P') {
+			tonccpy((u8*)(overlaysLocation+0x7C1B0), (u8*)0x02FFF17C, 4);
+			tonccpy((u8*)(overlaysLocation+0xD09D4), (u8*)0x02FFF17C, 4);
+			tonccpy((u8*)(overlaysLocation+0xDBDC0), (u8*)0x02FFF17C, 4);
+		} else {
+			tonccpy((u8*)(overlaysLocation+0xD09CC), (u8*)0x02FFF17C, 4);
+			tonccpy((u8*)(overlaysLocation+0xDBDBD), (u8*)0x02FFF17C, 4);
+			tonccpy((u8*)(overlaysLocation+0x270087), (u8*)0x02FFF17C, 4);
+		}
+	} else */ if (!isSdk5(moduleParams) && *(u32*)(overlaysLocation+0x3128AC) == 0x4B434148) {
+		*(u32*)(overlaysLocation+0x3128AC) = 0xA00;	// Primary fix for Mario's Holiday (before Rev 11)
 	}
 
 	overlaysInRam = true;

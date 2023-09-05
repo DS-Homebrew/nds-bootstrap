@@ -15355,44 +15355,50 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
 
 	// Golden Sun: Dark Dawn (USA, Australia)
 	else if (strcmp(romTid, "BO5E") == 0) {
-		// *(u32*)0x02003EC4 = *(u32*)0x02FFF17C;
+		*(u32*)0x02FFF17C = gsddChecksum; // New checksum for overlay 334
+
+		*(u32*)0x02003EC4 = *(u32*)0x02FFF17C;
+		setBL(0x0200AC00, (u32)ce9->patches->gsdd_get_offset);
 		setBL(0x0200AC08, (u32)ce9->patches->gsdd_fix);
 
 		*(u32*)0x02FFF000 = 0x021F7720;
-		// *(u32*)0x02FFF004 = 0x021EE7A0;
+		*(u32*)0x02FFF004 = 0x021EE7A0;
 		// *(u32*)0x02FFF008 = 0x021EE5A0;
 
-		*(u32*)0x02FFF17C = gsddChecksum; // New checksum for overlay 334
-		tonccpy((u32*)0x02FFF004, ce9->patches->gsdd_return, 0x10);
-		*(u32*)0x02FFF180 = (u32)ce9->patches->gsddChecksumPatch;
+		tonccpy((u32*)0x02FFF100, ce9->patches->gsdd_return, 0x10);
+		*(u32*)0x02FFF180 = (u32)ce9->patches->gsddReturn;
 	}
 
 	// Golden Sun: Dark Dawn (Europe)
 	else if (strcmp(romTid, "BO5P") == 0) {
-		// *(u32*)0x02003F00 = *(u32*)0x02FFF17C;
+		*(u32*)0x02FFF17C = gsddChecksum; // New checksum for overlay 334
+
+		*(u32*)0x02003F00 = *(u32*)0x02FFF17C;
+		setBL(0x0200AC3C, (u32)ce9->patches->gsdd_get_offset);
 		setBL(0x0200AC44, (u32)ce9->patches->gsdd_fix);
 
 		*(u32*)0x02FFF000 = 0x021F78C0;
-		// *(u32*)0x02FFF004 = 0x021EE944;
+		*(u32*)0x02FFF004 = 0x021EE944;
 		// *(u32*)0x02FFF008 = 0x021EE740;
 
-		*(u32*)0x02FFF17C = gsddChecksum; // New checksum for overlay 334
-		tonccpy((u32*)0x02FFF004, ce9->patches->gsdd_return, 0x10);
-		*(u32*)0x02FFF180 = (u32)ce9->patches->gsddChecksumPatch;
+		tonccpy((u32*)0x02FFF100, ce9->patches->gsdd_return, 0x10);
+		*(u32*)0x02FFF180 = (u32)ce9->patches->gsddReturn;
    }
 
 	// Ougon no Taiyou: Shikkoku Naru Yoake (Japan)
 	else if (strcmp(romTid, "BO5J") == 0) {
-		// *(u32*)0x02003EA0 = *(u32*)0x02FFF17C;
+		*(u32*)0x02FFF17C = gsddChecksum; // New checksum for overlay 334
+
+		*(u32*)0x02003EA0 = *(u32*)0x02FFF17C;
+		setBL(0x0200ABDC, (u32)ce9->patches->gsdd_get_offset);
 		setBL(0x0200ABE4, (u32)ce9->patches->gsdd_fix);
 
 		*(u32*)0x02FFF000 = 0x021F7500;
-		// *(u32*)0x02FFF004 = 0x021EE580;
+		*(u32*)0x02FFF004 = 0x021EE580;
 		// *(u32*)0x02FFF008 = 0x021EE380;
 
-		*(u32*)0x02FFF17C = gsddChecksum; // New checksum for overlay 334
-		tonccpy((u32*)0x02FFF004, ce9->patches->gsdd_return, 0x10);
-		*(u32*)0x02FFF180 = (u32)ce9->patches->gsddChecksumPatch;
+		tonccpy((u32*)0x02FFF100, ce9->patches->gsdd_return, 0x10);
+		*(u32*)0x02FFF180 = (u32)ce9->patches->gsddReturn;
 	}
 
 	// Tropix! Your Island Getaway

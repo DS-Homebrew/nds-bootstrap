@@ -320,7 +320,7 @@ static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
 	fileRead((char*)dst, ((ce9->valueBits & overlaysCached) && src >= ndsHeader->arm9romOffset+ndsHeader->arm9binarySize && src < ndsHeader->arm7romOffset) ? apFixOverlaysFile : romFile, src, len);
 #else
 	if (newOverlayOffset == 0) {
-		newOverlayOffset = ((ndsHeader->arm9romOffset+ndsHeader->arm9binarySize)/ce9->cacheBlockSize)*ce9->cacheBlockSize;
+		newOverlayOffset = ((ndsHeader->arm9romOffset + ndsHeader->arm9binarySize)/ce9->cacheBlockSize)*ce9->cacheBlockSize;
 		for (u32 i = newOverlayOffset; i < ndsHeader->arm7romOffset; i+= ce9->cacheBlockSize) {
 			newOverlaysSize += ce9->cacheBlockSize;
 		}
@@ -547,22 +547,31 @@ void gsddFix335(void) {
 	}
 }
 
+static u32* gsddCurrentOverlayOffset = NULL;
+
+void gsddGetOverlayOffset(u32* overlayOffset) {
+	gsddCurrentOverlayOffset = overlayOffset;
+}
+
 void gsddFix(void) {
 	sharedAddr[4] = 0x44445347; // 'GSDD'
 	IPC_SendSync(0x3);
 	while (sharedAddr[4] == 0x44445347) { swiDelay(100); }
 	cacheFlush();
-}
 
-u32 gsddChecksumPatch(u32* lr, u32 ret) {
-	// for (int i = 0; i < 0x400/sizeof(u32); i++)
-	for (int i = 0; i < 0x800/sizeof(u32); i++) {
-		if (lr[i] == 0x2FBB82E1) {
-			lr[i] = *(u32*)0x02FFF17C;
+	if ((u32)gsddCurrentOverlayOffset == *(u32*)0x02FFF000) {
+		return;
+	}
+
+	for (int i = 0; i < 0x80000/sizeof(u32); i++) {
+		if (gsddCurrentOverlayOffset[i] == 0x2FBB82E1) {
+			gsddCurrentOverlayOffset[i] = *(u32*)0x02FFF17C;
 			break;
 		}
 	}
+}
 
+u32 gsddReturn(void* unused, u32 ret) {
 	return (ret == 0x7B || ret == 0xCD || ret == 0x11F) ? ret : 0;
 }
 #endif
