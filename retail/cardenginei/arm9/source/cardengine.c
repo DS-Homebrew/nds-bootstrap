@@ -571,6 +571,8 @@ void gsddFix335(void) {
 		*(u32*)(gsddOverlayOffset+0xBBC) = 0xE3A00000; // mov r0, #0
 		*(u32*)(gsddOverlayOffset+0xBC4) = 0xE1A00000; // nop
 		*(u32*)(gsddOverlayOffset+0xBC8) = 0xE1A00000; // nop
+
+		cacheFlush();
 	}
 }
 
@@ -602,6 +604,8 @@ void gsddFix(void) {
 		*(u32*)(gsddOverlayOffset+0x1198) = 0xE12FFF1E; // bx lr
 		*(u32*)(gsddOverlayOffset+0x11D4) = 0xE12FFF1E; // bx lr
 		*(u32*)(gsddOverlayOffset+0x1210) = 0xE12FFF1E; // bx lr */
+
+		cacheFlush();
 	}
 
 	if (gsddCurrentOverlayOffset[0] == 0xE163F679 || gsddCurrentOverlayOffset[0] == 0xE544AA7C) {
@@ -615,11 +619,18 @@ void gsddFix(void) {
 		searchLen = 0x20000;
 	}
 
+	bool checksumFound = false;
+
 	for (int i = 0; i < (int)searchLen/sizeof(u32); i++) {
 		if (gsddCurrentOverlayOffset[i] == 0x2FBB82E1) {
 			gsddCurrentOverlayOffset[i] = *(u32*)0x02FFF17C;
+			checksumFound = true;
 			// break;
 		}
+	}
+
+	if (checksumFound) {
+		cacheFlush();
 	}
 }
 
