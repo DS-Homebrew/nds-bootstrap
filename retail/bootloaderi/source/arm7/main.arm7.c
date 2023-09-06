@@ -170,6 +170,18 @@ u32 romMap[4][3] = {
 	{0, 0, 0}
 };
 
+static void NTR_BIOS() {
+	// Switch to NTR mode BIOS (no effect with locked ARM7 SCFG)
+	REG_SCFG_ROM = 0x703;
+	if (REG_SCFG_ROM == 0x703) {
+		dbg_printf("Switched to NTR mode BIOS\n");
+	}
+}
+
+bool scfgBios9i(void) {
+	return ((REG_SCFG_EXT == 0) ? ((u8)a9ScfgRom == 1) : !(REG_SCFG_ROM & BIT(1)));
+}
+
 static void initMBK(void) {
 	// Give all DSi WRAM to ARM7 at boot
 	// This function has no effect with ARM7 SCFG locked
@@ -736,14 +748,14 @@ static module_params_t* loadModuleParams(const tNDSHeader* ndsHeader, bool* foun
 	return moduleParams;
 }
 
-u32 getRomLocation(const tNDSHeader* ndsHeader, const bool isSdk5) {
+u32 getRomLocation(const tNDSHeader* ndsHeader, const bool isESdk2, const bool isSdk5, const bool dsiBios) {
 	if (strncmp(ndsHeader->gameCode, "UBR", 3) == 0) {
 		return ROM_LOCATION_DSIMODE;
 	}
 	if (ndsHeader->unitCode > 0 && dsiModeConfirmed) {
 		return ROM_LOCATION_TWLSDK;
 	}
-	return dsiModeConfirmed ? (isSdk5 ? ROM_LOCATION_SDK5_DSIMODE : ROM_LOCATION_DSIMODE) : ROM_LOCATION;
+	return dsiModeConfirmed ? (isSdk5 ? ROM_LOCATION_SDK5_DSIMODE : ROM_LOCATION_DSIMODE) : (ROM_LOCATION - ((isESdk2 && dsiBios) ? cacheBlockSize : 0));
 }
 
 static bool isROMLoadableInRAM(const tDSiHeader* dsiHeader, const tNDSHeader* ndsHeader, const char* romTid, const module_params_t* moduleParams, const bool usesCloneboot) {
@@ -885,14 +897,6 @@ static void my_readUserSettings(tNDSHeader* ndsHeader) {
 	}
 }
 
-static void NTR_BIOS() {
-	// Switch to NTR mode BIOS (no effect with locked ARM7 SCFG)
-	REG_SCFG_ROM = 0x703;
-	if (REG_SCFG_ROM == 0x703) {
-		dbg_printf("Switched to NTR mode BIOS\n");
-	}
-}
-
 bool dataToPreloadFound(const tNDSHeader* ndsHeader) {
 	return (dataToPreloadSize[0] > 0 && (dataToPreloadSize[0]/*+dataToPreloadSize[1]*/) <= (consoleModel > 0 ? (dsiModeConfirmed ? (ndsHeader->unitCode > 0 ? dev_CACHE_ADRESS_SIZE_TWLSDK : dev_CACHE_ADRESS_SIZE_DSIMODE) : dev_CACHE_ADRESS_SIZE) : (dsiModeConfirmed ? retail_CACHE_ADRESS_SIZE_DSIMODE : retail_CACHE_ADRESS_SIZE))-0x40000);
 }
@@ -902,7 +906,9 @@ static void loadROMPartIntoRAM(const tNDSHeader* ndsHeader, const module_params_
 		return;
 	}
 
-	u32 dataLocation = getRomLocation(ndsHeader, isSdk5(moduleParams));
+	const bool dsiBios = scfgBios9i();
+
+	u32 dataLocation = getRomLocation(ndsHeader, (moduleParams->sdk_version < 0x2008000), isSdk5(moduleParams), dsiBios);
 	s32 preloadSizeEdit = dataToPreloadSize[0];
 
 	u32 romLocationChange = dataLocation;
@@ -912,7 +918,7 @@ static void loadROMPartIntoRAM(const tNDSHeader* ndsHeader, const module_params_
 		fileRead((char*)romLocationChange, file, romOffsetChange, romBlockSize);
 		romLocationChange += 0x4000;
 
-		if (isSdk5(moduleParams)) {
+		if (isSdk5(moduleParams) || (dsiBios && moduleParams->sdk_version >= 0x2008000)) {
 			if (romLocationChange == 0x0C7C4000) {
 				romLocationChange += (ndsHeader->unitCode > 0 ? 0x1C000 : 0x3C000);
 			} else if (ndsHeader->unitCode == 0) {
@@ -926,6 +932,8 @@ static void loadROMPartIntoRAM(const tNDSHeader* ndsHeader, const module_params_
 					romLocationChange += 0x20000;
 				}
 			}
+		} else if (romLocationChange == 0x0CFFC000 && dsiBios) {
+			romLocationChange += 0x4000;
 		} else if (romLocationChange == 0x0C7C0000) {
 			romLocationChange += 0x40000;
 		}
@@ -1002,8 +1010,10 @@ static void loadIOverlaysintoRAM(const tDSiHeader* dsiHeader, aFile* file, const
 static void loadROMintoRAM(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, aFile* romFile, aFile* savFile, const bool usesCloneboot) {
 	sdmmc_set_ndma_slot(0);
 
+	const bool dsiBios = scfgBios9i();
+
 	// Load ROM into RAM
-	u32 romLocation = getRomLocation(ndsHeader, isSdk5(moduleParams));
+	u32 romLocation = getRomLocation(ndsHeader, (moduleParams->sdk_version < 0x2008000), isSdk5(moduleParams), dsiBios);
 
 	u32 romOffset = 0;
 	s32 romSizeEdit = baseRomSize;
@@ -1028,7 +1038,7 @@ static void loadROMintoRAM(const tNDSHeader* ndsHeader, const module_params_t* m
 		fileRead((char*)romLocationChange, romFile, romOffsetChange, romBlockSize);
 		romLocationChange += 0x4000;
 
-		if (isSdk5(moduleParams)) {
+		if (isSdk5(moduleParams) || (dsiBios && moduleParams->sdk_version >= 0x2008000)) {
 			if (romLocationChange == 0x0C7C4000) {
 				romLocationChange += (ndsHeader->unitCode > 0 ? 0x1C000 : 0x3C000);
 			} else if (ndsHeader->unitCode == 0) {
@@ -1042,6 +1052,8 @@ static void loadROMintoRAM(const tNDSHeader* ndsHeader, const module_params_t* m
 					romLocationChange += 0x20000;
 				}
 			}
+		} else if (romLocationChange == 0x0CFFC000 && dsiBios) {
+			romLocationChange += 0x4000;
 		} else if (romLocationChange == 0x0C7C0000) {
 			romLocationChange += 0x40000;
 		}
@@ -2071,7 +2083,7 @@ int arm7_main(void) {
 		}
 
 		if (useApPatch) {
-			if (applyIpsPatch(ndsHeader, (u8*)IPS_LOCATION, (*(u8*)(IPS_LOCATION+apPatchSize-1) == 0xA9), isSdk5(moduleParams), ROMinRAM, usesCloneboot)) {
+			if (applyIpsPatch(ndsHeader, (u8*)IPS_LOCATION, (*(u8*)(IPS_LOCATION+apPatchSize-1) == 0xA9), (moduleParams->sdk_version < 0x2008000), isSdk5(moduleParams), ROMinRAM, usesCloneboot)) {
 				dbg_printf("AP-fix applied\n");
 			} else {
 				dbg_printf("Failed to apply AP-fix\n");

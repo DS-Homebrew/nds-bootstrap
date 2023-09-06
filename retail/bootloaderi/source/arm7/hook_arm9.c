@@ -159,9 +159,9 @@ static u32* hookInterruptHandler(const u32* start, size_t size) {
 }
 
 void configureRomMap(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const u32 romStart, const u8 dsiMode, const u8 consoleModel) {
-	extern u32 getRomLocation(const tNDSHeader* ndsHeader, const bool isSdk5);
+	extern u32 getRomLocation(const tNDSHeader* ndsHeader, const bool isESdk2, const bool isSdk5, const bool dsiBios);
 
-	u32 romLocation = getRomLocation(ndsHeader, (ce9->valueBits & b_isSdk5));
+	u32 romLocation = getRomLocation(ndsHeader, (ce9->valueBits & b_eSdk2), (ce9->valueBits & b_isSdk5), (ce9->valueBits & b_dsiBios));
 	ce9->romLocation = romLocation;
 	ce9->romLocation -= romStart;
 
@@ -181,29 +181,25 @@ void configureRomMap(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const u32
 	if (dsiMode || dsBrowser) {
 		romMapLines = 1;
 
-		if (ce9->valueBits & b_isSdk5) {
-			romMap[0][2] = romLocation+0x4000;
+		romMap[0][2] = romLocation+0x4000;
+
+		romMapLines++;
+
+		romMap[1][0] = romMap[0][0]+0x4000;
+		romMap[1][1] = romLocation+0x40000;
+		romMap[1][2] = romMap[1][1]+0x7FC000;
+
+		if (consoleModel > 0) {
+			romMap[2][0] = romMap[1][0]+0x7FC000;
+			romMap[2][1] = romMap[1][1]+0x800000;
+			romMap[2][2] = romMap[2][1]+0x1000000;
 
 			romMapLines++;
-
-			romMap[1][0] = romMap[0][0]+0x4000;
-			romMap[1][1] = romLocation+(ndsHeader->unitCode > 0 ? 0x20000 : 0x40000);
-			romMap[1][2] = romMap[1][1]+(ndsHeader->unitCode > 0 ? 0x1C000 : 0x7FC000);
-
-			if (consoleModel > 0) {
-				romMap[2][0] = romMap[1][0]+0x7FC000;
-				romMap[2][1] = romMap[1][1]+0x800000;
-				romMap[2][2] = romMap[2][1]+0x1000000;
-
-				romMapLines++;
-			}
-		} else {
-			romMap[0][2] = romMap[0][1]+(consoleModel > 0 ? 0x1800000 : 0x800000);
 		}
 	} else {
 		romMapLines = 2;
 
-		if (ce9->valueBits & b_isSdk5) {
+		if ((ce9->valueBits & b_isSdk5) || ((ce9->valueBits & b_dsiBios) && !(ce9->valueBits & b_eSdk2))) {
 			romMap[0][2] = romLocation+0x3C4000;
 
 			romMap[1][0] = romMap[0][0]+0x3C4000;
@@ -225,6 +221,20 @@ void configureRomMap(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const u32
 					romMapLines++;
 				}
 			} else if (consoleModel > 0) {
+				romMap[2][0] = romMap[1][0]+0x7FC000;
+				romMap[2][1] = romMap[1][1]+0x800000;
+				romMap[2][2] = romMap[2][1]+0x1000000;
+
+				romMapLines++;
+			}
+		} else if (ce9->valueBits & b_dsiBios) {
+			romMap[0][2] = romLocation+0x3C4000;
+
+			romMap[1][0] = romMap[0][0]+0x3C4000;
+			romMap[1][1] = romLocation+0x404000;
+			romMap[1][2] = romMap[1][1]+0x7FC000;
+
+			if (consoleModel > 0) {
 				romMap[2][0] = romMap[1][0]+0x7FC000;
 				romMap[2][1] = romMap[1][1]+0x800000;
 				romMap[2][2] = romMap[2][1]+0x1000000;
@@ -266,7 +276,7 @@ int hookNdsRetailArm9(
 ) {
 	nocashMessage("hookNdsRetailArm9");
 
-	extern u16 a9ScfgRom;
+	extern bool scfgBios9i(void);
 	extern u32 iUncompressedSize;
 	extern u32 overlaysSize;
 	extern bool overlayPatch;
@@ -305,7 +315,7 @@ int hookNdsRetailArm9(
 	) {
 		ce9->valueBits |= b_cacheDisabled; // Disable card data cache for specific games
 	} */
-	if ((REG_SCFG_EXT == 0) ? ((u8)a9ScfgRom == 1) : !(REG_SCFG_ROM & BIT(1))) {
+	if (scfgBios9i()) {
 		ce9->valueBits |= b_dsiBios;
 	}
 	if (asyncCardRead) {
@@ -326,22 +336,25 @@ int hookNdsRetailArm9(
 		bool runOverlayCheck = overlayPatch;
 		u32 dataToPreloadSizeAligned = 0;
 		ce9->cacheBlockSize = cacheBlockSize;
-		if (ndsHeader->unitCode > 0 && dsiModeConfirmed) {
+		if (ndsHeader->unitCode > 0 && dsiMode) {
 			extern u32 cheatSizeTotal;
 			const bool cheatsEnabled = (cheatSizeTotal > 4 && cheatSizeTotal <= 0x8000);
 
 			ce9->cacheAddress = (consoleModel > 0 ? dev_CACHE_ADRESS_START_TWLSDK : (cheatsEnabled ? retail_CACHE_ADRESS_START_TWLSDK_CHEAT : retail_CACHE_ADRESS_START_TWLSDK));
-			ce9->romLocation = ce9->romLocation;
+			ce9->romLocation = ce9->cacheAddress;
 			ce9->cacheSlots = (consoleModel > 0 ? (cheatsEnabled ? dev_CACHE_ADRESS_SIZE_TWLSDK_CHEAT : dev_CACHE_ADRESS_SIZE_TWLSDK) : (cheatsEnabled ? retail_CACHE_ADRESS_SIZE_TWLSDK_CHEAT : retail_CACHE_ADRESS_SIZE_TWLSDK))/cacheBlockSize;
 		} else {
 			if (strncmp(romTid, "UBR", 3) == 0) {
 				runOverlayCheck = false;
 				ce9->cacheAddress = CACHE_ADRESS_START;
-				ce9->romLocation = ce9->romLocation;
+				ce9->romLocation = ce9->cacheAddress;
 				ce9->cacheSlots = retail_CACHE_ADRESS_SIZE_BROWSER/cacheBlockSize;
 			} else {
 				ce9->cacheAddress = (dsiMode ? CACHE_ADRESS_START_DSIMODE : CACHE_ADRESS_START);
-				ce9->romLocation = ce9->romLocation;
+				if (!dsiMode && (ce9->valueBits & b_dsiBios) && moduleParams->sdk_version < 0x2008000) {
+					ce9->cacheAddress -= cacheBlockSize;
+				}
+				ce9->romLocation = ce9->cacheAddress;
 				if (dsiMode) {
 					ce9->cacheSlots = (consoleModel > 0 ? dev_CACHE_ADRESS_SIZE_DSIMODE : retail_CACHE_ADRESS_SIZE_DSIMODE)/cacheBlockSize;
 				} else {
@@ -356,7 +369,7 @@ int hookNdsRetailArm9(
 			configureRomMap(ce9, ndsHeader, dataToPreloadAddr[0], dsiMode, consoleModel);
 			for (u32 i = 0; i < dataToPreloadSize[0]/*+dataToPreloadSize[1]*/; i += cacheBlockSize) {
 				ce9->cacheAddress += cacheBlockSize;
-				if (isSdk5(moduleParams)) {
+				if (isSdk5(moduleParams) || ((ce9->valueBits & b_dsiBios) && moduleParams->sdk_version >= 0x2008000)) {
 					if (ce9->cacheAddress == 0x0C7C4000) {
 						ce9->cacheAddress += (ndsHeader->unitCode > 0 ? 0x1C000 : 0x3C000);
 					} else if (ndsHeader->unitCode == 0) {
@@ -370,6 +383,8 @@ int hookNdsRetailArm9(
 							ce9->cacheAddress += 0x20000;
 						}
 					}
+				} else if (ce9->cacheAddress == 0x0CFFC000 && (ce9->valueBits & b_dsiBios)) {
+					ce9->cacheAddress += 0x4000;
 				} else if (ce9->cacheAddress == 0x0C7C0000) {
 					ce9->cacheAddress += 0x40000;
 				}
@@ -411,7 +426,7 @@ int hookNdsRetailArm9(
 			u32 addr = ce9->cacheAddress;
 
 			for (int slot = 0; slot < ce9->cacheSlots; slot++) {
-				if (isSdk5(moduleParams)) {
+				if (isSdk5(moduleParams) || ((ce9->valueBits & b_dsiBios) && moduleParams->sdk_version >= 0x2008000)) {
 					if (addr == 0x0C7C4000) {
 						addr += (ndsHeader->unitCode > 0 ? 0x1C000 : 0x3C000);
 					} else if (ndsHeader->unitCode == 0) {
@@ -425,6 +440,8 @@ int hookNdsRetailArm9(
 							addr += 0x20000;
 						}
 					}
+				} else if (addr == 0x0CFFC000 && (ce9->valueBits & b_dsiBios)) {
+					addr += 0x4000;
 				} else if (addr == 0x0C7C0000) {
 					addr += 0x40000;
 				}

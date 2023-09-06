@@ -33,7 +33,11 @@ void setExceptionHandler2() {
 	#ifdef TWLSDK
 	if (EXCEPTION_VECTOR == enterException && *exceptionC == userException) return;
 	#else
-	if (EXCEPTION_VECTOR_SDK1 == enterException && *exceptionC == userException) return;
+	if (!(ce9->valueBits & dsiBios)) {
+		if (EXCEPTION_VECTOR_SDK1 == enterException && *exceptionC == userException) return;
+	} else {
+		if (EXCEPTION_VECTOR == enterException && *exceptionC == userException) return;
+	}
 	#endif
 
 	#ifndef TWLSDK
@@ -46,7 +50,11 @@ void setExceptionHandler2() {
 	EXCEPTION_VECTOR = enterException;
 	#else
 	exceptionStack = (u32)EXCEPTION_STACK_LOCATION;
-	EXCEPTION_VECTOR_SDK1 = enterException;
+	if (!(ce9->valueBits & dsiBios)) {
+		EXCEPTION_VECTOR_SDK1 = enterException;
+	} else {
+		EXCEPTION_VECTOR = enterException;
+	}
 	#endif
 	*exceptionC = userException;
 }
