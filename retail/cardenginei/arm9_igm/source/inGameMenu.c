@@ -800,6 +800,9 @@ void inGameMenu(s32 *mainScreen, u32 consoleModel, s32 *exceptionRegisters) {
 	REG_POWERCNT |= POWER_SWAP_LCDS;
 
 	SetBrightness(1, 0);
+	REG_MOSAIC_SUB = 0; // Register is write only, can't back up
+	REG_BLDCNT_SUB = 0; // Register is write only, can't back up
+	REG_BLDALPHA_SUB = 0; // Register is write only, can't back up
 	REG_BLDY_SUB = 0; // Register is write only, can't back up
 
 	tonccpy(bgMapBak, BG_MAP_RAM_SUB(15), sizeof(bgMapBak));	// Backup BG_MAP_RAM

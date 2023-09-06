@@ -208,6 +208,9 @@ void showException(s32 *expReg) {
 	REG_BG3HOFS = 0;
 
 	SetBrightness(0, 0);
+	REG_MOSAIC = 0;
+	REG_BLDCNT = 0;
+	REG_BLDALPHA = 0;
 	REG_BLDY = 0;
 
 	clearScreen(true);
