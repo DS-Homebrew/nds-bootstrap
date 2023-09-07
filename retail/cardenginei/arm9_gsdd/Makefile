@@ -43,6 +43,7 @@ CFLAGS	+=	$(INCLUDE) -DARM9 -DNO_CARDID -DGSDD
 CXXFLAGS	:=	$(CFLAGS) -fno-rtti -fno-exceptions
 
 ASFLAGS	:=	-g $(ARCH) $(INCLUDE)
+ASFLAGS	+=	-DGSDD
 
 LDFLAGS	=	-nostartfiles -T cardengine.ld -g $(ARCH) -Wl,-Map,$(notdir $*.map)
 

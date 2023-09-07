@@ -546,24 +546,7 @@ int cardReadPDash(u32* cacheStruct, u32 src, u8* dst, u32 len) {
     counter++;
 	return counter;
 }
-
-void gsddFix335(void) {
-}
-
-void gsddGetOverlayOffset(u32* overlayOffset) {
-}
-
-void gsddFix(void) {
-}
-
-u32 gsddReturn(u32 ret) {
-	return 0;
-}
 #else
-int cardReadPDash(u32* cacheStruct, u32 src, u8* dst, u32 len) {
-	return 0;
-}
-
 void gsddFix335(void) {
 	const u32 gsddOverlayOffset = *(u32*)0x02FFF000;
 

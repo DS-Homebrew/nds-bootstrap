@@ -151,11 +151,19 @@ patches:
 needFlushDCCache:
 .word   0x0
 #ifndef TWLSDK
-.word   pdash_read
+#ifdef GSDD
+.word   0
 .word   gsdd_get_offset
 .word   gsdd_fix
 .word   gsdd_return
 .word   gsddReturn
+#else
+.word   pdash_read
+.word   0x0
+.word   0x0
+.word   0x0
+.word   0x0
+#endif
 #else
 .word   0x0
 .word   0x0
@@ -498,6 +506,7 @@ thumb_card_irq_enable:
 
 #ifndef TWLSDK
 	.arm
+#ifndef GSDD
 pdash_read:
     push	{r1-r11, lr}
     @mov     r0, r4 @DST
@@ -509,7 +518,7 @@ pdash_read:
 	blx		r6
     pop	    {r1-r11, pc}
 .pool
-
+#else
 gsdd_get_offset:
 	push {lr}
 	bl gsddGetOverlayOffset
@@ -527,6 +536,7 @@ gsdd_return:
 	ldr r12, =0x02FFF180
 	ldr pc, [r12]
 .pool
+#endif
 
 	.thumb
 #endif
