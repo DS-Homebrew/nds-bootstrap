@@ -374,7 +374,13 @@ static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
 					readLen = ce9->cacheBlockSize*2;
 				}*/
 
+				#ifdef GSDD
+				int oldIME = enterCriticalSection();
+				#endif
 				fileRead((char*)buffer, ((ce9->valueBits & overlaysCached) && src >= newOverlayOffset && src < newOverlayOffset+newOverlaysSize) ? apFixOverlaysFile : romFile, sector, ce9->cacheBlockSize);
+				#ifdef GSDD
+				leaveCriticalSection(oldIME);
+				#endif
 				/*updateDescriptor(slot, sector);
 				if (readLen >= ce9->cacheBlockSize*2) {
 					updateDescriptor(slot+1, sector+ce9->cacheBlockSize);
@@ -461,9 +467,7 @@ static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
 
 	//sleepMsEnabled = false;
 
-	#ifdef GSDD
-	cacheFlush(); //workaround for some weird data-cache issue in Golden Sun: Dark Dawn
-	#else
+	#ifndef GSDD
 	#ifndef TWLSDK
 	if (ce9->valueBits & cacheFlushFlag) {
 		cacheFlush(); //workaround for some weird data-cache issue in Bowser's Inside Story.
@@ -612,6 +616,7 @@ void gsddFix(void) {
 		return;
 	}
 
+	int oldIME = enterCriticalSection();
 	u32 searchLen = 0x10000;
 	if ((u32)gsddCurrentOverlayOffset >= 0x02100000 && (u32)gsddCurrentOverlayOffset < 0x02120000) {
 		searchLen = 0x80000;
@@ -619,19 +624,13 @@ void gsddFix(void) {
 		searchLen = 0x20000;
 	}
 
-	bool checksumFound = false;
-
 	for (int i = 0; i < (int)searchLen/sizeof(u32); i++) {
 		if (gsddCurrentOverlayOffset[i] == 0x2FBB82E1) {
 			gsddCurrentOverlayOffset[i] = *(u32*)0x02FFF17C;
-			checksumFound = true;
 			// break;
 		}
 	}
-
-	if (checksumFound) {
-		cacheFlush();
-	}
+	leaveCriticalSection(oldIME);
 }
 
 u32 gsddReturn(u32 ret) {
@@ -681,11 +680,17 @@ void cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	u8* dst = dst0;
 	u32 len = len0;
 	#else
+	#ifdef GSDD
+	u32 src = src0;
+	u8* dst = dst0;
+	u32 len = len0;
+	#else
 	vu32* volatile cardStruct = (vu32* volatile)ce9->cardStruct0;
 
 	u32 src = ((ce9->valueBits & isSdk5) ? src0 : cardStruct[0]);
 	u8* dst = ((ce9->valueBits & isSdk5) ? dst0 : (u8*)(cardStruct[1]));
 	u32 len = ((ce9->valueBits & isSdk5) ? len0 : cardStruct[2]);
+	#endif
 	#endif
 
 	#ifdef DEBUG
