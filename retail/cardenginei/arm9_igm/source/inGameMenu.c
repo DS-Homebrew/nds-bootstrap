@@ -322,6 +322,7 @@ static void screenshot(void) {
 		while (REG_VCOUNT != 191) mySwiDelay(100);
 		while (REG_VCOUNT == 191) mySwiDelay(100);
 	}
+	DC_InvalidateRange(&igmText.currentScreenshot, 1);
 	#endif
 }
 
