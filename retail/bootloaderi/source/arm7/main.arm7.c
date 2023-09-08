@@ -1446,7 +1446,14 @@ int arm7_main(void) {
 			}
 
 			buildFatTableCacheCompressed(romFile);
-			buildFatTableCacheCompressed(savFile);
+			if (dsiModeConfirmed && ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr)) {
+				buildFatTableCacheCompressed(savFile);
+			} else {
+				buildFatTableCache(savFile);
+				if (!savFile->fatTableCached) {
+					buildFatTableCacheCompressed(savFile);
+				}
+			}
 		/* } else {
 			buildFatTableCache(romFile);
 			buildFatTableCache(savFile);

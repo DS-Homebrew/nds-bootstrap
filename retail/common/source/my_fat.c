@@ -1707,6 +1707,8 @@ void buildFatTableCache (aFile * file)
 
 	file->fatTableCache = lastClusterCacheUsed;
 
+	const u32* lastClusterCacheUsedBak = lastClusterCacheUsed;
+
 	// Follow cluster list until desired one is found
 	while (file->currentCluster != CLUSTER_EOF && file->firstCluster != CLUSTER_FREE 
 		&& (u32)lastClusterCacheUsed<clusterCache+clusterCacheSize)
@@ -1736,6 +1738,7 @@ void buildFatTableCache (aFile * file)
     else {
       nocashMessage("fat table not cached");
 	  file->fatTableCacheSize = 0;
+	  lastClusterCacheUsed = lastClusterCacheUsedBak;
     }
     #endif
 
@@ -1755,6 +1758,8 @@ void buildFatTableCacheCompressed (aFile * file)
 	file->currentCluster = file->firstCluster;
 
 	file->fatTableCache = lastClusterCacheUsed;
+
+	const u32* lastClusterCacheUsedBak = lastClusterCacheUsed;
 
 	// Follow cluster list until desired one is found
 	while (file->currentCluster != CLUSTER_EOF && file->firstCluster != CLUSTER_FREE 
@@ -1804,6 +1809,7 @@ void buildFatTableCacheCompressed (aFile * file)
     else {
       nocashMessage("fat table not cached and compressed");
 	  file->fatTableCacheSize = 0;
+	  lastClusterCacheUsed = lastClusterCacheUsedBak;
     }
     #endif
 
