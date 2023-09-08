@@ -541,6 +541,10 @@ int cardReadPDash(u32* cacheStruct, u32 src, u8* dst, u32 len) {
 	return counter;
 }
 #else
+void setBL(int arg1, int arg2) {
+	*(u32*)arg1 = (((u32)(arg2 - arg1 - 8) >> 2) & 0xFFFFFF) | 0xEB000000;
+}
+
 void gsddFix335(void) {
 	const u32 gsddOverlayOffset = *(u32*)0x02FFF000;
 
@@ -578,13 +582,24 @@ void gsddFix(void) {
 		VoidFn decrypt = (VoidFn)(gsddOverlayOffset+0x1210);
 		(*decrypt)();
 
-		tonccpy((u32*)(gsddOverlayOffset+0x14F0), ce9->patches->gsdd_return, 0xC);
+		extern u32 gsdd_fix2;
+		setBL(gsddOverlayOffset+0xA4C, gsdd_fix2);
 	}
 }
 
-u32 gsddReturn(u32 ret) {
-	return (ret == 0x7B || ret == 0xCD || ret == 0x11F) ? ret : 0;
+void gsddFix2(u32* code) {
+	if (code[0] != 0xE92D4FF0 && code[1] != 0xE24DDF93 && code[2] != 0xE58D000C && code[3] != 0xE3A0BA07) {
+		return;
+	}
+
+	// Patch overlay 334 (DSProtect v2.01) (Part 2)
+	code[0x228/sizeof(u32)] += 0xE0000000; // beq -> b
+	code[0x2C4/sizeof(u32)] = 0xE3A01000; // mov r1, #0
+	code[0x2C8/sizeof(u32)] = 0xE3A00000; // mov r0, #0
+	code[0x2D0/sizeof(u32)] = 0xE1A00000; // nop
+	code[0x2D4/sizeof(u32)] = 0xE1A00000; // nop
 }
+
 #endif
 #endif
 

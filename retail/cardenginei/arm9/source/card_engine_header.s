@@ -154,17 +154,11 @@ needFlushDCCache:
 #ifdef GSDD
 .word   0
 .word   gsdd_fix
-.word   gsdd_return
-.word   gsddReturn
 #else
 .word   pdash_read
 .word   0x0
-.word   0x0
-.word   0x0
 #endif
 #else
-.word   0x0
-.word   0x0
 .word   0x0
 .word   0x0
 #endif
@@ -522,10 +516,14 @@ gsdd_fix:
 	mov r0, #1
 	pop {pc}
 
-gsdd_return:
-	mov r0, r1
-	ldr pc, =gsddReturn
-.pool
+.global gsdd_fix2
+gsdd_fix2: .word gsdd_fix2+4
+	push {r0-r3, lr}
+	mov r0, r6
+	bl gsddFix2
+	pop {r0-r3}
+	sub r1, r4, #0x11
+	pop {pc}
 #endif
 
 	.thumb
