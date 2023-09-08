@@ -188,7 +188,9 @@ void reset(u32 param, u32 tid2) {
 		cacheFlush();
 		sharedAddr[3] = 0x52534554;
 		while (1);
-	} else {
+	} else
+	#endif
+	{
 		if (*(u32*)(resetParams+0xC) > 0) {
 			sharedAddr[1] = ce9->valueBits;
 		}
@@ -198,7 +200,6 @@ void reset(u32 param, u32 tid2) {
 		}
 		sharedAddr[3] = 0x52534554;
 	}
-	#endif
 #else
 	#ifdef DLDI
 	sysSetCardOwner(false);	// Give Slot-1 access to arm7
