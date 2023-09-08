@@ -442,7 +442,7 @@ void patchPostBoot(const tNDSHeader* ndsHeader) {
 		}
 	}
 	if (postBootOffset) {
-		bool usesThumb = (*(u16*)postBootOffset == 0xB5F8);
+		const bool usesThumb = (*(u16*)postBootOffset == 0xB5F8);
 		if (usesThumb) {
 			*(u16*)postBootOffset = 0x4770;	// bx lr
 		} else {
@@ -466,7 +466,7 @@ bool a7PatchCardIrqEnable(cardengineArm7* ce7, const tNDSHeader* ndsHeader, cons
 	if (!cardIrqEnableOffset) {
 		return false;
 	}
-	bool usesThumb = (*(u16*)cardIrqEnableOffset == 0xB510);
+	const bool usesThumb = (*(u16*)cardIrqEnableOffset == 0xB510 || *(u16*)cardIrqEnableOffset == 0xB530);
 	if (usesThumb) {
 		u16* cardIrqEnablePatch = (u16*)ce7->patches->thumb_card_irq_enable_arm7;
 		tonccpy(cardIrqEnableOffset, cardIrqEnablePatch, 0x20);
