@@ -557,57 +557,29 @@ void gsddFix335(void) {
 	}
 }
 
-static u32* gsddCurrentOverlayOffset = NULL;
-
-void gsddGetOverlayOffset(u32* overlayOffset) {
-	gsddCurrentOverlayOffset = overlayOffset;
-}
-
 void gsddFix(void) {
-	/* sharedAddr[4] = 0x44445347; // 'GSDD'
-	IPC_SendSync(0x3);
-	while (sharedAddr[4] == 0x44445347) { swiDelay(100); }
-	cacheFlush(); */
-
 	const u32 gsddOverlayOffset = *(u32*)0x02FFF000;
 
 	// Patch overlay 334 (DSProtect v2.01)
 	if (*(u32*)gsddOverlayOffset == 0xE544AA7C)
 	{
-		tonccpy((u32*)(gsddOverlayOffset+0x1120), (u32*)0x02FFF100, 0x10);
-		tonccpy((u32*)(gsddOverlayOffset+0x115C), (u32*)0x02FFF100, 0x10);
-		tonccpy((u32*)(gsddOverlayOffset+0x1198), (u32*)0x02FFF100, 0x10);
-		tonccpy((u32*)(gsddOverlayOffset+0x11D4), (u32*)0x02FFF100, 0x10);
-		tonccpy((u32*)(gsddOverlayOffset+0x1210), (u32*)0x02FFF100, 0x10);
-
 		/* *(u32*)(gsddOverlayOffset+0x1120) = 0xE12FFF1E; // bx lr
 		*(u32*)(gsddOverlayOffset+0x115C) = 0xE12FFF1E; // bx lr
 		*(u32*)(gsddOverlayOffset+0x1198) = 0xE12FFF1E; // bx lr
 		*(u32*)(gsddOverlayOffset+0x11D4) = 0xE12FFF1E; // bx lr
 		*(u32*)(gsddOverlayOffset+0x1210) = 0xE12FFF1E; // bx lr */
 
-		cacheFlush();
-	}
+		/* tonccpy((u32*)(gsddOverlayOffset+0x1120), (u32*)0x02FFF100, 0x10);
+		tonccpy((u32*)(gsddOverlayOffset+0x115C), (u32*)0x02FFF100, 0x10);
+		tonccpy((u32*)(gsddOverlayOffset+0x1198), (u32*)0x02FFF100, 0x10);
+		tonccpy((u32*)(gsddOverlayOffset+0x11D4), (u32*)0x02FFF100, 0x10);
+		tonccpy((u32*)(gsddOverlayOffset+0x1210), (u32*)0x02FFF100, 0x10); */
 
-	if (gsddCurrentOverlayOffset[0] == 0xE163F679 || gsddCurrentOverlayOffset[0] == 0xE544AA7C) {
-		return;
-	}
+		VoidFn decrypt = (VoidFn)(gsddOverlayOffset+0x1210);
+		(*decrypt)();
 
-	int oldIME = enterCriticalSection();
-	u32 searchLen = 0x10000;
-	if ((u32)gsddCurrentOverlayOffset >= 0x02100000 && (u32)gsddCurrentOverlayOffset < 0x02120000) {
-		searchLen = 0x80000;
-	} else if ((u32)gsddCurrentOverlayOffset >= 0x02160000 && (u32)gsddCurrentOverlayOffset < 0x02170000) {
-		searchLen = 0x20000;
+		tonccpy((u32*)(gsddOverlayOffset+0x14F0), ce9->patches->gsdd_return, 0xC);
 	}
-
-	for (int i = 0; i < (int)searchLen/sizeof(u32); i++) {
-		if (gsddCurrentOverlayOffset[i] == 0x2FBB82E1) {
-			gsddCurrentOverlayOffset[i] = *(u32*)0x02FFF17C;
-			// break;
-		}
-	}
-	leaveCriticalSection(oldIME);
 }
 
 u32 gsddReturn(u32 ret) {

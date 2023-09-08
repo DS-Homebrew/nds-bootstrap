@@ -153,7 +153,6 @@ needFlushDCCache:
 #ifndef TWLSDK
 #ifdef GSDD
 .word   0
-.word   gsdd_get_offset
 .word   gsdd_fix
 .word   gsdd_return
 .word   gsddReturn
@@ -162,10 +161,8 @@ needFlushDCCache:
 .word   0x0
 .word   0x0
 .word   0x0
-.word   0x0
 #endif
 #else
-.word   0x0
 .word   0x0
 .word   0x0
 .word   0x0
@@ -519,12 +516,6 @@ pdash_read:
     pop	    {r1-r11, pc}
 .pool
 #else
-gsdd_get_offset:
-	push {lr}
-	bl gsddGetOverlayOffset
-	mov r0, r6
-	pop {pc}
-
 gsdd_fix:
 	push {lr}
 	bl gsddFix
@@ -533,8 +524,7 @@ gsdd_fix:
 
 gsdd_return:
 	mov r0, r1
-	ldr r12, =0x02FFF180
-	ldr pc, [r12]
+	ldr pc, =gsddReturn
 .pool
 #endif
 
