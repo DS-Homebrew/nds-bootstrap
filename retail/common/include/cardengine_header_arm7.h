@@ -88,7 +88,7 @@ typedef struct cardengineArm7 {
 		6: preciseVolumeControl
 		7: powerCodeOnVBlank
 		8: runCardEngineCheck
-		9: cardReadDma
+		9: igmAccessible
 		10: hiyaCfwFound
 		11: slowSoftReset
 		12: wideCheatUsed
