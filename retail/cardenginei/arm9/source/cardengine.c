@@ -545,59 +545,40 @@ void setBL(int arg1, int arg2) {
 	*(u32*)arg1 = (((u32)(arg2 - arg1 - 8) >> 2) & 0xFFFFFF) | 0xEB000000;
 }
 
-void gsddFix335(void) {
+void gsddFix(void) {
 	const u32 gsddOverlayOffset = *(u32*)0x02FFF000;
+	extern u32 gsdd_fix2;
 
 	// Patch overlay 335 (DSProtect v2.01s)
 	if (*(u32*)gsddOverlayOffset == 0xE163F679)
 	{
-		*(u32*)(gsddOverlayOffset+0xB64) += 0xE0000000; // beq -> b
-		*(u32*)(gsddOverlayOffset+0xBB8) = 0xE3A01000; // mov r1, #0
-		*(u32*)(gsddOverlayOffset+0xBBC) = 0xE3A00000; // mov r0, #0
-		*(u32*)(gsddOverlayOffset+0xBC4) = 0xE1A00000; // nop
-		*(u32*)(gsddOverlayOffset+0xBC8) = 0xE1A00000; // nop
-
-		cacheFlush();
-	}
-}
-
-void gsddFix(void) {
-	const u32 gsddOverlayOffset = *(u32*)0x02FFF000;
-
-	// Patch overlay 334 (DSProtect v2.01)
+		setBL(gsddOverlayOffset+0x115C, gsdd_fix2);
+	} else // Patch overlay 334 (DSProtect v2.01)
 	if (*(u32*)gsddOverlayOffset == 0xE544AA7C)
 	{
-		/* *(u32*)(gsddOverlayOffset+0x1120) = 0xE12FFF1E; // bx lr
-		*(u32*)(gsddOverlayOffset+0x115C) = 0xE12FFF1E; // bx lr
-		*(u32*)(gsddOverlayOffset+0x1198) = 0xE12FFF1E; // bx lr
-		*(u32*)(gsddOverlayOffset+0x11D4) = 0xE12FFF1E; // bx lr
-		*(u32*)(gsddOverlayOffset+0x1210) = 0xE12FFF1E; // bx lr */
-
-		/* tonccpy((u32*)(gsddOverlayOffset+0x1120), (u32*)0x02FFF100, 0x10);
-		tonccpy((u32*)(gsddOverlayOffset+0x115C), (u32*)0x02FFF100, 0x10);
-		tonccpy((u32*)(gsddOverlayOffset+0x1198), (u32*)0x02FFF100, 0x10);
-		tonccpy((u32*)(gsddOverlayOffset+0x11D4), (u32*)0x02FFF100, 0x10);
-		tonccpy((u32*)(gsddOverlayOffset+0x1210), (u32*)0x02FFF100, 0x10); */
-
 		VoidFn decrypt = (VoidFn)(gsddOverlayOffset+0x1210);
 		(*decrypt)();
 
-		extern u32 gsdd_fix2;
 		setBL(gsddOverlayOffset+0xA4C, gsdd_fix2);
 	}
 }
 
 void gsddFix2(u32* code) {
-	if (code[0] != 0xE92D4FF0 && code[1] != 0xE24DDF93 && code[2] != 0xE58D000C && code[3] != 0xE3A0BA07) {
-		return;
+	// Patch overlay 335 (DSProtect v2.01s) (Part 2)
+	if (code[0] == 0xE92D4FF8 && code[1] == 0xE24DDF92 && code[2] == 0xE3A0BA07) {
+		code[0x224/sizeof(u32)] += 0xE0000000; // beq -> b
+		code[0x278/sizeof(u32)] = 0xE3A01000; // mov r1, #0
+		code[0x27C/sizeof(u32)] = 0xE3A00000; // mov r0, #0
+		code[0x284/sizeof(u32)] = 0xE1A00000; // nop
+		code[0x288/sizeof(u32)] = 0xE1A00000; // nop
+	} else // Patch overlay 334 (DSProtect v2.01) (Part 2)
+	if (code[0] == 0xE92D4FF0 && code[1] == 0xE24DDF93 && code[2] == 0xE58D000C && code[3] == 0xE3A0BA07) {
+		code[0x228/sizeof(u32)] += 0xE0000000; // beq -> b
+		code[0x2C4/sizeof(u32)] = 0xE3A01000; // mov r1, #0
+		code[0x2C8/sizeof(u32)] = 0xE3A00000; // mov r0, #0
+		code[0x2D0/sizeof(u32)] = 0xE1A00000; // nop
+		code[0x2D4/sizeof(u32)] = 0xE1A00000; // nop
 	}
-
-	// Patch overlay 334 (DSProtect v2.01) (Part 2)
-	code[0x228/sizeof(u32)] += 0xE0000000; // beq -> b
-	code[0x2C4/sizeof(u32)] = 0xE3A01000; // mov r1, #0
-	code[0x2C8/sizeof(u32)] = 0xE3A00000; // mov r0, #0
-	code[0x2D0/sizeof(u32)] = 0xE1A00000; // nop
-	code[0x2D4/sizeof(u32)] = 0xE1A00000; // nop
 }
 
 #endif
@@ -674,8 +655,6 @@ void cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	#endif
 
 	#ifdef GSDD
-	gsddFix335();
-
 	if (src < 0x8000) {
 		// Fix reads below 0x8000
 		src = 0x8000 + (src & 0x1FF);
