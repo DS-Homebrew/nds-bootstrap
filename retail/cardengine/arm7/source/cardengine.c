@@ -436,6 +436,10 @@ void myIrqHandlerVBlank(void) {
 		*(u32*)0x02FFFDF0 = (volumeLevel*2)+1;
 	}
 
+	if (REG_IE & IRQ_NETWORK) {
+		REG_IE &= ~IRQ_NETWORK; // DS(i) RTC fix
+	}
+
 	// Update main screen or swap screens
 	if (ipcEveryFrame) {
 		IPC_SendSync(swapScreens ? 0x7 : 0x6);
