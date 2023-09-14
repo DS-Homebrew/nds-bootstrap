@@ -767,7 +767,8 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	// Get region
 	u8 twlCfgCountry = (useTwlCfg ? *(u8*)0x02000405 : 0);
 	u8 newRegion = 0;
-	if (conf->useRomRegion && romTid[3] != 'A' && romTid[3] != 'O') {
+	if ((conf->useRomRegion || (conf->region == -1 && twlCfgCountry == 0)) && romTid[3] != 'A' && romTid[3] != 'O') {
+		// Determine region by TID
 		if (romTid[3] == 'J') {
 			newRegion = 0;
 		} else if (romTid[3] == 'E' || romTid[3] == 'T') {
@@ -781,19 +782,36 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		} else if (romTid[3] == 'K') {
 			newRegion = 5;
 		}
-	} else if (conf->region == 0xFF && twlCfgCountry != 0) {
-		if (twlCfgCountry == 0x01) {
-			newRegion = 0;	// Japan
-		} else if (twlCfgCountry == 0xA0) {
-			newRegion = 4;	// China
-		} else if (twlCfgCountry == 0x88) {
-			newRegion = 5;	// Korea
-		} else if (twlCfgCountry == 0x41 || twlCfgCountry == 0x5F) {
-			newRegion = 3;	// Australia
-		} else if ((twlCfgCountry >= 0x08 && twlCfgCountry <= 0x34) || twlCfgCountry == 0x99 || twlCfgCountry == 0xA8) {
-			newRegion = 1;	// USA
-		} else if (twlCfgCountry >= 0x40 && twlCfgCountry <= 0x70) {
-			newRegion = 2;	// Europe
+	} else if (conf->region == -1) {
+		if (twlCfgCountry != 0) {
+			// Determine region by country
+			if (twlCfgCountry == 0x01) {
+				newRegion = 0;	// Japan
+			} else if (twlCfgCountry == 0xA0) {
+				newRegion = 4;	// China
+			} else if (twlCfgCountry == 0x88) {
+				newRegion = 5;	// Korea
+			} else if (twlCfgCountry == 0x41 || twlCfgCountry == 0x5F) {
+				newRegion = 3;	// Australia
+			} else if ((twlCfgCountry >= 0x08 && twlCfgCountry <= 0x34) || twlCfgCountry == 0x99 || twlCfgCountry == 0xA8) {
+				newRegion = 1;	// USA
+			} else if (twlCfgCountry >= 0x40 && twlCfgCountry <= 0x70) {
+				newRegion = 2;	// Europe
+			}
+		} else {
+			// Determine region by language
+			int language = (conf->language >= 0 && conf->language <= 7) ? conf->language : PersonalData->language;
+			if (language == 0) {
+				newRegion = 0;	// Japan
+			} else if (language == 6) {
+				newRegion = 4;	// China
+			} else if (language == 7) {
+				newRegion = 5;	// Korea
+			} else if (language == 1) {
+				newRegion = 1;	// USA
+			} else if (language >= 2 && language <= 5) {
+				newRegion = 2;	// Europe
+			}
 		}
 	} else {
 		newRegion = conf->region;

@@ -40,7 +40,7 @@ typedef struct configuration {
 	u32 dataToPreloadSize[2];
 	u8 language;
 	char* guiLanguage;
-	u8 region; // SDK 5
+	s8 region; // SDK 5
 	bool useRomRegion;
 	bool sdNand; // SDK 5
 	u8 dsiMode; // SDK 5

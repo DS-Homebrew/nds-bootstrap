@@ -122,7 +122,7 @@ extern u32 sharedFontCluster;
 extern u8 patchMpuSize;
 extern u8 patchMpuRegion;
 extern u8 language;
-extern u8 region;
+extern s8 region;
 extern u8 dsiMode; // SDK 5
 extern u8 donorSdkVer;
 extern u8 consoleModel;
@@ -1199,6 +1199,7 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 
 		// Set region flag
 		if (useRomRegion && ndsHeader->gameCode[3] != 'A' && ndsHeader->gameCode[3] != 'O') {
+			// Determine region by TID
 			u8 newRegion = 0;
 			if (ndsHeader->gameCode[3] == 'J') {
 				newRegion = 0;
@@ -1214,20 +1215,37 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 				newRegion = 5;
 			}
 			toncset((u8*)0x02FFFD70, newRegion, 1);
-		} else if (region == 0xFF && twlCfgCountry != 0) {
+		} else if (region == -1 && twlCfgCountry != 0) {
 			u8 newRegion = 0;
-			if (twlCfgCountry == 0x01) {
-				newRegion = 0;	// Japan
-			} else if (twlCfgCountry == 0xA0) {
-				newRegion = 4;	// China
-			} else if (twlCfgCountry == 0x88) {
-				newRegion = 5;	// Korea
-			} else if (twlCfgCountry == 0x41 || twlCfgCountry == 0x5F) {
-				newRegion = 3;	// Australia
-			} else if ((twlCfgCountry >= 0x08 && twlCfgCountry <= 0x34) || twlCfgCountry == 0x99 || twlCfgCountry == 0xA8) {
-				newRegion = 1;	// USA
-			} else if (twlCfgCountry >= 0x40 && twlCfgCountry <= 0x70) {
-				newRegion = 2;	// Europe
+			if (twlCfgCountry != 0) {
+				// Determine region by country
+				if (twlCfgCountry == 0x01) {
+					newRegion = 0;	// Japan
+				} else if (twlCfgCountry == 0xA0) {
+					newRegion = 4;	// China
+				} else if (twlCfgCountry == 0x88) {
+					newRegion = 5;	// Korea
+				} else if (twlCfgCountry == 0x41 || twlCfgCountry == 0x5F) {
+					newRegion = 3;	// Australia
+				} else if ((twlCfgCountry >= 0x08 && twlCfgCountry <= 0x34) || twlCfgCountry == 0x99 || twlCfgCountry == 0xA8) {
+					newRegion = 1;	// USA
+				} else if (twlCfgCountry >= 0x40 && twlCfgCountry <= 0x70) {
+					newRegion = 2;	// Europe
+				}
+			} else {
+				// Determine region by language
+				PERSONAL_DATA* personalData = (PERSONAL_DATA*)((u32)__NDSHeader - (u32)ndsHeader + (u32)PersonalData); //(u8*)((u32)ndsHeader - 0x180)
+				if (personalData->language == 0) {
+					newRegion = 0;	// Japan
+				} else if (personalData->language == 6) {
+					newRegion = 4;	// China
+				} else if (personalData->language == 7) {
+					newRegion = 5;	// Korea
+				} else if (personalData->language == 1) {
+					newRegion = 1;	// USA
+				} else if (personalData->language >= 2 && personalData->language <= 5) {
+					newRegion = 2;	// Europe
+				}
 			}
 			toncset((u8*)0x02FFFD70, newRegion, 1);
 		} else {
@@ -1240,11 +1258,11 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 		} else if (curRegion == 2 || curRegion == 3) {
 			*(u32*)(0x02FFFD68) = 0x3E;
 		} else if (curRegion == 4) {
-			*(u32*)(0x02FFFD68) = 0x40; //CHN
+			*(u32*)(0x02FFFD68) = 0x40; // CHN
 		} else if (curRegion == 5) {
-			*(u32*)(0x02FFFD68) = 0x80; //KOR
+			*(u32*)(0x02FFFD68) = 0x80; // KOR
 		} else if (curRegion == 0) {
-			*(u32*)(0x02FFFD68) = 0x01; //JAP
+			*(u32*)(0x02FFFD68) = 0x01; // JAP
 		}
 
 		i2cWriteRegister(I2C_PM, I2CREGPM_MMCPWR, 1);		// Have IRQ check for power button press
