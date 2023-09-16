@@ -265,7 +265,7 @@ int hookNdsRetailArm9(
 	}
 	ce9->romLocation -= romOffset;
 
-	if (strncmp(romTid, "IPK", 3) == 0 || strncmp(romTid, "IPG", 3) == 0 || strncmp(romTid, "B4T", 3) == 0) {
+	if (strncmp(romTid, "IPK", 3) == 0 || strncmp(romTid, "IPG", 3) == 0) {
 		ce9->valueBits |= b_cardReadFix;
 	}
 
