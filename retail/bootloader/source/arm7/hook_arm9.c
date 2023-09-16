@@ -252,10 +252,14 @@ int hookNdsRetailArm9(
 	ce9->romLocation = romLocation;
 
 	u32 romOffset = 0;
-	if (usesCloneboot) {
-		romOffset = 0x8000;
-	} else if (ndsHeader->arm9overlaySource == 0 || ndsHeader->arm9overlaySize == 0) {
-		romOffset = (ndsHeader->arm7romOffset + ndsHeader->arm7binarySize);
+	if (ROMinRAM) {
+		if (usesCloneboot) {
+			romOffset = 0x8000;
+		} else if (ndsHeader->arm9overlaySource == 0 || ndsHeader->arm9overlaySize == 0) {
+			romOffset = (ndsHeader->arm7romOffset + ndsHeader->arm7binarySize);
+		} else {
+			romOffset = (ndsHeader->arm9romOffset + ndsHeader->arm9binarySize);
+		}
 	} else {
 		romOffset = (ndsHeader->arm9romOffset + ndsHeader->arm9binarySize);
 	}
