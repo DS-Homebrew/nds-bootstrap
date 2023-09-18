@@ -1947,7 +1947,7 @@ int arm7_main(void) {
 		bool useSdk5ce7 = (isSdk5(moduleParams) && ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr) && dsiModeConfirmed);
 
 		if (useSdk5ce7) {
-			ce7Size = 0x8400;
+			ce7Size = 0x8600;
 		}
 
 		if (ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr)) {
