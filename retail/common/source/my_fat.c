@@ -1290,8 +1290,8 @@ u32 fileRead (char* buffer, aFile* file, u32 startOffset, u32 length)
 		return 0;
 	}
 
-	if (file->fatTableCached && file->fatTableCache[0] != file->firstCluster) {
-		// Cluster in FAT table cache does not match the first one
+	if (file->fatTableCached && (file->fatTableCache[0] == CLUSTER_FREE || file->fatTableCache[0] == CLUSTER_EOF)) {
+		// Cluster in FAT table cache is invalid
 		return 0;
 	}
 
@@ -1558,8 +1558,8 @@ u32 fileWrite (const char* buffer, aFile* file, u32 startOffset, u32 length)
 		return 0;
 	}
 
-	if (file->fatTableCached && file->fatTableCache[0] != file->firstCluster) {
-		// Cluster in FAT table cache does not match the first one
+	if (file->fatTableCached && (file->fatTableCache[0] == CLUSTER_FREE || file->fatTableCache[0] == CLUSTER_EOF)) {
+		// Cluster in FAT table cache is invalid
 		return 0;
 	}
 
