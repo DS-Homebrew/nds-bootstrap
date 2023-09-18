@@ -268,7 +268,7 @@ static void resetMemory_ARM7(void) {
 		DMA_DEST(i) = 0;
 		TIMER_CR(i) = 0;
 		TIMER_DATA(i) = 0;
-		for(reg=0; reg<0x1c; reg+=4)*((vu32*)(0x04004104 + ((i*0x1c)+reg))) = 0;//Reset NDMA.
+		for (reg=0; reg<0x1c; reg+=4)*((vu32*)(0x04004104 + ((i*0x1c)+reg))) = 0; // Reset NDMA
 	}
 
 	// Clear out FIFO
@@ -1270,6 +1270,11 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 		*(u32*)0x03FFFFC4 = *(u32*)0x2FFFD08;
 		*(u32*)0x03FFFFC8 = 0xF884;
 
+		// Clear out ARM7 NDMA channels
+		for (int i = 0; i < 4; i++) {
+			for (int reg=0; reg<0x1c; reg+=4)*((vu32*)(0x04004104 + ((i*0x1c)+reg))) = 0;
+		}
+
 		i2cWriteRegister(I2C_PM, I2CREGPM_MMCPWR, 1);		// Have IRQ check for power button press
 		i2cWriteRegister(I2C_PM, I2CREGPM_RESETFLAG, 1);		// SDK 5 --> Bootflag = Warmboot/SkipHealthSafety
 	} else if (isSdk5(moduleParams)) {
@@ -2119,7 +2124,7 @@ int arm7_main(void) {
 			} else {
 				dbg_printf("Failed to apply AP-fix\n");
 			}
-			toncset((u32*)IPS_LOCATION, 0, apPatchSize);	// Clear IPS patch
+			dma_twlFill32(0, 0, (u32*)IPS_LOCATION, apPatchSize);	// Clear IPS patch
 		}
 
 		if (!ROMinRAM && overlayPatch) {
@@ -2134,7 +2139,7 @@ int arm7_main(void) {
 			}
 
 			fileWrite((char*)CACHE_ADRESS_START_DSIMODE, apFixOverlaysFile, alignedOverlaysOffset, newOverlaysSize);	// Write AP-fixed overlays to a file
-			toncset((char*)CACHE_ADRESS_START_DSIMODE, 0, newOverlaysSize);
+			dma_twlFill32(0, 0, (char*)CACHE_ADRESS_START_DSIMODE, newOverlaysSize);
 
 			dbg_printf("Overlays cached to a file\n");
 		}
