@@ -16108,7 +16108,6 @@ void rsetA7Cache(void)
 	patchOffsetCache.ramClearChecked = 0;
 	patchOffsetCache.ramClearIOffset = 0;
 	patchOffsetCache.ramClearI2Offset = 0;
-	patchOffsetCache.swiHaltOffset = 0;
 	patchOffsetCache.a7Swi12Offset = 0;
 	patchOffsetCache.a7Swi24Offset = 0;
 	patchOffsetCache.a7Swi25Offset = 0;

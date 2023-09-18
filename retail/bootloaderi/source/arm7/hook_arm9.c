@@ -276,6 +276,7 @@ int hookNdsRetailArm9(
 ) {
 	nocashMessage("hookNdsRetailArm9");
 
+	extern bool iQueGame;
 	extern bool scfgBios9i(void);
 	extern u32 iUncompressedSize;
 	extern u32 overlaysSize;
@@ -284,6 +285,7 @@ int hookNdsRetailArm9(
 	extern u32 dataToPreloadSize[2];
 	extern bool dataToPreloadFound(const tNDSHeader* ndsHeader);
 	const char* romTid = getRomTid(ndsHeader);
+	const bool laterSdk = (moduleParams->sdk_version >= 0x2008000 || iQueGame);
 
 	ce9->fileCluster            = fileCluster;
 	ce9->saveCluster            = saveCluster;
@@ -294,7 +296,7 @@ int hookNdsRetailArm9(
 	if (ROMinRAM) {
 		ce9->valueBits |= b_ROMinRAM;
 	}
-	if (moduleParams->sdk_version < 0x2008000) {
+	if (!laterSdk) {
 		ce9->valueBits |= b_eSdk2;
 	}
 	if (dsiMode) {
@@ -351,7 +353,7 @@ int hookNdsRetailArm9(
 				ce9->cacheSlots = retail_CACHE_ADRESS_SIZE_BROWSER/cacheBlockSize;
 			} else {
 				ce9->cacheAddress = (dsiMode ? CACHE_ADRESS_START_DSIMODE : CACHE_ADRESS_START);
-				if (!dsiMode && (ce9->valueBits & b_dsiBios) && moduleParams->sdk_version < 0x2008000) {
+				if (!dsiMode && (ce9->valueBits & b_dsiBios) && !laterSdk) {
 					ce9->cacheAddress -= cacheBlockSize;
 				}
 				ce9->romLocation = ce9->cacheAddress;
@@ -369,7 +371,7 @@ int hookNdsRetailArm9(
 			configureRomMap(ce9, ndsHeader, dataToPreloadAddr[0], dsiMode, consoleModel);
 			for (u32 i = 0; i < dataToPreloadSize[0]/*+dataToPreloadSize[1]*/; i += cacheBlockSize) {
 				ce9->cacheAddress += cacheBlockSize;
-				if (isSdk5(moduleParams) || ((ce9->valueBits & b_dsiBios) && moduleParams->sdk_version >= 0x2008000)) {
+				if (isSdk5(moduleParams) || ((ce9->valueBits & b_dsiBios) && laterSdk)) {
 					if (ce9->cacheAddress == 0x0C7C4000) {
 						ce9->cacheAddress += (ndsHeader->unitCode > 0 ? 0x1C000 : 0x3C000);
 					} else if (ndsHeader->unitCode == 0) {
@@ -426,7 +428,7 @@ int hookNdsRetailArm9(
 			u32 addr = ce9->cacheAddress;
 
 			for (int slot = 0; slot < ce9->cacheSlots; slot++) {
-				if (isSdk5(moduleParams) || ((ce9->valueBits & b_dsiBios) && moduleParams->sdk_version >= 0x2008000)) {
+				if (isSdk5(moduleParams) || ((ce9->valueBits & b_dsiBios) && laterSdk)) {
 					if (addr == 0x0C7C4000) {
 						addr += (ndsHeader->unitCode > 0 ? 0x1C000 : 0x3C000);
 					} else if (ndsHeader->unitCode == 0) {
