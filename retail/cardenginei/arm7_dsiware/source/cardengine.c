@@ -842,9 +842,9 @@ void myIrqHandlerVBlank(void) {
 		}
 	}
 
-	/*if (REG_IE & IRQ_NETWORK) {
-		REG_IE &= ~IRQ_NETWORK; // DSi RTC fix (Not needed for DSiWare)
-	}*/
+	if (REG_IE & IRQ_NETWORK) {
+		REG_IE &= ~IRQ_NETWORK; // DSi RTC fix
+	}
 
 	bool wifiIrqCheck = (REG_WIFIIRQ != 0);
 	if (wifiIrq != wifiIrqCheck) {
