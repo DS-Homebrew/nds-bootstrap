@@ -276,7 +276,6 @@ int hookNdsRetailArm9(
 ) {
 	nocashMessage("hookNdsRetailArm9");
 
-	extern bool iQueGame;
 	extern bool scfgBios9i(void);
 	extern u32 iUncompressedSize;
 	extern u32 overlaysSize;
@@ -285,7 +284,7 @@ int hookNdsRetailArm9(
 	extern u32 dataToPreloadSize[2];
 	extern bool dataToPreloadFound(const tNDSHeader* ndsHeader);
 	const char* romTid = getRomTid(ndsHeader);
-	const bool laterSdk = (moduleParams->sdk_version >= 0x2008000 || iQueGame);
+	const bool laterSdk = (moduleParams->sdk_version >= 0x2008000 || moduleParams->sdk_version == 0x20029A8);
 
 	ce9->fileCluster            = fileCluster;
 	ce9->saveCluster            = saveCluster;

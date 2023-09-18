@@ -154,7 +154,6 @@ u16 baseHeaderCRC = 0;
 u16 baseSecureCRC = 0;
 u32 baseRomSize = 0;
 u32 baseChipID = 0;
-bool iQueGame = false;
 bool pkmnHeader = false;
 bool ndmaDisabled = false;
 
@@ -711,8 +710,6 @@ static void loadBinary_ARM7(const tDSiHeader* dsiHeaderTemp, aFile* file) {
 		}
 	}
 
-	iQueGame = dsiHeaderTemp->ndshdr.reserved1[8] == 0x80;
-
 	char baseTid[5] = {0};
 	fileRead((char*)&baseTid, file, 0xC, 4);
 	if (
@@ -911,7 +908,7 @@ static void loadROMPartIntoRAM(const tNDSHeader* ndsHeader, const module_params_
 
 	const bool dsiBios = scfgBios9i();
 
-	u32 dataLocation = getRomLocation(ndsHeader, (moduleParams->sdk_version < 0x2008000 && !iQueGame), isSdk5(moduleParams), dsiBios);
+	u32 dataLocation = getRomLocation(ndsHeader, (moduleParams->sdk_version < 0x2008000 && moduleParams->sdk_version != 0x20029A8), isSdk5(moduleParams), dsiBios);
 	s32 preloadSizeEdit = dataToPreloadSize[0];
 
 	u32 romLocationChange = dataLocation;
@@ -921,7 +918,7 @@ static void loadROMPartIntoRAM(const tNDSHeader* ndsHeader, const module_params_
 		fileRead((char*)romLocationChange, file, romOffsetChange, romBlockSize);
 		romLocationChange += 0x4000;
 
-		if (isSdk5(moduleParams) || (dsiBios && (moduleParams->sdk_version >= 0x2008000 || iQueGame))) {
+		if (isSdk5(moduleParams) || (dsiBios && (moduleParams->sdk_version >= 0x2008000 || moduleParams->sdk_version == 0x20029A8))) {
 			if (romLocationChange == 0x0C7C4000) {
 				romLocationChange += (ndsHeader->unitCode > 0 ? 0x1C000 : 0x3C000);
 			} else if (ndsHeader->unitCode == 0) {
@@ -1016,7 +1013,7 @@ static void loadROMintoRAM(const tNDSHeader* ndsHeader, const module_params_t* m
 	const bool dsiBios = scfgBios9i();
 
 	// Load ROM into RAM
-	u32 romLocation = getRomLocation(ndsHeader, (moduleParams->sdk_version < 0x2008000 && !iQueGame), isSdk5(moduleParams), dsiBios);
+	u32 romLocation = getRomLocation(ndsHeader, (moduleParams->sdk_version < 0x2008000 && moduleParams->sdk_version != 0x20029A8), isSdk5(moduleParams), dsiBios);
 
 	u32 romOffset = 0;
 	s32 romSizeEdit = baseRomSize;
@@ -1041,7 +1038,7 @@ static void loadROMintoRAM(const tNDSHeader* ndsHeader, const module_params_t* m
 		fileRead((char*)romLocationChange, romFile, romOffsetChange, romBlockSize);
 		romLocationChange += 0x4000;
 
-		if (isSdk5(moduleParams) || (dsiBios && (moduleParams->sdk_version >= 0x2008000 || iQueGame))) {
+		if (isSdk5(moduleParams) || (dsiBios && (moduleParams->sdk_version >= 0x2008000 || moduleParams->sdk_version == 0x20029A8))) {
 			if (romLocationChange == 0x0C7C4000) {
 				romLocationChange += (ndsHeader->unitCode > 0 ? 0x1C000 : 0x3C000);
 			} else if (ndsHeader->unitCode == 0) {
@@ -1586,7 +1583,7 @@ int arm7_main(void) {
 		extern u32* lastClusterCacheUsed;
 		extern u32 clusterCache;
 
-		u32 add = (moduleParams->sdk_version >= 0x2008000 || iQueGame) ? 0xC8000 : 0xE8000; // 0x027C8000 : 0x027E8000
+		u32 add = (moduleParams->sdk_version >= 0x2008000 || moduleParams->sdk_version == 0x20029A8) ? 0xC8000 : 0xE8000; // 0x027C8000 : 0x027E8000
 		tonccpy((char*)0x02700000+add, (char*)0x02700000, 0x10000);	// Move FAT table cache elsewhere
 		romFile->fatTableCache = (u32*)((u32)romFile->fatTableCache+add);
 		savFile->fatTableCache = (u32*)((u32)savFile->fatTableCache+add);
@@ -2009,7 +2006,7 @@ int arm7_main(void) {
 				errorOutput();
 			}
 		} else {
-			const bool laterSdk = (moduleParams->sdk_version >= 0x2008000 || iQueGame);
+			const bool laterSdk = (moduleParams->sdk_version >= 0x2008000 || moduleParams->sdk_version == 0x20029A8);
 			ce9Location = dsiWramAccess ? CARDENGINEI_ARM9_LOCATION_DSI_WRAM : (laterSdk ? CARDENGINEI_ARM9_LOCATION2 : CARDENGINEI_ARM9_LOCATION);
 			ce9size = 0x5000;
 			tonccpy((u32*)ce9Location, (u32*)((!dsiWramAccess && laterSdk) ? CARDENGINEI_ARM9_BUFFERED_LOCATION2 : CARDENGINEI_ARM9_BUFFERED_LOCATION), ce9size);
@@ -2115,7 +2112,7 @@ int arm7_main(void) {
 		}
 
 		if (useApPatch) {
-			if (applyIpsPatch(ndsHeader, (u8*)IPS_LOCATION, (*(u8*)(IPS_LOCATION+apPatchSize-1) == 0xA9), (moduleParams->sdk_version < 0x2008000 && !iQueGame), isSdk5(moduleParams), ROMinRAM, usesCloneboot)) {
+			if (applyIpsPatch(ndsHeader, (u8*)IPS_LOCATION, (*(u8*)(IPS_LOCATION+apPatchSize-1) == 0xA9), (moduleParams->sdk_version < 0x2008000 && moduleParams->sdk_version != 0x20029A8), isSdk5(moduleParams), ROMinRAM, usesCloneboot)) {
 				dbg_printf("AP-fix applied\n");
 			} else {
 				dbg_printf("Failed to apply AP-fix\n");
