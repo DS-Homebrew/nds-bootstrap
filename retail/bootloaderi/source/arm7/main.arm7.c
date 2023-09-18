@@ -1265,6 +1265,9 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 			*(u32*)(0x02FFFD68) = 0x01; // JAP
 		}
 
+		*(u32*)0x03FFFFC4 = *(u32*)0x2FFFD08;
+		*(u32*)0x03FFFFC8 = 0xF884;
+
 		i2cWriteRegister(I2C_PM, I2CREGPM_MMCPWR, 1);		// Have IRQ check for power button press
 		i2cWriteRegister(I2C_PM, I2CREGPM_RESETFLAG, 1);		// SDK 5 --> Bootflag = Warmboot/SkipHealthSafety
 	} else if (isSdk5(moduleParams)) {
