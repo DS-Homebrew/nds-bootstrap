@@ -58,6 +58,7 @@
 #define REG_GPIO_WIFI *(vu16*)0x4004C04
 
 #include "tonccpy.h"
+#include "dmaTwl.h"
 #include "my_fat.h"
 #include "debug_file.h"
 #include "nds_header.h"
@@ -228,7 +229,8 @@ static void initMBK_dsiMode(void) {
 
 void memset_addrs_arm7(u32 start, u32 end)
 {
-	toncset((u32*)start, 0, ((int)end - (int)start));
+	// toncset((u32*)start, 0, ((int)end - (int)start));
+	dma_twlFill32(0, 0, (u32*)start, ((int)end - (int)start));
 }
 
 /*-------------------------------------------------------------------------
@@ -281,16 +283,16 @@ static void resetMemory_ARM7(void) {
 	}*/
 
 	memset_addrs_arm7(0x02004000, IMAGES_LOCATION);	// clear part of EWRAM - except before nds-bootstrap images
-	toncset((u32*)0x02380000, 0, 0x3F000);		// clear part of EWRAM - except before 0x023C0000, which has the arm9 code
-	toncset((u32*)0x023C0000, 0, 0x40000);		// clear part of EWRAM
+	dma_twlFill32(0, 0, (u32*)0x02380000, 0x3F000);		// clear part of EWRAM - except before 0x023C0000, which has the arm9 code
+	dma_twlFill32(0, 0, (u32*)0x023C0000, 0x40000);		// clear part of EWRAM
 	memset_addrs_arm7(0x02700000, BLOWFISH_LOCATION);		// clear part of EWRAM - except before ce7 and ce9 binaries
-	toncset((u32*)0x027F8000, 0, 0x8000);	// clear part of EWRAM
+	dma_twlFill32(0, 0, (u32*)0x027F8000, 0x8000);	// clear part of EWRAM
 	memset_addrs_arm7(0x02800000, 0x02E80000);
 	memset_addrs_arm7(0x02F80000, 0x02FFD7BC); // Leave eMMC CID intact
 	memset_addrs_arm7(0x02FFD7CC, 0x02FFE000);
-	toncset((u32*)0x02FFF000, 0, 0xD60);		// clear part of EWRAM
+	dma_twlFill32(0, 0, (u32*)0x02FFF000, 0xD60);		// clear part of EWRAM
 	toncset32((u32*)0x02FFFDFC, 0, 1);		// clear TWLCFG address
-	toncset((u32*)0x02FFFE00, 0, 0x200);		// clear part of EWRAM: header
+	dma_twlFill32(0, 0, (u32*)0x02FFFE00, 0x200);		// clear part of EWRAM: header
 	REG_IE = 0;
 	REG_IF = ~0;
 	REG_AUXIE = 0;
@@ -1574,8 +1576,8 @@ int arm7_main(void) {
 		REG_SCFG_EXT = 0x93FFFB06;
 		REG_SCFG_CLK = 0x187;
 	} else {
-		toncset((u32*)0x02400000, 0, 0x20);
-		toncset((u32*)0x02500000, 0, 0x100000);	// clear part of EWRAM - except before in-game menu data
+		toncset((u32*)0x02400000, 0, 0x2000);
+		dma_twlFill32(0, 0, (u32*)0x02500000, 0x100000);	// clear part of EWRAM - except before in-game menu data
 		toncset((u32*)0x02E80000, 0, 0x800);
 		memset_addrs_arm7(0x02F00000, 0x02F80000);
 		memset_addrs_arm7(0x02FFE000, 0x02FFF000); // clear DSi header
@@ -1771,7 +1773,7 @@ int arm7_main(void) {
 			cheatEngineOffset = CHEAT_ENGINE_TWLSDK_LOCATION_3DS;
 		}
 
-		toncset((u32*)0x02680000, 0, 0x100000);
+		dma_twlFill32(0, 0, (u32*)0x02680000, 0x100000);
 
 		errorCode = hookNdsRetailArm7(
 			(cardengineArm7*)ce7Location,
