@@ -1290,6 +1290,11 @@ u32 fileRead (char* buffer, aFile* file, u32 startOffset, u32 length)
 		return 0;
 	}
 
+	if (file->fatTableCached && file->fatTableCache[0] != file->firstCluster) {
+		// Cluster in FAT table cache does not match the first one
+		return 0;
+	}
+
 	clusterIndex = findCluster(file, startOffset);
 
 	// Calculate the sector and byte of the current position,
@@ -1550,6 +1555,11 @@ u32 fileWrite (const char* buffer, aFile* file, u32 startOffset, u32 length)
 		#ifdef DEBUG
 		nocashMessage("CLUSTER_FREE or CLUSTER_EOF");
 		#endif
+		return 0;
+	}
+
+	if (file->fatTableCached && file->fatTableCache[0] != file->firstCluster) {
+		// Cluster in FAT table cache does not match the first one
 		return 0;
 	}
 
