@@ -2009,9 +2009,9 @@ int arm7_main(void) {
 			}
 		} else {
 			const bool laterSdk = (moduleParams->sdk_version >= 0x2008000 || moduleParams->sdk_version == 0x20029A8);
-			ce9Location = dsiWramAccess ? CARDENGINEI_ARM9_LOCATION_DSI_WRAM : (laterSdk ? CARDENGINEI_ARM9_LOCATION2 : CARDENGINEI_ARM9_LOCATION);
+			ce9Location = dsiWramAccess ? CARDENGINEI_ARM9_LOCATION_DSI_WRAM : (!laterSdk ? CARDENGINEI_ARM9_LOCATION2 : CARDENGINEI_ARM9_LOCATION);
 			ce9size = 0x5000;
-			tonccpy((u32*)ce9Location, (u32*)((!dsiWramAccess && laterSdk) ? CARDENGINEI_ARM9_BUFFERED_LOCATION2 : CARDENGINEI_ARM9_BUFFERED_LOCATION), ce9size);
+			tonccpy((u32*)ce9Location, (u32*)((!dsiWramAccess && !laterSdk) ? CARDENGINEI_ARM9_BUFFERED_LOCATION2 : CARDENGINEI_ARM9_BUFFERED_LOCATION), ce9size);
 		}
 		patchHiHeapPointer(moduleParams, ndsHeader);
 
