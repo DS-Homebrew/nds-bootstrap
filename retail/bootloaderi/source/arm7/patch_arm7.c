@@ -323,11 +323,32 @@ static void fixForDifferentBios(const cardengineArm7* ce7, const tNDSHeader* nds
 	}
 }
 
-static void patchMirrorCheck(const tNDSHeader* ndsHeader) {
-	if (ndsHeader->arm7binarySize == 0x26F28) {
-		*(u32*)0x02380128 = 0xE1C200B0; // strh r0, [r2]
-		*(u32*)0x0238012C = 0xE12FFF1E; // bx lr
+static void patchMirrorCheck(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+	if (isSdk5(moduleParams)) {
+		return;
 	}
+
+	u32* offset = (u32*)patchOffsetCache.relocateStartOffset;
+	offset--;
+	offset--;
+	offset--;
+	offset--;
+	for (int i = 0; i < 0xA0/sizeof(u32); i++) {
+		if (offset[-1] == 0xE12FFF1E) {
+			break;
+		}
+		offset--;
+	}
+
+	offset[0] = dsiModeConfirmed ? 0xE3A01002 : 0xE3A01001; // mov r1, #dsiModeConfirmed ? 2 : 1
+	offset[1] = 0xE59F2004; // ldr r2, =0x027FFFFA
+	offset[2] = 0xE1C210B0; // strh r1, [r2]
+	offset[3] = 0xE12FFF1E; // bx lr
+	offset[4] = 0x027FFFFA;
+
+	dbg_printf("RAM mirror check location : ");
+	dbg_hexa((u32)offset);
+	dbg_printf("\n\n");
 }
 
 static void patchSleepMode(const tNDSHeader* ndsHeader) {
@@ -558,7 +579,6 @@ u32 patchCardNdsArm7(
 		patchOffsetCache.a7BinSize = newArm7binarySize;
 	}
 
-	patchMirrorCheck(ndsHeader);
 	patchPostBoot(ndsHeader);
 	patchScfgExt(ndsHeader);
 	patchSleepMode(ndsHeader);
@@ -588,6 +608,7 @@ u32 patchCardNdsArm7(
 	}
 
 	if (a7GetReloc(ndsHeader, moduleParams)) {
+		patchMirrorCheck(ndsHeader, moduleParams);
 		u32 saveResult = 0;
 		
 		if (newArm7binarySize==0x2352C || newArm7binarySize==0x235DC || newArm7binarySize==0x23CAC || newArm7binarySize==0x245C4) {
