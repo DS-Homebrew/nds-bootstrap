@@ -1335,7 +1335,7 @@ u32 fileRead (char* buffer, aFile* file, u32 startOffset, u32 length)
               if (curSect >= discSecPerClus[file->card2])
   			{
                   clusterIndex+= curSect >> discSecPerClusShift[file->card2];
-                  curSect = curSect & (discSecPerClus[file->card2] - 1);
+                  curSect &= (discSecPerClus[file->card2] - 1);
   				file->currentOffset+=discBytePerClus[file->card2];
 				file->currentCluster = getCachedCluster(file, clusterIndex);
 			}
@@ -1343,7 +1343,7 @@ u32 fileRead (char* buffer, aFile* file, u32 startOffset, u32 length)
               if (curSect >= discSecPerClus)
   			{
                   clusterIndex+= curSect >> discSecPerClusShift;
-                  curSect = curSect & (discSecPerClus - 1);
+                  curSect &= (discSecPerClus - 1);
   				file->currentOffset+=discBytePerClus;
 				file->currentCluster = getCachedCluster(file, clusterIndex);
   			}
@@ -1413,10 +1413,10 @@ u32 fileRead (char* buffer, aFile* file, u32 startOffset, u32 length)
 
 			  #ifdef TWOCARD
               clusterIndex+= curSect >> discSecPerClusShift[file->card2];
-              curSect = curSect & (discSecPerClus[file->card2] - 1);
+              curSect &= (discSecPerClus[file->card2] - 1);
 			  #else
               clusterIndex+= curSect >> discSecPerClusShift;
-              curSect = curSect & (discSecPerClus - 1);
+              curSect &= (discSecPerClus - 1);
               #endif
 				file->currentCluster = getCachedCluster(file, clusterIndex);
           } else {
@@ -1475,7 +1475,7 @@ u32 fileRead (char* buffer, aFile* file, u32 startOffset, u32 length)
 		{
 			if(file->fatTableCached) {
                   clusterIndex+= curSect >> discSecPerClusShift[file->card2];
-                  curSect = curSect & (discSecPerClus[file->card2] - 1);
+                  curSect &= (discSecPerClus[file->card2] - 1);
 				file->currentCluster = getCachedCluster(file, clusterIndex);
               } else {
                   curSect = 0;
@@ -1488,7 +1488,7 @@ u32 fileRead (char* buffer, aFile* file, u32 startOffset, u32 length)
 		{
 			if(file->fatTableCached) {
                   clusterIndex+= curSect >> discSecPerClusShift;
-                  curSect = curSect & (discSecPerClus - 1);
+                  curSect &= (discSecPerClus - 1);
 				file->currentCluster = getCachedCluster(file, clusterIndex);
               } else {
                   curSect = 0;
