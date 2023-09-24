@@ -323,6 +323,13 @@ static void fixForDifferentBios(const cardengineArm7* ce7, const tNDSHeader* nds
 	}
 }
 
+static void patchMirrorCheck(const tNDSHeader* ndsHeader) {
+	if (ndsHeader->arm7binarySize == 0x26F28) {
+		*(u32*)0x02380128 = 0xE1C200B0; // strh r0, [r2]
+		*(u32*)0x0238012C = 0xE12FFF1E; // bx lr
+	}
+}
+
 static void patchSleepMode(const tNDSHeader* ndsHeader) {
 	// Sleep
 	u32* sleepPatchOffset = patchOffsetCache.sleepPatchOffset;
@@ -551,10 +558,9 @@ u32 patchCardNdsArm7(
 		patchOffsetCache.a7BinSize = newArm7binarySize;
 	}
 
+	patchMirrorCheck(ndsHeader);
 	patchPostBoot(ndsHeader);
-
 	patchScfgExt(ndsHeader);
-
 	patchSleepMode(ndsHeader);
 
 	patchRamClear(ndsHeader, moduleParams);
