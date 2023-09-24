@@ -1461,26 +1461,25 @@ int arm7_main(void) {
 		dsiModeConfirmed = dsiMode && ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr);
 	}
 	if (gameOnFlashcard || !isDSiWare) {
-		// if (dsiModeConfirmed && ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr) && consoleModel == 0) {
-			extern u32 clusterCacheSize;
-			clusterCacheSize = 0x10000;
-			if (dsiModeConfirmed && ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr)) {
-				clusterCacheSize = 0x2000;
-			}
+		extern u32 clusterCacheSize;
+		clusterCacheSize = 0x14000;
+		if (dsiModeConfirmed && ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr)) {
+			clusterCacheSize = 0x2000;
+		}
 
+		if (dsiModeConfirmed && ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr)) {
 			buildFatTableCacheCompressed(romFile);
-			if (dsiModeConfirmed && ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr)) {
-				buildFatTableCacheCompressed(savFile);
-			} else {
-				buildFatTableCache(savFile);
-				if (!savFile->fatTableCached) {
-					buildFatTableCacheCompressed(savFile);
-				}
-			}
-		/* } else {
+			buildFatTableCacheCompressed(savFile);
+		} else {
 			buildFatTableCache(romFile);
+			if (!romFile->fatTableCached) {
+				buildFatTableCacheCompressed(romFile);
+			}
 			buildFatTableCache(savFile);
-		} */
+			if (!savFile->fatTableCached) {
+				buildFatTableCacheCompressed(savFile);
+			}
+		}
 	}
 
 	if (dsiModeConfirmed && (u32)dsiHeaderTemp.arm7idestination > 0x02E80000) {
@@ -1585,13 +1584,13 @@ int arm7_main(void) {
 		extern u32* lastClusterCacheUsed;
 		extern u32 clusterCache;
 
-		u32 add = (moduleParams->sdk_version >= 0x2008000 || moduleParams->sdk_version == 0x20029A8) ? 0xC8000 : 0xE8000; // 0x027C8000 : 0x027E8000
-		tonccpy((char*)0x02700000+add, (char*)0x02700000, 0x10000);	// Move FAT table cache elsewhere
+		u32 add = (moduleParams->sdk_version >= 0x2008000 || moduleParams->sdk_version == 0x20029A8) ? 0xC4000 : 0xE8000; // 0x027C4000 : 0x027E8000
+		tonccpy((char*)0x02700000+add, (char*)0x02700000, 0x14000);	// Move FAT table cache elsewhere
 		romFile->fatTableCache = (u32*)((u32)romFile->fatTableCache+add);
 		savFile->fatTableCache = (u32*)((u32)savFile->fatTableCache+add);
 		lastClusterCacheUsed = (u32*)((u32)lastClusterCacheUsed+add);
 		clusterCache += add;
-		toncset((char*)0x02700000, 0, 0x10000);
+		toncset((char*)0x02700000, 0, 0x14000);
 	}
 
 	//if (gameOnFlashcard || !isDSiWare || !dsiWramAccess) {
