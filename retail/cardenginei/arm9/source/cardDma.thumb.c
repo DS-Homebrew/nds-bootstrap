@@ -53,6 +53,7 @@
 extern cardengineArm9* volatile ce9;
 
 extern vu32* volatile sharedAddr;
+extern tNDSHeader* ndsHeader;
 
 extern aFile* romFile;
 
@@ -414,6 +415,12 @@ void cardSetDma(u32 * params) {
 	u8* dst = (u8*)params[4];
 	u32 len = params[5];
 
+	// Simulate ROM mirroring
+	const u32 romPaddingSize = 0x20000 << ndsHeader->deviceSize;
+	while (src >= romPaddingSize) {
+		src -= romPaddingSize;
+	}
+
 	bool romPart = false;
 	//int romPartNo = 0;
 	if (!(ce9->valueBits & ROMinRAM)) {
@@ -457,6 +464,12 @@ void cardSetDma(u32 * params) {
 	u32 src = ((ce9->valueBits & isSdk5) ? dmaParams[3] : cardStruct[0]);
 	u8* dst = ((ce9->valueBits & isSdk5) ? (u8*)(dmaParams[4]) : (u8*)(cardStruct[1]));
 	u32 len = ((ce9->valueBits & isSdk5) ? dmaParams[5] : cardStruct[2]);
+
+	// Simulate ROM mirroring
+	const u32 romPaddingSize = 0x20000 << ndsHeader->deviceSize;
+	while (src >= romPaddingSize) {
+		src -= romPaddingSize;
+	}
 
 	#ifndef TWLSDK
 	dataSplit = false;
@@ -654,6 +667,12 @@ void cardSetDma(u32 * params) {
 	u8* dst = ((ce9->valueBits & isSdk5) ? (u8*)(params[4]) : (u8*)(cardStruct[1]));
 	u32 len = ((ce9->valueBits & isSdk5) ? params[5] : cardStruct[2]);
 	#endif
+
+	// Simulate ROM mirroring
+	const u32 romPaddingSize = 0x20000 << ndsHeader->deviceSize;
+	while (src >= romPaddingSize) {
+		src -= romPaddingSize;
+	}
 
 	disableIrqMask(IRQ_CARD);
 	disableIrqMask(IRQ_CARD_LINE);
