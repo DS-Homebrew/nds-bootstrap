@@ -16155,7 +16155,7 @@ u32 patchCardNds(
 	u32 errorCodeArm9 = patchCardNdsArm9(ce9, ndsHeader, moduleParams, ltdModuleParams, ROMinRAM, patchMpuRegion, usesCloneboot);
 	
 	if (errorCodeArm9 == ERR_NONE || ndsHeader->fatSize == 0) {
-		return patchCardNdsArm7(ce7, ndsHeader, moduleParams, ROMinRAM, saveFileCluster);
+		return patchCardNdsArm7(ce7, ndsHeader, moduleParams, ROMinRAM, saveFileCluster, saveSize);
 	}
 
 	dbg_printf("ERR_LOAD_OTHR");

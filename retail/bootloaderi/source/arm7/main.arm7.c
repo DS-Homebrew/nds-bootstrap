@@ -1468,14 +1468,7 @@ int arm7_main(void) {
 		}
 
 		buildFatTableCacheCompressed(romFile);
-		if (dsiModeConfirmed && ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr)) {
-			buildFatTableCacheCompressed(savFile);
-		} else {
-			buildFatTableCache(savFile);
-			if (!savFile->fatTableCached) {
-				buildFatTableCacheCompressed(savFile);
-			}
-		}
+		buildFatTableCacheCompressed(savFile);
 	}
 
 	if (dsiModeConfirmed && (u32)dsiHeaderTemp.arm7idestination > 0x02E80000) {

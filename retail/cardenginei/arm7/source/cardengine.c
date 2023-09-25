@@ -94,6 +94,7 @@ extern int unlockMutex(int* addr);
 extern vu32* volatile cardStruct;
 extern u32 fileCluster;
 extern u32 saveCluster;
+extern u32 saveSize;
 extern u32 patchOffsetCacheFileCluster;
 extern u32 srParamsCluster;
 extern u32 ramDumpCluster;
@@ -1885,7 +1886,7 @@ bool eepromRead(u32 src, void *dst, u32 len) {
 			tonccpy(dst, (char*)0x02440000 + src, len);
 		} else {*/
 			sdmmc_set_ndma_slot(4);
-			fileRead(dst, savFile, src, len);
+			fileRead(dst, savFile, (src % saveSize), len);
 			sdmmc_set_ndma_slot(0);
 		//}
 		#ifdef TWLSDK
@@ -1925,7 +1926,7 @@ bool eepromPageWrite(u32 dst, const void *src, u32 len) {
 			tonccpy((char*)0x02440000 + dst, src, len);
 		}*/
 		sdmmc_set_ndma_slot(4);
-		fileWrite(src, savFile, dst, len);
+		fileWrite(src, savFile, (dst % saveSize), len);
 		sdmmc_set_ndma_slot(0);
 		#ifdef TWLSDK
 		//if (doBak) restoreSdBakData();
@@ -1964,7 +1965,7 @@ bool eepromPageProg(u32 dst, const void *src, u32 len) {
 			tonccpy((char*)0x02440000 + dst, src, len);
 		}*/
 		sdmmc_set_ndma_slot(4);
-		fileWrite(src, savFile, dst, len);
+		fileWrite(src, savFile, (dst % saveSize), len);
 		sdmmc_set_ndma_slot(0);
   		#ifdef TWLSDK
 		//if (doBak) restoreSdBakData();

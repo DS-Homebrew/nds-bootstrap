@@ -39,7 +39,7 @@ static const u16 a7JumpTableSignatureUniversalThumb_pt3_alt2[2] = {0x6820, 0x690
 static const u16 a7JumpTableSignatureUniversalThumb_pt3_alt3[2] = {0x6800, 0x6900};
 
 
-u32 savePatchUniversal(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, module_params_t* moduleParams, u32 saveFileCluster) {
+u32 savePatchUniversal(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, module_params_t* moduleParams, const u32 saveFileCluster, const u32 saveSize) {
 	dbg_printf("\nArm7 (patch vAll)\n");
 
 	// Find the card read
@@ -355,11 +355,12 @@ u32 savePatchUniversal(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, m
 	}
 
 	ce7->patches->arm7Functions->saveCluster = saveFileCluster;
+	ce7->patches->arm7Functions->saveSize = saveSize;
 
 	return 1;
 }
 
-u32 savePatchInvertedThumb(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, module_params_t* moduleParams, u32 saveFileCluster) {
+u32 savePatchInvertedThumb(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, module_params_t* moduleParams, const u32 saveFileCluster, const u32 saveSize) {
     dbg_printf("\nArm7 (patch kirby specific)\n");
 	
 	//u32* JumpTableFunc;
@@ -473,8 +474,9 @@ u32 savePatchInvertedThumb(const cardengineArm7* ce7, const tNDSHeader* ndsHeade
     dbg_printf("\t:\t");
     dbg_hexa(*eepromPageErase);
 	dbg_printf("\n");
-	
+
 	ce7->patches->arm7Functions->saveCluster = saveFileCluster;
-    
+	ce7->patches->arm7Functions->saveSize = saveSize;
+ 
     return 1;
 }

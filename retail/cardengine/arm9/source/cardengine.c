@@ -506,7 +506,7 @@ void myIrqHandlerIPC(void) {
 			u32 src = *(vu32*)(sharedAddr);
 			u32 len = *(vu32*)(sharedAddr+1);
 
-			fileRead((char*)dst, &savFile, src, len);
+			fileRead((char*)dst, &savFile, (src % ce9->saveSize), len);
 
 			sharedAddr[3] = 0;
 			REG_EXMEMCNT = exmemcnt;
@@ -520,7 +520,7 @@ void myIrqHandlerIPC(void) {
 			u32 dst = *(vu32*)(sharedAddr);
 			u32 len = *(vu32*)(sharedAddr+1);
 
-			fileWrite((char*)src, &savFile, dst, len);
+			fileWrite((char*)src, &savFile, (dst % ce9->saveSize), len);
 
 			sharedAddr[3] = 0;
 			REG_EXMEMCNT = exmemcnt;

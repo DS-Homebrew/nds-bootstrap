@@ -16,6 +16,7 @@
 .global moduleParams
 .global fileCluster
 .global saveCluster
+.global saveSize
 .global patchOffsetCacheFileCluster
 .global srParamsCluster
 .global ramDumpCluster
@@ -558,6 +559,8 @@ arm7Functions:
 .word    cardReadStub
 .word    cardIdStub
 saveCluster:
+.word    0x00000000
+saveSize:
 .word    0x00000000
 
 eepromProtectStub:

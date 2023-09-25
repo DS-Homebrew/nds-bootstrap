@@ -22,11 +22,11 @@ extern u32 newArm7binarySize;
 extern u32 newArm7ibinarySize;
 extern u32 oldArm7mbk;
 
-u32 savePatchV1(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 saveFileCluster);
-u32 savePatchV2(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 saveFileCluster);
-u32 savePatchUniversal(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 saveFileCluster);
-u32 savePatchInvertedThumb(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 saveFileCluster);
-u32 savePatchV5(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, u32 saveFileCluster); // SDK 5
+u32 savePatchV1(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, const u32 saveFileCluster, const u32 saveSize);
+u32 savePatchV2(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, const u32 saveFileCluster, const u32 saveSize);
+u32 savePatchUniversal(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, const u32 saveFileCluster, const u32 saveSize);
+u32 savePatchInvertedThumb(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, const u32 saveFileCluster, const u32 saveSize);
+u32 savePatchV5(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, const u32 saveFileCluster, const u32 saveSize); // SDK 5
 
 u32 generateA7Instr(int arg1, int arg2) {
 	return (((u32)(arg2 - arg1 - 8) >> 2) & 0xFFFFFF) | 0xEB000000;
@@ -561,7 +561,8 @@ u32 patchCardNdsArm7(
 	tNDSHeader* ndsHeader,
 	const module_params_t* moduleParams,
 	u32 ROMinRAM,
-	u32 saveFileCluster
+	u32 saveFileCluster,
+	u32 saveSize
 ) {
 	newArm7binarySize = ndsHeader->arm7binarySize;
 	newArm7ibinarySize = __DSiHeader->arm7ibinarySize;
@@ -612,25 +613,25 @@ u32 patchCardNdsArm7(
 		u32 saveResult = 0;
 		
 		if (newArm7binarySize==0x2352C || newArm7binarySize==0x235DC || newArm7binarySize==0x23CAC || newArm7binarySize==0x245C4) {
-			saveResult = savePatchInvertedThumb(ce7, ndsHeader, moduleParams, saveFileCluster);    
+			saveResult = savePatchInvertedThumb(ce7, ndsHeader, moduleParams, saveFileCluster, saveSize);    
 		} else if (isSdk5(moduleParams)) {
 			// SDK 5
-			saveResult = savePatchV5(ce7, ndsHeader, saveFileCluster);
+			saveResult = savePatchV5(ce7, ndsHeader, saveFileCluster, saveSize);
 		} else {
 			if (patchOffsetCache.savePatchType == 0) {
-				saveResult = savePatchV1(ce7, ndsHeader, moduleParams, saveFileCluster);
+				saveResult = savePatchV1(ce7, ndsHeader, moduleParams, saveFileCluster, saveSize);
 				if (!saveResult) {
 					patchOffsetCache.savePatchType = 1;
 				}
 			}
 			if (!saveResult && patchOffsetCache.savePatchType == 1) {
-				saveResult = savePatchV2(ce7, ndsHeader, moduleParams, saveFileCluster);
+				saveResult = savePatchV2(ce7, ndsHeader, moduleParams, saveFileCluster, saveSize);
 				if (!saveResult) {
 					patchOffsetCache.savePatchType = 2;
 				}
 			}
 			if (!saveResult && patchOffsetCache.savePatchType == 2) {
-				saveResult = savePatchUniversal(ce7, ndsHeader, moduleParams, saveFileCluster);
+				saveResult = savePatchUniversal(ce7, ndsHeader, moduleParams, saveFileCluster, saveSize);
 			}
 		}
 		if (!saveResult) {

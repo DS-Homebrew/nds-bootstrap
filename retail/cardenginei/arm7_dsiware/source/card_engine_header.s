@@ -244,6 +244,8 @@ arm7Functions:
 .word    cardIdStub
 saveCluster:
 .word    0x00000000
+saveSize:
+.word    0x00000000
 
 eepromProtectStub:
 	stmfd   sp!, {r3-r11,lr}
