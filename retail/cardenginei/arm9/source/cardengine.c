@@ -485,6 +485,12 @@ static inline void cardReadRAM(u8* dst, u32 src, u32 len/*, int romPartNo*/) {
 	// -------------------------------------
 	#endif
 
+	if (src >= 0 && src < 0x160) {
+		u32 newSrc = (u32)ndsHeader+src;
+		tonccpy(dst, (u8*)newSrc, len);
+		return;
+	}
+
 	// Copy directly
 	#ifdef TWLSDK
 	u32 newSrc = ce9->romLocation/*[romPartNo]*/+src;
@@ -637,6 +643,12 @@ void cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	u32 len = ((ce9->valueBits & isSdk5) ? len0 : cardStruct[2]);
 	#endif
 	#endif
+
+	// Simulate ROM mirroring
+	const u32 romPaddingSize = 0x20000 << ndsHeader->deviceSize;
+	while (src >= romPaddingSize) {
+		src -= romPaddingSize;
+	}
 
 	#ifdef DEBUG
 	u32 commandRead;

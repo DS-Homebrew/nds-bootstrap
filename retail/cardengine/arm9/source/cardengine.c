@@ -699,17 +699,28 @@ void cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	u8* dst = ((ce9->valueBits & isSdk5) ? dst0 : (u8*)(cardStruct[1]));
 	u32 len = ((ce9->valueBits & isSdk5) ? len0 : cardStruct[2]);
 
+	// Simulate ROM mirroring
+	const u32 romPaddingSize = 0x20000 << ndsHeader->deviceSize;
+	while (src >= romPaddingSize) {
+		src -= romPaddingSize;
+	}
+
 	if ((ce9->valueBits & cardReadFix) && src < 0x8000) {
 		// Fix reads below 0x8000
 		src = 0x8000 + (src & 0x1FF);
 	}
 
 	if ((ce9->valueBits & ROMinRAM) || ((ce9->valueBits & overlaysCached) && src >= ndsHeader->arm9romOffset+ndsHeader->arm9binarySize && src < ndsHeader->arm7romOffset)) {
-		u32 newSrc = ce9->romLocation+src;
-		if (ndsHeader->unitCode == 3 && src >= arm9iromOffset) {
-			newSrc -= arm9ibinarySize;
+		if (src >= 0 && src < 0x160) {
+			u32 newSrc = (u32)ndsHeader+src;
+			tonccpy(dst, (u8*)newSrc, len);
+		} else {
+			u32 newSrc = ce9->romLocation+src;
+			if (ndsHeader->unitCode == 3 && src >= arm9iromOffset) {
+				newSrc -= arm9ibinarySize;
+			}
+			tonccpy(dst, (u8*)newSrc, len);
 		}
-		tonccpy(dst, (u8*)newSrc, len);
 	} else {
 		cardReadNormal(dst, src, len);
 	}
