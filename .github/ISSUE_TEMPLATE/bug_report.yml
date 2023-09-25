@@ -30,6 +30,8 @@ body:
         required: false
       - label: New Nintendo 2DS XL/LL
         required: false
+    validations:
+      required: true
   - type: textarea
     id: launch-method
     attributes:
