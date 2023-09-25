@@ -13,23 +13,14 @@ body:
       description: What console(s) are you using?
       options:
       - label: Nintendo DS
-        required: false
       - label: Nintendo DS Lite
-        required: false
       - label: Nintendo DSi
-        required: false
       - label: Nintendo DSi XL/LL
-        required: false
       - label: Nintendo 3DS
-        required: false
       - label: Nintendo 3DS XL/LL
-        required: false
       - label: New Nintendo 3DS XL/LL
-        required: false
       - label: Nintendo 2DS
-        required: false
       - label: New Nintendo 2DS XL/LL
-        required: false
     validations:
       required: true
   - type: textarea
