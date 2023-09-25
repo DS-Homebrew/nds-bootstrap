@@ -420,6 +420,7 @@ void cardSetDma(u32 * params) {
 	while (src >= romPaddingSize) {
 		src -= romPaddingSize;
 	}
+	params[3] = src;
 
 	bool romPart = false;
 	//int romPartNo = 0;
@@ -469,6 +470,11 @@ void cardSetDma(u32 * params) {
 	const u32 romPaddingSize = 0x20000 << ndsHeader->deviceSize;
 	while (src >= romPaddingSize) {
 		src -= romPaddingSize;
+	}
+	if (ce9->valueBits & isSdk5) {
+		dmaParams[3] = src;
+	} else {
+		cardStruct[0] = src;
 	}
 
 	#ifndef TWLSDK
