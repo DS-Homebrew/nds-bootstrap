@@ -7,13 +7,29 @@ body:
   - type: markdown
     attributes:
       value: Duplicate issues will be closed. Please keep this in mind before submitting one.
-  - type: textarea
-    id: game-console
+  - type: checkboxes
     attributes:
-      label: Game Console
-      description: What console are you using?
-    validations:
-      required: true
+      label: Game Console(s) used
+      description: What console(s) are you using?
+      options:
+      - label: Nintendo DS
+        required: false
+      - label: Nintendo DS Lite
+        required: false
+      - label: Nintendo DSi
+        required: false
+      - label: Nintendo DSi XL/LL
+        required: false
+      - label: Nintendo 3DS
+        required: false
+      - label: Nintendo 3DS XL/LL
+        required: false
+      - label: New Nintendo 3DS XL/LL
+        required: false
+      - label: Nintendo 2DS
+        required: false
+      - label: New Nintendo 2DS XL/LL
+        required: false
   - type: textarea
     id: launch-method
     attributes:
