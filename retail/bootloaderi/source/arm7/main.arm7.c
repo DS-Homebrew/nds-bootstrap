@@ -1467,14 +1467,10 @@ int arm7_main(void) {
 			clusterCacheSize = 0x2000;
 		}
 
+		buildFatTableCacheCompressed(romFile);
 		if (dsiModeConfirmed && ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr)) {
-			buildFatTableCacheCompressed(romFile);
 			buildFatTableCacheCompressed(savFile);
 		} else {
-			buildFatTableCache(romFile);
-			if (!romFile->fatTableCached) {
-				buildFatTableCacheCompressed(romFile);
-			}
 			buildFatTableCache(savFile);
 			if (!savFile->fatTableCached) {
 				buildFatTableCacheCompressed(savFile);
