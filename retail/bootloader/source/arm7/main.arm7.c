@@ -1304,9 +1304,10 @@ int arm7_main(void) {
 		dbg_printf("Music pack found!\n");
 	}
 
+	const bool laterSdk = (moduleParams->sdk_version >= 0x2008000 || moduleParams->sdk_version == 0x20029A8);
 	bool wramUsed = false;
 	u32 fatTableSize = 0;
-	u32 fatTableSizeNoExp = (moduleParams->sdk_version < 0x2008000) ? 0x19C00 : 0x1A400;
+	u32 fatTableSizeNoExp = !laterSdk ? 0x19C00 : 0x1A400;
 	if (s2FlashcardId == 0x334D || s2FlashcardId == 0x3647 || s2FlashcardId == 0x4353) {
 		fatTableAddr = (s2FlashcardId==0x4353 ? 0x09F7FE00 : 0x09F80000);
 		fatTableSize = 0x80000;
@@ -1325,7 +1326,7 @@ int arm7_main(void) {
 			fatTableSize = 0x80000;
 		}
 	} else {
-		if (moduleParams->sdk_version >= 0x2008000) {
+		if (laterSdk) {
 			fatTableAddr = ce9Alt ? 0x023FF268 : 0x023FF200;
 			fatTableSizeNoExp = ce9Alt ? 0x598 : 0x600;
 
@@ -1358,7 +1359,7 @@ int arm7_main(void) {
 			// const bool startMem = (!ce9NotInHeap && ndsHeader->unitCode > 0 && (u32)ndsHeader->arm9destination >= 0x02004000 && ((accessControl & BIT(4)) || arm7mbk == 0x080037C0) && romFile.fatTableCacheSize <= 0x4000);
 
 			// if (ce9NotInHeap) {
-				ce9AltLargeTable = ((romFile.fatTableCacheSize > fatTableSizeNoExp) && (moduleParams->sdk_version >= 0x2008000));
+				ce9AltLargeTable = ((romFile.fatTableCacheSize > fatTableSizeNoExp) && laterSdk);
 				if (ce9AltLargeTable) {
 					dbg_printf("\n");
 					dbg_printf("Cluster cache is above 0x");
