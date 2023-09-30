@@ -12580,8 +12580,8 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x020B2E00, (u32)dsiSaveDelete);
 		*(u32*)0x020B4694 = 0xE1A00000; // nop
 		*(u32*)0x020B7F60 = 0xE1A00000; // nop
-		patchInitDSiWare(0x020BE070, heapEnd);
-		*(u32*)0x020BE3FC = 0x0213D220;
+		patchInitDSiWare(0x020BE070, heapEndMaxForRetail);
+		*(u32*)0x020BE3FC = *(u32*)0x02004FD0;
 		patchUserSettingsReadDSiWare(0x020BF7D0);
 	}
 
