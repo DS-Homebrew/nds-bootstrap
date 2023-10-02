@@ -567,7 +567,7 @@ u32 patchCardNdsArm7(
 	newArm7binarySize = ndsHeader->arm7binarySize;
 	newArm7ibinarySize = __DSiHeader->arm7ibinarySize;
 
-	if (REG_SCFG_EXT == 0 && *(u32*)DONOR_ROM_ARM7_SIZE_LOCATION != 0) {
+	if ((ndsHeader->unitCode > 0) ? (REG_SCFG_EXT == 0) : (memcmp(ndsHeader->gameCode, "AYI", 3) == 0 && ndsHeader->arm7binarySize == 0x25F70) && *(u32*)DONOR_ROM_ARM7_SIZE_LOCATION != 0) {
 		// Replace incompatible ARM7 binary
 		newArm7binarySize = *(u32*)DONOR_ROM_ARM7_SIZE_LOCATION;
 		newArm7ibinarySize = *(u32*)DONOR_ROM_ARM7I_SIZE_LOCATION;
