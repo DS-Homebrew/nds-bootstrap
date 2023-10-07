@@ -125,7 +125,7 @@ static inline void setDeviceOwner(void) {
 void s2RamAccess(bool open) {
 	if (__myio_dldi.features & FEATURE_SLOT_NDS) return;
 
-	u16 s2FlashcardId = ce9->s2FlashcardId;
+	const u16 s2FlashcardId = ce9->s2FlashcardId;
 	if (open) {
 		if (s2FlashcardId == 0x334D) {
 			_M3_changeMode(M3_MODE_RAM);
@@ -450,6 +450,7 @@ void inGameMenu(s32* exRegisters) {
 	}
 
 	int oldIME = enterCriticalSection();
+	const u16 exmemcnt = REG_EXMEMCNT;
 	setDeviceOwner();
 
 	if (!opened) {
@@ -490,6 +491,7 @@ void inGameMenu(s32* exRegisters) {
 		sharedAddr[3] = 0;
 	}
 
+	REG_EXMEMCNT = exmemcnt;
 	leaveCriticalSection(oldIME);
 }
 
