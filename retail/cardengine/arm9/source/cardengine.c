@@ -679,7 +679,7 @@ void cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 		mpuSet = true;
 	}
 
-	u16 exmemcnt = REG_EXMEMCNT;
+	const u16 exmemcnt = REG_EXMEMCNT;
 	cardReadInProgress = true;
 
 	setDeviceOwner();
