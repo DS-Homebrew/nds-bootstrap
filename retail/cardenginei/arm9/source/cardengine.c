@@ -1266,10 +1266,10 @@ void myIrqHandlerIPC(void) {
 		#endif
 #endif
 			break;
-		/* case 0x4:
+		case 0x4:
 			extern bool dmaOn;
 			dmaOn = !dmaOn;
-			break; */
+			break;
 		case 0x5:
 			igmReset = true;
 			sharedAddr[3] = 0x54495845;

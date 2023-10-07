@@ -68,7 +68,7 @@ extern void callEndReadDmaThumb(void);
 extern void disableIrqMask(u32 mask);
 
 bool isDma = false;
-// bool dmaOn = true;
+bool dmaOn = true;
 bool dmaDirectRead = false;
 #ifndef TWLSDK
 static bool dataSplit = false;
@@ -76,9 +76,9 @@ static bool dataSplit = false;
 
 void endCardReadDma() {
 #ifdef TWLSDK
-	if (dmaDirectRead /* && dmaOn */ && (ndmaBusy(0)))
+	if (dmaDirectRead && dmaOn && (ndmaBusy(0)))
 #else
-	if (dmaDirectRead /* && dmaOn */ && (ndmaBusy(0) || (dataSplit && ndmaBusy(1))))
+	if (dmaDirectRead && dmaOn && (ndmaBusy(0) || (dataSplit && ndmaBusy(1))))
 #endif
 	{
 		IPC_SendSync(0x3);
@@ -437,7 +437,7 @@ void cardSetDma(u32 * params) {
 		}*/
 		romPart = (ce9->romPartSize > 0 && src >= ce9->romPartSrc && src < ce9->romPartSrc+ce9->romPartSize);
 	}
-	if (/* dmaOn && */ ((ce9->valueBits & ROMinRAM) || romPart)) {
+	if (dmaOn && ((ce9->valueBits & ROMinRAM) || romPart)) {
 		dmaDirectRead = true;
 
 		disableIrqMask(IRQ_CARD);
@@ -495,7 +495,7 @@ void cardSetDma(u32 * params) {
 		}*/
 		romPart = (ce9->romPartSize > 0 && src >= ce9->romPartSrc && src < ce9->romPartSrc+ce9->romPartSize);
 	}
-	if (/* dmaOn && */ ((ce9->valueBits & ROMinRAM) || romPart)) {
+	if (dmaOn && ((ce9->valueBits & ROMinRAM) || romPart)) {
 		dmaDirectRead = true;
 
 		disableIrqMask(IRQ_CARD);
@@ -531,7 +531,7 @@ void cardSetDma(u32 * params) {
 
 		IPC_SendSync(0x3);
 		return;
-	} else if (/* !dmaOn || */ ce9->patches->sleepRef || ce9->thumbPatches->sleepRef) {
+	} else if (!dmaOn || ce9->patches->sleepRef || ce9->thumbPatches->sleepRef) {
 		cardRead(NULL, dst, src, len);
 		endCardReadDma();
 		return;
