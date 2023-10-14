@@ -487,13 +487,13 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 				*(u16*)(0x020000C0) = 0x4353;
 				*(vu16*)(0x08000000) = 0x4D54;
 			}
-			if (*(vu16*)(0x08000000) != 0x4D54) {
-				cExpansion::SetRompage(381);	// Try again with EZ Flash
+			/* if (*(vu16*)(0x08000000) != 0x4D54) {
+				cExpansion::SetRompage(381);	// Try again with EZ Flash (TWLMenu++ required)
 				cExpansion::OpenNorWrite();
 				cExpansion::SetSerialMode();
 				*(u16*)(0x020000C0) = 0x5A45;
 				*(vu16*)(0x08000000) = 0x4D54;
-			}
+			} */
 			if (*(vu16*)(0x08000000) != 0x4D54) {
 				*(u16*)(0x020000C0) = 0;
 			}
