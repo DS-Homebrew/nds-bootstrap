@@ -192,6 +192,7 @@ int hookNdsRetailArm9(
 	nocashMessage("hookNdsRetailArm9");
 
 	const char* romTid = getRomTid(ndsHeader);
+	extern u32 romPaddingSize;
 	extern u32 romLocation;
 	extern u32 romSizeLimit;
 	extern u16 s2FlashcardId;
@@ -249,7 +250,8 @@ int hookNdsRetailArm9(
 	ce9->s2FlashcardId          = s2FlashcardId;
 	ce9->overlaysSize           = overlaysSize;
 	ce9->ioverlaysSize          = ioverlaysSize;
-	ce9->romLocation = romLocation;
+	ce9->romPaddingSize         = romPaddingSize;
+	ce9->romLocation            = romLocation;
 
 	u32 romOffset = 0;
 	if (ROMinRAM) {

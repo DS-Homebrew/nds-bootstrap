@@ -37,6 +37,8 @@ mainScreen:
 	.word	0x00000000
 overlaysSize:
 	.word	0x00000000
+romPaddingSize:
+	.word	0x00000000
 consoleModel:
 	.word	0x00000000
 irqTable:

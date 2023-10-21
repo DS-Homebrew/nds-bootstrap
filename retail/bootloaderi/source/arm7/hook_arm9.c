@@ -280,6 +280,7 @@ int hookNdsRetailArm9(
 	extern u32 iUncompressedSize;
 	extern u32 overlaysSize;
 	extern bool overlayPatch;
+	extern u32 romPaddingSize;
 	extern u32 dataToPreloadAddr[2];
 	extern u32 dataToPreloadSize[2];
 	extern bool dataToPreloadFound(const tNDSHeader* ndsHeader);
@@ -330,6 +331,7 @@ int hookNdsRetailArm9(
 	}
 	ce9->mainScreen             = mainScreen;
 	ce9->overlaysSize           = overlaysSize;
+	ce9->romPaddingSize         = romPaddingSize;
 	ce9->consoleModel           = consoleModel;
 
 	if (!ROMinRAM) {

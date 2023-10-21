@@ -155,6 +155,7 @@ u16 baseHeaderCRC = 0;
 u16 baseSecureCRC = 0;
 u32 baseRomSize = 0;
 u32 baseChipID = 0;
+u32 romPaddingSize = 0;
 bool pkmnHeader = false;
 bool ndmaDisabled = false;
 
@@ -712,6 +713,13 @@ static void loadBinary_ARM7(const tDSiHeader* dsiHeaderTemp, aFile* file) {
 		}
 	}
 
+	dbg_printf("Header CRC is ");
+	u16 currentHeaderCRC = swiCRC16(0xFFFF, (void*)&dsiHeaderTemp->ndshdr, 0x15E);
+	if (currentHeaderCRC != dsiHeaderTemp->ndshdr.headerCRC16) {
+		dbg_printf("in");
+	}
+	dbg_printf("valid!\n");
+
 	char baseTid[5] = {0};
 	fileRead((char*)&baseTid, file, 0xC, 4);
 	if (
@@ -731,9 +739,17 @@ static void loadBinary_ARM7(const tDSiHeader* dsiHeaderTemp, aFile* file) {
 	fileRead((char*)&baseSecureCRC, file, 0x6C, sizeof(u16));
 	fileRead((char*)&baseRomSize, file, 0x80, sizeof(u32));
 
-	/*isGSDD = (strncmp(romTid, "BO5", 3) == 0)			// Golden Sun: Dark Dawn
-        || (strncmp(romTid, "TBR", 3) == 0)			    // Disney Pixar Brave 
-        ;*/
+	u8 baseDeviceSize = 0;
+	fileRead((char*)&baseDeviceSize, file, 0x14, sizeof(u8));
+
+	romPaddingSize = 0x20000 << baseDeviceSize;
+	if (baseRomSize == 0 ? (romSize > romPaddingSize) : (baseRomSize > romPaddingSize)) {
+		dbg_printf("ROM size is larger than device size!\n");
+		while (baseRomSize == 0 ? (romSize > romPaddingSize) : (baseRomSize > romPaddingSize)) {
+			baseDeviceSize++;
+			romPaddingSize = 0x20000 << baseDeviceSize;
+		}
+	}
 
 	sdmmc_set_ndma_slot(4);
 }

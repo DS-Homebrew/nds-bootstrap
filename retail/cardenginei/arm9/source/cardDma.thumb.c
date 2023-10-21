@@ -416,9 +416,8 @@ void cardSetDma(u32 * params) {
 	u32 len = params[5];
 
 	// Simulate ROM mirroring
-	const u32 romPaddingSize = 0x20000 << ndsHeader->deviceSize;
-	while (src >= romPaddingSize) {
-		src -= romPaddingSize;
+	while (src >= ce9->romPaddingSize) {
+		src -= ce9->romPaddingSize;
 	}
 	params[3] = src;
 
@@ -467,9 +466,8 @@ void cardSetDma(u32 * params) {
 	u32 len = ((ce9->valueBits & isSdk5) ? dmaParams[5] : cardStruct[2]);
 
 	// Simulate ROM mirroring
-	const u32 romPaddingSize = 0x20000 << ndsHeader->deviceSize;
-	while (src >= romPaddingSize) {
-		src -= romPaddingSize;
+	while (src >= ce9->romPaddingSize) {
+		src -= ce9->romPaddingSize;
 	}
 	if (ce9->valueBits & isSdk5) {
 		dmaParams[3] = src;
@@ -675,9 +673,8 @@ void cardSetDma(u32 * params) {
 	#endif
 
 	// Simulate ROM mirroring
-	const u32 romPaddingSize = 0x20000 << ndsHeader->deviceSize;
-	while (src >= romPaddingSize) {
-		src -= romPaddingSize;
+	while (src >= ce9->romPaddingSize) {
+		src -= ce9->romPaddingSize;
 	}
 
 	disableIrqMask(IRQ_CARD);

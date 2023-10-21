@@ -74,6 +74,8 @@ overlaysSize:
 	.word	0x00000000
 ioverlaysSize:
 	.word	0x00000000
+romPaddingSize:
+	.word	0x00000000
 irqTable:
 	.word	0x00000000
 romLocation:

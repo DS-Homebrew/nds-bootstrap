@@ -702,9 +702,8 @@ void cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	u32 len = ((ce9->valueBits & isSdk5) ? len0 : cardStruct[2]);
 
 	// Simulate ROM mirroring
-	const u32 romPaddingSize = 0x20000 << ndsHeader->deviceSize;
-	while (src >= romPaddingSize) {
-		src -= romPaddingSize;
+	while (src >= ce9->romPaddingSize) {
+		src -= ce9->romPaddingSize;
 	}
 
 	if ((ce9->valueBits & cardReadFix) && src < 0x8000) {
