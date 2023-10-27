@@ -735,7 +735,7 @@ void patchHiHeapPointer(cardengineArm9* ce9, const module_params_t* moduleParams
 	if ((!nandAccess && extendedMemory)
 	|| (moduleParams->sdk_version < 0x2008000 && moduleParams->sdk_version != 0x20029A8)
 	|| (ce9NotInHeap && !ce9AltLargeTable && cheatSizeTotal <= 4)
-	|| (strncmp(romTid, "YEE", 3) == 0 && romTid[3] != 'J') || strncmp(romTid, "BEB", 3) == 0 || strncmp(romTid, "BEE", 3) == 0 // Inazuma Eleven 1 & 2
+	|| (((strncmp(romTid, "YEE", 3) == 0 && romTid[3] != 'J') || strncmp(romTid, "BEB", 3) == 0 || strncmp(romTid, "BEE", 3) == 0) && !ce9AltLargeTable) // Inazuma Eleven 1 & 2
 	|| strncmp(romTid, "CLJ", 3) == 0 // Mario & Luigi: Bowser's Inside Story
 	|| strncmp(romTid, "VSO", 3) == 0 // Sonic Classic Collection
 	|| arm7mbk == 0x080037C0) {
