@@ -218,6 +218,8 @@ int hookNdsRetailArm7(
 	u32 cheatEngineAddr = CHEAT_ENGINE_LOCATION_B4DS;
 	if (!extendedMemory && strncmp(romTid, "CLJ", 3) == 0) { // Mario & Luigi: Bowser's Inside Story
 		cheatEngineAddr = 0x02002000;
+	} else if ((strncmp(romTid, "YEE", 3) == 0 && romTid[3] != 'J') || strncmp(romTid, "BEB", 3) == 0 || strncmp(romTid, "BEE", 3) == 0) { // Inazuma Eleven: Fix AP-fix causing undefined instruction
+		cheatEngineAddr = (u32)ce7-0x2000;
 	}
 
 	ce7->intr_vblank_orig_return = *vblankHandler;
