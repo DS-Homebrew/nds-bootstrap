@@ -74,7 +74,8 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	const bool largeS2RAM = (expansionPakFound && (s2FlashcardId != 0)); // 16MB or more
 	const u32 wirelessReturnCodeArm = wirelessCodeInVram ? 0xE3A00000 : 0xE3A00001; // mov r0, #wirelessCodeInVram ? 0 : 1
 	const u16 wirelessReturnCodeThumb = wirelessCodeInVram ? 0x2000 : 0x2001; // movs r0, #wirelessCodeInVram ? 0 : 1
-	if (donorFileCluster == CLUSTER_FREE) {
+	extern u32 arm7mbk;
+	if (arm7mbk == 0x080037C0 && donorFileCluster == CLUSTER_FREE) {
 		return;
 	}
 
