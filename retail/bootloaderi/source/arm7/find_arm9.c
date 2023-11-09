@@ -60,6 +60,7 @@ static const u32 cardRomInitSignatureEarly[2]      = {0xE92D4078, 0xE24DD00C};
 static const u32 cardRomInitSignature[2]           = {0xE92D4010, 0xE59F1064};
 static const u32 cardRomInitSignatureAlt[2]        = {0xE92D4010, 0xE59F1070};
 static const u16 cardRomInitSignatureEarlyThumb[2] = {0xB578, 0xB083};
+static const u16 cardRomInitSignatureThumb[2]      = {0xB510, 0x4915};
 
 //static const u32 instructionBHI[1] = {0x8A000001};
 
@@ -907,6 +908,13 @@ u16* findCardRomInitOffsetThumb(const u16* cardReadEndOffset) {
 		cardReadEndOffset+(0x200/sizeof(u16)), 0x180,//ndsHeader->arm9binarySize,
 		cardRomInitSignatureEarlyThumb, 2
 	);
+
+	if (!offset) {
+		offset = findOffsetThumb(
+			cardReadEndOffset+(0x200/sizeof(u16)), 0x180,//ndsHeader->arm9binarySize,
+			cardRomInitSignatureThumb, 2
+		);
+	}
 
 	if (!offset) {
 		offset = findOffsetThumb(
