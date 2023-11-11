@@ -168,6 +168,7 @@ void reset(u32 tid1, u32 tid2) {
 	REG_DISPSTAT = 0;
 	REG_DISPCNT = 0;
 	REG_DISPCNT_SUB = 0;
+	GFX_STATUS = 0;
 
 	toncset((u16*)0x04000000, 0, 0x56);
 	toncset((u16*)0x04001000, 0, 0x56);

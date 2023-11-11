@@ -213,6 +213,7 @@ void __attribute__((target("arm"))) arm9_main(void) {
 	dmaFill((u16*)&arm9_BLANK_RAM, VRAM_D, 272*1024);		// Banks D (excluded), E, F, G, H, I
 
 	REG_DISPSTAT = 0;
+	GFX_STATUS = 0;
 
 	//VRAM_A_CR = 0;
 	VRAM_B_CR = 0;
