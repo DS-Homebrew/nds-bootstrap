@@ -239,11 +239,9 @@ static void initialize(void) {
 		return;
 	}
 
-	#ifdef UNITTWL
 	if (consoleModel > 0 && *(u32*)CHEAT_ENGINE_TWLSDK_LOCATION_3DS == 0x3E4) {
 		cheatEngineAddr = CHEAT_ENGINE_TWLSDK_LOCATION_3DS;
 	}
-	#endif
 
 	if (language >= 0 && language <= 7) {
 		// Change language

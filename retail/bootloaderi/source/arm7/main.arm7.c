@@ -1773,7 +1773,7 @@ int arm7_main(void) {
 		/*extern u32 savePatchV5(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, u32 saveFileCluster); // SDK 5
 		savePatchV5((cardengineArm7*)ce7Location, ndsHeader, saveFileCluster);*/
 
-		if (consoleModel > 0 && newArm7binarySize == 0x28E54) {
+		if (consoleModel > 0) {
 			cheatEngineOffset = CHEAT_ENGINE_TWLSDK_LOCATION_3DS;
 		}
 
