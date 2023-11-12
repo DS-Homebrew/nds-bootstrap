@@ -512,9 +512,11 @@ int hookNdsRetailArm7(
 			cheatDataOffset += wideCheatSize;
 			*(cheatDataOffset + 3) = 0xCF;
 			ce7->valueBits |= b_wideCheatUsed;
+			dbg_printf("Wide cheat found and applied\n");
 		}
 		if (cheatFile.firstCluster != CLUSTER_FREE) {
 			fileRead(cheatDataOffset, &cheatFile, 0, cheatSize);
+			dbg_printf("Cheats found and applied\n");
 		}
 	}
 

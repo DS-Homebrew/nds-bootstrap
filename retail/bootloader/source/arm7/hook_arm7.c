@@ -254,6 +254,7 @@ int hookNdsRetailArm7(
 		}
 		if (cheatFile.firstCluster != CLUSTER_FREE) {
 			fileRead(cheatDataOffset, &cheatFile, 0, cheatSize);
+			dbg_printf("Cheats found and applied\n");
 		}
 	}
 	toncset((u8*)CHEAT_ENGINE_LOCATION_B4DS_BUFFERED, 0, 0x400);
