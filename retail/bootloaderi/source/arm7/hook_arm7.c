@@ -227,6 +227,10 @@ int hookNdsRetailArm7(
 					hookLocation = (u32*)0x23A5538;		// DSi-Exclusive/DSiWare games
 					break;
 
+				case 0x000268DC:
+					hookLocation = (u32*)0x23A5FFC;		// DSi-Exclusive/DSiWare games
+					break;
+
 				case 0x00026DF4:
 					hookLocation = (u32*)0x23A6AD4;		// DSi-Exclusive/DSiWare games
 					break;
