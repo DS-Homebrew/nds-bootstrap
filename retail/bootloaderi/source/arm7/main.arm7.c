@@ -1931,7 +1931,7 @@ int arm7_main(void) {
 		}
 
 		u32 clonebootFlag = 0;
-		fileRead((char*)&clonebootFlag, romFile, (romSize <= baseRomSize) ? romSize : baseRomSize, sizeof(u32));
+		fileRead((char*)&clonebootFlag, romFile, ((romSize-4) <= baseRomSize) ? (romSize-4) : baseRomSize, sizeof(u32));
 		const bool usesCloneboot = (clonebootFlag == 0x16361);
 		if (usesCloneboot) {
 			dbg_printf("Cloneboot detected\n");
