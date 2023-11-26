@@ -20,9 +20,12 @@
 #define DEBUG_FILE_H
 
 #include "my_fat.h"
+#include "hex.h"
 
 u32 dbg_printf(const char* message);
-u32 dbg_hexa(u32 n);
+static inline u32 dbg_hexa(u32 n) {
+	return dbg_printf(tohex(n));
+}
 void enableDebug(const aFile* debugFileCluster);
 
 #endif // DEBUG_FILE_H

@@ -21,7 +21,6 @@
 #include <string.h>
 #include <nds/debug.h>
 #include "my_fat.h"
-#include "hex.h"
 
 static bool _debug = false;
 static aFile _debugFileCluster;
@@ -44,10 +43,6 @@ u32 dbg_printf(const char* message) {
 	_currentPos += strlen(message);
 
 	return ret;
-}
-
-u32 dbg_hexa(u32 n) {
-	return dbg_printf(tohex(n));
 }
 
 #endif
