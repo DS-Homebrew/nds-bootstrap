@@ -1514,7 +1514,7 @@ int arm7_main(void) {
 		saveSize
 	);
 	if (errorCode == ERR_NONE) {
-		dbg_printf("Card patch successful");
+		dbg_printf("Card patch successful\n\n");
 	} else {
 		dbg_printf("Card patch failed");
 		errorOutput();
@@ -1537,9 +1537,9 @@ int arm7_main(void) {
 		getRumblePakType()
 	);
 	if (errorCode == ERR_NONE) {
-		dbg_printf("Card hook successful");
+		// dbg_printf("Card hook 7 successful\n\n");
 	} else {
-		dbg_printf("Card hook failed");
+		// dbg_printf("Card hook 7 failed");
 		errorOutput();
 	}
 
@@ -1596,12 +1596,12 @@ int arm7_main(void) {
 		fatTableSize,
 		fatTableAddr
 	);
-	if (errorCode == ERR_NONE) {
-		dbg_printf("Card hook successful");
+	/* if (errorCode == ERR_NONE) {
+		dbg_printf("Card hook 9 successful\n\n");
 	} else {
-		dbg_printf("Card hook failed");
-		// errorOutput();
-	}
+		dbg_printf("Card hook 9 failed");
+		errorOutput();
+	} */
 
 	patchOffsetCacheFileNewCrc = swiCRC16(0xFFFF, &patchOffsetCache, sizeof(patchOffsetCacheContents));
 	if (patchOffsetCacheFileNewCrc != patchOffsetCacheFilePrevCrc) {
