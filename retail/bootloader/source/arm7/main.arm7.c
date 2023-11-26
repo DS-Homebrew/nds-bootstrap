@@ -130,6 +130,7 @@ static u32 overlaysSize = 0;
 static u32 ioverlaysSize = 0;
 u32 fatTableAddr = 0;
 
+static aFile srParamsFile;
 static u32 softResetParams[4] = {0};
 bool srlFromPageFile = false;
 u32 srlAddr = 0;
@@ -1147,7 +1148,6 @@ int arm7_main(void) {
 
 	*(vu32*)(0x02000000) = 0; // Clear debug RAM check flag
 
-	aFile srParamsFile;
 	getFileFromCluster(&srParamsFile, srParamsFileCluster);
 	fileRead((char*)&softResetParams, &srParamsFile, 0, 0x10);
 	srlFromPageFile = (softResetParams[2] == 0x44414F4C); // 'LOAD'
@@ -1188,7 +1188,7 @@ int arm7_main(void) {
 	tDSiHeader dsiHeaderTemp;
 
 	// Load the NDS file
-	// nocashMessage("Loading the NDS file...\n");
+	dbg_printf("Loading the NDS file...\n");
 
 	loadBinary_ARM7(&dsiHeaderTemp, &romFile);
 	if (dsiHeaderTemp.ndshdr.arm9binarySize == 0) {
@@ -1218,8 +1218,6 @@ int arm7_main(void) {
 
 	patchOffsetCacheFilePrevCrc = swiCRC16(0xFFFF, &patchOffsetCache, sizeof(patchOffsetCacheContents));
 
-	// nocashMessage("Loading the header...\n");
-
 	bool foundModuleParams;
 	module_params_t* moduleParams = loadModuleParams(&dsiHeaderTemp.ndshdr, &foundModuleParams);
     dbg_printf("sdk_version: ");
@@ -1235,10 +1233,8 @@ int arm7_main(void) {
 
 	ensureBinaryDecompressed(&dsiHeaderTemp.ndshdr, moduleParams, foundModuleParams);
 	if (decrypt_arm9(&dsiHeaderTemp.ndshdr)) {
-		// nocashMessage("Secure area decrypted successfully");
 		dbg_printf("Secure area decrypted successfully");
 	} else {
-		// nocashMessage("Secure area already decrypted");
 		dbg_printf("Secure area already decrypted");
 	}
 	dbg_printf("\n");
@@ -1260,7 +1256,7 @@ int arm7_main(void) {
 	REG_SCFG_ROM = 0x703;
 
 	u32 clonebootFlag = 0;
-	fileRead((char*)&clonebootFlag, &romFile, baseRomSize, sizeof(u32));
+	fileRead((char*)&clonebootFlag, &romFile, (romSize <= baseRomSize) ? romSize : baseRomSize, sizeof(u32));
 	bool usesCloneboot = (clonebootFlag == 0x16361);
 	if (usesCloneboot) {
 		dbg_printf("Cloneboot detected\n");
@@ -1302,7 +1298,7 @@ int arm7_main(void) {
 		toncset((char*)0x080000D0, 0, 0x130);
 	}
 
-	// nocashMessage("Trying to patch the card...\n");
+	// dbg_printf("Trying to patch the card...\n");
 
 	ce9Location = *(u32*)CARDENGINE_ARM9_LOCATION_BUFFERED;
 	ce9Alt = (ce9Location == CARDENGINE_ARM9_LOCATION_DLDI_ALT || ce9Location == CARDENGINE_ARM9_LOCATION_DLDI_ALT2);
@@ -1314,7 +1310,6 @@ int arm7_main(void) {
 	toncset((u8*)CARDENGINE_ARM7_LOCATION_BUFFERED, 0, 0x1000);
 
 	if (!dldiPatchBinary((data_t*)ce9Location, 0x3800, (data_t*)(extendedMemory ? 0x027FC000 : ((accessControl & BIT(4)) && !ce9Alt) ? 0x023FC000 : 0x023FD000))) {
-		// nocashMessage("ce9 DLDI patch failed");
 		dbg_printf("ce9 DLDI patch failed\n");
 		errorOutput();
 	}
@@ -1519,9 +1514,9 @@ int arm7_main(void) {
 		saveSize
 	);
 	if (errorCode == ERR_NONE) {
-		// nocashMessage("Card patch successful");
+		dbg_printf("Card patch successful");
 	} else {
-		// nocashMessage("Card patch failed");
+		dbg_printf("Card patch failed");
 		errorOutput();
 	}
 	patchBinary((cardengineArm9*)ce9Location, ndsHeader, moduleParams);
@@ -1542,9 +1537,9 @@ int arm7_main(void) {
 		getRumblePakType()
 	);
 	if (errorCode == ERR_NONE) {
-		// nocashMessage("Card hook successful");
+		dbg_printf("Card hook successful");
 	} else {
-		// nocashMessage("Card hook failed");
+		dbg_printf("Card hook failed");
 		errorOutput();
 	}
 
@@ -1601,12 +1596,12 @@ int arm7_main(void) {
 		fatTableSize,
 		fatTableAddr
 	);
-	/*if (errorCode == ERR_NONE) {
-		// nocashMessage("Card hook successful");
+	if (errorCode == ERR_NONE) {
+		dbg_printf("Card hook successful");
 	} else {
-		// nocashMessage("Card hook failed");
-		errorOutput();
-	}*/
+		dbg_printf("Card hook failed");
+		// errorOutput();
+	}
 
 	patchOffsetCacheFileNewCrc = swiCRC16(0xFFFF, &patchOffsetCache, sizeof(patchOffsetCacheContents));
 	if (patchOffsetCacheFileNewCrc != patchOffsetCacheFilePrevCrc) {
@@ -1693,7 +1688,7 @@ int arm7_main(void) {
 	arm9_stateFlag = ARM9_SETSCFG;
 	while (arm9_stateFlag != ARM9_READY);
 
-	// nocashMessage("Starting the NDS file...");
+	// dbg_printf("Starting the NDS file...");
     setMemoryAddress(ndsHeader, moduleParams, romFile);
 
 	if (0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_DOWN | KEY_A))) {		// Dump RAM

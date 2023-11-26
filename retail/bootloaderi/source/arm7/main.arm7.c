@@ -149,6 +149,7 @@ u32 ioverlaysSize = 0;
 bool overlayPatch = false;
 bool overlaysInRam = false;
 
+static aFile patchOffsetCacheFile;
 static u32 softResetParams[4] = {0};
 u32 srlAddr = 0;
 u16 baseHeaderCRC = 0;
@@ -1456,7 +1457,7 @@ int arm7_main(void) {
 	tDSiHeader dsiHeaderTemp;
 
 	// Load the NDS file
-	nocashMessage("Loading the NDS file...\n");
+	dbg_printf("Loading the NDS file...\n");
 
 	//bool dsiModeConfirmed;
 	loadBinary_ARM7(&dsiHeaderTemp, romFile);
@@ -1492,7 +1493,6 @@ int arm7_main(void) {
 	}
 
 	// File containing cached patch offsets
-	aFile patchOffsetCacheFile;
 	getFileFromCluster(&patchOffsetCacheFile, patchOffsetCacheFileCluster, gameOnFlashcard);
 	fileRead((char*)&patchOffsetCache, &patchOffsetCacheFile, 0, 4);
 	if (patchOffsetCache.ver == patchOffsetCacheFileVersion
@@ -1508,8 +1508,6 @@ int arm7_main(void) {
 	fileRead((char*)&mainScreen, &patchOffsetCacheFile, 0x1FC, sizeof(u32));
 
 	patchOffsetCacheFilePrevCrc = swiCRC16(0xFFFF, &patchOffsetCache, sizeof(patchOffsetCacheContents));
-
-	nocashMessage("Loading the header...\n");
 
 	bool foundModuleParams;
 	module_params_t* moduleParams = loadModuleParams(&dsiHeaderTemp.ndshdr, &foundModuleParams);
@@ -1602,9 +1600,9 @@ int arm7_main(void) {
 		ensureBinaryDecompressed(&dsiHeaderTemp.ndshdr, moduleParams, ltdModuleParams, true);
 	//}
 	if (decrypt_arm9(&dsiHeaderTemp)) {
-		nocashMessage("Secure area decrypted successfully");
+		dbg_printf("Secure area decrypted successfully");
 	} else {
-		nocashMessage("Secure area already decrypted");
+		dbg_printf("Secure area already decrypted");
 	}
 	dbg_printf("\n");
 
@@ -1812,9 +1810,9 @@ int arm7_main(void) {
 			false
 		);
 		if (errorCode == ERR_NONE) {
-			nocashMessage("Card hook successful");
+			dbg_printf("Card hook successful");
 		} else {
-			nocashMessage("Card hook failed");
+			dbg_printf("Card hook failed");
 			errorOutput();
 		}
 
@@ -1898,7 +1896,7 @@ int arm7_main(void) {
 			}
 		}
 
-		bool twlTouch = (cdcReadReg(CDC_SOUND, 0x22) == 0xF0);
+		const bool twlTouch = (cdcReadReg(CDC_SOUND, 0x22) == 0xF0);
 
 		if (!twlTouch || !dsiModeConfirmed || !ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr) || (ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr) && !(*(u8*)0x02FFE1BF & BIT(0)))) {
 			*(u16*)0x4004700 = (soundFreq ? 0xC00F : 0x800F);
@@ -1933,23 +1931,22 @@ int arm7_main(void) {
 		}
 
 		u32 clonebootFlag = 0;
-		fileRead((char*)&clonebootFlag, romFile, baseRomSize, sizeof(u32));
-		bool usesCloneboot = (clonebootFlag == 0x16361);
+		fileRead((char*)&clonebootFlag, romFile, (romSize <= baseRomSize) ? romSize : baseRomSize, sizeof(u32));
+		const bool usesCloneboot = (clonebootFlag == 0x16361);
 		if (usesCloneboot) {
 			dbg_printf("Cloneboot detected\n");
 		}
 
 		// If possible, set to load ROM into RAM
-		u32 ROMinRAM = isROMLoadableInRAM(&dsiHeaderTemp, &dsiHeaderTemp.ndshdr, romTid, moduleParams, usesCloneboot);
+		const u32 ROMinRAM = isROMLoadableInRAM(&dsiHeaderTemp, &dsiHeaderTemp.ndshdr, romTid, moduleParams, usesCloneboot);
 
-		nocashMessage("Trying to patch the card...\n");
+		// dbg_printf("Trying to patch the card...\n");
 
 		u16 ce9size = 0;
 		ce7Location = *(u32*)CARDENGINEI_ARM7_BUFFERED_LOCATION;
 		u32 ce7Size = 0x11C00;
 
-		bool useSdk5ce7 = (isSdk5(moduleParams) && ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr) && dsiModeConfirmed);
-
+		const bool useSdk5ce7 = (isSdk5(moduleParams) && ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr) && dsiModeConfirmed);
 		if (useSdk5ce7) {
 			ce7Size = 0x8600;
 		}
@@ -1964,7 +1961,7 @@ int arm7_main(void) {
 			tonccpy((char*)SAV_FILE_LOCATION_MAINMEM, savFile, sizeof(aFile));
 		}
 
-		bool useApPatch = (srlAddr == 0 && apPatchFileCluster != 0 && !apPatchIsCheat && apPatchSize > 0 && apPatchSize <= 0x40000);
+		const bool useApPatch = (srlAddr == 0 && apPatchFileCluster != 0 && !apPatchIsCheat && apPatchSize > 0 && apPatchSize <= 0x40000);
 
 		if (useApPatch) {
 			aFile apPatchFile;
@@ -2035,9 +2032,9 @@ int arm7_main(void) {
 			saveSize
 		);
 		if (errorCode == ERR_NONE) {
-			nocashMessage("Card patch successful");
+			dbg_printf("Card patch successful");
 		} else {
-			nocashMessage("Card patch failed");
+			dbg_printf("Card patch failed");
 			errorOutput();
 		}
 		patchBinary((cardengineArm9*)ce9Location, ndsHeader, moduleParams);
@@ -2075,9 +2072,9 @@ int arm7_main(void) {
 			usesCloneboot
 		);
 		if (errorCode == ERR_NONE) {
-			nocashMessage("Card hook successful");
+			dbg_printf("Card hook successful");
 		} else {
-			nocashMessage("Card hook failed");
+			dbg_printf("Card hook failed");
 			errorOutput();
 		}
 
@@ -2205,7 +2202,7 @@ int arm7_main(void) {
 	arm9_stateFlag = ARM9_SETSCFG;
 	while (arm9_stateFlag != ARM9_READY);
 
-	nocashMessage("Starting the NDS file...");
+	// dbg_printf("Starting the NDS file...");
     setMemoryAddress(ndsHeader, moduleParams);
 
 	if (0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_DOWN | KEY_A))) {
