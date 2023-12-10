@@ -11426,30 +11426,36 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Glory Days: Tactical Defense (USA)
 	// Glory Days: Tactical Defense (Europe)
+	// Music does not play on retail consoles
 	else if (strcmp(romTid, "KGKE") == 0 || strcmp(romTid, "KGKP") == 0) {
 		// *(u32*)0x02004B9C = 0x0200002F;
 		*(u32*)0x0200B488 = 0xE1A00000; // nop
 		*(u32*)0x0200E7A0 = 0xE1A00000; // nop
 		patchInitDSiWare(0x02018F08, heapEnd);
+		*(u32*)0x02019294 = *(u32*)0x02004FD0;
 		patchUserSettingsReadDSiWare(0x0201A404);
 		*(u32*)0x0201FB24 = wirelessReturnCodeArm;
 		*(u32*)0x0201FB28 = 0xE12FFF1E; // bx lr
 		if (romTid[3] == 'E') {
+			*(u32*)0x02065B20 = 0x368940; // Shrink sound heap from 0x958940
 			for (int i = 0; i < 12; i++) {
 				u32* offset = (u32*)0x0206710C;
 				offset[i] = 0xE1A00000; // nop
 			}
 			*(u32*)0x020671B4 = 0xE1A00000; // nop
+			*(u32*)0x020671F0 = 0xE1A00000; // nop
 			for (int i = 0; i < 10; i++) {
 				u32* offset = (u32*)0x02075514;
 				offset[i] = 0xE1A00000; // nop
 			}
 		} else {
+			*(u32*)0x02065C80 = 0x368940; // Shrink sound heap from 0x958940
 			for (int i = 0; i < 12; i++) {
 				u32* offset = (u32*)0x02067264;
 				offset[i] = 0xE1A00000; // nop
 			}
 			*(u32*)0x0206730C = 0xE1A00000; // nop
+			*(u32*)0x02067348 = 0xE1A00000; // nop
 			for (int i = 0; i < 10; i++) {
 				u32* offset = (u32*)0x0207566C;
 				offset[i] = 0xE1A00000; // nop
@@ -19262,6 +19268,22 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x020862F0, newCloseCodeLoc);
 		setBL(0x02086310, newCloseCodeLoc);
 		*(u32*)0x020863B0 = 0xE1A00000; // nop
+	}
+
+	// Pop Island: Paperfield (USA)
+	// Full version plays on debug consoles
+	else if (strcmp(romTid, "KPFE") == 0 && ndsHeader->fatSize > 0 && extendedMemory) {
+		*(u32*)0x0200F820 = 0xE3A00001; // mov r0, #1 (Enable NitroFS reads)
+		*(u32*)0x0204E940 = 0x35C940; // Shrink sound heap from 0x958940
+		*(u8*)0x021C69D8 = 0; // Hide "DEMO" text
+	}
+
+	// Pop Island: Paperfield (Europe)
+	// Full version plays on debug consoles
+	else if (strcmp(romTid, "KPFP") == 0 && ndsHeader->fatSize > 0 && extendedMemory) {
+		*(u32*)0x0200F820 = 0xE3A00001; // mov r0, #1 (Enable NitroFS reads)
+		*(u32*)0x0204E968 = 0x35C940; // Shrink sound heap from 0x958940
+		*(u8*)0x021C4AB8 = 0; // Hide "DEMO" text
 	}
 
 	// Pop+ Solo (USA)
