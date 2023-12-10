@@ -585,6 +585,12 @@ static void patchMpu2(const tNDSHeader* ndsHeader, const module_params_t* module
 		dbg_hexa((u32)mpuInitOffset);
 		dbg_printf("\n\n");
 
+		/* u32 mpuInitOffsetInSrl = (u32)mpuInitOffset;
+		mpuInitOffsetInSrl -= (u32)ndsHeader->arm9destination;
+
+		if (mpuInitOffsetInSrl >= 0 && mpuInitOffsetInSrl < 0x4000) {
+			unpatchedFuncs->mpuInitOffset2 = mpuInitOffset;
+		} */
 		*mpuInitOffset = 0xE1A00000; // nop
 
 		// Try to find it

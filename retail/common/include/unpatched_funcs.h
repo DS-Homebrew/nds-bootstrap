@@ -10,6 +10,7 @@ typedef struct unpatchedFunctions {
 	u32* iCompressedFlagOffset;
 	u32 compressed_static_end;
 	u32 ltd_compressed_static_end;
+	u32* mpuInitOffset2;
 	u32* mpuDataOffset;
 	u32* mpuDataOffsetAlt;
 	u32* mpuDataOffset2;

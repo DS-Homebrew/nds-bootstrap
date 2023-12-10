@@ -304,6 +304,9 @@ void myIrqHandlerVBlank(void) {
 			}
 		}
 
+		/* if (unpatchedFuncs->mpuInitOffset2) {
+			*unpatchedFuncs->mpuInitOffset2 = 0xEE060F12;
+		} */
 		if (unpatchedFuncs->mpuDataOffset2) {
 			if (isSdk5Set) {
 				unpatchedFuncs->mpuDataOffset2[0] = 0xE3A0004A; // mov r0, #0x4A

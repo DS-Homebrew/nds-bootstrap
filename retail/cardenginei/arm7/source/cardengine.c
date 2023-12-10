@@ -1531,6 +1531,9 @@ void myIrqHandlerVBlank(void) {
 			*unpatchedFuncs->iCompressedFlagOffset = unpatchedFuncs->ltd_compressed_static_end;
 		}
 
+		if (unpatchedFuncs->mpuInitOffset2) {
+			*unpatchedFuncs->mpuInitOffset2 = 0xEE060F12;
+		}
 		if (unpatchedFuncs->mpuDataOffset2) {
 			*unpatchedFuncs->mpuDataOffset2 = unpatchedFuncs->mpuInitRegionOldData2;
 		}
@@ -1553,6 +1556,9 @@ void myIrqHandlerVBlank(void) {
 				*unpatchedFuncs->mpuDataOffsetAlt = unpatchedFuncs->mpuInitRegionOldDataAlt;
 			}
 
+			if (unpatchedFuncs->mpuInitOffset2) {
+				*unpatchedFuncs->mpuInitOffset2 = 0xEE060F12;
+			}
 			if (unpatchedFuncs->mpuDataOffset2) {
 				*unpatchedFuncs->mpuDataOffset2 = unpatchedFuncs->mpuInitRegionOldData2;
 			}
