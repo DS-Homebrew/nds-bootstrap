@@ -273,6 +273,7 @@ static void resetMemory_ARM7(void) {
 	toncset((u32*)0x02380000, 0, 0x38000);		// clear part of EWRAM - except before 0x023DA000, which has the arm9 code
 	toncset((u32*)0x023C0000, 0, 0x20000);
 	toncset((u32*)0x023F0000, 0, 0xD000);
+	toncset((u32*)0x023FE000, 0, 0x400);
 	toncset((u32*)0x023FF000, 0, 0x1000);
 	if (extendedMemory) {
 		toncset((u32*)0x02400000, 0, 0x3FC000);
