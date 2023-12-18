@@ -26,6 +26,7 @@
 #define b_asyncCardRead BIT(12)
 #define b_softResetMb BIT(13)
 #define b_cloneboot BIT(14)
+#define b_isDlp BIT(15)
 
 
 static const int MAX_HANDLER_LEN = 50;
@@ -328,6 +329,9 @@ int hookNdsRetailArm9(
 	}
 	if (usesCloneboot) {
 		ce9->valueBits |= b_cloneboot;
+	}
+	if (strncmp(romTid, "HND", 3) == 0) {
+		ce9->valueBits |= b_isDlp;
 	}
 	ce9->mainScreen             = mainScreen;
 	ce9->overlaysSize           = overlaysSize;

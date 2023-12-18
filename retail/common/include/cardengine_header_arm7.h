@@ -101,6 +101,7 @@ typedef struct cardengineArm7 {
 		18: dsiBios
 		19: bootstrapOnFlashcard
 		20: ndmaDisabled
+		21: isDlp
 		31: scfgLocked
 	*/
     s32 mainScreen;

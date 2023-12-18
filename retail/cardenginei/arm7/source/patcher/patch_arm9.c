@@ -479,7 +479,7 @@ static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 }
 
 static void patchMpu2(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
-	if (moduleParams->sdk_version < 0x2008000 || moduleParams->sdk_version > 0x5000000) {
+	if (moduleParams->sdk_version > 0x5000000) {
 		return;
 	}
 
@@ -522,7 +522,7 @@ static void patchMpu2(const tNDSHeader* ndsHeader, const module_params_t* module
 			//Original code made loading slow, so new code is used
 			unpatchedFuncs->mpuDataOffset2 = mpuDataOffset;
 			unpatchedFuncs->mpuInitRegionOldData2 = *mpuDataOffset;
-			*mpuDataOffset = PAGE_128K | 0x027E0000 | 1;
+			*mpuDataOffset = 0;
 		//}
 
 		/*u32 mpuInitRegionNewData = PAGE_32M | 0x02000000 | 1;

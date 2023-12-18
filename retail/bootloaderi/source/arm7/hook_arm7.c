@@ -54,6 +54,7 @@
 #define b_dsiBios BIT(18)
 #define b_bootstrapOnFlashcard BIT(19)
 #define b_ndmaDisabled BIT(20)
+#define b_isDlp BIT(21)
 #define b_scfgLocked BIT(31)
 
 extern u32 newArm7binarySize;
@@ -398,6 +399,9 @@ int hookNdsRetailArm7(
 		}
 		if (ndmaDisabled) {
 			ce7->valueBits |= b_ndmaDisabled;
+		}
+		if (strncmp(romTid, "HND", 3) == 0) {
+			ce7->valueBits |= b_isDlp;
 		}
 		if (REG_SCFG_EXT == 0) {
 			ce7->valueBits |= b_scfgLocked;

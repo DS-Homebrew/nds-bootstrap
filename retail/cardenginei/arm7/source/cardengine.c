@@ -75,6 +75,7 @@
 #define dsiBios BIT(18)
 #define bootstrapOnFlashcard BIT(19)
 #define ndmaDisabled BIT(20)
+#define isDlp BIT(21)
 #define scfgLocked BIT(31)
 
 #define	REG_EXTKEYINPUT	(*(vuint16*)0x04000136)
@@ -367,6 +368,10 @@ static void initialize(void) {
 		sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS_SDK5;
 		ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
 		personalData = (PERSONAL_DATA*)((u8*)NDS_HEADER_SDK5-0x180);
+	} else {
+		sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS_SDK1;
+		ndsHeader = (tNDSHeader*)NDS_HEADER;
+		personalData = (PERSONAL_DATA*)((u8*)NDS_HEADER-0x180);
 	}
 	#endif
 
@@ -451,9 +456,11 @@ static void cardReadRAM(u8* dst, u32 src, u32 len/*, int romPartNo*/) {
 }
 
 void reset(void) {
+	register int i, reg;
+
 #ifndef TWLSDK
 	u32 resetParam = ((valueBits & isSdk5) ? RESET_PARAM_SDK5 : RESET_PARAM);
-	if ((valueBits & slowSoftReset) || (*(u32*)(resetParam+0xC) > 0 && (*(u32*)CARDENGINEI_ARM9_LOCATION == 0 || (valueBits & isSdk5)))) {
+	if (((valueBits & isDlp) && *(u32*)(NDS_HEADER_SDK5+0xC) == 0) || (valueBits & slowSoftReset) || (*(u32*)(resetParam+0xC) > 0 && (*(u32*)CARDENGINEI_ARM9_LOCATION == 0 || (valueBits & isSdk5)))) {
 		REG_MASTER_VOLUME = 0;
 		int oldIME = enterCriticalSection();
 		//driveInitialize();
@@ -480,10 +487,10 @@ void reset(void) {
 		leaveCriticalSection(oldIME);
 		while (1);
 	}
+
+	if (!(valueBits & isDlp)) {
 #endif
 
-	register int i, reg;
-	
 	REG_IME = 0;
 
 	for (i = 0; i < 16; i++) {
@@ -522,37 +529,52 @@ void reset(void) {
 	*(vu32*)0x0380FFF8 = 0; // VBLANK_INTR_WAIT_FLAGS, ARM7 version
 	REG_POWERCNT = 1;  // Turn off power to stuff
 
-	initialized = false;
 	funcsUnpatched = false;
+
+#ifndef TWLSDK
+	}
+#endif
+
+	initialized = false;
 	//ipcSyncHooked = false;
 	languageTimer = 0;
 
 	#ifndef TWLSDK
-	if (currentSrlAddr != *(u32*)(resetParam+0xC) || *(u32*)(resetParam+8) == 0x44414F4C) {
+	if ((valueBits & isDlp) || currentSrlAddr != *(u32*)(resetParam+0xC) || *(u32*)(resetParam+8) == 0x44414F4C) {
 		currentSrlAddr = *(u32*)(resetParam+0xC);
-		if (*(u32*)(resetParam+8) == 0x44414F4C) {
+		if (valueBits & isDlp) {
 			ndmaCopyWordsAsynch(1, (u32*)0x022C0000, ndsHeader->arm7destination, ndsHeader->arm7binarySize);
-			*((u16*)(/*isSdk5(moduleParams) ? 0x02fffc40 :*/ 0x027ffc40)) = 2; // Boot Indicator (Cloneboot/Multiboot)
-			// tonccpy((u32*)0x027FFC40, (u32*)0x02344820, 0x40); // Multiboot info?
-		} else if (valueBits & ROMinRAM) {
-			cardReadRAM((u8*)ndsHeader, currentSrlAddr, 0x160);
-			cardReadRAM((u8*)ndsHeader->arm9destination, currentSrlAddr+ndsHeader->arm9romOffset, ndsHeader->arm9binarySize);
-			cardReadRAM((u8*)ndsHeader->arm7destination, currentSrlAddr+ndsHeader->arm7romOffset, ndsHeader->arm7binarySize);
+			*(u16*)0x02fffc40 = 2; // Boot Indicator (Cloneboot/Multiboot)
 		} else {
-			fileRead((char*)ndsHeader, romFile, currentSrlAddr, 0x160);
-			fileRead((char*)ndsHeader->arm9destination, romFile, currentSrlAddr+ndsHeader->arm9romOffset, ndsHeader->arm9binarySize);
-			fileRead((char*)ndsHeader->arm7destination, romFile, currentSrlAddr+ndsHeader->arm7romOffset, ndsHeader->arm7binarySize);
+			if (*(u32*)(resetParam+8) == 0x44414F4C) {
+				ndmaCopyWordsAsynch(1, (u32*)0x022C0000, ndsHeader->arm7destination, ndsHeader->arm7binarySize);
+				*((u16*)(/*isSdk5(moduleParams) ? 0x02fffc40 :*/ 0x027ffc40)) = 2; // Boot Indicator (Cloneboot/Multiboot)
+				// tonccpy((u32*)0x027FFC40, (u32*)0x02344820, 0x40); // Multiboot info?
+			} else if (valueBits & ROMinRAM) {
+				cardReadRAM((u8*)ndsHeader, currentSrlAddr, 0x160);
+				cardReadRAM((u8*)ndsHeader->arm9destination, currentSrlAddr+ndsHeader->arm9romOffset, ndsHeader->arm9binarySize);
+				cardReadRAM((u8*)ndsHeader->arm7destination, currentSrlAddr+ndsHeader->arm7romOffset, ndsHeader->arm7binarySize);
+			} else {
+				fileRead((char*)ndsHeader, romFile, currentSrlAddr, 0x160);
+				fileRead((char*)ndsHeader->arm9destination, romFile, currentSrlAddr+ndsHeader->arm9romOffset, ndsHeader->arm9binarySize);
+				fileRead((char*)ndsHeader->arm7destination, romFile, currentSrlAddr+ndsHeader->arm7romOffset, ndsHeader->arm7binarySize);
+			}
 		}
 
 		moduleParams = getModuleParams(ndsHeader);
 		/*dbg_printf("sdk_version: ");
 		dbg_hexa(moduleParams->sdk_version);
 		dbg_printf("\n");*/ 
+		if (moduleParams->sdk_version > 0x5000000) {
+			valueBits |= isSdk5;
+		} else {
+			valueBits &= ~isSdk5;
+		}
 
-		ensureBinaryDecompressed(ndsHeader, moduleParams, resetParam);
+		ensureBinaryDecompressed(ndsHeader, moduleParams, (valueBits & isDlp) ? 0x44414F4 : resetParam);
 
 		patchCardNdsArm9(
-			(cardengineArm9*)CARDENGINEI_ARM9_LOCATION,
+			(cardengineArm9*)((valueBits & isDlp) ? CARDENGINEI_ARM9_LOCATION_DLP : CARDENGINEI_ARM9_LOCATION),
 			ndsHeader,
 			moduleParams,
 			1
@@ -582,7 +604,15 @@ void reset(void) {
 			ndmaCopyWordsAsynch(1, ndsHeader->arm7destination, (char*)DONOR_ROM_ARM7_LOCATION, ndsHeader->arm7binarySize);
 			while (ndmaBusy(0) || ndmaBusy(1));
 		} */
-		*(u32*)(resetParam+8) = 0;
+		if (valueBits & isDlp) {
+			toncset((u32*)0x022C0000, 0, ndsHeader->arm7binarySize);
+			if (!(valueBits & isSdk5)) {
+				tonccpy((u8*)0x027FF000, (u8*)0x02FFF000, 0x1000);
+			}
+		} else {
+			*(u32*)(resetParam+8) = 0;
+		}
+		valueBits &= ~isDlp;
 	} else {
 		//driveInitialize();
 
@@ -1573,6 +1603,15 @@ void myIrqHandlerVBlank(void) {
 		i2cWriteRegister(0x4A, 0x70, 0x01);
 		i2cWriteRegister(0x4A, 0x11, 0x01);		// Reboot into error screen if SD card is removed
 	}
+
+#ifndef TWLSDK
+	if (valueBits & isDlp) {
+		if (!(REG_EXTKEYINPUT & KEY_A) && *(u32*)(NDS_HEADER_SDK5+0xC) != 0 && !wifiIrq) {
+			IPC_SendSync(0x5);
+			reset();
+		}
+	}
+#endif
 
 	if ((0 == (REG_KEYINPUT & igmHotkey) && 0 == (REG_EXTKEYINPUT & (((igmHotkey >> 10) & 3) | ((igmHotkey >> 6) & 0xC0))) && (valueBits & igmAccessible) && !wifiIrq) || returnToMenu || sharedAddr[5] == 0x4C4D4749 /* IGML */) {
 #ifdef TWLSDK

@@ -100,6 +100,7 @@ typedef struct cardengineArm9 {
 		12: asyncCardRead
 		13: softResetMb
 		14: cloneboot
+		15: isDlp
 	*/
 	s32 mainScreen;
 	u32 overlaysSize;

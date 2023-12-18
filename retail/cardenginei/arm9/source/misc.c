@@ -40,6 +40,7 @@
 #define slowSoftReset BIT(10)
 #define softResetMb BIT(13)
 #define cloneboot BIT(14)
+#define isDlp BIT(15)
 
 #include "my_fat.h"
 
@@ -131,9 +132,9 @@ void enableIPC_SYNC(void) {
 }
 
 #ifndef TWLSDK
-void initialize(void) {
-	static bool initialized = false;
+static bool initialized = false;
 
+void initialize(void) {
 	if (initialized) {
 		return;
 	}
@@ -150,6 +151,9 @@ void initialize(void) {
 			cacheAddressTable = (u32*)CACHE_ADDRESS_TABLE_LOCATION_TWLSDK;
 			#endif
 		}
+	} else {
+		sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS_SDK1;
+		ndsHeader = (tNDSHeader*)NDS_HEADER;
 	}
 	#endif
 	initialized = true;
@@ -335,12 +339,13 @@ void reset(u32 param, u32 tid2) {
 		while (REG_VCOUNT == 191);
 	}
 
-	if (*(u32*)(RESET_PARAM+0xC) > 0) {
+	if ((ce9->valueBits & isDlp) || *(u32*)(RESET_PARAM+0xC) > 0) {
 		u32 newIrqTable = sharedAddr[2];
 		ce9->valueBits = sharedAddr[1];
 		ce9->irqTable = (u32*)newIrqTable;
 		ce9->cardStruct0 = sharedAddr[4];
 		sharedAddr[4] = 0;
+		initialized = false;
 	}
 #endif
 
