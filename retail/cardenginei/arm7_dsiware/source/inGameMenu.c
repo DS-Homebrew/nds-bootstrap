@@ -155,9 +155,7 @@ void inGameMenu(void) {
 					exitMenu = true;
 					break;
 				case 0x50505353: // SSPP
-					#ifdef TWLSDK
 					prepareScreenshot();
-					#endif
 					break;
 				case 0x544F4853: // SHOT
 					saveScreenshot();

@@ -323,6 +323,7 @@ static void screenshot(void) {
 		while (REG_VCOUNT == 191) mySwiDelay(100);
 	}
 	DC_InvalidateRange(&igmText.currentScreenshot, 1);
+	DC_InvalidateRange((char*)INGAME_MENU_EXT_LOCATION, 0x40000);
 	#endif
 }
 
