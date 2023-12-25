@@ -1666,7 +1666,13 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	fclose(cebin);
 
 	// Load ce7 binary
-	cebin = fopen("nitro:/cardengine_arm7.bin", "rb");
+	if (strncmp(romTid, "KWY", 3) == 0 // Mighty Milky Way
+	||	strncmp(romTid, "KS3", 3) == 0 // Shantae: Risky's Revenge
+	) {
+		cebin = fopen("nitro:/cardengine_arm7_music.bin", "rb");
+	} else {
+		cebin = fopen("nitro:/cardengine_arm7.bin", "rb");
+	}
 	if (cebin) {
 		fread((u8*)CARDENGINE_ARM7_LOCATION_BUFFERED, 1, 0x1000, cebin);
 	}

@@ -90,8 +90,13 @@ int RumbleForce = 1;
 static int languageTimer = 0;
 static int volumeLevel = 3; // 0 = Off, 1 = Low, 2 = Medium, 3 = High/Max
 static int volumeLevelTimer = 0;
+#ifdef MUSIC
 static int musicBufferNo = 0;
 static bool customMusic = false;
+#else
+static bool wifiIrq = false;
+static int wifiIrqTimer = 0;
+#endif
 bool returnToMenu = false;
 bool isSdk5Set = false;
 
@@ -320,10 +325,15 @@ void myIrqHandlerVBlank(void) {
 		funcsUnpatched = true;
 	}
 
-	if ((0 == (REG_KEYINPUT & igmHotkey) && 0 == (REG_EXTKEYINPUT & (((igmHotkey >> 10) & 3) | ((igmHotkey >> 6) & 0xC0))) && (REG_WIFIIRQ == 0)) || sharedAddr[5] == 0x59444552 /* REDY */) {
+	if ((0 == (REG_KEYINPUT & igmHotkey) && 0 == (REG_EXTKEYINPUT & (((igmHotkey >> 10) & 3) | ((igmHotkey >> 6) & 0xC0)))
+#ifndef MUSIC
+		&& !wifiIrq
+#endif
+	) || sharedAddr[5] == 0x59444552 /* REDY */) {
 		inGameMenu();
 	}
 
+#ifdef MUSIC
 	if (sharedAddr[2] == 0x5053554D) { // 'MUSP'
 		customMusic = true;
 		sharedAddr[2] = 0;
@@ -354,6 +364,7 @@ void myIrqHandlerVBlank(void) {
 			if (musicBufferNo == 2) musicBufferNo = 0;
 		}
 	}
+#endif
 
 	if (sharedAddr[3] == 0x424D5552) { // 'RUMB'
 		RumbleForce = sharedAddr[1];
@@ -442,6 +453,22 @@ void myIrqHandlerVBlank(void) {
 	if (REG_IE & IRQ_NETWORK) {
 		REG_IE &= ~IRQ_NETWORK; // DS(i) RTC fix
 	}
+
+#ifndef MUSIC
+	bool wifiIrqCheck = (REG_WIFIIRQ != 0);
+	if (wifiIrq != wifiIrqCheck) {
+		if (wifiIrq) {
+			wifiIrqTimer++;
+			if (wifiIrqTimer == 30) {
+				wifiIrq = wifiIrqCheck;
+			}
+		} else {
+			wifiIrq = wifiIrqCheck;
+		}
+	} else {
+		wifiIrqTimer = 0;
+	}
+#endif
 
 	// Update main screen or swap screens
 	if (ipcEveryFrame) {
