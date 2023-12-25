@@ -339,7 +339,8 @@ void reset(u32 param, u32 tid2) {
 		while (REG_VCOUNT == 191);
 	}
 
-	if ((ce9->valueBits & isDlp) || *(u32*)(RESET_PARAM+0xC) > 0) {
+	#ifndef GSDD
+	if ((ce9->valueBits & isDlp) || *(u32*)(resetParams+0xC) > 0) {
 		u32 newIrqTable = sharedAddr[2];
 		ce9->valueBits = sharedAddr[1];
 		ce9->irqTable = (u32*)newIrqTable;
@@ -347,6 +348,7 @@ void reset(u32 param, u32 tid2) {
 		sharedAddr[4] = 0;
 		initialized = false;
 	}
+	#endif
 #endif
 
 	sharedAddr[0] = 0x544F4F42; // 'BOOT'
