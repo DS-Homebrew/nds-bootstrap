@@ -2518,9 +2518,9 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
     if (strncmp(romTid, "UOR", 3) == 0) { // Start at 0x2003800 for "WarioWare: DIY"
         startOffset = (u32)ndsHeader->arm9destination + 0x3800;
     } else if (strncmp(romTid, "UXB", 3) == 0) { // Start at 0x2080000 for "Jam with the Band"
-        startOffset = (u32)ndsHeader->arm9destination + 0x80000;        
+        startOffset = (u32)ndsHeader->arm9destination + 0x80000;
     } else if (strncmp(romTid, "USK", 3) == 0) { // Start at 0x20E8000 for "Face Training"
-        startOffset = (u32)ndsHeader->arm9destination + 0xE4000;        
+        startOffset = (u32)ndsHeader->arm9destination + 0xE4000;
     }
 
     dbg_printf("startOffset : ");

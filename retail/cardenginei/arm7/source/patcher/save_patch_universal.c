@@ -8,7 +8,6 @@
 
 extern u32 vAddrOfRelocSrc;
 extern u32 relocDestAtSharedMem;
-//extern u32 newSwiHaltAddr;
 
 //
 // Subroutine function signatures ARM7
@@ -35,6 +34,7 @@ static const u16 a7JumpTableSignatureUniversalThumb_pt2[3]      = {0x6910, 0x68D
 static const u16 a7JumpTableSignatureUniversalThumb_pt3[2]      = {0x6908, 0x6949};
 static const u16 a7JumpTableSignatureUniversalThumb_pt3_alt[2]  = {0x6910, 0x6951};
 static const u16 a7JumpTableSignatureUniversalThumb_pt3_alt2[2] = {0x6800, 0x6900};
+static const u16 a7JumpTableSignatureUniversalThumb_pt3_alt3[2] = {0x6800, 0x6900};
 
 
 u32 savePatchUniversal(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, module_params_t* moduleParams) {
@@ -175,6 +175,12 @@ u32 savePatchUniversal(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, m
 						a7JumpTableSignatureUniversalThumb_pt3_alt, 2
 					);
 				}
+				if (!EepromEraseJump) {
+					EepromEraseJump = (u32*)findOffsetThumb(
+						(u16*)EepromVerifyJump + 2, ndsHeader->arm7binarySize,
+						a7JumpTableSignatureUniversalThumb_pt3_alt2, 2
+					);
+				}
 			} else JumpTableFuncType++;
 		}
 		if (JumpTableFuncType == 1) {
@@ -193,7 +199,7 @@ u32 savePatchUniversal(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, m
 			);
 			EepromEraseJump = (u32*)findOffsetThumb(
 				(u16*)EepromVerifyJump - 2, ndsHeader->arm7binarySize,
-				a7JumpTableSignatureUniversalThumb_pt3_alt2, 2
+				a7JumpTableSignatureUniversalThumb_pt3_alt3, 2
 			);
 		}
 	}
@@ -333,4 +339,116 @@ u32 savePatchUniversal(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, m
 	}
 
 	return 1;
+}
+
+u32 savePatchInvertedThumb(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, module_params_t* moduleParams) {
+	// dbg_printf("\nArm7 (patch kirby specific)\n");
+	
+	//u32* JumpTableFunc;
+	u32* EepromReadJump;
+	u32* EepromWriteJump;
+	u32* EepromProgJump;
+	u32* EepromVerifyJump;
+	u32* EepromEraseJump;
+
+    // inverted order
+    EepromEraseJump = (u32*)findOffsetThumb(
+    	(u16*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
+    		a7JumpTableSignatureUniversalThumb_pt3_alt3, 2
+	);
+
+    EepromVerifyJump = (u32*)findOffsetThumb(
+		(u16*)EepromEraseJump + 2, ndsHeader->arm7binarySize,
+		a7JumpTableSignatureUniversalThumb_pt2, 3
+	);
+
+    EepromProgJump = (u32*)findOffsetThumb(
+		(u16*)EepromVerifyJump + 2, ndsHeader->arm7binarySize,
+		a7JumpTableSignatureUniversalThumb_pt2, 3
+	);
+
+    EepromWriteJump = (u32*)findOffsetThumb(
+		(u16*)EepromProgJump + 2, ndsHeader->arm7binarySize,
+		a7JumpTableSignatureUniversalThumb_pt2, 3
+	);
+
+    EepromReadJump = (u32*)findOffsetThumb(
+		(u16*)EepromWriteJump, ndsHeader->arm7binarySize,
+		a7JumpTableSignatureUniversalThumb, 3
+	);
+
+	/* dbg_printf("usesThumb\n");
+    dbg_printf("inverted order\n");
+	dbg_printf("EepromEraseJump\n");
+	dbg_hexa((u32)EepromEraseJump);
+    dbg_printf("\n"); */
+
+    //u32 srcAddr;
+
+	u32* eepromRead = (u32*)((u32)EepromReadJump + 0xA);
+	/* dbg_printf("Eeprom read :\t");
+	dbg_hexa((u32)eepromRead);
+    dbg_printf("\t:\t");
+    dbg_hexa(*eepromRead);
+	dbg_printf("\n"); */
+    *eepromRead = ce7->patches->arm7FunctionsDirect->eepromRead;
+    /* dbg_printf("Eeprom read after:\t");
+	dbg_hexa((u32)eepromRead);
+    dbg_printf("\t:\t");
+    dbg_hexa(*eepromRead);
+	dbg_printf("\n"); */
+
+	u32* eepromPageWrite = (u32*)((u32)EepromWriteJump + 0xA);
+	/* dbg_printf("Eeprom page write:\t");
+	dbg_hexa((u32)eepromPageWrite);
+    dbg_printf("\t:\t");
+    dbg_hexa(*eepromPageWrite);
+	dbg_printf("\n"); */
+    *eepromPageWrite = ce7->patches->arm7FunctionsDirect->eepromPageWrite;
+    /* dbg_printf("Eeprom page write after:\t");
+	dbg_hexa((u32)eepromPageWrite);
+    dbg_printf("\t:\t");
+    dbg_hexa(*eepromPageWrite);
+	dbg_printf("\n"); */
+
+	u32* eepromPageProg = (u32*)((u32)EepromProgJump + 0xA);
+	/* dbg_printf("Eeprom page prog:\t");
+	dbg_hexa((u32)eepromPageProg);
+    dbg_printf("\t:\t");
+    dbg_hexa(*eepromPageProg);
+	dbg_printf("\n"); */
+    *eepromPageProg = ce7->patches->arm7FunctionsDirect->eepromPageProg;
+    /* dbg_printf("Eeprom page prog after:\t");
+	dbg_hexa((u32)eepromPageProg);
+    dbg_printf("\t:\t");
+    dbg_hexa(*eepromPageProg);
+	dbg_printf("\n"); */
+
+	u32* eepromPageVerify = (u32*)((u32)EepromVerifyJump + 0xA);
+	/* dbg_printf("Eeprom verify:\t");
+	dbg_hexa((u32)eepromPageVerify);
+    dbg_printf("\t:\t");
+    dbg_hexa(*eepromPageVerify);
+	dbg_printf("\n"); */
+    *eepromPageVerify = ce7->patches->arm7FunctionsDirect->eepromPageVerify;
+    /* dbg_printf("Eeprom verify after:\t");
+	dbg_hexa((u32)eepromPageVerify);
+    dbg_printf("\t:\t");
+    dbg_hexa(*eepromPageVerify);
+	dbg_printf("\n"); */
+
+	u32* eepromPageErase = (u32*)((u32)EepromEraseJump + 0x8);
+	/* dbg_printf("Eeprom page erase:\t");
+	dbg_hexa((u32)eepromPageErase);
+    dbg_printf("\t:\t");
+    dbg_hexa(*eepromPageErase);
+	dbg_printf("\n"); */
+    *eepromPageErase = ce7->patches->arm7FunctionsDirect->eepromPageErase;
+    /* dbg_printf("Eeprom page erase after:\t");
+	dbg_hexa((u32)eepromPageErase);
+    dbg_printf("\t:\t");
+    dbg_hexa(*eepromPageErase);
+	dbg_printf("\n"); */
+
+    return 1;
 }

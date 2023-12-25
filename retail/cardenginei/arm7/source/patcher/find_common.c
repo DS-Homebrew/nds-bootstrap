@@ -37,6 +37,44 @@ u32* memsearch32(const u32* start, u32 dataSize, const u32* find, u32 findSize, 
 	}
 	return NULL;
 }
+u32* memsearch32_2(const u32* start, u32 dataSize, const u32* find, const u32* find2, u32 findSize, bool forward) {
+	u32 dataLen = dataSize/sizeof(u32);
+	u32 findLen = findSize/sizeof(u32);
+
+	const u32* end = forward ? (start + dataLen) : (start - dataLen);
+	for (u32* addr = (u32*)start; addr != end; forward ? ++addr : --addr) {
+		bool found = true;
+		for (u32 j = 0; j < findLen; ++j) {
+			if (addr[j] != find[j] && addr[j] != find2[j]) {
+				found = false;
+				break;
+			}
+		}
+		if (found) {
+			return (u32*)addr;
+		}
+	}
+	return NULL;
+}
+u32* memsearch32_3(const u32* start, u32 dataSize, const u32* find, const u32* find2, const u32* find3, u32 findSize, bool forward) {
+	u32 dataLen = dataSize/sizeof(u32);
+	u32 findLen = findSize/sizeof(u32);
+
+	const u32* end = forward ? (start + dataLen) : (start - dataLen);
+	for (u32* addr = (u32*)start; addr != end; forward ? ++addr : --addr) {
+		bool found = true;
+		for (u32 j = 0; j < findLen; ++j) {
+			if (addr[j] != find[j] && addr[j] != find2[j] && addr[j] != find3[j]) {
+				found = false;
+				break;
+			}
+		}
+		if (found) {
+			return (u32*)addr;
+		}
+	}
+	return NULL;
+}
 u16* memsearch16(const u16* start, u32 dataSize, const u16* find, u32 findSize, bool forward) {
 	u32 dataLen = dataSize/sizeof(u16);
 	u32 findLen = findSize/sizeof(u16);
@@ -46,6 +84,25 @@ u16* memsearch16(const u16* start, u32 dataSize, const u16* find, u32 findSize, 
 		bool found = true;
 		for (u32 j = 0; j < findLen; ++j) {
 			if (addr[j] != find[j]) {
+				found = false;
+				break;
+			}
+		}
+		if (found) {
+			return (u16*)addr;
+		}
+	}
+	return NULL;
+}
+u16* memsearch16_4(const u16* start, u32 dataSize, const u16* find, const u16* find2, const u16* find3, const u16* find4, u32 findSize, bool forward) {
+	u32 dataLen = dataSize/sizeof(u16);
+	u32 findLen = findSize/sizeof(u16);
+
+	const u16* end = forward ? (start + dataLen) : (start - dataLen);
+	for (u16* addr = (u16*)start; addr != end; forward ? ++addr : --addr) {
+		bool found = true;
+		for (u32 j = 0; j < findLen; ++j) {
+			if (addr[j] != find[j] && addr[j] != find2[j] && addr[j] != find3[j] && addr[j] != find4[j]) {
 				found = false;
 				break;
 			}

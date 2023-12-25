@@ -8,9 +8,11 @@
 //
 
 static const u32 relocateStartSignature[1] = {0x027FFFFA};
+static const u32 relocateStartSignature5[1]    = {0x3381C0DE}; //  33 81 C0 DE  DE C0 81 33 00 00 00 00 is the marker for the beggining of the relocated area :-)
+static const u32 relocateStartSignature5Alt[1] = {0x2106C0DE};
 
 static const u32 nextFunctiontSignature[1] = {0xE92D4000};
-// static const u32 relocateValidateSignature[1] = {0x400010C};
+static const u32 relocateValidateSignature[1] = {0x400010C};
 
 static const u32 swi12Signature[1] = {0x4770DF12}; // LZ77UnCompReadByCallbackWrite16bit
 
@@ -30,6 +32,8 @@ static const u32 swiGetPitchTableSignature1Alt10[3] = {0xE59FC000, 0xE12FFF1C, 0
 static const u32 swiGetPitchTableSignature1Alt11[3] = {0xE59FC000, 0xE12FFF1C, 0x03804189};
 static const u32 swiGetPitchTableSignature1Alt12[3] = {0xE59FC000, 0xE12FFF1C, 0x038049D5};
 static const u32 swiGetPitchTableSignature1Alt13[3] = {0xE59FC000, 0xE12FFF1C, 0x03804BE9};
+static const u32 swiGetPitchTableSignature1Alt14[3] = {0xE59FC000, 0xE12FFF1C, 0x03804E35};
+static const u32 swiGetPitchTableSignature1Alt15[3] = {0xE59FC000, 0xE12FFF1C, 0x03800D89};
 static const u32 swiGetPitchTableSignature3[3]      = {0xE59FC000, 0xE12FFF1C, 0x03800FD5};
 static const u32 swiGetPitchTableSignature3Alt1[3]  = {0xE59FC000, 0xE12FFF1C, 0x03801149};
 static const u32 swiGetPitchTableSignature3Alt2[3]  = {0xE59FC000, 0xE12FFF1C, 0x03801215};
@@ -53,6 +57,7 @@ static const u32 swiGetPitchTableSignature4Alt6[3]  = {0xE59FC000, 0xE12FFF1C, 0
 static const u32 swiGetPitchTableSignature4Alt7[3]  = {0xE59FC000, 0xE12FFF1C, 0x03803829};
 static const u32 swiGetPitchTableSignature4Alt8[3]  = {0xE59FC000, 0xE12FFF1C, 0x03803ED5};
 static const u32 swiGetPitchTableSignature4Alt9[3]  = {0xE59FC000, 0xE12FFF1C, 0x03803F15};
+static const u32 swiGetPitchTableSignature5[4]      = {0x781A4B06, 0xD3030791, 0xD20106D1, 0x1A404904};
 
 // Sleep patch
 static const u32 sleepPatch[2]         = {0x0A000001, 0xE3A00601};
@@ -67,10 +72,67 @@ static const u32 cardCheckPullOutSignature3[4] = {0xE92D4000, 0xE24DD004, 0xE59F
 // irq enable
 static const u32 irqEnableStartSignature1[4]      = {0xE59FC028, 0xE1DC30B0, 0xE3A01000, 0xE1CC10B0}; // SDK <= 3
 static const u32 irqEnableStartSignature4[4]      = {0xE92D4010, 0xE1A04000, 0xEBFFFFF6, 0xE59FC020}; // SDK >= 4
+static const u32 irqEnableStartSignature4Alt[4]   = {0xE92D4010, 0xE1A04000, 0xEBFFFFE9, 0xE59FC020}; // SDK 5
+static const u16 irqEnableStartSignatureThumb[5]  = {0xB530, 0xB081, 0x4D07, 0x882C, 0x2100};
+static const u16 irqEnableStartSignatureThumb3[5] = {0xB510, 0x1C04, 0xF7FF, 0xFFF4, 0x4B05}; // SDK 3
+static const u16 irqEnableStartSignatureThumb5[5] = {0xB510, 0x1C04, 0xF7FF, 0xFFE4, 0x4B05}; // SDK 5
 
+u32 relocationStart = 0;
 bool a7GetReloc(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	extern u32 vAddrOfRelocSrc;
 	extern u32 relocDestAtSharedMem;
+
+	if (moduleParams->sdk_version > 0x5000000) {
+		// Find the relocation signature
+		relocationStart = (u32)findOffset(
+			(u32*)ndsHeader->arm7destination, 0x800,
+			relocateStartSignature5, 1
+		);
+		if (!relocationStart) {
+			// dbg_printf("Relocation start not found. Trying alt\n");
+			relocationStart = (u32)findOffset(
+				(u32*)ndsHeader->arm7destination, 0x800,
+				relocateStartSignature5Alt, 1
+			);
+			if (relocationStart>0) relocationStart += 0x28;
+		}
+		if (!relocationStart) {
+			// dbg_printf("Relocation start alt not found\n");
+			return false;
+		}
+
+		// Validate the relocation signature
+		vAddrOfRelocSrc = relocationStart + 0x8;
+		// sanity checks
+		u32 relocationCheck = (u32)findOffset(
+			(u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
+			relocateValidateSignature, 1
+		);
+		u32 relocationCheck2 =
+			*(u32*)(relocationCheck - 0x4);
+
+		relocDestAtSharedMem = 0x37F8000;
+		if (relocationCheck + 0xC - vAddrOfRelocSrc + relocDestAtSharedMem > relocationCheck2) {
+			relocationCheck -= 4;
+		}
+		if (relocationCheck + 0xC - vAddrOfRelocSrc + relocDestAtSharedMem > relocationCheck2) {
+			relocationCheck += 4;
+			/* dbg_printf("Error in relocation checking\n");
+			dbg_hexa(relocationCheck + 0xC - vAddrOfRelocSrc + relocDestAtSharedMem);
+			dbg_printf(" ");
+			dbg_hexa(relocationCheck2);
+			dbg_printf("\n"); */
+
+			vAddrOfRelocSrc =  relocationCheck + 0xC - relocationCheck2 + relocDestAtSharedMem;
+			// dbg_printf("vAddrOfRelocSrc: ");
+		} /* else {
+			dbg_printf("Relocation src: ");
+		}
+		dbg_hexa(vAddrOfRelocSrc);
+		dbg_printf("\n"); */
+
+		return true;
+	}
 
 	// Find the relocation signature
     u32 relocationStart = (u32)findOffset(
@@ -187,402 +249,440 @@ u16* findSwiGetPitchTableThumbBranchOffset(const tNDSHeader* ndsHeader) {
 }
 
 u32* findSwiGetPitchTableOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
-	//dbg_printf("findSwiGetPitchTableOffset:\n");
+	// dbg_printf("findSwiGetPitchTableOffset:\n");
 
-	u32* swiGetPitchTableOffset = findOffset(
-		(u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize > 0x10000 ? 0x10000 : ndsHeader->arm7binarySize,
-		swiGetPitchTableSignature1, 4
-	);
-	/*if (swiGetPitchTableOffset) {
-		dbg_printf("swiGetPitchTable SDK <= 2 call found\n");
-	} else {
-		dbg_printf("swiGetPitchTable SDK <= 2 call not found\n");
-	}*/
+	u32* swiGetPitchTableOffset = NULL;
+
+	if (moduleParams->sdk_version > 0x5000000) {
+		swiGetPitchTableOffset = findOffset(
+			(u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize > 0x10000 ? 0x10000 : ndsHeader->arm7binarySize,
+			swiGetPitchTableSignature5, 4
+		);
+		/* if (swiGetPitchTableOffset) {
+			dbg_printf("swiGetPitchTable call SDK 5 found\n");
+		} else {
+			dbg_printf("swiGetPitchTable call SDK 5 not found\n");
+		} */
+	}
+
+	if (!swiGetPitchTableOffset) {
+		swiGetPitchTableOffset = findOffset(
+			(u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize > 0x10000 ? 0x10000 : ndsHeader->arm7binarySize,
+			swiGetPitchTableSignature1, 4
+		);
+		/* if (swiGetPitchTableOffset) {
+			dbg_printf("swiGetPitchTable SDK <= 2 call found\n");
+		} else {
+			dbg_printf("swiGetPitchTable SDK <= 2 call not found\n");
+		} */
+	}
 
 	if (!swiGetPitchTableOffset) {
 		swiGetPitchTableOffset = findOffset(
 			(u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize > 0x10000 ? 0x10000 : ndsHeader->arm7binarySize,
 			swiGetPitchTableSignature1Alt1, 4
 		);
-		/*if (swiGetPitchTableOffset) {
+		/* if (swiGetPitchTableOffset) {
 			dbg_printf("swiGetPitchTable SDK <= 2 call alt 1 found\n");
 		} else {
 			dbg_printf("swiGetPitchTable SDK <= 2 call alt 1 not found\n");
-		}*/
+		} */
 	}
 	if (!swiGetPitchTableOffset) {
 		swiGetPitchTableOffset = findOffset(
 			(u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize > 0x10000 ? 0x10000 : ndsHeader->arm7binarySize,
 			swiGetPitchTableSignature1Alt2, 4
 		);
-		/*if (swiGetPitchTableOffset) {
+		/* if (swiGetPitchTableOffset) {
 			dbg_printf("swiGetPitchTable SDK <= 2 call alt 2 found\n");
 		} else {
 			dbg_printf("swiGetPitchTable SDK <= 2 call alt 2 not found\n");
-		}*/
+		} */
 	}
 	if (!swiGetPitchTableOffset) {
 		swiGetPitchTableOffset = findOffset(
 			(u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize > 0x10000 ? 0x10000 : ndsHeader->arm7binarySize,
 			swiGetPitchTableSignature1Alt3, 4
 		);
-		/*if (swiGetPitchTableOffset) {
+		/* if (swiGetPitchTableOffset) {
 			dbg_printf("swiGetPitchTable SDK <= 2 call alt 3 found\n");
 		} else {
 			dbg_printf("swiGetPitchTable SDK <= 2 call alt 3 not found\n");
-		}*/
+		} */
 	}
 	if (!swiGetPitchTableOffset) {
 		swiGetPitchTableOffset = findOffset(
 			(u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize > 0x10000 ? 0x10000 : ndsHeader->arm7binarySize,
 			swiGetPitchTableSignature1Alt4, 4
 		);
-		/*if (swiGetPitchTableOffset) {
+		/* if (swiGetPitchTableOffset) {
 			dbg_printf("swiGetPitchTable SDK <= 2 call alt 4 found\n");
 		} else {
 			dbg_printf("swiGetPitchTable SDK <= 2 call alt 4 not found\n");
-		}*/
+		} */
 	}
 	if (!swiGetPitchTableOffset) {
 		swiGetPitchTableOffset = findOffset(
 			(u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize > 0x10000 ? 0x10000 : ndsHeader->arm7binarySize,
 			swiGetPitchTableSignature1Alt5, 4
 		);
-		/*if (swiGetPitchTableOffset) {
+		/* if (swiGetPitchTableOffset) {
 			dbg_printf("swiGetPitchTable SDK <= 2 call alt 5 found\n");
 		} else {
 			dbg_printf("swiGetPitchTable SDK <= 2 call alt 5 not found\n");
-		}*/
+		} */
 	}
 	if (!swiGetPitchTableOffset) {
 		swiGetPitchTableOffset = findOffset(
 			(u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize > 0x10000 ? 0x10000 : ndsHeader->arm7binarySize,
 			swiGetPitchTableSignature1Alt6, 3
 		);
-		/*if (swiGetPitchTableOffset) {
+		/* if (swiGetPitchTableOffset) {
 			dbg_printf("swiGetPitchTable SDK <= 2 call alt 6 found\n");
 		} else {
 			dbg_printf("swiGetPitchTable SDK <= 2 call alt 6 not found\n");
-		}*/
+		} */
 	}
 	if (!swiGetPitchTableOffset) {
 		swiGetPitchTableOffset = findOffset(
 			(u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize > 0x10000 ? 0x10000 : ndsHeader->arm7binarySize,
 			swiGetPitchTableSignature1Alt7, 3
 		);
-		/*if (swiGetPitchTableOffset) {
+		/* if (swiGetPitchTableOffset) {
 			dbg_printf("swiGetPitchTable SDK <= 2 call alt 7 found\n");
 		} else {
 			dbg_printf("swiGetPitchTable SDK <= 2 call alt 7 not found\n");
-		}*/
+		} */
 	}
 	if (!swiGetPitchTableOffset) {
 		swiGetPitchTableOffset = findOffset(
 			(u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize > 0x10000 ? 0x10000 : ndsHeader->arm7binarySize,
 			swiGetPitchTableSignature1Alt8, 3
 		);
-		/*if (swiGetPitchTableOffset) {
+		/* if (swiGetPitchTableOffset) {
 			dbg_printf("swiGetPitchTable SDK <= 2 call alt 8 found\n");
 		} else {
 			dbg_printf("swiGetPitchTable SDK <= 2 call alt 8 not found\n");
-		}*/
+		} */
 	}
 	if (!swiGetPitchTableOffset) {
 		swiGetPitchTableOffset = findOffset(
 			(u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize > 0x10000 ? 0x10000 : ndsHeader->arm7binarySize,
 			swiGetPitchTableSignature1Alt9, 3
 		);
-		/*if (swiGetPitchTableOffset) {
+		/* if (swiGetPitchTableOffset) {
 			dbg_printf("swiGetPitchTable SDK <= 2 call alt 9 found\n");
 		} else {
 			dbg_printf("swiGetPitchTable SDK <= 2 call alt 9 not found\n");
-		}*/
+		} */
 	}
 	if (!swiGetPitchTableOffset) {
 		swiGetPitchTableOffset = findOffset(
 			(u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize > 0x10000 ? 0x10000 : ndsHeader->arm7binarySize,
 			swiGetPitchTableSignature1Alt10, 3
 		);
-		/*if (swiGetPitchTableOffset) {
+		/* if (swiGetPitchTableOffset) {
 			dbg_printf("swiGetPitchTable SDK <= 2 call alt 10 found\n");
 		} else {
 			dbg_printf("swiGetPitchTable SDK <= 2 call alt 10 not found\n");
-		}*/
+		} */
 	}
 	if (!swiGetPitchTableOffset) {
 		swiGetPitchTableOffset = findOffset(
 			(u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize > 0x10000 ? 0x10000 : ndsHeader->arm7binarySize,
 			swiGetPitchTableSignature1Alt11, 3
 		);
-		/*if (swiGetPitchTableOffset) {
+		/* if (swiGetPitchTableOffset) {
 			dbg_printf("swiGetPitchTable SDK <= 2 call alt 11 found\n");
 		} else {
 			dbg_printf("swiGetPitchTable SDK <= 2 call alt 11 not found\n");
-		}*/
+		} */
 	}
 	if (!swiGetPitchTableOffset) {
 		swiGetPitchTableOffset = findOffset(
 			(u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize > 0x10000 ? 0x10000 : ndsHeader->arm7binarySize,
 			swiGetPitchTableSignature1Alt12, 3
 		);
-		/*if (swiGetPitchTableOffset) {
+		/* if (swiGetPitchTableOffset) {
 			dbg_printf("swiGetPitchTable SDK <= 2 call alt 12 found\n");
 		} else {
 			dbg_printf("swiGetPitchTable SDK <= 2 call alt 12 not found\n");
-		}*/
+		} */
 	}
 	if (!swiGetPitchTableOffset) {
 		swiGetPitchTableOffset = findOffset(
 			(u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize > 0x10000 ? 0x10000 : ndsHeader->arm7binarySize,
 			swiGetPitchTableSignature1Alt13, 3
 		);
-		/*if (swiGetPitchTableOffset) {
+		/* if (swiGetPitchTableOffset) {
 			dbg_printf("swiGetPitchTable SDK <= 2 call alt 13 found\n");
 		} else {
 			dbg_printf("swiGetPitchTable SDK <= 2 call alt 13 not found\n");
-		}*/
+		} */
+	}
+	if (!swiGetPitchTableOffset) {
+		swiGetPitchTableOffset = findOffset(
+			(u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize > 0x10000 ? 0x10000 : ndsHeader->arm7binarySize,
+			swiGetPitchTableSignature1Alt14, 3
+		);
+		/* if (swiGetPitchTableOffset) {
+			dbg_printf("swiGetPitchTable SDK <= 2 call alt 14 found\n");
+		} else {
+			dbg_printf("swiGetPitchTable SDK <= 2 call alt 14 not found\n");
+		} */
+	}
+	if (!swiGetPitchTableOffset) {
+		swiGetPitchTableOffset = findOffset(
+			(u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize > 0x10000 ? 0x10000 : ndsHeader->arm7binarySize,
+			swiGetPitchTableSignature1Alt15, 3
+		);
+		/* if (swiGetPitchTableOffset) {
+			dbg_printf("swiGetPitchTable SDK <= 2 call alt 15 found\n");
+		} else {
+			dbg_printf("swiGetPitchTable SDK <= 2 call alt 15 not found\n");
+		} */
 	}
 	if (!swiGetPitchTableOffset) {
 		swiGetPitchTableOffset = findOffset(
 			(u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize > 0x10000 ? 0x10000 : ndsHeader->arm7binarySize,
 			swiGetPitchTableSignature3, 3
 		);
-		/*if (swiGetPitchTableOffset) {
+		/* if (swiGetPitchTableOffset) {
 			dbg_printf("swiGetPitchTable SDK 3 call found\n");
 		} else {
 			dbg_printf("swiGetPitchTable SDK 3 call not found\n");
-		}*/
+		} */
 	}
 	if (!swiGetPitchTableOffset) {
 		swiGetPitchTableOffset = findOffset(
 			(u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize > 0x10000 ? 0x10000 : ndsHeader->arm7binarySize,
 			swiGetPitchTableSignature3Alt1, 3
 		);
-		/*if (swiGetPitchTableOffset) {
+		/* if (swiGetPitchTableOffset) {
 			dbg_printf("swiGetPitchTable SDK 3 call alt 1 found\n");
 		} else {
 			dbg_printf("swiGetPitchTable SDK 3 call alt 1 not found\n");
-		}*/
+		} */
 	}
 	if (!swiGetPitchTableOffset) {
 		swiGetPitchTableOffset = findOffset(
 			(u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize > 0x10000 ? 0x10000 : ndsHeader->arm7binarySize,
 			swiGetPitchTableSignature3Alt2, 3
 		);
-		/*if (swiGetPitchTableOffset) {
+		/* if (swiGetPitchTableOffset) {
 			dbg_printf("swiGetPitchTable SDK 3 call alt 2 found\n");
 		} else {
 			dbg_printf("swiGetPitchTable SDK 3 call alt 2 not found\n");
-		}*/
+		} */
 	}
 	if (!swiGetPitchTableOffset) {
 		swiGetPitchTableOffset = findOffset(
 			(u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize > 0x10000 ? 0x10000 : ndsHeader->arm7binarySize,
 			swiGetPitchTableSignature3Alt3, 3
 		);
-		/*if (swiGetPitchTableOffset) {
+		/* if (swiGetPitchTableOffset) {
 			dbg_printf("swiGetPitchTable SDK 3 call alt 3 found\n");
 		} else {
 			dbg_printf("swiGetPitchTable SDK 3 call alt 3 not found\n");
-		}*/
+		} */
 	}
 	if (!swiGetPitchTableOffset) {
 		swiGetPitchTableOffset = findOffset(
 			(u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize > 0x10000 ? 0x10000 : ndsHeader->arm7binarySize,
 			swiGetPitchTableSignature3Alt4, 3
 		);
-		/*if (swiGetPitchTableOffset) {
+		/* if (swiGetPitchTableOffset) {
 			dbg_printf("swiGetPitchTable SDK 3 call alt 4 found\n");
 		} else {
 			dbg_printf("swiGetPitchTable SDK 3 call alt 4 not found\n");
-		}*/
+		} */
 	}
 	if (!swiGetPitchTableOffset) {
 		swiGetPitchTableOffset = findOffset(
 			(u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize > 0x10000 ? 0x10000 : ndsHeader->arm7binarySize,
 			swiGetPitchTableSignature3Alt5, 3
 		);
-		/*if (swiGetPitchTableOffset) {
+		/* if (swiGetPitchTableOffset) {
 			dbg_printf("swiGetPitchTable SDK 3 call alt 5 found\n");
 		} else {
 			dbg_printf("swiGetPitchTable SDK 3 call alt 5 not found\n");
-		}*/
+		} */
 	}
 	if (!swiGetPitchTableOffset) {
 		swiGetPitchTableOffset = findOffset(
 			(u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize > 0x10000 ? 0x10000 : ndsHeader->arm7binarySize,
 			swiGetPitchTableSignature3Alt6, 3
 		);
-		/*if (swiGetPitchTableOffset) {
+		/* if (swiGetPitchTableOffset) {
 			dbg_printf("swiGetPitchTable SDK 3 call alt 6 found\n");
 		} else {
 			dbg_printf("swiGetPitchTable SDK 3 call alt 6 not found\n");
-		}*/
+		} */
 	}
 	if (!swiGetPitchTableOffset) {
 		swiGetPitchTableOffset = findOffset(
 			(u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize > 0x10000 ? 0x10000 : ndsHeader->arm7binarySize,
 			swiGetPitchTableSignature3Alt7, 3
 		);
-		/*if (swiGetPitchTableOffset) {
+		/* if (swiGetPitchTableOffset) {
 			dbg_printf("swiGetPitchTable SDK 3 call alt 7 found\n");
 		} else {
 			dbg_printf("swiGetPitchTable SDK 3 call alt 7 not found\n");
-		}*/
+		} */
 	}
 	if (!swiGetPitchTableOffset) {
 		swiGetPitchTableOffset = findOffset(
 			(u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize > 0x10000 ? 0x10000 : ndsHeader->arm7binarySize,
 			swiGetPitchTableSignature3Alt8, 3
 		);
-		/*if (swiGetPitchTableOffset) {
+		/* if (swiGetPitchTableOffset) {
 			dbg_printf("swiGetPitchTable SDK 3 call alt 8 found\n");
 		} else {
 			dbg_printf("swiGetPitchTable SDK 3 call alt 8 not found\n");
-		}*/
+		} */
 	}
 	if (!swiGetPitchTableOffset) {
 		swiGetPitchTableOffset = findOffset(
 			(u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize > 0x10000 ? 0x10000 : ndsHeader->arm7binarySize,
 			swiGetPitchTableSignature3Alt9, 3
 		);
-		/*if (swiGetPitchTableOffset) {
+		/* if (swiGetPitchTableOffset) {
 			dbg_printf("swiGetPitchTable SDK 3 call alt 9 found\n");
 		} else {
 			dbg_printf("swiGetPitchTable SDK 3 call alt 9 not found\n");
-		}*/
+		} */
 	}
 	if (!swiGetPitchTableOffset) {
 		swiGetPitchTableOffset = findOffset(
 			(u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize > 0x10000 ? 0x10000 : ndsHeader->arm7binarySize,
 			swiGetPitchTableSignature3Alt10, 3
 		);
-		/*if (swiGetPitchTableOffset) {
+		/* if (swiGetPitchTableOffset) {
 			dbg_printf("swiGetPitchTable SDK 3 call alt 10 found\n");
 		} else {
 			dbg_printf("swiGetPitchTable SDK 3 call alt 10 not found\n");
-		}*/
+		} */
 	}
 	if (!swiGetPitchTableOffset) {
 		swiGetPitchTableOffset = findOffset(
 			(u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize > 0x10000 ? 0x10000 : ndsHeader->arm7binarySize,
 			swiGetPitchTableSignature3Alt11, 3
 		);
-		/*if (swiGetPitchTableOffset) {
+		/* if (swiGetPitchTableOffset) {
 			dbg_printf("swiGetPitchTable SDK 3 call alt 11 found\n");
 		} else {
 			dbg_printf("swiGetPitchTable SDK 3 call alt 11 not found\n");
-		}*/
+		} */
 	}
 	if (!swiGetPitchTableOffset) {
 		swiGetPitchTableOffset = findOffset(
 			(u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize > 0x10000 ? 0x10000 : ndsHeader->arm7binarySize,
 			swiGetPitchTableSignature3Alt12, 3
 		);
-		/*if (swiGetPitchTableOffset) {
+		/* if (swiGetPitchTableOffset) {
 			dbg_printf("swiGetPitchTable SDK 3 call alt 12 found\n");
 		} else {
 			dbg_printf("swiGetPitchTable SDK 3 call alt 12 not found\n");
-		}*/
+		} */
 	}
 	if (!swiGetPitchTableOffset) {
 		swiGetPitchTableOffset = findOffset(
 			(u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize > 0x10000 ? 0x10000 : ndsHeader->arm7binarySize,
 			swiGetPitchTableSignature4, 3
 		);
-		/*if (swiGetPitchTableOffset) {
+		/* if (swiGetPitchTableOffset) {
 			dbg_printf("swiGetPitchTable SDK 4 call found\n");
 		} else {
 			dbg_printf("swiGetPitchTable SDK 4 call not found\n");
-		}*/
+		} */
 	}
 	if (!swiGetPitchTableOffset) {
 		swiGetPitchTableOffset = findOffset(
 			(u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize > 0x10000 ? 0x10000 : ndsHeader->arm7binarySize,
 			swiGetPitchTableSignature4Alt1, 3
 		);
-		/*if (swiGetPitchTableOffset) {
+		/* if (swiGetPitchTableOffset) {
 			dbg_printf("swiGetPitchTable SDK 4 call alt 1 found\n");
 		} else {
 			dbg_printf("swiGetPitchTable SDK 4 call alt 1 not found\n");
-		}*/
+		} */
 	}
 	if (!swiGetPitchTableOffset) {
 		swiGetPitchTableOffset = findOffset(
 			(u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize > 0x10000 ? 0x10000 : ndsHeader->arm7binarySize,
 			swiGetPitchTableSignature4Alt2, 3
 		);
-		/*if (swiGetPitchTableOffset) {
+		/* if (swiGetPitchTableOffset) {
 			dbg_printf("swiGetPitchTable SDK 4 call alt 2 found\n");
 		} else {
 			dbg_printf("swiGetPitchTable SDK 4 call alt 2 not found\n");
-		}*/
+		} */
 	}
 	if (!swiGetPitchTableOffset) {
 		swiGetPitchTableOffset = findOffset(
 			(u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize > 0x10000 ? 0x10000 : ndsHeader->arm7binarySize,
 			swiGetPitchTableSignature4Alt3, 3
 		);
-		/*if (swiGetPitchTableOffset) {
+		/* if (swiGetPitchTableOffset) {
 			dbg_printf("swiGetPitchTable SDK 4 call alt 3 found\n");
 		} else {
 			dbg_printf("swiGetPitchTable SDK 4 call alt 3 not found\n");
-		}*/
+		} */
 	}
 	if (!swiGetPitchTableOffset) {
 		swiGetPitchTableOffset = findOffset(
 			(u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize > 0x10000 ? 0x10000 : ndsHeader->arm7binarySize,
 			swiGetPitchTableSignature4Alt4, 3
 		);
-		/*if (swiGetPitchTableOffset) {
+		/* if (swiGetPitchTableOffset) {
 			dbg_printf("swiGetPitchTable SDK 4 call alt 4 found\n");
 		} else {
 			dbg_printf("swiGetPitchTable SDK 4 call alt 4 not found\n");
-		}*/
+		} */
 	}
 	if (!swiGetPitchTableOffset) {
 		swiGetPitchTableOffset = findOffset(
 			(u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize > 0x10000 ? 0x10000 : ndsHeader->arm7binarySize,
 			swiGetPitchTableSignature4Alt5, 3
 		);
-		/*if (swiGetPitchTableOffset) {
+		/* if (swiGetPitchTableOffset) {
 			dbg_printf("swiGetPitchTable SDK 4 call alt 5 found\n");
 		} else {
 			dbg_printf("swiGetPitchTable SDK 4 call alt 5 not found\n");
-		}*/
+		} */
 	}
 	if (!swiGetPitchTableOffset) {
 		swiGetPitchTableOffset = findOffset(
 			(u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize > 0x10000 ? 0x10000 : ndsHeader->arm7binarySize,
 			swiGetPitchTableSignature4Alt6, 3
 		);
-		/*if (swiGetPitchTableOffset) {
+		/* if (swiGetPitchTableOffset) {
 			dbg_printf("swiGetPitchTable SDK 4 call alt 6 found\n");
 		} else {
 			dbg_printf("swiGetPitchTable SDK 4 call alt 6 not found\n");
-		}*/
+		} */
 	}
 	if (!swiGetPitchTableOffset) {
 		swiGetPitchTableOffset = findOffset(
 			(u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize > 0x10000 ? 0x10000 : ndsHeader->arm7binarySize,
 			swiGetPitchTableSignature4Alt7, 3
 		);
-		/*if (swiGetPitchTableOffset) {
+		/* if (swiGetPitchTableOffset) {
 			dbg_printf("swiGetPitchTable SDK 4 call alt 7 found\n");
 		} else {
 			dbg_printf("swiGetPitchTable SDK 4 call alt 7 not found\n");
-		}*/
+		} */
 	}
 	if (!swiGetPitchTableOffset) {
 		swiGetPitchTableOffset = findOffset(
 			(u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize > 0x10000 ? 0x10000 : ndsHeader->arm7binarySize,
 			swiGetPitchTableSignature4Alt8, 3
 		);
-		/*if (swiGetPitchTableOffset) {
+		/* if (swiGetPitchTableOffset) {
 			dbg_printf("swiGetPitchTable SDK 4 call alt 8 found\n");
 		} else {
 			dbg_printf("swiGetPitchTable SDK 4 call alt 8 not found\n");
-		}*/
+		} */
 	}
 
 	if (!swiGetPitchTableOffset) {
@@ -590,14 +690,14 @@ u32* findSwiGetPitchTableOffset(const tNDSHeader* ndsHeader, const module_params
 			(u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize > 0x10000 ? 0x10000 : ndsHeader->arm7binarySize,
 			swiGetPitchTableSignature4Alt9, 3
 		);
-		/*if (swiGetPitchTableOffset) {
+		/* if (swiGetPitchTableOffset) {
 			dbg_printf("swiGetPitchTable SDK 4 call alt 9 found\n");
 		} else {
 			dbg_printf("swiGetPitchTable SDK 4 call alt 9 not found\n");
-		}*/
+		} */
 	}
 
-	//dbg_printf("\n");
+	// dbg_printf("\n");
 	return swiGetPitchTableOffset;
 }
 
@@ -687,10 +787,10 @@ u32* findCardCheckPullOutOffset(const tNDSHeader* ndsHeader, const module_params
 }
 
 u32* findCardIrqEnableOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
-	//dbg_printf("findCardIrqEnableOffset:\n");
+	// dbg_printf("findCardIrqEnableOffset:\n");
 	
 	const u32* irqEnableStartSignature = irqEnableStartSignature1;
-	if (moduleParams->sdk_version > 0x4000000) {
+	if (ndsHeader->arm7binarySize != 0x289C0 && moduleParams->sdk_version > 0x4000000) {
 		irqEnableStartSignature = irqEnableStartSignature4;
 	}
 
@@ -698,11 +798,11 @@ u32* findCardIrqEnableOffset(const tNDSHeader* ndsHeader, const module_params_t*
 		(u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
 		irqEnableStartSignature, 4
 	);
-	/*if (cardIrqEnableOffset) {
+	/* if (cardIrqEnableOffset) {
 		dbg_printf("irq enable found\n");
 	} else {
 		dbg_printf("irq enable not found\n");
-	}*/
+	} */
 
 	if (!cardIrqEnableOffset && moduleParams->sdk_version < 0x4000000) {
 		// SDK 4
@@ -710,11 +810,69 @@ u32* findCardIrqEnableOffset(const tNDSHeader* ndsHeader, const module_params_t*
 			(u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
             irqEnableStartSignature4, 4
 		);
-		/*if (cardIrqEnableOffset) {
+		/* if (cardIrqEnableOffset) {
 			dbg_printf("irq enable SDK 4 found\n");
 		} else {
 			dbg_printf("irq enable SDK 4 not found\n");
-		}*/
+		} */
+	}
+
+	if (!cardIrqEnableOffset) {
+		// SDK 5
+		cardIrqEnableOffset = findOffset(
+			(u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
+            irqEnableStartSignature4Alt, 4
+		);
+		/* if (cardIrqEnableOffset) {
+			dbg_printf("irq enable alt found\n");
+		} else {
+			dbg_printf("irq enable alt not found\n");
+		} */
+	}
+
+	if (!cardIrqEnableOffset) {
+		cardIrqEnableOffset = (u32*)findOffsetThumb(
+			(u16*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
+            irqEnableStartSignatureThumb, 5
+		);
+		if (cardIrqEnableOffset) {
+			// Find again
+			cardIrqEnableOffset = (u32*)findOffsetThumb(
+				(u16*)cardIrqEnableOffset+4, ndsHeader->arm7binarySize,
+				irqEnableStartSignatureThumb, 5
+			);
+		}
+		/* if (cardIrqEnableOffset) {
+			dbg_printf("irq enable thumb found\n");
+		} else {
+			dbg_printf("irq enable thumb not found\n");
+		} */
+	}
+
+	if (!cardIrqEnableOffset) {
+		// SDK 3
+		cardIrqEnableOffset = (u32*)findOffsetThumb(
+			(u16*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
+            irqEnableStartSignatureThumb3, 5
+		);
+		/* if (cardIrqEnableOffset) {
+			dbg_printf("irq enable thumb SDK 3 found\n");
+		} else {
+			dbg_printf("irq enable thumb SDK 3 not found\n");
+		} */
+	}
+
+	if (!cardIrqEnableOffset && moduleParams->sdk_version > 0x5000000) {
+		// SDK 5
+		cardIrqEnableOffset = (u32*)findOffsetThumb(
+			(u16*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
+            irqEnableStartSignatureThumb5, 5
+		);
+		/* if (cardIrqEnableOffset) {
+			dbg_printf("irq enable thumb SDK 5 found\n");
+		} else {
+			dbg_printf("irq enable thumb SDK 5 not found\n");
+		} */
 	}
 
 	//dbg_printf("\n");
