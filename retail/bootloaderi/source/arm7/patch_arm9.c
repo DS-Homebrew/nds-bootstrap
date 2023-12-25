@@ -974,7 +974,7 @@ static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 	patchOffsetCache.mpuInitOffset = mpuInitOffset;
 }
 
-void patchMpu2(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+void patchMpu2(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, const bool usesCloneboot) {
 	if (moduleParams->sdk_version > 0x5000000 && (ndsHeader->unitCode == 0 || !dsiModeConfirmed)) {
 		return;
 	}
@@ -1069,7 +1069,7 @@ void patchMpu2(const tNDSHeader* ndsHeader, const module_params_t* moduleParams)
 		u32 mpuInitOffsetInSrl = (u32)mpuInitOffset;
 		mpuInitOffsetInSrl -= (u32)ndsHeader->arm9destination;
 
-		if (mpuInitOffsetInSrl >= 0 && mpuInitOffsetInSrl < 0x4000) {
+		if (mpuInitOffsetInSrl >= 0 && mpuInitOffsetInSrl < 0x4000 && usesCloneboot) {
 			unpatchedFuncs->mpuInitOffset2 = mpuInitOffset;
 		}
 		*mpuInitOffset = 0xE1A00000; // nop
@@ -2501,7 +2501,7 @@ static void operaRamPatch(void) {
 	ce9->patches->needFlushDCCache = (patchMpuRegion == 1);
 }*/
 
-u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, const ltd_module_params_t* ltdModuleParams, u32 ROMinRAM, u32 patchMpuRegion, bool usesCloneboot) {
+u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, const ltd_module_params_t* ltdModuleParams, u32 ROMinRAM, u32 patchMpuRegion, const bool usesCloneboot) {
 
 	bool usesThumb;
 	//bool slot2usesThumb = false;
@@ -2528,7 +2528,7 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
     dbg_printf("\n\n");
 
 	patchMpu(ndsHeader, moduleParams, patchMpuRegion);
-	patchMpu2(ndsHeader, moduleParams);
+	patchMpu2(ndsHeader, moduleParams, usesCloneboot);
 	patchMpuChange(ndsHeader, moduleParams);
 	patchMpuInitTwl(ndsHeader);
 

@@ -1706,8 +1706,15 @@ int arm7_main(void) {
 
 		//ensureBinaryDecompressed(&dsiHeaderTemp.ndshdr, moduleParams, false);
 
-		extern void patchMpu2(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
-		patchMpu2(ndsHeader, moduleParams);
+		u32 clonebootFlag = 0;
+		fileRead((char*)&clonebootFlag, romFile, ((romSize-4) <= baseRomSize) ? (romSize-4) : baseRomSize, sizeof(u32));
+		const bool usesCloneboot = (clonebootFlag == 0x16361);
+		if (usesCloneboot) {
+			dbg_printf("Cloneboot detected\n");
+		}
+
+		extern void patchMpu2(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, const bool usesCloneboot);
+		patchMpu2(ndsHeader, moduleParams, usesCloneboot);
 
 		patchSharedFontPath((cardengineArm9*)ce9Location, ndsHeader, moduleParams, ltdModuleParams);
 		dsiWarePatch((cardengineArm9*)ce9Location, ndsHeader);

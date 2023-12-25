@@ -508,18 +508,17 @@ u32 patchCardNds(
 	tNDSHeader* ndsHeader,
 	const module_params_t* moduleParams,
 	u32 patchMpuRegion,
-	u32 patchMpuSize,
+	const bool usesCloneboot,
 	u32 saveFileCluster,
 	u32 saveSize
 ) {
 	dbg_printf("patchCardNds\n\n");
 
-	bool sdk5 = isSdk5(moduleParams);
-	if (sdk5) {
+	if (isSdk5(moduleParams)) {
 		dbg_printf("[SDK 5]\n\n");
 	}
 
-	u32 errorCodeArm9 = patchCardNdsArm9(ce9, ndsHeader, moduleParams, patchMpuRegion, patchMpuSize);
+	u32 errorCodeArm9 = patchCardNdsArm9(ce9, ndsHeader, moduleParams, patchMpuRegion, usesCloneboot);
 	
 	//if (cardReadFound || ndsHeader->fatSize == 0) {
 	if (errorCodeArm9 == ERR_NONE || ndsHeader->fatSize == 0) {

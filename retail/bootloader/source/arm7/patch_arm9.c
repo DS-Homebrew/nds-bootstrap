@@ -389,7 +389,7 @@ static bool patchCardIrqEnable(cardengineArm9* ce9, const tNDSHeader* ndsHeader,
 	return true;
 }
 
-static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 patchMpuRegion, u32 patchMpuSize) {
+static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 patchMpuRegion) {
 	if (!extendedMemory || patchMpuRegion == 2 || ndsHeader->unitCode > 0) {
 		return;
 	}
@@ -519,7 +519,7 @@ static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 	patchOffsetCache.mpuInitOffset = mpuInitOffset;
 }
 
-static void patchMpu2(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+static void patchMpu2(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, const bool usesCloneboot) {
 	if (((moduleParams->sdk_version < 0x2008000) && !extendedMemory) || moduleParams->sdk_version > 0x5000000) {
 		return;
 	}
@@ -588,7 +588,7 @@ static void patchMpu2(const tNDSHeader* ndsHeader, const module_params_t* module
 		u32 mpuInitOffsetInSrl = (u32)mpuInitOffset;
 		mpuInitOffsetInSrl -= (u32)ndsHeader->arm9destination;
 
-		if (mpuInitOffsetInSrl >= 0 && mpuInitOffsetInSrl < 0x4000) {
+		if (mpuInitOffsetInSrl >= 0 && mpuInitOffsetInSrl < 0x4000 && usesCloneboot) {
 			unpatchedFuncs->mpuInitOffset2 = mpuInitOffset;
 		}
 		*mpuInitOffset = 0xE1A00000; // nop
@@ -1938,7 +1938,7 @@ static void setFlushCache(cardengineArm9* ce9, u32 patchMpuRegion, bool usesThum
 	ce9->patches->needFlushDCCache = (patchMpuRegion == 1);
 }
 
-u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 patchMpuRegion, u32 patchMpuSize) {
+u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 patchMpuRegion, const bool usesCloneboot) {
 	bool usesThumb;
 	int readType;
 	int sdk5ReadType; // SDK 5
@@ -1987,8 +1987,8 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 		}
 	}
 
-	patchMpu(ndsHeader, moduleParams, patchMpuRegion, patchMpuSize);
-	patchMpu2(ndsHeader, moduleParams);
+	patchMpu(ndsHeader, moduleParams, patchMpuRegion);
+	patchMpu2(ndsHeader, moduleParams, usesCloneboot);
 	patchMpuFlagsSet(ndsHeader, moduleParams);
 	patchMpuChange(ndsHeader, moduleParams);
 

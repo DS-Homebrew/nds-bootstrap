@@ -1510,7 +1510,7 @@ int arm7_main(void) {
 		ndsHeader,
 		moduleParams,
 		1,
-		patchMpuSize,
+		usesCloneboot,
 		saveFileCluster,
 		saveSize
 	);

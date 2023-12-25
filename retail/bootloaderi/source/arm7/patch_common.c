@@ -16140,15 +16140,14 @@ u32 patchCardNds(
 	const module_params_t* moduleParams,
 	const ltd_module_params_t* ltdModuleParams,
 	u32 patchMpuRegion,
-	bool usesCloneboot,
+	const bool usesCloneboot,
 	u32 ROMinRAM,
 	u32 saveFileCluster,
 	u32 saveSize
 ) {
 	dbg_printf("patchCardNds\n\n");
 
-	bool sdk5 = isSdk5(moduleParams);
-	if (sdk5) {
+	if (isSdk5(moduleParams)) {
 		dbg_printf("[SDK 5]\n\n");
 	}
 
