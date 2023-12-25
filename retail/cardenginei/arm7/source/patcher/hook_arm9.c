@@ -9,8 +9,12 @@
 #include "nds_header.h"
 #include "cardengine_header_arm9.h"
 
+#define isSdk5_9 BIT(5)
+#define isSdk5_7 BIT(13)
 #define b_softResetMb BIT(13)
+#define b_isDlp BIT(15)
 
+extern u32 valueBits;
 extern vu32* volatile sharedAddr;
 
 
@@ -122,11 +126,17 @@ int hookNdsRetailArm9(
 	extern u32 iUncompressedSize;
 	extern bool softResetMb;
 
+	if (valueBits & isSdk5_7) {
+		sharedAddr[1] |= isSdk5_9;
+	} else {
+		sharedAddr[1] &= ~isSdk5_9;
+	}
 	if (softResetMb) {
 		sharedAddr[1] |= b_softResetMb;
 	} else {
 		sharedAddr[1] &= ~b_softResetMb;
 	}
+	sharedAddr[1] &= ~b_isDlp;
 
     u32* tableAddr = hookInterruptHandler((u32*)ndsHeader->arm9destination, iUncompressedSize);
    

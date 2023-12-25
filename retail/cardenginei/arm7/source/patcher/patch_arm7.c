@@ -13,6 +13,7 @@
 
 #define gameOnFlashcard BIT(0)
 #define ROMinRAM BIT(3)
+#define dsiMode BIT(4)
 
 extern u32 valueBits;
 extern u16 scfgRomBak;
@@ -23,6 +24,8 @@ extern bool sdRead;
 u32 savePatchV1(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
 u32 savePatchV2(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
 u32 savePatchUniversal(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
+u32 savePatchInvertedThumb(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
+u32 savePatchV5(const cardengineArm7* ce7, const tNDSHeader* ndsHeader); // SDK 5
 
 u32 generateA7Instr(int arg1, int arg2) {
 	return (((u32)(arg2 - arg1 - 8) >> 2) & 0xFFFFFF) | 0xEB000000;
@@ -97,6 +100,35 @@ static void fixForDifferentBios(const cardengineArm7* ce7, const tNDSHeader* nds
 	dbg_printf("\n\n");*/
 }
 
+static void patchMirrorCheck(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+	if (moduleParams->sdk_version > 0x5000000) {
+		return;
+	}
+
+	extern u32 relocationStart;
+	u32* offset = (u32*)relocationStart;
+	offset--;
+	offset--;
+	offset--;
+	offset--;
+	for (int i = 0; i < 0xA0/sizeof(u32); i++) {
+		if (offset[-1] == 0xE12FFF1E) {
+			break;
+		}
+		offset--;
+	}
+
+	offset[0] = (valueBits & dsiMode) ? 0xE3A01002 : 0xE3A01001; // mov r1, #dsiModeConfirmed ? 2 : 1
+	offset[1] = 0xE59F2004; // ldr r2, =0x027FFFFA
+	offset[2] = 0xE1C210B0; // strh r1, [r2]
+	offset[3] = 0xE12FFF1E; // bx lr
+	offset[4] = 0x027FFFFA;
+
+	/* dbg_printf("RAM mirror check location : ");
+	dbg_hexa((u32)offset);
+	dbg_printf("\n\n"); */
+}
+
 static void patchSleepMode(const tNDSHeader* ndsHeader) {
 	// Sleep
 	u32* sleepPatchOffset = findSleepPatchOffset(ndsHeader);
@@ -160,12 +192,22 @@ u32 patchCardNdsArm7(
 	}
 
 	if (a7GetReloc(ndsHeader, moduleParams)) {
-		u32 saveResult = savePatchV1(ce7, ndsHeader, moduleParams);
-		if (!saveResult) {
-			saveResult = savePatchV2(ce7, ndsHeader, moduleParams);
-		}
-		if (!saveResult) {
-			saveResult = savePatchUniversal(ce7, ndsHeader, moduleParams);
+		patchMirrorCheck(ndsHeader, moduleParams);
+		u32 saveResult = 0;
+		
+		if (ndsHeader->arm7binarySize==0x2352C || ndsHeader->arm7binarySize==0x235DC || ndsHeader->arm7binarySize==0x23CAC || ndsHeader->arm7binarySize==0x245C0 || ndsHeader->arm7binarySize==0x245C4) {
+			saveResult = savePatchInvertedThumb(ce7, ndsHeader, moduleParams);    
+		} else if (moduleParams->sdk_version > 0x5000000) {
+			// SDK 5
+			saveResult = savePatchV5(ce7, ndsHeader);
+		} else {
+			saveResult = savePatchV1(ce7, ndsHeader, moduleParams);
+			if (!saveResult) {
+				saveResult = savePatchV2(ce7, ndsHeader, moduleParams);
+			}
+			if (!saveResult) {
+				saveResult = savePatchUniversal(ce7, ndsHeader, moduleParams);
+			}
 		}
 	}
 

@@ -1166,7 +1166,8 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		conf->dsiWramAccess = true;
 	}
 	if (conf->dsiWramAccess) {
-		if (strncmp(romTid, "ADA", 3) == 0 // Diamond
+		if (strncmp(romTid, "HND", 3) == 0 // DS Download Play
+		 || strncmp(romTid, "ADA", 3) == 0 // Diamond
 		 || strncmp(romTid, "APA", 3) == 0 // Pearl
 		 || strncmp(romTid, "Y3E", 3) == 0 // 2006-Nen 10-Gatsu Taikenban Soft
 		 || strncmp(romTid, "CPU", 3) == 0 // Platinum
@@ -1235,6 +1236,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		}
 		fclose(cebin);
 
+		const bool dlp = (memcmp(romTid, "HND", 3) == 0);
 		const bool gsdd = (memcmp(romTid, "BO5", 3) == 0);
 
 		if (conf->gameOnFlashcard) {
@@ -1252,7 +1254,9 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			fclose(cebin);
 		} else {
 			const char* ce9Path = conf->dsiWramAccess ? "nitro:/cardenginei_arm9.lz77" : "nitro:/cardenginei_arm9_alt.lz77";
-			if (gsdd) {
+			if (dlp) {
+				ce9Path = "nitro:/cardenginei_arm9_dlp.lz77";
+			} else if (gsdd) {
 				ce9Path = conf->dsiWramAccess ? "nitro:/cardenginei_arm9_gsdd.lz77" : "nitro:/cardenginei_arm9_gsdd_alt.lz77";
 			}
 
@@ -1264,7 +1268,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			}
 			fclose(cebin);
 
-			if (!conf->dsiWramAccess && !gsdd) {
+			if (!conf->dsiWramAccess && !dlp && !gsdd) {
 				// Load ce9 binary (alt 2)
 				cebin = fopen("nitro:/cardenginei_arm9_alt2.lz77", "rb");
 				if (cebin) {

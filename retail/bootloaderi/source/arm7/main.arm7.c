@@ -1588,6 +1588,9 @@ int arm7_main(void) {
 		extern u32 clusterCache;
 
 		u32 add = (moduleParams->sdk_version >= 0x2008000 || moduleParams->sdk_version == 0x20029A8) ? 0xC8000 : 0xE8000; // 0x027C8000 : 0x027E8000
+		if (memcmp(romTid, "HND", 3) == 0) {
+			add = 0x108000; // 0x02808000
+		}
 		tonccpy((char*)0x02700000+add, (char*)0x02700000, 0x10000);	// Move FAT table cache elsewhere
 		romFile->fatTableCache = (u32*)((u32)romFile->fatTableCache+add);
 		savFile->fatTableCache = (u32*)((u32)savFile->fatTableCache+add);
@@ -2011,6 +2014,9 @@ int arm7_main(void) {
 		} else {
 			const bool laterSdk = (moduleParams->sdk_version >= 0x2008000 || moduleParams->sdk_version == 0x20029A8);
 			ce9Location = dsiWramAccess ? CARDENGINEI_ARM9_LOCATION_DSI_WRAM : (!laterSdk ? CARDENGINEI_ARM9_LOCATION2 : CARDENGINEI_ARM9_LOCATION);
+			if (memcmp(romTid, "HND", 3) == 0) {
+				ce9Location = CARDENGINEI_ARM9_LOCATION_DLP;
+			}
 			ce9size = 0x5000;
 			tonccpy((u32*)ce9Location, (u32*)((!dsiWramAccess && !laterSdk) ? CARDENGINEI_ARM9_BUFFERED_LOCATION2 : CARDENGINEI_ARM9_BUFFERED_LOCATION), ce9size);
 		}
