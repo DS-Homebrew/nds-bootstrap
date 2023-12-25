@@ -138,7 +138,7 @@ u32 patchCardNdsArm9(
 	const tNDSHeader* ndsHeader,
 	const module_params_t* moduleParams,
 	u32 patchMpuRegion,
-	u32 patchMpuSize
+	const bool usesCloneboot
 );
 void patchCardNdsArm9Cont(
 	cardengineArm9* ce9,
@@ -157,7 +157,7 @@ u32 patchCardNds(
 	tNDSHeader* ndsHeader,
 	const module_params_t* moduleParams,
 	u32 patchMpuRegion,
-	u32 patchMpuSize,
+	const bool usesCloneboot,
 	u32 saveFileCluster,
 	u32 saveSize
 );
