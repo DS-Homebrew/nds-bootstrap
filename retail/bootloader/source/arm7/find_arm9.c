@@ -2032,14 +2032,14 @@ u32* findTwlSleepModeEndOffset(const tNDSHeader* ndsHeader) {
 
 	if (!offset) {
 		offset = (u32*)findOffsetThumb(
-			(u32*)ndsHeader->arm9destination, iUncompressedSize,//ndsHeader->arm9binarySize,
+			(u16*)ndsHeader->arm9destination, iUncompressedSize,//ndsHeader->arm9binarySize,
 			twlSleepModeEndSignatureThumbEarly, 7
 		);
 	}
 
 	if (!offset) {
 		offset = (u32*)findOffsetThumb(
-			(u32*)ndsHeader->arm9destination, iUncompressedSize,//ndsHeader->arm9binarySize,
+			(u16*)ndsHeader->arm9destination, iUncompressedSize,//ndsHeader->arm9binarySize,
 			twlSleepModeEndSignatureThumb, 3
 		);
 	}
