@@ -66,7 +66,9 @@ vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS_SDK1;
 
 static bool initialized = false;
 static bool bootloaderCleared = false;
+#ifndef MUSIC
 static bool funcsUnpatched = false;
+#endif
 
 //static int saveReadTimeOut = 0;
 
@@ -235,7 +237,9 @@ void reset(void) {
 	REG_POWERCNT = 1;  // Turn off power to stuff
 
 	initialized = false;
+#ifndef MUSIC
 	funcsUnpatched = false;
+#endif
 	languageTimer = 0;
 
 	while (sharedAddr[0] != 0x544F4F42) { // 'BOOT'
@@ -279,6 +283,7 @@ void myIrqHandlerVBlank(void) {
 		languageTimer++;
 	}
 
+#ifndef MUSIC
 	if (!funcsUnpatched && *(int*)(isSdk5Set ? 0x02FFFC3C : 0x027FFC3C) >= 60) {
 		unpatchedFunctions* unpatchedFuncs = (unpatchedFunctions*)UNPATCHED_FUNCTION_LOCATION;
 
@@ -309,9 +314,9 @@ void myIrqHandlerVBlank(void) {
 			}
 		}
 
-		/* if (unpatchedFuncs->mpuInitOffset2) {
+		if (unpatchedFuncs->mpuInitOffset2) {
 			*unpatchedFuncs->mpuInitOffset2 = 0xEE060F12;
-		} */
+		}
 		if (unpatchedFuncs->mpuDataOffset2) {
 			if (isSdk5Set) {
 				unpatchedFuncs->mpuDataOffset2[0] = 0xE3A0004A; // mov r0, #0x4A
@@ -324,6 +329,7 @@ void myIrqHandlerVBlank(void) {
 
 		funcsUnpatched = true;
 	}
+#endif
 
 	if ((0 == (REG_KEYINPUT & igmHotkey) && 0 == (REG_EXTKEYINPUT & (((igmHotkey >> 10) & 3) | ((igmHotkey >> 6) & 0xC0)))
 #ifndef MUSIC
