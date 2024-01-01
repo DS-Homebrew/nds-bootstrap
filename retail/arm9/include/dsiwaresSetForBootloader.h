@@ -194,6 +194,7 @@ static const char dsiWareForBootloader1[][4] = {
 	// "K4K", // Flametail
 	"KFS", // Flashlight
 	"KKR", // Flip the Core
+	"KGU", // Flipnote Studio
 	"KFP", // Flipper
 	"KKN", // Flipper 2: Flush the Goldfish
 	"KFU", // Flips: The Bubonic Builders

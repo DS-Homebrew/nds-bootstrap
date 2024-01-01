@@ -814,11 +814,21 @@ void patchHiHeapDSiWare(u32 addr, u32 heapEnd) {
 		*(u32*)(addr+0x28) = 0xE3560001; // cmp r6, #1
 		*(u32*)(addr+0x30) = 0xE3A00627; // mov r0, #0x2700000
 
-		*(u32*)(addr+0x58) = 0xE3A00C00; // mov r0, #*(u32*)(addr+0x13C)
+		// Convert ldr to mov instruction
 		if (*(u32*)(addr+0x13C) != 0) {
-			for (u32 i = 0; i < *(u32*)(addr+0x13C); i += 0x100) {
-				*(u32*)(addr+0x58) += 1;
+			if (*(u8*)(addr+0x13C) != 0) {
+				*(u32*)(addr+0x58) = 0xE3A00D00; // mov r0, #*(u32*)(addr+0x13C)
+				for (u32 i = 0; i < *(u32*)(addr+0x13C); i += 0x40) {
+					*(u32*)(addr+0x58) += 1;
+				}
+			} else {
+				*(u32*)(addr+0x58) = 0xE3A00C00; // mov r0, #*(u32*)(addr+0x13C)
+				for (u32 i = 0; i < *(u32*)(addr+0x13C); i += 0x100) {
+					*(u32*)(addr+0x58) += 1;
+				}
 			}
+		} else {
+			*(u32*)(addr+0x58) = 0xE3A00000; // mov r0, #*(u32*)(addr+0x13C)
 		}
 
 		*(u32*)(addr+0x13C) = heapEnd;
@@ -829,11 +839,21 @@ void patchHiHeapDSiWare(u32 addr, u32 heapEnd) {
 	*(u32*)(addr+0x24) = 0xE3500001; // cmp r0, #1
 	*(u32*)(addr+0x2C) = 0x13A00627; // movne r0, #0x2700000
 
-	*(u32*)(addr+0x40) = 0xE3A01C00; // mov r1, #*(u32*)(addr+0x9C)
+	// Convert ldr to mov instruction
 	if (*(u32*)(addr+0x9C) != 0) {
-		for (u32 i = 0; i < *(u32*)(addr+0x9C); i += 0x100) {
-			*(u32*)(addr+0x40) += 1;
+		if (*(u8*)(addr+0x9C) != 0) {
+			*(u32*)(addr+0x40) = 0xE3A01D00; // mov r1, #*(u32*)(addr+0x9C)
+			for (u32 i = 0; i < *(u32*)(addr+0x9C); i += 0x40) {
+				*(u32*)(addr+0x40) += 1;
+			}
+		} else {
+			*(u32*)(addr+0x40) = 0xE3A01C00; // mov r1, #*(u32*)(addr+0x9C)
+			for (u32 i = 0; i < *(u32*)(addr+0x9C); i += 0x100) {
+				*(u32*)(addr+0x40) += 1;
+			}
 		}
+	} else {
+		*(u32*)(addr+0x40) = 0xE3A01000; // mov r1, #*(u32*)(addr+0x9C)
 	}
 
 	/*if (*(u32*)(addr+0x9C) == 0) {

@@ -6151,6 +6151,20 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBLThumb(0x0204A478, dsiSaveSeekT);
 	}
 
+	// Flipnote Studio (USA)
+	else if (strcmp(romTid, "KGUE") == 0 && saveOnFlashcard) {
+		*(u32*)0x02006844 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02006898 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0201D584 = 0xE3A00000; // mov r0, #0
+	}
+
+	// Flipnote Studio (Europe, Australia)
+	else if (strcmp(romTid, "KGUV") == 0 && saveOnFlashcard) {
+		*(u32*)0x02006748 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02006784 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0201D6CC = 0xE3A00000; // mov r0, #0
+	}
+
 	// Flips: The Bubonic Builders (USA)
 	// Flips: The Bubonic Builders (Europe, Australia)
 	// Flips: Silent But Deadly (USA)

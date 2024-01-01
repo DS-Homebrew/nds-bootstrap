@@ -10837,6 +10837,62 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u16*)0x020D86B8 = nopT;
 	}
 
+	// Flipnote Studio (USA)
+	// Requires 8MB of RAM
+	// Proof-of-Concept stage (Crashes when attempting to create a flipnote)
+	else if (strcmp(romTid, "KGUE") == 0 && extendedMemory) {
+		*(u32*)0x020051E8 = 0xE1A00000; // nop
+		*(u32*)0x020051F4 = 0xE1A00000; // nop
+		*(u32*)0x02005200 = 0xE1A00000; // nop
+		*(u32*)0x0200520C = 0xE1A00000; // nop
+		*(u32*)0x0200521C = 0xE3A0079E; // mov r0, #0x02780000
+		*(u32*)0x02005234 = 0xE3A0079D; // mov r0, #0x02740000
+		*(u32*)0x0200526C = 0xE1A00000; // nop
+		*(u32*)0x020052F4 = 0xE1A00000; // nop
+		*(u32*)0x02005C7C = 0xE1A00000; // nop
+		*(u32*)0x02006844 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02006898 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02006930 = 0xE1A00000; // nop
+		*(u32*)0x02006950 = 0xE1A00000; // nop
+		*(u32*)0x020069A4 = 0xE1A00000; // nop
+		*(u32*)0x020069D8 = 0xE1A00000; // nop
+		*(u32*)0x02010048 = 0xE1A00000; // nop
+		*(u32*)0x02011B68 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02018474 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02018478 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0201BA3C = 0xE12FFF1E; // bx lr
+		*(u32*)0x0201D584 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02022FD8 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02028BBC = 0xE12FFF1E; // bx lr (Skip loading SampleData .ash files)
+		*(u32*)0x0203202C = 0xE1A00000; // nop
+		*(u32*)0x02032160 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0203218C = 0xE1A00000; // nop
+		*(u32*)0x020325AC = 0xE1A00000; // nop
+		*(u32*)0x02058C10 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0206D698 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02070180 = 0xE1A00000; // nop
+		*(u32*)0x020B41A4 = 0xE1A00000; // nop
+		*(u32*)0x020B820C = 0xE1A00000; // nop
+		patchInitDSiWare(0x020C1418, heapEnd_512KBFreeForDebug);
+		*(u32*)0x020C1788 = *(u32*)0x02004FC0;
+		patchUserSettingsReadDSiWare(0x020C2998);
+		// *(u32*)0x020C29C0 = wirelessReturnCodeArm;
+		*(u32*)0x020C29C0 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x020C29C4 = 0xE12FFF1E; // bx lr
+		*(u32*)0x020C29CC = 0xE3A00001; // mov r0, #1
+		*(u32*)0x020C29D0 = 0xE12FFF1E; // bx lr
+		*(u32*)0x020C29F0 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x020C29F4 = 0xE12FFF1E; // bx lr
+		*(u32*)0x020C2A04 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x020C2A08 = 0xE12FFF1E; // bx lr
+		*(u32*)0x020C2A28 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x020C2A2C = 0xE12FFF1E; // bx lr
+		*(u32*)0x020C2EF8 = 0xE1A00000; // nop
+		*(u32*)0x020C2EFC = 0xE1A00000; // nop
+		*(u32*)0x020C2F00 = 0xE1A00000; // nop
+		*(u32*)0x020C2F04 = 0xE1A00000; // nop
+	}
+
 	// Flipper (USA)
 	// Saving not supported due to using more than one file in filesystem
 	else if (strcmp(romTid, "KFPE") == 0) {
