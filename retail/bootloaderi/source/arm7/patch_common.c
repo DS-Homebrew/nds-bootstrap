@@ -6165,6 +6165,13 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0201D6CC = 0xE3A00000; // mov r0, #0
 	}
 
+	// Ugoku Memo Chou (Japan) (v2)
+	else if (strcmp(romTid, "KGUJ") == 0 && ndsHeader->romversion == 2 && saveOnFlashcard) {
+		*(u32*)0x02006734 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02006770 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0201DAC8 = 0xE3A00000; // mov r0, #0
+	}
+
 	// Flips: The Bubonic Builders (USA)
 	// Flips: The Bubonic Builders (Europe, Australia)
 	// Flips: Silent But Deadly (USA)
