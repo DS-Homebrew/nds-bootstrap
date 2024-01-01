@@ -10838,15 +10838,19 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Flipnote Studio (USA)
-	// Requires 8MB of RAM
 	// Proof-of-Concept stage (Crashes when attempting to create a flipnote)
-	else if (strcmp(romTid, "KGUE") == 0 && extendedMemory) {
+	else if (strcmp(romTid, "KGUE") == 0) {
 		*(u32*)0x020051E8 = 0xE1A00000; // nop
 		*(u32*)0x020051F4 = 0xE1A00000; // nop
 		*(u32*)0x02005200 = 0xE1A00000; // nop
 		*(u32*)0x0200520C = 0xE1A00000; // nop
-		*(u32*)0x0200521C = 0xE3A0079E; // mov r0, #0x02780000
-		*(u32*)0x02005234 = 0xE3A0079D; // mov r0, #0x02740000
+		if (extendedMemory) {
+			*(u32*)0x0200521C = 0xE3A0079E; // mov r0, #0x02780000
+			*(u32*)0x02005234 = 0xE3A0079D; // mov r0, #0x02740000
+		} else {
+			*(u32*)0x0200521C = 0xE3A00691; // mov r0, #0x09100000
+			*(u32*)0x02005234 = 0xE3A00409; // mov r0, #0x09000000
+		}
 		*(u32*)0x0200526C = 0xE1A00000; // nop
 		*(u32*)0x020052F4 = 0xE1A00000; // nop
 		*(u32*)0x02005C7C = 0xE1A00000; // nop
@@ -10864,10 +10868,14 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0201D584 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x02022FD8 = 0xE12FFF1E; // bx lr
 		*(u32*)0x02028BBC = 0xE12FFF1E; // bx lr (Skip loading SampleData .ash files)
+		*(u32*)0x02031728 = 0xE3A00000; // mov r0, #0 (Sleep mode fix)
 		*(u32*)0x0203202C = 0xE1A00000; // nop
 		*(u32*)0x02032160 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x0203218C = 0xE1A00000; // nop
 		*(u32*)0x020325AC = 0xE1A00000; // nop
+		if (!extendedMemory) {
+			*(u32*)0x020429CC = 0xE3A00601; // mov r0, #0x100000 (Change heap size from 0x2C0000)
+		}
 		*(u32*)0x02058C10 = 0xE12FFF1E; // bx lr
 		*(u32*)0x0206D698 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x02070180 = 0xE1A00000; // nop
@@ -10891,6 +10899,38 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020C2EFC = 0xE1A00000; // nop
 		*(u32*)0x020C2F00 = 0xE1A00000; // nop
 		*(u32*)0x020C2F04 = 0xE1A00000; // nop
+
+		// WiFi code patch
+		*(u32*)0x0208ED08 = 0xE3A00001; // mov r0, #1
+		setB(0x0208FCF4, 0x0208FDDC);
+		*(u32*)0x0208FDDC = 0xE1A00000; // nop
+		*(u32*)0x0208FDE0 = 0xE1A00000; // nop
+		setB(0x0208FDE8, 0x0208FDF8);
+		setB(0x02090618, 0x020906B8);
+		// *(u32*)0x02090824 = wirelessReturnCodeArm;
+		*(u32*)0x02090824 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02090828 = 0xE12FFF1E; // bx lr
+		// *(u32*)0x02090880 = wirelessReturnCodeArm;
+		*(u32*)0x02090880 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02090884 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0209099C = 0xE1A00000; // nop
+		setB(0x020915C8, 0x02091774);
+		setB(0x02091E48, 0x02091E6C);
+		setB(0x020931F0, 0x0209320C);
+		setB(0x0209345C, 0x02093484);
+		*(u32*)0x02091B64 += 0xB0000000; // movcc r0, #0x240 -> mov r0, #0x240
+		*(u32*)0x02091B68 += 0xB0000000; // strcc r0, [r5,#0x2C] -> str r0, [r5,#0x2C]
+		*(u32*)0x02091B6C = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02091B70 = 0xE5850030; // str r0, [r5,#0x30]
+		*(u32*)0x02091B74 = 0xE8BD8078; // LDMFD SP!, {R4-R6,PC}
+		*(u32*)0x0209A738 = 0xE3A00001; // mov r0, #1
+		setB(0x0209A768, 0x0209A784);
+		*(u32*)0x0209CC80 = 0xE3A02C07; // mov r2, #0x700
+		*(u32*)0x0209CCA0 = 0xE2840B01; // add r0, r4, #0x400
+		*(u32*)0x0209CCA8 = 0xE1A00004; // mov r0, r4
+		setB(0x0209CCBC, 0x0209CCD0);
+		*(u32*)0x0209CCD4 = 0xE2841B01; // add r1, r4, #0x400
+		setBL(0x0209CCD8, 0x0209CCE8);
 	}
 
 	// Flipper (USA)

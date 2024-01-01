@@ -638,6 +638,8 @@ static bool isROMLoadableInRAM(const tDSiHeader* dsiHeader, const tNDSHeader* nd
 				 || strncmp(romTid, "KW6", 3) == 0 // Word Searcher III
 				 || strncmp(romTid, "KW8", 3) == 0) { // Word Searcher IV
 			romSizeLimitChange = 0x77C000;
+		} else if (strncmp(romTid, "KGU", 3) == 0) { // Flipnote Studio
+			romSizeLimitChange = 0x140000;
 		} else if (strncmp(romTid, "KUP", 3) == 0) { // Match Up!
 			romSizeLimitChange = 0x380000;
 		} else if (strncmp(romTid, "KAU", 3) == 0) { // Nintendo Cowndown Calendar
