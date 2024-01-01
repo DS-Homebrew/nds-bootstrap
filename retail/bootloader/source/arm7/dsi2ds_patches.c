@@ -10838,7 +10838,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Flipnote Studio (USA)
-	// Proof-of-Concept stage (Crashes when attempting to create a flipnote)
+	// Proof-of-Concept stage (Crashes when getting past the main menu)
 	else if (strcmp(romTid, "KGUE") == 0) {
 		*(u32*)0x020051E8 = 0xE1A00000; // nop
 		*(u32*)0x020051F4 = 0xE1A00000; // nop
