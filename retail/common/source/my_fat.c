@@ -1255,6 +1255,15 @@ static void loadSectorBuf(aFile* file, int curSect)
 #endif
 }
 
+void resetPrevSect(aFile* file)
+{
+#ifdef TWOCARD
+	prevSect[file->card2] = -1;
+#else
+	prevSect = -1;
+#endif
+}
+
 /*-----------------------------------------------------------------
 fileRead(buffer, cluster, startOffset, length)
 -----------------------------------------------------------------*/
@@ -1278,6 +1287,11 @@ u32 fileRead (char* buffer, aFile* file, u32 startOffset, u32 length)
 
 	if (file->firstCluster == CLUSTER_FREE || file->firstCluster == CLUSTER_EOF) 
 	{
+		return 0;
+	}
+
+	if (file->fatTableCached && (file->fatTableCache[0] == CLUSTER_FREE || file->fatTableCache[0] == CLUSTER_EOF)) {
+		// Cluster in FAT table cache is invalid
 		return 0;
 	}
 
@@ -1321,7 +1335,7 @@ u32 fileRead (char* buffer, aFile* file, u32 startOffset, u32 length)
               if (curSect >= discSecPerClus[file->card2])
   			{
                   clusterIndex+= curSect >> discSecPerClusShift[file->card2];
-                  curSect = curSect & (discSecPerClus[file->card2] - 1);
+                  curSect &= (discSecPerClus[file->card2] - 1);
   				file->currentOffset+=discBytePerClus[file->card2];
 				file->currentCluster = getCachedCluster(file, clusterIndex);
 			}
@@ -1329,7 +1343,7 @@ u32 fileRead (char* buffer, aFile* file, u32 startOffset, u32 length)
               if (curSect >= discSecPerClus)
   			{
                   clusterIndex+= curSect >> discSecPerClusShift;
-                  curSect = curSect & (discSecPerClus - 1);
+                  curSect &= (discSecPerClus - 1);
   				file->currentOffset+=discBytePerClus;
 				file->currentCluster = getCachedCluster(file, clusterIndex);
   			}
@@ -1399,10 +1413,10 @@ u32 fileRead (char* buffer, aFile* file, u32 startOffset, u32 length)
 
 			  #ifdef TWOCARD
               clusterIndex+= curSect >> discSecPerClusShift[file->card2];
-              curSect = curSect & (discSecPerClus[file->card2] - 1);
+              curSect &= (discSecPerClus[file->card2] - 1);
 			  #else
               clusterIndex+= curSect >> discSecPerClusShift;
-              curSect = curSect & (discSecPerClus - 1);
+              curSect &= (discSecPerClus - 1);
               #endif
 				file->currentCluster = getCachedCluster(file, clusterIndex);
           } else {
@@ -1461,7 +1475,7 @@ u32 fileRead (char* buffer, aFile* file, u32 startOffset, u32 length)
 		{
 			if(file->fatTableCached) {
                   clusterIndex+= curSect >> discSecPerClusShift[file->card2];
-                  curSect = curSect & (discSecPerClus[file->card2] - 1);
+                  curSect &= (discSecPerClus[file->card2] - 1);
 				file->currentCluster = getCachedCluster(file, clusterIndex);
               } else {
                   curSect = 0;
@@ -1474,7 +1488,7 @@ u32 fileRead (char* buffer, aFile* file, u32 startOffset, u32 length)
 		{
 			if(file->fatTableCached) {
                   clusterIndex+= curSect >> discSecPerClusShift;
-                  curSect = curSect & (discSecPerClus - 1);
+                  curSect &= (discSecPerClus - 1);
 				file->currentCluster = getCachedCluster(file, clusterIndex);
               } else {
                   curSect = 0;
@@ -1541,6 +1555,11 @@ u32 fileWrite (const char* buffer, aFile* file, u32 startOffset, u32 length)
 		#ifdef DEBUG
 		nocashMessage("CLUSTER_FREE or CLUSTER_EOF");
 		#endif
+		return 0;
+	}
+
+	if (file->fatTableCached && (file->fatTableCache[0] == CLUSTER_FREE || file->fatTableCache[0] == CLUSTER_EOF)) {
+		// Cluster in FAT table cache is invalid
 		return 0;
 	}
 
@@ -1698,6 +1717,8 @@ void buildFatTableCache (aFile * file)
 
 	file->fatTableCache = lastClusterCacheUsed;
 
+	const u32* lastClusterCacheUsedBak = lastClusterCacheUsed;
+
 	// Follow cluster list until desired one is found
 	while (file->currentCluster != CLUSTER_EOF && file->firstCluster != CLUSTER_FREE 
 		&& (u32)lastClusterCacheUsed<clusterCache+clusterCacheSize)
@@ -1727,6 +1748,7 @@ void buildFatTableCache (aFile * file)
     else {
       nocashMessage("fat table not cached");
 	  file->fatTableCacheSize = 0;
+	  lastClusterCacheUsed = lastClusterCacheUsedBak;
     }
     #endif
 
@@ -1746,6 +1768,8 @@ void buildFatTableCacheCompressed (aFile * file)
 	file->currentCluster = file->firstCluster;
 
 	file->fatTableCache = lastClusterCacheUsed;
+
+	const u32* lastClusterCacheUsedBak = lastClusterCacheUsed;
 
 	// Follow cluster list until desired one is found
 	while (file->currentCluster != CLUSTER_EOF && file->firstCluster != CLUSTER_FREE 
@@ -1795,6 +1819,7 @@ void buildFatTableCacheCompressed (aFile * file)
     else {
       nocashMessage("fat table not cached and compressed");
 	  file->fatTableCacheSize = 0;
+	  lastClusterCacheUsed = lastClusterCacheUsedBak;
     }
     #endif
 

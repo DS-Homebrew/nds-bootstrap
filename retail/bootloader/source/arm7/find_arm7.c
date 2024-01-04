@@ -3,6 +3,7 @@
 #include "find.h"
 #include "debug_file.h"
 
+extern u8 arm7newUnitCode;
 extern u32 newArm7binarySize;
 
 //
@@ -50,6 +51,8 @@ static const u32 swiGetPitchTableSignature1Alt10[3] = {0xE59FC000, 0xE12FFF1C, 0
 static const u32 swiGetPitchTableSignature1Alt11[3] = {0xE59FC000, 0xE12FFF1C, 0x03804189};
 static const u32 swiGetPitchTableSignature1Alt12[3] = {0xE59FC000, 0xE12FFF1C, 0x038049D5};
 static const u32 swiGetPitchTableSignature1Alt13[3] = {0xE59FC000, 0xE12FFF1C, 0x03804BE9};
+static const u32 swiGetPitchTableSignature1Alt14[3] = {0xE59FC000, 0xE12FFF1C, 0x03804E35};
+static const u32 swiGetPitchTableSignature1Alt15[3] = {0xE59FC000, 0xE12FFF1C, 0x03800D89};
 static const u32 swiGetPitchTableSignature3[3]      = {0xE59FC000, 0xE12FFF1C, 0x03800FD5};
 static const u32 swiGetPitchTableSignature3Alt1[3]  = {0xE59FC000, 0xE12FFF1C, 0x03801149};
 static const u32 swiGetPitchTableSignature3Alt2[3]  = {0xE59FC000, 0xE12FFF1C, 0x03801215};
@@ -81,7 +84,8 @@ static const u16 sleepPatchThumb[2]    = {0xD002, 0x4831};
 static const u16 sleepPatchThumbAlt[2] = {0xD002, 0x0440};
 
 // RAM clear
-static const u32 ramClearSignature[2] = {0x02FFC000, 0x02FFF000};
+// static const u32 ramClearSignature[2]    = {0xE12FFF1E, 0x027FF000};
+static const u32 ramClearSignatureTwl[2] = {0x02FFC000, 0x02FFF000};
 
 // Post-boot code
 static const u32 postBootStartSignature[1]      = {0xE92D47F0};
@@ -97,6 +101,8 @@ static const u32 cardCheckPullOutSignature3[4] = {0xE92D4000, 0xE24DD004, 0xE59F
 static const u32 irqEnableStartSignature1[4]      = {0xE59FC028, 0xE1DC30B0, 0xE3A01000, 0xE1CC10B0}; // SDK <= 3
 static const u32 irqEnableStartSignature4[4]      = {0xE92D4010, 0xE1A04000, 0xEBFFFFF6, 0xE59FC020}; // SDK >= 4
 static const u32 irqEnableStartSignature4Alt[4]   = {0xE92D4010, 0xE1A04000, 0xEBFFFFE9, 0xE59FC020}; // SDK 5
+static const u16 irqEnableStartSignatureThumb[5]  = {0xB530, 0xB081, 0x4D07, 0x882C, 0x2100};
+static const u16 irqEnableStartSignatureThumb3[5] = {0xB510, 0x1C04, 0xF7FF, 0xFFF4, 0x4B05}; // SDK 3
 static const u16 irqEnableStartSignatureThumb5[5] = {0xB510, 0x1C04, 0xF7FF, 0xFFE4, 0x4B05}; // SDK 5
 
 u32* findWramEndAddrOffset(const tNDSHeader* ndsHeader) {
@@ -120,7 +126,7 @@ u32* findWramClearOffset(const tNDSHeader* ndsHeader) {
 	dbg_printf("findWramEndAddrOffset:\n");
 
 	u32* offset = NULL;
-	if (ndsHeader->unitCode > 0) {
+	if (arm7newUnitCode > 0) {
 		offset = findOffset(
 			(u32*)ndsHeader->arm7destination, 0x1000,
 			wramClearSignatureTwlEarly, 3
@@ -637,6 +643,28 @@ u32* findSwiGetPitchTableOffset(const tNDSHeader* ndsHeader, const module_params
 	if (!swiGetPitchTableOffset) {
 		swiGetPitchTableOffset = findOffset(
 			(u32*)ndsHeader->arm7destination, newArm7binarySize > 0x10000 ? 0x10000 : newArm7binarySize,
+			swiGetPitchTableSignature1Alt14, 3
+		);
+		if (swiGetPitchTableOffset) {
+			dbg_printf("swiGetPitchTable SDK <= 2 call alt 14 found\n");
+		} else {
+			dbg_printf("swiGetPitchTable SDK <= 2 call alt 14 not found\n");
+		}
+	}
+	if (!swiGetPitchTableOffset) {
+		swiGetPitchTableOffset = findOffset(
+			(u32*)ndsHeader->arm7destination, newArm7binarySize > 0x10000 ? 0x10000 : newArm7binarySize,
+			swiGetPitchTableSignature1Alt15, 3
+		);
+		if (swiGetPitchTableOffset) {
+			dbg_printf("swiGetPitchTable SDK <= 2 call alt 15 found\n");
+		} else {
+			dbg_printf("swiGetPitchTable SDK <= 2 call alt 15 not found\n");
+		}
+	}
+	if (!swiGetPitchTableOffset) {
+		swiGetPitchTableOffset = findOffset(
+			(u32*)ndsHeader->arm7destination, newArm7binarySize > 0x10000 ? 0x10000 : newArm7binarySize,
 			swiGetPitchTableSignature3, 3
 		);
 		if (swiGetPitchTableOffset) {
@@ -944,12 +972,10 @@ u32* findRamClearOffset(const tNDSHeader* ndsHeader) {
 
 	u32* ramClearOffset = findOffset(
 		(u32*)ndsHeader->arm7destination, newArm7binarySize,
-		ramClearSignature, 2
+		/* (arm7newUnitCode > 0) ? */ ramClearSignatureTwl /* : ramClearSignature */, 2
 	);
 	if (ramClearOffset) {
-		dbg_printf("RAM clear found: ");
-		dbg_hexa((u32)ramClearOffset);
-		dbg_printf("\n");
+		dbg_printf("RAM clear found\n");
 	} else {
 		dbg_printf("RAM clear not found\n");
 	}
@@ -1072,6 +1098,38 @@ u32* findCardIrqEnableOffset(const tNDSHeader* ndsHeader, const module_params_t*
 		}
 	}
 
+	if (!cardIrqEnableOffset) {
+		cardIrqEnableOffset = (u32*)findOffsetThumb(
+			(u16*)ndsHeader->arm7destination, newArm7binarySize,
+            irqEnableStartSignatureThumb, 5
+		);
+		if (cardIrqEnableOffset) {
+			// Find again
+			cardIrqEnableOffset = (u32*)findOffsetThumb(
+				(u16*)cardIrqEnableOffset+4, newArm7binarySize,
+				irqEnableStartSignatureThumb, 5
+			);
+		}
+		if (cardIrqEnableOffset) {
+			dbg_printf("irq enable thumb found\n");
+		} else {
+			dbg_printf("irq enable thumb not found\n");
+		}
+	}
+
+	if (!cardIrqEnableOffset) {
+		// SDK 3
+		cardIrqEnableOffset = (u32*)findOffsetThumb(
+			(u16*)ndsHeader->arm7destination, newArm7binarySize,
+            irqEnableStartSignatureThumb3, 5
+		);
+		if (cardIrqEnableOffset) {
+			dbg_printf("irq enable thumb SDK 3 found\n");
+		} else {
+			dbg_printf("irq enable thumb SDK 3 not found\n");
+		}
+	}
+
 	if (!cardIrqEnableOffset && isSdk5(moduleParams)) {
 		// SDK 5
 		cardIrqEnableOffset = (u32*)findOffsetThumb(
@@ -1079,9 +1137,9 @@ u32* findCardIrqEnableOffset(const tNDSHeader* ndsHeader, const module_params_t*
             irqEnableStartSignatureThumb5, 5
 		);
 		if (cardIrqEnableOffset) {
-			dbg_printf("irq enable thumb found\n");
+			dbg_printf("irq enable thumb SDK 5 found\n");
 		} else {
-			dbg_printf("irq enable thumb not found\n");
+			dbg_printf("irq enable thumb SDK 5 not found\n");
 		}
 	}
 

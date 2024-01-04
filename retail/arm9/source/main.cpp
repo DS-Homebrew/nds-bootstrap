@@ -138,6 +138,11 @@ static inline void debugConfB4DS(configuration* conf) {
 	dbg_printf("debug: %s\n", btoa(conf->debug));
 	dbg_printf("ndsPath: \"%s\"\n", conf->ndsPath);
 	dbg_printf("savPath: \"%s\"\n", conf->savPath);
+	if (debug) {
+		dopause();
+	}
+	dbg_printf("donor20Path: \"%s\"\n", conf->donor20Path);
+	dbg_printf("donor5Path: \"%s\"\n", conf->donor5Path);
 	dbg_printf("donorTwlPath: \"%s\"\n", conf->donorTwlPath);
 	if (debug) {
 		dopause();
@@ -161,6 +166,9 @@ static inline void debugConf(configuration* conf) {
 	dbg_printf("debug: %s\n", btoa(conf->debug));
 	dbg_printf("ndsPath: \"%s\"\n", conf->ndsPath);
 	dbg_printf("savPath: \"%s\"\n", conf->savPath);
+	if (debug) {
+		dopause();
+	}
 	dbg_printf("prvPath: \"%s\"\n", conf->prvPath);
 	//dbg_printf("gbaPath: \"%s\"\n", conf->gbaPath);
 	if (isDSiMode() && REG_SCFG_EXT7 == 0) {
@@ -182,7 +190,6 @@ static inline void debugConf(configuration* conf) {
 	dbg_printf("donorSdkVer: %lX\n", conf->donorSdkVer);
 	dbg_printf("patchMpuRegion: %lX\n", conf->patchMpuRegion);
 	dbg_printf("patchMpuSize: %lX\n", conf->patchMpuSize);
-	dbg_printf("extendedMemory: %s\n", btoa(conf->extendedMemory));
 	dbg_printf("consoleModel: %lX\n", conf->consoleModel);
 	//dbg_printf("colorMode: %lX\n", conf->colorMode);
 	dbg_printf("romRead_LED: %lX\n", conf->romRead_LED);
@@ -396,6 +403,8 @@ static int runNdsFile(configuration* conf) {
 	struct stat stDonorStandalone;
 	struct stat stDonor;
 	struct stat stDonor0;
+	struct stat stDonor5;
+	struct stat stDonor5Alt;
 	struct stat stGba;
 	struct stat stGbaSav;
 	struct stat stWideCheat;
@@ -435,16 +444,34 @@ static int runNdsFile(configuration* conf) {
 		clusterSav = stSav.st_ino;
 	}
 
-	if (conf->useSdk20Donor) {
-		if (stat(conf->donor20Path, &stDonor) >= 0) {
+	if (!dsiFeatures() || conf->b4dsMode) {
+		if (conf->donorFileOffset) {
+			clusterDonor = st.st_ino;
+		} else if (conf->useSdk20Donor) {
+			if (stat(conf->donor20Path, &stDonor) >= 0) {
+				clusterDonor = stDonor.st_ino;
+			}
+		} else if (stat("fat:/_nds/nds-bootstrap/b4dsTwlDonor.bin", &stDonorStandalone) >= 0) {
+			clusterDonor = stDonorStandalone.st_ino;
+		} else if (conf->useSdk5DonorAlt) {
+			if (stat(conf->donor5PathAlt, &stDonor5Alt) >= 0) {
+				clusterDonor = stDonor5Alt.st_ino;
+			} else if (stat(conf->donorTwlPath, &stDonor) >= 0) {
+				clusterDonor = stDonor.st_ino;
+			} else if (stat(conf->donorTwl0Path, &stDonor0) >= 0) {
+				clusterDonor = stDonor0.st_ino;
+			} else if (stat(conf->donor5Path, &stDonor5) >= 0) {
+				clusterDonor = stDonor5.st_ino;
+			}
+		} else if (stat(conf->donorTwlPath, &stDonor) >= 0) {
 			clusterDonor = stDonor.st_ino;
+		} else if (stat(conf->donorTwl0Path, &stDonor0) >= 0) {
+			clusterDonor = stDonor0.st_ino;
+		} else if (stat(conf->donor5Path, &stDonor5) >= 0) {
+			clusterDonor = stDonor5.st_ino;
+		} else if (stat(conf->donor5PathAlt, &stDonor5Alt) >= 0) {
+			clusterDonor = stDonor5Alt.st_ino;
 		}
-	} else if (stat("fat:/_nds/nds-bootstrap/b4dsTwlDonor.bin", &stDonorStandalone) >= 0) {
-		clusterDonor = stDonorStandalone.st_ino;
-	} else if (stat(conf->donorTwlPath, &stDonor) >= 0) {
-		clusterDonor = stDonor.st_ino;
-	} else if (stat(conf->donorTwl0Path, &stDonor0) >= 0) {
-		clusterDonor = stDonor0.st_ino;
 	}
 
 	if (stat(conf->apPatchPath, &stApPatch) >= 0) {
@@ -475,11 +502,6 @@ static int runNdsFile(configuration* conf) {
 		if (stat(wideCheatFilePath.c_str(), &stWideCheat) >= 0) {
 			clusterWideCheat = stWideCheat.st_ino;
 		}
-
-		if (stat(apFixOverlaysPath.c_str(), &stApFixOverlays) >= 0) {
-			apFixOverlaysCluster = stApFixOverlays.st_ino;
-		}
-
 	}
 
 	if (stat(conf->manualPath, &stManual) >= 0) {
@@ -488,6 +510,10 @@ static int runNdsFile(configuration* conf) {
 
 	if (stat(screenshotPath.c_str(), &stScreenshot) >= 0) {
 		clusterScreenshot = stScreenshot.st_ino;
+	}
+
+	if (stat(apFixOverlaysPath.c_str(), &stApFixOverlays) >= 0) {
+		apFixOverlaysCluster = stApFixOverlays.st_ino;
 	}
 
 	if (stat(musicsFilePath.c_str(), &stMusic) >= 0) {

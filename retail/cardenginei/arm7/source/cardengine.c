@@ -57,14 +57,13 @@
 
 #define gameOnFlashcard BIT(0)
 #define saveOnFlashcard BIT(1)
-#define extendedMemory BIT(2)
 #define ROMinRAM BIT(3)
 #define dsiMode BIT(4)
 #define b_dsiSD BIT(5)
 #define preciseVolumeControl BIT(6)
 #define powerCodeOnVBlank BIT(7)
 #define b_runCardEngineCheck BIT(8)
-#define cardReadDma BIT(9)
+#define igmAccessible BIT(9)
 #define hiyaCfwFound BIT(10)
 #define slowSoftReset BIT(11)
 #define wideCheatUsed BIT(12)
@@ -75,9 +74,12 @@
 #define sleepMode BIT(17)
 #define dsiBios BIT(18)
 #define bootstrapOnFlashcard BIT(19)
+#define ndmaDisabled BIT(20)
+#define isDlp BIT(21)
 #define scfgLocked BIT(31)
 
 #define	REG_EXTKEYINPUT	(*(vuint16*)0x04000136)
+#define	REG_WIFIIRQ	(*(vuint16*)0x04808012)
 
 extern u32 ce7;
 
@@ -93,6 +95,8 @@ extern int unlockMutex(int* addr);
 extern vu32* volatile cardStruct;
 extern u32 fileCluster;
 extern u32 saveCluster;
+extern u32 saveSize;
+extern u32 patchOffsetCacheFileCluster;
 extern u32 srParamsCluster;
 extern u32 ramDumpCluster;
 extern u32 screenshotCluster;
@@ -100,6 +104,7 @@ extern u32 pageFileCluster;
 extern u32 manualCluster;
 extern module_params_t* moduleParams;
 extern u32 valueBits;
+extern s32 mainScreen;
 extern u32* languageAddr;
 extern u8 language;
 extern u8 consoleModel;
@@ -117,6 +122,9 @@ struct IgmText *igmText = (struct IgmText *)INGAME_MENU_LOCATION;
 
 static bool initialized = false;
 static bool driveInited = false;
+#ifdef TWLSDK
+static bool sixInHeader = false;
+#endif
 static bool bootloaderCleared = false;
 static bool funcsUnpatched = false;
 //static bool initializedIRQ = false;
@@ -131,6 +139,18 @@ static bool dmaSignal = false;
 static bool wifiIrq = false;
 static int wifiIrqTimer = 0;
 //static bool saveInRam = false;
+
+u32 cheatEngineAddr = 
+#ifdef TWLSDK
+CHEAT_ENGINE_TWLSDK_LOCATION
+#else
+#ifdef ALTERNATIVE
+CHEAT_ENGINE_LOCATION_ALT
+#else
+CHEAT_ENGINE_LOCATION
+#endif
+#endif
+;
 
 #ifdef TWLSDK
 static aFile* romFile = (aFile*)ROM_FILE_LOCATION_TWLSDK;
@@ -147,6 +167,7 @@ static aFile* savFile = (aFile*)SAV_FILE_LOCATION;
 //static aFile* gbaFile = (aFile*)GBA_FILE_LOCATION;
 #endif
 #endif
+static aFile patchOffsetCacheFile;
 static aFile ramDumpFile;
 static aFile srParamsFile;
 static aFile screenshotFile;
@@ -156,7 +177,7 @@ static aFile manualFile;
 static int saveTimer = 0;
 
 static int languageTimer = 0;
-static int swapTimer = 0;
+// static int swapTimer = 0;
 static int returnTimer = 0;
 static int softResetTimer = 0;
 static int ramDumpTimer = 0;
@@ -177,7 +198,13 @@ static PERSONAL_DATA* personalData = (PERSONAL_DATA*)((u8*)NDS_HEADER_SDK5-0x180
 static tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER;
 static PERSONAL_DATA* personalData = (PERSONAL_DATA*)((u8*)NDS_HEADER-0x180);
 #endif
-static const char* romLocation = NULL;
+
+extern u32 romLocation;
+
+extern u32 romMapLines;
+// 0: ROM part start, 1: ROM part start in RAM, 2: ROM part end in RAM
+extern u32 romMap[4][3];
+
 u32 currentSrlAddr = 0;
 
 void i2cIRQHandler(void);
@@ -200,7 +227,7 @@ static void unlaunchSetFilename(bool boot) {
 	} else {
 		for (int i = 0; i < 256; i++) {
 			#ifdef TWLSDK
-			*(u8*)(0x02000838+i2) = *(u8*)(ce7+0xF800+i);		// Unlaunch Device:/Path/Filename.ext (16bit Unicode,end by 0000h)
+			*(u8*)(0x02000838+i2) = *(u8*)(ce7+0x8400+i);		// Unlaunch Device:/Path/Filename.ext (16bit Unicode,end by 0000h)
 			#else
 			*(u8*)(0x02000838+i2) = *(u8*)(ce7+0x11800+i);	// Unlaunch Device:/Path/Filename.ext (16bit Unicode,end by 0000h)
 			#endif
@@ -236,9 +263,9 @@ static void readSrBackendId(void) {
 	*(u32*)(0x02000308) = 0;
 	*(u32*)(0x0200030C) = 0;
 	#ifdef TWLSDK
-	*(u32*)(0x02000310) = *(u32*)(ce7+0xF900);
-	*(u32*)(0x02000314) = *(u32*)(ce7+0xF904);
-	*(u32*)(0x02000318) = /* *(u32*)(ce7+0xF904) == 0x00030000 ? 0x13 : */ 0x17;
+	*(u32*)(0x02000310) = *(u32*)(ce7+0x8500);
+	*(u32*)(0x02000314) = *(u32*)(ce7+0x8504);
+	*(u32*)(0x02000318) = /* *(u32*)(ce7+0x8504) == 0x00030000 ? 0x13 : */ 0x17;
 	#else
 	*(u32*)(0x02000310) = *(u32*)(ce7+0x11900);
 	*(u32*)(0x02000314) = *(u32*)(ce7+0x11904);
@@ -276,6 +303,7 @@ static void driveInitialize(void) {
 		FAT_InitFiles(false, true);
 	}
 
+	getFileFromCluster(&patchOffsetCacheFile, patchOffsetCacheFileCluster, (valueBits & gameOnFlashcard));
 	getFileFromCluster(&ramDumpFile, ramDumpCluster, (valueBits & bootstrapOnFlashcard));
 	getFileFromCluster(&srParamsFile, srParamsCluster, (valueBits & gameOnFlashcard));
 	getFileFromCluster(&screenshotFile, screenshotCluster, (valueBits & bootstrapOnFlashcard));
@@ -313,7 +341,12 @@ static void driveInitialize(void) {
 	dbg_hexa(saveCluster);	
 	dbg_printf("\n");
 	#endif
-	
+
+	if (valueBits & ndmaDisabled) {
+		sdmmc_lock_ndma_slot();
+	}
+
+	sdmmc_set_ndma_slot(0);
 	driveInited = true;
 }
 
@@ -322,11 +355,23 @@ static void initialize(void) {
 		return;
 	}
 
-	#ifndef TWLSDK
+	#ifdef TWLSDK
+	if (*(u8*)(DSI_HEADER_SDK5+0x234) == 6) {
+		*(u8*)(DSI_HEADER_SDK5+0x234) = 0;
+		sixInHeader = true;
+	}
+	if (consoleModel > 0) {
+		cheatEngineAddr = CHEAT_ENGINE_TWLSDK_LOCATION_3DS;
+	}
+	#else
 	if (valueBits & isSdk5) {
 		sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS_SDK5;
 		ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
 		personalData = (PERSONAL_DATA*)((u8*)NDS_HEADER_SDK5-0x180);
+	} else {
+		sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS_SDK1;
+		ndsHeader = (tNDSHeader*)NDS_HEADER;
+		personalData = (PERSONAL_DATA*)((u8*)NDS_HEADER-0x180);
 	}
 	#endif
 
@@ -335,21 +380,12 @@ static void initialize(void) {
 		personalData->language = language;
 	}
 
-	#ifdef TWLSDK
-	romLocation = (char*)ROM_SDK5_LOCATION;
-	#else
-	romLocation = (char*)((consoleModel > 0 && (valueBits & isSdk5)) ? ROM_SDK5_LOCATION : ROM_LOCATION);
-	if (valueBits & extendedMemory) {
-		romLocation = (char*)((moduleParams->sdk_version < 0x2008000) ? ROM_LOCATION_EXT_SDK2 : ROM_LOCATION_EXT);
-	}
-	#endif
-
-	/*if (ndsHeader->unitCode > 0 && (valueBits & dsiMode)) {
-		igmText = (struct IgmText *)INGAME_MENU_LOCATION_TWLSDK;
-	}*/
-
 	if (!bootloaderCleared) {
 		toncset((u8*)0x06000000, 0, 0x40000);	// Clear bootloader
+		if (mainScreen) {
+			swapScreens = (mainScreen == 2);
+			ipcEveryFrame = true;
+		}
 		bootloaderCleared = true;
 	}
 
@@ -387,21 +423,56 @@ static module_params_t* getModuleParams(const tNDSHeader* ndsHeader) {
 }
 #endif
 
+static void cardReadRAM(u8* dst, u32 src, u32 len/*, int romPartNo*/) {
+	// Copy directly
+	#ifdef TWLSDK
+	u32 newSrc = romLocation/*[romPartNo]*/+src;
+	if (src > *(u32*)0x02FFE1C0) {
+		newSrc -= *(u32*)0x02FFE1CC;
+	}
+	tonccpy(dst, (u8*)newSrc, len);
+	#else
+	// tonccpy(dst, (u8*)romLocation/*[romPartNo]*/+src, len);
+	u32 len2 = 0;
+	for (int i = 0; i < romMapLines; i++) {
+		if (!(src >= romMap[i][0] && (i == romMapLines-1 || src < romMap[i+1][0])))
+			continue;
+
+		u32 newSrc = (romMap[i][1]-romMap[i][0])+src;
+		if (newSrc+len > romMap[i][2]) {
+			do {
+				len--;
+				len2++;
+			} while (newSrc+len != romMap[i][2]);
+			tonccpy(dst, (u8*)newSrc, len);
+			src += len;
+			dst += len;
+		} else {
+			tonccpy(dst, (u8*)newSrc, len2==0 ? len : len2);
+			break;
+		}
+	}
+	#endif
+}
+
 void reset(void) {
+	register int i, reg;
+
 #ifndef TWLSDK
 	u32 resetParam = ((valueBits & isSdk5) ? RESET_PARAM_SDK5 : RESET_PARAM);
-	if ((valueBits & slowSoftReset) || (*(u32*)(resetParam+0xC) > 0 && (*(u32*)CARDENGINEI_ARM9_LOCATION == 0 || (valueBits & isSdk5))) || (valueBits & extendedMemory)) {
+	if (((valueBits & isDlp) && *(u32*)(NDS_HEADER_SDK5+0xC) == 0) || (valueBits & slowSoftReset) || (*(u32*)(resetParam+0xC) > 0 && (*(u32*)CARDENGINEI_ARM9_LOCATION == 0 || (valueBits & isSdk5)))) {
 		REG_MASTER_VOLUME = 0;
 		int oldIME = enterCriticalSection();
 		//driveInitialize();
 		if (*(u32*)(resetParam+8) == 0x44414F4C) { // 'LOAD'
 			fileWrite((char*)ndsHeader, &pageFile, 0x2BFE00, 0x160);
-			fileWrite((char*)ndsHeader->arm9destination, &pageFile, 0, ndsHeader->arm9binarySize);
+			fileWrite((char*)ndsHeader->arm9destination, &pageFile, 0x14000, ndsHeader->arm9binarySize);
 			fileWrite((char*)0x022C0000, &pageFile, 0x2C0000, ndsHeader->arm7binarySize);
 		}
 		fileWrite((char*)resetParam, &srParamsFile, 0, 0x10);
 		toncset((u32*)0x02000000, 0, 0x400);
-		*(u32*)(0x02000000) = BIT(3);
+		*(u32*)0x02000000 = BIT(3);
+		*(u32*)0x02000004 = 0x54455352; // 'RSET'
 		if (consoleModel < 2) {
 			(*(u32*)(ce7+0x11900) == 0 && (valueBits & b_dsiSD)) ? unlaunchSetFilename(false) : unlaunchSetHiyaFilename();
 		}
@@ -416,10 +487,10 @@ void reset(void) {
 		leaveCriticalSection(oldIME);
 		while (1);
 	}
+
+	if (!(valueBits & isDlp)) {
 #endif
 
-	register int i, reg;
-	
 	REG_IME = 0;
 
 	for (i = 0; i < 16; i++) {
@@ -458,47 +529,52 @@ void reset(void) {
 	*(vu32*)0x0380FFF8 = 0; // VBLANK_INTR_WAIT_FLAGS, ARM7 version
 	REG_POWERCNT = 1;  // Turn off power to stuff
 
-	initialized = false;
 	funcsUnpatched = false;
+
+#ifndef TWLSDK
+	}
+#endif
+
+	initialized = false;
 	//ipcSyncHooked = false;
 	languageTimer = 0;
 
 	#ifndef TWLSDK
-	if (currentSrlAddr != *(u32*)(resetParam+0xC) || *(u32*)(resetParam+8) == 0x44414F4C) {
+	if ((valueBits & isDlp) || currentSrlAddr != *(u32*)(resetParam+0xC) || *(u32*)(resetParam+8) == 0x44414F4C) {
 		currentSrlAddr = *(u32*)(resetParam+0xC);
-		if (*(u32*)(resetParam+8) == 0x44414F4C) {
+		if (valueBits & isDlp) {
 			ndmaCopyWordsAsynch(1, (u32*)0x022C0000, ndsHeader->arm7destination, ndsHeader->arm7binarySize);
-			*((u16*)(/*isSdk5(moduleParams) ? 0x02fffc40 :*/ 0x027ffc40)) = 2; // Boot Indicator (Cloneboot/Multiboot)
-			// tonccpy((u32*)0x027FFC40, (u32*)0x02344820, 0x40); // Multiboot info?
-		} else if (valueBits & ROMinRAM) {
-			u32 newSrc = (u32)(romLocation-0x8000);
-			if (!(valueBits & cloneboot)) {
-				static u32 adjust = 0;
-				if (adjust == 0) {
-					adjust = (u32)(romLocation-ndsHeader->arm9romOffset-ndsHeader->arm9binarySize);
-				}
-				newSrc = adjust;
-			}
-			newSrc += currentSrlAddr;
-			tonccpy((char*)ndsHeader, (u8*)newSrc, 0x160);
-			ndmaCopyWordsAsynch(0, (u8*)newSrc+ndsHeader->arm9romOffset, ndsHeader->arm9destination, ndsHeader->arm9binarySize);
-			ndmaCopyWordsAsynch(1, (u8*)newSrc+ndsHeader->arm7romOffset, ndsHeader->arm7destination, ndsHeader->arm7binarySize);
-			while (ndmaBusy(0));
+			*(u16*)0x02fffc40 = 2; // Boot Indicator (Cloneboot/Multiboot)
 		} else {
-			fileRead((char*)ndsHeader, romFile, currentSrlAddr, 0x160);
-			fileRead((char*)ndsHeader->arm9destination, romFile, currentSrlAddr+ndsHeader->arm9romOffset, ndsHeader->arm9binarySize);
-			fileRead((char*)ndsHeader->arm7destination, romFile, currentSrlAddr+ndsHeader->arm7romOffset, ndsHeader->arm7binarySize);
+			if (*(u32*)(resetParam+8) == 0x44414F4C) {
+				ndmaCopyWordsAsynch(1, (u32*)0x022C0000, ndsHeader->arm7destination, ndsHeader->arm7binarySize);
+				*((u16*)(/*isSdk5(moduleParams) ? 0x02fffc40 :*/ 0x027ffc40)) = 2; // Boot Indicator (Cloneboot/Multiboot)
+				// tonccpy((u32*)0x027FFC40, (u32*)0x02344820, 0x40); // Multiboot info?
+			} else if (valueBits & ROMinRAM) {
+				cardReadRAM((u8*)ndsHeader, currentSrlAddr, 0x160);
+				cardReadRAM((u8*)ndsHeader->arm9destination, currentSrlAddr+ndsHeader->arm9romOffset, ndsHeader->arm9binarySize);
+				cardReadRAM((u8*)ndsHeader->arm7destination, currentSrlAddr+ndsHeader->arm7romOffset, ndsHeader->arm7binarySize);
+			} else {
+				fileRead((char*)ndsHeader, romFile, currentSrlAddr, 0x160);
+				fileRead((char*)ndsHeader->arm9destination, romFile, currentSrlAddr+ndsHeader->arm9romOffset, ndsHeader->arm9binarySize);
+				fileRead((char*)ndsHeader->arm7destination, romFile, currentSrlAddr+ndsHeader->arm7romOffset, ndsHeader->arm7binarySize);
+			}
 		}
 
 		moduleParams = getModuleParams(ndsHeader);
 		/*dbg_printf("sdk_version: ");
 		dbg_hexa(moduleParams->sdk_version);
 		dbg_printf("\n");*/ 
+		if (moduleParams->sdk_version > 0x5000000) {
+			valueBits |= isSdk5;
+		} else {
+			valueBits &= ~isSdk5;
+		}
 
-		ensureBinaryDecompressed(ndsHeader, moduleParams, resetParam);
+		ensureBinaryDecompressed(ndsHeader, moduleParams, (valueBits & isDlp) ? 0x44414F4 : resetParam);
 
 		patchCardNdsArm9(
-			(cardengineArm9*)CARDENGINEI_ARM9_LOCATION,
+			(cardengineArm9*)((valueBits & isDlp) ? CARDENGINEI_ARM9_LOCATION_DLP : CARDENGINEI_ARM9_LOCATION),
 			ndsHeader,
 			moduleParams,
 			1
@@ -518,32 +594,39 @@ void reset(void) {
 
 		extern u32 iUncompressedSize;
 
-		if ((valueBits & extendedMemory) || (valueBits & dsiMode)) {
-			fileWrite((char*)ndsHeader->arm9destination, &pageFile, 0, iUncompressedSize);
-			fileWrite((char*)ndsHeader->arm7destination, &pageFile, 0x2C0000, ndsHeader->arm7binarySize);
-			fileWrite((char*)&iUncompressedSize, &pageFile, 0x5FFFF0, sizeof(u32));
-			fileWrite((char*)&ndsHeader->arm7binarySize, &pageFile, 0x5FFFF4, sizeof(u32));
-		} else {
+		fileWrite((char*)ndsHeader->arm9destination, &pageFile, 0x14000, iUncompressedSize);
+		fileWrite((char*)ndsHeader->arm7destination, &pageFile, 0x2C0000, ndsHeader->arm7binarySize);
+		fileWrite((char*)&iUncompressedSize, &pageFile, 0x5FFFF0, sizeof(u32));
+		fileWrite((char*)&ndsHeader->arm7binarySize, &pageFile, 0x5FFFF4, sizeof(u32));
+		/* } else {
 			*(u32*)ARM9_DEC_SIZE_LOCATION = iUncompressedSize;
 			ndmaCopyWordsAsynch(0, ndsHeader->arm9destination, (char*)ndsHeader->arm9destination+0x400000, *(u32*)ARM9_DEC_SIZE_LOCATION);
 			ndmaCopyWordsAsynch(1, ndsHeader->arm7destination, (char*)DONOR_ROM_ARM7_LOCATION, ndsHeader->arm7binarySize);
 			while (ndmaBusy(0) || ndmaBusy(1));
+		} */
+		if (valueBits & isDlp) {
+			toncset((u32*)0x022C0000, 0, ndsHeader->arm7binarySize);
+			if (!(valueBits & isSdk5)) {
+				tonccpy((u8*)0x027FF000, (u8*)0x02FFF000, 0x1000);
+			}
+		} else {
+			*(u32*)(resetParam+8) = 0;
 		}
-		*(u32*)(resetParam+8) = 0;
-	} else if ((valueBits & extendedMemory) || (valueBits & dsiMode)) {
+		valueBits &= ~isDlp;
+	} else {
 		//driveInitialize();
 
 		u32 iUncompressedSize = 0;
 		u32 newArm7binarySize = 0;
 		fileRead((char*)&iUncompressedSize, &pageFile, 0x5FFFF0, sizeof(u32));
 		fileRead((char*)&newArm7binarySize, &pageFile, 0x5FFFF4, sizeof(u32));
-		fileRead((char*)ndsHeader->arm9destination, &pageFile, 0, iUncompressedSize);
+		fileRead((char*)ndsHeader->arm9destination, &pageFile, 0x14000, iUncompressedSize);
 		fileRead((char*)ndsHeader->arm7destination, &pageFile, 0x2C0000, newArm7binarySize);
-	} else {
+	} /* else {
 		ndmaCopyWordsAsynch(0, (char*)ndsHeader->arm9destination+0x400000, ndsHeader->arm9destination, *(u32*)ARM9_DEC_SIZE_LOCATION);
 		ndmaCopyWordsAsynch(1, (char*)DONOR_ROM_ARM7_LOCATION, ndsHeader->arm7destination, ndsHeader->arm7binarySize);
 		while (ndmaBusy(0) || ndmaBusy(1));
-	}
+	} */
 	#else
 	//bool doBak = ((valueBits & gameOnFlashcard) && (valueBits & b_dsiSD));
 	//if (doBak) bakSdData();
@@ -559,19 +642,14 @@ void reset(void) {
 	fileRead((char*)&newArm7binarySize, &pageFile, 0x5FFFF4, sizeof(u32));
 	fileRead((char*)&iUncompressedSizei, &pageFile, 0x5FFFF8, sizeof(u32));
 	fileRead((char*)&newArm7ibinarySize, &pageFile, 0x5FFFFC, sizeof(u32));
-	fileRead((char*)ndsHeader->arm9destination, &pageFile, 0, iUncompressedSize);
+	fileRead((char*)ndsHeader->arm9destination, &pageFile, 0x14000, iUncompressedSize);
 	fileRead((char*)ndsHeader->arm7destination, &pageFile, 0x2C0000, newArm7binarySize);
 	fileRead((char*)(*(u32*)0x02FFE1C8), &pageFile, 0x300000, iUncompressedSizei);
 	fileRead((char*)(*(u32*)0x02FFE1D8), &pageFile, 0x580000, newArm7ibinarySize);
 
-	if (!(valueBits & dsiBios) && *(u32*)0x02F10020 != 0xEA001FF6) {
-		u32 src = 0x02FF4000;
-		if (*(u32*)0x02FFE1A0 == 0x00403000) {
-			src -= 0x1C000;
-		}
-		tonccpy((u32*)0x02F10000, (u32*)src, 0x8000);
+	if (sixInHeader) {
+		*(u8*)(DSI_HEADER_SDK5+0x234) = 6;
 	}
-
 	//if (doBak) restoreSdBakData();
 	#endif
 	toncset((char*)((valueBits & isSdk5) ? 0x02FFFD80 : 0x027FFD80), 0, 0x80);
@@ -668,13 +746,14 @@ extern void inGameMenu(void);
 
 void forceGameReboot(void) {
 	toncset((u32*)0x02000000, 0, 0x400);
-	*(u32*)(0x02000000) = BIT(3);
+	*(u32*)0x02000000 = BIT(3);
+	*(u32*)0x02000004 = 0x54455352; // 'RSET'
 	sharedAddr[4] = 0x57534352;
 	IPC_SendSync(0x8);
 	if (consoleModel < 2) {
 		if (valueBits & b_dsiSD) {
 			#ifdef TWLSDK
-			(*(u32*)(ce7+0xF900) == 0) ? unlaunchSetFilename(false) : unlaunchSetHiyaFilename();
+			(*(u32*)(ce7+0x8500) == 0) ? unlaunchSetFilename(false) : unlaunchSetHiyaFilename();
 			#else
 			(*(u32*)(ce7+0x11900) == 0) ? unlaunchSetFilename(false) : unlaunchSetHiyaFilename();
 			#endif
@@ -690,7 +769,7 @@ void forceGameReboot(void) {
 	fileWrite((char*)&clearBuffer, &srParamsFile, 0, 0x4);
   	#ifdef TWLSDK
 	//if (doBak) restoreSdBakData();
-	if (*(u32*)(ce7+0xF900) == 0 && (valueBits & b_dsiSD))
+	if (*(u32*)(ce7+0x8500) == 0 && (valueBits & b_dsiSD))
 	#else
 	if (*(u32*)(ce7+0x11900) == 0 && (valueBits & b_dsiSD))
 	#endif
@@ -705,7 +784,7 @@ void forceGameReboot(void) {
 }
 
 #ifdef TWLSDK
-static void initMBK_dsiMode(void) {
+/* static void initMBK_dsiMode(void) {
 	// This function has no effect with ARM7 SCFG locked
 	*(vu32*)REG_MBK1 = *(u32*)0x02FFE180;
 	*(vu32*)REG_MBK2 = *(u32*)0x02FFE184;
@@ -716,14 +795,15 @@ static void initMBK_dsiMode(void) {
 	REG_MBK7 = *(u32*)0x02FFE1A4;
 	REG_MBK8 = *(u32*)0x02FFE1A8;
 	REG_MBK9 = *(u32*)0x02FFE1AC;
-}
+} */
 
 extern bool dldiPatchBinary (unsigned char *binData, u32 binSize);
 #endif
 
-void returnToLoader(bool wait) {
+void returnToLoader(bool reboot) {
 	toncset((u32*)0x02000000, 0, 0x400);
-	*(u32*)(0x02000000) = BIT(0) | BIT(1) | BIT(2);
+	*(u32*)0x02000000 = BIT(0) | BIT(1) | BIT(2);
+	*(u32*)0x02000004 = 0x54455352; // 'RSET'
 	sharedAddr[4] = 0x57534352;
 #ifdef TWLSDK
 	u32 twlCfgLoc = *(u32*)0x02FFFDFC;
@@ -731,17 +811,17 @@ void returnToLoader(bool wait) {
 		tonccpy((u8*)0x02000400, (u8*)twlCfgLoc, 0x128);
 	}
 
-	if (!(valueBits & dsiBios) || ((valueBits & twlTouch) && !(*(u8*)0x02FFE1BF & BIT(0))) || ((valueBits & b_dsiSD) && (valueBits & wideCheatUsed))) {
+	if (reboot || !(valueBits & dsiBios) || ((valueBits & twlTouch) && !(*(u8*)0x02FFE1BF & BIT(0))) || ((valueBits & b_dsiSD) && (valueBits & wideCheatUsed))) {
 		if (consoleModel >= 2) {
-			if (*(u32*)(ce7+0xF900) == 0) {
+			if (*(u32*)(ce7+0x8500) == 0) {
 				tonccpy((u32*)0x02000300, sr_data_srloader, 0x020);
-			} else if (*(char*)(ce7+0xF903) == 'H' || *(char*)(ce7+0xF903) == 'K') {
+			} else if (*(char*)(ce7+0x8503) == 'H' || *(char*)(ce7+0x8503) == 'K') {
 				// Use different SR backend ID
 				readSrBackendId();
 			}
 			waitFrames(1);
 		} else {
-			if (*(u32*)(ce7+0xF900) == 0) {
+			if (*(u32*)(ce7+0x8500) == 0) {
 				unlaunchSetFilename(true);
 			} else {
 				// Use different SR backend ID
@@ -818,7 +898,8 @@ void returnToLoader(bool wait) {
 		fileRead(__DSiHeader->arm9idestination, &file, (u32)__DSiHeader->arm9iromOffset, __DSiHeader->arm9ibinarySize);
 		fileRead(__DSiHeader->arm7idestination, &file, (u32)__DSiHeader->arm7iromOffset, __DSiHeader->arm7ibinarySize);
 
-		initMBK_dsiMode();
+		// Disabled due to ce7 code taking place in DSi WRAM
+		// initMBK_dsiMode();
 	}
 
 	if (!(valueBits & b_dsiSD)) {
@@ -899,17 +980,13 @@ void dumpRam(void) {
 }
 
 void prepareScreenshot(void) {
-#ifndef TWLSDK
-	if (valueBits & dsiMode) {
-#else
+#ifdef TWLSDK
 	//bool doBak = ((valueBits & gameOnFlashcard) && (valueBits & b_dsiSD));
 	//if (doBak) bakSdData();
 #endif
 		//driveInitialize();
 		fileWrite((char*)INGAME_MENU_EXT_LOCATION, &pageFile, 0x540000, 0x40000);
-#ifndef TWLSDK
-	}
-#else
+#ifdef TWLSDK
 	//if (doBak) restoreSdBakData();
 #endif
 }
@@ -931,29 +1008,20 @@ void saveScreenshot(void) {
 		fileRead(&magic, &screenshotFile, 0x200 + (igmText->currentScreenshot * 0x18400), 1);
 	} while(magic == 'B' && igmText->currentScreenshot < 50);
 
-#ifndef TWLSDK
-	if (valueBits & dsiMode) {
-#endif
 		fileRead((char*)INGAME_MENU_EXT_LOCATION, &pageFile, 0x540000, 0x40000);
-#ifndef TWLSDK
-	}
-#else
+#ifdef TWLSDK
 	//if (doBak) restoreSdBakData();
 #endif
 }
 
 void prepareManual(void) {
-#ifndef TWLSDK
-	if (valueBits & dsiMode) {
-#else
+#ifdef TWLSDK
 	//bool doBak = ((valueBits & gameOnFlashcard) && (valueBits & b_dsiSD));
 	//if (doBak) bakSdData();
 #endif
 		//driveInitialize();
 		fileWrite((char*)INGAME_MENU_EXT_LOCATION, &pageFile, 0x540000, 32 * 24);
-#ifndef TWLSDK
-	}
-#else
+#ifdef TWLSDK
 	//if (doBak) restoreSdBakData();
 #endif
 }
@@ -1022,19 +1090,40 @@ void readManual(int line) {
 }
 
 void restorePreManual(void) {
-#ifndef TWLSDK
-	if (valueBits & dsiMode) {
-#else
+#ifdef TWLSDK
 	//bool doBak = ((valueBits & gameOnFlashcard) && (valueBits & b_dsiSD));
 	//if (doBak) bakSdData();
 #endif
 		//driveInitialize();
 		fileRead((char*)INGAME_MENU_EXT_LOCATION, &pageFile, 0x540000, 32 * 24);
-#ifndef TWLSDK
-	}
-#else
+#ifdef TWLSDK
 	//if (doBak) restoreSdBakData();
 #endif
+}
+
+void saveMainScreenSetting(void) {
+	fileWrite((char*)sharedAddr, &patchOffsetCacheFile, 0x1FC, sizeof(u32));
+}
+
+void loadInGameMenu(void) {
+	const u32 igmLocation = INGAME_MENU_LOCATION;
+
+	sharedAddr[5] = 0x4C4D4749; // 'IGML'
+	fileWrite((char*)igmLocation, &pageFile, 0xA000, 0xA000);	// Backup part of game RAM to page file
+	fileRead((char*)igmLocation, &pageFile, 0, 0xA000);	// Read in-game menu
+	sharedAddr[5] = 0;
+}
+
+void unloadInGameMenu(void) {
+	while (REG_VCOUNT != 191) swiDelay(100);
+	while (REG_VCOUNT == 191) swiDelay(100);
+
+	const u32 igmLocation = INGAME_MENU_LOCATION;
+
+	sharedAddr[5] = 0x4C4D4749; // 'IGML'
+	fileWrite((char*)igmLocation, &pageFile, 0, 0xA000);	// Store in-game menu
+	fileRead((char*)igmLocation, &pageFile, 0xA000, 0xA000);	// Restore part of game RAM from page file
+	sharedAddr[5] = 0;
 }
 
 static void log_arm9(void) {
@@ -1232,6 +1321,25 @@ static bool resume_cardRead_arm9(void) {
         return false;    
     }
 }
+
+/* static bool gsddFix(void) {
+	if (sharedAddr[4] != 0x44445347) {
+        return false;
+    }
+
+	const u32 gsddOverlayChecksumOffset = *(u32*)0x02FFF004;
+	// const u32 gsddOverlayFuncOffset = *(u32*)0x02FFF008;
+	const u32 oldChecksum = 0x2FBB82E1;
+	const u32 newChecksum = *(u32*)0x02FFF17C;
+
+	if (*(u32*)gsddOverlayChecksumOffset == oldChecksum) {
+		*(u32*)gsddOverlayChecksumOffset = newChecksum;
+		// *(u32*)gsddOverlayFuncOffset = 0xE1A00000; // nop (Start the game past name setting)
+	}
+
+	sharedAddr[4] = 0;
+	return true;
+} */
 #endif
 
 static inline void sdmmcHandler(void) {
@@ -1261,9 +1369,9 @@ static inline void sdmmcHandler(void) {
 			//dbg_printf("my_sdmmc_sdcard_readsectors\n");
 			//#endif
 			//bool isDma = sharedAddr[4]==0x53444D41;
-			ongoingIsDma = sharedAddr[4]==0x53444D41;
+			ongoingIsDma = (sharedAddr[4] == 0x53444D41);
 			cardReadLED(true, ongoingIsDma);
-			if (wifiIrq || (sharedAddr[2] % 4) != 0) {
+			if (wifiIrq || (sharedAddr[2] % 4) != 0 || (valueBits & ndmaDisabled)) {
 				sharedAddr[4] = my_sdmmc_sdcard_readsectors(sharedAddr[0], sharedAddr[1], (u8*)sharedAddr[2]);
 				cardReadLED(false, ongoingIsDma);
 			} else {
@@ -1372,6 +1480,11 @@ void myIrqHandlerFIFO(void) {
 	calledViaIPC = true;
 
     if (IPC_GetSync() == 0x3) {
+		/* #ifndef TWLSDK
+		if (gsddFix()) {
+			return;
+		}
+		#endif */
 		swiDelay(100);
 		IPC_SendSync(0x3);
 		return;
@@ -1421,8 +1534,8 @@ void myIrqHandlerVBlank(void) {
 	nocashMessage("cheat_engine_start\n");
 	#endif
 
-	if (*(u32*)((u32)ce7-(0x8400+0x3E8)) != 0xCF000000) {
-		volatile void (*cheatEngine)() = (volatile void*)ce7-0x83FC;
+	if (*(u32*)cheatEngineAddr == 0x3E4 && *(u32*)(cheatEngineAddr+0x3E8) != 0xCF000000) {
+		volatile void (*cheatEngine)() = (volatile void*)cheatEngineAddr+4;
 		(*cheatEngine)();
 	}
 
@@ -1447,6 +1560,13 @@ void myIrqHandlerVBlank(void) {
 		if (unpatchedFuncs->ltd_compressed_static_end) {
 			*unpatchedFuncs->iCompressedFlagOffset = unpatchedFuncs->ltd_compressed_static_end;
 		}
+
+		if (unpatchedFuncs->mpuInitOffset2) {
+			*unpatchedFuncs->mpuInitOffset2 = 0xEE060F12;
+		}
+		if (unpatchedFuncs->mpuDataOffset2) {
+			*unpatchedFuncs->mpuDataOffset2 = unpatchedFuncs->mpuInitRegionOldData2;
+		}
 		#else
 		if (!(valueBits & isSdk5)) {
 			if (unpatchedFuncs->mpuDataOffset) {
@@ -1466,6 +1586,9 @@ void myIrqHandlerVBlank(void) {
 				*unpatchedFuncs->mpuDataOffsetAlt = unpatchedFuncs->mpuInitRegionOldDataAlt;
 			}
 
+			if (unpatchedFuncs->mpuInitOffset2) {
+				*unpatchedFuncs->mpuInitOffset2 = 0xEE060F12;
+			}
 			if (unpatchedFuncs->mpuDataOffset2) {
 				*unpatchedFuncs->mpuDataOffset2 = unpatchedFuncs->mpuInitRegionOldData2;
 			}
@@ -1475,26 +1598,24 @@ void myIrqHandlerVBlank(void) {
 		funcsUnpatched = true;
 	}
 
-	#ifdef TWLSDK
-	if (!(valueBits & dsiBios) && *(u32*)0x02F10020 == 0xEA001FF6) {
-		u32 dst = 0x02FF4000;
-		if (*(u32*)0x02FFE1A0 == 0x00403000) {
-			dst -= 0x1C000;
-		}
-		tonccpy((u32*)dst, (u32*)0x02F10000, 0x8000); // Copy bios7i from buffer
-		toncset((u32*)0x02F10000, 0, 0x8000);
-	}
-	#endif
-
 	if (!(valueBits & gameOnFlashcard) && !(valueBits & ROMinRAM) && isSdEjected()) {
 		tonccpy((u32*)0x02000300, sr_data_error, 0x020);
 		i2cWriteRegister(0x4A, 0x70, 0x01);
 		i2cWriteRegister(0x4A, 0x11, 0x01);		// Reboot into error screen if SD card is removed
 	}
 
-	if ((0 == (REG_KEYINPUT & igmHotkey) && 0 == (REG_EXTKEYINPUT & (((igmHotkey >> 10) & 3) | ((igmHotkey >> 6) & 0xC0))) && !(valueBits & extendedMemory)) || returnToMenu || sharedAddr[5] == 0x59444552 /* REDY */) {
+/* #ifndef TWLSDK
+	if (valueBits & isDlp) {
+		if (!(REG_EXTKEYINPUT & KEY_A) && *(u32*)(NDS_HEADER_SDK5+0xC) != 0 && !wifiIrq) {
+			IPC_SendSync(0x5);
+			reset();
+		}
+	}
+#endif */
+
+	if ((0 == (REG_KEYINPUT & igmHotkey) && 0 == (REG_EXTKEYINPUT & (((igmHotkey >> 10) & 3) | ((igmHotkey >> 6) & 0xC0))) && (valueBits & igmAccessible) && !wifiIrq) || returnToMenu || sharedAddr[5] == 0x4C4D4749 /* IGML */) {
 #ifdef TWLSDK
-		igmText = (struct IgmText *)INGAME_MENU_LOCATION_TWLSDK;
+		igmText = (struct IgmText *)INGAME_MENU_LOCATION;
 		i2cWriteRegister(0x4A, 0x12, 0x00);
 #endif
 		inGameMenu();
@@ -1503,7 +1624,8 @@ void myIrqHandlerVBlank(void) {
 #endif
 	}
 
-	if (0==(REG_KEYINPUT & (KEY_L | KEY_R | KEY_UP)) && !(REG_EXTKEYINPUT & KEY_A/*KEY_X*/)) {
+/*KEY_X*/
+	/* if (0==(REG_KEYINPUT & (KEY_L | KEY_R | KEY_UP)) && !(REG_EXTKEYINPUT & KEY_A)) {
 		if (tryLockMutex(&saveMutex)) {
 			if (swapTimer == 60){
 				swapTimer = 0;
@@ -1515,9 +1637,9 @@ void myIrqHandlerVBlank(void) {
 		}
 		unlockMutex(&saveMutex);
 		swapTimer++;
-	}else{
+	} else {
 		swapTimer = 0;
-	}
+	} */
 
 #ifdef TWLSDK
 	if (sharedAddr[3] == (vu32)0x54495845) {
@@ -1530,7 +1652,7 @@ void myIrqHandlerVBlank(void) {
 #ifdef TWLSDK
 			IPC_SendSync(0x5);
 #else
-			returnToLoader(true);
+			returnToLoader(false);
 #endif
 		}
 		returnTimer++;
@@ -1573,9 +1695,11 @@ void myIrqHandlerVBlank(void) {
 		softResetTimer = 0;
 	}
 
+	#ifndef TWLSDK
 	if (valueBits & powerCodeOnVBlank) {
 		i2cIRQHandler();
 	}
+	#endif
 
 	if (valueBits & preciseVolumeControl) {
 		// Precise volume adjustment (for DSi)
@@ -1617,7 +1741,7 @@ void myIrqHandlerVBlank(void) {
 		REG_IE &= ~IRQ_NETWORK; // DSi RTC fix
 	}
 
-	bool wifiIrqCheck = (*(vu16*)0x04808012 != 0);
+	bool wifiIrqCheck = (REG_WIFIIRQ != 0);
 	if (wifiIrq != wifiIrqCheck) {
 		// Turn off card read DMA if WiFi is used, and back on when not in use
 		if (wifiIrq) {
@@ -1660,6 +1784,7 @@ void myIrqHandlerVBlank(void) {
   }
 }
 
+#ifndef TWLSDK
 void i2cIRQHandler(void) {
 	int cause = (i2cReadRegister(I2C_PM, I2CREGPM_PWRIF) & 0x3) | (i2cReadRegister(I2C_GPIO, 0x02)<<2);
 
@@ -1685,6 +1810,7 @@ void i2cIRQHandler(void) {
 		break;
 	}
 }
+#endif
 
 u32 myIrqEnable(u32 irq) {	
 	int oldIME = enterCriticalSection();
@@ -1804,7 +1930,9 @@ bool eepromRead(u32 src, void *dst, u32 len) {
 		/*if (saveInRam) {
 			tonccpy(dst, (char*)0x02440000 + src, len);
 		} else {*/
-			fileRead(dst, savFile, src, len);
+			sdmmc_set_ndma_slot(4);
+			fileRead(dst, savFile, (src % saveSize), len);
+			sdmmc_set_ndma_slot(0);
 		//}
 		#ifdef TWLSDK
 		//if (doBak) restoreSdBakData();
@@ -1842,7 +1970,9 @@ bool eepromPageWrite(u32 dst, const void *src, u32 len) {
 		/*if (saveInRam) {
 			tonccpy((char*)0x02440000 + dst, src, len);
 		}*/
-		fileWrite(src, savFile, dst, len);
+		sdmmc_set_ndma_slot(4);
+		fileWrite(src, savFile, (dst % saveSize), len);
+		sdmmc_set_ndma_slot(0);
 		#ifdef TWLSDK
 		//if (doBak) restoreSdBakData();
 		#endif
@@ -1867,7 +1997,7 @@ bool eepromPageProg(u32 dst, const void *src, u32 len) {
 		return false;
 	}
 
-  	if (tryLockMutex(&saveMutex)) {
+ 	if (tryLockMutex(&saveMutex)) {
 		while (readOngoing) { swiDelay(100); }
 		#ifdef TWLSDK
 		//bool doBak = ((valueBits & gameOnFlashcard) && !(valueBits & saveOnFlashcard));
@@ -1879,7 +2009,9 @@ bool eepromPageProg(u32 dst, const void *src, u32 len) {
 		/*if (saveInRam) {
 			tonccpy((char*)0x02440000 + dst, src, len);
 		}*/
-		fileWrite(src, savFile, dst, len);
+		sdmmc_set_ndma_slot(4);
+		fileWrite(src, savFile, (dst % saveSize), len);
+		sdmmc_set_ndma_slot(0);
   		#ifdef TWLSDK
 		//if (doBak) restoreSdBakData();
 		#endif
@@ -2000,7 +2132,7 @@ u32 cardId(void) {
 bool cardRead(u32 dma, u32 src, void *dst, u32 len) {
 	#ifdef DEBUG	
 	dbg_printf("\narm7 cardRead\n");	
-	
+
 	dbg_printf("\ndma : \n");
 	dbg_hexa(dma);		
 	dbg_printf("\nsrc : \n");
@@ -2010,18 +2142,9 @@ bool cardRead(u32 dma, u32 src, void *dst, u32 len) {
 	dbg_printf("\nlen : \n");
 	dbg_hexa(len);
 	#endif	
-	
+
 	if (valueBits & ROMinRAM) {
-		u32 newSrc = (u32)(romLocation-0x8000)+src;
-		if (!(valueBits & cloneboot)) {
-			newSrc = (u32)(romLocation-ndsHeader->arm9romOffset-ndsHeader->arm9binarySize)+src;
-		}
-		#ifdef TWLSDK
-		if (src > *(u32*)0x02FFE1C0) {
-			newSrc -= *(u32*)0x02FFE1CC;
-		}
-		#endif
-		tonccpy(dst, (u8*)newSrc, len);
+		cardReadRAM(dst, src, len);
 	} else {
 		while (readOngoing) { swiDelay(100); }
 		//driveInitialize();
@@ -2034,6 +2157,6 @@ bool cardRead(u32 dma, u32 src, void *dst, u32 len) {
 		//ndmaUsed = true;
 		cardReadLED(false, false);    // After loading is done, turn off LED for card read indicator
 	}
-	
+
 	return true;
 }

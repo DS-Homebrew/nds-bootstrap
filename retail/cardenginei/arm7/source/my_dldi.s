@@ -93,7 +93,11 @@ _DLDI_shutdown:
 	.align
 	.pool
 
+#ifdef TWLSDK
+	.space (__mydldi_start + 8192) - .	@ Fill to 8KiB
+#else
 	.space (__mydldi_start + 16384) - .	@ Fill to 16KiB
+#endif
 
 _dldi_end:
 	.end

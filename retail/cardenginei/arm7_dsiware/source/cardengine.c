@@ -36,6 +36,7 @@
 #include "my_fat.h"
 #include "locations.h"
 #include "module_params.h"
+#include "unpatched_funcs.h"
 #include "debug_file.h"
 #include "cardengine.h"
 #include "nds_header.h"
@@ -45,12 +46,15 @@
 #include "sr_data_srloader.h"   // For rebooting into TWiLight Menu++ or the game
 
 #define preciseVolumeControl BIT(6)
+#define igmAccessible BIT(9)
 #define hiyaCfwFound BIT(10)
 #define wideCheatUsed BIT(12)
 #define twlTouch BIT(15)
+#define ndmaDisabled BIT(20)
 #define scfgLocked BIT(31)
 
 #define	REG_EXTKEYINPUT	(*(vuint16*)0x04000136)
+#define	REG_WIFIIRQ	(*(vuint16*)0x04808012)
 
 extern u32 ce7;
 
@@ -61,6 +65,7 @@ static char hiyaDSiPath[14] = {'s','d','m','c',':','/','h','i','y','a','.','d','
 extern void ndsCodeStart(u32* addr);
 
 extern u32 saveCluster;
+extern u32 patchOffsetCacheFileCluster;
 extern u32 srParamsCluster;
 extern u32 ramDumpCluster;
 extern u32 screenshotCluster;
@@ -68,6 +73,7 @@ extern u32 pageFileCluster;
 extern u32 manualCluster;
 extern module_params_t* moduleParams;
 extern u32 valueBits;
+extern s32 mainScreen;
 extern u32* languageAddr;
 extern u8 language;
 extern u8 consoleModel;
@@ -75,17 +81,29 @@ extern u16 igmHotkey;
 
 vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS_SDK5;
 
-struct IgmText *igmText = (struct IgmText *)INGAME_MENU_LOCATION_DSIWARE;
+struct IgmText *igmText = (struct IgmText *)INGAME_MENU_LOCATION;
 
 static bool initialized = false;
 static bool driveInited = false;
 static bool bootloaderCleared = false;
+static bool funcsUnpatched = false;
 bool ipcEveryFrame = false;
 static bool swapScreens = false;
+static bool wifiIrq = false;
+static int wifiIrqTimer = 0;
+
+u32 cheatEngineAddr = 
+#ifdef UNITTWL
+CHEAT_ENGINE_DSIWARE_LOCATION3
+#else
+CHEAT_ENGINE_DSIWARE_LOCATION
+#endif
+;
 
 #ifdef CARDSAVE
 static aFile savFile;
 #endif
+static aFile patchOffsetCacheFile;
 static aFile ramDumpFile;
 static aFile srParamsFile;
 static aFile screenshotFile;
@@ -94,7 +112,7 @@ static aFile manualFile;
 
 static int sdRightsTimer = 0;
 static int languageTimer = 0;
-static int swapTimer = 0;
+// static int swapTimer = 0;
 static int returnTimer = 0;
 static int softResetTimer = 0;
 static int ramDumpTimer = 0;
@@ -123,7 +141,7 @@ static void unlaunchSetFilename(bool boot) {
 		}
 	} else {
 		for (int i = 0; i < 256; i++) {
-			*(u8*)(0x02000838+i2) = *(u8*)(ce7+0x8C00+i);		// Unlaunch Device:/Path/Filename.ext (16bit Unicode,end by 0000h)
+			*(u8*)(0x02000838+i2) = *(u8*)(ce7+0x8000+i);		// Unlaunch Device:/Path/Filename.ext (16bit Unicode,end by 0000h)
 			i2 += 2;
 		}
 	}
@@ -155,8 +173,8 @@ static void readSrBackendId(void) {
 	*(u16*)(0x02000304) = 0x1801;
 	*(u32*)(0x02000308) = 0;
 	*(u32*)(0x0200030C) = 0;
-	*(u32*)(0x02000310) = *(u32*)(ce7+0x8D00);
-	*(u32*)(0x02000314) = *(u32*)(ce7+0x8D04);
+	*(u32*)(0x02000310) = *(u32*)(ce7+0x8100);
+	*(u32*)(0x02000314) = *(u32*)(ce7+0x8104);
 	*(u32*)(0x02000318) = 0x17;
 	*(u32*)(0x0200031C) = 0;
 	*(u16*)(0x02000306) = swiCRC16(0xFFFF, (void*)0x02000308, 0x18);
@@ -191,6 +209,7 @@ static void driveInitialize(void) {
 	#ifdef CARDSAVE
 	getFileFromCluster(&savFile, saveCluster);
 	#endif
+	getFileFromCluster(&patchOffsetCacheFile, patchOffsetCacheFileCluster);
 	getFileFromCluster(&ramDumpFile, ramDumpCluster);
 	getFileFromCluster(&srParamsFile, srParamsCluster);
 	getFileFromCluster(&screenshotFile, screenshotCluster);
@@ -207,12 +226,21 @@ static void driveInitialize(void) {
 	dbg_printf("\n");
 	#endif
 	
+	if (valueBits & ndmaDisabled) {
+		sdmmc_lock_ndma_slot();
+	}
+
+	sdmmc_set_ndma_slot(0);
 	driveInited = true;
 }
 
 static void initialize(void) {
 	if (initialized) {
 		return;
+	}
+
+	if (consoleModel > 0 && *(u32*)CHEAT_ENGINE_TWLSDK_LOCATION_3DS == 0x3E4) {
+		cheatEngineAddr = CHEAT_ENGINE_TWLSDK_LOCATION_3DS;
 	}
 
 	if (language >= 0 && language <= 7) {
@@ -222,6 +250,10 @@ static void initialize(void) {
 
 	if (!bootloaderCleared) {
 		toncset((u8*)0x06000000, 0, 0x40000);	// Clear bootloader
+		if (mainScreen) {
+			swapScreens = (mainScreen == 2);
+			ipcEveryFrame = true;
+		}
 		bootloaderCleared = true;
 	}
 
@@ -314,6 +346,7 @@ void reset(void) {
 	REG_POWERCNT = 1;  // Turn off power to stuff
 
 	initialized = false;
+	funcsUnpatched = false;
 	sdRightsTimer = 0;
 	languageTimer = 0;
 
@@ -328,10 +361,10 @@ void reset(void) {
 	}
 
 	if (consoleModel > 0) {
-		ndmaCopyWordsAsynch(0, (char*)ndsHeader->arm9destination+0xB000000, ndsHeader->arm9destination, *(u32*)0x0DFFE02C);
-		ndmaCopyWordsAsynch(1, (char*)ndsHeader->arm7destination+0xB000000, ndsHeader->arm7destination, *(u32*)0x0DFFE03C);
-		ndmaCopyWordsAsynch(2, (char*)(*(u32*)0x02FFE1C8)+0xB000000, (void*)(*(u32*)0x02FFE1C8), *(u32*)0x0DFFE1CC);
-		ndmaCopyWordsAsynch(3, (char*)(*(u32*)0x02FFE1D8)+0xB000000, (void*)(*(u32*)0x02FFE1D8), *(u32*)0x0DFFE1DC);
+		ndmaCopyWordsAsynch(0, (char*)ndsHeader->arm9destination+0xB000000, ndsHeader->arm9destination, *(u32*)0x0DFEE02C);
+		ndmaCopyWordsAsynch(1, (char*)ndsHeader->arm7destination+0xB000000, ndsHeader->arm7destination, *(u32*)0x0DFEE03C);
+		ndmaCopyWordsAsynch(2, (char*)(*(u32*)0x02FFE1C8)+0xB000000, (void*)(*(u32*)0x02FFE1C8), *(u32*)0x0DFEE1CC);
+		ndmaCopyWordsAsynch(3, (char*)(*(u32*)0x02FFE1D8)+0xB000000, (void*)(*(u32*)0x02FFE1D8), *(u32*)0x0DFEE1DC);
 		while (ndmaBusy(0) || ndmaBusy(1) || ndmaBusy(2) || ndmaBusy(3));
 	} else {
 		bakData();
@@ -347,7 +380,7 @@ void reset(void) {
 		fileRead((char*)&newArm7binarySize, &pageFile, 0x5FFFF4, sizeof(u32));
 		fileRead((char*)&iUncompressedSizei, &pageFile, 0x5FFFF8, sizeof(u32));
 		fileRead((char*)&newArm7ibinarySize, &pageFile, 0x5FFFFC, sizeof(u32));
-		fileRead((char*)ndsHeader->arm9destination, &pageFile, 0, iUncompressedSize);
+		fileRead((char*)ndsHeader->arm9destination, &pageFile, 0x14000, iUncompressedSize);
 		fileRead((char*)ndsHeader->arm7destination, &pageFile, 0x2C0000, newArm7binarySize);
 		fileRead((char*)(*(u32*)0x02FFE1C8), &pageFile, 0x300000, iUncompressedSizei);
 		fileRead((char*)(*(u32*)0x02FFE1D8), &pageFile, 0x580000, newArm7ibinarySize);
@@ -374,17 +407,18 @@ void reset(void) {
 
 void forceGameReboot(void) {
 	toncset((u32*)0x02000000, 0, 0x400);
-	*(u32*)(0x02000000) = BIT(3);
+	*(u32*)0x02000000 = BIT(3);
+	*(u32*)0x02000004 = 0x54455352; // 'RSET'
 	sharedAddr[4] = 0x57534352;
 	IPC_SendSync(0x8);
 	if (consoleModel < 2) {
-		(*(u32*)(ce7+0x8D00) == 0) ? unlaunchSetFilename(false) : unlaunchSetHiyaFilename();
+		(*(u32*)(ce7+0x8100) == 0) ? unlaunchSetFilename(false) : unlaunchSetHiyaFilename();
 		waitFrames(5);							// Wait for DSi screens to stabilize
 	}
 	u32 clearBuffer = 0;
 	driveInitialize();
 	fileWrite((char*)&clearBuffer, &srParamsFile, 0, 0x4);
-	if (*(u32*)(ce7+0x8D00) == 0) {
+	if (*(u32*)(ce7+0x8100) == 0) {
 		tonccpy((u32*)0x02000300, sr_data_srloader, 0x20);
 	} else {
 		// Use different SR backend ID
@@ -394,7 +428,7 @@ void forceGameReboot(void) {
 	i2cWriteRegister(0x4A, 0x11, 0x01);		// Force-reboot game
 }
 
-static void initMBK_dsiMode(void) {
+/* static void initMBK_dsiMode(void) {
 	// This function has no effect with ARM7 SCFG locked
 	*(vu32*)REG_MBK1 = *(u32*)0x02FFE180;
 	*(vu32*)REG_MBK2 = *(u32*)0x02FFE184;
@@ -405,11 +439,12 @@ static void initMBK_dsiMode(void) {
 	REG_MBK7 = *(u32*)0x02FFE1A4;
 	REG_MBK8 = *(u32*)0x02FFE1A8;
 	REG_MBK9 = *(u32*)0x02FFE1AC;
-}
+} */
 
-void returnToLoader(bool wait) {
+void returnToLoader(bool reboot) {
 	toncset((u32*)0x02000000, 0, 0x400);
-	*(u32*)(0x02000000) = BIT(0) | BIT(1) | BIT(2);
+	*(u32*)0x02000000 = BIT(0) | BIT(1) | BIT(2);
+	*(u32*)0x02000004 = 0x54455352; // 'RSET'
 	sharedAddr[4] = 0x57534352;
 	//IPC_SendSync(0x8);
 
@@ -418,17 +453,17 @@ void returnToLoader(bool wait) {
 		tonccpy((u8*)0x02000400, (u8*)twlCfgLoc, 0x128);
 	}
 
-	if (((valueBits & twlTouch) && !(*(u8*)0x02FFE1BF & BIT(0))) || (valueBits & wideCheatUsed)) {
+	if (reboot || ((valueBits & twlTouch) && !(*(u8*)0x02FFE1BF & BIT(0))) || (valueBits & wideCheatUsed)) {
 		if (consoleModel >= 2) {
-			if (*(u32*)(ce7+0x8D00) == 0) {
+			if (*(u32*)(ce7+0x8100) == 0) {
 				tonccpy((u32*)0x02000300, sr_data_srloader, 0x020);
-			} else if (*(char*)(ce7+0x8D03) == 'H' || *(char*)(ce7+0x8D03) == 'K') {
+			} else if (*(char*)(ce7+0x8103) == 'H' || *(char*)(ce7+0x8103) == 'K') {
 				// Use different SR backend ID
 				readSrBackendId();
 			}
 			//waitFrames(1);
 		} else {
-			if (*(u32*)(ce7+0x8D00) == 0) {
+			if (*(u32*)(ce7+0x8100) == 0) {
 				unlaunchSetFilename(true);
 			} else {
 				// Use different SR backend ID
@@ -505,7 +540,8 @@ void returnToLoader(bool wait) {
 		fileRead(__DSiHeader->arm9idestination, &file, (u32)__DSiHeader->arm9iromOffset, __DSiHeader->arm9ibinarySize);
 		fileRead(__DSiHeader->arm7idestination, &file, (u32)__DSiHeader->arm7iromOffset, __DSiHeader->arm7ibinarySize);
 
-		initMBK_dsiMode();
+		// Disabled due to ce7 code taking place in DSi WRAM
+		// initMBK_dsiMode();
 	}
 
 	sharedAddr[0] = 0x44414F4C; // 'LOAD'
@@ -532,14 +568,12 @@ void dumpRam(void) {
 }
 
 void prepareScreenshot(void) {
-	driveInitialize();
 	fileWrite((char*)INGAME_MENU_EXT_LOCATION, &pageFile, 0x540000, 0x40000);
 }
 
 void saveScreenshot(void) {
 	if (igmText->currentScreenshot >= 50) return;
 
-	driveInitialize();
 	fileWrite((char*)INGAME_MENU_EXT_LOCATION, &screenshotFile, 0x200 + (igmText->currentScreenshot * 0x18400), 0x18046);
 
 	// Skip until next blank slot
@@ -553,7 +587,6 @@ void saveScreenshot(void) {
 }
 
 void prepareManual(void) {
-	driveInitialize();
 	fileWrite((char*)INGAME_MENU_EXT_LOCATION, &pageFile, 0x540000, 32 * 24);
 }
 
@@ -624,6 +657,32 @@ void restorePreManual(void) {
 	fileRead((char*)INGAME_MENU_EXT_LOCATION, &pageFile, 0x540000, 32 * 24);
 }
 
+void saveMainScreenSetting(void) {
+	fileWrite((char*)sharedAddr, &patchOffsetCacheFile, 0x1FC, sizeof(u32));
+}
+
+void loadInGameMenu(void) {
+	const u32 igmLocation = INGAME_MENU_LOCATION;
+
+	sharedAddr[5] = 0x4C4D4749; // 'IGML'
+	driveInitialize();
+	fileWrite((char*)igmLocation, &pageFile, 0xA000, 0xA000);	// Backup part of game RAM to page file
+	fileRead((char*)igmLocation, &pageFile, 0, 0xA000);	// Read in-game menu
+	sharedAddr[5] = 0;
+}
+
+void unloadInGameMenu(void) {
+	while (REG_VCOUNT != 191) swiDelay(100);
+	while (REG_VCOUNT == 191) swiDelay(100);
+
+	const u32 igmLocation = INGAME_MENU_LOCATION;
+
+	sharedAddr[5] = 0x4C4D4749; // 'IGML'
+	fileWrite((char*)igmLocation, &pageFile, 0, 0xA000);	// Store in-game menu
+	fileRead((char*)igmLocation, &pageFile, 0xA000, 0xA000);	// Restore part of game RAM from page file
+	sharedAddr[5] = 0;
+}
+
 void myIrqHandlerVBlank(void) {
   while (1) {
 	#ifdef DEBUG		
@@ -634,8 +693,8 @@ void myIrqHandlerVBlank(void) {
 	nocashMessage("cheat_engine_start\n");
 	#endif
 
-	if (*(u32*)((u32)ce7-(0x8400+0x3E8)) != 0xCF000000) {
-		volatile void (*cheatEngine)() = (volatile void*)ce7-0x83FC;
+	if (*(u32*)cheatEngineAddr == 0x3E4 && *(u32*)(cheatEngineAddr+0x3E8) != 0xCF000000) {
+		volatile void (*cheatEngine)() = (volatile void*)cheatEngineAddr+4;
 		(*cheatEngine)();
 	}
 
@@ -665,19 +724,39 @@ void myIrqHandlerVBlank(void) {
 		languageTimer++;
 	}
 
+	if (!funcsUnpatched && *(int*)0x02FFFC3C >= 60) {
+		unpatchedFunctions* unpatchedFuncs = (unpatchedFunctions*)UNPATCHED_FUNCTION_LOCATION_SDK5;
+
+		if (unpatchedFuncs->compressed_static_end) {
+			*unpatchedFuncs->compressedFlagOffset = unpatchedFuncs->compressed_static_end;
+		}
+		if (unpatchedFuncs->ltd_compressed_static_end) {
+			*unpatchedFuncs->iCompressedFlagOffset = unpatchedFuncs->ltd_compressed_static_end;
+		}
+		if (unpatchedFuncs->mpuInitOffset2) {
+			*unpatchedFuncs->mpuInitOffset2 = 0xEE060F12;
+		}
+		if (unpatchedFuncs->mpuDataOffset2) {
+			*unpatchedFuncs->mpuDataOffset2 = unpatchedFuncs->mpuInitRegionOldData2;
+		}
+
+		funcsUnpatched = true;
+	}
+
 	if (isSdEjected()) {
 		tonccpy((u32*)0x02000300, sr_data_error, 0x020);
 		i2cWriteRegister(0x4A, 0x70, 0x01);
 		i2cWriteRegister(0x4A, 0x11, 0x01);		// Reboot into error screen if SD card is removed
 	}
 
-	if ((0 == (REG_KEYINPUT & igmHotkey) && 0 == (REG_EXTKEYINPUT & (((igmHotkey >> 10) & 3) | ((igmHotkey >> 6) & 0xC0)))) || returnToMenu || sharedAddr[5] == 0x59444552 /* REDY */) {
+	if ((0 == (REG_KEYINPUT & igmHotkey) && 0 == (REG_EXTKEYINPUT & (((igmHotkey >> 10) & 3) | ((igmHotkey >> 6) & 0xC0))) && (valueBits & igmAccessible) && !wifiIrq) || returnToMenu || sharedAddr[5] == 0x4C4D4749 /* IGML */) {
 		bakData();
 		inGameMenu();
 		restoreBakData();
 	}
 
-	if (0==(REG_KEYINPUT & (KEY_L | KEY_R | KEY_UP)) && !(REG_EXTKEYINPUT & KEY_A/*KEY_X*/)) {
+/*KEY_X*/
+	/* if (0==(REG_KEYINPUT & (KEY_L | KEY_R | KEY_UP)) && !(REG_EXTKEYINPUT & KEY_A)) {
 		if (swapTimer == 60){
 			swapTimer = 0;
 			if (!ipcEveryFrame) {
@@ -686,9 +765,9 @@ void myIrqHandlerVBlank(void) {
 			swapScreens = true;
 		}
 		swapTimer++;
-	}else{
+	} else {
 		swapTimer = 0;
-	}
+	} */
 	
 	if (0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_DOWN | KEY_B))) {
 		if (returnTimer == 60 * 2) {
@@ -764,9 +843,23 @@ void myIrqHandlerVBlank(void) {
 		}
 	}
 
-	/*if (REG_IE & IRQ_NETWORK) {
-		REG_IE &= ~IRQ_NETWORK; // DSi RTC fix (Not needed for DSiWare)
-	}*/
+	if (REG_IE & IRQ_NETWORK) {
+		REG_IE &= ~IRQ_NETWORK; // DSi RTC fix
+	}
+
+	bool wifiIrqCheck = (REG_WIFIIRQ != 0);
+	if (wifiIrq != wifiIrqCheck) {
+		if (wifiIrq) {
+			wifiIrqTimer++;
+			if (wifiIrqTimer == 30) {
+				wifiIrq = wifiIrqCheck;
+			}
+		} else {
+			wifiIrq = wifiIrqCheck;
+		}
+	} else {
+		wifiIrqTimer = 0;
+	}
 
 	// Update main screen or swap screens
 	if (ipcEveryFrame) {

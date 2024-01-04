@@ -32,8 +32,9 @@
 	.global dsiSD
 	.global valueBits
 	.global saveFileCluster
-	.global donorFileTwlCluster
-	.global donorFileTwlSize
+	.global donorFileCluster
+	.global donorFileSize
+	.global donorFileOffset
 	.global gbaFileCluster
 	.global gbaSaveFileCluster
 	.global romSize
@@ -66,7 +67,6 @@
 	.global dsiMode
 	.global valueBits2
 	.global donorSdkVer
-	.global extendedMemory
 	.global consoleModel
 	.global romRead_LED
 	.global dmaRomRead_LED
@@ -100,10 +100,12 @@ valueBits:
 	.byte	0
 saveFileCluster:
 	.word	0x00000000		@ .sav file
-donorFileTwlCluster:
-	.word	0x00000000		@ SDK5 (TWL) donor .nds file
-donorFileTwlSize:
-	.word	0x00000000		@ SDK5 (TWL) donor .nds file size
+donorFileCluster:
+	.word	0x00000000		@ SDK5 donor .nds file
+donorFileSize:
+	.word	0x00000000		@ SDK5 donor .nds file size
+donorFileOffset:
+	.word	0x00000000		@ SDK5 donor .nds file offset
 gbaFileCluster:
 	.word	0x00000000		@ .gba file
 gbaSaveFileCluster:
@@ -168,8 +170,6 @@ valueBits2:
 	.byte	0
 donorSdkVer:
 	.byte	0		@ donor SDK version
-extendedMemory:
-	.byte	0
 consoleModel:
 	.byte	0
 romRead_LED:

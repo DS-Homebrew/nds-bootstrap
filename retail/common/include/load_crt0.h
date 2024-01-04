@@ -17,8 +17,9 @@ typedef struct loadCrt0 {
     u8 dsiSD;
     u8 valueBits;
     u32 saveFileCluster;
-	u32 donorFileTwlCluster;
-	u32 donorFileTwlSize;
+	u32 donorFileCluster;
+	u32 donorFileSize;
+	u32 donorFileOffset;
     u32 gbaFileCluster;
     u32 gbaSaveFileCluster;
     u32 romSize;
@@ -46,11 +47,10 @@ typedef struct loadCrt0 {
     u32 patchMpuSize;
     u8 patchMpuRegion;
     u8 language;
-    u8 region; // SDK 5
+    s8 region; // SDK 5
     u8 dsiMode; // SDK 5
     u8 valueBits2;
     u8 donorSdkVer;
-    u8 extendedMemory;
     u8 consoleModel;
     u8 romRead_LED;
     u8 dmaRomRead_LED;

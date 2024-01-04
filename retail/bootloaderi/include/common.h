@@ -55,8 +55,9 @@
 #define ARM9_SCRNCLR 5
 #define ARM9_DISPSCRN 6
 #define ARM9_DISPERR 7
-#define ARM9_SETSCFG 8
-#define ARM9_DISPESRB 9
+#define ARM9_INITMBK 8
+#define ARM9_SETSCFG 9
+#define ARM9_DISPESRB 10
 //};
 
 extern tNDSHeader* ndsHeader;
@@ -64,7 +65,6 @@ extern bool isGSDD;
 extern bool arm9_isSdk5;
 extern bool dsiModeConfirmed;
 extern bool arm9_boostVram;
-extern bool extendedMemoryConfirmed;
 extern bool arm9_macroMode;
 extern volatile bool esrbScreenPrepared;
 extern volatile bool esrbImageLoaded;

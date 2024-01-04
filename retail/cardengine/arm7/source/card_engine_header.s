@@ -13,9 +13,12 @@
 .global card_engine_end
 .global cardStruct
 .global patches_offset
+.global cheatEngineAddr
+.global musicBuffer
 .global moduleParams
 .global saveCluster
 .global valueBits
+.global mainScreen
 .global language
 .global languageAddr
 .global igmHotkey
@@ -33,11 +36,17 @@ patches_offset:
 	.word	patches
 intr_vblank_orig_return:
 	.word	0x00000000
+cheatEngineAddr:
+	.word	0x00000000
+musicBuffer:
+	.word	0x00000000
 moduleParams:
 	.word	0x00000000
 cardStruct:
 	.word	0x00000000
 valueBits:
+	.word	0x00000000
+mainScreen:
 	.word	0x00000000
 language:
 	.word	0x00000000

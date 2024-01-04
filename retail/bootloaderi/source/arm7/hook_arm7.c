@@ -36,14 +36,13 @@
 
 #define b_gameOnFlashcard BIT(0)
 #define b_saveOnFlashcard BIT(1)
-#define b_extendedMemory BIT(2)
 #define b_ROMinRAM BIT(3)
 #define b_dsiMode BIT(4)
 #define b_dsiSD BIT(5)
 #define b_preciseVolumeControl BIT(6)
 #define b_powerCodeOnVBlank BIT(7)
 #define b_runCardEngineCheck BIT(8)
-#define b_cardReadDma BIT(9)
+#define b_igmAccessible BIT(9)
 #define b_hiyaCfwFound BIT(10)
 #define b_slowSoftReset BIT(11)
 #define b_wideCheatUsed BIT(12)
@@ -54,10 +53,13 @@
 #define b_sleepMode BIT(17)
 #define b_dsiBios BIT(18)
 #define b_bootstrapOnFlashcard BIT(19)
+#define b_ndmaDisabled BIT(20)
+#define b_isDlp BIT(21)
 #define b_scfgLocked BIT(31)
 
 extern u32 newArm7binarySize;
 extern u32 newArm7ibinarySize;
+bool igmAccessible = true;
 
 static const int MAX_HANDLER_LEN = 50;
 
@@ -123,6 +125,7 @@ int hookNdsRetailArm7(
 	const tNDSHeader* ndsHeader,
 	const module_params_t* moduleParams,
 	u32 fileCluster,
+    u32 patchOffsetCacheFileCluster,
 	u32 srParamsFileCluster,
 	u32 ramDumpCluster,
 	u32 screenshotCluster,
@@ -137,14 +140,15 @@ int hookNdsRetailArm7(
     u16 bootstrapOnFlashcard,
     u8 gameOnFlashcard,
     u8 saveOnFlashcard,
+	s32 mainScreen,
 	u8 language,
 	u8 dsiMode, // SDK 5
 	u8 dsiSD,
-	u8 extendedMemory,
 	u8 ROMinRAM,
 	u8 consoleModel,
 	u8 romRead_LED,
 	u8 dmaRomRead_LED,
+	bool ndmaDisabled,
 	bool twlTouch,
 	bool usesCloneboot
 ) {
@@ -222,6 +226,10 @@ int hookNdsRetailArm7(
 
 				case 0x00025860:
 					hookLocation = (u32*)0x23A5538;		// DSi-Exclusive/DSiWare games
+					break;
+
+				case 0x000268DC:
+					hookLocation = (u32*)0x23A5FFC;		// DSi-Exclusive/DSiWare games
 					break;
 
 				case 0x00026DF4:
@@ -335,6 +343,7 @@ int hookNdsRetailArm7(
 		ce7->intr_fifo_orig_return    = *ipcSyncHandler;
 		//ce7->intr_ndma0_orig_return   = *ndma0Handler;
 		ce7->fileCluster              = fileCluster;
+		ce7->patchOffsetCacheFileCluster = patchOffsetCacheFileCluster;
 		ce7->srParamsCluster          = srParamsFileCluster;
 		ce7->ramDumpCluster           = ramDumpCluster;
 		ce7->screenshotCluster        = screenshotCluster;
@@ -345,9 +354,6 @@ int hookNdsRetailArm7(
 		}
 		if (saveOnFlashcard) {
 			ce7->valueBits |= b_saveOnFlashcard;
-		}
-		if (extendedMemory) {
-			ce7->valueBits |= b_extendedMemory;
 		}
 		if (ROMinRAM) {
 			ce7->valueBits |= b_ROMinRAM;
@@ -364,11 +370,11 @@ int hookNdsRetailArm7(
 		if (hiyaCfwFound) {
 			ce7->valueBits |= b_hiyaCfwFound;
 		}
-		if (strncmp(romTid, "UBR", 3) == 0 || iUncompressedSize > 0x280000) {
+		if (strncmp(romTid, "UBR", 3) == 0 || iUncompressedSize > 0x26C000) {
 			ce7->valueBits |= b_slowSoftReset;
 		}
-		if (cardReadDMA) {
-			ce7->valueBits |= b_cardReadDma;
+		if (igmAccessible) {
+			ce7->valueBits |= b_igmAccessible;
 		}
 		if (isSdk5(moduleParams)) {
 			ce7->valueBits |= b_isSdk5;
@@ -391,9 +397,16 @@ int hookNdsRetailArm7(
 		if (bootstrapOnFlashcard) {
 			ce7->valueBits |= b_bootstrapOnFlashcard;
 		}
+		if (ndmaDisabled) {
+			ce7->valueBits |= b_ndmaDisabled;
+		}
+		if (strncmp(romTid, "HND", 3) == 0) {
+			ce7->valueBits |= b_isDlp;
+		}
 		if (REG_SCFG_EXT == 0) {
 			ce7->valueBits |= b_scfgLocked;
 		}
+		ce7->mainScreen               = mainScreen;
 		ce7->language                 = language;
 		if (strcmp(romTid, "AKYP") == 0) { // Etrian Odyssey (EUR)
 			ce7->languageAddr = (u32*)0x020DC5DC;
@@ -402,6 +415,31 @@ int hookNdsRetailArm7(
 		ce7->romRead_LED              = romRead_LED;
 		ce7->dmaRomRead_LED           = dmaRomRead_LED;
 		ce7->scfgRomBak               = REG_SCFG_ROM;
+
+		extern u32 getRomLocation(const tNDSHeader* ndsHeader, const bool isSdk5);
+		u32 romLocation = getRomLocation(ndsHeader, (ce7->valueBits & b_isSdk5));
+		ce7->romLocation = romLocation;
+
+		u32 romOffset = 0;
+		if (usesCloneboot) {
+			romOffset = 0x4000;
+		} else if (ndsHeader->arm9overlaySource == 0 || ndsHeader->arm9overlaySize == 0) {
+			romOffset = (ndsHeader->arm7romOffset + ndsHeader->arm7binarySize);
+		} else {
+			romOffset = (ndsHeader->arm9romOffset + ndsHeader->arm9binarySize);
+		}
+		ce7->romLocation -= romOffset;
+
+		// 0: ROM part start, 1: ROM part start in RAM, 2: ROM part end in RAM
+		extern u32 romMapLines;
+		extern u32 romMap[4][3];
+
+		ce7->romMapLines = romMapLines;
+		for (int i = 0; i < 4; i++) {
+			for (int i2 = 0; i2 < 3; i2++) {
+				ce7->romMap[i][i2] = romMap[i][i2];
+			}
+		}
 
 		*vblankHandler = ce7->patches->vblankHandler;
 		if (ce7->patches->fifoHandler) {
@@ -426,8 +464,10 @@ int hookNdsRetailArm7(
 		}*/
 	}
 
-	u32 cheatEngineOffset = (u32)ce7-0x8400;
-	u16 cheatSizeLimit = (ce7NotFound ? 0x1BF0 : 0x8000);
+	extern u32 cheatSizeTotal;
+	extern u32 cheatEngineOffset;
+	extern char cheatEngineBuffer[0x400];
+	u16 cheatSizeLimit = (ce7NotFound ? 0x1C00 : 0x8000);
 	char* cheatDataOffset = (char*)cheatEngineOffset+0x3E8;
 	/*if (ce7NotFound) {
 		cheatEngineOffset = 0x2FFC000;
@@ -454,18 +494,21 @@ int hookNdsRetailArm7(
 			cheatSizeLimit -= 8;
 		}
 		*(cheatDataOffset + 3) = 0xCF;
-	}*/
+	}
 	if (!gameOnFlashcard && isDSiWare) {
 		cheatSizeLimit -= 0x10;
-	}
+	}*/
 
-	aFile wideCheatFile;
-	getFileFromCluster(&wideCheatFile, wideCheatFileCluster, gameOnFlashcard);
-	aFile cheatFile;
-	getFileFromCluster(&cheatFile, cheatFileCluster, gameOnFlashcard);
-	aFile apPatchFile;
-	getFileFromCluster(&apPatchFile, apPatchFileCluster, gameOnFlashcard);
-	if (wideCheatSize+cheatSize+(apPatchIsCheat ? apPatchSize : 0) <= cheatSizeLimit) {
+	if (cheatSizeTotal > 4 && cheatSizeTotal <= cheatSizeLimit) {
+		aFile wideCheatFile;
+		getFileFromCluster(&wideCheatFile, wideCheatFileCluster, gameOnFlashcard);
+		aFile cheatFile;
+		getFileFromCluster(&cheatFile, cheatFileCluster, gameOnFlashcard);
+		aFile apPatchFile;
+		getFileFromCluster(&apPatchFile, apPatchFileCluster, gameOnFlashcard);
+
+		tonccpy((u8*)cheatEngineOffset, cheatEngineBuffer, 0x400);
+
 		if (ndsHeader->unitCode < 3 && apPatchFile.firstCluster != CLUSTER_FREE && apPatchIsCheat) {
 			fileRead(cheatDataOffset, &apPatchFile, 0, apPatchSize);
 			cheatDataOffset += apPatchSize;
@@ -477,28 +520,11 @@ int hookNdsRetailArm7(
 			cheatDataOffset += wideCheatSize;
 			*(cheatDataOffset + 3) = 0xCF;
 			ce7->valueBits |= b_wideCheatUsed;
+			dbg_printf("Wide cheat found and applied\n");
 		}
 		if (cheatFile.firstCluster != CLUSTER_FREE) {
 			fileRead(cheatDataOffset, &cheatFile, 0, cheatSize);
-		}
-		if (!gameOnFlashcard && isDSiWare) {
-			unpatchedFunctions* unpatchedFuncs = (unpatchedFunctions*)UNPATCHED_FUNCTION_LOCATION;
-
-			if (unpatchedFuncs->compressed_static_end) {
-				*(u32*)((u32)cheatDataOffset) = (u32)unpatchedFuncs->compressedFlagOffset;
-				cheatDataOffset += 4;
-				*(u32*)((u32)cheatDataOffset) = unpatchedFuncs->compressed_static_end;
-				cheatDataOffset += 4;
-				cheatSizeLimit -= 8;
-			}
-			if (unpatchedFuncs->ltd_compressed_static_end) {
-				*(u32*)((u32)cheatDataOffset) = (u32)unpatchedFuncs->iCompressedFlagOffset;
-				cheatDataOffset += 4;
-				*(u32*)((u32)cheatDataOffset) = unpatchedFuncs->ltd_compressed_static_end;
-				cheatDataOffset += 4;
-				cheatSizeLimit -= 8;
-			}
-			*(cheatDataOffset + 3) = 0xCF;
+			dbg_printf("Cheats found and applied\n");
 		}
 	}
 

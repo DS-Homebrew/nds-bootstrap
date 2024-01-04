@@ -33,7 +33,11 @@ cacheStruct:
 	.word	0x00000000
 valueBits:
 	.word	0x00000000
+mainScreen:
+	.word	0x00000000
 overlaysSize:
+	.word	0x00000000
+romPaddingSize:
 	.word	0x00000000
 consoleModel:
 	.word	0x00000000
@@ -54,6 +58,26 @@ romPartSrc:
 romPartSize:
 	.word	0x00000000
 @	.word	0x00000000
+#ifndef TWLSDK
+romMapLines:
+	.word	0x00000000
+romMap:
+	.word	0x00000000
+	.word	0x00000000
+	.word	0x00000000
+
+	.word	0x00000000
+	.word	0x00000000
+	.word	0x00000000
+
+	.word	0x00000000
+	.word	0x00000000
+	.word	0x00000000
+
+	.word	0x00000000
+	.word	0x00000000
+	.word	0x00000000
+#endif
 
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
@@ -129,8 +153,15 @@ patches:
 needFlushDCCache:
 .word   0x0
 #ifndef TWLSDK
-.word   pdash_read
+#ifdef GSDD
+.word   0
+.word   gsdd_fix
 #else
+.word   pdash_read
+.word   0x0
+#endif
+#else
+.word   0x0
 .word   0x0
 #endif
 .word   vblankHandler
@@ -166,12 +197,7 @@ swi02:
 @---------------------------------------------------------------------------------
 card_read_arm9:
 @---------------------------------------------------------------------------------
-	stmfd   sp!, {r4-r11,lr}
-
-	ldr		r6, =cardRead
-	blx		r6
-
-	ldmfd   sp!, {r4-r11,pc}
+	ldr		pc, =cardRead
 .pool
 cardStructArm9:
 .word    0x00000000     
@@ -185,12 +211,10 @@ cacheRef:
 @---------------------------------------------------------------------------------
 thumb_card_read_arm9:
 @---------------------------------------------------------------------------------
-	push	{r3-r7, lr}
-
-	ldr		r6, =cardRead
-	blx		r6
-
-	pop	{r3-r7, pc}
+	push {r6, lr}
+	ldr	r6, =cardRead
+	blx	r6
+	pop	{r6, pc}
 .pool
 .align	4
  	
@@ -209,24 +233,14 @@ cardIdData:
 @---------------------------------------------------------------------------------
 card_dma_arm9:
 @---------------------------------------------------------------------------------
-    stmfd   sp!, {r1-r11,lr}
-
-	ldr		r6, =cardReadDma
-	blx		r6
-
-	ldmfd   sp!, {r1-r11,pc}
+	ldr		pc, =cardReadDma
 .pool
 @---------------------------------------------------------------------------------
 
 @---------------------------------------------------------------------------------
 card_set_dma_arm9:
 @---------------------------------------------------------------------------------
-    stmfd   sp!, {r1-r11,lr}
-
-	ldr		r6, =cardSetDma
-	blx		r6
-
-	ldmfd   sp!, {r1-r11,pc}
+	ldr		pc, =cardSetDma
 .pool
 @---------------------------------------------------------------------------------
 
@@ -293,12 +307,10 @@ cardIdDataT:
 @---------------------------------------------------------------------------------
 thumb_card_dma_arm9:
 @---------------------------------------------------------------------------------
-    push	{r1-r7, lr}
-
-	ldr		r6, =cardReadDma
-	blx		r6
-
-    pop	{r1-r7, pc}
+	push {r6, lr}
+	ldr r6, =cardReadDma
+	blx r6
+	pop	{r6, pc}
 .pool
 .align	4
 @---------------------------------------------------------------------------------
@@ -306,12 +318,10 @@ thumb_card_dma_arm9:
 @---------------------------------------------------------------------------------
 thumb_card_set_dma_arm9:
 @---------------------------------------------------------------------------------
-    push	{r1-r7, lr}
-
-	ldr		r6, =cardSetDma
-	blx		r6
-
-    pop	{r1-r7, pc}
+	push {r6, lr}
+	ldr r6, =cardSetDma
+	blx r6
+	pop {r6, pc}
 .pool
 .align	4
 @---------------------------------------------------------------------------------
@@ -320,26 +330,14 @@ thumb_card_set_dma_arm9:
 @---------------------------------------------------------------------------------
 nand_read_arm9:
 @---------------------------------------------------------------------------------
-    stmfd   sp!, {r3-r9,lr}
-
-	ldr		r6, =nandRead
-	blx		r6
-
-	ldmfd   sp!, {r3-r9,pc}
+	ldr		pc, =nandRead
 .pool
 @---------------------------------------------------------------------------------
 
 @---------------------------------------------------------------------------------
 nand_write_arm9:
 @---------------------------------------------------------------------------------
-    stmfd   sp!, {r3-r9,lr}
-
-	ldr		r6, =nandWrite
-	blx		r6
-
-	ldmfd   sp!, {r3-r9,pc}
-_blx_r6_stub_nand_write:
-	bx	r6	
+	ldr		pc, =nandWrite
 .pool
 @---------------------------------------------------------------------------------
 
@@ -347,12 +345,10 @@ _blx_r6_stub_nand_write:
 @---------------------------------------------------------------------------------
 thumb_nand_read_arm9:
 @---------------------------------------------------------------------------------
-    push	{r1-r7, lr}
-
-	ldr		r6, =nandRead
-	blx		r6
-
-	pop	{r1-r7, pc}
+    push {r6, lr}
+	ldr r6, =nandRead
+	blx r6
+	pop {r6, pc}
 _blx_r6_stub_thumb_nand_read:
 	bx	r6	
 .pool
@@ -362,12 +358,10 @@ _blx_r6_stub_thumb_nand_read:
 @---------------------------------------------------------------------------------
 thumb_nand_write_arm9:
 @---------------------------------------------------------------------------------
-    push	{r1-r7, lr}
-
-	ldr		r6, =nandWrite
-	blx		r6
-
-	pop	{r1-r7, pc}
+    push {r6, lr}
+	ldr r6, =nandWrite
+	blx r6
+	pop {r6, pc}
 .pool
 .align	4
 @---------------------------------------------------------------------------------
@@ -505,6 +499,7 @@ thumb_card_irq_enable:
 
 #ifndef TWLSDK
 	.arm
+#ifndef GSDD
 pdash_read:
     push	{r1-r11, lr}
     @mov     r0, r4 @DST
@@ -516,6 +511,22 @@ pdash_read:
 	blx		r6
     pop	    {r1-r11, pc}
 .pool
+#else
+gsdd_fix:
+	push {lr}
+	bl gsddFix
+	mov r0, #1
+	pop {pc}
+
+.global gsdd_fix2
+gsdd_fix2: .word gsdd_fix2+4
+	push {r0-r3, lr}
+	mov r0, r6
+	bl gsddFix2
+	pop {r0-r3}
+	sub r1, r4, #0x11
+	pop {pc}
+#endif
 
 	.thumb
 #endif

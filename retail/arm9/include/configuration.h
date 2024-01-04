@@ -14,7 +14,10 @@ typedef struct configuration {
 	char* savPath;
 	char* prvPath;
 	bool useSdk20Donor;
+	bool useSdk5DonorAlt;
 	char* donor20Path;
+	char* donor5Path;
+	char* donor5PathAlt;
 	char* donorTwl0Path;
 	char* donorTwlPath;
 	char* donorTwlOnly0Path;
@@ -23,7 +26,8 @@ typedef struct configuration {
 	char* gbaPath;
 	char* gbaSavPath;
 	char* apPatchPath;
-	u32 donorFileTwlSize;
+	u32 donorFileSize;
+	u32 donorFileOffset;
 	u32 romSize;
 	u32 saveSize;
 	u32 gbaRomSize;
@@ -36,7 +40,7 @@ typedef struct configuration {
 	u32 dataToPreloadSize[2];
 	u8 language;
 	char* guiLanguage;
-	u8 region; // SDK 5
+	s8 region; // SDK 5
 	bool useRomRegion;
 	bool sdNand; // SDK 5
 	u8 dsiMode; // SDK 5
@@ -47,7 +51,6 @@ typedef struct configuration {
 	u8 donorSdkVer;
 	u8 patchMpuRegion;
 	u32 patchMpuSize;
-	int extendedMemory;
 	u8 consoleModel;
 	//int colorMode;
 	u8 romRead_LED;

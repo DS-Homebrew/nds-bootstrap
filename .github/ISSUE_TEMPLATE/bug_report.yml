@@ -1,0 +1,94 @@
+name: Bug Report
+description: File a bug report
+body:
+  - type: markdown
+    attributes:
+      value: Use the latest version of nds-bootstrap when reporting compatibility issues.
+  - type: markdown
+    attributes:
+      value: Duplicate issues will be closed. Please keep this in mind before submitting one.
+  - type: checkboxes
+    attributes:
+      label: Game Console(s) used
+      description: What console(s) are you using?
+      options:
+      - label: Nintendo DS
+      - label: Nintendo DS Lite
+      - label: Nintendo DSi
+      - label: Nintendo DSi XL/LL
+      - label: Nintendo 3DS
+      - label: Nintendo 3DS XL/LL
+      - label: New Nintendo 3DS XL/LL
+      - label: Nintendo 2DS
+      - label: New Nintendo 2DS XL/LL
+    validations:
+      required: true
+  - type: textarea
+    id: launch-method
+    attributes:
+      label: Launch Method
+      description: Is it launched via the SD card or a flashcart? Is SCFG locked or Unlocked? Please be specific and include firmwares and versions.
+    validations:
+      required: true
+  - type: textarea
+    id: version-used
+    attributes:
+      label: Version used
+      description: Specify whether you used release or nightly. If you use release, please include the version number. If you use nightly, please include the hash. Simply saying "latest", "release", or "nightly" isn't helpful.
+    validations:
+      required: true
+  - type: textarea
+    id: game-tested
+    attributes:
+      label: Game tested/used/applicable
+      description: Include SHA1/MD5 hashes, Title IDs, and anything that could be used to identify it. If it's homebrew, please link said homebrew here.
+    validations:
+      required: true
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: Expected Behavior
+      description: What should have happened?
+    validations:
+      required: true
+  - type: textarea
+    id: actual-behavior
+    attributes:
+      label: Actual Behavior
+      description: What actually happened?
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction-steps
+    attributes:
+      label: Steps to reproduce
+      description: List here anything needed to reproduce this issue. If possible, provide a save file to aid in reproducing the issue.
+    validations:
+      required: true
+  - type: textarea
+    id: ini-file
+    attributes:
+      label: nds-bootstrap.ini
+      description: Be sure to upload your nds-bootstrap ini from `sd:/_nds/nds-bootstrap.ini`. Copy the text from the file and paste it below, and put it in a ```codeblock``` for nicer formatting.
+    validations:
+      required: true
+  - type: textarea
+    id: log
+    attributes:
+      label: Logs
+      description: To enable logging, set `LOGGING` to `1` in `sd:/_nds/nds-bootstrap.ini`. It will be found at `sd:/NDSBTSTRP.log`. Upload it by dragging and dropping into the GitHub text box. Using TWiLight Menu++? Toggle it via the 'nds-bootstrap' page instead
+    validations:
+      required: true
+  - type: textarea
+    id: other-notes
+    attributes:
+      label: Other notes
+      description: Anything else that may be relevant to the issue.
+    validations:
+      required: false
+  - type: input
+    attributes:
+      label: Will you be available for future issues and/or replies?
+      placeholder: Yes / No
+    validations:
+      required: true

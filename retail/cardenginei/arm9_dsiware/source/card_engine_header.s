@@ -33,7 +33,11 @@ cacheStruct:
 	.word	0x00000000
 valueBits:
 	.word	0x00000000
+mainScreen:
+	.word	0x00000000
 overlaysSize:
+	.word	0x00000000
+romPaddingSize:
 	.word	0x00000000
 consoleModel:
 	.word	0x00000000
@@ -91,6 +95,7 @@ patches:
 .word   0x0
 .word   reset_arm9
 needFlushDCCache:
+.word   0x0
 .word   0x0
 .word   0x0
 .word   vblankHandler

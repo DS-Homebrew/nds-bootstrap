@@ -50,7 +50,7 @@
 
 //extern bool cardReadFound; // patch_arm9.c
 
-#define patchOffsetCacheFileVersion 34	// Change when new functions are being patched, some offsets removed,
+#define patchOffsetCacheFileVersion 42	// Change when new functions are being patched, some offsets removed,
 										// the offset order changed, and/or the function signatures changed (not added)
 
 typedef struct patchOffsetCacheContents {
@@ -72,6 +72,7 @@ typedef struct patchOffsetCacheContents {
 	u32* fileIoCloseOffset;
 	u32* fileIoSeekOffset;
 	u32* fileIoReadOffset;
+	u32* initLockEndOffset;
 	u32* a9CardIrqEnableOffset;
 	u32 a9CardIrqIsThumb;
 	u32* resetOffset;
@@ -137,7 +138,12 @@ u32 patchCardNdsArm9(
 	const tNDSHeader* ndsHeader,
 	const module_params_t* moduleParams,
 	u32 patchMpuRegion,
-	u32 patchMpuSize
+	const bool usesCloneboot
+);
+void patchCardNdsArm9Cont(
+	cardengineArm9* ce9,
+	const tNDSHeader* ndsHeader,
+	const module_params_t* moduleParams
 );
 u32 patchCardNdsArm7(
 	cardengineArm7* ce7,
@@ -151,7 +157,7 @@ u32 patchCardNds(
 	tNDSHeader* ndsHeader,
 	const module_params_t* moduleParams,
 	u32 patchMpuRegion,
-	u32 patchMpuSize,
+	const bool usesCloneboot,
 	u32 saveFileCluster,
 	u32 saveSize
 );

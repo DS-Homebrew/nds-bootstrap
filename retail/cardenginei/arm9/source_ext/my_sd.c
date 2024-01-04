@@ -123,8 +123,10 @@ bool my_sdio_ReadSectors(sec_t sector, sec_t numSectors, void* buffer) {
 	sharedAddr[2] = (vu32)buffer;
 	sharedAddr[4] = commandRead;
 
+	bool triggerIpc = (dmaOn && ((vu32)buffer % 4) == 0);
+
 	while (sharedAddr[4] == commandRead) {
-		if (dmaOn) IPC_SendSync(0x4);
+		if (triggerIpc) IPC_SendSync(0x4);
 		sleepMs(1);
 	}
 	return sharedAddr[4] == 0;

@@ -16,12 +16,14 @@
 .global moduleParams
 .global fileCluster
 .global saveCluster
+.global patchOffsetCacheFileCluster
 .global srParamsCluster
 .global ramDumpCluster
 .global screenshotCluster
 .global pageFileCluster
 .global manualCluster
 .global valueBits
+.global mainScreen
 .global language
 .global languageAddr
 .global consoleModel
@@ -30,6 +32,9 @@
 .global scfgRomBak
 .global igmHotkey
 .global ndsCodeStart
+.global romLocation
+.global romMapLines
+.global romMap
 
 #define ICACHE_SIZE	0x2000
 #define DCACHE_SIZE	0x1000
@@ -50,6 +55,8 @@ moduleParams:
 	.word	0x00000000
 fileCluster:
 	.word	0x00000000
+patchOffsetCacheFileCluster:
+	.word	0x00000000
 srParamsCluster:
 	.word	0x00000000
 ramDumpCluster:
@@ -64,6 +71,8 @@ cardStruct:
 	.word	0x00000000
 valueBits:
 	.word	0x00000000
+mainScreen:
+	.word	0
 languageAddr:
 	.word	0x00000000
 language:
@@ -80,6 +89,26 @@ scfgRomBak:
 	.hword	0
 igmHotkey:
 	.hword	0
+romLocation:
+	.word	0x00000000
+romMapLines:
+	.word	0x00000000
+romMap:
+	.word	0x00000000
+	.word	0x00000000
+	.word	0x00000000
+
+	.word	0x00000000
+	.word	0x00000000
+	.word	0x00000000
+
+	.word	0x00000000
+	.word	0x00000000
+	.word	0x00000000
+
+	.word	0x00000000
+	.word	0x00000000
+	.word	0x00000000
 .align	4
 
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -147,9 +176,9 @@ patches:
 .word	0
 .word	0
 .word   0
+.word   arm7FunctionsDirect
 .word   arm7Functions
 .word   arm7FunctionsThumb
-.word   0
 .word   0
 .word   0
 .word   0
@@ -194,7 +223,7 @@ thumb_blx_r3_stub2:
 @---------------------------------------------------------------------------------
 
 #ifdef CARDSAVE
-arm7Functions:
+arm7FunctionsDirect:
 .word    eepromProtect
 .word    eepromPageErase
 .word    eepromPageVerify
@@ -203,8 +232,85 @@ arm7Functions:
 .word    eepromRead
 .word    cardRead
 .word    cardId
+
+arm7Functions:
+.word    eepromProtectStub
+.word    eepromPageEraseStub
+.word    eepromPageVerifyStub
+.word    eepromPageWriteStub
+.word    eepromPageProgStub
+.word    eepromReadStub
+.word    cardReadStub
+.word    cardIdStub
 saveCluster:
 .word    0x00000000
+saveSize:
+.word    0x00000000
+
+eepromProtectStub:
+	stmfd   sp!, {r3-r11,lr}
+	ldr	r4, =eepromProtect
+	bl	_blx_r4_stub1
+	ldmfd   sp!, {r3-r11,pc}
+_blx_r4_stub1:
+	bx	r4
+.pool
+eepromPageEraseStub:
+	stmfd   sp!, {r3-r11,lr}
+	ldr	r4, =eepromPageErase
+	bl	_blx_r4_stub2
+	ldmfd   sp!, {r3-r11,pc}
+_blx_r4_stub2:
+	bx	r4
+.pool
+eepromPageVerifyStub:
+	stmfd   sp!, {r3-r11,lr}
+	ldr	r4, =eepromPageVerify
+	bl	_blx_r4_stub3
+	ldmfd   sp!, {r3-r11,pc}
+_blx_r4_stub3:
+	bx	r4
+.pool
+eepromPageWriteStub:
+	stmfd   sp!, {r4-r11,lr}
+	ldr	r4, =eepromPageWrite
+	bl	_blx_r4_stub4
+	ldmfd   sp!, {r4-r11,pc}
+_blx_r4_stub4:
+	bx	r4
+.pool
+eepromPageProgStub:
+	stmfd   sp!, {r4-r11,lr}
+	ldr	r4, =eepromPageProg
+	bl	_blx_r4_stub5
+	ldmfd   sp!, {r4-r11,pc}
+_blx_r4_stub5:
+	bx	r4
+.pool
+cardReadStub:
+	stmfd   sp!, {r4-r11,lr}
+	ldr	r4, =cardRead
+	bl	_blx_r4_stub6
+	ldmfd   sp!, {r4-r11,pc}
+_blx_r4_stub6:
+	bx	r4
+.pool
+eepromReadStub:
+	stmfd   sp!, {r4-r11,lr}
+	ldr	r4, =eepromRead
+	bl	_blx_r4_stub7
+	ldmfd   sp!, {r4-r11,pc}
+_blx_r4_stub7:
+	bx	r4
+.pool
+cardIdStub:
+	stmfd   sp!, {r4-r11,lr}
+	ldr	r4, =cardId
+	bl	_blx_r4_stub8
+	ldmfd   sp!, {r4-r11,pc}
+_blx_r4_stub8:
+	bx	r4
+.pool
 
 arm7FunctionsThumb:
 .word    eepromProtectThumbStub
@@ -298,6 +404,7 @@ _blx_r3_stubthumb8:
 	bx	r4
 .pool
 #else
+arm7FunctionsDirect:
 arm7Functions:
 arm7FunctionsThumb:
 #endif

@@ -19,6 +19,7 @@
 #include <string.h>
 #include <nds/ndstypes.h>
 #include <nds/arm9/video.h>
+#include <nds/bios.h>
 #include <nds/system.h>
 #include <nds/dma.h>
 #include <nds/interrupts.h>
@@ -47,8 +48,6 @@ vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS_SDK5;
 static tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
 
 static bool igmReset = false;
-
-s8 mainScreen = 0;
 
 static void SetBrightness(u8 screen, s8 bright) {
 	u8 mode = 1;
@@ -169,6 +168,7 @@ void reset(u32 tid1, u32 tid2) {
 	REG_DISPSTAT = 0;
 	REG_DISPCNT = 0;
 	REG_DISPCNT_SUB = 0;
+	GFX_STATUS = 0;
 
 	toncset((u16*)0x04000000, 0, 0x56);
 	toncset((u16*)0x04001000, 0, 0x56);
@@ -219,9 +219,26 @@ void reset(u32 tid1, u32 tid2) {
 }
 
 void inGameMenu(s32* exRegisters) {
-	*(u32*)(INGAME_MENU_LOCATION_DSIWARE + IGM_TEXT_SIZE_ALIGNED) = (u32)sharedAddr;
-	volatile void (*inGameMenu)(s8*, u32, s32*) = (volatile void*)INGAME_MENU_LOCATION_DSIWARE + IGM_TEXT_SIZE_ALIGNED + 0x10;
-	(*inGameMenu)(&mainScreen, ce9->consoleModel, exRegisters);
+	int oldIME = enterCriticalSection();
+
+	while (sharedAddr[5] == 0x4C4D4749) { // 'IGML'
+		while (REG_VCOUNT != 191) swiDelay(100);
+		while (REG_VCOUNT == 191) swiDelay(100);
+	}
+
+	*(u32*)(INGAME_MENU_LOCATION + IGM_TEXT_SIZE_ALIGNED) = (u32)sharedAddr;
+	volatile void (*inGameMenu)(s32*, u32, s32*) = (volatile void*)INGAME_MENU_LOCATION + IGM_TEXT_SIZE_ALIGNED + 0x10;
+	(*inGameMenu)(&ce9->mainScreen, ce9->consoleModel, exRegisters);
+
+	while (sharedAddr[5] != 0x4C4D4749) { // 'IGML'
+		while (REG_VCOUNT != 191) swiDelay(100);
+		while (REG_VCOUNT == 191) swiDelay(100);
+	}
+	while (sharedAddr[5] == 0x4C4D4749) { // 'IGML'
+		while (REG_VCOUNT != 191) swiDelay(100);
+		while (REG_VCOUNT == 191) swiDelay(100);
+	}
+
 	if (sharedAddr[3] == 0x52534554 || sharedAddr[3] == 0x54495845) {
 		igmReset = true;
 		if (sharedAddr[3] == 0x52534554) {
@@ -230,6 +247,8 @@ void inGameMenu(s32* exRegisters) {
 			reset(0, 0);
 		}
 	}
+
+	leaveCriticalSection(oldIME);
 }
 
 //---------------------------------------------------------------------------------
@@ -260,22 +279,22 @@ void myIrqHandlerIPC(void) {
 			reset(0, 0);
 			break;
 		case 0x6:
-			if(mainScreen == 1)
+			if(ce9->mainScreen == 1)
 				REG_POWERCNT &= ~POWER_SWAP_LCDS;
-			else if(mainScreen == 2)
+			else if(ce9->mainScreen == 2)
 				REG_POWERCNT |= POWER_SWAP_LCDS;
 			break;
-		case 0x7: {
-			mainScreen++;
-			if(mainScreen > 2)
-				mainScreen = 0;
+		/* case 0x7: {
+			ce9->mainScreen++;
+			if(ce9->mainScreen > 2)
+				ce9->mainScreen = 0;
 
-			if(mainScreen == 1)
+			if(ce9->mainScreen == 1)
 				REG_POWERCNT &= ~POWER_SWAP_LCDS;
-			else if(mainScreen == 2)
+			else if(ce9->mainScreen == 2)
 				REG_POWERCNT |= POWER_SWAP_LCDS;
 		}
-			break;
+			break; */
 		case 0x9:
 			inGameMenu((s32*)0);
 			break;

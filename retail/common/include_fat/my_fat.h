@@ -75,6 +75,7 @@ bool FAT_InitFiles(bool initCard);
 void getBootFileCluster(aFile* file, const char* bootName);
 void getFileFromCluster(aFile* file, u32 cluster);
 #endif
+void resetPrevSect(aFile* file);
 #ifndef B4DS
 u32 fileRead(char* buffer, aFile* file, u32 startOffset, u32 length);
 bool fileReadNonBLocking(char* buffer, aFile* file, u32 startOffset, u32 length);

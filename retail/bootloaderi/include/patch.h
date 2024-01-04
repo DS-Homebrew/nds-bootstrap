@@ -50,7 +50,7 @@
 
 //extern bool cardReadFound; // patch_arm9.c
 
-#define patchOffsetCacheFileVersion 88	// Change when new functions are being patched, some offsets removed,
+#define patchOffsetCacheFileVersion 101	// Change when new functions are being patched, some offsets removed,
 										// the offset order changed, and/or the function signatures changed (not added)
 
 typedef struct patchOffsetCacheContents {
@@ -98,7 +98,7 @@ typedef struct patchOffsetCacheContents {
 	u32 resetChecked;
 	u32* nandTmpJumpFuncOffset;
 	u32 nandTmpJumpFuncChecked;
-	u32* mbkWramBOffset;
+	// u32* mbkWramBOffset;
 	u32* sharedFontPathOffset;
 	u32 sharedFontPathChecked;
 	u32* sleepFuncOffset;
@@ -112,6 +112,7 @@ typedef struct patchOffsetCacheContents {
     u32* mpuStartOffset2;
     u32* mpuDataOffset2;
     u32* mpuInitOffset2;
+    u32* mpuChangeOffset;
     u32* mpuInitEndTwl;
 	u32* randomPatchOffset;
 	u32 randomPatchChecked;
@@ -122,7 +123,9 @@ typedef struct patchOffsetCacheContents {
 	u32 a7IsThumb;
 	u32* ramClearOffset;
 	u32 ramClearChecked;
-	u32* swiHaltOffset;
+	u32* ramClearIOffset;
+	u32* ramClearI2Offset;
+	// u32* swiHaltOffset;
 	u32* a7Swi12Offset;
 	u16* a7Swi24Offset;
 	u16* a7Swi25Offset;
@@ -143,7 +146,6 @@ typedef struct patchOffsetCacheContents {
 	u32 savePatchType;
 	u32 relocateStartOffset;
 	u32 relocateValidateOffset;		// aka nextFunctionOffset
-	u32 a7iStartOffset; // Unused
 	u32 a7CardReadEndOffset;
 	u32 a7JumpTableFuncOffset;
 	u32 a7JumpTableType;
@@ -156,6 +158,7 @@ extern patchOffsetCacheContents patchOffsetCache;
 
 u32 generateA7Instr(int arg1, int arg2);
 void setB(int arg1, int arg2);
+void setBEQ(int arg1, int arg2);
 void setBL(int arg1, int arg2);
 u32* getOffsetFromBL(u32* blOffset);
 const u16* generateA7InstrThumb(int arg1, int arg2);
@@ -173,14 +176,15 @@ u32 patchCardNdsArm9(
 	const ltd_module_params_t* ltdModuleParams,
 	u32 ROMinRAM,
 	u32 patchMpuRegion,
-	bool usesCloneboot
+	const bool usesCloneboot
 );
 u32 patchCardNdsArm7(
 	cardengineArm7* ce7,
 	tNDSHeader* ndsHeader,
 	const module_params_t* moduleParams,
 	u32 ROMinRAM,
-	u32 saveFileCluster
+	u32 saveFileCluster,
+	u32 saveSize
 );
 u32 patchCardNds(
 	cardengineArm7* ce7,
@@ -189,7 +193,7 @@ u32 patchCardNds(
 	const module_params_t* moduleParams,
 	const ltd_module_params_t* ltdModuleParams,
 	u32 patchMpuRegion,
-	bool usesCloneboot,
+	const bool usesCloneboot,
 	u32 ROMinRAM,
 	u32 saveFileCluster,
 	u32 saveSize
@@ -199,10 +203,9 @@ u32* patchLoHeapPointer(
     const tNDSHeader* ndsHeader,
 	bool ROMinRAM
 );
-u32* patchHiHeapPointer(
+void patchHiHeapPointer(
     const module_params_t* moduleParams,
-    const tNDSHeader* ndsHeader,
-	bool ROMinRAM
+    const tNDSHeader* ndsHeader
 );
 void relocate_ce9(
     u32 default_location, 

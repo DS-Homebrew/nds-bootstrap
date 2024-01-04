@@ -45,7 +45,11 @@ u16 igmPal[6] = {
 static u16* vramBak = (u16*)INGAME_MENU_EXT_LOCATION+(0x18200/sizeof(u16));
 static u16* bmpBuffer = (u16*)INGAME_MENU_EXT_LOCATION;
 #else
+#ifdef EXTMEM
 cardengineArm9* volatile ce9 = (cardengineArm9*)CARDENGINE_ARM9_LOCATION_DLDI_EXTMEM;
+#else
+cardengineArm9* volatile ce9 = (cardengineArm9*)CARDENGINE_ARM9_LOCATION_DLDI_START;
+#endif
 
 static u16* vramBak = (u16*)INGAME_MENU_EXT_LOCATION_B4DS+(0x18200/sizeof(u16));
 static u16* bmpBuffer = (u16*)INGAME_MENU_EXT_LOCATION_B4DS;
@@ -62,6 +66,15 @@ const static u8 bmpHeader[] = {
 };
 
 #define KEYS sharedAddr[5]
+
+bool swiDelayEnabled = true;
+void mySwiDelay(int delay) {
+	if (!swiDelayEnabled) {
+		return;
+	}
+
+	swiDelay(delay);
+}
 
 void SetBrightness(u8 screen, s8 bright) {
 	u8 mode = 1;
@@ -123,8 +136,8 @@ void printHex(int x, int y, u32 val, u8 bytes, FontPalette palette, bool main) {
 
 static void printTime(void) {
 	while (!(sharedAddr[7] & 0x10000000)) { // Wait for time to be received
-		while (REG_VCOUNT != 191) swiDelay(100);
-		while (REG_VCOUNT == 191) swiDelay(100);
+		while (REG_VCOUNT != 191) mySwiDelay(100);
+		while (REG_VCOUNT == 191) mySwiDelay(100);
 	}
 	#ifndef B4DS
 	#define timeYpos 3
@@ -142,8 +155,8 @@ static void printTime(void) {
 #ifndef B4DS
 static void printBattery(void) {
 	while ((u8)sharedAddr[6] == 0) { // Wait for battery level to be received
-		while (REG_VCOUNT != 191) swiDelay(100);
-		while (REG_VCOUNT == 191) swiDelay(100);
+		while (REG_VCOUNT != 191) mySwiDelay(100);
+		while (REG_VCOUNT == 191) mySwiDelay(100);
 	}
 	u8 batteryLevel = (u8)sharedAddr[6];
 	const char *bars = "\3\3";
@@ -175,8 +188,8 @@ static void printBattery(void) {
 static void waitKeys(u16 keys) {
 	// Prevent key repeat for 10 frames
 	for(int i = 0; i < 10 && (KEYS & keys); i++) {
-		while (REG_VCOUNT != 191) swiDelay(100);
-		while (REG_VCOUNT == 191) swiDelay(100);
+		while (REG_VCOUNT != 191) mySwiDelay(100);
+		while (REG_VCOUNT == 191) mySwiDelay(100);
 	}
 
 	u32 status = sharedAddr[6]; // Battery, brightness, volume
@@ -184,8 +197,8 @@ static void waitKeys(u16 keys) {
 	u8 minutes = (u8)sharedAddr[8];
 
 	do {
-		while (REG_VCOUNT != 191) swiDelay(100);
-		while (REG_VCOUNT == 191) swiDelay(100);
+		while (REG_VCOUNT != 191) mySwiDelay(100);
+		while (REG_VCOUNT == 191) mySwiDelay(100);
 	} while(!(KEYS & keys) && sharedAddr[6] == status && (u8)sharedAddr[7] == hours && (u8)sharedAddr[8] == minutes);
 }
 
@@ -270,8 +283,8 @@ static void screenshot(void) {
 	#else
 	sharedAddr[4] = 0x50505353;
 	while (sharedAddr[4] == 0x50505353) {
-		while (REG_VCOUNT != 191) swiDelay(100);
-		while (REG_VCOUNT == 191) swiDelay(100);
+		while (REG_VCOUNT != 191) mySwiDelay(100);
+		while (REG_VCOUNT == 191) mySwiDelay(100);
 	}
 	#endif
 
@@ -306,9 +319,11 @@ static void screenshot(void) {
 	#else
 	sharedAddr[4] = 0x544F4853;
 	while (sharedAddr[4] == 0x544F4853) {
-		while (REG_VCOUNT != 191) swiDelay(100);
-		while (REG_VCOUNT == 191) swiDelay(100);
+		while (REG_VCOUNT != 191) mySwiDelay(100);
+		while (REG_VCOUNT == 191) mySwiDelay(100);
 	}
+	DC_InvalidateRange(&igmText.currentScreenshot, 1);
+	DC_InvalidateRange((char*)INGAME_MENU_EXT_LOCATION, 0x40000);
 	#endif
 }
 
@@ -319,8 +334,8 @@ static void manual(void) {
 	#else
 	sharedAddr[4] = 0x4E414D50; // PMAN
 	do {
-		while (REG_VCOUNT != 191) swiDelay(100);
-		while (REG_VCOUNT == 191) swiDelay(100);
+		while (REG_VCOUNT != 191) mySwiDelay(100);
+		while (REG_VCOUNT == 191) mySwiDelay(100);
 	} while (sharedAddr[4] == 0x4E414D50);
 	#endif
 
@@ -335,8 +350,8 @@ static void manual(void) {
 		sharedAddr[0] = igmText.manualLine;
 		sharedAddr[4] = 0x554E414D; // MANU
 		do {
-			while (REG_VCOUNT != 191) swiDelay(100);
-			while (REG_VCOUNT == 191) swiDelay(100);
+			while (REG_VCOUNT != 191) mySwiDelay(100);
+			while (REG_VCOUNT == 191) mySwiDelay(100);
 		} while (sharedAddr[4] == 0x554E414D);
 
 		print(0, 0, (unsigned char *)INGAME_MENU_EXT_LOCATION, FONT_WHITE, false);
@@ -368,8 +383,8 @@ static void manual(void) {
 	#else
 	sharedAddr[4] = 0x4E414D52; // RMAN
 	do {
-		while (REG_VCOUNT != 191) swiDelay(100);
-		while (REG_VCOUNT == 191) swiDelay(100);
+		while (REG_VCOUNT != 191) mySwiDelay(100);
+		while (REG_VCOUNT == 191) mySwiDelay(100);
 	} while (sharedAddr[4] == 0x4E414D52);
 	#endif
 }
@@ -406,7 +421,7 @@ static void drawMainMenu(MenuItem *menuItems, int menuItemCount) {
 	#endif
 }
 
-static void optionsMenu(s8 *mainScreen, u32 consoleModel) {
+static void optionsMenu(s32 *mainScreen, u32 consoleModel) {
 	OptionsItem optionsItems[8];
 	int optionsItemCount = 0;
 	optionsItems[optionsItemCount++] = OPTIONS_MAIN_SCREEN;
@@ -417,6 +432,8 @@ static void optionsMenu(s8 *mainScreen, u32 consoleModel) {
 	optionsItems[optionsItemCount++] = OPTIONS_CLOCK_SPEED;
 	optionsItems[optionsItemCount++] = OPTIONS_VRAM_MODE;
 #endif
+
+	bool mainScreenChanged = false;
 
 	u8 cursorPosition = 0;
 	while(1) {
@@ -440,10 +457,10 @@ static void optionsMenu(s8 *mainScreen, u32 consoleModel) {
 					isString = false;
 					break;
 				case OPTIONS_CLOCK_SPEED:
-					optionValue = igmText.optionsValues[3 + ((REG_SCFG_CLK == 0 ? scfgClkBak : REG_SCFG_CLK) & 1)];
+					optionValue = igmText.optionsValues[3 + ((REG_SCFG_CLK == 0 ? *scfgClkBak : REG_SCFG_CLK) & 1)];
 					break;
 				case OPTIONS_VRAM_MODE:
-					optionValue = igmText.optionsValues[5 + (((REG_SCFG_EXT == 0 ? scfgExtBak : REG_SCFG_EXT) & BIT(13)) >> 13)];
+					optionValue = igmText.optionsValues[5 + (((REG_SCFG_EXT == 0 ? *scfgExtBak : REG_SCFG_EXT) & BIT(13)) >> 13)];
 					break;
 			}
 
@@ -489,6 +506,7 @@ static void optionsMenu(s8 *mainScreen, u32 consoleModel) {
 					else if(*mainScreen < 0)
 						*mainScreen = 2;
 					sharedAddr[4] = (*mainScreen == 0) ? 0x4E435049 : 0x59435049;
+					mainScreenChanged = true;
 					break;
 				case OPTIONS_BRIGHTNESS:
 				{
@@ -501,8 +519,8 @@ static void optionsMenu(s8 *mainScreen, u32 consoleModel) {
 					sharedAddr[0] = brightness;
 					sharedAddr[4] = 0x4554494C; // LITE
 					while(sharedAddr[4] == 0x4554494C) {
-						while (REG_VCOUNT != 191) swiDelay(100);
-						while (REG_VCOUNT == 191) swiDelay(100);
+						while (REG_VCOUNT != 191) mySwiDelay(100);
+						while (REG_VCOUNT == 191) mySwiDelay(100);
 					}
 					break;
 				}
@@ -517,13 +535,14 @@ static void optionsMenu(s8 *mainScreen, u32 consoleModel) {
 					sharedAddr[0] = volume;
 					sharedAddr[4] = 0x554C4F56; // VOLU
 					while(sharedAddr[4] == 0x554C4F56) {
-						while (REG_VCOUNT != 191) swiDelay(100);
-						while (REG_VCOUNT == 191) swiDelay(100);
+						while (REG_VCOUNT != 191) mySwiDelay(100);
+						while (REG_VCOUNT == 191) mySwiDelay(100);
 					}
 					break;
 				}
 				case OPTIONS_CLOCK_SPEED:
 					REG_SCFG_CLK ^= 1;
+					u32* waitSysCyclesLoc = (u32*)(waitSysCyclesLocPtr ? *waitSysCyclesLocPtr : 0);
 					if (waitSysCyclesLoc) {
 						if (waitSysCyclesLoc[0] == 0xE92D4008) {
 							waitSysCyclesLoc[1] = (REG_SCFG_CLK & BIT(1)) ? 0xE1A00100 : 0xE1A00080;
@@ -540,6 +559,19 @@ static void optionsMenu(s8 *mainScreen, u32 consoleModel) {
 					break;
 			}
 		} else if (KEYS & KEY_B) {
+			if (mainScreenChanged) {
+				#ifndef B4DS
+				sharedAddr[0] = *mainScreen;
+				sharedAddr[4] = 0x53435049; // IPCS
+				while(sharedAddr[4] == 0x53435049) {
+					while (REG_VCOUNT != 191) mySwiDelay(100);
+					while (REG_VCOUNT == 191) mySwiDelay(100);
+				}
+				#else
+				codeJumpWord = ce9->saveMainScreenSetting;
+				(*codeJump)();
+				#endif
+			}
 			return;
 		}
 	}
@@ -595,8 +627,8 @@ static void ramViewer(void) {
 			sharedAddr[1] = (vu32)address;
 			sharedAddr[4] = 0x524D4152; // RAMR
 			while (sharedAddr[4] == 0x524D4152) {
-				while (REG_VCOUNT != 191) swiDelay(100);
-				while (REG_VCOUNT == 191) swiDelay(100);
+				while (REG_VCOUNT != 191) mySwiDelay(100);
+				while (REG_VCOUNT == 191) mySwiDelay(100);
 			}
 		}
 		ramLoaded = true;
@@ -707,8 +739,8 @@ static void ramViewer(void) {
 					sharedAddr[2] = cursorPosition;
 					sharedAddr[4] = 0x574D4152; // RAMW
 					while (sharedAddr[4] == 0x574D4152) {
-						while (REG_VCOUNT != 191) swiDelay(100);
-						while (REG_VCOUNT == 191) swiDelay(100);
+						while (REG_VCOUNT != 191) mySwiDelay(100);
+						while (REG_VCOUNT == 191) mySwiDelay(100);
 					}
 					ramLoaded = false;
 				}
@@ -720,27 +752,24 @@ static void ramViewer(void) {
 	(*revertMpu)();
 }
 
-void inGameMenu(s8 *mainScreen, u32 consoleModel, s32 *exceptionRegisters) {
+void inGameMenu(s32 *mainScreen, u32 consoleModel, s32 *exceptionRegisters) {
 	// If we were given exception registers, then we're handling an exception
 	bool exception = (exceptionRegisters != 0);
 
-	#ifndef B4DS
-	int oldIME = enterCriticalSection();
-
-	u16 exmemcnt = REG_EXMEMCNT;
-	sysSetCardOwner(false);	// Give Slot-1 access to arm7
-	#else
+	#ifdef B4DS
+	#ifndef EXTMEM
 	static bool ce9Set = false;
 	if (!ce9Set) {
-		if (*(u32*)CARDENGINE_ARM9_LOCATION_DLDI == CARDENGINE_ARM9_LOCATION_DLDI) {
-			ce9 = (cardengineArm9*)CARDENGINE_ARM9_LOCATION_DLDI;
-		} else if (*(u32*)CARDENGINE_ARM9_LOCATION_DLDI_ALT == CARDENGINE_ARM9_LOCATION_DLDI_ALT) {
+		if (*(u32*)CARDENGINE_ARM9_LOCATION_DLDI_ALT == CARDENGINE_ARM9_LOCATION_DLDI_ALT) {
 			ce9 = (cardengineArm9*)CARDENGINE_ARM9_LOCATION_DLDI_ALT;
 		} else if (*(u32*)CARDENGINE_ARM9_LOCATION_DLDI_ALT2 == CARDENGINE_ARM9_LOCATION_DLDI_ALT2) {
 			ce9 = (cardengineArm9*)CARDENGINE_ARM9_LOCATION_DLDI_ALT2;
+		} else if (*(u32*)CARDENGINE_ARM9_LOCATION_DLDI == CARDENGINE_ARM9_LOCATION_DLDI) {
+			ce9 = (cardengineArm9*)CARDENGINE_ARM9_LOCATION_DLDI;
 		}
 		ce9Set = true;
 	}
+	#endif
 	#endif
 
 	u32 dispcnt = REG_DISPCNT_SUB;
@@ -773,6 +802,9 @@ void inGameMenu(s8 *mainScreen, u32 consoleModel, s32 *exceptionRegisters) {
 	REG_POWERCNT |= POWER_SWAP_LCDS;
 
 	SetBrightness(1, 0);
+	REG_MOSAIC_SUB = 0; // Register is write only, can't back up
+	REG_BLDCNT_SUB = 0; // Register is write only, can't back up
+	REG_BLDALPHA_SUB = 0; // Register is write only, can't back up
 	REG_BLDY_SUB = 0; // Register is write only, can't back up
 
 	tonccpy(bgMapBak, BG_MAP_RAM_SUB(15), sizeof(bgMapBak));	// Backup BG_MAP_RAM
@@ -821,8 +853,8 @@ void inGameMenu(s8 *mainScreen, u32 consoleModel, s32 *exceptionRegisters) {
 		#ifndef B4DS
 		printBattery();
 		#endif
-		while (REG_VCOUNT != 191) swiDelay(100);
-		while (REG_VCOUNT == 191) swiDelay(100);
+		while (REG_VCOUNT != 191) mySwiDelay(100);
+		while (REG_VCOUNT == 191) mySwiDelay(100);
 	} while(KEYS & igmText.hotkey);
 
 	u8 cursorPosition = 0;
@@ -853,8 +885,8 @@ void inGameMenu(s8 *mainScreen, u32 consoleModel, s32 *exceptionRegisters) {
 			switch(menuItems[cursorPosition]) {
 				case MENU_EXIT:
 					do {
-						while (REG_VCOUNT != 191) swiDelay(100);
-						while (REG_VCOUNT == 191) swiDelay(100);
+						while (REG_VCOUNT != 191) mySwiDelay(100);
+						while (REG_VCOUNT == 191) mySwiDelay(100);
 					} while(KEYS & KEY_A);
 					sharedAddr[4] = 0x54495845; // EXIT
 					break;
@@ -874,8 +906,8 @@ void inGameMenu(s8 *mainScreen, u32 consoleModel, s32 *exceptionRegisters) {
 					#ifndef B4DS
 					sharedAddr[4] = 0x444D4152; // RAMD
 					while (sharedAddr[4] == 0x444D4152) {
-						while (REG_VCOUNT != 191) swiDelay(100);
-						while (REG_VCOUNT == 191) swiDelay(100);
+						while (REG_VCOUNT != 191) mySwiDelay(100);
+						while (REG_VCOUNT == 191) mySwiDelay(100);
 					}
 					#else
 					sharedAddr[3] = 0x444D4152; // RAMD
@@ -897,16 +929,16 @@ void inGameMenu(s8 *mainScreen, u32 consoleModel, s32 *exceptionRegisters) {
 			}
 		} else if (KEYS & KEY_B && !exception) {
 			do {
-				while (REG_VCOUNT != 191) swiDelay(100);
-				while (REG_VCOUNT == 191) swiDelay(100);
+				while (REG_VCOUNT != 191) mySwiDelay(100);
+				while (REG_VCOUNT == 191) mySwiDelay(100);
 			} while(KEYS & KEY_B);
 			sharedAddr[4] = 0x54495845; // EXIT
 		}
 		#ifndef B4DS
 		else if (KEYS & KEY_R && !exception) {
 			do {
-				while (REG_VCOUNT != 191) swiDelay(100);
-				while (REG_VCOUNT == 191) swiDelay(100);
+				while (REG_VCOUNT != 191) mySwiDelay(100);
+				while (REG_VCOUNT == 191) mySwiDelay(100);
 			} while(KEYS & KEY_R);
 			sharedAddr[4] = 0x50455453; // STEP
 		}
@@ -934,10 +966,4 @@ void inGameMenu(s8 *mainScreen, u32 consoleModel, s32 *exceptionRegisters) {
 		REG_POWERCNT &= ~POWER_SWAP_LCDS;
 	else if(*mainScreen == 2)
 		REG_POWERCNT |= POWER_SWAP_LCDS;
-
-	#ifndef B4DS
-	REG_EXMEMCNT = exmemcnt;
-
-	leaveCriticalSection(oldIME);
-	#endif
 }

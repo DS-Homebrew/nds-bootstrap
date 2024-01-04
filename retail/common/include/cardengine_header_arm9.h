@@ -41,6 +41,7 @@ typedef struct cardengineArm9Patches {
 	u32* reset_arm9;
 	u32 needFlushDCCache;
 	u32* pdash_read;
+	u32* gsdd_fix;
 	u32* vblankHandlerRef;
 	u32* ipcSyncHandlerRef;
 } cardengineArm9Patches;
@@ -72,16 +73,16 @@ typedef struct cardengineArm9ThumbPatches {
 // ARM9 cardengine
 //
 typedef struct cardengineArm9 {
-    u32 ce9;
-    cardengineArm9Patches* patches;
-    cardengineArm9ThumbPatches* thumbPatches;
-    u32 intr_vblank_orig_return;
-    u32 intr_ipc_orig_return;
-    u32 fileCluster;
-    u32 saveCluster;
-    u32 saveSize;
-    u32 cardStruct0;
-    u32 cacheStruct;
+	u32 ce9;
+	cardengineArm9Patches* patches;
+	cardengineArm9ThumbPatches* thumbPatches;
+	u32 intr_vblank_orig_return;
+	u32 intr_ipc_orig_return;
+	u32 fileCluster;
+	u32 saveCluster;
+	u32 saveSize;
+	u32 cardStruct0;
+	u32 cacheStruct;
 	u32 valueBits;
 	/*
 		0: saveOnFlashcard
@@ -99,17 +100,22 @@ typedef struct cardengineArm9 {
 		12: asyncCardRead
 		13: softResetMb
 		14: cloneboot
+		15: isDlp
 	*/
-    u32 overlaysSize;
+	s32 mainScreen;
+	u32 overlaysSize;
+	u32 romPaddingSize;
 	u32 consoleModel;
-    u32* irqTable;
-	// Below not used for ROM in RAM ce9 binary
-    u32 romLocation;
-    u32 cacheAddress;
-    u16 cacheSlots;
-    u16 cacheBlockSize;
-    u32 romPartSrc;
-    u32 romPartSize;
+	u32* irqTable;
+	// Below not used for DSiWare ce9 binary
+	u32 romLocation;
+	u32 cacheAddress;
+	u16 cacheSlots;
+	u16 cacheBlockSize;
+	u32 romPartSrc;
+	u32 romPartSize;
+	u32 romMapLines;
+	u32 romMap[4][3]; // 0: ROM part start, 1: ROM part start in RAM, 2: ROM part end in RAM
 } cardengineArm9;
 
 #else
@@ -185,14 +191,18 @@ typedef struct cardengineArm9 {
     u32 saveSize;
     u32 romFatTableCache;
     u32 savFatTableCache;
-    u16 romFatTableCompressed;
-    u16 savFatTableCompressed;
+    u8 romFatTableCompressed;
+    u8 savFatTableCompressed;
+    u16 musicsFatTableCompressed;
+    u32 patchOffsetCacheFileCluster;
     u32 musicFatTableCache;
     u32 ramDumpCluster;
     u32 srParamsCluster;
 	u32 screenshotCluster;
+	u32 apFixOverlaysCluster;
 	u32 musicCluster;
 	u32 musicsSize;
+	u32 musicBuffer;
     u32 pageFileCluster;
     u32 manualCluster;
     u32 sharedFontCluster;
@@ -206,13 +216,16 @@ typedef struct cardengineArm9 {
 		4: enableExceptionHandler
 		5: isSdk5
 		6: overlaysCached
+		13: softResetMb
 	*/
-    u16 s2FlashcardId;
-    u16 padding;
-    u32 overlaysSize;
-    u32 ioverlaysSize;
-    u32* irqTable;
-    u32 romLocation;
+    s32 mainScreen;
+	u16 s2FlashcardId;
+	u16 padding;
+	u32 overlaysSize;
+	u32 ioverlaysSize;
+	u32 romPaddingSize;
+	u32* irqTable;
+	u32 romLocation;
 	u32 rumbleFrames[2];
 	u32 rumbleForce[2];
 	u32 prepareScreenshot;
@@ -220,6 +233,7 @@ typedef struct cardengineArm9 {
 	u32 prepareManual;
 	u32 readManual;
 	u32 restorePreManual;
+	u32 saveMainScreenSetting;
 } cardengineArm9;
 #endif
 

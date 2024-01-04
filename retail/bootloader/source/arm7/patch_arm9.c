@@ -389,8 +389,8 @@ static bool patchCardIrqEnable(cardengineArm9* ce9, const tNDSHeader* ndsHeader,
 	return true;
 }
 
-static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 patchMpuRegion, u32 patchMpuSize) {
-	if (!extendedMemory2 || patchMpuRegion == 2 || ndsHeader->unitCode > 0) {
+static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 patchMpuRegion) {
+	if (!extendedMemory || patchMpuRegion == 2 || ndsHeader->unitCode > 0) {
 		return;
 	}
 
@@ -493,7 +493,7 @@ static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 		}*/
 	}
 
-	if (!isSdk5(moduleParams)) {
+	if (!isSdk5(moduleParams) && unpatchedFuncs->mpuInitRegionOldData != 0x200002B) {
 		u32* mpuDataOffsetAlt = patchOffsetCache.mpuDataOffsetAlt;
 		if (!patchOffsetCache.mpuDataOffsetAlt) {
 			mpuDataOffsetAlt = findMpuDataOffsetAlt(ndsHeader);
@@ -519,8 +519,8 @@ static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 	patchOffsetCache.mpuInitOffset = mpuInitOffset;
 }
 
-static void patchMpu2(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
-	if (((moduleParams->sdk_version < 0x2008000) && !extendedMemory2) || moduleParams->sdk_version > 0x5000000) {
+static void patchMpu2(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, const bool usesCloneboot) {
+	if (((moduleParams->sdk_version < 0x2008000) && !extendedMemory) || moduleParams->sdk_version > 0x5000000) {
 		return;
 	}
 
@@ -585,6 +585,12 @@ static void patchMpu2(const tNDSHeader* ndsHeader, const module_params_t* module
 		dbg_hexa((u32)mpuInitOffset);
 		dbg_printf("\n\n");
 
+		u32 mpuInitOffsetInSrl = (u32)mpuInitOffset;
+		mpuInitOffsetInSrl -= (u32)ndsHeader->arm9destination;
+
+		if (mpuInitOffsetInSrl >= 0 && mpuInitOffsetInSrl < 0x4000 && usesCloneboot) {
+			unpatchedFuncs->mpuInitOffset2 = mpuInitOffset;
+		}
 		*mpuInitOffset = 0xE1A00000; // nop
 
 		// Try to find it
@@ -636,7 +642,7 @@ void patchMpuFlagsSet(const tNDSHeader* ndsHeader, const module_params_t* module
 
 void patchMpuChange(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	extern u32 arm7mbk;
-	if (!extendedMemory2 || moduleParams->sdk_version < 0x5000000 || arm7mbk == 0x080037C0) {
+	if (!extendedMemory || moduleParams->sdk_version < 0x5000000 || arm7mbk == 0x080037C0) {
 		return;
 	}
 
@@ -730,11 +736,14 @@ void patchHiHeapPointer(cardengineArm9* ce9, const module_params_t* moduleParams
 	const u32 cheatSizeTotal = cheatSize+(apPatchIsCheat ? apPatchSize : 0);
 
 	const bool nandAccess = (accessControl & BIT(4)); // isDSiWare
+	const bool ce9NotInHeap = (ce9Alt || (u32)ce9 == CARDENGINE_ARM9_LOCATION_DLDI_START);
 
-	if ((!nandAccess && extendedMemory2)
-	|| moduleParams->sdk_version < 0x2008000
-	|| (ce9Alt && !ce9AltLargeTable && cheatSizeTotal <= 4)
-	|| strncmp(romTid, "VSO", 3) == 0
+	if ((!nandAccess && extendedMemory)
+	|| (moduleParams->sdk_version < 0x2008000 && moduleParams->sdk_version != 0x20029A8)
+	|| (ce9NotInHeap && !ce9AltLargeTable && cheatSizeTotal <= 4)
+	|| (((strncmp(romTid, "YEE", 3) == 0 && romTid[3] != 'J') || strncmp(romTid, "BEB", 3) == 0 || strncmp(romTid, "BEE", 3) == 0) && !ce9AltLargeTable) // Inazuma Eleven 1 & 2
+	|| strncmp(romTid, "CLJ", 3) == 0 // Mario & Luigi: Bowser's Inside Story
+	|| strncmp(romTid, "VSO", 3) == 0 // Sonic Classic Collection
 	|| arm7mbk == 0x080037C0) {
 		return;
 	}
@@ -763,19 +772,18 @@ void patchHiHeapPointer(cardengineArm9* ce9, const module_params_t* moduleParams
 	dbg_hexa((u32)oldheapPointer);
     dbg_printf("\n\n");
 
-	if (ce9Alt && !ce9AltLargeTable) {
+	if (nandAccess && extendedMemory) {
+		*heapPointer = CARDENGINE_ARM9_LOCATION_DLDI_EXTMEM;
+	} else if (ce9NotInHeap && !ce9AltLargeTable) {
 		*heapPointer = CHEAT_ENGINE_LOCATION_B4DS-0x400000;
 	} else {
 		*heapPointer = (fatTableAddr < 0x023C0000 || fatTableAddr >= (u32)ce9) ? (u32)ce9 : fatTableAddr; // shrink heap by FAT table size + ce9 binary size
-	}
-	if (nandAccess && extendedMemory2) {
-		*heapPointer = CARDENGINE_ARM9_LOCATION_DLDI_EXTMEM;
 	}
 
     dbg_printf("new hi heap value: ");
 	dbg_hexa((u32)*heapPointer);
     dbg_printf("\n\n");
-    dbg_printf("Hi Heap Shrink Sucessfull\n\n");
+    dbg_printf(!(nandAccess && extendedMemory) ? "Hi Heap Shrink Successful\n\n" : "Hi Heap Grow Successful\n\n");
 }
 
 u32 relocateBssPart(const tNDSHeader* ndsHeader, u32 bssEnd, u32 bssPartStart, u32 bssPartEnd, u32 newPartStart) {
@@ -806,11 +814,21 @@ void patchHiHeapDSiWare(u32 addr, u32 heapEnd) {
 		*(u32*)(addr+0x28) = 0xE3560001; // cmp r6, #1
 		*(u32*)(addr+0x30) = 0xE3A00627; // mov r0, #0x2700000
 
-		*(u32*)(addr+0x58) = 0xE3A00C00; // mov r0, #*(u32*)(addr+0x13C)
+		// Convert ldr to mov instruction
 		if (*(u32*)(addr+0x13C) != 0) {
-			for (u32 i = 0; i < *(u32*)(addr+0x13C); i += 0x100) {
-				*(u32*)(addr+0x58) += 1;
+			if (*(u8*)(addr+0x13C) != 0) {
+				*(u32*)(addr+0x58) = 0xE3A00D00; // mov r0, #*(u32*)(addr+0x13C)
+				for (u32 i = 0; i < *(u32*)(addr+0x13C); i += 0x40) {
+					*(u32*)(addr+0x58) += 1;
+				}
+			} else {
+				*(u32*)(addr+0x58) = 0xE3A00C00; // mov r0, #*(u32*)(addr+0x13C)
+				for (u32 i = 0; i < *(u32*)(addr+0x13C); i += 0x100) {
+					*(u32*)(addr+0x58) += 1;
+				}
 			}
+		} else {
+			*(u32*)(addr+0x58) = 0xE3A00000; // mov r0, #*(u32*)(addr+0x13C)
 		}
 
 		*(u32*)(addr+0x13C) = heapEnd;
@@ -821,11 +839,21 @@ void patchHiHeapDSiWare(u32 addr, u32 heapEnd) {
 	*(u32*)(addr+0x24) = 0xE3500001; // cmp r0, #1
 	*(u32*)(addr+0x2C) = 0x13A00627; // movne r0, #0x2700000
 
-	*(u32*)(addr+0x40) = 0xE3A01C00; // mov r1, #*(u32*)(addr+0x9C)
+	// Convert ldr to mov instruction
 	if (*(u32*)(addr+0x9C) != 0) {
-		for (u32 i = 0; i < *(u32*)(addr+0x9C); i += 0x100) {
-			*(u32*)(addr+0x40) += 1;
+		if (*(u8*)(addr+0x9C) != 0) {
+			*(u32*)(addr+0x40) = 0xE3A01D00; // mov r1, #*(u32*)(addr+0x9C)
+			for (u32 i = 0; i < *(u32*)(addr+0x9C); i += 0x40) {
+				*(u32*)(addr+0x40) += 1;
+			}
+		} else {
+			*(u32*)(addr+0x40) = 0xE3A01C00; // mov r1, #*(u32*)(addr+0x9C)
+			for (u32 i = 0; i < *(u32*)(addr+0x9C); i += 0x100) {
+				*(u32*)(addr+0x40) += 1;
+			}
 		}
+	} else {
+		*(u32*)(addr+0x40) = 0xE3A01000; // mov r1, #*(u32*)(addr+0x9C)
 	}
 
 	/*if (*(u32*)(addr+0x9C) == 0) {
@@ -948,6 +976,187 @@ void patchTwlSleepMode(const tNDSHeader* ndsHeader, const module_params_t* modul
 	}
 }
 
+void patchInitLock(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+	u32* offset = patchOffsetCache.initLockEndOffset;
+	if (!patchOffsetCache.initLockEndOffset) {
+		offset = findInitLockEndOffset(ndsHeader);
+		if (offset) {
+			patchOffsetCache.initLockEndOffset = offset;
+		}
+	}
+
+	if (!offset) {
+		return;
+	}
+
+	dbg_printf("initLockEnd location : ");
+	dbg_hexa((u32)offset);
+	dbg_printf("\n\n");
+
+	if (offset[1] == 0x02FFFFB4) { // Debug
+		u32* newBranchOffset2 = (u32*)((u32)offset + 0x160);
+
+		for (int i = 0; i < 0x100/sizeof(u32); i++) {
+			newBranchOffset2++;
+			if (newBranchOffset2[0] == 0xE92D000F && newBranchOffset2[1] == 0xE92D4008) {
+				break;
+			}
+		}
+
+		u32* newBranchOffset1 = (u32*)((u32)newBranchOffset2 + 0x80);
+
+		for (int i = 0; i < 0x100/sizeof(u32); i++) {
+			newBranchOffset1++;
+			if (newBranchOffset1[0] == 0xE92D000F && newBranchOffset1[1] == 0xE92D4008) {
+				break;
+			}
+		}
+
+		if (*newBranchOffset1 == 0xE92D000F) {
+			dbg_printf("newBranch location 1 : ");
+			dbg_hexa((u32)newBranchOffset1);
+			dbg_printf("\n\n");
+		}
+
+		if (*newBranchOffset2 == 0xE92D000F) {
+			dbg_printf("newBranch location 2 : ");
+			dbg_hexa((u32)newBranchOffset2);
+			dbg_printf("\n\n");
+		}
+
+		u32 startOffset = (u32)ndsHeader->arm9destination;
+		u32* newBranchPrepOffset1 = (u32*)(startOffset+0x860);
+		u32* newBranchPrepOffset2 = (u32*)(startOffset+0x874);
+		if (moduleParams->sdk_version > 0x5050000) {
+			newBranchPrepOffset1 = (u32*)(startOffset+0x870);
+			newBranchPrepOffset2 = (u32*)(startOffset+0x884);
+		}
+
+		newBranchPrepOffset1[0] = 0xE92D4000; // push {lr}
+		newBranchPrepOffset1[1] = 0xE3A0007E; // mov r0, #0x7E
+		newBranchPrepOffset1[2] = 0xE3A02000; // mov r2, #0
+		setBL(((u32)newBranchPrepOffset1 + 3*sizeof(u32)), (u32)newBranchOffset1);
+		newBranchPrepOffset1[4] = 0xE8BD8000; // pop {pc}
+
+		newBranchPrepOffset2[0] = 0xE92D4000; // push {lr}
+		newBranchPrepOffset2[1] = 0xE3A0007F; // mov r0, #0x7F
+		newBranchPrepOffset2[2] = 0xE3A02000; // mov r2, #0
+		setBL(((u32)newBranchPrepOffset2 + 3*sizeof(u32)), (u32)newBranchOffset2);
+		newBranchPrepOffset2[4] = 0xE8BD8000; // pop {pc}
+
+		setBL(((u32)offset - 17*sizeof(u32)), (u32)newBranchPrepOffset1);
+		setBL(((u32)offset - 14*sizeof(u32)), (u32)newBranchPrepOffset2);
+	} else if (offset[1] == 0xFFFF0000) { // THUMB
+		u16* newBranchOffset2 = (u16*)offset;
+
+		for (int i = 0; i < 32; i++) {
+			newBranchOffset2++;
+			if (newBranchOffset2[0] == 0xB508 && newBranchOffset2[1] == 0x2300) {
+				break;
+			}
+		}
+
+		u16* newBranchOffset1 = newBranchOffset2;
+		newBranchOffset1 += 6;
+
+		for (int i = 0; i < 40; i++) {
+			newBranchOffset1++;
+			if (newBranchOffset1[0] == 0xB508 && newBranchOffset1[1] == 0x2300) {
+				break;
+			}
+		}
+
+		if (*newBranchOffset1 == 0xB508) {
+			dbg_printf("newBranch location 1 : ");
+			dbg_hexa((u32)newBranchOffset1);
+			dbg_printf("\n\n");
+		}
+
+		if (*newBranchOffset2 == 0xB508) {
+			dbg_printf("newBranch location 2 : ");
+			dbg_hexa((u32)newBranchOffset2);
+			dbg_printf("\n\n");
+		}
+
+		u32 startOffset = (u32)ndsHeader->arm9destination;
+		u16* newBranchPrepOffset1 = (u16*)(startOffset+0x860);
+		u16* newBranchPrepOffset2 = (u16*)(startOffset+0x86C);
+		if (moduleParams->sdk_version > 0x5050000) {
+			newBranchPrepOffset1 = (u16*)(startOffset+0x870);
+			newBranchPrepOffset2 = (u16*)(startOffset+0x87C);
+		}
+
+		newBranchPrepOffset1[0] = 0xB500; // push {lr}
+		newBranchPrepOffset1[1] = 0x207E; // movs r0, #0x7E
+		newBranchPrepOffset1[2] = 0x2200; // movs r2, #0
+		setBLThumb(((u32)newBranchPrepOffset1 + 3*sizeof(u16)), (u32)newBranchOffset1);
+		newBranchPrepOffset1[5] = 0xBD00; // pop {pc}
+
+		newBranchPrepOffset2[0] = 0xB500; // push {lr}
+		newBranchPrepOffset2[1] = 0x207F; // movs r0, #0x7F
+		newBranchPrepOffset2[2] = 0x2200; // movs r2, #0
+		setBLThumb(((u32)newBranchPrepOffset2 + 3*sizeof(u16)), (u32)newBranchOffset2);
+		newBranchPrepOffset2[5] = 0xBD00; // pop {pc}
+
+		setBLThumb(((u32)offset - 10*sizeof(u16)), (u32)newBranchPrepOffset1);
+		setBLThumb(((u32)offset - 6*sizeof(u16)), (u32)newBranchPrepOffset2);
+	} else {
+		u32* newBranchOffset2 = offset;
+
+		for (int i = 0; i < 32; i++) {
+			newBranchOffset2++;
+			if (*newBranchOffset2 == 0xE59FC004) {
+				break;
+			}
+		}
+
+		u32* newBranchOffset1 = newBranchOffset2;
+		newBranchOffset1 += 4;
+
+		for (int i = 0; i < 40; i++) {
+			newBranchOffset1++;
+			if (*newBranchOffset1 == 0xE59FC004) {
+				break;
+			}
+		}
+
+		if (*newBranchOffset1 == 0xE59FC004) {
+			dbg_printf("newBranch location 1 : ");
+			dbg_hexa((u32)newBranchOffset1);
+			dbg_printf("\n\n");
+		}
+
+		if (*newBranchOffset2 == 0xE59FC004) {
+			dbg_printf("newBranch location 2 : ");
+			dbg_hexa((u32)newBranchOffset2);
+			dbg_printf("\n\n");
+		}
+
+		u32 startOffset = (u32)ndsHeader->arm9destination;
+		u32* newBranchPrepOffset1 = (u32*)(startOffset+0x860);
+		u32* newBranchPrepOffset2 = (u32*)(startOffset+0x874);
+		if (moduleParams->sdk_version > 0x5050000) {
+			newBranchPrepOffset1 = (u32*)(startOffset+0x870);
+			newBranchPrepOffset2 = (u32*)(startOffset+0x884);
+		}
+
+		newBranchPrepOffset1[0] = 0xE92D4000; // push {lr}
+		newBranchPrepOffset1[1] = 0xE3A0007E; // mov r0, #0x7E
+		newBranchPrepOffset1[2] = 0xE3A02000; // mov r2, #0
+		setBL(((u32)newBranchPrepOffset1 + 3*sizeof(u32)), (u32)newBranchOffset1);
+		newBranchPrepOffset1[4] = 0xE8BD8000; // pop {pc}
+
+		newBranchPrepOffset2[0] = 0xE92D4000; // push {lr}
+		newBranchPrepOffset2[1] = 0xE3A0007F; // mov r0, #0x7F
+		newBranchPrepOffset2[2] = 0xE3A02000; // mov r2, #0
+		setBL(((u32)newBranchPrepOffset2 + 3*sizeof(u32)), (u32)newBranchOffset2);
+		newBranchPrepOffset2[4] = 0xE8BD8000; // pop {pc}
+
+		setBL(((u32)offset - 6*sizeof(u32)), (u32)newBranchPrepOffset1);
+		setBL(((u32)offset - 3*sizeof(u32)), (u32)newBranchPrepOffset2);
+	}
+}
+
 bool useSharedFont = false;
 
 void patchSharedFontPath(const cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
@@ -1045,8 +1254,20 @@ void patchSharedFontPath(const cardengineArm9* ce9, const tNDSHeader* ndsHeader,
 		dbg_hexa((u32)fileIoRead);
 		dbg_printf("\n\n");
 
-		extern u32* findLtdModuleParamsOffset(const tNDSHeader* ndsHeader);
-		ltd_module_params_t* ltdModuleParams = (ltd_module_params_t*)(findLtdModuleParamsOffset(ndsHeader) - 4);
+		ltd_module_params_t* ltdModuleParams = (ltd_module_params_t*)patchOffsetCache.ltdModuleParamsOffset;
+		if (!ltdModuleParams) {
+			extern u32* findLtdModuleParamsOffset(const tNDSHeader* ndsHeader);
+			ltdModuleParams = (ltd_module_params_t*)(findLtdModuleParamsOffset(ndsHeader) - 4);
+			if (ltdModuleParams) {
+				patchOffsetCache.ltdModuleParamsOffset = (u32*)ltdModuleParams;
+			}
+		}
+
+		if (ltdModuleParams) {
+			dbg_printf("Ltd module params offset: ");
+			dbg_hexa((u32)ltdModuleParams);
+			dbg_printf("\n");		
+		}
 
 		u32 iUncompressedSizei = arm9ibinarySize;
 
@@ -1696,7 +1917,7 @@ static void patchCardReadPdash(cardengineArm9* ce9, const tNDSHeader* ndsHeader)
 }
 
 static void operaRamPatch(void) {
-	if (dsDebugRam || !extendedMemory2) {
+	if (dsDebugRam || !extendedMemory) {
 		return;
 	}
 
@@ -1737,7 +1958,7 @@ static void setFlushCache(cardengineArm9* ce9, u32 patchMpuRegion, bool usesThum
 	ce9->patches->needFlushDCCache = (patchMpuRegion == 1);
 }
 
-u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 patchMpuRegion, u32 patchMpuSize) {
+u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 patchMpuRegion, const bool usesCloneboot) {
 	bool usesThumb;
 	int readType;
 	int sdk5ReadType; // SDK 5
@@ -1765,16 +1986,16 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
     dbg_printf("\n\n");
 
 	if (ndsHeader->unitCode > 0) {
-		extern u32 donorFileTwlCluster;
+		extern u32 donorFileCluster;
 		extern u32 arm7mbk;
 		extern u32 accessControl;
 
 		if (((accessControl & BIT(4))
-		   || (strncmp(romTid, "DME", 3) == 0 && extendedMemory2)
-		   || (strncmp(romTid, "DMD", 3) == 0 && extendedMemory2)
+		   || (strncmp(romTid, "DME", 3) == 0 && extendedMemory)
+		   || (strncmp(romTid, "DMD", 3) == 0 && extendedMemory)
 		   || strncmp(romTid, "DMP", 3) == 0
-		   || (strncmp(romTid, "DHS", 3) == 0 && extendedMemory2)
-		)	&& arm7mbk == 0x080037C0 && donorFileTwlCluster != CLUSTER_FREE) {
+		   || strncmp(romTid, "DHS", 3) == 0
+		)	&& arm7mbk == 0x080037C0 && donorFileCluster != CLUSTER_FREE) {
 			if (moduleParams->sdk_version > 0x5050000) {
 				*(u32*)(startOffset+0x838) = 0xE1A00000; // nop
 				*(u32*)(startOffset+0x99C) = 0xE1A00000; // nop
@@ -1784,12 +2005,10 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 
 			patchTwlSleepMode(ndsHeader, moduleParams);
 		}
-
-		patchSharedFontPath(ce9, ndsHeader, moduleParams);
 	}
 
-	patchMpu(ndsHeader, moduleParams, patchMpuRegion, patchMpuSize);
-	patchMpu2(ndsHeader, moduleParams);
+	patchMpu(ndsHeader, moduleParams, patchMpuRegion);
+	patchMpu2(ndsHeader, moduleParams, usesCloneboot);
 	patchMpuFlagsSet(ndsHeader, moduleParams);
 	patchMpuChange(ndsHeader, moduleParams);
 
@@ -1846,4 +2065,27 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 
 	dbg_printf("ERR_NONE\n\n");
 	return ERR_NONE;
+}
+
+void patchCardNdsArm9Cont(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+	if (ndsHeader->unitCode == 0) {
+		return;
+	}
+
+	patchSharedFontPath(ce9, ndsHeader, moduleParams);
+
+	// Further patching in order for DSiWare to boot with NTR ARM7 binary
+	extern u8 arm7newUnitCode;
+	extern u32 arm7mbk;
+	extern u32 donorFileCluster;
+	if (arm7newUnitCode == 0 && arm7mbk == 0x080037C0 && donorFileCluster != CLUSTER_FREE) {
+		u32 startOffset = (u32)ndsHeader->arm9destination;
+		if (moduleParams->sdk_version > 0x5050000) {
+			setB(startOffset+0x86C, startOffset+0x8F0);
+		} else {
+			setB(startOffset+0x85C, (moduleParams->sdk_version > 0x5020000) ? startOffset+0x8E0 : startOffset+0x8D8);
+		}
+
+		patchInitLock(ndsHeader, moduleParams);
+	}
 }

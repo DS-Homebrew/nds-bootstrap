@@ -103,6 +103,11 @@ static const u32 fileIoReadSignature[4]        = {0xE92D4038, 0xE24DD008, 0xE28D
 static const u16 fileIoReadSignature51Thumb[4] = {0xB510, 0xB082, 0x1C04, 0xAB00}; // SDK 5.1
 static const u16 fileIoReadSignatureThumb[4]   = {0xB538, 0xB082, 0x1C05, 0xAB00}; // SDK 5.?
 
+// Init Lock (SDK 5)
+static const u32 initLockEndSignature[2]      = {0x02FFFFB0, 0x04000204};
+static const u32 initLockEndSignatureThumb[3] = {0x02FFFFB0, 0xFFFF0000, 0x04000204};
+static const u32 initLockEndSignatureDebug[3] = {0x02FFFFB0, 0x02FFFFB4, 0x02FFFFC0};
+
 // irq enable
 static const u32 irqEnableStartSignature1[4]        = {0xE59FC028, 0xE3A01000, 0xE1DC30B0, 0xE59F2020};					// SDK <= 3
 static const u32 irqEnableStartSignature2Alt[4]     = {0xE92D000F, 0xE92D4030, 0xE24DD004, 0xEBFFFFDB};					// SDK 2
@@ -191,32 +196,14 @@ extern bool isPawsAndClaws(const tNDSHeader* ndsHeader);
 u32* findModuleParamsOffset(const tNDSHeader* ndsHeader) {
 	dbg_printf("findModuleParamsOffset:\n");
 
-	extern u32 srlAddr;
-	u32* moduleParamsOffset = NULL;
-	if (patchOffsetCache.ver != patchOffsetCacheFileVersion
-	 || patchOffsetCache.type != 1) {
-		patchOffsetCache.moduleParamsOffset = 0;
-	} else {
-		moduleParamsOffset = patchOffsetCache.moduleParamsOffset;
-	}
-	if (srlAddr > 0 || !moduleParamsOffset) {
-		moduleParamsOffset = findOffset(
-			(u32*)ndsHeader->arm9destination, ndsHeader->arm9binarySize,
-			moduleParamsSignature, 2
-		);
-		if (moduleParamsOffset) {
-			dbg_printf("Module params offset found: ");
-			patchOffsetCache.moduleParamsOffset = moduleParamsOffset;
-		} else {
-			dbg_printf("Module params offset not found\n");
-		}
-	} else {
-		dbg_printf("Module params offset restored: ");
-	}
-
+	u32* moduleParamsOffset = findOffset(
+		(u32*)ndsHeader->arm9destination, ndsHeader->arm9binarySize,
+		moduleParamsSignature, 2
+	);
 	if (moduleParamsOffset) {
-		dbg_hexa((u32)moduleParamsOffset);
-		dbg_printf("\n");
+		dbg_printf("Module params offset found\n");
+	} else {
+		dbg_printf("Module params offset not found\n");
 	}
 
 	return moduleParamsOffset;
@@ -225,31 +212,14 @@ u32* findModuleParamsOffset(const tNDSHeader* ndsHeader) {
 u32* findLtdModuleParamsOffset(const tNDSHeader* ndsHeader) {
 	dbg_printf("findLtdModuleParamsOffset:\n");
 
-	u32* moduleParamsOffset = NULL;
-	if (patchOffsetCache.ver != patchOffsetCacheFileVersion
-	 || patchOffsetCache.type != 1) {
-		patchOffsetCache.ltdModuleParamsOffset = 0;
-	} else {
-		moduleParamsOffset = patchOffsetCache.ltdModuleParamsOffset;
-	}
-	if (!moduleParamsOffset) {
-		moduleParamsOffset = findOffset(
-			(u32*)ndsHeader->arm9destination, ndsHeader->arm9binarySize,
-			moduleParamsLtdSignature, 2
-		);
-		if (moduleParamsOffset) {
-			dbg_printf("Ltd module params offset found: ");
-			patchOffsetCache.ltdModuleParamsOffset = moduleParamsOffset;
-		} else {
-			dbg_printf("Ltd module params offset not found\n");
-		}
-	} else {
-		dbg_printf("Ltd module params offset restored: ");
-	}
-
+	u32* moduleParamsOffset = findOffset(
+		(u32*)ndsHeader->arm9destination, ndsHeader->arm9binarySize,
+		moduleParamsLtdSignature, 2
+	);
 	if (moduleParamsOffset) {
-		dbg_hexa((u32)moduleParamsOffset);
-		dbg_printf("\n");
+		dbg_printf("Ltd module params offset found\n");
+	} else {
+		dbg_printf("Ltd module params offset not found\n");
 	}
 
 	return moduleParamsOffset;
@@ -963,9 +933,9 @@ u32* findCardIdStartOffset(const module_params_t* moduleParams, const u32* cardI
 
 	if (isSdk5(moduleParams)) {
 		// SDK 5
-		cardIdStartOffset = findOffsetBackwards(
+		cardIdStartOffset = findOffsetBackwards2(
 			(u32*)cardIdEndOffset, 0x200,
-			cardIdStartSignature5, 2
+			cardIdStartSignature5, cardIdStartSignature5Alt, 2
 		);
 		if (cardIdStartOffset) {
 			dbg_printf("Card ID start SDK 5 found\n");
@@ -974,49 +944,25 @@ u32* findCardIdStartOffset(const module_params_t* moduleParams, const u32* cardI
 		}
 
 		if (!cardIdStartOffset) {
-			cardIdStartOffset = findOffsetBackwards(
-				(u32*)cardIdEndOffset, 0x200,
-				cardIdStartSignature5Alt, 2
+			cardIdStartOffset = findOffsetBackwards2(
+				(u32*)cardIdEndOffset, 0x100,
+				cardIdStartSignatureAlt1, cardIdStartSignatureAlt2, 1
 			);
 			if (cardIdStartOffset) {
-				dbg_printf("Card ID start SDK 5 alt 1 found\n");
+				dbg_printf("Card ID start alt found\n");
 			} else {
-				dbg_printf("Card ID start SDK 5 alt 1 not found\n");
+				dbg_printf("Card ID start alt not found\n");
 			}
 		}
 	} else {
-		cardIdStartOffset = findOffsetBackwards(
+		cardIdStartOffset = findOffsetBackwards3(
 			(u32*)cardIdEndOffset, 0x100,
-			cardIdStartSignature, 1
+			cardIdStartSignature, cardIdStartSignatureAlt1, cardIdStartSignatureAlt2, 1
 		);
 		if (cardIdStartOffset) {
 			dbg_printf("Card ID start found\n");
 		} else {
 			dbg_printf("Card ID start not found\n");
-		}
-	}
-
-	if (!cardIdStartOffset) {
-		cardIdStartOffset = findOffsetBackwards(
-			(u32*)cardIdEndOffset, 0x100,
-			cardIdStartSignatureAlt1, 1
-		);
-		if (cardIdStartOffset) {
-			dbg_printf("Card ID start alt 1 found\n");
-		} else {
-			dbg_printf("Card ID start alt 1 not found\n");
-		}
-	}
-
-	if (!cardIdStartOffset) {
-		cardIdStartOffset = findOffsetBackwards(
-			(u32*)cardIdEndOffset, 0x100,
-			cardIdStartSignatureAlt2, 1
-		);
-		if (cardIdStartOffset) {
-			dbg_printf("Card ID start alt 2 found\n");
-		} else {
-			dbg_printf("Card ID start alt 2 not found\n");
 		}
 	}
 
@@ -1033,48 +979,14 @@ u16* findCardIdStartOffsetThumb(const module_params_t* moduleParams, const u16* 
 
 	//if (usesThumb) {
 	
-	u16* cardIdStartOffset = findOffsetBackwardsThumb(
+	u16* cardIdStartOffset = findOffsetBackwardsThumb4(
 		(u16*)cardIdEndOffset, 0x50,
-		cardIdStartSignatureThumb, 2
+		cardIdStartSignatureThumb, cardIdStartSignatureThumbAlt1, cardIdStartSignatureThumbAlt2, cardIdStartSignatureThumbAlt3, 2
 	);
 	if (cardIdStartOffset) {
 		dbg_printf("Card ID start thumb found\n");
 	} else {
 		dbg_printf("Card ID start thumb not found\n");
-	}
-
-	if (!cardIdStartOffset) {
-		cardIdStartOffset = findOffsetBackwardsThumb(
-			(u16*)cardIdEndOffset, 0x50,
-			cardIdStartSignatureThumbAlt1, 2
-		);
-		if (cardIdStartOffset) {
-			dbg_printf("Card ID start thumb alt 1 found\n");
-		} else {
-			dbg_printf("Card ID start thumb alt 1 not found\n");
-		}
-	}
-	if (!cardIdStartOffset) {
-		cardIdStartOffset = findOffsetBackwardsThumb(
-			(u16*)cardIdEndOffset, 0x50,
-			cardIdStartSignatureThumbAlt2, 2
-		);
-		if (cardIdStartOffset) {
-			dbg_printf("Card ID start thumb alt 2 found\n");
-		} else {
-			dbg_printf("Card ID start thumb alt 2 not found\n");
-		}
-	}
-	if (!cardIdStartOffset) {
-		cardIdStartOffset = findOffsetBackwardsThumb(
-			(u16*)cardIdEndOffset, 0x50,
-			cardIdStartSignatureThumbAlt3, 2
-		);
-		if (cardIdStartOffset) {
-			dbg_printf("Card ID start thumb alt 3 found\n");
-		} else {
-			dbg_printf("Card ID start thumb alt 3 not found\n");
-		}
 	}
 
 	dbg_printf("\n");
@@ -1256,6 +1168,49 @@ u16* findCardReadDmaStartOffsetThumb(const u16* cardReadDmaEndOffset) {
 	return cardReadDmaStartOffset;
 }
 
+u32* findInitLockEndOffset(const tNDSHeader* ndsHeader) {
+	dbg_printf("findInitLockEndOffset:\n");
+
+	u32* offset = findOffset(
+		(u32*)ndsHeader->arm9destination, iUncompressedSize,
+		initLockEndSignature, 2
+	);
+	if (offset) {
+		dbg_printf("Init lock end found\n");
+	} else {
+		dbg_printf("Init lock end not found\n");
+	}
+
+	if (!offset) {
+		offset = findOffset(
+			(u32*)ndsHeader->arm9destination, iUncompressedSize,
+			initLockEndSignatureThumb, 3
+		);
+
+		if (offset) {
+			dbg_printf("Init lock end THUMB found\n");
+		} else {
+			dbg_printf("Init lock end THUMB not found\n");
+		}
+	}
+
+	if (!offset) {
+		offset = findOffset(
+			(u32*)ndsHeader->arm9destination, iUncompressedSize,
+			initLockEndSignatureDebug, 3
+		);
+
+		if (offset) {
+			dbg_printf("Init lock end Debug found\n");
+		} else {
+			dbg_printf("Init lock end Debug not found\n");
+		}
+	}
+
+	dbg_printf("\n");
+	return offset;
+}
+
 u32* a9FindCardIrqEnableOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool* usesThumb) {
 	dbg_printf("findCardIrqEnableOffset:\n");
 	
@@ -1360,10 +1315,19 @@ u32* findMpuStartOffset(const tNDSHeader* ndsHeader, u32 patchMpuRegion) {
 
 	const u32* mpuInitRegionSignature = getMpuInitRegionSignature(patchMpuRegion);
 
-	u32* mpuStartOffset = findOffset(
-		(u32*)ndsHeader->arm9destination, iUncompressedSize,
-		mpuInitRegionSignature, 1
-	);
+	u32* mpuStartOffset = NULL;
+	if (((u32)ndsHeader->arm9executeAddress - (u32)ndsHeader->arm9destination) >= 0x1000) {
+		mpuStartOffset = findOffset(
+			(u32*)ndsHeader->arm9executeAddress, 0x400,
+			mpuInitRegionSignature, 1
+		);
+	}
+	if (!mpuStartOffset) {
+		mpuStartOffset = findOffset(
+			(u32*)ndsHeader->arm9destination, iUncompressedSize,
+			mpuInitRegionSignature, 1
+		);
+	}
 	if (mpuStartOffset) {
 		dbg_printf("Mpu init found\n");
 	} else {
@@ -1383,7 +1347,7 @@ u32* findMpuDataOffset(const module_params_t* moduleParams, u32 patchMpuRegion, 
 
 	const u32* mpuInitRegion1Data = mpuInitRegion1Data1;
 	const u32* mpuInitRegion2Data = mpuInitRegion2Data1;
-	if (moduleParams->sdk_version >= 0x2008000) {
+	if (moduleParams->sdk_version > 0x4000000) {
 		mpuInitRegion2Data = mpuInitRegion2Data3;
 	}
 	if (moduleParams->sdk_version > 0x5000000) {
@@ -1394,9 +1358,6 @@ u32* findMpuDataOffset(const module_params_t* moduleParams, u32 patchMpuRegion, 
 	switch (patchMpuRegion) {
 		case 0:
 			mpuInitRegionData = mpuInitRegion0Data;
-			break;
-		case 1:
-			mpuInitRegionData = mpuInitRegion1Data;
 			break;
 		case 2:
 			mpuInitRegionData = mpuInitRegion2Data;
@@ -1410,6 +1371,18 @@ u32* findMpuDataOffset(const module_params_t* moduleParams, u32 patchMpuRegion, 
 		mpuStartOffset, 0x100,
 		mpuInitRegionData, 1
 	);
+	if (!mpuDataOffset && patchMpuRegion == 1 && moduleParams->sdk_version < 0x4000000) {
+		mpuDataOffset = findOffset(
+			mpuStartOffset, 0x100,
+			mpuInitRegion1DataAlt, 1
+		);
+	}
+	if (!mpuDataOffset && patchMpuRegion == 2 && moduleParams->sdk_version < 0x4000000) {
+		mpuDataOffset = findOffset(
+			mpuStartOffset, 0x100,
+			mpuInitRegion2Data3, 1
+		);
+	}
 	if (!mpuDataOffset) {
 		// Try to find it
 		for (int i = 0; i < 0x100; i++) {
@@ -2059,14 +2032,14 @@ u32* findTwlSleepModeEndOffset(const tNDSHeader* ndsHeader) {
 
 	if (!offset) {
 		offset = (u32*)findOffsetThumb(
-			(u32*)ndsHeader->arm9destination, iUncompressedSize,//ndsHeader->arm9binarySize,
+			(u16*)ndsHeader->arm9destination, iUncompressedSize,//ndsHeader->arm9binarySize,
 			twlSleepModeEndSignatureThumbEarly, 7
 		);
 	}
 
 	if (!offset) {
 		offset = (u32*)findOffsetThumb(
-			(u32*)ndsHeader->arm9destination, iUncompressedSize,//ndsHeader->arm9binarySize,
+			(u16*)ndsHeader->arm9destination, iUncompressedSize,//ndsHeader->arm9binarySize,
 			twlSleepModeEndSignatureThumb, 3
 		);
 	}

@@ -51,23 +51,8 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
 
 	const char* romTid = getRomTid(ndsHeader);
 
-	// Trauma Center: Under the Knife (USA)
-	if (strcmp(romTid, "AKDE") == 0) {
-		*(u32*)0x2007434 = 0;
-	}
-
-	// Trauma Center: Under the Knife (Europe)
-	else if (strcmp(romTid, "AKDP") == 0) {
-		*(u32*)0x20A6B90 = 0;
-	}
-
-	// Chou Shittou Caduceus (Japan)
-	else if (strcmp(romTid, "AKDJ") == 0 && ndsHeader->romversion == 1) {
-		*(u32*)0x20CCB18 = 0;
-	}
-
 	// Animal Crossing: Wild World
-	else if ((strncmp(romTid, "ADM", 3) == 0 || strncmp(romTid, "A62", 3) == 0) && !extendedMemory2) {
+	if ((strncmp(romTid, "ADM", 3) == 0 || strncmp(romTid, "A62", 3) == 0) && !extendedMemory) {
 		int instancesPatched = 0;
 		u32 addrOffset = (u32)ndsHeader->arm9destination;
 		while (instancesPatched < 3) {
@@ -494,12 +479,8 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
 	}
 }
 
-static bool rsetA7CacheDone = false;
-
 void rsetA7Cache(void)
 {
-	if (rsetA7CacheDone) return;
-
 	patchOffsetCache.a7BinSize = 0;
 	patchOffsetCache.a7IsThumb = 0;
 	patchOffsetCache.wramEndAddrOffset = 0;
@@ -519,24 +500,6 @@ void rsetA7Cache(void)
 	patchOffsetCache.a7CardReadEndOffset = 0;
 	patchOffsetCache.a7JumpTableFuncOffset = 0;
 	patchOffsetCache.a7JumpTableType = 0;
-
-	rsetA7CacheDone = true;
-}
-
-void rsetPatchCache(void)
-{
-	extern u8 baseUnitCode;
-
-	if (patchOffsetCache.ver != patchOffsetCacheFileVersion
-	 || patchOffsetCache.type != 1) {
-		if ((baseUnitCode > 0 || srlAddr == 0) && !esrbScreenPrepared) pleaseWaitOutput();
-		u32* moduleParamsOffset = patchOffsetCache.moduleParamsOffset;
-		toncset(&patchOffsetCache, 0, sizeof(patchOffsetCacheContents));
-		patchOffsetCache.ver = patchOffsetCacheFileVersion;
-		patchOffsetCache.type = 1;	// 0 = Regular, 1 = B4DS, 2 = HB
-		patchOffsetCache.moduleParamsOffset = moduleParamsOffset;
-		rsetA7CacheDone = true;
-	}
 }
 
 u32 patchCardNds(
@@ -545,18 +508,17 @@ u32 patchCardNds(
 	tNDSHeader* ndsHeader,
 	const module_params_t* moduleParams,
 	u32 patchMpuRegion,
-	u32 patchMpuSize,
+	const bool usesCloneboot,
 	u32 saveFileCluster,
 	u32 saveSize
 ) {
 	dbg_printf("patchCardNds\n\n");
 
-	bool sdk5 = isSdk5(moduleParams);
-	if (sdk5) {
+	if (isSdk5(moduleParams)) {
 		dbg_printf("[SDK 5]\n\n");
 	}
 
-	u32 errorCodeArm9 = patchCardNdsArm9(ce9, ndsHeader, moduleParams, patchMpuRegion, patchMpuSize);
+	u32 errorCodeArm9 = patchCardNdsArm9(ce9, ndsHeader, moduleParams, patchMpuRegion, usesCloneboot);
 	
 	//if (cardReadFound || ndsHeader->fatSize == 0) {
 	if (errorCodeArm9 == ERR_NONE || ndsHeader->fatSize == 0) {

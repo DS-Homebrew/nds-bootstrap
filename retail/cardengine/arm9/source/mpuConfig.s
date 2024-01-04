@@ -12,12 +12,12 @@ slot2MpuFix:
     bx lr
 
 // Revert region 0 patch
-.global region0Fix
-.type	region0Fix STT_FUNC
-region0Fix:
-	LDR R0,= 0x4000033
-    mcr p15, 0, r0, C6,C0,0
-    bx lr
+@.global region0Fix
+@.type	region0Fix STT_FUNC
+@region0Fix:
+@	LDR R0,= 0x4000033
+@    mcr p15, 0, r0, C6,C0,0
+@    bx lr
 
 .global sdk5MpuFix
 .type	sdk5MpuFix STT_FUNC

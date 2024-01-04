@@ -41,6 +41,7 @@
 #define WARIOWARE_PAK		(*(vuint16 *)0x080000C4)
 
 #define	REG_EXTKEYINPUT	(*(vuint16*)0x04000136)
+#define	REG_WIFIIRQ	(*(vuint16*)0x04808012)
 
 extern u32 ce7;
 
@@ -53,6 +54,9 @@ extern void ndsCodeStart(u32* addr);
 
 extern vu32* volatile cardStruct;
 extern module_params_t* moduleParams;
+extern u32 cheatEngineAddr;
+extern u32 musicBuffer;
+extern s32 mainScreen;
 extern u32 language;
 extern u32* languageAddr;
 extern u16 igmHotkey;
@@ -62,7 +66,9 @@ vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS_SDK1;
 
 static bool initialized = false;
 static bool bootloaderCleared = false;
+#ifndef MUSIC
 static bool funcsUnpatched = false;
+#endif
 
 //static int saveReadTimeOut = 0;
 
@@ -82,12 +88,17 @@ int RumbleForce = 1;
 
 //static int cardEgnineCommandMutex = 0;
 //static int saveMutex = 0;
-static int swapTimer = 0;
+// static int swapTimer = 0;
 static int languageTimer = 0;
 static int volumeLevel = 3; // 0 = Off, 1 = Low, 2 = Medium, 3 = High/Max
 static int volumeLevelTimer = 0;
-static int soundBuffer = 0;
+#ifdef MUSIC
+static int musicBufferNo = 0;
 static bool customMusic = false;
+#else
+static bool wifiIrq = false;
+static int wifiIrqTimer = 0;
+#endif
 bool returnToMenu = false;
 bool isSdk5Set = false;
 
@@ -138,6 +149,10 @@ static void initialize(void) {
 	if (!bootloaderCleared) {
 		toncset((u32*)0x02377000, 0, 0x1000);
 		toncset((u8*)0x06000000, 0, 0x40000);	// Clear bootloader
+		if (mainScreen) {
+			swapScreens = (mainScreen == 2);
+			ipcEveryFrame = true;
+		}
 		bootloaderCleared = true;
 	}
 
@@ -222,7 +237,9 @@ void reset(void) {
 	REG_POWERCNT = 1;  // Turn off power to stuff
 
 	initialized = false;
+#ifndef MUSIC
 	funcsUnpatched = false;
+#endif
 	languageTimer = 0;
 
 	while (sharedAddr[0] != 0x544F4F42) { // 'BOOT'
@@ -251,8 +268,8 @@ void myIrqHandlerVBlank(void) {
 	nocashMessage("myIrqHandlerVBlank");
 	#endif	
 
-	if (*(u32*)CHEAT_ENGINE_LOCATION_B4DS == 0x3E4 && *(u32*)((u32)CHEAT_ENGINE_LOCATION_B4DS+0x3E8) != 0xCF000000) {
-		volatile void (*cheatEngine)() = (volatile void*)CHEAT_ENGINE_LOCATION_B4DS+4;
+	if (*(u32*)cheatEngineAddr == 0x3E4 && *(u32*)(cheatEngineAddr+0x3E8) != 0xCF000000) {
+		volatile void (*cheatEngine)() = (volatile void*)cheatEngineAddr+4;
 		(*cheatEngine)();
 	}
 
@@ -266,6 +283,7 @@ void myIrqHandlerVBlank(void) {
 		languageTimer++;
 	}
 
+#ifndef MUSIC
 	if (!funcsUnpatched && *(int*)(isSdk5Set ? 0x02FFFC3C : 0x027FFC3C) >= 60) {
 		unpatchedFunctions* unpatchedFuncs = (unpatchedFunctions*)UNPATCHED_FUNCTION_LOCATION;
 
@@ -296,6 +314,9 @@ void myIrqHandlerVBlank(void) {
 			}
 		}
 
+		if (unpatchedFuncs->mpuInitOffset2) {
+			*unpatchedFuncs->mpuInitOffset2 = 0xEE060F12;
+		}
 		if (unpatchedFuncs->mpuDataOffset2) {
 			if (isSdk5Set) {
 				unpatchedFuncs->mpuDataOffset2[0] = 0xE3A0004A; // mov r0, #0x4A
@@ -308,11 +329,17 @@ void myIrqHandlerVBlank(void) {
 
 		funcsUnpatched = true;
 	}
+#endif
 
-	if ((0 == (REG_KEYINPUT & igmHotkey) && 0 == (REG_EXTKEYINPUT & (((igmHotkey >> 10) & 3) | ((igmHotkey >> 6) & 0xC0)))) || sharedAddr[5] == 0x59444552 /* REDY */) {
+	if ((0 == (REG_KEYINPUT & igmHotkey) && 0 == (REG_EXTKEYINPUT & (((igmHotkey >> 10) & 3) | ((igmHotkey >> 6) & 0xC0)))
+#ifndef MUSIC
+		&& !wifiIrq
+#endif
+	) || sharedAddr[5] == 0x59444552 /* REDY */) {
 		inGameMenu();
 	}
 
+#ifdef MUSIC
 	if (sharedAddr[2] == 0x5053554D) { // 'MUSP'
 		customMusic = true;
 		sharedAddr[2] = 0;
@@ -320,7 +347,7 @@ void myIrqHandlerVBlank(void) {
 
 	if (sharedAddr[2] == 0x5353554D) { // 'MUSS'
 		SCHANNEL_CR(15) &= ~SCHANNEL_ENABLE;
-		soundBuffer = 0;
+		musicBufferNo = 0;
 		customMusic = false;
 		sharedAddr[2] = 0;
 	}
@@ -333,16 +360,17 @@ void myIrqHandlerVBlank(void) {
 			sharedAddr[2] = 0x5953554D; // 'MUSY'
 			IPC_SendSync(0x5);
 
-			SCHANNEL_SOURCE(15) = 0x027F0000+(soundBuffer*0x2000);
+			SCHANNEL_SOURCE(15) = musicBuffer+(musicBufferNo*0x2000);
 			SCHANNEL_REPEAT_POINT(15) = 0;
 			SCHANNEL_LENGTH(15) = 0x2000/4;
 			SCHANNEL_TIMER(15) = SOUND_FREQ(22050);
 			SCHANNEL_CR(15) = SCHANNEL_ENABLE | SOUND_VOL(127) | SOUND_PAN(63) | SOUND_FORMAT_8BIT | SOUND_ONE_SHOT;
 
-			soundBuffer++;
-			if (soundBuffer == 2) soundBuffer = 0;
+			musicBufferNo++;
+			if (musicBufferNo == 2) musicBufferNo = 0;
 		}
 	}
+#endif
 
 	if (sharedAddr[3] == 0x424D5552) { // 'RUMB'
 		RumbleForce = sharedAddr[1];
@@ -362,7 +390,8 @@ void myIrqHandlerVBlank(void) {
 		reset();
 	}
 
-	if (0==(REG_KEYINPUT & (KEY_L | KEY_R | KEY_UP)) && !(REG_EXTKEYINPUT & KEY_A/*KEY_X*/)) {
+	/*KEY_X*/
+	/* if (0==(REG_KEYINPUT & (KEY_L | KEY_R | KEY_UP)) && !(REG_EXTKEYINPUT & KEY_A)) {
 		if (swapTimer == 60){
 			swapTimer = 0;
 			if (!ipcEveryFrame) {
@@ -373,7 +402,7 @@ void myIrqHandlerVBlank(void) {
 		swapTimer++;
 	} else {
 		swapTimer = 0;
-	}
+	} */
 	
 	/*if ( 0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_DOWN | KEY_B))) {
 		if ((softResetTimer == 60 * 2) && (saveTimer == 0)) {
@@ -426,6 +455,26 @@ void myIrqHandlerVBlank(void) {
 	if (ndsHeader->unitCode == 3) {
 		*(u32*)0x02FFFDF0 = (volumeLevel*2)+1;
 	}
+
+	if (REG_IE & IRQ_NETWORK) {
+		REG_IE &= ~IRQ_NETWORK; // DS(i) RTC fix
+	}
+
+#ifndef MUSIC
+	bool wifiIrqCheck = (REG_WIFIIRQ != 0);
+	if (wifiIrq != wifiIrqCheck) {
+		if (wifiIrq) {
+			wifiIrqTimer++;
+			if (wifiIrqTimer == 30) {
+				wifiIrq = wifiIrqCheck;
+			}
+		} else {
+			wifiIrq = wifiIrqCheck;
+		}
+	} else {
+		wifiIrqTimer = 0;
+	}
+#endif
 
 	// Update main screen or swap screens
 	if (ipcEveryFrame) {

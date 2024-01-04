@@ -259,8 +259,9 @@ int runNds(u32 cluster, u32 saveCluster, u32 donorTwlCluster, u32 gbaCluster, u3
 	loader->valueBits         = conf->valueBits;
 
 	loader->saveFileCluster             = saveCluster;
-	loader->donorFileTwlCluster         = donorTwlCluster;
-	loader->donorFileTwlSize            = conf->donorFileTwlSize;
+	loader->donorFileCluster            = donorTwlCluster;
+	loader->donorFileSize               = conf->donorFileSize;
+	loader->donorFileOffset             = conf->donorFileOffset;
 	loader->gbaFileCluster              = gbaCluster;
 	loader->gbaSaveFileCluster          = gbaSavCluster;
 	loader->romSize                     = conf->romSize;
@@ -294,7 +295,6 @@ int runNds(u32 cluster, u32 saveCluster, u32 donorTwlCluster, u32 gbaCluster, u3
 	loader->donorSdkVer                 = conf->donorSdkVer;
 	loader->patchMpuRegion              = conf->patchMpuRegion;
 	loader->patchMpuSize                = conf->patchMpuSize;
-	loader->extendedMemory              = conf->extendedMemory;
 	loader->consoleModel                = conf->consoleModel;
 	loader->romRead_LED                 = conf->romRead_LED;
 	loader->dmaRomRead_LED              = conf->dmaRomRead_LED;

@@ -79,18 +79,23 @@
 
 extern cardengineArm9* volatile ce9;
 
+
 extern void ndsCodeStart(u32* addr);
 extern u32 getDtcmBase(void);
 
 #ifdef TWLSDK
 vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS_SDK5;
 #else
+#ifdef GSDD
+vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS_SDK5;
+#else
 vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS_SDK1;
 #endif
-
-#ifndef TWLSDK
-static unpatchedFunctions* unpatchedFuncs = (unpatchedFunctions*)UNPATCHED_FUNCTION_LOCATION;
 #endif
+
+/* #ifndef TWLSDK
+static unpatchedFunctions* unpatchedFuncs = (unpatchedFunctions*)UNPATCHED_FUNCTION_LOCATION;
+#endif */
 
 #ifdef TWLSDK
 tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
@@ -99,7 +104,11 @@ aFile* savFile = (aFile*)SAV_FILE_LOCATION_TWLSDK;
 aFile* apFixOverlaysFile = (aFile*)OVL_FILE_LOCATION_TWLSDK;
 aFile* sharedFontFile = (aFile*)FONT_FILE_LOCATION_TWLSDK;
 #else
+#ifdef GSDD
+tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
+#else
 tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER;
+#endif
 aFile* romFile = (aFile*)ROM_FILE_LOCATION_MAINMEM;
 aFile* savFile = (aFile*)SAV_FILE_LOCATION_MAINMEM;
 aFile* apFixOverlaysFile = (aFile*)OVL_FILE_LOCATION_MAINMEM;
@@ -113,6 +122,7 @@ aFile* apFixOverlaysFile = (aFile*)OVL_FILE_LOCATION_MAINMEM;
 u32 cacheDescriptor[dev_CACHE_SLOTS_16KB_TWLSDK];
 int cacheCounter[dev_CACHE_SLOTS_16KB_TWLSDK];
 #else
+u32* cacheAddressTable = (u32*)CACHE_ADDRESS_TABLE_LOCATION;
 u32 cacheDescriptor[dev_CACHE_SLOTS_16KB];
 int cacheCounter[dev_CACHE_SLOTS_16KB];
 #endif
@@ -120,9 +130,9 @@ int accessCounter = 0;
 #endif
 bool flagsSet = false;
 static bool driveInitialized = false;
-#ifndef TWLSDK
+/* #ifndef TWLSDK
 static bool region0FixNeeded = false;
-#endif
+#endif */
 bool igmReset = false;
 
 extern bool isDma;
@@ -130,8 +140,6 @@ extern bool isDma;
 extern void endCardReadDma();
 extern void continueCardReadDmaArm7();
 extern void continueCardReadDmaArm9();
-
-s8 mainScreen = 0;
 
 void myIrqHandlerDMA(void);
 
@@ -177,7 +185,7 @@ void sleepMs(int ms) {
 	}
 }*/
 
-#ifdef TWLSDK
+/* #ifdef TWLSDK
 void resetSlots(void) {
 	for (int i = 0; i < ce9->cacheSlots; i++) {
 		cacheDescriptor[i] = 0;
@@ -185,7 +193,7 @@ void resetSlots(void) {
 	}
 	accessCounter = 0;
 }
-#endif
+#endif */
 
 int allocateCacheSlot(void) {
 	int slot = 0;
@@ -222,8 +230,11 @@ int getSlotForSector(u32 sector) {
 }*/
 
 vu8* getCacheAddress(int slot) {
-	//return (vu32*)(ce9->cacheAddress + slot*ce9->cacheBlockSize);
+	#ifdef TWLSDK
 	return (vu8*)(ce9->cacheAddress + slot*ce9->cacheBlockSize);
+	#else
+	return (vu8*)(cacheAddressTable[slot]);
+	#endif
 }
 
 void updateDescriptor(int slot, u32 sector) {
@@ -314,7 +325,7 @@ static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
 	fileRead((char*)dst, ((ce9->valueBits & overlaysCached) && src >= ndsHeader->arm9romOffset+ndsHeader->arm9binarySize && src < ndsHeader->arm7romOffset) ? apFixOverlaysFile : romFile, src, len);
 #else
 	if (newOverlayOffset == 0) {
-		newOverlayOffset = ((ndsHeader->arm9romOffset+ndsHeader->arm9binarySize)/ce9->cacheBlockSize)*ce9->cacheBlockSize;
+		newOverlayOffset = ((ndsHeader->arm9romOffset + ndsHeader->arm9binarySize)/ce9->cacheBlockSize)*ce9->cacheBlockSize;
 		for (u32 i = newOverlayOffset; i < ndsHeader->arm7romOffset; i+= ce9->cacheBlockSize) {
 			newOverlaysSize += ce9->cacheBlockSize;
 		}
@@ -450,10 +461,12 @@ static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
 
 	//sleepMsEnabled = false;
 
+	#ifndef GSDD
 	#ifndef TWLSDK
 	if (ce9->valueBits & cacheFlushFlag) {
 		cacheFlush(); //workaround for some weird data-cache issue in Bowser's Inside Story.
 	}
+	#endif
 	#endif
 }
 
@@ -472,6 +485,12 @@ static inline void cardReadRAM(u8* dst, u32 src, u32 len/*, int romPartNo*/) {
 	// -------------------------------------
 	#endif
 
+	if (src >= 0 && src < 0x160) {
+		u32 newSrc = (u32)ndsHeader+src;
+		tonccpy(dst, (u8*)newSrc, len);
+		return;
+	}
+
 	// Copy directly
 	#ifdef TWLSDK
 	u32 newSrc = ce9->romLocation/*[romPartNo]*/+src;
@@ -480,7 +499,26 @@ static inline void cardReadRAM(u8* dst, u32 src, u32 len/*, int romPartNo*/) {
 	}
 	tonccpy(dst, (u8*)newSrc, len);
 	#else
-	tonccpy(dst, (u8*)ce9->romLocation/*[romPartNo]*/+src, len);
+	// tonccpy(dst, (u8*)ce9->romLocation/*[romPartNo]*/+src, len);
+	u32 len2 = 0;
+	for (int i = 0; i < ce9->romMapLines; i++) {
+		if (!(src >= ce9->romMap[i][0] && (i == ce9->romMapLines-1 || src < ce9->romMap[i+1][0])))
+			continue;
+
+		u32 newSrc = (ce9->romMap[i][1]-ce9->romMap[i][0])+src;
+		if (newSrc+len > ce9->romMap[i][2]) {
+			do {
+				len--;
+				len2++;
+			} while (newSrc+len != ce9->romMap[i][2]);
+			tonccpy(dst, (u8*)newSrc, len);
+			src += len;
+			dst += len;
+		} else {
+			tonccpy(dst, (u8*)newSrc, len2==0 ? len : len2);
+			break;
+		}
+	}
 	#endif
 }
 
@@ -494,6 +532,7 @@ bool isNotTcm(u32 address, u32 len) {
 }  
 
 #ifndef TWLSDK
+#ifndef GSDD
 static int counter=0;
 int cardReadPDash(u32* cacheStruct, u32 src, u8* dst, u32 len) {
 	vu32* volatile cardStruct = (vu32* volatile)ce9->cardStruct0;
@@ -507,6 +546,48 @@ int cardReadPDash(u32* cacheStruct, u32 src, u8* dst, u32 len) {
     counter++;
 	return counter;
 }
+#else
+void setBL(int arg1, int arg2) {
+	*(u32*)arg1 = (((u32)(arg2 - arg1 - 8) >> 2) & 0xFFFFFF) | 0xEB000000;
+}
+
+void gsddFix(void) {
+	const u32 gsddOverlayOffset = *(u32*)0x02FFF000;
+	extern u32 gsdd_fix2;
+
+	// Patch overlay 335 (DSProtect v2.01s)
+	if (*(u32*)gsddOverlayOffset == 0xE163F679)
+	{
+		setBL(gsddOverlayOffset+0x115C, gsdd_fix2);
+	} else // Patch overlay 334 (DSProtect v2.01)
+	if (*(u32*)gsddOverlayOffset == 0xE544AA7C)
+	{
+		VoidFn decrypt = (VoidFn)(gsddOverlayOffset+0x1210);
+		(*decrypt)();
+
+		setBL(gsddOverlayOffset+0xA4C, gsdd_fix2);
+	}
+}
+
+void gsddFix2(u32* code) {
+	// Patch overlay 335 (DSProtect v2.01s) (Part 2)
+	if (code[0] == 0xE92D4FF8 && code[1] == 0xE24DDF92 && code[2] == 0xE3A0BA07) {
+		code[0x224/sizeof(u32)] += 0xE0000000; // beq -> b
+		code[0x278/sizeof(u32)] = 0xE3A01000; // mov r1, #0
+		code[0x27C/sizeof(u32)] = 0xE3A00000; // mov r0, #0
+		code[0x284/sizeof(u32)] = 0xE1A00000; // nop
+		code[0x288/sizeof(u32)] = 0xE1A00000; // nop
+	} else // Patch overlay 334 (DSProtect v2.01) (Part 2)
+	if (code[0] == 0xE92D4FF0 && code[1] == 0xE24DDF93 && code[2] == 0xE58D000C && code[3] == 0xE3A0BA07) {
+		code[0x228/sizeof(u32)] += 0xE0000000; // beq -> b
+		code[0x2C4/sizeof(u32)] = 0xE3A01000; // mov r1, #0
+		code[0x2C8/sizeof(u32)] = 0xE3A00000; // mov r0, #0
+		code[0x2D0/sizeof(u32)] = 0xE1A00000; // nop
+		code[0x2D4/sizeof(u32)] = 0xE1A00000; // nop
+	}
+}
+
+#endif
 #endif
 
 //extern void region2Disable();
@@ -528,11 +609,11 @@ void cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	#endif
 
 	if (!flagsSet) {
-		#ifndef TWLSDK
+		/* #ifndef TWLSDK
 		if (!(ce9->valueBits & isSdk5) && region0FixNeeded) {
 			region0Fix();
 		}
-		#endif
+		#endif */
 		if (!driveInitialized) {
 			FAT_InitFiles(false);
 			driveInitialized = true;
@@ -550,12 +631,23 @@ void cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	u8* dst = dst0;
 	u32 len = len0;
 	#else
+	#ifdef GSDD
+	u32 src = src0;
+	u8* dst = dst0;
+	u32 len = len0;
+	#else
 	vu32* volatile cardStruct = (vu32* volatile)ce9->cardStruct0;
 
 	u32 src = ((ce9->valueBits & isSdk5) ? src0 : cardStruct[0]);
 	u8* dst = ((ce9->valueBits & isSdk5) ? dst0 : (u8*)(cardStruct[1]));
 	u32 len = ((ce9->valueBits & isSdk5) ? len0 : cardStruct[2]);
 	#endif
+	#endif
+
+	// Simulate ROM mirroring
+	while (src >= ce9->romPaddingSize) {
+		src -= ce9->romPaddingSize;
+	}
 
 	#ifdef DEBUG
 	u32 commandRead;
@@ -573,10 +665,17 @@ void cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	// -------------------------------------*/
 	#endif
 
+	#ifdef GSDD
+	if (src < 0x8000) {
+		// Fix reads below 0x8000
+		src = 0x8000 + (src & 0x1FF);
+	}
+	#else
 	if ((ce9->valueBits & cardReadFix) && src < 0x8000) {
 		// Fix reads below 0x8000
 		src = 0x8000 + (src & 0x1FF);
 	}
+	#endif
 
 	bool romPart = false;
 	//int romPartNo = 0;
@@ -1076,21 +1175,29 @@ void initMBKARM9_dsiMode(void) {
 extern void reset(u32 param, u32 tid2);
 
 void inGameMenu(s32* exRegisters) {
-	#ifdef TWLSDK
-	/*if (ce9->consoleModel > 0) {
-		*(u32*)(INGAME_MENU_LOCATION_DSIWARE + IGM_TEXT_SIZE_ALIGNED) = (u32)sharedAddr;
-		volatile void (*inGameMenu)(s8*, u32, s32*) = (volatile void*)INGAME_MENU_LOCATION_DSIWARE + IGM_TEXT_SIZE_ALIGNED + 0x10;
-		(*inGameMenu)(&mainScreen, ce9->consoleModel, exRegisters);
-	} else {*/
-		*(u32*)(INGAME_MENU_LOCATION_TWLSDK + IGM_TEXT_SIZE_ALIGNED) = (u32)sharedAddr;
-		volatile void (*inGameMenu)(s8*, u32, s32*) = (volatile void*)INGAME_MENU_LOCATION_TWLSDK + IGM_TEXT_SIZE_ALIGNED + 0x10;
-		(*inGameMenu)(&mainScreen, ce9->consoleModel, exRegisters);
-	//}
-	#else
+	int oldIME = enterCriticalSection();
+
+	while (sharedAddr[5] == 0x4C4D4749) { // 'IGML'
+		while (REG_VCOUNT != 191) swiDelay(100);
+		while (REG_VCOUNT == 191) swiDelay(100);
+	}
+
 	*(u32*)(INGAME_MENU_LOCATION + IGM_TEXT_SIZE_ALIGNED) = (u32)sharedAddr;
-	volatile void (*inGameMenu)(s8*, u32, s32*) = (volatile void*)INGAME_MENU_LOCATION + IGM_TEXT_SIZE_ALIGNED + 0x10;
-	(*inGameMenu)(&mainScreen, ce9->consoleModel, exRegisters);
+	#ifndef TWLSDK
+	*(u32*)((u32)INGAME_MENU_LOCATION + IGM_TEXT_SIZE_ALIGNED + 4) = 0x027FEFF4;
 	#endif
+	volatile void (*inGameMenu)(s32*, u32, s32*) = (volatile void*)INGAME_MENU_LOCATION + IGM_TEXT_SIZE_ALIGNED + 0x10;
+	(*inGameMenu)(&ce9->mainScreen, ce9->consoleModel, exRegisters);
+
+	while (sharedAddr[5] != 0x4C4D4749) { // 'IGML'
+		while (REG_VCOUNT != 191) swiDelay(100);
+		while (REG_VCOUNT == 191) swiDelay(100);
+	}
+	while (sharedAddr[5] == 0x4C4D4749) { // 'IGML'
+		while (REG_VCOUNT != 191) swiDelay(100);
+		while (REG_VCOUNT == 191) swiDelay(100);
+	}
+
 	#ifdef TWLSDK
 	if (sharedAddr[3] == 0x54495845) {
 		igmReset = true;
@@ -1113,6 +1220,8 @@ void inGameMenu(s32* exRegisters) {
 		}
 	#endif
 	}
+
+	leaveCriticalSection(oldIME);
 }
 
 //---------------------------------------------------------------------------------
@@ -1136,6 +1245,7 @@ void myIrqHandlerIPC(void) {
 	nocashMessage("myIrqHandlerIPC");
 	#endif
 
+#ifndef GSDD
 	switch (IPC_GetSync()) {
 		case 0x3:
 			extern bool dmaDirectRead;
@@ -1173,22 +1283,22 @@ void myIrqHandlerIPC(void) {
 			#endif
 			break;
 		case 0x6:
-			if(mainScreen == 1)
+			if(ce9->mainScreen == 1)
 				REG_POWERCNT &= ~POWER_SWAP_LCDS;
-			else if(mainScreen == 2)
+			else if(ce9->mainScreen == 2)
 				REG_POWERCNT |= POWER_SWAP_LCDS;
 			break;
-		case 0x7: {
-			mainScreen++;
-			if(mainScreen > 2)
-				mainScreen = 0;
+		/* case 0x7: {
+			ce9->mainScreen++;
+			if(ce9->mainScreen > 2)
+				ce9->mainScreen = 0;
 
-			if(mainScreen == 1)
+			if(ce9->mainScreen == 1)
 				REG_POWERCNT &= ~POWER_SWAP_LCDS;
-			else if(mainScreen == 2)
+			else if(ce9->mainScreen == 2)
 				REG_POWERCNT |= POWER_SWAP_LCDS;
 		}
-			break;
+			break; */
 		case 0x9:
 			inGameMenu((s32*)0);
 			break;
@@ -1204,25 +1314,30 @@ void myIrqHandlerIPC(void) {
 		cacheFlush();
 		while (1);
 	}
+#endif
 }
 
 u32 myIrqEnable(u32 irq) {	
-	int oldIME = enterCriticalSection();
-
 	#ifdef DEBUG
 	nocashMessage("myIrqEnable\n");
 	#endif
 
+	#ifdef GSDD
+	return irq;
+	#else
+
+	int oldIME = enterCriticalSection();
+
 	#ifdef TWLSDK
 	#ifdef DLDI
-	if (!(ce9->valueBits & dsiBios) && *(u32*)0x02F40000 != 0) {
+	if (!(ce9->valueBits & dsiBios) && *(u32*)0x02F70000 == 0xEA00002E) {
 		extern void setLowVectors();
 
 		u32* itcmAddr = (u32*)0x01000000;
 		u32* newVectorAddr = (u32*)0x02000000;
 		for (int i = 0; i < 8; i++) {
 			itcmAddr[i] = 0xEA7FFFFE;
-			newVectorAddr[i] = 0xEA3CFFFE;
+			newVectorAddr[i] = 0xEA3DBFFE;
 		}
 
 		setLowVectors();
@@ -1236,11 +1351,11 @@ u32 myIrqEnable(u32 irq) {
 		setExceptionHandler2();
 	}
 
-	#ifndef TWLSDK
+	/* #ifndef TWLSDK
 	if (!(ce9->valueBits & isSdk5) && unpatchedFuncs->mpuDataOffset) {
 		region0FixNeeded = unpatchedFuncs->mpuInitRegionOldData == 0x4000033;
 	}
-	#endif
+	#endif */
 
 	hookIPC_SYNC();
 
@@ -1251,4 +1366,6 @@ u32 myIrqEnable(u32 irq) {
 	REG_IE |= irq;
 	leaveCriticalSection(oldIME);
 	return irq_before;
+
+	#endif
 }

@@ -165,10 +165,13 @@ int hookNdsRetailArm9(
 	u32 savFatTableCache,
 	bool romFatTableCompressed,
 	bool savFatTableCompressed,
+	bool musicsFatTableCompressed,
+    u32 patchOffsetCacheFileCluster,
     u32 musicFatTableCache,
 	u32 ramDumpCluster,
 	u32 srParamsFileCluster,
 	u32 screenshotCluster,
+	u32 apFixOverlaysCluster,
 	u32 musicCluster,
 	u32 musicsSize,
 	u32 pageFileCluster,
@@ -179,6 +182,8 @@ int hookNdsRetailArm9(
 	bool ROMinRAM,
 	bool dsDebugRam,
 	u8 enableExceptionHandler,
+	s32 mainScreen,
+	const bool usesCloneboot,
 	u32 overlaysSize,
 	u32 ioverlaysSize,
 	u32 maxClusterCacheSize,
@@ -187,8 +192,11 @@ int hookNdsRetailArm9(
 	nocashMessage("hookNdsRetailArm9");
 
 	const char* romTid = getRomTid(ndsHeader);
+	extern u32 romPaddingSize;
+	extern u32 romLocation;
 	extern u32 romSizeLimit;
 	extern u16 s2FlashcardId;
+	extern bool maxHeapOpen;
 
 	ce9->bootNdsCluster         = bootNdsCluster;
 	ce9->fileCluster            = fileCluster;
@@ -196,14 +204,18 @@ int hookNdsRetailArm9(
 	ce9->saveSize               = saveSize;
 	ce9->romFatTableCache       = romFatTableCache;
 	ce9->savFatTableCache       = savFatTableCache;
-	ce9->romFatTableCompressed  = (u16)romFatTableCompressed;
-	ce9->savFatTableCompressed  = (u16)savFatTableCompressed;
+	ce9->romFatTableCompressed  = (u8)romFatTableCompressed;
+	ce9->savFatTableCompressed  = (u8)savFatTableCompressed;
+	ce9->musicsFatTableCompressed = (u16)musicsFatTableCompressed;
+	ce9->patchOffsetCacheFileCluster = patchOffsetCacheFileCluster;
 	ce9->musicFatTableCache     = musicFatTableCache;
 	ce9->ramDumpCluster         = ramDumpCluster;
 	ce9->srParamsCluster        = srParamsFileCluster;
 	ce9->screenshotCluster      = screenshotCluster;
+	ce9->apFixOverlaysCluster   = apFixOverlaysCluster;
 	ce9->musicCluster           = musicCluster;
 	ce9->musicsSize             = musicsSize;
+	ce9->musicBuffer = maxHeapOpen ? 0x027F8000 : 0x027F0000;
 	ce9->pageFileCluster        = pageFileCluster;
 	ce9->manualCluster          = manualCluster;
 	ce9->sharedFontCluster      = sharedFontCluster;
@@ -225,7 +237,7 @@ int hookNdsRetailArm9(
 	if (isSdk5(moduleParams)) {
 		ce9->valueBits |= b_isSdk5;
 	}
-	if (strncmp(romTid, "NTRJ", 4) != 0 && (expansionPakFound || (extendedMemory && !dsDebugRam && strncmp(romTid, "UBRP", 4) != 0)) && ce9->overlaysSize <= romSizeLimit) {
+	if ((expansionPakFound || (extendedMemory && !dsDebugRam && strncmp(romTid, "UBRP", 4) != 0)) && ce9->overlaysSize <= romSizeLimit) {
 		ce9->valueBits |= b_overlaysCached;
 	}
 	if (strncmp(romTid, "CLJ", 3) == 0) {
@@ -234,17 +246,28 @@ int hookNdsRetailArm9(
 	if (patchOffsetCache.resetMb) {
 		ce9->valueBits |= b_softResetMb;
 	}
+	ce9->mainScreen             = mainScreen;
 	ce9->s2FlashcardId          = s2FlashcardId;
 	ce9->overlaysSize           = overlaysSize;
 	ce9->ioverlaysSize          = ioverlaysSize;
-	if (extendedMemory && !dsDebugRam) {
-		ce9->romLocation = 0x0C800000;
-	} else {
-		extern u32 romLocation;
-		ce9->romLocation = romLocation;
-	}
+	ce9->romPaddingSize         = romPaddingSize;
+	ce9->romLocation            = romLocation;
 
-	if (strncmp(romTid, "IPK", 3) == 0 || strncmp(romTid, "IPG", 3) == 0 || strncmp(romTid, "B4T", 3) == 0) {
+	u32 romOffset = 0;
+	if (ROMinRAM) {
+		if (usesCloneboot) {
+			romOffset = 0x8000;
+		} else if (ndsHeader->arm9overlaySource == 0 || ndsHeader->arm9overlaySize == 0) {
+			romOffset = (ndsHeader->arm7romOffset + ndsHeader->arm7binarySize);
+		} else {
+			romOffset = (ndsHeader->arm9romOffset + ndsHeader->arm9binarySize);
+		}
+	} else {
+		romOffset = (ndsHeader->arm9romOffset + ndsHeader->arm9binarySize);
+	}
+	ce9->romLocation -= romOffset;
+
+	if (strncmp(romTid, "IPK", 3) == 0 || strncmp(romTid, "IPG", 3) == 0) {
 		ce9->valueBits |= b_cardReadFix;
 	}
 

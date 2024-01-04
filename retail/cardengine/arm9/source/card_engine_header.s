@@ -32,9 +32,13 @@ romFatTableCache:
 savFatTableCache:
 	.word	0x00000000
 romFatTableCompressed:
-	.hword	0x0000
+	.byte	0x00
 savFatTableCompressed:
+	.byte	0x00
+musicFatTableCompressed:
 	.hword	0x0000
+patchOffsetCacheFileCluster:
+	.word	0x00000000
 musicFatTableCache:
 	.word	0x00000000
 ramDumpCluster:
@@ -43,9 +47,13 @@ srParamsCluster:
 	.word	0x00000000
 screenshotCluster:
 	.word	0x00000000
+apFixOverlaysCluster:
+	.word	0x00000000
 musicCluster:
 	.word	0x00000000
 musicsSize:
+	.word	0x00000000
+musicBuffer:
 	.word	0x00000000
 pageFileCluster:
 	.word	0x00000000
@@ -57,12 +65,16 @@ cardStruct0:
 	.word	0x00000000
 valueBits:
 	.word	0x00000000
+mainScreen:
+	.word	0x00000000
 s2FlashcardId:
 	.hword	0x0000
 	.hword	0x0000 @ align
 overlaysSize:
 	.word	0x00000000
 ioverlaysSize:
+	.word	0x00000000
+romPaddingSize:
 	.word	0x00000000
 irqTable:
 	.word	0x00000000
@@ -84,6 +96,8 @@ readManualPtr:
 	.word readManual
 restorePreManualPtr:
 	.word restorePreManual
+saveMainScreenSettingPtr:
+	.word saveMainScreenSetting
 
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 

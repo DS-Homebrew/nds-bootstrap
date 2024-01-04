@@ -159,7 +159,5 @@ u32 savePatchV1(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, const mo
 
 	ce7->patches->arm7Functions->saveCluster = saveFileCluster;
 
-	dbg_printf("Arm7 patched!\n");
-
 	return 1;
 }

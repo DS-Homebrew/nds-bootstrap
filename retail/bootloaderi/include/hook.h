@@ -34,6 +34,7 @@ int hookNdsRetailArm7(
 	const tNDSHeader* ndsHeader,
 	const module_params_t* moduleParams,
 	u32 fileCluster,
+    u32 patchOffsetCacheFileCluster,
 	u32 srParamsFileCluster,
 	u32 ramDumpCluster,
 	u32 screenshotCluster,
@@ -48,14 +49,15 @@ int hookNdsRetailArm7(
     u16 bootstrapOnFlashcard,
     u8 gameOnFlashcard,
     u8 saveOnFlashcard,
+	s32 mainScreen,
 	u8 language,
 	u8 dsiMode, // SDK5
 	u8 dsiSD,
-	u8 extendedMemory,
 	u8 ROMinRAM,
 	u8 consoleModel,
 	u8 romRead_LED,
 	u8 dmaRomRead_LED,
+	bool ndmaDisabled,
 	bool twlTouch,
 	bool usesCloneboot
 );
@@ -68,13 +70,13 @@ int hookNdsRetailArm9(
 	u32 saveSize,
 	u8 saveOnFlashcard,
 	u32 cacheBlockSize,
-	u8 extendedMemory,
 	u8 ROMinRAM,
 	u8 dsiMode, // SDK5
 	u8 enableExceptionHandler,
+	s32 mainScreen,
 	u8 consoleModel,
 	bool usesCloneboot
 );
-int hookNdsRetailArm9Mini(cardengineArm9* ce9, const tNDSHeader* ndsHeader, u8 consoleModel);
+int hookNdsRetailArm9Mini(cardengineArm9* ce9, const tNDSHeader* ndsHeader, s32 mainScreen, u8 consoleModel);
 
 #endif // HOOK_H

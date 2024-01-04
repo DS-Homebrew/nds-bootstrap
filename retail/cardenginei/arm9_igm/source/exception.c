@@ -208,6 +208,9 @@ void showException(s32 *expReg) {
 	REG_BG3HOFS = 0;
 
 	SetBrightness(0, 0);
+	REG_MOSAIC = 0;
+	REG_BLDCNT = 0;
+	REG_BLDALPHA = 0;
 	REG_BLDY = 0;
 
 	clearScreen(true);
@@ -291,6 +294,11 @@ void showException(s32 *expReg) {
 		printChar(10, 14 + i, ':', FONT_WHITE, true);
 		printHex(13, 14 + i, *(stack++), 4, FONT_WHITE, true);
 		printHex(22, 14 + i, *(stack++), 4, FONT_WHITE, true);
+	}
+
+	// If sp isn't valid, disable SWI delay calls
+	if ((u32)stack >= 0 && (u32)stack < 0x01FF8000) {
+		swiDelayEnabled = false;
 	}
 
 	// If the RAM viewer address is still on the default, and if pc address is valid,

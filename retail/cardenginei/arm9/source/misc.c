@@ -40,12 +40,19 @@
 #define slowSoftReset BIT(10)
 #define softResetMb BIT(13)
 #define cloneboot BIT(14)
+#define isDlp BIT(15)
+
+#include "my_fat.h"
 
 extern cardengineArm9* volatile ce9;
 
 extern vu32* volatile sharedAddr;
 
 extern tNDSHeader* ndsHeader;
+extern aFile* romFile;
+extern aFile* savFile;
+extern aFile* apFixOverlaysFile;
+extern u32* cacheAddressTable;
 
 extern bool flagsSet;
 extern bool igmReset;
@@ -55,6 +62,7 @@ extern void ndsCodeStart(u32* addr);
 void resetSlots(void);
 void initMBKARM9_dsiMode(void);
 
+#ifndef GSDD
 void SetBrightness(u8 screen, s8 bright) {
 	u16 mode = 1 << 14;
 
@@ -75,6 +83,7 @@ void waitFrames(int count) {
 		while (REG_VCOUNT == 191);
 	}
 }
+#endif
 
 /*void sleepMs(int ms) {
 	if (REG_IME == 0 || REG_IF == 0) {
@@ -97,6 +106,7 @@ static void waitForArm7(void) {
 
 bool IPC_SYNC_hooked = false;
 void hookIPC_SYNC(void) {
+	#ifndef GSDD
     if (!IPC_SYNC_hooked) {
 		#ifndef TWLSDK
 		if (!(ce9->valueBits & isSdk5)) {
@@ -110,25 +120,43 @@ void hookIPC_SYNC(void) {
 		*ipcSyncHandler = (u32)ce9->patches->ipcSyncHandlerRef;
 		IPC_SYNC_hooked = true;
     }
+	#endif
 }
 
 void enableIPC_SYNC(void) {
+	#ifndef GSDD
 	if (IPC_SYNC_hooked && !(REG_IE & IRQ_IPC_SYNC)) {
 		REG_IE |= IRQ_IPC_SYNC;
 	}
+	#endif
 }
 
 #ifndef TWLSDK
-void initialize(void) {
-	static bool initialized = false;
+static bool initialized = false;
 
-	if (!initialized) {
-		if (ce9->valueBits & isSdk5) {
-			sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS_SDK5;
-			ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
-		}
-		initialized = true;
+void initialize(void) {
+	if (initialized) {
+		return;
 	}
+
+	#ifndef GSDD
+	if (ce9->valueBits & isSdk5) {
+		sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS_SDK5;
+		ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
+		if (ndsHeader->unitCode > 0) {
+			romFile = (aFile*)ROM_FILE_LOCATION_MAINMEM5;
+			savFile = (aFile*)SAV_FILE_LOCATION_MAINMEM5;
+			apFixOverlaysFile = (aFile*)OVL_FILE_LOCATION_MAINMEM5;
+			#ifndef DLDI
+			cacheAddressTable = (u32*)CACHE_ADDRESS_TABLE_LOCATION_TWLSDK;
+			#endif
+		}
+	} else {
+		sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS_SDK1;
+		ndsHeader = (tNDSHeader*)NDS_HEADER;
+	}
+	#endif
+	initialized = true;
 }
 #endif
 
@@ -148,6 +176,7 @@ void reset(u32 param, u32 tid2) {
 #ifndef TWLSDK
 	u32 resetParams = ((ce9->valueBits & isSdk5) ? RESET_PARAM_SDK5 : RESET_PARAM);
 	*(u32*)resetParams = param;
+	#ifndef GSDD
 	if (ce9->valueBits & slowSoftReset) {
 		if (ce9->consoleModel < 2) {
 			// Make screens white
@@ -163,7 +192,9 @@ void reset(u32 param, u32 tid2) {
 		cacheFlush();
 		sharedAddr[3] = 0x52534554;
 		while (1);
-	} else {
+	} else
+	#endif
+	{
 		if (*(u32*)(resetParams+0xC) > 0) {
 			sharedAddr[1] = ce9->valueBits;
 		}
@@ -251,6 +282,7 @@ void reset(u32 param, u32 tid2) {
 		REG_DISPSTAT = 0;
 		REG_DISPCNT = 0;
 		REG_DISPCNT_SUB = 0;
+		GFX_STATUS = 0;
 
 		toncset((u16*)0x04000000, 0, 0x56);
 		toncset((u16*)0x04001000, 0, 0x56);
@@ -280,11 +312,11 @@ void reset(u32 param, u32 tid2) {
 		VRAM_I_CR = 0;
 	}
 
-	#ifndef DLDI
+	/* #ifndef DLDI
 	if (ce9->consoleModel == 0) {
 		resetSlots();
 	}
-	#endif
+	#endif */
 
 	while (sharedAddr[0] != 0x44414F4C) { // 'LOAD'
 		while (REG_VCOUNT != 191);
@@ -307,13 +339,16 @@ void reset(u32 param, u32 tid2) {
 		while (REG_VCOUNT == 191);
 	}
 
-	if (*(u32*)(RESET_PARAM+0xC) > 0) {
+	#ifndef GSDD
+	if ((ce9->valueBits & isDlp) || *(u32*)(resetParams+0xC) > 0) {
 		u32 newIrqTable = sharedAddr[2];
 		ce9->valueBits = sharedAddr[1];
 		ce9->irqTable = (u32*)newIrqTable;
 		ce9->cardStruct0 = sharedAddr[4];
 		sharedAddr[4] = 0;
+		initialized = false;
 	}
+	#endif
 #endif
 
 	sharedAddr[0] = 0x544F4F42; // 'BOOT'

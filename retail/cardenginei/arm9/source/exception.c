@@ -19,6 +19,7 @@ extern vu32* volatile sharedAddr;
 void userException() {
 //---------------------------------------------------------------------------------
 	sharedAddr[0] = 0x524F5245; // 'EROR'
+	sharedAddr[5] = 0x4C4D4749; // 'IGML'
 
 	extern void inGameMenu(s32* exRegisters);
 	while (1) {
@@ -32,7 +33,11 @@ void setExceptionHandler2() {
 	#ifdef TWLSDK
 	if (EXCEPTION_VECTOR == enterException && *exceptionC == userException) return;
 	#else
-	if (EXCEPTION_VECTOR_SDK1 == enterException && *exceptionC == userException) return;
+	if (!(ce9->valueBits & dsiBios)) {
+		if (EXCEPTION_VECTOR_SDK1 == enterException && *exceptionC == userException) return;
+	} else {
+		if (EXCEPTION_VECTOR == enterException && *exceptionC == userException) return;
+	}
 	#endif
 
 	#ifndef TWLSDK
@@ -40,11 +45,16 @@ void setExceptionHandler2() {
 		exceptionAddr = 0x027FFD90;
 	}
 	#endif
-	exceptionStack = (u32)EXCEPTION_STACK_LOCATION;
 	#ifdef TWLSDK
+	exceptionStack = (u32)EXCEPTION_STACK_LOCATION_SDK5;
 	EXCEPTION_VECTOR = enterException;
 	#else
-	EXCEPTION_VECTOR_SDK1 = enterException;
+	exceptionStack = (u32)EXCEPTION_STACK_LOCATION;
+	if (!(ce9->valueBits & dsiBios)) {
+		EXCEPTION_VECTOR_SDK1 = enterException;
+	} else {
+		EXCEPTION_VECTOR = enterException;
+	}
 	#endif
 	*exceptionC = userException;
 }

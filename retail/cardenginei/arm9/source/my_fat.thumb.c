@@ -872,6 +872,11 @@ u32 fileRead (char* buffer, aFile* file, u32 startOffset, u32 length)
 		return 0;
 	}
 
+	if (file->fatTableCached && (file->fatTableCache[0] == CLUSTER_FREE || file->fatTableCache[0] == CLUSTER_EOF)) {
+		// Cluster in FAT table cache is invalid
+		return 0;
+	}
+
 	clusterIndex = findCluster(file, startOffset);
 
 	// Calculate the sector and byte of the current position,
@@ -908,7 +913,7 @@ u32 fileRead (char* buffer, aFile* file, u32 startOffset, u32 length)
               if (curSect >= discSecPerClus)
   			{
                   clusterIndex+= curSect >> discSecPerClusShift;
-                  curSect = curSect & (discSecPerClus - 1);
+                  curSect &= (discSecPerClus - 1);
   				file->currentOffset+=discBytePerClus;
                   file->currentCluster = getCachedCluster(file, clusterIndex);
   			}
@@ -955,7 +960,7 @@ u32 fileRead (char* buffer, aFile* file, u32 startOffset, u32 length)
               #endif
               
               clusterIndex+= curSect >> discSecPerClusShift;
-              curSect = curSect & (discSecPerClus - 1);
+              curSect &= (discSecPerClus - 1);
 				file->currentCluster = getCachedCluster(file, clusterIndex);
           } else {
               // Move to the next cluster if necessary
@@ -994,7 +999,7 @@ u32 fileRead (char* buffer, aFile* file, u32 startOffset, u32 length)
 		{
 			if(file->fatTableCached) {
                   clusterIndex+= curSect >> discSecPerClusShift;
-                  curSect = curSect & (discSecPerClus - 1);
+                  curSect &= (discSecPerClus - 1);
 				file->currentCluster = getCachedCluster(file, clusterIndex);
               } else {
                   curSect = 0;
@@ -1047,6 +1052,11 @@ u32 fileWrite (const char* buffer, aFile* file, u32 startOffset, u32 length)
 		#ifdef DEBUG
 		nocashMessage("CLUSTER_FREE or CLUSTER_EOF");
 		#endif
+		return 0;
+	}
+
+	if (file->fatTableCached && (file->fatTableCache[0] == CLUSTER_FREE || file->fatTableCache[0] == CLUSTER_EOF)) {
+		// Cluster in FAT table cache is invalid
 		return 0;
 	}
 

@@ -20,6 +20,7 @@
 #include <nds/ndstypes.h>
 #include <nds/arm9/exceptions.h>
 #include <nds/arm9/cache.h>
+#include <nds/bios.h>
 #include <nds/system.h>
 #include <nds/dma.h>
 #include <nds/interrupts.h>
@@ -52,6 +53,7 @@
 extern cardengineArm9* volatile ce9;
 
 extern vu32* volatile sharedAddr;
+extern tNDSHeader* ndsHeader;
 
 extern aFile* romFile;
 
@@ -59,15 +61,26 @@ extern u32 cacheDescriptor[];
 extern int cacheCounter[];
 extern int accessCounter;
 
+extern int romMapLines;
+extern u32 romMap[4][3];
+
 extern void callEndReadDmaThumb(void);
 extern void disableIrqMask(u32 mask);
 
 bool isDma = false;
 bool dmaOn = true;
 bool dmaDirectRead = false;
+#ifndef TWLSDK
+static bool dataSplit = false;
+#endif
 
 void endCardReadDma() {
-	if (dmaDirectRead && dmaOn && ndmaBusy(0)) {
+#ifdef TWLSDK
+	if (dmaDirectRead && dmaOn && (ndmaBusy(0)))
+#else
+	if (dmaDirectRead && dmaOn && (ndmaBusy(0) || (dataSplit && ndmaBusy(1))))
+#endif
+	{
 		IPC_SendSync(0x3);
 		return;
 	}
@@ -402,6 +415,12 @@ void cardSetDma(u32 * params) {
 	u8* dst = (u8*)params[4];
 	u32 len = params[5];
 
+	// Simulate ROM mirroring
+	while (src >= ce9->romPaddingSize) {
+		src -= ce9->romPaddingSize;
+	}
+	params[3] = src;
+
 	bool romPart = false;
 	//int romPartNo = 0;
 	if (!(ce9->valueBits & ROMinRAM)) {
@@ -446,6 +465,19 @@ void cardSetDma(u32 * params) {
 	u8* dst = ((ce9->valueBits & isSdk5) ? (u8*)(dmaParams[4]) : (u8*)(cardStruct[1]));
 	u32 len = ((ce9->valueBits & isSdk5) ? dmaParams[5] : cardStruct[2]);
 
+	// Simulate ROM mirroring
+	while (src >= ce9->romPaddingSize) {
+		src -= ce9->romPaddingSize;
+	}
+	if (ce9->valueBits & isSdk5) {
+		dmaParams[3] = src;
+	} else {
+		cardStruct[0] = src;
+	}
+
+	#ifndef TWLSDK
+	dataSplit = false;
+	#endif
 	bool romPart = false;
 	//int romPartNo = 0;
 	if (!(ce9->valueBits & ROMinRAM)) {
@@ -470,7 +502,31 @@ void cardSetDma(u32 * params) {
 		enableIPC_SYNC();
 
 		// Copy via dma
-		ndmaCopyWordsAsynch(0, (u8*)ce9->romLocation/*[romPartNo]*/+src, dst, len);
+		// ndmaCopyWordsAsynch(0, (u8*)ce9->romLocation/*[romPartNo]*/+src, dst, len);
+
+		u32 len2 = 0;
+		for (int i = 0; i < ce9->romMapLines; i++) {
+			if (!(src >= ce9->romMap[i][0] && (i == ce9->romMapLines-1 || src < ce9->romMap[i+1][0])))
+				continue;
+
+			u32 newSrc = (ce9->romMap[i][1]-ce9->romMap[i][0])+src;
+			if (newSrc+len > ce9->romMap[i][2]) {
+				do {
+					len--;
+					len2++;
+				} while (newSrc+len != ce9->romMap[i][2]);
+				ndmaCopyWordsAsynch(1, (u8*)newSrc, dst, len);
+				src += len;
+				dst += len;
+				#ifndef TWLSDK
+				dataSplit = true;
+				#endif
+			} else {
+				ndmaCopyWordsAsynch(0, (u8*)newSrc, dst, len2==0 ? len : len2);
+				break;
+			}
+		}
+
 		IPC_SendSync(0x3);
 		return;
 	} else if (!dmaOn || ce9->patches->sleepRef || ce9->thumbPatches->sleepRef) {
@@ -615,6 +671,11 @@ void cardSetDma(u32 * params) {
 	u8* dst = ((ce9->valueBits & isSdk5) ? (u8*)(params[4]) : (u8*)(cardStruct[1]));
 	u32 len = ((ce9->valueBits & isSdk5) ? params[5] : cardStruct[2]);
 	#endif
+
+	// Simulate ROM mirroring
+	while (src >= ce9->romPaddingSize) {
+		src -= ce9->romPaddingSize;
+	}
 
 	disableIrqMask(IRQ_CARD);
 	disableIrqMask(IRQ_CARD_LINE);

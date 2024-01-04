@@ -4,7 +4,7 @@
 	.global _start
 	.global igmText
 	.global sharedAddr
-	.global waitSysCyclesLoc
+	.global waitSysCyclesLocPtr
 	.global scfgExtBak
 	.global scfgClkBak
 	.global codeJump
@@ -28,12 +28,12 @@ igmText:
 
 sharedAddr:
 .word 0
-waitSysCyclesLoc:
+waitSysCyclesLocPtr:
 .word 0
 scfgExtBak:
-.word 0
+.word 0x027FEFF8
 scfgClkBak:
-.hword 0
+.word 0x027FEFFC
 .align 4
 
 card_engine_start:

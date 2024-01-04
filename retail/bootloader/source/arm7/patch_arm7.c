@@ -15,6 +15,7 @@ extern u32 _io_dldi_features;
 
 extern u16 a9ScfgRom;
 
+extern u8 arm7newUnitCode;
 extern u32 newArm7binarySize;
 extern u32 arm7mbk;
 
@@ -95,7 +96,7 @@ u16* getOffsetFromBLThumb(u16* blOffset) {
 }
 
 static bool patchWramClear(const tNDSHeader* ndsHeader) {
-	if (ndsHeader->unitCode == 0) {
+	if (arm7newUnitCode == 0) {
 		u32* offset = patchOffsetCache.wramEndAddrOffset;
 		if (!patchOffsetCache.wramEndAddrOffset) {
 			offset = findWramEndAddrOffset(ndsHeader);
@@ -133,14 +134,14 @@ static bool patchWramClear(const tNDSHeader* ndsHeader) {
 			}
 		} else {
 			if (usesThumb) {
-				if (ndsHeader->unitCode == 0) {
+				if (arm7newUnitCode == 0) {
 					*((u16*)offset + 21) = 0x2200;	// movs r2, #0
 				} else {
 					*((u16*)offset + 11) = 0x2100;	// movs r1, #0
 					*((u16*)offset + 55) = 0x2100;	// movs r1, #0
 				}
 			} else {
-				if (ndsHeader->unitCode == 0) {
+				if (arm7newUnitCode == 0) {
 					offset[*offset==0xE92D4038 ? 15 : (offset[1]==0xE24DD008 ? 18 : 17)] = 0xE3A02000;	// mov r2, #0
 				} else if (offset[1]==0xE24DD008) {
 					offset[10] = 0xE3A01000;	// mov r1, #0
@@ -217,10 +218,7 @@ static void fixForDSiBios(const cardengineArm7* ce7, const tNDSHeader* ndsHeader
 		if (swiGetPitchTableOffset) {
 			// Patch
 			if (isSdk5(moduleParams)) {
-				u16* offset = (u16*)swiGetPitchTableOffset;
-				for (int i = 0; i < 6; i++) {
-					offset[i] = 0x46C0; // nop
-				}
+				toncset16(swiGetPitchTableOffset, 0x46C0, 6);
 			} else if (patchOffsetCache.a7IsThumb) {
 				tonccpy((u16*)newSwiGetPitchTableAddr, swiGetPitchTablePatch, 0x10);
 				u32 srcAddr = (u32)swiGetPitchTableOffset - vAddrOfRelocSrc + 0x37F8000;
@@ -270,7 +268,7 @@ static void patchSleepMode(const tNDSHeader* ndsHeader) {
 }
 
 static void patchRamClear(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
-	if (moduleParams->sdk_version < 0x5000000 || ndsHeader->unitCode == 0) {
+	if (moduleParams->sdk_version < 0x5000000 || arm7newUnitCode == 0) {
 		return;
 	}
 
@@ -282,8 +280,12 @@ static void patchRamClear(const tNDSHeader* ndsHeader, const module_params_t* mo
 		}
 	}
 	if (ramClearOffset) {
-		*(ramClearOffset) = 0x02FFF000;
-		*(ramClearOffset + 1) = 0x02FFF000;
+		// if (arm7newUnitCode > 0) {
+			*(ramClearOffset) = 0x02FFF000;
+			*(ramClearOffset + 1) = 0x02FFF000;
+		// }
+		// ramClearOffset[3] -= 0x1800; // Shrink hi heap
+
 		dbg_printf("RAM clear location : ");
 		dbg_hexa((u32)ramClearOffset);
 		dbg_printf("\n\n");
@@ -292,7 +294,7 @@ static void patchRamClear(const tNDSHeader* ndsHeader, const module_params_t* mo
 }
 
 static void patchPostBoot(const tNDSHeader* ndsHeader) {
-	if (ndsHeader->unitCode == 0 || arm7mbk != 0x080037C0) {
+	if (arm7mbk != 0x080037C0) {
 		return;
 	}
 
@@ -304,7 +306,7 @@ static void patchPostBoot(const tNDSHeader* ndsHeader) {
 		}
 	}
 	if (postBootOffset) {
-		bool usesThumb = (*(u16*)postBootOffset == 0xB5F8);
+		const bool usesThumb = (*(u16*)postBootOffset == 0xB5F8);
 		if (usesThumb) {
 			*(u16*)postBootOffset = 0x4770;	// bx lr
 		} else {
@@ -328,7 +330,7 @@ static bool patchCardIrqEnable(cardengineArm7* ce7, const tNDSHeader* ndsHeader,
 	if (!cardIrqEnableOffset) {
 		return false;
 	}
-	bool usesThumb = (*(u16*)cardIrqEnableOffset == 0xB510);
+	const bool usesThumb = (*(u16*)cardIrqEnableOffset == 0xB510 || *(u16*)cardIrqEnableOffset == 0xB530);
 	if (usesThumb) {
 		u16* cardIrqEnablePatch = (u16*)ce7->patches->thumb_card_irq_enable_arm7;
 		tonccpy(cardIrqEnableOffset, cardIrqEnablePatch, 0x20);
@@ -368,32 +370,54 @@ u32 patchCardNdsArm7(
 	const module_params_t* moduleParams,
 	u32 saveFileCluster
 ) {
+	arm7newUnitCode = ndsHeader->unitCode;
 	newArm7binarySize = ndsHeader->arm7binarySize;
 
 	if ((ndsHeader->unitCode > 0) ? (arm7mbk == 0x080037C0) : (memcmp(ndsHeader->gameCode, "AYI", 3) == 0 && ndsHeader->arm7binarySize == 0x25F70)) {
 		// Replace incompatible ARM7 binary
-		extern u32 donorFileTwlCluster;	// SDK5 (TWL)
+		extern u32 donorFileCluster;	// SDK5
+		extern u32 donorFileOffset;
 		aFile donorRomFile;
-		getFileFromCluster(&donorRomFile, donorFileTwlCluster);
-		if (donorRomFile.firstCluster == CLUSTER_FREE && ndsHeader->gameCode[0] != 'D') {
-			dbg_printf("ERR_LOAD_OTHR\n\n");
-			return ERR_LOAD_OTHR;
+		getFileFromCluster(&donorRomFile, donorFileCluster);
+		if (donorRomFile.firstCluster == CLUSTER_FREE) {
+			if (ndsHeader->gameCode[0] == 'D') {
+				if (newArm7binarySize != patchOffsetCache.a7BinSize) {
+					rsetA7Cache(); // Reset arm7 hook offsets
+					patchOffsetCache.a7BinSize = newArm7binarySize;
+				}
+				dbg_printf("ERR_NONE\n\n");
+				return ERR_NONE;
+			} else {
+				dbg_printf("ERR_LOAD_OTHR\n\n");
+				return ERR_LOAD_OTHR;
+			}
 		}
 		u32 arm7dst = 0;
-		fileRead((char*)&arm7dst, &donorRomFile, 0x38, 0x4);
+		fileRead((char*)&arm7dst, &donorRomFile, donorFileOffset+0x38, 0x4);
 		if (arm7dst == 0x02380000) {
 			// Donor found within a ROM file
 			u32 arm7src = 0;
 			u32 arm7size = 0;
-			fileRead((char*)&arm7src, &donorRomFile, 0x30, 0x4);
-			fileRead((char*)&arm7size, &donorRomFile, 0x3C, 0x4);
-			fileRead(ndsHeader->arm7destination, &donorRomFile, arm7src, arm7size);
+			fileRead((char*)&arm7newUnitCode, &donorRomFile, donorFileOffset+0x12, 1);
+			fileRead((char*)&arm7src, &donorRomFile, donorFileOffset+0x30, 0x4);
+			fileRead((char*)&arm7size, &donorRomFile, donorFileOffset+0x3C, 0x4);
+			fileRead(ndsHeader->arm7destination, &donorRomFile, donorFileOffset+arm7src, arm7size);
 			newArm7binarySize = arm7size;
 		} else {
 			// Standalone donor found
-			extern u32 donorFileTwlSize;
-			fileRead(ndsHeader->arm7destination, &donorRomFile, 0, donorFileTwlSize);
-			newArm7binarySize = donorFileTwlSize;
+			extern u32 donorFileSize;
+			fileRead(ndsHeader->arm7destination, &donorRomFile, 0, donorFileSize);
+			newArm7binarySize = donorFileSize;
+
+			u32 startOffset = (u32)ndsHeader->arm7destination;
+			if (*(u32*)(startOffset + newArm7binarySize - 0xC) == 0x027E0000 || *(u32*)(startOffset + newArm7binarySize - 0x24) == 0x027E0000) {
+				arm7newUnitCode = 0; // NTR ARM7 binary found
+			}
+		}
+		if (memcmp(ndsHeader->gameCode, "KUB", 3) == 0 && arm7newUnitCode == 0) {
+			dbg_printf("Donor incompatible with this ROM! Please use a DSi-Enhanced donor.\n\n");
+			dbg_printf("ERR_LOAD_OTHR\n\n");
+			return ERR_LOAD_OTHR;
 		}
 	}
 
@@ -431,7 +455,7 @@ u32 patchCardNdsArm7(
 	if (a7GetReloc(ndsHeader, moduleParams)) {
 		u32 saveResult = 0;
 
-		if (newArm7binarySize==0x2352C || newArm7binarySize==0x235DC || newArm7binarySize==0x23CAC || newArm7binarySize==0x245C4) {
+		if (newArm7binarySize==0x2352C || newArm7binarySize==0x235DC || newArm7binarySize==0x23CAC || newArm7binarySize==0x245C0 || newArm7binarySize==0x245C4) {
 			saveResult = savePatchInvertedThumb(ce7, ndsHeader, moduleParams, saveFileCluster);    
 		} else if (isSdk5(moduleParams)) {
 			// SDK 5

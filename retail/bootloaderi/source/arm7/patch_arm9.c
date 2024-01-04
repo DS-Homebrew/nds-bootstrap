@@ -436,6 +436,11 @@ static void patchCardId(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const 
 }
 
 void patchGbaSlotInit_cont(const tNDSHeader* ndsHeader, bool usesThumb, bool searchAgainForThumb) {
+	extern u32 oldArm7mbk;
+	if (REG_SCFG_EXT != 0 || ndsHeader->unitCode == 0 || !dsiModeConfirmed || (oldArm7mbk == 0x080037C0 && *(u32*)0x02FFE1A0 == 0x080037C0) || *(u32*)0x02FFE1A0 == 0x00403000) {
+		return;
+	}
+
 	// Card ID
 	u32* gbaSlotInitOffset = patchOffsetCache.gbaSlotInitOffset;
 	if (!patchOffsetCache.gbaSlotInitChecked) {
@@ -474,10 +479,6 @@ void patchGbaSlotInit_cont(const tNDSHeader* ndsHeader, bool usesThumb, bool sea
 }
 
 static void patchGbaSlotInit(const tNDSHeader* ndsHeader, bool usesThumb) {
-	extern u32 oldArm7mbk;
-	if (ndsHeader->unitCode == 0 || !dsiModeConfirmed || (oldArm7mbk != 0x080037C0 && *(u32*)0x02FFE1A0 != 0x080037C0) || oldArm7mbk == 0x080037C0) {
-		return;
-	}
 	patchGbaSlotInit_cont(ndsHeader, usesThumb, false);
 }
 
@@ -716,7 +717,7 @@ static void patchReset(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const m
 }
 
 void patchResetTwl(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {    
-	if (!isDSiWare) {
+	if (ndsHeader->unitCode == 0 || !dsiModeConfirmed || (patchOffsetCache.resetOffset && !isDSiWare)) {
 		return;
 	}
 
@@ -811,13 +812,17 @@ bool a9PatchCardIrqEnable(cardengineArm9* ce9, const tNDSHeader* ndsHeader, cons
 
 	if (strncmp(romTid, "AJS", 3) == 0 // Jump Super Stars - Fix white screen on boot
 	 || strncmp(romTid, "AJU", 3) == 0 // Jump Ultimate Stars - Fix white screen on boot
-	 || strncmp(romTid, "AWD", 3) == 0	// Diddy Kong Racing - Fix corrupted 3D model bug
-	 || strncmp(romTid, "CP3", 3) == 0	// Viva Pinata - Fix touch and model rendering bug
-	 || strncmp(romTid, "BO5", 3) == 0 // Golden Sun: Dark Dawn
+	 || strncmp(romTid, "AWD", 3) == 0 // Diddy Kong Racing - Fix corrupted 3D model bug
+	 || strncmp(romTid, "CP3", 3) == 0 // Viva Pinata - Fix touch and model rendering bug
+	 || strncmp(romTid, "BO5", 3) == 0 // Golden Sun: Dark Dawn - Fix black screen on boot
 	 || strncmp(romTid, "Y8L", 3) == 0 // Golden Sun: Dark Dawn (Demo Version) - Fix black screen on boot
 	 || strncmp(romTid, "B8I", 3) == 0 // Spider-Man: Edge of Time - Fix white screen on boot
 	 || strncmp(romTid, "TAM", 3) == 0 // The Amazing Spider-Man - Fix white screen on boot
-	) return true;
+	) {
+		extern bool igmAccessible;
+		igmAccessible = false;
+		return true;
+	}
 
 	bool usesThumb = patchOffsetCache.a9CardIrqIsThumb;
 
@@ -943,7 +948,7 @@ static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 		}*/
 	}
 
-	if (!isSdk5(moduleParams)) {
+	if (!isSdk5(moduleParams) && unpatchedFuncs->mpuInitRegionOldData != 0x200002B) {
 		u32* mpuDataOffsetAlt = patchOffsetCache.mpuDataOffsetAlt;
 		if (!patchOffsetCache.mpuDataOffsetAlt) {
 			mpuDataOffsetAlt = findMpuDataOffsetAlt(ndsHeader);
@@ -969,8 +974,8 @@ static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 	patchOffsetCache.mpuInitOffset = mpuInitOffset;
 }
 
-static void patchMpu2(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
-	if (moduleParams->sdk_version < 0x2008000 || moduleParams->sdk_version > 0x5000000) {
+void patchMpu2(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, const bool usesCloneboot) {
+	if (moduleParams->sdk_version > 0x5000000 && (ndsHeader->unitCode == 0 || !dsiModeConfirmed)) {
 		return;
 	}
 
@@ -1018,7 +1023,8 @@ static void patchMpu2(const tNDSHeader* ndsHeader, const module_params_t* module
 		} else {*/
 			unpatchedFuncs->mpuDataOffset2 = mpuDataOffset;
 			unpatchedFuncs->mpuInitRegionOldData2 = *mpuDataOffset;
-			*mpuDataOffset = PAGE_128K | 0x027E0000 | 1;
+			// *mpuDataOffset = (ndsHeader->unitCode > 0 && dsiModeConfirmed) ? 0 : (PAGE_128K | 0x027E0000 | 1);
+			*mpuDataOffset = 0;
 		//}
 
 		/*u32 mpuInitRegionNewData = PAGE_32M | 0x02000000 | 1;
@@ -1060,6 +1066,12 @@ static void patchMpu2(const tNDSHeader* ndsHeader, const module_params_t* module
 		dbg_hexa((u32)mpuInitOffset);
 		dbg_printf("\n\n");
 
+		u32 mpuInitOffsetInSrl = (u32)mpuInitOffset;
+		mpuInitOffsetInSrl -= (u32)ndsHeader->arm9destination;
+
+		if (mpuInitOffsetInSrl >= 0 && mpuInitOffsetInSrl < 0x4000 && usesCloneboot) {
+			unpatchedFuncs->mpuInitOffset2 = mpuInitOffset;
+		}
 		*mpuInitOffset = 0xE1A00000; // nop
 
 		// Try to find it
@@ -1086,11 +1098,11 @@ void patchMpuChange(const tNDSHeader* ndsHeader, const module_params_t* modulePa
 		return;
 	}
 
-	u32* offset = patchOffsetCache.mpuDataOffset2;
-	if (!patchOffsetCache.mpuDataOffset2) {
+	u32* offset = patchOffsetCache.mpuChangeOffset;
+	if (!patchOffsetCache.mpuChangeOffset) {
 		offset = findMpuChange(ndsHeader);
 		if (offset) {
-			patchOffsetCache.mpuDataOffset2 = offset;
+			patchOffsetCache.mpuChangeOffset = offset;
 		}
 	}
 
@@ -1256,7 +1268,7 @@ static void patchWaitSysCycles(const cardengineArm9* ce9, const tNDSHeader* ndsH
 			}
 
 			if (dsiModeConfirmed) {	
-				*(u32*)((u32)INGAME_MENU_LOCATION + IGM_TEXT_SIZE_ALIGNED + 4) = (u32)offset;
+				*(u32*)0x027FEFF4 = (u32)offset;
 			}
 		}
 
@@ -1326,15 +1338,15 @@ static void patchWaitSysCycles(const cardengineArm9* ce9, const tNDSHeader* ndsH
     return oldheapPointer;
 }*/
 
-u32* patchHiHeapPointer(const module_params_t* moduleParams, const tNDSHeader* ndsHeader, bool ROMinRAM) {
-	bool ROMsupportsDsiMode = (ndsHeader->unitCode>0 && dsiModeConfirmed);
-	if (!ROMsupportsDsiMode) {
-		return NULL;
-	}
-
-	const char* romTid = getRomTid(ndsHeader);
-
+void patchHiHeapPointer(const module_params_t* moduleParams, const tNDSHeader* ndsHeader) {
 	extern u8 consoleModel;
+	extern u32 cheatSizeTotal;
+	bool ROMsupportsDsiMode = (ndsHeader->unitCode > 0 && dsiModeConfirmed);
+	const bool cheatsEnabled = (cheatSizeTotal > 4 && cheatSizeTotal <= 0x8000);
+
+	if (moduleParams->sdk_version < 0x2008000 || !dsiModeConfirmed || strncmp(ndsHeader->gameCode, "UBR", 3) == 0) {
+		return;
+	}
 
 	u32* heapPointer = patchOffsetCache.heapPointerOffset;
 	if (*patchOffsetCache.heapPointerOffset != (ROMsupportsDsiMode ? 0x13A007BE : 0x023E0000)
@@ -1349,183 +1361,179 @@ u32* patchHiHeapPointer(const module_params_t* moduleParams, const tNDSHeader* n
 		patchOffsetCache.heapPointerOffset = heapPointer;
 	} else {
 		dbg_printf("Heap pointer not found\n");
-		return NULL;
+		return;
 	}
 
     dbg_printf("hi heap end: ");
 	dbg_hexa((u32)heapPointer);
     dbg_printf("\n\n");
 
-    u32* oldheapPointer = (u32*)*heapPointer;
+	if (ROMsupportsDsiMode && ((gameOnFlashcard && consoleModel == 0 && !cheatsEnabled) || consoleModel > 0) && (u8)a9ScfgRom == 1) {
+		return;
+	}
 
-    dbg_printf("old hi heap value: ");
+	u32* oldheapPointer = (u32*)*heapPointer;
+
+	dbg_printf("old hi heap value: ");
 	dbg_hexa((u32)oldheapPointer);
-    dbg_printf("\n\n");
+	dbg_printf("\n\n");
 
-	//if (ROMsupportsDsiMode) {
-		if (consoleModel == 0 && strncmp(romTid, "DD3", 3) == 0 && dsiWramAccess) {
-			// DSi: Hidden Photo (Europe/German) needs more heap space
-			u32 addr = (u32)heapPointer;
+	const u32 dsiHiHeap = ((gameOnFlashcard && consoleModel == 0 && !cheatsEnabled) || consoleModel > 0) ? 0x02F70000 : retail_CACHE_ADRESS_START_TWLSDK;
+	bool newHiHeapReported = false;
 
-			*(u32*)(addr) = 0xE59F0094; // ldr r0, =0x2F26000
-
-			*(u32*)(addr+0x40) = 0xE3A01C00; // mov r1, #*(u32*)(addr+0x9C)
-			if (*(u32*)(addr+0x9C) != 0) {
-				for (u32 i = 0; i < *(u32*)(addr+0x9C); i += 0x100) {
-					*(u32*)(addr+0x40) += 1;
-				}
-			}
-
-			*(u32*)(addr+0x9C) = 0x2F26000;
-			if ((u8)a9ScfgRom != 1) {
-				*(u32*)(addr+0x9C) -= 0x6000;
-			}
-		} else if (consoleModel == 0 && (gameOnFlashcard || !isDSiWare) && !dsiWramAccess) {
+	if (ROMsupportsDsiMode) {
+		/* if (!dsiWramAccess) {
 			// DSi WRAM not mapped to ARM9
-			// DSi-Enhanced/Exclusive title loaded from flashcard/SD, or DSiWare loaded from flashcard, both on DSi
+			// DSi mode title loaded on DSi/3DS
 			switch (*heapPointer) {
 				case 0x13A007BE:
-					*heapPointer = (u32)0x13A007B9; /* MOVNE R0, #0x2E40000 */
+					*heapPointer = (u32)0x13A007BA; // MOVNE R0, #0x2E80000
 					break;
 				case 0xE3A007BE:
-					*heapPointer = (u32)0xE3A007B9; /* MOV R0, #0x2E40000 */
+					*heapPointer = (u32)0xE3A007BA; // MOV R0, #0x2E80000
 					break;
 				case 0x048020BE:
-					*heapPointer = (u32)0x048020B9; /* MOVS R0, #0x2E40000 */
+					*heapPointer = (u32)0x048020BA; // MOVS R0, #0x2E80000
 					break;
 			}
-		} else if (!gameOnFlashcard && (consoleModel > 0 || isDSiWare) && !dsiWramAccess) {
-			// DSi WRAM not mapped to ARM9
-			// DSiWare loaded from SD on DSi/3DS, or DSi mode title loaded on 3DS
+		} else { */
+			// DSi mode title loaded on DSi from SD card, or DSi/3DS with external DSi BIOS files loaded
 			switch (*heapPointer) {
-				case 0x13A007BE:
-					*heapPointer = (u32)0x13A007BA; /* MOVNE R0, #0x2E80000 */
-					break;
-				case 0xE3A007BE:
-					*heapPointer = (u32)0xE3A007BA; /* MOV R0, #0x2E80000 */
-					break;
-				case 0x048020BE:
-					*heapPointer = (u32)0x048020BA; /* MOVS R0, #0x2E80000 */
-					break;
-			}
-		} else if (consoleModel == 0 && (gameOnFlashcard || !isDSiWare)) {
-			// DSi-Enhanced/Exclusive title loaded from flashcard/SD, or DSiWare loaded from flashcard, both on DSi (or 3DS with DS BIOS set in SCFG register)
-			switch (*heapPointer) {
-				case 0x13A007BE:
-					*heapPointer = (u32)0x13A0062F; /* MOVNE R0, #0x2F00000 */
-					break;
-				case 0xE3A007BE:
-					*heapPointer = (u32)0xE3A0062F; /* MOV R0, #0x2F00000 */
-					break;
-				case 0x048020BE:
-					*heapPointer = (u32)0x048020BC; /* MOVS R0, #0x2F00000 */
-					break;
-			}
-		} else {
-			// DSiWare loaded from SD on DSi/3DS, or DSi mode title loaded on 3DS
-			switch (*heapPointer) {
-				case 0x13A007BE:
-					*heapPointer = (u32)0x13A007BD; /* MOVNE R0, #0x2F40000 */
-					break;
-				case 0xE3A007BE:
-					*heapPointer = (u32)0xE3A007BD; /* MOV R0, #0x2F40000 */
-					break;
-				case 0x048020BE:
-					*heapPointer = (u32)0x048020BD; /* MOVS R0, #0x2F40000 */
-					break;
-			}
-		}
-	/*} else {
-		*heapPointer = (u32)CARDENGINEI_ARM9_CACHED_LOCATION2_ROMINRAM;
-	}*/
+				case 0x13A007BE: {
+					// *heapPointer = (u32)0x13A007BD; // MOVNE R0, #0x2F40000
+					heapPointer[-1] = 0xE3500001; // cmp r0, #1
+					for (int i = 0xA0/sizeof(u32); i < 0xE0/sizeof(u32); i++) {
+						if (heapPointer[i] == 0x023E0000) {
+							dbg_printf("hi heap end: ");
+							dbg_hexa((u32)heapPointer+(i*sizeof(u32)));
+							dbg_printf("\n\n");
 
-    dbg_printf("new hi heap value: ");
-	dbg_hexa((u32)*heapPointer);
-    dbg_printf("\n\n");
-    dbg_printf("Hi Heap Shrink Sucessfull\n\n");
+							heapPointer[i] = dsiHiHeap;
 
-    return (u32*)*heapPointer;
+							dbg_printf("new hi heap value: ");
+							dbg_hexa(heapPointer[i]);
+							dbg_printf("\n\n");
+
+							newHiHeapReported = true;
+							break;
+						}
+					}
+				}	break;
+				case 0xE3A007BE: {
+					// *heapPointer = (u32)0xE3A007BD; // MOV R0, #0x2F40000
+					const bool debuggerSdk = (heapPointer[1] == 0xEA000043);
+					u32 addr = (u32)heapPointer;
+
+					if (debuggerSdk) { // debuggerSdk
+						*(u32*)(addr) = 0xE59F0134; // ldr r0, =0x????????
+						*(u32*)(addr+0x28) = 0xE3560001; // cmp r6, #1
+						*(u32*)(addr+0x30) = 0xE3A00627; // mov r0, #0x2700000
+
+						*(u32*)(addr+0x58) = 0xE3A00C00; // mov r0, #*(u32*)(addr+0x13C)
+						if (*(u32*)(addr+0x13C) != 0) {
+							for (u32 i = 0; i < *(u32*)(addr+0x13C); i += 0x100) {
+								*(u32*)(addr+0x58) += 1;
+							}
+						}
+
+						*(u32*)(addr+0x13C) = dsiHiHeap;
+					} else {
+						*(u32*)(addr) = 0xE59F0094; // ldr r0, =0x2F60000
+
+						*(u32*)(addr+0x40) = 0xE3A01C00; // mov r1, #*(u32*)(addr+0x9C)
+						if (*(u32*)(addr+0x9C) != 0) {
+							for (u32 i = 0; i < *(u32*)(addr+0x9C); i += 0x100) {
+								*(u32*)(addr+0x40) += 1;
+							}
+						}
+
+						*(u32*)(addr+0x9C) = dsiHiHeap;
+					}
+					dbg_printf("new hi heap value: ");
+					dbg_hexa(*(u32*)(addr+(debuggerSdk ? 0x13C : 0x9C)));
+					dbg_printf("\n\n");
+
+					newHiHeapReported = true;
+				}	break;
+				case 0x048020BE: {
+					u16* offsetThumb = (u16*)heapPointer;
+					if (offsetThumb[-2] == 0x2800) { // cmp r0, #0
+						offsetThumb[-2] = 0x2801; // cmp r0, #1
+						for (int i = 0x60/sizeof(u32); i < 0xA0/sizeof(u32); i++) {
+							if (heapPointer[i] == 0x023E0000) {
+								dbg_printf("hi heap end: ");
+								dbg_hexa((u32)heapPointer+(i*sizeof(u32)));
+								dbg_printf("\n\n");
+
+								heapPointer[i] = dsiHiHeap;
+
+								dbg_printf("new hi heap value: ");
+								dbg_hexa(heapPointer[i]);
+								dbg_printf("\n\n");
+
+								newHiHeapReported = true;
+								break;
+							}
+						}
+					} else {
+						*heapPointer = (u32)0x048020BD; // MOVS R0, #0x2F40000
+					}
+				}	break;
+			}
+		// }
+	} else {
+		*heapPointer = 0x027C0000;
+	}
+
+	if (!newHiHeapReported) {
+		dbg_printf("new hi heap value: ");
+		dbg_hexa((u32)*heapPointer);
+		dbg_printf("\n\n");
+	}
+    dbg_printf(ROMsupportsDsiMode ? "Hi Heap Shrink Successful\n\n" : "Hi Heap Grow Successful\n\n");
 }
 
-void patchA9Mbk(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool standAlone) {
+/* void patchA9Mbk(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool standAlone) {
 	if (dsiWramAccess) {
 		return;
 	}
 
-	extern u8 consoleModel;
-
 	u32* mbkWramBOffset = patchOffsetCache.mbkWramBOffset;
-	if (consoleModel > 0 || standAlone) { // DSiWare loaded from SD on DSi/3DS, or DSi mode title loaded on 3DS
-		if (!patchOffsetCache.mbkWramBOffset) {
-			if (standAlone) {
-				mbkWramBOffset = findMbkWramBOffsetBoth(ndsHeader, moduleParams, (bool*)&patchOffsetCache.a9IsThumb);
-			} else {
-				if (patchOffsetCache.a9IsThumb) {
-					mbkWramBOffset = (u32*)findMbkWramBOffsetThumb(ndsHeader, moduleParams);
-				} else {
-					mbkWramBOffset = findMbkWramBOffset(ndsHeader, moduleParams);
-				}
-			}
-			if (mbkWramBOffset) {
-				patchOffsetCache.mbkWramBOffset = mbkWramBOffset;
-			}
-		}
-		if (mbkWramBOffset) {
-			if (patchOffsetCache.a9IsThumb) {
-				u16* offsetThumb = (u16*)mbkWramBOffset;
-
-				// WRAM-B
-				offsetThumb[0] = 0x20BB; // MOVS R0, #0x2EC0000
-				offsetThumb[1] = 0x0480;
-				offsetThumb[2] = 0x4770; // bx lr
-
-				// WRAM-C
-				offsetThumb[14] = 0x20BA; // MOVS R0, #0x2E80000
-				offsetThumb[15] = 0x0480;
-				offsetThumb[16] = 0x4770; // bx lr
-			} else {
-				// WRAM-B
-				mbkWramBOffset[0]  = 0xE3A007BB; // MOV R0, #0x2EC0000
-				mbkWramBOffset[1]  = 0xE12FFF1E; // bx lr
-
-				// WRAM-C
-				mbkWramBOffset[10] = 0xE3A007BA; // MOV R0, #0x2E80000
-				mbkWramBOffset[11] = 0xE12FFF1E; // bx lr
-			}
-		}
-	} else {
-		if (!patchOffsetCache.mbkWramBOffset) {
+	if (!patchOffsetCache.mbkWramBOffset) {
+		if (standAlone) {
+			mbkWramBOffset = findMbkWramBOffsetBoth(ndsHeader, moduleParams, (bool*)&patchOffsetCache.a9IsThumb);
+		} else {
 			if (patchOffsetCache.a9IsThumb) {
 				mbkWramBOffset = (u32*)findMbkWramBOffsetThumb(ndsHeader, moduleParams);
 			} else {
 				mbkWramBOffset = findMbkWramBOffset(ndsHeader, moduleParams);
 			}
-			if (mbkWramBOffset) {
-				patchOffsetCache.mbkWramBOffset = mbkWramBOffset;
-			}
 		}
 		if (mbkWramBOffset) {
-			if (patchOffsetCache.a9IsThumb) {
-				u16* offsetThumb = (u16*)mbkWramBOffset;
+			patchOffsetCache.mbkWramBOffset = mbkWramBOffset;
+		}
+	}
+	if (mbkWramBOffset) {
+		if (patchOffsetCache.a9IsThumb) {
+			u16* offsetThumb = (u16*)mbkWramBOffset;
 
-				// WRAM-B
-				offsetThumb[0] = 0x20BA; // MOVS R0, #0x2E80000
-				offsetThumb[1] = 0x0480;
-				offsetThumb[2] = 0x4770; // bx lr
+			// WRAM-B
+			offsetThumb[0] = 0x20BB; // MOVS R0, #0x2EC0000
+			offsetThumb[1] = 0x0480;
+			offsetThumb[2] = 0x4770; // bx lr
 
-				// WRAM-C
-				offsetThumb[14] = 0x20B9; // MOVS R0, #0x2E40000
-				offsetThumb[15] = 0x0480;
-				offsetThumb[16] = 0x4770; // bx lr
-			} else {
-				// WRAM-B
-				mbkWramBOffset[0]  = 0xE3A007BA; // MOV R0, #0x2E80000
-				mbkWramBOffset[1]  = 0xE12FFF1E; // bx lr
+			// WRAM-C
+			offsetThumb[14] = 0x20BA; // MOVS R0, #0x2E80000
+			offsetThumb[15] = 0x0480;
+			offsetThumb[16] = 0x4770; // bx lr
+		} else {
+			// WRAM-B
+			mbkWramBOffset[0]  = 0xE3A007BB; // MOV R0, #0x2EC0000
+			mbkWramBOffset[1]  = 0xE12FFF1E; // bx lr
 
-				// WRAM-C
-				mbkWramBOffset[10] = 0xE3A007B9; // MOV R0, #0x2E40000
-				mbkWramBOffset[11] = 0xE12FFF1E; // bx lr
-			}
+			// WRAM-C
+			mbkWramBOffset[10] = 0xE3A007BA; // MOV R0, #0x2E80000
+			mbkWramBOffset[11] = 0xE12FFF1E; // bx lr
 		}
 	}
 	if (!mbkWramBOffset) {
@@ -1535,7 +1543,7 @@ void patchA9Mbk(const tNDSHeader* ndsHeader, const module_params_t* moduleParams
 	dbg_printf("mbkWramBCGet location : ");
 	dbg_hexa((u32)mbkWramBOffset);
 	dbg_printf("\n\n");
-}
+} */
 
 void patchSharedFontPath(const cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, const ltd_module_params_t* ltdModuleParams) {
 	if (!isDSiWare) {
@@ -1879,7 +1887,7 @@ void patchSharedFontPath(const cardengineArm9* ce9, const tNDSHeader* ndsHeader,
 		const char* twlFontPath = "sdmc:/_nds/nds-bootstrap/TWLFontTable.dat";
 		const char* chnFontPath = "sdmc:/_nds/nds-bootstrap/CHNFontTable.dat";
 		const char* korFontPath = "sdmc:/_nds/nds-bootstrap/KORFontTable.dat";
-		const u32 newFontPathOffset = ce9 ? 0x02F7FC00 : 0x02FFDC00;
+		const u32 newFontPathOffset = 0x02FFDC00;
 
 		bool found = false;
 		extern u32 iUncompressedSize;
@@ -2459,16 +2467,16 @@ static void operaRamPatch(void) {
 	extern u8 consoleModel;
 
 	// Opera RAM patch (ARM9)
-	*(u32*)0x02003D48 = 0xC400000;
-	*(u32*)0x02003D4C = 0xC400004;
+	*(u32*)0x02003D48 = 0xC3E0000;
+	*(u32*)0x02003D4C = 0xC3E0004;
 
-	*(u32*)0x02010FF0 = 0xC400000;
-	*(u32*)0x02010FF4 = 0xC4000CE;
+	*(u32*)0x02010FF0 = 0xC3E0000;
+	*(u32*)0x02010FF4 = 0xC3E00CE;
 
-	*(u32*)0x020112AC = 0xC400080;
+	*(u32*)0x020112AC = 0xC3E0080;
 
-	*(u32*)0x020402BC = 0xC4000C2;
-	*(u32*)0x020402C0 = 0xC4000C0;
+	*(u32*)0x020402BC = 0xC3E00C2;
+	*(u32*)0x020402C0 = 0xC3E00C0;
 	if (consoleModel > 0) {
 		*(u32*)0x020402CC = 0xD7FFFFE;
 		*(u32*)0x020402D0 = 0xD000000;
@@ -2493,7 +2501,7 @@ static void operaRamPatch(void) {
 	ce9->patches->needFlushDCCache = (patchMpuRegion == 1);
 }*/
 
-u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, const ltd_module_params_t* ltdModuleParams, u32 ROMinRAM, u32 patchMpuRegion, bool usesCloneboot) {
+u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, const ltd_module_params_t* ltdModuleParams, u32 ROMinRAM, u32 patchMpuRegion, const bool usesCloneboot) {
 
 	bool usesThumb;
 	//bool slot2usesThumb = false;
@@ -2510,9 +2518,9 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
     if (strncmp(romTid, "UOR", 3) == 0) { // Start at 0x2003800 for "WarioWare: DIY"
         startOffset = (u32)ndsHeader->arm9destination + 0x3800;
     } else if (strncmp(romTid, "UXB", 3) == 0) { // Start at 0x2080000 for "Jam with the Band"
-        startOffset = (u32)ndsHeader->arm9destination + 0x80000;        
+        startOffset = (u32)ndsHeader->arm9destination + 0x80000;
     } else if (strncmp(romTid, "USK", 3) == 0) { // Start at 0x20E8000 for "Face Training"
-        startOffset = (u32)ndsHeader->arm9destination + 0xE4000;        
+        startOffset = (u32)ndsHeader->arm9destination + 0xE4000;
     }
 
     dbg_printf("startOffset : ");
@@ -2520,7 +2528,7 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
     dbg_printf("\n\n");
 
 	patchMpu(ndsHeader, moduleParams, patchMpuRegion);
-	patchMpu2(ndsHeader, moduleParams);
+	patchMpu2(ndsHeader, moduleParams, usesCloneboot);
 	patchMpuChange(ndsHeader, moduleParams);
 	patchMpuInitTwl(ndsHeader);
 
@@ -2545,7 +2553,7 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 			return ERR_LOAD_OTHR;
 		}
 
-		patchA9Mbk(ndsHeader, moduleParams, false);
+		// patchA9Mbk(ndsHeader, moduleParams, false);
 		patchSharedFontPath(ce9, ndsHeader, moduleParams, ltdModuleParams);
 	}
 

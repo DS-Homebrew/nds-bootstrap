@@ -11,6 +11,7 @@ static const char dsiWareForBootloader1[][4] = {
 	"KVM", // 200 Vmaja: Charen Ji Supirittsu
 	"KBJ", // 21 Blackjack
 	"K4I", // 24/7 Solitaire
+	"K2P", // 2Puzzle It: Fantasy
 	"K3Y", // 3 Heroes: Crystal Soul
 	"KMJ", // 3D Mahjong
 	"K3C", "K3U", // 3D Twist Match
@@ -40,9 +41,12 @@ static const char dsiWareForBootloader1[][4] = {
 	"KQK", // Ace Mathician
 	"KAC", // Advanced Circuits
 	"K5H", // Ah! Heaven
+	"K25", // G.G Series: Air Pinball Hockey
+	"KAT", // AiRace: Tunnel
 	"KP7", // Alien Puzzle Adventure
-	"K27", // G.G. Series: All Breaker
+	"K27", // G.G Series: All Breaker
 	"KAO", // All-Star Air Hockey
+	"K2Z", // G.G Series: Altered Weapon
 	"KF2", // Amakuchi! Dairoujou
 	"KAX", // Animal Boxing
 	"KPC", // Animal Puzzle Adventure
@@ -67,7 +71,7 @@ static const char dsiWareForBootloader1[][4] = {
 	"K9Z", // Artillery: Knights vs. Orcs
 	"KQJ", // Aru Seishun no Monogatari: Kouenji Joshi Sakka
 	"KA4", // Asphalt 4: Elite Racing (bootloaderi-exclusive)
-	"KAB", // G.G. Series: Assault Buster
+	"KAB", // G.G Series: Assault Buster
 	"K7D", // Astro
 	"KZ3", // Atama o Yoku Suru Anzan DS: Zou no Hana Fuusen
 	"KVU", // ATV Fever
@@ -79,6 +83,7 @@ static const char dsiWareForBootloader1[][4] = {
 	"KBE", // Bejeweled Twist
 	"K9G", // Big Bass Arcade
 	"KP6", // Bird & Beans / Tori to Mame (Japan)
+	"K96", // G.G Series: Black x Block
 	"KBZ", // BlayzBloo: Super Melee Brawlers Battle Royale
 	"KZ4", // Blockado: Puzzle Island (bootloaderi-exclusive)
 	"KLN", // Bloons TD
@@ -123,8 +128,10 @@ static const char dsiWareForBootloader1[][4] = {
 	"KTD", "KTB", // Clubhouse Games Express: Strategy Pack
 	"KXF", // Color Commando
 	"KC7", // Commando: Steel Disaster
+	"KH5", // G.G Series: Conveyor Toy Packing
 	"K56", // Coropata
 	"KCX", // Cosmo Fighters
+	"K5D", // G.G Series: Cosmo Rally!!
 	"KDC", // Crash-Course Domo
 	"KQZ", // Crazy Chicken: Director's Cut (bootloaderi-exclusive)
 	"KCV", // Crazy Chicken: Pirates (bootloaderi-exclusive)
@@ -133,8 +140,10 @@ static const char dsiWareForBootloader1[][4] = {
 	"KXD", // Crystal Adventure
 	"KQQ", // Crystal Caverns of Amon-Ra
 	"K32", // CuteWitch! runner
+	"KTA", // G.G Series: D-Tank
 	"KF3", // Dairojo! Samurai Defenders
 	"KIN", // Dancing Academy
+	"KSD", // G.G Series: Dark Spirits
 	"KDV", // Dark Void Zero
 	"KUI", // Decathlon 2012
 	"K6B", // Deep Sea Creatures
@@ -149,6 +158,10 @@ static const char dsiWareForBootloader1[][4] = {
 	"KDL", // Dragon's Lair
 	"KLY", // Dragon's Lair II: Time Warp
 	"K9E", // Dreamwalker
+	"K2C", // G.G Series: Drift Circuit
+	"KUG", // G.G Series: Drift Circuit 2
+	"KIF", // Drift Street International
+	"KDA", // G.G Series: Drilling Attack!!
 	"B88", // DS WiFi Settings
 	"KB8", // GO Series: Earth Saver
 	"KB9", // Earth Saver: Inseki Bakuha Dai Sakuse
@@ -164,9 +177,11 @@ static const char dsiWareForBootloader1[][4] = {
 	"KED", // Electroplankton: Sun-Animalcule
 	"KEA", // Electroplankton: Trapy
 	"KEJ", // Electroplankton: Varvoice
+	"KD7", // G.G Series: Energy Chain
 	"K5Q", // Escape Trick: The Secret of Rock City Prison (bootloaderi-exclusive)
 	"KEY", // Escape Trick: Ninja Castle (bootloaderi-exclusive)
 	"K5K", // Escape Trick: Convenience Store (bootloaderi-exclusive)
+	"KER", // G.G Series: Exciting River
 	"KYB", // Face Pilot: Fly With Your Nintendo DSi Camera! (bootloaderi-exclusive)
 	"K4E", // Fall in the Dark
 	"Z2E", // Famicom Wars DS: Ushinawareta Hikari
@@ -179,6 +194,7 @@ static const char dsiWareForBootloader1[][4] = {
 	// "K4K", // Flametail
 	"KFS", // Flashlight
 	"KKR", // Flip the Core
+	"KGU", // Flipnote Studio
 	"KFP", // Flipper
 	"KKN", // Flipper 2: Flush the Goldfish
 	"KFU", // Flips: The Bubonic Builders
@@ -209,6 +225,7 @@ static const char dsiWareForBootloader1[][4] = {
 	"KGQ", // Go! Go! Island Rescue!
 	"K3G", // Go! Go! Kokopolo
 	"K9A", // Goooooal America
+	"KVQ", // G.G Series: Great Whip Adventure
 	"K83", // Hachiwandaiba DS: Naru Zouku Ha Samishougi
 	"KZH", // Halloween Trick or Treat
 	"KHO", // Handy Hockey
@@ -217,11 +234,15 @@ static const char dsiWareForBootloader1[][4] = {
 	"KHQ", // Hearts Spades Euchre
 	"K6S", // Heathcliff: Spot On
 	"KHL", // Hell's Kitchen VS
+	"K5E", // G.G Series: Hero Puzzle
+	"K5J", // G.G Series: The Hidden Ninja Kagemaru
 	"KTX", // High Stakes Texas Hold'em
 	"KHI", // Hints Hunter
+	"KT2", // G.G Series: Horizontal Bar
 	// "KNE", // Ichi Moudaji!: Neko King
 	"KNK", // Ideyou Sukeno: Kenkou Maja DSi
 	"KBT", // Invasion of the Alien Blobs (bootloaderi-exclusive)
+	"K3J", // iSpot Japan
 	"KIK", // Ivy the Kiwi? mini
 	"K9B", // Jazzy Billiards
 	"KJY", // JellyCar 2
@@ -243,10 +264,12 @@ static const char dsiWareForBootloader1[][4] = {
 	"KMX", // Kemonomix
 	"K9C", // Kokoro no Herusumeta: Kokoron
 	"KON", // Koneko no ie: Kiri Shima Keto-San Biki no Koneko
+	"KTM", // Korogashi Pazuru: Katamari Damacy
 	"KJC", // Koukou Eijukugo: Kiho 200 Go Master
 	"KEK", // Koukou Eitango: Kiho 400 Go Master
 	"KVF", // Kuizu Ongaku Nojika (bootloaderi-exclusive)
 	"KT9", // Kung Fu Dragon
+	"K5M", // G.G Series: The Last Knight
 	"KQ9", // The Legend of Zelda: Four Swords: Anniversary Edition
 	"KLD", // Legendary Wars: T-Rex Rumble
 	"K5C", // Letter Challenge
@@ -298,12 +321,15 @@ static const char dsiWareForBootloader2[][4] = {
 	"KL3", // My Asian Farm
 	"KL4", // My Australian Farm
 	"KMV", // My Exotic Farm
+	"KLT", // My Little Restaurant
 	"KMR", // My Farm
 	"KJW", // Nandoku 500 Kanji: Wado Pazuru
 	"KN3", // Nazo no Mini Game
 	"KNP", // Need for Speed: Nitro-X
 	"K9N", // Neko Neko Bakery: Pan de Pazurunya!
 	"KNV", // Neko Reversi
+	"KAQ", // G.G Series: Ninja Karakuri Den
+	"KQ2", // G.G Series: Ninja Karakuri Den 2
 	"KAU", // Nintendo Countdown Calendar
 	"K2D", // Nintendo DSi + Internet
 	"HNI", // Nintendo DSi Camera (bootloaderi-exclusive)
@@ -312,9 +338,12 @@ static const char dsiWareForBootloader2[][4] = {
 	"KJI", // Noroi no Game: Chi
 	"KG9", // Noroi no Game: Oku
 	"KSU", // Number Battle
+	"KU9", // G.G Series: Nyokki
 	"K6T", // Orion's Odyssey
+	"KO4", // Oscar in Movieland
 	"KOT", // Oscar in Toyland
 	"KOY", // Oscar in Toyland 2
+	"KO9", // Oscar's World Tour
 	"KTV", // Otegaru Pazuru Shirizu: Yurito Fushigina Meikyuu
 	"KOL", // Othello
 	"KL7", // Otona no Nihonshi Pazuru
@@ -385,11 +414,14 @@ static const char dsiWareForBootloader2[][4] = {
 	"KD6", // Rock-n-Roll Domo
 	"KRL", // Roller Angels
 	"KRP", // RPG Dashutsu Game
+	"K5F", // G.G Series: Run & Strike
 	"KG4", // Saikyou Ginsei Shougi
 	"K3P", // Sakurai Miho No Kouno: Megami Serapi Uranai
 	"K7T", // Save the Turtles
+	"K5G", // G.G Series: Score Attacker
 	"KRW", // Sea Battle
 	"KLL", // The Seller
+	"KZJ", // G.G Series: Shadow Army
 	"KS3", // Shantae: Risky's Revenge
 	"KSJ", // Shawn Johnson Gymnastics
 	"KK5", // Kakitori Rekishi: Shouga Kusei (01)
@@ -421,6 +453,7 @@ static const char dsiWareForBootloader2[][4] = {
 	"KU4", // Sora Kake Girl: Shojo Shooting
 	"KA6", // Space Ace
 	"KEV", // Space Invaders Extreme Z
+	"K5N", // G.G Series: The Spiky Blowfish
 	"KQ6", // Spin Six
 	"KIT", // Spot It! Challenge
 	"K2U", // Spot It! Challenge: Mean Machines
@@ -444,6 +477,8 @@ static const char dsiWareForBootloader2[][4] = {
 	"K4F", // Sudoku 4Pockets
 	"KWU", // Sudoku & Kakuro: Welt Edition
 	"KSC", // Sudoku Challenge!
+	"KOG", // G.G Series: Super Hero Ogre
+	"KOZ", // G.G Series: Super Hero Ogre 2
 	"K4W", // Super Swap
 	"K4P", // Super Yum Yum: Puzzle Adventures
 	"KOW", // Surfacer+
@@ -465,6 +500,7 @@ static const char dsiWareForBootloader2[][4] = {
 	"KOS", // Tell me Darling
 	"KTE", // Tetris Party Live
 	"KTW", // Thorium Wars
+	"K3O", // G.G Series: Throw Out
 	"KSL", // Touch Solitaire
 	"KWW", // The Tower DS: Classic
 	"KWV", // The Tower DS: Hotel
@@ -476,12 +512,15 @@ static const char dsiWareForBootloader2[][4] = {
 	"KUB", // Ubongo
 	"KKM", // Uchi Makure!: Touch the Chameleon
 	"K6P", // Unou to Sanougaren Sasuru: Uranoura
+	"K5O", // G.G Series: Vector
+	"KVE", // G.G Series: Vertex
 	"KVK", // Viking Invasion
 	"KVT", // VT Tennis
 	"KK4", // Wakugumi: Monochrome Puzzle
 	"Z2A", // WarioWare: Touched! DL
 	"KWQ", // Whack-A-Friend
 	"KDW", // White-Water Domo
+	"KWL", // G.G Series: Wonder Land
 	"KBS", // Wonderful Sports: Bowling
 	"KWS", // Word Searcher
 	"KWR", // Word Searcher II
@@ -492,6 +531,8 @@ static const char dsiWareForBootloader2[][4] = {
 	"KU3", // Working Dawgs: Rivet Retriever
 	"KDX", // X-Scape (bootloaderi-exclusive)
 	"KYU", // Yummy Yummy Cooking Jam
+	"KNZ", "KZN", // G.G Series: Z-One
+	"KZ2", // G.G Series: Z-One 2
 	"KZX", // Za Curosu
 	"KAS", // Art Style: ZENGAGE
 	"KKH", // Zimo: Mahjong Fanatic

@@ -1,4 +1,5 @@
 @---------------------------------------------------------------------------------
+	@.global lrStoreTestCode
 	.global mepHeapSetPatch
 	.global twlFontHeapAlloc
 	.global twlFontHeapAllocSize
@@ -14,10 +15,14 @@
 	@.global goGoKokopoloHeapAddrPtr
 	.global metalTorrentSndLoad
 	@.global mvdk3HeapAlloc
+@	.global myLtlRestHeapAlloc
+@	.global myLtlRestHeapAddrPtr
 	.global nintCdwnCalHeapAlloc
 	.global nintCdwnCalHeapAddrPtr
 	.global nintendojiHeapAlloc
 	.global nintendojiHeapAddrPtr
+	.global ps0MiniPatch
+	.global ps0MiniFuncHook
 	.global rmtRacersHeapAlloc
 	.global rmtRacersHeapAddrPtr
 	.global siezHeapAlloc
@@ -27,6 +32,8 @@
 
 .word 0x5050454D @ 'MEPP' string
 
+@lrStoreTestCode:
+@	.word lrStoreTest
 mepHeapSetPatch:
 	.word mepHeapSetPatchFunc
 twlFontHeapAlloc:
@@ -57,6 +64,10 @@ metalTorrentSndLoad:
 	.word metalTorrentSndLoadFunc
 @mvdk3HeapAlloc:
 @	.word mvdk3HeapAllocFunc
+@myLtlRestHeapAlloc:
+@	.word myLtlRestHeapAllocFunc
+@myLtlRestHeapAddrPtr:
+@	.word myLtlRestHeapAddr
 nintCdwnCalHeapAlloc:
 	.word nintCdwnCalHeapAllocFunc
 nintCdwnCalHeapAddrPtr:
@@ -66,6 +77,10 @@ nintendojiHeapAlloc:
 	.word nintendojiHeapAllocFunc
 nintendojiHeapAddrPtr:
 	.word nintendojiHeapAddr
+ps0MiniPatch:
+	.word ps0MiniPatchFunc
+ps0MiniFuncHook:
+	.word ps0MiniFuncHookFunc
 rmtRacersHeapAlloc:
 	.word rmtRacersHeapAllocFunc
 rmtRacersHeapAddrPtr:
@@ -74,6 +89,15 @@ siezHeapAlloc:
 	.word siezHeapAllocFunc
 siezHeapAddrPtr:
 	.word siezHeapAddr
+
+@---------------------------------------------------------------------------------
+@lrStoreTest:
+@---------------------------------------------------------------------------------
+@	ldr r12, =0x02000000
+@	str lr, [r12]
+@	bx lr
+@.pool
+@---------------------------------------------------------------------------------
 
 @---------------------------------------------------------------------------------
 mepHeapSetOrgFunc: .word 0
@@ -107,7 +131,7 @@ twlFontHeapAllocFunc:
 	cmpge r1, #0x02800000
 	movlt r1, r0
 twlFontFilenameCheck:
-	ldr r3, =0x02000000 @ filesize pointer list
+	ldr r3, =0x02FFF100 @ filesize pointer list
 	ldr r5, [r3, r6]
 	cmp r5, r1
 	beq twlFontUseOldHeapPtr
@@ -118,7 +142,7 @@ twlFontFilenameCheck:
 	b twlFontFilenameCheck
 
 twlFontLastHeapPtrUpdate:
-	ldr r3, =0x020000FC @ last heap pointer
+	ldr r3, =0x02FFF1FC @ last heap pointer
 	ldr r4, [r3]
 	cmp r4, #0
 	ldreq r4, twlFontHeapPtr
@@ -129,13 +153,13 @@ twlFontLastHeapPtrStr:
 	str r4, [r3]
 
 @ save heap ponter
-	ldr r3, =0x02000080 @ heap pointers
+	ldr r3, =0x02FFF180 @ heap pointers
 	str r4, [r3, r6]
 	mov r0, r4
 	ldmfd   sp!, {r3-r6,pc}
 
 twlFontUseOldHeapPtr:
-	ldr r3, =0x02000080 @ heap pointers
+	ldr r3, =0x02FFF180 @ heap pointers
 	ldr r0, [r3, r6]
 	ldmfd   sp!, {r3-r6,pc}
 .pool
@@ -252,83 +276,151 @@ fourSwHeapAllocFunc:
 
 	@ldr r6, =0x45720 @ Size of subtask.cmp
 	@cmp r0, r6
-	@moveq r6, #0
-	@beq fourSwHeapAlloc_cont
+	@ldreq r0, fourSwHeapAddr_subtask
+	@ldmeqfd   sp!, {r6,pc}
+
 	@ldr r6, =0x6C24 @ Size of subtask_us_en.cmp
 	@cmp r0, r6
-	@moveq r6, #4
-	@beq fourSwHeapAlloc_cont
+	@ldreq r0, fourSwHeapAddr_subtask_lang
+	@ldmeqfd   sp!, {r6,pc}
+
 	@ldr r6, =0x7090 @ Size of subtask_us_fr.cmp & subtask_eu_fr.cmp
 	@cmp r0, r6
-	@moveq r6, #4
-	@beq fourSwHeapAlloc_cont
+	@ldreq r0, fourSwHeapAddr_subtask_lang
+	@ldmeqfd   sp!, {r6,pc}
+
 	@ldr r6, =0x71F4 @ Size of subtask_us_sp.cmp
 	@cmp r0, r6
-	@moveq r6, #4
-	@beq fourSwHeapAlloc_cont
+	@ldreq r0, fourSwHeapAddr_subtask_lang
+	@ldmeqfd   sp!, {r6,pc}
+
 	@ldr r6, =0x6C70 @ Size of subtask_eu_en.cmp
 	@cmp r0, r6
-	@moveq r6, #4
-	@beq fourSwHeapAlloc_cont
+	@ldreq r0, fourSwHeapAddr_subtask_lang
+	@ldmeqfd   sp!, {r6,pc}
+
 	@ldr r6, =0x6E40 @ Size of subtask_eu_gr.cmp
 	@cmp r0, r6
-	@moveq r6, #4
-	@beq fourSwHeapAlloc_cont
+	@ldreq r0, fourSwHeapAddr_subtask_lang
+	@ldmeqfd   sp!, {r6,pc}
+
 	@ldr r6, =0x6E20 @ Size of subtask_eu_it.cmp
 	@cmp r0, r6
-	@moveq r6, #4
-	@beq fourSwHeapAlloc_cont
+	@ldreq r0, fourSwHeapAddr_subtask_lang
+	@ldmeqfd   sp!, {r6,pc}
+
 	@ldr r6, =0x7260 @ Size of subtask_eu_sp.cmp
 	@cmp r0, r6
-	@moveq r6, #4
-	@beq fourSwHeapAlloc_cont
+	@ldreq r0, fourSwHeapAddr_subtask_lang
+	@ldmeqfd   sp!, {r6,pc}
+
 	@ldr r6, =0x7468 @ Size of subtask_jp.cmp
 	@cmp r0, r6
-	@moveq r6, #4
-	@beq fourSwHeapAlloc_cont
-	ldr r6, =0x128F8 @ Size of pat.bin
-	cmp r0, r6
-	moveq r6, #0
-	beq fourSwHeapAlloc_cont
+	@ldreq r0, fourSwHeapAddr_subtask_lang
+	@ldmeqfd   sp!, {r6,pc}
+
+	@ldr r6, =0x128F8 @ Size of pat.bin
+	@cmp r0, r6
+	@ldreq r0, fourSwHeapAddr_pat
+	@ldmeqfd   sp!, {r6,pc}
+
 	ldr r6, =0x1AFC7C @ Size of zeldat.bin
 	cmp r0, r6
-	moveq r6, #4
-	beq fourSwHeapAlloc_cont
+	ldreq r0, fourSwHeapAddr_zeldat
+	ldmeqfd   sp!, {r6,pc}
+
+	ldr r6, =0xFA30 @ Size of zeldat_us_en.bin / zeldat_eu_en.bin
+	cmp r0, r6
+	ldreq r0, fourSwHeapAddr_zeldat_lang
+	ldmeqfd   sp!, {r6,pc}
+
+	ldr r6, =0xF89C @ Size of zeldat_us_fr.bin
+	cmp r0, r6
+	ldreq r0, fourSwHeapAddr_zeldat_lang
+	ldmeqfd   sp!, {r6,pc}
+
+	ldr r6, =0xF898 @ Size of zeldat_us_sp.bin
+	cmp r0, r6
+	ldreq r0, fourSwHeapAddr_zeldat_lang
+	ldmeqfd   sp!, {r6,pc}
+
+	ldr r6, =0xF8AC @ Size of zeldat_eu_fr.bin
+	cmp r0, r6
+	ldreq r0, fourSwHeapAddr_zeldat_lang
+	ldmeqfd   sp!, {r6,pc}
+
+	ldr r6, =0xF788 @ Size of zeldat_eu_gr.bin
+	cmp r0, r6
+	ldreq r0, fourSwHeapAddr_zeldat_lang
+	ldmeqfd   sp!, {r6,pc}
+
+	ldr r6, =0xF9F8 @ Size of zeldat_eu_it.bin
+	cmp r0, r6
+	ldreq r0, fourSwHeapAddr_zeldat_lang
+	ldmeqfd   sp!, {r6,pc}
+
+	ldr r6, =0xF888 @ Size of zeldat_eu_sp.bin
+	cmp r0, r6
+	ldreq r0, fourSwHeapAddr_zeldat_lang
+	ldmeqfd   sp!, {r6,pc}
+
+	ldr r6, =0xFDC0 @ Size of zeldat_jp.bin
+	cmp r0, r6
+	ldreq r0, fourSwHeapAddr_zeldat_lang
+	ldmeqfd   sp!, {r6,pc}
+
 	ldr r6, =0x1086DC @ Size of zelmap.bin
 	cmp r0, r6
-	moveq r6, #8
-	beq fourSwHeapAlloc_cont
+	ldreq r0, fourSwHeapAddr_zelmap
+	ldmeqfd   sp!, {r6,pc}
+
 	ldr r6, =0x20208 @ Size of us.kmsg
 	cmp r0, r6
-	moveq r6, #0xC
-	beq fourSwHeapAlloc_cont
+	ldreq r0, fourSwHeapAddr_kmsg
+	ldmeqfd   sp!, {r6,pc}
+
 	ldr r6, =0x33310 @ Size of eu.kmsg
 	cmp r0, r6
-	moveq r6, #0xC
-	beq fourSwHeapAlloc_cont
+	ldreq r0, fourSwHeapAddr_kmsg
+	ldmeqfd   sp!, {r6,pc}
+
 	ldr r6, =0xF638 @ Size of jp.kmsg
 	cmp r0, r6
-	moveq r6, #0xC
-	beq fourSwHeapAlloc_cont
+	ldreq r0, fourSwHeapAddr_kmsg
+	ldmeqfd   sp!, {r6,pc}
+
+	ldr r6, =0x1008 @ Size of font_ltn.nftr
+	cmp r0, r6
+	ldreq r0, fourSwHeapAddr_font
+	ldmeqfd   sp!, {r6,pc}
+
+	ldr r6, =0x15100 @ Size of font_jp.nftr
+	cmp r0, r6
+	ldreq r0, fourSwHeapAddr_font
+	ldmeqfd   sp!, {r6,pc}
+
 	ldr	r6, fourSwOrgFunction
 	bl	_blx_fourSwOrgFunction
-	b fourSwHeapAlloc_return
-
-fourSwHeapAlloc_cont:
-	ldr r0, =0x02019FA4+0x80 @ fourSwHeapAddr
-	ldr r0, [r0, r6]
-
-fourSwHeapAlloc_return:
 	ldmfd   sp!, {r6,pc}
 _blx_fourSwOrgFunction:
 	bx	r6
 fourSwHeapAddr:
+fourSwHeapAddr_subtask:
 @.word	0x09320000 @ Offset of subtask.cmp
+fourSwHeapAddr_subtask_lang:
 @.word	0x09370000 @ Offset of subtask_??_??.cmp
-.word	0x092C0000 @ Offset of pat.bin
+fourSwHeapAddr_pat:
+@.word	0x092C0000 @ Offset of pat.bin
+fourSwHeapAddr_zeldat:
 .word	0x09000000 @ Offset of zeldat.bin
-.word	0x091B0000 @ Offset of zelmap.bin
-.word	0x092E0000 @ Offset of us/eu/jp.kmsg
+fourSwHeapAddr_zeldat_lang:
+.word	0x091B0000 @ Offset of zeldat_??_??.bin
+fourSwHeapAddr_zelmap:
+.word	0x091C0000 @ Offset of zelmap.bin
+fourSwHeapAddr_kmsg:
+.word	0x092D0000 @ Offset of us/eu/jp.kmsg
+fourSwHeapAddr_font:
+.word	0x09308000 @ Offset of font_??.nftr
 .pool
 @---------------------------------------------------------------------------------
 
@@ -420,7 +512,26 @@ _blx_metalTorrentSndLoadOrgFunc:
 @	ldmfd   sp!, {r5,pc}
 @.pool
 @---------------------------------------------------------------------------------
+@	.thumb
+@---------------------------------------------------------------------------------
+@myLtlRestHeapAllocFunc:
+@---------------------------------------------------------------------------------
+@	push {r6,lr}
 
+@	@ldr r6, =0x1C404C @ Modified size of textures.dat (Original: 0x1C7BD0)
+@	@cmp r0, r6
+@	@bne myLtlRestHeapAllocFunc_return
+@	ldr r0, myLtlRestHeapAddr
+@	@pop {r6,pc}
+
+@myLtlRestHeapAllocFunc_return:
+@	pop {r6,pc}
+@.align 4
+@myLtlRestHeapAddr:
+@.word	0x09080000
+@.pool
+@---------------------------------------------------------------------------------
+@	.arm
 @---------------------------------------------------------------------------------
 nintCdwnCalHeapAllocFunc:
 @---------------------------------------------------------------------------------
@@ -503,15 +614,98 @@ nintendojiHeapAddr:
 @---------------------------------------------------------------------------------
 	.thumb
 @---------------------------------------------------------------------------------
+ps0MiniPatchFunc:
+@---------------------------------------------------------------------------------
+	bx pc
+	nop
+	.arm
+	adr r12, ps0MiniLocs
+	cmp r4, #1
+	bgt ps0MiniPatch_skip
+	lsl r5, r4, #2
+	push {r11}
+	mov r11, r6
+	add r11, r5
+	ldr r0, [r11]
+	cmp r4, #1
+	addeq r12, #4
+	str r11, [r12]
+	pop {r11}
+	bx lr
+
+ps0MiniPatch_skip:
+	lsl r5, r4, #2
+	ldr r0, [r12]
+	ldr r0, [r0]
+	str r0, [r6,r5]
+	add r4, r4, #1
+
+	lsl r5, r4, #2
+	ldr r0, [r12,#4]
+	ldr r0, [r0]
+	str r0, [r6,r5]
+	add r4, r4, #1
+
+	cmp r4, #0x18
+	blt ps0MiniPatch_skip
+
+	ldr pc, =0x0208C514+1
+ps0MiniLocs:
+.word	0 @ m
+.word	0 @ w
+.pool
+@---------------------------------------------------------------------------------
+	.thumb
+@---------------------------------------------------------------------------------
+ps0MiniFuncHookFunc:
+@---------------------------------------------------------------------------------
+	push {r3-r5,lr}
+	ldr r0, =0x020CCC48
+	ldr r0, [r0,r2]
+	push {r0}
+	.hword 0x4780 @ blx r0
+	pop {r0}
+	ldr r3, =0x020BA254+1
+	cmp r0, r3
+	bne ps0MiniFuncHook_ret
+	@ Load specific animation for selected character, instead of loading them all at once
+	ldr r3, =0x020E9000 @ player anim filename pointers
+	ldr r5, =0x022696DC
+	ldr r5, [r5]
+	cmp r5, #0
+	beq ps0MiniFuncHook_anim0
+	cmp r5, #1
+	beq ps0MiniFuncHook_anim1
+	cmp r5, #2
+	beq ps0MiniFuncHook_anim2
+ps0MiniFuncHook_cont:
+	ldr r3, =0x0208C4CC+1
+	.hword 0x4798 @ blx r3
+ps0MiniFuncHook_ret:
+	pop {r3-r5,pc}
+
+ps0MiniFuncHook_anim0:
+	ldr r4, =0x020E8D30 @ player/01_saver_m_pa00.narc
+	ldr r5, =0x020E8D4C @ player/01_saver_w_pa00.narc
+	b ps0MiniFuncHook_str
+ps0MiniFuncHook_anim1:
+	ldr r4, =0x020E8ED8 @ player/09_a_rifle_m_pa00.narc
+	ldr r5, =0x020E8EF8 @ player/09_a_rifle_w_pa00.narc
+	b ps0MiniFuncHook_str
+ps0MiniFuncHook_anim2:
+	ldr r4, =0x020E8CA4 @ player/14_rod_m_pa00.narc
+	ldr r5, =0x020E8CC0 @ player/14_rod_w_pa00.narc
+ps0MiniFuncHook_str:
+	str r4, [r3]
+	str r5, [r3,#4]
+	b ps0MiniFuncHook_cont
+.pool
+@---------------------------------------------------------------------------------
+
+@---------------------------------------------------------------------------------
 rmtRacersHeapAllocFunc:
 @---------------------------------------------------------------------------------
 	push {r6,lr}
-
-	@ldr r6, =0x1C404C @ Modified size of textures.dat (My Little Restaurant) (Original: 0x1C7BD0)
-	@cmp r0, r6
-	@bne rmtRacersAllocTextures
-	@ldr r0, =#0x09000000
-	@pop {r6,pc}
 
 rmtRacersAllocTextures:
 	ldr r6, =0x13A160 @ Modified size of textures.dat (Original: 0x13ACCC)
