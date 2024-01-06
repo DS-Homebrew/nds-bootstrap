@@ -10838,19 +10838,19 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Flipnote Studio (USA)
-	// Proof-of-Concept stage (Crashes when getting past the main menu)
-	else if (strcmp(romTid, "KGUE") == 0) {
+	// Uses more than 8MB of RAM (Crashes when getting past the main menu)
+	else if (strcmp(romTid, "KGUE") == 0 && extendedMemory) {
 		*(u32*)0x020051E8 = 0xE1A00000; // nop
 		*(u32*)0x020051F4 = 0xE1A00000; // nop
 		*(u32*)0x02005200 = 0xE1A00000; // nop
 		*(u32*)0x0200520C = 0xE1A00000; // nop
-		if (extendedMemory) {
+		// if (extendedMemory) {
 			*(u32*)0x0200521C = 0xE3A0079E; // mov r0, #0x02780000
 			*(u32*)0x02005234 = 0xE3A0079D; // mov r0, #0x02740000
-		} else {
+		/* } else {
 			*(u32*)0x0200521C = 0xE3A00691; // mov r0, #0x09100000
 			*(u32*)0x02005234 = 0xE3A00409; // mov r0, #0x09000000
-		}
+		} */
 		*(u32*)0x0200526C = 0xE1A00000; // nop
 		*(u32*)0x020052F4 = 0xE1A00000; // nop
 		*(u32*)0x02005C7C = 0xE1A00000; // nop
@@ -10873,9 +10873,9 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02032160 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x0203218C = 0xE1A00000; // nop
 		*(u32*)0x020325AC = 0xE1A00000; // nop
-		if (!extendedMemory) {
-			*(u32*)0x020429CC = 0xE3A00601; // mov r0, #0x100000 (Change heap size from 0x2C0000)
-		}
+		/* if (!extendedMemory) {
+			*(u32*)0x020429CC = 0xE3A00601; // mov r0, #0x100000 (Change heap size from 0x2C0000: Breaks flipnote mode)
+		} */
 		*(u32*)0x02058C10 = 0xE12FFF1E; // bx lr
 		*(u32*)0x0206D698 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x02070180 = 0xE1A00000; // nop
