@@ -147,6 +147,7 @@ static const char dsiWareForBootloader1[][4] = {
 	"KDV", // Dark Void Zero
 	"KUI", // Decathlon 2012
 	"K6B", // Deep Sea Creatures
+	"K35", // Defense of the Middle Kingdom
 	"KWT", // GO Series: Defense Wars
 	"KCP", // Dekisugi Tingle Pack
 	"KN2", // Devil Band: Rock the Underworld

@@ -8383,6 +8383,33 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02072780 = 0xE1A00000; // nop (Skip Manual screen)
 	}
 
+	// Defense of the Middle Kingdom (USA)
+	// Sangoku Tower Defense: Doushou Teppeki (Japan)
+	// Requires 8MB of RAM
+	else if (strncmp(romTid, "K35", 3) == 0 && extendedMemory) {
+		const u32 newCodeAddr = 0x0205EE58;
+
+		codeCopy((u32*)newCodeAddr, (u32*)0x0200B390, 0xC0);
+		setBL(newCodeAddr+0x28, (u32)dsiSaveOpen);
+		setBL(newCodeAddr+0x40, (u32)dsiSaveGetLength);
+		setBL(newCodeAddr+0x5C, (u32)dsiSaveRead);
+		setBL(newCodeAddr+0x8C, (u32)dsiSaveClose);
+
+		*(u32*)0x0200B1E0 = 0xE1A00000; // nop
+		setBL(0x0200B240, newCodeAddr);
+		*(u32*)0x0200B27C = 0xE1A00000; // nop
+		setBL(0x0200B478, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+		setBL(0x0200B488, (u32)dsiSaveOpen);
+		setBL(0x0200B4A8, (u32)dsiSaveWrite);
+		setBL(0x0200B4C0, (u32)dsiSaveClose);
+		*(u32*)0x0205CE4C = 0xE1A00000; // nop
+		tonccpy((u32*)0x0205D9D0, dsiSaveGetResultCode, 0xC);
+		*(u32*)0x02061130 = 0xE1A00000; // nop
+		patchInitDSiWare(0x02068918, heapEnd);
+		*(u32*)0x02068CA4 -= 0x39000;
+		patchUserSettingsReadDSiWare(0x02069DA4);
+	}
+
 	// GO Series: Defense Wars (USA)
 	// GO Series: Defence Wars (Europe)
 	// Uchi Makure!: Touch Pen Wars (Japan)
