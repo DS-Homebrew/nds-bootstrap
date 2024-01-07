@@ -5729,6 +5729,70 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// Elite Forces: Unit 77 (USA)
+	else if (strcmp(romTid, "K42E") == 0 && saveOnFlashcard) {
+		*(u32*)0x020340E4 = 0xE1A00000; // nop
+		*(u32*)0x020340F8 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02034104 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02034134 = 0xE1A00000; // nop
+		*(u32*)0x02034178 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02034184 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x020341B4 = 0xE1A00000; // nop
+		*(u32*)0x020341D8 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x020341E8 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02034214 = 0xE1A00000; // nop
+		*(u32*)0x020343E0 = 0xE1A00000; // nop
+		*(u32*)0x020343F4 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02034400 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02034430 = 0xE1A00000; // nop
+		*(u32*)0x02034460 = 0xE1A00000; // nop
+		*(u32*)0x02034474 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02034484 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x020344B4 = 0xE1A00000; // nop
+		setBL(0x02042188, (u32)dsiSaveCreate);
+		setBL(0x02042190, (u32)dsiSaveGetResultCode);
+		setBL(0x020421B4, (u32)dsiSaveOpen);
+		setBL(0x02042208, (u32)dsiSaveSeek);
+		setBL(0x02042224, (u32)dsiSaveWrite);
+		setBL(0x02042230, (u32)dsiSaveClose);
+		setBL(0x02042508, (u32)dsiSaveOpen);
+		setBL(0x02042560, (u32)dsiSaveSeek);
+		setBL(0x0204257C, (u32)dsiSaveRead);
+		setBL(0x02042594, (u32)dsiSaveClose);
+	}
+
+	// Elite Forces: Unit 77 (Europe)
+	else if (strcmp(romTid, "K42P") == 0 && saveOnFlashcard) {
+		*(u32*)0x02033F4C = 0xE1A00000; // nop
+		*(u32*)0x02033F60 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02033F6C = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02033F9C = 0xE1A00000; // nop
+		*(u32*)0x02033FDC = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02033FE8 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02034018 = 0xE1A00000; // nop
+		*(u32*)0x0203403C = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0203404C = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02034078 = 0xE1A00000; // nop
+		*(u32*)0x02034224 = 0xE1A00000; // nop
+		*(u32*)0x02034238 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02034244 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02034274 = 0xE1A00000; // nop
+		*(u32*)0x020342A4 = 0xE1A00000; // nop
+		*(u32*)0x020342B8 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x020342C8 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x020342F8 = 0xE1A00000; // nop
+		setBL(0x02041F98, (u32)dsiSaveCreate);
+		setBL(0x02041FA0, (u32)dsiSaveGetResultCode);
+		setBL(0x02041FC4, (u32)dsiSaveOpen);
+		setBL(0x02042018, (u32)dsiSaveSeek);
+		setBL(0x02042034, (u32)dsiSaveWrite);
+		setBL(0x02042040, (u32)dsiSaveClose);
+		setBL(0x02042318, (u32)dsiSaveOpen);
+		setBL(0x02042370, (u32)dsiSaveSeek);
+		setBL(0x0204238C, (u32)dsiSaveRead);
+		setBL(0x020423A4, (u32)dsiSaveClose);
+	}
+
 	// Escape Trick: The Secret of Rock City Prison (USA)
 	else if (strcmp(romTid, "K5QE") == 0) {
 		if (!twlFontFound) {

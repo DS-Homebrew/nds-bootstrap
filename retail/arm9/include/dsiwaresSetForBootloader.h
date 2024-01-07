@@ -178,6 +178,7 @@ static const char dsiWareForBootloader1[][4] = {
 	"KED", // Electroplankton: Sun-Animalcule
 	"KEA", // Electroplankton: Trapy
 	"KEJ", // Electroplankton: Varvoice
+	"K42", // Elite Forces: Unit 77
 	"KD7", // G.G Series: Energy Chain
 	"K5Q", // Escape Trick: The Secret of Rock City Prison (bootloaderi-exclusive)
 	"KEY", // Escape Trick: Ninja Castle (bootloaderi-exclusive)
