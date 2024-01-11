@@ -2163,6 +2163,48 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// Antipole (USA)
+	else if (strcmp(romTid, "KJHE") == 0 && saveOnFlashcard) {
+		const u32 newCodeAddr = 0x02F00000;
+		const u32 newCodeAddr2 = newCodeAddr+0x14;
+		codeCopy((u32*)newCodeAddr, 0x02035858, 0x14+0x218);
+		setBL(newCodeAddr+8, newCodeAddr2);
+
+		setBL(0x02034C64, newCodeAddr);
+		setBL(0x02034DFC, (u32)dsiSaveCreate);
+		setBL(0x02034E0C, (u32)dsiSaveOpen);
+		setBL(0x02034E2C, (u32)dsiSaveSetLength);
+		setBL(0x02034E40, (u32)dsiSaveClose);
+		setBL(0x02034E54, (u32)dsiSaveWrite);
+		setBL(0x02034E60, (u32)dsiSaveClose);
+		*(u32*)0x02034F84 = 0xE3A00000; // mov r0, #0
+		setBL(newCodeAddr2+0x10C, (u32)dsiSaveOpenR);
+		setBL(newCodeAddr2+0x11C, (u32)dsiSaveGetLength);
+		setBL(newCodeAddr2+0x140, (u32)dsiSaveRead);
+		setBL(newCodeAddr2+0x168, (u32)dsiSaveClose);
+	}
+
+	// Antipole (Europe)
+	else if (strcmp(romTid, "KJHP") == 0) {
+		const u32 newCodeAddr = 0x02F00000;
+		const u32 newCodeAddr2 = newCodeAddr+0x14;
+		codeCopy((u32*)newCodeAddr, 0x02035A1C, 0x14+0x218);
+		setBL(newCodeAddr+8, newCodeAddr2);
+
+		setBL(0x02034E0C, newCodeAddr);
+		setBL(0x02034FAC, (u32)dsiSaveCreate);
+		setBL(0x02034FBC, (u32)dsiSaveOpen);
+		setBL(0x02034FDC, (u32)dsiSaveSetLength);
+		setBL(0x02034FF0, (u32)dsiSaveClose);
+		setBL(0x02035004, (u32)dsiSaveWrite);
+		setBL(0x02035010, (u32)dsiSaveClose);
+		*(u32*)0x02035134 = 0xE3A00000; // mov r0, #0
+		setBL(newCodeAddr2+0x10C, (u32)dsiSaveOpenR);
+		setBL(newCodeAddr2+0x11C, (u32)dsiSaveGetLength);
+		setBL(newCodeAddr2+0x140, (u32)dsiSaveRead);
+		setBL(newCodeAddr2+0x168, (u32)dsiSaveClose);
+	}
+
 	// Anyohaseyo!: Kankokugo Wado Pazuru (Japan)
 	else if (strcmp(romTid, "KL8J") == 0) {
 		if (saveOnFlashcard) {

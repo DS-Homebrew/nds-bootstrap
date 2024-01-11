@@ -1571,6 +1571,10 @@ void codeCopy(u32* dst, u32* src, u32 len) {
 			// then fix it
 			u32* offsetByBl = getOffsetFromBL((u32*)srci);
 			setBL(dsti, (u32)offsetByBl);
+		} else if (*(u8*)(srci+3) == 0xFB) { // If blx instruction...
+			// then fix it
+			u32* offsetByBlx = getOffsetFromBLX((u32*)srci);
+			setBLX(dsti, (u32)offsetByBlx);
 		}
 		srci += 4;
 		dsti += 4;

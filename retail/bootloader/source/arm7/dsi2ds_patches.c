@@ -3330,60 +3330,80 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Antipole (USA)
-	// Does not boot due to lack of memory
-	/*else if (strcmp(romTid, "KJHE") == 0) {
+	// Audio does not play due to memory limitations
+	else if (strcmp(romTid, "KJHE") == 0) {
+		const u32 newCodeAddr = *(u32*)0x02004FE8;
+		const u32 newCodeAddr2 = newCodeAddr+0x14;
+		codeCopy((u32*)newCodeAddr, 0x02035858, 0x14+0x218);
+		setBL(newCodeAddr+8, newCodeAddr2);
+
 		*(u32*)0x020050FC = 0xE1A00000; // nop
 		*(u32*)0x02005104 = 0xE1A00000; // nop
-		*(u32*)0x0200525C = 0xE1A00000; // nop
-		*(u32*)0x020333F8 = 0xE12FFF1E; // bx lr
-		*(u32*)0x02035704 = 0xE1A00000; // nop
+		*(u32*)0x0200512C = 0xE3A03901; // mov r3, #0x4000 (Disable audio)
+		*(u32*)0x02008EC0 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02033408 = 0xE1A00000; // nop
+		*(u32*)0x02033414 = 0xE1A00000; // nop
+		*(u32*)0x02033428 = 0xE1A00000; // nop
+		*(u32*)0x020335BC = 0xE1A00000; // nop
+		*(u32*)0x02033600 = 0xE1A00000; // nop
+		setBL(0x02034C64, newCodeAddr);
+		setBL(0x02034DFC, (u32)dsiSaveCreate);
+		setBL(0x02034E0C, (u32)dsiSaveOpen);
+		setBL(0x02034E2C, (u32)dsiSaveSetLength);
+		setBL(0x02034E40, (u32)dsiSaveClose);
+		setBL(0x02034E54, (u32)dsiSaveWrite);
+		setBL(0x02034E60, (u32)dsiSaveClose);
+		*(u32*)0x02034F84 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x020357E0 = 0xE1A00000; // nop
-		*(u32*)0x0203BAD8 = 0xE1A00000; // nop
-		*(u32*)0x0203D9E4 = 0xE1A00000; // nop
+		setBL(newCodeAddr2+0x10C, (u32)dsiSaveOpenR);
+		setBL(newCodeAddr2+0x11C, (u32)dsiSaveGetLength);
+		setBL(newCodeAddr2+0x140, (u32)dsiSaveRead);
+		setBL(newCodeAddr2+0x168, (u32)dsiSaveClose);
+		*(u32*)0x02053704 = 0xE1A00000; // nop
 		*(u32*)0x02056BD0 = 0xE1A00000; // nop
-		*(u32*)0x020577A4 = 0xE1A00000; // nop
-		*(u32*)0x020581AC = 0xE1A00000; // nop
-		*(u32*)0x02058260 = 0xE1A00000; // nop
-		*(u32*)0x02058300 = 0xE1A00000; // nop
-		*(u32*)0x02058380 = 0xE1A00000; // nop
-		*(u32*)0x020583FC = 0xE1A00000; // nop
-		*(u32*)0x02058480 = 0xE1A00000; // nop
-		*(u32*)0x02058988 = 0xE1A00000; // nop
-		*(u32*)0x02058A44 = 0xE1A00000; // nop
-		*(u32*)0x02058AF0 = 0xE1A00000; // nop
-		*(u32*)0x02058B84 = 0xE1A00000; // nop
-		*(u32*)0x02058C18 = 0xE1A00000; // nop
-		*(u32*)0x02058CAC = 0xE1A00000; // nop
-		*(u32*)0x02058D40 = 0xE1A00000; // nop
-		*(u32*)0x02058DD4 = 0xE1A00000; // nop
-		*(u32*)0x02058E68 = 0xE1A00000; // nop
-		*(u32*)0x02058EFC = 0xE1A00000; // nop
-		*(u32*)0x02059020 = 0xE1A00000; // nop
-		*(u32*)0x02059084 = 0xE1A00000; // nop
-		*(u32*)0x0205914C = 0xE1A00000; // nop
-		*(u32*)0x020591BC = 0xE1A00000; // nop
-		*(u32*)0x02059248 = 0xE1A00000; // nop
-		*(u32*)0x020592B8 = 0xE1A00000; // nop
-		*(u32*)0x02059340 = 0xE1A00000; // nop
-		*(u32*)0x020593B0 = 0xE1A00000; // nop
-		*(u32*)0x020594C4 = 0xE1A00000; // nop
-		*(u32*)0x0205952C = 0xE1A00000; // nop
-		*(u32*)0x020595AC = 0xE1A00000; // nop
-		*(u32*)0x02059610 = 0xE1A00000; // nop
-		*(u32*)0x020596C8 = 0xE1A00000; // nop
-		*(u32*)0x02059738 = 0xE1A00000; // nop
-		*(u32*)0x0205D874 = 0xE1A00000; // nop
-		*(u32*)0x0205D878 = 0xE1A00000; // nop
-		*(u32*)0x0205D884 = 0xE1A00000; // nop
-		*(u32*)0x0205DA40 = 0xE3A0078F; // mov r0, #0x23E0000
-		*(u32*)0x0205DA64 = 0xE3500001; // cmp r0, #1
-		*(u32*)0x0205DA6C = 0x13A00627; // movne r0, #0x2700000
-		*(u32*)0x0205F090 = 0xE1A00000; // nop
-		*(u32*)0x0205F094 = 0xE1A00000; // nop
-		*(u32*)0x0205F098 = 0xE1A00000; // nop
-		*(u32*)0x0205F09C = 0xE1A00000; // nop
-		*(u32*)0x02061984 = 0xE1A00000; // nop
-	}*/
+		*(u32*)0x02057510 = 0xE1A00000; // nop
+		*(u32*)0x02057514 = 0xE1A00000; // nop
+		patchInitDSiWare(0x0205D7E8, heapEnd);
+		patchUserSettingsReadDSiWare(0x0205EC88);
+	}
+
+	// Antipole (Europe)
+	// Audio does not play due to memory limitations
+	else if (strcmp(romTid, "KJHP") == 0) {
+		const u32 newCodeAddr = *(u32*)0x02004FE8;
+		const u32 newCodeAddr2 = newCodeAddr+0x14;
+		codeCopy((u32*)newCodeAddr, 0x02035A1C, 0x14+0x218);
+		setBL(newCodeAddr+8, newCodeAddr2);
+
+		*(u32*)0x020050EC = 0xE1A00000; // nop
+		*(u32*)0x020050F4 = 0xE1A00000; // nop
+		*(u32*)0x0200511C = 0xE3A03901; // mov r3, #0x4000 (Disable audio)
+		*(u32*)0x02008EFC = 0xE3A00001; // mov r0, #1
+		*(u32*)0x020335AC = 0xE1A00000; // nop
+		*(u32*)0x020335B8 = 0xE1A00000; // nop
+		*(u32*)0x020335CC = 0xE1A00000; // nop
+		*(u32*)0x02033760 = 0xE1A00000; // nop
+		*(u32*)0x020337A4 = 0xE1A00000; // nop
+		setBL(0x02034E0C, newCodeAddr);
+		setBL(0x02034FAC, (u32)dsiSaveCreate);
+		setBL(0x02034FBC, (u32)dsiSaveOpen);
+		setBL(0x02034FDC, (u32)dsiSaveSetLength);
+		setBL(0x02034FF0, (u32)dsiSaveClose);
+		setBL(0x02035004, (u32)dsiSaveWrite);
+		setBL(0x02035010, (u32)dsiSaveClose);
+		*(u32*)0x02035134 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x020359A0 = 0xE1A00000; // nop
+		setBL(newCodeAddr2+0x10C, (u32)dsiSaveOpenR);
+		setBL(newCodeAddr2+0x11C, (u32)dsiSaveGetLength);
+		setBL(newCodeAddr2+0x140, (u32)dsiSaveRead);
+		setBL(newCodeAddr2+0x168, (u32)dsiSaveClose);
+		*(u32*)0x02053874 = 0xE1A00000; // nop
+		*(u32*)0x02056D40 = 0xE1A00000; // nop
+		*(u32*)0x02057680 = 0xE1A00000; // nop
+		*(u32*)0x02057684 = 0xE1A00000; // nop
+		patchInitDSiWare(0x0205D958, heapEnd);
+		patchUserSettingsReadDSiWare(0x0205EDF8);
+	}
 
 	// Anyohaseyo!: Kankokugo Wado Pazuru (Japan)
 	else if (strcmp(romTid, "KL8J") == 0) {

@@ -63,6 +63,7 @@ static const char dsiWareForBootloader1[][4] = {
 	"KV2", // Anonymous Notes 2: From The Abyss
 	"KV3", // Anonymous Notes 3: From The Abyss
 	"KV4", // Anonymous Notes 4: From The Abyss
+	"KJH", // Antipole
 	"KL8", // Anyohaseyo!: Kankokugo Wado Pazuru
 	"KAA", // Art Style: Aquia
 	"KAZ", // ARC Style: Soccer!
