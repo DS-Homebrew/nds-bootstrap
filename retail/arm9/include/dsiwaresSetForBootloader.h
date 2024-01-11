@@ -40,6 +40,9 @@ static const char dsiWareForBootloader1[][4] = {
 	"KXG", // Abyss
 	"KT3", // Academy Tic-Tac-Toe
 	"KQK", // Ace Mathician
+	"KE5", // ACT Series: Tangocho: Ni Chi Hen
+	"KCS", // ACT Series: Tangocho: Ni Chu Hen
+	"KRE", // ACT Series: Tangocho: Ni Kan Hen
 	"KAC", // Advanced Circuits
 	"K5H", // Ah! Heaven
 	"K25", // G.G Series: Air Pinball Hockey

@@ -1384,6 +1384,66 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02005098 = 0xE1A00000; // nop (Disable NFTR font loading from TWLNAND)
 	}
 
+	// ACT Series: Tangocho: Ni Chi Hen (Japan)
+	// Saving not supported due to using more than one file in filesystem
+	else if (strcmp(romTid, "KE5J") == 0) {
+		/* if (saveOnFlashcard) {
+			setBL(0x0200BFC4, (u32)dsiSaveOpen);
+			setBL(0x0200BFFC, (u32)dsiSaveGetLength);
+			setBL(0x0200C010, (u32)dsiSaveRead);
+			setBL(0x0200C024, (u32)dsiSaveClose);
+			setBL(0x0200C034, (u32)dsiSaveClose);
+			setBL(0x0200C088, (u32)dsiSaveCreate);
+			setBL(0x0200C09C, (u32)dsiSaveOpen);
+			setBL(0x0200C0D8, (u32)dsiSaveSetLength);
+			setBL(0x0200C0E8, (u32)dsiSaveWrite);
+			setBL(0x0200C0F0, (u32)dsiSaveClose);
+		} */
+		if (!twlFontFound) {
+			*(u32*)0x0200C1A8 = 0xE12FFF1E; // bx lr (Skip Manual screen)
+		}
+	}
+
+	// ACT Series: Tangocho: Ni Chu Hen (Japan)
+	// Saving not supported due to using more than one file in filesystem
+	else if (strcmp(romTid, "KCSJ") == 0) {
+		/* if (saveOnFlashcard) {
+			setBL(0x0200BC84, (u32)dsiSaveOpen);
+			setBL(0x0200BCBC, (u32)dsiSaveGetLength);
+			setBL(0x0200BCD0, (u32)dsiSaveRead);
+			setBL(0x0200BCE4, (u32)dsiSaveClose);
+			setBL(0x0200BCF4, (u32)dsiSaveClose);
+			setBL(0x0200BD48, (u32)dsiSaveCreate);
+			setBL(0x0200BD5C, (u32)dsiSaveOpen);
+			setBL(0x0200BD98, (u32)dsiSaveSetLength);
+			setBL(0x0200BDA8, (u32)dsiSaveWrite);
+			setBL(0x0200BDB0, (u32)dsiSaveClose);
+		} */
+		if (!twlFontFound) {
+			*(u32*)0x0200BE68 = 0xE12FFF1E; // bx lr (Skip Manual screen)
+		}
+	}
+
+	// ACT Series: Tangocho: Ni Kan Hen (Japan)
+	// Saving not supported due to using more than one file in filesystem
+	else if (strcmp(romTid, "KREJ") == 0) {
+		/* if (saveOnFlashcard) {
+			setBL(0x0200C0F0, (u32)dsiSaveOpen);
+			setBL(0x0200C128, (u32)dsiSaveGetLength);
+			setBL(0x0200C13C, (u32)dsiSaveRead);
+			setBL(0x0200C150, (u32)dsiSaveClose);
+			setBL(0x0200C160, (u32)dsiSaveClose);
+			setBL(0x0200C1B4, (u32)dsiSaveCreate);
+			setBL(0x0200C1C8, (u32)dsiSaveOpen);
+			setBL(0x0200C204, (u32)dsiSaveSetLength);
+			setBL(0x0200C214, (u32)dsiSaveWrite);
+			setBL(0x0200C21C, (u32)dsiSaveClose);
+		} */
+		if (!twlFontFound) {
+			*(u32*)0x0200C2D4 = 0xE12FFF1E; // bx lr (Skip Manual screen)
+		}
+	}
+
 	// Advanced Circuits (USA)
 	// Advanced Circuits (Europe, Australia)
 	else if (strncmp(romTid, "KAC", 3) == 0 && saveOnFlashcard) {

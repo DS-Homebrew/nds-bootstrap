@@ -2172,6 +2172,68 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02039B90 = 0xE1A00000; // nop
 	}
 
+	// ACT Series: Tangocho: Ni Chi Hen (Japan)
+	// Saving not supported due to using more than one file in filesystem
+	else if (strcmp(romTid, "KE5J") == 0) {
+		/* setBL(0x0200BFC4, (u32)dsiSaveOpen);
+		setBL(0x0200BFFC, (u32)dsiSaveGetLength);
+		setBL(0x0200C010, (u32)dsiSaveRead);
+		setBL(0x0200C024, (u32)dsiSaveClose);
+		setBL(0x0200C034, (u32)dsiSaveClose);
+		setBL(0x0200C088, (u32)dsiSaveCreate);
+		setBL(0x0200C09C, (u32)dsiSaveOpen);
+		setBL(0x0200C0D8, (u32)dsiSaveSetLength);
+		setBL(0x0200C0E8, (u32)dsiSaveWrite);
+		setBL(0x0200C0F0, (u32)dsiSaveClose); */
+		*(u32*)0x0200C1A8 = 0xE12FFF1E; // bx lr (Skip Manual screen)
+		*(u32*)0x0203B5B0 = 0xE1A00000; // nop
+		*(u32*)0x0203EFEC = 0xE1A00000; // nop
+		patchInitDSiWare(0x0204574C, heapEnd);
+		patchUserSettingsReadDSiWare(0x02046C18);
+	}
+
+	// ACT Series: Tangocho: Ni Chu Hen (Japan)
+	// Saving not supported due to using more than one file in filesystem
+	else if (strcmp(romTid, "KCSJ") == 0) {
+		/* setBL(0x0200BC84, (u32)dsiSaveOpen);
+		setBL(0x0200BCBC, (u32)dsiSaveGetLength);
+		setBL(0x0200BCD0, (u32)dsiSaveRead);
+		setBL(0x0200BCE4, (u32)dsiSaveClose);
+		setBL(0x0200BCF4, (u32)dsiSaveClose);
+		setBL(0x0200BD48, (u32)dsiSaveCreate);
+		setBL(0x0200BD5C, (u32)dsiSaveOpen);
+		setBL(0x0200BD98, (u32)dsiSaveSetLength);
+		setBL(0x0200BDA8, (u32)dsiSaveWrite);
+		setBL(0x0200BDB0, (u32)dsiSaveClose); */
+		*(u32*)0x0200BE68 = 0xE12FFF1E; // bx lr (Skip Manual screen)
+		*(u32*)0x0203777C = 0xE1A00000; // nop
+		*(u32*)0x0203B1B8 = 0xE1A00000; // nop
+		patchInitDSiWare(0x02041918, heapEnd);
+		patchUserSettingsReadDSiWare(0x02042DE4);
+	}
+
+	// ACT Series: Tangocho: Ni Kan Hen (Japan)
+	// Saving not supported due to using more than one file in filesystem
+	else if (strcmp(romTid, "KREJ") == 0) {
+		*(u32*)0x020050A4 = 0xE1A00000; // nop
+		/* setBL(0x0200C0F0, (u32)dsiSaveOpen);
+		setBL(0x0200C128, (u32)dsiSaveGetLength);
+		setBL(0x0200C13C, (u32)dsiSaveRead);
+		setBL(0x0200C150, (u32)dsiSaveClose);
+		setBL(0x0200C160, (u32)dsiSaveClose);
+		setBL(0x0200C1B4, (u32)dsiSaveCreate);
+		setBL(0x0200C1C8, (u32)dsiSaveOpen);
+		setBL(0x0200C204, (u32)dsiSaveSetLength);
+		setBL(0x0200C214, (u32)dsiSaveWrite);
+		setBL(0x0200C21C, (u32)dsiSaveClose); */
+		*(u32*)0x0200C2D4 = 0xE12FFF1E; // bx lr (Skip Manual screen)
+		*(u32*)0x0200C618 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0203B974 = 0xE1A00000; // nop
+		*(u32*)0x0203F3B0 = 0xE1A00000; // nop
+		patchInitDSiWare(0x02045B10, heapEnd);
+		patchUserSettingsReadDSiWare(0x02046FDC);
+	}
+
 	// Advanced Circuits (USA)
 	// Advanced Circuits (Europe, Australia)
 	// Saving not supported due to using more than one file in filesystem
