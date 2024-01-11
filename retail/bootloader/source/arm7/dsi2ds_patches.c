@@ -12797,6 +12797,31 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)(0x020B1470+offsetChangeS) = 0xE1A00000; // nop
 	}
 
+	// Ivy the Kiwi? mini (Japan)
+	else if (strcmp(romTid, "KIKJ") == 0) {
+		*(u32*)0x020124D4 = 0xE1A00000; // nop
+		tonccpy((u32*)0x02013058, dsiSaveGetResultCode, 0xC);
+		*(u32*)0x02015B74 = 0xE1A00000; // nop
+		patchInitDSiWare(0x0202546C, heapEnd);
+		patchUserSettingsReadDSiWare(0x02026994);
+		*(u32*)0x0202E978 = wirelessReturnCodeArm;
+		*(u32*)0x0202E97C = 0xE12FFF1E; // bx lr
+		*(u32*)0x020683A4 = 0xE1A00000; // nop
+		*(u32*)0x020683B8 = 0xE1A00000; // nop
+		setBL(0x020B9174, (u32)dsiSaveCreate);
+		*(u32*)0x020B9450 = 0xE1A00000; // nop
+		setBL(0x020B9734, (u32)dsiSaveCreate);
+		setBL(0x020B9744, (u32)dsiSaveOpen);
+		setBL(0x020B9764, (u32)dsiSaveSetLength);
+		setBL(0x020B97A4, (u32)dsiSaveWrite);
+		setBL(0x020B97AC, (u32)dsiSaveClose);
+		*(u32*)0x020B97F8 = 0xE1A00000; // nop
+		setBL(0x020B9880, (u32)dsiSaveOpen);
+		setBL(0x020B98A4, (u32)dsiSaveRead);
+		setBL(0x020B98AC, (u32)dsiSaveClose);
+		*(u32*)0x020B9B94 = 0xE1A00000; // nop
+	}
+
 	// Jazzy Billiards (USA)
 	// Saving not supported due to code taking place in the overlays
 	else if (strcmp(romTid, "K9BE") == 0) {

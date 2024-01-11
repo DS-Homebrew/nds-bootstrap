@@ -7186,14 +7186,17 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		u16 offsetChangeS = (romTid[3] == 'X') ? 0 : 0x344;
 		tonccpy((u32*)0x02013058, dsiSaveGetResultCode, 0xC);
 		setBL(0x020B0AB8+offsetChangeS, (u32)dsiSaveCreate);
+		*(u32*)(0x020B0D94+offsetChangeS) = 0xE1A00000; // nop
 		setBL(0x020B1078+offsetChangeS, (u32)dsiSaveCreate);
 		setBL(0x020B1088+offsetChangeS, (u32)dsiSaveOpen);
 		setBL(0x020B10A8+offsetChangeS, (u32)dsiSaveSetLength);
 		setBL(0x020B10E8+offsetChangeS, (u32)dsiSaveWrite);
 		setBL(0x020B10F0+offsetChangeS, (u32)dsiSaveClose);
+		*(u32*)(0x020B113C+offsetChangeS) = 0xE1A00000; // nop
 		setBL(0x020B11D8+offsetChangeS, (u32)dsiSaveOpen);
 		setBL(0x020B1200+offsetChangeS, (u32)dsiSaveRead);
 		setBL(0x020B1208+offsetChangeS, (u32)dsiSaveClose);
+		*(u32*)(0x020B128C+offsetChangeS) = 0xE1A00000; // nop
 		setBL(0x020B1324+offsetChangeS, (u32)dsiSaveCreate);
 		setBL(0x020B1334+offsetChangeS, (u32)dsiSaveOpen);
 		setBL(0x020B135C+offsetChangeS, (u32)dsiSaveSetLength);
@@ -7201,6 +7204,24 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x020B13E8+offsetChangeS, (u32)dsiSaveClose);
 		setBL(0x020B1448+offsetChangeS, (u32)dsiSaveClose);
 		setBL(0x020B1464+offsetChangeS, (u32)dsiSaveClose);
+		*(u32*)(0x020B1470+offsetChangeS) = 0xE1A00000; // nop
+	}
+
+	// Ivy the Kiwi? mini (Japan)
+	else if (strcmp(romTid, "KIKJ") == 0 && saveOnFlashcard) {
+		tonccpy((u32*)0x02013058, dsiSaveGetResultCode, 0xC);
+		setBL(0x020B9174, (u32)dsiSaveCreate);
+		*(u32*)0x020B9450 = 0xE1A00000; // nop
+		setBL(0x020B9734, (u32)dsiSaveCreate);
+		setBL(0x020B9744, (u32)dsiSaveOpen);
+		setBL(0x020B9764, (u32)dsiSaveSetLength);
+		setBL(0x020B97A4, (u32)dsiSaveWrite);
+		setBL(0x020B97AC, (u32)dsiSaveClose);
+		*(u32*)0x020B97F8 = 0xE1A00000; // nop
+		setBL(0x020B9880, (u32)dsiSaveOpen);
+		setBL(0x020B98A4, (u32)dsiSaveRead);
+		setBL(0x020B98AC, (u32)dsiSaveClose);
+		*(u32*)0x020B9B94 = 0xE1A00000; // nop
 	}
 
 	// JellyCar 2 (USA)
