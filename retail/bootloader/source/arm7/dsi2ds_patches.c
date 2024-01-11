@@ -2112,6 +2112,23 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)(0x02070920+offsetChange) = 0xE1A00000; // nop
 	}
 
+	// Academy Tic-Tac-Toe (USA)
+	// Academy Tic-Tac-Toe: Noughts and Crosses (Europe, Australia)
+	// Saving not supported due to a weird bug
+	// Requires 8MB of RAM
+	else if (strncmp(romTid, "KT3", 3) == 0 && extendedMemory) {
+		u8 offsetChange = (romTid[3] == 'E') ? 0 : 0x78;
+
+		*(u32*)0x02005098 = 0xE1A00000; // nop (Disable NFTR font loading from TWLNAND)
+		*(u32*)0x02005128 = 0xE1A00000; // nop
+		*(u32*)0x02005140 = 0xE1A00000; // nop
+		*(u32*)(0x02039378-offsetChange) = 0xE1A00000; // nop
+		*(u32*)(0x0203CCF0-offsetChange) = 0xE1A00000; // nop
+		patchInitDSiWare(0x020420A0-offsetChange, heapEnd);
+		*(u32*)(0x0204242C-offsetChange) = *(u32*)0x02004FD0;
+		patchUserSettingsReadDSiWare(0x0204356C-offsetChange);
+	}
+
 	// Ace Mathician (USA)
 	// Saving not supported due to using more than one file in filesystem
 	else if (strcmp(romTid, "KQKE") == 0) {
@@ -5264,6 +5281,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}*/
 
 	// Boom Boom Squaries (USA)
+	// Saving not supported due to a weird bug
 	else if (strcmp(romTid, "KBME") == 0) {
 		*(u32*)0x02005150 = 0xE1A00000; // nop (Disable NFTR font loading from TWLNAND)
 		*(u32*)0x020051CC = 0xE1A00000; // nop
@@ -5292,6 +5310,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Boom Boom Squaries (Europe, Australia)
+	// Saving not supported due to a weird bug
 	else if (strcmp(romTid, "KBMV") == 0) {
 		*(u32*)0x02005150 = 0xE1A00000; // nop (Disable NFTR font loading from TWLNAND)
 		*(u32*)0x020051CC = 0xE1A00000; // nop

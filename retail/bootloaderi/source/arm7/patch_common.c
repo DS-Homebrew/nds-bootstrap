@@ -1378,6 +1378,12 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02031AC4+offsetChange, (u32)dsiSaveClose);
 	}
 
+	// Academy Tic-Tac-Toe (USA)
+	// Academy Tic-Tac-Toe: Noughts and Crosses (Europe, Australia)
+	else if (strncmp(romTid, "KT3", 3) == 0 && !twlFontFound) {
+		*(u32*)0x02005098 = 0xE1A00000; // nop (Disable NFTR font loading from TWLNAND)
+	}
+
 	// Advanced Circuits (USA)
 	// Advanced Circuits (Europe, Australia)
 	else if (strncmp(romTid, "KAC", 3) == 0 && saveOnFlashcard) {

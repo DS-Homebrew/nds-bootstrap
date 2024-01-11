@@ -38,6 +38,7 @@ static const char dsiWareForBootloader1[][4] = {
 	"KCZ", // Absolute Chess (bootloaderi-exclusive)
 	"KA8", // Absolute Reversi (bootloaderi-exclusive)
 	"KXG", // Abyss
+	"KT3", // Academy Tic-Tac-Toe
 	"KQK", // Ace Mathician
 	"KAC", // Advanced Circuits
 	"K5H", // Ah! Heaven
