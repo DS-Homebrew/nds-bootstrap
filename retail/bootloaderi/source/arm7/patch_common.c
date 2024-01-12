@@ -2185,7 +2185,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Antipole (Europe)
-	else if (strcmp(romTid, "KJHP") == 0) {
+	else if (strcmp(romTid, "KJHP") == 0 && saveOnFlashcard) {
 		const u32 newCodeAddr = 0x02F00000;
 		const u32 newCodeAddr2 = newCodeAddr+0x14;
 		codeCopy((u32*)newCodeAddr, (u32*)0x02035A1C, 0x14+0x218);
