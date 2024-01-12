@@ -7092,6 +7092,27 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0205B750, (u32)dsiSaveClose);
 	}
 
+	// Hellokids: Vol. 1: Coloring and Painting! (USA)
+	// Hellokids: Vol. 1: Coloring and Painting! (Europe)
+	// Due to our save implementation, save data is stored in all 4 slots
+	else if (strncmp(romTid, "KKI", 3) == 0 && saveOnFlashcard) {
+		u8 offsetChange2 = (romTid[3] == 'E') ? 0 : 0x2C;
+		*(u32*)0x02005134 = 0xE1A00000; // nop (Disable photo functions)
+		setBL(0x02019800+offsetChange2, (u32)dsiSaveOpen);
+		setBL(0x02019810+offsetChange2, (u32)dsiSaveGetResultCode);
+		setBL(0x02019860+offsetChange2, (u32)dsiSaveRead);
+		setBL(0x02019868+offsetChange2, (u32)dsiSaveClose);
+		setBL(0x02019AD8+offsetChange2, (u32)dsiSaveOpen);
+		setBL(0x02019AEC+offsetChange2, (u32)dsiSaveCreate);
+		setBL(0x02019B20+offsetChange2, (u32)dsiSaveOpen);
+		setBL(0x02019B58+offsetChange2, (u32)dsiSaveWrite);
+		setBL(0x02019B60+offsetChange2, (u32)dsiSaveClose);
+		setBL(0x02019BBC+offsetChange2, (u32)dsiSaveDelete);
+		*(u32*)(0x02019FFC+offsetChange2) = 0xE3A00000; // mov r0, #0
+		*(u32*)(0x0201DA14+offsetChange2) = 0xE3A00000; // mov r0, #0 (Return empty Hellokids Album)
+		*(u32*)(0x0201FE9C+offsetChange2) = 0xE3A00000; // mov r0, #0 (Return empty Hellokids Album)
+	}
+
 	// High Stakes Texas Hold'em (USA)
 	// High Stakes Texas Hold'em (Europe, Australia)
 	else if ((strcmp(romTid, "KTXE") == 0 || strcmp(romTid, "KTXV") == 0) && saveOnFlashcard) {

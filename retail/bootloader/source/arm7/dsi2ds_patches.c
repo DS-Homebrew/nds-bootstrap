@@ -12520,22 +12520,42 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Hellokids: Vol. 1: Coloring and Painting! (USA)
-	// Loops in some code during white screens
-	/*else if (strcmp(romTid, "KKIE") == 0) {
-		*(u32*)0x0200B888 = 0xE3A02001; // mov r2, #1
-		*(u32*)0x02028700 = 0xE1A00000; // nop
-		*(u32*)0x0202F7F4 = 0xE1A00000; // nop
-		*(u32*)0x02034310 = 0xE1A00000; // nop
-		*(u32*)0x020361A8 = 0xE1A00000; // nop
-		*(u32*)0x020361AC = 0xE1A00000; // nop
-		*(u32*)0x020361B8 = 0xE1A00000; // nop
-		*(u32*)0x02036318 = 0xE1A00000; // nop
-		patchHiHeapDSiWare(0x02036374, heapEnd); // mov r0, #0x23E0000
-		patchUserSettingsReadDSiWare(0x02037868);
-		*(u32*)0x02039C48 = 0xE3A00001; // mov r0, #1
-		*(u32*)0x02039C80 = 0xE1A00000; // nop
-		*(u32*)0x0203B674 = 0xE1A00000; // nop
-	}*/
+	// Hellokids: Vol. 1: Coloring and Painting! (Europe)
+	// Due to our save implementation, save data is stored in all 4 slots
+	else if (strncmp(romTid, "KKI", 3) == 0) {
+		u8 offsetChange = (romTid[3] == 'E') ? 0 : 0x28;
+		u8 offsetChange2 = (romTid[3] == 'E') ? 0 : 0x2C;
+		u16 offsetChange3 = (romTid[3] == 'E') ? 0 : 0xDFC;
+
+		*(u32*)0x02005130 = 0xE1A00000; // nop
+		*(u32*)0x02005134 = 0xE1A00000; // nop (Disable photo functions)
+		*(u32*)0x02005148 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x020053C8 = 0xE1A00000; // nop
+		if (!extendedMemory) {
+			*(u32*)0x02012580 = 0xE3A00901; // mov r0, #0x4000
+			*(u32*)0x020125C0 = 0xE3A06705; // mov r6, #0x140000
+		}
+		*(u32*)(0x020161B4+offsetChange) = 0xE1A00000; // nop
+		setBL(0x02019800+offsetChange2, (u32)dsiSaveOpen);
+		setBL(0x02019810+offsetChange2, (u32)dsiSaveGetResultCode);
+		setBL(0x02019860+offsetChange2, (u32)dsiSaveRead);
+		setBL(0x02019868+offsetChange2, (u32)dsiSaveClose);
+		setBL(0x02019AD8+offsetChange2, (u32)dsiSaveOpen);
+		setBL(0x02019AEC+offsetChange2, (u32)dsiSaveCreate);
+		setBL(0x02019B20+offsetChange2, (u32)dsiSaveOpen);
+		setBL(0x02019B58+offsetChange2, (u32)dsiSaveWrite);
+		setBL(0x02019B60+offsetChange2, (u32)dsiSaveClose);
+		setBL(0x02019BBC+offsetChange2, (u32)dsiSaveDelete);
+		*(u32*)(0x02019FFC+offsetChange2) = 0xE3A00000; // mov r0, #0
+		*(u32*)(0x0201CB38+offsetChange2) = 0xE3A00001; // mov r0, #1 (Disable photo mode and softlock on black screens instead)
+		*(u32*)(0x0201DA14+offsetChange2) = 0xE3A00000; // mov r0, #0 (Return empty Hellokids Album)
+		*(u32*)(0x0201FE9C+offsetChange2) = 0xE3A00000; // mov r0, #0 (Return empty Hellokids Album)
+		*(u32*)(0x02028700-offsetChange3) = 0xE1A00000; // nop
+		*(u32*)(0x0202F7F4-offsetChange3) = 0xE1A00000; // nop
+		patchInitDSiWare(0x0203611C-offsetChange3, heapEnd);
+		*(u32*)(0x020364A8-offsetChange3) = *(u32*)0x02004FE8;
+		patchUserSettingsReadDSiWare(0x02037868-offsetChange3);
+	}
 
 	// G.G Series: Hero Puzzle (USA)
 	// G.G Series: Hero Puzzle (Japan)
