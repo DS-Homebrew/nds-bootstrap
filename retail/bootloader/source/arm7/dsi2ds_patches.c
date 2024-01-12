@@ -79,6 +79,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		return;
 	}
 
+	const u32* ndmaCopy = ce9->patches->ndmaCopy;
 	const u32* dsiSaveCheckExists = ce9->patches->dsiSaveCheckExists;
 	const u32* dsiSaveGetResultCode = ce9->patches->dsiSaveGetResultCode;
 	const u32* dsiSaveCreate = ce9->patches->dsiSaveCreate;
@@ -3334,7 +3335,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	else if (strcmp(romTid, "KJHE") == 0) {
 		const u32 newCodeAddr = *(u32*)0x02004FE8;
 		const u32 newCodeAddr2 = newCodeAddr+0x14;
-		codeCopy((u32*)newCodeAddr, 0x02035858, 0x14+0x218);
+		codeCopy((u32*)newCodeAddr, (u32*)0x02035858, 0x14+0x218);
 		setBL(newCodeAddr+8, newCodeAddr2);
 
 		*(u32*)0x020050FC = 0xE1A00000; // nop
@@ -3372,7 +3373,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	else if (strcmp(romTid, "KJHP") == 0) {
 		const u32 newCodeAddr = *(u32*)0x02004FE8;
 		const u32 newCodeAddr2 = newCodeAddr+0x14;
-		codeCopy((u32*)newCodeAddr, 0x02035A1C, 0x14+0x218);
+		codeCopy((u32*)newCodeAddr, (u32*)0x02035A1C, 0x14+0x218);
 		setBL(newCodeAddr+8, newCodeAddr2);
 
 		*(u32*)0x020050EC = 0xE1A00000; // nop
@@ -7616,6 +7617,88 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			*(u32*)0x02060090 = *(u32*)0x02060004; // Shrink large part of heap from 0x100000
 			*(u32*)0x02060094 = *(u32*)0x02060008; // Shrink part of heap from 0x60000
 		}
+	}
+
+	// Cosmos X2 (USA)
+	else if (strcmp(romTid, "KX2E") == 0) {
+		const u32 newCodeAddr = *(u32*)0x02004FD0;
+		const u32 newCodeAddr2 = newCodeAddr+0x14;
+		codeCopy((u32*)newCodeAddr, (u32*)0x020208E0, 0x14+0x110);
+		setBL(newCodeAddr+8, newCodeAddr2);
+
+		*(u32*)0x02005100 = 0xE1A00000; // nop
+		*(u32*)0x02005108 = 0xE1A00000; // nop
+		*(u32*)0x0200518C = 0xE3A0392F; // mov r3, #0xBC000 (Shrink sound heap from 0x100000)
+		*(u32*)0x02005314 = 0xE1A00000; // nop
+		setBL(0x02009BBC, (u32)ndmaCopy);
+		*(u32*)0x0201EB14 = 0xE1A00000; // nop
+		*(u32*)0x0201EB20 = 0xE1A00000; // nop
+		*(u32*)0x0201EB34 = 0xE1A00000; // nop
+		*(u32*)0x0201ECC8 = 0xE1A00000; // nop
+		*(u32*)0x0201ED0C = 0xE1A00000; // nop
+		setBL(0x0201FCB0, newCodeAddr);
+		setBL(0x0201FE48, (u32)dsiSaveCreate);
+		setBL(0x0201FE58, (u32)dsiSaveOpen);
+		setBL(0x0201FE78, (u32)dsiSaveSetLength);
+		setBL(0x0201FE8C, (u32)dsiSaveClose);
+		setBL(0x0201FEA0, (u32)dsiSaveWrite);
+		setBL(0x0201FEAC, (u32)dsiSaveClose);
+		*(u32*)0x0201FFD0 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0202086C = 0xE1A00000; // nop
+		setBL(newCodeAddr2+0x30, (u32)dsiSaveOpenR);
+		setBL(newCodeAddr2+0x40, (u32)dsiSaveGetLength);
+		setBL(newCodeAddr2+0x5C, (u32)dsiSaveRead);
+		setBL(newCodeAddr2+0x84, (u32)dsiSaveClose);
+		setBL(0x0202212C, (u32)ndmaCopy);
+		setBL(0x020223CC, (u32)ndmaCopy);
+		*(u32*)0x0203D2AC = 0xE1A00000; // nop
+		*(u32*)0x020406E4 = 0xE1A00000; // nop
+		*(u32*)0x02040B0C = 0xE1A00000; // nop
+		*(u32*)0x02040B10 = 0xE1A00000; // nop
+		patchInitDSiWare(0x02046710, heapEnd);
+		*(u32*)0x02046A9C = (*(u32*)0x02004FD0)+0x200;
+		patchUserSettingsReadDSiWare(0x02047BA0);
+	}
+
+	// Cosmos X2 (Europe)
+	else if (strcmp(romTid, "KX2P") == 0) {
+		const u32 newCodeAddr = *(u32*)0x02004FE8;
+		const u32 newCodeAddr2 = newCodeAddr+0x14;
+		codeCopy((u32*)newCodeAddr, (u32*)0x020206C0, 0x14+0x118);
+		setBL(newCodeAddr+8, newCodeAddr2);
+
+		*(u32*)0x02005108 = 0xE1A00000; // nop
+		*(u32*)0x02005110 = 0xE1A00000; // nop
+		*(u32*)0x02005194 = 0xE3A0392F; // mov r3, #0xBC000 (Shrink sound heap from 0x100000)
+		*(u32*)0x02005328 = 0xE1A00000; // nop
+		setBL(0x020098A0, (u32)ndmaCopy);
+		*(u32*)0x0201E888 = 0xE1A00000; // nop
+		*(u32*)0x0201E894 = 0xE1A00000; // nop
+		*(u32*)0x0201E8A8 = 0xE1A00000; // nop
+		*(u32*)0x0201EA3C = 0xE1A00000; // nop
+		*(u32*)0x0201EA80 = 0xE1A00000; // nop
+		setBL(0x0201FA7C, newCodeAddr);
+		setBL(0x0201FC14, (u32)dsiSaveCreate);
+		setBL(0x0201FC24, (u32)dsiSaveOpen);
+		setBL(0x0201FC44, (u32)dsiSaveSetLength);
+		setBL(0x0201FC58, (u32)dsiSaveClose);
+		setBL(0x0201FC6C, (u32)dsiSaveWrite);
+		setBL(0x0201FC78, (u32)dsiSaveClose);
+		*(u32*)0x0201FD9C = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02020648 = 0xE1A00000; // nop
+		setBL(newCodeAddr2+0x30, (u32)dsiSaveOpenR);
+		setBL(newCodeAddr2+0x40, (u32)dsiSaveGetLength);
+		setBL(newCodeAddr2+0x64, (u32)dsiSaveRead);
+		setBL(newCodeAddr2+0x8C, (u32)dsiSaveClose);
+		setBL(0x02021EA0, (u32)ndmaCopy);
+		setBL(0x02022140, (u32)ndmaCopy);
+		*(u32*)0x0203D020 = 0xE1A00000; // nop
+		*(u32*)0x020404EC = 0xE1A00000; // nop
+		*(u32*)0x0204093C = 0xE1A00000; // nop
+		*(u32*)0x02040940 = 0xE1A00000; // nop
+		patchInitDSiWare(0x02046564, heapEnd);
+		*(u32*)0x020468F0 = (*(u32*)0x02004FE8)+0x200;
+		patchUserSettingsReadDSiWare(0x02047A04);
 	}
 
 	// Crash-Course Domo (USA)

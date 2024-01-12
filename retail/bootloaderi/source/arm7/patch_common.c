@@ -2167,7 +2167,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	else if (strcmp(romTid, "KJHE") == 0 && saveOnFlashcard) {
 		const u32 newCodeAddr = 0x02F00000;
 		const u32 newCodeAddr2 = newCodeAddr+0x14;
-		codeCopy((u32*)newCodeAddr, 0x02035858, 0x14+0x218);
+		codeCopy((u32*)newCodeAddr, (u32*)0x02035858, 0x14+0x218);
 		setBL(newCodeAddr+8, newCodeAddr2);
 
 		setBL(0x02034C64, newCodeAddr);
@@ -2188,7 +2188,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	else if (strcmp(romTid, "KJHP") == 0) {
 		const u32 newCodeAddr = 0x02F00000;
 		const u32 newCodeAddr2 = newCodeAddr+0x14;
-		codeCopy((u32*)newCodeAddr, 0x02035A1C, 0x14+0x218);
+		codeCopy((u32*)newCodeAddr, (u32*)0x02035A1C, 0x14+0x218);
 		setBL(newCodeAddr+8, newCodeAddr2);
 
 		setBL(0x02034E0C, newCodeAddr);
@@ -4546,6 +4546,48 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBL(0x0206EA84, (u32)dsiSaveWrite);
 			setBL(0x0206EA8C, (u32)dsiSaveClose);
 		}
+	}
+
+	// Cosmos X2 (USA)
+	else if (strcmp(romTid, "KX2E") == 0 && saveOnFlashcard) {
+		const u32 newCodeAddr = 0x02003000;
+		const u32 newCodeAddr2 = newCodeAddr+0x14;
+		codeCopy((u32*)newCodeAddr, (u32*)0x020208E0, 0x14+0x110);
+		setBL(newCodeAddr+8, newCodeAddr2);
+
+		setBL(0x0201FCB0, newCodeAddr);
+		setBL(0x0201FE48, (u32)dsiSaveCreate);
+		setBL(0x0201FE58, (u32)dsiSaveOpen);
+		setBL(0x0201FE78, (u32)dsiSaveSetLength);
+		setBL(0x0201FE8C, (u32)dsiSaveClose);
+		setBL(0x0201FEA0, (u32)dsiSaveWrite);
+		setBL(0x0201FEAC, (u32)dsiSaveClose);
+		*(u32*)0x0201FFD0 = 0xE3A00000; // mov r0, #0
+		setBL(newCodeAddr2+0x30, (u32)dsiSaveOpenR);
+		setBL(newCodeAddr2+0x40, (u32)dsiSaveGetLength);
+		setBL(newCodeAddr2+0x5C, (u32)dsiSaveRead);
+		setBL(newCodeAddr2+0x84, (u32)dsiSaveClose);
+	}
+
+	// Cosmos X2 (Europe)
+	else if (strcmp(romTid, "KX2P") == 0 && saveOnFlashcard) {
+		const u32 newCodeAddr = 0x02F00000;
+		const u32 newCodeAddr2 = newCodeAddr+0x14;
+		codeCopy((u32*)newCodeAddr, (u32*)0x020206C0, 0x14+0x118);
+		setBL(newCodeAddr+8, newCodeAddr2);
+
+		setBL(0x0201FA7C, newCodeAddr);
+		setBL(0x0201FC14, (u32)dsiSaveCreate);
+		setBL(0x0201FC24, (u32)dsiSaveOpen);
+		setBL(0x0201FC44, (u32)dsiSaveSetLength);
+		setBL(0x0201FC58, (u32)dsiSaveClose);
+		setBL(0x0201FC6C, (u32)dsiSaveWrite);
+		setBL(0x0201FC78, (u32)dsiSaveClose);
+		*(u32*)0x0201FD9C = 0xE3A00000; // mov r0, #0
+		setBL(newCodeAddr2+0x30, (u32)dsiSaveOpenR);
+		setBL(newCodeAddr2+0x40, (u32)dsiSaveGetLength);
+		setBL(newCodeAddr2+0x64, (u32)dsiSaveRead);
+		setBL(newCodeAddr2+0x8C, (u32)dsiSaveClose);
 	}
 
 	// Crash-Course Domo (USA)

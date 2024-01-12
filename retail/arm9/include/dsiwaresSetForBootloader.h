@@ -137,6 +137,7 @@ static const char dsiWareForBootloader1[][4] = {
 	"K56", // Coropata
 	"KCX", // Cosmo Fighters
 	"K5D", // G.G Series: Cosmo Rally!!
+	"KX2", // Cosmos X2
 	"KDC", // Crash-Course Domo
 	"KQZ", // Crazy Chicken: Director's Cut (bootloaderi-exclusive)
 	"KCV", // Crazy Chicken: Pirates (bootloaderi-exclusive)

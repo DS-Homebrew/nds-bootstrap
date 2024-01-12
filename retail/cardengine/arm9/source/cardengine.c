@@ -748,6 +748,10 @@ bool nandWrite(void* memory,void* flash,u32 len,u32 dma) {
 }
 
 #ifndef NODSIWARE
+void ndmaCopy(int ndmaSlot, const void* src, void* dst, u32 len) {
+	tonccpy(dst, src, len);
+}
+
 static bool sharedFontOpened = false;
 static bool dsiSaveInited = false;
 static bool dsiSaveExists = false;
