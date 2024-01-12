@@ -12633,7 +12633,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0201672C = 0xE1A00000; // nop
 		*(u32*)0x020199EC = 0xE1A00000; // nop
 		patchInitDSiWare(0x0201F340, heapEnd);
-		*(u32*)0x0201F6CC = 0x02096EE0;
+		*(u32*)0x0201F6CC = *(u32*)0x02004FD0;
 		patchUserSettingsReadDSiWare(0x020207D0);
 		setBL(0x020472CC, (u32)dsiSaveOpen);
 		setBL(0x020472E0, (u32)dsiSaveCreate);
@@ -12667,7 +12667,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020167B0 = 0xE1A00000; // nop
 		*(u32*)0x02019B04 = 0xE1A00000; // nop
 		patchInitDSiWare(0x0201F490, heapEnd);
-		*(u32*)0x0201F81C = 0x0209B4E0;
+		*(u32*)0x0201F81C = *(u32*)0x02004FE8;
 		patchUserSettingsReadDSiWare(0x02020930);
 		setBL(0x02044060, (u32)dsiSaveOpen);
 		setBL(0x02044074, (u32)dsiSaveGetResultCode);
@@ -18661,7 +18661,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02012FA4 = 0xE1A00000; // nop
 		*(u32*)0x02016348 = 0xE1A00000; // nop
 		patchInitDSiWare(0x0201BC88, heapEnd);
-		*(u32*)0x0201C014 = 0x022D5D40;
+		*(u32*)0x0201C014 = *(u32*)0x02004FD0;
 		patchUserSettingsReadDSiWare(0x0201D118);
 		*(u32*)0x02037928 = 0xE1A00000; // nop
 		*(u32*)0x02037930 = 0xE1A00000; // nop
@@ -18694,7 +18694,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02012FBC = 0xE1A00000; // nop
 		*(u32*)0x020163F4 = 0xE1A00000; // nop
 		patchInitDSiWare(0x0201BD6C, heapEnd);
-		*(u32*)0x0201C0F8 = 0x022D60C0;
+		*(u32*)0x0201C0F8 = *(u32*)0x02004FE8;
 		patchUserSettingsReadDSiWare(0x0201D20C);
 		*(u32*)0x02037800 = 0xE1A00000; // nop
 		*(u32*)0x02037808 = 0xE1A00000; // nop
