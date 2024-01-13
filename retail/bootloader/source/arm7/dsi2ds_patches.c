@@ -12874,6 +12874,47 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// Shunkan Tsubutsubu Tsubushi (Japan)
+	else if (strcmp(romTid, "KBTJ") == 0) {
+		*(u32*)0x0201C02C = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		*(u32*)0x0201C048 = 0xE1A00000; // nop
+		setBL(0x0202218C, (u32)dsiSaveOpen);
+		setBL(0x020221A4, (u32)dsiSaveClose);
+		setBL(0x020221FC, (u32)dsiSaveOpen);
+		setBL(0x02022218, (u32)dsiSaveGetLength);
+		setBL(0x02022230, (u32)dsiSaveClose);
+		setBL(0x02022250, (u32)dsiSaveSeek);
+		setBL(0x0202226C, (u32)dsiSaveRead);
+		setBL(0x02022284, (u32)dsiSaveClose);
+		setBL(0x020222A0, (u32)dsiSaveSeek);
+		setBL(0x020222B0, (u32)dsiSaveRead);
+		setBL(0x020222BC, (u32)dsiSaveClose);
+		setBL(0x020223B8, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+		setBL(0x020223DC, (u32)dsiSaveOpen);
+		setBL(0x02022408, (u32)dsiSaveSeek);
+		setBL(0x02022418, (u32)dsiSaveWrite);
+		setBL(0x0202242C, (u32)dsiSaveClose);
+		setBL(0x02022440, (u32)dsiSaveSeek);
+		setBL(0x0202244C, (u32)dsiSaveWrite);
+		setBL(0x02022460, (u32)dsiSaveClose);
+		setBL(0x02022470, (u32)dsiSaveClose);
+		setBL(0x020224E0, (u32)dsiSaveOpen);
+		setBL(0x02022518, (u32)dsiSaveSeek);
+		setBL(0x0202252C, (u32)dsiSaveRead);
+		setBL(0x02022538, (u32)dsiSaveClose);
+		*(u32*)0x02023524 = 0xE1A00000; // nop
+		*(u32*)0x0203C828 = 0xE1A00000; // nop
+		*(u32*)0x020404A0 = 0xE1A00000; // nop
+		patchInitDSiWare(0x02048370, heapEnd);
+		*(u32*)0x020486FC = *(u32*)0x02004FD0;
+		patchUserSettingsReadDSiWare(0x0204983C);
+		if (!extendedMemory) {
+			// *(u32*)0x0205471C = 0x100000;
+			*(u32*)0x0205472C = 0xF0000;
+			*(u32*)0x0205473C = 0xF0000;
+		}
+	}
+
 	// iSpot Japan (USA)
 	// iSpot Japan (Europe)
 	// Saving not supported due to using more than one file in filesystem
@@ -13291,6 +13332,47 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchInitDSiWare(0x020478AC, heapEnd);
 		*(u32*)0x02047C38 -= 0x38000;
 		patchUserSettingsReadDSiWare(0x02048D88);
+	}
+
+	// Shunkan Janpu Kentei (Japan)
+	else if (strcmp(romTid, "KJPJ") == 0) {
+		*(u32*)0x0200ECE8 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		if (!extendedMemory) {
+			*(u32*)0x02016A48 = 0xE3A01902; // mov r1, #0x8000 (Shrink heap from 0x300000)
+		}
+		*(u32*)0x02017E58 = 0xE1A00000; // nop
+		*(u32*)0x02017E8C = 0xE1A00000; // nop
+		*(u32*)0x02017EAC = 0xE1A00000; // nop
+		setBL(0x0201A578, (u32)dsiSaveOpen);
+		setBL(0x0201A590, (u32)dsiSaveClose);
+		setBL(0x0201A5E8, (u32)dsiSaveOpen);
+		setBL(0x0201A604, (u32)dsiSaveGetLength);
+		setBL(0x0201A61C, (u32)dsiSaveClose);
+		setBL(0x0201A63C, (u32)dsiSaveSeek);
+		setBL(0x0201A658, (u32)dsiSaveRead);
+		setBL(0x0201A670, (u32)dsiSaveClose);
+		setBL(0x0201A68C, (u32)dsiSaveSeek);
+		setBL(0x0201A69C, (u32)dsiSaveRead);
+		setBL(0x0201A6A8, (u32)dsiSaveClose);
+		setBL(0x0201A7A4, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+		setBL(0x0201A7C8, (u32)dsiSaveOpen);
+		setBL(0x0201A7F4, (u32)dsiSaveSeek);
+		setBL(0x0201A804, (u32)dsiSaveWrite);
+		setBL(0x0201A818, (u32)dsiSaveClose);
+		setBL(0x0201A82C, (u32)dsiSaveSeek);
+		setBL(0x0201A838, (u32)dsiSaveWrite);
+		setBL(0x0201A84C, (u32)dsiSaveClose);
+		setBL(0x0201A85C, (u32)dsiSaveClose);
+		setBL(0x0201A8CC, (u32)dsiSaveOpen);
+		setBL(0x0201A904, (u32)dsiSaveSeek);
+		setBL(0x0201A918, (u32)dsiSaveRead);
+		setBL(0x0201A924, (u32)dsiSaveClose);
+		*(u32*)0x0201AB40 = 0xE1A00000; // nop
+		*(u32*)0x020366F4 = 0xE1A00000; // nop
+		*(u32*)0x0203A974 = 0xE1A00000; // nop
+		patchInitDSiWare(0x02043298, heapEnd);
+		*(u32*)0x02043624 -= 0x38000;
+		patchUserSettingsReadDSiWare(0x02044774);
 	}
 
 	// Jump Trials Extreme (USA)

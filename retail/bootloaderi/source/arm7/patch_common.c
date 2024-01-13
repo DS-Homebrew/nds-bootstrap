@@ -7312,6 +7312,39 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// Shunkan Tsubutsubu Tsubushi (Japan)
+	else if (strcmp(romTid, "KBTJ") == 0) {
+		if (!twlFontFound) {
+			*(u32*)0x0201C02C = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		}
+		if (saveOnFlashcard) {
+			setBL(0x0202218C, (u32)dsiSaveOpen);
+			setBL(0x020221A4, (u32)dsiSaveClose);
+			setBL(0x020221FC, (u32)dsiSaveOpen);
+			setBL(0x02022218, (u32)dsiSaveGetLength);
+			setBL(0x02022230, (u32)dsiSaveClose);
+			setBL(0x02022250, (u32)dsiSaveSeek);
+			setBL(0x0202226C, (u32)dsiSaveRead);
+			setBL(0x02022284, (u32)dsiSaveClose);
+			setBL(0x020222A0, (u32)dsiSaveSeek);
+			setBL(0x020222B0, (u32)dsiSaveRead);
+			setBL(0x020222BC, (u32)dsiSaveClose);
+			setBL(0x020223B8, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+			setBL(0x020223DC, (u32)dsiSaveOpen);
+			setBL(0x02022408, (u32)dsiSaveSeek);
+			setBL(0x02022418, (u32)dsiSaveWrite);
+			setBL(0x0202242C, (u32)dsiSaveClose);
+			setBL(0x02022440, (u32)dsiSaveSeek);
+			setBL(0x0202244C, (u32)dsiSaveWrite);
+			setBL(0x02022460, (u32)dsiSaveClose);
+			setBL(0x02022470, (u32)dsiSaveClose);
+			setBL(0x020224E0, (u32)dsiSaveOpen);
+			setBL(0x02022518, (u32)dsiSaveSeek);
+			setBL(0x0202252C, (u32)dsiSaveRead);
+			setBL(0x02022538, (u32)dsiSaveClose);
+		}
+	}
+
 	// Ivy the Kiwi? mini (USA)
 	// GO Series: Ivy the Kiwi? mini (Europe, Australia)
 	else if ((strcmp(romTid, "KIKX") == 0 || strcmp(romTid, "KIKV") == 0) && saveOnFlashcard) {
@@ -7546,6 +7579,39 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBL(0x0201EBF0, (u32)dsiSaveSeek);
 			setBL(0x0201EC04, (u32)dsiSaveRead);
 			setBL(0x0201EC10, (u32)dsiSaveClose);
+		}
+	}
+
+	// Shunkan Janpu Kentei (Japan)
+	else if (strcmp(romTid, "KJPJ") == 0) {
+		if (!twlFontFound) {
+			*(u32*)0x0200ECE8 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		}
+		if (saveOnFlashcard) {
+			setBL(0x0201A578, (u32)dsiSaveOpen);
+			setBL(0x0201A590, (u32)dsiSaveClose);
+			setBL(0x0201A5E8, (u32)dsiSaveOpen);
+			setBL(0x0201A604, (u32)dsiSaveGetLength);
+			setBL(0x0201A61C, (u32)dsiSaveClose);
+			setBL(0x0201A63C, (u32)dsiSaveSeek);
+			setBL(0x0201A658, (u32)dsiSaveRead);
+			setBL(0x0201A670, (u32)dsiSaveClose);
+			setBL(0x0201A68C, (u32)dsiSaveSeek);
+			setBL(0x0201A69C, (u32)dsiSaveRead);
+			setBL(0x0201A6A8, (u32)dsiSaveClose);
+			setBL(0x0201A7A4, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+			setBL(0x0201A7C8, (u32)dsiSaveOpen);
+			setBL(0x0201A7F4, (u32)dsiSaveSeek);
+			setBL(0x0201A804, (u32)dsiSaveWrite);
+			setBL(0x0201A818, (u32)dsiSaveClose);
+			setBL(0x0201A82C, (u32)dsiSaveSeek);
+			setBL(0x0201A838, (u32)dsiSaveWrite);
+			setBL(0x0201A84C, (u32)dsiSaveClose);
+			setBL(0x0201A85C, (u32)dsiSaveClose);
+			setBL(0x0201A8CC, (u32)dsiSaveOpen);
+			setBL(0x0201A904, (u32)dsiSaveSeek);
+			setBL(0x0201A918, (u32)dsiSaveRead);
+			setBL(0x0201A924, (u32)dsiSaveClose);
 		}
 	}
 
