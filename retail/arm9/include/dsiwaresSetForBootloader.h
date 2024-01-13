@@ -250,7 +250,7 @@ static const char dsiWareForBootloader1[][4] = {
 	"KT2", // G.G Series: Horizontal Bar
 	// "KNE", // Ichi Moudaji!: Neko King
 	"KNK", // Ideyou Sukeno: Kenkou Maja DSi
-	"KBT", // Invasion of the Alien Blobs! (bootloaderi-exclusive)
+	"KBT", // Invasion of the Alien Blobs!
 	"K3J", // iSpot Japan
 	"KIK", // Ivy the Kiwi? mini
 	"K9B", // Jazzy Billiards
