@@ -12833,26 +12833,46 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	} */
 
-	// Invasion of the Alien Blobs (USA)
-	// Branches to DSi code in ITCM?
-	/*else if (strcmp(romTid, "KBTE") == 0) {
-		*(u32*)0x0201BF84 = 0xE1A00000; // nop
-		*(u32*)0x0201BF94 = 0xE1A00000; // nop
+	// Invasion of the Alien Blobs! (USA)
+	else if (strcmp(romTid, "KBTE") == 0) {
+		*(u32*)0x0201BF94 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		*(u32*)0x0201BFB0 = 0xE1A00000; // nop
-		*(u32*)0x02021214 = 0xE1A00000; // nop
-		*(u32*)0x020224EC = 0xE3A00000; // mov r0, #0
-		*(u32*)0x020224F0 = 0xE12FFF1E; // bx lr
+		setBL(0x020220F0, (u32)dsiSaveOpen);
+		setBL(0x02022108, (u32)dsiSaveClose);
+		setBL(0x02022160, (u32)dsiSaveOpen);
+		setBL(0x0202217C, (u32)dsiSaveGetLength);
+		setBL(0x02022194, (u32)dsiSaveClose);
+		setBL(0x020221B4, (u32)dsiSaveSeek);
+		setBL(0x020221D0, (u32)dsiSaveRead);
+		setBL(0x020221E8, (u32)dsiSaveClose);
+		setBL(0x02022204, (u32)dsiSaveSeek);
+		setBL(0x02022214, (u32)dsiSaveRead);
+		setBL(0x02022220, (u32)dsiSaveClose);
+		setBL(0x0202231C, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+		setBL(0x02022340, (u32)dsiSaveOpen);
+		setBL(0x0202236C, (u32)dsiSaveSeek);
+		setBL(0x0202237C, (u32)dsiSaveWrite);
+		setBL(0x02022390, (u32)dsiSaveClose);
+		setBL(0x020223A4, (u32)dsiSaveSeek);
+		setBL(0x020223B0, (u32)dsiSaveWrite);
+		setBL(0x020223C4, (u32)dsiSaveClose);
+		setBL(0x020223D4, (u32)dsiSaveClose);
+		setBL(0x02022444, (u32)dsiSaveOpen);
+		setBL(0x0202247C, (u32)dsiSaveSeek);
+		setBL(0x02022490, (u32)dsiSaveRead);
+		setBL(0x0202249C, (u32)dsiSaveClose);
 		*(u32*)0x02023498 = 0xE1A00000; // nop
 		*(u32*)0x0203C79C = 0xE1A00000; // nop
 		*(u32*)0x020404A8 = 0xE1A00000; // nop
-		*(u32*)0x02046608 = 0xE1A00000; // nop
-		*(u32*)0x02048444 = 0xE1A00000; // nop
-		*(u32*)0x02048448 = 0xE1A00000; // nop
-		*(u32*)0x02048454 = 0xE1A00000; // nop
-		*(u32*)0x020485B4 = 0xE1A00000; // nop
-		patchHiHeapDSiWare(0x02048610, heapEnd8MBHack);
+		patchInitDSiWare(0x020483B8, heapEnd);
+		*(u32*)0x02048744 = *(u32*)0x02004FE8;
 		patchUserSettingsReadDSiWare(0x02049894);
-	}*/
+		if (!extendedMemory) {
+			// *(u32*)0x020547B4 = 0x100000;
+			*(u32*)0x020547C4 = 0xF0000;
+			*(u32*)0x020547D4 = 0xF0000;
+		}
+	}
 
 	// iSpot Japan (USA)
 	// iSpot Japan (Europe)
