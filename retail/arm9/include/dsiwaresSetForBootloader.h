@@ -263,8 +263,8 @@ static const char dsiWareForBootloader1[][4] = {
 	"KD5", // Jinia Supasonaru: Waei Rakubiki Jiten
 	"KJF", // Just SING! 80's
 	"K4C", // Just SING! Christmas Songs (bootloaderi-exclusive)
-	"KJP", // Jump Trials (bootloaderi-exclusive)
-	"KZC", // Jump Trials Extreme (bootloaderi-exclusive)
+	"KJP", // Jump Trials
+	"KZC", // Jump Trials Extreme
 	"KPA", // A Kappa's Trail (bootloaderi-exclusive)
 	"K69", // Katamukusho (bootloaderi-exclusive)
 	"K3H", // Kazu De Asobu: Mahoujin To Imeji Kei-san
@@ -278,6 +278,9 @@ static const char dsiWareForBootloader1[][4] = {
 	"KEK", // Koukou Eitango: Kiho 400 Go Master
 	"KVF", // Kuizu Ongaku Nojika (bootloaderi-exclusive)
 	"KT9", // Kung Fu Dragon
+	"K47", // Kyou Hanan no hi Hyakka: Hyakkajiten Maipedea Yori (bootloaderi-exclusive)
+};
+static const char dsiWareForBootloader2[][4] = {
 	"K5M", // G.G Series: The Last Knight
 	"KQ9", // The Legend of Zelda: Four Swords: Anniversary Edition
 	"KLD", // Legendary Wars: T-Rex Rumble
@@ -289,8 +292,6 @@ static const char dsiWareForBootloader1[][4] = {
 	"KLP", // Littlest Pet Shop
 	"KLK", // Lola's Alphabet Train
 	"KOF", // Lola's Fruit Shop Sudoku
-};
-static const char dsiWareForBootloader2[][4] = {
 	"KMU", "KM6", // Maestro! Green Groove
 	"K73", "K85", // Magical Diary: Secrets Sharing (bootloaderi-exclusive)
 	"KMA", // Magical Drop Yurutto (bootloaderi-exclusive)

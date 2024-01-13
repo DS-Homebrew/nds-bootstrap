@@ -13252,54 +13252,88 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Jump Trials (USA)
-	// Does not work on real hardware
-	/*else if (strcmp(romTid, "KJPE") == 0) {
+	else if (strcmp(romTid, "KJPE") == 0) {
 		*(u32*)0x020050AC = 0xE1A00000; // nop
+		*(u32*)0x0200F6E4 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		if (!extendedMemory) {
+			*(u32*)0x0201A3B4 = 0xE3A01902; // mov r1, #0x8000 (Shrink heap from 0x300000)
+		}
 		*(u32*)0x0201BD6C = 0xE1A00000; // nop
 		*(u32*)0x0201BD9C = 0xE1A00000; // nop
 		*(u32*)0x0201BDBC = 0xE1A00000; // nop
-		*(u32*)0x0201E5D0 = 0xE1A00000; // nop
-		*(u32*)0x0201E5E0 = 0xE1A00000; // nop
-		*(u32*)0x0201E61C = 0xE1A00000; // nop
-		*(u32*)0x0201E88C = 0xE3A00000; // mov r0, #0
-		*(u32*)0x0201E890 = 0xE12FFF1E; // bx lr
-		*(u32*)0x0201EA40 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x0201EA44 = 0xE12FFF1E; // bx lr
+		setBL(0x0201E864, (u32)dsiSaveOpen);
+		setBL(0x0201E87C, (u32)dsiSaveClose);
+		setBL(0x0201E8D4, (u32)dsiSaveOpen);
+		setBL(0x0201E8F0, (u32)dsiSaveGetLength);
+		setBL(0x0201E908, (u32)dsiSaveClose);
+		setBL(0x0201E928, (u32)dsiSaveSeek);
+		setBL(0x0201E944, (u32)dsiSaveRead);
+		setBL(0x0201E95C, (u32)dsiSaveClose);
+		setBL(0x0201E978, (u32)dsiSaveSeek);
+		setBL(0x0201E988, (u32)dsiSaveRead);
+		setBL(0x0201E994, (u32)dsiSaveClose);
+		setBL(0x0201EA90, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+		setBL(0x0201EAB4, (u32)dsiSaveOpen);
+		setBL(0x0201EAE0, (u32)dsiSaveSeek);
+		setBL(0x0201EAF0, (u32)dsiSaveWrite);
+		setBL(0x0201EB04, (u32)dsiSaveClose);
+		setBL(0x0201EB18, (u32)dsiSaveSeek);
+		setBL(0x0201EB24, (u32)dsiSaveWrite);
+		setBL(0x0201EB38, (u32)dsiSaveClose);
+		setBL(0x0201EB48, (u32)dsiSaveClose);
+		setBL(0x0201EBB8, (u32)dsiSaveOpen);
+		setBL(0x0201EBF0, (u32)dsiSaveSeek);
+		setBL(0x0201EC04, (u32)dsiSaveRead);
+		setBL(0x0201EC10, (u32)dsiSaveClose);
+		*(u32*)0x0201EE2C = 0xE1A00000; // nop
 		*(u32*)0x0203AA5C = 0xE1A00000; // nop
 		*(u32*)0x0203ED64 = 0xE1A00000; // nop
-		*(u32*)0x02045AFC = 0xE1A00000; // nop
-		*(u32*)0x02047938 = 0xE1A00000; // nop
-		*(u32*)0x0204793C = 0xE1A00000; // nop
-		*(u32*)0x02047948 = 0xE1A00000; // nop
-		*(u32*)0x02047AA8 = 0xE1A00000; // nop
-		patchHiHeapDSiWare(0x02047B04, heapEnd8MBHack);
+		patchInitDSiWare(0x020478AC, heapEnd);
+		*(u32*)0x02047C38 -= 0x38000;
 		patchUserSettingsReadDSiWare(0x02048D88);
-	}*/
+	}
 
 	// Jump Trials Extreme (USA)
-	// Does not work on real hardware
-	/*else if (strcmp(romTid, "KZCE") == 0) {
+	else if (strcmp(romTid, "KZCE") == 0) {
 		*(u32*)0x020050AC = 0xE1A00000; // nop
+		*(u32*)0x0201232C = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		if (!extendedMemory) {
+			*(u32*)0x0201D088 = 0xE3A01902; // mov r1, #0x8000 (Shrink heap from 0x300000)
+		}
 		*(u32*)0x0201EAD0 = 0xE1A00000; // nop
 		*(u32*)0x0201EB00 = 0xE1A00000; // nop
 		*(u32*)0x0201EB20 = 0xE1A00000; // nop
-		*(u32*)0x02021334 = 0xE1A00000; // nop
-		*(u32*)0x02021344 = 0xE1A00000; // nop
-		*(u32*)0x02021380 = 0xE1A00000; // nop
-		*(u32*)0x020215F0 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x020215F4 = 0xE12FFF1E; // bx lr
-		*(u32*)0x020217A4 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x020217A8 = 0xE12FFF1E; // bx lr
+		setBL(0x020215C8, (u32)dsiSaveOpen);
+		setBL(0x020215E0, (u32)dsiSaveClose);
+		setBL(0x02021638, (u32)dsiSaveOpen);
+		setBL(0x02021654, (u32)dsiSaveGetLength);
+		setBL(0x0202166C, (u32)dsiSaveClose);
+		setBL(0x0202168C, (u32)dsiSaveSeek);
+		setBL(0x020216A8, (u32)dsiSaveRead);
+		setBL(0x020216C0, (u32)dsiSaveClose);
+		setBL(0x020216DC, (u32)dsiSaveSeek);
+		setBL(0x020216EC, (u32)dsiSaveRead);
+		setBL(0x020216F8, (u32)dsiSaveClose);
+		setBL(0x020217F4, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+		setBL(0x02021818, (u32)dsiSaveOpen);
+		setBL(0x02021844, (u32)dsiSaveSeek);
+		setBL(0x02021854, (u32)dsiSaveWrite);
+		setBL(0x02021868, (u32)dsiSaveClose);
+		setBL(0x0202187C, (u32)dsiSaveSeek);
+		setBL(0x02021888, (u32)dsiSaveWrite);
+		setBL(0x0202189C, (u32)dsiSaveClose);
+		setBL(0x020218AC, (u32)dsiSaveClose);
+		setBL(0x0202191C, (u32)dsiSaveOpen);
+		setBL(0x02021954, (u32)dsiSaveSeek);
+		setBL(0x02021968, (u32)dsiSaveRead);
+		setBL(0x02021974, (u32)dsiSaveClose);
+		*(u32*)0x02021B90 = 0xE1A00000; // nop
 		*(u32*)0x0203D7C0 = 0xE1A00000; // nop
 		*(u32*)0x02041AC8 = 0xE1A00000; // nop
-		*(u32*)0x020488C0 = 0xE1A00000; // nop
-		*(u32*)0x0204A6FC = 0xE1A00000; // nop
-		*(u32*)0x0204A700 = 0xE1A00000; // nop
-		*(u32*)0x0204A70C = 0xE1A00000; // nop
-		*(u32*)0x0204A86C = 0xE1A00000; // nop
-		patchHiHeapDSiWare(0x0204A8C8, heapEnd8MBHack);
+		patchInitDSiWare(0x0204A670, heapEnd);
+		*(u32*)0x0204A9FC -= 0x38000;
 		patchUserSettingsReadDSiWare(0x0204BB4C);
-	}*/
+	}
 
 	// Just SING! 80's (USA)
 	// Just SING! 80's (Europe)
@@ -13939,7 +13973,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020291AC = 0xE1A00000; // nop
 		*(u32*)0x0202F3F0 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 	}*/
-
+#else
 	// G.G Series: The Last Knight (USA)
 	// G.G Series: The Last Knight (Japan)
 	// Saving not supported due to possible bug
@@ -14500,7 +14534,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchUserSettingsReadDSiWare(0x02014C78);
 		*(u32*)0x0201CFCC = 0xE1A00000; // nop (Skip Manual screen)
 	}
-#else
+
 	// Maestro! Green Groove (USA)
 	// Maestro! Green Groove (Europe, Australia)
 	// Does not save due to unknown cause
