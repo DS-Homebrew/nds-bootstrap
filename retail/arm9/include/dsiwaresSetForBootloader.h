@@ -394,7 +394,7 @@ static const char dsiWareForBootloader2[][4] = {
 	"KNU", // Pucca: Noodle Rush
 	"KLF", // Puffins: Let's Fish!
 	"KLR", // Puffins: Let's Race!
-	"KL2", // Puffins: Let's Roll! (bootloaderi-exclusive)
+	"KL2", // Puffins: Let's Roll!
 	"KPN", // Puzzle League: Express
 	"KPL", // Puzzle Rocks
 	"KYE", // Puzzler Brain Games

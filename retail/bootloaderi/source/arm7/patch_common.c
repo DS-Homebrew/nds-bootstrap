@@ -11593,27 +11593,18 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Puffins: Let's Roll! (USA)
-	// Due to our save implementation, save data is stored in all 3 slots
-	else if (strcmp(romTid, "KL2E") == 0 && saveOnFlashcard) {
-		*(u32*)0x0204BF1C = (u32)dsiSaveGetLength;
-		setBL(0x0204BFA0, (u32)dsiSaveRead);
-		setBL(0x0204C074, (u32)dsiSaveSeek);
-		setBL(0x0204C10C, (u32)dsiSaveWrite);
-		setBL(0x0204C1B4, (u32)dsiSaveClose);
-		setBL(0x0204C1E8, (u32)dsiSaveOpen);
-		setBL(0x0204C230, (u32)dsiSaveCreate);
-	}
-
 	// Puffins: Let's Roll! (Europe)
 	// Due to our save implementation, save data is stored in all 3 slots
-	else if (strcmp(romTid, "KL2P") == 0 && saveOnFlashcard) {
-		*(u32*)0x0204C4D4 = (u32)dsiSaveGetLength;
-		setBL(0x0204C558, (u32)dsiSaveRead);
-		setBL(0x0204C62C, (u32)dsiSaveSeek);
-		setBL(0x0204C6C4, (u32)dsiSaveWrite);
-		setBL(0x0204C76C, (u32)dsiSaveClose);
-		setBL(0x0204C7A0, (u32)dsiSaveOpen);
-		setBL(0x0204C7E8, (u32)dsiSaveCreate);
+	else if ((strcmp(romTid, "KL2E") == 0 || strcmp(romTid, "KL2P") == 0) && saveOnFlashcard) {
+		u16 offsetChange2 = (romTid[3] == 'E') ? 0 : 0x5B8;
+
+		*(u32*)(0x0204BF1C+offsetChange2) = (u32)dsiSaveGetLength;
+		setBL(0x0204BFA0+offsetChange2, (u32)dsiSaveRead);
+		setBL(0x0204C074+offsetChange2, (u32)dsiSaveSeek);
+		setBL(0x0204C10C+offsetChange2, (u32)dsiSaveWrite);
+		setBL(0x0204C1B4+offsetChange2, (u32)dsiSaveClose);
+		setBL(0x0204C1E8+offsetChange2, (u32)dsiSaveOpen);
+		setBL(0x0204C230+offsetChange2, (u32)dsiSaveCreate);
 	}
 
 	// Puzzle League: Express (USA)

@@ -20380,6 +20380,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	else if (strcmp(romTid, "KLFE") == 0 || strcmp(romTid, "KLFP") == 0) {
 		u8 offsetChange = (romTid[3] == 'P') ? 8 : 0;
 
+		*(u32*)0x02014DF8 = 0xE2404901; // sub r4, r0, #0x4000
 		*(u32*)0x020195B4 = 0xE12FFF1E; // bx lr
 		*(u32*)0x02019608 = 0xE12FFF1E; // bx lr
 		setBL(0x0202BA80-offsetChange, (u32)dsiSaveGetLength);
@@ -20393,8 +20394,8 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)(0x0204AFD0-offsetChange) = 0xE1A00000; // nop
 		*(u32*)(0x02069374-offsetChange) = 0xE1A00000; // nop
 		*(u32*)(0x0206C6B4-offsetChange) = 0xE1A00000; // nop
-		patchInitDSiWare(0x02074794-offsetChange, heapEnd8MBHack);
-		*(u32*)(0x02074A80-offsetChange) -= 0x30000;
+		patchInitDSiWare(0x02074794-offsetChange, heapEnd);
+		*(u32*)(0x02074A80-offsetChange) = *(u32*)0x02004FD0;
 		patchUserSettingsReadDSiWare(0x02075DA8-offsetChange);
 	}
 
@@ -20402,6 +20403,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Puffins: Let's Race! (Europe)
 	// Due to our save implementation, save data is stored in all 3 slots
 	else if (strcmp(romTid, "KLRE") == 0 || strcmp(romTid, "KLRP") == 0) {
+		*(u32*)0x02014E54 = 0xE2404901; // sub r4, r0, #0x4000
 		setBL(0x020289D0, (u32)dsiSaveGetLength);
 		setBL(0x02028AC8, (u32)dsiSaveRead);
 		setBL(0x02028BB8, (u32)dsiSaveSeek);
@@ -20413,31 +20415,42 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0202F128 = 0xE1A00000; // nop
 		*(u32*)0x020733CC = 0xE1A00000; // nop
 		*(u32*)0x02076668 = 0xE1A00000; // nop
-		patchInitDSiWare(0x0207EC3C, heapEnd8MBHack);
-		*(u32*)0x0207EFC8 -= 0x30000;
+		patchInitDSiWare(0x0207EC3C, heapEnd);
+		*(u32*)0x0207EFC8 = *(u32*)0x02004FD0;
 		patchUserSettingsReadDSiWare(0x02080334);
 		*(u32*)0x02085B84 = wirelessReturnCodeArm;
 		*(u32*)0x02085B88 = 0xE12FFF1E; // bx lr
 	}
 
 	// Puffins: Let's Roll! (USA)
+	// Puffins: Let's Roll! (Europe)
 	// Due to our save implementation, save data is stored in all 3 slots
-	// Requires more than 8MB of RAM?
-	/*else if (strcmp(romTid, "KL2E") == 0) {
-		*(u32*)0x0204BF1C = (u32)dsiSaveGetLength;
-		setBL(0x0204BFA0, (u32)dsiSaveRead);
-		setBL(0x0204C074, (u32)dsiSaveSeek);
-		setBL(0x0204C10C, (u32)dsiSaveWrite);
-		setBL(0x0204C1B4, (u32)dsiSaveClose);
-		setBL(0x0204C1E8, (u32)dsiSaveOpen);
-		setBL(0x0204C230, (u32)dsiSaveCreate);
-		*(u32*)0x0204C63C = 0xE1A00000; // nop
-		*(u32*)0x020716A0 = 0xE1A00000; // nop
-		*(u32*)0x02074884 = 0xE1A00000; // nop
-		patchInitDSiWare(0x0207C640, heapEnd8MBHack);
-		*(u32*)0x0207C9CC -= 0x30000;
-		patchUserSettingsReadDSiWare(0x0207DC54);
-	}*/
+	else if (strcmp(romTid, "KL2E") == 0 || strcmp(romTid, "KL2P") == 0) {
+		u16 offsetChange = (romTid[3] == 'E') ? 0 : 0x100;
+		u16 offsetChange2 = (romTid[3] == 'E') ? 0 : 0x5B8;
+		u16 offsetChange3 = (romTid[3] == 'E') ? 0 : 0x5A8;
+		u16 offsetChangeInit = (romTid[3] == 'E') ? 0 : 0x568;
+
+		*(u32*)(0x02015124+offsetChange) = 0xE2408901; // sub r8, r0, #0x4000
+		*(u32*)(0x0204BF1C+offsetChange2) = (u32)dsiSaveGetLength;
+		setBL(0x0204BFA0+offsetChange2, (u32)dsiSaveRead);
+		setBL(0x0204C074+offsetChange2, (u32)dsiSaveSeek);
+		setBL(0x0204C10C+offsetChange2, (u32)dsiSaveWrite);
+		setBL(0x0204C1B4+offsetChange2, (u32)dsiSaveClose);
+		setBL(0x0204C1E8+offsetChange2, (u32)dsiSaveOpen);
+		setBL(0x0204C230+offsetChange2, (u32)dsiSaveCreate);
+		*(u32*)(0x0204C63C+offsetChange2) = 0xE1A00000; // nop
+		*(u32*)(0x0204CB88+offsetChange3) = 0xE1A00000; // nop
+		*(u32*)(0x0204CBA0+offsetChange3) = 0xE1A00000; // nop
+		if (romTid[3] == 'E') {
+			*(u32*)0x0204CBB4 = 0xE1A00000; // nop
+		}
+		*(u32*)(0x020716A0+offsetChangeInit) = 0xE1A00000; // nop
+		*(u32*)(0x02074884+offsetChangeInit) = 0xE1A00000; // nop
+		patchInitDSiWare(0x0207C640+offsetChangeInit, heapEnd);
+		*(u32*)(0x0207C9CC+offsetChangeInit) = *(u32*)0x02004FD0;
+		patchUserSettingsReadDSiWare(0x0207DC54+offsetChangeInit);
+	}
 
 	// Puzzle League: Express (USA)
 	// Some code seems to make save reading fail, preventing support
