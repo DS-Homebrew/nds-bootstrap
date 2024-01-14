@@ -9209,6 +9209,11 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// Missy Mila Twisted Tales (Europe)
+	else if (strcmp(romTid, "KM7P") == 0 && !twlFontFound) {
+		setB(0x02024D90, 0x02024DA8); // Skip Manual screen
+	}
+
 	// Mixed Messages (USA)
 	// Mixed Messages (Europe, Australia)
 	else if (strcmp(romTid, "KMME") == 0 || strcmp(romTid, "KMMV") == 0) {

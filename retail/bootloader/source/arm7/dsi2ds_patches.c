@@ -16139,10 +16139,9 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020151B8 = 0xE1A00000; // nop
 		*(u32*)0x0201874C = 0xE1A00000; // nop
 		patchInitDSiWare(0x0201DC84, heapEnd);
-		if (!extendedMemory) {
-			*(u32*)0x0201E010 = 0x02095240;
-		}
+		*(u32*)0x0201E010 = *(u32*)0x02004FE8;
 		patchUserSettingsReadDSiWare(0x0201F350);
+		setB(0x02024D90, 0x02024DA8); // Skip Manual screen
 	}
 
 	// Mixed Messages (USA)
@@ -16325,11 +16324,12 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02005B54, (u32)dsiSaveWrite);
 		setBL(0x02005B6C, (u32)dsiSaveClose);
 		*(u32*)0x0200648C = 0xE1A00000; // nop
-		*(u32*)0x0200949C = 0xE1A00000; // nop
+		*(u32*)0x02009548 = 0xE3A0480B; // mov r4, #0xB0000 (Shrink heap from 0x4B0000)
+		*(u32*)0x0200958C = 0x1E1000; // Shrink heap from 0x5E1000
 		*(u32*)0x02025AB4 = 0xE1A00000; // nop
 		tonccpy((u32*)0x02026748, dsiSaveGetResultCode, 0xC);
 		*(u32*)0x02029804 = 0xE1A00000; // nop
-		patchInitDSiWare(0x02032570, heapEndExceed);
+		patchInitDSiWare(0x02032570, heapEnd);
 		patchUserSettingsReadDSiWare(0x02033AC4);
 	}
 
@@ -20460,6 +20460,10 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020050D0 = 0xE1A00000; // nop
 		*(u32*)0x020050D4 = 0xE1A00000; // nop
 		*(u32*)0x020050E8 = 0xE1A00000; // nop
+		if (!extendedMemory) {
+			*(u32*)0x02005660 = 0xE3A01805; // mov r1, #0x50000
+			*(u32*)0x02005674 = 0xE2812805; // add r2, r1, #0x50000
+		}
 		*(u32*)0x02023614 = 0xE3A00001; // mov r0, #1 (Hide volume icon in gameplay)
 		*(u32*)0x0203604C = 0xE1A00000; // nop
 		*(u32*)0x0205663C = 0xE3A00001; // mov r0, #1
@@ -20488,7 +20492,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020ACF54 = 0xE1A00000; // nop
 		//tonccpy((u32*)0x020ADBF4, dsiSaveGetResultCode, 0xC);
 		*(u32*)0x020B1334 = 0xE1A00000; // nop
-		patchInitDSiWare(0x020BFF78, heapEnd8MBHack);
+		patchInitDSiWare(0x020BFF78, heapEnd);
 		patchUserSettingsReadDSiWare(0x020C1668);
 	}
 
@@ -20499,6 +20503,10 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020050D0 = 0xE1A00000; // nop
 		*(u32*)0x020050D4 = 0xE1A00000; // nop
 		*(u32*)0x020050E8 = 0xE1A00000; // nop
+		if (!extendedMemory) {
+			*(u32*)0x02005660 = 0xE3A01805; // mov r1, #0x50000
+			*(u32*)0x02005674 = 0xE2812805; // add r2, r1, #0x50000
+		}
 		*(u32*)0x02023634 = 0xE3A00001; // mov r0, #1 (Hide volume icon in gameplay)
 		*(u32*)0x02036FA0 = 0xE1A00000; // nop
 		*(u32*)0x020575FC = 0xE3A00001; // mov r0, #1
@@ -20507,7 +20515,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02065DE4 = 0xE3A00001; // mov r0, #1 (Hide volume icon in menu)
 		*(u32*)0x020AE94C = 0xE1A00000; // nop
 		*(u32*)0x020BD2DC = 0xE1A00000; // nop
-		patchInitDSiWare(0x020C1970, heapEnd8MBHack);
+		patchInitDSiWare(0x020C1970, heapEnd);
 		patchUserSettingsReadDSiWare(0x020C3060);
 	}
 
@@ -20518,6 +20526,10 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020050AC = 0xE1A00000; // nop
 		*(u32*)0x020050B0 = 0xE1A00000; // nop
 		*(u32*)0x020050C4 = 0xE1A00000; // nop
+		if (!extendedMemory) {
+			*(u32*)0x02005638 = 0xE3A01805; // mov r1, #0x50000
+			*(u32*)0x0200564C = 0xE2812805; // add r2, r1, #0x50000
+		}
 		*(u32*)0x02023404 = 0xE3A00001; // mov r0, #1 (Hide volume icon in gameplay)
 		*(u32*)0x02035BB8 = 0xE1A00000; // nop
 		*(u32*)0x02056128 = 0xE3A00001; // mov r0, #1
@@ -20527,7 +20539,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020ADCCC = 0xE28DD00C; // ADD   SP, SP, #0xC
 		*(u32*)0x020ADCD0 = 0xE8BD8078; // LDMFD SP!, {R3-R6,PC}
 		*(u32*)0x020B21BC = 0xE1A00000; // nop
-		patchInitDSiWare(0x020C2934, heapEnd8MBHack);
+		patchInitDSiWare(0x020C2934, heapEnd);
 		patchUserSettingsReadDSiWare(0x020C4030);
 	}
 
