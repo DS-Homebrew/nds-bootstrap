@@ -10865,88 +10865,92 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Fashion Tycoon (USA)
-	// Saving not supported due to some weirdness with the code going on
-	else if (strcmp(romTid, "KU7E") == 0) {
-		/* const u32 dsiSaveCreateT = 0x020370F4;
+	// Fashion Tycoon (Europe)
+	else if (strncmp(romTid, "KU7", 3) == 0) {
+		u16 offsetChange = (romTid[3] == 'E') ? 0 : 0x268;
+		u16 offsetChange2 = (romTid[3] == 'E') ? 0 : 0x278;
+
+		const u32 dsiSaveCreateT = 0x020370F4-offsetChange2;
 		*(u16*)dsiSaveCreateT = 0x4778; // bx pc
 		tonccpy((u32*)(dsiSaveCreateT + 4), dsiSaveCreate, 0xC); // Original function overwritten, no BL setting needed
 
-		const u32 dsiSaveSetLengthT = 0x02037104;
+		const u32 dsiSaveSetLengthT = 0x02037104-offsetChange2;
 		*(u16*)dsiSaveSetLengthT = 0x4778; // bx pc
 		tonccpy((u32*)(dsiSaveSetLengthT + 4), dsiSaveSetLength, 0xC);
 
-		const u32 dsiSaveOpenT = 0x02037114;
+		const u32 dsiSaveOpenT = 0x02037114-offsetChange2;
 		*(u16*)dsiSaveOpenT = 0x4778; // bx pc
 		tonccpy((u32*)(dsiSaveOpenT + 4), dsiSaveOpen, 0xC);
 
-		const u32 dsiSaveOpenRT = 0x02037124;
+		const u32 dsiSaveOpenRT = 0x02037124-offsetChange2;
 		*(u16*)dsiSaveOpenRT = 0x4778; // bx pc
 		tonccpy((u32*)(dsiSaveOpenRT + 4), dsiSaveOpenR, 0x10);
 
-		const u32 dsiSaveCloseT = 0x02037138;
+		const u32 dsiSaveCloseT = 0x02037138-offsetChange2;
 		*(u16*)dsiSaveCloseT = 0x4778; // bx pc
 		tonccpy((u32*)(dsiSaveCloseT + 4), dsiSaveClose, 0xC);
 
-		const u32 dsiSaveSeekT = 0x02037148;
+		const u32 dsiSaveSeekT = 0x02037148-offsetChange2;
 		*(u16*)dsiSaveSeekT = 0x4778; // bx pc
 		tonccpy((u32*)(dsiSaveSeekT + 4), dsiSaveSeek, 0xC);
 
-		const u32 dsiSaveReadT = 0x02037300;
+		const u32 dsiSaveReadT = 0x02037300-offsetChange2;
 		*(u16*)dsiSaveReadT = 0x4778; // bx pc
 		tonccpy((u32*)(dsiSaveReadT + 4), dsiSaveRead, 0xC);
 
-		const u32 dsiSaveWriteT = 0x020372F0;
+		const u32 dsiSaveWriteT = 0x0203725C-offsetChange2;
 		*(u16*)dsiSaveWriteT = 0x4778; // bx pc
-		tonccpy((u32*)(dsiSaveWriteT + 4), dsiSaveWrite, 0xC); // Original function overwritten, no BL setting needed */
+		tonccpy((u32*)(dsiSaveWriteT + 4), dsiSaveWrite, 0xC); // Original function overwritten, no BL setting needed
 
-		*(u16*)0x020271CC = 0x2001; // movs r0, #1
-		*(u16*)0x020271CE = 0x4770; // bx lr
-		*(u16*)0x02027A40 = 0x2001; // movs r0, #1
-		*(u16*)0x02027A42 = 0x4770; // bx lr
-		/* setBLThumb(0x020271F2, dsiSaveOpenRT);
-		setBLThumb(0x020271FC, 0x020274A6);
-		setBLThumb(0x020274C2, dsiSaveOpenT);
-		setBLThumb(0x020274D6, dsiSaveSeekT);
-		setBLThumb(0x020274E2, dsiSaveReadT);
-		doubleNopT(0x020274F4);
-		setBLThumb(0x02027500, dsiSaveCloseT);
-		setBLThumb(0x02027828, dsiSaveOpenT);
-		setBLThumb(0x02027838, dsiSaveSetLengthT);
-		doubleNopT(0x0202783E); // dsiSaveFlush
-		setBLThumb(0x02027844, dsiSaveCloseT);
-		setBLThumb(0x0202784E, dsiSaveCloseT);
-		setBLThumb(0x02027A6E, dsiSaveOpenRT);
-		setBLThumb(0x02027A78, 0x02027D3E);
-		setBLThumb(0x02027DF8, dsiSaveSetLengthT);
-		doubleNopT(0x02027DFE); // dsiSaveFlush
-		setBLThumb(0x02027E04, dsiSaveCloseT);
-		setBLThumb(0x02027E2C, dsiSaveSeekT);
-		setBLThumb(0x02027E36, dsiSaveReadT);
-		doubleNopT(0x02027E4C);
-		setBLThumb(0x02027E5E, dsiSaveCloseT);
-		setBLThumb(0x02028170, dsiSaveOpenT);
-		setBLThumb(0x02028198, dsiSaveSetLengthT);
-		doubleNopT(0x0202819E); // dsiSaveFlush
-		setBLThumb(0x020281A4, dsiSaveCloseT);
-		setBLThumb(0x020281C6, dsiSaveCloseT);
-		setBLThumb(0x02028200, dsiSaveOpenT);
-		setBLThumb(0x02028216, dsiSaveSeekT);
-		setBLThumb(0x02028220, dsiSaveReadT); // dsiSaveReadAsync
-		doubleNopT(0x02028230); // dsiSaveFlush
-		setBLThumb(0x02028236, dsiSaveCloseT); */
-		doubleNopT(0x0203633E);
-		// *(u16*)0x0203728C = 0x2000; // movs r0, #0 (dsiSaveOpenDir)
-		// *(u16*)0x0203728E = 0x4770; // bx lr
-		// *(u16*)0x020372D8 = 0x2000; // movs r0, #0 (dsiSaveCloseDir)
-		// *(u16*)0x020372DA = 0x4770; // bx lr
-		doubleNopT(0x02038386);
-		doubleNopT(0x0203AC10);
-		doubleNopT(0x0203C232);
-		doubleNopT(0x0203C236);
-		doubleNopT(0x0203C242);
-		doubleNopT(0x0203C326);
-		patchHiHeapDSiWareThumb(0x0203C364, 0x0203A144, heapEnd); // movs r0, #0x23E0000
-		patchUserSettingsReadDSiWare(0x0203D182);
+		/* *(u16*)(0x020271CC-offsetChange) = 0x2001; // movs r0, #1
+		*(u16*)(0x020271CE-offsetChange) = 0x4770; // bx lr
+		*(u16*)(0x02027A40-offsetChange) = 0x2001; // movs r0, #1
+		*(u16*)(0x02027A42-offsetChange) = 0x4770; // bx lr */
+		setBLThumb(0x020271F2-offsetChange, dsiSaveOpenRT);
+		// setBLThumb(0x020271FC-offsetChange, 0x020274A6-offsetChange);
+		setBLThumb(0x020274C2-offsetChange, dsiSaveOpenT);
+		setBLThumb(0x020274D6-offsetChange, dsiSaveSeekT);
+		setBLThumb(0x020274E2-offsetChange, dsiSaveReadT);
+		doubleNopT(0x020274F4-offsetChange);
+		setBLThumb(0x02027500-offsetChange, dsiSaveCloseT);
+		setBLThumb(0x02027828-offsetChange, dsiSaveOpenT);
+		setBLThumb(0x02027838-offsetChange, dsiSaveSetLengthT);
+		doubleNopT(0x0202783E -offsetChange); // dsiSaveFlush
+		setBLThumb(0x02027844-offsetChange, dsiSaveCloseT);
+		setBLThumb(0x0202784E -offsetChange, dsiSaveCloseT);
+		setBLThumb(0x02027A6E -offsetChange, dsiSaveOpenRT);
+		// setBLThumb(0x02027A78-offsetChange, 0x02027D3E-offsetChange);
+		doubleNopT(0x02027A84-offsetChange);
+		setBLThumb(0x02027DD0-offsetChange, dsiSaveOpenT);
+		setBLThumb(0x02027DF8-offsetChange, dsiSaveSetLengthT);
+		doubleNopT(0x02027DFE -offsetChange); // dsiSaveFlush
+		setBLThumb(0x02027E04-offsetChange, dsiSaveCloseT);
+		setBLThumb(0x02027E2C-offsetChange, dsiSaveSeekT);
+		setBLThumb(0x02027E36-offsetChange, dsiSaveReadT);
+		doubleNopT(0x02027E4C-offsetChange);
+		setBLThumb(0x02027E5E -offsetChange, dsiSaveCloseT);
+		setBLThumb(0x02028170-offsetChange, dsiSaveOpenT);
+		setBLThumb(0x02028198-offsetChange, dsiSaveSetLengthT);
+		doubleNopT(0x0202819E -offsetChange); // dsiSaveFlush
+		setBLThumb(0x020281A4-offsetChange, dsiSaveCloseT);
+		setBLThumb(0x020281C6-offsetChange, dsiSaveCloseT);
+		setBLThumb(0x02028200-offsetChange, dsiSaveOpenT);
+		setBLThumb(0x02028216-offsetChange, dsiSaveSeekT);
+		doubleNopT(0x02028230-offsetChange); // dsiSaveFlush
+		setBLThumb(0x02028236-offsetChange, dsiSaveCloseT);
+		doubleNopT(0x0203633E -offsetChange2);
+		*(u16*)(0x0203728C-offsetChange2) = 0x2000; // movs r0, #0 (dsiSaveOpenDir)
+		*(u16*)(0x0203728E -offsetChange2) = 0x4770; // bx lr
+		*(u16*)(0x020372D8-offsetChange2) = 0x2000; // movs r0, #0 (dsiSaveCloseDir)
+		*(u16*)(0x020372DA-offsetChange2) = 0x4770; // bx lr
+		doubleNopT(0x02038386-offsetChange2);
+		doubleNopT(0x0203AC10-offsetChange2);
+		doubleNopT(0x0203C232-offsetChange2);
+		doubleNopT(0x0203C236-offsetChange2);
+		doubleNopT(0x0203C242-offsetChange2);
+		doubleNopT(0x0203C326-offsetChange2);
+		patchHiHeapDSiWareThumb(0x0203C364-offsetChange2, 0x0203A144-offsetChange2, heapEnd); // movs r0, #0x23E0000
+		patchUserSettingsReadDSiWare(0x0203D182-offsetChange2);
 	}
 
 	// Fieldrunners (USA)
