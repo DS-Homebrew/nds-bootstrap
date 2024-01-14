@@ -11456,7 +11456,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		} else {
 			*(u16*)0x0202A710 += 0x1000; // beq -> b
 		}
-		if (!extendedMemory) {
+		if (!extendedMemory && !maxHeapOpen) {
 			*(u16*)(0x0206E8DC+offsetChange) = 0x4770; // bx lr (Disable loading exception textures)
 		}
 		*(u16*)(0x0206F160+offsetChange) = 0x4770; // bx lr
@@ -11468,7 +11468,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		doubleNopT(0x02087BDA+offsetChange);
 		doubleNopT(0x02087BE6+offsetChange);
 		doubleNopT(0x02087CCA+offsetChange);
-		patchHiHeapDSiWareThumb(0x02087D08+offsetChange, 0x0207A0EC+offsetChange, heapEnd);
+		patchHiHeapDSiWareThumb(0x02087D08+offsetChange, 0x0207A0EC+offsetChange, heapEndMaxForRetail);
 		*(u32*)(0x02087DE0+offsetChange) = *(u32*)0x02004FDC;
 		patchUserSettingsReadDSiWare(0x02088A36+offsetChange);
 	}
