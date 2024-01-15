@@ -4273,6 +4273,54 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// Chronos Twins: One Hero in Two Times (USA)
+	// Due to our save implementation, save data is stored in all 3 slots
+	else if (strcmp(romTid, "K9TE") == 0 && saveOnFlashcard) {
+		*(u32*)0x020051DC = 0xE1A00000; // nop
+		setBL(0x02056998, (u32)dsiSaveOpen);
+		setBL(0x020569B0, (u32)dsiSaveGetLength);
+		setBL(0x020569D0, (u32)dsiSaveRead);
+		setBL(0x020569D8, (u32)dsiSaveClose);
+		setBL(0x02056A58, (u32)dsiSaveOpen);
+		setBL(0x02056A70, (u32)dsiSaveGetLength);
+		setBL(0x02056A80, (u32)dsiSaveSeek);
+		setBL(0x02056A90, (u32)dsiSaveWrite);
+		setBL(0x02056A98, (u32)dsiSaveClose);
+		setBL(0x02056B08, (u32)dsiSaveOpen);
+		setBL(0x02056B20, (u32)dsiSaveGetLength);
+		setBL(0x02056B30, (u32)dsiSaveSeek);
+		setBL(0x02056B40, (u32)dsiSaveRead);
+		setBL(0x02056B48, (u32)dsiSaveClose);
+		setBL(0x02056BC0, (u32)dsiSaveCreate);
+		setBL(0x02056BEC, (u32)dsiSaveOpen);
+		setBL(0x02056C28, (u32)dsiSaveWrite);
+		setBL(0x02056C38, (u32)dsiSaveClose);
+	}
+
+	// Chronos Twins: One Hero in Two Times (Europe)
+	// Due to our save implementation, save data is stored in all 3 slots
+	else if (strcmp(romTid, "K9TP") == 0 && saveOnFlashcard) {
+		*(u32*)0x020107EC = 0xE1A00000; // nop
+		setBL(0x0204529C, (u32)dsiSaveOpen);
+		setBL(0x020452B4, (u32)dsiSaveGetLength);
+		setBL(0x020452D4, (u32)dsiSaveRead);
+		setBL(0x020452DC, (u32)dsiSaveClose);
+		setBL(0x0204535C, (u32)dsiSaveOpen);
+		setBL(0x02045374, (u32)dsiSaveGetLength);
+		setBL(0x02045384, (u32)dsiSaveSeek);
+		setBL(0x02045394, (u32)dsiSaveWrite);
+		setBL(0x0204539C, (u32)dsiSaveClose);
+		setBL(0x0204540C, (u32)dsiSaveOpen);
+		setBL(0x02045424, (u32)dsiSaveGetLength);
+		setBL(0x02045434, (u32)dsiSaveSeek);
+		setBL(0x02045444, (u32)dsiSaveRead);
+		setBL(0x0204544C, (u32)dsiSaveClose);
+		setBL(0x020454C4, (u32)dsiSaveCreate);
+		setBL(0x020454F0, (u32)dsiSaveOpen);
+		setBL(0x0204552C, (u32)dsiSaveWrite);
+		setBL(0x0204553C, (u32)dsiSaveClose);
+	}
+
 	// Chuck E. Cheese's Alien Defense Force (USA)
 	else if (strcmp(romTid, "KUQE") == 0) {
 		if (saveOnFlashcard) {

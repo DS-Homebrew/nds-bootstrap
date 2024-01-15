@@ -122,6 +122,7 @@ static const char dsiWareForBootloader1[][4] = {
 	"K2W", // Christmas Wonderland 2
 	"KVW", // Chronicles of Vampires: Origins
 	"KVV", // Chronicles of Vampires: Awakening
+	"K9T", // Chronos Twins: One Hero in Two Times
 	"KUQ", // Chuck E. Cheese's Alien Defense Force
 	"KUC", // Chuck E. Cheese's Arcade Room
 	"KJC", // Chuugaku Eijukugo: Kiho 150 Go Master
