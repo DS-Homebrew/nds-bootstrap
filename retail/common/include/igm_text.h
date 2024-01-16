@@ -30,14 +30,13 @@ static_assert(sizeof(IgmText) == 0xA0C, "IgmText is too big! Allocate more space
 
 enum class IgmFont : u8 {
 	arabic = 0,
-	chinese = 1,
-	cyrillic = 2,
-	extendedLatin = 3,
-	greek = 4,
-	hangul = 5,
-	hebrew = 6,
-	japanese = 7,
-	vietnamese = 8
+	cyrillic = 1,
+	extendedLatin = 2,
+	greek = 3,
+	hangul = 4,
+	hebrew = 5,
+	japanese = 6,
+	chinese = 7
 };
 #endif
 

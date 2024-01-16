@@ -6,16 +6,6 @@
 
 IgmFont extendedFont = IgmFont::extendedLatin;
 
-constexpr char16_t mapAscii[] =
-	u"\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0A\x0B\x0C\x0D\x0E\x0F"
-	u"ẲẴẪỶỸỴ\x16\x17\x18\x19\x1A\x1B\x1C\x1D\x1E\x1F"
-	u" !\"#$%&'()*+,-./"
-	u"0123456789:;<=>?"
-	u"@ABCDEFGHIJKLMNO"
-	u"PQRSTUVWXYZ[\\]^_"
-	u"`abcdefghijklmno"
-	u"pqrstuvwxyz{|}~\x7F";
-
 constexpr char16_t mapArabic[] =
 	u"ءآأؤإئابةتثجحخدذ"
 	u"رزسشصضطظعغـفقكلم"
@@ -25,13 +15,6 @@ constexpr char16_t mapArabic[] =
 	u"ﺿﻀﻂﻃﻄﻆﻇﻈﻊﻋﻌﻎﻏﻐﻒﻓ"
 	u"ﻔﻖﻗﻘﻚﻛﻜﻞﻟﻠﻢﻣﻤﻦﻧﻨ"
 	u"ﻪﻫﻬﻮﻰﻲﻳﻴ،؟ﻻﻼ";
-
-constexpr char16_t mapChinese[] =
-	u"主书亮位儲出到动動区器回图圖地址"
-	u"块存定屏幕底度式戏截戲择擇数數时"
-	u"明显時書查模檢游率界畫目看移端置"
-	u"自至螢視計設說说跳轉转返退选遊選"
-	u"部重量鐘钟開離面音頂頻顶项频　";
 
 constexpr char16_t mapCyrillic[] =
 	u"ЂЃ ѓ      Љ ЊЌЋЏ"
@@ -85,27 +68,22 @@ constexpr char16_t mapJapanese[] =
 	u"上下主了動定度戻択数明書画終自設"
 	u"説速選量面音";
 
-constexpr char16_t mapVietnamese[] =
-	u"ẠẮẰẶẤẦẨẬẼẸẾỀỂỄỆỐ"
-	u"ỒỔỖỘỢỚỜỞỊỎỌỈỦŨỤỲ"
-	u"Õắằặấầẩậẽẹếềểễệố"
-	u"ồổỗỠƠộờởịỰỨỪỬơớƯ"
-	u"ÀÁÂÃẢĂẳẵÈÉÊẺÌÍĨỳ"
-	u"ĐứÒÓÔạỷừửÙÚỹỵÝỡư"
-	u"àáâãảăữẫèéêẻìíĩỉ"
-	u"đựòóôõỏọụùúũủýợỮ";
-
+constexpr char16_t mapChinese[] =
+	u"主书亮位儲出到动動区器回图圖地址"
+	u"块存定屏幕底度式戏截戲择擇数數时"
+	u"明显時書查模檢游率界畫目看移端置"
+	u"自至螢視計設說说跳轉转返退选遊選"
+	u"部重量鐘钟開離面音頂頻顶项频　";
 
 constexpr const char16_t *extendedMaps[] = {
 	mapArabic,
-	mapChinese,
 	mapCyrillic,
 	mapExtendedLatin,
 	mapGreek,
 	mapHangul,
 	mapHebrew,
 	mapJapanese,
-	mapVietnamese
+	mapChinese
 };
 
 std::map<char16_t, std::array<char16_t, 3>> arabicPresentationForms = {
@@ -157,15 +135,13 @@ std::map<char16_t, std::array<char16_t, 3>> arabicPresentationForms = {
 
 // Can't do a binary search as the maps aren't fully sorted
 constexpr char getIndex(char16_t c) {
-	for(uint i = 0; i < 0x80; i++) {
-		if(c == mapAscii[i]) {
-			return i;
-		}
-	}
-
-	for(uint i = 0; i < 0x80; i++) {
-		if(c == extendedMaps[u8(extendedFont)][i]) {
-			return 0x80 + i;
+	if(c < 0x80) { // ASCII is left as is
+		return c;
+	} else {
+		for(uint i = 0; i < 0x80; i++) {
+			if(c == extendedMaps[u8(extendedFont)][i]) {
+				return 0x80 + i;
+			}
 		}
 	}
 
@@ -232,7 +208,7 @@ void processRTL(unsigned char *begin, unsigned char *end) {
 			}
 		}
 
-		char16_t c = *p < 0x80 ? mapAscii[*p] : extendedMaps[u8(extendedFont)][(*p) - 0x80];
+		char16_t c = *p < 0x80 ? *p : extendedMaps[u8(extendedFont)][(*p) - 0x80];
 		nocashMessage(("a" + std::to_string(c)).c_str());
 
 		// If at the end of an LTR section within RTL, jump back to the RTL
@@ -241,7 +217,7 @@ void processRTL(unsigned char *begin, unsigned char *end) {
 				break;
 
 			p = ltrBegin;
-			c = *p < 0x80 ? mapAscii[*p] : extendedMaps[u8(extendedFont)][(*p) - 0x80];
+			c = *p < 0x80 ? *p : extendedMaps[u8(extendedFont)][(*p) - 0x80];
 			ltrBegin = end;
 			rtl = true;
 		// If in RTL and hit a non-RTL character that's not punctuation, switch to LTR
@@ -257,7 +233,7 @@ void processRTL(unsigned char *begin, unsigned char *end) {
 				if(allNumbers && !isNumber(c) && !isWeak(c))
 					allNumbers = false;
 				p--;
-				c = *p < 0x80 ? mapAscii[*p] : extendedMaps[u8(extendedFont)][(*p) - 0x80];
+				c = *p < 0x80 ? *p : extendedMaps[u8(extendedFont)][(*p) - 0x80];
 			}
 
 			// Save where we are to return to after printing the LTR section
@@ -266,7 +242,7 @@ void processRTL(unsigned char *begin, unsigned char *end) {
 			// If on an RTL char right now, add one
 			if(isStrongRTL(c)) {
 				p++;
-				c = *p < 0x80 ? mapAscii[*p] : extendedMaps[u8(extendedFont)][(*p) - 0x80];
+				c = *p < 0x80 ? *p : extendedMaps[u8(extendedFont)][(*p) - 0x80];
 			}
 
 			// Remove all punctuation and, if the section isn't only numbers,
@@ -276,14 +252,14 @@ void processRTL(unsigned char *begin, unsigned char *end) {
 					if(p != begin)
 						ltrBegin++;
 					p++;
-					c = *p < 0x80 ? mapAscii[*p] : extendedMaps[u8(extendedFont)][(*p) - 0x80];
+					c = *p < 0x80 ? *p : extendedMaps[u8(extendedFont)][(*p) - 0x80];
 				}
 			} else {
 				while(isWeak(c)) {
 					if(p != begin)
 						ltrBegin++;
 					p++;
-					c = *p < 0x80 ? mapAscii[*p] : extendedMaps[u8(extendedFont)][(*p) - 0x80];
+					c = *p < 0x80 ? *p : extendedMaps[u8(extendedFont)][(*p) - 0x80];
 				}
 			}
 
@@ -293,7 +269,7 @@ void processRTL(unsigned char *begin, unsigned char *end) {
 					ltrBegin--;
 				p--;
 			}
-			c = *p < 0x80 ? mapAscii[*p] : extendedMaps[u8(extendedFont)][(*p) - 0x80];
+			c = *p < 0x80 ? *p : extendedMaps[u8(extendedFont)][(*p) - 0x80];
 
 			rtl = false;
 		}

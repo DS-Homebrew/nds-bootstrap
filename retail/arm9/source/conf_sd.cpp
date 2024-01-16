@@ -338,9 +338,6 @@ void getIgmStrings(configuration* conf, bool b4ds) {
 		extendedFont = IgmFont::arabic;
 		extendedFontPath = "nitro:/fonts/arabic.lz77";
 		igmText->rtl = true;
-	} else if (strncmp(conf->guiLanguage, "zh", 2) == 0) {
-		extendedFont = IgmFont::chinese;
-		extendedFontPath = "nitro:/fonts/chinese.lz77";
 	} else if (strcmp(conf->guiLanguage, "ru") == 0 || strcmp(conf->guiLanguage, "uk") == 0) {
 		extendedFont = IgmFont::cyrillic;
 		extendedFontPath = "nitro:/fonts/cyrillic.lz77";
@@ -357,9 +354,9 @@ void getIgmStrings(configuration* conf, bool b4ds) {
 	} else if (strcmp(conf->guiLanguage, "ja") == 0 || strcmp(conf->guiLanguage, "ry") == 0) {
 		extendedFont = IgmFont::japanese;
 		extendedFontPath = "nitro:/fonts/japanese.lz77";
-	} else if (strncmp(conf->guiLanguage, "vi", 2) == 0) {
-		extendedFont = IgmFont::vietnamese;
-		extendedFontPath = "nitro:/fonts/vietnamese.lz77";
+	} else if (strncmp(conf->guiLanguage, "zh", 2) == 0) {
+		extendedFont = IgmFont::chinese;
+		extendedFontPath = "nitro:/fonts/chinese.lz77";
 	}
 
 	FILE *font = fopen("nitro:/fonts/ascii.lz77", "rb");
