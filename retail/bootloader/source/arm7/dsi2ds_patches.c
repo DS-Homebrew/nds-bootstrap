@@ -6623,14 +6623,15 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Cat Frenzy (USA)
 	// Cat Frenzy (Europe)
-	// May require 8MB of RAM
-	/* else if (strcmp(romTid, "KVXE") == 0 || strcmp(romTid, "KVXP") == 0) {
+	// Requires 8MB of RAM
+	else if ((strcmp(romTid, "KVXE") == 0 || strcmp(romTid, "KVXP") == 0) && extendedMemory) {
+		useSharedFont = twlFontFound;
 		*(u32*)0x020050EC = 0xE1A00000; // nop
 		*(u32*)0x020176F4 = 0xE1A00000; // nop
 		tonccpy((u32*)0x02018278, dsiSaveGetResultCode, 0xC);
 		*(u32*)0x0201AED4 = 0xE1A00000; // nop
 		patchInitDSiWare(0x02021B28, heapEnd);
-		*(u32*)0x02021EB4 = *(u32*)0x02004FE8;
+		// *(u32*)0x02021EB4 = *(u32*)0x02004FE8;
 		patchUserSettingsReadDSiWare(0x0202301C);
 		*(u32*)0x02027F58 = 0xE1A00000; // nop
 		*(u32*)0x02027F60 = 0xE1A00000; // nop
@@ -6646,7 +6647,19 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x020295AC, (u32)dsiSaveRead); // dsiSaveReadAsync
 		setBL(0x020295DC, (u32)dsiSaveClose);
 		*(u32*)0x020296D0 = 0xE1A00000; // nop
-	} */
+		if (!useSharedFont) {
+			if (romTid[3] == 'E') {
+				*(u32*)0x020544D4 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+			} else {
+				*(u32*)0x0205456C = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+			}
+		}
+		/* if (romTid[3] == 'E') {
+			*(u32*)0x02054894 = 0xE3A0470A; // mov r4, #0x280000
+		} else {
+			*(u32*)0x0205492C = 0xE3A0470A; // mov r4, #0x280000
+		} */
+	}
 
 	// Cave Story (USA)
 	else if (strcmp(romTid, "KCVE") == 0) {

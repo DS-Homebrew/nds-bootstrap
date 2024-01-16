@@ -114,7 +114,7 @@ static const char dsiWareForBootloader1[][4] = {
 	"KC5", // Castle Conqueror: Heroes
 	"KXC", // Castle Conqueror: Heroes 2
 	"KQN", // Castle Conqueror: Revolution
-	"KVX", // Cat Frenzy (bootloaderi-exclusive)
+	"KVX", // Cat Frenzy
 	"KCV", // Cave Story
 	"KCT", // Chess Challenge!
 	"KBG", // Chotto DS Bun ga Kuzenshuu: Sekai no Bungaku 20

@@ -4115,35 +4115,49 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Cat Frenzy (USA)
 	// Cat Frenzy (Europe)
-	else if ((strcmp(romTid, "KVXE") == 0 || strcmp(romTid, "KVXP") == 0) && saveOnFlashcard) {
-		tonccpy((u32*)0x02018278, dsiSaveGetResultCode, 0xC);
-		setBL(0x020293A0, (u32)dsiSaveGetInfo);
-		setBL(0x020293D4, (u32)dsiSaveCreate);
-		setBL(0x020293FC, (u32)dsiSaveOpen);
-		setBL(0x02029424, (u32)dsiSaveSetLength);
-		setBL(0x0202943C, (u32)dsiSaveWrite);
-		setBL(0x02029444, (u32)dsiSaveClose);
-		setBL(0x020294A8, (u32)dsiSaveOpen);
-		setBL(0x020294D0, (u32)dsiSaveSetLength);
-		setBL(0x02029554, (u32)dsiSaveWrite); // dsiSaveWriteAsync
-		setBL(0x020295AC, (u32)dsiSaveRead); // dsiSaveReadAsync
-		setBL(0x020295DC, (u32)dsiSaveClose);
+	else if (strcmp(romTid, "KVXE") == 0 || strcmp(romTid, "KVXP") == 0) {
+		if (saveOnFlashcard) {
+			tonccpy((u32*)0x02018278, dsiSaveGetResultCode, 0xC);
+			setBL(0x020293A0, (u32)dsiSaveGetInfo);
+			setBL(0x020293D4, (u32)dsiSaveCreate);
+			setBL(0x020293FC, (u32)dsiSaveOpen);
+			setBL(0x02029424, (u32)dsiSaveSetLength);
+			setBL(0x0202943C, (u32)dsiSaveWrite);
+			setBL(0x02029444, (u32)dsiSaveClose);
+			setBL(0x020294A8, (u32)dsiSaveOpen);
+			setBL(0x020294D0, (u32)dsiSaveSetLength);
+			setBL(0x02029554, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+			setBL(0x020295AC, (u32)dsiSaveRead); // dsiSaveReadAsync
+			setBL(0x020295DC, (u32)dsiSaveClose);
+		}
+		if (!twlFontFound) {
+			if (romTid[3] == 'E') {
+				*(u32*)0x020544D4 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+			} else {
+				*(u32*)0x0205456C = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+			}
+		}
 	}
 
 	// Mew Mew Chamber (Japan)
-	else if (strcmp(romTid, "KVXJ") == 0 && saveOnFlashcard) {
-		tonccpy((u32*)0x02018254, dsiSaveGetResultCode, 0xC);
-		setBL(0x0202929C, (u32)dsiSaveGetInfo);
-		setBL(0x020292D0, (u32)dsiSaveCreate);
-		setBL(0x020292F8, (u32)dsiSaveOpen);
-		setBL(0x02029320, (u32)dsiSaveSetLength);
-		setBL(0x02029338, (u32)dsiSaveWrite);
-		setBL(0x02029340, (u32)dsiSaveClose);
-		setBL(0x020293A4, (u32)dsiSaveOpen);
-		setBL(0x020293CC, (u32)dsiSaveSetLength);
-		setBL(0x02029450, (u32)dsiSaveWrite); // dsiSaveWriteAsync
-		setBL(0x020294A8, (u32)dsiSaveRead); // dsiSaveReadAsync
-		setBL(0x020294D8, (u32)dsiSaveClose);
+	else if (strcmp(romTid, "KVXJ") == 0) {
+		if (saveOnFlashcard) {
+			tonccpy((u32*)0x02018254, dsiSaveGetResultCode, 0xC);
+			setBL(0x0202929C, (u32)dsiSaveGetInfo);
+			setBL(0x020292D0, (u32)dsiSaveCreate);
+			setBL(0x020292F8, (u32)dsiSaveOpen);
+			setBL(0x02029320, (u32)dsiSaveSetLength);
+			setBL(0x02029338, (u32)dsiSaveWrite);
+			setBL(0x02029340, (u32)dsiSaveClose);
+			setBL(0x020293A4, (u32)dsiSaveOpen);
+			setBL(0x020293CC, (u32)dsiSaveSetLength);
+			setBL(0x02029450, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+			setBL(0x020294A8, (u32)dsiSaveRead); // dsiSaveReadAsync
+			setBL(0x020294D8, (u32)dsiSaveClose);
+		}
+		if (!twlFontFound) {
+			*(u32*)0x02051F08 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		}
 	}
 
 	// Cave Story (USA)
