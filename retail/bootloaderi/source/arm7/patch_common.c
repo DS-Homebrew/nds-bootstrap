@@ -3731,20 +3731,41 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Candle Route (USA)
-	else if (strcmp(romTid, "K9YE") == 0 && !twlFontFound) {
-		// Skip Manual screen
-		for (int i = 0; i < 11; i++) {
-			u32* offset = (u32*)0x020AE76C;
-			offset[i] = 0xE1A00000; // nop
-		}
-	}
-
 	// Candle Route (Europe)
-	else if (strcmp(romTid, "K9YP") == 0 && !twlFontFound) {
-		// Skip Manual screen
-		for (int i = 0; i < 11; i++) {
-			u32* offset = (u32*)0x020AE810;
-			offset[i] = 0xE1A00000; // nop
+	else if (strcmp(romTid, "K9YE") == 0 || strcmp(romTid, "K9YP") == 0) {
+		if (saveOnFlashcard) {
+			u8 offsetChange = (romTid[3] == 'E') ? 0 : 0xA4;
+			tonccpy((u32*)0x02018178, dsiSaveGetResultCode, 0xC);
+			setBL(0x02089814+offsetChange, (u32)dsiSaveGetInfo);
+			setBL(0x02089840+offsetChange, (u32)dsiSaveCreate);
+			setBL(0x02089868+offsetChange, (u32)dsiSaveOpen);
+			setBL(0x020898BC+offsetChange, (u32)dsiSaveSetLength);
+			setBL(0x020898F8+offsetChange, (u32)dsiSaveWrite);
+			setBL(0x02089900+offsetChange, (u32)dsiSaveClose);
+			setBL(0x0208999C+offsetChange, (u32)dsiSaveOpen);
+			setBL(0x020899F0+offsetChange, (u32)dsiSaveSetLength);
+			setBL(0x02089A60+offsetChange, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+			setBL(0x02089B80+offsetChange, (u32)dsiSaveClose);
+			*(u32*)(0x02089D84+offsetChange) = 0xE1A00000; // nop
+		}
+		if (!twlFontFound) {
+			if (romTid[3] == 'E') {
+				*(u32*)0x020AE44C = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+
+				// Skip Manual screen
+				for (int i = 0; i < 11; i++) {
+					u32* offset = (u32*)0x020AE76C;
+					offset[i] = 0xE1A00000; // nop
+				}
+			} else {
+				*(u32*)0x020AE4F0 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+
+				// Skip Manual screen
+				for (int i = 0; i < 11; i++) {
+					u32* offset = (u32*)0x020AE810;
+					offset[i] = 0xE1A00000; // nop
+				}
+			}
 		}
 	}
 

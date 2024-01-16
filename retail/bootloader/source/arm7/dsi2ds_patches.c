@@ -6034,23 +6034,40 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Candle Route (Europe)
 	// Requires 8MB of RAM
 	/* else if ((strcmp(romTid, "K9YE") == 0 || strcmp(romTid, "K9YP") == 0) && extendedMemory) {
+		u8 offsetChange = (romTid[3] == 'E') ? 0 : 0xA4;
+
 		*(u32*)0x020175F4 = 0xE1A00000; // nop
+		tonccpy((u32*)0x02018178, dsiSaveGetResultCode, 0xC);
 		*(u32*)0x0201ADD4 = 0xE1A00000; // nop
 		patchInitDSiWare(0x02021C14, heapEnd);
+		// *(u32*)0x02021FA0 = *(u32*)0x02004FE8;
 		patchUserSettingsReadDSiWare(0x02023108);
 		*(u32*)0x0207DEB8 = 0xE1A00000; // nop
 		*(u32*)0x0207DEBC = 0xE1A00000; // nop
 		*(u32*)0x0207DEC0 = 0xE1A00000; // nop
+		setBL(0x02089814+offsetChange, (u32)dsiSaveGetInfo);
+		setBL(0x02089840+offsetChange, (u32)dsiSaveCreate);
+		setBL(0x02089868+offsetChange, (u32)dsiSaveOpen);
+		setBL(0x020898BC+offsetChange, (u32)dsiSaveSetLength);
+		setBL(0x020898F8+offsetChange, (u32)dsiSaveWrite);
+		setBL(0x02089900+offsetChange, (u32)dsiSaveClose);
+		setBL(0x0208999C+offsetChange, (u32)dsiSaveOpen);
+		setBL(0x020899F0+offsetChange, (u32)dsiSaveSetLength);
+		setBL(0x02089A60+offsetChange, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+		setBL(0x02089B80+offsetChange, (u32)dsiSaveClose);
+		*(u32*)(0x02089D84+offsetChange) = 0xE1A00000; // nop
 		if (romTid[3] == 'E') {
-			*(u32*)0x020AE44C = 0xE1A00000; // nop
+			*(u32*)0x020AE404 = 0xE3A05901; // mov r5, #0x4000
+			*(u32*)0x020AE44C = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 
 			// Skip Manual screen
 			for (int i = 0; i < 11; i++) {
 				u32* offset = (u32*)0x020AE76C;
 				offset[i] = 0xE1A00000; // nop
 			}
-		} else if (romTid[3] == 'P') {
-			*(u32*)0x020AE4F0 = 0xE1A00000; // nop
+		} else {
+			*(u32*)0x020AE4A8 = 0xE3A05901; // mov r5, #0x4000
+			*(u32*)0x020AE4F0 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 
 			// Skip Manual screen
 			for (int i = 0; i < 11; i++) {
