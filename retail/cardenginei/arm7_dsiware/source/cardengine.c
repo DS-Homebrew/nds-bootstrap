@@ -717,10 +717,10 @@ void myIrqHandlerVBlank(void) {
 	if (language >= 0 && language <= 7 && languageTimer < 60*3) {
 		// Change language
 		personalData->language = language;
-		if (languageAddr > 0) {
+		/* if (languageAddr > 0) {
 			// Extra measure for specific games
 			*languageAddr = language;
-		}
+		} */
 		languageTimer++;
 	}
 
@@ -743,13 +743,13 @@ void myIrqHandlerVBlank(void) {
 		funcsUnpatched = true;
 	}
 
-	if (isSdEjected()) {
+	/* if (isSdEjected()) {
 		tonccpy((u32*)0x02000300, sr_data_error, 0x020);
 		i2cWriteRegister(0x4A, 0x70, 0x01);
 		i2cWriteRegister(0x4A, 0x11, 0x01);		// Reboot into error screen if SD card is removed
-	}
+	} */
 
-	if ((0 == (REG_KEYINPUT & igmHotkey) && 0 == (REG_EXTKEYINPUT & (((igmHotkey >> 10) & 3) | ((igmHotkey >> 6) & 0xC0))) && (valueBits & igmAccessible) && !wifiIrq) || returnToMenu || sharedAddr[5] == 0x4C4D4749 /* IGML */) {
+	if ((0 == (REG_KEYINPUT & igmHotkey) && 0 == (REG_EXTKEYINPUT & (((igmHotkey >> 10) & 3) | ((igmHotkey >> 6) & 0xC0))) && (valueBits & igmAccessible) && !wifiIrq) /* || returnToMenu */ || sharedAddr[5] == 0x4C4D4749 /* IGML */) {
 		bakData();
 		inGameMenu();
 		restoreBakData();

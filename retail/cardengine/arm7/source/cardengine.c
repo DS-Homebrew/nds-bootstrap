@@ -99,7 +99,7 @@ static bool customMusic = false;
 static bool wifiIrq = false;
 static int wifiIrqTimer = 0;
 #endif
-bool returnToMenu = false;
+// bool returnToMenu = false;
 bool isSdk5Set = false;
 
 static const tNDSHeader* ndsHeader = NULL;

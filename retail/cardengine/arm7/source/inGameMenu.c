@@ -19,7 +19,7 @@ extern u32 valueBits;
 
 extern vu32* volatile sharedAddr;
 extern bool ipcEveryFrame;
-extern bool returnToMenu;
+// extern bool returnToMenu;
 
 extern void rebootConsole(void);
 extern void reset(void);
@@ -102,9 +102,9 @@ void inGameMenu(void) {
 			while (REG_VCOUNT == 191) swiDelay(100);
 
 			switch (sharedAddr[4]) {
-				case 0x54495845: // EXIT
+				/* case 0x54495845: // EXIT
 					exitMenu = true;
-					break;
+					break; */
 				case 0x54455352: // RSET
 				case 0x54495551: // QUIT
 					exitMenu = true;
@@ -159,14 +159,17 @@ void inGameMenu(void) {
 					break;
 			}
 
-			if (!exitMenu) {
+			if (sharedAddr[4] == 0x54495845) { // EXIT
+				// returnToMenu = (sharedAddr[1]);
+				exitMenu = true;
+			} else if (!exitMenu) {
 				sharedAddr[4] = 0x554E454D; // MENU
 			}
 		}
 	}
 
 	sharedAddr[0] = errorBak;
-	sharedAddr[4] = 0x54495845; // EXIT
+	sharedAddr[4] = 0;
 	sharedAddr[7] -= 0x10000000; // Clear time receive flag
 	timeTillStatusRefresh = 7;
 

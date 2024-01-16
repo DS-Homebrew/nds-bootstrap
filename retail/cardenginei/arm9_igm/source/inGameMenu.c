@@ -888,7 +888,9 @@ void inGameMenu(s32 *mainScreen, u32 consoleModel, s32 *exceptionRegisters) {
 						while (REG_VCOUNT != 191) mySwiDelay(100);
 						while (REG_VCOUNT == 191) mySwiDelay(100);
 					} while(KEYS & KEY_A);
+					// sharedAddr[1] = 0;
 					sharedAddr[4] = 0x54495845; // EXIT
+					while (sharedAddr[4] != 0) swiDelay(100);
 					break;
 				case MENU_RESET:
 					extern bool exceptionPrinted;
@@ -910,8 +912,10 @@ void inGameMenu(s32 *mainScreen, u32 consoleModel, s32 *exceptionRegisters) {
 						while (REG_VCOUNT == 191) mySwiDelay(100);
 					}
 					#else
+					// sharedAddr[1] = 0;
 					sharedAddr[3] = 0x444D4152; // RAMD
 					sharedAddr[4] = 0x54495845; // EXIT
+					while (sharedAddr[4] != 0) swiDelay(100);
 					#endif
 					break;
 				case MENU_OPTIONS:
@@ -932,17 +936,18 @@ void inGameMenu(s32 *mainScreen, u32 consoleModel, s32 *exceptionRegisters) {
 				while (REG_VCOUNT != 191) mySwiDelay(100);
 				while (REG_VCOUNT == 191) mySwiDelay(100);
 			} while(KEYS & KEY_B);
+			// sharedAddr[1] = 0;
 			sharedAddr[4] = 0x54495845; // EXIT
-		}
-		#ifndef B4DS
-		else if (KEYS & KEY_R && !exception) {
+			while (sharedAddr[4] != 0) swiDelay(100);
+		} /* else if (KEYS & KEY_R && !exception) {
 			do {
 				while (REG_VCOUNT != 191) mySwiDelay(100);
 				while (REG_VCOUNT == 191) mySwiDelay(100);
 			} while(KEYS & KEY_R);
-			sharedAddr[4] = 0x50455453; // STEP
-		}
-		#endif
+			sharedAddr[1] = 1;
+			sharedAddr[4] = 0x54495845; // EXIT
+			while (sharedAddr[4] != 0) swiDelay(100);
+		} */
 	}
 
 	tonccpy(BG_MAP_RAM_SUB(15), bgMapBak, sizeof(bgMapBak));	// Restore BG_MAP_RAM
