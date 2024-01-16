@@ -221,6 +221,10 @@ void reset(u32 tid1, u32 tid2) {
 void inGameMenu(s32* exRegisters) {
 	int oldIME = enterCriticalSection();
 
+	while (sharedAddr[5] != 0x4C4D4749) { // 'IGML'
+		while (REG_VCOUNT != 191) swiDelay(100);
+		while (REG_VCOUNT == 191) swiDelay(100);
+	}
 	while (sharedAddr[5] == 0x4C4D4749) { // 'IGML'
 		while (REG_VCOUNT != 191) swiDelay(100);
 		while (REG_VCOUNT == 191) swiDelay(100);

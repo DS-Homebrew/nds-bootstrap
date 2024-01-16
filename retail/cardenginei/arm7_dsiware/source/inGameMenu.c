@@ -218,6 +218,7 @@ void inGameMenu(void) {
 
 	sharedAddr[0] = errorBak;
 	sharedAddr[4] = 0;
+	sharedAddr[5] = 0;
 	sharedAddr[7] -= 0x10000000; // Clear time receive flag
 	timeTillStatusRefresh = 7;
 
