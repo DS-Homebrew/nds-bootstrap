@@ -22229,7 +22229,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02019840 = 0xE1A00000; // nop
 		*(u32*)0x0201D4E8 = 0xE1A00000; // nop
 		patchInitDSiWare(0x02023C6C, heapEnd);
-		*(u32*)0x02023FDC = 0x02116740;
+		*(u32*)0x02023FDC = *(u32*)0x02004FD0;
 		patchUserSettingsReadDSiWare(0x02025274);
 		*(u32*)0x02090C7C = 0xE3A00003; // mov r0, #3
 		setBL(0x02090D84, (u32)dsiSaveCreate);
