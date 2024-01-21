@@ -70,13 +70,15 @@ extern void disableIrqMask(u32 mask);
 bool isDma = false;
 bool dmaOn = true;
 bool dmaDirectRead = false;
-#ifndef TWLSDK
+#ifdef TWLSDK
+static u8 currentNdmaSlot = 4;
+#else
 static bool dataSplit = false;
 #endif
 
 void endCardReadDma() {
 #ifdef TWLSDK
-	if (dmaDirectRead && dmaOn && (ndmaBusy(0)))
+	if (dmaDirectRead && dmaOn && (ndmaBusy(currentNdmaSlot)))
 #else
 	if (dmaDirectRead && dmaOn && (ndmaBusy(0) || (dataSplit && ndmaBusy(1))))
 #endif
@@ -449,8 +451,21 @@ void cardSetDma(u32 * params) {
 		if (src > *(u32*)0x02FFE1C0) {
 			newSrc -= *(u32*)0x02FFE1CC;
 		}
-		ndmaCopyWordsAsynch(0, (u8*)newSrc, dst, len);
-		IPC_SendSync(0x3);
+		currentNdmaSlot = 4;
+		for (u8 i = 0; i < 4; i++) {
+			if (!ndmaBusy(i)) {
+				currentNdmaSlot = i;
+				break;
+			}
+		}
+		if (currentNdmaSlot == 4) {
+			// Copy via CPU if all NDMA slots are in use
+			cardRead(NULL, dst, src, len);
+			endCardReadDma();
+		} else {
+			ndmaCopyWordsAsynch(currentNdmaSlot, (u8*)newSrc, dst, len);
+			IPC_SendSync(0x3);
+		}
 	} else {
 		cardRead(NULL, dst, src, len);
 		endCardReadDma();
