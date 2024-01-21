@@ -1493,6 +1493,49 @@ void patchHiHeapPointer(const module_params_t* moduleParams, const tNDSHeader* n
     dbg_printf(ROMsupportsDsiMode ? "Hi Heap Shrink Successful\n\n" : "Hi Heap Grow Successful\n\n");
 }
 
+void patchHiHeapPointerDSiWare(const module_params_t* moduleParams, const tNDSHeader* ndsHeader) {
+	u32* heapPointer = patchOffsetCache.heapPointerOffset;
+	if (*patchOffsetCache.heapPointerOffset != 0x13A007BE
+	 && *patchOffsetCache.heapPointerOffset != 0xE3A007BE
+	 && *patchOffsetCache.heapPointerOffset != 0x048020BE) {
+		patchOffsetCache.heapPointerOffset = 0;
+	}
+	if (!patchOffsetCache.heapPointerOffset) {
+		heapPointer = findHeapPointer2Offset(moduleParams, ndsHeader);
+	}
+    if(heapPointer) {
+		patchOffsetCache.heapPointerOffset = heapPointer;
+	} else {
+		dbg_printf("Heap pointer not found\n");
+		return;
+	}
+
+    dbg_printf("hi heap end: ");
+	dbg_hexa((u32)heapPointer);
+    dbg_printf("\n\n");
+
+	u32* oldheapPointer = (u32*)*heapPointer;
+
+	dbg_printf("old hi heap value: ");
+	dbg_hexa((u32)oldheapPointer);
+	dbg_printf("\n\n");
+
+	// DSi WRAM not mapped to ARM9
+	switch (*heapPointer) {
+		case 0x13A007BE:
+			*heapPointer = (u32)0x13A0062F; // MOVNE R0, #0x2F00000
+			break;
+		case 0xE3A007BE:
+			*heapPointer = (u32)0xE3A0062F; // MOV R0, #0x2F00000
+			break;
+		case 0x048020BE:
+			*heapPointer = (u32)0x048020BC; // MOVS R0, #0x2F00000
+			break;
+	}
+
+    dbg_printf("Hi Heap Shrink Successful\n\n");
+}
+
 /* void patchA9Mbk(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool standAlone) {
 	if (dsiWramAccess) {
 		return;

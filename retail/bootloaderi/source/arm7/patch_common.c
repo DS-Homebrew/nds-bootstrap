@@ -6474,24 +6474,47 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Flipnote Studio (USA)
-	else if (strcmp(romTid, "KGUE") == 0 && saveOnFlashcard) {
-		*(u32*)0x02006844 = 0xE3A00001; // mov r0, #1
-		*(u32*)0x02006898 = 0xE3A00001; // mov r0, #1
-		*(u32*)0x0201D584 = 0xE3A00000; // mov r0, #0
+	else if (strcmp(romTid, "KGUE") == 0) {
+		if (!dsiWramAccess) {
+			*(u32*)0x0200521C = 0xE3A007BD; // mov r0, #0x02F40000
+			*(u32*)0x02005234 = 0xE3A0062F; // mov r0, #0x02F00000
+		}
+		if (saveOnFlashcard) {
+			*(u32*)0x02006844 = 0xE3A00001; // mov r0, #1
+			*(u32*)0x02006898 = 0xE3A00001; // mov r0, #1
+			*(u32*)0x0201D584 = 0xE3A00000; // mov r0, #0
+		}
 	}
 
 	// Flipnote Studio (Europe, Australia)
-	else if (strcmp(romTid, "KGUV") == 0 && saveOnFlashcard) {
-		*(u32*)0x02006748 = 0xE3A00001; // mov r0, #1
-		*(u32*)0x02006784 = 0xE3A00001; // mov r0, #1
-		*(u32*)0x0201D6CC = 0xE3A00000; // mov r0, #0
+	else if (strcmp(romTid, "KGUV") == 0) {
+		if (!dsiWramAccess) {
+			*(u32*)0x02005210 = 0xE3A007BD; // mov r0, #0x02F40000
+			*(u32*)0x02005228 = 0xE3A0062F; // mov r0, #0x02F00000
+		}
+		if (saveOnFlashcard) {
+			*(u32*)0x02006748 = 0xE3A00001; // mov r0, #1
+			*(u32*)0x02006784 = 0xE3A00001; // mov r0, #1
+			*(u32*)0x0201D6CC = 0xE3A00000; // mov r0, #0
+		}
 	}
 
-	// Ugoku Memo Chou (Japan) (v2)
-	else if (strcmp(romTid, "KGUJ") == 0 && ndsHeader->romversion == 2 && saveOnFlashcard) {
-		*(u32*)0x02006734 = 0xE3A00001; // mov r0, #1
-		*(u32*)0x02006770 = 0xE3A00001; // mov r0, #1
-		*(u32*)0x0201DAC8 = 0xE3A00000; // mov r0, #0
+	// Ugoku Memo Chou (Japan)
+	else if (strcmp(romTid, "KGUJ") == 0) {
+		if (ndsHeader->romversion == 2) {
+			if (!dsiWramAccess) {
+				*(u32*)0x020051FC = 0xE3A007BD; // mov r0, #0x02F40000
+				*(u32*)0x02005214 = 0xE3A0062F; // mov r0, #0x02F00000
+			}
+			if (saveOnFlashcard) {
+				*(u32*)0x02006734 = 0xE3A00001; // mov r0, #1
+				*(u32*)0x02006770 = 0xE3A00001; // mov r0, #1
+				*(u32*)0x0201DAC8 = 0xE3A00000; // mov r0, #0
+			}
+		} else if (!dsiWramAccess) {
+			*(u32*)0x020051E0 = 0xE3A007BD; // mov r0, #0x02F40000
+			*(u32*)0x020051F8 = 0xE3A0062F; // mov r0, #0x02F00000
+		}
 	}
 
 	// Flips: The Bubonic Builders (USA)

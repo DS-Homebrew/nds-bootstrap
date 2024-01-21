@@ -1726,9 +1726,9 @@ int arm7_main(void) {
 		newArm7binarySize = ndsHeader->arm7binarySize;
 		newArm7ibinarySize = __DSiHeader->arm7ibinarySize;
 
-		/* if (!dsiWramAccess) {
-			patchHiHeapPointer(moduleParams, ndsHeader);
-		} */
+		if (!dsiWramAccess && memcmp(romTid, "KGU", 3) == 0) {
+			patchHiHeapPointerDSiWare(moduleParams, ndsHeader);
+		}
 
 		extern bool a9PatchCardIrqEnable(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
 		a9PatchCardIrqEnable((cardengineArm9*)ce9Location, ndsHeader, moduleParams);

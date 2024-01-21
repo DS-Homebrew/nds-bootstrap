@@ -209,6 +209,10 @@ void patchHiHeapPointer(
     const module_params_t* moduleParams,
     const tNDSHeader* ndsHeader
 );
+void patchHiHeapPointerDSiWare(
+    const module_params_t* moduleParams,
+    const tNDSHeader* ndsHeader
+);
 void relocate_ce9(
     u32 default_location, 
     u32 current_location, 
