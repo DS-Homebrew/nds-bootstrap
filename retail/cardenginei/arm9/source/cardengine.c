@@ -1253,14 +1253,10 @@ void myIrqHandlerIPC(void) {
 	switch (IPC_GetSync()) {
 		case 0x3:
 			extern bool dmaDirectRead;
-#ifdef DLDI
 		if (dmaDirectRead) {
 			endCardReadDma();
 		}
-#else
-		if (dmaDirectRead) {
-			endCardReadDma();
-		}
+#ifndef DLDI
 		#ifndef TWLSDK
 		else if (ce9->patches->cardEndReadDmaRef || ce9->thumbPatches->cardEndReadDmaRef) { // new dma method
 			continueCardReadDmaArm7();

@@ -682,78 +682,19 @@ void cardSetDma(u32 * params) {
 	u32 src = params[3];
 	u8* dst = (u8*)params[4];
 	u32 len = params[5];
-
-	// Simulate ROM mirroring
-	while (src >= ce9->romPaddingSize) {
-		src -= ce9->romPaddingSize;
-	}
-	params[3] = src;
-
-	disableIrqMask(IRQ_CARD);
-	disableIrqMask(IRQ_CARD_LINE);
-
-	bool romPart = false;
-	//int romPartNo = 0;
-	if (!(ce9->valueBits & ROMinRAM)) {
-		/*for (int i = 0; i < 2; i++) {
-			if (ce9->romPartSize[i] == 0) {
-				break;
-			}
-			romPart = (src >= ce9->romPartSrc[i] && src < ce9->romPartSrc[i]+ce9->romPartSize[i]);
-			if (romPart) {
-				romPartNo = i;
-				break;
-			}
-		}*/
-		romPart = (ce9->romPartSize > 0 && src >= ce9->romPartSrc && src < ce9->romPartSrc+ce9->romPartSize);
-	}
-	if (dmaOn && ((ce9->valueBits & ROMinRAM) || romPart)) {
-		dmaDirectRead = true;
-
-		enableIPC_SYNC();
-
-		// Copy via dma
-		u32 newSrc = ce9->romLocation/*[romPartNo]*/+src;
-		if (src > *(u32*)0x02FFE1C0) {
-			newSrc -= *(u32*)0x02FFE1CC;
-		}
-		currentNdmaSlot = 4;
-		for (u8 i = 0; i < 4; i++) {
-			if (!ndmaBusy(i)) {
-				currentNdmaSlot = i;
-				break;
-			}
-		}
-		if (currentNdmaSlot == 4) {
-			// Copy via CPU if all NDMA slots are in use
-			cardRead(NULL, dst, src, len);
-			endCardReadDma();
-		} else {
-			ndmaCopyWordsAsynch(currentNdmaSlot, (u8*)newSrc, dst, len);
-			IPC_SendSync(0x3);
-		}
-	} else {
-		cardRead(NULL, dst, src, len);
-		endCardReadDma();
-	}
 	#else
 	vu32* volatile cardStruct = (vu32*)ce9->cardStruct0;
 
 	u32 src = ((ce9->valueBits & isSdk5) ? params[3] : cardStruct[0]);
 	u8* dst = ((ce9->valueBits & isSdk5) ? (u8*)(params[4]) : (u8*)(cardStruct[1]));
 	u32 len = ((ce9->valueBits & isSdk5) ? params[5] : cardStruct[2]);
-
-	// Simulate ROM mirroring
-	while (src >= ce9->romPaddingSize) {
-		src -= ce9->romPaddingSize;
-	}
+	#endif
 
 	disableIrqMask(IRQ_CARD);
 	disableIrqMask(IRQ_CARD_LINE);
 
 	cardRead(NULL, dst, src, len);
 	endCardReadDma();
-	#endif
 }
 #endif
 
