@@ -78,7 +78,7 @@ static bool dataSplit = false;
 
 void endCardReadDma() {
 #ifdef TWLSDK
-	if (dmaOn && (ndmaBusy(currentNdmaSlot)))
+	if (dmaOn && ndmaBusy(currentNdmaSlot))
 #else
 	if (dmaDirectRead && dmaOn && (ndmaBusy(0) || (dataSplit && ndmaBusy(1))))
 #endif
@@ -707,14 +707,14 @@ u32 cardReadDma(u32 dma0, u8* dst0, u32 src0, u32 len0) {
         if (ce9->patches->cardEndReadDmaRef || ce9->thumbPatches->cardEndReadDmaRef) {
 			// new dma method
 			#ifdef TWLSDK
-			// Simulate ROM mirroring
-			while (src >= ce9->romPaddingSize) {
-				src -= ce9->romPaddingSize;
-			}
-
 			bool romPart = false;
 			//int romPartNo = 0;
 			if (!(ce9->valueBits & ROMinRAM)) {
+				// Simulate ROM mirroring
+				while (src >= ce9->romPaddingSize) {
+					src -= ce9->romPaddingSize;
+				}
+
 				/*for (int i = 0; i < 2; i++) {
 					if (ce9->romPartSize[i] == 0) {
 						break;
