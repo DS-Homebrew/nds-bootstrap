@@ -658,11 +658,11 @@ u32 cardReadDma(u32 dma0, u8* dst0, u32 src0, u32 len0) {
         && dma <= 3 
         //&& func != NULL
         && len > 0
-        && !(((int)dst) & 3)
+        && !(((u32)dst) & ((ce9->valueBits & isSdk5) ? 31 : 3))
         && isNotTcm((u32)dst, len)
         // check 512 bytes page alignement 
-        && !(((int)len) & 511)
-        && !(((int)src) & 511)
+        && !(len & 511)
+        && !(src & 511)
 	) {
 		isDma = true;
         if (ce9->patches->cardEndReadDmaRef || ce9->thumbPatches->cardEndReadDmaRef) {
