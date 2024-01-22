@@ -543,7 +543,7 @@ static void patchCardReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, c
     dbg_printf("\n\n");
 }
 
-static bool patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb, u32 ROMinRAM) {
+static bool patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
 	const char* romTid = getRomTid(ndsHeader);
 
 	if (strncmp(romTid, "AJS", 3) == 0 // Jump Super Stars
@@ -656,7 +656,7 @@ static bool patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader
 }
 
 bool setDmaPatched = false;
-static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb, u32 ROMinRAM) {
+static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
 	const char* romTid = getRomTid(ndsHeader);
 
 	if (strncmp(romTid, "AJS", 3) == 0 // Jump Super Stars
@@ -2638,10 +2638,10 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 	if (getSleep(ce9, ndsHeader, moduleParams, usesThumb, ROMinRAM)) {
 		patchCardReadDma(ce9, ndsHeader, moduleParams, usesThumb);
 	} else {
-		if (!patchCardSetDma(ce9, ndsHeader, moduleParams, usesThumb, ROMinRAM)) {
+		if (!patchCardSetDma(ce9, ndsHeader, moduleParams, usesThumb) || (ndsHeader->unitCode > 0 && dsiModeConfirmed)) {
 			patchCardReadDma(ce9, ndsHeader, moduleParams, usesThumb);
 		}
-		if (!patchCardEndReadDma(ce9, ndsHeader, moduleParams, usesThumb, ROMinRAM) && (ndsHeader->unitCode == 0 || !dsiModeConfirmed)) {
+		if (!patchCardEndReadDma(ce9, ndsHeader, moduleParams, usesThumb) && (ndsHeader->unitCode == 0 || !dsiModeConfirmed)) {
 			randomPatch(ndsHeader, moduleParams);
 			randomPatch5Second(ndsHeader, moduleParams);
 		}
