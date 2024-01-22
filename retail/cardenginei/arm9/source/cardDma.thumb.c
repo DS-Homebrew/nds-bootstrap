@@ -69,19 +69,12 @@ extern void disableIrqMask(u32 mask);
 
 bool isDma = false;
 bool dmaOn = true;
-#ifdef TWLSDK
-static u8 currentNdmaSlot = 4;
-#else
+#ifndef TWLSDK
 bool dmaDirectRead = false;
 static bool dataSplit = false;
-#endif
 
 void endCardReadDma() {
-#ifdef TWLSDK
-	if (dmaOn && ndmaBusy(currentNdmaSlot))
-#else
 	if (dmaDirectRead && dmaOn && (ndmaBusy(0) || (dataSplit && ndmaBusy(1))))
-#endif
 	{
 		IPC_SendSync(0x3);
 		return;
@@ -94,6 +87,7 @@ void endCardReadDma() {
 		callEndReadDmaThumb();
 	}    
 }
+#endif
 
 #ifndef DLDI
 #ifdef ASYNCPF
@@ -409,10 +403,8 @@ void continueCardReadDmaArm7() {
 #endif
 
 void cardSetDma(u32 * params) {
-	isDma = true;
-
 	#ifdef TWLSDK
-	u32 src = params[3];
+	/* u32 src = params[3];
 	u8* dst = (u8*)params[4];
 	u32 len = params[5];
 
@@ -428,13 +420,14 @@ void cardSetDma(u32 * params) {
 	enableIPC_SYNC();
 
 	// Copy via dma
-	u32 newSrc = ce9->romLocation/*[romPartNo]*/+src;
+	u32 newSrc = ce9->romLocation+src;
 	if (src > *(u32*)0x02FFE1C0) {
 		newSrc -= *(u32*)0x02FFE1CC;
 	}
 	ndmaCopyWordsAsynch(currentNdmaSlot, (u8*)newSrc, dst, len);
-	IPC_SendSync(0x3);
+	IPC_SendSync(0x3); */
 	#else
+	isDma = true;
 	dmaDirectRead = false;
 
 	vu32* cardStruct = (vu32*)ce9->cardStruct0;
@@ -456,9 +449,9 @@ void cardSetDma(u32 * params) {
 		cardStruct[0] = src;
 	}
 
-	#ifndef TWLSDK
+	// #ifndef TWLSDK
 	dataSplit = false;
-	#endif
+	// #endif
 	bool romPart = false;
 	//int romPartNo = 0;
 	if (!(ce9->valueBits & ROMinRAM)) {
@@ -499,9 +492,9 @@ void cardSetDma(u32 * params) {
 				ndmaCopyWordsAsynch(1, (u8*)newSrc, dst, len);
 				src += len;
 				dst += len;
-				#ifndef TWLSDK
+				// #ifndef TWLSDK
 				dataSplit = true;
-				#endif
+				// #endif
 			} else {
 				ndmaCopyWordsAsynch(0, (u8*)newSrc, dst, len2==0 ? len : len2);
 				break;
@@ -642,9 +635,9 @@ void cardSetDma(u32 * params) {
 #else
 void cardSetDma(u32 * params) {
 	#ifdef TWLSDK
-	u32 src = params[3];
+	/* u32 src = params[3];
 	u8* dst = (u8*)params[4];
-	u32 len = params[5];
+	u32 len = params[5]; */
 	#else
 	vu32* volatile cardStruct = (vu32*)ce9->cardStruct0;
 
@@ -654,7 +647,7 @@ void cardSetDma(u32 * params) {
 	#endif
 
 	#ifdef TWLSDK
-	// Simulate ROM mirroring
+	/* // Simulate ROM mirroring
 	while (src >= ce9->romPaddingSize) {
 		src -= ce9->romPaddingSize;
 	}
@@ -667,12 +660,12 @@ void cardSetDma(u32 * params) {
 	enableIPC_SYNC();
 
 	// Copy via dma
-	u32 newSrc = ce9->romLocation/*[romPartNo]*/+src;
+	u32 newSrc = ce9->romLocation+src;
 	if (src > *(u32*)0x02FFE1C0) {
 		newSrc -= *(u32*)0x02FFE1CC;
 	}
 	ndmaCopyWordsAsynch(currentNdmaSlot, (u8*)newSrc, dst, len);
-	IPC_SendSync(0x3);
+	IPC_SendSync(0x3); */
 	#else
 	disableIrqMask(IRQ_CARD);
 	disableIrqMask(IRQ_CARD_LINE);
@@ -704,49 +697,16 @@ u32 cardReadDma(u32 dma0, u8* dst0, u32 src0, u32 len0) {
         && !(((int)src) & 511)
 	) {
 		isDma = true;
+		#ifndef TWLSDK
         if (ce9->patches->cardEndReadDmaRef || ce9->thumbPatches->cardEndReadDmaRef) {
 			// new dma method
-			#ifdef TWLSDK
-			bool romPart = false;
-			//int romPartNo = 0;
-			if (!(ce9->valueBits & ROMinRAM)) {
-				// Simulate ROM mirroring
-				while (src >= ce9->romPaddingSize) {
-					src -= ce9->romPaddingSize;
-				}
-
-				/*for (int i = 0; i < 2; i++) {
-					if (ce9->romPartSize[i] == 0) {
-						break;
-					}
-					romPart = (src >= ce9->romPartSrc[i] && src < ce9->romPartSrc[i]+ce9->romPartSize[i]);
-					if (romPart) {
-						romPartNo = i;
-						break;
-					}
-				}*/
-				romPart = (ce9->romPartSize > 0 && src >= ce9->romPartSrc && src < ce9->romPartSrc+ce9->romPartSize);
-			}
-			if (dmaOn && ((ce9->valueBits & ROMinRAM) || romPart)) {
-				currentNdmaSlot = 4;
-				for (u8 i = 0; i < 4; i++) {
-					if (!ndmaBusy(i)) {
-						currentNdmaSlot = i;
-						break;
-					}
-				}
-				if (currentNdmaSlot < 4) {
-					return true;
-				}
-			}
-			#else
 			if (!(ce9->valueBits & isSdk5)) {
 				cacheFlush();
 				cardSetDma(NULL);
 			}
 			return true;
-			#endif
 		}
+		#endif
     } /*else {
         dma=4;
         clearIcache();

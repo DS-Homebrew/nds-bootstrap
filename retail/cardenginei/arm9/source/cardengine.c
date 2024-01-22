@@ -436,16 +436,24 @@ static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
     		#endif
 
     		// Copy directly
-			/*if (isDma) {
-				ndmaCopyWordsAsynch(0, (u8*)buffer+(src-sector), dst, len2);
+			/* #ifdef TWLSDK
+			u8 currentNdmaSlot = 4;
+			for (u8 i = 0; i < 4; i++) {
+				if (!ndmaBusy(i)) {
+					currentNdmaSlot = i;
+					break;
+				}
+			}
+			if (isDma && currentNdmaSlot < 4) {
+				ndmaCopyWords(currentNdmaSlot, (u8*)buffer+(src-sector), dst, len2);
 				while (ndmaBusy(0)) {
 					if (runSleep) {
 						sleepMs(1);
 					}
 				}
-			} else {*/
+			} else
+			#endif */
 				tonccpy(dst, (u8*)buffer+(src-sector), len2);
-			//}
 
 			len -= len2;
 			if (len > 0) {
@@ -1252,14 +1260,14 @@ void myIrqHandlerIPC(void) {
 #ifndef GSDD
 	switch (IPC_GetSync()) {
 		case 0x3:
-		#ifndef TWLSDK
+		/*#ifndef TWLSDK
 			extern bool dmaDirectRead;
 		if (dmaDirectRead)
 		#endif
-			endCardReadDma();
+			endCardReadDma(); */
 #ifndef DLDI
 		#ifndef TWLSDK
-		else if (ce9->patches->cardEndReadDmaRef || ce9->thumbPatches->cardEndReadDmaRef) { // new dma method
+		if (ce9->patches->cardEndReadDmaRef || ce9->thumbPatches->cardEndReadDmaRef) { // new dma method
 			continueCardReadDmaArm7();
 			continueCardReadDmaArm9();
 		}
