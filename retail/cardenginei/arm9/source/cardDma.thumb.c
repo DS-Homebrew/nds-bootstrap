@@ -95,6 +95,10 @@ void endCardReadDma() {
 	}    
 }
 
+extern bool IPC_SYNC_hooked;
+extern void hookIPC_SYNC(void);
+extern void enableIPC_SYNC(void);
+
 #ifndef DLDI
 #ifdef ASYNCPF
 static u32 asyncSector = 0;
@@ -218,10 +222,6 @@ static inline bool checkArm7(void) {
     IPC_SendSync(0x4);
 	return (sharedAddr[3] == (vu32)0);
 }
-
-extern bool IPC_SYNC_hooked;
-extern void hookIPC_SYNC(void);
-extern void enableIPC_SYNC(void);
 
 #ifndef TWLSDK
 static u32 * dmaParams = NULL;
