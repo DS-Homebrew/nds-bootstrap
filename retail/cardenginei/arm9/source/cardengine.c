@@ -1260,14 +1260,14 @@ void myIrqHandlerIPC(void) {
 #ifndef GSDD
 	switch (IPC_GetSync()) {
 		case 0x3:
-		/*#ifndef TWLSDK
+		#ifndef TWLSDK
 			extern bool dmaDirectRead;
 		if (dmaDirectRead)
 		#endif
-			endCardReadDma(); */
+			endCardReadDma();
 #ifndef DLDI
 		#ifndef TWLSDK
-		if (ce9->patches->cardEndReadDmaRef || ce9->thumbPatches->cardEndReadDmaRef) { // new dma method
+		else if (ce9->patches->cardEndReadDmaRef || ce9->thumbPatches->cardEndReadDmaRef) { // new dma method
 			continueCardReadDmaArm7();
 			continueCardReadDmaArm9();
 		}

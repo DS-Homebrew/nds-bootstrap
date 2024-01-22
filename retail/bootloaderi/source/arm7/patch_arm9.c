@@ -543,8 +543,8 @@ static void patchCardReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, c
     dbg_printf("\n\n");
 }
 
-static bool patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
-	if (ndsHeader->unitCode > 0 && dsiModeConfirmed) {
+static bool patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb, u32 ROMinRAM) {
+	if (ndsHeader->unitCode > 0 && dsiModeConfirmed && !ROMinRAM) {
 		return false;
 	}
 
@@ -558,7 +558,7 @@ static bool patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader
 	 || strncmp(romTid, "Y8L", 3) == 0 // Golden Sun: Dark Dawn (Demo Version)
 	 || strncmp(romTid, "B8I", 3) == 0 // Spider-Man: Edge of Time
 	 || strncmp(romTid, "TAM", 3) == 0 // The Amazing Spider-Man
-	 || strncmp(romTid, "V2G", 3) == 0 // Mario vs. Donkey Kong: Mini-Land Mayhem
+	 || (strncmp(romTid, "V2G", 3) == 0 && !dsiModeConfirmed) // Mario vs. Donkey Kong: Mini-Land Mayhem (DS mode)
 	 || !cardReadDMA) return false;
 
     u32* offset = patchOffsetCache.cardEndReadDmaOffset;
@@ -660,8 +660,8 @@ static bool patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader
 }
 
 bool setDmaPatched = false;
-static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
-	if (ndsHeader->unitCode > 0 && dsiModeConfirmed) {
+static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb, u32 ROMinRAM) {
+	if (ndsHeader->unitCode > 0 && dsiModeConfirmed && !ROMinRAM) {
 		return false;
 	}
 
@@ -675,7 +675,7 @@ static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, co
 	 || strncmp(romTid, "Y8L", 3) == 0 // Golden Sun: Dark Dawn (Demo Version)
 	 || strncmp(romTid, "B8I", 3) == 0 // Spider-Man: Edge of Time
 	 || strncmp(romTid, "TAM", 3) == 0 // The Amazing Spider-Man
-	 || strncmp(romTid, "V2G", 3) == 0 // Mario vs. Donkey Kong: Mini-Land Mayhem
+	 || (strncmp(romTid, "V2G", 3) == 0 && !dsiModeConfirmed) // Mario vs. Donkey Kong: Mini-Land Mayhem (DS mode)
 	 || !cardReadDMA) return false;
 
 	dbg_printf("\npatchCardSetDma\n");           
@@ -2646,10 +2646,10 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 	if (getSleep(ce9, ndsHeader, moduleParams, usesThumb, ROMinRAM)) {
 		patchCardReadDma(ce9, ndsHeader, moduleParams, usesThumb);
 	} else {
-		if (!patchCardSetDma(ce9, ndsHeader, moduleParams, usesThumb)) {
+		if (!patchCardSetDma(ce9, ndsHeader, moduleParams, usesThumb, ROMinRAM)) {
 			patchCardReadDma(ce9, ndsHeader, moduleParams, usesThumb);
 		}
-		if (!patchCardEndReadDma(ce9, ndsHeader, moduleParams, usesThumb) && (ndsHeader->unitCode == 0 || !dsiModeConfirmed)) {
+		if (!patchCardEndReadDma(ce9, ndsHeader, moduleParams, usesThumb, ROMinRAM) && (ndsHeader->unitCode == 0 || !dsiModeConfirmed)) {
 			randomPatch(ndsHeader, moduleParams);
 			randomPatch5Second(ndsHeader, moduleParams);
 		}

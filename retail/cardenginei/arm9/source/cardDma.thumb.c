@@ -69,12 +69,19 @@ extern void disableIrqMask(u32 mask);
 
 bool isDma = false;
 bool dmaOn = true;
-#ifndef TWLSDK
+#ifdef TWLSDK
+static u8 currentNdmaSlot = 4;
+#else
 bool dmaDirectRead = false;
 static bool dataSplit = false;
+#endif
 
 void endCardReadDma() {
+#ifdef TWLSDK
+	if (dmaOn && ndmaBusy(currentNdmaSlot) && currentNdmaSlot < 4)
+#else
 	if (dmaDirectRead && dmaOn && (ndmaBusy(0) || (dataSplit && ndmaBusy(1))))
+#endif
 	{
 		IPC_SendSync(0x3);
 		return;
@@ -87,7 +94,10 @@ void endCardReadDma() {
 		callEndReadDmaThumb();
 	}    
 }
-#endif
+
+extern bool IPC_SYNC_hooked;
+extern void hookIPC_SYNC(void);
+extern void enableIPC_SYNC(void);
 
 #ifndef DLDI
 #ifdef ASYNCPF
@@ -212,10 +222,6 @@ static inline bool checkArm7(void) {
     IPC_SendSync(0x4);
 	return (sharedAddr[3] == (vu32)0);
 }
-
-extern bool IPC_SYNC_hooked;
-extern void hookIPC_SYNC(void);
-extern void enableIPC_SYNC(void);
 
 #ifndef TWLSDK
 static u32 * dmaParams = NULL;
@@ -404,7 +410,7 @@ void continueCardReadDmaArm7() {
 
 void cardSetDma(u32 * params) {
 	#ifdef TWLSDK
-	/* u32 src = params[3];
+	u32 src = params[3];
 	u8* dst = (u8*)params[4];
 	u32 len = params[5];
 
@@ -424,8 +430,21 @@ void cardSetDma(u32 * params) {
 	if (src > *(u32*)0x02FFE1C0) {
 		newSrc -= *(u32*)0x02FFE1CC;
 	}
-	ndmaCopyWordsAsynch(currentNdmaSlot, (u8*)newSrc, dst, len);
-	IPC_SendSync(0x3); */
+	currentNdmaSlot = 4;
+	for (u8 i = 0; i < 4; i++) {
+		if (!ndmaBusy(i)) {
+			currentNdmaSlot = i;
+			break;
+		}
+	}
+	if (currentNdmaSlot == 4) {
+		// Copy via CPU if all NDMA slots are in use
+		cardRead(NULL, dst, src, len);
+		endCardReadDma();
+	} else {
+		ndmaCopyWordsAsynch(currentNdmaSlot, (u8*)newSrc, dst, len);
+		IPC_SendSync(0x3);
+	}
 	#else
 	isDma = true;
 	dmaDirectRead = false;
@@ -635,9 +654,9 @@ void cardSetDma(u32 * params) {
 #else
 void cardSetDma(u32 * params) {
 	#ifdef TWLSDK
-	/* u32 src = params[3];
+	u32 src = params[3];
 	u8* dst = (u8*)params[4];
-	u32 len = params[5]; */
+	u32 len = params[5];
 	#else
 	vu32* volatile cardStruct = (vu32*)ce9->cardStruct0;
 
@@ -647,7 +666,7 @@ void cardSetDma(u32 * params) {
 	#endif
 
 	#ifdef TWLSDK
-	/* // Simulate ROM mirroring
+	// Simulate ROM mirroring
 	while (src >= ce9->romPaddingSize) {
 		src -= ce9->romPaddingSize;
 	}
@@ -664,8 +683,21 @@ void cardSetDma(u32 * params) {
 	if (src > *(u32*)0x02FFE1C0) {
 		newSrc -= *(u32*)0x02FFE1CC;
 	}
-	ndmaCopyWordsAsynch(currentNdmaSlot, (u8*)newSrc, dst, len);
-	IPC_SendSync(0x3); */
+	currentNdmaSlot = 4;
+	for (u8 i = 0; i < 4; i++) {
+		if (!ndmaBusy(i)) {
+			currentNdmaSlot = i;
+			break;
+		}
+	}
+	if (currentNdmaSlot == 4) {
+		// Copy via CPU if all NDMA slots are in use
+		cardRead(NULL, dst, src, len);
+		endCardReadDma();
+	} else {
+		ndmaCopyWordsAsynch(currentNdmaSlot, (u8*)newSrc, dst, len);
+		IPC_SendSync(0x3);
+	}
 	#else
 	disableIrqMask(IRQ_CARD);
 	disableIrqMask(IRQ_CARD_LINE);
