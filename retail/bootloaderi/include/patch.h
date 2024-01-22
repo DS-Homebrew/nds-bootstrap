@@ -65,7 +65,7 @@ typedef struct patchOffsetCacheContents {
     u32* heapPointerOffset;
 	u32 a9IsThumb;
     u32* cardHashInitOffset;
-    u32* cardRomInitOffset;
+    u32* cardRomInitOffset; // Unused, remove when updating cache version
     u32* cardReadStartOffset;
     u32* cardReadEndOffset;
     u32* cardPullOutOffset;

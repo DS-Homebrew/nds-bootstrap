@@ -149,7 +149,7 @@ static bool patchCardHashInit(const tNDSHeader* ndsHeader, const module_params_t
 	return true;
 }
 
-static void patchCardRomInit(u32* cardReadEndOffset, bool usesThumb) {
+/* static void patchCardRomInit(u32* cardReadEndOffset, bool usesThumb) {
 	u32* cardRomInitOffset = patchOffsetCache.cardRomInitOffset;
 	if (!patchOffsetCache.cardRomInitOffset) {
 		cardRomInitOffset = usesThumb ? (u32*)findCardRomInitOffsetThumb((u16*)cardReadEndOffset) : findCardRomInitOffset(cardReadEndOffset);
@@ -174,7 +174,7 @@ static void patchCardRomInit(u32* cardReadEndOffset, bool usesThumb) {
     dbg_printf("cardRomInit location : ");
     dbg_hexa((u32)cardRomInitOffset);
     dbg_printf("\n\n");
-}
+} */
 
 static bool patchCardRead(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool* usesThumbPtr, int* readTypePtr, int* sdk5ReadTypePtr, u32** cardReadEndOffsetPtr, u32 startOffset) {
 	bool usesThumb = patchOffsetCache.a9IsThumb;
@@ -2593,7 +2593,7 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 	fixForDifferentBios(ce9, ndsHeader, usesThumb, usesCloneboot);
 
 	if (ndsHeader->unitCode > 0 && dsiModeConfirmed) {
-		patchCardRomInit(cardReadEndOffset, usesThumb);
+		// patchCardRomInit(cardReadEndOffset, usesThumb);
 
 		if (!patchCardHashInit(ndsHeader, moduleParams, usesThumb)) {
 			dbg_printf("ERR_LOAD_OTHR\n\n");

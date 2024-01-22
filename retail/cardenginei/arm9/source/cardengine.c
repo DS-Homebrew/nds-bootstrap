@@ -600,12 +600,33 @@ extern void region0Fix();
 
 void cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	//nocashMessage("\narm9 cardRead\n");
-	#ifndef TWLSDK
+	#ifdef TWLSDK
+	u32 src = src0;
+	u8* dst = dst0;
+	u32 len = len0;
+
+	if (src == ndsHeader->romSize) {
+		tonccpy(dst, (u8*)0x02FFDC00, len); // Load pre-loaded RSA key
+		return;
+	}
+	#else
+	#ifdef GSDD
+	u32 src = src0;
+	u8* dst = dst0;
+	u32 len = len0;
+	#else
 	initialize();
 
 	if (!(ce9->valueBits & isSdk5) && !(ce9->valueBits & ROMinRAM)) {
 		debugRamMpuFix();
 	}
+
+	vu32* volatile cardStruct = (vu32* volatile)ce9->cardStruct0;
+
+	u32 src = ((ce9->valueBits & isSdk5) ? src0 : cardStruct[0]);
+	u8* dst = ((ce9->valueBits & isSdk5) ? dst0 : (u8*)(cardStruct[1]));
+	u32 len = ((ce9->valueBits & isSdk5) ? len0 : cardStruct[2]);
+	#endif
 	#endif
 
 	if (!flagsSet) {
@@ -625,24 +646,6 @@ void cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	}
 
 	enableIPC_SYNC();
-
-	#ifdef TWLSDK
-	u32 src = src0;
-	u8* dst = dst0;
-	u32 len = len0;
-	#else
-	#ifdef GSDD
-	u32 src = src0;
-	u8* dst = dst0;
-	u32 len = len0;
-	#else
-	vu32* volatile cardStruct = (vu32* volatile)ce9->cardStruct0;
-
-	u32 src = ((ce9->valueBits & isSdk5) ? src0 : cardStruct[0]);
-	u8* dst = ((ce9->valueBits & isSdk5) ? dst0 : (u8*)(cardStruct[1]));
-	u32 len = ((ce9->valueBits & isSdk5) ? len0 : cardStruct[2]);
-	#endif
-	#endif
 
 	// Simulate ROM mirroring
 	while (src >= ce9->romPaddingSize) {

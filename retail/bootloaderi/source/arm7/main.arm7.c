@@ -1941,7 +1941,8 @@ int arm7_main(void) {
 		}
 
 		u32 clonebootFlag = 0;
-		fileRead((char*)&clonebootFlag, romFile, ((romSize-4) <= baseRomSize) ? (romSize-4) : baseRomSize, sizeof(u32));
+		const u32 clonebootOffset = ((romSize-0x88) <= baseRomSize) ? (romSize-0x88) : baseRomSize;
+		fileRead((char*)&clonebootFlag, romFile, clonebootOffset, sizeof(u32));
 		const bool usesCloneboot = (clonebootFlag == 0x16361);
 		if (usesCloneboot) {
 			dbg_printf("Cloneboot detected\n");
@@ -2125,6 +2126,10 @@ int arm7_main(void) {
 			}
 		} else if ((ROMsupportsDsiMode(ndsHeader) && !isDSiWare) || strncmp(romTid, "UBR", 3) != 0) {
 			loadOverlaysintoRAM(ndsHeader, moduleParams, romFile);
+		}
+
+		if (ROMsupportsDsiMode(ndsHeader) && usesCloneboot) {
+			fileRead((char*)0x02FFDC00, romFile, clonebootOffset, 0x88); // Pre-load RSA key
 		}
 
 		if (useApPatch) {

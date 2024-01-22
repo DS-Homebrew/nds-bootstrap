@@ -56,11 +56,11 @@ static const u16 cardReadStartSignatureThumb5Alt[1] = {0xB5F8};                 
 //static const u32 cardReadHashSignature[3]           = {0xE92D4010, 0xE59F000C, 0xE1A04003};                             // SDK 5
 
 // Card init (SDK 5)
-static const u32 cardRomInitSignatureEarly[2]      = {0xE92D4078, 0xE24DD00C};
-static const u32 cardRomInitSignature[2]           = {0xE92D4010, 0xE59F1064};
-static const u32 cardRomInitSignatureAlt[2]        = {0xE92D4010, 0xE59F1070};
-static const u16 cardRomInitSignatureEarlyThumb[2] = {0xB578, 0xB083};
-static const u16 cardRomInitSignatureThumb[2]      = {0xB510, 0x4915};
+// static const u32 cardRomInitSignatureEarly[2]      = {0xE92D4078, 0xE24DD00C};
+// static const u32 cardRomInitSignature[2]           = {0xE92D4010, 0xE59F1064};
+// static const u32 cardRomInitSignatureAlt[2]        = {0xE92D4010, 0xE59F1070};
+// static const u16 cardRomInitSignatureEarlyThumb[2] = {0xB578, 0xB083};
+// static const u16 cardRomInitSignatureThumb[2]      = {0xB510, 0x4915};
 
 //static const u32 instructionBHI[1] = {0x8A000001};
 
@@ -862,7 +862,7 @@ u16* findCardReadStartOffsetThumb5Type1(const module_params_t* moduleParams, con
 	return cardReadStartOffset;
 }
 
-u32* findCardRomInitOffset(const u32* cardReadEndOffset) {
+/* u32* findCardRomInitOffset(const u32* cardReadEndOffset) {
 	dbg_printf("findCardRomInitOffset\n");
 
 	u32* offset = findOffset(
@@ -931,7 +931,7 @@ u16* findCardRomInitOffsetThumb(const u16* cardReadEndOffset) {
 
 	dbg_printf("\n");
 	return offset;
-}
+} */
 
 /*u32* findCardReadHashOffset(void) {
 	dbg_printf("findCardReadHashOffset\n");

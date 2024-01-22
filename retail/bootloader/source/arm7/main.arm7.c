@@ -1259,7 +1259,7 @@ int arm7_main(void) {
 	REG_SCFG_ROM = 0x703;
 
 	u32 clonebootFlag = 0;
-	fileRead((char*)&clonebootFlag, &romFile, ((romSize-4) <= baseRomSize) ? (romSize-4) : baseRomSize, sizeof(u32));
+	fileRead((char*)&clonebootFlag, &romFile, ((romSize-0x88) <= baseRomSize) ? (romSize-0x88) : baseRomSize, sizeof(u32));
 	bool usesCloneboot = (clonebootFlag == 0x16361);
 	if (usesCloneboot) {
 		dbg_printf("Cloneboot detected\n");
