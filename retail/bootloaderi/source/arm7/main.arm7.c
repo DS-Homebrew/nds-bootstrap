@@ -2002,7 +2002,7 @@ int arm7_main(void) {
 
 		if (ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed) {
 			ce9Location = *(u32*)CARDENGINEI_ARM9_SDK5_BUFFERED_LOCATION;
-			ce9size = 0x7800;
+			ce9size = 0x7400;
 			tonccpy((u32*)ce9Location, (u32*)CARDENGINEI_ARM9_SDK5_BUFFERED_LOCATION, ce9size);
 			if (gameOnFlashcard) {
 				if (!dldiPatchBinary((data_t*)ce9Location, ce9size)) {

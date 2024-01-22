@@ -69,16 +69,16 @@ extern void disableIrqMask(u32 mask);
 
 bool isDma = false;
 bool dmaOn = true;
+bool dmaDirectRead = false;
 #ifdef TWLSDK
 static u8 currentNdmaSlot = 4;
 #else
-bool dmaDirectRead = false;
 static bool dataSplit = false;
 #endif
 
 void endCardReadDma() {
 #ifdef TWLSDK
-	if (dmaOn && ndmaBusy(currentNdmaSlot) && currentNdmaSlot < 4)
+	if (dmaDirectRead && dmaOn && (ndmaBusy(currentNdmaSlot)))
 #else
 	if (dmaDirectRead && dmaOn && (ndmaBusy(0) || (dataSplit && ndmaBusy(1))))
 #endif
@@ -94,10 +94,6 @@ void endCardReadDma() {
 		callEndReadDmaThumb();
 	}    
 }
-
-extern bool IPC_SYNC_hooked;
-extern void hookIPC_SYNC(void);
-extern void enableIPC_SYNC(void);
 
 #ifndef DLDI
 #ifdef ASYNCPF
@@ -222,6 +218,10 @@ static inline bool checkArm7(void) {
     IPC_SendSync(0x4);
 	return (sharedAddr[3] == (vu32)0);
 }
+
+extern bool IPC_SYNC_hooked;
+extern void hookIPC_SYNC(void);
+extern void enableIPC_SYNC(void);
 
 #ifndef TWLSDK
 static u32 * dmaParams = NULL;
@@ -409,6 +409,9 @@ void continueCardReadDmaArm7() {
 #endif
 
 void cardSetDma(u32 * params) {
+	isDma = true;
+	dmaDirectRead = false;
+
 	#ifdef TWLSDK
 	u32 src = params[3];
 	u8* dst = (u8*)params[4];
@@ -420,35 +423,54 @@ void cardSetDma(u32 * params) {
 	}
 	params[3] = src;
 
-	disableIrqMask(IRQ_CARD);
-	disableIrqMask(IRQ_CARD_LINE);
-
-	enableIPC_SYNC();
-
-	// Copy via dma
-	u32 newSrc = ce9->romLocation+src;
-	if (src > *(u32*)0x02FFE1C0) {
-		newSrc -= *(u32*)0x02FFE1CC;
+	bool romPart = false;
+	//int romPartNo = 0;
+	if (!(ce9->valueBits & ROMinRAM)) {
+		/*for (int i = 0; i < 2; i++) {
+			if (ce9->romPartSize[i] == 0) {
+				break;
+			}
+			romPart = (src >= ce9->romPartSrc[i] && src < ce9->romPartSrc[i]+ce9->romPartSize[i]);
+			if (romPart) {
+				romPartNo = i;
+				break;
+			}
+		}*/
+		romPart = (ce9->romPartSize > 0 && src >= ce9->romPartSrc && src < ce9->romPartSrc+ce9->romPartSize);
 	}
-	currentNdmaSlot = 4;
-	for (u8 i = 0; i < 4; i++) {
-		if (!ndmaBusy(i)) {
-			currentNdmaSlot = i;
-			break;
+	if (dmaOn && ((ce9->valueBits & ROMinRAM) || romPart)) {
+		dmaDirectRead = true;
+
+		disableIrqMask(IRQ_CARD);
+		disableIrqMask(IRQ_CARD_LINE);
+
+		enableIPC_SYNC();
+
+		// Copy via dma
+		u32 newSrc = ce9->romLocation/*[romPartNo]*/+src;
+		if (src > *(u32*)0x02FFE1C0) {
+			newSrc -= *(u32*)0x02FFE1CC;
 		}
-	}
-	if (currentNdmaSlot == 4) {
-		// Copy via CPU if all NDMA slots are in use
+		currentNdmaSlot = 4;
+		for (u8 i = 0; i < 4; i++) {
+			if (!ndmaBusy(i)) {
+				currentNdmaSlot = i;
+				break;
+			}
+		}
+		if (currentNdmaSlot == 4) {
+			// Copy via CPU if all NDMA slots are in use
+			cardRead(NULL, dst, src, len);
+			endCardReadDma();
+		} else {
+			ndmaCopyWordsAsynch(currentNdmaSlot, (u8*)newSrc, dst, len);
+			IPC_SendSync(0x3);
+		}
+	} else {
 		cardRead(NULL, dst, src, len);
 		endCardReadDma();
-	} else {
-		ndmaCopyWordsAsynch(currentNdmaSlot, (u8*)newSrc, dst, len);
-		IPC_SendSync(0x3);
 	}
 	#else
-	isDma = true;
-	dmaDirectRead = false;
-
 	vu32* cardStruct = (vu32*)ce9->cardStruct0;
 
 	if (ce9->valueBits & isSdk5) {
@@ -468,9 +490,9 @@ void cardSetDma(u32 * params) {
 		cardStruct[0] = src;
 	}
 
-	// #ifndef TWLSDK
+	#ifndef TWLSDK
 	dataSplit = false;
-	// #endif
+	#endif
 	bool romPart = false;
 	//int romPartNo = 0;
 	if (!(ce9->valueBits & ROMinRAM)) {
@@ -511,9 +533,9 @@ void cardSetDma(u32 * params) {
 				ndmaCopyWordsAsynch(1, (u8*)newSrc, dst, len);
 				src += len;
 				dst += len;
-				// #ifndef TWLSDK
+				#ifndef TWLSDK
 				dataSplit = true;
-				// #endif
+				#endif
 			} else {
 				ndmaCopyWordsAsynch(0, (u8*)newSrc, dst, len2==0 ? len : len2);
 				break;
@@ -665,46 +687,16 @@ void cardSetDma(u32 * params) {
 	u32 len = ((ce9->valueBits & isSdk5) ? params[5] : cardStruct[2]);
 	#endif
 
-	#ifdef TWLSDK
 	// Simulate ROM mirroring
 	while (src >= ce9->romPaddingSize) {
 		src -= ce9->romPaddingSize;
 	}
 
-	params[3] = src;
-
-	disableIrqMask(IRQ_CARD);
-	disableIrqMask(IRQ_CARD_LINE);
-
-	enableIPC_SYNC();
-
-	// Copy via dma
-	u32 newSrc = ce9->romLocation+src;
-	if (src > *(u32*)0x02FFE1C0) {
-		newSrc -= *(u32*)0x02FFE1CC;
-	}
-	currentNdmaSlot = 4;
-	for (u8 i = 0; i < 4; i++) {
-		if (!ndmaBusy(i)) {
-			currentNdmaSlot = i;
-			break;
-		}
-	}
-	if (currentNdmaSlot == 4) {
-		// Copy via CPU if all NDMA slots are in use
-		cardRead(NULL, dst, src, len);
-		endCardReadDma();
-	} else {
-		ndmaCopyWordsAsynch(currentNdmaSlot, (u8*)newSrc, dst, len);
-		IPC_SendSync(0x3);
-	}
-	#else
 	disableIrqMask(IRQ_CARD);
 	disableIrqMask(IRQ_CARD_LINE);
 
 	cardRead(NULL, dst, src, len);
 	endCardReadDma();
-	#endif
 }
 #endif
 
@@ -729,16 +721,16 @@ u32 cardReadDma(u32 dma0, u8* dst0, u32 src0, u32 len0) {
         && !(((int)src) & 511)
 	) {
 		isDma = true;
-		#ifndef TWLSDK
         if (ce9->patches->cardEndReadDmaRef || ce9->thumbPatches->cardEndReadDmaRef) {
 			// new dma method
+			#ifndef TWLSDK
 			if (!(ce9->valueBits & isSdk5)) {
 				cacheFlush();
 				cardSetDma(NULL);
 			}
+			#endif
 			return true;
 		}
-		#endif
     } /*else {
         dma=4;
         clearIcache();
