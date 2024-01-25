@@ -1277,7 +1277,7 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 		} else if (curRegion == 2) {
 			*(u32*)(0x02FFFD68) = 0x3E; // EUR
 		} else if (curRegion == 3) {
-			*(u32*)(0x02FFFD68) = BIT(1); // AUS
+			*(u32*)(0x02FFFD68) = 0x02; // AUS
 		} else if (curRegion == 4) {
 			*(u32*)(0x02FFFD68) = 0x40; // CHN
 		} else if (curRegion == 5) {
