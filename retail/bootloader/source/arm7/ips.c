@@ -50,12 +50,10 @@ bool applyIpsPatch(const tNDSHeader* ndsHeader, u8* ipsbyte, bool arm9Only, bool
 					rombyte -= ndsHeader->arm7romOffset;
 					rombyte -= ndsHeader->arm7binarySize;
 				} else {
-					rombyte -= ndsHeader->arm9romOffset;
-					rombyte -= ndsHeader->arm9binarySize;
+					rombyte -= ndsHeader->arm9overlaySource;
 				}
 			} else {
-				rombyte -= ndsHeader->arm9romOffset;
-				rombyte -= ndsHeader->arm9binarySize;
+				rombyte -= ndsHeader->arm9overlaySource;
 			}
 		}
 		ipson += 3;

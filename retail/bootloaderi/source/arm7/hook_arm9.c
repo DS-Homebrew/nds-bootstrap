@@ -463,7 +463,7 @@ int hookNdsRetailArm9(
 		} else if (ndsHeader->arm9overlaySource == 0 || ndsHeader->arm9overlaySize == 0) {
 			romOffset = (ndsHeader->arm7romOffset + ndsHeader->arm7binarySize);
 		} else {
-			romOffset = (ndsHeader->arm9romOffset + ndsHeader->arm9binarySize);
+			romOffset = ndsHeader->arm9overlaySource;
 		}
 		configureRomMap(ce9, ndsHeader, romOffset, dsiMode, consoleModel);
 	}

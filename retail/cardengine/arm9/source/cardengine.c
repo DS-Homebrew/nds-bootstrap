@@ -646,7 +646,7 @@ static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
 	nocashMessage("\n");*/
 
 	//nocashMessage("aaaaaaaaaa\n");
-	fileRead((char*)dst, (ce9->apFixOverlaysCluster && src >= ndsHeader->arm9romOffset+ndsHeader->arm9binarySize && src < ndsHeader->arm7romOffset) ? &apFixOverlaysFile : &romFile, src, len);
+	fileRead((char*)dst, (ce9->apFixOverlaysCluster && src >= ndsHeader->arm9overlaySource && src < ndsHeader->arm7romOffset) ? &apFixOverlaysFile : &romFile, src, len);
 
 	//nocashMessage("end\n");
 
@@ -712,7 +712,7 @@ void cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 		src = 0x8000 + (src & 0x1FF);
 	}
 
-	if ((ce9->valueBits & ROMinRAM) || ((ce9->valueBits & overlaysCached) && src >= ndsHeader->arm9romOffset+ndsHeader->arm9binarySize && src < ndsHeader->arm7romOffset)) {
+	if ((ce9->valueBits & ROMinRAM) || ((ce9->valueBits & overlaysCached) && src >= ndsHeader->arm9overlaySource && src < ndsHeader->arm7romOffset)) {
 		if (src >= 0 && src < 0x160) {
 			u32 newSrc = (u32)ndsHeader+src;
 			tonccpy(dst, (u8*)newSrc, len);

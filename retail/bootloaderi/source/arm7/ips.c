@@ -55,8 +55,7 @@ bool applyIpsPatch(const tNDSHeader* ndsHeader, u8* ipsbyte, const bool arm9Only
 					rombyte -= ndsHeader->arm7romOffset;
 					rombyte -= ndsHeader->arm7binarySize;
 				} else {
-					rombyte -= ndsHeader->arm9romOffset;
-					rombyte -= ndsHeader->arm9binarySize;
+					rombyte -= ndsHeader->arm9overlaySource;
 				}
 				if (ndsHeader->unitCode == 0 || !dsiModeConfirmed) {
 					if (isSdk5 || (dsiBios && !isESdk2)) {
@@ -81,7 +80,7 @@ bool applyIpsPatch(const tNDSHeader* ndsHeader, u8* ipsbyte, const bool arm9Only
 				}
 			} else {
 				rombyte = (void*)CACHE_ADRESS_START_DSIMODE;
-				rombyte -= ((ndsHeader->arm9romOffset + ndsHeader->arm9binarySize)/cacheBlockSize)*cacheBlockSize;
+				rombyte -= (ndsHeader->arm9overlaySource/cacheBlockSize)*cacheBlockSize;
 			}
 		}
 		ipson += 3;

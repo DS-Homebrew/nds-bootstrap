@@ -698,10 +698,9 @@ static bool isROMLoadableInRAM(const tDSiHeader* dsiHeader, const tNDSHeader* nd
 			romSize -= ndsHeader->arm7romOffset;
 			romSize -= ndsHeader->arm7binarySize;
 		} else {
-			romSize -= ndsHeader->arm9romOffset;
-			romSize -= ndsHeader->arm9binarySize;
+			romSize -= ndsHeader->arm9overlaySource;
 		}
-		res = ((expansionPakFound || (extendedMemory && !dsDebugRam)) && (ndsHeader->unitCode == 3 ? (usesCloneboot ? ((u32)dsiHeader->arm9iromOffset-0x8000) : ((u32)dsiHeader->arm9iromOffset-ndsHeader->arm9romOffset-ndsHeader->arm9binarySize))+ioverlaysSize : romSize) <= romSizeLimit);
+		res = ((expansionPakFound || (extendedMemory && !dsDebugRam)) && (ndsHeader->unitCode == 3 ? (usesCloneboot ? ((u32)dsiHeader->arm9iromOffset-0x8000) : ((u32)dsiHeader->arm9iromOffset-ndsHeader->arm9overlaySource))+ioverlaysSize : romSize) <= romSizeLimit);
 		if (res) {
 			dbg_printf(expansionPakFound ? "ROM is loadable into Slot-2 RAM\n" : "ROM is loadable into RAM\n");
 		}
@@ -844,7 +843,7 @@ static void loadOverlaysintoRAM(const tNDSHeader* ndsHeader, const module_params
 			while (1) {
 				u32 readLen = (len > bufferSize) ? bufferSize : len;
 
-				fileRead((char*)buffer, file, (ndsHeader->arm9romOffset + ndsHeader->arm9binarySize)+dst, readLen);
+				fileRead((char*)buffer, file, ndsHeader->arm9overlaySource+dst, readLen);
 				tonccpy((char*)romLocation+dst, (char*)buffer, readLen);
 
 				len -= bufferSize;
@@ -856,11 +855,11 @@ static void loadOverlaysintoRAM(const tNDSHeader* ndsHeader, const module_params
 			}
 			toncset((char*)buffer, 0, bufferSize);
 		} else {
-			fileRead((char*)romLocation, file, ndsHeader->arm9romOffset + ndsHeader->arm9binarySize, overlaysSize);
+			fileRead((char*)romLocation, file, ndsHeader->arm9overlaySource, overlaysSize);
 		}
 
-		if (!isSdk5(moduleParams) && *(u32*)((romLocation-ndsHeader->arm9romOffset-ndsHeader->arm9binarySize)+0x003128AC) == 0x4B434148) {
-			*(u32*)((romLocation-ndsHeader->arm9romOffset-ndsHeader->arm9binarySize)+0x3128AC) = 0xA00;	// Primary fix for Mario's Holiday
+		if (!isSdk5(moduleParams) && *(u32*)((romLocation-ndsHeader->arm9overlaySource)+0x003128AC) == 0x4B434148) {
+			*(u32*)((romLocation-ndsHeader->arm9overlaySource)+0x3128AC) = 0xA00;	// Primary fix for Mario's Holiday
 		}
 	}
 }
@@ -879,8 +878,8 @@ static void loadOverlaysintoFile(const tNDSHeader* ndsHeader, const module_param
 		while (1) {
 			u32 readLen = (len > bufferSize) ? bufferSize : len;
 
-			fileRead((char*)buffer, file, (ndsHeader->arm9romOffset + ndsHeader->arm9binarySize)+dst, readLen);
-			fileWrite((char*)buffer, &apFixOverlaysFile, (ndsHeader->arm9romOffset + ndsHeader->arm9binarySize)+dst, readLen);
+			fileRead((char*)buffer, file, ndsHeader->arm9overlaySource+dst, readLen);
+			fileWrite((char*)buffer, &apFixOverlaysFile, ndsHeader->arm9overlaySource+dst, readLen);
 
 			len -= bufferSize;
 			dst += bufferSize;
@@ -908,7 +907,7 @@ static void loadIOverlaysintoRAM(const tDSiHeader* dsiHeader, aFile* file, const
 	// Load overlays into RAM
 	if (ioverlaysSize>0x700000) return;
 
-	u32 romOffset = usesCloneboot ? 0x8000 : (ndsHeader->arm9romOffset + ndsHeader->arm9binarySize);
+	u32 romOffset = usesCloneboot ? 0x8000 : ndsHeader->arm9overlaySource;
 	fileRead((char*)romLocation+((u32)dsiHeader->arm9iromOffset-romOffset), file, (u32)dsiHeader->arm9iromOffset+dsiHeader->arm9ibinarySize, ioverlaysSize);
 }
 
@@ -921,12 +920,11 @@ static void loadROMintoRAM(const tNDSHeader* ndsHeader, const module_params_t* m
 		romSizeEdit += 0x88;
 	} else if (ndsHeader->arm9overlaySource == 0 || ndsHeader->arm9overlaySize == 0) {
 		romOffset = (ndsHeader->arm7romOffset + ndsHeader->arm7binarySize);
-		romSizeEdit -= ndsHeader->arm7romOffset;
-		romSizeEdit -= ndsHeader->arm7binarySize;
 	} else {
-		romOffset = (ndsHeader->arm9romOffset + ndsHeader->arm9binarySize);
-		romSizeEdit -= ndsHeader->arm9romOffset;
-		romSizeEdit -= ndsHeader->arm9binarySize;
+		romOffset = ndsHeader->arm9overlaySource;
+	}
+	if (!usesCloneboot) {
+		romSizeEdit -= romOffset;
 	}
 
 	if ((_io_dldi_features & FEATURE_SLOT_GBA) && s2FlashcardId != 0) {
@@ -1268,7 +1266,7 @@ int arm7_main(void) {
 	}
 
 	// Calculate overlay pack size
-	for (u32 i = ndsHeader->arm9romOffset+ndsHeader->arm9binarySize; i < ndsHeader->arm7romOffset; i++) {
+	for (u32 i = ndsHeader->arm9overlaySource; i < ndsHeader->arm7romOffset; i++) {
 		overlaysSize++;
 	}
 	if (ndsHeader->unitCode == 3) {

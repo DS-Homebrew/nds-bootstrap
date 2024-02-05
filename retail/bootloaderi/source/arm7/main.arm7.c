@@ -803,12 +803,11 @@ static bool isROMLoadableInRAM(const tDSiHeader* dsiHeader, const tNDSHeader* nd
 			romSize += 0x88;
 		} else if (ndsHeader->arm9overlaySource == 0 || ndsHeader->arm9overlaySize == 0) {
 			romOffset = (ndsHeader->arm7romOffset + ndsHeader->arm7binarySize);
-			romSize -= ndsHeader->arm7romOffset;
-			romSize -= ndsHeader->arm7binarySize;
 		} else {
-			romOffset = (ndsHeader->arm9romOffset + ndsHeader->arm9binarySize);
-			romSize -= ndsHeader->arm9romOffset;
-			romSize -= ndsHeader->arm9binarySize;
+			romOffset = ndsHeader->arm9overlaySource;
+		}
+		if (!usesCloneboot) {
+			romSize -= romOffset;
 		}
 		res = ((consoleModel> 0 && twlType && ((u32)dsiHeader->arm9iromOffset - romOffset)+ioverlaysSize <= (cheatsEnabled ? dev_CACHE_ADRESS_SIZE_TWLSDK_CHEAT : dev_CACHE_ADRESS_SIZE_TWLSDK))
 			|| (consoleModel> 0 && !twlType && romSize <= (dsiModeConfirmed ? 0x01800000 : 0x01BC0000))
@@ -978,7 +977,7 @@ static void loadOverlaysintoRAM(const tNDSHeader* ndsHeader, const module_params
 	}
 
 	u32 overlaysLocation = CACHE_ADRESS_START_DSIMODE;
-	u32 alignedOverlaysOffset = ((ndsHeader->arm9romOffset + ndsHeader->arm9binarySize)/cacheBlockSize)*cacheBlockSize;
+	u32 alignedOverlaysOffset = (ndsHeader->arm9overlaySource/cacheBlockSize)*cacheBlockSize;
 	u32 newOverlaysSize = 0;
 	for (u32 i = alignedOverlaysOffset; i < ndsHeader->arm7romOffset; i+= cacheBlockSize) {
 		newOverlaysSize += cacheBlockSize;
@@ -1021,7 +1020,7 @@ static void loadIOverlaysintoRAM(const tDSiHeader* dsiHeader, aFile* file, const
 	} else if (ndsHeader->arm9overlaySource == 0 || ndsHeader->arm9overlaySize == 0) {
 		romOffset = (ndsHeader->arm7romOffset + ndsHeader->arm7binarySize);
 	} else {
-		romOffset = (ndsHeader->arm9romOffset + ndsHeader->arm9binarySize);
+		romOffset = ndsHeader->arm9overlaySource;
 	}
 	fileRead((char*)ROM_LOCATION_TWLSDK+((u32)dsiHeader->arm9iromOffset-romOffset), file, (u32)dsiHeader->arm9iromOffset+dsiHeader->arm9ibinarySize, ioverlaysSize);
 }
@@ -1042,12 +1041,11 @@ static void loadROMintoRAM(const tNDSHeader* ndsHeader, const module_params_t* m
 		romSizeEdit += 0x88;
 	} else if (ndsHeader->arm9overlaySource == 0 || ndsHeader->arm9overlaySize == 0) {
 		romOffset = (ndsHeader->arm7romOffset + ndsHeader->arm7binarySize);
-		romSizeEdit -= ndsHeader->arm7romOffset;
-		romSizeEdit -= ndsHeader->arm7binarySize;
 	} else {
-		romOffset = (ndsHeader->arm9romOffset + ndsHeader->arm9binarySize);
-		romSizeEdit -= ndsHeader->arm9romOffset;
-		romSizeEdit -= ndsHeader->arm9binarySize;
+		romOffset = ndsHeader->arm9overlaySource;
+	}
+	if (!usesCloneboot) {
+		romSizeEdit -= romOffset;
 	}
 
 	u32 romLocationChange = romLocation;
@@ -1612,7 +1610,7 @@ int arm7_main(void) {
 	dbg_printf("\n");
 
 	// Calculate overlay pack size
-	for (u32 i = ndsHeader->arm9romOffset+ndsHeader->arm9binarySize; i < ndsHeader->arm7romOffset; i++) {
+	for (u32 i = ndsHeader->arm9overlaySource; i < ndsHeader->arm7romOffset; i++) {
 		overlaysSize++;
 	}
 	if (ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr) && dsiModeConfirmed) {
@@ -2148,7 +2146,7 @@ int arm7_main(void) {
 			getFileFromCluster(apFixOverlaysFile, apFixOverlaysCluster, gameOnFlashcard);
 			buildFatTableCacheCompressed(apFixOverlaysFile);
 
-			u32 alignedOverlaysOffset = ((ndsHeader->arm9romOffset + ndsHeader->arm9binarySize)/cacheBlockSize)*cacheBlockSize;
+			u32 alignedOverlaysOffset = (ndsHeader->arm9overlaySource/cacheBlockSize)*cacheBlockSize;
 			u32 newOverlaysSize = 0;
 			for (u32 i = alignedOverlaysOffset; i < ndsHeader->arm7romOffset; i+= cacheBlockSize) {
 				newOverlaysSize += cacheBlockSize;
