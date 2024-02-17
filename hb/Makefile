@@ -129,7 +129,7 @@ export LIBPATHS	:=	$(foreach dir,$(LIBDIRS),-L$(dir)/lib)
 export GAME_ICON := $(CURDIR)/$(ASSETS)/icon.bmp
 
 #.PHONY: sdengine bootloader bootstub BootStrap clean
-.PHONY: all dist release nightly bootloader bootloaderInject bootstub BootStrap dldi/dsisd.dldi sdengine clean
+.PHONY: all dist release nightly bootloader bootloaderInject bootstub BootStrap dldi/dsisd.dldi sdengine sdengine_alt clean
 
 all:	$(OUTPUT)
 
@@ -167,7 +167,7 @@ dldi/dsisd.dldi:
 	@$(MAKE) -C dldi
 
 #---------------------------------------------------------------------------------		
-bootloader: $(DATA) sdengine
+bootloader: $(DATA) sdengine sdengine_alt
 	@$(MAKE) -C bootloader
 	@dlditool dldi/dsisd.dldi nitrofiles/load.bin
 
@@ -184,6 +184,11 @@ sdengine: $(DATA)
 	@mkdir -p bootloader/$(DATA)
 	@$(MAKE) -C sdengine
 
+#---------------------------------------------------------------------------------	
+sdengine_alt: $(DATA)
+	@mkdir -p bootloader/$(DATA)
+	@$(MAKE) -C sdengine_alt
+
 #---------------------------------------------------------------------------------
 #$(BUILD):
 	#@[ -d $@ ] || mkdir -p $@
@@ -196,6 +201,7 @@ clean:
 	@$(MAKE) -C arm7 clean
 	@$(MAKE) -C arm9 clean
 	@$(MAKE) -C sdengine clean
+	@$(MAKE) -C sdengine_alt clean
 	@$(MAKE) -C bootloader clean
 	@$(MAKE) -C bootloaderInject clean
 	@$(MAKE) -C bootstub clean

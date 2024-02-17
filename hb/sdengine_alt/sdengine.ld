@@ -4,7 +4,7 @@ OUTPUT_ARCH(arm)
 
 MEMORY {
 
-	vram	: ORIGIN = 0x03000000, LENGTH = 32K
+	vram	: ORIGIN = 0x037C0000, LENGTH = 32K
 }
 
 __vram_start	=	ORIGIN(vram);

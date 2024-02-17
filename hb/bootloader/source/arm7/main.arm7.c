@@ -89,6 +89,7 @@ extern u32 srParamsFileCluster;
 extern u32 ndsPreloaded;
 
 u8 TWL_HEAD[0x1000] = {0};
+static u32 sdEngineLocation = 0;
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // Firmware stuff
@@ -195,8 +196,8 @@ static void initMBK(void) {
 	*((vu32*)REG_MBK5)=0x9C989490;
 
 	// WRAM mapped to the 0x3700000 - 0x37FFFFF area 
-	// WRAM-A mapped to the 0x37C0000 - 0x37FFFFF area : 256k
-	REG_MBK6=0x080037C0; // same as dsiware
+	// WRAM-A mapped to the 0x3000000 - 0x303FFFF area : 256k
+	REG_MBK6=0x00403000; // same as dsi-enhanced and certain dsiware
 	// WRAM-B mapped to the 0x3740000 - 0x37BFFFF area : 512k // why? only 256k real memory is there
 	REG_MBK7=0x07C03740; // same as dsiware
 	// WRAM-C mapped to the 0x3700000 - 0x373FFFF area : 256k
@@ -241,6 +242,8 @@ static void resetMemory_ARM7 (void)
 	REG_IPC_SYNC = 0;
 	REG_IPC_FIFO_CR = IPC_FIFO_ENABLE | IPC_FIFO_SEND_CLEAR;
 	REG_IPC_FIFO_CR = 0;
+
+	sdEngineLocation = (*(u32*)0x02FFE1A0 == 0x080037C0) ? SDENGINE_LOCATION_ALT : SDENGINE_LOCATION;
 
 	arm7clearRAM();								// clear exclusive IWRAM
 	if (ndsPreloaded) {
@@ -712,7 +715,7 @@ int arm7_main (void) {
 		}
 		u32* wordCommandAddr = (u32 *) (((u32)((u32*)NDS_HEADER)[0x0A])+patchOffset+0x80);
 
-		hookNds(ndsHeader, (u32*)SDENGINE_LOCATION, wordCommandAddr);
+		hookNds(ndsHeader, (u32*)sdEngineLocation, wordCommandAddr);
 
 		if (!patchOffsetCache.bootloaderChecked) {
 			u32 bootloaderSignature[4] = {0xEA000002, 0x00000000, 0x00000001, 0x00000000};
