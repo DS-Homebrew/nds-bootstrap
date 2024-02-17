@@ -55,6 +55,7 @@ Helpful information:
 #define REG_GPIO_WIFI *(vu16*)0x4004C04
 
 #include "tonccpy.h"
+#include "dmaTwl.h"
 //#include "my_sdmmc.h"
 #include "my_fat.h"
 #include "dldi_patcher.h"
@@ -63,8 +64,6 @@ Helpful information:
 #include "common.h"
 #include "locations.h"
 #include "i2c.h"
-
-void arm7clearRAM();
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // Important things
@@ -204,6 +203,12 @@ static void initMBK(void) {
 	REG_MBK8=0x07403700; // same as dsiware
 }
 
+void memset_addrs_arm7(u32 start, u32 end)
+{
+	// toncset((u32*)start, 0, ((int)end - (int)start));
+	dma_twlFill32(0, 0, (u32*)start, ((int)end - (int)start));
+}
+
 /*-------------------------------------------------------------------------
 resetMemory_ARM7
 Clears all of the NDS's RAM that is visible to the ARM7
@@ -227,6 +232,13 @@ static void resetMemory_ARM7 (void)
 	}
 
 	REG_SOUNDCNT = 0;
+	REG_SNDCAP0CNT = 0;
+	REG_SNDCAP1CNT = 0;
+
+	REG_SNDCAP0DAD = 0;
+	REG_SNDCAP0LEN = 0;
+	REG_SNDCAP1DAD = 0;
+	REG_SNDCAP1LEN = 0;
 
 	//clear out ARM7 DMA channels and timers
 	for (i=0; i<4; i++) {
@@ -245,24 +257,26 @@ static void resetMemory_ARM7 (void)
 
 	sdEngineLocation = (*(u32*)0x02FFE1A0 == 0x080037C0) ? SDENGINE_LOCATION_ALT : SDENGINE_LOCATION;
 
-	arm7clearRAM();								// clear exclusive IWRAM
+	memset_addrs_arm7(0x03000000, 0x03800000 + 0x10000);
 	if (ndsPreloaded) {
-		toncset((u32*)0x02200000, 0, 0x180000);	// clear most of EWRAM (except pre-loaded ARM9 binary)
+		dma_twlFill32(0, 0, (u32*)0x02200000, 0x180000);	// clear most of EWRAM (except pre-loaded ARM9 binary)
 	} else {
-		toncset((u32*)0x02004000, 0, 0x37C000);	// clear most of EWRAM
+		dma_twlFill32(0, 0, (u32*)0x02004000, 0x37C000);	// clear most of EWRAM
 	}
-	toncset((u32*)0x02380000, 0, 0x70000);
-	toncset((u32*)0x023F1000, 0, 0xF000);
+	dma_twlFill32(0, 0, (u32*)0x02380000, 0x70000);
+	dma_twlFill32(0, 0, (u32*)0x023F1000, 0xF000);
 	if (romIsCompressed) {
-		toncset((u32*)0x02D00000, 0, 0x300000);	// clear other part of EWRAM
+		dma_twlFill32(0, 0, (u32*)0x02D00000, 0x300000);	// clear other part of EWRAM
 	} else {
-		toncset((u32*)0x02400000, 0, 0xC00000);	// clear other part of EWRAM
+		dma_twlFill32(0, 0, (u32*)0x02400000, 0xC00000);	// clear other part of EWRAM
 	}
 
 	REG_IE = 0;
 	REG_IF = ~0;
-	(*(vu32*)(0x04000000-4)) = 0;  //IRQ_HANDLER ARM7 version
-	(*(vu32*)(0x04000000-8)) = ~0; //VBLANK_INTR_WAIT_FLAGS, ARM7 version
+	REG_AUXIE = 0;
+	REG_AUXIF = ~0;
+	*(vu32*)0x0380FFFC = 0;  // IRQ_HANDLER ARM7 version
+	*(vu32*)0x0380FFF8 = 0; // VBLANK_INTR_WAIT_FLAGS, ARM7 version
 	REG_POWERCNT = 1;  //turn off power to stuff
 
 	// Get settings location
