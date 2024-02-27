@@ -22229,6 +22229,47 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			*(u32*)0x020F5814 = 0xE1A00000; // nop
 			*(u32*)0x020F5818 = 0xE1A00000; // nop
 			*(u32*)0x020F5824 = 0xE1A00000; // nop (Enable error exception screen)
+		} else if (ndsHeader->headerCRC16 == 0x784C) { // Prototype build: 04/15/10
+			ce9->patches->rumble_arm9[0][3] = *(u32*)0x0202853C;
+
+			// Hide help button
+			*(u32*)0x02015954 = 0xE1A00000; // nop
+
+			if (!extendedMemory) {
+				// Disable pre-load function
+				*(u32*)0x020BDE0C = 0xE12FFF1E; // bx lr
+			}
+			*(u32*)0x020211F8 = 0xE12FFF1E; // bx lr (Disable loading sdat file)
+			tonccpy((u32*)0x02021218, ce9->patches->musicPlay, 0xC);
+			tonccpy((u32*)0x02021250, ce9->patches->musicStopEffect, 0xC);
+			setBL(0x0202853C, (int)ce9->patches->rumble_arm9[0]); // Rumble when hair is whipped
+			setBL(0x020902AC, (u32)dsiSaveCreate);
+			setBL(0x020902D0, (u32)dsiSaveGetResultCode);
+			*(u32*)0x020902E0 = 0xE1A00000; // nop
+			setBL(0x020902EC, (u32)dsiSaveCreate);
+			*(u32*)0x020902FC = 0xE3A00000; // mov r0, #0
+			setBL(0x020909C0, (u32)dsiSaveOpen);
+			*(u32*)0x020909D8 = 0xE1A00000; // nop
+			setBL(0x020909E8, (u32)dsiSaveOpen);
+			setBL(0x020909FC, (u32)dsiSaveRead);
+			setBL(0x02090A04, (u32)dsiSaveClose);
+			setBL(0x02090C7C, (u32)dsiSaveCreate);
+			setBL(0x02090C8C, (u32)dsiSaveOpen);
+			setBL(0x02090E98, (u32)dsiSaveSetLength);
+			setBL(0x02090EA8, (u32)dsiSaveWrite);
+			setBL(0x02090EB0, (u32)dsiSaveClose);
+			*(u32*)0x020DFF34 = 0xE1A00000; // nop
+			*(u32*)0x020E0070 = 0xE1A00000; // nop
+			*(u32*)0x020E0084 = 0xE1A00000; // nop
+			*(u32*)0x020E3DDC = 0xE1A00000; // nop
+			patchInitDSiWare(0x020EA71C, heapEndMaxForRetailMus);
+			*(u32*)0x020EAAA8 = *(u32*)0x02005020;
+			patchUserSettingsReadDSiWare(0x020EBC94);
+			*(u32*)0x020EC188 = 0xE1A00000; // nop
+			*(u32*)0x020EC18C = 0xE1A00000; // nop
+			*(u32*)0x020EC190 = 0xE1A00000; // nop
+			*(u32*)0x020EC194 = 0xE1A00000; // nop
+			*(u32*)0x020EC1A0 = 0xE1A00000; // nop (Enable error exception screen)
 		} else { // Final release
 			ce9->patches->rumble_arm9[0][3] = *(u32*)0x02026F68;
 

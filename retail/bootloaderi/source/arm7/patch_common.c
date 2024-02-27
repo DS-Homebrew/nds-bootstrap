@@ -12892,6 +12892,25 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 				setBL(0x0209935C, (u32)dsiSaveWrite);
 				setBL(0x02099364, (u32)dsiSaveClose);
 			}
+		} else if (ndsHeader->headerCRC16 == 0x784C) { // Prototype build: 04/15/10
+			if (!twlFontFound) {
+				// Hide help button
+				*(u32*)0x02015954 = 0xE1A00000; // nop
+			}
+			if (saveOnFlashcard) {
+				setBL(0x020902AC, (u32)dsiSaveCreate);
+				setBL(0x020902D0, (u32)dsiSaveGetResultCode);
+				setBL(0x020902EC, (u32)dsiSaveCreate);
+				setBL(0x020909C0, (u32)dsiSaveOpen);
+				setBL(0x020909E8, (u32)dsiSaveOpen);
+				setBL(0x020909FC, (u32)dsiSaveRead);
+				setBL(0x02090A04, (u32)dsiSaveClose);
+				setBL(0x02090C7C, (u32)dsiSaveCreate);
+				setBL(0x02090C8C, (u32)dsiSaveOpen);
+				setBL(0x02090E98, (u32)dsiSaveSetLength);
+				setBL(0x02090EA8, (u32)dsiSaveWrite);
+				setBL(0x02090EB0, (u32)dsiSaveClose);
+			}
 		} else { // Final release
 			if (!twlFontFound) {
 				// Skip Manual screen
