@@ -1477,6 +1477,7 @@ int arm7_main(void) {
 	} else {
 		dsiModeConfirmed = dsiMode && ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr);
 	}
+	const char* romTid = getRomTid(&dsiHeaderTemp.ndshdr);
 	if (gameOnFlashcard || !isDSiWare) {
 		extern u32 clusterCacheSize;
 		clusterCacheSize = 0x10000;
@@ -1484,7 +1485,14 @@ int arm7_main(void) {
 			clusterCacheSize = 0x2000;
 		}
 
-		buildFatTableCacheCompressed(romFile);
+		if ((memcmp(romTid, "IPG", 3) == 0) || ((memcmp(romTid, "IPK", 3) == 0))) {
+			buildFatTableCache(romFile); // Build uncompressed table for HGSS
+			if (!romFile->fatTableCached) {
+				buildFatTableCacheCompressed(romFile);
+			}
+		} else {
+			buildFatTableCacheCompressed(romFile);
+		}
 		buildFatTableCacheCompressed(savFile);
 	}
 
@@ -1532,8 +1540,6 @@ int arm7_main(void) {
     dbg_printf("\n"); 
 
 	ndsHeader = loadHeader(&dsiHeaderTemp, moduleParams, dsiModeConfirmed);
-
-	const char* romTid = getRomTid(ndsHeader);
 
 	if (!isDSiWare && srlAddr == 0 && memcmp(romTid, "UBR", 3) != 0 && memcmp(romTid, "HND", 3) != 0 && memcmp(romTid, "HNE", 3) != 0 && (softResetParams[0] == 0 || softResetParams[0] == 0xFFFFFFFF)) {
 		esrbOutput();
