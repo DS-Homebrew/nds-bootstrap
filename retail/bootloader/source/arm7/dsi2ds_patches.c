@@ -22134,7 +22134,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Shantae: Risky's Revenge (USA)
-	// Requires 8MB of RAM, crashes after first battle with 4MB of RAM, but can get past with a save file 
+	// Requires 8MB of RAM, crashes after first battle with 4MB of RAM, but can get past with a save file
 	// BGM is disabled to stay within RAM limitations
 	else if (strcmp(romTid, "KS3E") == 0) {
 		ce9->rumbleFrames[0] = 10;
