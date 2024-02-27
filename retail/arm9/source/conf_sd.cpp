@@ -1798,7 +1798,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			||	strncmp(romTid, "K6T", 3) == 0 // Orion's Odyssey
 			||	strncmp(romTid, "KPS", 3) == 0 // Phantasy Star 0 Mini
 			||	strncmp(romTid, "KHR", 3) == 0 // Picture Perfect: Hair Stylist
-			||	strncmp(romTid, "KS3", 3) == 0 // Shantae: Risky's Revenge
+			|| ((strncmp(romTid, "KS3", 3) == 0) && (headerCRC == 0x57FE || headerCRC == 0x2BFA)) // Shantae: Risky's Revenge (Non-proto builds and clean ROMs)
 			||	strncmp(romTid, "KZU", 3) == 0 // Tales to Enjoy!: Little Red Riding Hood
 			||	strncmp(romTid, "KZV", 3) == 0 // Tales to Enjoy!: Puss in Boots
 			||	strncmp(romTid, "KZ7", 3) == 0 // Tales to Enjoy!: The Three Little Pigs
@@ -1979,6 +1979,10 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 				break;
 			}
 		}
+	}
+
+	if (!conf->loader2 && (strcmp(romTid, "NTRJ") == 0) && (headerCRC == 0x9B41)) { // Use bootloader2 for Shantae: Risky's Revenge (USA) (Review Build)
+		conf->loader2 = true;
 	}
 
 	const char *typeToReplace = ".nds";

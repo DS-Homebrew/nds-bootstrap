@@ -12830,32 +12830,94 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
-	// Shantae: Risky's Revenge (USA)
-	else if (strcmp(romTid, "KS3E") == 0) {
+	// Shantae: Risky's Revenge (USA) (Review Build)
+	else if ((strcmp(romTid, "NTRJ") == 0) && (ndsHeader->headerCRC16 == 0x9B41)) {
 		if (!twlFontFound) {
-			// Skip Manual screen
-			/* *(u32*)0x02016130 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
-			*(u32*)0x020161C8 = 0xE1A00000; // nop
-			*(u32*)0x020161D0 = 0xE1A00000; // nop
-			*(u32*)0x020161DC = 0xE1A00000; // nop
-			*(u32*)0x020166C8 = 0xE3A06901; // mov r6, #0x4000 */
-
 			// Hide help button
-			*(u32*)0x02016688 = 0xE1A00000; // nop
+			*(u32*)0x02015874 = 0xE1A00000; // nop
 		}
 		if (saveOnFlashcard) {
-			setBL(0x0209201C, (u32)dsiSaveCreate);
-			setBL(0x02092040, (u32)dsiSaveGetResultCode);
-			setBL(0x0209205C, (u32)dsiSaveCreate);
-			setBL(0x0209291C, (u32)dsiSaveOpen);
-			setBL(0x02092944, (u32)dsiSaveOpen);
-			setBL(0x02092958, (u32)dsiSaveRead);
-			setBL(0x02092960, (u32)dsiSaveClose);
-			setBL(0x02092BCC, (u32)dsiSaveCreate);
-			setBL(0x02092BDC, (u32)dsiSaveOpen);
-			setBL(0x02092DE4, (u32)dsiSaveSetLength);
-			setBL(0x02092DF4, (u32)dsiSaveWrite);
-			setBL(0x02092DFC, (u32)dsiSaveClose);
+			setBL(0x0208B9A0, (u32)dsiSaveCreate);
+			setBL(0x0208B9C4, (u32)dsiSaveGetResultCode);
+			setBL(0x0208B9E0, (u32)dsiSaveCreate);
+			setBL(0x0208C054, (u32)dsiSaveOpen);
+			setBL(0x0208C07C, (u32)dsiSaveOpen);
+			setBL(0x0208C090, (u32)dsiSaveRead);
+			setBL(0x0208C098, (u32)dsiSaveClose);
+			setBL(0x0208C310, (u32)dsiSaveCreate);
+			setBL(0x0208C320, (u32)dsiSaveOpen);
+			setBL(0x0208C52C, (u32)dsiSaveSetLength);
+			setBL(0x0208C53C, (u32)dsiSaveWrite);
+			setBL(0x0208C544, (u32)dsiSaveClose);
+		}
+	}
+
+	// Shantae: Risky's Revenge (USA)
+	else if (strcmp(romTid, "KS3E") == 0) {
+		if (ndsHeader->headerCRC16 == 0xC9EC) { // Prototype build: 10/27/10 (Normal)
+			if (!twlFontFound) {
+				// Hide help button
+				*(u32*)0x02016BE4 = 0xE1A00000; // nop
+			}
+			if (saveOnFlashcard) {
+				setBL(0x02098B60, (u32)dsiSaveCreate);
+				setBL(0x02098B84, (u32)dsiSaveGetResultCode);
+				setBL(0x02098BA0, (u32)dsiSaveCreate);
+				setBL(0x020997C0, (u32)dsiSaveOpen);
+				setBL(0x020997E8, (u32)dsiSaveOpen);
+				setBL(0x020997FC, (u32)dsiSaveRead);
+				setBL(0x02099804, (u32)dsiSaveClose);
+				setBL(0x02099A88, (u32)dsiSaveCreate);
+				setBL(0x02099A98, (u32)dsiSaveOpen);
+				setBL(0x02099CA0, (u32)dsiSaveSetLength);
+				setBL(0x02099CB0, (u32)dsiSaveWrite);
+				setBL(0x02099CB8, (u32)dsiSaveClose);
+			}
+		} else if (ndsHeader->headerCRC16 == 0x4D03) { // Prototype build: 06/23/10
+			if (!twlFontFound) {
+				// Hide help button
+				*(u32*)0x020167C8 = 0xE1A00000; // nop
+			}
+			if (saveOnFlashcard) {
+				setBL(0x020984C4, (u32)dsiSaveCreate);
+				setBL(0x020984E8, (u32)dsiSaveGetResultCode);
+				setBL(0x02098504, (u32)dsiSaveCreate);
+				setBL(0x02098E74, (u32)dsiSaveOpen);
+				setBL(0x02098E9C, (u32)dsiSaveOpen);
+				setBL(0x02098EB0, (u32)dsiSaveRead);
+				setBL(0x02098EB8, (u32)dsiSaveClose);
+				setBL(0x02099130, (u32)dsiSaveCreate);
+				setBL(0x02099140, (u32)dsiSaveOpen);
+				setBL(0x0209934C, (u32)dsiSaveSetLength);
+				setBL(0x0209935C, (u32)dsiSaveWrite);
+				setBL(0x02099364, (u32)dsiSaveClose);
+			}
+		} else { // Final release
+			if (!twlFontFound) {
+				// Skip Manual screen
+				/* *(u32*)0x02016130 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+				*(u32*)0x020161C8 = 0xE1A00000; // nop
+				*(u32*)0x020161D0 = 0xE1A00000; // nop
+				*(u32*)0x020161DC = 0xE1A00000; // nop
+				*(u32*)0x020166C8 = 0xE3A06901; // mov r6, #0x4000 */
+
+				// Hide help button
+				*(u32*)0x02016688 = 0xE1A00000; // nop
+			}
+			if (saveOnFlashcard) {
+				setBL(0x0209201C, (u32)dsiSaveCreate);
+				setBL(0x02092040, (u32)dsiSaveGetResultCode);
+				setBL(0x0209205C, (u32)dsiSaveCreate);
+				setBL(0x0209291C, (u32)dsiSaveOpen);
+				setBL(0x02092944, (u32)dsiSaveOpen);
+				setBL(0x02092958, (u32)dsiSaveRead);
+				setBL(0x02092960, (u32)dsiSaveClose);
+				setBL(0x02092BCC, (u32)dsiSaveCreate);
+				setBL(0x02092BDC, (u32)dsiSaveOpen);
+				setBL(0x02092DE4, (u32)dsiSaveSetLength);
+				setBL(0x02092DF4, (u32)dsiSaveWrite);
+				setBL(0x02092DFC, (u32)dsiSaveClose);
+			}
 		}
 	}
 

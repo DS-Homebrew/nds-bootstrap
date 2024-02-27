@@ -22085,71 +22085,211 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// Shantae: Risky's Revenge (USA) (Review Build)
+	// Requires 8MB of RAM, crashes after first battle with 4MB of RAM, but can get past with a save file
+	// BGM is disabled to stay within RAM limitations
+	else if ((strcmp(romTid, "NTRJ") == 0) && (ndsHeader->headerCRC16 == 0x9B41)) {
+		ce9->rumbleFrames[0] = 10;
+		ce9->rumbleForce[0] = 1;
+		ce9->patches->rumble_arm9[0][3] = *(u32*)0x02026E44;
+
+		// Hide help button
+		*(u32*)0x02015874 = 0xE1A00000; // nop
+
+		if (!extendedMemory) {
+			// Disable pre-load function
+			*(u32*)0x020B80A4 = 0xE12FFF1E; // bx lr
+		}
+		*(u32*)0x02020404 = 0xE12FFF1E; // bx lr (Disable loading sdat file)
+		tonccpy((u32*)0x02020424, ce9->patches->musicPlay, 0xC);
+		tonccpy((u32*)0x0202045C, ce9->patches->musicStopEffect, 0xC);
+		setBL(0x02026E44, (int)ce9->patches->rumble_arm9[0]); // Rumble when hair is whipped
+		setBL(0x0208B9A0, (u32)dsiSaveCreate);
+		setBL(0x0208B9C4, (u32)dsiSaveGetResultCode);
+		*(u32*)0x0208B9D4 = 0xE1A00000; // nop
+		setBL(0x0208B9E0, (u32)dsiSaveCreate);
+		*(u32*)0x0208B9F0 = 0xE3A00000; // mov r0, #0
+		setBL(0x0208C054, (u32)dsiSaveOpen);
+		*(u32*)0x0208C06C = 0xE1A00000; // nop
+		setBL(0x0208C07C, (u32)dsiSaveOpen);
+		setBL(0x0208C090, (u32)dsiSaveRead);
+		setBL(0x0208C098, (u32)dsiSaveClose);
+		setBL(0x0208C310, (u32)dsiSaveCreate);
+		setBL(0x0208C320, (u32)dsiSaveOpen);
+		setBL(0x0208C52C, (u32)dsiSaveSetLength);
+		setBL(0x0208C53C, (u32)dsiSaveWrite);
+		setBL(0x0208C544, (u32)dsiSaveClose);
+		*(u32*)0x020D9E28 = 0xE1A00000; // nop
+		*(u32*)0x020D9F64 = 0xE1A00000; // nop
+		*(u32*)0x020D9F78 = 0xE1A00000; // nop
+		*(u32*)0x020DDCD0 = 0xE1A00000; // nop
+		patchInitDSiWare(0x020E4610, heapEndMaxForRetailMus);
+		*(u32*)0x020E499C = *(u32*)0x02005020;
+		patchUserSettingsReadDSiWare(0x020E5B88);
+		*(u32*)0x020E607C = 0xE1A00000; // nop
+		*(u32*)0x020E6080 = 0xE1A00000; // nop
+		*(u32*)0x020E6084 = 0xE1A00000; // nop
+		*(u32*)0x020E6088 = 0xE1A00000; // nop
+		*(u32*)0x020E6094 = 0xE1A00000; // nop (Enable error exception screen)
+	}
+
 	// Shantae: Risky's Revenge (USA)
 	// Requires 8MB of RAM, crashes after first battle with 4MB of RAM, but can get past with a save file
 	// BGM is disabled to stay within RAM limitations
 	else if (strcmp(romTid, "KS3E") == 0) {
 		ce9->rumbleFrames[0] = 10;
 		ce9->rumbleForce[0] = 1;
-		ce9->patches->rumble_arm9[0][3] = *(u32*)0x02026F68;
 
-		// Skip Manual screen
-		/* *(u32*)0x02016130 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
-		*(u32*)0x020161C8 = 0xE1A00000; // nop
-		*(u32*)0x020161D0 = 0xE1A00000; // nop
-		*(u32*)0x020161DC = 0xE1A00000; // nop
-		*(u32*)0x020166C8 = 0xE3A06901; // mov r6, #0x4000 */
+		if (ndsHeader->headerCRC16 == 0xC9EC) { // Prototype build: 10/27/10 (Normal)
+			ce9->patches->rumble_arm9[0][3] = *(u32*)0x0202A548;
 
-		// Hide help button
-		*(u32*)0x02016688 = 0xE1A00000; // nop
+			// Hide help button
+			*(u32*)0x02016BE4 = 0xE1A00000; // nop
 
-		if (!extendedMemory) {
-			// Disable pre-load function
-			/* *(u32*)0x0201FBA0 = 0xE12FFF1E; // bx lr
-			*(u32*)0x0201FD3C = 0xE12FFF1E; // bx lr
-			*(u32*)0x0201FDA8 = 0xE12FFF1E; // bx lr
-			*(u32*)0x0201FE14 = 0xE12FFF1E; // bx lr */
-			// *(u32*)0x020AB800 = 0xE1A00000; // nop
-			*(u32*)0x020BCE44 = 0xE12FFF1E; // bx lr
+			if (!extendedMemory) {
+				// Disable pre-load function
+				*(u32*)0x020C76E0 = 0xE12FFF1E; // bx lr
+			}
+			*(u32*)0x02022EF0 = 0xE12FFF1E; // bx lr (Disable loading sdat file)
+			tonccpy((u32*)0x02022F10, ce9->patches->musicPlay, 0xC);
+			tonccpy((u32*)0x02022F48, ce9->patches->musicStopEffect, 0xC);
+			setBL(0x0202A548, (int)ce9->patches->rumble_arm9[0]); // Rumble when hair is whipped
+			setBL(0x02098B60, (u32)dsiSaveCreate);
+			setBL(0x02098B84, (u32)dsiSaveGetResultCode);
+			*(u32*)0x02098B94 = 0xE1A00000; // nop
+			setBL(0x02098BA0, (u32)dsiSaveCreate);
+			*(u32*)0x02098BBC = 0xE3A00000; // mov r0, #0
+			setBL(0x020997C0, (u32)dsiSaveOpen);
+			*(u32*)0x020997D8 = 0xE1A00000; // nop
+			setBL(0x020997E8, (u32)dsiSaveOpen);
+			setBL(0x020997FC, (u32)dsiSaveRead);
+			setBL(0x02099804, (u32)dsiSaveClose);
+			*(u32*)0x02099A64 = 0xE1A00000; // nop
+			setBL(0x02099A88, (u32)dsiSaveCreate);
+			setBL(0x02099A98, (u32)dsiSaveOpen);
+			setBL(0x02099CA0, (u32)dsiSaveSetLength);
+			setBL(0x02099CB0, (u32)dsiSaveWrite);
+			setBL(0x02099CB8, (u32)dsiSaveClose);
+			*(u32*)0x02099CC4 = 0xE1A00000; // nop
+			*(u32*)0x02099CC8 = 0xE1A00000; // nop
+			*(u32*)0x02099CCC = 0xE1A00000; // nop
+			*(u32*)0x02099CD0 = 0xE1A00000; // nop
+			*(u32*)0x02099CDC = 0xE1A00000; // nop
+			*(u32*)0x02099CE0 = 0xE1A00000; // nop
+			*(u32*)0x020E9848 = 0xE1A00000; // nop
+			*(u32*)0x020E9984 = 0xE1A00000; // nop
+			*(u32*)0x020E9998 = 0xE1A00000; // nop
+			*(u32*)0x020ED778 = 0xE1A00000; // nop
+			patchInitDSiWare(0x020F40DC, heapEndMaxForRetailMus);
+			*(u32*)0x020F4468 = *(u32*)0x02005038;
+			patchUserSettingsReadDSiWare(0x020F5654);
+			*(u32*)0x020F5B48 = 0xE1A00000; // nop
+			*(u32*)0x020F5B4C = 0xE1A00000; // nop
+			*(u32*)0x020F5B50 = 0xE1A00000; // nop
+			*(u32*)0x020F5B54 = 0xE1A00000; // nop
+			*(u32*)0x020F5B60 = 0xE1A00000; // nop (Enable error exception screen)
+		} else if (ndsHeader->headerCRC16 == 0x4D03) { // Prototype build: 06/23/10
+			ce9->patches->rumble_arm9[0][3] = *(u32*)0x02029F94;
+
+			// Hide help button
+			*(u32*)0x020167C8 = 0xE1A00000; // nop
+
+			if (!extendedMemory) {
+				// Disable pre-load function
+				*(u32*)0x020C73F0 = 0xE12FFF1E; // bx lr
+			}
+			*(u32*)0x020229D0 = 0xE12FFF1E; // bx lr (Disable loading sdat file)
+			tonccpy((u32*)0x020229F0, ce9->patches->musicPlay, 0xC);
+			tonccpy((u32*)0x02022A28, ce9->patches->musicStopEffect, 0xC);
+			setBL(0x02029F94, (int)ce9->patches->rumble_arm9[0]); // Rumble when hair is whipped
+			setBL(0x020984C4, (u32)dsiSaveCreate);
+			setBL(0x020984E8, (u32)dsiSaveGetResultCode);
+			*(u32*)0x020984F8 = 0xE1A00000; // nop
+			setBL(0x02098504, (u32)dsiSaveCreate);
+			*(u32*)0x02098520 = 0xE3A00000; // mov r0, #0
+			setBL(0x02098E74, (u32)dsiSaveOpen);
+			*(u32*)0x02098E8C = 0xE1A00000; // nop
+			setBL(0x02098E9C, (u32)dsiSaveOpen);
+			setBL(0x02098EB0, (u32)dsiSaveRead);
+			setBL(0x02098EB8, (u32)dsiSaveClose);
+			setBL(0x02099130, (u32)dsiSaveCreate);
+			setBL(0x02099140, (u32)dsiSaveOpen);
+			setBL(0x0209934C, (u32)dsiSaveSetLength);
+			setBL(0x0209935C, (u32)dsiSaveWrite);
+			setBL(0x02099364, (u32)dsiSaveClose);
+			*(u32*)0x020E95B8 = 0xE1A00000; // nop
+			*(u32*)0x020E96F4 = 0xE1A00000; // nop
+			*(u32*)0x020E9708 = 0xE1A00000; // nop
+			*(u32*)0x020ED460 = 0xE1A00000; // nop
+			patchInitDSiWare(0x020F3DA0, heapEndMaxForRetailMus);
+			*(u32*)0x020F412C = *(u32*)0x02005020;
+			patchUserSettingsReadDSiWare(0x020F5318);
+			*(u32*)0x020F580C = 0xE1A00000; // nop
+			*(u32*)0x020F5810 = 0xE1A00000; // nop
+			*(u32*)0x020F5814 = 0xE1A00000; // nop
+			*(u32*)0x020F5818 = 0xE1A00000; // nop
+			*(u32*)0x020F5824 = 0xE1A00000; // nop (Enable error exception screen)
+		} else { // Final release
+			ce9->patches->rumble_arm9[0][3] = *(u32*)0x02026F68;
+
+			// Skip Manual screen
+			/* *(u32*)0x02016130 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+			*(u32*)0x020161C8 = 0xE1A00000; // nop
+			*(u32*)0x020161D0 = 0xE1A00000; // nop
+			*(u32*)0x020161DC = 0xE1A00000; // nop
+			*(u32*)0x020166C8 = 0xE3A06901; // mov r6, #0x4000 */
+
+			// Hide help button
+			*(u32*)0x02016688 = 0xE1A00000; // nop
+
+			if (!extendedMemory) {
+				// Disable pre-load function
+				/* *(u32*)0x0201FBA0 = 0xE12FFF1E; // bx lr
+				*(u32*)0x0201FD3C = 0xE12FFF1E; // bx lr
+				*(u32*)0x0201FDA8 = 0xE12FFF1E; // bx lr
+				*(u32*)0x0201FE14 = 0xE12FFF1E; // bx lr */
+				// *(u32*)0x020AB800 = 0xE1A00000; // nop
+				*(u32*)0x020BCE44 = 0xE12FFF1E; // bx lr
+			}
+			*(u32*)0x0201FC20 = 0xE12FFF1E; // bx lr (Disable loading sdat file)
+			tonccpy((u32*)0x0201FC40, ce9->patches->musicPlay, 0xC);
+			tonccpy((u32*)0x0201FC78, ce9->patches->musicStopEffect, 0xC);
+			setBL(0x02026F68, (int)ce9->patches->rumble_arm9[0]); // Rumble when hair is whipped
+			setBL(0x0209201C, (u32)dsiSaveCreate);
+			setBL(0x02092040, (u32)dsiSaveGetResultCode);
+			*(u32*)0x02092050 = 0xE1A00000; // nop
+			setBL(0x0209205C, (u32)dsiSaveCreate);
+			*(u32*)0x02092078 = 0xE3A00000; // mov r0, #0
+			setBL(0x0209291C, (u32)dsiSaveOpen);
+			*(u32*)0x02092934 = 0xE1A00000; // nop
+			setBL(0x02092944, (u32)dsiSaveOpen);
+			setBL(0x02092958, (u32)dsiSaveRead);
+			setBL(0x02092960, (u32)dsiSaveClose);
+			*(u32*)0x02092BA8 = 0xE1A00000; // nop
+			setBL(0x02092BCC, (u32)dsiSaveCreate);
+			setBL(0x02092BDC, (u32)dsiSaveOpen);
+			setBL(0x02092DE4, (u32)dsiSaveSetLength);
+			setBL(0x02092DF4, (u32)dsiSaveWrite);
+			setBL(0x02092DFC, (u32)dsiSaveClose);
+			*(u32*)0x02092E08 = 0xE1A00000; // nop
+			*(u32*)0x02092E0C = 0xE1A00000; // nop
+			*(u32*)0x02092E10 = 0xE1A00000; // nop
+			*(u32*)0x02092E14 = 0xE1A00000; // nop
+			*(u32*)0x02092E20 = 0xE1A00000; // nop
+			*(u32*)0x02092E24 = 0xE1A00000; // nop
+			*(u32*)0x020DE420 = 0xE1A00000; // nop
+			*(u32*)0x020DE548 = 0xE1A00000; // nop
+			*(u32*)0x020DE55C = 0xE1A00000; // nop
+			*(u32*)0x020E20C4 = 0xE1A00000; // nop
+			patchInitDSiWare(0x020E7ED8, heapEndMaxForRetailMus);
+			*(u32*)0x020E8264 = *(u32*)0x02004FD0;
+			patchUserSettingsReadDSiWare(0x020E9348);
+			*(u32*)0x020E977C = 0xE1A00000; // nop
+			*(u32*)0x020E9780 = 0xE1A00000; // nop
+			*(u32*)0x020E9784 = 0xE1A00000; // nop
+			*(u32*)0x020E9788 = 0xE1A00000; // nop
+			*(u32*)0x020E9794 = 0xE1A00000; // nop (Enable error exception screen)
 		}
-		*(u32*)0x0201FC20 = 0xE12FFF1E; // bx lr (Disable loading sdat file)
-		tonccpy((u32*)0x0201FC40, ce9->patches->musicPlay, 0xC);
-		tonccpy((u32*)0x0201FC78, ce9->patches->musicStopEffect, 0xC);
-		setBL(0x02026F68, (int)ce9->patches->rumble_arm9[0]); // Rumble when hair is whipped
-		setBL(0x0209201C, (u32)dsiSaveCreate);
-		setBL(0x02092040, (u32)dsiSaveGetResultCode);
-		*(u32*)0x02092050 = 0xE1A00000; // nop
-		setBL(0x0209205C, (u32)dsiSaveCreate);
-		*(u32*)0x02092078 = 0xE3A00000; // mov r0, #0
-		setBL(0x0209291C, (u32)dsiSaveOpen);
-		*(u32*)0x02092934 = 0xE1A00000; // nop
-		setBL(0x02092944, (u32)dsiSaveOpen);
-		setBL(0x02092958, (u32)dsiSaveRead);
-		setBL(0x02092960, (u32)dsiSaveClose);
-		*(u32*)0x02092BA8 = 0xE1A00000; // nop
-		setBL(0x02092BCC, (u32)dsiSaveCreate);
-		setBL(0x02092BDC, (u32)dsiSaveOpen);
-		setBL(0x02092DE4, (u32)dsiSaveSetLength);
-		setBL(0x02092DF4, (u32)dsiSaveWrite);
-		setBL(0x02092DFC, (u32)dsiSaveClose);
-		*(u32*)0x02092E08 = 0xE1A00000; // nop
-		*(u32*)0x02092E0C = 0xE1A00000; // nop
-		*(u32*)0x02092E10 = 0xE1A00000; // nop
-		*(u32*)0x02092E14 = 0xE1A00000; // nop
-		*(u32*)0x02092E20 = 0xE1A00000; // nop
-		*(u32*)0x02092E24 = 0xE1A00000; // nop
-		*(u32*)0x020DE420 = 0xE1A00000; // nop
-		*(u32*)0x020DE548 = 0xE1A00000; // nop
-		*(u32*)0x020DE55C = 0xE1A00000; // nop
-		*(u32*)0x020E20C4 = 0xE1A00000; // nop
-		patchInitDSiWare(0x020E7ED8, heapEndMaxForRetailMus);
-		*(u32*)0x020E8264 = *(u32*)0x02004FD0;
-		patchUserSettingsReadDSiWare(0x020E9348);
-		*(u32*)0x020E977C = 0xE1A00000; // nop
-		*(u32*)0x020E9780 = 0xE1A00000; // nop
-		*(u32*)0x020E9784 = 0xE1A00000; // nop
-		*(u32*)0x020E9788 = 0xE1A00000; // nop
-		*(u32*)0x020E9794 = 0xE1A00000; // nop (Enable error exception screen)
 	}
 
 	// Shantae: Risky's Revenge (Europe)

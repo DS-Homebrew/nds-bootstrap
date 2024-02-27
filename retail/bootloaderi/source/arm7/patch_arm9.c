@@ -745,6 +745,9 @@ void patchResetTwl(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const modul
 	// Patch
 	if (moduleParams->sdk_version < 0x5008000) {
 		*nandTmpJumpFuncOffset = generateA7Instr((int)nandTmpJumpFuncOffset, (int)ce9->patches->reset_arm9);
+	} else if (nandTmpJumpFuncOffset[-3] == 0xE8BD8008 && nandTmpJumpFuncOffset[-1] == 0x02FFE230) { // DEBUG
+		nandTmpJumpFuncOffset[-4] = generateA7Instr((int)(((u32)nandTmpJumpFuncOffset) - (4 * sizeof(u32))), (int)ce9->patches->reset_arm9);
+		dbg_printf("Reset (TWL) patched!\n");
 	} else if (nandTmpJumpFuncOffset[-2] == 0xE8BD8008 && nandTmpJumpFuncOffset[-1] == 0x02FFE230) {
 		nandTmpJumpFuncOffset[-3] = generateA7Instr((int)(((u32)nandTmpJumpFuncOffset) - (3 * sizeof(u32))), (int)ce9->patches->reset_arm9);
 		dbg_printf("Reset (TWL) patched!\n");
