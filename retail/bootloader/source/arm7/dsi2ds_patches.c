@@ -22140,54 +22140,56 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		ce9->rumbleFrames[0] = 10;
 		ce9->rumbleForce[0] = 1;
 
-		if (ndsHeader->headerCRC16 == 0xC9EC) { // Prototype build: 10/27/10 (Normal)
-			ce9->patches->rumble_arm9[0][3] = *(u32*)0x0202A548;
+		if (ndsHeader->headerCRC16 == 0xC9EC || ndsHeader->headerCRC16 == 0x21DC) { // Prototype builds: 10/27/10
+			u8 offsetChange = (ndsHeader->headerCRC16 == 0xC9EC) ? 0 : 0xA8;
+
+			ce9->patches->rumble_arm9[0][3] = *(u32*)(0x0202A548-offsetChange);
 
 			// Hide help button
 			*(u32*)0x02016BE4 = 0xE1A00000; // nop
 
 			if (!extendedMemory) {
 				// Disable pre-load function
-				*(u32*)0x020C76E0 = 0xE12FFF1E; // bx lr
+				*(u32*)(0x020C76E0-offsetChange) = 0xE12FFF1E; // bx lr
 			}
-			*(u32*)0x02022EF0 = 0xE12FFF1E; // bx lr (Disable loading sdat file)
-			tonccpy((u32*)0x02022F10, ce9->patches->musicPlay, 0xC);
-			tonccpy((u32*)0x02022F48, ce9->patches->musicStopEffect, 0xC);
-			setBL(0x0202A548, (int)ce9->patches->rumble_arm9[0]); // Rumble when hair is whipped
-			setBL(0x02098B60, (u32)dsiSaveCreate);
-			setBL(0x02098B84, (u32)dsiSaveGetResultCode);
-			*(u32*)0x02098B94 = 0xE1A00000; // nop
-			setBL(0x02098BA0, (u32)dsiSaveCreate);
-			*(u32*)0x02098BBC = 0xE3A00000; // mov r0, #0
-			setBL(0x020997C0, (u32)dsiSaveOpen);
-			*(u32*)0x020997D8 = 0xE1A00000; // nop
-			setBL(0x020997E8, (u32)dsiSaveOpen);
-			setBL(0x020997FC, (u32)dsiSaveRead);
-			setBL(0x02099804, (u32)dsiSaveClose);
-			*(u32*)0x02099A64 = 0xE1A00000; // nop
-			setBL(0x02099A88, (u32)dsiSaveCreate);
-			setBL(0x02099A98, (u32)dsiSaveOpen);
-			setBL(0x02099CA0, (u32)dsiSaveSetLength);
-			setBL(0x02099CB0, (u32)dsiSaveWrite);
-			setBL(0x02099CB8, (u32)dsiSaveClose);
-			*(u32*)0x02099CC4 = 0xE1A00000; // nop
-			*(u32*)0x02099CC8 = 0xE1A00000; // nop
-			*(u32*)0x02099CCC = 0xE1A00000; // nop
-			*(u32*)0x02099CD0 = 0xE1A00000; // nop
-			*(u32*)0x02099CDC = 0xE1A00000; // nop
-			*(u32*)0x02099CE0 = 0xE1A00000; // nop
-			*(u32*)0x020E9848 = 0xE1A00000; // nop
-			*(u32*)0x020E9984 = 0xE1A00000; // nop
-			*(u32*)0x020E9998 = 0xE1A00000; // nop
-			*(u32*)0x020ED778 = 0xE1A00000; // nop
-			patchInitDSiWare(0x020F40DC, heapEndMaxForRetailMus);
-			*(u32*)0x020F4468 = *(u32*)0x02005038;
+			*(u32*)(0x02022EF0-offsetChange) = 0xE12FFF1E; // bx lr (Disable loading sdat file)
+			tonccpy((u32*)(0x02022F10-offsetChange), ce9->patches->musicPlay, 0xC);
+			tonccpy((u32*)(0x02022F48-offsetChange), ce9->patches->musicStopEffect, 0xC);
+			setBL(0x0202A548-offsetChange, (int)ce9->patches->rumble_arm9[0]); // Rumble when hair is whipped
+			setBL(0x02098B60-offsetChange, (u32)dsiSaveCreate);
+			setBL(0x02098B84-offsetChange, (u32)dsiSaveGetResultCode);
+			*(u32*)(0x02098B94-offsetChange) = 0xE1A00000; // nop
+			setBL(0x02098BA0-offsetChange, (u32)dsiSaveCreate);
+			*(u32*)(0x02098BBC-offsetChange) = 0xE3A00000; // mov r0, #0
+			setBL(0x020997C0-offsetChange, (u32)dsiSaveOpen);
+			*(u32*)(0x020997D8-offsetChange) = 0xE1A00000; // nop
+			setBL(0x020997E8-offsetChange, (u32)dsiSaveOpen);
+			setBL(0x020997FC-offsetChange, (u32)dsiSaveRead);
+			setBL(0x02099804-offsetChange, (u32)dsiSaveClose);
+			*(u32*)(0x02099A64-offsetChange) = 0xE1A00000; // nop
+			setBL(0x02099A88-offsetChange, (u32)dsiSaveCreate);
+			setBL(0x02099A98-offsetChange, (u32)dsiSaveOpen);
+			setBL(0x02099CA0-offsetChange, (u32)dsiSaveSetLength);
+			setBL(0x02099CB0-offsetChange, (u32)dsiSaveWrite);
+			setBL(0x02099CB8-offsetChange, (u32)dsiSaveClose);
+			*(u32*)(0x02099CC4-offsetChange) = 0xE1A00000; // nop
+			*(u32*)(0x02099CC8-offsetChange) = 0xE1A00000; // nop
+			*(u32*)(0x02099CCC-offsetChange) = 0xE1A00000; // nop
+			*(u32*)(0x02099CD0-offsetChange) = 0xE1A00000; // nop
+			*(u32*)(0x02099CDC-offsetChange) = 0xE1A00000; // nop
+			*(u32*)(0x02099CE0-offsetChange) = 0xE1A00000; // nop
+			*(u32*)(0x020E9848-offsetChange) = 0xE1A00000; // nop
+			*(u32*)(0x020E9984-offsetChange) = 0xE1A00000; // nop
+			*(u32*)(0x020E9998-offsetChange) = 0xE1A00000; // nop
+			*(u32*)(0x020ED778-offsetChange) = 0xE1A00000; // nop
+			patchInitDSiWare(0x020F40DC-offsetChange, heapEndMaxForRetailMus);
+			*(u32*)(0x020F4468-offsetChange) = *(u32*)0x02005038;
 			patchUserSettingsReadDSiWare(0x020F5654);
-			*(u32*)0x020F5B48 = 0xE1A00000; // nop
-			*(u32*)0x020F5B4C = 0xE1A00000; // nop
-			*(u32*)0x020F5B50 = 0xE1A00000; // nop
-			*(u32*)0x020F5B54 = 0xE1A00000; // nop
-			*(u32*)0x020F5B60 = 0xE1A00000; // nop (Enable error exception screen)
+			*(u32*)(0x020F5B48-offsetChange) = 0xE1A00000; // nop
+			*(u32*)(0x020F5B4C-offsetChange) = 0xE1A00000; // nop
+			*(u32*)(0x020F5B50-offsetChange) = 0xE1A00000; // nop
+			*(u32*)(0x020F5B54-offsetChange) = 0xE1A00000; // nop
+			*(u32*)(0x020F5B60-offsetChange) = 0xE1A00000; // nop (Enable error exception screen)
 		} else if (ndsHeader->headerCRC16 == 0x4D03) { // Prototype build: 06/23/10
 			ce9->patches->rumble_arm9[0][3] = *(u32*)0x02029F94;
 

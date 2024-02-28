@@ -12854,24 +12854,25 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Shantae: Risky's Revenge (USA)
 	else if (strcmp(romTid, "KS3E") == 0) {
-		if (ndsHeader->headerCRC16 == 0xC9EC) { // Prototype build: 10/27/10 (Normal)
+		if (ndsHeader->headerCRC16 == 0xC9EC || ndsHeader->headerCRC16 == 0x21DC) { // Prototype builds: 10/27/10
 			if (!twlFontFound) {
 				// Hide help button
 				*(u32*)0x02016BE4 = 0xE1A00000; // nop
 			}
 			if (saveOnFlashcard) {
-				setBL(0x02098B60, (u32)dsiSaveCreate);
-				setBL(0x02098B84, (u32)dsiSaveGetResultCode);
-				setBL(0x02098BA0, (u32)dsiSaveCreate);
-				setBL(0x020997C0, (u32)dsiSaveOpen);
-				setBL(0x020997E8, (u32)dsiSaveOpen);
-				setBL(0x020997FC, (u32)dsiSaveRead);
-				setBL(0x02099804, (u32)dsiSaveClose);
-				setBL(0x02099A88, (u32)dsiSaveCreate);
-				setBL(0x02099A98, (u32)dsiSaveOpen);
-				setBL(0x02099CA0, (u32)dsiSaveSetLength);
-				setBL(0x02099CB0, (u32)dsiSaveWrite);
-				setBL(0x02099CB8, (u32)dsiSaveClose);
+				u8 offsetChange = (ndsHeader->headerCRC16 == 0xC9EC) ? 0 : 0xA8;
+				setBL(0x02098B60-offsetChange, (u32)dsiSaveCreate);
+				setBL(0x02098B84-offsetChange, (u32)dsiSaveGetResultCode);
+				setBL(0x02098BA0-offsetChange, (u32)dsiSaveCreate);
+				setBL(0x020997C0-offsetChange, (u32)dsiSaveOpen);
+				setBL(0x020997E8-offsetChange, (u32)dsiSaveOpen);
+				setBL(0x020997FC-offsetChange, (u32)dsiSaveRead);
+				setBL(0x02099804-offsetChange, (u32)dsiSaveClose);
+				setBL(0x02099A88-offsetChange, (u32)dsiSaveCreate);
+				setBL(0x02099A98-offsetChange, (u32)dsiSaveOpen);
+				setBL(0x02099CA0-offsetChange, (u32)dsiSaveSetLength);
+				setBL(0x02099CB0-offsetChange, (u32)dsiSaveWrite);
+				setBL(0x02099CB8-offsetChange, (u32)dsiSaveClose);
 			}
 		} else if (ndsHeader->headerCRC16 == 0x4D03) { // Prototype build: 06/23/10
 			if (!twlFontFound) {
