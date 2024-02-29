@@ -22133,6 +22133,54 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020E6094 = 0xE1A00000; // nop (Enable error exception screen)
 	}
 
+	// Shantae: Risky's Revenge (USA) (Ubisoft Review Build)
+	// Requires 8MB of RAM, crashes after first battle with 4MB of RAM, but can get past with a save file
+	// BGM is disabled to stay within RAM limitations
+	else if ((strcmp(romTid, "NTRJ") == 0) && (ndsHeader->headerCRC16 == 0x69D6)) {
+		ce9->rumbleFrames[0] = 10;
+		ce9->rumbleForce[0] = 1;
+		ce9->patches->rumble_arm9[0][3] = *(u32*)0x0202657C;
+
+		// Hide help button
+		*(u32*)0x02015630 = 0xE1A00000; // nop
+
+		if (!extendedMemory) {
+			// Disable pre-load function
+			*(u32*)0x020B6C94 = 0xE12FFF1E; // bx lr
+		}
+		*(u32*)0x0201FCEC = 0xE12FFF1E; // bx lr (Disable loading sdat file)
+		tonccpy((u32*)0x0201FD0C, ce9->patches->musicPlay, 0xC);
+		tonccpy((u32*)0x0201FD44, ce9->patches->musicStopEffect, 0xC);
+		setBL(0x0202657C, (int)ce9->patches->rumble_arm9[0]); // Rumble when hair is whipped
+		setBL(0x0208A8E0, (u32)dsiSaveCreate);
+		setBL(0x0208A904, (u32)dsiSaveGetResultCode);
+		*(u32*)0x0208A914 = 0xE1A00000; // nop
+		setBL(0x0208A920, (u32)dsiSaveCreate);
+		*(u32*)0x0208A930 = 0xE3A00000; // mov r0, #0
+		setBL(0x0208AF94, (u32)dsiSaveOpen);
+		*(u32*)0x0208AFAC = 0xE1A00000; // nop
+		setBL(0x0208AFBC, (u32)dsiSaveOpen);
+		setBL(0x0208AFD0, (u32)dsiSaveRead);
+		setBL(0x0208AFD8, (u32)dsiSaveClose);
+		setBL(0x0208B250, (u32)dsiSaveCreate);
+		setBL(0x0208B260, (u32)dsiSaveOpen);
+		setBL(0x0208B46C, (u32)dsiSaveSetLength);
+		setBL(0x0208B47C, (u32)dsiSaveWrite);
+		setBL(0x0208B484, (u32)dsiSaveClose);
+		*(u32*)0x020D8A10 = 0xE1A00000; // nop
+		*(u32*)0x020D8B4C = 0xE1A00000; // nop
+		*(u32*)0x020D8B60 = 0xE1A00000; // nop
+		*(u32*)0x020DC8A0 = 0xE1A00000; // nop
+		patchInitDSiWare(0x020E31CC, heapEndMaxForRetailMus);
+		*(u32*)0x020E3558 = *(u32*)0x02005020;
+		patchUserSettingsReadDSiWare(0x020E4734);
+		*(u32*)0x020E4C28 = 0xE1A00000; // nop
+		*(u32*)0x020E4C2C = 0xE1A00000; // nop
+		*(u32*)0x020E4C30 = 0xE1A00000; // nop
+		*(u32*)0x020E4C34 = 0xE1A00000; // nop
+		*(u32*)0x020E4C40 = 0xE1A00000; // nop (Enable error exception screen)
+	}
+
 	// Shantae: Risky's Revenge (USA)
 	// Requires 8MB of RAM, crashes after first battle with 4MB of RAM, but can get past with a save file
 	// BGM is disabled to stay within RAM limitations
@@ -22272,6 +22320,47 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			*(u32*)0x020EC190 = 0xE1A00000; // nop
 			*(u32*)0x020EC194 = 0xE1A00000; // nop
 			*(u32*)0x020EC1A0 = 0xE1A00000; // nop (Enable error exception screen)
+		} else if (ndsHeader->headerCRC16 == 0x735B) { // Ubisoft Build
+			ce9->patches->rumble_arm9[0][3] = *(u32*)0x020299A4;
+
+			// Hide help button
+			*(u32*)0x02016940 = 0xE1A00000; // nop
+
+			if (!extendedMemory) {
+				// Disable pre-load function
+				*(u32*)0x020C5DD4 = 0xE12FFF1E; // bx lr
+			}
+			*(u32*)0x02022594 = 0xE12FFF1E; // bx lr (Disable loading sdat file)
+			tonccpy((u32*)0x020225B4, ce9->patches->musicPlay, 0xC);
+			tonccpy((u32*)0x020225EC, ce9->patches->musicStopEffect, 0xC);
+			setBL(0x020299A4, (int)ce9->patches->rumble_arm9[0]); // Rumble when hair is whipped
+			setBL(0x02097484, (u32)dsiSaveCreate);
+			setBL(0x020974A8, (u32)dsiSaveGetResultCode);
+			*(u32*)0x020974B8 = 0xE1A00000; // nop
+			setBL(0x020974C4, (u32)dsiSaveCreate);
+			*(u32*)0x020974E0 = 0xE3A00000; // mov r0, #0
+			setBL(0x02098144, (u32)dsiSaveOpen);
+			*(u32*)0x0209815C = 0xE1A00000; // nop
+			setBL(0x0209816C, (u32)dsiSaveOpen);
+			setBL(0x02098180, (u32)dsiSaveRead);
+			setBL(0x02098188, (u32)dsiSaveClose);
+			setBL(0x02098400, (u32)dsiSaveCreate);
+			setBL(0x02098410, (u32)dsiSaveOpen);
+			setBL(0x0209861C, (u32)dsiSaveSetLength);
+			setBL(0x0209862C, (u32)dsiSaveWrite);
+			setBL(0x02098634, (u32)dsiSaveClose);
+			*(u32*)0x020E7BE4 = 0xE1A00000; // nop
+			*(u32*)0x020E7D20 = 0xE1A00000; // nop
+			*(u32*)0x020E7D34 = 0xE1A00000; // nop
+			*(u32*)0x020EBA8C = 0xE1A00000; // nop
+			patchInitDSiWare(0x020F23CC, heapEndMaxForRetailMus);
+			*(u32*)0x020F2758 = *(u32*)0x02005020;
+			patchUserSettingsReadDSiWare(0x020F3944);
+			*(u32*)0x020F3E38 = 0xE1A00000; // nop
+			*(u32*)0x020F3E3C = 0xE1A00000; // nop
+			*(u32*)0x020F3E40 = 0xE1A00000; // nop
+			*(u32*)0x020F3E44 = 0xE1A00000; // nop
+			*(u32*)0x020F3E50 = 0xE1A00000; // nop (Enable error exception screen)
 		} else { // Final release
 			ce9->patches->rumble_arm9[0][3] = *(u32*)0x02026F68;
 

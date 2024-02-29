@@ -12852,6 +12852,28 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// Shantae: Risky's Revenge (USA) (Ubisoft Review Build)
+	else if ((strcmp(romTid, "NTRJ") == 0) && (ndsHeader->headerCRC16 == 0x69D6)) {
+		if (!twlFontFound) {
+			// Hide help button
+			*(u32*)0x02015630 = 0xE1A00000; // nop
+		}
+		if (saveOnFlashcard) {
+			setBL(0x0208A8E0, (u32)dsiSaveCreate);
+			setBL(0x0208A904, (u32)dsiSaveGetResultCode);
+			setBL(0x0208A920, (u32)dsiSaveCreate);
+			setBL(0x0208AF94, (u32)dsiSaveOpen);
+			setBL(0x0208AFBC, (u32)dsiSaveOpen);
+			setBL(0x0208AFD0, (u32)dsiSaveRead);
+			setBL(0x0208AFD8, (u32)dsiSaveClose);
+			setBL(0x0208B250, (u32)dsiSaveCreate);
+			setBL(0x0208B260, (u32)dsiSaveOpen);
+			setBL(0x0208B46C, (u32)dsiSaveSetLength);
+			setBL(0x0208B47C, (u32)dsiSaveWrite);
+			setBL(0x0208B484, (u32)dsiSaveClose);
+		}
+	}
+
 	// Shantae: Risky's Revenge (USA)
 	else if (strcmp(romTid, "KS3E") == 0) {
 		if (ndsHeader->headerCRC16 == 0xC9EC || ndsHeader->headerCRC16 == 0x21DC) { // Prototype builds: 10/27/10
@@ -12911,6 +12933,25 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 				setBL(0x02090E98, (u32)dsiSaveSetLength);
 				setBL(0x02090EA8, (u32)dsiSaveWrite);
 				setBL(0x02090EB0, (u32)dsiSaveClose);
+			}
+		} else if (ndsHeader->headerCRC16 == 0x735B) { // Ubisoft Build
+			if (!twlFontFound) {
+				// Hide help button
+				*(u32*)0x02016940 = 0xE1A00000; // nop
+			}
+			if (saveOnFlashcard) {
+				setBL(0x02097484, (u32)dsiSaveCreate);
+				setBL(0x020974A8, (u32)dsiSaveGetResultCode);
+				setBL(0x020974C4, (u32)dsiSaveCreate);
+				setBL(0x02098144, (u32)dsiSaveOpen);
+				setBL(0x0209816C, (u32)dsiSaveOpen);
+				setBL(0x02098180, (u32)dsiSaveRead);
+				setBL(0x02098188, (u32)dsiSaveClose);
+				setBL(0x02098400, (u32)dsiSaveCreate);
+				setBL(0x02098410, (u32)dsiSaveOpen);
+				setBL(0x0209861C, (u32)dsiSaveSetLength);
+				setBL(0x0209862C, (u32)dsiSaveWrite);
+				setBL(0x02098634, (u32)dsiSaveClose);
 			}
 		} else { // Final release
 			if (!twlFontFound) {

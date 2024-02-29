@@ -1981,7 +1981,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		}
 	}
 
-	if (!conf->loader2 && (strcmp(romTid, "NTRJ") == 0) && (headerCRC == 0x9B41)) { // Use bootloader2 for Shantae: Risky's Revenge (USA) (Review Build)
+	if (!conf->loader2 && (strcmp(romTid, "NTRJ") == 0) && (headerCRC == 0x9B41 || headerCRC == 0x69D6)) { // Use bootloader2 for Shantae: Risky's Revenge (USA) (Review Build)
 		conf->loader2 = true;
 	}
 
