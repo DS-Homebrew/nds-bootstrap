@@ -477,6 +477,18 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
 		const u16* branchCode7 = generateA7InstrThumb(0x020BAC60, 0x020BACB6);
 		tonccpy((void*)0x020BAC60, branchCode7, 0x4);
 	}
+
+	// Shantae DSi (03/06/09 build)
+	else if (strcmp(romTid, "AIPE") == 0 && ndsHeader->headerCRC16 == 0x700E && !extendedMemory) {
+		*(u32*)0x02046BFC -= 2;
+		*(u32*)0x02046DE4 -= 2;
+	}
+
+	// Shantae DSi (04/01/09 build)
+	else if (strcmp(romTid, "NTRJ") == 0 && ndsHeader->headerCRC16 == 0xAC4C && !extendedMemory) {
+		*(u32*)0x0203FB20 -= 2;
+		*(u32*)0x0203FD14 -= 2;
+	}
 }
 
 void rsetA7Cache(void)

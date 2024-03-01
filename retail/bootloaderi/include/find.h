@@ -47,7 +47,7 @@ u32* findDsiModeCheck2Offset(const u32* dsiModeCheckOffset, bool usesThumb);
 u32* findCardHashInitOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
 u16* findCardHashInitOffsetThumb(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
 u32* findCardReadEndOffsetType0(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 startOffset);
-u32* findCardReadEndOffsetType1(const tNDSHeader* ndsHeader, u32 startOffset);
+u32* findCardReadEndOffsetType1(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 startOffset);
 u16* findCardReadEndOffsetThumb(const tNDSHeader* ndsHeader, u32 startOffset);
 u16* findCardReadEndOffsetThumb5Type0(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 startOffset); // SDK 5
 u16* findCardReadEndOffsetThumb5Type1(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 startOffset); // SDK 5

@@ -26,9 +26,10 @@ static const u16 wramClearSignature4Thumb[1]   = {0x80E0};
 static const u16 wramClearSignatureTwlThumb[3] = {0xB570, 0x1C05, 0x2D01};
 
 // Relocate
-static const u32 relocateStartSignature[1] = {0x027FFFFA};
-static const u32 relocateStartSignature5[1]    = {0x3381C0DE}; //  33 81 C0 DE  DE C0 81 33 00 00 00 00 is the marker for the beggining of the relocated area :-)
-static const u32 relocateStartSignature5Alt[1] = {0x2106C0DE};
+static const u32 relocateStartSignature[1]      = {0x027FFFFA};
+static const u32 relocateStartSignature5[1]     = {0x3381C0DE}; //  33 81 C0 DE  DE C0 81 33 00 00 00 00 is the marker for the beggining of the relocated area :-)
+static const u32 relocateStartSignature5Alt[1]  = {0x2106C0DE};
+static const u32 relocateStartSignature5Alt2[1] = {0x02FFFFFA};
 
 static const u32 nextFunctiontSignature[1] = {0xE92D4000};
 static const u32 relocateValidateSignature[1] = {0x400010C};
@@ -296,7 +297,27 @@ bool a7GetReloc(const tNDSHeader* ndsHeader, const module_params_t* moduleParams
 					(u32*)ndsHeader->arm7destination, 0x800,
 					relocateStartSignature5Alt, 1
 				);
-				if (relocationStart>0) relocationStart += 0x28;
+				if (relocationStart) relocationStart += 0x28;
+			}
+
+			if (!relocationStart) {
+				dbg_printf("Relocation start not found. Trying alt 2\n");
+				relocationStart = (u32)findOffset(
+					(u32*)ndsHeader->arm7destination, 0x800,
+					relocateStartSignature5Alt2, 1
+				);
+				if (relocationStart) {
+					int i = 0;
+					while ((*(u32*)relocationStart != 0) && (i < 0x100)) {
+						relocationStart += 4;
+						i += 4;
+					}
+					if (*(u32*)relocationStart != 0) {
+						relocationStart = 0;
+					} else {
+						relocationStart -= 8;
+					}
+				}
 			}
 
 			if (relocationStart) {
@@ -304,7 +325,7 @@ bool a7GetReloc(const tNDSHeader* ndsHeader, const module_params_t* moduleParams
 			}
 		}
 		if (!relocationStart) {
-			dbg_printf("Relocation start alt not found\n");
+			dbg_printf("Relocation start alt 2 not found\n");
 			return false;
 		}
 

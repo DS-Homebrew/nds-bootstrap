@@ -65,7 +65,7 @@ static bool patchCardRead(cardengineArm9* ce9, const tNDSHeader* ndsHeader, cons
 		}
 		if (!cardReadEndOffset) {
 			//dbg_printf("Trying alt...\n");
-			cardReadEndOffset = findCardReadEndOffsetType1(ndsHeader, startOffset);
+			cardReadEndOffset = findCardReadEndOffsetType1(ndsHeader, moduleParams, startOffset);
 			if (cardReadEndOffset) {
 				readType = 1;
 				if (*(cardReadEndOffset - 1) == 0xFFFFFE00) {
@@ -217,9 +217,9 @@ static void patchCacheFlush(cardengineArm9* ce9, bool usesThumb, u32* cardPullOu
 	tonccpy(forceToPowerOffOffset, cardPullOutPatch, 0x4);
 }*/
 
-static void patchCardId(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb, u32* cardReadEndOffset) {
+static bool patchCardId(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb, u32* cardReadEndOffset) {
 	if (!isPawsAndClaws(ndsHeader) && !cardReadEndOffset) {
-		return;
+		return true;
 	}
 
 	// Card ID
@@ -250,7 +250,11 @@ static void patchCardId(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const 
 		dbg_printf("cardId location : ");
 		dbg_hexa((u32)cardIdStartOffset);
 		dbg_printf("\n\n");
+	} else if (isSdk5(moduleParams)) {
+		return false;
 	}
+
+	return true;
 }
 
 static void patchCardReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
@@ -2052,7 +2056,10 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 	//patchForceToPowerOff(ce9, ndsHeader, usesThumb);
 
 	if (!isPawsAndClaws(ndsHeader)) {
-		patchCardId(ce9, ndsHeader, moduleParams, usesThumb, cardReadEndOffset);
+		if (!patchCardId(ce9, ndsHeader, moduleParams, usesThumb, cardReadEndOffset)) {
+			dbg_printf("ERR_LOAD_OTHR\n\n");
+			return ERR_LOAD_OTHR;
+		}
 	}
 
 	patchCardReadDma(ce9, ndsHeader, moduleParams, usesThumb);

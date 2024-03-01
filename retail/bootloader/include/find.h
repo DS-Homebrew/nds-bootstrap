@@ -42,7 +42,7 @@ inline u16* findOffsetBackwardsThumb4(const u16* start, u32 dataSize, const u16*
 u32* findModuleParamsOffset(const tNDSHeader* ndsHeader);
 u32* findLtdModuleParamsOffset(const tNDSHeader* ndsHeader);
 u32* findCardReadEndOffsetType0(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 startOffset);
-u32* findCardReadEndOffsetType1(const tNDSHeader* ndsHeader, u32 startOffset);
+u32* findCardReadEndOffsetType1(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 startOffset);
 u16* findCardReadEndOffsetThumb(const tNDSHeader* ndsHeader, u32 startOffset);
 u16* findCardReadEndOffsetThumb5Type0(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 startOffset); // SDK 5
 u16* findCardReadEndOffsetThumb5Type1(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 startOffset); // SDK 5
