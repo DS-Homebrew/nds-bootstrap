@@ -15729,7 +15729,7 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
 		*(u32*)0x0204CDBC = 0xe1a00000; //nop
 	}
 	
-	// 0735 - Castlevania - Portrait of Ruin (USA)
+	// Castlevania - Portrait of Ruin (USA)
 	else if (strcmp(romTid, "ACBE") == 0) {
 		*(u32*)0x02007910 = 0xeb02508e;
 		*(u32*)0x02007918 = 0xea000004;
@@ -15740,18 +15740,25 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
 		*(u32*)0x02007a14 = 0xea000003;
 	}
 	
-	// 0676 - Akumajou Dracula - Gallery of Labyrinth (Japan)
-	else if (strcmp(romTid, "ACBJ") == 0 && ndsHeader->romversion == 0) {
-		*(u32*)0x02007910 = 0xeb0250b0;
-		*(u32*)0x02007918 = 0xea000004;
-		*(u32*)0x02007a00 = 0xeb025074;
-		*(u32*)0x02007a08 = 0xe59f1030;
-		*(u32*)0x02007a0c = 0xe59f0028;
-		*(u32*)0x02007a10 = 0xe0281097;
-		*(u32*)0x02007a14 = 0xea000003;
+	// Akumajou Dracula - Gallery of Labyrinth (Japan)
+	else if (strcmp(romTid, "ACBJ") == 0) {
+		if (ndsHeader->romversion == 0) {
+			*(u32*)0x02007910 += 5;
+			*(u32*)0x02007918 += 0xd0000000; // bne -> b
+			*(u32*)0x02007a00 += 5;
+			*(u32*)0x02007a08 += 0xe0000000; // ldreq -> ldr
+			*(u32*)0x02007a0c += 0xe0000000; // ldreq -> ldr
+			*(u32*)0x02007a10 += 0xe0000000; // mlaeq -> mla
+			*(u32*)0x02007a14 += 0xe0000000; // beq -> b
+		} else {
+			*(u32*)0x0200753C += 5;
+			*(u32*)0x02007544 += 0xd0000000; // bne -> b
+			*(u32*)0x02007624 += 5;
+			*(u32*)0x0200762C += 0xd0000000; // bne -> b
+		}
 	}
 	
-	// 0881 - Castlevania - Portrait of Ruin (Europe) (En,Fr,De,Es,It)
+	// Castlevania - Portrait of Ruin (Europe) (En,Fr,De,Es,It)
 	else if (strcmp(romTid, "ACBP") == 0) {
 		*(u32*)0x02007b00 = 0xeb025370;
 		*(u32*)0x02007b08 = 0xea000004;
