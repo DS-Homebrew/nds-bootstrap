@@ -16827,6 +16827,5 @@ u32 patchCardNds(
 		return patchCardNdsArm7(ce7, ndsHeader, moduleParams, ROMinRAM, saveFileCluster, saveSize);
 	}
 
-	dbg_printf("ERR_LOAD_OTHR");
 	return ERR_LOAD_OTHR;
 }
