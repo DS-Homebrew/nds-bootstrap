@@ -531,23 +531,6 @@ rumble2_arm9:
 @---------------------------------------------------------------------------------
 #endif
 
-	.thumb
-.global disableIrqMask
-.type	disableIrqMask STT_FUNC
-disableIrqMask:
-    LDR             R7, =0x4000208
-    MOV             R2, #0
-    LDRH            R3, [R7]
-    MVN             R1, R0
-    STRH            R2, [R7]
-    LDR             R0, [R7,#8]
-    AND             R1, R0, R1
-    STR             R1, [R7,#8]
-    LDRH            R1, [R7]
-    STRH            R3, [R7]
-    BX              LR
-
-	.arm
 //---------------------------------------------------------------------------------
 .global  getDtcmBase
 .type	 getDtcmBase STT_FUNC

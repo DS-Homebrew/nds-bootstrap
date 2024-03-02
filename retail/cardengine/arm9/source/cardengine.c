@@ -683,11 +683,6 @@ void cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	const u16 exmemcnt = REG_EXMEMCNT;
 	cardReadInProgress = true;
 
-	if (__myio_dldi.features & FEATURE_SLOT_GBA) {
-		extern void disableIrqMask(u32 mask);
-		disableIrqMask(IRQ_CART);
-	}
-
 	setDeviceOwner();
 	initialize();
 
