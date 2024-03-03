@@ -137,6 +137,7 @@ static const u32 mpuInitRegion2Data3[1]     = {0x27E0021}; // SDK >= 2 (Late)
 static const u32 mpuInitRegion3Signature[1] = {0xEE060F13};
 static const u32 mpuInitRegion3Data[1]      = {0x8000035};
 static const u32 mpuFlagsSetSignature[4]    = {0xE3A0004A, 0xEE020F30, 0xE3A0004A, 0xEE020F10}; // SDK 5
+static const u32 mpuCodeCacheChangeSignature[4] = {0xEE121F30, 0xE1811000, 0xEE021F30, 0xE12FFF1E}; // SDK 5
 static const u32 mpuChangeRegion1Signature[3]         = {0xE3A00001, 0xE3A01402, 0xE3A0202A};
 static const u32 mpuChangeRegion1SignatureAlt[3]      = {0x03A0202C, 0xE3A00001, 0xE3A01402};
 static const u16 mpuChangeRegion1SignatureThumb[3]    = {0x2001, 0x0609, 0x222A};
@@ -1520,6 +1521,23 @@ u32* findMpuFlagsSetOffset(const tNDSHeader* ndsHeader) {
 		dbg_printf("Mpu flags set found\n");
 	} else {
 		dbg_printf("Mpu flags set not found\n");
+	}
+
+	dbg_printf("\n");
+	return offset;
+}
+
+u32* findMpuCodeCacheChangeOffset(const tNDSHeader* ndsHeader) {
+	dbg_printf("findMpuCodeCacheChangeOffset:\n");
+
+	u32* offset = findOffset(
+		(u32*)ndsHeader->arm9destination, iUncompressedSize,
+		mpuCodeCacheChangeSignature, 4
+	);
+	if (offset) {
+		dbg_printf("Mpu code cache change found\n");
+	} else {
+		dbg_printf("Mpu code cache change not found\n");
 	}
 
 	dbg_printf("\n");

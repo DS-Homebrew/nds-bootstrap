@@ -620,7 +620,7 @@ static void patchMpu2(const tNDSHeader* ndsHeader, const module_params_t* module
 	patchOffsetCache.mpuInitOffset2 = mpuInitOffset;
 }
 
-void patchMpuFlagsSet(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+void patchSlot2IoBlock(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	extern u32 _io_dldi_features;
 	extern u32 arm7mbk;
 	if ((_io_dldi_features & FEATURE_SLOT_NDS) || moduleParams->sdk_version < 0x5000000 || arm7mbk == 0x080037C0) {
@@ -645,6 +645,31 @@ void patchMpuFlagsSet(const tNDSHeader* ndsHeader, const module_params_t* module
 	offset[4] = 0xE3A00002; // mov r0, #0x02
 
 	dbg_printf("Mpu flags set: ");
+	dbg_hexa((u32)offset);
+	dbg_printf("\n\n");
+
+	offset = patchOffsetCache.mpuCodeCacheChangeOffset;
+	if (!patchOffsetCache.mpuCodeCacheChangeOffset) {
+		offset = findMpuCodeCacheChangeOffset(ndsHeader);
+		if (offset) {
+			patchOffsetCache.mpuCodeCacheChangeOffset = offset;
+		}
+	}
+
+	if (!offset) {
+		return;
+	}
+
+	// Disable MPU cache and write buffer changes for the Slot-2 region
+	offset[0] = 0xE12FFF1E; // bx lr
+	offset[4] = 0xE12FFF1E; // bx lr
+	offset[8] = 0xE12FFF1E; // bx lr
+	offset[12] = 0xE12FFF1E; // bx lr
+	offset[16] = 0xE12FFF1E; // bx lr
+	offset[21] = 0xE12FFF1E; // bx lr
+	offset[25] = 0xE12FFF1E; // bx lr
+
+	dbg_printf("Mpu cache change: ");
 	dbg_hexa((u32)offset);
 	dbg_printf("\n\n");
 }
@@ -2023,7 +2048,7 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 
 	patchMpu(ndsHeader, moduleParams, patchMpuRegion);
 	patchMpu2(ndsHeader, moduleParams, usesCloneboot);
-	patchMpuFlagsSet(ndsHeader, moduleParams);
+	patchSlot2IoBlock(ndsHeader, moduleParams);
 	patchMpuChange(ndsHeader, moduleParams);
 
 	patchHiHeapPointer(ce9, moduleParams, ndsHeader);
