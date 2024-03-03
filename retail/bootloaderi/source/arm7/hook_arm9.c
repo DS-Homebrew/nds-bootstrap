@@ -179,7 +179,7 @@ void configureRomMap(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const u32
 	romMap[0][0] = romStart;
 	romMap[0][1] = romLocation;
 
-	if (dsiMode || dsBrowser) {
+	if (dsiMode) {
 		romMapLines = 1;
 
 		romMap[0][2] = romLocation+0x4000;

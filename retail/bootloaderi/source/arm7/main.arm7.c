@@ -768,9 +768,6 @@ static module_params_t* loadModuleParams(const tNDSHeader* ndsHeader, bool* foun
 }
 
 u32 getRomLocation(const tNDSHeader* ndsHeader, const bool isESdk2, const bool isSdk5, const bool dsiBios) {
-	if (strncmp(ndsHeader->gameCode, "UBR", 3) == 0) {
-		return ROM_LOCATION_DSIMODE;
-	}
 	if (ndsHeader->unitCode > 0 && dsiModeConfirmed) {
 		return ROM_LOCATION_TWLSDK;
 	}

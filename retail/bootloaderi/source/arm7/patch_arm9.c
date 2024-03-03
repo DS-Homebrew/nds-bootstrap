@@ -9,6 +9,7 @@
 #include "cardengine_header_arm9.h"
 #include "unpatched_funcs.h"
 #include "debug_file.h"
+#include "dmaTwl.h"
 #include "tonccpy.h"
 
 #include "igm_text.h"
@@ -2546,7 +2547,7 @@ static void operaRamPatch(void) {
 		*(u32*)0x020402D8 = 0xD3FFFFF;
 		*(u32*)0x020402DC = 0xD7FFFFF;
 		*(u32*)0x020402E0 = 0xDFFFFFF;	// ???
-		toncset((char*)0xD000000, 0xFF, 0x800000);		// Fill fake MEP with FFs
+		dma_twlFill32(0, 0xFFFFFFFF, (u32*)0xD000000, 0x800000);		// Fill fake MEP with FFs
 	} else {
 		*(u32*)0x020402CC = 0xCFFFFFE;
 		*(u32*)0x020402D0 = 0xC800000;
@@ -2554,7 +2555,7 @@ static void operaRamPatch(void) {
 		*(u32*)0x020402D8 = 0xCBFFFFF;
 		*(u32*)0x020402DC = 0xCFFFFFF;
 		*(u32*)0x020402E0 = 0xD7FFFFF;	// ???
-		toncset((char*)0xC800000, 0xFF, 0x800000);		// Fill fake MEP with FFs
+		dma_twlFill32(0, 0xFFFFFFFF, (u32*)0xC800000, 0x800000);		// Fill fake MEP with FFs
 	}
 }
 
