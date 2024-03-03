@@ -831,39 +831,6 @@ static void startBinary_ARM7(void) {
 	arm7code(ndsHeader->arm7executeAddress);
 }
 
-static void loadOverlaysintoRAM(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, aFile* file) {
-	// Load overlays into RAM
-	if (overlaysSize < romSizeLimit)
-	{
-		if ((_io_dldi_features & FEATURE_SLOT_GBA) && s2FlashcardId != 0) {
-			const u32 buffer = 0x037F8000;
-			const u16 bufferSize = 0x8000;
-			s32 len = (s32)overlaysSize;
-			u32 dst = 0;
-			while (1) {
-				u32 readLen = (len > bufferSize) ? bufferSize : len;
-
-				fileRead((char*)buffer, file, ndsHeader->arm9overlaySource+dst, readLen);
-				tonccpy((char*)romLocation+dst, (char*)buffer, readLen);
-
-				len -= bufferSize;
-				dst += bufferSize;
-
-				if (len <= 0) {
-					break;
-				}
-			}
-			toncset((char*)buffer, 0, bufferSize);
-		} else {
-			fileRead((char*)romLocation, file, ndsHeader->arm9overlaySource, overlaysSize);
-		}
-
-		if (!isSdk5(moduleParams) && *(u32*)((romLocation-ndsHeader->arm9overlaySource)+0x003128AC) == 0x4B434148) {
-			*(u32*)((romLocation-ndsHeader->arm9overlaySource)+0x3128AC) = 0xA00;	// Primary fix for Mario's Holiday
-		}
-	}
-}
-
 static void loadOverlaysintoFile(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, aFile* file) {
 	// Load overlays into RAM
 	if (overlaysSize <= 0x700000)
@@ -1547,15 +1514,10 @@ int arm7_main(void) {
 		errorOutput();
 	}
 
-	bool overlaysInRam = (expansionPakFound || (extendedMemory && !dsDebugRam && !dsBrowser));
-	if (overlaysInRam) {
-		if (ROMinRAM) {
-			loadROMintoRAM(ndsHeader, moduleParams, &romFile, usesCloneboot);
-			if (ndsHeader->unitCode == 3) {
-				loadIOverlaysintoRAM(&dsiHeaderTemp, &romFile, usesCloneboot);
-			}
-		} else {
-			loadOverlaysintoRAM(ndsHeader, moduleParams, &romFile);
+	if (ROMinRAM) {
+		loadROMintoRAM(ndsHeader, moduleParams, &romFile, usesCloneboot);
+		if (ndsHeader->unitCode == 3) {
+			loadIOverlaysintoRAM(&dsiHeaderTemp, &romFile, usesCloneboot);
 		}
 	} else {
 		loadOverlaysintoFile(ndsHeader, moduleParams, &romFile);
@@ -1623,7 +1585,7 @@ int arm7_main(void) {
 			}
 		}
 		fileRead((char*)IMAGES_LOCATION, &apPatchFile, 0, apPatchSize);
-		if (applyIpsPatch(ndsHeader, (u8*)IMAGES_LOCATION, (*(u8*)(IMAGES_LOCATION+apPatchSize-1) == 0xA9), ROMinRAM, (overlaysInRam && overlaysSize <= 0x700000), usesCloneboot)) {
+		if (applyIpsPatch(ndsHeader, (u8*)IMAGES_LOCATION, (*(u8*)(IMAGES_LOCATION+apPatchSize-1) == 0xA9), ROMinRAM, usesCloneboot)) {
 			dbg_printf("AP-fix applied\n");
 		} else {
 			dbg_printf("Failed to apply AP-fix\n");

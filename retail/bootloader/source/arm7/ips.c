@@ -16,15 +16,13 @@ extern bool extendedMemory;
 extern bool dsDebugRam;
 extern u32 romLocation;
 
-bool applyIpsPatch(const tNDSHeader* ndsHeader, u8* ipsbyte, bool arm9Only, bool ROMinRAM, bool overlaysInRam, const bool usesCloneboot) {
+bool applyIpsPatch(const tNDSHeader* ndsHeader, u8* ipsbyte, bool arm9Only, bool ROMinRAM, const bool usesCloneboot) {
 	if (ipsbyte[0] != 'P' && ipsbyte[1] != 'A' && ipsbyte[2] != 'T' && ipsbyte[3] != 'C' && ipsbyte[4] != 'H' && ipsbyte[5] != 0) {
 		return false;
 	}
 
 	aFile apFixOverlaysFile;
-	if (!overlaysInRam) {
-		getFileFromCluster(&apFixOverlaysFile, apFixOverlaysCluster);
-	}
+	getFileFromCluster(&apFixOverlaysFile, apFixOverlaysCluster);
 
 	int ipson = 5;
 	int totalrepeats = 0;
@@ -39,7 +37,7 @@ bool applyIpsPatch(const tNDSHeader* ndsHeader, u8* ipsbyte, bool arm9Only, bool
 		} else if (offset >= ndsHeader->arm7romOffset && offset < ndsHeader->arm7romOffset+ndsHeader->arm7binarySize) {
 			// ARM7 binary
 			rombyte = ndsHeader->arm7destination - ndsHeader->arm7romOffset;
-		} else if (offset >= ndsHeader->arm9romOffset+ndsHeader->arm9binarySize && offset < ndsHeader->arm7romOffset) {
+		} else if (offset >= ndsHeader->arm9overlaySource && offset < ndsHeader->arm7romOffset) {
 			// Overlays
 			overlays = true;
 			rombyte = (void*)romLocation;
@@ -52,8 +50,6 @@ bool applyIpsPatch(const tNDSHeader* ndsHeader, u8* ipsbyte, bool arm9Only, bool
 				} else {
 					rombyte -= ndsHeader->arm9overlaySource;
 				}
-			} else {
-				rombyte -= ndsHeader->arm9overlaySource;
 			}
 		}
 		ipson += 3;
@@ -65,7 +61,7 @@ bool applyIpsPatch(const tNDSHeader* ndsHeader, u8* ipsbyte, bool arm9Only, bool
 			for (int ontime = 0; ontime < totalrepeats; ontime++) {
 				repeatbyte[ontime] = ipsbyte[ipson];
 			}
-			if (!overlays || overlaysInRam) {
+			if (!overlays || ROMinRAM) {
 				tonccpy(rombyte+offset, repeatbyte, totalrepeats);
 			} else {
 				fileWrite((char*)&repeatbyte, &apFixOverlaysFile, offset, totalrepeats);
@@ -74,7 +70,7 @@ bool applyIpsPatch(const tNDSHeader* ndsHeader, u8* ipsbyte, bool arm9Only, bool
 		} else {
 			totalrepeats = ipsbyte[ipson] * 256 + ipsbyte[ipson + 1];
 			ipson += 2;
-			if (!overlays || overlaysInRam) {
+			if (!overlays || ROMinRAM) {
 				tonccpy(rombyte+offset, ipsbyte+ipson, totalrepeats);
 			} else {
 				fileWrite((char*)ipsbyte+ipson, &apFixOverlaysFile, offset, totalrepeats);
