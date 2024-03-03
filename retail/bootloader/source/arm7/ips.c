@@ -22,7 +22,9 @@ bool applyIpsPatch(const tNDSHeader* ndsHeader, u8* ipsbyte, bool arm9Only, bool
 	}
 
 	aFile apFixOverlaysFile;
-	getFileFromCluster(&apFixOverlaysFile, apFixOverlaysCluster);
+	if (!ROMinRAM) {
+		getFileFromCluster(&apFixOverlaysFile, apFixOverlaysCluster);
+	}
 
 	int ipson = 5;
 	int totalrepeats = 0;
