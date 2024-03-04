@@ -49,6 +49,7 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
 		return;
 	}
 
+#ifndef LOADERTWO
 	const char* romTid = getRomTid(ndsHeader);
 
 	// Animal Crossing: Wild World
@@ -150,7 +151,6 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
 		*(u32*)0x0207af40 = 0xebfe271e;
 	}
 
-#ifndef LOADERTWO
 	// Art Style: DIGIDRIVE (USA) (child.srl)
 	// Art Style: INTERSECT (Europe, Australia) (child.srl)
 	else if (strcmp(romTid, "NTRJ") == 0 && ndsHeader->headerCRC16 == 0x53E2 && srlAddr > 0) {
@@ -208,7 +208,6 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
 	else if (strcmp(romTid, "NTRJ") == 0 && ndsHeader->headerCRC16 == 0xCD01 && srlAddr > 0) {
 		*(u32*)0x02000BEC = 0xE3A00001; // mov r0, #1 (Do not wait for other consoles to connect)
 	}
-#endif
 
 	// Power Rangers - Samurai (USA) (En,Fr,Es)
 	else if (strcmp(romTid, "B3NE") == 0) {
@@ -496,6 +495,7 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
 		*(u32*)0x0203FB20 -= 2;
 		*(u32*)0x0203FD14 -= 2;
 	}
+#endif
 }
 
 void rsetA7Cache(void)

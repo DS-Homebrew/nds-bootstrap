@@ -870,12 +870,40 @@ static void loadOverlaysintoFile(const tNDSHeader* ndsHeader, const module_param
 	}
 }
 
+static void fileReadWithBuffer(const u32 memDst, aFile* file, const u32 src, u32 readLen) {
+	const u32 buffer = 0x037F8000;
+	const u16 bufferSize = 0x8000;
+	s32 len = readLen;
+	u32 dst = 0;
+	while (1) {
+		u32 readLenBuf = (len > bufferSize) ? bufferSize : len;
+
+		fileRead((char*)buffer, file, src+dst, readLenBuf);
+		tonccpy((char*)memDst+dst, (char*)buffer, readLenBuf);
+
+		len -= bufferSize;
+		dst += bufferSize;
+
+		if (len <= 0) {
+			break;
+		}
+	}
+	toncset((char*)buffer, 0, bufferSize);
+}
+
 static void loadIOverlaysintoRAM(const tDSiHeader* dsiHeader, aFile* file, const bool usesCloneboot) {
 	// Load overlays into RAM
 	if (ioverlaysSize>0x700000) return;
 
-	u32 romOffset = usesCloneboot ? 0x8000 : ndsHeader->arm9overlaySource;
-	fileRead((char*)romLocation+((u32)dsiHeader->arm9iromOffset-romOffset), file, (u32)dsiHeader->arm9iromOffset+dsiHeader->arm9ibinarySize, ioverlaysSize);
+	const u32 romOffset = usesCloneboot ? 0x8000 : ndsHeader->arm9overlaySource;
+	const u32 overlayOffset = (u32)dsiHeader->arm9iromOffset+dsiHeader->arm9ibinarySize;
+	const u32 romLocationEdit = romLocation+((u32)dsiHeader->arm9iromOffset-romOffset);
+
+	if ((_io_dldi_features & FEATURE_SLOT_GBA) && s2FlashcardId != 0) {
+		fileReadWithBuffer(romLocationEdit, file, overlayOffset, ioverlaysSize);
+	} else {
+		fileRead((char*)romLocationEdit, file, overlayOffset, ioverlaysSize);
+	}
 }
 
 static void loadROMintoRAM(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, aFile* file, const bool usesCloneboot) {
@@ -895,24 +923,7 @@ static void loadROMintoRAM(const tNDSHeader* ndsHeader, const module_params_t* m
 	}
 
 	if ((_io_dldi_features & FEATURE_SLOT_GBA) && s2FlashcardId != 0) {
-		const u32 buffer = 0x037F8000;
-		const u16 bufferSize = 0x8000;
-		s32 len = romSizeEdit;
-		u32 dst = 0;
-		while (1) {
-			u32 readLen = (len > bufferSize) ? bufferSize : len;
-
-			fileRead((char*)buffer, file, romOffset+dst, readLen);
-			tonccpy((char*)romLocation+dst, (char*)buffer, readLen);
-
-			len -= bufferSize;
-			dst += bufferSize;
-
-			if (len <= 0) {
-				break;
-			}
-		}
-		toncset((char*)buffer, 0, bufferSize);
+		fileReadWithBuffer(romLocation, file, romOffset, romSizeEdit);
 	} else {
 		fileRead((char*)romLocation, file, romOffset, romSizeEdit);
 	}
