@@ -934,8 +934,7 @@ static void loadROMintoRAM(const tNDSHeader* ndsHeader, const module_params_t* m
 
 	dbg_printf("ROM pre-loaded into RAM at ");
 	dbg_hexa(romLocation);
-	dbg_printf("\n");
-	dbg_printf("\n");
+	dbg_printf("\n\n");
 }
 
 static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, aFile romFile) {
