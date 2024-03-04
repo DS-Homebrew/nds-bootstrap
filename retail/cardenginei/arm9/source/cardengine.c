@@ -343,9 +343,9 @@ static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
 	//	sleepMsEnabled = true;
 	//}
 
-	if ((ce9->valueBits & cacheDisabled) && (u32)dst >= 0x02000000 && (u32)dst < 0x03000000) {
+	/* if ((ce9->valueBits & cacheDisabled) && (u32)dst >= 0x02000000 && (u32)dst < 0x03000000) {
 		fileRead((char*)dst, ((ce9->valueBits & overlaysCached) && src >= newOverlayOffset && src < newOverlayOffset+newOverlaysSize) ? apFixOverlaysFile : romFile, src, len);
-	} else {
+	} else { */
 		// Read via the main RAM cache
 		//bool runSleep = true;
 		while(len > 0) {
@@ -456,7 +456,7 @@ static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
 				//slot = getSlotForSectorManual(slot+1, sector);
 			}
 		}
-	}
+	// }
 #endif
 
 	//sleepMsEnabled = false;
