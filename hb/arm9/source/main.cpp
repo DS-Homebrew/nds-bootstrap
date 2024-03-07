@@ -120,11 +120,11 @@ void runFile(string filename, string fullPath, string homebrewArg, string ramDis
 	int romFileType = -1;
 	bool romIsCompressed = false;
 	if ((strcasecmp (ramDiskFilename.c_str() + ramDiskFilename.size() - 4, ".gen") == 0)
-	 || (strcasecmp (ramDiskFilename.c_str() + ramDiskFilename.size() - 4, ".md") == 0))
+	 || (strcasecmp (ramDiskFilename.c_str() + ramDiskFilename.size() - 3, ".md") == 0))
 	{
 		romFileType = 0;
 		romIsCompressed = ((strcasecmp (ramDiskFilename.c_str() + ramDiskFilename.size() - 9, ".lz77.gen") == 0)
-						|| (strcasecmp (ramDiskFilename.c_str() + ramDiskFilename.size() - 9, ".lz77.md") == 0));
+						|| (strcasecmp (ramDiskFilename.c_str() + ramDiskFilename.size() - 8, ".lz77.md") == 0));
 	}
 	else if ((strcasecmp (ramDiskFilename.c_str() + ramDiskFilename.size() - 4, ".smc") == 0)
 		  || (strcasecmp (ramDiskFilename.c_str() + ramDiskFilename.size() - 4, ".sfc") == 0))
