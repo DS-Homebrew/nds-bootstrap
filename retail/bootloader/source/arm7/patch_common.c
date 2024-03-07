@@ -49,6 +49,7 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
 		return;
 	}
 
+#ifndef LOADERTWO
 	const char* romTid = getRomTid(ndsHeader);
 
 	// Animal Crossing: Wild World
@@ -88,7 +89,7 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
 		*(u32*)0x0204CDBC = 0xe1a00000; //nop
 	}
 
-	// 0735 - Castlevania - Portrait of Ruin (USA)
+	// Castlevania - Portrait of Ruin (USA)
 	else if (strcmp(romTid, "ACBE") == 0) {
 		*(u32*)0x02007910 = 0xeb02508e;
 		*(u32*)0x02007918 = 0xea000004;
@@ -99,18 +100,25 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
 		*(u32*)0x02007a14 = 0xea000003;
 	}
 
-	// 0676 - Akumajou Dracula - Gallery of Labyrinth (Japan)
-	else if (strcmp(romTid, "ACBJ") == 0 && ndsHeader->romversion == 0) {
-		*(u32*)0x02007910 = 0xeb0250b0;
-		*(u32*)0x02007918 = 0xea000004;
-		*(u32*)0x02007a00 = 0xeb025074;
-		*(u32*)0x02007a08 = 0xe59f1030;
-		*(u32*)0x02007a0c = 0xe59f0028;
-		*(u32*)0x02007a10 = 0xe0281097;
-		*(u32*)0x02007a14 = 0xea000003;
+	// Akumajou Dracula - Gallery of Labyrinth (Japan)
+	else if (strcmp(romTid, "ACBJ") == 0) {
+		if (ndsHeader->romversion == 0) {
+			*(u32*)0x02007910 += 5;
+			*(u32*)0x02007918 += 0xd0000000; // bne -> b
+			*(u32*)0x02007a00 += 5;
+			*(u32*)0x02007a08 += 0xe0000000; // ldreq -> ldr
+			*(u32*)0x02007a0c += 0xe0000000; // ldreq -> ldr
+			*(u32*)0x02007a10 += 0xe0000000; // mlaeq -> mla
+			*(u32*)0x02007a14 += 0xe0000000; // beq -> b
+		} else {
+			*(u32*)0x0200753C += 5;
+			*(u32*)0x02007544 += 0xd0000000; // bne -> b
+			*(u32*)0x02007624 += 5;
+			*(u32*)0x0200762C += 0xd0000000; // bne -> b
+		}
 	}
 
-	// 0881 - Castlevania - Portrait of Ruin (Europe) (En,Fr,De,Es,It)
+	// Castlevania - Portrait of Ruin (Europe) (En,Fr,De,Es,It)
 	else if (strcmp(romTid, "ACBP") == 0) {
 		*(u32*)0x02007b00 = 0xeb025370;
 		*(u32*)0x02007b08 = 0xea000004;
@@ -143,7 +151,6 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
 		*(u32*)0x0207af40 = 0xebfe271e;
 	}
 
-#ifndef LOADERTWO
 	// Art Style: DIGIDRIVE (USA) (child.srl)
 	// Art Style: INTERSECT (Europe, Australia) (child.srl)
 	else if (strcmp(romTid, "NTRJ") == 0 && ndsHeader->headerCRC16 == 0x53E2 && srlAddr > 0) {
@@ -201,7 +208,6 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
 	else if (strcmp(romTid, "NTRJ") == 0 && ndsHeader->headerCRC16 == 0xCD01 && srlAddr > 0) {
 		*(u32*)0x02000BEC = 0xE3A00001; // mov r0, #1 (Do not wait for other consoles to connect)
 	}
-#endif
 
 	// Power Rangers - Samurai (USA) (En,Fr,Es)
 	else if (strcmp(romTid, "B3NE") == 0) {
@@ -477,6 +483,19 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
 		const u16* branchCode7 = generateA7InstrThumb(0x020BAC60, 0x020BACB6);
 		tonccpy((void*)0x020BAC60, branchCode7, 0x4);
 	}
+
+	// Shantae DSi (03/06/09 build)
+	else if (strcmp(romTid, "AIPE") == 0 && ndsHeader->headerCRC16 == 0x700E && !extendedMemory) {
+		*(u32*)0x02046BFC -= 2;
+		*(u32*)0x02046DE4 -= 2;
+	}
+
+	// Shantae DSi (04/01/09 build)
+	else if (strcmp(romTid, "NTRJ") == 0 && ndsHeader->headerCRC16 == 0xAC4C && !extendedMemory) {
+		*(u32*)0x0203FB20 -= 2;
+		*(u32*)0x0203FD14 -= 2;
+	}
+#endif
 }
 
 void rsetA7Cache(void)
@@ -525,6 +544,5 @@ u32 patchCardNds(
 		return patchCardNdsArm7(ce7, ndsHeader, moduleParams, saveFileCluster);
 	}
 
-	dbg_printf("ERR_LOAD_OTHR");
 	return ERR_LOAD_OTHR;
 }

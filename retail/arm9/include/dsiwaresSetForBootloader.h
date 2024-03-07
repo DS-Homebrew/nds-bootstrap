@@ -38,7 +38,11 @@ static const char dsiWareForBootloader1[][4] = {
 	"KCZ", // Absolute Chess (bootloaderi-exclusive)
 	"KA8", // Absolute Reversi (bootloaderi-exclusive)
 	"KXG", // Abyss
+	"KT3", // Academy Tic-Tac-Toe
 	"KQK", // Ace Mathician
+	"KE5", // ACT Series: Tangocho: Ni Chi Hen
+	"KCS", // ACT Series: Tangocho: Ni Chu Hen
+	"KRE", // ACT Series: Tangocho: Ni Kan Hen
 	"KAC", // Advanced Circuits
 	"K5H", // Ah! Heaven
 	"K25", // G.G Series: Air Pinball Hockey
@@ -59,6 +63,7 @@ static const char dsiWareForBootloader1[][4] = {
 	"KV2", // Anonymous Notes 2: From The Abyss
 	"KV3", // Anonymous Notes 3: From The Abyss
 	"KV4", // Anonymous Notes 4: From The Abyss
+	"KJH", // Antipole
 	"KL8", // Anyohaseyo!: Kankokugo Wado Pazuru
 	"KAA", // Art Style: Aquia
 	"KAZ", // ARC Style: Soccer!
@@ -109,7 +114,7 @@ static const char dsiWareForBootloader1[][4] = {
 	"KC5", // Castle Conqueror: Heroes
 	"KXC", // Castle Conqueror: Heroes 2
 	"KQN", // Castle Conqueror: Revolution
-	"KVX", // Cat Frenzy (bootloaderi-exclusive)
+	"KVX", // Cat Frenzy
 	"KCV", // Cave Story
 	"KCT", // Chess Challenge!
 	"KBG", // Chotto DS Bun ga Kuzenshuu: Sekai no Bungaku 20
@@ -117,6 +122,7 @@ static const char dsiWareForBootloader1[][4] = {
 	"K2W", // Christmas Wonderland 2
 	"KVW", // Chronicles of Vampires: Origins
 	"KVV", // Chronicles of Vampires: Awakening
+	"K9T", // Chronos Twins: One Hero in Two Times
 	"KUQ", // Chuck E. Cheese's Alien Defense Force
 	"KUC", // Chuck E. Cheese's Arcade Room
 	"KJC", // Chuugaku Eijukugo: Kiho 150 Go Master
@@ -132,6 +138,7 @@ static const char dsiWareForBootloader1[][4] = {
 	"K56", // Coropata
 	"KCX", // Cosmo Fighters
 	"K5D", // G.G Series: Cosmo Rally!!
+	"KX2", // Cosmos X2
 	"KDC", // Crash-Course Domo
 	"KQZ", // Crazy Chicken: Director's Cut (bootloaderi-exclusive)
 	"KCV", // Crazy Chicken: Pirates (bootloaderi-exclusive)
@@ -147,6 +154,7 @@ static const char dsiWareForBootloader1[][4] = {
 	"KDV", // Dark Void Zero
 	"KUI", // Decathlon 2012
 	"K6B", // Deep Sea Creatures
+	"K35", // Defense of the Middle Kingdom
 	"KWT", // GO Series: Defense Wars
 	"KCP", // Dekisugi Tingle Pack
 	"KN2", // Devil Band: Rock the Underworld
@@ -177,6 +185,7 @@ static const char dsiWareForBootloader1[][4] = {
 	"KED", // Electroplankton: Sun-Animalcule
 	"KEA", // Electroplankton: Trapy
 	"KEJ", // Electroplankton: Varvoice
+	"K42", // Elite Forces: Unit 77
 	"KD7", // G.G Series: Energy Chain
 	"K5Q", // Escape Trick: The Secret of Rock City Prison (bootloaderi-exclusive)
 	"KEY", // Escape Trick: Ninja Castle (bootloaderi-exclusive)
@@ -234,6 +243,7 @@ static const char dsiWareForBootloader1[][4] = {
 	"KHQ", // Hearts Spades Euchre
 	"K6S", // Heathcliff: Spot On
 	"KHL", // Hell's Kitchen VS
+	"KKI", // Hellokids: Vol. 1: Coloring and Painting!
 	"K5E", // G.G Series: Hero Puzzle
 	"K5J", // G.G Series: The Hidden Ninja Kagemaru
 	"KTX", // High Stakes Texas Hold'em
@@ -241,7 +251,7 @@ static const char dsiWareForBootloader1[][4] = {
 	"KT2", // G.G Series: Horizontal Bar
 	// "KNE", // Ichi Moudaji!: Neko King
 	"KNK", // Ideyou Sukeno: Kenkou Maja DSi
-	"KBT", // Invasion of the Alien Blobs (bootloaderi-exclusive)
+	"KBT", // Invasion of the Alien Blobs!
 	"K3J", // iSpot Japan
 	"KIK", // Ivy the Kiwi? mini
 	"K9B", // Jazzy Billiards
@@ -254,8 +264,8 @@ static const char dsiWareForBootloader1[][4] = {
 	"KD5", // Jinia Supasonaru: Waei Rakubiki Jiten
 	"KJF", // Just SING! 80's
 	"K4C", // Just SING! Christmas Songs (bootloaderi-exclusive)
-	"KJP", // Jump Trials (bootloaderi-exclusive)
-	"KZC", // Jump Trials Extreme (bootloaderi-exclusive)
+	"KJP", // Jump Trials
+	"KZC", // Jump Trials Extreme
 	"KPA", // A Kappa's Trail (bootloaderi-exclusive)
 	"K69", // Katamukusho (bootloaderi-exclusive)
 	"K3H", // Kazu De Asobu: Mahoujin To Imeji Kei-san
@@ -269,6 +279,9 @@ static const char dsiWareForBootloader1[][4] = {
 	"KEK", // Koukou Eitango: Kiho 400 Go Master
 	"KVF", // Kuizu Ongaku Nojika (bootloaderi-exclusive)
 	"KT9", // Kung Fu Dragon
+	"K47", // Kyou Hanan no hi Hyakka: Hyakkajiten Maipedea Yori (bootloaderi-exclusive)
+};
+static const char dsiWareForBootloader2[][4] = {
 	"K5M", // G.G Series: The Last Knight
 	"KQ9", // The Legend of Zelda: Four Swords: Anniversary Edition
 	"KLD", // Legendary Wars: T-Rex Rumble
@@ -280,8 +293,6 @@ static const char dsiWareForBootloader1[][4] = {
 	"KLP", // Littlest Pet Shop
 	"KLK", // Lola's Alphabet Train
 	"KOF", // Lola's Fruit Shop Sudoku
-};
-static const char dsiWareForBootloader2[][4] = {
 	"KMU", "KM6", // Maestro! Green Groove
 	"K73", "K85", // Magical Diary: Secrets Sharing (bootloaderi-exclusive)
 	"KMA", // Magical Drop Yurutto (bootloaderi-exclusive)
@@ -384,7 +395,7 @@ static const char dsiWareForBootloader2[][4] = {
 	"KNU", // Pucca: Noodle Rush
 	"KLF", // Puffins: Let's Fish!
 	"KLR", // Puffins: Let's Race!
-	"KL2", // Puffins: Let's Roll! (bootloaderi-exclusive)
+	"KL2", // Puffins: Let's Roll!
 	"KPN", // Puzzle League: Express
 	"KPL", // Puzzle Rocks
 	"KYE", // Puzzler Brain Games

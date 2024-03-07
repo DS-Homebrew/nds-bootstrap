@@ -21,6 +21,7 @@
 #include <nds/debug.h>
 
 #include "sdengine_bin.h"
+#include "sdengine_alt_bin.h"
 #include "patch.h"
 #include "hook.h"
 #include "common.h"
@@ -63,11 +64,11 @@ static const u32 homebrewSig[5] = {
 // interruptDispatcher.s jump_intr:
 // Patch
 static const u32 homebrewSigPatched[5] = {
-	0xE59F1008, // ldr    r1, =0x3900010   @ my custom handler
+	0xE59F1008, // ldr    r1, =0x3000010   @ my custom handler
 	0xE5012008, // str    r2, [r1,#-8]     @ irqhandler
 	0xE501F004, // str    r0, [r1,#-4]     @ irqsig
 	0xEA000000, // b      got_handler
-	0x037C0010  // DCD 	  0x037C0010
+	0x00000010  // DCD 	  0x03000010
 };
 
 // Accelerator patch for IPC_SYNC v2007
@@ -101,9 +102,9 @@ static const u32 homebrewAccelSig2010[4] = {
 };
 
 static const u32 homebrewAccelSigPatched[2] = {
-	0x47104A00   , // LDR     R2, =0x037C0020
+	0x47104A00   , // LDR     R2, =0x03000020
 	               // BX      R2
-	0x037C0020
+	0x00000020
 };
 
 static const u16 swi00Sig[2] = {
@@ -333,7 +334,7 @@ int hookNds (const tNDSHeader* ndsHeader, u32* sdEngineLocation, u32* wordComman
 		hookLocation[1] = homebrewSigPatched[1];
 		hookLocation[2] = homebrewSigPatched[2];
 		hookLocation[3] = homebrewSigPatched[3];
-		hookLocation[4] = homebrewSigPatched[4];
+		hookLocation[4] = ((u32)sdEngineLocation)+homebrewSigPatched[4];
 	} else {
 		nocashMessage("ERR_HOOK");
 		return ERR_HOOK;
@@ -354,7 +355,7 @@ int hookNds (const tNDSHeader* ndsHeader, u32* sdEngineLocation, u32* wordComman
 	} else {
 		// patch the program
 		hookAccel[0] = homebrewAccelSigPatched[0];
-		hookAccel[1] = homebrewAccelSigPatched[1];
+		hookAccel[1] = ((u32)sdEngineLocation)+homebrewAccelSigPatched[1];
 
 		nocashMessage("ACCEL_IPC_OK");
 	}
@@ -373,7 +374,7 @@ int hookNds (const tNDSHeader* ndsHeader, u32* sdEngineLocation, u32* wordComman
 		hookSwi05((u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize, hookAccel, sdEngineLocation);
 	}*/
 
-	tonccpy (sdEngineLocation, sdengine_bin, sdengine_bin_size);
+	tonccpy (sdEngineLocation, (sdEngineLocation == (u32*)SDENGINE_LOCATION_ALT) ? sdengine_alt_bin : sdengine_bin, (sdEngineLocation == (u32*)SDENGINE_LOCATION_ALT) ? sdengine_alt_bin_size : sdengine_bin_size);
 
 	sdEngineLocation[1] = (u32)wordCommandAddr;
 

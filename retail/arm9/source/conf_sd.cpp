@@ -338,6 +338,9 @@ void getIgmStrings(configuration* conf, bool b4ds) {
 		extendedFont = IgmFont::arabic;
 		extendedFontPath = "nitro:/fonts/arabic.lz77";
 		igmText->rtl = true;
+	} else if (strncmp(conf->guiLanguage, "zh", 2) == 0) {
+		extendedFont = IgmFont::chinese;
+		extendedFontPath = "nitro:/fonts/chinese.lz77";
 	} else if (strcmp(conf->guiLanguage, "ru") == 0 || strcmp(conf->guiLanguage, "uk") == 0) {
 		extendedFont = IgmFont::cyrillic;
 		extendedFontPath = "nitro:/fonts/cyrillic.lz77";
@@ -354,9 +357,9 @@ void getIgmStrings(configuration* conf, bool b4ds) {
 	} else if (strcmp(conf->guiLanguage, "ja") == 0 || strcmp(conf->guiLanguage, "ry") == 0) {
 		extendedFont = IgmFont::japanese;
 		extendedFontPath = "nitro:/fonts/japanese.lz77";
-	} else if (strncmp(conf->guiLanguage, "zh", 2) == 0) {
-		extendedFont = IgmFont::chinese;
-		extendedFontPath = "nitro:/fonts/chinese.lz77";
+	} else if (strncmp(conf->guiLanguage, "vi", 2) == 0) {
+		extendedFont = IgmFont::vietnamese;
+		extendedFontPath = "nitro:/fonts/vietnamese.lz77";
 	}
 
 	FILE *font = fopen("nitro:/fonts/ascii.lz77", "rb");
@@ -502,7 +505,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 				*(u16*)(0x020000C0) = 0x334D;
 			} else if (memcmp(io_dldi_data->friendlyName, "G6", 2) == 0) {
 				*(u16*)(0x020000C0) = 0x3647;
-			} else if (memcmp(io_dldi_data->friendlyName, "SuperCard", 9) == 0) {
+			} else if (memcmp(io_dldi_data->friendlyName, "SuperCard", 9) == 0 || memcmp(io_dldi_data->friendlyName, "SCSD", 4) == 0) {
 				*(u16*)(0x020000C0) = 0x4353;
 			}
 		  }
@@ -1787,6 +1790,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			||	strncmp(romTid, "KUG", 3) == 0 // G.G Series: Drift Circuit 2
 			||	strncmp(romTid, "KEI", 3) == 0 // Electroplankton: Beatnes
 			||	strncmp(romTid, "KEA", 3) == 0 // Electroplankton: Trapy
+			||	strncmp(romTid, "KFO", 3) == 0 // Frenzic
 			||	strncmp(romTid, "K5M", 3) == 0 // G.G Series: The Last Knight
 			||	strncmp(romTid, "KPT", 3) == 0 // Link 'n' Launch
 			||	strncmp(romTid, "KNP", 3) == 0 // Need for Speed: Nitro-X
@@ -1794,7 +1798,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			||	strncmp(romTid, "K6T", 3) == 0 // Orion's Odyssey
 			||	strncmp(romTid, "KPS", 3) == 0 // Phantasy Star 0 Mini
 			||	strncmp(romTid, "KHR", 3) == 0 // Picture Perfect: Hair Stylist
-			||	strncmp(romTid, "KS3", 3) == 0 // Shantae: Risky's Revenge
+			|| ((strncmp(romTid, "KS3", 3) == 0) && (headerCRC == 0x57FE || headerCRC == 0x2BFA)) // Shantae: Risky's Revenge (Non-proto builds and clean ROMs)
 			||	strncmp(romTid, "KZU", 3) == 0 // Tales to Enjoy!: Little Red Riding Hood
 			||	strncmp(romTid, "KZV", 3) == 0 // Tales to Enjoy!: Puss in Boots
 			||	strncmp(romTid, "KZ7", 3) == 0 // Tales to Enjoy!: The Three Little Pigs
@@ -1828,7 +1832,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	// Load ce9 binary
 	if (b4dsDebugRam) {
 		cebin = fopen("nitro:/cardengine_arm9_extmem.lz77", "rb");
-	} else if (!startMultibootSrl && ((accessControl & BIT(4)) || (a7mbk6 == 0x080037C0 && ndsArm9Offset >= 0x02004000))) {
+	} else if (!startMultibootSrl && ((accessControl & BIT(4)) || (a7mbk6 == 0x080037C0 && ndsArm9Offset >= 0x02004000) || (strncmp(romTid, "AP2", 3) == 0))) {
 		cebin = fopen(ndsArm9Offset >= 0x02004000 ? "nitro:/cardengine_arm9_start.lz77" : "nitro:/cardengine_arm9.lz77", "rb");
 	} else {
 		const char* ce9path = "nitro:/cardengine_arm9_alt.lz77";
@@ -1975,6 +1979,10 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 				break;
 			}
 		}
+	}
+
+	if (!conf->loader2 && (strcmp(romTid, "NTRJ") == 0) && (headerCRC == 0x9B41 || headerCRC == 0x69D6)) { // Use bootloader2 for Shantae: Risky's Revenge (USA) (Review Build)
+		conf->loader2 = true;
 	}
 
 	const char *typeToReplace = ".nds";

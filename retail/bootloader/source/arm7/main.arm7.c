@@ -638,9 +638,9 @@ static bool isROMLoadableInRAM(const tDSiHeader* dsiHeader, const tNDSHeader* nd
 				 || strncmp(romTid, "KW6", 3) == 0 // Word Searcher III
 				 || strncmp(romTid, "KW8", 3) == 0) { // Word Searcher IV
 			romSizeLimitChange = 0x77C000;
-		} else if (strncmp(romTid, "KGU", 3) == 0) { // Flipnote Studio
+		} /* else if (strncmp(romTid, "KGU", 3) == 0) { // Flipnote Studio
 			romSizeLimitChange = 0x140000;
-		} else if (strncmp(romTid, "KUP", 3) == 0) { // Match Up!
+		} */ else if (strncmp(romTid, "KUP", 3) == 0) { // Match Up!
 			romSizeLimitChange = 0x380000;
 		} else if (strncmp(romTid, "KAU", 3) == 0) { // Nintendo Cowndown Calendar
 			romSizeLimitChange = 0x200000;
@@ -698,10 +698,9 @@ static bool isROMLoadableInRAM(const tDSiHeader* dsiHeader, const tNDSHeader* nd
 			romSize -= ndsHeader->arm7romOffset;
 			romSize -= ndsHeader->arm7binarySize;
 		} else {
-			romSize -= ndsHeader->arm9romOffset;
-			romSize -= ndsHeader->arm9binarySize;
+			romSize -= ndsHeader->arm9overlaySource;
 		}
-		res = ((expansionPakFound || (extendedMemory && !dsDebugRam)) && (ndsHeader->unitCode == 3 ? (usesCloneboot ? ((u32)dsiHeader->arm9iromOffset-0x8000) : ((u32)dsiHeader->arm9iromOffset-ndsHeader->arm9romOffset-ndsHeader->arm9binarySize))+ioverlaysSize : romSize) <= romSizeLimit);
+		res = ((expansionPakFound || (extendedMemory && !dsDebugRam)) && (ndsHeader->unitCode == 3 ? (usesCloneboot ? ((u32)dsiHeader->arm9iromOffset-0x8000) : ((u32)dsiHeader->arm9iromOffset-ndsHeader->arm9overlaySource))+ioverlaysSize : romSize) <= romSizeLimit);
 		if (res) {
 			dbg_printf(expansionPakFound ? "ROM is loadable into Slot-2 RAM\n" : "ROM is loadable into RAM\n");
 		}
@@ -832,39 +831,6 @@ static void startBinary_ARM7(void) {
 	arm7code(ndsHeader->arm7executeAddress);
 }
 
-static void loadOverlaysintoRAM(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, aFile* file) {
-	// Load overlays into RAM
-	if (overlaysSize < romSizeLimit)
-	{
-		if ((_io_dldi_features & FEATURE_SLOT_GBA) && s2FlashcardId != 0) {
-			const u32 buffer = 0x037F8000;
-			const u16 bufferSize = 0x8000;
-			s32 len = (s32)overlaysSize;
-			u32 dst = 0;
-			while (1) {
-				u32 readLen = (len > bufferSize) ? bufferSize : len;
-
-				fileRead((char*)buffer, file, (ndsHeader->arm9romOffset + ndsHeader->arm9binarySize)+dst, readLen);
-				tonccpy((char*)romLocation+dst, (char*)buffer, readLen);
-
-				len -= bufferSize;
-				dst += bufferSize;
-
-				if (len <= 0) {
-					break;
-				}
-			}
-			toncset((char*)buffer, 0, bufferSize);
-		} else {
-			fileRead((char*)romLocation, file, ndsHeader->arm9romOffset + ndsHeader->arm9binarySize, overlaysSize);
-		}
-
-		if (!isSdk5(moduleParams) && *(u32*)((romLocation-ndsHeader->arm9romOffset-ndsHeader->arm9binarySize)+0x003128AC) == 0x4B434148) {
-			*(u32*)((romLocation-ndsHeader->arm9romOffset-ndsHeader->arm9binarySize)+0x3128AC) = 0xA00;	// Primary fix for Mario's Holiday
-		}
-	}
-}
-
 static void loadOverlaysintoFile(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, aFile* file) {
 	// Load overlays into RAM
 	if (overlaysSize <= 0x700000)
@@ -879,8 +845,8 @@ static void loadOverlaysintoFile(const tNDSHeader* ndsHeader, const module_param
 		while (1) {
 			u32 readLen = (len > bufferSize) ? bufferSize : len;
 
-			fileRead((char*)buffer, file, (ndsHeader->arm9romOffset + ndsHeader->arm9binarySize)+dst, readLen);
-			fileWrite((char*)buffer, &apFixOverlaysFile, (ndsHeader->arm9romOffset + ndsHeader->arm9binarySize)+dst, readLen);
+			fileRead((char*)buffer, file, ndsHeader->arm9overlaySource+dst, readLen);
+			fileWrite((char*)buffer, &apFixOverlaysFile, ndsHeader->arm9overlaySource+dst, readLen);
 
 			len -= bufferSize;
 			dst += bufferSize;
@@ -904,12 +870,40 @@ static void loadOverlaysintoFile(const tNDSHeader* ndsHeader, const module_param
 	}
 }
 
+static void fileReadWithBuffer(const u32 memDst, aFile* file, const u32 src, u32 readLen) {
+	const u32 buffer = 0x037F8000;
+	const u16 bufferSize = 0x8000;
+	s32 len = readLen;
+	u32 dst = 0;
+	while (1) {
+		u32 readLenBuf = (len > bufferSize) ? bufferSize : len;
+
+		fileRead((char*)buffer, file, src+dst, readLenBuf);
+		tonccpy((char*)memDst+dst, (char*)buffer, readLenBuf);
+
+		len -= bufferSize;
+		dst += bufferSize;
+
+		if (len <= 0) {
+			break;
+		}
+	}
+	toncset((char*)buffer, 0, bufferSize);
+}
+
 static void loadIOverlaysintoRAM(const tDSiHeader* dsiHeader, aFile* file, const bool usesCloneboot) {
 	// Load overlays into RAM
 	if (ioverlaysSize>0x700000) return;
 
-	u32 romOffset = usesCloneboot ? 0x8000 : (ndsHeader->arm9romOffset + ndsHeader->arm9binarySize);
-	fileRead((char*)romLocation+((u32)dsiHeader->arm9iromOffset-romOffset), file, (u32)dsiHeader->arm9iromOffset+dsiHeader->arm9ibinarySize, ioverlaysSize);
+	const u32 romOffset = usesCloneboot ? 0x8000 : ndsHeader->arm9overlaySource;
+	const u32 overlayOffset = (u32)dsiHeader->arm9iromOffset+dsiHeader->arm9ibinarySize;
+	const u32 romLocationEdit = romLocation+((u32)dsiHeader->arm9iromOffset-romOffset);
+
+	if ((_io_dldi_features & FEATURE_SLOT_GBA) && s2FlashcardId != 0) {
+		fileReadWithBuffer(romLocationEdit, file, overlayOffset, ioverlaysSize);
+	} else {
+		fileRead((char*)romLocationEdit, file, overlayOffset, ioverlaysSize);
+	}
 }
 
 static void loadROMintoRAM(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, aFile* file, const bool usesCloneboot) {
@@ -921,33 +915,15 @@ static void loadROMintoRAM(const tNDSHeader* ndsHeader, const module_params_t* m
 		romSizeEdit += 0x88;
 	} else if (ndsHeader->arm9overlaySource == 0 || ndsHeader->arm9overlaySize == 0) {
 		romOffset = (ndsHeader->arm7romOffset + ndsHeader->arm7binarySize);
-		romSizeEdit -= ndsHeader->arm7romOffset;
-		romSizeEdit -= ndsHeader->arm7binarySize;
 	} else {
-		romOffset = (ndsHeader->arm9romOffset + ndsHeader->arm9binarySize);
-		romSizeEdit -= ndsHeader->arm9romOffset;
-		romSizeEdit -= ndsHeader->arm9binarySize;
+		romOffset = ndsHeader->arm9overlaySource;
+	}
+	if (!usesCloneboot) {
+		romSizeEdit -= romOffset;
 	}
 
 	if ((_io_dldi_features & FEATURE_SLOT_GBA) && s2FlashcardId != 0) {
-		const u32 buffer = 0x037F8000;
-		const u16 bufferSize = 0x8000;
-		s32 len = romSizeEdit;
-		u32 dst = 0;
-		while (1) {
-			u32 readLen = (len > bufferSize) ? bufferSize : len;
-
-			fileRead((char*)buffer, file, romOffset+dst, readLen);
-			tonccpy((char*)romLocation+dst, (char*)buffer, readLen);
-
-			len -= bufferSize;
-			dst += bufferSize;
-
-			if (len <= 0) {
-				break;
-			}
-		}
-		toncset((char*)buffer, 0, bufferSize);
+		fileReadWithBuffer(romLocation, file, romOffset, romSizeEdit);
 	} else {
 		fileRead((char*)romLocation, file, romOffset, romSizeEdit);
 	}
@@ -958,8 +934,7 @@ static void loadROMintoRAM(const tNDSHeader* ndsHeader, const module_params_t* m
 
 	dbg_printf("ROM pre-loaded into RAM at ");
 	dbg_hexa(romLocation);
-	dbg_printf("\n");
-	dbg_printf("\n");
+	dbg_printf("\n\n");
 }
 
 static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, aFile romFile) {
@@ -1045,9 +1020,11 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 		// Set bitmask for supported languages
 		u8 curRegion = *(u8*)0x02FFFD70;
 		if (curRegion == 1) {
-			*(u32*)(0x02FFFD68) = 0x26;
-		} else if (curRegion == 2 || curRegion == 3) {
-			*(u32*)(0x02FFFD68) = 0x3E;
+			*(u32*)(0x02FFFD68) = 0x26; // USA
+		} else if (curRegion == 2) {
+			*(u32*)(0x02FFFD68) = 0x3E; // EUR
+		} else if (curRegion == 3) {
+			*(u32*)(0x02FFFD68) = 0x02; // AUS
 		} else if (curRegion == 4) {
 			*(u32*)(0x02FFFD68) = 0x40; // CHN
 		} else if (curRegion == 5) {
@@ -1259,14 +1236,14 @@ int arm7_main(void) {
 	REG_SCFG_ROM = 0x703;
 
 	u32 clonebootFlag = 0;
-	fileRead((char*)&clonebootFlag, &romFile, ((romSize-4) <= baseRomSize) ? (romSize-4) : baseRomSize, sizeof(u32));
+	fileRead((char*)&clonebootFlag, &romFile, ((romSize-0x88) <= baseRomSize) ? (romSize-0x88) : baseRomSize, sizeof(u32));
 	bool usesCloneboot = (clonebootFlag == 0x16361);
 	if (usesCloneboot) {
 		dbg_printf("Cloneboot detected\n");
 	}
 
 	// Calculate overlay pack size
-	for (u32 i = ndsHeader->arm9romOffset+ndsHeader->arm9binarySize; i < ndsHeader->arm7romOffset; i++) {
+	for (u32 i = ndsHeader->arm9overlaySource; i < ndsHeader->arm7romOffset; i++) {
 		overlaysSize++;
 	}
 	if (ndsHeader->unitCode == 3) {
@@ -1400,6 +1377,7 @@ int arm7_main(void) {
 					||	strncmp(romTid, "KUG", 3) == 0 // G.G Series: Drift Circuit 2
 					||	strncmp(romTid, "KEI", 3) == 0 // Electroplankton: Beatnes
 					||	strncmp(romTid, "KEA", 3) == 0 // Electroplankton: Trapy
+					||	strncmp(romTid, "KFO", 3) == 0 // Frenzic
 					||	strncmp(romTid, "K5M", 3) == 0 // G.G Series: The Last Knight
 					||	strncmp(romTid, "KPT", 3) == 0 // Link 'n' Launch
 					||	strncmp(romTid, "CLJ", 3) == 0 // Mario & Luigi: Bowser's Inside Story
@@ -1546,15 +1524,10 @@ int arm7_main(void) {
 		errorOutput();
 	}
 
-	bool overlaysInRam = (expansionPakFound || (extendedMemory && !dsDebugRam && !dsBrowser));
-	if (overlaysInRam) {
-		if (ROMinRAM) {
-			loadROMintoRAM(ndsHeader, moduleParams, &romFile, usesCloneboot);
-			if (ndsHeader->unitCode == 3) {
-				loadIOverlaysintoRAM(&dsiHeaderTemp, &romFile, usesCloneboot);
-			}
-		} else {
-			loadOverlaysintoRAM(ndsHeader, moduleParams, &romFile);
+	if (ROMinRAM) {
+		loadROMintoRAM(ndsHeader, moduleParams, &romFile, usesCloneboot);
+		if (ndsHeader->unitCode == 3) {
+			loadIOverlaysintoRAM(&dsiHeaderTemp, &romFile, usesCloneboot);
 		}
 	} else {
 		loadOverlaysintoFile(ndsHeader, moduleParams, &romFile);
@@ -1622,7 +1595,7 @@ int arm7_main(void) {
 			}
 		}
 		fileRead((char*)IMAGES_LOCATION, &apPatchFile, 0, apPatchSize);
-		if (applyIpsPatch(ndsHeader, (u8*)IMAGES_LOCATION, (*(u8*)(IMAGES_LOCATION+apPatchSize-1) == 0xA9), ROMinRAM, (overlaysInRam && overlaysSize <= 0x700000), usesCloneboot)) {
+		if (applyIpsPatch(ndsHeader, (u8*)IMAGES_LOCATION, (*(u8*)(IMAGES_LOCATION+apPatchSize-1) == 0xA9), ROMinRAM, usesCloneboot)) {
 			dbg_printf("AP-fix applied\n");
 		} else {
 			dbg_printf("Failed to apply AP-fix\n");

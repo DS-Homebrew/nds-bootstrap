@@ -186,9 +186,11 @@ u32 getExceptionAddress(u32 opcodeAddress, u32 thumbState) {
 
 
 void showException(s32 *expReg) {
+	static u16 bgColor = 0x0010;
+
 	if (exceptionPrinted) {
 		// Make the background red
-		BG_PALETTE_SUB[0] = 0x0010;
+		BG_PALETTE_SUB[0] = bgColor;
 		return;
 	}
 	exceptionPrinted = true;
@@ -228,8 +230,8 @@ void showException(s32 *expReg) {
 	}
 
 	// Make the background red
-	BG_PALETTE[0] = 0x0010;
-	BG_PALETTE_SUB[0] = 0x0010;
+	BG_PALETTE[0] = bgColor;
+	BG_PALETTE_SUB[0] = bgColor;
 
 	(*changeMpu)();
 
@@ -262,12 +264,22 @@ void showException(s32 *expReg) {
 		else
 			exceptionAddress = codeAddress;
 	} else {
-		printCenter(16, 1, (const u8 *)"Error: Undefined Instruction!", FONT_WHITE, true);
 		if(thumbState)
 			offset = 2;
 		else
 			offset = 4;
 		codeAddress = exceptionRegisters[15] - offset;
+		// For debugging purposes: Uncomment this code to know where you're at in the code
+		/* if (((codeAddress % 4) == 0) && *(u32*)codeAddress == 0x77777777) {
+			// Make the background blue
+			bgColor = 0x6000;
+			BG_PALETTE[0] = bgColor;
+			BG_PALETTE_SUB[0] = bgColor;
+
+			printCenter(16, 1, (const u8 *)"Breakpoint Reached!", FONT_WHITE, true);
+		} else { */
+			printCenter(16, 1, (const u8 *)"Error: Undefined Instruction!", FONT_WHITE, true);
+		// }
 		exceptionAddress = codeAddress;
 	}
 

@@ -646,7 +646,7 @@ static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
 	nocashMessage("\n");*/
 
 	//nocashMessage("aaaaaaaaaa\n");
-	fileRead((char*)dst, (ce9->apFixOverlaysCluster && src >= ndsHeader->arm9romOffset+ndsHeader->arm9binarySize && src < ndsHeader->arm7romOffset) ? &apFixOverlaysFile : &romFile, src, len);
+	fileRead((char*)dst, (ce9->apFixOverlaysCluster && src >= ndsHeader->arm9overlaySource && src < ndsHeader->arm7romOffset) ? &apFixOverlaysFile : &romFile, src, len);
 
 	//nocashMessage("end\n");
 
@@ -683,6 +683,10 @@ void cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	const u16 exmemcnt = REG_EXMEMCNT;
 	cardReadInProgress = true;
 
+	if (__myio_dldi.features & FEATURE_SLOT_GBA) {
+		REG_IE &= ~IRQ_CART;
+	}
+
 	setDeviceOwner();
 	initialize();
 
@@ -712,7 +716,7 @@ void cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 		src = 0x8000 + (src & 0x1FF);
 	}
 
-	if ((ce9->valueBits & ROMinRAM) || ((ce9->valueBits & overlaysCached) && src >= ndsHeader->arm9romOffset+ndsHeader->arm9binarySize && src < ndsHeader->arm7romOffset)) {
+	if (ce9->valueBits & ROMinRAM) {
 		if (src >= 0 && src < 0x160) {
 			u32 newSrc = (u32)ndsHeader+src;
 			tonccpy(dst, (u8*)newSrc, len);
@@ -748,6 +752,10 @@ bool nandWrite(void* memory,void* flash,u32 len,u32 dma) {
 }
 
 #ifndef NODSIWARE
+void ndmaCopy(int ndmaSlot, const void* src, void* dst, u32 len) {
+	tonccpy(dst, src, len);
+}
+
 static bool sharedFontOpened = false;
 static bool dsiSaveInited = false;
 static bool dsiSaveExists = false;

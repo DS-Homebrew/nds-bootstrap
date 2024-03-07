@@ -65,7 +65,7 @@ static bool patchCardRead(cardengineArm9* ce9, const tNDSHeader* ndsHeader, cons
 		}
 		if (!cardReadEndOffset) {
 			//dbg_printf("Trying alt...\n");
-			cardReadEndOffset = findCardReadEndOffsetType1(ndsHeader, startOffset);
+			cardReadEndOffset = findCardReadEndOffsetType1(ndsHeader, moduleParams, startOffset);
 			if (cardReadEndOffset) {
 				readType = 1;
 				if (*(cardReadEndOffset - 1) == 0xFFFFFE00) {
@@ -217,9 +217,9 @@ static void patchCacheFlush(cardengineArm9* ce9, bool usesThumb, u32* cardPullOu
 	tonccpy(forceToPowerOffOffset, cardPullOutPatch, 0x4);
 }*/
 
-static void patchCardId(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb, u32* cardReadEndOffset) {
+static bool patchCardId(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb, u32* cardReadEndOffset) {
 	if (!isPawsAndClaws(ndsHeader) && !cardReadEndOffset) {
-		return;
+		return true;
 	}
 
 	// Card ID
@@ -250,7 +250,11 @@ static void patchCardId(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const 
 		dbg_printf("cardId location : ");
 		dbg_hexa((u32)cardIdStartOffset);
 		dbg_printf("\n\n");
+	} else if (isSdk5(moduleParams)) {
+		return false;
 	}
+
+	return true;
 }
 
 static void patchCardReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
@@ -328,6 +332,11 @@ static void patchResetTwl(cardengineArm9* ce9, const tNDSHeader* ndsHeader, cons
 		nandTmpJumpFuncOffset[0] = 0xE59F0000; // ldr r0, =0xFFFFFFFF
 		nandTmpJumpFuncOffset[1] = generateA7Instr((int)(((u32)nandTmpJumpFuncOffset) + (1 * sizeof(u32))), (int)ce9->patches->reset_arm9);
 		nandTmpJumpFuncOffset[2] = 0xFFFFFFFF;
+	} else if (nandTmpJumpFuncOffset[-3] == 0xE8BD8008 && nandTmpJumpFuncOffset[-1] == 0x02FFE230) { // DEBUG
+		nandTmpJumpFuncOffset[-15] = 0xE59F0000; // ldr r0, =0
+		nandTmpJumpFuncOffset[-14] = generateA7Instr((int)(((u32)nandTmpJumpFuncOffset) - (14 * sizeof(u32))), (int)ce9->patches->reset_arm9);
+		nandTmpJumpFuncOffset[-13] = 0;
+		dbg_printf("Reset (TWL) patched!\n");
 	} else if (nandTmpJumpFuncOffset[-2] == 0xE8BD8008 && nandTmpJumpFuncOffset[-1] == 0x02FFE230) {
 		nandTmpJumpFuncOffset[-11] = 0xE59F0000; // ldr r0, =0
 		nandTmpJumpFuncOffset[-10] = generateA7Instr((int)(((u32)nandTmpJumpFuncOffset) - (10 * sizeof(u32))), (int)ce9->patches->reset_arm9);
@@ -611,7 +620,7 @@ static void patchMpu2(const tNDSHeader* ndsHeader, const module_params_t* module
 	patchOffsetCache.mpuInitOffset2 = mpuInitOffset;
 }
 
-void patchMpuFlagsSet(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+void patchSlot2IoBlock(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	extern u32 _io_dldi_features;
 	extern u32 arm7mbk;
 	if ((_io_dldi_features & FEATURE_SLOT_NDS) || moduleParams->sdk_version < 0x5000000 || arm7mbk == 0x080037C0) {
@@ -636,6 +645,31 @@ void patchMpuFlagsSet(const tNDSHeader* ndsHeader, const module_params_t* module
 	offset[4] = 0xE3A00002; // mov r0, #0x02
 
 	dbg_printf("Mpu flags set: ");
+	dbg_hexa((u32)offset);
+	dbg_printf("\n\n");
+
+	offset = patchOffsetCache.mpuCodeCacheChangeOffset;
+	if (!patchOffsetCache.mpuCodeCacheChangeOffset) {
+		offset = findMpuCodeCacheChangeOffset(ndsHeader);
+		if (offset) {
+			patchOffsetCache.mpuCodeCacheChangeOffset = offset;
+		}
+	}
+
+	if (!offset) {
+		return;
+	}
+
+	// Disable MPU cache and write buffer changes for the Slot-2 region
+	offset[0] = 0xE12FFF1E; // bx lr
+	offset[4] = 0xE12FFF1E; // bx lr
+	offset[8] = 0xE12FFF1E; // bx lr
+	offset[12] = 0xE12FFF1E; // bx lr
+	offset[16] = 0xE12FFF1E; // bx lr
+	offset[21] = 0xE12FFF1E; // bx lr
+	offset[25] = 0xE12FFF1E; // bx lr
+
+	dbg_printf("Mpu cache change: ");
 	dbg_hexa((u32)offset);
 	dbg_printf("\n\n");
 }
@@ -1024,12 +1058,12 @@ void patchInitLock(const tNDSHeader* ndsHeader, const module_params_t* modulePar
 			dbg_printf("\n\n");
 		}
 
-		u32 startOffset = (u32)ndsHeader->arm9destination;
-		u32* newBranchPrepOffset1 = (u32*)(startOffset+0x860);
-		u32* newBranchPrepOffset2 = (u32*)(startOffset+0x874);
+		u32 startOffset = (u32)ndsHeader->arm9executeAddress;
+		u32* newBranchPrepOffset1 = (u32*)(startOffset+0x60);
+		u32* newBranchPrepOffset2 = (u32*)(startOffset+0x74);
 		if (moduleParams->sdk_version > 0x5050000) {
-			newBranchPrepOffset1 = (u32*)(startOffset+0x870);
-			newBranchPrepOffset2 = (u32*)(startOffset+0x884);
+			newBranchPrepOffset1 = (u32*)(startOffset+0x70);
+			newBranchPrepOffset2 = (u32*)(startOffset+0x84);
 		}
 
 		newBranchPrepOffset1[0] = 0xE92D4000; // push {lr}
@@ -1078,12 +1112,12 @@ void patchInitLock(const tNDSHeader* ndsHeader, const module_params_t* modulePar
 			dbg_printf("\n\n");
 		}
 
-		u32 startOffset = (u32)ndsHeader->arm9destination;
-		u16* newBranchPrepOffset1 = (u16*)(startOffset+0x860);
-		u16* newBranchPrepOffset2 = (u16*)(startOffset+0x86C);
+		u32 startOffset = (u32)ndsHeader->arm9executeAddress;
+		u16* newBranchPrepOffset1 = (u16*)(startOffset+0x60);
+		u16* newBranchPrepOffset2 = (u16*)(startOffset+0x6C);
 		if (moduleParams->sdk_version > 0x5050000) {
-			newBranchPrepOffset1 = (u16*)(startOffset+0x870);
-			newBranchPrepOffset2 = (u16*)(startOffset+0x87C);
+			newBranchPrepOffset1 = (u16*)(startOffset+0x70);
+			newBranchPrepOffset2 = (u16*)(startOffset+0x7C);
 		}
 
 		newBranchPrepOffset1[0] = 0xB500; // push {lr}
@@ -1132,12 +1166,12 @@ void patchInitLock(const tNDSHeader* ndsHeader, const module_params_t* modulePar
 			dbg_printf("\n\n");
 		}
 
-		u32 startOffset = (u32)ndsHeader->arm9destination;
-		u32* newBranchPrepOffset1 = (u32*)(startOffset+0x860);
-		u32* newBranchPrepOffset2 = (u32*)(startOffset+0x874);
+		u32 startOffset = (u32)ndsHeader->arm9executeAddress;
+		u32* newBranchPrepOffset1 = (u32*)(startOffset+0x60);
+		u32* newBranchPrepOffset2 = (u32*)(startOffset+0x74);
 		if (moduleParams->sdk_version > 0x5050000) {
-			newBranchPrepOffset1 = (u32*)(startOffset+0x870);
-			newBranchPrepOffset2 = (u32*)(startOffset+0x884);
+			newBranchPrepOffset1 = (u32*)(startOffset+0x70);
+			newBranchPrepOffset2 = (u32*)(startOffset+0x84);
 		}
 
 		newBranchPrepOffset1[0] = 0xE92D4000; // push {lr}
@@ -1571,6 +1605,10 @@ void codeCopy(u32* dst, u32* src, u32 len) {
 			// then fix it
 			u32* offsetByBl = getOffsetFromBL((u32*)srci);
 			setBL(dsti, (u32)offsetByBl);
+		} else if (*(u8*)(srci+3) == 0xFB) { // If blx instruction...
+			// then fix it
+			u32* offsetByBlx = getOffsetFromBLX((u32*)srci);
+			setBLX(dsti, (u32)offsetByBlx);
 		}
 		srci += 4;
 		dsti += 4;
@@ -1996,11 +2034,12 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 		   || strncmp(romTid, "DMP", 3) == 0
 		   || strncmp(romTid, "DHS", 3) == 0
 		)	&& arm7mbk == 0x080037C0 && donorFileCluster != CLUSTER_FREE) {
+			u32 startOffset = (u32)ndsHeader->arm9executeAddress;
 			if (moduleParams->sdk_version > 0x5050000) {
-				*(u32*)(startOffset+0x838) = 0xE1A00000; // nop
-				*(u32*)(startOffset+0x99C) = 0xE1A00000; // nop
+				*(u32*)(startOffset+0x38) = 0xE1A00000; // nop
+				*(u32*)(startOffset+0x19C) = 0xE1A00000; // nop
 			} else if (moduleParams->sdk_version > 0x5020000 && moduleParams->sdk_version < 0x5050000) {
-				*(u32*)(startOffset+0x98C) = 0xE1A00000; // nop
+				*(u32*)(startOffset+0x18C) = 0xE1A00000; // nop
 			}
 
 			patchTwlSleepMode(ndsHeader, moduleParams);
@@ -2009,7 +2048,7 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 
 	patchMpu(ndsHeader, moduleParams, patchMpuRegion);
 	patchMpu2(ndsHeader, moduleParams, usesCloneboot);
-	patchMpuFlagsSet(ndsHeader, moduleParams);
+	patchSlot2IoBlock(ndsHeader, moduleParams);
 	patchMpuChange(ndsHeader, moduleParams);
 
 	patchHiHeapPointer(ce9, moduleParams, ndsHeader);
@@ -2042,7 +2081,10 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 	//patchForceToPowerOff(ce9, ndsHeader, usesThumb);
 
 	if (!isPawsAndClaws(ndsHeader)) {
-		patchCardId(ce9, ndsHeader, moduleParams, usesThumb, cardReadEndOffset);
+		if (!patchCardId(ce9, ndsHeader, moduleParams, usesThumb, cardReadEndOffset)) {
+			dbg_printf("ERR_LOAD_OTHR\n\n");
+			return ERR_LOAD_OTHR;
+		}
 	}
 
 	patchCardReadDma(ce9, ndsHeader, moduleParams, usesThumb);
@@ -2079,11 +2121,11 @@ void patchCardNdsArm9Cont(cardengineArm9* ce9, const tNDSHeader* ndsHeader, cons
 	extern u32 arm7mbk;
 	extern u32 donorFileCluster;
 	if (arm7newUnitCode == 0 && arm7mbk == 0x080037C0 && donorFileCluster != CLUSTER_FREE) {
-		u32 startOffset = (u32)ndsHeader->arm9destination;
+		u32 startOffset = (u32)ndsHeader->arm9executeAddress;
 		if (moduleParams->sdk_version > 0x5050000) {
-			setB(startOffset+0x86C, startOffset+0x8F0);
+			setB(startOffset+0x6C, startOffset+0xF0);
 		} else {
-			setB(startOffset+0x85C, (moduleParams->sdk_version > 0x5020000) ? startOffset+0x8E0 : startOffset+0x8D8);
+			setB(startOffset+0x5C, (moduleParams->sdk_version > 0x5020000) ? startOffset+0xE0 : startOffset+0xD8);
 		}
 
 		patchInitLock(ndsHeader, moduleParams);

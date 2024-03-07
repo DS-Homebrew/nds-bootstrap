@@ -1,12 +1,10 @@
-#include "locations.h"
-
 OUTPUT_FORMAT("elf32-littlearm", "elf32-bigarm", "elf32-littlearm")
 OUTPUT_ARCH(arm)
 /*ENTRY(_start)*/
 
 MEMORY {
 
-	vram	: ORIGIN = CARDENGINEI_ARM9_TWLSDK_LOCATION, LENGTH = 30K /* Main RAM */
+	vram	: ORIGIN = 0x037C0000, LENGTH = 32K
 }
 
 __vram_start	=	ORIGIN(vram);
@@ -16,7 +14,6 @@ __sp_svc	=	__sp_irq - 0x100;
 __sp_usr	=	__sp_svc - 0x100;
 
 __irq_flags	=	__vram_top - 8;
-__irq_flagsaux	=	__vram_top - 0x40; /*__irq_flagsaux	=	0x04000000 - 0x40;*/
 __irq_vector	=	__vram_top - 4;
 
 SECTIONS

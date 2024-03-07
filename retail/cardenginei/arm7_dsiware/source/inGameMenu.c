@@ -22,7 +22,7 @@ extern u8 consoleModel;
 
 extern vu32* volatile sharedAddr;
 extern bool ipcEveryFrame;
-extern bool returnToMenu;
+// extern bool returnToMenu;
 
 extern struct IgmText *igmText;
 
@@ -53,8 +53,9 @@ void biosRead(void* dst, const void* src, u32 len)
 volatile int timeTillStatusRefresh = 7;
 
 void inGameMenu(void) {
-	returnToMenu = false;
+	// returnToMenu = false;
 	sharedAddr[4] = 0x554E454D; // 'MENU'
+	u32 errorBak = sharedAddr[0];
 	IPC_SendSync(0x9);
 	REG_MASTER_VOLUME = 0;
 	int oldIME = enterCriticalSection();
@@ -121,9 +122,9 @@ void inGameMenu(void) {
 			while (REG_VCOUNT == 191) swiDelay(100);
 
 			switch (sharedAddr[4]) {
-				case 0x54495845: // EXIT
+				/* case 0x54495845: // EXIT
 					exitMenu = true;
-					break;
+					break; */
 				case 0x54455352: // RSET
 					exitMenu = true;
 					timeTillStatusRefresh = 7;
@@ -150,10 +151,10 @@ void inGameMenu(void) {
 					dumpRam();
 					exitMenu = true;
 					break;
-				case 0x50455453: // STEP
+				/* case 0x50455453: // STEP
 					returnToMenu = true;
 					exitMenu = true;
-					break;
+					break; */
 				case 0x50505353: // SSPP
 					prepareScreenshot();
 					break;
@@ -206,13 +207,18 @@ void inGameMenu(void) {
 					break;
 			}
 
-			if (!exitMenu) {
+			if (sharedAddr[4] == 0x54495845) { // EXIT
+				// returnToMenu = (sharedAddr[1]);
+				exitMenu = true;
+			} else if (!exitMenu) {
 				sharedAddr[4] = 0x554E454D; // MENU
 			}
 		}
 	}
 
-	sharedAddr[4] = 0x54495845; // EXIT
+	sharedAddr[0] = errorBak;
+	sharedAddr[4] = 0;
+	sharedAddr[5] = 0;
 	sharedAddr[7] -= 0x10000000; // Clear time receive flag
 	timeTillStatusRefresh = 7;
 

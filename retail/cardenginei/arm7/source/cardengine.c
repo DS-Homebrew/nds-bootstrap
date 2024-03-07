@@ -1542,10 +1542,12 @@ void myIrqHandlerVBlank(void) {
 	if (language >= 0 && language <= 7 && languageTimer < 60*3) {
 		// Change language
 		personalData->language = language;
+		#ifndef TWLSDK
 		if (languageAddr > 0) {
 			// Extra measure for specific games
 			*languageAddr = language;
 		}
+		#endif
 		languageTimer++;
 	}
 
@@ -1598,11 +1600,13 @@ void myIrqHandlerVBlank(void) {
 		funcsUnpatched = true;
 	}
 
+#ifndef TWLSDK
 	if (!(valueBits & gameOnFlashcard) && !(valueBits & ROMinRAM) && isSdEjected()) {
 		tonccpy((u32*)0x02000300, sr_data_error, 0x020);
 		i2cWriteRegister(0x4A, 0x70, 0x01);
 		i2cWriteRegister(0x4A, 0x11, 0x01);		// Reboot into error screen if SD card is removed
 	}
+#endif
 
 /* #ifndef TWLSDK
 	if (valueBits & isDlp) {
@@ -1613,7 +1617,7 @@ void myIrqHandlerVBlank(void) {
 	}
 #endif */
 
-	if ((0 == (REG_KEYINPUT & igmHotkey) && 0 == (REG_EXTKEYINPUT & (((igmHotkey >> 10) & 3) | ((igmHotkey >> 6) & 0xC0))) && (valueBits & igmAccessible) && !wifiIrq) || returnToMenu || sharedAddr[5] == 0x4C4D4749 /* IGML */) {
+	if ((0 == (REG_KEYINPUT & igmHotkey) && 0 == (REG_EXTKEYINPUT & (((igmHotkey >> 10) & 3) | ((igmHotkey >> 6) & 0xC0))) && (valueBits & igmAccessible) && !wifiIrq) /* || returnToMenu */ || sharedAddr[5] == 0x4C4D4749 /* IGML */) {
 #ifdef TWLSDK
 		igmText = (struct IgmText *)INGAME_MENU_LOCATION;
 		i2cWriteRegister(0x4A, 0x12, 0x00);

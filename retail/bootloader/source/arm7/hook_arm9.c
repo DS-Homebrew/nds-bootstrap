@@ -237,9 +237,6 @@ int hookNdsRetailArm9(
 	if (isSdk5(moduleParams)) {
 		ce9->valueBits |= b_isSdk5;
 	}
-	if ((expansionPakFound || (extendedMemory && !dsDebugRam && strncmp(romTid, "UBRP", 4) != 0)) && ce9->overlaysSize <= romSizeLimit) {
-		ce9->valueBits |= b_overlaysCached;
-	}
 	if (strncmp(romTid, "CLJ", 3) == 0) {
 		ce9->valueBits |= b_cacheFlushFlag;
 	}
@@ -260,12 +257,10 @@ int hookNdsRetailArm9(
 		} else if (ndsHeader->arm9overlaySource == 0 || ndsHeader->arm9overlaySize == 0) {
 			romOffset = (ndsHeader->arm7romOffset + ndsHeader->arm7binarySize);
 		} else {
-			romOffset = (ndsHeader->arm9romOffset + ndsHeader->arm9binarySize);
+			romOffset = ndsHeader->arm9overlaySource;
 		}
-	} else {
-		romOffset = (ndsHeader->arm9romOffset + ndsHeader->arm9binarySize);
+		ce9->romLocation -= romOffset;
 	}
-	ce9->romLocation -= romOffset;
 
 	if (strncmp(romTid, "IPK", 3) == 0 || strncmp(romTid, "IPG", 3) == 0) {
 		ce9->valueBits |= b_cardReadFix;

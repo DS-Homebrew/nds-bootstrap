@@ -45,6 +45,10 @@ void setBL(int arg1, int arg2) {
 	*(u32*)arg1 = (((u32)(arg2 - arg1 - 8) >> 2) & 0xFFFFFF) | 0xEB000000;
 }
 
+void setBLX(int arg1, int arg2) {
+	*(u32*)arg1 = (((u32)(arg2 - arg1 - 10) >> 2) & 0xFFFFFF) | 0xFB000000;
+}
+
 u32* getOffsetFromBL(u32* blOffset) {
 	if (*blOffset < 0xEB000000 && *blOffset >= 0xEC000000) {
 		return NULL;
@@ -60,6 +64,23 @@ u32* getOffsetFromBL(u32* blOffset) {
 		return (u32*)offset;
 	}
 	return (u32*)((u32)blOffset + (opCode*4) + 8);
+}
+
+u32* getOffsetFromBLX(u32* blxOffset) {
+	if (*blxOffset < 0xFB000000 && *blxOffset >= 0xFC000000) {
+		return NULL;
+	}
+	u32 opCode = (*blxOffset) - 0xFB000000;
+
+	if (opCode >= 0x00800000 && opCode <= 0x00FFFFFF) {
+		u32 offset = (u32)blxOffset + 10;
+		for (u32 i = opCode; i <= 0x00FFFFFF; i++) {
+			offset -= 4;
+		}
+
+		return (u32*)offset;
+	}
+	return (u32*)((u32)blxOffset + (opCode*4) + 10);
 }
 
 const u16* generateA7InstrThumb(int arg1, int arg2) {
@@ -568,7 +589,7 @@ u32 patchCardNdsArm7(
 	newArm7binarySize = ndsHeader->arm7binarySize;
 	newArm7ibinarySize = __DSiHeader->arm7ibinarySize;
 
-	if ((ndsHeader->unitCode > 0) ? (REG_SCFG_EXT == 0) : (memcmp(ndsHeader->gameCode, "AYI", 3) == 0 && ndsHeader->arm7binarySize == 0x25F70) && *(u32*)DONOR_ROM_ARM7_SIZE_LOCATION != 0) {
+	if (((ndsHeader->unitCode > 0) ? (REG_SCFG_EXT == 0) : (memcmp(ndsHeader->gameCode, "AYI", 3) == 0 && ndsHeader->arm7binarySize == 0x25F70)) && *(u32*)DONOR_ROM_ARM7_SIZE_LOCATION != 0) {
 		// Replace incompatible ARM7 binary
 		newArm7binarySize = *(u32*)DONOR_ROM_ARM7_SIZE_LOCATION;
 		newArm7ibinarySize = *(u32*)DONOR_ROM_ARM7I_SIZE_LOCATION;

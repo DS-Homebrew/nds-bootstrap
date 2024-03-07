@@ -322,10 +322,10 @@ static u32 newOverlaysSize = 0;
 static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
 #ifdef DLDI
 	while (sharedAddr[3]==0x444D4152);	// Wait during a RAM dump
-	fileRead((char*)dst, ((ce9->valueBits & overlaysCached) && src >= ndsHeader->arm9romOffset+ndsHeader->arm9binarySize && src < ndsHeader->arm7romOffset) ? apFixOverlaysFile : romFile, src, len);
+	fileRead((char*)dst, ((ce9->valueBits & overlaysCached) && src >= ndsHeader->arm9overlaySource && src < ndsHeader->arm7romOffset) ? apFixOverlaysFile : romFile, src, len);
 #else
 	if (newOverlayOffset == 0) {
-		newOverlayOffset = ((ndsHeader->arm9romOffset + ndsHeader->arm9binarySize)/ce9->cacheBlockSize)*ce9->cacheBlockSize;
+		newOverlayOffset = (ndsHeader->arm9overlaySource/ce9->cacheBlockSize)*ce9->cacheBlockSize;
 		for (u32 i = newOverlayOffset; i < ndsHeader->arm7romOffset; i+= ce9->cacheBlockSize) {
 			newOverlaysSize += ce9->cacheBlockSize;
 		}
@@ -343,9 +343,9 @@ static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
 	//	sleepMsEnabled = true;
 	//}
 
-	if ((ce9->valueBits & cacheDisabled) && (u32)dst >= 0x02000000 && (u32)dst < 0x03000000) {
+	/* if ((ce9->valueBits & cacheDisabled) && (u32)dst >= 0x02000000 && (u32)dst < 0x03000000) {
 		fileRead((char*)dst, ((ce9->valueBits & overlaysCached) && src >= newOverlayOffset && src < newOverlayOffset+newOverlaysSize) ? apFixOverlaysFile : romFile, src, len);
-	} else {
+	} else { */
 		// Read via the main RAM cache
 		//bool runSleep = true;
 		while(len > 0) {
@@ -456,7 +456,7 @@ static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
 				//slot = getSlotForSectorManual(slot+1, sector);
 			}
 		}
-	}
+	// }
 #endif
 
 	//sleepMsEnabled = false;
@@ -600,12 +600,33 @@ extern void region0Fix();
 
 void cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	//nocashMessage("\narm9 cardRead\n");
-	#ifndef TWLSDK
+	#ifdef TWLSDK
+	u32 src = src0;
+	u8* dst = dst0;
+	u32 len = len0;
+
+	if (src == ndsHeader->romSize) {
+		tonccpy(dst, (u8*)0x02FFDC00, len); // Load pre-loaded RSA key
+		return;
+	}
+	#else
+	#ifdef GSDD
+	u32 src = src0;
+	u8* dst = dst0;
+	u32 len = len0;
+	#else
 	initialize();
 
 	if (!(ce9->valueBits & isSdk5) && !(ce9->valueBits & ROMinRAM)) {
 		debugRamMpuFix();
 	}
+
+	vu32* volatile cardStruct = (vu32* volatile)ce9->cardStruct0;
+
+	u32 src = ((ce9->valueBits & isSdk5) ? src0 : cardStruct[0]);
+	u8* dst = ((ce9->valueBits & isSdk5) ? dst0 : (u8*)(cardStruct[1]));
+	u32 len = ((ce9->valueBits & isSdk5) ? len0 : cardStruct[2]);
+	#endif
 	#endif
 
 	if (!flagsSet) {
@@ -625,24 +646,6 @@ void cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	}
 
 	enableIPC_SYNC();
-
-	#ifdef TWLSDK
-	u32 src = src0;
-	u8* dst = dst0;
-	u32 len = len0;
-	#else
-	#ifdef GSDD
-	u32 src = src0;
-	u8* dst = dst0;
-	u32 len = len0;
-	#else
-	vu32* volatile cardStruct = (vu32* volatile)ce9->cardStruct0;
-
-	u32 src = ((ce9->valueBits & isSdk5) ? src0 : cardStruct[0]);
-	u8* dst = ((ce9->valueBits & isSdk5) ? dst0 : (u8*)(cardStruct[1]));
-	u32 len = ((ce9->valueBits & isSdk5) ? len0 : cardStruct[2]);
-	#endif
-	#endif
 
 	// Simulate ROM mirroring
 	while (src >= ce9->romPaddingSize) {
@@ -1177,6 +1180,10 @@ extern void reset(u32 param, u32 tid2);
 void inGameMenu(s32* exRegisters) {
 	int oldIME = enterCriticalSection();
 
+	while (sharedAddr[5] != 0x4C4D4749) { // 'IGML'
+		while (REG_VCOUNT != 191) swiDelay(100);
+		while (REG_VCOUNT == 191) swiDelay(100);
+	}
 	while (sharedAddr[5] == 0x4C4D4749) { // 'IGML'
 		while (REG_VCOUNT != 191) swiDelay(100);
 		while (REG_VCOUNT == 191) swiDelay(100);
@@ -1248,15 +1255,13 @@ void myIrqHandlerIPC(void) {
 #ifndef GSDD
 	switch (IPC_GetSync()) {
 		case 0x3:
+		#ifndef TWLSDK
 			extern bool dmaDirectRead;
-#ifdef DLDI
 		if (dmaDirectRead) {
 			endCardReadDma();
 		}
-#else
-		if (dmaDirectRead) {
-			endCardReadDma();
-		}
+		#endif
+#ifndef DLDI
 		#ifndef TWLSDK
 		else if (ce9->patches->cardEndReadDmaRef || ce9->thumbPatches->cardEndReadDmaRef) { // new dma method
 			continueCardReadDmaArm7();
