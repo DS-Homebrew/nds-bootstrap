@@ -509,7 +509,18 @@ void myIrqHandlerIPC(void) {
 			u32 src = *(vu32*)(sharedAddr);
 			u32 len = *(vu32*)(sharedAddr+1);
 
-			fileRead((char*)dst, &savFile, (src % ce9->saveSize), len);
+			if ((src % ce9->saveSize)+len > ce9->saveSize) {
+				u32 len2 = len;
+				u32 len3 = 0;
+				while ((src % ce9->saveSize)+len2 > ce9->saveSize) {
+					len2--;
+					len3++;
+				}
+				fileRead((char*)dst, &savFile, (src % ce9->saveSize), len2);
+				fileRead((char*)dst+len2, &savFile, ((src+len2) % ce9->saveSize), len3);
+			} else {
+				fileRead((char*)dst, &savFile, (src % ce9->saveSize), len);
+			}
 
 			sharedAddr[3] = 0;
 			REG_EXMEMCNT = exmemcnt;
@@ -523,7 +534,18 @@ void myIrqHandlerIPC(void) {
 			u32 dst = *(vu32*)(sharedAddr);
 			u32 len = *(vu32*)(sharedAddr+1);
 
-			fileWrite((char*)src, &savFile, (dst % ce9->saveSize), len);
+			if ((dst % ce9->saveSize)+len > ce9->saveSize) {
+				u32 len2 = len;
+				u32 len3 = 0;
+				while ((dst % ce9->saveSize)+len2 > ce9->saveSize) {
+					len2--;
+					len3++;
+				}
+				fileWrite((char*)src, &savFile, (dst % ce9->saveSize), len2);
+				fileWrite((char*)src+len2, &savFile, ((dst+len2) % ce9->saveSize), len3);
+			} else {
+				fileWrite((char*)src, &savFile, (dst % ce9->saveSize), len);
+			}
 
 			sharedAddr[3] = 0;
 			REG_EXMEMCNT = exmemcnt;
