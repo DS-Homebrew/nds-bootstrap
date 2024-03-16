@@ -20,7 +20,7 @@
 #include "decompress.h"
 #include "debug_file.h"
 #include "locations.h"
-#include "tonccpy.h"
+#include "aeabi.h"
 
 #define BLZ_SHIFT     1          // bits to shift
 #define BLZ_MASK      0x80       // bits to check:
@@ -234,8 +234,8 @@ static u32 decompressIBinary(unsigned char *pak_buffer, unsigned int pak_len) {
 
   BLZ_Invert((char *)raw_buffer + dec_len, raw_len - dec_len);
 
-	tonccpy(pak_buffer, raw_buffer, raw_len);
-	toncset(raw_buffer, 0, raw_len);
+	__aeabi_memcpy(pak_buffer, raw_buffer, raw_len);
+	__aeabi_memclr(raw_buffer, raw_len);
 
 	return raw_len;
 }
@@ -370,7 +370,7 @@ void init2(u32 *magic, u32 a[3])
 
 void init1(u32 cardheader_gamecode)
 {
-	tonccpy(card_hash, encr_data, 4*(1024 + 18));
+	__aeabi_memcpy(card_hash, encr_data, 4*(1024 + 18));
 	arg2[0] = *(u32 *)&cardheader_gamecode;
 	arg2[1] = (*(u32 *)&cardheader_gamecode) >> 1;
 	arg2[2] = (*(u32 *)&cardheader_gamecode) << 1;
@@ -391,7 +391,7 @@ bool decrypt_arm9ntr(const tDSiHeader* dsiHeader)
 	u32 *p = (u32*)dsiHeader->ndshdr.arm9destination;
 
 	if (p[0] == 0 || (p[0] == 0xE7FFDEFF && p[1] == 0xE7FFDEFF)) {
-		toncset(encr_data, 0, 0x1048);
+		__aeabi_memclr(encr_data, 0x1048);
 		return false;
 	}
 
@@ -418,7 +418,7 @@ bool decrypt_arm9ntr(const tDSiHeader* dsiHeader)
 		size -= 8;
 	}
 
-	toncset(encr_data, 0, 0x1048);
+	__aeabi_memclr(encr_data, 0x1048);
 	return true;
 }
 

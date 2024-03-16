@@ -3,7 +3,7 @@
 #include <nds/arm9/background.h>
 
 #include "igm_text.h"
-#include "tonccpy.h"
+#include "aeabi.h"
 
 bool exceptionPrinted = false;
 
@@ -217,7 +217,7 @@ void showException(s32 *expReg) {
 
 	clearScreen(true);
 
-	toncset16(BG_PALETTE, 0, 256);
+	__aeabi_memclr(BG_PALETTE, 256*sizeof(u16));
 	for(int i = 0; i < sizeof(igmPal) / sizeof(igmPal[0]); i++) {
 		BG_PALETTE[i * 0x10 + 1] = igmPal[i];
 	}

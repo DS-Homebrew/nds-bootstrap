@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include "aeabi.h"
 #include "u128_math.h"
 
 void dsi_set_key( dsi_context* ctx,
@@ -225,15 +226,15 @@ void dsi_decrypt_ccm( dsi_context* ctx,
 		size -= 16;
 	}
 
-	memcpy(ctr, ctx->ctr, 16);
-	memset(block, 0, 16);	
+	__aeabi_memcpy(ctr, ctx->ctr, 16);
+	__aeabi_memset(block, 0, 16);	
 	dsi_crypt_ctr_block(ctx, block, block);
-	memcpy(ctx->ctr, ctr, 16);
-	memcpy(block, input, size);
+	__aeabi_memcpy(ctx->ctr, ctr, 16);
+	__aeabi_memcpy(block, input, size);
 
 
 	dsi_decrypt_ccm_block(ctx, block, block, mac);
-	memcpy(output, block, size);
+	__aeabi_memcpy(output, block, size);
 }
 
 
@@ -257,23 +258,23 @@ void dsi_encrypt_ccm( dsi_context* ctx,
 		size -= 16;
 	}
 
-	memset(block, 0, 16);
-	memcpy(block, input, size);
+	__aeabi_memset(block, 0, 16);
+	__aeabi_memcpy(block, input, size);
 	dsi_encrypt_ccm_block(ctx, block, block, mac);
-	memcpy(output, block, size);
+	__aeabi_memcpy(output, block, size);
 }
 
 void dsi_es_init( dsi_es_context* ctx,
 				  unsigned char key[16] )
 {
-	memcpy(ctx->key, key, 16);
+	__aeabi_memcpy(ctx->key, key, 16);
 	ctx->randomnonce = 1;
 }
 
 void dsi_es_set_nonce( dsi_es_context* ctx,
 					   unsigned char nonce[12] )
 {
-	memcpy(ctx->nonce, nonce, 12);
+	__aeabi_memcpy(ctx->nonce, nonce, 12);
 	ctx->randomnonce = 0;
 }
 
@@ -297,9 +298,9 @@ int dsi_es_decrypt( dsi_es_context* ctx,
 	unsigned int chksize;
 
 
-	memcpy(chkmac, metablock, 16);
+	__aeabi_memcpy(chkmac, metablock, 16);
 
-	memcpy(ctr, metablock + 16, 16);
+	__aeabi_memcpy(ctr, metablock + 16, 16);
 	ctr[0] = 0;
 	ctr[13] = 0;
 	ctr[14] = 0;
@@ -320,7 +321,7 @@ int dsi_es_decrypt( dsi_es_context* ctx,
       return -2;
   }
 
-	memcpy(nonce, metablock + 17, 12);
+	__aeabi_memcpy(nonce, metablock + 17, 12);
 
 	dsi_init_ccm(&cryptoctx, ctx->key, 16, size, 0, nonce);
 	dsi_decrypt_ccm(&cryptoctx, buffer, buffer, size, genmac);
@@ -355,25 +356,25 @@ void dsi_es_encrypt( dsi_es_context* ctx,
 	}
 	else
 	{
-		memcpy(nonce, ctx->nonce, 12);
+		__aeabi_memcpy(nonce, ctx->nonce, 12);
 	}
 
 	dsi_init_ccm(&cryptoctx, ctx->key, 16, size, 0, nonce);
 	dsi_encrypt_ccm(&cryptoctx, buffer, buffer, size, mac);
 
-	memset(scratchpad, 0, 16);
+	__aeabi_memset(scratchpad, 0, 16);
 	scratchpad[0] = 0x3A;
 	scratchpad[13] = size >> 16;
 	scratchpad[14] = size >> 8;
 	scratchpad[15] = size >> 0;
 
-	memset(ctr, 0, 16);
-	memcpy(ctr+1, nonce, 12);
+	__aeabi_memset(ctr, 0, 16);
+	__aeabi_memcpy(ctr+1, nonce, 12);
 
 	dsi_init_ctr(&cryptoctx, ctx->key, ctr);
 	dsi_crypt_ctr_block(&cryptoctx, scratchpad, metablock+16);
-	memcpy(metablock+17, nonce, 12);
+	__aeabi_memcpy(metablock+17, nonce, 12);
 
-	memcpy(metablock, mac, 16);
+	__aeabi_memcpy(metablock, mac, 16);
 
 }

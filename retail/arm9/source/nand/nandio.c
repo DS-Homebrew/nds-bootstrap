@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include "crypto.h"
 #include "sector0.h"
-#include "tonccpy.h"
+#include "aeabi.h"
 #include "f_xy.h"
 
 //#define SECTOR_SIZE 512
@@ -31,7 +31,7 @@ void getConsoleID(u8 *consoleID){
 	u8 key_x[16];////key3_x - contains a DSi console id (which just happens to be the LFCS on 3ds)
 	u8 key_y[16] = {0x76, 0xDC, 0xB9, 0x0A, 0xD3, 0xC4, 0x4D, 0xBD, 0x1D, 0xDD, 0x2D, 0x20, 0x05, 0x00, 0xA0, 0xE1}; //key3_y NAND constant
 	
-	tonccpy(key, fifo, 16);  //receive the goods from arm7
+	__aeabi_memcpy(key, fifo, 16);  //receive the goods from arm7
 
 	F_XY_reverse(key, key_xy); //work backwards from the normalkey to get key_x that has the consoleID
 
@@ -39,8 +39,8 @@ void getConsoleID(u8 *consoleID){
 		key_x[i] = key_xy[i] ^ key_y[i];             //''
 	}
 
-	tonccpy(&consoleID[0], &key_x[0], 4);             
-	tonccpy(&consoleID[4], &key_x[0xC], 4);
+	__aeabi_memcpy(&consoleID[0], &key_x[0], 4);             
+	__aeabi_memcpy(&consoleID[4], &key_x[0xC], 4);
 }
 
 bool nandio_startup() {

@@ -42,8 +42,8 @@
 #include <nds/ipc.h>
 #include <nds/arm9/dldi.h>
 #include "my_sdmmc.h"
-#include "tonccpy.h"
 #include "locations.h"
+#include "aeabi.h"
 
 extern char ioType[4];
 extern u32 dataStartOffset;
@@ -106,7 +106,7 @@ static inline void sendValue32(u32 value32) {
 static inline void sendMsg(int size, u8* msg) {
 	//nocashMessage("sendMsg");
 	*(vu32*)(word_command_offset+4) = (vu32)size;
-	tonccpy((u8*)word_command_offset+8, msg, size);
+	__aeabi_memcpy((u8*)word_command_offset+8, msg, size);
 	*(vu32*)word_command_offset = (vu32)0x027FEE05;
 	IPC_SendSync(0xEE24);
 }
@@ -187,7 +187,7 @@ bool sd_ReadSectors(sec_t sector, sec_t numSectors,void* buffer) {
 
 		result = getValue32();
 
-		tonccpy(buffer+numreads*512, (u32*)mybuffer, readsectors*512);
+		__aeabi_memcpy(buffer+numreads*512, (u32*)mybuffer, readsectors*512);
 	}
 
 	/*sec_t alignedSector = (sector/cacheBlockSectors)*cacheBlockSectors;
@@ -221,7 +221,7 @@ bool sd_ReadSectors(sec_t sector, sec_t numSectors,void* buffer) {
 			len2 = alignedSector - sector + cacheBlockSectors;
 		}
 
-		tonccpy(buffer, (u8*)cacheBuffer+((sector-alignedSector)*BYTES_PER_READ), len2*BYTES_PER_READ);
+		__aeabi_memcpy(buffer, (u8*)cacheBuffer+((sector-alignedSector)*BYTES_PER_READ), len2*BYTES_PER_READ);
 		numSectors -= len2;
 		if (numSectors > 0) {
 			sector += len2;
@@ -251,7 +251,7 @@ bool sd_WriteSectors(sec_t sector, sec_t numSectors,void* buffer) {
 
 		vu32* mybuffer = (vu32*)((u32)tmp_buf_addr + (dsiMode ? 0x0A000000 : 0x00400000));
 
-		tonccpy((u32*)mybuffer, buffer+numreads*512, readsectors*512);
+		__aeabi_memcpy((u32*)mybuffer, buffer+numreads*512, readsectors*512);
 
 		msg.type = SDMMC_SD_WRITE_SECTORS;
 		msg.sdParams.startsector = startsector;
@@ -296,7 +296,7 @@ bool sd_WriteSectors(sec_t sector, sec_t numSectors,void* buffer) {
 			len2 = alignedSector - sector + cacheBlockSectors;
 		}
 
-		tonccpy((u8*)cacheBuffer+((sector-alignedSector)*BYTES_PER_READ), buffer, len2*BYTES_PER_READ);
+		__aeabi_memcpy((u8*)cacheBuffer+((sector-alignedSector)*BYTES_PER_READ), buffer, len2*BYTES_PER_READ);
 
 		msg.type = SDMMC_SD_WRITE_SECTORS;
 		msg.sdParams.startsector = alignedSector;
@@ -329,7 +329,7 @@ bool ramDisk = false;
 bool ramd_ReadSectors(u32 sector, u32 numSectors, void* buffer) {
 //---------------------------------------------------------------------------------
 	if (dsiMode) {
-		tonccpy(buffer, (void*)RAM_DISK_LOCATION_DSIMODE+(sector << 9), numSectors << 9);
+		__aeabi_memcpy(buffer, (void*)RAM_DISK_LOCATION_DSIMODE+(sector << 9), numSectors << 9);
 	} else {
 		if (buffer >= (void*)0x02C00000 && buffer < (void*)0x03000000) {
 			buffer -= 0xC00000;		// Move out of RAM disk location
@@ -340,7 +340,7 @@ bool ramd_ReadSectors(u32 sector, u32 numSectors, void* buffer) {
 		}
 
 		if (!isArm7) extendedMemory(true);		// Enable extended memory mode to access RAM drive
-		tonccpy(buffer, (void*)RAM_DISK_LOCATION+(sector << 9), numSectors << 9);
+		__aeabi_memcpy(buffer, (void*)RAM_DISK_LOCATION+(sector << 9), numSectors << 9);
 		if (!isArm7) extendedMemory(false);	// Disable extended memory mode
 	}
 	return true;
@@ -350,7 +350,7 @@ bool ramd_ReadSectors(u32 sector, u32 numSectors, void* buffer) {
 bool ramd_WriteSectors(u32 sector, u32 numSectors, void* buffer) {
 //---------------------------------------------------------------------------------
 	if (dsiMode) {
-		tonccpy((void*)RAM_DISK_LOCATION_DSIMODE+(sector << 9), buffer, numSectors << 9);
+		__aeabi_memcpy((void*)RAM_DISK_LOCATION_DSIMODE+(sector << 9), buffer, numSectors << 9);
 	} else {
 		if (buffer >= (void*)0x02C00000 && buffer < (void*)0x03000000) {
 			buffer -= 0xC00000;		// Move out of RAM disk location
@@ -361,7 +361,7 @@ bool ramd_WriteSectors(u32 sector, u32 numSectors, void* buffer) {
 		}
 
 		if (!isArm7) extendedMemory(true);		// Enable extended memory mode to access RAM drive
-		tonccpy((void*)RAM_DISK_LOCATION+(sector << 9), buffer, numSectors << 9);
+		__aeabi_memcpy((void*)RAM_DISK_LOCATION+(sector << 9), buffer, numSectors << 9);
 		if (!isArm7) extendedMemory(false);	// Disable extended memory mode
 	}
 	return true;

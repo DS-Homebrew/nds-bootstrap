@@ -19,7 +19,7 @@
 #include "myDSiMode.h"
 #include "lzss.h"
 #include "text.h"
-#include "tonccpy.h"
+#include "aeabi.h"
 #include "hex.h"
 #include "cardengine_header_arm7.h"
 #include "cheat_engine.h"
@@ -54,9 +54,9 @@ void decrypt_modcrypt_area(dsi_context* ctx, u8 *buffer, unsigned int size)
 
 	while(len>0)
 	{
-		toncset(block, 0, 0x10);
+		__aeabi_memset(block, 0x10, 0);
 		dsi_crypt_ctr_block(ctx, buffer, block);
-		tonccpy(buffer, block, 0x10);
+		__aeabi_memcpy(buffer, block, 0x10);
 		buffer+=0x10;
 		len--;
 	}
@@ -95,14 +95,14 @@ void addTwlDevice(const char letter, u8 flags, u8 accessRights, const char* name
 	static char currentLetter = 'A';
 	static u8* deviceList = (u8*)0x02EFF000;
 	if (deviceList == (u8*)0x02EFF000) {
-		toncset(deviceList, 0, 0x400);
+		__aeabi_memclr(deviceList, 0x400);
 	}
 
-	toncset(deviceList, (letter == 0) ? currentLetter : letter, 1);
-	toncset(deviceList+1, flags, 1);
-	toncset(deviceList+2, accessRights, 1);
-	tonccpy(deviceList+4, name, strlen(name));
-	tonccpy(deviceList+0x14, path, strlen(path));
+	__aeabi_memset(deviceList, 1, (letter == 0) ? currentLetter : letter);
+	__aeabi_memset(deviceList+1, 1, flags);
+	__aeabi_memset(deviceList+2, 1, accessRights);
+	__aeabi_memcpy(deviceList+4, name, strlen(name));
+	__aeabi_memcpy(deviceList+0x14, path, strlen(path));
 
 	deviceList += 0x54;
 	if (letter == 0) {
@@ -327,8 +327,8 @@ static void load_conf(configuration* conf, const char* fn) {
 
 void getIgmStrings(configuration* conf, bool b4ds) {
 	// Set In-Game Menu strings
-	tonccpy(igmText->version, VER_NUMBER, sizeof(VER_NUMBER));
-	tonccpy(igmText->ndsBootstrap, "nds-bootstrap", 28);
+	__aeabi_memcpy(igmText->version, VER_NUMBER, sizeof(VER_NUMBER));
+	__aeabi_memcpy(igmText->ndsBootstrap, "nds-bootstrap", 28);
 	igmText->rtl = false;
 
 	// Load In-Game Menu font
@@ -748,13 +748,13 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			u8* twlCfg = (u8*)0x02000400;
 			readFirmware(0x1FD, twlCfg+0x1E0, 1); // WlFirm Type (1=DWM-W015, 2=W024, 3=W028)
 			if (twlCfg[0x1E0] == 2 || twlCfg[0x1E0] == 3) {
-				toncset32(twlCfg+0x1E4, 0x520000, 1); // WlFirm RAM vars
-				toncset32(twlCfg+0x1E8, 0x520000, 1); // WlFirm RAM base
-				toncset32(twlCfg+0x1EC, 0x020000, 1); // WlFirm RAM size
+				__aeabi_memset4(twlCfg+0x1E4, 4, 0x520000); // WlFirm RAM vars
+				__aeabi_memset4(twlCfg+0x1E8, 4, 0x520000); // WlFirm RAM base
+				__aeabi_memset4(twlCfg+0x1EC, 4, 0x020000); // WlFirm RAM size
 			} else {
-				toncset32(twlCfg+0x1E4, 0x500400, 1); // WlFirm RAM vars
-				toncset32(twlCfg+0x1E8, 0x500000, 1); // WlFirm RAM base
-				toncset32(twlCfg+0x1EC, 0x02E000, 1); // WlFirm RAM size
+				__aeabi_memset4(twlCfg+0x1E4, 4, 0x500400); // WlFirm RAM vars
+				__aeabi_memset4(twlCfg+0x1E8, 4, 0x500000); // WlFirm RAM base
+				__aeabi_memset4(twlCfg+0x1EC, 4, 0x02E000); // WlFirm RAM size
 			}
 			*(u16*)(twlCfg+0x1E2) = swiCRC16(0xFFFF, twlCfg+0x1E4, 0xC); // WlFirm CRC16
 
@@ -892,7 +892,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		uint8_t *target = (uint8_t *)TARGETBUFFERHEADER ;
 		fseek(ndsFile, 0, SEEK_SET);
 		fread(target, 1, 0x1000, ndsFile);
-		toncset32((u8*)target+0x1D8, ndsArm7idst, 1);
+		__aeabi_memset4((u8*)target+0x1D8, 4, ndsArm7idst);
 
 		/*if (conf->dsiMode > 0 && unitCode > 0 && !conf->isDSiWare) {
 			load_game_conf(conf, conf->sdFound ? "sd:/_nds/nds-bootstrap.ini" : "fat:/_nds/nds-bootstrap.ini", (char*)romTid);
@@ -947,18 +947,18 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			if ((target[0x1C] & 4) || (target[0x1BF] & 0x80))
 			{
 				// Debug Key
-				tonccpy(key, target, 16) ;
+				__aeabi_memcpy(key, target, 16) ;
 			} else
 			{
 				//Retail key
 				char modcrypt_shared_key[8] = {'N','i','n','t','e','n','d','o'};
-				tonccpy(keyp, modcrypt_shared_key, 8) ;
+				__aeabi_memcpy(keyp, modcrypt_shared_key, 8) ;
 				for (int i=0;i<4;i++)
 				{
 					keyp[8+i] = target[0x0c+i] ;
 					keyp[15-i] = target[0x0c+i] ;
 				}
-				tonccpy(key, target+0x350, 16) ;
+				__aeabi_memcpy(key, target+0x350, 16) ;
 				
 				u128_xor(key, keyp);
 				u128_add(key, DSi_KEY_MAGIC);
@@ -991,18 +991,18 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 				if ((target[0x1C] & 4) || (target[0x1BF] & 0x80))
 				{
 					// Debug Key
-					tonccpy(key, target, 16) ;
+					__aeabi_memcpy(key, target, 16) ;
 				} else
 				{
 					//Retail key
 					char modcrypt_shared_key[8] = {'N','i','n','t','e','n','d','o'};
-					tonccpy(keyp, modcrypt_shared_key, 8) ;
+					__aeabi_memcpy(keyp, modcrypt_shared_key, 8) ;
 					for (int i=0;i<4;i++)
 					{
 						keyp[8+i] = target[0x0c+i] ;
 						keyp[15-i] = target[0x0c+i] ;
 					}
-					tonccpy(key, target+0x350, 16) ;
+					__aeabi_memcpy(key, target+0x350, 16) ;
 					
 					u128_xor(key, keyp);
 					u128_add(key, DSi_KEY_MAGIC);
@@ -1150,8 +1150,8 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 		if (!conf->gameOnFlashcard && strlen(conf->appPath) < 62) {
 			char sdmcText[4] = {'s','d','m','c'};
-			tonccpy((char*)0x02EFF3C2, conf->appPath, strlen(conf->appPath));
-			tonccpy((char*)0x02EFF3C0, sdmcText, 4);
+			__aeabi_memcpy((char*)0x02EFF3C2, conf->appPath, strlen(conf->appPath));
+			__aeabi_memcpy((char*)0x02EFF3C0, sdmcText, 4);
 		}
 	}
 
@@ -1203,9 +1203,9 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			fread(lz77ImageBuffer, 1, sizeof(lz77ImageBuffer), cebin);
 			LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINEI_ARM7_BUFFERED_LOCATION);
 			if (REG_SCFG_EXT7 != 0) {
-				tonccpy((u8*)LOADER_RETURN_SDK5_LOCATION, twlmenuResetGamePath, 256);
+				__aeabi_memcpy((u8*)LOADER_RETURN_SDK5_LOCATION, twlmenuResetGamePath, 256);
 			}
-			tonccpy((u8*)LOADER_RETURN_SDK5_LOCATION+0x100, &srBackendId, 8);
+			__aeabi_memcpy((u8*)LOADER_RETURN_SDK5_LOCATION+0x100, &srBackendId, 8);
 		}
 		fclose(cebin);
 
@@ -1233,9 +1233,9 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			fread(lz77ImageBuffer, 1, sizeof(lz77ImageBuffer), cebin);
 			LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINEI_ARM7_BUFFERED_LOCATION);
 			if (REG_SCFG_EXT7 != 0) {
-				tonccpy((u8*)LOADER_RETURN_LOCATION, twlmenuResetGamePath, 256);
+				__aeabi_memcpy((u8*)LOADER_RETURN_LOCATION, twlmenuResetGamePath, 256);
 			}
-			tonccpy((u8*)LOADER_RETURN_LOCATION+0x100, &srBackendId, 8);
+			__aeabi_memcpy((u8*)LOADER_RETURN_LOCATION+0x100, &srBackendId, 8);
 		}
 		fclose(cebin);
 
@@ -1373,9 +1373,9 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		fread(lz77ImageBuffer, 1, sizeof(lz77ImageBuffer), cebin);
 		LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINEI_ARM7_BUFFERED_LOCATION);
 		if (REG_SCFG_EXT7 != 0) {
-			tonccpy((u8*)LOADER_RETURN_DSIWARE_LOCATION, twlmenuResetGamePath, 256);
+			__aeabi_memcpy((u8*)LOADER_RETURN_DSIWARE_LOCATION, twlmenuResetGamePath, 256);
 		}
-		tonccpy((u8*)LOADER_RETURN_DSIWARE_LOCATION+0x100, &srBackendId, 8);
+		__aeabi_memcpy((u8*)LOADER_RETURN_DSIWARE_LOCATION+0x100, &srBackendId, 8);
 	}
 	fclose(cebin);
 
@@ -1477,7 +1477,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		cebin = fopen(pageFilePath.c_str(), "r+");
 		fwrite((u8*)igmText, 1, 0xA000, cebin);
 		fclose(cebin);
-		toncset((u8*)igmText, 0, 0xA000);
+		__aeabi_memclr((u8*)igmText, 0xA000);
 	}
 
 	// Load DS blowfish
@@ -1586,11 +1586,11 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			delete[] bmpImageBuffer;*/
 			fread((u16*)IMAGES_LOCATION, 1, 0x18000, bootstrapImages);
 		} else {
-			toncset16((u16*)IMAGES_LOCATION, 0, 256*192);
+			__aeabi_memclr((u16*)IMAGES_LOCATION, (256*192)*sizeof(u16));
 		}
 		fclose(bootstrapImages);
 	} else {
-		toncset16((u16*)IMAGES_LOCATION, 0, 256*192);
+		__aeabi_memclr((u16*)IMAGES_LOCATION, (256*192)*sizeof(u16));
 	}
 
   } else {
@@ -1611,18 +1611,18 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			if ((target[0x1C] & 4) || (target[0x1BF] & 0x80))
 			{
 				// Debug Key
-				tonccpy(key, target, 16) ;
+				__aeabi_memcpy(key, target, 16) ;
 			} else
 			{
 				//Retail key
 				char modcrypt_shared_key[8] = {'N','i','n','t','e','n','d','o'};
-				tonccpy(keyp, modcrypt_shared_key, 8) ;
+				__aeabi_memcpy(keyp, modcrypt_shared_key, 8) ;
 				for (int i=0;i<4;i++)
 				{
 					keyp[8+i] = target[0x0c+i] ;
 					keyp[15-i] = target[0x0c+i] ;
 				}
-				tonccpy(key, target+0x350, 16) ;
+				__aeabi_memcpy(key, target+0x350, 16) ;
 				
 				u128_xor(key, keyp);
 				u128_add(key, DSi_KEY_MAGIC);
@@ -1669,10 +1669,11 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	fclose(cebin);
 
 	// Load ce7 binary
-	if (strncmp(romTid, "KWY", 3) == 0 // Mighty Milky Way
+	if (strncmp(romTid, "KMG", 3) == 0 // Mighty Flip Champs!
+	||	strncmp(romTid, "KWY", 3) == 0 // Mighty Milky Way
 	||	strncmp(romTid, "KS3", 3) == 0 // Shantae: Risky's Revenge
 	) {
-		cebin = fopen("nitro:/cardengine_arm7_music.bin", "rb");
+		cebin = fopen("nitro:/cardengine_arm7_music.bin", "rb"); // Music and/or rumble
 	} else {
 		cebin = fopen("nitro:/cardengine_arm7.bin", "rb");
 	}
@@ -1768,7 +1769,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		cebin = fopen(pageFilePath.c_str(), "r+");
 		fwrite((u8*)igmText, 1, 0xA000, cebin);
 		fclose(cebin);
-		toncset((u8*)igmText, 0, 0xA000);
+		__aeabi_memclr((u8*)igmText, 0xA000);
 	}
 
 	if (accessControl & BIT(4)) {
@@ -1956,11 +1957,11 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			delete[] bmpImageBuffer;*/
 			fread((u16*)IMAGES_LOCATION, 1, 0x18000, bootstrapImages);
 		} else {
-			toncset16((u16*)IMAGES_LOCATION, 0, 256*192);
+			__aeabi_memclr((u16*)IMAGES_LOCATION, (256*192)*sizeof(u16));
 		}
 		fclose(bootstrapImages);
 	} else {
-		toncset16((u16*)IMAGES_LOCATION, 0, 256*192);
+		__aeabi_memclr((u16*)IMAGES_LOCATION, (256*192)*sizeof(u16));
 	}
 
 	sprintf(patchOffsetCacheFilePath, "fat:/_nds/nds-bootstrap/musicPacks/%s-%04X.pck", romTid, headerCRC);

@@ -21,7 +21,6 @@
 //#include "debug_file.h"
 #include "locations.h"
 #include "ndma.h"
-#include "tonccpy.h"
 
 u32 iUncompressedSize = 0;
 static u32 iFixedAddr = 0;

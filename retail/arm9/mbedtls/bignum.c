@@ -47,6 +47,7 @@
 #include "bn_mul.h"
 
 #include <string.h>
+#include "aeabi.h"
 
 #if defined(MBEDTLS_PLATFORM_C)
 #include "mbedtls/platform.h"
@@ -125,7 +126,7 @@ int mbedtls_mpi_grow( mbedtls_mpi *X, size_t nblimbs )
 
         if( X->p != NULL )
         {
-            memcpy( p, X->p, X->n * ciL );
+            __aeabi_memcpy( p, X->p, X->n * ciL );
             mbedtls_mpi_zeroize( X->p, X->n );
             mbedtls_free( X->p );
         }
@@ -163,7 +164,7 @@ int mbedtls_mpi_shrink( mbedtls_mpi *X, size_t nblimbs )
 
     if( X->p != NULL )
     {
-        memcpy( p, X->p, i * ciL );
+        __aeabi_memcpy( p, X->p, i * ciL );
         mbedtls_mpi_zeroize( X->p, X->n );
         mbedtls_free( X->p );
     }
@@ -200,8 +201,8 @@ int mbedtls_mpi_copy( mbedtls_mpi *X, const mbedtls_mpi *Y )
 
     MBEDTLS_MPI_CHK( mbedtls_mpi_grow( X, i ) );
 
-    memset( X->p, 0, X->n * ciL );
-    memcpy( X->p, Y->p, i * ciL );
+    __aeabi_memset( X->p, 0, X->n * ciL );
+    __aeabi_memcpy( X->p, Y->p, i * ciL );
 
 cleanup:
 
@@ -215,9 +216,9 @@ void mbedtls_mpi_swap( mbedtls_mpi *X, mbedtls_mpi *Y )
 {
     mbedtls_mpi T;
 
-    memcpy( &T,  X, sizeof( mbedtls_mpi ) );
-    memcpy(  X,  Y, sizeof( mbedtls_mpi ) );
-    memcpy(  Y, &T, sizeof( mbedtls_mpi ) );
+    __aeabi_memcpy( &T,  X, sizeof( mbedtls_mpi ) );
+    __aeabi_memcpy(  X,  Y, sizeof( mbedtls_mpi ) );
+    __aeabi_memcpy(  Y, &T, sizeof( mbedtls_mpi ) );
 }
 
 /*
@@ -292,7 +293,7 @@ int mbedtls_mpi_lset( mbedtls_mpi *X, mbedtls_mpi_sint z )
     int ret;
 
     MBEDTLS_MPI_CHK( mbedtls_mpi_grow( X, 1 ) );
-    memset( X->p, 0, X->n * ciL );
+    __aeabi_memset( X->p, 0, X->n * ciL );
 
     X->p[0] = ( z < 0 ) ? -z : z;
     X->s    = ( z < 0 ) ? -1 : 1;
@@ -610,7 +611,7 @@ int mbedtls_mpi_read_file( mbedtls_mpi *X, int radix, FILE *fin )
      */
     char s[ MBEDTLS_MPI_RW_BUFFER_SIZE ];
 
-    memset( s, 0, sizeof( s ) );
+    __aeabi_memset( s, 0, sizeof( s ) );
     if( fgets( s, sizeof( s ) - 1, fin ) == NULL )
         return( MBEDTLS_ERR_MPI_FILE_IO_ERROR );
 
@@ -642,7 +643,7 @@ int mbedtls_mpi_write_file( const char *p, const mbedtls_mpi *X, int radix, FILE
      */
     char s[ MBEDTLS_MPI_RW_BUFFER_SIZE ];
 
-    memset( s, 0, sizeof( s ) );
+    __aeabi_memset( s, 0, sizeof( s ) );
 
     MBEDTLS_MPI_CHK( mbedtls_mpi_write_string( X, radix, s, sizeof( s ) - 2, &n ) );
 
@@ -703,7 +704,7 @@ int mbedtls_mpi_write_binary( const mbedtls_mpi *X, unsigned char *buf, size_t b
     if( buflen < n )
         return( MBEDTLS_ERR_MPI_BUFFER_TOO_SMALL );
 
-    memset( buf, 0, buflen );
+    __aeabi_memset( buf, 0, buflen );
 
     for( i = buflen - 1, j = 0; n > 0; i--, j++, n-- )
         buf[i] = (unsigned char)( X->p[j / ciL] >> ((j % ciL) << 3) );
@@ -1558,7 +1559,7 @@ static int mpi_montmul( mbedtls_mpi *A, const mbedtls_mpi *B, const mbedtls_mpi 
     if( T->n < N->n + 1 || T->p == NULL )
         return( MBEDTLS_ERR_MPI_BAD_INPUT_DATA );
 
-    memset( T->p, 0, T->n * ciL );
+    __aeabi_memset( T->p, 0, T->n * ciL );
 
     d = T->p;
     n = N->n;
@@ -1578,7 +1579,7 @@ static int mpi_montmul( mbedtls_mpi *A, const mbedtls_mpi *B, const mbedtls_mpi 
         *d++ = u0; d[n + 1] = 0;
     }
 
-    memcpy( A->p, d, ( n + 1 ) * ciL );
+    __aeabi_memcpy( A->p, d, ( n + 1 ) * ciL );
 
     if( mbedtls_mpi_cmp_abs( A, N ) >= 0 )
         mpi_sub_hlp( n, N->p, A->p );
@@ -1628,7 +1629,7 @@ int mbedtls_mpi_exp_mod( mbedtls_mpi *X, const mbedtls_mpi *A, const mbedtls_mpi
     mpi_montg_init( &mm, N );
     mbedtls_mpi_init( &RR ); mbedtls_mpi_init( &T );
     mbedtls_mpi_init( &Apos );
-    memset( W, 0, sizeof( W ) );
+    __aeabi_memset( W, 0, sizeof( W ) );
 
     i = mbedtls_mpi_bitlen( E );
 
@@ -1664,10 +1665,10 @@ int mbedtls_mpi_exp_mod( mbedtls_mpi *X, const mbedtls_mpi *A, const mbedtls_mpi
         MBEDTLS_MPI_CHK( mbedtls_mpi_mod_mpi( &RR, &RR, N ) );
 
         if( _RR != NULL )
-            memcpy( _RR, &RR, sizeof( mbedtls_mpi ) );
+            __aeabi_memcpy( _RR, &RR, sizeof( mbedtls_mpi ) );
     }
     else
-        memcpy( &RR, _RR, sizeof( mbedtls_mpi ) );
+        __aeabi_memcpy( &RR, _RR, sizeof( mbedtls_mpi ) );
 
     /*
      * W[1] = A * R^2 * R^-1 mod N = A * R mod N

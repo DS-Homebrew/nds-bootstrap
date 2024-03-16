@@ -22,7 +22,7 @@
 #include <nds/system.h>
 #include <nds/input.h>
 #include <nds/arm7/audio.h>
-#include "tonccpy.h"
+#include "aeabi.h"
 #include "my_sdmmc.h"
 #include "sdmmcEngine.h"
 //#include "i2c.h"
@@ -48,7 +48,7 @@ static int cardEgnineCommandMutex = 0;
 /*static int softResetTimer = 0;
 
 static void unlaunchSetHiyaBoot(void) {
-	tonccpy((u8*)0x02000800, unlaunchAutoLoadID, 12);
+	__aeabi_memcpy((u8*)0x02000800, unlaunchAutoLoadID, 12);
 	*(u16*)(0x0200080C) = 0x3F0;		// Unlaunch Length for CRC16 (fixed, must be 3F0h)
 	*(u16*)(0x0200080E) = 0;			// Unlaunch CRC16 (empty)
 	*(u32*)(0x02000810) |= BIT(0);		// Load the title at 2000838h
@@ -73,7 +73,7 @@ static void sendValue32(vu32 value32) {
 }
 
 static inline void getDatamsg(int size, u8* msg) {
-	tonccpy(msg, (u8*)commandAddr+8, size);
+	__aeabi_memcpy(msg, (u8*)commandAddr+8, size);
 }
 
 //---------------------------------------------------------------------------------
@@ -197,7 +197,7 @@ void myIrqHandler(void) {
 			//if (consoleModel < 2) {
 				unlaunchSetHiyaBoot();
 			//}
-			tonccpy((u32*)0x02000300, sr_data_srloader, 0x020);
+			__aeabi_memcpy((u32*)0x02000300, sr_data_srloader, 0x020);
 			i2cWriteRegister(0x4A, 0x70, 0x01);
 			i2cWriteRegister(0x4A, 0x11, 0x01);		// Reboot into TWiLight Menu++
 		}
@@ -210,7 +210,7 @@ void myIrqHandler(void) {
 		//if (consoleModel < 2) {
 			unlaunchSetHiyaBoot();
 		//}
-		tonccpy((u32*)0x02000300, sr_data_srllastran, 0x020);
+		__aeabi_memcpy((u32*)0x02000300, sr_data_srllastran, 0x020);
 		i2cWriteRegister(0x4A, 0x70, 0x01);
 		i2cWriteRegister(0x4A, 0x11, 0x01);			// Reboot game
 	}*/

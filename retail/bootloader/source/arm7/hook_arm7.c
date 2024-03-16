@@ -31,7 +31,7 @@
 #include "patch.h"
 #include "find.h"
 #include "hook.h"
-#include "tonccpy.h"
+#include "aeabi.h"
 
 #define b_sleepMode BIT(17)
 
@@ -243,7 +243,7 @@ int hookNdsRetailArm7(
 	aFile apPatchFile; getFileFromCluster(&apPatchFile, apPatchFileCluster);
 	const u32 cheatSizeTotal = cheatSize+(apPatchIsCheat ? apPatchSize : 0);
 	if (cheatSizeTotal > 4 && cheatSizeTotal <= 0x1C00) {
-		tonccpy((u8*)cheatEngineAddr, (u8*)CHEAT_ENGINE_LOCATION_B4DS_BUFFERED, 0x400);
+		__aeabi_memcpy((u8*)cheatEngineAddr, (u8*)CHEAT_ENGINE_LOCATION_B4DS_BUFFERED, 0x400);
 
 		char* cheatDataOffset = (char*)cheatEngineAddr+0x3E8;
 		if (apPatchFile.firstCluster != CLUSTER_FREE && apPatchIsCheat) {
@@ -257,7 +257,7 @@ int hookNdsRetailArm7(
 			dbg_printf("Cheats found and applied\n");
 		}
 	}
-	toncset((u8*)CHEAT_ENGINE_LOCATION_B4DS_BUFFERED, 0, 0x400);
+	__aeabi_memclr((u8*)CHEAT_ENGINE_LOCATION_B4DS_BUFFERED, 0x400);
 
 	nocashMessage("ERR_NONE");
 	return ERR_NONE;

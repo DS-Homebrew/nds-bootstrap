@@ -29,7 +29,7 @@
     project at chishm@hotmail.com
 ------------------------------------------------------------------*/
    
-#include "tonccpy.h"
+#include "aeabi.h"
 #include "my_fat.h"
 #include "card.h"
 #include "debug_file.h"
@@ -833,7 +833,7 @@ bool resumeFileRead()
             CARD_ReadSector( context.curSect + FAT_ClustToSect(context.file->currentCluster), lastGlobalBuffer, 0, 0);
 
       		// Read in last partial chunk
-              tonccpy(context.buffer+context.dataPos,lastGlobalBuffer+context.curByte,context.length-context.dataPos);
+              __aeabi_memcpy(context.buffer+context.dataPos,lastGlobalBuffer+context.curByte,context.length-context.dataPos);
 
               context.curByte+=context.length;
               context.dataPos+=context.length;
@@ -898,7 +898,7 @@ u32 fileRead (char* buffer, aFile* file, u32 startOffset, u32 length)
 
 	// Read first part from buffer, to align with sector boundary
     dataPos=0;
-    tonccpy(buffer,globalBuffer+curByte,beginBytes);
+    __aeabi_memcpy(buffer,globalBuffer+curByte,beginBytes);
     curByte+=beginBytes;
     dataPos+=beginBytes;
 
@@ -1016,7 +1016,7 @@ u32 fileRead (char* buffer, aFile* file, u32 startOffset, u32 length)
 		CARD_ReadSectors( curSect + FAT_ClustToSect(file->currentCluster), 1, lastGlobalBuffer);
 
 		// Read in last partial chunk
-          tonccpy(buffer+dataPos,lastGlobalBuffer,length-dataPos);
+          __aeabi_memcpy(buffer+dataPos,lastGlobalBuffer,length-dataPos);
           curByte+=length;
           dataPos+=length;
 	}
@@ -1081,7 +1081,7 @@ u32 fileWrite (const char* buffer, aFile* file, u32 startOffset, u32 length)
 
 	// Read first part from buffer, to align with sector boundary
     dataPos=0;
-    tonccpy(globalBuffer+curByte,buffer,beginBytes);
+    __aeabi_memcpy(globalBuffer+curByte,buffer,beginBytes);
     curByte+=beginBytes;
     dataPos+=beginBytes;
 
@@ -1140,7 +1140,7 @@ u32 fileWrite (const char* buffer, aFile* file, u32 startOffset, u32 length)
 		CARD_ReadSectors( curSect + FAT_ClustToSect(file->currentCluster), 1, lastGlobalBuffer);
 
 		// Read in last partial chunk
-        tonccpy(lastGlobalBuffer,buffer+dataPos,length-dataPos);
+        __aeabi_memcpy(lastGlobalBuffer,buffer+dataPos,length-dataPos);
         curByte+=length;
         dataPos+=length;
 

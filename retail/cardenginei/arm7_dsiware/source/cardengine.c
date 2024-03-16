@@ -31,7 +31,7 @@
 #include <nds/debug.h>
 
 #include "ndma.h"
-#include "tonccpy.h"
+#include "aeabi.h"
 #include "my_sdmmc.h"
 #include "my_fat.h"
 #include "locations.h"
@@ -125,14 +125,14 @@ static tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
 static PERSONAL_DATA* personalData = (PERSONAL_DATA*)((u8*)NDS_HEADER_SDK5-0x180);
 
 static void unlaunchSetFilename(bool boot) {
-	tonccpy((u8*)0x02000800, unlaunchAutoLoadID, 12);
+	__aeabi_memcpy((u8*)0x02000800, unlaunchAutoLoadID, 12);
 	*(u16*)(0x0200080C) = 0x3F0;		// Unlaunch Length for CRC16 (fixed, must be 3F0h)
 	*(u16*)(0x0200080E) = 0;			// Unlaunch CRC16 (empty)
 	*(u32*)(0x02000810) = (BIT(0) | BIT(1));		// Load the title at 2000838h
 													// Use colors 2000814h
 	*(u16*)(0x02000814) = 0x7FFF;		// Unlaunch Upper screen BG color (0..7FFFh)
 	*(u16*)(0x02000816) = 0x7FFF;		// Unlaunch Lower screen BG color (0..7FFFh)
-	toncset((u8*)0x02000818, 0, 0x20+0x208+0x1C0);		// Unlaunch Reserved (zero)
+	__aeabi_memclr((u8*)0x02000818, 0x20+0x208+0x1C0);		// Unlaunch Reserved (zero)
 	int i2 = 0;
 	if (boot) {
 		for (int i = 0; i < (int)sizeof(bootNdsPath); i++) {
@@ -151,14 +151,14 @@ static void unlaunchSetFilename(bool boot) {
 static void unlaunchSetHiyaFilename(void) {
 	if (!(valueBits & hiyaCfwFound)) return;
 
-	tonccpy((u8*)0x02000800, unlaunchAutoLoadID, 12);
+	__aeabi_memcpy((u8*)0x02000800, unlaunchAutoLoadID, 12);
 	*(u16*)(0x0200080C) = 0x3F0;		// Unlaunch Length for CRC16 (fixed, must be 3F0h)
 	*(u16*)(0x0200080E) = 0;			// Unlaunch CRC16 (empty)
 	*(u32*)(0x02000810) = (BIT(0) | BIT(1));		// Load the title at 2000838h
 													// Use colors 2000814h
 	*(u16*)(0x02000814) = 0x7FFF;		// Unlaunch Upper screen BG color (0..7FFFh)
 	*(u16*)(0x02000816) = 0x7FFF;		// Unlaunch Lower screen BG color (0..7FFFh)
-	toncset((u8*)0x02000818, 0, 0x20+0x208+0x1C0);		// Unlaunch Reserved (zero)
+	__aeabi_memclr((u8*)0x02000818, 0x20+0x208+0x1C0);		// Unlaunch Reserved (zero)
 	int i2 = 0;
 	for (int i = 0; i < (int)sizeof(hiyaDSiPath); i++) {
 		*(u8*)(0x02000838+i2) = hiyaDSiPath[i];				// Unlaunch Device:/Path/Filename.ext (16bit Unicode,end by 0000h)
@@ -249,7 +249,7 @@ static void initialize(void) {
 	}
 
 	if (!bootloaderCleared) {
-		toncset((u8*)0x06000000, 0, 0x40000);	// Clear bootloader
+		__aeabi_memclr((u8*)0x06000000, 0x40000);	// Clear bootloader
 		if (mainScreen) {
 			swapScreens = (mainScreen == 2);
 			ipcEveryFrame = true;
@@ -354,7 +354,7 @@ void reset(void) {
 	if (deviceListAddr[0x3C0] == 's' && deviceListAddr[0x3C1] == 'd') {
 		for (int i = 0; i < 0x3C0; i += 0x54) {
 			if (deviceListAddr[i+4] == 's' && deviceListAddr[i+5] == 'd') {
-				toncset(deviceListAddr+i+2, 0, 1); // Clear SD access rights
+				__aeabi_memclr(deviceListAddr+i+2, 1); // Clear SD access rights
 				break;
 			}
 		}
@@ -387,8 +387,8 @@ void reset(void) {
 
 		restoreBakData();
 	}
-	toncset((char*)0x02FFFD80, 0, 0x80);
-	toncset((char*)0x02FFFF80, 0, 0x80);
+	__aeabi_memclr((char*)0x02FFFD80, 0x80);
+	__aeabi_memclr((char*)0x02FFFF80, 0x80);
 
 	sharedAddr[0] = 0x44414F4C; // 'LOAD'
 
@@ -406,7 +406,7 @@ void reset(void) {
 }
 
 void forceGameReboot(void) {
-	toncset((u32*)0x02000000, 0, 0x400);
+	__aeabi_memclr((u32*)0x02000000, 0x400);
 	*(u32*)0x02000000 = BIT(3);
 	*(u32*)0x02000004 = 0x54455352; // 'RSET'
 	sharedAddr[4] = 0x57534352;
@@ -419,7 +419,7 @@ void forceGameReboot(void) {
 	driveInitialize();
 	fileWrite((char*)&clearBuffer, &srParamsFile, 0, 0x4);
 	if (*(u32*)(ce7+0x8100) == 0) {
-		tonccpy((u32*)0x02000300, sr_data_srloader, 0x20);
+		__aeabi_memcpy((u32*)0x02000300, sr_data_srloader, 0x20);
 	} else {
 		// Use different SR backend ID
 		readSrBackendId();
@@ -442,7 +442,7 @@ void forceGameReboot(void) {
 } */
 
 void returnToLoader(bool reboot) {
-	toncset((u32*)0x02000000, 0, 0x400);
+	__aeabi_memclr((u32*)0x02000000, 0x400);
 	*(u32*)0x02000000 = BIT(0) | BIT(1) | BIT(2);
 	*(u32*)0x02000004 = 0x54455352; // 'RSET'
 	sharedAddr[4] = 0x57534352;
@@ -450,13 +450,13 @@ void returnToLoader(bool reboot) {
 
 	u32 twlCfgLoc = *(u32*)0x02FFFDFC;
 	if (twlCfgLoc != 0x02000400) {
-		tonccpy((u8*)0x02000400, (u8*)twlCfgLoc, 0x128);
+		__aeabi_memcpy((u8*)0x02000400, (u8*)twlCfgLoc, 0x128);
 	}
 
 	if (reboot || ((valueBits & twlTouch) && !(*(u8*)0x02FFE1BF & BIT(0))) || (valueBits & wideCheatUsed)) {
 		if (consoleModel >= 2) {
 			if (*(u32*)(ce7+0x8100) == 0) {
-				tonccpy((u32*)0x02000300, sr_data_srloader, 0x020);
+				__aeabi_memcpy((u32*)0x02000300, sr_data_srloader, 0x020);
 			} else if (*(char*)(ce7+0x8103) == 'H' || *(char*)(ce7+0x8103) == 'K') {
 				// Use different SR backend ID
 				readSrBackendId();
@@ -627,7 +627,7 @@ void readManual(int line) {
 		}
 	}
 
-	toncset((u8*)INGAME_MENU_EXT_LOCATION, ' ', 32 * 24);
+	__aeabi_memset((u8*)INGAME_MENU_EXT_LOCATION, 32 * 24, ' ');
 	((vu8*)INGAME_MENU_EXT_LOCATION)[32 * 24] = '\0';
 
 	// Read in 24 lines
@@ -646,7 +646,7 @@ void readManual(int line) {
 				if(buffer[i] == '\n')
 					tempManualOffset++;
 				fullLine = i == 32;
-				tonccpy((char*)INGAME_MENU_EXT_LOCATION + line * 32, buffer, i);
+				__aeabi_memcpy((char*)INGAME_MENU_EXT_LOCATION + line * 32, buffer, i);
 				break;
 			}
 		}
@@ -703,7 +703,7 @@ void myIrqHandlerVBlank(void) {
 		if (deviceListAddr[0x3C0] == 's' && deviceListAddr[0x3C1] == 'd') {
 			for (int i = 0; i < 0x3C0; i += 0x54) {
 				if (deviceListAddr[i+4] == 's' && deviceListAddr[i+5] == 'd') {
-					toncset(deviceListAddr+i+2, 0x06, 1); // Set SD access rights
+					__aeabi_memset(deviceListAddr+i+2, 1, 0x06); // Set SD access rights
 					break;
 				}
 			}
@@ -744,7 +744,7 @@ void myIrqHandlerVBlank(void) {
 	}
 
 	/* if (isSdEjected()) {
-		tonccpy((u32*)0x02000300, sr_data_error, 0x020);
+		__aeabi_memcpy((u32*)0x02000300, sr_data_error, 0x020);
 		i2cWriteRegister(0x4A, 0x70, 0x01);
 		i2cWriteRegister(0x4A, 0x11, 0x01);		// Reboot into error screen if SD card is removed
 	} */

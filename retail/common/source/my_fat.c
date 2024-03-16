@@ -29,7 +29,7 @@
     project at chishm@hotmail.com
 ------------------------------------------------------------------*/
    
-#include "tonccpy.h"
+#include "aeabi.h"
 #include "my_fat.h"
 #include "card.h"
 #include "debug_file.h"
@@ -1218,9 +1218,9 @@ bool resumeFileRead()
 
       		// Read in last partial chunk
 			  #ifdef TWOCARD
-              tonccpy(context.buffer+context.dataPos,lastGlobalBuffer[0]+context.curByte,context.length-context.dataPos);
+              __aeabi_memcpy(context.buffer+context.dataPos,lastGlobalBuffer[0]+context.curByte,context.length-context.dataPos);
 			  #else
-              tonccpy(context.buffer+context.dataPos,lastGlobalBuffer+context.curByte,context.length-context.dataPos);
+              __aeabi_memcpy(context.buffer+context.dataPos,lastGlobalBuffer+context.curByte,context.length-context.dataPos);
 			  #endif
 
               context.curByte+=context.length;
@@ -1316,9 +1316,9 @@ u32 fileRead (char* buffer, aFile* file, u32 startOffset, u32 length)
 	// Read first part from buffer, to align with sector boundary
     dataPos=0;
 	#ifdef TWOCARD
-    tonccpy(buffer,globalBuffer[file->card2]+curByte,beginBytes);
+    __aeabi_memcpy(buffer,globalBuffer[file->card2]+curByte,beginBytes);
 	#else
-    tonccpy(buffer,globalBuffer+curByte,beginBytes);
+    __aeabi_memcpy(buffer,globalBuffer+curByte,beginBytes);
 	#endif
     curByte+=beginBytes;
     dataPos+=beginBytes;
@@ -1516,9 +1516,9 @@ u32 fileRead (char* buffer, aFile* file, u32 startOffset, u32 length)
 
 		// Read in last partial chunk
 		  #ifdef TWOCARD
-          tonccpy(buffer+dataPos,lastGlobalBuffer[file->card2],length-dataPos);
+          __aeabi_memcpy(buffer+dataPos,lastGlobalBuffer[file->card2],length-dataPos);
 		  #else
-          tonccpy(buffer+dataPos,lastGlobalBuffer,length-dataPos);
+          __aeabi_memcpy(buffer+dataPos,lastGlobalBuffer,length-dataPos);
 		  #endif
           curByte+=length;
           dataPos+=length;
@@ -1582,9 +1582,9 @@ u32 fileWrite (const char* buffer, aFile* file, u32 startOffset, u32 length)
 	// Read first part from buffer, to align with sector boundary
     dataPos=0;
 	#ifdef TWOCARD
-    tonccpy(globalBuffer[file->card2]+curByte,buffer,beginBytes);
+    __aeabi_memcpy(globalBuffer[file->card2]+curByte,buffer,beginBytes);
 	#else
-    tonccpy(globalBuffer+curByte,buffer,beginBytes);
+    __aeabi_memcpy(globalBuffer+curByte,buffer,beginBytes);
 	#endif
     curByte+=beginBytes;
     dataPos+=beginBytes;
@@ -1687,9 +1687,9 @@ u32 fileWrite (const char* buffer, aFile* file, u32 startOffset, u32 length)
 
 		// Read in last partial chunk
 		#ifdef TWOCARD
-        tonccpy(lastGlobalBuffer[file->card2]+curByte,buffer+dataPos,length-dataPos);
+        __aeabi_memcpy(lastGlobalBuffer[file->card2]+curByte,buffer+dataPos,length-dataPos);
 		#else
-        tonccpy(lastGlobalBuffer+curByte,buffer+dataPos,length-dataPos);
+        __aeabi_memcpy(lastGlobalBuffer+curByte,buffer+dataPos,length-dataPos);
 		#endif
         curByte+=length;
         dataPos+=length;

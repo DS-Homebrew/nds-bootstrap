@@ -10,7 +10,7 @@
 #include "unpatched_funcs.h"
 #include "debug_file.h"
 #include "dmaTwl.h"
-#include "tonccpy.h"
+#include "aeabi.h"
 
 #include "igm_text.h"
 #include "locations.h"
@@ -48,7 +48,7 @@ static void fixForDifferentBios(const cardengineArm9* ce9, const tNDSHeader* nds
 		if (swi12Offset && (u8)a9ScfgRom == 1 && (!(REG_SCFG_ROM & BIT(1)) || dsiModeConfirmed)) {
 			// Patch to call swi 0x02 instead of 0x12
 			u32* swi12Patch = ce9->patches->swi02;
-			tonccpy(swi12Offset, swi12Patch, 0x4);
+			__aeabi_memcpy(swi12Offset, swi12Patch, 0x4);
 		}
 
 		dbg_printf("swi12 location : ");
@@ -285,7 +285,7 @@ static bool patchCardRead(cardengineArm9* ce9, const tNDSHeader* ndsHeader, cons
 
 	// Patch
 	u32* cardReadPatch = (usesThumb ? ce9->thumbPatches->card_read_arm9 : ce9->patches->card_read_arm9);
-	tonccpy(cardReadStartOffset, cardReadPatch, usesThumb ? (isSdk5(moduleParams) ? 0xB0 : 0xA0) : 0xE0); // 0xE0 = 0xF0 - 0x08
+	__aeabi_memcpy(cardReadStartOffset, cardReadPatch, usesThumb ? (isSdk5(moduleParams) ? 0xB0 : 0xA0) : 0xE0); // 0xE0 = 0xF0 - 0x08
     dbg_printf("cardRead location : ");
     dbg_hexa((u32)cardReadStartOffset);
     dbg_printf("\n");
@@ -305,7 +305,7 @@ static bool patchCardRead(cardengineArm9* ce9, const tNDSHeader* ndsHeader, cons
 
 		if (cardReadStartOffset) {
 			cardReadPatch = ce9->patches->card_read_arm9;
-			tonccpy(cardReadStartOffset, cardReadPatch, 0x2C);
+			__aeabi_memcpy(cardReadStartOffset, cardReadPatch, 0x2C);
 		}
 
 		dbg_printf("cardReadHash location : ");
@@ -361,7 +361,7 @@ static void patchCardPullOut(cardengineArm9* ce9, const tNDSHeader* ndsHeader, c
 
 	// Patch
 	u32* cardPullOutPatch = (usesThumb ? ce9->thumbPatches->card_pull_out_arm9 : ce9->patches->card_pull_out_arm9);
-	tonccpy(cardPullOutOffset, cardPullOutPatch, usesThumb ? 0x2 : 0x30);
+	__aeabi_memcpy(cardPullOutOffset, cardPullOutPatch, usesThumb ? 0x2 : 0x30);
     dbg_printf("cardPullOut location : ");
     dbg_hexa((u32)cardPullOutOffset);
     dbg_printf("\n\n");
@@ -397,7 +397,7 @@ static void patchCacheFlush(cardengineArm9* ce9, bool usesThumb, u32* cardPullOu
 	}
 	// Patch
 	u32* cardPullOutPatch = (usesThumb ? ce9->thumbPatches->card_pull : ce9->patches->card_pull);
-	tonccpy(forceToPowerOffOffset, cardPullOutPatch, 0x4);
+	__aeabi_memcpy(forceToPowerOffOffset, cardPullOutPatch, 0x4);
 }*/
 
 static bool patchCardId(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb, u32* cardReadEndOffset) {
@@ -429,7 +429,7 @@ static bool patchCardId(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const 
 		u32* cardIdPatch = (usesThumb ? ce9->thumbPatches->card_id_arm9 : ce9->patches->card_id_arm9);
 
 		cardIdPatch[usesThumb ? 1 : 2] = baseChipID;
-		tonccpy(cardIdStartOffset, cardIdPatch, usesThumb ? 0x8 : 0xC);
+		__aeabi_memcpy(cardIdStartOffset, cardIdPatch, usesThumb ? 0x8 : 0xC);
 		dbg_printf("cardId location : ");
 		dbg_hexa((u32)cardIdStartOffset);
 		dbg_printf("\n\n");
@@ -542,7 +542,7 @@ static void patchCardReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, c
 	}
 	// Patch
 	u32* cardReadDmaPatch = (usesThumb ? ce9->thumbPatches->card_dma_arm9 : ce9->patches->card_dma_arm9);
-	tonccpy(cardReadDmaStartOffset, cardReadDmaPatch, 0x40);
+	__aeabi_memcpy(cardReadDmaStartOffset, cardReadDmaPatch, 0x40);
     dbg_printf("cardReadDma location : ");
     dbg_hexa((u32)cardReadDmaStartOffset);
     dbg_printf("\n\n");
@@ -699,7 +699,7 @@ static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, co
     dbg_hexa((u32)setDmaoffset);
     dbg_printf("\n\n");
       u32* cardSetDmaPatch = (usesThumb ? ce9->thumbPatches->card_set_dma_arm9 : ce9->patches->card_set_dma_arm9);
-	  tonccpy(setDmaoffset, cardSetDmaPatch, 0x30);
+	  __aeabi_memcpy(setDmaoffset, cardSetDmaPatch, 0x30);
 	  setDmaPatched = true;
 
       return true;  
@@ -723,7 +723,7 @@ static void patchReset(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const m
 
 	// Patch
 	u32* resetPatch = ce9->patches->reset_arm9;
-	tonccpy(reset, resetPatch, 0x40);
+	__aeabi_memcpy(reset, resetPatch, 0x40);
 	dbg_printf("reset location : ");
 	dbg_hexa((u32)reset);
 	dbg_printf("\n\n");
@@ -855,7 +855,7 @@ bool a9PatchCardIrqEnable(cardengineArm9* ce9, const tNDSHeader* ndsHeader, cons
 		return false;
 	}
 	u32* cardIrqEnablePatch = (usesThumb ? ce9->thumbPatches->card_irq_enable : ce9->patches->card_irq_enable);
-	tonccpy(cardIrqEnableOffset, cardIrqEnablePatch, usesThumb ? 0x18 : 0x30);
+	__aeabi_memcpy(cardIrqEnableOffset, cardIrqEnablePatch, usesThumb ? 0x18 : 0x30);
     dbg_printf("cardIrqEnable location : ");
     dbg_hexa((u32)cardIrqEnableOffset);
     dbg_printf("\n\n");
@@ -1241,7 +1241,7 @@ static void patchCartRead(cardengineArm9* ce9, const tNDSHeader* ndsHeader, cons
 
 	// Patch
 	u32* cartReadPatch = (usesThumb ? ce9->thumbPatches->cart_read : ce9->patches->cart_read);
-	tonccpy(offset, cartReadPatch, 0x40);
+	__aeabi_memcpy(offset, cartReadPatch, 0x40);
     dbg_printf("cartRead location : ");
     dbg_hexa((u32)offset);
     dbg_printf("\n\n");
@@ -1703,7 +1703,7 @@ void patchSharedFontPath(const cardengineArm9* ce9, const tNDSHeader* ndsHeader,
 			dbg_hexa((u32)ltdModuleParams->arm9i_offset);
 			dbg_printf("\n\n");*/
 
-			tonccpy(moduleParams->static_bss_end, ltdModuleParams->arm9i_offset, iUncompressedSizei);
+			__aeabi_memcpy(moduleParams->static_bss_end, ltdModuleParams->arm9i_offset, iUncompressedSizei);
 
 			//bool armFound = false;
 			u32* arm9idst = moduleParams->static_bss_end;
@@ -1801,19 +1801,19 @@ void patchSharedFontPath(const cardengineArm9* ce9, const tNDSHeader* ndsHeader,
 				}
 				if (openBlFound) {
 					*(u16*)dsiSaveOpenT = 0x4778; // bx pc
-					tonccpy((u32*)(dsiSaveOpenT + 4), dsiSaveOpen, 0xC);
+					__aeabi_memcpy((u32*)(dsiSaveOpenT + 4), dsiSaveOpen, 0xC);
 				}
 				if (closeBlFound) {
 					*(u16*)dsiSaveCloseT = 0x4778; // bx pc
-					tonccpy((u32*)(dsiSaveCloseT + 4), dsiSaveClose, 0xC);
+					__aeabi_memcpy((u32*)(dsiSaveCloseT + 4), dsiSaveClose, 0xC);
 				}
 				if (seekBlFound) {
 					*(u16*)dsiSaveSeekT = 0x4778; // bx pc
-					tonccpy((u32*)(dsiSaveSeekT + 4), dsiSaveSeek, 0xC);
+					__aeabi_memcpy((u32*)(dsiSaveSeekT + 4), dsiSaveSeek, 0xC);
 				}
 				if (readBlFound) {
 					*(u16*)dsiSaveReadT = 0x4778; // bx pc
-					tonccpy((u32*)(dsiSaveReadT + 4), dsiSaveRead, 0xC);
+					__aeabi_memcpy((u32*)(dsiSaveReadT + 4), dsiSaveRead, 0xC);
 				}
 			}*/
 		} else { // THUMB
@@ -1864,7 +1864,7 @@ void patchSharedFontPath(const cardengineArm9* ce9, const tNDSHeader* ndsHeader,
 
 			return; // getOffsetFromBLThumb currently doesn't get backward offsets correctly
 
-			tonccpy(moduleParams->static_bss_end, ltdModuleParams->arm9i_offset, iUncompressedSizei);
+			__aeabi_memcpy(moduleParams->static_bss_end, ltdModuleParams->arm9i_offset, iUncompressedSizei);
 
 			const u32 dsiSaveOpenT = 0x02000200;
 			const u32 dsiSaveCloseT = 0x02000210;
@@ -1917,24 +1917,24 @@ void patchSharedFontPath(const cardengineArm9* ce9, const tNDSHeader* ndsHeader,
 			}
 			if (openBlFound) {
 				*(u16*)dsiSaveOpenT = 0x4778; // bx pc
-				tonccpy((u32*)(dsiSaveOpenT + 4), dsiSaveOpen, 0xC);
+				__aeabi_memcpy((u32*)(dsiSaveOpenT + 4), dsiSaveOpen, 0xC);
 			}
 			if (closeBlFound) {
 				*(u16*)dsiSaveCloseT = 0x4778; // bx pc
-				tonccpy((u32*)(dsiSaveCloseT + 4), dsiSaveClose, 0xC);
+				__aeabi_memcpy((u32*)(dsiSaveCloseT + 4), dsiSaveClose, 0xC);
 			}
 			if (seekBlFound) {
 				*(u16*)dsiSaveSeekT = 0x4778; // bx pc
-				tonccpy((u32*)(dsiSaveSeekT + 4), dsiSaveSeek, 0xC);
+				__aeabi_memcpy((u32*)(dsiSaveSeekT + 4), dsiSaveSeek, 0xC);
 			}
 			if (readBlFound) {
 				*(u16*)dsiSaveReadT = 0x4778; // bx pc
-				tonccpy((u32*)(dsiSaveReadT + 4), dsiSaveRead, 0xC);
+				__aeabi_memcpy((u32*)(dsiSaveReadT + 4), dsiSaveRead, 0xC);
 			}
 		}
 
-		tonccpy(ltdModuleParams->arm9i_offset, moduleParams->static_bss_end, iUncompressedSizei);
-		toncset(moduleParams->static_bss_end, 0, iUncompressedSizei);
+		__aeabi_memcpy(ltdModuleParams->arm9i_offset, moduleParams->static_bss_end, iUncompressedSizei);
+		__aeabi_memclr(moduleParams->static_bss_end, iUncompressedSizei);
 	} else {
 		extern int sharedFontRegion;
 		if ((sharedFontRegion == 2 && ndsHeader->gameCode[3] == 'K')
@@ -1974,17 +1974,17 @@ void patchSharedFontPath(const cardengineArm9* ce9, const tNDSHeader* ndsHeader,
 		}
 
 		if (ndsHeader->gameCode[3] == 'K') {
-			tonccpy((u32*)newFontPathOffset, korFontPath, strlen(korFontPath));
+			__aeabi_memcpy((u32*)newFontPathOffset, korFontPath, strlen(korFontPath));
 		} else if (ndsHeader->gameCode[3] == 'C') {
-			tonccpy((u32*)newFontPathOffset, chnFontPath, strlen(chnFontPath));
+			__aeabi_memcpy((u32*)newFontPathOffset, chnFontPath, strlen(chnFontPath));
 		} else {
-			tonccpy((u32*)newFontPathOffset, twlFontPath, strlen(twlFontPath));
+			__aeabi_memcpy((u32*)newFontPathOffset, twlFontPath, strlen(twlFontPath));
 		}
 	}
 }
 
 void codeCopy(u32* dst, u32* src, u32 len) {
-	tonccpy(dst, src, len);
+	__aeabi_memcpy(dst, src, len);
 
 	u32 srci = (u32)src;
 	u32 dsti = (u32)dst;
@@ -2425,11 +2425,11 @@ static void nandSavePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader, cons
 
       //u32 gNandWrite(void* memory,void* flash,u32 size,u32 dma_channel)
       u32* nandWritePatch = ce9->patches->nand_write_arm9;
-      tonccpy((u8*)sdPatchEntry+0x958, nandWritePatch, 0x40);
+      __aeabi_memcpy((u8*)sdPatchEntry+0x958, nandWritePatch, 0x40);
 
       //u32 gNandRead(void* memory,void* flash,u32 size,u32 dma_channel)
       u32* nandReadPatch = ce9->patches->nand_read_arm9;
-      tonccpy((u8*)sdPatchEntry+0xD24, nandReadPatch, 0x40);
+      __aeabi_memcpy((u8*)sdPatchEntry+0xD24, nandReadPatch, 0x40);
     } else {
         // Jam with the Band (Europe)
         if (strcmp(romTid, "UXBP") == 0) {
@@ -2447,11 +2447,11 @@ static void nandSavePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader, cons
 
             //u32 gNandWrite(void* memory,void* flash,u32 size,u32 dma_channel)
             u32* nandWritePatch = ce9->patches->nand_write_arm9;
-            tonccpy((u32*)0x0206176C, nandWritePatch, 0x40);
+            __aeabi_memcpy((u32*)0x0206176C, nandWritePatch, 0x40);
 
             //u32 gNandRead(void* memory,void* flash,u32 size,u32 dma_channel)
             u32* nandReadPatch = ce9->patches->nand_read_arm9;
-            tonccpy((u32*)0x02061AC4, nandReadPatch, 0x40);
+            __aeabi_memcpy((u32*)0x02061AC4, nandReadPatch, 0x40);
     	} else
         // Face Training (Europe)
         if (strcmp(romTid, "USKV") == 0) {
@@ -2469,11 +2469,11 @@ static void nandSavePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader, cons
 
             //u32 gNandWrite(void* memory,void* flash,u32 size,u32 dma_channel)
             u32* nandWritePatch = ce9->patches->nand_write_arm9;
-            tonccpy((u32*)0x020E2BF0, nandWritePatch, 0x40);
+            __aeabi_memcpy((u32*)0x020E2BF0, nandWritePatch, 0x40);
 
             //u32 gNandRead(void* memory,void* flash,u32 size,u32 dma_channel)
             u32* nandReadPatch = ce9->patches->nand_read_arm9;
-            tonccpy((u32*)0x020E2F3C, nandReadPatch, 0x40);
+            __aeabi_memcpy((u32*)0x020E2F3C, nandReadPatch, 0x40);
     	}
 	}
 }
@@ -2522,7 +2522,7 @@ static void patchCardReadPdash(cardengineArm9* ce9, const tNDSHeader* ndsHeader)
     if(sdPatchEntry) {   
      	// Patch
     	u32* pDashReadPatch = ce9->patches->pdash_read;
-    	tonccpy((u32*)sdPatchEntry, pDashReadPatch, 0x40);   
+    	__aeabi_memcpy((u32*)sdPatchEntry, pDashReadPatch, 0x40);   
     }
 }
 
@@ -2632,7 +2632,7 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 
 	patchCardReadPdash(ce9, ndsHeader);
 
-    // made obsolete by tonccpy
+    // made obsolete by __aeabi_memcpy
 	//patchCardReadCached(ce9, ndsHeader, moduleParams, usesThumb);
 
 	patchCardPullOut(ce9, ndsHeader, moduleParams, usesThumb, sdk5ReadType, &cardPullOutOffset);
