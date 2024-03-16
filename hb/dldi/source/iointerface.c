@@ -45,6 +45,27 @@
 #include "locations.h"
 #include "aeabi.h"
 
+/*! \fn DC_FlushRange(const void *base, u32 size)
+	\brief flush the data cache for a range of addresses to memory.
+	\param base base address of the region to flush.
+	\param size size of the region to flush.
+*/
+void	DC_FlushRange(const void *base, u32 size);
+
+
+/*! \fn DC_InvalidateAll()
+	\brief invalidate the entire data cache.
+*/
+void	DC_InvalidateAll();
+
+
+/*! \fn DC_InvalidateRange(const void *base, u32 size)
+	\brief invalidate the data cache for a range of addresses.
+	\param base base address of the region to invalidate
+	\param size size of the region to invalidate.
+*/
+void	DC_InvalidateRange(const void *base, u32 size);
+
 extern char ioType[4];
 extern u32 dataStartOffset;
 //extern vu32 word_command; // word_command_offset
@@ -165,29 +186,42 @@ bool sd_ReadSectors(sec_t sector, sec_t numSectors,void* buffer) {
 	//nocashMessage("sd_ReadSectors");
 	FifoMessage msg;
 	int result = 0;
-	sec_t startsector, readsectors;
+	if ((u32)buffer < 0x02000000 || (u32)buffer >= 0x04000000) {
+		sec_t startsector, readsectors;
 
-	int max_reads = ((1 << allocated_space) / 512) - 11;
+		int max_reads = ((1 << allocated_space) / 512) - 11;
 
-	for(int numreads =0; numreads<numSectors; numreads+=max_reads) {
-		startsector = sector+numreads;
-		if(numSectors - numreads < max_reads) readsectors = numSectors - numreads ;
-		else readsectors = max_reads;
+		for(int numreads =0; numreads<numSectors; numreads+=max_reads) {
+			startsector = sector+numreads;
+			if(numSectors - numreads < max_reads) readsectors = numSectors - numreads ;
+			else readsectors = max_reads;
 
-		vu32* mybuffer = (vu32*)((u32)tmp_buf_addr + (dsiMode ? 0x0A000000 : 0x00400000));
+			msg.type = SDMMC_SD_READ_SECTORS;
+			msg.sdParams.startsector = startsector;
+			msg.sdParams.numsectors = readsectors;
+			msg.sdParams.buffer = (u32*)tmp_buf_addr;
 
+			DC_InvalidateRange((u32*)tmp_buf_addr, readsectors*512);
+			sendMsg(sizeof(msg), (u8*)&msg);
+
+			waitValue32();
+
+			result = getValue32();
+
+			__aeabi_memcpy(buffer+numreads*512, (u32*)tmp_buf_addr, readsectors*512);
+		}
+	} else {
 		msg.type = SDMMC_SD_READ_SECTORS;
-		msg.sdParams.startsector = startsector;
-		msg.sdParams.numsectors = readsectors;
-		msg.sdParams.buffer = (u32*)mybuffer;
+		msg.sdParams.startsector = sector;
+		msg.sdParams.numsectors = numSectors;
+		msg.sdParams.buffer = buffer;
 
+		DC_InvalidateRange(buffer, numSectors*512);
 		sendMsg(sizeof(msg), (u8*)&msg);
 
 		waitValue32();
 
 		result = getValue32();
-
-		__aeabi_memcpy(buffer+numreads*512, (u32*)mybuffer, readsectors*512);
 	}
 
 	/*sec_t alignedSector = (sector/cacheBlockSectors)*cacheBlockSectors;
@@ -240,24 +274,36 @@ bool sd_WriteSectors(sec_t sector, sec_t numSectors,void* buffer) {
 	//nocashMessage("sd_ReadSectors");
 	FifoMessage msg;
 	int result = 0;
-	sec_t startsector, readsectors;
+	if ((u32)buffer < 0x02000000 || (u32)buffer >= 0x04000000) {
+		sec_t startsector, readsectors;
 
-	int max_reads = ((1 << allocated_space) / 512) - 11;
+		int max_reads = ((1 << allocated_space) / 512) - 11;
 
-	for(int numreads =0; numreads<numSectors; numreads+=max_reads) {
-		startsector = sector+numreads;
-		if(numSectors - numreads < max_reads) readsectors = numSectors - numreads ;
-		else readsectors = max_reads;
+		for(int numreads =0; numreads<numSectors; numreads+=max_reads) {
+			startsector = sector+numreads;
+			if(numSectors - numreads < max_reads) readsectors = numSectors - numreads ;
+			else readsectors = max_reads;
 
-		vu32* mybuffer = (vu32*)((u32)tmp_buf_addr + (dsiMode ? 0x0A000000 : 0x00400000));
+			msg.type = SDMMC_SD_WRITE_SECTORS;
+			msg.sdParams.startsector = startsector;
+			msg.sdParams.numsectors = readsectors;
+			msg.sdParams.buffer = (u32*)tmp_buf_addr;
 
-		__aeabi_memcpy((u32*)mybuffer, buffer+numreads*512, readsectors*512);
+			__aeabi_memcpy((u32*)tmp_buf_addr, buffer+numreads*512, readsectors*512);
+			DC_FlushRange((u32*)tmp_buf_addr, numSectors*512);
+			sendMsg(sizeof(msg), (u8*)&msg);
 
+			waitValue32();
+
+			result = getValue32();
+		}
+	} else {
 		msg.type = SDMMC_SD_WRITE_SECTORS;
-		msg.sdParams.startsector = startsector;
-		msg.sdParams.numsectors = readsectors;
-		msg.sdParams.buffer = (u32*)mybuffer;
+		msg.sdParams.startsector = sector;
+		msg.sdParams.numsectors = numSectors;
+		msg.sdParams.buffer = buffer;
 
+		DC_FlushRange(buffer, numSectors*512);
 		sendMsg(sizeof(msg), (u8*)&msg);
 
 		waitValue32();
