@@ -892,7 +892,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		uint8_t *target = (uint8_t *)TARGETBUFFERHEADER ;
 		fseek(ndsFile, 0, SEEK_SET);
 		fread(target, 1, 0x1000, ndsFile);
-		__aeabi_memset4((u8*)target+0x1D8, 4, ndsArm7idst);
+		__aeabi_memcpy((u8*)target+0x1D8, &ndsArm7idst, 4);
 
 		/*if (conf->dsiMode > 0 && unitCode > 0 && !conf->isDSiWare) {
 			load_game_conf(conf, conf->sdFound ? "sd:/_nds/nds-bootstrap.ini" : "fat:/_nds/nds-bootstrap.ini", (char*)romTid);
