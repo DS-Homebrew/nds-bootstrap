@@ -54,7 +54,7 @@ void decrypt_modcrypt_area(dsi_context* ctx, u8 *buffer, unsigned int size)
 
 	while(len>0)
 	{
-		__aeabi_memset(block, 0x10, 0);
+		__aeabi_memclr(block, 0x10);
 		dsi_crypt_ctr_block(ctx, buffer, block);
 		__aeabi_memcpy(buffer, block, 0x10);
 		buffer+=0x10;
