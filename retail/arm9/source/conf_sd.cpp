@@ -747,17 +747,17 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			// WiFi RAM data
 			u8* twlCfg = (u8*)0x02000400;
 			readFirmware(0x1FD, twlCfg+0x1E0, 1); // WlFirm Type (1=DWM-W015, 2=W024, 3=W028)
+			u32 wlFirmVars = 0x500400;
+			u32 wlFirmBase = 0x500000;
+			u32 wlFirmSize = 0x02E000;
 			if (twlCfg[0x1E0] == 2 || twlCfg[0x1E0] == 3) {
-				__aeabi_memset4(twlCfg+0x1E4, 4, 0x520000); // WlFirm RAM vars
-				__aeabi_memset4(twlCfg+0x1E8, 4, 0x520000); // WlFirm RAM base
-				__aeabi_memset4(twlCfg+0x1EC, 4, 0x020000); // WlFirm RAM size
-			} else {
-				__aeabi_memset4(twlCfg+0x1E4, 4, 0x500400); // WlFirm RAM vars
-				__aeabi_memset4(twlCfg+0x1E8, 4, 0x500000); // WlFirm RAM base
-				__aeabi_memset4(twlCfg+0x1EC, 4, 0x02E000); // WlFirm RAM size
+				wlFirmVars = 0x520000;
+				wlFirmBase = 0x520000;
+				wlFirmSize = 0x020000;
 			}
-			*(u16*)(twlCfg+0x1E2) = swiCRC16(0xFFFF, twlCfg+0x1E4, 0xC); // WlFirm CRC16
-
+			__aeabi_memcpy(twlCfg+0x1E4, &wlFirmVars, 4); // WlFirm RAM vars
+			__aeabi_memcpy(twlCfg+0x1E8, &wlFirmBase, 4); // WlFirm RAM base
+			__aeabi_memcpy(twlCfg+0x1EC, &wlFirmSize, 4); // WlFirm RAM size
 			twlCfgFile = fopen(nandMounted ? "nand:/sys/HWINFO_N.dat" : "sd:/sys/HWINFO_N.dat", "rb");
 			fseek(twlCfgFile, 0x88, SEEK_SET);
 			fread((void*)0x02000600, 1, 0x14, twlCfgFile);
