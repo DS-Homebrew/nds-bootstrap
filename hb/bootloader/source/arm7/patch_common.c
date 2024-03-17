@@ -31,7 +31,7 @@ patchOffsetCacheContents patchOffsetCache;
 void patchBinary(const tNDSHeader* ndsHeader) {
 	const char* romTid = getRomTid(ndsHeader);
 
-	// Moonshell Ver 2 Beta 8.1 & Ver 2.01+1
+	// Moonshell Ver 2 Beta 8.1/beta.9 & Ver 2.01+1
 	if (strcmp(romTid, "####") == 0 && (ndsHeader->headerCRC16 == 0xD75F || ndsHeader->headerCRC16 == 0x999C)) {
 		// Bypass ARM9 binary check
 		*(u32*)0x0200015C = 0xE1A00000; // nop
