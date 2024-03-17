@@ -4,11 +4,15 @@
 #include <nds/ndstypes.h>
 #include <nds/memory.h> // tNDSHeader
 
+#define patchOffsetCacheFileVersion 4	// Change when new functions are being patched, some offsets removed
+										// the offset order changed, and/or the function signatures changed
 typedef struct patchOffsetCacheContents {
     u16 ver;
     u16 type;
 	u32 dldiOffset;
 	u32 dldiChecked;
+	u32* mpuRegionOffset;
+	u32 mpuRegionChecked;
 	u32* wordCommandOffset;
 	u32* bootloaderOffset;
 	u32 bootloaderChecked;
@@ -20,9 +24,10 @@ typedef struct patchOffsetCacheContents {
 	u32 swi00Checked;
 } patchOffsetCacheContents;
 
-extern u16 patchOffsetCacheFileVersion;
+extern u16 patchOffsetCacheFilePrevCrc;
+extern u16 patchOffsetCacheFileNewCrc;
+
 extern patchOffsetCacheContents patchOffsetCache;
-extern bool patchOffsetCacheChanged;
 extern void rsetPatchCache(const tNDSHeader* ndsHeader);
 
 extern void patchBinary(const tNDSHeader* ndsHeader);

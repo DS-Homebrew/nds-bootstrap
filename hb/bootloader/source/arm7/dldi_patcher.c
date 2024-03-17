@@ -130,9 +130,7 @@ bool dldiPatchBinary (data_t *binData, u32 binSize, bool ramDisk) {
 		// does not have a DLDI section
 		return false;
 	} else {
-		extern bool patchOffsetCacheChanged;
 		patchOffsetCache.dldiOffset = (u32)patchOffset;
-		patchOffsetCacheChanged = true;
 	}
 
 	data_t *pDH = (data_t*)(((u32*)(&_io_dldi)) - 24);

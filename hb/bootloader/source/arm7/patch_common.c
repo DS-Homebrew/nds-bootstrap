@@ -23,12 +23,10 @@
 #include "common.h"
 #include "tonccpy.h"
 
-u16 patchOffsetCacheFileVersion = 3;	// Change when new functions are being patched, some offsets removed
-										// the offset order changed, and/or the function signatures changed
+u16 patchOffsetCacheFilePrevCrc = 0;
+u16 patchOffsetCacheFileNewCrc = 0;
 
 patchOffsetCacheContents patchOffsetCache;
-
-bool patchOffsetCacheChanged = false;
 
 void rsetPatchCache(const tNDSHeader* ndsHeader)
 {
