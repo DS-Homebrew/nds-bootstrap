@@ -708,8 +708,6 @@ int arm7_main (void) {
 
 	patchOffsetCacheFilePrevCrc = swiCRC16(0xFFFF, &patchOffsetCache, sizeof(patchOffsetCacheContents));
 
-	rsetPatchCache(ndsHeader);
-
 	dldiMagicLoaderString[0]--;
 
 	// Patch with DLDI if desired

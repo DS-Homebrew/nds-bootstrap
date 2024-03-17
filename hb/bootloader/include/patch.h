@@ -28,7 +28,6 @@ extern u16 patchOffsetCacheFilePrevCrc;
 extern u16 patchOffsetCacheFileNewCrc;
 
 extern patchOffsetCacheContents patchOffsetCache;
-extern void rsetPatchCache(const tNDSHeader* ndsHeader);
 
 extern void patchBinary(const tNDSHeader* ndsHeader);
 

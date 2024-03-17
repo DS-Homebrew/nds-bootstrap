@@ -28,16 +28,6 @@ u16 patchOffsetCacheFileNewCrc = 0;
 
 patchOffsetCacheContents patchOffsetCache;
 
-void rsetPatchCache(const tNDSHeader* ndsHeader)
-{
-	if (patchOffsetCache.ver != patchOffsetCacheFileVersion
-	 || patchOffsetCache.type != 2) {
-		toncset(&patchOffsetCache, 0, sizeof(patchOffsetCacheContents));
-		patchOffsetCache.ver = patchOffsetCacheFileVersion;
-		patchOffsetCache.type = 2;	// 0 = Regular, 1 = B4DS, 2 = Homebrew
-	}
-}
-
 void patchBinary(const tNDSHeader* ndsHeader) {
 	const char* romTid = getRomTid(ndsHeader);
 
