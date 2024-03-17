@@ -91,6 +91,11 @@ static const u32 homebrewAccelSig2007_2[4] = {
 	0x430A2108   , // ...
 };
 
+// Accelerator patch for IPC_SYNC v2007
+static const u32 homebrewAccelSig2007ARM[4] = {
+	0xE59F316C, 0xE3A01000, 0xE0832181, 0xE5922004
+};
+
 // Accelerator patch for IPC_SYNC v2010 (libnds 1.4.8)
 static const u32 homebrewAccelSig2010[4] = {
 	0x07C3B500   , // .
@@ -185,6 +190,28 @@ static u32* hookAccelIPCHomebrew2010(u32* addr, size_t size) {
 			(addr[1] == homebrewAccelSig2010[1]) &&
 			(addr[2] == homebrewAccelSig2010[2]) &&
 			(addr[3] == homebrewAccelSig2010[3]))
+		{
+			break;
+		}
+		addr++;
+	}
+
+	if (addr >= end) {
+		return NULL;
+	}
+
+	return addr;
+}
+
+static u32* hookAccelIPCHomebrew2007ARM(u32* addr, size_t size) {
+	u32* end = addr + size/sizeof(u32);
+
+	// Find the start of the handler
+	while (addr < end) {
+		if ((addr[0] == homebrewAccelSig2007ARM[0]) &&
+			(addr[1] == homebrewAccelSig2007ARM[1]) &&
+			(addr[2] == homebrewAccelSig2007ARM[2]) &&
+			(addr[3] == homebrewAccelSig2007ARM[3]))
 		{
 			break;
 		}
@@ -345,6 +372,9 @@ int hookNds (const tNDSHeader* ndsHeader, u32* sdEngineLocation, u32* wordComman
 		if (!hookAccel) {
 			hookAccel = hookAccelIPCHomebrew2010((u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize);
 		}
+		if (!hookAccel) {
+			hookAccel = hookAccelIPCHomebrew2007ARM((u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize);
+		}
 		if (hookAccel) {
 			patchOffsetCache.a7IrqHookAccelOffset = hookAccel;
 		}
@@ -354,7 +384,7 @@ int hookNds (const tNDSHeader* ndsHeader, u32* sdEngineLocation, u32* wordComman
 		nocashMessage("ACCEL_IPC_ERR");
 	} else {
 		// patch the program
-		hookAccel[0] = homebrewAccelSigPatched[0];
+		hookAccel[0] = (*hookAccel == homebrewAccelSig2007ARM[0]) ? 0xE51FF004 : homebrewAccelSigPatched[0];
 		hookAccel[1] = ((u32)sdEngineLocation)+homebrewAccelSigPatched[1];
 
 		nocashMessage("ACCEL_IPC_OK");
