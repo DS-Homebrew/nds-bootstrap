@@ -32,29 +32,28 @@ void patchBinary(const tNDSHeader* ndsHeader) {
 	const char* romTid = getRomTid(ndsHeader);
 
 	// Moonshell Ver 2 Beta 8.1/beta.9 & Ver 2.01+1
-	if (strcmp(romTid, "####") == 0 && (ndsHeader->headerCRC16 == 0xD75F || ndsHeader->headerCRC16 == 0x999C)) {
+	/* if (strcmp(romTid, "####") == 0 && (ndsHeader->headerCRC16 == 0xD75F || ndsHeader->headerCRC16 == 0x999C)) {
 		// Bypass ARM9 binary check
 		*(u32*)0x0200015C = 0xE1A00000; // nop
-	} else // Moonshell Ver 2.01+1
+	} else */ // Moonshell Ver 2.10
 	if (strcmp(romTid, "####") == 0 && ndsHeader->headerCRC16 == 0x6319) {
-		// Bypass ARM9/7 binary check (Further patching required)
-		*(u32*)0x02000168 = 0xE1A00000; // nop
-		// *(u32*)0x037F80C0 = 0xE1A00000; // nop
-		*(u32*)0x02000994 = 0xE1A00000; // nop
-		*(u32*)0x02000998 += 0xE0000000; // beq -> b
-		*(u32*)0x02000B5C = 0xE1A00000; // nop
-		*(u32*)0x02000B60 = 0xE1A00000; // nop
+		// Bypass ARM9/7 binary check
+		// *(u32*)0x02000168 = 0xE1A00000; // nop
+		*(u32*)0x037F80C0 = 0xE1A00000; // nop
+		*(u32*)0x037F8160 = 0;
+		// *(u32*)0x02000994 = 0xE1A00000; // nop
+		// *(u32*)0x02000998 += 0xE0000000; // beq -> b
+		// *(u32*)0x02000B5C = 0xE1A00000; // nop
+		// *(u32*)0x02000B60 = 0xE1A00000; // nop
 	} else // Moonshell Ver 2.10 for child Zwai: Direct Boot
 	if (strcmp(romTid, "####") == 0 && ((ndsHeader->headerCRC16 == 0x5638) || (ndsHeader->headerCRC16 == 0x0DE9))) {
-		// Bypass ARM9/7 binary check (Further patching required)
-		*(u32*)0x02000168 = 0xE1A00000; // nop
-		// *(u32*)0x037F80A8 = 0xE1A00000; // nop
-		// *(u32*)0x02000208 = 0;
-		// *(u32*)0x0200020C = 0;
-		// *(u32*)0x02000210 = 0;
-		*(u32*)0x02000B90 = 0xE1A00000; // nop
-		*(u32*)0x02000B94 += 0xE0000000; // beq -> b
-		*(u32*)0x02000D54 = 0xE1A00000; // nop
-		*(u32*)0x02000D58 = 0xE1A00000; // nop
-	}
+		// Bypass ARM9/7 binary check
+		// *(u32*)0x02000168 = 0xE1A00000; // nop
+		*(u32*)0x037F80A8 = 0xE1A00000; // nop
+		*(u32*)0x037F8148 = 0;
+		// *(u32*)0x02000B90 = 0xE1A00000; // nop
+		// *(u32*)0x02000B94 += 0xE0000000; // beq -> b
+		// *(u32*)0x02000D54 = 0xE1A00000; // nop
+		// *(u32*)0x02000D58 = 0xE1A00000; // nop
+	} 
 }

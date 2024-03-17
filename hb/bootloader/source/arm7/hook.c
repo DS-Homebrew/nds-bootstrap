@@ -128,8 +128,6 @@ static const u32 swi00Patched[3] = {
 	0x4770DF05   , // SWI 0X05
 };*/
 
-static u32 mpuRegionSignature = 0x04000033;
-
 //static const int MAX_HANDLER_SIZE = 50;
 
 static u32* hookInterruptHandlerHomebrew (u32* addr, size_t size) {
@@ -187,24 +185,6 @@ static u32* hookAccelIPCHomebrew2010(u32* addr, size_t size) {
 			(addr[1] == homebrewAccelSig2010[1]) &&
 			(addr[2] == homebrewAccelSig2010[2]) &&
 			(addr[3] == homebrewAccelSig2010[3]))
-		{
-			break;
-		}
-		addr++;
-	}
-
-	if (addr >= end) {
-		return NULL;
-	}
-
-	return addr;
-}
-
-static u32* hookMpu(u32* addr, size_t size) {
-	u32* end = addr + size/sizeof(u32);
-
-	while (addr < end) {
-		if (*addr == mpuRegionSignature)
 		{
 			break;
 		}
@@ -303,24 +283,10 @@ const u16* generateA7InstrThumb(int arg1, int arg2) {
 int hookNds (const tNDSHeader* ndsHeader, u32* sdEngineLocation, u32* wordCommandAddr) {
 	u32* hookLocation = patchOffsetCache.a7IrqHookOffset;
 	u32* hookAccel = patchOffsetCache.a7IrqHookAccelOffset;
-	u32* mpuRegionLocation = patchOffsetCache.mpuRegionOffset;
 	u16* a9Swi12Location = patchOffsetCache.a9Swi12Offset;
 	u16* swi00Location = patchOffsetCache.swi00Offset;
 
 	nocashMessage("hookNds");
-
-	if (patchOffsetCache.dldiOffset) {
-		if (!patchOffsetCache.mpuRegionChecked) {
-			mpuRegionLocation = hookMpu((u32*)ndsHeader->arm9destination, ndsHeader->arm9binarySize);
-			if (mpuRegionLocation) {
-				patchOffsetCache.mpuRegionOffset = mpuRegionLocation;
-			}
-			patchOffsetCache.mpuRegionChecked = true;
-		}
-		if (mpuRegionLocation) {
-			*mpuRegionLocation = 0x00000035; // Patch MPU to allow DSi WRAM access
-		}
-	}
 
 	if (!patchOffsetCache.a9Swi12Checked) {
 		a9Swi12Location = hookSwi12((u16*)ndsHeader->arm9destination, ndsHeader->arm9binarySize);

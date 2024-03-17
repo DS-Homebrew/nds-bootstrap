@@ -68,6 +68,8 @@ void	DC_InvalidateAll();
 */
 void	DC_InvalidateRange(const void *base, u32 size);
 
+void unlockDSiWram(void);
+
 extern char ioType[4];
 extern u32 dataStartOffset;
 //extern vu32 word_command; // word_command_offset
@@ -451,6 +453,7 @@ bool startup(void) {
 		sdmmc_init();
 		return SD_Init()==0;
 	} else {
+		unlockDSiWram();
 		for (int i = 0; i < 16; i++) {
 			transferToArm9(i);
 		}
