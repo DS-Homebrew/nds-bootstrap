@@ -47,27 +47,6 @@
 #include "locations.h"
 #include "aeabi.h"
 
-/*! \fn DC_FlushRange(const void *base, u32 size)
-	\brief flush the data cache for a range of addresses to memory.
-	\param base base address of the region to flush.
-	\param size size of the region to flush.
-*/
-void	DC_FlushRange(const void *base, u32 size);
-
-
-/*! \fn DC_InvalidateAll()
-	\brief invalidate the entire data cache.
-*/
-void	DC_InvalidateAll();
-
-
-/*! \fn DC_InvalidateRange(const void *base, u32 size)
-	\brief invalidate the data cache for a range of addresses.
-	\param base base address of the region to invalidate
-	\param size size of the region to invalidate.
-*/
-void	DC_InvalidateRange(const void *base, u32 size);
-
 void unlockDSiWram(void);
 
 extern char ioType[4];
@@ -128,7 +107,8 @@ void transferToArm9(int slot) {
 }
 
 // Use the dldi remaining space as temporary buffer : 28k usually available
-extern vu32* tmp_buf_addr;
+u32* tmp_buf_addr = 0;
+extern u32 dldi_bss_end;
 extern vu8 allocated_space;
 
 bool dsiMode = false;
@@ -247,7 +227,7 @@ bool sd_ReadSectors(sec_t sector, sec_t numSectors,void* buffer) {
 				accessCounter++;
 			}
 		}
-	} else if ((u32)buffer < 0x02000000 || (u32)buffer >= 0x04000000) {
+	} else {
 		sec_t startsector, readsectors;
 
 		int max_reads = ((1 << allocated_space) / 512) - 11;
@@ -260,29 +240,16 @@ bool sd_ReadSectors(sec_t sector, sec_t numSectors,void* buffer) {
 			msg.type = SDMMC_SD_READ_SECTORS;
 			msg.sdParams.startsector = startsector;
 			msg.sdParams.numsectors = readsectors;
-			msg.sdParams.buffer = (u32*)tmp_buf_addr;
+			msg.sdParams.buffer = tmp_buf_addr;
 
-			DC_InvalidateRange((u32*)tmp_buf_addr, readsectors*512);
 			sendMsg(sizeof(msg), (u8*)&msg);
 
 			waitValue32();
 
 			result = getValue32();
 
-			__aeabi_memcpy(buffer+numreads*512, (u32*)tmp_buf_addr, readsectors*512);
+			__aeabi_memcpy(buffer+numreads*512, tmp_buf_addr, readsectors*512);
 		}
-	} else {
-		msg.type = SDMMC_SD_READ_SECTORS;
-		msg.sdParams.startsector = sector;
-		msg.sdParams.numsectors = numSectors;
-		msg.sdParams.buffer = buffer;
-
-		DC_InvalidateRange(buffer, numSectors*512);
-		sendMsg(sizeof(msg), (u8*)&msg);
-
-		waitValue32();
-
-		result = getValue32();
 	}
 
 	return result == 0;
@@ -346,36 +313,21 @@ bool sd_WriteSectors(sec_t sector, sec_t numSectors,void* buffer) {
 		numSectors = numSectorsBak;
 	}
 
-	if ((u32)buffer < 0x02000000 || (u32)buffer >= 0x04000000) {
-		sec_t startsector, readsectors;
+	sec_t startsector, readsectors;
 
-		int max_reads = ((1 << allocated_space) / 512) - 11;
+	int max_reads = ((1 << allocated_space) / 512) - 11;
 
-		for(int numreads =0; numreads<numSectors; numreads+=max_reads) {
-			startsector = sector+numreads;
-			if(numSectors - numreads < max_reads) readsectors = numSectors - numreads ;
-			else readsectors = max_reads;
+	for(int numreads =0; numreads<numSectors; numreads+=max_reads) {
+		startsector = sector+numreads;
+		if(numSectors - numreads < max_reads) readsectors = numSectors - numreads ;
+		else readsectors = max_reads;
 
-			msg.type = SDMMC_SD_WRITE_SECTORS;
-			msg.sdParams.startsector = startsector;
-			msg.sdParams.numsectors = readsectors;
-			msg.sdParams.buffer = (u32*)tmp_buf_addr;
-
-			__aeabi_memcpy((u32*)tmp_buf_addr, buffer+numreads*512, readsectors*512);
-			DC_FlushRange((u32*)tmp_buf_addr, numSectors*512);
-			sendMsg(sizeof(msg), (u8*)&msg);
-
-			waitValue32();
-
-			result = getValue32();
-		}
-	} else {
 		msg.type = SDMMC_SD_WRITE_SECTORS;
-		msg.sdParams.startsector = sector;
-		msg.sdParams.numsectors = numSectors;
-		msg.sdParams.buffer = buffer;
+		msg.sdParams.startsector = startsector;
+		msg.sdParams.numsectors = readsectors;
+		msg.sdParams.buffer = tmp_buf_addr;
 
-		DC_FlushRange(buffer, numSectors*512);
+		__aeabi_memcpy(tmp_buf_addr, buffer+numreads*512, readsectors*512);
 		sendMsg(sizeof(msg), (u8*)&msg);
 
 		waitValue32();
@@ -453,18 +405,19 @@ bool startup(void) {
 		sdmmc_init();
 		return SD_Init()==0;
 	} else {
-		unlockDSiWram();
+		unlockDSiWram(); // Unlock DSi WRAM and uncached RAM mirrors
 		for (int i = 0; i < 16; i++) {
 			transferToArm9(i);
 		}
 		*(vu32*)0x03700000 = 0x4253444E; // 'NDSB'
 		if (*(vu32*)0x03700000 == 0x4253444E) {
 			*(vu32*)0x03708000 = 0x77777777;
-			cacheEnabled = (*(vu32*)0x03700000 != *(vu32*)0x03708000);
+			cacheEnabled = (*(vu32*)0x03700000 != *(vu32*)0x03708000); // DSi WRAM found, enable LRU cache
 		}
 
-		word_command_offset = dataStartOffset+0x80;
-		word_command_offset += (REG_SCFG_EXT == 0x8307F100) ? 0x0A000000 : 0xC00000;
+		const u32 mirrorOffset = (REG_SCFG_EXT == 0x8307F100) ? 0x0A000000 : 0xC00000;
+		word_command_offset = dataStartOffset + 0x80 + mirrorOffset;
+		tmp_buf_addr = (u32*)(dldi_bss_end + mirrorOffset);
 		return sd_Startup();
 	}
 }
