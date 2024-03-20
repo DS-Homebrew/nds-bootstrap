@@ -24,7 +24,7 @@
 
 //#define MAX_READ 53
 #define cacheBlockSize 0x8000
-#define cacheSlots 0x80000/cacheBlockSize
+#define defaultCacheSlots 0x80000/cacheBlockSize
 #define BYTES_PER_READ 512
 #define cacheBlockSectors (cacheBlockSize/BYTES_PER_READ)
 
@@ -56,9 +56,12 @@ extern u32 dataStartOffset;
 //extern u32* words_msg; // word_command_offset+8
 u32 word_command_offset = 0;
 
+extern u32 heapShrunk;
+u32 cacheAddress = CACHE_ADRESS_START;
+int cacheSlots = 16;
 bool cacheEnabled = false;
-u32 cacheDescriptor[cacheSlots] = {0xFFFFFFFF};
-int cacheCounter[cacheSlots];
+u32 cacheDescriptor[defaultCacheSlots] = {0xFFFFFFFF};
+int cacheCounter[defaultCacheSlots];
 int cacheAllocated = 0;
 int accessCounter = 0;
 
@@ -90,7 +93,7 @@ int getSlotForSector(sec_t sector) {
 }
 
 vu8* getCacheAddress(int slot) {
-	return (vu8*)(CACHE_ADRESS_START + slot*cacheBlockSize);
+	return (vu8*)(cacheAddress + slot*cacheBlockSize);
 }
 
 void updateDescriptor(int slot, sec_t sector) {
@@ -412,7 +415,13 @@ bool startup(void) {
 		*(vu32*)0x03700000 = 0x4253444E; // 'NDSB'
 		if (*(vu32*)0x03700000 == 0x4253444E) {
 			*(vu32*)0x03708000 = 0x77777777;
-			cacheEnabled = (*(vu32*)0x03700000 != *(vu32*)0x03708000); // DSi WRAM found, enable LRU cache
+			cacheEnabled = (*(vu32*)0x03700000 == 0x4253444E); // DSi WRAM found, enable LRU cache
+		}
+		if (!cacheEnabled && heapShrunk) {
+			cacheAddress = 0x02FE4000;
+			cacheSlots = 3;
+			cacheEnabled = true; // Enable LRU cache in Main RAM
+			heapShrunk = 0;
 		}
 
 		const u32 mirrorOffset = (REG_SCFG_EXT == 0x8307F100) ? 0x0A000000 : 0xC00000;

@@ -92,6 +92,10 @@ static addr_t quickFind (const data_t* data, const data_t* search, size_t dataLe
 	return -1;
 }
 
+static u32 heapEndSubtractSignature = 0xE2488903; // sub r8, r8, #0xC000
+static u32 heapEndSignature = 0x023FF000;
+static u32 heapEndSignatureMoonshell[2] = {0x023F0000, 0x803E00};
+
 //static const data_t dldiMagicString[] = "\xED\xA5\x8D\xBF Chishm";	// Normal DLDI file
 /*static const*/ data_t dldiMagicLoaderString[] = "\xEE\xA5\x8D\xBF Chishm";	// Different to a normal DLDI file
 static const data_t ramdFriendlyNameString[] = "RAM disk\x00\x00\xA0\xE1\x00\x00\xA0\xE1";
@@ -107,7 +111,7 @@ extern const u32 _io_dldi;
 	return (patchOffset > 0x02380000);
 }*/
 
-bool dldiPatchBinary (data_t *binData, u32 binSize, bool ramDisk) {
+bool dldiPatchBinary (data_t *binData, u32 binSize, const bool ramDisk) {
 
 	addr_t memOffset;		// Offset of DLDI after the file is loaded into memory
 	addr_t patchOffset;		// Position of patch destination in the file
@@ -183,6 +187,53 @@ bool dldiPatchBinary (data_t *binData, u32 binSize, bool ramDisk) {
 	if (ramDisk) {
 		tonccpy (pAH+DO_friendlyName, ramdFriendlyNameString, sizeof (ramdFriendlyNameString));
 		tonccpy (pAH+DO_ioType, ramdIoTypeString, 4);
+	} else {
+		bool dsiWramAccess = false;
+		*(vu32*)0x03700000 = 0x4253444E; // 'NDSB'
+		if (*(vu32*)0x03700000 == 0x4253444E) {
+			*(vu32*)0x03708000 = 0x77777777;
+			dsiWramAccess = (*(vu32*)0x03700000 == 0x4253444E);
+		}
+		*(vu32*)0x03700000 = 0;
+		*(vu32*)0x03708000 = 0;
+
+		if (!dsiWramAccess) {
+			if (!patchOffsetCache.heapEndChecked) {
+				bool found = false;
+				u32* arm9bin = (u32*)binData;
+				int i = 0;
+				for (i = 0; i < 0x200/sizeof(u32); i++) {
+					if (arm9bin[i] == heapEndSubtractSignature) {
+						found = true;
+						break;
+					}
+				}
+				if (!found) {
+					for (i = 0; i < 0x400/sizeof(u32); i++) {
+						if (arm9bin[i] == heapEndSignature) {
+							found = true;
+							break;
+						}
+					}
+				}
+				if (!found) {
+					for (i = 1; i < binSize/sizeof(u32); i++) {
+						if ((arm9bin[i-1] >= ((u32)binData)+binSize) && (arm9bin[i-1] < heapEndSignatureMoonshell[0]) && (arm9bin[i] == heapEndSignatureMoonshell[0]) && (arm9bin[i+1] == heapEndSignatureMoonshell[1])) {
+							found = true;
+							break;
+						}
+					}
+				}
+				if (found) {
+					patchOffsetCache.heapEndOffset = arm9bin + i;
+				}
+				patchOffsetCache.heapEndChecked = true;
+			}
+			if (patchOffsetCache.heapEndOffset) {
+				*patchOffsetCache.heapEndOffset = (*patchOffsetCache.heapEndOffset == heapEndSubtractSignature) ? 0xE2488907 : 0x023E3F00; // Shrink heap to make room for LRU SD cache
+				toncset32 (pAH+DO_code+8, 1, 1); // Heap shrunk flag
+			}
+		}
 	}
 
 	// Put the correct DLDI magic string back into the DLDI header

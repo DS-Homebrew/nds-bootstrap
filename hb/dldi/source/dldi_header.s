@@ -6,11 +6,12 @@
 	.global _start
 	.global dataStartOffset
 	.global ioType
+	.global dldi_bss_end
+	.global allocated_space
 	.global word_command
 	.global word_params
 	.global words_msg
-	.global dldi_bss_end
-	.global allocated_space
+	.global heapShrunk
 	.align	4
 	.arm
 
@@ -59,12 +60,13 @@
 	.word	0x00000000
 	word_params:
 	.word	0x00000000
+	heapShrunk:
 	words_msg:
 	.word	0x00000000
 	.word	0x00000000
 	.word	0x00000000
 	.word	0x00000000
-	
+
 @---------------------------------------------------------------------------------
 _start:
 @---------------------------------------------------------------------------------
