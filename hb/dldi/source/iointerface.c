@@ -164,7 +164,14 @@ bool sd_Startup() {
 
 	sendValue32(SDMMC_HAVE_SD);
 
-	waitValue32();
+	// waitValue32();
+	int waitCycles = 0x100000;
+	while(*(vu32*)word_command_offset != (vu32)0x027FEE08) {
+		waitCycles--;
+		if (waitCycles == 0) {
+			return false;
+		}
+	}
 
 	int result = getValue32();
 
