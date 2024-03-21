@@ -54,10 +54,10 @@ extern u32 dataStartOffset;
 //extern vu32 word_command; // word_command_offset
 //extern vu32 word_params; // word_command_offset+4
 //extern u32* words_msg; // word_command_offset+8
-u32 word_command_offset = 0;
+u32 word_command_offset = CARDENGINE_SHARED_ADDRESS;
 
 extern u32 heapShrunk;
-u32 cacheAddress = CACHE_ADRESS_START;
+u32 cacheAddress = CACHE_ADDRESS_START;
 int cacheSlots = 16;
 bool cacheEnabled = false;
 u32 cacheDescriptor[defaultCacheSlots] = {0xFFFFFFFF};
@@ -425,14 +425,13 @@ bool startup(void) {
 			cacheEnabled = (*(vu32*)0x03700000 == 0x4253444E); // DSi WRAM found, enable LRU cache
 		}
 		if (!cacheEnabled && heapShrunk) {
-			cacheAddress = 0x02FE4000;
+			cacheAddress = CACHE_ADDRESS_START_ALT;
 			cacheSlots = 3;
 			cacheEnabled = true; // Enable LRU cache in Main RAM
 			heapShrunk = 0;
 		}
 
 		const u32 mirrorOffset = (REG_SCFG_EXT == 0x8307F100) ? 0x0A000000 : 0xC00000;
-		word_command_offset = dataStartOffset + 0x80 + mirrorOffset;
 		tmp_buf_addr = (u32*)(dldi_bss_end + mirrorOffset);
 		return sd_Startup();
 	}

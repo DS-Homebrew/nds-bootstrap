@@ -24,6 +24,7 @@
 #include <nds/arm7/audio.h>
 #include "aeabi.h"
 #include "my_sdmmc.h"
+#include "locations.h"
 #include "sdmmcEngine.h"
 //#include "i2c.h"
 
@@ -41,7 +42,7 @@ extern int unlockMutex(int* addr);
 static bool initialized = false;
 extern volatile IntFn* volatile irqHandler; // this pointer is not at the end of the table but at the handler pointer corresponding to the current irq
 extern vu32* volatile irqSig; // always NULL
-extern vu32* volatile commandAddr;
+static vu32* volatile commandAddr = (vu32*)CARDENGINE_SHARED_ADDRESS;
 
 static int cardEgnineCommandMutex = 0;
 

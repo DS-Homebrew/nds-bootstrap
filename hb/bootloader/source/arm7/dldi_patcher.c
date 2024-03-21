@@ -231,7 +231,7 @@ bool dldiPatchBinary (data_t *binData, u32 binSize, const bool ramDisk) {
 			}
 			if (patchOffsetCache.heapEndOffset) {
 				*patchOffsetCache.heapEndOffset = (*patchOffsetCache.heapEndOffset == heapEndSubtractSignature) ? 0xE2488907 : 0x023E3F00; // Shrink heap to make room for LRU SD cache
-				toncset32 (pAH+DO_code+8, 1, 1); // Heap shrunk flag
+				toncset32 (pAH+DO_code, 1, 1); // Heap shrunk flag
 			}
 		}
 	}

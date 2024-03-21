@@ -8,9 +8,6 @@
 	.global ioType
 	.global dldi_bss_end
 	.global allocated_space
-	.global word_command
-	.global word_params
-	.global words_msg
 	.global heapShrunk
 	.align	4
 	.arm
@@ -56,15 +53,7 @@
 	.word	clearStatus		@ 
 	.word	shutdown		@ 
 	
-	word_command:
-	.word	0x00000000
-	word_params:
-	.word	0x00000000
 	heapShrunk:
-	words_msg:
-	.word	0x00000000
-	.word	0x00000000
-	.word	0x00000000
 	.word	0x00000000
 
 @---------------------------------------------------------------------------------

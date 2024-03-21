@@ -307,7 +307,7 @@ const u16* generateA7InstrThumb(int arg1, int arg2) {
 	return addr;
 }*/
 
-int hookNds (const tNDSHeader* ndsHeader, u32* sdEngineLocation, u32* wordCommandAddr) {
+int hookNds (const tNDSHeader* ndsHeader, u32* sdEngineLocation) {
 	u32* hookLocation = patchOffsetCache.a7IrqHookOffset;
 	u32* hookAccel = patchOffsetCache.a7IrqHookAccelOffset;
 	u16* a9Swi12Location = patchOffsetCache.a9Swi12Offset;
@@ -405,8 +405,6 @@ int hookNds (const tNDSHeader* ndsHeader, u32* sdEngineLocation, u32* wordComman
 	}*/
 
 	tonccpy (sdEngineLocation, (sdEngineLocation == (u32*)SDENGINE_LOCATION_ALT) ? sdengine_alt_bin : sdengine_bin, (sdEngineLocation == (u32*)SDENGINE_LOCATION_ALT) ? sdengine_alt_bin_size : sdengine_bin_size);
-
-	sdEngineLocation[1] = (u32)wordCommandAddr;
 
 	nocashMessage("ERR_NONE");
 	return ERR_NONE;

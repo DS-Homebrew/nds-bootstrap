@@ -732,9 +732,8 @@ int arm7_main (void) {
 			}
 			patchOffsetCache.dldiChecked = true;
 		}
-		u32* wordCommandAddr = (u32 *) (((u32)((u32*)NDS_HEADER)[0x0A])+patchOffset+0x80);
 
-		hookNds(ndsHeader, (u32*)sdEngineLocation, wordCommandAddr);
+		hookNds(ndsHeader, (u32*)sdEngineLocation);
 
 		if (!patchOffsetCache.bootloaderChecked) {
 			u32 bootloaderSignature[4] = {0xEA000002, 0x00000000, 0x00000001, 0x00000000};
@@ -759,7 +758,7 @@ int arm7_main (void) {
 			//tonccpy((char*)BOOT_INJECT_LOCATION, (char*)0x06000000, 0x8000);
 		}
 	} else if (!isGbaR2 && (!recentLibnds || !dsiModeConfirmed)) {
-		hookNds(ndsHeader, NULL, 0); // Only patch SWI functions
+		hookNds(ndsHeader, NULL); // Only patch SWI functions
 	}
 	toncset((char*)0x06000000, 0, 0x8000);
 
