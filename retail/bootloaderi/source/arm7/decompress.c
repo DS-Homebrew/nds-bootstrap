@@ -246,10 +246,9 @@ static bool a9iDecompressed = false;
 void ensureBinaryDecompressed(const tNDSHeader* ndsHeader, module_params_t* moduleParams, ltd_module_params_t* ltdModuleParams, bool arm9iToo) {
 	if (a9Decompressed) return;
 
-	const char* romTid = getRomTid(ndsHeader);
 	unpatchedFunctions* unpatchedFuncs = (unpatchedFunctions*)UNPATCHED_FUNCTION_LOCATION;
 
-	if (moduleParams->compressed_static_end) {
+	if (moduleParams->compressed_static_end == ((u32)ndsHeader->arm9destination)+ndsHeader->arm9binarySize) {
 		// Compressed
 		dbg_printf("arm9 is compressed\n");
 		unpatchedFuncs->compressedFlagOffset = (u32*)((u32)moduleParams+0x14);
