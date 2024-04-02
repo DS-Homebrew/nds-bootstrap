@@ -462,6 +462,8 @@ int hookNdsRetailArm9(
 			romOffset = 0x4000;
 		} else if (ndsHeader->arm9overlaySource == 0 || ndsHeader->arm9overlaySize == 0) {
 			romOffset = (ndsHeader->arm7romOffset + ndsHeader->arm7binarySize);
+		} else if (ndsHeader->arm9overlaySource > ndsHeader->arm7romOffset) {
+			romOffset = (ndsHeader->arm9romOffset + ndsHeader->arm9binarySize);
 		} else {
 			romOffset = ndsHeader->arm9overlaySource;
 		}

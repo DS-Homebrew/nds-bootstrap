@@ -194,7 +194,6 @@ int hookNdsRetailArm9(
 	const char* romTid = getRomTid(ndsHeader);
 	extern u32 romPaddingSize;
 	extern u32 romLocation;
-	extern u32 romSizeLimit;
 	extern u16 s2FlashcardId;
 	extern bool maxHeapOpen;
 

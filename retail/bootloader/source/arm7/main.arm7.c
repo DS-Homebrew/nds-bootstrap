@@ -694,8 +694,9 @@ static bool isROMLoadableInRAM(const tDSiHeader* dsiHeader, const tNDSHeader* nd
 			romSize -= 0x8000;
 			romSize += 0x88;
 		} else if (ndsHeader->arm9overlaySource == 0 || ndsHeader->arm9overlaySize == 0) {
-			romSize -= ndsHeader->arm7romOffset;
-			romSize -= ndsHeader->arm7binarySize;
+			romSize -= (ndsHeader->arm7romOffset + ndsHeader->arm7binarySize);
+		} else if (ndsHeader->arm9overlaySource > ndsHeader->arm7romOffset) {
+			romSize -= (ndsHeader->arm9romOffset + ndsHeader->arm9binarySize);
 		} else {
 			romSize -= ndsHeader->arm9overlaySource;
 		}
@@ -914,6 +915,8 @@ static void loadROMintoRAM(const tNDSHeader* ndsHeader, const module_params_t* m
 		romSizeEdit += 0x88;
 	} else if (ndsHeader->arm9overlaySource == 0 || ndsHeader->arm9overlaySize == 0) {
 		romOffset = (ndsHeader->arm7romOffset + ndsHeader->arm7binarySize);
+	} else if (ndsHeader->arm9overlaySource > ndsHeader->arm7romOffset) {
+		romOffset = (ndsHeader->arm9romOffset + ndsHeader->arm9binarySize);
 	} else {
 		romOffset = ndsHeader->arm9overlaySource;
 	}
