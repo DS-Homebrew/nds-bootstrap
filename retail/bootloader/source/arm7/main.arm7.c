@@ -840,13 +840,14 @@ static void loadOverlaysintoFile(const tNDSHeader* ndsHeader, const module_param
 
 		const u32 buffer = 0x037F8000;
 		const u16 bufferSize = 0x8000;
+		const u32 overlaysOffset = (ndsHeader->arm9overlaySource > ndsHeader->arm7romOffset) ? (ndsHeader->arm9romOffset + ndsHeader->arm9binarySize) : ndsHeader->arm9overlaySource;
 		s32 len = (s32)overlaysSize;
 		u32 dst = 0;
 		while (1) {
 			u32 readLen = (len > bufferSize) ? bufferSize : len;
 
-			fileRead((char*)buffer, file, ndsHeader->arm9overlaySource+dst, readLen);
-			fileWrite((char*)buffer, &apFixOverlaysFile, ndsHeader->arm9overlaySource+dst, readLen);
+			fileRead((char*)buffer, file, overlaysOffset+dst, readLen);
+			fileWrite((char*)buffer, &apFixOverlaysFile, overlaysOffset+dst, readLen);
 
 			len -= bufferSize;
 			dst += bufferSize;
@@ -1248,8 +1249,14 @@ int arm7_main(void) {
 	}
 
 	// Calculate overlay pack size
-	for (u32 i = ndsHeader->arm9overlaySource; i < ndsHeader->arm7romOffset; i++) {
-		overlaysSize++;
+	if (ndsHeader->arm9overlaySource > ndsHeader->arm7romOffset) {
+		for (u32 i = ndsHeader->arm9romOffset+ndsHeader->arm9binarySize; i < ndsHeader->arm7romOffset; i++) {
+			overlaysSize++;
+		}
+	} else {
+		for (u32 i = ndsHeader->arm9overlaySource; i < ndsHeader->arm7romOffset; i++) {
+			overlaysSize++;
+		}
 	}
 	if (ndsHeader->unitCode == 3) {
 		// Calculate i-overlay pack size

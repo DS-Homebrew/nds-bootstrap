@@ -244,6 +244,7 @@ int hookNdsRetailArm9(
 	}
 	ce9->mainScreen             = mainScreen;
 	ce9->s2FlashcardId          = s2FlashcardId;
+	ce9->overlaysSrc            = (ndsHeader->arm9overlaySource > ndsHeader->arm7romOffset) ? (ndsHeader->arm9romOffset + ndsHeader->arm9binarySize) : ndsHeader->arm9overlaySource;
 	ce9->overlaysSize           = overlaysSize;
 	ce9->ioverlaysSize          = ioverlaysSize;
 	ce9->romPaddingSize         = romPaddingSize;
@@ -256,7 +257,7 @@ int hookNdsRetailArm9(
 		} else if (ndsHeader->arm9overlaySource == 0 || ndsHeader->arm9overlaySize == 0) {
 			romOffset = (ndsHeader->arm7romOffset + ndsHeader->arm7binarySize);
 		} else {
-			romOffset = ndsHeader->arm9overlaySource;
+			romOffset = ce9->overlaysSrc;
 		}
 		ce9->romLocation -= romOffset;
 	}

@@ -977,6 +977,9 @@ static void loadOverlaysintoRAM(const tNDSHeader* ndsHeader, const module_params
 
 	u32 overlaysLocation = CACHE_ADRESS_START_DSIMODE;
 	u32 alignedOverlaysOffset = (ndsHeader->arm9overlaySource/cacheBlockSize)*cacheBlockSize;
+	if (ndsHeader->arm9overlaySource > ndsHeader->arm7romOffset) {
+		alignedOverlaysOffset = ((ndsHeader->arm9romOffset+ndsHeader->arm9binarySize)/cacheBlockSize)*cacheBlockSize;
+	}
 	u32 newOverlaysSize = 0;
 	for (u32 i = alignedOverlaysOffset; i < ndsHeader->arm7romOffset; i+= cacheBlockSize) {
 		newOverlaysSize += cacheBlockSize;
@@ -1622,8 +1625,14 @@ int arm7_main(void) {
 	dbg_printf("\n");
 
 	// Calculate overlay pack size
-	for (u32 i = ndsHeader->arm9overlaySource; i < ndsHeader->arm7romOffset; i++) {
-		overlaysSize++;
+	if (ndsHeader->arm9overlaySource > ndsHeader->arm7romOffset) {
+		for (u32 i = ndsHeader->arm9romOffset+ndsHeader->arm9binarySize; i < ndsHeader->arm7romOffset; i++) {
+			overlaysSize++;
+		}
+	} else {
+		for (u32 i = ndsHeader->arm9overlaySource; i < ndsHeader->arm7romOffset; i++) {
+			overlaysSize++;
+		}
 	}
 	if (ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr) && dsiModeConfirmed) {
 		// Calculate i-overlay pack size
@@ -2159,6 +2168,9 @@ int arm7_main(void) {
 			buildFatTableCacheCompressed(apFixOverlaysFile);
 
 			u32 alignedOverlaysOffset = (ndsHeader->arm9overlaySource/cacheBlockSize)*cacheBlockSize;
+			if (ndsHeader->arm9overlaySource > ndsHeader->arm7romOffset) {
+				alignedOverlaysOffset = ((ndsHeader->arm9romOffset+ndsHeader->arm9binarySize)/cacheBlockSize)*cacheBlockSize;
+			}
 			u32 newOverlaysSize = 0;
 			for (u32 i = alignedOverlaysOffset; i < ndsHeader->arm7romOffset; i+= cacheBlockSize) {
 				newOverlaysSize += cacheBlockSize;

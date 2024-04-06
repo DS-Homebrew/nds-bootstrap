@@ -668,7 +668,7 @@ static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
 	nocashMessage("\n");*/
 
 	//nocashMessage("aaaaaaaaaa\n");
-	fileRead((char*)dst, (ce9->apFixOverlaysCluster && src >= ndsHeader->arm9overlaySource && src < ndsHeader->arm7romOffset) ? &apFixOverlaysFile : &romFile, src, len);
+	fileRead((char*)dst, (ce9->apFixOverlaysCluster && src >= ce9->overlaysSrc && src < ndsHeader->arm7romOffset) ? &apFixOverlaysFile : &romFile, src, len);
 
 	//nocashMessage("end\n");
 

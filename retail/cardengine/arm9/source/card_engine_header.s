@@ -67,16 +67,18 @@ valueBits:
 	.word	0x00000000
 mainScreen:
 	.word	0x00000000
+irqTable:
+	.word	0x00000000
 s2FlashcardId:
 	.hword	0x0000
 	.hword	0x0000 @ align
+overlaysSrc:
+	.word	0x00000000
 overlaysSize:
 	.word	0x00000000
 ioverlaysSize:
 	.word	0x00000000
 romPaddingSize:
-	.word	0x00000000
-irqTable:
 	.word	0x00000000
 romLocation:
 	.word	0x00000000
