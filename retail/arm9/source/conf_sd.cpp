@@ -18,6 +18,7 @@
 #include <easysave/ini.hpp>
 #include "myDSiMode.h"
 #include "lzss.h"
+#include "lzx.h"
 #include "text.h"
 #include "aeabi.h"
 #include "hex.h"
@@ -2021,22 +2022,62 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 	conf->donorFileOffset = 0;
 
-	if (romFSInited && (!dsiFeatures() || conf->b4dsMode) && donorInsideNds) {
-		// Set cloneboot/multiboot SRL file either to boot instead, or as Donor ROM
-		FILE* ndsFile = fopen(multibootSrl, "rb");
-		if (ndsFile) {
-			conf->donorFileOffset = offsetOfOpenedNitroFile;
-		}
-		if (startMultibootSrl) {
-			FILE* pageFile = fopen(pageFilePath.c_str(), "rb+");
-			if (ndsFile && pageFile) {
-				FILE* srParamsFile = fopen(srParamsFilePath.c_str(), "rb+");
-				fseek(srParamsFile, 0xC, SEEK_SET);
-				fwrite(&offsetOfOpenedNitroFile, sizeof(u32), 1, srParamsFile);
-				fclose(srParamsFile);
+	if (romFSInited && (!dsiFeatures() || conf->b4dsMode)) {
+		if (!b4dsDebugRam && (strncmp(romTid, "KAA", 3) == 0)) {
+			// Decompress sdat file for Art Style: Aquia
+			u32 sdatSize = getFileSize("rom:/sound_data.sdat");
+			if (sdatSize) {
+				u8 sdatSize0[4];
+				FILE* sdatFile = fopen("rom:/sound_data.sdat", "rb");
+				fread(sdatSize0, 1, 4, sdatFile);
+				sdatSize = LZ77_GetLength(sdatSize0);
+				u32 sdatSizeCur = 0;
+				u32 sdatString = 0;
+
+				FILE* pageFile = fopen(pageFilePath.c_str(), "rb+");
+				fseek(pageFile, 0xC0000, SEEK_SET);
+				fread(&sdatSizeCur, sizeof(u32), 1, pageFile);
+				fread(&sdatString, sizeof(u32), 1, pageFile);
+
+				if (sdatSizeCur != sdatSize || sdatString != 0x54414453) {
+					fseek(pageFile, 0xC0000, SEEK_SET);
+					fwrite(&sdatSize, sizeof(u32), 1, pageFile);
+
+					u8* sdat = new u8[sdatSize];
+					LZX_DecodeFromFile(sdat, sdatFile, sdatSize);
+					fclose(sdatFile);
+
+					fwrite(sdat, 1, sdatSize, pageFile);
+					fclose(pageFile);
+
+					delete[] sdat;
+				} else {
+					fclose(sdatFile);
+					fclose(pageFile);
+				}
+			} else {
+				FILE* pageFile = fopen(pageFilePath.c_str(), "rb+");
+				fseek(pageFile, 0xC0000, SEEK_SET);
+				fwrite(&sdatSize, sizeof(u32), 1, pageFile);
+				fclose(pageFile);
 			}
+		} else if (donorInsideNds) {
+			// Set cloneboot/multiboot SRL file either to boot instead, or as Donor ROM
+			FILE* ndsFile = fopen(multibootSrl, "rb");
+			if (ndsFile) {
+				conf->donorFileOffset = offsetOfOpenedNitroFile;
+			}
+			if (startMultibootSrl) {
+				FILE* pageFile = fopen(pageFilePath.c_str(), "rb+");
+				if (ndsFile && pageFile) {
+					FILE* srParamsFile = fopen(srParamsFilePath.c_str(), "rb+");
+					fseek(srParamsFile, 0xC, SEEK_SET);
+					fwrite(&offsetOfOpenedNitroFile, sizeof(u32), 1, srParamsFile);
+					fclose(srParamsFile);
+				}
+			}
+			fclose(ndsFile);
 		}
-		fclose(ndsFile);
 	}
 
 	u32 srlAddr = 0;

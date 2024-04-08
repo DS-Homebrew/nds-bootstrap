@@ -3452,7 +3452,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Art Style: AQUIA (USA)
-	// Audio doesn't play on retail consoles
 	else if (strcmp(romTid, "KAAE") == 0) {
 		*(u32*)0x02005094 = 0xE1A00000; // nop
 		*(u32*)0x02005098 = 0xE1A00000; // nop
@@ -3484,7 +3483,23 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02054CDC = 0xE8BD8078; // LDMFD SP!, {R3-R6,PC}
 		*(u32*)0x020583BC = 0xE1A00000; // nop
 		patchInitDSiWare(0x020649BC, heapEnd);
+		*(u32*)0x02064D38 = *(u32*)0x02004FB8;
 		patchUserSettingsReadDSiWare(0x020660BC);
+
+		if (!extendedMemory) {
+			const u32 newCodeAddr = 0x02067208;
+			codeCopy((u32*)newCodeAddr, (u32*)0x02037598, 0xC4);
+
+			setBL(newCodeAddr+0x38, (u32)dsiSaveOpenR);
+			setBL(newCodeAddr+0x48, (u32)dsiSaveGetLength);
+			setBL(newCodeAddr+0x68, (u32)dsiSaveRead);
+			setBL(newCodeAddr+0x98, (u32)dsiSaveClose);
+			*(u32*)(newCodeAddr+0xA4) += 0xE0000000; // beq -> b
+
+			setBL(0x020050E4, newCodeAddr);
+			ce9->filePathHook = 0x0208B56C; // "/sound_data.sdat"
+			*(u32*)0x0200535C -= 0xD0000; // Shrink unknown heap from 0xE8888
+		}
 
 		/* *(u32*)0x02064B9C = generateA7Instr(0x02064B9C, 0x020665C4); // bl 0x020665C4
 		{
@@ -3502,7 +3517,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Art Style: AQUITE (Europe, Australia)
-	// Audio doesn't play on retail consoles
 	else if (strcmp(romTid, "KAAV") == 0) {
 		*(u32*)0x02005094 = 0xE1A00000; // nop
 		*(u32*)0x02005098 = 0xE1A00000; // nop
@@ -3534,11 +3548,26 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02054DEC = 0xE8BD8078; // LDMFD SP!, {R3-R6,PC}
 		*(u32*)0x020584CC = 0xE1A00000; // nop
 		patchInitDSiWare(0x02064ACC, heapEnd);
+		*(u32*)0x02064E48 = *(u32*)0x02004FB8;
 		patchUserSettingsReadDSiWare(0x020661CC);
+
+		if (!extendedMemory) {
+			const u32 newCodeAddr = 0x02067318;
+			codeCopy((u32*)newCodeAddr, (u32*)0x020376A8, 0xC4);
+
+			setBL(newCodeAddr+0x38, (u32)dsiSaveOpenR);
+			setBL(newCodeAddr+0x48, (u32)dsiSaveGetLength);
+			setBL(newCodeAddr+0x68, (u32)dsiSaveRead);
+			setBL(newCodeAddr+0x98, (u32)dsiSaveClose);
+			*(u32*)(newCodeAddr+0xA4) += 0xE0000000; // beq -> b
+
+			setBL(0x020050E4, newCodeAddr);
+			ce9->filePathHook = 0x0208B68C; // "/sound_data.sdat"
+			*(u32*)0x0200535C -= 0xD0000; // Shrink unknown heap from 0xE8888
+		}
 	}
 
 	// Art Style: AQUARIO (Japan)
-	// Audio doesn't play on retail consoles
 	else if (strcmp(romTid, "KAAJ") == 0) {
 		*(u32*)0x020050A8 = 0xE1A00000; // nop
 		*(u32*)0x020050AC = 0xE1A00000; // nop
@@ -3570,6 +3599,22 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02057348 = 0xE8BD8078; // LDMFD SP!, {R3-R6,PC}
 		*(u32*)0x0205AA28 = 0xE1A00000; // nop
 		patchInitDSiWare(0x02067028, heapEnd);
+		*(u32*)0x020673A4 = *(u32*)0x02004FB8;
+
+		if (!extendedMemory) {
+			const u32 newCodeAddr = 0x020697E4;
+			codeCopy((u32*)newCodeAddr, (u32*)0x02039ADC, 0xBC);
+
+			setBL(newCodeAddr+0x30, (u32)dsiSaveOpenR);
+			setBL(newCodeAddr+0x40, (u32)dsiSaveGetLength);
+			setBL(newCodeAddr+0x60, (u32)dsiSaveRead);
+			setBL(newCodeAddr+0x90, (u32)dsiSaveClose);
+			*(u32*)(newCodeAddr+0x9C) += 0xE0000000; // beq -> b
+
+			setBL(0x020050E4, newCodeAddr);
+			ce9->filePathHook = 0x02090498; // "/sound_data.sdat"
+			*(u32*)0x02005378 -= 0xD0000; // Shrink unknown heap from 0xE8888
+		}
 	}
 
 	// Everyday Soccer (USA)
@@ -13627,7 +13672,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchInitDSiWare(0x0209CC28, heapEnd);
 		patchUserSettingsReadDSiWare(0x0209E2CC);
 	} */
-
+#else
 	// A Kappa's Trail (USA)
 	// Requires 8MB of RAM
 	// Crashes after ESRB screen
@@ -14138,7 +14183,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020291AC = 0xE1A00000; // nop
 		*(u32*)0x0202F3F0 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 	}*/
-#else
+
 	// G.G Series: The Last Knight (USA)
 	// G.G Series: The Last Knight (Japan)
 	// Saving not supported due to possible bug
