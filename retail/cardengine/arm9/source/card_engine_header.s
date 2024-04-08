@@ -61,8 +61,6 @@ manualCluster:
 	.word	0x00000000
 sharedFontCluster:
 	.word	0x00000000
-filePathHook:
-	.word	0x00000000
 cardStruct0:
 	.word	0x00000000
 valueBits:

@@ -3453,6 +3453,8 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Art Style: AQUIA (USA)
 	else if (strcmp(romTid, "KAAE") == 0) {
+		const u32 bssEnd = *(u32*)0x02004FB8;
+
 		*(u32*)0x02005094 = 0xE1A00000; // nop
 		*(u32*)0x02005098 = 0xE1A00000; // nop
 		*(u32*)0x020050A0 = 0xE1A00000; // nop
@@ -3483,21 +3485,19 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02054CDC = 0xE8BD8078; // LDMFD SP!, {R3-R6,PC}
 		*(u32*)0x020583BC = 0xE1A00000; // nop
 		patchInitDSiWare(0x020649BC, heapEnd);
-		*(u32*)0x02064D38 = *(u32*)0x02004FB8;
+		*(u32*)0x02064D38 = bssEnd;
 		patchUserSettingsReadDSiWare(0x020660BC);
 
-		if (!extendedMemory) {
-			const u32 newCodeAddr = 0x02067208;
-			codeCopy((u32*)newCodeAddr, (u32*)0x02037598, 0xC4);
+		if (!extendedMemory && *(u32*)(bssEnd-4)) {
+			*(u32*)0x02064D38 += *(u32*)(bssEnd-4);
+			*(u32*)(bssEnd-4) = 0;
 
-			setBL(newCodeAddr+0x38, (u32)dsiSaveOpenR);
-			setBL(newCodeAddr+0x48, (u32)dsiSaveGetLength);
-			setBL(newCodeAddr+0x68, (u32)dsiSaveRead);
-			setBL(newCodeAddr+0x98, (u32)dsiSaveClose);
-			*(u32*)(newCodeAddr+0xA4) += 0xE0000000; // beq -> b
+			u32* newCodeAddr = 0x02067208;
+			newCodeAddr[0] = 0xE59F0000; // ldr r0, =bssEnd
+			newCodeAddr[1] = 0xE12FFF1E; // bx lr
+			newCodeAddr[2] = bssEnd;
 
-			setBL(0x020050E4, newCodeAddr);
-			ce9->filePathHook = 0x0208B56C; // "/sound_data.sdat"
+			setBL(0x020050E4, (u32)newCodeAddr);
 			*(u32*)0x0200535C -= 0xD0000; // Shrink unknown heap from 0xE8888
 		}
 
@@ -3518,6 +3518,8 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Art Style: AQUITE (Europe, Australia)
 	else if (strcmp(romTid, "KAAV") == 0) {
+		const u32 bssEnd = *(u32*)0x02004FB8;
+
 		*(u32*)0x02005094 = 0xE1A00000; // nop
 		*(u32*)0x02005098 = 0xE1A00000; // nop
 		*(u32*)0x020050A0 = 0xE1A00000; // nop
@@ -3548,27 +3550,27 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02054DEC = 0xE8BD8078; // LDMFD SP!, {R3-R6,PC}
 		*(u32*)0x020584CC = 0xE1A00000; // nop
 		patchInitDSiWare(0x02064ACC, heapEnd);
-		*(u32*)0x02064E48 = *(u32*)0x02004FB8;
+		*(u32*)0x02064E48 = bssEnd;
 		patchUserSettingsReadDSiWare(0x020661CC);
 
-		if (!extendedMemory) {
-			const u32 newCodeAddr = 0x02067318;
-			codeCopy((u32*)newCodeAddr, (u32*)0x020376A8, 0xC4);
+		if (!extendedMemory && *(u32*)(bssEnd-4)) {
+			*(u32*)0x02064E48 += *(u32*)(bssEnd-4);
+			*(u32*)(bssEnd-4) = 0;
 
-			setBL(newCodeAddr+0x38, (u32)dsiSaveOpenR);
-			setBL(newCodeAddr+0x48, (u32)dsiSaveGetLength);
-			setBL(newCodeAddr+0x68, (u32)dsiSaveRead);
-			setBL(newCodeAddr+0x98, (u32)dsiSaveClose);
-			*(u32*)(newCodeAddr+0xA4) += 0xE0000000; // beq -> b
+			u32* newCodeAddr = 0x02067318;
+			newCodeAddr[0] = 0xE59F0000; // ldr r0, =bssEnd
+			newCodeAddr[1] = 0xE12FFF1E; // bx lr
+			newCodeAddr[2] = bssEnd;
 
 			setBL(0x020050E4, newCodeAddr);
-			ce9->filePathHook = 0x0208B68C; // "/sound_data.sdat"
 			*(u32*)0x0200535C -= 0xD0000; // Shrink unknown heap from 0xE8888
 		}
 	}
 
 	// Art Style: AQUARIO (Japan)
 	else if (strcmp(romTid, "KAAJ") == 0) {
+		const u32 bssEnd = *(u32*)0x02004FB8;
+
 		*(u32*)0x020050A8 = 0xE1A00000; // nop
 		*(u32*)0x020050AC = 0xE1A00000; // nop
 		*(u32*)0x020050B4 = 0xE1A00000; // nop
@@ -3599,20 +3601,18 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02057348 = 0xE8BD8078; // LDMFD SP!, {R3-R6,PC}
 		*(u32*)0x0205AA28 = 0xE1A00000; // nop
 		patchInitDSiWare(0x02067028, heapEnd);
-		*(u32*)0x020673A4 = *(u32*)0x02004FB8;
+		*(u32*)0x020673A4 = bssEnd;
 
-		if (!extendedMemory) {
-			const u32 newCodeAddr = 0x020697E4;
-			codeCopy((u32*)newCodeAddr, (u32*)0x02039ADC, 0xBC);
+		if (!extendedMemory && *(u32*)(bssEnd-4)) {
+			*(u32*)0x020673A4 += *(u32*)(bssEnd-4);
+			*(u32*)(bssEnd-4) = 0;
 
-			setBL(newCodeAddr+0x30, (u32)dsiSaveOpenR);
-			setBL(newCodeAddr+0x40, (u32)dsiSaveGetLength);
-			setBL(newCodeAddr+0x60, (u32)dsiSaveRead);
-			setBL(newCodeAddr+0x90, (u32)dsiSaveClose);
-			*(u32*)(newCodeAddr+0x9C) += 0xE0000000; // beq -> b
+			u32* newCodeAddr = 0x020697E4;
+			newCodeAddr[0] = 0xE59F0000; // ldr r0, =bssEnd
+			newCodeAddr[1] = 0xE12FFF1E; // bx lr
+			newCodeAddr[2] = bssEnd;
 
 			setBL(0x020050E4, newCodeAddr);
-			ce9->filePathHook = 0x02090498; // "/sound_data.sdat"
 			*(u32*)0x02005378 -= 0xD0000; // Shrink unknown heap from 0xE8888
 		}
 	}

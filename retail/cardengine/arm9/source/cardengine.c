@@ -778,7 +778,7 @@ void ndmaCopy(int ndmaSlot, const void* src, void* dst, u32 len) {
 	__aeabi_memcpy(dst, src, len);
 }
 
-static int otherFileType = 0; // 0 == dataPub/dataPrv, 1 == sharedFont, 2 == File from page file
+static bool sharedFontOpened = false;
 static bool dsiSaveInited = false;
 static bool dsiSaveExists = false;
 static u32 dsiSavePerms = 0;
@@ -958,12 +958,7 @@ u32 dsiSaveSetLength(void* ctx, s32 len) {
 
 bool dsiSaveOpen(void* ctx, const char* path, u32 mode) {
 	dsiSaveSeekPos = 0;
-	if ((u32)path == ce9->filePathHook) {
-		dsiSaveResultCode = 0;
-		__aeabi_memset4(ctx+0x14, 4, dsiSaveResultCode);
-		otherFileType = 2;
-		return true;
-	} else if (strcmp(path, "nand:/<sharedFont>") == 0) {
+	if (strcmp(path, "nand:/<sharedFont>") == 0) {
 		if (sharedFontFile.firstCluster == CLUSTER_FREE || sharedFontFile.firstCluster == CLUSTER_EOF) {
 			dsiSaveResultCode = 0xE;
 			__aeabi_memset4(ctx+0x14, 4, dsiSaveResultCode);
@@ -971,7 +966,7 @@ bool dsiSaveOpen(void* ctx, const char* path, u32 mode) {
 		}
 		dsiSaveResultCode = 0;
 		__aeabi_memset4(ctx+0x14, 4, dsiSaveResultCode);
-		otherFileType = 1;
+		sharedFontOpened = true;
 		return true;
 	}
 	if (savFile.firstCluster == CLUSTER_FREE || savFile.firstCluster == CLUSTER_EOF) {
@@ -990,13 +985,8 @@ bool dsiSaveOpen(void* ctx, const char* path, u32 mode) {
 
 bool dsiSaveClose(void* ctx) {
 	dsiSaveSeekPos = 0;
-	if (otherFileType == 2) {
-		otherFileType = 0;
-		dsiSaveResultCode = 0;
-		__aeabi_memset4(ctx+0x14, 4, dsiSaveResultCode);
-		return true;
-	} else if (otherFileType == 1) {
-		otherFileType = 0;
+	if (sharedFontOpened) {
+		sharedFontOpened = false;
 		if (sharedFontFile.firstCluster == CLUSTER_FREE || sharedFontFile.firstCluster == CLUSTER_EOF) {
 			dsiSaveResultCode = 0xE;
 			__aeabi_memset4(ctx+0x14, 4, dsiSaveResultCode);
@@ -1019,20 +1009,6 @@ bool dsiSaveClose(void* ctx) {
 
 u32 dsiSaveGetLength(void* ctx) {
 	dsiSaveSeekPos = 0;
-	if (otherFileType == 2) {
-		u32 otherFileSize = 0;
-
-		int oldIME = enterCriticalSection();
-		u16 exmemcnt = REG_EXMEMCNT;
-		cardReadInProgress = true;
-		setDeviceOwner();
-		fileRead((char*)&otherFileSize, &pageFile, 0xC0000, 4);
-		cardReadInProgress = false;
-		REG_EXMEMCNT = exmemcnt;
-		leaveCriticalSection(oldIME);
-
-		return otherFileSize;
-	}
 	if (savFile.firstCluster == CLUSTER_FREE || savFile.firstCluster == CLUSTER_EOF) {
 		return 0;
 	}
@@ -1049,7 +1025,7 @@ u32 dsiSaveGetPosition(void* ctx) {
 }
 
 bool dsiSaveSeek(void* ctx, s32 pos, u32 mode) {
-	if (otherFileType == 1) {
+	if (sharedFontOpened) {
 		if (sharedFontFile.firstCluster == CLUSTER_FREE || sharedFontFile.firstCluster == CLUSTER_EOF) {
 			dsiSaveResultCode = 0xE;
 			return false;
@@ -1076,7 +1052,7 @@ bool dsiSaveSeek(void* ctx, s32 pos, u32 mode) {
 }
 
 s32 dsiSaveRead(void* ctx, void* dst, s32 len) {
-	if (otherFileType == 0) {
+	if (!sharedFontOpened) {
 		if (dsiSavePerms == 2 || !dsiSaveExists) {
 			dsiSaveResultCode = 1;
 			__aeabi_memset4(ctx+0x14, 4, dsiSaveResultCode);
@@ -1111,7 +1087,7 @@ s32 dsiSaveRead(void* ctx, void* dst, s32 len) {
 		while (1) {
 			u32 readLen = (bufLen > 0x600) ? 0x600 : len;
 
-			res = fileRead((char*)0x027FF200, (otherFileType == 1) ? &sharedFontFile : &savFile, dsiSaveSeekPos+dstAdd, readLen);
+			res = fileRead((char*)0x027FF200, sharedFontOpened ? &sharedFontFile : &savFile, dsiSaveSeekPos+dstAdd, readLen);
 			if (!res) {
 				break;
 			}
@@ -1124,10 +1100,8 @@ s32 dsiSaveRead(void* ctx, void* dst, s32 len) {
 				break;
 			}
 		}
-	} else if (otherFileType == 2) {
-		res = fileRead(dst, &pageFile, 0xC0004, len);
 	} else {
-		res = fileRead(dst, (otherFileType == 1) ? &sharedFontFile : &savFile, dsiSaveSeekPos, len);
+		res = fileRead(dst, sharedFontOpened ? &sharedFontFile : &savFile, dsiSaveSeekPos, len);
 	}
 	dsiSaveResultCode = res ? 0 : 1;
 	__aeabi_memset4(ctx+0x14, 4, dsiSaveResultCode);

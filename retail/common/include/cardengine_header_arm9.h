@@ -208,7 +208,6 @@ typedef struct cardengineArm9 {
     u32 pageFileCluster;
     u32 manualCluster;
     u32 sharedFontCluster;
-    u32 filePathHook;
     u32 cardStruct0;
 	u32 valueBits;
 	/*

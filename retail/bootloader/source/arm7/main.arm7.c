@@ -268,7 +268,8 @@ static void resetMemory_ARM7(void) {
 	REG_IPC_FIFO_CR = 0;
 
 	memset_addrs_arm7(0x03800000 - 0x8000, 0x03800000 + 0x10000);
-	memset_addrs_arm7(0x02000620, IMAGES_LOCATION-0x1000);	// clear part of EWRAM - except before nds-bootstrap images
+	memset_addrs_arm7(0x02000620, 0x02084000);	// clear part of EWRAM
+	memset_addrs_arm7(0x02280000, IMAGES_LOCATION-0x1000);	// clear part of EWRAM - except before nds-bootstrap images
 	__aeabi_memclr((u32*)0x02380000, 0x38000);		// clear part of EWRAM - except before 0x023DA000, which has the arm9 code
 	__aeabi_memclr((u32*)0x023C0000, 0x20000);
 	__aeabi_memclr((u32*)0x023F0000, 0xD000);

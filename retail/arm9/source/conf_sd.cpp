@@ -78,7 +78,8 @@ extern std::string musicsFilePath;
 extern std::string pageFilePath;
 extern std::string sharedFontPath;
 
-extern u8 lz77ImageBuffer[0x20000];
+extern u8* lz77ImageBuffer;
+#define sizeof_lz77ImageBuffer 0x30000
 
 off_t getFileSize(const char* path) {
 	FILE* fp = fopen(path, "rb");
@@ -365,13 +366,13 @@ void getIgmStrings(configuration* conf, bool b4ds) {
 
 	FILE *font = fopen("nitro:/fonts/ascii.lz77", "rb");
 	if (font) {
-		fread(lz77ImageBuffer, 1, sizeof(lz77ImageBuffer), font);
+		fread(lz77ImageBuffer, 1, sizeof_lz77ImageBuffer, font);
 		LZ77_Decompress(lz77ImageBuffer, igmText->font);
 		fclose(font);
 	}
 	font = fopen(extendedFontPath, "rb");
 	if (font) {
-		fread(lz77ImageBuffer, 1, sizeof(lz77ImageBuffer), font);
+		fread(lz77ImageBuffer, 1, sizeof_lz77ImageBuffer, font);
 		LZ77_Decompress(lz77ImageBuffer, igmText->font + 0x400);
 		fclose(font);
 	}
@@ -610,6 +611,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 	char romTid[5] = {0};
 	u8 unitCode = 0;
+	u32 ndsArm9BinOffset = 0;
 	u32 ndsArm9Offset = 0;
 	u32 ndsArm7Size = 0;
 	u32 fatAddr = 0;
@@ -633,6 +635,8 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		fread(&romTid, 1, 4, ndsFile);
 		fseek(ndsFile, 0x12, SEEK_SET);
 		fread(&unitCode, 1, 1, ndsFile);
+		fseek(ndsFile, 0x20, SEEK_SET);
+		fread(&ndsArm9BinOffset, sizeof(u32), 1, ndsFile);
 		fseek(ndsFile, 0x28, SEEK_SET);
 		fread(&ndsArm9Offset, sizeof(u32), 1, ndsFile);
 		fseek(ndsFile, 0x3C, SEEK_SET);
@@ -1201,7 +1205,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		// Load SDK5 ce7 binary
 		cebin = fopen(binary3 ? "nitro:/cardenginei_arm7_twlsdk3.lz77" : "nitro:/cardenginei_arm7_twlsdk.lz77", "rb");
 		if (cebin) {
-			fread(lz77ImageBuffer, 1, sizeof(lz77ImageBuffer), cebin);
+			fread(lz77ImageBuffer, 1, sizeof_lz77ImageBuffer, cebin);
 			LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINEI_ARM7_BUFFERED_LOCATION);
 			if (REG_SCFG_EXT7 != 0) {
 				__aeabi_memcpy((u8*)LOADER_RETURN_SDK5_LOCATION, twlmenuResetGamePath, 256);
@@ -1214,7 +1218,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			// Load SDK5 DLDI ce9 binary
 			cebin = fopen(binary3 ? "nitro:/cardenginei_arm9_twlsdk3_dldi.lz77" : "nitro:/cardenginei_arm9_twlsdk_dldi.lz77", "rb");
 			if (cebin) {
-				fread(lz77ImageBuffer, 1, sizeof(lz77ImageBuffer), cebin);
+				fread(lz77ImageBuffer, 1, sizeof_lz77ImageBuffer, cebin);
 				LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINEI_ARM9_SDK5_BUFFERED_LOCATION);
 			}
 			fclose(cebin);
@@ -1222,7 +1226,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			// Load SDK5 ce9 binary
 			cebin = fopen(binary3 ? "nitro:/cardenginei_arm9_twlsdk3.lz77" : "nitro:/cardenginei_arm9_twlsdk.lz77", "rb");
 			if (cebin) {
-				fread(lz77ImageBuffer, 1, sizeof(lz77ImageBuffer), cebin);
+				fread(lz77ImageBuffer, 1, sizeof_lz77ImageBuffer, cebin);
 				LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINEI_ARM9_SDK5_BUFFERED_LOCATION);
 			}
 			fclose(cebin);
@@ -1231,7 +1235,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		// Load ce7 binary
 		cebin = fopen(dsiEnhancedMbk ? "nitro:/cardenginei_arm7_alt.lz77" : "nitro:/cardenginei_arm7.lz77", "rb");
 		if (cebin) {
-			fread(lz77ImageBuffer, 1, sizeof(lz77ImageBuffer), cebin);
+			fread(lz77ImageBuffer, 1, sizeof_lz77ImageBuffer, cebin);
 			LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINEI_ARM7_BUFFERED_LOCATION);
 			if (REG_SCFG_EXT7 != 0) {
 				__aeabi_memcpy((u8*)LOADER_RETURN_LOCATION, twlmenuResetGamePath, 256);
@@ -1252,7 +1256,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			// Load DLDI ce9 binary
 			cebin = fopen(ce9Path, "rb");
 			if (cebin) {
-				fread(lz77ImageBuffer, 1, sizeof(lz77ImageBuffer), cebin);
+				fread(lz77ImageBuffer, 1, sizeof_lz77ImageBuffer, cebin);
 				LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINEI_ARM9_BUFFERED_LOCATION);
 			}
 			fclose(cebin);
@@ -1267,7 +1271,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			// Load ce9 binary
 			cebin = fopen(ce9Path, "rb");
 			if (cebin) {
-				fread(lz77ImageBuffer, 1, sizeof(lz77ImageBuffer), cebin);
+				fread(lz77ImageBuffer, 1, sizeof_lz77ImageBuffer, cebin);
 				LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINEI_ARM9_BUFFERED_LOCATION);
 			}
 			fclose(cebin);
@@ -1276,7 +1280,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 				// Load ce9 binary (alt 2)
 				cebin = fopen("nitro:/cardenginei_arm9_alt2.lz77", "rb");
 				if (cebin) {
-					fread(lz77ImageBuffer, 1, sizeof(lz77ImageBuffer), cebin);
+					fread(lz77ImageBuffer, 1, sizeof_lz77ImageBuffer, cebin);
 					LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINEI_ARM9_BUFFERED_LOCATION2);
 				}
 				fclose(cebin);
@@ -1371,7 +1375,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	// Load ce7 binary
 	cebin = fopen(binary3 ? "nitro:/cardenginei_arm7_dsiware3.lz77" : "nitro:/cardenginei_arm7_dsiware.lz77", "rb");
 	if (cebin) {
-		fread(lz77ImageBuffer, 1, sizeof(lz77ImageBuffer), cebin);
+		fread(lz77ImageBuffer, 1, sizeof_lz77ImageBuffer, cebin);
 		LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINEI_ARM7_BUFFERED_LOCATION);
 		if (REG_SCFG_EXT7 != 0) {
 			__aeabi_memcpy((u8*)LOADER_RETURN_DSIWARE_LOCATION, twlmenuResetGamePath, 256);
@@ -1390,7 +1394,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	// Load ce9 binary
 	cebin = fopen(binary3 ? "nitro:/cardenginei_arm9_dsiware3.lz77" : "nitro:/cardenginei_arm9_dsiware.lz77", "rb");
 	if (cebin) {
-		fread(lz77ImageBuffer, 1, sizeof(lz77ImageBuffer), cebin);
+		fread(lz77ImageBuffer, 1, sizeof_lz77ImageBuffer, cebin);
 		LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINEI_ARM9_BUFFERED_LOCATION);
 	}
 	fclose(cebin);
@@ -1416,7 +1420,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	// Load in-game menu ce9 binary
 	cebin = fopen("nitro:/cardenginei_arm9_igm.lz77", "rb");
 	if (cebin) {
-		fread(lz77ImageBuffer, 1, sizeof(lz77ImageBuffer), cebin);
+		fread(lz77ImageBuffer, 1, sizeof_lz77ImageBuffer, cebin);
 		LZ77_Decompress(lz77ImageBuffer, (u8*)igmText);
 
 		getIgmStrings(conf, false);
@@ -1542,7 +1546,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 	FILE* bootstrapImages = fopen("nitro:/bootloader_images.lz77", "rb");
 	if (bootstrapImages) {
-		fread(lz77ImageBuffer, 1, sizeof(lz77ImageBuffer), bootstrapImages);
+		fread(lz77ImageBuffer, 1, sizeof_lz77ImageBuffer, bootstrapImages);
 		LZ77_Decompress(lz77ImageBuffer, (u8*)IMAGES_LOCATION+0x18000);
 	}
 	fclose(bootstrapImages);
@@ -1711,7 +1715,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	if (cebin) {
 		igmText = (struct IgmText *)(b4dsDebugRam ? INGAME_MENU_LOCATION_B4DS_EXTMEM : INGAME_MENU_LOCATION_B4DS);
 
-		fread(lz77ImageBuffer, 1, sizeof(lz77ImageBuffer), cebin);
+		fread(lz77ImageBuffer, 1, sizeof_lz77ImageBuffer, cebin);
 		LZ77_Decompress(lz77ImageBuffer, (u8*)igmText);
 
 		getIgmStrings(conf, true);
@@ -1892,7 +1896,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		cebin = fopen(ce9path, "rb");
 	}
 	if (cebin) {
-		fread(lz77ImageBuffer, 1, sizeof(lz77ImageBuffer), cebin);
+		fread(lz77ImageBuffer, 1, sizeof_lz77ImageBuffer, cebin);
 		LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINE_ARM9_LOCATION_BUFFERED);
 	}
 	fclose(cebin);
@@ -1913,7 +1917,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 	FILE* bootstrapImages = fopen("nitro:/bootloader_images.lz77", "rb");
 	if (bootstrapImages) {
-		fread(lz77ImageBuffer, 1, sizeof(lz77ImageBuffer), bootstrapImages);
+		fread(lz77ImageBuffer, 1, sizeof_lz77ImageBuffer, bootstrapImages);
 		LZ77_Decompress(lz77ImageBuffer, (u8*)IMAGES_LOCATION+0x18000);
 	}
 	fclose(bootstrapImages);
@@ -2025,41 +2029,24 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	if (romFSInited && (!dsiFeatures() || conf->b4dsMode)) {
 		if (!b4dsDebugRam && (strncmp(romTid, "KAA", 3) == 0)) {
 			// Decompress sdat file for Art Style: Aquia
-			u32 sdatSize = getFileSize("rom:/sound_data.sdat");
-			if (sdatSize) {
+			if (getFileSize("rom:/sound_data.sdat")) {
 				u8 sdatSize0[4];
 				FILE* sdatFile = fopen("rom:/sound_data.sdat", "rb");
 				fread(sdatSize0, 1, 4, sdatFile);
-				sdatSize = LZ77_GetLength(sdatSize0);
-				u32 sdatSizeCur = 0;
-				u32 sdatString = 0;
+				const u32 sdatSize = LZ77_GetLength(sdatSize0);
 
-				FILE* pageFile = fopen(pageFilePath.c_str(), "rb+");
-				fseek(pageFile, 0xC0000, SEEK_SET);
-				fread(&sdatSizeCur, sizeof(u32), 1, pageFile);
-				fread(&sdatString, sizeof(u32), 1, pageFile);
+				u32 bssEnd = 0;
+				ndsFile = fopen(conf->ndsPath, "rb");
+				fseek(ndsFile, ndsArm9BinOffset+0xFB8, SEEK_SET);
+				fread(&bssEnd, sizeof(u32), 1, ndsFile);
+				fclose(ndsFile);
 
-				if (sdatSizeCur != sdatSize || sdatString != 0x54414453) {
-					fseek(pageFile, 0xC0000, SEEK_SET);
-					fwrite(&sdatSize, sizeof(u32), 1, pageFile);
-
-					u8* sdat = new u8[sdatSize];
+				if (bssEnd+sdatSize < 0x02280000) {
+					*(u32*)(bssEnd-4) = sdatSize;
+					u8* sdat = (u8*)bssEnd;
 					LZX_DecodeFromFile(sdat, sdatFile, sdatSize);
-					fclose(sdatFile);
-
-					fwrite(sdat, 1, sdatSize, pageFile);
-					fclose(pageFile);
-
-					delete[] sdat;
-				} else {
-					fclose(sdatFile);
-					fclose(pageFile);
 				}
-			} else {
-				FILE* pageFile = fopen(pageFilePath.c_str(), "rb+");
-				fseek(pageFile, 0xC0000, SEEK_SET);
-				fwrite(&sdatSize, sizeof(u32), 1, pageFile);
-				fclose(pageFile);
+				fclose(sdatFile);
 			}
 		} else if (donorInsideNds) {
 			// Set cloneboot/multiboot SRL file either to boot instead, or as Donor ROM
