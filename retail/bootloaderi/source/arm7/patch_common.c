@@ -7820,7 +7820,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02042DB4, (u32)dsiSaveRead); // dsiSaveReadAsync
 		*(u32*)0x0205063C = 0xE12FFF1E; // bx lr (Skip NAND error checking)
 	}
-
+#else
 	// A Kappa's Trail (USA)
 	else if (strcmp(romTid, "KPAE") == 0 && saveOnFlashcard) {
 		__aeabi_memcpy((u32*)0x0201A020, dsiSaveGetResultCode, 0xC);
@@ -8174,7 +8174,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02020EE4 = 0xE1A00000; // nop (dsiSaveCloseDir)*/
 		*(u32*)0x0202F3F0 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 	}
-#else
+
 	// The Legend of Zelda: Four Swords: Anniversary Edition (USA)
 	// The Legend of Zelda: Four Swords: Anniversary Edition (Europe, Australia)
 	// Zelda no Densetsu: 4-tsu no Tsurugi: 25th Kinen Edition (Japan)
