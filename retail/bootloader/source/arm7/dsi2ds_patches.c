@@ -23363,6 +23363,9 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		extern u32* siezHeapAlloc;
 		extern u32* siezHeapAddrPtr;
 
+		if (!extendedMemory) {
+			*(u32*)0x02004BA4 = 0x08000033;
+		}
 		*(u32*)0x02017904 = 0xE1A00000; // nop
 		if (!extendedMemory && expansionPakFound) {
 			if (s2FlashcardId == 0x5A45) {

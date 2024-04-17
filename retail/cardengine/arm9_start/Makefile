@@ -31,18 +31,19 @@ DATA		:=	data
 #---------------------------------------------------------------------------------
 # options for code generation
 #---------------------------------------------------------------------------------
-ARCH	:=	-mthumb -mthumb-interwork -march=armv5te -mtune=arm946e-s
+ARCH	:=	-mthumb -march=armv5te -mtune=arm946e-s
 
 CFLAGS	:=	-g -Wall -Os\
  			-march=armv5te -mtune=arm946e-s -fomit-frame-pointer\
 			-ffast-math \
+			-flto \
 			$(ARCH)
 
 # ADD -DDEBUG here for logging/debug
 CFLAGS	+=	$(INCLUDE) -DARM9 -DB4DS -D_NO_SDMMC -DNO_CARDID -DNOGETBOOTCLUSTER
 CXXFLAGS	:=	$(CFLAGS) -fno-rtti -fno-exceptions
 
-ASFLAGS	:=	-g $(ARCH) $(INCLUDE)
+ASFLAGS	:=	-g $(ARCH) -flto $(INCLUDE)
 
 LDFLAGS	=	-nostartfiles -T cardengine.ld -g $(ARCH) -Wl,-Map,$(notdir $*.map)
 

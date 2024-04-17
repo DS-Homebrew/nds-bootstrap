@@ -42,6 +42,9 @@
 #include "io_g6_common.h"
 #include "io_sc_common.h"
 
+#define cacheBlockSize 0x1000
+#define cacheSlots 0x8000/cacheBlockSize
+
 #define EXCEPTION_VECTOR_SDK1	(*(VoidFn *)(0x27FFD9C))
 
 #define FEATURE_SLOT_GBA			0x00000010
@@ -85,14 +88,14 @@ static aFile ramDumpFile;
 static aFile srParamsFile;
 static aFile screenshotFile;
 static aFile apFixOverlaysFile;
-static aFile musicsFile;
+// static aFile musicsFile;
 static aFile pageFile;
 static aFile manualFile;
 
 #ifndef NODSIWARE
 static aFile sharedFontFile;
 
-void updateMusic(void);
+/* void updateMusic(void);
 
 static bool musicInited = false;
 static bool musicMagicStringChecked = false;
@@ -105,7 +108,13 @@ static u32 musicPos = 0x2000;
 static u32 musicLoopPos = 0;
 static u32 musicPosRev = 0;
 static u32 musicPosInFile = 0x0;
-static u32 musicFileSize = 0x0;
+static u32 musicFileSize = 0x0; */
+
+// u32* debugArea = (u32*)0x02004000;
+static u32 cachedRomOffset = 0x563000;
+/* u32 cacheDescriptor[cacheSlots];
+int cacheCounter[cacheSlots];
+int accessCounter = 0; */
 #endif
 
 static bool cardReadInProgress = false;
@@ -499,7 +508,7 @@ void inGameMenu(s32* exRegisters) {
 //---------------------------------------------------------------------------------
 void myIrqHandlerIPC(void) {
 //---------------------------------------------------------------------------------
-	switch (sharedAddr[3]) {
+	/* switch (sharedAddr[3]) {
 		case 0x53415652: {
 			u16 exmemcnt = REG_EXMEMCNT;
 			// Read save
@@ -564,13 +573,13 @@ void myIrqHandlerIPC(void) {
 			sharedAddr[3] = 0;
 			REG_EXMEMCNT = exmemcnt;
 		} break;
-	}
+	} */
 
 	switch (IPC_GetSync()) {
 		#ifndef NODSIWARE
-		case 0x5:
+		/* case 0x5:
 			updateMusic();
-			break;
+			break; */
 		#endif
 		case 0x6:
 			if(ce9->mainScreen == 1)
@@ -609,7 +618,7 @@ static void initialize(void) {
 	getFileFromCluster(&romFile, ce9->fileCluster);
 	getFileFromCluster(&savFile, ce9->saveCluster);
 	getFileFromCluster(&patchOffsetCacheFile, ce9->patchOffsetCacheFileCluster);
-	getFileFromCluster(&musicsFile, ce9->musicCluster);
+	// getFileFromCluster(&musicsFile, ce9->musicCluster);
 
 	if (ce9->romFatTableCache != 0) {
 		romFile.fatTableCache = (u32*)ce9->romFatTableCache;
@@ -621,11 +630,11 @@ static void initialize(void) {
 		savFile.fatTableCached = true;
 		savFile.fatTableCompressed = (bool)ce9->savFatTableCompressed;
 	}
-	if (ce9->musicFatTableCache != 0) {
+	/* if (ce9->musicFatTableCache != 0) {
 		musicsFile.fatTableCache = (u32*)ce9->musicFatTableCache;
 		musicsFile.fatTableCached = true;
 		musicsFile.fatTableCompressed = (bool)ce9->musicsFatTableCompressed;
-	}
+	} */
 
 	getFileFromCluster(&ramDumpFile, ce9->ramDumpCluster);
 	getFileFromCluster(&srParamsFile, ce9->srParamsCluster);
@@ -738,6 +747,11 @@ void cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 		src = 0x8000 + (src & 0x1FF);
 	}
 
+	#ifndef NODSIWARE
+	if ((u32)dst >= 0x0C000000 && (u32)dst < 0x10000000) {
+		cachedRomOffset = src;
+	} else
+	#endif
 	if (ce9->valueBits & ROMinRAM) {
 		if (src >= 0 && src < 0x160) {
 			u32 newSrc = (u32)ndsHeader+src;
@@ -774,6 +788,93 @@ bool nandWrite(void* memory,void* flash,u32 len,u32 dma) {
 }
 
 #ifndef NODSIWARE
+/* int allocateCacheSlot(void) {
+	int slot = 0;
+	int lowerCounter = accessCounter;
+	for (int i = 0; i < cacheSlots; i++) {
+		if (cacheCounter[i] <= lowerCounter) {
+			lowerCounter = cacheCounter[i];
+			slot = i;
+			if (!lowerCounter) {
+				break;
+			}
+		}
+	}
+	return slot;
+}
+
+int getSlotForSector(u32 sector) {
+	for (int i = 0; i < cacheSlots; i++) {
+		if (cacheDescriptor[i] == sector) {
+			return i;
+		}
+	}
+	return -1;
+}
+
+vu8* getCacheAddress(int slot) {
+	return (vu8*)(0x023D0000 + slot*cacheBlockSize);
+}
+
+void updateDescriptor(int slot, u32 sector) {
+	cacheDescriptor[slot] = sector;
+	cacheCounter[slot] = accessCounter;
+} */
+
+void readRomBlock(u32 src, u8 len) {
+	src -= 0x0C000000;
+	src += cachedRomOffset;
+	// debugArea[1] = src;
+	/* const u32 sector = (src/cacheBlockSize)*cacheBlockSize;
+
+	accessCounter++;
+
+	int slot = getSlotForSector(sector);
+	vu8* buffer = getCacheAddress(slot);
+	if (slot == -1) {
+		slot = allocateCacheSlot();
+
+		buffer = getCacheAddress(slot);
+
+		const u16 exmemcnt = REG_EXMEMCNT;
+		setDeviceOwner();
+
+		if (ce9->valueBits & ROMinRAM) {
+			u32 newSrc = ce9->romLocation+sector;
+			__aeabi_memcpy((u8*)buffer, (u8*)newSrc, cacheBlockSize);
+		} else {
+			fileRead((char*)buffer, &romFile, sector, cacheBlockSize);
+		}
+
+		REG_EXMEMCNT = exmemcnt;
+	}
+	updateDescriptor(slot, sector);
+
+	u8 len2 = len;
+	if ((src - sector) + len2 > cacheBlockSize) {
+		len2 = sector - src + cacheBlockSize;
+	}
+
+	extern u32 newRegister;
+	newRegister = 0;
+	__aeabi_memcpy(&newRegister, (u8*)buffer+(src-sector), len); */
+
+	extern u32 newRegister;
+	newRegister = 0;
+
+	const u16 exmemcnt = REG_EXMEMCNT;
+	setDeviceOwner();
+
+	if (ce9->valueBits & ROMinRAM) {
+		u32 newSrc = ce9->romLocation+src;
+		__aeabi_memcpy(&newRegister, (u8*)newSrc, len);
+	} else {
+		fileRead((char*)&newRegister, &romFile, src, len);
+	}
+
+	REG_EXMEMCNT = exmemcnt;
+}
+
 void ndmaCopy(int ndmaSlot, const void* src, void* dst, u32 len) {
 	__aeabi_memcpy(dst, src, len);
 }
@@ -1203,7 +1304,7 @@ s32 dsiSaveWrite(void* ctx, void* src, s32 len) {
 
 #ifndef NODSIWARE
 void musicInit(void) {
-	if (musicInited || musicMagicStringChecked || ce9->musicCluster == 0) {
+	/* if (musicInited || musicMagicStringChecked || ce9->musicCluster == 0) {
 		return;
 	}
 
@@ -1222,11 +1323,11 @@ void musicInit(void) {
 
 	REG_EXMEMCNT = exmemcnt;
 
-	musicInited = true;
+	musicInited = true; */
 }
 
 void updateMusic(void) {
-	if (sharedAddr[2] == 0x5953554D && !cardReadInProgress) { // 'MUSY'
+	/* if (sharedAddr[2] == 0x5953554D && !cardReadInProgress) { // 'MUSY'
 		u16 exmemcnt = REG_EXMEMCNT;
 		setDeviceOwner();
 
@@ -1257,11 +1358,11 @@ void updateMusic(void) {
 
 		sharedAddr[2] = 0;
 		REG_EXMEMCNT = exmemcnt;
-	}
+	} */
 }
 
 void musicPlay(int id) {
-	musicInit();
+	/* musicInit();
 
 	if (musicPlaying) {
 		sharedAddr[2] = 0x5353554D; // 'MUSS'
@@ -1288,16 +1389,16 @@ void musicPlay(int id) {
 		sharedAddr[2] = 0x5053554D; // 'MUSP'
 		while (sharedAddr[2] == 0x5053554D);
 		musicPlaying = true;
-	}
+	} */
 }
 
 void musicStopEffect(int id) {
-	if (!musicPlaying) {
+	/* if (!musicPlaying) {
 		return;
 	}
 	sharedAddr[2] = 0x5353554D; // 'MUSS'
 	while (sharedAddr[2] == 0x5353554D);
-	musicPlaying = false;
+	musicPlaying = false; */
 }
 
 void rumble(u32 arg) {
