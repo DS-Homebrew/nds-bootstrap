@@ -70,8 +70,8 @@ metalTorrentSndLoad:
 @	.word myLtlRestHeapAddr
 nintCdwnCalHeapAlloc:
 	.word nintCdwnCalHeapAllocFunc
-nintCdwnCalHeapAddrPtr:
-	.word nintCdwnCalHeapAddr
+@nintCdwnCalHeapAddrPtr:
+@	.word nintCdwnCalHeapAddr
 @mvdk3HeapAlloc:
 nintendojiHeapAlloc:
 	.word nintendojiHeapAllocFunc
@@ -533,64 +533,97 @@ _blx_metalTorrentSndLoadOrgFunc:
 @---------------------------------------------------------------------------------
 @	.arm
 @---------------------------------------------------------------------------------
+nintCdwnCalOrgFunction: .word 0
 nintCdwnCalHeapAllocFunc:
 @---------------------------------------------------------------------------------
-	stmfd   sp!, {r6,lr}
+	stmfd   sp!, {r4-r5,lr}
 
-	ldr r6, =0x72C0 @ Size of Font.nftr
-	cmp r0, r6
-	ldreq r0, nintCdwnCalHeapAddr
-	ldmeqfd   sp!, {r6,pc}
+	adr r5, nintCdwnCalTWLFontSize
+	ldr r4, [r5]
+	cmp r4, #0
+	streq r0, [r5] @ Store size of suraTWLFont8x16.nftr (0x4452C, first font read)
+	moveq r4, r0
+	cmp r0, r4
+	bne nintCdwnCalHeapAllocFunc_notTWLFont
+	adr r5, nintCdwnCalTWLFontOffset
+	ldr r4, [r5]
+	cmp r4, #0
+	movne r0, r4
+	ldmnefd   sp!, {r4-r5,pc}
 
-	ldr r6, =0x72B0 @ Size of FontCal.nftr
-	cmp r0, r6
-	ldreq r0, nintCdwnCalHeapAddr+4
-	ldmeqfd   sp!, {r6,pc}
+	ldr r4, nintCdwnCalOrgFunction
+	bl _blx_nintCdwnCalOrgFunction
+	str r0, [r5]
+	ldmfd   sp!, {r4-r5,pc}
 
-	ldr r6, =0x67D4 @ Size of FontCal2.nftr
-	cmp r0, r6
-	ldreq r0, nintCdwnCalHeapAddr+8
-	ldmeqfd   sp!, {r6,pc}
-
-	ldr r6, =0x7340 @ Size of FontInfo.nftr
-	cmp r0, r6
-	ldreq r0, nintCdwnCalHeapAddr+0xC
-	ldmeqfd   sp!, {r6,pc}
-
-	ldr r6, =0x733C @ Size of FontLine.nftr
-	cmp r0, r6
-	ldreq r0, nintCdwnCalHeapAddr+0x10
-	ldmeqfd   sp!, {r6,pc}
-
-	ldr r6, =0x7474 @ Size of FontPage.nftr
-	cmp r0, r6
-	ldreq r0, nintCdwnCalHeapAddr+0x14
-	ldmeqfd   sp!, {r6,pc}
-
-	ldr r6, =0xAF44 @ Size of FontRed.nftr (USA/EUR)
-	cmp r0, r6
-	ldreq r0, nintCdwnCalHeapAddr+0x18
-	ldmeqfd   sp!, {r6,pc}
-
-	@ldr r6, =0x4AE8 @ Size of FontRed.nftr (JAP)
-	@cmp r0, r6
-	@ldreq r0, nintCdwnCalHeapAddr+0x18
-	@ldmeqfd   sp!, {r6,pc}
-
-	@ldr r6, =0x4452C @ Size of suraTWLFont8x16.nftr
-	@cmp r0, r6
-	ldr r0, nintCdwnCalHeapAddr+0x1C
-	ldmfd   sp!, {r6,pc}
-nintCdwnCalHeapAddr:
-.word	0x09000000
-.word	0x09008000
-.word	0x09010000
-.word	0x09018000
-.word	0x09020000
-.word	0x09028000
-.word	0x09030000
-.word	0x0903B000
+nintCdwnCalHeapAllocFunc_notTWLFont:
+	ldr r4, nintCdwnCalOrgFunction
+	bl _blx_nintCdwnCalOrgFunction
+	ldmfd   sp!, {r4-r5,pc}
+_blx_nintCdwnCalOrgFunction:
+	bx	r4
 .pool
+nintCdwnCalTWLFontOffset:
+.word 0
+nintCdwnCalTWLFontSize:
+.word 0
+
+@	stmfd   sp!, {r6,lr}
+
+@	ldr r6, =0x72C0 @ Size of Font.nftr
+@	cmp r0, r6
+@	ldreq r0, nintCdwnCalHeapAddr
+@	ldmeqfd   sp!, {r6,pc}
+
+@	ldr r6, =0x72B0 @ Size of FontCal.nftr
+@	cmp r0, r6
+@	ldreq r0, nintCdwnCalHeapAddr+4
+@	ldmeqfd   sp!, {r6,pc}
+
+@	ldr r6, =0x67D4 @ Size of FontCal2.nftr
+@	cmp r0, r6
+@	ldreq r0, nintCdwnCalHeapAddr+8
+@	ldmeqfd   sp!, {r6,pc}
+
+@	ldr r6, =0x7340 @ Size of FontInfo.nftr
+@	cmp r0, r6
+@	ldreq r0, nintCdwnCalHeapAddr+0xC
+@	ldmeqfd   sp!, {r6,pc}
+
+@	ldr r6, =0x733C @ Size of FontLine.nftr
+@	cmp r0, r6
+@	ldreq r0, nintCdwnCalHeapAddr+0x10
+@	ldmeqfd   sp!, {r6,pc}
+
+@	ldr r6, =0x7474 @ Size of FontPage.nftr
+@	cmp r0, r6
+@	ldreq r0, nintCdwnCalHeapAddr+0x14
+@	ldmeqfd   sp!, {r6,pc}
+
+@	ldr r6, =0xAF44 @ Size of FontRed.nftr (USA/EUR)
+@	cmp r0, r6
+@	ldreq r0, nintCdwnCalHeapAddr+0x18
+@	ldmeqfd   sp!, {r6,pc}
+
+@	@ldr r6, =0x4AE8 @ Size of FontRed.nftr (JAP)
+@	@cmp r0, r6
+@	@ldreq r0, nintCdwnCalHeapAddr+0x18
+@	@ldmeqfd   sp!, {r6,pc}
+
+@	@ldr r6, =0x4452C @ Size of suraTWLFont8x16.nftr
+@	@cmp r0, r6
+@	ldr r0, nintCdwnCalHeapAddr+0x1C
+@	ldmfd   sp!, {r6,pc}
+@nintCdwnCalHeapAddr:
+@.word	0x09000000
+@.word	0x09008000
+@.word	0x09010000
+@.word	0x09018000
+@.word	0x09020000
+@.word	0x09028000
+@.word	0x09030000
+@.word	0x0903B000
+@.pool
 @---------------------------------------------------------------------------------
 
 @---------------------------------------------------------------------------------

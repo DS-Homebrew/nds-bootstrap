@@ -10223,6 +10223,11 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			__aeabi_memcpy((u32*)0x02086F2C, dsiSaveGetResultCode, 0xC);
 		}
 		if (!twlFontFound) {
+			// Skip Manual screen
+			for (int i = 0; i < 9; i++) {
+				u32* offset = (u32*)0x0204FAA8;
+				offset[i] = 0xE1A00000; // nop
+			}
 			*(u32*)0x0205C1B4 = 0xE1A00000; // nop
 		}
 	}
@@ -10242,6 +10247,11 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			__aeabi_memcpy((u32*)0x02087164, dsiSaveGetResultCode, 0xC);
 		}
 		if (!twlFontFound) {
+			// Skip Manual screen
+			for (int i = 0; i < 9; i++) {
+				u32* offset = (u32*)0x0204FCB4;
+				offset[i] = 0xE1A00000; // nop
+			}
 			*(u32*)0x0205C3EC = 0xE1A00000; // nop
 		}
 	}
@@ -10261,6 +10271,11 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			__aeabi_memcpy((u32*)0x0207F9E8, dsiSaveGetResultCode, 0xC);
 		}
 		if (!twlFontFound) {
+			// Skip Manual screen
+			for (int i = 0; i < 9; i++) {
+				u32* offset = (u32*)0x0204D794;
+				offset[i] = 0xE1A00000; // nop
+			}
 			*(u32*)0x020597A4 = 0xE1A00000; // nop
 		}
 	}

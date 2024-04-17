@@ -17854,10 +17854,9 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Nintendo Countdown Calendar (USA)
-	// Requires either 8MB of RAM or Memory Expansion Pak
-	else if (strcmp(romTid, "KAUE") == 0 && debugOrMep) {
+	else if (strcmp(romTid, "KAUE") == 0) {
 		extern u32* nintCdwnCalHeapAlloc;
-		extern u32* nintCdwnCalHeapAddrPtr;
+		// extern u32* nintCdwnCalHeapAddrPtr;
 
 		// useSharedFont = twlFontFound;
 		setBL(0x02012480, (u32)dsiSaveGetLength);
@@ -17875,18 +17874,26 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020148D0 = 0xE1A00000; // nop
 		*(u32*)0x0204F008 = 0xE1A00000; // nop
 		if (!extendedMemory) {
-			if (s2FlashcardId == 0x5A45) {
+			*(u32*)0x0204F070 = 0xE3A01901; // mov r1, #0x4000 (Shrink unknown heap from 0x100000)
+			*(u32*)0x0204FAEC = *(u32*)0x0204F070;
+			/* if (s2FlashcardId == 0x5A45) {
 				for (int i = 0; i < 8; i++) {
 					nintCdwnCalHeapAddrPtr[i] -= 0x800000;
 				}
-			}
-			__aeabi_memcpy((u32*)0x020917D8, nintCdwnCalHeapAlloc, 0xC0);
-			setBL(0x0205AB70, 0x020917D8);
+			} */
+			*(u32*)0x020917D8 = (u32)getOffsetFromBL((u32*)0x0205AB70);
+			__aeabi_memcpy((u32*)0x020917DC, nintCdwnCalHeapAlloc, 0xBC);
+			setBL(0x0205AB70, 0x020917DC);
 			/* if (twlFontFound) {
 				patchTwlFontLoad(0x0205AC48, 0x02092324);
 			} */
 		}
 		// if (!twlFontFound) {
+			// Skip Manual screen
+			for (int i = 0; i < 9; i++) {
+				u32* offset = (u32*)0x0204FAA8;
+				offset[i] = 0xE1A00000; // nop
+			}
 			*(u32*)0x0205C1B4 = 0xE1A00000; // nop
 		// }
 		*(u32*)0x020863A8 = 0xE1A00000; // nop
@@ -17898,11 +17905,11 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Nintendo Countdown Calendar (Europe, Australia)
-	// Requires either 8MB of RAM or Memory Expansion Pak
-	else if (strcmp(romTid, "KAUV") == 0 && debugOrMep) {
+	else if (strcmp(romTid, "KAUV") == 0) {
 		extern u32* nintCdwnCalHeapAlloc;
-		extern u32* nintCdwnCalHeapAddrPtr;
+		// extern u32* nintCdwnCalHeapAddrPtr;
 
+		*(u32*)0x02005154 = 0xE1A00000; // nop (Skip Manual Screen)
 		setBL(0x020124DC, (u32)dsiSaveGetLength);
 		setBL(0x0201251C, (u32)dsiSaveRead);
 		setBL(0x02012598, (u32)dsiSaveWrite);
@@ -17918,13 +17925,21 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0201492C = 0xE1A00000; // nop
 		*(u32*)0x0204F214 = 0xE1A00000; // nop
 		if (!extendedMemory) {
-			if (s2FlashcardId == 0x5A45) {
+			*(u32*)0x0204F27C = 0xE3A01901; // mov r1, #0x4000 (Shrink unknown heap from 0x100000)
+			*(u32*)0x0204FCF8 = *(u32*)0x0204F27C;
+			/* if (s2FlashcardId == 0x5A45) {
 				for (int i = 0; i < 8; i++) {
 					nintCdwnCalHeapAddrPtr[i] -= 0x800000;
 				}
-			}
-			__aeabi_memcpy((u32*)0x02091A20, nintCdwnCalHeapAlloc, 0xC0);
-			setBL(0x0205ADA8, 0x02091A20);
+			} */
+			*(u32*)0x02091A20 = (u32)getOffsetFromBL((u32*)0x0205ADA8);
+			__aeabi_memcpy((u32*)0x02091A24, nintCdwnCalHeapAlloc, 0xBC);
+			setBL(0x0205ADA8, 0x02091A24);
+		}
+		// Skip Manual screen
+		for (int i = 0; i < 9; i++) {
+			u32* offset = (u32*)0x0204FCB4;
+			offset[i] = 0xE1A00000; // nop
 		}
 		*(u32*)0x0205C3EC = 0xE1A00000; // nop
 		*(u32*)0x020865E0 = 0xE1A00000; // nop
@@ -17936,10 +17951,9 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Atonannichi Kazoeru: Nintendo DSi Calendar (Japan)
-	// Requires either 8MB of RAM or Memory Expansion Pak
-	/* else if (strcmp(romTid, "KAUJ") == 0 && debugOrMep) {
+	/* else if (strcmp(romTid, "KAUJ") == 0) {
 		extern u32* nintCdwnCalHeapAlloc;
-		extern u32* nintCdwnCalHeapAddrPtr;
+		// extern u32* nintCdwnCalHeapAddrPtr;
 
 		useSharedFont = twlFontFound;
 		setBL(0x02014EAC, (u32)dsiSaveGetLength);
@@ -17962,10 +17976,16 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 					nintCdwnCalHeapAddrPtr[i] -= 0x800000;
 				}
 			}
-			__aeabi_memcpy((u32*)0x0208A268, nintCdwnCalHeapAlloc, 0xC0);
-			setBL(0x02058404, 0x0208A268);
+			*(u32*)0x0208A268 = (u32)getOffsetFromBL((u32*)0x02058404);
+			__aeabi_memcpy((u32*)0x0208A26C, nintCdwnCalHeapAlloc, 0xBC);
+			setBL(0x02058404, 0x0208A26C);
 		}
 		if (!twlFontFound) {
+			// Skip Manual screen
+			for (int i = 0; i < 9; i++) {
+				u32* offset = (u32*)0x0204D794;
+				offset[i] = 0xE1A00000; // nop
+			}
 			*(u32*)0x020597A4 = 0xE1A00000; // nop
 		}
 		*(u32*)0x0207EE70 = 0xE1A00000; // nop
