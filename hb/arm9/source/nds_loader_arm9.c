@@ -474,8 +474,10 @@ int runNdsFile (const char* filename, const char* ramDiskFilename, const char* c
 		return 1;
 	}
 	
-	if (stat(ramDiskFilename, &stRam) >= 0) {
-		clusterRam = stRam.st_ino;
+	if (ramDiskSize > 0) {
+		if (stat(ramDiskFilename, &stRam) >= 0) {
+			clusterRam = stRam.st_ino;
+		}
 	}
 
 	if (stat(cfgFilename, &stCfg) >= 0) {

@@ -604,7 +604,7 @@ int arm7_main (void) {
 		fileWrite((char*)&srParams, srParamsFile, 0xC, 4);
 	}
 
-	const bool ramDiskFound = (ramDiskCluster != 0 && ramDiskSize > 0);
+	const bool ramDiskFound = (ramDiskSize > 0);
 
 	aFile romFile = getFileFromCluster(storedFileCluster);
 	if (!ramDiskFound && (standaloneFileCluster != 0xFFFFFFFF)) {
