@@ -109,8 +109,6 @@ static u32 musicLoopPos = 0;
 static u32 musicPosRev = 0;
 static u32 musicPosInFile = 0x0;
 static u32 musicFileSize = 0x0; */
-
-// u32* debugArea = (u32*)0x02004000;
 #endif
 
 static bool cardReadInProgress = false;

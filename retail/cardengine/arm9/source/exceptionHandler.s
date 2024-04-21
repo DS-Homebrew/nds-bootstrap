@@ -38,10 +38,16 @@ BEGIN_ASM_FUNC enterException
 @---------------------------------------------------------------------------------
 	// store context
 #ifndef NODSIWARE
-    push {r12}
+    push {r12, lr}
 #endif
 	adr	r12, exceptionRegisters
 	stmia	r12,{r0-r11}
+
+	adr r12, oldStack
+	str	r13,[r12]
+	// assign a stack
+	adr	r13, exceptionStack
+	ldr	r13,[r13]
 
 #ifndef NODSIWARE
 	// bios exception stack
@@ -52,9 +58,7 @@ BEGIN_ASM_FUNC enterException
 	ldr r0, [r0, #4]
 	str r0, [r1]
 
-    push {lr}
 	bl newSlot2Access
-    pop {lr}
 	cmp r0, #1
     bne enterException_cont
 
@@ -66,21 +70,16 @@ BEGIN_ASM_FUNC enterException
 	ldr r1, [r1]
 	str r1, [r0, #4]
 
+	// restore registers
 	adr	r12, exceptionRegisters
 	ldmia	r12,{r0-r11}
+	adr r12, oldStack
+	ldr	r13,[r12]
 
-    pop {r12}
-	bx lr
+    pop {r12, pc}
 
 enterException_cont:
-    pop {r12}
-	adr	r12, exceptionRegisters
 #endif
-
-	str	r13,[r12,#oldStack - exceptionRegisters]
-	// assign a stack
-	adr	r13, exceptionStack
-	ldr	r13,[r13]
 
 	// renable MPU
 	mrc	p15,0,r0,c1,c0,0
@@ -91,8 +90,9 @@ enterException_cont:
 	ldr 	r0, =0x027FFD90
 
 	// grab r15 from bios exception stack
+	adr r12, reg15
 	ldr	r2,[r0,#8]
-	str	r2,[r12,#reg15 - exceptionRegisters]
+	str	r2,[r12]
 
 	// grab stored r12 and SPSR from bios exception stack
 	ldmia	r0,{r2,r12}

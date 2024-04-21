@@ -12,17 +12,22 @@ extern u32 exceptionAddr;
 
 extern s8 mainScreen;
 extern vu32* volatile sharedAddr;
-// extern u32* debugArea;
 
 #ifndef NODSIWARE
+static u32* debugArea = (u32*)0x02004000;
+
 //---------------------------------------------------------------------------------
 bool newSlot2Access() {
 //---------------------------------------------------------------------------------
 	static u32 opcode = 0;
 	opcode = (*(u32*)0x027FFD98)-8;
+	if (opcode < 0x01FF8000 && opcode >= 0x02400000) {
+		return false;
+	}
 	opcode = *(u32*)opcode;
 
-	// debugArea[0] = opcode;
+	debugArea[0] = opcode;
+	debugArea[1] = 0;
 
 	int regL = 0, regR = 0;
 
@@ -55,8 +60,9 @@ bool newSlot2Access() {
 		}
 	}
 
-	/* debugArea[0] = opcode;
-	debugArea[1] = regR;
+	debugArea[0] = opcode;
+	debugArea[1] = 1;
+	/* debugArea[1] = regR;
 	debugArea[2] = regL; */
 
 	const bool regInRange = (exceptionRegisters[regR] >= 0x0C000000 && exceptionRegisters[regR] < 0x10000000);
@@ -66,100 +72,107 @@ bool newSlot2Access() {
 
 	const u32 fixedRegR = exceptionRegisters[regR] - 0x04000000;
 
+	const u16 offsetChange = (u16)opcode;
 	const u8 opcodeLastByte = (opcode & 0xFF);
 
-	if (opcode >= 0x05900000 && opcode <= 0x05900FFF) { // ldr rL, [rR]
-		const u16 offsetChange = (u16)opcode;
+	u32 opcodeAlt = opcode;
+	opcode -= offsetChange;
+
+	debugArea[0] = opcode;
+	debugArea[1] = 2;
+
+	if (opcode == 0x05900000) { // ldr rL, [rR]
 		exceptionRegisters[regL] = *(u32*)(fixedRegR+offsetChange);
 		return true;
 	} else
-	if (opcode >= 0x05800000 && opcode <= 0x05800FFF) { // str rL, [rR]
-		const u16 offsetChange = (u16)opcode;
+	if (opcode == 0x05800000) { // str rL, [rR]
 		*(u32*)(fixedRegR+offsetChange) = exceptionRegisters[regL];
 		return true;
 	} else
-	if (opcode >= 0x04900000 && opcode <= 0x04900FFF) { // ldr rL, [rR],#0-#0xFFF
+	if (opcode == 0x04900000) { // ldr rL, [rR],#0-#0xFFF
 		exceptionRegisters[regL] = *(u32*)fixedRegR;
-		exceptionRegisters[regR] += (u16)opcode;
+		exceptionRegisters[regR] += offsetChange;
 		return true;
 	} else
-	if (opcode >= 0x04800000 && opcode <= 0x04800FFF) { // str rL, [rR],#0-#0xFFF
+	if (opcode == 0x04800000) { // str rL, [rR],#0-#0xFFF
 		*(u32*)fixedRegR = exceptionRegisters[regL];
-		exceptionRegisters[regR] += (u16)opcode;
+		exceptionRegisters[regR] += offsetChange;
 		return true;
 	} else
-	if (opcode >= 0x07900000 && opcode <= 0x0790000C) { // ldr rL, [rR, r0-r12]
+	if (opcodeAlt >= 0x07900000 && opcodeAlt <= 0x0790000C) { // ldr rL, [rR, r0-r12]
 		exceptionRegisters[regL] = *(u32*)(fixedRegR+exceptionRegisters[opcodeLastByte]);
 		return true;
 	} else
-	if (opcode >= 0x07800000 && opcode <= 0x0780000C) { // str rL, [rR, r0-r12]
+	if (opcodeAlt >= 0x07800000 && opcodeAlt <= 0x0780000C) { // str rL, [rR, r0-r12]
 		*(u32*)(fixedRegR+exceptionRegisters[opcodeLastByte]) = exceptionRegisters[regL];
 		return true;
 	} else
-	if (opcode >= 0x01D00000 && opcode <= 0x01D00FFF && opcodeLastByte >= 0xB0 && opcodeLastByte <= 0xBF) { // ldrh rL, [rR]
+	if (opcode == 0x01D00000 && opcodeLastByte >= 0xB0 && opcodeLastByte <= 0xBF) { // ldrh rL, [rR]
 		u8 offsetChange = opcodeLastByte - 0xB0;
 
-		opcode -= 0x01D00000;
+		opcodeAlt -= 0x01D00000;
 
-		while (opcode >= 0x00000100) {
-			opcode -= 0x00000100;
+		while (opcodeAlt >= 0x00000100) {
+			opcodeAlt -= 0x00000100;
 			offsetChange += 0x10;
 		}
 
 		exceptionRegisters[regL] = *(u16*)(fixedRegR+offsetChange);
 		return true;
 	} else
-	if (opcode >= 0x01C00000 && opcode <= 0x01C00FFF && opcodeLastByte >= 0xB0 && opcodeLastByte <= 0xBF) { // strh rL, [rR]
+	if (opcode == 0x01C00000 && opcodeLastByte >= 0xB0 && opcodeLastByte <= 0xBF) { // strh rL, [rR]
 		u8 offsetChange = opcodeLastByte - 0xB0;
 
-		opcode -= 0x01C00000;
+		opcodeAlt -= 0x01C00000;
 
-		while (opcode >= 0x00000100) {
-			opcode -= 0x00000100;
+		while (opcodeAlt >= 0x00000100) {
+			opcodeAlt -= 0x00000100;
 			offsetChange += 0x10;
 		}
 
 		*(u16*)(fixedRegR+offsetChange) = (u16)exceptionRegisters[regL];
 		return true;
 	} else
-	if (opcode >= 0x00D00000 && opcode <= 0x00D00FFF && opcodeLastByte >= 0xB0 && opcodeLastByte <= 0xBF) { // ldrh rL, [rR],#0-#0xFF
+	if (opcode == 0x00D00000 && opcodeLastByte >= 0xB0 && opcodeLastByte <= 0xBF) { // ldrh rL, [rR],#0-#0xFF
 		exceptionRegisters[regL] = *(u16*)fixedRegR;
 		u8 regAddCount = opcodeLastByte - 0xB0;
 
-		opcode -= 0x00D00000;
+		opcodeAlt -= 0x00D00000;
 
-		while (opcode >= 0x00000100) {
-			opcode -= 0x00000100;
+		while (opcodeAlt >= 0x00000100) {
+			opcodeAlt -= 0x00000100;
 			regAddCount += 0x10;
 		}
 
 		exceptionRegisters[regR] += regAddCount;
 		return true;
 	} else
-	if (opcode >= 0x00C00000 && opcode <= 0x00C00FFF && opcodeLastByte >= 0xB0 && opcodeLastByte <= 0xBF) { // strh rL, [rR],#0-#0xFF
+	if (opcode == 0x00C00000 && opcodeLastByte >= 0xB0 && opcodeLastByte <= 0xBF) { // strh rL, [rR],#0-#0xFF
 		*(u16*)fixedRegR = (u16)exceptionRegisters[regL];
 		u8 regAddCount = opcodeLastByte - 0xB0;
 
-		opcode -= 0x00C00000;
+		opcodeAlt -= 0x00C00000;
 
-		while (opcode >= 0x00000100) {
-			opcode -= 0x00000100;
+		while (opcodeAlt >= 0x00000100) {
+			opcodeAlt -= 0x00000100;
 			regAddCount += 0x10;
 		}
 
 		exceptionRegisters[regR] += regAddCount;
 		return true;
 	} else
-	if (opcode >= 0x05D00000 && opcode <= 0x05D00FFF) { // ldrb rL, [rR]
+	if (opcode == 0x05D00000) { // ldrb rL, [rR]
 		const u16 offsetChange = (u16)opcode;
 		exceptionRegisters[regL] = *(u8*)(fixedRegR+offsetChange);
 		return true;
 	} else
-	if (opcode >= 0x04D00000 && opcode <= 0x04D00FFF) { // ldrb rL, [rR],#0-#0xFFF
+	if (opcode == 0x04D00000) { // ldrb rL, [rR],#0-#0xFFF
 		exceptionRegisters[regL] = *(u8*)fixedRegR;
 		exceptionRegisters[regR] += (u16)opcode;
 		return true;
 	}
+
+	debugArea[1] = 3;
 
 	return false;
 }
