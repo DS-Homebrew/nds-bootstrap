@@ -7289,28 +7289,30 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Clash of Elementalists (USA)
 	// Clash of Elementalists (Europe)
 	// Requires Memory Expansion Pak
-	// Crashes when stage starts
-	/*else if ((strcmp(romTid, "KVLE") == 0 || strcmp(romTid, "KVLP") == 0) && expansionPakFound) {
-		extern u32* mepHeapSetPatch;
-		extern u32* elementalistsHeapAlloc;
+	else if ((strcmp(romTid, "KVLE") == 0 || strcmp(romTid, "KVLP") == 0) && expansionPakFound) {
+		// extern u32* mepHeapSetPatch;
+		// extern u32* elementalistsHeapAlloc;
 
-		__aeabi_memcpy((u32*)0x02002004, mepHeapSetPatch, 0x1C);
+		// __aeabi_memcpy((u32*)0x02002004, mepHeapSetPatch, 0x1C);
 
+		*(u32*)0x02004BBC = 0x08000033;
 		*(u32*)0x0200C038 = 0xE1A00000; // nop
 		*(u32*)0x0200C160 = 0xE1A00000; // nop
 		*(u32*)0x0200C174 = 0xE1A00000; // nop
 		*(u32*)0x0200F3C4 = 0xE1A00000; // nop
-		patchInitDSiWare(0x0201717C, heapEndExceed);
-		*(u32*)0x02017508 -= 0x30000;
+		patchInitDSiWare(0x0201717C, heapEnd);
+		*(u32*)0x02017508 = *(u32*)0x02004FE8;
 		patchUserSettingsReadDSiWare(0x0201875C);
 		*(u32*)0x02018778 = 0xE3A00001; // mov r0, #1
 		*(u32*)0x0201877C = 0xE12FFF1E; // bx lr
 		*(u32*)0x02018784 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x02018788 = 0xE12FFF1E; // bx lr
-		__aeabi_memcpy((u32*)0x02018C50, elementalistsHeapAlloc, 0xC0);
+		// __aeabi_memcpy((u32*)0x02018C50, elementalistsHeapAlloc, 0xC0);
 		if (romTid[3] == 'E') {
 			*(u32*)0x0202627C = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
-			setBL(0x02027524, 0x02018C50);
+			*(u32*)0x02026DB8 = 0xE3A0040D; // mov r0, #0x0D000000
+			*(u32*)0x02026DE4 = 0xE3A0AA02; // mov r10, #0x2000
+			// setBL(0x02027524, 0x02018C50);
 			*(u32*)0x02028B6C = 0xE1A00000; // nop
 			*(u32*)0x02028B70 = 0xE1A00000; // nop
 			*(u32*)0x02028B88 = 0xE1A00000; // nop
@@ -7318,9 +7320,9 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			*(u32*)0x02028BB0 = 0xE1A00000; // nop
 			*(u32*)0x0202B8CC = 0xE1A00000; // nop
 			*(u32*)0x0202B8E8 = 0xE1A00000; // nop
-			*(u32*)0x02002000 = (u32)getOffsetFromBL((u32*)0x02040A5C);
+			/* *(u32*)0x02002000 = (u32)getOffsetFromBL((u32*)0x02040A5C);
 			*(u32*)0x020409AC = 0xE1A00000; // nop
-			setBL(0x02040A5C, 0x02002004);
+			setBL(0x02040A5C, 0x02002004); */
 		} else {
 			*(u32*)0x02028C58 = 0xE1A00000; // nop
 			*(u32*)0x02028C5C = 0xE1A00000; // nop
@@ -7330,7 +7332,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			*(u32*)0x0202BAC8 = 0xE1A00000; // nop
 			*(u32*)0x0202BAE4 = 0xE1A00000; // nop
 		}
-	}*/
+	}
 
 	// Clubhouse Games Express: Card Classics (USA, Australia)
 	else if (strcmp(romTid, "KTRT") == 0) {
@@ -23363,9 +23365,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		extern u32* siezHeapAlloc;
 		extern u32* siezHeapAddrPtr;
 
-		if (!extendedMemory) {
-			*(u32*)0x02004BA4 = 0x08000033;
-		}
 		*(u32*)0x02017904 = 0xE1A00000; // nop
 		if (!extendedMemory && expansionPakFound) {
 			if (s2FlashcardId == 0x5A45) {

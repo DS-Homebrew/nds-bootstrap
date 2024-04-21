@@ -753,8 +753,7 @@ siezHeapAlloc_return:
 _blx_siezOrgFunction:
 	bx	r6
 siezHeapAddr:
-@.word	0x09000000 @ Offset of kr0000.ntfx
-.word	0x0C000000 @ Offset of kr0000.ntfx
+.word	0x09000000 @ Offset of kr0000.ntfx
 .word	0x09200000 @ Offset of kr0100.ntfx
 .pool
 @---------------------------------------------------------------------------------

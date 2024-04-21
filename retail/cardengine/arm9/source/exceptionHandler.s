@@ -44,10 +44,6 @@ BEGIN_ASM_FUNC enterException
 	stmia	r12,{r0-r11}
 
 #ifndef NODSIWARE
-
-	@ldr 	r0, =0x02004008
-	@str lr, [r0]
-
 	// bios exception stack
 	ldr 	r0, =0x027FFD90
 
@@ -56,144 +52,28 @@ BEGIN_ASM_FUNC enterException
 	ldr r0, [r0, #4]
 	str r0, [r1]
 
-	ldr r0,[r12]
-	ldr r1,[r12,#4]
-
-    pop {r12}
-
-    push {r0-r12, lr}
-	bl readOutsideWord
+    push {lr}
+	bl newSlot2Access
+    pop {lr}
 	cmp r0, #1
-    pop {r0-r12, lr}
     bne enterException_cont
 
-    push {r12}
-	ldr r12, regDst
+	// bios exception stack
+	ldr 	r0, =0x027FFD90
 
-	cmp r12, #0
-	ldreq r0, newRegister
-	beq newRegisterSet
+	// store r12 to bios exception stack
+	adr	r1, reg12
+	ldr r1, [r1]
+	str r1, [r0, #4]
 
-	cmp r12, #1
-	ldreq r1, newRegister
-	beq newRegisterSet
+	adr	r12, exceptionRegisters
+	ldmia	r12,{r0-r11}
 
-	cmp r12, #2
-	ldreq r2, newRegister
-	beq newRegisterSet
-
-	cmp r12, #3
-	ldreq r3, newRegister
-	beq newRegisterSet
-
-	cmp r12, #4
-	ldreq r4, newRegister
-	beq newRegisterSet
-
-	cmp r12, #5
-	ldreq r5, newRegister
-	beq newRegisterSet
-
-	cmp r12, #6
-	ldreq r6, newRegister
-	beq newRegisterSet
-
-	cmp r12, #7
-	ldreq r7, newRegister
-	beq newRegisterSet
-
-	cmp r12, #8
-	ldreq r8, newRegister
-	beq newRegisterSet
-
-	cmp r12, #9
-	ldreq r9, newRegister
-	beq newRegisterSet
-
-	cmp r12, #10
-	ldreq r10, newRegister
-	beq newRegisterSet
-
-	cmp r12, #11
-	ldreq r11, newRegister
-	beq newRegisterSet
-
-	cmp r12, #12
-	ldreq r12, newRegister
-    pusheq {r0}
-	ldreq 	r0, =0x027FFD90
-	streq r12, [r0, #4]
-    popeq {r0}
-
-newRegisterSet:
-	ldr r12, regToAdd
-	cmp r12, #12
-	bge addToRegDone
-
-	cmp r12, #0
-	ldreq r12, regAddCount
-	addeq r0, r0, r12
-	beq addToRegDone
-
-	cmp r12, #1
-	ldreq r12, regAddCount
-	addeq r1, r1, r12
-	beq addToRegDone
-
-	cmp r12, #2
-	ldreq r12, regAddCount
-	addeq r2, r2, r12
-	beq addToRegDone
-
-	cmp r12, #3
-	ldreq r12, regAddCount
-	addeq r3, r3, r12
-	beq addToRegDone
-
-	cmp r12, #4
-	ldreq r12, regAddCount
-	addeq r4, r4, r12
-	beq addToRegDone
-
-	cmp r12, #5
-	ldreq r12, regAddCount
-	addeq r5, r5, r12
-	beq addToRegDone
-
-	cmp r12, #6
-	ldreq r12, regAddCount
-	addeq r6, r6, r12
-	beq addToRegDone
-
-	cmp r12, #7
-	ldreq r12, regAddCount
-	addeq r7, r7, r12
-	beq addToRegDone
-
-	cmp r12, #8
-	ldreq r12, regAddCount
-	addeq r8, r8, r12
-	beq addToRegDone
-
-	cmp r12, #9
-	ldreq r12, regAddCount
-	addeq r9, r9, r12
-	beq addToRegDone
-
-	cmp r12, #10
-	ldreq r12, regAddCount
-	addeq r10, r10, r12
-	beq addToRegDone
-
-	cmp r12, #11
-	ldreq r12, regAddCount
-	addeq r11, r11, r12
-
-addToRegDone:
     pop {r12}
 	bx lr
 
 enterException_cont:
+    pop {r12}
 	adr	r12, exceptionRegisters
 #endif
 
@@ -246,29 +126,6 @@ enterException_cont:
 	// return through bios
 	mov	pc,lr
 
-#ifndef NODSIWARE
-@---------------------------------------------------------------------------------
-.global newRegister
-newRegister:
-@---------------------------------------------------------------------------------
-	.word	0x00000000
-@---------------------------------------------------------------------------------
-.global regDst
-regDst:
-@---------------------------------------------------------------------------------
-	.word	0x00000000
-@---------------------------------------------------------------------------------
-.global regToAdd
-regToAdd:
-@---------------------------------------------------------------------------------
-	.word	0x00000000
-@---------------------------------------------------------------------------------
-.global regAddCount
-regAddCount:
-@---------------------------------------------------------------------------------
-	.word	0x00000000
-@---------------------------------------------------------------------------------
-#endif
 @---------------------------------------------------------------------------------
 	.global exceptionC
 @---------------------------------------------------------------------------------

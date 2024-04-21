@@ -111,10 +111,6 @@ static u32 musicPosInFile = 0x0;
 static u32 musicFileSize = 0x0; */
 
 // u32* debugArea = (u32*)0x02004000;
-static u32 cachedRomOffset = 0x563000;
-/* u32 cacheDescriptor[cacheSlots];
-int cacheCounter[cacheSlots];
-int accessCounter = 0; */
 #endif
 
 static bool cardReadInProgress = false;
@@ -749,8 +745,8 @@ void cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 
 	#ifndef NODSIWARE
 	if ((u32)dst >= 0x0C000000 && (u32)dst < 0x10000000) {
-		cachedRomOffset = src;
-	} else
+		dst -= 0x04000000;
+	}
 	#endif
 	if (ce9->valueBits & ROMinRAM) {
 		if (src >= 0 && src < 0x160) {
@@ -788,93 +784,6 @@ bool nandWrite(void* memory,void* flash,u32 len,u32 dma) {
 }
 
 #ifndef NODSIWARE
-/* int allocateCacheSlot(void) {
-	int slot = 0;
-	int lowerCounter = accessCounter;
-	for (int i = 0; i < cacheSlots; i++) {
-		if (cacheCounter[i] <= lowerCounter) {
-			lowerCounter = cacheCounter[i];
-			slot = i;
-			if (!lowerCounter) {
-				break;
-			}
-		}
-	}
-	return slot;
-}
-
-int getSlotForSector(u32 sector) {
-	for (int i = 0; i < cacheSlots; i++) {
-		if (cacheDescriptor[i] == sector) {
-			return i;
-		}
-	}
-	return -1;
-}
-
-vu8* getCacheAddress(int slot) {
-	return (vu8*)(0x023D0000 + slot*cacheBlockSize);
-}
-
-void updateDescriptor(int slot, u32 sector) {
-	cacheDescriptor[slot] = sector;
-	cacheCounter[slot] = accessCounter;
-} */
-
-void readRomBlock(u32 src, u8 len) {
-	src -= 0x0C000000;
-	src += cachedRomOffset;
-	// debugArea[1] = src;
-	/* const u32 sector = (src/cacheBlockSize)*cacheBlockSize;
-
-	accessCounter++;
-
-	int slot = getSlotForSector(sector);
-	vu8* buffer = getCacheAddress(slot);
-	if (slot == -1) {
-		slot = allocateCacheSlot();
-
-		buffer = getCacheAddress(slot);
-
-		const u16 exmemcnt = REG_EXMEMCNT;
-		setDeviceOwner();
-
-		if (ce9->valueBits & ROMinRAM) {
-			u32 newSrc = ce9->romLocation+sector;
-			__aeabi_memcpy((u8*)buffer, (u8*)newSrc, cacheBlockSize);
-		} else {
-			fileRead((char*)buffer, &romFile, sector, cacheBlockSize);
-		}
-
-		REG_EXMEMCNT = exmemcnt;
-	}
-	updateDescriptor(slot, sector);
-
-	u8 len2 = len;
-	if ((src - sector) + len2 > cacheBlockSize) {
-		len2 = sector - src + cacheBlockSize;
-	}
-
-	extern u32 newRegister;
-	newRegister = 0;
-	__aeabi_memcpy(&newRegister, (u8*)buffer+(src-sector), len); */
-
-	extern u32 newRegister;
-	newRegister = 0;
-
-	const u16 exmemcnt = REG_EXMEMCNT;
-	setDeviceOwner();
-
-	if (ce9->valueBits & ROMinRAM) {
-		u32 newSrc = ce9->romLocation+src;
-		__aeabi_memcpy(&newRegister, (u8*)newSrc, len);
-	} else {
-		fileRead((char*)&newRegister, &romFile, src, len);
-	}
-
-	REG_EXMEMCNT = exmemcnt;
-}
-
 void ndmaCopy(int ndmaSlot, const void* src, void* dst, u32 len) {
 	__aeabi_memcpy(dst, src, len);
 }
