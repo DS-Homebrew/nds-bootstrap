@@ -66,19 +66,18 @@ BEGIN_ASM_FUNC enterException
 	ldr 	r0, =0x027FFD90
 
 	// store r12 to bios exception stack
-	adr	r1, reg12
-	ldr r1, [r1]
+	ldr	r1, reg12
 	str r1, [r0, #4]
 
 	// restore registers
 	adr	r12, exceptionRegisters
 	ldmia	r12,{r0-r11}
-	adr r12, oldStack
-	ldr	r13,[r12]
+	ldr r13, oldStack
 
     pop {r12, pc}
 
 enterException_cont:
+    pop {r12, lr}
 #endif
 
 	// renable MPU
@@ -114,8 +113,7 @@ enterException_cont:
 	msr	cpsr,r3
 
 	// Get C function & call it
-	adr	r12, exceptionC
-	ldr	r12,[r12]
+	ldr	r12, exceptionC
 	blxne	r12
 
 	// restore registers
