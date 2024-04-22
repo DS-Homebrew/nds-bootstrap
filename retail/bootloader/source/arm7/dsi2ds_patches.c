@@ -7289,28 +7289,28 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Clash of Elementalists (USA)
 	// Clash of Elementalists (Europe)
 	// Requires Memory Expansion Pak
-	// Crashes when stage starts
-	/*else if ((strcmp(romTid, "KVLE") == 0 || strcmp(romTid, "KVLP") == 0) && expansionPakFound) {
-		extern u32* mepHeapSetPatch;
-		extern u32* elementalistsHeapAlloc;
-
-		__aeabi_memcpy((u32*)0x02002004, mepHeapSetPatch, 0x1C);
+	else if ((strcmp(romTid, "KVLE") == 0 || strcmp(romTid, "KVLP") == 0) && expansionPakFound) {
+		const u32 mepAddr = (s2FlashcardId == 0x5A45) ? 0x08800000 : 0x09000000;
+		u32* sdatAlloc = (u32*)0x02018C50;
 
 		*(u32*)0x0200C038 = 0xE1A00000; // nop
 		*(u32*)0x0200C160 = 0xE1A00000; // nop
 		*(u32*)0x0200C174 = 0xE1A00000; // nop
 		*(u32*)0x0200F3C4 = 0xE1A00000; // nop
-		patchInitDSiWare(0x0201717C, heapEndExceed);
-		*(u32*)0x02017508 -= 0x30000;
+		patchInitDSiWare(0x0201717C, mepAddr+0x77C000);
+		// *(u32*)0x02017508 = *(u32*)0x02004FE8;
+		*(u32*)0x02017508 = mepAddr;
 		patchUserSettingsReadDSiWare(0x0201875C);
-		*(u32*)0x02018778 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02018778 = 0xE3A00000; // mov r0, #0 (Disable Versus Mode to avoid a crash)
 		*(u32*)0x0201877C = 0xE12FFF1E; // bx lr
 		*(u32*)0x02018784 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x02018788 = 0xE12FFF1E; // bx lr
-		__aeabi_memcpy((u32*)0x02018C50, elementalistsHeapAlloc, 0xC0);
+		sdatAlloc[0] = 0xE59F0000; // ldr r0, =bssEnd
+		sdatAlloc[1] = 0xE12FFF1E; // bx lr
+		sdatAlloc[2] = *(u32*)0x02004FE8;
+		*(u32*)0x0202627C = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		if (romTid[3] == 'E') {
-			*(u32*)0x0202627C = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
-			setBL(0x02027524, 0x02018C50);
+			*(u32*)0x02026DAC = 0xE3A0A70B; // mov r10, #0x2C0000 (Shrink heap from 0x500000)
 			*(u32*)0x02028B6C = 0xE1A00000; // nop
 			*(u32*)0x02028B70 = 0xE1A00000; // nop
 			*(u32*)0x02028B88 = 0xE1A00000; // nop
@@ -7318,10 +7318,9 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			*(u32*)0x02028BB0 = 0xE1A00000; // nop
 			*(u32*)0x0202B8CC = 0xE1A00000; // nop
 			*(u32*)0x0202B8E8 = 0xE1A00000; // nop
-			*(u32*)0x02002000 = (u32)getOffsetFromBL((u32*)0x02040A5C);
-			*(u32*)0x020409AC = 0xE1A00000; // nop
-			setBL(0x02040A5C, 0x02002004);
+			setBL(0x0202C028, (u32)sdatAlloc);
 		} else {
+			*(u32*)0x02026DE4 = 0xE3A0A70B; // mov r10, #0x2C0000 (Shrink heap from 0x500000)
 			*(u32*)0x02028C58 = 0xE1A00000; // nop
 			*(u32*)0x02028C5C = 0xE1A00000; // nop
 			*(u32*)0x02028C74 = 0xE1A00000; // nop
@@ -7329,8 +7328,44 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			*(u32*)0x02028C9C = 0xE1A00000; // nop
 			*(u32*)0x0202BAC8 = 0xE1A00000; // nop
 			*(u32*)0x0202BAE4 = 0xE1A00000; // nop
+			setBL(0x0202C224, (u32)sdatAlloc);
 		}
-	}*/
+		__aeabi_memclr((u32*)mepAddr, 0x77C000);
+	}
+
+	// Battle of Elementalists (Japan)
+	// Requires Memory Expansion Pak
+	else if (strcmp(romTid, "KVLJ") == 0 && expansionPakFound) {
+		const u32 mepAddr = (s2FlashcardId == 0x5A45) ? 0x08800000 : 0x09000000;
+		u32* sdatAlloc = (u32*)0x02018C20;
+
+		*(u32*)0x0200C008 = 0xE1A00000; // nop
+		*(u32*)0x0200C130 = 0xE1A00000; // nop
+		*(u32*)0x0200C144 = 0xE1A00000; // nop
+		*(u32*)0x0200F394 = 0xE1A00000; // nop
+		patchInitDSiWare(0x0201714C, mepAddr+0x77C000);
+		// *(u32*)0x020174D8 = *(u32*)0x02004FE8;
+		*(u32*)0x020174D8 = mepAddr;
+		patchUserSettingsReadDSiWare(0x0201872C);
+		*(u32*)0x02018748 = 0xE3A00000; // mov r0, #0 (Disable Versus Mode to avoid a crash)
+		*(u32*)0x0201874C = 0xE12FFF1E; // bx lr
+		*(u32*)0x02018754 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02018758 = 0xE12FFF1E; // bx lr
+		sdatAlloc[0] = 0xE59F0000; // ldr r0, =bssEnd
+		sdatAlloc[1] = 0xE12FFF1E; // bx lr
+		sdatAlloc[2] = *(u32*)0x02004FE8;
+		*(u32*)0x0202624C = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		*(u32*)0x02026CC8 = 0xE3A0A70B; // mov r10, #0x2C0000 (Shrink heap from 0x500000)
+		*(u32*)0x02028A84 = 0xE1A00000; // nop
+		*(u32*)0x02028A88 = 0xE1A00000; // nop
+		*(u32*)0x02028AA0 = 0xE1A00000; // nop
+		*(u32*)0x02028AA8 = 0xE1A00000; // nop
+		*(u32*)0x02028AC8 = 0xE1A00000; // nop
+		*(u32*)0x0202B670 = 0xE1A00000; // nop
+		*(u32*)0x0202B68C = 0xE1A00000; // nop
+		setBL(0x0202BDCC, (u32)sdatAlloc);
+		__aeabi_memclr((u32*)mepAddr, 0x77C000);
+	}
 
 	// Clubhouse Games Express: Card Classics (USA, Australia)
 	else if (strcmp(romTid, "KTRT") == 0) {

@@ -658,6 +658,10 @@ static bool isROMLoadableInRAM(const tDSiHeader* dsiHeader, const tNDSHeader* nd
 	if ((strncmp(romTid, "KD3", 3) == 0 || strncmp(romTid, "KD4", 3) == 0 || strncmp(romTid, "KD5", 3) == 0) && s2FlashcardId == 0x5A45) {
 		return false;
 	}
+	if ((strncmp(romTid, "KVL", 3) == 0) // Clash of Elementalists
+	&& ((s2FlashcardId != 0x334D && s2FlashcardId != 0x3647 && s2FlashcardId != 0x4353) || (s2FlashcardId == 0x5A45 && baseRomSize > 0x800000))) {
+		return false;
+	}
 	if (extendedMemory && !dsDebugRam) {
 		*(vu32*)(0x0DFFFE0C) = 0x4253444E;		// Check for 32MB of RAM
 		isDevConsole = (*(vu32*)(0x0DFFFE0C) == 0x4253444E);

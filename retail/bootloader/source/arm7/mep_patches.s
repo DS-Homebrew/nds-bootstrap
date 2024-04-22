@@ -6,7 +6,6 @@
 	.global twlFontHeapAllocNoMep
 	.global cch2HeapAlloc
 	.global cch2HeapAddrPtr
-	@.global elementalistsHeapAlloc
 	.global fourSwHeapAlloc
 	.global fourSwHeapAddrPtr
 	@.global gate18HeapAlloc
@@ -199,73 +198,6 @@ _blx_cch2OrgFunction:
 cch2HeapAddr:
 .word	0x09000000 @ Offset of fontGBK.bin
 .pool
-@---------------------------------------------------------------------------------
-
-@---------------------------------------------------------------------------------
-@elementalistsOrgFunction: .word 0
-@elementalistsHeapAllocFunc:
-@---------------------------------------------------------------------------------
-@	stmfd   sp!, {r3-r7,lr}
-
-@	mov r7, #0
-@elementalistsFilenameCheck:
-@	ldr r3, =0x02000000 @ filename pointer list
-@	ldr r5, [r3, r7]
-@	cmp r5, r6
-@	beq elementalistsUseOldHeapPtr
-@	cmp r5, #0
-@	streq r6, [r3, r7]
-@	beq elementalistsLastHeapPtrUpdate
-@	add r7, #4
-@	b elementalistsFilenameCheck
-
-@elementalistsLastHeapPtrUpdate:
-@	ldr r3, =0x02003FFC @ last heap pointer
-@	ldr r4, [r3]
-@	cmp r4, #0
-@	moveq r4, #0x09000000
-@	beq elementalistsLastHeapPtrStr
-@elementalistsAlign:
-@	add r4, #0xC000
-@	cmp r4, r1
-@	blt elementalistsAlign
-@elementalistsLastHeapPtrStr:
-@	str r4, [r3]
-
-@ save heap ponter
-@	ldr r3, =0x02001000 @ heap pointers
-@	str r4, [r3, r7]
-@	mov r0, r4
-@	ldmfd   sp!, {r3-r7,pc}
-
-@elementalistsUseOldHeapPtr:
-@	ldr r3, =0x02001000 @ heap pointers
-@	ldr r0, [r3, r7]
-@	ldmfd   sp!, {r3-r7,pc}
-@.pool
-@---------------------------------------------------------------------------------
-@ old functions
-@elementalistsAlign:
-@	sub r1, #4
-@	cmp r1, #4
-@	bgt elementalistsAlign
-@	beq elementalistsLastHeapPtrStr
-
-@	cmp r1, #3
-@	addeq r4, #1
-@	beq elementalistsLastHeapPtrStr
-@	cmp r1, #2
-@	addeq r4, #2
-@	beq elementalistsLastHeapPtrStr
-@	cmp r1, #1
-@	addeq r4, #3
-
-@elementalistsRunOrgFunction:
-@	ldr	r7, elementalistsOrgFunction
-@	bl	_blx_elementalistsOrgFunction
-@	ldmfd   sp!, {r3-r7,pc}
-@_blx_elementalistsOrgFunction:
-@	bx	r7
 @---------------------------------------------------------------------------------
 
 @---------------------------------------------------------------------------------

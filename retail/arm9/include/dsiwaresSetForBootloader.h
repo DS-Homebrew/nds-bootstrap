@@ -129,6 +129,7 @@ static const char dsiWareForBootloader1[][4] = {
 	"KET", // Chuugaku Eitango: Kiho 400 Go Master
 	"KWP", // Chuuga Kukihon' Eitango: Wado Pazuru
 	"KQL", // Chuukara! Dairoujou
+	"KVL", // Clash of Elementalists
 	"KTR", // Clubhouse Games Express: Card Classics
 	"KTC", "KTP", // Clubhouse Games Express: Family Favorites
 	"KTD", "KTB", // Clubhouse Games Express: Strategy Pack
