@@ -164,13 +164,12 @@ bool newSlot2Access() {
 		return true;
 	} else
 	if (opcode == 0x05D00000) { // ldrb rL, [rR]
-		const u16 offsetChange = (u16)opcode;
 		exceptionRegisters[regL] = *(u8*)(fixedRegR+offsetChange);
 		return true;
 	} else
 	if (opcode == 0x04D00000) { // ldrb rL, [rR],#0-#0xFFF
 		exceptionRegisters[regL] = *(u8*)fixedRegR;
-		exceptionRegisters[regR] += (u16)opcode;
+		exceptionRegisters[regR] += offsetChange;
 		return true;
 	} else
 	if ((opcode == 0x07D00000) && ((opcodeLastByte >= 0x00 && opcodeLastByte <= 0x0C) || (opcodeLastByte >= 0x80 && opcodeLastByte <= 0x8C))) { // ldrb rL, [rR, r0-r12, lsl #?]
