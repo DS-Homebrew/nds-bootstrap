@@ -642,8 +642,6 @@ static bool isROMLoadableInRAM(const tDSiHeader* dsiHeader, const tNDSHeader* nd
 			romSizeLimitChange = 0x140000;
 		} */ else if (strncmp(romTid, "KUP", 3) == 0) { // Match Up!
 			romSizeLimitChange = 0x380000;
-		} else if (strncmp(romTid, "KAU", 3) == 0) { // Nintendo Cowndown Calendar
-			romSizeLimitChange = 0x200000;
 		} else if (strncmp(romTid, "KQR", 3) == 0) { // Remote Racers
 			romSizeLimitChange = 0x280000;
 		}
