@@ -273,6 +273,8 @@ static void resetMemory_ARM7(void) {
 		for(reg=0; reg<0x1c; reg+=4)*((vu32*)(0x04004104 + ((i*0x1c)+reg))) = 0;//Reset NDMA.
 	}
 
+	REG_RCNT = 0;
+
 	// Clear out FIFO
 	REG_IPC_SYNC = 0;
 	REG_IPC_FIFO_CR = IPC_FIFO_ENABLE | IPC_FIFO_SEND_CLEAR;

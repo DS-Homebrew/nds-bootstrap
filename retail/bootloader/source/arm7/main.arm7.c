@@ -262,6 +262,8 @@ static void resetMemory_ARM7(void) {
 		TIMER_DATA(i) = 0;
 	}
 
+	REG_RCNT = 0;
+
 	// Clear out FIFO
 	REG_IPC_SYNC = 0;
 	REG_IPC_FIFO_CR = IPC_FIFO_ENABLE | IPC_FIFO_SEND_CLEAR;
