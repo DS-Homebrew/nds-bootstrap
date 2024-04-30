@@ -1207,7 +1207,7 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 		u8* twlCfg = (u8*)0x02000400;
 		if (relocateTwlCfg) {
 			twlCfg = (u8*)0x02FFD400;
-			*(u32*)0x02FFFDFC = 0x02FFD400;
+			*(u32*)0x02FFFDFC = (u32)twlCfg;
 		}
 		u32 configFlags = useTwlCfg ? (*(u32*)((u32)twlCfg)) : 0x0100000F;
 		if (consoleModel < 2) {
@@ -1494,7 +1494,7 @@ int arm7_main(void) {
 		extern u32 clusterCacheSize;
 		clusterCacheSize = 0x10000;
 		if (dsiModeConfirmed && ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr)) {
-			clusterCacheSize = 0x2000;
+			clusterCacheSize = 0x7B0;
 		}
 
 		if ((memcmp(romTid, "IPG", 3) == 0) || ((memcmp(romTid, "IPK", 3) == 0))) {
@@ -1573,8 +1573,8 @@ int arm7_main(void) {
 				clusterCache += 0xB880000;
 				__aeabi_memclr((char*)0x02700000, 0x80000);
 			} else { */
-				u32 add = (*(u32*)0x02FFE1A0 == 0x00403000) ? 0x8DE000 : 0x8FA000; // 0x02FDE000 : 0x02FFA000
-				__aeabi_memcpy((char*)0x02700000+add, (char*)0x02700000, 0x2000);	// Move FAT table cache elsewhere
+				const u32 add = 0x8FD000; // 0x02FFD000
+				__aeabi_memcpy((char*)0x02700000+add, (char*)0x02700000, 0x7B0);	// Move FAT table cache elsewhere
 				romFile->fatTableCache = (u32*)((u32)romFile->fatTableCache+add);
 				savFile->fatTableCache = (u32*)((u32)savFile->fatTableCache+add);
 				lastClusterCacheUsed = (u32*)((u32)lastClusterCacheUsed+add);
@@ -1722,7 +1722,7 @@ int arm7_main(void) {
 		ce9Location = *(u32*)CARDENGINEI_ARM9_BUFFERED_LOCATION;
 		ce7Location = *(u32*)CARDENGINEI_ARM7_BUFFERED_LOCATION;
 
-		__aeabi_memcpy((u32*)ce9Location, (u32*)CARDENGINEI_ARM9_BUFFERED_LOCATION, 0x1400);
+		__aeabi_memcpy((u32*)ce9Location, (u32*)CARDENGINEI_ARM9_BUFFERED_LOCATION, 0xC00);
 
 		__aeabi_memcpy((u32*)ce7Location, (u32*)CARDENGINEI_ARM7_BUFFERED_LOCATION, 0x8400);
 		cheatEngineOffset = ((ce7Location == CARDENGINEI_ARM7_DSIWARE_LOCATION3) ? CHEAT_ENGINE_DSIWARE_LOCATION3 : CHEAT_ENGINE_DSIWARE_LOCATION);

@@ -442,7 +442,7 @@ void patchRamClearI(const tNDSHeader* ndsHeader, const module_params_t* modulePa
 		extern u32 cheatSizeTotal;
 		const bool cheatsEnabled = (cheatSizeTotal > 4 && cheatSizeTotal <= 0x8000);
 
-		ramClearOffset[0] = (consoleModel == 0 && _isDSiWare && cheatsEnabled && newArm7binarySize != 0x28E54) ? CHEAT_ENGINE_DSIWARE_LOCATION3 : 0x02FFA000;
+		ramClearOffset[0] = (consoleModel == 0 && _isDSiWare && cheatsEnabled && newArm7binarySize != 0x28E54) ? CHEAT_ENGINE_DSIWARE_LOCATION3 : 0x02FFC000;
 		ramClearOffset[2] = ce7Location;
 	} else {
 		extern u32 ce9Location;
