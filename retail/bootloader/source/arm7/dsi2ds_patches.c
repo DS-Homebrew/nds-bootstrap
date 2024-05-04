@@ -7364,7 +7364,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0202B670 = 0xE1A00000; // nop
 		*(u32*)0x0202B68C = 0xE1A00000; // nop
 		setBL(0x0202BDCC, (u32)sdatAlloc);
-		__aeabi_memclr((u32*)mepAddr, 0x77C000);
+		toncset((u32*)mepAddr, 0, 0x77C000);
 	}
 
 	// Clubhouse Games Express: Card Classics (USA, Australia)
