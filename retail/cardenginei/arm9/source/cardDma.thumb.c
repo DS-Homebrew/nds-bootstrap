@@ -30,6 +30,7 @@
 #include <nds/memory.h> // tNDSHeader
 #include "module_params.h"
 #include "ndma.h"
+#include "tonccpy.h"
 #include "hex.h"
 #include "igm_text.h"
 #include "nds_header.h"

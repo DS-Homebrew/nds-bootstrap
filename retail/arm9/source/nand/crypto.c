@@ -1,6 +1,5 @@
 #include <stdint.h>
 #include "../mbedtls/mbedtls_aes.h"
-#include "aeabi.h"
 #include "crypto.h"
 //#include "ticket0.h"
 #include "utils.h"
@@ -216,8 +215,8 @@ void dsi_boot2_crypt(uint8_t* out, const uint8_t* in, unsigned count) {
 	// and also nonce, it becomes garbage after decryption
 	uint8_t ccm_mac[AES_CCM_MAC_LEN];
 	uint8_t nonce[AES_CCM_NONCE_LEN];
-	__aeabi_memcpy(ccm_mac, footer->ccm_mac, AES_CCM_MAC_LEN);
-	__aeabi_memcpy(nonce, footer->nonce, AES_CCM_NONCE_LEN);
+	memcpy(ccm_mac, footer->ccm_mac, AES_CCM_MAC_LEN);
+	memcpy(nonce, footer->nonce, AES_CCM_NONCE_LEN);
 
 	uint32_t ctr32[4], pad32[4], mac32[4];
 // I'm too paranoid to use more stack variables
@@ -229,11 +228,11 @@ void dsi_boot2_crypt(uint8_t* out, const uint8_t* in, unsigned count) {
 	if (mode == DECRYPT) {
 		// decrypt footer
 		zero(ctr32);
-		__aeabi_memcpy(ctr + 1, nonce, AES_CCM_NONCE_LEN);
+		memcpy(ctr + 1, nonce, AES_CCM_NONCE_LEN);
 		// footer might not be 32 bit aligned after all, so we copy it out to decrypt
-		__aeabi_memcpy(pad, footer->encrypted, AES_BLOCK_SIZE);
+		memcpy(pad, footer->encrypted, AES_BLOCK_SIZE);
 		aes_ctr(es_rk, ctr32, pad32, pad32);
-		__aeabi_memcpy(footer->encrypted, pad, AES_BLOCK_SIZE);
+		memcpy(footer->encrypted, pad, AES_BLOCK_SIZE);
 	}
 	// check decrypted footer
 	if (footer->fixed_3a != 0x3a) {
@@ -254,21 +253,21 @@ void dsi_boot2_crypt(uint8_t* out, const uint8_t* in, unsigned count) {
 		zero(pad32);
 		if (mode == DECRYPT) {
 			ctr32[0] = (block_size >> 4) + 1;
-			__aeabi_memcpy(ctr + 3, nonce, AES_CCM_NONCE_LEN);
+			memcpy(ctr + 3, nonce, AES_CCM_NONCE_LEN);
 			ctr[0xf] = 2;
 			aes_ctr(es_rk, ctr32, pad32, pad32);
 		}
-		__aeabi_memcpy(buf + block_size, pad + remainder, 16 - remainder);
+		memcpy(buf + block_size, pad + remainder, 16 - remainder);
 		block_size += 16 - remainder;
 	}
 	// AES-CCM MAC
 	mac32[0] = block_size;
-	__aeabi_memcpy(mac + 3, nonce, AES_CCM_NONCE_LEN);
+	memcpy(mac + 3, nonce, AES_CCM_NONCE_LEN);
 	mac[0xf] = 0x3a;
 	aes_encrypt_128_be(es_rk, mac, mac);
 	// AES-CCM CTR
 	ctr32[0] = 0;
-	__aeabi_memcpy(ctr + 3, nonce, AES_CCM_NONCE_LEN);
+	memcpy(ctr + 3, nonce, AES_CCM_NONCE_LEN);
 	ctr[0xf] = 2;
 	// AES-CCM start
 	zero(pad32);
@@ -296,25 +295,25 @@ void dsi_boot2_crypt(uint8_t* out, const uint8_t* in, unsigned count) {
 		if (memcmp(mac, ccm_mac, 16) == 0) {
 			if (remainder != 0) {
 				// restore mac
-				__aeabi_memcpy(footer->ccm_mac, ccm_mac, AES_CCM_MAC_LEN);
+				memcpy(footer->ccm_mac, ccm_mac, AES_CCM_MAC_LEN);
 			}
 			// restore nonce
-			__aeabi_memcpy(footer->nonce, nonce, AES_CCM_NONCE_LEN);
+			memcpy(footer->nonce, nonce, AES_CCM_NONCE_LEN);
 			return 0;
 		} else {
 			//printf("MAC verification failed\n");
 			return 1;
 		}
 	} else {
-		__aeabi_memcpy(footer->ccm_mac, mac, AES_CCM_MAC_LEN);
+		memcpy(footer->ccm_mac, mac, AES_CCM_MAC_LEN);
 		// AES-CTR crypt later half of footer
 		zero(ctr32);
-		__aeabi_memcpy(ctr + 1, nonce, AES_CCM_NONCE_LEN);
-		__aeabi_memcpy(pad, footer->encrypted, AES_BLOCK_SIZE);
+		memcpy(ctr + 1, nonce, AES_CCM_NONCE_LEN);
+		memcpy(pad, footer->encrypted, AES_BLOCK_SIZE);
 		aes_ctr(es_rk, ctr32, pad32, pad32);
-		__aeabi_memcpy(footer->encrypted, pad, AES_BLOCK_SIZE);
+		memcpy(footer->encrypted, pad, AES_BLOCK_SIZE);
 		// restore nonce
-		__aeabi_memcpy(footer->nonce, nonce, AES_CCM_NONCE_LEN);
+		memcpy(footer->nonce, nonce, AES_CCM_NONCE_LEN);
 		return 0;
 	}
 #undef ctr

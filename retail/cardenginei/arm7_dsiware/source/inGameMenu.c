@@ -11,7 +11,7 @@
 #include "locations.h"
 #include "cardengine.h"
 #include "nds_header.h"
-#include "aeabi.h"
+#include "tonccpy.h"
 
 #define sleepMode BIT(17)
 
@@ -175,7 +175,7 @@ void inGameMenu(void) {
 					u32* src = (u32*)((u32)sharedAddr[1]);
 					for (int i = 0; i < 0xC0/8; i++) {
 						if ((u32)src >= 0x8000) {
-							__aeabi_memcpy(dst, src, 8);
+							tonccpy(dst, src, 8);
 						} else {
 							biosRead(dst, src, 8);
 						}
@@ -187,7 +187,7 @@ void inGameMenu(void) {
 					break;
 				case 0x574D4152: // RAMW
 					if (sharedAddr[1]+sharedAddr[2] >= 0x8000) {
-						__aeabi_memcpy((u8*)((u32)sharedAddr[1])+sharedAddr[2], (u8*)((u32)sharedAddr[0])+sharedAddr[2], 1);
+						tonccpy((u8*)((u32)sharedAddr[1])+sharedAddr[2], (u8*)((u32)sharedAddr[0])+sharedAddr[2], 1);
 					}
 					break;
 				case 0x4554494C: // LITE

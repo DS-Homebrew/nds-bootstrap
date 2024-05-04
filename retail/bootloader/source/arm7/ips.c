@@ -8,7 +8,7 @@
 #include "nds_header.h"
 #include "locations.h"
 #include "my_fat.h"
-#include "aeabi.h"
+#include "tonccpy.h"
 
 extern u32 apFixOverlaysCluster;
 
@@ -65,7 +65,7 @@ bool applyIpsPatch(const tNDSHeader* ndsHeader, u8* ipsbyte, bool arm9Only, bool
 				repeatbyte[ontime] = ipsbyte[ipson];
 			}
 			if (!overlays || ROMinRAM) {
-				__aeabi_memcpy(rombyte+offset, repeatbyte, totalrepeats);
+				tonccpy(rombyte+offset, repeatbyte, totalrepeats);
 			} else {
 				fileWrite((char*)&repeatbyte, &apFixOverlaysFile, offset, totalrepeats);
 			}
@@ -74,7 +74,7 @@ bool applyIpsPatch(const tNDSHeader* ndsHeader, u8* ipsbyte, bool arm9Only, bool
 			totalrepeats = ipsbyte[ipson] * 256 + ipsbyte[ipson + 1];
 			ipson += 2;
 			if (!overlays || ROMinRAM) {
-				__aeabi_memcpy(rombyte+offset, ipsbyte+ipson, totalrepeats);
+				tonccpy(rombyte+offset, ipsbyte+ipson, totalrepeats);
 			} else {
 				fileWrite((char*)ipsbyte+ipson, &apFixOverlaysFile, offset, totalrepeats);
 			}

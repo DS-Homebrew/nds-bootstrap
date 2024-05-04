@@ -7,7 +7,7 @@
 #include "common.h"
 #include "value_bits.h"
 #include "locations.h"
-#include "aeabi.h"
+#include "tonccpy.h"
 #include "cardengine_header_arm7.h"
 #include "debug_file.h"
 
@@ -155,18 +155,18 @@ static void patchSwiHalt(const cardengineArm7* ce7, const tNDSHeader* ndsHeader,
 	if (swiHaltOffset && swiHaltHook && doPatch) {
 		// Patch
 		if (patchOffsetCache.a7IsThumb) {
-			__aeabi_memcpy((u16*)newSwiHaltAddr, ce7->patches->newSwiHaltThumb, 0x10);
+			tonccpy((u16*)newSwiHaltAddr, ce7->patches->newSwiHaltThumb, 0x10);
 			u32 srcAddr = (u32)swiHaltOffset - vAddrOfRelocSrc + 0x37F8000;
 			u32 dstAddr = (u32)newSwiHaltAddr - vAddrOfRelocSrc + 0x37F8000;
 			const u16* swiHaltPatch = generateA7InstrThumb(srcAddr, dstAddr);
-			__aeabi_memcpy(swiHaltOffset, swiHaltPatch, 0x4);
+			tonccpy(swiHaltOffset, swiHaltPatch, 0x4);
 
 			dbg_printf("swiHalt new location : ");
 			dbg_hexa(newSwiHaltAddr);
 			dbg_printf("\n\n");
 		} else {
 			u32* swiHaltPatch = ce7->patches->j_newSwiHalt;
-			__aeabi_memcpy(swiHaltOffset, swiHaltPatch, 0xC);
+			tonccpy(swiHaltOffset, swiHaltPatch, 0xC);
 		}
 		swiHaltPatched = true;
 		dbg_printf("swiHalt hooked\n");
@@ -237,24 +237,23 @@ static void fixForDifferentBios(const cardengineArm7* ce7, const tNDSHeader* nds
 	if (swi12Offset && !(REG_SCFG_ROM & BIT(9))) {
 		// Patch to call swi 0x02 instead of 0x12
 		u32* swi12Patch = ce7->patches->swi02;
-		__aeabi_memcpy(swi12Offset, swi12Patch, 0x4);
+		tonccpy(swi12Offset, swi12Patch, 0x4);
 	}
 
 	// swi get pitch table
 	if (swiGetPitchTableOffset && (!(REG_SCFG_ROM & BIT(9)) || ((REG_SCFG_ROM & BIT(9)) && ndsHeader->unitCode > 0 && dsiModeConfirmed))) {
 		// Patch
 		if (useGetPitchTableBranch) {
-			__aeabi_memcpy(swiGetPitchTableOffset, ce7->patches->j_twlGetPitchTableThumb, 0x40);
+			tonccpy(swiGetPitchTableOffset, ce7->patches->j_twlGetPitchTableThumb, 0x40);
 		} else if (isSdk5(moduleParams)) {
-			u16 swiGetPitchTablePatch[6] = {0x46C0};
-			__aeabi_memcpy(swiGetPitchTableOffset, swiGetPitchTablePatch, 6*sizeof(u16));
+			toncset16(swiGetPitchTableOffset, 0x46C0, 6);
 			if ((REG_SCFG_ROM & BIT(9)) && dsiModeConfirmed) {
 				u16* swiGetPitchTableOffsetThumb = (u16*)patchOffsetCache.swiGetPitchTableOffset;
-				__aeabi_memcpy(swiGetPitchTableOffsetThumb+2, swiGetPitchTablePatch, 6*sizeof(u16));
+				toncset16(swiGetPitchTableOffsetThumb+2, 0x46C0, 6);
 			}
 		} else if (!patchOffsetCache.a7IsThumb) {
 			u32* swiGetPitchTablePatch = ce7->patches->j_twlGetPitchTable;
-			__aeabi_memcpy(swiGetPitchTableOffset, swiGetPitchTablePatch, 0xC);
+			tonccpy(swiGetPitchTableOffset, swiGetPitchTablePatch, 0xC);
 		}
 	}
 
@@ -299,25 +298,25 @@ static void fixForDifferentBios(const cardengineArm7* ce7, const tNDSHeader* nds
 			*swi24Offset = 0xE77E;
 
 			u32 dst = ((u32)swi24Offset) - 0x100;
-			__aeabi_memcpy((u32*)dst, ce7->patches->swi24, 0x8);
+			tonccpy((u32*)dst, ce7->patches->swi24, 0x8);
 		}
 		if (swi25Offset) {
 			*swi25Offset = 0xE780;
 
 			u32 dst = ((u32)swi25Offset) - 0xFC;
-			__aeabi_memcpy((u32*)dst, ce7->patches->swi25, 0x8);
+			tonccpy((u32*)dst, ce7->patches->swi25, 0x8);
 		}
 		if (swi26Offset) {
 			*swi26Offset = 0xE77F;
 
 			u32 dst = ((u32)swi26Offset) - 0xFE;
-			__aeabi_memcpy((u32*)dst, ce7->patches->swi26, 0x8);
+			tonccpy((u32*)dst, ce7->patches->swi26, 0x8);
 		}
 		if (swi27Offset) {
 			*swi27Offset = 0xE780;
 
 			u32 dst = ((u32)swi27Offset) - 0xFC;
-			__aeabi_memcpy((u32*)dst, ce7->patches->swi27, 0x8);
+			tonccpy((u32*)dst, ce7->patches->swi27, 0x8);
 		}
 
 		//u32 mainMemA7iStart = (*(u32*)0x02FFE1A0 != 0x00403000) ? 0x02F88000 : 0x02F80000;
@@ -519,10 +518,10 @@ bool a7PatchCardIrqEnable(cardengineArm7* ce7, const tNDSHeader* ndsHeader, cons
 	const bool usesThumb = (*(u16*)cardIrqEnableOffset == 0xB510 || *(u16*)cardIrqEnableOffset == 0xB530);
 	if (usesThumb) {
 		u16* cardIrqEnablePatch = (u16*)ce7->patches->thumb_card_irq_enable_arm7;
-		__aeabi_memcpy(cardIrqEnableOffset, cardIrqEnablePatch, 0x20);
+		tonccpy(cardIrqEnableOffset, cardIrqEnablePatch, 0x20);
 	} else {
 		u32* cardIrqEnablePatch = ce7->patches->card_irq_enable_arm7;
-		__aeabi_memcpy(cardIrqEnableOffset, cardIrqEnablePatch, 0x30);
+		tonccpy(cardIrqEnableOffset, cardIrqEnablePatch, 0x30);
 	}
 
     dbg_printf("cardIrqEnable location : ");
@@ -543,7 +542,7 @@ static void patchCardCheckPullOut(cardengineArm7* ce7, const tNDSHeader* ndsHead
 	}
 	if (cardCheckPullOutOffset) {
 		u32* cardCheckPullOutPatch = ce7->patches->card_pull_out_arm9;
-		__aeabi_memcpy(cardCheckPullOutOffset, cardCheckPullOutPatch, 0x4);
+		tonccpy(cardCheckPullOutOffset, cardCheckPullOutPatch, 0x4);
 	}
 }
 
@@ -593,8 +592,8 @@ u32 patchCardNdsArm7(
 		// Replace incompatible ARM7 binary
 		newArm7binarySize = *(u32*)DONOR_ROM_ARM7_SIZE_LOCATION;
 		newArm7ibinarySize = *(u32*)DONOR_ROM_ARM7I_SIZE_LOCATION;
-		__aeabi_memcpy(ndsHeader->arm7destination, (u8*)DONOR_ROM_ARM7_LOCATION, newArm7binarySize);
-		__aeabi_memclr((u8*)DONOR_ROM_ARM7_LOCATION, 0x30010);
+		tonccpy(ndsHeader->arm7destination, (u8*)DONOR_ROM_ARM7_LOCATION, newArm7binarySize);
+		toncset((u8*)DONOR_ROM_ARM7_LOCATION, 0, 0x30010);
 	}
 
 	if (newArm7binarySize != patchOffsetCache.a7BinSize) {
@@ -613,9 +612,9 @@ u32 patchCardNdsArm7(
 	if (newArm7binarySize == 0x24B64
 	 && *(u32*)0x023825E4 == 0xE92D4030
 	 && *(u32*)0x023825E8 == 0xE24DD004) {
-		__aeabi_memcpy((char*)0x023825E4, (char*)ARM7_FIX_BUFFERED_LOCATION, 0x140);
+		tonccpy((char*)0x023825E4, (char*)ARM7_FIX_BUFFERED_LOCATION, 0x140);
 	}
-	__aeabi_memclr((char*)ARM7_FIX_BUFFERED_LOCATION, 0x140);
+	toncset((char*)ARM7_FIX_BUFFERED_LOCATION, 0, 0x140);
 
 	if (!a7PatchCardIrqEnable(ce7, ndsHeader, moduleParams)) {
 		dbg_printf("ERR_LOAD_OTHR");

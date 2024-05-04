@@ -7,7 +7,7 @@
 #include "common.h"
 //#include "value_bits.h"
 #include "locations.h"
-#include "aeabi.h"
+#include "tonccpy.h"
 #include "cardengine_header_arm7.h"
 //#include "debug_file.h"
 
@@ -76,19 +76,19 @@ static void fixForDifferentBios(const cardengineArm7* ce7, const tNDSHeader* nds
 	if (swi12Offset) {
 		// Patch to call swi 0x02 instead of 0x12
 		u32* swi12Patch = ce7->patches->swi02;
-		__aeabi_memcpy(swi12Offset, swi12Patch, 0x4);
+		tonccpy(swi12Offset, swi12Patch, 0x4);
 	}
 
 	// swi get pitch table
 	if (swiGetPitchTableOffset) {
 		// Patch
 		if (useGetPitchTableBranch) {
-			__aeabi_memcpy(swiGetPitchTableOffset, ce7->patches->j_twlGetPitchTableThumb, 0x40);
+			tonccpy(swiGetPitchTableOffset, ce7->patches->j_twlGetPitchTableThumb, 0x40);
 		} else if (isSdk5(moduleParams)) {
-			__aeabi_memset(swiGetPitchTableOffset, 6*sizeof(u16), 0x46C046C0);
+			toncset16(swiGetPitchTableOffset, 0x46C0, 6);
 		} else if (!a7IsThumb) {
 			u32* swiGetPitchTablePatch = ce7->patches->j_twlGetPitchTable;
-			__aeabi_memcpy(swiGetPitchTableOffset, swiGetPitchTablePatch, 0xC);
+			tonccpy(swiGetPitchTableOffset, swiGetPitchTablePatch, 0xC);
 		}
 	}
 
@@ -155,10 +155,10 @@ bool a7PatchCardIrqEnable(cardengineArm7* ce7, const tNDSHeader* ndsHeader, cons
 	bool usesThumb = (*(u16*)cardIrqEnableOffset == 0xB510);
 	if (usesThumb) {
 		u16* cardIrqEnablePatch = (u16*)ce7->patches->thumb_card_irq_enable_arm7;
-		__aeabi_memcpy(cardIrqEnableOffset, cardIrqEnablePatch, 0x20);
+		tonccpy(cardIrqEnableOffset, cardIrqEnablePatch, 0x20);
 	} else {
 		u32* cardIrqEnablePatch = ce7->patches->card_irq_enable_arm7;
-		__aeabi_memcpy(cardIrqEnableOffset, cardIrqEnablePatch, 0x30);
+		tonccpy(cardIrqEnableOffset, cardIrqEnablePatch, 0x30);
 	}
 
     /*dbg_printf("cardIrqEnable location : ");
@@ -172,7 +172,7 @@ static void patchCardCheckPullOut(cardengineArm7* ce7, const tNDSHeader* ndsHead
 	u32* cardCheckPullOutOffset = findCardCheckPullOutOffset(ndsHeader, moduleParams);
 	if (cardCheckPullOutOffset) {
 		u32* cardCheckPullOutPatch = ce7->patches->card_pull_out_arm9;
-		__aeabi_memcpy(cardCheckPullOutOffset, cardCheckPullOutPatch, 0x4);
+		tonccpy(cardCheckPullOutOffset, cardCheckPullOutPatch, 0x4);
 	}
 }
 

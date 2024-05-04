@@ -23,7 +23,7 @@
 #include <string.h>
 #include <nds.h>
 #include "dldi_patcher.h"
-#include "aeabi.h"
+#include "tonccpy.h"
 
 #define FIX_ALL	0x01
 #define FIX_GLUE	0x02
@@ -132,7 +132,7 @@ bool dldiPatchBinary (data_t *binDataSrc, u32 binSize, data_t *binData) {
 		}
 	}
 
-	__aeabi_memcpy (binData, (u32*)dldiDataSrc, 0x80);
+	tonccpy (binData, (u32*)dldiDataSrc, 0x80);
 
 	data_t *pDH = (data_t*)(((u32*)(&__myio_dldi)) - 24);
 	data_t *pAH = &(binData[patchOffset]);
@@ -163,7 +163,7 @@ bool dldiPatchBinary (data_t *binDataSrc, u32 binSize, data_t *binData) {
 	// Remember how much space is actually reserved
 	pDH[DO_allocatedSpace] = pAH[DO_allocatedSpace];
 	// Copy the DLDI patch into the application
-	__aeabi_memcpy (pAH, pDH, dldiFileSize);
+	tonccpy (pAH, pDH, dldiFileSize);
 
 	// Fix the section pointers in the header
 	writeAddr (pAH, DO_text_start, readAddr (pAH, DO_text_start) + relocationOffset);
@@ -183,7 +183,7 @@ bool dldiPatchBinary (data_t *binDataSrc, u32 binSize, data_t *binData) {
 	writeAddr (pAH, DO_shutdown, readAddr (pAH, DO_shutdown) + relocationOffset);
 
 	// Put the correct DLDI magic string back into the DLDI header
-	__aeabi_memcpy (pAH, dldiMagicString, sizeof (dldiMagicString));
+	tonccpy (pAH, dldiMagicString, sizeof (dldiMagicString));
 
 	if (pDH[DO_fixSections] & FIX_ALL) { 
 		// Search through and fix pointers within the data section of the file
@@ -214,10 +214,10 @@ bool dldiPatchBinary (data_t *binDataSrc, u32 binSize, data_t *binData) {
 
 	/*if (pDH[DO_fixSections] & FIX_BSS) { 
 		// Initialise the BSS to 0
-		__aeabi_memclr (&pAH[readAddr(pDH, DO_bss_start) - ddmemStart], readAddr(pDH, DO_bss_end) - readAddr(pDH, DO_bss_start));
+		toncset (&pAH[readAddr(pDH, DO_bss_start) - ddmemStart] , 0, readAddr(pDH, DO_bss_end) - readAddr(pDH, DO_bss_start));
 	}*/
 
-	__aeabi_memcpy ((u32*)dldiDataSrc, binData, 0x80);
+	tonccpy ((u32*)dldiDataSrc, binData, 0x80);
 	return true;
 }
 #endif

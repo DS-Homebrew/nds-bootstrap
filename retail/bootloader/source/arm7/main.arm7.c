@@ -57,7 +57,7 @@
 
 #define REG_GPIO_WIFI *(vu16*)0x4004C04
 
-#include "aeabi.h"
+#include "tonccpy.h"
 #include "my_fat.h"
 #include "debug_file.h"
 #include "nds_header.h"
@@ -222,7 +222,7 @@ static void initMBK(void) {
 
 void memset_addrs_arm7(u32 start, u32 end)
 {
-	__aeabi_memclr((u32*)start, ((int)end - (int)start));
+	toncset((u32*)start, 0, ((int)end - (int)start));
 }
 
 /*-------------------------------------------------------------------------
@@ -272,14 +272,14 @@ static void resetMemory_ARM7(void) {
 	memset_addrs_arm7(0x03800000 - 0x8000, 0x03800000 + 0x10000);
 	memset_addrs_arm7(0x02000620, 0x02084000);	// clear part of EWRAM
 	memset_addrs_arm7(0x02280000, IMAGES_LOCATION-0x1000);	// clear part of EWRAM - except before nds-bootstrap images
-	__aeabi_memclr((u32*)0x02380000, 0x38000);		// clear part of EWRAM - except before 0x023DA000, which has the arm9 code
-	__aeabi_memclr((u32*)0x023C0000, 0x20000);
-	__aeabi_memclr((u32*)0x023F0000, 0xD000);
-	__aeabi_memclr((u32*)0x023FE000, 0x400);
-	__aeabi_memclr((u32*)0x023FF000, 0x1000);
+	toncset((u32*)0x02380000, 0, 0x38000);		// clear part of EWRAM - except before 0x023DA000, which has the arm9 code
+	toncset((u32*)0x023C0000, 0, 0x20000);
+	toncset((u32*)0x023F0000, 0, 0xD000);
+	toncset((u32*)0x023FE000, 0, 0x400);
+	toncset((u32*)0x023FF000, 0, 0x1000);
 	if (extendedMemory) {
-		__aeabi_memclr((u32*)0x02400000, 0x3FC000);
-		__aeabi_memclr((u32*)0x027FF000, dsDebugRam ? 0x1000 : 0x801000);
+		toncset((u32*)0x02400000, 0, 0x3FC000);
+		toncset((u32*)0x027FF000, 0, dsDebugRam ? 0x1000 : 0x801000);
 	}
 
 	REG_IE = 0;
@@ -449,7 +449,7 @@ static void NDSTouchscreenMode(void) {
 
 static module_params_t* buildModuleParams(u32 donorSdkVer) {
 	module_params_t* moduleParams = (module_params_t*)malloc(sizeof(module_params_t));
-	__aeabi_memclr(moduleParams, sizeof(module_params_t));
+	toncset(moduleParams, 0, sizeof(module_params_t));
 
 	moduleParams->compressed_static_end = 0; // Avoid decompressing
 	switch (donorSdkVer) {
@@ -769,7 +769,7 @@ static void my_readUserSettings(tNDSHeader* ndsHeader) {
 
 	PERSONAL_DATA* personalData = (PERSONAL_DATA*)((u32)__NDSHeader - (u32)ndsHeader + (u32)PersonalData); //(u8*)((u32)ndsHeader - 0x180)
 
-	__aeabi_memcpy(PersonalData, currentSettings, sizeof(PERSONAL_DATA));
+	tonccpy(PersonalData, currentSettings, sizeof(PERSONAL_DATA));
 
 	if (language >= 0 && language <= 7) {
 		// Change language
@@ -861,7 +861,7 @@ static void loadOverlaysintoFile(const tNDSHeader* ndsHeader, const module_param
 				break;
 			}
 		}
-		__aeabi_memclr((char*)buffer, bufferSize);
+		toncset((char*)buffer, 0, bufferSize);
 
 		if (!isSdk5(moduleParams)) {
 			u32 word = 0;
@@ -885,7 +885,7 @@ static void fileReadWithBuffer(const u32 memDst, aFile* file, const u32 src, u32
 		u32 readLenBuf = (len > bufferSize) ? bufferSize : len;
 
 		fileRead((char*)buffer, file, src+dst, readLenBuf);
-		__aeabi_memcpy((char*)memDst+dst, (char*)buffer, readLenBuf);
+		tonccpy((char*)memDst+dst, (char*)buffer, readLenBuf);
 
 		len -= bufferSize;
 		dst += bufferSize;
@@ -894,7 +894,7 @@ static void fileReadWithBuffer(const u32 memDst, aFile* file, const u32 src, u32
 			break;
 		}
 	}
-	__aeabi_memclr((char*)buffer, bufferSize);
+	toncset((char*)buffer, 0, bufferSize);
 }
 
 static void loadIOverlaysintoRAM(const tDSiHeader* dsiHeader, aFile* file, const bool usesCloneboot) {
@@ -951,38 +951,35 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 			// Construct TWLCFG
 			u8* twlCfg = (u8*)0x02000400;
 			u8* personalData = (u8*)0x02FFFC80;
-			const u32 unk = 0x0201209C;
-			__aeabi_memcpy(twlCfg+0x6, personalData+0x64, 1); // Selected Language (eg. 1=English)
-			__aeabi_memcpy(twlCfg+0x7, personalData+0x66, 1); // RTC Year (last date change) (max 63h=2099)
-			__aeabi_memcpy(twlCfg+0x8, personalData+0x68, 4); // RTC Offset (difference in seconds on change)
-			__aeabi_memcpy(twlCfg+0x1A, personalData+0x52, 1); // Alarm Hour   (0..17h)
-			__aeabi_memcpy(twlCfg+0x1B, personalData+0x53, 1); // Alarm Minute (0..3Bh)
-			__aeabi_memcpy(twlCfg+0x1E, personalData+0x56, 1); // Alarm Enable (0=Off, 1=On)
-			__aeabi_memset(twlCfg+0x24, 1, 0x03); // Unknown (02h or 03h)
-			__aeabi_memcpy(twlCfg+0x30, personalData+0x58, 0xC); // TSC calib
-			__aeabi_memcpy(twlCfg+0x3C, &unk, 4);
-			__aeabi_memcpy(twlCfg+0x44, personalData+0x02, 1); // Favorite color (also Sysmenu Cursor Color)
-			__aeabi_memcpy(twlCfg+0x46, personalData+0x03, 2); // Birthday (month, day)
-			__aeabi_memcpy(twlCfg+0x48, personalData+0x06, 0x16); // Nickname (UCS-2), max 10 chars+EOL
-			__aeabi_memcpy(twlCfg+0x5E, personalData+0x1C, 0x36); // Message (UCS-2), max 26 chars+EOL
+			tonccpy(twlCfg+0x6, personalData+0x64, 1); // Selected Language (eg. 1=English)
+			tonccpy(twlCfg+0x7, personalData+0x66, 1); // RTC Year (last date change) (max 63h=2099)
+			tonccpy(twlCfg+0x8, personalData+0x68, 4); // RTC Offset (difference in seconds on change)
+			tonccpy(twlCfg+0x1A, personalData+0x52, 1); // Alarm Hour   (0..17h)
+			tonccpy(twlCfg+0x1B, personalData+0x53, 1); // Alarm Minute (0..3Bh)
+			tonccpy(twlCfg+0x1E, personalData+0x56, 1); // Alarm Enable (0=Off, 1=On)
+			toncset(twlCfg+0x24, 0x03, 1); // Unknown (02h or 03h)
+			tonccpy(twlCfg+0x30, personalData+0x58, 0xC); // TSC calib
+			toncset32(twlCfg+0x3C, 0x0201209C, 1);
+			tonccpy(twlCfg+0x44, personalData+0x02, 1); // Favorite color (also Sysmenu Cursor Color)
+			tonccpy(twlCfg+0x46, personalData+0x03, 2); // Birthday (month, day)
+			tonccpy(twlCfg+0x48, personalData+0x06, 0x16); // Nickname (UCS-2), max 10 chars+EOL
+			tonccpy(twlCfg+0x5E, personalData+0x1C, 0x36); // Message (UCS-2), max 26 chars+EOL
 			readFirmware(0x1FD, twlCfg+0x1E0, 1); // WlFirm Type (1=DWM-W015, 2=W024, 3=W028)
-			u32 wlFirmVars = 0x500400;
-			u32 wlFirmBase = 0x500000;
-			u32 wlFirmSize = 0x02E000;
 			if (twlCfg[0x1E0] == 2 || twlCfg[0x1E0] == 3) {
-				wlFirmVars = 0x520000;
-				wlFirmBase = 0x520000;
-				wlFirmSize = 0x020000;
+				toncset32(twlCfg+0x1E4, 0x520000, 1); // WlFirm RAM vars
+				toncset32(twlCfg+0x1E8, 0x520000, 1); // WlFirm RAM base
+				toncset32(twlCfg+0x1EC, 0x020000, 1); // WlFirm RAM size
+			} else {
+				toncset32(twlCfg+0x1E4, 0x500400, 1); // WlFirm RAM vars
+				toncset32(twlCfg+0x1E8, 0x500000, 1); // WlFirm RAM base
+				toncset32(twlCfg+0x1EC, 0x02E000, 1); // WlFirm RAM size
 			}
-			__aeabi_memcpy(twlCfg+0x1E4, &wlFirmVars, 4); // WlFirm RAM vars
-			__aeabi_memcpy(twlCfg+0x1E8, &wlFirmBase, 4); // WlFirm RAM base
-			__aeabi_memcpy(twlCfg+0x1EC, &wlFirmSize, 4); // WlFirm RAM size
 			*(u16*)(twlCfg+0x1E2) = swiCRC16(0xFFFF, twlCfg+0x1E4, 0xC); // WlFirm CRC16
 
 			u32 configFlags = 0x0100000F;
 			configFlags |= BIT(3);
 
-			__aeabi_memcpy(twlCfg, &configFlags, 4); // Config Flags
+			toncset32(twlCfg, configFlags, 1); // Config Flags
 			fileRead(twlCfg+0x10, &romFile, 0x20E, 1); // EULA Version (0=None/CountryChanged, 1=v1)
 			fileRead(twlCfg+0x9C, &romFile, 0x2F0, 1);  // Parental Controls Years of Age Rating (00h..14h)
 		}*/
@@ -1008,7 +1005,7 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 			} else if (ndsHeader->gameCode[3] == 'K') {
 				newRegion = 5;
 			}
-			__aeabi_memset((u8*)0x02FFFD70, 1, newRegion);
+			toncset((u8*)0x02FFFD70, newRegion, 1);
 		} else if (region == -1) {
 			// Determine region by language
 			PERSONAL_DATA* personalData = (PERSONAL_DATA*)((u32)__NDSHeader - (u32)ndsHeader + (u32)PersonalData); //(u8*)((u32)ndsHeader - 0x180)
@@ -1024,9 +1021,9 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 			} else if (personalData->language >= 2 && personalData->language <= 5) {
 				newRegion = 2;	// Europe
 			}
-			__aeabi_memset((u8*)0x02FFFD70, 1, newRegion);
+			toncset((u8*)0x02FFFD70, newRegion, 1);
 		} else {
-			__aeabi_memset((u8*)0x02FFFD70, 1, region);
+			toncset((u8*)0x02FFFD70, region, 1);
 		}
 		// Set bitmask for supported languages
 		u8 curRegion = *(u8*)0x02FFFD70;
@@ -1057,7 +1054,7 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 		// Make the Pokemon game code ADAJ.
 		const char gameCodePokemon[] = { 'A', 'D', 'A', 'J' };
 		tNDSHeader* ndsHeaderPokemon = (tNDSHeader*)NDS_HEADER_POKEMON;
-		__aeabi_memcpy(ndsHeaderPokemon->gameCode, gameCodePokemon, 4);
+		tonccpy(ndsHeaderPokemon->gameCode, gameCodePokemon, 4);
 	}
 
     // Set memory values expected by loaded NDS
@@ -1273,26 +1270,26 @@ int arm7_main(void) {
 	const bool dsBrowser = (strcmp(romTid, "UBRP") == 0);
 
 	if (dsBrowser && extendedMemory && !dsDebugRam) {
-		__aeabi_memset((char*)0x0C400000, 0xC0, 0xFF);
-		__aeabi_memclr((u8*)0x0C4000B2, 3);
-		__aeabi_memset((u8*)0x0C4000B5, 3, 0x24);
+		toncset((char*)0x0C400000, 0xFF, 0xC0);
+		toncset((u8*)0x0C4000B2, 0, 3);
+		toncset((u8*)0x0C4000B5, 0x24, 3);
 		*(u16*)0x0C4000BE = 0x7FFF;
-		__aeabi_memclr((char*)0x0C4000C0, 0xE);
+		toncset((char*)0x0C4000C0, 0, 0xE);
 		*(u16*)0x0C4000CE = 0x7FFF;
-		__aeabi_memclr((char*)0x0C4000D0, 0x130);
+		toncset((char*)0x0C4000D0, 0, 0x130);
 	}
 
 	*(vu16*)0x08240000 = 1;
 	expansionPakFound = ((*(vu16*)0x08240000 == 1) && (s2FlashcardId != 0 || !dsBrowser));
 
 	if (dsBrowser && s2FlashcardId != 0 && s2FlashcardId != 0x5A45) {
-		__aeabi_memset((char*)0x08000000, 0xC0, 0xFF);
-		__aeabi_memclr((u8*)0x080000B2, 3);
-		__aeabi_memset((u8*)0x080000B5, 3, 0x24);
+		toncset((char*)0x08000000, 0xFF, 0xC0);
+		toncset((u8*)0x080000B2, 0, 3);
+		toncset((u8*)0x080000B5, 0x24, 3);
 		*(u16*)0x080000BE = 0x7FFF;
-		__aeabi_memclr((char*)0x080000C0, 0xE);
+		toncset((char*)0x080000C0, 0, 0xE);
 		*(u16*)0x080000CE = 0x7FFF;
-		__aeabi_memclr((char*)0x080000D0, 0x130);
+		toncset((char*)0x080000D0, 0, 0x130);
 	}
 
 	// dbg_printf("Trying to patch the card...\n");
@@ -1300,11 +1297,11 @@ int arm7_main(void) {
 	ce9Location = *(u32*)CARDENGINE_ARM9_LOCATION_BUFFERED;
 	ce9Alt = (ce9Location == CARDENGINE_ARM9_LOCATION_DLDI_ALT || ce9Location == CARDENGINE_ARM9_LOCATION_DLDI_ALT2);
 	// const bool ce9NotInHeap = (ce9Alt || ce9Location == CARDENGINE_ARM9_LOCATION_DLDI_START);
-	__aeabi_memcpy((u32*)ce9Location, (u32*)CARDENGINE_ARM9_LOCATION_BUFFERED, ce9Alt ? 0x2800 : 0x3800);
-	__aeabi_memclr((u32*)0x023E0000, 0x10000);
+	tonccpy((u32*)ce9Location, (u32*)CARDENGINE_ARM9_LOCATION_BUFFERED, ce9Alt ? 0x2800 : 0x3800);
+	toncset((u32*)0x023E0000, 0, 0x10000);
 
-	__aeabi_memcpy((u8*)CARDENGINE_ARM7_LOCATION, (u8*)CARDENGINE_ARM7_LOCATION_BUFFERED, 0x1000);
-	__aeabi_memclr((u8*)CARDENGINE_ARM7_LOCATION_BUFFERED, 0x1000);
+	tonccpy((u8*)CARDENGINE_ARM7_LOCATION, (u8*)CARDENGINE_ARM7_LOCATION_BUFFERED, 0x1000);
+	toncset((u8*)CARDENGINE_ARM7_LOCATION_BUFFERED, 0, 0x1000);
 
 	if (!dldiPatchBinary((data_t*)ce9Location, 0x3800, (data_t*)(extendedMemory ? 0x027FC000 : ((accessControl & BIT(4)) && !ce9Alt) ? 0x023FC000 : 0x023FD000))) {
 		dbg_printf("ce9 DLDI patch failed\n");
@@ -1438,7 +1435,7 @@ int arm7_main(void) {
 					fatTableAddr -= romFile.fatTableCacheSize;
 				}
 			} */
-			__aeabi_memcpy((u32*)fatTableAddr, (u32*)0x037F8000, romFile.fatTableCacheSize);
+			tonccpy((u32*)fatTableAddr, (u32*)0x037F8000, romFile.fatTableCacheSize);
 			romFile.fatTableCache = (u32*)fatTableAddr;
 
 			lastClusterCacheUsed = (u32*)0x037F8000;
@@ -1454,7 +1451,7 @@ int arm7_main(void) {
 					} else {
 						fatTableAddr -= savFile.fatTableCacheSize;
 					}
-					__aeabi_memcpy((u32*)fatTableAddr, (u32*)0x037F8000, savFile.fatTableCacheSize);
+					tonccpy((u32*)fatTableAddr, (u32*)0x037F8000, savFile.fatTableCacheSize);
 					savFile.fatTableCache = (u32*)fatTableAddr;
 				}
 				if (musicCluster != 0) {
@@ -1469,7 +1466,7 @@ int arm7_main(void) {
 					} else {
 						fatTableAddr -= musicsFile.fatTableCacheSize;
 					}
-					__aeabi_memcpy((u32*)fatTableAddr, (u32*)0x037F8000, musicsFile.fatTableCacheSize);
+					tonccpy((u32*)fatTableAddr, (u32*)0x037F8000, musicsFile.fatTableCacheSize);
 					musicsFile.fatTableCache = (u32*)fatTableAddr;
 				}
 			// }
@@ -1520,7 +1517,7 @@ int arm7_main(void) {
 	patchBinary((cardengineArm9*)ce9Location, ndsHeader, moduleParams);
 	patchCardNdsArm9Cont((cardengineArm9*)ce9Location, ndsHeader, moduleParams);
 
-	__aeabi_memclr((u32*)0x0380C000, 0x2780);
+	toncset((u32*)0x0380C000, 0, 0x2780);
 
 	errorCode = hookNdsRetailArm7(
 		(cardengineArm7*)CARDENGINE_ARM7_LOCATION,
@@ -1628,7 +1625,7 @@ int arm7_main(void) {
 		}
 	}
 
-	__aeabi_memclr((u32*)IMAGES_LOCATION, ((256*192)*3)*sizeof(u16));	// Clear nds-bootstrap images and IPS patch
+	toncset16((u32*)IMAGES_LOCATION, 0, (256*192)*3);	// Clear nds-bootstrap images and IPS patch
 
 	if (ce9Alt) {
 		unpatchedFunctions* unpatchedFuncs = (unpatchedFunctions*)UNPATCHED_FUNCTION_LOCATION;
@@ -1640,8 +1637,8 @@ int arm7_main(void) {
 		//codeBranch += 0x30;
 		const u32 codeBranch = 0x023FF200;
 
-		__aeabi_memcpy((u32*)0x02370000, ce9, 0x2800);
-		__aeabi_memcpy((u32*)codeBranch, copyBackCe9, copyBackCe9Len);
+		tonccpy((u32*)0x02370000, ce9, 0x2800);
+		tonccpy((u32*)codeBranch, copyBackCe9, copyBackCe9Len);
 		for (int i = 0; i < copyBackCe9Len/4; i++) {
 			u32* addr = (u32*)codeBranch;
 			if (addr[i] == 0x77777777) {
@@ -1650,7 +1647,7 @@ int arm7_main(void) {
 			}
 		}
 
-		__aeabi_memclr(ce9, 0x2800);
+		toncset(ce9, 0, 0x2800);
 
 		u32 blFrom = (u32)ndsHeader->arm9executeAddress;
 		for (int i = 0; i < 0x200/4; i++) {

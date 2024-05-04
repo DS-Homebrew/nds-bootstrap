@@ -7,7 +7,7 @@
 #include "common.h"
 #include "value_bits.h"
 #include "locations.h"
-#include "aeabi.h"
+#include "tonccpy.h"
 #include "cardengine_header_arm7.h"
 #include "debug_file.h"
 
@@ -232,27 +232,26 @@ static void fixForDSiBios(const cardengineArm7* ce7, const tNDSHeader* ndsHeader
 		// swi 0x12 call
 		if (swi12Offset) {
 			// Patch to call swi 0x02 instead of 0x12
-			__aeabi_memcpy(swi12Offset, swi12Patch, 0x4);
+			tonccpy(swi12Offset, swi12Patch, 0x4);
 		}
 
 		// swi get pitch table
 		if (swiGetPitchTableOffset) {
 			// Patch
 			if (isSdk5(moduleParams)) {
-				u16 swiGetPitchTablePatch5[6] = {0x46C0};
-				__aeabi_memcpy(swiGetPitchTableOffset, swiGetPitchTablePatch5, 6*sizeof(u16));
+				toncset16(swiGetPitchTableOffset, 0x46C0, 6);
 			} else if (patchOffsetCache.a7IsThumb) {
-				__aeabi_memcpy((u16*)newSwiGetPitchTableAddr, swiGetPitchTablePatch, 0x10);
+				tonccpy((u16*)newSwiGetPitchTableAddr, swiGetPitchTablePatch, 0x10);
 				u32 srcAddr = (u32)swiGetPitchTableOffset - vAddrOfRelocSrc + 0x37F8000;
 				u32 dstAddr = (u32)newSwiGetPitchTableAddr - vAddrOfRelocSrc + 0x37F8000;
 				const u16* swiGetPitchTableBranch = generateA7InstrThumb(srcAddr, dstAddr);
-				__aeabi_memcpy(swiGetPitchTableOffset, swiGetPitchTableBranch, 0x4);
+				tonccpy(swiGetPitchTableOffset, swiGetPitchTableBranch, 0x4);
 
 				dbg_printf("swiGetPitchTable new location : ");
 				dbg_hexa(newSwiGetPitchTableAddr);
 				dbg_printf("\n\n");
 			} else {
-				__aeabi_memcpy(swiGetPitchTableOffset, ce7->patches->j_twlGetPitchTable, 0xC);
+				tonccpy(swiGetPitchTableOffset, ce7->patches->j_twlGetPitchTable, 0xC);
 			}
 		}
 	}
@@ -355,10 +354,10 @@ static bool patchCardIrqEnable(cardengineArm7* ce7, const tNDSHeader* ndsHeader,
 	const bool usesThumb = (*(u16*)cardIrqEnableOffset == 0xB510 || *(u16*)cardIrqEnableOffset == 0xB530);
 	if (usesThumb) {
 		u16* cardIrqEnablePatch = (u16*)ce7->patches->thumb_card_irq_enable_arm7;
-		__aeabi_memcpy(cardIrqEnableOffset, cardIrqEnablePatch, 0x20);
+		tonccpy(cardIrqEnableOffset, cardIrqEnablePatch, 0x20);
 	} else {
 		u32* cardIrqEnablePatch = ce7->patches->card_irq_enable_arm7;
-		__aeabi_memcpy(cardIrqEnableOffset, cardIrqEnablePatch, 0x30);
+		tonccpy(cardIrqEnableOffset, cardIrqEnablePatch, 0x30);
 	}
 
     dbg_printf("cardIrqEnable location : ");
@@ -372,7 +371,7 @@ static bool patchCardIrqEnable(cardengineArm7* ce7, const tNDSHeader* ndsHeader,
 	u32* cardCheckPullOutOffset = findCardCheckPullOutOffset(ndsHeader, moduleParams);
 	if (cardCheckPullOutOffset) {
 		u32* cardCheckPullOutPatch = ce7->patches->card_pull_out_arm9;
-		__aeabi_memcpy(cardCheckPullOutOffset, cardCheckPullOutPatch, 0x4);
+		tonccpy(cardCheckPullOutOffset, cardCheckPullOutPatch, 0x4);
 	}
 }*/
 

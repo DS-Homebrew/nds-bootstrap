@@ -7,7 +7,7 @@
 #include <nds/memory.h>
 #include "nds_header.h"
 #include "locations.h"
-#include "aeabi.h"
+#include "tonccpy.h"
 
 #define cacheBlockSize 0x4000
 
@@ -93,7 +93,7 @@ bool applyIpsPatch(const tNDSHeader* ndsHeader, u8* ipsbyte, const bool arm9Only
 			for (int ontime = 0; ontime < totalrepeats; ontime++) {
 				repeatbyte[ontime] = ipsbyte[ipson];
 			}
-			// __aeabi_memcpy(rombyte+offset, repeatbyte, totalrepeats);
+			// tonccpy(rombyte+offset, repeatbyte, totalrepeats);
 			u8* rombyteOffset = (u8*)rombyte+offset;
 			for (int i = 0; i < totalrepeats; i++) {
 				*rombyteOffset = repeatbyte[i];
@@ -124,7 +124,7 @@ bool applyIpsPatch(const tNDSHeader* ndsHeader, u8* ipsbyte, const bool arm9Only
 		} else {
 			totalrepeats = ipsbyte[ipson] * 256 + ipsbyte[ipson + 1];
 			ipson += 2;
-			// __aeabi_memcpy(rombyte+offset, ipsbyte+ipson, totalrepeats);
+			// tonccpy(rombyte+offset, ipsbyte+ipson, totalrepeats);
 			u8* rombyteOffset = (u8*)rombyte+offset;
 			for (int i = 0; i < totalrepeats; i++) {
 				*rombyteOffset = ipsbyte[ipson+i];

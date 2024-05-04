@@ -1,7 +1,6 @@
 #include "text.h"
-#include "aeabi.h"
+#include "tonccpy.h"
 
-#include <nds.h>
 #include <array>
 #include <map>
 
@@ -210,6 +209,7 @@ char16_t arabicForm(char16_t current, char16_t prev, char16_t next) {
 	return current;
 }
 
+#include <nds.h>
 #include <string>
 
 void processRTL(unsigned char *begin, unsigned char *end) {
@@ -332,7 +332,7 @@ void processRTL(unsigned char *begin, unsigned char *end) {
 		}
 	}
 
-	__aeabi_memcpy(begin, buffer, sizeof(buffer));
+	tonccpy(begin, buffer, sizeof(buffer));
 }
 
 void setIgmString(const char *src, unsigned char *dst) {

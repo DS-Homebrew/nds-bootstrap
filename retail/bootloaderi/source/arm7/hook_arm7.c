@@ -32,7 +32,7 @@
 #include "patch.h"
 #include "find.h"
 #include "hook.h"
-#include "aeabi.h"
+#include "tonccpy.h"
 
 #define b_gameOnFlashcard BIT(0)
 #define b_saveOnFlashcard BIT(1)
@@ -187,7 +187,7 @@ int hookNdsRetailArm7(
 
 	/*bool handlerPatched = false;
 	if (!gameOnFlashcard && !ROMinRAM && handlerLocation && ce7->patches->fifoHandler) {
-		__aeabi_memcpy(handlerLocation, ce7->patches->j_irqHandler, 0xC);
+		tonccpy(handlerLocation, ce7->patches->j_irqHandler, 0xC);
 		handlerPatched = true;
 	}*/
 
@@ -507,7 +507,7 @@ int hookNdsRetailArm7(
 		aFile apPatchFile;
 		getFileFromCluster(&apPatchFile, apPatchFileCluster, gameOnFlashcard);
 
-		__aeabi_memcpy((u8*)cheatEngineOffset, cheatEngineBuffer, 0x400);
+		tonccpy((u8*)cheatEngineOffset, cheatEngineBuffer, 0x400);
 
 		if (ndsHeader->unitCode < 3 && apPatchFile.firstCluster != CLUSTER_FREE && apPatchIsCheat) {
 			fileRead(cheatDataOffset, &apPatchFile, 0, apPatchSize);

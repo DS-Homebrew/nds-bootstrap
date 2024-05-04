@@ -35,7 +35,7 @@
 #include "unpatched_funcs.h"
 #include "cardengine.h"
 #include "nds_header.h"
-#include "aeabi.h"
+#include "tonccpy.h"
 
 #define RUMBLE_PAK			(*(vuint16 *)0x08000000)
 #define WARIOWARE_PAK		(*(vuint16 *)0x080000C4)
@@ -83,10 +83,8 @@ static bool volumeAdjustActivated = false;*/
 bool ipcEveryFrame = false;
 static bool swapScreens = false;
 
-#ifdef MUSIC
 int RumbleTimer = 0;
 int RumbleForce = 1;
-#endif
 
 //static int cardEgnineCommandMutex = 0;
 //static int saveMutex = 0;
@@ -149,8 +147,8 @@ static void initialize(void) {
 	}
 
 	if (!bootloaderCleared) {
-		__aeabi_memclr((u32*)0x02377000, 0x1000);
-		__aeabi_memclr((u8*)0x06000000, 0x40000);	// Clear bootloader
+		toncset((u32*)0x02377000, 0, 0x1000);
+		toncset((u8*)0x06000000, 0, 0x40000);	// Clear bootloader
 		if (mainScreen) {
 			swapScreens = (mainScreen == 2);
 			ipcEveryFrame = true;
@@ -163,7 +161,6 @@ static void initialize(void) {
 
 extern void inGameMenu(void);
 
-#ifdef MUSIC
 void Rumble(int Frames) {
 	if ((RumblePakType == 0) || (RumbleForce == 0)) return;
 
@@ -195,7 +192,6 @@ void DoRumble() {
 		RumbleTimer = 0;
 	}
 }
-#endif
 
 void rebootConsole(void) {
 	if (*(vu16*)0x4004700 != 0) {
@@ -216,7 +212,7 @@ void reset(void) {
 
 	REG_IME = 0;
 
-	__aeabi_memclr((u32*)0x04000400, 0x104); // Clear sound channel & control registers
+	toncset32((u32*)0x04000400, 0, 0x104/4); // Clear sound channel & control registers
 
 	REG_SNDCAP0CNT = 0;
 	REG_SNDCAP1CNT = 0;
@@ -226,8 +222,8 @@ void reset(void) {
 	REG_SNDCAP1DAD = 0;
 	REG_SNDCAP1LEN = 0;
 
-	__aeabi_memclr((u32*)0x040000B0, 0x40); // Clear DMA channels
-	__aeabi_memclr((u32*)0x04000100, 0x10); // Clear timers
+	toncset16((u32*)0x040000B0, 0, 0x40/2); // Clear DMA channels
+	toncset16((u32*)0x04000100, 0, 0x10/2); // Clear timers
 
 	// Clear out FIFO
 	REG_IPC_SYNC = 0;
@@ -374,6 +370,7 @@ void myIrqHandlerVBlank(void) {
 			if (musicBufferNo == 2) musicBufferNo = 0;
 		}
 	}
+#endif
 
 	if (sharedAddr[3] == 0x424D5552) { // 'RUMB'
 		RumbleForce = sharedAddr[1];
@@ -388,7 +385,6 @@ void myIrqHandlerVBlank(void) {
 	} else {
 		DoRumble();
 	}
-#endif
 
 	if (sharedAddr[3] == (vu32)0x52534554) {
 		reset();

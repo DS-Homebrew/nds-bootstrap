@@ -58,7 +58,7 @@
 #define cardReadFix BIT(8)
 #define softResetMb BIT(13)
 
-#include "aeabi.h"
+#include "tonccpy.h"
 #include "card.h"
 #include "my_fat.h"
 
@@ -213,7 +213,7 @@ void reset(u32 param) {
 	REG_IE = 0;
 	REG_IF = ~0;
 
-	//__aeabi_memclr((u32*)0x01FF8000, 0x8000);
+	//toncset((u32*)0x01FF8000, 0, 0x8000);
 
 	cacheFlush();
 
@@ -243,8 +243,8 @@ void reset(u32 param) {
 	mpuSet = false;
 	IPC_SYNC_hooked = false;
 
-	__aeabi_memclr((char*)((ce9->valueBits & isSdk5) ? 0x02FFFD80 : 0x027FFD80), 0x80);
-	__aeabi_memclr((char*)((ce9->valueBits & isSdk5) ? 0x02FFFF80 : 0x027FFF80), 0x80);
+	toncset((char*)((ce9->valueBits & isSdk5) ? 0x02FFFD80 : 0x027FFD80), 0, 0x80);
+	toncset((char*)((ce9->valueBits & isSdk5) ? 0x02FFFF80 : 0x027FFF80), 0, 0x80);
 
 	if (param == 0xFFFFFFFF || *(u32*)(resetParams+0xC) > 0) {
 		resetMpu();
@@ -254,16 +254,16 @@ void reset(u32 param) {
 		REG_DISPCNT_SUB = 0;
 		GFX_STATUS = 0;
 
-		__aeabi_memclr((u16*)0x04000000, 0x56);
-		__aeabi_memclr((u16*)0x04001000, 0x56);
+		toncset((u16*)0x04000000, 0, 0x56);
+		toncset((u16*)0x04001000, 0, 0x56);
 
 		*(vu32*)&VRAM_A_CR = 0x80808080; //ABCD
 		*(vu16*)&VRAM_E_CR = 0x8080; //EF
 		VRAM_G_CR = 0x80; //G
 		*(vu16*)&VRAM_H_CR = 0x8080; //HI
 
-		__aeabi_memclr(BG_PALETTE, 512*sizeof(u16)); // Clear main and sub palettes
-		__aeabi_memclr(VRAM, 0xC0000); // Clear VRAM
+		toncset16(BG_PALETTE, 0, 512); // Clear main and sub palettes
+		toncset(VRAM, 0, 0xC0000); // Clear VRAM
 
 		*(vu32*)&VRAM_A_CR = 0; //ABCD
 		*(vu16*)&VRAM_E_CR = 0; //EF
@@ -277,14 +277,14 @@ void reset(u32 param) {
 		if (param == 0xFFFFFFFF) {
 			*(u32*)(0x02000000) |= BIT(2);
 		}*/
-		//__aeabi_memclr((u32*)0x02000004, 0x3DA000 - 4);
-		__aeabi_memclr((u32*)0x02000000, 0x3C0000);
+		//toncset((u32*)0x02000004, 0, 0x3DA000 - 4);
+		toncset((u32*)0x02000000, 0, 0x3C0000);
 		#ifdef NODSIWARE
-		__aeabi_memclr((u32*)0x023C4000, 0x1C000);
-		__aeabi_memclr((u32*)0x02FE4000, 0x19C00-0x4000);
+		toncset((u32*)0x023C4000, 0, 0x1C000);
+		toncset((u32*)0x02FE4000, 0, 0x19C00-0x4000);
 		#else
-		__aeabi_memclr((u32*)0x023C4000, 0x16800);
-		__aeabi_memclr((u32*)0x02FE4000, 0x1D000-0x4000);
+		toncset((u32*)0x023C4000, 0, 0x16800);
+		toncset((u32*)0x02FE4000, 0, 0x1D000-0x4000);
 		#endif
 		if (param == 0xFFFFFFFF) {
 			*(u32*)(0x02000000) = BIT(0) | BIT(1) | BIT(2);
@@ -303,7 +303,7 @@ void reset(u32 param) {
 			sharedAddr[1] = 0x57495344;
 		}
 
-		__aeabi_memclr((u32*)0x02FFD000, 0x2000);
+		toncset((u32*)0x02FFD000, 0, 0x2000);
 	} else {
 		u32 newArm7binarySize = 0;
 		fileRead((char*)&newArm7binarySize, &pageFile, 0x3FFFF4, sizeof(u32));
@@ -316,7 +316,7 @@ void reset(u32 param) {
 		#endif
 
 		#ifdef NODSIWARE
-		__aeabi_memcpy((u32*)0x02370000, ce9, 0x2800);
+		tonccpy((u32*)0x02370000, ce9, 0x2800);
 		#endif
 
 		resetMpu();
@@ -391,7 +391,7 @@ void readManual(int line) {
 		}
 	}
 
-	__aeabi_memset((u8*)0x027FF200, 32 * 24, ' ');
+	toncset((u8*)0x027FF200, ' ', 32 * 24);
 	((vu8*)0x027FF200)[32 * 24] = '\0';
 
 	// Read in 24 lines
@@ -410,7 +410,7 @@ void readManual(int line) {
 				if(buffer[i] == '\n')
 					tempManualOffset++;
 				fullLine = i == 32;
-				__aeabi_memcpy((char*)0x027FF200 + line * 32, buffer, i);
+				tonccpy((char*)0x027FF200 + line * 32, buffer, i);
 				break;
 			}
 		}
@@ -741,13 +741,13 @@ void cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	if (ce9->valueBits & ROMinRAM) {
 		if (src >= 0 && src < 0x160) {
 			u32 newSrc = (u32)ndsHeader+src;
-			__aeabi_memcpy(dst, (u8*)newSrc, len);
+			tonccpy(dst, (u8*)newSrc, len);
 		} else {
 			u32 newSrc = ce9->romLocation+src;
 			if (ndsHeader->unitCode == 3 && src >= arm9iromOffset) {
 				newSrc -= arm9ibinarySize;
 			}
-			__aeabi_memcpy(dst, (u8*)newSrc, len);
+			tonccpy(dst, (u8*)newSrc, len);
 		}
 	} else {
 		cardReadNormal(dst, src, len);
@@ -775,7 +775,7 @@ bool nandWrite(void* memory,void* flash,u32 len,u32 dma) {
 
 #ifndef NODSIWARE
 void ndmaCopy(int ndmaSlot, const void* src, void* dst, u32 len) {
-	__aeabi_memcpy(dst, src, len);
+	tonccpy(dst, src, len);
 }
 
 static bool sharedFontOpened = false;
@@ -906,7 +906,7 @@ bool dsiSaveDelete(const char* path) {
 }
 
 bool dsiSaveGetInfo(const char* path, dsiSaveInfo* info) {
-	__aeabi_memclr(info, sizeof(dsiSaveInfo));
+	toncset(info, 0, sizeof(dsiSaveInfo));
 	if (savFile.firstCluster == CLUSTER_FREE || savFile.firstCluster == CLUSTER_EOF) {
 		dsiSaveResultCode = 0xE;
 		return false;
@@ -932,7 +932,7 @@ u32 dsiSaveSetLength(void* ctx, s32 len) {
 	dsiSaveSeekPos = 0;
 	if (savFile.firstCluster == CLUSTER_FREE || savFile.firstCluster == CLUSTER_EOF) {
 		dsiSaveResultCode = 1;
-		__aeabi_memset4(ctx+0x14, 4, dsiSaveResultCode);
+		toncset32(ctx+0x14, dsiSaveResultCode, 1);
 		return 1;
 	}
 
@@ -948,7 +948,7 @@ u32 dsiSaveSetLength(void* ctx, s32 len) {
 	setDeviceOwner();
 	bool res = fileWrite((char*)&dsiSaveSize, &savFile, ce9->saveSize-4, 4);
 	dsiSaveResultCode = res ? 0 : 1;
-	__aeabi_memset4(ctx+0x14, 4, dsiSaveResultCode);
+	toncset32(ctx+0x14, dsiSaveResultCode, 1);
 	cardReadInProgress = false;
 	REG_EXMEMCNT = exmemcnt;
 	leaveCriticalSection(oldIME);
@@ -961,23 +961,23 @@ bool dsiSaveOpen(void* ctx, const char* path, u32 mode) {
 	if (strcmp(path, "nand:/<sharedFont>") == 0) {
 		if (sharedFontFile.firstCluster == CLUSTER_FREE || sharedFontFile.firstCluster == CLUSTER_EOF) {
 			dsiSaveResultCode = 0xE;
-			__aeabi_memset4(ctx+0x14, 4, dsiSaveResultCode);
+			toncset32(ctx+0x14, dsiSaveResultCode, 1);
 			return false;
 		}
 		dsiSaveResultCode = 0;
-		__aeabi_memset4(ctx+0x14, 4, dsiSaveResultCode);
+		toncset32(ctx+0x14, dsiSaveResultCode, 1);
 		sharedFontOpened = true;
 		return true;
 	}
 	if (savFile.firstCluster == CLUSTER_FREE || savFile.firstCluster == CLUSTER_EOF) {
 		dsiSaveResultCode = 0xE;
-		__aeabi_memset4(ctx+0x14, 4, dsiSaveResultCode);
+		toncset32(ctx+0x14, dsiSaveResultCode, 1);
 		return false;
 	}
 
 	dsiSaveInit();
 	dsiSaveResultCode = dsiSaveExists ? 0 : 0xB;
-	__aeabi_memset4(ctx+0x14, 4, dsiSaveResultCode);
+	toncset32(ctx+0x14, dsiSaveResultCode, 1);
 
 	dsiSavePerms = mode;
 	return dsiSaveExists;
@@ -989,21 +989,21 @@ bool dsiSaveClose(void* ctx) {
 		sharedFontOpened = false;
 		if (sharedFontFile.firstCluster == CLUSTER_FREE || sharedFontFile.firstCluster == CLUSTER_EOF) {
 			dsiSaveResultCode = 0xE;
-			__aeabi_memset4(ctx+0x14, 4, dsiSaveResultCode);
+			toncset32(ctx+0x14, dsiSaveResultCode, 1);
 			return false;
 		}
 		dsiSaveResultCode = 0;
-		__aeabi_memset4(ctx+0x14, 4, dsiSaveResultCode);
+		toncset32(ctx+0x14, dsiSaveResultCode, 1);
 		return true;
 	}
 	if (savFile.firstCluster == CLUSTER_FREE || savFile.firstCluster == CLUSTER_EOF) {
 		dsiSaveResultCode = 0xE;
-		__aeabi_memset4(ctx+0x14, 4, dsiSaveResultCode);
+		toncset32(ctx+0x14, dsiSaveResultCode, 1);
 		return false;
 	}
-	//__aeabi_memset(ctx, 0, 0x80);
+	//toncset(ctx, 0, 0x80);
 	dsiSaveResultCode = dsiSaveExists ? 0 : 0xB;
-	__aeabi_memset4(ctx+0x14, 4, dsiSaveResultCode);
+	toncset32(ctx+0x14, dsiSaveResultCode, 1);
 	return dsiSaveExists;
 }
 
@@ -1032,22 +1032,22 @@ bool dsiSaveSeek(void* ctx, s32 pos, u32 mode) {
 		}
 		dsiSaveSeekPos = pos;
 		dsiSaveResultCode = 0;
-		__aeabi_memset4(ctx+0x14, 4, dsiSaveResultCode);
+		toncset32(ctx+0x14, dsiSaveResultCode, 1);
 		return true;
 	}
 	if (savFile.firstCluster == CLUSTER_FREE || savFile.firstCluster == CLUSTER_EOF) {
 		dsiSaveResultCode = 0xE;
-		__aeabi_memset4(ctx+0x14, 4, dsiSaveResultCode);
+		toncset32(ctx+0x14, dsiSaveResultCode, 1);
 		return false;
 	}
 	if (!dsiSaveExists) {
 		dsiSaveResultCode = 1;
-		__aeabi_memset4(ctx+0x14, 4, dsiSaveResultCode);
+		toncset32(ctx+0x14, dsiSaveResultCode, 1);
 		return false;
 	}
 	dsiSaveSeekPos = pos;
 	dsiSaveResultCode = 0;
-	__aeabi_memset4(ctx+0x14, 4, dsiSaveResultCode);
+	toncset32(ctx+0x14, dsiSaveResultCode, 1);
 	return true;
 }
 
@@ -1055,13 +1055,13 @@ s32 dsiSaveRead(void* ctx, void* dst, s32 len) {
 	if (!sharedFontOpened) {
 		if (dsiSavePerms == 2 || !dsiSaveExists) {
 			dsiSaveResultCode = 1;
-			__aeabi_memset4(ctx+0x14, 4, dsiSaveResultCode);
+			toncset32(ctx+0x14, dsiSaveResultCode, 1);
 			return -1; // Return if only write perms are set
 		}
 
 		if (dsiSaveSize == 0) {
 			dsiSaveResultCode = 1;
-			__aeabi_memset4(ctx+0x14, 4, dsiSaveResultCode);
+			toncset32(ctx+0x14, dsiSaveResultCode, 1);
 			return 0;
 		}
 
@@ -1071,7 +1071,7 @@ s32 dsiSaveRead(void* ctx, void* dst, s32 len) {
 
 		if (len == 0) {
 			dsiSaveResultCode = 1;
-			__aeabi_memset4(ctx+0x14, 4, dsiSaveResultCode);
+			toncset32(ctx+0x14, dsiSaveResultCode, 1);
 			return 0;
 		}
 	}
@@ -1091,7 +1091,7 @@ s32 dsiSaveRead(void* ctx, void* dst, s32 len) {
 			if (!res) {
 				break;
 			}
-			__aeabi_memcpy((char*)dst+dstAdd, (char*)0x027FF200, readLen);
+			tonccpy((char*)dst+dstAdd, (char*)0x027FF200, readLen);
 
 			bufLen -= 0x600;
 			dstAdd += 0x600;
@@ -1104,7 +1104,7 @@ s32 dsiSaveRead(void* ctx, void* dst, s32 len) {
 		res = fileRead(dst, sharedFontOpened ? &sharedFontFile : &savFile, dsiSaveSeekPos, len);
 	}
 	dsiSaveResultCode = res ? 0 : 1;
-	__aeabi_memset4(ctx+0x14, 4, dsiSaveResultCode);
+	toncset32(ctx+0x14, dsiSaveResultCode, 1);
 	cardReadInProgress = false;
 	REG_EXMEMCNT = exmemcnt;
 	leaveCriticalSection(oldIME);
@@ -1118,7 +1118,7 @@ s32 dsiSaveRead(void* ctx, void* dst, s32 len) {
 s32 dsiSaveWrite(void* ctx, void* src, s32 len) {
 	if (dsiSavePerms == 1 || !dsiSaveExists) {
 		dsiSaveResultCode = 1;
-		__aeabi_memset4(ctx+0x14, 4, dsiSaveResultCode);
+		toncset32(ctx+0x14, dsiSaveResultCode, 1);
 		return -1; // Return if only read perms are set
 	}
 
@@ -1142,7 +1142,7 @@ s32 dsiSaveWrite(void* ctx, void* src, s32 len) {
 		while (1) {
 			u32 readLen = (bufLen > 0x600) ? 0x600 : len;
 
-			__aeabi_memcpy((char*)0x027FF200, (char*)src+srcAdd, readLen);
+			tonccpy((char*)0x027FF200, (char*)src+srcAdd, readLen);
 			res = fileWrite((char*)0x027FF200, &savFile, dsiSaveSeekPos+srcAdd, readLen);
 			if (!res) {
 				break;
@@ -1159,7 +1159,7 @@ s32 dsiSaveWrite(void* ctx, void* src, s32 len) {
 		res = fileWrite(src, &savFile, dsiSaveSeekPos, len);
 	}
 	dsiSaveResultCode = res ? 0 : 1;
-	__aeabi_memset4(ctx+0x14, 4, dsiSaveResultCode);
+	toncset32(ctx+0x14, dsiSaveResultCode, 1);
 	cardReadInProgress = false;
 	REG_EXMEMCNT = exmemcnt;
 	leaveCriticalSection(oldIME);

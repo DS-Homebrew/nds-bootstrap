@@ -61,7 +61,7 @@
 #include <nds/arm9/dldi.h>
 #include "myDSiMode.h"
 #include "nitrofs.h"
-#include "aeabi.h"
+#include "tonccpy.h"
 
 //This seems to be a typo! memory.h has REG_EXEMEMCNT
 #ifndef REG_EXMEMCNT
@@ -141,7 +141,7 @@ static inline ssize_t nitroSubRead(off_t *npos, void *ptr, size_t len)
     }
     else if (!bootNitro)
     {                                             //reading from gbarom
-        __aeabi_memcpy(ptr, *npos + (void *)GBAROM, len); //len isnt checked here because other checks exist in the callers (hopefully)
+        tonccpy(ptr, *npos + (void *)GBAROM, len); //len isnt checked here because other checks exist in the callers (hopefully)
     }
     if (len > 0)
         *npos += len;

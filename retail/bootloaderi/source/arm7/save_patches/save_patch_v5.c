@@ -4,7 +4,7 @@
 #include "find.h"
 #include "cardengine_header_arm7.h"
 #include "debug_file.h"
-#include "aeabi.h"
+#include "tonccpy.h"
 
 extern u32 newArm7binarySize;
 extern u32 vAddrOfRelocSrc;
@@ -82,7 +82,7 @@ u32 savePatchV5(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, const u3
 		dbg_printf("Eeprom read:\t");
 		dbg_hexa((u32)eepromRead);
 		dbg_printf("\n");
-		__aeabi_memcpy(eepromRead, (u16*)ce7->patches->arm7FunctionsThumb->eepromRead, 0x14);
+		tonccpy(eepromRead, (u16*)ce7->patches->arm7FunctionsThumb->eepromRead, 0x14);
 
 		u16* eepromPageWriteBranch = (u16*)(JumpTableFunc + 0x16);
 		dbg_printf("Eeprom page write branch:\t");
@@ -92,7 +92,7 @@ u32 savePatchV5(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, const u3
 		dbg_printf("Eeprom page write:\t");
 		dbg_hexa((u32)eepromPageWrite);
 		dbg_printf("\n");
-		__aeabi_memcpy(eepromPageWrite, (u16*)ce7->patches->arm7FunctionsThumb->eepromPageWrite, 0x14);
+		tonccpy(eepromPageWrite, (u16*)ce7->patches->arm7FunctionsThumb->eepromPageWrite, 0x14);
 		//newSwiHaltAddr = (u32)eepromPageWrite+0x14;
 
 		u16* eepromPageProgBranch = (u16*)(JumpTableFunc + 0x24);
@@ -103,7 +103,7 @@ u32 savePatchV5(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, const u3
 		dbg_printf("Eeprom page prog:\t");
 		dbg_hexa((u32)eepromPageProg);
 		dbg_printf("\n");
-		__aeabi_memcpy(eepromPageProg, (u16*)ce7->patches->arm7FunctionsThumb->eepromPageProg, 0x14);
+		tonccpy(eepromPageProg, (u16*)ce7->patches->arm7FunctionsThumb->eepromPageProg, 0x14);
 
 		u16* eepromPageVerifyBranch = (u16*)(JumpTableFunc + 0x32);
 		dbg_printf("Eeprom verify branch:\t");
@@ -113,7 +113,7 @@ u32 savePatchV5(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, const u3
 		dbg_printf("Eeprom verify:\t");
 		dbg_hexa((u32)eepromPageVerify);
 		dbg_printf("\n");
-		__aeabi_memcpy(eepromPageVerify, (u16*)ce7->patches->arm7FunctionsThumb->eepromPageVerify, 0x14);
+		tonccpy(eepromPageVerify, (u16*)ce7->patches->arm7FunctionsThumb->eepromPageVerify, 0x14);
 
 		u16* eepromPageEraseBranch = (u16*)(JumpTableFunc + 0x3E);
 		dbg_printf("Eeprom page erase branch:\t");
@@ -123,7 +123,7 @@ u32 savePatchV5(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, const u3
 		dbg_printf("Eeprom page erase:\t");
 		dbg_hexa((u32)eepromPageErase);
 		dbg_printf("\n");
-		__aeabi_memcpy(eepromPageErase, (u16*)ce7->patches->arm7FunctionsThumb->eepromPageErase, 0x14);
+		tonccpy(eepromPageErase, (u16*)ce7->patches->arm7FunctionsThumb->eepromPageErase, 0x14);
 	} else {
 		if (*(u32*)(JumpTableFunc - 0x24) == 0xEBFFFFB3) {
 			u32* cardId = (u32*) (JumpTableFunc - 0x24);

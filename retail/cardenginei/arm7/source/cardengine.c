@@ -31,7 +31,7 @@
 #include <nds/debug.h>
 
 #include "ndma.h"
-#include "aeabi.h"
+#include "tonccpy.h"
 #include "my_sdmmc.h"
 #include "my_fat.h"
 #include "locations.h"
@@ -210,14 +210,14 @@ u32 currentSrlAddr = 0;
 void i2cIRQHandler(void);
 
 static void unlaunchSetFilename(bool boot) {
-	__aeabi_memcpy((u8*)0x02000800, unlaunchAutoLoadID, 12);
+	tonccpy((u8*)0x02000800, unlaunchAutoLoadID, 12);
 	*(u16*)(0x0200080C) = 0x3F0;		// Unlaunch Length for CRC16 (fixed, must be 3F0h)
 	*(u16*)(0x0200080E) = 0;			// Unlaunch CRC16 (empty)
 	*(u32*)(0x02000810) = (BIT(0) | BIT(1));		// Load the title at 2000838h
 													// Use colors 2000814h
 	*(u16*)(0x02000814) = 0x7FFF;		// Unlaunch Upper screen BG color (0..7FFFh)
 	*(u16*)(0x02000816) = 0x7FFF;		// Unlaunch Lower screen BG color (0..7FFFh)
-	__aeabi_memclr((u8*)0x02000818, 0x20+0x208+0x1C0);		// Unlaunch Reserved (zero)
+	toncset((u8*)0x02000818, 0, 0x20+0x208+0x1C0);		// Unlaunch Reserved (zero)
 	int i2 = 0;
 	if (boot) {
 		for (int i = 0; i < (int)sizeof(bootNdsPath); i++) {
@@ -240,14 +240,14 @@ static void unlaunchSetFilename(bool boot) {
 static void unlaunchSetHiyaFilename(void) {
 	if (!(valueBits & hiyaCfwFound)) return;
 
-	__aeabi_memcpy((u8*)0x02000800, unlaunchAutoLoadID, 12);
+	tonccpy((u8*)0x02000800, unlaunchAutoLoadID, 12);
 	*(u16*)(0x0200080C) = 0x3F0;		// Unlaunch Length for CRC16 (fixed, must be 3F0h)
 	*(u16*)(0x0200080E) = 0;			// Unlaunch CRC16 (empty)
 	*(u32*)(0x02000810) = (BIT(0) | BIT(1));		// Load the title at 2000838h
 													// Use colors 2000814h
 	*(u16*)(0x02000814) = 0x7FFF;		// Unlaunch Upper screen BG color (0..7FFFh)
 	*(u16*)(0x02000816) = 0x7FFF;		// Unlaunch Lower screen BG color (0..7FFFh)
-	__aeabi_memclr((u8*)0x02000818, 0x20+0x208+0x1C0);		// Unlaunch Reserved (zero)
+	toncset((u8*)0x02000818, 0, 0x20+0x208+0x1C0);		// Unlaunch Reserved (zero)
 	int i2 = 0;
 	for (int i = 0; i < (int)sizeof(hiyaDSiPath); i++) {
 		*(u8*)(0x02000838+i2) = hiyaDSiPath[i];				// Unlaunch Device:/Path/Filename.ext (16bit Unicode,end by 0000h)
@@ -381,7 +381,7 @@ static void initialize(void) {
 	}
 
 	if (!bootloaderCleared) {
-		__aeabi_memclr((u8*)0x06000000, 0x40000);	// Clear bootloader
+		toncset((u8*)0x06000000, 0, 0x40000);	// Clear bootloader
 		if (mainScreen) {
 			swapScreens = (mainScreen == 2);
 			ipcEveryFrame = true;
@@ -430,9 +430,9 @@ static void cardReadRAM(u8* dst, u32 src, u32 len/*, int romPartNo*/) {
 	if (src > *(u32*)0x02FFE1C0) {
 		newSrc -= *(u32*)0x02FFE1CC;
 	}
-	__aeabi_memcpy(dst, (u8*)newSrc, len);
+	tonccpy(dst, (u8*)newSrc, len);
 	#else
-	// __aeabi_memcpy(dst, (u8*)romLocation/*[romPartNo]*/+src, len);
+	// tonccpy(dst, (u8*)romLocation/*[romPartNo]*/+src, len);
 	u32 len2 = 0;
 	for (int i = 0; i < romMapLines; i++) {
 		if (!(src >= romMap[i][0] && (i == romMapLines-1 || src < romMap[i+1][0])))
@@ -444,11 +444,11 @@ static void cardReadRAM(u8* dst, u32 src, u32 len/*, int romPartNo*/) {
 				len--;
 				len2++;
 			} while (newSrc+len != romMap[i][2]);
-			__aeabi_memcpy(dst, (u8*)newSrc, len);
+			tonccpy(dst, (u8*)newSrc, len);
 			src += len;
 			dst += len;
 		} else {
-			__aeabi_memcpy(dst, (u8*)newSrc, len2==0 ? len : len2);
+			tonccpy(dst, (u8*)newSrc, len2==0 ? len : len2);
 			break;
 		}
 	}
@@ -470,14 +470,14 @@ void reset(void) {
 			fileWrite((char*)0x022C0000, &pageFile, 0x2C0000, ndsHeader->arm7binarySize);
 		}
 		fileWrite((char*)resetParam, &srParamsFile, 0, 0x10);
-		__aeabi_memclr((u32*)0x02000000, 0x400);
+		toncset((u32*)0x02000000, 0, 0x400);
 		*(u32*)0x02000000 = BIT(3);
 		*(u32*)0x02000004 = 0x54455352; // 'RSET'
 		if (consoleModel < 2) {
 			(*(u32*)(ce7+0x11900) == 0 && (valueBits & b_dsiSD)) ? unlaunchSetFilename(false) : unlaunchSetHiyaFilename();
 		}
 		if (*(u32*)(ce7+0x11900) == 0 && (valueBits & b_dsiSD)) {
-			__aeabi_memcpy((u32*)0x02000300, sr_data_srloader, 0x20);
+			tonccpy((u32*)0x02000300, sr_data_srloader, 0x20);
 		} else {
 			// Use different SR backend ID
 			readSrBackendId();
@@ -549,7 +549,7 @@ void reset(void) {
 			if (*(u32*)(resetParam+8) == 0x44414F4C) {
 				ndmaCopyWordsAsynch(1, (u32*)0x022C0000, ndsHeader->arm7destination, ndsHeader->arm7binarySize);
 				*((u16*)(/*isSdk5(moduleParams) ? 0x02fffc40 :*/ 0x027ffc40)) = 2; // Boot Indicator (Cloneboot/Multiboot)
-				// __aeabi_memcpy((u32*)0x027FFC40, (u32*)0x02344820, 0x40); // Multiboot info?
+				// tonccpy((u32*)0x027FFC40, (u32*)0x02344820, 0x40); // Multiboot info?
 			} else if (valueBits & ROMinRAM) {
 				cardReadRAM((u8*)ndsHeader, currentSrlAddr, 0x160);
 				cardReadRAM((u8*)ndsHeader->arm9destination, currentSrlAddr+ndsHeader->arm9romOffset, ndsHeader->arm9binarySize);
@@ -605,9 +605,9 @@ void reset(void) {
 			while (ndmaBusy(0) || ndmaBusy(1));
 		} */
 		if (valueBits & isDlp) {
-			__aeabi_memclr((u32*)0x022C0000, ndsHeader->arm7binarySize);
+			toncset((u32*)0x022C0000, 0, ndsHeader->arm7binarySize);
 			if (!(valueBits & isSdk5)) {
-				__aeabi_memcpy((u8*)0x027FF000, (u8*)0x02FFF000, 0x1000);
+				tonccpy((u8*)0x027FF000, (u8*)0x02FFF000, 0x1000);
 			}
 		} else {
 			*(u32*)(resetParam+8) = 0;
@@ -652,8 +652,8 @@ void reset(void) {
 	}
 	//if (doBak) restoreSdBakData();
 	#endif
-	__aeabi_memclr((char*)((valueBits & isSdk5) ? 0x02FFFD80 : 0x027FFD80), 0x80);
-	__aeabi_memclr((char*)((valueBits & isSdk5) ? 0x02FFFF80 : 0x027FFF80), 0x80);
+	toncset((char*)((valueBits & isSdk5) ? 0x02FFFD80 : 0x027FFD80), 0, 0x80);
+	toncset((char*)((valueBits & isSdk5) ? 0x02FFFF80 : 0x027FFF80), 0, 0x80);
 
 	sharedAddr[0] = 0x44414F4C; // 'LOAD'
 
@@ -745,7 +745,7 @@ static void cardReadLED(bool on, bool dmaLed) {
 extern void inGameMenu(void);
 
 void forceGameReboot(void) {
-	__aeabi_memclr((u32*)0x02000000, 0x400);
+	toncset((u32*)0x02000000, 0, 0x400);
 	*(u32*)0x02000000 = BIT(3);
 	*(u32*)0x02000004 = 0x54455352; // 'RSET'
 	sharedAddr[4] = 0x57534352;
@@ -774,7 +774,7 @@ void forceGameReboot(void) {
 	if (*(u32*)(ce7+0x11900) == 0 && (valueBits & b_dsiSD))
 	#endif
 	{
-		__aeabi_memcpy((u32*)0x02000300, sr_data_srloader, 0x20);
+		tonccpy((u32*)0x02000300, sr_data_srloader, 0x20);
 	} else {
 		// Use different SR backend ID
 		readSrBackendId();
@@ -801,20 +801,20 @@ extern bool dldiPatchBinary (unsigned char *binData, u32 binSize);
 #endif
 
 void returnToLoader(bool reboot) {
-	__aeabi_memclr((u32*)0x02000000, 0x400);
+	toncset((u32*)0x02000000, 0, 0x400);
 	*(u32*)0x02000000 = BIT(0) | BIT(1) | BIT(2);
 	*(u32*)0x02000004 = 0x54455352; // 'RSET'
 	sharedAddr[4] = 0x57534352;
 #ifdef TWLSDK
 	u32 twlCfgLoc = *(u32*)0x02FFFDFC;
 	if (twlCfgLoc != 0x02000400) {
-		__aeabi_memcpy((u8*)0x02000400, (u8*)twlCfgLoc, 0x128);
+		tonccpy((u8*)0x02000400, (u8*)twlCfgLoc, 0x128);
 	}
 
 	if (reboot || !(valueBits & dsiBios) || ((valueBits & twlTouch) && !(*(u8*)0x02FFE1BF & BIT(0))) || ((valueBits & b_dsiSD) && (valueBits & wideCheatUsed))) {
 		if (consoleModel >= 2) {
 			if (*(u32*)(ce7+0x8500) == 0) {
-				__aeabi_memcpy((u32*)0x02000300, sr_data_srloader, 0x020);
+				tonccpy((u32*)0x02000300, sr_data_srloader, 0x020);
 			} else if (*(char*)(ce7+0x8503) == 'H' || *(char*)(ce7+0x8503) == 'K') {
 				// Use different SR backend ID
 				readSrBackendId();
@@ -924,7 +924,7 @@ void returnToLoader(bool reboot) {
 	if (consoleModel >= 2) {
 		if (*(u32*)(ce7+0x11900) == 0 && (valueBits & b_dsiSD))
 		{
-			__aeabi_memcpy((u32*)0x02000300, sr_data_srloader, 0x020);
+			tonccpy((u32*)0x02000300, sr_data_srloader, 0x020);
 		}
 		else if (*(char*)(ce7+0x11903) == 'H' || *(char*)(ce7+0x11903) == 'K')
 		{
@@ -1063,7 +1063,7 @@ void readManual(int line) {
 		}
 	}
 
-	__aeabi_memset((u8*)INGAME_MENU_EXT_LOCATION, 32 * 24, ' ');
+	toncset((u8*)INGAME_MENU_EXT_LOCATION, ' ', 32 * 24);
 	((vu8*)INGAME_MENU_EXT_LOCATION)[32 * 24] = '\0';
 
 	// Read in 24 lines
@@ -1082,7 +1082,7 @@ void readManual(int line) {
 				if(buffer[i] == '\n')
 					tempManualOffset++;
 				fullLine = i == 32;
-				__aeabi_memcpy((char*)INGAME_MENU_EXT_LOCATION + line * 32, buffer, i);
+				tonccpy((char*)INGAME_MENU_EXT_LOCATION + line * 32, buffer, i);
 				break;
 			}
 		}
@@ -1602,7 +1602,7 @@ void myIrqHandlerVBlank(void) {
 
 #ifndef TWLSDK
 	if (!(valueBits & gameOnFlashcard) && !(valueBits & ROMinRAM) && isSdEjected()) {
-		__aeabi_memcpy((u32*)0x02000300, sr_data_error, 0x020);
+		tonccpy((u32*)0x02000300, sr_data_error, 0x020);
 		i2cWriteRegister(0x4A, 0x70, 0x01);
 		i2cWriteRegister(0x4A, 0x11, 0x01);		// Reboot into error screen if SD card is removed
 	}
@@ -1932,10 +1932,9 @@ bool eepromRead(u32 src, void *dst, u32 len) {
 		#endif
 		//driveInitialize();
 		/*if (saveInRam) {
-			__aeabi_memcpy(dst, (char*)0x02440000 + src, len);
+			tonccpy(dst, (char*)0x02440000 + src, len);
 		} else {*/
 			sdmmc_set_ndma_slot(4);
-			#ifndef TWLSDK
 			if ((u32)(src % saveSize)+len > saveSize) {
 				u32 len2 = len;
 				u32 len3 = 0;
@@ -1945,9 +1944,9 @@ bool eepromRead(u32 src, void *dst, u32 len) {
 				}
 				fileRead(dst, savFile, (src % saveSize), len2);
 				fileRead(dst+len2, savFile, ((src+len2) % saveSize), len3);
-			} else
-			#endif
-				{ fileRead(dst, savFile, (src % saveSize), len); }
+			} else {
+				fileRead(dst, savFile, (src % saveSize), len);
+			}
 			sdmmc_set_ndma_slot(0);
 		//}
 		#ifdef TWLSDK
@@ -1984,10 +1983,9 @@ bool eepromPageWrite(u32 dst, const void *src, u32 len) {
 		saveTimer = 1;
 		//i2cWriteRegister(0x4A, 0x12, 0x01);		// When we're saving, power button does nothing, in order to prevent corruption.
 		/*if (saveInRam) {
-			__aeabi_memcpy((char*)0x02440000 + dst, src, len);
+			tonccpy((char*)0x02440000 + dst, src, len);
 		}*/
 		sdmmc_set_ndma_slot(4);
-		#ifndef TWLSDK
 		if ((dst % saveSize)+len > saveSize) {
 			u32 len2 = len;
 			u32 len3 = 0;
@@ -1997,9 +1995,9 @@ bool eepromPageWrite(u32 dst, const void *src, u32 len) {
 			}
 			fileWrite(src, savFile, (dst % saveSize), len2);
 			fileWrite(src+len2, savFile, ((dst+len2) % saveSize), len3);
-		} else
-		#endif
-			{ fileWrite(src, savFile, (dst % saveSize), len); }
+		} else {
+			fileWrite(src, savFile, (dst % saveSize), len);
+		}
 		sdmmc_set_ndma_slot(0);
 		#ifdef TWLSDK
 		//if (doBak) restoreSdBakData();
@@ -2035,10 +2033,9 @@ bool eepromPageProg(u32 dst, const void *src, u32 len) {
 		saveTimer = 1;
 		//i2cWriteRegister(0x4A, 0x12, 0x01);		// When we're saving, power button does nothing, in order to prevent corruption.
 		/*if (saveInRam) {
-			__aeabi_memcpy((char*)0x02440000 + dst, src, len);
+			tonccpy((char*)0x02440000 + dst, src, len);
 		}*/
 		sdmmc_set_ndma_slot(4);
-		#ifndef TWLSDK
 		if ((dst % saveSize)+len > saveSize) {
 			u32 len2 = len;
 			u32 len3 = 0;
@@ -2048,9 +2045,9 @@ bool eepromPageProg(u32 dst, const void *src, u32 len) {
 			}
 			fileWrite(src, savFile, (dst % saveSize), len2);
 			fileWrite(src+len2, savFile, ((dst+len2) % saveSize), len3);
-		} else
-		#endif
-			{ fileWrite(src, savFile, (dst % saveSize), len); }
+		} else {
+			fileWrite(src, savFile, (dst % saveSize), len);
+		}
 		sdmmc_set_ndma_slot(0);
   		#ifdef TWLSDK
 		//if (doBak) restoreSdBakData();

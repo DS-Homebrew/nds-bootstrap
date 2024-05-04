@@ -33,7 +33,7 @@
 
 #include "myDSiMode.h"
 #include "lzss.h"
-#include "aeabi.h"
+#include "tonccpy.h"
 #include "hex.h"
 #include "configuration.h"
 #include "nds_loader_arm9.h"
@@ -180,7 +180,7 @@ static bool dldiPatchLoader (data_t *binData, u32 binSize, bool clearBSS)
 	// Remember how much space is actually reserved
 	pDH[DO_allocatedSpace] = pAH[DO_allocatedSpace];
 	// Copy the DLDI patch into the application
-	__aeabi_memcpy (pAH, pDH, dldiFileSize);
+	tonccpy (pAH, pDH, dldiFileSize);
 
 	// Fix the section pointers in the header
 	writeAddr (pAH, DO_text_start, readAddr (pAH, DO_text_start) + relocationOffset);
@@ -228,7 +228,7 @@ static bool dldiPatchLoader (data_t *binData, u32 binSize, bool clearBSS)
 
 	if (clearBSS && (pDH[DO_fixSections] & FIX_BSS)) { 
 		// Initialise the BSS to 0, only if the disc is being re-inited
-		__aeabi_memset (&pAH[readAddr(pDH, DO_bss_start) - ddmemStart] , 0, readAddr(pDH, DO_bss_end) - readAddr(pDH, DO_bss_start));
+		toncset (&pAH[readAddr(pDH, DO_bss_start) - ddmemStart] , 0, readAddr(pDH, DO_bss_end) - readAddr(pDH, DO_bss_start));
 	}
 
 	return true;
@@ -310,7 +310,7 @@ int runNds(u32 cluster, u32 saveCluster, u32 donorTwlCluster, u32 gbaCluster, u3
 	// Set the parameters for the loader
 
 	// Load the loader into the correct address
-	__aeabi_memcpy(lc0, loader, 0x40000); //vramcpy(LCDC_BANK_D, loader, loaderSize);
+	tonccpy(lc0, loader, 0x40000); //vramcpy(LCDC_BANK_D, loader, loaderSize);
 
 	if(conf->gameOnFlashcard || conf->saveOnFlashcard) {
 		// Patch the loader with a DLDI for the card

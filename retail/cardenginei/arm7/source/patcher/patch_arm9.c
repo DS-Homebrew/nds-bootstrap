@@ -9,7 +9,7 @@
 #include "cardengine_header_arm9.h"
 #include "unpatched_funcs.h"
 //#include "debug_file.h"
-#include "aeabi.h"
+#include "tonccpy.h"
 
 #define gameOnFlashcard BIT(0)
 #define ROMinRAM BIT(3)
@@ -42,7 +42,7 @@ static void fixForDifferentBios(const cardengineArm9* ce9, const tNDSHeader* nds
 	if (swi12Offset) {
 		// Patch to call swi 0x02 instead of 0x12
 		u32* swi12Patch = ce9->patches->swi02;
-		__aeabi_memcpy(swi12Offset, swi12Patch, 0x4);
+		tonccpy(swi12Offset, swi12Patch, 0x4);
 	}
 
 	/*dbg_printf("swi12 location : ");
@@ -143,7 +143,7 @@ static bool patchCardRead(cardengineArm9* ce9, const tNDSHeader* ndsHeader, cons
 
 	// Patch
 	u32* cardReadPatch = (usesThumb ? ce9->thumbPatches->card_read_arm9 : ce9->patches->card_read_arm9);
-	__aeabi_memcpy(cardReadStartOffset, cardReadPatch, usesThumb ? ((moduleParams->sdk_version > 0x5000000) ? 0xB0 : 0xA0) : 0xE0); // 0xE0 = 0xF0 - 0x08
+	tonccpy(cardReadStartOffset, cardReadPatch, usesThumb ? ((moduleParams->sdk_version > 0x5000000) ? 0xB0 : 0xA0) : 0xE0); // 0xE0 = 0xF0 - 0x08
     /* dbg_printf("cardRead location : ");
     dbg_hexa((u32)cardReadStartOffset);
     dbg_printf("\n");
@@ -192,7 +192,7 @@ static void patchCardPullOut(cardengineArm9* ce9, const tNDSHeader* ndsHeader, c
 
 	// Patch
 	u32* cardPullOutPatch = (usesThumb ? ce9->thumbPatches->card_pull_out_arm9 : ce9->patches->card_pull_out_arm9);
-	__aeabi_memcpy(cardPullOutOffset, cardPullOutPatch, usesThumb ? 0x2 : 0x30);
+	tonccpy(cardPullOutOffset, cardPullOutPatch, usesThumb ? 0x2 : 0x30);
     /* dbg_printf("cardPullOut location : ");
     dbg_hexa((u32)cardPullOutOffset);
     dbg_printf("\n\n"); */
@@ -227,7 +227,7 @@ static void patchCardId(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const 
 	if (cardIdStartOffset) {
         // Patch
 		u32* cardIdPatch = (usesThumb ? ce9->thumbPatches->card_id_arm9 : ce9->patches->card_id_arm9);
-		__aeabi_memcpy(cardIdStartOffset, cardIdPatch, usesThumb ? 0x8 : 0xC);
+		tonccpy(cardIdStartOffset, cardIdPatch, usesThumb ? 0x8 : 0xC);
 		/* dbg_printf("cardId location : ");
 		dbg_hexa((u32)cardIdStartOffset);
 		dbg_printf("\n\n"); */
@@ -251,7 +251,7 @@ static void patchCardReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, c
 	}
 	// Patch
 	u32* cardReadDmaPatch = (usesThumb ? ce9->thumbPatches->card_dma_arm9 : ce9->patches->card_dma_arm9);
-	__aeabi_memcpy(cardReadDmaStartOffset, cardReadDmaPatch, 0x40);
+	tonccpy(cardReadDmaStartOffset, cardReadDmaPatch, 0x40);
     /*dbg_printf("cardReadDma location : ");
     dbg_hexa((u32)cardReadDmaStartOffset);
     dbg_printf("\n\n");*/
@@ -381,7 +381,7 @@ static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, co
     dbg_hexa((u32)setDmaoffset);
     dbg_printf("\n\n");*/
       u32* cardSetDmaPatch = (usesThumb ? ce9->thumbPatches->card_set_dma_arm9 : ce9->patches->card_set_dma_arm9);
-	  __aeabi_memcpy(setDmaoffset, cardSetDmaPatch, 0x30);
+	  tonccpy(setDmaoffset, cardSetDmaPatch, 0x30);
 	  setDmaPatched = true;
 
       return true;  
@@ -401,7 +401,7 @@ static void patchReset(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const m
 
 	// Patch
 	u32* resetPatch = ce9->patches->reset_arm9;
-	__aeabi_memcpy(reset, resetPatch, 0x40);
+	tonccpy(reset, resetPatch, 0x40);
 	/*dbg_printf("reset location : ");
 	dbg_hexa((u32)reset);
 	dbg_printf("\n\n");*/
@@ -461,7 +461,7 @@ bool a9PatchCardIrqEnable(cardengineArm9* ce9, const tNDSHeader* ndsHeader, cons
 		return false;
 	}
 	u32* cardIrqEnablePatch = (usesThumb ? ce9->thumbPatches->card_irq_enable : ce9->patches->card_irq_enable);
-	__aeabi_memcpy(cardIrqEnableOffset, cardIrqEnablePatch, usesThumb ? 0x18 : 0x30);
+	tonccpy(cardIrqEnableOffset, cardIrqEnablePatch, usesThumb ? 0x18 : 0x30);
     /*dbg_printf("cardIrqEnable location : ");
     dbg_hexa((u32)cardIrqEnableOffset);
     dbg_printf("\n\n");*/

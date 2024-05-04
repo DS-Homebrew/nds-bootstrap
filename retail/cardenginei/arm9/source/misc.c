@@ -25,7 +25,7 @@
 #include <nds/ipc.h>
 #include <nds/timers.h>
 #include <nds/memory.h> // tNDSHeader
-#include "aeabi.h"
+#include "tonccpy.h"
 #include "nds_header.h"
 #include "cardengine.h"
 #include "locations.h"
@@ -247,7 +247,7 @@ void reset(u32 param, u32 tid2) {
 		}
 #endif
 	} else {
-		__aeabi_memclr((u8*)getDtcmBase()+0x3E00, 0x200);
+		toncset((u8*)getDtcmBase()+0x3E00, 0, 0x200);
 #ifdef TWLSDK
 		if (ce9->intr_vblank_orig_return && (*(u32*)0x02FFE234 == 0x00030004 || *(u32*)0x02FFE234 == 0x00030005)) {
 			*(u32*)0x02FFC230 = 0;
@@ -284,8 +284,8 @@ void reset(u32 param, u32 tid2) {
 		REG_DISPCNT_SUB = 0;
 		GFX_STATUS = 0;
 
-		__aeabi_memclr((u16*)0x04000000, 0x56);
-		__aeabi_memclr((u16*)0x04001000, 0x56);
+		toncset((u16*)0x04000000, 0, 0x56);
+		toncset((u16*)0x04001000, 0, 0x56);
 
 		VRAM_A_CR = 0x80;
 		VRAM_B_CR = 0x80;
@@ -297,9 +297,9 @@ void reset(u32 param, u32 tid2) {
 		VRAM_H_CR = 0x80;
 		VRAM_I_CR = 0x80;
 
-		__aeabi_memclr(BG_PALETTE, 256*sizeof(u16)); // Clear palettes
-		__aeabi_memclr(BG_PALETTE_SUB, 256*sizeof(u16));
-		__aeabi_memclr(VRAM, 0xC0000); // Clear VRAM
+		toncset16(BG_PALETTE, 0, 256); // Clear palettes
+		toncset16(BG_PALETTE_SUB, 0, 256);
+		toncset(VRAM, 0, 0xC0000); // Clear VRAM
 
 		VRAM_A_CR = 0;
 		VRAM_B_CR = 0;

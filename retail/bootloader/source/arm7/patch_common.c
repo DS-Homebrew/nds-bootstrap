@@ -25,7 +25,7 @@
 #include "patch.h"
 #include "common.h"
 #include "locations.h"
-#include "aeabi.h"
+#include "tonccpy.h"
 #include "loading_screen.h"
 #include "debug_file.h"
 
@@ -450,38 +450,38 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
     else if (strcmp(romTid, "CTXE") == 0) {
 		extern u32 baseChipID;
 		u32 cardIdFunc[2] = {0, 0};
-		__aeabi_memcpy(cardIdFunc, ce9->thumbPatches->card_id_arm9, 0x4);
+		tonccpy(cardIdFunc, ce9->thumbPatches->card_id_arm9, 0x4);
 		cardIdFunc[1] = baseChipID;
 
 		const u16* branchCode1 = generateA7InstrThumb(0x020BA666, 0x020BA670);
-		__aeabi_memcpy((void*)0x020BA666, branchCode1, 0x4);
+		tonccpy((void*)0x020BA666, branchCode1, 0x4);
 
-		__aeabi_memcpy((void*)0x020BA670, cardIdFunc, 0x8);
+		tonccpy((void*)0x020BA670, cardIdFunc, 0x8);
 
 		const u16* branchCode2 = generateA7InstrThumb(0x020BA66A, 0x020BA6C0);
-		__aeabi_memcpy((void*)0x020BA66A, branchCode2, 0x4);
+		tonccpy((void*)0x020BA66A, branchCode2, 0x4);
 
-		/* __aeabi_memcpy((void*)0x020BA728, ce9->thumbPatches->card_set_dma_arm9, 0xC);
+		/* tonccpy((void*)0x020BA728, ce9->thumbPatches->card_set_dma_arm9, 0xC);
 
 		const u16* branchCode3 = generateA7InstrThumb(0x020BA70C, 0x020BA728);
-		__aeabi_memcpy((void*)0x020BA70C, branchCode3, 0x4);
+		tonccpy((void*)0x020BA70C, branchCode3, 0x4);
 		*(u16*)0x020BA710 = 0xBDF8; */
 
 		const u16* branchCode4 = generateA7InstrThumb(0x020BAAA2, 0x020BAAAC);
-		__aeabi_memcpy((void*)0x020BAAA2, branchCode4, 0x4);
+		tonccpy((void*)0x020BAAA2, branchCode4, 0x4);
 
-		__aeabi_memcpy((void*)0x020BAAAC, cardIdFunc, 0x8);
+		tonccpy((void*)0x020BAAAC, cardIdFunc, 0x8);
 
 		const u16* branchCode5 = generateA7InstrThumb(0x020BAAA6, 0x020BAAFC);
-		__aeabi_memcpy((void*)0x020BAAA6, branchCode5, 0x4);
+		tonccpy((void*)0x020BAAA6, branchCode5, 0x4);
 
 		const u16* branchCode6 = generateA7InstrThumb(0x020BAC5C, 0x020BAC64);
-		__aeabi_memcpy((void*)0x020BAC5C, branchCode6, 0x4);
+		tonccpy((void*)0x020BAC5C, branchCode6, 0x4);
 
-		__aeabi_memcpy((void*)0x020BAC64, cardIdFunc, 0x8);
+		tonccpy((void*)0x020BAC64, cardIdFunc, 0x8);
 
 		const u16* branchCode7 = generateA7InstrThumb(0x020BAC60, 0x020BACB6);
-		__aeabi_memcpy((void*)0x020BAC60, branchCode7, 0x4);
+		tonccpy((void*)0x020BAC60, branchCode7, 0x4);
 	}
 
 	// Shantae DSi (03/06/09 build)

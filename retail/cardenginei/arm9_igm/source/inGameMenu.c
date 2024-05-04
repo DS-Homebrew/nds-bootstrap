@@ -12,7 +12,7 @@
 #include "locations.h"
 #include "cardengine_header_arm9.h"
 #include "nds_header.h"
-#include "aeabi.h"
+#include "tonccpy.h"
 
 void DC_InvalidateRange(const void *base, u32 size);
 void DC_FlushRange(const void *base, u32 size);
@@ -203,7 +203,7 @@ static void waitKeys(u16 keys) {
 }
 
 void clearScreen(bool main) {
-	__aeabi_memclr(main ? BG_MAP_RAM(15) : BG_MAP_RAM_SUB(15), 0x300*sizeof(u16));
+	toncset16(main ? BG_MAP_RAM(15) : BG_MAP_RAM_SUB(15), 0, 0x300);
 }
 
 #define VRAM_x(bank) ((u16*)(0x6800000 + (0x0020000 * (bank))))
@@ -242,12 +242,10 @@ static void screenshot(void) {
 
 		clearScreen(false);
 
-		for (int i = 0; i < 20; i++) {
-			printChar(5 + i, 9, '-', FONT_WHITE, false);
-			printChar(5 + i, 13, '-', FONT_WHITE, false);
-		}
+		toncset16(BG_MAP_RAM_SUB(15) + 0x20 * 9 + 5, '-', 20);
 		printCenter(15, 10, igmText.selectBank, FONT_WHITE, false);
 		printChar(15, 12, 'A' + vramBank, FONT_LIGHT_BLUE, false);
+		toncset16(BG_MAP_RAM_SUB(15) + 0x20 * 13 + 5, '-', 20);
 
 		FontPalette color = igmText.currentScreenshot == 50 ? FONT_RED : FONT_LIME;
 		if(igmText.rtl) {
@@ -291,12 +289,12 @@ static void screenshot(void) {
 	#endif
 
 	// Backup VRAM bank
-	__aeabi_memcpy(vramBak, VRAM_x(vramBank), 0x18000);
+	tonccpy(vramBak, VRAM_x(vramBank), 0x18000);
 
 	REG_DISPCAPCNT = DCAP_BANK(vramBank) | DCAP_SIZE(DCAP_SIZE_256x192) | DCAP_MODE(captureMode) | DCAP_ENABLE;
 	while(REG_DISPCAPCNT & DCAP_ENABLE);
 
-	__aeabi_memcpy(bmpBuffer, bmpHeader, sizeof(bmpHeader));
+	tonccpy(bmpBuffer, bmpHeader, sizeof(bmpHeader));
 
 	// ABGR 1555 -> RGB 565
 	for (int i = 0; i < 256 * 192; i++) {
@@ -307,12 +305,12 @@ static void screenshot(void) {
 	// Write image data, upside down as that's how BMPs want it
 	u16 *bmp = bmpBuffer + sizeof(bmpHeader) / sizeof(u16);
 	for(int i = 191; i >= 0; i--) {
-		__aeabi_memcpy(bmp, VRAM_x(vramBank) + (i * 256), 256 * sizeof(u16));
+		tonccpy(bmp, VRAM_x(vramBank) + (i * 256), 256 * sizeof(u16));
 		bmp += 256;
 	}
 
 	// Restore VRAM bank
-	__aeabi_memcpy(VRAM_x(vramBank), vramBak, 0x18000);
+	tonccpy(VRAM_x(vramBank), vramBak, 0x18000);
 	VRAM_x_CR(vramBank) = vramCr;
 
 	#ifdef B4DS
@@ -584,13 +582,11 @@ static void jumpToAddress(void) {
 
 	u8 cursorPosition = 0;
 	while(1) {
-		for (int i = 0; i < 20; i++) {
-			printChar(5 + i, 9, '-', FONT_WHITE, false);
-			printChar(5 + i, 13, '-', FONT_WHITE, false);
-		}
+		toncset16(BG_MAP_RAM_SUB(15) + 0x20 * 9 + 5, '-', 20);
 		printCenter(15, 10, igmText.jumpAddress, FONT_WHITE, false);
 		printHex(11, 12, (u32)address, 4, FONT_LIGHT_BLUE, false);
 		BG_MAP_RAM_SUB(15)[0x20 * 12 + 11 + 6 - cursorPosition] = (BG_MAP_RAM_SUB(15)[0x20 * 12 + 11 + 6 - cursorPosition] & ~(0xF << 12)) | 4 << 12;
+		toncset16(BG_MAP_RAM_SUB(15) + 0x20 * 13 + 5, '-', 20);
 
 		waitKeys(KEY_UP | KEY_DOWN | KEY_LEFT | KEY_RIGHT | KEY_A | KEY_B);
 
@@ -615,7 +611,7 @@ static void ramViewer(void) {
 	(*changeMpu)();
 
 	u8 *arm7RamBuffer = ((u8*)sharedAddr) - 0x74C;
-	__aeabi_memcpy(arm7RamBak, arm7RamBuffer, 0xC0);
+	tonccpy(arm7RamBak, arm7RamBuffer, 0xC0);
 	bool ramLoaded = false;
 	u8 cursorPosition = 0, mode = 0;
 	while(1) {
@@ -752,7 +748,7 @@ static void ramViewer(void) {
 			}
 		}
 	}
-	__aeabi_memcpy(arm7RamBuffer, arm7RamBak, 0xC0);
+	tonccpy(arm7RamBuffer, arm7RamBak, 0xC0);
 	(*revertMpu)();
 }
 
@@ -811,16 +807,16 @@ void inGameMenu(s32 *mainScreen, u32 consoleModel, s32 *exceptionRegisters) {
 	REG_BLDALPHA_SUB = 0; // Register is write only, can't back up
 	REG_BLDY_SUB = 0; // Register is write only, can't back up
 
-	__aeabi_memcpy(bgMapBak, BG_MAP_RAM_SUB(15), sizeof(bgMapBak));	// Backup BG_MAP_RAM
+	tonccpy(bgMapBak, BG_MAP_RAM_SUB(15), sizeof(bgMapBak));	// Backup BG_MAP_RAM
 	clearScreen(false);
 
-	__aeabi_memcpy(palBak, BG_PALETTE_SUB, sizeof(palBak));	// Backup the palette
-	__aeabi_memclr(BG_PALETTE_SUB, 256*sizeof(u16));
+	tonccpy(palBak, BG_PALETTE_SUB, sizeof(palBak));	// Backup the palette
+	toncset16(BG_PALETTE_SUB, 0, 256);
 	for(int i = 0; i < sizeof(igmPal) / sizeof(igmPal[0]); i++) {
 		BG_PALETTE_SUB[i * 0x10 + 1] = igmPal[i];
 	}
 
-	__aeabi_memcpy(bgBak, BG_GFX_SUB, sizeof(igmText.font) * 4);	// Backup the original graphics
+	tonccpy(bgBak, BG_GFX_SUB, sizeof(igmText.font) * 4);	// Backup the original graphics
 	for(int i = 0; i < sizeof(igmText.font); i++) {	// Load font from 1bpp to 4bpp
 		u8 val = igmText.font[i];
 		BG_GFX_SUB[i * 2]     = (val & 1) | ((val & 2) << 3) | ((val & 4) << 6) | ((val & 8) << 9);
@@ -954,9 +950,9 @@ void inGameMenu(s32 *mainScreen, u32 consoleModel, s32 *exceptionRegisters) {
 		} */
 	}
 
-	__aeabi_memcpy(BG_MAP_RAM_SUB(15), bgMapBak, sizeof(bgMapBak));	// Restore BG_MAP_RAM
-	__aeabi_memcpy(BG_PALETTE_SUB, palBak, sizeof(palBak));	// Restore the palette
-	__aeabi_memcpy(BG_GFX_SUB, bgBak, sizeof(igmText.font) * 4);	// Restore the original graphics
+	tonccpy(BG_MAP_RAM_SUB(15), bgMapBak, sizeof(bgMapBak));	// Restore BG_MAP_RAM
+	tonccpy(BG_PALETTE_SUB, palBak, sizeof(palBak));	// Restore the palette
+	tonccpy(BG_GFX_SUB, bgBak, sizeof(igmText.font) * 4);	// Restore the original graphics
 
 	*(vu16*)0x0400106C = masterBright;
 
