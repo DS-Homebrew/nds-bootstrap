@@ -1432,12 +1432,16 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			screenshotPath = "fat:/_nds/nds-bootstrap/screenshots.tar";
 		}
 
-		if (access(screenshotPath.c_str(), F_OK) != 0) {
+		if (getFileSize(screenshotPath.c_str()) < 0x4BCC00) {
 			char buffer[2][0x100] = {{0}};
 
 			consoleDemoInit();
 			iprintf("Creating screenshots.tar\n");
-			iprintf("Please wait...\n");
+			iprintf("Please wait...");
+
+			if (access(screenshotPath.c_str(), F_OK) == 0) {
+				remove(screenshotPath.c_str());
+			}
 
 			FILE *headerFile = fopen("nitro:/screenshotTarHeaders.bin", "rb");
 			if (headerFile) {
@@ -1460,6 +1464,11 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			}
 
 			consoleClear();
+			if (getFileSize(screenshotPath.c_str()) < 0x4BCC00) {
+				consoleDemoInit();
+				iprintf("Failed to create screenshots.tar");
+				while (1) swiWaitForVBlank();
+			}
 			igmText->currentScreenshot = 0;
 		} else {
 			FILE *screenshotFile = fopen(screenshotPath.c_str(), "rb");
@@ -1723,12 +1732,16 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 		screenshotPath = "fat:/_nds/nds-bootstrap/screenshots.tar";
 
-		if (access(screenshotPath.c_str(), F_OK) != 0) {
+		if (getFileSize(screenshotPath.c_str()) < 0x4BCC00) {
 			char buffer[2][0x100] = {{0}};
 
 			consoleDemoInit();
 			iprintf("Creating screenshots.tar\n");
-			iprintf("Please wait...\n");
+			iprintf("Please wait...");
+
+			if (access(screenshotPath.c_str(), F_OK) == 0) {
+				remove(screenshotPath.c_str());
+			}
 
 			FILE *headerFile = fopen("nitro:/screenshotTarHeaders.bin", "rb");
 			if (headerFile) {
@@ -1751,6 +1764,11 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			}
 
 			consoleClear();
+			if (getFileSize(screenshotPath.c_str()) < 0x4BCC00) {
+				consoleDemoInit();
+				iprintf("Failed to create screenshots.tar");
+				while (1) swiWaitForVBlank();
+			}
 			igmText->currentScreenshot = 0;
 		} else {
 			FILE *screenshotFile = fopen(screenshotPath.c_str(), "rb");
@@ -2112,19 +2130,15 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			ramDumpPath = "fat:/_nds/nds-bootstrap/ramDump.bin";
 		}
 
-		if (access(ramDumpPath.c_str(), F_OK) != 0) {
+		if (getFileSize(ramDumpPath.c_str()) < 0x02000000) {
 			consoleDemoInit();
 			iprintf("Allocating space for\n");
 			iprintf("creating a RAM dump.\n");
-			iprintf("Please wait...\n");
-			/* printf("\n");
-			if (conf->consoleModel >= 2) {
-				iprintf("If this takes a while, press\n");
-				iprintf("HOME, then press B.\n");
-			} else {
-				iprintf("If this takes a while, close\n");
-				iprintf("the lid, and open it again.\n");
-			} */
+			iprintf("Please wait...");
+
+			if (access(ramDumpPath.c_str(), F_OK) == 0) {
+				remove(ramDumpPath.c_str());
+			}
 
 			FILE *ramDumpFile = fopen(ramDumpPath.c_str(), "wb");
 			if (ramDumpFile) {
@@ -2134,6 +2148,11 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			}
 
 			consoleClear();
+			if (getFileSize(ramDumpPath.c_str()) < 0x02000000) {
+				consoleDemoInit();
+				iprintf("Failed to create RAM dump file.");
+				while (1) swiWaitForVBlank();
+			}
 		}
 
 		apFixOverlaysPath = "sd:/_nds/nds-bootstrap/apFixOverlays.bin";
@@ -2141,11 +2160,15 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			apFixOverlaysPath = "fat:/_nds/nds-bootstrap/apFixOverlays.bin";	
 		}
 
-		if (!conf->isDSiWare && access(apFixOverlaysPath.c_str(), F_OK) != 0) {
+		if (!conf->isDSiWare && getFileSize(apFixOverlaysPath.c_str()) < 0x800000) {
 			consoleDemoInit();
 			iprintf("Allocating space for\n");
 			iprintf("AP-fixed overlays.\n");
-			iprintf("Please wait...\n");
+			iprintf("Please wait...");
+
+			if (access(apFixOverlaysPath.c_str(), F_OK) == 0) {
+				remove(apFixOverlaysPath.c_str());
+			}
 
 			FILE *apFixOverlaysFile = fopen(apFixOverlaysPath.c_str(), "wb");
 			if (apFixOverlaysFile) {
@@ -2155,14 +2178,24 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			}
 
 			consoleClear();
+			if (getFileSize(apFixOverlaysPath.c_str()) < 0x800000) {
+				consoleDemoInit();
+				iprintf("Failed to allocate space\n");
+				iprintf("for AP-fixed overlays.");
+				while (1) swiWaitForVBlank();
+			}
 		}
 	} else {
 		ramDumpPath = "fat:/_nds/nds-bootstrap/ramDump.bin";
 
-		if (access(ramDumpPath.c_str(), F_OK) != 0) {
+		if (getFileSize(ramDumpPath.c_str()) < 0x800000) {
 			consoleDemoInit();
 			iprintf("Creating RAM dump file.\n");
-			iprintf("Please wait...\n");
+			iprintf("Please wait...");
+
+			if (access(ramDumpPath.c_str(), F_OK) == 0) {
+				remove(ramDumpPath.c_str());
+			}
 
 			FILE *ramDumpFile = fopen(ramDumpPath.c_str(), "wb");
 			if (ramDumpFile) {
@@ -2172,15 +2205,24 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			}
 
 			consoleClear();
+			if (getFileSize(ramDumpPath.c_str()) < 0x800000) {
+				consoleDemoInit();
+				iprintf("Failed to create RAM dump file.");
+				while (1) swiWaitForVBlank();
+			}
 		}
 
 		apFixOverlaysPath = "fat:/_nds/nds-bootstrap/apFixOverlays.bin";
 
-		if (!conf->isDSiWare && access(apFixOverlaysPath.c_str(), F_OK) != 0) {
+		if (!conf->isDSiWare && getFileSize(apFixOverlaysPath.c_str()) < 0x800000) {
 			consoleDemoInit();
 			iprintf("Allocating space for\n");
 			iprintf("AP-fixed overlays.\n");
-			iprintf("Please wait...\n");
+			iprintf("Please wait...");
+
+			if (access(apFixOverlaysPath.c_str(), F_OK) == 0) {
+				remove(apFixOverlaysPath.c_str());
+			}
 
 			FILE *apFixOverlaysFile = fopen(apFixOverlaysPath.c_str(), "wb");
 			if (apFixOverlaysFile) {
@@ -2190,6 +2232,12 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			}
 
 			consoleClear();
+			if (getFileSize(apFixOverlaysPath.c_str()) < 0x800000) {
+				consoleDemoInit();
+				iprintf("Failed to allocate space\n");
+				iprintf("for AP-fixed overlays.");
+				while (1) swiWaitForVBlank();
+			}
 		}
 	}
 
