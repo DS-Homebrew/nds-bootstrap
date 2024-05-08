@@ -1465,7 +1465,6 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 			consoleClear();
 			if (getFileSize(screenshotPath.c_str()) < 0x4BCC00) {
-				consoleDemoInit();
 				iprintf("Failed to create screenshots.tar");
 				while (1) swiWaitForVBlank();
 			}
@@ -1765,7 +1764,6 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 			consoleClear();
 			if (getFileSize(screenshotPath.c_str()) < 0x4BCC00) {
-				consoleDemoInit();
 				iprintf("Failed to create screenshots.tar");
 				while (1) swiWaitForVBlank();
 			}
@@ -2149,7 +2147,6 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 			consoleClear();
 			if (getFileSize(ramDumpPath.c_str()) < 0x02000000) {
-				consoleDemoInit();
 				iprintf("Failed to create RAM dump file.");
 				while (1) swiWaitForVBlank();
 			}
@@ -2179,7 +2176,6 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 			consoleClear();
 			if (getFileSize(apFixOverlaysPath.c_str()) < 0x800000) {
-				consoleDemoInit();
 				iprintf("Failed to allocate space\n");
 				iprintf("for AP-fixed overlays.");
 				while (1) swiWaitForVBlank();
@@ -2206,7 +2202,6 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 			consoleClear();
 			if (getFileSize(ramDumpPath.c_str()) < 0x800000) {
-				consoleDemoInit();
 				iprintf("Failed to create RAM dump file.");
 				while (1) swiWaitForVBlank();
 			}
@@ -2233,7 +2228,6 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 			consoleClear();
 			if (getFileSize(apFixOverlaysPath.c_str()) < 0x800000) {
-				consoleDemoInit();
 				iprintf("Failed to allocate space\n");
 				iprintf("for AP-fixed overlays.");
 				while (1) swiWaitForVBlank();
