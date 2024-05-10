@@ -101,6 +101,7 @@ typedef struct cardengineArm9 {
 		13: softResetMb
 		14: cloneboot
 		15: isDlp
+		16: bypassExceptionHandler
 	*/
 	s32 mainScreen;
 	u32 consoleModel;
@@ -218,6 +219,9 @@ typedef struct cardengineArm9 {
 		4: enableExceptionHandler
 		5: isSdk5
 		6: overlaysCached
+		7: cacheFlushFlag
+		8: cardReadFix
+		9: bypassExceptionHandler
 		13: softResetMb
 	*/
     s32 mainScreen;

@@ -19,6 +19,7 @@
 #define b_overlaysCached BIT(6)
 #define b_cacheFlushFlag BIT(7)
 #define b_cardReadFix BIT(8)
+#define b_bypassExceptionHandler BIT(9)
 #define b_softResetMb BIT(13)
 
 
@@ -241,6 +242,9 @@ int hookNdsRetailArm9(
 	}
 	if (patchOffsetCache.resetMb) {
 		ce9->valueBits |= b_softResetMb;
+	}
+	if (strncmp(romTid, "AZE", 3) == 0) { // Zelda: Phantom Hourglass
+		ce9->valueBits |= b_bypassExceptionHandler;
 	}
 	ce9->mainScreen             = mainScreen;
 	ce9->s2FlashcardId          = s2FlashcardId;

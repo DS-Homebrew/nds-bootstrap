@@ -27,6 +27,7 @@
 #define b_softResetMb BIT(13)
 #define b_cloneboot BIT(14)
 #define b_isDlp BIT(15)
+#define b_bypassExceptionHandler BIT(16)
 
 
 static const int MAX_HANDLER_LEN = 50;
@@ -332,6 +333,9 @@ int hookNdsRetailArm9(
 	}
 	if (strncmp(romTid, "HND", 3) == 0) {
 		ce9->valueBits |= b_isDlp;
+	}
+	if (strncmp(romTid, "AZE", 3) == 0) { // Zelda: Phantom Hourglass
+		ce9->valueBits |= b_bypassExceptionHandler;
 	}
 	ce9->mainScreen             = mainScreen;
 	ce9->overlaysSrc            = (ndsHeader->arm9overlaySource > ndsHeader->arm7romOffset) ? (ndsHeader->arm9romOffset + ndsHeader->arm9binarySize) : ndsHeader->arm9overlaySource;
