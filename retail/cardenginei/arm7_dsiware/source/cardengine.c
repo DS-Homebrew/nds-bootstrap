@@ -195,16 +195,40 @@ static inline bool isSdEjected(void) {
 	return false;
 }
 
+u32 auxIeBak = 0;
+u32 sdStatBak = 0;
+u32 sdMaskBak = 0;
+
+void bakData(void) {
+	auxIeBak = REG_AUXIE;
+	sdStatBak = *(vu32*)0x400481C;
+	sdMaskBak = *(vu32*)0x4004820;
+
+	i2cWriteRegister(0x4A, 0x12, 0x00);
+	REG_AUXIE &= ~(1UL << 8);
+	*(vu32*)0x400481C = 0;
+	*(vu32*)0x4004820 = 0;
+}
+
+void restoreBakData(void) {
+	REG_AUXIE = auxIeBak;
+	*(vu32*)0x400481C = sdStatBak;
+	*(vu32*)0x4004820 = sdMaskBak;
+	i2cWriteRegister(0x4A, 0x12, 0x01);
+}
+
 static void driveInitialize(void) {
 	if (driveInited) {
 		return;
 	}
 
+	bakData();
 	if (sdmmc_read16(REG_SDSTATUS0) != 0) {
 		sdmmc_init();
 		SD_Init();
 	}
 	FAT_InitFiles(false);
+	restoreBakData();
 
 	#ifdef CARDSAVE
 	getFileFromCluster(&savFile, saveCluster);
@@ -261,28 +285,6 @@ static void initialize(void) {
 }
 
 extern void inGameMenu(void);
-
-u32 auxIeBak = 0;
-u32 sdStatBak = 0;
-u32 sdMaskBak = 0;
-
-void bakData(void) {
-	auxIeBak = REG_AUXIE;
-	sdStatBak = *(vu32*)0x400481C;
-	sdMaskBak = *(vu32*)0x4004820;
-
-	i2cWriteRegister(0x4A, 0x12, 0x00);
-	REG_AUXIE &= ~(1UL << 8);
-	*(vu32*)0x400481C = 0;
-	*(vu32*)0x4004820 = 0;
-}
-
-void restoreBakData(void) {
-	REG_AUXIE = auxIeBak;
-	*(vu32*)0x400481C = sdStatBak;
-	*(vu32*)0x4004820 = sdMaskBak;
-	i2cWriteRegister(0x4A, 0x12, 0x01);
-}
 
 #ifdef CARDSAVE
 void bakSdData(void) {
@@ -369,8 +371,6 @@ void reset(void) {
 	} else {
 		bakData();
 
-		driveInitialize();
-
 		u32 iUncompressedSize = 0;
 		u32 iUncompressedSizei = 0;
 		u32 newArm7binarySize = 0;
@@ -416,7 +416,6 @@ void forceGameReboot(void) {
 		waitFrames(5);							// Wait for DSi screens to stabilize
 	}
 	u32 clearBuffer = 0;
-	driveInitialize();
 	fileWrite((char*)&clearBuffer, &srParamsFile, 0, 0x4);
 	if (*(u32*)(ce7+0x8100) == 0) {
 		tonccpy((u32*)0x02000300, sr_data_srloader, 0x20);
@@ -521,8 +520,6 @@ void returnToLoader(bool reboot) {
 	*(vu32*)0x400481C = 0;
 	*(vu32*)0x4004820 = 0;
 
-	driveInitialize();
-
 	aFile file;
 	getBootFileCluster(&file, "BOOT.NDS");
 	if (file.firstCluster == CLUSTER_FREE) {
@@ -560,7 +557,6 @@ void returnToLoader(bool reboot) {
 }
 
 void dumpRam(void) {
-	driveInitialize();
 	sharedAddr[3] = 0x444D4152;
 	// Dump RAM
 	fileWrite((char*)0x0C000000, &ramDumpFile, 0, (consoleModel==0 ? 0x01000000 : 0x02000000));
@@ -665,7 +661,6 @@ void loadInGameMenu(void) {
 	const u32 igmLocation = INGAME_MENU_LOCATION;
 
 	sharedAddr[5] = 0x4C4D4749; // 'IGML'
-	driveInitialize();
 	fileWrite((char*)igmLocation, &pageFile, 0xA000, 0xA000);	// Backup part of game RAM to page file
 	fileRead((char*)igmLocation, &pageFile, 0, 0xA000);	// Read in-game menu
 	sharedAddr[5] = 0;
@@ -885,6 +880,7 @@ u32 myIrqEnable(u32 irq) {
 	#endif	
 
 	initialize();
+	driveInitialize();
 
 	u32 irq_before = REG_IE;		
 	REG_IE |= irq;
@@ -918,7 +914,6 @@ bool eepromRead(u32 src, void *dst, u32 len) {
 	#endif	
 
 	bakSdData();
-	driveInitialize();
 	fileRead(dst, savFile, src, len);
 	restoreSdBakData();
 
@@ -938,7 +933,6 @@ bool eepromPageWrite(u32 dst, const void *src, u32 len) {
 	#endif	
 	
 	bakSdData();
-	driveInitialize();
 	fileWrite(src, savFile, dst, len);
 	restoreSdBakData();
 
@@ -958,7 +952,6 @@ bool eepromPageProg(u32 dst, const void *src, u32 len) {
 	#endif	
 
 	bakSdData();
-	driveInitialize();
 	fileWrite(src, savFile, dst, len);
 	restoreSdBakData();
 
