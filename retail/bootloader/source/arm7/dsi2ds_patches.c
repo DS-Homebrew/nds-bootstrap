@@ -3492,7 +3492,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			*(u32*)0x02064D38 += *(u32*)(bssEnd-4);
 			*(u32*)(bssEnd-4) = 0;
 
-			u32* newCodeAddr = 0x02067208;
+			u32* newCodeAddr = (u32*)0x02067208;
 			newCodeAddr[0] = 0xE59F0000; // ldr r0, =bssEnd
 			newCodeAddr[1] = 0xE12FFF1E; // bx lr
 			newCodeAddr[2] = bssEnd;
@@ -3557,12 +3557,12 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			*(u32*)0x02064E48 += *(u32*)(bssEnd-4);
 			*(u32*)(bssEnd-4) = 0;
 
-			u32* newCodeAddr = 0x02067318;
+			u32* newCodeAddr = (u32*)0x02067318;
 			newCodeAddr[0] = 0xE59F0000; // ldr r0, =bssEnd
 			newCodeAddr[1] = 0xE12FFF1E; // bx lr
 			newCodeAddr[2] = bssEnd;
 
-			setBL(0x020050E4, newCodeAddr);
+			setBL(0x020050E4, (u32)newCodeAddr);
 			*(u32*)0x0200535C -= 0xD0000; // Shrink unknown heap from 0xE8888
 		}
 	}
@@ -3607,12 +3607,12 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			*(u32*)0x020673A4 += *(u32*)(bssEnd-4);
 			*(u32*)(bssEnd-4) = 0;
 
-			u32* newCodeAddr = 0x020697E4;
+			u32* newCodeAddr = (u32*)0x020697E4;
 			newCodeAddr[0] = 0xE59F0000; // ldr r0, =bssEnd
 			newCodeAddr[1] = 0xE12FFF1E; // bx lr
 			newCodeAddr[2] = bssEnd;
 
-			setBL(0x020050E4, newCodeAddr);
+			setBL(0x020050E4, (u32)newCodeAddr);
 			*(u32*)0x02005378 -= 0xD0000; // Shrink unknown heap from 0xE8888
 		}
 	}
