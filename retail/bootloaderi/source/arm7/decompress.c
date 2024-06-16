@@ -248,7 +248,7 @@ void ensureBinaryDecompressed(const tNDSHeader* ndsHeader, module_params_t* modu
 
 	unpatchedFunctions* unpatchedFuncs = (unpatchedFunctions*)UNPATCHED_FUNCTION_LOCATION;
 
-	if (moduleParams->compressed_static_end && ((moduleParams->compressed_static_end/512)*512 == ((((u32)ndsHeader->arm9destination)+ndsHeader->arm9binarySize)/512)*512 || (moduleParams->compressed_static_end/4)*4 == 0xDEC00621)) {
+	if (moduleParams->compressed_static_end && ((moduleParams->compressed_static_end/512)*512 == ((((u32)ndsHeader->arm9destination)+ndsHeader->arm9binarySize)/512)*512 || *(u32*)moduleParams->compressed_static_end == 0xDEC00621)) {
 		// Compressed
 		dbg_printf("arm9 is compressed\n");
 		unpatchedFuncs->compressedFlagOffset = (u32*)((u32)moduleParams+0x14);
