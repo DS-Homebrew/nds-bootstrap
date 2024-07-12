@@ -124,6 +124,8 @@ bool returnToMenu = false;
 static tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
 static PERSONAL_DATA* personalData = (PERSONAL_DATA*)((u8*)NDS_HEADER_SDK5-0x180);
 
+static u16 sdmcPos = 0;
+
 static void unlaunchSetFilename(bool boot) {
 	tonccpy((u8*)0x02000800, unlaunchAutoLoadID, 12);
 	*(u16*)(0x0200080C) = 0x3F0;		// Unlaunch Length for CRC16 (fixed, must be 3F0h)
@@ -278,6 +280,17 @@ static void initialize(void) {
 			swapScreens = (mainScreen == 2);
 			ipcEveryFrame = true;
 		}
+
+		u8* deviceListAddr = (u8*)(*(u32*)0x02FFE1D4);
+		if (deviceListAddr[0x3C0] == 's' && deviceListAddr[0x3C1] == 'd') {
+			for (u16 i = 0; i < 0x3C0; i += 0x54) {
+				if (deviceListAddr[i+4] == 's' && deviceListAddr[i+5] == 'd') {
+					sdmcPos = i;
+					break;
+				}
+			}
+		}
+
 		bootloaderCleared = true;
 	}
 
@@ -351,16 +364,6 @@ void reset(void) {
 	funcsUnpatched = false;
 	sdRightsTimer = 0;
 	languageTimer = 0;
-
-	u8* deviceListAddr = (u8*)(*(u32*)0x02FFE1D4);
-	if (deviceListAddr[0x3C0] == 's' && deviceListAddr[0x3C1] == 'd') {
-		for (int i = 0; i < 0x3C0; i += 0x54) {
-			if (deviceListAddr[i+4] == 's' && deviceListAddr[i+5] == 'd') {
-				toncset(deviceListAddr+i+2, 0, 1); // Clear SD access rights
-				break;
-			}
-		}
-	}
 
 	if (consoleModel > 0) {
 		ndmaCopyWordsAsynch(0, (char*)ndsHeader->arm9destination+0xB000000, ndsHeader->arm9destination, *(u32*)0x0DFEE02C);
@@ -693,20 +696,11 @@ void myIrqHandlerVBlank(void) {
 		(*cheatEngine)();
 	}
 
-	if (sdRightsTimer == 60*3) {
+	{
 		u8* deviceListAddr = (u8*)(*(u32*)0x02FFE1D4);
-		if (deviceListAddr[0x3C0] == 's' && deviceListAddr[0x3C1] == 'd') {
-			for (int i = 0; i < 0x3C0; i += 0x54) {
-				if (deviceListAddr[i+4] == 's' && deviceListAddr[i+5] == 'd') {
-					toncset(deviceListAddr+i+2, 0x06, 1); // Set SD access rights
-					break;
-				}
-			}
+		if (deviceListAddr[0x3C0] == 's' && deviceListAddr[0x3C1] == 'd' && sdmcPos) {
+			toncset(deviceListAddr+sdmcPos+2, 0x06, 1); // Set SD access rights
 		}
-
-		sdRightsTimer++;
-	} else if (sdRightsTimer < 60*3) {
-		sdRightsTimer++;
 	}
 
 	if (language >= 0 && language <= 7 && languageTimer < 60*3) {
