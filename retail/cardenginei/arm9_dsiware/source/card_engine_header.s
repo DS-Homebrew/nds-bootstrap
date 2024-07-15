@@ -35,10 +35,6 @@ valueBits:
 	.word	0x00000000
 mainScreen:
 	.word	0x00000000
-overlaysSize:
-	.word	0x00000000
-romPaddingSize:
-	.word	0x00000000
 consoleModel:
 	.word	0x00000000
 irqTable:
@@ -48,6 +44,7 @@ irqTable:
 
 card_engine_start:
 
+.thumb
 ndsCodeStart:
 	mov r1, #0
 	mov r2, #0
@@ -56,13 +53,13 @@ ndsCodeStart:
 	mov r5, #0
 	mov r6, #0
 	mov r7, #0
-	mov r8, #0
-	mov r9, #0
-	mov r10, #0
-	mov r11, #0
+	mov r8, r1
+	mov r9, r1
+	mov r10, r1
+	mov r11, r1
+	bx r0
 
-	bx	r0
-
+.balign	4
 patches:
 .word   0x0
 .word	card_irq_enable

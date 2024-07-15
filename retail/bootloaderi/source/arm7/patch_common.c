@@ -7820,7 +7820,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02042DB4, (u32)dsiSaveRead); // dsiSaveReadAsync
 		*(u32*)0x0205063C = 0xE12FFF1E; // bx lr (Skip NAND error checking)
 	}
-
+#else
 	// A Kappa's Trail (USA)
 	else if (strcmp(romTid, "KPAE") == 0 && saveOnFlashcard) {
 		tonccpy((u32*)0x0201A020, dsiSaveGetResultCode, 0xC);
@@ -8174,7 +8174,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02020EE4 = 0xE1A00000; // nop (dsiSaveCloseDir)*/
 		*(u32*)0x0202F3F0 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 	}
-#else
+
 	// The Legend of Zelda: Four Swords: Anniversary Edition (USA)
 	// The Legend of Zelda: Four Swords: Anniversary Edition (Europe, Australia)
 	// Zelda no Densetsu: 4-tsu no Tsurugi: 25th Kinen Edition (Japan)
@@ -10223,6 +10223,11 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			tonccpy((u32*)0x02086F2C, dsiSaveGetResultCode, 0xC);
 		}
 		if (!twlFontFound) {
+			// Skip Manual screen
+			for (int i = 0; i < 9; i++) {
+				u32* offset = (u32*)0x0204FAA8;
+				offset[i] = 0xE1A00000; // nop
+			}
 			*(u32*)0x0205C1B4 = 0xE1A00000; // nop
 		}
 	}
@@ -10242,6 +10247,11 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			tonccpy((u32*)0x02087164, dsiSaveGetResultCode, 0xC);
 		}
 		if (!twlFontFound) {
+			// Skip Manual screen
+			for (int i = 0; i < 9; i++) {
+				u32* offset = (u32*)0x0204FCB4;
+				offset[i] = 0xE1A00000; // nop
+			}
 			*(u32*)0x0205C3EC = 0xE1A00000; // nop
 		}
 	}
@@ -10261,6 +10271,11 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			tonccpy((u32*)0x0207F9E8, dsiSaveGetResultCode, 0xC);
 		}
 		if (!twlFontFound) {
+			// Skip Manual screen
+			for (int i = 0; i < 9; i++) {
+				u32* offset = (u32*)0x0204D794;
+				offset[i] = 0xE1A00000; // nop
+			}
 			*(u32*)0x020597A4 = 0xE1A00000; // nop
 		}
 	}
@@ -16048,6 +16063,18 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
 		setBL(0x0200ABE4, (u32)ce9->patches->gsdd_fix);
 		*(u32*)0x02FFF000 = 0x021F7500;
 	}
+
+	// Tony Hawk's Motion (USA)
+	// Tony Hawk's Motion (Europe)
+	/* else if (strncmp(romTid, "CTW", 3) == 0) {
+		// Remove Motion Pak checks
+		*(u16*)0x02002490 = 0;
+		*(u32*)0x0202A834 = 0;
+		*(u16*)0x0202A842 = 0;
+		*(u16*)0x0202A844 = 0;
+		*(u32*)0x02039BA8 = 0;
+		*(u16*)0x02069EC8 = 0;
+	} */
 
 	// Tropix! Your Island Getaway
     else if (strcmp(romTid, "CTXE") == 0) {

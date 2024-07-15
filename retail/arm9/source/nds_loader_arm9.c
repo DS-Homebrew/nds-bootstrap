@@ -45,8 +45,8 @@
 
 //#define LCDC_BANK_C (u16*)0x06840000
 
-extern u8 lz77ImageBuffer[0x40000];
-void* loaderBin[0x40000];
+extern u8* lz77ImageBuffer;
+void* loaderBin = (void*)0x02034000;
 
 loadCrt0* lc0 = (loadCrt0*)LOAD_CRT0_LOCATION;
 
@@ -240,7 +240,7 @@ int runNds(u32 cluster, u32 saveCluster, u32 donorTwlCluster, u32 gbaCluster, u3
 	// Load bootloader binary
 	FILE* bootloaderBin = fopen(dsiFeatures() && !conf->b4dsMode ? (conf->loader2 ? "nitro:/loadi2.lz77" : "nitro:/loadi.lz77") : (conf->loader2 ? "nitro:/load2.lz77" : "nitro:/load.lz77"), "rb");
 	if (bootloaderBin) {
-		fread(lz77ImageBuffer, 1, (int)sizeof(lz77ImageBuffer), bootloaderBin);
+		fread(lz77ImageBuffer, 1, 0x30000, bootloaderBin);
 		LZ77_Decompress(lz77ImageBuffer, (u8*)loaderBin);
 		fclose(bootloaderBin);
 	} else {

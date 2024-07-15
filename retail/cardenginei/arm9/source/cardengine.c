@@ -322,10 +322,10 @@ static u32 newOverlaysSize = 0;
 static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
 #ifdef DLDI
 	while (sharedAddr[3]==0x444D4152);	// Wait during a RAM dump
-	fileRead((char*)dst, ((ce9->valueBits & overlaysCached) && src >= ndsHeader->arm9overlaySource && src < ndsHeader->arm7romOffset) ? apFixOverlaysFile : romFile, src, len);
+	fileRead((char*)dst, ((ce9->valueBits & overlaysCached) && src >= ce9->overlaysSrc && src < ndsHeader->arm7romOffset) ? apFixOverlaysFile : romFile, src, len);
 #else
 	if (newOverlayOffset == 0) {
-		newOverlayOffset = (ndsHeader->arm9overlaySource/ce9->cacheBlockSize)*ce9->cacheBlockSize;
+		newOverlayOffset = (ce9->overlaysSrc/ce9->cacheBlockSize)*ce9->cacheBlockSize;
 		for (u32 i = newOverlayOffset; i < ndsHeader->arm7romOffset; i+= ce9->cacheBlockSize) {
 			newOverlaysSize += ce9->cacheBlockSize;
 		}

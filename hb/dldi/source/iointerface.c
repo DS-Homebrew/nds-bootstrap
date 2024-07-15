@@ -24,9 +24,11 @@
 
 //#define MAX_READ 53
 #define cacheBlockSize 0x8000
-#define cacheSlots 0x800000/cacheBlockSize
+#define defaultCacheSlots 0x80000/cacheBlockSize
 #define BYTES_PER_READ 512
 #define cacheBlockSectors (cacheBlockSize/BYTES_PER_READ)
+
+#define REG_MBK_CACHE_START	0x4004044
 
 #ifndef NULL
  #define NULL 0
@@ -42,25 +44,34 @@
 #include <nds/ipc.h>
 #include <nds/arm9/dldi.h>
 #include "my_sdmmc.h"
-#include "tonccpy.h"
 #include "locations.h"
+#include "aeabi.h"
+
+void unlockDSiWram(void);
 
 extern char ioType[4];
 extern u32 dataStartOffset;
 //extern vu32 word_command; // word_command_offset
 //extern vu32 word_params; // word_command_offset+4
 //extern u32* words_msg; // word_command_offset+8
-u32 word_command_offset = 0;
+u32 word_command_offset = CARDENGINE_SHARED_ADDRESS;
 
-// NOTE: The cache code isn't working properly for some reason
-/*u32 cacheDescriptor[cacheSlots] = {0xFFFFFFFF};
-int cacheCounter[cacheSlots];
+extern u32 heapShrunk;
+u32 cacheAddress = CACHE_ADDRESS_START;
+int cacheSlots = 16;
+bool cacheEnabled = false;
+u32 cacheDescriptor[defaultCacheSlots] = {0xFFFFFFFF};
+int cacheCounter[defaultCacheSlots];
+int cacheAllocated = 0;
 int accessCounter = 0;
 
 int allocateCacheSlot(void) {
+	cacheAllocated++;
+	if (cacheAllocated > cacheSlots) cacheAllocated = cacheSlots;
+
 	int slot = 0;
 	u32 lowerCounter = accessCounter;
-	for (int i = 0; i < cacheSlots; i++) {
+	for (int i = 0; i < cacheAllocated; i++) {
 		if (cacheCounter[i] <= lowerCounter) {
 			lowerCounter = cacheCounter[i];
 			slot = i;
@@ -73,7 +84,7 @@ int allocateCacheSlot(void) {
 }
 
 int getSlotForSector(sec_t sector) {
-	for (int i = 0; i < cacheSlots; i++) {
+	for (int i = 0; i < cacheAllocated; i++) {
 		if (cacheDescriptor[i] == sector) {
 			return i;
 		}
@@ -82,16 +93,25 @@ int getSlotForSector(sec_t sector) {
 }
 
 vu8* getCacheAddress(int slot) {
-	return (vu8*)(CACHE_ADRESS_START + slot*cacheBlockSize);
+	return (vu8*)(cacheAddress + slot*cacheBlockSize);
 }
 
 void updateDescriptor(int slot, sec_t sector) {
 	cacheDescriptor[slot] = sector;
 	cacheCounter[slot] = accessCounter;
-}*/
+}
 
- // Use the dldi remaining space as temporary buffer : 28k usually available
-extern vu32* tmp_buf_addr;
+void transferToArm7(int slot) {
+	*((vu8*)(REG_MBK_CACHE_START+slot)) |= 0x1;
+}
+
+void transferToArm9(int slot) {
+	*((vu8*)(REG_MBK_CACHE_START+slot)) &= 0xFE;
+}
+
+// Use the dldi remaining space as temporary buffer : 28k usually available
+u32* tmp_buf_addr = 0;
+extern u32 dldi_bss_end;
 extern vu8 allocated_space;
 
 bool dsiMode = false;
@@ -106,7 +126,7 @@ static inline void sendValue32(u32 value32) {
 static inline void sendMsg(int size, u8* msg) {
 	//nocashMessage("sendMsg");
 	*(vu32*)(word_command_offset+4) = (vu32)size;
-	tonccpy((u8*)word_command_offset+8, msg, size);
+	__aeabi_memcpy((u8*)word_command_offset+8, msg, size);
 	*(vu32*)word_command_offset = (vu32)0x027FEE05;
 	IPC_SendSync(0xEE24);
 }
@@ -144,7 +164,14 @@ bool sd_Startup() {
 
 	sendValue32(SDMMC_HAVE_SD);
 
-	waitValue32();
+	// waitValue32();
+	int waitCycles = 0x100000;
+	while(*(vu32*)word_command_offset != (vu32)0x027FEE08) {
+		waitCycles--;
+		if (waitCycles == 0) {
+			return false;
+		}
+	}
 
 	int result = getValue32();
 
@@ -165,71 +192,75 @@ bool sd_ReadSectors(sec_t sector, sec_t numSectors,void* buffer) {
 	//nocashMessage("sd_ReadSectors");
 	FifoMessage msg;
 	int result = 0;
-	sec_t startsector, readsectors;
+	if (cacheEnabled) {
+		accessCounter++;
 
-	int max_reads = ((1 << allocated_space) / 512) - 11;
+		while(numSectors > 0) {
+			const sec_t alignedSector = (sector/cacheBlockSectors)*cacheBlockSectors;
 
-	for(int numreads =0; numreads<numSectors; numreads+=max_reads) {
-		startsector = sector+numreads;
-		if(numSectors - numreads < max_reads) readsectors = numSectors - numreads ;
-		else readsectors = max_reads;
+			int slot = getSlotForSector(alignedSector);
+			vu8* cacheBuffer = getCacheAddress(slot);
+			// Read max CACHE_READ_SIZE via the main RAM cache
+			if (slot == -1) {
+				slot = allocateCacheSlot();
 
-		vu32* mybuffer = (vu32*)((u32)tmp_buf_addr + (dsiMode ? 0x0A000000 : 0x00400000));
+				cacheBuffer = getCacheAddress(slot);
 
-		msg.type = SDMMC_SD_READ_SECTORS;
-		msg.sdParams.startsector = startsector;
-		msg.sdParams.numsectors = readsectors;
-		msg.sdParams.buffer = (u32*)mybuffer;
+				msg.type = SDMMC_SD_READ_SECTORS;
+				msg.sdParams.startsector = alignedSector;
+				msg.sdParams.numsectors = cacheBlockSectors;
+				msg.sdParams.buffer = (u32*)cacheBuffer;
 
-		sendMsg(sizeof(msg), (u8*)&msg);
+				transferToArm7(15-slot);
+				sendMsg(sizeof(msg), (u8*)&msg);
+				waitValue32();
+				transferToArm9(15-slot);
 
-		waitValue32();
+				result = getValue32();
+			}
+			updateDescriptor(slot, alignedSector);	
 
-		result = getValue32();
+			sec_t len2 = numSectors;
+			if ((sector - alignedSector) + numSectors > cacheBlockSectors) {
+				len2 = alignedSector - sector + cacheBlockSectors;
+			}
 
-		tonccpy(buffer+numreads*512, (u32*)mybuffer, readsectors*512);
-	}
+			__aeabi_memcpy(buffer, (u8*)cacheBuffer+((sector-alignedSector)*BYTES_PER_READ), len2*BYTES_PER_READ);
 
-	/*sec_t alignedSector = (sector/cacheBlockSectors)*cacheBlockSectors;
+			for (u32 i = 0; i < len2; i++) {
+				numSectors--;
+				if (numSectors == 0) break;
+			}
+			if (numSectors > 0) {
+				sector += len2;
+				buffer += len2*BYTES_PER_READ;
+				accessCounter++;
+			}
+		}
+	} else {
+		sec_t startsector, readsectors;
 
-	accessCounter++;
+		int max_reads = ((1 << allocated_space) / 512) - 11;
 
-	while(numSectors > 0) {
-		int slot = getSlotForSector(sector);
-		vu8* cacheBuffer = getCacheAddress(slot);
-		// Read max CACHE_READ_SIZE via the main RAM cache
-		if (slot == -1) {
-			slot = allocateCacheSlot();
-
-			cacheBuffer = getCacheAddress(slot);
+		for(int numreads =0; numreads<numSectors; numreads+=max_reads) {
+			startsector = sector+numreads;
+			if(numSectors - numreads < max_reads) readsectors = numSectors - numreads ;
+			else readsectors = max_reads;
 
 			msg.type = SDMMC_SD_READ_SECTORS;
-			msg.sdParams.startsector = alignedSector;
-			msg.sdParams.numsectors = cacheBlockSectors;
-			msg.sdParams.buffer = (u32*)cacheBuffer;
+			msg.sdParams.startsector = startsector;
+			msg.sdParams.numsectors = readsectors;
+			msg.sdParams.buffer = tmp_buf_addr;
 
 			sendMsg(sizeof(msg), (u8*)&msg);
 
 			waitValue32();
 
 			result = getValue32();
-		}
-		updateDescriptor(slot, alignedSector);	
 
-		sec_t len2 = numSectors;
-		if ((sector - alignedSector) + len2 > cacheBlockSectors) {
-			len2 = alignedSector - sector + cacheBlockSectors;
+			__aeabi_memcpy(buffer+numreads*512, tmp_buf_addr, readsectors*512);
 		}
-
-		tonccpy(buffer, (u8*)cacheBuffer+((sector-alignedSector)*BYTES_PER_READ), len2*BYTES_PER_READ);
-		numSectors -= len2;
-		if (numSectors > 0) {
-			sector += len2;
-			buffer += len2*BYTES_PER_READ;
-			alignedSector = (sector/cacheBlockSectors)*cacheBlockSectors;
-			accessCounter++;
-		}
-	}*/
+	}
 
 	return result == 0;
 }
@@ -240,6 +271,58 @@ bool sd_WriteSectors(sec_t sector, sec_t numSectors,void* buffer) {
 	//nocashMessage("sd_ReadSectors");
 	FifoMessage msg;
 	int result = 0;
+
+	if (cacheEnabled) {
+		accessCounter++;
+
+		sec_t numSectorsBak = numSectors;
+
+		while(numSectors > 0) {
+			const sec_t alignedSector = (sector/cacheBlockSectors)*cacheBlockSectors;
+
+			int slot = getSlotForSector(alignedSector);
+			vu8* cacheBuffer = getCacheAddress(slot);
+			// Read max CACHE_READ_SIZE via the main RAM cache
+			if (slot == -1) {
+				slot = allocateCacheSlot();
+
+				cacheBuffer = getCacheAddress(slot);
+
+				msg.type = SDMMC_SD_READ_SECTORS;
+				msg.sdParams.startsector = alignedSector;
+				msg.sdParams.numsectors = cacheBlockSectors;
+				msg.sdParams.buffer = (u32*)cacheBuffer;
+
+				transferToArm7(15-slot);
+				sendMsg(sizeof(msg), (u8*)&msg);
+				waitValue32();
+				transferToArm9(15-slot);
+
+				result = getValue32();
+			}
+			updateDescriptor(slot, alignedSector);	
+
+			sec_t len2 = numSectors;
+			if ((sector - alignedSector) + numSectors > cacheBlockSectors) {
+				len2 = alignedSector - sector + cacheBlockSectors;
+			}
+
+			__aeabi_memcpy((u8*)cacheBuffer+((sector-alignedSector)*BYTES_PER_READ), buffer, len2*BYTES_PER_READ);
+
+			for (u32 i = 0; i < len2; i++) {
+				numSectors--;
+				if (numSectors == 0) break;
+			}
+			if (numSectors > 0) {
+				sector += len2;
+				buffer += len2*BYTES_PER_READ;
+				accessCounter++;
+			}
+		}
+
+		numSectors = numSectorsBak;
+	}
+
 	sec_t startsector, readsectors;
 
 	int max_reads = ((1 << allocated_space) / 512) - 11;
@@ -249,74 +332,18 @@ bool sd_WriteSectors(sec_t sector, sec_t numSectors,void* buffer) {
 		if(numSectors - numreads < max_reads) readsectors = numSectors - numreads ;
 		else readsectors = max_reads;
 
-		vu32* mybuffer = (vu32*)((u32)tmp_buf_addr + (dsiMode ? 0x0A000000 : 0x00400000));
-
-		tonccpy((u32*)mybuffer, buffer+numreads*512, readsectors*512);
-
 		msg.type = SDMMC_SD_WRITE_SECTORS;
 		msg.sdParams.startsector = startsector;
 		msg.sdParams.numsectors = readsectors;
-		msg.sdParams.buffer = (u32*)mybuffer;
+		msg.sdParams.buffer = tmp_buf_addr;
 
+		__aeabi_memcpy(tmp_buf_addr, buffer+numreads*512, readsectors*512);
 		sendMsg(sizeof(msg), (u8*)&msg);
 
 		waitValue32();
 
 		result = getValue32();
 	}
-
-	/*sec_t alignedSector = (sector/cacheBlockSectors)*cacheBlockSectors;
-
-	accessCounter++;
-
-	while(numSectors > 0) {
-		int slot = getSlotForSector(sector);
-		vu8* cacheBuffer = getCacheAddress(slot);
-		// Read max CACHE_READ_SIZE via the main RAM cache
-		if (slot == -1) {
-			slot = allocateCacheSlot();
-
-			cacheBuffer = getCacheAddress(slot);
-
-			msg.type = SDMMC_SD_READ_SECTORS;
-			msg.sdParams.startsector = alignedSector;
-			msg.sdParams.numsectors = cacheBlockSectors;
-			msg.sdParams.buffer = (u32*)cacheBuffer;
-
-			sendMsg(sizeof(msg), (u8*)&msg);
-
-			waitValue32();
-
-			result = getValue32();
-		}
-		updateDescriptor(slot, alignedSector);	
-
-		sec_t len2 = numSectors;
-		if ((sector - alignedSector) + len2 > cacheBlockSectors) {
-			len2 = alignedSector - sector + cacheBlockSectors;
-		}
-
-		tonccpy((u8*)cacheBuffer+((sector-alignedSector)*BYTES_PER_READ), buffer, len2*BYTES_PER_READ);
-
-		msg.type = SDMMC_SD_WRITE_SECTORS;
-		msg.sdParams.startsector = alignedSector;
-		msg.sdParams.numsectors = len2;
-		msg.sdParams.buffer = (u8*)cacheBuffer+((sector-alignedSector)*BYTES_PER_READ);
-
-		sendMsg(sizeof(msg), (u8*)&msg);
-
-		waitValue32();
-
-		result = getValue32();
-
-		numSectors -= len2;
-		if (numSectors > 0) {
-			sector += len2;
-			buffer += len2*BYTES_PER_READ;
-			alignedSector = (sector/cacheBlockSectors)*cacheBlockSectors;
-			accessCounter++;
-		}
-	}*/
 
 	return result == 0;
 }
@@ -329,7 +356,7 @@ bool ramDisk = false;
 bool ramd_ReadSectors(u32 sector, u32 numSectors, void* buffer) {
 //---------------------------------------------------------------------------------
 	if (dsiMode) {
-		tonccpy(buffer, (void*)RAM_DISK_LOCATION_DSIMODE+(sector << 9), numSectors << 9);
+		__aeabi_memcpy(buffer, (void*)RAM_DISK_LOCATION_DSIMODE+(sector << 9), numSectors << 9);
 	} else {
 		if (buffer >= (void*)0x02C00000 && buffer < (void*)0x03000000) {
 			buffer -= 0xC00000;		// Move out of RAM disk location
@@ -340,7 +367,7 @@ bool ramd_ReadSectors(u32 sector, u32 numSectors, void* buffer) {
 		}
 
 		if (!isArm7) extendedMemory(true);		// Enable extended memory mode to access RAM drive
-		tonccpy(buffer, (void*)RAM_DISK_LOCATION+(sector << 9), numSectors << 9);
+		__aeabi_memcpy(buffer, (void*)RAM_DISK_LOCATION+(sector << 9), numSectors << 9);
 		if (!isArm7) extendedMemory(false);	// Disable extended memory mode
 	}
 	return true;
@@ -350,7 +377,7 @@ bool ramd_ReadSectors(u32 sector, u32 numSectors, void* buffer) {
 bool ramd_WriteSectors(u32 sector, u32 numSectors, void* buffer) {
 //---------------------------------------------------------------------------------
 	if (dsiMode) {
-		tonccpy((void*)RAM_DISK_LOCATION_DSIMODE+(sector << 9), buffer, numSectors << 9);
+		__aeabi_memcpy((void*)RAM_DISK_LOCATION_DSIMODE+(sector << 9), buffer, numSectors << 9);
 	} else {
 		if (buffer >= (void*)0x02C00000 && buffer < (void*)0x03000000) {
 			buffer -= 0xC00000;		// Move out of RAM disk location
@@ -361,7 +388,7 @@ bool ramd_WriteSectors(u32 sector, u32 numSectors, void* buffer) {
 		}
 
 		if (!isArm7) extendedMemory(true);		// Enable extended memory mode to access RAM drive
-		tonccpy((void*)RAM_DISK_LOCATION+(sector << 9), buffer, numSectors << 9);
+		__aeabi_memcpy((void*)RAM_DISK_LOCATION+(sector << 9), buffer, numSectors << 9);
 		if (!isArm7) extendedMemory(false);	// Disable extended memory mode
 	}
 	return true;
@@ -388,8 +415,24 @@ bool startup(void) {
 		sdmmc_init();
 		return SD_Init()==0;
 	} else {
-		word_command_offset = dataStartOffset+0x80;
-		word_command_offset += dsiMode ? 0x0A000000 : 0x00400000;
+		unlockDSiWram(); // Unlock DSi WRAM and uncached RAM mirrors
+		for (int i = 0; i < 16; i++) {
+			transferToArm9(i);
+		}
+		*(vu32*)0x03700000 = 0x4253444E; // 'NDSB'
+		if (*(vu32*)0x03700000 == 0x4253444E) {
+			*(vu32*)0x03708000 = 0x77777777;
+			cacheEnabled = (*(vu32*)0x03700000 == 0x4253444E); // DSi WRAM found, enable LRU cache
+		}
+		if (!cacheEnabled && heapShrunk) {
+			cacheAddress = CACHE_ADDRESS_START_ALT;
+			cacheSlots = 3;
+			cacheEnabled = true; // Enable LRU cache in Main RAM
+			heapShrunk = 0;
+		}
+
+		const u32 mirrorOffset = (REG_SCFG_EXT == 0x8307F100) ? 0x0A000000 : 0xC00000;
+		tmp_buf_addr = (u32*)(dldi_bss_end + mirrorOffset);
 		return sd_Startup();
 	}
 }

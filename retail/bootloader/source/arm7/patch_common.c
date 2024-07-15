@@ -446,6 +446,18 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
         *(u32*)0x20499C4 = 0xe12fff1e; //bx lr
     }*/
 
+	// Tony Hawk's Motion (USA)
+	// Tony Hawk's Motion (Europe)
+	/* else if (strncmp(romTid, "CTW", 3) == 0) {
+		// Remove Motion Pak checks
+		*(u16*)0x02002490 = 0;
+		*(u32*)0x0202A834 = 0;
+		*(u16*)0x0202A842 = 0;
+		*(u16*)0x0202A844 = 0;
+		*(u32*)0x02039BA8 = 0;
+		*(u16*)0x02069EC8 = 0;
+	} */
+
 	// Tropix! Your Island Getaway
     else if (strcmp(romTid, "CTXE") == 0) {
 		extern u32 baseChipID;

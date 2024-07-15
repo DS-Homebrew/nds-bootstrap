@@ -4,6 +4,8 @@
 #include "locations.h"
 #include "cardengine_header_arm9.h"
 
+#define bypassExceptionHandler BIT(9)
+
 #define EXCEPTION_VECTOR_SDK1	(*(VoidFn *)(0x27FFD9C))
 
 extern cardengineArm9* volatile ce9;
@@ -27,10 +29,10 @@ void userException() {
 //---------------------------------------------------------------------------------
 void setExceptionHandler2() {
 //---------------------------------------------------------------------------------
-	if (EXCEPTION_VECTOR_SDK1 == enterException && *exceptionC == userException) return;
+	if (EXCEPTION_VECTOR_SDK1 == ((ce9->valueBits & bypassExceptionHandler) ? 0 : enterException) && *exceptionC == userException) return;
 
 	exceptionStack = (u32)EXCEPTION_STACK_LOCATION;
-	EXCEPTION_VECTOR_SDK1 = enterException;
+	EXCEPTION_VECTOR_SDK1 = (ce9->valueBits & bypassExceptionHandler) ? 0 : enterException;
 	*exceptionC = userException;
 }
 

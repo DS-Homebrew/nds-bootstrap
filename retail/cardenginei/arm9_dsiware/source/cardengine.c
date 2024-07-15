@@ -100,9 +100,7 @@ void initMBKARM9_dsiMode(void) {
 	REG_MBK9 = *(u32*)0x02FFE1AC;
 }
 
-void __attribute__((target("arm"))) resetMpu(void) {
-	asm("LDR R0,=#0x12078\n\tmcr p15, 0, r0, C1,C0,0");
-}
+extern void resetMpu(void);
 
 void reset(u32 tid1, u32 tid2) {
 	if (tid1 != *(u32*)0x02FFE230 && tid2 != *(u32*)0x02FFE234) {

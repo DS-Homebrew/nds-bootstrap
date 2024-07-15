@@ -468,6 +468,13 @@ int hookNdsRetailArm7(
 	extern u32 cheatEngineOffset;
 	extern char cheatEngineBuffer[0x400];
 	u16 cheatSizeLimit = (ce7NotFound ? 0x1C00 : 0x8000);
+	if (!ce7NotFound) {
+		if (cheatEngineOffset == CHEAT_ENGINE_DSIWARE_LOCATION) {
+			cheatSizeLimit -= 0x1800;
+		} else if (cheatEngineOffset == CHEAT_ENGINE_DSIWARE_LOCATION3) {
+			cheatSizeLimit -= 0x1000;
+		}
+	}
 	char* cheatDataOffset = (char*)cheatEngineOffset+0x3E8;
 	/*if (ce7NotFound) {
 		cheatEngineOffset = 0x2FFC000;

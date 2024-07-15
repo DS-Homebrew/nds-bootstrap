@@ -23,32 +23,45 @@
 #include "common.h"
 #include "tonccpy.h"
 
-u16 patchOffsetCacheFileVersion = 3;	// Change when new functions are being patched, some offsets removed
-										// the offset order changed, and/or the function signatures changed
+u16 patchOffsetCacheFilePrevCrc = 0;
+u16 patchOffsetCacheFileNewCrc = 0;
 
 patchOffsetCacheContents patchOffsetCache;
-
-bool patchOffsetCacheChanged = false;
-
-void rsetPatchCache(const tNDSHeader* ndsHeader)
-{
-	if (patchOffsetCache.ver != patchOffsetCacheFileVersion
-	 || patchOffsetCache.type != 2) {
-		toncset(&patchOffsetCache, 0, sizeof(patchOffsetCacheContents));
-		patchOffsetCache.ver = patchOffsetCacheFileVersion;
-		patchOffsetCache.type = 2;	// 0 = Regular, 1 = B4DS, 2 = Homebrew
-	}
-}
 
 void patchBinary(const tNDSHeader* ndsHeader) {
 	const char* romTid = getRomTid(ndsHeader);
 
-	// Moonshell Ver 2.10 for child Zwai: Direct Boot
-	if (strcmp(romTid, "####") == 0 && ndsHeader->headerCRC16 == 0x5638) {
-		// Bypass ARM9/7 binary check
-        *(u32*)0x02000B90 = 0xE1A00000; // nop
-        *(u32*)0x02000B94 += 0xE0000000; // beq -> b
-        *(u32*)0x02000D54 = 0xE1A00000; // nop
-        *(u32*)0x02000D58 = 0xE1A00000; // nop
+	if (!(REG_SCFG_ROM & BIT(9))) {
+		// Moonshell Ver 1.71
+		if (strcmp(romTid, "####") == 0 && ndsHeader->headerCRC16 == 0xD151) {
+			// Fix ARM7 "farmware" error
+			*(u32*)0x037F93C4 = 0x178;
+		}
 	}
+
+	// Moonshell Ver 2 Beta 8.1/beta.9 & Ver 2.01+1
+	/* if (strcmp(romTid, "####") == 0 && (ndsHeader->headerCRC16 == 0xD75F || ndsHeader->headerCRC16 == 0x999C)) {
+		// Bypass ARM9 binary check
+		*(u32*)0x0200015C = 0xE1A00000; // nop
+	} else */ // Moonshell Ver 2.10
+	if (strcmp(romTid, "####") == 0 && ndsHeader->headerCRC16 == 0x6319) {
+		// Bypass ARM9/7 binary check
+		// *(u32*)0x02000168 = 0xE1A00000; // nop
+		*(u32*)0x037F80C0 = 0xE1A00000; // nop
+		*(u32*)0x037F8160 = 0;
+		// *(u32*)0x02000994 = 0xE1A00000; // nop
+		// *(u32*)0x02000998 += 0xE0000000; // beq -> b
+		// *(u32*)0x02000B5C = 0xE1A00000; // nop
+		// *(u32*)0x02000B60 = 0xE1A00000; // nop
+	} else // Moonshell Ver 2.10 for child Zwai: Direct Boot
+	if (strcmp(romTid, "####") == 0 && ((ndsHeader->headerCRC16 == 0x5638) || (ndsHeader->headerCRC16 == 0x0DE9))) {
+		// Bypass ARM9/7 binary check
+		// *(u32*)0x02000168 = 0xE1A00000; // nop
+		*(u32*)0x037F80A8 = 0xE1A00000; // nop
+		*(u32*)0x037F8148 = 0;
+		// *(u32*)0x02000B90 = 0xE1A00000; // nop
+		// *(u32*)0x02000B94 += 0xE0000000; // beq -> b
+		// *(u32*)0x02000D54 = 0xE1A00000; // nop
+		// *(u32*)0x02000D58 = 0xE1A00000; // nop
+	} 
 }

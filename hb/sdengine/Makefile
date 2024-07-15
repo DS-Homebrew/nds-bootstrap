@@ -31,6 +31,7 @@ ARCH	:=	-mthumb-interwork -march=armv4t
 COMMON	:=	-g -Wall -O2\
 			-mcpu=arm7tdmi -mtune=arm7tdmi -fomit-frame-pointer\
 			-ffast-math \
+			-flto \
 			$(ARCH)
 
 # ADD -DDEBUG here for logging/debug
@@ -39,8 +40,8 @@ COMMON	+=	$(INCLUDE) -DARM7 -D_NO_FAT
 CFLAGS	:=	$(COMMON) -std=gnu99
 CXXFLAGS	:= $(COMMON) -fno-rtti -fno-exceptions
 
-ASFLAGS	:=	-g $(ARCH) $(INCLUDE)
-LDFLAGS	=	-nostartfiles -T ../sdengine.ld -g $(ARCH) -Wl,-Map,$(TARGET).map
+ASFLAGS	:=	-g $(ARCH) -flto $(INCLUDE)
+LDFLAGS	=	-nostartfiles -nostdlib -T ../sdengine.ld -g $(ARCH) -Wl,-Map,$(TARGET).map
 
 LIBS	:=
 

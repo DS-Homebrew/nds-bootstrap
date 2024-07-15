@@ -86,7 +86,6 @@ typedef unsigned char data_t;
 
 //#define resetCpu() __asm volatile("\tswi 0x000000\n");
 
-extern void arm7clearRAM(void);
 extern void arm7code(u32* addr);
 
 //extern u32 _start;
@@ -263,13 +262,16 @@ static void resetMemory_ARM7(void) {
 		TIMER_DATA(i) = 0;
 	}
 
+	REG_RCNT = 0;
+
 	// Clear out FIFO
 	REG_IPC_SYNC = 0;
 	REG_IPC_FIFO_CR = IPC_FIFO_ENABLE | IPC_FIFO_SEND_CLEAR;
 	REG_IPC_FIFO_CR = 0;
 
 	memset_addrs_arm7(0x03800000 - 0x8000, 0x03800000 + 0x10000);
-	memset_addrs_arm7(0x02000620, IMAGES_LOCATION-0x1000);	// clear part of EWRAM - except before nds-bootstrap images
+	memset_addrs_arm7(0x02000620, 0x02084000);	// clear part of EWRAM
+	memset_addrs_arm7(0x02280000, IMAGES_LOCATION-0x1000);	// clear part of EWRAM - except before nds-bootstrap images
 	toncset((u32*)0x02380000, 0, 0x38000);		// clear part of EWRAM - except before 0x023DA000, which has the arm9 code
 	toncset((u32*)0x023C0000, 0, 0x20000);
 	toncset((u32*)0x023F0000, 0, 0xD000);
@@ -642,8 +644,6 @@ static bool isROMLoadableInRAM(const tDSiHeader* dsiHeader, const tNDSHeader* nd
 			romSizeLimitChange = 0x140000;
 		} */ else if (strncmp(romTid, "KUP", 3) == 0) { // Match Up!
 			romSizeLimitChange = 0x380000;
-		} else if (strncmp(romTid, "KAU", 3) == 0) { // Nintendo Cowndown Calendar
-			romSizeLimitChange = 0x200000;
 		} else if (strncmp(romTid, "KQR", 3) == 0) { // Remote Racers
 			romSizeLimitChange = 0x280000;
 		}
@@ -656,6 +656,10 @@ static bool isROMLoadableInRAM(const tDSiHeader* dsiHeader, const tNDSHeader* nd
 		romSizeLimit -= 0x200000;
 	}
 	if ((strncmp(romTid, "KD3", 3) == 0 || strncmp(romTid, "KD4", 3) == 0 || strncmp(romTid, "KD5", 3) == 0) && s2FlashcardId == 0x5A45) {
+		return false;
+	}
+	if ((strncmp(romTid, "KVL", 3) == 0) // Clash of Elementalists
+	&& ((s2FlashcardId != 0x334D && s2FlashcardId != 0x3647 && s2FlashcardId != 0x4353) || (s2FlashcardId == 0x5A45 && baseRomSize > 0x800000))) {
 		return false;
 	}
 	if (extendedMemory && !dsDebugRam) {
@@ -695,8 +699,9 @@ static bool isROMLoadableInRAM(const tDSiHeader* dsiHeader, const tNDSHeader* nd
 			romSize -= 0x8000;
 			romSize += 0x88;
 		} else if (ndsHeader->arm9overlaySource == 0 || ndsHeader->arm9overlaySize == 0) {
-			romSize -= ndsHeader->arm7romOffset;
-			romSize -= ndsHeader->arm7binarySize;
+			romSize -= (ndsHeader->arm7romOffset + ndsHeader->arm7binarySize);
+		} else if (ndsHeader->arm9overlaySource > ndsHeader->arm7romOffset) {
+			romSize -= (ndsHeader->arm9romOffset + ndsHeader->arm9binarySize);
 		} else {
 			romSize -= ndsHeader->arm9overlaySource;
 		}
@@ -840,13 +845,14 @@ static void loadOverlaysintoFile(const tNDSHeader* ndsHeader, const module_param
 
 		const u32 buffer = 0x037F8000;
 		const u16 bufferSize = 0x8000;
+		const u32 overlaysOffset = (ndsHeader->arm9overlaySource > ndsHeader->arm7romOffset) ? (ndsHeader->arm9romOffset + ndsHeader->arm9binarySize) : ndsHeader->arm9overlaySource;
 		s32 len = (s32)overlaysSize;
 		u32 dst = 0;
 		while (1) {
 			u32 readLen = (len > bufferSize) ? bufferSize : len;
 
-			fileRead((char*)buffer, file, ndsHeader->arm9overlaySource+dst, readLen);
-			fileWrite((char*)buffer, &apFixOverlaysFile, ndsHeader->arm9overlaySource+dst, readLen);
+			fileRead((char*)buffer, file, overlaysOffset+dst, readLen);
+			fileWrite((char*)buffer, &apFixOverlaysFile, overlaysOffset+dst, readLen);
 
 			len -= bufferSize;
 			dst += bufferSize;
@@ -915,6 +921,8 @@ static void loadROMintoRAM(const tNDSHeader* ndsHeader, const module_params_t* m
 		romSizeEdit += 0x88;
 	} else if (ndsHeader->arm9overlaySource == 0 || ndsHeader->arm9overlaySize == 0) {
 		romOffset = (ndsHeader->arm7romOffset + ndsHeader->arm7binarySize);
+	} else if (ndsHeader->arm9overlaySource > ndsHeader->arm7romOffset) {
+		romOffset = (ndsHeader->arm9romOffset + ndsHeader->arm9binarySize);
 	} else {
 		romOffset = ndsHeader->arm9overlaySource;
 	}
@@ -1243,8 +1251,14 @@ int arm7_main(void) {
 	}
 
 	// Calculate overlay pack size
-	for (u32 i = ndsHeader->arm9overlaySource; i < ndsHeader->arm7romOffset; i++) {
-		overlaysSize++;
+	if (ndsHeader->arm9overlaySource > ndsHeader->arm7romOffset) {
+		for (u32 i = ndsHeader->arm9romOffset+ndsHeader->arm9binarySize; i < ndsHeader->arm7romOffset; i++) {
+			overlaysSize++;
+		}
+	} else {
+		for (u32 i = ndsHeader->arm9overlaySource; i < ndsHeader->arm7romOffset; i++) {
+			overlaysSize++;
+		}
 	}
 	if (ndsHeader->unitCode == 3) {
 		// Calculate i-overlay pack size

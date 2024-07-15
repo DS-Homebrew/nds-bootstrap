@@ -19,6 +19,7 @@
 #define b_overlaysCached BIT(6)
 #define b_cacheFlushFlag BIT(7)
 #define b_cardReadFix BIT(8)
+#define b_bypassExceptionHandler BIT(9)
 #define b_softResetMb BIT(13)
 
 
@@ -194,7 +195,6 @@ int hookNdsRetailArm9(
 	const char* romTid = getRomTid(ndsHeader);
 	extern u32 romPaddingSize;
 	extern u32 romLocation;
-	extern u32 romSizeLimit;
 	extern u16 s2FlashcardId;
 	extern bool maxHeapOpen;
 
@@ -243,8 +243,12 @@ int hookNdsRetailArm9(
 	if (patchOffsetCache.resetMb) {
 		ce9->valueBits |= b_softResetMb;
 	}
+	if (strncmp(romTid, "AZE", 3) == 0) { // Zelda: Phantom Hourglass
+		ce9->valueBits |= b_bypassExceptionHandler;
+	}
 	ce9->mainScreen             = mainScreen;
 	ce9->s2FlashcardId          = s2FlashcardId;
+	ce9->overlaysSrc            = (ndsHeader->arm9overlaySource > ndsHeader->arm7romOffset) ? (ndsHeader->arm9romOffset + ndsHeader->arm9binarySize) : ndsHeader->arm9overlaySource;
 	ce9->overlaysSize           = overlaysSize;
 	ce9->ioverlaysSize          = ioverlaysSize;
 	ce9->romPaddingSize         = romPaddingSize;
@@ -257,7 +261,7 @@ int hookNdsRetailArm9(
 		} else if (ndsHeader->arm9overlaySource == 0 || ndsHeader->arm9overlaySize == 0) {
 			romOffset = (ndsHeader->arm7romOffset + ndsHeader->arm7binarySize);
 		} else {
-			romOffset = ndsHeader->arm9overlaySource;
+			romOffset = ce9->overlaysSrc;
 		}
 		ce9->romLocation -= romOffset;
 	}

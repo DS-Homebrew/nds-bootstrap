@@ -180,19 +180,19 @@ static void passArgs_ARM7 (void) {
 static void initMBK(void) {
 	// This function has no effect with ARM7 SCFG locked
 
-	// arm7 is master of WRAM-A, arm9 of WRAM-B & C
-	REG_MBK9=0x3000000F;
+	// ARM7 is master of WRAM-A, arm9 of WRAM-B & C
+	REG_MBK9 = 0x3000000F;
 
-	// WRAM-A fully mapped to arm7
-	*((vu32*)REG_MBK1)=0x8D898581; // same as dsiware
+	// WRAM-A fully mapped to ARM7
+	*(vu32*)REG_MBK1 = 0x8185898D; // Same as DSiWare
 
-	// WRAM-B fully mapped to arm9 // inverted order
-	*((vu32*)REG_MBK2)=0x8C888480;
-	*((vu32*)REG_MBK3)=0x9C989490;
+	// WRAM-B fully mapped to ARM7 // inverted order
+	*(vu32*)REG_MBK2 = 0x9195999D;
+	*(vu32*)REG_MBK3 = 0x8185898D;
 
-	// WRAM-C fully mapped to arm9 // inverted order
-	*((vu32*)REG_MBK4)=0x8C888480;
-	*((vu32*)REG_MBK5)=0x9C989490;
+	// WRAM-C fully mapped to arm7 // inverted order
+	*(vu32*)REG_MBK4 = 0x9195999D;
+	*(vu32*)REG_MBK5 = 0x8185898D;
 
 	// WRAM mapped to the 0x3700000 - 0x37FFFFF area 
 	// WRAM-A mapped to the 0x3000000 - 0x303FFFF area : 256k
@@ -604,7 +604,7 @@ int arm7_main (void) {
 		fileWrite((char*)&srParams, srParamsFile, 0xC, 4);
 	}
 
-	const bool ramDiskFound = (ramDiskCluster != 0 && ramDiskSize > 0);
+	const bool ramDiskFound = (ramDiskSize > 0);
 
 	aFile romFile = getFileFromCluster(storedFileCluster);
 	if (!ramDiskFound && (standaloneFileCluster != 0xFFFFFFFF)) {
@@ -697,10 +697,16 @@ int arm7_main (void) {
 
 	// File containing cached patch offsets
 	aFile patchOffsetCacheFile = getFileFromCluster(patchOffsetCacheFileCluster);
-	fileRead((char*)&patchOffsetCache, patchOffsetCacheFile, 0, sizeof(patchOffsetCacheContents));
-	u16 prevPatchOffsetCacheFileVersion = patchOffsetCache.ver;
+	fileRead((char*)&patchOffsetCache, patchOffsetCacheFile, 0, 4);
+	if (patchOffsetCache.ver == patchOffsetCacheFileVersion
+	 && patchOffsetCache.type == 2) {	// 0 = Regular, 1 = B4DS, 2 = HB
+		fileRead((char*)&patchOffsetCache, patchOffsetCacheFile, 0, sizeof(patchOffsetCacheContents));
+	} else {
+		patchOffsetCache.ver = patchOffsetCacheFileVersion;
+		patchOffsetCache.type = 2;
+	}
 
-	rsetPatchCache(ndsHeader);
+	patchOffsetCacheFilePrevCrc = swiCRC16(0xFFFF, &patchOffsetCache, sizeof(patchOffsetCacheContents));
 
 	dldiMagicLoaderString[0]--;
 
@@ -725,11 +731,9 @@ int arm7_main (void) {
 				patchOffsetCache.dldiOffset = patchOffset;
 			}
 			patchOffsetCache.dldiChecked = true;
-			patchOffsetCacheChanged = true;
 		}
-		u32* wordCommandAddr = (u32 *) (((u32)((u32*)NDS_HEADER)[0x0A])+patchOffset+0x80);
 
-		hookNds(ndsHeader, (u32*)sdEngineLocation, wordCommandAddr);
+		hookNds(ndsHeader, (u32*)sdEngineLocation);
 
 		if (!patchOffsetCache.bootloaderChecked) {
 			u32 bootloaderSignature[4] = {0xEA000002, 0x00000000, 0x00000001, 0x00000000};
@@ -747,7 +751,6 @@ int arm7_main (void) {
 				}
 			}
 			patchOffsetCache.bootloaderChecked = true;
-			patchOffsetCacheChanged = true;
 		}
 		if (patchOffsetCache.bootloaderOffset) {
 			//toncset(patchOffsetCache.bootloaderOffset, 0, 0x9C98);
@@ -755,11 +758,12 @@ int arm7_main (void) {
 			//tonccpy((char*)BOOT_INJECT_LOCATION, (char*)0x06000000, 0x8000);
 		}
 	} else if (!isGbaR2 && (!recentLibnds || !dsiModeConfirmed)) {
-		hookNds(ndsHeader, NULL, 0); // Only patch SWI functions
+		hookNds(ndsHeader, NULL); // Only patch SWI functions
 	}
 	toncset((char*)0x06000000, 0, 0x8000);
 
-	if (prevPatchOffsetCacheFileVersion != patchOffsetCacheFileVersion || patchOffsetCacheChanged) {
+	patchOffsetCacheFileNewCrc = swiCRC16(0xFFFF, &patchOffsetCache, sizeof(patchOffsetCacheContents));
+	if (patchOffsetCacheFileNewCrc != patchOffsetCacheFilePrevCrc) {
 		fileWrite((char*)&patchOffsetCache, patchOffsetCacheFile, 0, sizeof(patchOffsetCacheContents));
 	}
 

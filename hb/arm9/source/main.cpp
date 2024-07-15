@@ -80,6 +80,17 @@ static off_t getFileSize(const char* path) {
 	return fsize;
 }
 
+static int language;
+static int dsiMode;
+static bool boostVram;
+static int consoleModel;
+
+static std::string ndsPath;
+static std::string homebrewArg;
+static std::string ramDrivePath;
+
+static u32 ramDiskSize = 0;
+
 void runFile(string filename, string fullPath, string homebrewArg, string ramDiskFilename, u32 ramDiskSize, string srParamsFilePath, const char* patchOffsetCacheFilePath, u32 cfgSize, int language, int dsiMode, bool boostVram, int consoleModel, u32 srTid1, u32 srTid2) {
 	char filePath[256];
 
@@ -257,10 +268,10 @@ int main( int argc, char **argv) {
 		}
 
 		// Language
-		int language = strtol(config_file.fetch("NDS-BOOTSTRAP", "LANGUAGE").c_str(), NULL, 0);
+		language = strtol(config_file.fetch("NDS-BOOTSTRAP", "LANGUAGE").c_str(), NULL, 0);
 
 		// DSi Mode
-		int dsiMode = strtol(config_file.fetch("NDS-BOOTSTRAP", "DSI_MODE").c_str(), NULL, 0);
+		dsiMode = strtol(config_file.fetch("NDS-BOOTSTRAP", "DSI_MODE").c_str(), NULL, 0);
 
 		if (dsiMode>0 || (bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "BOOST_CPU").c_str(), NULL, 0)) {	
 			dbg_printf("CPU boosted\n");
@@ -270,13 +281,13 @@ int main( int argc, char **argv) {
 			fifoSendValue32(FIFO_USER_07, 1);
 		}
 
-		bool boostVram = (bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "BOOST_VRAM").c_str(), NULL, 0);
+		boostVram = (bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "BOOST_VRAM").c_str(), NULL, 0);
 		if (dsiMode>0 || boostVram) {	
 			dbg_printf("VRAM boosted\n");
 		}
 
 		// Console model
-		int consoleModel = strtol(config_file.fetch("NDS-BOOTSTRAP", "CONSOLE_MODEL").c_str(), NULL, 0);
+		consoleModel = strtol(config_file.fetch("NDS-BOOTSTRAP", "CONSOLE_MODEL").c_str(), NULL, 0);
 
 		fifoSendValue32(FIFO_USER_03, 1);
 		fifoWaitValue32(FIFO_USER_05);
@@ -309,17 +320,17 @@ int main( int argc, char **argv) {
 			remove ("fat:/NDSBTSRP.LOG");
 		}
 
-		std::string	ndsPath(config_file.fetch("NDS-BOOTSTRAP", "NDS_PATH"));
+		ndsPath = (config_file.fetch("NDS-BOOTSTRAP", "NDS_PATH"));
         if(strncmp(ndsPath.c_str(), substr.c_str(), substr.size()) == 0)
 			ndsPath = ReplaceAll(ndsPath, "sd:/", "fat:/");
 
-		std::string	homebrewArg(config_file.fetch("NDS-BOOTSTRAP", "HOMEBREW_ARG"));
+		homebrewArg = (config_file.fetch("NDS-BOOTSTRAP", "HOMEBREW_ARG"));
 		if (homebrewArg != "") {
 			if(strncmp(homebrewArg.c_str(), substr.c_str(), substr.size()) == 0)
 				homebrewArg = ReplaceAll(homebrewArg, "sd:/", "fat:/");
 		}
 
-		std::string	ramDrivePath(config_file.fetch("NDS-BOOTSTRAP", "RAM_DRIVE_PATH"));
+		ramDrivePath = (config_file.fetch("NDS-BOOTSTRAP", "RAM_DRIVE_PATH"));
 		if (ramDrivePath != "") {
 			if(strncmp(ramDrivePath.c_str(), substr.c_str(), substr.size()) == 0)
 				ramDrivePath = ReplaceAll(ramDrivePath, "sd:/", "fat:/");
@@ -338,9 +349,11 @@ int main( int argc, char **argv) {
 			filename.erase(0, last_slash_idx + 1);
 		}
 
-		u32 ramDiskSize = getFileSize(ramDrivePath.c_str());
-		if (ramDiskSize > 0) {
-			chdir("fat:/");	// Change directory to root for RAM disk usage
+		if (ramDrivePath.size() > (substr.size()+1)) {
+			ramDiskSize = getFileSize(ramDrivePath.c_str());
+			if (ramDiskSize > 0) {
+				chdir("fat:/");	// Change directory to root for RAM disk usage
+			}
 		}
 
 		u32 cfgSize = getFileSize("fat:/snemul.cfg");

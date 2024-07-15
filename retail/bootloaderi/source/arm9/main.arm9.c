@@ -75,11 +75,11 @@ void initMBKARM9(void) {
 	// WRAM-B fully mapped to arm7 // inverted order
 	*(vu32*)REG_MBK2 = 0x9195999D;
 	*(vu32*)REG_MBK3 = 0x8185898D;
-	
+
 	// WRAM-C fully mapped to arm7 // inverted order
 	*(vu32*)REG_MBK4 = 0x9195999D;
 	*(vu32*)REG_MBK5 = 0x8185898D;
-		
+
 	// WRAM-A not mapped (reserved to arm7)
 	REG_MBK6 = 0x00000000;
 	// WRAM-B mapped to the 0x3740000 - 0x37BFFFF area : 512k // why? only 256k real memory is there

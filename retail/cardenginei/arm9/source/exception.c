@@ -5,6 +5,7 @@
 #include "cardengine_header_arm9.h"
 
 #define dsiBios BIT(11)
+#define bypassExceptionHandler BIT(16)
 
 #define EXCEPTION_VECTOR_SDK1	(*(VoidFn *)(0x27FFD9C))
 
@@ -31,12 +32,12 @@ void userException() {
 void setExceptionHandler2() {
 //---------------------------------------------------------------------------------
 	#ifdef TWLSDK
-	if (EXCEPTION_VECTOR == enterException && *exceptionC == userException) return;
+	if (EXCEPTION_VECTOR == ((ce9->valueBits & bypassExceptionHandler) ? 0 : enterException) && *exceptionC == userException) return;
 	#else
 	if (!(ce9->valueBits & dsiBios)) {
-		if (EXCEPTION_VECTOR_SDK1 == enterException && *exceptionC == userException) return;
+		if (EXCEPTION_VECTOR_SDK1 == ((ce9->valueBits & bypassExceptionHandler) ? 0 : enterException) && *exceptionC == userException) return;
 	} else {
-		if (EXCEPTION_VECTOR == enterException && *exceptionC == userException) return;
+		if (EXCEPTION_VECTOR == ((ce9->valueBits & bypassExceptionHandler) ? 0 : enterException) && *exceptionC == userException) return;
 	}
 	#endif
 
@@ -47,13 +48,13 @@ void setExceptionHandler2() {
 	#endif
 	#ifdef TWLSDK
 	exceptionStack = (u32)EXCEPTION_STACK_LOCATION_SDK5;
-	EXCEPTION_VECTOR = enterException;
+	EXCEPTION_VECTOR = (ce9->valueBits & bypassExceptionHandler) ? 0 : enterException;
 	#else
 	exceptionStack = (u32)EXCEPTION_STACK_LOCATION;
 	if (!(ce9->valueBits & dsiBios)) {
-		EXCEPTION_VECTOR_SDK1 = enterException;
+		EXCEPTION_VECTOR_SDK1 = (ce9->valueBits & bypassExceptionHandler) ? 0 : enterException;
 	} else {
-		EXCEPTION_VECTOR = enterException;
+		EXCEPTION_VECTOR = (ce9->valueBits & bypassExceptionHandler) ? 0 : enterException;
 	}
 	#endif
 	*exceptionC = userException;

@@ -24,7 +24,7 @@ DATA			:=	data
 #---------------------------------------------------------------------------------
 # options for code generation
 #---------------------------------------------------------------------------------
-ARCH	:=	-mthumb -mthumb-interwork -march=armv4t
+ARCH	:=	-mthumb -march=armv4t
 
 CFLAGS	:=	-g -Wall -Oz\
 			-mcpu=arm7tdmi -mtune=arm7tdmi -fomit-frame-pointer\

@@ -35,13 +35,15 @@ valueBits:
 	.word	0x00000000
 mainScreen:
 	.word	0x00000000
-overlaysSize:
-	.word	0x00000000
-romPaddingSize:
-	.word	0x00000000
 consoleModel:
 	.word	0x00000000
 irqTable:
+	.word	0x00000000
+overlaysSrc:
+	.word	0x00000000
+overlaysSize:
+	.word	0x00000000
+romPaddingSize:
 	.word	0x00000000
 romLocation:
 	.word	0x00000000
@@ -83,11 +85,8 @@ romMap:
 
 card_engine_start:
 
+.thumb
 ndsCodeStart:
-	.thumb
-	bx	pc
-.align	4
-	.arm
 	mov r1, #0
 	mov r2, #0
 	mov r3, #0
@@ -95,13 +94,13 @@ ndsCodeStart:
 	mov r5, #0
 	mov r6, #0
 	mov r7, #0
-	mov r8, #0
-	mov r9, #0
-	mov r10, #0
-	mov r11, #0
+	mov r8, r1
+	mov r9, r1
+	mov r10, r1
+	mov r11, r1
+	bx r0
 
-	bx	r0
-
+.balign	4
 patches:
 .word	card_read_arm9
 .word	card_irq_enable

@@ -52,8 +52,9 @@ bool applyIpsPatch(const tNDSHeader* ndsHeader, u8* ipsbyte, const bool arm9Only
 				if (usesCloneboot) {
 					rombyte -= 0x4000;
 				} else if (ndsHeader->arm9overlaySource == 0 || ndsHeader->arm9overlaySize == 0) {
-					rombyte -= ndsHeader->arm7romOffset;
-					rombyte -= ndsHeader->arm7binarySize;
+					rombyte -= (ndsHeader->arm7romOffset + ndsHeader->arm7binarySize);
+				} else if (ndsHeader->arm9overlaySource > ndsHeader->arm7romOffset) {
+					rombyte -= (ndsHeader->arm9romOffset + ndsHeader->arm9binarySize);
 				} else {
 					rombyte -= ndsHeader->arm9overlaySource;
 				}

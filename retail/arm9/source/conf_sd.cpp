@@ -18,6 +18,7 @@
 #include <easysave/ini.hpp>
 #include "myDSiMode.h"
 #include "lzss.h"
+#include "lzx.h"
 #include "text.h"
 #include "tonccpy.h"
 #include "hex.h"
@@ -77,7 +78,8 @@ extern std::string musicsFilePath;
 extern std::string pageFilePath;
 extern std::string sharedFontPath;
 
-extern u8 lz77ImageBuffer[0x20000];
+extern u8* lz77ImageBuffer;
+#define sizeof_lz77ImageBuffer 0x30000
 
 off_t getFileSize(const char* path) {
 	FILE* fp = fopen(path, "rb");
@@ -364,13 +366,13 @@ void getIgmStrings(configuration* conf, bool b4ds) {
 
 	FILE *font = fopen("nitro:/fonts/ascii.lz77", "rb");
 	if (font) {
-		fread(lz77ImageBuffer, 1, sizeof(lz77ImageBuffer), font);
+		fread(lz77ImageBuffer, 1, sizeof_lz77ImageBuffer, font);
 		LZ77_Decompress(lz77ImageBuffer, igmText->font);
 		fclose(font);
 	}
 	font = fopen(extendedFontPath, "rb");
 	if (font) {
-		fread(lz77ImageBuffer, 1, sizeof(lz77ImageBuffer), font);
+		fread(lz77ImageBuffer, 1, sizeof_lz77ImageBuffer, font);
 		LZ77_Decompress(lz77ImageBuffer, igmText->font + 0x400);
 		fclose(font);
 	}
@@ -609,6 +611,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 	char romTid[5] = {0};
 	u8 unitCode = 0;
+	u32 ndsArm9BinOffset = 0;
 	u32 ndsArm9Offset = 0;
 	u32 ndsArm7Size = 0;
 	u32 fatAddr = 0;
@@ -632,6 +635,8 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		fread(&romTid, 1, 4, ndsFile);
 		fseek(ndsFile, 0x12, SEEK_SET);
 		fread(&unitCode, 1, 1, ndsFile);
+		fseek(ndsFile, 0x20, SEEK_SET);
+		fread(&ndsArm9BinOffset, sizeof(u32), 1, ndsFile);
 		fseek(ndsFile, 0x28, SEEK_SET);
 		fread(&ndsArm9Offset, sizeof(u32), 1, ndsFile);
 		fseek(ndsFile, 0x3C, SEEK_SET);
@@ -747,17 +752,17 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			// WiFi RAM data
 			u8* twlCfg = (u8*)0x02000400;
 			readFirmware(0x1FD, twlCfg+0x1E0, 1); // WlFirm Type (1=DWM-W015, 2=W024, 3=W028)
+			u32 wlFirmVars = 0x500400;
+			u32 wlFirmBase = 0x500000;
+			u32 wlFirmSize = 0x02E000;
 			if (twlCfg[0x1E0] == 2 || twlCfg[0x1E0] == 3) {
-				toncset32(twlCfg+0x1E4, 0x520000, 1); // WlFirm RAM vars
-				toncset32(twlCfg+0x1E8, 0x520000, 1); // WlFirm RAM base
-				toncset32(twlCfg+0x1EC, 0x020000, 1); // WlFirm RAM size
-			} else {
-				toncset32(twlCfg+0x1E4, 0x500400, 1); // WlFirm RAM vars
-				toncset32(twlCfg+0x1E8, 0x500000, 1); // WlFirm RAM base
-				toncset32(twlCfg+0x1EC, 0x02E000, 1); // WlFirm RAM size
+				wlFirmVars = 0x520000;
+				wlFirmBase = 0x520000;
+				wlFirmSize = 0x020000;
 			}
-			*(u16*)(twlCfg+0x1E2) = swiCRC16(0xFFFF, twlCfg+0x1E4, 0xC); // WlFirm CRC16
-
+			toncset32(twlCfg+0x1E4, wlFirmVars, 1); // WlFirm RAM vars
+			toncset32(twlCfg+0x1E8, wlFirmBase, 1); // WlFirm RAM base
+			toncset32(twlCfg+0x1EC, wlFirmSize, 1); // WlFirm RAM size
 			twlCfgFile = fopen(nandMounted ? "nand:/sys/HWINFO_N.dat" : "sd:/sys/HWINFO_N.dat", "rb");
 			fseek(twlCfgFile, 0x88, SEEK_SET);
 			fread((void*)0x02000600, 1, 0x14, twlCfgFile);
@@ -1200,7 +1205,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		// Load SDK5 ce7 binary
 		cebin = fopen(binary3 ? "nitro:/cardenginei_arm7_twlsdk3.lz77" : "nitro:/cardenginei_arm7_twlsdk.lz77", "rb");
 		if (cebin) {
-			fread(lz77ImageBuffer, 1, sizeof(lz77ImageBuffer), cebin);
+			fread(lz77ImageBuffer, 1, sizeof_lz77ImageBuffer, cebin);
 			LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINEI_ARM7_BUFFERED_LOCATION);
 			if (REG_SCFG_EXT7 != 0) {
 				tonccpy((u8*)LOADER_RETURN_SDK5_LOCATION, twlmenuResetGamePath, 256);
@@ -1213,7 +1218,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			// Load SDK5 DLDI ce9 binary
 			cebin = fopen(binary3 ? "nitro:/cardenginei_arm9_twlsdk3_dldi.lz77" : "nitro:/cardenginei_arm9_twlsdk_dldi.lz77", "rb");
 			if (cebin) {
-				fread(lz77ImageBuffer, 1, sizeof(lz77ImageBuffer), cebin);
+				fread(lz77ImageBuffer, 1, sizeof_lz77ImageBuffer, cebin);
 				LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINEI_ARM9_SDK5_BUFFERED_LOCATION);
 			}
 			fclose(cebin);
@@ -1221,7 +1226,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			// Load SDK5 ce9 binary
 			cebin = fopen(binary3 ? "nitro:/cardenginei_arm9_twlsdk3.lz77" : "nitro:/cardenginei_arm9_twlsdk.lz77", "rb");
 			if (cebin) {
-				fread(lz77ImageBuffer, 1, sizeof(lz77ImageBuffer), cebin);
+				fread(lz77ImageBuffer, 1, sizeof_lz77ImageBuffer, cebin);
 				LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINEI_ARM9_SDK5_BUFFERED_LOCATION);
 			}
 			fclose(cebin);
@@ -1230,7 +1235,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		// Load ce7 binary
 		cebin = fopen(dsiEnhancedMbk ? "nitro:/cardenginei_arm7_alt.lz77" : "nitro:/cardenginei_arm7.lz77", "rb");
 		if (cebin) {
-			fread(lz77ImageBuffer, 1, sizeof(lz77ImageBuffer), cebin);
+			fread(lz77ImageBuffer, 1, sizeof_lz77ImageBuffer, cebin);
 			LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINEI_ARM7_BUFFERED_LOCATION);
 			if (REG_SCFG_EXT7 != 0) {
 				tonccpy((u8*)LOADER_RETURN_LOCATION, twlmenuResetGamePath, 256);
@@ -1251,7 +1256,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			// Load DLDI ce9 binary
 			cebin = fopen(ce9Path, "rb");
 			if (cebin) {
-				fread(lz77ImageBuffer, 1, sizeof(lz77ImageBuffer), cebin);
+				fread(lz77ImageBuffer, 1, sizeof_lz77ImageBuffer, cebin);
 				LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINEI_ARM9_BUFFERED_LOCATION);
 			}
 			fclose(cebin);
@@ -1266,7 +1271,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			// Load ce9 binary
 			cebin = fopen(ce9Path, "rb");
 			if (cebin) {
-				fread(lz77ImageBuffer, 1, sizeof(lz77ImageBuffer), cebin);
+				fread(lz77ImageBuffer, 1, sizeof_lz77ImageBuffer, cebin);
 				LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINEI_ARM9_BUFFERED_LOCATION);
 			}
 			fclose(cebin);
@@ -1275,7 +1280,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 				// Load ce9 binary (alt 2)
 				cebin = fopen("nitro:/cardenginei_arm9_alt2.lz77", "rb");
 				if (cebin) {
-					fread(lz77ImageBuffer, 1, sizeof(lz77ImageBuffer), cebin);
+					fread(lz77ImageBuffer, 1, sizeof_lz77ImageBuffer, cebin);
 					LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINEI_ARM9_BUFFERED_LOCATION2);
 				}
 				fclose(cebin);
@@ -1370,7 +1375,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	// Load ce7 binary
 	cebin = fopen(binary3 ? "nitro:/cardenginei_arm7_dsiware3.lz77" : "nitro:/cardenginei_arm7_dsiware.lz77", "rb");
 	if (cebin) {
-		fread(lz77ImageBuffer, 1, sizeof(lz77ImageBuffer), cebin);
+		fread(lz77ImageBuffer, 1, sizeof_lz77ImageBuffer, cebin);
 		LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINEI_ARM7_BUFFERED_LOCATION);
 		if (REG_SCFG_EXT7 != 0) {
 			tonccpy((u8*)LOADER_RETURN_DSIWARE_LOCATION, twlmenuResetGamePath, 256);
@@ -1389,7 +1394,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	// Load ce9 binary
 	cebin = fopen(binary3 ? "nitro:/cardenginei_arm9_dsiware3.lz77" : "nitro:/cardenginei_arm9_dsiware.lz77", "rb");
 	if (cebin) {
-		fread(lz77ImageBuffer, 1, sizeof(lz77ImageBuffer), cebin);
+		fread(lz77ImageBuffer, 1, sizeof_lz77ImageBuffer, cebin);
 		LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINEI_ARM9_BUFFERED_LOCATION);
 	}
 	fclose(cebin);
@@ -1415,7 +1420,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	// Load in-game menu ce9 binary
 	cebin = fopen("nitro:/cardenginei_arm9_igm.lz77", "rb");
 	if (cebin) {
-		fread(lz77ImageBuffer, 1, sizeof(lz77ImageBuffer), cebin);
+		fread(lz77ImageBuffer, 1, sizeof_lz77ImageBuffer, cebin);
 		LZ77_Decompress(lz77ImageBuffer, (u8*)igmText);
 
 		getIgmStrings(conf, false);
@@ -1427,12 +1432,16 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			screenshotPath = "fat:/_nds/nds-bootstrap/screenshots.tar";
 		}
 
-		if (access(screenshotPath.c_str(), F_OK) != 0) {
+		if (getFileSize(screenshotPath.c_str()) < 0x4BCC00) {
 			char buffer[2][0x100] = {{0}};
 
 			consoleDemoInit();
 			iprintf("Creating screenshots.tar\n");
-			iprintf("Please wait...\n");
+			iprintf("Please wait...");
+
+			if (access(screenshotPath.c_str(), F_OK) == 0) {
+				remove(screenshotPath.c_str());
+			}
 
 			FILE *headerFile = fopen("nitro:/screenshotTarHeaders.bin", "rb");
 			if (headerFile) {
@@ -1455,6 +1464,10 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			}
 
 			consoleClear();
+			if (getFileSize(screenshotPath.c_str()) < 0x4BCC00) {
+				iprintf("Failed to create screenshots.tar");
+				while (1) swiWaitForVBlank();
+			}
 			igmText->currentScreenshot = 0;
 		} else {
 			FILE *screenshotFile = fopen(screenshotPath.c_str(), "rb");
@@ -1541,7 +1554,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 	FILE* bootstrapImages = fopen("nitro:/bootloader_images.lz77", "rb");
 	if (bootstrapImages) {
-		fread(lz77ImageBuffer, 1, sizeof(lz77ImageBuffer), bootstrapImages);
+		fread(lz77ImageBuffer, 1, sizeof_lz77ImageBuffer, bootstrapImages);
 		LZ77_Decompress(lz77ImageBuffer, (u8*)IMAGES_LOCATION+0x18000);
 	}
 	fclose(bootstrapImages);
@@ -1709,7 +1722,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	if (cebin) {
 		igmText = (struct IgmText *)(b4dsDebugRam ? INGAME_MENU_LOCATION_B4DS_EXTMEM : INGAME_MENU_LOCATION_B4DS);
 
-		fread(lz77ImageBuffer, 1, sizeof(lz77ImageBuffer), cebin);
+		fread(lz77ImageBuffer, 1, sizeof_lz77ImageBuffer, cebin);
 		LZ77_Decompress(lz77ImageBuffer, (u8*)igmText);
 
 		getIgmStrings(conf, true);
@@ -1718,12 +1731,16 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 		screenshotPath = "fat:/_nds/nds-bootstrap/screenshots.tar";
 
-		if (access(screenshotPath.c_str(), F_OK) != 0) {
+		if (getFileSize(screenshotPath.c_str()) < 0x4BCC00) {
 			char buffer[2][0x100] = {{0}};
 
 			consoleDemoInit();
 			iprintf("Creating screenshots.tar\n");
-			iprintf("Please wait...\n");
+			iprintf("Please wait...");
+
+			if (access(screenshotPath.c_str(), F_OK) == 0) {
+				remove(screenshotPath.c_str());
+			}
 
 			FILE *headerFile = fopen("nitro:/screenshotTarHeaders.bin", "rb");
 			if (headerFile) {
@@ -1746,6 +1763,10 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			}
 
 			consoleClear();
+			if (getFileSize(screenshotPath.c_str()) < 0x4BCC00) {
+				iprintf("Failed to create screenshots.tar");
+				while (1) swiWaitForVBlank();
+			}
 			igmText->currentScreenshot = 0;
 		} else {
 			FILE *screenshotFile = fopen(screenshotPath.c_str(), "rb");
@@ -1890,7 +1911,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		cebin = fopen(ce9path, "rb");
 	}
 	if (cebin) {
-		fread(lz77ImageBuffer, 1, sizeof(lz77ImageBuffer), cebin);
+		fread(lz77ImageBuffer, 1, sizeof_lz77ImageBuffer, cebin);
 		LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINE_ARM9_LOCATION_BUFFERED);
 	}
 	fclose(cebin);
@@ -1911,7 +1932,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 	FILE* bootstrapImages = fopen("nitro:/bootloader_images.lz77", "rb");
 	if (bootstrapImages) {
-		fread(lz77ImageBuffer, 1, sizeof(lz77ImageBuffer), bootstrapImages);
+		fread(lz77ImageBuffer, 1, sizeof_lz77ImageBuffer, bootstrapImages);
 		LZ77_Decompress(lz77ImageBuffer, (u8*)IMAGES_LOCATION+0x18000);
 	}
 	fclose(bootstrapImages);
@@ -2020,22 +2041,45 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 	conf->donorFileOffset = 0;
 
-	if (romFSInited && (!dsiFeatures() || conf->b4dsMode) && donorInsideNds) {
-		// Set cloneboot/multiboot SRL file either to boot instead, or as Donor ROM
-		FILE* ndsFile = fopen(multibootSrl, "rb");
-		if (ndsFile) {
-			conf->donorFileOffset = offsetOfOpenedNitroFile;
-		}
-		if (startMultibootSrl) {
-			FILE* pageFile = fopen(pageFilePath.c_str(), "rb+");
-			if (ndsFile && pageFile) {
-				FILE* srParamsFile = fopen(srParamsFilePath.c_str(), "rb+");
-				fseek(srParamsFile, 0xC, SEEK_SET);
-				fwrite(&offsetOfOpenedNitroFile, sizeof(u32), 1, srParamsFile);
-				fclose(srParamsFile);
+	if (romFSInited && (!dsiFeatures() || conf->b4dsMode)) {
+		if (!b4dsDebugRam && (strncmp(romTid, "KAA", 3) == 0)) {
+			// Decompress sdat file for Art Style: Aquia
+			if (getFileSize("rom:/sound_data.sdat")) {
+				u8 sdatSize0[4];
+				FILE* sdatFile = fopen("rom:/sound_data.sdat", "rb");
+				fread(sdatSize0, 1, 4, sdatFile);
+				const u32 sdatSize = LZ77_GetLength(sdatSize0);
+
+				u32 bssEnd = 0;
+				ndsFile = fopen(conf->ndsPath, "rb");
+				fseek(ndsFile, ndsArm9BinOffset+0xFB8, SEEK_SET);
+				fread(&bssEnd, sizeof(u32), 1, ndsFile);
+				fclose(ndsFile);
+
+				if (bssEnd+sdatSize < 0x02280000) {
+					*(u32*)(bssEnd-4) = sdatSize;
+					u8* sdat = (u8*)bssEnd;
+					LZX_DecodeFromFile(sdat, sdatFile, sdatSize);
+				}
+				fclose(sdatFile);
 			}
+		} else if (donorInsideNds) {
+			// Set cloneboot/multiboot SRL file either to boot instead, or as Donor ROM
+			FILE* ndsFile = fopen(multibootSrl, "rb");
+			if (ndsFile) {
+				conf->donorFileOffset = offsetOfOpenedNitroFile;
+			}
+			if (startMultibootSrl) {
+				FILE* pageFile = fopen(pageFilePath.c_str(), "rb+");
+				if (ndsFile && pageFile) {
+					FILE* srParamsFile = fopen(srParamsFilePath.c_str(), "rb+");
+					fseek(srParamsFile, 0xC, SEEK_SET);
+					fwrite(&offsetOfOpenedNitroFile, sizeof(u32), 1, srParamsFile);
+					fclose(srParamsFile);
+				}
+			}
+			fclose(ndsFile);
 		}
-		fclose(ndsFile);
 	}
 
 	u32 srlAddr = 0;
@@ -2084,19 +2128,15 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			ramDumpPath = "fat:/_nds/nds-bootstrap/ramDump.bin";
 		}
 
-		if (access(ramDumpPath.c_str(), F_OK) != 0) {
+		if (getFileSize(ramDumpPath.c_str()) < 0x02000000) {
 			consoleDemoInit();
 			iprintf("Allocating space for\n");
 			iprintf("creating a RAM dump.\n");
-			iprintf("Please wait...\n");
-			/* printf("\n");
-			if (conf->consoleModel >= 2) {
-				iprintf("If this takes a while, press\n");
-				iprintf("HOME, then press B.\n");
-			} else {
-				iprintf("If this takes a while, close\n");
-				iprintf("the lid, and open it again.\n");
-			} */
+			iprintf("Please wait...");
+
+			if (access(ramDumpPath.c_str(), F_OK) == 0) {
+				remove(ramDumpPath.c_str());
+			}
 
 			FILE *ramDumpFile = fopen(ramDumpPath.c_str(), "wb");
 			if (ramDumpFile) {
@@ -2106,6 +2146,10 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			}
 
 			consoleClear();
+			if (getFileSize(ramDumpPath.c_str()) < 0x02000000) {
+				iprintf("Failed to create RAM dump file.");
+				while (1) swiWaitForVBlank();
+			}
 		}
 
 		apFixOverlaysPath = "sd:/_nds/nds-bootstrap/apFixOverlays.bin";
@@ -2113,11 +2157,15 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			apFixOverlaysPath = "fat:/_nds/nds-bootstrap/apFixOverlays.bin";	
 		}
 
-		if (!conf->isDSiWare && access(apFixOverlaysPath.c_str(), F_OK) != 0) {
+		if (!conf->isDSiWare && getFileSize(apFixOverlaysPath.c_str()) < 0x800000) {
 			consoleDemoInit();
 			iprintf("Allocating space for\n");
 			iprintf("AP-fixed overlays.\n");
-			iprintf("Please wait...\n");
+			iprintf("Please wait...");
+
+			if (access(apFixOverlaysPath.c_str(), F_OK) == 0) {
+				remove(apFixOverlaysPath.c_str());
+			}
 
 			FILE *apFixOverlaysFile = fopen(apFixOverlaysPath.c_str(), "wb");
 			if (apFixOverlaysFile) {
@@ -2127,14 +2175,23 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			}
 
 			consoleClear();
+			if (getFileSize(apFixOverlaysPath.c_str()) < 0x800000) {
+				iprintf("Failed to allocate space\n");
+				iprintf("for AP-fixed overlays.");
+				while (1) swiWaitForVBlank();
+			}
 		}
 	} else {
 		ramDumpPath = "fat:/_nds/nds-bootstrap/ramDump.bin";
 
-		if (access(ramDumpPath.c_str(), F_OK) != 0) {
+		if (getFileSize(ramDumpPath.c_str()) < 0x800000) {
 			consoleDemoInit();
 			iprintf("Creating RAM dump file.\n");
-			iprintf("Please wait...\n");
+			iprintf("Please wait...");
+
+			if (access(ramDumpPath.c_str(), F_OK) == 0) {
+				remove(ramDumpPath.c_str());
+			}
 
 			FILE *ramDumpFile = fopen(ramDumpPath.c_str(), "wb");
 			if (ramDumpFile) {
@@ -2144,15 +2201,23 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			}
 
 			consoleClear();
+			if (getFileSize(ramDumpPath.c_str()) < 0x800000) {
+				iprintf("Failed to create RAM dump file.");
+				while (1) swiWaitForVBlank();
+			}
 		}
 
 		apFixOverlaysPath = "fat:/_nds/nds-bootstrap/apFixOverlays.bin";
 
-		if (!conf->isDSiWare && access(apFixOverlaysPath.c_str(), F_OK) != 0) {
+		if (!conf->isDSiWare && getFileSize(apFixOverlaysPath.c_str()) < 0x800000) {
 			consoleDemoInit();
 			iprintf("Allocating space for\n");
 			iprintf("AP-fixed overlays.\n");
-			iprintf("Please wait...\n");
+			iprintf("Please wait...");
+
+			if (access(apFixOverlaysPath.c_str(), F_OK) == 0) {
+				remove(apFixOverlaysPath.c_str());
+			}
 
 			FILE *apFixOverlaysFile = fopen(apFixOverlaysPath.c_str(), "wb");
 			if (apFixOverlaysFile) {
@@ -2162,6 +2227,11 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			}
 
 			consoleClear();
+			if (getFileSize(apFixOverlaysPath.c_str()) < 0x800000) {
+				iprintf("Failed to allocate space\n");
+				iprintf("for AP-fixed overlays.");
+				while (1) swiWaitForVBlank();
+			}
 		}
 	}
 

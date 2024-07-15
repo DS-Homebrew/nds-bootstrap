@@ -101,13 +101,15 @@ typedef struct cardengineArm9 {
 		13: softResetMb
 		14: cloneboot
 		15: isDlp
+		16: bypassExceptionHandler
 	*/
 	s32 mainScreen;
-	u32 overlaysSize;
-	u32 romPaddingSize;
 	u32 consoleModel;
 	u32* irqTable;
 	// Below not used for DSiWare ce9 binary
+	u32 overlaysSrc;
+	u32 overlaysSize;
+	u32 romPaddingSize;
 	u32 romLocation;
 	u32 cacheAddress;
 	u16 cacheSlots;
@@ -217,15 +219,19 @@ typedef struct cardengineArm9 {
 		4: enableExceptionHandler
 		5: isSdk5
 		6: overlaysCached
+		7: cacheFlushFlag
+		8: cardReadFix
+		9: bypassExceptionHandler
 		13: softResetMb
 	*/
     s32 mainScreen;
+	u32* irqTable;
 	u16 s2FlashcardId;
 	u16 padding;
+	u32 overlaysSrc;
 	u32 overlaysSize;
 	u32 ioverlaysSize;
 	u32 romPaddingSize;
-	u32* irqTable;
 	u32 romLocation;
 	u32 rumbleFrames[2];
 	u32 rumbleForce[2];

@@ -273,6 +273,8 @@ static void resetMemory_ARM7(void) {
 		for(reg=0; reg<0x1c; reg+=4)*((vu32*)(0x04004104 + ((i*0x1c)+reg))) = 0;//Reset NDMA.
 	}
 
+	REG_RCNT = 0;
+
 	// Clear out FIFO
 	REG_IPC_SYNC = 0;
 	REG_IPC_FIFO_CR = IPC_FIFO_ENABLE | IPC_FIFO_SEND_CLEAR;
@@ -284,7 +286,8 @@ static void resetMemory_ARM7(void) {
 		memset_addrs_arm7(0x03800000 - 0x8000, 0x03800000 + 0x10000);
 	}*/
 
-	memset_addrs_arm7(0x02004000, IMAGES_LOCATION);	// clear part of EWRAM - except before nds-bootstrap images
+	memset_addrs_arm7(0x02004000, 0x02084000);	// clear part of EWRAM
+	memset_addrs_arm7(0x02280000, IMAGES_LOCATION);	// clear part of EWRAM - except before nds-bootstrap images
 	dma_twlFill32(0, 0, (u32*)0x02380000, 0x3F000);		// clear part of EWRAM - except before 0x023C0000, which has the arm9 code
 	dma_twlFill32(0, 0, (u32*)0x023C0000, 0x40000);		// clear part of EWRAM
 	memset_addrs_arm7(0x02700000, BLOWFISH_LOCATION);		// clear part of EWRAM - except before ce7 and ce9 binaries
@@ -800,6 +803,8 @@ static bool isROMLoadableInRAM(const tDSiHeader* dsiHeader, const tNDSHeader* nd
 			romSize += 0x88;
 		} else if (ndsHeader->arm9overlaySource == 0 || ndsHeader->arm9overlaySize == 0) {
 			romOffset = (ndsHeader->arm7romOffset + ndsHeader->arm7binarySize);
+		} else if (ndsHeader->arm9overlaySource > ndsHeader->arm7romOffset) {
+			romOffset = (ndsHeader->arm9romOffset + ndsHeader->arm9binarySize);
 		} else {
 			romOffset = ndsHeader->arm9overlaySource;
 		}
@@ -975,6 +980,9 @@ static void loadOverlaysintoRAM(const tNDSHeader* ndsHeader, const module_params
 
 	u32 overlaysLocation = CACHE_ADRESS_START_DSIMODE;
 	u32 alignedOverlaysOffset = (ndsHeader->arm9overlaySource/cacheBlockSize)*cacheBlockSize;
+	if (ndsHeader->arm9overlaySource > ndsHeader->arm7romOffset) {
+		alignedOverlaysOffset = ((ndsHeader->arm9romOffset+ndsHeader->arm9binarySize)/cacheBlockSize)*cacheBlockSize;
+	}
 	u32 newOverlaysSize = 0;
 	for (u32 i = alignedOverlaysOffset; i < ndsHeader->arm7romOffset; i+= cacheBlockSize) {
 		newOverlaysSize += cacheBlockSize;
@@ -1016,6 +1024,8 @@ static void loadIOverlaysintoRAM(const tDSiHeader* dsiHeader, aFile* file, const
 		romOffset = 0x4000;
 	} else if (ndsHeader->arm9overlaySource == 0 || ndsHeader->arm9overlaySize == 0) {
 		romOffset = (ndsHeader->arm7romOffset + ndsHeader->arm7binarySize);
+	} else if (ndsHeader->arm9overlaySource > ndsHeader->arm7romOffset) {
+		romOffset = (ndsHeader->arm9romOffset + ndsHeader->arm9binarySize);
 	} else {
 		romOffset = ndsHeader->arm9overlaySource;
 	}
@@ -1038,6 +1048,8 @@ static void loadROMintoRAM(const tNDSHeader* ndsHeader, const module_params_t* m
 		romSizeEdit += 0x88;
 	} else if (ndsHeader->arm9overlaySource == 0 || ndsHeader->arm9overlaySize == 0) {
 		romOffset = (ndsHeader->arm7romOffset + ndsHeader->arm7binarySize);
+	} else if (ndsHeader->arm9overlaySource > ndsHeader->arm7romOffset) {
+		romOffset = (ndsHeader->arm9romOffset + ndsHeader->arm9binarySize);
 	} else {
 		romOffset = ndsHeader->arm9overlaySource;
 	}
@@ -1192,7 +1204,7 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 		u8* twlCfg = (u8*)0x02000400;
 		if (relocateTwlCfg) {
 			twlCfg = (u8*)0x02FFD400;
-			*(u32*)0x02FFFDFC = 0x02FFD400;
+			*(u32*)0x02FFFDFC = (u32)twlCfg;
 		}
 		u32 configFlags = useTwlCfg ? (*(u32*)((u32)twlCfg)) : 0x0100000F;
 		if (consoleModel < 2) {
@@ -1479,7 +1491,7 @@ int arm7_main(void) {
 		extern u32 clusterCacheSize;
 		clusterCacheSize = 0x10000;
 		if (dsiModeConfirmed && ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr)) {
-			clusterCacheSize = 0x2000;
+			clusterCacheSize = 0x7B0;
 		}
 
 		if ((memcmp(romTid, "IPG", 3) == 0) || ((memcmp(romTid, "IPK", 3) == 0))) {
@@ -1558,8 +1570,8 @@ int arm7_main(void) {
 				clusterCache += 0xB880000;
 				toncset((char*)0x02700000, 0, 0x80000);
 			} else { */
-				u32 add = (*(u32*)0x02FFE1A0 == 0x00403000) ? 0x8DE000 : 0x8FA000; // 0x02FDE000 : 0x02FFA000
-				tonccpy((char*)0x02700000+add, (char*)0x02700000, 0x2000);	// Move FAT table cache elsewhere
+				const u32 add = 0x8FD000; // 0x02FFD000
+				tonccpy((char*)0x02700000+add, (char*)0x02700000, 0x7B0);	// Move FAT table cache elsewhere
 				romFile->fatTableCache = (u32*)((u32)romFile->fatTableCache+add);
 				savFile->fatTableCache = (u32*)((u32)savFile->fatTableCache+add);
 				lastClusterCacheUsed = (u32*)((u32)lastClusterCacheUsed+add);
@@ -1613,8 +1625,14 @@ int arm7_main(void) {
 	dbg_printf("\n");
 
 	// Calculate overlay pack size
-	for (u32 i = ndsHeader->arm9overlaySource; i < ndsHeader->arm7romOffset; i++) {
-		overlaysSize++;
+	if (ndsHeader->arm9overlaySource > ndsHeader->arm7romOffset) {
+		for (u32 i = ndsHeader->arm9romOffset+ndsHeader->arm9binarySize; i < ndsHeader->arm7romOffset; i++) {
+			overlaysSize++;
+		}
+	} else {
+		for (u32 i = ndsHeader->arm9overlaySource; i < ndsHeader->arm7romOffset; i++) {
+			overlaysSize++;
+		}
 	}
 	if (ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr) && dsiModeConfirmed) {
 		// Calculate i-overlay pack size
@@ -1701,7 +1719,7 @@ int arm7_main(void) {
 		ce9Location = *(u32*)CARDENGINEI_ARM9_BUFFERED_LOCATION;
 		ce7Location = *(u32*)CARDENGINEI_ARM7_BUFFERED_LOCATION;
 
-		tonccpy((u32*)ce9Location, (u32*)CARDENGINEI_ARM9_BUFFERED_LOCATION, 0x1400);
+		tonccpy((u32*)ce9Location, (u32*)CARDENGINEI_ARM9_BUFFERED_LOCATION, 0xC00);
 
 		tonccpy((u32*)ce7Location, (u32*)CARDENGINEI_ARM7_BUFFERED_LOCATION, 0x8400);
 		cheatEngineOffset = ((ce7Location == CARDENGINEI_ARM7_DSIWARE_LOCATION3) ? CHEAT_ENGINE_DSIWARE_LOCATION3 : CHEAT_ENGINE_DSIWARE_LOCATION);
@@ -2150,6 +2168,9 @@ int arm7_main(void) {
 			buildFatTableCacheCompressed(apFixOverlaysFile);
 
 			u32 alignedOverlaysOffset = (ndsHeader->arm9overlaySource/cacheBlockSize)*cacheBlockSize;
+			if (ndsHeader->arm9overlaySource > ndsHeader->arm7romOffset) {
+				alignedOverlaysOffset = ((ndsHeader->arm9romOffset+ndsHeader->arm9binarySize)/cacheBlockSize)*cacheBlockSize;
+			}
 			u32 newOverlaysSize = 0;
 			for (u32 i = alignedOverlaysOffset; i < ndsHeader->arm7romOffset; i+= cacheBlockSize) {
 				newOverlaysSize += cacheBlockSize;

@@ -28,6 +28,6 @@
 typedef signed int addr_t;
 typedef unsigned char data_t;
 bool checkArm7DLDI (data_t *binData, u32 binSize);
-bool dldiPatchBinary (data_t *binData, u32 binSize, bool ramDisk);
+bool dldiPatchBinary (data_t *binData, u32 binSize, const bool ramDisk);
 
 #endif // DLDI_PATCHER_H

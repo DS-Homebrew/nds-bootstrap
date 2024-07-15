@@ -2,8 +2,8 @@
 #define _ASMINC_H_
 
 #if !__ASSEMBLER__
-	#error This header file is only for use in assembly files!
-#endif	// !__ASSEMBLER__
+# error "This header file is only for use in assembly files!"
+#endif
 
 
 .macro BEGIN_ASM_FUNC name section=text
@@ -11,6 +11,13 @@
 	.global \name
 	.type \name, %function
 	.align 2
+\name:
+.endm
+
+.macro BEGIN_ASM_FUNC_NO_SECTION name
+    .global \name
+    .type \name, %function
+    .align 2
 \name:
 .endm
 

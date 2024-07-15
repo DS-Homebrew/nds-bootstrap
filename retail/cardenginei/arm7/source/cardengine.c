@@ -1935,7 +1935,18 @@ bool eepromRead(u32 src, void *dst, u32 len) {
 			tonccpy(dst, (char*)0x02440000 + src, len);
 		} else {*/
 			sdmmc_set_ndma_slot(4);
-			fileRead(dst, savFile, (src % saveSize), len);
+			if ((u32)(src % saveSize)+len > saveSize) {
+				u32 len2 = len;
+				u32 len3 = 0;
+				while ((u32)(src % saveSize)+len2 > saveSize) {
+					len2--;
+					len3++;
+				}
+				fileRead(dst, savFile, (src % saveSize), len2);
+				fileRead(dst+len2, savFile, ((src+len2) % saveSize), len3);
+			} else {
+				fileRead(dst, savFile, (src % saveSize), len);
+			}
 			sdmmc_set_ndma_slot(0);
 		//}
 		#ifdef TWLSDK
@@ -1975,7 +1986,18 @@ bool eepromPageWrite(u32 dst, const void *src, u32 len) {
 			tonccpy((char*)0x02440000 + dst, src, len);
 		}*/
 		sdmmc_set_ndma_slot(4);
-		fileWrite(src, savFile, (dst % saveSize), len);
+		if ((dst % saveSize)+len > saveSize) {
+			u32 len2 = len;
+			u32 len3 = 0;
+			while ((u32)(dst % saveSize)+len2 > saveSize) {
+				len2--;
+				len3++;
+			}
+			fileWrite(src, savFile, (dst % saveSize), len2);
+			fileWrite(src+len2, savFile, ((dst+len2) % saveSize), len3);
+		} else {
+			fileWrite(src, savFile, (dst % saveSize), len);
+		}
 		sdmmc_set_ndma_slot(0);
 		#ifdef TWLSDK
 		//if (doBak) restoreSdBakData();
@@ -2014,7 +2036,18 @@ bool eepromPageProg(u32 dst, const void *src, u32 len) {
 			tonccpy((char*)0x02440000 + dst, src, len);
 		}*/
 		sdmmc_set_ndma_slot(4);
-		fileWrite(src, savFile, (dst % saveSize), len);
+		if ((dst % saveSize)+len > saveSize) {
+			u32 len2 = len;
+			u32 len3 = 0;
+			while ((u32)(dst % saveSize)+len2 > saveSize) {
+				len2--;
+				len3++;
+			}
+			fileWrite(src, savFile, (dst % saveSize), len2);
+			fileWrite(src+len2, savFile, ((dst+len2) % saveSize), len3);
+		} else {
+			fileWrite(src, savFile, (dst % saveSize), len);
+		}
 		sdmmc_set_ndma_slot(0);
   		#ifdef TWLSDK
 		//if (doBak) restoreSdBakData();

@@ -129,6 +129,7 @@ static const char dsiWareForBootloader1[][4] = {
 	"KET", // Chuugaku Eitango: Kiho 400 Go Master
 	"KWP", // Chuuga Kukihon' Eitango: Wado Pazuru
 	"KQL", // Chuukara! Dairoujou
+	"KVL", // Clash of Elementalists
 	"KTR", // Clubhouse Games Express: Card Classics
 	"KTC", "KTP", // Clubhouse Games Express: Family Favorites
 	"KTD", "KTB", // Clubhouse Games Express: Strategy Pack
@@ -262,10 +263,12 @@ static const char dsiWareForBootloader1[][4] = {
 	// "K43", // Jewel Quest 4: Heritage
 	"KD3", // Jinia Supasonaru: Eiwa Rakubiki Jiten
 	"KD5", // Jinia Supasonaru: Waei Rakubiki Jiten
-	"KJF", // Just SING! 80's
-	"K4C", // Just SING! Christmas Songs (bootloaderi-exclusive)
 	"KJP", // Jump Trials
 	"KZC", // Jump Trials Extreme
+	"KJF", // Just SING! 80's
+	"K4C", // Just SING! Christmas Songs (bootloaderi-exclusive)
+};
+static const char dsiWareForBootloader2[][4] = {
 	"KPA", // A Kappa's Trail (bootloaderi-exclusive)
 	"K69", // Katamukusho (bootloaderi-exclusive)
 	"K3H", // Kazu De Asobu: Mahoujin To Imeji Kei-san
@@ -280,8 +283,6 @@ static const char dsiWareForBootloader1[][4] = {
 	"KVF", // Kuizu Ongaku Nojika (bootloaderi-exclusive)
 	"KT9", // Kung Fu Dragon
 	"K47", // Kyou Hanan no hi Hyakka: Hyakkajiten Maipedea Yori (bootloaderi-exclusive)
-};
-static const char dsiWareForBootloader2[][4] = {
 	"K5M", // G.G Series: The Last Knight
 	"KQ9", // The Legend of Zelda: Four Swords: Anniversary Edition
 	"KLD", // Legendary Wars: T-Rex Rumble
