@@ -183,18 +183,12 @@ void configureRomMap(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const u32
 	if (dsiMode) {
 		romMapLines = 1;
 
-		romMap[0][2] = romLocation+0x4000;
-
-		romMapLines++;
-
-		romMap[1][0] = romMap[0][0]+0x4000;
-		romMap[1][1] = romLocation+0x40000;
-		romMap[1][2] = romMap[1][1]+0x7FC000;
+		romMap[0][2] = romLocation+0x7FC000;
 
 		if (consoleModel > 0) {
-			romMap[2][0] = romMap[1][0]+0x7FC000;
-			romMap[2][1] = romMap[1][1]+0x800000;
-			romMap[2][2] = romMap[2][1]+0x1000000;
+			romMap[1][0] = romMap[0][0]+0x7FC000;
+			romMap[1][1] = romMap[0][1]+0x800000;
+			romMap[1][2] = romMap[1][1]+0x1000000;
 
 			romMapLines++;
 		}

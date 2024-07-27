@@ -774,7 +774,7 @@ u32 getRomLocation(const tNDSHeader* ndsHeader, const bool isESdk2, const bool i
 	if (ndsHeader->unitCode > 0 && dsiModeConfirmed) {
 		return ROM_LOCATION_TWLSDK;
 	}
-	return dsiModeConfirmed ? (isSdk5 ? ROM_LOCATION_SDK5_DSIMODE : ROM_LOCATION_DSIMODE) : (ROM_LOCATION - ((isESdk2 && dsiBios) ? cacheBlockSize : 0));
+	return dsiModeConfirmed ? ROM_LOCATION_DSIMODE : (ROM_LOCATION - ((isESdk2 && dsiBios) ? cacheBlockSize : 0));
 }
 
 static bool isROMLoadableInRAM(const tDSiHeader* dsiHeader, const tNDSHeader* ndsHeader, const char* romTid, const module_params_t* moduleParams, const bool usesCloneboot) {
