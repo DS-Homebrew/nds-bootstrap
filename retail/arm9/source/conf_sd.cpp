@@ -2186,7 +2186,8 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 		if (getFileSize(ramDumpPath.c_str()) < 0x800000) {
 			consoleDemoInit();
-			iprintf("Creating RAM dump file.\n");
+			iprintf("Allocating space for\n");
+			iprintf("creating a RAM dump.\n");
 			iprintf("Please wait...");
 
 			if (access(ramDumpPath.c_str(), F_OK) == 0) {
