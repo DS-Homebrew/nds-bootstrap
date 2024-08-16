@@ -293,8 +293,8 @@ static void resetMemory_ARM7(void) {
 	memset_addrs_arm7(0x02700000, BLOWFISH_LOCATION);		// clear part of EWRAM - except before ce7 and ce9 binaries
 	dma_twlFill32(0, 0, (u32*)0x027F8000, 0x8000);	// clear part of EWRAM
 	memset_addrs_arm7(0x02800000, 0x02E80000);
-	memset_addrs_arm7(0x02F80000, 0x02FFD7BC); // Leave eMMC CID intact
-	memset_addrs_arm7(0x02FFD7CC, 0x02FFE000);
+	memset_addrs_arm7(0x02F80000, 0x02FFD7B0); // Leave eMMC data intact
+	memset_addrs_arm7(0x02FFD800, 0x02FFE000);
 	dma_twlFill32(0, 0, (u32*)0x02FFF000, 0xD60);		// clear part of EWRAM
 	toncset32((u32*)0x02FFFDFC, 0, 1);		// clear TWLCFG address
 	dma_twlFill32(0, 0, (u32*)0x02FFFE00, 0x200);		// clear part of EWRAM: header
@@ -2257,7 +2257,7 @@ int arm7_main(void) {
 
 	if (ROMsupportsDsiMode(ndsHeader) && isDSiWare && !gameOnFlashcard && !(REG_SCFG_ROM & BIT(9))) {
 		*(vu32*)0x400481C = 0;				// Reset SD IRQ stat register
-		*(vu32*)0x4004820 = 0x8B7F0305;	// Set SD IRQ mask register (Data won't read without the correct bytes!)
+		*(vu32*)0x4004820 = 0x8B7F0305;		// Set SD IRQ mask register (Data won't read without the correct bytes!)
 	} /*else if (!isDSiWare) {
 		*(vu32*)0x400481C = 0;				// Reset SD IRQ stat register
 		if (!gameOnFlashcard) {
