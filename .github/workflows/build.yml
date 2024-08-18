@@ -17,9 +17,6 @@ jobs:
     runs-on: ubuntu-latest
     container: devkitpro/devkitarm
     name: Build with Docker using devkitARM
-    outputs:
-      commit_tag: ${{ steps.vars.outputs.commit_tag }}
-      commit_hash: ${{ steps.vars.outputs.commit_hash }}
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
@@ -37,15 +34,10 @@ jobs:
       - name: Build release
         if: ${{ startsWith(github.ref, 'refs/tags') }}
         run: make package-release
-      - name: Set variables
-        id: vars
-        run: |
-          echo "commit_tag=$(git describe --abbrev=0 --tags)" >> $GITHUB_OUTPUT
-          echo "commit_hash=$(git log --format=%h -1)" >> $GITHUB_OUTPUT
       - name: Pack 7z nightly
         if: ${{ !startsWith(github.ref, 'refs/tags') }}
         run: |
-          printf "${{ steps.vars.outputs.commit_hash }}\n" >> bin/nightly-bootstrap.ver
+          printf "${{ github.sha }}\n" >> bin/nightly-bootstrap.ver
           mv bin/ nds-bootstrap/
           7z a nds-bootstrap.7z nds-bootstrap/
 
@@ -54,7 +46,7 @@ jobs:
       - name: Pack 7z release
         if: ${{ startsWith(github.ref, 'refs/tags') }}
         run: |
-          printf "Release ${{ steps.vars.outputs.commit_tag }}\n" >> bin/release-bootstrap.ver
+          printf "Release ${{ github.ref_name }}\n" >> bin/release-bootstrap.ver
           cd bin
           mkdir -p ~/artifacts
 
