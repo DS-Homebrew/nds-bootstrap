@@ -1747,7 +1747,7 @@ int arm7_main(void) {
 		newArm7binarySize = ndsHeader->arm7binarySize;
 		newArm7ibinarySize = __DSiHeader->arm7ibinarySize;
 
-		if (!dsiWramAccess && memcmp(romTid, "KGU", 3) == 0) {
+		if (!dsiWramAccess && (memcmp(romTid, "KKT", 3) == 0 || memcmp(romTid, "KGU", 3) == 0)) {
 			patchHiHeapPointerDSiWare(moduleParams, ndsHeader);
 		}
 

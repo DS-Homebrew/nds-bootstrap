@@ -4873,6 +4873,12 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// Cut the Rope (USA)
+	// Cut the Rope (Europe, Australia)
+	else if (strncmp(romTid, "KKT", 3) == 0 && !dsiWramAccess) {
+		*(u32*)0x0203BA44 = 0xE3A0162F; // mov r1, #0x02F00000
+	}
+
 	// CuteWitch! runner (USA)
 	// CuteWitch! runner (Europe)
 	else if (strncmp(romTid, "K32", 3) == 0 && saveOnFlashcard) {
