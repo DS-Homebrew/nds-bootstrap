@@ -46,7 +46,6 @@ typedef struct cardengineArm7Patches {
     u32* j_irqHandler;
     u32 vblankHandler;
     u32 fifoHandler;
-    u32 ndma0Handler;
     u32 card_pull;
     cardengineArm7PatchesArm7FunctionsThumb* arm7FunctionsDirect;
     cardengineArm7PatchesArm7Functions* arm7Functions;
@@ -56,6 +55,8 @@ typedef struct cardengineArm7Patches {
     u32* swi25;
     u32* swi26;
     u32* swi27;
+    u32* j_newSwiHalt;
+    u32* newSwiHaltThumb;
     u32* j_twlGetPitchTable;
     u32* j_twlGetPitchTableThumb;
 } cardengineArm7Patches;
@@ -68,7 +69,6 @@ typedef struct cardengineArm7 {
     cardengineArm7Patches* patches;
     u32 intr_vblank_orig_return;
     u32 intr_fifo_orig_return;
-    u32 intr_ndma0_orig_return;
     const module_params_t* moduleParams;
     u32 fileCluster;
     u32 patchOffsetCacheFileCluster;

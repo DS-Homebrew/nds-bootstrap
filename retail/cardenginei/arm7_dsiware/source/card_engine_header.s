@@ -49,8 +49,6 @@ intr_vblank_orig_return:
 	.word	0x00000000
 intr_fifo_orig_return:
 	.word	0x00000000
-intr_ndma0_orig_return:
-	.word	0x00000000
 moduleParams:
 	.word	0x00000000
 fileCluster:
@@ -174,11 +172,12 @@ patches:
 .word	0
 .word	vblankHandler
 .word	0
-.word	0
 .word   0
 .word   arm7FunctionsDirect
 .word   arm7Functions
 .word   arm7FunctionsThumb
+.word   0
+.word   0
 .word   0
 .word   0
 .word   0

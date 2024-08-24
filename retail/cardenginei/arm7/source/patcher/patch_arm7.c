@@ -57,6 +57,36 @@ u16* getOffsetFromBLThumb(u16* blOffset) {
 u32 vAddrOfRelocSrc = 0;
 u32 relocDestAtSharedMem = 0;
 bool a7IsThumb = false;
+u32 newSwiHaltAddr = 0;
+// bool swiHaltPatched = false;
+
+static void patchSwiHalt(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+	u32* swiHaltOffset = a7IsThumb ? (u32*)findSwiHaltThumbOffset(ndsHeader, moduleParams) : findSwiHaltOffset(ndsHeader, moduleParams);
+
+	if (swiHaltOffset) {
+		// Patch
+		if (a7IsThumb) {
+			tonccpy((u16*)newSwiHaltAddr, ce7->patches->newSwiHaltThumb, 0x18);
+			u32 srcAddr = (u32)swiHaltOffset - vAddrOfRelocSrc + 0x37F8000;
+			u32 dstAddr = (u32)newSwiHaltAddr - vAddrOfRelocSrc + 0x37F8000;
+			const u16* swiHaltPatch = generateA7InstrThumb(srcAddr, dstAddr);
+			tonccpy(swiHaltOffset, swiHaltPatch, 0x4);
+
+			/* dbg_printf("swiHalt new location : ");
+			dbg_hexa(newSwiHaltAddr);
+			dbg_printf("\n\n"); */
+		} else {
+			u32* swiHaltPatch = ce7->patches->j_newSwiHalt;
+			tonccpy(swiHaltOffset, swiHaltPatch, 0xC);
+		}
+		// swiHaltPatched = true;
+		// dbg_printf("swiHalt hooked\n");
+	}
+
+    /* dbg_printf("swiHalt location : ");
+    dbg_hexa((u32)swiHaltOffset);
+    dbg_printf("\n\n"); */
+}
 
 static void fixForDifferentBios(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	if (scfgRomBak & BIT(9)) {
@@ -210,6 +240,8 @@ u32 patchCardNdsArm7(
 			}
 		}
 	}
+
+	patchSwiHalt(ce7, ndsHeader, moduleParams);
 
 	fixForDifferentBios(ce7, ndsHeader, moduleParams);
 

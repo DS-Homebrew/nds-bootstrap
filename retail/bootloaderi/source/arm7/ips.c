@@ -9,8 +9,6 @@
 #include "locations.h"
 #include "tonccpy.h"
 
-#define cacheBlockSize 0x4000
-
 extern u8 consoleModel;
 extern bool dsiModeConfirmed;
 extern bool extendedMemoryConfirmed;
@@ -19,7 +17,7 @@ extern bool overlaysInRam;
 extern bool scfgBios9i(void);
 extern u32 getRomLocation(const tNDSHeader* ndsHeader, const bool isESdk2, const bool isSdk5, const bool dsiBios);
 
-bool applyIpsPatch(const tNDSHeader* ndsHeader, u8* ipsbyte, const bool arm9Only, const bool isESdk2, const bool isSdk5, const bool ROMinRAM, const bool usesCloneboot) {
+bool applyIpsPatch(const tNDSHeader* ndsHeader, u8* ipsbyte, const bool arm9Only, const bool isESdk2, const bool isSdk5, const bool ROMinRAM, const bool usesCloneboot, const u32 cacheBlockSize) {
 	if (ipsbyte[0] != 'P' && ipsbyte[1] != 'A' && ipsbyte[2] != 'T' && ipsbyte[3] != 'C' && ipsbyte[4] != 'H' && ipsbyte[5] != 0) {
 		return false;
 	}

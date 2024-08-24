@@ -125,12 +125,10 @@ u16* getOffsetFromBLThumb(u16* blOffset) {
 
 u32 vAddrOfRelocSrc = 0;
 u32 relocDestAtSharedMem = 0;
-/*u32 newSwiHaltAddr = 0;
-bool swiHaltPatched = false;
+u32 newSwiHaltAddr = 0;
+// bool swiHaltPatched = false;
 
-static void patchSwiHalt(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 ROMinRAM) {
-	extern bool setDmaPatched;
-
+static void patchSwiHalt(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	u32* swiHaltOffset = patchOffsetCache.swiHaltOffset;
 	if (!patchOffsetCache.swiHaltOffset) {
 		swiHaltOffset = patchOffsetCache.a7IsThumb ? (u32*)findSwiHaltThumbOffset(ndsHeader, moduleParams) : findSwiHaltOffset(ndsHeader, moduleParams);
@@ -139,25 +137,12 @@ static void patchSwiHalt(const cardengineArm7* ce7, const tNDSHeader* ndsHeader,
 		}
 	}
 
-	bool doPatch = ((!gameOnFlashcard && !ROMinRAM) || ((ROMinRAM && !extendedMemoryConfirmed && setDmaPatched) && (ndsHeader->unitCode == 0 || (ndsHeader->unitCode > 0 && !dsiModeConfirmed))));
-	const char* romTid = getRomTid(ndsHeader);
-	if ((u32)ce7 == CARDENGINEI_ARM7_SDK5_LOCATION
-	 || strncmp(romTid, "CBB", 3) == 0		// Big Bang Mini
-	 || strncmp(romTid, "AFF", 3) == 0		// Final Fantasy III
-	 || strncmp(romTid, "AWI", 3) == 0		// Hotel Dusk: Room 215
-	 || strncmp(romTid, "YLU", 3) == 0		// Last Window: The Secret of Cape West
-	 || strncmp(romTid, "AWV", 3) == 0		// Nervous Brickdown
-	 || strncmp(romTid, "AH9", 3) == 0		// Tony Hawk's American Sk8Land
-	) {
-		doPatch = false;
-	}
-
-	if (swiHaltOffset && swiHaltHook && doPatch) {
+	if (swiHaltOffset) {
 		// Patch
 		if (patchOffsetCache.a7IsThumb) {
-			tonccpy((u16*)newSwiHaltAddr, ce7->patches->newSwiHaltThumb, 0x10);
-			u32 srcAddr = (u32)swiHaltOffset - vAddrOfRelocSrc + 0x37F8000;
-			u32 dstAddr = (u32)newSwiHaltAddr - vAddrOfRelocSrc + 0x37F8000;
+			tonccpy((u16*)newSwiHaltAddr, ce7->patches->newSwiHaltThumb, 0x18);
+			u32 srcAddr = (u32)swiHaltOffset - vAddrOfRelocSrc + (*(u32*)0x02FFE1A0==0x080037C0 ? 0x37C0000 : 0x37F8000);
+			u32 dstAddr = (u32)newSwiHaltAddr - vAddrOfRelocSrc + (*(u32*)0x02FFE1A0==0x080037C0 ? 0x37C0000 : 0x37F8000);
 			const u16* swiHaltPatch = generateA7InstrThumb(srcAddr, dstAddr);
 			tonccpy(swiHaltOffset, swiHaltPatch, 0x4);
 
@@ -168,14 +153,14 @@ static void patchSwiHalt(const cardengineArm7* ce7, const tNDSHeader* ndsHeader,
 			u32* swiHaltPatch = ce7->patches->j_newSwiHalt;
 			tonccpy(swiHaltOffset, swiHaltPatch, 0xC);
 		}
-		swiHaltPatched = true;
+		// swiHaltPatched = true;
 		dbg_printf("swiHalt hooked\n");
 	}
 
     dbg_printf("swiHalt location : ");
     dbg_hexa((u32)swiHaltOffset);
     dbg_printf("\n\n");
-}*/
+}
 
 void patchScfgExt(const tNDSHeader* ndsHeader) {
 	if (ndsHeader->unitCode == 0 || newArm7binarySize == 0x44C) return;
@@ -663,7 +648,7 @@ u32 patchCardNdsArm7(
 		}*/
 	}
 
-	//patchSwiHalt(ce7, ndsHeader, moduleParams, ROMinRAM);
+	patchSwiHalt(ce7, ndsHeader, moduleParams);
 
 	if (strcmp(romTid, "UBRP") == 0) {
 		operaRamPatch();

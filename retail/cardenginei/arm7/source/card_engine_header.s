@@ -50,8 +50,6 @@ intr_vblank_orig_return:
 	.word	0x00000000
 intr_fifo_orig_return:
 	.word	0x00000000
-intr_ndma0_orig_return:
-	.word	0x00000000
 moduleParams:
 	.word	0x00000000
 fileCluster:
@@ -130,27 +128,15 @@ fifoHandler:
 	ldr 	r0,	intr_fifo_orig_return
 	bx  	r0
 
-ndma0Handler:
-@ Hook the return address, then go back to the original function
-	stmdb	sp!, {lr}
-	adr 	lr, code_handler_start_ndma0
-	ldr 	r0,	intr_ndma0_orig_return
-	bx  	r0
-
 code_handler_start_vblank:
-	push	{r0-r12} 
+	push	{r0-r12}
 	bl	myIrqHandlerVBlank
-	pop   	{r0-r12,pc} 
+	pop   	{r0-r12,pc}
 
 code_handler_start_fifo:
-	push	{r0-r12} 
+	push	{r0-r12}
 	bl	myIrqHandlerFIFO
-	pop   	{r0-r12,pc} 
-
-code_handler_start_ndma0:
-	push	{r0-r12} 
-	bl	myIrqHandlerNdma0
-	pop   	{r0-r12,pc} 
+	pop   	{r0-r12,pc}
 
 .pool
 
@@ -285,7 +271,6 @@ patches:
 .word	j_irqHandler
 .word	vblankHandler
 .word	fifoHandler
-.word	ndma0Handler
 .word   card_pull
 .word   arm7FunctionsDirect
 .word   arm7Functions
@@ -296,6 +281,8 @@ patches:
 .word   0
 .word   0
 .word   0
+.word   j_newSwiHalt
+.word   newSwiHaltThumb
 .word   j_twlGetPitchTable
 .word   j_twlGetPitchTableThumb
 #else
@@ -303,6 +290,8 @@ patches:
 .word   swi25
 .word   swi26
 .word   swi27
+.word   j_newSwiHalt
+.word   newSwiHaltThumb
 .word   0
 .word   0
 #endif
@@ -356,6 +345,40 @@ j_irqHandler:
 	ldr	pc, =irqHandler
 .pool
 @---------------------------------------------------------------------------------
+
+@---------------------------------------------------------------------------------
+j_newSwiHalt:
+@---------------------------------------------------------------------------------
+	ldr	pc, =newSwiHalt
+.pool
+@---------------------------------------------------------------------------------
+
+@---------------------------------------------------------------------------------
+newSwiHalt:
+@---------------------------------------------------------------------------------
+	push	{lr}
+	bl runCardEngineCheck
+	swi	#0x060000
+	pop	{pc}
+@---------------------------------------------------------------------------------
+
+	.thumb
+@---------------------------------------------------------------------------------
+newSwiHaltThumb:
+@---------------------------------------------------------------------------------
+	push	{r4, lr}
+	ldr	r4, =runCardEngineCheck
+	bl	_blx_r4_stub_halt
+	swi	0x06
+	pop             {r4}
+	pop             {r3}
+	bx  r3
+_blx_r4_stub_halt:
+	bx	r4
+.pool
+@---------------------------------------------------------------------------------
+
+	.arm
 #ifndef TWLSDK
 @---------------------------------------------------------------------------------
 j_twlGetPitchTable:

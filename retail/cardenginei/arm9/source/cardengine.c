@@ -614,6 +614,11 @@ void cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	u32 src = src0;
 	u8* dst = dst0;
 	u32 len = len0;
+
+	if (src == ndsHeader->romSize) {
+		tonccpy(dst, (u8*)0x027FFEC0, len); // Load pre-loaded RSA key
+		return;
+	}
 	#else
 	initialize();
 
@@ -626,6 +631,11 @@ void cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	u32 src = ((ce9->valueBits & isSdk5) ? src0 : cardStruct[0]);
 	u8* dst = ((ce9->valueBits & isSdk5) ? dst0 : (u8*)(cardStruct[1]));
 	u32 len = ((ce9->valueBits & isSdk5) ? len0 : cardStruct[2]);
+
+	if ((ce9->valueBits & isSdk5) && (src == ndsHeader->romSize)) {
+		tonccpy(dst, (u8*)0x027FFEC0, len); // Load pre-loaded RSA key
+		return;
+	}
 	#endif
 	#endif
 
@@ -1270,10 +1280,10 @@ void myIrqHandlerIPC(void) {
 		#endif
 #endif
 			break;
-		case 0x4:
+		/* case 0x4:
 			extern bool dmaOn;
 			dmaOn = !dmaOn;
-			break;
+			break; */
 		case 0x5:
 			igmReset = true;
 			sharedAddr[3] = 0x54495845;

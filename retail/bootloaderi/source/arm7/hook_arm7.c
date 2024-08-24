@@ -328,7 +328,6 @@ int hookNdsRetailArm7(
 
 	u32* vblankHandler = hookLocation;
 	u32* ipcSyncHandler = hookLocation + 16;
-	//u32* ndma0Handler = hookLocation + 28;
 
 	if (!ce7NotFound) {
 	/*	u32 intr_vblank_orig_return = *(u32*)0x2FFC004;
@@ -341,7 +340,6 @@ int hookNdsRetailArm7(
 
 		ce7->intr_vblank_orig_return  = *vblankHandler;
 		ce7->intr_fifo_orig_return    = *ipcSyncHandler;
-		//ce7->intr_ndma0_orig_return   = *ndma0Handler;
 		ce7->fileCluster              = fileCluster;
 		ce7->patchOffsetCacheFileCluster = patchOffsetCacheFileCluster;
 		ce7->srParamsCluster          = srParamsFileCluster;
@@ -448,7 +446,6 @@ int hookNdsRetailArm7(
 		 || (strncmp(romTid, "UXB", 3) == 0)
 		 || (strncmp(romTid, "USK", 3) == 0)
 		|| (!gameOnFlashcard && !ROMinRAM)) {
-			*ndma0Handler = ce7->patches->ndma0Handler;
 			if (!ROMinRAM) {
 				ce7->valueBits |= b_runCardEngineCheck;
 			}

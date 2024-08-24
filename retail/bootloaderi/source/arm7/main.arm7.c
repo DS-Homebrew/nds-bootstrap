@@ -770,11 +770,18 @@ static module_params_t* loadModuleParams(const tNDSHeader* ndsHeader, bool* foun
 	return moduleParams;
 }
 
-u32 getRomLocation(const tNDSHeader* ndsHeader, const bool isESdk2, const bool isSdk5, const bool dsiBios) {
+u32 getRomPartLocation(const tNDSHeader* ndsHeader, const bool isESdk2, const bool isSdk5, const bool dsiBios) {
 	if (ndsHeader->unitCode > 0 && dsiModeConfirmed) {
 		return ROM_LOCATION_TWLSDK;
 	}
 	return dsiModeConfirmed ? ROM_LOCATION_DSIMODE : (ROM_LOCATION - ((isESdk2 && dsiBios) ? cacheBlockSize : 0));
+}
+
+u32 getRomLocation(const tNDSHeader* ndsHeader, const bool isESdk2, const bool isSdk5, const bool dsiBios) {
+	if (ndsHeader->unitCode > 0 && dsiModeConfirmed) {
+		return ROM_LOCATION_TWLSDK;
+	}
+	return dsiModeConfirmed ? ROM_LOCATION_DSIMODE : (ROM_LOCATION - ((isESdk2 && dsiBios) ? 0x4000 : 0));
 }
 
 static bool isROMLoadableInRAM(const tDSiHeader* dsiHeader, const tNDSHeader* ndsHeader, const char* romTid, const module_params_t* moduleParams, const bool usesCloneboot) {
@@ -928,38 +935,38 @@ static void loadROMPartIntoRAM(const tNDSHeader* ndsHeader, const module_params_
 
 	const bool dsiBios = scfgBios9i();
 
-	u32 dataLocation = getRomLocation(ndsHeader, (moduleParams->sdk_version < 0x2008000 && moduleParams->sdk_version != 0x20029A8), isSdk5(moduleParams), dsiBios);
+	u32 dataLocation = getRomPartLocation(ndsHeader, (moduleParams->sdk_version < 0x2008000 && moduleParams->sdk_version != 0x20029A8), isSdk5(moduleParams), dsiBios);
 	s32 preloadSizeEdit = dataToPreloadSize[0];
 
 	u32 romLocationChange = dataLocation;
 	u32 romOffsetChange = dataToPreloadAddr[0];
 	while (preloadSizeEdit > 0) {
-		u32 romBlockSize = (preloadSizeEdit > 0x4000) ? 0x4000 : preloadSizeEdit;
+		u32 romBlockSize = (preloadSizeEdit > cacheBlockSize) ? cacheBlockSize : preloadSizeEdit;
 		fileRead((char*)romLocationChange, file, romOffsetChange, romBlockSize);
-		romLocationChange += 0x4000;
+		romLocationChange += cacheBlockSize;
 
 		if (isSdk5(moduleParams) || (dsiBios && (moduleParams->sdk_version >= 0x2008000 || moduleParams->sdk_version == 0x20029A8))) {
-			if (romLocationChange == 0x0C7C4000) {
-				romLocationChange += (ndsHeader->unitCode > 0 ? 0x1C000 : 0x3C000);
+			if (romLocationChange == 0x0C7C0000+cacheBlockSize) {
+				romLocationChange += (ndsHeader->unitCode > 0 ? 0x20000 : 0x40000)-cacheBlockSize;
 			} else if (ndsHeader->unitCode == 0) {
-				if (romLocationChange == 0x0CFFC000) {
-					romLocationChange += 0x4000;
+				if (romLocationChange == 0x0D000000-cacheBlockSize) {
+					romLocationChange += cacheBlockSize;
 				}
 			} else {
-				if (romLocationChange == 0x0C7FC000) {
-					romLocationChange += 0x4000;
+				if (romLocationChange == 0x0C800000-cacheBlockSize) {
+					romLocationChange += cacheBlockSize;
 				} else if (romLocationChange == 0x0CFE0000) {
 					romLocationChange += 0x20000;
 				}
 			}
-		} else if (romLocationChange == 0x0CFFC000 && dsiBios) {
-			romLocationChange += 0x4000;
+		} else if ((romLocationChange == 0x0D000000-cacheBlockSize) && dsiBios) {
+			romLocationChange += cacheBlockSize;
 		} else if (romLocationChange == 0x0C7C0000) {
 			romLocationChange += 0x40000;
 		}
 
-		romOffsetChange += 0x4000;
-		preloadSizeEdit -= 0x4000;
+		romOffsetChange += cacheBlockSize;
+		preloadSizeEdit -= cacheBlockSize;
 	}
 
 	/*if (dataToPreloadSize[1] > 0) {
@@ -2149,12 +2156,12 @@ int arm7_main(void) {
 			loadOverlaysintoRAM(ndsHeader, moduleParams, romFile);
 		}
 
-		if (ROMsupportsDsiMode(ndsHeader) && usesCloneboot) {
-			fileRead((char*)0x02FFDC00, romFile, clonebootOffset, 0x88); // Pre-load RSA key
+		if ((ROMsupportsDsiMode(ndsHeader) || isSdk5(moduleParams)) && usesCloneboot) {
+			fileRead((char*)((ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed) ? 0x02FFDC00 : 0x027FFEC0), romFile, clonebootOffset, 0x88); // Pre-load RSA key
 		}
 
 		if (useApPatch) {
-			if (applyIpsPatch(ndsHeader, (u8*)IPS_LOCATION, (*(u8*)(IPS_LOCATION+apPatchSize-1) == 0xA9), (moduleParams->sdk_version < 0x2008000 && moduleParams->sdk_version != 0x20029A8), isSdk5(moduleParams), ROMinRAM, usesCloneboot)) {
+			if (applyIpsPatch(ndsHeader, (u8*)IPS_LOCATION, (*(u8*)(IPS_LOCATION+apPatchSize-1) == 0xA9), (moduleParams->sdk_version < 0x2008000 && moduleParams->sdk_version != 0x20029A8), isSdk5(moduleParams), ROMinRAM, usesCloneboot, cacheBlockSize)) {
 				dbg_printf("AP-fix applied\n");
 			} else {
 				dbg_printf("Failed to apply AP-fix\n");

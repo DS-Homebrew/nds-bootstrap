@@ -128,7 +128,7 @@ static bool sixInHeader = false;
 static bool bootloaderCleared = false;
 static bool funcsUnpatched = false;
 //static bool initializedIRQ = false;
-static bool calledViaIPC = false;
+//static bool calledViaIPC = false;
 //static bool ipcSyncHooked = false;
 bool ipcEveryFrame = false;
 //static bool dmaLed = false;
@@ -180,13 +180,13 @@ static int languageTimer = 0;
 // static int swapTimer = 0;
 static int returnTimer = 0;
 static int softResetTimer = 0;
-static int ramDumpTimer = 0;
+// static int ramDumpTimer = 0;
 static int volumeAdjustDelay = 0;
 static bool volumeAdjustActivated = false;
 
 //static bool ndmaUsed = false;
 
-static int cardEgnineCommandMutex = 0;
+// static int cardEgnineCommandMutex = 0;
 static int saveMutex = 0;
 
 bool returnToMenu = false;
@@ -1126,9 +1126,9 @@ void unloadInGameMenu(void) {
 	sharedAddr[5] = 0;
 }
 
+#ifdef DEBUG
 static void log_arm9(void) {
 	//driveInitialize();
-	#ifdef DEBUG
 	u32 src = *(vu32*)(sharedAddr+2);
 	u32 dst = *(vu32*)(sharedAddr);
 	u32 len = *(vu32*)(sharedAddr+1);
@@ -1151,8 +1151,8 @@ static void log_arm9(void) {
 	dbg_hexa(marker);
 
 	dbg_printf("\nlog only \n");
-	#endif
 }
+#endif
 
 static bool nandRead(void) {
 	u32 flash = *(vu32*)(sharedAddr+2);
@@ -1239,7 +1239,7 @@ static bool nandWrite(void) {
 }*/
 
 static bool readOngoing = false;
-static bool sdReadOngoing = false;
+//static bool sdReadOngoing = false;
 static bool ongoingIsDma = false;
 //static int currentCmd=0, currentNdmaSlot=0;
 //static int timeTillDmaLedOff = 0;
@@ -1343,14 +1343,14 @@ static bool resume_cardRead_arm9(void) {
 #endif
 
 static inline void sdmmcHandler(void) {
-	if (sdReadOngoing) {
+	/* if (sdReadOngoing) {
 		if (my_sdmmc_sdcard_check_command(0x33C12)) {
 			sharedAddr[4] = 0;
 			cardReadLED(false, ongoingIsDma);
 			sdReadOngoing = false;
 		}
 		return;
-	}
+	} */
 
 	switch (sharedAddr[4]) {
 		case 0x53445231:
@@ -1371,13 +1371,13 @@ static inline void sdmmcHandler(void) {
 			//bool isDma = sharedAddr[4]==0x53444D41;
 			ongoingIsDma = (sharedAddr[4] == 0x53444D41);
 			cardReadLED(true, ongoingIsDma);
-			if (wifiIrq || (sharedAddr[2] % 4) != 0 || (valueBits & ndmaDisabled)) {
+			// if ((sharedAddr[2] % 4) != 0 || (valueBits & ndmaDisabled)) {
 				sharedAddr[4] = my_sdmmc_sdcard_readsectors(sharedAddr[0], sharedAddr[1], (u8*)sharedAddr[2]);
 				cardReadLED(false, ongoingIsDma);
-			} else {
-				/* sharedAddr[4] = */ my_sdmmc_sdcard_readsectors_nonblocking(sharedAddr[0], sharedAddr[1], (u8*)sharedAddr[2]);
+			/* } else {
+				my_sdmmc_sdcard_readsectors_nonblocking(sharedAddr[0], sharedAddr[1], (u8*)sharedAddr[2]);
 				sdReadOngoing = true;
-			}
+			} */
 		}	break;
 		/*case 0x53444348:
 			sharedAddr[4] = my_sdmmc_sdcard_check_command(sharedAddr[0], sharedAddr[1]);
@@ -1400,13 +1400,15 @@ static inline void sdmmcHandler(void) {
 	}
 }
 
-static void runCardEngineCheck(void) {
+void runCardEngineCheck(void) {
+	// if (!(valueBits & b_runCardEngineCheck)) return;
+
 	//dbg_printf("runCardEngineCheck\n");
 	#ifdef DEBUG		
 	nocashMessage("runCardEngineCheck");
 	#endif	
 
-  	if (tryLockMutex(&cardEgnineCommandMutex)) {
+  	// if (lockMutex(&cardEgnineCommandMutex)) {
         //if(!readOngoing)
         //{
     
@@ -1443,21 +1445,23 @@ static void runCardEngineCheck(void) {
 				#endif
 			}
 
+			#ifdef DEBUG
     		if (sharedAddr[3] == (vu32)0x026FF800) {
     			log_arm9();
     			sharedAddr[3] = 0;
                 //IPC_SendSync(0x8);
     		}
-    
-            if (sharedAddr[3] == (vu32)0x025FFC01) {
-                //dmaLed = (sharedAddr[3] == (vu32)0x025FFC01);
-    			sharedAddr[3] = nandRead();
-    		}
+			#endif
 
-            if (sharedAddr[3] == (vu32)0x025FFC02) {
-                //dmaLed = (sharedAddr[3] == (vu32)0x025FFC02);
-    			sharedAddr[3] = nandWrite();
-    		}
+			if (sharedAddr[3] == (vu32)0x025FFC01) {
+				//dmaLed = (sharedAddr[3] == (vu32)0x025FFC01);
+				sharedAddr[3] = nandRead();
+			}
+
+			if (sharedAddr[3] == (vu32)0x025FFC02) {
+				//dmaLed = (sharedAddr[3] == (vu32)0x025FFC02);
+				sharedAddr[3] = nandWrite();
+			}
 
             /*if (sharedAddr[3] == (vu32)0x025FBC01) {
                 dmaLed = false;
@@ -1466,8 +1470,8 @@ static void runCardEngineCheck(void) {
     			IPC_SendSync(0x8);
     		}*/
         //}
-  		unlockMutex(&cardEgnineCommandMutex);
-  	}
+  		// unlockMutex(&cardEgnineCommandMutex);
+  	// }
 }
 
 //---------------------------------------------------------------------------------
@@ -1477,7 +1481,7 @@ void myIrqHandlerFIFO(void) {
 	nocashMessage("myIrqHandlerFIFO");
 	#endif
 
-	calledViaIPC = true;
+	// calledViaIPC = true;
 
     if (IPC_GetSync() == 0x3) {
 		/* #ifndef TWLSDK
@@ -1490,37 +1494,7 @@ void myIrqHandlerFIFO(void) {
 		return;
 	}
 
-	runCardEngineCheck();
-}
-
-//---------------------------------------------------------------------------------
-void myIrqHandlerHalt(void) {
-//---------------------------------------------------------------------------------
-	#ifdef DEBUG
-	nocashMessage("myIrqHandlerHalt");
-	#endif
-
-	/*if (readOngoing) {
-		timeTillDmaLedOff++;
-		if (timeTillDmaLedOff > 10) {
-			readOngoing = false;
-			cardReadLED(false, true);
-		}
-	}*/
-}
-
-//---------------------------------------------------------------------------------
-void myIrqHandlerNdma0(void) {
-//---------------------------------------------------------------------------------
-	#ifdef DEBUG		
-	nocashMessage("myIrqHandlerNdma0");
-	#endif	
-	
-	//calledViaIPC = false;
-
-	//i2cWriteRegister(0x4A, 0x70, 0x01);
-	//i2cWriteRegister(0x4A, 0x11, 0x01);			// Reboot console
-	//runCardEngineCheckResume();
+	// runCardEngineCheck();
 }
 
 
@@ -1664,7 +1638,7 @@ void myIrqHandlerVBlank(void) {
 		returnTimer = 0;
 	}
 
-	if ((valueBits & b_dsiSD) && (0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_DOWN | KEY_A)))) {
+	/* if ((valueBits & b_dsiSD) && (0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_DOWN | KEY_A)))) {
 		if (tryLockMutex(&cardEgnineCommandMutex)) {
 			if (ramDumpTimer == 60 * 2) {
 				REG_MASTER_VOLUME = 0;
@@ -1678,7 +1652,7 @@ void myIrqHandlerVBlank(void) {
 		ramDumpTimer++;
 	} else {
 		ramDumpTimer = 0;
-	}
+	} */
 
 	if (sharedAddr[3] == (vu32)0x52534554) {
 		reset();
@@ -1751,21 +1725,19 @@ void myIrqHandlerVBlank(void) {
 		if (wifiIrq) {
 			wifiIrqTimer++;
 			if (wifiIrqTimer == 30) {
-				IPC_SendSync(0x4);
+				// IPC_SendSync(0x4);
 				wifiIrq = wifiIrqCheck;
 			}
 		} else {
-			IPC_SendSync(0x4);
+			// IPC_SendSync(0x4);
 			wifiIrq = wifiIrqCheck;
 		}
 	} else {
 		wifiIrqTimer = 0;
 	}
 
-	//if (valueBits & b_runCardEngineCheck) {
-		calledViaIPC = false;
-		runCardEngineCheck();
-	//}
+	// calledViaIPC = false;
+	// runCardEngineCheck();
 
 	// Update main screen or swap screens
 	if (ipcEveryFrame) {

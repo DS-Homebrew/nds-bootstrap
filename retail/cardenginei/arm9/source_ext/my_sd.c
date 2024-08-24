@@ -11,7 +11,7 @@
 extern cardengineArm9* volatile ce9;
 
 extern bool isDma;
-extern bool dmaOn;
+// extern bool dmaOn;
 extern void sleepMs(int ms);
 
 /*! \fn DC_FlushRange(const void *base, u32 size)
@@ -89,7 +89,7 @@ bool my_sdio_ReadSector(sec_t sector, void* buffer, u32 startOffset, u32 endOffs
 	sharedAddr[3] = endOffset;
 	sharedAddr[4] = commandRead;
 
-	if (dmaOn) IPC_SendSync(0x4);
+	// if (dmaOn) IPC_SendSync(0x4);
 	while (sharedAddr[4] == commandRead) {
 		sleepMs(1);
 	}
@@ -123,10 +123,10 @@ bool my_sdio_ReadSectors(sec_t sector, sec_t numSectors, void* buffer) {
 	sharedAddr[2] = (vu32)buffer;
 	sharedAddr[4] = commandRead;
 
-	bool triggerIpc = (dmaOn && ((vu32)buffer % 4) == 0);
+	// bool triggerIpc = (dmaOn && ((vu32)buffer % 4) == 0);
 
 	while (sharedAddr[4] == commandRead) {
-		if (triggerIpc) IPC_SendSync(0x4);
+		// if (triggerIpc) IPC_SendSync(0x4);
 		sleepMs(1);
 	}
 	return sharedAddr[4] == 0;
@@ -194,7 +194,7 @@ bool my_sdio_WriteSectors(sec_t sector, sec_t numSectors, const void* buffer) {
 	sharedAddr[2] = (vu32)buffer;
 	sharedAddr[4] = commandWrite;
 
-	if (dmaOn) IPC_SendSync(0x4);
+	// if (dmaOn) IPC_SendSync(0x4);
 	while (sharedAddr[4] == commandWrite) {
 		sleepMs(1);
 	}
