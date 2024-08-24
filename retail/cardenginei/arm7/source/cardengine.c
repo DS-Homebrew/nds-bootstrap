@@ -156,15 +156,18 @@ CHEAT_ENGINE_LOCATION
 static aFile* romFile = (aFile*)ROM_FILE_LOCATION_TWLSDK;
 static aFile* savFile = (aFile*)SAV_FILE_LOCATION_TWLSDK;
 //static aFile* gbaFile = (aFile*)GBA_FILE_LOCATION_TWLSDK;
+static aFile* apFixOverlaysFile = (aFile*)OVL_FILE_LOCATION_TWLSDK;
 #else
 #ifdef ALTERNATIVE
 static aFile* romFile = (aFile*)ROM_FILE_LOCATION_ALT;
 static aFile* savFile = (aFile*)SAV_FILE_LOCATION_ALT;
 //static aFile* gbaFile = (aFile*)GBA_FILE_LOCATION_ALT;
+static aFile* apFixOverlaysFile = (aFile*)OVL_FILE_LOCATION_ALT;
 #else
 static aFile* romFile = (aFile*)ROM_FILE_LOCATION;
 static aFile* savFile = (aFile*)SAV_FILE_LOCATION;
 //static aFile* gbaFile = (aFile*)GBA_FILE_LOCATION;
+static aFile* apFixOverlaysFile = (aFile*)OVL_FILE_LOCATION;
 #endif
 #endif
 static aFile patchOffsetCacheFile;
@@ -1245,7 +1248,7 @@ static bool ongoingIsDma = false;
 //static int timeTillDmaLedOff = 0;
 
 #ifndef TWLSDK
-static bool start_cardRead_arm9(void) {
+/* static bool start_cardRead_arm9(void) {
 	u32 src = sharedAddr[2];
 	u32 dst = sharedAddr[0];
 	u32 len = sharedAddr[1];
@@ -1320,7 +1323,7 @@ static bool resume_cardRead_arm9(void) {
     {
         return false;    
     }
-}
+} */
 
 /* static bool gsddFix(void) {
 	if (sharedAddr[4] != 0x44445347) {
@@ -1342,7 +1345,7 @@ static bool resume_cardRead_arm9(void) {
 } */
 #endif
 
-static inline void sdmmcHandler(void) {
+static inline void sdmmcHandler(void) { // Unused
 	/* if (sdReadOngoing) {
 		if (my_sdmmc_sdcard_check_command(0x33C12)) {
 			sharedAddr[4] = 0;
@@ -1420,29 +1423,36 @@ void runCardEngineCheck(void) {
   		}*/
 
 			if (!(valueBits & gameOnFlashcard)) {
-				sdmmcHandler();
+				// sdmmcHandler();
 
-				#ifndef TWLSDK
-				if (/*sharedAddr[3] == (vu32)0x020FF808 || sharedAddr[3] == (vu32)0x020FF80A ||*/ sharedAddr[3] == (vu32)0x025FFB0A) {	// Card read DMA
-					if (!readOngoing ? start_cardRead_arm9() : resume_cardRead_arm9()) {
-						/*u32 src = sharedAddr[2];
+				// #ifndef TWLSDK
+				if (/*sharedAddr[3] == (vu32)0x020FF808 || */sharedAddr[3] == (vu32)0x020FF80A || sharedAddr[3] == (vu32)0x025FFB0A) {	// Card read DMA
+					//if (!readOngoing ? start_cardRead_arm9() : resume_cardRead_arm9()) {
+						bool useApFixOverlays = false;
+						u32 src = sharedAddr[2];
 						u32 dst = sharedAddr[0];
 						u32 len = sharedAddr[1];
+						if (src >= 0x80000000) {
+							src -= 0x80000000;
+							useApFixOverlays = true;
+						}
 
-						cardReadLED(true, true);    // When a file is loading, turn on LED for card read indicator
-						fileRead((char*)dst, romFile, src, len, !sdRead, 0);
-						cardReadLED(false, true);    // After loading is done, turn off LED for card read indicator */
-						sharedAddr[3] = 0;
-					}
-					//if (sharedAddr[3] == (vu32)0x025FFB0A) {
+						const bool isDma = sharedAddr[3] == (vu32)0x025FFB0A;
+
+						cardReadLED(true, isDma);    // When a file is loading, turn on LED for card read indicator
+						fileRead((char*)dst, useApFixOverlays ? apFixOverlaysFile : romFile, src, len);
+						cardReadLED(false, isDma);    // After loading is done, turn off LED for card read indicator
+					if (sharedAddr[3] == (vu32)0x025FFB0A) {
 						IPC_SendSync(0x3);
+					}
+						sharedAddr[3] = 0;
 					//}
 				} /*else if (sharedAddr[3] == (vu32)0x026FFB0A) {	// Card read DMA (Card data cache)
 					ndmaCopyWords(0, (u8*)sharedAddr[2], (u8*)(sharedAddr[0] >= 0x03000000 ? 0 : sharedAddr[0]), sharedAddr[1]);
 					sharedAddr[3] = 0;
 					IPC_SendSync(0x3);
 				}*/
-				#endif
+				// #endif
 			}
 
 			#ifdef DEBUG

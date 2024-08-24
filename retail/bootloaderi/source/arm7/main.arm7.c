@@ -2173,6 +2173,9 @@ int arm7_main(void) {
 			aFile* apFixOverlaysFile = (aFile*)(ROMsupportsDsiMode(ndsHeader) ? (dsiModeConfirmed ? OVL_FILE_LOCATION_TWLSDK : OVL_FILE_LOCATION_MAINMEM5) : OVL_FILE_LOCATION_MAINMEM);
 			getFileFromCluster(apFixOverlaysFile, apFixOverlaysCluster, gameOnFlashcard);
 			buildFatTableCacheCompressed(apFixOverlaysFile);
+			if (!ROMsupportsDsiMode(ndsHeader) || !dsiModeConfirmed) {
+				tonccpy((char*)(dsiEnhancedMbk ? OVL_FILE_LOCATION_ALT : OVL_FILE_LOCATION), apFixOverlaysFile, sizeof(aFile));
+			}
 
 			u32 alignedOverlaysOffset = (ndsHeader->arm9overlaySource/cacheBlockSize)*cacheBlockSize;
 			if (ndsHeader->arm9overlaySource > ndsHeader->arm7romOffset) {

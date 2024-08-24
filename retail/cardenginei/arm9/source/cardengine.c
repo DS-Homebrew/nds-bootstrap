@@ -129,7 +129,9 @@ int cacheCounter[dev_CACHE_SLOTS_16KB];
 int accessCounter = 0;
 #endif
 bool flagsSet = false;
+#ifdef DLDI
 static bool driveInitialized = false;
+#endif
 /* #ifndef TWLSDK
 static bool region0FixNeeded = false;
 #endif */
@@ -256,7 +258,7 @@ void updateDescriptor(int slot, u32 sector) {
 extern void setExceptionHandler2();
 
 static inline void waitForArm7(void) {
-	IPC_SendSync(0x4);
+	// IPC_SendSync(0x4);
 	while (sharedAddr[3] != (vu32)0) {
 		swiDelay(100);
 	}
@@ -264,7 +266,7 @@ static inline void waitForArm7(void) {
 
 #ifndef DLDI
 static inline bool checkArm7(void) {
-    IPC_SendSync(0x4);
+	// IPC_SendSync(0x4);
 	return (sharedAddr[3] == (vu32)0);
 }
 #endif
@@ -374,7 +376,21 @@ static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
 					readLen = ce9->cacheBlockSize*2;
 				}*/
 
-				fileRead((char*)buffer, ((ce9->valueBits & overlaysCached) && src >= newOverlayOffset && src < newOverlayOffset+newOverlaysSize) ? apFixOverlaysFile : romFile, sector, ce9->cacheBlockSize);
+				DC_InvalidateRange((vu32*)buffer, ce9->cacheBlockSize);
+
+				const u32 commandRead=0x020FF80A;
+
+				// Write the command
+				sharedAddr[0] = (vu32)buffer;
+				sharedAddr[1] = ce9->cacheBlockSize;
+				sharedAddr[2] = ((ce9->valueBits & overlaysCached) && src >= newOverlayOffset && src < newOverlayOffset+newOverlaysSize) ? sector+0x80000000 : sector;
+				sharedAddr[3] = commandRead;
+
+				while (sharedAddr[3] == commandRead) {
+					sleepMs(1);
+				}
+
+				// fileRead((char*)buffer, ((ce9->valueBits & overlaysCached) && src >= newOverlayOffset && src < newOverlayOffset+newOverlaysSize) ? apFixOverlaysFile : romFile, sector, ce9->cacheBlockSize);
 				/*updateDescriptor(slot, sector);
 				if (readLen >= ce9->cacheBlockSize*2) {
 					updateDescriptor(slot+1, sector+ce9->cacheBlockSize);
@@ -645,10 +661,12 @@ void cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 			region0Fix();
 		}
 		#endif */
+		#ifdef DLDI
 		if (!driveInitialized) {
 			FAT_InitFiles(false);
 			driveInitialized = true;
 		}
+		#endif
 		if (ce9->valueBits & enableExceptionHandler) {
 			setExceptionHandler2();
 		}
@@ -726,22 +744,19 @@ bool nandRead(void* memory,void* flash,u32 len,u32 dma) {
 #ifdef DLDI
 	if (ce9->valueBits & saveOnFlashcard) {
 		fileRead(memory, savFile, (u32)flash, len);
-		return true;
-	} else {
-		// Send a command to the ARM7 to read the nand save
-		u32 commandNandRead = 0x025FFC01;
-
-		// Write the command
-		sharedAddr[0] = (u32)memory;
-		sharedAddr[1] = len;
-		sharedAddr[2] = (u32)flash;
-		sharedAddr[3] = commandNandRead;
-
-		waitForArm7();
+		return true; 
 	}
-#else
-	fileRead(memory, savFile, (u32)flash, len);
 #endif
+	// Send a command to the ARM7 to read the nand save
+	u32 commandNandRead = 0x025FFC01;
+
+	// Write the command
+	sharedAddr[0] = (u32)memory;
+	sharedAddr[1] = len;
+	sharedAddr[2] = (u32)flash;
+	sharedAddr[3] = commandNandRead;
+
+	waitForArm7();
     return true; 
 }
 
@@ -750,21 +765,18 @@ bool nandWrite(void* memory,void* flash,u32 len,u32 dma) {
 	if (ce9->valueBits & saveOnFlashcard) {
 		fileWrite(memory, savFile, (u32)flash, len);
 		return true;
-	} else {
-		// Send a command to the ARM7 to write the nand save
-		u32 commandNandWrite = 0x025FFC02;
-
-		// Write the command
-		sharedAddr[0] = (u32)memory;
-		sharedAddr[1] = len;
-		sharedAddr[2] = (u32)flash;
-		sharedAddr[3] = commandNandWrite;
-
-		waitForArm7();
 	}
-#else
-	fileWrite(memory, savFile, (u32)flash, len);
 #endif
+	// Send a command to the ARM7 to write the nand save
+	u32 commandNandWrite = 0x025FFC02;
+
+	// Write the command
+	sharedAddr[0] = (u32)memory;
+	sharedAddr[1] = len;
+	sharedAddr[2] = (u32)flash;
+	sharedAddr[3] = commandNandWrite;
+
+	waitForArm7();
     return true; 
 }
 

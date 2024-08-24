@@ -212,7 +212,7 @@ void getAsyncSector() {
 #endif
 
 static inline bool checkArm7(void) {
-    IPC_SendSync(0x4);
+	// IPC_SendSync(0x4);
 	return (sharedAddr[3] == (vu32)0);
 }
 
