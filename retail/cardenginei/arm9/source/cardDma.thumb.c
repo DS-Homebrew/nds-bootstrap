@@ -191,7 +191,7 @@ void continueCardReadDmaArm9() {
 
 				dmaReadOnArm7 = true;
 
-				IPC_SendSync(0x4);
+				// IPC_SendSync(0x4);
 
 				updateDescriptor(slot, sector);
 				/*if (readLen >= ce9->cacheBlockSize*2) {
@@ -451,7 +451,7 @@ void cardSetDma(u32 * params) {
 
 			dmaReadOnArm7 = true;
 
-			IPC_SendSync(0x4);
+			// IPC_SendSync(0x4);
 
 			updateDescriptor(slot, sector);
 			/*if (readLen >= ce9->cacheBlockSize*2) {
