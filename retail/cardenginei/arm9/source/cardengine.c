@@ -453,7 +453,9 @@ static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
 		while(len > 0) {
 			int slot = getSlotForSector(sector);
 			vu8* buffer = getCacheAddress(slot);
+			#ifdef ASYNCPF
 			u32 nextSector = sector+ce9->cacheBlockSize;
+			#endif
 			// Read max CACHE_READ_SIZE via the main RAM cache
 			if (slot == -1) {
 				#ifdef ASYNCPF
