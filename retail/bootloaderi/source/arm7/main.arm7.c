@@ -1496,13 +1496,13 @@ int arm7_main(void) {
 	const char* romTid = getRomTid(&dsiHeaderTemp.ndshdr);
 	if (gameOnFlashcard || !isDSiWare) {
 		extern u32 clusterCacheSize;
-		clusterCacheSize = 0x10000;
+		clusterCacheSize = 0x14000;
 		if (dsiModeConfirmed && ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr)) {
 			clusterCacheSize = 0x7B0;
 		}
 
-		if ((memcmp(romTid, "IPG", 3) == 0) || ((memcmp(romTid, "IPK", 3) == 0))) {
-			buildFatTableCache(romFile); // Build uncompressed table for HGSS
+		if (!ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr) || !dsiModeConfirmed) {
+			buildFatTableCache(romFile); // Build uncompressed table for NTR titles
 			if (!romFile->fatTableCached) {
 				buildFatTableCacheCompressed(romFile);
 			}
@@ -1613,12 +1613,12 @@ int arm7_main(void) {
 		if (memcmp(romTid, "HND", 3) == 0) {
 			add = 0x108000; // 0x02808000
 		}
-		tonccpy((char*)0x02700000+add, (char*)0x02700000, 0x10000);	// Move FAT table cache elsewhere
+		tonccpy((char*)0x02700000+add, (char*)0x02700000, 0x14000);	// Move FAT table cache elsewhere
 		romFile->fatTableCache = (u32*)((u32)romFile->fatTableCache+add);
 		savFile->fatTableCache = (u32*)((u32)savFile->fatTableCache+add);
 		lastClusterCacheUsed = (u32*)((u32)lastClusterCacheUsed+add);
 		clusterCache += add;
-		toncset((char*)0x02700000, 0, 0x10000);
+		toncset((char*)0x02700000, 0, 0x14000);
 	}
 
 	//if (gameOnFlashcard || !isDSiWare || !dsiWramAccess) {
