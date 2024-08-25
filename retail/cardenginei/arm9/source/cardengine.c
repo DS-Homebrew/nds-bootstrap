@@ -423,7 +423,7 @@ static u32 newOverlaysSize = 0;
 
 static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
 #ifdef DLDI
-	while (sharedAddr[3]==0x444D4152);	// Wait during a RAM dump
+	// while (sharedAddr[3]==0x444D4152);	// Wait during a RAM dump
 	fileRead((char*)dst, ((ce9->valueBits & overlaysCached) && src >= ce9->overlaysSrc && src < ndsHeader->arm7romOffset) ? apFixOverlaysFile : romFile, src, len);
 #else
 	if (newOverlayOffset == 0) {
@@ -433,6 +433,7 @@ static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
 		}
 	}
 
+	const u32 commandRead = (isDma ? 0x025FFB0A : 0x025FFB08);
 	u32 sector = (src/ce9->cacheBlockSize)*ce9->cacheBlockSize;
 
 	accessCounter++;
@@ -446,7 +447,18 @@ static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
 	//}
 
 	/* if ((ce9->valueBits & cacheDisabled) && (u32)dst >= 0x02000000 && (u32)dst < 0x03000000) {
-		fileRead((char*)dst, ((ce9->valueBits & overlaysCached) && src >= newOverlayOffset && src < newOverlayOffset+newOverlaysSize) ? apFixOverlaysFile : romFile, src, len);
+		DC_InvalidateRange((u32*)dst, len);
+
+		// Write the command
+		sharedAddr[0] = (vu32)dst;
+		sharedAddr[1] = len;
+		sharedAddr[2] = ((ce9->valueBits & overlaysCached) && src >= ce9->overlaysSrc && src < ndsHeader->arm7romOffset) ? src+0x80000000 : src;
+		sharedAddr[3] = commandRead;
+
+		while (sharedAddr[3] == commandRead) {
+			sleepMs(1);
+		}
+		// fileRead((char*)dst, ((ce9->valueBits & overlaysCached) && src >= newOverlayOffset && src < newOverlayOffset+newOverlaysSize) ? apFixOverlaysFile : romFile, src, len);
 	} else { */
 		// Read via the main RAM cache
 		//bool runSleep = true;
@@ -477,8 +489,6 @@ static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
 				}*/
 
 				DC_InvalidateRange((u32*)buffer, ce9->cacheBlockSize);
-
-				const u32 commandRead = (isDma ? 0x025FFB0A : 0x025FFB08);
 
 				// Write the command
 				sharedAddr[0] = (vu32)buffer;

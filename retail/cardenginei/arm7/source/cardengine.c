@@ -1241,7 +1241,7 @@ static bool nandWrite(void) {
 	cardReadLED(false);
 }*/
 
-static bool readOngoing = false;
+//static bool readOngoing = false;
 //static bool sdReadOngoing = false;
 static bool ongoingIsDma = false;
 //static int currentCmd=0, currentNdmaSlot=0;
@@ -1439,11 +1439,11 @@ void runCardEngineCheck(void) {
 
 						const bool isDma = (/* sharedAddr[3] == (vu32)0x020FF80A || */ sharedAddr[3] == (vu32)0x025FFB0A);
 
-						readOngoing = true;
+						// readOngoing = true;
 						cardReadLED(true, isDma);    // When a file is loading, turn on LED for card read indicator
 						fileRead((char*)dst, useApFixOverlays ? apFixOverlaysFile : romFile, src, len);
 						cardReadLED(false, isDma);    // After loading is done, turn off LED for card read indicator
-						readOngoing = false;
+						// readOngoing = false;
 						sharedAddr[3] = 0;
 					if (isDma) {
 						IPC_SendSync(0x3);
@@ -1909,7 +1909,7 @@ bool eepromRead(u32 src, void *dst, u32 len) {
 	}
 
 	if (tryLockMutex(&saveMutex)) {
-		while (readOngoing) { swiDelay(100); }
+		// while (readOngoing) { swiDelay(100); }
 		#ifdef TWLSDK
 		//bool doBak = ((valueBits & gameOnFlashcard) && !(valueBits & saveOnFlashcard));
 		//if (doBak) bakSdData();
@@ -1958,7 +1958,7 @@ bool eepromPageWrite(u32 dst, const void *src, u32 len) {
 	}
 
 	if (tryLockMutex(&saveMutex)) {
-		while (readOngoing) { swiDelay(100); }
+		// while (readOngoing) { swiDelay(100); }
 		#ifdef TWLSDK
 		//bool doBak = ((valueBits & gameOnFlashcard) && !(valueBits & saveOnFlashcard));
 		//if (doBak) bakSdData();
@@ -2008,7 +2008,7 @@ bool eepromPageProg(u32 dst, const void *src, u32 len) {
 	}
 
  	if (tryLockMutex(&saveMutex)) {
-		while (readOngoing) { swiDelay(100); }
+		// while (readOngoing) { swiDelay(100); }
 		#ifdef TWLSDK
 		//bool doBak = ((valueBits & gameOnFlashcard) && !(valueBits & saveOnFlashcard));
 		//if (doBak) bakSdData();
@@ -2167,7 +2167,7 @@ bool cardRead(u32 dma, u32 src, void *dst, u32 len) {
 	if (valueBits & ROMinRAM) {
 		cardReadRAM(dst, src, len);
 	} else {
-		while (readOngoing) { swiDelay(100); }
+		// while (readOngoing) { swiDelay(100); }
 		//driveInitialize();
 		cardReadLED(true, false);    // When a file is loading, turn on LED for card read indicator
 		//ndmaUsed = false;

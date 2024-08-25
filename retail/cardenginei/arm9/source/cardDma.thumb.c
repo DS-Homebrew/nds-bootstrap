@@ -393,7 +393,7 @@ void cardSetDma(u32 * params) {
 
 	enableIPC_SYNC();
 
-	u32 commandRead=0x025FFB0A;
+	const u32 commandRead=0x025FFB0A;
 	u32 sector = (src/ce9->cacheBlockSize)*ce9->cacheBlockSize;
 	//u32 page = (src / 512) * 512;
 
@@ -412,7 +412,7 @@ void cardSetDma(u32 * params) {
 
 		dmaReadOnArm7 = true;
 
-		IPC_SendSync(0x4);
+		// IPC_SendSync(0x4);
 	} else { */
 		// Read via the main RAM cache
 		int slot = getSlotForSector(sector);
