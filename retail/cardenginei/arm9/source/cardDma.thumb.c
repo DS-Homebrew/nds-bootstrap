@@ -93,14 +93,6 @@ extern void hookIPC_SYNC(void);
 extern void enableIPC_SYNC(void);
 
 #ifndef DLDI
-#ifdef ASYNCPF
-static u32 asyncSector = 0;
-//static u32 asyncQueue[5];
-//static int aQHead = 0;
-//static int aQTail = 0;
-//static int aQSize = 0;
-#endif
-
 bool dmaReadOnArm7 = false;
 bool dmaReadOnArm9 = false;
 
@@ -109,107 +101,6 @@ extern int getSlotForSector(u32 sector);
 //extern int getSlotForSectorManual(int i, u32 sector);
 extern vu8* getCacheAddress(int slot);
 extern void updateDescriptor(int slot, u32 sector);
-
-/*#ifdef ASYNCPF
-void addToAsyncQueue(sector) {
-	asyncQueue[aQHead] = sector;
-	aQHead++;
-	aQSize++;
-	if(aQHead>4) {
-		aQHead=0;
-	}
-	if(aQSize>5) {
-		aQSize=5;
-		aQTail++;
-		if(aQTail>4) aQTail=0;
-	}
-}
-
-u32 popFromAsyncQueueHead() {	
-	if(aQSize>0) {
-	
-		aQHead--;
-		if(aQHead == -1) aQHead = 4;
-		aQSize--;
-		
-		return asyncQueue[aQHead];
-	} else return 0;
-}
-#endif*/
-
-#ifdef ASYNCPF
-static void waitForArm7(bool ipc) {
-	extern void sleepMs(int ms);
-
-	if (!ipc) {
-		IPC_SendSync(0x4);
-	}
-	while (sharedAddr[3] != (vu32)0) {
-		if (ipc) {
-			IPC_SendSync(0x4);
-			sleepMs(1);
-		}
-	}
-}
-
-void triggerAsyncPrefetch(sector) {	
-	if(asyncSector == 0) {
-		int slot = getSlotForSector(sector);
-		// read max 32k via the WRAM cache
-		// do it only if there is no async command ongoing
-		if(slot==-1) {
-			//addToAsyncQueue(sector);
-			// send a command to the arm7 to fill the main RAM cache
-			u32 commandRead = (isDma ? 0x020FF80A : 0x020FF808);
-
-			slot = allocateCacheSlot();
-
-			vu8* buffer = getCacheAddress(slot);
-
-			cacheDescriptor[slot] = sector;
-			cacheCounter[slot] = 0x0FFFFFFF; // async marker
-			asyncSector = sector;		
-
-			// write the command
-			sharedAddr[0] = buffer;
-			sharedAddr[1] = ce9->cacheBlockSize;
-			sharedAddr[2] = sector;
-			sharedAddr[3] = commandRead;
-
-			IPC_SendSync(0x4);
-
-			// do it asynchronously
-			/*waitForArm7();*/
-		}	
-	}	
-}
-
-void processAsyncCommand() {
-	if(asyncSector != 0) {
-		int slot = getSlotForSector(asyncSector);
-		if(slot!=-1 && cacheCounter[slot] == 0x0FFFFFFF) {
-			// get back the data from arm7
-			if(sharedAddr[3] == (vu32)0) {
-				updateDescriptor(slot, asyncSector);
-				asyncSector = 0;
-			}			
-		}	
-	}
-}
-
-void getAsyncSector() {
-	if(asyncSector != 0) {
-		int slot = getSlotForSector(asyncSector);
-		if(slot!=-1 && cacheCounter[slot] == 0x0FFFFFFF) {
-			// get back the data from arm7
-			waitForArm7(true);
-
-			updateDescriptor(slot, asyncSector);
-			asyncSector = 0;
-		}	
-	}	
-}
-#endif
 
 static inline bool checkArm7(void) {
 	// IPC_SendSync(0x4);

@@ -108,11 +108,11 @@ aFile* sharedFontFile = (aFile*)FONT_FILE_LOCATION_TWLSDK;
 tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
 #else
 tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER;
-#endif
+#endif // GSDD
 aFile* romFile = (aFile*)ROM_FILE_LOCATION_MAINMEM;
 aFile* savFile = (aFile*)SAV_FILE_LOCATION_MAINMEM;
 aFile* apFixOverlaysFile = (aFile*)OVL_FILE_LOCATION_MAINMEM;
-#endif
+#endif // TWLSDK
 //static aFile* gbaFile = (aFile*)GBA_FILE_LOCATION_MAINMEM;
 //static aFile* gbaSavFile = (aFile*)GBA_SAV_FILE_LOCATION_MAINMEM;
 #ifndef DLDI
@@ -125,9 +125,16 @@ int cacheCounter[dev_CACHE_SLOTS_16KB_TWLSDK];
 u32* cacheAddressTable = (u32*)CACHE_ADDRESS_TABLE_LOCATION;
 u32 cacheDescriptor[dev_CACHE_SLOTS_16KB];
 int cacheCounter[dev_CACHE_SLOTS_16KB];
-#endif
+#endif // TWLSDK
 int accessCounter = 0;
-#endif
+#ifdef ASYNCPF
+static u32 asyncSector = 0;
+//static u32 asyncQueue[5];
+//static int aQHead = 0;
+//static int aQTail = 0;
+//static int aQSize = 0;
+#endif // ASYNCPF
+#endif // DLDI
 bool flagsSet = false;
 #ifdef DLDI
 static bool driveInitialized = false;
@@ -243,6 +250,99 @@ void updateDescriptor(int slot, u32 sector) {
 	cacheDescriptor[slot] = sector;
 	cacheCounter[slot] = accessCounter;
 }
+
+#ifdef ASYNCPF
+void addToAsyncQueue(u32 sector) {
+	asyncQueue[aQHead] = sector;
+	aQHead++;
+	aQSize++;
+	if(aQHead>4) {
+		aQHead=0;
+	}
+	if(aQSize>5) {
+		aQSize=5;
+		aQTail++;
+		if(aQTail>4) aQTail=0;
+	}
+}
+
+u32 popFromAsyncQueueHead() {	
+	if(aQSize>0) {
+	
+		aQHead--;
+		if(aQHead == -1) aQHead = 4;
+		aQSize--;
+		
+		return asyncQueue[aQHead];
+	} else return 0;
+}
+
+void triggerAsyncPrefetch(u32 src, u32 sector) {	
+	if (asyncSector == 0) {
+		return;
+	}
+	int slot = getSlotForSector(sector);
+	// read max 32k via the WRAM cache
+	// do it only if there is no async command ongoing
+	if(slot==-1) {
+		//addToAsyncQueue(sector);
+		// send a command to the arm7 to fill the main RAM cache
+		const u32 commandRead = (isDma ? 0x020FF80A : 0x020FF808);
+
+		slot = allocateCacheSlot();
+
+		vu8* buffer = getCacheAddress(slot);
+
+		cacheDescriptor[slot] = sector;
+		cacheCounter[slot] = 0x0FFFFFFF; // async marker
+		asyncSector = sector;
+
+		DC_InvalidateRange((u32*)buffer, ce9->cacheBlockSize);
+
+		// write the command
+		sharedAddr[0] = (vu32)buffer;
+		sharedAddr[1] = ce9->cacheBlockSize;
+		sharedAddr[2] = ((ce9->valueBits & overlaysCached) && src >= newOverlayOffset && src < newOverlayOffset+newOverlaysSize) ? sector+0x80000000 : sector;
+		sharedAddr[3] = commandRead;
+
+		// IPC_SendSync(0x4);
+
+		// do it asynchronously
+		/*waitForArm7();*/
+	}	
+}
+
+void processAsyncCommand() {
+	if (asyncSector == 0) {
+		return;
+	}
+	int slot = getSlotForSector(asyncSector);
+	if(slot!=-1 && cacheCounter[slot] == 0x0FFFFFFF) {
+		// get back the data from arm7
+		if(sharedAddr[3] == (vu32)0) {
+			updateDescriptor(slot, asyncSector);
+			asyncSector = 0;
+		}			
+	}	
+}
+
+void getAsyncSector() {
+	if (asyncSector == 0) {
+		return;
+	}
+	int slot = getSlotForSector(asyncSector);
+	if(slot!=-1 && cacheCounter[slot] == 0x0FFFFFFF) {
+		// get back the data from arm7
+		const u32 commandRead = (isDma ? 0x020FF80A : 0x020FF808);
+		while (sharedAddr[3] == commandRead) {
+			sleepMs(1);
+		}
+
+		updateDescriptor(slot, asyncSector);
+		asyncSector = 0;
+	}
+}
+#endif
 #endif
 
 /*static void sleep(u32 ms) {
@@ -353,9 +453,7 @@ static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
 		while(len > 0) {
 			int slot = getSlotForSector(sector);
 			vu8* buffer = getCacheAddress(slot);
-			#ifdef ASYNCPF
 			u32 nextSector = sector+ce9->cacheBlockSize;
-			#endif
 			// Read max CACHE_READ_SIZE via the main RAM cache
 			if (slot == -1) {
 				#ifdef ASYNCPF
@@ -376,9 +474,9 @@ static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
 					readLen = ce9->cacheBlockSize*2;
 				}*/
 
-				DC_InvalidateRange((vu32*)buffer, ce9->cacheBlockSize);
+				DC_InvalidateRange((u32*)buffer, ce9->cacheBlockSize);
 
-				const u32 commandRead=0x020FF80A;
+				const u32 commandRead = (isDma ? 0x025FFB0A : 0x025FFB08);
 
 				// Write the command
 				sharedAddr[0] = (vu32)buffer;
@@ -389,6 +487,10 @@ static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
 				while (sharedAddr[3] == commandRead) {
 					sleepMs(1);
 				}
+
+				#ifdef ASYNCPF
+				updateDescriptor(slot, sector);
+				#endif
 
 				// fileRead((char*)buffer, ((ce9->valueBits & overlaysCached) && src >= newOverlayOffset && src < newOverlayOffset+newOverlaysSize) ? apFixOverlaysFile : romFile, sector, ce9->cacheBlockSize);
 				/*updateDescriptor(slot, sector);
@@ -403,9 +505,7 @@ static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
 				}*/
 
 				#ifdef ASYNCPF
-				if (REG_IME != 0 && REG_IF != 0) {
-					triggerAsyncPrefetch(nextSector);
-				}
+				triggerAsyncPrefetch(src + ce9->cacheBlockSize, nextSector);
 				#endif
 				//runSleep = false;
 			} else {
@@ -414,7 +514,7 @@ static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
 					// prefetch successfull
 					getAsyncSector();
 
-					triggerAsyncPrefetch(nextSector);
+					triggerAsyncPrefetch(src + ce9->cacheBlockSize, nextSector);
 				} /*else {
 					int i;
 					for(i=0; i<5; i++) {
@@ -425,10 +525,12 @@ static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
 						}
 					}
 				}*/
+				updateDescriptor(slot, sector);
 				#endif
-				//updateDescriptor(slot, sector);
 			}
+			#ifndef ASYNCPF
 			updateDescriptor(slot, sector);
+			#endif
 
 			//getSdatAddr(sector, (u32)buffer);
 
