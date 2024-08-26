@@ -1797,6 +1797,9 @@ int arm7_main(void) {
 		extern void patchScfgExt(const tNDSHeader* ndsHeader);
 		patchScfgExt(ndsHeader);
 
+		extern void patchSleepInputWrite(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
+		patchSleepInputWrite(ndsHeader, moduleParams);
+
 		extern void patchRamClearI(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, const bool _isDSiWare);
 		patchRamClearI(ndsHeader, moduleParams, true);
 

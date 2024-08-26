@@ -14,6 +14,7 @@
 #define gameOnFlashcard BIT(0)
 #define ROMinRAM BIT(3)
 #define dsiMode BIT(4)
+#define sleepMode BIT(17)
 
 extern u32 valueBits;
 extern u16 scfgRomBak;
@@ -176,6 +177,28 @@ static void patchSleepMode(const tNDSHeader* ndsHeader) {
 	//}
 }
 
+static void patchSleepInputWrite(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+	if (valueBits & sleepMode) {
+		return;
+	}
+
+	u32* offset = findSleepInputWriteOffset(ndsHeader, moduleParams);
+	if (!offset) {
+		return;
+	}
+
+	if (*offset == 0x13A04902) {
+		*offset = 0xE1A00000; // nop
+	} else {
+		u16* offsetThumb = (u16*)offset;
+		*offsetThumb = 0x46C0; // nop
+	}
+
+	/* dbg_printf("Sleep input write location : ");
+	dbg_hexa((u32)offset);
+	dbg_printf("\n\n"); */
+}
+
 bool a7PatchCardIrqEnable(cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	// Card irq enable
 	u32* cardIrqEnableOffset = findCardIrqEnableOffset(ndsHeader, moduleParams);
@@ -212,6 +235,7 @@ u32 patchCardNdsArm7(
 	const module_params_t* moduleParams
 ) {
 	patchSleepMode(ndsHeader);
+	patchSleepInputWrite(ndsHeader, moduleParams);
 
 	if (!a7PatchCardIrqEnable(ce7, ndsHeader, moduleParams)) {
 		return ERR_LOAD_OTHR;

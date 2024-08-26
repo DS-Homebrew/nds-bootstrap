@@ -382,6 +382,32 @@ static void patchSleepMode(const tNDSHeader* ndsHeader) {
 	}
 }
 
+void patchSleepInputWrite(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+	u32* offset = patchOffsetCache.sleepInputWriteOffset;
+	if (!patchOffsetCache.sleepInputWriteOffset) {
+		offset = findSleepInputWriteOffset(ndsHeader, moduleParams);
+		if (offset) {
+			patchOffsetCache.sleepInputWriteOffset = offset;
+		}
+	}
+	if (!offset) {
+		return;
+	}
+
+	if (!sleepMode) {
+		if (*offset == 0x13A04902) {
+			*offset = 0xE1A00000; // nop
+		} else {
+			u16* offsetThumb = (u16*)offset;
+			*offsetThumb = 0x46C0; // nop
+		}
+	}
+
+	dbg_printf("Sleep input write location : ");
+	dbg_hexa((u32)offset);
+	dbg_printf("\n\n");
+}
+
 static void patchRamClear(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	if (moduleParams->sdk_version < 0x5000000 || ndsHeader->unitCode == 0 || dsiModeConfirmed) {
 		return;
@@ -589,6 +615,7 @@ u32 patchCardNdsArm7(
 	patchPostBoot(ndsHeader);
 	patchScfgExt(ndsHeader);
 	patchSleepMode(ndsHeader);
+	patchSleepInputWrite(ndsHeader, moduleParams);
 
 	patchRamClear(ndsHeader, moduleParams);
 	patchRamClearI(ndsHeader, moduleParams, false);

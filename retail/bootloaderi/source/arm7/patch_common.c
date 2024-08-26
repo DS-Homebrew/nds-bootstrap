@@ -16818,6 +16818,7 @@ void rsetA7Cache(void)
 	patchOffsetCache.ramClearChecked = 0;
 	patchOffsetCache.ramClearIOffset = 0;
 	patchOffsetCache.ramClearI2Offset = 0;
+	patchOffsetCache.swiHaltOffset = 0;
 	patchOffsetCache.a7Swi12Offset = 0;
 	patchOffsetCache.a7Swi24Offset = 0;
 	patchOffsetCache.a7Swi25Offset = 0;
@@ -16827,6 +16828,7 @@ void rsetA7Cache(void)
 	patchOffsetCache.swiGetPitchTableOffset = 0;
 	patchOffsetCache.swiGetPitchTableChecked = 0;
 	patchOffsetCache.sleepPatchOffset = 0;
+	patchOffsetCache.sleepInputWriteOffset = 0;
 	patchOffsetCache.postBootOffset = 0;
 	patchOffsetCache.a7CardIrqEnableOffset = 0;
 	patchOffsetCache.cardCheckPullOutOffset = 0;
