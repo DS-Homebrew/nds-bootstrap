@@ -1157,7 +1157,7 @@ static void log_arm9(void) {
 }
 #endif
 
-static bool nandRead(void) {
+static void nandRead(void) {
 	u32 flash = *(vu32*)(sharedAddr+2);
 	u32 memory = *(vu32*)(sharedAddr);
 	u32 len = *(vu32*)(sharedAddr+1);
@@ -1181,11 +1181,13 @@ static bool nandRead(void) {
 
 	//driveInitialize();
 	//cardReadLED(true, true);    // When a file is loading, turn on LED for card read indicator
-	return fileRead((char *)memory, savFile, flash, len);
+	sdmmc_set_ndma_slot(4);
+	fileRead((char *)memory, savFile, flash, len);
+	sdmmc_set_ndma_slot(0);
 	//cardReadLED(false, true);
 }
 
-static bool nandWrite(void) {
+static void nandWrite(void) {
 	u32 flash = *(vu32*)(sharedAddr+2);
 	u32 memory = *(vu32*)(sharedAddr);
 	u32 len = *(vu32*)(sharedAddr+1);
@@ -1210,7 +1212,9 @@ static bool nandWrite(void) {
 	//driveInitialize();
 	saveTimer = 1;			// When we're saving, power button does nothing, in order to prevent corruption.
 	//cardReadLED(true, true);    // When a file is loading, turn on LED for card read indicator
-	return fileWrite((char *)memory, savFile, flash, len);
+	sdmmc_set_ndma_slot(4);
+	fileWrite((char *)memory, savFile, flash, len);
+	sdmmc_set_ndma_slot(0);
 	//cardReadLED(false, true);
 }
 
@@ -1462,17 +1466,17 @@ void runCardEngineCheck(void) {
     			log_arm9();
     			sharedAddr[3] = 0;
                 //IPC_SendSync(0x8);
-    		}
+    		} else
 			#endif
 
 			if (sharedAddr[3] == (vu32)0x025FFC01) {
 				//dmaLed = (sharedAddr[3] == (vu32)0x025FFC01);
-				sharedAddr[3] = nandRead();
-			}
-
-			if (sharedAddr[3] == (vu32)0x025FFC02) {
+				nandRead();
+    			sharedAddr[3] = 0;
+			} else if (sharedAddr[3] == (vu32)0x025FFC02) {
 				//dmaLed = (sharedAddr[3] == (vu32)0x025FFC02);
-				sharedAddr[3] = nandWrite();
+				nandWrite();
+    			sharedAddr[3] = 0;
 			}
 
             /*if (sharedAddr[3] == (vu32)0x025FBC01) {

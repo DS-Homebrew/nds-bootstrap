@@ -360,7 +360,11 @@ extern void setExceptionHandler2();
 static inline void waitForArm7(void) {
 	// IPC_SendSync(0x4);
 	while (sharedAddr[3] != (vu32)0) {
-		swiDelay(100);
+		#ifdef DLDI
+		swiDelay(50);
+		#else
+		sleepMs(1);
+		#endif
 	}
 }
 
@@ -496,9 +500,7 @@ static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
 				sharedAddr[2] = ((ce9->valueBits & overlaysCached) && src >= newOverlayOffset && src < newOverlayOffset+newOverlaysSize) ? sector+0x80000000 : sector;
 				sharedAddr[3] = commandRead;
 
-				while (sharedAddr[3] == commandRead) {
-					sleepMs(1);
-				}
+				waitForArm7();
 
 				#ifdef ASYNCPF
 				updateDescriptor(slot, sector);
@@ -861,8 +863,10 @@ bool nandRead(void* memory,void* flash,u32 len,u32 dma) {
 		return true; 
 	}
 #endif
+	DC_InvalidateRange(memory, len);
+
 	// Send a command to the ARM7 to read the nand save
-	u32 commandNandRead = 0x025FFC01;
+	const u32 commandNandRead = 0x025FFC01;
 
 	// Write the command
 	sharedAddr[0] = (u32)memory;
@@ -881,8 +885,10 @@ bool nandWrite(void* memory,void* flash,u32 len,u32 dma) {
 		return true;
 	}
 #endif
+	DC_FlushRange(memory, len);
+
 	// Send a command to the ARM7 to write the nand save
-	u32 commandNandWrite = 0x025FFC02;
+	const u32 commandNandWrite = 0x025FFC02;
 
 	// Write the command
 	sharedAddr[0] = (u32)memory;
