@@ -187,7 +187,7 @@ static void patchSleepInputWrite(const tNDSHeader* ndsHeader, const module_param
 		return;
 	}
 
-	if (*offset == 0x13A04902) {
+	if (*offset == 0x13A04902 || *offset == 0x11A05004) {
 		*offset = 0xE1A00000; // nop
 	} else {
 		u16* offsetThumb = (u16*)offset;

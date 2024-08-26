@@ -88,6 +88,7 @@ static const u16 sleepPatchThumbAlt[2] = {0xD002, 0x0440};
 static const u32 sleepInputWriteEndSignature1[2]     = {0x04000136, 0x027FFFA8};
 static const u32 sleepInputWriteEndSignature5[2]     = {0x04000136, 0x02FFFFA8};
 static const u32 sleepInputWriteSignature[1]         = {0x13A04902};
+static const u32 sleepInputWriteSignatureAlt[1]      = {0x11A05004};
 static const u16 sleepInputWriteBeqSignatureThumb[1] = {0xD000};
 
 // RAM clear
@@ -1007,6 +1008,12 @@ u32* findSleepInputWriteOffset(const tNDSHeader* ndsHeader, const module_params_
 			endOffset, 0x38,
 			sleepInputWriteSignature, 1
 		);
+		if (!offset) {
+			offset = findOffsetBackwards(
+				endOffset, 0x3C,
+				sleepInputWriteSignatureAlt, 1
+			);
+		}
 		if (!offset) {
 			u32 thumbOffset = (u32)findOffsetBackwardsThumb(
 				(u16*)endOffset, 0x30,
