@@ -26,6 +26,8 @@ jobs:
           sudo apt-get install p7zip-full gcc -y
 
           sudo gcc lzss.c -o /usr/local/bin/lzss
+      - name: Setup environment
+        run: git config --global safe.directory '*'
       - name: Build nightly
         if: ${{ !startsWith(github.ref, 'refs/tags') }}
         run: make package-nightly
