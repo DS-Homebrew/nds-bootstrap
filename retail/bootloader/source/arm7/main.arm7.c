@@ -1101,8 +1101,9 @@ int arm7_main(void) {
 
 	if (cdcReadReg(CDC_SOUND, 0x22) == 0xF0) {
 		// Switch touch mode to NTR
-		*(vu16*)0x4004700 &= ~BIT(15); // Runs before sound frequency change
+		*(vu16*)0x4004700 &= ~BIT(15); // Disable sound output: Runs before sound frequency change
 		*(vu16*)0x4004700 = (soundFreq ? 0xC00F : 0x800F);
+		*(vu16*)0x4004700 |= BIT(15); // Enable sound output
 		NDSTouchscreenMode();
 		*(vu16*)0x4000500 = 0x807F;
 	}
