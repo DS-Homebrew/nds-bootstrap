@@ -1671,8 +1671,9 @@ int arm7_main(void) {
 
 		const bool twlTouch = (cdcReadReg(CDC_SOUND, 0x22) == 0xF0);
 
-		*(vu16*)0x4004700 &= ~BIT(15); // Runs before sound frequency change
+		*(vu16*)0x4004700 &= ~BIT(15); // Disable sound output: Runs before sound frequency change
 		*(vu16*)0x4004700 = (soundFreq ? 0xC00F : 0x800F);
+		*(vu16*)0x4004700 |= BIT(15); // Enable sound output
 
 		if (twlTouch && *(u8*)0x02FFE1BF & BIT(0)) {
 			DSiTouchscreenMode();
@@ -1945,10 +1946,13 @@ int arm7_main(void) {
 			}
 		}
 
+		*(vu16*)0x4004700 &= ~BIT(15); // Disable sound output: Runs before sound frequency change
+		*(vu16*)0x4004700 = (soundFreq ? 0xC00F : 0x800F);
+		*(vu16*)0x4004700 |= BIT(15); // Enable sound output
+
 		const bool twlTouch = (cdcReadReg(CDC_SOUND, 0x22) == 0xF0);
 
 		if (!twlTouch || !dsiModeConfirmed || !ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr) || (ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr) && !(*(u8*)0x02FFE1BF & BIT(0)))) {
-			*(u16*)0x4004700 = (soundFreq ? 0xC00F : 0x800F);
 			NDSTouchscreenMode();
 			*(u16*)0x4000500 = 0x807F;
 			if (!dsiModeConfirmed || !ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr)) {
@@ -1969,9 +1973,8 @@ int arm7_main(void) {
 				DSiTouchscreenMode();
 				*(u16*)0x4000500 = 0x807F;
 			} else*/ if (*(u8*)0x02FFE1BF & BIT(0)) {
-				*(u16*)0x4004700 = (soundFreq ? 0xC00F : 0x800F);
 				DSiTouchscreenMode();
-				*(u16*)0x4000500 = 0x807F;
+				*(vu16*)0x4000500 = 0x807F;
 			}
 		}
 

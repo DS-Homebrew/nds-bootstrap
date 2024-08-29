@@ -84,6 +84,7 @@ static int language;
 static int dsiMode;
 static bool boostVram;
 static int consoleModel;
+static bool soundFreq;
 
 static std::string ndsPath;
 static std::string homebrewArg;
@@ -91,7 +92,7 @@ static std::string ramDrivePath;
 
 static u32 ramDiskSize = 0;
 
-void runFile(string filename, string fullPath, string homebrewArg, string ramDiskFilename, u32 ramDiskSize, string srParamsFilePath, const char* patchOffsetCacheFilePath, u32 cfgSize, int language, int dsiMode, bool boostVram, int consoleModel, u32 srTid1, u32 srTid2) {
+void runFile(string filename, string fullPath, string homebrewArg, string ramDiskFilename, u32 ramDiskSize, string srParamsFilePath, const char* patchOffsetCacheFilePath, u32 cfgSize, int language, int dsiMode, bool boostVram, int consoleModel, bool soundFreq, u32 srTid1, u32 srTid2) {
 	char filePath[256];
 
 	getcwd (filePath, 256);
@@ -173,7 +174,7 @@ void runFile(string filename, string fullPath, string homebrewArg, string ramDis
 		free(argarray.at(0));
 		argarray.at(0) = filePath;
 		dbg_printf("Running %s with %d parameters\n", argarray[0], argarray.size());
-		int err = runNdsFile (fullPath.c_str(), ramDiskFilename.c_str(), "fat:/snemul.cfg", ramDiskSize, srParamsFilePath.c_str(), patchOffsetCacheFilePath, cfgSize, romFileType, romIsCompressed, argarray.size(), (const char **)&argarray[0], language, dsiMode, boostVram, consoleModel, srTid1, srTid2);
+		int err = runNdsFile (fullPath.c_str(), ramDiskFilename.c_str(), "fat:/snemul.cfg", ramDiskSize, srParamsFilePath.c_str(), patchOffsetCacheFilePath, cfgSize, romFileType, romIsCompressed, argarray.size(), (const char **)&argarray[0], language, dsiMode, boostVram, consoleModel, soundFreq, srTid1, srTid2);
 		dbg_printf("Start failed. Error %i\n", err);
 
 	}
@@ -244,7 +245,7 @@ int main( int argc, char **argv) {
         // REG_SCFG_CLK = 0x80;
 		//REG_SCFG_EXT = 0x83000000; // NAND/SD Access
 
-		debug = (bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "DEBUG").c_str(), NULL, 0);
+		debug = (bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "DEBUG", "0").c_str(), NULL, 0);
 		if (debug)
 			consoleDemoInit();
 
@@ -258,7 +259,7 @@ int main( int argc, char **argv) {
 		mkdir("fat:/_nds/nds-bootstrap", 0777);
 		mkdir("fat:/_nds/nds-bootstrap/patchOffsetCache", 0777);
 
-		if ((bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "RESETSLOT1").c_str(), NULL, 0)) {
+		if ((bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "RESETSLOT1", "0").c_str(), NULL, 0)) {
 			if(REG_SCFG_MC == 0x11) { 
 				iprintf("Please insert a cartridge...\n");
 				do { swiWaitForVBlank(); } 
@@ -268,12 +269,13 @@ int main( int argc, char **argv) {
 		}
 
 		// Language
-		language = strtol(config_file.fetch("NDS-BOOTSTRAP", "LANGUAGE").c_str(), NULL, 0);
+		language = strtol(config_file.fetch("NDS-BOOTSTRAP", "LANGUAGE", "-1").c_str(), NULL, 0);
+		if (language < -1) language = -1;
 
 		// DSi Mode
-		dsiMode = strtol(config_file.fetch("NDS-BOOTSTRAP", "DSI_MODE").c_str(), NULL, 0);
+		dsiMode = strtol(config_file.fetch("NDS-BOOTSTRAP", "DSI_MODE", "0").c_str(), NULL, 0);
 
-		if (dsiMode>0 || (bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "BOOST_CPU").c_str(), NULL, 0)) {	
+		if (dsiMode>0 || (bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "BOOST_CPU", "0").c_str(), NULL, 0)) {	
 			dbg_printf("CPU boosted\n");
 			//REG_SCFG_CLK |= 0x1;
 		} else {
@@ -281,13 +283,16 @@ int main( int argc, char **argv) {
 			fifoSendValue32(FIFO_USER_07, 1);
 		}
 
-		boostVram = (bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "BOOST_VRAM").c_str(), NULL, 0);
+		boostVram = (bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "BOOST_VRAM", "0").c_str(), NULL, 0);
 		if (dsiMode>0 || boostVram) {	
 			dbg_printf("VRAM boosted\n");
 		}
 
 		// Console model
-		consoleModel = strtol(config_file.fetch("NDS-BOOTSTRAP", "CONSOLE_MODEL").c_str(), NULL, 0);
+		consoleModel = strtol(config_file.fetch("NDS-BOOTSTRAP", "CONSOLE_MODEL", "0").c_str(), NULL, 0);
+
+		// Sound/Mic frequency
+		soundFreq = (bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "SOUND_FREQ", "0").c_str(), NULL, 0);
 
 		fifoSendValue32(FIFO_USER_03, 1);
 		fifoWaitValue32(FIFO_USER_05);
@@ -423,7 +428,7 @@ int main( int argc, char **argv) {
 		fread(&srBackendId, sizeof(u32), 2, srBackendBin);
 		fclose(srBackendBin);
 
-		runFile(filename, ndsPath, homebrewArg, ramDrivePath, ramDiskSize, srParamsFilePath, patchOffsetCacheFilePath, cfgSize, language, dsiMode, boostVram, consoleModel, srBackendId[0], srBackendId[1]);
+		runFile(filename, ndsPath, homebrewArg, ramDrivePath, ramDiskSize, srParamsFilePath, patchOffsetCacheFilePath, cfgSize, language, dsiMode, boostVram, consoleModel, soundFreq, srBackendId[0], srBackendId[1]);
 	} else {
 		consoleDemoInit();
 		printf("SD init failed!\n");
