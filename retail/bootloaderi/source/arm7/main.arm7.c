@@ -1684,7 +1684,7 @@ int arm7_main(void) {
 				writePowerManagement(PM_CONTROL_REG, temp);
 			}
 		}
-		*(u16*)0x4000500 = 0x807F;
+		*(vu16*)0x4000500 = 0x807F;
 
 	 //if (*(u32*)0x02FFE1D8 <= 0x02E80000) {
 		memset_addrs_arm7(0x02F00000, 0x02F80000);
