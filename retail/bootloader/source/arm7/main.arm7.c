@@ -655,7 +655,7 @@ static void my_readUserSettings(tNDSHeader* ndsHeader) {
 
 u8 getRumblePakType(void) {
 	// First, make sure we're on DS Phat/Lite, and if DLDI is Slot-1
-	if (*(u16*)0x4004700 != 0 || (_io_dldi_features & FEATURE_SLOT_GBA) || s2FlashcardId != 0 || *(vu16*)0x08240000 == 1 || GBA_BUS[0] == 0xFFFE || GBA_BUS[1] == 0xFFFF) {
+	if (*(vu16*)0x4004700 != 0 || (_io_dldi_features & FEATURE_SLOT_GBA) || s2FlashcardId != 0 || *(vu16*)0x08240000 == 1 || GBA_BUS[0] == 0xFFFE || GBA_BUS[1] == 0xFFFF) {
 		return 0;
 	}
 	// Then, check for 0x96 to see if it's a GBA game or flashcart
@@ -663,11 +663,10 @@ u8 getRumblePakType(void) {
 		WARIOWARE_ENABLE = 8;
 		return 1;
 	} else {
-		for (int i = 0; i < 4000; i++) { // Run 4000 times to make sure it works
-			for (int p = 0; p < 0x1000/2; p++) {
-				if (GBA_BUS[1+(p*2)] == 0xFFFD) {
-					return 2;
-				}
+		// Check for DS Phat or Lite Rumble Pak
+		for (int i = 0; i < 0xFFF; i++) {
+			if (GBA_BUS[i] != 0xFFFD && GBA_BUS[i] != 0xFDFF) {
+				return 2;
 			}
 		}
 	}
