@@ -300,6 +300,11 @@ void __attribute__((target("arm"))) arm9_main(void) {
 		}
 	}
 
+	// Clear out ARM9 DMA channel 3
+	DMA_CR(3) = 0;
+	DMA_SRC(3) = 0;
+	DMA_DEST(3) = 0;
+
 	while (REG_VCOUNT != 191);
 	while (REG_VCOUNT == 191);
 
