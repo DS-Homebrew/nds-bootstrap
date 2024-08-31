@@ -2042,6 +2042,9 @@ int arm7_main(void) {
 		}
 		if (ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed) {
 			cheatEngineOffset = (consoleModel > 0) ? CHEAT_ENGINE_TWLSDK_LOCATION_3DS : CHEAT_ENGINE_TWLSDK_LOCATION;
+			if (consoleModel == 0 && !gameOnFlashcard && (strncmp(romTid, "IRB", 3) == 0 || strncmp(romTid, "IRA", 3) == 0 || strncmp(romTid, "IRE", 3) == 0 || strncmp(romTid, "IRD", 3) == 0)) {
+				cheatEngineOffset = CHEAT_ENGINE_PKMN_TWLSDK_LOCATION;
+			}
 		} else {
 			cheatEngineOffset = (ce7Location == CARDENGINEI_ARM7_LOCATION_ALT) ? CHEAT_ENGINE_LOCATION_ALT : CHEAT_ENGINE_LOCATION;
 		}

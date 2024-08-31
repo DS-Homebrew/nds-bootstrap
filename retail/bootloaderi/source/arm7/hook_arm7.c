@@ -329,6 +329,8 @@ int hookNdsRetailArm7(
 	u32* vblankHandler = hookLocation;
 	u32* ipcSyncHandler = hookLocation + 16;
 
+	extern u32 cheatEngineOffset;
+
 	if (!ce7NotFound) {
 	/*	u32 intr_vblank_orig_return = *(u32*)0x2FFC004;
 		intr_vblank_orig_return += 0x2FFC008;
@@ -340,6 +342,7 @@ int hookNdsRetailArm7(
 
 		ce7->intr_vblank_orig_return  = *vblankHandler;
 		ce7->intr_fifo_orig_return    = *ipcSyncHandler;
+		ce7->cheatEngineAddr          = cheatEngineOffset;
 		ce7->fileCluster              = fileCluster;
 		ce7->patchOffsetCacheFileCluster = patchOffsetCacheFileCluster;
 		ce7->srParamsCluster          = srParamsFileCluster;
@@ -462,7 +465,6 @@ int hookNdsRetailArm7(
 	}
 
 	extern u32 cheatSizeTotal;
-	extern u32 cheatEngineOffset;
 	extern char cheatEngineBuffer[0x400];
 	u16 cheatSizeLimit = (ce7NotFound ? 0x1C00 : 0x8000);
 	if (!ce7NotFound) {

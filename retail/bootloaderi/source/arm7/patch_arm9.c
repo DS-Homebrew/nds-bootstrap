@@ -1357,10 +1357,11 @@ static void patchWaitSysCycles(const cardengineArm9* ce9, const tNDSHeader* ndsH
 void patchHiHeapPointer(const module_params_t* moduleParams, const tNDSHeader* ndsHeader) {
 	extern u8 consoleModel;
 	extern u32 cheatSizeTotal;
-	bool ROMsupportsDsiMode = (ndsHeader->unitCode > 0 && dsiModeConfirmed);
+	const bool ROMsupportsDsiMode = (ndsHeader->unitCode > 0 && dsiModeConfirmed);
 	const bool cheatsEnabled = (cheatSizeTotal > 4 && cheatSizeTotal <= 0x8000);
+	const char* romTid = getRomTid(ndsHeader);
 
-	if (moduleParams->sdk_version < 0x2008000 || !dsiModeConfirmed || strncmp(ndsHeader->gameCode, "UBR", 3) == 0) {
+	if (moduleParams->sdk_version < 0x2008000 || !dsiModeConfirmed || strncmp(romTid, "UBR", 3) == 0) {
 		return;
 	}
 
@@ -1414,7 +1415,19 @@ void patchHiHeapPointer(const module_params_t* moduleParams, const tNDSHeader* n
 			}
 		} else { */
 			// DSi mode title loaded on DSi from SD card, or DSi/3DS with external DSi BIOS files loaded
-			switch (*heapPointer) {
+			if (!gameOnFlashcard && (strncmp(romTid, "IRB", 3) == 0 || strncmp(romTid, "IRA", 3) == 0 || strncmp(romTid, "IRE", 3) == 0 || strncmp(romTid, "IRD", 3) == 0)) {
+				switch (*heapPointer) {
+					case 0x13A007BE:
+						*heapPointer = (u32)0x13A0062F; // MOVNE R0, #0x2F00000
+						break;
+					case 0xE3A007BE:
+						*heapPointer = (u32)0xE3A0062F; // MOV R0, #0x2F00000
+						break;
+					case 0x048020BE:
+						*heapPointer = (u32)0x048020BC; // MOVS R0, #0x2F00000
+						break;
+				}
+			} else switch (*heapPointer) {
 				case 0x13A007BE: {
 					// *heapPointer = (u32)0x13A007BD; // MOVNE R0, #0x2F40000
 					heapPointer[-1] = 0xE3500001; // cmp r0, #1

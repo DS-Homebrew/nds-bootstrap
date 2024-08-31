@@ -93,6 +93,7 @@ extern int lockMutex(int* addr);
 extern int unlockMutex(int* addr);
 
 extern vu32* volatile cardStruct;
+extern u32 cheatEngineAddr;
 extern u32 fileCluster;
 extern u32 saveCluster;
 extern u32 saveSize;
@@ -139,18 +140,6 @@ static bool dmaSignal = false;
 static bool wifiIrq = false;
 static int wifiIrqTimer = 0;
 //static bool saveInRam = false;
-
-u32 cheatEngineAddr = 
-#ifdef TWLSDK
-CHEAT_ENGINE_TWLSDK_LOCATION
-#else
-#ifdef ALTERNATIVE
-CHEAT_ENGINE_LOCATION_ALT
-#else
-CHEAT_ENGINE_LOCATION
-#endif
-#endif
-;
 
 #ifdef TWLSDK
 static aFile* romFile = (aFile*)ROM_FILE_LOCATION_TWLSDK;
@@ -362,9 +351,6 @@ static void initialize(void) {
 	if (*(u8*)(DSI_HEADER_SDK5+0x234) == 6) {
 		*(u8*)(DSI_HEADER_SDK5+0x234) = 0;
 		sixInHeader = true;
-	}
-	if (consoleModel > 0) {
-		cheatEngineAddr = CHEAT_ENGINE_TWLSDK_LOCATION_3DS;
 	}
 	#else
 	if (valueBits & isSdk5) {

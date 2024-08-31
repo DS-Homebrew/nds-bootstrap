@@ -64,6 +64,7 @@ static char hiyaDSiPath[14] = {'s','d','m','c',':','/','h','i','y','a','.','d','
 
 extern void ndsCodeStart(u32* addr);
 
+extern u32 cheatEngineAddr;
 extern u32 saveCluster;
 extern u32 patchOffsetCacheFileCluster;
 extern u32 srParamsCluster;
@@ -91,14 +92,6 @@ bool ipcEveryFrame = false;
 static bool swapScreens = false;
 static bool wifiIrq = false;
 static int wifiIrqTimer = 0;
-
-u32 cheatEngineAddr = 
-#ifdef UNITTWL
-CHEAT_ENGINE_DSIWARE_LOCATION3
-#else
-CHEAT_ENGINE_DSIWARE_LOCATION
-#endif
-;
 
 #ifdef CARDSAVE
 static aFile savFile;
@@ -263,10 +256,6 @@ static void driveInitialize(void) {
 static void initialize(void) {
 	if (initialized) {
 		return;
-	}
-
-	if (consoleModel > 0 && *(u32*)CHEAT_ENGINE_TWLSDK_LOCATION_3DS == 0x3E4) {
-		cheatEngineAddr = CHEAT_ENGINE_TWLSDK_LOCATION_3DS;
 	}
 
 	if (language >= 0 && language <= 7) {
