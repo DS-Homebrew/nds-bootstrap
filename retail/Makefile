@@ -128,7 +128,7 @@ export LIBPATHS	:=	$(foreach dir,$(LIBDIRS),-L$(dir)/lib)
 export GAME_ICON := $(CURDIR)/$(ASSETS)/icon.bmp
 
 #.PHONY: cardengine_arm7 cardengine_arm9 bootloader BootStrap clean
-.PHONY: all dist release nightly bootloader bootloader2 bootloaderi bootloaderi2 cardengine_arm7 cardengine_arm7_music cardengine_arm9_igm cardengine_arm9_igm_extmem cardengine_arm9 cardengine_arm9_start cardengine_arm9_alt cardengine_arm9_alt2 cardengine_arm9_extmem cardenginei_arm7 cardenginei_arm7_alt cardenginei_arm7_twlsdk cardenginei_arm7_twlsdk3 cardenginei_arm7_dsiware cardenginei_arm7_dsiware3 cardenginei_arm7_cheat cardenginei_arm9_igm cardenginei_arm9 cardenginei_arm9_alt cardenginei_arm9_alt2 cardenginei_arm9_dlp cardenginei_arm9_gsdd cardenginei_arm9_gsdd_alt cardenginei_arm9_dldi cardenginei_arm9_gsdd_dldi cardenginei_arm9_twlsdk cardenginei_arm9_twlsdk3 cardenginei_arm9_twlsdk_dldi cardenginei_arm9_twlsdk3_dldi cardenginei_arm9_dsiware cardenginei_arm9_dsiware3 arm7/$(TARGET).elf arm9/$(TARGET).elf clean
+.PHONY: all dist release nightly bootloader bootloader2 bootloaderi bootloaderi2 cardengine_arm7 cardengine_arm7_music cardengine_arm9_igm cardengine_arm9_igm_extmem cardengine_arm9 cardengine_arm9_start cardengine_arm9_alt cardengine_arm9_alt2 cardengine_arm9_extmem cardenginei_arm7 cardenginei_arm7_alt cardenginei_arm7_twlsdk cardenginei_arm7_twlsdk3 cardenginei_arm7_dsiware cardenginei_arm7_dsiware3 cardenginei_arm7_cheat cardenginei_arm9_igm cardenginei_arm9 cardenginei_arm9_alt cardenginei_arm9_alt2 cardenginei_arm9_dlp cardenginei_arm9_gsdd cardenginei_arm9_gsdd_alt cardenginei_arm9_dldi cardenginei_arm9_gsdd_dldi cardenginei_arm9_twlsdk cardenginei_arm9_twlsdk3 cardenginei_arm9_twlsdk_dldi cardenginei_arm9_twlsdk3_dldi cardenginei_arm9_dsiware cardenginei_arm9_dsiware3 preLoadSettings arm7/$(TARGET).elf arm9/$(TARGET).elf clean
 
 all:	$(OUTPUT)
 
@@ -157,7 +157,7 @@ arm7/$(TARGET).elf:
 	@$(MAKE) -C arm7
 	
 #---------------------------------------------------------------------------------
-arm9/$(TARGET).elf:	bootloader bootloader2 bootloaderi bootloaderi2
+arm9/$(TARGET).elf:	bootloader bootloader2 bootloaderi bootloaderi2 preLoadSettings
 	@$(MAKE) -C arm9
 
 #---------------------------------------------------------------------------------		
@@ -300,6 +300,10 @@ cardenginei_arm9_dsiware: $(DATA)
 cardenginei_arm9_dsiware3: $(DATA)
 	@$(MAKE) -C cardenginei/arm9_dsiware3
 
+#---------------------------------------------------------------------------------		
+preLoadSettings: $(DATA)
+	@$(MAKE) -C preLoadSettings
+
 #---------------------------------------------------------------------------------
 #$(BUILD):
 #	@[ -d $@ ] || mkdir -p $@
@@ -343,6 +347,8 @@ clean:
 	@$(MAKE) -C cardenginei/arm9_twlsdk3_dldi clean
 	@$(MAKE) -C cardenginei/arm9_dsiware clean
 	@$(MAKE) -C cardenginei/arm9_dsiware3 clean
+	@rm $(NITRODATA)/preLoadSettingsDSi.pck
+	@rm $(NITRODATA)/preLoadSettings3DS.pck
 	@$(MAKE) -C bootloader clean
 	@$(MAKE) -C bootloader2 clean
 	@$(MAKE) -C bootloaderi clean
