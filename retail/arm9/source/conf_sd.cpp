@@ -1187,6 +1187,14 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			conf->valueBits2 |= BIT(5);
 		}
 	}
+	if (conf->dsiWramAccess) {
+		u32 wordBak = *(vu32*)0x03700000;
+		*(vu32*)0x03700000 = 0x414C5253;
+		if (*(vu32*)0x03700000 == 0x414C5253 && *(vu32*)0x03708000 == 0x414C5253) {
+			conf->valueBits3 |= BIT(6); // DSi WRAM is mirrored by 32KB
+		}
+		*(vu32*)0x03700000 = wordBak;
+	}
 	if (access("sd:/hiya.dsi", F_OK) == 0) {
 		conf->valueBits2 |= BIT(6);
 	}

@@ -430,10 +430,10 @@ int hookNdsRetailArm7(
 
 		// 0: ROM part start, 1: ROM part start in RAM, 2: ROM part end in RAM
 		extern u32 romMapLines;
-		extern u32 romMap[4][3];
+		extern u32 romMap[5][3];
 
 		ce7->romMapLines = romMapLines;
-		for (int i = 0; i < 4; i++) {
+		for (int i = 0; i < 5; i++) {
 			for (int i2 = 0; i2 < 3; i2++) {
 				ce7->romMap[i][i2] = romMap[i][i2];
 			}

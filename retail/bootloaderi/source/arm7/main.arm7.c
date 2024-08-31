@@ -166,7 +166,8 @@ u32 oldArm7mbk = 0;
 
 u32 romMapLines = 0;
 // 0: ROM part start, 1: ROM part start in RAM, 2: ROM part end in RAM
-u32 romMap[4][3] = {
+u32 romMap[5][3] = {
+	{0, 0, 0},
 	{0, 0, 0},
 	{0, 0, 0},
 	{0, 0, 0},
@@ -826,8 +827,8 @@ static bool isROMLoadableInRAM(const tDSiHeader* dsiHeader, const tNDSHeader* nd
 			romSize -= romOffset;
 		}
 		res = ((consoleModel> 0 && twlType && ((u32)dsiHeader->arm9iromOffset - romOffset)+ioverlaysSize <= (cheatsEnabled ? dev_CACHE_ADRESS_SIZE_TWLSDK_CHEAT : dev_CACHE_ADRESS_SIZE_TWLSDK))
-			|| (consoleModel> 0 && !twlType && romSize <= (dsiModeConfirmed ? 0x01800000 : 0x01BC0000))
-			|| (consoleModel==0 && !twlType && romSize <= (dsiModeConfirmed ? 0x00800000 : 0x00BC0000)));
+			|| (consoleModel> 0 && !twlType && romSize <= (dsiModeConfirmed ? 0x01800000 : 0x01BC0000)+(dsiWramAccess&&!dsiWramMirrored ? 0x78000 : 0))
+			|| (consoleModel==0 && !twlType && romSize <= (dsiModeConfirmed ? 0x00800000 : 0x00BC0000)+(dsiWramAccess&&!dsiWramMirrored ? 0x78000 : 0)));
 
 	}
 	if (res) {
@@ -1078,7 +1079,9 @@ static void loadROMintoRAM(const tNDSHeader* ndsHeader, const module_params_t* m
 		fileRead((char*)romLocationChange, romFile, romOffsetChange, romBlockSize);
 		romLocationChange += 0x4000;
 
-		if (isSdk5(moduleParams) || (dsiBios && (moduleParams->sdk_version >= 0x2008000 || moduleParams->sdk_version == 0x20029A8))) {
+		if (dsiWramAccess && !dsiWramMirrored && romLocationChange == (consoleModel > 0 ? 0x0E000000 : 0x0D000000)) {
+			romLocationChange = 0x03708000;
+		} else if (isSdk5(moduleParams) || (dsiBios && (moduleParams->sdk_version >= 0x2008000 || moduleParams->sdk_version == 0x20029A8))) {
 			if (romLocationChange == 0x0C7C4000) {
 				romLocationChange += (ndsHeader->unitCode > 0 ? 0x1C000 : 0x3C000);
 			} else if (ndsHeader->unitCode == 0) {

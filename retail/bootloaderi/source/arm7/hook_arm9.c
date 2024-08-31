@@ -174,9 +174,11 @@ void configureRomMap(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const u32
 		return;
 	}
 
+	const bool dsiWramUseable = (dsiWramAccess && !dsiWramMirrored);
+
 	// 0: ROM part start, 1: ROM part start in RAM, 2: ROM part end in RAM
 	extern u32 romMapLines;
-	extern u32 romMap[4][3];
+	extern u32 romMap[5][3];
 	romMap[0][0] = romStart;
 	romMap[0][1] = romLocation;
 
@@ -189,6 +191,20 @@ void configureRomMap(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const u32
 			romMap[1][0] = romMap[0][0]+(0x800000-cacheBlockSize);
 			romMap[1][1] = romMap[0][1]+0x800000;
 			romMap[1][2] = romMap[1][1]+0x1000000;
+
+			romMapLines++;
+
+			if (dsiWramUseable) {
+				romMap[2][0] = romMap[1][0]+0x1000000;
+				romMap[2][1] = 0x03708000;
+				romMap[2][2] = 0x03780000;
+
+				romMapLines++;
+			}
+		} else if (dsiWramUseable) {
+			romMap[1][0] = romMap[0][0]+(0x800000-cacheBlockSize);
+			romMap[1][1] = 0x03708000;
+			romMap[1][2] = 0x03780000;
 
 			romMapLines++;
 		}
@@ -215,11 +231,33 @@ void configureRomMap(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const u32
 					romMap[3][2] = romMap[3][1]+0x1000000;
 
 					romMapLines++;
+
+					if (dsiWramUseable) {
+						romMap[4][0] = romMap[3][0]+0x1000000;
+						romMap[4][1] = 0x03708000;
+						romMap[4][2] = 0x03780000;
+
+						romMapLines++;
+					}
 				}
 			} else if (consoleModel > 0) {
 				romMap[2][0] = romMap[1][0]+(0x800000-cacheBlockSize);
 				romMap[2][1] = romMap[1][1]+0x800000;
 				romMap[2][2] = romMap[2][1]+0x1000000;
+
+				romMapLines++;
+
+				if (dsiWramUseable) {
+					romMap[3][0] = romMap[2][0]+0x1000000;
+					romMap[3][1] = 0x03708000;
+					romMap[3][2] = 0x03780000;
+
+					romMapLines++;
+				}
+			} else if (dsiWramUseable) {
+				romMap[2][0] = romMap[1][0]+(0x800000-cacheBlockSize);
+				romMap[2][1] = 0x03708000;
+				romMap[2][2] = 0x03780000;
 
 				romMapLines++;
 			}
@@ -236,6 +274,20 @@ void configureRomMap(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const u32
 				romMap[2][2] = romMap[2][1]+0x1000000;
 
 				romMapLines++;
+
+				if (dsiWramUseable) {
+					romMap[3][0] = romMap[2][0]+0x1000000;
+					romMap[3][1] = 0x03708000;
+					romMap[3][2] = 0x03780000;
+
+					romMapLines++;
+				}
+			} else if (dsiWramUseable) {
+				romMap[2][0] = romMap[1][0]+(0x800000-cacheBlockSize);
+				romMap[2][1] = 0x03708000;
+				romMap[2][2] = 0x03780000;
+
+				romMapLines++;
 			}
 		} else {
 			romMap[0][2] = romLocation+0x3C0000;
@@ -243,6 +295,14 @@ void configureRomMap(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const u32
 			romMap[1][0] = romMap[0][0]+0x3C0000;
 			romMap[1][1] = romLocation+0x400000;
 			romMap[1][2] = romMap[1][1]+(consoleModel > 0 ? 0x1800000 : 0x800000);
+
+			if (dsiWramUseable) {
+				romMap[2][0] = romMap[1][0]+(consoleModel > 0 ? 0x1800000 : 0x800000);
+				romMap[2][1] = 0x03708000;
+				romMap[2][2] = 0x03780000;
+
+				romMapLines++;
+			}
 		}
 	}
 
