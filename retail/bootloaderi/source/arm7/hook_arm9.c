@@ -304,12 +304,8 @@ int hookNdsRetailArm9(
 	if (isSdk5(moduleParams)) {
 		ce9->valueBits |= b_isSdk5;
 	}
-	/* if (strncmp(romTid, "CAY", 3) == 0 // Army Men: Soldiers of Misfortune
-	 || strncmp(romTid, "B7F", 3) == 0 // The Magic School Bus: Oceans
-	) {
-		ce9->valueBits |= b_cacheDisabled; // Disable card data cache for specific games
-	} */
-	/* if (strncmp(romTid, "YV5", 3) == 0 // Dragon Quest V: Hand of the Heavenly Bride
+	/* if (strncmp(romTid, "CBB", 3) == 0 // Big Bang Mini
+	 || strncmp(romTid, "AWV", 3) == 0 // Nervous Brickdown
 	) {
 		ce9->valueBits |= b_cacheDisabled; // Disable card data cache for specific games
 	} */
