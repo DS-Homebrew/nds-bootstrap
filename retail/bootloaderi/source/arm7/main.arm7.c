@@ -933,6 +933,10 @@ static void my_readUserSettings(tNDSHeader* ndsHeader) {
 }
 
 bool dataToPreloadFound(const tNDSHeader* ndsHeader) {
+	if (strncmp(ndsHeader->gameCode, "UBR", 3) == 0) {
+		return (dataToPreloadSize[0] > 0 && (dataToPreloadSize[0]/*+dataToPreloadSize[1]*/) <= retail_CACHE_ADRESS_SIZE_BROWSER-0x40000);
+	}
+
 	return (dataToPreloadSize[0] > 0 && (dataToPreloadSize[0]/*+dataToPreloadSize[1]*/) <= (consoleModel > 0 ? (dsiModeConfirmed ? (ndsHeader->unitCode > 0 ? dev_CACHE_ADRESS_SIZE_TWLSDK : dev_CACHE_ADRESS_SIZE_DSIMODE) : dev_CACHE_ADRESS_SIZE) : (dsiModeConfirmed ? retail_CACHE_ADRESS_SIZE_DSIMODE : retail_CACHE_ADRESS_SIZE))-0x40000);
 }
 
@@ -2212,7 +2216,7 @@ int arm7_main(void) {
 			dbg_printf("Overlays cached to a file\n");
 		}
 
-		if (!ROMinRAM && ((ROMsupportsDsiMode(ndsHeader) && !isDSiWare && (!dsiModeConfirmed || consoleModel > 0)) || strncmp(romTid, "UBR", 3) != 0)) {
+		if (!ROMinRAM && ((ROMsupportsDsiMode(ndsHeader) && !isDSiWare && (!dsiModeConfirmed || consoleModel > 0)) || !ROMsupportsDsiMode(ndsHeader))) {
 			loadROMPartIntoRAM(ndsHeader, moduleParams, romFile);
 		}
 

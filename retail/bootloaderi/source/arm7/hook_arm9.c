@@ -167,9 +167,7 @@ void configureRomMap(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const u32
 	ce9->romLocation = romLocation;
 	ce9->romLocation -= romStart;
 
-	const bool dsBrowser = (strncmp(ndsHeader->gameCode, "UBR", 3) == 0);
-
-	if ((ndsHeader->unitCode > 0 && dsiMode) || (consoleModel == 0 && dsBrowser)) {
+	if (ndsHeader->unitCode > 0 && dsiMode) {
 		// ROM map is not used for TWL games in DSi mode
 		return;
 	}

@@ -613,8 +613,10 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	u8 unitCode = 0;
 	u32 ndsArm9BinOffset = 0;
 	u32 ndsArm9Offset = 0;
+	u32 ndsArm7BinOffset = 0;
 	u32 ndsArm7Size = 0;
 	u32 fatAddr = 0;
+	u32 internalRomSize = 0;
 	u16 headerCRC = 0;
 	u32 a7mbk6 = 0;
 	u32 accessControl = 0;
@@ -639,10 +641,14 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		fread(&ndsArm9BinOffset, sizeof(u32), 1, ndsFile);
 		fseek(ndsFile, 0x28, SEEK_SET);
 		fread(&ndsArm9Offset, sizeof(u32), 1, ndsFile);
+		fseek(ndsFile, 0x30, SEEK_SET);
+		fread(&ndsArm7BinOffset, sizeof(u32), 1, ndsFile);
 		fseek(ndsFile, 0x3C, SEEK_SET);
 		fread(&ndsArm7Size, sizeof(u32), 1, ndsFile);
 		fseek(ndsFile, 0x48, SEEK_SET);
 		fread(&fatAddr, sizeof(u32), 1, ndsFile);
+		fseek(ndsFile, 0x80, SEEK_SET);
+		fread(&internalRomSize, sizeof(u32), 1, ndsFile);
 		fseek(ndsFile, 0x15E, SEEK_SET);
 		fread(&headerCRC, sizeof(u16), 1, ndsFile);
 		fseek(ndsFile, 0x1A0, SEEK_SET);
@@ -1375,6 +1381,11 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		}
 	  }
 		fclose(file);
+	}
+	if (conf->dataToPreloadAddr[0] == 0) {
+		// Set NitroFS pre-load, in case if full ROM pre-load fails
+		conf->dataToPreloadAddr[0] = ndsArm7BinOffset+ndsArm7Size;
+		conf->dataToPreloadSize[0] = ((internalRomSize == 0) ? conf->romSize : internalRomSize)-conf->dataToPreloadAddr[0];
 	}
   } else if (ndsArm7idst <= 0x02E80000) {
 	const bool binary3 = (REG_SCFG_EXT7 == 0 ? !dsiEnhancedMbk : (a7mbk6 != 0x00403000));
