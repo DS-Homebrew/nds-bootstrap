@@ -1385,7 +1385,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	if (conf->dataToPreloadAddr[0] == 0) {
 		// Set NitroFS pre-load, in case if full ROM pre-load fails
 		conf->dataToPreloadAddr[0] = ndsArm7BinOffset+ndsArm7Size;
-		conf->dataToPreloadSize[0] = ((internalRomSize == 0) ? conf->romSize : internalRomSize)-conf->dataToPreloadAddr[0];
+		conf->dataToPreloadSize[0] = ((internalRomSize == 0 || internalRomSize > conf->romSize) ? conf->romSize : internalRomSize)-conf->dataToPreloadAddr[0];
 	}
   } else if (ndsArm7idst <= 0x02E80000) {
 	const bool binary3 = (REG_SCFG_EXT7 == 0 ? !dsiEnhancedMbk : (a7mbk6 != 0x00403000));
