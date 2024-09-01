@@ -609,6 +609,8 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		pageFilePath = "fat:/_nds/pagefile.sys";	
 	}
 
+	conf->romSize = getFileSize(conf->ndsPath);
+
 	char romTid[5] = {0};
 	u8 unitCode = 0;
 	u32 ndsArm9BinOffset = 0;
@@ -1560,7 +1562,6 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		cheatFilePath = "sd:/_nds/nds-bootstrap/cheatData.bin";
 	}
 
-	conf->romSize = getFileSize(conf->ndsPath);
 	conf->saveSize = getFileSize(conf->savPath);
 	conf->gbaRomSize = getFileSize(conf->gbaPath);
 	conf->gbaSaveSize = getFileSize(conf->gbaSavPath);
@@ -1943,7 +1944,6 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 	cheatFilePath = "fat:/_nds/nds-bootstrap/cheatData.bin";
 
-	conf->romSize = getFileSize(conf->ndsPath);
 	conf->saveSize = getFileSize(conf->savPath);
 	conf->apPatchSize = getFileSize(conf->apPatchPath);
 	conf->cheatSize = getFileSize(cheatFilePath.c_str());
