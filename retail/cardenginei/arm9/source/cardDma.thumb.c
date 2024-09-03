@@ -79,6 +79,7 @@ void endCardReadDma() {
 		return;
 	}
 
+	isDma = false;
 	if (ce9->patches->cardEndReadDmaRef) {
 		VoidFn cardEndReadDmaRef = (VoidFn)ce9->patches->cardEndReadDmaRef;
 		(*cardEndReadDmaRef)();
@@ -246,7 +247,6 @@ void continueCardReadDmaArm9() {
           //disableIrqMask(IRQ_DMA0 << dma);
           //resetRequestIrqMask(IRQ_DMA0 << dma);
           //disableDMA(dma);
-		  isDma = false;
           endCardReadDma();
 		}
     }
