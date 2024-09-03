@@ -940,14 +940,14 @@ bool dataToPreloadFound(const tNDSHeader* ndsHeader) {
 	return (dataToPreloadSize[0] > 0 && (dataToPreloadSize[0]/*+dataToPreloadSize[1]*/) <= (consoleModel > 0 ? (dsiModeConfirmed ? (ndsHeader->unitCode > 0 ? dev_CACHE_ADRESS_SIZE_TWLSDK : dev_CACHE_ADRESS_SIZE_DSIMODE) : dev_CACHE_ADRESS_SIZE) : (dsiModeConfirmed ? retail_CACHE_ADRESS_SIZE_DSIMODE : retail_CACHE_ADRESS_SIZE))-0x40000);
 }
 
-static void loadROMPartIntoRAM(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, aFile* file) {
+static void loadROMPartIntoRAM(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, const bool laterSdk, aFile* file) {
 	if (!dataToPreloadFound(ndsHeader)) {
 		return;
 	}
 
 	const bool dsiBios = scfgBios9i();
 
-	u32 dataLocation = getRomPartLocation(ndsHeader, (moduleParams->sdk_version < 0x2008000 && moduleParams->sdk_version != 0x20029A8), isSdk5(moduleParams), dsiBios);
+	u32 dataLocation = getRomPartLocation(ndsHeader, !laterSdk, isSdk5(moduleParams), dsiBios);
 	s32 preloadSizeEdit = dataToPreloadSize[0];
 
 	u32 romLocationChange = dataLocation;
@@ -957,7 +957,7 @@ static void loadROMPartIntoRAM(const tNDSHeader* ndsHeader, const module_params_
 		fileRead((char*)romLocationChange, file, romOffsetChange, romBlockSize);
 		romLocationChange += cacheBlockSize;
 
-		if (isSdk5(moduleParams) || (dsiBios && (moduleParams->sdk_version >= 0x2008000 || moduleParams->sdk_version == 0x20029A8))) {
+		if (isSdk5(moduleParams) || (dsiBios && laterSdk)) {
 			if (romLocationChange == 0x0C7C0000+cacheBlockSize) {
 				romLocationChange += (ndsHeader->unitCode > 0 ? 0x20000 : 0x40000)-cacheBlockSize;
 			} else if (ndsHeader->unitCode == 0) {
@@ -1051,13 +1051,13 @@ static void loadIOverlaysintoRAM(const tDSiHeader* dsiHeader, aFile* file, const
 	fileRead((char*)ROM_LOCATION_TWLSDK+((u32)dsiHeader->arm9iromOffset-romOffset), file, (u32)dsiHeader->arm9iromOffset+dsiHeader->arm9ibinarySize, ioverlaysSize);
 }
 
-static void loadROMintoRAM(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, aFile* romFile, aFile* savFile, const bool usesCloneboot) {
+static void loadROMintoRAM(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, const bool laterSdk, aFile* romFile, aFile* savFile, const bool usesCloneboot) {
 	sdmmc_set_ndma_slot(0);
 
 	const bool dsiBios = scfgBios9i();
 
 	// Load ROM into RAM
-	u32 romLocation = getRomLocation(ndsHeader, (moduleParams->sdk_version < 0x2008000 && moduleParams->sdk_version != 0x20029A8), isSdk5(moduleParams), dsiBios);
+	u32 romLocation = getRomLocation(ndsHeader, !laterSdk, isSdk5(moduleParams), dsiBios);
 
 	u32 romOffset = 0;
 	s32 romSizeEdit = baseRomSize;
@@ -1085,7 +1085,7 @@ static void loadROMintoRAM(const tNDSHeader* ndsHeader, const module_params_t* m
 
 		if (dsiWramAccess && !dsiWramMirrored && romLocationChange == (consoleModel > 0 ? 0x0E000000 : 0x0D000000)) {
 			romLocationChange = 0x03708000;
-		} else if (isSdk5(moduleParams) || (dsiBios && (moduleParams->sdk_version >= 0x2008000 || moduleParams->sdk_version == 0x20029A8))) {
+		} else if (isSdk5(moduleParams) || (dsiBios && laterSdk)) {
 			if (romLocationChange == 0x0C7C4000) {
 				romLocationChange += (ndsHeader->unitCode > 0 ? 0x1C000 : 0x3C000);
 			} else if (ndsHeader->unitCode == 0) {
@@ -1549,6 +1549,7 @@ int arm7_main(void) {
 
 	bool foundModuleParams;
 	module_params_t* moduleParams = loadModuleParams(&dsiHeaderTemp.ndshdr, &foundModuleParams);
+	const bool laterSdk = ((moduleParams->sdk_version >= 0x2008000 && moduleParams->sdk_version != 0x2012774) || moduleParams->sdk_version == 0x20029A8);
 	ltd_module_params_t* ltdModuleParams = (ltd_module_params_t*)patchOffsetCache.ltdModuleParamsOffset;
 	if (dsiHeaderTemp.ndshdr.unitCode > 0) {
 		if (!ltdModuleParams) {
@@ -1623,7 +1624,7 @@ int arm7_main(void) {
 		extern u32* lastClusterCacheUsed;
 		extern u32 clusterCache;
 
-		u32 add = (moduleParams->sdk_version >= 0x2008000 || moduleParams->sdk_version == 0x20029A8) ? 0xC8000 : 0xE8000; // 0x027C8000 : 0x027E8000
+		u32 add = laterSdk ? 0xC8000 : 0xE8000; // 0x027C8000 : 0x027E8000
 		if (memcmp(romTid, "HND", 3) == 0) {
 			add = 0x108000; // 0x02808000
 		}
@@ -2072,7 +2073,6 @@ int arm7_main(void) {
 				errorOutput();
 			}
 		} else {
-			const bool laterSdk = (moduleParams->sdk_version >= 0x2008000 || moduleParams->sdk_version == 0x20029A8);
 			ce9Location = dsiWramAccess ? CARDENGINEI_ARM9_LOCATION_DSI_WRAM : (!laterSdk ? CARDENGINEI_ARM9_LOCATION2 : CARDENGINEI_ARM9_LOCATION);
 			if (memcmp(romTid, "HND", 3) == 0) {
 				ce9Location = CARDENGINEI_ARM9_LOCATION_DLP;
@@ -2172,7 +2172,7 @@ int arm7_main(void) {
 		}
 
 		if (ROMinRAM) {
-			loadROMintoRAM(ndsHeader, moduleParams, romFile, savFile, usesCloneboot);
+			loadROMintoRAM(ndsHeader, moduleParams, laterSdk, romFile, savFile, usesCloneboot);
 			if (ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed) {
 				loadIOverlaysintoRAM(&dsiHeaderTemp, romFile, usesCloneboot);
 			}
@@ -2185,7 +2185,7 @@ int arm7_main(void) {
 		}
 
 		if (useApPatch) {
-			if (applyIpsPatch(ndsHeader, (u8*)IPS_LOCATION, (*(u8*)(IPS_LOCATION+apPatchSize-1) == 0xA9), (moduleParams->sdk_version < 0x2008000 && moduleParams->sdk_version != 0x20029A8), isSdk5(moduleParams), ROMinRAM, usesCloneboot, cacheBlockSize)) {
+			if (applyIpsPatch(ndsHeader, (u8*)IPS_LOCATION, (*(u8*)(IPS_LOCATION+apPatchSize-1) == 0xA9), !laterSdk, isSdk5(moduleParams), ROMinRAM, usesCloneboot, cacheBlockSize)) {
 				dbg_printf("AP-fix applied\n");
 			} else {
 				dbg_printf("Failed to apply AP-fix\n");
@@ -2217,7 +2217,7 @@ int arm7_main(void) {
 		}
 
 		if (!ROMinRAM && ((ROMsupportsDsiMode(ndsHeader) && !isDSiWare && (!dsiModeConfirmed || consoleModel > 0)) || !ROMsupportsDsiMode(ndsHeader))) {
-			loadROMPartIntoRAM(ndsHeader, moduleParams, romFile);
+			loadROMPartIntoRAM(ndsHeader, moduleParams, laterSdk, romFile);
 		}
 
 		if (gameOnFlashcard && isDSiWare) {

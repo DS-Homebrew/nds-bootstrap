@@ -1183,7 +1183,7 @@ int arm7_main(void) {
 		dbg_printf("Music pack found!\n");
 	}
 
-	const bool laterSdk = (moduleParams->sdk_version >= 0x2008000 || moduleParams->sdk_version == 0x20029A8);
+	const bool laterSdk = ((moduleParams->sdk_version >= 0x2008000 && moduleParams->sdk_version != 0x2012774) || moduleParams->sdk_version == 0x20029A8);
 	bool wramUsed = false;
 	u32 fatTableSize = 0;
 	u32 fatTableSizeNoExp = !laterSdk ? 0x19C00 : 0x1A400;

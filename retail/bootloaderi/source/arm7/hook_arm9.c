@@ -339,7 +339,7 @@ int hookNdsRetailArm9(
 	extern u32 dataToPreloadSize[2];
 	extern bool dataToPreloadFound(const tNDSHeader* ndsHeader);
 	const char* romTid = getRomTid(ndsHeader);
-	const bool laterSdk = (moduleParams->sdk_version >= 0x2008000 || moduleParams->sdk_version == 0x20029A8);
+	const bool laterSdk = ((moduleParams->sdk_version >= 0x2008000 && moduleParams->sdk_version != 0x2012774) || moduleParams->sdk_version == 0x20029A8);
 
 	ce9->fileCluster            = fileCluster;
 	ce9->saveCluster            = saveCluster;
