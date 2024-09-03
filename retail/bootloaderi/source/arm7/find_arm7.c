@@ -72,8 +72,9 @@ static const u32 swiGetPitchTableSignature4Alt4[3]  = {0xE59FC000, 0xE12FFF1C, 0
 static const u32 swiGetPitchTableSignature4Alt5[3]  = {0xE59FC000, 0xE12FFF1C, 0x038035ED};
 static const u32 swiGetPitchTableSignature4Alt6[3]  = {0xE59FC000, 0xE12FFF1C, 0x03803715};
 static const u32 swiGetPitchTableSignature4Alt7[3]  = {0xE59FC000, 0xE12FFF1C, 0x03803829};
-static const u32 swiGetPitchTableSignature4Alt8[3]  = {0xE59FC000, 0xE12FFF1C, 0x03803ED5};
-static const u32 swiGetPitchTableSignature4Alt9[3]  = {0xE59FC000, 0xE12FFF1C, 0x03803F15};
+static const u32 swiGetPitchTableSignature4Alt8[3]  = {0xE59FC000, 0xE12FFF1C, 0x03803DC1};
+static const u32 swiGetPitchTableSignature4Alt9[3]  = {0xE59FC000, 0xE12FFF1C, 0x03803ED5};
+static const u32 swiGetPitchTableSignature4Alt10[3] = {0xE59FC000, 0xE12FFF1C, 0x03803F15};
 static const u32 swiGetPitchTableSignature5[4]      = {0x781A4B06, 0xD3030791, 0xD20106D1, 0x1A404904};
 
 // User data address
@@ -964,7 +965,6 @@ u32* findSwiGetPitchTableOffset(const tNDSHeader* ndsHeader, const module_params
 			dbg_printf("swiGetPitchTable SDK 4 call alt 8 not found\n");
 		}
 	}
-
 	if (!swiGetPitchTableOffset) {
 		swiGetPitchTableOffset = findOffset(
 			(u32*)ndsHeader->arm7destination, newArm7binarySize > 0x10000 ? 0x10000 : newArm7binarySize,
@@ -974,6 +974,17 @@ u32* findSwiGetPitchTableOffset(const tNDSHeader* ndsHeader, const module_params
 			dbg_printf("swiGetPitchTable SDK 4 call alt 9 found\n");
 		} else {
 			dbg_printf("swiGetPitchTable SDK 4 call alt 9 not found\n");
+		}
+	}
+	if (!swiGetPitchTableOffset) {
+		swiGetPitchTableOffset = findOffset(
+			(u32*)ndsHeader->arm7destination, newArm7binarySize > 0x10000 ? 0x10000 : newArm7binarySize,
+			swiGetPitchTableSignature4Alt10, 3
+		);
+		if (swiGetPitchTableOffset) {
+			dbg_printf("swiGetPitchTable SDK 4 call alt 10 found\n");
+		} else {
+			dbg_printf("swiGetPitchTable SDK 4 call alt 10 not found\n");
 		}
 	}
 
