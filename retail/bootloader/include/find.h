@@ -88,6 +88,8 @@ u32* findFileIoSeekOffset(const u32* fileIoCloseOffset, const module_params_t* m
 u16* findFileIoSeekOffsetThumb(const u16* fileIoCloseOffset);
 u32* findFileIoReadOffset(const u32* fileIoSeekOffset, const module_params_t* moduleParams);
 u16* findFileIoReadOffsetThumb(const u16* fileIoSeekOffset, const module_params_t* moduleParams);
+u32* findCardEndReadDma(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb, const u32* cardReadDmaEndOffset, u32* offsetDmaHandler);
+u32* findCardSetDma(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb);
 u32* findResetOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool* softResetMb);
 u32* findNandTmpJumpFuncOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
 u32* findTwlSleepModeEndOffset(const tNDSHeader* ndsHeader);

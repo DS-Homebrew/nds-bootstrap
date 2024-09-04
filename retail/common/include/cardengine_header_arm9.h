@@ -130,6 +130,7 @@ typedef struct cardengineArm9Patches {
 	u32* card_pull_out_arm9; // Unused
 	u32* card_id_arm9;
 	u32* card_dma_arm9;
+	u32* card_set_dma_arm9;
 	u32* nand_read_arm9;
 	u32* nand_write_arm9;
 	u32* ndmaCopy;
@@ -152,7 +153,7 @@ typedef struct cardengineArm9Patches {
 	u32* cardStructArm9;
 	u32* card_pull;
 	u32* cacheFlushRef;
-	u32* readCachedRef;
+	u32* cardEndReadDmaRef;
 	u32* reset_arm9;
 	u32* rumble_arm9[2];
 	u32 needFlushDCCache;
@@ -170,12 +171,14 @@ typedef struct cardengineArm9ThumbPatches {
     u32* card_pull_out_arm9; // Unused
     u32* card_id_arm9;
     u32* card_dma_arm9;
+	u32* card_set_dma_arm9;
     u32* nand_read_arm9;
     u32* nand_write_arm9;
     u32* cardStructArm9;
     u32* card_pull;
     u32* cacheFlushRef;
     u32* readCachedRef;
+	u32* cardEndReadDmaRef;
     u32* reset_arm9;
 } cardengineArm9ThumbPatches;
 
@@ -231,6 +234,8 @@ typedef struct cardengineArm9 {
 	u32 overlaysSrc;
 	u32 overlaysSize;
 	u32 ioverlaysSize;
+	u32 arm9iromOffset;
+	u32 arm9ibinarySize;
 	u32 romPaddingSize;
 	u32 romLocation;
 	u32 rumbleFrames[2];

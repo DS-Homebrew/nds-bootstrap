@@ -274,6 +274,9 @@ static void patchCardReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, c
 		if (cardReadDmaStartOffset) {
 			patchOffsetCache.cardReadDmaOffset = cardReadDmaStartOffset;
 		}
+		if (cardReadDmaEndOffset) {
+			patchOffsetCache.cardReadDmaEndOffset = cardReadDmaEndOffset;
+		}
 		patchOffsetCache.cardReadDmaChecked = true;
 	}
 	if (!cardReadDmaStartOffset) {
@@ -281,10 +284,160 @@ static void patchCardReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, c
 	}
 	// Patch
 	u32* cardReadDmaPatch = (usesThumb ? ce9->thumbPatches->card_dma_arm9 : ce9->patches->card_dma_arm9);
-	tonccpy(cardReadDmaStartOffset, cardReadDmaPatch, usesThumb ? 4 : 8);
+	tonccpy(cardReadDmaStartOffset, cardReadDmaPatch, 0x40);
     dbg_printf("cardReadDma location : ");
     dbg_hexa((u32)cardReadDmaStartOffset);
     dbg_printf("\n\n");
+}
+
+static bool patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
+	const char* romTid = getRomTid(ndsHeader);
+
+	if (strncmp(romTid, "AJS", 3) == 0 // Jump Super Stars
+	 || strncmp(romTid, "AJU", 3) == 0 // Jump Ultimate Stars
+	 || strncmp(romTid, "AWD", 3) == 0 // Diddy Kong Racing
+	 || strncmp(romTid, "CP3", 3) == 0	// Viva Pinata
+	 || strncmp(romTid, "BO5", 3) == 0 // Golden Sun: Dark Dawn
+	 || strncmp(romTid, "Y8L", 3) == 0 // Golden Sun: Dark Dawn (Demo Version)
+	 || strncmp(romTid, "B8I", 3) == 0 // Spider-Man: Edge of Time
+	 || strncmp(romTid, "TAM", 3) == 0 // The Amazing Spider-Man
+	 || (strncmp(romTid, "V2G", 3) == 0 /* && !dsiModeConfirmed */) // Mario vs. Donkey Kong: Mini-Land Mayhem (DS mode)
+	 || !cardReadDMA) return false;
+
+    u32* offset = patchOffsetCache.cardEndReadDmaOffset;
+    u32 offsetDmaHandler = patchOffsetCache.dmaHandlerOffset;
+	  if (!patchOffsetCache.cardEndReadDmaChecked) {
+		if (!patchOffsetCache.cardReadDmaEndOffset) {
+			u32* cardReadDmaEndOffset = findCardReadDmaEndOffset(ndsHeader, moduleParams);
+			if (!cardReadDmaEndOffset && usesThumb) {
+				cardReadDmaEndOffset = (u32*)findCardReadDmaEndOffsetThumb(ndsHeader);
+			}
+			if (cardReadDmaEndOffset) {
+				patchOffsetCache.cardReadDmaEndOffset = cardReadDmaEndOffset;
+			}
+		}
+		offset = findCardEndReadDma(ndsHeader,moduleParams,usesThumb,patchOffsetCache.cardReadDmaEndOffset,&offsetDmaHandler);
+		if (offset) {
+			patchOffsetCache.cardEndReadDmaOffset = offset;
+			patchOffsetCache.dmaHandlerOffset = offsetDmaHandler;
+		}
+		patchOffsetCache.cardEndReadDmaChecked = true;
+	  }
+    if(offset) {
+      dbg_printf("\nDMA CARD READ METHOD ACTIVE\n");
+    dbg_printf("cardEndReadDma location : ");
+    dbg_hexa((u32)offset);
+    dbg_printf("\n\n");
+      if(!isSdk5(moduleParams)) {
+        // SDK1-4        
+        if(usesThumb) {
+            u16* thumbOffset = (u16*)offset;
+            u16* thumbOffsetStartFunc = (u16*)offset;
+			bool lrOnly = false;
+            for (int i = 0; i <= 18; i++) {
+                thumbOffsetStartFunc--;
+				if (*thumbOffsetStartFunc==0xB5F0) {
+					//dbg_printf("\nthumbOffsetStartFunc : ");
+					//dbg_hexa(*thumbOffsetStartFunc);
+					lrOnly = true;
+					break;
+				}
+            }
+            thumbOffset--;
+			if (lrOnly) {
+				thumbOffset--;
+				thumbOffset[0] = *thumbOffsetStartFunc; // push	{r4-r7, lr}
+				thumbOffset[1] = 0xB081; // SUB SP, SP, #4
+			} else {
+				*thumbOffset = 0xB5F8; // push	{r3-r7, lr}
+			}
+            ce9->thumbPatches->cardEndReadDmaRef = (u32*)thumbOffset;
+        } else {
+            u32* armOffset = (u32*)offset;
+            u32* armOffsetStartFunc = (u32*)offset;
+			bool lrOnly = false;
+            for (int i = 0; i <= 16; i++) {
+                armOffsetStartFunc--;
+				if (*armOffsetStartFunc==0xE92D4000 || *armOffsetStartFunc==0xE92D4030 || *armOffsetStartFunc==0xE92D40F0) {
+					//dbg_printf("\narmOffsetStartFunc : ");
+					//dbg_hexa(*armOffsetStartFunc);
+					lrOnly = true;
+					break;
+				}
+            }
+            armOffset--;
+			if (lrOnly) {
+				armOffset--;
+				armOffset[0] = *armOffsetStartFunc; // "STMFD SP!, {LR}", "STMFD SP!, {R4,R5,LR}", or "STMFD SP!, {R4-R7,LR}"
+				armOffset[1] = 0xE24DD004; // SUB SP, SP, #4
+				if (offsetDmaHandler && *armOffsetStartFunc==0xE92D40F0) {
+					offsetDmaHandler += 14*sizeof(u32); // Relocation fix
+				}
+			} else {
+				*armOffset = 0xE92D40F8; // STMFD SP!, {R3-R7,LR}
+			}
+            ce9->patches->cardEndReadDmaRef = offsetDmaHandler==0 ? armOffset : (u32*)offsetDmaHandler;
+        }
+      } else {
+        // SDK5 
+        if(usesThumb) {
+            u16* thumbOffset = (u16*)offset;
+            while(*thumbOffset!=0xB508) { // push	{r3, lr}
+                thumbOffset--;
+            }
+            ce9->thumbPatches->cardEndReadDmaRef = (u32*)thumbOffset;
+            thumbOffset[1] = 0x46C0; // NOP
+            thumbOffset[2] = 0x46C0; // NOP
+            thumbOffset[3] = 0x46C0; // NOP
+            thumbOffset[4] = 0x46C0; // NOP
+        } else  {
+            u32* armOffset = (u32*)offset;
+            armOffset--;
+			*armOffset = 0xE92D4008; // STMFD SP!, {R3,LR}
+            ce9->patches->cardEndReadDmaRef = armOffset;
+        }  
+	  }
+	  return true;
+    }
+	return false;
+}
+
+static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
+	const char* romTid = getRomTid(ndsHeader);
+
+	if (strncmp(romTid, "AJS", 3) == 0 // Jump Super Stars
+	 || strncmp(romTid, "AJU", 3) == 0 // Jump Ultimate Stars
+	 || strncmp(romTid, "AWD", 3) == 0 // Diddy Kong Racing
+	 || strncmp(romTid, "CP3", 3) == 0	// Viva Pinata
+	 || strncmp(romTid, "BO5", 3) == 0 // Golden Sun: Dark Dawn
+	 || strncmp(romTid, "Y8L", 3) == 0 // Golden Sun: Dark Dawn (Demo Version)
+	 || strncmp(romTid, "B8I", 3) == 0 // Spider-Man: Edge of Time
+	 || strncmp(romTid, "TAM", 3) == 0 // The Amazing Spider-Man
+	 || (strncmp(romTid, "V2G", 3) == 0 /* && !dsiModeConfirmed */) // Mario vs. Donkey Kong: Mini-Land Mayhem (DS mode)
+	 || !cardReadDMA) return false;
+
+	dbg_printf("\npatchCardSetDma\n");           
+
+    u32* setDmaoffset = patchOffsetCache.cardSetDmaOffset;
+    if (!patchOffsetCache.cardSetDmaChecked) {
+		setDmaoffset = findCardSetDma(ndsHeader,moduleParams,usesThumb);
+		if (setDmaoffset) {
+			patchOffsetCache.cardSetDmaOffset = setDmaoffset;
+		}
+		patchOffsetCache.cardSetDmaChecked = true;
+    }
+    if(setDmaoffset) {
+      dbg_printf("\nDMA CARD SET METHOD ACTIVE\n");       
+    dbg_printf("cardSetDma location : ");
+    dbg_hexa((u32)setDmaoffset);
+    dbg_printf("\n\n");
+      u32* cardSetDmaPatch = (usesThumb ? ce9->thumbPatches->card_set_dma_arm9 : ce9->patches->card_set_dma_arm9);
+	  tonccpy(setDmaoffset, cardSetDmaPatch, 0x30);
+
+      return true;  
+    }
+
+    return false; 
 }
 
 static void patchReset(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {    
@@ -2087,15 +2240,18 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 		}
 	}
 
-	patchCardReadDma(ce9, ndsHeader, moduleParams, usesThumb);
+	if (!patchCardSetDma(ce9, ndsHeader, moduleParams, usesThumb)) {
+		patchCardReadDma(ce9, ndsHeader, moduleParams, usesThumb);
+	}
+	if (!patchCardEndReadDma(ce9, ndsHeader, moduleParams, usesThumb)) {
+		randomPatch(ndsHeader, moduleParams);
+		randomPatch5Second(ndsHeader, moduleParams);
+	}
 
 	//patchDownloadplay(ndsHeader);
 
 	patchReset(ce9, ndsHeader, moduleParams);
 	patchResetTwl(ce9, ndsHeader, moduleParams);
-
-	randomPatch(ndsHeader, moduleParams);
-	randomPatch5Second(ndsHeader, moduleParams);
 
 	if (strcmp(romTid, "UBRP") == 0) {
 		operaRamPatch();

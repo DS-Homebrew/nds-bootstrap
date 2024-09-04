@@ -7504,7 +7504,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x020B98AC, (u32)dsiSaveClose);
 		*(u32*)0x020B9B94 = 0xE1A00000; // nop
 	}
-
+#else
 	// JellyCar 2 (USA)
 	else if (strcmp(romTid, "KJYE") == 0) {
 		if (saveOnFlashcard) {
@@ -7826,7 +7826,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02042DB4, (u32)dsiSaveRead); // dsiSaveReadAsync
 		*(u32*)0x0205063C = 0xE12FFF1E; // bx lr (Skip NAND error checking)
 	}
-#else
+
 	// A Kappa's Trail (USA)
 	else if (strcmp(romTid, "KPAE") == 0 && saveOnFlashcard) {
 		tonccpy((u32*)0x0201A020, dsiSaveGetResultCode, 0xC);

@@ -194,23 +194,7 @@ int hookNdsRetailArm7(
 	patchOffsetCache.a7IrqHandlerOffset = hookLocation;
 
 	u32* vblankHandler = hookLocation;
-	//u32* ipcSyncHandler = hookLocation + 16;
-
-	/*hookAccel = hookAccelIPCHomebrew2007((u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize);
-
-	if (!hookAccel) {
-		nocashMessage("ACCEL_IPC_2007_ERR");
-	} else {
-		nocashMessage("ACCEL_IPC_2007_OK");
-	}
-
-	hookAccel = hookAccelIPCHomebrew2010((u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize);
-
-	if (!hookAccel) {
-		nocashMessage("ACCEL_IPC_2010_ERR");
-	} else {
-		nocashMessage("ACCEL_IPC_2010_OK");
-	}*/
+	u32* ipcSyncHandler = hookLocation + 16;
 
 	const char* romTid = getRomTid(ndsHeader);
 	extern bool maxHeapOpen;
@@ -223,7 +207,7 @@ int hookNdsRetailArm7(
 	}
 
 	ce7->intr_vblank_orig_return = *vblankHandler;
-	//ce7->intr_fifo_orig_return   = *ipcSyncHandler;
+	ce7->intr_fifo_orig_return   = *ipcSyncHandler;
 	ce7->cheatEngineAddr         = cheatEngineAddr;
 	ce7->musicBuffer = maxHeapOpen ? 0x027F8000 : 0x027F0000;
 	ce7->moduleParams            = moduleParams;
@@ -238,6 +222,7 @@ int hookNdsRetailArm7(
 	ce7->RumblePakType           = RumblePakType;
 
 	*vblankHandler = ce7->patches->vblankHandler;
+	*ipcSyncHandler = ce7->patches->fifoHandler;
 
 	aFile cheatFile; getFileFromCluster(&cheatFile, cheatFileCluster);
 	aFile apPatchFile; getFileFromCluster(&apPatchFile, apPatchFileCluster);

@@ -50,6 +50,8 @@
 #include "card.h"
 //#endif
 
+#define dmaReadLen 512
+
 extern cardengineArm9* volatile ce9;
 
 extern vu32* volatile sharedAddr;
@@ -68,13 +70,12 @@ extern void callEndReadDmaThumb(void);
 extern void disableIrqMask(u32 mask);
 
 bool isDma = false;
-bool dmaOn = true;
 bool dmaDirectRead = false;
 #ifndef TWLSDK
 static bool dataSplit = false;
 
 void endCardReadDma() {
-	if (dmaDirectRead && dmaOn && (ndmaBusy(0) || (dataSplit && ndmaBusy(1)))) {
+	if (dmaDirectRead && (ndmaBusy(0) || (dataSplit && ndmaBusy(1)))) {
 		IPC_SendSync(0x3);
 		return;
 	}
@@ -95,13 +96,16 @@ extern void enableIPC_SYNC(void);
 
 #ifndef DLDI
 bool dmaReadOnArm7 = false;
+#endif
 bool dmaReadOnArm9 = false;
 
+#ifndef DLDI
 extern int allocateCacheSlot(void);
 extern int getSlotForSector(u32 sector);
 //extern int getSlotForSectorManual(int i, u32 sector);
 extern vu8* getCacheAddress(int slot);
 extern void updateDescriptor(int slot, u32 sector);
+#endif
 
 static inline bool checkArm7(void) {
 	// IPC_SendSync(0x4);
@@ -124,7 +128,9 @@ void continueCardReadDmaArm9() {
         vu32* volatile cardStruct = (vu32*)ce9->cardStruct0;
         //u32	dma = cardStruct[3]; // dma channel
 
+		#ifndef DLDI
 		u32 commandRead=0x025FFB0A;
+		#endif
 
 		u32 src = ((ce9->valueBits & isSdk5) ? dmaParams[3] : cardStruct[0]);
 		u8* dst = ((ce9->valueBits & isSdk5) ? (u8*)(dmaParams[4]) : (u8*)(cardStruct[1]));
@@ -145,6 +151,7 @@ void continueCardReadDmaArm9() {
 		dst = ((ce9->valueBits & isSdk5) ? (u8*)(dmaParams[4]) : (u8*)(cardStruct[1]));
 		len = ((ce9->valueBits & isSdk5) ? dmaParams[5] : cardStruct[2]);
 
+		#ifndef DLDI
 		u32 sector = (src/ce9->cacheBlockSize)*ce9->cacheBlockSize;
 
 		#ifdef ASYNCPF
@@ -249,9 +256,22 @@ void continueCardReadDmaArm9() {
           //disableDMA(dma);
           endCardReadDma();
 		}
+		#else
+		if (len > 0) {
+			currentLen = (len > dmaReadLen) ? dmaReadLen : len;
+
+			fileRead((char*)dst, romFile, src, currentLen);
+
+			dmaReadOnArm9 = true;
+			IPC_SendSync(0x3);
+		} else {
+			endCardReadDma();
+		}
+		#endif
     }
 }
 
+#ifndef DLDI
 void continueCardReadDmaArm7() {
     if(dmaReadOnArm7) {
         if(!checkArm7()) return;
@@ -290,6 +310,7 @@ void continueCardReadDmaArm7() {
 		// }
 	}
 }
+#endif
 #endif
 
 void cardSetDma(u32 * params) {
@@ -344,7 +365,7 @@ void cardSetDma(u32 * params) {
 		}*/
 		romPart = (ce9->romPartSize > 0 && src >= ce9->romPartSrc && src < ce9->romPartSrc+ce9->romPartSize);
 	}
-	if (dmaOn && ((ce9->valueBits & ROMinRAM) || romPart)) {
+	if ((ce9->valueBits & ROMinRAM) || romPart) {
 		dmaDirectRead = true;
 
 		disableIrqMask(IRQ_CARD);
@@ -380,7 +401,7 @@ void cardSetDma(u32 * params) {
 
 		IPC_SendSync(0x3);
 		return;
-	} else if (!dmaOn || ce9->patches->sleepRef || ce9->thumbPatches->sleepRef) {
+	} else if (ce9->patches->sleepRef || ce9->thumbPatches->sleepRef) {
 		cardRead(NULL, dst, src, len);
 		endCardReadDma();
 		return;
@@ -393,6 +414,7 @@ void cardSetDma(u32 * params) {
 
 	enableIPC_SYNC();
 
+	#ifndef DLDI
 	const u32 commandRead=0x025FFB0A;
 	u32 sector = (src/ce9->cacheBlockSize)*ce9->cacheBlockSize;
 	//u32 page = (src / 512) * 512;
@@ -507,32 +529,26 @@ void cardSetDma(u32 * params) {
 
 		IPC_SendSync(0x3);
 	// }
-	#endif
-}
-#else
-void cardSetDma(u32 * params) {
-	#ifdef TWLSDK
-	/* u32 src = params[3];
-	u8* dst = (u8*)params[4];
-	u32 len = params[5]; */
 	#else
-	isDma = true;
-	dmaDirectRead = false;
+	/* sysSetCardOwner(false);	// Give Slot-1 access to arm7
 
-	vu32* volatile cardStruct = (vu32*)ce9->cardStruct0;
+	// Write the command
+	sharedAddr[0] = (vu32)dst;
+	sharedAddr[1] = len;
+	sharedAddr[2] = src;
+	sharedAddr[3] = commandRead;
 
-	u32 src = ((ce9->valueBits & isSdk5) ? params[3] : cardStruct[0]);
-	u8* dst = ((ce9->valueBits & isSdk5) ? (u8*)(params[4]) : (u8*)(cardStruct[1]));
-	u32 len = ((ce9->valueBits & isSdk5) ? params[5] : cardStruct[2]);
+	dmaReadOnArm7 = true; */
 
-	disableIrqMask(IRQ_CARD);
-	disableIrqMask(IRQ_CARD_LINE);
+	currentLen = (len > dmaReadLen) ? dmaReadLen : len;
 
-	cardRead(NULL, dst, src, len);
-	endCardReadDma();
-	#endif
+	fileRead((char*)dst, romFile, src, currentLen);
+
+	dmaReadOnArm9 = true;
+	IPC_SendSync(0x3);
+	#endif // DLDI
+	#endif // TWLSDK
 }
-#endif
 
 extern bool isNotTcm(u32 address, u32 len);
 

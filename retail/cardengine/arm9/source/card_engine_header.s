@@ -78,6 +78,10 @@ overlaysSize:
 	.word	0x00000000
 ioverlaysSize:
 	.word	0x00000000
+arm9iromOffset:
+	.word	0x00000000
+arm9ibinarySize:
+	.word	0x00000000
 romPaddingSize:
 	.word	0x00000000
 romLocation:
@@ -142,6 +146,7 @@ patches:
 .word	card_pull_out_arm9
 .word	card_id_arm9
 .word	card_dma_arm9
+.word	card_set_dma_arm9
 .word   nand_read_arm9
 .word   nand_write_arm9
 #ifdef NODSIWARE
@@ -184,7 +189,7 @@ patches:
 .word	cardStructArm9
 .word   card_pull
 .word   cacheFlushRef
-.word   terminateForPullOutRef
+.word   0x0 @cardEndReadDmaRef
 .word   reset_arm9
 #ifdef NODSIWARE
 .word   0x0
@@ -203,12 +208,14 @@ thumbPatches:
 .word	thumb_card_pull_out_arm9
 .word	thumb_card_id_arm9
 .word	thumb_card_dma_arm9
+.word	thumb_card_set_dma_arm9
 .word   thumb_nand_read_arm9
 .word   thumb_nand_write_arm9
 .word	cardStructArm9
 .word   thumb_card_pull
 .word   cacheFlushRef
-.word   terminateForPullOutRef
+thumbCardEndReadDmaRef:
+.word   0x0 @cardEndReadDmaRef
 .word   thumb_reset_arm9
 
 @---------------------------------------------------------------------------------
@@ -219,8 +226,6 @@ card_read_arm9:
 cardStructArm9:
 .word    0x00000000     
 cacheFlushRef:
-.word    0x00000000  
-terminateForPullOutRef:
 .word    0x00000000  
 cacheRef:
 .word    0x00000000  
@@ -249,8 +254,15 @@ cardIdData:
 @---------------------------------------------------------------------------------
 card_dma_arm9:
 @---------------------------------------------------------------------------------
-	mov r0, #0
-	bx      lr
+	ldr		pc, =cardReadDma
+.pool
+@---------------------------------------------------------------------------------
+
+@---------------------------------------------------------------------------------
+card_set_dma_arm9:
+@---------------------------------------------------------------------------------
+	ldr		pc, =cardSetDma
+.pool
 @---------------------------------------------------------------------------------
 
 @---------------------------------------------------------------------------------
@@ -273,8 +285,23 @@ cardIdDataT:
 @---------------------------------------------------------------------------------
 thumb_card_dma_arm9:
 @---------------------------------------------------------------------------------
-	mov r0, #0
-	bx      lr		
+	push {r6, lr}
+	ldr r6, =cardReadDma
+	blx r6
+	pop	{r6, pc}
+.pool
+.balign	4
+@---------------------------------------------------------------------------------
+
+@---------------------------------------------------------------------------------
+thumb_card_set_dma_arm9:
+@---------------------------------------------------------------------------------
+	push {r6, lr}
+	ldr r6, =cardSetDma
+	blx r6
+	pop {r6, pc}
+.pool
+.balign	4
 @---------------------------------------------------------------------------------
 
 @---------------------------------------------------------------------------------
@@ -504,6 +531,31 @@ reset_arm9:
     ldr pc,= reset
 .pool
 @---------------------------------------------------------------------------------
+
+.global callEndReadDmaThumb
+.type	callEndReadDmaThumb STT_FUNC
+callEndReadDmaThumb:
+    push	{r1-r11, lr}
+    ldr     r6, thumbCardEndReadDmaRef
+    add     r6, #1
+	blx		r6
+    pop	    {r1-r11, pc}
+
+.global disableIrqMask
+.type	disableIrqMask STT_FUNC
+disableIrqMask:
+	PUSH {R7, LR}
+    LDR             R7, =0x4000208
+    MOV             R2, #0
+    LDRH            R3, [R7]
+    MVN             R1, R0
+    STRH            R2, [R7]
+    LDR             R0, [R7,#8]
+    AND             R1, R0, R1
+    STR             R1, [R7,#8]
+    LDRH            R1, [R7]
+    STRH            R3, [R7]
+	POP {R7, PC}
 
 #ifndef NODSIWARE
 @---------------------------------------------------------------------------------

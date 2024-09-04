@@ -661,7 +661,7 @@ bool isNotTcm(u32 address, u32 len) {
     // test data not in DTCM
     && (address < base || address> base+0x4000)
     && (address+len < base || address+len> base+0x4000);
-}  
+}
 
 #ifndef TWLSDK
 #ifndef GSDD
@@ -928,7 +928,7 @@ static void dsiSaveInit(void) {
 	u32 existByte = 0;
 
 	int oldIME = enterCriticalSection();
-	u16 exmemcnt = REG_EXMEMCNT;
+	const u16 exmemcnt = REG_EXMEMCNT;
 	sysSetCardOwner(true);	// Give Slot-1 access to arm9
 	fileRead((char*)&dsiSaveSize, savFile, ce9->saveSize-4, 4);
 	fileRead((char*)&existByte, savFile, ce9->saveSize-8, 4);
@@ -993,7 +993,7 @@ bool dsiSaveCreate(const char* path, u32 permit) {
 		u32 existByte = 1;
 
 		int oldIME = enterCriticalSection();
-		u16 exmemcnt = REG_EXMEMCNT;
+		const u16 exmemcnt = REG_EXMEMCNT;
 		sysSetCardOwner(true);	// Give Slot-1 access to arm9
 		fileWrite((char*)&existByte, savFile, ce9->saveSize-8, 4);
 		REG_EXMEMCNT = exmemcnt;
@@ -1020,7 +1020,7 @@ bool dsiSaveDelete(const char* path) {
 		dsiSaveSize = 0;
 
 		int oldIME = enterCriticalSection();
-		u16 exmemcnt = REG_EXMEMCNT;
+		const u16 exmemcnt = REG_EXMEMCNT;
 		sysSetCardOwner(true);	// Give Slot-1 access to arm9
 		fileWrite((char*)&dsiSaveSize, savFile, ce9->saveSize-4, 4);
 		fileWrite((char*)&dsiSaveSize, savFile, ce9->saveSize-8, 4);
@@ -1080,7 +1080,7 @@ u32 dsiSaveSetLength(void* ctx, s32 len) {
 	dsiSaveSize = len;
 
 	int oldIME = enterCriticalSection();
-	u16 exmemcnt = REG_EXMEMCNT;
+	const u16 exmemcnt = REG_EXMEMCNT;
 	sysSetCardOwner(true);	// Give Slot-1 access to arm9
 	bool res = fileWrite((char*)&dsiSaveSize, savFile, ce9->saveSize-4, 4);
 	dsiSaveResultCode = res ? 0 : 1;
@@ -1236,7 +1236,7 @@ s32 dsiSaveRead(void* ctx, void* dst, u32 len) {
 	}
 
 	int oldIME = enterCriticalSection();
-	u16 exmemcnt = REG_EXMEMCNT;
+	const u16 exmemcnt = REG_EXMEMCNT;
 	sysSetCardOwner(true);	// Give Slot-1 access to arm9
 	bool res = fileRead(dst, sharedFontOpened ? sharedFontFile : savFile, dsiSaveSeekPos, len);
 	dsiSaveResultCode = res ? 0 : 1;
@@ -1269,7 +1269,7 @@ s32 dsiSaveWrite(void* ctx, void* src, s32 len) {
 	}
 
 	int oldIME = enterCriticalSection();
-	u16 exmemcnt = REG_EXMEMCNT;
+	const u16 exmemcnt = REG_EXMEMCNT;
 	sysSetCardOwner(true);	// Give Slot-1 access to arm9
 	bool res = fileWrite(src, savFile, dsiSaveSeekPos, len);
 	dsiSaveResultCode = res ? 0 : 1;
@@ -1281,7 +1281,7 @@ s32 dsiSaveWrite(void* ctx, void* src, s32 len) {
 			dsiSaveSize = dsiSaveSeekPos+len;
 
 			int oldIME = enterCriticalSection();
-			u16 exmemcnt = REG_EXMEMCNT;
+			const u16 exmemcnt = REG_EXMEMCNT;
 			sysSetCardOwner(true);	// Give Slot-1 access to arm9
 			fileWrite((char*)&dsiSaveSize, savFile, ce9->saveSize-4, 4);
 			REG_EXMEMCNT = exmemcnt;
@@ -1401,21 +1401,14 @@ void myIrqHandlerIPC(void) {
 			extern bool dmaDirectRead;
 		if (dmaDirectRead) {
 			endCardReadDma();
-		}
-		#endif
+		} else { // new dma method
 #ifndef DLDI
-		#ifndef TWLSDK
-		else if (ce9->patches->cardEndReadDmaRef || ce9->thumbPatches->cardEndReadDmaRef) { // new dma method
 			continueCardReadDmaArm7();
+#endif
 			continueCardReadDmaArm9();
 		}
 		#endif
-#endif
 			break;
-		/* case 0x4:
-			extern bool dmaOn;
-			dmaOn = !dmaOn;
-			break; */
 		case 0x5:
 			igmReset = true;
 			sharedAddr[3] = 0x54495845;

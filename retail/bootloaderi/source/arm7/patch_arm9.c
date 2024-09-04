@@ -664,7 +664,7 @@ static bool patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader
 	return false;
 }
 
-bool setDmaPatched = false;
+// bool setDmaPatched = false;
 static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
 	if (ndsHeader->unitCode > 0 && dsiModeConfirmed) {
 		return false;
@@ -700,7 +700,7 @@ static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, co
     dbg_printf("\n\n");
       u32* cardSetDmaPatch = (usesThumb ? ce9->thumbPatches->card_set_dma_arm9 : ce9->patches->card_set_dma_arm9);
 	  tonccpy(setDmaoffset, cardSetDmaPatch, 0x30);
-	  setDmaPatched = true;
+	  // setDmaPatched = true;
 
       return true;  
     }

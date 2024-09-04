@@ -205,12 +205,13 @@ void rebootConsole(void) {
 }
 
 void reset(void) {
-	//u32 resetParam = (isSdk5Set ? RESET_PARAM_SDK5 : RESET_PARAM);
-	if (sharedAddr[0] == 0x57495344 /*|| *(u32*)resetParam == 0xFFFFFFFF*/) {
-		rebootConsole();
-	}
+	rebootConsole();
+	// u32 resetParam = (isSdk5Set ? RESET_PARAM_SDK5 : RESET_PARAM);
+	// if (sharedAddr[0] == 0x57495344 /*|| *(u32*)resetParam == 0xFFFFFFFF*/) {
+	// 	rebootConsole();
+	// }
 
-	REG_IME = 0;
+	/* REG_IME = 0;
 
 	toncset32((u32*)0x04000400, 0, 0x104/4); // Clear sound channel & control registers
 
@@ -256,7 +257,20 @@ void reset(void) {
 	}
 
 	// Start ARM7
-	ndsCodeStart(ndsHeader->arm7executeAddress);
+	ndsCodeStart(ndsHeader->arm7executeAddress); */
+}
+
+//---------------------------------------------------------------------------------
+void myIrqHandlerFIFO(void) {
+//---------------------------------------------------------------------------------
+	#ifdef DEBUG		
+	nocashMessage("myIrqHandlerFIFO");
+	#endif
+
+    if (IPC_GetSync() == 0x3) {
+		swiDelay(100);
+		IPC_SendSync(0x3);
+	}
 }
 
 
@@ -501,9 +515,13 @@ u32 myIrqEnable(u32 irq) {
 
 	initialize();
 
+	u32 irq_before = REG_IE | IRQ_IPC_SYNC;
+	irq |= IRQ_IPC_SYNC;
+	REG_IPC_SYNC |= IPC_SYNC_IRQ_ENABLE;
+
 	REG_IE |= irq;
 	leaveCriticalSection(oldIME);
-	return irq;
+	return irq_before;
 }
 
 //
@@ -531,7 +549,7 @@ bool eepromRead(u32 src, void *dst, u32 len) {
 	#endif	
 
 	// Send a command to the ARM9 to read the save
-	u32 commandSaveRead = 0x53415652;
+	const u32 commandSaveRead = 0x53415652;
 
 	// Write the command
 	sharedAddr[0] = src;
@@ -557,7 +575,7 @@ bool eepromPageWrite(u32 dst, const void *src, u32 len) {
 	#endif	
 	
 	// Send a command to the ARM9 to write the save
-	u32 commandSaveWrite = 0x53415657;
+	const u32 commandSaveWrite = 0x53415657;
 
 	// Write the command
 	sharedAddr[0] = dst;
@@ -583,7 +601,7 @@ bool eepromPageProg(u32 dst, const void *src, u32 len) {
 	#endif	
 
 	// Send a command to the ARM9 to write the save
-	u32 commandSaveWrite = 0x53415657;
+	const u32 commandSaveWrite = 0x53415657;
 
 	// Write the command
 	sharedAddr[0] = dst;
@@ -610,7 +628,7 @@ bool eepromPageVerify(u32 dst, const void *src, u32 len) {
 
   	/*if (lockMutex(&saveMutex)) {
 		// Send a command to the ARM9 to write the save
-		u32 commandSaveWrite = 0x53415657;
+		const u32 commandSaveWrite = 0x53415657;
 
 		// Write the command
 		sharedAddr[0] = dst;
@@ -649,7 +667,7 @@ bool cardRead(u32 dma, u32 src, void *dst, u32 len) {
 	#endif	
 	
 	// Send a command to the ARM9 to read the ROM
-	u32 commandRomRead = 0x524F4D52;
+	const u32 commandRomRead = 0x524F4D52;
 
 	// Write the command
 	sharedAddr[0] = src;

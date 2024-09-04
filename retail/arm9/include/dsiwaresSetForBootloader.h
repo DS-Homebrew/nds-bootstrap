@@ -251,6 +251,8 @@ static const char dsiWareForBootloader1[][4] = {
 	"KTX", // High Stakes Texas Hold'em
 	"KHI", // Hints Hunter
 	"KT2", // G.G Series: Horizontal Bar
+};
+static const char dsiWareForBootloader2[][4] = {
 	// "KNE", // Ichi Moudaji!: Neko King
 	"KNK", // Ideyou Sukeno: Kenkou Maja DSi
 	"KBT", // Invasion of the Alien Blobs!
@@ -268,8 +270,6 @@ static const char dsiWareForBootloader1[][4] = {
 	"KZC", // Jump Trials Extreme
 	"KJF", // Just SING! 80's
 	"K4C", // Just SING! Christmas Songs (bootloaderi-exclusive)
-};
-static const char dsiWareForBootloader2[][4] = {
 	"KPA", // A Kappa's Trail (bootloaderi-exclusive)
 	"K69", // Katamukusho (bootloaderi-exclusive)
 	"K3H", // Kazu De Asobu: Mahoujin To Imeji Kei-san

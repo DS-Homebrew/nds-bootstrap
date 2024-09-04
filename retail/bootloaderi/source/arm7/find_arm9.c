@@ -2786,7 +2786,7 @@ u32* findCardSetDmaSdk5(const tNDSHeader* ndsHeader, const module_params_t* modu
             dbg_printf("cardSetDmaSignatureValue1 found\n");
          	dbg_hexa((u32)cardSetDmaEndOffset);
         	dbg_printf(" : ");
-            dbg_hexa(*cardSetDmaEndOffset);   
+            dbg_hexa(*cardSetDmaEndOffset);
             dbg_printf("\n");
         
             currentOffset = cardSetDmaEndOffset+2;
@@ -2856,7 +2856,7 @@ u32* findCardSetDma(const tNDSHeader* ndsHeader, const module_params_t* modulePa
             dbg_printf("cardSetDmaSignatureValue1 found\n");
          	dbg_hexa((u32)cardSetDmaEndOffset);
         	dbg_printf(" : ");
-            dbg_hexa(*cardSetDmaEndOffset);   
+            dbg_hexa(*cardSetDmaEndOffset);
             dbg_printf("\n");
         
             currentOffset = cardSetDmaEndOffset+2;
@@ -2868,7 +2868,7 @@ u32* findCardSetDma(const tNDSHeader* ndsHeader, const module_params_t* modulePa
                 dbg_printf("cardSetDmaSignatureValue2 found\n");
              	dbg_hexa((u32)cardSetDmaEndOffset);
             	dbg_printf(" : ");
-                dbg_hexa(*cardSetDmaEndOffset);   
+                dbg_hexa(*cardSetDmaEndOffset);
                 dbg_printf("\n");
                 
                 break;
@@ -2879,7 +2879,7 @@ u32* findCardSetDma(const tNDSHeader* ndsHeader, const module_params_t* modulePa
     dbg_printf("cardSetDmaEnd found\n");
  	dbg_hexa((u32)cardSetDmaEndOffset);
 	dbg_printf(" : ");
-    dbg_hexa(*cardSetDmaEndOffset);   
+    dbg_hexa(*cardSetDmaEndOffset);
     dbg_printf("\n");
 
     u32 * offset = NULL;
@@ -2926,7 +2926,7 @@ u32* findCardSetDma(const tNDSHeader* ndsHeader, const module_params_t* modulePa
 
     dbg_printf("\n");
 	return offset;
-}    
+}
 
 u32* findResetOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool* softResetMb) {
 	dbg_printf("findResetOffset\n");

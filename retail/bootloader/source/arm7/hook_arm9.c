@@ -187,6 +187,8 @@ int hookNdsRetailArm9(
 	const bool usesCloneboot,
 	u32 overlaysSize,
 	u32 ioverlaysSize,
+	u32 arm9iromOffset,
+	u32 arm9ibinarySize,
 	u32 maxClusterCacheSize,
     u32 fatTableAddr
 ) {
@@ -251,6 +253,8 @@ int hookNdsRetailArm9(
 	ce9->overlaysSrc            = (ndsHeader->arm9overlaySource > ndsHeader->arm7romOffset) ? (ndsHeader->arm9romOffset + ndsHeader->arm9binarySize) : ndsHeader->arm9overlaySource;
 	ce9->overlaysSize           = overlaysSize;
 	ce9->ioverlaysSize          = ioverlaysSize;
+	ce9->arm9iromOffset         = arm9iromOffset;
+	ce9->arm9ibinarySize        = arm9ibinarySize;
 	ce9->romPaddingSize         = romPaddingSize;
 	ce9->romLocation            = romLocation;
 

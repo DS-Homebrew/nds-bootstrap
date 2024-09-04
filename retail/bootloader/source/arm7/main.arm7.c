@@ -138,6 +138,7 @@ u16 baseHeaderCRC = 0;
 u16 baseSecureCRC = 0;
 u32 baseRomSize = 0;
 u32 romPaddingSize = 0;
+u32 arm9iromOffset = 0;
 u32 arm9ibinarySize = 0;
 u32 baseChipID = 0;
 bool pkmnHeader = false;
@@ -449,6 +450,7 @@ static void loadBinary_ARM7(const tDSiHeader* dsiHeaderTemp, aFile* file) {
 		}
 	}
 
+	arm9iromOffset = (u32)dsiHeaderTemp->arm9iromOffset;
 	arm9ibinarySize = dsiHeaderTemp->arm9ibinarySize;
 }
 
@@ -1452,6 +1454,8 @@ int arm7_main(void) {
 		usesCloneboot,
 		overlaysSize,
 		ioverlaysSize,
+		arm9iromOffset,
+		arm9ibinarySize,
 		fatTableSize,
 		fatTableAddr
 	);

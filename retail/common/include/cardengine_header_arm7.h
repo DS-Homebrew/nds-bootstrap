@@ -126,6 +126,7 @@ typedef struct cardengineArm7B4DS {
 	u32 ce7;
 	cardengineArm7Patches* patches;
 	u32 intr_vblank_orig_return;
+    u32 intr_fifo_orig_return;
 	u32 cheatEngineAddr;
 	u32 musicBuffer;
 	const module_params_t* moduleParams;
@@ -148,6 +149,7 @@ typedef struct cardengineArm7Patches {
     u32* card_irq_enable_arm7;
     u32* thumb_card_irq_enable_arm7;
     u32 vblankHandler;
+    u32 fifoHandler;
     u32* j_twlGetPitchTable;
     cardengineArm7PatchesArm7FunctionsThumb* arm7FunctionsDirect;
     cardengineArm7PatchesArm7Functions* arm7Functions;
@@ -161,6 +163,7 @@ typedef struct cardengineArm7 {
 	u32 ce7;
 	cardengineArm7Patches* patches;
 	u32 intr_vblank_orig_return;
+    u32 intr_fifo_orig_return;
 	u32 cheatEngineAddr;
 	u32 musicBuffer;
 	const module_params_t* moduleParams;

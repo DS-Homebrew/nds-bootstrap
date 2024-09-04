@@ -36,6 +36,8 @@ patches_offset:
 	.word	patches
 intr_vblank_orig_return:
 	.word	0x00000000
+intr_fifo_orig_return:
+	.word	0x00000000
 cheatEngineAddr:
 	.word	0x00000000
 musicBuffer:
@@ -69,18 +71,22 @@ vblankHandler:
 	ldr 	r0,	intr_vblank_orig_return
 	bx  	r0
 
-code_handler_start_vblank:
-	push	{r0-r12} 
-	ldr	r3, =myIrqHandlerVBlank
-	bl	_blx_r3_stub		@ jump to myIrqHandler
-	
-	@ exit after return
-	b	exit
+fifoHandler:
+@ Hook the return address, then go back to the original function
+	stmdb	sp!, {lr}
+	adr 	lr, code_handler_start_fifo
+	ldr 	r0,	intr_fifo_orig_return
+	bx  	r0
 
-@---------------------------------------------------------------------------------
-_blx_r3_stub:
-@---------------------------------------------------------------------------------
-	bx	r3
+code_handler_start_vblank:
+	push	{r0-r12}
+	bl	myIrqHandlerVBlank
+	pop   	{r0-r12,pc}
+
+code_handler_start_fifo:
+	push	{r0-r12}
+	bl	myIrqHandlerFIFO
+	pop   	{r0-r12,pc}
 
 @---------------------------------------------------------------------------------
 
@@ -119,6 +125,7 @@ patches:
 .word	card_irq_enable_arm7
 .word	thumb_card_irq_enable_arm7
 .word	vblankHandler
+.word	fifoHandler
 .word   j_twlGetPitchTable
 .word   arm7FunctionsDirect
 .word   arm7Functions
@@ -128,8 +135,7 @@ patches:
 @---------------------------------------------------------------------------------
 j_twlGetPitchTable:
 @---------------------------------------------------------------------------------
-	ldr	r12, = twlGetPitchTable
-	bx	r12
+	ldr	pc, =twlGetPitchTable
 .pool
 @---------------------------------------------------------------------------------
 
