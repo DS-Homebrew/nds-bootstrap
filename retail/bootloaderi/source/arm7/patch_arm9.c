@@ -549,10 +549,6 @@ static void patchCardReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, c
 }
 
 static bool patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
-	if (ndsHeader->unitCode > 0 && dsiModeConfirmed) {
-		return false;
-	}
-
 	const char* romTid = getRomTid(ndsHeader);
 
 	if (strncmp(romTid, "AJS", 3) == 0 // Jump Super Stars
@@ -563,7 +559,7 @@ static bool patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader
 	 || strncmp(romTid, "Y8L", 3) == 0 // Golden Sun: Dark Dawn (Demo Version)
 	 || strncmp(romTid, "B8I", 3) == 0 // Spider-Man: Edge of Time
 	 || strncmp(romTid, "TAM", 3) == 0 // The Amazing Spider-Man
-	 || (strncmp(romTid, "V2G", 3) == 0 /* && !dsiModeConfirmed */) // Mario vs. Donkey Kong: Mini-Land Mayhem (DS mode)
+	 || (strncmp(romTid, "V2G", 3) == 0 && !dsiModeConfirmed) // Mario vs. Donkey Kong: Mini-Land Mayhem (DS mode)
 	 || !cardReadDMA) return false;
 
     u32* offset = patchOffsetCache.cardEndReadDmaOffset;
@@ -666,10 +662,6 @@ static bool patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader
 
 // bool setDmaPatched = false;
 static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
-	if (ndsHeader->unitCode > 0 && dsiModeConfirmed) {
-		return false;
-	}
-
 	const char* romTid = getRomTid(ndsHeader);
 
 	if (strncmp(romTid, "AJS", 3) == 0 // Jump Super Stars
@@ -680,7 +672,7 @@ static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, co
 	 || strncmp(romTid, "Y8L", 3) == 0 // Golden Sun: Dark Dawn (Demo Version)
 	 || strncmp(romTid, "B8I", 3) == 0 // Spider-Man: Edge of Time
 	 || strncmp(romTid, "TAM", 3) == 0 // The Amazing Spider-Man
-	 || (strncmp(romTid, "V2G", 3) == 0 /* && !dsiModeConfirmed */) // Mario vs. Donkey Kong: Mini-Land Mayhem (DS mode)
+	 || (strncmp(romTid, "V2G", 3) == 0 && !dsiModeConfirmed) // Mario vs. Donkey Kong: Mini-Land Mayhem (DS mode)
 	 || !cardReadDMA) return false;
 
 	dbg_printf("\npatchCardSetDma\n");           

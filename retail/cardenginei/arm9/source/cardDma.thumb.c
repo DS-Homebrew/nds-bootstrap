@@ -73,9 +73,15 @@ bool isDma = false;
 bool dmaDirectRead = false;
 #ifndef TWLSDK
 static bool dataSplit = false;
+#endif
 
 void endCardReadDma() {
-	if (dmaDirectRead && (ndmaBusy(0) || (dataSplit && ndmaBusy(1)))) {
+	#ifndef TWLSDK
+	if (dmaDirectRead && (ndmaBusy(0) || (dataSplit && ndmaBusy(1))))
+	#else
+	if (dmaDirectRead && ndmaBusy(0))
+	#endif
+	{
 		IPC_SendSync(0x3);
 		return;
 	}
@@ -88,7 +94,6 @@ void endCardReadDma() {
 		callEndReadDmaThumb();
 	}    
 }
-#endif
 
 extern bool IPC_SYNC_hooked;
 extern void hookIPC_SYNC(void);
@@ -112,7 +117,6 @@ static inline bool checkArm7(void) {
 	return (sharedAddr[3] == (vu32)0);
 }
 
-#ifndef TWLSDK
 static u32 * dmaParams = NULL;
 static int currentLen = 0;
 //static int currentSlot = 0;
@@ -125,31 +129,49 @@ void continueCardReadDmaArm9() {
 		}
         dmaReadOnArm9 = false;
 
+		#ifndef TWLSDK
         vu32* volatile cardStruct = (vu32*)ce9->cardStruct0;
         //u32	dma = cardStruct[3]; // dma channel
+		#endif
 
 		#ifndef DLDI
 		u32 commandRead=0x025FFB0A;
 		#endif
 
+		#ifndef TWLSDK
 		u32 src = ((ce9->valueBits & isSdk5) ? dmaParams[3] : cardStruct[0]);
 		u8* dst = ((ce9->valueBits & isSdk5) ? (u8*)(dmaParams[4]) : (u8*)(cardStruct[1]));
 		u32 len = ((ce9->valueBits & isSdk5) ? dmaParams[5] : cardStruct[2]);
+		#else
+		u32 src = dmaParams[3];
+		u8* dst = (u8*)dmaParams[4];
+		u32 len = dmaParams[5];
+		#endif
 
         // Update cardi common
+		#ifndef TWLSDK
 		if (ce9->valueBits & isSdk5) {
+		#endif
 			dmaParams[3] = src + currentLen;
 			dmaParams[4] = (vu32)(dst + currentLen);
 			dmaParams[5] = len - currentLen;
+		#ifndef TWLSDK
 		} else {
 			cardStruct[0] = src + currentLen;
 			cardStruct[1] = (vu32)(dst + currentLen);
 			cardStruct[2] = len - currentLen;
 		}
+		#endif
 
+		#ifndef TWLSDK
 		src = ((ce9->valueBits & isSdk5) ? dmaParams[3] : cardStruct[0]);
 		dst = ((ce9->valueBits & isSdk5) ? (u8*)(dmaParams[4]) : (u8*)(cardStruct[1]));
 		len = ((ce9->valueBits & isSdk5) ? dmaParams[5] : cardStruct[2]);
+		#else
+		src = dmaParams[3];
+		dst = (u8*)dmaParams[4];
+		len = dmaParams[5];
+		#endif
 
 		#ifndef DLDI
 		u32 sector = (src/ce9->cacheBlockSize)*ce9->cacheBlockSize;
@@ -311,23 +333,24 @@ void continueCardReadDmaArm7() {
 	}
 }
 #endif
-#endif
 
 void cardSetDma(u32 * params) {
-	#ifdef TWLSDK
-	/* u32 src = params[3];
-	u8* dst = (u8*)params[4];
-	u32 len = params[5];
-
-	disableIrqMask(IRQ_CARD);
-	disableIrqMask(IRQ_CARD_LINE);
-
-	cardRead(NULL, dst, src, len);
-	endCardReadDma(); */
-	#else
 	isDma = true;
 	dmaDirectRead = false;
 
+	#ifdef TWLSDK
+	dmaParams = params;
+
+	u32 src = dmaParams[3];
+	u8* dst = (u8*)dmaParams[4];
+	u32 len = dmaParams[5];
+
+	// Simulate ROM mirroring
+	while (src >= ce9->romPaddingSize) {
+		src -= ce9->romPaddingSize;
+	}
+	dmaParams[3] = src;
+	#else
 	vu32* cardStruct = (vu32*)ce9->cardStruct0;
 
 	if (ce9->valueBits & isSdk5) {
@@ -346,6 +369,7 @@ void cardSetDma(u32 * params) {
 	} else {
 		cardStruct[0] = src;
 	}
+	#endif
 
 	#ifndef TWLSDK
 	dataSplit = false;
@@ -406,9 +430,7 @@ void cardSetDma(u32 * params) {
 		endCardReadDma();
 		return;
 	}
-	#endif
 
-	#ifndef TWLSDK
 	disableIrqMask(IRQ_CARD);
 	disableIrqMask(IRQ_CARD_LINE);
 
@@ -546,14 +568,12 @@ void cardSetDma(u32 * params) {
 
 	dmaReadOnArm9 = true;
 	IPC_SendSync(0x3);
-	#endif // DLDI
-	#endif // TWLSDK
+	#endif
 }
 
 extern bool isNotTcm(u32 address, u32 len);
 
 u32 cardReadDma(u32 dma0, u8* dst0, u32 src0, u32 len0) {
-	#ifndef TWLSDK
 	vu32* volatile cardStruct = (vu32*)ce9->cardStruct0;
 
 	u32 src = ((ce9->valueBits & isSdk5) ? src0 : cardStruct[0]);
@@ -565,7 +585,11 @@ u32 cardReadDma(u32 dma0, u8* dst0, u32 src0, u32 len0) {
         && dma <= 3 
         //&& func != NULL
         && len > 0
+		#ifndef TWLSDK
         && !(((u32)dst) & ((ce9->valueBits & isSdk5) ? 31 : 3))
+		#else
+        && !(((u32)dst) & 31)
+		#endif
         && isNotTcm((u32)dst, len)
         // check 512 bytes page alignement 
         && !(len & 511)
@@ -574,17 +598,18 @@ u32 cardReadDma(u32 dma0, u8* dst0, u32 src0, u32 len0) {
 		isDma = true;
         if (ce9->patches->cardEndReadDmaRef || ce9->thumbPatches->cardEndReadDmaRef) {
 			// new dma method
+			#ifndef TWLSDK
 			if (!(ce9->valueBits & isSdk5)) {
 				cacheFlush();
 				cardSetDma(NULL);
 			}
+			#endif
 			return true;
 		}
     } /*else {
         dma=4;
         clearIcache();
     }*/
-	#endif
 
     return false;
 }

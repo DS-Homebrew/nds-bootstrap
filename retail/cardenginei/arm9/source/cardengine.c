@@ -1397,7 +1397,6 @@ void myIrqHandlerIPC(void) {
 #ifndef GSDD
 	switch (IPC_GetSync()) {
 		case 0x3:
-		#ifndef TWLSDK
 			extern bool dmaDirectRead;
 		if (dmaDirectRead) {
 			endCardReadDma();
@@ -1407,7 +1406,6 @@ void myIrqHandlerIPC(void) {
 #endif
 			continueCardReadDmaArm9();
 		}
-		#endif
 			break;
 		case 0x5:
 			igmReset = true;
