@@ -500,77 +500,78 @@ void inGameMenu(s32* exRegisters) {
 //---------------------------------------------------------------------------------
 void myIrqHandlerIPC(void) {
 //---------------------------------------------------------------------------------
-	switch (sharedAddr[3]) {
-		case 0x53415652: {
-			u16 exmemcnt = REG_EXMEMCNT;
-			// Read save
-			setDeviceOwner();
-
-			u32 dst = *(vu32*)(sharedAddr+2);
-			u32 src = *(vu32*)(sharedAddr);
-			u32 len = *(vu32*)(sharedAddr+1);
-
-			if ((src % ce9->saveSize)+len > ce9->saveSize) {
-				u32 len2 = len;
-				u32 len3 = 0;
-				while ((src % ce9->saveSize)+len2 > ce9->saveSize) {
-					len2--;
-					len3++;
-				}
-				fileRead((char*)dst, &savFile, (src % ce9->saveSize), len2);
-				fileRead((char*)dst+len2, &savFile, ((src+len2) % ce9->saveSize), len3);
-			} else {
-				fileRead((char*)dst, &savFile, (src % ce9->saveSize), len);
-			}
-
-			sharedAddr[3] = 0;
-			REG_EXMEMCNT = exmemcnt;
-		} break;
-		case 0x53415657: {
-			u16 exmemcnt = REG_EXMEMCNT;
-			// Write save
-			setDeviceOwner();
-
-			u32 src = *(vu32*)(sharedAddr+2);
-			u32 dst = *(vu32*)(sharedAddr);
-			u32 len = *(vu32*)(sharedAddr+1);
-
-			if ((dst % ce9->saveSize)+len > ce9->saveSize) {
-				u32 len2 = len;
-				u32 len3 = 0;
-				while ((dst % ce9->saveSize)+len2 > ce9->saveSize) {
-					len2--;
-					len3++;
-				}
-				fileWrite((char*)src, &savFile, (dst % ce9->saveSize), len2);
-				fileWrite((char*)src+len2, &savFile, ((dst+len2) % ce9->saveSize), len3);
-			} else {
-				fileWrite((char*)src, &savFile, (dst % ce9->saveSize), len);
-			}
-
-			sharedAddr[3] = 0;
-			REG_EXMEMCNT = exmemcnt;
-		} break;
-		case 0x524F4D52: {
-			u16 exmemcnt = REG_EXMEMCNT;
-			// Read ROM (redirected from arm7)
-			setDeviceOwner();
-
-			u32 dst = *(vu32*)(sharedAddr+2);
-			u32 src = *(vu32*)(sharedAddr);
-			u32 len = *(vu32*)(sharedAddr+1);
-
-			fileRead((char*)dst, &romFile, src, len);
-
-			sharedAddr[3] = 0;
-			REG_EXMEMCNT = exmemcnt;
-		} break;
-	}
-
 	switch (IPC_GetSync()) {
 		case 0x3:
 			continueCardReadDmaArm9();
 			break;
+		case 0x4: {
+		switch (sharedAddr[3]) {
+			case 0x53415652: {
+				const u16 exmemcnt = REG_EXMEMCNT;
+				// Read save
+				setDeviceOwner();
+
+				u32 dst = *(vu32*)(sharedAddr+2);
+				u32 src = *(vu32*)(sharedAddr);
+				u32 len = *(vu32*)(sharedAddr+1);
+
+				if ((src % ce9->saveSize)+len > ce9->saveSize) {
+					u32 len2 = len;
+					u32 len3 = 0;
+					while ((src % ce9->saveSize)+len2 > ce9->saveSize) {
+						len2--;
+						len3++;
+					}
+					fileRead((char*)dst, &savFile, (src % ce9->saveSize), len2);
+					fileRead((char*)dst+len2, &savFile, ((src+len2) % ce9->saveSize), len3);
+				} else {
+					fileRead((char*)dst, &savFile, (src % ce9->saveSize), len);
+				}
+
+				sharedAddr[3] = 0;
+				REG_EXMEMCNT = exmemcnt;
+			} break;
+			case 0x53415657: {
+				const u16 exmemcnt = REG_EXMEMCNT;
+				// Write save
+				setDeviceOwner();
+
+				u32 src = *(vu32*)(sharedAddr+2);
+				u32 dst = *(vu32*)(sharedAddr);
+				u32 len = *(vu32*)(sharedAddr+1);
+
+				if ((dst % ce9->saveSize)+len > ce9->saveSize) {
+					u32 len2 = len;
+					u32 len3 = 0;
+					while ((dst % ce9->saveSize)+len2 > ce9->saveSize) {
+						len2--;
+						len3++;
+					}
+					fileWrite((char*)src, &savFile, (dst % ce9->saveSize), len2);
+					fileWrite((char*)src+len2, &savFile, ((dst+len2) % ce9->saveSize), len3);
+				} else {
+					fileWrite((char*)src, &savFile, (dst % ce9->saveSize), len);
+				}
+
+				sharedAddr[3] = 0;
+				REG_EXMEMCNT = exmemcnt;
+			} break;
+			case 0x524F4D52: {
+				const u16 exmemcnt = REG_EXMEMCNT;
+				// Read ROM (redirected from arm7)
+				setDeviceOwner();
+
+				u32 dst = *(vu32*)(sharedAddr+2);
+				u32 src = *(vu32*)(sharedAddr);
+				u32 len = *(vu32*)(sharedAddr+1);
+
+				fileRead((char*)dst, &romFile, src, len);
+
+				sharedAddr[3] = 0;
+				REG_EXMEMCNT = exmemcnt;
+			} break;
+		}
+		} break;
 		#ifndef NODSIWARE
 		case 0x5:
 			updateMusic();
