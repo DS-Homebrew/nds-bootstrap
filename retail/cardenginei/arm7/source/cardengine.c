@@ -662,11 +662,11 @@ void reset(void) {
 }
 
 static void cardReadLED(bool on, bool dmaLed) {
-	if (consoleModel < 2) { /* Proceed below */ } else { return; }
+	if (!(valueBits & i2cBricked) && consoleModel < 2) { /* Proceed below */ } else { return; }
 
 	if (dmaRomRead_LED == -1) dmaRomRead_LED = romRead_LED;
 	if (!powerLedChecked && (romRead_LED || dmaRomRead_LED)) {
-		u8 byte = i2cReadRegister(0x4A, 0x63);
+		const u8 byte = i2cReadRegister(0x4A, 0x63);
 		powerLedIsPurple = (byte == 0xFF);
 		powerLedChecked = true;
 	}
