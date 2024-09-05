@@ -355,14 +355,17 @@ void my_disableSlot1() {
 }
 
 static void NDSTouchscreenMode(void) {
+	const u8 i2cVer = i2cReadRegister(0x4A, 0);
+	const bool i2cBricked = (i2cVer == 0 || i2cVer == 0xFF);
 	const bool noSgba = (strncmp((const char*)0x04FFFA00, "no$gba", 6) == 0);
+	const bool malfunction = (noSgba || i2cBricked);
 
 	// 0xAC: special setting (when found special gamecode)
 	// 0xA7: normal setting (for any other gamecodes)
-	const u8 volLevel = volumeFix ? 0xAC : 0xA7;
+	const u8 volLevel = (i2cBricked || volumeFix) ? 0xAC : 0xA7;
 
 	// Touchscreen
-	if (noSgba) {
+	if (malfunction) {
 		cdcReadReg (0x63, 0x00);
 		cdcWriteReg(CDC_CONTROL, 0x3A, 0x00);
 		cdcReadReg (CDC_CONTROL, 0x51);
@@ -468,7 +471,7 @@ static void NDSTouchscreenMode(void) {
 	cdcWriteReg(CDC_CONTROL, 0x52, 0x80);
 	cdcWriteReg(CDC_CONTROL, 0x51, 0x00);
 
-	if (noSgba) {
+	if (malfunction) {
 		// Set remaining values
 		cdcWriteReg(CDC_CONTROL, 0x03, 0x44);
 		cdcWriteReg(CDC_CONTROL, 0x0D, 0x00);
@@ -516,7 +519,11 @@ static void NDSTouchscreenMode(void) {
 }
 
 static void DSiTouchscreenMode(void) {
-	if (strncmp((const char*)0x04FFFA00, "no$gba", 6) != 0) {
+	const u8 i2cVer = i2cReadRegister(0x4A, 0);
+	const bool i2cBricked = (i2cVer == 0 || i2cVer == 0xFF);
+	const bool noSgba = (strncmp((const char*)0x04FFFA00, "no$gba", 6) == 0);
+
+	if (!noSgba && !i2cBricked) {
 		return;
 	}
 

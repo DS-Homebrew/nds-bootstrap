@@ -51,6 +51,7 @@
 #define wideCheatUsed BIT(12)
 #define twlTouch BIT(15)
 #define ndmaDisabled BIT(20)
+#define i2cBricked BIT(30)
 #define scfgLocked BIT(31)
 
 #define	REG_EXTKEYINPUT	(*(vuint16*)0x04000136)
@@ -109,6 +110,7 @@ static int languageTimer = 0;
 static int returnTimer = 0;
 static int softResetTimer = 0;
 static int ramDumpTimer = 0;
+static int noI2CVolLevel = 127; // Volume workaround for bricked I2C chips
 static int volumeAdjustDelay = 0;
 static bool volumeAdjustActivated = false;
 
@@ -676,6 +678,10 @@ void myIrqHandlerVBlank(void) {
 	nocashMessage("myIrqHandlerVBlank");
 	#endif	
 
+	if (valueBits & i2cBricked) {
+		REG_MASTER_VOLUME = noI2CVolLevel;
+	}
+
 	#ifdef DEBUG
 	nocashMessage("cheat_engine_start\n");
 	#endif
@@ -793,7 +799,7 @@ void myIrqHandlerVBlank(void) {
 		softResetTimer = 0;
 	}
 
-	if (valueBits & preciseVolumeControl) {
+	if ((valueBits & preciseVolumeControl) || (valueBits & i2cBricked)) {
 		// Precise volume adjustment (for DSi)
 		if (volumeAdjustActivated) {
 			volumeAdjustDelay++;
@@ -802,21 +808,31 @@ void myIrqHandlerVBlank(void) {
 				volumeAdjustActivated = false;
 			}
 		} else if (0==(REG_KEYINPUT & KEY_SELECT)) {
-			u8 i2cVolLevel = i2cReadRegister(0x4A, 0x40);
-			u8 i2cNewVolLevel = i2cVolLevel;
-			if (0==(REG_KEYINPUT & KEY_UP)) {
-				i2cNewVolLevel++;
-			} else if (0==(REG_KEYINPUT & KEY_DOWN)) {
-				i2cNewVolLevel--;
-			}
-			if (i2cNewVolLevel == 0xFF) {
-				i2cNewVolLevel = 0;
-			} else if (i2cNewVolLevel > 0x1F) {
-				i2cNewVolLevel = 0x1F;
-			}
-			if (i2cNewVolLevel != i2cVolLevel) {
-				i2cWriteRegister(0x4A, 0x40, i2cNewVolLevel);
-				volumeAdjustActivated = true;
+			if (valueBits & i2cBricked) {
+				const int oldVolLevel = noI2CVolLevel;
+				if (0==(REG_KEYINPUT & KEY_UP)) {
+					noI2CVolLevel = 127;
+				} else if (0==(REG_KEYINPUT & KEY_DOWN)) {
+					noI2CVolLevel = 0;
+				}
+				volumeAdjustActivated = (noI2CVolLevel != oldVolLevel);
+			} else {
+				const u8 i2cVolLevel = i2cReadRegister(0x4A, 0x40);
+				u8 i2cNewVolLevel = i2cVolLevel;
+				if (0==(REG_KEYINPUT & KEY_UP)) {
+					i2cNewVolLevel++;
+				} else if (0==(REG_KEYINPUT & KEY_DOWN)) {
+					i2cNewVolLevel--;
+				}
+				if (i2cNewVolLevel == 0xFF) {
+					i2cNewVolLevel = 0;
+				} else if (i2cNewVolLevel > 0x1F) {
+					i2cNewVolLevel = 0x1F;
+				}
+				if (i2cNewVolLevel != i2cVolLevel) {
+					i2cWriteRegister(0x4A, 0x40, i2cNewVolLevel);
+					volumeAdjustActivated = true;
+				}
 			}
 		}
 	}

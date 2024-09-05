@@ -19,6 +19,7 @@
 #include <string.h> // memcpy
 #include <stdio.h>
 #include <nds/system.h>
+#include <nds/arm7/i2c.h>
 #include <nds/debug.h>
 
 //#include "my_fat.h"
@@ -55,6 +56,7 @@
 #define b_bootstrapOnFlashcard BIT(19)
 #define b_ndmaDisabled BIT(20)
 #define b_isDlp BIT(21)
+#define b_i2cBricked BIT(30)
 #define b_scfgLocked BIT(31)
 
 extern u32 newArm7binarySize;
@@ -403,6 +405,10 @@ int hookNdsRetailArm7(
 		}
 		if (strncmp(romTid, "HND", 3) == 0) {
 			ce7->valueBits |= b_isDlp;
+		}
+		const u8 i2cVer = i2cReadRegister(0x4A, 0);
+		if (i2cVer == 0 || i2cVer == 0xFF) {
+			ce7->valueBits |= b_i2cBricked;
 		}
 		if (REG_SCFG_EXT == 0) {
 			ce7->valueBits |= b_scfgLocked;
