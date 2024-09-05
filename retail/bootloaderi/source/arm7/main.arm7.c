@@ -362,7 +362,7 @@ static void NDSTouchscreenMode(void) {
 
 	// 0xAC: special setting (when found special gamecode)
 	// 0xA7: normal setting (for any other gamecodes)
-	const u8 volLevel = (i2cBricked || volumeFix) ? 0xAC : 0xA7;
+	const u8 volLevel = volumeFix ? 0xAC : 0xA7;
 
 	// Touchscreen
 	if (malfunction) {
