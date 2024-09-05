@@ -136,6 +136,7 @@ u8 twlCfgCountry = 0;
 int twlCfgLang = 0;
 int sharedFontRegion = 0;
 u8 wifiLedState = 0;
+bool i2cBricked = false;
 
 //bool gbaRomFound = false;
 
@@ -355,8 +356,6 @@ void my_disableSlot1() {
 }
 
 static void NDSTouchscreenMode(void) {
-	const u8 i2cVer = i2cReadRegister(0x4A, 0);
-	const bool i2cBricked = (i2cVer == 0 || i2cVer == 0xFF);
 	const bool noSgba = (strncmp((const char*)0x04FFFA00, "no$gba", 6) == 0);
 	const bool malfunction = (noSgba || i2cBricked);
 
@@ -519,8 +518,6 @@ static void NDSTouchscreenMode(void) {
 }
 
 static void DSiTouchscreenMode(void) {
-	const u8 i2cVer = i2cReadRegister(0x4A, 0);
-	const bool i2cBricked = (i2cVer == 0 || i2cVer == 0xFF);
 	const bool noSgba = (strncmp((const char*)0x04FFFA00, "no$gba", 6) == 0);
 
 	if (!noSgba && !i2cBricked) {
@@ -1321,7 +1318,7 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 			*(u32*)(0x02FFFD68) = 0x01; // JAP
 		}
 
-		*(u32*)0x03FFFFC4 = 0x93FFFB06; // *(u32*)0x2FFFD08
+		*(u32*)0x03FFFFC4 = *(u32*)0x2FFFD08;
 		*(u32*)0x03FFFFC8 = 0xF884;
 
 		i2cWriteRegister(I2C_PM, I2CREGPM_MMCPWR, 1);		// Have IRQ check for power button press
@@ -1451,7 +1448,11 @@ int arm7_main(void) {
 		enableDebug(&logFile);
 	}
 
-	bool dsiEnhancedMbk = (*(u32*)0x02FFE1A0 == 0x00403000 && ((REG_SCFG_EXT == 0) || (strncmp((const char*)0x04FFFA00, "no$gba", 6) == 0)));
+	{
+		const u8 i2cVer = i2cReadRegister(0x4A, 0);
+		i2cBricked = (i2cVer == 0 || i2cVer == 0xFF);
+	}
+	const bool dsiEnhancedMbk = (*(u32*)0x02FFE1A0 == 0x00403000 && ((REG_SCFG_EXT == 0) || (strncmp((const char*)0x04FFFA00, "no$gba", 6) == 0)));
 
 	aFile srParamsFile;
 	getFileFromCluster(&srParamsFile, srParamsFileCluster, gameOnFlashcard);
@@ -2309,6 +2310,10 @@ int arm7_main(void) {
 	}*/
 			//*(vu32*)0x4004820 = (BIT(0) | BIT(2) | BIT(3) | BIT(24) | BIT(25) | BIT(29) | BIT(30));	// Set SD IRQ mask register
 			//*(vu32*)0x4004820 = 0x8B7F0305;	// Set SD IRQ mask register
+
+	if (i2cBricked) {
+		REG_SCFG_EXT &= ~BIT(22); // Disable I2C access
+	}
 
 	if (!dsiModeConfirmed /*|| (ROMsupportsDsiMode(ndsHeader) && !isDSiWare)*/) {
 		REG_SCFG_EXT &= ~(1UL << 31); // Lock SCFG

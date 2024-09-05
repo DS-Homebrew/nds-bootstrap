@@ -735,6 +735,17 @@ static void cardReadLED(bool on, bool dmaLed) {
 
 extern void inGameMenu(void);
 
+static inline void rebootConsole(void) {
+	if (valueBits & i2cBricked) {
+		u8 readCommand = readPowerManagement(0x10);
+		readCommand |= BIT(0);
+		writePowerManagement(0x10, readCommand); // Reboot console
+		return;
+	}
+	i2cWriteRegister(0x4A, 0x70, 0x01);
+	i2cWriteRegister(0x4A, 0x11, 0x01);
+}
+
 void forceGameReboot(void) {
 	toncset((u32*)0x02000000, 0, 0x400);
 	*(u32*)0x02000000 = BIT(3);
@@ -770,8 +781,7 @@ void forceGameReboot(void) {
 		// Use different SR backend ID
 		readSrBackendId();
 	}
-	i2cWriteRegister(0x4A, 0x70, 0x01);
-	i2cWriteRegister(0x4A, 0x11, 0x01);		// Force-reboot game
+	rebootConsole();		// Force-reboot game
 }
 
 #ifdef TWLSDK
@@ -820,8 +830,7 @@ void returnToLoader(bool reboot) {
 			}
 			waitFrames(5);							// Wait for DSi screens to stabilize
 		}
-		i2cWriteRegister(0x4A, 0x70, 0x01);
-		i2cWriteRegister(0x4A, 0x11, 0x01);
+		rebootConsole();
 	}
 
 	register int i, reg;
@@ -934,8 +943,7 @@ void returnToLoader(bool reboot) {
 		waitFrames(5);							// Wait for DSi screens to stabilize
 	}
 
-	i2cWriteRegister(0x4A, 0x70, 0x01);
-	i2cWriteRegister(0x4A, 0x11, 0x01);		// Reboot into TWiLight Menu++
+	rebootConsole();		// Reboot into TWiLight Menu++
 #endif
 }
 
@@ -1585,8 +1593,7 @@ void myIrqHandlerVBlank(void) {
 #ifndef TWLSDK
 	if (!(valueBits & gameOnFlashcard) && !(valueBits & ROMinRAM) && isSdEjected()) {
 		tonccpy((u32*)0x02000300, sr_data_error, 0x020);
-		i2cWriteRegister(0x4A, 0x70, 0x01);
-		i2cWriteRegister(0x4A, 0x11, 0x01);		// Reboot into error screen if SD card is removed
+		rebootConsole();		// Reboot into error screen if SD card is removed
 	}
 #endif
 
@@ -1794,8 +1801,7 @@ void i2cIRQHandler(void) {
 			IPC_SendSync(0x8);
 			waitFrames(5);							// Wait for DSi screens to stabilize
 		}
-		i2cWriteRegister(0x4A, 0x70, 0x01);
-		i2cWriteRegister(0x4A, 0x11, 0x01);			// Reboot console
+		rebootConsole();			// Reboot console
 		leaveCriticalSection(oldIME);
 		break;
 	}

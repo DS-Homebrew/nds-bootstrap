@@ -406,8 +406,8 @@ int hookNdsRetailArm7(
 		if (strncmp(romTid, "HND", 3) == 0) {
 			ce7->valueBits |= b_isDlp;
 		}
-		const u8 i2cVer = i2cReadRegister(0x4A, 0);
-		if (i2cVer == 0 || i2cVer == 0xFF) {
+		extern bool i2cBricked;
+		if (i2cBricked) {
 			ce7->valueBits |= b_i2cBricked;
 		}
 		if (REG_SCFG_EXT == 0) {

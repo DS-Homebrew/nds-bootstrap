@@ -163,7 +163,25 @@ static void patchSwiHalt(const cardengineArm7* ce7, const tNDSHeader* ndsHeader,
 }
 
 void patchScfgExt(const tNDSHeader* ndsHeader) {
-	if (ndsHeader->unitCode == 0 || newArm7binarySize == 0x44C) return;
+	if (ndsHeader->unitCode == 0) return;
+
+	const u32 scfgLoc = 0x2FFFD00;
+
+	if (dsiModeConfirmed) {
+		extern bool i2cBricked;
+
+		*(u16*)(scfgLoc+0x00) = 0x0101;
+		//*(u16*)(scfgLoc+0x04) = 0x0187;
+		//*(u16*)(scfgLoc+0x06) = 0;
+		*(u32*)(scfgLoc+0x08) = 0x93FFFB06;
+		if (i2cBricked) {
+			*(u32*)(scfgLoc+0x08) &= ~BIT(22); // Disable I2C access
+		}
+		//*(u16*)(scfgLoc+0x20) = 1;
+		//*(u16*)(scfgLoc+0x24) = 0;
+	}
+
+	if (newArm7binarySize == 0x44C) return;
 
 	u32* scfgExtOffset = patchOffsetCache.a7ScfgExtOffset;
 	if (!patchOffsetCache.a7ScfgExtOffset) {
@@ -172,16 +190,7 @@ void patchScfgExt(const tNDSHeader* ndsHeader) {
 			patchOffsetCache.a7ScfgExtOffset = scfgExtOffset;
 		}
 	}
-	if (scfgExtOffset && dsiModeConfirmed) {
-		u32 scfgLoc = 0x2FFFD00;
-
-		*(u16*)(scfgLoc+0x00) = 0x0101;
-		//*(u16*)(scfgLoc+0x04) = 0x0187;
-		//*(u16*)(scfgLoc+0x06) = 0;
-		*(u32*)(scfgLoc+0x08) = 0x93FFFB06;
-		//*(u16*)(scfgLoc+0x20) = 1;
-		//*(u16*)(scfgLoc+0x24) = 0;
-
+	if (scfgExtOffset) {
 		scfgExtOffset[0] = scfgLoc+0x08;
 		//scfgExtOffset[1] = scfgLoc+0x20;
 		//scfgExtOffset[2] = scfgLoc+0x04;

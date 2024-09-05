@@ -63,7 +63,7 @@ void inGameMenu(void) {
 		while (!exitMenu) {
 			sharedAddr[5] = ~REG_KEYINPUT & 0x3FF;
 			sharedAddr[5] |= ((~REG_EXTKEYINPUT & 0x3) << 10) | ((~REG_EXTKEYINPUT & 0xC0) << 6);
-			if ((REG_EXTKEYINPUT & BIT(7)) && (valueBits & sleepMode) && (*(u16*)0x4004700 == 0)) {
+			if ((REG_EXTKEYINPUT & BIT(7)) && (valueBits & sleepMode) && (*(vu16*)0x4004700 == 0)) {
 				// Save current power state.
 				int power = readPowerManagement(PM_CONTROL_REG);
 				// Set sleep LED. (Only works on DS/DS lite?)
