@@ -16834,6 +16834,7 @@ void rsetA7Cache(void)
 	patchOffsetCache.cardCheckPullOutOffset = 0;
 	patchOffsetCache.cardCheckPullOutChecked = 0;
 	patchOffsetCache.sdCardResetOffset = 0;
+	patchOffsetCache.autoPowerOffOffset = 0;
 	patchOffsetCache.a7IrqHandlerOffset = 0;
 	patchOffsetCache.a7IrqHandlerWordsOffset = 0;
 	patchOffsetCache.a7IrqHookOffset = 0;

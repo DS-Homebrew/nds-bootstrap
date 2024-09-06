@@ -1941,11 +1941,14 @@ void patchSharedFontPath(const cardengineArm9* ce9, const tNDSHeader* ndsHeader,
 		tonccpy(ltdModuleParams->arm9i_offset, moduleParams->static_bss_end, iUncompressedSizei);
 		toncset(moduleParams->static_bss_end, 0, iUncompressedSizei);
 	} else {
-		extern int sharedFontRegion;
-		if ((sharedFontRegion == 2 && ndsHeader->gameCode[3] == 'K')
-		 || (sharedFontRegion == 1 && ndsHeader->gameCode[3] == 'C')
-		 || (sharedFontRegion == 0 && ndsHeader->gameCode[3] != 'C' && ndsHeader->gameCode[3] != 'K')) {
-			return;
+		extern bool i2cBricked;
+		if (!i2cBricked) {
+			extern int sharedFontRegion;
+			if ((sharedFontRegion == 2 && ndsHeader->gameCode[3] == 'K')
+			 || (sharedFontRegion == 1 && ndsHeader->gameCode[3] == 'C')
+			 || (sharedFontRegion == 0 && ndsHeader->gameCode[3] != 'C' && ndsHeader->gameCode[3] != 'K')) {
+				return;
+			}
 		}
 
 		const char* twlFontPath = "sdmc:/_nds/nds-bootstrap/TWLFontTable.dat";

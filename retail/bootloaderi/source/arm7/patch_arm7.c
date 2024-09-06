@@ -16,6 +16,7 @@ extern u8 saveOnFlashcard;
 extern u16 a9ScfgRom;
 //extern u8 dsiSD;
 
+extern bool i2cBricked;
 extern bool sdRead;
 
 extern u32 newArm7binarySize;
@@ -168,15 +169,10 @@ void patchScfgExt(const tNDSHeader* ndsHeader) {
 	const u32 scfgLoc = 0x2FFFD00;
 
 	if (dsiModeConfirmed) {
-		extern bool i2cBricked;
-
 		*(u16*)(scfgLoc+0x00) = 0x0101;
 		//*(u16*)(scfgLoc+0x04) = 0x0187;
 		//*(u16*)(scfgLoc+0x06) = 0;
 		*(u32*)(scfgLoc+0x08) = 0x93FFFB06;
-		if (i2cBricked) {
-			*(u32*)(scfgLoc+0x08) &= ~BIT(22); // Disable I2C access
-		}
 		//*(u16*)(scfgLoc+0x20) = 1;
 		//*(u16*)(scfgLoc+0x24) = 0;
 	}
@@ -587,6 +583,35 @@ static void patchSdCardReset(const tNDSHeader* ndsHeader, const module_params_t*
 	}
 }
 
+void patchAutoPowerOff(const tNDSHeader* ndsHeader) {
+	if (!i2cBricked || ndsHeader->unitCode == 0 || !dsiModeConfirmed) return;
+
+	u32* offset = patchOffsetCache.autoPowerOffOffset;
+	if (!patchOffsetCache.autoPowerOffOffset) {
+		offset = findAutoPowerOffOffset(ndsHeader);
+		if (offset) {
+			patchOffsetCache.autoPowerOffOffset = offset;
+		}
+	}
+
+	if (!offset) {
+		return;
+	}
+
+	u16* offsetThumb = (u16*)offset;
+	if (offsetThumb[0] == 0xB5F8) {
+		offsetThumb[0] = 0x2004; // movs r0, #4
+		offsetThumb[1] = 0x4770; // bx lr
+	} else {
+		offset[0] = 0xE3A00004; // mov r0, #4
+		offset[1] = 0xE12FFF1E; // bx lr
+	}
+
+	dbg_printf("autoPowerOff location : ");
+	dbg_hexa((u32)offset);
+	dbg_printf("\n\n");
+}
+
 static void operaRamPatch(void) {
 	// Opera RAM patch (ARM7)
 	*(u32*)0x0238C7BC = 0xC3E0000;
@@ -695,6 +720,8 @@ u32 patchCardNdsArm7(
 	//if (!gameOnFlashcard) {
 		patchSdCardReset(ndsHeader, moduleParams);
 	//}
+
+	patchAutoPowerOff(ndsHeader);
 
 	dbg_printf("ERR_NONE\n\n");
 	return ERR_NONE;

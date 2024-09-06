@@ -138,6 +138,10 @@ static const u16 sdCardResetSignatureThumbType4[7] = {0xF7FF, 0xFDB2, 0xF7FF, 0x
 static const u16 sdCardResetSignatureThumbType5[7] = {0xF7FF, 0xFDC1, 0xF7FF, 0xFF5F, 0xF000, 0xF849, 0x1C05};
 static const u16 sdCardResetSignatureThumbType6[7] = {0xF7FF, 0xFDCE, 0xF7FF, 0xFF68, 0xF000, 0xF85A, 0x1C05};
 
+// Auto power-off (SDK 5)
+static const u32 autoPowerOffSignature[4]      = {0xE92D41F0, 0xE59F4070, 0xE1A08000, 0xE1A07001};
+static const u16 autoPowerOffSignatureThumb[6] = {0xB5F8, 0x1C05, 0x1C0E, 0x2400, 0x27C5, 0xE019};
+
 bool a7GetReloc(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	extern u32 vAddrOfRelocSrc;
 	extern u32 relocDestAtSharedMem;
@@ -1522,4 +1526,44 @@ u32* findSdCardResetOffset(const tNDSHeader* ndsHeader, const module_params_t* m
 
 	dbg_printf("\n");
 	return sdCardResetOffset;
+}
+
+u32* findAutoPowerOffOffset(const tNDSHeader* ndsHeader) {
+	dbg_printf("findAutoPowerOffOffset:\n");
+
+	u32* offset = NULL;
+
+	if (*(u32*)0x02FFE1A0 != 0x00403000) {
+		offset = findOffset(
+			ndsHeader->arm7destination, newArm7binarySize,
+			autoPowerOffSignature, 4
+		);
+		if (!offset) {
+			offset = (u32*)findOffsetThumb(
+				(u16*)ndsHeader->arm7destination, newArm7binarySize,
+				autoPowerOffSignatureThumb, 6
+			);
+		}
+	}
+	if (!offset) {
+		offset = findOffset(
+			__DSiHeader->arm7idestination, newArm7ibinarySize,
+			autoPowerOffSignature, 4
+		);
+	}
+	if (!offset) {
+		offset = (u32*)findOffsetThumb(
+			(u16*)__DSiHeader->arm7idestination, newArm7ibinarySize,
+			autoPowerOffSignatureThumb, 6
+		);
+	}
+
+	if (offset) {
+		dbg_printf("SD Card reset found\n");
+	} else {
+		dbg_printf("SD Card reset not found\n");
+	}
+
+	dbg_printf("\n");
+	return offset;
 }

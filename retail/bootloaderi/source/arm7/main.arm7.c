@@ -1834,6 +1834,9 @@ int arm7_main(void) {
 			errorOutput();
 		}
 
+		extern void patchAutoPowerOff(const tNDSHeader* ndsHeader);
+		patchAutoPowerOff(ndsHeader);
+
 		/*extern u32 savePatchV5(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, u32 saveFileCluster); // SDK 5
 		savePatchV5((cardengineArm7*)ce7Location, ndsHeader, saveFileCluster);*/
 
@@ -2310,10 +2313,6 @@ int arm7_main(void) {
 	}*/
 			//*(vu32*)0x4004820 = (BIT(0) | BIT(2) | BIT(3) | BIT(24) | BIT(25) | BIT(29) | BIT(30));	// Set SD IRQ mask register
 			//*(vu32*)0x4004820 = 0x8B7F0305;	// Set SD IRQ mask register
-
-	if (i2cBricked) {
-		REG_SCFG_EXT &= ~BIT(22); // Disable I2C access
-	}
 
 	if (!dsiModeConfirmed /*|| (ROMsupportsDsiMode(ndsHeader) && !isDSiWare)*/) {
 		REG_SCFG_EXT &= ~(1UL << 31); // Lock SCFG
