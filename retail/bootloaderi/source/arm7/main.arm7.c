@@ -1685,7 +1685,7 @@ int arm7_main(void) {
 	if (!gameOnFlashcard && isDSiWare) {
 		extern void patchSharedFontPath(const cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, const ltd_module_params_t* ltdModuleParams);
 
-		const bool twlTouch = (cdcReadReg(CDC_SOUND, 0x22) == 0xF0);
+		const bool twlTouch = (cdcReadReg(CDC_SOUND, 0x22) == 0xF0 || i2cBricked);
 
 		*(vu16*)0x4004700 &= ~BIT(15); // Disable sound output: Runs before sound frequency change
 		*(vu16*)0x4004700 = (soundFreq ? 0xC00F : 0x800F);
@@ -1969,7 +1969,7 @@ int arm7_main(void) {
 		*(vu16*)0x4004700 = (soundFreq ? 0xC00F : 0x800F);
 		*(vu16*)0x4004700 |= BIT(15); // Enable sound output
 
-		const bool twlTouch = (cdcReadReg(CDC_SOUND, 0x22) == 0xF0);
+		const bool twlTouch = (cdcReadReg(CDC_SOUND, 0x22) == 0xF0 || i2cBricked);
 
 		if (!twlTouch || !dsiModeConfirmed || !ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr) || (ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr) && !(*(u8*)0x02FFE1BF & BIT(0)))) {
 			NDSTouchscreenMode();
