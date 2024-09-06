@@ -288,7 +288,8 @@ static void resetMemory_ARM7(void) {
 		memset_addrs_arm7(0x03800000 - 0x8000, 0x03800000 + 0x10000);
 	}*/
 
-	memset_addrs_arm7(0x02004000, 0x02084000);	// clear part of EWRAM
+	memset_addrs_arm7(0x02000000, 0x02000400);	// clear part of EWRAM - except before TWLCFG
+	memset_addrs_arm7(0x02000620, 0x02084000);	// clear part of EWRAM
 	memset_addrs_arm7(0x02280000, IMAGES_LOCATION);	// clear part of EWRAM - except before nds-bootstrap images
 	dma_twlFill32(0, 0, (u32*)0x02380000, 0x3F000);		// clear part of EWRAM - except before 0x023C0000, which has the arm9 code
 	dma_twlFill32(0, 0, (u32*)0x023C0000, 0x40000);		// clear part of EWRAM
@@ -1233,7 +1234,7 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 		}
 		u32 configFlags = useTwlCfg ? (*(u32*)((u32)twlCfg)) : 0x0100000F;
 		if (consoleModel < 2) {
-			if (wifiLedState == 0 || wifiLedState == 0x12) {
+			if (i2cBricked || wifiLedState == 0 || wifiLedState == 0x12) {
 				configFlags &= ~BIT(3); // Clear WiFi Enable flag
 			} else {
 				configFlags |= BIT(3);
