@@ -39,6 +39,7 @@ patchOffsetCacheContents patchOffsetCache;
 
 extern bool gbaRomFound;
 extern u8 dsiSD;
+extern bool i2cBricked;
 extern int sharedFontRegion;
 
 #define nopT 0x46C0
@@ -68,11 +69,21 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	const u32* dsiSaveRead = ce9->patches->dsiSaveRead;
 	const u32* dsiSaveWrite = ce9->patches->dsiSaveWrite;
 
-	const bool twlFontFound = ((sharedFontRegion == 0 && !gameOnFlashcard) || twlSharedFont);
-	//const bool chnFontFound = ((sharedFontRegion == 1 && !gameOnFlashcard) || chnSharedFont);
-	const bool korFontFound = ((sharedFontRegion == 2 && !gameOnFlashcard) || korSharedFont);
+	const bool twlFontFound = ((sharedFontRegion == 0 && !gameOnFlashcard && !i2cBricked) || twlSharedFont);
+	//const bool chnFontFound = ((sharedFontRegion == 1 && !gameOnFlashcard && !i2cBricked) || chnSharedFont);
+	const bool korFontFound = ((sharedFontRegion == 2 && !gameOnFlashcard && !i2cBricked) || korSharedFont);
 
-	if (ndsHeader->arm7binarySize == 0x44C) {
+	if (ndsHeader->arm7binarySize == 0xA888) {
+		if (*(u32*)0x0228A688 >= 0x02F00000 && *(u32*)0x0228A688 < 0x02F80000) {
+			*(u32*)0x0228A688 -= 0x80000;
+		}
+		if (*(u32*)0x0228A68C >= 0x02F00000 && *(u32*)0x0228A68C < 0x02F80000) {
+			*(u32*)0x0228A68C -= 0x80000;
+		}
+		if (*(u32*)0x0228A690 >= 0x02F00000 && *(u32*)0x0228A690 < 0x02F80000) {
+			*(u32*)0x0228A690 -= 0x80000;
+		}
+	} else if (ndsHeader->arm7binarySize == 0x44C) {
 		if (*(u32*)0x023803BC >= 0x02F00000 && *(u32*)0x023803BC < 0x02F80000) {
 			*(u32*)0x023803BC -= 0x80000;
 		}
