@@ -463,7 +463,7 @@ static void patchReset(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const m
 
 static void patchResetTwl(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	extern u32 accessControl;
-	if (!(accessControl & BIT(4))) {
+	if (!(accessControl & BIT(4)) && strncmp(ndsHeader->gameCode, "DMF", 3) != 0) {
 		return;
 	}
 
@@ -2182,6 +2182,7 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 		extern u32 accessControl;
 
 		if (((accessControl & BIT(4))
+		   || strncmp(romTid, "DMF", 3) == 0
 		   || (strncmp(romTid, "DME", 3) == 0 && extendedMemory)
 		   || (strncmp(romTid, "DMD", 3) == 0 && extendedMemory)
 		   || strncmp(romTid, "DMP", 3) == 0
