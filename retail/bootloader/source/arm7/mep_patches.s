@@ -6,6 +6,7 @@
 	.global twlFontHeapAllocNoMep
 	.global cch2HeapAlloc
 	.global cch2HeapAddrPtr
+	.global fotoShowdownScrnClr
 	.global fourSwHeapAlloc
 	.global fourSwHeapAddrPtr
 	@.global gate18HeapAlloc
@@ -47,6 +48,8 @@ cch2HeapAddrPtr:
 	.word cch2HeapAddr
 @elementalistsHeapAlloc:
 @	.word elementalistsHeapAllocFunc
+fotoShowdownScrnClr:
+	.word fotoShowdownScrnClrFunc
 fourSwHeapAlloc:
 	.word fourSwHeapAllocFunc
 fourSwHeapAddrPtr:
@@ -197,6 +200,24 @@ _blx_cch2OrgFunction:
 	bx	r6
 cch2HeapAddr:
 .word	0x09000000 @ Offset of fontGBK.bin
+.pool
+@---------------------------------------------------------------------------------
+
+@---------------------------------------------------------------------------------
+fotoShowdownScrnClrFunc:
+@---------------------------------------------------------------------------------
+	ldr r0, =0x06008000 @ This is a BMP16 image
+	mov r1, #0x8000
+	mov r2, #0
+
+fotoShowdownScrnClr_loop:
+	strh r1, [r0, r2]
+	add r2, #2
+
+	cmp r2, #0x18000
+	bne fotoShowdownScrnClr_loop
+
+	bx lr
 .pool
 @---------------------------------------------------------------------------------
 
