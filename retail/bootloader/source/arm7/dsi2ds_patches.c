@@ -101,6 +101,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Patch DSi-Exclusives to run in DS mode
 
+#ifndef LOADERTWO
 	// Foto Showdown (USA)
 	if (strcmp(romTid, "DMFE") == 0) {
 		*(u32*)0x0200EE34 = 0xE3A00000; // mov r0, #0
@@ -217,7 +218,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Patch DSiWare to run in DS mode
 
-#ifndef LOADERTWO
 	// 1st Class Poker & BlackJack (USA)
 	else if (strcmp(romTid, "KYPE") == 0) {
 		setBL(0x02012E50, (u32)dsiSaveOpen);
@@ -13040,7 +13040,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	} */
 
 	// Invasion of the Alien Blobs! (USA)
-	else if (strcmp(romTid, "KBTE") == 0) {
+	if (strcmp(romTid, "KBTE") == 0) {
 		*(u32*)0x0201BF94 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		*(u32*)0x0201BFB0 = 0xE1A00000; // nop
 		setBL(0x020220F0, (u32)dsiSaveOpen);
