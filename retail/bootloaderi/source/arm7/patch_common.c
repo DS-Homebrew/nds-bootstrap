@@ -6643,6 +6643,16 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0203E034, (u32)dsiSaveClose);
 	}
 
+	// Foto Showdown (USA)
+	if (strcmp(romTid, "DMFE") == 0 && !dsiWramAccess) {
+		*(u32*)0x0204D3F4 = 0xE3A00001; // mov r0, #1 (Disable shutter sound playback)
+	}
+
+	// Monster Finder (Japan)
+	else if (strcmp(romTid, "DMFJ") == 0 && !dsiWramAccess) {
+		*(u32*)0x0204D10C = 0xE3A00001; // mov r0, #1 (Disable shutter sound playback)
+	}
+
 	// Frogger Returns (USA)
 	else if (strcmp(romTid, "KFGE") == 0) {
 		if (saveOnFlashcard) {
