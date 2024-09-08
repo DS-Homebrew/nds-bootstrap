@@ -399,17 +399,17 @@ int hookNdsRetailArm9(
 		if (ndsHeader->unitCode > 0 && dsiMode) {
 			extern u32 cheatSizeTotal;
 			const bool cheatsEnabled = (cheatSizeTotal > 4 && cheatSizeTotal <= 0x8000);
-			const bool pokemon = (strncmp(romTid, "IRB", 3) == 0 || strncmp(romTid, "IRA", 3) == 0 || strncmp(romTid, "IRE", 3) == 0 || strncmp(romTid, "IRD", 3) == 0);
+			const bool specialTitle = (strncmp(romTid, "V2G", 3) == 0 || strncmp(romTid, "DD3", 3) == 0);
 			extern u8 gameOnFlashcard;
 
 			ce9->cacheAddress = (consoleModel > 0 ? dev_CACHE_ADRESS_START_TWLSDK : (cheatsEnabled ? retail_CACHE_ADRESS_START_TWLSDK_CHEAT : retail_CACHE_ADRESS_START_TWLSDK));
-			if (consoleModel == 0 && !gameOnFlashcard && pokemon) {
-				ce9->cacheAddress = (cheatsEnabled ? retail_CACHE_ADRESS_START_PKMN_TWLSDK_CHEAT : retail_CACHE_ADRESS_START_PKMN_TWLSDK);
+			if (consoleModel == 0 && !gameOnFlashcard && specialTitle) {
+				ce9->cacheAddress = (cheatsEnabled ? retail_CACHE_ADRESS_START_TWLSDK_SMALL_CHEAT : retail_CACHE_ADRESS_START_TWLSDK_SMALL);
 			}
 			ce9->romLocation = ce9->cacheAddress;
 			ce9->cacheSlots = (consoleModel > 0 ? (cheatsEnabled ? dev_CACHE_ADRESS_SIZE_TWLSDK_CHEAT : dev_CACHE_ADRESS_SIZE_TWLSDK) : (cheatsEnabled ? retail_CACHE_ADRESS_SIZE_TWLSDK_CHEAT : retail_CACHE_ADRESS_SIZE_TWLSDK))/cacheBlockSize;
-			if (consoleModel == 0 && !gameOnFlashcard && pokemon) {
-				ce9->cacheSlots = (cheatsEnabled ? retail_CACHE_ADRESS_SIZE_PKMN_TWLSDK_CHEAT : retail_CACHE_ADRESS_SIZE_PKMN_TWLSDK)/cacheBlockSize;
+			if (consoleModel == 0 && !gameOnFlashcard && specialTitle) {
+				ce9->cacheSlots = (cheatsEnabled ? retail_CACHE_ADRESS_SIZE_TWLSDK_SMALL_CHEAT : retail_CACHE_ADRESS_SIZE_TWLSDK_SMALL)/cacheBlockSize;
 			}
 		} else {
 			if (strncmp(romTid, "UBR", 3) == 0) {

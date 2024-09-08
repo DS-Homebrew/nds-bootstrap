@@ -1387,7 +1387,7 @@ void patchHiHeapPointer(const module_params_t* moduleParams, const tNDSHeader* n
 	dbg_hexa((u32)oldheapPointer);
 	dbg_printf("\n\n");
 
-	const u32 dsiHiHeap = ((gameOnFlashcard && consoleModel == 0 && !cheatsEnabled) || consoleModel > 0) ? 0x02F70000 : retail_CACHE_ADRESS_START_TWLSDK;
+	const u32 dsiHiHeap = ((gameOnFlashcard && consoleModel == 0 && !cheatsEnabled) || consoleModel > 0) ? 0x02F70000 : retail_CACHE_ADRESS_START_TWLSDK_SMALL;
 	bool newHiHeapReported = false;
 
 	if (ROMsupportsDsiMode) {
@@ -1407,7 +1407,7 @@ void patchHiHeapPointer(const module_params_t* moduleParams, const tNDSHeader* n
 			}
 		} else { */
 			// DSi mode title loaded on DSi from SD card, or DSi/3DS with external DSi BIOS files loaded
-			if (!gameOnFlashcard && (strncmp(romTid, "IRB", 3) == 0 || strncmp(romTid, "IRA", 3) == 0 || strncmp(romTid, "IRE", 3) == 0 || strncmp(romTid, "IRD", 3) == 0)) {
+			if (!gameOnFlashcard && strncmp(romTid, "V2G", 3) != 0 && strncmp(romTid, "DD3", 3) != 0) {
 				switch (*heapPointer) {
 					case 0x13A007BE:
 						*heapPointer = (u32)0x13A0062F; // MOVNE R0, #0x2F00000
