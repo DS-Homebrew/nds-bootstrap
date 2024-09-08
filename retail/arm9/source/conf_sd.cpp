@@ -2175,7 +2175,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			apFixOverlaysPath = "fat:/_nds/nds-bootstrap/apFixOverlays.bin";	
 		}
 
-		if (!conf->isDSiWare && getFileSize(apFixOverlaysPath.c_str()) < 0x800000) {
+		if (!conf->isDSiWare && getFileSize(apFixOverlaysPath.c_str()) < 0xA00000) {
 			consoleDemoInit();
 			iprintf("Allocating space for\n");
 			iprintf("AP-fixed overlays.\n");
@@ -2187,13 +2187,13 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 			FILE *apFixOverlaysFile = fopen(apFixOverlaysPath.c_str(), "wb");
 			if (apFixOverlaysFile) {
-				fseek(apFixOverlaysFile, 0x800000 - 1, SEEK_SET);
+				fseek(apFixOverlaysFile, 0xA00000 - 1, SEEK_SET);
 				fputc('\0', apFixOverlaysFile);
 				fclose(apFixOverlaysFile);
 			}
 
 			consoleClear();
-			if (getFileSize(apFixOverlaysPath.c_str()) < 0x800000) {
+			if (getFileSize(apFixOverlaysPath.c_str()) < 0xA00000) {
 				iprintf("Failed to allocate space\n");
 				iprintf("for AP-fixed overlays.");
 				while (1) swiWaitForVBlank();
@@ -2228,7 +2228,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 		apFixOverlaysPath = "fat:/_nds/nds-bootstrap/apFixOverlays.bin";
 
-		if (!conf->isDSiWare && getFileSize(apFixOverlaysPath.c_str()) < 0x800000) {
+		if (!conf->isDSiWare && getFileSize(apFixOverlaysPath.c_str()) < 0xA00000) {
 			consoleDemoInit();
 			iprintf("Allocating space for\n");
 			iprintf("AP-fixed overlays.\n");
@@ -2240,13 +2240,13 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 			FILE *apFixOverlaysFile = fopen(apFixOverlaysPath.c_str(), "wb");
 			if (apFixOverlaysFile) {
-				fseek(apFixOverlaysFile, 0x800000 - 1, SEEK_SET);
+				fseek(apFixOverlaysFile, 0xA00000 - 1, SEEK_SET);
 				fputc('\0', apFixOverlaysFile);
 				fclose(apFixOverlaysFile);
 			}
 
 			consoleClear();
-			if (getFileSize(apFixOverlaysPath.c_str()) < 0x800000) {
+			if (getFileSize(apFixOverlaysPath.c_str()) < 0xA00000) {
 				iprintf("Failed to allocate space\n");
 				iprintf("for AP-fixed overlays.");
 				while (1) swiWaitForVBlank();
