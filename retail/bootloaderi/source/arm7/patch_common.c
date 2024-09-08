@@ -7250,6 +7250,24 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)(0x0201FE9C+offsetChange2) = 0xE3A00000; // mov r0, #0 (Return empty Hellokids Album)
 	}
 
+	// Hidden Photo (USA)
+	if (strcmp(romTid, "KHJE") == 0 && !dsiWramAccess) {
+		*(u32*)0x020335A0 = 0xE1A00000; // nop (Disable shutter sound loading)
+		*(u32*)0x02033A98 = 0xE3A00001; // mov r0, #1 (Disable shutter sound playback, still softlocks when taking photo)
+	}
+
+	// Hidden Photo (Europe)
+	if (strcmp(romTid, "DD3P") == 0 && !dsiWramAccess) {
+		*(u32*)0x0202C8E0 = 0xE1A00000; // nop (Disable shutter sound loading)
+		*(u32*)0x0202CDC8 = 0xE3A00001; // mov r0, #1 (Disable shutter sound playback, still softlocks when taking photo)
+	}
+
+	// Wimmelbild Creator (German)
+	if (strcmp(romTid, "DD3D") == 0 && !dsiWramAccess) {
+		*(u32*)0x0202B9E8 = 0xE1A00000; // nop (Disable shutter sound loading)
+		*(u32*)0x0202BED0 = 0xE3A00001; // mov r0, #1 (Disable shutter sound playback, still softlocks when taking photo)
+	}
+
 	// High Stakes Texas Hold'em (USA)
 	// High Stakes Texas Hold'em (Europe, Australia)
 	else if ((strcmp(romTid, "KTXE") == 0 || strcmp(romTid, "KTXV") == 0) && saveOnFlashcard) {

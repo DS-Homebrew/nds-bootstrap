@@ -248,6 +248,7 @@ static const char dsiWareForBootloader1[][4] = {
 	"KKI", // Hellokids: Vol. 1: Coloring and Painting!
 	"K5E", // G.G Series: Hero Puzzle
 	"K5J", // G.G Series: The Hidden Ninja Kagemaru
+	"KHJ", // Hidden Photo (bootloaderi-exclusive)
 	"KTX", // High Stakes Texas Hold'em
 	"KHI", // Hints Hunter
 	"KT2", // G.G Series: Horizontal Bar
