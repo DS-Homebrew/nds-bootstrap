@@ -128,7 +128,7 @@ export LIBPATHS	:=	$(foreach dir,$(LIBDIRS),-L$(dir)/lib)
 export GAME_ICON := $(CURDIR)/$(ASSETS)/icon.bmp
 
 #.PHONY: cardengine_arm7 cardengine_arm9 bootloader BootStrap clean
-.PHONY: all dist release nightly bootloader bootloader2 bootloaderi bootloaderi2 cardengine_arm7 cardengine_arm7_music cardengine_arm9_igm cardengine_arm9_igm_extmem cardengine_arm9 cardengine_arm9_start cardengine_arm9_alt cardengine_arm9_alt2 cardengine_arm9_extmem cardenginei_arm7 cardenginei_arm7_alt cardenginei_arm7_twlsdk cardenginei_arm7_twlsdk3 cardenginei_arm7_dsiware cardenginei_arm7_dsiware3 cardenginei_arm7_cheat cardenginei_arm9_igm cardenginei_arm9 cardenginei_arm9_alt cardenginei_arm9_alt2 cardenginei_arm9_dlp cardenginei_arm9_gsdd cardenginei_arm9_gsdd_alt cardenginei_arm9_dldi cardenginei_arm9_gsdd_dldi cardenginei_arm9_twlsdk cardenginei_arm9_twlsdk3 cardenginei_arm9_twlsdk_dldi cardenginei_arm9_twlsdk3_dldi cardenginei_arm9_dsiware cardenginei_arm9_dsiware3 preLoadSettings arm7/$(TARGET).elf arm9/$(TARGET).elf clean
+.PHONY: all dist release nightly bootloader bootloader2 bootloaderi bootloaderi2 cardengine_arm7 cardengine_arm7_music cardengine_arm9_igm cardengine_arm9_igm_extmem cardengine_arm9 cardengine_arm9_start cardengine_arm9_start_foto cardengine_arm9_alt cardengine_arm9_alt2 cardengine_arm9_extmem cardengine_arm9_extmem_foto cardenginei_arm7 cardenginei_arm7_alt cardenginei_arm7_twlsdk cardenginei_arm7_twlsdk3 cardenginei_arm7_dsiware cardenginei_arm7_dsiware3 cardenginei_arm7_cheat cardenginei_arm9_igm cardenginei_arm9 cardenginei_arm9_alt cardenginei_arm9_alt2 cardenginei_arm9_dlp cardenginei_arm9_gsdd cardenginei_arm9_gsdd_alt cardenginei_arm9_dldi cardenginei_arm9_gsdd_dldi cardenginei_arm9_twlsdk cardenginei_arm9_twlsdk3 cardenginei_arm9_twlsdk_dldi cardenginei_arm9_twlsdk3_dldi cardenginei_arm9_dsiware cardenginei_arm9_dsiware3 preLoadSettings arm7/$(TARGET).elf arm9/$(TARGET).elf clean
 
 all:	$(OUTPUT)
 
@@ -161,7 +161,7 @@ arm9/$(TARGET).elf:	bootloader bootloader2 bootloaderi bootloaderi2 preLoadSetti
 	@$(MAKE) -C arm9
 
 #---------------------------------------------------------------------------------		
-bootloader: $(DATA) cardengine_arm7 cardengine_arm7_music cardengine_arm9_igm cardengine_arm9_igm_extmem cardengine_arm9 cardengine_arm9_start cardengine_arm9_alt cardengine_arm9_alt2 cardengine_arm9_extmem
+bootloader: $(DATA) cardengine_arm7 cardengine_arm7_music cardengine_arm9_igm cardengine_arm9_igm_extmem cardengine_arm9 cardengine_arm9_start cardengine_arm9_start_foto cardengine_arm9_alt cardengine_arm9_alt2 cardengine_arm9_extmem cardengine_arm9_extmem_foto
 	@$(MAKE) -C bootloader
 
 #---------------------------------------------------------------------------------		
@@ -201,6 +201,10 @@ cardengine_arm9_start: $(DATA)
 	@$(MAKE) -C cardengine/arm9_start
 
 #---------------------------------------------------------------------------------		
+cardengine_arm9_start_foto: $(DATA)
+	@$(MAKE) -C cardengine/arm9_start_foto
+
+#---------------------------------------------------------------------------------		
 cardengine_arm9_alt: $(DATA)
 	@$(MAKE) -C cardengine/arm9_alt
 
@@ -211,6 +215,10 @@ cardengine_arm9_alt2: $(DATA)
 #---------------------------------------------------------------------------------		
 cardengine_arm9_extmem: $(DATA)
 	@$(MAKE) -C cardengine/arm9_extmem
+
+#---------------------------------------------------------------------------------		
+cardengine_arm9_extmem_foto: $(DATA)
+	@$(MAKE) -C cardengine/arm9_extmem_foto
 
 #---------------------------------------------------------------------------------		
 cardenginei_arm7: $(DATA)
@@ -321,9 +329,11 @@ clean:
 	@$(MAKE) -C cardengine/arm9_igm_extmem clean
 	@$(MAKE) -C cardengine/arm9 clean
 	@$(MAKE) -C cardengine/arm9_start clean
+	@$(MAKE) -C cardengine/arm9_start_foto clean
 	@$(MAKE) -C cardengine/arm9_alt clean
 	@$(MAKE) -C cardengine/arm9_alt2 clean
 	@$(MAKE) -C cardengine/arm9_extmem clean
+	@$(MAKE) -C cardengine/arm9_extmem_foto clean
 	@$(MAKE) -C cardenginei/arm7 clean
 	@$(MAKE) -C cardenginei/arm7_alt clean
 	@$(MAKE) -C cardenginei/arm7_twlsdk clean

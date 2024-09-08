@@ -1182,7 +1182,11 @@ int arm7_main(void) {
 	aFile musicsFile;
 	getFileFromCluster(&musicsFile, musicCluster);
 	if (((accessControl & BIT(4)) || arm7mbk == 0x080037C0) && musicCluster != 0) {
-		dbg_printf("Music pack found!\n");
+		if (strncmp(romTid, "DMF", 3) == 0) {
+			dbg_printf("Photo/video found!\n");
+		} else {
+			dbg_printf("Music pack found!\n");
+		}
 	}
 
 	const bool laterSdk = ((moduleParams->sdk_version >= 0x2008000 && moduleParams->sdk_version != 0x2012774) || moduleParams->sdk_version == 0x20029A8);

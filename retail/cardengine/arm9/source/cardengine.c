@@ -91,6 +91,7 @@ static aFile manualFile;
 #ifndef NODSIWARE
 static aFile sharedFontFile;
 
+#ifndef FOTO
 void updateMusic(void);
 
 static bool musicInited = false;
@@ -105,7 +106,8 @@ static u32 musicLoopPos = 0;
 static u32 musicPosRev = 0;
 static u32 musicPosInFile = 0x0;
 static u32 musicFileSize = 0x0;
-#endif
+#endif // FOTO
+#endif // NODSIWARE
 
 bool cardReadInProgress = false;
 static int cardReadCount = 0;
@@ -573,10 +575,12 @@ void myIrqHandlerIPC(void) {
 		}
 		} break;
 		#ifndef NODSIWARE
+		#ifndef FOTO
 		case 0x5:
 			updateMusic();
 			break;
-		#endif
+		#endif // FOTO
+		#endif // NODSIWARE
 		case 0x6:
 			if(ce9->mainScreen == 1)
 				REG_POWERCNT &= ~POWER_SWAP_LCDS;
@@ -1217,6 +1221,7 @@ s32 dsiSaveWrite(void* ctx, void* src, s32 len) {
 
 #ifndef NODSIWARE
 void musicInit(void) {
+	#ifndef FOTO
 	if (musicInited || musicMagicStringChecked || ce9->musicCluster == 0) {
 		return;
 	}
@@ -1237,9 +1242,11 @@ void musicInit(void) {
 	REG_EXMEMCNT = exmemcnt;
 
 	musicInited = true;
+	#endif
 }
 
 void updateMusic(void) {
+	#ifndef FOTO
 	if (sharedAddr[2] == 0x5953554D && !cardReadInProgress) { // 'MUSY'
 		const u16 exmemcnt = REG_EXMEMCNT;
 		setDeviceOwner();
@@ -1272,9 +1279,28 @@ void updateMusic(void) {
 		sharedAddr[2] = 0;
 		REG_EXMEMCNT = exmemcnt;
 	}
+	#endif
 }
 
-void musicPlay(int id) {
+#ifdef FOTO
+void musicPlay(void)
+#else
+void musicPlay(int id)
+#endif
+{
+	#ifdef FOTO
+	if (ce9->musicCluster == 0 || ce9->musicsSize < 0x18000) {
+		toncset16((u16*)0x06008000, 0x8000, 256*192);
+		return;
+	}
+
+	const u16 exmemcnt = REG_EXMEMCNT;
+	setDeviceOwner();
+
+	fileRead((char*)0x06008000, &musicsFile, 0, (256*192)*2);
+
+	REG_EXMEMCNT = exmemcnt;
+	#else
 	musicInit();
 
 	if (musicPlaying) {
@@ -1303,15 +1329,18 @@ void musicPlay(int id) {
 		while (sharedAddr[2] == 0x5053554D);
 		musicPlaying = true;
 	}
+	#endif
 }
 
 void musicStopEffect(int id) {
+	#ifndef FOTO
 	if (!musicPlaying) {
 		return;
 	}
 	sharedAddr[2] = 0x5353554D; // 'MUSS'
 	while (sharedAddr[2] == 0x5353554D);
 	musicPlaying = false;
+	#endif
 }
 
 void rumble(u32 arg) {

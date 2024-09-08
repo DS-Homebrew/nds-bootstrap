@@ -103,10 +103,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Foto Showdown (USA)
 	if (strcmp(romTid, "DMFE") == 0) {
-		const u32 newFunc = 0x0201EC9C;
-		extern u32* fotoShowdownScrnClr;
-		tonccpy((u32*)newFunc, fotoShowdownScrnClr, 0x24);
-
 		*(u32*)0x0200EE34 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x02011784 = 0xE1A00000; // nop
 		*(u32*)0x02014B1C = 0xE1A00000; // nop
@@ -120,17 +116,13 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020475C0 = 0xE1A00000; // nop
 		*(u32*)0x0204D3F4 = 0xE3A00001; // mov r0, #1 (Disable shutter sound playback)
 		*(u32*)0x0204D518 = 0xE3A00002; // mov r0, #2 (Skip camera check after A button press)
-		setBL(0x020537F8, newFunc);
+		setBL(0x020537F8, (int)ce9->patches->musicPlay);
 		*(u32*)0x020539F4 = 0xE1A00000; // nop
 		*(u32*)0x02053CF4 = 0xE12FFF1E; // bx lr
 	}
 
 	// Monster Finder (Japan)
 	else if (strcmp(romTid, "DMFJ") == 0) {
-		const u32 newFunc = 0x0201ECD0;
-		extern u32* fotoShowdownScrnClr;
-		tonccpy((u32*)newFunc, fotoShowdownScrnClr, 0x24);
-
 		*(u32*)0x0200EE38 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x02011788 = 0xE1A00000; // nop
 		*(u32*)0x02014B20 = 0xE1A00000; // nop
@@ -145,7 +137,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020472D8 = 0xE1A00000; // nop
 		*(u32*)0x0204D10C = 0xE3A00001; // mov r0, #1 (Disable shutter sound playback)
 		*(u32*)0x0204D230 = 0xE3A00002; // mov r0, #2 (Skip camera check after A button press)
-		setBL(0x02053500, newFunc);
+		setBL(0x02053500, (int)ce9->patches->musicPlay);
 		*(u32*)0x020536FC = 0xE1A00000; // nop
 		*(u32*)0x020539FC = 0xE12FFF1E; // bx lr
 	}

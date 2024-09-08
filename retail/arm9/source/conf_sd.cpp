@@ -1869,11 +1869,21 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		}
 	}
 
+	const bool foto = (strncmp(romTid, "DMF", 3) == 0);
+
 	// Load ce9 binary
 	if (b4dsDebugRam) {
-		cebin = fopen("nitro:/cardengine_arm9_extmem.lz77", "rb");
+		if (foto) {
+			cebin = fopen("nitro:/cardengine_arm9_extmem_foto.lz77", "rb");
+		} else {
+			cebin = fopen("nitro:/cardengine_arm9_extmem.lz77", "rb");
+		}
 	} else if (!startMultibootSrl && ((accessControl & BIT(4)) || (a7mbk6 == 0x080037C0 && ndsArm9Offset >= 0x02004000) || (strncmp(romTid, "AP2", 3) == 0))) {
-		cebin = fopen(ndsArm9Offset >= 0x02004000 ? "nitro:/cardengine_arm9_start.lz77" : "nitro:/cardengine_arm9.lz77", "rb");
+		if (foto) {
+			cebin = fopen("nitro:/cardengine_arm9_start_foto.lz77", "rb");
+		} else {
+			cebin = fopen(ndsArm9Offset >= 0x02004000 ? "nitro:/cardengine_arm9_start.lz77" : "nitro:/cardengine_arm9.lz77", "rb");
+		}
 	} else {
 		const char* ce9path = "nitro:/cardengine_arm9_alt.lz77";
 		if (romFSInited && donorInsideNds) {
@@ -2002,7 +2012,11 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		toncset16((u16*)IMAGES_LOCATION, 0, 256*192);
 	}
 
-	sprintf(patchOffsetCacheFilePath, "fat:/_nds/nds-bootstrap/musicPacks/%s-%04X.pck", romTid, headerCRC);
+	if (foto) {
+		sprintf(patchOffsetCacheFilePath, "fat:/_nds/nds-bootstrap/VID_0000.BIN");
+	} else {
+		sprintf(patchOffsetCacheFilePath, "fat:/_nds/nds-bootstrap/musicPacks/%s-%04X.pck", romTid, headerCRC);
+	}
 
 	musicsFilePath = patchOffsetCacheFilePath;
 	conf->musicsSize = getFileSize(patchOffsetCacheFilePath);
