@@ -114,9 +114,10 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 		*(u32*)0x020475BC = 0xE1A00000; // nop
 		*(u32*)0x020475C0 = 0xE1A00000; // nop
+		setBL(0x0204D3AC, (int)ce9->patches->musicStopEffect); // Update video frame
 		*(u32*)0x0204D3F4 = 0xE3A00001; // mov r0, #1 (Disable shutter sound playback)
 		*(u32*)0x0204D518 = 0xE3A00002; // mov r0, #2 (Skip camera check after A button press)
-		setBL(0x020537F8, (int)ce9->patches->musicPlay);
+		setBL(0x020537F8, (int)ce9->patches->musicPlay); // Start video
 		*(u32*)0x020539F4 = 0xE1A00000; // nop
 		*(u32*)0x02053CF4 = 0xE12FFF1E; // bx lr
 	}
@@ -135,9 +136,10 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 		*(u32*)0x020472D4 = 0xE1A00000; // nop
 		*(u32*)0x020472D8 = 0xE1A00000; // nop
+		setBL(0x0204D0C4, (int)ce9->patches->musicStopEffect); // Update video frame
 		*(u32*)0x0204D10C = 0xE3A00001; // mov r0, #1 (Disable shutter sound playback)
 		*(u32*)0x0204D230 = 0xE3A00002; // mov r0, #2 (Skip camera check after A button press)
-		setBL(0x02053500, (int)ce9->patches->musicPlay);
+		setBL(0x02053500, (int)ce9->patches->musicPlay); // Start video
 		*(u32*)0x020536FC = 0xE1A00000; // nop
 		*(u32*)0x020539FC = 0xE12FFF1E; // bx lr
 	}

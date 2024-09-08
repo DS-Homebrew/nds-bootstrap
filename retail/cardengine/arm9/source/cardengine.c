@@ -91,7 +91,12 @@ static aFile manualFile;
 #ifndef NODSIWARE
 static aFile sharedFontFile;
 
-#ifndef FOTO
+#ifdef FOTO
+static bool videoFrameLoading = false;
+static u32 videoPos = 0;
+#define videoFrameDelayMax 10
+static int videoFrameDelay = videoFrameDelayMax;
+#else
 void updateMusic(void);
 
 static bool musicInited = false;
@@ -447,6 +452,12 @@ void saveMainScreenSetting(void) {
 #endif
 
 void inGameMenu(s32* exRegisters) {
+	#ifdef FOTO
+	if (videoFrameLoading) {
+		while (1);
+	}
+	#endif
+
 	static bool opening = false;
 	static bool opened = false;
 	if (opening) { // If an exception error occured while reading in-game menu...
@@ -1294,12 +1305,14 @@ void musicPlay(int id)
 		return;
 	}
 
+	videoFrameLoading = true;
 	const u16 exmemcnt = REG_EXMEMCNT;
 	setDeviceOwner();
 
-	fileRead((char*)0x06008000, &musicsFile, 0, (256*192)*2);
+	fileRead((char*)0x06008000, &musicsFile, videoPos, (256*192)*2);
 
 	REG_EXMEMCNT = exmemcnt;
+	videoFrameLoading = false;
 	#else
 	musicInit();
 
@@ -1332,8 +1345,35 @@ void musicPlay(int id)
 	#endif
 }
 
-void musicStopEffect(int id) {
-	#ifndef FOTO
+#ifdef FOTO
+u32 musicStopEffect(void)
+#else
+void musicStopEffect(int id)
+#endif
+{
+	#ifdef FOTO
+	const u32 ret = (ndsHeader->gameCode[3] == 'J') ? 0x020EEE68 : 0x020EE108;
+
+	videoFrameDelay++;
+	if (videoFrameDelay > videoFrameDelayMax) videoFrameDelay = 0;
+
+	if (videoFrameDelay || ce9->musicCluster == 0 || ce9->musicsSize < 0x18004*2) {
+		return ret;
+	}
+
+	videoFrameLoading = true;
+	const u16 exmemcnt = REG_EXMEMCNT;
+	setDeviceOwner();
+
+	videoPos += 0x18004; // Seek to next frame
+	if (videoPos >= ce9->musicsSize) videoPos = 0; // Loop back to first frame after last frame has been reached
+
+	fileRead((char*)0x06008000, &musicsFile, videoPos, (256*192)*2);
+
+	REG_EXMEMCNT = exmemcnt;
+	videoFrameLoading = false;
+	return ret;
+	#else
 	if (!musicPlaying) {
 		return;
 	}
