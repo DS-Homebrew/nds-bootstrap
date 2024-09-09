@@ -24543,6 +24543,58 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// System Flaw: Recruit (USA)
+	// Requires 8MB of RAM
+	else if (strcmp(romTid, "KSYE") == 0 && extendedMemory) {
+		*(u32*)0x0200F4B0 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x020115B8 = 0xE1A00000; // nop
+		*(u32*)0x02014C30 = 0xE1A00000; // nop
+		patchInitDSiWare(0x0201A548, heapEnd);
+		*(u32*)0x0201A8D4 = *(u32*)0x02004FD0;
+		setBL(0x02042080, (u32)dsiSaveOpen);
+		setBL(0x020420D4, (u32)dsiSaveGetLength);
+		setBL(0x020420E4, (u32)dsiSaveRead);
+		setBL(0x020420EC, (u32)dsiSaveClose);
+		setBL(0x02042128, (u32)dsiSaveOpen);
+		*(u32*)0x02042140 = 0xE1A00000; // nop (dsiSaveGetArcSrc)
+		*(u32*)0x02042150 = 0xE3A00001; // mov r0, #1 (dsiSaveFreeSpaceAvailable)
+		setBL(0x0204216C, (u32)dsiSaveCreate);
+		setBL(0x02042178, (u32)dsiSaveClose);
+		setBL(0x02042188, (u32)dsiSaveOpen);
+		setBL(0x020421DC, (u32)dsiSaveSetLength);
+		setBL(0x020421EC, (u32)dsiSaveWrite);
+		setBL(0x020421F4, (u32)dsiSaveClose);
+		/* if (!extendedMemory) {
+			*(u32*)0x02045AF0 = 0xE12FFF1E; // bx lr (Disable music)
+			*(u32*)0x02045CC8 = 0xE12FFF1E; // bx lr (Disable sound)
+		} */
+		setBL(0x02047C94, (int)ce9->patches->musicPlay); // Play video
+	}
+
+	// System Flaw: Recruit (Europe)
+	// Requires 8MB of RAM
+	else if (strcmp(romTid, "KSYP") == 0 && extendedMemory) {
+		setBL(0x0200D84C, (int)ce9->patches->musicPlay); // Play video
+		setBL(0x0200DAAC, (u32)dsiSaveOpen);
+		setBL(0x0200DB00, (u32)dsiSaveGetLength);
+		setBL(0x0200DB10, (u32)dsiSaveRead);
+		setBL(0x0200DB18, (u32)dsiSaveClose);
+		setBL(0x0200DB54, (u32)dsiSaveOpen);
+		*(u32*)0x0200DB6C = 0xE1A00000; // nop (dsiSaveGetArcSrc)
+		*(u32*)0x0200DB7C = 0xE3A00001; // mov r0, #1 (dsiSaveFreeSpaceAvailable)
+		setBL(0x0200DB98, (u32)dsiSaveCreate);
+		setBL(0x0200DBA4, (u32)dsiSaveClose);
+		setBL(0x0200DBB4, (u32)dsiSaveOpen);
+		setBL(0x0200DC08, (u32)dsiSaveSetLength);
+		setBL(0x0200DC18, (u32)dsiSaveWrite);
+		setBL(0x0200DC20, (u32)dsiSaveClose);
+		*(u32*)0x0202652C = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02028634 = 0xE1A00000; // nop
+		*(u32*)0x0202BCAC = 0xE1A00000; // nop
+		patchInitDSiWare(0x020315C4, heapEnd);
+		*(u32*)0x02031950 = *(u32*)0x02004FD0;
+	}
+
 	// Tales to Enjoy!: Little Red Riding Hood (USA)
 	// Tales to Enjoy!: Puss in Boots (USA)
 	// Tales to Enjoy!: The Three Little Pigs (USA)

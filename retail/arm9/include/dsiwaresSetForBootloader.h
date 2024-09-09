@@ -498,7 +498,7 @@ static const char dsiWareForBootloader2[][4] = {
 	"KOW", // Surfacer+
 	"K97", // Sutanoberuzu: Kono Hareta Sora no Shita de
 	"K98", // Sutanoberuzu: Shirogane no Torikago
-	"KSY", // System Flaw: Recruit (bootloaderi-exclusive)
+	"KSY", // System Flaw: Recruit
 	"KZU", // Tales to Enjoy!: Little Red Riding Hood
 	"KZV", // Tales to Enjoy!: Puss in Boots
 	"KZ7", // Tales to Enjoy!: The Three Little Pigs

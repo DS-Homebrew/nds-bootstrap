@@ -1302,7 +1302,8 @@ void musicPlay(int id)
 #endif
 {
 	#ifdef FOTO
-	if (strncmp(getRomTid(ndsHeader), "DSY", 3) == 0) {
+	const char* romTid = getRomTid(ndsHeader);
+	if (strncmp(romTid, "DSY", 3) == 0 || strncmp(romTid, "KSY", 3) == 0) {
 		// This is System FLAW
 		if (ce9->musicCluster == 0 || ce9->musicsSize < 0x18004*2) {
 			return;
