@@ -1300,6 +1300,37 @@ void musicPlay(int id)
 #endif
 {
 	#ifdef FOTO
+	if (strncmp(getRomTid(ndsHeader), "DSY", 3) == 0) {
+		// This is System FLAW
+		if (ce9->musicCluster == 0 || ce9->musicsSize < 0x18004*2) {
+			return;
+		}
+
+		videoFrameLoading = true;
+		const u16 exmemcnt = REG_EXMEMCNT;
+		setDeviceOwner();
+
+		u32 frameOffset = (ndsHeader->gameCode[3] == 'P') ? 0x020767E0 : 0x02077C60;
+		static u32 frameOffsetAdd = 0x30000;
+
+		fileRead((char*)frameOffset+frameOffsetAdd, &musicsFile, videoPos, (256*192)*2);
+		frameOffsetAdd += 0x30000;
+		if (frameOffsetAdd > 0x30000*4) frameOffsetAdd = 0;
+
+		videoPos += 0x18004; // Seek to next frame
+		if (videoPos >= ce9->musicsSize) videoPos = 0; // Loop back to first frame after last frame has been reached
+
+		REG_EXMEMCNT = exmemcnt;
+		videoFrameLoading = false;
+
+		for (int i = 0; i < videoFrameDelayMax/2; i++) {
+			while (REG_VCOUNT != 191);
+			while (REG_VCOUNT == 191);
+		}
+		return;
+	}
+
+	// Otherwise, this is Foto Showdown
 	if (ce9->musicCluster == 0 || ce9->musicsSize < 0x18000) {
 		toncset16((u16*)0x06008000, 0x8000, 256*192);
 		return;

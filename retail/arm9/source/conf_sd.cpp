@@ -1869,7 +1869,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		}
 	}
 
-	const bool foto = (strncmp(romTid, "DMF", 3) == 0);
+	const bool foto = (strncmp(romTid, "DMF", 3) == 0 || strncmp(romTid, "DSY", 3) == 0);
 
 	// Load ce9 binary
 	if (b4dsDebugRam) {

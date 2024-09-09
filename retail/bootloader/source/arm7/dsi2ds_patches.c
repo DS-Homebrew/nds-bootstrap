@@ -216,6 +216,31 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02072984 += 0xE0000000; // beq -> b
 	}
 
+	// System FLAW (USA)
+	// Requires 8MB of RAM
+	else if (strcmp(romTid, "DSYE") == 0 && extendedMemory) {
+		*(u32*)0x0200D0A0 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0200F964 = 0xE1A00000; // nop
+		*(u32*)0x02012A90 = 0xE1A00000; // nop
+		patchInitDSiWare(0x02018070, heapEnd);
+		*(u32*)0x020183E0 = *(u32*)0x020510B4;
+		setBL(0x0201DA1C, (int)ce9->patches->musicPlay); // Play video
+		/* *(u32*)0x02023320 = 0xE12FFF1E; // bx lr (Disable music)
+		*(u32*)0x020234F0 = 0xE12FFF1E; // bx lr (Disable sound)
+		*(u32*)0x02023614 = 0xE12FFF1E; // bx lr (Disable sound) */
+	}
+
+	// System FLAW (Europe)
+	// Requires 8MB of RAM
+	else if (strcmp(romTid, "DSYP") == 0 && extendedMemory) {
+		*(u32*)0x0200D0F4 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0200F9B8 = 0xE1A00000; // nop
+		*(u32*)0x02012AE4 = 0xE1A00000; // nop
+		patchInitDSiWare(0x020180C4, heapEnd);
+		*(u32*)0x02018434 = *(u32*)0x020510C8;
+		setBL(0x0201DA70, (int)ce9->patches->musicPlay); // Play video
+	}
+
 	// Patch DSiWare to run in DS mode
 
 	// 1st Class Poker & BlackJack (USA)
