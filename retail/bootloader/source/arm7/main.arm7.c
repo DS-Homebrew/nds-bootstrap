@@ -1084,7 +1084,7 @@ int arm7_main(void) {
 	ndsHeader = loadHeader(&dsiHeaderTemp, moduleParams);
 	const char* romTid = getRomTid(ndsHeader);
 
-	if (dsiHeaderTemp.ndshdr.unitCode < 3 && romTid[0] != 'K' && romTid[0] != 'Z' && memcmp(romTid, "UBR", 3) != 0 && memcmp(romTid, "HND", 3) != 0 && memcmp(romTid, "HNE", 3) != 0 && srlAddr == 0 && (softResetParams[0] == 0 || softResetParams[0] == 0xFFFFFFFF)) {
+	if (!(accessControl & BIT(4)) && srlAddr == 0 && memcmp(romTid, "UBR", 3) != 0 && memcmp(romTid, "HND", 3) != 0 && memcmp(romTid, "HNE", 3) != 0 && srlAddr == 0 && (softResetParams[0] == 0 || softResetParams[0] == 0xFFFFFFFF)) {
 		esrbOutput();
 	}
 
