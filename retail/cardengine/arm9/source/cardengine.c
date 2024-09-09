@@ -58,6 +58,9 @@
 #define cardReadFix BIT(8)
 #define softResetMb BIT(13)
 
+#define videoFrameDelayMax 10
+#define videoFrameDelayMaxFlaw 1
+
 #include "tonccpy.h"
 #include "card.h"
 #include "my_fat.h"
@@ -94,7 +97,6 @@ static aFile sharedFontFile;
 #ifdef FOTO
 static bool videoFrameLoading = false;
 static u32 videoPos = 0;
-#define videoFrameDelayMax 10
 static int videoFrameDelay = videoFrameDelayMax;
 #else
 void updateMusic(void);
@@ -1294,7 +1296,7 @@ void updateMusic(void) {
 }
 
 #ifdef FOTO
-void musicPlay(void)
+void musicPlay(u32 r0, u32 r1)
 #else
 void musicPlay(int id)
 #endif
@@ -1306,27 +1308,32 @@ void musicPlay(int id)
 			return;
 		}
 
+		static u32 r1Bak = 0;
+
+		videoFrameDelay++;
+		if (videoFrameDelay > videoFrameDelayMaxFlaw) videoFrameDelay = 0;
+
 		videoFrameLoading = true;
 		const u16 exmemcnt = REG_EXMEMCNT;
 		setDeviceOwner();
 
-		u32 frameOffset = (ndsHeader->gameCode[3] == 'P') ? 0x020767E0 : 0x02077C60;
-		static u32 frameOffsetAdd = 0x30000;
+		// r1 is the frame offset
+		if (videoFrameDelay) {
+			tonccpy((u16*)r1, (u16*)r1Bak, 0x18000);
+		} else {
+			fileRead((char*)r1, &musicsFile, videoPos, (256*192)*2);
 
-		fileRead((char*)frameOffset+frameOffsetAdd, &musicsFile, videoPos, (256*192)*2);
-		frameOffsetAdd += 0x30000;
-		if (frameOffsetAdd > 0x30000*4) frameOffsetAdd = 0;
+			videoPos += 0x18004; // Seek to next frame
+			if (videoPos >= ce9->musicsSize) videoPos = 0; // Loop back to first frame after last frame has been reached
+		}
 
-		videoPos += 0x18004; // Seek to next frame
-		if (videoPos >= ce9->musicsSize) videoPos = 0; // Loop back to first frame after last frame has been reached
+		r1Bak = r1;
 
 		REG_EXMEMCNT = exmemcnt;
 		videoFrameLoading = false;
 
-		for (int i = 0; i < videoFrameDelayMax/2; i++) {
-			while (REG_VCOUNT != 191);
-			while (REG_VCOUNT == 191);
-		}
+		while (REG_VCOUNT != 191);
+		while (REG_VCOUNT == 191);
 		return;
 	}
 
