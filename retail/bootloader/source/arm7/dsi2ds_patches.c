@@ -15271,17 +15271,17 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u16*)0x020474F0 = nopT;
 	}
 
+#ifndef MVDK3_UNUSED
 	// Mario vs. Donkey Kong: Minis March Again! (USA)
 	// Save code too advanced to patch, preventing support
-	// Requires 8MB of RAM
-	else if (strcmp(romTid, "KDME") == 0 && extendedMemory) {
+	// Mini toy sprites not loaded due to memory limitations
+	// WiFi code patch not possible, due to the code taking place in the overlays
+	else if (strcmp(romTid, "KDME") == 0) {
 		//extern u32* mvdk3HeapAlloc;
 
 		*(u32*)0x02005180 = 0xE3A01702; // mov r1, #0x80000
-		/*if (!extendedMemory) {
-			*(u32*)0x02005188 = 0xE1A00000; // nop (Disable loading sound data)
-		}*/
 		*(u32*)0x02005190 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		*(u32*)0x02018EBC = 0xE1A00000; // nop
 		*(u32*)0x0202BE84 = 0xE3A00001; // mov r0, #1
 		*(u32*)0x0202BE88 = 0xE12FFF1E; // bx lr
 		/* *(u32*)0x0202BDB0 = 0xE3A00001; // mov r0, #1 (dsiSaveFlush)
@@ -15314,6 +15314,8 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0202CD74, (u32)dsiSaveClose); */
 		*(u32*)0x0202E6F8 = 0xE1A00000; // nop
 		*(u32*)0x0202E788 = 0xE1A00000; // nop
+		*(u32*)0x0202E7B4 = 0x4000; // Shrink sound heap from 0x196000: Disables music
+		*(u32*)0x02032FB0 = 0xE12FFF1E; // bx lr (Skip loading mini toy sprites)
 		/*if (!extendedMemory) {
 			tonccpy((u32*)0x0206AAC8, mvdk3HeapAlloc, 0x1D8);
 			setBL(0x02033288, 0x0206AAC8);
@@ -15321,8 +15323,19 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020612B8 = 0xE28DD00C; // ADD   SP, SP, #0xC
 		*(u32*)0x020612BC = 0xE8BD8078; // LDMFD SP!, {R3-R6,PC}
 		*(u32*)0x02064F80 = 0xE1A00000; // nop
-		patchInitDSiWare(0x0206F720, heapEndExceed);
+		patchInitDSiWare(0x0206F720, heapEnd);
 		patchUserSettingsReadDSiWare(0x02070E5C);
+		// *(u32*)0x02070E84 = wirelessReturnCodeArm;
+		*(u32*)0x02070E84 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02070E88 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02070EAC = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02070EB0 = 0xE12FFF1E; // bx lr
+		// *(u32*)0x02070ED0 = 0xE3A00001; // mov r0, #1
+		// *(u32*)0x02070ED4 = 0xE12FFF1E; // bx lr
+		// *(u32*)0x02070EE4 = 0xE3A00001; // mov r0, #1
+		// *(u32*)0x02070EE8 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02070EF4 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02070EF8 = 0xE12FFF1E; // bx lr
 		*(u32*)0x02071390 = 0xE1A00000; // nop
 		*(u32*)0x02071394 = 0xE1A00000; // nop
 		*(u32*)0x02071398 = 0xE1A00000; // nop
@@ -15331,24 +15344,41 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Mario vs. Donkey Kong: Minis March Again! (Europe, Australia)
 	// Save code too advanced to patch, preventing support
-	// Requires 8MB of RAM
-	// Does not boot
-	else if (strcmp(romTid, "KDMV") == 0 && extendedMemory) {
+	// Mini toy sprites not loaded due to memory limitations
+	// WiFi code patch not possible, due to the code taking place in the overlays
+	else if (strcmp(romTid, "KDMV") == 0) {
 		*(u32*)0x0200518C = 0xE3A01702; // mov r1, #0x80000
 		/*if (!extendedMemory) {
 			*(u32*)0x02005194 = 0xE1A00000; // nop (Disable loading sound data)
 		}*/
 		*(u32*)0x0200519C = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		*(u32*)0x020190E8 = 0xE1A00000; // nop
 		*(u32*)0x0202C6D0 = 0xE3A00001; // mov r0, #1
 		*(u32*)0x0202C6D4 = 0xE12FFF1E; // bx lr
 		*(u32*)0x0202EF08 = 0xE1A00000; // nop
 		*(u32*)0x0202EF98 = 0xE1A00000; // nop
+		*(u32*)0x0202EFC4 = 0x4000; // Shrink sound heap from 0x196000: Disables music
 		*(u32*)0x02033850 = 0xE1A00000; // nop
 		*(u32*)0x02033858 = 0xE1A00000; // nop
+		*(u32*)0x02033A6C = 0xE1A00000; // nop (Skip loading mini toy sprites)
+		*(u32*)0x02033A90 = 0xE1A00000; // nop (Skip loading mini toy sprites)
+		*(u32*)0x02033AB4 = 0xE1A00000; // nop (Skip loading mini toy sprites)
+		*(u32*)0x02033AD8 = 0xE1A00000; // nop (Skip loading mini toy sprites)
 		*(u32*)0x020617B4 = 0xE1A00000; // nop
 		*(u32*)0x0206534C = 0xE1A00000; // nop
-		patchInitDSiWare(0x0206E490, heapEndExceed);
+		patchInitDSiWare(0x0206E490, heapEnd);
 		patchUserSettingsReadDSiWare(0x0206FBAC);
+		// *(u32*)0x0206FBD4 = wirelessReturnCodeArm;
+		*(u32*)0x0206FBD4 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0206FBD8 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0206FBE0 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0206FBE4 = 0xE12FFF1E; // bx lr
+		// *(u32*)0x0206FC04 = 0xE3A00001; // mov r0, #1
+		// *(u32*)0x0206FC08 = 0xE12FFF1E; // bx lr
+		// *(u32*)0x0206FC18 = 0xE3A00001; // mov r0, #1
+		// *(u32*)0x0206FC1C = 0xE12FFF1E; // bx lr
+		*(u32*)0x0206FC28 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0206FC2C = 0xE12FFF1E; // bx lr
 		*(u32*)0x020700AC = 0xE1A00000; // nop
 		*(u32*)0x020700B0 = 0xE1A00000; // nop
 		*(u32*)0x020700B4 = 0xE1A00000; // nop
@@ -15380,6 +15410,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020700F4 = 0xE1A00000; // nop
 		*(u32*)0x020700F8 = 0xE1A00000; // nop
 	}
+#endif
 
 	// Master of Illusion Express: Deep Psyche (USA, Australia)
 	// A Little Bit of... Magic Made Fun: Deep Psyche (Europe)

@@ -302,7 +302,7 @@ static const char dsiWareForBootloader2[][4] = {
 	"KWM", // Magical Whip
 	"KJO", // Magnetic Joe
 	"KYL", // Make Up & Style
-	"KDM", // Mario vs. Donkey Kong: Minis March Again!
+	"KDM", // Mario vs. Donkey Kong: Minis March Again! (bootloaderi-exclusive)
 	"KM9", // Master of Illusion Express: Deep Psyche
 	"KMF", // Master of Illusion Express: Funny Face
 	"KMD", // Master of Illusion Express: Matchmaker
