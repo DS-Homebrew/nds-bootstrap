@@ -116,13 +116,13 @@ ipcSyncHandler:
 	ldr 	pc,	intr_ipc_orig_return
 
 code_handler_start_ipc:
-	push	{r0-r12} 
+	push	{r0-r12}
 	bl		myIrqHandlerIPC @ jump to myIrqHandler
-	pop   	{r0-r12,pc} 
+	pop   	{r0-r12,pc}
 
 .pool
 
-.thumb
+/* .thumb
 ndsCodeStart:
 	mov r1, #0
 	mov r2, #0
@@ -138,7 +138,7 @@ ndsCodeStart:
 	bx r0
 
 .balign	4
-.arm
+.arm */
 
 patches:
 .word	card_read_arm9
@@ -149,25 +149,18 @@ patches:
 .word	card_set_dma_arm9
 .word   nand_read_arm9
 .word   nand_write_arm9
-#ifdef NODSIWARE
+.word	cardStructArm9
+.word   card_pull
+.word   cacheFlushRef
+.word   0x0 @cardEndReadDmaRef
+.word   reset_arm9
+needFlushDCCache:
 .word   0x0
-.word   0x0
-.word   0x0
-.word   0x0
-.word   0x0
-.word   0x0
-.word   0x0
-.word   0x0
-.word   0x0
-.word   0x0
-.word   0x0
-.word   0x0
-.word   0x0
-.word   0x0
-.word   0x0
-.word   0x0
-.word   0x0
-#else
+.word   pdash_read
+.word	ipcSyncHandler
+#ifndef NODSIWARE
+.word   rumble_arm9
+.word   rumble2_arm9
 .word   ndmaCopy_arm
 .word   dsiSaveCheckExists_arm
 .word   dsiSaveGetResultCode_arm
@@ -186,22 +179,6 @@ patches:
 .word   musicPlay_arm
 .word   musicStopEffect_arm
 #endif
-.word	cardStructArm9
-.word   card_pull
-.word   cacheFlushRef
-.word   0x0 @cardEndReadDmaRef
-.word   reset_arm9
-#ifdef NODSIWARE
-.word   0x0
-.word   0x0
-#else
-.word   rumble_arm9
-.word   rumble2_arm9
-#endif
-needFlushDCCache:
-.word   0x0
-.word   pdash_read
-.word	ipcSyncHandler
 thumbPatches:
 .word	thumb_card_read_arm9
 .word	thumb_card_irq_enable

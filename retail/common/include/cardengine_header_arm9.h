@@ -133,6 +133,15 @@ typedef struct cardengineArm9Patches {
 	u32* card_set_dma_arm9;
 	u32* nand_read_arm9;
 	u32* nand_write_arm9;
+	u32* cardStructArm9;
+	u32* card_pull;
+	u32* cacheFlushRef;
+	u32* cardEndReadDmaRef;
+	u32* reset_arm9;
+	u32 needFlushDCCache;
+	u32* pdash_read;
+	u32* ipcSyncHandlerRef;
+	u32* rumble_arm9[2];
 	u32* ndmaCopy;
 	u32* dsiSaveCheckExists;
 	u32* dsiSaveGetResultCode;
@@ -150,15 +159,6 @@ typedef struct cardengineArm9Patches {
 	u32* dsiSaveWrite;
 	u32* musicPlay;
 	u32* musicStopEffect;
-	u32* cardStructArm9;
-	u32* card_pull;
-	u32* cacheFlushRef;
-	u32* cardEndReadDmaRef;
-	u32* reset_arm9;
-	u32* rumble_arm9[2];
-	u32 needFlushDCCache;
-	u32* pdash_read;
-	u32* ipcSyncHandlerRef;
 } cardengineArm9Patches;
 
 
