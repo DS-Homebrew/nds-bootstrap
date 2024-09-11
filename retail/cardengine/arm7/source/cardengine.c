@@ -402,7 +402,7 @@ void myIrqHandlerVBlank(void) {
 		DoRumble();
 	}
 
-	if (sharedAddr[3] == (vu32)0x52534554) {
+	if (sharedAddr[3] == 0x52534554 || sharedAddr[3] == 0x4E445352) {
 		reset();
 	}
 
