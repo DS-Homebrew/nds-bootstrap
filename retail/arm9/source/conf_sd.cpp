@@ -1869,12 +1869,15 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		}
 	}
 
+	const bool gsdd = (memcmp(romTid, "BO5", 3) == 0);
 	const bool foto = (strncmp(romTid, "DMF", 3) == 0 || strncmp(romTid, "DSY", 3) == 0 || strncmp(romTid, "KSY", 3) == 0);
 
 	// Load ce9 binary
 	if (b4dsDebugRam) {
 		if (foto) {
 			cebin = fopen("nitro:/cardengine_arm9_extmem_foto.lz77", "rb");
+		} else if (gsdd) {
+			cebin = fopen("nitro:/cardengine_arm9_extmem_gsdd.lz77", "rb");
 		} else {
 			cebin = fopen("nitro:/cardengine_arm9_extmem.lz77", "rb");
 		}
@@ -1885,7 +1888,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			cebin = fopen(ndsArm9Offset >= 0x02004000 ? "nitro:/cardengine_arm9_start.lz77" : "nitro:/cardengine_arm9.lz77", "rb");
 		}
 	} else {
-		const char* ce9path = "nitro:/cardengine_arm9_alt.lz77";
+		const char* ce9path = gsdd ? "nitro:/cardengine_arm9_alt_gsdd.lz77" : "nitro:/cardengine_arm9_alt.lz77";
 		if (romFSInited && donorInsideNds) {
 			donorNdsPath = multibootSrl;
 		}

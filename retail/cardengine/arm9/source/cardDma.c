@@ -52,6 +52,8 @@
 
 #define dmaReadLen 512
 
+#ifndef GSDD
+
 extern cardengineArm9* volatile ce9;
 
 extern aFile romFile;
@@ -212,3 +214,4 @@ u32 cardReadDma(u32 dma0, u8* dst0, u32 src0, u32 len0) {
 
     return false;
 }
+#endif

@@ -438,13 +438,26 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
         *(u32*)0x02000C14 = 0xE1A00000; //nop
 	}*/
 
+	// Golden Sun: Dark Dawn (USA, Australia)
+	else if (strcmp(romTid, "BO5E") == 0) {
+		// setBEQ(0x02003CA0, 0x02003C30); // Skip a block of DSProtect code branches
+		setBL(0x0200AC08, (u32)ce9->patches->gsdd_fix);
+		*(u32*)0x02FFF000 = 0x021F7720;
+	}
 
-    // Golden Sun
-    /*else if (strcmp(romTid, "BO5E") == 0) {
-        // patch "refresh" function
-        *(u32*)0x204995C = 0xe12fff1e; //bx lr
-        *(u32*)0x20499C4 = 0xe12fff1e; //bx lr
-    }*/
+	// Golden Sun: Dark Dawn (Europe)
+	else if (strcmp(romTid, "BO5P") == 0) {
+		// setBEQ(0x02003CDC, 0x02003C6C); // Skip a block of DSProtect code branches
+		setBL(0x0200AC44, (u32)ce9->patches->gsdd_fix);
+		*(u32*)0x02FFF000 = 0x021F78C0;
+	}
+
+	// Ougon no Taiyou: Shikkoku Naru Yoake (Japan)
+	else if (strcmp(romTid, "BO5J") == 0) {
+		// setBEQ(0x02003C7C, 0x02003C0C); // Skip a block of DSProtect code branches
+		setBL(0x0200ABE4, (u32)ce9->patches->gsdd_fix);
+		*(u32*)0x02FFF000 = 0x021F7500;
+	}
 
 	// Tony Hawk's Motion (USA)
 	// Tony Hawk's Motion (Europe)

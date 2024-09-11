@@ -77,7 +77,11 @@ vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS_SDK1;
 
 extern vu32* volatile cardStruct0;
 
+#ifdef GSDD
+static tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
+#else
 static tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER;
+#endif
 
 static aFile bootNds;
 aFile romFile;
@@ -87,7 +91,9 @@ static aFile ramDumpFile;
 static aFile srParamsFile;
 static aFile screenshotFile;
 static aFile apFixOverlaysFile;
+#ifndef NODSIWARE
 static aFile musicsFile;
+#endif
 static aFile pageFile;
 static aFile manualFile;
 
@@ -157,6 +163,7 @@ static bool initialized = false;
 // static bool region0FixNeeded = false;
 static bool igmReset = false;
 static bool mpuSet = false;
+#ifndef GSDD
 static bool isDSiWare = false;
 
 extern void continueCardReadDmaArm9();
@@ -179,6 +186,7 @@ void enableIPC_SYNC(void) {
 		REG_IE |= IRQ_IPC_SYNC;
 	}
 }
+#endif
 
 extern void slot2MpuFix();
 // extern void region0Fix(); // Revert region 0 patch
@@ -516,6 +524,7 @@ void inGameMenu(s32* exRegisters) {
 //---------------------------------------------------------------------------------
 void myIrqHandlerIPC(void) {
 //---------------------------------------------------------------------------------
+#ifndef GSDD
 	switch (IPC_GetSync()) {
 		case 0x3:
 			continueCardReadDmaArm9();
@@ -616,6 +625,7 @@ void myIrqHandlerIPC(void) {
 			inGameMenu((s32*)0);
 			break;
 	}
+#endif
 }
 
 static void initialize(void) {
@@ -632,7 +642,9 @@ static void initialize(void) {
 	getFileFromCluster(&romFile, ce9->fileCluster);
 	getFileFromCluster(&savFile, ce9->saveCluster);
 	getFileFromCluster(&patchOffsetCacheFile, ce9->patchOffsetCacheFileCluster);
+	#ifndef NODSIWARE
 	getFileFromCluster(&musicsFile, ce9->musicCluster);
+	#endif
 
 	if (ce9->romFatTableCache != 0) {
 		romFile.fatTableCache = (u32*)ce9->romFatTableCache;
@@ -644,11 +656,13 @@ static void initialize(void) {
 		savFile.fatTableCached = true;
 		savFile.fatTableCompressed = (bool)ce9->savFatTableCompressed;
 	}
+	#ifndef NODSIWARE
 	if (ce9->musicFatTableCache != 0) {
 		musicsFile.fatTableCache = (u32*)ce9->musicFatTableCache;
 		musicsFile.fatTableCached = true;
 		musicsFile.fatTableCompressed = (bool)ce9->musicsFatTableCompressed;
 	}
+	#endif
 
 	getFileFromCluster(&ramDumpFile, ce9->ramDumpCluster);
 	getFileFromCluster(&srParamsFile, ce9->srParamsCluster);
@@ -662,6 +676,7 @@ static void initialize(void) {
 
 	// bool cloneboot = (ce9->valueBits & isSdk5) ? *(u16*)0x02FFFC40 == 2 : *(u16*)0x027FFC40 == 2;
 
+	#ifndef GSDD
 	if (ce9->valueBits & isSdk5) {
 		ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
 	}
@@ -671,6 +686,7 @@ static void initialize(void) {
 		fileRead((char*)&buffer, &romFile, 0x234, sizeof(u32));
 		isDSiWare = (buffer == 0x00030004 || buffer == 0x00030005);
 	}
+	#endif
 
 	initialized = true;
 }
@@ -690,9 +706,11 @@ static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
 
 	//nocashMessage("end\n");
 
+	#ifndef GSDD
 	if (ce9->valueBits & cacheFlushFlag) {
 		cacheFlush(); //workaround for some weird data-cache issue in Bowser's Inside Story.
 	}
+	#endif
 }
 
 void cardReadRAM(u8* dst, u32 src, u32 len) {
@@ -718,6 +736,7 @@ bool isNotTcm(u32 address, u32 len) {
     && (address+len < base || address+len> base+0x4000);
 }
 
+#ifndef GSDD
 static int counter=0;
 int cardReadPDash(u32* cacheStruct, u32 src, u8* dst, u32 len) {
 	vu32* volatile cardStruct = (vu32* volatile)ce9->cardStruct0;
@@ -726,11 +745,53 @@ int cardReadPDash(u32* cacheStruct, u32 src, u8* dst, u32 len) {
     cardStruct[1] = (vu32)dst;
     cardStruct[2] = len;
 
-    cardRead(cacheStruct, dst, src, len);
+	cardRead(cacheStruct, dst, src, len);
 
     counter++;
 	return counter;
 }
+#else
+void setBL(int arg1, int arg2) {
+	*(u32*)arg1 = (((u32)(arg2 - arg1 - 8) >> 2) & 0xFFFFFF) | 0xEB000000;
+}
+
+void gsddFix(void) {
+	const u32 gsddOverlayOffset = *(u32*)0x02FFF000;
+	extern u32 gsdd_fix2;
+
+	// Patch overlay 335 (DSProtect v2.01s)
+	if (*(u32*)gsddOverlayOffset == 0xE163F679)
+	{
+		setBL(gsddOverlayOffset+0x115C, gsdd_fix2);
+	} else // Patch overlay 334 (DSProtect v2.01)
+	if (*(u32*)gsddOverlayOffset == 0xE544AA7C)
+	{
+		VoidFn decrypt = (VoidFn)(gsddOverlayOffset+0x1210);
+		(*decrypt)();
+
+		setBL(gsddOverlayOffset+0xA4C, gsdd_fix2);
+	}
+}
+
+void gsddFix2(u32* code) {
+	// Patch overlay 335 (DSProtect v2.01s) (Part 2)
+	if (code[0] == 0xE92D4FF8 && code[1] == 0xE24DDF92 && code[2] == 0xE3A0BA07) {
+		code[0x224/sizeof(u32)] += 0xE0000000; // beq -> b
+		code[0x278/sizeof(u32)] = 0xE3A01000; // mov r1, #0
+		code[0x27C/sizeof(u32)] = 0xE3A00000; // mov r0, #0
+		code[0x284/sizeof(u32)] = 0xE1A00000; // nop
+		code[0x288/sizeof(u32)] = 0xE1A00000; // nop
+	} else // Patch overlay 334 (DSProtect v2.01) (Part 2)
+	if (code[0] == 0xE92D4FF0 && code[1] == 0xE24DDF93 && code[2] == 0xE58D000C && code[3] == 0xE3A0BA07) {
+		code[0x228/sizeof(u32)] += 0xE0000000; // beq -> b
+		code[0x2C4/sizeof(u32)] = 0xE3A01000; // mov r1, #0
+		code[0x2C8/sizeof(u32)] = 0xE3A00000; // mov r0, #0
+		code[0x2D0/sizeof(u32)] = 0xE1A00000; // nop
+		code[0x2D4/sizeof(u32)] = 0xE1A00000; // nop
+	}
+}
+
+#endif
 
 void cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	if (!mpuSet) {
@@ -761,6 +822,11 @@ void cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 
 	cardReadCount++;
 
+	#ifdef GSDD
+	u32 src = src0;
+	u8* dst = dst0;
+	u32 len = len0;
+	#else
 	enableIPC_SYNC();
 
 	vu32* cardStruct = (vu32*)(ce9->cardStruct0);
@@ -768,6 +834,7 @@ void cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	u32 src = ((ce9->valueBits & isSdk5) ? src0 : cardStruct[0]);
 	u8* dst = ((ce9->valueBits & isSdk5) ? dst0 : (u8*)(cardStruct[1]));
 	u32 len = ((ce9->valueBits & isSdk5) ? len0 : cardStruct[2]);
+	#endif
 
 	// Simulate ROM mirroring
 	while (src >= ce9->romPaddingSize) {
@@ -1437,6 +1504,9 @@ void rumble2(u32 arg) {
 #endif
 
 u32 myIrqEnable(u32 irq) {	
+	#ifdef GSDD
+	return irq;
+	#else
 	int oldIME = enterCriticalSection();
 	u16 exmemcnt = REG_EXMEMCNT;
 
@@ -1474,4 +1544,5 @@ u32 myIrqEnable(u32 irq) {
 	REG_IE |= irq;
 	leaveCriticalSection(oldIME);
 	return irq_before;
+	#endif
 }
