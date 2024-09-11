@@ -240,8 +240,6 @@ card_dma_arm9:
 #ifndef GSDD
 	ldr		pc, =cardReadDma
 .pool
-	mov r0, #0
-	bx lr
 #endif
 @---------------------------------------------------------------------------------
 
