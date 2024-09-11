@@ -551,9 +551,7 @@ static void patchCardReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, c
 static bool patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
 	const char* romTid = getRomTid(ndsHeader);
 
-	if (strncmp(romTid, "AJS", 3) == 0 // Jump Super Stars
-	 || strncmp(romTid, "AJU", 3) == 0 // Jump Ultimate Stars
-	 || strncmp(romTid, "AWD", 3) == 0 // Diddy Kong Racing
+	if (strncmp(romTid, "AWD", 3) == 0 // Diddy Kong Racing
 	 || strncmp(romTid, "CP3", 3) == 0	// Viva Pinata
 	 || strncmp(romTid, "BO5", 3) == 0 // Golden Sun: Dark Dawn
 	 || strncmp(romTid, "Y8L", 3) == 0 // Golden Sun: Dark Dawn (Demo Version)
@@ -664,9 +662,7 @@ static bool patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader
 static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
 	const char* romTid = getRomTid(ndsHeader);
 
-	if (strncmp(romTid, "AJS", 3) == 0 // Jump Super Stars
-	 || strncmp(romTid, "AJU", 3) == 0 // Jump Ultimate Stars
-	 || strncmp(romTid, "AWD", 3) == 0 // Diddy Kong Racing
+	if (strncmp(romTid, "AWD", 3) == 0 // Diddy Kong Racing
 	 || strncmp(romTid, "CP3", 3) == 0	// Viva Pinata
 	 || strncmp(romTid, "BO5", 3) == 0 // Golden Sun: Dark Dawn
 	 || strncmp(romTid, "Y8L", 3) == 0 // Golden Sun: Dark Dawn (Demo Version)
@@ -818,9 +814,7 @@ static bool getSleep(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 bool a9PatchCardIrqEnable(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	const char* romTid = getRomTid(ndsHeader);
 
-	if (strncmp(romTid, "AJS", 3) == 0 // Jump Super Stars - Fix white screen on boot
-	 || strncmp(romTid, "AJU", 3) == 0 // Jump Ultimate Stars - Fix white screen on boot
-	 || strncmp(romTid, "AWD", 3) == 0 // Diddy Kong Racing - Fix corrupted 3D model bug
+	if (strncmp(romTid, "AWD", 3) == 0 // Diddy Kong Racing - Fix corrupted 3D model bug
 	 || strncmp(romTid, "CP3", 3) == 0 // Viva Pinata - Fix touch and model rendering bug
 	 || strncmp(romTid, "BO5", 3) == 0 // Golden Sun: Dark Dawn - Fix black screen on boot
 	 || strncmp(romTid, "Y8L", 3) == 0 // Golden Sun: Dark Dawn (Demo Version) - Fix black screen on boot

@@ -293,9 +293,7 @@ static void patchCardReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, c
 static bool patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
 	const char* romTid = getRomTid(ndsHeader);
 
-	if (strncmp(romTid, "AJS", 3) == 0 // Jump Super Stars
-	 || strncmp(romTid, "AJU", 3) == 0 // Jump Ultimate Stars
-	 || strncmp(romTid, "AWD", 3) == 0 // Diddy Kong Racing
+	if (strncmp(romTid, "AWD", 3) == 0 // Diddy Kong Racing
 	 || strncmp(romTid, "CP3", 3) == 0	// Viva Pinata
 	 || strncmp(romTid, "BO5", 3) == 0 // Golden Sun: Dark Dawn
 	 || strncmp(romTid, "Y8L", 3) == 0 // Golden Sun: Dark Dawn (Demo Version)
@@ -405,9 +403,7 @@ static bool patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader
 static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
 	const char* romTid = getRomTid(ndsHeader);
 
-	if (strncmp(romTid, "AJS", 3) == 0 // Jump Super Stars
-	 || strncmp(romTid, "AJU", 3) == 0 // Jump Ultimate Stars
-	 || strncmp(romTid, "AWD", 3) == 0 // Diddy Kong Racing
+	if (strncmp(romTid, "AWD", 3) == 0 // Diddy Kong Racing
 	 || strncmp(romTid, "CP3", 3) == 0	// Viva Pinata
 	 || strncmp(romTid, "BO5", 3) == 0 // Golden Sun: Dark Dawn
 	 || strncmp(romTid, "Y8L", 3) == 0 // Golden Sun: Dark Dawn (Demo Version)
