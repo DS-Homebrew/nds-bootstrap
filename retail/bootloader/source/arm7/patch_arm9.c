@@ -524,7 +524,21 @@ static void patchResetTwl(cardengineArm9* ce9, const tNDSHeader* ndsHeader, cons
 	dbg_printf("\n\n");
 }
 
+bool patchedCardIrqEnable = false;
+
 static bool patchCardIrqEnable(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+	const char* romTid = getRomTid(ndsHeader);
+
+	if (strncmp(romTid, "AWD", 3) == 0 // Diddy Kong Racing - Fix corrupted 3D model bug
+	 || strncmp(romTid, "CP3", 3) == 0 // Viva Pinata - Fix touch and model rendering bug
+	 || strncmp(romTid, "BO5", 3) == 0 // Golden Sun: Dark Dawn - Fix black screen on boot
+	 || strncmp(romTid, "Y8L", 3) == 0 // Golden Sun: Dark Dawn (Demo Version) - Fix black screen on boot
+	 || strncmp(romTid, "B8I", 3) == 0 // Spider-Man: Edge of Time - Fix white screen on boot
+	 || strncmp(romTid, "TAM", 3) == 0 // The Amazing Spider-Man - Fix white screen on boot
+	) {
+		return true;
+	}
+
 	bool usesThumb = patchOffsetCache.a9CardIrqIsThumb;
 
 	// Card irq enable
@@ -544,6 +558,7 @@ static bool patchCardIrqEnable(cardengineArm9* ce9, const tNDSHeader* ndsHeader,
     dbg_printf("cardIrqEnable location : ");
     dbg_hexa((u32)cardIrqEnableOffset);
     dbg_printf("\n\n");
+	patchedCardIrqEnable = true;
 	return true;
 }
 

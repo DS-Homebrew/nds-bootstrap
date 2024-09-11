@@ -37,6 +37,8 @@
 #include "nds_header.h"
 #include "tonccpy.h"
 
+#define a9IrqHooked BIT(7)
+
 #define RUMBLE_PAK			(*(vuint16 *)0x08000000)
 #define WARIOWARE_PAK		(*(vuint16 *)0x080000C4)
 
@@ -56,6 +58,7 @@ extern vu32* volatile cardStruct;
 extern module_params_t* moduleParams;
 extern u32 cheatEngineAddr;
 extern u32 musicBuffer;
+extern u32 valueBits;
 extern s32 mainScreen;
 extern u32 language;
 extern u32* languageAddr;
@@ -349,7 +352,7 @@ void myIrqHandlerVBlank(void) {
 
 	if ((0 == (REG_KEYINPUT & igmHotkey) && 0 == (REG_EXTKEYINPUT & (((igmHotkey >> 10) & 3) | ((igmHotkey >> 6) & 0xC0)))
 #ifndef MUSIC
-		&& !wifiIrq
+		&& (valueBits & a9IrqHooked) && !wifiIrq
 #endif
 	) || sharedAddr[5] == 0x59444552 /* REDY */) {
 		inGameMenu();
@@ -550,6 +553,10 @@ bool eepromRead(u32 src, void *dst, u32 len) {
 	dbg_hexa(len);
 	#endif	
 
+	if (!(valueBits & a9IrqHooked)) {
+		return false;
+	}
+
 	// Send a command to the ARM9 to read the save
 	const u32 commandSaveRead = 0x53415652;
 
@@ -576,6 +583,10 @@ bool eepromPageWrite(u32 dst, const void *src, u32 len) {
 	dbg_hexa(len);
 	#endif	
 	
+	if (!(valueBits & a9IrqHooked)) {
+		return false;
+	}
+
 	// Send a command to the ARM9 to write the save
 	const u32 commandSaveWrite = 0x53415657;
 
@@ -601,6 +612,10 @@ bool eepromPageProg(u32 dst, const void *src, u32 len) {
 	dbg_printf("\nlen : \n");
 	dbg_hexa(len);
 	#endif	
+
+	if (!(valueBits & a9IrqHooked)) {
+		return false;
+	}
 
 	// Send a command to the ARM9 to write the save
 	const u32 commandSaveWrite = 0x53415657;
@@ -650,6 +665,10 @@ bool eepromPageErase (u32 dst) {
 	dbg_printf("\narm7 eepromPageErase\n");	
 	#endif	
 	
+	if (!(valueBits & a9IrqHooked)) {
+		return false;
+	}
+
 	// TODO: this should be implemented?
 	return true;
 }
@@ -668,6 +687,10 @@ bool cardRead(u32 dma, u32 src, void *dst, u32 len) {
 	dbg_hexa(len);
 	#endif	
 	
+	if (!(valueBits & a9IrqHooked)) {
+		return false;
+	}
+
 	// Send a command to the ARM9 to read the ROM
 	const u32 commandRomRead = 0x524F4D52;
 

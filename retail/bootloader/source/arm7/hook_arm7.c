@@ -33,6 +33,7 @@
 #include "hook.h"
 #include "tonccpy.h"
 
+#define b_a9IrqHooked BIT(7)
 #define b_sleepMode BIT(17)
 
 extern u32 newArm7binarySize;
@@ -198,6 +199,7 @@ int hookNdsRetailArm7(
 
 	const char* romTid = getRomTid(ndsHeader);
 	extern bool maxHeapOpen;
+	extern bool patchedCardIrqEnable;
 
 	u32 cheatEngineAddr = CHEAT_ENGINE_LOCATION_B4DS;
 	if (!extendedMemory && strncmp(romTid, "CLJ", 3) == 0) { // Mario & Luigi: Bowser's Inside Story
@@ -211,6 +213,9 @@ int hookNdsRetailArm7(
 	ce7->cheatEngineAddr         = cheatEngineAddr;
 	ce7->musicBuffer = maxHeapOpen ? 0x027F8000 : 0x027F0000;
 	ce7->moduleParams            = moduleParams;
+	if (patchedCardIrqEnable) {
+		ce7->valueBits |= b_a9IrqHooked;
+	}
 	if (sleepMode) {
 		ce7->valueBits |= b_sleepMode;
 	}
