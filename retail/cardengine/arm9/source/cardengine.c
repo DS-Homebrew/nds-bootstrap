@@ -208,7 +208,8 @@ void reset(u32 param) {
 		}
 		fileWrite((char*)resetParams, &srParamsFile, 0, 0x10);
 		// if (sharedAddr[0] == 0x57495344 || param == 0xFFFFFFFF) {
-			sharedAddr[3] = 0x52534554;
+		// 	sharedAddr[3] = 0x52534554;
+			sharedAddr[3] = 0x4E445352; // 'RSDN'
 			while (1);
 		// }
 	/* }
@@ -485,9 +486,9 @@ void inGameMenu(s32* exRegisters) {
 
 	opened = false;
 
-	if ((sharedAddr[3] == 0x52534554 || sharedAddr[3] == 0x54495845) && isDSiWare) {
+	/* if ((sharedAddr[3] == 0x52534554 || sharedAddr[3] == 0x54495845) && isDSiWare) {
 		sharedAddr[0] = 0x57495344;
-	}
+	} */
 
 	fileWrite((char*)igmLocation, &pageFile, 0, 0xA000);	// Store in-game menu
 	fileRead((char*)igmLocation, &pageFile, 0xA000, 0xA000);	// Restore part of game RAM from page file

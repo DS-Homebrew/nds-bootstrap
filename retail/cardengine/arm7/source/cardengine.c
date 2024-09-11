@@ -205,6 +205,8 @@ void rebootConsole(void) {
 }
 
 void reset(void) {
+	while (sharedAddr[3] != 0x4E445352) swiDelay(100);
+
 	rebootConsole();
 	// u32 resetParam = (isSdk5Set ? RESET_PARAM_SDK5 : RESET_PARAM);
 	// if (sharedAddr[0] == 0x57495344 /*|| *(u32*)resetParam == 0xFFFFFFFF*/) {

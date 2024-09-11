@@ -109,10 +109,6 @@ void inGameMenu(void) {
 				case 0x54495551: // QUIT
 					exitMenu = true;
 					timeTillStatusRefresh = 7;
-					for (int i = 0; i < 2; i++) {
-						while (REG_VCOUNT != 191) swiDelay(100);
-						while (REG_VCOUNT == 191) swiDelay(100);
-					}
 					reset();
 					break;
 					//rebootConsole();
