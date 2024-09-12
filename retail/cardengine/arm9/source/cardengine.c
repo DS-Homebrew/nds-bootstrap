@@ -529,74 +529,15 @@ void myIrqHandlerIPC(void) {
 		case 0x3:
 			continueCardReadDmaArm9();
 			break;
-		case 0x4: {
-		switch (sharedAddr[3]) {
-			case 0x53415652: {
-				const u16 exmemcnt = REG_EXMEMCNT;
-				// Read save
-				setDeviceOwner();
-
-				u32 dst = *(vu32*)(sharedAddr+2);
-				u32 src = *(vu32*)(sharedAddr);
-				u32 len = *(vu32*)(sharedAddr+1);
-
-				if ((src % ce9->saveSize)+len > ce9->saveSize) {
-					u32 len2 = len;
-					u32 len3 = 0;
-					while ((src % ce9->saveSize)+len2 > ce9->saveSize) {
-						len2--;
-						len3++;
-					}
-					fileRead((char*)dst, &savFile, (src % ce9->saveSize), len2);
-					fileRead((char*)dst+len2, &savFile, ((src+len2) % ce9->saveSize), len3);
-				} else {
-					fileRead((char*)dst, &savFile, (src % ce9->saveSize), len);
-				}
-
+		#ifndef GSDD
+		case 0x4:
+			if (sharedAddr[3] == 0x45564153) {
+				bool cardSave(void);
+				cardSave();
 				sharedAddr[3] = 0;
-				REG_EXMEMCNT = exmemcnt;
-			} break;
-			case 0x53415657: {
-				const u16 exmemcnt = REG_EXMEMCNT;
-				// Write save
-				setDeviceOwner();
-
-				u32 src = *(vu32*)(sharedAddr+2);
-				u32 dst = *(vu32*)(sharedAddr);
-				u32 len = *(vu32*)(sharedAddr+1);
-
-				if ((dst % ce9->saveSize)+len > ce9->saveSize) {
-					u32 len2 = len;
-					u32 len3 = 0;
-					while ((dst % ce9->saveSize)+len2 > ce9->saveSize) {
-						len2--;
-						len3++;
-					}
-					fileWrite((char*)src, &savFile, (dst % ce9->saveSize), len2);
-					fileWrite((char*)src+len2, &savFile, ((dst+len2) % ce9->saveSize), len3);
-				} else {
-					fileWrite((char*)src, &savFile, (dst % ce9->saveSize), len);
-				}
-
-				sharedAddr[3] = 0;
-				REG_EXMEMCNT = exmemcnt;
-			} break;
-			case 0x524F4D52: {
-				const u16 exmemcnt = REG_EXMEMCNT;
-				// Read ROM (redirected from arm7)
-				setDeviceOwner();
-
-				u32 dst = *(vu32*)(sharedAddr+2);
-				u32 src = *(vu32*)(sharedAddr);
-				u32 len = *(vu32*)(sharedAddr+1);
-
-				fileRead((char*)dst, &romFile, src, len);
-
-				sharedAddr[3] = 0;
-				REG_EXMEMCNT = exmemcnt;
-			} break;
-		}
-		} break;
+			}
+			break;
+		#endif
 		#ifndef NODSIWARE
 		#ifndef FOTO
 		case 0x5:
@@ -854,6 +795,92 @@ void cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 
 	cardReadInProgress = false;
 	REG_EXMEMCNT = exmemcnt;
+}
+
+bool cardSave(void) {
+	#ifdef GSDD
+	vu32* cardStruct = (vu32*)(ce9->cardStruct1);
+	#else
+	vu32* cardStruct = (vu32*)(ce9->cardStruct1 ? ce9->cardStruct1 : ce9->cardStruct0);
+	#endif
+
+	#ifdef GSDD
+	u32 src = cardStruct[0];
+	u32 dst = cardStruct[1];
+	u32 len = cardStruct[2];
+	#else
+	u32 src = (ce9->valueBits & isSdk5) ? cardStruct[0] : *(vu32*)(sharedAddr);
+	u32 dst = (ce9->valueBits & isSdk5) ? cardStruct[1] : *(vu32*)(sharedAddr+1);
+	u32 len = (ce9->valueBits & isSdk5) ? cardStruct[2] : *(vu32*)(sharedAddr+2);
+	#endif
+
+	// volatile void (*finish)(void*) = (volatile void*)(cardStruct[ce9->cardSaveCmdPos+1]);
+	// void *const arg = (void*)(cardStruct[ce9->cardSaveCmdPos+2]);
+	volatile void (*finish)(void*) = (volatile void*)(cardStruct[-3]);
+	void *const arg = (void*)(cardStruct[-2]);
+
+	if (len == 0) {
+		#ifdef GSDD
+		if (finish)
+		#else
+		if ((ce9->valueBits & isSdk5) && finish)
+		#endif
+		{
+			(*finish)(arg);
+		}
+		return false;
+	}
+
+	bool res = false;
+
+	const u16 exmemcnt = REG_EXMEMCNT;
+	setDeviceOwner();
+
+	#ifdef GSDD
+	if (cardStruct[ce9->cardSaveCmdPos] != 2)
+	#else
+	if (ce9->cardStruct1 ? (cardStruct[ce9->cardSaveCmdPos] != 2) : (dst >= 0x01FF8000))
+	#endif
+	{
+		// Read save
+		if ((src % ce9->saveSize)+len > ce9->saveSize) {
+			u32 len2 = len;
+			u32 len3 = 0;
+			while ((src % ce9->saveSize)+len2 > ce9->saveSize) {
+				len2--;
+				len3++;
+			}
+			fileRead((char*)dst, &savFile, (src % ce9->saveSize), len2);
+			res = fileRead((char*)dst+len2, &savFile, ((src+len2) % ce9->saveSize), len3);
+		} else {
+			res = fileRead((char*)dst, &savFile, (src % ce9->saveSize), len);
+		}
+	} else {
+		// Write save
+		if ((dst % ce9->saveSize)+len > ce9->saveSize) {
+			u32 len2 = len;
+			u32 len3 = 0;
+			while ((dst % ce9->saveSize)+len2 > ce9->saveSize) {
+				len2--;
+				len3++;
+			}
+			fileWrite((char*)src, &savFile, (dst % ce9->saveSize), len2);
+			res = fileWrite((char*)src+len2, &savFile, ((dst+len2) % ce9->saveSize), len3);
+		} else {
+			res = fileWrite((char*)src, &savFile, (dst % ce9->saveSize), len);
+		}
+	}
+
+	REG_EXMEMCNT = exmemcnt;
+	#ifdef GSDD
+	if (finish)
+	#else
+	if ((ce9->valueBits & isSdk5) && finish)
+	#endif
+	{
+		(*finish)(arg);
+	}
+	return res;
 }
 
 bool nandRead(void* memory,void* flash,u32 len,u32 dma) {

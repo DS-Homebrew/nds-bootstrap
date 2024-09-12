@@ -36,7 +36,9 @@ romFatTableCompressed:
 savFatTableCompressed:
 	.byte	0x00
 musicFatTableCompressed:
-	.hword	0x0000
+	.byte	0x00
+cardSaveCmdPos:
+	.byte	0x00
 patchOffsetCacheFileCluster:
 	.word	0x00000000
 musicFatTableCache:
@@ -62,6 +64,8 @@ manualCluster:
 sharedFontCluster:
 	.word	0x00000000
 cardStruct0:
+	.word	0x00000000
+cardStruct1:
 	.word	0x00000000
 valueBits:
 	.word	0x00000000
@@ -142,6 +146,7 @@ ndsCodeStart:
 
 patches:
 .word	card_read_arm9
+.word	card_save_arm9
 .word	card_irq_enable
 .word	card_pull_out_arm9
 .word	card_id_arm9
@@ -206,6 +211,11 @@ card_read_arm9:
 @---------------------------------------------------------------------------------
 	ldr	pc, =cardRead
 .pool
+@---------------------------------------------------------------------------------
+card_save_arm9:
+@---------------------------------------------------------------------------------
+	ldr	pc, =cardSave
+.pool
 cardStructArm9:
 .word    0x00000000     
 cacheFlushRef:
@@ -218,7 +228,16 @@ thumb_card_read_arm9:
 @---------------------------------------------------------------------------------
 	push {r6, lr}
 	ldr	r6, =cardRead
-    blx	r6
+	blx	r6
+	pop	{r6, pc}
+.pool
+.balign	4
+@---------------------------------------------------------------------------------
+@thumb_card_save_arm9:
+@---------------------------------------------------------------------------------
+	push {r6, lr}
+	ldr	r6, =cardSave
+	blx	r6
 	pop	{r6, pc}
 .pool
 .balign	4

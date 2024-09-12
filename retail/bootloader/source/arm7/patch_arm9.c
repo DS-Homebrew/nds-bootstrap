@@ -135,7 +135,8 @@ static bool patchCardRead(cardengineArm9* ce9, const tNDSHeader* ndsHeader, cons
 
 	// Patch
 	u32* cardReadPatch = (usesThumb ? ce9->thumbPatches->card_read_arm9 : ce9->patches->card_read_arm9);
-	tonccpy(cardReadStartOffset, cardReadPatch, usesThumb ? (isSdk5(moduleParams) ? 0xB0 : 0xA0) : 0xE0); // 0xE0 = 0xF0 - 0x08
+	// tonccpy(cardReadStartOffset, cardReadPatch, usesThumb ? (isSdk5(moduleParams) ? 0xB0 : 0xA0) : 0xE0); // 0xE0 = 0xF0 - 0x08
+	tonccpy(cardReadStartOffset, cardReadPatch, usesThumb ? 0x18 : 0x10);
     dbg_printf("cardRead location : ");
     dbg_hexa((u32)cardReadStartOffset);
     dbg_printf("\n");
@@ -158,6 +159,167 @@ static bool patchCardReadMvDK4(u32 startOffset) {
 	dbg_hexa((u32)offset);
 	dbg_printf("\n\n");
 	return true;
+}
+
+static void patchCardSaveCmd(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+	// Card save command
+	/* u32* offset = patchOffsetCache.cardSaveCmdOffset;
+	if (!patchOffsetCache.cardSaveCmdChecked) {
+		offset = (u32*)findCardSaveCmdOffset(ndsHeader);
+		if (offset) {
+			patchOffsetCache.cardSaveCmdOffset = offset;
+		}
+	} */
+	u32* offset = patchOffsetCache.cardSaveCmdOffset;
+	if (!patchOffsetCache.cardSaveCmdOffset) {
+		if (isSdk5(moduleParams)) {
+			offset = findCardSaveCmdOffset5(ndsHeader);
+		} else if (moduleParams->sdk_version > 0x2020000) {
+			offset = findCardSaveCmdOffset3(ndsHeader);
+		} /* else {
+			offset = findCardSaveCmdOffset2(ndsHeader);
+		} */
+		if (offset) {
+			patchOffsetCache.cardSaveCmdOffset = offset;
+		}
+	}
+
+	if (!offset) {
+		return;
+	}
+	// Patch
+	if (isSdk5(moduleParams)) {
+		// SDK 5
+		if (*offset == 0xE92D4070) {
+			if (offset[1] == 0xE1A05001) {
+				// offset[6] = 0xE1A00000; // nop
+				// setBL((u32)offset+19*4, (u32)patchOffsetCache.cardReadStartOffset+8);
+				ce9->cardStruct1 = offset[21]+0x4FC;
+				offset[22] = (u32)ce9->patches->card_save_arm9;
+			} else {
+				// offset[10] = 0xE1A00000; // nop
+				// setBL((u32)offset+23*4, (u32)patchOffsetCache.cardReadStartOffset+8);
+				ce9->cardStruct1 = offset[25]+0x4FC;
+				offset[26] = (u32)ce9->patches->card_save_arm9;
+			}
+		} else {
+			// u16* offsetThumb = (u16*)offset;
+			// offsetThumb[12] = 0x46C0; // nop
+			// offsetThumb[13] = 0x46C0; // nop
+			// setBLThumb((u32)offset+27*2, (u32)patchOffsetCache.cardReadStartOffset+0xC);
+			ce9->cardStruct1 = offset[15]+0x7C;
+			offset[17] = (u32)ce9->patches->card_save_arm9;
+		}
+		ce9->cardSaveCmdPos = 7;
+	} else if (moduleParams->sdk_version > 0x2020000) {
+		// SDK 2.2 - 4
+		/* const u8 add = (moduleParams->sdk_version > 0x3000000) ? 0x1C : 0x18;
+		u16* offsetThumb = (u16*)offset;
+		if (*offset == 0xE92D47F0) {
+			// setB((u32)offset+8*4, (u32)offset+27*4);
+			offset[37] = 0xE1A00000; // nop
+			offset[38] = 0xE1A00000; // nop
+			setBL((u32)offset+40*4, (u32)patchOffsetCache.cardReadStartOffset+8);
+			// offset[41] = 0xE1A00000; // nop
+			ce9->cardStruct1 = offset[57]+add;
+			// offset[59] = (u32)ce9->patches->card_save_arm9;
+		} else if (*offset == 0xE92D43F8) {
+			// setB((u32)offset+8*4, (u32)offset+26*4);
+			offset[36] = 0xE1A00000; // nop
+			offset[37] = 0xE1A00000; // nop
+			setBL((u32)offset+39*4, (u32)patchOffsetCache.cardReadStartOffset+8);
+			// offset[40] = 0xE1A00000; // nop
+			ce9->cardStruct1 = offset[54]+add;
+			// offset[56] = (u32)ce9->patches->card_save_arm9;
+		} else if (offsetThumb[2] == 0x1C06) {
+			// for (int i = 10; i <= 43; i++) {
+			//	offsetThumb[i] = 0x46C0; // nop
+			// }
+			offsetThumb[55] = 0x46C0; // nop
+			offsetThumb[56] = 0x46C0; // nop
+			setBLThumb((u32)offset+58*2, (u32)patchOffsetCache.cardReadStartOffset+0xC);
+			// offsetThumb[60] = 0x46C0; // nop
+			ce9->cardStruct1 = offset[44]+add;
+			// offset[46] = (u32)ce9->patches->card_save_arm9;
+		} else {
+			// for (int i = 10; i <= 39; i++) {
+			//	offsetThumb[i] = 0x46C0; // nop
+			// }
+			offsetThumb[53] = 0x46C0; // nop
+			offsetThumb[54] = 0x46C0; // nop
+			setBLThumb((u32)offset+56*2, (u32)patchOffsetCache.cardReadStartOffset+0xC);
+			if (offsetThumb[58] == 0x2001) {
+				// offsetThumb[58] = 0x46C0; // nop
+				ce9->cardStruct1 = offset[42]+add;
+				// offset[43] = (u32)ce9->patches->card_save_arm9;
+			} else {
+				// offsetThumb[59] = 0x46C0; // nop
+				ce9->cardStruct1 = offset[41]+add;
+				// offset[42] = (u32)ce9->patches->card_save_arm9;
+			}
+		} */
+		ce9->cardSaveCmdPos = (moduleParams->sdk_version > 0x3000000) ? 6 : 5;
+	} /* else {
+		// SDK 2
+		if (*offset == 0xE92D47F0) {
+			if (offset[1] == 0xE59F60BC) {
+				setB((u32)offset+6*4, (u32)offset+23*4);
+				offset[30] = 0xE1A00000; // nop
+				offset[31] = 0xE1A00000; // nop
+				setBL((u32)offset+33*4, (u32)patchOffsetCache.cardReadStartOffset+8);
+				offset[34] = 0xE1A00000; // nop
+
+				u32* offset2 = (offset + 0xD4/4);
+				if (*offset2 == 0xE92D47F0) {
+					setB((u32)offset2+6*4, (u32)offset2+23*4);
+					offset2[30] = 0xE1A00000; // nop
+					offset2[31] = 0xE1A00000; // nop
+					setBL((u32)offset2+33*4, (u32)patchOffsetCache.cardReadStartOffset+8);
+					offset2[34] = 0xE1A00000; // nop
+				}
+			} else {
+				setB((u32)offset+6*4, (u32)offset+22*4);
+				offset[29] = 0xE1A00000; // nop
+				offset[30] = 0xE1A00000; // nop
+				setBL((u32)offset+32*4, (u32)patchOffsetCache.cardReadStartOffset+8);
+				offset[33] = 0xE1A00000; // nop
+
+				u32* offset2 = (offset + 0xD0/4);
+				if (*offset2 == 0xE92D47F0) {
+					setB((u32)offset2+6*4, (u32)offset2+22*4);
+					offset2[29] = 0xE1A00000; // nop
+					offset2[30] = 0xE1A00000; // nop
+					setBL((u32)offset2+32*4, (u32)patchOffsetCache.cardReadStartOffset+8);
+					offset2[33] = 0xE1A00000; // nop
+				}
+			}
+		} else {
+			u16* offsetThumb = (u16*)offset;
+			for (int i = 7; i <= 29; i++) {
+				offsetThumb[i] = 0x46C0; // nop
+			}
+			offsetThumb[39] = 0x46C0; // nop
+			offsetThumb[40] = 0x46C0; // nop
+			setBLThumb((u32)offset+42*2, (u32)patchOffsetCache.cardReadStartOffset+0xC);
+			offsetThumb[44] = 0x46C0; // nop
+
+			u32* offset2 = (offset + 0x9C/4);
+			u16* offsetThumb2 = (u16*)offset2;
+			if (*offsetThumb2 == 0xB5F0) {
+				for (int i = 7; i <= 29; i++) {
+					offsetThumb2[i] = 0x46C0; // nop
+				}
+				offsetThumb2[39] = 0x46C0; // nop
+				offsetThumb2[40] = 0x46C0; // nop
+				setBLThumb((u32)offset2+42*2, (u32)patchOffsetCache.cardReadStartOffset+0xC);
+				offsetThumb2[44] = 0x46C0; // nop
+			}
+		}
+	} */
+
+	dbg_printf("cardSaveCmd location : ");
+	dbg_hexa((u32)offset);
+	dbg_printf("\n\n");
 }
 
 static void patchCardPullOut(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb, int sdk5ReadType, u32** cardPullOutOffsetPtr) {
@@ -2227,6 +2389,8 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 		dbg_printf("ERR_LOAD_OTHR\n\n");
 		return ERR_LOAD_OTHR;
 	}
+
+	patchCardSaveCmd(ce9, ndsHeader, moduleParams);
 
 	if (strncmp(romTid, "V2G", 3) == 0) {
 		// try to patch card read a second time

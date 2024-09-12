@@ -126,6 +126,7 @@ typedef struct cardengineArm9 {
 //
 typedef struct cardengineArm9Patches {
 	u32* card_read_arm9;
+	u32* card_save_arm9;
 	u32* card_irq_enable;
 	u32* card_pull_out_arm9; // Unused
 	u32* card_id_arm9;
@@ -199,7 +200,8 @@ typedef struct cardengineArm9 {
     u32 savFatTableCache;
     u8 romFatTableCompressed;
     u8 savFatTableCompressed;
-    u16 musicsFatTableCompressed;
+    u8 musicsFatTableCompressed;
+	u8 cardSaveCmdPos;
     u32 patchOffsetCacheFileCluster;
     u32 musicFatTableCache;
     u32 ramDumpCluster;
@@ -213,6 +215,7 @@ typedef struct cardengineArm9 {
     u32 manualCluster;
     u32 sharedFontCluster;
     u32 cardStruct0;
+    u32 cardStruct1;
 	u32 valueBits;
 	/*
 		0: expansionPakFound
