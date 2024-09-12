@@ -529,7 +529,6 @@ void myIrqHandlerIPC(void) {
 		case 0x3:
 			continueCardReadDmaArm9();
 			break;
-		#ifndef GSDD
 		case 0x4:
 			if (sharedAddr[3] == 0x45564153) {
 				bool cardSave(void);
@@ -537,7 +536,6 @@ void myIrqHandlerIPC(void) {
 				sharedAddr[3] = 0;
 			}
 			break;
-		#endif
 		#ifndef NODSIWARE
 		#ifndef FOTO
 		case 0x5:
