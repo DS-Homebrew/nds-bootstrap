@@ -147,11 +147,6 @@ ndsCodeStart:
 patches:
 .word	card_read_arm9
 .word	card_save_arm9
-#ifdef GSDD
-.word   0
-#else
-.word	card_saveW_arm9
-#endif
 .word	card_irq_enable
 .word	card_pull_out_arm9
 .word	card_id_arm9
@@ -197,6 +192,11 @@ needFlushDCCache:
 #endif
 thumbPatches:
 .word	thumb_card_read_arm9
+#ifdef GSDD
+.word   0
+#else
+.word   thumb_card_save_arm9
+#endif
 .word	thumb_card_irq_enable
 .word	thumb_card_pull_out_arm9
 .word	thumb_card_id_arm9
@@ -222,12 +222,7 @@ card_save_arm9:
 #ifdef GSDD
 	ldr	pc, =cardSave
 #else
-	ldr	pc, =cardSaveR
-.pool
-@---------------------------------------------------------------------------------
-card_saveW_arm9:
-@---------------------------------------------------------------------------------
-	ldr	pc, =cardSaveW
+	ldr	pc, =cardSaveA
 #endif
 .pool
 cardStructArm9:
@@ -246,15 +241,17 @@ thumb_card_read_arm9:
 	pop	{r6, pc}
 .pool
 .balign	4
+#ifndef GSDD
 @---------------------------------------------------------------------------------
-@thumb_card_save_arm9:
+thumb_card_save_arm9:
 @---------------------------------------------------------------------------------
-@	push {r6, lr}
-@	ldr	r6, =cardSave
-@	blx	r6
-@	pop	{r6, pc}
-@.pool
-@.balign	4
+	push {r6, lr}
+	ldr	r6, =cardSaveA
+	blx	r6
+	pop	{r6, pc}
+.pool
+.balign	4
+#endif
 	.arm
 @---------------------------------------------------------------------------------
 

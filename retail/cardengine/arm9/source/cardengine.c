@@ -550,11 +550,9 @@ void cardSave(u32 src, u32 dst, u32 len, const bool write) {
 	REG_EXMEMCNT = exmemcnt;
 }
 
-void cardSaveR(u32 src, u32 dst, u32 len) {
-	cardSave(src, dst, len, false);
-}
-void cardSaveW(u32 src, u32 dst, u32 len) {
-	cardSave(src, dst, len, true);
+bool cardSaveA(u32 src, u32 dst, u32 len) {
+	cardSave(src, dst, len, (src >= 0x01FF8000 && src < 0x03000000));
+	return true;
 }
 #endif
 
