@@ -146,7 +146,11 @@ ndsCodeStart:
 
 patches:
 .word	card_read_arm9
+#ifdef GSDD
 .word	card_save_arm9
+#else
+.word   0
+#endif
 .word	card_irq_enable
 .word	card_pull_out_arm9
 .word	card_id_arm9
@@ -211,11 +215,13 @@ card_read_arm9:
 @---------------------------------------------------------------------------------
 	ldr	pc, =cardRead
 .pool
+#ifdef GSDD
 @---------------------------------------------------------------------------------
 card_save_arm9:
 @---------------------------------------------------------------------------------
 	ldr	pc, =cardSave
 .pool
+#endif
 cardStructArm9:
 .word    0x00000000     
 cacheFlushRef:
