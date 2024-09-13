@@ -521,6 +521,43 @@ void inGameMenu(s32* exRegisters) {
 	leaveCriticalSection(oldIME);
 }
 
+#ifndef GSDD
+void cardSave(u32 src, u32 dst, u32 len, const bool write) {
+	const u16 exmemcnt = REG_EXMEMCNT;
+	// Read/Write save
+	setDeviceOwner();
+
+	if ((src % ce9->saveSize)+len > ce9->saveSize) {
+		u32 len2 = len;
+		u32 len3 = 0;
+		while ((src % ce9->saveSize)+len2 > ce9->saveSize) {
+			len2--;
+			len3++;
+		}
+		if (write) {
+			fileWrite((char*)src, &savFile, (dst % ce9->saveSize), len2);
+			fileWrite((char*)src+len2, &savFile, ((dst+len2) % ce9->saveSize), len3);
+		} else {
+			fileRead((char*)dst, &savFile, (src % ce9->saveSize), len2);
+			fileRead((char*)dst+len2, &savFile, ((src+len2) % ce9->saveSize), len3);
+		}
+	} else if (write) {
+		fileWrite((char*)src, &savFile, (dst % ce9->saveSize), len);
+	} else {
+		fileRead((char*)dst, &savFile, (src % ce9->saveSize), len);
+	}
+
+	REG_EXMEMCNT = exmemcnt;
+}
+
+void cardSaveR(u32 src, u32 dst, u32 len) {
+	cardSave(src, dst, len, false);
+}
+void cardSaveW(u32 src, u32 dst, u32 len) {
+	cardSave(src, dst, len, true);
+}
+#endif
+
 //---------------------------------------------------------------------------------
 void myIrqHandlerIPC(void) {
 //---------------------------------------------------------------------------------
@@ -533,37 +570,8 @@ void myIrqHandlerIPC(void) {
 		switch (sharedAddr[3]) {
 			case 0x53415652:
 			case 0x53415657: {
-				const bool write = (sharedAddr[3] == 0x53415657);
-				u32 src = *(vu32*)(sharedAddr);
-				u32 dst = *(vu32*)(sharedAddr+1);
-				u32 len = *(vu32*)(sharedAddr+2);
-
-				const u16 exmemcnt = REG_EXMEMCNT;
-				// Read/Write save
-				setDeviceOwner();
-
-				if ((src % ce9->saveSize)+len > ce9->saveSize) {
-					u32 len2 = len;
-					u32 len3 = 0;
-					while ((src % ce9->saveSize)+len2 > ce9->saveSize) {
-						len2--;
-						len3++;
-					}
-					if (write) {
-						fileWrite((char*)src, &savFile, (dst % ce9->saveSize), len2);
-						fileWrite((char*)src+len2, &savFile, ((dst+len2) % ce9->saveSize), len3);
-					} else {
-						fileRead((char*)dst, &savFile, (src % ce9->saveSize), len2);
-						fileRead((char*)dst+len2, &savFile, ((src+len2) % ce9->saveSize), len3);
-					}
-				} else if (write) {
-					fileWrite((char*)src, &savFile, (dst % ce9->saveSize), len);
-				} else {
-					fileRead((char*)dst, &savFile, (src % ce9->saveSize), len);
-				}
-
+				cardSave(*(vu32*)(sharedAddr), *(vu32*)(sharedAddr+1), *(vu32*)(sharedAddr+2), (sharedAddr[3] == 0x53415657));
 				sharedAddr[3] = 0;
-				REG_EXMEMCNT = exmemcnt;
 			} break;
 			case 0x524F4D52: {
 				u32 src = *(vu32*)(sharedAddr);
@@ -576,8 +584,8 @@ void myIrqHandlerIPC(void) {
 
 				fileRead((char*)dst, &romFile, src, len);
 
-				sharedAddr[3] = 0;
 				REG_EXMEMCNT = exmemcnt;
+				sharedAddr[3] = 0;
 			} break;
 		} break;
 		#ifndef NODSIWARE
@@ -768,6 +776,68 @@ void gsddFix2(u32* code) {
 	}
 }
 
+bool cardSave(void) {
+	vu32* cardStruct = (vu32*)(ce9->cardStruct1);
+
+	u32 src = cardStruct[0];
+	u32 dst = cardStruct[1];
+	u32 len = cardStruct[2];
+
+	// volatile void (*finish)(void*) = (volatile void*)(cardStruct[ce9->cardSaveCmdPos+1]);
+	// void *const arg = (void*)(cardStruct[ce9->cardSaveCmdPos+2]);
+	volatile void (*finish)(void*) = (volatile void*)(cardStruct[-3]);
+	void *const arg = (void*)(cardStruct[-2]);
+
+	if (len == 0) {
+		if (finish) {
+			(*finish)(arg);
+		}
+		return false;
+	}
+
+	bool res = false;
+
+	const u16 exmemcnt = REG_EXMEMCNT;
+	setDeviceOwner();
+
+	if (cardStruct[7] != 2)
+	// if (ce9->cardSaveCmdPos ? (cardStruct[ce9->cardSaveCmdPos] != 2) : (dst >= 0x01FF8000))
+	{
+		// Read save
+		if ((src % ce9->saveSize)+len > ce9->saveSize) {
+			u32 len2 = len;
+			u32 len3 = 0;
+			while ((src % ce9->saveSize)+len2 > ce9->saveSize) {
+				len2--;
+				len3++;
+			}
+			fileRead((char*)dst, &savFile, (src % ce9->saveSize), len2);
+			res = fileRead((char*)dst+len2, &savFile, ((src+len2) % ce9->saveSize), len3);
+		} else {
+			res = fileRead((char*)dst, &savFile, (src % ce9->saveSize), len);
+		}
+	} else {
+		// Write save
+		if ((dst % ce9->saveSize)+len > ce9->saveSize) {
+			u32 len2 = len;
+			u32 len3 = 0;
+			while ((dst % ce9->saveSize)+len2 > ce9->saveSize) {
+				len2--;
+				len3++;
+			}
+			fileWrite((char*)src, &savFile, (dst % ce9->saveSize), len2);
+			res = fileWrite((char*)src+len2, &savFile, ((dst+len2) % ce9->saveSize), len3);
+		} else {
+			res = fileWrite((char*)src, &savFile, (dst % ce9->saveSize), len);
+		}
+	}
+
+	REG_EXMEMCNT = exmemcnt;
+	if (finish) {
+		(*finish)(arg);
+	}
+	return res;
+}
 #endif
 
 void cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
@@ -837,71 +907,6 @@ void cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	cardReadInProgress = false;
 	REG_EXMEMCNT = exmemcnt;
 }
-
-#ifdef GSDD
-bool cardSave(void) {
-	vu32* cardStruct = (vu32*)(ce9->cardStruct1);
-
-	u32 src = cardStruct[0];
-	u32 dst = cardStruct[1];
-	u32 len = cardStruct[2];
-
-	// volatile void (*finish)(void*) = (volatile void*)(cardStruct[ce9->cardSaveCmdPos+1]);
-	// void *const arg = (void*)(cardStruct[ce9->cardSaveCmdPos+2]);
-	volatile void (*finish)(void*) = (volatile void*)(cardStruct[-3]);
-	void *const arg = (void*)(cardStruct[-2]);
-
-	if (len == 0) {
-		if (finish) {
-			(*finish)(arg);
-		}
-		return false;
-	}
-
-	bool res = false;
-
-	const u16 exmemcnt = REG_EXMEMCNT;
-	setDeviceOwner();
-
-	if (cardStruct[7] != 2)
-	// if (ce9->cardSaveCmdPos ? (cardStruct[ce9->cardSaveCmdPos] != 2) : (dst >= 0x01FF8000))
-	{
-		// Read save
-		if ((src % ce9->saveSize)+len > ce9->saveSize) {
-			u32 len2 = len;
-			u32 len3 = 0;
-			while ((src % ce9->saveSize)+len2 > ce9->saveSize) {
-				len2--;
-				len3++;
-			}
-			fileRead((char*)dst, &savFile, (src % ce9->saveSize), len2);
-			res = fileRead((char*)dst+len2, &savFile, ((src+len2) % ce9->saveSize), len3);
-		} else {
-			res = fileRead((char*)dst, &savFile, (src % ce9->saveSize), len);
-		}
-	} else {
-		// Write save
-		if ((dst % ce9->saveSize)+len > ce9->saveSize) {
-			u32 len2 = len;
-			u32 len3 = 0;
-			while ((dst % ce9->saveSize)+len2 > ce9->saveSize) {
-				len2--;
-				len3++;
-			}
-			fileWrite((char*)src, &savFile, (dst % ce9->saveSize), len2);
-			res = fileWrite((char*)src+len2, &savFile, ((dst+len2) % ce9->saveSize), len3);
-		} else {
-			res = fileWrite((char*)src, &savFile, (dst % ce9->saveSize), len);
-		}
-	}
-
-	REG_EXMEMCNT = exmemcnt;
-	if (finish) {
-		(*finish)(arg);
-	}
-	return res;
-}
-#endif
 
 bool nandRead(void* memory,void* flash,u32 len,u32 dma) {
 	const u16 exmemcnt = REG_EXMEMCNT;

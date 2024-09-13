@@ -127,6 +127,7 @@ typedef struct cardengineArm9 {
 typedef struct cardengineArm9Patches {
 	u32* card_read_arm9;
 	u32* card_save_arm9;
+	u32* card_saveW_arm9;
 	u32* card_irq_enable;
 	u32* card_pull_out_arm9; // Unused
 	u32* card_id_arm9;
