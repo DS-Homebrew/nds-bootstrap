@@ -41,6 +41,7 @@
 
 #define ROMinRAM BIT(1)
 #define isSdk5 BIT(5)
+#define overlaysCached BIT(6)
 #define cacheFlushFlag BIT(7)
 #define cardReadFix BIT(8)
 #define cacheDisabled BIT(9)
@@ -58,6 +59,7 @@ extern vu32* volatile sharedAddr;
 extern tNDSHeader* ndsHeader;
 
 extern aFile* romFile;
+extern aFile* apFixOverlaysFile;
 
 extern u32 cacheDescriptor[];
 extern int cacheCounter[];
@@ -110,6 +112,9 @@ extern int getSlotForSector(u32 sector);
 //extern int getSlotForSectorManual(int i, u32 sector);
 extern vu8* getCacheAddress(int slot);
 extern void updateDescriptor(int slot, u32 sector);
+
+extern u32 newOverlayOffset;
+extern u32 newOverlaysSize;
 #endif
 
 static inline bool checkArm7(void) {
@@ -216,7 +221,7 @@ void continueCardReadDmaArm9() {
 				// Write the command
 				sharedAddr[0] = (vu32)buffer;
 				sharedAddr[1] = ce9->cacheBlockSize;
-				sharedAddr[2] = sector;
+				sharedAddr[2] = ((ce9->valueBits & overlaysCached) && src >= newOverlayOffset && src < newOverlayOffset+newOverlaysSize) ? sector+0x80000000 : sector;
 				sharedAddr[3] = commandRead;
 
 				dmaReadOnArm7 = true;
@@ -282,7 +287,7 @@ void continueCardReadDmaArm9() {
 		if (len > 0) {
 			currentLen = (len > dmaReadLen) ? dmaReadLen : len;
 
-			fileRead((char*)dst, romFile, src, currentLen);
+			fileRead((char*)dst, ((ce9->valueBits & overlaysCached) && src >= ce9->overlaysSrc && src < ndsHeader->arm7romOffset) ? apFixOverlaysFile : romFile, src, currentLen);
 
 			dmaReadOnArm9 = true;
 			IPC_SendSync(0x3);
@@ -437,6 +442,13 @@ void cardSetDma(u32 * params) {
 	enableIPC_SYNC();
 
 	#ifndef DLDI
+	if (newOverlayOffset == 0) {
+		newOverlayOffset = (ce9->overlaysSrc/ce9->cacheBlockSize)*ce9->cacheBlockSize;
+		for (u32 i = newOverlayOffset; i < ndsHeader->arm7romOffset; i+= ce9->cacheBlockSize) {
+			newOverlaysSize += ce9->cacheBlockSize;
+		}
+	}
+
 	const u32 commandRead=0x025FFB0A;
 	u32 sector = (src/ce9->cacheBlockSize)*ce9->cacheBlockSize;
 	//u32 page = (src / 512) * 512;
@@ -490,7 +502,7 @@ void cardSetDma(u32 * params) {
 			// Write the command
 			sharedAddr[0] = (vu32)buffer;
 			sharedAddr[1] = ce9->cacheBlockSize;
-			sharedAddr[2] = sector;
+			sharedAddr[2] = ((ce9->valueBits & overlaysCached) && src >= newOverlayOffset && src < newOverlayOffset+newOverlaysSize) ? sector+0x80000000 : sector;
 			sharedAddr[3] = commandRead;
 
 			dmaReadOnArm7 = true;
@@ -564,7 +576,7 @@ void cardSetDma(u32 * params) {
 
 	currentLen = (len > dmaReadLen) ? dmaReadLen : len;
 
-	fileRead((char*)dst, romFile, src, currentLen);
+	fileRead((char*)dst, ((ce9->valueBits & overlaysCached) && src >= ce9->overlaysSrc && src < ndsHeader->arm7romOffset) ? apFixOverlaysFile : romFile, src, currentLen);
 
 	dmaReadOnArm9 = true;
 	IPC_SendSync(0x3);

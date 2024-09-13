@@ -56,12 +56,11 @@
 
 extern cardengineArm9* volatile ce9;
 
-extern aFile romFile;
-
 extern bool cardReadInProgress;
 
 extern void setDeviceOwner(void);
 
+extern void cardReadNormal(u8* dst, u32 src, u32 len);
 extern void cardReadRAM(u8* dst, u32 src, u32 len);
 
 extern void callEndReadDmaThumb(void);
@@ -119,7 +118,7 @@ void continueCardReadDmaArm9() {
 			if (ce9->valueBits & ROMinRAM) {
 				cardReadRAM(dst, src, currentLen);
 			} else {
-				fileRead((char*)dst, &romFile, src, currentLen);
+				cardReadNormal(dst, src, currentLen);
 			}
 
 			dmaReadOnArm9 = true;
@@ -171,7 +170,7 @@ void cardSetDma(u32 * params) {
 	if (ce9->valueBits & ROMinRAM) {
 		cardReadRAM(dst, src, currentLen);
 	} else {
-		fileRead((char*)dst, &romFile, src, currentLen);
+		cardReadNormal(dst, src, currentLen);
 	}
 
 	dmaReadOnArm9 = true;

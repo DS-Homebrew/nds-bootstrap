@@ -78,13 +78,13 @@ vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS_SDK1;
 extern vu32* volatile cardStruct0;
 
 #ifdef GSDD
-static tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
+tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
 #else
-static tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER;
+tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER;
 #endif
 
 static aFile bootNds;
-aFile romFile;
+static aFile romFile;
 static aFile savFile;
 static aFile patchOffsetCacheFile;
 static aFile ramDumpFile;
@@ -630,7 +630,7 @@ static void initialize(void) {
 	initialized = true;
 }
 
-static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
+void cardReadNormal(u8* dst, u32 src, u32 len) {
 	/*nocashMessage("begin\n");
 
 	dbg_hexa(dst);
@@ -644,12 +644,6 @@ static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
 	fileRead((char*)dst, (ce9->apFixOverlaysCluster && src >= ce9->overlaysSrc && src < ndsHeader->arm7romOffset) ? &apFixOverlaysFile : &romFile, src, len);
 
 	//nocashMessage("end\n");
-
-	#ifndef GSDD
-	if (ce9->valueBits & cacheFlushFlag) {
-		cacheFlush(); //workaround for some weird data-cache issue in Bowser's Inside Story.
-	}
-	#endif
 }
 
 void cardReadRAM(u8* dst, u32 src, u32 len) {
@@ -789,6 +783,11 @@ void cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 		cardReadRAM(dst, src, len);
 	} else {
 		cardReadNormal(dst, src, len);
+		#ifndef GSDD
+		if (ce9->valueBits & cacheFlushFlag) {
+			cacheFlush(); //workaround for some weird data-cache issue in Bowser's Inside Story.
+		}
+		#endif
 	}
 
 	cardReadInProgress = false;

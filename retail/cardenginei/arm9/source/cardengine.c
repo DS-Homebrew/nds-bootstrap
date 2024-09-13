@@ -421,8 +421,8 @@ volatile void (*FS_Write)(u32*, u32, u32) = (volatile void*)0x0203C5C8;*/
 #endif
 
 #ifndef DLDI
-static u32 newOverlayOffset = 0;
-static u32 newOverlaysSize = 0;
+u32 newOverlayOffset = 0;
+u32 newOverlaysSize = 0;
 #endif
 
 static inline void cardReadNormal(u8* dst, u32 src, u32 len) {

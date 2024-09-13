@@ -1897,24 +1897,24 @@ u32 myIrqEnable(u32 irq) {
 //
 
 bool eepromProtect(void) {
-	#ifdef DEBUG		
+	#ifdef DEBUG
 	dbg_printf("\narm7 eepromProtect\n");
-	#endif	
-	
+	#endif
+
 	return true;
 }
 
 bool eepromRead(u32 src, void *dst, u32 len) {
-	#ifdef DEBUG	
-	dbg_printf("\narm7 eepromRead\n");	
-	
+	#ifdef DEBUG
+	dbg_printf("\narm7 eepromRead\n");
+
 	dbg_printf("\nsrc : \n");
-	dbg_hexa(src);		
+	dbg_hexa(src);
 	dbg_printf("\ndst : \n");
 	dbg_hexa((u32)dst);
 	dbg_printf("\nlen : \n");
 	dbg_hexa(len);
-	#endif	
+	#endif
 
 	if (!(valueBits & saveOnFlashcard) && isSdEjected()) {
 		return false;
@@ -1954,17 +1954,17 @@ bool eepromRead(u32 src, void *dst, u32 len) {
 }
 
 bool eepromPageWrite(u32 dst, const void *src, u32 len) {
-	#ifdef DEBUG	
-	dbg_printf("\narm7 eepromPageWrite\n");	
-	
+	#ifdef DEBUG
+	dbg_printf("\narm7 eepromPageWrite\n");
+
 	dbg_printf("\nsrc : \n");
-	dbg_hexa((u32)src);		
+	dbg_hexa((u32)src);
 	dbg_printf("\ndst : \n");
 	dbg_hexa(dst);
 	dbg_printf("\nlen : \n");
 	dbg_hexa(len);
-	#endif	
-	
+	#endif
+
 	if (!(valueBits & saveOnFlashcard) && isSdEjected()) {
 		return false;
 	}
@@ -2004,66 +2004,24 @@ bool eepromPageWrite(u32 dst, const void *src, u32 len) {
 }
 
 bool eepromPageProg(u32 dst, const void *src, u32 len) {
-	#ifdef DEBUG	
-	dbg_printf("\narm7 eepromPageProg\n");	
-	
-	dbg_printf("\nsrc : \n");
-	dbg_hexa((u32)src);		
-	dbg_printf("\ndst : \n");
-	dbg_hexa(dst);
-	dbg_printf("\nlen : \n");
-	dbg_hexa(len);
-	#endif	
+	#ifdef DEBUG
+	dbg_printf("\narm7 eepromPageProg\n");
+	#endif
 
-	if (!(valueBits & saveOnFlashcard) && isSdEjected()) {
-		return false;
-	}
-
- 	if (tryLockMutex(&saveMutex)) {
-		// while (readOngoing) { swiDelay(100); }
-		#ifdef TWLSDK
-		//bool doBak = ((valueBits & gameOnFlashcard) && !(valueBits & saveOnFlashcard));
-		//if (doBak) bakSdData();
-		#endif
-		//driveInitialize();
-		saveTimer = 1;
-		//i2cWriteRegister(0x4A, 0x12, 0x01);		// When we're saving, power button does nothing, in order to prevent corruption.
-		/*if (saveInRam) {
-			tonccpy((char*)0x02440000 + dst, src, len);
-		}*/
-		sdmmc_set_ndma_slot(4);
-		if ((dst % saveSize)+len > saveSize) {
-			u32 len2 = len;
-			u32 len3 = 0;
-			while ((u32)(dst % saveSize)+len2 > saveSize) {
-				len2--;
-				len3++;
-			}
-			fileWrite(src, savFile, (dst % saveSize), len2);
-			fileWrite(src+len2, savFile, ((dst+len2) % saveSize), len3);
-		} else {
-			fileWrite(src, savFile, (dst % saveSize), len);
-		}
-		sdmmc_set_ndma_slot(0);
-  		#ifdef TWLSDK
-		//if (doBak) restoreSdBakData();
-		#endif
-		unlockMutex(&saveMutex);
-	}
-	return true;
+	return eepromPageWrite(dst, src, len);
 }
 
 bool eepromPageVerify(u32 dst, const void *src, u32 len) {
-	#ifdef DEBUG	
-	dbg_printf("\narm7 eepromPageVerify\n");	
-	
+	#ifdef DEBUG
+	dbg_printf("\narm7 eepromPageVerify\n");
+
 	dbg_printf("\nsrc : \n");
-	dbg_hexa((u32)src);		
+	dbg_hexa((u32)src);
 	dbg_printf("\ndst : \n");
 	dbg_hexa(dst);
 	dbg_printf("\nlen : \n");
 	dbg_hexa(len);
-	#endif	
+	#endif
 
 	//i2cWriteRegister(0x4A, 0x12, 0x01);		// When we're saving, power button does nothing, in order to prevent corruption.
 	//fileWrite(src, savFile, dst, len, -1);
