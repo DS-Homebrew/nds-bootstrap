@@ -56,7 +56,7 @@ u16* findCardReadStartOffsetThumb5Type1(const module_params_t* moduleParams, con
 u32* findCardReadCachedEndOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
 u32* findCardReadCachedStartOffset(const module_params_t* moduleParams, const u32* cardReadCachedEndOffset);
 // u32* findCardSaveCmdOffset2(const tNDSHeader* ndsHeader);
-u32* findCardSaveCmdOffset3(const tNDSHeader* ndsHeader);
+// u32* findCardSaveCmdOffset3(const tNDSHeader* ndsHeader);
 u32* findCardSaveCmdOffset5(const tNDSHeader* ndsHeader);
 u32* findCardPullOutOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
 u16* findCardPullOutOffsetThumb(const tNDSHeader* ndsHeader);

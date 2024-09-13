@@ -806,25 +806,24 @@ bool cardSave(void) {
 	u32 dst = cardStruct[1];
 	u32 len = cardStruct[2];
 	#else
-	u32 src = (ce9->valueBits & isSdk5) ? cardStruct[0] : *(vu32*)(sharedAddr);
-	u32 dst = (ce9->valueBits & isSdk5) ? cardStruct[1] : *(vu32*)(sharedAddr+1);
-	u32 len = (ce9->valueBits & isSdk5) ? cardStruct[2] : *(vu32*)(sharedAddr+2);
+	u32 src = *(vu32*)(sharedAddr);
+	u32 dst = *(vu32*)(sharedAddr+1);
+	u32 len = *(vu32*)(sharedAddr+2);
 	#endif
 
+	#ifdef GSDD
 	// volatile void (*finish)(void*) = (volatile void*)(cardStruct[ce9->cardSaveCmdPos+1]);
 	// void *const arg = (void*)(cardStruct[ce9->cardSaveCmdPos+2]);
 	volatile void (*finish)(void*) = (volatile void*)(cardStruct[-3]);
 	void *const arg = (void*)(cardStruct[-2]);
+	#endif
 
 	if (len == 0) {
 		#ifdef GSDD
-		if (finish)
-		#else
-		if ((ce9->valueBits & isSdk5) && finish)
-		#endif
-		{
+		if (finish) {
 			(*finish)(arg);
 		}
+		#endif
 		return false;
 	}
 
@@ -836,7 +835,7 @@ bool cardSave(void) {
 	#ifdef GSDD
 	if (cardStruct[ce9->cardSaveCmdPos] != 2)
 	#else
-	if (ce9->cardStruct1 ? (cardStruct[ce9->cardSaveCmdPos] != 2) : (dst >= 0x01FF8000))
+	if (ce9->cardSaveCmdPos ? (cardStruct[ce9->cardSaveCmdPos] != 2) : (dst >= 0x01FF8000))
 	#endif
 	{
 		// Read save
@@ -870,13 +869,10 @@ bool cardSave(void) {
 
 	REG_EXMEMCNT = exmemcnt;
 	#ifdef GSDD
-	if (finish)
-	#else
-	if ((ce9->valueBits & isSdk5) && finish)
-	#endif
-	{
+	if (finish) {
 		(*finish)(arg);
 	}
+	#endif
 	return res;
 }
 

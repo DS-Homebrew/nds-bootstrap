@@ -41,11 +41,11 @@ static const u16 cardReadStartSignatureThumb5Alt[1] = {0xB5F8};                 
 // static const u32 cardSaveCmdSignature2[4]          = {0xE92D47F0, 0xE59F60BC, 0xE1A0A000, 0xE1A09001};
 // static const u32 cardSaveCmdSignature21[4]         = {0xE92D47F0, 0xE59F60B8, 0xE1A0A000, 0xE1A09001};
 // static const u16 cardSaveCmdSignatureThumb2[7]     = {0xB5F0, 0xB083, 0x1C06, 0x1C0F, 0x9200, 0x9301, 0x4D1F};
-static const u32 cardSaveCmdSignature3[4]          = {0xE92D47F0, 0xE1A0A000, 0xE59F60D4, 0xE59F00D4}; // SDK 2.2 - 3
-static const u32 cardSaveCmdSignature3Alt[4]       = {0xE92D43F8, 0xE1A09000, 0xE59F40C8, 0xE59F00C8}; // SDK 3-4
-static const u16 cardSaveCmdSignatureThumb3[8]     = {0xB5F0, 0xB083, 0x1C06, 0x1C0F, 0x9200, 0x9301, 0x4D28, 0x4829}; // SDK 2.2 - 3
-static const u16 cardSaveCmdSignatureThumb3Alt[8]  = {0xB5F0, 0xB085, 0x9000, 0x9101, 0x9202, 0x9303, 0x4D26, 0x4827};
-static const u16 cardSaveCmdSignatureThumb3Alt2[4] = {0xB5F0, 0xB085, 0x9000, 0x4827}; // SDK 3-4
+// static const u32 cardSaveCmdSignature3[4]          = {0xE92D47F0, 0xE1A0A000, 0xE59F60D4, 0xE59F00D4}; // SDK 2.2 - 3
+// static const u32 cardSaveCmdSignature3Alt[4]       = {0xE92D43F8, 0xE1A09000, 0xE59F40C8, 0xE59F00C8}; // SDK 3-4
+// static const u16 cardSaveCmdSignatureThumb3[8]     = {0xB5F0, 0xB083, 0x1C06, 0x1C0F, 0x9200, 0x9301, 0x4D28, 0x4829}; // SDK 2.2 - 3
+// static const u16 cardSaveCmdSignatureThumb3Alt[8]  = {0xB5F0, 0xB085, 0x9000, 0x9101, 0x9202, 0x9303, 0x4D26, 0x4827};
+// static const u16 cardSaveCmdSignatureThumb3Alt2[4] = {0xB5F0, 0xB085, 0x9000, 0x4827}; // SDK 3-4
 static const u32 cardSaveCmdSignature5[5]          = {0xE92D4070, 0xE1A05001, 0xE1A06000, 0xE59D1010, 0xE1A00003}; // SDK 5
 static const u32 cardSaveCmdSignature5Alt[5]       = {0xE92D4070, 0xE59DC020, 0xE1A06000, 0xE1A04002, 0xE1A05001}; // SDK 5
 static const u16 cardSaveCmdSignatureThumb5[5]     = {0xB570, 0x1C05, 0x9808, 0x1C0C, 0x1C16}; // SDK 5
@@ -691,7 +691,7 @@ u16* findCardReadStartOffsetThumb5Type1(const module_params_t* moduleParams, con
 
 	dbg_printf("\n");
 	return offset;
-} */
+}
 
 u32* findCardSaveCmdOffset3(const tNDSHeader* ndsHeader) {
 	dbg_printf("findCardSaveCmdOffset3:\n");
@@ -732,7 +732,7 @@ u32* findCardSaveCmdOffset3(const tNDSHeader* ndsHeader) {
 
 	dbg_printf("\n");
 	return offset;
-}
+} */
 
 u32* findCardSaveCmdOffset5(const tNDSHeader* ndsHeader) {
 	dbg_printf("findCardSaveCmdOffset5:\n");

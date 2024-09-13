@@ -553,7 +553,7 @@ bool eepromRead(u32 src, void *dst, u32 len) {
 	dbg_hexa(len);
 	#endif
 
-	if (isSdk5Set || !(valueBits & a9IrqHooked)) {
+	if (!(valueBits & a9IrqHooked)) {
 		return false;
 	}
 
@@ -583,7 +583,7 @@ bool eepromPageWrite(u32 dst, const void *src, u32 len) {
 	dbg_hexa(len);
 	#endif
 
-	if (isSdk5Set || !(valueBits & a9IrqHooked)) {
+	if (!(valueBits & a9IrqHooked)) {
 		return false;
 	}
 
@@ -613,7 +613,7 @@ bool eepromPageProg(u32 dst, const void *src, u32 len) {
 	dbg_hexa(len);
 	#endif
 
-	if (isSdk5Set || !(valueBits & a9IrqHooked)) {
+	if (!(valueBits & a9IrqHooked)) {
 		return false;
 	}
 
@@ -665,7 +665,7 @@ bool eepromPageErase (u32 dst) {
 	dbg_printf("\narm7 eepromPageErase\n");
 	#endif
 
-	if (isSdk5Set || !(valueBits & a9IrqHooked)) {
+	if (!(valueBits & a9IrqHooked)) {
 		return false;
 	}
 

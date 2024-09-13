@@ -174,9 +174,9 @@ static void patchCardSaveCmd(cardengineArm9* ce9, const tNDSHeader* ndsHeader, c
 	if (!patchOffsetCache.cardSaveCmdOffset) {
 		if (isSdk5(moduleParams)) {
 			offset = findCardSaveCmdOffset5(ndsHeader);
-		} else if (moduleParams->sdk_version > 0x2020000) {
+		} /* else if (moduleParams->sdk_version > 0x2020000) {
 			offset = findCardSaveCmdOffset3(ndsHeader);
-		} /* else {
+		} else {
 			offset = findCardSaveCmdOffset2(ndsHeader);
 		} */
 		if (offset) {
@@ -184,23 +184,24 @@ static void patchCardSaveCmd(cardengineArm9* ce9, const tNDSHeader* ndsHeader, c
 		}
 	}
 
-	if (!offset) {
+	if (!offset && isSdk5(moduleParams)) {
 		return;
 	}
 	// Patch
 	if (isSdk5(moduleParams)) {
 		// SDK 5
+		const bool gsdd = (strncmp(getRomTid(ndsHeader), "BO5", 3) == 0);
 		if (*offset == 0xE92D4070) {
 			if (offset[1] == 0xE1A05001) {
 				// offset[6] = 0xE1A00000; // nop
 				// setBL((u32)offset+19*4, (u32)patchOffsetCache.cardReadStartOffset+8);
 				ce9->cardStruct1 = offset[21]+0x4FC;
-				offset[22] = (u32)ce9->patches->card_save_arm9;
+				if (gsdd) offset[22] = (u32)ce9->patches->card_save_arm9;
 			} else {
 				// offset[10] = 0xE1A00000; // nop
 				// setBL((u32)offset+23*4, (u32)patchOffsetCache.cardReadStartOffset+8);
 				ce9->cardStruct1 = offset[25]+0x4FC;
-				offset[26] = (u32)ce9->patches->card_save_arm9;
+				if (gsdd) offset[26] = (u32)ce9->patches->card_save_arm9;
 			}
 		} else {
 			// u16* offsetThumb = (u16*)offset;
@@ -208,7 +209,7 @@ static void patchCardSaveCmd(cardengineArm9* ce9, const tNDSHeader* ndsHeader, c
 			// offsetThumb[13] = 0x46C0; // nop
 			// setBLThumb((u32)offset+27*2, (u32)patchOffsetCache.cardReadStartOffset+0xC);
 			ce9->cardStruct1 = offset[15]+0x7C;
-			offset[17] = (u32)ce9->patches->card_save_arm9;
+			if (gsdd) offset[17] = (u32)ce9->patches->card_save_arm9;
 		}
 		ce9->cardSaveCmdPos = 7;
 	} else if (moduleParams->sdk_version > 0x2020000) {
@@ -317,9 +318,11 @@ static void patchCardSaveCmd(cardengineArm9* ce9, const tNDSHeader* ndsHeader, c
 		}
 	} */
 
-	dbg_printf("cardSaveCmd location : ");
-	dbg_hexa((u32)offset);
-	dbg_printf("\n\n");
+	if (offset) {
+		dbg_printf("cardSaveCmd location : ");
+		dbg_hexa((u32)offset);
+		dbg_printf("\n\n");
+	}
 }
 
 static void patchCardPullOut(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb, int sdk5ReadType, u32** cardPullOutOffsetPtr) {
