@@ -486,11 +486,11 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
 		const u16* branchCode2 = generateA7InstrThumb(0x020BA66A, 0x020BA6C0);
 		tonccpy((void*)0x020BA66A, branchCode2, 0x4);
 
-		/* tonccpy((void*)0x020BA728, ce9->thumbPatches->card_set_dma_arm9, 0xC);
+		tonccpy((void*)0x020BA728, ce9->thumbPatches->card_set_dma_arm9, 0xC);
 
 		const u16* branchCode3 = generateA7InstrThumb(0x020BA70C, 0x020BA728);
 		tonccpy((void*)0x020BA70C, branchCode3, 0x4);
-		*(u16*)0x020BA710 = 0xBDF8; */
+		*(u16*)0x020BA710 = 0xBDF8;
 
 		const u16* branchCode4 = generateA7InstrThumb(0x020BAAA2, 0x020BAAAC);
 		tonccpy((void*)0x020BAAA2, branchCode4, 0x4);
