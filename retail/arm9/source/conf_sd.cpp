@@ -2016,7 +2016,13 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	}
 
 	if (foto) {
-		sprintf(patchOffsetCacheFilePath, "fat:/_nds/nds-bootstrap/VID_0000.BIN");
+		sprintf(patchOffsetCacheFilePath, "fat:/_nds/nds-bootstrap/dsiCamera/%s-%04X.bin", romTid, headerCRC);
+		if (access(patchOffsetCacheFilePath, F_OK) != 0) {
+			sprintf(patchOffsetCacheFilePath, "fat:/_nds/nds-bootstrap/dsiCamera/%s.bin", romTid);
+		}
+		if (access(patchOffsetCacheFilePath, F_OK) != 0) {
+			sprintf(patchOffsetCacheFilePath, "fat:/_nds/nds-bootstrap/dsiCamera/default.bin");
+		}
 	} else {
 		sprintf(patchOffsetCacheFilePath, "fat:/_nds/nds-bootstrap/musicPacks/%s-%04X.pck", romTid, headerCRC);
 	}
