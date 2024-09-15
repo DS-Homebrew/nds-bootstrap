@@ -2257,6 +2257,10 @@ static void nandSavePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader, cons
 		*(u32*)(0x020098C8) = 0xe3a00000; //mov r0, #0
 		*(u32*)(0x020098CC) = 0xe12fff1e; //bx lr
 
+		//u32 gNandState(void)
+		*(u32*)(0x02009AA8) = 0xe1a00000; //nop
+		*(u32*)(0x02009AB0) = 0x06600000;
+
 		//u32 gNandError(void)
 		*(u32*)(0x02009AB4) = 0xe3a00000; //mov r0, #0
 		*(u32*)(0x02009AB8) = 0xe12fff1e; //bx lr
