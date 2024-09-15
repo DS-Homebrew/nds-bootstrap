@@ -110,6 +110,10 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchInitDSiWare(0x0201C4FC, heapEnd);
 		*(u32*)0x0201C86C = *(u32*)0x02004FD0;
 		*(u32*)0x0201D698 = 0xE12FFF1E; // bx lr (Disable changing SCFG_CLK)
+		*(u32*)0x0201D7A8 = wirelessReturnCodeArm;
+		*(u32*)0x0201D7AC = 0xE12FFF1E; // bx lr
+		*(u32*)0x0201D7B4 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0201D7B8 = 0xE12FFF1E; // bx lr
 		if (!extendedMemory) {
 			*(u32*)0x0202048C = 0xE12FFF1E; // bx lr
 		}
@@ -132,6 +136,10 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchInitDSiWare(0x0201C510, heapEnd);
 		*(u32*)0x0201C880 = *(u32*)0x02004FD0;
 		*(u32*)0x0201D6AC = 0xE12FFF1E; // bx lr (Disable changing SCFG_CLK)
+		*(u32*)0x0201D7BC = wirelessReturnCodeArm;
+		*(u32*)0x0201D7C0 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0201D7C8 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0201D7CC = 0xE12FFF1E; // bx lr
 		if (!extendedMemory) {
 			*(u32*)0x020204C0 = 0xE12FFF1E; // bx lr
 		}
