@@ -2409,74 +2409,95 @@ static void nandSavePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader, cons
 		sdPatchEntry = 0x2002be4; 
 	}
 
-    if(sdPatchEntry) {   
-      //u32 gNandInit(void* data)
-      *(u32*)((u8*)sdPatchEntry+0x50C) = 0xe3a00001; //mov r0, #1
-      *(u32*)((u8*)sdPatchEntry+0x510) = 0xe12fff1e; //bx lr
+	if (sdPatchEntry) {
+		//u32 gNandInit(void* data)
+		*(u32*)((u8*)sdPatchEntry+0x50C) = 0xe3a00001; //mov r0, #1
+		*(u32*)((u8*)sdPatchEntry+0x510) = 0xe12fff1e; //bx lr
 
-      //u32 gNandWait(void)
-      *(u32*)((u8*)sdPatchEntry+0xC9C) = 0xe12fff1e; //bx lr
+		//u32 gNandWait(void)
+		*(u32*)((u8*)sdPatchEntry+0xC9C) = 0xe12fff1e; //bx lr
 
-      //u32 gNandState(void)
-      *(u32*)((u8*)sdPatchEntry+0xEB0) = 0xe3a00003; //mov r0, #3
-      *(u32*)((u8*)sdPatchEntry+0xEB4) = 0xe12fff1e; //bx lr
+		//u32 gNandState(void)
+		*(u32*)((u8*)sdPatchEntry+0xEB0) = 0xe3a00003; //mov r0, #3
+		*(u32*)((u8*)sdPatchEntry+0xEB4) = 0xe12fff1e; //bx lr
 
-      //u32 gNandError(void)
-      *(u32*)((u8*)sdPatchEntry+0xEC8) = 0xe3a00000; //mov r0, #0
-      *(u32*)((u8*)sdPatchEntry+0xECC) = 0xe12fff1e; //bx lr
+		//u32 gNandError(void)
+		*(u32*)((u8*)sdPatchEntry+0xEC8) = 0xe3a00000; //mov r0, #0
+		*(u32*)((u8*)sdPatchEntry+0xECC) = 0xe12fff1e; //bx lr
 
-      //u32 gNandWrite(void* memory,void* flash,u32 size,u32 dma_channel)
-      u32* nandWritePatch = ce9->patches->nand_write_arm9;
-      tonccpy((u8*)sdPatchEntry+0x958, nandWritePatch, 0x40);
+		//u32 gNandWrite(void* memory,void* flash,u32 size,u32 dma_channel)
+		u32* nandWritePatch = ce9->patches->nand_write_arm9;
+		tonccpy((u8*)sdPatchEntry+0x958, nandWritePatch, 0x40);
 
-      //u32 gNandRead(void* memory,void* flash,u32 size,u32 dma_channel)
-      u32* nandReadPatch = ce9->patches->nand_read_arm9;
-      tonccpy((u8*)sdPatchEntry+0xD24, nandReadPatch, 0x40);
-    } else {
-        // Jam with the Band (Europe)
-        if (strcmp(romTid, "UXBP") == 0) {
-          	//u32 gNandInit(void* data)
-            *(u32*)(0x020613CC) = 0xe3a00001; //mov r0, #1
-            *(u32*)(0x020613D0) = 0xe12fff1e; //bx lr
+		//u32 gNandRead(void* memory,void* flash,u32 size,u32 dma_channel)
+		u32* nandReadPatch = ce9->patches->nand_read_arm9;
+		tonccpy((u8*)sdPatchEntry+0xD24, nandReadPatch, 0x40);
+	} else
+	// Jam with the Band (Europe)
+	if (strcmp(romTid, "UXBP") == 0) {
+		//u32 gNandInit(void* data)
+		*(u32*)(0x020613CC) = 0xe3a00001; //mov r0, #1
+		*(u32*)(0x020613D0) = 0xe12fff1e; //bx lr
 
-            //u32 gNandResume(void)
-            *(u32*)(0x02061A4C) = 0xe3a00000; //mov r0, #0
-            *(u32*)(0x02061A50) = 0xe12fff1e; //bx lr
+		//u32 gNandResume(void)
+		*(u32*)(0x02061A4C) = 0xe3a00000; //mov r0, #0
+		*(u32*)(0x02061A50) = 0xe12fff1e; //bx lr
 
-            //u32 gNandError(void)
-            *(u32*)(0x02061C24) = 0xe3a00000; //mov r0, #0
-            *(u32*)(0x02061C28) = 0xe12fff1e; //bx lr
+		//u32 gNandError(void)
+		*(u32*)(0x02061C24) = 0xe3a00000; //mov r0, #0
+		*(u32*)(0x02061C28) = 0xe12fff1e; //bx lr
 
-            //u32 gNandWrite(void* memory,void* flash,u32 size,u32 dma_channel)
-            u32* nandWritePatch = ce9->patches->nand_write_arm9;
-            tonccpy((u32*)0x0206176C, nandWritePatch, 0x40);
+		//u32 gNandWrite(void* memory,void* flash,u32 size,u32 dma_channel)
+		u32* nandWritePatch = ce9->patches->nand_write_arm9;
+		tonccpy((u32*)0x0206176C, nandWritePatch, 0x40);
 
-            //u32 gNandRead(void* memory,void* flash,u32 size,u32 dma_channel)
-            u32* nandReadPatch = ce9->patches->nand_read_arm9;
-            tonccpy((u32*)0x02061AC4, nandReadPatch, 0x40);
-    	} else
-        // Face Training (Europe)
-        if (strcmp(romTid, "USKV") == 0) {
-          	//u32 gNandInit(void* data)
-            *(u32*)(0x020E2AEC) = 0xe3a00001; //mov r0, #1
-            *(u32*)(0x020E2AF0) = 0xe12fff1e; //bx lr
+		//u32 gNandRead(void* memory,void* flash,u32 size,u32 dma_channel)
+		u32* nandReadPatch = ce9->patches->nand_read_arm9;
+		tonccpy((u32*)0x02061AC4, nandReadPatch, 0x40);
+	} else
+	// Face Training (Europe)
+	if (strcmp(romTid, "USKV") == 0) {
+		//u32 gNandInit(void* data)
+		*(u32*)(0x020E2AEC) = 0xe3a00001; //mov r0, #1
+		*(u32*)(0x020E2AF0) = 0xe12fff1e; //bx lr
 
-            //u32 gNandResume(void)
-            *(u32*)(0x020E2EC0) = 0xe3a00000; //mov r0, #0
-            *(u32*)(0x020E2EC4) = 0xe12fff1e; //bx lr
+		//u32 gNandResume(void)
+		*(u32*)(0x020E2EC0) = 0xe3a00000; //mov r0, #0
+		*(u32*)(0x020E2EC4) = 0xe12fff1e; //bx lr
 
-            //u32 gNandError(void)
-            *(u32*)(0x020E3150) = 0xe3a00000; //mov r0, #0
-            *(u32*)(0x020E3154) = 0xe12fff1e; //bx lr
+		//u32 gNandError(void)
+		*(u32*)(0x020E3150) = 0xe3a00000; //mov r0, #0
+		*(u32*)(0x020E3154) = 0xe12fff1e; //bx lr
 
-            //u32 gNandWrite(void* memory,void* flash,u32 size,u32 dma_channel)
-            u32* nandWritePatch = ce9->patches->nand_write_arm9;
-            tonccpy((u32*)0x020E2BF0, nandWritePatch, 0x40);
+		//u32 gNandWrite(void* memory,void* flash,u32 size,u32 dma_channel)
+		u32* nandWritePatch = ce9->patches->nand_write_arm9;
+		tonccpy((u32*)0x020E2BF0, nandWritePatch, 0x40);
 
-            //u32 gNandRead(void* memory,void* flash,u32 size,u32 dma_channel)
-            u32* nandReadPatch = ce9->patches->nand_read_arm9;
-            tonccpy((u32*)0x020E2F3C, nandReadPatch, 0x40);
-    	}
+		//u32 gNandRead(void* memory,void* flash,u32 size,u32 dma_channel)
+		u32* nandReadPatch = ce9->patches->nand_read_arm9;
+		tonccpy((u32*)0x020E2F3C, nandReadPatch, 0x40);
+	} else
+	// Nintendo DS Guide (World)
+	if (strncmp(romTid, "UGD", 3) == 0) {
+		//u32 gNandInit(void* data)
+		*(u32*)(0x02009298) = 0xe3a00001; //mov r0, #1
+		*(u32*)(0x0200929C) = 0xe12fff1e; //bx lr
+
+		//u32 gNandResume(void)
+		*(u32*)(0x020098C8) = 0xe3a00000; //mov r0, #0
+		*(u32*)(0x020098CC) = 0xe12fff1e; //bx lr
+
+		//u32 gNandError(void)
+		*(u32*)(0x02009AB4) = 0xe3a00000; //mov r0, #0
+		*(u32*)(0x02009AB8) = 0xe12fff1e; //bx lr
+
+		//u32 gNandWrite(void* memory,void* flash,u32 size,u32 dma_channel)
+		u32* nandWritePatch = ce9->patches->nand_write_arm9;
+		tonccpy((u32*)0x0200961C, nandWritePatch, 0x40);
+
+		//u32 gNandRead(void* memory,void* flash,u32 size,u32 dma_channel)
+		u32* nandReadPatch = ce9->patches->nand_read_arm9;
+		tonccpy((u32*)0x02009940, nandReadPatch, 0x40);
 	}
 }
 
@@ -2577,16 +2598,18 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 
 	a9PatchCardIrqEnable(ce9, ndsHeader, moduleParams);
 
-    const char* romTid = getRomTid(ndsHeader);
+	const char* romTid = getRomTid(ndsHeader);
 
-    u32 startOffset = (u32)ndsHeader->arm9destination;
-    if (strncmp(romTid, "UOR", 3) == 0) { // Start at 0x2003800 for "WarioWare: DIY"
-        startOffset = (u32)ndsHeader->arm9destination + 0x3800;
-    } else if (strncmp(romTid, "UXB", 3) == 0) { // Start at 0x2080000 for "Jam with the Band"
-        startOffset = (u32)ndsHeader->arm9destination + 0x80000;
-    } else if (strncmp(romTid, "USK", 3) == 0) { // Start at 0x20E8000 for "Face Training"
-        startOffset = (u32)ndsHeader->arm9destination + 0xE4000;
-    }
+	u32 startOffset = (u32)ndsHeader->arm9destination;
+	if (strncmp(romTid, "UOR", 3) == 0) { // Start at 0x2003800 for "WarioWare: DIY"
+		startOffset = (u32)ndsHeader->arm9destination + 0x3800;
+	} else if (strncmp(romTid, "UXB", 3) == 0) { // Start at 0x2080000 for "Jam with the Band"
+		startOffset = (u32)ndsHeader->arm9destination + 0x80000;
+	} else if (strncmp(romTid, "USK", 3) == 0) { // Start at 0x20E8000 for "Face Training"
+		startOffset = (u32)ndsHeader->arm9destination + 0xE4000;
+	} else if (strncmp(romTid, "UGD", 3) == 0) { // Start at 0x2010000 for "Nintendo DS Guide"
+		startOffset = (u32)ndsHeader->arm9destination + 0x10000;
+	}
 
     dbg_printf("startOffset : ");
     dbg_hexa(startOffset);
