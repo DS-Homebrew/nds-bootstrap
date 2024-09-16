@@ -83,7 +83,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		if (*(u32*)0x0228A690 >= 0x02F00000 && *(u32*)0x0228A690 < 0x02F80000) {
 			*(u32*)0x0228A690 -= 0x80000;
 		}
-	} else if (ndsHeader->arm7binarySize == 0x44C) {
+	} else if (ndsHeader->arm7binarySize == 0x44C || ndsHeader->arm7binarySize == 0x46C) {
 		if (*(u32*)0x023803BC >= 0x02F00000 && *(u32*)0x023803BC < 0x02F80000) {
 			*(u32*)0x023803BC -= 0x80000;
 		}
