@@ -724,8 +724,10 @@ static void loadBinary_ARM7(const tDSiHeader* dsiHeaderTemp, aFile* file) {
 		}
 
 		// Load binaries into memory
-		fileRead(dsiHeaderTemp->ndshdr.arm9destination, file, srlAddr+dsiHeaderTemp->ndshdr.arm9romOffset, dsiHeaderTemp->ndshdr.arm9binarySize);
-		if (*(u32*)DONOR_ROM_ARM7_SIZE_LOCATION == 0) {
+		if (dsiHeaderTemp->ndshdr.arm9destination < 0x02400000) {
+			fileRead(dsiHeaderTemp->ndshdr.arm9destination, file, srlAddr+dsiHeaderTemp->ndshdr.arm9romOffset, dsiHeaderTemp->ndshdr.arm9binarySize);
+		}
+		if (((u32)ndsHeader->arm9destination+ndsHeader->arm9binarySize) < DONOR_ROM_ARM7_LOCATION && *(u32*)DONOR_ROM_ARM7_SIZE_LOCATION == 0) {
 			fileRead(dsiHeaderTemp->ndshdr.arm7destination, file, srlAddr+dsiHeaderTemp->ndshdr.arm7romOffset, dsiHeaderTemp->ndshdr.arm7binarySize);
 		}
 	}
@@ -1535,10 +1537,6 @@ int arm7_main(void) {
 		buildFatTableCacheCompressed(savFile);
 	}
 
-	if (dsiModeConfirmed && (u32)dsiHeaderTemp.arm7idestination > 0x02E80000) {
-		dsiHeaderTemp.arm7idestination = (u32*)0x02E80000;
-	}
-
 	// File containing cached patch offsets
 	getFileFromCluster(&patchOffsetCacheFile, patchOffsetCacheFileCluster, gameOnFlashcard);
 	fileRead((char*)&patchOffsetCache, &patchOffsetCacheFile, 0, 4);
@@ -1588,7 +1586,7 @@ int arm7_main(void) {
 	if (ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed) {
 		extern u32* lastClusterCacheUsed;
 		extern u32 clusterCache;
-		if (REG_SCFG_EXT == 0 && *(u32*)DONOR_ROM_ARM7_SIZE_LOCATION != 0) {
+		if (((u32)ndsHeader->arm9destination+ndsHeader->arm9binarySize) < DONOR_ROM_ARM7_LOCATION && REG_SCFG_EXT == 0 && *(u32*)DONOR_ROM_ARM7_SIZE_LOCATION != 0) {
 			*(u32*)0x02FFE1A0 = *(u32*)DONOR_ROM_MBK6_LOCATION;
 			*(u32*)0x02FFE1D4 = *(u32*)DONOR_ROM_DEVICE_LIST_LOCATION;
 		}
@@ -1626,7 +1624,6 @@ int arm7_main(void) {
 	} else {
 		toncset((u32*)0x02400000, 0, 0x2000);
 		dma_twlFill32(0, 0, (u32*)0x02500000, 0x100000);	// clear part of EWRAM - except before in-game menu data
-		toncset((u32*)0x02E80000, 0, 0x800);
 		memset_addrs_arm7(0x02F00000, 0x02F80000);
 		memset_addrs_arm7(0x02FFE000, 0x02FFF000); // clear DSi header
 
@@ -1704,8 +1701,6 @@ int arm7_main(void) {
 		}
 		*(vu16*)0x4000500 = 0x807F;
 
-	 //if (*(u32*)0x02FFE1D8 <= 0x02E80000) {
-		memset_addrs_arm7(0x02F00000, 0x02F80000);
 	  /* if (ndsHeader->arm7binarySize < 0x8000) {
 		patchSharedFontPath(NULL, ndsHeader, moduleParams, ltdModuleParams);
 		dsiWarePatch((cardengineArm9*)ce9Location, ndsHeader);
@@ -1714,7 +1709,7 @@ int arm7_main(void) {
 		newArm7ibinarySize = __DSiHeader->arm7ibinarySize;
 
 		if (REG_SCFG_EXT == 0) {
-			if (*(u32*)DONOR_ROM_ARM7_SIZE_LOCATION != 0) {
+			if (((u32)ndsHeader->arm9destination+ndsHeader->arm9binarySize) < DONOR_ROM_ARM7_LOCATION && *(u32*)DONOR_ROM_ARM7_SIZE_LOCATION != 0) {
 				// Replace incompatible ARM7 binary
 				newArm7binarySize = *(u32*)DONOR_ROM_ARM7_SIZE_LOCATION;
 				newArm7ibinarySize = *(u32*)DONOR_ROM_ARM7I_SIZE_LOCATION;
@@ -1791,7 +1786,7 @@ int arm7_main(void) {
 		patchResetTwl((cardengineArm9*)ce9Location, ndsHeader, moduleParams);
 
 		if (REG_SCFG_EXT == 0) {
-			if (*(u32*)DONOR_ROM_ARM7_SIZE_LOCATION != 0) {
+			if (((u32)ndsHeader->arm9destination+ndsHeader->arm9binarySize) < DONOR_ROM_ARM7_LOCATION && *(u32*)DONOR_ROM_ARM7_SIZE_LOCATION != 0) {
 				// Replace incompatible ARM7 binary
 				newArm7binarySize = *(u32*)DONOR_ROM_ARM7_SIZE_LOCATION;
 				newArm7ibinarySize = *(u32*)DONOR_ROM_ARM7I_SIZE_LOCATION;
@@ -1845,7 +1840,9 @@ int arm7_main(void) {
 			cheatEngineOffset = CHEAT_ENGINE_TWLSDK_LOCATION_3DS;
 		}
 
-		dma_twlFill32(0, 0, (u32*)0x02680000, 0x100000);
+		if (((u32)ndsHeader->arm9destination+ndsHeader->arm9binarySize) < DONOR_ROM_ARM7_LOCATION) {
+			dma_twlFill32(0, 0, (u32*)0x02680000, 0x100000);
+		}
 
 		errorCode = hookNdsRetailArm7(
 			(cardengineArm7*)ce7Location,
@@ -1927,7 +1924,6 @@ int arm7_main(void) {
 			fileWrite((char*)&newArm7ibinarySize, &pageFile, 0x5FFFFC, sizeof(u32));
 		}
 	  // }
-	 // }
 	} else {
 		if (strncmp(romTid, "UBR", 3) == 0) {
 			toncset((char*)0x0C3E0000, 0xFF, 0xC0);

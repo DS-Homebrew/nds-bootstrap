@@ -73,32 +73,10 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	//const bool chnFontFound = ((sharedFontRegion == 1 && !gameOnFlashcard && !i2cBricked) || chnSharedFont);
 	const bool korFontFound = ((sharedFontRegion == 2 && !gameOnFlashcard && !i2cBricked) || korSharedFont);
 
-	if (ndsHeader->arm7binarySize == 0xA888) {
-		if (*(u32*)0x0228A688 >= 0x02F00000 && *(u32*)0x0228A688 < 0x02F80000) {
-			*(u32*)0x0228A688 -= 0x80000;
-		}
-		if (*(u32*)0x0228A68C >= 0x02F00000 && *(u32*)0x0228A68C < 0x02F80000) {
-			*(u32*)0x0228A68C -= 0x80000;
-		}
-		if (*(u32*)0x0228A690 >= 0x02F00000 && *(u32*)0x0228A690 < 0x02F80000) {
-			*(u32*)0x0228A690 -= 0x80000;
-		}
-	} else if (ndsHeader->arm7binarySize == 0x44C || ndsHeader->arm7binarySize == 0x46C) {
-		if (*(u32*)0x023803BC >= 0x02F00000 && *(u32*)0x023803BC < 0x02F80000) {
-			*(u32*)0x023803BC -= 0x80000;
-		}
-		if (*(u32*)0x023803C0 >= 0x02F00000 && *(u32*)0x023803C0 < 0x02F80000) {
-			*(u32*)0x023803C0 -= 0x80000;
-		}
-		if (*(u32*)0x023803C4 >= 0x02F00000 && *(u32*)0x023803C4 < 0x02F80000) {
-			*(u32*)0x023803C4 -= 0x80000;
-		}
-	}
-
 #ifndef LOADERTWO
 	// GO Series: 10 Second Run (USA)
 	// GO Series: 10 Second Run (Europe)
-	else if (strcmp(romTid, "KJUE") == 0 || strcmp(romTid, "KJUP") == 0) {
+	if (strcmp(romTid, "KJUE") == 0 || strcmp(romTid, "KJUP") == 0) {
 		if (saveOnFlashcard) {
 			*(u32*)0x020150FC = 0xE12FFF1E; // bx lr
 			// Save patch causes the game to crash on panic function?
@@ -7545,7 +7523,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 #else
 	// JellyCar 2 (USA)
-	else if (strcmp(romTid, "KJYE") == 0) {
+	if (strcmp(romTid, "KJYE") == 0) {
 		if (saveOnFlashcard) {
 			setBL(0x020067C4, (u32)dsiSaveOpen);
 			*(u32*)0x020067DC = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)

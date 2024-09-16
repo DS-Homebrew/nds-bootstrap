@@ -629,6 +629,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	u32 ndsArm7idst = 0;
 	u32 ndsArm7ilen = 0;
 	u8 shared2len = 0;
+	u32 modcrypt1off = 0;
 	u32 modcrypt1len = 0;
 	u32 modcrypt2len = 0;
 	u32 pubSize = 0;
@@ -666,11 +667,13 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		fseek(ndsFile, 0x1D0, SEEK_SET);
 		fread(&ndsArm7isrc, sizeof(u32), 1, ndsFile);
 		fseek(ndsFile, 0x1D8, SEEK_SET);
-		fread(&ndsArm7idst, sizeof(u32), 1, ndsFile); if (ndsArm7idst > 0x02E80000) ndsArm7idst = 0x02E80000;
+		fread(&ndsArm7idst, sizeof(u32), 1, ndsFile);
 		fseek(ndsFile, 0x1DC, SEEK_SET);
 		fread(&ndsArm7ilen, sizeof(u32), 1, ndsFile);
 		fseek(ndsFile, 0x20C, SEEK_SET);
 		fread(&shared2len, sizeof(u8), 1, ndsFile);
+		fseek(ndsFile, 0x220, SEEK_SET);
+		fread(&modcrypt1off, sizeof(u32), 1, ndsFile);
 		fseek(ndsFile, 0x224, SEEK_SET);
 		fread(&modcrypt1len, sizeof(u32), 1, ndsFile);
 		fseek(ndsFile, 0x22C, SEEK_SET);
@@ -901,11 +904,11 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	}
 
   if (dsiFeatures() && !conf->b4dsMode) {
+	toncset((u32*)0x02E80000, 0, 0x800); // Clear nds-bootstrap arm7i binary from RAM
 	if ((conf->dsiMode > 0 && unitCode > 0) || conf->isDSiWare) {
 		uint8_t *target = (uint8_t *)TARGETBUFFERHEADER ;
 		fseek(ndsFile, 0, SEEK_SET);
 		fread(target, 1, 0x1000, ndsFile);
-		toncset32((u8*)target+0x1D8, ndsArm7idst, 1);
 
 		/*if (conf->dsiMode > 0 && unitCode > 0 && !conf->isDSiWare) {
 			load_game_conf(conf, conf->sdFound ? "sd:/_nds/nds-bootstrap.ini" : "fat:/_nds/nds-bootstrap.ini", (char*)romTid);
@@ -937,6 +940,10 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			}
 		}*/
 
+		if (ndsArm9Offset >= 0x02400000) {
+			fseek(ndsFile, ndsArm9BinOffset, SEEK_SET);
+			fread((u32*)ndsArm9Offset, 1, ndsArm9ilen, ndsFile);
+		}
 		if (ndsArm9ilen) {
 			fseek(ndsFile, ndsArm9isrc, SEEK_SET);
 			fread((u32*)ndsArm9idst, 1, ndsArm9ilen, ndsFile);
@@ -983,7 +990,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			dsi_set_ctr(&ctx, &target[0x300]);
 			if (modcrypt1len)
 			{
-				decrypt_modcrypt_area(&ctx, (u8*)ndsArm9idst, modcrypt1len);
+				decrypt_modcrypt_area(&ctx, (u8*)((modcrypt1off == ndsArm9BinOffset) ? ndsArm9Offset : ndsArm9idst), modcrypt1len);
 			}
 
 			dsi_set_key(&ctx, key);
@@ -1389,7 +1396,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		conf->dataToPreloadAddr[0] = ndsArm7BinOffset+ndsArm7Size;
 		conf->dataToPreloadSize[0] = ((internalRomSize == 0 || internalRomSize > conf->romSize) ? conf->romSize : internalRomSize)-conf->dataToPreloadAddr[0];
 	}
-  } else if (ndsArm7idst <= 0x02E80000) {
+  } else {
 	const bool binary3 = (REG_SCFG_EXT7 == 0 ? !dsiEnhancedMbk : (a7mbk6 != 0x00403000));
 
 	// Load ce7 binary

@@ -286,10 +286,10 @@ int hookNdsRetailArm7(
 			if (!hookLocation && ndsHeader->unitCode == 3) {
 				switch (newArm7ibinarySize) {
 					case 0x6AFD4:
-						hookLocation = (u32*)0x2EE7360;
+						hookLocation = (u32*)0x2F67360;
 						break;
 					case 0x6B038:
-						hookLocation = (u32*)0x2EE7348;
+						hookLocation = (u32*)0x2F67348;
 						break;
 					case 0x7250C:
 						hookLocation = (u32*)0x2EE5E10;
