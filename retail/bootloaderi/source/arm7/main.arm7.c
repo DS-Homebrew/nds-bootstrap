@@ -724,7 +724,7 @@ static void loadBinary_ARM7(const tDSiHeader* dsiHeaderTemp, aFile* file) {
 		}
 
 		// Load binaries into memory
-		if (dsiHeaderTemp->ndshdr.arm9destination < 0x02400000) {
+		if ((u32)dsiHeaderTemp->ndshdr.arm9destination < 0x02400000) {
 			fileRead(dsiHeaderTemp->ndshdr.arm9destination, file, srlAddr+dsiHeaderTemp->ndshdr.arm9romOffset, dsiHeaderTemp->ndshdr.arm9binarySize);
 		}
 		if (((u32)ndsHeader->arm9destination+ndsHeader->arm9binarySize) < DONOR_ROM_ARM7_LOCATION && *(u32*)DONOR_ROM_ARM7_SIZE_LOCATION == 0) {
