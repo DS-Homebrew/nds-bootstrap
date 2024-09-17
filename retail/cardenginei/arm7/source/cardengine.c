@@ -76,6 +76,7 @@
 #define bootstrapOnFlashcard BIT(19)
 #define ndmaDisabled BIT(20)
 #define isDlp BIT(21)
+#define i2cBricked BIT(30)
 #define scfgLocked BIT(31)
 
 #define	REG_EXTKEYINPUT	(*(vuint16*)0x04000136)
@@ -93,6 +94,7 @@ extern int lockMutex(int* addr);
 extern int unlockMutex(int* addr);
 
 extern vu32* volatile cardStruct;
+extern u32 cheatEngineAddr;
 extern u32 fileCluster;
 extern u32 saveCluster;
 extern u32 saveSize;
@@ -128,7 +130,7 @@ static bool sixInHeader = false;
 static bool bootloaderCleared = false;
 static bool funcsUnpatched = false;
 //static bool initializedIRQ = false;
-static bool calledViaIPC = false;
+//static bool calledViaIPC = false;
 //static bool ipcSyncHooked = false;
 bool ipcEveryFrame = false;
 //static bool dmaLed = false;
@@ -140,31 +142,22 @@ static bool wifiIrq = false;
 static int wifiIrqTimer = 0;
 //static bool saveInRam = false;
 
-u32 cheatEngineAddr = 
-#ifdef TWLSDK
-CHEAT_ENGINE_TWLSDK_LOCATION
-#else
-#ifdef ALTERNATIVE
-CHEAT_ENGINE_LOCATION_ALT
-#else
-CHEAT_ENGINE_LOCATION
-#endif
-#endif
-;
-
 #ifdef TWLSDK
 static aFile* romFile = (aFile*)ROM_FILE_LOCATION_TWLSDK;
 static aFile* savFile = (aFile*)SAV_FILE_LOCATION_TWLSDK;
 //static aFile* gbaFile = (aFile*)GBA_FILE_LOCATION_TWLSDK;
+static aFile* apFixOverlaysFile = (aFile*)OVL_FILE_LOCATION_TWLSDK;
 #else
 #ifdef ALTERNATIVE
 static aFile* romFile = (aFile*)ROM_FILE_LOCATION_ALT;
 static aFile* savFile = (aFile*)SAV_FILE_LOCATION_ALT;
 //static aFile* gbaFile = (aFile*)GBA_FILE_LOCATION_ALT;
+static aFile* apFixOverlaysFile = (aFile*)OVL_FILE_LOCATION_ALT;
 #else
 static aFile* romFile = (aFile*)ROM_FILE_LOCATION;
 static aFile* savFile = (aFile*)SAV_FILE_LOCATION;
 //static aFile* gbaFile = (aFile*)GBA_FILE_LOCATION;
+static aFile* apFixOverlaysFile = (aFile*)OVL_FILE_LOCATION;
 #endif
 #endif
 static aFile patchOffsetCacheFile;
@@ -180,13 +173,14 @@ static int languageTimer = 0;
 // static int swapTimer = 0;
 static int returnTimer = 0;
 static int softResetTimer = 0;
-static int ramDumpTimer = 0;
+// static int ramDumpTimer = 0;
+static int noI2CVolLevel = 127; // Volume workaround for bricked I2C chips
 static int volumeAdjustDelay = 0;
 static bool volumeAdjustActivated = false;
 
 //static bool ndmaUsed = false;
 
-static int cardEgnineCommandMutex = 0;
+// static int cardEgnineCommandMutex = 0;
 static int saveMutex = 0;
 
 bool returnToMenu = false;
@@ -203,7 +197,7 @@ extern u32 romLocation;
 
 extern u32 romMapLines;
 // 0: ROM part start, 1: ROM part start in RAM, 2: ROM part end in RAM
-extern u32 romMap[4][3];
+extern u32 romMap[5][3];
 
 u32 currentSrlAddr = 0;
 
@@ -359,9 +353,6 @@ static void initialize(void) {
 	if (*(u8*)(DSI_HEADER_SDK5+0x234) == 6) {
 		*(u8*)(DSI_HEADER_SDK5+0x234) = 0;
 		sixInHeader = true;
-	}
-	if (consoleModel > 0) {
-		cheatEngineAddr = CHEAT_ENGINE_TWLSDK_LOCATION_3DS;
 	}
 	#else
 	if (valueBits & isSdk5) {
@@ -671,11 +662,11 @@ void reset(void) {
 }
 
 static void cardReadLED(bool on, bool dmaLed) {
-	if (consoleModel < 2) { /* Proceed below */ } else { return; }
+	if (!(valueBits & i2cBricked) && consoleModel < 2) { /* Proceed below */ } else { return; }
 
 	if (dmaRomRead_LED == -1) dmaRomRead_LED = romRead_LED;
 	if (!powerLedChecked && (romRead_LED || dmaRomRead_LED)) {
-		u8 byte = i2cReadRegister(0x4A, 0x63);
+		const u8 byte = i2cReadRegister(0x4A, 0x63);
 		powerLedIsPurple = (byte == 0xFF);
 		powerLedChecked = true;
 	}
@@ -744,6 +735,17 @@ static void cardReadLED(bool on, bool dmaLed) {
 
 extern void inGameMenu(void);
 
+static inline void rebootConsole(void) {
+	if (valueBits & i2cBricked) {
+		u8 readCommand = readPowerManagement(0x10);
+		readCommand |= BIT(0);
+		writePowerManagement(0x10, readCommand); // Reboot console
+		return;
+	}
+	i2cWriteRegister(0x4A, 0x70, 0x01);
+	i2cWriteRegister(0x4A, 0x11, 0x01);
+}
+
 void forceGameReboot(void) {
 	toncset((u32*)0x02000000, 0, 0x400);
 	*(u32*)0x02000000 = BIT(3);
@@ -779,8 +781,7 @@ void forceGameReboot(void) {
 		// Use different SR backend ID
 		readSrBackendId();
 	}
-	i2cWriteRegister(0x4A, 0x70, 0x01);
-	i2cWriteRegister(0x4A, 0x11, 0x01);		// Force-reboot game
+	rebootConsole();		// Force-reboot game
 }
 
 #ifdef TWLSDK
@@ -829,8 +830,7 @@ void returnToLoader(bool reboot) {
 			}
 			waitFrames(5);							// Wait for DSi screens to stabilize
 		}
-		i2cWriteRegister(0x4A, 0x70, 0x01);
-		i2cWriteRegister(0x4A, 0x11, 0x01);
+		rebootConsole();
 	}
 
 	register int i, reg;
@@ -943,8 +943,7 @@ void returnToLoader(bool reboot) {
 		waitFrames(5);							// Wait for DSi screens to stabilize
 	}
 
-	i2cWriteRegister(0x4A, 0x70, 0x01);
-	i2cWriteRegister(0x4A, 0x11, 0x01);		// Reboot into TWiLight Menu++
+	rebootConsole();		// Reboot into TWiLight Menu++
 #endif
 }
 
@@ -1126,9 +1125,9 @@ void unloadInGameMenu(void) {
 	sharedAddr[5] = 0;
 }
 
+#ifdef DEBUG
 static void log_arm9(void) {
 	//driveInitialize();
-	#ifdef DEBUG
 	u32 src = *(vu32*)(sharedAddr+2);
 	u32 dst = *(vu32*)(sharedAddr);
 	u32 len = *(vu32*)(sharedAddr+1);
@@ -1151,10 +1150,10 @@ static void log_arm9(void) {
 	dbg_hexa(marker);
 
 	dbg_printf("\nlog only \n");
-	#endif
 }
+#endif
 
-static bool nandRead(void) {
+static void nandRead(void) {
 	u32 flash = *(vu32*)(sharedAddr+2);
 	u32 memory = *(vu32*)(sharedAddr);
 	u32 len = *(vu32*)(sharedAddr+1);
@@ -1178,11 +1177,13 @@ static bool nandRead(void) {
 
 	//driveInitialize();
 	//cardReadLED(true, true);    // When a file is loading, turn on LED for card read indicator
-	return fileRead((char *)memory, savFile, flash, len);
+	sdmmc_set_ndma_slot(4);
+	fileRead((char *)memory, savFile, flash, len);
+	sdmmc_set_ndma_slot(0);
 	//cardReadLED(false, true);
 }
 
-static bool nandWrite(void) {
+static void nandWrite(void) {
 	u32 flash = *(vu32*)(sharedAddr+2);
 	u32 memory = *(vu32*)(sharedAddr);
 	u32 len = *(vu32*)(sharedAddr+1);
@@ -1207,7 +1208,9 @@ static bool nandWrite(void) {
 	//driveInitialize();
 	saveTimer = 1;			// When we're saving, power button does nothing, in order to prevent corruption.
 	//cardReadLED(true, true);    // When a file is loading, turn on LED for card read indicator
-	return fileWrite((char *)memory, savFile, flash, len);
+	sdmmc_set_ndma_slot(4);
+	fileWrite((char *)memory, savFile, flash, len);
+	sdmmc_set_ndma_slot(0);
 	//cardReadLED(false, true);
 }
 
@@ -1238,14 +1241,14 @@ static bool nandWrite(void) {
 	cardReadLED(false);
 }*/
 
-static bool readOngoing = false;
-static bool sdReadOngoing = false;
+//static bool readOngoing = false;
+//static bool sdReadOngoing = false;
 static bool ongoingIsDma = false;
 //static int currentCmd=0, currentNdmaSlot=0;
 //static int timeTillDmaLedOff = 0;
 
 #ifndef TWLSDK
-static bool start_cardRead_arm9(void) {
+/* static bool start_cardRead_arm9(void) {
 	u32 src = sharedAddr[2];
 	u32 dst = sharedAddr[0];
 	u32 len = sharedAddr[1];
@@ -1320,7 +1323,7 @@ static bool resume_cardRead_arm9(void) {
     {
         return false;    
     }
-}
+} */
 
 /* static bool gsddFix(void) {
 	if (sharedAddr[4] != 0x44445347) {
@@ -1342,15 +1345,15 @@ static bool resume_cardRead_arm9(void) {
 } */
 #endif
 
-static inline void sdmmcHandler(void) {
-	if (sdReadOngoing) {
+static inline void sdmmcHandler(void) { // Unused
+	/* if (sdReadOngoing) {
 		if (my_sdmmc_sdcard_check_command(0x33C12)) {
 			sharedAddr[4] = 0;
 			cardReadLED(false, ongoingIsDma);
 			sdReadOngoing = false;
 		}
 		return;
-	}
+	} */
 
 	switch (sharedAddr[4]) {
 		case 0x53445231:
@@ -1371,13 +1374,13 @@ static inline void sdmmcHandler(void) {
 			//bool isDma = sharedAddr[4]==0x53444D41;
 			ongoingIsDma = (sharedAddr[4] == 0x53444D41);
 			cardReadLED(true, ongoingIsDma);
-			if (wifiIrq || (sharedAddr[2] % 4) != 0 || (valueBits & ndmaDisabled)) {
+			// if ((sharedAddr[2] % 4) != 0 || (valueBits & ndmaDisabled)) {
 				sharedAddr[4] = my_sdmmc_sdcard_readsectors(sharedAddr[0], sharedAddr[1], (u8*)sharedAddr[2]);
 				cardReadLED(false, ongoingIsDma);
-			} else {
-				/* sharedAddr[4] = */ my_sdmmc_sdcard_readsectors_nonblocking(sharedAddr[0], sharedAddr[1], (u8*)sharedAddr[2]);
+			/* } else {
+				my_sdmmc_sdcard_readsectors_nonblocking(sharedAddr[0], sharedAddr[1], (u8*)sharedAddr[2]);
 				sdReadOngoing = true;
-			}
+			} */
 		}	break;
 		/*case 0x53444348:
 			sharedAddr[4] = my_sdmmc_sdcard_check_command(sharedAddr[0], sharedAddr[1]);
@@ -1400,13 +1403,15 @@ static inline void sdmmcHandler(void) {
 	}
 }
 
-static void runCardEngineCheck(void) {
+void runCardEngineCheck(void) {
+	// if (!(valueBits & b_runCardEngineCheck)) return;
+
 	//dbg_printf("runCardEngineCheck\n");
 	#ifdef DEBUG		
 	nocashMessage("runCardEngineCheck");
 	#endif	
 
-  	if (tryLockMutex(&cardEgnineCommandMutex)) {
+  	// if (lockMutex(&cardEgnineCommandMutex)) {
         //if(!readOngoing)
         //{
     
@@ -1418,46 +1423,57 @@ static void runCardEngineCheck(void) {
   		}*/
 
 			if (!(valueBits & gameOnFlashcard)) {
-				sdmmcHandler();
+				// sdmmcHandler();
 
-				#ifndef TWLSDK
-				if (/*sharedAddr[3] == (vu32)0x020FF808 || sharedAddr[3] == (vu32)0x020FF80A ||*/ sharedAddr[3] == (vu32)0x025FFB0A) {	// Card read DMA
-					if (!readOngoing ? start_cardRead_arm9() : resume_cardRead_arm9()) {
-						/*u32 src = sharedAddr[2];
+				// #ifndef TWLSDK
+				if (/* sharedAddr[3] == (vu32)0x020FF808 || sharedAddr[3] == (vu32)0x020FF80A || */ sharedAddr[3] == (vu32)0x025FFB08 || sharedAddr[3] == (vu32)0x025FFB0A) {	// Card read DMA
+					//if (!readOngoing ? start_cardRead_arm9() : resume_cardRead_arm9()) {
+						bool useApFixOverlays = false;
+						u32 src = sharedAddr[2];
 						u32 dst = sharedAddr[0];
 						u32 len = sharedAddr[1];
+						if (src >= 0x80000000) {
+							src -= 0x80000000;
+							useApFixOverlays = true;
+						}
 
-						cardReadLED(true, true);    // When a file is loading, turn on LED for card read indicator
-						fileRead((char*)dst, romFile, src, len, !sdRead, 0);
-						cardReadLED(false, true);    // After loading is done, turn off LED for card read indicator */
+						const bool isDma = (/* sharedAddr[3] == (vu32)0x020FF80A || */ sharedAddr[3] == (vu32)0x025FFB0A);
+
+						// readOngoing = true;
+						cardReadLED(true, isDma);    // When a file is loading, turn on LED for card read indicator
+						fileRead((char*)dst, useApFixOverlays ? apFixOverlaysFile : romFile, src, len);
+						cardReadLED(false, isDma);    // After loading is done, turn off LED for card read indicator
+						// readOngoing = false;
 						sharedAddr[3] = 0;
-					}
-					//if (sharedAddr[3] == (vu32)0x025FFB0A) {
+					if (isDma) {
 						IPC_SendSync(0x3);
+					}
 					//}
 				} /*else if (sharedAddr[3] == (vu32)0x026FFB0A) {	// Card read DMA (Card data cache)
 					ndmaCopyWords(0, (u8*)sharedAddr[2], (u8*)(sharedAddr[0] >= 0x03000000 ? 0 : sharedAddr[0]), sharedAddr[1]);
 					sharedAddr[3] = 0;
 					IPC_SendSync(0x3);
 				}*/
-				#endif
+				// #endif
 			}
 
+			#ifdef DEBUG
     		if (sharedAddr[3] == (vu32)0x026FF800) {
     			log_arm9();
     			sharedAddr[3] = 0;
                 //IPC_SendSync(0x8);
-    		}
-    
-            if (sharedAddr[3] == (vu32)0x025FFC01) {
-                //dmaLed = (sharedAddr[3] == (vu32)0x025FFC01);
-    			sharedAddr[3] = nandRead();
-    		}
+    		} else
+			#endif
 
-            if (sharedAddr[3] == (vu32)0x025FFC02) {
-                //dmaLed = (sharedAddr[3] == (vu32)0x025FFC02);
-    			sharedAddr[3] = nandWrite();
-    		}
+			if (sharedAddr[3] == (vu32)0x025FFC01) {
+				//dmaLed = (sharedAddr[3] == (vu32)0x025FFC01);
+				nandRead();
+    			sharedAddr[3] = 0;
+			} else if (sharedAddr[3] == (vu32)0x025FFC02) {
+				//dmaLed = (sharedAddr[3] == (vu32)0x025FFC02);
+				nandWrite();
+    			sharedAddr[3] = 0;
+			}
 
             /*if (sharedAddr[3] == (vu32)0x025FBC01) {
                 dmaLed = false;
@@ -1466,8 +1482,8 @@ static void runCardEngineCheck(void) {
     			IPC_SendSync(0x8);
     		}*/
         //}
-  		unlockMutex(&cardEgnineCommandMutex);
-  	}
+  		// unlockMutex(&cardEgnineCommandMutex);
+  	// }
 }
 
 //---------------------------------------------------------------------------------
@@ -1477,7 +1493,7 @@ void myIrqHandlerFIFO(void) {
 	nocashMessage("myIrqHandlerFIFO");
 	#endif
 
-	calledViaIPC = true;
+	// calledViaIPC = true;
 
     if (IPC_GetSync() == 0x3) {
 		/* #ifndef TWLSDK
@@ -1490,37 +1506,7 @@ void myIrqHandlerFIFO(void) {
 		return;
 	}
 
-	runCardEngineCheck();
-}
-
-//---------------------------------------------------------------------------------
-void myIrqHandlerHalt(void) {
-//---------------------------------------------------------------------------------
-	#ifdef DEBUG
-	nocashMessage("myIrqHandlerHalt");
-	#endif
-
-	/*if (readOngoing) {
-		timeTillDmaLedOff++;
-		if (timeTillDmaLedOff > 10) {
-			readOngoing = false;
-			cardReadLED(false, true);
-		}
-	}*/
-}
-
-//---------------------------------------------------------------------------------
-void myIrqHandlerNdma0(void) {
-//---------------------------------------------------------------------------------
-	#ifdef DEBUG		
-	nocashMessage("myIrqHandlerNdma0");
-	#endif	
-	
-	//calledViaIPC = false;
-
-	//i2cWriteRegister(0x4A, 0x70, 0x01);
-	//i2cWriteRegister(0x4A, 0x11, 0x01);			// Reboot console
-	//runCardEngineCheckResume();
+	// runCardEngineCheck();
 }
 
 
@@ -1529,6 +1515,10 @@ void myIrqHandlerVBlank(void) {
 	#ifdef DEBUG		
 	nocashMessage("myIrqHandlerVBlank");
 	#endif	
+
+	if (valueBits & i2cBricked) {
+		REG_MASTER_VOLUME = noI2CVolLevel;
+	}
 
 	#ifdef DEBUG
 	nocashMessage("cheat_engine_start\n");
@@ -1603,8 +1593,7 @@ void myIrqHandlerVBlank(void) {
 #ifndef TWLSDK
 	if (!(valueBits & gameOnFlashcard) && !(valueBits & ROMinRAM) && isSdEjected()) {
 		tonccpy((u32*)0x02000300, sr_data_error, 0x020);
-		i2cWriteRegister(0x4A, 0x70, 0x01);
-		i2cWriteRegister(0x4A, 0x11, 0x01);		// Reboot into error screen if SD card is removed
+		rebootConsole();		// Reboot into error screen if SD card is removed
 	}
 #endif
 
@@ -1664,7 +1653,7 @@ void myIrqHandlerVBlank(void) {
 		returnTimer = 0;
 	}
 
-	if ((valueBits & b_dsiSD) && (0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_DOWN | KEY_A)))) {
+	/* if ((valueBits & b_dsiSD) && (0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_DOWN | KEY_A)))) {
 		if (tryLockMutex(&cardEgnineCommandMutex)) {
 			if (ramDumpTimer == 60 * 2) {
 				REG_MASTER_VOLUME = 0;
@@ -1678,7 +1667,7 @@ void myIrqHandlerVBlank(void) {
 		ramDumpTimer++;
 	} else {
 		ramDumpTimer = 0;
-	}
+	} */
 
 	if (sharedAddr[3] == (vu32)0x52534554) {
 		reset();
@@ -1705,7 +1694,7 @@ void myIrqHandlerVBlank(void) {
 	}
 	#endif
 
-	if (valueBits & preciseVolumeControl) {
+	if ((valueBits & preciseVolumeControl) || (valueBits & i2cBricked)) {
 		// Precise volume adjustment (for DSi)
 		if (volumeAdjustActivated) {
 			volumeAdjustDelay++;
@@ -1714,21 +1703,31 @@ void myIrqHandlerVBlank(void) {
 				volumeAdjustActivated = false;
 			}
 		} else if (0==(REG_KEYINPUT & KEY_SELECT)) {
-			u8 i2cVolLevel = i2cReadRegister(0x4A, 0x40);
-			u8 i2cNewVolLevel = i2cVolLevel;
-			if (0==(REG_KEYINPUT & KEY_UP)) {
-				i2cNewVolLevel++;
-			} else if (0==(REG_KEYINPUT & KEY_DOWN)) {
-				i2cNewVolLevel--;
-			}
-			if (i2cNewVolLevel == 0xFF) {
-				i2cNewVolLevel = 0;
-			} else if (i2cNewVolLevel > 0x1F) {
-				i2cNewVolLevel = 0x1F;
-			}
-			if (i2cNewVolLevel != i2cVolLevel) {
-				i2cWriteRegister(0x4A, 0x40, i2cNewVolLevel);
-				volumeAdjustActivated = true;
+			if (valueBits & i2cBricked) {
+				const int oldVolLevel = noI2CVolLevel;
+				if (0==(REG_KEYINPUT & KEY_UP)) {
+					noI2CVolLevel = 127;
+				} else if (0==(REG_KEYINPUT & KEY_DOWN)) {
+					noI2CVolLevel = 0;
+				}
+				volumeAdjustActivated = (noI2CVolLevel != oldVolLevel);
+			} else {
+				const u8 i2cVolLevel = i2cReadRegister(0x4A, 0x40);
+				u8 i2cNewVolLevel = i2cVolLevel;
+				if (0==(REG_KEYINPUT & KEY_UP)) {
+					i2cNewVolLevel++;
+				} else if (0==(REG_KEYINPUT & KEY_DOWN)) {
+					i2cNewVolLevel--;
+				}
+				if (i2cNewVolLevel == 0xFF) {
+					i2cNewVolLevel = 0;
+				} else if (i2cNewVolLevel > 0x1F) {
+					i2cNewVolLevel = 0x1F;
+				}
+				if (i2cNewVolLevel != i2cVolLevel) {
+					i2cWriteRegister(0x4A, 0x40, i2cNewVolLevel);
+					volumeAdjustActivated = true;
+				}
 			}
 		}
 	}
@@ -1751,21 +1750,19 @@ void myIrqHandlerVBlank(void) {
 		if (wifiIrq) {
 			wifiIrqTimer++;
 			if (wifiIrqTimer == 30) {
-				IPC_SendSync(0x4);
+				// IPC_SendSync(0x4);
 				wifiIrq = wifiIrqCheck;
 			}
 		} else {
-			IPC_SendSync(0x4);
+			// IPC_SendSync(0x4);
 			wifiIrq = wifiIrqCheck;
 		}
 	} else {
 		wifiIrqTimer = 0;
 	}
 
-	//if (valueBits & b_runCardEngineCheck) {
-		calledViaIPC = false;
-		runCardEngineCheck();
-	//}
+	// calledViaIPC = false;
+	// runCardEngineCheck();
 
 	// Update main screen or swap screens
 	if (ipcEveryFrame) {
@@ -1804,8 +1801,7 @@ void i2cIRQHandler(void) {
 			IPC_SendSync(0x8);
 			waitFrames(5);							// Wait for DSi screens to stabilize
 		}
-		i2cWriteRegister(0x4A, 0x70, 0x01);
-		i2cWriteRegister(0x4A, 0x11, 0x01);			// Reboot console
+		rebootConsole();			// Reboot console
 		leaveCriticalSection(oldIME);
 		break;
 	}
@@ -1901,31 +1897,31 @@ u32 myIrqEnable(u32 irq) {
 //
 
 bool eepromProtect(void) {
-	#ifdef DEBUG		
+	#ifdef DEBUG
 	dbg_printf("\narm7 eepromProtect\n");
-	#endif	
-	
+	#endif
+
 	return true;
 }
 
 bool eepromRead(u32 src, void *dst, u32 len) {
-	#ifdef DEBUG	
-	dbg_printf("\narm7 eepromRead\n");	
-	
+	#ifdef DEBUG
+	dbg_printf("\narm7 eepromRead\n");
+
 	dbg_printf("\nsrc : \n");
-	dbg_hexa(src);		
+	dbg_hexa(src);
 	dbg_printf("\ndst : \n");
 	dbg_hexa((u32)dst);
 	dbg_printf("\nlen : \n");
 	dbg_hexa(len);
-	#endif	
+	#endif
 
 	if (!(valueBits & saveOnFlashcard) && isSdEjected()) {
 		return false;
 	}
 
 	if (tryLockMutex(&saveMutex)) {
-		while (readOngoing) { swiDelay(100); }
+		// while (readOngoing) { swiDelay(100); }
 		#ifdef TWLSDK
 		//bool doBak = ((valueBits & gameOnFlashcard) && !(valueBits & saveOnFlashcard));
 		//if (doBak) bakSdData();
@@ -1958,23 +1954,23 @@ bool eepromRead(u32 src, void *dst, u32 len) {
 }
 
 bool eepromPageWrite(u32 dst, const void *src, u32 len) {
-	#ifdef DEBUG	
-	dbg_printf("\narm7 eepromPageWrite\n");	
-	
+	#ifdef DEBUG
+	dbg_printf("\narm7 eepromPageWrite\n");
+
 	dbg_printf("\nsrc : \n");
-	dbg_hexa((u32)src);		
+	dbg_hexa((u32)src);
 	dbg_printf("\ndst : \n");
 	dbg_hexa(dst);
 	dbg_printf("\nlen : \n");
 	dbg_hexa(len);
-	#endif	
-	
+	#endif
+
 	if (!(valueBits & saveOnFlashcard) && isSdEjected()) {
 		return false;
 	}
 
 	if (tryLockMutex(&saveMutex)) {
-		while (readOngoing) { swiDelay(100); }
+		// while (readOngoing) { swiDelay(100); }
 		#ifdef TWLSDK
 		//bool doBak = ((valueBits & gameOnFlashcard) && !(valueBits & saveOnFlashcard));
 		//if (doBak) bakSdData();
@@ -2008,66 +2004,24 @@ bool eepromPageWrite(u32 dst, const void *src, u32 len) {
 }
 
 bool eepromPageProg(u32 dst, const void *src, u32 len) {
-	#ifdef DEBUG	
-	dbg_printf("\narm7 eepromPageProg\n");	
-	
-	dbg_printf("\nsrc : \n");
-	dbg_hexa((u32)src);		
-	dbg_printf("\ndst : \n");
-	dbg_hexa(dst);
-	dbg_printf("\nlen : \n");
-	dbg_hexa(len);
-	#endif	
+	#ifdef DEBUG
+	dbg_printf("\narm7 eepromPageProg\n");
+	#endif
 
-	if (!(valueBits & saveOnFlashcard) && isSdEjected()) {
-		return false;
-	}
-
- 	if (tryLockMutex(&saveMutex)) {
-		while (readOngoing) { swiDelay(100); }
-		#ifdef TWLSDK
-		//bool doBak = ((valueBits & gameOnFlashcard) && !(valueBits & saveOnFlashcard));
-		//if (doBak) bakSdData();
-		#endif
-		//driveInitialize();
-		saveTimer = 1;
-		//i2cWriteRegister(0x4A, 0x12, 0x01);		// When we're saving, power button does nothing, in order to prevent corruption.
-		/*if (saveInRam) {
-			tonccpy((char*)0x02440000 + dst, src, len);
-		}*/
-		sdmmc_set_ndma_slot(4);
-		if ((dst % saveSize)+len > saveSize) {
-			u32 len2 = len;
-			u32 len3 = 0;
-			while ((u32)(dst % saveSize)+len2 > saveSize) {
-				len2--;
-				len3++;
-			}
-			fileWrite(src, savFile, (dst % saveSize), len2);
-			fileWrite(src+len2, savFile, ((dst+len2) % saveSize), len3);
-		} else {
-			fileWrite(src, savFile, (dst % saveSize), len);
-		}
-		sdmmc_set_ndma_slot(0);
-  		#ifdef TWLSDK
-		//if (doBak) restoreSdBakData();
-		#endif
-		unlockMutex(&saveMutex);
-	}
-	return true;
+	return eepromPageWrite(dst, src, len);
 }
 
 bool eepromPageVerify(u32 dst, const void *src, u32 len) {
-	#ifdef DEBUG	
-	dbg_printf("\narm7 eepromPageVerify\n");	
-	
+	#ifdef DEBUG
+	dbg_printf("\narm7 eepromPageVerify\n");
+
 	dbg_printf("\nsrc : \n");
-	dbg_hexa((u32)src);		
+	dbg_hexa((u32)src);
 	dbg_printf("\ndst : \n");
 	dbg_hexa(dst);
 	dbg_printf("\nlen : \n");
 	dbg_hexa(len);
-	#endif	
+	#endif
 
 	//i2cWriteRegister(0x4A, 0x12, 0x01);		// When we're saving, power button does nothing, in order to prevent corruption.
 	//fileWrite(src, savFile, dst, len, -1);
@@ -2183,7 +2137,7 @@ bool cardRead(u32 dma, u32 src, void *dst, u32 len) {
 	if (valueBits & ROMinRAM) {
 		cardReadRAM(dst, src, len);
 	} else {
-		while (readOngoing) { swiDelay(100); }
+		// while (readOngoing) { swiDelay(100); }
 		//driveInitialize();
 		cardReadLED(true, false);    // When a file is loading, turn on LED for card read indicator
 		//ndmaUsed = false;

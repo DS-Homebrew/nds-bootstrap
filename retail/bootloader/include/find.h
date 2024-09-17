@@ -55,6 +55,9 @@ u16* findCardReadStartOffsetThumb5Type0(const module_params_t* moduleParams, con
 u16* findCardReadStartOffsetThumb5Type1(const module_params_t* moduleParams, const u16* cardReadEndOffset); // SDK 5
 u32* findCardReadCachedEndOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
 u32* findCardReadCachedStartOffset(const module_params_t* moduleParams, const u32* cardReadCachedEndOffset);
+u32* findCardSaveCmdOffset2(const tNDSHeader* ndsHeader);
+u32* findCardSaveCmdOffset3(const tNDSHeader* ndsHeader);
+u32* findCardSaveCmdOffset5(const tNDSHeader* ndsHeader);
 u32* findCardPullOutOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
 u16* findCardPullOutOffsetThumb(const tNDSHeader* ndsHeader);
 u16* findCardPullOutOffsetThumb5Type0(const tNDSHeader* ndsHeader, const module_params_t* moduleParams); // SDK 5
@@ -88,6 +91,8 @@ u32* findFileIoSeekOffset(const u32* fileIoCloseOffset, const module_params_t* m
 u16* findFileIoSeekOffsetThumb(const u16* fileIoCloseOffset);
 u32* findFileIoReadOffset(const u32* fileIoSeekOffset, const module_params_t* moduleParams);
 u16* findFileIoReadOffsetThumb(const u16* fileIoSeekOffset, const module_params_t* moduleParams);
+u32* findCardEndReadDma(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb, const u32* cardReadDmaEndOffset, u32* offsetDmaHandler);
+u32* findCardSetDma(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb);
 u32* findResetOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool* softResetMb);
 u32* findNandTmpJumpFuncOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
 u32* findTwlSleepModeEndOffset(const tNDSHeader* ndsHeader);
@@ -103,6 +108,7 @@ u32* findSwiGetPitchTableOffset(const tNDSHeader* ndsHeader, const module_params
 u32* findUserDataAddrOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
 u32* findSleepPatchOffset(const tNDSHeader* ndsHeader);
 u16* findSleepPatchOffsetThumb(const tNDSHeader* ndsHeader);
+u32* findSleepInputWriteOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
 u32* findRamClearOffset(const tNDSHeader* ndsHeader);
 u32* findPostBootOffset(const tNDSHeader* ndsHeader);
 u32* findCardIrqEnableOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);

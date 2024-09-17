@@ -138,6 +138,7 @@ u16 baseHeaderCRC = 0;
 u16 baseSecureCRC = 0;
 u32 baseRomSize = 0;
 u32 romPaddingSize = 0;
+u32 arm9iromOffset = 0;
 u32 arm9ibinarySize = 0;
 u32 baseChipID = 0;
 bool pkmnHeader = false;
@@ -290,153 +291,21 @@ static void resetMemory_ARM7(void) {
 }
 
 static void NDSTouchscreenMode(void) {
-	u8 volLevel;
-	
 	// 0xAC: special setting (when found special gamecode)
 	// 0xA7: normal setting (for any other gamecodes)
-	volLevel = volumeFix ? 0xAC : 0xA7;
+	const u8 volLevel = volumeFix ? 0xAC : 0xA7;
 
 	// Touchscreen
-	cdcReadReg (0x63, 0x00);
-	cdcWriteReg(CDC_CONTROL, 0x3A, 0x00);
-	cdcReadReg (CDC_CONTROL, 0x51);
-	cdcReadReg (CDC_TOUCHCNT, 0x02);
-	cdcReadReg (CDC_CONTROL, 0x3F);
-	cdcReadReg (CDC_SOUND, 0x28);
-	cdcReadReg (CDC_SOUND, 0x2A);
-	cdcReadReg (CDC_SOUND, 0x2E);
-	cdcWriteReg(CDC_CONTROL, 0x52, 0x80);
-	cdcWriteReg(CDC_CONTROL, 0x40, 0x0C);
-	cdcWriteReg(CDC_SOUND, 0x24, 0xFF);
-	cdcWriteReg(CDC_SOUND, 0x25, 0xFF);
-	cdcWriteReg(CDC_SOUND, 0x26, 0x7F);
-	cdcWriteReg(CDC_SOUND, 0x27, 0x7F);
-	cdcWriteReg(CDC_SOUND, 0x28, 0x4A);
-	cdcWriteReg(CDC_SOUND, 0x29, 0x4A);
-	cdcWriteReg(CDC_SOUND, 0x2A, 0x10);
-	cdcWriteReg(CDC_SOUND, 0x2B, 0x10);
-	cdcWriteReg(CDC_CONTROL, 0x51, 0x00);
-	cdcReadReg (CDC_TOUCHCNT, 0x02);
-	cdcWriteReg(CDC_TOUCHCNT, 0x02, 0x98);
-	cdcWriteReg(CDC_SOUND, 0x23, 0x00);
-	cdcWriteReg(CDC_SOUND, 0x1F, 0x14);
-	cdcWriteReg(CDC_SOUND, 0x20, 0x14);
-	cdcWriteReg(CDC_CONTROL, 0x3F, 0x00);
-	cdcReadReg (CDC_CONTROL, 0x0B);
-	cdcWriteReg(CDC_CONTROL, 0x05, 0x00);
-	cdcWriteReg(CDC_CONTROL, 0x0B, 0x01);
-	cdcWriteReg(CDC_CONTROL, 0x0C, 0x02);
-	cdcWriteReg(CDC_CONTROL, 0x12, 0x01);
-	cdcWriteReg(CDC_CONTROL, 0x13, 0x02);
-	cdcWriteReg(CDC_SOUND, 0x2E, 0x00);
-	cdcWriteReg(CDC_CONTROL, 0x3A, 0x60);
-	cdcWriteReg(CDC_CONTROL, 0x01, 0x01);
-	cdcWriteReg(CDC_CONTROL, 0x39, 0x66);
-	cdcReadReg (CDC_SOUND, 0x20);
-	cdcWriteReg(CDC_SOUND, 0x20, 0x10);
-	cdcWriteReg(CDC_CONTROL, 0x04, 0x00);
-	cdcWriteReg(CDC_CONTROL, 0x12, 0x81);
-	cdcWriteReg(CDC_CONTROL, 0x13, 0x82);
-	cdcWriteReg(CDC_CONTROL, 0x51, 0x82);
-	cdcWriteReg(CDC_CONTROL, 0x51, 0x00);
-	cdcWriteReg(CDC_CONTROL, 0x04, 0x03);
-	cdcWriteReg(CDC_CONTROL, 0x05, 0xA1);
-	cdcWriteReg(CDC_CONTROL, 0x06, 0x15);
-	cdcWriteReg(CDC_CONTROL, 0x0B, 0x87);
-	cdcWriteReg(CDC_CONTROL, 0x0C, 0x83);
-	cdcWriteReg(CDC_CONTROL, 0x12, 0x87);
-	cdcWriteReg(CDC_CONTROL, 0x13, 0x83);
-	cdcReadReg (CDC_TOUCHCNT, 0x10);
-	cdcWriteReg(CDC_TOUCHCNT, 0x10, 0x08);
-	cdcWriteReg(0x04, 0x08, 0x7F);
-	cdcWriteReg(0x04, 0x09, 0xE1);
-	cdcWriteReg(0x04, 0x0A, 0x80);
-	cdcWriteReg(0x04, 0x0B, 0x1F);
-	cdcWriteReg(0x04, 0x0C, 0x7F);
-	cdcWriteReg(0x04, 0x0D, 0xC1);
-	cdcWriteReg(CDC_CONTROL, 0x41, 0x08);
-	cdcWriteReg(CDC_CONTROL, 0x42, 0x08);
-	cdcWriteReg(CDC_CONTROL, 0x3A, 0x00);
-	cdcWriteReg(0x04, 0x08, 0x7F);
-	cdcWriteReg(0x04, 0x09, 0xE1);
-	cdcWriteReg(0x04, 0x0A, 0x80);
-	cdcWriteReg(0x04, 0x0B, 0x1F);
-	cdcWriteReg(0x04, 0x0C, 0x7F);
-	cdcWriteReg(0x04, 0x0D, 0xC1);
-	cdcWriteReg(CDC_SOUND, 0x2F, 0x2B);
-	cdcWriteReg(CDC_SOUND, 0x30, 0x40);
-	cdcWriteReg(CDC_SOUND, 0x31, 0x40);
-	cdcWriteReg(CDC_SOUND, 0x32, 0x60);
-	cdcReadReg (CDC_CONTROL, 0x74);
-	cdcWriteReg(CDC_CONTROL, 0x74, 0x02);
-	cdcReadReg (CDC_CONTROL, 0x74);
-	cdcWriteReg(CDC_CONTROL, 0x74, 0x10);
-	cdcReadReg (CDC_CONTROL, 0x74);
-	cdcWriteReg(CDC_CONTROL, 0x74, 0x40);
-	cdcWriteReg(CDC_SOUND, 0x21, 0x20);
-	cdcWriteReg(CDC_SOUND, 0x22, 0xF0);
-	cdcReadReg (CDC_CONTROL, 0x51);
-	cdcReadReg (CDC_CONTROL, 0x3F);
-	cdcWriteReg(CDC_CONTROL, 0x3F, 0xD4);
-	cdcWriteReg(CDC_SOUND, 0x23, 0x44);
-	cdcWriteReg(CDC_SOUND, 0x1F, 0xD4);
-	cdcWriteReg(CDC_SOUND, 0x28, 0x4E);
-	cdcWriteReg(CDC_SOUND, 0x29, 0x4E);
-	cdcWriteReg(CDC_SOUND, 0x24, 0x9E);
-	cdcWriteReg(CDC_SOUND, 0x25, 0x9E);
-	cdcWriteReg(CDC_SOUND, 0x20, 0xD4);
-	cdcWriteReg(CDC_SOUND, 0x2A, 0x14);
-	cdcWriteReg(CDC_SOUND, 0x2B, 0x14);
-	cdcWriteReg(CDC_SOUND, 0x26, 0xA7);
-	cdcWriteReg(CDC_SOUND, 0x27, 0xA7);
-	cdcWriteReg(CDC_CONTROL, 0x40, 0x00);
-	cdcWriteReg(CDC_CONTROL, 0x3A, 0x60);
 	cdcWriteReg(CDC_SOUND, 0x26, volLevel);
 	cdcWriteReg(CDC_SOUND, 0x27, volLevel);
 	cdcWriteReg(CDC_SOUND, 0x2E, 0x03);
 	cdcWriteReg(CDC_TOUCHCNT, 0x03, 0x00);
 	cdcWriteReg(CDC_SOUND, 0x21, 0x20);
 	cdcWriteReg(CDC_SOUND, 0x22, 0xF0);
-	cdcReadReg (CDC_SOUND, 0x22);
-	cdcWriteReg(CDC_SOUND, 0x22, 0x00);
+	cdcWriteReg(CDC_SOUND, 0x22, 0x70);
 	cdcWriteReg(CDC_CONTROL, 0x52, 0x80);
 	cdcWriteReg(CDC_CONTROL, 0x51, 0x00);
 	
-	// Set remaining values
-	cdcWriteReg(CDC_CONTROL, 0x03, 0x44);
-	cdcWriteReg(CDC_CONTROL, 0x0D, 0x00);
-	cdcWriteReg(CDC_CONTROL, 0x0E, 0x80);
-	cdcWriteReg(CDC_CONTROL, 0x0F, 0x80);
-	cdcWriteReg(CDC_CONTROL, 0x10, 0x08);
-	cdcWriteReg(CDC_CONTROL, 0x14, 0x80);
-	cdcWriteReg(CDC_CONTROL, 0x15, 0x80);
-	cdcWriteReg(CDC_CONTROL, 0x16, 0x04);
-	cdcWriteReg(CDC_CONTROL, 0x1A, 0x01);
-	cdcWriteReg(CDC_CONTROL, 0x1E, 0x01);
-	cdcWriteReg(CDC_CONTROL, 0x24, 0x80);
-	cdcWriteReg(CDC_CONTROL, 0x33, 0x34);
-	cdcWriteReg(CDC_CONTROL, 0x34, 0x32);
-	cdcWriteReg(CDC_CONTROL, 0x35, 0x12);
-	cdcWriteReg(CDC_CONTROL, 0x36, 0x03);
-	cdcWriteReg(CDC_CONTROL, 0x37, 0x02);
-	cdcWriteReg(CDC_CONTROL, 0x38, 0x03);
-	cdcWriteReg(CDC_CONTROL, 0x3C, 0x19);
-	cdcWriteReg(CDC_CONTROL, 0x3D, 0x05);
-	cdcWriteReg(CDC_CONTROL, 0x44, 0x0F);
-	cdcWriteReg(CDC_CONTROL, 0x45, 0x38);
-	cdcWriteReg(CDC_CONTROL, 0x49, 0x00);
-	cdcWriteReg(CDC_CONTROL, 0x4A, 0x00);
-	cdcWriteReg(CDC_CONTROL, 0x4B, 0xEE);
-	cdcWriteReg(CDC_CONTROL, 0x4C, 0x10);
-	cdcWriteReg(CDC_CONTROL, 0x4D, 0xD8);
-	cdcWriteReg(CDC_CONTROL, 0x4E, 0x7E);
-	cdcWriteReg(CDC_CONTROL, 0x4F, 0xE3);
-	cdcWriteReg(CDC_CONTROL, 0x58, 0x7F);
-	cdcWriteReg(CDC_CONTROL, 0x74, 0xD2);
-	cdcWriteReg(CDC_CONTROL, 0x75, 0x2C);
-	cdcWriteReg(CDC_SOUND, 0x22, 0x70);
-	cdcWriteReg(CDC_SOUND, 0x2C, 0x20);
-
 	// Finish up!
 	cdcReadReg (CDC_TOUCHCNT, 0x02);
 	cdcWriteReg(CDC_TOUCHCNT, 0x02, 0x98);
@@ -581,6 +450,7 @@ static void loadBinary_ARM7(const tDSiHeader* dsiHeaderTemp, aFile* file) {
 		}
 	}
 
+	arm9iromOffset = (u32)dsiHeaderTemp->arm9iromOffset;
 	arm9ibinarySize = dsiHeaderTemp->arm9ibinarySize;
 }
 
@@ -787,7 +657,7 @@ static void my_readUserSettings(tNDSHeader* ndsHeader) {
 
 u8 getRumblePakType(void) {
 	// First, make sure we're on DS Phat/Lite, and if DLDI is Slot-1
-	if (*(u16*)0x4004700 != 0 || (_io_dldi_features & FEATURE_SLOT_GBA) || s2FlashcardId != 0 || *(vu16*)0x08240000 == 1 || GBA_BUS[0] == 0xFFFE || GBA_BUS[1] == 0xFFFF) {
+	if (*(vu16*)0x4004700 != 0 || (_io_dldi_features & FEATURE_SLOT_GBA) || s2FlashcardId != 0 || *(vu16*)0x08240000 == 1 || GBA_BUS[0] == 0xFFFE || GBA_BUS[1] == 0xFFFF) {
 		return 0;
 	}
 	// Then, check for 0x96 to see if it's a GBA game or flashcart
@@ -795,11 +665,10 @@ u8 getRumblePakType(void) {
 		WARIOWARE_ENABLE = 8;
 		return 1;
 	} else {
-		for (int i = 0; i < 4000; i++) { // Run 4000 times to make sure it works
-			for (int p = 0; p < 0x1000/2; p++) {
-				if (GBA_BUS[1+(p*2)] == 0xFFFD) {
-					return 2;
-				}
+		// Check for DS Phat or Lite Rumble Pak
+		for (int i = 0; i < 0xFFF; i++) {
+			if (GBA_BUS[i] != 0xFFFD && GBA_BUS[i] != 0xFDFF) {
+				return 2;
 			}
 		}
 	}
@@ -1215,7 +1084,7 @@ int arm7_main(void) {
 	ndsHeader = loadHeader(&dsiHeaderTemp, moduleParams);
 	const char* romTid = getRomTid(ndsHeader);
 
-	if (dsiHeaderTemp.ndshdr.unitCode < 3 && romTid[0] != 'K' && romTid[0] != 'Z' && memcmp(romTid, "UBR", 3) != 0 && memcmp(romTid, "HND", 3) != 0 && memcmp(romTid, "HNE", 3) != 0 && srlAddr == 0 && (softResetParams[0] == 0 || softResetParams[0] == 0xFFFFFFFF)) {
+	if (!(accessControl & BIT(4)) && srlAddr == 0 && memcmp(romTid, "UBR", 3) != 0 && memcmp(romTid, "HND", 3) != 0 && memcmp(romTid, "HNE", 3) != 0 && srlAddr == 0 && (softResetParams[0] == 0 || softResetParams[0] == 0xFFFFFFFF)) {
 		esrbOutput();
 	}
 
@@ -1233,9 +1102,11 @@ int arm7_main(void) {
 
 	if (cdcReadReg(CDC_SOUND, 0x22) == 0xF0) {
 		// Switch touch mode to NTR
-		*(u16*)0x4004700 = (soundFreq ? 0xC00F : 0x800F);
+		*(vu16*)0x4004700 &= ~BIT(15); // Disable sound output: Runs before sound frequency change
+		*(vu16*)0x4004700 = (soundFreq ? 0xC00F : 0x800F);
+		*(vu16*)0x4004700 |= BIT(15); // Enable sound output
 		NDSTouchscreenMode();
-		*(u16*)0x4000500 = 0x807F;
+		*(vu16*)0x4000500 = 0x807F;
 	}
 
 	REG_GPIO_WIFI |= BIT(8);	// Old NDS-Wifi mode
@@ -1311,10 +1182,14 @@ int arm7_main(void) {
 	aFile musicsFile;
 	getFileFromCluster(&musicsFile, musicCluster);
 	if (((accessControl & BIT(4)) || arm7mbk == 0x080037C0) && musicCluster != 0) {
-		dbg_printf("Music pack found!\n");
+		if (strncmp(romTid, "DMF", 3) == 0) {
+			dbg_printf("Photo/video found!\n");
+		} else {
+			dbg_printf("Music pack found!\n");
+		}
 	}
 
-	const bool laterSdk = (moduleParams->sdk_version >= 0x2008000 || moduleParams->sdk_version == 0x20029A8);
+	const bool laterSdk = ((moduleParams->sdk_version >= 0x2008000 && moduleParams->sdk_version != 0x2012774) || moduleParams->sdk_version == 0x20029A8);
 	bool wramUsed = false;
 	u32 fatTableSize = 0;
 	u32 fatTableSizeNoExp = !laterSdk ? 0x19C00 : 0x1A400;
@@ -1583,6 +1458,8 @@ int arm7_main(void) {
 		usesCloneboot,
 		overlaysSize,
 		ioverlaysSize,
+		arm9iromOffset,
+		arm9ibinarySize,
 		fatTableSize,
 		fatTableAddr
 	);
@@ -1667,9 +1544,9 @@ int arm7_main(void) {
 	aFile pageFile;
 	getFileFromCluster(&pageFile, pageFileCluster);
 
-	fileWrite((char*)ndsHeader->arm9destination, &pageFile, 0x14000, iUncompressedSize);
+	/* fileWrite((char*)ndsHeader->arm9destination, &pageFile, 0x14000, iUncompressedSize);
 	fileWrite((char*)ndsHeader->arm7destination, &pageFile, 0x2C0000, newArm7binarySize);
-	fileWrite((char*)CHEAT_ENGINE_LOCATION_B4DS, &pageFile, 0x2FE000, 0x2000);
+	fileWrite((char*)CHEAT_ENGINE_LOCATION_B4DS, &pageFile, 0x2FE000, 0x2000); */
 	fileWrite((char*)&iUncompressedSize, &pageFile, 0x3FFFF0, sizeof(u32));
 	fileWrite((char*)&newArm7binarySize, &pageFile, 0x3FFFF4, sizeof(u32));
 

@@ -15,6 +15,7 @@ extern u8 valueBits3;
 #define apPatchIsCheat (valueBits & BIT(5))
 #define macroMode (valueBits & BIT(6))
 #define logging (valueBits & BIT(7))
+#define cardReadDMA (valueBits2 & BIT(2))
 #define useRomRegion (valueBits2 & BIT(7))
 #define sleepMode (valueBits3 & BIT(2))
 #define twlSharedFont (valueBits3 & BIT(3))

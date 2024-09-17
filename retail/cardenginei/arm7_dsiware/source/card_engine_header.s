@@ -13,6 +13,7 @@
 .global card_engine_end
 .global cardStruct
 .global patches_offset
+.global cheatEngineAddr
 .global moduleParams
 .global fileCluster
 .global saveCluster
@@ -49,7 +50,7 @@ intr_vblank_orig_return:
 	.word	0x00000000
 intr_fifo_orig_return:
 	.word	0x00000000
-intr_ndma0_orig_return:
+cheatEngineAddr:
 	.word	0x00000000
 moduleParams:
 	.word	0x00000000
@@ -94,6 +95,10 @@ romLocation:
 romMapLines:
 	.word	0x00000000
 romMap:
+	.word	0x00000000
+	.word	0x00000000
+	.word	0x00000000
+
 	.word	0x00000000
 	.word	0x00000000
 	.word	0x00000000
@@ -174,11 +179,12 @@ patches:
 .word	0
 .word	vblankHandler
 .word	0
-.word	0
 .word   0
 .word   arm7FunctionsDirect
 .word   arm7Functions
 .word   arm7FunctionsThumb
+.word   0
+.word   0
 .word   0
 .word   0
 .word   0

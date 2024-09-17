@@ -37,6 +37,8 @@
 #include "nds_header.h"
 #include "tonccpy.h"
 
+#define a9IrqHooked BIT(7)
+
 #define RUMBLE_PAK			(*(vuint16 *)0x08000000)
 #define WARIOWARE_PAK		(*(vuint16 *)0x080000C4)
 
@@ -56,6 +58,7 @@ extern vu32* volatile cardStruct;
 extern module_params_t* moduleParams;
 extern u32 cheatEngineAddr;
 extern u32 musicBuffer;
+extern u32 valueBits;
 extern s32 mainScreen;
 extern u32 language;
 extern u32* languageAddr;
@@ -205,12 +208,15 @@ void rebootConsole(void) {
 }
 
 void reset(void) {
-	//u32 resetParam = (isSdk5Set ? RESET_PARAM_SDK5 : RESET_PARAM);
-	if (sharedAddr[0] == 0x57495344 /*|| *(u32*)resetParam == 0xFFFFFFFF*/) {
-		rebootConsole();
-	}
+	while (sharedAddr[3] != 0x4E445352) swiDelay(100);
 
-	REG_IME = 0;
+	rebootConsole();
+	// u32 resetParam = (isSdk5Set ? RESET_PARAM_SDK5 : RESET_PARAM);
+	// if (sharedAddr[0] == 0x57495344 /*|| *(u32*)resetParam == 0xFFFFFFFF*/) {
+	// 	rebootConsole();
+	// }
+
+	/* REG_IME = 0;
 
 	toncset32((u32*)0x04000400, 0, 0x104/4); // Clear sound channel & control registers
 
@@ -256,7 +262,20 @@ void reset(void) {
 	}
 
 	// Start ARM7
-	ndsCodeStart(ndsHeader->arm7executeAddress);
+	ndsCodeStart(ndsHeader->arm7executeAddress); */
+}
+
+//---------------------------------------------------------------------------------
+void myIrqHandlerFIFO(void) {
+//---------------------------------------------------------------------------------
+	#ifdef DEBUG		
+	nocashMessage("myIrqHandlerFIFO");
+	#endif
+
+    if (IPC_GetSync() == 0x3) {
+		swiDelay(100);
+		IPC_SendSync(0x3);
+	}
 }
 
 
@@ -333,7 +352,7 @@ void myIrqHandlerVBlank(void) {
 
 	if ((0 == (REG_KEYINPUT & igmHotkey) && 0 == (REG_EXTKEYINPUT & (((igmHotkey >> 10) & 3) | ((igmHotkey >> 6) & 0xC0)))
 #ifndef MUSIC
-		&& !wifiIrq
+		&& (valueBits & a9IrqHooked) && !wifiIrq
 #endif
 	) || sharedAddr[5] == 0x59444552 /* REDY */) {
 		inGameMenu();
@@ -386,7 +405,7 @@ void myIrqHandlerVBlank(void) {
 		DoRumble();
 	}
 
-	if (sharedAddr[3] == (vu32)0x52534554) {
+	if (sharedAddr[3] == 0x52534554 || sharedAddr[3] == 0x4E445352) {
 		reset();
 	}
 
@@ -495,15 +514,19 @@ void myIrqHandlerVBlank(void) {
 u32 myIrqEnable(u32 irq) {	
 	int oldIME = enterCriticalSection();
 
-	#ifdef DEBUG		
+	#ifdef DEBUG
 	nocashMessage("myIrqEnable\n");
-	#endif	
+	#endif
 
 	initialize();
 
+	u32 irq_before = REG_IE | IRQ_IPC_SYNC;
+	irq |= IRQ_IPC_SYNC;
+	REG_IPC_SYNC |= IPC_SYNC_IRQ_ENABLE;
+
 	REG_IE |= irq;
 	leaveCriticalSection(oldIME);
-	return irq;
+	return irq_before;
 }
 
 //
@@ -511,32 +534,36 @@ u32 myIrqEnable(u32 irq) {
 //
 
 bool eepromProtect(void) {
-	#ifdef DEBUG		
+	#ifdef DEBUG
 	dbg_printf("\narm7 eepromProtect\n");
-	#endif	
-	
+	#endif
+
 	return true;
 }
 
 bool eepromRead(u32 src, void *dst, u32 len) {
-	#ifdef DEBUG	
-	dbg_printf("\narm7 eepromRead\n");	
-	
+	#ifdef DEBUG
+	dbg_printf("\narm7 eepromRead\n");
+
 	dbg_printf("\nsrc : \n");
-	dbg_hexa(src);		
+	dbg_hexa(src);
 	dbg_printf("\ndst : \n");
 	dbg_hexa((u32)dst);
 	dbg_printf("\nlen : \n");
 	dbg_hexa(len);
-	#endif	
+	#endif
+
+	if (!(valueBits & a9IrqHooked)) {
+		return false;
+	}
 
 	// Send a command to the ARM9 to read the save
-	u32 commandSaveRead = 0x53415652;
+	const u32 commandSaveRead = 0x53415652;
 
 	// Write the command
 	sharedAddr[0] = src;
-	sharedAddr[1] = len;
-	sharedAddr[2] = (vu32)dst;
+	sharedAddr[1] = (vu32)dst;
+	sharedAddr[2] = len;
 	sharedAddr[3] = commandSaveRead;
 
 	waitForArm9();
@@ -545,24 +572,28 @@ bool eepromRead(u32 src, void *dst, u32 len) {
 }
 
 bool eepromPageWrite(u32 dst, const void *src, u32 len) {
-	#ifdef DEBUG	
-	dbg_printf("\narm7 eepromPageWrite\n");	
-	
+	#ifdef DEBUG
+	dbg_printf("\narm7 eepromPageWrite\n");
+
 	dbg_printf("\nsrc : \n");
-	dbg_hexa((u32)src);		
+	dbg_hexa((u32)src);
 	dbg_printf("\ndst : \n");
 	dbg_hexa(dst);
 	dbg_printf("\nlen : \n");
 	dbg_hexa(len);
-	#endif	
-	
+	#endif
+
+	if (!(valueBits & a9IrqHooked)) {
+		return false;
+	}
+
 	// Send a command to the ARM9 to write the save
-	u32 commandSaveWrite = 0x53415657;
+	const u32 commandSaveWrite = 0x53415657;
 
 	// Write the command
-	sharedAddr[0] = dst;
-	sharedAddr[1] = len;
-	sharedAddr[2] = (vu32)src;
+	sharedAddr[0] = (vu32)src;
+	sharedAddr[1] = dst;
+	sharedAddr[2] = len;
 	sharedAddr[3] = commandSaveWrite;
 
 	waitForArm9();
@@ -571,46 +602,28 @@ bool eepromPageWrite(u32 dst, const void *src, u32 len) {
 }
 
 bool eepromPageProg(u32 dst, const void *src, u32 len) {
-	#ifdef DEBUG	
-	dbg_printf("\narm7 eepromPageProg\n");	
-	
-	dbg_printf("\nsrc : \n");
-	dbg_hexa((u32)src);		
-	dbg_printf("\ndst : \n");
-	dbg_hexa(dst);
-	dbg_printf("\nlen : \n");
-	dbg_hexa(len);
-	#endif	
+	#ifdef DEBUG
+	dbg_printf("\narm7 eepromPageProg\n");
+	#endif
 
-	// Send a command to the ARM9 to write the save
-	u32 commandSaveWrite = 0x53415657;
-
-	// Write the command
-	sharedAddr[0] = dst;
-	sharedAddr[1] = len;
-	sharedAddr[2] = (vu32)src;
-	sharedAddr[3] = commandSaveWrite;
-
-	waitForArm9();
-
-	return true;
+	return eepromPageWrite(dst, src, len);
 }
 
 bool eepromPageVerify(u32 dst, const void *src, u32 len) {
-	#ifdef DEBUG	
-	dbg_printf("\narm7 eepromPageVerify\n");	
-	
+	#ifdef DEBUG
+	dbg_printf("\narm7 eepromPageVerify\n");
+
 	dbg_printf("\nsrc : \n");
-	dbg_hexa((u32)src);		
+	dbg_hexa((u32)src);
 	dbg_printf("\ndst : \n");
 	dbg_hexa(dst);
 	dbg_printf("\nlen : \n");
 	dbg_hexa(len);
-	#endif	
+	#endif
 
   	/*if (lockMutex(&saveMutex)) {
 		// Send a command to the ARM9 to write the save
-		u32 commandSaveWrite = 0x53415657;
+		const u32 commandSaveWrite = 0x53415657;
 
 		// Write the command
 		sharedAddr[0] = dst;
@@ -626,35 +639,43 @@ bool eepromPageVerify(u32 dst, const void *src, u32 len) {
 }
 
 bool eepromPageErase (u32 dst) {
-	#ifdef DEBUG	
-	dbg_printf("\narm7 eepromPageErase\n");	
-	#endif	
-	
+	#ifdef DEBUG
+	dbg_printf("\narm7 eepromPageErase\n");
+	#endif
+
+	if (!(valueBits & a9IrqHooked)) {
+		return false;
+	}
+
 	// TODO: this should be implemented?
 	return true;
 }
 
 bool cardRead(u32 dma, u32 src, void *dst, u32 len) {
-	#ifdef DEBUG	
-	dbg_printf("\narm7 cardRead\n");	
-	
+	#ifdef DEBUG
+	dbg_printf("\narm7 cardRead\n");
+
 	dbg_printf("\ndma : \n");
-	dbg_hexa(dma);		
+	dbg_hexa(dma);
 	dbg_printf("\nsrc : \n");
-	dbg_hexa(src);		
+	dbg_hexa(src);
 	dbg_printf("\ndst : \n");
 	dbg_hexa((u32)dst);
 	dbg_printf("\nlen : \n");
 	dbg_hexa(len);
-	#endif	
-	
+	#endif
+
+	if (!(valueBits & a9IrqHooked)) {
+		return false;
+	}
+
 	// Send a command to the ARM9 to read the ROM
-	u32 commandRomRead = 0x524F4D52;
+	const u32 commandRomRead = 0x524F4D52;
 
 	// Write the command
 	sharedAddr[0] = src;
-	sharedAddr[1] = len;
-	sharedAddr[2] = (vu32)dst;
+	sharedAddr[1] = (vu32)dst;
+	sharedAddr[2] = len;
 	sharedAddr[3] = commandRomRead;
 
 	waitForArm9();

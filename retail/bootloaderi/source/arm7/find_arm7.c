@@ -19,11 +19,11 @@ static const u32 relocateStartSignature5Alt2[1] = {0x02FFFFFA};
 static const u32 nextFunctiontSignature[1] = {0xE92D4000};
 static const u32 relocateValidateSignature[1] = {0x400010C};
 
-/*static const u32 swiHaltSignature1[1] = {0xE59FC004};
+static const u32 swiHaltSignature1[1] = {0xE59FC004};
 static const u32 swiHaltSignature2[1] = {0xE59FC000};
 static const u16 swiHaltCmpSignature[1] = {0x2800};
 static const u32 swiHaltConstSignature[1] = {0x4000004};
-static const u32 swiHaltConstSignatureAlt[1] = {0x4000208};*/
+static const u32 swiHaltConstSignatureAlt[1] = {0x4000208};
 
 static const u32 swi12Signature[1] = {0x4770DF12}; // LZ77UnCompReadByCallbackWrite16bit
 static const u16 swi24Signature[2] = {0xDF24,0x4770}; // SHA1_Init
@@ -72,8 +72,9 @@ static const u32 swiGetPitchTableSignature4Alt4[3]  = {0xE59FC000, 0xE12FFF1C, 0
 static const u32 swiGetPitchTableSignature4Alt5[3]  = {0xE59FC000, 0xE12FFF1C, 0x038035ED};
 static const u32 swiGetPitchTableSignature4Alt6[3]  = {0xE59FC000, 0xE12FFF1C, 0x03803715};
 static const u32 swiGetPitchTableSignature4Alt7[3]  = {0xE59FC000, 0xE12FFF1C, 0x03803829};
-static const u32 swiGetPitchTableSignature4Alt8[3]  = {0xE59FC000, 0xE12FFF1C, 0x03803ED5};
-static const u32 swiGetPitchTableSignature4Alt9[3]  = {0xE59FC000, 0xE12FFF1C, 0x03803F15};
+static const u32 swiGetPitchTableSignature4Alt8[3]  = {0xE59FC000, 0xE12FFF1C, 0x03803DC1};
+static const u32 swiGetPitchTableSignature4Alt9[3]  = {0xE59FC000, 0xE12FFF1C, 0x03803ED5};
+static const u32 swiGetPitchTableSignature4Alt10[3] = {0xE59FC000, 0xE12FFF1C, 0x03803F15};
 static const u32 swiGetPitchTableSignature5[4]      = {0x781A4B06, 0xD3030791, 0xD20106D1, 0x1A404904};
 
 // User data address
@@ -84,6 +85,13 @@ static const u32 swiGetPitchTableSignature5[4]      = {0x781A4B06, 0xD3030791, 0
 static const u32 sleepPatch[2]         = {0x0A000001, 0xE3A00601};
 static const u16 sleepPatchThumb[2]    = {0xD002, 0x4831};
 static const u16 sleepPatchThumbAlt[2] = {0xD002, 0x0440};
+
+// Sleep input write
+static const u32 sleepInputWriteEndSignature1[2]     = {0x04000136, 0x027FFFA8};
+static const u32 sleepInputWriteEndSignature5[2]     = {0x04000136, 0x02FFFFA8};
+static const u32 sleepInputWriteSignature[1]         = {0x13A04902};
+static const u32 sleepInputWriteSignatureAlt[1]      = {0x11A05004};
+static const u16 sleepInputWriteBeqSignatureThumb[1] = {0xD000};
 
 // RAM clear
 static const u32 ramClearSignature[2]        = {0x02FFC000, 0x02FFF000};
@@ -129,6 +137,10 @@ static const u16 sdCardResetSignatureThumbType3[7] = {0xF7FF, 0xFD9C, 0xF7FF, 0x
 static const u16 sdCardResetSignatureThumbType4[7] = {0xF7FF, 0xFDB2, 0xF7FF, 0xFF50, 0xF000, 0xF84A, 0x1C05};
 static const u16 sdCardResetSignatureThumbType5[7] = {0xF7FF, 0xFDC1, 0xF7FF, 0xFF5F, 0xF000, 0xF849, 0x1C05};
 static const u16 sdCardResetSignatureThumbType6[7] = {0xF7FF, 0xFDCE, 0xF7FF, 0xFF68, 0xF000, 0xF85A, 0x1C05};
+
+// Auto power-off (SDK 5)
+static const u32 autoPowerOffSignature[4]      = {0xE92D41F0, 0xE59F4070, 0xE1A08000, 0xE1A07001};
+static const u16 autoPowerOffSignatureThumb[6] = {0xB5F8, 0x1C05, 0x1C0E, 0x2400, 0x27C5, 0xE019};
 
 bool a7GetReloc(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	extern u32 vAddrOfRelocSrc;
@@ -305,7 +317,7 @@ bool a7GetReloc(const tNDSHeader* ndsHeader, const module_params_t* moduleParams
 	return true;
 }
 
-/*u32* findSwiHaltOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+u32* findSwiHaltOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	dbg_printf("findSwiHaltOffset:\n");
 
 	u32* swiHaltOffset = NULL;
@@ -381,7 +393,7 @@ u16* findSwiHaltThumbOffset(const tNDSHeader* ndsHeader, const module_params_t* 
 
 	dbg_printf("\n");
 	return (u16*)swiHaltOffset;
-}*/
+}
 
 u32* a7_findSwi12Offset(const tNDSHeader* ndsHeader) {
 	dbg_printf("findSwi12Offset:\n");
@@ -957,7 +969,6 @@ u32* findSwiGetPitchTableOffset(const tNDSHeader* ndsHeader, const module_params
 			dbg_printf("swiGetPitchTable SDK 4 call alt 8 not found\n");
 		}
 	}
-
 	if (!swiGetPitchTableOffset) {
 		swiGetPitchTableOffset = findOffset(
 			(u32*)ndsHeader->arm7destination, newArm7binarySize > 0x10000 ? 0x10000 : newArm7binarySize,
@@ -967,6 +978,17 @@ u32* findSwiGetPitchTableOffset(const tNDSHeader* ndsHeader, const module_params
 			dbg_printf("swiGetPitchTable SDK 4 call alt 9 found\n");
 		} else {
 			dbg_printf("swiGetPitchTable SDK 4 call alt 9 not found\n");
+		}
+	}
+	if (!swiGetPitchTableOffset) {
+		swiGetPitchTableOffset = findOffset(
+			(u32*)ndsHeader->arm7destination, newArm7binarySize > 0x10000 ? 0x10000 : newArm7binarySize,
+			swiGetPitchTableSignature4Alt10, 3
+		);
+		if (swiGetPitchTableOffset) {
+			dbg_printf("swiGetPitchTable SDK 4 call alt 10 found\n");
+		} else {
+			dbg_printf("swiGetPitchTable SDK 4 call alt 10 not found\n");
 		}
 	}
 
@@ -1035,6 +1057,52 @@ u16* findSleepPatchOffsetThumb(const tNDSHeader* ndsHeader) {
 
 	dbg_printf("\n");
 	return sleepPatchOffset;
+}
+
+u32* findSleepInputWriteOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+	dbg_printf("findSleepInputWriteOffset:\n");
+
+	u32* offset = NULL;
+	u32* endOffset = findOffset(
+		(u32*)ndsHeader->arm7destination, newArm7binarySize,
+		isSdk5(moduleParams) ? sleepInputWriteEndSignature5 : sleepInputWriteEndSignature1, 2
+	);
+	if (!endOffset && dsiModeConfirmed && ndsHeader->unitCode > 0 && *(u32*)0x02FFE1A0 != 0x00403000) {
+		endOffset = findOffset(
+			(u32*)__DSiHeader->arm7idestination, newArm7ibinarySize,
+			sleepInputWriteEndSignature5, 2
+		);
+	}
+	if (endOffset) {
+		offset = findOffsetBackwards(
+			endOffset, 0x38,
+			sleepInputWriteSignature, 1
+		);
+		if (!offset) {
+			offset = findOffsetBackwards(
+				endOffset, 0x3C,
+				sleepInputWriteSignatureAlt, 1
+			);
+		}
+		if (!offset) {
+			u32 thumbOffset = (u32)findOffsetBackwardsThumb(
+				(u16*)endOffset, 0x30,
+				sleepInputWriteBeqSignatureThumb, 1
+			);
+			if (thumbOffset) {
+				thumbOffset += 2;
+				offset = (u32*)thumbOffset;
+			}
+		}
+	}
+	if (offset) {
+		dbg_printf("Sleep input write found\n");
+	} else {
+		dbg_printf("Sleep input write not found\n");
+	}
+
+	dbg_printf("\n");
+	return offset;
 }
 
 u32* findRamClearOffset(const tNDSHeader* ndsHeader) {
@@ -1458,4 +1526,44 @@ u32* findSdCardResetOffset(const tNDSHeader* ndsHeader, const module_params_t* m
 
 	dbg_printf("\n");
 	return sdCardResetOffset;
+}
+
+u32* findAutoPowerOffOffset(const tNDSHeader* ndsHeader) {
+	dbg_printf("findAutoPowerOffOffset:\n");
+
+	u32* offset = NULL;
+
+	if (*(u32*)0x02FFE1A0 != 0x00403000) {
+		offset = findOffset(
+			ndsHeader->arm7destination, newArm7binarySize,
+			autoPowerOffSignature, 4
+		);
+		if (!offset) {
+			offset = (u32*)findOffsetThumb(
+				(u16*)ndsHeader->arm7destination, newArm7binarySize,
+				autoPowerOffSignatureThumb, 6
+			);
+		}
+	}
+	if (!offset) {
+		offset = findOffset(
+			__DSiHeader->arm7idestination, newArm7ibinarySize,
+			autoPowerOffSignature, 4
+		);
+	}
+	if (!offset) {
+		offset = (u32*)findOffsetThumb(
+			(u16*)__DSiHeader->arm7idestination, newArm7ibinarySize,
+			autoPowerOffSignatureThumb, 6
+		);
+	}
+
+	if (offset) {
+		dbg_printf("SD Card reset found\n");
+	} else {
+		dbg_printf("SD Card reset not found\n");
+	}
+
+	dbg_printf("\n");
+	return offset;
 }

@@ -41,6 +41,7 @@
 	.global patchOffsetCacheFileCluster
 	.global srParamsFileCluster
 	.global ndsPreloaded
+	.global soundFreq
 @---------------------------------------------------------------------------------
 	.align	4
 	.arm
@@ -88,6 +89,9 @@ srParamsFileCluster:
 	.word	0x00000000
 ndsPreloaded:
 	.word	0x00000000
+soundFreq:
+	.word	0x00000000
+
 
 startUp:
 	mov	r0, #0x04000000

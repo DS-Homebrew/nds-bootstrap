@@ -36,7 +36,9 @@ romFatTableCompressed:
 savFatTableCompressed:
 	.byte	0x00
 musicFatTableCompressed:
-	.hword	0x0000
+	.byte	0x00
+cardSaveCmdPos:
+	.byte	0x00
 patchOffsetCacheFileCluster:
 	.word	0x00000000
 musicFatTableCache:
@@ -63,6 +65,8 @@ sharedFontCluster:
 	.word	0x00000000
 cardStruct0:
 	.word	0x00000000
+cardStruct1:
+	.word	0x00000000
 valueBits:
 	.word	0x00000000
 mainScreen:
@@ -77,6 +81,10 @@ overlaysSrc:
 overlaysSize:
 	.word	0x00000000
 ioverlaysSize:
+	.word	0x00000000
+arm9iromOffset:
+	.word	0x00000000
+arm9ibinarySize:
 	.word	0x00000000
 romPaddingSize:
 	.word	0x00000000
@@ -112,13 +120,13 @@ ipcSyncHandler:
 	ldr 	pc,	intr_ipc_orig_return
 
 code_handler_start_ipc:
-	push	{r0-r12} 
+	push	{r0-r12}
 	bl		myIrqHandlerIPC @ jump to myIrqHandler
-	pop   	{r0-r12,pc} 
+	pop   	{r0-r12,pc}
 
 .pool
 
-.thumb
+/* .thumb
 ndsCodeStart:
 	mov r1, #0
 	mov r2, #0
@@ -134,35 +142,36 @@ ndsCodeStart:
 	bx r0
 
 .balign	4
-.arm
+.arm */
 
 patches:
 .word	card_read_arm9
+.word	card_save_arm9
 .word	card_irq_enable
 .word	card_pull_out_arm9
 .word	card_id_arm9
 .word	card_dma_arm9
+.word	card_set_dma_arm9
 .word   nand_read_arm9
 .word   nand_write_arm9
-#ifdef NODSIWARE
+.word	cardStructArm9
+.word   card_pull
+.word   cacheFlushRef
+.word   0x0 @cardEndReadDmaRef
+.word   reset_arm9
+needFlushDCCache:
 .word   0x0
-.word   0x0
-.word   0x0
-.word   0x0
-.word   0x0
-.word   0x0
-.word   0x0
-.word   0x0
-.word   0x0
-.word   0x0
-.word   0x0
-.word   0x0
-.word   0x0
-.word   0x0
-.word   0x0
-.word   0x0
-.word   0x0
+#ifdef GSDD
+.word   0
+.word   gsdd_fix
 #else
+.word   pdash_read
+.word   0x0
+#endif
+.word	ipcSyncHandler
+#ifndef NODSIWARE
+.word   rumble_arm9
+.word   rumble2_arm9
 .word   ndmaCopy_arm
 .word   dsiSaveCheckExists_arm
 .word   dsiSaveGetResultCode_arm
@@ -181,34 +190,25 @@ patches:
 .word   musicPlay_arm
 .word   musicStopEffect_arm
 #endif
-.word	cardStructArm9
-.word   card_pull
-.word   cacheFlushRef
-.word   terminateForPullOutRef
-.word   reset_arm9
-#ifdef NODSIWARE
-.word   0x0
-.word   0x0
-#else
-.word   rumble_arm9
-.word   rumble2_arm9
-#endif
-needFlushDCCache:
-.word   0x0
-.word   pdash_read
-.word	ipcSyncHandler
 thumbPatches:
 .word	thumb_card_read_arm9
+#ifdef GSDD
+.word   0
+#else
+.word   thumb_card_save_arm9
+#endif
 .word	thumb_card_irq_enable
 .word	thumb_card_pull_out_arm9
 .word	thumb_card_id_arm9
 .word	thumb_card_dma_arm9
+.word	thumb_card_set_dma_arm9
 .word   thumb_nand_read_arm9
 .word   thumb_nand_write_arm9
 .word	cardStructArm9
 .word   thumb_card_pull
 .word   cacheFlushRef
-.word   terminateForPullOutRef
+thumbCardEndReadDmaRef:
+.word   0x0 @cardEndReadDmaRef
 .word   thumb_reset_arm9
 
 @---------------------------------------------------------------------------------
@@ -216,11 +216,18 @@ card_read_arm9:
 @---------------------------------------------------------------------------------
 	ldr	pc, =cardRead
 .pool
+@---------------------------------------------------------------------------------
+card_save_arm9:
+@---------------------------------------------------------------------------------
+#ifdef GSDD
+	ldr	pc, =cardSave
+#else
+	ldr	pc, =cardSaveA
+#endif
+.pool
 cardStructArm9:
 .word    0x00000000     
 cacheFlushRef:
-.word    0x00000000  
-terminateForPullOutRef:
 .word    0x00000000  
 cacheRef:
 .word    0x00000000  
@@ -230,10 +237,21 @@ thumb_card_read_arm9:
 @---------------------------------------------------------------------------------
 	push {r6, lr}
 	ldr	r6, =cardRead
-    blx	r6
+	blx	r6
 	pop	{r6, pc}
 .pool
 .balign	4
+#ifndef GSDD
+@---------------------------------------------------------------------------------
+thumb_card_save_arm9:
+@---------------------------------------------------------------------------------
+	push {r6, lr}
+	ldr	r6, =cardSaveA
+	blx	r6
+	pop	{r6, pc}
+.pool
+.balign	4
+#endif
 	.arm
 @---------------------------------------------------------------------------------
 
@@ -249,8 +267,22 @@ cardIdData:
 @---------------------------------------------------------------------------------
 card_dma_arm9:
 @---------------------------------------------------------------------------------
+#ifndef GSDD
+	ldr		pc, =cardReadDma
+.pool
+#endif
+@---------------------------------------------------------------------------------
+
+@---------------------------------------------------------------------------------
+card_set_dma_arm9:
+@---------------------------------------------------------------------------------
+#ifndef GSDD
+	ldr		pc, =cardSetDma
+.pool
+#else
 	mov r0, #0
-	bx      lr
+	bx lr
+#endif
 @---------------------------------------------------------------------------------
 
 @---------------------------------------------------------------------------------
@@ -273,8 +305,30 @@ cardIdDataT:
 @---------------------------------------------------------------------------------
 thumb_card_dma_arm9:
 @---------------------------------------------------------------------------------
+#ifndef GSDD
+	push {r6, lr}
+	ldr r6, =cardReadDma
+	blx r6
+	pop	{r6, pc}
+.pool
+.balign	4
+#endif
+@---------------------------------------------------------------------------------
+
+@---------------------------------------------------------------------------------
+thumb_card_set_dma_arm9:
+@---------------------------------------------------------------------------------
+#ifndef GSDD
+	push {r6, lr}
+	ldr r6, =cardSetDma
+	blx r6
+	pop {r6, pc}
+.pool
+.balign	4
+#else
 	mov r0, #0
-	bx      lr		
+	bx lr
+#endif
 @---------------------------------------------------------------------------------
 
 @---------------------------------------------------------------------------------
@@ -471,6 +525,7 @@ thumb_card_irq_enable:
 @---------------------------------------------------------------------------------
 
 	.arm
+#ifndef GSDD
 pdash_read:
     push	{r1-r11, lr}
     @mov     r0, r4 @DST
@@ -479,9 +534,25 @@ pdash_read:
     @mov     r3, r10 @cardStruct
     add     r0, r0, #0x2C    
     ldr		r6, =cardReadPDash
-    blx	r6
+	blx		r6
     pop	    {r1-r11, pc}
 .pool
+#else
+gsdd_fix:
+	push {lr}
+	bl gsddFix
+	mov r0, #1
+	pop {pc}
+
+.global gsdd_fix2
+gsdd_fix2: .word gsdd_fix2+4
+	push {r0-r3, lr}
+	mov r0, r6
+	bl gsddFix2
+	pop {r0-r3}
+	sub r1, r4, #0x11
+	pop {pc}
+#endif
 
 	.thumb   
 @---------------------------------------------------------------------------------
@@ -504,6 +575,31 @@ reset_arm9:
     ldr pc,= reset
 .pool
 @---------------------------------------------------------------------------------
+
+.global callEndReadDmaThumb
+.type	callEndReadDmaThumb STT_FUNC
+callEndReadDmaThumb:
+    push	{r1-r11, lr}
+    ldr     r6, thumbCardEndReadDmaRef
+    add     r6, #1
+	blx		r6
+    pop	    {r1-r11, pc}
+
+.global disableIrqMask
+.type	disableIrqMask STT_FUNC
+disableIrqMask:
+	PUSH {R7, LR}
+    LDR             R7, =0x4000208
+    MOV             R2, #0
+    LDRH            R3, [R7]
+    MVN             R1, R0
+    STRH            R2, [R7]
+    LDR             R0, [R7,#8]
+    AND             R1, R0, R1
+    STR             R1, [R7,#8]
+    LDRH            R1, [R7]
+    STRH            R3, [R7]
+	POP {R7, PC}
 
 #ifndef NODSIWARE
 @---------------------------------------------------------------------------------

@@ -75,14 +75,22 @@ static const u32 swiGetPitchTableSignature4Alt4[3]  = {0xE59FC000, 0xE12FFF1C, 0
 static const u32 swiGetPitchTableSignature4Alt5[3]  = {0xE59FC000, 0xE12FFF1C, 0x038035ED};
 static const u32 swiGetPitchTableSignature4Alt6[3]  = {0xE59FC000, 0xE12FFF1C, 0x03803715};
 static const u32 swiGetPitchTableSignature4Alt7[3]  = {0xE59FC000, 0xE12FFF1C, 0x03803829};
-static const u32 swiGetPitchTableSignature4Alt8[3]  = {0xE59FC000, 0xE12FFF1C, 0x03803ED5};
-static const u32 swiGetPitchTableSignature4Alt9[3]  = {0xE59FC000, 0xE12FFF1C, 0x03803F15};
+static const u32 swiGetPitchTableSignature4Alt8[3]  = {0xE59FC000, 0xE12FFF1C, 0x03803DC1};
+static const u32 swiGetPitchTableSignature4Alt9[3]  = {0xE59FC000, 0xE12FFF1C, 0x03803ED5};
+static const u32 swiGetPitchTableSignature4Alt10[3] = {0xE59FC000, 0xE12FFF1C, 0x03803F15};
 static const u32 swiGetPitchTableSignature5[4]      = {0x781A4B06, 0xD3030791, 0xD20106D1, 0x1A404904};
 
 // Sleep patch
 static const u32 sleepPatch[2]         = {0x0A000001, 0xE3A00601};
 static const u16 sleepPatchThumb[2]    = {0xD002, 0x4831};
 static const u16 sleepPatchThumbAlt[2] = {0xD002, 0x0440};
+
+// Sleep input write
+static const u32 sleepInputWriteEndSignature1[2]     = {0x04000136, 0x027FFFA8};
+static const u32 sleepInputWriteEndSignature5[2]     = {0x04000136, 0x02FFFFA8};
+static const u32 sleepInputWriteSignature[1]         = {0x13A04902};
+static const u32 sleepInputWriteSignatureAlt[1]      = {0x11A05004};
+static const u16 sleepInputWriteBeqSignatureThumb[1] = {0xD000};
 
 // RAM clear
 // static const u32 ramClearSignature[2]    = {0xE12FFF1E, 0x027FF000};
@@ -925,7 +933,6 @@ u32* findSwiGetPitchTableOffset(const tNDSHeader* ndsHeader, const module_params
 			dbg_printf("swiGetPitchTable SDK 4 call alt 8 not found\n");
 		}
 	}
-
 	if (!swiGetPitchTableOffset) {
 		swiGetPitchTableOffset = findOffset(
 			(u32*)ndsHeader->arm7destination, newArm7binarySize > 0x10000 ? 0x10000 : newArm7binarySize,
@@ -935,6 +942,17 @@ u32* findSwiGetPitchTableOffset(const tNDSHeader* ndsHeader, const module_params
 			dbg_printf("swiGetPitchTable SDK 4 call alt 9 found\n");
 		} else {
 			dbg_printf("swiGetPitchTable SDK 4 call alt 9 not found\n");
+		}
+	}
+	if (!swiGetPitchTableOffset) {
+		swiGetPitchTableOffset = findOffset(
+			(u32*)ndsHeader->arm7destination, newArm7binarySize > 0x10000 ? 0x10000 : newArm7binarySize,
+			swiGetPitchTableSignature4Alt10, 3
+		);
+		if (swiGetPitchTableOffset) {
+			dbg_printf("swiGetPitchTable SDK 4 call alt 10 found\n");
+		} else {
+			dbg_printf("swiGetPitchTable SDK 4 call alt 10 not found\n");
 		}
 	}
 
@@ -986,6 +1004,46 @@ u16* findSleepPatchOffsetThumb(const tNDSHeader* ndsHeader) {
 
 	dbg_printf("\n");
 	return sleepPatchOffset;
+}
+
+u32* findSleepInputWriteOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+	dbg_printf("findSleepInputWriteOffset:\n");
+
+	u32* offset = NULL;
+	u32* endOffset = findOffset(
+		(u32*)ndsHeader->arm7destination, newArm7binarySize,
+		isSdk5(moduleParams) ? sleepInputWriteEndSignature5 : sleepInputWriteEndSignature1, 2
+	);
+	if (endOffset) {
+		offset = findOffsetBackwards(
+			endOffset, 0x38,
+			sleepInputWriteSignature, 1
+		);
+		if (!offset) {
+			offset = findOffsetBackwards(
+				endOffset, 0x3C,
+				sleepInputWriteSignatureAlt, 1
+			);
+		}
+		if (!offset) {
+			u32 thumbOffset = (u32)findOffsetBackwardsThumb(
+				(u16*)endOffset, 0x30,
+				sleepInputWriteBeqSignatureThumb, 1
+			);
+			if (thumbOffset) {
+				thumbOffset += 2;
+				offset = (u32*)thumbOffset;
+			}
+		}
+	}
+	if (offset) {
+		dbg_printf("Sleep input write found\n");
+	} else {
+		dbg_printf("Sleep input write not found\n");
+	}
+
+	dbg_printf("\n");
+	return offset;
 }
 
 u32* findRamClearOffset(const tNDSHeader* ndsHeader) {

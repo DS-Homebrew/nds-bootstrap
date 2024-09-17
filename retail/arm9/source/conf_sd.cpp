@@ -609,12 +609,16 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		pageFilePath = "fat:/_nds/pagefile.sys";	
 	}
 
+	conf->romSize = getFileSize(conf->ndsPath);
+
 	char romTid[5] = {0};
 	u8 unitCode = 0;
 	u32 ndsArm9BinOffset = 0;
 	u32 ndsArm9Offset = 0;
+	u32 ndsArm7BinOffset = 0;
 	u32 ndsArm7Size = 0;
 	u32 fatAddr = 0;
+	u32 internalRomSize = 0;
 	u16 headerCRC = 0;
 	u32 a7mbk6 = 0;
 	u32 accessControl = 0;
@@ -625,6 +629,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	u32 ndsArm7idst = 0;
 	u32 ndsArm7ilen = 0;
 	u8 shared2len = 0;
+	u32 modcrypt1off = 0;
 	u32 modcrypt1len = 0;
 	u32 modcrypt2len = 0;
 	u32 pubSize = 0;
@@ -639,10 +644,14 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		fread(&ndsArm9BinOffset, sizeof(u32), 1, ndsFile);
 		fseek(ndsFile, 0x28, SEEK_SET);
 		fread(&ndsArm9Offset, sizeof(u32), 1, ndsFile);
+		fseek(ndsFile, 0x30, SEEK_SET);
+		fread(&ndsArm7BinOffset, sizeof(u32), 1, ndsFile);
 		fseek(ndsFile, 0x3C, SEEK_SET);
 		fread(&ndsArm7Size, sizeof(u32), 1, ndsFile);
 		fseek(ndsFile, 0x48, SEEK_SET);
 		fread(&fatAddr, sizeof(u32), 1, ndsFile);
+		fseek(ndsFile, 0x80, SEEK_SET);
+		fread(&internalRomSize, sizeof(u32), 1, ndsFile);
 		fseek(ndsFile, 0x15E, SEEK_SET);
 		fread(&headerCRC, sizeof(u16), 1, ndsFile);
 		fseek(ndsFile, 0x1A0, SEEK_SET);
@@ -658,11 +667,13 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		fseek(ndsFile, 0x1D0, SEEK_SET);
 		fread(&ndsArm7isrc, sizeof(u32), 1, ndsFile);
 		fseek(ndsFile, 0x1D8, SEEK_SET);
-		fread(&ndsArm7idst, sizeof(u32), 1, ndsFile); if (ndsArm7idst > 0x02E80000) ndsArm7idst = 0x02E80000;
+		fread(&ndsArm7idst, sizeof(u32), 1, ndsFile);
 		fseek(ndsFile, 0x1DC, SEEK_SET);
 		fread(&ndsArm7ilen, sizeof(u32), 1, ndsFile);
 		fseek(ndsFile, 0x20C, SEEK_SET);
 		fread(&shared2len, sizeof(u8), 1, ndsFile);
+		fseek(ndsFile, 0x220, SEEK_SET);
+		fread(&modcrypt1off, sizeof(u32), 1, ndsFile);
 		fseek(ndsFile, 0x224, SEEK_SET);
 		fread(&modcrypt1len, sizeof(u32), 1, ndsFile);
 		fseek(ndsFile, 0x22C, SEEK_SET);
@@ -893,11 +904,11 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	}
 
   if (dsiFeatures() && !conf->b4dsMode) {
+	toncset((u32*)0x02E80000, 0, 0x800); // Clear nds-bootstrap arm7i binary from RAM
 	if ((conf->dsiMode > 0 && unitCode > 0) || conf->isDSiWare) {
 		uint8_t *target = (uint8_t *)TARGETBUFFERHEADER ;
 		fseek(ndsFile, 0, SEEK_SET);
 		fread(target, 1, 0x1000, ndsFile);
-		toncset32((u8*)target+0x1D8, ndsArm7idst, 1);
 
 		/*if (conf->dsiMode > 0 && unitCode > 0 && !conf->isDSiWare) {
 			load_game_conf(conf, conf->sdFound ? "sd:/_nds/nds-bootstrap.ini" : "fat:/_nds/nds-bootstrap.ini", (char*)romTid);
@@ -929,6 +940,10 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			}
 		}*/
 
+		if (ndsArm9Offset >= 0x02400000) {
+			fseek(ndsFile, ndsArm9BinOffset, SEEK_SET);
+			fread((u32*)ndsArm9Offset, 1, ndsArm9ilen, ndsFile);
+		}
 		if (ndsArm9ilen) {
 			fseek(ndsFile, ndsArm9isrc, SEEK_SET);
 			fread((u32*)ndsArm9idst, 1, ndsArm9ilen, ndsFile);
@@ -975,7 +990,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			dsi_set_ctr(&ctx, &target[0x300]);
 			if (modcrypt1len)
 			{
-				decrypt_modcrypt_area(&ctx, (u8*)ndsArm9idst, modcrypt1len);
+				decrypt_modcrypt_area(&ctx, (u8*)((modcrypt1off == ndsArm9BinOffset) ? ndsArm9Offset : ndsArm9idst), modcrypt1len);
 			}
 
 			dsi_set_key(&ctx, key);
@@ -1095,7 +1110,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 	u32 srBackendId[2] = {0};
 	// Load srBackendId
-	if (REG_SCFG_EXT7 == 0 && conf->gameOnFlashcard) {
+	if (REG_SCFG_EXT7 == 0 && conf->bootstrapOnFlashcard) {
 		/*srBackendId[0] = 0x464B4356; // "VCKF" (My Cooking Coach)
 		srBackendId[1] = 0x00030000;*/
 	} else {
@@ -1186,6 +1201,14 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		} else {
 			conf->valueBits2 |= BIT(5);
 		}
+	}
+	if (conf->dsiWramAccess) {
+		u32 wordBak = *(vu32*)0x03700000;
+		*(vu32*)0x03700000 = 0x414C5253;
+		if (*(vu32*)0x03700000 == 0x414C5253 && *(vu32*)0x03708000 == 0x414C5253) {
+			conf->valueBits3 |= BIT(6); // DSi WRAM is mirrored by 32KB
+		}
+		*(vu32*)0x03700000 = wordBak;
 	}
 	if (access("sd:/hiya.dsi", F_OK) == 0) {
 		conf->valueBits2 |= BIT(6);
@@ -1311,8 +1334,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	}
 	fclose(cebin);
 
-	FILE *file = fopen(conf->consoleModel > 0 ? (conf->bootstrapOnFlashcard ? "fat:/_nds/nds-bootstrap/preLoadSettings3DS.pck" : "sd:/_nds/nds-bootstrap/preLoadSettings3DS.pck")
-											  : (conf->bootstrapOnFlashcard ? "fat:/_nds/nds-bootstrap/preLoadSettingsDSi.pck" : "sd:/_nds/nds-bootstrap/preLoadSettingsDSi.pck"), "rb");
+	FILE *file = fopen(conf->consoleModel > 0 ? "nitro:/preLoadSettings3DS.pck" : "nitro:/preLoadSettingsDSi.pck", "rb");
 	if (file) {
 		char buf[5] = {0};
 		fread(buf, 1, 4, file);
@@ -1369,7 +1391,12 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	  }
 		fclose(file);
 	}
-  } else if (ndsArm7idst <= 0x02E80000) {
+	if (conf->dataToPreloadAddr[0] == 0) {
+		// Set NitroFS pre-load, in case if full ROM pre-load fails
+		conf->dataToPreloadAddr[0] = ndsArm7BinOffset+ndsArm7Size;
+		conf->dataToPreloadSize[0] = ((internalRomSize == 0 || internalRomSize > conf->romSize) ? conf->romSize : internalRomSize)-conf->dataToPreloadAddr[0];
+	}
+  } else {
 	const bool binary3 = (REG_SCFG_EXT7 == 0 ? !dsiEnhancedMbk : (a7mbk6 != 0x00403000));
 
 	// Load ce7 binary
@@ -1542,7 +1569,6 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		cheatFilePath = "sd:/_nds/nds-bootstrap/cheatData.bin";
 	}
 
-	conf->romSize = getFileSize(conf->ndsPath);
 	conf->saveSize = getFileSize(conf->savPath);
 	conf->gbaRomSize = getFileSize(conf->gbaPath);
 	conf->gbaSaveSize = getFileSize(conf->gbaSavPath);
@@ -1850,13 +1876,26 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		}
 	}
 
+	const bool gsdd = (memcmp(romTid, "BO5", 3) == 0);
+	const bool foto = (strncmp(romTid, "DMF", 3) == 0 || strncmp(romTid, "DSY", 3) == 0 || strncmp(romTid, "KSY", 3) == 0);
+
 	// Load ce9 binary
 	if (b4dsDebugRam) {
-		cebin = fopen("nitro:/cardengine_arm9_extmem.lz77", "rb");
+		if (foto) {
+			cebin = fopen("nitro:/cardengine_arm9_extmem_foto.lz77", "rb");
+		} else if (gsdd) {
+			cebin = fopen("nitro:/cardengine_arm9_extmem_gsdd.lz77", "rb");
+		} else {
+			cebin = fopen("nitro:/cardengine_arm9_extmem.lz77", "rb");
+		}
 	} else if (!startMultibootSrl && ((accessControl & BIT(4)) || (a7mbk6 == 0x080037C0 && ndsArm9Offset >= 0x02004000) || (strncmp(romTid, "AP2", 3) == 0))) {
-		cebin = fopen(ndsArm9Offset >= 0x02004000 ? "nitro:/cardengine_arm9_start.lz77" : "nitro:/cardengine_arm9.lz77", "rb");
+		if (foto) {
+			cebin = fopen("nitro:/cardengine_arm9_start_foto.lz77", "rb");
+		} else {
+			cebin = fopen(ndsArm9Offset >= 0x02004000 ? "nitro:/cardengine_arm9_start.lz77" : "nitro:/cardengine_arm9.lz77", "rb");
+		}
 	} else {
-		const char* ce9path = "nitro:/cardengine_arm9_alt.lz77";
+		const char* ce9path = gsdd ? "nitro:/cardengine_arm9_alt_gsdd.lz77" : "nitro:/cardengine_arm9_alt.lz77";
 		if (romFSInited && donorInsideNds) {
 			donorNdsPath = multibootSrl;
 		}
@@ -1925,7 +1964,6 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 	cheatFilePath = "fat:/_nds/nds-bootstrap/cheatData.bin";
 
-	conf->romSize = getFileSize(conf->ndsPath);
 	conf->saveSize = getFileSize(conf->savPath);
 	conf->apPatchSize = getFileSize(conf->apPatchPath);
 	conf->cheatSize = getFileSize(cheatFilePath.c_str());
@@ -1984,7 +2022,17 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		toncset16((u16*)IMAGES_LOCATION, 0, 256*192);
 	}
 
-	sprintf(patchOffsetCacheFilePath, "fat:/_nds/nds-bootstrap/musicPacks/%s-%04X.pck", romTid, headerCRC);
+	if (foto) {
+		sprintf(patchOffsetCacheFilePath, "fat:/_nds/nds-bootstrap/dsiCamera/%s-%04X.bin", romTid, headerCRC);
+		if (access(patchOffsetCacheFilePath, F_OK) != 0) {
+			sprintf(patchOffsetCacheFilePath, "fat:/_nds/nds-bootstrap/dsiCamera/%s.bin", romTid);
+		}
+		if (access(patchOffsetCacheFilePath, F_OK) != 0) {
+			sprintf(patchOffsetCacheFilePath, "fat:/_nds/nds-bootstrap/dsiCamera/default.bin");
+		}
+	} else {
+		sprintf(patchOffsetCacheFilePath, "fat:/_nds/nds-bootstrap/musicPacks/%s-%04X.pck", romTid, headerCRC);
+	}
 
 	musicsFilePath = patchOffsetCacheFilePath;
 	conf->musicsSize = getFileSize(patchOffsetCacheFilePath);
@@ -2157,7 +2205,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			apFixOverlaysPath = "fat:/_nds/nds-bootstrap/apFixOverlays.bin";	
 		}
 
-		if (!conf->isDSiWare && getFileSize(apFixOverlaysPath.c_str()) < 0x800000) {
+		if (!conf->isDSiWare && getFileSize(apFixOverlaysPath.c_str()) < 0xA00000) {
 			consoleDemoInit();
 			iprintf("Allocating space for\n");
 			iprintf("AP-fixed overlays.\n");
@@ -2169,13 +2217,13 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 			FILE *apFixOverlaysFile = fopen(apFixOverlaysPath.c_str(), "wb");
 			if (apFixOverlaysFile) {
-				fseek(apFixOverlaysFile, 0x800000 - 1, SEEK_SET);
+				fseek(apFixOverlaysFile, 0xA00000 - 1, SEEK_SET);
 				fputc('\0', apFixOverlaysFile);
 				fclose(apFixOverlaysFile);
 			}
 
 			consoleClear();
-			if (getFileSize(apFixOverlaysPath.c_str()) < 0x800000) {
+			if (getFileSize(apFixOverlaysPath.c_str()) < 0xA00000) {
 				iprintf("Failed to allocate space\n");
 				iprintf("for AP-fixed overlays.");
 				while (1) swiWaitForVBlank();
@@ -2186,7 +2234,8 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 		if (getFileSize(ramDumpPath.c_str()) < 0x800000) {
 			consoleDemoInit();
-			iprintf("Creating RAM dump file.\n");
+			iprintf("Allocating space for\n");
+			iprintf("creating a RAM dump.\n");
 			iprintf("Please wait...");
 
 			if (access(ramDumpPath.c_str(), F_OK) == 0) {
@@ -2209,7 +2258,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 		apFixOverlaysPath = "fat:/_nds/nds-bootstrap/apFixOverlays.bin";
 
-		if (!conf->isDSiWare && getFileSize(apFixOverlaysPath.c_str()) < 0x800000) {
+		if (!conf->isDSiWare && getFileSize(apFixOverlaysPath.c_str()) < 0xA00000) {
 			consoleDemoInit();
 			iprintf("Allocating space for\n");
 			iprintf("AP-fixed overlays.\n");
@@ -2221,13 +2270,13 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 			FILE *apFixOverlaysFile = fopen(apFixOverlaysPath.c_str(), "wb");
 			if (apFixOverlaysFile) {
-				fseek(apFixOverlaysFile, 0x800000 - 1, SEEK_SET);
+				fseek(apFixOverlaysFile, 0xA00000 - 1, SEEK_SET);
 				fputc('\0', apFixOverlaysFile);
 				fclose(apFixOverlaysFile);
 			}
 
 			consoleClear();
-			if (getFileSize(apFixOverlaysPath.c_str()) < 0x800000) {
+			if (getFileSize(apFixOverlaysPath.c_str()) < 0xA00000) {
 				iprintf("Failed to allocate space\n");
 				iprintf("for AP-fixed overlays.");
 				while (1) swiWaitForVBlank();

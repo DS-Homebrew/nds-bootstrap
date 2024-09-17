@@ -117,7 +117,7 @@ typedef struct cardengineArm9 {
 	u32 romPartSrc;
 	u32 romPartSize;
 	u32 romMapLines;
-	u32 romMap[4][3]; // 0: ROM part start, 1: ROM part start in RAM, 2: ROM part end in RAM
+	u32 romMap[5][3]; // 0: ROM part start, 1: ROM part start in RAM, 2: ROM part end in RAM
 } cardengineArm9;
 
 #else
@@ -126,12 +126,24 @@ typedef struct cardengineArm9 {
 //
 typedef struct cardengineArm9Patches {
 	u32* card_read_arm9;
+	u32* card_save_arm9;
 	u32* card_irq_enable;
 	u32* card_pull_out_arm9; // Unused
 	u32* card_id_arm9;
 	u32* card_dma_arm9;
+	u32* card_set_dma_arm9;
 	u32* nand_read_arm9;
 	u32* nand_write_arm9;
+	u32* cardStructArm9;
+	u32* card_pull;
+	u32* cacheFlushRef;
+	u32* cardEndReadDmaRef;
+	u32* reset_arm9;
+	u32 needFlushDCCache;
+	u32* pdash_read;
+	u32* gsdd_fix;
+	u32* ipcSyncHandlerRef;
+	u32* rumble_arm9[2];
 	u32* ndmaCopy;
 	u32* dsiSaveCheckExists;
 	u32* dsiSaveGetResultCode;
@@ -149,15 +161,6 @@ typedef struct cardengineArm9Patches {
 	u32* dsiSaveWrite;
 	u32* musicPlay;
 	u32* musicStopEffect;
-	u32* cardStructArm9;
-	u32* card_pull;
-	u32* cacheFlushRef;
-	u32* readCachedRef;
-	u32* reset_arm9;
-	u32* rumble_arm9[2];
-	u32 needFlushDCCache;
-	u32* pdash_read;
-	u32* ipcSyncHandlerRef;
 } cardengineArm9Patches;
 
 
@@ -166,16 +169,18 @@ typedef struct cardengineArm9Patches {
 //
 typedef struct cardengineArm9ThumbPatches {
     u32* card_read_arm9;
+	u32* card_save_arm9;
     u32* card_irq_enable;
     u32* card_pull_out_arm9; // Unused
     u32* card_id_arm9;
     u32* card_dma_arm9;
+	u32* card_set_dma_arm9;
     u32* nand_read_arm9;
     u32* nand_write_arm9;
     u32* cardStructArm9;
     u32* card_pull;
     u32* cacheFlushRef;
-    u32* readCachedRef;
+	u32* cardEndReadDmaRef;
     u32* reset_arm9;
 } cardengineArm9ThumbPatches;
 
@@ -196,7 +201,8 @@ typedef struct cardengineArm9 {
     u32 savFatTableCache;
     u8 romFatTableCompressed;
     u8 savFatTableCompressed;
-    u16 musicsFatTableCompressed;
+    u8 musicsFatTableCompressed;
+	u8 cardSaveCmdPos;
     u32 patchOffsetCacheFileCluster;
     u32 musicFatTableCache;
     u32 ramDumpCluster;
@@ -210,6 +216,7 @@ typedef struct cardengineArm9 {
     u32 manualCluster;
     u32 sharedFontCluster;
     u32 cardStruct0;
+    u32 cardStruct1;
 	u32 valueBits;
 	/*
 		0: expansionPakFound
@@ -231,6 +238,8 @@ typedef struct cardengineArm9 {
 	u32 overlaysSrc;
 	u32 overlaysSize;
 	u32 ioverlaysSize;
+	u32 arm9iromOffset;
+	u32 arm9ibinarySize;
 	u32 romPaddingSize;
 	u32 romLocation;
 	u32 rumbleFrames[2];

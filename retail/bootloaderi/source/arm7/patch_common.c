@@ -39,6 +39,7 @@ patchOffsetCacheContents patchOffsetCache;
 
 extern bool gbaRomFound;
 extern u8 dsiSD;
+extern bool i2cBricked;
 extern int sharedFontRegion;
 
 #define nopT 0x46C0
@@ -68,26 +69,14 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	const u32* dsiSaveRead = ce9->patches->dsiSaveRead;
 	const u32* dsiSaveWrite = ce9->patches->dsiSaveWrite;
 
-	const bool twlFontFound = ((sharedFontRegion == 0 && !gameOnFlashcard) || twlSharedFont);
-	//const bool chnFontFound = ((sharedFontRegion == 1 && !gameOnFlashcard) || chnSharedFont);
-	const bool korFontFound = ((sharedFontRegion == 2 && !gameOnFlashcard) || korSharedFont);
-
-	if (ndsHeader->arm7binarySize == 0x44C) {
-		if (*(u32*)0x023803BC >= 0x02F00000 && *(u32*)0x023803BC < 0x02F80000) {
-			*(u32*)0x023803BC -= 0x80000;
-		}
-		if (*(u32*)0x023803C0 >= 0x02F00000 && *(u32*)0x023803C0 < 0x02F80000) {
-			*(u32*)0x023803C0 -= 0x80000;
-		}
-		if (*(u32*)0x023803C4 >= 0x02F00000 && *(u32*)0x023803C4 < 0x02F80000) {
-			*(u32*)0x023803C4 -= 0x80000;
-		}
-	}
+	const bool twlFontFound = ((sharedFontRegion == 0 && !gameOnFlashcard && !i2cBricked) || twlSharedFont);
+	//const bool chnFontFound = ((sharedFontRegion == 1 && !gameOnFlashcard && !i2cBricked) || chnSharedFont);
+	const bool korFontFound = ((sharedFontRegion == 2 && !gameOnFlashcard && !i2cBricked) || korSharedFont);
 
 #ifndef LOADERTWO
 	// GO Series: 10 Second Run (USA)
 	// GO Series: 10 Second Run (Europe)
-	else if (strcmp(romTid, "KJUE") == 0 || strcmp(romTid, "KJUP") == 0) {
+	if (strcmp(romTid, "KJUE") == 0 || strcmp(romTid, "KJUP") == 0) {
 		if (saveOnFlashcard) {
 			*(u32*)0x020150FC = 0xE12FFF1E; // bx lr
 			// Save patch causes the game to crash on panic function?
@@ -4873,6 +4862,12 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// Cut the Rope (USA)
+	// Cut the Rope (Europe, Australia)
+	else if (strncmp(romTid, "KKT", 3) == 0 && !dsiWramAccess) {
+		*(u32*)0x0203BA44 = 0xE3A0162F; // mov r1, #0x02F00000
+	}
+
 	// CuteWitch! runner (USA)
 	// CuteWitch! runner (Europe)
 	else if (strncmp(romTid, "K32", 3) == 0 && saveOnFlashcard) {
@@ -6626,6 +6621,16 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0203E034, (u32)dsiSaveClose);
 	}
 
+	// Foto Showdown (USA)
+	if (strcmp(romTid, "DMFE") == 0 && !dsiWramAccess) {
+		*(u32*)0x0204D3F4 = 0xE3A00001; // mov r0, #1 (Disable shutter sound playback)
+	}
+
+	// Monster Finder (Japan)
+	else if (strcmp(romTid, "DMFJ") == 0 && !dsiWramAccess) {
+		*(u32*)0x0204D10C = 0xE3A00001; // mov r0, #1 (Disable shutter sound playback)
+	}
+
 	// Frogger Returns (USA)
 	else if (strcmp(romTid, "KFGE") == 0) {
 		if (saveOnFlashcard) {
@@ -7223,6 +7228,24 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)(0x0201FE9C+offsetChange2) = 0xE3A00000; // mov r0, #0 (Return empty Hellokids Album)
 	}
 
+	// Hidden Photo (USA)
+	if (strcmp(romTid, "KHJE") == 0 && !dsiWramAccess) {
+		*(u32*)0x020335A0 = 0xE1A00000; // nop (Disable shutter sound loading)
+		*(u32*)0x02033A98 = 0xE3A00001; // mov r0, #1 (Disable shutter sound playback, still softlocks when taking photo)
+	}
+
+	// Hidden Photo (Europe)
+	if (strcmp(romTid, "DD3P") == 0 && !dsiWramAccess) {
+		*(u32*)0x0202C8E0 = 0xE1A00000; // nop (Disable shutter sound loading)
+		*(u32*)0x0202CDC8 = 0xE3A00001; // mov r0, #1 (Disable shutter sound playback, still softlocks when taking photo)
+	}
+
+	// Wimmelbild Creator (German)
+	if (strcmp(romTid, "DD3D") == 0 && !dsiWramAccess) {
+		*(u32*)0x0202B9E8 = 0xE1A00000; // nop (Disable shutter sound loading)
+		*(u32*)0x0202BED0 = 0xE3A00001; // mov r0, #1 (Disable shutter sound playback, still softlocks when taking photo)
+	}
+
 	// High Stakes Texas Hold'em (USA)
 	// High Stakes Texas Hold'em (Europe, Australia)
 	else if ((strcmp(romTid, "KTXE") == 0 || strcmp(romTid, "KTXV") == 0) && saveOnFlashcard) {
@@ -7498,9 +7521,9 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x020B98AC, (u32)dsiSaveClose);
 		*(u32*)0x020B9B94 = 0xE1A00000; // nop
 	}
-
+#else
 	// JellyCar 2 (USA)
-	else if (strcmp(romTid, "KJYE") == 0) {
+	if (strcmp(romTid, "KJYE") == 0) {
 		if (saveOnFlashcard) {
 			setBL(0x020067C4, (u32)dsiSaveOpen);
 			*(u32*)0x020067DC = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
@@ -7820,7 +7843,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02042DB4, (u32)dsiSaveRead); // dsiSaveReadAsync
 		*(u32*)0x0205063C = 0xE12FFF1E; // bx lr (Skip NAND error checking)
 	}
-#else
+
 	// A Kappa's Trail (USA)
 	else if (strcmp(romTid, "KPAE") == 0 && saveOnFlashcard) {
 		tonccpy((u32*)0x0201A020, dsiSaveGetResultCode, 0xC);
@@ -16812,6 +16835,7 @@ void rsetA7Cache(void)
 	patchOffsetCache.ramClearChecked = 0;
 	patchOffsetCache.ramClearIOffset = 0;
 	patchOffsetCache.ramClearI2Offset = 0;
+	patchOffsetCache.swiHaltOffset = 0;
 	patchOffsetCache.a7Swi12Offset = 0;
 	patchOffsetCache.a7Swi24Offset = 0;
 	patchOffsetCache.a7Swi25Offset = 0;
@@ -16821,11 +16845,13 @@ void rsetA7Cache(void)
 	patchOffsetCache.swiGetPitchTableOffset = 0;
 	patchOffsetCache.swiGetPitchTableChecked = 0;
 	patchOffsetCache.sleepPatchOffset = 0;
+	patchOffsetCache.sleepInputWriteOffset = 0;
 	patchOffsetCache.postBootOffset = 0;
 	patchOffsetCache.a7CardIrqEnableOffset = 0;
 	patchOffsetCache.cardCheckPullOutOffset = 0;
 	patchOffsetCache.cardCheckPullOutChecked = 0;
 	patchOffsetCache.sdCardResetOffset = 0;
+	patchOffsetCache.autoPowerOffOffset = 0;
 	patchOffsetCache.a7IrqHandlerOffset = 0;
 	patchOffsetCache.a7IrqHandlerWordsOffset = 0;
 	patchOffsetCache.a7IrqHookOffset = 0;

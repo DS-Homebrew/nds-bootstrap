@@ -327,20 +327,31 @@ void __attribute__((target("arm"))) arm9_main(void) {
 					if (!arm9_boostVram) {
 						REG_SCFG_EXT &= ~BIT(13);
 					}
-					transferToArm9(15);
+					// transferToArm9(15);
+					for (int i = 0; i < 16; i++) {
+						transferToArm9(i);
+					}
 				}
 			} else {
 				REG_SCFG_EXT = 0x8300C000;
 				REG_SCFG_EXT |= BIT(16);	// NDMA
 				*(u32*)0x027FEFF8 = REG_SCFG_EXT;
 				*(u16*)0x027FEFFC = REG_SCFG_CLK;
-				transferToArm9(15);
+				// transferToArm9(15);
+				for (int i = 0; i < 16; i++) {
+					transferToArm9(i);
+				}
 				// lock SCFG
 				REG_SCFG_EXT &= ~(1UL << 31);
 			}
 			arm9_stateFlag = ARM9_READY;
 		}
 	}
+
+	// Clear out ARM9 DMA channel 3
+	DMA_CR(3) = 0;
+	DMA_SRC(3) = 0;
+	DMA_DEST(3) = 0;
 
 	while (REG_VCOUNT != 191);
 	while (REG_VCOUNT == 191);

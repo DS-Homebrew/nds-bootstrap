@@ -344,7 +344,6 @@ void reset(u32 param, u32 tid2) {
 		u32 newIrqTable = sharedAddr[2];
 		ce9->valueBits = sharedAddr[1];
 		ce9->irqTable = (u32*)newIrqTable;
-		ce9->cardStruct0 = sharedAddr[4];
 		sharedAddr[4] = 0;
 		initialized = false;
 	}

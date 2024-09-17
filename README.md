@@ -1,5 +1,5 @@
 <p align="center">
-   <img src="https://i.imgur.com/BFIu7xX.png"><br>
+   <img src="https://github.com/DS-Homebrew/nds-bootstrap/blob/master/logo.png"><br>
    <a href="https://gbatemp.net/threads/nds-bootstrap-loader-run-commercial-nds-backups-from-an-sd-card.454323/">
       <img src="https://img.shields.io/badge/GBAtemp-Thread-blue.svg" alt="GBAtemp thread">
    </a>
@@ -24,7 +24,7 @@ Anti-Piracy patches can be loaded via IPS files, but they are not included insid
 
 nds-bootstrap also supports many homebrew applications, including games like DScraft.
 
-B4DS mode (a result of running nds-bootstrap on DS-mode flashcards with locked SCFG or DS Phat/Lite) only supports some DS and DSiWare ROMs. You can increase compatibility by inserting a DS Memory Expansion Pak.
+B4DS mode (a result of running nds-bootstrap on DS-mode flashcards with locked SCFG or DS Phat/Lite) supports most (if not all) DS ROMs of which are supported on DSi/3DS. Some DSiWare ROMs are also supported.
 
 # Compiling
 

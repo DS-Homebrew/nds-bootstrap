@@ -51,6 +51,7 @@
 #define wideCheatUsed BIT(12)
 #define twlTouch BIT(15)
 #define ndmaDisabled BIT(20)
+#define i2cBricked BIT(30)
 #define scfgLocked BIT(31)
 
 #define	REG_EXTKEYINPUT	(*(vuint16*)0x04000136)
@@ -64,6 +65,7 @@ static char hiyaDSiPath[14] = {'s','d','m','c',':','/','h','i','y','a','.','d','
 
 extern void ndsCodeStart(u32* addr);
 
+extern u32 cheatEngineAddr;
 extern u32 saveCluster;
 extern u32 patchOffsetCacheFileCluster;
 extern u32 srParamsCluster;
@@ -92,14 +94,6 @@ static bool swapScreens = false;
 static bool wifiIrq = false;
 static int wifiIrqTimer = 0;
 
-u32 cheatEngineAddr = 
-#ifdef UNITTWL
-CHEAT_ENGINE_DSIWARE_LOCATION3
-#else
-CHEAT_ENGINE_DSIWARE_LOCATION
-#endif
-;
-
 #ifdef CARDSAVE
 static aFile savFile;
 #endif
@@ -116,6 +110,7 @@ static int languageTimer = 0;
 static int returnTimer = 0;
 static int softResetTimer = 0;
 static int ramDumpTimer = 0;
+static int noI2CVolLevel = 127; // Volume workaround for bricked I2C chips
 static int volumeAdjustDelay = 0;
 static bool volumeAdjustActivated = false;
 
@@ -265,10 +260,6 @@ static void initialize(void) {
 		return;
 	}
 
-	if (consoleModel > 0 && *(u32*)CHEAT_ENGINE_TWLSDK_LOCATION_3DS == 0x3E4) {
-		cheatEngineAddr = CHEAT_ENGINE_TWLSDK_LOCATION_3DS;
-	}
-
 	if (language >= 0 && language <= 7) {
 		// Change language
 		personalData->language = language;
@@ -408,6 +399,17 @@ void reset(void) {
 	ndsCodeStart(ndsHeader->arm7executeAddress);
 }
 
+static inline void rebootConsole(void) {
+	if (valueBits & i2cBricked) {
+		u8 readCommand = readPowerManagement(0x10);
+		readCommand |= BIT(0);
+		writePowerManagement(0x10, readCommand); // Reboot console
+		return;
+	}
+	i2cWriteRegister(0x4A, 0x70, 0x01);
+	i2cWriteRegister(0x4A, 0x11, 0x01);
+}
+
 void forceGameReboot(void) {
 	toncset((u32*)0x02000000, 0, 0x400);
 	*(u32*)0x02000000 = BIT(3);
@@ -426,8 +428,7 @@ void forceGameReboot(void) {
 		// Use different SR backend ID
 		readSrBackendId();
 	}
-	i2cWriteRegister(0x4A, 0x70, 0x01);
-	i2cWriteRegister(0x4A, 0x11, 0x01);		// Force-reboot game
+	rebootConsole();		// Force-reboot game
 }
 
 /* static void initMBK_dsiMode(void) {
@@ -473,8 +474,7 @@ void returnToLoader(bool reboot) {
 			}
 			//waitFrames(wait ? 5 : 1);							// Wait for DSi screens to stabilize
 		}
-		i2cWriteRegister(0x4A, 0x70, 0x01);
-		i2cWriteRegister(0x4A, 0x11, 0x01);
+		rebootConsole();
 	}
 
 	register int i, reg;
@@ -527,8 +527,7 @@ void returnToLoader(bool reboot) {
 	getBootFileCluster(&file, "BOOT.NDS");
 	if (file.firstCluster == CLUSTER_FREE) {
 		// File not found, so reboot console instead
-		i2cWriteRegister(0x4A, 0x70, 0x01);
-		i2cWriteRegister(0x4A, 0x11, 0x01);
+		rebootConsole();
 	}
 
 	fileRead((char*)__DSiHeader, &file, 0, sizeof(tDSiHeader));
@@ -687,6 +686,10 @@ void myIrqHandlerVBlank(void) {
 	nocashMessage("myIrqHandlerVBlank");
 	#endif	
 
+	if (valueBits & i2cBricked) {
+		REG_MASTER_VOLUME = noI2CVolLevel;
+	}
+
 	#ifdef DEBUG
 	nocashMessage("cheat_engine_start\n");
 	#endif
@@ -804,7 +807,7 @@ void myIrqHandlerVBlank(void) {
 		softResetTimer = 0;
 	}
 
-	if (valueBits & preciseVolumeControl) {
+	if ((valueBits & preciseVolumeControl) || (valueBits & i2cBricked)) {
 		// Precise volume adjustment (for DSi)
 		if (volumeAdjustActivated) {
 			volumeAdjustDelay++;
@@ -813,21 +816,31 @@ void myIrqHandlerVBlank(void) {
 				volumeAdjustActivated = false;
 			}
 		} else if (0==(REG_KEYINPUT & KEY_SELECT)) {
-			u8 i2cVolLevel = i2cReadRegister(0x4A, 0x40);
-			u8 i2cNewVolLevel = i2cVolLevel;
-			if (0==(REG_KEYINPUT & KEY_UP)) {
-				i2cNewVolLevel++;
-			} else if (0==(REG_KEYINPUT & KEY_DOWN)) {
-				i2cNewVolLevel--;
-			}
-			if (i2cNewVolLevel == 0xFF) {
-				i2cNewVolLevel = 0;
-			} else if (i2cNewVolLevel > 0x1F) {
-				i2cNewVolLevel = 0x1F;
-			}
-			if (i2cNewVolLevel != i2cVolLevel) {
-				i2cWriteRegister(0x4A, 0x40, i2cNewVolLevel);
-				volumeAdjustActivated = true;
+			if (valueBits & i2cBricked) {
+				const int oldVolLevel = noI2CVolLevel;
+				if (0==(REG_KEYINPUT & KEY_UP)) {
+					noI2CVolLevel = 127;
+				} else if (0==(REG_KEYINPUT & KEY_DOWN)) {
+					noI2CVolLevel = 0;
+				}
+				volumeAdjustActivated = (noI2CVolLevel != oldVolLevel);
+			} else {
+				const u8 i2cVolLevel = i2cReadRegister(0x4A, 0x40);
+				u8 i2cNewVolLevel = i2cVolLevel;
+				if (0==(REG_KEYINPUT & KEY_UP)) {
+					i2cNewVolLevel++;
+				} else if (0==(REG_KEYINPUT & KEY_DOWN)) {
+					i2cNewVolLevel--;
+				}
+				if (i2cNewVolLevel == 0xFF) {
+					i2cNewVolLevel = 0;
+				} else if (i2cNewVolLevel > 0x1F) {
+					i2cNewVolLevel = 0x1F;
+				}
+				if (i2cNewVolLevel != i2cVolLevel) {
+					i2cWriteRegister(0x4A, 0x40, i2cNewVolLevel);
+					volumeAdjustActivated = true;
+				}
 			}
 		}
 	}

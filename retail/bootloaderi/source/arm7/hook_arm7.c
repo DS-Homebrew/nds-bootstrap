@@ -19,6 +19,7 @@
 #include <string.h> // memcpy
 #include <stdio.h>
 #include <nds/system.h>
+#include <nds/arm7/i2c.h>
 #include <nds/debug.h>
 
 //#include "my_fat.h"
@@ -55,6 +56,7 @@
 #define b_bootstrapOnFlashcard BIT(19)
 #define b_ndmaDisabled BIT(20)
 #define b_isDlp BIT(21)
+#define b_i2cBricked BIT(30)
 #define b_scfgLocked BIT(31)
 
 extern u32 newArm7binarySize;
@@ -284,10 +286,10 @@ int hookNdsRetailArm7(
 			if (!hookLocation && ndsHeader->unitCode == 3) {
 				switch (newArm7ibinarySize) {
 					case 0x6AFD4:
-						hookLocation = (u32*)0x2EE7360;
+						hookLocation = (u32*)0x2F67360;
 						break;
 					case 0x6B038:
-						hookLocation = (u32*)0x2EE7348;
+						hookLocation = (u32*)0x2F67348;
 						break;
 					case 0x7250C:
 						hookLocation = (u32*)0x2EE5E10;
@@ -328,7 +330,8 @@ int hookNdsRetailArm7(
 
 	u32* vblankHandler = hookLocation;
 	u32* ipcSyncHandler = hookLocation + 16;
-	//u32* ndma0Handler = hookLocation + 28;
+
+	extern u32 cheatEngineOffset;
 
 	if (!ce7NotFound) {
 	/*	u32 intr_vblank_orig_return = *(u32*)0x2FFC004;
@@ -341,7 +344,7 @@ int hookNdsRetailArm7(
 
 		ce7->intr_vblank_orig_return  = *vblankHandler;
 		ce7->intr_fifo_orig_return    = *ipcSyncHandler;
-		//ce7->intr_ndma0_orig_return   = *ndma0Handler;
+		ce7->cheatEngineAddr          = cheatEngineOffset;
 		ce7->fileCluster              = fileCluster;
 		ce7->patchOffsetCacheFileCluster = patchOffsetCacheFileCluster;
 		ce7->srParamsCluster          = srParamsFileCluster;
@@ -403,6 +406,10 @@ int hookNdsRetailArm7(
 		if (strncmp(romTid, "HND", 3) == 0) {
 			ce7->valueBits |= b_isDlp;
 		}
+		extern bool i2cBricked;
+		if (i2cBricked) {
+			ce7->valueBits |= b_i2cBricked;
+		}
 		if (REG_SCFG_EXT == 0) {
 			ce7->valueBits |= b_scfgLocked;
 		}
@@ -432,10 +439,10 @@ int hookNdsRetailArm7(
 
 		// 0: ROM part start, 1: ROM part start in RAM, 2: ROM part end in RAM
 		extern u32 romMapLines;
-		extern u32 romMap[4][3];
+		extern u32 romMap[5][3];
 
 		ce7->romMapLines = romMapLines;
-		for (int i = 0; i < 4; i++) {
+		for (int i = 0; i < 5; i++) {
 			for (int i2 = 0; i2 < 3; i2++) {
 				ce7->romMap[i][i2] = romMap[i][i2];
 			}
@@ -448,7 +455,6 @@ int hookNdsRetailArm7(
 		 || (strncmp(romTid, "UXB", 3) == 0)
 		 || (strncmp(romTid, "USK", 3) == 0)
 		|| (!gameOnFlashcard && !ROMinRAM)) {
-			*ndma0Handler = ce7->patches->ndma0Handler;
 			if (!ROMinRAM) {
 				ce7->valueBits |= b_runCardEngineCheck;
 			}
@@ -465,7 +471,6 @@ int hookNdsRetailArm7(
 	}
 
 	extern u32 cheatSizeTotal;
-	extern u32 cheatEngineOffset;
 	extern char cheatEngineBuffer[0x400];
 	u16 cheatSizeLimit = (ce7NotFound ? 0x1C00 : 0x8000);
 	if (!ce7NotFound) {

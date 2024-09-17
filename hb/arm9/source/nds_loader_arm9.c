@@ -81,6 +81,7 @@ dsiSD:
 #define ROM_IS_COMPRESSED_OFFSET 64
 #define PATCHCACHE_FILE_OFFSET 68
 #define SOFTRESET_FILE_OFFSET 72
+#define SOUND_FREQ_OFFSET 76
 
 
 typedef signed int addr_t;
@@ -285,14 +286,14 @@ char load_bin[0x10000];
 char loadInject_bin[0x8000];
 char imgTemplateBuffer[0xEA00];
 
-int runNds (const void* loader, u32 loaderSize, u32 cluster, u32 ramDiskCluster, u32 ramDiskSize, u32 srParamsCluster, u32 patchOffsetCacheCluster, u32 cfgCluster, u32 cfgSize, int romToRamDisk, bool romIsCompressed, bool initDisc, bool dldiPatchNds, int argc, const char** argv, int language, int dsiMode, bool boostVram, int consoleModel, u32 srTid1, u32 srTid2)
+int runNds (const void* loader, u32 loaderSize, u32 cluster, u32 ramDiskCluster, u32 ramDiskSize, u32 srParamsCluster, u32 patchOffsetCacheCluster, u32 cfgCluster, u32 cfgSize, int romToRamDisk, bool romIsCompressed, bool initDisc, bool dldiPatchNds, int argc, const char** argv, int language, int dsiMode, bool boostVram, int consoleModel, bool soundFreq, u32 srTid1, u32 srTid2)
 {
 	char* argStart;
 	u16* argData;
 	u16 argTempVal = 0;
 	int argSize;
 	const char* argChar;
-	
+
 	nocashMessage("runNds");
 
 	irqDisable(IRQ_ALL);
@@ -326,7 +327,7 @@ int runNds (const void* loader, u32 loaderSize, u32 cluster, u32 ramDiskCluster,
 	argStart = (char*)(((int)argStart + 3) & ~3);	// Align to word
 	argData = (u16*)argStart;
 	argSize = 0;
-	
+
 	for (; argc > 0 && *argv; ++argv, --argc) 
 	{
 		for (argChar = *argv; *argChar != 0; ++argChar, ++argSize) 
@@ -351,7 +352,7 @@ int runNds (const void* loader, u32 loaderSize, u32 cluster, u32 ramDiskCluster,
 		++argSize;
 	}
 	*argData = argTempVal;
-	
+
 	writeAddr ((data_t*) LCDC_BANK_C, 0x24, consoleModel);
 	writeAddr ((data_t*) LCDC_BANK_C, 0x28, srParamsCluster);
 	writeAddr ((data_t*) LCDC_BANK_C, 0x2C, srTid1);
@@ -370,8 +371,9 @@ int runNds (const void* loader, u32 loaderSize, u32 cluster, u32 ramDiskCluster,
 	writeAddr ((data_t*) LCDC_BANK_D, ROM_IS_COMPRESSED_OFFSET, romIsCompressed);
 	writeAddr ((data_t*) LCDC_BANK_D, PATCHCACHE_FILE_OFFSET, patchOffsetCacheCluster);
 	writeAddr ((data_t*) LCDC_BANK_D, SOFTRESET_FILE_OFFSET, srParamsCluster);
+	writeAddr ((data_t*) LCDC_BANK_D, SOUND_FREQ_OFFSET, soundFreq);
 
-		
+
 	/*if(dldiPatchNds) {
 		// Patch the loader with a DLDI for the card
 		nocashMessage("dldiPatchNds");
@@ -380,7 +382,7 @@ int runNds (const void* loader, u32 loaderSize, u32 cluster, u32 ramDiskCluster,
 			return 3;
 		}
 	}*/
-	
+
 	nocashMessage("irqDisable(IRQ_ALL);");
 
 	irqDisable(IRQ_ALL);
@@ -389,26 +391,26 @@ int runNds (const void* loader, u32 loaderSize, u32 cluster, u32 ramDiskCluster,
 	// Give the VRAM to the ARM7
 	VRAM_C_CR = VRAM_ENABLE | VRAM_C_ARM7_0x06000000;
 	VRAM_D_CR = VRAM_ENABLE | VRAM_D_ARM7_0x06020000;
-	
+
 	nocashMessage("Reset into a passme loop");
 	// Reset into a passme loop
 	REG_EXMEMCNT |= ARM7_OWNS_ROM | ARM7_OWNS_CARD;
-	
+
 	*((vu32*)0x02FFFFFC) = 0;
 	*((vu32*)0x02FFFE04) = (u32)0xE59FF018;
 	*((vu32*)0x02FFFE24) = (u32)0x02FFFE04;
-	
+
 	nocashMessage("resetARM7");
 
 	resetARM7(0x06020000);
-	
+
 	nocashMessage("swiSoftReset");
 
 	swiSoftReset(); 
 	return true;
 }
 
-int runNdsFile (const char* filename, const char* ramDiskFilename, const char* cfgFilename, u32 ramDiskSize, const char* srParamsFilename, const char* patchOffsetCacheFilename, u32 cfgSize, int romToRamDisk, bool romIsCompressed, int argc, const char** argv, int language, int dsiMode, bool boostVram, int consoleModel, u32 srTid1, u32 srTid2) {
+int runNdsFile (const char* filename, const char* ramDiskFilename, const char* cfgFilename, u32 ramDiskSize, const char* srParamsFilename, const char* patchOffsetCacheFilename, u32 cfgSize, int romToRamDisk, bool romIsCompressed, int argc, const char** argv, int language, int dsiMode, bool boostVram, int consoleModel, bool soundFreq, u32 srTid1, u32 srTid2) {
 	struct stat st;
 	struct stat stRam;
 	struct stat stCfg;
@@ -509,7 +511,7 @@ int runNdsFile (const char* filename, const char* ramDiskFilename, const char* c
 	
 	//installBootStub(havedsiSD);
 
-	return runNds (load_bin, 0x10000, st.st_ino, clusterRam, ramDiskSize, clusterSr, clusterPatchCache, clusterCfg, cfgSize, romToRamDisk, romIsCompressed, true, true, argc, argv, language, dsiMode, boostVram, consoleModel, srTid1, srTid2);
+	return runNds (load_bin, 0x10000, st.st_ino, clusterRam, ramDiskSize, clusterSr, clusterPatchCache, clusterCfg, cfgSize, romToRamDisk, romIsCompressed, true, true, argc, argv, language, dsiMode, boostVram, consoleModel, soundFreq, srTid1, srTid2);
 }
 
 /*

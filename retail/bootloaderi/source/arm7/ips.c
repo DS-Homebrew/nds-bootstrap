@@ -9,8 +9,6 @@
 #include "locations.h"
 #include "tonccpy.h"
 
-#define cacheBlockSize 0x4000
-
 extern u8 consoleModel;
 extern bool dsiModeConfirmed;
 extern bool extendedMemoryConfirmed;
@@ -19,7 +17,7 @@ extern bool overlaysInRam;
 extern bool scfgBios9i(void);
 extern u32 getRomLocation(const tNDSHeader* ndsHeader, const bool isESdk2, const bool isSdk5, const bool dsiBios);
 
-bool applyIpsPatch(const tNDSHeader* ndsHeader, u8* ipsbyte, const bool arm9Only, const bool isESdk2, const bool isSdk5, const bool ROMinRAM, const bool usesCloneboot) {
+bool applyIpsPatch(const tNDSHeader* ndsHeader, u8* ipsbyte, const bool arm9Only, const bool isESdk2, const bool isSdk5, const bool ROMinRAM, const bool usesCloneboot, const u32 cacheBlockSize) {
 	if (ipsbyte[0] != 'P' && ipsbyte[1] != 'A' && ipsbyte[2] != 'T' && ipsbyte[3] != 'C' && ipsbyte[4] != 'H' && ipsbyte[5] != 0) {
 		return false;
 	}
@@ -58,7 +56,9 @@ bool applyIpsPatch(const tNDSHeader* ndsHeader, u8* ipsbyte, const bool arm9Only
 				} else {
 					rombyte -= ndsHeader->arm9overlaySource;
 				}
-				if (ndsHeader->unitCode == 0 || !dsiModeConfirmed) {
+				if ((u32)rombyte == (consoleModel > 0 ? 0x0E000000 : 0x0D000000)) {
+					rombyte = (void*)0x03708000;
+				} else if (ndsHeader->unitCode == 0 || !dsiModeConfirmed) {
 					if (isSdk5 || (dsiBios && !isESdk2)) {
 						if (romLocation < (ndsHeader->unitCode > 0 ? 0x0C7E0000 : 0x0C800000) && (u32)rombyte >= 0x0C7C4000) {
 							rombyte += (ndsHeader->unitCode > 0 ? 0x1C000 : 0x3C000);
@@ -99,7 +99,9 @@ bool applyIpsPatch(const tNDSHeader* ndsHeader, u8* ipsbyte, const bool arm9Only
 				*rombyteOffset = repeatbyte[i];
 				rombyteOffset++;
 				if (ROMinRAM && (ndsHeader->unitCode == 0 || !dsiModeConfirmed)) {
-					if (isSdk5 || (dsiBios && !isESdk2)) {
+					if ((u32)rombyteOffset == (consoleModel > 0 ? 0x0E000000 : 0x0D000000)) {
+						rombyteOffset = (u8*)0x03708000;
+					} else if (isSdk5 || (dsiBios && !isESdk2)) {
 						if ((u32)rombyteOffset == 0x0C7C4000) {
 							rombyteOffset += (ndsHeader->unitCode > 0 ? 0x1C000 : 0x3C000);
 						} else if (ndsHeader->unitCode == 0) {
@@ -130,7 +132,9 @@ bool applyIpsPatch(const tNDSHeader* ndsHeader, u8* ipsbyte, const bool arm9Only
 				*rombyteOffset = ipsbyte[ipson+i];
 				rombyteOffset++;
 				if (ROMinRAM && (ndsHeader->unitCode == 0 || !dsiModeConfirmed)) {
-					if (isSdk5 || (dsiBios && !isESdk2)) {
+					if ((u32)rombyteOffset == (consoleModel > 0 ? 0x0E000000 : 0x0D000000)) {
+						rombyteOffset = (u8*)0x03708000;
+					} else if (isSdk5 || (dsiBios && !isESdk2)) {
 						if ((u32)rombyteOffset == 0x0C7C4000) {
 							rombyteOffset += (ndsHeader->unitCode > 0 ? 0x1C000 : 0x3C000);
 						} else if (ndsHeader->unitCode == 0) {

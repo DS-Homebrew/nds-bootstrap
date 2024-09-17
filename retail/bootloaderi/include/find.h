@@ -129,6 +129,7 @@ u32* findSwiGetPitchTableOffset(const tNDSHeader* ndsHeader, const module_params
 //u32* findUserDataAddrOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
 u32* findSleepPatchOffset(const tNDSHeader* ndsHeader);
 u16* findSleepPatchOffsetThumb(const tNDSHeader* ndsHeader);
+u32* findSleepInputWriteOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
 u32* findRamClearOffset(const tNDSHeader* ndsHeader);
 u32* findRamClearIOffset(const tNDSHeader* ndsHeader);
 u32* findRamClearI2Offset(const u32* ramClearIOffset);
@@ -137,5 +138,6 @@ u32* findCardCheckPullOutOffset(const tNDSHeader* ndsHeader, const module_params
 u32* findCardIrqEnableOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
 //u32* findA7iStartOffset(void);
 u32* findSdCardResetOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
+u32* findAutoPowerOffOffset(const tNDSHeader* ndsHeader);
 
 #endif // FIND_H

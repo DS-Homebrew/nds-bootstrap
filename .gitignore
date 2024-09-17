@@ -117,6 +117,7 @@ retail/nitrofiles/cardengine_arm7*.bin
 retail/nitrofiles/cardengine_arm9*.bin
 retail/nitrofiles/cardenginei_arm7*.bin
 retail/nitrofiles/cardenginei_arm9*.bin
+retail/nitrofiles/preLoadSettings*.pck
 retail/nitrofiles_dec/cardengine_arm7*.bin
 retail/nitrofiles_dec/cardengine_arm9*.bin
 retail/nitrofiles_dec/cardenginei_arm7*.bin

@@ -74,6 +74,8 @@ int hookNdsRetailArm9(
 	const bool usesCloneboot,
 	u32 overlaysSize,
 	u32 ioverlaysSize,
+	u32 arm9iromOffset,
+	u32 arm9ibinarySize,
 	u32 maxClusterCacheSize,
     u32 fatTableAddr
 );
