@@ -291,8 +291,17 @@ int hookNdsRetailArm7(
 					case 0x6B038:
 						hookLocation = (u32*)0x2F67348;
 						break;
+					case 0x6EAD0:
+						hookLocation = (u32*)0x2F6772C;
+						break;
+					case 0x6EB54:
+						hookLocation = (u32*)0x2F67734;
+						break;
 					case 0x7250C:
 						hookLocation = (u32*)0x2EE5E10;
+						break;
+					case 0x7603C:
+						hookLocation = (u32*)0x2EE61FC;
 						break;
 				}
 			}
