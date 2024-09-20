@@ -840,7 +840,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 	if (dsiFeatures() && !conf->b4dsMode) {
 		if (!isDSiMode()) {
-			toncset((u32*)0x02400000, 0, 0x2B8000); // Clear leftover garbage data
+			toncset((u32*)0x02400000, 0, 0x300000); // Clear leftover garbage data
 		}
 
 		dsiEnhancedMbk = (isDSiMode() && *(u32*)0x02FFE1A0 == 0x00403000 && ((REG_SCFG_EXT7 == 0) || (strncmp((const char*)0x04FFFA00, "no$gba", 6) == 0)));
