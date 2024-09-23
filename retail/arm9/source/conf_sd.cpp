@@ -453,7 +453,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 	if (!conf->sdFound && !flashcardFound) {
 		consoleDemoInit();
-		printf("FAT init failed!\n");
+		iprintf("FAT init failed!\n");
 		return -1;
 	}
 	nocashMessage("fatInitDefault");
@@ -464,7 +464,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	}
 	if (!nitroFSInit(bootstrapPath)) {
 		consoleDemoInit();
-		printf("nitroFSInit failed!\n");
+		iprintf("nitroFSInit failed!\n");
 		return -1;
 	}
 	

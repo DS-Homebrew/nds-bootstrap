@@ -235,7 +235,7 @@ int main( int argc, char **argv) {
 	// No! broke no$gba compatibility
 	//REG_SCFG_CLK = 0x85;
 
-    //printf("fat init ...");    
+    //iprintf("fat init ...");    
 
 	if (fatMountSimple("fat", get_io_dsisd())) {
     	nocashMessage("fat inited");
@@ -431,7 +431,7 @@ int main( int argc, char **argv) {
 		runFile(filename, ndsPath, homebrewArg, ramDrivePath, ramDiskSize, srParamsFilePath, patchOffsetCacheFilePath, cfgSize, language, dsiMode, boostVram, consoleModel, soundFreq, srBackendId[0], srBackendId[1]);
 	} else {
 		consoleDemoInit();
-		printf("SD init failed!\n");
+		iprintf("SD init failed!\n");
 	}
 
 	while(1) { swiWaitForVBlank(); }

@@ -77,7 +77,7 @@ static void stop(void) {
 }
 
 static void dopause(void) {
-	printf("Press start...\n");
+	iprintf("Press start...\n");
 	while(1) {
 		scanKeys();
 		if (keysDown() & KEY_START)
@@ -105,25 +105,25 @@ bool extention(const std::string& filename, const char* ext) {
 }
 
 static void getSFCG_ARM9(void) {
-	printf("SCFG_ROM ARM9 %X\n", REG_SCFG_ROM); 
-	printf("SCFG_CLK ARM9 %X\n", REG_SCFG_CLK); 
-	//printf("SCFG_EXT ARM9 %X\n", REG_SCFG_EXT); 
+	iprintf("SCFG_ROM ARM9 %X\n", REG_SCFG_ROM); 
+	iprintf("SCFG_CLK ARM9 %X\n", REG_SCFG_CLK); 
+	//iprintf("SCFG_EXT ARM9 %X\n", REG_SCFG_EXT); 
 }
 
 static void getSFCG_ARM7(void) {
-	//printf("SCFG_ROM ARM7\n");
+	//iprintf("SCFG_ROM ARM7\n");
 
 	//nocashMessage("fifoSendValue32(FIFO_USER_01, MSG_SCFG_ROM);\n");
 	//fifoSendValue32(FIFO_USER_01, (u32)&REG_SCFG_ROM);
 
 	//nocashMessage("dbg_printf\n");
 
-	printf("SCFG_CLK ARM7\n");
+	iprintf("SCFG_CLK ARM7\n");
 
 	nocashMessage("fifoSendValue32(FIFO_USER_01, MSG_SCFG_CLK);\n");
 	fifoSendValue32(FIFO_USER_01, (u32)&REG_SCFG_CLK);
 
-	printf("SCFG_EXT ARM7\n");
+	iprintf("SCFG_EXT ARM7\n");
 
 	nocashMessage("fifoSendValue32(FIFO_USER_01, MSG_SCFG_EXT);\n");
 	fifoSendValue32(FIFO_USER_01, (u32)&REG_SCFG_EXT);
@@ -131,7 +131,7 @@ static void getSFCG_ARM7(void) {
 
 static void myFIFOValue32Handler(u32 value, void* userdata) {
 	nocashMessage("myFIFOValue32Handler\n");
-	printf("ARM7 data %lX\n", value);
+	iprintf("ARM7 data %lX\n", value);
 }
 
 static inline void debugConfB4DS(configuration* conf) {
