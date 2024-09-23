@@ -158,10 +158,10 @@ static void load_conf(configuration* conf, const char* fn) {
 	conf->donorTwlOnlyPath = strdup(config_file.fetch("NDS-BOOTSTRAP", "DONORTWLONLY_NDS_PATH").c_str());
 
 	// GBA path
-	conf->gbaPath = strdup(config_file.fetch("NDS-BOOTSTRAP", "GBA_PATH").c_str());
+	// conf->gbaPath = strdup(config_file.fetch("NDS-BOOTSTRAP", "GBA_PATH").c_str());
 
 	// GBA SAV path
-	conf->gbaSavPath = strdup(config_file.fetch("NDS-BOOTSTRAP", "GBA_SAV_PATH").c_str());
+	// conf->gbaSavPath = strdup(config_file.fetch("NDS-BOOTSTRAP", "GBA_SAV_PATH").c_str());
 
 	// AP-patch path
 	conf->apPatchPath = strdup(config_file.fetch("NDS-BOOTSTRAP", "AP_FIX_PATH").c_str());
@@ -1574,8 +1574,8 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	}
 
 	conf->saveSize = getFileSize(conf->savPath);
-	conf->gbaRomSize = getFileSize(conf->gbaPath);
-	conf->gbaSaveSize = getFileSize(conf->gbaSavPath);
+	// conf->gbaRomSize = getFileSize(conf->gbaPath);
+	// conf->gbaSaveSize = getFileSize(conf->gbaSavPath);
 	conf->wideCheatSize = getFileSize(wideCheatFilePath.c_str());
 	conf->apPatchSize = getFileSize(conf->apPatchPath);
 	conf->cheatSize = getFileSize(cheatFilePath.c_str());

@@ -405,8 +405,8 @@ static int runNdsFile(configuration* conf) {
 	struct stat stDonor0;
 	struct stat stDonor5;
 	struct stat stDonor5Alt;
-	struct stat stGba;
-	struct stat stGbaSav;
+	// struct stat stGba;
+	// struct stat stGbaSav;
 	struct stat stWideCheat;
 	struct stat stApPatch;
 	struct stat stCheat;
@@ -421,8 +421,8 @@ static int runNdsFile(configuration* conf) {
 	struct stat stTwlFont;
 	u32 clusterSav = 0;
 	u32 clusterDonor = 0;
-	u32 clusterGba = 0;
-	u32 clusterGbaSav = 0;
+	// u32 clusterGba = 0;
+	// u32 clusterGbaSav = 0;
 	u32 clusterWideCheat = 0;
 	u32 clusterApPatch = 0;
 	u32 clusterCheat = 0;
@@ -491,13 +491,13 @@ static int runNdsFile(configuration* conf) {
 	}
 
 	if (dsiFeatures() && !conf->b4dsMode) {
-		if (stat(conf->gbaPath, &stGba) >= 0) {
+		/* if (stat(conf->gbaPath, &stGba) >= 0) {
 			clusterGba = stGba.st_ino;
 		}
 
 		if (stat(conf->gbaSavPath, &stGbaSav) >= 0) {
 			clusterGbaSav = stGbaSav.st_ino;
-		}
+		} */
 
 		if (stat(wideCheatFilePath.c_str(), &stWideCheat) >= 0) {
 			clusterWideCheat = stWideCheat.st_ino;
@@ -532,7 +532,7 @@ static int runNdsFile(configuration* conf) {
 		clusterTwlFont = stTwlFont.st_ino;
 	}
 
-	return runNds(st.st_ino, clusterSav, clusterDonor, clusterGba, clusterGbaSav, clusterWideCheat, clusterApPatch, clusterCheat, clusterPatchOffsetCache, clusterRamDump, clusterSrParams, clusterScreenshot, apFixOverlaysCluster, musicCluster, clusterPageFile, clusterManual, clusterTwlFont, conf);
+	return runNds(st.st_ino, clusterSav, clusterDonor, /* clusterGba, clusterGbaSav, */ clusterWideCheat, clusterApPatch, clusterCheat, clusterPatchOffsetCache, clusterRamDump, clusterSrParams, clusterScreenshot, apFixOverlaysCluster, musicCluster, clusterPageFile, clusterManual, clusterTwlFont, conf);
 }
 
 int main(int argc, char** argv) {

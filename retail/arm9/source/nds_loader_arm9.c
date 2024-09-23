@@ -234,7 +234,7 @@ static bool dldiPatchLoader (data_t *binData, u32 binSize, bool clearBSS)
 	return true;
 }
 
-int runNds(u32 cluster, u32 saveCluster, u32 donorTwlCluster, u32 gbaCluster, u32 gbaSavCluster, u32 wideCheatCluster, u32 apPatchCluster, u32 cheatCluster, u32 patchOffsetCacheCluster, u32 ramDumpCluster, u32 srParamsCluster, u32 screenshotCluster, u32 apFixOverlaysCluster, u32 musicCluster, u32 pageFileCluster, u32 manualCluster, u32 sharedFontCluster, configuration* conf) {
+int runNds(u32 cluster, u32 saveCluster, u32 donorTwlCluster, /* u32 gbaCluster, u32 gbaSavCluster, */ u32 wideCheatCluster, u32 apPatchCluster, u32 cheatCluster, u32 patchOffsetCacheCluster, u32 ramDumpCluster, u32 srParamsCluster, u32 screenshotCluster, u32 apFixOverlaysCluster, u32 musicCluster, u32 pageFileCluster, u32 manualCluster, u32 sharedFontCluster, configuration* conf) {
 	nocashMessage("runNds");
 
 	// Load bootloader binary
@@ -262,12 +262,12 @@ int runNds(u32 cluster, u32 saveCluster, u32 donorTwlCluster, u32 gbaCluster, u3
 	loader->donorFileCluster            = donorTwlCluster;
 	loader->donorFileSize               = conf->donorFileSize;
 	loader->donorFileOffset             = conf->donorFileOffset;
-	loader->gbaFileCluster              = gbaCluster;
-	loader->gbaSaveFileCluster          = gbaSavCluster;
+	// loader->gbaFileCluster              = gbaCluster;
+	// loader->gbaSaveFileCluster          = gbaSavCluster;
 	loader->romSize                     = conf->romSize;
 	loader->saveSize                    = conf->saveSize;
-	loader->gbaRomSize                  = conf->gbaRomSize;
-	loader->gbaSaveSize                 = conf->gbaSaveSize;
+	// loader->gbaRomSize                  = conf->gbaRomSize;
+	// loader->gbaSaveSize                 = conf->gbaSaveSize;
 	loader->dataToPreloadAddr[0]        = conf->dataToPreloadAddr[0];
 	loader->dataToPreloadAddr[1]        = conf->dataToPreloadAddr[1];
 	loader->dataToPreloadSize[0]        = conf->dataToPreloadSize[0];
