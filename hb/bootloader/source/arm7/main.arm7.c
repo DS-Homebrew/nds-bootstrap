@@ -88,7 +88,7 @@ extern u32 romFileType;
 extern u32 romIsCompressed;
 extern u32 patchOffsetCacheFileCluster;
 extern u32 srParamsFileCluster;
-extern u32 ndsPreloaded;
+//extern u32 ndsPreloaded;
 extern u32 soundFreq;
 
 u8 TWL_HEAD[0x1000] = {0};
@@ -262,11 +262,11 @@ static void resetMemory_ARM7 (void)
 	sdEngineLocation = (*(u32*)0x02FFE1A0 == 0x080037C0) ? SDENGINE_LOCATION_ALT : SDENGINE_LOCATION;
 
 	memset_addrs_arm7(0x03000000, 0x03800000 + 0x10000);
-	if (ndsPreloaded) {
+	/* if (ndsPreloaded) {
 		dma_twlFill32(0, 0, (u32*)0x02200000, 0x180000);	// clear most of EWRAM (except pre-loaded ARM9 binary)
-	} else {
+	} else { */
 		dma_twlFill32(0, 0, (u32*)0x02004000, 0x37C000);	// clear most of EWRAM
-	}
+	// }
 	dma_twlFill32(0, 0, (u32*)0x02380000, 0x70000);
 	dma_twlFill32(0, 0, (u32*)0x023F1000, 0xF000);
 	if (romIsCompressed) {
@@ -319,16 +319,16 @@ static void loadBinary_ARM7 (aFile file)
 	fileRead((char*)&dsiFlags, file, 0x1BF, 1);
 
 	// Load binaries into memory
-	if (ndsPreloaded) {
+	/* if (ndsPreloaded) {
 		if ((u32)ndsHeader->arm9destination < 0x02004000) {
 			fileRead(ndsHeader->arm9destination, file, ndsHeader->arm9romOffset, ndsHeader->arm9binarySize >= 0x4000 ? 0x4000 : ndsHeader->arm9binarySize);
 		}
 		if ((u32)ndsHeader->arm9destination+ndsHeader->arm9binarySize >= 0x02200000) {
 			fileRead((char*)0x02200000, file, ndsHeader->arm9romOffset + 0x200000 + ((u32)ndsHeader->arm9destination - 0x02000000), ndsHeader->arm9binarySize-0x200000);
 		}
-	} else {
+	} else { */
 		fileRead(ndsHeader->arm9destination, file, ndsHeader->arm9romOffset, ndsHeader->arm9binarySize);
-	}
+	// }
 	fileRead(ndsHeader->arm7destination, file, ndsHeader->arm7romOffset, ndsHeader->arm7binarySize);
 
 	if (dsiModeConfirmed && (*(u8*)(NDS_HEADER + 0x012) & BIT(1)))
