@@ -959,34 +959,52 @@ static void loadROMPartIntoRAM(const tNDSHeader* ndsHeader, const module_params_
 	s32 preloadSizeEdit = dataToPreloadSize[0];
 
 	u32 romLocationChange = dataLocation;
+	u32 romLocationChangePrep = romLocationChange;
 	u32 romOffsetChange = dataToPreloadAddr[0];
+	u32 romBlockSize = 0;
 	while (preloadSizeEdit > 0) {
-		u32 romBlockSize = (preloadSizeEdit > cacheBlockSize) ? cacheBlockSize : preloadSizeEdit;
-		fileRead((char*)romLocationChange, file, romOffsetChange, romBlockSize);
-		romLocationChange += cacheBlockSize;
+		bool readRom = false;
+		romBlockSize += (preloadSizeEdit > cacheBlockSize) ? cacheBlockSize : preloadSizeEdit;
+		romLocationChangePrep += cacheBlockSize;
+		preloadSizeEdit -= cacheBlockSize;
 
-		if (isSdk5(moduleParams) || (dsiBios && laterSdk)) {
-			if (romLocationChange == 0x0C7C0000+cacheBlockSize) {
-				romLocationChange += (ndsHeader->unitCode > 0 ? 0x20000 : 0x40000)-cacheBlockSize;
+		if (preloadSizeEdit <= 0) {
+			readRom = true;
+		} else if (dsiWramAccess && !dsiWramMirrored && romLocationChangePrep == (consoleModel > 0 ? 0x0E000000 : 0x0D000000)) {
+			romLocationChangePrep = 0x03708000;
+			readRom = true;
+		} else if (isSdk5(moduleParams) || (dsiBios && laterSdk)) {
+			if (romLocationChangePrep == 0x0C7C0000+cacheBlockSize) {
+				romLocationChangePrep += (ndsHeader->unitCode > 0 ? 0x20000 : 0x40000)-cacheBlockSize;
+				readRom = true;
 			} else if (ndsHeader->unitCode == 0) {
-				if (romLocationChange == 0x0D000000-cacheBlockSize) {
-					romLocationChange += cacheBlockSize;
+				if (romLocationChangePrep == 0x0D000000-cacheBlockSize) {
+					romLocationChangePrep += cacheBlockSize;
+					readRom = true;
 				}
 			} else {
-				if (romLocationChange == 0x0C800000-cacheBlockSize) {
-					romLocationChange += cacheBlockSize;
-				} else if (romLocationChange == 0x0CFE0000) {
-					romLocationChange += 0x20000;
+				if (romLocationChangePrep == 0x0C800000-cacheBlockSize) {
+					romLocationChangePrep += cacheBlockSize;
+					readRom = true;
+				} else if (romLocationChangePrep == 0x0CFE0000) {
+					romLocationChangePrep += 0x20000;
+					readRom = true;
 				}
 			}
-		} else if ((romLocationChange == 0x0D000000-cacheBlockSize) && dsiBios) {
-			romLocationChange += cacheBlockSize;
-		} else if (romLocationChange == 0x0C7C0000) {
-			romLocationChange += 0x40000;
+		} else if ((romLocationChangePrep == 0x0D000000-cacheBlockSize) && dsiBios) {
+			romLocationChangePrep += cacheBlockSize;
+			readRom = true;
+		} else if (romLocationChangePrep == 0x0C7C0000) {
+			romLocationChangePrep += 0x40000;
+			readRom = true;
 		}
 
-		romOffsetChange += cacheBlockSize;
-		preloadSizeEdit -= cacheBlockSize;
+		if (readRom) {
+			fileRead((char*)romLocationChange, file, romOffsetChange, romBlockSize);
+			romLocationChange = romLocationChangePrep;
+			romOffsetChange += romBlockSize;
+			romBlockSize = 0;
+		}
 	}
 
 	/*if (dataToPreloadSize[1] > 0) {
@@ -1085,36 +1103,52 @@ static void loadROMintoRAM(const tNDSHeader* ndsHeader, const module_params_t* m
 	}
 
 	u32 romLocationChange = romLocation;
+	u32 romLocationChangePrep = romLocationChange;
 	u32 romOffsetChange = romOffset;
+	u32 romBlockSize = 0;
 	while (romSizeEdit > 0) {
-		u32 romBlockSize = (romSizeEdit > 0x4000) ? 0x4000 : romSizeEdit;
-		fileRead((char*)romLocationChange, romFile, romOffsetChange, romBlockSize);
-		romLocationChange += 0x4000;
+		bool readRom = false;
+		romBlockSize += (romSizeEdit > 0x4000) ? 0x4000 : romSizeEdit;
+		romLocationChangePrep += 0x4000;
+		romSizeEdit -= 0x4000;
 
-		if (dsiWramAccess && !dsiWramMirrored && romLocationChange == (consoleModel > 0 ? 0x0E000000 : 0x0D000000)) {
-			romLocationChange = 0x03708000;
+		if (romSizeEdit <= 0) {
+			readRom = true;
+		} else if (dsiWramAccess && !dsiWramMirrored && romLocationChangePrep == (consoleModel > 0 ? 0x0E000000 : 0x0D000000)) {
+			romLocationChangePrep = 0x03708000;
+			readRom = true;
 		} else if (isSdk5(moduleParams) || (dsiBios && laterSdk)) {
-			if (romLocationChange == 0x0C7C4000) {
-				romLocationChange += (ndsHeader->unitCode > 0 ? 0x1C000 : 0x3C000);
+			if (romLocationChangePrep == 0x0C7C4000) {
+				romLocationChangePrep += (ndsHeader->unitCode > 0 ? 0x1C000 : 0x3C000);
+				readRom = true;
 			} else if (ndsHeader->unitCode == 0) {
-				if (romLocationChange == 0x0CFFC000) {
-					romLocationChange += 0x4000;
+				if (romLocationChangePrep == 0x0CFFC000) {
+					romLocationChangePrep += 0x4000;
+					readRom = true;
 				}
 			} else {
-				if (romLocationChange == 0x0C7FC000) {
-					romLocationChange += 0x4000;
-				} else if (romLocationChange == 0x0CFE0000) {
-					romLocationChange += 0x20000;
+				if (romLocationChangePrep == 0x0C7FC000) {
+					romLocationChangePrep += 0x4000;
+					readRom = true;
+				} else if (romLocationChangePrep == 0x0CFE0000) {
+					romLocationChangePrep += 0x20000;
+					readRom = true;
 				}
 			}
-		} else if (romLocationChange == 0x0CFFC000 && dsiBios) {
-			romLocationChange += 0x4000;
-		} else if (romLocationChange == 0x0C7C0000) {
-			romLocationChange += 0x40000;
+		} else if (romLocationChangePrep == 0x0CFFC000 && dsiBios) {
+			romLocationChangePrep += 0x4000;
+			readRom = true;
+		} else if (romLocationChangePrep == 0x0C7C0000) {
+			romLocationChangePrep += 0x40000;
+			readRom = true;
 		}
 
-		romOffsetChange += 0x4000;
-		romSizeEdit -= 0x4000;
+		if (readRom) {
+			fileRead((char*)romLocationChange, romFile, romOffsetChange, romBlockSize);
+			romLocationChange = romLocationChangePrep;
+			romOffsetChange += romBlockSize;
+			romBlockSize = 0;
+		}
 	}
 	if (!isSdk5(moduleParams) && *(u32*)((romLocation-romOffset)+0x003128AC) == 0x4B434148) {
 		*(u32*)((romLocation-romOffset)+0x3128AC) = 0xA00;	// Primary fix for Mario's Holiday (before Rev 11)
