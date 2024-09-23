@@ -41,6 +41,7 @@
 #include "common.h"
 
 extern void arm9_clearCache(void);
+extern void arm9code(u32* addr);
 
 tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER;
 bool dsiModeConfirmed = false;
@@ -207,8 +208,5 @@ void arm9_main(void) {
 	while (REG_VCOUNT == 191);
 
 	// Start ARM9
-	VoidFn arm9code = *(VoidFn*)(0x2FFFE24);
-	arm9code();
-	
-	while (1);
+	arm9code(ndsHeader->arm9executeAddress);
 }

@@ -68,6 +68,8 @@ Helpful information:
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // Important things
+extern void arm7code(u32* addr);
+
 extern unsigned long _start;
 extern unsigned long storedFileCluster;
 extern unsigned long initDisc;
@@ -538,10 +540,6 @@ Modified by Chishm:
  * Removed MultiNDS specific stuff
 --------------------------------------------------------------------------*/
 static void startBinary_ARM7 (void) {
-	REG_IME=0;
-	while(REG_VCOUNT!=191);
-	while(REG_VCOUNT==191);
-
 	// Get the ARM9 to boot
 	arm9_stateFlag = ARM9_BOOTBIN;
 
@@ -549,8 +547,7 @@ static void startBinary_ARM7 (void) {
 	while (REG_VCOUNT == 191);
 
 	// Start ARM7
-	VoidFn arm7code = *(VoidFn*)(0x2FFFE34);
-	arm7code();
+	arm7code(ndsHeader->arm7executeAddress);
 }
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -670,11 +667,13 @@ int arm7_main (void) {
 	}
 
 	bool isGbaR2 = false;
-	u32 bannerOffset = 0;
-	char gbaR2Text[0x20];
-	fileRead((char*)&bannerOffset, romFile, 0x48, 4);
-	fileRead(gbaR2Text, romFile, bannerOffset+0x240, 0x20);
-	isGbaR2 = (gbaR2Text[0] == 'G' && gbaR2Text[2] == 'B' && gbaR2Text[4] == 'A' && gbaR2Text[6] == 'R' && gbaR2Text[8] == 'u' && gbaR2Text[0xA] == 'n' && gbaR2Text[0xC] == 'n' && gbaR2Text[0xE] == 'e' && gbaR2Text[0x10] == 'r');
+	{
+		u32 bannerOffset = 0;
+		char gbaR2Text[0x20];
+		fileRead((char*)&bannerOffset, romFile, 0x48, 4);
+		fileRead(gbaR2Text, romFile, bannerOffset+0x240, 0x20);
+		isGbaR2 = (gbaR2Text[0] == 'G' && gbaR2Text[2] == 'B' && gbaR2Text[4] == 'A' && gbaR2Text[6] == 'R' && gbaR2Text[8] == 'u' && gbaR2Text[0xA] == 'n' && gbaR2Text[0xC] == 'n' && gbaR2Text[0xE] == 'e' && gbaR2Text[0x10] == 'r');
+	}
 
 	if ((!soundFreq && (REG_SNDEXTCNT & BIT(13))) || (soundFreq && !(REG_SNDEXTCNT & BIT(13)))) {
 		REG_SNDEXTCNT &= ~SNDEXTCNT_ENABLE; // Disable sound output: Runs before sound frequency change
