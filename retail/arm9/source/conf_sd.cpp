@@ -1917,6 +1917,10 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 				fread(&ndsArm7Size, sizeof(u32), 1, ndsFile);
 			}
 
+			if ((memcmp(romTid, "ADM", 3) == 0) && ndsArm7Size == 0x28ADC) {
+				ndsArm7Size -= 0xE4; // Fix for AC:WW - Singleplayer Nookingtons
+			}
+
 			u32 arm7allocOffset = 0;
 
 			for (int i = 0; i < 0x80; i += 4) {
