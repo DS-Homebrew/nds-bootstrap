@@ -53,6 +53,8 @@ static const char dsiWareForBootloader1[][4] = {
 	"K2Z", // G.G Series: Altered Weapon
 	"KF2", // Amakuchi! Dairoujou
 	"KAX", // Animal Boxing
+	"KWG", // Animal Crossing Calculator
+	// "KWC", // Animal Crossing Clock
 	"KPC", // Animal Puzzle Adventure
 	"KY8", // Anne's Doll Studio: Antique Collection
 	"K54", // Anne's Doll Studio: Gothic Collection
@@ -302,6 +304,7 @@ static const char dsiWareForBootloader2[][4] = {
 	"KWM", // Magical Whip
 	"KJO", // Magnetic Joe
 	"KYL", // Make Up & Style
+	"KWF", // Mario Calculator
 	"KDM", // Mario vs. Donkey Kong: Minis March Again! (bootloaderi-exclusive)
 	"KM9", // Master of Illusion Express: Deep Psyche
 	"KMF", // Master of Illusion Express: Funny Face

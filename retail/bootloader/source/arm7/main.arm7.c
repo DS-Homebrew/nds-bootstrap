@@ -504,18 +504,21 @@ static bool isROMLoadableInRAM(const tDSiHeader* dsiHeader, const tNDSHeader* nd
 		} /* else if (strncmp(romTid, "KAT", 3) == 0) { // AiRace: Tunnel
 			romSizeLimitChange = 0x80000;
 		} */ else if (strncmp(romTid, "KCT", 3) == 0 // Chess Challenge!
-				 || strncmp(romTid, "KWK", 3) == 0 // Mega Words
-				 || strncmp(romTid, "KSC", 3) == 0 // Sudoku Challenge!
-				 || strncmp(romTid, "KWS", 3) == 0 // Word Searcher
-				 || strncmp(romTid, "KWR", 3) == 0 // Word Searcher II
-				 || strncmp(romTid, "KW6", 3) == 0 // Word Searcher III
-				 || strncmp(romTid, "KW8", 3) == 0) { // Word Searcher IV
+				   || strncmp(romTid, "KWK", 3) == 0 // Mega Words
+				   || strncmp(romTid, "KSC", 3) == 0 // Sudoku Challenge!
+				   || strncmp(romTid, "KWS", 3) == 0 // Word Searcher
+				   || strncmp(romTid, "KWR", 3) == 0 // Word Searcher II
+				   || strncmp(romTid, "KW6", 3) == 0 // Word Searcher III
+				   || strncmp(romTid, "KW8", 3) == 0) { // Word Searcher IV
 			romSizeLimitChange = 0x77C000;
 		} /* else if (strncmp(romTid, "KGU", 3) == 0) { // Flipnote Studio
 			romSizeLimitChange = 0x140000;
 		} */ else if (strncmp(romTid, "KUP", 3) == 0) { // Match Up!
 			romSizeLimitChange = 0x380000;
-		} else if (strncmp(romTid, "KQR", 3) == 0) { // Remote Racers
+		} else if (strncmp(romTid, "KQR", 3) == 0 // Remote Racers
+				|| strncmp(romTid, "KWG", 3) == 0 // Animal Crossing Calculator
+				// || strncmp(romTid, "KWC", 3) == 0 // Animal Crossing Clock
+				|| strncmp(romTid, "KWF", 3) == 0) { // Mario Calculator
 			romSizeLimitChange = 0x280000;
 		}
 		if (romSizeLimitChange) {

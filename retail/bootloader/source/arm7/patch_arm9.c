@@ -1256,11 +1256,26 @@ void patchHiHeapDSiWareThumb(u32 addr, u32 newCodeAddr, u32 heapEnd) {
 
 void patchUserSettingsReadDSiWare(u32 addr) {
 	if (*(u16*)(addr) == 0x4806) { // ldr r0, =0x2FFFDFC (THUMB)
-		*(u16*)(addr) = 0x46C0; // nop
-		*(u16*)(addr+4) = 0xBD38; // POP {R3-R5,PC}
+		*(u16*)(addr) = 0x1C28; // movs r0, r5
+		*(u16*)(addr+4) = 0x3054; // adds r0, #0x54
+		*(u16*)(addr+6) = 0x3464; // adds r4, #0x64
+		*(u16*)(addr+8) = 0x7001; // strb r1, [r0]
+		*(u16*)(addr+0xA) = 0x8820; // ldrh r0, [r4]
+		*(u16*)(addr+0xC) = 0x0740; // lsls r0, r0, #0x1D
+		*(u16*)(addr+0xE) = 0x0F40; // lsrs r0, r0, #0x1D
+		// *(u16*)(addr+0x10) = 0x7028; // strb r0, [r5]
+		// *(u16*)(addr+0x12) = 0xBD38; // pop {r3-r5, pc}
 	} else if (*(u16*)(addr) == 0x4805) { // ldr r0, =0x2FFFDFC (THUMB)
-		*(u16*)(addr) = 0x46C0; // nop
-		*(u16*)(addr+4) = 0xBD10; // POP {R4,PC}
+		*(u16*)(addr) = 0x2100; // movs r1, #0
+		*(u16*)(addr+2) = 0x3054; // adds r0, #0x54
+		*(u16*)(addr+4) = 0x7001; // strb r1, [r0]
+		*(u16*)(addr+6) = 0x4803; // ldr r0, =0x2FFFC80
+		*(u16*)(addr+8) = 0x3064; // adds r0, #0x64
+		*(u16*)(addr+0xA) = 0x8800; // ldrh r0, [r0]
+		*(u16*)(addr+0xC) = 0x0740; // lsls r0, r0, #0x1D
+		*(u16*)(addr+0xE) = 0x0F40; // lsrs r0, r0, #0x1D
+		*(u16*)(addr+0x10) = 0x7020; // strb r0, [r4]
+		*(u16*)(addr+0x12) = 0xBD10; // pop {r4, pc}
 	} else if (*(u32*)(addr) == 0xE594117C) { // ldr r1, [r4,#0x17C]
 		*(u32*)(addr) = 0xE5C50054; // strb r0, [r5,#0x54]
 		*(u32*)(addr+4) = 0xE1D406B4; // ldrh r0, [r4,#0x64]

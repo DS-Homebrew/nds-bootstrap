@@ -2737,6 +2737,135 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// Animal Crossing Calculator (USA)
+	// Requires either 8MB of RAM or Memory Expansion Pak
+	else if (strcmp(romTid, "KWGE") == 0 && debugOrMep) {
+		doubleNopT(0x0200504E);
+		doubleNopT(0x02005060); // Disable NFTR loading from TWLNAND
+		if (!extendedMemory) {
+			extern u16* marioCalcStrbForSlot2;
+			tonccpy((u16*)0x02037298, marioCalcStrbForSlot2, 0x100);
+
+			// movs r0, (s2FlashcardId == 0x5A45) ? #0x08000000 : #0x09000000
+			*(u16*)0x0200F078 = (s2FlashcardId == 0x5A45) ? 0x2080 : 0x2090; // movs r0, #0x90
+			*(u16*)0x0200F07A = 0x0500; // lsls r0, r0, 0x14
+
+			setBLThumb(0x02023876, 0x02037298);
+			setBLThumb(0x020238BA, 0x02037298);
+		}
+		*(u16*)0x0200FF50 = 0x2005; // movs r0, #5       -> movs r0, #0x280000 (Shrink heap from 0x400000)
+		*(u16*)0x0200FF52 = 0x04C0; // lsls r0, r0, 0x13 ->
+		*(u16*)0x02031F48 = 0xB003; // ADD SP, SP, #0xC
+		*(u16*)0x02031F4A = 0xBD78; // POP {R3-R6,PC}
+		doubleNopT(0x02034224);
+		doubleNopT(0x020388DC);
+		doubleNopT(0x02039E2A);
+		doubleNopT(0x02039E2E);
+		doubleNopT(0x02039E3A);
+		doubleNopT(0x02039F26);
+		patchHiHeapDSiWareThumb(0x02039F64, 0x02037290, heapEnd);
+		*(u32*)0x0203A03C = *(u32*)0x02004FBC;
+		patchUserSettingsReadDSiWare(0x0203AD94);
+	}
+
+	// Animal Crossing Calculator (Europe, Australia)
+	// Requires 8MB of RAM
+	else if (strcmp(romTid, "KWGV") == 0 && extendedMemory) {
+		doubleNopT(0x0200504E);
+		doubleNopT(0x02005060); // Disable NFTR loading from TWLNAND
+		/* if (!extendedMemory) {
+			extern u16* marioCalcStrbForSlot2;
+			tonccpy((u16*)0x02037390, marioCalcStrbForSlot2, 0x100);
+
+			// movs r0, (s2FlashcardId == 0x5A45) ? #0x08000000 : #0x09000000
+			*(u16*)0x0200F170 = (s2FlashcardId == 0x5A45) ? 0x2080 : 0x2090; // movs r0, #0x90
+			*(u16*)0x0200F172 = 0x0500; // lsls r0, r0, 0x14
+
+			setBLThumb(0x0202396E, 0x02037390);
+			setBLThumb(0x020239B2, 0x02037390);
+		} */
+		*(u16*)0x02010048 = 0x2005; // movs r0, #5       -> movs r0, #0x280000 (Shrink heap from 0x400000)
+		*(u16*)0x0201004A = 0x04C0; // lsls r0, r0, 0x13 ->
+		*(u16*)0x02032040 = 0xB003; // ADD SP, SP, #0xC
+		*(u16*)0x02032042 = 0xBD78; // POP {R3-R6,PC}
+		doubleNopT(0x0203431C);
+		doubleNopT(0x020389D4);
+		doubleNopT(0x02039F22);
+		doubleNopT(0x02039F26);
+		doubleNopT(0x02039F32);
+		doubleNopT(0x0203A01E);
+		patchHiHeapDSiWareThumb(0x0203A05C, 0x02037388, heapEnd);
+		*(u32*)0x0203A134 = *(u32*)0x02004FBC;
+		patchUserSettingsReadDSiWare(0x0203AE8C);
+	}
+
+	// Animal Crossing Calculator (China)
+	// Requires either 8MB of RAM or Memory Expansion Pak
+	else if (strcmp(romTid, "KWGC") == 0 && debugOrMep) {
+		doubleNopT(0x020050A6);
+		doubleNopT(0x020050B2); // Disable NFTR loading from TWLNAND
+		doubleNopT(0x020050E2);
+		doubleNopT(0x020050E8);
+		doubleNopT(0x020050F6);
+		if (!extendedMemory) {
+			extern u16* marioCalcStrbForSlot2;
+			tonccpy((u16*)0x023FF000, marioCalcStrbForSlot2, 0x100);
+
+			// movs r0, (s2FlashcardId == 0x5A45) ? #0x08000000 : #0x09000000
+			*(u16*)0x0200E804 = (s2FlashcardId == 0x5A45) ? 0x2080 : 0x2090; // movs r0, #0x90
+			*(u16*)0x0200E806 = 0x0500; // lsls r0, r0, 0x14
+
+			setBLThumb(0x02022B52, 0x023FF000);
+			setBLThumb(0x02022B96, 0x023FF000);
+		}
+		*(u16*)0x0200F6BC = 0x2005; // movs r0, #5       -> movs r0, #0x280000 (Shrink heap from 0x400000)
+		*(u16*)0x0200F6BE = 0x04C0; // lsls r0, r0, 0x13 ->
+		doubleNopT(0x0203115A);
+		doubleNopT(0x0203330A);
+		doubleNopT(0x0203696C);
+		doubleNopT(0x02037F7E);
+		doubleNopT(0x02037F82);
+		doubleNopT(0x02037F8E);
+		doubleNopT(0x02038072);
+		patchHiHeapDSiWareThumb(0x020380B0, 0x02035AA4, heapEnd);
+		*(u32*)0x02038188 = *(u32*)0x02004FDC;
+		patchUserSettingsReadDSiWare(0x0203B6F6);
+	}
+
+	// Nintendo DSi Tokei: Doubutsu no Mori Type (Japan)
+	// Requires either 8MB of RAM or Memory Expansion Pak
+	// More work needed
+	/* else if (strcmp(romTid, "KWCJ") == 0 && debugOrMep) {
+		doubleNopT(0x0200504E);
+		doubleNopT(0x0200505A); // Disable NFTR loading from TWLNAND
+		doubleNopT(0x020090E6);
+		doubleNopT(0x020091BC);
+		if (!extendedMemory) {
+			extern u16* marioCalcStrbForSlot2;
+			tonccpy((u16*)0x02034D88, marioCalcStrbForSlot2, 0x100);
+
+			// movs r0, (s2FlashcardId == 0x5A45) ? #0x08000000 : #0x09000000
+			*(u16*)0x0200C55C = (s2FlashcardId == 0x5A45) ? 0x2080 : 0x2090; // movs r0, #0x90
+			*(u16*)0x0200C55E = 0x0500; // lsls r0, r0, 0x14
+
+			setBLThumb(0x02021362, 0x02034D88);
+			setBLThumb(0x020213A6, 0x02034D88);
+		}
+		*(u16*)0x0200D410 = 0x2005; // movs r0, #5       -> movs r0, #0x280000 (Shrink heap from 0x400000)
+		*(u16*)0x0200D412 = 0x04C0; // lsls r0, r0, 0x13 ->
+		*(u16*)0x0202FA40 = 0xB003; // ADD SP, SP, #0xC
+		*(u16*)0x0202FA42 = 0xBD78; // POP {R3-R6,PC}
+		doubleNopT(0x02031D14);
+		doubleNopT(0x020363CC);
+		doubleNopT(0x0203795E);
+		doubleNopT(0x02037962);
+		doubleNopT(0x0203796E);
+		doubleNopT(0x02037A5A);
+		patchHiHeapDSiWareThumb(0x02037A98, 0x02034D80, heapEnd);
+		*(u32*)0x02037B70 = *(u32*)0x02004FBC;
+		patchUserSettingsReadDSiWare(0x020388C8);
+	} */
+
 	// Animal Puzzle Adventure (USA)
 	else if (strcmp(romTid, "KPCE") == 0) {
 		useSharedFont = (twlFontFound && debugOrMep);
@@ -15260,10 +15389,23 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Mario Calculator (USA)
-	// Requires 8MB of RAM
-	else if (strcmp(romTid, "KWFE") == 0 && extendedMemory) {
+	// Requires either 8MB of RAM or Memory Expansion Pak
+	else if (strcmp(romTid, "KWFE") == 0 && debugOrMep) {
 		doubleNopT(0x0200504E);
-		*(u16*)0x02010E64 = 0x7047; // bx lr
+		doubleNopT(0x02005060); // Disable NFTR loading from TWLNAND
+		if (!extendedMemory) {
+			extern u16* marioCalcStrbForSlot2;
+			tonccpy((u16*)0x02039A48, marioCalcStrbForSlot2, 0x100);
+
+			// movs r0, (s2FlashcardId == 0x5A45) ? #0x08000000 : #0x09000000
+			*(u16*)0x0201182C = (s2FlashcardId == 0x5A45) ? 0x2080 : 0x2090; // movs r0, #0x90
+			*(u16*)0x0201182E = 0x0500; // lsls r0, r0, 0x14
+
+			setBLThumb(0x02026026, 0x02039A48);
+			setBLThumb(0x0202606A, 0x02039A48);
+		}
+		*(u16*)0x02012704 = 0x2005; // movs r0, #5       -> movs r0, #0x280000 (Shrink heap from 0x400000)
+		*(u16*)0x02012706 = 0x04C0; // lsls r0, r0, 0x13 ->
 		*(u16*)0x020346F8 = 0xB003; // ADD SP, SP, #0xC
 		*(u16*)0x020346FA = 0xBD78; // POP {R3-R6,PC}
 		doubleNopT(0x020369D4);
@@ -15273,10 +15415,106 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		doubleNopT(0x0203C5EA);
 		doubleNopT(0x0203C6D6);
 		patchHiHeapDSiWareThumb(0x0203C714, 0x02039A40, heapEnd);
-		// *(u32*)0x0203C7EC = 0x02090140;
-		*(u16*)0x020474DA = nopT;
-		*(u16*)0x020474E6 = nopT;
-		*(u16*)0x020474F0 = nopT;
+		*(u32*)0x0203C7EC = *(u32*)0x02004FBC;
+		patchUserSettingsReadDSiWare(0x0203D544);
+		// *(u16*)0x020474DA = nopT;
+		// *(u16*)0x020474E6 = nopT;
+		// *(u16*)0x020474F0 = nopT;
+	}
+
+	// Mario Calculator (Europe, Australia)
+	// Requires either 8MB of RAM or Memory Expansion Pak
+	else if (strcmp(romTid, "KWFV") == 0 && debugOrMep) {
+		doubleNopT(0x0200504E);
+		doubleNopT(0x02005060); // Disable NFTR loading from TWLNAND
+		if (!extendedMemory) {
+			extern u16* marioCalcStrbForSlot2;
+			tonccpy((u16*)0x02039B20, marioCalcStrbForSlot2, 0x100);
+
+			// movs r0, (s2FlashcardId == 0x5A45) ? #0x08000000 : #0x09000000
+			*(u16*)0x02011904 = (s2FlashcardId == 0x5A45) ? 0x2080 : 0x2090; // movs r0, #0x90
+			*(u16*)0x02011906 = 0x0500; // lsls r0, r0, 0x14
+
+			setBLThumb(0x020260FE, 0x02039B20);
+			setBLThumb(0x02026142, 0x02039B20);
+		}
+		*(u16*)0x020127DC = 0x2005; // movs r0, #5       -> movs r0, #0x280000 (Shrink heap from 0x400000)
+		*(u16*)0x020127DE = 0x04C0; // lsls r0, r0, 0x13 ->
+		*(u16*)0x020347D0 = 0xB003; // ADD SP, SP, #0xC
+		*(u16*)0x020347D2 = 0xBD78; // POP {R3-R6,PC}
+		doubleNopT(0x02036AAC);
+		doubleNopT(0x0203B164);
+		doubleNopT(0x0203C6B2);
+		doubleNopT(0x0203C6B6);
+		doubleNopT(0x0203C6C2);
+		doubleNopT(0x0203C7AE);
+		patchHiHeapDSiWareThumb(0x0203C7EC, 0x02039B18, heapEnd);
+		*(u32*)0x0203C8C4 = *(u32*)0x02004FBC;
+		patchUserSettingsReadDSiWare(0x0203D61C);
+	}
+
+	// Nintendo DSi Dentaku: Famicom Mario Type (Japan)
+	// Requires either 8MB of RAM or Memory Expansion Pak
+	else if (strcmp(romTid, "KWFJ") == 0 && debugOrMep) {
+		doubleNopT(0x0200504E);
+		doubleNopT(0x0200505A); // Disable NFTR loading from TWLNAND
+		if (!extendedMemory) {
+			extern u16* marioCalcStrbForSlot2;
+			tonccpy((u16*)0x02038C0C, marioCalcStrbForSlot2, 0x100);
+
+			// movs r0, (s2FlashcardId == 0x5A45) ? #0x08000000 : #0x09000000
+			*(u16*)0x02010F3C = (s2FlashcardId == 0x5A45) ? 0x2080 : 0x2090; // movs r0, #0x90
+			*(u16*)0x02010F3E = 0x0500; // lsls r0, r0, 0x14
+
+			setBLThumb(0x0202530A, 0x02038C0C);
+			setBLThumb(0x0202534E, 0x02038C0C);
+		}
+		*(u16*)0x02011DF0 = 0x2005; // movs r0, #5       -> movs r0, #0x280000 (Shrink heap from 0x400000)
+		*(u16*)0x02011DF2 = 0x04C0; // lsls r0, r0, 0x13 ->
+		*(u16*)0x020338FC = 0xB003; // ADD SP, SP, #0xC
+		*(u16*)0x020338FE = 0xBD78; // POP {R3-R6,PC}
+		doubleNopT(0x02035B98);
+		doubleNopT(0x0203A250);
+		doubleNopT(0x0203B782);
+		doubleNopT(0x0203B786);
+		doubleNopT(0x0203B792);
+		doubleNopT(0x0203B87E);
+		patchHiHeapDSiWareThumb(0x0203B8BC, 0x02038C04, heapEnd);
+		*(u32*)0x0203B994 = *(u32*)0x02004FBC;
+		patchUserSettingsReadDSiWare(0x0203C6EC);
+	}
+
+	// Mario Calculator (China)
+	// Requires either 8MB of RAM or Memory Expansion Pak
+	else if (strcmp(romTid, "KWFC") == 0 && debugOrMep) {
+		doubleNopT(0x020050A6);
+		doubleNopT(0x020050B2); // Disable NFTR loading from TWLNAND
+		doubleNopT(0x020050E2);
+		doubleNopT(0x020050E8);
+		doubleNopT(0x020050F6);
+		if (!extendedMemory) {
+			extern u16* marioCalcStrbForSlot2;
+			tonccpy((u16*)0x023FF000, marioCalcStrbForSlot2, 0x100);
+
+			// movs r0, (s2FlashcardId == 0x5A45) ? #0x08000000 : #0x09000000
+			*(u16*)0x02010F94 = (s2FlashcardId == 0x5A45) ? 0x2080 : 0x2090; // movs r0, #0x90
+			*(u16*)0x02010F96 = 0x0500; // lsls r0, r0, 0x14
+
+			setBLThumb(0x0202537A, 0x023FF000);
+			setBLThumb(0x020253BE, 0x023FF000);
+		}
+		*(u16*)0x02011E4C = 0x2005; // movs r0, #5       -> movs r0, #0x280000 (Shrink heap from 0x400000)
+		*(u16*)0x02011E4E = 0x04C0; // lsls r0, r0, 0x13 ->
+		doubleNopT(0x02033982);
+		doubleNopT(0x02035B32);
+		doubleNopT(0x02039194);
+		doubleNopT(0x0203A7A6);
+		doubleNopT(0x0203A7AA);
+		doubleNopT(0x0203A7B6);
+		doubleNopT(0x0203A89A);
+		patchHiHeapDSiWareThumb(0x0203A8D8, 0x020382CC, heapEnd);
+		*(u32*)0x0203A9B0 = *(u32*)0x02004FDC;
+		patchUserSettingsReadDSiWare(0x0203B6F6);
 	}
 
 #ifndef MVDK3_UNUSED
