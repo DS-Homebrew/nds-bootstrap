@@ -13,6 +13,7 @@
 	.global goGoKokopoloHeapAlloc
 	@.global goGoKokopoloHeapAddrPtr
 	.global marioCalcStrbForSlot2
+	@.global marioClockHeapAlloc
 	.global metalTorrentSndLoad
 	@.global mvdk3HeapAlloc
 @	.global myLtlRestHeapAlloc
@@ -62,6 +63,8 @@ goGoKokopoloHeapAlloc:
 @	.word goGoKokopoloHeapAddr
 marioCalcStrbForSlot2:
 	.word marioCalcStrbForSlot2Func
+@marioClockHeapAlloc:
+@	.word marioClockHeapAllocFunc
 metalTorrentSndLoad:
 	.word metalTorrentSndLoadFunc
 @mvdk3HeapAlloc:
@@ -487,7 +490,39 @@ marioCalcStrbForSlot2_writeByte1:
 	pop {r2-r4, pc}
 .pool
 @---------------------------------------------------------------------------------
-	.arm
+/*
+@---------------------------------------------------------------------------------
+marioClockHeapAllocFunc:
+@---------------------------------------------------------------------------------
+	push {r4-r5, lr}
+	ldr r4, marioClockHeapAllocFlag
+	cmp r4, #2
+	beq marioClockHeapAllocFunc_runOrg
+	cmp r4, #1
+	beq marioClockHeapAllocMep
+	adr r4, marioClockHeapAllocFlag
+	mov r5, #1
+	str r5, [r4]
+marioClockHeapAllocFunc_runOrg:
+	ldr r4, marioClockHeapAllocOrgFunc
+	bl	_blx_marioClockHeapAllocOrgFunc
+	pop {r4-r5, pc}
+marioClockHeapAllocMep:
+	adr r4, marioClockHeapAllocFlag
+	mov r5, #2
+	str r5, [r4]
+	ldr r0, marioClockHeapAddr
+	pop {r4-r5, pc}
+_blx_marioClockHeapAllocOrgFunc:
+	bx	r4
+marioClockHeapAllocOrgFunc:
+.word	0
+marioClockHeapAddr:
+.word	0x09000000
+marioClockHeapAllocFlag:
+.word	0
+@---------------------------------------------------------------------------------
+*/	.arm
 @---------------------------------------------------------------------------------
 metalTorrentSndLoadOrgFunc: .word 0
 metalTorrentSndLoadFunc:

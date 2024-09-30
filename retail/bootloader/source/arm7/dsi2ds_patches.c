@@ -2744,7 +2744,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		doubleNopT(0x02005060); // Disable NFTR loading from TWLNAND
 		if (!extendedMemory) {
 			extern u16* marioCalcStrbForSlot2;
-			tonccpy((u16*)0x02037298, marioCalcStrbForSlot2, 0x100);
+			tonccpy((u16*)0x02037298, marioCalcStrbForSlot2, 0x78);
 
 			// movs r0, (s2FlashcardId == 0x5A45) ? #0x08000000 : #0x09000000
 			*(u16*)0x0200F078 = (s2FlashcardId == 0x5A45) ? 0x2080 : 0x2090; // movs r0, #0x90
@@ -2775,7 +2775,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		doubleNopT(0x02005060); // Disable NFTR loading from TWLNAND
 		/* if (!extendedMemory) {
 			extern u16* marioCalcStrbForSlot2;
-			tonccpy((u16*)0x02037390, marioCalcStrbForSlot2, 0x100);
+			tonccpy((u16*)0x02037390, marioCalcStrbForSlot2, 0x78);
 
 			// movs r0, (s2FlashcardId == 0x5A45) ? #0x08000000 : #0x09000000
 			*(u16*)0x0200F170 = (s2FlashcardId == 0x5A45) ? 0x2080 : 0x2090; // movs r0, #0x90
@@ -2809,14 +2809,14 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		doubleNopT(0x020050F6);
 		if (!extendedMemory) {
 			extern u16* marioCalcStrbForSlot2;
-			tonccpy((u16*)0x023FF000, marioCalcStrbForSlot2, 0x100);
+			tonccpy((u16*)0x0203A044, marioCalcStrbForSlot2, 0x78);
 
 			// movs r0, (s2FlashcardId == 0x5A45) ? #0x08000000 : #0x09000000
 			*(u16*)0x0200E804 = (s2FlashcardId == 0x5A45) ? 0x2080 : 0x2090; // movs r0, #0x90
 			*(u16*)0x0200E806 = 0x0500; // lsls r0, r0, 0x14
 
-			setBLThumb(0x02022B52, 0x023FF000);
-			setBLThumb(0x02022B96, 0x023FF000);
+			setBLThumb(0x02022B52, 0x0203A044);
+			setBLThumb(0x02022B96, 0x0203A044);
 		}
 		*(u16*)0x0200F6BC = 0x2005; // movs r0, #5       -> movs r0, #0x280000 (Shrink heap from 0x400000)
 		*(u16*)0x0200F6BE = 0x04C0; // lsls r0, r0, 0x13 ->
@@ -2833,23 +2833,28 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Nintendo DSi Tokei: Doubutsu no Mori Type (Japan)
-	// Requires either 8MB of RAM or Memory Expansion Pak
-	// More work needed
+	// Likely only works on 8MB of RAM
 	/* else if (strcmp(romTid, "KWCJ") == 0 && debugOrMep) {
 		doubleNopT(0x0200504E);
 		doubleNopT(0x0200505A); // Disable NFTR loading from TWLNAND
 		doubleNopT(0x020090E6);
 		doubleNopT(0x020091BC);
 		if (!extendedMemory) {
+			const u32 newCodeAddr = 0x02034D88;
+			const u32 newCodeAddr2 = newCodeAddr+0x78;
+
 			extern u16* marioCalcStrbForSlot2;
-			tonccpy((u16*)0x02034D88, marioCalcStrbForSlot2, 0x100);
+			tonccpy((u16*)newCodeAddr, marioCalcStrbForSlot2, 0x78);
 
-			// movs r0, (s2FlashcardId == 0x5A45) ? #0x08000000 : #0x09000000
-			*(u16*)0x0200C55C = (s2FlashcardId == 0x5A45) ? 0x2080 : 0x2090; // movs r0, #0x90
-			*(u16*)0x0200C55E = 0x0500; // lsls r0, r0, 0x14
+			extern u16* marioClockHeapAlloc;
+			tonccpy((u16*)newCodeAddr2, marioClockHeapAlloc, 0x28);
+			*(u32*)(newCodeAddr2+0x1C) = 0x02043B1D;
+			*(u32*)(newCodeAddr2+0x20) = (s2FlashcardId == 0x5A45) ? 0x08000000 : 0x09000000;
 
-			setBLThumb(0x02021362, 0x02034D88);
-			setBLThumb(0x020213A6, 0x02034D88);
+			setBLThumb(0x0200C55C, newCodeAddr2);
+
+			setBLThumb(0x02021362, newCodeAddr);
+			setBLThumb(0x020213A6, newCodeAddr);
 		}
 		*(u16*)0x0200D410 = 0x2005; // movs r0, #5       -> movs r0, #0x280000 (Shrink heap from 0x400000)
 		*(u16*)0x0200D412 = 0x04C0; // lsls r0, r0, 0x13 ->
@@ -15395,7 +15400,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		doubleNopT(0x02005060); // Disable NFTR loading from TWLNAND
 		if (!extendedMemory) {
 			extern u16* marioCalcStrbForSlot2;
-			tonccpy((u16*)0x02039A48, marioCalcStrbForSlot2, 0x100);
+			tonccpy((u16*)0x02039A48, marioCalcStrbForSlot2, 0x78);
 
 			// movs r0, (s2FlashcardId == 0x5A45) ? #0x08000000 : #0x09000000
 			*(u16*)0x0201182C = (s2FlashcardId == 0x5A45) ? 0x2080 : 0x2090; // movs r0, #0x90
@@ -15429,7 +15434,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		doubleNopT(0x02005060); // Disable NFTR loading from TWLNAND
 		if (!extendedMemory) {
 			extern u16* marioCalcStrbForSlot2;
-			tonccpy((u16*)0x02039B20, marioCalcStrbForSlot2, 0x100);
+			tonccpy((u16*)0x02039B20, marioCalcStrbForSlot2, 0x78);
 
 			// movs r0, (s2FlashcardId == 0x5A45) ? #0x08000000 : #0x09000000
 			*(u16*)0x02011904 = (s2FlashcardId == 0x5A45) ? 0x2080 : 0x2090; // movs r0, #0x90
@@ -15460,7 +15465,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		doubleNopT(0x0200505A); // Disable NFTR loading from TWLNAND
 		if (!extendedMemory) {
 			extern u16* marioCalcStrbForSlot2;
-			tonccpy((u16*)0x02038C0C, marioCalcStrbForSlot2, 0x100);
+			tonccpy((u16*)0x02038C0C, marioCalcStrbForSlot2, 0x78);
 
 			// movs r0, (s2FlashcardId == 0x5A45) ? #0x08000000 : #0x09000000
 			*(u16*)0x02010F3C = (s2FlashcardId == 0x5A45) ? 0x2080 : 0x2090; // movs r0, #0x90
@@ -15494,14 +15499,14 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		doubleNopT(0x020050F6);
 		if (!extendedMemory) {
 			extern u16* marioCalcStrbForSlot2;
-			tonccpy((u16*)0x023FF000, marioCalcStrbForSlot2, 0x100);
+			tonccpy((u16*)0x0203C86C, marioCalcStrbForSlot2, 0x78);
 
 			// movs r0, (s2FlashcardId == 0x5A45) ? #0x08000000 : #0x09000000
 			*(u16*)0x02010F94 = (s2FlashcardId == 0x5A45) ? 0x2080 : 0x2090; // movs r0, #0x90
 			*(u16*)0x02010F96 = 0x0500; // lsls r0, r0, 0x14
 
-			setBLThumb(0x0202537A, 0x023FF000);
-			setBLThumb(0x020253BE, 0x023FF000);
+			setBLThumb(0x0202537A, 0x0203C86C);
+			setBLThumb(0x020253BE, 0x0203C86C);
 		}
 		*(u16*)0x02011E4C = 0x2005; // movs r0, #5       -> movs r0, #0x280000 (Shrink heap from 0x400000)
 		*(u16*)0x02011E4E = 0x04C0; // lsls r0, r0, 0x13 ->
