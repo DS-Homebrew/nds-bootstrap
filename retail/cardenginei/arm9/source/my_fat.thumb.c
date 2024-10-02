@@ -35,6 +35,20 @@
 #include "debug_file.h"
 #include "locations.h"
 
+extern vu32* volatile sharedAddr;
+
+static inline void sdReadModeOn() {
+	#ifndef DLDI
+	sharedAddr[5] = 0x54534453; // 'SDST'
+	#endif
+}
+
+static inline void sdReadModeOff() {
+	#ifndef DLDI
+	sharedAddr[5] = 0;
+	#endif
+}
+
 //#define memcpy __builtin_memcpy
 
 
@@ -213,16 +227,13 @@ enum {FS_UNKNOWN, FS_FAT12, FS_FAT16, FS_FAT32} discFileSystem;
 // Global sector buffer to save on stack space
 #ifdef TWLSDK
 unsigned char nextClusterBuffer[BYTES_PER_SECTOR];
-unsigned char lastGlobalBuffer[BYTES_PER_SECTOR];
 unsigned char globalBuffer[BYTES_PER_SECTOR];
 #else
 #ifdef DLDI
 unsigned char nextClusterBuffer[BYTES_PER_SECTOR];
-unsigned char lastGlobalBuffer[BYTES_PER_SECTOR];
 unsigned char globalBuffer[BYTES_PER_SECTOR];
 #else
-unsigned char* nextClusterBuffer = (unsigned char*)CARDENGINEI_ARM9_LOCATION+0x7A00;
-unsigned char* lastGlobalBuffer = (unsigned char*)CARDENGINEI_ARM9_LOCATION+0x7C00;
+unsigned char* nextClusterBuffer = (unsigned char*)CARDENGINEI_ARM9_LOCATION+0x7C00;
 unsigned char* globalBuffer = (unsigned char*)CARDENGINEI_ARM9_LOCATION+0x7E00;
 #endif
 #endif
@@ -887,6 +898,7 @@ u32 fileRead (char* buffer, aFile* file, u32 startOffset, u32 length)
 	// Load sector buffer for new position in file
 	if (prevFirstClust != file->firstCluster || prevSect != curSect || prevClust != file->currentCluster) {
 		prevFirstClust = file->firstCluster;
+		sdReadModeOn();
 		CARD_ReadSectors( curSect + FAT_ClustToSect(file->currentCluster), 1, globalBuffer);
 		prevSect = curSect;
 		prevClust = file->currentCluster;
@@ -949,10 +961,11 @@ u32 fileRead (char* buffer, aFile* file, u32 startOffset, u32 length)
               #endif
               
               // Read the sectors
-    			CARD_ReadSectors(curSect + FAT_ClustToSect(file->currentCluster), sectorsToRead, buffer + dataPos);
-    			chunks  -= sectorsToRead;
-    			curSect += sectorsToRead;
-    			dataPos += BYTES_PER_SECTOR * sectorsToRead;
+				sdReadModeOn();
+				CARD_ReadSectors(curSect + FAT_ClustToSect(file->currentCluster), sectorsToRead, buffer + dataPos);
+				chunks  -= sectorsToRead;
+				curSect += sectorsToRead;
+				dataPos += BYTES_PER_SECTOR * sectorsToRead;
                 
               #ifdef DEBUG
               dbg_hexa(discSecPerClus);
@@ -977,10 +990,11 @@ u32 fileRead (char* buffer, aFile* file, u32 startOffset, u32 length)
 			sectorsToRead = chunks;
               
               // Read the sectors
-  			CARD_ReadSectors(curSect + FAT_ClustToSect(file->currentCluster), sectorsToRead, buffer + dataPos);
-  			chunks  -= sectorsToRead;
-  			curSect += sectorsToRead;
-  			dataPos += BYTES_PER_SECTOR * sectorsToRead;
+			sdReadModeOn();
+			CARD_ReadSectors(curSect + FAT_ClustToSect(file->currentCluster), sectorsToRead, buffer + dataPos);
+			chunks  -= sectorsToRead;
+			curSect += sectorsToRead;
+			dataPos += BYTES_PER_SECTOR * sectorsToRead;
           }			
 	}
 
@@ -1013,13 +1027,19 @@ u32 fileRead (char* buffer, aFile* file, u32 startOffset, u32 length)
           dbg_hexa(lastGlobalBuffer);
           #endif
 
-		CARD_ReadSectors( curSect + FAT_ClustToSect(file->currentCluster), 1, lastGlobalBuffer);
+		if (prevSect != curSect || prevClust != file->currentCluster) {
+			sdReadModeOn();
+			CARD_ReadSectors( curSect + FAT_ClustToSect(file->currentCluster), 1, globalBuffer);
+			prevSect = curSect;
+			prevClust = file->currentCluster;
+		}
 
 		// Read in last partial chunk
-          tonccpy(buffer+dataPos,lastGlobalBuffer,length-dataPos);
+          tonccpy(buffer+dataPos,globalBuffer,length-dataPos);
           curByte+=length;
           dataPos+=length;
 	}
+	sdReadModeOff();
 
       #ifdef DEBUG
       nocashMessage("fileRead completed");
@@ -1030,6 +1050,7 @@ u32 fileRead (char* buffer, aFile* file, u32 startOffset, u32 length)
 	
 }
 
+#ifdef DLDI
 /*-----------------------------------------------------------------
 fileWrite(buffer, cluster, startOffset, length)
 -----------------------------------------------------------------*/
@@ -1137,15 +1158,20 @@ u32 fileWrite (const char* buffer, aFile* file, u32 startOffset, u32 length)
 			curSect = 0;
 			file->currentOffset+=discBytePerClus;
 		}
-		CARD_ReadSectors( curSect + FAT_ClustToSect(file->currentCluster), 1, lastGlobalBuffer);
+		if (prevSect != curSect || prevClust != file->currentCluster) {
+			CARD_ReadSectors( curSect + FAT_ClustToSect(file->currentCluster), 1, globalBuffer);
+			prevSect = curSect;
+			prevClust = file->currentCluster;
+		}
 
 		// Read in last partial chunk
-        tonccpy(lastGlobalBuffer,buffer+dataPos,length-dataPos);
+        tonccpy(globalBuffer,buffer+dataPos,length-dataPos);
         curByte+=length;
         dataPos+=length;
 
-		CARD_WriteSector( curSect + FAT_ClustToSect(file->currentCluster), lastGlobalBuffer);
+		CARD_WriteSector( curSect + FAT_ClustToSect(file->currentCluster), globalBuffer);
 	}
 
 	return dataPos;
 }
+#endif

@@ -242,7 +242,6 @@ discFileSystem;
 // Global sector buffer to save on stack space
 #ifdef TWOCARD
 unsigned char nextClusterBuffer[2][BYTES_PER_SECTOR];
-unsigned char lastGlobalBuffer[2][BYTES_PER_SECTOR];
 unsigned char globalBuffer[2][BYTES_PER_SECTOR];
 #else
 #ifdef MORECLUSTERBUFFERS
@@ -250,7 +249,6 @@ unsigned char nextClusterBuffer[nextClusterBufferCount][BYTES_PER_SECTOR];
 #else
 unsigned char nextClusterBuffer[BYTES_PER_SECTOR];
 #endif
-unsigned char lastGlobalBuffer[BYTES_PER_SECTOR];
 unsigned char globalBuffer[BYTES_PER_SECTOR];
 #endif
 
@@ -1201,26 +1199,34 @@ bool resumeFileRead()
               #ifdef DEBUG
 			  #ifdef TWOCARD
               dbg_hexa(context.curSect + FAT_ClustToSect(context.file->currentCluster, false));
-              dbg_hexa(lastGlobalBuffer[0]);
+              dbg_hexa(globalBuffer[0]);
 			  #else
               dbg_hexa(context.curSect + FAT_ClustToSect(context.file->currentCluster));
-              dbg_hexa(lastGlobalBuffer);
+              dbg_hexa(globalBuffer);
 			  #endif
               #endif
 
 			#ifdef TWOCARD
-            CARD_ReadSector( context.curSect + FAT_ClustToSect(context.file->currentCluster, false), lastGlobalBuffer[0], 0, 0, false);    
-      		//CARD_ReadSector( context.curSect + FAT_ClustToSect(context.file->currentCluster, false), context.buffer+context.dataPos, 0, 512-(context.length-context.dataPos), false);
+			if (prevSect[0] != context.curSect || prevClust[0] != context.file->currentCluster) {
+				CARD_ReadSector( context.curSect + FAT_ClustToSect(context.file->currentCluster, false), globalBuffer[0], 0, 0, false);    
+				//CARD_ReadSector( context.curSect + FAT_ClustToSect(context.file->currentCluster, false), context.buffer+context.dataPos, 0, 512-(context.length-context.dataPos), false);
+				prevSect[0] = context.curSect;
+				prevClust[0] = context.file->currentCluster;
+			}
 			#else
-            CARD_ReadSector( context.curSect + FAT_ClustToSect(context.file->currentCluster), lastGlobalBuffer, 0, 0);    
-      		//CARD_ReadSector( context.curSect + FAT_ClustToSect(context.file->currentCluster, false), context.buffer+context.dataPos, 0, 512-(context.length-context.dataPos));
+			if (prevSect != context.curSect || prevClust != context.file->currentCluster) {
+				CARD_ReadSector( context.curSect + FAT_ClustToSect(context.file->currentCluster), globalBuffer, 0, 0);    
+				//CARD_ReadSector( context.curSect + FAT_ClustToSect(context.file->currentCluster, false), context.buffer+context.dataPos, 0, 512-(context.length-context.dataPos));
+				prevSect = context.curSect;
+				prevClust = context.file->currentCluster;
+			}
 			#endif
 
       		// Read in last partial chunk
 			  #ifdef TWOCARD
-              tonccpy(context.buffer+context.dataPos,lastGlobalBuffer[0]+context.curByte,context.length-context.dataPos);
+              tonccpy(context.buffer+context.dataPos,globalBuffer[0]+context.curByte,context.length-context.dataPos);
 			  #else
-              tonccpy(context.buffer+context.dataPos,lastGlobalBuffer+context.curByte,context.length-context.dataPos);
+              tonccpy(context.buffer+context.dataPos,globalBuffer+context.curByte,context.length-context.dataPos);
 			  #endif
 
               context.curByte+=context.length;
@@ -1501,24 +1507,32 @@ u32 fileRead (char* buffer, aFile* file, u32 startOffset, u32 length)
           #ifdef DEBUG
 		  #ifdef TWOCARD
           dbg_hexa(curSect + FAT_ClustToSect(file->currentCluster, file->card2));
-          dbg_hexa(lastGlobalBuffer[file->card2]);
+          dbg_hexa(globalBuffer[file->card2]);
 		  #else
           dbg_hexa(curSect + FAT_ClustToSect(file->currentCluster));
 		  #endif
-          dbg_hexa(lastGlobalBuffer);
+          dbg_hexa(globalBuffer);
           #endif
 
 		#ifdef TWOCARD
-		CARD_ReadSectors( curSect + FAT_ClustToSect(file->currentCluster, file->card2), 1, lastGlobalBuffer[file->card2], file->card2);
+		if (prevSect[file->card2] != curSect || prevClust[file->card2] != file->currentCluster) {
+			CARD_ReadSectors( curSect + FAT_ClustToSect(file->currentCluster, file->card2), 1, globalBuffer[file->card2], file->card2);
+			prevSect[file->card2] = curSect;
+			prevClust[file->card2] = file->currentCluster;
+		}
 		#else
-		CARD_ReadSector( curSect + FAT_ClustToSect(file->currentCluster), lastGlobalBuffer, 0, 0);
+		if (prevSect != curSect || prevClust != file->currentCluster) {
+			CARD_ReadSector( curSect + FAT_ClustToSect(file->currentCluster), globalBuffer, 0, 0);
+			prevSect = curSect;
+			prevClust = file->currentCluster;
+		}
 		#endif
 
 		// Read in last partial chunk
 		  #ifdef TWOCARD
-          tonccpy(buffer+dataPos,lastGlobalBuffer[file->card2],length-dataPos);
+          tonccpy(buffer+dataPos,globalBuffer[file->card2],length-dataPos);
 		  #else
-          tonccpy(buffer+dataPos,lastGlobalBuffer,length-dataPos);
+          tonccpy(buffer+dataPos,globalBuffer,length-dataPos);
 		  #endif
           curByte+=length;
           dataPos+=length;
@@ -1669,7 +1683,11 @@ u32 fileWrite (const char* buffer, aFile* file, u32 startOffset, u32 length)
 			curSect = 0;
 			file->currentOffset+=discBytePerClus[file->card2];
 		}
-		CARD_ReadSectors( curSect + FAT_ClustToSect(file->currentCluster, file->card2), 1, lastGlobalBuffer[file->card2], file->card2);
+		if (prevSect[file->card2] != curSect || prevClust[file->card2] != file->currentCluster) {
+			CARD_ReadSectors( curSect + FAT_ClustToSect(file->currentCluster, file->card2), 1, globalBuffer[file->card2], file->card2);
+			prevSect[file->card2] = curSect;
+			prevClust[file->card2] = file->currentCluster;
+		}
 		#else
 		if (curSect >= discSecPerClus)
 		{
@@ -1682,22 +1700,26 @@ u32 fileWrite (const char* buffer, aFile* file, u32 startOffset, u32 length)
 			curSect = 0;
 			file->currentOffset+=discBytePerClus;
 		}
-		CARD_ReadSector( curSect + FAT_ClustToSect(file->currentCluster), lastGlobalBuffer, 0, 0);
+		if (prevSect != curSect || prevClust != file->currentCluster) {
+			CARD_ReadSector( curSect + FAT_ClustToSect(file->currentCluster), globalBuffer, 0, 0);
+			prevSect = curSect;
+			prevClust = file->currentCluster;
+		}
 		#endif
 
 		// Read in last partial chunk
 		#ifdef TWOCARD
-        tonccpy(lastGlobalBuffer[file->card2]+curByte,buffer+dataPos,length-dataPos);
+        tonccpy(globalBuffer[file->card2]+curByte,buffer+dataPos,length-dataPos);
 		#else
-        tonccpy(lastGlobalBuffer+curByte,buffer+dataPos,length-dataPos);
+        tonccpy(globalBuffer+curByte,buffer+dataPos,length-dataPos);
 		#endif
         curByte+=length;
         dataPos+=length;
 
 		#ifdef TWOCARD
-		CARD_WriteSector( curSect + FAT_ClustToSect(file->currentCluster, file->card2), lastGlobalBuffer[file->card2], file->card2);
+		CARD_WriteSector( curSect + FAT_ClustToSect(file->currentCluster, file->card2), globalBuffer[file->card2], file->card2);
 		#else
-		CARD_WriteSector( curSect + FAT_ClustToSect(file->currentCluster), lastGlobalBuffer);
+		CARD_WriteSector( curSect + FAT_ClustToSect(file->currentCluster), globalBuffer);
 		#endif
 	}
 

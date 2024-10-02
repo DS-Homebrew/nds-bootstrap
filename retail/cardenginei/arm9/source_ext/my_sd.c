@@ -187,7 +187,7 @@ bool my_sdio_WriteSectors(sec_t sector, sec_t numSectors, const void* buffer) {
 	nocashMessage("writeSectors internal");
 	#endif
 
-	u32 commandWrite = 0x53445752;
+	/* u32 commandWrite = 0x53445752;
 
 	sharedAddr[0] = sector;
 	sharedAddr[1] = numSectors;
@@ -198,7 +198,8 @@ bool my_sdio_WriteSectors(sec_t sector, sec_t numSectors, const void* buffer) {
 	while (sharedAddr[4] == commandWrite) {
 		sleepMs(1);
 	}
-	return sharedAddr[4] == 0;
+	return sharedAddr[4] == 0; */
+	return false;
 }
 
 
@@ -230,7 +231,8 @@ bool my_sdio_Shutdown(void) {
 
 const NEW_DISC_INTERFACE __myio_dsisd = {
 	DEVICE_TYPE_DSI_SD,
-	FEATURE_MEDIUM_CANREAD | FEATURE_MEDIUM_CANWRITE,
+	// FEATURE_MEDIUM_CANREAD | FEATURE_MEDIUM_CANWRITE,
+	FEATURE_MEDIUM_CANREAD,
 	(FN_MEDIUM_STARTUP)&my_sdio_Startup,
 	(FN_MEDIUM_ISINSERTED)&my_sdio_IsInserted,
     (FN_MEDIUM_READSECTOR)&my_sdio_ReadSector,

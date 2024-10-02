@@ -136,9 +136,9 @@ static u32 asyncSector = 0;
 #endif // ASYNCPF
 #endif // DLDI
 bool flagsSet = false;
-#ifdef DLDI
+// #ifdef DLDI
 static bool driveInitialized = false;
-#endif
+// #endif
 /* #ifndef TWLSDK
 static bool region0FixNeeded = false;
 #endif */
@@ -437,7 +437,7 @@ static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
 		}
 	}
 
-	const u32 commandRead = (isDma ? 0x025FFB0A : 0x025FFB08);
+	// const u32 commandRead = (isDma ? 0x025FFB0A : 0x025FFB08);
 	u32 sector = (src/ce9->cacheBlockSize)*ce9->cacheBlockSize;
 
 	accessCounter++;
@@ -492,7 +492,7 @@ static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
 					readLen = ce9->cacheBlockSize*2;
 				}*/
 
-				DC_InvalidateRange((u32*)buffer, ce9->cacheBlockSize);
+				/* DC_InvalidateRange((u32*)buffer, ce9->cacheBlockSize);
 
 				// Write the command
 				sharedAddr[0] = (vu32)buffer;
@@ -500,13 +500,13 @@ static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
 				sharedAddr[2] = ((ce9->valueBits & overlaysCached) && src >= newOverlayOffset && src < newOverlayOffset+newOverlaysSize) ? sector+0x80000000 : sector;
 				sharedAddr[3] = commandRead;
 
-				waitForArm7();
+				waitForArm7(); */
 
 				#ifdef ASYNCPF
 				updateDescriptor(slot, sector);
 				#endif
 
-				// fileRead((char*)buffer, ((ce9->valueBits & overlaysCached) && src >= newOverlayOffset && src < newOverlayOffset+newOverlaysSize) ? apFixOverlaysFile : romFile, sector, ce9->cacheBlockSize);
+				fileRead((char*)buffer, ((ce9->valueBits & overlaysCached) && src >= newOverlayOffset && src < newOverlayOffset+newOverlaysSize) ? apFixOverlaysFile : romFile, sector, ce9->cacheBlockSize);
 				/*updateDescriptor(slot, sector);
 				if (readLen >= ce9->cacheBlockSize*2) {
 					updateDescriptor(slot+1, sector+ce9->cacheBlockSize);
@@ -542,9 +542,6 @@ static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
 				updateDescriptor(slot, sector);
 				#endif
 			}
-			#ifndef ASYNCPF
-			updateDescriptor(slot, sector);
-			#endif
 
 			//getSdatAddr(sector, (u32)buffer);
 
@@ -553,19 +550,23 @@ static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
 				len2 = sector - src + ce9->cacheBlockSize;
 			}
 
-    		#ifdef DEBUG
-    		// Send a log command for debug purpose
-    		// -------------------------------------
-   			commandRead = 0x026ff800;
+			#ifndef ASYNCPF
+			updateDescriptor(slot, sector);
+			#endif
 
-    		sharedAddr[0] = dst;
-    		sharedAddr[1] = len2;
-    		sharedAddr[2] = buffer+src-sector;
-    		sharedAddr[3] = commandRead;
+			#ifdef DEBUG
+			// Send a log command for debug purpose
+			// -------------------------------------
+			commandRead = 0x026ff800;
 
-    		waitForArm7();
-    		// -------------------------------------
-    		#endif
+			sharedAddr[0] = dst;
+			sharedAddr[1] = len2;
+			sharedAddr[2] = buffer+src-sector;
+			sharedAddr[3] = commandRead;
+
+			waitForArm7();
+			// -------------------------------------
+			#endif
 
     		// Copy directly
 			/*if (isDma) {
@@ -777,12 +778,18 @@ void cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 			region0Fix();
 		}
 		#endif */
-		#ifdef DLDI
+		// #ifdef DLDI
 		if (!driveInitialized) {
+			#ifndef DLDI
+			sharedAddr[5] = 0x54534453; // 'SDST'
+			#endif
 			FAT_InitFiles(false);
+			#ifndef DLDI
+			sharedAddr[5] = 0;
+			#endif
 			driveInitialized = true;
 		}
-		#endif
+		// #endif
 		if (ce9->valueBits & enableExceptionHandler) {
 			setExceptionHandler2();
 		}

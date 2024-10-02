@@ -661,8 +661,17 @@ void reset(void) {
 	ndsCodeStart(ndsHeader->arm7executeAddress);
 }
 
-static void cardReadLED(bool on, bool dmaLed) {
+static void cardReadLED(const bool on, const bool dmaLed) {
 	if (!(valueBits & i2cBricked) && consoleModel < 2) { /* Proceed below */ } else { return; }
+
+	static bool ledIsOn = false;
+	static bool dmaLedIsOn = false;
+	if (dmaLed ? dmaLedIsOn == on : ledIsOn == on) {
+		return;
+	}
+	dmaLed
+		? (dmaLedIsOn = on)
+		: (ledIsOn = on);
 
 	if (dmaRomRead_LED == -1) dmaRomRead_LED = romRead_LED;
 	if (!powerLedChecked && (romRead_LED || dmaRomRead_LED)) {
@@ -1358,29 +1367,38 @@ static inline void sdmmcHandler(void) { // Unused
 	switch (sharedAddr[4]) {
 		case 0x53445231:
 		case 0x53444D31: {
+		
 			//#ifdef DEBUG		
 			//dbg_printf("my_sdmmc_sdcard_readsector\n");
 			//#endif
-			bool isDma = sharedAddr[4]==0x53444D31;
-			cardReadLED(true, isDma);
+			// bool isDma = sharedAddr[4]==0x53444D31;
+			// cardReadLED(true, isDma);
+			ongoingIsDma = (sharedAddr[4] == 0x53444D31);
+			cardReadLED(true, ongoingIsDma);
 			sharedAddr[4] = my_sdmmc_sdcard_readsector(sharedAddr[0], (u8*)sharedAddr[1], sharedAddr[2], sharedAddr[3]);
-			cardReadLED(false, isDma);
+			// cardReadLED(false, isDma);
 		}	break;
 		case 0x53445244:
 		case 0x53444D41: {
+		
 			//#ifdef DEBUG		
 			//dbg_printf("my_sdmmc_sdcard_readsectors\n");
 			//#endif
 			//bool isDma = sharedAddr[4]==0x53444D41;
 			ongoingIsDma = (sharedAddr[4] == 0x53444D41);
 			cardReadLED(true, ongoingIsDma);
-			// if ((sharedAddr[2] % 4) != 0 || (valueBits & ndmaDisabled)) {
+			/* if ((sharedAddr[2] % 4) != 0 || (valueBits & ndmaDisabled)) {
 				sharedAddr[4] = my_sdmmc_sdcard_readsectors(sharedAddr[0], sharedAddr[1], (u8*)sharedAddr[2]);
-				cardReadLED(false, ongoingIsDma);
-			/* } else {
+				// cardReadLED(false, ongoingIsDma);
+			} else {
 				my_sdmmc_sdcard_readsectors_nonblocking(sharedAddr[0], sharedAddr[1], (u8*)sharedAddr[2]);
 				sdReadOngoing = true;
 			} */
+			/* if ((sharedAddr[2] % 4) != 0) {
+				sdmmc_set_ndma_slot(4);
+			} */
+			sharedAddr[4] = my_sdmmc_sdcard_readsectors(sharedAddr[0], sharedAddr[1], (u8*)sharedAddr[2]);
+			// sdmmc_set_ndma_slot(0);
 		}	break;
 		/*case 0x53444348:
 			sharedAddr[4] = my_sdmmc_sdcard_check_command(sharedAddr[0], sharedAddr[1]);
@@ -1395,11 +1413,11 @@ static inline void sdmmcHandler(void) { // Unused
 			timeTillDmaLedOff = 0;
 			readOngoing = true;
 			break;*/
-		case 0x53445752:
+		/* case 0x53445752:
 			cardReadLED(true, true);
 			sharedAddr[4] = my_sdmmc_sdcard_writesectors(sharedAddr[0], sharedAddr[1], (u8*)sharedAddr[2]);
 			cardReadLED(false, true);
-			break;
+			break; */
 	}
 }
 
@@ -1423,10 +1441,15 @@ void runCardEngineCheck(void) {
   		}*/
 
 			if (!(valueBits & gameOnFlashcard)) {
-				// sdmmcHandler();
+				if (sharedAddr[5] == 0x54534453) {
+					while (sharedAddr[5] == 0x54534453) { // 'SDST'
+						sdmmcHandler();
+					}
+					cardReadLED(false, ongoingIsDma);
+				}
 
 				// #ifndef TWLSDK
-				if (/* sharedAddr[3] == (vu32)0x020FF808 || sharedAddr[3] == (vu32)0x020FF80A || */ sharedAddr[3] == (vu32)0x025FFB08 || sharedAddr[3] == (vu32)0x025FFB0A) {	// Card read DMA
+				if (/* sharedAddr[3] == (vu32)0x020FF808 || sharedAddr[3] == (vu32)0x020FF80A || sharedAddr[3] == (vu32)0x025FFB08 || */ sharedAddr[3] == (vu32)0x025FFB0A) {	// Card read DMA
 					//if (!readOngoing ? start_cardRead_arm9() : resume_cardRead_arm9()) {
 						bool useApFixOverlays = false;
 						u32 src = sharedAddr[2];
@@ -1437,7 +1460,8 @@ void runCardEngineCheck(void) {
 							useApFixOverlays = true;
 						}
 
-						const bool isDma = (/* sharedAddr[3] == (vu32)0x020FF80A || */ sharedAddr[3] == (vu32)0x025FFB0A);
+						// const bool isDma = (sharedAddr[3] == (vu32)0x025FFB0A);
+						const bool isDma = true;
 
 						// readOngoing = true;
 						cardReadLED(true, isDma);    // When a file is loading, turn on LED for card read indicator
@@ -1445,9 +1469,9 @@ void runCardEngineCheck(void) {
 						cardReadLED(false, isDma);    // After loading is done, turn off LED for card read indicator
 						// readOngoing = false;
 						sharedAddr[3] = 0;
-					if (isDma) {
+					// if (isDma) {
 						IPC_SendSync(0x3);
-					}
+					// }
 					//}
 				} /*else if (sharedAddr[3] == (vu32)0x026FFB0A) {	// Card read DMA (Card data cache)
 					ndmaCopyWords(0, (u8*)sharedAddr[2], (u8*)(sharedAddr[0] >= 0x03000000 ? 0 : sharedAddr[0]), sharedAddr[1]);
