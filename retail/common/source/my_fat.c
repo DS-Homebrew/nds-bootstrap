@@ -1070,7 +1070,7 @@ bool resumeFileRead()
 			  #else
               if(!sectorsToRead) sectorsToRead = discSecPerClus - context.curSect;
 			  #endif
-              else sectorsToRead = sectorsToRead - context.curSect;
+              else sectorsToRead -= context.curSect;
 
               if(context.chunks < sectorsToRead) {
   		    sectorsToRead = context.chunks;
