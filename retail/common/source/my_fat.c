@@ -1313,7 +1313,6 @@ u32 fileRead (char* buffer, aFile* file, u32 startOffset, u32 length)
 	curByte = startOffset % BYTES_PER_SECTOR;
 
 	loadSectorBuf(file, curSect);
-
 	curSect++;
 
 	// Number of bytes needed to read to align with a sector
@@ -1381,7 +1380,7 @@ u32 fileRead (char* buffer, aFile* file, u32 startOffset, u32 length)
 			  #else
               if(!sectorsToRead) sectorsToRead = discSecPerClus - curSect;
 			  #endif
-              else sectorsToRead = sectorsToRead - curSect;
+              else sectorsToRead -= curSect;
               
               if(chunks < sectorsToRead) {
 			    sectorsToRead = chunks;
@@ -1514,19 +1513,7 @@ u32 fileRead (char* buffer, aFile* file, u32 startOffset, u32 length)
           dbg_hexa(globalBuffer);
           #endif
 
-		#ifdef TWOCARD
-		if (prevSect[file->card2] != curSect || prevClust[file->card2] != file->currentCluster) {
-			CARD_ReadSectors( curSect + FAT_ClustToSect(file->currentCluster, file->card2), 1, globalBuffer[file->card2], file->card2);
-			prevSect[file->card2] = curSect;
-			prevClust[file->card2] = file->currentCluster;
-		}
-		#else
-		if (prevSect != curSect || prevClust != file->currentCluster) {
-			CARD_ReadSector( curSect + FAT_ClustToSect(file->currentCluster), globalBuffer, 0, 0);
-			prevSect = curSect;
-			prevClust = file->currentCluster;
-		}
-		#endif
+		loadSectorBuf(file, curSect);
 
 		// Read in last partial chunk
 		  #ifdef TWOCARD
@@ -1683,11 +1670,6 @@ u32 fileWrite (const char* buffer, aFile* file, u32 startOffset, u32 length)
 			curSect = 0;
 			file->currentOffset+=discBytePerClus[file->card2];
 		}
-		if (prevSect[file->card2] != curSect || prevClust[file->card2] != file->currentCluster) {
-			CARD_ReadSectors( curSect + FAT_ClustToSect(file->currentCluster, file->card2), 1, globalBuffer[file->card2], file->card2);
-			prevSect[file->card2] = curSect;
-			prevClust[file->card2] = file->currentCluster;
-		}
 		#else
 		if (curSect >= discSecPerClus)
 		{
@@ -1700,12 +1682,8 @@ u32 fileWrite (const char* buffer, aFile* file, u32 startOffset, u32 length)
 			curSect = 0;
 			file->currentOffset+=discBytePerClus;
 		}
-		if (prevSect != curSect || prevClust != file->currentCluster) {
-			CARD_ReadSector( curSect + FAT_ClustToSect(file->currentCluster), globalBuffer, 0, 0);
-			prevSect = curSect;
-			prevClust = file->currentCluster;
-		}
 		#endif
+		loadSectorBuf(file, curSect);
 
 		// Read in last partial chunk
 		#ifdef TWOCARD
