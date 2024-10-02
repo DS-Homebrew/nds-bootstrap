@@ -102,11 +102,14 @@ typedef struct cardengineArm9 {
 		14: cloneboot
 		15: isDlp
 		16: bypassExceptionHandler
+		17: fntFatCached
 	*/
 	s32 mainScreen;
 	u32 consoleModel;
 	u32* irqTable;
 	// Below not used for DSiWare ce9 binary
+	u32 fntSrc;
+	u32 fntFatSize;
 	u32 overlaysSrc;
 	u32 overlaysSize;
 	u32 romPaddingSize;

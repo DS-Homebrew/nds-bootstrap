@@ -39,6 +39,10 @@ consoleModel:
 	.word	0x00000000
 irqTable:
 	.word	0x00000000
+fntSrc:
+	.word	0x00000000
+fntFatSize:
+	.word	0x00000000
 overlaysSrc:
 	.word	0x00000000
 overlaysSize:

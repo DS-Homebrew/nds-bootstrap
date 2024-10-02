@@ -52,6 +52,7 @@
 #define asyncCardRead BIT(12)
 #define softResetMb BIT(13)
 #define cloneboot BIT(14)
+#define fntFatCached BIT(17)
 
 //#ifdef DLDI
 #include "my_fat.h"
@@ -848,6 +849,10 @@ void cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	}
 	if ((ce9->valueBits & ROMinRAM) || romPart) {
 		cardReadRAM(dst, src, len/*, romPartNo*/);
+	#ifndef TWLSDK
+	} else if ((ce9->valueBits & fntFatCached) && src >= ce9->fntSrc && src < ce9->fntSrc+ce9->fntFatSize) {
+		tonccpy(dst, (u8*)((0x03708000-ce9->fntSrc)+src), len);
+	#endif
 	} else {
 		cardReadNormal(dst, src, len);
 	}

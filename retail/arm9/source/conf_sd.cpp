@@ -1192,7 +1192,8 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	} else {
 		conf->dsiWramAccess = true;
 	}
-	if (conf->dsiWramAccess) {
+	bool ce9Wram = conf->dsiWramAccess;
+	if (ce9Wram) {
 		if (strncmp(romTid, "HND", 3) == 0 // DS Download Play
 		 || strncmp(romTid, "ADA", 3) == 0 // Diamond
 		 || strncmp(romTid, "APA", 3) == 0 // Pearl
@@ -1201,12 +1202,11 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		 || strncmp(romTid, "IPK", 3) == 0 // HG
 		 || strncmp(romTid, "IPG", 3) == 0 // SS
 		) {
-			conf->dsiWramAccess = false;
-		} else {
-			conf->valueBits2 |= BIT(5);
+			ce9Wram = false;
 		}
 	}
 	if (conf->dsiWramAccess) {
+		conf->valueBits2 |= BIT(5);
 		u32 wordBak = *(vu32*)0x03700000;
 		*(vu32*)0x03700000 = 0x414C5253;
 		if (*(vu32*)0x03700000 == 0x414C5253 && *(vu32*)0x03708000 == 0x414C5253) {
@@ -1288,11 +1288,11 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			}
 			fclose(cebin);
 		} else {
-			const char* ce9Path = conf->dsiWramAccess ? "nitro:/cardenginei_arm9.lz77" : "nitro:/cardenginei_arm9_alt.lz77";
+			const char* ce9Path = ce9Wram ? "nitro:/cardenginei_arm9.lz77" : "nitro:/cardenginei_arm9_alt.lz77";
 			if (dlp) {
 				ce9Path = "nitro:/cardenginei_arm9_dlp.lz77";
 			} else if (gsdd) {
-				ce9Path = conf->dsiWramAccess ? "nitro:/cardenginei_arm9_gsdd.lz77" : "nitro:/cardenginei_arm9_gsdd_alt.lz77";
+				ce9Path = ce9Wram ? "nitro:/cardenginei_arm9_gsdd.lz77" : "nitro:/cardenginei_arm9_gsdd_alt.lz77";
 			}
 
 			// Load ce9 binary
@@ -1303,7 +1303,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			}
 			fclose(cebin);
 
-			if (!conf->dsiWramAccess && !dlp && !gsdd) {
+			if (!ce9Wram && !dlp && !gsdd) {
 				// Load ce9 binary (alt 2)
 				cebin = fopen("nitro:/cardenginei_arm9_alt2.lz77", "rb");
 				if (cebin) {

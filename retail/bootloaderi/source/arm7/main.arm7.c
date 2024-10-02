@@ -1077,7 +1077,7 @@ static void loadIOverlaysintoRAM(const tDSiHeader* dsiHeader, aFile* file, const
 	fileRead((char*)ROM_LOCATION_TWLSDK+((u32)dsiHeader->arm9iromOffset-romOffset), file, (u32)dsiHeader->arm9iromOffset+dsiHeader->arm9ibinarySize, ioverlaysSize);
 }
 
-static void loadROMintoRAM(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, const bool laterSdk, aFile* romFile, aFile* savFile, const bool usesCloneboot) {
+static void loadROMintoRAM(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, const bool laterSdk, aFile* romFile, const bool usesCloneboot) {
 	sdmmc_set_ndma_slot(0);
 
 	const bool dsiBios = scfgBios9i();
@@ -1158,6 +1158,22 @@ static void loadROMintoRAM(const tNDSHeader* ndsHeader, const module_params_t* m
 
 	dbg_printf("ROM pre-loaded into RAM at ");
 	dbg_hexa(romLocation);
+	dbg_printf("\n");
+	dbg_printf("\n");
+}
+
+static void loadNitroFileInfoIntoRAM(const tNDSHeader* ndsHeader, aFile* romFile) {
+	if (ndsHeader->fatSize == 0) return;
+
+	const u32 size = (ndsHeader->fatOffset-ndsHeader->filenameOffset)+ndsHeader->fatSize;
+	if (size > 0x78000) return;
+
+	sdmmc_set_ndma_slot(0);
+	fileRead((char*)0x03708000, romFile, ndsHeader->filenameOffset, size);
+	sdmmc_set_ndma_slot(4);
+
+	dbg_printf("Nitro file info pre-loaded into RAM at ");
+	dbg_hexa(0x03708000);
 	dbg_printf("\n");
 	dbg_printf("\n");
 }
@@ -2182,12 +2198,11 @@ int arm7_main(void) {
 				errorOutput();
 			}
 		} else {
-			ce9Location = dsiWramAccess ? CARDENGINEI_ARM9_LOCATION_DSI_WRAM : (!laterSdk ? CARDENGINEI_ARM9_LOCATION2 : CARDENGINEI_ARM9_LOCATION);
-			if (memcmp(romTid, "HND", 3) == 0) {
-				ce9Location = CARDENGINEI_ARM9_LOCATION_DLP;
-			}
+			const bool ce9DsiWram = (*(u32*)CARDENGINEI_ARM9_BUFFERED_LOCATION == CARDENGINEI_ARM9_LOCATION_DSI_WRAM);
+			const u32* ce9Src = (u32*)((!ce9DsiWram && !laterSdk) ? CARDENGINEI_ARM9_BUFFERED_LOCATION2 : CARDENGINEI_ARM9_BUFFERED_LOCATION);
+			ce9Location = *ce9Src;
 			ce9size = 0x5000;
-			tonccpy((u32*)ce9Location, (u32*)((!dsiWramAccess && !laterSdk) ? CARDENGINEI_ARM9_BUFFERED_LOCATION2 : CARDENGINEI_ARM9_BUFFERED_LOCATION), ce9size);
+			tonccpy((u32*)ce9Location, ce9Src, ce9size);
 		}
 		patchHiHeapPointer(moduleParams, ndsHeader);
 
@@ -2281,7 +2296,7 @@ int arm7_main(void) {
 		}
 
 		if (ROMinRAM) {
-			loadROMintoRAM(ndsHeader, moduleParams, laterSdk, romFile, savFile, usesCloneboot);
+			loadROMintoRAM(ndsHeader, moduleParams, laterSdk, romFile, usesCloneboot);
 			if (ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed) {
 				loadIOverlaysintoRAM(&dsiHeaderTemp, romFile, usesCloneboot);
 			}
@@ -2327,6 +2342,10 @@ int arm7_main(void) {
 
 		if (!ROMinRAM && ((ROMsupportsDsiMode(ndsHeader) && !isDSiWare && (!dsiModeConfirmed || consoleModel > 0)) || !ROMsupportsDsiMode(ndsHeader))) {
 			loadROMPartIntoRAM(ndsHeader, moduleParams, laterSdk, romFile);
+		}
+
+		if (!ROMinRAM && dsiWramAccess && !dsiWramMirrored && (!ROMsupportsDsiMode(ndsHeader) || !dsiModeConfirmed)) {
+			loadNitroFileInfoIntoRAM(ndsHeader, romFile);
 		}
 
 		if (gameOnFlashcard && isDSiWare) {
