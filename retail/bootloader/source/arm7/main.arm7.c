@@ -296,7 +296,7 @@ static void NDSTouchscreenMode(void) {
 	const u8 i2cVer = i2cReadRegister(0x4A, 0);
 	const bool i2cBricked = (i2cVer == 0 || i2cVer == 0xFF);
 
-	const bool malfunction = (noSgba || i2cBricked || ((u8)a9ScfgRom != 1 && (REG_SCFG_ROM & BIT(1))));
+	const bool malfunction = (noSgba || i2cBricked);
 
 	// 0xAC: special setting (when found special gamecode)
 	// 0xA7: normal setting (for any other gamecodes)
