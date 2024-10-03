@@ -57,7 +57,6 @@
 
 #define REG_GPIO_WIFI *(vu16*)0x4004C04
 
-#include "blocks_codec.h"
 #include "tonccpy.h"
 #include "my_fat.h"
 #include "debug_file.h"
@@ -1105,40 +1104,11 @@ int arm7_main(void) {
 	baseChipID = getChipId(pkmnHeader ? (tNDSHeader*)NDS_HEADER_POKEMON : ndsHeader, moduleParams);
 
 	if ((REG_SNDEXTCNT & SNDEXTCNT_ENABLE) && ((!soundFreq && (REG_SNDEXTCNT & BIT(13))) || (soundFreq && !(REG_SNDEXTCNT & BIT(13))))) {
-		REG_SNDEXTCNT &= ~SNDEXTCNT_ENABLE; // Disable sound output: Runs before sound frequency change
-
-		// Reconfigure clock dividers, based on the TSC2117 datasheet.
-		// - We disable PLL, as MCLK is always equal to the sample frequency
-		//   times 256, which is an integer multiple.
-		// - We disable ADC NADC/MADC dividers, to share the DAC clock.
-		// This also prevents us from having to reconfigure the PLL multipliers
-		// for 32kHz/47kHz.
-		// This produces low quality output
-		/* cdcWriteReg(CDC_CONTROL, CDC_CONTROL_PLL_PR, 0);
-		cdcWriteReg(CDC_CONTROL, CDC_CONTROL_DAC_MDAC, CDC_CONTROL_CLOCK_ENABLE(2));
-		cdcWriteReg(CDC_CONTROL, CDC_CONTROL_DAC_NDAC, CDC_CONTROL_CLOCK_ENABLE(1));
-		cdcWriteReg(CDC_CONTROL, CDC_CONTROL_ADC_MADC, CDC_CONTROL_CLOCK_DISABLE);
-		cdcWriteReg(CDC_CONTROL, CDC_CONTROL_ADC_NADC, CDC_CONTROL_CLOCK_DISABLE);
-		cdcWriteReg(CDC_CONTROL, CDC_CONTROL_CLOCK_MUX, CDC_CONTROL_CLOCK_PLL_IN_MCLK | CDC_CONTROL_CLOCK_CODEC_IN_MCLK); */
-
-		cdcWriteReg(CDC_CONTROL, CDC_CONTROL_ADC_MADC, CDC_CONTROL_CLOCK_DISABLE);
-		cdcWriteReg(CDC_CONTROL, CDC_CONTROL_ADC_NADC, CDC_CONTROL_CLOCK_DISABLE);
-
-		if (soundFreq)
-		{
-			// Configure a PLL multiplier/divider of 15/2, and a NDAC/NADC divider of 5.
-			cdcWriteReg(CDC_CONTROL, CDC_CONTROL_PLL_J, 15);
-			cdcWriteReg(CDC_CONTROL, CDC_CONTROL_DAC_NDAC, CDC_CONTROL_CLOCK_ENABLE(5));
+		if (soundFreq) {
+			*(vu16*)0x04004700 |= BIT(13);	// Set 48khz sound/mic frequency
+		} else {
+			*(vu16*)0x04004700 &= ~BIT(13);	// Set 32khz sound/mic frequency
 		}
-		else
-		{
-			// Configure a PLL multiplier/divider of 21/2, and a NDAC/NADC divider of 7.
-			cdcWriteReg(CDC_CONTROL, CDC_CONTROL_DAC_NDAC, CDC_CONTROL_CLOCK_ENABLE(7));
-			cdcWriteReg(CDC_CONTROL, CDC_CONTROL_PLL_J, 21);
-		}
-
-		REG_SNDEXTCNT = (REG_SNDEXTCNT & ~SNDEXTCNT_FREQ_47KHZ) | (soundFreq ? SNDEXTCNT_FREQ_47KHZ : SNDEXTCNT_FREQ_32KHZ) | SNDEXTCNT_ENABLE;
-		// REG_SNDEXTCNT |= SNDEXTCNT_ENABLE; // Enable sound output
 	}
 
 	if (cdcReadReg(CDC_SOUND, 0x22) == 0xF0) {
