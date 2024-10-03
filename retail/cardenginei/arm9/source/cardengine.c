@@ -451,8 +451,8 @@ static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
 	//	sleepMsEnabled = true;
 	//}
 
-	/* if ((ce9->valueBits & cacheDisabled) && (u32)dst >= 0x02000000 && (u32)dst < 0x03000000) {
-		DC_InvalidateRange((u32*)dst, len);
+	if ((u32)dst >= 0x02000000 && (u32)dst < 0x03000000 && ((u32)dst % 4) == 0 && len > ce9->cacheBlockSize) {
+		/* DC_InvalidateRange((u32*)dst, len);
 
 		// Write the command
 		sharedAddr[0] = (vu32)dst;
@@ -460,9 +460,9 @@ static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
 		sharedAddr[2] = ((ce9->valueBits & overlaysCached) && src >= ce9->overlaysSrc && src < ndsHeader->arm7romOffset) ? src+0x80000000 : src;
 		sharedAddr[3] = commandRead;
 
-		waitForArm7();
-		// fileRead((char*)dst, ((ce9->valueBits & overlaysCached) && src >= newOverlayOffset && src < newOverlayOffset+newOverlaysSize) ? apFixOverlaysFile : romFile, src, len);
-	} else { */
+		waitForArm7(); */
+		fileRead((char*)dst, ((ce9->valueBits & overlaysCached) && src >= newOverlayOffset && src < newOverlayOffset+newOverlaysSize) ? apFixOverlaysFile : romFile, src, len);
+	} else {
 		// Read via the main RAM cache
 		//bool runSleep = true;
 		while(len > 0) {
@@ -588,7 +588,7 @@ static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
 				//slot = getSlotForSectorManual(slot+1, sector);
 			}
 		}
-	// }
+	}
 #endif
 
 	//sleepMsEnabled = false;
