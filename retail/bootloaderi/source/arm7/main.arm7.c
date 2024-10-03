@@ -358,7 +358,7 @@ void my_disableSlot1() {
 
 static void NDSTouchscreenMode(void) {
 	const bool noSgba = (strncmp((const char*)0x04FFFA00, "no$gba", 6) == 0);
-	const bool malfunction = (noSgba || i2cBricked);
+	const bool malfunction = (noSgba || i2cBricked || ((u8)a9ScfgRom != 1 && (REG_SCFG_ROM & BIT(1))));
 
 	// 0xAC: special setting (when found special gamecode)
 	// 0xA7: normal setting (for any other gamecodes)
