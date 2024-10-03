@@ -460,9 +460,7 @@ static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
 		sharedAddr[2] = ((ce9->valueBits & overlaysCached) && src >= ce9->overlaysSrc && src < ndsHeader->arm7romOffset) ? src+0x80000000 : src;
 		sharedAddr[3] = commandRead;
 
-		while (sharedAddr[3] == commandRead) {
-			sleepMs(1);
-		}
+		waitForArm7();
 		// fileRead((char*)dst, ((ce9->valueBits & overlaysCached) && src >= newOverlayOffset && src < newOverlayOffset+newOverlaysSize) ? apFixOverlaysFile : romFile, src, len);
 	} else { */
 		// Read via the main RAM cache
@@ -781,13 +779,7 @@ void cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 		#endif */
 		// #ifdef DLDI
 		if (!driveInitialized) {
-			#ifndef DLDI
-			sharedAddr[5] = 0x54534453; // 'SDST'
-			#endif
 			FAT_InitFiles(false);
-			#ifndef DLDI
-			sharedAddr[5] = 0;
-			#endif
 			driveInitialized = true;
 		}
 		// #endif

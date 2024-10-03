@@ -81,7 +81,7 @@ bool my_sdio_ReadSector(sec_t sector, void* buffer, u32 startOffset, u32 endOffs
 	}
 	#endif
 
-	u32 commandRead = isDma ? 0x53444D31 : 0x53445231;
+	const u32 commandRead = isDma ? 0x53444D31 : 0x53445231;
 
 	sharedAddr[0] = sector;
 	sharedAddr[1] = (vu32)buffer;
@@ -89,7 +89,7 @@ bool my_sdio_ReadSector(sec_t sector, void* buffer, u32 startOffset, u32 endOffs
 	sharedAddr[3] = endOffset;
 	sharedAddr[4] = commandRead;
 
-	// if (dmaOn) IPC_SendSync(0x4);
+	IPC_SendSync(0x4);
 	while (sharedAddr[4] == commandRead) {
 		sleepMs(1);
 	}
@@ -116,17 +116,20 @@ bool my_sdio_ReadSectors(sec_t sector, sec_t numSectors, void* buffer) {
 	}
 	#endif
 
-	u32 commandRead = isDma ? 0x53444D41 : 0x53445244;
+	const u32 commandRead = isDma ? 0x53444D41 : 0x53445244;
 
 	sharedAddr[0] = sector;
 	sharedAddr[1] = numSectors;
 	sharedAddr[2] = (vu32)buffer;
 	sharedAddr[4] = commandRead;
 
-	// bool triggerIpc = (dmaOn && ((vu32)buffer % 4) == 0);
-
+	IPC_SendSync(0x4);
 	while (sharedAddr[4] == commandRead) {
-		// if (triggerIpc) IPC_SendSync(0x4);
+		if (sharedAddr[5] == 0x474E4950) { // 'PING'
+			sharedAddr[5] = 0;
+			sleepMs(1);
+			IPC_SendSync(0x4);
+		}
 		sleepMs(1);
 	}
 	return sharedAddr[4] == 0;
@@ -165,7 +168,7 @@ bool  my_sdio_check_command(int cmd) {
 	nocashMessage("my_sdio_check_command");
 	#endif
 
-	/*u32 commandCheck = 0x53444348;
+	/*const u32 commandCheck = 0x53444348;
 
 	sharedAddr[0] = cmd;
 	sharedAddr[4] = commandCheck;
@@ -187,7 +190,7 @@ bool my_sdio_WriteSectors(sec_t sector, sec_t numSectors, const void* buffer) {
 	nocashMessage("writeSectors internal");
 	#endif
 
-	/* u32 commandWrite = 0x53445752;
+	/* const u32 commandWrite = 0x53445752;
 
 	sharedAddr[0] = sector;
 	sharedAddr[1] = numSectors;

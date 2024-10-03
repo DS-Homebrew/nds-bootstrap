@@ -1242,7 +1242,7 @@ bool resumeFileRead()
 #endif
 
 // Load sector buffer for new position in file
-static void loadSectorBuf(aFile* file, int curSect)
+static inline void loadSectorBuf(aFile* file, int curSect)
 {
 #ifdef TWOCARD
 	if (prevFirstClust[file->card2] != file->firstCluster || prevSect[file->card2] != curSect || prevClust[file->card2] != file->currentCluster) {

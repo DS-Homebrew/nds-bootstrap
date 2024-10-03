@@ -35,20 +35,6 @@
 #include "debug_file.h"
 #include "locations.h"
 
-extern vu32* volatile sharedAddr;
-
-static inline void sdReadModeOn() {
-	#ifndef DLDI
-	sharedAddr[5] = 0x54534453; // 'SDST'
-	#endif
-}
-
-static inline void sdReadModeOff() {
-	#ifndef DLDI
-	sharedAddr[5] = 0;
-	#endif
-}
-
 //#define memcpy __builtin_memcpy
 
 
@@ -853,11 +839,10 @@ bool resumeFileRead()
 #endif
 
 // Load sector buffer for new position in file
-static void loadSectorBuf(aFile* file, int curSect)
+static inline void loadSectorBuf(aFile* file, int curSect)
 {
 	if (prevFirstClust != file->firstCluster || prevSect != curSect || prevClust != file->currentCluster) {
 		prevFirstClust = file->firstCluster;
-		sdReadModeOn();
 		CARD_ReadSectors( curSect + FAT_ClustToSect(file->currentCluster), 1, globalBuffer);
 		prevSect = curSect;
 		prevClust = file->currentCluster;
@@ -966,7 +951,6 @@ u32 fileRead (char* buffer, aFile* file, u32 startOffset, u32 length)
               #endif
               
               // Read the sectors
-				sdReadModeOn();
 				CARD_ReadSectors(curSect + FAT_ClustToSect(file->currentCluster), sectorsToRead, buffer + dataPos);
 				chunks  -= sectorsToRead;
 				curSect += sectorsToRead;
@@ -995,7 +979,6 @@ u32 fileRead (char* buffer, aFile* file, u32 startOffset, u32 length)
 			sectorsToRead = chunks;
               
               // Read the sectors
-			sdReadModeOn();
 			CARD_ReadSectors(curSect + FAT_ClustToSect(file->currentCluster), sectorsToRead, buffer + dataPos);
 			chunks  -= sectorsToRead;
 			curSect += sectorsToRead;
@@ -1039,7 +1022,6 @@ u32 fileRead (char* buffer, aFile* file, u32 startOffset, u32 length)
           curByte+=length;
           dataPos+=length;
 	}
-	sdReadModeOff();
 
       #ifdef DEBUG
       nocashMessage("fileRead completed");

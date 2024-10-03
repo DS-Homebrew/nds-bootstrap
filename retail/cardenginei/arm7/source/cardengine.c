@@ -664,14 +664,14 @@ void reset(void) {
 static void cardReadLED(const bool on, const bool dmaLed) {
 	if (!(valueBits & i2cBricked) && consoleModel < 2) { /* Proceed below */ } else { return; }
 
-	static bool ledIsOn = false;
+	/* static bool ledIsOn = false;
 	static bool dmaLedIsOn = false;
 	if (dmaLed ? dmaLedIsOn == on : ledIsOn == on) {
 		return;
 	}
 	dmaLed
 		? (dmaLedIsOn = on)
-		: (ledIsOn = on);
+		: (ledIsOn = on); */
 
 	if (dmaRomRead_LED == -1) dmaRomRead_LED = romRead_LED;
 	if (!powerLedChecked && (romRead_LED || dmaRomRead_LED)) {
@@ -1251,7 +1251,7 @@ static void nandWrite(void) {
 }*/
 
 //static bool readOngoing = false;
-//static bool sdReadOngoing = false;
+static bool sdReadOngoing = false;
 static bool ongoingIsDma = false;
 //static int currentCmd=0, currentNdmaSlot=0;
 //static int timeTillDmaLedOff = 0;
@@ -1354,15 +1354,15 @@ static bool resume_cardRead_arm9(void) {
 } */
 #endif
 
-static inline void sdmmcHandler(void) { // Unused
-	/* if (sdReadOngoing) {
+static inline void sdmmcHandler(void) {
+	if (sdReadOngoing) {
 		if (my_sdmmc_sdcard_check_command(0x33C12)) {
 			sharedAddr[4] = 0;
 			cardReadLED(false, ongoingIsDma);
 			sdReadOngoing = false;
 		}
 		return;
-	} */
+	}
 
 	switch (sharedAddr[4]) {
 		case 0x53445231:
@@ -1387,18 +1387,13 @@ static inline void sdmmcHandler(void) { // Unused
 			//bool isDma = sharedAddr[4]==0x53444D41;
 			ongoingIsDma = (sharedAddr[4] == 0x53444D41);
 			cardReadLED(true, ongoingIsDma);
-			/* if ((sharedAddr[2] % 4) != 0 || (valueBits & ndmaDisabled)) {
+			if ((sharedAddr[2] % 4) != 0 || (valueBits & ndmaDisabled)) {
 				sharedAddr[4] = my_sdmmc_sdcard_readsectors(sharedAddr[0], sharedAddr[1], (u8*)sharedAddr[2]);
-				// cardReadLED(false, ongoingIsDma);
+				cardReadLED(false, ongoingIsDma);
 			} else {
 				my_sdmmc_sdcard_readsectors_nonblocking(sharedAddr[0], sharedAddr[1], (u8*)sharedAddr[2]);
 				sdReadOngoing = true;
-			} */
-			/* if ((sharedAddr[2] % 4) != 0) {
-				sdmmc_set_ndma_slot(4);
-			} */
-			sharedAddr[4] = my_sdmmc_sdcard_readsectors(sharedAddr[0], sharedAddr[1], (u8*)sharedAddr[2]);
-			// sdmmc_set_ndma_slot(0);
+			}
 		}	break;
 		/*case 0x53444348:
 			sharedAddr[4] = my_sdmmc_sdcard_check_command(sharedAddr[0], sharedAddr[1]);
@@ -1441,13 +1436,6 @@ void runCardEngineCheck(void) {
   		}*/
 
 			if (!(valueBits & gameOnFlashcard)) {
-				if (sharedAddr[5] == 0x54534453) {
-					while (sharedAddr[5] == 0x54534453) { // 'SDST'
-						sdmmcHandler();
-					}
-					cardReadLED(false, ongoingIsDma);
-				}
-
 				// #ifndef TWLSDK
 				if (/* sharedAddr[3] == (vu32)0x020FF808 || sharedAddr[3] == (vu32)0x020FF80A || sharedAddr[3] == (vu32)0x025FFB08 || */ sharedAddr[3] == (vu32)0x025FFB0A) {	// Card read DMA
 					//if (!readOngoing ? start_cardRead_arm9() : resume_cardRead_arm9()) {
@@ -1531,6 +1519,12 @@ void myIrqHandlerFIFO(void) {
 	}
 
 	// runCardEngineCheck();
+	if (!(valueBits & gameOnFlashcard)) {
+		sdmmcHandler();
+		if (sdReadOngoing) {
+			sharedAddr[5] = 0x474E4950; // 'PING'
+		}
+	}
 }
 
 
