@@ -1022,6 +1022,16 @@ static void loadOverlaysintoRAM(const tNDSHeader* ndsHeader, const module_params
 		return;
 	}
 
+	aFile apFixOverlaysFile;
+	getFileFromCluster(&apFixOverlaysFile, apFixOverlaysCluster, gameOnFlashcard);
+
+	char overlaysHeader[0x160];
+	fileRead(overlaysHeader, &apFixOverlaysFile, 0, 0x160);
+	if (memcmp(ndsHeader, overlaysHeader, 0x160) == 0) {
+		overlaysInRam = true;
+		return;
+	}
+
 	u32 overlaysLocation = CACHE_ADRESS_START_DSIMODE;
 	u32 alignedOverlaysOffset = (ndsHeader->arm9overlaySource/cacheBlockSize)*cacheBlockSize;
 	if (ndsHeader->arm9overlaySource > ndsHeader->arm7romOffset) {
@@ -2266,17 +2276,23 @@ int arm7_main(void) {
 				tonccpy((char*)(dsiEnhancedMbk ? OVL_FILE_LOCATION_ALT : OVL_FILE_LOCATION), apFixOverlaysFile, sizeof(aFile));
 			}
 
-			u32 alignedOverlaysOffset = (ndsHeader->arm9overlaySource/cacheBlockSize)*cacheBlockSize;
-			if (ndsHeader->arm9overlaySource > ndsHeader->arm7romOffset) {
-				alignedOverlaysOffset = ((ndsHeader->arm9romOffset+ndsHeader->arm9binarySize)/cacheBlockSize)*cacheBlockSize;
-			}
-			u32 newOverlaysSize = 0;
-			for (u32 i = alignedOverlaysOffset; i < ndsHeader->arm7romOffset; i+= cacheBlockSize) {
-				newOverlaysSize += cacheBlockSize;
-			}
+			char overlaysHeader[0x160];
+			fileRead(overlaysHeader, apFixOverlaysFile, 0, 0x160);
+			if (memcmp(ndsHeader, overlaysHeader, 0x160) != 0) {
+				u32 alignedOverlaysOffset = (ndsHeader->arm9overlaySource/cacheBlockSize)*cacheBlockSize;
+				if (ndsHeader->arm9overlaySource > ndsHeader->arm7romOffset) {
+					alignedOverlaysOffset = ((ndsHeader->arm9romOffset+ndsHeader->arm9binarySize)/cacheBlockSize)*cacheBlockSize;
+				}
+				u32 newOverlaysSize = 0;
+				for (u32 i = alignedOverlaysOffset; i < ndsHeader->arm7romOffset; i+= cacheBlockSize) {
+					newOverlaysSize += cacheBlockSize;
+				}
 
-			fileWrite((char*)CACHE_ADRESS_START_DSIMODE, apFixOverlaysFile, alignedOverlaysOffset, newOverlaysSize);	// Write AP-fixed overlays to a file
-			dma_twlFill32(0, 0, (char*)CACHE_ADRESS_START_DSIMODE, newOverlaysSize);
+				fileWrite((char*)CACHE_ADRESS_START_DSIMODE, apFixOverlaysFile, alignedOverlaysOffset, newOverlaysSize);	// Write AP-fixed overlays to a file
+				dma_twlFill32(0, 0, (char*)CACHE_ADRESS_START_DSIMODE, newOverlaysSize);
+
+				fileWrite((char*)ndsHeader, apFixOverlaysFile, 0, 0x160);
+			}
 
 			dbg_printf("Overlays cached to a file\n");
 		}

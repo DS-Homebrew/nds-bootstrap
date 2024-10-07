@@ -855,6 +855,12 @@ static void loadOverlaysintoFile(const tNDSHeader* ndsHeader, const module_param
 		aFile apFixOverlaysFile;
 		getFileFromCluster(&apFixOverlaysFile, apFixOverlaysCluster);
 
+		char overlaysHeader[0x160];
+		fileRead(overlaysHeader, &apFixOverlaysFile, 0, 0x160);
+		if (memcmp(ndsHeader, overlaysHeader, 0x160) == 0) {
+			return;
+		}
+
 		const u32 buffer = 0x037F8000;
 		const u16 bufferSize = 0x8000;
 		const u32 overlaysOffset = (ndsHeader->arm9overlaySource > ndsHeader->arm7romOffset) ? (ndsHeader->arm9romOffset + ndsHeader->arm9binarySize) : ndsHeader->arm9overlaySource;
@@ -883,6 +889,8 @@ static void loadOverlaysintoFile(const tNDSHeader* ndsHeader, const module_param
 				fileWrite((char*)&word, &apFixOverlaysFile, 0x3128AC, sizeof(u32));
 			}
 		}
+
+		fileWrite((char*)ndsHeader, &apFixOverlaysFile, 0, 0x160);
 	} else {
 		apFixOverlaysCluster = 0;
 	}
