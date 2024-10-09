@@ -549,42 +549,42 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		}
 
 		if (*(u16*)(0x020000C0) == 0) {
-		  if (io_dldi_data->ioInterface.features & FEATURE_SLOT_NDS) {
-			*(vu16*)(0x08000000) = 0x4D54;	// Write test
-			if (*(vu16*)(0x08000000) != 0x4D54) {	// If not writeable
-				_M3_changeMode(M3_MODE_RAM);	// Try again with M3
-				*(u16*)(0x020000C0) = 0x334D;
-				*(vu16*)(0x08000000) = 0x4D54;
+			if (io_dldi_data->ioInterface.features & FEATURE_SLOT_NDS) {
+				*(vu16*)(0x08000000) = 0x4D54;	// Write test
+				if (*(vu16*)(0x08000000) != 0x4D54) {	// If not writeable
+					_M3_changeMode(M3_MODE_RAM);	// Try again with M3
+					*(u16*)(0x020000C0) = 0x334D;
+					*(vu16*)(0x08000000) = 0x4D54;
+				}
+				if (*(vu16*)(0x08000000) != 0x4D54) {
+					_G6_SelectOperation(G6_MODE_RAM);	// Try again with G6
+					*(u16*)(0x020000C0) = 0x3647;
+					*(vu16*)(0x08000000) = 0x4D54;
+				}
+				if (*(vu16*)(0x08000000) != 0x4D54) {
+					_SC_changeMode(SC_MODE_RAM);	// Try again with SuperCard
+					*(u16*)(0x020000C0) = 0x4353;
+					*(vu16*)(0x08000000) = 0x4D54;
+				}
+				/* if (*(vu16*)(0x08000000) != 0x4D54) {
+					cExpansion::SetRompage(381);	// Try again with EZ Flash (TWLMenu++ required)
+					cExpansion::OpenNorWrite();
+					cExpansion::SetSerialMode();
+					*(u16*)(0x020000C0) = 0x5A45;
+					*(vu16*)(0x08000000) = 0x4D54;
+				} */
+				if (*(vu16*)(0x08000000) != 0x4D54) {
+					*(u16*)(0x020000C0) = 0;
+				}
+			} else if (io_dldi_data->ioInterface.features & FEATURE_SLOT_GBA) {
+				if (memcmp(io_dldi_data->friendlyName, "M3 Adapter", 10) == 0) {
+					*(u16*)(0x020000C0) = 0x334D;
+				} else if (memcmp(io_dldi_data->friendlyName, "G6", 2) == 0) {
+					*(u16*)(0x020000C0) = 0x3647;
+				} else if (memcmp(io_dldi_data->friendlyName, "SuperCard", 9) == 0 || memcmp(io_dldi_data->friendlyName, "SCSD", 4) == 0) {
+					*(u16*)(0x020000C0) = 0x4353;
+				}
 			}
-			if (*(vu16*)(0x08000000) != 0x4D54) {
-				_G6_SelectOperation(G6_MODE_RAM);	// Try again with G6
-				*(u16*)(0x020000C0) = 0x3647;
-				*(vu16*)(0x08000000) = 0x4D54;
-			}
-			if (*(vu16*)(0x08000000) != 0x4D54) {
-				_SC_changeMode(SC_MODE_RAM);	// Try again with SuperCard
-				*(u16*)(0x020000C0) = 0x4353;
-				*(vu16*)(0x08000000) = 0x4D54;
-			}
-			/* if (*(vu16*)(0x08000000) != 0x4D54) {
-				cExpansion::SetRompage(381);	// Try again with EZ Flash (TWLMenu++ required)
-				cExpansion::OpenNorWrite();
-				cExpansion::SetSerialMode();
-				*(u16*)(0x020000C0) = 0x5A45;
-				*(vu16*)(0x08000000) = 0x4D54;
-			} */
-			if (*(vu16*)(0x08000000) != 0x4D54) {
-				*(u16*)(0x020000C0) = 0;
-			}
-		  } else if (io_dldi_data->ioInterface.features & FEATURE_SLOT_GBA) {
-			if (memcmp(io_dldi_data->friendlyName, "M3 Adapter", 10) == 0) {
-				*(u16*)(0x020000C0) = 0x334D;
-			} else if (memcmp(io_dldi_data->friendlyName, "G6", 2) == 0) {
-				*(u16*)(0x020000C0) = 0x3647;
-			} else if (memcmp(io_dldi_data->friendlyName, "SuperCard", 9) == 0 || memcmp(io_dldi_data->friendlyName, "SCSD", 4) == 0) {
-				*(u16*)(0x020000C0) = 0x4353;
-			}
-		  }
 		}
 	}
 
@@ -981,106 +981,62 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		}
 	}
 
-  if (dsiFeatures() && !conf->b4dsMode) {
-	toncset((u32*)0x02E80000, 0, 0x800); // Clear nds-bootstrap arm7i binary from RAM
-	if ((conf->dsiMode > 0 && unitCode > 0) || conf->isDSiWare) {
-		uint8_t *target = (uint8_t *)TARGETBUFFERHEADER ;
-		fseek(ndsFile, 0, SEEK_SET);
-		fread(target, 1, 0x1000, ndsFile);
+	if (dsiFeatures() && !conf->b4dsMode) {
+		toncset((u32*)0x02E80000, 0, 0x800); // Clear nds-bootstrap arm7i binary from RAM
+		if ((conf->dsiMode > 0 && unitCode > 0) || conf->isDSiWare) {
+			uint8_t *target = (uint8_t *)TARGETBUFFERHEADER ;
+			fseek(ndsFile, 0, SEEK_SET);
+			fread(target, 1, 0x1000, ndsFile);
 
-		/*if (conf->dsiMode > 0 && unitCode > 0 && !conf->isDSiWare) {
-			load_game_conf(conf, conf->sdFound ? "sd:/_nds/nds-bootstrap.ini" : "fat:/_nds/nds-bootstrap.ini", (char*)romTid);
+			/*if (conf->dsiMode > 0 && unitCode > 0 && !conf->isDSiWare) {
+				load_game_conf(conf, conf->sdFound ? "sd:/_nds/nds-bootstrap.ini" : "fat:/_nds/nds-bootstrap.ini", (char*)romTid);
 
-			if (std::string(conf->cleanDonorPath) != std::string(conf->ndsPath) && strlen(conf->cleanDonorPath) > 8) {
-				fclose(ndsFile);
-				FILE* ndsFile = fopen(conf->cleanDonorPath, "rb");
-				if (ndsFile) {
-					fseek(ndsFile, 0x1C0, SEEK_SET);
-					fread(&ndsArm9isrc, sizeof(u32), 1, ndsFile);
-					fseek(ndsFile, 0x1C8, SEEK_SET);
-					fread(&ndsArm9idst, sizeof(u32), 1, ndsFile);
-					fseek(ndsFile, 0x1CC, SEEK_SET);
-					fread(&ndsArm9ilen, sizeof(u32), 1, ndsFile);
-					fseek(ndsFile, 0x1D0, SEEK_SET);
-					fread(&ndsArm7isrc, sizeof(u32), 1, ndsFile);
-					fseek(ndsFile, 0x1D8, SEEK_SET);
-					fread(&ndsArm7idst, sizeof(u32), 1, ndsFile);
-					fseek(ndsFile, 0x1DC, SEEK_SET);
-					fread(&ndsArm7ilen, sizeof(u32), 1, ndsFile);
-					fseek(ndsFile, 0x224, SEEK_SET);
-					fread(&modcrypt1len, sizeof(u32), 1, ndsFile);
-					fseek(ndsFile, 0x22C, SEEK_SET);
-					fread(&modcrypt2len, sizeof(u32), 1, ndsFile);
+				if (std::string(conf->cleanDonorPath) != std::string(conf->ndsPath) && strlen(conf->cleanDonorPath) > 8) {
+					fclose(ndsFile);
+					FILE* ndsFile = fopen(conf->cleanDonorPath, "rb");
+					if (ndsFile) {
+						fseek(ndsFile, 0x1C0, SEEK_SET);
+						fread(&ndsArm9isrc, sizeof(u32), 1, ndsFile);
+						fseek(ndsFile, 0x1C8, SEEK_SET);
+						fread(&ndsArm9idst, sizeof(u32), 1, ndsFile);
+						fseek(ndsFile, 0x1CC, SEEK_SET);
+						fread(&ndsArm9ilen, sizeof(u32), 1, ndsFile);
+						fseek(ndsFile, 0x1D0, SEEK_SET);
+						fread(&ndsArm7isrc, sizeof(u32), 1, ndsFile);
+						fseek(ndsFile, 0x1D8, SEEK_SET);
+						fread(&ndsArm7idst, sizeof(u32), 1, ndsFile);
+						fseek(ndsFile, 0x1DC, SEEK_SET);
+						fread(&ndsArm7ilen, sizeof(u32), 1, ndsFile);
+						fseek(ndsFile, 0x224, SEEK_SET);
+						fread(&modcrypt1len, sizeof(u32), 1, ndsFile);
+						fseek(ndsFile, 0x22C, SEEK_SET);
+						fread(&modcrypt2len, sizeof(u32), 1, ndsFile);
 
-					fseek(ndsFile, 0, SEEK_SET);
-					fread(target, 1, 0x180, ndsFile);
+						fseek(ndsFile, 0, SEEK_SET);
+						fread(target, 1, 0x180, ndsFile);
+					}
+				}
+			}*/
+
+			if (ndsArm9Offset >= 0x02400000) {
+				fseek(ndsFile, ndsArm9BinOffset, SEEK_SET);
+				fread((u32*)ndsArm9Offset, 1, ndsArm9ilen, ndsFile);
+			}
+			if (ndsArm9ilen) {
+				fseek(ndsFile, ndsArm9isrc, SEEK_SET);
+				fread((u32*)ndsArm9idst, 1, ndsArm9ilen, ndsFile);
+			}
+			if (donorLoaded) {
+				if (*(u32*)DONOR_ROM_ARM7I_SIZE_LOCATION) {
+					fseek(donorNdsFile, donorArm7iOffset, SEEK_SET);
+					fread((u32*)ndsArm7idst, 1, *(u32*)DONOR_ROM_ARM7I_SIZE_LOCATION, donorNdsFile);
+				}
+			} else {
+				if (ndsArm7ilen) {
+					fseek(ndsFile, ndsArm7isrc, SEEK_SET);
+					fread((u32*)ndsArm7idst, 1, ndsArm7ilen, ndsFile);
 				}
 			}
-		}*/
-
-		if (ndsArm9Offset >= 0x02400000) {
-			fseek(ndsFile, ndsArm9BinOffset, SEEK_SET);
-			fread((u32*)ndsArm9Offset, 1, ndsArm9ilen, ndsFile);
-		}
-		if (ndsArm9ilen) {
-			fseek(ndsFile, ndsArm9isrc, SEEK_SET);
-			fread((u32*)ndsArm9idst, 1, ndsArm9ilen, ndsFile);
-		}
-		if (donorLoaded) {
-			if (*(u32*)DONOR_ROM_ARM7I_SIZE_LOCATION) {
-				fseek(donorNdsFile, donorArm7iOffset, SEEK_SET);
-				fread((u32*)ndsArm7idst, 1, *(u32*)DONOR_ROM_ARM7I_SIZE_LOCATION, donorNdsFile);
-			}
-		} else {
-			if (ndsArm7ilen) {
-				fseek(ndsFile, ndsArm7isrc, SEEK_SET);
-				fread((u32*)ndsArm7idst, 1, ndsArm7ilen, ndsFile);
-			}
-		}
-
-		if (target[0x1C] & 2)
-		{
-			u8 key[16] = {0} ;
-			u8 keyp[16] = {0} ;
-			if ((target[0x1C] & 4) || (target[0x1BF] & 0x80))
-			{
-				// Debug Key
-				tonccpy(key, target, 16) ;
-			} else
-			{
-				//Retail key
-				char modcrypt_shared_key[8] = {'N','i','n','t','e','n','d','o'};
-				tonccpy(keyp, modcrypt_shared_key, 8) ;
-				for (int i=0;i<4;i++)
-				{
-					keyp[8+i] = target[0x0c+i] ;
-					keyp[15-i] = target[0x0c+i] ;
-				}
-				tonccpy(key, target+0x350, 16) ;
-				
-				u128_xor(key, keyp);
-				u128_add(key, DSi_KEY_MAGIC);
-		  u128_lrot(key, 42) ;
-			}
-
-			dsi_context ctx;
-			dsi_set_key(&ctx, key);
-			dsi_set_ctr(&ctx, &target[0x300]);
-			if (modcrypt1len)
-			{
-				decrypt_modcrypt_area(&ctx, (u8*)((modcrypt1off == ndsArm9BinOffset) ? ndsArm9Offset : ndsArm9idst), modcrypt1len);
-			}
-
-			dsi_set_key(&ctx, key);
-			dsi_set_ctr(&ctx, &target[0x314]);
-			if (modcrypt2len && !donorLoaded)
-			{
-				decrypt_modcrypt_area(&ctx, (u8*)ndsArm7idst, modcrypt2len);
-			}
-		}
-		if (donorLoaded && donorModcrypt2len) {
-			fseek(donorNdsFile, 0, SEEK_SET);
-			fread(target, 1, 0x1000, donorNdsFile);
 
 			if (target[0x1C] & 2)
 			{
@@ -1104,1025 +1060,1069 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 					
 					u128_xor(key, keyp);
 					u128_add(key, DSi_KEY_MAGIC);
-			  u128_lrot(key, 42) ;
+					u128_lrot(key, 42) ;
 				}
 
 				dsi_context ctx;
 				dsi_set_key(&ctx, key);
+				dsi_set_ctr(&ctx, &target[0x300]);
+				if (modcrypt1len)
+				{
+					decrypt_modcrypt_area(&ctx, (u8*)((modcrypt1off == ndsArm9BinOffset) ? ndsArm9Offset : ndsArm9idst), modcrypt1len);
+				}
+
+				dsi_set_key(&ctx, key);
 				dsi_set_ctr(&ctx, &target[0x314]);
-				//if (donorModcrypt2len)
-				//{
-					decrypt_modcrypt_area(&ctx, (u8*)ndsArm7idst, donorModcrypt2len);
-				//}
+				if (modcrypt2len && !donorLoaded)
+				{
+					decrypt_modcrypt_area(&ctx, (u8*)ndsArm7idst, modcrypt2len);
+				}
 			}
-		}
-	}
-	fclose(ndsFile);
-	fclose(donorNdsFile);
+			if (donorLoaded && donorModcrypt2len) {
+				fseek(donorNdsFile, 0, SEEK_SET);
+				fread(target, 1, 0x1000, donorNdsFile);
 
-	if (!conf->gameOnFlashcard && !conf->saveOnFlashcard) {
-		if (romTid[0] != 'I' && memcmp(romTid, "UZP", 3) != 0 && memcmp(romTid, "HND", 3) != 0) {
-			disableSlot1();
-		} else {
-			// Initialize card and read header, HGSS IR doesn't work if you don't read the full header
-			sysSetCardOwner(BUS_OWNER_ARM9); // Allow arm9 to access NDS cart
-			if (isDSiMode()) {
-				// Reset card slot
-				disableSlot1();
-				for(int i = 0; i < 25; i++) { swiWaitForVBlank(); }
-				enableSlot1();
-				for(int i = 0; i < 15; i++) { swiWaitForVBlank(); }
-
-				// Dummy command sent after card reset
-				cardParamCommand (CARD_CMD_DUMMY, 0,
-					CARD_ACTIVATE | CARD_nRESET | CARD_CLK_SLOW | CARD_BLK_SIZE(1) | CARD_DELAY1(0x1FFF) | CARD_DELAY2(0x3F),
-					NULL, 0);
-			}
-
-			REG_ROMCTRL = 0;
-			REG_AUXSPICNT = 0;
-			for(int i = 0; i < 25; i++) { swiWaitForVBlank(); }
-			REG_AUXSPICNT = CARD_CR1_ENABLE | CARD_CR1_IRQ;
-			REG_ROMCTRL = CARD_nRESET | CARD_SEC_SEED;
-			while(REG_ROMCTRL & CARD_BUSY);
-			cardReset();
-			while(REG_ROMCTRL & CARD_BUSY);
-
-			u32 iCardId = cardReadID(CARD_CLK_SLOW);
-			while(REG_ROMCTRL & CARD_BUSY);
-
-			bool normalChip = (iCardId & BIT(31)) != 0; // ROM chip ID MSB
-
-			// Read the header
-			char headerData[0x1000];
-			cardParamCommand (CARD_CMD_HEADER_READ, 0,
-				CARD_ACTIVATE | CARD_nRESET | CARD_CLK_SLOW | CARD_BLK_SIZE(1) | CARD_DELAY1(0x1FFF) | CARD_DELAY2(0x3F),
-				(u32 *)headerData, 0x200 / sizeof(u32));
-
-			if ((headerData[0x12] != 0) || (headerData[0x1BF] != 0)) {
-				// Extended header found
-				if(normalChip) {
-					for(int i = 0; i < 8; i++) {
-						cardParamCommand (CARD_CMD_HEADER_READ, i * 0x200,
-							CARD_ACTIVATE | CARD_nRESET | CARD_CLK_SLOW | CARD_BLK_SIZE(1) | CARD_DELAY1(0x1FFF) | CARD_DELAY2(0x3F),
-							(u32 *)headerData + i * 0x200 / sizeof(u32), 0x200 / sizeof(u32));
+				if (target[0x1C] & 2)
+				{
+					u8 key[16] = {0} ;
+					u8 keyp[16] = {0} ;
+					if ((target[0x1C] & 4) || (target[0x1BF] & 0x80))
+					{
+						// Debug Key
+						tonccpy(key, target, 16) ;
+					} else
+					{
+						//Retail key
+						char modcrypt_shared_key[8] = {'N','i','n','t','e','n','d','o'};
+						tonccpy(keyp, modcrypt_shared_key, 8) ;
+						for (int i=0;i<4;i++)
+						{
+							keyp[8+i] = target[0x0c+i] ;
+							keyp[15-i] = target[0x0c+i] ;
+						}
+						tonccpy(key, target+0x350, 16) ;
+						
+						u128_xor(key, keyp);
+						u128_add(key, DSi_KEY_MAGIC);
+						u128_lrot(key, 42) ;
 					}
-				} else {
-					cardParamCommand (CARD_CMD_HEADER_READ, 0,
-						CARD_ACTIVATE | CARD_nRESET | CARD_CLK_SLOW | CARD_BLK_SIZE(4) | CARD_DELAY1(0x1FFF) | CARD_DELAY2(0x3F),
-						(u32 *)headerData, 0x1000 / sizeof(u32));
+
+					dsi_context ctx;
+					dsi_set_key(&ctx, key);
+					dsi_set_ctr(&ctx, &target[0x314]);
+					//if (donorModcrypt2len)
+					//{
+						decrypt_modcrypt_area(&ctx, (u8*)ndsArm7idst, donorModcrypt2len);
+					//}
 				}
 			}
+		}
+		fclose(ndsFile);
+		fclose(donorNdsFile);
 
-			sysSetCardOwner(BUS_OWNER_ARM7);
-
-			// Leave Slot-1 enabled for IR cartridges, Battle & Get: Pokémon Typing DS, and DS Download Play
-			conf->specialCard = (headerData[0xC] == 'I' || memcmp(headerData + 0xC, "UZP", 3) == 0 || memcmp(romTid, "HND", 3) == 0);
-			if (conf->specialCard) {
-				conf->valueBits2 |= BIT(4);
-			} else {
+		if (!conf->gameOnFlashcard && !conf->saveOnFlashcard) {
+			if (romTid[0] != 'I' && memcmp(romTid, "UZP", 3) != 0 && memcmp(romTid, "HND", 3) != 0) {
 				disableSlot1();
-			}
-		}
-	}
+			} else {
+				// Initialize card and read header, HGSS IR doesn't work if you don't read the full header
+				sysSetCardOwner(BUS_OWNER_ARM9); // Allow arm9 to access NDS cart
+				if (isDSiMode()) {
+					// Reset card slot
+					disableSlot1();
+					for(int i = 0; i < 25; i++) { swiWaitForVBlank(); }
+					enableSlot1();
+					for(int i = 0; i < 15; i++) { swiWaitForVBlank(); }
 
-	u32 srBackendId[2] = {0};
-	// Load srBackendId
-	if (REG_SCFG_EXT7 == 0 && conf->bootstrapOnFlashcard) {
-		/*srBackendId[0] = 0x464B4356; // "VCKF" (My Cooking Coach)
-		srBackendId[1] = 0x00030000;*/
-	} else {
-		cebin = fopen("sd:/_nds/nds-bootstrap/srBackendId.bin", "rb");
-		fread(&srBackendId, sizeof(u32), 2, cebin);
-		fclose(cebin);
-	}
+					// Dummy command sent after card reset
+					cardParamCommand (CARD_CMD_DUMMY, 0,
+						CARD_ACTIVATE | CARD_nRESET | CARD_CLK_SLOW | CARD_BLK_SIZE(1) | CARD_DELAY1(0x1FFF) | CARD_DELAY2(0x3F),
+						NULL, 0);
+				}
 
-	if (isDSiMode() && unitCode > 0 && !conf->gameOnFlashcard) {
-		const bool sdNandFound = conf->sdNand && (access("sd:/shared1", F_OK) == 0);
-		const bool sdPhotoFound = conf->sdNand && (access("sd:/photo", F_OK) == 0);
+				REG_ROMCTRL = 0;
+				REG_AUXSPICNT = 0;
+				for(int i = 0; i < 25; i++) { swiWaitForVBlank(); }
+				REG_AUXSPICNT = CARD_CR1_ENABLE | CARD_CR1_IRQ;
+				REG_ROMCTRL = CARD_nRESET | CARD_SEC_SEED;
+				while(REG_ROMCTRL & CARD_BUSY);
+				cardReset();
+				while(REG_ROMCTRL & CARD_BUSY);
 
-		// Load device list
-		addTwlDevice(0, (u8)(sdNandFound ? 0 : 0x81), 0x06, "nand", "/");
-		if (!sdNandFound) {
-			addTwlDevice(0, 0xA1, 0x06, "nand2", "/");
-		} else {
-			addTwlDevice(0, 0, 0x06, "sdmc", "/");
-		}
-		if (shared2len > 0) {
-			addTwlDevice(0, (u8)(sdNandFound ? 0x08 : 0x09), 0x06, "share", "nand:/shared2/0000");
-		}
-		if (!sdNandFound) {
-			addTwlDevice(0, 0, 0x06, "sdmc", "/");
-		}
-		if (romTid[0] == 'H') {
-			addTwlDevice(0, (u8)(sdNandFound ? 0x10 : 0x11), 0x06, "shared1", "nand:/shared1");
-			if (shared2len == 0) {
-				addTwlDevice(0, (u8)(sdNandFound ? 0x10 : 0x11), 0x06, "shared2", "nand:/shared2");
-			}
-		}
-		addTwlDevice(0, (u8)((sdNandFound || sdPhotoFound) ? 0x10 : 0x31), 0x06, "photo", ((sdNandFound || sdPhotoFound) ? "sdmc:/photo" : "nand2:/photo"));
-		if (!conf->saveOnFlashcard) {
-			if (strlen(conf->prvPath) < 62 && prvSize > 0) {
-				if (strncasecmp(conf->prvPath, "sd:", 3) != 0) {
-					const bool isSdmc = (strncasecmp(conf->prvPath, "sdmc:", 5) == 0);
-					addTwlDevice(0, (u8)((sdNandFound || isSdmc) ? 0x08 : 0x09), 0x06, "dataPrv", conf->prvPath);
+				u32 iCardId = cardReadID(CARD_CLK_SLOW);
+				while(REG_ROMCTRL & CARD_BUSY);
+
+				bool normalChip = (iCardId & BIT(31)) != 0; // ROM chip ID MSB
+
+				// Read the header
+				char headerData[0x1000];
+				cardParamCommand (CARD_CMD_HEADER_READ, 0,
+					CARD_ACTIVATE | CARD_nRESET | CARD_CLK_SLOW | CARD_BLK_SIZE(1) | CARD_DELAY1(0x1FFF) | CARD_DELAY2(0x3F),
+					(u32 *)headerData, 0x200 / sizeof(u32));
+
+				if ((headerData[0x12] != 0) || (headerData[0x1BF] != 0)) {
+					// Extended header found
+					if(normalChip) {
+						for(int i = 0; i < 8; i++) {
+							cardParamCommand (CARD_CMD_HEADER_READ, i * 0x200,
+								CARD_ACTIVATE | CARD_nRESET | CARD_CLK_SLOW | CARD_BLK_SIZE(1) | CARD_DELAY1(0x1FFF) | CARD_DELAY2(0x3F),
+								(u32 *)headerData + i * 0x200 / sizeof(u32), 0x200 / sizeof(u32));
+						}
+					} else {
+						cardParamCommand (CARD_CMD_HEADER_READ, 0,
+							CARD_ACTIVATE | CARD_nRESET | CARD_CLK_SLOW | CARD_BLK_SIZE(4) | CARD_DELAY1(0x1FFF) | CARD_DELAY2(0x3F),
+							(u32 *)headerData, 0x1000 / sizeof(u32));
+					}
+				}
+
+				sysSetCardOwner(BUS_OWNER_ARM7);
+
+				// Leave Slot-1 enabled for IR cartridges, Battle & Get: Pokémon Typing DS, and DS Download Play
+				conf->specialCard = (headerData[0xC] == 'I' || memcmp(headerData + 0xC, "UZP", 3) == 0 || memcmp(romTid, "HND", 3) == 0);
+				if (conf->specialCard) {
+					conf->valueBits2 |= BIT(4);
 				} else {
-					char twlPath[64];
-					sprintf(twlPath, "sdmc%s", conf->prvPath+2);
-
-					addTwlDevice(0, 0x08, 0x06, "dataPrv", twlPath);
+					disableSlot1();
 				}
 			}
-			if (strlen(conf->savPath) < 62 && pubSize > 0) {
-				if (strncasecmp(conf->savPath, "sd:", 3) != 0) {
-					const bool isSdmc = (strncasecmp(conf->savPath, "sdmc:", 5) == 0);
-					addTwlDevice(0, (u8)((sdNandFound || isSdmc) ? 0x08 : 0x09), 0x06, "dataPub", conf->savPath);
-				} else {
-					char twlPath[64];
-					sprintf(twlPath, "sdmc%s", conf->savPath+2);
+		}
 
-					addTwlDevice(0, 0x08, 0x06, "dataPub", twlPath);
+		u32 srBackendId[2] = {0};
+		// Load srBackendId
+		if (REG_SCFG_EXT7 == 0 && conf->bootstrapOnFlashcard) {
+			/*srBackendId[0] = 0x464B4356; // "VCKF" (My Cooking Coach)
+			srBackendId[1] = 0x00030000;*/
+		} else {
+			cebin = fopen("sd:/_nds/nds-bootstrap/srBackendId.bin", "rb");
+			fread(&srBackendId, sizeof(u32), 2, cebin);
+			fclose(cebin);
+		}
+
+		if (isDSiMode() && unitCode > 0 && !conf->gameOnFlashcard) {
+			const bool sdNandFound = conf->sdNand && (access("sd:/shared1", F_OK) == 0);
+			const bool sdPhotoFound = conf->sdNand && (access("sd:/photo", F_OK) == 0);
+
+			// Load device list
+			addTwlDevice(0, (u8)(sdNandFound ? 0 : 0x81), 0x06, "nand", "/");
+			if (!sdNandFound) {
+				addTwlDevice(0, 0xA1, 0x06, "nand2", "/");
+			} else {
+				addTwlDevice(0, 0, 0x06, "sdmc", "/");
+			}
+			if (shared2len > 0) {
+				addTwlDevice(0, (u8)(sdNandFound ? 0x08 : 0x09), 0x06, "share", "nand:/shared2/0000");
+			}
+			if (!sdNandFound) {
+				addTwlDevice(0, 0, 0x06, "sdmc", "/");
+			}
+			if (romTid[0] == 'H') {
+				addTwlDevice(0, (u8)(sdNandFound ? 0x10 : 0x11), 0x06, "shared1", "nand:/shared1");
+				if (shared2len == 0) {
+					addTwlDevice(0, (u8)(sdNandFound ? 0x10 : 0x11), 0x06, "shared2", "nand:/shared2");
 				}
+			}
+			addTwlDevice(0, (u8)((sdNandFound || sdPhotoFound) ? 0x10 : 0x31), 0x06, "photo", ((sdNandFound || sdPhotoFound) ? "sdmc:/photo" : "nand2:/photo"));
+			if (!conf->saveOnFlashcard) {
+				if (strlen(conf->prvPath) < 62 && prvSize > 0) {
+					if (strncasecmp(conf->prvPath, "sd:", 3) != 0) {
+						const bool isSdmc = (strncasecmp(conf->prvPath, "sdmc:", 5) == 0);
+						addTwlDevice(0, (u8)((sdNandFound || isSdmc) ? 0x08 : 0x09), 0x06, "dataPrv", conf->prvPath);
+					} else {
+						char twlPath[64];
+						sprintf(twlPath, "sdmc%s", conf->prvPath+2);
+
+						addTwlDevice(0, 0x08, 0x06, "dataPrv", twlPath);
+					}
+				}
+				if (strlen(conf->savPath) < 62 && pubSize > 0) {
+					if (strncasecmp(conf->savPath, "sd:", 3) != 0) {
+						const bool isSdmc = (strncasecmp(conf->savPath, "sdmc:", 5) == 0);
+						addTwlDevice(0, (u8)((sdNandFound || isSdmc) ? 0x08 : 0x09), 0x06, "dataPub", conf->savPath);
+					} else {
+						char twlPath[64];
+						sprintf(twlPath, "sdmc%s", conf->savPath+2);
+
+						addTwlDevice(0, 0x08, 0x06, "dataPub", twlPath);
+					}
+				}
+			}
+
+			if (!conf->gameOnFlashcard && strlen(conf->appPath) < 62) {
+				char sdmcText[4] = {'s','d','m','c'};
+				tonccpy((char*)0x02EFF3C2, conf->appPath, strlen(conf->appPath));
+				tonccpy((char*)0x02EFF3C0, sdmcText, 4);
 			}
 		}
 
-		if (!conf->gameOnFlashcard && strlen(conf->appPath) < 62) {
-			char sdmcText[4] = {'s','d','m','c'};
-			tonccpy((char*)0x02EFF3C2, conf->appPath, strlen(conf->appPath));
-			tonccpy((char*)0x02EFF3C0, sdmcText, 4);
-		}
-	}
-
-	if (REG_SCFG_EXT7 == 0) {
-		if (conf->gameOnFlashcard && !conf->sdFound) {
-			// MBK and WRAM are inaccessible, but DSi titles and cardEngine seem to access those fine?
-			conf->dsiWramAccess = (memcmp(romTid, "VDE", 3) != 0); // Fossil Fighters: Champions
+		if (REG_SCFG_EXT7 == 0) {
+			if (conf->gameOnFlashcard && !conf->sdFound) {
+				// MBK and WRAM are inaccessible, but DSi titles and cardEngine seem to access those fine?
+				conf->dsiWramAccess = (memcmp(romTid, "VDE", 3) != 0); // Fossil Fighters: Champions
+			} else {
+				u32 wordBak = *(vu32*)0x03700000;
+				*(vu32*)0x03700000 = 0x414C5253;
+				conf->dsiWramAccess = *(vu32*)0x03700000 == 0x414C5253;
+				*(vu32*)0x03700000 = wordBak;
+			}
 		} else {
+			conf->dsiWramAccess = true;
+		}
+		bool ce9Wram = conf->dsiWramAccess;
+		if (ce9Wram) {
+			if (strncmp(romTid, "HND", 3) == 0 // DS Download Play
+			|| strncmp(romTid, "ADA", 3) == 0 // Diamond
+			|| strncmp(romTid, "APA", 3) == 0 // Pearl
+			|| strncmp(romTid, "Y3E", 3) == 0 // 2006-Nen 10-Gatsu Taikenban Soft
+			|| strncmp(romTid, "CPU", 3) == 0 // Platinum
+			|| strncmp(romTid, "IPK", 3) == 0 // HG
+			|| strncmp(romTid, "IPG", 3) == 0 // SS
+			) {
+				ce9Wram = false;
+			}
+		}
+		if (conf->dsiWramAccess) {
+			conf->valueBits2 |= BIT(5);
 			u32 wordBak = *(vu32*)0x03700000;
 			*(vu32*)0x03700000 = 0x414C5253;
-			conf->dsiWramAccess = *(vu32*)0x03700000 == 0x414C5253;
+			if (*(vu32*)0x03700000 == 0x414C5253 && *(vu32*)0x03708000 == 0x414C5253) {
+				conf->valueBits3 |= BIT(6); // DSi WRAM is mirrored by 32KB
+			}
 			*(vu32*)0x03700000 = wordBak;
 		}
-	} else {
-		conf->dsiWramAccess = true;
-	}
-	bool ce9Wram = conf->dsiWramAccess;
-	if (ce9Wram) {
-		if (strncmp(romTid, "HND", 3) == 0 // DS Download Play
-		 || strncmp(romTid, "ADA", 3) == 0 // Diamond
-		 || strncmp(romTid, "APA", 3) == 0 // Pearl
-		 || strncmp(romTid, "Y3E", 3) == 0 // 2006-Nen 10-Gatsu Taikenban Soft
-		 || strncmp(romTid, "CPU", 3) == 0 // Platinum
-		 || strncmp(romTid, "IPK", 3) == 0 // HG
-		 || strncmp(romTid, "IPG", 3) == 0 // SS
-		) {
-			ce9Wram = false;
+		if (access("sd:/hiya.dsi", F_OK) == 0) {
+			conf->valueBits2 |= BIT(6);
 		}
-	}
-	if (conf->dsiWramAccess) {
-		conf->valueBits2 |= BIT(5);
-		u32 wordBak = *(vu32*)0x03700000;
-		*(vu32*)0x03700000 = 0x414C5253;
-		if (*(vu32*)0x03700000 == 0x414C5253 && *(vu32*)0x03708000 == 0x414C5253) {
-			conf->valueBits3 |= BIT(6); // DSi WRAM is mirrored by 32KB
-		}
-		*(vu32*)0x03700000 = wordBak;
-	}
-	if (access("sd:/hiya.dsi", F_OK) == 0) {
-		conf->valueBits2 |= BIT(6);
-	}
 
-  if (conf->gameOnFlashcard || !conf->isDSiWare) {
-	// Load external cheat engine binary
-	cebin = fopen("nitro:/cardenginei_arm7_cheat.bin", "rb");
-	if (cebin) {
-		fread((u8*)CHEAT_ENGINE_BUFFERED_LOCATION, 1, 0x400, cebin);
-	}
-	fclose(cebin);
-
-	if ((unitCode > 0 && conf->dsiMode) || conf->isDSiWare) {
-		const bool binary3 = (REG_SCFG_EXT7 == 0 ? !dsiEnhancedMbk : (a7mbk6 != 0x00403000));
-
-		// Load SDK5 ce7 binary
-		cebin = fopen(binary3 ? "nitro:/cardenginei_arm7_twlsdk3.lz77" : "nitro:/cardenginei_arm7_twlsdk.lz77", "rb");
-		if (cebin) {
-			fread(lz77ImageBuffer, 1, sizeof_lz77ImageBuffer, cebin);
-			LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINEI_ARM7_BUFFERED_LOCATION);
-			if (REG_SCFG_EXT7 != 0) {
-				tonccpy((u8*)LOADER_RETURN_SDK5_LOCATION, twlmenuResetGamePath, 256);
-			}
-			tonccpy((u8*)LOADER_RETURN_SDK5_LOCATION+0x100, &srBackendId, 8);
-		}
-		fclose(cebin);
-
-		if (conf->gameOnFlashcard) {
-			// Load SDK5 DLDI ce9 binary
-			cebin = fopen(binary3 ? "nitro:/cardenginei_arm9_twlsdk3_dldi.lz77" : "nitro:/cardenginei_arm9_twlsdk_dldi.lz77", "rb");
+		if (conf->gameOnFlashcard || !conf->isDSiWare) {
+			// Load external cheat engine binary
+			cebin = fopen("nitro:/cardenginei_arm7_cheat.bin", "rb");
 			if (cebin) {
-				fread(lz77ImageBuffer, 1, sizeof_lz77ImageBuffer, cebin);
-				LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINEI_ARM9_SDK5_BUFFERED_LOCATION);
-			}
-			fclose(cebin);
-		} else {
-			// Load SDK5 ce9 binary
-			cebin = fopen(binary3 ? "nitro:/cardenginei_arm9_twlsdk3.lz77" : "nitro:/cardenginei_arm9_twlsdk.lz77", "rb");
-			if (cebin) {
-				fread(lz77ImageBuffer, 1, sizeof_lz77ImageBuffer, cebin);
-				LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINEI_ARM9_SDK5_BUFFERED_LOCATION);
-			}
-			fclose(cebin);
-		}
-	} else {
-		// Load ce7 binary
-		cebin = fopen(dsiEnhancedMbk ? "nitro:/cardenginei_arm7_alt.lz77" : "nitro:/cardenginei_arm7.lz77", "rb");
-		if (cebin) {
-			fread(lz77ImageBuffer, 1, sizeof_lz77ImageBuffer, cebin);
-			LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINEI_ARM7_BUFFERED_LOCATION);
-			if (REG_SCFG_EXT7 != 0) {
-				tonccpy((u8*)LOADER_RETURN_LOCATION, twlmenuResetGamePath, 256);
-			}
-			tonccpy((u8*)LOADER_RETURN_LOCATION+0x100, &srBackendId, 8);
-		}
-		fclose(cebin);
-
-		const bool dlp = (memcmp(romTid, "HND", 3) == 0);
-		const bool gsdd = (memcmp(romTid, "BO5", 3) == 0);
-
-		if (conf->gameOnFlashcard) {
-			const char* ce9Path = "nitro:/cardenginei_arm9_dldi.lz77";
-			if (gsdd) {
-				ce9Path = "nitro:/cardenginei_arm9_gsdd_dldi.lz77";
-			}
-
-			// Load DLDI ce9 binary
-			cebin = fopen(ce9Path, "rb");
-			if (cebin) {
-				fread(lz77ImageBuffer, 1, sizeof_lz77ImageBuffer, cebin);
-				LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINEI_ARM9_BUFFERED_LOCATION);
-			}
-			fclose(cebin);
-		} else {
-			const char* ce9Path = ce9Wram ? "nitro:/cardenginei_arm9.lz77" : "nitro:/cardenginei_arm9_alt.lz77";
-			if (dlp) {
-				ce9Path = "nitro:/cardenginei_arm9_dlp.lz77";
-			} else if (gsdd) {
-				ce9Path = ce9Wram ? "nitro:/cardenginei_arm9_gsdd.lz77" : "nitro:/cardenginei_arm9_gsdd_alt.lz77";
-			}
-
-			// Load ce9 binary
-			cebin = fopen(ce9Path, "rb");
-			if (cebin) {
-				fread(lz77ImageBuffer, 1, sizeof_lz77ImageBuffer, cebin);
-				LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINEI_ARM9_BUFFERED_LOCATION);
+				fread((u8*)CHEAT_ENGINE_BUFFERED_LOCATION, 1, 0x400, cebin);
 			}
 			fclose(cebin);
 
-			if (!ce9Wram && !dlp && !gsdd) {
-				// Load ce9 binary (alt 2)
-				cebin = fopen("nitro:/cardenginei_arm9_alt2.lz77", "rb");
+			if ((unitCode > 0 && conf->dsiMode) || conf->isDSiWare) {
+				const bool binary3 = (REG_SCFG_EXT7 == 0 ? !dsiEnhancedMbk : (a7mbk6 != 0x00403000));
+
+				// Load SDK5 ce7 binary
+				cebin = fopen(binary3 ? "nitro:/cardenginei_arm7_twlsdk3.lz77" : "nitro:/cardenginei_arm7_twlsdk.lz77", "rb");
 				if (cebin) {
 					fread(lz77ImageBuffer, 1, sizeof_lz77ImageBuffer, cebin);
-					LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINEI_ARM9_BUFFERED_LOCATION2);
+					LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINEI_ARM7_BUFFERED_LOCATION);
+					if (REG_SCFG_EXT7 != 0) {
+						tonccpy((u8*)LOADER_RETURN_SDK5_LOCATION, twlmenuResetGamePath, 256);
+					}
+					tonccpy((u8*)LOADER_RETURN_SDK5_LOCATION+0x100, &srBackendId, 8);
 				}
 				fclose(cebin);
-			}
-		}
-	}
 
-	bool found = (access(pageFilePath.c_str(), F_OK) == 0);
-	if (!found) {
-		consoleDemoInit();
-		iprintf("Creating pagefile.sys\n");
-		iprintf("Please wait...\n");
-	}
-
-	cebin = fopen(pageFilePath.c_str(), found ? "r+" : "wb");
-	fseek(cebin, twlPageFileSize - 1, SEEK_SET);
-	fputc('\0', cebin);
-	fclose(cebin);
-
-	if (!found) {
-		consoleClear();
-	}
-
-	// Load touch fix for SM64DS (U) v1.0
-	cebin = fopen("nitro:/arm7fix.bin", "rb");
-	if (cebin) {
-		fread((u8*)ARM7_FIX_BUFFERED_LOCATION, 1, 0x140, cebin);
-	}
-	fclose(cebin);
-
-	FILE *file = fopen(conf->consoleModel > 0 ? "nitro:/preLoadSettings3DS.pck" : "nitro:/preLoadSettingsDSi.pck", "rb");
-	if (file) {
-		char buf[5] = {0};
-		fread(buf, 1, 4, file);
-	  if (strcmp(buf, ".PCK") == 0) {
-
-		u32 fileCount;
-		fread(&fileCount, 1, sizeof(fileCount), file);
-
-		u32 offset = 0, size = 0;
-
-		// Try binary search for the game
-		int left = 0;
-		int right = fileCount;
-
-		while (left <= right) {
-			int mid = left + ((right - left) / 2);
-			fseek(file, 16 + mid * 16, SEEK_SET);
-			fread(buf, 1, 4, file);
-			int cmp = strcmp(buf, romTid);
-			if (cmp == 0) { // TID matches, check CRC
-				u16 crc;
-				fread(&crc, 1, sizeof(crc), file);
-
-				if (crc == headerCRC) { // CRC matches
-					fread(&offset, 1, sizeof(offset), file);
-					fread(&size, 1, sizeof(size), file);
-					break;
-				} else if (crc < headerCRC) {
-					left = mid + 1;
+				if (conf->gameOnFlashcard) {
+					// Load SDK5 DLDI ce9 binary
+					cebin = fopen(binary3 ? "nitro:/cardenginei_arm9_twlsdk3_dldi.lz77" : "nitro:/cardenginei_arm9_twlsdk_dldi.lz77", "rb");
+					if (cebin) {
+						fread(lz77ImageBuffer, 1, sizeof_lz77ImageBuffer, cebin);
+						LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINEI_ARM9_SDK5_BUFFERED_LOCATION);
+					}
+					fclose(cebin);
 				} else {
-					right = mid - 1;
+					// Load SDK5 ce9 binary
+					cebin = fopen(binary3 ? "nitro:/cardenginei_arm9_twlsdk3.lz77" : "nitro:/cardenginei_arm9_twlsdk.lz77", "rb");
+					if (cebin) {
+						fread(lz77ImageBuffer, 1, sizeof_lz77ImageBuffer, cebin);
+						LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINEI_ARM9_SDK5_BUFFERED_LOCATION);
+					}
+					fclose(cebin);
 				}
-			} else if (cmp < 0) {
-				left = mid + 1;
 			} else {
-				right = mid - 1;
-			}
-		}
+				// Load ce7 binary
+				cebin = fopen(dsiEnhancedMbk ? "nitro:/cardenginei_arm7_alt.lz77" : "nitro:/cardenginei_arm7.lz77", "rb");
+				if (cebin) {
+					fread(lz77ImageBuffer, 1, sizeof_lz77ImageBuffer, cebin);
+					LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINEI_ARM7_BUFFERED_LOCATION);
+					if (REG_SCFG_EXT7 != 0) {
+						tonccpy((u8*)LOADER_RETURN_LOCATION, twlmenuResetGamePath, 256);
+					}
+					tonccpy((u8*)LOADER_RETURN_LOCATION+0x100, &srBackendId, 8);
+				}
+				fclose(cebin);
 
-		if (offset > 0) {
-			if (size > 0xC) {
-				size = 0xC;
-			}
-			fseek(file, offset, SEEK_SET);
-			u32 *buffer = new u32[size/4];
-			fread(buffer, 1, size, file);
+				const bool dlp = (memcmp(romTid, "HND", 3) == 0);
+				const bool gsdd = (memcmp(romTid, "BO5", 3) == 0);
 
-			/* for (u32 i = 0; i < size/8; i++) {
-				conf->dataToPreloadAddr[i] = buffer[0+(i*2)];
-				conf->dataToPreloadSize[i] = buffer[1+(i*2)];
-			} */
-			conf->dataToPreloadAddr = buffer[0];
-			conf->dataToPreloadSize = buffer[1];
-			conf->dataToPreloadFrame = (size == 0xC) ? buffer[2] : 0;
-			delete[] buffer;
-		}
-	  }
-		fclose(file);
-	}
-	if (conf->dataToPreloadAddr == 0) {
-		// Set NitroFS pre-load, in case if full ROM pre-load fails
-		conf->dataToPreloadAddr = ndsArm7BinOffset+ndsArm7Size;
-		conf->dataToPreloadSize = ((internalRomSize == 0 || internalRomSize > conf->romSize) ? conf->romSize : internalRomSize)-conf->dataToPreloadAddr;
-		conf->dataToPreloadFrame = 0;
-	}
-  } else {
-	const bool binary3 = (REG_SCFG_EXT7 == 0 ? !dsiEnhancedMbk : (a7mbk6 != 0x00403000));
+				if (conf->gameOnFlashcard) {
+					const char* ce9Path = "nitro:/cardenginei_arm9_dldi.lz77";
+					if (gsdd) {
+						ce9Path = "nitro:/cardenginei_arm9_gsdd_dldi.lz77";
+					}
 
-	// Load ce7 binary
-	cebin = fopen(binary3 ? "nitro:/cardenginei_arm7_dsiware3.lz77" : "nitro:/cardenginei_arm7_dsiware.lz77", "rb");
-	if (cebin) {
-		fread(lz77ImageBuffer, 1, sizeof_lz77ImageBuffer, cebin);
-		LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINEI_ARM7_BUFFERED_LOCATION);
-		if (REG_SCFG_EXT7 != 0) {
-			tonccpy((u8*)LOADER_RETURN_DSIWARE_LOCATION, twlmenuResetGamePath, 256);
-		}
-		tonccpy((u8*)LOADER_RETURN_DSIWARE_LOCATION+0x100, &srBackendId, 8);
-	}
-	fclose(cebin);
+					// Load DLDI ce9 binary
+					cebin = fopen(ce9Path, "rb");
+					if (cebin) {
+						fread(lz77ImageBuffer, 1, sizeof_lz77ImageBuffer, cebin);
+						LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINEI_ARM9_BUFFERED_LOCATION);
+					}
+					fclose(cebin);
+				} else {
+					const char* ce9Path = ce9Wram ? "nitro:/cardenginei_arm9.lz77" : "nitro:/cardenginei_arm9_alt.lz77";
+					if (dlp) {
+						ce9Path = "nitro:/cardenginei_arm9_dlp.lz77";
+					} else if (gsdd) {
+						ce9Path = ce9Wram ? "nitro:/cardenginei_arm9_gsdd.lz77" : "nitro:/cardenginei_arm9_gsdd_alt.lz77";
+					}
 
-	// Load external cheat engine binary
-	cebin = fopen("nitro:/cardenginei_arm7_cheat.bin", "rb");
-	if (cebin) {
-		fread((u8*)CHEAT_ENGINE_BUFFERED_LOCATION, 1, 0x400, cebin);
-	}
-	fclose(cebin);
+					// Load ce9 binary
+					cebin = fopen(ce9Path, "rb");
+					if (cebin) {
+						fread(lz77ImageBuffer, 1, sizeof_lz77ImageBuffer, cebin);
+						LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINEI_ARM9_BUFFERED_LOCATION);
+					}
+					fclose(cebin);
 
-	// Load ce9 binary
-	cebin = fopen(binary3 ? "nitro:/cardenginei_arm9_dsiware3.lz77" : "nitro:/cardenginei_arm9_dsiware.lz77", "rb");
-	if (cebin) {
-		fread(lz77ImageBuffer, 1, sizeof_lz77ImageBuffer, cebin);
-		LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINEI_ARM9_BUFFERED_LOCATION);
-	}
-	fclose(cebin);
-
-	bool found = (access(pageFilePath.c_str(), F_OK) == 0);
-	if (!found) {
-		consoleDemoInit();
-		iprintf("Creating pagefile.sys\n");
-		iprintf("Please wait...\n");
-	}
-
-	cebin = fopen(pageFilePath.c_str(), found ? "r+" : "wb");
-	fseek(cebin, twlPageFileSize - 1, SEEK_SET);
-	fputc('\0', cebin);
-	fclose(cebin);
-
-	if (!found) {
-		consoleClear();
-	}
-
-  }
-
-	// Load in-game menu ce9 binary
-	cebin = fopen("nitro:/cardenginei_arm9_igm.lz77", "rb");
-	if (cebin) {
-		fread(lz77ImageBuffer, 1, sizeof_lz77ImageBuffer, cebin);
-		LZ77_Decompress(lz77ImageBuffer, (u8*)igmText);
-
-		getIgmStrings(conf, false);
-
-		fclose(cebin);
-
-		screenshotPath = "sd:/_nds/nds-bootstrap/screenshots.tar";
-		if (conf->bootstrapOnFlashcard) {
-			screenshotPath = "fat:/_nds/nds-bootstrap/screenshots.tar";
-		}
-
-		if (getFileSize(screenshotPath.c_str()) < 0x4BCC00) {
-			char buffer[2][0x100] = {{0}};
-
-			consoleDemoInit();
-			iprintf("Creating screenshots.tar\n");
-			iprintf("Please wait...");
-
-			if (access(screenshotPath.c_str(), F_OK) == 0) {
-				remove(screenshotPath.c_str());
+					if (!ce9Wram && !dlp && !gsdd) {
+						// Load ce9 binary (alt 2)
+						cebin = fopen("nitro:/cardenginei_arm9_alt2.lz77", "rb");
+						if (cebin) {
+							fread(lz77ImageBuffer, 1, sizeof_lz77ImageBuffer, cebin);
+							LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINEI_ARM9_BUFFERED_LOCATION2);
+						}
+						fclose(cebin);
+					}
+				}
 			}
 
-			FILE *headerFile = fopen("nitro:/screenshotTarHeaders.bin", "rb");
-			if (headerFile) {
-				fread(buffer[0], 1, 0x100, headerFile);
-				FILE *screenshotFile = fopen(screenshotPath.c_str(), "wb");
+			bool found = (access(pageFilePath.c_str(), F_OK) == 0);
+			if (!found) {
+				consoleDemoInit();
+				iprintf("Creating pagefile.sys\n");
+				iprintf("Please wait...\n");
+			}
+
+			cebin = fopen(pageFilePath.c_str(), found ? "r+" : "wb");
+			fseek(cebin, twlPageFileSize - 1, SEEK_SET);
+			fputc('\0', cebin);
+			fclose(cebin);
+
+			if (!found) {
+				consoleClear();
+			}
+
+			// Load touch fix for SM64DS (U) v1.0
+			cebin = fopen("nitro:/arm7fix.bin", "rb");
+			if (cebin) {
+				fread((u8*)ARM7_FIX_BUFFERED_LOCATION, 1, 0x140, cebin);
+			}
+			fclose(cebin);
+
+			FILE *file = fopen(conf->consoleModel > 0 ? "nitro:/preLoadSettings3DS.pck" : "nitro:/preLoadSettingsDSi.pck", "rb");
+			if (file) {
+				char buf[5] = {0};
+					fread(buf, 1, 4, file);
+				if (strcmp(buf, ".PCK") == 0) {
+
+					u32 fileCount;
+					fread(&fileCount, 1, sizeof(fileCount), file);
+
+					u32 offset = 0, size = 0;
+
+					// Try binary search for the game
+					int left = 0;
+					int right = fileCount;
+
+					while (left <= right) {
+						int mid = left + ((right - left) / 2);
+						fseek(file, 16 + mid * 16, SEEK_SET);
+						fread(buf, 1, 4, file);
+						int cmp = strcmp(buf, romTid);
+						if (cmp == 0) { // TID matches, check CRC
+							u16 crc;
+							fread(&crc, 1, sizeof(crc), file);
+
+							if (crc == headerCRC) { // CRC matches
+								fread(&offset, 1, sizeof(offset), file);
+								fread(&size, 1, sizeof(size), file);
+								break;
+							} else if (crc < headerCRC) {
+								left = mid + 1;
+							} else {
+								right = mid - 1;
+							}
+						} else if (cmp < 0) {
+							left = mid + 1;
+						} else {
+							right = mid - 1;
+						}
+					}
+
+					if (offset > 0) {
+						if (size > 0xC) {
+							size = 0xC;
+						}
+						fseek(file, offset, SEEK_SET);
+						u32 *buffer = new u32[size/4];
+						fread(buffer, 1, size, file);
+
+						/* for (u32 i = 0; i < size/8; i++) {
+							conf->dataToPreloadAddr[i] = buffer[0+(i*2)];
+							conf->dataToPreloadSize[i] = buffer[1+(i*2)];
+						} */
+						conf->dataToPreloadAddr = buffer[0];
+						conf->dataToPreloadSize = buffer[1];
+						conf->dataToPreloadFrame = (size == 0xC) ? buffer[2] : 0;
+						delete[] buffer;
+					}
+				}
+				fclose(file);
+			}
+			if (conf->dataToPreloadAddr == 0) {
+				// Set NitroFS pre-load, in case if full ROM pre-load fails
+				conf->dataToPreloadAddr = ndsArm7BinOffset+ndsArm7Size;
+				conf->dataToPreloadSize = ((internalRomSize == 0 || internalRomSize > conf->romSize) ? conf->romSize : internalRomSize)-conf->dataToPreloadAddr;
+				conf->dataToPreloadFrame = 0;
+			}
+		} else {
+			const bool binary3 = (REG_SCFG_EXT7 == 0 ? !dsiEnhancedMbk : (a7mbk6 != 0x00403000));
+
+			// Load ce7 binary
+			cebin = fopen(binary3 ? "nitro:/cardenginei_arm7_dsiware3.lz77" : "nitro:/cardenginei_arm7_dsiware.lz77", "rb");
+			if (cebin) {
+				fread(lz77ImageBuffer, 1, sizeof_lz77ImageBuffer, cebin);
+				LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINEI_ARM7_BUFFERED_LOCATION);
+				if (REG_SCFG_EXT7 != 0) {
+					tonccpy((u8*)LOADER_RETURN_DSIWARE_LOCATION, twlmenuResetGamePath, 256);
+				}
+				tonccpy((u8*)LOADER_RETURN_DSIWARE_LOCATION+0x100, &srBackendId, 8);
+			}
+			fclose(cebin);
+
+			// Load external cheat engine binary
+			cebin = fopen("nitro:/cardenginei_arm7_cheat.bin", "rb");
+			if (cebin) {
+				fread((u8*)CHEAT_ENGINE_BUFFERED_LOCATION, 1, 0x400, cebin);
+			}
+			fclose(cebin);
+
+			// Load ce9 binary
+			cebin = fopen(binary3 ? "nitro:/cardenginei_arm9_dsiware3.lz77" : "nitro:/cardenginei_arm9_dsiware.lz77", "rb");
+			if (cebin) {
+				fread(lz77ImageBuffer, 1, sizeof_lz77ImageBuffer, cebin);
+				LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINEI_ARM9_BUFFERED_LOCATION);
+			}
+			fclose(cebin);
+
+			bool found = (access(pageFilePath.c_str(), F_OK) == 0);
+			if (!found) {
+				consoleDemoInit();
+				iprintf("Creating pagefile.sys\n");
+				iprintf("Please wait...\n");
+			}
+
+			cebin = fopen(pageFilePath.c_str(), found ? "r+" : "wb");
+			fseek(cebin, twlPageFileSize - 1, SEEK_SET);
+			fputc('\0', cebin);
+			fclose(cebin);
+
+			if (!found) {
+				consoleClear();
+			}
+
+		}
+
+		// Load in-game menu ce9 binary
+		cebin = fopen("nitro:/cardenginei_arm9_igm.lz77", "rb");
+		if (cebin) {
+			fread(lz77ImageBuffer, 1, sizeof_lz77ImageBuffer, cebin);
+			LZ77_Decompress(lz77ImageBuffer, (u8*)igmText);
+
+			getIgmStrings(conf, false);
+
+			fclose(cebin);
+
+			screenshotPath = "sd:/_nds/nds-bootstrap/screenshots.tar";
+			if (conf->bootstrapOnFlashcard) {
+				screenshotPath = "fat:/_nds/nds-bootstrap/screenshots.tar";
+			}
+
+			if (getFileSize(screenshotPath.c_str()) < 0x4BCC00) {
+				char buffer[2][0x100] = {{0}};
+
+				consoleDemoInit();
+				iprintf("Creating screenshots.tar\n");
+				iprintf("Please wait...");
+
+				if (access(screenshotPath.c_str(), F_OK) == 0) {
+					remove(screenshotPath.c_str());
+				}
+
+				FILE *headerFile = fopen("nitro:/screenshotTarHeaders.bin", "rb");
+				if (headerFile) {
+					fread(buffer[0], 1, 0x100, headerFile);
+					FILE *screenshotFile = fopen(screenshotPath.c_str(), "wb");
+					if (screenshotFile) {
+						fseek(screenshotFile, 0x4BCC00 - 1, SEEK_SET);
+						fputc('\0', screenshotFile);
+
+						for (int i = 0; i < 50; i++) {
+							fseek(screenshotFile, i*0x18400, SEEK_SET);
+							fread(buffer[1], 1, 0x100, headerFile);
+							fwrite(buffer[1], 1, 0x100, screenshotFile);
+							fwrite(buffer[0], 1, 0x100, screenshotFile);
+						}
+
+						fclose(screenshotFile);
+					}
+					fclose(headerFile);
+				}
+
+				consoleClear();
+				if (getFileSize(screenshotPath.c_str()) < 0x4BCC00) {
+					iprintf("Failed to create screenshots.tar");
+					while (1) swiWaitForVBlank();
+				}
+				igmText->currentScreenshot = 0;
+			} else {
+				FILE *screenshotFile = fopen(screenshotPath.c_str(), "rb");
+				igmText->currentScreenshot = 50;
 				if (screenshotFile) {
-					fseek(screenshotFile, 0x4BCC00 - 1, SEEK_SET);
-					fputc('\0', screenshotFile);
-
+					fseek(screenshotFile, 0x200, SEEK_SET);
 					for (int i = 0; i < 50; i++) {
-						fseek(screenshotFile, i*0x18400, SEEK_SET);
-						fread(buffer[1], 1, 0x100, headerFile);
-						fwrite(buffer[1], 1, 0x100, screenshotFile);
-						fwrite(buffer[0], 1, 0x100, screenshotFile);
+						if(fgetc(screenshotFile) != 'B') {
+							igmText->currentScreenshot = i;
+							break;
+						}
+
+						fseek(screenshotFile, 0x18400 - 1, SEEK_CUR);
 					}
 
 					fclose(screenshotFile);
 				}
-				fclose(headerFile);
 			}
 
-			consoleClear();
-			if (getFileSize(screenshotPath.c_str()) < 0x4BCC00) {
-				iprintf("Failed to create screenshots.tar");
-				while (1) swiWaitForVBlank();
+			cebin = fopen(pageFilePath.c_str(), "r+");
+			fwrite((u8*)igmText, 1, 0xA000, cebin);
+			fclose(cebin);
+			toncset((u8*)igmText, 0, 0xA000);
+		}
+
+		// Load DS blowfish
+		cebin = fopen("nitro:/encr_data.bin", "rb");
+		if (cebin) {
+			fread((void*)BLOWFISH_LOCATION, 1, 0x1048, cebin);
+		}
+		fclose(cebin);
+
+		if (!isDSiMode() && unitCode>0 && (conf->dsiMode || conf->isDSiWare)) {
+			// Load DSi ARM9 BIOS
+			const u32 relocAddr9 = 0x02F70000;
+			cebin = fopen("sd:/_nds/bios9i.bin", "rb");
+			if (!cebin) {
+				cebin = fopen("sd:/_nds/bios9i_part1.bin", "rb");
 			}
-			igmText->currentScreenshot = 0;
+			if (cebin) {
+				fread((u32*)relocAddr9, 1, 0x8000, cebin);
+
+				u16 biosAddrs[12] = {0x00CC, 0x3264, 0x3268, 0x326C, 0x33E0, 0x42C0, 0x4B88, 0x4B90, 0x4B9C, 0x4BA0, 0x4E1C, 0x4F18};
+				// Relocate addresses
+				for (int i = 0; i < 12; i++) {
+					*(u32*)(relocAddr9+biosAddrs[i]) -= 0xFFFF0000;
+					*(u32*)(relocAddr9+biosAddrs[i]) += relocAddr9;
+				}
+			}
+			fclose(cebin);
+
+			// Load DSi ARM7 BIOS
+			const u32 relocAddr7 = relocAddr9+0x8000;
+			cebin = fopen("sd:/_nds/bios7i.bin", "rb");
+			if (!cebin) {
+				cebin = fopen("sd:/_nds/bios7i_part1.bin", "rb");
+			}
+			if (cebin) {
+				fread((u8*)relocAddr7, 1, 0x8000, cebin);
+
+				// Relocate address
+				*(u32*)(relocAddr7+0x58A8) += relocAddr7;
+			}
+			fclose(cebin);
+		}
+
+		if (conf->gameOnFlashcard) {
+			wideCheatFilePath = "fat:/_nds/nds-bootstrap/wideCheatData.bin";
+			cheatFilePath = "fat:/_nds/nds-bootstrap/cheatData.bin";
 		} else {
-			FILE *screenshotFile = fopen(screenshotPath.c_str(), "rb");
-			igmText->currentScreenshot = 50;
-			if (screenshotFile) {
-				fseek(screenshotFile, 0x200, SEEK_SET);
-				for (int i = 0; i < 50; i++) {
-					if(fgetc(screenshotFile) != 'B') {
-						igmText->currentScreenshot = i;
-						break;
-					}
-
-					fseek(screenshotFile, 0x18400 - 1, SEEK_CUR);
-				}
-
-				fclose(screenshotFile);
-			}
+			wideCheatFilePath = "sd:/_nds/nds-bootstrap/wideCheatData.bin";
+			cheatFilePath = "sd:/_nds/nds-bootstrap/cheatData.bin";
 		}
 
-		cebin = fopen(pageFilePath.c_str(), "r+");
-		fwrite((u8*)igmText, 1, 0xA000, cebin);
-		fclose(cebin);
-		toncset((u8*)igmText, 0, 0xA000);
-	}
+		conf->saveSize = getFileSize(conf->savPath);
+		// conf->gbaRomSize = getFileSize(conf->gbaPath);
+		// conf->gbaSaveSize = getFileSize(conf->gbaSavPath);
+		conf->wideCheatSize = getFileSize(wideCheatFilePath.c_str());
+		conf->apPatchSize = getFileSize(conf->apPatchPath);
+		conf->cheatSize = getFileSize(cheatFilePath.c_str());
 
-	// Load DS blowfish
-	cebin = fopen("nitro:/encr_data.bin", "rb");
-	if (cebin) {
-		fread((void*)BLOWFISH_LOCATION, 1, 0x1048, cebin);
-	}
-	fclose(cebin);
+		//bool wideCheatFound = (access(wideCheatFilePath.c_str(), F_OK) == 0);
 
-	if (!isDSiMode() && unitCode>0 && (conf->dsiMode || conf->isDSiWare)) {
-		// Load DSi ARM9 BIOS
-		const u32 relocAddr9 = 0x02F70000;
-		cebin = fopen("sd:/_nds/bios9i.bin", "rb");
-		if (!cebin) {
-			cebin = fopen("sd:/_nds/bios9i_part1.bin", "rb");
-		}
-		if (cebin) {
-			fread((u32*)relocAddr9, 1, 0x8000, cebin);
-
-			u16 biosAddrs[12] = {0x00CC, 0x3264, 0x3268, 0x326C, 0x33E0, 0x42C0, 0x4B88, 0x4B90, 0x4B9C, 0x4BA0, 0x4E1C, 0x4F18};
-			// Relocate addresses
-			for (int i = 0; i < 12; i++) {
-				*(u32*)(relocAddr9+biosAddrs[i]) -= 0xFFFF0000;
-				*(u32*)(relocAddr9+biosAddrs[i]) += relocAddr9;
-			}
-		}
-		fclose(cebin);
-
-		// Load DSi ARM7 BIOS
-		const u32 relocAddr7 = relocAddr9+0x8000;
-		cebin = fopen("sd:/_nds/bios7i.bin", "rb");
-		if (!cebin) {
-			cebin = fopen("sd:/_nds/bios7i_part1.bin", "rb");
-		}
-		if (cebin) {
-			fread((u8*)relocAddr7, 1, 0x8000, cebin);
-
-			// Relocate address
-			*(u32*)(relocAddr7+0x58A8) += relocAddr7;
-		}
-		fclose(cebin);
-	}
-
-	if (conf->gameOnFlashcard) {
-		wideCheatFilePath = "fat:/_nds/nds-bootstrap/wideCheatData.bin";
-		cheatFilePath = "fat:/_nds/nds-bootstrap/cheatData.bin";
-	} else {
-		wideCheatFilePath = "sd:/_nds/nds-bootstrap/wideCheatData.bin";
-		cheatFilePath = "sd:/_nds/nds-bootstrap/cheatData.bin";
-	}
-
-	conf->saveSize = getFileSize(conf->savPath);
-	// conf->gbaRomSize = getFileSize(conf->gbaPath);
-	// conf->gbaSaveSize = getFileSize(conf->gbaSavPath);
-	conf->wideCheatSize = getFileSize(wideCheatFilePath.c_str());
-	conf->apPatchSize = getFileSize(conf->apPatchPath);
-	conf->cheatSize = getFileSize(cheatFilePath.c_str());
-
-	//bool wideCheatFound = (access(wideCheatFilePath.c_str(), F_OK) == 0);
-
-	FILE* bootstrapImages = fopen("nitro:/bootloader_images.lz77", "rb");
-	if (bootstrapImages) {
-		fread(lz77ImageBuffer, 1, sizeof_lz77ImageBuffer, bootstrapImages);
-		LZ77_Decompress(lz77ImageBuffer, (u8*)IMAGES_LOCATION+0x18000);
-	}
-	fclose(bootstrapImages);
-
-	if (displayEsrb) {
-		// Read ESRB rating and descriptor(s) for current title
-		bootstrapImages = fopen(conf->bootstrapOnFlashcard ? "fat:/_nds/nds-bootstrap/esrb.bin" : "sd:/_nds/nds-bootstrap/esrb.bin", "rb");
+		FILE* bootstrapImages = fopen("nitro:/bootloader_images.lz77", "rb");
 		if (bootstrapImages) {
-			// Read width & height
-			/*fseek(bootstrapImages, 0x12, SEEK_SET);
-			u32 width, height;
-			fread(&width, 1, sizeof(width), bootstrapImages);
-			fread(&height, 1, sizeof(height), bootstrapImages);
+			fread(lz77ImageBuffer, 1, sizeof_lz77ImageBuffer, bootstrapImages);
+			LZ77_Decompress(lz77ImageBuffer, (u8*)IMAGES_LOCATION+0x18000);
+		}
+		fclose(bootstrapImages);
 
-			if (width > 256 || height > 192) {
-				fclose(bootstrapImages);
-				return false;
-			}
+		if (displayEsrb) {
+			// Read ESRB rating and descriptor(s) for current title
+			bootstrapImages = fopen(conf->bootstrapOnFlashcard ? "fat:/_nds/nds-bootstrap/esrb.bin" : "sd:/_nds/nds-bootstrap/esrb.bin", "rb");
+			if (bootstrapImages) {
+				// Read width & height
+				/*fseek(bootstrapImages, 0x12, SEEK_SET);
+				u32 width, height;
+				fread(&width, 1, sizeof(width), bootstrapImages);
+				fread(&height, 1, sizeof(height), bootstrapImages);
 
-			fseek(bootstrapImages, 0xE, SEEK_SET);
-			u8 headerSize = fgetc(bootstrapImages);
-			bool rgb565 = false;
-			if(headerSize == 0x38) {
-				// Check the upper byte green mask for if it's got 5 or 6 bits
-				fseek(bootstrapImages, 0x2C, SEEK_CUR);
-				rgb565 = fgetc(bootstrapImages) == 0x07;
-				fseek(bootstrapImages, headerSize - 0x2E, SEEK_CUR);
-			} else {
-				fseek(bootstrapImages, headerSize - 1, SEEK_CUR);
-			}
-			u16 *bmpImageBuffer = new u16[width * height];
-			fread(bmpImageBuffer, 2, width * height, bootstrapImages);
-			u16 *dst = (u16*)IMAGES_LOCATION + ((191 - ((192 - height) / 2)) * 256) + (256 - width) / 2;
-			u16 *src = bmpImageBuffer;
-			for (uint y = 0; y < height; y++, dst -= 256) {
-				for (uint x = 0; x < width; x++) {
-					u16 val = *(src++);
-					*(dst + x) = ((val >> (rgb565 ? 11 : 10)) & 0x1F) | ((val >> (rgb565 ? 1 : 0)) & (0x1F << 5)) | (val & 0x1F) << 10 | BIT(15);
+				if (width > 256 || height > 192) {
+					fclose(bootstrapImages);
+					return false;
 				}
-			}
 
-			delete[] bmpImageBuffer;*/
-			fread((u16*)IMAGES_LOCATION, 1, 0x18000, bootstrapImages);
+				fseek(bootstrapImages, 0xE, SEEK_SET);
+				u8 headerSize = fgetc(bootstrapImages);
+				bool rgb565 = false;
+				if(headerSize == 0x38) {
+					// Check the upper byte green mask for if it's got 5 or 6 bits
+					fseek(bootstrapImages, 0x2C, SEEK_CUR);
+					rgb565 = fgetc(bootstrapImages) == 0x07;
+					fseek(bootstrapImages, headerSize - 0x2E, SEEK_CUR);
+				} else {
+					fseek(bootstrapImages, headerSize - 1, SEEK_CUR);
+				}
+				u16 *bmpImageBuffer = new u16[width * height];
+				fread(bmpImageBuffer, 2, width * height, bootstrapImages);
+				u16 *dst = (u16*)IMAGES_LOCATION + ((191 - ((192 - height) / 2)) * 256) + (256 - width) / 2;
+				u16 *src = bmpImageBuffer;
+				for (uint y = 0; y < height; y++, dst -= 256) {
+					for (uint x = 0; x < width; x++) {
+						u16 val = *(src++);
+						*(dst + x) = ((val >> (rgb565 ? 11 : 10)) & 0x1F) | ((val >> (rgb565 ? 1 : 0)) & (0x1F << 5)) | (val & 0x1F) << 10 | BIT(15);
+					}
+				}
+
+				delete[] bmpImageBuffer;*/
+				fread((u16*)IMAGES_LOCATION, 1, 0x18000, bootstrapImages);
+			} else {
+				toncset16((u16*)IMAGES_LOCATION, 0, 256*192);
+			}
+			fclose(bootstrapImages);
 		} else {
 			toncset16((u16*)IMAGES_LOCATION, 0, 256*192);
 		}
-		fclose(bootstrapImages);
+
 	} else {
-		toncset16((u16*)IMAGES_LOCATION, 0, 256*192);
-	}
+		if (accessControl & BIT(4)) {
+			uint8_t *target = new uint8_t[0x1000];
+			fseek(ndsFile, 0, SEEK_SET);
+			fread(target, 1, 0x1000, ndsFile);
 
-  } else {
-	if (accessControl & BIT(4)) {
-		uint8_t *target = new uint8_t[0x1000];
-		fseek(ndsFile, 0, SEEK_SET);
-		fread(target, 1, 0x1000, ndsFile);
+			if (ndsArm9ilen && ndsArm9ilen <= 0x8000) {
+				fseek(ndsFile, ndsArm9isrc, SEEK_SET);
+				fread((u32*)0x023B8000, 1, ndsArm9ilen, ndsFile);
+			}
 
-		if (ndsArm9ilen && ndsArm9ilen <= 0x8000) {
-			fseek(ndsFile, ndsArm9isrc, SEEK_SET);
-			fread((u32*)0x023B8000, 1, ndsArm9ilen, ndsFile);
-		}
-
-		if ((target[0x1C] & 2) && ndsArm9ilen <= 0x8000)
-		{
-			u8 key[16] = {0} ;
-			u8 keyp[16] = {0} ;
-			if ((target[0x1C] & 4) || (target[0x1BF] & 0x80))
+			if ((target[0x1C] & 2) && ndsArm9ilen <= 0x8000)
 			{
-				// Debug Key
-				tonccpy(key, target, 16) ;
-			} else
-			{
-				//Retail key
-				char modcrypt_shared_key[8] = {'N','i','n','t','e','n','d','o'};
-				tonccpy(keyp, modcrypt_shared_key, 8) ;
-				for (int i=0;i<4;i++)
+				u8 key[16] = {0} ;
+				u8 keyp[16] = {0} ;
+				if ((target[0x1C] & 4) || (target[0x1BF] & 0x80))
 				{
-					keyp[8+i] = target[0x0c+i] ;
-					keyp[15-i] = target[0x0c+i] ;
+					// Debug Key
+					tonccpy(key, target, 16) ;
+				} else
+				{
+					//Retail key
+					char modcrypt_shared_key[8] = {'N','i','n','t','e','n','d','o'};
+					tonccpy(keyp, modcrypt_shared_key, 8) ;
+					for (int i=0;i<4;i++)
+					{
+						keyp[8+i] = target[0x0c+i] ;
+						keyp[15-i] = target[0x0c+i] ;
+					}
+					tonccpy(key, target+0x350, 16) ;
+					
+					u128_xor(key, keyp);
+					u128_add(key, DSi_KEY_MAGIC);
+					u128_lrot(key, 42) ;
 				}
-				tonccpy(key, target+0x350, 16) ;
-				
-				u128_xor(key, keyp);
-				u128_add(key, DSi_KEY_MAGIC);
-		  u128_lrot(key, 42) ;
+
+				dsi_context ctx;
+				dsi_set_key(&ctx, key);
+				dsi_set_ctr(&ctx, &target[0x300]);
+				if (modcrypt1len)
+				{
+					decrypt_modcrypt_area(&ctx, (u8*)0x023B8000, modcrypt1len);
+				}
 			}
 
-			dsi_context ctx;
-			dsi_set_key(&ctx, key);
-			dsi_set_ctr(&ctx, &target[0x300]);
-			if (modcrypt1len)
-			{
-				decrypt_modcrypt_area(&ctx, (u8*)0x023B8000, modcrypt1len);
-			}
+			delete[] target;
+		}
+		fclose(ndsFile);
+		fclose(donorNdsFile);
+
+		if (dsiFeatures() && (strncmp(conf->donor20Path, "fat", 3) != 0 || strncmp(conf->donor5Path, "fat", 3) != 0 || strncmp(conf->donorTwl0Path, "fat", 3) != 0 || strncmp(conf->donorTwlPath, "fat", 3) != 0)) {
+			easysave::ini config_file_b4ds("fat:/_nds/nds-bootstrap.ini");
+
+			// SDK2.0 Donor NDS path
+			conf->donor20Path = strdup(config_file_b4ds.fetch("NDS-BOOTSTRAP", "DONOR20_NDS_PATH").c_str());
+
+			// SDK5.x (NTR) Donor NDS path
+			conf->donor5Path = strdup(config_file_b4ds.fetch("NDS-BOOTSTRAP", "DONOR5_NDS_PATH").c_str());
+
+			// SDK5.0 (TWL) DSi-Enhanced Donor NDS path
+			conf->donorTwl0Path = strdup(config_file_b4ds.fetch("NDS-BOOTSTRAP", "DONORTWL0_NDS_PATH").c_str());
+
+			// SDK5.x (TWL) DSi-Enhanced Donor NDS path
+			conf->donorTwlPath = strdup(config_file_b4ds.fetch("NDS-BOOTSTRAP", "DONORTWL_NDS_PATH").c_str());
 		}
 
-		delete[] target;
-	}
-	fclose(ndsFile);
-	fclose(donorNdsFile);
+		conf->donorFileSize = getFileSize("fat:/_nds/nds-bootstrap/b4dsTwlDonor.bin");
 
-	if (dsiFeatures() && (strncmp(conf->donor20Path, "fat", 3) != 0 || strncmp(conf->donor5Path, "fat", 3) != 0 || strncmp(conf->donorTwl0Path, "fat", 3) != 0 || strncmp(conf->donorTwlPath, "fat", 3) != 0)) {
-		easysave::ini config_file_b4ds("fat:/_nds/nds-bootstrap.ini");
-
-		// SDK2.0 Donor NDS path
-		conf->donor20Path = strdup(config_file_b4ds.fetch("NDS-BOOTSTRAP", "DONOR20_NDS_PATH").c_str());
-
-		// SDK5.x (NTR) Donor NDS path
-		conf->donor5Path = strdup(config_file_b4ds.fetch("NDS-BOOTSTRAP", "DONOR5_NDS_PATH").c_str());
-
-		// SDK5.0 (TWL) DSi-Enhanced Donor NDS path
-		conf->donorTwl0Path = strdup(config_file_b4ds.fetch("NDS-BOOTSTRAP", "DONORTWL0_NDS_PATH").c_str());
-
-		// SDK5.x (TWL) DSi-Enhanced Donor NDS path
-		conf->donorTwlPath = strdup(config_file_b4ds.fetch("NDS-BOOTSTRAP", "DONORTWL_NDS_PATH").c_str());
-	}
-
-	conf->donorFileSize = getFileSize("fat:/_nds/nds-bootstrap/b4dsTwlDonor.bin");
-
-	// Load external cheat engine binary
-	cebin = fopen("nitro:/cardenginei_arm7_cheat.bin", "rb");
-	if (cebin) {
-		fread((u8*)CHEAT_ENGINE_LOCATION_B4DS_BUFFERED, 1, 0x400, cebin);
-	}
-	fclose(cebin);
-
-	// Load ce7 binary
-	if (strncmp(romTid, "KWY", 3) == 0 // Mighty Milky Way
-	||	strncmp(romTid, "KS3", 3) == 0 // Shantae: Risky's Revenge
-	) {
-		cebin = fopen("nitro:/cardengine_arm7_music.bin", "rb");
-	} else {
-		cebin = fopen("nitro:/cardengine_arm7.bin", "rb");
-	}
-	if (cebin) {
-		fread((u8*)CARDENGINE_ARM7_LOCATION_BUFFERED, 1, 0x1000, cebin);
-	}
-	fclose(cebin);
-
-	bool found = (access(pageFilePath.c_str(), F_OK) == 0);
-	if (!found) {
-		consoleDemoInit();
-		iprintf("Creating pagefile.sys\n");
-		iprintf("Please wait...\n");
-	}
-
-	cebin = fopen(pageFilePath.c_str(), found ? "r+" : "wb");
-	fseek(cebin, ntrPageFileSize - 1, SEEK_SET);
-	fputc('\0', cebin);
-	fclose(cebin);
-
-	if (!found) {
-		consoleClear();
-	}
-
-	if (conf->b4dsMode == 0) {
-		*(vu32*)(0x02800000) = 0x314D454D;
-		*(vu32*)(0x02C00000) = 0x324D454D;
-	}
-
-	b4dsDebugRam = (conf->b4dsMode == 2 || (*(vu32*)(0x02800000) == 0x314D454D && *(vu32*)(0x02C00000) == 0x324D454D));
-
-	// Load in-game menu ce9 binary
-	cebin = fopen(b4dsDebugRam ? "nitro:/cardengine_arm9_igm_extmem.lz77" : "nitro:/cardengine_arm9_igm.lz77", "rb");
-	if (cebin) {
-		igmText = (struct IgmText *)(b4dsDebugRam ? INGAME_MENU_LOCATION_B4DS_EXTMEM : INGAME_MENU_LOCATION_B4DS);
-
-		fread(lz77ImageBuffer, 1, sizeof_lz77ImageBuffer, cebin);
-		LZ77_Decompress(lz77ImageBuffer, (u8*)igmText);
-
-		getIgmStrings(conf, true);
-
+		// Load external cheat engine binary
+		cebin = fopen("nitro:/cardenginei_arm7_cheat.bin", "rb");
+		if (cebin) {
+			fread((u8*)CHEAT_ENGINE_LOCATION_B4DS_BUFFERED, 1, 0x400, cebin);
+		}
 		fclose(cebin);
 
-		screenshotPath = "fat:/_nds/nds-bootstrap/screenshots.tar";
+		// Load ce7 binary
+		if (strncmp(romTid, "KWY", 3) == 0 // Mighty Milky Way
+		||	strncmp(romTid, "KS3", 3) == 0 // Shantae: Risky's Revenge
+		) {
+			cebin = fopen("nitro:/cardengine_arm7_music.bin", "rb");
+		} else {
+			cebin = fopen("nitro:/cardengine_arm7.bin", "rb");
+		}
+		if (cebin) {
+			fread((u8*)CARDENGINE_ARM7_LOCATION_BUFFERED, 1, 0x1000, cebin);
+		}
+		fclose(cebin);
 
-		if (getFileSize(screenshotPath.c_str()) < 0x4BCC00) {
-			char buffer[2][0x100] = {{0}};
-
+		bool found = (access(pageFilePath.c_str(), F_OK) == 0);
+		if (!found) {
 			consoleDemoInit();
-			iprintf("Creating screenshots.tar\n");
-			iprintf("Please wait...");
+			iprintf("Creating pagefile.sys\n");
+			iprintf("Please wait...\n");
+		}
 
-			if (access(screenshotPath.c_str(), F_OK) == 0) {
-				remove(screenshotPath.c_str());
-			}
+		cebin = fopen(pageFilePath.c_str(), found ? "r+" : "wb");
+		fseek(cebin, ntrPageFileSize - 1, SEEK_SET);
+		fputc('\0', cebin);
+		fclose(cebin);
 
-			FILE *headerFile = fopen("nitro:/screenshotTarHeaders.bin", "rb");
-			if (headerFile) {
-				fread(buffer[0], 1, 0x100, headerFile);
-				FILE *screenshotFile = fopen(screenshotPath.c_str(), "wb");
+		if (!found) {
+			consoleClear();
+		}
+
+		if (conf->b4dsMode == 0) {
+			*(vu32*)(0x02800000) = 0x314D454D;
+			*(vu32*)(0x02C00000) = 0x324D454D;
+		}
+
+		b4dsDebugRam = (conf->b4dsMode == 2 || (*(vu32*)(0x02800000) == 0x314D454D && *(vu32*)(0x02C00000) == 0x324D454D));
+
+		// Load in-game menu ce9 binary
+		cebin = fopen(b4dsDebugRam ? "nitro:/cardengine_arm9_igm_extmem.lz77" : "nitro:/cardengine_arm9_igm.lz77", "rb");
+		if (cebin) {
+			igmText = (struct IgmText *)(b4dsDebugRam ? INGAME_MENU_LOCATION_B4DS_EXTMEM : INGAME_MENU_LOCATION_B4DS);
+
+			fread(lz77ImageBuffer, 1, sizeof_lz77ImageBuffer, cebin);
+			LZ77_Decompress(lz77ImageBuffer, (u8*)igmText);
+
+			getIgmStrings(conf, true);
+
+			fclose(cebin);
+
+			screenshotPath = "fat:/_nds/nds-bootstrap/screenshots.tar";
+
+			if (getFileSize(screenshotPath.c_str()) < 0x4BCC00) {
+				char buffer[2][0x100] = {{0}};
+
+				consoleDemoInit();
+				iprintf("Creating screenshots.tar\n");
+				iprintf("Please wait...");
+
+				if (access(screenshotPath.c_str(), F_OK) == 0) {
+					remove(screenshotPath.c_str());
+				}
+
+				FILE *headerFile = fopen("nitro:/screenshotTarHeaders.bin", "rb");
+				if (headerFile) {
+					fread(buffer[0], 1, 0x100, headerFile);
+					FILE *screenshotFile = fopen(screenshotPath.c_str(), "wb");
+					if (screenshotFile) {
+						fseek(screenshotFile, 0x4BCC00 - 1, SEEK_SET);
+						fputc('\0', screenshotFile);
+
+						for (int i = 0; i < 50; i++) {
+							fseek(screenshotFile, i*0x18400, SEEK_SET);
+							fread(buffer[1], 1, 0x100, headerFile);
+							fwrite(buffer[1], 1, 0x100, screenshotFile);
+							fwrite(buffer[0], 1, 0x100, screenshotFile);
+						}
+
+						fclose(screenshotFile);
+					}
+					fclose(headerFile);
+				}
+
+				consoleClear();
+				if (getFileSize(screenshotPath.c_str()) < 0x4BCC00) {
+					iprintf("Failed to create screenshots.tar");
+					while (1) swiWaitForVBlank();
+				}
+				igmText->currentScreenshot = 0;
+			} else {
+				FILE *screenshotFile = fopen(screenshotPath.c_str(), "rb");
+				igmText->currentScreenshot = 50;
 				if (screenshotFile) {
-					fseek(screenshotFile, 0x4BCC00 - 1, SEEK_SET);
-					fputc('\0', screenshotFile);
-
+					fseek(screenshotFile, 0x200, SEEK_SET);
 					for (int i = 0; i < 50; i++) {
-						fseek(screenshotFile, i*0x18400, SEEK_SET);
-						fread(buffer[1], 1, 0x100, headerFile);
-						fwrite(buffer[1], 1, 0x100, screenshotFile);
-						fwrite(buffer[0], 1, 0x100, screenshotFile);
+						if(fgetc(screenshotFile) != 'B') {
+							igmText->currentScreenshot = i;
+							break;
+						}
+
+						fseek(screenshotFile, 0x18400 - 1, SEEK_CUR);
 					}
 
 					fclose(screenshotFile);
 				}
-				fclose(headerFile);
 			}
 
-			consoleClear();
-			if (getFileSize(screenshotPath.c_str()) < 0x4BCC00) {
-				iprintf("Failed to create screenshots.tar");
-				while (1) swiWaitForVBlank();
-			}
-			igmText->currentScreenshot = 0;
-		} else {
-			FILE *screenshotFile = fopen(screenshotPath.c_str(), "rb");
-			igmText->currentScreenshot = 50;
-			if (screenshotFile) {
-				fseek(screenshotFile, 0x200, SEEK_SET);
-				for (int i = 0; i < 50; i++) {
-					if(fgetc(screenshotFile) != 'B') {
-						igmText->currentScreenshot = i;
-						break;
-					}
-
-					fseek(screenshotFile, 0x18400 - 1, SEEK_CUR);
-				}
-
-				fclose(screenshotFile);
-			}
+			cebin = fopen(pageFilePath.c_str(), "r+");
+			fwrite((u8*)igmText, 1, 0xA000, cebin);
+			fclose(cebin);
+			toncset((u8*)igmText, 0, 0xA000);
 		}
 
-		cebin = fopen(pageFilePath.c_str(), "r+");
-		fwrite((u8*)igmText, 1, 0xA000, cebin);
-		fclose(cebin);
-		toncset((u8*)igmText, 0, 0xA000);
-	}
+		if (accessControl & BIT(4)) {
+			romFSInited = (romFSInit(conf->ndsPath));
+			startMultibootSrl = (strncmp(romTid, "KCX", 3) == 0 || (!b4dsDebugRam && strncmp(romTid, "KAV", 3) == 0) || strncmp(romTid, "KNK", 3) == 0);
+		}
 
-	if (accessControl & BIT(4)) {
-		romFSInited = (romFSInit(conf->ndsPath));
-		startMultibootSrl = (strncmp(romTid, "KCX", 3) == 0 || (!b4dsDebugRam && strncmp(romTid, "KAV", 3) == 0) || strncmp(romTid, "KNK", 3) == 0);
-	}
+		const char* donorNdsPath = "";
+		bool standaloneDonor = false;
+		if (!b4dsDebugRam && !donorInsideNds) {
+			if (a7mbk6 == 0x080037C0) {
+				conf->useSdk5DonorAlt = ( // Use alternate ARM7 donor in order for below games to use more of the main RAM
+					strncmp(romTid, "KII", 3) == 0 // 101 Pinball World
+				||	strncmp(romTid, "KAT", 3) == 0 // AiRace: Tunnel
+				||	strncmp(romTid, "K2Z", 3) == 0 // G.G Series: Altered Weapon
+				||	strncmp(romTid, "KSR", 3) == 0 // Aura-Aura Climber
+				||	strcmp(romTid, "KBEV") == 0 // Bejeweled Twist (Europe, Australia)
+				||	strncmp(romTid, "K9G", 3) == 0 // Big Bass Arcade
+				||	strncmp(romTid, "KUG", 3) == 0 // G.G Series: Drift Circuit 2
+				||	strncmp(romTid, "KEI", 3) == 0 // Electroplankton: Beatnes
+				||	strncmp(romTid, "KEA", 3) == 0 // Electroplankton: Trapy
+				||	strncmp(romTid, "KFO", 3) == 0 // Frenzic
+				||	strncmp(romTid, "K5M", 3) == 0 // G.G Series: The Last Knight
+				||	strncmp(romTid, "KPT", 3) == 0 // Link 'n' Launch
+				||	strncmp(romTid, "KNP", 3) == 0 // Need for Speed: Nitro-X
+				||	strncmp(romTid, "K9K", 3) == 0 // Nintendoji
+				||	strncmp(romTid, "K6T", 3) == 0 // Orion's Odyssey
+				||	strncmp(romTid, "KPS", 3) == 0 // Phantasy Star 0 Mini
+				||	strncmp(romTid, "KHR", 3) == 0 // Picture Perfect: Hair Stylist
+				|| ((strncmp(romTid, "KS3", 3) == 0) && (headerCRC == 0x57FE || headerCRC == 0x2BFA)) // Shantae: Risky's Revenge (Non-proto builds and clean ROMs)
+				||	strncmp(romTid, "KZU", 3) == 0 // Tales to Enjoy!: Little Red Riding Hood
+				||	strncmp(romTid, "KZV", 3) == 0 // Tales to Enjoy!: Puss in Boots
+				||	strncmp(romTid, "KZ7", 3) == 0 // Tales to Enjoy!: The Three Little Pigs
+				||	strncmp(romTid, "KZ8", 3) == 0 // Tales to Enjoy!: The Ugly Duckling
+				);
 
-	const char* donorNdsPath = "";
-	bool standaloneDonor = false;
-	if (!b4dsDebugRam && !donorInsideNds) {
-		if (a7mbk6 == 0x080037C0) {
-			conf->useSdk5DonorAlt = ( // Use alternate ARM7 donor in order for below games to use more of the main RAM
-				strncmp(romTid, "KII", 3) == 0 // 101 Pinball World
-			||	strncmp(romTid, "KAT", 3) == 0 // AiRace: Tunnel
-			||	strncmp(romTid, "K2Z", 3) == 0 // G.G Series: Altered Weapon
-			||	strncmp(romTid, "KSR", 3) == 0 // Aura-Aura Climber
-			||	strcmp(romTid, "KBEV") == 0 // Bejeweled Twist (Europe, Australia)
-			||	strncmp(romTid, "K9G", 3) == 0 // Big Bass Arcade
-			||	strncmp(romTid, "KUG", 3) == 0 // G.G Series: Drift Circuit 2
-			||	strncmp(romTid, "KEI", 3) == 0 // Electroplankton: Beatnes
-			||	strncmp(romTid, "KEA", 3) == 0 // Electroplankton: Trapy
-			||	strncmp(romTid, "KFO", 3) == 0 // Frenzic
-			||	strncmp(romTid, "K5M", 3) == 0 // G.G Series: The Last Knight
-			||	strncmp(romTid, "KPT", 3) == 0 // Link 'n' Launch
-			||	strncmp(romTid, "KNP", 3) == 0 // Need for Speed: Nitro-X
-			||	strncmp(romTid, "K9K", 3) == 0 // Nintendoji
-			||	strncmp(romTid, "K6T", 3) == 0 // Orion's Odyssey
-			||	strncmp(romTid, "KPS", 3) == 0 // Phantasy Star 0 Mini
-			||	strncmp(romTid, "KHR", 3) == 0 // Picture Perfect: Hair Stylist
-			|| ((strncmp(romTid, "KS3", 3) == 0) && (headerCRC == 0x57FE || headerCRC == 0x2BFA)) // Shantae: Risky's Revenge (Non-proto builds and clean ROMs)
-			||	strncmp(romTid, "KZU", 3) == 0 // Tales to Enjoy!: Little Red Riding Hood
-			||	strncmp(romTid, "KZV", 3) == 0 // Tales to Enjoy!: Puss in Boots
-			||	strncmp(romTid, "KZ7", 3) == 0 // Tales to Enjoy!: The Three Little Pigs
-			||	strncmp(romTid, "KZ8", 3) == 0 // Tales to Enjoy!: The Ugly Duckling
-			);
-
-			if (access("fat:/_nds/nds-bootstrap/b4dsTwlDonor.bin", F_OK) == 0) {
-				donorNdsPath = "fat:/_nds/nds-bootstrap/b4dsTwlDonor.bin";
-				standaloneDonor = true;
-			} else if (conf->useSdk5DonorAlt && access(conf->donor5PathAlt, F_OK) == 0) {
-				donorNdsPath = conf->donor5PathAlt;
-			}
-			if (strlen(donorNdsPath) <= 5) {
-				if (access(conf->donorTwlPath, F_OK) == 0) {
-					donorNdsPath = conf->donorTwlPath;
-				} else if (access(conf->donorTwl0Path, F_OK) == 0) {
-					donorNdsPath = conf->donorTwl0Path;
-				} else if (access(conf->donor5Path, F_OK) == 0) {
-					donorNdsPath = conf->donor5Path;
-				} else if (!conf->donor5PathAlt && access(conf->donor5PathAlt, F_OK) == 0) {
+				if (access("fat:/_nds/nds-bootstrap/b4dsTwlDonor.bin", F_OK) == 0) {
+					donorNdsPath = "fat:/_nds/nds-bootstrap/b4dsTwlDonor.bin";
+					standaloneDonor = true;
+				} else if (conf->useSdk5DonorAlt && access(conf->donor5PathAlt, F_OK) == 0) {
 					donorNdsPath = conf->donor5PathAlt;
 				}
-			}
-		} else if (conf->useSdk20Donor) {
-			if (access(conf->donor20Path, F_OK) == 0) {
-				donorNdsPath = conf->donor20Path;
-			}
-		}
-	}
-
-	const bool gsdd = (memcmp(romTid, "BO5", 3) == 0);
-	const bool foto = (strncmp(romTid, "DMF", 3) == 0 || strncmp(romTid, "DSY", 3) == 0 || strncmp(romTid, "KSY", 3) == 0);
-
-	// Load ce9 binary
-	if (b4dsDebugRam) {
-		if (foto) {
-			cebin = fopen("nitro:/cardengine_arm9_extmem_foto.lz77", "rb");
-		} else if (gsdd) {
-			cebin = fopen("nitro:/cardengine_arm9_extmem_gsdd.lz77", "rb");
-		} else {
-			cebin = fopen("nitro:/cardengine_arm9_extmem.lz77", "rb");
-		}
-	} else if (!startMultibootSrl && ((accessControl & BIT(4)) || (a7mbk6 == 0x080037C0 && ndsArm9Offset >= 0x02004000) || (strncmp(romTid, "AP2", 3) == 0))) {
-		if (foto) {
-			cebin = fopen("nitro:/cardengine_arm9_start_foto.lz77", "rb");
-		} else {
-			cebin = fopen(ndsArm9Offset >= 0x02004000 ? "nitro:/cardengine_arm9_start.lz77" : "nitro:/cardengine_arm9.lz77", "rb");
-		}
-	} else {
-		const char* ce9path = gsdd ? "nitro:/cardengine_arm9_alt_gsdd.lz77" : "nitro:/cardengine_arm9_alt.lz77";
-		if (romFSInited && donorInsideNds) {
-			donorNdsPath = multibootSrl;
-		}
-		FILE* ndsFile = (strlen(donorNdsPath) > 5) ? fopen(donorNdsPath, "rb") : fopen(conf->ndsPath, "rb");
-		if (ndsFile) {
-			u32 ndsArm7Offset = 0;
-			u32 ndsArm7Size = 0;
-
-			if (standaloneDonor) {
-				ndsArm7Size = conf->donorFileSize;
-			} else {
-				fseek(ndsFile, 0x30, SEEK_SET);
-				fread(&ndsArm7Offset, sizeof(u32), 1, ndsFile);
-				fseek(ndsFile, 0x3C, SEEK_SET);
-				fread(&ndsArm7Size, sizeof(u32), 1, ndsFile);
-			}
-
-			if ((memcmp(romTid, "ADM", 3) == 0) && ndsArm7Size == 0x28ADC) {
-				ndsArm7Size -= 0xE4; // Fix for AC:WW - Singleplayer Nookingtons
-			}
-
-			u32 arm7allocOffset = 0;
-
-			for (int i = 0; i < 0x80; i += 4) {
-				fseek(ndsFile, (ndsArm7Offset+(ndsArm7Size-0x80))+i, SEEK_SET);
-				fread(&arm7allocOffset, sizeof(u32), 1, ndsFile);
-				if (arm7allocOffset == 0x027C0000 || arm7allocOffset == 0x027E0000 || arm7allocOffset == 0x02FE0000) {
-					break;
+				if (strlen(donorNdsPath) <= 5) {
+					if (access(conf->donorTwlPath, F_OK) == 0) {
+						donorNdsPath = conf->donorTwlPath;
+					} else if (access(conf->donorTwl0Path, F_OK) == 0) {
+						donorNdsPath = conf->donorTwl0Path;
+					} else if (access(conf->donor5Path, F_OK) == 0) {
+						donorNdsPath = conf->donor5Path;
+					} else if (!conf->donor5PathAlt && access(conf->donor5PathAlt, F_OK) == 0) {
+						donorNdsPath = conf->donor5PathAlt;
+					}
+				}
+			} else if (conf->useSdk20Donor) {
+				if (access(conf->donor20Path, F_OK) == 0) {
+					donorNdsPath = conf->donor20Path;
 				}
 			}
+		}
 
-			if (arm7allocOffset != 0x027C0000) {
-				// Not SDK 2.0
-				u32 arm7alloc1 = 0;
-				u32 arm7alloc2 = 0;
+		const bool gsdd = (memcmp(romTid, "BO5", 3) == 0);
+		const bool foto = (strncmp(romTid, "DMF", 3) == 0 || strncmp(romTid, "DSY", 3) == 0 || strncmp(romTid, "KSY", 3) == 0);
 
-				fseek(ndsFile, (ndsArm7Offset+ndsArm7Size)-4, SEEK_SET);
-				fread(&arm7alloc2, sizeof(u32), 1, ndsFile);
-				fseek(ndsFile, (ndsArm7Offset+ndsArm7Size)-8, SEEK_SET);
-				fread(&arm7alloc1, sizeof(u32), 1, ndsFile);
-				if ((arm7alloc1 > 0x02FE0000 && arm7alloc1 < 0x03000000) || (arm7alloc1 > 0x06000000 && arm7alloc1 < 0x06020000)) {
-					// TWL binary found
-					fseek(ndsFile, (ndsArm7Offset+ndsArm7Size)-0xC, SEEK_SET);
+		// Load ce9 binary
+		if (b4dsDebugRam) {
+			if (foto) {
+				cebin = fopen("nitro:/cardengine_arm9_extmem_foto.lz77", "rb");
+			} else if (gsdd) {
+				cebin = fopen("nitro:/cardengine_arm9_extmem_gsdd.lz77", "rb");
+			} else {
+				cebin = fopen("nitro:/cardengine_arm9_extmem.lz77", "rb");
+			}
+		} else if (!startMultibootSrl && ((accessControl & BIT(4)) || (a7mbk6 == 0x080037C0 && ndsArm9Offset >= 0x02004000) || (strncmp(romTid, "AP2", 3) == 0))) {
+			if (foto) {
+				cebin = fopen("nitro:/cardengine_arm9_start_foto.lz77", "rb");
+			} else {
+				cebin = fopen(ndsArm9Offset >= 0x02004000 ? "nitro:/cardengine_arm9_start.lz77" : "nitro:/cardengine_arm9.lz77", "rb");
+			}
+		} else {
+			const char* ce9path = gsdd ? "nitro:/cardengine_arm9_alt_gsdd.lz77" : "nitro:/cardengine_arm9_alt.lz77";
+			if (romFSInited && donorInsideNds) {
+				donorNdsPath = multibootSrl;
+			}
+			FILE* ndsFile = (strlen(donorNdsPath) > 5) ? fopen(donorNdsPath, "rb") : fopen(conf->ndsPath, "rb");
+			if (ndsFile) {
+				u32 ndsArm7Offset = 0;
+				u32 ndsArm7Size = 0;
+
+				if (standaloneDonor) {
+					ndsArm7Size = conf->donorFileSize;
+				} else {
+					fseek(ndsFile, 0x30, SEEK_SET);
+					fread(&ndsArm7Offset, sizeof(u32), 1, ndsFile);
+					fseek(ndsFile, 0x3C, SEEK_SET);
+					fread(&ndsArm7Size, sizeof(u32), 1, ndsFile);
+				}
+
+				if ((memcmp(romTid, "ADM", 3) == 0) && ndsArm7Size == 0x28ADC) {
+					ndsArm7Size -= 0xE4; // Fix for AC:WW - Singleplayer Nookingtons
+				}
+
+				u32 arm7allocOffset = 0;
+
+				for (int i = 0; i < 0x80; i += 4) {
+					fseek(ndsFile, (ndsArm7Offset+(ndsArm7Size-0x80))+i, SEEK_SET);
+					fread(&arm7allocOffset, sizeof(u32), 1, ndsFile);
+					if (arm7allocOffset == 0x027C0000 || arm7allocOffset == 0x027E0000 || arm7allocOffset == 0x02FE0000) {
+						break;
+					}
+				}
+
+				if (arm7allocOffset != 0x027C0000) {
+					// Not SDK 2.0
+					u32 arm7alloc1 = 0;
+					u32 arm7alloc2 = 0;
+
+					fseek(ndsFile, (ndsArm7Offset+ndsArm7Size)-4, SEEK_SET);
+					fread(&arm7alloc2, sizeof(u32), 1, ndsFile);
+					fseek(ndsFile, (ndsArm7Offset+ndsArm7Size)-8, SEEK_SET);
 					fread(&arm7alloc1, sizeof(u32), 1, ndsFile);
+					if ((arm7alloc1 > 0x02FE0000 && arm7alloc1 < 0x03000000) || (arm7alloc1 > 0x06000000 && arm7alloc1 < 0x06020000)) {
+						// TWL binary found
+						fseek(ndsFile, (ndsArm7Offset+ndsArm7Size)-0xC, SEEK_SET);
+						fread(&arm7alloc1, sizeof(u32), 1, ndsFile);
+					}
+
+					if ((arm7alloc1+arm7alloc2) > 0x1A800) {
+						ce9path = (unitCode > 0 && ndsArm9Offset >= 0x02004000) ? "nitro:/cardengine_arm9_start.lz77" : "nitro:/cardengine_arm9.lz77";
+					} else if ((arm7alloc1+arm7alloc2) > 0x19C00) {
+						ce9path = "nitro:/cardengine_arm9_alt2.lz77";
+					}
 				}
 
-				if ((arm7alloc1+arm7alloc2) > 0x1A800) {
-					ce9path = (unitCode > 0 && ndsArm9Offset >= 0x02004000) ? "nitro:/cardengine_arm9_start.lz77" : "nitro:/cardengine_arm9.lz77";
-				} else if ((arm7alloc1+arm7alloc2) > 0x19C00) {
-					ce9path = "nitro:/cardengine_arm9_alt2.lz77";
-				}
+				fclose(ndsFile);
 			}
-
-			fclose(ndsFile);
+			cebin = fopen(ce9path, "rb");
 		}
-		cebin = fopen(ce9path, "rb");
-	}
-	if (cebin) {
-		fread(lz77ImageBuffer, 1, sizeof_lz77ImageBuffer, cebin);
-		LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINE_ARM9_LOCATION_BUFFERED);
-	}
-	fclose(cebin);
+		if (cebin) {
+			fread(lz77ImageBuffer, 1, sizeof_lz77ImageBuffer, cebin);
+			LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINE_ARM9_LOCATION_BUFFERED);
+		}
+		fclose(cebin);
 
-	// Load DS blowfish
-	cebin = fopen("nitro:/encr_data.bin", "rb");
-	if (cebin) {
-		fread((void*)BLOWFISH_LOCATION_B4DS, 1, 0x1048, cebin);
-	}
-	fclose(cebin);
+		// Load DS blowfish
+		cebin = fopen("nitro:/encr_data.bin", "rb");
+		if (cebin) {
+			fread((void*)BLOWFISH_LOCATION_B4DS, 1, 0x1048, cebin);
+		}
+		fclose(cebin);
 
-	cheatFilePath = "fat:/_nds/nds-bootstrap/cheatData.bin";
+		cheatFilePath = "fat:/_nds/nds-bootstrap/cheatData.bin";
 
-	conf->saveSize = getFileSize(conf->savPath);
-	conf->apPatchSize = getFileSize(conf->apPatchPath);
-	conf->cheatSize = getFileSize(cheatFilePath.c_str());
+		conf->saveSize = getFileSize(conf->savPath);
+		conf->apPatchSize = getFileSize(conf->apPatchPath);
+		conf->cheatSize = getFileSize(cheatFilePath.c_str());
 
-	FILE* bootstrapImages = fopen("nitro:/bootloader_images.lz77", "rb");
-	if (bootstrapImages) {
-		fread(lz77ImageBuffer, 1, sizeof_lz77ImageBuffer, bootstrapImages);
-		LZ77_Decompress(lz77ImageBuffer, (u8*)IMAGES_LOCATION+0x18000);
-	}
-	fclose(bootstrapImages);
-
-	if (displayEsrb) {
-		// Read ESRB rating and descriptor(s) for current title
-		bootstrapImages = fopen(conf->bootstrapOnFlashcard ? "fat:/_nds/nds-bootstrap/esrb.bin" : "sd:/_nds/nds-bootstrap/esrb.bin", "rb");
+		FILE* bootstrapImages = fopen("nitro:/bootloader_images.lz77", "rb");
 		if (bootstrapImages) {
-			// Read width & height
-			/*fseek(bootstrapImages, 0x12, SEEK_SET);
-			u32 width, height;
-			fread(&width, 1, sizeof(width), bootstrapImages);
-			fread(&height, 1, sizeof(height), bootstrapImages);
+			fread(lz77ImageBuffer, 1, sizeof_lz77ImageBuffer, bootstrapImages);
+			LZ77_Decompress(lz77ImageBuffer, (u8*)IMAGES_LOCATION+0x18000);
+		}
+		fclose(bootstrapImages);
 
-			if (width > 256 || height > 192) {
-				fclose(bootstrapImages);
-				return false;
-			}
+		if (displayEsrb) {
+			// Read ESRB rating and descriptor(s) for current title
+			bootstrapImages = fopen(conf->bootstrapOnFlashcard ? "fat:/_nds/nds-bootstrap/esrb.bin" : "sd:/_nds/nds-bootstrap/esrb.bin", "rb");
+			if (bootstrapImages) {
+				// Read width & height
+				/*fseek(bootstrapImages, 0x12, SEEK_SET);
+				u32 width, height;
+				fread(&width, 1, sizeof(width), bootstrapImages);
+				fread(&height, 1, sizeof(height), bootstrapImages);
 
-			fseek(bootstrapImages, 0xE, SEEK_SET);
-			u8 headerSize = fgetc(bootstrapImages);
-			bool rgb565 = false;
-			if(headerSize == 0x38) {
-				// Check the upper byte green mask for if it's got 5 or 6 bits
-				fseek(bootstrapImages, 0x2C, SEEK_CUR);
-				rgb565 = fgetc(bootstrapImages) == 0x07;
-				fseek(bootstrapImages, headerSize - 0x2E, SEEK_CUR);
-			} else {
-				fseek(bootstrapImages, headerSize - 1, SEEK_CUR);
-			}
-			u16 *bmpImageBuffer = new u16[width * height];
-			fread(bmpImageBuffer, 2, width * height, bootstrapImages);
-			u16 *dst = (u16*)IMAGES_LOCATION + ((191 - ((192 - height) / 2)) * 256) + (256 - width) / 2;
-			u16 *src = bmpImageBuffer;
-			for (uint y = 0; y < height; y++, dst -= 256) {
-				for (uint x = 0; x < width; x++) {
-					u16 val = *(src++);
-					*(dst + x) = ((val >> (rgb565 ? 11 : 10)) & 0x1F) | ((val >> (rgb565 ? 1 : 0)) & (0x1F << 5)) | (val & 0x1F) << 10 | BIT(15);
+				if (width > 256 || height > 192) {
+					fclose(bootstrapImages);
+					return false;
 				}
-			}
 
-			delete[] bmpImageBuffer;*/
-			fread((u16*)IMAGES_LOCATION, 1, 0x18000, bootstrapImages);
+				fseek(bootstrapImages, 0xE, SEEK_SET);
+				u8 headerSize = fgetc(bootstrapImages);
+				bool rgb565 = false;
+				if(headerSize == 0x38) {
+					// Check the upper byte green mask for if it's got 5 or 6 bits
+					fseek(bootstrapImages, 0x2C, SEEK_CUR);
+					rgb565 = fgetc(bootstrapImages) == 0x07;
+					fseek(bootstrapImages, headerSize - 0x2E, SEEK_CUR);
+				} else {
+					fseek(bootstrapImages, headerSize - 1, SEEK_CUR);
+				}
+				u16 *bmpImageBuffer = new u16[width * height];
+				fread(bmpImageBuffer, 2, width * height, bootstrapImages);
+				u16 *dst = (u16*)IMAGES_LOCATION + ((191 - ((192 - height) / 2)) * 256) + (256 - width) / 2;
+				u16 *src = bmpImageBuffer;
+				for (uint y = 0; y < height; y++, dst -= 256) {
+					for (uint x = 0; x < width; x++) {
+						u16 val = *(src++);
+						*(dst + x) = ((val >> (rgb565 ? 11 : 10)) & 0x1F) | ((val >> (rgb565 ? 1 : 0)) & (0x1F << 5)) | (val & 0x1F) << 10 | BIT(15);
+					}
+				}
+
+				delete[] bmpImageBuffer;*/
+				fread((u16*)IMAGES_LOCATION, 1, 0x18000, bootstrapImages);
+			} else {
+				toncset16((u16*)IMAGES_LOCATION, 0, 256*192);
+			}
+			fclose(bootstrapImages);
 		} else {
 			toncset16((u16*)IMAGES_LOCATION, 0, 256*192);
 		}
-		fclose(bootstrapImages);
-	} else {
-		toncset16((u16*)IMAGES_LOCATION, 0, 256*192);
-	}
 
-	if (foto) {
-		sprintf(patchOffsetCacheFilePath, "fat:/_nds/nds-bootstrap/dsiCamera/%s-%04X.bin", romTid, headerCRC);
-		if (access(patchOffsetCacheFilePath, F_OK) != 0) {
-			sprintf(patchOffsetCacheFilePath, "fat:/_nds/nds-bootstrap/dsiCamera/%s.bin", romTid);
+		if (foto) {
+			sprintf(patchOffsetCacheFilePath, "fat:/_nds/nds-bootstrap/dsiCamera/%s-%04X.bin", romTid, headerCRC);
+			if (access(patchOffsetCacheFilePath, F_OK) != 0) {
+				sprintf(patchOffsetCacheFilePath, "fat:/_nds/nds-bootstrap/dsiCamera/%s.bin", romTid);
+			}
+			if (access(patchOffsetCacheFilePath, F_OK) != 0) {
+				sprintf(patchOffsetCacheFilePath, "fat:/_nds/nds-bootstrap/dsiCamera/default.bin");
+			}
+		} else {
+			sprintf(patchOffsetCacheFilePath, "fat:/_nds/nds-bootstrap/musicPacks/%s-%04X.pck", romTid, headerCRC);
 		}
-		if (access(patchOffsetCacheFilePath, F_OK) != 0) {
-			sprintf(patchOffsetCacheFilePath, "fat:/_nds/nds-bootstrap/dsiCamera/default.bin");
-		}
-	} else {
-		sprintf(patchOffsetCacheFilePath, "fat:/_nds/nds-bootstrap/musicPacks/%s-%04X.pck", romTid, headerCRC);
-	}
 
-	musicsFilePath = patchOffsetCacheFilePath;
-	conf->musicsSize = getFileSize(patchOffsetCacheFilePath);
-  }
+		musicsFilePath = patchOffsetCacheFilePath;
+		conf->musicsSize = getFileSize(patchOffsetCacheFilePath);
+	}
 
 	conf->loader2 = false;
 	if (accessControl & BIT(4)) {
@@ -2140,8 +2140,18 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		conf->loader2 = true;
 	}
 
-	std::string romFilename = conf->ndsPath;
-	romFilename = romFilename.substr(0, romFilename.find_last_of('.')) + ".bin";
+	const char *typeToReplace = ".nds";
+	if (extention(conf->ndsPath, ".dsi")) {
+		typeToReplace = ".dsi";
+	} else if (extention(conf->ndsPath, ".ids")) {
+		typeToReplace = ".ids";
+	} else if (extention(conf->ndsPath, ".srl")) {
+		typeToReplace = ".srl";
+	} else if (extention(conf->ndsPath, ".app")) {
+		typeToReplace = ".app";
+	}
+
+	std::string romFilename = ReplaceAll(conf->ndsPath, typeToReplace, ".bin");
 	const size_t last_slash_idx = romFilename.find_last_of("/");
 	if (std::string::npos != last_slash_idx)
 	{
