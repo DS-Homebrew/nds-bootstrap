@@ -2140,18 +2140,8 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		conf->loader2 = true;
 	}
 
-	const char *typeToReplace = ".nds";
-	if (extention(conf->ndsPath, ".dsi")) {
-		typeToReplace = ".dsi";
-	} else if (extention(conf->ndsPath, ".ids")) {
-		typeToReplace = ".ids";
-	} else if (extention(conf->ndsPath, ".srl")) {
-		typeToReplace = ".srl";
-	} else if (extention(conf->ndsPath, ".app")) {
-		typeToReplace = ".app";
-	}
-
-	std::string romFilename = ReplaceAll(conf->ndsPath, typeToReplace, ".bin");
+	std::string romFilename = conf->ndsPath;
+	romFilename = romFilename.substr(0, romFilename.find_last_of('.')) + ".bin";
 	const size_t last_slash_idx = romFilename.find_last_of("/");
 	if (std::string::npos != last_slash_idx)
 	{
