@@ -115,6 +115,80 @@ void addTwlDevice(const char letter, u8 flags, u8 accessRights, const char* name
 extern std::string ReplaceAll(std::string str, const std::string& from, const std::string& to);
 extern bool extention(const std::string& filename, const char* ext);
 
+static void createRamDumpBin(configuration* conf) {
+	int ramDumpSize;
+	if (dsiFeatures() && !conf->b4dsMode)
+	{
+		ramDumpPath = conf->bootstrapOnFlashcard ? "fat:" : "sd:";
+		ramDumpPath.append("/_nds/nds-bootstrap/ramDump.bin");
+		ramDumpSize = 0x02000000;
+	}
+	else {
+		ramDumpPath = "fat:/_nds/nds-bootstrap/ramDump.bin";
+		ramDumpSize = 0x800000;
+	}
+
+	if (getFileSize(ramDumpPath.c_str()) < ramDumpSize) {
+		consoleDemoInit();
+		iprintf("Allocating space for\n");
+		iprintf("creating a RAM dump.\n");
+		iprintf("Please wait...");
+
+		if (access(ramDumpPath.c_str(), F_OK) == 0) {
+			remove(ramDumpPath.c_str());
+		}
+
+		FILE *ramDumpFile = fopen(ramDumpPath.c_str(), "wb");
+		if (ramDumpFile) {
+			fseek(ramDumpFile, ramDumpSize - 1, SEEK_SET);
+			fputc('\0', ramDumpFile);
+			fclose(ramDumpFile);
+		}
+
+		consoleClear();
+		if (getFileSize(ramDumpPath.c_str()) < ramDumpSize) {
+			iprintf("Failed to create RAM dump file.");
+			while (1) swiWaitForVBlank();
+		}
+	}
+}
+
+static void createApFixOverlayBin(configuration* conf) {
+	if (dsiFeatures() && !conf->b4dsMode)
+	{
+		apFixOverlaysPath = conf->gameOnFlashcard ? "fat:" : "sd:";
+		apFixOverlaysPath.append("/_nds/nds-bootstrap/apFixOverlays.bin");
+	}
+	else {
+		apFixOverlaysPath = "fat:/_nds/nds-bootstrap/ramDump.bin";
+	}
+
+	if (!conf->isDSiWare && getFileSize(apFixOverlaysPath.c_str()) < 0xA00000) {
+		consoleDemoInit();
+		iprintf("Allocating space for\n");
+		iprintf("AP-fixed overlays.\n");
+		iprintf("Please wait...");
+
+		if (access(apFixOverlaysPath.c_str(), F_OK) == 0) {
+			remove(apFixOverlaysPath.c_str());
+		}
+
+		FILE *apFixOverlaysFile = fopen(apFixOverlaysPath.c_str(), "wb");
+		if (apFixOverlaysFile) {
+			fseek(apFixOverlaysFile, 0xA00000 - 1, SEEK_SET);
+			fputc('\0', apFixOverlaysFile);
+			fclose(apFixOverlaysFile);
+		}
+
+		consoleClear();
+		if (getFileSize(apFixOverlaysPath.c_str()) < 0xA00000) {
+			iprintf("Failed to allocate space\n");
+			iprintf("for AP-fixed overlays.");
+			while (1) swiWaitForVBlank();
+		}
+	}
+}
+
 static void load_conf(configuration* conf, const char* fn) {
 	easysave::ini config_file(fn);
 
@@ -2182,119 +2256,11 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		fclose(patchOffsetCacheFile);
 	}
 
-	if (dsiFeatures() && !conf->b4dsMode) {	// Not for B4DS
-		ramDumpPath = "sd:/_nds/nds-bootstrap/ramDump.bin";
-		if (conf->bootstrapOnFlashcard) {
-			ramDumpPath = "fat:/_nds/nds-bootstrap/ramDump.bin";
-		}
+	// Create RAM dump binary
+	createRamDumpBin(conf);
 
-		if (getFileSize(ramDumpPath.c_str()) < 0x02000000) {
-			consoleDemoInit();
-			iprintf("Allocating space for\n");
-			iprintf("creating a RAM dump.\n");
-			iprintf("Please wait...");
-
-			if (access(ramDumpPath.c_str(), F_OK) == 0) {
-				remove(ramDumpPath.c_str());
-			}
-
-			FILE *ramDumpFile = fopen(ramDumpPath.c_str(), "wb");
-			if (ramDumpFile) {
-				fseek(ramDumpFile, 0x02000000 - 1, SEEK_SET);
-				fputc('\0', ramDumpFile);
-				fclose(ramDumpFile);
-			}
-
-			consoleClear();
-			if (getFileSize(ramDumpPath.c_str()) < 0x02000000) {
-				iprintf("Failed to create RAM dump file.");
-				while (1) swiWaitForVBlank();
-			}
-		}
-
-		apFixOverlaysPath = "sd:/_nds/nds-bootstrap/apFixOverlays.bin";
-		if (conf->gameOnFlashcard) {
-			apFixOverlaysPath = "fat:/_nds/nds-bootstrap/apFixOverlays.bin";	
-		}
-
-		if (!conf->isDSiWare && getFileSize(apFixOverlaysPath.c_str()) < 0xA00000) {
-			consoleDemoInit();
-			iprintf("Allocating space for\n");
-			iprintf("AP-fixed overlays.\n");
-			iprintf("Please wait...");
-
-			if (access(apFixOverlaysPath.c_str(), F_OK) == 0) {
-				remove(apFixOverlaysPath.c_str());
-			}
-
-			FILE *apFixOverlaysFile = fopen(apFixOverlaysPath.c_str(), "wb");
-			if (apFixOverlaysFile) {
-				fseek(apFixOverlaysFile, 0xA00000 - 1, SEEK_SET);
-				fputc('\0', apFixOverlaysFile);
-				fclose(apFixOverlaysFile);
-			}
-
-			consoleClear();
-			if (getFileSize(apFixOverlaysPath.c_str()) < 0xA00000) {
-				iprintf("Failed to allocate space\n");
-				iprintf("for AP-fixed overlays.");
-				while (1) swiWaitForVBlank();
-			}
-		}
-	} else {
-		ramDumpPath = "fat:/_nds/nds-bootstrap/ramDump.bin";
-
-		if (getFileSize(ramDumpPath.c_str()) < 0x800000) {
-			consoleDemoInit();
-			iprintf("Allocating space for\n");
-			iprintf("creating a RAM dump.\n");
-			iprintf("Please wait...");
-
-			if (access(ramDumpPath.c_str(), F_OK) == 0) {
-				remove(ramDumpPath.c_str());
-			}
-
-			FILE *ramDumpFile = fopen(ramDumpPath.c_str(), "wb");
-			if (ramDumpFile) {
-				fseek(ramDumpFile, 0x800000 - 1, SEEK_SET);
-				fputc('\0', ramDumpFile);
-				fclose(ramDumpFile);
-			}
-
-			consoleClear();
-			if (getFileSize(ramDumpPath.c_str()) < 0x800000) {
-				iprintf("Failed to create RAM dump file.");
-				while (1) swiWaitForVBlank();
-			}
-		}
-
-		apFixOverlaysPath = "fat:/_nds/nds-bootstrap/apFixOverlays.bin";
-
-		if (!conf->isDSiWare && getFileSize(apFixOverlaysPath.c_str()) < 0xA00000) {
-			consoleDemoInit();
-			iprintf("Allocating space for\n");
-			iprintf("AP-fixed overlays.\n");
-			iprintf("Please wait...");
-
-			if (access(apFixOverlaysPath.c_str(), F_OK) == 0) {
-				remove(apFixOverlaysPath.c_str());
-			}
-
-			FILE *apFixOverlaysFile = fopen(apFixOverlaysPath.c_str(), "wb");
-			if (apFixOverlaysFile) {
-				fseek(apFixOverlaysFile, 0xA00000 - 1, SEEK_SET);
-				fputc('\0', apFixOverlaysFile);
-				fclose(apFixOverlaysFile);
-			}
-
-			consoleClear();
-			if (getFileSize(apFixOverlaysPath.c_str()) < 0xA00000) {
-				iprintf("Failed to allocate space\n");
-				iprintf("for AP-fixed overlays.");
-				while (1) swiWaitForVBlank();
-			}
-		}
-	}
+	// Create AP-fixed overlay binary
+	createApFixOverlayBin(conf);
 
 	if (conf->gameOnFlashcard || !conf->isDSiWare) {
 		// Update modified date
