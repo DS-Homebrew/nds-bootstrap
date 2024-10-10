@@ -438,7 +438,7 @@ static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
 		}
 	}
 
-	const u32 commandRead = (isDma ? 0x025FFB09 : 0x025FFB08);
+	const u32 commandRead = (isDma ? 0x025FFB0A : 0x025FFB08);
 	u32 sector = (src/ce9->cacheBlockSize)*ce9->cacheBlockSize;
 
 	accessCounter++;

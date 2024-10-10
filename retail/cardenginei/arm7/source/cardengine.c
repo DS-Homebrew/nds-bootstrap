@@ -1437,7 +1437,7 @@ void runCardEngineCheck(void) {
 
 			if (!(valueBits & gameOnFlashcard)) {
 				// #ifndef TWLSDK
-				if (/* sharedAddr[3] == (vu32)0x020FF808 || sharedAddr[3] == (vu32)0x020FF80A || */ sharedAddr[3] & (vu32)0x025FFB00) {	// ARM9 Card Read
+				if (/* sharedAddr[3] == (vu32)0x020FF808 || sharedAddr[3] == (vu32)0x020FF80A || */ sharedAddr[3] == (vu32)0x025FFB08 || sharedAddr[3] == (vu32)0x025FFB0A) {	// ARM9 Card Read
 					//if (!readOngoing ? start_cardRead_arm9() : resume_cardRead_arm9()) {
 						bool useApFixOverlays = false;
 						u32 src = sharedAddr[2];
@@ -1448,8 +1448,7 @@ void runCardEngineCheck(void) {
 							useApFixOverlays = true;
 						}
 
-						const bool isDma = (sharedAddr[3] != (vu32)0x025FFB08);
-						const bool sendDmaIpc = (sharedAddr[3] == (vu32)0x025FFB0A);
+						const bool isDma = (sharedAddr[3] == (vu32)0x025FFB0A);
 
 						// readOngoing = true;
 						cardReadLED(true, isDma);    // When a file is loading, turn on LED for card read indicator
@@ -1457,7 +1456,7 @@ void runCardEngineCheck(void) {
 						cardReadLED(false, isDma);    // After loading is done, turn off LED for card read indicator
 						// readOngoing = false;
 						sharedAddr[3] = 0;
-					if (sendDmaIpc) {
+					if (isDma) {
 						IPC_SendSync(0x3);
 					}
 					//}
