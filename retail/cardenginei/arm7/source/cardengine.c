@@ -1354,7 +1354,7 @@ static bool resume_cardRead_arm9(void) {
 } */
 #endif
 
-static inline void sdmmcHandler(void) {
+static inline void sdmmcHandler(void) { // Unused
 	if (sdReadOngoing) {
 		if (my_sdmmc_sdcard_check_command(0x33C12)) {
 			sharedAddr[4] = 0;
@@ -1437,7 +1437,7 @@ void runCardEngineCheck(void) {
 
 			if (!(valueBits & gameOnFlashcard)) {
 				// #ifndef TWLSDK
-				if (/* sharedAddr[3] == (vu32)0x020FF808 || sharedAddr[3] == (vu32)0x020FF80A || sharedAddr[3] == (vu32)0x025FFB08 || */ sharedAddr[3] == (vu32)0x025FFB0A) {	// Card read DMA
+				if (/* sharedAddr[3] == (vu32)0x020FF808 || sharedAddr[3] == (vu32)0x020FF80A || */ sharedAddr[3] & (vu32)0x025FFB00) {	// ARM9 Card Read
 					//if (!readOngoing ? start_cardRead_arm9() : resume_cardRead_arm9()) {
 						bool useApFixOverlays = false;
 						u32 src = sharedAddr[2];
@@ -1448,8 +1448,8 @@ void runCardEngineCheck(void) {
 							useApFixOverlays = true;
 						}
 
-						// const bool isDma = (sharedAddr[3] == (vu32)0x025FFB0A);
-						const bool isDma = true;
+						const bool isDma = (sharedAddr[3] != (vu32)0x025FFB08);
+						const bool sendDmaIpc = (sharedAddr[3] == (vu32)0x025FFB0A);
 
 						// readOngoing = true;
 						cardReadLED(true, isDma);    // When a file is loading, turn on LED for card read indicator
@@ -1457,9 +1457,9 @@ void runCardEngineCheck(void) {
 						cardReadLED(false, isDma);    // After loading is done, turn off LED for card read indicator
 						// readOngoing = false;
 						sharedAddr[3] = 0;
-					// if (isDma) {
+					if (sendDmaIpc) {
 						IPC_SendSync(0x3);
-					// }
+					}
 					//}
 				} /*else if (sharedAddr[3] == (vu32)0x026FFB0A) {	// Card read DMA (Card data cache)
 					ndmaCopyWords(0, (u8*)sharedAddr[2], (u8*)(sharedAddr[0] >= 0x03000000 ? 0 : sharedAddr[0]), sharedAddr[1]);
@@ -1519,12 +1519,12 @@ void myIrqHandlerFIFO(void) {
 	}
 
 	// runCardEngineCheck();
-	if (!(valueBits & gameOnFlashcard)) {
+	/* if (!(valueBits & gameOnFlashcard)) {
 		sdmmcHandler();
 		if (sdReadOngoing) {
 			sharedAddr[5] = 0x474E4950; // 'PING'
 		}
-	}
+	} */
 }
 
 
