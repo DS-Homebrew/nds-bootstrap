@@ -455,7 +455,7 @@ int hookNdsRetailArm7(
 			romOffset = ndsHeader->arm9overlaySource;
 		}
 		ce7->romLocation -= romOffset;
-		if (dataToPreloadFound(ndsHeader) && dataToPreloadFrame) {
+		if (!ROMinRAM && dataToPreloadFound(ndsHeader) && dataToPreloadFrame) {
 			ce7->romPartLocation = romPartLocation;
 			ce7->romPartSrc = dataToPreloadAddr;
 			ce7->romPartSize = dataToPreloadSize;
