@@ -37,6 +37,7 @@
 
 #define b_gameOnFlashcard BIT(0)
 #define b_saveOnFlashcard BIT(1)
+#define b_eSdk2 BIT(2)
 #define b_ROMinRAM BIT(3)
 #define b_dsiMode BIT(4)
 #define b_dsiSD BIT(5)
@@ -152,7 +153,8 @@ int hookNdsRetailArm7(
 	u8 dmaRomRead_LED,
 	bool ndmaDisabled,
 	bool twlTouch,
-	bool usesCloneboot
+	bool usesCloneboot,
+	u32 romPartLocation
 ) {
 	dbg_printf("hookNdsRetailArm7\n");
 
@@ -350,6 +352,11 @@ int hookNdsRetailArm7(
 		*vblankHandler = 0x2FFC008;
 	} else {*/
 		extern u32 iUncompressedSize;
+		extern u32 dataToPreloadAddr;
+		extern u32 dataToPreloadSize;
+		extern u32 dataToPreloadFrame;
+		extern bool dataToPreloadFound(const tNDSHeader* ndsHeader);
+		const bool laterSdk = ((moduleParams->sdk_version >= 0x2008000 && moduleParams->sdk_version != 0x2012774) || moduleParams->sdk_version == 0x20029A8);
 
 		ce7->intr_vblank_orig_return  = *vblankHandler;
 		ce7->intr_fifo_orig_return    = *ipcSyncHandler;
@@ -366,6 +373,9 @@ int hookNdsRetailArm7(
 		}
 		if (saveOnFlashcard) {
 			ce7->valueBits |= b_saveOnFlashcard;
+		}
+		if (!laterSdk) {
+			ce7->valueBits |= b_eSdk2;
 		}
 		if (ROMinRAM) {
 			ce7->valueBits |= b_ROMinRAM;
@@ -445,6 +455,12 @@ int hookNdsRetailArm7(
 			romOffset = ndsHeader->arm9overlaySource;
 		}
 		ce7->romLocation -= romOffset;
+		if (dataToPreloadFound(ndsHeader) && dataToPreloadFrame) {
+			ce7->romPartLocation = romPartLocation;
+			ce7->romPartSrc = dataToPreloadAddr;
+			ce7->romPartSize = dataToPreloadSize;
+			ce7->romPartFrame = dataToPreloadFrame;
+		}
 
 		// 0: ROM part start, 1: ROM part start in RAM, 2: ROM part end in RAM
 		extern u32 romMapLines;

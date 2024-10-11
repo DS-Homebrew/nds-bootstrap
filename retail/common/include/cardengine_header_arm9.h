@@ -103,6 +103,7 @@ typedef struct cardengineArm9 {
 		15: isDlp
 		16: bypassExceptionHandler
 		17: fntFatCached
+		18: waitForPreloadToFinish
 	*/
 	s32 mainScreen;
 	u32 consoleModel;

@@ -1379,26 +1379,30 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		}
 
 		if (offset > 0) {
-			if (size > 0x10) {
-				size = 0x10;
+			if (size > 0xC) {
+				size = 0xC;
 			}
 			fseek(file, offset, SEEK_SET);
 			u32 *buffer = new u32[size/4];
 			fread(buffer, 1, size, file);
 
-			for (u32 i = 0; i < size/8; i++) {
+			/* for (u32 i = 0; i < size/8; i++) {
 				conf->dataToPreloadAddr[i] = buffer[0+(i*2)];
 				conf->dataToPreloadSize[i] = buffer[1+(i*2)];
-			}
+			} */
+			conf->dataToPreloadAddr = buffer[0];
+			conf->dataToPreloadSize = buffer[1];
+			conf->dataToPreloadFrame = (size == 0xC) ? buffer[2] : 0;
 			delete[] buffer;
 		}
 	  }
 		fclose(file);
 	}
-	if (conf->dataToPreloadAddr[0] == 0) {
+	if (conf->dataToPreloadAddr == 0) {
 		// Set NitroFS pre-load, in case if full ROM pre-load fails
-		conf->dataToPreloadAddr[0] = ndsArm7BinOffset+ndsArm7Size;
-		conf->dataToPreloadSize[0] = ((internalRomSize == 0 || internalRomSize > conf->romSize) ? conf->romSize : internalRomSize)-conf->dataToPreloadAddr[0];
+		conf->dataToPreloadAddr = ndsArm7BinOffset+ndsArm7Size;
+		conf->dataToPreloadSize = ((internalRomSize == 0 || internalRomSize > conf->romSize) ? conf->romSize : internalRomSize)-conf->dataToPreloadAddr;
+		conf->dataToPreloadFrame = 0;
 	}
   } else {
 	const bool binary3 = (REG_SCFG_EXT7 == 0 ? !dsiEnhancedMbk : (a7mbk6 != 0x00403000));

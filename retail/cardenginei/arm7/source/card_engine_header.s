@@ -35,6 +35,10 @@
 .global igmHotkey
 .global ndsCodeStart
 .global romLocation
+.global romPartLocation
+.global romPartSrc
+.global romPartSize
+.global romPartFrame
 .global romMapLines
 .global romMap
 
@@ -92,6 +96,14 @@ scfgRomBak:
 igmHotkey:
 	.hword	0
 romLocation:
+	.word	0x00000000
+romPartLocation:
+	.word	0x00000000
+romPartSrc:
+	.word	0x00000000
+romPartSize:
+	.word	0x00000000
+romPartFrame:
 	.word	0x00000000
 romMapLines:
 	.word	0x00000000

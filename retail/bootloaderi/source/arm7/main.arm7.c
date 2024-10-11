@@ -104,8 +104,9 @@ extern u32 romSize;
 extern u32 saveSize;
 // extern u32 gbaRomSize;
 // extern u32 gbaSaveSize;
-extern u32 dataToPreloadAddr[2];
-extern u32 dataToPreloadSize[2];
+extern u32 dataToPreloadAddr;
+extern u32 dataToPreloadSize;
+extern u32 dataToPreloadFrame;
 extern u32 wideCheatFileCluster;
 extern u32 wideCheatSize;
 extern u32 apPatchFileCluster;
@@ -941,10 +942,10 @@ static void my_readUserSettings(tNDSHeader* ndsHeader) {
 
 bool dataToPreloadFound(const tNDSHeader* ndsHeader) {
 	if (strncmp(ndsHeader->gameCode, "UBR", 3) == 0) {
-		return (dataToPreloadSize[0] > 0 && (dataToPreloadSize[0]/*+dataToPreloadSize[1]*/) <= retail_CACHE_ADRESS_SIZE_BROWSER-0x40000);
+		return (dataToPreloadSize > 0 && (dataToPreloadSize/*+dataToPreloadSize[1]*/) <= retail_CACHE_ADRESS_SIZE_BROWSER-0x40000);
 	}
 
-	return (dataToPreloadSize[0] > 0 && (dataToPreloadSize[0]/*+dataToPreloadSize[1]*/) <= (consoleModel > 0 ? (dsiModeConfirmed ? (ndsHeader->unitCode > 0 ? dev_CACHE_ADRESS_SIZE_TWLSDK : dev_CACHE_ADRESS_SIZE_DSIMODE) : dev_CACHE_ADRESS_SIZE) : (dsiModeConfirmed ? retail_CACHE_ADRESS_SIZE_DSIMODE : retail_CACHE_ADRESS_SIZE))-0x40000);
+	return (dataToPreloadSize > 0 && (dataToPreloadSize/*+dataToPreloadSize[1]*/) <= (consoleModel > 0 ? (dsiModeConfirmed ? (ndsHeader->unitCode > 0 ? dev_CACHE_ADRESS_SIZE_TWLSDK : dev_CACHE_ADRESS_SIZE_DSIMODE) : dev_CACHE_ADRESS_SIZE) : (dsiModeConfirmed ? retail_CACHE_ADRESS_SIZE_DSIMODE : retail_CACHE_ADRESS_SIZE))-0x40000);
 }
 
 static void loadROMPartIntoRAM(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, const bool laterSdk, aFile* file) {
@@ -952,14 +953,19 @@ static void loadROMPartIntoRAM(const tNDSHeader* ndsHeader, const module_params_
 		return;
 	}
 
+	if ((dataToPreloadFrame > 0) && !gameOnFlashcard && (!ROMsupportsDsiMode(ndsHeader) || !dsiModeConfirmed)) {
+		dbg_printf("Part of ROM will pre-load into RAM\n");
+		return;
+	}
+
 	const bool dsiBios = scfgBios9i();
 
 	u32 dataLocation = getRomPartLocation(ndsHeader, !laterSdk, isSdk5(moduleParams), dsiBios);
-	s32 preloadSizeEdit = dataToPreloadSize[0];
+	s32 preloadSizeEdit = dataToPreloadSize;
 
 	u32 romLocationChange = dataLocation;
 	u32 romLocationChangePrep = romLocationChange;
-	u32 romOffsetChange = dataToPreloadAddr[0];
+	u32 romOffsetChange = dataToPreloadAddr;
 	u32 romBlockSize = 0;
 	while (preloadSizeEdit > 0) {
 		bool readRom = false;
@@ -968,9 +974,6 @@ static void loadROMPartIntoRAM(const tNDSHeader* ndsHeader, const module_params_
 		preloadSizeEdit -= cacheBlockSize;
 
 		if (preloadSizeEdit <= 0) {
-			readRom = true;
-		} else if (dsiWramAccess && !dsiWramMirrored && romLocationChangePrep == (consoleModel > 0 ? 0x0E000000 : 0x0D000000)) {
-			romLocationChangePrep = 0x03708000;
 			readRom = true;
 		} else if (isSdk5(moduleParams) || (dsiBios && laterSdk)) {
 			if (romLocationChangePrep == 0x0C7C0000+cacheBlockSize) {
@@ -1938,7 +1941,8 @@ int arm7_main(void) {
 			dmaRomRead_LED,
 			ndmaDisabled,
 			twlTouch,
-			false
+			false,
+			0
 		);
 		if (errorCode == ERR_NONE) {
 			dbg_printf("Card hook 7 successful\n\n");
@@ -2210,7 +2214,8 @@ int arm7_main(void) {
 			dmaRomRead_LED,
 			ndmaDisabled,
 			twlTouch,
-			usesCloneboot
+			usesCloneboot,
+			getRomPartLocation(ndsHeader, !laterSdk, isSdk5(moduleParams), scfgBios9i())
 		);
 		if (errorCode == ERR_NONE) {
 			// dbg_printf("Card hook 7 successful\n\n");

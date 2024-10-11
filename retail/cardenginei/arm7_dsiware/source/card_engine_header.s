@@ -92,6 +92,14 @@ igmHotkey:
 	.hword	0
 romLocation:
 	.word	0x00000000
+romPartLocation:
+	.word	0x00000000
+romPartSrc:
+	.word	0x00000000
+romPartSize:
+	.word	0x00000000
+romPartFrame:
+	.word	0x00000000
 romMapLines:
 	.word	0x00000000
 romMap:

@@ -41,7 +41,7 @@ volatile int timeTillStatusRefresh = 7;
 void inGameMenu(void) {
 	sharedAddr[4] = 0x554E454D; // 'MENU'
 	IPC_SendSync(0x9);
-	u32 errorBak = sharedAddr[0];
+	const u32 errorBak = sharedAddr[0];
 	int volBak = REG_MASTER_VOLUME;
 	REG_MASTER_VOLUME = 0;
 	int oldIME = enterCriticalSection();

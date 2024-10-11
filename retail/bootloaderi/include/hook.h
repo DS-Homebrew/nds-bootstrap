@@ -59,7 +59,8 @@ int hookNdsRetailArm7(
 	u8 dmaRomRead_LED,
 	bool ndmaDisabled,
 	bool twlTouch,
-	bool usesCloneboot
+	bool usesCloneboot,
+	u32 romPartLocation
 );
 int hookNdsRetailArm9(
 	cardengineArm9* ce9,

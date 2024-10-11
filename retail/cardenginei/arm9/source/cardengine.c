@@ -53,6 +53,7 @@
 #define softResetMb BIT(13)
 #define cloneboot BIT(14)
 #define fntFatCached BIT(17)
+#define waitForPreloadToFinish BIT(18)
 
 //#ifdef DLDI
 #include "my_fat.h"
@@ -137,6 +138,7 @@ static u32 asyncSector = 0;
 #endif // ASYNCPF
 #endif // DLDI
 bool flagsSet = false;
+bool romPart = false;
 #ifdef DLDI
 static bool driveInitialized = false;
 #endif
@@ -357,6 +359,10 @@ void getAsyncSector() {
 
 
 extern void setExceptionHandler2();
+
+static inline bool isPreloadFinished(void) {
+	return (sharedAddr[5] == 0x44454C50); // 'PLED'
+}
 
 static inline void waitForArm7(void) {
 	// IPC_SendSync(0x4);
@@ -824,7 +830,7 @@ void cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	}
 	#endif
 
-	bool romPart = false;
+	romPart = false;
 	//int romPartNo = 0;
 	if (!(ce9->valueBits & ROMinRAM)) {
 		/*for (int i = 0; i < 2; i++) {
@@ -838,6 +844,18 @@ void cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 			}
 		}*/
 		romPart = (ce9->romPartSize > 0 && src >= ce9->romPartSrc && src < ce9->romPartSrc+ce9->romPartSize);
+		#ifndef DLDI
+		#ifndef TWLSDK
+		if (romPart && (ce9->valueBits & waitForPreloadToFinish)) {
+			if (isPreloadFinished()) {
+				sharedAddr[5] = 0;
+				ce9->valueBits &= ~waitForPreloadToFinish;
+			} else {
+				romPart = false;
+			}
+		}
+		#endif
+		#endif
 	}
 	if ((ce9->valueBits & ROMinRAM) || romPart) {
 		cardReadRAM(dst, src, len/*, romPartNo*/);

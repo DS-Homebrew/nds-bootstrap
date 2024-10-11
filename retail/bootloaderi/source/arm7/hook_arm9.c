@@ -29,6 +29,7 @@
 #define b_isDlp BIT(15)
 #define b_bypassExceptionHandler BIT(16)
 #define b_fntFatCached BIT(17)
+#define b_waitForPreloadToFinish BIT(18)
 
 
 static const int MAX_HANDLER_LEN = 50;
@@ -336,8 +337,9 @@ int hookNdsRetailArm9(
 	extern u32 overlaysSize;
 	extern bool overlayPatch;
 	extern u32 romPaddingSize;
-	extern u32 dataToPreloadAddr[2];
-	extern u32 dataToPreloadSize[2];
+	extern u32 dataToPreloadAddr;
+	extern u32 dataToPreloadSize;
+	extern u32 dataToPreloadFrame;
 	extern bool dataToPreloadFound(const tNDSHeader* ndsHeader);
 	const char* romTid = getRomTid(ndsHeader);
 	const bool laterSdk = ((moduleParams->sdk_version >= 0x2008000 && moduleParams->sdk_version != 0x2012774) || moduleParams->sdk_version == 0x20029A8);
@@ -443,8 +445,8 @@ int hookNdsRetailArm9(
 			//ce9->romLocation[1] = ce9->romLocation[0]+dataToPreloadSize[0];
 			// ce9->romLocation -= dataToPreloadAddr[0];
 			//ce9->romLocation[1] -= dataToPreloadAddr[1];
-			configureRomMap(ce9, ndsHeader, dataToPreloadAddr[0], cacheBlockSize, dsiMode, consoleModel);
-			for (u32 i = 0; i < dataToPreloadSize[0]/*+dataToPreloadSize[1]*/; i += cacheBlockSize) {
+			configureRomMap(ce9, ndsHeader, dataToPreloadAddr, cacheBlockSize, dsiMode, consoleModel);
+			for (u32 i = 0; i < dataToPreloadSize/*+dataToPreloadSize[1]*/; i += cacheBlockSize) {
 				ce9->cacheAddress += cacheBlockSize;
 				if (isSdk5(moduleParams) || ((ce9->valueBits & b_dsiBios) && laterSdk)) {
 					if (ce9->cacheAddress == 0x0C7C0000+cacheBlockSize) {
@@ -468,10 +470,13 @@ int hookNdsRetailArm9(
 				dataToPreloadSizeAligned += cacheBlockSize;
 			}
 			ce9->cacheSlots -= dataToPreloadSizeAligned/cacheBlockSize;
-			ce9->romPartSrc = dataToPreloadAddr[0];
+			ce9->romPartSrc = dataToPreloadAddr;
 			//ce9->romPartSrc[1] = dataToPreloadAddr[1];
-			ce9->romPartSize = dataToPreloadSize[0];
+			ce9->romPartSize = dataToPreloadSize;
 			//ce9->romPartSize[1] = dataToPreloadSize[1];
+			if (dataToPreloadFrame) {
+				ce9->valueBits |= b_waitForPreloadToFinish;
+			}
 		}
 		if (runOverlayCheck && overlaysSize <= 0x700000) {
 			/*extern u8 gameOnFlashcard;

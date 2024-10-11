@@ -57,6 +57,7 @@
 
 #define gameOnFlashcard BIT(0)
 #define saveOnFlashcard BIT(1)
+#define eSdk2 BIT(1)
 #define ROMinRAM BIT(3)
 #define dsiMode BIT(4)
 #define b_dsiSD BIT(5)
@@ -529,6 +530,7 @@ void reset(void) {
 	initialized = false;
 	//ipcSyncHooked = false;
 	languageTimer = 0;
+	unlockMutex(&saveMutex);
 
 	#ifndef TWLSDK
 	if ((valueBits & isDlp) || currentSrlAddr != *(u32*)(resetParam+0xC) || *(u32*)(resetParam+8) == 0x44414F4C) {
@@ -1352,6 +1354,72 @@ static bool resume_cardRead_arm9(void) {
 	sharedAddr[4] = 0;
 	return true;
 } */
+
+static void loadROMPartIntoRAM(void) {
+	static bool finished = false;
+	extern u32 romPartLocation;
+	extern u32 romPartSrc;
+	extern u32 romPartSize;
+	extern u32 romPartFrame;
+
+	if (finished || romPartFrame == 0 || *(int*)((valueBits & isSdk5) ? 0x02FFFC3C : 0x027FFC3C) < romPartFrame) {
+		return;
+	}
+
+	const int oldIME = enterCriticalSection(); // This is needed to avoid crashing when reading or writing save data
+
+	static bool inited = false;
+	const u32 cacheBlockSize = 0x4000;
+
+	static s32 preloadSizeEdit = 0;
+	static u32 romLocationChange = 0;
+	static u32 romOffsetChange = 0;
+
+	if (!inited) {
+		preloadSizeEdit = romPartSize;
+		romLocationChange = romPartLocation;
+		romOffsetChange = romPartSrc;
+		inited = true;
+	}
+
+	if (preloadSizeEdit > 0) {
+		const u32 romBlockSize = (preloadSizeEdit > cacheBlockSize) ? cacheBlockSize : preloadSizeEdit;
+		if (lockMutex(&saveMutex)) {
+			cardReadLED(true, true);
+			fileRead((char*)romLocationChange, romFile, romOffsetChange, romBlockSize);
+			cardReadLED(false, true);
+			unlockMutex(&saveMutex);
+		}
+		preloadSizeEdit -= romBlockSize;
+		romOffsetChange += cacheBlockSize;
+		romLocationChange += cacheBlockSize;
+
+		if ((valueBits & isSdk5) || ((valueBits & dsiBios) && !(valueBits & eSdk2))) {
+			if (romLocationChange == 0x0C7C0000+cacheBlockSize) {
+				romLocationChange += (ndsHeader->unitCode > 0 ? 0x20000 : 0x40000)-cacheBlockSize;
+			} else if (ndsHeader->unitCode == 0) {
+				if (romLocationChange == 0x0D000000-cacheBlockSize) {
+					romLocationChange += cacheBlockSize;
+				}
+			} else {
+				if (romLocationChange == 0x0C800000-cacheBlockSize) {
+					romLocationChange += cacheBlockSize;
+				} else if (romLocationChange == 0x0CFE0000) {
+					romLocationChange += 0x20000;
+				}
+			}
+		} else if ((romLocationChange == 0x0D000000-cacheBlockSize) && (valueBits & dsiBios)) {
+			romLocationChange += cacheBlockSize;
+		} else if (romLocationChange == 0x0C7C0000) {
+			romLocationChange += 0x40000;
+		}
+	} else {
+		sharedAddr[5] = 0x44454C50; // 'PLED'
+		finished = true;
+	}
+
+	leaveCriticalSection(oldIME);
+}
 #endif
 
 static inline void sdmmcHandler(void) { // Unused
@@ -1436,7 +1504,9 @@ void runCardEngineCheck(void) {
   		}*/
 
 			if (!(valueBits & gameOnFlashcard)) {
-				// #ifndef TWLSDK
+				#ifndef TWLSDK
+				loadROMPartIntoRAM();
+				#endif
 				if (/* sharedAddr[3] == (vu32)0x020FF808 || sharedAddr[3] == (vu32)0x020FF80A || */ sharedAddr[3] == (vu32)0x025FFB08 || sharedAddr[3] == (vu32)0x025FFB0A) {	// ARM9 Card Read
 					//if (!readOngoing ? start_cardRead_arm9() : resume_cardRead_arm9()) {
 						bool useApFixOverlays = false;
@@ -1451,9 +1521,12 @@ void runCardEngineCheck(void) {
 						const bool isDma = (sharedAddr[3] == (vu32)0x025FFB0A);
 
 						// readOngoing = true;
-						cardReadLED(true, isDma);    // When a file is loading, turn on LED for card read indicator
-						fileRead((char*)dst, useApFixOverlays ? apFixOverlaysFile : romFile, src, len);
-						cardReadLED(false, isDma);    // After loading is done, turn off LED for card read indicator
+						if (lockMutex(&saveMutex)) {
+							cardReadLED(true, isDma);    // When a file is loading, turn on LED for card read indicator
+							fileRead((char*)dst, useApFixOverlays ? apFixOverlaysFile : romFile, src, len);
+							cardReadLED(false, isDma);    // After loading is done, turn off LED for card read indicator
+							unlockMutex(&saveMutex);
+						}
 						// readOngoing = false;
 						sharedAddr[3] = 0;
 					if (isDma) {
@@ -1465,7 +1538,6 @@ void runCardEngineCheck(void) {
 					sharedAddr[3] = 0;
 					IPC_SendSync(0x3);
 				}*/
-				// #endif
 			}
 
 			#ifdef DEBUG
@@ -1624,6 +1696,7 @@ void myIrqHandlerVBlank(void) {
 #endif */
 
 	if ((0 == (REG_KEYINPUT & igmHotkey) && 0 == (REG_EXTKEYINPUT & (((igmHotkey >> 10) & 3) | ((igmHotkey >> 6) & 0xC0))) && (valueBits & igmAccessible) && !wifiIrq) /* || returnToMenu */ || sharedAddr[5] == 0x4C4D4749 /* IGML */) {
+		if (tryLockMutex(&saveMutex)) {
 #ifdef TWLSDK
 		igmText = (struct IgmText *)INGAME_MENU_LOCATION;
 		i2cWriteRegister(0x4A, 0x12, 0x00);
@@ -1632,11 +1705,13 @@ void myIrqHandlerVBlank(void) {
 #ifdef TWLSDK
 		i2cWriteRegister(0x4A, 0x12, 0x01);
 #endif
+		unlockMutex(&saveMutex);
+		}
 	}
 
 /*KEY_X*/
 	/* if (0==(REG_KEYINPUT & (KEY_L | KEY_R | KEY_UP)) && !(REG_EXTKEYINPUT & KEY_A)) {
-		if (tryLockMutex(&saveMutex)) {
+		if (lockMutex(&saveMutex)) {
 			if (swapTimer == 60){
 				swapTimer = 0;
 				if (!ipcEveryFrame) {
@@ -1691,7 +1766,7 @@ void myIrqHandlerVBlank(void) {
 	}
 
 	if ( 0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_START | KEY_SELECT))) {
-		if (tryLockMutex(&saveMutex)) {
+		if (lockMutex(&saveMutex)) {
 			if ((softResetTimer == 60 * 2) && (saveTimer == 0)) {
 				REG_MASTER_VOLUME = 0;
 				int oldIME = enterCriticalSection();
@@ -1937,7 +2012,7 @@ bool eepromRead(u32 src, void *dst, u32 len) {
 		return false;
 	}
 
-	if (tryLockMutex(&saveMutex)) {
+	if (lockMutex(&saveMutex)) {
 		// while (readOngoing) { swiDelay(100); }
 		#ifdef TWLSDK
 		//bool doBak = ((valueBits & gameOnFlashcard) && !(valueBits & saveOnFlashcard));
@@ -1986,7 +2061,7 @@ bool eepromPageWrite(u32 dst, const void *src, u32 len) {
 		return false;
 	}
 
-	if (tryLockMutex(&saveMutex)) {
+	if (lockMutex(&saveMutex)) {
 		// while (readOngoing) { swiDelay(100); }
 		#ifdef TWLSDK
 		//bool doBak = ((valueBits & gameOnFlashcard) && !(valueBits & saveOnFlashcard));

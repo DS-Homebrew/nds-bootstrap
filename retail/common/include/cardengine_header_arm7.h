@@ -83,7 +83,7 @@ typedef struct cardengineArm7 {
 	/*
 		0: gameOnFlashcard
 		1: saveOnFlashcard
-		2: extendedMemory
+		2: eSdk2
 		3: ROMinRAM
 		4: dsiMode
 		5: dsiSD
@@ -116,6 +116,10 @@ typedef struct cardengineArm7 {
     u16 scfgRomBak;
     u16 igmHotkey;
 	u32 romLocation;
+	u32 romPartLocation;
+	u32 romPartSrc;
+	u32 romPartSize;
+	u32 romPartFrame;
 	u32 romMapLines;
 	u32 romMap[5][3]; // 0: ROM part start, 1: ROM part start in RAM, 2: ROM part end in RAM
 } cardengineArm7;
