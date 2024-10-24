@@ -62,9 +62,12 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	const bool ce9NotInHeap = (ce9Alt || (u32)ce9 == CARDENGINE_ARM9_LOCATION_DLDI_START);
 	const bool wirelessCodeInVram = (*(u32*)(((u32)ndsHeader->arm7destination) + newArm7binarySize - 0x24) == 0x027E0000);
+	if (wirelessCodeInVram) {
+		*(u32*)(((u32)ndsHeader->arm7destination) + newArm7binarySize - 0xC) = 0; // Disable loading VRAM wireless code to RAM
+	}
 	maxHeapOpen = (!extendedMemory && ce9NotInHeap && wirelessCodeInVram);
-	u32 heapEndRetail = (ce9NotInHeap && !ce9AltLargeTable) ? ((cheatSizeTotal <= 4) ? 0x023E0000 : CHEAT_ENGINE_LOCATION_B4DS-0x400000) : ((fatTableAddr < 0x023C0000 || fatTableAddr >= (u32)ce9) ? (u32)ce9 : fatTableAddr);
-	if (!extendedMemory && !maxHeapOpen && _io_dldi_size >= 0x0E) {
+	u32 heapEndRetail = (ce9NotInHeap && !ce9AltLargeTable) ? ((cheatSizeTotal <= 4 || _io_dldi_size >= 0x0E) ? 0x023E0000 : CHEAT_ENGINE_LOCATION_B4DS-0x400000) : ((fatTableAddr < 0x023C0000 || fatTableAddr >= (u32)ce9) ? (u32)ce9 : fatTableAddr);
+	if (!extendedMemory && !maxHeapOpen && !wirelessCodeInVram && _io_dldi_size >= 0x0E) {
 		const u32 ce9DldiOffset = (_io_dldi_size == 0x0F) ? 0x023D8000 : 0x023DC000;
 		heapEndRetail = ((u32)ndsHeader->arm9destination >= 0x02004000) ? ce9DldiOffset : CARDENGINE_ARM9_LOCATION_DLDI_32;
 

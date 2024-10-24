@@ -1926,13 +1926,76 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 				||	strncmp(romTid, "K9K", 3) == 0 // Nintendoji
 				||	strncmp(romTid, "K6T", 3) == 0 // Orion's Odyssey
 				||	strncmp(romTid, "KPS", 3) == 0 // Phantasy Star 0 Mini
-				||	strncmp(romTid, "KHR", 3) == 0 // Picture Perfect: Hair Stylist
+				||	strncmp(romTid, "KHR", 3) == 0 // Picture Perfect: Pocket Stylist
 				|| ((strncmp(romTid, "KS3", 3) == 0) && (headerCRC == 0x57FE || headerCRC == 0x2BFA)) // Shantae: Risky's Revenge (Non-proto builds and clean ROMs)
 				||	strncmp(romTid, "KZU", 3) == 0 // Tales to Enjoy!: Little Red Riding Hood
 				||	strncmp(romTid, "KZV", 3) == 0 // Tales to Enjoy!: Puss in Boots
 				||	strncmp(romTid, "KZ7", 3) == 0 // Tales to Enjoy!: The Three Little Pigs
 				||	strncmp(romTid, "KZ8", 3) == 0 // Tales to Enjoy!: The Ugly Duckling
 				);
+				if (!conf->useSdk5DonorAlt && io_dldi_data->driverSize >= 0x0E) {
+					conf->useSdk5DonorAlt = ( // Do not use alternate ARM7 donor for games with wireless features and/or made with debugger SDK
+						strncmp(romTid, "K7A", 3) != 0 // 4 Elements
+					&&	strncmp(romTid, "K45", 3) != 0 // 40-in-1: Explosive Megamix
+					&&	strncmp(romTid, "KV3", 3) != 0 // Anonymous Notes 3: From The Abyss
+					&&	strncmp(romTid, "KV4", 3) != 0 // Anonymous Notes 4: From The Abyss
+					&&	strncmp(romTid, "KAZ", 3) != 0 // ARC Style: Soccer!
+					&&	strncmp(romTid, "K7B", 3) != 0 // Around the World in 80 Days
+					&&	strncmp(romTid, "KVU", 3) != 0 // ATV Fever
+					&&	strncmp(romTid, "K9U", 3) != 0 // ATV Quad Kings
+					&&	strncmp(romTid, "KBE", 3) != 0 // Bejeweled Twist
+					&&	strncmp(romTid, "KBB", 3) != 0 // Bomberman Blitz
+					&&	strncmp(romTid, "K2J", 3) != 0 // Cake Ninja
+					&&	strncmp(romTid, "K2N", 3) != 0 // Cake Ninja 2
+					&&	strncmp(romTid, "KQL", 3) != 0 // Chuukara! Dairoujou
+					&&	strncmp(romTid, "KVL", 3) != 0 // Clash of Elementalists
+					&&	strncmp(romTid, "KZG", 3) != 0 // Crazy Golf
+					&&	strncmp(romTid, "KF3", 3) != 0 // Dairojo! Samurai Defenders
+					&&	strncmp(romTid, "K6B", 3) != 0 // Deep Sea Creatures
+					&&	strncmp(romTid, "KIF", 3) != 0 // Drift Street International
+					&&	strncmp(romTid, "B88", 3) != 0 // DS WiFi Settings
+					&&	strncmp(romTid, "K42", 3) != 0 // Elite Forces: Unit 77
+					&&	strncmp(romTid, "Z2E", 3) != 0 // Famicom Wars DS: Ushinawareta Hikari
+					&&	strncmp(romTid, "K6J", 3) != 0 // Fuuu! Dairoujou Kai
+					&&	strncmp(romTid, "KGK", 3) != 0 // Glory Days: Tactical Defense
+					&&	strncmp(romTid, "KKF", 3) != 0 // Go Fetch! 2
+					&&	strncmp(romTid, "KHO", 3) != 0 // Handy Hockey
+					&&	strncmp(romTid, "KHM", 3) != 0 // Handy Mahjong
+					&&	strncmp(romTid, "K6S", 3) != 0 // Heathcliff: Spot On
+					&&	strncmp(romTid, "KHL", 3) != 0 // Hell's Kitchen VS
+					&&	strncmp(romTid, "KTX", 3) != 0 // High Stakes Texas Hold'em
+					&&	strncmp(romTid, "K3J", 3) != 0 // iSpot Japan
+					&&	strncmp(romTid, "KIK", 3) != 0 // Ivy the Kiwi? mini
+					&&	strncmp(romTid, "K9B", 3) != 0 // Jazzy Billiards
+					&&	strncmp(romTid, "KD3", 3) != 0 // Jinia Supasonaru: Eiwa Rakubiki Jiten
+					&&	strncmp(romTid, "KD5", 3) != 0 // Jinia Supasonaru: Waei Rakubiki Jiten
+					// &&	strncmp(romTid, "K69", 3) != 0 // Katamukusho
+					// &&	strncmp(romTid, "KVF", 3) != 0 // Kuizu Ongaku Nojika
+					&&	strncmp(romTid, "KQ9", 3) != 0 // The Legend of Zelda: Four Swords: Anniversary Edition
+					&&	strncmp(romTid, "KJO", 3) != 0 // Magnetic Joe
+					&&	strncmp(romTid, "KD4", 3) != 0 // Meikyou Kokugo: Rakubiki Jiten
+					&&	strncmp(romTid, "K7Z", 3) != 0 && strncmp(romTid, "K9R", 3) != 0 // My Aquarium: Seven Oceans
+					&&	strncmp(romTid, "KMR", 3) != 0 // My Farm
+					&&	strncmp(romTid, "KMV", 3) != 0 // My Exotic Farm
+					&&	strncmp(romTid, "KL3", 3) != 0 // My Asian Farm
+					&&	strncmp(romTid, "KL4", 3) != 0 // My Australian Farm
+					&&	strncmp(romTid, "KSU", 3) != 0 // Number Battle
+					&&	strncmp(romTid, "KUS", 3) != 0 // Paul's Shooting Adventure 2
+					&&	strncmp(romTid, "KE3", 3) != 0 // PictureBook Games: The Royal Bluff
+					&&	strncmp(romTid, "KPM", 3) != 0 // Pomjong
+					&&	strncmp(romTid, "KLR", 3) != 0 // Puffins: Let's Race!
+					&&	strncmp(romTid, "KLX", 3) != 0 // Redau Shirizu: Gunjin Shougi
+					&&	strncmp(romTid, "KG4", 3) != 0 // Saikyou Ginsei Shougi
+					&&	strncmp(romTid, "KRW", 3) != 0 // Sea Battle
+					&&  strncmp(romTid, "KS3", 3) != 0 // Shantae: Risky's Revenge (Proto builds and non-clean ROMs)
+					&&	strncmp(romTid, "KTE", 3) != 0 // Tetris Party Live
+					&&	strncmp(romTid, "KTW", 3) != 0 // Thorium Wars
+					&&	strncmp(romTid, "K72", 3) != 0 // True Swing Golf Express
+					&&	strncmp(romTid, "KTI", 3) != 0 // Turn: The Lost Artifact
+					&&	strncmp(romTid, "KUB", 3) != 0 // Ubongo
+					&&	strncmp(romTid, "K7K", 3) != 0 // Zombie Blaster
+					);
+				}
 
 				if (access("fat:/_nds/nds-bootstrap/b4dsTwlDonor.bin", F_OK) == 0) {
 					donorNdsPath = "fat:/_nds/nds-bootstrap/b4dsTwlDonor.bin";
