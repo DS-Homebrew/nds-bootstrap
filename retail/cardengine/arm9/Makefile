@@ -65,7 +65,7 @@ LIBDIRS	:=	$(LIBNDS)
 ifneq ($(BUILD),$(notdir $(CURDIR)))
 #---------------------------------------------------------------------------------
 
-export TARGET	:=	cardengine_arm9_alt3
+export TARGET	:=	cardengine_arm9
 export OUTPUT	:=	$(CURDIR)/../../nitrofiles_dec/$(TARGET)
 export OUTPUT_CMP	:=	$(CURDIR)/../../nitrofiles/$(TARGET)
 export DEPSDIR	:=	$(CURDIR)/$(BUILD)
