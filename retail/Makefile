@@ -29,7 +29,6 @@ VERSION	:=	$(VERSION_MAJOR).$(VERSION_MINOR).$(VERSION_PATCH)
 #---------------------------------------------------------------------------------
 TARGET		:=	nds-bootstrap
 BIN		:=	bin
-DATA		:=	data
 ASSETS		:=	assets
 NITRODATA	:=	nitrofiles
 
@@ -106,187 +105,187 @@ arm9/$(TARGET).elf:	bootloader bootloader1 bootloader2 bootloaderi bootloaderi1 
 	@$(MAKE) -C arm9
 
 #---------------------------------------------------------------------------------		
-libnds32: $(DATA)
+libnds32:
 	@$(MAKE) -C libnds32
 
 #---------------------------------------------------------------------------------		
-bootloader: $(DATA) cardengine_arm7 cardengine_arm7_music cardengine_arm9_igm cardengine_arm9_igm_extmem cardengine_arm9 cardengine_arm9_32 cardengine_arm9_start cardengine_arm9_start_foto cardengine_arm9_alt cardengine_arm9_alt_gsdd cardengine_arm9_alt2 cardengine_arm9_alt3 cardengine_arm9_extmem cardengine_arm9_extmem_gsdd cardengine_arm9_extmem_start cardengine_arm9_extmem_foto
+bootloader: cardengine_arm7 cardengine_arm7_music cardengine_arm9_igm cardengine_arm9_igm_extmem cardengine_arm9 cardengine_arm9_32 cardengine_arm9_start cardengine_arm9_start_foto cardengine_arm9_alt cardengine_arm9_alt_gsdd cardengine_arm9_alt2 cardengine_arm9_alt3 cardengine_arm9_extmem cardengine_arm9_extmem_gsdd cardengine_arm9_extmem_start cardengine_arm9_extmem_foto
 	@$(MAKE) -C bootloader
 
 #---------------------------------------------------------------------------------		
-bootloader1: $(DATA)
+bootloader1:
 	@$(MAKE) -C bootloader1
 
 #---------------------------------------------------------------------------------		
-bootloader2: $(DATA)
+bootloader2:
 	@$(MAKE) -C bootloader2
 
 #---------------------------------------------------------------------------------		
-bootloaderi: $(DATA) cardenginei_arm7 cardenginei_arm7_alt cardenginei_arm7_twlsdk cardenginei_arm7_twlsdk3 cardenginei_arm7_dsiware cardenginei_arm7_dsiware3 cardenginei_arm7_cheat cardenginei_arm9_igm cardenginei_arm9 cardenginei_arm9_alt cardenginei_arm9_alt2 cardenginei_arm9_dlp cardenginei_arm9_gsdd cardenginei_arm9_gsdd_alt cardenginei_arm9_dldi cardenginei_arm9_gsdd_dldi cardenginei_arm9_twlsdk cardenginei_arm9_twlsdk3 cardenginei_arm9_twlsdk_dldi cardenginei_arm9_twlsdk3_dldi cardenginei_arm9_dsiware cardenginei_arm9_dsiware3
+bootloaderi: cardenginei_arm7 cardenginei_arm7_alt cardenginei_arm7_twlsdk cardenginei_arm7_twlsdk3 cardenginei_arm7_dsiware cardenginei_arm7_dsiware3 cardenginei_arm7_cheat cardenginei_arm9_igm cardenginei_arm9 cardenginei_arm9_alt cardenginei_arm9_alt2 cardenginei_arm9_dlp cardenginei_arm9_gsdd cardenginei_arm9_gsdd_alt cardenginei_arm9_dldi cardenginei_arm9_gsdd_dldi cardenginei_arm9_twlsdk cardenginei_arm9_twlsdk3 cardenginei_arm9_twlsdk_dldi cardenginei_arm9_twlsdk3_dldi cardenginei_arm9_dsiware cardenginei_arm9_dsiware3
 	@$(MAKE) -C bootloaderi
 
 #---------------------------------------------------------------------------------		
-bootloaderi1: $(DATA)
+bootloaderi1:
 	@$(MAKE) -C bootloaderi1
 
 #---------------------------------------------------------------------------------		
-bootloaderi2: $(DATA)
+bootloaderi2:
 	@$(MAKE) -C bootloaderi2
 
 #---------------------------------------------------------------------------------		
-cardengine_arm7: $(DATA)
+cardengine_arm7:
 	@$(MAKE) -C cardengine/arm7
 
 #---------------------------------------------------------------------------------		
-cardengine_arm7_music: $(DATA)
+cardengine_arm7_music:
 	@$(MAKE) -C cardengine/arm7_music
 
 #---------------------------------------------------------------------------------		
-cardengine_arm9_igm: $(DATA)
+cardengine_arm9_igm:
 	@$(MAKE) -C cardengine/arm9_igm
 
 #---------------------------------------------------------------------------------		
-cardengine_arm9_igm_extmem: $(DATA)
+cardengine_arm9_igm_extmem:
 	@$(MAKE) -C cardengine/arm9_igm_extmem
 
 #---------------------------------------------------------------------------------		
-cardengine_arm9: $(DATA)
+cardengine_arm9:
 	@$(MAKE) -C cardengine/arm9
 
 #---------------------------------------------------------------------------------		
-cardengine_arm9_32: $(DATA)
+cardengine_arm9_32:
 	@$(MAKE) -C cardengine/arm9_32
 
 #---------------------------------------------------------------------------------		
-cardengine_arm9_start: $(DATA)
+cardengine_arm9_start:
 	@$(MAKE) -C cardengine/arm9_start
 
 #---------------------------------------------------------------------------------		
-cardengine_arm9_start_foto: $(DATA)
+cardengine_arm9_start_foto:
 	@$(MAKE) -C cardengine/arm9_start_foto
 
 #---------------------------------------------------------------------------------		
-cardengine_arm9_alt: $(DATA)
+cardengine_arm9_alt:
 	@$(MAKE) -C cardengine/arm9_alt
 
 #---------------------------------------------------------------------------------		
-cardengine_arm9_alt_gsdd: $(DATA)
+cardengine_arm9_alt_gsdd:
 	@$(MAKE) -C cardengine/arm9_alt_gsdd
 
 #---------------------------------------------------------------------------------		
-cardengine_arm9_alt2: $(DATA)
+cardengine_arm9_alt2:
 	@$(MAKE) -C cardengine/arm9_alt2
 
 #---------------------------------------------------------------------------------		
-cardengine_arm9_alt3: $(DATA)
+cardengine_arm9_alt3:
 	@$(MAKE) -C cardengine/arm9_alt3
 
 #---------------------------------------------------------------------------------		
-cardengine_arm9_extmem: $(DATA)
+cardengine_arm9_extmem:
 	@$(MAKE) -C cardengine/arm9_extmem
 
 #---------------------------------------------------------------------------------		
-cardengine_arm9_extmem_gsdd: $(DATA)
+cardengine_arm9_extmem_gsdd:
 	@$(MAKE) -C cardengine/arm9_extmem_gsdd
 
 #---------------------------------------------------------------------------------		
-cardengine_arm9_extmem_start: $(DATA)
+cardengine_arm9_extmem_start:
 	@$(MAKE) -C cardengine/arm9_extmem_start
 
 #---------------------------------------------------------------------------------		
-cardengine_arm9_extmem_foto: $(DATA)
+cardengine_arm9_extmem_foto:
 	@$(MAKE) -C cardengine/arm9_extmem_foto
 
 #---------------------------------------------------------------------------------		
-cardenginei_arm7: $(DATA)
+cardenginei_arm7:
 	@$(MAKE) -C cardenginei/arm7
 
 #---------------------------------------------------------------------------------		
-cardenginei_arm7_alt: $(DATA)
+cardenginei_arm7_alt:
 	@$(MAKE) -C cardenginei/arm7_alt
 
 #---------------------------------------------------------------------------------		
-cardenginei_arm7_twlsdk: $(DATA)
+cardenginei_arm7_twlsdk:
 	@$(MAKE) -C cardenginei/arm7_twlsdk
 
 #---------------------------------------------------------------------------------		
-cardenginei_arm7_twlsdk3: $(DATA)
+cardenginei_arm7_twlsdk3:
 	@$(MAKE) -C cardenginei/arm7_twlsdk3
 
 #---------------------------------------------------------------------------------		
-cardenginei_arm7_dsiware: $(DATA)
+cardenginei_arm7_dsiware:
 	@$(MAKE) -C cardenginei/arm7_dsiware
 
 #---------------------------------------------------------------------------------		
-cardenginei_arm7_dsiware3: $(DATA)
+cardenginei_arm7_dsiware3:
 	@$(MAKE) -C cardenginei/arm7_dsiware3
 
 #---------------------------------------------------------------------------------		
-cardenginei_arm7_cheat: $(DATA)
+cardenginei_arm7_cheat:
 	@$(MAKE) -C cardenginei/arm7_cheat
 
 #---------------------------------------------------------------------------------		
-cardenginei_arm9_igm: $(DATA)
+cardenginei_arm9_igm:
 	@$(MAKE) -C cardenginei/arm9_igm
 
 #---------------------------------------------------------------------------------		
-cardenginei_arm9: $(DATA)
+cardenginei_arm9:
 	@$(MAKE) -C cardenginei/arm9
 
 #---------------------------------------------------------------------------------		
-cardenginei_arm9_alt: $(DATA)
+cardenginei_arm9_alt:
 	@$(MAKE) -C cardenginei/arm9_alt
 
 #---------------------------------------------------------------------------------		
-cardenginei_arm9_alt2: $(DATA)
+cardenginei_arm9_alt2:
 	@$(MAKE) -C cardenginei/arm9_alt2
 
 #---------------------------------------------------------------------------------		
-cardenginei_arm9_dlp: $(DATA)
+cardenginei_arm9_dlp:
 	@$(MAKE) -C cardenginei/arm9_dlp
 
 #---------------------------------------------------------------------------------		
-cardenginei_arm9_gsdd: $(DATA)
+cardenginei_arm9_gsdd:
 	@$(MAKE) -C cardenginei/arm9_gsdd
 
 #---------------------------------------------------------------------------------		
-cardenginei_arm9_gsdd_alt: $(DATA)
+cardenginei_arm9_gsdd_alt:
 	@$(MAKE) -C cardenginei/arm9_gsdd_alt
 
 #---------------------------------------------------------------------------------		
-cardenginei_arm9_dldi: $(DATA)
+cardenginei_arm9_dldi:
 	@$(MAKE) -C cardenginei/arm9_dldi
 
 #---------------------------------------------------------------------------------		
-cardenginei_arm9_gsdd_dldi: $(DATA)
+cardenginei_arm9_gsdd_dldi:
 	@$(MAKE) -C cardenginei/arm9_gsdd_dldi
 
 #---------------------------------------------------------------------------------		
-cardenginei_arm9_twlsdk: $(DATA)
+cardenginei_arm9_twlsdk:
 	@$(MAKE) -C cardenginei/arm9_twlsdk
 
 #---------------------------------------------------------------------------------		
-cardenginei_arm9_twlsdk3: $(DATA)
+cardenginei_arm9_twlsdk3:
 	@$(MAKE) -C cardenginei/arm9_twlsdk3
 
 #---------------------------------------------------------------------------------		
-cardenginei_arm9_twlsdk_dldi: $(DATA)
+cardenginei_arm9_twlsdk_dldi:
 	@$(MAKE) -C cardenginei/arm9_twlsdk_dldi
 
 #---------------------------------------------------------------------------------		
-cardenginei_arm9_twlsdk3_dldi: $(DATA)
+cardenginei_arm9_twlsdk3_dldi:
 	@$(MAKE) -C cardenginei/arm9_twlsdk3_dldi
 
 #---------------------------------------------------------------------------------		
-cardenginei_arm9_dsiware: $(DATA)
+cardenginei_arm9_dsiware:
 	@$(MAKE) -C cardenginei/arm9_dsiware
 
 #---------------------------------------------------------------------------------		
-cardenginei_arm9_dsiware3: $(DATA)
+cardenginei_arm9_dsiware3:
 	@$(MAKE) -C cardenginei/arm9_dsiware3
 
 #---------------------------------------------------------------------------------		
-preLoadSettings: $(DATA)
+preLoadSettings:
 	@$(MAKE) -C preLoadSettings
 
 #---------------------------------------------------------------------------------
@@ -297,7 +296,7 @@ preLoadSettings: $(DATA)
 #---------------------------------------------------------------------------------
 clean:
 	@echo clean ...
-	@rm -fr $(BUILD) $(TARGET).elf $(TARGET).nds $(TARGET).nds.orig.nds $(TARGET).arm9 $(DATA) $(BIN)
+	@rm -fr $(BUILD) $(TARGET).elf $(TARGET).nds $(TARGET).nds.orig.nds $(TARGET).arm9 $(BIN)
 	@$(MAKE) -C libnds32 clean
 	@$(MAKE) -C arm7 clean
 	@$(MAKE) -C arm9 clean
@@ -347,9 +346,6 @@ clean:
 	@$(MAKE) -C bootloaderi clean
 	@$(MAKE) -C bootloaderi1 clean
 	@$(MAKE) -C bootloaderi2 clean
-
-$(DATA):
-	@mkdir -p $(DATA)
 
 $(BIN):
 	@mkdir -p $(BIN)
