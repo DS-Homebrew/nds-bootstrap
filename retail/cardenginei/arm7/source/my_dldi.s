@@ -43,10 +43,18 @@ __mydldi_start:
 #endif
 	.asciz	" Chishm"		@ Identifying Magic string (8 bytes with null terminator)
 	.byte	0x01			@ Version number
+#ifdef TWLSDK
+	.byte	0x0d		@ 8KiB	@ Log [base-2] of the size of this driver in bytes.
+#else
 	.byte	0x0e		@ 16KiB	@ Log [base-2] of the size of this driver in bytes.
+#endif
 	.byte	0x00			@ Sections to fix
+#ifdef TWLSDK
+	.byte 	0x0d		@ 8KiB	@ Log [base-2] of the allocated space in bytes.
+#else
 	.byte 	0x0e		@ 16KiB	@ Log [base-2] of the allocated space in bytes.
-	
+#endif
+
 @---------------------------------------------------------------------------------
 @ Text identifier - can be anything up to 47 chars + terminating null -- 16 bytes
 	.align	4
