@@ -57,9 +57,16 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
 		int instancesPatched = 0;
 		u32 addrOffset = (u32)ndsHeader->arm9destination;
 		while (instancesPatched < 3) {
-			if(*(u32*)addrOffset >= 0x023FF000 && *(u32*)addrOffset < 0x023FF020) { 
-				//*(u32*)addrOffset -= 0x2000;
-				*(u32*)addrOffset = CARDENGINE_ARM9_LOCATION_DLDI_ALT2;
+			if (*(u32*)addrOffset >= 0x023FF000 && *(u32*)addrOffset < 0x023FF020) { 
+				extern u8 _io_dldi_size;
+				if (_io_dldi_size == 0x0E) {
+					*(u32*)addrOffset = 0x023DC000;
+				} else if (_io_dldi_size == 0x0F) {
+					*(u32*)addrOffset = 0x023D8000;
+				} else {
+					//*(u32*)addrOffset -= 0x2000;
+					*(u32*)addrOffset = CARDENGINE_ARM9_LOCATION_DLDI_ALT2;
+				}
 				instancesPatched++;
 			}
 			addrOffset += 4;
