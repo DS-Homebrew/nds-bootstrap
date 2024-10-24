@@ -588,6 +588,14 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		}
 	}
 
+	// Fix DLDI driver size
+	if ((memcmp(io_dldi_data->friendlyName, "CycloDS iEvolution", 18) == 0
+	  || memcmp(io_dldi_data->friendlyName, "SuperCard Rumble (MiniSD)", 25) == 0)
+	&& io_dldi_data->driverSize >= 0x0E) {
+		DLDI_INTERFACE* dldiWrite = (DLDI_INTERFACE*)io_dldi_data;
+		dldiWrite->driverSize = 0x0D;
+	}
+
 	conf->bootstrapOnFlashcard = ((bootstrapPath[0] == 'f' && bootstrapPath[1] == 'a' && bootstrapPath[2] == 't') || !conf->sdFound);
 
 	load_conf(conf, conf->bootstrapOnFlashcard ? "fat:/_nds/nds-bootstrap.ini" : "sd:/_nds/nds-bootstrap.ini");
