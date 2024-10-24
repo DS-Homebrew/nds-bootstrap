@@ -106,7 +106,7 @@ arm9/$(TARGET).elf:	bootloader bootloader1 bootloader2 bootloaderi bootloaderi1 
 	@$(MAKE) -C arm9
 
 #---------------------------------------------------------------------------------		
-libnds32:
+libnds32: $(DATA)
 	@$(MAKE) -C libnds32
 
 #---------------------------------------------------------------------------------		
