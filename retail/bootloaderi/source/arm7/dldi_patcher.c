@@ -92,7 +92,7 @@ static addr_t quickFind (const data_t* data, const data_t* search, size_t dataLe
 }
 
 static const data_t dldiMagicString[] = "\xED\xA5\x8D\xBF Chishm";	// Normal DLDI file
-static const data_t dldiMagicLoaderString[] = "\xEE\xA5\x8D\xBF Chishm";	// Different to a normal DLDI file
+// static const data_t dldiMagicLoaderString[] = "\xEE\xA5\x8D\xBF Chishm";	// Different to a normal DLDI file
 #define DEVICE_TYPE_DLDI 0x49444C44
 
 extern const u32 __myio_dldi;
@@ -111,7 +111,7 @@ bool dldiPatchBinary (data_t *binData, u32 binSize) {
 	size_t dldiFileSize = 0;
 
 	// Find the DLDI reserved space in the file
-	patchOffset = quickFind (binData, dldiMagicLoaderString, binSize, sizeof(dldiMagicLoaderString));
+	patchOffset = quickFind (binData, dldiMagicString, binSize, sizeof(dldiMagicString));
 
 	if (patchOffset < 0) {
 		// does not have a DLDI section

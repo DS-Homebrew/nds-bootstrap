@@ -36,11 +36,7 @@ __mydldi_start:
 
 @---------------------------------------------------------------------------------
 @ Driver patch file standard header -- 16 bytes
-#ifdef STANDARD_DLDI
 	.word	0xBF8DA5ED		@ Magic number to identify this region
-#else
-	.word	0xBF8DA5EE		@ Magic number to identify this region
-#endif
 	.asciz	" Chishm"		@ Identifying Magic string (8 bytes with null terminator)
 	.byte	0x01			@ Version number
 #ifdef TWLSDK
@@ -58,7 +54,7 @@ __mydldi_start:
 @---------------------------------------------------------------------------------
 @ Text identifier - can be anything up to 47 chars + terminating null -- 16 bytes
 	.align	4
-	.asciz "Loader (No interface)"
+	.asciz "Default (No interface)"
 
 @---------------------------------------------------------------------------------
 @ Offsets to important sections within the data	-- 32 bytes
