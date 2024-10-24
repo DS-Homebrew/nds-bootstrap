@@ -73,7 +73,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	//const bool chnFontFound = ((sharedFontRegion == 1 && !gameOnFlashcard && !i2cBricked) || chnSharedFont);
 	const bool korFontFound = ((sharedFontRegion == 2 && !gameOnFlashcard && !i2cBricked) || korSharedFont);
 
-#ifndef LOADERTWO
+#ifdef LOADERTYPE0
 	// GO Series: 10 Second Run (USA)
 	// GO Series: 10 Second Run (Europe)
 	if (strcmp(romTid, "KJUE") == 0 || strcmp(romTid, "KJUP") == 0) {
@@ -5797,9 +5797,11 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u16*)0x020051F4 = branchCode[0];
 		*(u16*)0x020051F6 = branchCode[1];
 	}
+#endif
 
+#ifdef LOADERTYPE1
 	// GO Series: Earth Saver (USA)
-	else if (strcmp(romTid, "KB8E") == 0) {
+	if (strcmp(romTid, "KB8E") == 0) {
 		if (!twlFontFound) {
 			*(u32*)0x0200A3D8 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 			*(u32*)0x0200B800 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
@@ -7521,9 +7523,9 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x020B98AC, (u32)dsiSaveClose);
 		*(u32*)0x020B9B94 = 0xE1A00000; // nop
 	}
-#else
+
 	// JellyCar 2 (USA)
-	if (strcmp(romTid, "KJYE") == 0) {
+	else if (strcmp(romTid, "KJYE") == 0) {
 		if (saveOnFlashcard) {
 			setBL(0x020067C4, (u32)dsiSaveOpen);
 			*(u32*)0x020067DC = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
@@ -10415,10 +10417,12 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			*(u32*)0x02021C20 = 0xE1A00000; // nop (Skip Manual screen)
 		}
 	}
+#endif
 
+#ifdef LOADERTYPE2
 	// Orion's Odyssey (USA)
 	// Due to our save implementation, save data is stored in both slots
-	else if (strcmp(romTid, "K6TE") == 0 && saveOnFlashcard) {
+	if (strcmp(romTid, "K6TE") == 0 && saveOnFlashcard) {
 		setBL(0x020284D0, (u32)dsiSaveDelete);
 		setBL(0x020284DC, (u32)dsiSaveCreate);
 		setBL(0x020284EC, (u32)dsiSaveOpen);
@@ -16139,7 +16143,7 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
 
 	// DSiWare containing Cloneboot
 
-#ifndef LOADERTWO
+#ifdef LOADERTYPE0
 	// 1st Class Poker & BlackJack (USA)
 	else if (strcmp(romTid, "KYPE") == 0 && saveOnFlashcard) {
 		setBL(0x02012E50, (u32)dsiSaveOpen);

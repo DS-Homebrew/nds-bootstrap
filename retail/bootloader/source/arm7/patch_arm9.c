@@ -1102,6 +1102,7 @@ void patchMpuChange(const tNDSHeader* ndsHeader, const module_params_t* modulePa
 }*/
 
 void patchHiHeapPointer(cardengineArm9* ce9, const module_params_t* moduleParams, const tNDSHeader* ndsHeader) {
+	extern u8 _io_dldi_size;
 	extern bool ce9Alt;
 	extern bool ce9AltLargeTable;
 	extern u32 arm7mbk;
@@ -1114,12 +1115,13 @@ void patchHiHeapPointer(cardengineArm9* ce9, const module_params_t* moduleParams
 	const u32 cheatSizeTotal = cheatSize+(apPatchIsCheat ? apPatchSize : 0);
 
 	const bool nandAccess = (accessControl & BIT(4)); // isDSiWare
+	const bool laterSdk = ((moduleParams->sdk_version >= 0x2008000 && moduleParams->sdk_version != 0x2012774) || moduleParams->sdk_version == 0x20029A8);
 	const bool ce9NotInHeap = (ce9Alt || (u32)ce9 == CARDENGINE_ARM9_LOCATION_DLDI_START);
 
 	if ((!nandAccess && extendedMemory)
-	|| (moduleParams->sdk_version < 0x2008000 && moduleParams->sdk_version != 0x20029A8)
-	|| (ce9NotInHeap && !ce9AltLargeTable && cheatSizeTotal <= 4)
-	|| (((strncmp(romTid, "YEE", 3) == 0 && romTid[3] != 'J') || strncmp(romTid, "BEB", 3) == 0 || strncmp(romTid, "BEE", 3) == 0) && !ce9AltLargeTable) // Inazuma Eleven 1 & 2
+	|| !laterSdk
+	|| (ce9NotInHeap && !ce9AltLargeTable && cheatSizeTotal <= 4 && _io_dldi_size < 0x0E)
+	|| (((strncmp(romTid, "YEE", 3) == 0 && romTid[3] != 'J') || strncmp(romTid, "BEB", 3) == 0 || strncmp(romTid, "BEE", 3) == 0) && !ce9AltLargeTable && _io_dldi_size < 0x0E) // Inazuma Eleven 1 & 2
 	|| strncmp(romTid, "CLJ", 3) == 0 // Mario & Luigi: Bowser's Inside Story
 	|| strncmp(romTid, "VSO", 3) == 0 // Sonic Classic Collection
 	|| arm7mbk == 0x080037C0) {
@@ -1151,9 +1153,16 @@ void patchHiHeapPointer(cardengineArm9* ce9, const module_params_t* moduleParams
     dbg_printf("\n\n");
 
 	if (nandAccess && extendedMemory) {
-		*heapPointer = CARDENGINE_ARM9_LOCATION_DLDI_EXTMEM;
+		*heapPointer = 0x027D8000;
 	} else if (ce9NotInHeap && !ce9AltLargeTable) {
 		*heapPointer = CHEAT_ENGINE_LOCATION_B4DS-0x400000;
+		if ((u32)ce9 == CARDENGINE_ARM9_LOCATION_DLDI_32) {
+			*heapPointer = CARDENGINE_ARM9_LOCATION_DLDI_32;
+		} else if (_io_dldi_size == 0x0E) {
+			*heapPointer = 0x023DC000;
+		} else if (_io_dldi_size == 0x0F) {
+			*heapPointer = 0x023D8000;
+		}
 	} else {
 		*heapPointer = (fatTableAddr < 0x023C0000 || fatTableAddr >= (u32)ce9) ? (u32)ce9 : fatTableAddr; // shrink heap by FAT table size + ce9 binary size
 	}

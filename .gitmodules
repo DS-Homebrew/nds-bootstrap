@@ -1,0 +1,4 @@
+[submodule "retail/libnds32"]
+	path = retail/libnds32
+	url = https://github.com/lifehackerhansol/libnds32
+	branch = master

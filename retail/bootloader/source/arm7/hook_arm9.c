@@ -194,6 +194,7 @@ int hookNdsRetailArm9(
 ) {
 	nocashMessage("hookNdsRetailArm9");
 
+	extern u8 _io_dldi_size;
 	const char* romTid = getRomTid(ndsHeader);
 	extern u32 romPaddingSize;
 	extern u32 romLocation;
@@ -217,7 +218,7 @@ int hookNdsRetailArm9(
 	ce9->apFixOverlaysCluster   = apFixOverlaysCluster;
 	ce9->musicCluster           = musicCluster;
 	ce9->musicsSize             = musicsSize;
-	ce9->musicBuffer = maxHeapOpen ? 0x027F8000 : 0x027F0000;
+	ce9->musicBuffer = maxHeapOpen ? ((_io_dldi_size == 0x0F) ? 0x027F6000 : (_io_dldi_size == 0x0E) ? 0x027FA000 : 0x027FC000)-0x4000 : 0x027F0000;
 	ce9->pageFileCluster        = pageFileCluster;
 	ce9->manualCluster          = manualCluster;
 	ce9->sharedFontCluster      = sharedFontCluster;

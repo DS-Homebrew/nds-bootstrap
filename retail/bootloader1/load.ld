@@ -1,12 +1,11 @@
-#include "locations.h"
-
 OUTPUT_FORMAT("elf32-littlearm", "elf32-bigarm", "elf32-littlearm")
 OUTPUT_ARCH(arm)
-/*ENTRY(_start)*/
+ENTRY(_start)
 
 MEMORY {
 
-	vram	: ORIGIN = CARDENGINE_ARM9_LOCATION_DLDI_START, LENGTH = 15K /* Main RAM */
+	vram	: ORIGIN = 0x06000000, LENGTH = 256K
+	arm9ram	: ORIGIN = 0x02337000, LENGTH = 4K		/* Used for the ARM9's functions */
 }
 
 __vram_start	=	ORIGIN(vram);
@@ -18,6 +17,14 @@ __sp_usr	=	__sp_svc - 0x100;
 __irq_flags	=	__vram_top - 8;
 __irq_flagsaux	=	__vram_top - 0x40; /*__irq_flagsaux	=	0x04000000 - 0x40;*/
 __irq_vector	=	__vram_top - 4;
+
+
+__arm9ram_start	=	ORIGIN(arm9ram);
+__arm9ram_top	=	ORIGIN(arm9ram)+ LENGTH(arm9ram);
+__arm9_sp_irq	=	__arm9ram_top - 0x60;
+__arm9_sp_svc	=	__arm9_sp_irq - 0x100;
+__arm9_sp_usr	=	__arm9_sp_svc - 0x100;
+
 
 SECTIONS
 {
@@ -32,6 +39,22 @@ SECTIONS
 	{ 
 		*(.plt) 
 	} >vram = 0xff
+
+	__arm9_source_start = . ;
+	.arm9 :
+	{
+		__arm9_start = . ;
+		*.arm9.*(.text*)
+		*.arm9.*(.data*)
+		__arm9_bss_start = ABSOLUTE(.);
+		*.arm9.*(.bss*)
+		__arm9_bss_end = ABSOLUTE(.);
+		__arm9_end = . ;
+	} >arm9ram AT>vram =0xff
+	__arm9_source_end = __arm9_source_start + SIZEOF(.arm9);
+
+	. = __arm9_source_end;
+	. = ALIGN(4);
 
 	.text :   /* ALIGN (4): */
 	{

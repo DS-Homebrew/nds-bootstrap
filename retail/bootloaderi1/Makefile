@@ -5,10 +5,10 @@ ifeq ($(strip $(DEVKITARM)),)
 $(error "Please set DEVKITARM in your environment. export DEVKITARM=<path to>devkitARM")
 endif
 
-include $(DEVKITARM)/ds_rules
+-include $(DEVKITARM)/ds_rules
 
 ifeq ($(OS),Windows_NT)
-LZSS			?=	../../../lzss.exe
+LZSS			?=	../../lzss.exe
 
 else
 
@@ -19,37 +19,30 @@ endif
 # BUILD is the directory where object files & intermediate files will be placed
 # SOURCES is a list of directories containing source code
 # INCLUDES is a list of directories containing extra header files
-# DATA is a list of directories containing binary files
-# all directories are relative to this makefile
 #---------------------------------------------------------------------------------
+TARGET		:=	loadi1
 BUILD		:=	build
-SOURCES		:=	source ../../common/source ../../common/source_general
-INCLUDES	:=	include ../../common/include ../../common/include_fat
-DATA		:=	data
-
-
+SOURCES		:=	../bootloaderi/source ../bootloaderi/source/arm7 ../bootloaderi/source/arm7/save_patches ../bootloaderi/source/arm9 ../common/source ../common/source_general
+INCLUDES	:=	../bootloaderi/include build ../common/include ../common/include_fat
+DATA		:=	../data
+SPECS		:=  specs
+ 
 #---------------------------------------------------------------------------------
 # options for code generation
 #---------------------------------------------------------------------------------
-ARCH	:=	-mthumb -march=armv5te -mtune=arm946e-s
+ARCH	:=  -mthumb -march=armv4t
 
-CFLAGS	:=	-g -Wall -Oz\
- 			-march=armv5te -mtune=arm946e-s -fomit-frame-pointer\
+CFLAGS	:=	-g -Wall -O2\
+			-mcpu=arm7tdmi -mtune=arm7tdmi -fomit-frame-pointer\
 			-ffast-math \
 			$(ARCH)
 
-# ADD -DDEBUG here for logging/debug
-CFLAGS	+=	$(INCLUDE) -DARM9 -DB4DS -D_NO_SDMMC -DNO_CARDID -DNOGETBOOTCLUSTER
-CXXFLAGS	:=	$(CFLAGS) -fno-rtti -fno-exceptions
+CFLAGS	+=	$(INCLUDE) -DARM7 -std=gnu99 -DTWOCARD -DLOADERTYPE1
 
-ASFLAGS	:=	-g $(ARCH) -flto $(INCLUDE)
+ASFLAGS	:=	-g $(ARCH) $(INCLUDE)
+LDFLAGS	=	-nostartfiles -T $(TOPDIR)/load.ld -g $(ARCH) -Wl,--nmagic -Wl,-Map,$(TARGET).map
 
-LDFLAGS	=	-nostartfiles -T cardengine.ld -g $(ARCH) -Oz -Wl,-Map,$(notdir $*.map),--use-blx
-
-#---------------------------------------------------------------------------------
-# any extra libraries we wish to link with the project (order is important)
-#---------------------------------------------------------------------------------
-LIBS	:=	
+LIBS	:= -lnds7
 
 #---------------------------------------------------------------------------------
 # list of directories containing libraries, this must be the top level containing
@@ -64,81 +57,93 @@ LIBDIRS	:=	$(LIBNDS)
 #---------------------------------------------------------------------------------
 ifneq ($(BUILD),$(notdir $(CURDIR)))
 #---------------------------------------------------------------------------------
-
-export TARGET	:=	cardengine_arm9_alt3
-export OUTPUT	:=	$(CURDIR)/../../nitrofiles_dec/$(TARGET)
-export OUTPUT_CMP	:=	$(CURDIR)/../../nitrofiles/$(TARGET)
+ 
+export TOPDIR	:=	$(CURDIR)
+export LOADBIN	:=	$(CURDIR)/../nitrofiles_dec/$(TARGET).bin
+export LOADBIN_CMP	:=	$(CURDIR)/../nitrofiles/$(TARGET).lz77
+export LOADELF	:=	$(CURDIR)/$(TARGET).elf
 export DEPSDIR	:=	$(CURDIR)/$(BUILD)
 
-export VPATH	:=	$(foreach dir,$(SOURCES),$(CURDIR)/$(dir)) \
-					$(foreach dir,$(DATA),$(CURDIR)/$(dir))
-
+export VPATH	:=	$(foreach dir,$(SOURCES),$(CURDIR)/$(dir))
+ 
 CFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.c)))
 CPPFILES	:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.cpp)))
 SFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.s)))
-BINFILES	:=	$(foreach dir,$(DATA),$(notdir $(wildcard $(dir)/*.*)))
-
-#---------------------------------------------------------------------------------
-# use CXX for linking C++ projects, CC for standard C
-#---------------------------------------------------------------------------------
-ifeq ($(strip $(CPPFILES)),)
-#---------------------------------------------------------------------------------
-	export LD	:=	$(CC)
-#---------------------------------------------------------------------------------
-else
-#---------------------------------------------------------------------------------
-	export LD	:=	$(CXX)
-#---------------------------------------------------------------------------------
-endif
-#---------------------------------------------------------------------------------
-
-export OFILES	:=	$(addsuffix .o,$(BINFILES)) \
-					$(CPPFILES:.cpp=.o) $(CFILES:.c=.o) $(SFILES:.s=.o)
-
+#BINFILES	:=	$(foreach dir,$(DATA),$(notdir $(wildcard $(dir)/*.bin)))
+BINFILES	:=	
+ 
+export OFILES	:=	$(addsuffix .o,$(BINFILES)) $(CPPFILES:.cpp=.o) $(CFILES:.c=.o) $(SFILES:.s=.o)
+ 
 export INCLUDE	:=	$(foreach dir,$(INCLUDES),-I$(CURDIR)/$(dir)) \
 					$(foreach dir,$(LIBDIRS),-I$(dir)/include) \
 					-I$(CURDIR)/$(BUILD)
  
 export LIBPATHS	:=	$(foreach dir,$(LIBDIRS),-L$(dir)/lib)
- 
+
+#---------------------------------------------------------------------------------
+# use CC for linking standard C
+#---------------------------------------------------------------------------------
+export LD	:=	$(CC)
+#---------------------------------------------------------------------------------
+
 .PHONY: $(BUILD) clean
  
 #---------------------------------------------------------------------------------
 $(BUILD):
 	@[ -d $@ ] || mkdir -p $@
-	@$(MAKE) --no-print-directory -C $(BUILD) -f $(CURDIR)/Makefile
-	@cp $(OUTPUT).bin $(OUTPUT_CMP).lz77
-	@$(LZSS) -ewf $(OUTPUT_CMP).lz77
+	@$(MAKE) -C $(BUILD) -f $(CURDIR)/Makefile 
+	@cp $(LOADBIN) $(LOADBIN_CMP)
+	@$(LZSS) -ewn $(LOADBIN_CMP)
 
 #---------------------------------------------------------------------------------
 clean:
 	@echo clean ...
-	@rm -fr $(BUILD) $(TARGET).bin $(TARGET).elf
+	@rm -fr $(BUILD) *.elf
  
  
 #---------------------------------------------------------------------------------
 else
-
+ 
+DEPENDS	:=	$(OFILES:.o=.d)
+ 
 #---------------------------------------------------------------------------------
 # main targets
 #---------------------------------------------------------------------------------
-$(OUTPUT).bin:	$(DEPSDIR)/$(TARGET).elf
-$(DEPSDIR)/$(TARGET).elf:	cardengine.ld $(OFILES)
-#	@echo linking $(notdir $@)
-#	@$(LD)  $(LDFLAGS) $(OFILES) $(LIBPATHS) $(LIBS) -o $@
+$(LOADBIN)	:	$(LOADELF)
 
-cardengine.ld:	$(CURDIR)/../cardengine.ld.in
-	$(CPP) -P $(INCLUDE) $< $@
+
+$(LOADELF)	:	$(OFILES)
+	@echo linking $(notdir $@)
+	@$(LD)  $(LDFLAGS) $(OFILES) $(LIBPATHS) $(LIBS) -o $@
+	
+	
+#dldiengine.bin.o : $(CURDIR)/../../data/dldiengine.bin
+#	@echo $(notdir $<)
+#	$(bin2o)
+	
+#cardengine_arm9.bin.o : $(CURDIR)/../../data/cardengine_arm9.bin
+#	@echo $(notdir $<)
+#	$(bin2o)
+
+#cardengine_arm9_reloc.bin.o : $(CURDIR)/../../data/cardengine_arm9_reloc.bin
+#	@echo $(notdir $<)
+#	$(bin2o)
+
+-include $(DEPENDS)
 
 
 #---------------------------------------------------------------------------------
-%.bin	:	%.elf
+%.bin: %.elf
 #---------------------------------------------------------------------------------
 	@$(OBJCOPY) -O binary $< $@
 	@echo built ... $(notdir $@)
 
--include $(DEPSDIR)/*.d
- 
+#---------------------------------------------------------------------------------
+%.bin.o: %.bin
+#---------------------------------------------------------------------------------
+	@echo $(notdir $<)
+	$(bin2o)
+
 #---------------------------------------------------------------------------------------
 endif
 #---------------------------------------------------------------------------------------

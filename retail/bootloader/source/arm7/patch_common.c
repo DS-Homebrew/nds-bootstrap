@@ -49,7 +49,7 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
 		return;
 	}
 
-#ifndef LOADERTWO
+#ifdef LOADERTYPE0
 	const char* romTid = getRomTid(ndsHeader);
 
 	// Animal Crossing: Wild World

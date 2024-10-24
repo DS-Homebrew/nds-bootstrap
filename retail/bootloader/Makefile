@@ -20,7 +20,7 @@ endif
 # SOURCES is a list of directories containing source code
 # INCLUDES is a list of directories containing extra header files
 #---------------------------------------------------------------------------------
-TARGET		:=	load
+TARGET		:=	load0
 BUILD		:=	build
 SOURCES		:=	source source/arm7 source/arm7/save_patches source/arm9 ../common/source ../common/source_general
 INCLUDES	:=	include build ../common/include ../common/include_fat
@@ -32,12 +32,12 @@ SPECS		:=  specs
 #---------------------------------------------------------------------------------
 ARCH	:=  -mthumb -march=armv4t
 
-CFLAGS	:=	-g -Wall -Os\
+CFLAGS	:=	-g -Wall -O2\
 			-mcpu=arm7tdmi -mtune=arm7tdmi -fomit-frame-pointer\
 			-ffast-math \
 			$(ARCH)
 
-CFLAGS	+=	$(INCLUDE) -DARM7 -D_NO_SDMMC -DB4DS -std=gnu99
+CFLAGS	+=	$(INCLUDE) -DARM7 -D_NO_SDMMC -DB4DS -DLOADERTYPE0 -std=gnu99
 
 ASFLAGS	:=	-g $(ARCH) $(INCLUDE)
 LDFLAGS	=	-nostartfiles -T $(TOPDIR)/load.ld -g $(ARCH) -Wl,--nmagic -Wl,-Map,$(TARGET).map

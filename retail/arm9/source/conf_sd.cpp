@@ -1963,8 +1963,12 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 		// Load ce9 binary
 		if (b4dsDebugRam) {
-			if (foto) {
-				cebin = fopen("nitro:/cardengine_arm9_extmem_foto.lz77", "rb");
+			if (!startMultibootSrl && ((accessControl & BIT(4)) || (a7mbk6 == 0x080037C0 && ndsArm9Offset >= 0x02004000) || (strncmp(romTid, "AP2", 3) == 0))) {
+				if (foto) {
+					cebin = fopen("nitro:/cardengine_arm9_extmem_foto.lz77", "rb");
+				} else {
+					cebin = fopen(ndsArm9Offset >= 0x02004000 ? "nitro:/cardengine_arm9_extmem_start.lz77" : "nitro:/cardengine_arm9_extmem.lz77", "rb");
+				}
 			} else if (gsdd) {
 				cebin = fopen("nitro:/cardengine_arm9_extmem_gsdd.lz77", "rb");
 			} else {
@@ -2025,10 +2029,12 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 					}
 
 					if ((arm7alloc1+arm7alloc2) > 0x1A800) {
-						ce9path = (unitCode > 0 && ndsArm9Offset >= 0x02004000) ? "nitro:/cardengine_arm9_start.lz77" : "nitro:/cardengine_arm9.lz77";
+						ce9path = (unitCode > 0 && ndsArm9Offset >= 0x02004000) ? "nitro:/cardengine_arm9_start.lz77" : (io_dldi_data->driverSize >= 0x0E) ? "nitro:/cardengine_arm9_32.lz77" : "nitro:/cardengine_arm9.lz77";
 					} else if ((arm7alloc1+arm7alloc2) > 0x19C00) {
 						ce9path = "nitro:/cardengine_arm9_alt2.lz77";
 					}
+				} else if (io_dldi_data->driverSize >= 0x0E) {
+					ce9path = "nitro:/cardengine_arm9_alt3.lz77";
 				}
 
 				fclose(ndsFile);
@@ -2124,20 +2130,42 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		conf->musicsSize = getFileSize(patchOffsetCacheFilePath);
 	}
 
-	conf->loader2 = false;
+	conf->loaderType = 0;
 	if (accessControl & BIT(4)) {
+		bool loaderSet = false;
+
 		// TODO: If the list gets large enough, switch to bsearch().
-		for (unsigned int i = 0; i < sizeof(dsiWareForBootloader2)/sizeof(dsiWareForBootloader2[0]); i++) {
-			if (memcmp(romTid, dsiWareForBootloader2[i], 3) == 0) {
+		for (unsigned int i = 0; i < sizeof(dsiWareForBootloader1)/sizeof(dsiWareForBootloader1[0]); i++) {
+			if (memcmp(romTid, dsiWareForBootloader1[i], 3) == 0) {
 				// Found match
-				conf->loader2 = true;
+				loaderSet = true;
 				break;
+			}
+		}
+		if (!loaderSet) {
+			for (unsigned int i = 0; i < sizeof(dsiWareForBootloader2)/sizeof(dsiWareForBootloader2[0]); i++) {
+				if (memcmp(romTid, dsiWareForBootloader2[i], 3) == 0) {
+					// Found match
+					conf->loaderType = 1;
+					loaderSet = true;
+					break;
+				}
+			}
+		}
+		if (!loaderSet) {
+			for (unsigned int i = 0; i < sizeof(dsiWareForBootloader3)/sizeof(dsiWareForBootloader3[0]); i++) {
+				if (memcmp(romTid, dsiWareForBootloader3[i], 3) == 0) {
+					// Found match
+					conf->loaderType = 2;
+					loaderSet = true;
+					break;
+				}
 			}
 		}
 	}
 
-	if (!conf->loader2 && (strcmp(romTid, "NTRJ") == 0) && (headerCRC == 0x9B41 || headerCRC == 0x69D6)) { // Use bootloader2 for Shantae: Risky's Revenge (USA) (Review Build)
-		conf->loader2 = true;
+	if (conf->loaderType < 2 && (strcmp(romTid, "NTRJ") == 0) && (headerCRC == 0x9B41 || headerCRC == 0x69D6)) { // Use bootloader2 for Shantae: Risky's Revenge (USA) (Review Build)
+		conf->loaderType = 2;
 	}
 
 	const char *typeToReplace = ".nds";

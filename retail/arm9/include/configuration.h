@@ -8,7 +8,7 @@ typedef struct configuration {
     bool debug;
 	bool dsiWramAccess;
 	int b4dsMode;
-	bool loader2;
+	int loaderType;
 	char* ndsPath;
 	char* appPath;
 	char* savPath;

@@ -116,6 +116,7 @@ extern s8 region;
 extern u8 donorSdkVer;
 extern u8 soundFreq;
 
+extern u8 _io_dldi_size;
 extern u32 _io_dldi_features;
 
 extern u32* lastClusterCacheUsed;
@@ -1231,6 +1232,7 @@ int arm7_main(void) {
     dbg_printf("sdk_version: ");
     dbg_hexa(moduleParams->sdk_version);
     dbg_printf("\n"); 
+	const bool laterSdk = ((moduleParams->sdk_version >= 0x2008000 && moduleParams->sdk_version != 0x2012774) || moduleParams->sdk_version == 0x20029A8);
 
 	ndsHeader = loadHeader(&dsiHeaderTemp, moduleParams);
 	const char* romTid = getRomTid(ndsHeader);
@@ -1330,7 +1332,13 @@ int arm7_main(void) {
 	tonccpy((u8*)CARDENGINE_ARM7_LOCATION, (u8*)CARDENGINE_ARM7_LOCATION_BUFFERED, 0x1000);
 	toncset((u8*)CARDENGINE_ARM7_LOCATION_BUFFERED, 0, 0x1000);
 
-	if (!dldiPatchBinary((data_t*)ce9Location, 0x3800, (data_t*)(extendedMemory ? 0x027FC000 : ((accessControl & BIT(4)) && !ce9Alt) ? 0x023FC000 : 0x023FD000))) {
+	u32 ce9DldiOffset = (extendedMemory ? 0x027FC000 : ((accessControl & BIT(4)) && !ce9Alt) ? 0x023FC000 : 0x023FD000);
+	if (_io_dldi_size == 0x0E) {
+		ce9DldiOffset = (extendedMemory ? 0x027DC000 : ((u32)ndsHeader->arm9destination >= 0x02004000 && ((accessControl & BIT(4)) || arm7mbk == 0x080037C0) && !ce9Alt) ? 0x023FA000 : (laterSdk ? 0x023DC000 : 0x023FB000));
+	} else if (_io_dldi_size == 0x0F) {
+		ce9DldiOffset = (extendedMemory ? 0x027D8000 : ((u32)ndsHeader->arm9destination >= 0x02004000 && ((accessControl & BIT(4)) || arm7mbk == 0x080037C0) && !ce9Alt) ? 0x023F6000 : (laterSdk ? 0x023D8000 : 0x023F7000));
+	}
+	if (!dldiPatchBinary((data_t*)ce9Location, 0x3800, (data_t*)ce9DldiOffset)) {
 		dbg_printf("ce9 DLDI patch failed\n");
 		errorOutput();
 	}
@@ -1345,7 +1353,6 @@ int arm7_main(void) {
 		}
 	}
 
-	const bool laterSdk = ((moduleParams->sdk_version >= 0x2008000 && moduleParams->sdk_version != 0x2012774) || moduleParams->sdk_version == 0x20029A8);
 	bool wramUsed = false;
 	u32 fatTableSize = 0;
 	u32 fatTableSizeNoExp = !laterSdk ? 0x19C00 : 0x1A400;
@@ -1360,8 +1367,17 @@ int arm7_main(void) {
 		fatTableSize = 0x80000;
 	} else if (extendedMemory) {
 		if (ndsHeader->unitCode > 0 && (u32)ndsHeader->arm9destination >= 0x02004000 && ((accessControl & BIT(4)) || arm7mbk == 0x080037C0)) {
-			fatTableAddr = 0x02000000;
-			fatTableSize = 0x4000;
+			// fatTableAddr = 0x02000000;
+			// fatTableSize = 0x4000;
+
+			fatTableAddr = 0x027FF200;
+			fatTableSizeNoExp = 0x600;
+
+			lastClusterCacheUsed = (u32*)0x037F8000;
+			clusterCache = 0x037F8000;
+			clusterCacheSize = 0x16780;
+
+			wramUsed = true;
 		} else {
 			fatTableAddr = 0x02700000;
 			fatTableSize = 0x80000;
@@ -1404,7 +1420,7 @@ int arm7_main(void) {
 				if (ce9AltLargeTable) {
 					dbg_printf("\n");
 					dbg_printf("Cluster cache is above 0x");
-					dbg_printf(ce9Alt ? "598" : "600");
+					dbg_printf((fatTableSizeNoExp == 0x598) ? "598" : "600");
 					dbg_printf(" bytes!\n");
 					dbg_printf("Consider backing up and restoring the SD card contents to defragment it");
 					if (*(u16*)0x4004700 == 0) {
@@ -1412,8 +1428,8 @@ int arm7_main(void) {
 					} else {
 						dbg_printf("\n");
 					}
-					if (
-						strncmp(romTid, "KII", 3) == 0 // 101 Pinball World
+					if (extendedMemory || _io_dldi_size >= 0x0E
+					||	strncmp(romTid, "KII", 3) == 0 // 101 Pinball World
 					||	strncmp(romTid, "KAT", 3) == 0 // AiRace: Tunnel
 					||	strncmp(romTid, "K2Z", 3) == 0 // G.G Series: Altered Weapon
 					||	strncmp(romTid, "KSR", 3) == 0 // Aura-Aura Climber

@@ -175,6 +175,8 @@ static const char dsiWareForBootloader1[][4] = {
 	"KIF", // Drift Street International
 	"KDA", // G.G Series: Drilling Attack!!
 	"B88", // DS WiFi Settings
+};
+static const char dsiWareForBootloader2[][4] = {
 	"KB8", // GO Series: Earth Saver
 	"KB9", // Earth Saver: Inseki Bakuha Dai Sakuse
 	"K2E", // Easter Eggztravaganza
@@ -254,8 +256,6 @@ static const char dsiWareForBootloader1[][4] = {
 	"KTX", // High Stakes Texas Hold'em
 	"KHI", // Hints Hunter
 	"KT2", // G.G Series: Horizontal Bar
-};
-static const char dsiWareForBootloader2[][4] = {
 	// "KNE", // Ichi Moudaji!: Neko King
 	"KNK", // Ideyou Sukeno: Kenkou Maja DSi
 	"KBT", // Invasion of the Alien Blobs!
@@ -356,6 +356,8 @@ static const char dsiWareForBootloader2[][4] = {
 	"KG9", // Noroi no Game: Oku
 	"KSU", // Number Battle
 	"KU9", // G.G Series: Nyokki
+};
+static const char dsiWareForBootloader3[][4] = {
 	"K6T", // Orion's Odyssey
 	"KO4", // Oscar in Movieland
 	"KOT", // Oscar in Toyland

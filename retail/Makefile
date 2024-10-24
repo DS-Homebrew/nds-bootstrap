@@ -29,42 +29,9 @@ VERSION	:=	$(VERSION_MAJOR).$(VERSION_MINOR).$(VERSION_PATCH)
 #---------------------------------------------------------------------------------
 TARGET		:=	nds-bootstrap
 BIN		:=	bin
-BUILD		:=	build
-SOURCES		:=	source
-INCLUDES	:=	include
 DATA		:=	data
 ASSETS		:=	assets
 NITRODATA	:=	nitrofiles
-GRAPHICS	:=  $(ASSETS)/gfx
-
-#---------------------------------------------------------------------------------
-# options for code generation
-#---------------------------------------------------------------------------------
-ARCH	:=	-mthumb -mthumb-interwork
-
-COMMON	:=	-g -Wall -O2\
- 		-march=armv5te -mtune=arm946e-s -fomit-frame-pointer\
-		-ffast-math \
-		$(ARCH)
-
-COMMON	+=	$(INCLUDE) -DARM9
-CFLAGS	:=	$(COMMON) -std=gnu99
-CXXFLAGS	:= $(COMMON) -fno-rtti -fno-exceptions
-
-ASFLAGS	:=	-g $(ARCH)
-LDFLAGS	=	-specs=ds_arm9.specs -g -Wl,--gc-sections $(ARCH) -Wl,-Map,$(notdir $*.map)
-
-#---------------------------------------------------------------------------------
-# any extra libraries we wish to link with the project (order is important)
-#---------------------------------------------------------------------------------
-LIBS	:= 	-lfat -lnds9
-
-
-#---------------------------------------------------------------------------------
-# list of directories containing libraries, this must be the top level containing
-# include and lib
-#---------------------------------------------------------------------------------
-LIBDIRS	:=	$(LIBNDS)
 
 #---------------------------------------------------------------------------------
 # no real need to edit anything past this point unless you need to add additional
@@ -75,23 +42,11 @@ ifneq ($(BUILD),$(notdir $(CURDIR)))
 
 export OUTPUT	:=	$(CURDIR)/$(BIN)/$(TARGET).nds
 
-export VPATH	:=	$(foreach dir,$(SOURCES),$(CURDIR)/$(dir)) \
-					$(foreach dir,$(DATA),$(CURDIR)/$(dir)) \
-					$(foreach dir,$(GRAPHICS),$(CURDIR)/$(dir))
-
-export DEPSDIR	:=	$(CURDIR)/$(BUILD)
-
 export CC		:=	$(PREFIX)gcc
 export CXX		:=	$(PREFIX)g++
 export AR		:=	$(PREFIX)ar
 export OBJCOPY	:=	$(PREFIX)objcopy
 export CPP		:=	$(PREFIX)cpp
-
-CFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.c)))
-CPPFILES	:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.cpp)))
-PNGFILES	:=	$(foreach dir,$(GRAPHICS),$(notdir $(wildcard $(dir)/*.png)))
-SFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.s)))
-BINFILES	:=	
 
 #---------------------------------------------------------------------------------
 # use CXX for linking C++ projects, CC for standard C
@@ -107,16 +62,6 @@ else
 endif
 #---------------------------------------------------------------------------------
 
-export OFILES	:=	$(addsuffix .o,$(BINFILES)) \
-					$(PNGFILES:.png=.o) \
-					$(CPPFILES:.cpp=.o) $(CFILES:.c=.o) $(SFILES:.s=.o)
-
-export INCLUDE	:=	$(foreach dir,$(INCLUDES),-iquote $(CURDIR)/$(dir)) \
-					$(foreach dir,$(LIBDIRS),-I$(dir)/include) \
-					-I$(CURDIR)/$(BUILD)
-
-export LIBPATHS	:=	$(foreach dir,$(LIBDIRS),-L$(dir)/lib)
-
 #icons := $(wildcard *.bmp)
 #ifneq (,$(findstring $(TARGET).bmp,$(icons)))
 #	export GAME_ICON := $(CURDIR)/$(TARGET).bmp
@@ -128,7 +73,7 @@ export LIBPATHS	:=	$(foreach dir,$(LIBDIRS),-L$(dir)/lib)
 export GAME_ICON := $(CURDIR)/$(ASSETS)/icon.bmp
 
 #.PHONY: cardengine_arm7 cardengine_arm9 bootloader BootStrap clean
-.PHONY: all dist release nightly bootloader bootloader2 bootloaderi bootloaderi2 cardengine_arm7 cardengine_arm7_music cardengine_arm9_igm cardengine_arm9_igm_extmem cardengine_arm9 cardengine_arm9_start cardengine_arm9_start_foto cardengine_arm9_alt cardengine_arm9_alt_gsdd cardengine_arm9_alt2 cardengine_arm9_extmem cardengine_arm9_extmem_gsdd cardengine_arm9_extmem_foto cardenginei_arm7 cardenginei_arm7_alt cardenginei_arm7_twlsdk cardenginei_arm7_twlsdk3 cardenginei_arm7_dsiware cardenginei_arm7_dsiware3 cardenginei_arm7_cheat cardenginei_arm9_igm cardenginei_arm9 cardenginei_arm9_alt cardenginei_arm9_alt2 cardenginei_arm9_dlp cardenginei_arm9_gsdd cardenginei_arm9_gsdd_alt cardenginei_arm9_dldi cardenginei_arm9_gsdd_dldi cardenginei_arm9_twlsdk cardenginei_arm9_twlsdk3 cardenginei_arm9_twlsdk_dldi cardenginei_arm9_twlsdk3_dldi cardenginei_arm9_dsiware cardenginei_arm9_dsiware3 preLoadSettings arm7/$(TARGET).elf arm9/$(TARGET).elf clean
+.PHONY: all dist release nightly bootloader bootloader1 bootloader2 bootloaderi bootloaderi1 bootloaderi2 cardengine_arm7 cardengine_arm7_music cardengine_arm9_igm cardengine_arm9_igm_extmem cardengine_arm9 cardengine_arm9_32 cardengine_arm9_start cardengine_arm9_start_foto cardengine_arm9_alt cardengine_arm9_alt_gsdd cardengine_arm9_alt2 cardengine_arm9_alt3 cardengine_arm9_extmem cardengine_arm9_extmem_gsdd cardengine_arm9_extmem_start cardengine_arm9_extmem_foto cardenginei_arm7 cardenginei_arm7_alt cardenginei_arm7_twlsdk cardenginei_arm7_twlsdk3 cardenginei_arm7_dsiware cardenginei_arm7_dsiware3 cardenginei_arm7_cheat cardenginei_arm9_igm cardenginei_arm9 cardenginei_arm9_alt cardenginei_arm9_alt2 cardenginei_arm9_dlp cardenginei_arm9_gsdd cardenginei_arm9_gsdd_alt cardenginei_arm9_dldi cardenginei_arm9_gsdd_dldi cardenginei_arm9_twlsdk cardenginei_arm9_twlsdk3 cardenginei_arm9_twlsdk_dldi cardenginei_arm9_twlsdk3_dldi cardenginei_arm9_dsiware cardenginei_arm9_dsiware3 preLoadSettings libnds32 arm7/$(TARGET).elf arm9/$(TARGET).elf clean
 
 all:	$(OUTPUT)
 
@@ -157,12 +102,20 @@ arm7/$(TARGET).elf:
 	@$(MAKE) -C arm7
 	
 #---------------------------------------------------------------------------------
-arm9/$(TARGET).elf:	bootloader bootloader2 bootloaderi bootloaderi2 preLoadSettings
+arm9/$(TARGET).elf:	bootloader bootloader1 bootloader2 bootloaderi bootloaderi1 bootloaderi2 preLoadSettings libnds32
 	@$(MAKE) -C arm9
 
 #---------------------------------------------------------------------------------		
-bootloader: $(DATA) cardengine_arm7 cardengine_arm7_music cardengine_arm9_igm cardengine_arm9_igm_extmem cardengine_arm9 cardengine_arm9_start cardengine_arm9_start_foto cardengine_arm9_alt cardengine_arm9_alt_gsdd cardengine_arm9_alt2 cardengine_arm9_extmem cardengine_arm9_extmem_gsdd cardengine_arm9_extmem_foto
+libnds32:
+	@$(MAKE) -C libnds32
+
+#---------------------------------------------------------------------------------		
+bootloader: $(DATA) cardengine_arm7 cardengine_arm7_music cardengine_arm9_igm cardengine_arm9_igm_extmem cardengine_arm9 cardengine_arm9_32 cardengine_arm9_start cardengine_arm9_start_foto cardengine_arm9_alt cardengine_arm9_alt_gsdd cardengine_arm9_alt2 cardengine_arm9_alt3 cardengine_arm9_extmem cardengine_arm9_extmem_gsdd cardengine_arm9_extmem_start cardengine_arm9_extmem_foto
 	@$(MAKE) -C bootloader
+
+#---------------------------------------------------------------------------------		
+bootloader1: $(DATA)
+	@$(MAKE) -C bootloader1
 
 #---------------------------------------------------------------------------------		
 bootloader2: $(DATA)
@@ -171,6 +124,10 @@ bootloader2: $(DATA)
 #---------------------------------------------------------------------------------		
 bootloaderi: $(DATA) cardenginei_arm7 cardenginei_arm7_alt cardenginei_arm7_twlsdk cardenginei_arm7_twlsdk3 cardenginei_arm7_dsiware cardenginei_arm7_dsiware3 cardenginei_arm7_cheat cardenginei_arm9_igm cardenginei_arm9 cardenginei_arm9_alt cardenginei_arm9_alt2 cardenginei_arm9_dlp cardenginei_arm9_gsdd cardenginei_arm9_gsdd_alt cardenginei_arm9_dldi cardenginei_arm9_gsdd_dldi cardenginei_arm9_twlsdk cardenginei_arm9_twlsdk3 cardenginei_arm9_twlsdk_dldi cardenginei_arm9_twlsdk3_dldi cardenginei_arm9_dsiware cardenginei_arm9_dsiware3
 	@$(MAKE) -C bootloaderi
+
+#---------------------------------------------------------------------------------		
+bootloaderi1: $(DATA)
+	@$(MAKE) -C bootloaderi1
 
 #---------------------------------------------------------------------------------		
 bootloaderi2: $(DATA)
@@ -197,6 +154,10 @@ cardengine_arm9: $(DATA)
 	@$(MAKE) -C cardengine/arm9
 
 #---------------------------------------------------------------------------------		
+cardengine_arm9_32: $(DATA)
+	@$(MAKE) -C cardengine/arm9_32
+
+#---------------------------------------------------------------------------------		
 cardengine_arm9_start: $(DATA)
 	@$(MAKE) -C cardengine/arm9_start
 
@@ -217,12 +178,20 @@ cardengine_arm9_alt2: $(DATA)
 	@$(MAKE) -C cardengine/arm9_alt2
 
 #---------------------------------------------------------------------------------		
+cardengine_arm9_alt3: $(DATA)
+	@$(MAKE) -C cardengine/arm9_alt3
+
+#---------------------------------------------------------------------------------		
 cardengine_arm9_extmem: $(DATA)
 	@$(MAKE) -C cardengine/arm9_extmem
 
 #---------------------------------------------------------------------------------		
 cardengine_arm9_extmem_gsdd: $(DATA)
 	@$(MAKE) -C cardengine/arm9_extmem_gsdd
+
+#---------------------------------------------------------------------------------		
+cardengine_arm9_extmem_start: $(DATA)
+	@$(MAKE) -C cardengine/arm9_extmem_start
 
 #---------------------------------------------------------------------------------		
 cardengine_arm9_extmem_foto: $(DATA)
@@ -329,6 +298,7 @@ preLoadSettings: $(DATA)
 clean:
 	@echo clean ...
 	@rm -fr $(BUILD) $(TARGET).elf $(TARGET).nds $(TARGET).nds.orig.nds $(TARGET).arm9 $(DATA) $(BIN)
+	@$(MAKE) -C libnds32 clean
 	@$(MAKE) -C arm7 clean
 	@$(MAKE) -C arm9 clean
 	@$(MAKE) -C cardengine/arm7 clean
@@ -341,8 +311,10 @@ clean:
 	@$(MAKE) -C cardengine/arm9_alt clean
 	@$(MAKE) -C cardengine/arm9_alt_gsdd clean
 	@$(MAKE) -C cardengine/arm9_alt2 clean
+	@$(MAKE) -C cardengine/arm9_alt3 clean
 	@$(MAKE) -C cardengine/arm9_extmem clean
 	@$(MAKE) -C cardengine/arm9_extmem_gsdd clean
+	@$(MAKE) -C cardengine/arm9_extmem_start clean
 	@$(MAKE) -C cardengine/arm9_extmem_foto clean
 	@$(MAKE) -C cardenginei/arm7 clean
 	@$(MAKE) -C cardenginei/arm7_alt clean
@@ -370,8 +342,10 @@ clean:
 	@rm $(NITRODATA)/preLoadSettingsDSi.pck
 	@rm $(NITRODATA)/preLoadSettings3DS.pck
 	@$(MAKE) -C bootloader clean
+	@$(MAKE) -C bootloader1 clean
 	@$(MAKE) -C bootloader2 clean
 	@$(MAKE) -C bootloaderi clean
+	@$(MAKE) -C bootloaderi1 clean
 	@$(MAKE) -C bootloaderi2 clean
 
 $(DATA):
@@ -384,28 +358,10 @@ $(BIN):
 else
 
 #---------------------------------------------------------------------------------
-# main targets
-#---------------------------------------------------------------------------------
-#$(OUTPUT)		: 	$(TARGET).elf
-#$(TARGET).elf	:	$(OFILES)
-
-#---------------------------------------------------------------------------------
 %.bin.o	:	%.bin
 #---------------------------------------------------------------------------------
 	@echo $(notdir $<)
 	$(bin2o)
-
-#---------------------------------------------------------------------------------
-# This rule creates assembly source files using grit
-# grit takes an image file and a .grit describing how the file is to be processed
-# add additional rules like this for each image extension
-# you use in the graphics folders
-#---------------------------------------------------------------------------------
-%.s %.h   : %.png %.grit
-#---------------------------------------------------------------------------------
-	grit $< -fts -o$*
-
--include $(DEPSDIR)/*.d
 
 #---------------------------------------------------------------------------------------
 endif

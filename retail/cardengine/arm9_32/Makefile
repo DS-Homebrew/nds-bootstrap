@@ -23,8 +23,8 @@ endif
 # all directories are relative to this makefile
 #---------------------------------------------------------------------------------
 BUILD		:=	build
-SOURCES		:=	source ../../common/source ../../common/source_general
-INCLUDES	:=	include ../../common/include ../../common/include_fat
+SOURCES		:=	../arm9/source ../../common/source ../../common/source_general
+INCLUDES	:=	../arm9/include ../../common/include ../../common/include_fat
 DATA		:=	data
 
 
@@ -65,7 +65,7 @@ LIBDIRS	:=	$(LIBNDS)
 ifneq ($(BUILD),$(notdir $(CURDIR)))
 #---------------------------------------------------------------------------------
 
-export TARGET	:=	cardengine_arm9_alt3
+export TARGET	:=	cardengine_arm9_32
 export OUTPUT	:=	$(CURDIR)/../../nitrofiles_dec/$(TARGET)
 export OUTPUT_CMP	:=	$(CURDIR)/../../nitrofiles/$(TARGET)
 export DEPSDIR	:=	$(CURDIR)/$(BUILD)

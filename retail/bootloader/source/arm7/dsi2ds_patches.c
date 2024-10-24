@@ -2,6 +2,7 @@
 #include <nds/system.h>
 #include "nds_header.h"
 #include "module_params.h"
+#include "dldi_patcher.h"
 #include "cardengine_header_arm7.h"
 #include "cardengine_header_arm9.h"
 #include "patch.h"
@@ -36,6 +37,7 @@ static void patchMsg16(u32 addr, const char* msg) {
 }
 
 void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
+	extern u8 _io_dldi_size;
 	extern bool ce9Alt;
 	extern bool ce9AltLargeTable;
 	extern bool expansionPakFound;
@@ -61,12 +63,23 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	const bool ce9NotInHeap = (ce9Alt || (u32)ce9 == CARDENGINE_ARM9_LOCATION_DLDI_START);
 	const bool wirelessCodeInVram = (*(u32*)(((u32)ndsHeader->arm7destination) + newArm7binarySize - 0x24) == 0x027E0000);
 	maxHeapOpen = (!extendedMemory && ce9NotInHeap && wirelessCodeInVram);
-	const u32 heapEndRetail = (ce9NotInHeap && !ce9AltLargeTable) ? ((cheatSizeTotal <= 4) ? 0x023E0000 : CHEAT_ENGINE_LOCATION_B4DS-0x400000) : ((fatTableAddr < 0x023C0000 || fatTableAddr >= (u32)ce9) ? (u32)ce9 : fatTableAddr);
-	const u32 heapEnd = extendedMemory ? (((u32)ndsHeader->arm9destination >= 0x02004000) ? CARDENGINE_ARM9_LOCATION_DLDI_EXTMEM : 0x02700000) : heapEndRetail;
+	u32 heapEndRetail = (ce9NotInHeap && !ce9AltLargeTable) ? ((cheatSizeTotal <= 4) ? 0x023E0000 : CHEAT_ENGINE_LOCATION_B4DS-0x400000) : ((fatTableAddr < 0x023C0000 || fatTableAddr >= (u32)ce9) ? (u32)ce9 : fatTableAddr);
+	if (!extendedMemory && !maxHeapOpen && _io_dldi_size >= 0x0E) {
+		const u32 ce9DldiOffset = (_io_dldi_size == 0x0F) ? 0x023D8000 : 0x023DC000;
+		heapEndRetail = ((u32)ndsHeader->arm9destination >= 0x02004000) ? ce9DldiOffset : CARDENGINE_ARM9_LOCATION_DLDI_32;
+
+		// Move DLDI driver to proper location
+		toncset((u32*)0x023F6000, 0, 0x8000);
+		if (!dldiPatchBinary((data_t*)ce9, 0x3800, (data_t*)ce9DldiOffset)) {
+			dbg_printf("ce9 DLDI patch failed\n");
+			errorOutput();
+		}
+	}
+	const u32 heapEnd = extendedMemory ? (((u32)ndsHeader->arm9destination >= 0x02004000) ? 0x027D8000 : 0x02700000) : heapEndRetail;
 	const u32 heapEnd8MBHack = extendedMemory ? heapEnd : heapEndRetail+0x400000; // extendedMemory ? #0x27B0000 : #0x27E0000 (mirrors to 0x23E0000 on retail DS units)
 	const u32 heapEndExceed = extendedMemory ? heapEnd+0x800000 : heapEndRetail+0xC00000; // extendedMemory ? #0x2FB0000 (mirrors to 0x27B0000 on debug DS units) : #0x2FE0000 (mirrors to 0x23E0000 on retail DS units)
-	const u32 heapEndMaxForRetail = maxHeapOpen ? 0x023FC000 : heapEnd;
-	const u32 heapEndMaxForRetailMus = maxHeapOpen ? 0x023F8000 : heapEnd;
+	const u32 heapEndMaxForRetail = maxHeapOpen ? ((_io_dldi_size == 0x0F) ? 0x023F6000 : (_io_dldi_size == 0x0E) ? 0x023FA000 : 0x023FC000) : heapEnd;
+	const u32 heapEndMaxForRetailMus = maxHeapOpen ? heapEndMaxForRetail-0x4000 : heapEnd;
 	const u32 heapEnd_512KBFreeForDebug = extendedMemory ? 0x02740000 : heapEnd;
 	// const u32 heapEnd_512KBFreeForDebugAlt = extendedMemory ? 0x02700000 : heapEnd;
 	const u32 heapEndMaxForRetail_512KBFreeForDebugAlt = extendedMemory ? 0x02700000 : heapEndMaxForRetail;
@@ -101,7 +114,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Patch DSi-Exclusives to run in DS mode
 
-#ifndef LOADERTWO
+#ifdef LOADERTYPE0
 	// Foto Showdown (USA)
 	if (strcmp(romTid, "DMFE") == 0) {
 		*(u32*)0x0200EE34 = 0xE3A00000; // mov r0, #0
@@ -10108,9 +10121,11 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u16*)0x0203B490 = 0x2003; // movs r0, #3
 		*(u16*)0x0203B492 = 0x4770; // bx lr
 	}
+#endif
 
+#ifdef LOADERTYPE1
 	// GO Series: Earth Saver (USA)
-	else if (strcmp(romTid, "KB8E") == 0) {
+	if (strcmp(romTid, "KB8E") == 0) {
 		*(u32*)0x02005234 = 0xE1A00000; // nop
 		*(u32*)0x02005530 = 0xE1A00000; // nop
 		//if (!twlFontFound) {
@@ -13170,10 +13185,10 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			*(u32*)0x0205C848 = *(u32*)0x0205C7E4; // Shrink large part of heap from 0xC0000
 		}
 	}
-#else
+
 	// Ichi Moudaji!: Neko King (Japan)
 	// Either this uses more than one save file in filesystem, or saving is somehow just bugged
-	/* if (strcmp(romTid, "KNEJ") == 0) {
+	/* else if (strcmp(romTid, "KNEJ") == 0) {
 		*(u32*)0x02003398 = 0xE1A00000; // nop
 		*(u32*)0x02011F90 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		setBL(0x02012210, (u32)dsiSaveCreate);
@@ -13207,7 +13222,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	} */
 
 	// Invasion of the Alien Blobs! (USA)
-	if (strcmp(romTid, "KBTE") == 0) {
+	else if (strcmp(romTid, "KBTE") == 0) {
 		*(u32*)0x0201BF94 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		*(u32*)0x0201BFB0 = 0xE1A00000; // nop
 		setBL(0x020220F0, (u32)dsiSaveOpen);
@@ -18686,11 +18701,13 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			*(u32*)0x020612B4 = *(u32*)0x02061228; // Shrink large part of heap from 0xA0000
 		}
 	}
+#endif
 
+#ifdef LOADERTYPE2
 	// Odekake! Earth Seeker (Japan)
 	// Black screens after company logos
 	// Seemingly not possible to fix the cause? (Fails to read or write save)
-	/*else if (strcmp(romTid, "KA7J") == 0) {
+	/*if (strcmp(romTid, "KA7J") == 0) {
 		*(u32*)0x020107E8 = 0xE1A00000; // nop
 		*(u32*)0x02014350 = 0xE1A00000; // nop
 		*(u32*)0x02018864 = 0xE1A00000; // nop
@@ -18719,7 +18736,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Orion's Odyssey (USA)
 	// Due to our save implementation, save data is stored in both slots
 	// Crashes later on retail consoles
-	else if (strcmp(romTid, "K6TE") == 0) {
+	if (strcmp(romTid, "K6TE") == 0) {
 		*(u32*)0x02011FAC = 0xE1A00000; // nop
 		*(u32*)0x02015790 = 0xE1A00000; // nop
 		patchInitDSiWare(0x0201ABF0, heapEndMaxForRetail);
