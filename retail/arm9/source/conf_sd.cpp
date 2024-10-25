@@ -1964,6 +1964,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 					&&	strncmp(romTid, "B88", 3) != 0 // DS WiFi Settings
 					&&	strncmp(romTid, "K42", 3) != 0 // Elite Forces: Unit 77
 					&&	strncmp(romTid, "Z2E", 3) != 0 // Famicom Wars DS: Ushinawareta Hikari
+					&&	strncmp(romTid, "DMF", 3) != 0 // Foto Showdown
 					&&	strncmp(romTid, "K6J", 3) != 0 // Fuuu! Dairoujou Kai
 					&&	strncmp(romTid, "KGK", 3) != 0 // Glory Days: Tactical Defense
 					&&	strncmp(romTid, "KKF", 3) != 0 // Go Fetch! 2
@@ -1989,6 +1990,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 					&&	strncmp(romTid, "KL4", 3) != 0 // My Australian Farm
 					&&	strncmp(romTid, "KSU", 3) != 0 // Number Battle
 					&&	strncmp(romTid, "KUS", 3) != 0 // Paul's Shooting Adventure 2
+					&&	strncmp(romTid, "DHS", 3) != 0 // Picture Perfect Hair Salon
 					&&	strncmp(romTid, "KE3", 3) != 0 // PictureBook Games: The Royal Bluff
 					&&	strncmp(romTid, "KPM", 3) != 0 // Pomjong
 					&&	strncmp(romTid, "KLR", 3) != 0 // Puffins: Let's Race!
