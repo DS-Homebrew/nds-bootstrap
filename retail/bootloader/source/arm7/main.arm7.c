@@ -1332,17 +1332,6 @@ int arm7_main(void) {
 	tonccpy((u8*)CARDENGINE_ARM7_LOCATION, (u8*)CARDENGINE_ARM7_LOCATION_BUFFERED, 0x1000);
 	toncset((u8*)CARDENGINE_ARM7_LOCATION_BUFFERED, 0, 0x1000);
 
-	u32 ce9DldiOffset = (extendedMemory ? 0x027FC000 : ((accessControl & BIT(4)) && !ce9Alt) ? 0x023FC000 : 0x023FD000);
-	if (_io_dldi_size == 0x0E) {
-		ce9DldiOffset = (extendedMemory ? 0x027DC000 : ((u32)ndsHeader->arm9destination >= 0x02004000 && ((accessControl & BIT(4)) || arm7mbk == 0x080037C0) && !ce9Alt) ? 0x023FA000 : (laterSdk ? 0x023DC000 : 0x023FB000));
-	} else if (_io_dldi_size == 0x0F) {
-		ce9DldiOffset = (extendedMemory ? 0x027D8000 : ((u32)ndsHeader->arm9destination >= 0x02004000 && ((accessControl & BIT(4)) || arm7mbk == 0x080037C0) && !ce9Alt) ? 0x023F6000 : (laterSdk ? 0x023D8000 : 0x023F7000));
-	}
-	if (!dldiPatchBinary((data_t*)ce9Location, 0x3800, (data_t*)ce9DldiOffset)) {
-		dbg_printf("ce9 DLDI patch failed\n");
-		errorOutput();
-	}
-
 	aFile musicsFile;
 	getFileFromCluster(&musicsFile, musicCluster);
 	if (((accessControl & BIT(4)) || arm7mbk == 0x080037C0) && musicCluster != 0) {
@@ -1563,6 +1552,18 @@ int arm7_main(void) {
 	}
 	patchBinary((cardengineArm9*)ce9Location, ndsHeader, moduleParams);
 	patchCardNdsArm9Cont((cardengineArm9*)ce9Location, ndsHeader, moduleParams);
+
+	extern bool maxHeapOpen;
+	u32 ce9DldiOffset = (extendedMemory ? 0x027FC000 : ((accessControl & BIT(4)) && !ce9Alt) ? 0x023FC000 : 0x023FD000);
+	if (_io_dldi_size == 0x0E) {
+		ce9DldiOffset = (extendedMemory ? 0x027DC000 : maxHeapOpen ? 0x023FA000 : (laterSdk ? 0x023DC000 : 0x023FB000));
+	} else if (_io_dldi_size == 0x0F) {
+		ce9DldiOffset = (extendedMemory ? 0x027D8000 : maxHeapOpen ? 0x023F6000 : (laterSdk ? 0x023D8000 : 0x023F7000));
+	}
+	if (!dldiPatchBinary((data_t*)ce9Location, 0x3800, (data_t*)ce9DldiOffset)) {
+		dbg_printf("ce9 DLDI patch failed\n");
+		errorOutput();
+	}
 
 	toncset((u32*)0x0380C000, 0, 0x2780);
 

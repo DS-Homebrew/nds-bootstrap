@@ -2051,7 +2051,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			if (foto) {
 				cebin = fopen("nitro:/cardengine_arm9_start_foto.lz77", "rb");
 			} else {
-				cebin = fopen(ndsArm9Offset >= 0x02004000 ? "nitro:/cardengine_arm9_start.lz77" : "nitro:/cardengine_arm9.lz77", "rb");
+				cebin = fopen(ndsArm9Offset >= 0x02004000 ? "nitro:/cardengine_arm9_start.lz77" : (io_dldi_data->driverSize >= 0x0E) ? "nitro:/cardengine_arm9_32.lz77" : "nitro:/cardengine_arm9.lz77", "rb");
 			}
 		} else {
 			const char* ce9path = gsdd ? "nitro:/cardengine_arm9_alt_gsdd.lz77" : "nitro:/cardengine_arm9_alt.lz77";

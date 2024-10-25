@@ -2,7 +2,6 @@
 #include <nds/system.h>
 #include "nds_header.h"
 #include "module_params.h"
-#include "dldi_patcher.h"
 #include "cardengine_header_arm7.h"
 #include "cardengine_header_arm9.h"
 #include "patch.h"
@@ -70,13 +69,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	if (!extendedMemory && !maxHeapOpen && !wirelessCodeInVram && _io_dldi_size >= 0x0E) {
 		const u32 ce9DldiOffset = (_io_dldi_size == 0x0F) ? 0x023D8000 : 0x023DC000;
 		heapEndRetail = ((u32)ndsHeader->arm9destination >= 0x02004000) ? ce9DldiOffset : CARDENGINE_ARM9_LOCATION_DLDI_32;
-
-		// Move DLDI driver to proper location
-		toncset((u32*)0x023F6000, 0, 0x8000);
-		if (!dldiPatchBinary((data_t*)ce9, 0x3800, (data_t*)ce9DldiOffset)) {
-			dbg_printf("ce9 DLDI patch failed\n");
-			errorOutput();
-		}
 	}
 	const u32 heapEnd = extendedMemory ? (((u32)ndsHeader->arm9destination >= 0x02004000) ? 0x027D8000 : 0x02700000) : heapEndRetail;
 	const u32 heapEnd8MBHack = extendedMemory ? heapEnd : heapEndRetail+0x400000; // extendedMemory ? #0x27B0000 : #0x27E0000 (mirrors to 0x23E0000 on retail DS units)
