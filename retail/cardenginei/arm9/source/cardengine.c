@@ -427,23 +427,11 @@ volatile void (*FS_Write)(u32*, u32, u32) = (volatile void*)0x0203C5C8;*/
 #endif
 #endif
 
-#ifndef DLDI
-u32 newOverlayOffset = 0;
-u32 newOverlaysSize = 0;
-#endif
-
 static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
 #ifdef DLDI
 	// while (sharedAddr[3]==0x444D4152);	// Wait during a RAM dump
 	fileRead((char*)dst, ((ce9->valueBits & overlaysCached) && src >= ce9->overlaysSrc && src < ndsHeader->arm7romOffset) ? apFixOverlaysFile : romFile, src, len);
 #else
-	if (newOverlayOffset == 0) {
-		newOverlayOffset = (ce9->overlaysSrc/ce9->cacheBlockSize)*ce9->cacheBlockSize;
-		for (u32 i = newOverlayOffset; i < ndsHeader->arm7romOffset; i+= ce9->cacheBlockSize) {
-			newOverlaysSize += ce9->cacheBlockSize;
-		}
-	}
-
 	const u32 commandRead = (isDma ? 0x025FFB0A : 0x025FFB08);
 	u32 sector = (src/ce9->cacheBlockSize)*ce9->cacheBlockSize;
 
@@ -467,7 +455,7 @@ static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
 		sharedAddr[3] = commandRead;
 
 		waitForArm7();
-		// fileRead((char*)dst, ((ce9->valueBits & overlaysCached) && src >= newOverlayOffset && src < newOverlayOffset+newOverlaysSize) ? apFixOverlaysFile : romFile, src, len);
+		// fileRead((char*)dst, ((ce9->valueBits & overlaysCached) && src >= ce9->overlaysSrcAlign && src < ce9->overlaysSrcAlign+ce9->overlaysSizeAlign) ? apFixOverlaysFile : romFile, src, len);
 	} else { */
 		// Read via the main RAM cache
 		//bool runSleep = true;
@@ -502,7 +490,7 @@ static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
 				// Write the command
 				sharedAddr[0] = (vu32)buffer;
 				sharedAddr[1] = ce9->cacheBlockSize;
-				sharedAddr[2] = ((ce9->valueBits & overlaysCached) && src >= newOverlayOffset && src < newOverlayOffset+newOverlaysSize) ? sector+0x80000000 : sector;
+				sharedAddr[2] = ((ce9->valueBits & overlaysCached) && src >= ce9->overlaysSrcAlign && src < ce9->overlaysSrcAlign+ce9->overlaysSizeAlign) ? sector+0x80000000 : sector;
 				sharedAddr[3] = commandRead;
 
 				waitForArm7();
@@ -511,7 +499,7 @@ static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
 				updateDescriptor(slot, sector);
 				#endif
 
-				// fileRead((char*)buffer, ((ce9->valueBits & overlaysCached) && src >= newOverlayOffset && src < newOverlayOffset+newOverlaysSize) ? apFixOverlaysFile : romFile, sector, ce9->cacheBlockSize);
+				// fileRead((char*)buffer, ((ce9->valueBits & overlaysCached) && src >= ce9->overlaysSrcAlign && src < ce9->overlaysSrcAlign+ce9->overlaysSizeAlign) ? apFixOverlaysFile : romFile, sector, ce9->cacheBlockSize);
 				/*updateDescriptor(slot, sector);
 				if (readLen >= ce9->cacheBlockSize*2) {
 					updateDescriptor(slot+1, sector+ce9->cacheBlockSize);

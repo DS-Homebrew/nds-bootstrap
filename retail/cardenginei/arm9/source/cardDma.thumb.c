@@ -114,9 +114,6 @@ extern int getSlotForSector(u32 sector);
 //extern int getSlotForSectorManual(int i, u32 sector);
 extern vu8* getCacheAddress(int slot);
 extern void updateDescriptor(int slot, u32 sector);
-
-extern u32 newOverlayOffset;
-extern u32 newOverlaysSize;
 #endif
 
 static inline bool isPreloadFinished(void) {
@@ -227,7 +224,7 @@ void continueCardReadDmaArm9() {
 				// Write the command
 				sharedAddr[0] = (vu32)buffer;
 				sharedAddr[1] = ce9->cacheBlockSize;
-				sharedAddr[2] = ((ce9->valueBits & overlaysCached) && src >= newOverlayOffset && src < newOverlayOffset+newOverlaysSize) ? sector+0x80000000 : sector;
+				sharedAddr[2] = ((ce9->valueBits & overlaysCached) && src >= ce9->overlaysSrcAlign && src < ce9->overlaysSrcAlign+ce9->overlaysSizeAlign) ? sector+0x80000000 : sector;
 				sharedAddr[3] = commandRead;
 
 				dmaReadOnArm7 = true;
@@ -460,13 +457,6 @@ void cardSetDma(u32 * params) {
 	enableIPC_SYNC();
 
 	#ifndef DLDI
-	if (newOverlayOffset == 0) {
-		newOverlayOffset = (ce9->overlaysSrc/ce9->cacheBlockSize)*ce9->cacheBlockSize;
-		for (u32 i = newOverlayOffset; i < ndsHeader->arm7romOffset; i+= ce9->cacheBlockSize) {
-			newOverlaysSize += ce9->cacheBlockSize;
-		}
-	}
-
 	const u32 commandRead=0x025FFB0A;
 	u32 sector = (src/ce9->cacheBlockSize)*ce9->cacheBlockSize;
 	//u32 page = (src / 512) * 512;
@@ -520,7 +510,7 @@ void cardSetDma(u32 * params) {
 			// Write the command
 			sharedAddr[0] = (vu32)buffer;
 			sharedAddr[1] = ce9->cacheBlockSize;
-			sharedAddr[2] = ((ce9->valueBits & overlaysCached) && src >= newOverlayOffset && src < newOverlayOffset+newOverlaysSize) ? sector+0x80000000 : sector;
+			sharedAddr[2] = ((ce9->valueBits & overlaysCached) && src >= ce9->overlaysSrcAlign && src < ce9->overlaysSrcAlign+ce9->overlaysSizeAlign) ? sector+0x80000000 : sector;
 			sharedAddr[3] = commandRead;
 
 			dmaReadOnArm7 = true;

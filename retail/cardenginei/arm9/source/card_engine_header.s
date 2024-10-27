@@ -45,7 +45,11 @@ fntFatSize:
 	.word	0x00000000
 overlaysSrc:
 	.word	0x00000000
+overlaysSrcAlign:
+	.word	0x00000000
 overlaysSize:
+	.word	0x00000000
+overlaysSizeAlign:
 	.word	0x00000000
 romPaddingSize:
 	.word	0x00000000

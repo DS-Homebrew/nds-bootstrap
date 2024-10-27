@@ -112,7 +112,9 @@ typedef struct cardengineArm9 {
 	u32 fntSrc;
 	u32 fntFatSize;
 	u32 overlaysSrc;
+	u32 overlaysSrcAlign;
 	u32 overlaysSize;
+	u32 overlaysSizeAlign;
 	u32 romPaddingSize;
 	u32 romLocation;
 	u32 cacheAddress;

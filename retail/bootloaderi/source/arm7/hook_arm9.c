@@ -407,6 +407,12 @@ int hookNdsRetailArm9(
 		bool runOverlayCheck = overlayPatch;
 		u32 dataToPreloadSizeAligned = 0;
 		ce9->cacheBlockSize = cacheBlockSize;
+		if (ce9->overlaysSrc) {
+			ce9->overlaysSrcAlign = (ce9->overlaysSrc/ce9->cacheBlockSize)*ce9->cacheBlockSize;
+			for (u32 i = ce9->overlaysSrcAlign; i < ndsHeader->arm7romOffset; i+= ce9->cacheBlockSize) {
+				ce9->overlaysSizeAlign += ce9->cacheBlockSize;
+			}
+		}
 		if (ndsHeader->unitCode > 0 && dsiMode) {
 			extern u32 cheatSizeTotal;
 			const bool cheatsEnabled = (cheatSizeTotal > 4 && cheatSizeTotal <= 0x8000);
