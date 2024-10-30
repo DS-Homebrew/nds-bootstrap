@@ -4534,18 +4534,11 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Art Style: BASE 10 (USA)
 	else if (strcmp(romTid, "KADE") == 0) {
-		*getOffsetFromBL((u32*)0x020074A8) = 0xE12FFF1E; // bx lr
-		*getOffsetFromBL((u32*)0x020074BC) = 0xE12FFF1E; // bx lr
-		*getOffsetFromBL((u32*)0x020074D8) = 0xE12FFF1E; // bx lr
-		*getOffsetFromBL((u32*)0x020074E8) = 0xE12FFF1E; // bx lr
-		*getOffsetFromBL((u32*)0x02007500) = 0xE12FFF1E; // bx lr
-		*getOffsetFromBL((u32*)0x020075C4) = 0xE12FFF1E; // bx lr
 		*(u32*)0x0202D25C = 0xEB00007C; // bl 0x0202D454 (Skip Manual screen)
 		// *(u32*)0x0202D2EC = 0xE3A00000; // mov r0, #0
 		// *(u32*)0x0202D314 = 0xE3A00000; // mov r0, #0
 		setBL(0x0203A248, (u32)dsiSaveOpen);
 		setBL(0x0203A26C, (u32)dsiSaveClose);
-		*(u32*)0x0203A288 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x0203A2B8 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
 		*(u32*)0x0203A2DC = 0xE3A00001; // mov r0, #1 (dsiSaveFreeSpaceAvailable)
 		setBL(0x0203A2FC, (u32)dsiSaveCreate);
@@ -4558,37 +4551,15 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0203A4E0, (u32)dsiSaveOpen);
 		setBL(0x0203A508, (u32)dsiSaveWrite);
 		setBL(0x0203A524, (u32)dsiSaveClose);
-		*(u32*)0x02056724 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x02059F88 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x02064FC0 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x020668F8 = 0xE3A00001; // mov r0, #1
-		*(u32*)0x020668FC = 0xE12FFF1E; // bx lr
-		*(u32*)0x02066E50 = 0xE1A00000; // nop
-		*(u32*)0x02066E54 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x02066E6C = 0xE3A00000; // mov r0, #0
-		*(u32*)0x02066FB4 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x02067050 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x02067080 = 0xE3A00000; // mov r0, #0
-		// *(u32*)0x02067154 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x02067184 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x0206865C = 0xE3A00000; // mov r0, #0
-		*(u32*)0x020686B0 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x02068A98 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x02070068 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02059DA8 = 0xE3A00001; // mov r0, #1 (Enable NitroFS reads)
+		// *(u32*)0x02067154 = 0xE3A00001; // mov r0, #1
 	}
 
 	// Art Style: CODE (Europe, Australia)
 	else if (strcmp(romTid, "KADV") == 0) {
-		*getOffsetFromBL((u32*)0x020074A8) = 0xE12FFF1E; // bx lr
-		*getOffsetFromBL((u32*)0x020074BC) = 0xE12FFF1E; // bx lr
-		*getOffsetFromBL((u32*)0x020074D8) = 0xE12FFF1E; // bx lr
-		*getOffsetFromBL((u32*)0x020074E8) = 0xE12FFF1E; // bx lr
-		*getOffsetFromBL((u32*)0x02007500) = 0xE12FFF1E; // bx lr
-		*getOffsetFromBL((u32*)0x020075C4) = 0xE12FFF1E; // bx lr
 		*(u32*)0x0202D288 = 0xEB00007C; // bl 0x0202D480 (Skip Manual screen)
 		setBL(0x0203A2D8, (u32)dsiSaveOpen);
 		setBL(0x0203A2FC, (u32)dsiSaveClose);
-		*(u32*)0x0203A318 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x0203A348 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
 		*(u32*)0x0203A36C = 0xE3A00001; // mov r0, #1 (dsiSaveFreeSpaceAvailable)
 		setBL(0x0203A38C, (u32)dsiSaveCreate);
@@ -4601,37 +4572,14 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0203A570, (u32)dsiSaveOpen);
 		setBL(0x0203A598, (u32)dsiSaveWrite);
 		setBL(0x0203A5B4, (u32)dsiSaveClose);
-		*(u32*)0x020567B4 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x0205A018 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x02065050 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x02066988 = 0xE3A00001; // mov r0, #1
-		*(u32*)0x0206698C = 0xE12FFF1E; // bx lr
-		*(u32*)0x02066EE0 = 0xE1A00000; // nop
-		*(u32*)0x02066EE4 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x02066EFC = 0xE3A00000; // mov r0, #0
-		*(u32*)0x02067044 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x020670E0 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x02067110 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x020671E4 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x02067214 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x020686EC = 0xE3A00000; // mov r0, #0
-		*(u32*)0x02068740 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x02068B28 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x020700F8 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02059E38 = 0xE3A00001; // mov r0, #1 (Enable NitroFS reads)
 	}
 
 	// Art Style: DECODE (Japan)
 	else if (strcmp(romTid, "KADJ") == 0) {
-		*getOffsetFromBL((u32*)0x020074B0) = 0xE12FFF1E; // bx lr
-		*getOffsetFromBL((u32*)0x020074C4) = 0xE12FFF1E; // bx lr
-		*getOffsetFromBL((u32*)0x020074E0) = 0xE12FFF1E; // bx lr
-		*getOffsetFromBL((u32*)0x020074F0) = 0xE12FFF1E; // bx lr
-		*getOffsetFromBL((u32*)0x02007508) = 0xE12FFF1E; // bx lr
-		*getOffsetFromBL((u32*)0x020075C8) = 0xE12FFF1E; // bx lr
 		*(u32*)0x0202E2AC = 0xEB000071; // bl 0x0202E478 (Skip Manual screen)
 		setBL(0x0203B108, (u32)dsiSaveOpen);
 		setBL(0x0203B12C, (u32)dsiSaveClose);
-		*(u32*)0x0203B148 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x0203B170 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
 		*(u32*)0x0203B194 = 0xE3A00001; // mov r0, #1 (dsiSaveFreeSpaceAvailable)
 		setBL(0x0203B1B0, (u32)dsiSaveCreate);
@@ -4644,21 +4592,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0203B398, (u32)dsiSaveOpen);
 		setBL(0x0203B3C4, (u32)dsiSaveWrite);
 		setBL(0x0203B3E0, (u32)dsiSaveClose);
-		*(u32*)0x020575B0 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x0205AE14 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x02067784 = 0xE3A00001; // mov r0, #1
-		*(u32*)0x02067788 = 0xE12FFF1E; // bx lr
-		*(u32*)0x02067CDC = 0xE1A00000; // nop
-		*(u32*)0x02067CE0 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x02067CF8 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x02067E40 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x02067EDC = 0xE3A00000; // mov r0, #0
-		*(u32*)0x02067F0C = 0xE3A00000; // mov r0, #0
-		*(u32*)0x02067FE0 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x02068010 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x02069480 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x020694C0 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x02070E08 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0205AC34 = 0xE3A00001; // mov r0, #1 (Enable NitroFS reads)
 	}
 
 	// Beauty Academy (Europe)
