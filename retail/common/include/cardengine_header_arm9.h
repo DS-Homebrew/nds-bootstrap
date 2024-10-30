@@ -248,6 +248,8 @@ typedef struct cardengineArm9 {
 	u32 arm9ibinarySize;
 	u32 romPaddingSize;
 	u32 romLocation;
+	u32 romPartSrc;
+	u32 romPartSize;
 	u32 rumbleFrames[2];
 	u32 rumbleForce[2];
 	u32 prepareScreenshot;

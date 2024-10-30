@@ -197,6 +197,9 @@ int hookNdsRetailArm9(
 	extern u8 _io_dldi_size;
 	const char* romTid = getRomTid(ndsHeader);
 	extern u32 romPaddingSize;
+	extern u32 dataToPreloadAddr;
+	extern u32 dataToPreloadSize;
+	extern bool dataToPreloadFound(const tNDSHeader* ndsHeader);
 	extern u32 romLocation;
 	extern u16 s2FlashcardId;
 	extern bool maxHeapOpen;
@@ -259,8 +262,8 @@ int hookNdsRetailArm9(
 	ce9->romPaddingSize         = romPaddingSize;
 	ce9->romLocation            = romLocation;
 
-	u32 romOffset = 0;
 	if (ROMinRAM) {
+		u32 romOffset = 0;
 		if (usesCloneboot) {
 			romOffset = 0x8000;
 		} else if (ndsHeader->arm9overlaySource == 0 || ndsHeader->arm9overlaySize == 0) {
@@ -269,6 +272,10 @@ int hookNdsRetailArm9(
 			romOffset = ce9->overlaysSrc;
 		}
 		ce9->romLocation -= romOffset;
+	} else if (dataToPreloadFound(ndsHeader)) {
+		ce9->romLocation -= dataToPreloadAddr;
+		ce9->romPartSrc = dataToPreloadAddr;
+		ce9->romPartSize = dataToPreloadSize;
 	}
 
 	if (strncmp(romTid, "IPK", 3) == 0 || strncmp(romTid, "IPG", 3) == 0) {

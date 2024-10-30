@@ -13,6 +13,7 @@ endif
 #---------------------------------------------------------------------------------
 OUTPUT_DIR		:=	../nitrofiles
 
+FILESMEP		:= files-mep
 FILESDSI		:= files-dsi
 FILES3DS		:= files-3ds
 
@@ -21,7 +22,10 @@ FILES3DS		:= files-3ds
 #---------------------------------------------------------------------------------
 .PHONY:
 
-all:	$(OUTPUT_DIR)/preLoadSettingsDSi.pck $(OUTPUT_DIR)/preLoadSettings3DS.pck
+all:	$(OUTPUT_DIR)/preLoadSettingsMEP.pck $(OUTPUT_DIR)/preLoadSettingsDSi.pck $(OUTPUT_DIR)/preLoadSettings3DS.pck
+
+$(OUTPUT_DIR)/preLoadSettingsMEP.pck: $(FILESMEP)
+	$(PYTHON) pack.py $^ -o $@
 
 $(OUTPUT_DIR)/preLoadSettingsDSi.pck: $(FILESDSI)
 	$(PYTHON) pack.py $^ -o $@

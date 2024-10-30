@@ -115,7 +115,7 @@ void continueCardReadDmaArm9() {
 
 			currentLen = (len > dmaReadLen) ? dmaReadLen : len;
 
-			if (ce9->valueBits & ROMinRAM) {
+			if ((ce9->valueBits & ROMinRAM) || (ce9->romPartSize > 0 && src >= ce9->romPartSrc && src < ce9->romPartSrc+ce9->romPartSize)) {
 				cardReadRAM(dst, src, currentLen);
 			} else {
 				cardReadNormal(dst, src, currentLen);
@@ -167,7 +167,7 @@ void cardSetDma(u32 * params) {
 
 	currentLen = (len > dmaReadLen) ? dmaReadLen : len;
 
-	if (ce9->valueBits & ROMinRAM) {
+	if ((ce9->valueBits & ROMinRAM) || (ce9->romPartSize > 0 && src >= ce9->romPartSrc && src < ce9->romPartSrc+ce9->romPartSize)) {
 		cardReadRAM(dst, src, currentLen);
 	} else {
 		cardReadNormal(dst, src, currentLen);

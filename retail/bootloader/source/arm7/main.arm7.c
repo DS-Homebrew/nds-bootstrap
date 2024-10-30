@@ -95,6 +95,8 @@ extern u32 romSize;
 extern u32 initDisc;
 extern u32 saveFileCluster;
 extern u32 saveSize;
+extern u32 dataToPreloadAddr;
+extern u32 dataToPreloadSize;
 extern u32 apPatchFileCluster;
 extern u32 apPatchSize;
 extern u32 cheatFileCluster;
@@ -933,6 +935,30 @@ static void loadIOverlaysintoRAM(const tDSiHeader* dsiHeader, aFile* file, const
 	}
 }
 
+bool dataToPreloadFound(const tNDSHeader* ndsHeader) {
+	if (!expansionPakFound) {
+		return false;
+	}
+
+	return (dataToPreloadSize > 0 && dataToPreloadSize <= romSizeLimit);
+}
+
+static void loadROMPartintoRAM(const tNDSHeader* ndsHeader, aFile* file) {
+	if (!dataToPreloadFound(ndsHeader)) {
+		return;
+	}
+
+	if ((_io_dldi_features & FEATURE_SLOT_GBA) && s2FlashcardId != 0) {
+		fileReadWithBuffer(romLocation, file, dataToPreloadAddr, dataToPreloadSize);
+	} else {
+		fileRead((char*)romLocation, file, dataToPreloadAddr, dataToPreloadSize);
+	}
+
+	dbg_printf("Part of ROM pre-loaded into RAM at ");
+	dbg_hexa(romLocation);
+	dbg_printf("\n\n");
+}
+
 static void loadROMintoRAM(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, aFile* file, const bool usesCloneboot) {
 	u32 romOffset = 0;
 	s32 romSizeEdit = baseRomSize;
@@ -1593,6 +1619,7 @@ int arm7_main(void) {
 		}
 	} else {
 		loadOverlaysintoFile(ndsHeader, moduleParams, &romFile);
+		loadROMPartintoRAM(ndsHeader, &romFile);
 	}
 
 	aFile bootNds;

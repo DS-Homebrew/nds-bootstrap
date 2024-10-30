@@ -115,6 +115,71 @@ void addTwlDevice(const char letter, u8 flags, u8 accessRights, const char* name
 extern std::string ReplaceAll(std::string str, const std::string& from, const std::string& to);
 extern bool extention(const std::string& filename, const char* ext);
 
+static void loadPreLoadSettings(configuration* conf, const char* pckPath, const char* romTid, const u16 headerCRC) {
+	FILE *file = fopen(pckPath, "rb");
+	if (!file) {
+		return;
+	}
+
+	char buf[5] = {0};
+		fread(buf, 1, 4, file);
+	if (strcmp(buf, ".PCK") == 0) {
+
+		u32 fileCount;
+		fread(&fileCount, 1, sizeof(fileCount), file);
+
+		u32 offset = 0, size = 0;
+
+		// Try binary search for the game
+		int left = 0;
+		int right = fileCount;
+
+		while (left <= right) {
+			int mid = left + ((right - left) / 2);
+			fseek(file, 16 + mid * 16, SEEK_SET);
+			fread(buf, 1, 4, file);
+			int cmp = strcmp(buf, romTid);
+			if (cmp == 0) { // TID matches, check CRC
+				u16 crc;
+				fread(&crc, 1, sizeof(crc), file);
+
+				if (crc == headerCRC) { // CRC matches
+					fread(&offset, 1, sizeof(offset), file);
+					fread(&size, 1, sizeof(size), file);
+					break;
+				} else if (crc < headerCRC) {
+					left = mid + 1;
+				} else {
+					right = mid - 1;
+				}
+			} else if (cmp < 0) {
+				left = mid + 1;
+			} else {
+				right = mid - 1;
+			}
+		}
+
+		if (offset > 0) {
+			if (size > 0xC) {
+				size = 0xC;
+			}
+			fseek(file, offset, SEEK_SET);
+			u32 *buffer = new u32[size/4];
+			fread(buffer, 1, size, file);
+
+			/* for (u32 i = 0; i < size/8; i++) {
+				conf->dataToPreloadAddr[i] = buffer[0+(i*2)];
+				conf->dataToPreloadSize[i] = buffer[1+(i*2)];
+			} */
+			conf->dataToPreloadAddr = buffer[0];
+			conf->dataToPreloadSize = buffer[1];
+			conf->dataToPreloadFrame = (size == 0xC) ? buffer[2] : 0;
+			delete[] buffer;
+		}
+	}
+	fclose(file);
+}
+
 static void createRamDumpBin(configuration* conf) {
 	int ramDumpSize;
 	if (dsiFeatures() && !conf->b4dsMode)
@@ -1420,66 +1485,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			}
 			fclose(cebin);
 
-			FILE *file = fopen(conf->consoleModel > 0 ? "nitro:/preLoadSettings3DS.pck" : "nitro:/preLoadSettingsDSi.pck", "rb");
-			if (file) {
-				char buf[5] = {0};
-					fread(buf, 1, 4, file);
-				if (strcmp(buf, ".PCK") == 0) {
-
-					u32 fileCount;
-					fread(&fileCount, 1, sizeof(fileCount), file);
-
-					u32 offset = 0, size = 0;
-
-					// Try binary search for the game
-					int left = 0;
-					int right = fileCount;
-
-					while (left <= right) {
-						int mid = left + ((right - left) / 2);
-						fseek(file, 16 + mid * 16, SEEK_SET);
-						fread(buf, 1, 4, file);
-						int cmp = strcmp(buf, romTid);
-						if (cmp == 0) { // TID matches, check CRC
-							u16 crc;
-							fread(&crc, 1, sizeof(crc), file);
-
-							if (crc == headerCRC) { // CRC matches
-								fread(&offset, 1, sizeof(offset), file);
-								fread(&size, 1, sizeof(size), file);
-								break;
-							} else if (crc < headerCRC) {
-								left = mid + 1;
-							} else {
-								right = mid - 1;
-							}
-						} else if (cmp < 0) {
-							left = mid + 1;
-						} else {
-							right = mid - 1;
-						}
-					}
-
-					if (offset > 0) {
-						if (size > 0xC) {
-							size = 0xC;
-						}
-						fseek(file, offset, SEEK_SET);
-						u32 *buffer = new u32[size/4];
-						fread(buffer, 1, size, file);
-
-						/* for (u32 i = 0; i < size/8; i++) {
-							conf->dataToPreloadAddr[i] = buffer[0+(i*2)];
-							conf->dataToPreloadSize[i] = buffer[1+(i*2)];
-						} */
-						conf->dataToPreloadAddr = buffer[0];
-						conf->dataToPreloadSize = buffer[1];
-						conf->dataToPreloadFrame = (size == 0xC) ? buffer[2] : 0;
-						delete[] buffer;
-					}
-				}
-				fclose(file);
-			}
+			loadPreLoadSettings(conf, conf->consoleModel > 0 ? "nitro:/preLoadSettings3DS.pck" : "nitro:/preLoadSettingsDSi.pck", romTid, headerCRC);
 			if (conf->dataToPreloadAddr == 0) {
 				// Set NitroFS pre-load, in case if full ROM pre-load fails
 				conf->dataToPreloadAddr = ndsArm7BinOffset+ndsArm7Size;
@@ -1721,7 +1727,6 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		} else {
 			toncset16((u16*)IMAGES_LOCATION, 0, 256*192);
 		}
-
 	} else {
 		if (accessControl & BIT(4)) {
 			uint8_t *target = new uint8_t[0x1000];
@@ -1832,6 +1837,14 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		}
 
 		b4dsDebugRam = (conf->b4dsMode == 2 || (*(vu32*)(0x02800000) == 0x314D454D && *(vu32*)(0x02C00000) == 0x324D454D));
+
+		loadPreLoadSettings(conf, "nitro:/preLoadSettingsMEP.pck", romTid, headerCRC);
+		if (conf->dataToPreloadAddr == 0) {
+			// Set NitroFS pre-load, in case if full ROM pre-load fails
+			conf->dataToPreloadAddr = ndsArm7BinOffset+ndsArm7Size;
+			conf->dataToPreloadSize = ((internalRomSize == 0 || internalRomSize > conf->romSize) ? conf->romSize : internalRomSize)-conf->dataToPreloadAddr;
+			conf->dataToPreloadFrame = 0;
+		}
 
 		// Load in-game menu ce9 binary
 		cebin = fopen(b4dsDebugRam ? "nitro:/cardengine_arm9_igm_extmem.lz77" : "nitro:/cardengine_arm9_igm.lz77", "rb");
