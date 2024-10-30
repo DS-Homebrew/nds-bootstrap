@@ -123,7 +123,7 @@ static u32 musicFileSize = 0x0;
 #endif // NODSIWARE
 
 bool cardReadInProgress = false;
-static int cardReadCount = 0;
+// static int cardReadCount = 0;
 
 extern void setExceptionHandler2();
 
@@ -865,7 +865,7 @@ void cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 		exmemcnt = REG_EXMEMCNT;
 	}*/
 
-	cardReadCount++;
+	// cardReadCount++;
 
 	#ifdef GSDD
 	u32 src = src0;
