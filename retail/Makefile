@@ -106,7 +106,7 @@ arm9/$(TARGET).elf:	bootloader bootloader1 bootloader2 bootloaderi bootloaderi1 
 
 #---------------------------------------------------------------------------------		
 libnds32:
-	@$(MAKE) -C libnds32
+	@$(MAKE) -C libnds32 release
 
 #---------------------------------------------------------------------------------		
 bootloader: cardengine_arm7 cardengine_arm7_music cardengine_arm9_igm cardengine_arm9_igm_extmem cardengine_arm9 cardengine_arm9_32 cardengine_arm9_start cardengine_arm9_start_foto cardengine_arm9_alt cardengine_arm9_alt_gsdd cardengine_arm9_alt2 cardengine_arm9_alt3 cardengine_arm9_extmem cardengine_arm9_extmem_gsdd cardengine_arm9_extmem_start cardengine_arm9_extmem_foto
