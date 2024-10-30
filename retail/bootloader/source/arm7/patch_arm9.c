@@ -2431,7 +2431,7 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 		   || strncmp(romTid, "DHS", 3) == 0
 		   || (strncmp(romTid, "DSY", 3) == 0 && extendedMemory)
 		)	&& arm7mbk == 0x080037C0 && donorFileCluster != CLUSTER_FREE) {
-			u32 startOffset = (u32)ndsHeader->arm9executeAddress;
+			const u32 startOffset = (u32)ndsHeader->arm9executeAddress;
 			if (moduleParams->sdk_version > 0x5050000) {
 				*(u32*)(startOffset+0x38) = 0xE1A00000; // nop
 				*(u32*)(startOffset+0x19C) = 0xE1A00000; // nop
@@ -2440,6 +2440,15 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 			}
 
 			patchTwlSleepMode(ndsHeader, moduleParams);
+		} else if ((accessControl & BIT(4)) && arm7mbk != 0x080037C0 && moduleParams->sdk_version > 0x5050000) {
+			unpatchedFunctions* unpatchedFuncs = (unpatchedFunctions*)UNPATCHED_FUNCTION_LOCATION;
+			u32 startOffset = (u32)ndsHeader->arm9executeAddress;
+			startOffset += 0x38;
+
+			unpatchedFuncs->exeCodeOffset = (u32*)startOffset;
+			unpatchedFuncs->exeCode = *(u32*)startOffset;
+
+			*(u32*)startOffset = 0xE1A00000; // nop
 		}
 	}
 
@@ -2523,7 +2532,7 @@ void patchCardNdsArm9Cont(cardengineArm9* ce9, const tNDSHeader* ndsHeader, cons
 	extern u32 arm7mbk;
 	extern u32 donorFileCluster;
 	if (arm7newUnitCode == 0 && arm7mbk == 0x080037C0 && donorFileCluster != CLUSTER_FREE) {
-		u32 startOffset = (u32)ndsHeader->arm9executeAddress;
+		const u32 startOffset = (u32)ndsHeader->arm9executeAddress;
 		if (moduleParams->sdk_version > 0x5050000) {
 			setB(startOffset+0x6C, startOffset+0xF0);
 		} else {
