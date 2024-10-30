@@ -8947,9 +8947,11 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			offset[i] = 0xE1A00000; // nop
 		}*/
 	}
+#endif
 
+#ifdef LOADERTYPE1
 	// Dekisugi Tingle Pack (Japan)
-	else if (strcmp(romTid, "KCPJ") == 0) {
+	if (strcmp(romTid, "KCPJ") == 0) {
 		*(u32*)0x0200506C = 0xE1A00000; // nop
 		*(u32*)0x020050C0 = 0xE1A00000; // nop
 		*(u32*)0x020050FC = 0xE1A00000; // nop
@@ -10032,11 +10034,9 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u16*)0x0203B490 = 0x2003; // movs r0, #3
 		*(u16*)0x0203B492 = 0x4770; // bx lr
 	}
-#endif
 
-#ifdef LOADERTYPE1
 	// GO Series: Earth Saver (USA)
-	if (strcmp(romTid, "KB8E") == 0) {
+	else if (strcmp(romTid, "KB8E") == 0) {
 		*(u32*)0x02005234 = 0xE1A00000; // nop
 		*(u32*)0x02005530 = 0xE1A00000; // nop
 		//if (!twlFontFound) {

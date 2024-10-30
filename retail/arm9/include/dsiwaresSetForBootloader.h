@@ -160,6 +160,8 @@ static const char dsiWareForBootloader1[][4] = {
 	"K6B", // Deep Sea Creatures
 	"K35", // Defense of the Middle Kingdom
 	"KWT", // GO Series: Defense Wars
+};
+static const char dsiWareForBootloader2[][4] = {
 	"KCP", // Dekisugi Tingle Pack
 	"KN2", // Devil Band: Rock the Underworld
 	"KAV", // Art Style: DIGIDRIVE
@@ -175,8 +177,6 @@ static const char dsiWareForBootloader1[][4] = {
 	"KIF", // Drift Street International
 	"KDA", // G.G Series: Drilling Attack!!
 	"B88", // DS WiFi Settings
-};
-static const char dsiWareForBootloader2[][4] = {
 	"KB8", // GO Series: Earth Saver
 	"KB9", // Earth Saver: Inseki Bakuha Dai Sakuse
 	"K2E", // Easter Eggztravaganza

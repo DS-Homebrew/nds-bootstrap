@@ -5287,9 +5287,11 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			tonccpy((u32*)((romTid[3] != 'J') ? 0x0204AAEC : 0x0204A8E8), dsiSaveGetResultCode, 0xC);
 		}
 	}
+#endif
 
+#ifdef LOADERTYPE1
 	// Dekisugi Tingle Pack (Japan)
-	else if (strcmp(romTid, "KCPJ") == 0 && saveOnFlashcard) {
+	if (strcmp(romTid, "KCPJ") == 0 && saveOnFlashcard) {
 		// *(u32*)0x020255F4 = 0xE3A00000; // mov r0, #0
 		// *(u32*)0x020255F8 = 0xE12FFF1E; // bx lr
 		setBL(0x02025604, (u32)dsiSaveCreate);
@@ -5797,11 +5799,9 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u16*)0x020051F4 = branchCode[0];
 		*(u16*)0x020051F6 = branchCode[1];
 	}
-#endif
 
-#ifdef LOADERTYPE1
 	// GO Series: Earth Saver (USA)
-	if (strcmp(romTid, "KB8E") == 0) {
+	else if (strcmp(romTid, "KB8E") == 0) {
 		if (!twlFontFound) {
 			*(u32*)0x0200A3D8 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 			*(u32*)0x0200B800 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
