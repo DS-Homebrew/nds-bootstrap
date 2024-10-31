@@ -75,6 +75,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	const u32 heapEndExceed = extendedMemory ? heapEnd+0x800000 : heapEndRetail+0xC00000; // extendedMemory ? #0x2FB0000 (mirrors to 0x27B0000 on debug DS units) : #0x2FE0000 (mirrors to 0x23E0000 on retail DS units)
 	const u32 heapEndMaxForRetail = maxHeapOpen ? ((_io_dldi_size == 0x0F) ? 0x023F6000 : (_io_dldi_size == 0x0E) ? 0x023FA000 : 0x023FC000) : heapEnd;
 	const u32 heapEndMaxForRetail2 = maxHeapOpen ? ((_io_dldi_size == 0x0F) ? heapEndMaxForRetail : 0x023FF000) : heapEnd;
+	const u32 heapEndMaxForRetail32 = maxHeapOpen ? 0x023FF000 : heapEnd;
 	const u32 heapEndMaxForRetailMus = maxHeapOpen ? heapEndMaxForRetail-0x4000 : heapEnd;
 	const u32 heapEnd_512KBFreeForDebug = extendedMemory ? 0x02740000 : heapEnd;
 	// const u32 heapEnd_512KBFreeForDebugAlt = extendedMemory ? 0x02700000 : heapEnd;
@@ -18672,7 +18673,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	if (strcmp(romTid, "K6TE") == 0) {
 		*(u32*)0x02011FAC = 0xE1A00000; // nop
 		*(u32*)0x02015790 = 0xE1A00000; // nop
-		patchInitDSiWare(0x0201ABF0, heapEndMaxForRetail);
+		patchInitDSiWare(0x0201ABF0, heapEndMaxForRetail32);
 		*(u32*)0x0201AF7C = *(u32*)0x02004FE8;
 		patchUserSettingsReadDSiWare(0x0201C1F4);
 		*(u32*)0x02020B68 = 0xE1A00000; // nop
@@ -19518,7 +19519,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02007FAC = 0xE8BD8078; // LDMFD SP!, {R3-R6,PC}
 		// tonccpy((u32*)0x02009C88, dsiSaveGetResultCode, 0xC);
 		*(u32*)0x0200CC88 = 0xE1A00000; // nop
-		patchInitDSiWare(0x0202D950, heapEndMaxForRetail);
+		patchInitDSiWare(0x0202D950, heapEndMaxForRetail32);
 		*(u32*)0x0202DCCC -= 0x64000;
 		patchUserSettingsReadDSiWare(0x0202EE48);
 		*(u32*)0x0202EE70 = wirelessReturnCodeArm;
@@ -19818,7 +19819,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02013144 = 0xE1A00000; // nop
 		*(u32*)0x02013158 = 0xE1A00000; // nop
 		*(u32*)0x02016F98 = 0xE1A00000; // nop
-		patchInitDSiWare(0x0201F054, heapEndMaxForRetail);
+		patchInitDSiWare(0x0201F054, heapEndMaxForRetail32);
 		*(u32*)0x0201F3E0 = *(u32*)0x02004FE8;
 		patchUserSettingsReadDSiWare(0x02020614);
 		*(u32*)0x02025884 = 0xE1A00000; // nop
@@ -19866,7 +19867,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020132AC = 0xE1A00000; // nop
 		*(u32*)0x020132C0 = 0xE1A00000; // nop
 		*(u32*)0x0201718C = 0xE1A00000; // nop
-		patchInitDSiWare(0x0201F570, heapEndMaxForRetail);
+		patchInitDSiWare(0x0201F570, heapEndMaxForRetail32);
 		*(u32*)0x0201F8E0 = *(u32*)0x02004FD0;
 		patchUserSettingsReadDSiWare(0x02020B34);
 		*(u32*)0x02026080 = 0xE1A00000; // nop
@@ -24834,7 +24835,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	else if (strcmp(romTid, "KZUE") == 0 || strcmp(romTid, "KZVE") == 0 || strcmp(romTid, "KZ7E") == 0 || strcmp(romTid, "KZ8E") == 0) {
 		*(u32*)0x02006F60 = 0xE1A00000; // nop
 		*(u32*)0x0200A80C = 0xE1A00000; // nop
-		patchInitDSiWare(0x0200FE40, heapEndMaxForRetail);
+		patchInitDSiWare(0x0200FE40, heapEndMaxForRetail32);
 		*(u32*)0x020101CC = *(u32*)0x02004FE8;
 		patchUserSettingsReadDSiWare(0x02011470);
 		setBL(0x0204D500, (u32)dsiSaveOpen);

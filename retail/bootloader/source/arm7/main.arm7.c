@@ -1587,8 +1587,23 @@ int arm7_main(void) {
 		ce9DldiOffset = (extendedMemory ? 0x027D8000 : maxHeapOpen ? 0x023F6000 : (laterSdk ? 0x023D8000 : 0x023F7000));
 	}
 	u32 ce9DldiItcm = 0;
-	if (maxHeapOpen && (strncmp(romTid, "KAT", 3) == 0 || strncmp(romTid, "KNP", 3) == 0) && _io_dldi_size < 0x0F) {
-		ce9DldiItcm = 0x01FFC000;
+	if (maxHeapOpen) {
+		if (
+		   strncmp(romTid, "K6T", 3) == 0 // Orion's Odyssey
+		|| strncmp(romTid, "KPS", 3) == 0 // Phantasy Star 0 Mini
+		|| strncmp(romTid, "KHR", 3) == 0 // Picture Perfect: Pocket Stylist
+		|| strncmp(romTid, "KZU", 3) == 0 // Tales to Enjoy!: Little Red Riding Hood
+		|| strncmp(romTid, "KZV", 3) == 0 // Tales to Enjoy!: Puss in Boots
+		|| strncmp(romTid, "KZ7", 3) == 0 // Tales to Enjoy!: The Three Little Pigs
+		|| strncmp(romTid, "KZ8", 3) == 0 // Tales to Enjoy!: The Ugly Duckling
+		) {
+			ce9DldiItcm = 0x01FF8400; // Set <= 32KB DLDI location at ITCM
+		} else if ( _io_dldi_size < 0x0F && (
+		   strncmp(romTid, "KAT", 3) == 0 // AiRace: Tunnel
+		|| strncmp(romTid, "KNP", 3) == 0 // Need for Speed: Nitro-X
+		)) {
+			ce9DldiItcm = 0x01FFC000; // Set <= 16KB DLDI location at ITCM
+		}
 	}
 	if (!dldiPatchBinary((data_t*)ce9Location, 0x3800, (data_t*)ce9DldiOffset, (data_t*)ce9DldiItcm)) {
 		dbg_printf("ce9 DLDI patch failed\n");
