@@ -1586,7 +1586,11 @@ int arm7_main(void) {
 	} else if (_io_dldi_size == 0x0F) {
 		ce9DldiOffset = (extendedMemory ? 0x027D8000 : maxHeapOpen ? 0x023F6000 : (laterSdk ? 0x023D8000 : 0x023F7000));
 	}
-	if (!dldiPatchBinary((data_t*)ce9Location, 0x3800, (data_t*)ce9DldiOffset)) {
+	u32 ce9DldiItcm = 0;
+	if (maxHeapOpen && (strncmp(romTid, "KAT", 3) == 0 || strncmp(romTid, "KNP", 3) == 0) && _io_dldi_size < 0x0F) {
+		ce9DldiItcm = 0x01FFC000;
+	}
+	if (!dldiPatchBinary((data_t*)ce9Location, 0x3800, (data_t*)ce9DldiOffset, (data_t*)ce9DldiItcm)) {
 		dbg_printf("ce9 DLDI patch failed\n");
 		errorOutput();
 	}

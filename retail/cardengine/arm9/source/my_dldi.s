@@ -23,6 +23,8 @@
 	.align	4
 	.arm
 	.global __mydldi_start
+	.global dldiDriverSize
+	.global dldiOffset
 	.global __myio_dldi
 @---------------------------------------------------------------------------------
 .equ FEATURE_MEDIUM_CANREAD,		0x00000001
@@ -37,6 +39,7 @@ __mydldi_start:
 	.word	0xBF8DA5ED		@ Magic number to identify this region
 	.asciz	" Chishm"		@ Identifying Magic string (8 bytes with null terminator)
 	.byte	0x01			@ Version number
+dldiDriverSize:
 	.byte	0x0f		@ 32KiB	@ Log [base-2] of the size of this driver in bytes.
 	.byte	0x00			@ Sections to fix
 	.byte 	0x0f		@ 32KiB	@ Log [base-2] of the allocated space in bytes.
@@ -49,6 +52,7 @@ __mydldi_start:
 @---------------------------------------------------------------------------------
 @ Offsets to important sections within the data	-- 32 bytes
 	.align	6
+dldiOffset:
 	.word   __mydldi_start		@ data start
 	.word   _dldi_end		@ data end
 	.word	0x00000000		@ Interworking glue start	-- Needs address fixing

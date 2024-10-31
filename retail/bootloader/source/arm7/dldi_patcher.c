@@ -97,7 +97,7 @@ static const data_t dldiMagicString[] = "\xED\xA5\x8D\xBF Chishm";	// Normal DLD
 
 extern const u32 __myio_dldi;
 
-bool dldiPatchBinary (data_t *binDataSrc, u32 binSize, data_t *binData) {
+bool dldiPatchBinary (data_t *binDataSrc, u32 binSize, data_t *binData, data_t* binDataItcm) {
 
 	addr_t memOffset;			// Offset of DLDI after the file is loaded into memory
 	addr_t patchOffset;			// Position of patch destination in the file
@@ -155,6 +155,10 @@ bool dldiPatchBinary (data_t *binDataSrc, u32 binSize, data_t *binData) {
 	}
 	ddmemOffset = readAddr (pDH, DO_text_start);
 	relocationOffset = memOffset - ddmemOffset;
+	if (binDataItcm) {
+		relocationOffset -= (u32)binData;
+		relocationOffset += (u32)binDataItcm;
+	}
 
 	ddmemStart = readAddr (pDH, DO_text_start);
 	ddmemSize = (1 << pDH[DO_driverSize]);
@@ -183,7 +187,7 @@ bool dldiPatchBinary (data_t *binDataSrc, u32 binSize, data_t *binData) {
 	writeAddr (pAH, DO_shutdown, readAddr (pAH, DO_shutdown) + relocationOffset);
 
 	// Put the correct DLDI magic string back into the DLDI header
-	tonccpy (pAH, dldiMagicString, sizeof (dldiMagicString));
+	// tonccpy (pAH, dldiMagicString, sizeof (dldiMagicString));
 
 	if (pDH[DO_fixSections] & FIX_ALL) { 
 		// Search through and fix pointers within the data section of the file
