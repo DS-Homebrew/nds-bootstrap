@@ -30,6 +30,7 @@
 #define b_bypassExceptionHandler BIT(16)
 #define b_fntFatCached BIT(17)
 #define b_waitForPreloadToFinish BIT(18)
+#define b_resetOnFirstException BIT(19)
 
 
 static const int MAX_HANDLER_LEN = 50;
@@ -507,6 +508,9 @@ int hookNdsRetailArm9(
 		}
 		if (strncmp(romTid, "UBR", 3) == 0 || iUncompressedSize > 0x26C000) {
 			ce9->valueBits |= b_slowSoftReset;
+		}
+		if (consoleModel == 0 && strncmp(romTid, "YPT", 3) == 0) { // Puppy Palace
+			ce9->valueBits |= b_resetOnFirstException;
 		}
 
 		if (ndsHeader->unitCode == 0 || !dsiMode) {
