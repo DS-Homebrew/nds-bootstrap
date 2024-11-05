@@ -243,7 +243,7 @@ int hookNdsRetailArm9(
 	if (isSdk5(moduleParams)) {
 		ce9->valueBits |= b_isSdk5;
 	}
-	if (strncmp(romTid, "CLJ", 3) == 0) {
+	if (strncmp(romTid, "CLJ", 3) == 0 || strncmp(romTid, "IPK", 3) == 0 || strncmp(romTid, "IPG", 3) == 0) {
 		ce9->valueBits |= b_cacheFlushFlag;
 	}
 	if (patchOffsetCache.resetMb) {
