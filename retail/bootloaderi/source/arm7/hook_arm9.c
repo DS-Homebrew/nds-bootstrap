@@ -509,7 +509,7 @@ int hookNdsRetailArm9(
 		if (strncmp(romTid, "UBR", 3) == 0 || iUncompressedSize > 0x26C000) {
 			ce9->valueBits |= b_slowSoftReset;
 		}
-		if (consoleModel == 0 && strncmp(romTid, "YPT", 3) == 0) { // Puppy Palace
+		if (dataToPreloadFound(ndsHeader) && (strncmp(romTid, "YPT", 3) == 0)) { // Puppy Palace
 			ce9->valueBits |= b_resetOnFirstException;
 		}
 
