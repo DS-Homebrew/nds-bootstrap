@@ -10969,44 +10969,50 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Petz Catz: Family (USA)
-	else if (strcmp(romTid, "KP5E") == 0 && saveOnFlashcard) {
-		const u32 dsiSaveCreateT = 0x020A721C;
-		*(u16*)dsiSaveCreateT = 0x4778; // bx pc
-		tonccpy((u32*)(dsiSaveCreateT + 4), dsiSaveCreate, 0xC);
+	else if (strcmp(romTid, "KP5E") == 0) {
+		if (!twlFontFound || gameOnFlashcard) {
+			*(u16*)0x02019E12 = nopT;
+			doubleNopT(0x02019E14); // Disable NFTR loading from TWLNAND
+		}
+		if (saveOnFlashcard) {
+			const u32 dsiSaveCreateT = 0x020A721C;
+			*(u16*)dsiSaveCreateT = 0x4778; // bx pc
+			tonccpy((u32*)(dsiSaveCreateT + 4), dsiSaveCreate, 0xC);
 
-		const u32 dsiSaveGetInfoT = 0x020A722C;
-		*(u16*)dsiSaveGetInfoT = 0x4778; // bx pc
-		tonccpy((u32*)(dsiSaveGetInfoT + 4), dsiSaveGetInfo, 0xC);
+			const u32 dsiSaveGetInfoT = 0x020A722C;
+			*(u16*)dsiSaveGetInfoT = 0x4778; // bx pc
+			tonccpy((u32*)(dsiSaveGetInfoT + 4), dsiSaveGetInfo, 0xC);
 
-		const u32 dsiSaveOpenT = 0x020A723C;
-		*(u16*)dsiSaveOpenT = 0x4778; // bx pc
-		tonccpy((u32*)(dsiSaveOpenT + 4), dsiSaveOpen, 0xC);
+			const u32 dsiSaveOpenT = 0x020A723C;
+			*(u16*)dsiSaveOpenT = 0x4778; // bx pc
+			tonccpy((u32*)(dsiSaveOpenT + 4), dsiSaveOpen, 0xC);
 
-		const u32 dsiSaveCloseT = 0x020A724C;
-		*(u16*)dsiSaveCloseT = 0x4778; // bx pc
-		tonccpy((u32*)(dsiSaveCloseT + 4), dsiSaveClose, 0xC);
+			const u32 dsiSaveCloseT = 0x020A724C;
+			*(u16*)dsiSaveCloseT = 0x4778; // bx pc
+			tonccpy((u32*)(dsiSaveCloseT + 4), dsiSaveClose, 0xC);
 
-		const u32 dsiSaveSeekT = 0x020A725C;
-		*(u16*)dsiSaveSeekT = 0x4778; // bx pc
-		tonccpy((u32*)(dsiSaveSeekT + 4), dsiSaveSeek, 0xC);
+			const u32 dsiSaveSeekT = 0x020A725C;
+			*(u16*)dsiSaveSeekT = 0x4778; // bx pc
+			tonccpy((u32*)(dsiSaveSeekT + 4), dsiSaveSeek, 0xC);
 
-		const u32 dsiSaveReadT = 0x020A726C;
-		*(u16*)dsiSaveReadT = 0x4778; // bx pc
-		tonccpy((u32*)(dsiSaveReadT + 4), dsiSaveRead, 0xC);
+			const u32 dsiSaveReadT = 0x020A726C;
+			*(u16*)dsiSaveReadT = 0x4778; // bx pc
+			tonccpy((u32*)(dsiSaveReadT + 4), dsiSaveRead, 0xC);
 
-		const u32 dsiSaveWriteT = 0x020A727C;
-		*(u16*)dsiSaveWriteT = 0x4778; // bx pc
-		tonccpy((u32*)(dsiSaveWriteT + 4), dsiSaveWrite, 0xC);
+			const u32 dsiSaveWriteT = 0x020A727C;
+			*(u16*)dsiSaveWriteT = 0x4778; // bx pc
+			tonccpy((u32*)(dsiSaveWriteT + 4), dsiSaveWrite, 0xC);
 
-		setBLThumb(0x0203810A, dsiSaveOpenT);
-		setBLThumb(0x02038152, dsiSaveCloseT);
-		setBLThumb(0x02038176, dsiSaveGetInfoT);
-		setBLThumb(0x0203819C, dsiSaveCreateT);
-		setBLThumb(0x020381BE, dsiSaveSeekT);
-		setBLThumb(0x020381D4, dsiSaveReadT);
-		setBLThumb(0x020381F6, dsiSaveSeekT);
-		setBLThumb(0x0203820C, dsiSaveWriteT);
-		tonccpy((u32*)0x020A67EC, dsiSaveGetResultCode, 0xC);
+			setBLThumb(0x0203810A, dsiSaveOpenT);
+			setBLThumb(0x02038152, dsiSaveCloseT);
+			setBLThumb(0x02038176, dsiSaveGetInfoT);
+			setBLThumb(0x0203819C, dsiSaveCreateT);
+			setBLThumb(0x020381BE, dsiSaveSeekT);
+			setBLThumb(0x020381D4, dsiSaveReadT);
+			setBLThumb(0x020381F6, dsiSaveSeekT);
+			setBLThumb(0x0203820C, dsiSaveWriteT);
+			tonccpy((u32*)0x020A67EC, dsiSaveGetResultCode, 0xC);
+		}
 	}
 
 	// Petz Cat: Superstar (Europe, Australia)

@@ -19446,8 +19446,8 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}*/
 
 	// Petz Catz: Family (USA)
-	// Unsure if it requires 8MB of RAM
-	/*else if (strcmp(romTid, "KP5E") == 0) {
+	// Crashes after title screen
+	/* else if (strcmp(romTid, "KP5E") == 0) {
 		const u32 dsiSaveCreateT = 0x020A721C;
 		*(u16*)dsiSaveCreateT = 0x4778; // bx pc
 		tonccpy((u32*)(dsiSaveCreateT + 4), dsiSaveCreate, 0xC);
@@ -19477,11 +19477,8 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		tonccpy((u32*)(dsiSaveWriteT + 4), dsiSaveWrite, 0xC);
 
 		doubleNopT(0x020191A8);
-		doubleNopT(0x0201A4E4);
-		doubleNopT(0x0201A4E8);
-		doubleNopT(0x0201A4FC);
-		doubleNopT(0x0201A50E);
-		doubleNopT(0x0201A526);
+		*(u16*)0x02019E12 = nopT;
+		doubleNopT(0x02019E14); // Disable NFTR loading from TWLNAND
 		doubleNopT(0x02031234);
 		setBLThumb(0x0203810A, dsiSaveOpenT);
 		setBLThumb(0x02038152, dsiSaveCloseT);
@@ -19491,43 +19488,13 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBLThumb(0x020381D4, dsiSaveReadT);
 		setBLThumb(0x020381F6, dsiSaveSeekT);
 		setBLThumb(0x0203820C, dsiSaveWriteT);
-		if (!extendedMemory) {
-			*(u32*)0x02089404 = 0xE3A00000; // mov r0, #0
-		}
 		*(u32*)0x020A5B04 = 0xE1A00000; // nop
 		tonccpy((u32*)0x020A67EC, dsiSaveGetResultCode, 0xC);
 		*(u32*)0x020A9B78 = 0xE1A00000; // nop
-		*(u32*)0x020B046C = 0xE1A00000; // nop
-		*(u32*)0x020B244C = 0xE1A00000; // nop
-		*(u32*)0x020B2450 = 0xE1A00000; // nop
-		*(u32*)0x020B245C = 0xE1A00000; // nop
-		*(u32*)0x020B25A0 = 0xE1A00000; // nop
-		patchHiHeapDSiWare(0x020B25FC, heapEnd); // mov r0, #0x23E0000
+		patchInitDSiWare(0x020B23C0, heapEnd);
 		*(u32*)0x020B2730 = 0x021CD200;
 		patchUserSettingsReadDSiWare(0x020B3A34);
-		if (!extendedMemory) {
-			*(u32*)0x020CEF70 = 0xE3A00000; // mov r0, #0
-			*(u32*)0x020CEF74 = 0xE12FFF1E; // bx lr
-			*(u32*)0x020CEFD4 = 0xE3A00000; // mov r0, #0
-			*(u32*)0x020CEFD8 = 0xE12FFF1E; // bx lr
-			*(u32*)0x020CF038 = 0xE3A00000; // mov r0, #0
-			*(u32*)0x020CF03C = 0xE12FFF1E; // bx lr
-			*(u32*)0x020CF09C = 0xE3A00000; // mov r0, #0
-			*(u32*)0x020CF0A0 = 0xE12FFF1E; // bx lr
-			*(u32*)0x020CF100 = 0xE3A00000; // mov r0, #0
-			*(u32*)0x020CF104 = 0xE12FFF1E; // bx lr
-			*(u32*)0x020CF164 = 0xE3A00000; // mov r0, #0
-			*(u32*)0x020CF168 = 0xE12FFF1E; // bx lr
-			*(u32*)0x020CF1C8 = 0xE3A00000; // mov r0, #0
-			*(u32*)0x020CF1CC = 0xE12FFF1E; // bx lr
-			*(u32*)0x020CF22C = 0xE3A00000; // mov r0, #0
-			*(u32*)0x020CF230 = 0xE12FFF1E; // bx lr
-			*(u32*)0x020CF290 = 0xE3A00000; // mov r0, #0
-			*(u32*)0x020CF294 = 0xE12FFF1E; // bx lr
-			*(u32*)0x020D0254 = 0xE3A00000; // mov r0, #0
-			*(u32*)0x020D0258 = 0xE12FFF1E; // bx lr
-		}
-	}*/
+	} */
 
 	// Phantasy Star 0 Mini (Japan)
 	// Save code does not work due to a weird crash caused by it
