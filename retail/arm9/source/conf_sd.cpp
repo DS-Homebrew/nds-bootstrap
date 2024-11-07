@@ -225,7 +225,7 @@ static void createApFixOverlayBin(configuration* conf) {
 		apFixOverlaysPath.append("/_nds/nds-bootstrap/apFixOverlays.bin");
 	}
 	else {
-		apFixOverlaysPath = "fat:/_nds/nds-bootstrap/ramDump.bin";
+		apFixOverlaysPath = "fat:/_nds/nds-bootstrap/apfixOverlays.bin";
 	}
 
 	if (!conf->isDSiWare && getFileSize(apFixOverlaysPath.c_str()) < 0xA00000) {
