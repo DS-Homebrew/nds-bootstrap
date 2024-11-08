@@ -13,6 +13,8 @@
 
 ce9:
 	.word	ce9
+dldiOffset:
+	.word	0x00000000
 patches_offset:
 	.word	patches
 thumbPatches_offset:

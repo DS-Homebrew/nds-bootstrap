@@ -156,6 +156,7 @@ static u32* hookInterruptHandler(const u32* start, size_t size) {
 
 int hookNdsRetailArm9(
 	cardengineArm9* ce9,
+	const u32 dldiOffset,
 	const tNDSHeader* ndsHeader,
 	const module_params_t* moduleParams,
 	u32 bootNdsCluster,
@@ -204,6 +205,7 @@ int hookNdsRetailArm9(
 	extern u16 s2FlashcardId;
 	extern bool maxHeapOpen;
 
+	ce9->dldiOffset             = dldiOffset;
 	ce9->bootNdsCluster         = bootNdsCluster;
 	ce9->fileCluster            = fileCluster;
 	ce9->saveCluster            = saveCluster;

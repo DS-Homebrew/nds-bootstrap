@@ -622,21 +622,13 @@ static void initialize(void) {
 		return;
 	}
 
-	extern u32 dldiOffset;
-	if (dldiOffset < 0x02000000 || dldiOffset >= 0x03000000) {
+	extern u32 dldiOffsetNew;
+	if (dldiOffsetNew < 0x02000000 || dldiOffsetNew >= 0x03000000) {
 		extern u8 dldiDriverSize;
-
-		u32 dldiOldOffset = 0x023FD000;
-		while (*(u32*)dldiOldOffset != 0xBF8DA5ED) {
-			dldiOldOffset -= 0x1000;
-			if (dldiOldOffset == 0x023F6000) dldiOldOffset = 0x023DC000;
-			else if (dldiOldOffset == 0x023D7000) break;
-		}
-
 		const u16 dldiFileSize = 1 << dldiDriverSize;
 
-		tonccpy((u32*)dldiOffset, (u32*)dldiOldOffset, dldiFileSize); // Move to ITCM
-		toncset((u32*)dldiOldOffset, 0, dldiFileSize);
+		tonccpy((u32*)dldiOffsetNew, (u32*)ce9->dldiOffset, dldiFileSize); // Move to ITCM
+		toncset((u32*)ce9->dldiOffset, 0, dldiFileSize);
 	}
 
 	if (!FAT_InitFiles(true)) {

@@ -24,7 +24,7 @@
 	.arm
 	.global __mydldi_start
 	.global dldiDriverSize
-	.global dldiOffset
+	.global dldiOffsetNew
 	.global __myio_dldi
 @---------------------------------------------------------------------------------
 .equ FEATURE_MEDIUM_CANREAD,		0x00000001
@@ -52,7 +52,7 @@ dldiDriverSize:
 @---------------------------------------------------------------------------------
 @ Offsets to important sections within the data	-- 32 bytes
 	.align	6
-dldiOffset:
+dldiOffsetNew:
 	.word   __mydldi_start		@ data start
 	.word   _dldi_end		@ data end
 	.word	0x00000000		@ Interworking glue start	-- Needs address fixing

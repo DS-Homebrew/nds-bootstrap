@@ -197,6 +197,7 @@ typedef struct cardengineArm9ThumbPatches {
 //
 typedef struct cardengineArm9 {
     u32 ce9;
+	u32 dldiOffset;
     cardengineArm9Patches* patches;
     cardengineArm9ThumbPatches* thumbPatches;
     u32 intr_ipc_orig_return;

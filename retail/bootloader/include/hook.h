@@ -43,6 +43,7 @@ int hookNdsRetailArm7(
 );
 int hookNdsRetailArm9(
 	cardengineArm9* ce9,
+	const u32 dldiOffset,
 	const tNDSHeader* ndsHeader,
 	const module_params_t* moduleParams,
 	u32 bootNdsCluster,

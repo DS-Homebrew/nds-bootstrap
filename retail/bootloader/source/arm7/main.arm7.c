@@ -1646,6 +1646,7 @@ int arm7_main(void) {
 
 	errorCode = hookNdsRetailArm9(
 		(cardengineArm9*)ce9Location,
+		ce9DldiOffset,
 		ndsHeader,
 		moduleParams,
 		bootNds.firstCluster,
