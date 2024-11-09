@@ -2049,7 +2049,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 		// Load ce9 binary
 		if (b4dsDebugRam) {
-			if (!startMultibootSrl && ((accessControl & BIT(4)) || (a7mbk6 == 0x080037C0 && ndsArm9Offset >= 0x02004000) || (strncmp(romTid, "AP2", 3) == 0))) {
+			if (!startMultibootSrl && ((accessControl & BIT(4)) || (a7mbk6 == 0x080037C0 && ndsArm9Offset >= 0x02004000))) {
 				if (foto) {
 					cebin = fopen("nitro:/cardengine_arm9_extmem_foto.lz77", "rb");
 				} else {
@@ -2060,7 +2060,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			} else {
 				cebin = fopen("nitro:/cardengine_arm9_extmem.lz77", "rb");
 			}
-		} else if (!startMultibootSrl && ((accessControl & BIT(4)) || (a7mbk6 == 0x080037C0 && ndsArm9Offset >= 0x02004000) || (strncmp(romTid, "AP2", 3) == 0))) {
+		} else if (!startMultibootSrl && ((accessControl & BIT(4)) || (a7mbk6 == 0x080037C0 && ndsArm9Offset >= 0x02004000) || strncmp(romTid, "AP2", 3) == 0 || strncmp(romTid, "VSO", 3) == 0)) {
 			if (foto) {
 				cebin = fopen("nitro:/cardengine_arm9_start_foto.lz77", "rb");
 			} else {
