@@ -543,7 +543,7 @@ int hookNdsRetailArm7(
 		aFile cheatFile;
 		getFileFromCluster(&cheatFile, cheatFileCluster, gameOnFlashcard);
 		aFile apPatchFile;
-		getFileFromCluster(&apPatchFile, apPatchFileCluster, gameOnFlashcard);
+		getFileFromCluster(&apPatchFile, apPatchFileCluster, bootstrapOnFlashcard);
 
 		tonccpy((u8*)cheatEngineOffset, cheatEngineBuffer, 0x400);
 

@@ -2109,7 +2109,7 @@ int arm7_main(void) {
 
 		if (useApPatch) {
 			aFile apPatchFile;
-			getFileFromCluster(&apPatchFile, apPatchFileCluster, gameOnFlashcard);
+			getFileFromCluster(&apPatchFile, apPatchFileCluster, bootstrapOnFlashcard);
 			dbg_printf("AP-fix found\n");
 			fileRead((char*)IPS_LOCATION, &apPatchFile, apPatchOffset, apPatchSize);
 			if (*(u8*)(IPS_LOCATION+apPatchSize-1) != 0xA9) {
