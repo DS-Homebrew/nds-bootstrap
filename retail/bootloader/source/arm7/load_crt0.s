@@ -47,6 +47,7 @@
 	.global wideCheatFileCluster
 	.global wideCheatSize
 	.global apPatchFileCluster
+	.global apPatchOffset
 	.global apPatchSize
 	.global apPatchIsCheat
 	.global cheatFileCluster
@@ -130,6 +131,8 @@ wideCheatFileCluster:
 wideCheatSize:
 	.word	0x00000000
 apPatchFileCluster:
+	.word	0x00000000
+apPatchOffset:
 	.word	0x00000000
 apPatchSize:
 	.word	0x00000000

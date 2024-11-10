@@ -276,6 +276,7 @@ int runNds(u32 cluster, u32 saveCluster, u32 donorTwlCluster, /* u32 gbaCluster,
 	loader->wideCheatFileCluster        = wideCheatCluster;
 	loader->wideCheatSize               = conf->wideCheatSize;
 	loader->apPatchFileCluster          = apPatchCluster;
+	loader->apPatchOffset               = conf->apPatchOffset;
 	loader->apPatchSize                 = conf->apPatchSize;
 	loader->cheatFileCluster            = cheatCluster;
 	loader->cheatSize                   = conf->cheatSize;

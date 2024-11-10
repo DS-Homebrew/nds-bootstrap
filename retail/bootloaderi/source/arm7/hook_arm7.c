@@ -137,6 +137,7 @@ int hookNdsRetailArm7(
 	u32 cheatFileCluster,
 	u32 cheatSize,
 	u32 apPatchFileCluster,
+	u32 apPatchOffset,
 	u32 apPatchSize,
 	u32 pageFileCluster,
 	u32 manualCluster,
@@ -547,7 +548,7 @@ int hookNdsRetailArm7(
 		tonccpy((u8*)cheatEngineOffset, cheatEngineBuffer, 0x400);
 
 		if (ndsHeader->unitCode < 3 && apPatchFile.firstCluster != CLUSTER_FREE && apPatchIsCheat) {
-			fileRead(cheatDataOffset, &apPatchFile, 0, apPatchSize);
+			fileRead(cheatDataOffset, &apPatchFile, apPatchOffset, apPatchSize);
 			cheatDataOffset += apPatchSize;
 			*(cheatDataOffset + 3) = 0xCF;
 			dbg_printf("AP-fix found and applied\n");

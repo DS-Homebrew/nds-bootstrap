@@ -33,6 +33,7 @@ typedef struct configuration {
 	// u32 gbaRomSize;
 	// u32 gbaSaveSize;
 	u32 wideCheatSize;
+	u32 apPatchOffset;
 	u32 apPatchSize;
 	u32 cheatSize;
 	u32 musicsSize;

@@ -180,6 +180,64 @@ static void loadPreLoadSettings(configuration* conf, const char* pckPath, const 
 	fclose(file);
 }
 
+static void loadApFix(configuration* conf, const char* bootstrapPath, const char* pckPath, const char* romTid, const u16 headerCRC) {
+	FILE *file = fopen(pckPath, "rb");
+	if (!file) {
+		return;
+	}
+
+	char buf[5] = {0};
+		fread(buf, 1, 4, file);
+	if (strcmp(buf, ".PCK") == 0) {
+
+		u32 fileCount;
+		fread(&fileCount, 1, sizeof(fileCount), file);
+
+		u32 offset = 0, size = 0;
+		bool cheatVer = false;
+
+		// Try binary search for the game
+		int left = 0;
+		int right = fileCount;
+
+		while (left <= right) {
+			int mid = left + ((right - left) / 2);
+			fseek(file, 16 + mid * 16, SEEK_SET);
+			fread(buf, 1, 4, file);
+			int cmp = strcmp(buf, romTid);
+			if (cmp == 0) { // TID matches, check CRC
+				u16 crc;
+				fread(&crc, 1, sizeof(crc), file);
+
+				if (crc == headerCRC) { // CRC matches
+					fread(&offset, 1, sizeof(offset), file);
+					fread(&size, 1, sizeof(size), file);
+					cheatVer = fgetc(file) & 1;
+					break;
+				} else if (crc < headerCRC) {
+					left = mid + 1;
+				} else {
+					right = mid - 1;
+				}
+			} else if (cmp < 0) {
+				left = mid + 1;
+			} else {
+				right = mid - 1;
+			}
+		}
+
+		if (offset > 0 && size > 0) {
+			sprintf(conf->apPatchPath, bootstrapPath);
+			conf->apPatchOffset = offsetOfOpenedNitroFile+offset;
+			conf->apPatchSize = size;
+			if (cheatVer) {
+				conf->valueBits |= BIT(5);
+			}
+		}
+	}
+	fclose(file);
+}
+
 static void createRamDumpBin(configuration* conf) {
 	int ramDumpSize;
 	if (dsiFeatures() && !conf->b4dsMode)
@@ -303,7 +361,7 @@ static void load_conf(configuration* conf, const char* fn) {
 	// conf->gbaSavPath = strdup(config_file.fetch("NDS-BOOTSTRAP", "GBA_SAV_PATH").c_str());
 
 	// AP-patch path
-	conf->apPatchPath = strdup(config_file.fetch("NDS-BOOTSTRAP", "AP_FIX_PATH").c_str());
+	// conf->apPatchPath = strdup(config_file.fetch("NDS-BOOTSTRAP", "AP_FIX_PATH").c_str());
 
 	// Language
 	conf->language = strtol(config_file.fetch("NDS-BOOTSTRAP", "LANGUAGE", "-1").c_str(), NULL, 0);
@@ -687,9 +745,9 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	if (conf->preciseVolumeControl) {
 		conf->valueBits |= BIT(4);
 	}
-	if (extention(conf->apPatchPath, ".bin")) {
+	/* if (extention(conf->apPatchPath, ".bin")) {
 		conf->valueBits |= BIT(5);
-	}
+	} */
 	if (conf->macroMode) {
 		conf->valueBits |= BIT(6);
 	}
@@ -1669,7 +1727,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		// conf->gbaRomSize = getFileSize(conf->gbaPath);
 		// conf->gbaSaveSize = getFileSize(conf->gbaSavPath);
 		conf->wideCheatSize = getFileSize(wideCheatFilePath.c_str());
-		conf->apPatchSize = getFileSize(conf->apPatchPath);
+		// conf->apPatchSize = getFileSize(conf->apPatchPath);
 		conf->cheatSize = getFileSize(cheatFilePath.c_str());
 
 		//bool wideCheatFound = (access(wideCheatFilePath.c_str(), F_OK) == 0);
@@ -2143,7 +2201,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		cheatFilePath = "fat:/_nds/nds-bootstrap/cheatData.bin";
 
 		conf->saveSize = getFileSize(conf->savPath);
-		conf->apPatchSize = getFileSize(conf->apPatchPath);
+		// conf->apPatchSize = getFileSize(conf->apPatchPath);
 		conf->cheatSize = getFileSize(cheatFilePath.c_str());
 
 		FILE* bootstrapImages = fopen("nitro:/bootloader_images.lz77", "rb");
@@ -2248,6 +2306,8 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 				}
 			}
 		}
+	} else {
+		loadApFix(conf, bootstrapPath, "nitro:/apfix.pck", romTid, headerCRC);
 	}
 
 	if (conf->loaderType < 2 && (strcmp(romTid, "NTRJ") == 0) && (headerCRC == 0x9B41 || headerCRC == 0x69D6)) { // Use bootloader2 for Shantae: Risky's Revenge (USA) (Review Build)

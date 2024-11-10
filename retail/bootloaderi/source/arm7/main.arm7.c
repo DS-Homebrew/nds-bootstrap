@@ -110,6 +110,7 @@ extern u32 dataToPreloadFrame;
 extern u32 wideCheatFileCluster;
 extern u32 wideCheatSize;
 extern u32 apPatchFileCluster;
+extern u32 apPatchOffset;
 extern u32 apPatchSize;
 extern u32 cheatFileCluster;
 extern u32 cheatSize;
@@ -1926,6 +1927,7 @@ int arm7_main(void) {
 			cheatFileCluster,
 			cheatSize,
 			apPatchFileCluster,
+			apPatchOffset,
 			apPatchSize,
 			pageFileCluster,
 			manualCluster,
@@ -2109,7 +2111,7 @@ int arm7_main(void) {
 			aFile apPatchFile;
 			getFileFromCluster(&apPatchFile, apPatchFileCluster, gameOnFlashcard);
 			dbg_printf("AP-fix found\n");
-			fileRead((char*)IPS_LOCATION, &apPatchFile, 0, apPatchSize);
+			fileRead((char*)IPS_LOCATION, &apPatchFile, apPatchOffset, apPatchSize);
 			if (*(u8*)(IPS_LOCATION+apPatchSize-1) != 0xA9) {
 				overlayPatch = ipsHasOverlayPatch(ndsHeader, (u8*)IPS_LOCATION);
 			}
@@ -2199,6 +2201,7 @@ int arm7_main(void) {
 			cheatFileCluster,
 			cheatSize,
 			apPatchFileCluster,
+			apPatchOffset,
 			apPatchSize,
 			pageFileCluster,
 			manualCluster,

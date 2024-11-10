@@ -98,6 +98,7 @@ extern u32 saveSize;
 extern u32 dataToPreloadAddr;
 extern u32 dataToPreloadSize;
 extern u32 apPatchFileCluster;
+extern u32 apPatchOffset;
 extern u32 apPatchSize;
 extern u32 cheatFileCluster;
 extern u32 cheatSize;
@@ -1618,6 +1619,7 @@ int arm7_main(void) {
 		cheatFileCluster,
 		cheatSize,
 		apPatchFileCluster,
+		apPatchOffset,
 		apPatchSize,
 		mainScreen,
 		language,
@@ -1704,7 +1706,7 @@ int arm7_main(void) {
 				while (REG_VCOUNT == 191);
 			}
 		}
-		fileRead((char*)IMAGES_LOCATION, &apPatchFile, 0, apPatchSize);
+		fileRead((char*)IMAGES_LOCATION, &apPatchFile, apPatchOffset, apPatchSize);
 		if (applyIpsPatch(ndsHeader, (u8*)IMAGES_LOCATION, (*(u8*)(IMAGES_LOCATION+apPatchSize-1) == 0xA9), ROMinRAM, usesCloneboot)) {
 			dbg_printf("AP-fix applied\n");
 		} else {
