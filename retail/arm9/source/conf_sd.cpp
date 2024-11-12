@@ -180,8 +180,43 @@ static void loadPreLoadSettings(configuration* conf, const char* pckPath, const 
 	fclose(file);
 }
 
-static void loadApFix(configuration* conf, const char* bootstrapPath, const char* pckPath, const char* romTid, const u16 headerCRC) {
-	FILE *file = fopen(pckPath, "rb");
+static void loadApFix(configuration* conf, const char* bootstrapPath, const char* romTid, const u16 headerCRC) {
+	{
+		std::string romFilename = conf->ndsPath;
+		const size_t last_slash_idx = romFilename.find_last_of("/");
+		if (std::string::npos != last_slash_idx)
+		{
+			romFilename.erase(0, last_slash_idx + 1);
+		}
+
+		sprintf(conf->apPatchPath, "%s:/_nds/nds-bootstrap/apFix/%s.ips", conf->bootstrapOnFlashcard ? "fat" : "sd", romFilename.c_str());
+		if (access(conf->apPatchPath, F_OK) == 0) {
+			conf->apPatchSize = getFileSize(conf->apPatchPath);
+			return;
+		}
+
+		sprintf(conf->apPatchPath, "%s:/_nds/nds-bootstrap/apFix/%s.bin", conf->bootstrapOnFlashcard ? "fat" : "sd", romFilename.c_str());
+		if (access(conf->apPatchPath, F_OK) == 0) {
+			conf->apPatchSize = getFileSize(conf->apPatchPath);
+			conf->valueBits |= BIT(5);
+			return;
+		}
+
+		sprintf(conf->apPatchPath, "%s:/_nds/nds-bootstrap/apFix/%s-%04X.ips", conf->bootstrapOnFlashcard ? "fat" : "sd", romTid, headerCRC);
+		if (access(conf->apPatchPath, F_OK) == 0) {
+			conf->apPatchSize = getFileSize(conf->apPatchPath);
+			return;
+		}
+
+		sprintf(conf->apPatchPath, "%s:/_nds/nds-bootstrap/apFix/%s-%04X.bin", conf->bootstrapOnFlashcard ? "fat" : "sd", romTid, headerCRC);
+		if (access(conf->apPatchPath, F_OK) == 0) {
+			conf->apPatchSize = getFileSize(conf->apPatchPath);
+			conf->valueBits |= BIT(5);
+			return;
+		}
+	}
+
+	FILE *file = fopen("nitro:/apfix.pck", "rb");
 	if (!file) {
 		return;
 	}
@@ -2307,7 +2342,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			}
 		}
 	} else {
-		loadApFix(conf, bootstrapPath, "nitro:/apfix.pck", romTid, headerCRC);
+		loadApFix(conf, bootstrapPath, romTid, headerCRC);
 	}
 
 	if (conf->loaderType < 2 && (strcmp(romTid, "NTRJ") == 0) && (headerCRC == 0x9B41 || headerCRC == 0x69D6)) { // Use bootloader2 for Shantae: Risky's Revenge (USA) (Review Build)
@@ -2323,13 +2358,6 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		typeToReplace = ".srl";
 	} else if (extention(conf->ndsPath, ".app")) {
 		typeToReplace = ".app";
-	}
-
-	std::string romFilename = ReplaceAll(conf->ndsPath, typeToReplace, ".bin");
-	const size_t last_slash_idx = romFilename.find_last_of("/");
-	if (std::string::npos != last_slash_idx)
-	{
-		romFilename.erase(0, last_slash_idx + 1);
 	}
 
 	srParamsFilePath = "sd:/_nds/nds-bootstrap/softResetParams.bin";
@@ -2420,7 +2448,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		fclose(ndsFile);
 	}
 
-	sprintf(patchOffsetCacheFilePath, "%s:/_nds/nds-bootstrap/patchOffsetCache/%s-%04X.bin", (conf->ndsPath[0] == 'f' && conf->ndsPath[1] == 'a' && conf->ndsPath[2] == 't') ? "fat" : "sd", romTid, headerCRC);
+	sprintf(patchOffsetCacheFilePath, "%s:/_nds/nds-bootstrap/patchOffsetCache/%s-%04X.bin", conf->gameOnFlashcard ? "fat" : "sd", romTid, headerCRC);
 
 	if (access(patchOffsetCacheFilePath, F_OK) != 0) {
 		char buffer[0x200] = {0};
