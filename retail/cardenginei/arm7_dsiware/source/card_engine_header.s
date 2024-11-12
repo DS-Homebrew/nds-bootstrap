@@ -85,7 +85,7 @@ romRead_LED:
 dmaRomRead_LED:
 	.byte	0
 irqTable_offset:
-	.word	irqTable
+	.word	0
 scfgRomBak:
 	.hword	0
 igmHotkey:
