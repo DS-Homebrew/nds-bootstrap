@@ -342,10 +342,10 @@ clean:
 	@$(MAKE) -C cardenginei/arm9_twlsdk3_dldi clean
 	@$(MAKE) -C cardenginei/arm9_dsiware clean
 	@$(MAKE) -C cardenginei/arm9_dsiware3 clean
-	@rm $(NITRODATA)/preLoadSettingsMEP.pck
-	@rm $(NITRODATA)/preLoadSettingsDSi.pck
-	@rm $(NITRODATA)/preLoadSettings3DS.pck
-	@rm $(NITRODATA)/apfix.pck
+	@rm -f $(NITRODATA)/preLoadSettingsMEP.pck
+	@rm -f $(NITRODATA)/preLoadSettingsDSi.pck
+	@rm -f $(NITRODATA)/preLoadSettings3DS.pck
+	@rm -f $(NITRODATA)/apfix.pck
 	@$(MAKE) -C bootloader clean
 	@$(MAKE) -C bootloader1 clean
 	@$(MAKE) -C bootloader2 clean
