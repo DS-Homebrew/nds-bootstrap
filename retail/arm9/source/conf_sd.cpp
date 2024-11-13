@@ -214,6 +214,8 @@ static void loadApFix(configuration* conf, const char* bootstrapPath, const char
 			conf->valueBits |= BIT(5);
 			return;
 		}
+
+		conf->apPatchPath[0] = 0;
 	}
 
 	FILE *file = fopen("nitro:/apfix.pck", "rb");
