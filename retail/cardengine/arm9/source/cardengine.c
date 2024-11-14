@@ -189,6 +189,9 @@ void enableIPC_SYNC(void) {
 #endif
 
 extern void slot2MpuFix();
+// fixes mpu protection settings when using a slot2 flashcart
+// to allow running games accessing the slot2 like pokemon
+extern void slot2MpuFixGbaDldi();
 // extern void region0Fix(); // Revert region 0 patch
 extern void sdk5MpuFix();
 extern void resetMpu();
@@ -863,6 +866,7 @@ void cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 
 	if (__myio_dldi.features & FEATURE_SLOT_GBA) {
 		REG_IE &= ~IRQ_CART;
+		slot2MpuFixGbaDldi();
 	}
 
 	setDeviceOwner();
@@ -1572,6 +1576,10 @@ u32 myIrqEnable(u32 irq) {
 	#ifdef DEBUG
 	nocashMessage("myIrqEnable\n");
 	#endif
+
+	if (__myio_dldi.features & FEATURE_SLOT_GBA) {
+		slot2MpuFixGbaDldi();
+	}
 
 	setDeviceOwner();
 	initialize();
