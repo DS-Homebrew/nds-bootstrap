@@ -17,9 +17,9 @@
 */
 
 #include <string.h>
-#include <nds/debug.h>
 #include "my_fat.h"
 #include "hex.h"
+#include "nocashMessage.h"
 
 static bool _debug = false;
 static aFile _debugFileCluster;

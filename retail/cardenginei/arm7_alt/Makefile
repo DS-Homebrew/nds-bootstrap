@@ -24,7 +24,7 @@ endif
 # all directories are relative to this makefile
 #---------------------------------------------------------------------------------
 BUILD			:=	build
-SOURCES			:=	../arm7/source ../arm7/source/patcher ../../common/source ../../common/source_general
+SOURCES			:=	../arm7/source ../arm7/source/patcher ../arm7/source/libnds ../../common/source ../../common/source_general
 INCLUDES		:=	../arm7/include ../arm7/include/patcher ../../common/include ../../common/include_fat
 DATA			:=	data
 
@@ -49,7 +49,7 @@ LDFLAGS	=	-nostartfiles -T cardengine.ld -g $(ARCH) -Wl,--nmagic -Wl,-Map,$(notd
 #---------------------------------------------------------------------------------
 # any extra libraries we wish to link with the project
 #---------------------------------------------------------------------------------
-LIBS	:= -lnds7
+LIBS	:=
 
 #---------------------------------------------------------------------------------
 # list of directories containing libraries, this must be the top level containing
