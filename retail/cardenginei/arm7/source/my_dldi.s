@@ -42,13 +42,13 @@ __mydldi_start:
 #ifdef TWLSDK
 	.byte	0x0d		@ 8KiB	@ Log [base-2] of the size of this driver in bytes.
 #else
-	.byte	0x0e		@ 16KiB	@ Log [base-2] of the size of this driver in bytes.
+	.byte	0x0f		@ 32KiB	@ Log [base-2] of the size of this driver in bytes.
 #endif
 	.byte	0x00			@ Sections to fix
 #ifdef TWLSDK
 	.byte 	0x0d		@ 8KiB	@ Log [base-2] of the allocated space in bytes.
 #else
-	.byte 	0x0e		@ 16KiB	@ Log [base-2] of the allocated space in bytes.
+	.byte 	0x0f		@ 32KiB	@ Log [base-2] of the allocated space in bytes.
 #endif
 
 @---------------------------------------------------------------------------------
@@ -100,7 +100,7 @@ _DLDI_shutdown:
 #ifdef TWLSDK
 	.space (__mydldi_start + 8192) - .	@ Fill to 8KiB
 #else
-	.space (__mydldi_start + 16384) - .	@ Fill to 16KiB
+	.space (__mydldi_start + 32768) - .	@ Fill to 32KiB
 #endif
 
 _dldi_end:

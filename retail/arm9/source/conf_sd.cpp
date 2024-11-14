@@ -1434,19 +1434,6 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		} else {
 			conf->dsiWramAccess = true;
 		}
-		bool ce9Wram = conf->dsiWramAccess;
-		if (ce9Wram) {
-			if (strncmp(romTid, "HND", 3) == 0 // DS Download Play
-			|| strncmp(romTid, "ADA", 3) == 0 // Diamond
-			|| strncmp(romTid, "APA", 3) == 0 // Pearl
-			|| strncmp(romTid, "Y3E", 3) == 0 // 2006-Nen 10-Gatsu Taikenban Soft
-			|| strncmp(romTid, "CPU", 3) == 0 // Platinum
-			|| strncmp(romTid, "IPK", 3) == 0 // HG
-			|| strncmp(romTid, "IPG", 3) == 0 // SS
-			) {
-				ce9Wram = false;
-			}
-		}
 		if (conf->dsiWramAccess) {
 			conf->valueBits2 |= BIT(5);
 			u32 wordBak = *(vu32*)0x03700000;
@@ -1529,12 +1516,22 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 						LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINEI_ARM9_BUFFERED_LOCATION);
 					}
 					fclose(cebin);
+
+					if (!dlp && !gsdd) {
+						// Load ce9 binary (SDK 2.0)
+						cebin = fopen("nitro:/cardenginei_arm9_sdk20_dldi.lz77", "rb");
+						if (cebin) {
+							fread(lz77ImageBuffer, 1, sizeof_lz77ImageBuffer, cebin);
+							LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINEI_ARM9_BUFFERED_LOCATION2);
+						}
+						fclose(cebin);
+					}
 				} else {
-					const char* ce9Path = ce9Wram ? "nitro:/cardenginei_arm9.lz77" : "nitro:/cardenginei_arm9_alt.lz77";
+					const char* ce9Path = "nitro:/cardenginei_arm9.lz77";
 					if (dlp) {
 						ce9Path = "nitro:/cardenginei_arm9_dlp.lz77";
 					} else if (gsdd) {
-						ce9Path = ce9Wram ? "nitro:/cardenginei_arm9_gsdd.lz77" : "nitro:/cardenginei_arm9_gsdd_alt.lz77";
+						ce9Path = "nitro:/cardenginei_arm9_gsdd.lz77";
 					}
 
 					// Load ce9 binary
@@ -1545,9 +1542,9 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 					}
 					fclose(cebin);
 
-					if (!ce9Wram && !dlp && !gsdd) {
-						// Load ce9 binary (alt 2)
-						cebin = fopen("nitro:/cardenginei_arm9_alt2.lz77", "rb");
+					if (!dlp && !gsdd) {
+						// Load ce9 binary (SDK 2.0)
+						cebin = fopen("nitro:/cardenginei_arm9_sdk20.lz77", "rb");
 						if (cebin) {
 							fread(lz77ImageBuffer, 1, sizeof_lz77ImageBuffer, cebin);
 							LZ77_Decompress(lz77ImageBuffer, (u8*)CARDENGINEI_ARM9_BUFFERED_LOCATION2);

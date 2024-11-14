@@ -23,8 +23,8 @@ endif
 # all directories are relative to this makefile
 #---------------------------------------------------------------------------------
 BUILD		:=	build
-SOURCES		:=	../arm9/source ../arm9/source_ext ../../common/source_general
-INCLUDES	:=	../arm9/include ../arm9/include_ext ../../common/include
+SOURCES		:=	../arm9_dldi/source_ext ../arm9/source ../../common/source_general
+INCLUDES	:=	../arm9/include ../../common/include ../../common/include_fat
 DATA		:=	data
 
 
@@ -39,11 +39,10 @@ CFLAGS	:=	-g -Wall -O2\
 			$(ARCH)
 
 # ADD -DDEBUG here for logging/debug
-CFLAGS	+=	$(INCLUDE) -DARM9 -DNO_CARDID -DGSDD
+CFLAGS	+=	$(INCLUDE) -DARM9 -DDLDI -D_NO_SDMMC -DNO_CARDID
 CXXFLAGS	:=	$(CFLAGS) -fno-rtti -fno-exceptions
 
 ASFLAGS	:=	-g $(ARCH) $(INCLUDE)
-ASFLAGS	+=	-DGSDD
 
 LDFLAGS	=	-nostartfiles -T cardengine.ld -g $(ARCH) -Wl,-Map,$(notdir $*.map)
 
@@ -66,7 +65,7 @@ LIBDIRS	:=	$(LIBNDS)
 ifneq ($(BUILD),$(notdir $(CURDIR)))
 #---------------------------------------------------------------------------------
 
-export TARGET	:=	cardenginei_arm9_gsdd_alt
+export TARGET	:=	cardenginei_arm9_sdk20_dldi
 export OUTPUT	:=	$(CURDIR)/../../nitrofiles_dec/$(TARGET)
 export OUTPUT_CMP	:=	$(CURDIR)/../../nitrofiles/$(TARGET)
 export DEPSDIR	:=	$(CURDIR)/$(BUILD)

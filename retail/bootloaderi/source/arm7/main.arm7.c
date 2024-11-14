@@ -133,6 +133,8 @@ extern u8 romRead_LED;
 extern u8 dmaRomRead_LED;
 extern u8 soundFreq;
 
+extern u8 _io_dldi_size;
+
 bool useTwlCfg = false;
 u8 twlCfgCountry = 0;
 int twlCfgLang = 0;
@@ -2096,9 +2098,9 @@ int arm7_main(void) {
 
 		// dbg_printf("Trying to patch the card...\n");
 
-		u16 ce9size = 0;
+		const u16 ce9size = 0x8000;
 		ce7Location = *(u32*)CARDENGINEI_ARM7_BUFFERED_LOCATION;
-		u32 ce7Size = 0x11C00;
+		u32 ce7Size = 0x13400;
 
 		const bool useSdk5ce7 = (isSdk5(moduleParams) && ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr) && dsiModeConfirmed);
 		if (useSdk5ce7) {
@@ -2133,7 +2135,7 @@ int arm7_main(void) {
 
 		tonccpy((u32*)ce7Location, (u32*)CARDENGINEI_ARM7_BUFFERED_LOCATION, ce7Size);
 		if (gameOnFlashcard || saveOnFlashcard) {
-			if (!dldiPatchBinary((data_t*)ce7Location, ce7Size-0x400)) {
+			if (!dldiPatchBinary((data_t*)ce7Location, ce7Size-0x400, 0)) {
 				dbg_printf("ce7 DLDI patch failed\n");
 				errorOutput();
 			}
@@ -2149,33 +2151,22 @@ int arm7_main(void) {
 
 		if (ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed) {
 			ce9Location = *(u32*)CARDENGINEI_ARM9_SDK5_BUFFERED_LOCATION;
-			ce9size = 0x7800;
 			tonccpy((u32*)ce9Location, (u32*)CARDENGINEI_ARM9_SDK5_BUFFERED_LOCATION, ce9size);
-			if (gameOnFlashcard) {
-				if (!dldiPatchBinary((data_t*)ce9Location, ce9size)) {
-					dbg_printf("ce9 DLDI patch failed\n");
-					errorOutput();
-				}
-			}
-		} else if (gameOnFlashcard) {
-			ce9Location = CARDENGINEI_ARM9_LOCATION_DSI_WRAM;
-			ce9size = 0x7000;
-			tonccpy((u32*)CARDENGINEI_ARM9_LOCATION_DSI_WRAM, (u32*)CARDENGINEI_ARM9_BUFFERED_LOCATION, ce9size);
-			if (!dldiPatchBinary((data_t*)ce9Location, ce9size)) {
+		} else {
+			const u32* ce9Src = (u32*)(!laterSdk ? CARDENGINEI_ARM9_BUFFERED_LOCATION2 : CARDENGINEI_ARM9_BUFFERED_LOCATION);
+			ce9Location = *ce9Src;
+			tonccpy((u32*)ce9Location, ce9Src, ce9size);
+		}
+		if (gameOnFlashcard) {
+			if (!dldiPatchBinary((data_t*)ce9Location, ce9size, (data_t*)((ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed && _io_dldi_size < 0xF) ? ce9Location+0x3800 : CARDENGINEI_ARM9_LOCATION_DSI_WRAM))) {
 				dbg_printf("ce9 DLDI patch failed\n");
 				errorOutput();
 			}
-		} else {
-			const bool ce9DsiWram = (*(u32*)CARDENGINEI_ARM9_BUFFERED_LOCATION == CARDENGINEI_ARM9_LOCATION_DSI_WRAM);
-			const u32* ce9Src = (u32*)((!ce9DsiWram && !laterSdk) ? CARDENGINEI_ARM9_BUFFERED_LOCATION2 : CARDENGINEI_ARM9_BUFFERED_LOCATION);
-			ce9Location = *ce9Src;
-			ce9size = 0x5000;
-			tonccpy((u32*)ce9Location, ce9Src, ce9size);
 		}
 		patchHiHeapPointer(moduleParams, ndsHeader);
 
 		toncset((u32*)CARDENGINEI_ARM9_BUFFERED_LOCATION, 0, 0x10000);
-		toncset((u32*)CARDENGINEI_ARM7_BUFFERED_LOCATION, 0, 0x11C00);
+		toncset((u32*)CARDENGINEI_ARM7_BUFFERED_LOCATION, 0, 0x13400);
 
 		errorCode = patchCardNds(
 			(cardengineArm7*)ce7Location,
