@@ -444,7 +444,7 @@ int hookNdsRetailArm7(
 		ce7->scfgRomBak               = REG_SCFG_ROM;
 
 		extern u32 getRomLocation(const tNDSHeader* ndsHeader, const bool isSdk5);
-		u32 romLocation = getRomLocation(ndsHeader, (ce7->valueBits & b_isSdk5));
+		const u32 romLocation = getRomLocation(ndsHeader, (ce7->valueBits & b_isSdk5));
 		ce7->romLocation = romLocation;
 
 		u32 romOffset = 0;

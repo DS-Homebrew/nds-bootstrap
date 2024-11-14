@@ -1005,6 +1005,11 @@ static void loadROMPartIntoRAM(const tNDSHeader* ndsHeader, const module_params_
 
 		if (readRom) {
 			fileRead((char*)romLocationChange, file, romOffsetChange, romBlockSize);
+			romMap[romMapLines][0] = romOffsetChange;
+			romMap[romMapLines][1] = romLocationChange;
+			romMap[romMapLines][2] = romLocationChange+romBlockSize;
+			romMapLines++;
+
 			romLocationChange = romLocationChangePrep;
 			romOffsetChange += romBlockSize;
 			romBlockSize = 0;
@@ -1097,7 +1102,7 @@ static void loadROMintoRAM(const tNDSHeader* ndsHeader, const module_params_t* m
 	const bool dsiBios = scfgBios9i();
 
 	// Load ROM into RAM
-	u32 romLocation = getRomLocation(ndsHeader, !laterSdk, isSdk5(moduleParams), dsiBios);
+	const u32 romLocation = getRomLocation(ndsHeader, !laterSdk, isSdk5(moduleParams), dsiBios);
 
 	u32 romOffset = 0;
 	s32 romSizeEdit = baseRomSize;
@@ -1159,6 +1164,11 @@ static void loadROMintoRAM(const tNDSHeader* ndsHeader, const module_params_t* m
 
 		if (readRom) {
 			fileRead((char*)romLocationChange, romFile, romOffsetChange, romBlockSize);
+			romMap[romMapLines][0] = romOffsetChange;
+			romMap[romMapLines][1] = romLocationChange;
+			romMap[romMapLines][2] = romLocationChange+romBlockSize;
+			romMapLines++;
+
 			romLocationChange = romLocationChangePrep;
 			romOffsetChange += romBlockSize;
 			romBlockSize = 0;
@@ -2187,6 +2197,61 @@ int arm7_main(void) {
 		}
 		patchBinary((cardengineArm9*)ce9Location, ndsHeader, moduleParams);
 
+		if (ROMinRAM) {
+			loadROMintoRAM(ndsHeader, moduleParams, laterSdk, romFile, usesCloneboot);
+			if (ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed) {
+				loadIOverlaysintoRAM(&dsiHeaderTemp, romFile, usesCloneboot);
+			}
+		} else if ((ROMsupportsDsiMode(ndsHeader) && !isDSiWare) || strncmp(romTid, "UBR", 3) != 0) {
+			loadOverlaysintoRAM(ndsHeader, moduleParams, romFile);
+		}
+
+		if (useApPatch) {
+			if (applyIpsPatch(ndsHeader, (u8*)IPS_LOCATION, (*(u8*)(IPS_LOCATION+apPatchSize-1) == 0xA9), !laterSdk, isSdk5(moduleParams), ROMinRAM, usesCloneboot, cacheBlockSize)) {
+				dbg_printf("AP-fix applied\n");
+			} else {
+				dbg_printf("Failed to apply AP-fix\n");
+			}
+			dma_twlFill32(0, 0, (u32*)IPS_LOCATION, apPatchSize);	// Clear IPS patch
+		}
+
+		if (!ROMinRAM && overlayPatch) {
+			aFile* apFixOverlaysFile = (aFile*)(ROMsupportsDsiMode(ndsHeader) ? (dsiModeConfirmed ? OVL_FILE_LOCATION_TWLSDK : OVL_FILE_LOCATION_MAINMEM5) : OVL_FILE_LOCATION_MAINMEM);
+			getFileFromCluster(apFixOverlaysFile, apFixOverlaysCluster, gameOnFlashcard);
+			buildFatTableCacheCompressed(apFixOverlaysFile);
+			if (!ROMsupportsDsiMode(ndsHeader) || !dsiModeConfirmed) {
+				tonccpy((char*)(dsiEnhancedMbk ? OVL_FILE_LOCATION_ALT : OVL_FILE_LOCATION), apFixOverlaysFile, sizeof(aFile));
+			}
+
+			/* char overlaysHeader[0x160];
+			fileRead(overlaysHeader, apFixOverlaysFile, 0, 0x160);
+			if (memcmp(ndsHeader, overlaysHeader, 0x160) != 0) { */
+				u32 alignedOverlaysOffset = (ndsHeader->arm9overlaySource/cacheBlockSize)*cacheBlockSize;
+				if (ndsHeader->arm9overlaySource > ndsHeader->arm7romOffset) {
+					alignedOverlaysOffset = ((ndsHeader->arm9romOffset+ndsHeader->arm9binarySize)/cacheBlockSize)*cacheBlockSize;
+				}
+				u32 newOverlaysSize = 0;
+				for (u32 i = alignedOverlaysOffset; i < ndsHeader->arm7romOffset; i+= cacheBlockSize) {
+					newOverlaysSize += cacheBlockSize;
+				}
+
+				fileWrite((char*)CACHE_ADRESS_START_DSIMODE, apFixOverlaysFile, alignedOverlaysOffset, newOverlaysSize);	// Write AP-fixed overlays to a file
+				dma_twlFill32(0, 0, (char*)CACHE_ADRESS_START_DSIMODE, newOverlaysSize);
+
+				// fileWrite((char*)ndsHeader, apFixOverlaysFile, 0, 0x160);
+			// }
+
+			dbg_printf("Overlays cached to a file\n");
+		}
+
+		if (!ROMinRAM && ((ROMsupportsDsiMode(ndsHeader) && !isDSiWare && (!dsiModeConfirmed || consoleModel > 0)) || !ROMsupportsDsiMode(ndsHeader))) {
+			loadROMPartIntoRAM(ndsHeader, moduleParams, laterSdk, romFile);
+		}
+
+		if (!ROMinRAM && dsiWramAccess && !dsiWramMirrored && (!ROMsupportsDsiMode(ndsHeader) || !dsiModeConfirmed)) {
+			loadNitroFileInfoIntoRAM(ndsHeader, romFile);
+		}
+
 		errorCode = hookNdsRetailArm7(
 			(cardengineArm7*)ce7Location,
 			ndsHeader,
@@ -2255,63 +2320,8 @@ int arm7_main(void) {
 			toncset((u32*)UNPATCHED_FUNCTION_LOCATION, 0, 0x40);
 		}
 
-		if (ROMinRAM) {
-			loadROMintoRAM(ndsHeader, moduleParams, laterSdk, romFile, usesCloneboot);
-			if (ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed) {
-				loadIOverlaysintoRAM(&dsiHeaderTemp, romFile, usesCloneboot);
-			}
-		} else if ((ROMsupportsDsiMode(ndsHeader) && !isDSiWare) || strncmp(romTid, "UBR", 3) != 0) {
-			loadOverlaysintoRAM(ndsHeader, moduleParams, romFile);
-		}
-
 		if ((ROMsupportsDsiMode(ndsHeader) || isSdk5(moduleParams)) && usesCloneboot) {
 			fileRead((char*)((ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed) ? 0x02FFDC00 : 0x027FFEC0), romFile, clonebootOffset, 0x88); // Pre-load RSA key
-		}
-
-		if (useApPatch) {
-			if (applyIpsPatch(ndsHeader, (u8*)IPS_LOCATION, (*(u8*)(IPS_LOCATION+apPatchSize-1) == 0xA9), !laterSdk, isSdk5(moduleParams), ROMinRAM, usesCloneboot, cacheBlockSize)) {
-				dbg_printf("AP-fix applied\n");
-			} else {
-				dbg_printf("Failed to apply AP-fix\n");
-			}
-			dma_twlFill32(0, 0, (u32*)IPS_LOCATION, apPatchSize);	// Clear IPS patch
-		}
-
-		if (!ROMinRAM && overlayPatch) {
-			aFile* apFixOverlaysFile = (aFile*)(ROMsupportsDsiMode(ndsHeader) ? (dsiModeConfirmed ? OVL_FILE_LOCATION_TWLSDK : OVL_FILE_LOCATION_MAINMEM5) : OVL_FILE_LOCATION_MAINMEM);
-			getFileFromCluster(apFixOverlaysFile, apFixOverlaysCluster, gameOnFlashcard);
-			buildFatTableCacheCompressed(apFixOverlaysFile);
-			if (!ROMsupportsDsiMode(ndsHeader) || !dsiModeConfirmed) {
-				tonccpy((char*)(dsiEnhancedMbk ? OVL_FILE_LOCATION_ALT : OVL_FILE_LOCATION), apFixOverlaysFile, sizeof(aFile));
-			}
-
-			/* char overlaysHeader[0x160];
-			fileRead(overlaysHeader, apFixOverlaysFile, 0, 0x160);
-			if (memcmp(ndsHeader, overlaysHeader, 0x160) != 0) { */
-				u32 alignedOverlaysOffset = (ndsHeader->arm9overlaySource/cacheBlockSize)*cacheBlockSize;
-				if (ndsHeader->arm9overlaySource > ndsHeader->arm7romOffset) {
-					alignedOverlaysOffset = ((ndsHeader->arm9romOffset+ndsHeader->arm9binarySize)/cacheBlockSize)*cacheBlockSize;
-				}
-				u32 newOverlaysSize = 0;
-				for (u32 i = alignedOverlaysOffset; i < ndsHeader->arm7romOffset; i+= cacheBlockSize) {
-					newOverlaysSize += cacheBlockSize;
-				}
-
-				fileWrite((char*)CACHE_ADRESS_START_DSIMODE, apFixOverlaysFile, alignedOverlaysOffset, newOverlaysSize);	// Write AP-fixed overlays to a file
-				dma_twlFill32(0, 0, (char*)CACHE_ADRESS_START_DSIMODE, newOverlaysSize);
-
-				// fileWrite((char*)ndsHeader, apFixOverlaysFile, 0, 0x160);
-			// }
-
-			dbg_printf("Overlays cached to a file\n");
-		}
-
-		if (!ROMinRAM && ((ROMsupportsDsiMode(ndsHeader) && !isDSiWare && (!dsiModeConfirmed || consoleModel > 0)) || !ROMsupportsDsiMode(ndsHeader))) {
-			loadROMPartIntoRAM(ndsHeader, moduleParams, laterSdk, romFile);
-		}
-
-		if (!ROMinRAM && dsiWramAccess && !dsiWramMirrored && (!ROMsupportsDsiMode(ndsHeader) || !dsiModeConfirmed)) {
-			loadNitroFileInfoIntoRAM(ndsHeader, romFile);
 		}
 
 		if (gameOnFlashcard && isDSiWare) {

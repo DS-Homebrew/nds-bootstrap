@@ -166,7 +166,7 @@ static u32* hookInterruptHandler(const u32* start, size_t size) {
 void configureRomMap(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const u32 romStart, const u32 cacheBlockSize, const u8 dsiMode, const u8 consoleModel) {
 	extern u32 getRomLocation(const tNDSHeader* ndsHeader, const bool isESdk2, const bool isSdk5, const bool dsiBios);
 
-	u32 romLocation = getRomLocation(ndsHeader, (ce9->valueBits & b_eSdk2), (ce9->valueBits & b_isSdk5), (ce9->valueBits & b_dsiBios));
+	const u32 romLocation = getRomLocation(ndsHeader, (ce9->valueBits & b_eSdk2), (ce9->valueBits & b_isSdk5), (ce9->valueBits & b_dsiBios));
 	ce9->romLocation = romLocation;
 	ce9->romLocation -= romStart;
 
@@ -175,137 +175,9 @@ void configureRomMap(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const u32
 		return;
 	}
 
-	const bool dsiWramUseable = (dsiWramAccess && !dsiWramMirrored);
-
 	// 0: ROM part start, 1: ROM part start in RAM, 2: ROM part end in RAM
 	extern u32 romMapLines;
 	extern u32 romMap[5][3];
-	romMap[0][0] = romStart;
-	romMap[0][1] = romLocation;
-
-	if (dsiMode) {
-		romMapLines = 1;
-
-		romMap[0][2] = romLocation+(0x800000-cacheBlockSize);
-
-		if (consoleModel > 0) {
-			romMap[1][0] = romMap[0][0]+(0x800000-cacheBlockSize);
-			romMap[1][1] = romMap[0][1]+0x800000;
-			romMap[1][2] = romMap[1][1]+0x1000000;
-
-			romMapLines++;
-
-			if (dsiWramUseable) {
-				romMap[2][0] = romMap[1][0]+0x1000000;
-				romMap[2][1] = 0x03708000;
-				romMap[2][2] = 0x03780000;
-
-				romMapLines++;
-			}
-		} else if (dsiWramUseable) {
-			romMap[1][0] = romMap[0][0]+(0x800000-cacheBlockSize);
-			romMap[1][1] = 0x03708000;
-			romMap[1][2] = 0x03780000;
-
-			romMapLines++;
-		}
-	} else {
-		romMapLines = 2;
-
-		if ((ce9->valueBits & b_isSdk5) || ((ce9->valueBits & b_dsiBios) && !(ce9->valueBits & b_eSdk2))) {
-			romMap[0][2] = romLocation+0x3C0000+cacheBlockSize;
-
-			romMap[1][0] = romMap[0][0]+0x3C0000+cacheBlockSize;
-			romMap[1][1] = romLocation+(ndsHeader->unitCode > 0 ? 0x3E0000 : 0x400000);
-			romMap[1][2] = romMap[1][1]+((ndsHeader->unitCode > 0 ? 0x20000 : 0x800000)-cacheBlockSize);
-
-			if (ndsHeader->unitCode > 0) {
-				romMap[2][0] = romMap[1][0]+(0x20000-cacheBlockSize);
-				romMap[2][1] = romMap[1][1]+0x20000;
-				romMap[2][2] = romMap[2][1]+0x7E0000;
-
-				romMapLines++;
-
-				if (consoleModel > 0) {
-					romMap[3][0] = romMap[2][0]+0x7E0000;
-					romMap[3][1] = romMap[2][1]+0x800000;
-					romMap[3][2] = romMap[3][1]+0x1000000;
-
-					romMapLines++;
-
-					if (dsiWramUseable) {
-						romMap[4][0] = romMap[3][0]+0x1000000;
-						romMap[4][1] = 0x03708000;
-						romMap[4][2] = 0x03780000;
-
-						romMapLines++;
-					}
-				}
-			} else if (consoleModel > 0) {
-				romMap[2][0] = romMap[1][0]+(0x800000-cacheBlockSize);
-				romMap[2][1] = romMap[1][1]+0x800000;
-				romMap[2][2] = romMap[2][1]+0x1000000;
-
-				romMapLines++;
-
-				if (dsiWramUseable) {
-					romMap[3][0] = romMap[2][0]+0x1000000;
-					romMap[3][1] = 0x03708000;
-					romMap[3][2] = 0x03780000;
-
-					romMapLines++;
-				}
-			} else if (dsiWramUseable) {
-				romMap[2][0] = romMap[1][0]+(0x800000-cacheBlockSize);
-				romMap[2][1] = 0x03708000;
-				romMap[2][2] = 0x03780000;
-
-				romMapLines++;
-			}
-		} else if (ce9->valueBits & b_dsiBios) {
-			romMap[0][2] = romLocation+0x3C0000+cacheBlockSize;
-
-			romMap[1][0] = romMap[0][0]+0x3C0000+cacheBlockSize;
-			romMap[1][1] = romLocation+0x400000+cacheBlockSize;
-			romMap[1][2] = romMap[1][1]+(0x800000-cacheBlockSize);
-
-			if (consoleModel > 0) {
-				romMap[2][0] = romMap[1][0]+(0x800000-cacheBlockSize);
-				romMap[2][1] = romMap[1][1]+0x800000;
-				romMap[2][2] = romMap[2][1]+0x1000000;
-
-				romMapLines++;
-
-				if (dsiWramUseable) {
-					romMap[3][0] = romMap[2][0]+0x1000000;
-					romMap[3][1] = 0x03708000;
-					romMap[3][2] = 0x03780000;
-
-					romMapLines++;
-				}
-			} else if (dsiWramUseable) {
-				romMap[2][0] = romMap[1][0]+(0x800000-cacheBlockSize);
-				romMap[2][1] = 0x03708000;
-				romMap[2][2] = 0x03780000;
-
-				romMapLines++;
-			}
-		} else {
-			romMap[0][2] = romLocation+0x3C0000;
-
-			romMap[1][0] = romMap[0][0]+0x3C0000;
-			romMap[1][1] = romLocation+0x400000;
-			romMap[1][2] = romMap[1][1]+(consoleModel > 0 ? 0x1800000 : 0x800000);
-
-			if (dsiWramUseable) {
-				romMap[2][0] = romMap[1][0]+(consoleModel > 0 ? 0x1800000 : 0x800000);
-				romMap[2][1] = 0x03708000;
-				romMap[2][2] = 0x03780000;
-
-				romMapLines++;
-			}
-		}
-	}
 
 	ce9->romMapLines = romMapLines;
 	for (int i = 0; i < 4; i++) {
