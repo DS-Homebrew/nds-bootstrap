@@ -1,6 +1,21 @@
 .align	4
 .arm
 
+.global slot2MpuFixGbaDldi
+.type slot2MpuFixGbaDldi, STT_FUNC
+slot2MpuFixGbaDldi:
+    mrc p15, 0, r0, c2, c0, 0
+    bic r0, r0, #(1 << 3)
+    mcr p15, 0, r0, c2, c0, 0
+    mrc p15, 0, r0, c3, c0, 0
+    bic r0, r0, #(1 << 3)
+    mcr p15, 0, r0, c3, c0, 0
+    mrc p15, 0, r0, c5, c0, 2
+    bic r0, r0, #(0xF << 12)
+    orr r0, r0, #(3 << 12)
+    mcr p15, 0, r0, c5, c0, 2
+    bx lr
+
 .global slot2MpuFix
 .type	slot2MpuFix STT_FUNC
 slot2MpuFix:
