@@ -2135,7 +2135,7 @@ int arm7_main(void) {
 
 		tonccpy((u32*)ce7Location, (u32*)CARDENGINEI_ARM7_BUFFERED_LOCATION, ce7Size);
 		if (gameOnFlashcard || saveOnFlashcard) {
-			if (!dldiPatchBinary((data_t*)ce7Location, ce7Size-0x400, 0)) {
+			if (!dldiPatchBinary((data_t*)ce7Location, ce7Size-0x400, (data_t*)((ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed && _io_dldi_size < 0xF) ? 0 : (dsiEnhancedMbk ? CARDENGINEI_ARM7_LOCATION_ALT_DLDI : CARDENGINEI_ARM7_LOCATION_DLDI)))) {
 				dbg_printf("ce7 DLDI patch failed\n");
 				errorOutput();
 			}

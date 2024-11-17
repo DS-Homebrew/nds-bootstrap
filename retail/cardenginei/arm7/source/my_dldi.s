@@ -32,7 +32,6 @@
 
 
 __mydldi_start:
-#ifndef NO_DLDI
 
 @---------------------------------------------------------------------------------
 @ Driver patch file standard header -- 16 bytes
@@ -94,39 +93,13 @@ _DLDI_shutdown:
 
 
 @---------------------------------------------------------------------------------
+#ifdef TWLSDK
 	.align
 	.pool
 
-#ifdef TWLSDK
 	.space (__mydldi_start + 8192) - .	@ Fill to 8KiB
 #else
-	.space (__mydldi_start + 32768) - .	@ Fill to 32KiB
 #endif
 
 _dldi_end:
 	.end
-@---------------------------------------------------------------------------------
-#else
-@---------------------------------------------------------------------------------
-@ IO_INTERFACE data -- 32 bytes
-__myio_dldi:
-	.ascii	"DLDI"				@ ioType
-	.word	0x00000000			@ Features
-	.word	__mydldi_startup		@
-	.word	_DLDI_isInserted		@
-	.word	_DLDI_readSectors		@   Function pointers to standard device driver functions
-	.word	_DLDI_writeSectors		@
-	.word	_DLDI_clearStatus		@
-	.word	_DLDI_shutdown			@
-
-	__mydldi_startup:
-_DLDI_isInserted:
-_DLDI_readSectors:
-_DLDI_writeSectors:
-_DLDI_clearStatus:
-_DLDI_shutdown:
-	mov		r0, #0x00		@ Return false for every function
-	bx		lr
-
-
-#endif
