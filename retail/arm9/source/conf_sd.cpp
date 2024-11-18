@@ -2383,17 +2383,6 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		conf->loaderType = 2;
 	}
 
-	const char *typeToReplace = ".nds";
-	if (extention(conf->ndsPath, ".dsi")) {
-		typeToReplace = ".dsi";
-	} else if (extention(conf->ndsPath, ".ids")) {
-		typeToReplace = ".ids";
-	} else if (extention(conf->ndsPath, ".srl")) {
-		typeToReplace = ".srl";
-	} else if (extention(conf->ndsPath, ".app")) {
-		typeToReplace = ".app";
-	}
-
 	srParamsFilePath = "sd:/_nds/nds-bootstrap/softResetParams.bin";
 	if (conf->gameOnFlashcard) {
 		srParamsFilePath = "fat:/_nds/nds-bootstrap/softResetParams.bin";
