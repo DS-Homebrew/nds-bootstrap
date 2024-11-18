@@ -22,7 +22,7 @@ endif
 #---------------------------------------------------------------------------------
 TARGET		:=	loadi0
 BUILD		:=	build
-SOURCES		:=	source source/arm7 source/arm7/save_patches source/arm9 ../common/source ../common/source_general
+SOURCES		:=	source source/arm7 source/arm7/libnds source/arm7/save_patches source/arm9 ../common/source ../common/source_general
 INCLUDES	:=	include build ../common/include ../common/include_fat
 DATA		:=	../data
 SPECS		:=  specs
@@ -42,7 +42,7 @@ CFLAGS	+=	$(INCLUDE) -DARM7 -std=gnu99 -DTWOCARD -DLOADERTYPE0
 ASFLAGS	:=	-g $(ARCH) $(INCLUDE)
 LDFLAGS	=	-nostartfiles -T $(TOPDIR)/load.ld -g $(ARCH) -Wl,--nmagic -Wl,-Map,$(TARGET).map
 
-LIBS	:= -lnds7
+LIBS	:=
 
 #---------------------------------------------------------------------------------
 # list of directories containing libraries, this must be the top level containing

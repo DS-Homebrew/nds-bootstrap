@@ -1,7 +1,6 @@
 /*---------------------------------------------------------------------------------
 
 	Copyright (C) 2005
-		Michael Noland (joat)
 		Jason Rogers (dovoto)
 		Dave Murphy (WinterMute)
 
@@ -17,27 +16,51 @@
 		must not claim that you wrote the original software. If you use
 		this software in a product, an acknowledgment in the product
 		documentation would be appreciated but is not required.
+
 	2.	Altered source versions must be plainly marked as such, and
 		must not be misrepresented as being the original software.
+
 	3.	This notice may not be removed or altered from any source
 		distribution.
 
+
 ---------------------------------------------------------------------------------*/
-#include <nds/asminc.h>
+/*! \file debug.h
+\brief Currently only used to send debug messages to NO$GBA debug window
 
-	.text
-	.align 4
+<div class="fileHeader">
+On the ARM 9 this functionality is best accessed via the console studio integration.
+- \ref console.h "Debug Messages via stdio"
 
-	.thumb
+</div>
+*/
 
-@---------------------------------------------------------------------------------
-BEGIN_ASM_FUNC swiDelay
-@---------------------------------------------------------------------------------
-	swi	0x03
-	bx	lr
+#ifndef NDS_DEBUG_INCLUDE
+#define NDS_DEBUG_INCLUDE
 
-@---------------------------------------------------------------------------------
-BEGIN_ASM_FUNC swiSleep
-@---------------------------------------------------------------------------------
-	swi	0x07
-	bx	lr
+#include <stddef.h>
+#include <nds/ndstypes.h>
+
+#define REG_NOCASH_OUT_STRZ (*(vu32*)0x4fffa10)
+#define REG_NOCASH_OUT_CHAR (*(vu8*) 0x4fffa1c)
+
+/*! \brief Send a message to the no$gba debug window
+\param message The message to send
+\param len Length in characters of the message to send
+*/
+static inline void nocashWrite(const char *message, size_t len)
+{
+	for (size_t i = 0; i < len; i ++) {
+		REG_NOCASH_OUT_CHAR = message[i];
+	}
+}
+
+/*! \brief Send a message to the no$gba debug window
+\param message The message to send (zero-terminated string)
+*/
+static inline void nocashMessage(const char *message)
+{
+	REG_NOCASH_OUT_STRZ = (u32)message;
+}
+
+#endif // NDS_DEBUG_INCLUDE

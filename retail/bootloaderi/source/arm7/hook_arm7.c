@@ -20,7 +20,6 @@
 #include <stdio.h>
 #include <nds/system.h>
 #include <nds/arm7/i2c.h>
-#include <nds/debug.h>
 
 //#include "my_fat.h"
 #include "unpatched_funcs.h"
@@ -34,6 +33,7 @@
 #include "find.h"
 #include "hook.h"
 #include "tonccpy.h"
+#include "nocashMessage.h"
 
 #define b_gameOnFlashcard BIT(0)
 #define b_saveOnFlashcard BIT(1)

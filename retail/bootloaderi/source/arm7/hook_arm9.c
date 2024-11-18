@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <nds/ndstypes.h>
-#include <nds/debug.h>
 #include <nds/system.h>
 #include "debug_file.h"
 #include "hook.h"
@@ -10,6 +9,7 @@
 #include "nds_header.h"
 #include "cardengine_header_arm9.h"
 #include "value_bits.h"
+#include "nocashMessage.h"
 
 #define b_saveOnFlashcard BIT(0)
 #define b_ROMinRAM BIT(1)

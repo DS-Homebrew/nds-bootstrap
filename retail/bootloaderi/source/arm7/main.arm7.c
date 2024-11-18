@@ -50,7 +50,6 @@
 #include <nds/arm7/audio.h>
 #include <nds/memory.h> // tNDSHeader
 #include <nds/arm7/i2c.h>
-#include <nds/debug.h>
 #include <nds/ipc.h>
 
 #define BASE_DELAY (100)
@@ -74,6 +73,7 @@
 #include "value_bits.h"
 #include "loading_screen.h"
 #include "unpatched_funcs.h"
+#include "nocashMessage.h"
 
 #define cacheBlockSize 0x4000
 
