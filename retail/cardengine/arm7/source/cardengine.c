@@ -212,9 +212,6 @@ void reset(void) {
 
 	// rebootConsole();
 	// u32 resetParam = (isSdk5Set ? RESET_PARAM_SDK5 : RESET_PARAM);
-	if (sharedAddr[0] == 0x57495344 /*|| *(u32*)resetParam == 0xFFFFFFFF*/) {
-		rebootConsole();
-	}
 
 	REG_IME = 0;
 
@@ -247,6 +244,10 @@ void reset(void) {
 	funcsUnpatched = false;
 #endif
 	languageTimer = 0;
+
+	if (sharedAddr[0] == 0x57495344 /*|| *(u32*)resetParam == 0xFFFFFFFF*/) {
+		rebootConsole();
+	}
 
 	while (sharedAddr[0] != 0x544F4F42) { // 'BOOT'
 		if (sharedAddr[1] == 0x48495344) {  // 'DSIH'
