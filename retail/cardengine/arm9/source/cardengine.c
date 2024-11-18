@@ -235,7 +235,7 @@ void reset(u32 param) {
 	//EXCEPTION_VECTOR_SDK1 = 0;
 
 	//volatile u32 arm9_BLANK_RAM = 0;
- 	register int i;
+ 	// register int i;
 
 	REG_IME = 0;
 	REG_IE = 0;
@@ -250,7 +250,7 @@ void reset(u32 param) {
 	}
 
 	// Clear out ARM9 DMA channels
-	vu32* dma = &DMA0_SRC;
+	/* vu32* dma = &DMA0_SRC;
 	vu16* tmr = &TIMER0_DATA;
 	for (i = 0; i < 4; i++) {
 		dma[2] = 0; //CR
@@ -261,7 +261,9 @@ void reset(u32 param) {
 		tmr[1] = 0; //CR
 		tmr[0] = 0; //DATA
 		tmr += 2;
-	}
+	} */
+	toncset16((u32*)0x040000B0, 0, 0x40/2); // Clear DMA channels
+	toncset16((u32*)0x04000100, 0, 0x10/2); // Clear timers
 
 	// Clear out FIFO
 	REG_IPC_SYNC = 0;
@@ -312,7 +314,6 @@ void reset(u32 param) {
 		toncset((u32*)0x02000000, 0, 0x3C0000);
 		#else
 		toncset((u32*)0x02004000, 0, 0x3BC000);
-		*(u32*)(0x02000004) = 0;
 		#endif
 		/* #ifdef NODSIWARE
 		toncset((u32*)0x023C4000, 0, 0x1C000);
@@ -329,6 +330,7 @@ void reset(u32 param) {
 			*(u32*)(0x02000000) = 0;
 		}
 		#endif
+		*(u32*)0x02000004 = 0x54455352; // 'RSET'
 
 		WRAM_CR = 0; // Set shared ram to ARM9
 
