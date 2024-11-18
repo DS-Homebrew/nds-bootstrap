@@ -322,6 +322,7 @@ static int loadCardEngineBinary(const char* cardenginePath, u8* location, bool c
 	fseek(cebin, 0, SEEK_SET);
 	if(compressed) {
 		if(size <= sizeof_lz77ImageBuffer) {
+			toncset32(lz77ImageBuffer, 0, sizeof_lz77ImageBuffer);
 			fread(lz77ImageBuffer, 1, size, cebin);
 			LZ77_Decompress(lz77ImageBuffer, location);
 		}
