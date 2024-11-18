@@ -96,7 +96,7 @@ std::string ReplaceAll(std::string str, const std::string& from, const std::stri
 	return str;
 }
 
-bool extention(const std::string& filename, const char* ext) {
+bool extension(const std::string& filename, const char* ext) {
 	if(strcasecmp(filename.c_str() + filename.size() - strlen(ext), ext)) {
 		return false;
 	} else {
@@ -374,11 +374,11 @@ static int runNdsFile(configuration* conf) {
 	dbg_printf("version: " VER_NUMBER "\n");
 	(dsiFeatures() && !conf->b4dsMode) ? debugConf(conf) : debugConfB4DS(conf);
 
-	if ((!extention(conf->ndsPath, ".nds"))
-	&& (!extention(conf->ndsPath, ".dsi"))
-	&& (!extention(conf->ndsPath, ".ids"))
-	&& (!extention(conf->ndsPath, ".srl"))
-	&& (!extention(conf->ndsPath, ".app"))) {
+	if ((!extension(conf->ndsPath, ".nds"))
+	&& (!extension(conf->ndsPath, ".dsi"))
+	&& (!extension(conf->ndsPath, ".ids"))
+	&& (!extension(conf->ndsPath, ".srl"))
+	&& (!extension(conf->ndsPath, ".app"))) {
 		if (debug) {
 			dbg_printf("No NDS file specified\n");
 			dopause();

@@ -122,7 +122,7 @@ void addTwlDevice(const char letter, u8 flags, u8 accessRights, const char* name
 }
 
 extern std::string ReplaceAll(std::string str, const std::string& from, const std::string& to);
-extern bool extention(const std::string& filename, const char* ext);
+extern bool extension(const std::string& filename, const char* ext);
 
 static void loadPreLoadSettings(configuration* conf, const char* pckPath, const char* romTid, const u16 headerCRC) {
 	FILE *file = NULL;
@@ -311,7 +311,7 @@ static void loadApFix(configuration* conf, const char* bootstrapPath, const char
 	fclose(file);
 }
 
-static int loadCardEngineBinary(const char* cardenginePath, u8* location, bool compressed) {
+static int loadCardEngineBinary(const char* cardenginePath, u8* location) {
 	FILE* cebin = fopen(cardenginePath, "rb");
 	int size;
 	if(!cebin) {
@@ -320,7 +320,7 @@ static int loadCardEngineBinary(const char* cardenginePath, u8* location, bool c
 	fseek(cebin, 0, SEEK_END);
 	size = ftell(cebin);
 	fseek(cebin, 0, SEEK_SET);
-	if(compressed) {
+	if(extension(cardenginePath, ".lz77")) {
 		if(size <= sizeof_lz77ImageBuffer) {
 			toncset32(lz77ImageBuffer, 0, sizeof_lz77ImageBuffer/sizeof(u32));
 			fread(lz77ImageBuffer, 1, size, cebin);
@@ -845,7 +845,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	if (conf->preciseVolumeControl) {
 		conf->valueBits |= BIT(4);
 	}
-	/* if (extention(conf->apPatchPath, ".bin")) {
+	/* if (extension(conf->apPatchPath, ".bin")) {
 		conf->valueBits |= BIT(5);
 	} */
 	if (conf->macroMode) {
@@ -1512,7 +1512,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 		if (conf->gameOnFlashcard || !conf->isDSiWare) {
 			// Load external cheat engine binary
-			loadCardEngineBinary("nitro:/cardenginei_arm7_cheat.bin", (u8*)CHEAT_ENGINE_BUFFERED_LOCATION, false);
+			loadCardEngineBinary("nitro:/cardenginei_arm7_cheat.bin", (u8*)CHEAT_ENGINE_BUFFERED_LOCATION);
 
 			if ((unitCode > 0 && conf->dsiMode) || conf->isDSiWare) {
 				const bool binary3 = (REG_SCFG_EXT7 == 0 ? !dsiEnhancedMbk : (a7mbk6 != 0x00403000));
@@ -1520,8 +1520,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 				// Load SDK5 ce7 binary
 				rc = loadCardEngineBinary(
 					binary3 ? "nitro:/cardenginei_arm7_twlsdk3.lz77" : "nitro:/cardenginei_arm7_twlsdk.lz77",
-					(u8*)CARDENGINEI_ARM7_BUFFERED_LOCATION,
-					true
+					(u8*)CARDENGINEI_ARM7_BUFFERED_LOCATION
 				);
 				if (rc == 0) {
 					if (REG_SCFG_EXT7 != 0) {
@@ -1534,23 +1533,20 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 					// Load SDK5 DLDI ce9 binary
 					loadCardEngineBinary(
 						binary3 ? "nitro:/cardenginei_arm9_twlsdk3_dldi.lz77" : "nitro:/cardenginei_arm9_twlsdk_dldi.lz77",
-						(u8*)CARDENGINEI_ARM9_SDK5_BUFFERED_LOCATION,
-						true
+						(u8*)CARDENGINEI_ARM9_SDK5_BUFFERED_LOCATION
 					);
 				} else {
 					// Load SDK5 ce9 binary
 					loadCardEngineBinary(
 						binary3 ? "nitro:/cardenginei_arm9_twlsdk3.lz77" : "nitro:/cardenginei_arm9_twlsdk.lz77",
-						(u8*)CARDENGINEI_ARM9_SDK5_BUFFERED_LOCATION,
-						true
+						(u8*)CARDENGINEI_ARM9_SDK5_BUFFERED_LOCATION
 					);
 				}
 			} else {
 				// Load ce7 binary
 				rc = loadCardEngineBinary(
 					dsiEnhancedMbk ? "nitro:/cardenginei_arm7_alt.lz77" : "nitro:/cardenginei_arm7.lz77",
-					(u8*)CARDENGINEI_ARM7_BUFFERED_LOCATION,
-					true
+					(u8*)CARDENGINEI_ARM7_BUFFERED_LOCATION
 				);
 				if (rc == 0) {
 					if (REG_SCFG_EXT7 != 0) {
@@ -1569,11 +1565,11 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 					}
 
 					// Load DLDI ce9 binary
-					loadCardEngineBinary(ce9Path, (u8*)CARDENGINEI_ARM9_BUFFERED_LOCATION, true);
+					loadCardEngineBinary(ce9Path, (u8*)CARDENGINEI_ARM9_BUFFERED_LOCATION);
 
 					if (!dlp && !gsdd) {
 						// Load ce9 binary (SDK 2.0)
-						loadCardEngineBinary("nitro:/cardenginei_arm9_sdk20_dldi.lz77", (u8*)CARDENGINEI_ARM9_BUFFERED_LOCATION2, true);
+						loadCardEngineBinary("nitro:/cardenginei_arm9_sdk20_dldi.lz77", (u8*)CARDENGINEI_ARM9_BUFFERED_LOCATION2);
 					}
 				} else {
 					const char* ce9Path = "nitro:/cardenginei_arm9.lz77";
@@ -1584,11 +1580,11 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 					}
 
 					// Load ce9 binary
-					loadCardEngineBinary(ce9Path, (u8*)CARDENGINEI_ARM9_BUFFERED_LOCATION, true);
+					loadCardEngineBinary(ce9Path, (u8*)CARDENGINEI_ARM9_BUFFERED_LOCATION);
 
 					if (!dlp && !gsdd) {
 						// Load ce9 binary (SDK 2.0)
-						loadCardEngineBinary("nitro:/cardenginei_arm9_sdk20.lz77", (u8*)CARDENGINEI_ARM9_BUFFERED_LOCATION2, true);
+						loadCardEngineBinary("nitro:/cardenginei_arm9_sdk20.lz77", (u8*)CARDENGINEI_ARM9_BUFFERED_LOCATION2);
 					}
 				}
 			}
@@ -1629,8 +1625,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			// Load ce7 binary
 			rc = loadCardEngineBinary(
 				binary3 ? "nitro:/cardenginei_arm7_dsiware3.lz77" : "nitro:/cardenginei_arm7_dsiware.lz77",
-				(u8*)CARDENGINEI_ARM7_BUFFERED_LOCATION,
-				true
+				(u8*)CARDENGINEI_ARM7_BUFFERED_LOCATION
 			);
 			if (rc == 0) {
 				if (REG_SCFG_EXT7 != 0) {
@@ -1640,13 +1635,12 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			}
 
 			// Load external cheat engine binary
-			loadCardEngineBinary("nitro:/cardenginei_arm7_cheat.bin", (u8*)CHEAT_ENGINE_BUFFERED_LOCATION, false);
+			loadCardEngineBinary("nitro:/cardenginei_arm7_cheat.bin", (u8*)CHEAT_ENGINE_BUFFERED_LOCATION);
 
 			// Load ce9 binary
 			loadCardEngineBinary(
 				binary3 ? "nitro:/cardenginei_arm9_dsiware3.lz77" : "nitro:/cardenginei_arm9_dsiware.lz77",
-				(u8*)CHEAT_ENGINE_BUFFERED_LOCATION,
-				true
+				(u8*)CHEAT_ENGINE_BUFFERED_LOCATION
 			);
 
 			bool found = (access(pageFilePath.c_str(), F_OK) == 0);
@@ -1668,7 +1662,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		}
 
 		// Load in-game menu ce9 binary
-		rc = loadCardEngineBinary("nitro:/cardenginei_arm9_igm.lz77", (u8*)igmText, true);
+		rc = loadCardEngineBinary("nitro:/cardenginei_arm9_igm.lz77", (u8*)igmText);
 		if (rc == 0) {
 			getIgmStrings(conf, false);
 
@@ -1918,15 +1912,15 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		conf->donorFileSize = getFileSize("fat:/_nds/nds-bootstrap/b4dsTwlDonor.bin");
 
 		// Load external cheat engine binary
-		loadCardEngineBinary("nitro:/cardenginei_arm7_cheat.bin", (u8*)CHEAT_ENGINE_LOCATION_B4DS_BUFFERED, false);
+		loadCardEngineBinary("nitro:/cardenginei_arm7_cheat.bin", (u8*)CHEAT_ENGINE_LOCATION_B4DS_BUFFERED);
 
 		// Load ce7 binary
 		if (strncmp(romTid, "KWY", 3) == 0 // Mighty Milky Way
 		||	strncmp(romTid, "KS3", 3) == 0 // Shantae: Risky's Revenge
 		) {
-			loadCardEngineBinary("nitro:/cardengine_arm7_music.bin", (u8*)CARDENGINE_ARM7_LOCATION_BUFFERED, false);
+			loadCardEngineBinary("nitro:/cardengine_arm7_music.bin", (u8*)CARDENGINE_ARM7_LOCATION_BUFFERED);
 		} else {
-			loadCardEngineBinary("nitro:/cardengine_arm7.bin", (u8*)CARDENGINE_ARM7_LOCATION_BUFFERED, false);
+			loadCardEngineBinary("nitro:/cardengine_arm7.bin", (u8*)CARDENGINE_ARM7_LOCATION_BUFFERED);
 		}
 
 		bool found = (access(pageFilePath.c_str(), F_OK) == 0);
@@ -1963,8 +1957,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		// Load in-game menu ce9 binary
 		rc = loadCardEngineBinary(
 			b4dsDebugRam ? "nitro:/cardengine_arm9_igm_extmem.lz77" : "nitro:/cardengine_arm9_igm.lz77",
-			b4dsDebugRam ? (u8*)INGAME_MENU_LOCATION_B4DS_EXTMEM : (u8*)INGAME_MENU_LOCATION_B4DS,
-			true
+			b4dsDebugRam ? (u8*)INGAME_MENU_LOCATION_B4DS_EXTMEM : (u8*)INGAME_MENU_LOCATION_B4DS
 		);
 		if (rc == 0) {
 			igmText = (struct IgmText *)(b4dsDebugRam ? INGAME_MENU_LOCATION_B4DS_EXTMEM : INGAME_MENU_LOCATION_B4DS);
@@ -2164,27 +2157,25 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		if (b4dsDebugRam) {
 			if (!startMultibootSrl && ((accessControl & BIT(4)) || (a7mbk6 == 0x080037C0 && ndsArm9Offset >= 0x02004000))) {
 				if (foto) {
-					loadCardEngineBinary("nitro:/cardengine_arm9_extmem_foto.lz77", (u8*)CARDENGINE_ARM9_LOCATION_BUFFERED, true);
+					loadCardEngineBinary("nitro:/cardengine_arm9_extmem_foto.lz77", (u8*)CARDENGINE_ARM9_LOCATION_BUFFERED);
 				} else {
 					loadCardEngineBinary(
 						ndsArm9Offset >= 0x02004000 ? "nitro:/cardengine_arm9_extmem_start.lz77" : "nitro:/cardengine_arm9_extmem.lz77",
-						(u8*)CARDENGINE_ARM9_LOCATION_BUFFERED,
-						true
+						(u8*)CARDENGINE_ARM9_LOCATION_BUFFERED
 					);
 				}
 			} else if (gsdd) {
-				loadCardEngineBinary("nitro:/cardengine_arm9_extmem_gsdd.lz77", (u8*)CARDENGINE_ARM9_LOCATION_BUFFERED, true);
+				loadCardEngineBinary("nitro:/cardengine_arm9_extmem_gsdd.lz77", (u8*)CARDENGINE_ARM9_LOCATION_BUFFERED);
 			} else {
-				loadCardEngineBinary("nitro:/cardengine_arm9_extmem.lz77", (u8*)CARDENGINE_ARM9_LOCATION_BUFFERED, true);
+				loadCardEngineBinary("nitro:/cardengine_arm9_extmem.lz77", (u8*)CARDENGINE_ARM9_LOCATION_BUFFERED);
 			}
 		} else if (!startMultibootSrl && ((accessControl & BIT(4)) || (a7mbk6 == 0x080037C0 && ndsArm9Offset >= 0x02004000) || strncmp(romTid, "AP2", 3) == 0 || strncmp(romTid, "VSO", 3) == 0)) {
 			if (foto) {
-				loadCardEngineBinary("nitro:/cardengine_arm9_start_foto.lz77", (u8*)CARDENGINE_ARM9_LOCATION_BUFFERED, true);
+				loadCardEngineBinary("nitro:/cardengine_arm9_start_foto.lz77", (u8*)CARDENGINE_ARM9_LOCATION_BUFFERED);
 			} else {
 				loadCardEngineBinary(
 					ndsArm9Offset >= 0x02004000 ? "nitro:/cardengine_arm9_start.lz77" : (io_dldi_data->driverSize >= 0x0E) ? "nitro:/cardengine_arm9_32.lz77" : "nitro:/cardengine_arm9.lz77",
-					(u8*)CARDENGINE_ARM9_LOCATION_BUFFERED,
-					true
+					(u8*)CARDENGINE_ARM9_LOCATION_BUFFERED
 				);
 			}
 		} else {
@@ -2246,7 +2237,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 				fclose(ndsFile);
 			}
-			loadCardEngineBinary(ce9path, (u8*)CARDENGINE_ARM9_LOCATION_BUFFERED, true);
+			loadCardEngineBinary(ce9path, (u8*)CARDENGINE_ARM9_LOCATION_BUFFERED);
 		}
 
 		// Load DS blowfish
