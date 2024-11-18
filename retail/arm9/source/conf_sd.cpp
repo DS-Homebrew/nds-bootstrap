@@ -1668,7 +1668,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		}
 
 		// Load in-game menu ce9 binary
-		rc = loadCardEngineBinary("nitro:/cardenginei_arm9_igm.lz77", (u8*)igmText, false);
+		rc = loadCardEngineBinary("nitro:/cardenginei_arm9_igm.lz77", (u8*)igmText, true);
 		if (rc == 0) {
 			getIgmStrings(conf, false);
 
