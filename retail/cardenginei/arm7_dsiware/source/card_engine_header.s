@@ -136,26 +136,9 @@ vblankHandler:
 	bx  	r0
 
 code_handler_start_vblank:
-	push	{r0-r12} 
-	ldr	r3, =myIrqHandlerVBlank
-	bl	_blx_r3_stub		@ jump to myIrqHandler
-	
-	@ exit after return
-	b	exit
-
-@---------------------------------------------------------------------------------
-_blx_r3_stub:
-@---------------------------------------------------------------------------------
-	bx	r3
-
-@---------------------------------------------------------------------------------
-
-@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-
-exit:
-	pop   	{r0-r12} 
-	pop  	{lr}
-	bx  lr
+	push	{r0-r12}
+	bl	myIrqHandlerVBlank
+	pop   	{r0-r12,pc}
 
 .pool
 
@@ -210,7 +193,7 @@ card_irq_enable_arm7:
 	push	{r1-r12}
 	ldr	r3, =myIrqEnable
 	bl	_blx_r3_stub2
-	pop   	{r1-r12} 
+	pop   	{r1-r12}
 	pop  	{lr}
 	bx  lr
 _blx_r3_stub2:
@@ -341,9 +324,9 @@ eepromProtectThumbStub:
 	push	{r3-r7,lr}
 	ldr	r4, =eepromProtect
 	bl	_blx_r3_stubthumb1
-	pop   	{r3-r7} 
+	pop   	{r3-r7}
 	pop  	{r3}
-	bx  r3    
+	bx  r3
 _blx_r3_stubthumb1:
 	bx	r4
 .pool
@@ -351,9 +334,9 @@ eepromPageEraseThumbStub:
 	push	{r3-r7,lr}
 	ldr	r4, =eepromPageErase
 	bl	_blx_r3_stubthumb2
-	pop   	{r3-r7} 
+	pop   	{r3-r7}
 	pop  	{r3}
-	bx  r3    
+	bx  r3
 _blx_r3_stubthumb2:
 	bx	r4
 .pool
@@ -361,7 +344,7 @@ eepromPageVerifyThumbStub:
 	push	{r3-r7,lr}
 	ldr	r4, =eepromPageVerify
 	bl	_blx_r3_stubthumb3
-	pop   	{r3-r7} 
+	pop   	{r3-r7}
 	pop  	{r3}
 	bx  r3
 _blx_r3_stubthumb3:
@@ -371,7 +354,7 @@ eepromPageWriteThumbStub:
 	push	{r4-r7,lr}
 	ldr	r4, =eepromPageWrite
 	bl	_blx_r3_stubthumb4
-	pop   	{r4-r7} 
+	pop   	{r4-r7}
 	pop  	{r3}
 	bx  r3
 _blx_r3_stubthumb4:
@@ -381,7 +364,7 @@ eepromPageProgThumbStub:
 	push	{r4-r7,lr}
 	ldr	r4, =eepromPageProg
 	bl	_blx_r3_stubthumb5
-	pop   	{r4-r7} 
+	pop   	{r4-r7}
 	pop  	{r3}
 	bx  r3
 _blx_r3_stubthumb5:
@@ -391,7 +374,7 @@ cardReadThumbStub:
 	push	{r4-r6,lr}
 	ldr	r4, =cardRead
 	bl	_blx_r3_stubthumb6
-	pop   	{r4-r6} 
+	pop   	{r4-r6}
 	pop  	{r3}
 	bx  r3
 _blx_r3_stubthumb6:
@@ -401,7 +384,7 @@ eepromReadThumbStub:
 	push	{r4-r6,lr}
 	ldr	r4, =eepromRead
 	bl	_blx_r3_stubthumb7
-	pop   	{r4-r6} 
+	pop   	{r4-r6}
 	pop  	{r3}
 	bx  r3
 _blx_r3_stubthumb7:
@@ -411,7 +394,7 @@ cardIdThumbStub:
 	push	{r4-r6,lr}
 	ldr	r4, =cardId
 	bl	_blx_r3_stubthumb8
-	pop   	{r4-r6} 
+	pop   	{r4-r6}
 	pop  	{r3}
 	bx  r3
 _blx_r3_stubthumb8:
