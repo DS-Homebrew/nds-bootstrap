@@ -107,8 +107,6 @@ endif
 $(BUILD):
 	@[ -d $@ ] || mkdir -p $@
 	@$(MAKE) -C $(BUILD) -f $(CURDIR)/Makefile
-	@cp $(OUTPUT).bin $(OUTPUT_CMP).lz77
-	@$(LZSS) -ewf $(OUTPUT_CMP).lz77
 
 #---------------------------------------------------------------------------------
 clean:
@@ -124,6 +122,10 @@ DEPENDS	:=	$(OFILES:.o=.d)
 #---------------------------------------------------------------------------------
 # main targets
 #---------------------------------------------------------------------------------
+$(OUTPUT_CMP).lz77: $(OUTPUT).bin
+	@cp $< $@
+	@$(LZSS) -ewf $@
+
 $(OUTPUT).bin:	$(DEPSDIR)/$(TARGET).elf
 $(DEPSDIR)/$(TARGET).elf:	cardengine.ld $(OFILES)
 #	@echo linking $(notdir $@)
