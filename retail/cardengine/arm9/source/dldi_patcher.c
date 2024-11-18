@@ -116,13 +116,9 @@ bool dldiPatchBinary (data_t *binData, u32 binSize) {
 		return false;
 	}
 
-	#ifdef EXTMEM
-	const u32 dldiOffset = 0x027BD060;
-	#else
-	const u32 dldiOffset = 0x023FD060;
-	#endif
+	extern u32 dldiOffsetNew;
 
-	data_t *pDH = (data_t*)(((u32*)dldiOffset) - 24);
+	data_t *pDH = (data_t*)dldiOffsetNew;
 	data_t *pAH = &(binData[patchOffset]);
 
 	if (*((u32*)(pDH + DO_ioType)) == DEVICE_TYPE_DLDI) {

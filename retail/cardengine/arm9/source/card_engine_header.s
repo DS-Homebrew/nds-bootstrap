@@ -132,7 +132,7 @@ code_handler_start_ipc:
 
 .pool
 
-/* .thumb
+.thumb
 ndsCodeStart:
 	mov r1, #0
 	mov r2, #0
@@ -148,7 +148,7 @@ ndsCodeStart:
 	bx r0
 
 .balign	4
-.arm */
+.arm
 
 patches:
 .word	cardRead

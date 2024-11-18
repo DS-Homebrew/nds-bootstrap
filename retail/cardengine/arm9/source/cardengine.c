@@ -201,16 +201,21 @@ extern bool dldiPatchBinary (unsigned char *binData, u32 binSize);
 
 void reset(u32 param) {
 	setDeviceOwner();
-	u32 resetParams = ((ce9->valueBits & isSdk5) ? RESET_PARAM_SDK5 : RESET_PARAM);
+	#ifndef GSDD
+	const u32 resetParams = ((ce9->valueBits & isSdk5) ? RESET_PARAM_SDK5 : RESET_PARAM);
+	#else
+	const u32 resetParams = RESET_PARAM_SDK5;
+	#endif
 	u32 iUncompressedSize = 0;
 	fileRead((char*)&iUncompressedSize, &pageFile, 0x3FFFF0, sizeof(u32));
 
 	*(u32*)resetParams = param;
-	// if (isDSiWare || iUncompressedSize > 0x280000 /*|| param == 0xFFFFFFFF*/ || *(u32*)(resetParams+0xC) > 0) {
+	#ifndef GSDD
+	if (isDSiWare || iUncompressedSize > 0x280000 /*|| param == 0xFFFFFFFF*/ || *(u32*)(resetParams+0xC) > 0) {
 		enterCriticalSection();
-		/* if (isDSiWare || iUncompressedSize > 0x280000) {
+		if (isDSiWare || iUncompressedSize > 0x280000) {
 			sharedAddr[0] = 0x57495344; // 'DSIW'
-		} else */ if (param != 0xFFFFFFFF && !igmReset && (ce9->valueBits & softResetMb)) {
+		} else if (param != 0xFFFFFFFF && !igmReset && (ce9->valueBits & softResetMb)) {
 			*(u32*)resetParams = 0;
 			*(u32*)(resetParams+8) = 0x44414F4C; // 'LOAD'
 			fileWrite((char*)ndsHeader, &pageFile, 0x2BFE00, 0x160);
@@ -218,12 +223,13 @@ void reset(u32 param) {
 			fileWrite((char*)0x022C0000, &pageFile, 0x2C0000, ndsHeader->arm7binarySize);
 		}
 		fileWrite((char*)resetParams, &srParamsFile, 0, 0x10);
-		// if (sharedAddr[0] == 0x57495344 || param == 0xFFFFFFFF) {
-		// 	sharedAddr[3] = 0x52534554;
-			sharedAddr[3] = 0x4E445352; // 'RSDN'
+		if (sharedAddr[0] == 0x57495344 || param == 0xFFFFFFFF) {
+			sharedAddr[3] = 0x52534554;
+		// 	sharedAddr[3] = 0x4E445352; // 'RSDN'
 			while (1);
-		// }
-	/* }
+		}
+	}
+	#endif
 	sharedAddr[3] = 0x52534554;
 
 	//EXCEPTION_VECTOR_SDK1 = 0;
@@ -263,7 +269,9 @@ void reset(u32 param) {
 	REG_IPC_FIFO_CR = 0;
 
 	mpuSet = false;
+	#ifndef GSDD
 	IPC_SYNC_hooked = false;
+	#endif
 
 	toncset((char*)((ce9->valueBits & isSdk5) ? 0x02FFFD80 : 0x027FFD80), 0, 0x80);
 	toncset((char*)((ce9->valueBits & isSdk5) ? 0x02FFFF80 : 0x027FFF80), 0, 0x80);
@@ -300,17 +308,27 @@ void reset(u32 param) {
 		// 	*(u32*)(0x02000000) |= BIT(2);
 		// }
 		//toncset((u32*)0x02000004, 0, 0x3DA000 - 4);
-		toncset((u32*)0x02000000, 0, 0x3C0000);
 		#ifdef NODSIWARE
+		toncset((u32*)0x02000000, 0, 0x3C0000);
+		#else
+		toncset((u32*)0x02004000, 0, 0x3BC000);
+		*(u32*)(0x02000004) = 0;
+		#endif
+		/* #ifdef NODSIWARE
 		toncset((u32*)0x023C4000, 0, 0x1C000);
 		toncset((u32*)0x02FE4000, 0, 0x19C00-0x4000);
 		#else
 		toncset((u32*)0x023C4000, 0, 0x16800);
 		toncset((u32*)0x02FE4000, 0, 0x1D000-0x4000);
-		#endif
+		#endif */
 		if (param == 0xFFFFFFFF) {
 			*(u32*)(0x02000000) = BIT(0) | BIT(1) | BIT(2);
 		}
+		#ifndef NODSIWARE
+		else {
+			*(u32*)(0x02000000) = 0;
+		}
+		#endif
 
 		WRAM_CR = 0; // Set shared ram to ARM9
 
@@ -331,11 +349,11 @@ void reset(u32 param) {
 		fileRead((char*)&newArm7binarySize, &pageFile, 0x3FFFF4, sizeof(u32));
 		fileRead((char*)ndsHeader->arm9destination, &pageFile, 0x14000, iUncompressedSize);
 		fileRead((char*)ndsHeader->arm7destination, &pageFile, 0x2C0000, newArm7binarySize);
-		#ifdef EXTMEM
+		/* #ifdef EXTMEM
 		fileRead((char*)CHEAT_ENGINE_LOCATION_B4DS, &pageFile, 0x2FE000, 0x2000);
 		#else
 		fileRead((char*)CHEAT_ENGINE_LOCATION_B4DS-0x400000, &pageFile, 0x2FE000, 0x2000);
-		#endif
+		#endif */
 
 		#ifdef NODSIWARE
 		tonccpy((u32*)0x02370000, ce9, 0x2800);
@@ -350,7 +368,7 @@ void reset(u32 param) {
 	while (REG_VCOUNT == 191);
 
 	// Start ARM9
-	ndsCodeStart(ndsHeader->arm9executeAddress); */
+	ndsCodeStart(ndsHeader->arm9executeAddress);
 }
 
 void prepareScreenshot(void) {
@@ -574,7 +592,7 @@ void myIrqHandlerIPC(void) {
 				cardSave(*(vu32*)(sharedAddr), *(vu32*)(sharedAddr+1), *(vu32*)(sharedAddr+2), (sharedAddr[3] == 0x53415657));
 				sharedAddr[3] = 0;
 			} break;
-			case 0x524F4D52: {
+			/* case 0x524F4D52: {
 				u32 src = *(vu32*)(sharedAddr);
 				u32 dst = *(vu32*)(sharedAddr+1);
 				u32 len = *(vu32*)(sharedAddr+2);
@@ -587,7 +605,7 @@ void myIrqHandlerIPC(void) {
 
 				REG_EXMEMCNT = exmemcnt;
 				sharedAddr[3] = 0;
-			} break;
+			} break; */
 		} break;
 		#ifndef NODSIWARE
 		#ifndef FOTO

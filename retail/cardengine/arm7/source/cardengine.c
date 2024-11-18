@@ -208,15 +208,15 @@ void rebootConsole(void) {
 }
 
 void reset(void) {
-	while (sharedAddr[3] != 0x4E445352) swiDelay(100);
+	// while (sharedAddr[3] != 0x4E445352) swiDelay(100);
 
-	rebootConsole();
+	// rebootConsole();
 	// u32 resetParam = (isSdk5Set ? RESET_PARAM_SDK5 : RESET_PARAM);
-	// if (sharedAddr[0] == 0x57495344 /*|| *(u32*)resetParam == 0xFFFFFFFF*/) {
-	// 	rebootConsole();
-	// }
+	if (sharedAddr[0] == 0x57495344 /*|| *(u32*)resetParam == 0xFFFFFFFF*/) {
+		rebootConsole();
+	}
 
-	/* REG_IME = 0;
+	REG_IME = 0;
 
 	toncset32((u32*)0x04000400, 0, 0x104/4); // Clear sound channel & control registers
 
@@ -262,7 +262,7 @@ void reset(void) {
 	}
 
 	// Start ARM7
-	ndsCodeStart(ndsHeader->arm7executeAddress); */
+	ndsCodeStart(ndsHeader->arm7executeAddress);
 }
 
 //---------------------------------------------------------------------------------
@@ -665,11 +665,11 @@ bool cardRead(u32 dma, u32 src, void *dst, u32 len) {
 	dbg_hexa(len);
 	#endif
 
-	if (!(valueBits & a9IrqHooked)) {
+	// if (!(valueBits & a9IrqHooked)) {
 		return false;
-	}
+	// }
 
-	// Send a command to the ARM9 to read the ROM
+	/* // Send a command to the ARM9 to read the ROM
 	const u32 commandRomRead = 0x524F4D52;
 
 	// Write the command
@@ -680,5 +680,5 @@ bool cardRead(u32 dma, u32 src, void *dst, u32 len) {
 
 	waitForArm9();
 
-	return true;
+	return true; */
 }
