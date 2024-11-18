@@ -93,6 +93,14 @@ off_t getFileSize(const char* path) {
 	return fsize;
 }
 
+off_t getFileSize(FILE* fp) {
+	fseek(fp, 0, SEEK_END);
+	off_t fsize = ftell(fp);
+	if (!fsize) fsize = 0;
+
+	return fsize;
+}
+
 void addTwlDevice(const char letter, u8 flags, u8 accessRights, const char* name, const char* path) {
 	static char currentLetter = 'A';
 	static u8* deviceList = (u8*)0x02EFF000;
@@ -116,7 +124,34 @@ extern std::string ReplaceAll(std::string str, const std::string& from, const st
 extern bool extention(const std::string& filename, const char* ext);
 
 static void loadPreLoadSettings(configuration* conf, const char* pckPath, const char* romTid, const u16 headerCRC) {
-	FILE *file = fopen(pckPath, "rb");
+	FILE *file = NULL;
+
+	// Pre-load sound data for mainline Gen 4 Pokemon games
+	if (strncmp(romTid, "ADA", 3) == 0
+	 || strncmp(romTid, "APA", 3) == 0) {
+		if (romFSInit(conf->ndsPath)) {
+			file = fopen("rom:/data/sound/sound_data.sdat", "rb");
+		}
+	} else if (strncmp(romTid, "CPU", 3) == 0) {
+		if (romFSInit(conf->ndsPath)) {
+			file = fopen("rom:/data/sound/pl_sound_data.sdat", "rb");
+		}
+	} else if (strncmp(romTid, "IPK", 3) == 0
+			|| strncmp(romTid, "IPG", 3) == 0) {
+		if (romFSInit(conf->ndsPath)) {
+			file = fopen("rom:/data/sound/gs_sound_data.sdat", "rb");
+		}
+	}
+
+	if (file) {
+		conf->dataToPreloadAddr = offsetOfOpenedNitroFile;
+		conf->dataToPreloadSize = getFileSize(file);
+		conf->dataToPreloadFrame = 0;
+		fclose(file);
+		return;
+	}
+
+	file = fopen(pckPath, "rb");
 	if (!file) {
 		return;
 	}
