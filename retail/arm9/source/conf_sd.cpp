@@ -1646,7 +1646,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			loadCardEngineBinary(
 				binary3 ? "nitro:/cardenginei_arm9_dsiware3.lz77" : "nitro:/cardenginei_arm9_dsiware.lz77",
 				(u8*)CHEAT_ENGINE_BUFFERED_LOCATION,
-				false
+				true
 			);
 
 			bool found = (access(pageFilePath.c_str(), F_OK) == 0);
