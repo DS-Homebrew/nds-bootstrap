@@ -8,7 +8,7 @@ endif
 include $(DEVKITARM)/ds_rules
 
 ifeq ($(OS),Windows_NT)
-LZSS			?=	../../../lzss.exe
+LZSS			?=	../../../../lzss.exe
 
 else
 
