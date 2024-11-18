@@ -149,6 +149,7 @@ void inGameMenu(void) {
 					break;
 				case 0x444D4152: // RAMD
 					dumpRam();
+					unloadInGameMenu();
 					exitMenu = true;
 					break;
 				/* case 0x50455453: // STEP

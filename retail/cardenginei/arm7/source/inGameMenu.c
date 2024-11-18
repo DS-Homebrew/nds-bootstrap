@@ -130,6 +130,7 @@ void inGameMenu(void) {
 					exitMenu = true;
 					timeTillStatusRefresh = 7;
 					unloadInGameMenu();
+					sharedAddr[5] = flagBak;
 					#ifdef TWLSDK
 					i2cWriteRegister(0x4A, 0x12, 0x01);
 					#endif
@@ -151,6 +152,8 @@ void inGameMenu(void) {
 					break;
 				case 0x444D4152: // RAMD
 					dumpRam();
+					unloadInGameMenu();
+					sharedAddr[5] = flagBak;
 					exitMenu = true;
 					break;
 				/* case 0x50455453: // STEP
@@ -220,11 +223,11 @@ void inGameMenu(void) {
 
 	sharedAddr[0] = errorBak;
 	sharedAddr[4] = 0;
-	sharedAddr[5] = flagBak;
 	sharedAddr[7] -= 0x10000000; // Clear time receive flag
 	timeTillStatusRefresh = 7;
 
 	unloadInGameMenu();
+	sharedAddr[5] = flagBak;
 
 	leaveCriticalSection(oldIME);
 	REG_MASTER_VOLUME = 127;
