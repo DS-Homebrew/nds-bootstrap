@@ -72,7 +72,7 @@ endif
 export GAME_ICON := $(CURDIR)/$(ASSETS)/icon.bmp
 
 #.PHONY: cardengine_arm7 cardengine_arm9 bootloader BootStrap clean
-.PHONY: all dist release nightly bootloader bootloader1 bootloader2 bootloaderi bootloaderi1 bootloaderi2 cardengine_arm7 cardengine_arm7_music cardengine_arm9_igm cardengine_arm9_igm_extmem cardengine_arm9 cardengine_arm9_32 cardengine_arm9_start cardengine_arm9_start_foto cardengine_arm9_alt cardengine_arm9_alt_gsdd cardengine_arm9_alt2 cardengine_arm9_alt3 cardengine_arm9_extmem cardengine_arm9_extmem_gsdd cardengine_arm9_extmem_start cardengine_arm9_extmem_foto cardenginei_arm7 cardenginei_arm7_alt cardenginei_arm7_twlsdk cardenginei_arm7_twlsdk3 cardenginei_arm7_dsiware cardenginei_arm7_dsiware3 cardenginei_arm7_cheat cardenginei_arm9_igm cardenginei_arm9 cardenginei_arm9_sdk20 cardenginei_arm9_dlp cardenginei_arm9_gsdd cardenginei_arm9_dldi cardenginei_arm9_sdk20_dldi cardenginei_arm9_gsdd_dldi cardenginei_arm9_twlsdk cardenginei_arm9_twlsdk3 cardenginei_arm9_twlsdk_dldi cardenginei_arm9_twlsdk3_dldi cardenginei_arm9_dsiware cardenginei_arm9_dsiware3 preLoadSettings apfix libnds32 arm7/$(TARGET).elf arm9/$(TARGET).elf clean
+.PHONY: all dist release nightly bootloader bootloader1 bootloader2 bootloaderi bootloaderi1 bootloaderi2 cardengine_arm7 cardengine_arm7_music cardengine_arm9_igm cardengine_arm9_igm_extmem cardengine_arm9 cardengine_arm9_32 cardengine_arm9_start cardengine_arm9_start_foto cardengine_arm9_alt cardengine_arm9_alt_gsdd cardengine_arm9_alt2 cardengine_arm9_alt3 cardengine_arm9_extmem cardengine_arm9_extmem_gsdd cardengine_arm9_extmem_start cardengine_arm9_extmem_foto cardenginei_arm7 cardenginei_arm7_alt cardenginei_arm7_twlsdk cardenginei_arm7_twlsdk3 cardenginei_arm7_dsiware cardenginei_arm7_dsiware3 cardenginei_arm7_cheat cardenginei_arm9_igm cardenginei_arm9 cardenginei_arm9_sdk20 cardenginei_arm9_dlp cardenginei_arm9_gsdd cardenginei_arm9_dldi cardenginei_arm9_sdk20_dldi cardenginei_arm9_gsdd_dldi cardenginei_arm9_twlsdk cardenginei_arm9_twlsdk3 cardenginei_arm9_twlsdk_dldi cardenginei_arm9_twlsdk3_dldi cardenginei_arm9_dsiware cardenginei_arm9_dsiware3 preLoadSettings apfix arm7/$(TARGET).elf arm9/$(TARGET).elf clean
 
 all:	$(OUTPUT)
 
@@ -101,12 +101,8 @@ arm7/$(TARGET).elf:
 	@$(MAKE) -C arm7
 	
 #---------------------------------------------------------------------------------
-arm9/$(TARGET).elf:	bootloader bootloader1 bootloader2 bootloaderi bootloaderi1 bootloaderi2 preLoadSettings apfix libnds32
+arm9/$(TARGET).elf:	bootloader bootloader1 bootloader2 bootloaderi bootloaderi1 bootloaderi2 preLoadSettings apfix
 	@$(MAKE) -C arm9
-
-#---------------------------------------------------------------------------------		
-libnds32:
-	@$(MAKE) -C libnds32 release
 
 #---------------------------------------------------------------------------------		
 bootloader: cardengine_arm7 cardengine_arm7_music cardengine_arm9_igm cardengine_arm9_igm_extmem cardengine_arm9 cardengine_arm9_32 cardengine_arm9_start cardengine_arm9_start_foto cardengine_arm9_alt cardengine_arm9_alt_gsdd cardengine_arm9_alt2 cardengine_arm9_alt3 cardengine_arm9_extmem cardengine_arm9_extmem_gsdd cardengine_arm9_extmem_start cardengine_arm9_extmem_foto
@@ -297,7 +293,6 @@ apfix:
 clean:
 	@echo clean ...
 	@rm -fr $(BUILD) $(TARGET).elf $(TARGET).nds $(TARGET).nds.orig.nds $(TARGET).arm9 $(BIN)
-	@$(MAKE) -C libnds32 clean
 	@$(MAKE) -C arm7 clean
 	@$(MAKE) -C arm9 clean
 	@$(MAKE) -C cardengine/arm7 clean
