@@ -58,26 +58,24 @@ bool applyIpsPatch(const tNDSHeader* ndsHeader, u8* ipsbyte, const bool arm9Only
 				}
 				if ((u32)rombyte == (consoleModel > 0 ? 0x0E000000 : 0x0D000000)) {
 					rombyte = (void*)0x03708000;
-				} else if (ndsHeader->unitCode == 0 || !dsiModeConfirmed) {
-					if (isSdk5 || (dsiBios && !isESdk2)) {
-						if (romLocation < (ndsHeader->unitCode > 0 ? 0x0C7E0000 : 0x0C800000) && (u32)rombyte >= 0x0C7C4000) {
-							rombyte += (ndsHeader->unitCode > 0 ? 0x1C000 : 0x3C000);
-						} else if (ndsHeader->unitCode == 0) {
-							if (romLocation < 0x0D000000 && (u32)rombyte >= 0x0CFFC000) {
-								rombyte += 0x4000;
-							}
-						} else {
-							if (romLocation < 0x0C800000 && (u32)rombyte >= 0x0C7FC000) {
-								rombyte += 0x4000;
-							} else if (romLocation < 0x0D000000 && (u32)rombyte >= 0x0CFE0000) {
-								rombyte += 0x20000;
-							}
+				} else if (isSdk5 || (dsiBios && !isESdk2)) {
+					if (romLocation < (ndsHeader->unitCode > 0 ? 0x0C7E0000 : 0x0C800000) && (u32)rombyte >= 0x0C7C4000) {
+						rombyte += (ndsHeader->unitCode > 0 ? 0x1C000 : 0x3C000);
+					} else if (ndsHeader->unitCode == 0) {
+						if (romLocation < 0x0D000000 && (u32)rombyte >= 0x0CFFC000) {
+							rombyte += 0x4000;
 						}
-					} else if (romLocation < 0x0D000000 && (u32)rombyte >= 0x0CFFC000 && dsiBios) {
-						rombyte += 0x4000;
-					} else if (romLocation < 0x0C800000 && (u32)rombyte >= 0x0C7C0000) {
-						rombyte += 0x40000;
+					} else {
+						if (romLocation < 0x0C800000 && (u32)rombyte >= 0x0C7FC000) {
+							rombyte += 0x4000;
+						} else if (romLocation < 0x0D000000 && (u32)rombyte >= 0x0CFE0000) {
+							rombyte += 0x20000;
+						}
 					}
+				} else if (romLocation < 0x0D000000 && (u32)rombyte >= 0x0CFFC000 && dsiBios) {
+					rombyte += 0x4000;
+				} else if (romLocation < 0x0C800000 && (u32)rombyte >= 0x0C7C0000) {
+					rombyte += 0x40000;
 				}
 			} else {
 				rombyte = (void*)CACHE_ADRESS_START_DSIMODE;
