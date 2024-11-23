@@ -74,14 +74,11 @@ extern void disableIrqMask(u32 mask);
 
 bool isDma = false;
 bool dmaDirectRead = false;
-#ifndef TWLSDK
-static bool dataSplit = false;
-#endif
 extern bool romPart;
 
 void endCardReadDma() {
 	#ifndef TWLSDK
-	if (dmaDirectRead && (ndmaBusy(0) || (dataSplit && ndmaBusy(1))))
+	if (dmaDirectRead && (ndmaBusy(0) || ndmaBusy(1)))
 	#else
 	if (dmaDirectRead && ndmaBusy(0))
 	#endif
@@ -379,9 +376,6 @@ void cardSetDma(u32 * params) {
 	}
 	#endif
 
-	#ifndef TWLSDK
-	dataSplit = false;
-	#endif
 	romPart = false;
 	//int romPartNo = 0;
 	if (!(ce9->valueBits & ROMinRAM)) {
@@ -420,28 +414,35 @@ void cardSetDma(u32 * params) {
 		// Copy via dma
 		// ndmaCopyWordsAsynch(0, (u8*)ce9->romLocation/*[romPartNo]*/+src, dst, len);
 
-		u32 len2 = 0;
-		for (int i = 0; i < ce9->romMapLines; i++) {
-			if (!(src >= ce9->romMap[i][0] && (i == ce9->romMapLines-1 || src < ce9->romMap[i+1][0])))
-				continue;
-
-			u32 newSrc = (ce9->romMap[i][1]-ce9->romMap[i][0])+src;
-			if (newSrc+len > ce9->romMap[i][2]) {
-				do {
-					len--;
-					len2++;
-				} while (newSrc+len != ce9->romMap[i][2]);
-				ndmaCopyWordsAsynch(1, (u8*)newSrc, dst, len);
-				src += len;
-				dst += len;
-				#ifndef TWLSDK
-				dataSplit = true;
-				#endif
-			} else {
-				ndmaCopyWordsAsynch(0, (u8*)newSrc, dst, len2==0 ? len : len2);
+		#ifdef TWLSDK
+		u32 newSrc = ce9->romLocation/*[romPartNo]*/+src;
+		if (src > *(u32*)0x02FFE1C0) {
+			newSrc -= *(u32*)0x02FFE1CC;
+		}
+		ndmaCopyWordsAsynch(0, (u8*)newSrc, dst, len);
+		#else
+		u32 newSrc = 0;
+		u32 newLen = 0;
+		int i = 0;
+		for (i = 0; i < ce9->romMapLines; i++) {
+			if (src >= ce9->romMap[i][0] && (i == ce9->romMapLines-1 || src < ce9->romMap[i+1][0])) {
 				break;
 			}
 		}
+		while (len > 0) {
+			newSrc = (ce9->romMap[i][1]-ce9->romMap[i][0])+src;
+			newLen = len;
+			while (newSrc+newLen > ce9->romMap[i][2]) {
+				newLen--;
+			}
+			while (ndmaBusy(i % 2)) { swiDelay(100); }
+			ndmaCopyWordsAsynch(i % 2, (u8*)newSrc, dst, newLen);
+			src += newLen;
+			dst += newLen;
+			len -= newLen;
+			i++;
+		}
+		#endif
 
 		IPC_SendSync(0x3);
 		return;

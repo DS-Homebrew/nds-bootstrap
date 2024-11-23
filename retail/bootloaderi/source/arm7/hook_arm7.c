@@ -463,7 +463,6 @@ int hookNdsRetailArm7(
 			ce7->romPartFrame = dataToPreloadFrame;
 		}
 
-		// 0: ROM part start, 1: ROM part start in RAM, 2: ROM part end in RAM
 		extern u32 romMapLines;
 		extern u32 romMap[5][3];
 

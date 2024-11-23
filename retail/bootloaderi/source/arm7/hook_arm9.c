@@ -163,7 +163,7 @@ static u32* hookInterruptHandler(const u32* start, size_t size) {
 	// 2     LCD V-Counter Match
 }
 
-void configureRomMap(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const u32 romStart, const u32 cacheBlockSize, const u8 dsiMode, const u8 consoleModel) {
+void configureRomMap(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const u32 romStart, const u8 dsiMode) {
 	extern u32 getRomLocation(const tNDSHeader* ndsHeader, const bool isESdk2, const bool isSdk5, const bool dsiBios);
 
 	const u32 romLocation = getRomLocation(ndsHeader, (ce9->valueBits & b_eSdk2), (ce9->valueBits & b_isSdk5), (ce9->valueBits & b_dsiBios));
@@ -175,12 +175,11 @@ void configureRomMap(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const u32
 		return;
 	}
 
-	// 0: ROM part start, 1: ROM part start in RAM, 2: ROM part end in RAM
 	extern u32 romMapLines;
 	extern u32 romMap[5][3];
 
 	ce9->romMapLines = romMapLines;
-	for (int i = 0; i < 4; i++) {
+	for (int i = 0; i < 5; i++) {
 		for (int i2 = 0; i2 < 3; i2++) {
 			ce9->romMap[i][i2] = romMap[i][i2];
 		}
@@ -324,7 +323,7 @@ int hookNdsRetailArm9(
 			//ce9->romLocation[1] = ce9->romLocation[0]+dataToPreloadSize[0];
 			// ce9->romLocation -= dataToPreloadAddr[0];
 			//ce9->romLocation[1] -= dataToPreloadAddr[1];
-			configureRomMap(ce9, ndsHeader, dataToPreloadAddr, cacheBlockSize, dsiMode, consoleModel);
+			configureRomMap(ce9, ndsHeader, dataToPreloadAddr, dsiMode);
 			for (u32 i = 0; i < dataToPreloadSize/*+dataToPreloadSize[1]*/; i += cacheBlockSize) {
 				ce9->cacheAddress += cacheBlockSize;
 				if (isSdk5(moduleParams) || ((ce9->valueBits & b_dsiBios) && laterSdk)) {
@@ -424,7 +423,7 @@ int hookNdsRetailArm9(
 		} else {
 			romOffset = ndsHeader->arm9overlaySource;
 		}
-		configureRomMap(ce9, ndsHeader, romOffset, 0x4000, dsiMode, consoleModel);
+		configureRomMap(ce9, ndsHeader, romOffset, dsiMode);
 	}
 
     u32* tableAddr = patchOffsetCache.a9IrqHookOffset;

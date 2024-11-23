@@ -626,24 +626,25 @@ static inline void cardReadRAM(u8* dst, u32 src, u32 len/*, int romPartNo*/) {
 	tonccpy(dst, (u8*)newSrc, len);
 	#else
 	// tonccpy(dst, (u8*)ce9->romLocation/*[romPartNo]*/+src, len);
-	u32 len2 = 0;
-	for (int i = 0; i < ce9->romMapLines; i++) {
-		if (!(src >= ce9->romMap[i][0] && (i == ce9->romMapLines-1 || src < ce9->romMap[i+1][0])))
-			continue;
-
-		u32 newSrc = (ce9->romMap[i][1]-ce9->romMap[i][0])+src;
-		if (newSrc+len > ce9->romMap[i][2]) {
-			do {
-				len--;
-				len2++;
-			} while (newSrc+len != ce9->romMap[i][2]);
-			tonccpy(dst, (u8*)newSrc, len);
-			src += len;
-			dst += len;
-		} else {
-			tonccpy(dst, (u8*)newSrc, len2==0 ? len : len2);
+	u32 newSrc = 0;
+	u32 newLen = 0;
+	int i = 0;
+	for (i = 0; i < ce9->romMapLines; i++) {
+		if (src >= ce9->romMap[i][0] && (i == ce9->romMapLines-1 || src < ce9->romMap[i+1][0])) {
 			break;
 		}
+	}
+	while (len > 0) {
+		newSrc = (ce9->romMap[i][1]-ce9->romMap[i][0])+src;
+		newLen = len;
+		while (newSrc+newLen > ce9->romMap[i][2]) {
+			newLen--;
+		}
+		tonccpy(dst, (u8*)newSrc, newLen);
+		src += newLen;
+		dst += newLen;
+		len -= newLen;
+		i++;
 	}
 	#endif
 }
