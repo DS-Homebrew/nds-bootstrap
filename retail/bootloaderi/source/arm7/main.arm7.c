@@ -800,7 +800,7 @@ u32 getRomLocation(const tNDSHeader* ndsHeader, const bool isESdk2, const bool i
 	if (ndsHeader->unitCode > 0 && dsiModeConfirmed) {
 		return ROM_LOCATION_TWLSDK;
 	}
-	return dsiModeConfirmed ? ROM_LOCATION_DSIMODE : (ROM_LOCATION - ((isESdk2 && dsiBios) ? 0x4000 : 0));
+	return (dsiModeConfirmed || strncmp(getRomTid(ndsHeader), "B6X", 3) == 0) ? ROM_LOCATION_DSIMODE : (ROM_LOCATION - ((isESdk2 && dsiBios) ? 0x4000 : 0));
 }
 
 static bool isROMLoadableInRAM(const tDSiHeader* dsiHeader, const tNDSHeader* ndsHeader, const char* romTid, const module_params_t* moduleParams, const bool usesCloneboot) {
@@ -820,6 +820,7 @@ static bool isROMLoadableInRAM(const tDSiHeader* dsiHeader, const tNDSHeader* nd
 	) {
 		const bool twlType = (ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed);
 		const bool cheatsEnabled = (cheatSizeTotal > 4 && cheatSizeTotal <= 0x8000);
+		const bool _8MBarea = (dsiModeConfirmed || strncmp(romTid, "B6X", 3) == 0);
 
 		u32 romOffset = 0;
 		u32 romSize = baseRomSize;
@@ -838,8 +839,8 @@ static bool isROMLoadableInRAM(const tDSiHeader* dsiHeader, const tNDSHeader* nd
 			romSize -= romOffset;
 		}
 		res = ((consoleModel> 0 && twlType && ((u32)dsiHeader->arm9iromOffset - romOffset)+ioverlaysSize <= (cheatsEnabled ? dev_CACHE_ADRESS_SIZE_TWLSDK_CHEAT : dev_CACHE_ADRESS_SIZE_TWLSDK))
-			|| (consoleModel> 0 && !twlType && romSize <= (dsiModeConfirmed ? 0x01800000 : 0x01BC0000)+(dsiWramAccess&&!dsiWramMirrored ? 0x78000 : 0))
-			|| (consoleModel==0 && !twlType && romSize <= (dsiModeConfirmed ? 0x00800000 : 0x00BC0000)+(dsiWramAccess&&!dsiWramMirrored ? 0x78000 : 0)));
+			|| (consoleModel> 0 && !twlType && romSize <= (_8MBarea ? 0x01800000 : 0x01BC0000)+(dsiWramAccess&&!dsiWramMirrored ? 0x78000 : 0))
+			|| (consoleModel==0 && !twlType && romSize <= (_8MBarea ? 0x00800000 : 0x00BC0000)+(dsiWramAccess&&!dsiWramMirrored ? 0x78000 : 0)));
 
 	}
 	if (res) {
