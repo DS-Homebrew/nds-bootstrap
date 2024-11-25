@@ -1401,7 +1401,20 @@ void patchHiHeapPointer(const module_params_t* moduleParams, const tNDSHeader* n
 			}
 		} else { */
 			// DSi mode title loaded on DSi from SD card, or DSi/3DS with external DSi BIOS files loaded
-			if (!gameOnFlashcard && strncmp(romTid, "V2G", 3) != 0 && strncmp(romTid, "DD3", 3) != 0) {
+			if (!gameOnFlashcard && (strncmp(romTid, "IRB", 3) == 0 || strncmp(romTid, "IRA", 3) == 0 || strncmp(romTid, "IRE", 3) == 0 || strncmp(romTid, "IRD", 3) == 0)) {
+				// Pokemon Black & White 1&2
+				switch (*heapPointer) {
+					case 0x13A007BE:
+						*heapPointer = (u32)0x13A0062D; // MOVNE R0, #0x2D00000
+						break;
+					case 0xE3A007BE:
+						*heapPointer = (u32)0xE3A0062D; // MOV R0, #0x2D00000
+						break;
+					case 0x048020BE:
+						*heapPointer = (u32)0x048020B4; // MOVS R0, #0x2D00000
+						break;
+				}
+			} else if (!gameOnFlashcard && strncmp(romTid, "V2G", 3) != 0 && strncmp(romTid, "DD3", 3) != 0) {
 				switch (*heapPointer) {
 					case 0x13A007BE:
 						*heapPointer = (u32)0x13A0062F; // MOVNE R0, #0x2F00000
@@ -2005,7 +2018,7 @@ void codeCopy(u32* dst, u32* src, u32 len) {
 	}
 }
 
-void relocate_ce9(u32 default_location, u32 current_location, u32 size) {
+/* void relocate_ce9(u32 default_location, u32 current_location, u32 size) {
     dbg_printf("relocate_ce9\n");
 
     u32 location_sig[1] = {default_location};
@@ -2245,7 +2258,7 @@ void relocate_ce9(u32 default_location, u32 current_location, u32 size) {
     ce9->thumbPatches->cardEndReadDmaRef = (u32*)((u32)ce9->thumbPatches->cardEndReadDmaRef - default_location + current_location);
     ce9->thumbPatches->sleepRef = (u32*)((u32)ce9->thumbPatches->sleepRef - default_location + current_location);
     ce9->thumbPatches->reset_arm9 = (u32*)((u32)ce9->thumbPatches->reset_arm9 - default_location + current_location);
-}
+} */
 
 static void randomPatch(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	const char* romTid = getRomTid(ndsHeader);

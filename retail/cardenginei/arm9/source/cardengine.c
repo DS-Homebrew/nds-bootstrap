@@ -197,7 +197,7 @@ void sleepMs(int ms) {
 	}
 }*/
 
-/* #ifdef TWLSDK
+#ifdef TWLSDK
 void resetSlots(void) {
 	for (int i = 0; i < ce9->cacheSlots; i++) {
 		cacheDescriptor[i] = 0;
@@ -205,7 +205,7 @@ void resetSlots(void) {
 	}
 	accessCounter = 0;
 }
-#endif */
+#endif
 
 int allocateCacheSlot(void) {
 	int slot = 0;
