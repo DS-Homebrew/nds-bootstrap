@@ -22,6 +22,7 @@ static const u32 relocateValidateSignature[1] = {0x400010C};
 static const u32 swiHaltSignature1[1] = {0xE59FC004};
 static const u32 swiHaltSignature2[1] = {0xE59FC000};
 static const u16 swiHaltCmpSignature[1] = {0x2800};
+static const u16 swiHaltMovSignature[1] = {0x200C};
 static const u32 swiHaltConstSignature[1] = {0x4000004};
 static const u32 swiHaltConstSignatureAlt[1] = {0x4000208};
 
@@ -365,6 +366,20 @@ u16* findSwiHaltThumbOffset(const tNDSHeader* ndsHeader, const module_params_t* 
 			(u32)findOffsetThumb((u16*)vAddrOfRelocSrc, 0x200,
 				swiHaltCmpSignature, 1
 		);
+		if (!findOffsetBackwardsThumb((u16*)swiHaltOffset, 0x20, swiHaltMovSignature, 1)) {
+			const u32 oldOffset = swiHaltOffset;
+			const u16 cmpBak = *(u16*)swiHaltOffset;
+			*(u16*)oldOffset = 0; // Avoid re-searching for wrong offset
+
+			swiHaltOffset =
+				(u32)findOffsetThumb((u16*)vAddrOfRelocSrc, 0x200,
+					swiHaltCmpSignature, 1
+			);
+			*(u16*)oldOffset = cmpBak;
+			// if (!findOffsetBackwardsThumb((u16*)swiHaltOffset, 0x20, swiHaltMovSignature, 1)) {
+			// 	swiHaltOffset = 0;
+			// }
+		}
 	}
 	if (!swiHaltOffset) {
 		u32 dispStatAddr = (u32)findOffset(
