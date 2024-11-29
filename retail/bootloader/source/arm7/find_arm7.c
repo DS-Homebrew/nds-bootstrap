@@ -135,7 +135,7 @@ u32* findWramEndAddrOffset(const tNDSHeader* ndsHeader) {
 }
 
 u32* findWramClearOffset(const tNDSHeader* ndsHeader) {
-	dbg_printf("findWramEndAddrOffset:\n");
+	dbg_printf("findWramClearOffset:\n");
 
 	u32* offset = NULL;
 	if (arm7newUnitCode > 0) {
