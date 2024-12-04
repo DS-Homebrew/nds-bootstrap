@@ -1810,7 +1810,7 @@ int arm7_main(void) {
 		tonccpy((u32*)ce9Location, (u32*)CARDENGINEI_ARM9_BUFFERED_LOCATION, 0xC00);
 
 		tonccpy((u32*)ce7Location, (u32*)CARDENGINEI_ARM7_BUFFERED_LOCATION, 0x8400);
-		if (gameOnFlashcard || saveOnFlashcard) {
+		if (gameOnFlashcard) {
 			if (!dldiPatchBinary((data_t*)ce7Location, 0x8000, NULL)) {
 				dbg_printf("ce7 DLDI patch failed\n");
 				errorOutput();
