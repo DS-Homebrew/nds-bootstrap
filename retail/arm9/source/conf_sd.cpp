@@ -746,7 +746,8 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	fatMountSimple("fat", dldiGetInternal());
 
 	conf->sdFound = (access("sd:/", F_OK) == 0);
-	bool flashcardFound = (access("fat:/", F_OK) == 0);
+	const bool flashcardFound = (access("fat:/", F_OK) == 0);
+	const bool scfgSdmmcEnabled = (*(u8*)0x02FFFDF4 == 1);
 
 	if (!conf->sdFound && !flashcardFound) {
 		consoleDemoInit();
@@ -1432,7 +1433,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			fclose(cebin);
 		}
 
-		if (isDSiMode() && unitCode > 0 && conf->sdFound) {
+		if (isDSiMode() && unitCode > 0 && scfgSdmmcEnabled) {
 			const bool sdNandFound = conf->sdNand && (access(conf->gameOnFlashcard ? "fat:/shared1" : "sd:/shared1", F_OK) == 0);
 			const bool sdPhotoFound = conf->sdNand && (access(conf->gameOnFlashcard ? "fat:/photo" : "sd:/photo", F_OK) == 0);
 
@@ -1512,7 +1513,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			conf->valueBits2 |= BIT(6);
 		}
 
-		if (!conf->isDSiWare || !conf->sdFound) {
+		if (!conf->isDSiWare || !scfgSdmmcEnabled) {
 			// Load external cheat engine binary
 			loadCardEngineBinary("nitro:/cardenginei_arm7_cheat.bin", (u8*)CHEAT_ENGINE_BUFFERED_LOCATION);
 
@@ -2469,7 +2470,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	// Create AP-fixed overlay binary
 	createApFixOverlayBin(conf);
 
-	if ((!dsiFeatures() || conf->b4dsMode) || !conf->sdFound || !conf->isDSiWare) {
+	if ((!dsiFeatures() || conf->b4dsMode) || !scfgSdmmcEnabled || !conf->isDSiWare) {
 		// Update modified date
 		FILE *savFile = fopen(conf->savPath, "r+");
 		if (savFile) {

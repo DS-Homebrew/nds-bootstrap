@@ -38,6 +38,7 @@ u16 patchOffsetCacheFileNewCrc = 0;
 patchOffsetCacheContents patchOffsetCache;
 
 extern bool gbaRomFound;
+extern bool scfgSdmmcEnabled;
 extern u8 dsiSD;
 extern bool i2cBricked;
 extern int sharedFontRegion;
@@ -54,8 +55,8 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	const char* dataPub = "dataPub:";
 	const char* dataPrv = "dataPrv:";
 
-	const bool sdmmcMode = (dsiSD && !(REG_SCFG_ROM & BIT(9)));
-	const bool saveOnFlashcardNtr = (saveOnFlashcard && (!dsiSD || (REG_SCFG_ROM & BIT(9))));
+	const bool sdmmcMode = (scfgSdmmcEnabled && !(REG_SCFG_ROM & BIT(9)));
+	const bool saveOnFlashcardNtr = (saveOnFlashcard && (!scfgSdmmcEnabled || (REG_SCFG_ROM & BIT(9))));
 
 	const u32* dsiSaveCheckExists = ce9->patches->dsiSaveCheckExists;
 	const u32* dsiSaveGetResultCode = ce9->patches->dsiSaveGetResultCode;
@@ -15775,7 +15776,7 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
 
 	const char* romTid = getRomTid(ndsHeader);
 
-	const bool saveOnFlashcardNtr = (saveOnFlashcard && (!dsiSD || (REG_SCFG_ROM & BIT(9))));
+	const bool saveOnFlashcardNtr = (saveOnFlashcard && (!scfgSdmmcEnabled || (REG_SCFG_ROM & BIT(9))));
 
 	const u32* dsiSaveGetResultCode = ce9->patches->dsiSaveGetResultCode;
 	const u32* dsiSaveCreate = ce9->patches->dsiSaveCreate;
