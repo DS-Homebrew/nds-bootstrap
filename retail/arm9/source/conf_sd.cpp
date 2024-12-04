@@ -1432,9 +1432,9 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			fclose(cebin);
 		}
 
-		if (isDSiMode() && unitCode > 0 && !conf->gameOnFlashcard) {
-			const bool sdNandFound = conf->sdNand && (access("sd:/shared1", F_OK) == 0);
-			const bool sdPhotoFound = conf->sdNand && (access("sd:/photo", F_OK) == 0);
+		if (isDSiMode() && unitCode > 0 && conf->sdFound) {
+			const bool sdNandFound = conf->sdNand && (access(conf->gameOnFlashcard ? "fat:/shared1" : "sd:/shared1", F_OK) == 0);
+			const bool sdPhotoFound = conf->sdNand && (access(conf->gameOnFlashcard ? "fat:/photo" : "sd:/photo", F_OK) == 0);
 
 			// Load device list
 			addTwlDevice(0, (u8)(sdNandFound ? 0 : 0x81), 0x06, "nand", "/");
@@ -1456,36 +1456,34 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 				}
 			}
 			addTwlDevice(0, (u8)((sdNandFound || sdPhotoFound) ? 0x10 : 0x31), 0x06, "photo", ((sdNandFound || sdPhotoFound) ? "sdmc:/photo" : "nand2:/photo"));
-			if (!conf->saveOnFlashcard) {
+			if (conf->saveOnFlashcard == conf->gameOnFlashcard) {
 				if (strlen(conf->prvPath) < 62 && prvSize > 0) {
-					if (strncasecmp(conf->prvPath, "sd:", 3) != 0) {
+					if (strncasecmp(conf->prvPath, "sd:", 3) != 0 && strncasecmp(conf->prvPath, "fat:", 4) != 0) {
 						const bool isSdmc = (strncasecmp(conf->prvPath, "sdmc:", 5) == 0);
 						addTwlDevice(0, (u8)((sdNandFound || isSdmc) ? 0x08 : 0x09), 0x06, "dataPrv", conf->prvPath);
 					} else {
 						char twlPath[64];
-						sprintf(twlPath, "sdmc%s", conf->prvPath+2);
+						sprintf(twlPath, "sdmc%s", conf->prvPath+(conf->saveOnFlashcard ? 3 : 2));
 
 						addTwlDevice(0, 0x08, 0x06, "dataPrv", twlPath);
 					}
 				}
 				if (strlen(conf->savPath) < 62 && pubSize > 0) {
-					if (strncasecmp(conf->savPath, "sd:", 3) != 0) {
+					if (strncasecmp(conf->savPath, "sd:", 3) != 0 && strncasecmp(conf->savPath, "fat:", 4) != 0) {
 						const bool isSdmc = (strncasecmp(conf->savPath, "sdmc:", 5) == 0);
 						addTwlDevice(0, (u8)((sdNandFound || isSdmc) ? 0x08 : 0x09), 0x06, "dataPub", conf->savPath);
 					} else {
 						char twlPath[64];
-						sprintf(twlPath, "sdmc%s", conf->savPath+2);
+						sprintf(twlPath, "sdmc%s", conf->savPath+(conf->saveOnFlashcard ? 3 : 2));
 
 						addTwlDevice(0, 0x08, 0x06, "dataPub", twlPath);
 					}
 				}
 			}
 
-			if (!conf->gameOnFlashcard && strlen(conf->appPath) < 62) {
-				char sdmcText[4] = {'s','d','m','c'};
-				tonccpy((char*)0x02EFF3C2, conf->appPath, strlen(conf->appPath));
-				tonccpy((char*)0x02EFF3C0, sdmcText, 4);
-			}
+			char sdmcText[4] = {'s','d','m','c'};
+			tonccpy((char*)(conf->gameOnFlashcard ? 0x02EFF3C1 : 0x02EFF3C2), conf->appPath, strlen(conf->appPath));
+			tonccpy((char*)0x02EFF3C0, sdmcText, 4);
 		}
 
 		if (REG_SCFG_EXT7 == 0) {
@@ -1514,7 +1512,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			conf->valueBits2 |= BIT(6);
 		}
 
-		if (conf->gameOnFlashcard || !conf->isDSiWare) {
+		if (!conf->isDSiWare || !conf->sdFound) {
 			// Load external cheat engine binary
 			loadCardEngineBinary("nitro:/cardenginei_arm7_cheat.bin", (u8*)CHEAT_ENGINE_BUFFERED_LOCATION);
 
@@ -2471,7 +2469,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	// Create AP-fixed overlay binary
 	createApFixOverlayBin(conf);
 
-	if (conf->gameOnFlashcard || !conf->isDSiWare) {
+	if ((!dsiFeatures() || conf->b4dsMode) || !conf->sdFound || !conf->isDSiWare) {
 		// Update modified date
 		FILE *savFile = fopen(conf->savPath, "r+");
 		if (savFile) {

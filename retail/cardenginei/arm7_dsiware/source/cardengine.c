@@ -45,11 +45,15 @@
 #include "sr_data_error.h"      // For showing an error screen
 #include "sr_data_srloader.h"   // For rebooting into TWiLight Menu++ or the game
 
+#define gameOnFlashcard BIT(0)
+#define saveOnFlashcard BIT(1)
+#define b_dsiSD BIT(5)
 #define preciseVolumeControl BIT(6)
 #define igmAccessible BIT(9)
 #define hiyaCfwFound BIT(10)
 #define wideCheatUsed BIT(12)
 #define twlTouch BIT(15)
+#define bootstrapOnFlashcard BIT(19)
 #define ndmaDisabled BIT(20)
 #define i2cBricked BIT(30)
 #define scfgLocked BIT(31)
@@ -220,22 +224,27 @@ static void driveInitialize(void) {
 	}
 
 	bakData();
-	if (sdmmc_read16(REG_SDSTATUS0) != 0) {
-		sdmmc_init();
-		SD_Init();
+	if (valueBits & b_dsiSD) {
+		if (sdmmc_read16(REG_SDSTATUS0) != 0) {
+			sdmmc_init();
+			SD_Init();
+		}
+		FAT_InitFiles(false, false);
 	}
-	FAT_InitFiles(false);
+	if ((valueBits & gameOnFlashcard) || (valueBits & saveOnFlashcard)) {
+		FAT_InitFiles(false, true);
+	}
 	restoreBakData();
 
 	#ifdef CARDSAVE
-	getFileFromCluster(&savFile, saveCluster);
+	getFileFromCluster(&savFile, saveCluster, (valueBits & saveOnFlashcard));
 	#endif
-	getFileFromCluster(&patchOffsetCacheFile, patchOffsetCacheFileCluster);
-	getFileFromCluster(&ramDumpFile, ramDumpCluster);
-	getFileFromCluster(&srParamsFile, srParamsCluster);
-	getFileFromCluster(&screenshotFile, screenshotCluster);
-	getFileFromCluster(&pageFile, pageFileCluster);
-	getFileFromCluster(&manualFile, manualCluster);
+	getFileFromCluster(&patchOffsetCacheFile, patchOffsetCacheFileCluster, (valueBits & gameOnFlashcard));
+	getFileFromCluster(&ramDumpFile, ramDumpCluster, (valueBits & bootstrapOnFlashcard));
+	getFileFromCluster(&srParamsFile, srParamsCluster, (valueBits & gameOnFlashcard));
+	getFileFromCluster(&screenshotFile, screenshotCluster, (valueBits & bootstrapOnFlashcard));
+	getFileFromCluster(&pageFile, pageFileCluster, (valueBits & bootstrapOnFlashcard));
+	getFileFromCluster(&manualFile, manualCluster, (valueBits & bootstrapOnFlashcard));
 
 	#ifdef DEBUG
 	aFile myDebugFile;
@@ -524,7 +533,7 @@ void returnToLoader(bool reboot) {
 	*(vu32*)0x4004820 = 0;
 
 	aFile file;
-	getBootFileCluster(&file, "BOOT.NDS");
+	getBootFileCluster(&file, "BOOT.NDS", !(valueBits & b_dsiSD));
 	if (file.firstCluster == CLUSTER_FREE) {
 		// File not found, so reboot console instead
 		rebootConsole();

@@ -50,7 +50,7 @@
 
 //extern bool cardReadFound; // patch_arm9.c
 
-#define patchOffsetCacheFileVersion 109	// Change when new functions are being patched, some offsets removed,
+#define patchOffsetCacheFileVersion 110	// Change when new functions are being patched, some offsets removed,
 										// the offset order changed, and/or the function signatures changed (not added)
 
 typedef struct patchOffsetCacheContents {
@@ -141,6 +141,7 @@ typedef struct patchOffsetCacheContents {
 	u32* cardCheckPullOutOffset;
 	u32 cardCheckPullOutChecked;
 	u32* sdCardResetOffset;
+	u32* sdCardFuncsOffset;
 	u32* autoPowerOffOffset;
 	u32* a7IrqHandlerOffset;
 	u32* a7IrqHandlerWordsOffset;
@@ -166,7 +167,7 @@ void setBLX(int arg1, int arg2);
 u32* getOffsetFromBL(u32* blOffset);
 u32* getOffsetFromBLX(u32* blxOffset);
 const u16* generateA7InstrThumb(int arg1, int arg2);
-u16* getOffsetFromBLThumb(u16* blOffset);
+u16* getOffsetFromBLThumb(const u16* blOffset);
 void setBLThumb(int arg1, int arg2);
 void codeCopy(u32* dst, u32* src, u32 len);
 void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader);

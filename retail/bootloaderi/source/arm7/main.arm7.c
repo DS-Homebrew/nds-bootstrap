@@ -1211,7 +1211,7 @@ static void startBinary_ARM7(void) {
 
 static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	if (ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed) {
-		if (isDSiWare && !(REG_SCFG_ROM & BIT(9))) {
+		if (isDSiWare && dsiSD && !(REG_SCFG_ROM & BIT(9))) {
 			u32* deviceListAddr = (u32*)(*(u32*)0x02FFE1D4);
 
 			dbg_printf("Device list address: ");
@@ -1382,7 +1382,7 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 		toncset((u32*)0x02FFFD60, 0, 0xA0);
 	}
 
-	if (!gameOnFlashcard && isDSiWare) {
+	if (isDSiWare && dsiSD && !(REG_SCFG_ROM & BIT(9))) {
 		*(u16*)(0x02FFFC40) = 3;						// Boot Indicator (NAND/SD)
 		return;
 	}
@@ -1571,7 +1571,7 @@ int arm7_main(void) {
 		dsiModeConfirmed = dsiMode && ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr);
 	}
 	const char* romTid = getRomTid(&dsiHeaderTemp.ndshdr);
-	if (gameOnFlashcard || !isDSiWare) {
+	if (!isDSiWare || !dsiSD || (REG_SCFG_ROM & BIT(9))) {
 		extern u32 clusterCacheSize;
 		clusterCacheSize = 0x10000;
 		if (dsiModeConfirmed && ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr)) {
@@ -1596,7 +1596,7 @@ int arm7_main(void) {
 	 && patchOffsetCache.type == 0) {	// 0 = Regular, 1 = B4DS, 2 = HB
 		fileRead((char*)&patchOffsetCache, &patchOffsetCacheFile, 0, sizeof(patchOffsetCacheContents));
 	} else {
-		if (srlAddr == 0 && !isDSiWare) pleaseWaitOutput();
+		if (srlAddr == 0 && (!isDSiWare || !dsiSD || (REG_SCFG_ROM & BIT(9)))) pleaseWaitOutput();
 		patchOffsetCache.ver = patchOffsetCacheFileVersion;
 		patchOffsetCache.type = 0;
 	}
@@ -1642,7 +1642,7 @@ int arm7_main(void) {
 			*(u32*)0x02FFE1A0 = *(u32*)DONOR_ROM_MBK6_LOCATION;
 			*(u32*)0x02FFE1D4 = *(u32*)DONOR_ROM_DEVICE_LIST_LOCATION;
 		}
-		if (gameOnFlashcard || !isDSiWare) {
+		if (!isDSiWare || !dsiSD || (REG_SCFG_ROM & BIT(9))) {
 			/* if (consoleModel > 0) {
 				tonccpy((char*)0x0DF80000, (char*)0x02700000, 0x80000);	// Move FAT table cache to debug RAM
 				romFile->fatTableCache = (u32*)((u32)romFile->fatTableCache+0xB880000);
@@ -1732,7 +1732,7 @@ int arm7_main(void) {
 	tonccpy(cheatEngineBuffer, (char*)CHEAT_ENGINE_BUFFERED_LOCATION, 0x400);
 	toncset((char*)CHEAT_ENGINE_BUFFERED_LOCATION, 0, 0x400);
 
-	if (!gameOnFlashcard && isDSiWare) {
+	if (isDSiWare && dsiSD && !(REG_SCFG_ROM & BIT(9))) {
 		extern void patchSharedFontPath(const cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, const ltd_module_params_t* ltdModuleParams);
 
 		const bool twlTouch = (cdcReadReg(CDC_SOUND, 0x22) == 0xF0 || i2cBricked);
@@ -1806,6 +1806,12 @@ int arm7_main(void) {
 		tonccpy((u32*)ce9Location, (u32*)CARDENGINEI_ARM9_BUFFERED_LOCATION, 0xC00);
 
 		tonccpy((u32*)ce7Location, (u32*)CARDENGINEI_ARM7_BUFFERED_LOCATION, 0x8400);
+		if (gameOnFlashcard || saveOnFlashcard) {
+			if (!dldiPatchBinary((data_t*)ce7Location, 0x8000, NULL)) {
+				dbg_printf("ce7 DLDI patch failed\n");
+				errorOutput();
+			}
+		}
 		cheatEngineOffset = ((ce7Location == CARDENGINEI_ARM7_DSIWARE_LOCATION3) ? CHEAT_ENGINE_DSIWARE_LOCATION3 : CHEAT_ENGINE_DSIWARE_LOCATION);
 		toncset((u32*)CARDENGINEI_ARM7_BUFFERED_LOCATION, 0, 0x8400);
 
@@ -1884,6 +1890,14 @@ int arm7_main(void) {
 		if (!a7PatchCardIrqEnable((cardengineArm7*)ce7Location, ndsHeader, moduleParams)) {
 			dbg_printf("ERR_LOAD_OTHR");
 			errorOutput();
+		}
+
+		if (gameOnFlashcard) {
+			extern bool patchSdCardFuncs(cardengineArm7* ce7, const tNDSHeader* ndsHeader);
+			if (!patchSdCardFuncs((cardengineArm7*)ce7Location, ndsHeader)) {
+				dbg_printf("ERR_LOAD_OTHR");
+				errorOutput();
+			}
 		}
 
 		extern void patchAutoPowerOff(const tNDSHeader* ndsHeader);
@@ -2365,7 +2379,7 @@ int arm7_main(void) {
 		//fileWrite((char*)dsiHeaderTemp.arm9idestination, &ramDumpFile, 0, dsiHeaderTemp.arm9ibinarySize);	// Dump (decrypted?) arm9 binary
 	}
 
-	if (ROMsupportsDsiMode(ndsHeader) && isDSiWare && !gameOnFlashcard && !(REG_SCFG_ROM & BIT(9))) {
+	if (ROMsupportsDsiMode(ndsHeader) && isDSiWare && dsiSD && !(REG_SCFG_ROM & BIT(9))) {
 		*(vu32*)0x400481C = 0;				// Reset SD IRQ stat register
 		*(vu32*)0x4004820 = 0x8B7F0305;		// Set SD IRQ mask register (Data won't read without the correct bytes!)
 	} /*else if (!isDSiWare) {

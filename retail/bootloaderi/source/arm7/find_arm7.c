@@ -139,6 +139,10 @@ static const u16 sdCardResetSignatureThumbType4[7] = {0xF7FF, 0xFDB2, 0xF7FF, 0x
 static const u16 sdCardResetSignatureThumbType5[7] = {0xF7FF, 0xFDC1, 0xF7FF, 0xFF5F, 0xF000, 0xF849, 0x1C05};
 static const u16 sdCardResetSignatureThumbType6[7] = {0xF7FF, 0xFDCE, 0xF7FF, 0xFF68, 0xF000, 0xF85A, 0x1C05};
 
+// SD card functions (SDK 5)
+static const u32 sdCardFuncsSignature[4]      = {0xE92D4018, 0xE24DDF5D, 0xE24DDB01, 0xE59FE050};
+static const u32 sdCardFuncsSignatureThumb[4] = {0xB0FFB518, 0xB0DFB0FF, 0x4A0E490D, 0x64CA4469};
+
 // Auto power-off (SDK 5)
 static const u32 autoPowerOffSignature[4]      = {0xE92D41F0, 0xE59F4070, 0xE1A08000, 0xE1A07001};
 static const u16 autoPowerOffSignatureThumb[6] = {0xB5F8, 0x1C05, 0x1C0E, 0x2400, 0x27C5, 0xE019};
@@ -1541,6 +1545,30 @@ u32* findSdCardResetOffset(const tNDSHeader* ndsHeader, const module_params_t* m
 
 	dbg_printf("\n");
 	return sdCardResetOffset;
+}
+
+u32* findSdCardFuncsOffset(const tNDSHeader* ndsHeader) {
+	dbg_printf("findSdCardFuncsOffset:\n");
+
+	u32* offset = findOffset(
+			__DSiHeader->arm7idestination, newArm7ibinarySize,
+			sdCardFuncsSignature, 4
+		);
+	if (!offset) {
+		offset = (u32*)findOffset(
+			__DSiHeader->arm7idestination, newArm7ibinarySize,
+			sdCardFuncsSignatureThumb, 4
+		);
+	}
+
+	if (offset) {
+		dbg_printf("SD Card functions found\n");
+	} else {
+		dbg_printf("SD Card functions not found\n");
+	}
+
+	dbg_printf("\n");
+	return offset;
 }
 
 u32* findAutoPowerOffOffset(const tNDSHeader* ndsHeader) {

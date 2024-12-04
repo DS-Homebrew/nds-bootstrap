@@ -92,7 +92,7 @@ igmHotkey:
 	.hword	0
 romLocation:
 	.word	0x00000000
-romPartLocation:
+getDriveStructAddr: @ romPartLocation
 	.word	0x00000000
 romPartSrc:
 	.word	0x00000000
@@ -216,8 +216,65 @@ thumb_card_irq_enable_arm7:
 thumb_blx_r3_stub2:
 	bx	r3
 .pool
-.align	4
 @---------------------------------------------------------------------------------
+
+// r0 = drive number
+// r1 = start sector
+// r2 = source/destination buffer
+// r3 = sector count
+// [sp] = isReading (0 = write, otherwise read)
+__patch_dsisdredirect_io:
+	push {r4,lr}
+	movs r0, r1
+	movs r1, r3
+	ldr r4, [sp, #8] // reading
+	cmp r4, #0
+	bne __patch_dsisdredirect_io_1
+
+	ldr r3, =_DLDI_writeSectors_ptr
+	ldr r3, [r3]
+	bl sd_blx_r3
+	mov r0, #1 // success
+	b sd_return
+
+__patch_dsisdredirect_io_1:
+	ldr r3, =_DLDI_readSectors_ptr
+	ldr r3, [r3]
+	bl sd_blx_r3
+
+	mov r0, #1 // success
+sd_return:
+	pop {r4}
+	pop {r3}
+sd_blx_r3:
+	bx r3
+
+// r0 = drive number
+// r1 = command
+// r2 = argument buffer
+__patch_dsisdredirect_control:
+	push {lr}
+	cmp r1, #1 // startup
+	bne sd_returnZero
+
+	ldr r3, =getDriveStructAddr
+	ldr r3, [r3]
+	bl sd_blx_r3
+	ldr r1,= 0x4B4
+	mov r2, #0
+	str r2, [r0, r1] // partition 0
+	sub r1, r1, #4
+	ldr r2, [r0, r1]
+	mov r3, #0x83 // valid, partitioned, inserted
+	orr r2, r2, r3
+	str r2, [r0, r1]
+
+sd_returnZero:
+	mov r0, #0
+	pop {r3}
+	bx r3
+
+.pool
 
 #ifdef CARDSAVE
 arm7FunctionsDirect:
@@ -404,4 +461,6 @@ _blx_r3_stubthumb8:
 arm7FunctionsDirect:
 arm7Functions:
 arm7FunctionsThumb:
+.word __patch_dsisdredirect_io+1
+.word __patch_dsisdredirect_control+1
 #endif

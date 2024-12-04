@@ -110,10 +110,13 @@ void setBLThumb(int arg1, int arg2) {
 	*(u16*)(arg1 + 2) = instrs[1];
 }
 
-u16* getOffsetFromBLThumb(u16* blOffset) {
-	s16 codeOffset = blOffset[1];
-
-	return (u16*)((u32)blOffset + (codeOffset*2) + 4);
+u16* getOffsetFromBLThumb(const u16* blOffset) {
+	const u32* instructionPointer = (u32*)blOffset;
+	u32 blInstruction1 = ((u16*)instructionPointer)[0];
+	u32 blInstruction2 = ((u16*)instructionPointer)[1];
+	u32 res = (u32)instructionPointer + 5 + ((int)((((blInstruction1 & 0x7FF) << 11) | (blInstruction2 & 0x7FF)) << 10) >> 9);
+	res--;
+	return (u16*)res;
 }
 
 static bool patchWramClear(const tNDSHeader* ndsHeader) {

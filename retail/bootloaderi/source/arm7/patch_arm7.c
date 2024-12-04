@@ -118,10 +118,13 @@ void setBLThumb(int arg1, int arg2) {
 	*(u16*)(arg1 + 2) = instrs[1];
 }
 
-u16* getOffsetFromBLThumb(u16* blOffset) {
-	s16 codeOffset = blOffset[1];
-
-	return (u16*)((u32)blOffset + (codeOffset*2) + 4);
+u16* getOffsetFromBLThumb(const u16* blOffset) {
+	const u32* instructionPointer = (u32*)blOffset;
+	u32 blInstruction1 = ((u16*)instructionPointer)[0];
+	u32 blInstruction2 = ((u16*)instructionPointer)[1];
+	u32 res = (u32)instructionPointer + 5 + ((int)((((blInstruction1 & 0x7FF) << 11) | (blInstruction2 & 0x7FF)) << 10) >> 9);
+	res--;
+	return (u16*)res;
 }
 
 u32 vAddrOfRelocSrc = 0;
@@ -581,6 +584,37 @@ static void patchSdCardReset(const tNDSHeader* ndsHeader, const module_params_t*
 		dbg_hexa((u32)sdCardResetOffset);
 		dbg_printf("\n\n");
 	}
+}
+
+bool patchSdCardFuncs(cardengineArm7* ce7, const tNDSHeader* ndsHeader) {
+	u32* offset = patchOffsetCache.sdCardFuncsOffset;
+	if (!patchOffsetCache.sdCardFuncsOffset) {
+		offset = findSdCardFuncsOffset(ndsHeader);
+		if (offset) {
+			patchOffsetCache.sdCardFuncsOffset = offset;
+		}
+	}
+
+	if (!offset) {
+		return false;
+	}
+
+	u16* offsetThumb = (u16*)offset;
+	if (*offsetThumb == 0xB518) {
+		ce7->romPartLocation = (u32)getOffsetFromBLThumb((u16*)((u8*)offset - 0x20)); // getDriveStructAddr
+		ce7->romPartLocation++;
+		*(u32*)((u8*)offset + 0x44) = ce7->patches->arm7Functions->eepromProtect; // __patch_dsisdredirect_io
+		*(u32*)((u8*)offset + 0x48) = ce7->patches->arm7Functions->eepromPageErase; // __patch_dsisdredirect_control
+	} else {
+		ce7->romPartLocation = (u32)getOffsetFromBL((u32*)((u8*)offset - 0x20)); // getDriveStructAddr
+		*(u32*)((u8*)offset + 0x64) = ce7->patches->arm7Functions->eepromProtect; // __patch_dsisdredirect_io
+		*(u32*)((u8*)offset + 0x68) = ce7->patches->arm7Functions->eepromPageErase; // __patch_dsisdredirect_control
+	}
+
+	dbg_printf("sdCardFuncs location : ");
+	dbg_hexa((u32)offset);
+	dbg_printf("\n\n");
+	return true;
 }
 
 void patchAutoPowerOff(const tNDSHeader* ndsHeader) {
