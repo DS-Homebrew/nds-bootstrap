@@ -460,7 +460,7 @@ void reset(void) {
 		if (*(u32*)(resetParam+8) == 0x44414F4C) { // 'LOAD'
 			fileWrite((char*)ndsHeader, &pageFile, 0x2BFE00, 0x160);
 			fileWrite((char*)ndsHeader->arm9destination, &pageFile, 0x14000, ndsHeader->arm9binarySize);
-			fileWrite((char*)0x022C0000, &pageFile, 0x2C0000, ndsHeader->arm7binarySize);
+			fileWrite((char*)0x02380000, &pageFile, 0x2C0000, ndsHeader->arm7binarySize);
 		}
 		fileWrite((char*)resetParam, &srParamsFile, 0, 0x10);
 		toncset((u32*)0x02000000, 0, 0x400);
@@ -541,7 +541,7 @@ void reset(void) {
 			*(u16*)0x02fffc40 = 2; // Boot Indicator (Cloneboot/Multiboot)
 		} else {
 			if (*(u32*)(resetParam+8) == 0x44414F4C) {
-				ndmaCopyWordsAsynch(1, (u32*)0x022C0000, ndsHeader->arm7destination, ndsHeader->arm7binarySize);
+				// ndmaCopyWordsAsynch(1, (u32*)0x022C0000, ndsHeader->arm7destination, ndsHeader->arm7binarySize);
 				*((u16*)(/*isSdk5(moduleParams) ? 0x02fffc40 :*/ 0x027ffc40)) = 2; // Boot Indicator (Cloneboot/Multiboot)
 				// tonccpy((u32*)0x027FFC40, (u32*)0x02344820, 0x40); // Multiboot info?
 			} else if (valueBits & ROMinRAM) {
@@ -573,7 +573,7 @@ void reset(void) {
 			moduleParams,
 			1
 		);
-		while (ndmaBusy(1));
+		// while (ndmaBusy(1));
 		patchCardNdsArm7(
 			(cardengineArm7*)ce7,
 			ndsHeader,

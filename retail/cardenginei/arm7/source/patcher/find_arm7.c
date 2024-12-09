@@ -90,6 +90,9 @@ static const u16 irqEnableStartSignatureThumb[5]  = {0xB530, 0xB081, 0x4D07, 0x8
 static const u16 irqEnableStartSignatureThumb3[5] = {0xB510, 0x1C04, 0xF7FF, 0xFFF4, 0x4B05}; // SDK 3
 static const u16 irqEnableStartSignatureThumb5[5] = {0xB510, 0x1C04, 0xF7FF, 0xFFE4, 0x4B05}; // SDK 5
 
+// Reset
+static const u32 resetSignature3Eoo[] = {0xE92D4070, 0xE59F0098, 0xE5904004, 0xE3540000}; // eoo.dat (Pokemon)
+
 u32 relocationStart = 0;
 bool a7GetReloc(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	extern u32 vAddrOfRelocSrc;
@@ -1008,4 +1011,23 @@ u32* findCardIrqEnableOffset(const tNDSHeader* ndsHeader, const module_params_t*
 
 	//dbg_printf("\n");
 	return cardIrqEnableOffset;
+}
+
+u32* findResetOffset7(const tNDSHeader* ndsHeader) {
+	// dbg_printf("findResetOffset\n");
+
+    u32* resetOffset = findOffset(
+		ndsHeader->arm7destination, ndsHeader->arm7binarySize,
+		resetSignature3Eoo, 4
+	);
+
+	if (resetOffset) {
+		// dbg_printf("Reset found\n");
+		// dbg_printf("\n");
+		return resetOffset;
+	} else {
+		// dbg_printf("Reset not found\n");
+	}
+
+	return NULL;
 }

@@ -166,7 +166,7 @@ static const u32 resetSignature2Alt1[4] = {0xE92D000F, 0xE92D4010, 0xEB000026, 0
 static const u32 resetSignature2Alt2[4] = {0xE92D4010, 0xE59F1078, 0xE1A04000, 0xE1D100B0}; // sdk2
 static const u32 resetSignature3[4]     = {0xE92D4010, 0xE59F106C, 0xE1A04000, 0xE1D100B0}; // sdk3
 static const u32 resetSignature3Alt[4]  = {0xE92D4010, 0xE59F1068, 0xE1A04000, 0xE1D100B0}; // sdk3
-static const u32 resetSignature3Mb[1]   = {0xE92D4008}; // sdk3
+static const u32 resetSignature3Eoo[4]  = {0xE92D4010, 0xE59F003C, 0xE5904000, 0xE3540000}; // eoo.dat (Pokemon)
 static const u32 resetSignature4[4]     = {0xE92D4070, 0xE59F10A0, 0xE1A04000, 0xE1D100B0}; // sdk4
 static const u32 resetSignature4Alt[4]  = {0xE92D4010, 0xE59F1084, 0xE1A04000, 0xE1D100B0}; // sdk4
 static const u32 resetSignature5[4]     = {0xE92D4038, 0xE59F1054, 0xE1A05000, 0xE1D100B0}; // sdk5
@@ -176,7 +176,6 @@ static const u32 resetSignature5Alt3[4] = {0xE92D4038, 0xE59F106C, 0xE1A05000, 0
 static const u32 resetSignature5Alt4[4] = {0xE92D4038, 0xE59F1090, 0xE1A05000, 0xE1D100B0}; // sdk5
 
 static const u32 resetConstant[1]       = {RESET_PARAM};
-static const u32 resetConstantMb[1]     = {0x027FFE34};
 static const u32 resetConstant5[1]      = {RESET_PARAM_SDK5};
 
 // Panic
@@ -1936,32 +1935,19 @@ u32* findResetOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleP
     u32 * resetOffset = NULL;
 
 	if ((memcmp(getRomTid(ndsHeader), "NTRJ", 4) == 0) && (moduleParams->sdk_version < 0x5000000)) {
-		u32* resetConstOffset = findOffset(
+		resetOffset = findOffset(
 			(u32*)ndsHeader->arm9destination, iUncompressedSize,//ndsHeader->arm9binarySize,
-			resetConstantMb, 1
+			resetSignature3Eoo, 4
 		);
 
-		if (resetConstOffset) {
-			resetOffset = findOffsetBackwards(
-				resetConstOffset, 0x80,
-				resetSignature3Mb, 1
-			);
-			if (!resetOffset) {
-				resetOffset = findOffsetBackwards(
-					resetConstOffset, 0x80,
-					resetSignature3, 1
-				);
-			}
-
-			if (resetOffset) {
-				/* dbg_printf("Reset found\n");
-				dbg_printf("\n");*/
-				*softResetMb = true;
-				return resetOffset;
-			} /* else {
-				dbg_printf("Reset not found\n");
-			} */
-		}
+		if (resetOffset) {
+			/* dbg_printf("Reset found\n");
+			dbg_printf("\n");*/
+			*softResetMb = true;
+			return resetOffset;
+		} /* else {
+			dbg_printf("Reset not found\n");
+		} */
 	}
 
   	resetOffset = findOffset(

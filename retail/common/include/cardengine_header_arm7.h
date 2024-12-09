@@ -59,6 +59,7 @@ typedef struct cardengineArm7Patches {
     u32* newSwiHaltThumb;
     u32* j_twlGetPitchTable;
     u32* j_twlGetPitchTableThumb;
+	u32* reset;
 } cardengineArm7Patches;
 
 //

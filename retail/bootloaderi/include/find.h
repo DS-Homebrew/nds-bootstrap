@@ -140,5 +140,6 @@ u32* findCardIrqEnableOffset(const tNDSHeader* ndsHeader, const module_params_t*
 u32* findSdCardResetOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
 u32* findSdCardFuncsOffset(const tNDSHeader* ndsHeader);
 u32* findAutoPowerOffOffset(const tNDSHeader* ndsHeader);
+u32* findResetOffset7(const tNDSHeader* ndsHeader);
 
 #endif // FIND_H

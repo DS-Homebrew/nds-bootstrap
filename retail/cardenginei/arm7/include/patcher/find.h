@@ -94,5 +94,6 @@ u16* findSleepPatchOffsetThumb(const tNDSHeader* ndsHeader);
 u32* findSleepInputWriteOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
 u32* findCardCheckPullOutOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
 u32* findCardIrqEnableOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
+u32* findResetOffset7(const tNDSHeader* ndsHeader);
 
 #endif // FIND_H

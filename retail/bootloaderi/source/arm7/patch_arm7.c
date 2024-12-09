@@ -565,6 +565,17 @@ static void patchCardCheckPullOut(cardengineArm7* ce7, const tNDSHeader* ndsHead
 	}
 }
 
+static void patchReset(cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+	u32* offset = findResetOffset7(ndsHeader);
+	if (!offset) {
+		return;
+	}
+
+	offset[0] = 0xE59F0000; // ldr r0, =reset
+	offset[1] = 0xE12FFF10; // bx r0
+	offset[2] = (u32)ce7->patches->reset;
+}
+
 static void patchSdCardReset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	if (ndsHeader->unitCode == 0 || !dsiModeConfirmed) return;
 
@@ -707,6 +718,10 @@ u32 patchCardNdsArm7(
 	|| (strncmp(romTid, "UXB", 3) == 0 && !saveOnFlashcard)
 	|| (!ROMinRAM && !gameOnFlashcard)) {
 		patchCardCheckPullOut(ce7, ndsHeader, moduleParams);
+	}
+
+	if (patchOffsetCache.resetMb) {
+		patchReset(ce7, ndsHeader, moduleParams);
 	}
 
 	if (a7GetReloc(ndsHeader, moduleParams)) {

@@ -229,6 +229,17 @@ static void patchCardCheckPullOut(cardengineArm7* ce7, const tNDSHeader* ndsHead
 	}
 }
 
+static void patchReset(cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+	u32* offset = findResetOffset7(ndsHeader);
+	if (!offset) {
+		return;
+	}
+
+	offset[0] = 0xE59F0000; // ldr r0, =reset
+	offset[1] = 0xE12FFF10; // bx r0
+	offset[2] = (u32)ce7->patches->reset;
+}
+
 u32 patchCardNdsArm7(
 	cardengineArm7* ce7,
 	tNDSHeader* ndsHeader,
@@ -243,6 +254,11 @@ u32 patchCardNdsArm7(
 
 	if (!(valueBits & ROMinRAM) && !(valueBits & gameOnFlashcard)) {
 		patchCardCheckPullOut(ce7, ndsHeader, moduleParams);
+	}
+
+	extern bool softResetMb;
+	if (softResetMb) {
+		patchReset(ce7, ndsHeader, moduleParams);
 	}
 
 	if (a7GetReloc(ndsHeader, moduleParams)) {
