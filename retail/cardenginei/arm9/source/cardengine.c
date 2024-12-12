@@ -628,11 +628,17 @@ static inline void cardReadRAM(u8* dst, u32 src, u32 len/*, int romPartNo*/) {
 	// tonccpy(dst, (u8*)ce9->romLocation/*[romPartNo]*/+src, len);
 	u32 newSrc = 0;
 	u32 newLen = 0;
+	bool srcFound = false;
 	int i = 0;
 	for (i = 0; i < ce9->romMapLines; i++) {
 		if (src >= ce9->romMap[i][0] && (i == ce9->romMapLines-1 || src < ce9->romMap[i+1][0])) {
+			srcFound = true;
 			break;
 		}
+	}
+	if (!srcFound) {
+		toncset(dst, 0, len); // Fill dst with 0 if ROM area is not within the map
+		return;
 	}
 	while (len > 0) {
 		newSrc = (ce9->romMap[i][1]-ce9->romMap[i][0])+src;
