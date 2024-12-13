@@ -537,13 +537,10 @@ void reset(void) {
 	if ((valueBits & isDlp) || currentSrlAddr != *(u32*)(resetParam+0xC) || *(u32*)(resetParam+8) == 0x44414F4C) {
 		currentSrlAddr = *(u32*)(resetParam+0xC);
 		if (valueBits & isDlp) {
-			ndmaCopyWordsAsynch(1, (u32*)0x022C0000, ndsHeader->arm7destination, ndsHeader->arm7binarySize);
-			*(u16*)0x02fffc40 = 2; // Boot Indicator (Cloneboot/Multiboot)
+			// ndmaCopyWordsAsynch(1, (u32*)0x022C0000, ndsHeader->arm7destination, ndsHeader->arm7binarySize);
 		} else {
 			if (*(u32*)(resetParam+8) == 0x44414F4C) {
 				// ndmaCopyWordsAsynch(1, (u32*)0x022C0000, ndsHeader->arm7destination, ndsHeader->arm7binarySize);
-				*((u16*)(/*isSdk5(moduleParams) ? 0x02fffc40 :*/ 0x027ffc40)) = 2; // Boot Indicator (Cloneboot/Multiboot)
-				// tonccpy((u32*)0x027FFC40, (u32*)0x02344820, 0x40); // Multiboot info?
 			} else if (valueBits & ROMinRAM) {
 				cardReadRAM((u8*)ndsHeader, currentSrlAddr, 0x160);
 				cardReadRAM((u8*)ndsHeader->arm9destination, currentSrlAddr+ndsHeader->arm9romOffset, ndsHeader->arm9binarySize);
@@ -967,6 +964,9 @@ void dumpRam(void) {
 	//driveInitialize();
 	sharedAddr[3] = 0x444D4152;
 	// Dump RAM
+	#ifdef TWLSDK
+	fileWrite((char*)0x0C000000, &ramDumpFile, 0, (consoleModel==0 ? 0x01000000 : 0x02000000));
+	#else
 	if (valueBits & dsiMode) {
 		// Dump full RAM
 		fileWrite((char*)0x0C000000, &ramDumpFile, 0, (consoleModel==0 ? 0x01000000 : 0x02000000));
@@ -984,6 +984,7 @@ void dumpRam(void) {
 		fileWrite((char*)0x02000000, &ramDumpFile, 0, 0x3C0000);
 		fileWrite((char*)0x027C0000, &ramDumpFile, 0x3C0000, 0x40000);
 	}
+	#endif
 	sharedAddr[3] = 0;
   	#ifdef TWLSDK
 	//if (doBak) restoreSdBakData();
