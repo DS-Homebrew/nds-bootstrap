@@ -98,7 +98,6 @@ typedef struct cardengineArm9 {
 		10: slowSoftReset
 		11: dsiBios
 		12: asyncCardRead
-		13: softResetMb
 		14: cloneboot
 		15: isDlp
 		16: bypassExceptionHandler

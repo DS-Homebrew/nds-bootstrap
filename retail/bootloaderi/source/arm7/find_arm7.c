@@ -119,8 +119,8 @@ static const u16 irqEnableStartSignatureThumb[5]  = {0xB530, 0xB081, 0x4D07, 0x8
 static const u16 irqEnableStartSignatureThumb3[5] = {0xB510, 0x1C04, 0xF7FF, 0xFFF4, 0x4B05}; // SDK 3
 static const u16 irqEnableStartSignatureThumb5[5] = {0xB510, 0x1C04, 0xF7FF, 0xFFE4, 0x4B05}; // SDK 5
 
-// Reset
-static const u32 resetSignature3Eoo[] = {0xE92D4070, 0xE59F0098, 0xE5904004, 0xE3540000}; // eoo.dat (Pokemon)
+// SRL start
+static const u32 srlStartSignature3[4] = {0xE92D4070, 0xE59F0098, 0xE5904004, 0xE3540000}; // eoo.dat (Pokemon)
 
 // ARM7i start (SDK 5)
 //static const u32 a7iStartSignatureConstant[3] = {0x6F696473, 0x616C775F, 0x0000006E}; // 'sdio_wlan'
@@ -1407,23 +1407,22 @@ u32* findCardIrqEnableOffset(const tNDSHeader* ndsHeader, const module_params_t*
 	return cardIrqEnableOffset;
 }
 
-u32* findResetOffset7(const tNDSHeader* ndsHeader) {
-	// dbg_printf("findResetOffset\n");
+u32* findSrlStartOffset7(const tNDSHeader* ndsHeader) {
+	dbg_printf("findSrlStartOffset7\n");
 
-    u32* resetOffset = findOffset(
+    u32* offset = findOffset(
 		ndsHeader->arm7destination, newArm7ibinarySize,
-		resetSignature3Eoo, 4
+		srlStartSignature3, 4
 	);
 
-	if (resetOffset) {
-		dbg_printf("Reset found\n");
-		dbg_printf("\n");
-		return resetOffset;
+	if (offset) {
+		dbg_printf("SRL start function found\n");
 	} else {
-		dbg_printf("Reset not found\n");
+		dbg_printf("SRL start function not found\n");
 	}
 
-	return NULL;
+	dbg_printf("\n");
+	return offset;
 }
 
 /*u32* findA7iStartOffset(void) {

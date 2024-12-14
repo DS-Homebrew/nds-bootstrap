@@ -24,7 +24,6 @@
 #define b_slowSoftReset BIT(10)
 #define b_dsiBios BIT(11)
 #define b_asyncCardRead BIT(12)
-#define b_softResetMb BIT(13)
 #define b_cloneboot BIT(14)
 #define b_isDlp BIT(15)
 #define b_bypassExceptionHandler BIT(16)
@@ -247,9 +246,6 @@ int hookNdsRetailArm9(
 	}
 	if (asyncCardRead) {
 		ce9->valueBits |= b_asyncCardRead;
-	}
-	if (patchOffsetCache.resetMb) {
-		ce9->valueBits |= b_softResetMb;
 	}
 	if (usesCloneboot) {
 		ce9->valueBits |= b_cloneboot;

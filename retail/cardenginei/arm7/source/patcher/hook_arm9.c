@@ -11,7 +11,6 @@
 
 #define isSdk5_9 BIT(5)
 #define isSdk5_7 BIT(13)
-#define b_softResetMb BIT(13)
 #define b_isDlp BIT(15)
 
 extern u32 valueBits;
@@ -119,24 +118,19 @@ static u32* hookInterruptHandler(const u32* start, size_t size) {
 }
 
 int hookNdsRetailArm9(
+	cardengineArm9* ce9,
 	const tNDSHeader* ndsHeader
 ) {
 	//nocashMessage("hookNdsRetailArm9");
 
 	extern u32 iUncompressedSize;
-	extern bool softResetMb;
 
 	if (valueBits & isSdk5_7) {
-		sharedAddr[1] |= isSdk5_9;
+		ce9->valueBits |= isSdk5_9;
 	} else {
-		sharedAddr[1] &= ~isSdk5_9;
+		ce9->valueBits &= ~isSdk5_9;
 	}
-	if (softResetMb) {
-		sharedAddr[1] |= b_softResetMb;
-	} else {
-		sharedAddr[1] &= ~b_softResetMb;
-	}
-	sharedAddr[1] &= ~b_isDlp;
+	ce9->valueBits &= ~b_isDlp;
 
     u32* tableAddr = hookInterruptHandler((u32*)ndsHeader->arm9destination, iUncompressedSize);
    
@@ -149,7 +143,7 @@ int hookNdsRetailArm9(
 	dbg_hexa((u32)tableAddr);
 	dbg_printf("\n\n");*/
     
-    sharedAddr[2] = (u32)tableAddr;
+    ce9->irqTable   = tableAddr;
 
 	//nocashMessage("ERR_NONE");
 	return ERR_NONE;

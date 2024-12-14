@@ -26,7 +26,7 @@ extern bool ipcEveryFrame;
 
 extern struct IgmText *igmText;
 
-extern void reset(void);
+extern void reset(const bool downloadedSrl);
 extern void dumpRam(void);
 extern void returnToLoader(bool reboot);
 extern void prepareScreenshot(void);
@@ -134,7 +134,7 @@ void inGameMenu(void) {
 					#ifdef TWLSDK
 					i2cWriteRegister(0x4A, 0x12, 0x01);
 					#endif
-					reset();
+					reset(false);
 					break;
 				case 0x54495551: // QUIT
 					unloadInGameMenu();

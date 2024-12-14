@@ -448,7 +448,7 @@ static void cardReadRAM(u8* dst, u32 src, u32 len/*, int romPartNo*/) {
 	#endif
 }
 
-void reset(void) {
+void reset(const bool downloadedSrl) {
 	register int i, reg;
 
 #ifndef TWLSDK
@@ -457,7 +457,7 @@ void reset(void) {
 		REG_MASTER_VOLUME = 0;
 		int oldIME = enterCriticalSection();
 		//driveInitialize();
-		if (*(u32*)(resetParam+8) == 0x44414F4C) { // 'LOAD'
+		if (downloadedSrl) {
 			fileWrite((char*)ndsHeader, &pageFile, 0x2BFE00, 0x160);
 			fileWrite((char*)ndsHeader->arm9destination, &pageFile, 0x14000, ndsHeader->arm9binarySize);
 			fileWrite((char*)0x02380000, &pageFile, 0x2C0000, ndsHeader->arm7binarySize);
@@ -534,22 +534,18 @@ void reset(void) {
 	unlockMutex(&saveMutex);
 
 	#ifndef TWLSDK
-	if ((valueBits & isDlp) || currentSrlAddr != *(u32*)(resetParam+0xC) || *(u32*)(resetParam+8) == 0x44414F4C) {
+	if ((valueBits & isDlp) || currentSrlAddr != *(u32*)(resetParam+0xC) || downloadedSrl) {
 		currentSrlAddr = *(u32*)(resetParam+0xC);
-		if (valueBits & isDlp) {
+		if ((valueBits & isDlp) || downloadedSrl) {
 			// ndmaCopyWordsAsynch(1, (u32*)0x022C0000, ndsHeader->arm7destination, ndsHeader->arm7binarySize);
+		} else if (valueBits & ROMinRAM) {
+			cardReadRAM((u8*)ndsHeader, currentSrlAddr, 0x160);
+			cardReadRAM((u8*)ndsHeader->arm9destination, currentSrlAddr+ndsHeader->arm9romOffset, ndsHeader->arm9binarySize);
+			cardReadRAM((u8*)ndsHeader->arm7destination, currentSrlAddr+ndsHeader->arm7romOffset, ndsHeader->arm7binarySize);
 		} else {
-			if (*(u32*)(resetParam+8) == 0x44414F4C) {
-				// ndmaCopyWordsAsynch(1, (u32*)0x022C0000, ndsHeader->arm7destination, ndsHeader->arm7binarySize);
-			} else if (valueBits & ROMinRAM) {
-				cardReadRAM((u8*)ndsHeader, currentSrlAddr, 0x160);
-				cardReadRAM((u8*)ndsHeader->arm9destination, currentSrlAddr+ndsHeader->arm9romOffset, ndsHeader->arm9binarySize);
-				cardReadRAM((u8*)ndsHeader->arm7destination, currentSrlAddr+ndsHeader->arm7romOffset, ndsHeader->arm7binarySize);
-			} else {
-				fileRead((char*)ndsHeader, romFile, currentSrlAddr, 0x160);
-				fileRead((char*)ndsHeader->arm9destination, romFile, currentSrlAddr+ndsHeader->arm9romOffset, ndsHeader->arm9binarySize);
-				fileRead((char*)ndsHeader->arm7destination, romFile, currentSrlAddr+ndsHeader->arm7romOffset, ndsHeader->arm7binarySize);
-			}
+			fileRead((char*)ndsHeader, romFile, currentSrlAddr, 0x160);
+			fileRead((char*)ndsHeader->arm9destination, romFile, currentSrlAddr+ndsHeader->arm9romOffset, ndsHeader->arm9binarySize);
+			fileRead((char*)ndsHeader->arm7destination, romFile, currentSrlAddr+ndsHeader->arm7romOffset, ndsHeader->arm7binarySize);
 		}
 
 		moduleParams = getModuleParams(ndsHeader);
@@ -562,7 +558,7 @@ void reset(void) {
 			valueBits &= ~isSdk5;
 		}
 
-		ensureBinaryDecompressed(ndsHeader, moduleParams, (valueBits & isDlp) ? 0x44414F4 : resetParam);
+		ensureBinaryDecompressed(ndsHeader, moduleParams);
 
 		patchCardNdsArm9(
 			(cardengineArm9*)((valueBits & isDlp) ? CARDENGINEI_ARM9_LOCATION_DLP : CARDENGINEI_ARM9_LOCATION),
@@ -570,7 +566,6 @@ void reset(void) {
 			moduleParams,
 			1
 		);
-		// while (ndmaBusy(1));
 		patchCardNdsArm7(
 			(cardengineArm7*)ce7,
 			ndsHeader,
@@ -581,7 +576,10 @@ void reset(void) {
 			(cardengineArm7*)ce7,
 			ndsHeader
 		);
-		hookNdsRetailArm9(ndsHeader);
+		hookNdsRetailArm9(
+			(cardengineArm9*)((valueBits & isDlp) ? CARDENGINEI_ARM9_LOCATION_DLP : CARDENGINEI_ARM9_LOCATION),
+			ndsHeader
+		);
 
 		extern u32 iUncompressedSize;
 
@@ -595,13 +593,8 @@ void reset(void) {
 			ndmaCopyWordsAsynch(1, ndsHeader->arm7destination, (char*)DONOR_ROM_ARM7_LOCATION, ndsHeader->arm7binarySize);
 			while (ndmaBusy(0) || ndmaBusy(1));
 		} */
-		if (valueBits & isDlp) {
-			toncset((u32*)0x022C0000, 0, ndsHeader->arm7binarySize);
-			if (!(valueBits & isSdk5)) {
-				tonccpy((u8*)0x027FF000, (u8*)0x02FFF000, 0x1000);
-			}
-		} else {
-			*(u32*)(resetParam+8) = 0;
+		if ((valueBits & isDlp) && !(valueBits & isSdk5)) {
+			tonccpy((u8*)0x027FF000, (u8*)0x02FFF000, 0x1000);
 		}
 		valueBits &= ~isDlp;
 	} else {
@@ -1692,7 +1685,7 @@ void myIrqHandlerVBlank(void) {
 	if (valueBits & isDlp) {
 		if (!(REG_EXTKEYINPUT & KEY_A) && *(u32*)(NDS_HEADER_SDK5+0xC) != 0 && !wifiIrq) {
 			IPC_SendSync(0x5);
-			reset();
+			reset(false);
 		}
 	}
 #endif */
@@ -1764,7 +1757,7 @@ void myIrqHandlerVBlank(void) {
 	} */
 
 	if (sharedAddr[3] == (vu32)0x52534554) {
-		reset();
+		reset(false);
 	}
 
 	if ( 0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_START | KEY_SELECT))) {

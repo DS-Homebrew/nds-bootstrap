@@ -80,7 +80,8 @@ u32* findRandomPatchOffset5Second(const tNDSHeader* ndsHeader); // SDK 5
 u32* findSleepOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb, bool* usesThumbPtr);
 u32* findCardEndReadDma(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb, const u32* cardReadDmaEndOffset, u32* offsetDmaHandler);
 u32* findCardSetDma(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb);
-u32* findResetOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool* softResetMb);
+u32* findSrlStartOffset9(const tNDSHeader* ndsHeader);
+u32* findResetOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, const bool softResetMb);
 
 // ARM7
 bool a7GetReloc(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
@@ -94,6 +95,6 @@ u16* findSleepPatchOffsetThumb(const tNDSHeader* ndsHeader);
 u32* findSleepInputWriteOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
 u32* findCardCheckPullOutOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
 u32* findCardIrqEnableOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
-u32* findResetOffset7(const tNDSHeader* ndsHeader);
+u32* findSrlStartOffset7(const tNDSHeader* ndsHeader);
 
 #endif // FIND_H

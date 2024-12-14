@@ -697,23 +697,45 @@ static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, co
 }
 
 static void patchReset(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {    
-	u32* reset = patchOffsetCache.resetOffset;
+	const char* romTid = getRomTid(ndsHeader);
+	if (strcmp(romTid, "NTRJ") == 0 || strncmp(romTid, "HND", 3) == 0 || strncmp(romTid, "HNE", 3) == 0) {
+		u32* offset = patchOffsetCache.srlStartOffset9;
+
+		if (!patchOffsetCache.srlStartOffsetChecked) {
+			offset = findSrlStartOffset9(ndsHeader);
+			if (offset) patchOffsetCache.srlStartOffset9 = offset;
+			patchOffsetCache.srlStartOffsetChecked = true;
+		}
+
+		if (offset) {
+			// Patch
+			tonccpy(offset, ce9->patches->reset_arm9, 0x40);
+			dbg_printf("srlStart location : ");
+			dbg_hexa((u32)offset);
+			dbg_printf("\n\n");
+		}
+	}
+
+	u32* offset = patchOffsetCache.resetOffset;
 
     if (!patchOffsetCache.resetChecked) {
-		reset = findResetOffset(ndsHeader, moduleParams, (bool*)&patchOffsetCache.resetMb);
-		if (reset) patchOffsetCache.resetOffset = reset;
+		offset = findResetOffset(ndsHeader, moduleParams, (bool)patchOffsetCache.srlStartOffset9);
+		if (offset) patchOffsetCache.resetOffset = offset;
 		patchOffsetCache.resetChecked = true;
 	}
 
-	if (!reset) {
+	if (!offset) {
 		return;
 	}
 
+	/* if (patchOffsetCache.resetMb && offset[-(0x158/4)] == 0xE92D4010 && offset[(-(0x158/4))+1] == 0xE59FE04C && offset[(-(0x158/4))+2] == 0xE59F204C && offset[(-(0x158/4))+16] == 0x18BD8001) {
+		offset[(-(0x158/4))+16] = 0xE1A00000; // nop
+	} */
+
 	// Patch
-	u32* resetPatch = ce9->patches->reset_arm9;
-	tonccpy(reset, resetPatch, 0x40);
+	tonccpy(offset, ce9->patches->reset_arm9, 0x40);
 	dbg_printf("reset location : ");
-	dbg_hexa((u32)reset);
+	dbg_hexa((u32)offset);
 	dbg_printf("\n\n");
 }
 

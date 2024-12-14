@@ -107,7 +107,8 @@ u32* findWaitSysCyclesOffset(const tNDSHeader* ndsHeader);
 u32* findSleepOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb, u32* usesThumbPtr);
 u32* findCardEndReadDma(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb, const u32* cardReadDmaEndOffset, u32* offsetDmaHandler);
 u32* findCardSetDma(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb);
-u32* findResetOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool* softResetMb);
+u32* findSrlStartOffset9(const tNDSHeader* ndsHeader);
+u32* findResetOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, const bool softResetMb);
 u32* findNandTmpJumpFuncOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
 u32* findMbkWramBOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
 u16* findMbkWramBOffsetThumb(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
@@ -140,6 +141,6 @@ u32* findCardIrqEnableOffset(const tNDSHeader* ndsHeader, const module_params_t*
 u32* findSdCardResetOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
 u32* findSdCardFuncsOffset(const tNDSHeader* ndsHeader);
 u32* findAutoPowerOffOffset(const tNDSHeader* ndsHeader);
-u32* findResetOffset7(const tNDSHeader* ndsHeader);
+u32* findSrlStartOffset7(const tNDSHeader* ndsHeader);
 
 #endif // FIND_H

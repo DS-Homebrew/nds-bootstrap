@@ -38,7 +38,6 @@
 #define isSdk5 BIT(5)
 #define overlaysInRam BIT(6)
 #define slowSoftReset BIT(10)
-#define softResetMb BIT(13)
 #define cloneboot BIT(14)
 #define isDlp BIT(15)
 
@@ -185,23 +184,12 @@ void reset(u32 param, u32 tid2) {
 			waitFrames(5);	// Wait for DSi screens to stabilize
 		}
 		enterCriticalSection();
-		if (!igmReset && (ce9->valueBits & softResetMb)) {
-			*(u32*)resetParams = 0;
-			*(u32*)(resetParams+8) = 0x44414F4C; // 'LOAD'
-		}
 		cacheFlush();
 		sharedAddr[3] = 0x52534554;
 		while (1);
 	} else
 	#endif
 	{
-		if (*(u32*)(resetParams+0xC) > 0) {
-			sharedAddr[1] = ce9->valueBits;
-		}
-		if (!igmReset && (ce9->valueBits & softResetMb)) {
-			*(u32*)resetParams = 0;
-			*(u32*)(resetParams+8) = 0x44414F4C; // 'LOAD'
-		}
 		sharedAddr[3] = 0x52534554;
 	}
 #else
@@ -341,9 +329,6 @@ void reset(u32 param, u32 tid2) {
 
 	#ifndef GSDD
 	if ((ce9->valueBits & isDlp) || *(u32*)(resetParams+0xC) > 0) {
-		u32 newIrqTable = sharedAddr[2];
-		ce9->valueBits = sharedAddr[1];
-		ce9->irqTable = (u32*)newIrqTable;
 		sharedAddr[4] = 0;
 		initialized = false;
 	}

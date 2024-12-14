@@ -50,7 +50,7 @@
 
 //extern bool cardReadFound; // patch_arm9.c
 
-#define patchOffsetCacheFileVersion 111	// Change when new functions are being patched, some offsets removed,
+#define patchOffsetCacheFileVersion 112	// Change when new functions are being patched, some offsets removed,
 										// the offset order changed, and/or the function signatures changed (not added)
 
 typedef struct patchOffsetCacheContents {
@@ -65,7 +65,6 @@ typedef struct patchOffsetCacheContents {
     u32* heapPointerOffset;
 	u32 a9IsThumb;
     u32* cardHashInitOffset;
-    u32* cardRomInitOffset; // Unused, remove when updating cache version
     u32* cardReadStartOffset;
     u32* cardReadEndOffset;
     u32* cardPullOutOffset;
@@ -93,8 +92,9 @@ typedef struct patchOffsetCacheContents {
 	u32* fileIoReadOffset;
 	u32* a9CardIrqEnableOffset;
 	u32 a9CardIrqIsThumb;
+	u32* srlStartOffset9;
+	u32 srlStartOffsetChecked;
 	u32* resetOffset;
-	u32 resetMb;
 	u32 resetChecked;
 	u32* nandTmpJumpFuncOffset;
 	u32 nandTmpJumpFuncChecked;

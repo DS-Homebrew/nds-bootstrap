@@ -90,8 +90,8 @@ static const u16 irqEnableStartSignatureThumb[5]  = {0xB530, 0xB081, 0x4D07, 0x8
 static const u16 irqEnableStartSignatureThumb3[5] = {0xB510, 0x1C04, 0xF7FF, 0xFFF4, 0x4B05}; // SDK 3
 static const u16 irqEnableStartSignatureThumb5[5] = {0xB510, 0x1C04, 0xF7FF, 0xFFE4, 0x4B05}; // SDK 5
 
-// Reset
-static const u32 resetSignature3Eoo[] = {0xE92D4070, 0xE59F0098, 0xE5904004, 0xE3540000}; // eoo.dat (Pokemon)
+// SRL start
+static const u32 srlStartSignature3[4] = {0xE92D4070, 0xE59F0098, 0xE5904004, 0xE3540000}; // eoo.dat (Pokemon)
 
 u32 relocationStart = 0;
 bool a7GetReloc(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
@@ -166,13 +166,13 @@ bool a7GetReloc(const tNDSHeader* ndsHeader, const module_params_t* moduleParams
 		forwardedRelocStartAddr += 4;
 	}
 	vAddrOfRelocSrc = *(u32*)(forwardedRelocStartAddr + 8);
-    
+
     /*dbg_printf("forwardedRelocStartAddr\n");
-    dbg_hexa(forwardedRelocStartAddr);   
+    dbg_hexa(forwardedRelocStartAddr);
     dbg_printf("\nvAddrOfRelocSrc\n");
     dbg_hexa(vAddrOfRelocSrc);
     dbg_printf("\n");*/
-	
+
 	// Sanity checks
 	u32 relocationCheck1 = *(u32*)(forwardedRelocStartAddr + 0xC);
 	u32 relocationCheck2 = *(u32*)(forwardedRelocStartAddr + 0x10);
@@ -184,13 +184,13 @@ bool a7GetReloc(const tNDSHeader* ndsHeader, const module_params_t* moduleParams
 			(u32*)relocationStart, ndsHeader->arm7binarySize,
 			nextFunctiontSignature, 1
 		);
-	
+
 		// Validate the relocation signature
 		forwardedRelocStartAddr = nextFunction - 0x14;
-		
+
 		// Validate the relocation signature
 		vAddrOfRelocSrc = *(u32*)(nextFunction - 0xC);
-		
+
 		// Sanity checks
 		relocationCheck1 = *(u32*)(forwardedRelocStartAddr + 0xC);
 		relocationCheck2 = *(u32*)(forwardedRelocStartAddr + 0x10);
@@ -819,7 +819,7 @@ u32* findSleepPatchOffset(const tNDSHeader* ndsHeader) {
 
 u16* findSleepPatchOffsetThumb(const tNDSHeader* ndsHeader) {
 	//dbg_printf("findSleepPatchOffsetThumb:\n");
-	
+
 	u16* sleepPatchOffset = findOffsetThumb(
 		(u16*)ndsHeader->arm7destination, ndsHeader->arm7binarySize,
 		sleepPatchThumb, 2
@@ -893,7 +893,7 @@ u32* findSleepInputWriteOffset(const tNDSHeader* ndsHeader, const module_params_
 
 u32* findCardCheckPullOutOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	//dbg_printf("findCardCheckPullOutOffset:\n");
-	
+
 	const u32* cardCheckPullOutSignature = cardCheckPullOutSignature1;
     if (moduleParams->sdk_version > 0x2004FFF && moduleParams->sdk_version < 0x3000000) {
 		cardCheckPullOutSignature = cardCheckPullOutSignature2;
@@ -922,7 +922,7 @@ u32* findCardCheckPullOutOffset(const tNDSHeader* ndsHeader, const module_params
 
 u32* findCardIrqEnableOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	// dbg_printf("findCardIrqEnableOffset:\n");
-	
+
 	const u32* irqEnableStartSignature = irqEnableStartSignature1;
 	if (ndsHeader->arm7binarySize != 0x289C0 && moduleParams->sdk_version > 0x4000000) {
 		irqEnableStartSignature = irqEnableStartSignature4;
@@ -1013,21 +1013,20 @@ u32* findCardIrqEnableOffset(const tNDSHeader* ndsHeader, const module_params_t*
 	return cardIrqEnableOffset;
 }
 
-u32* findResetOffset7(const tNDSHeader* ndsHeader) {
-	// dbg_printf("findResetOffset\n");
+u32* findSrlStartOffset7(const tNDSHeader* ndsHeader) {
+	// dbg_printf("findSrlStartOffset7\n");
 
-    u32* resetOffset = findOffset(
+    u32* offset = findOffset(
 		ndsHeader->arm7destination, ndsHeader->arm7binarySize,
-		resetSignature3Eoo, 4
+		srlStartSignature3, 4
 	);
 
-	if (resetOffset) {
-		// dbg_printf("Reset found\n");
-		// dbg_printf("\n");
-		return resetOffset;
+	/* if (offset) {
+		dbg_printf("SRL start function found\n");
 	} else {
-		// dbg_printf("Reset not found\n");
+		dbg_printf("SRL start function not found\n");
 	}
 
-	return NULL;
+	dbg_printf("\n"); */
+	return offset;
 }

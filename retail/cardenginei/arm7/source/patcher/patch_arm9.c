@@ -18,8 +18,6 @@
 extern u32 valueBits;
 extern u16 scfgRomBak;
 
-extern vu32* volatile sharedAddr;
-
 bool isPawsAndClaws(const tNDSHeader* ndsHeader) {
 	const char* romTid = getRomTid(ndsHeader);
 
@@ -393,18 +391,35 @@ static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, co
 bool softResetMb = false;
 static void patchReset(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	softResetMb = false;
-	u32* reset = findResetOffset(ndsHeader, moduleParams, &softResetMb);
+	const char* romTid = getRomTid(ndsHeader);
+	if (strcmp(romTid, "NTRJ") == 0 || strncmp(romTid, "HND", 3) == 0 || strncmp(romTid, "HNE", 3) == 0) {
+		u32* offset = findSrlStartOffset9(ndsHeader);
 
-	if (!reset) {
+		if (offset) {
+			// Patch
+			tonccpy(offset, ce9->patches->reset_arm9, 0x40);
+			/* dbg_printf("srlStart location : ");
+			dbg_hexa((u32)offset);
+			dbg_printf("\n\n"); */
+			softResetMb = true;
+		}
+	}
+
+	u32* offset = findResetOffset(ndsHeader, moduleParams, softResetMb);
+
+	if (!offset) {
 		return;
 	}
 
+	/* if (softResetMb && offset[-(0x158/4)] == 0xE92D4010 && offset[(-(0x158/4))+1] == 0xE59FE04C && offset[(-(0x158/4))+2] == 0xE59F204C && offset[(-(0x158/4))+16] == 0x18BD8001) {
+		offset[(-(0x158/4))+16] = 0xE1A00000; // nop
+	} */
+
 	// Patch
-	u32* resetPatch = ce9->patches->reset_arm9;
-	tonccpy(reset, resetPatch, 0x40);
-	/*dbg_printf("reset location : ");
-	dbg_hexa((u32)reset);
-	dbg_printf("\n\n");*/
+	tonccpy(offset, ce9->patches->reset_arm9, 0x40);
+	/* dbg_printf("reset location : ");
+	dbg_hexa((u32)offset);
+	dbg_printf("\n\n"); */
 }
 
 static bool getSleep(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {

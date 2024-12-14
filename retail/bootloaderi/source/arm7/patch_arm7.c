@@ -565,15 +565,16 @@ static void patchCardCheckPullOut(cardengineArm7* ce7, const tNDSHeader* ndsHead
 	}
 }
 
-static void patchReset(cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
-	u32* offset = findResetOffset7(ndsHeader);
+static void patchSrlStart(cardengineArm7* ce7, const tNDSHeader* ndsHeader) {
+	u32* offset = findSrlStartOffset7(ndsHeader);
 	if (!offset) {
 		return;
 	}
 
-	offset[0] = 0xE59F0000; // ldr r0, =reset
-	offset[1] = 0xE12FFF10; // bx r0
-	offset[2] = (u32)ce7->patches->reset;
+	offset[0] = 0xE3A00001; // mov r0, #1
+	offset[1] = 0xE59FC000; // ldr r12, =reset
+	offset[2] = 0xE12FFF1C; // bx r12
+	offset[3] = (u32)ce7->patches->reset;
 }
 
 static void patchSdCardReset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
@@ -720,8 +721,8 @@ u32 patchCardNdsArm7(
 		patchCardCheckPullOut(ce7, ndsHeader, moduleParams);
 	}
 
-	if (patchOffsetCache.resetMb) {
-		patchReset(ce7, ndsHeader, moduleParams);
+	if (patchOffsetCache.srlStartOffset9) {
+		patchSrlStart(ce7, ndsHeader);
 	}
 
 	if (a7GetReloc(ndsHeader, moduleParams)) {
