@@ -698,7 +698,7 @@ static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, co
 
 static void patchReset(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {    
 	const char* romTid = getRomTid(ndsHeader);
-	if (strcmp(romTid, "NTRJ") == 0 || strncmp(romTid, "HND", 3) == 0 || strncmp(romTid, "HNE", 3) == 0) {
+	if (ndsHeader->unitCode == 0 && (strcmp(romTid, "NTRJ") == 0 || strncmp(romTid, "HND", 3) == 0 || strncmp(romTid, "HNE", 3) == 0)) {
 		u32* offset = patchOffsetCache.srlStartOffset9;
 
 		if (!patchOffsetCache.srlStartOffsetChecked) {
