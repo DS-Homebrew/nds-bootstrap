@@ -460,7 +460,7 @@ void reset(const bool downloadedSrl) {
 		if (downloadedSrl) {
 			fileWrite((char*)ndsHeader, &pageFile, 0x2BFE00, 0x160);
 			fileWrite((char*)ndsHeader->arm9destination, &pageFile, 0x14000, ndsHeader->arm9binarySize);
-			fileWrite((char*)0x02380000, &pageFile, 0x2C0000, ndsHeader->arm7binarySize);
+			fileWrite((char*)ndsHeader->arm7destination, &pageFile, 0x2C0000, ndsHeader->arm7binarySize);
 		}
 		fileWrite((char*)resetParam, &srParamsFile, 0, 0x10);
 		toncset((u32*)0x02000000, 0, 0x400);
