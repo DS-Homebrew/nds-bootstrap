@@ -1125,9 +1125,6 @@ static void buildRomMap(const tNDSHeader* ndsHeader, const module_params_t* modu
 
 		if (romSizeEdit <= 0) {
 			readRom = true;
-		} else if (dsiWramAccess && !dsiWramMirrored && romLocationChangePrep == (consoleModel > 0 ? 0x0E000000 : 0x0D000000)) {
-			romLocationChangePrep = 0x03708000;
-			readRom = true;
 		} else if (isSdk5(moduleParams) || (dsiBios && laterSdk)) {
 			if (romLocationChangePrep == 0x0C7C4000) {
 				romLocationChangePrep += (ndsHeader->unitCode > 0 ? 0x1C000 : 0x3C000);
@@ -1152,6 +1149,9 @@ static void buildRomMap(const tNDSHeader* ndsHeader, const module_params_t* modu
 		} else if (romLocationChangePrep == 0x0C7C0000) {
 			romLocationChangePrep += 0x40000;
 			readRom = true;
+		}
+		if (romLocationChangePrep == (consoleModel > 0 ? 0x0E000000 : 0x0D000000)) {
+			romLocationChangePrep = 0x03708000;
 		}
 
 		if (readRom) {
