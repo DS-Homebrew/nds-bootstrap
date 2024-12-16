@@ -20,6 +20,7 @@
 #include <nds/ndstypes.h>
 #include <nds/arm9/exceptions.h>
 #include <nds/arm9/cache.h>
+#include <nds/arm9/video.h>
 #include <nds/bios.h>
 #include <nds/system.h>
 #include <nds/dma.h>
@@ -50,7 +51,7 @@
 #define slowSoftReset BIT(10)
 #define dsiBios BIT(11)
 #define asyncCardRead BIT(12)
-#define softResetMb BIT(13)
+#define useSharedWram BIT(13)
 #define cloneboot BIT(14)
 #define fntFatCached BIT(17)
 #define waitForPreloadToFinish BIT(18)
@@ -640,6 +641,9 @@ static inline void cardReadRAM(u8* dst, u32 src, u32 len/*, int romPartNo*/) {
 		toncset(dst, 0, len); // Fill dst with 0 if ROM area is not within the map
 		return;
 	}
+	if (ce9->valueBits & useSharedWram) {
+		WRAM_CR = 0; // Set shared WRAM to ARM9
+	}
 	while (len > 0) {
 		newSrc = (ce9->romMap[i][1]-ce9->romMap[i][0])+src;
 		newLen = len;
@@ -856,7 +860,7 @@ void cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 		cardReadRAM(dst, src, len/*, romPartNo*/);
 	#ifndef TWLSDK
 	} else if ((ce9->valueBits & fntFatCached) && src >= ce9->fntSrc && src < ce9->fntSrc+ce9->fntFatSize) {
-		tonccpy(dst, (u8*)((0x03708000-ce9->fntSrc)+src), len);
+		tonccpy(dst, (u8*)((0x03700000-ce9->fntSrc)+src), len);
 	#endif
 	} else {
 		cardReadNormal(dst, src, len);
@@ -1347,6 +1351,12 @@ void inGameMenu(s32* exRegisters) {
 		while (REG_VCOUNT != 191) swiDelay(100);
 		while (REG_VCOUNT == 191) swiDelay(100);
 	}
+
+	#ifndef TWLSDK
+	if (ce9->valueBits & useSharedWram) {
+		WRAM_CR = 0; // Set shared WRAM to ARM9
+	}
+	#endif
 
 	*(u32*)(INGAME_MENU_LOCATION + IGM_TEXT_SIZE_ALIGNED) = (u32)sharedAddr;
 	#ifndef TWLSDK

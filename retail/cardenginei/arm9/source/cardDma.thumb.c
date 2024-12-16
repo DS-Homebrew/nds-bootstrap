@@ -20,6 +20,7 @@
 #include <nds/ndstypes.h>
 #include <nds/arm9/exceptions.h>
 #include <nds/arm9/cache.h>
+#include <nds/arm9/video.h>
 #include <nds/bios.h>
 #include <nds/system.h>
 #include <nds/dma.h>
@@ -45,6 +46,7 @@
 #define cacheFlushFlag BIT(7)
 #define cardReadFix BIT(8)
 #define cacheDisabled BIT(9)
+#define useSharedWram BIT(13)
 #define waitForPreloadToFinish BIT(18)
 
 //#ifdef DLDI
@@ -428,6 +430,9 @@ void cardSetDma(u32 * params) {
 			if (src >= ce9->romMap[i][0] && (i == ce9->romMapLines-1 || src < ce9->romMap[i+1][0])) {
 				break;
 			}
+		}
+		if (ce9->valueBits & useSharedWram) {
+			WRAM_CR = 0; // Set shared WRAM to ARM9
 		}
 		while (len > 0) {
 			newSrc = (ce9->romMap[i][1]-ce9->romMap[i][0])+src;

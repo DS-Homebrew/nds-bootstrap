@@ -9,9 +9,11 @@
 #include "locations.h"
 #include "tonccpy.h"
 
+extern u8 gameOnFlashcard;
 extern u8 consoleModel;
+extern u8 _io_dldi_size;
 extern bool dsiModeConfirmed;
-extern bool extendedMemoryConfirmed;
+extern bool sharedWramEnabled;
 extern bool overlaysInRam;
 
 extern bool scfgBios9i(void);
@@ -25,6 +27,7 @@ bool applyIpsPatch(const tNDSHeader* ndsHeader, u8* ipsbyte, const bool arm9Only
 	bool armPatched = false;
 	const bool dsiBios = scfgBios9i();
 	const u32 romLocation = getRomLocation(ndsHeader, isESdk2, isSdk5, dsiBios);
+	const u32 wramLocation = sharedWramEnabled ? 0x036F8000 : 0x03700000;
 
 	int ipson = 5;
 	int totalrepeats = 0;
@@ -76,7 +79,7 @@ bool applyIpsPatch(const tNDSHeader* ndsHeader, u8* ipsbyte, const bool arm9Only
 					rombyte += 0x40000;
 				}
 				if ((u32)rombyte == (consoleModel > 0 ? 0x0E000000 : 0x0D000000)) {
-					rombyte = (void*)0x03708000;
+					rombyte = (void*)wramLocation;
 				}
 			} else {
 				rombyte = (void*)CACHE_ADRESS_START_DSIMODE;
@@ -118,7 +121,7 @@ bool applyIpsPatch(const tNDSHeader* ndsHeader, u8* ipsbyte, const bool arm9Only
 						rombyteOffset += 0x40000;
 					}
 					if ((u32)rombyteOffset == (consoleModel > 0 ? 0x0E000000 : 0x0D000000)) {
-						rombyteOffset = (u8*)0x03708000;
+						rombyteOffset = (u8*)wramLocation;
 					}
 				}
 			}
@@ -152,7 +155,7 @@ bool applyIpsPatch(const tNDSHeader* ndsHeader, u8* ipsbyte, const bool arm9Only
 						rombyteOffset += 0x40000;
 					}
 					if ((u32)rombyteOffset == (consoleModel > 0 ? 0x0E000000 : 0x0D000000)) {
-						rombyteOffset = (u8*)0x03708000;
+						rombyteOffset = (u8*)wramLocation;
 					}
 				}
 			}

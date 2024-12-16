@@ -165,6 +165,7 @@ u32 baseChipID = 0;
 u32 romPaddingSize = 0;
 bool pkmnHeader = false;
 bool ndmaDisabled = false;
+bool sharedWramEnabled = false;
 
 u32 newArm7binarySize = 0;
 u32 newArm7ibinarySize = 0;
@@ -797,14 +798,14 @@ u32 getRomPartLocation(const tNDSHeader* ndsHeader, const bool isESdk2, const bo
 	if (ndsHeader->unitCode > 0 && dsiModeConfirmed) {
 		return ROM_LOCATION_TWLSDK;
 	}
-	return dsiModeConfirmed ? ROM_LOCATION_DSIMODE : (ROM_LOCATION - ((isESdk2 && dsiBios) ? cacheBlockSize : 0));
+	return (dsiModeConfirmed ? ROM_LOCATION_DSIMODE : (ROM_LOCATION - ((isESdk2 && dsiBios) ? cacheBlockSize : 0))) + ((gameOnFlashcard && _io_dldi_size >= 0xF) ? 0x8000 : 0);
 }
 
 u32 getRomLocation(const tNDSHeader* ndsHeader, const bool isESdk2, const bool isSdk5, const bool dsiBios) {
 	if (ndsHeader->unitCode > 0 && dsiModeConfirmed) {
 		return ROM_LOCATION_TWLSDK;
 	}
-	return (dsiModeConfirmed || strncmp(getRomTid(ndsHeader), "B6X", 3) == 0) ? ROM_LOCATION_DSIMODE : (ROM_LOCATION - ((isESdk2 && dsiBios) ? 0x4000 : 0));
+	return ((dsiModeConfirmed || strncmp(getRomTid(ndsHeader), "B6X", 3) == 0) ? ROM_LOCATION_DSIMODE : (ROM_LOCATION - ((isESdk2 && dsiBios) ? 0x4000 : 0))) + ((gameOnFlashcard && _io_dldi_size >= 0xF) ? 0x8000 : 0);
 }
 
 static bool isROMLoadableInRAM(const tDSiHeader* dsiHeader, const tNDSHeader* ndsHeader, const char* romTid, const module_params_t* moduleParams, const bool usesCloneboot) {
@@ -825,6 +826,21 @@ static bool isROMLoadableInRAM(const tDSiHeader* dsiHeader, const tNDSHeader* nd
 		const bool twlType = (ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed);
 		const bool cheatsEnabled = (cheatSizeTotal > 4 && cheatSizeTotal <= 0x8000);
 		const bool _8MBarea = (dsiModeConfirmed || strncmp(romTid, "B6X", 3) == 0);
+		u32 wramSize = 0x80000;
+		if (ce7Location == CARDENGINEI_ARM7_LOCATION) {
+			wramSize += 0x8000; // Shared 32KB of WRAM is available for ARM9 to use
+			sharedWramEnabled = true;
+		}
+		u32 romSizeLimit = (_8MBarea ? 0x00800000 : 0x00BC0000);
+		if (consoleModel > 0) {
+			romSizeLimit += 0x01000000;
+		}
+		if (dsiWramAccess && !dsiWramMirrored) {
+			romSizeLimit += wramSize;
+		}
+		if (gameOnFlashcard && _io_dldi_size >= 0xF) {
+			romSizeLimit -= 0x8000;
+		}
 
 		u32 romOffset = 0;
 		u32 romSize = baseRomSize;
@@ -843,12 +859,12 @@ static bool isROMLoadableInRAM(const tDSiHeader* dsiHeader, const tNDSHeader* nd
 			romSize -= romOffset;
 		}
 		res = ((consoleModel> 0 && twlType && ((u32)dsiHeader->arm9iromOffset - romOffset)+ioverlaysSize <= (cheatsEnabled ? dev_CACHE_ADRESS_SIZE_TWLSDK_CHEAT : dev_CACHE_ADRESS_SIZE_TWLSDK))
-			|| (consoleModel> 0 && !twlType && romSize <= (_8MBarea ? 0x01800000 : 0x01BC0000)+(dsiWramAccess&&!dsiWramMirrored ? 0x78000 : 0))
-			|| (consoleModel==0 && !twlType && romSize <= (_8MBarea ? 0x00800000 : 0x00BC0000)+(dsiWramAccess&&!dsiWramMirrored ? 0x78000 : 0)));
-
+			|| (!twlType && romSize <= romSizeLimit));
 	}
 	if (res) {
 		dbg_printf("ROM is loadable into RAM\n");
+	} else {
+		sharedWramEnabled = false;
 	}
 	return res;
 }
@@ -1151,7 +1167,7 @@ static void buildRomMap(const tNDSHeader* ndsHeader, const module_params_t* modu
 			readRom = true;
 		}
 		if (romLocationChangePrep == (consoleModel > 0 ? 0x0E000000 : 0x0D000000)) {
-			romLocationChangePrep = 0x03708000;
+			romLocationChangePrep = sharedWramEnabled ? 0x036F8000 : 0x03700000;
 		}
 
 		if (readRom) {
@@ -1171,14 +1187,14 @@ static void loadNitroFileInfoIntoRAM(const tNDSHeader* ndsHeader, aFile* romFile
 	if (ndsHeader->fatSize == 0) return;
 
 	const u32 size = (ndsHeader->fatOffset-ndsHeader->filenameOffset)+ndsHeader->fatSize;
-	if (size > 0x78000) return;
+	if (size > 0x80000) return;
 
 	sdmmc_set_ndma_slot(0);
-	fileRead((char*)0x03708000, romFile, ndsHeader->filenameOffset, size);
+	fileRead((char*)0x03700000, romFile, ndsHeader->filenameOffset, size);
 	sdmmc_set_ndma_slot(4);
 
 	dbg_printf("Nitro file info pre-loaded into RAM at ");
-	dbg_hexa(0x03708000);
+	dbg_hexa(0x03700000);
 	dbg_printf("\n");
 	dbg_printf("\n");
 }
@@ -2081,17 +2097,6 @@ int arm7_main(void) {
 			NTR_BIOS();
 		}
 
-		u32 clonebootFlag = 0;
-		const u32 clonebootOffset = ((romSize-0x88) <= baseRomSize) ? (romSize-0x88) : baseRomSize;
-		fileRead((char*)&clonebootFlag, romFile, clonebootOffset, sizeof(u32));
-		const bool usesCloneboot = (clonebootFlag == 0x16361);
-		if (usesCloneboot) {
-			dbg_printf("Cloneboot detected\n");
-		}
-
-		// If possible, set to load ROM into RAM
-		const u32 ROMinRAM = isROMLoadableInRAM(&dsiHeaderTemp, &dsiHeaderTemp.ndshdr, romTid, moduleParams, usesCloneboot);
-
 		// dbg_printf("Trying to patch the card...\n");
 
 		const u16 ce9size = 0x8000;
@@ -2158,7 +2163,9 @@ int arm7_main(void) {
 			tonccpy((u32*)ce9Location, ce9Src, ce9size);
 		}
 		if (gameOnFlashcard) {
-			if (!dldiPatchBinary((data_t*)ce9Location, ce9size, (data_t*)((ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed && _io_dldi_size < 0xF) ? ce9Location+0x3800 : CARDENGINEI_ARM9_LOCATION_DSI_WRAM))) {
+			const bool _8MBarea = (dsiModeConfirmed || strncmp(romTid, "B6X", 3) == 0);
+			const u32 ce9DldiOffset = _8MBarea ? CARDENGINEI_ARM9_LOCATION_DLDI_DRIVER_DSI : (CARDENGINEI_ARM9_LOCATION_DLDI_DRIVER - ((!laterSdk && scfgBios9i()) ? 0x4000 : 0));
+			if (!dldiPatchBinary((data_t*)ce9Location, ce9size, (data_t*)((ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed && _io_dldi_size < 0xF) ? ce9Location+0x3800 : (_io_dldi_size >= 0xF) ? ce9DldiOffset : ce9Location+0x4000))) {
 				dbg_printf("ce9 DLDI patch failed\n");
 				errorOutput();
 			}
@@ -2167,6 +2174,17 @@ int arm7_main(void) {
 
 		toncset((u32*)CARDENGINEI_ARM9_BUFFERED_LOCATION, 0, 0x10000);
 		toncset((u32*)CARDENGINEI_ARM7_BUFFERED_LOCATION, 0, 0x13400);
+
+		u32 clonebootFlag = 0;
+		const u32 clonebootOffset = ((romSize-0x88) <= baseRomSize) ? (romSize-0x88) : baseRomSize;
+		fileRead((char*)&clonebootFlag, romFile, clonebootOffset, sizeof(u32));
+		const bool usesCloneboot = (clonebootFlag == 0x16361);
+		if (usesCloneboot) {
+			dbg_printf("Cloneboot detected\n");
+		}
+
+		// If possible, set to load ROM into RAM
+		const u32 ROMinRAM = isROMLoadableInRAM(&dsiHeaderTemp, &dsiHeaderTemp.ndshdr, romTid, moduleParams, usesCloneboot);
 
 		errorCode = patchCardNds(
 			(cardengineArm7*)ce7Location,

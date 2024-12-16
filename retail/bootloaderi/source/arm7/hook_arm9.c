@@ -24,6 +24,7 @@
 #define b_slowSoftReset BIT(10)
 #define b_dsiBios BIT(11)
 #define b_asyncCardRead BIT(12)
+#define b_useSharedRam BIT(13)
 #define b_cloneboot BIT(14)
 #define b_isDlp BIT(15)
 #define b_bypassExceptionHandler BIT(16)
@@ -203,6 +204,7 @@ int hookNdsRetailArm9(
 ) {
 	nocashMessage("hookNdsRetailArm9");
 
+	extern bool sharedWramEnabled;
 	extern bool scfgBios9i(void);
 	extern u32 iUncompressedSize;
 	extern u32 overlaysSize;
@@ -247,6 +249,9 @@ int hookNdsRetailArm9(
 	if (asyncCardRead) {
 		ce9->valueBits |= b_asyncCardRead;
 	}
+	if (sharedWramEnabled) {
+		ce9->valueBits |= b_useSharedRam;
+	}
 	if (usesCloneboot) {
 		ce9->valueBits |= b_cloneboot;
 	}
@@ -258,7 +263,7 @@ int hookNdsRetailArm9(
 	}
 	if (!ROMinRAM && dsiWramAccess && !dsiWramMirrored && (ndsHeader->unitCode == 0 || !dsiModeConfirmed) && ndsHeader->fatSize != 0) {
 		const u32 fntFatSize = (ndsHeader->fatOffset-ndsHeader->filenameOffset)+ndsHeader->fatSize;
-		if (fntFatSize <= 0x78000) {
+		if (fntFatSize <= 0x80000) {
 			ce9->fntSrc = ndsHeader->filenameOffset;
 			ce9->fntFatSize = fntFatSize;
 			ce9->valueBits |= b_fntFatCached;
@@ -272,6 +277,7 @@ int hookNdsRetailArm9(
 
 	if (!ROMinRAM) {
 		//extern bool gbaRomFound;
+		extern u8 gameOnFlashcard;
 		bool runOverlayCheck = overlayPatch;
 		u32 dataToPreloadSizeAligned = 0;
 		ce9->cacheBlockSize = cacheBlockSize;
@@ -286,7 +292,6 @@ int hookNdsRetailArm9(
 			const bool cheatsEnabled = (cheatSizeTotal > 4 && cheatSizeTotal <= 0x8000);
 			const bool specialTitle = (strncmp(romTid, "V2G", 3) == 0 || strncmp(romTid, "DD3", 3) == 0);
 			const bool pkmnTitle = (strncmp(romTid, "IRB", 3) == 0 || strncmp(romTid, "IRA", 3) == 0 || strncmp(romTid, "IRE", 3) == 0 || strncmp(romTid, "IRD", 3) == 0);
-			extern u8 gameOnFlashcard;
 
 			ce9->cacheAddress = (consoleModel > 0 ? dev_CACHE_ADRESS_START_TWLSDK : (cheatsEnabled ? retail_CACHE_ADRESS_START_TWLSDK_CHEAT : retail_CACHE_ADRESS_START_TWLSDK));
 			if (consoleModel == 0 && !gameOnFlashcard) {
@@ -306,23 +311,29 @@ int hookNdsRetailArm9(
 				}
 			}
 		} else {
+			u32 size = 0;
 			if (strncmp(romTid, "UBR", 3) == 0) {
 				runOverlayCheck = false;
 				ce9->cacheAddress = CACHE_ADRESS_START;
-				ce9->romLocation = ce9->cacheAddress;
-				ce9->cacheSlots = retail_CACHE_ADRESS_SIZE_BROWSER/cacheBlockSize;
+				size = retail_CACHE_ADRESS_SIZE_BROWSER;
 			} else {
 				ce9->cacheAddress = (dsiMode ? CACHE_ADRESS_START_DSIMODE : CACHE_ADRESS_START);
 				if (!dsiMode && (ce9->valueBits & b_dsiBios) && !laterSdk) {
 					ce9->cacheAddress -= cacheBlockSize;
 				}
-				ce9->romLocation = ce9->cacheAddress;
 				if (dsiMode) {
-					ce9->cacheSlots = (consoleModel > 0 ? dev_CACHE_ADRESS_SIZE_DSIMODE : retail_CACHE_ADRESS_SIZE_DSIMODE)/cacheBlockSize;
+					size = (consoleModel > 0 ? dev_CACHE_ADRESS_SIZE_DSIMODE : retail_CACHE_ADRESS_SIZE_DSIMODE);
 				} else {
-					ce9->cacheSlots = (consoleModel > 0 ? dev_CACHE_ADRESS_SIZE : retail_CACHE_ADRESS_SIZE)/cacheBlockSize;
+					size = (consoleModel > 0 ? dev_CACHE_ADRESS_SIZE : retail_CACHE_ADRESS_SIZE);
 				}
 			}
+			extern u8 _io_dldi_size;
+			if (gameOnFlashcard && _io_dldi_size >= 0xF) {
+				ce9->cacheAddress += 0x8000;
+				size -= 0x8000;
+			}
+			ce9->romLocation = ce9->cacheAddress;
+			ce9->cacheSlots = size/cacheBlockSize;
 		}
 		if (dataToPreloadFound(ndsHeader)) {
 			//ce9->romLocation[1] = ce9->romLocation[0]+dataToPreloadSize[0];
