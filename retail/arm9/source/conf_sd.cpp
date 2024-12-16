@@ -2371,12 +2371,12 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		srParamsFilePath = "fat:/_nds/nds-bootstrap/softResetParams.bin";
 	}
 	
-	if (getFileSize(srParamsFilePath.c_str()) < 0x10) {
-		u32 buffer = 0xFFFFFFFF;
+	if (getFileSize(srParamsFilePath.c_str()) < 0x50) {
+		const u32 buffer = 0xFFFFFFFF;
 
 		FILE* srParamsFile = fopen(srParamsFilePath.c_str(), "wb");
 		fwrite(&buffer, sizeof(u32), 1, srParamsFile);
-		fseek(srParamsFile, 0x10 - 1, SEEK_SET);
+		fseek(srParamsFile, 0x50 - 1, SEEK_SET);
 		fputc('\0', srParamsFile);
 		fclose(srParamsFile);
 	}

@@ -134,7 +134,7 @@ static u32 ioverlaysSize = 0;
 u32 fatTableAddr = 0;
 
 static aFile srParamsFile;
-static u32 softResetParams[4] = {0};
+static u32 softResetParams[0x50/4] = {0};
 bool srlFromPageFile = false;
 u32 srlAddr = 0;
 u8 baseUnitCode = 0;
@@ -1122,25 +1122,28 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 
 	*((u16*)(isSdk5(moduleParams) ? 0x02fffc10 : 0x027ffc10)) = 0x5835;
 
+	u16* bootInfo = ((u16*)(isSdk5(moduleParams) ? 0x02fffc40 : 0x027ffc40));
+
 	if (softResetParams[0] != 0xFFFFFFFF) {
 		u32* resetParamLoc = (u32*)(isSdk5(moduleParams) ? RESET_PARAM_SDK5 : RESET_PARAM);
-		resetParamLoc[0] = softResetParams[0];
-		resetParamLoc[1] = softResetParams[1];
-		if (!srlFromPageFile) {
-			resetParamLoc[2] = softResetParams[2];
+		tonccpy(resetParamLoc, softResetParams, 0x10);
+		tonccpy(bootInfo, softResetParams+4, 0x40);
+		if (srlFromPageFile) {
+			resetParamLoc[2] = 0;
 		}
-		resetParamLoc[3] = softResetParams[3];
 	}
 
-	*((u16*)(isSdk5(moduleParams) ? 0x02fffc40 : 0x027ffc40)) = 0x1;						// Boot Indicator (Booted from card for SDK5) -- EXTREMELY IMPORTANT!!! Thanks to cReDiAr
-
 	const char* romTid = getRomTid(ndsHeader);
-	if (strncmp(romTid, "KPP", 3) == 0 	// Pop Island
-	 || (strncmp(romTid, "KPF", 3) == 0 && (ndsHeader->fatSize == 0 || !extendedMemory))		// Pop Island: Paperfield
-	 || (strncmp(romTid, "KGK", 3) == 0 && (ndsHeader->fatSize == 0 || !extendedMemory))		// Glory Days: Tactical Defense
-	 || (strcmp(romTid, "NTRJ") == 0 && (ndsHeader->headerCRC16 == 0x53E2 || ndsHeader->headerCRC16 == 0x681E || ndsHeader->headerCRC16 == 0xCD01)) || srlFromPageFile)
-	{
-		*((u16*)(isSdk5(moduleParams) ? 0x02fffc40 : 0x027ffc40)) = 0x2;					// Boot Indicator (Cloneboot/Multiboot)
+	if (*bootInfo != 1 && *bootInfo != 2) {
+		*bootInfo = 0x1;						// Boot Indicator (Booted from card for SDK5) -- EXTREMELY IMPORTANT!!! Thanks to cReDiAr
+
+		if (strncmp(romTid, "KPP", 3) == 0 	// Pop Island
+		 || (strncmp(romTid, "KPF", 3) == 0 && (ndsHeader->fatSize == 0 || !extendedMemory))		// Pop Island: Paperfield
+		 || (strncmp(romTid, "KGK", 3) == 0 && (ndsHeader->fatSize == 0 || !extendedMemory))		// Glory Days: Tactical Defense
+		 || (strcmp(romTid, "NTRJ") == 0 && (ndsHeader->headerCRC16 == 0x53E2 || ndsHeader->headerCRC16 == 0x681E || ndsHeader->headerCRC16 == 0xCD01)) || srlFromPageFile)
+		{
+			*bootInfo = 0x2;					// Boot Indicator (Cloneboot/Multiboot)
+		}
 	}
 
 	if (memcmp(romTid, "HND", 3) == 0 || memcmp(romTid, "HNE", 3) == 0) {
@@ -1185,16 +1188,16 @@ int arm7_main(void) {
 	*(vu32*)(0x02000000) = 0; // Clear debug RAM check flag
 
 	getFileFromCluster(&srParamsFile, srParamsFileCluster);
-	fileRead((char*)&softResetParams, &srParamsFile, 0, 0x10);
+	fileRead((char*)&softResetParams, &srParamsFile, 0, 0x50);
 	srlFromPageFile = (softResetParams[2] == 0x44414F4C); // 'LOAD'
 	bool softResetParamsFound = (softResetParams[0] != 0xFFFFFFFF || srlFromPageFile || softResetParams[3] != 0);
 	if (softResetParamsFound) {
 		u32 clearBuffer = 0xFFFFFFFF;
 		fileWrite((char*)&clearBuffer, &srParamsFile, 0, 0x4);
 		clearBuffer = 0;
-		fileWrite((char*)&clearBuffer, &srParamsFile, 0x4, 0x4);
-		fileWrite((char*)&clearBuffer, &srParamsFile, 0x8, 0x4);
-		fileWrite((char*)&clearBuffer, &srParamsFile, 0xC, 0x4);
+		for (int i = 0x4; i < 0x50; i += 4) {
+			fileWrite((char*)&clearBuffer, &srParamsFile, i, 0x4);
+		}
 	}
 
 	// BOOT.NDS file
@@ -1428,7 +1431,7 @@ int arm7_main(void) {
 
 	if (wramUsed) {
 		buildFatTableCacheCompressed(&romFile);
-		if (romFile.fatTableCached) {
+		if (romFile.fatTableSettings & fatCached) {
 			// const bool startMem = (!ce9NotInHeap && ndsHeader->unitCode > 0 && (u32)ndsHeader->arm9destination >= 0x02004000 && ((accessControl & BIT(4)) || arm7mbk == 0x080037C0) && romFile.fatTableCacheSize <= 0x4000);
 
 			// if (ce9NotInHeap) {
@@ -1507,7 +1510,7 @@ int arm7_main(void) {
 
 			// if (!startMem || (startMem && romFile.fatTableCacheSize < 0x4000)) {
 				buildFatTableCacheCompressed(&savFile);
-				if (savFile.fatTableCached) {
+				if (savFile.fatTableSettings & fatCached) {
 					// if (startMem || (ce9NotInHeap && !ce9AltLargeTable)) {
 					if (!ce9AltLargeTable) {
 						fatTableAddr += romFile.fatTableCacheSize;
@@ -1656,9 +1659,9 @@ int arm7_main(void) {
 		saveSize,
 		(u32)romFile.fatTableCache,
 		(u32)savFile.fatTableCache,
-		romFile.fatTableCompressed,
-		savFile.fatTableCompressed,
-		musicsFile.fatTableCompressed,
+		romFile.fatTableSettings & fatCompressed,
+		savFile.fatTableSettings & fatCompressed,
+		musicsFile.fatTableSettings & fatCompressed,
 		patchOffsetCacheFileCluster,
 		(u32)musicsFile.fatTableCache,
 		ramDumpCluster,

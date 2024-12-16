@@ -583,12 +583,12 @@ void getFileFromCluster(aFile* file, u32 cluster) {
 	file->firstCluster = cluster;
 	file->currentCluster = file->firstCluster;
 	file->currentOffset = 0;
-	file->fatTableCached = false;
+	file->fatTableSettings = 0;
 }
 
 u32 getCachedCluster(aFile * file, int clusterIndex)
 {
-	if (file->fatTableCompressed) {
+	if (file->fatTableSettings & fatCompressed) {
 		const u32* fatCache = file->fatTableCache;
 		u32 offset = 0;
 		while (offset <= clusterIndex) {
@@ -606,7 +606,7 @@ u32 getCachedCluster(aFile * file, int clusterIndex)
 static u32 findCluster(aFile* file, u32 startOffset)
 {
 	u32 clusterIndex = 0;
-	if (file->fatTableCached) {
+	if (file->fatTableSettings & fatCached) {
     	#ifdef DEBUG
         nocashMessage("fat table cached");
         #endif
@@ -880,7 +880,7 @@ u32 fileRead (char* buffer, aFile* file, u32 startOffset, u32 length)
 		return 0;
 	}
 
-	if (file->fatTableCached && (file->fatTableCache[0] == CLUSTER_FREE || file->fatTableCache[0] == CLUSTER_EOF)) {
+	if ((file->fatTableSettings & fatCached) && (file->fatTableCache[0] == CLUSTER_FREE || file->fatTableCache[0] == CLUSTER_EOF)) {
 		// Cluster in FAT table cache is invalid
 		return 0;
 	}
@@ -909,7 +909,7 @@ u32 fileRead (char* buffer, aFile* file, u32 startOffset, u32 length)
 	{
 		int sectorsToRead=0;
 
-		if(file->fatTableCached) {
+		if(file->fatTableSettings & fatCached) {
           
               // Move to the next cluster if necessary
               if (curSect >= discSecPerClus)
@@ -999,7 +999,7 @@ u32 fileRead (char* buffer, aFile* file, u32 startOffset, u32 length)
 		// Update the read buffer
 		if (curSect >= discSecPerClus)
 		{
-			if(file->fatTableCached) {
+			if(file->fatTableSettings & fatCached) {
                   clusterIndex+= curSect >> discSecPerClusShift;
                   curSect &= (discSecPerClus - 1);
 				file->currentCluster = getCachedCluster(file, clusterIndex);
@@ -1058,7 +1058,7 @@ u32 fileWrite (const char* buffer, aFile* file, u32 startOffset, u32 length)
 		return 0;
 	}
 
-	if (file->fatTableCached && (file->fatTableCache[0] == CLUSTER_FREE || file->fatTableCache[0] == CLUSTER_EOF)) {
+	if ((file->fatTableSettings & fatCached) && (file->fatTableCache[0] == CLUSTER_FREE || file->fatTableCache[0] == CLUSTER_EOF)) {
 		// Cluster in FAT table cache is invalid
 		return 0;
 	}
@@ -1093,7 +1093,7 @@ u32 fileWrite (const char* buffer, aFile* file, u32 startOffset, u32 length)
 		// Move to the next cluster if necessary
 		if (curSect >= discSecPerClus)
 		{
-            if(file->fatTableCached) {
+            if(file->fatTableSettings & fatCached) {
                 clusterIndex++;
                 file->currentCluster = getCachedCluster(file, clusterIndex);
             } else {
@@ -1124,7 +1124,7 @@ u32 fileWrite (const char* buffer, aFile* file, u32 startOffset, u32 length)
 		// Update the read buffer
 		if (curSect >= discSecPerClus)
 		{
-            if(file->fatTableCached) {
+            if(file->fatTableSettings & fatCached) {
                 clusterIndex++;
                 file->currentCluster = getCachedCluster(file, clusterIndex);
             } else {

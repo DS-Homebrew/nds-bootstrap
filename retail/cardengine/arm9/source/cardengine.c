@@ -56,7 +56,6 @@
 #define overlaysCached BIT(6)
 #define cacheFlushFlag BIT(7)
 #define cardReadFix BIT(8)
-#define softResetMb BIT(13)
 
 #define videoFrameDelayMax 10
 #define videoFrameDelayMaxFlaw 1
@@ -199,38 +198,43 @@ extern u32 getDtcmBase(void);
 
 extern bool dldiPatchBinary (unsigned char *binData, u32 binSize);
 
-void reset(u32 param) {
+void reset(u32 param, u32 param2) {
 	setDeviceOwner();
 	#ifndef GSDD
 	const u32 resetParams = ((ce9->valueBits & isSdk5) ? RESET_PARAM_SDK5 : RESET_PARAM);
 	#else
 	const u32 resetParams = RESET_PARAM_SDK5;
 	#endif
+	*(u32*)resetParams = param;
+
 	u32 iUncompressedSize = 0;
 	fileRead((char*)&iUncompressedSize, &pageFile, 0x3FFFF0, sizeof(u32));
-
-	*(u32*)resetParams = param;
+	const bool downloadedSrl = (param2 == 0x4C525344); // 'DSRL'
+	const bool loadNitroSrl = (*(u32*)(resetParams+0xC) > 0);
 	#ifndef GSDD
-	if (isDSiWare || iUncompressedSize > 0x280000 /*|| param == 0xFFFFFFFF*/ || *(u32*)(resetParams+0xC) > 0) {
+	if (isDSiWare || iUncompressedSize > 0x280000 /*|| param == 0xFFFFFFFF*/ || downloadedSrl || loadNitroSrl) {
 		enterCriticalSection();
 		if (isDSiWare || iUncompressedSize > 0x280000) {
-			sharedAddr[0] = 0x57495344; // 'DSIW'
-		} else if (param != 0xFFFFFFFF && !igmReset && (ce9->valueBits & softResetMb)) {
+			sharedAddr[1] = 0x57495344; // 'DSIW'
+		}
+		if (param != 0xFFFFFFFF && !igmReset && downloadedSrl) {
 			*(u32*)resetParams = 0;
 			*(u32*)(resetParams+8) = 0x44414F4C; // 'LOAD'
 			fileWrite((char*)ndsHeader, &pageFile, 0x2BFE00, 0x160);
 			fileWrite((char*)ndsHeader->arm9destination, &pageFile, 0x14000, ndsHeader->arm9binarySize);
-			fileWrite((char*)0x022C0000, &pageFile, 0x2C0000, ndsHeader->arm7binarySize);
+			fileWrite((char*)ndsHeader->arm7destination, &pageFile, 0x2C0000, ndsHeader->arm7binarySize);
 		}
 		fileWrite((char*)resetParams, &srParamsFile, 0, 0x10);
-		if (sharedAddr[0] == 0x57495344 || param == 0xFFFFFFFF) {
-			sharedAddr[3] = 0x52534554;
-		// 	sharedAddr[3] = 0x4E445352; // 'RSDN'
+		fileWrite((char*)resetParams+0x20, &srParamsFile, 0x10, 0x40);
+		if (sharedAddr[1] == 0x57495344 || param == 0xFFFFFFFF) {
+		//	sharedAddr[3] = 0x52534554;
+		 	sharedAddr[3] = 0x4E445352; // 'RSDN'
 			while (1);
 		}
 	}
 	#endif
-	sharedAddr[3] = 0x52534554;
+	// sharedAddr[3] = 0x52534554;
+	sharedAddr[3] = 0x4E445352; // 'RSDN'
 
 	//EXCEPTION_VECTOR_SDK1 = 0;
 
@@ -278,7 +282,7 @@ void reset(u32 param) {
 	toncset((char*)((ce9->valueBits & isSdk5) ? 0x02FFFD80 : 0x027FFD80), 0, 0x80);
 	toncset((char*)((ce9->valueBits & isSdk5) ? 0x02FFFF80 : 0x027FFF80), 0, 0x80);
 
-	if (param == 0xFFFFFFFF || *(u32*)(resetParams+0xC) > 0) {
+	if (param == 0xFFFFFFFF || downloadedSrl || loadNitroSrl) {
 		resetMpu();
 
 		REG_DISPSTAT = 0;
@@ -470,9 +474,9 @@ void saveMainScreenSetting(void) {
 //---------------------------------------------------------------------------------
 /*void myIrqHandlerVBlank(void) {
 //---------------------------------------------------------------------------------
-	#ifdef DEBUG		
+	#ifdef DEBUG
 	nocashMessage("myIrqHandlerVBlank");
-	#endif	
+	#endif
 
 	if (sharedAddr[4] == 0x554E454D) {
 		while (sharedAddr[4] != 0x54495845);
@@ -484,6 +488,14 @@ void saveMainScreenSetting(void) {
 #else
 #define igmLocation INGAME_MENU_LOCATION_B4DS
 #endif
+
+void writeIgm(u32 dst) {
+	fileWrite((char*)igmLocation, &pageFile, dst, 0xA000);
+}
+
+void readIgm(u32 src) {
+	fileRead((char*)igmLocation, &pageFile, src, 0xA000);
+}
 
 void inGameMenu(s32* exRegisters) {
 	#ifdef FOTO
@@ -504,8 +516,8 @@ void inGameMenu(s32* exRegisters) {
 
 	if (!opened) {
 		opening = true;
-		fileWrite((char*)igmLocation, &pageFile, 0xA000, 0xA000);	// Backup part of game RAM to page file
-		fileRead((char*)igmLocation, &pageFile, 0, 0xA000);	// Read in-game menu
+		writeIgm(0xA000);	// Backup part of game RAM to page file
+		readIgm(0);	// Read in-game menu
 	}
 	opening = false;
 
@@ -521,19 +533,19 @@ void inGameMenu(s32* exRegisters) {
 		sharedAddr[0] = 0x57495344;
 	} */
 
-	fileWrite((char*)igmLocation, &pageFile, 0, 0xA000);	// Store in-game menu
-	fileRead((char*)igmLocation, &pageFile, 0xA000, 0xA000);	// Restore part of game RAM from page file
+	writeIgm(0);	// Store in-game menu
+	readIgm(0xA000);	// Restore part of game RAM from page file
 
 	if (sharedAddr[3] == 0x54495845) {
 		igmReset = true;
-		reset(0xFFFFFFFF);
+		reset(0xFFFFFFFF, 0);
 	} else if (sharedAddr[3] == 0x52534554) {
 		igmReset = true;
-		reset(0);
+		reset(0, 0);
 	} else if (sharedAddr[3] == 0x444D4152) { // RAMD
 		#ifdef EXTMEM
-		fileWrite((char*)0x02000000, &ramDumpFile, 0, 0x7E0000);
-		fileWrite((char*)((ce9->valueBits & isSdk5) ? 0x02FE0000 : 0x027E0000), &ramDumpFile, 0x7E0000, 0x20000);
+		fileWrite((char*)0x02000000, &ramDumpFile, 0, 0x800000);
+		// fileWrite((char*)((ce9->valueBits & isSdk5) ? 0x02FE0000 : 0x027E0000), &ramDumpFile, 0x7E0000, 0x20000);
 		#else
 		fileWrite((char*)0x02000000, &ramDumpFile, 0, 0x400000);
 		#endif
@@ -669,19 +681,25 @@ static void initialize(void) {
 
 	if (ce9->romFatTableCache != 0) {
 		romFile.fatTableCache = (u32*)ce9->romFatTableCache;
-		romFile.fatTableCached = true;
-		romFile.fatTableCompressed = (bool)ce9->romFatTableCompressed;
+		romFile.fatTableSettings |= fatCached;
+		if (ce9->romFatTableCompressed) {
+			romFile.fatTableSettings |= fatCompressed;
+		}
 	}
 	if (ce9->savFatTableCache != 0) {
 		savFile.fatTableCache = (u32*)ce9->savFatTableCache;
-		savFile.fatTableCached = true;
-		savFile.fatTableCompressed = (bool)ce9->savFatTableCompressed;
+		savFile.fatTableSettings |= fatCached;
+		if (ce9->savFatTableCompressed) {
+			savFile.fatTableSettings |= fatCompressed;
+		}
 	}
 	#ifndef NODSIWARE
 	if (ce9->musicFatTableCache != 0) {
 		musicsFile.fatTableCache = (u32*)ce9->musicFatTableCache;
-		musicsFile.fatTableCached = true;
-		musicsFile.fatTableCompressed = (bool)ce9->musicsFatTableCompressed;
+		musicsFile.fatTableSettings |= fatCached;
+		if (ce9->musicsFatTableCompressed) {
+			musicsFile.fatTableSettings |= fatCompressed;
+		}
 	}
 	#endif
 
@@ -944,7 +962,7 @@ bool nandRead(void* memory,void* flash,u32 len,u32 dma) {
 	setDeviceOwner();
 	fileRead(memory, &savFile, (u32)flash, len);
 	REG_EXMEMCNT = exmemcnt;
-    return true; 
+    return true;
 }
 
 bool nandWrite(void* memory,void* flash,u32 len,u32 dma) {
@@ -1586,7 +1604,7 @@ void rumble2(u32 arg) {
 }
 #endif
 
-u32 myIrqEnable(u32 irq) {	
+u32 myIrqEnable(u32 irq) {
 	#ifdef GSDD
 	return irq;
 	#else
@@ -1624,7 +1642,7 @@ u32 myIrqEnable(u32 irq) {
 
 	REG_EXMEMCNT = exmemcnt;
 
-	u32 irq_before = REG_IE | IRQ_IPC_SYNC;		
+	u32 irq_before = REG_IE | IRQ_IPC_SYNC;
 	irq |= IRQ_IPC_SYNC;
 	REG_IPC_SYNC |= IPC_SYNC_IRQ_ENABLE;
 

@@ -114,6 +114,9 @@ static const u16 irqEnableStartSignatureThumb[5]  = {0xB530, 0xB081, 0x4D07, 0x8
 static const u16 irqEnableStartSignatureThumb3[5] = {0xB510, 0x1C04, 0xF7FF, 0xFFF4, 0x4B05}; // SDK 3
 static const u16 irqEnableStartSignatureThumb5[5] = {0xB510, 0x1C04, 0xF7FF, 0xFFE4, 0x4B05}; // SDK 5
 
+// SRL start
+static const u32 srlStartSignature3[4] = {0xE92D4070, 0xE59F0098, 0xE5904004, 0xE3540000}; // eoo.dat (Pokemon)
+
 u32* findWramEndAddrOffset(const tNDSHeader* ndsHeader) {
 	dbg_printf("findWramEndAddrOffset:\n");
 
@@ -1224,4 +1227,22 @@ u32* findCardIrqEnableOffset(const tNDSHeader* ndsHeader, const module_params_t*
 
 	dbg_printf("\n");
 	return cardIrqEnableOffset;
+}
+
+u32* findSrlStartOffset7(const tNDSHeader* ndsHeader) {
+	dbg_printf("findSrlStartOffset7\n");
+
+    u32* offset = findOffset(
+		ndsHeader->arm7destination, newArm7binarySize,
+		srlStartSignature3, 4
+	);
+
+	if (offset) {
+		dbg_printf("SRL start function found\n");
+	} else {
+		dbg_printf("SRL start function not found\n");
+	}
+
+	dbg_printf("\n");
+	return offset;
 }

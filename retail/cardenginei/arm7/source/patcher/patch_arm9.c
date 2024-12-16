@@ -411,10 +411,6 @@ static void patchReset(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const m
 		return;
 	}
 
-	/* if (softResetMb && offset[-(0x158/4)] == 0xE92D4010 && offset[(-(0x158/4))+1] == 0xE59FE04C && offset[(-(0x158/4))+2] == 0xE59F204C && offset[(-(0x158/4))+16] == 0x18BD8001) {
-		offset[(-(0x158/4))+16] = 0xE1A00000; // nop
-	} */
-
 	// Patch
 	tonccpy(offset, ce9->patches->reset_arm9, 0x40);
 	/* dbg_printf("reset location : ");

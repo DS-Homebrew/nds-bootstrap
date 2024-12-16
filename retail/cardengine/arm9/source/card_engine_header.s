@@ -166,9 +166,7 @@ patches:
 .word	cardStructArm9
 .word   cacheFlushRef
 .word   0x0 @cardEndReadDmaRef
-.word   reset_arm9
-needFlushDCCache:
-.word   0x0
+.word   reset
 #ifdef GSDD
 .word   0
 .word   gsdd_fix
@@ -406,13 +404,6 @@ thumb_reset_arm9:
 
 
 	.arm
-@---------------------------------------------------------------------------------
-reset_arm9:
-@---------------------------------------------------------------------------------
-    ldr pc,= reset
-.pool
-@---------------------------------------------------------------------------------
-
 .global callEndReadDmaThumb
 .type	callEndReadDmaThumb STT_FUNC
 callEndReadDmaThumb:

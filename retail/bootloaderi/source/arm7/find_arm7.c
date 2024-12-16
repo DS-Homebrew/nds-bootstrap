@@ -1411,7 +1411,7 @@ u32* findSrlStartOffset7(const tNDSHeader* ndsHeader) {
 	dbg_printf("findSrlStartOffset7\n");
 
     u32* offset = findOffset(
-		ndsHeader->arm7destination, newArm7ibinarySize,
+		ndsHeader->arm7destination, newArm7binarySize,
 		srlStartSignature3, 4
 	);
 

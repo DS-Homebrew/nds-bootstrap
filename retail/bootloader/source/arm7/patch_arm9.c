@@ -653,23 +653,46 @@ static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, co
 }
 
 static void patchReset(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
-    u32* reset = patchOffsetCache.resetOffset;
+	const u32 newReset = (u32)ce9->patches->reset_arm9;
+	const char* romTid = getRomTid(ndsHeader);
+	if (ndsHeader->unitCode == 0 && (strcmp(romTid, "NTRJ") == 0 || strncmp(romTid, "HND", 3) == 0 || strncmp(romTid, "HNE", 3) == 0)) {
+		u32* offset = patchOffsetCache.srlStartOffset9;
+
+		if (!patchOffsetCache.srlStartOffsetChecked) {
+			offset = findSrlStartOffset9(ndsHeader);
+			if (offset) patchOffsetCache.srlStartOffset9 = offset;
+			patchOffsetCache.srlStartOffsetChecked = true;
+		}
+
+		if (offset) {
+			// Patch
+			offset[0] = 0xE59F1000; // ldr r1, =newReset
+			offset[1] = 0xE59FF000; // ldr pc, =reset_arm9
+			offset[2] = 0x4C525344; // 'DSRL'
+			offset[3] = newReset;
+			dbg_printf("srlStart location : ");
+			dbg_hexa((u32)offset);
+			dbg_printf("\n\n");
+		}
+	}
+
+	u32* offset = patchOffsetCache.resetOffset;
 
     if (!patchOffsetCache.resetChecked) {
-		reset = findResetOffset(ndsHeader,moduleParams, (bool*)&patchOffsetCache.resetMb);
-		if (reset) patchOffsetCache.resetOffset = reset;
+		offset = findResetOffset(ndsHeader, moduleParams, (bool)patchOffsetCache.srlStartOffset9);
+		if (offset) patchOffsetCache.resetOffset = offset;
 		patchOffsetCache.resetChecked = true;
 	}
 
-	if (!reset) {
+	if (!offset) {
 		return;
 	}
 
 	// Patch
-	u32* resetPatch = ce9->patches->reset_arm9;
-	tonccpy(reset, resetPatch, 0x40);
+	offset[0] = 0xE51FF004; // ldr pc, =newReset
+	offset[1] = newReset;
 	dbg_printf("reset location : ");
-	dbg_hexa((u32)reset);
+	dbg_hexa((u32)offset);
 	dbg_printf("\n\n");
 }
 
@@ -2430,11 +2453,6 @@ static void operaRamPatch(void) {
 	}
 }
 
-static void setFlushCache(cardengineArm9* ce9, u32 patchMpuRegion, bool usesThumb) {
-	//if (!usesThumb) {
-	ce9->patches->needFlushDCCache = (patchMpuRegion == 1);
-}
-
 u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 patchMpuRegion, const bool usesCloneboot) {
 	bool usesThumb;
 	int readType;
@@ -2559,8 +2577,6 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 	}
 
 	nandSavePatch(ce9, ndsHeader, moduleParams);
-
-	setFlushCache(ce9, patchMpuRegion, usesThumb);
 
 	dbg_printf("ERR_NONE\n\n");
 	return ERR_NONE;

@@ -1,10 +1,10 @@
 /*-----------------------------------------------------------------
  boot.c
- 
+
  BootLoader
  Loads a file into memory and runs it
 
- All resetMemory and startBinary functions are based 
+ All resetMemory and startBinary functions are based
  on the MultiNDS loader by Darkain.
  Original source available at:
  http://cvs.sourceforge.net/viewcvs.py/ndslib/ndslib/examples/loader/boot/main.cpp
@@ -28,7 +28,7 @@
 
 	If you use this code, please give due credit and email me about your
 	project at chishm@hotmail.com
- 
+
 	Helpful information:
 	This code runs from VRAM bank C on ARM7
 ------------------------------------------------------------------*/
@@ -156,7 +156,7 @@ bool overlayPatch = false;
 bool overlaysInRam = false;
 
 static aFile patchOffsetCacheFile;
-static u32 softResetParams[4] = {0};
+static u32 softResetParams[0x50/4] = {0};
 u32 srlAddr = 0;
 u16 baseHeaderCRC = 0;
 u16 baseSecureCRC = 0;
@@ -214,7 +214,7 @@ static void initMBK(void) {
 	*(vu32*)REG_MBK4 = 0x9195999D;
 	*(vu32*)REG_MBK5 = 0x8185898D;
 
-	// WRAM mapped to the 0x3700000 - 0x37FFFFF area 
+	// WRAM mapped to the 0x3700000 - 0x37FFFFF area
 	// WRAM-A mapped to the 0x37C0000 - 0x37FFFFF area : 256k
 	REG_MBK6 = 0x080037C0; // same as DSiWare
 	// WRAM-B mapped to the 0x3740000 - 0x37BFFFF area : 512k // why? only 256k real memory is there
@@ -917,7 +917,7 @@ static void my_readUserSettings(tNDSHeader* ndsHeader) {
 	}
 
 	// If both slots are valid pick the most recent
-	if (calc1CRC == slot1CRC && calc2CRC == slot2CRC) { 
+	if (calc1CRC == slot1CRC && calc2CRC == slot2CRC) {
 		currentSettings = (slot2count == ((slot1count + 1) & 0x7f) ? &slot2 : &slot1); //if ((slot1count & 0x7F) == ((slot2count + 1) & 0x7F)) {
 	} else {
 		if (calc2CRC == slot2CRC) {
@@ -1393,7 +1393,7 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 
     dbg_printf("chipID: ");
     dbg_hexa(baseChipID);
-    dbg_printf("\n"); 
+    dbg_printf("\n");
 
     // TODO
     // figure out what is 0x027ffc10, somehow related to cardId check
@@ -1438,25 +1438,28 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 
 	*((u16*)(isSdk5(moduleParams) ? 0x02fffc10 : 0x027ffc10)) = 0x5835;
 
+	u16* bootInfo = ((u16*)(isSdk5(moduleParams) ? 0x02fffc40 : 0x027ffc40));
+
 	if (softResetParams[0] != 0xFFFFFFFF) {
 		u32* resetParamLoc = (u32*)(isSdk5(moduleParams) ? RESET_PARAM_SDK5 : RESET_PARAM);
-		resetParamLoc[0] = softResetParams[0];
-		resetParamLoc[1] = softResetParams[1];
-		if (softResetParams[2] != 0x44414F4C) {
-			resetParamLoc[2] = softResetParams[2];
+		tonccpy(resetParamLoc, softResetParams, 0x10);
+		tonccpy(bootInfo, softResetParams+4, 0x40);
+		if (softResetParams[2] == 0x44414F4C) {
+			resetParamLoc[2] = 0;
 		}
-		resetParamLoc[3] = softResetParams[3];
 	}
 
-	*((u16*)(isSdk5(moduleParams) ? 0x02fffc40 : 0x027ffc40)) = 1;						// Boot Indicator (Booted from card for SDK5) -- EXTREMELY IMPORTANT!!! Thanks to cReDiAr
-
 	const char* romTid = getRomTid(ndsHeader);
-	if ((!dsiModeConfirmed && 
-		(strncmp(romTid, "KPP", 3) == 0 	// Pop Island
-	  || strncmp(romTid, "KPF", 3) == 0)	// Pop Island: Paperfield
-	) || (softResetParams[2] == 0x44414F4C))
-	{
-		*((u16*)(isSdk5(moduleParams) ? 0x02fffc40 : 0x027ffc40)) = 2;					// Boot Indicator (Cloneboot/Multiboot)
+	if (*bootInfo != 1 && *bootInfo != 2) {
+		*bootInfo = 0x1;						// Boot Indicator (Booted from card for SDK5) -- EXTREMELY IMPORTANT!!! Thanks to cReDiAr
+
+		if ((!dsiModeConfirmed &&
+			(strncmp(romTid, "KPP", 3) == 0 	// Pop Island
+		  || strncmp(romTid, "KPF", 3) == 0)	// Pop Island: Paperfield
+		) || (softResetParams[2] == 0x44414F4C))
+		{
+			*bootInfo = 2;					// Boot Indicator (Cloneboot/Multiboot)
+		}
 	}
 
 	if (memcmp(romTid, "HND", 3) == 0 || memcmp(romTid, "HNE", 3) == 0) {
@@ -1515,15 +1518,15 @@ int arm7_main(void) {
 
 	aFile srParamsFile;
 	getFileFromCluster(&srParamsFile, srParamsFileCluster, gameOnFlashcard);
-	fileRead((char*)&softResetParams, &srParamsFile, 0, 0x10);
+	fileRead((char*)&softResetParams, &srParamsFile, 0, 0x50);
 	bool softResetParamsFound = (softResetParams[0] != 0xFFFFFFFF || softResetParams[2] == 0x44414F4C);
 	if (softResetParamsFound) {
 		u32 clearBuffer = 0xFFFFFFFF;
 		fileWrite((char*)&clearBuffer, &srParamsFile, 0, 0x4);
 		clearBuffer = 0;
-		fileWrite((char*)&clearBuffer, &srParamsFile, 0x4, 0x4);
-		fileWrite((char*)&clearBuffer, &srParamsFile, 0x8, 0x4);
-		fileWrite((char*)&clearBuffer, &srParamsFile, 0xC, 0x4);
+		for (int i = 0x4; i < 0x50; i += 4) {
+			fileWrite((char*)&clearBuffer, &srParamsFile, i, 0x4);
+		}
 	}
 
 	// ROM file
@@ -1584,7 +1587,7 @@ int arm7_main(void) {
 
 		if ((memcmp(romTid, "IPG", 3) == 0) || ((memcmp(romTid, "IPK", 3) == 0))) {
 			buildFatTableCache(romFile); // Build uncompressed table for HGSS
-			if (!romFile->fatTableCached) {
+			if (!(romFile->fatTableSettings & fatCached)) {
 				buildFatTableCacheCompressed(romFile);
 			}
 		} else {
@@ -1626,12 +1629,12 @@ int arm7_main(void) {
 		if (ltdModuleParams) {
 			dbg_printf("Ltd module params offset: ");
 			dbg_hexa((u32)ltdModuleParams);
-			dbg_printf("\n");		
+			dbg_printf("\n");
 		}
 	}
     dbg_printf("sdk_version: ");
     dbg_hexa(moduleParams->sdk_version);
-    dbg_printf("\n"); 
+    dbg_printf("\n");
 
 	ndsHeader = loadHeader(&dsiHeaderTemp, moduleParams, dsiModeConfirmed);
 

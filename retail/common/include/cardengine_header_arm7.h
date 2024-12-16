@@ -161,6 +161,7 @@ typedef struct cardengineArm7Patches {
     cardengineArm7PatchesArm7FunctionsThumb* arm7FunctionsDirect;
     cardengineArm7PatchesArm7Functions* arm7Functions;
     cardengineArm7PatchesArm7FunctionsThumb* arm7FunctionsThumb;
+	u32* reset;
 } cardengineArm7Patches;
 
 //

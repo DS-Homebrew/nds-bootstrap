@@ -38,13 +38,15 @@
 #define	CLUSTER_EOF		0x0FFFFFFF
 #define CLUSTER_FIRST	0x00000002
 
+#define fatCached BIT(0)
+#define fatCompressed BIT(1)
+
 typedef	struct
 {
 	u32	firstCluster;
 	u32	currentCluster;
 	u32 currentOffset;
-	bool fatTableCached;
-	bool fatTableCompressed;
+	u32 fatTableSettings; // 0: Cached, 1: Compressed
 	u32* fatTableCache;
 	u32 fatTableCacheSize;
 } aFile;

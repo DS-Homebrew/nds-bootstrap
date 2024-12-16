@@ -405,6 +405,17 @@ static bool patchCardIrqEnable(cardengineArm7* ce7, const tNDSHeader* ndsHeader,
 	}
 }*/
 
+static void patchSrlStart(cardengineArm7* ce7, const tNDSHeader* ndsHeader) {
+	u32* offset = findSrlStartOffset7(ndsHeader);
+	if (!offset) {
+		return;
+	}
+
+	offset[0] = 0xE59FC000; // ldr r12, =reset
+	offset[1] = 0xE12FFF1C; // bx r12
+	offset[2] = (u32)ce7->patches->reset;
+}
+
 static void operaRamPatch(void) {
 	// Opera RAM patch (ARM7)
 	*(u32*)0x0238C7BC = 0xC400000;
@@ -503,6 +514,10 @@ u32 patchCardNdsArm7(
 	u32* cardIdPatchThumb = (u32*)ce7->patches->arm7FunctionsThumb->cardId;
 	cardIdPatch[2] = cardId;
 	cardIdPatchThumb[1] = cardId;
+
+	if (patchOffsetCache.srlStartOffset9) {
+		patchSrlStart(ce7, ndsHeader);
+	}
 
 	if (a7GetReloc(ndsHeader, moduleParams)) {
 		u32 saveResult = 0;

@@ -142,7 +142,6 @@ typedef struct cardengineArm9Patches {
 	u32* cacheFlushRef;
 	u32* cardEndReadDmaRef;
 	u32* reset_arm9;
-	u32 needFlushDCCache;
 	u32* pdash_read;
 	u32* gsdd_fix;
 	u32* ipcSyncHandlerRef;
@@ -172,10 +171,10 @@ typedef struct cardengineArm9Patches {
 //
 typedef struct cardengineArm9ThumbPatches {
 	u32* card_save_arm9;
-    u32* cardStructArm9;
-    u32* cacheFlushRef;
+	u32* cardStructArm9;
+	u32* cacheFlushRef;
 	u32* cardEndReadDmaRef;
-    u32* reset_arm9;
+	u32* reset_arm9;
 } cardengineArm9ThumbPatches;
 
 
@@ -224,7 +223,6 @@ typedef struct cardengineArm9 {
 		7: cacheFlushFlag
 		8: cardReadFix
 		9: bypassExceptionHandler
-		13: softResetMb
 	*/
     s32 mainScreen;
 	u32* irqTable;
