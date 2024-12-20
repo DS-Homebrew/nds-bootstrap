@@ -61,27 +61,16 @@
 //};
 
 extern tNDSHeader* ndsHeader;
-extern bool isGSDD;
-extern bool arm9_isSdk5;
 extern bool dsiModeConfirmed;
 extern bool arm9_boostVram;
-extern bool arm9_macroMode;
+extern u32 arm9_SCFG_EXT;
+extern u16 arm9_SCFG_CLK;
 extern volatile bool esrbScreenPrepared;
 extern volatile bool esrbImageLoaded;
 extern volatile int arm9_stateFlag;
-extern volatile bool arm9_errorColor;
 extern volatile int arm9_screenMode;
-extern volatile int arm9_loadBarLength;
-//extern volatile bool arm9_animateLoadingCircle;
 extern volatile int screenBrightness;
 extern volatile bool fadeType;
-
-extern volatile bool arm9_darkTheme;
-extern volatile bool arm9_swapLcds;
-extern volatile int arm9_loadingFrames;
-extern volatile int arm9_loadingFps;
-extern volatile bool arm9_loadingBar;
-extern volatile int arm9_loadingBarYpos;
 
 static inline void dmaFill(const void* src, void* dest, u32 size) {
 	DMA_SRC(3)  = (u32)src;

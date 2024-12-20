@@ -1359,9 +1359,6 @@ void inGameMenu(s32* exRegisters) {
 	#endif
 
 	*(u32*)(INGAME_MENU_LOCATION + IGM_TEXT_SIZE_ALIGNED) = (u32)sharedAddr;
-	#ifndef TWLSDK
-	*(u32*)((u32)INGAME_MENU_LOCATION + IGM_TEXT_SIZE_ALIGNED + 4) = 0x027FEFF4;
-	#endif
 	volatile void (*inGameMenu)(s32*, u32, s32*) = (volatile void*)INGAME_MENU_LOCATION + IGM_TEXT_SIZE_ALIGNED + 0x10;
 	(*inGameMenu)(&ce9->mainScreen, ce9->consoleModel, exRegisters);
 

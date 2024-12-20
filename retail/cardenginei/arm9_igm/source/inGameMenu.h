@@ -34,9 +34,9 @@ typedef enum {
 
 extern struct IgmText igmText;
 
-extern u32* waitSysCyclesLocPtr;
-extern u32* scfgExtBak;
-extern u16* scfgClkBak;
+extern u32* waitSysCyclesLoc;
+extern u32 scfgExtBak;
+extern u16 scfgClkBak;
 extern vu32* volatile sharedAddr;
 extern vu32 *address;
 

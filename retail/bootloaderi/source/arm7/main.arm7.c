@@ -69,6 +69,7 @@
 #include "find.h"
 #include "hook.h"
 #include "common.h"
+#include "igm_text.h"
 #include "locations.h"
 #include "value_bits.h"
 #include "loading_screen.h"
@@ -156,6 +157,7 @@ bool overlayPatch = false;
 bool overlaysInRam = false;
 
 static aFile patchOffsetCacheFile;
+u32 waitSysCyclesOffset = 0;
 static u32 softResetParams[0x50/4] = {0};
 u32 srlAddr = 0;
 u16 baseHeaderCRC = 0;
@@ -1498,8 +1500,6 @@ int arm7_main(void) {
 	nocashMessage("Getting ARM7 to clear RAM...\n");
 	resetMemory_ARM7();
 
-	arm9_macroMode = macroMode;
-
 	wifiLedState = i2cReadRegister(0x4A, 0x30);
 
 	// Init card
@@ -2372,11 +2372,6 @@ int arm7_main(void) {
 	}
 
 	arm9_boostVram = boostVram;
-	arm9_isSdk5 = isSdk5(moduleParams);
-
-    /*if (isGSDD) {
-	   *(vu32*)REG_MBK1 = 0x8185898C; // WRAM-A slot 0 mapped to ARM9
-	}*/
 
 	if (esrbScreenPrepared) {
 		while (!esrbImageLoaded) {
@@ -2391,7 +2386,17 @@ int arm7_main(void) {
 	i2cReadRegister(0x4A, 0x10);	// Clear accidential POWER button press
 
 	arm9_stateFlag = ARM9_SETSCFG;
-	while (arm9_stateFlag != ARM9_READY);
+	while (arm9_stateFlag != ARM9_READY) {};
+
+	{
+		aFile pageFile;
+		getFileFromCluster(&pageFile, pageFileCluster, bootstrapOnFlashcard);
+
+		// Write ARM9 SCFG registers to in-game menu before locking the registers
+		fileWrite((char*)&waitSysCyclesOffset, &pageFile, IGM_TEXT_SIZE_ALIGNED+0x4, sizeof(u32));
+		fileWrite((char*)&arm9_SCFG_EXT, &pageFile, IGM_TEXT_SIZE_ALIGNED+0x8, sizeof(u32));
+		fileWrite((char*)&arm9_SCFG_CLK, &pageFile, IGM_TEXT_SIZE_ALIGNED+0xC, sizeof(u16));
+	}
 
 	// dbg_printf("Starting the NDS file...");
     setMemoryAddress(ndsHeader, moduleParams);

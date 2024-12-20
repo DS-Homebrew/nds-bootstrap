@@ -457,10 +457,10 @@ static void optionsMenu(s32 *mainScreen, u32 consoleModel) {
 					isString = false;
 					break;
 				case OPTIONS_CLOCK_SPEED:
-					optionValue = igmText.optionsValues[3 + ((REG_SCFG_CLK == 0 ? *scfgClkBak : REG_SCFG_CLK) & 1)];
+					optionValue = igmText.optionsValues[3 + ((REG_SCFG_CLK == 0 ? scfgClkBak : REG_SCFG_CLK) & 1)];
 					break;
 				case OPTIONS_VRAM_MODE:
-					optionValue = igmText.optionsValues[5 + (((REG_SCFG_EXT == 0 ? *scfgExtBak : REG_SCFG_EXT) & BIT(13)) >> 13)];
+					optionValue = igmText.optionsValues[5 + (((REG_SCFG_EXT == 0 ? scfgExtBak : REG_SCFG_EXT) & BIT(13)) >> 13)];
 					break;
 			}
 
@@ -542,7 +542,6 @@ static void optionsMenu(s32 *mainScreen, u32 consoleModel) {
 				}
 				case OPTIONS_CLOCK_SPEED:
 					REG_SCFG_CLK ^= 1;
-					u32* waitSysCyclesLoc = (u32*)(waitSysCyclesLocPtr ? *waitSysCyclesLocPtr : 0);
 					if (waitSysCyclesLoc) {
 						if (waitSysCyclesLoc[0] == 0xE92D4008) {
 							waitSysCyclesLoc[1] = (REG_SCFG_CLK & BIT(1)) ? 0xE1A00100 : 0xE1A00080;

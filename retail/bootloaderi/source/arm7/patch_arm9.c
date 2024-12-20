@@ -1252,6 +1252,7 @@ static void patchCartRead(cardengineArm9* ce9, const tNDSHeader* ndsHeader, cons
 }*/
 
 static void patchWaitSysCycles(const cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+	extern u32 waitSysCyclesOffset;
 	u32* offset = patchOffsetCache.waitSysCyclesOffset;
 
 	if (isSdk5(moduleParams)) {
@@ -1288,7 +1289,7 @@ static void patchWaitSysCycles(const cardengineArm9* ce9, const tNDSHeader* ndsH
 			}
 
 			if (dsiModeConfirmed) {	
-				*(u32*)0x027FEFF4 = (u32)offset;
+				waitSysCyclesOffset = (u32)offset;
 			}
 		}
 
@@ -1311,7 +1312,7 @@ static void patchWaitSysCycles(const cardengineArm9* ce9, const tNDSHeader* ndsH
 		offset[2] = (u32)ce9->patches->waitSysCycles;
 
 		if (dsiModeConfirmed) {	
-			*(u32*)((u32)INGAME_MENU_LOCATION + IGM_TEXT_SIZE_ALIGNED + 4) = (u32)ce9->patches->waitSysCycles;
+			waitSysCyclesOffset = (u32)ce9->patches->waitSysCycles;
 		}
 	}
 
