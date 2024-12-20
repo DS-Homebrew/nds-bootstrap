@@ -425,13 +425,15 @@ static void optionsMenu(s32 *mainScreen, u32 consoleModel) {
 	OptionsItem optionsItems[8];
 	int optionsItemCount = 0;
 	optionsItems[optionsItemCount++] = OPTIONS_MAIN_SCREEN;
+	#ifndef B4DS
 	if(consoleModel < 2) // Not on 3DS
+	#endif
 		optionsItems[optionsItemCount++] = OPTIONS_BRIGHTNESS;
-#ifndef B4DS
+	#ifndef B4DS
 	optionsItems[optionsItemCount++] = OPTIONS_VOLUME;
 	optionsItems[optionsItemCount++] = OPTIONS_CLOCK_SPEED;
 	optionsItems[optionsItemCount++] = OPTIONS_VRAM_MODE;
-#endif
+	#endif
 
 	bool mainScreenChanged = false;
 
@@ -452,6 +454,7 @@ static void optionsMenu(s32 *mainScreen, u32 consoleModel) {
 					optionPercent = (u8)(sharedAddr[6] >> 8) * 100 / MAX_BRIGHTNESS;
 					isString = false;
 					break;
+				#ifndef B4DS
 				case OPTIONS_VOLUME:
 					optionPercent = (u8)(sharedAddr[6] >> 16) * 100 / 31;
 					isString = false;
@@ -462,6 +465,7 @@ static void optionsMenu(s32 *mainScreen, u32 consoleModel) {
 				case OPTIONS_VRAM_MODE:
 					optionValue = igmText.optionsValues[5 + (((REG_SCFG_EXT == 0 ? scfgExtBak : REG_SCFG_EXT) & BIT(13)) >> 13)];
 					break;
+				#endif
 			}
 
 			int digits = optionPercent == 100 ? 3 : (optionPercent >= 10 ? 2 : 1);
@@ -524,6 +528,7 @@ static void optionsMenu(s32 *mainScreen, u32 consoleModel) {
 					}
 					break;
 				}
+				#ifndef B4DS
 				case OPTIONS_VOLUME:
 				{
 					u8 volume = (u8)(sharedAddr[6] >> 16);
@@ -554,6 +559,7 @@ static void optionsMenu(s32 *mainScreen, u32 consoleModel) {
 				case OPTIONS_VRAM_MODE:
 					REG_SCFG_EXT ^= BIT(13);
 					break;
+				#endif
 				default:
 					break;
 			}
