@@ -1569,11 +1569,6 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 					// Load DLDI ce9 binary
 					loadCardEngineBinary(ce9Path, (u8*)CARDENGINEI_ARM9_BUFFERED_LOCATION);
-
-					if (!dlp && !gsdd) {
-						// Load ce9 binary (SDK 2.0)
-						loadCardEngineBinary("nitro:/cardenginei_arm9_sdk20_dldi.lz77", (u8*)CARDENGINEI_ARM9_BUFFERED_LOCATION2);
-					}
 				} else {
 					const char* ce9Path = "nitro:/cardenginei_arm9.lz77";
 					if (dlp) {
@@ -1584,11 +1579,6 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 					// Load ce9 binary
 					loadCardEngineBinary(ce9Path, (u8*)CARDENGINEI_ARM9_BUFFERED_LOCATION);
-
-					if (!dlp && !gsdd) {
-						// Load ce9 binary (SDK 2.0)
-						loadCardEngineBinary("nitro:/cardenginei_arm9_sdk20.lz77", (u8*)CARDENGINEI_ARM9_BUFFERED_LOCATION2);
-					}
 				}
 			}
 

@@ -52,6 +52,8 @@ extern aFile* romFile;
 extern aFile* savFile;
 extern aFile* apFixOverlaysFile;
 extern u32* cacheAddressTable;
+extern u32* cacheDescriptor;
+extern int* cacheCounter;
 
 extern bool flagsSet;
 extern bool igmReset;
@@ -142,17 +144,16 @@ void initialize(void) {
 	if (ce9->valueBits & isSdk5) {
 		sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS_SDK5;
 		ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
-		if (ndsHeader->unitCode > 0) {
-			romFile = (aFile*)ROM_FILE_LOCATION_MAINMEM5;
-			savFile = (aFile*)SAV_FILE_LOCATION_MAINMEM5;
-			apFixOverlaysFile = (aFile*)OVL_FILE_LOCATION_MAINMEM5;
-			#ifndef DLDI
-			cacheAddressTable = (u32*)CACHE_ADDRESS_TABLE_LOCATION_TWLSDK;
-			#endif
-		}
 	} else {
 		sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS_SDK1;
 		ndsHeader = (tNDSHeader*)NDS_HEADER;
+		#ifndef DLDI
+		if (ce9->valueBits & eSdk2) {
+			cacheAddressTable = (u32*)CACHE_ADDRESS_TABLE_LOCATION2;
+			cacheDescriptor = (u32*)CACHE_DESCRIPTOR_TABLE_LOCATION2;
+			cacheCounter = (int*)CACHE_COUNTER_TABLE_LOCATION2;
+		}
+		#endif
 	}
 	#endif
 	initialized = true;

@@ -126,8 +126,8 @@ u32 cacheDescriptor[dev_CACHE_SLOTS_16KB_TWLSDK];
 int cacheCounter[dev_CACHE_SLOTS_16KB_TWLSDK];
 #else
 u32* cacheAddressTable = (u32*)CACHE_ADDRESS_TABLE_LOCATION;
-u32 cacheDescriptor[dev_CACHE_SLOTS_16KB];
-int cacheCounter[dev_CACHE_SLOTS_16KB];
+u32* cacheDescriptor = (u32*)CACHE_DESCRIPTOR_TABLE_LOCATION;
+int* cacheCounter = (int*)CACHE_COUNTER_TABLE_LOCATION;
 #endif // TWLSDK
 int accessCounter = 0;
 #ifdef ASYNCPF

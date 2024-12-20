@@ -800,14 +800,14 @@ u32 getRomPartLocation(const tNDSHeader* ndsHeader, const bool isESdk2, const bo
 	if (ndsHeader->unitCode > 0 && dsiModeConfirmed) {
 		return ROM_LOCATION_TWLSDK;
 	}
-	return (dsiModeConfirmed ? ROM_LOCATION_DSIMODE : (ROM_LOCATION - ((isESdk2 && dsiBios) ? cacheBlockSize : 0))) + ((gameOnFlashcard && _io_dldi_size >= 0xF) ? 0x8000 : 0);
+	return dsiModeConfirmed ? ROM_LOCATION_DSIMODE : (ROM_LOCATION - ((isESdk2 && dsiBios) ? cacheBlockSize : 0));
 }
 
 u32 getRomLocation(const tNDSHeader* ndsHeader, const bool isESdk2, const bool isSdk5, const bool dsiBios) {
 	if (ndsHeader->unitCode > 0 && dsiModeConfirmed) {
 		return ROM_LOCATION_TWLSDK;
 	}
-	return ((dsiModeConfirmed || strncmp(getRomTid(ndsHeader), "B6X", 3) == 0) ? ROM_LOCATION_DSIMODE : (ROM_LOCATION - ((isESdk2 && dsiBios) ? 0x4000 : 0))) + ((gameOnFlashcard && _io_dldi_size >= 0xF) ? 0x8000 : 0);
+	return (dsiModeConfirmed || strncmp(getRomTid(ndsHeader), "B6X", 3) == 0) ? ROM_LOCATION_DSIMODE : (ROM_LOCATION - ((isESdk2 && dsiBios) ? 0x4000 : 0));
 }
 
 static bool isROMLoadableInRAM(const tDSiHeader* dsiHeader, const tNDSHeader* ndsHeader, const char* romTid, const module_params_t* moduleParams, const bool usesCloneboot) {
@@ -839,9 +839,6 @@ static bool isROMLoadableInRAM(const tDSiHeader* dsiHeader, const tNDSHeader* nd
 		}
 		if (dsiWramAccess && !dsiWramMirrored) {
 			romSizeLimit += wramSize;
-		}
-		if (gameOnFlashcard && _io_dldi_size >= 0xF) {
-			romSizeLimit -= 0x8000;
 		}
 
 		u32 romOffset = 0;
@@ -2099,7 +2096,7 @@ int arm7_main(void) {
 
 		// dbg_printf("Trying to patch the card...\n");
 
-		const u16 ce9size = 0x8000;
+		const u16 ce9size = (ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr) && dsiModeConfirmed) ? 0x3800 : 0x2FA0;
 		ce7Location = *(u32*)CARDENGINEI_ARM7_BUFFERED_LOCATION;
 		u32 ce7Size = 0x13400;
 
@@ -2108,12 +2105,7 @@ int arm7_main(void) {
 			ce7Size = 0x8600;
 		}
 
-		if (ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr)) {
-			if (!dsiModeConfirmed) {
-				tonccpy((char*)ROM_FILE_LOCATION_MAINMEM5, romFile, sizeof(aFile));
-				tonccpy((char*)SAV_FILE_LOCATION_MAINMEM5, savFile, sizeof(aFile));
-			}
-		} else {
+		if (!ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr) || !dsiModeConfirmed) {
 			tonccpy((char*)ROM_FILE_LOCATION_MAINMEM, romFile, sizeof(aFile));
 			tonccpy((char*)SAV_FILE_LOCATION_MAINMEM, savFile, sizeof(aFile));
 		}
@@ -2158,14 +2150,13 @@ int arm7_main(void) {
 			ce9Location = *(u32*)CARDENGINEI_ARM9_SDK5_BUFFERED_LOCATION;
 			tonccpy((u32*)ce9Location, (u32*)CARDENGINEI_ARM9_SDK5_BUFFERED_LOCATION, ce9size);
 		} else {
-			const u32* ce9Src = (u32*)(!laterSdk ? CARDENGINEI_ARM9_BUFFERED_LOCATION2 : CARDENGINEI_ARM9_BUFFERED_LOCATION);
+			const u32* ce9Src = (u32*)CARDENGINEI_ARM9_BUFFERED_LOCATION;
 			ce9Location = *ce9Src;
 			tonccpy((u32*)ce9Location, ce9Src, ce9size);
 		}
 		if (gameOnFlashcard) {
-			const bool _8MBarea = (dsiModeConfirmed || strncmp(romTid, "B6X", 3) == 0);
-			const u32 ce9DldiOffset = _8MBarea ? CARDENGINEI_ARM9_LOCATION_DLDI_DRIVER_DSI : (CARDENGINEI_ARM9_LOCATION_DLDI_DRIVER - ((!laterSdk && scfgBios9i()) ? 0x4000 : 0));
-			if (!dldiPatchBinary((data_t*)ce9Location, ce9size, (data_t*)((ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed && _io_dldi_size < 0xF) ? ce9Location+0x3800 : (_io_dldi_size >= 0xF) ? ce9DldiOffset : ce9Location+0x4000))) {
+			const u32 ce9DldiOffset = !laterSdk ? CARDENGINEI_ARM9_LOCATION2_DLDI_DRIVER : CARDENGINEI_ARM9_LOCATION_DLDI_DRIVER;
+			if (!dldiPatchBinary((data_t*)ce9Location, ce9size, (data_t*)((ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed && _io_dldi_size < 0xF) ? ce9Location+0x3800 : ce9DldiOffset))) {
 				dbg_printf("ce9 DLDI patch failed\n");
 				errorOutput();
 			}
@@ -2299,7 +2290,7 @@ int arm7_main(void) {
 		}
 
 		if (!ROMinRAM && overlayPatch) {
-			aFile* apFixOverlaysFile = (aFile*)(ROMsupportsDsiMode(ndsHeader) ? (dsiModeConfirmed ? OVL_FILE_LOCATION_TWLSDK : OVL_FILE_LOCATION_MAINMEM5) : OVL_FILE_LOCATION_MAINMEM);
+			aFile* apFixOverlaysFile = (aFile*)((ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed) ? OVL_FILE_LOCATION_TWLSDK : OVL_FILE_LOCATION_MAINMEM);
 			getFileFromCluster(apFixOverlaysFile, apFixOverlaysCluster, gameOnFlashcard);
 			buildFatTableCacheCompressed(apFixOverlaysFile);
 			if (!ROMsupportsDsiMode(ndsHeader) || !dsiModeConfirmed) {
