@@ -175,7 +175,8 @@ u32 oldArm7mbk = 0;
 
 u32 romMapLines = 0;
 // 0: ROM part start, 1: ROM part start in RAM, 2: ROM part end in RAM
-u32 romMap[5][3] = {
+u32 romMap[6][3] = {
+	{0, 0, 0},
 	{0, 0, 0},
 	{0, 0, 0},
 	{0, 0, 0},
@@ -807,7 +808,7 @@ u32 getRomLocation(const tNDSHeader* ndsHeader, const bool isESdk2, const bool i
 	if (ndsHeader->unitCode > 0 && dsiModeConfirmed) {
 		return ROM_LOCATION_TWLSDK;
 	}
-	return (dsiModeConfirmed || strncmp(getRomTid(ndsHeader), "B6X", 3) == 0) ? ROM_LOCATION_DSIMODE : (ROM_LOCATION - ((isESdk2 && dsiBios) ? 0x4000 : 0));
+	return dsiModeConfirmed ? ROM_LOCATION_DSIMODE : (ROM_LOCATION - ((isESdk2 && dsiBios) ? 0x4000 : 0));
 }
 
 static bool isROMLoadableInRAM(const tDSiHeader* dsiHeader, const tNDSHeader* ndsHeader, const char* romTid, const module_params_t* moduleParams, const bool usesCloneboot) {
@@ -827,13 +828,12 @@ static bool isROMLoadableInRAM(const tDSiHeader* dsiHeader, const tNDSHeader* nd
 	) {
 		const bool twlType = (ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed);
 		const bool cheatsEnabled = (cheatSizeTotal > 4 && cheatSizeTotal <= 0x8000);
-		const bool _8MBarea = (dsiModeConfirmed || strncmp(romTid, "B6X", 3) == 0);
 		u32 wramSize = 0x80000;
 		if (ce7Location == CARDENGINEI_ARM7_LOCATION) {
 			wramSize += 0x8000; // Shared 32KB of WRAM is available for ARM9 to use
 			sharedWramEnabled = true;
 		}
-		u32 romSizeLimit = (_8MBarea ? 0x00800000 : 0x00BC0000);
+		u32 romSizeLimit = (dsiModeConfirmed ? 0x00800000 : 0x00BC0000);
 		if (consoleModel > 0) {
 			romSizeLimit += 0x01000000;
 		}
@@ -1142,15 +1142,24 @@ static void buildRomMap(const tNDSHeader* ndsHeader, const module_params_t* modu
 			readRom = true;
 		} else if (isSdk5(moduleParams) || (dsiBios && laterSdk)) {
 			if (romLocationChangePrep == 0x0C7C4000) {
-				romLocationChangePrep += (ndsHeader->unitCode > 0 ? 0x1C000 : 0x3C000);
+				romLocationChangePrep += (laterSdk ? 0x4000 : 0x24000);
 				readRom = true;
 			} else if (ndsHeader->unitCode == 0) {
 				if (romLocationChangePrep == 0x0CFFC000) {
 					romLocationChangePrep += 0x4000;
 					readRom = true;
+				} else if (romLocationChangePrep == 0x0C7D8000 && laterSdk) {
+					romLocationChangePrep += 0x28000;
+					readRom = true;
+				} else if (romLocationChangePrep == 0x0C7F8000 && !laterSdk) {
+					romLocationChangePrep += 0x8000;
+					readRom = true;
 				}
 			} else {
-				if (romLocationChangePrep == 0x0C7FC000) {
+				if (romLocationChangePrep == 0x0C7D8000) {
+					romLocationChangePrep += 0x8000;
+					readRom = true;
+				} else if (romLocationChangePrep == 0x0C7FC000) {
 					romLocationChangePrep += 0x4000;
 					readRom = true;
 				} else if (romLocationChangePrep == 0x0CFE0000) {
@@ -1162,7 +1171,13 @@ static void buildRomMap(const tNDSHeader* ndsHeader, const module_params_t* modu
 			romLocationChangePrep += 0x4000;
 			readRom = true;
 		} else if (romLocationChangePrep == 0x0C7C0000) {
-			romLocationChangePrep += 0x40000;
+			romLocationChangePrep += (laterSdk ? 0x8000 : 0x28000);
+			readRom = true;
+		} else if (romLocationChangePrep == 0x0C7D8000 && laterSdk) {
+			romLocationChangePrep += 0x28000;
+			readRom = true;
+		} else if (romLocationChangePrep == 0x0C7F8000 && !laterSdk) {
+			romLocationChangePrep += 0x8000;
 			readRom = true;
 		}
 		if (romLocationChangePrep == (consoleModel > 0 ? 0x0E000000 : 0x0D000000)) {
@@ -1593,18 +1608,16 @@ int arm7_main(void) {
 	const char* romTid = getRomTid(&dsiHeaderTemp.ndshdr);
 	if (!isDSiWare || !scfgSdmmcEnabled || (REG_SCFG_ROM & BIT(9))) {
 		extern u32 clusterCacheSize;
-		clusterCacheSize = 0x10000;
-		if (dsiModeConfirmed && ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr)) {
-			clusterCacheSize = 0x7B0;
-		}
+		clusterCacheSize = (ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr) && dsiModeConfirmed) ? 0x7B0 : 0x600;
 
-		if ((memcmp(romTid, "IPG", 3) == 0) || ((memcmp(romTid, "IPK", 3) == 0))) {
-			buildFatTableCache(romFile); // Build uncompressed table for HGSS
-			if (!(romFile->fatTableSettings & fatCached)) {
-				buildFatTableCacheCompressed(romFile);
-			}
-		} else {
-			buildFatTableCacheCompressed(romFile);
+		buildFatTableCacheCompressed(romFile);
+		if (!(romFile->fatTableSettings & fatCached)) {
+			dbg_printf("\n");
+			dbg_printf("Cluster cache is above 0x");
+			dbg_printf((clusterCacheSize == 0x7B0) ? "7B0" : "600");
+			dbg_printf(" bytes!\n");
+			dbg_printf("Please back up and restore the SD card contents to defragment it\n");
+			errorOutput();
 		}
 		buildFatTableCacheCompressed(savFile);
 	}
@@ -1677,7 +1690,7 @@ int arm7_main(void) {
 				savFile->fatTableCache = (u32*)((u32)savFile->fatTableCache+add);
 				lastClusterCacheUsed = (u32*)((u32)lastClusterCacheUsed+add);
 				clusterCache += add;
-				toncset((char*)0x02700000, 0, 0x10000);
+				toncset((char*)0x02700000, 0, 0x7B0);
 			// }
 		}
 
@@ -1702,16 +1715,17 @@ int arm7_main(void) {
 		extern u32* lastClusterCacheUsed;
 		extern u32 clusterCache;
 
-		u32 add = laterSdk ? 0xC8000 : 0xE8000; // 0x027C8000 : 0x027E8000
+		/* u32 add = laterSdk ? 0xC8000 : 0xE8000; // 0x027C8000 : 0x027E8000
 		if (memcmp(romTid, "HND", 3) == 0) {
 			add = 0x108000; // 0x02808000
-		}
-		tonccpy((char*)0x02700000+add, (char*)0x02700000, 0x10000);	// Move FAT table cache elsewhere
+		} */
+		const u32 add = 0xFF200; // 0x027FF200
+		tonccpy((char*)0x02700000+add, (char*)0x02700000, 0x600);	// Move FAT table cache elsewhere
 		romFile->fatTableCache = (u32*)((u32)romFile->fatTableCache+add);
 		savFile->fatTableCache = (u32*)((u32)savFile->fatTableCache+add);
 		lastClusterCacheUsed = (u32*)((u32)lastClusterCacheUsed+add);
 		clusterCache += add;
-		toncset((char*)0x02700000, 0, 0x10000);
+		toncset((char*)0x02700000, 0, 0x600);
 	}
 
 	//if (gameOnFlashcard || !isDSiWare || !dsiWramAccess) {
@@ -2281,7 +2295,7 @@ int arm7_main(void) {
 		}
 
 		if (useApPatch) {
-			if (applyIpsPatch(ndsHeader, (u8*)IPS_LOCATION, (*(u8*)(IPS_LOCATION+apPatchSize-1) == 0xA9), !laterSdk, isSdk5(moduleParams), ROMinRAM, cacheBlockSize)) {
+			if (applyIpsPatch(ndsHeader, (u8*)IPS_LOCATION, (*(u8*)(IPS_LOCATION+apPatchSize-1) == 0xA9), laterSdk, isSdk5(moduleParams), ROMinRAM, cacheBlockSize)) {
 				dbg_printf("AP-fix applied\n");
 			} else {
 				dbg_printf("Failed to apply AP-fix\n");

@@ -18,7 +18,7 @@ extern bool overlaysInRam;
 
 extern bool scfgBios9i(void);
 
-bool applyIpsPatch(const tNDSHeader* ndsHeader, u8* ipsbyte, const bool arm9Only, const bool isESdk2, const bool isSdk5, const bool ROMinRAM, const u32 cacheBlockSize) {
+bool applyIpsPatch(const tNDSHeader* ndsHeader, u8* ipsbyte, const bool arm9Only, const bool laterSdk, const bool isSdk5, const bool ROMinRAM, const u32 cacheBlockSize) {
 	if (ipsbyte[0] != 'P' && ipsbyte[1] != 'A' && ipsbyte[2] != 'T' && ipsbyte[3] != 'C' && ipsbyte[4] != 'H' && ipsbyte[5] != 0) {
 		return false;
 	}
@@ -76,15 +76,21 @@ bool applyIpsPatch(const tNDSHeader* ndsHeader, u8* ipsbyte, const bool arm9Only
 				*rombyteOffset = repeatbyte[i];
 				rombyteOffset++;
 				if (ROMinRAM && (ndsHeader->unitCode == 0 || !dsiModeConfirmed)) {
-					if (isSdk5 || (dsiBios && !isESdk2)) {
+					if (isSdk5 || (dsiBios && laterSdk)) {
 						if ((u32)rombyteOffset == 0x0C7C4000) {
-							rombyteOffset += (ndsHeader->unitCode > 0 ? 0x1C000 : 0x3C000);
+							rombyteOffset += (laterSdk ? 0x4000 : 0x24000);
 						} else if (ndsHeader->unitCode == 0) {
 							if ((u32)rombyteOffset == 0x0CFFC000) {
 								rombyteOffset += 0x4000;
+							} else if ((u32)rombyteOffset == 0x0C7D8000 && laterSdk) {
+								rombyteOffset += 0x28000;
+							} else if ((u32)rombyteOffset == 0x0C7F8000 && !laterSdk) {
+								rombyteOffset += 0x8000;
 							}
 						} else {
-							if ((u32)rombyteOffset == 0x0C7FC000) {
+							if ((u32)rombyteOffset == 0x0C7D8000) {
+								rombyteOffset += 0x8000;
+							} else if ((u32)rombyteOffset == 0x0C7FC000) {
 								rombyteOffset += 0x4000;
 							} else if ((u32)rombyteOffset == 0x0CFE0000) {
 								rombyteOffset += 0x20000;
@@ -93,7 +99,11 @@ bool applyIpsPatch(const tNDSHeader* ndsHeader, u8* ipsbyte, const bool arm9Only
 					} else if ((u32)rombyteOffset == 0x0CFFC000 && dsiBios) {
 						rombyteOffset += 0x4000;
 					} else if ((u32)rombyteOffset == 0x0C7C0000) {
-						rombyteOffset += 0x40000;
+						rombyteOffset += (laterSdk ? 0x8000 : 0x28000);
+					} else if ((u32)rombyteOffset == 0x0C7D8000 && laterSdk) {
+						rombyteOffset += 0x28000;
+					} else if ((u32)rombyteOffset == 0x0C7F8000 && !laterSdk) {
+						rombyteOffset += 0x8000;
 					}
 					if ((u32)rombyteOffset == (consoleModel > 0 ? 0x0E000000 : 0x0D000000)) {
 						rombyteOffset = (u8*)wramLocation;
@@ -110,15 +120,21 @@ bool applyIpsPatch(const tNDSHeader* ndsHeader, u8* ipsbyte, const bool arm9Only
 				*rombyteOffset = ipsbyte[ipson+i];
 				rombyteOffset++;
 				if (ROMinRAM && (ndsHeader->unitCode == 0 || !dsiModeConfirmed)) {
-					if (isSdk5 || (dsiBios && !isESdk2)) {
+					if (isSdk5 || (dsiBios && laterSdk)) {
 						if ((u32)rombyteOffset == 0x0C7C4000) {
-							rombyteOffset += (ndsHeader->unitCode > 0 ? 0x1C000 : 0x3C000);
+							rombyteOffset += (laterSdk ? 0x4000 : 0x24000);
 						} else if (ndsHeader->unitCode == 0) {
 							if ((u32)rombyteOffset == 0x0CFFC000) {
 								rombyteOffset += 0x4000;
+							} else if ((u32)rombyteOffset == 0x0C7D8000 && laterSdk) {
+								rombyteOffset += 0x28000;
+							} else if ((u32)rombyteOffset == 0x0C7F8000 && !laterSdk) {
+								rombyteOffset += 0x8000;
 							}
 						} else {
-							if ((u32)rombyteOffset == 0x0C7FC000) {
+							if ((u32)rombyteOffset == 0x0C7D8000) {
+								rombyteOffset += 0x8000;
+							} else if ((u32)rombyteOffset == 0x0C7FC000) {
 								rombyteOffset += 0x4000;
 							} else if ((u32)rombyteOffset == 0x0CFE0000) {
 								rombyteOffset += 0x20000;
@@ -127,7 +143,11 @@ bool applyIpsPatch(const tNDSHeader* ndsHeader, u8* ipsbyte, const bool arm9Only
 					} else if ((u32)rombyteOffset == 0x0CFFC000 && dsiBios) {
 						rombyteOffset += 0x4000;
 					} else if ((u32)rombyteOffset == 0x0C7C0000) {
-						rombyteOffset += 0x40000;
+						rombyteOffset += (laterSdk ? 0x8000 : 0x28000);
+					} else if ((u32)rombyteOffset == 0x0C7D8000 && laterSdk) {
+						rombyteOffset += 0x28000;
+					} else if ((u32)rombyteOffset == 0x0C7F8000 && !laterSdk) {
+						rombyteOffset += 0x8000;
 					}
 					if ((u32)rombyteOffset == (consoleModel > 0 ? 0x0E000000 : 0x0D000000)) {
 						rombyteOffset = (u8*)wramLocation;

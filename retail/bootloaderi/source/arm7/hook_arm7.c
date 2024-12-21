@@ -464,10 +464,10 @@ int hookNdsRetailArm7(
 		}
 
 		extern u32 romMapLines;
-		extern u32 romMap[5][3];
+		extern u32 romMap[6][3];
 
 		ce7->romMapLines = romMapLines;
-		for (int i = 0; i < 5; i++) {
+		for (int i = 0; i < 6; i++) {
 			for (int i2 = 0; i2 < 3; i2++) {
 				ce7->romMap[i][i2] = romMap[i][i2];
 			}

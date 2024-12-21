@@ -176,10 +176,10 @@ void configureRomMap(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const u32
 	}
 
 	extern u32 romMapLines;
-	extern u32 romMap[5][3];
+	extern u32 romMap[6][3];
 
 	ce9->romMapLines = romMapLines;
-	for (int i = 0; i < 5; i++) {
+	for (int i = 0; i < 6; i++) {
 		for (int i2 = 0; i2 < 3; i2++) {
 			ce9->romMap[i][i2] = romMap[i][i2];
 		}
@@ -344,13 +344,19 @@ int hookNdsRetailArm9(
 				ce9->cacheAddress += cacheBlockSize;
 				if (isSdk5(moduleParams) || ((ce9->valueBits & b_dsiBios) && laterSdk)) {
 					if (ce9->cacheAddress == 0x0C7C0000+cacheBlockSize) {
-						ce9->cacheAddress += (ndsHeader->unitCode > 0 ? 0x20000 : 0x40000)-cacheBlockSize;
+						ce9->cacheAddress += (laterSdk ? 0x8000 : 0x28000)-cacheBlockSize;
 					} else if (ndsHeader->unitCode == 0) {
 						if (ce9->cacheAddress == 0x0D000000-cacheBlockSize) {
 							ce9->cacheAddress += cacheBlockSize;
+						} else if (ce9->cacheAddress == 0x0C7D8000 && laterSdk) {
+							ce9->cacheAddress += 0x28000;
+						} else if (ce9->cacheAddress == 0x0C7F8000 && !laterSdk) {
+							ce9->cacheAddress += 0x8000;
 						}
 					} else {
-						if (ce9->cacheAddress == 0x0C800000-cacheBlockSize) {
+						if (ce9->cacheAddress == 0x0C7D8000) {
+							ce9->cacheAddress += 0x8000;
+						} else if (ce9->cacheAddress == 0x0C800000-cacheBlockSize) {
 							ce9->cacheAddress += cacheBlockSize;
 						} else if (ce9->cacheAddress == 0x0CFE0000) {
 							ce9->cacheAddress += 0x20000;
@@ -359,7 +365,11 @@ int hookNdsRetailArm9(
 				} else if ((ce9->cacheAddress == 0x0D000000-cacheBlockSize) && (ce9->valueBits & b_dsiBios)) {
 					ce9->cacheAddress += cacheBlockSize;
 				} else if (ce9->cacheAddress == 0x0C7C0000) {
-					ce9->cacheAddress += 0x40000;
+					ce9->cacheAddress += (laterSdk ? 0x8000 : 0x28000);
+				} else if (ce9->cacheAddress == 0x0C7D8000 && laterSdk) {
+					ce9->cacheAddress += 0x28000;
+				} else if (ce9->cacheAddress == 0x0C7F8000 && !laterSdk) {
+					ce9->cacheAddress += 0x8000;
 				}
 				dataToPreloadSizeAligned += cacheBlockSize;
 			}
@@ -407,13 +417,19 @@ int hookNdsRetailArm9(
 			for (int slot = 0; slot < ce9->cacheSlots; slot++) {
 				if (isSdk5(moduleParams) || ((ce9->valueBits & b_dsiBios) && laterSdk)) {
 					if (addr == 0x0C7C0000+cacheBlockSize) {
-						addr += (ndsHeader->unitCode > 0 ? 0x20000 : 0x40000)-cacheBlockSize;
+						addr += (laterSdk ? 0x8000 : 0x28000)-cacheBlockSize;
 					} else if (ndsHeader->unitCode == 0) {
 						if (addr == 0x0D000000-cacheBlockSize) {
 							addr += cacheBlockSize;
+						} else if (addr == 0x0C7D8000 && laterSdk) {
+							addr += 0x28000;
+						} else if (addr == 0x0C7F8000 && !laterSdk) {
+							addr += 0x8000;
 						}
 					} else {
-						if (addr == 0x0C800000-cacheBlockSize) {
+						if (addr == 0x0C7D8000) {
+							addr += 0x8000;
+						} else if (addr == 0x0C800000-cacheBlockSize) {
 							addr += cacheBlockSize;
 						} else if (addr == 0x0CFE0000) {
 							addr += 0x20000;
@@ -422,7 +438,11 @@ int hookNdsRetailArm9(
 				} else if ((addr == 0x0D000000-cacheBlockSize) && (ce9->valueBits & b_dsiBios)) {
 					addr += cacheBlockSize;
 				} else if (addr == 0x0C7C0000) {
-					addr += 0x40000;
+					addr += (laterSdk ? 0x8000 : 0x28000);
+				} else if (addr == 0x0C7D8000 && laterSdk) {
+					addr += 0x28000;
+				} else if (addr == 0x0C7F8000 && !laterSdk) {
+					addr += 0x8000;
 				}
 				cacheAddressTable[slot] = addr;
 				addr += cacheBlockSize;
