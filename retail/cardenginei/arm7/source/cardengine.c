@@ -1394,13 +1394,19 @@ static void loadROMPartIntoRAM(void) {
 
 		if ((valueBits & isSdk5) || ((valueBits & dsiBios) && !(valueBits & eSdk2))) {
 			if (romLocationChange == 0x0C7C0000+cacheBlockSize) {
-				romLocationChange += (ndsHeader->unitCode > 0 ? 0x20000 : 0x40000)-cacheBlockSize;
+				romLocationChange += (!(valueBits & eSdk2) ? 0x8000 : 0x28000)-cacheBlockSize;
 			} else if (ndsHeader->unitCode == 0) {
 				if (romLocationChange == 0x0D000000-cacheBlockSize) {
 					romLocationChange += cacheBlockSize;
+				} else if (romLocationChange == 0x0C7D8000 && !(valueBits & eSdk2)) {
+					romLocationChange += 0x28000;
+				} else if (romLocationChange == 0x0C7F8000 && (valueBits & eSdk2)) {
+					romLocationChange += 0x8000;
 				}
 			} else {
-				if (romLocationChange == 0x0C800000-cacheBlockSize) {
+				if (romLocationChange == 0x0C7D8000) {
+					romLocationChange += 0x8000;
+				} else if (romLocationChange == 0x0C800000-cacheBlockSize) {
 					romLocationChange += cacheBlockSize;
 				} else if (romLocationChange == 0x0CFE0000) {
 					romLocationChange += 0x20000;
@@ -1409,7 +1415,11 @@ static void loadROMPartIntoRAM(void) {
 		} else if ((romLocationChange == 0x0D000000-cacheBlockSize) && (valueBits & dsiBios)) {
 			romLocationChange += cacheBlockSize;
 		} else if (romLocationChange == 0x0C7C0000) {
-			romLocationChange += 0x40000;
+			romLocationChange += (!(valueBits & eSdk2) ? 0x8000 : 0x28000);
+		} else if (romLocationChange == 0x0C7D8000 && !(valueBits & eSdk2)) {
+			romLocationChange += 0x28000;
+		} else if (romLocationChange == 0x0C7F8000 && (valueBits & eSdk2)) {
+			romLocationChange += 0x8000;
 		}
 	} else {
 		sharedAddr[5] = 0x44454C50; // 'PLED'
