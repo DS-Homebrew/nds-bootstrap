@@ -327,11 +327,6 @@ int hookNdsRetailArm9(
 					size = (consoleModel > 0 ? dev_CACHE_ADRESS_SIZE : retail_CACHE_ADRESS_SIZE);
 				}
 			}
-			extern u8 _io_dldi_size;
-			if (gameOnFlashcard && _io_dldi_size >= 0xF) {
-				ce9->cacheAddress += 0x8000;
-				size -= 0x8000;
-			}
 			ce9->romLocation = ce9->cacheAddress;
 			ce9->cacheSlots = size/cacheBlockSize;
 		}
