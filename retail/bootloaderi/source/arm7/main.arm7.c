@@ -833,7 +833,7 @@ static bool isROMLoadableInRAM(const tDSiHeader* dsiHeader, const tNDSHeader* nd
 			wramSize += 0x8000; // Shared 32KB of WRAM is available for ARM9 to use
 			sharedWramEnabled = true;
 		}
-		u32 romSizeLimit = (dsiModeConfirmed ? 0x00800000 : 0x00BC0000);
+		u32 romSizeLimit = (dsiModeConfirmed ? 0x00800000 : 0x00BD0000);
 		if (consoleModel > 0) {
 			romSizeLimit += 0x01000000;
 		}
