@@ -1182,18 +1182,28 @@ static void buildRomMap(const tNDSHeader* ndsHeader, const module_params_t* modu
 		}
 		if (romLocationChangePrep == (consoleModel > 0 ? 0x0E000000 : 0x0D000000)) {
 			romLocationChangePrep = sharedWramEnabled ? 0x036F8000 : 0x03700000;
+			readRom = true;
 		}
+		// dbg_hexa(romLocationChangePrep);
 
 		if (readRom) {
 			romMap[romMapLines][0] = romOffsetChange;
 			romMap[romMapLines][1] = romLocationChange;
 			romMap[romMapLines][2] = romLocationChange+romBlockSize;
+
+			/* dbg_printf("  ");
+			dbg_hexa(romMap[romMapLines][0]);
+			dbg_printf(" ");
+			dbg_hexa(romMap[romMapLines][1]);
+			dbg_printf(" ");
+			dbg_hexa(romMap[romMapLines][2]); */
 			romMapLines++;
 
 			romLocationChange = romLocationChangePrep;
 			romOffsetChange += romBlockSize;
 			romBlockSize = 0;
 		}
+		// dbg_printf("\n");
 	}
 }
 
