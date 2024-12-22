@@ -1558,28 +1558,14 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 					tonccpy((u8*)LOADER_RETURN_LOCATION+0x100, &srBackendId, 8);
 				}
 
-				const bool dlp = (memcmp(romTid, "HND", 3) == 0);
 				const bool gsdd = (memcmp(romTid, "BO5", 3) == 0);
 
-				if (conf->gameOnFlashcard) {
-					const char* ce9Path = "nitro:/cardenginei_arm9_dldi.lz77";
-					if (gsdd) {
-						ce9Path = "nitro:/cardenginei_arm9_gsdd_dldi.lz77";
-					}
-
-					// Load DLDI ce9 binary
-					loadCardEngineBinary(ce9Path, (u8*)CARDENGINEI_ARM9_BUFFERED_LOCATION);
-				} else {
-					const char* ce9Path = "nitro:/cardenginei_arm9.lz77";
-					if (dlp) {
-						ce9Path = "nitro:/cardenginei_arm9_dlp.lz77";
-					} else if (gsdd) {
-						ce9Path = "nitro:/cardenginei_arm9_gsdd.lz77";
-					}
-
-					// Load ce9 binary
-					loadCardEngineBinary(ce9Path, (u8*)CARDENGINEI_ARM9_BUFFERED_LOCATION);
-				}
+				// Load DLDI ce9 binary
+				loadCardEngineBinary(
+					conf->gameOnFlashcard
+				?	(gsdd ? "nitro:/cardenginei_arm9_gsdd_dldi.lz77" : "nitro:/cardenginei_arm9_dldi.lz77")
+				:	(gsdd ? "nitro:/cardenginei_arm9_gsdd.lz77" : "nitro:/cardenginei_arm9.lz77")
+				, (u8*)CARDENGINEI_ARM9_BUFFERED_LOCATION);
 			}
 
 			bool found = (access(pageFilePath.c_str(), F_OK) == 0);

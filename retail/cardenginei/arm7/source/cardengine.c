@@ -564,7 +564,7 @@ void reset(const bool downloadedSrl) {
 		ensureBinaryDecompressed(ndsHeader, moduleParams);
 
 		patchCardNdsArm9(
-			(cardengineArm9*)((valueBits & isDlp) ? CARDENGINEI_ARM9_LOCATION_DLP : CARDENGINEI_ARM9_LOCATION),
+			(cardengineArm9*)CARDENGINEI_ARM9_LOCATION,
 			ndsHeader,
 			moduleParams,
 			1
@@ -580,7 +580,7 @@ void reset(const bool downloadedSrl) {
 			ndsHeader
 		);
 		hookNdsRetailArm9(
-			(cardengineArm9*)((valueBits & isDlp) ? CARDENGINEI_ARM9_LOCATION_DLP : CARDENGINEI_ARM9_LOCATION),
+			(cardengineArm9*)CARDENGINEI_ARM9_LOCATION,
 			ndsHeader
 		);
 
