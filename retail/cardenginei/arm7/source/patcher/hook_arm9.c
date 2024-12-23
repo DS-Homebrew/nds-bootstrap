@@ -32,7 +32,7 @@ static const u32 handlerStartSig[5] = {
 // alt gsun
 static const u32 handlerStartSigAlt[5] = {
 	0xe3a0c301, 	// mov  ip, #0x4000000
-	0xe5bc2208,		// 
+	0xe5bc2208,		//
 	0xe1ec00d8,		//
 	0xe3520000		// cmp	r2, #0
 };
@@ -47,10 +47,10 @@ static const u32 handlerEndSig[4] = {
 
 // alt gsun
 static const u32 handlerEndSigAlt[4] = {
-	0xe59f100C, 	// 
-	0xe5813000,		// 
-	0xe5813004,		// 
-	0xeaffffb8		// 
+	0xe59f100C, 	//
+	0xe5813000,		//
+	0xe5813004,		//
+	0xeaffffb8		//
 };
 
 static u32* hookInterruptHandler(const u32* start, size_t size) {
@@ -69,7 +69,7 @@ static u32* hookInterruptHandler(const u32* start, size_t size) {
     		return NULL;
         }
 	}
-    
+
     /*dbg_printf("handlerStartSig\n");
     dbg_hexa((u32)addr);
     dbg_printf("\n");*/
@@ -103,12 +103,12 @@ static u32* hookInterruptHandler(const u32* start, size_t size) {
     /*dbg_printf("tableAddr\n");
     dbg_hexa(tableAddr);
     dbg_printf("\n");*/
-    
+
 	// u32 returnAddr = addr[1];
     /*dbg_printf("returnAddr\n");
     dbg_hexa(returnAddr);
     dbg_printf("\n");*/
-    
+
 	//u32* actualReturnAddr = addr + 2;
 	//u32* actualTableAddr = actualReturnAddr + (tableAddr - returnAddr)/sizeof(u32);
 
@@ -132,18 +132,28 @@ int hookNdsRetailArm9(
 	}
 	ce9->valueBits &= ~b_isDlp;
 
-    u32* tableAddr = hookInterruptHandler((u32*)ndsHeader->arm9destination, iUncompressedSize);
-   
-    if (!tableAddr) {
+	extern u32 romMapLines;
+	extern u32 romMap[7][3];
+
+	ce9->romMapLines = romMapLines;
+	for (int i = 0; i < 7; i++) {
+		for (int i2 = 0; i2 < 3; i2++) {
+			ce9->romMap[i][i2] = romMap[i][i2];
+		}
+	}
+
+	u32* tableAddr = hookInterruptHandler((u32*)ndsHeader->arm9destination, iUncompressedSize);
+
+	if (!tableAddr) {
 		//dbg_printf("ERR_HOOK_9\n");
 		return ERR_HOOK;
 	}
-    
+
     /*dbg_printf("hookLocation arm9: ");
 	dbg_hexa((u32)tableAddr);
 	dbg_printf("\n\n");*/
-    
-    ce9->irqTable   = tableAddr;
+
+	ce9->irqTable   = tableAddr;
 
 	//nocashMessage("ERR_NONE");
 	return ERR_NONE;

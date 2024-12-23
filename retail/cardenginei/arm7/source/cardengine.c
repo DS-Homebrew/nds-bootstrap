@@ -198,7 +198,7 @@ extern u32 romLocation;
 
 extern u32 romMapLines;
 // 0: ROM part start, 1: ROM part start in RAM, 2: ROM part end in RAM
-extern u32 romMap[5][3];
+extern u32 romMap[7][3];
 
 u32 currentSrlAddr = 0;
 
@@ -224,7 +224,7 @@ static void unlaunchSetFilename(bool boot) {
 			#ifdef TWLSDK
 			*(u8*)(0x02000838+i2) = *(u8*)(ce7+0x8400+i);		// Unlaunch Device:/Path/Filename.ext (16bit Unicode,end by 0000h)
 			#else
-			*(u8*)(0x02000838+i2) = *(u8*)(ce7+0xB000+i);	// Unlaunch Device:/Path/Filename.ext (16bit Unicode,end by 0000h)
+			*(u8*)(0x02000838+i2) = *(u8*)(ce7+0xB400+i);	// Unlaunch Device:/Path/Filename.ext (16bit Unicode,end by 0000h)
 			#endif
 			i2 += 2;
 		}
@@ -262,9 +262,9 @@ static void readSrBackendId(void) {
 	*(u32*)(0x02000314) = *(u32*)(ce7+0x8504);
 	*(u32*)(0x02000318) = /* *(u32*)(ce7+0x8504) == 0x00030000 ? 0x13 : */ 0x17;
 	#else
-	*(u32*)(0x02000310) = *(u32*)(ce7+0xB100);
-	*(u32*)(0x02000314) = *(u32*)(ce7+0xB104);
-	*(u32*)(0x02000318) = /* *(u32*)(ce7+0xB104) == 0x00030000 ? 0x13 : */ 0x17;
+	*(u32*)(0x02000310) = *(u32*)(ce7+0xB500);
+	*(u32*)(0x02000314) = *(u32*)(ce7+0xB504);
+	*(u32*)(0x02000318) = /* *(u32*)(ce7+0xB504) == 0x00030000 ? 0x13 : */ 0x17;
 	#endif
 	*(u32*)(0x0200031C) = 0;
 	*(u16*)(0x02000306) = swiCRC16(0xFFFF, (void*)0x02000308, 0x18);
@@ -470,9 +470,9 @@ void reset(const bool downloadedSrl) {
 		*(u32*)0x02000000 = BIT(3);
 		*(u32*)0x02000004 = 0x54455352; // 'RSET'
 		if (consoleModel < 2) {
-			(*(u32*)(ce7+0xB100) == 0 && (valueBits & b_dsiSD)) ? unlaunchSetFilename(false) : unlaunchSetHiyaFilename();
+			(*(u32*)(ce7+0xB500) == 0 && (valueBits & b_dsiSD)) ? unlaunchSetFilename(false) : unlaunchSetHiyaFilename();
 		}
-		if (*(u32*)(ce7+0xB100) == 0 && (valueBits & b_dsiSD)) {
+		if (*(u32*)(ce7+0xB500) == 0 && (valueBits & b_dsiSD)) {
 			tonccpy((u32*)0x02000300, sr_data_srloader, 0x20);
 		} else {
 			// Use different SR backend ID
@@ -560,6 +560,11 @@ void reset(const bool downloadedSrl) {
 		} else {
 			valueBits &= ~isSdk5;
 		}
+		/* if ((moduleParams->sdk_version >= 0x2008000 && moduleParams->sdk_version != 0x2012774) || moduleParams->sdk_version == 0x20029A8) {
+			valueBits &= ~eSdk2;
+		} else {
+			valueBits |= eSdk2;
+		} */
 
 		ensureBinaryDecompressed(ndsHeader, moduleParams);
 
@@ -762,7 +767,7 @@ void forceGameReboot(void) {
 			#ifdef TWLSDK
 			(*(u32*)(ce7+0x8500) == 0) ? unlaunchSetFilename(false) : unlaunchSetHiyaFilename();
 			#else
-			(*(u32*)(ce7+0xB100) == 0) ? unlaunchSetFilename(false) : unlaunchSetHiyaFilename();
+			(*(u32*)(ce7+0xB500) == 0) ? unlaunchSetFilename(false) : unlaunchSetHiyaFilename();
 			#endif
 		}
 		waitFrames(5);							// Wait for DSi screens to stabilize
@@ -778,7 +783,7 @@ void forceGameReboot(void) {
 	//if (doBak) restoreSdBakData();
 	if (*(u32*)(ce7+0x8500) == 0 && (valueBits & b_dsiSD))
 	#else
-	if (*(u32*)(ce7+0xB100) == 0 && (valueBits & b_dsiSD))
+	if (*(u32*)(ce7+0xB500) == 0 && (valueBits & b_dsiSD))
 	#endif
 	{
 		tonccpy((u32*)0x02000300, sr_data_srloader, 0x20);
@@ -927,18 +932,18 @@ void returnToLoader(bool reboot) {
 #else
 	IPC_SendSync(0x8);
 	if (consoleModel >= 2) {
-		if (*(u32*)(ce7+0xB100) == 0 && (valueBits & b_dsiSD))
+		if (*(u32*)(ce7+0xB500) == 0 && (valueBits & b_dsiSD))
 		{
 			tonccpy((u32*)0x02000300, sr_data_srloader, 0x020);
 		}
-		else if (*(char*)(ce7+0xB103) == 'H' || *(char*)(ce7+0xB103) == 'K')
+		else if (*(char*)(ce7+0xB503) == 'H' || *(char*)(ce7+0xB503) == 'K')
 		{
 			// Use different SR backend ID
 			readSrBackendId();
 		}
 		waitFrames(1);
 	} else {
-		if (*(u32*)(ce7+0xB100) == 0 && (valueBits & b_dsiSD))
+		if (*(u32*)(ce7+0xB500) == 0 && (valueBits & b_dsiSD))
 		{
 			unlaunchSetFilename(true);
 		} else {
