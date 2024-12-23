@@ -96,7 +96,7 @@ typedef struct cardengineArm7 {
 		11: slowSoftReset
 		12: wideCheatUsed
 		13: isSdk5
-		14: asyncCardRead
+		14: hasVramWifiBinary
 		15: twlTouch
 		16: cloneboot
 		17: sleepMode

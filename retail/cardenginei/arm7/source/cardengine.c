@@ -69,11 +69,11 @@
 #define slowSoftReset BIT(11)
 #define wideCheatUsed BIT(12)
 #define isSdk5 BIT(13)
-//#define asyncCardRead BIT(14)
+#define hasVramWifiBinary BIT(14)
 #define twlTouch BIT(15)
 #define cloneboot BIT(16)
 #define sleepMode BIT(17)
-#define dsiBios BIT(18)
+#define b_dsiBios BIT(18)
 #define bootstrapOnFlashcard BIT(19)
 #define ndmaDisabled BIT(20)
 #define isDlp BIT(21)
@@ -817,7 +817,7 @@ void returnToLoader(bool reboot) {
 		tonccpy((u8*)0x02000400, (u8*)twlCfgLoc, 0x128);
 	}
 
-	if (reboot || !(valueBits & dsiBios) || ((valueBits & twlTouch) && !(*(u8*)0x02FFE1BF & BIT(0))) || ((valueBits & b_dsiSD) && (valueBits & wideCheatUsed))) {
+	if (reboot || !(valueBits & b_dsiBios) || ((valueBits & twlTouch) && !(*(u8*)0x02FFE1BF & BIT(0))) || ((valueBits & b_dsiSD) && (valueBits & wideCheatUsed))) {
 		if (consoleModel >= 2) {
 			if (*(u32*)(ce7+0x8500) == 0) {
 				tonccpy((u32*)0x02000300, sr_data_srloader, 0x020);
@@ -1353,6 +1353,36 @@ static bool resume_cardRead_arm9(void) {
 	return true;
 } */
 
+bool romLocationAdjust(const tNDSHeader* ndsHeader, const bool laterSdk, const bool dsiBios, u32* romLocation) {
+	const bool ntrType = (ndsHeader->unitCode == 0);
+	const u32 romLocationOld = *romLocation;
+	if (*romLocation == 0x0C3FC000) {
+		*romLocation += 0x4000;
+	} else if (*romLocation == 0x0C7C0000 && ((laterSdk && !dsiBios) || !laterSdk) && ntrType) {
+		*romLocation += laterSdk ? 0x8000 : 0x28000;
+	} else if (*romLocation == 0x0C7C4000) {
+		*romLocation += 0x4000;
+	} else if (*romLocation == 0x0C7D8000 && laterSdk) {
+		if (ntrType) {
+			*romLocation += (valueBits & hasVramWifiBinary) ? 0x10000 : 0x28000;
+		} else {
+			*romLocation += 0x8000;
+		}
+	} else if (*romLocation == 0x0C7F8000 && (laterSdk || !dsiBios) && ntrType) {
+		*romLocation += 0x8000;
+	} else if (*romLocation == 0x0C7FC000) {
+		*romLocation += 0x4000;
+	} else if (*romLocation == 0x0CFE0000 && !ntrType) {
+		*romLocation += 0x20000;
+	} else if (*romLocation == 0x0CFFC000 && dsiBios) {
+		*romLocation += 0x4000;
+	}
+	/* if (*romLocation == (consoleModel > 0 ? 0x0E000000 : 0x0D000000)) {
+		*romLocation = sharedWramEnabled ? 0x036F8000 : 0x03700000;
+	} */
+	return (*romLocation != romLocationOld);
+}
+
 static void loadROMPartIntoRAM(void) {
 	static bool finished = false;
 	extern u32 romPartLocation;
@@ -1392,35 +1422,7 @@ static void loadROMPartIntoRAM(void) {
 		romOffsetChange += cacheBlockSize;
 		romLocationChange += cacheBlockSize;
 
-		if ((valueBits & isSdk5) || ((valueBits & dsiBios) && !(valueBits & eSdk2))) {
-			if (romLocationChange == 0x0C7C0000+cacheBlockSize) {
-				romLocationChange += (!(valueBits & eSdk2) ? 0x8000 : 0x28000)-cacheBlockSize;
-			} else if (ndsHeader->unitCode == 0) {
-				if (romLocationChange == 0x0D000000-cacheBlockSize) {
-					romLocationChange += cacheBlockSize;
-				} else if (romLocationChange == 0x0C7D8000 && !(valueBits & eSdk2)) {
-					romLocationChange += 0x28000;
-				} else if (romLocationChange == 0x0C7F8000 && (valueBits & eSdk2)) {
-					romLocationChange += 0x8000;
-				}
-			} else {
-				if (romLocationChange == 0x0C7D8000) {
-					romLocationChange += 0x8000;
-				} else if (romLocationChange == 0x0C800000-cacheBlockSize) {
-					romLocationChange += cacheBlockSize;
-				} else if (romLocationChange == 0x0CFE0000) {
-					romLocationChange += 0x20000;
-				}
-			}
-		} else if ((romLocationChange == 0x0D000000-cacheBlockSize) && (valueBits & dsiBios)) {
-			romLocationChange += cacheBlockSize;
-		} else if (romLocationChange == 0x0C7C0000) {
-			romLocationChange += (!(valueBits & eSdk2) ? 0x8000 : 0x28000);
-		} else if (romLocationChange == 0x0C7D8000 && !(valueBits & eSdk2)) {
-			romLocationChange += 0x28000;
-		} else if (romLocationChange == 0x0C7F8000 && (valueBits & eSdk2)) {
-			romLocationChange += 0x8000;
-		}
+		romLocationAdjust(ndsHeader, !(valueBits & eSdk2), (valueBits & b_dsiBios), &romLocationChange);
 	} else {
 		sharedAddr[5] = 0x44454C50; // 'PLED'
 		finished = true;

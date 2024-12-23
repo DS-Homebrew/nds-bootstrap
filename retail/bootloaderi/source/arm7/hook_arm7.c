@@ -49,7 +49,7 @@
 #define b_slowSoftReset BIT(11)
 #define b_wideCheatUsed BIT(12)
 #define b_isSdk5 BIT(13)
-#define b_asyncCardRead BIT(14)
+#define b_hasVramWifiBinary BIT(14)
 #define b_twlTouch BIT(15)
 #define b_cloneboot BIT(16)
 #define b_sleepMode BIT(17)
@@ -353,6 +353,7 @@ int hookNdsRetailArm7(
 		*vblankHandler = 0x2FFC008;
 	} else {*/
 		extern u32 iUncompressedSize;
+		extern bool hasVramWifiBinary;
 		extern u32 dataToPreloadAddr;
 		extern u32 dataToPreloadSize;
 		extern u32 dataToPreloadFrame;
@@ -402,8 +403,8 @@ int hookNdsRetailArm7(
 		if (isSdk5(moduleParams)) {
 			ce7->valueBits |= b_isSdk5;
 		}
-		if (asyncCardRead) {
-			ce7->valueBits |= b_asyncCardRead;
+		if (hasVramWifiBinary) {
+			ce7->valueBits |= b_hasVramWifiBinary;
 		}
 		if (twlTouch) {
 			ce7->valueBits |= b_twlTouch;
