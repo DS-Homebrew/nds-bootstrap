@@ -365,6 +365,42 @@ static void patchMirrorCheck(const tNDSHeader* ndsHeader, const module_params_t*
 	dbg_printf("\n\n");
 }
 
+bool hasVramWifiBinary = false;
+static void patchVramWifiBinaryLoad(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+	if (ndsHeader->unitCode > 0 || moduleParams->sdk_version < 0x2008000) return;
+
+	// Relocate VRAM WiFi binary from Main RAM to DSi WRAM
+	u32* offset = (u32*)patchOffsetCache.relocateStartOffset;
+	const u32 add = ((u32)ce7 == CARDENGINEI_ARM7_LOCATION) ? 0x00FE0000 : 0x00820000; // 0x037C0000 : 0x03000000
+	bool found = false;
+	for (int i = 0; i < 0x100/sizeof(u32); i++) {
+		if (*offset >= 0x027E0000 && *offset < 0x027E0200) {
+			*offset += add;
+			found = true;
+			break;
+		}
+		offset++;
+	}
+	if (!found) {
+		return;
+	}
+
+	hasVramWifiBinary = true;
+
+	dbg_printf("VRAM WiFi binary load location end : ");
+	dbg_hexa((u32)offset);
+	dbg_printf("\n\n");
+
+	offset = (u32*)patchOffsetCache.relocateStartOffset;
+
+	for (int i = 0; i < 0x80/sizeof(u32); i++) {
+		if (offset[i] == 0x0A000000) {
+			offset[i+1] = 0xE1A00000; // nop
+			break;
+		}
+	}
+}
+
 static void patchSleepMode(const tNDSHeader* ndsHeader) {
 	// Sleep
 	u32* sleepPatchOffset = patchOffsetCache.sleepPatchOffset;
@@ -727,6 +763,7 @@ u32 patchCardNdsArm7(
 
 	if (a7GetReloc(ndsHeader, moduleParams)) {
 		patchMirrorCheck(ndsHeader, moduleParams);
+		patchVramWifiBinaryLoad(ce7, ndsHeader, moduleParams);
 		u32 saveResult = 0;
 		
 		if (newArm7binarySize==0x2352C || newArm7binarySize==0x235DC || newArm7binarySize==0x23CAC || newArm7binarySize==0x245C0 || newArm7binarySize==0x245C4) {

@@ -25,7 +25,7 @@ bool applyIpsPatch(const tNDSHeader* ndsHeader, u8* ipsbyte, const bool arm9Only
 
 	bool armPatched = false;
 	const bool dsiBios = scfgBios9i();
-	const u32 wramLocation = sharedWramEnabled ? 0x036F8000 : 0x03700000;
+	extern bool romLocationAdjust(const tNDSHeader* ndsHeader, const bool laterSdk, const bool dsiBios, u32* romLocation);
 
 	int ipson = 5;
 	int totalrepeats = 0;
@@ -76,38 +76,9 @@ bool applyIpsPatch(const tNDSHeader* ndsHeader, u8* ipsbyte, const bool arm9Only
 				*rombyteOffset = repeatbyte[i];
 				rombyteOffset++;
 				if (ROMinRAM && (ndsHeader->unitCode == 0 || !dsiModeConfirmed)) {
-					if (isSdk5 || (dsiBios && laterSdk)) {
-						if ((u32)rombyteOffset == 0x0C7C4000) {
-							rombyteOffset += (laterSdk ? 0x4000 : 0x24000);
-						} else if (ndsHeader->unitCode == 0) {
-							if ((u32)rombyteOffset == 0x0CFFC000) {
-								rombyteOffset += 0x4000;
-							} else if ((u32)rombyteOffset == 0x0C7D8000 && laterSdk) {
-								rombyteOffset += 0x28000;
-							} else if ((u32)rombyteOffset == 0x0C7F8000 && !laterSdk) {
-								rombyteOffset += 0x8000;
-							}
-						} else {
-							if ((u32)rombyteOffset == 0x0C7D8000) {
-								rombyteOffset += 0x8000;
-							} else if ((u32)rombyteOffset == 0x0C7FC000) {
-								rombyteOffset += 0x4000;
-							} else if ((u32)rombyteOffset == 0x0CFE0000) {
-								rombyteOffset += 0x20000;
-							}
-						}
-					} else if ((u32)rombyteOffset == 0x0CFFC000 && dsiBios) {
-						rombyteOffset += 0x4000;
-					} else if ((u32)rombyteOffset == 0x0C7C0000) {
-						rombyteOffset += (laterSdk ? 0x8000 : 0x28000);
-					} else if ((u32)rombyteOffset == 0x0C7D8000 && laterSdk) {
-						rombyteOffset += 0x28000;
-					} else if ((u32)rombyteOffset == 0x0C7F8000 && !laterSdk) {
-						rombyteOffset += 0x8000;
-					}
-					if ((u32)rombyteOffset == (consoleModel > 0 ? 0x0E000000 : 0x0D000000)) {
-						rombyteOffset = (u8*)wramLocation;
-					}
+					u32 u32_rombyteOffset = (u32)rombyteOffset;
+					romLocationAdjust(ndsHeader, laterSdk, dsiBios, &u32_rombyteOffset);
+					rombyteOffset = (u8*)u32_rombyteOffset;
 				}
 			}
 			ipson++;
@@ -120,38 +91,9 @@ bool applyIpsPatch(const tNDSHeader* ndsHeader, u8* ipsbyte, const bool arm9Only
 				*rombyteOffset = ipsbyte[ipson+i];
 				rombyteOffset++;
 				if (ROMinRAM && (ndsHeader->unitCode == 0 || !dsiModeConfirmed)) {
-					if (isSdk5 || (dsiBios && laterSdk)) {
-						if ((u32)rombyteOffset == 0x0C7C4000) {
-							rombyteOffset += (laterSdk ? 0x4000 : 0x24000);
-						} else if (ndsHeader->unitCode == 0) {
-							if ((u32)rombyteOffset == 0x0CFFC000) {
-								rombyteOffset += 0x4000;
-							} else if ((u32)rombyteOffset == 0x0C7D8000 && laterSdk) {
-								rombyteOffset += 0x28000;
-							} else if ((u32)rombyteOffset == 0x0C7F8000 && !laterSdk) {
-								rombyteOffset += 0x8000;
-							}
-						} else {
-							if ((u32)rombyteOffset == 0x0C7D8000) {
-								rombyteOffset += 0x8000;
-							} else if ((u32)rombyteOffset == 0x0C7FC000) {
-								rombyteOffset += 0x4000;
-							} else if ((u32)rombyteOffset == 0x0CFE0000) {
-								rombyteOffset += 0x20000;
-							}
-						}
-					} else if ((u32)rombyteOffset == 0x0CFFC000 && dsiBios) {
-						rombyteOffset += 0x4000;
-					} else if ((u32)rombyteOffset == 0x0C7C0000) {
-						rombyteOffset += (laterSdk ? 0x8000 : 0x28000);
-					} else if ((u32)rombyteOffset == 0x0C7D8000 && laterSdk) {
-						rombyteOffset += 0x28000;
-					} else if ((u32)rombyteOffset == 0x0C7F8000 && !laterSdk) {
-						rombyteOffset += 0x8000;
-					}
-					if ((u32)rombyteOffset == (consoleModel > 0 ? 0x0E000000 : 0x0D000000)) {
-						rombyteOffset = (u8*)wramLocation;
-					}
+					u32 u32_rombyteOffset = (u32)rombyteOffset;
+					romLocationAdjust(ndsHeader, laterSdk, dsiBios, &u32_rombyteOffset);
+					rombyteOffset = (u8*)u32_rombyteOffset;
 				}
 			}
 			ipson += totalrepeats;

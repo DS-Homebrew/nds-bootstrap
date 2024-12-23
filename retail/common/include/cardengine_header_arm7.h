@@ -122,7 +122,7 @@ typedef struct cardengineArm7 {
 	u32 romPartSize;
 	u32 romPartFrame;
 	u32 romMapLines;
-	u32 romMap[6][3]; // 0: ROM part start, 1: ROM part start in RAM, 2: ROM part end in RAM
+	u32 romMap[7][3]; // 0: ROM part start, 1: ROM part start in RAM, 2: ROM part end in RAM
 } cardengineArm7;
 
 //

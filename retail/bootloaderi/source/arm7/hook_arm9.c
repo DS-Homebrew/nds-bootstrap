@@ -176,10 +176,10 @@ void configureRomMap(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const u32
 	}
 
 	extern u32 romMapLines;
-	extern u32 romMap[6][3];
+	extern u32 romMap[7][3];
 
 	ce9->romMapLines = romMapLines;
-	for (int i = 0; i < 6; i++) {
+	for (int i = 0; i < 7; i++) {
 		for (int i2 = 0; i2 < 3; i2++) {
 			ce9->romMap[i][i2] = romMap[i][i2];
 		}
@@ -213,6 +213,7 @@ int hookNdsRetailArm9(
 	extern u32 dataToPreloadAddr;
 	extern u32 dataToPreloadSize;
 	extern u32 dataToPreloadFrame;
+	extern bool romLocationAdjust(const tNDSHeader* ndsHeader, const bool laterSdk, const bool dsiBios, u32* romLocation);
 	extern bool dataToPreloadFound(const tNDSHeader* ndsHeader);
 	const char* romTid = getRomTid(ndsHeader);
 	const bool laterSdk = ((moduleParams->sdk_version >= 0x2008000 && moduleParams->sdk_version != 0x2012774) || moduleParams->sdk_version == 0x20029A8);
@@ -311,13 +312,15 @@ int hookNdsRetailArm9(
 				}
 			}
 		} else {
+			extern bool hasVramWifiBinary;
+			const u32 start = (hasVramWifiBinary ? CACHE_ADRESS_START_ALT : CACHE_ADRESS_START);
 			u32 size = 0;
 			if (strncmp(romTid, "UBR", 3) == 0) {
 				runOverlayCheck = false;
-				ce9->cacheAddress = CACHE_ADRESS_START;
+				ce9->cacheAddress = start;
 				size = retail_CACHE_ADRESS_SIZE_BROWSER;
 			} else {
-				ce9->cacheAddress = (dsiMode ? CACHE_ADRESS_START_DSIMODE : CACHE_ADRESS_START);
+				ce9->cacheAddress = (dsiMode ? CACHE_ADRESS_START_DSIMODE : start);
 				if (!dsiMode && (ce9->valueBits & b_dsiBios) && !laterSdk) {
 					ce9->cacheAddress -= cacheBlockSize;
 				}
@@ -337,35 +340,7 @@ int hookNdsRetailArm9(
 			configureRomMap(ce9, ndsHeader, dataToPreloadAddr, dsiMode);
 			for (u32 i = 0; i < dataToPreloadSize/*+dataToPreloadSize[1]*/; i += cacheBlockSize) {
 				ce9->cacheAddress += cacheBlockSize;
-				if (isSdk5(moduleParams) || ((ce9->valueBits & b_dsiBios) && laterSdk)) {
-					if (ce9->cacheAddress == 0x0C7C0000+cacheBlockSize) {
-						ce9->cacheAddress += (laterSdk ? 0x8000 : 0x28000)-cacheBlockSize;
-					} else if (ndsHeader->unitCode == 0) {
-						if (ce9->cacheAddress == 0x0D000000-cacheBlockSize) {
-							ce9->cacheAddress += cacheBlockSize;
-						} else if (ce9->cacheAddress == 0x0C7D8000 && laterSdk) {
-							ce9->cacheAddress += 0x28000;
-						} else if (ce9->cacheAddress == 0x0C7F8000 && !laterSdk) {
-							ce9->cacheAddress += 0x8000;
-						}
-					} else {
-						if (ce9->cacheAddress == 0x0C7D8000) {
-							ce9->cacheAddress += 0x8000;
-						} else if (ce9->cacheAddress == 0x0C800000-cacheBlockSize) {
-							ce9->cacheAddress += cacheBlockSize;
-						} else if (ce9->cacheAddress == 0x0CFE0000) {
-							ce9->cacheAddress += 0x20000;
-						}
-					}
-				} else if ((ce9->cacheAddress == 0x0D000000-cacheBlockSize) && (ce9->valueBits & b_dsiBios)) {
-					ce9->cacheAddress += cacheBlockSize;
-				} else if (ce9->cacheAddress == 0x0C7C0000) {
-					ce9->cacheAddress += (laterSdk ? 0x8000 : 0x28000);
-				} else if (ce9->cacheAddress == 0x0C7D8000 && laterSdk) {
-					ce9->cacheAddress += 0x28000;
-				} else if (ce9->cacheAddress == 0x0C7F8000 && !laterSdk) {
-					ce9->cacheAddress += 0x8000;
-				}
+				romLocationAdjust(ndsHeader, laterSdk, (ce9->valueBits & b_dsiBios), &ce9->cacheAddress);
 				dataToPreloadSizeAligned += cacheBlockSize;
 			}
 			ce9->cacheSlots -= dataToPreloadSizeAligned/cacheBlockSize;
@@ -410,35 +385,7 @@ int hookNdsRetailArm9(
 			u32 addr = ce9->cacheAddress;
 
 			for (int slot = 0; slot < ce9->cacheSlots; slot++) {
-				if (isSdk5(moduleParams) || ((ce9->valueBits & b_dsiBios) && laterSdk)) {
-					if (addr == 0x0C7C0000+cacheBlockSize) {
-						addr += (laterSdk ? 0x8000 : 0x28000)-cacheBlockSize;
-					} else if (ndsHeader->unitCode == 0) {
-						if (addr == 0x0D000000-cacheBlockSize) {
-							addr += cacheBlockSize;
-						} else if (addr == 0x0C7D8000 && laterSdk) {
-							addr += 0x28000;
-						} else if (addr == 0x0C7F8000 && !laterSdk) {
-							addr += 0x8000;
-						}
-					} else {
-						if (addr == 0x0C7D8000) {
-							addr += 0x8000;
-						} else if (addr == 0x0C800000-cacheBlockSize) {
-							addr += cacheBlockSize;
-						} else if (addr == 0x0CFE0000) {
-							addr += 0x20000;
-						}
-					}
-				} else if ((addr == 0x0D000000-cacheBlockSize) && (ce9->valueBits & b_dsiBios)) {
-					addr += cacheBlockSize;
-				} else if (addr == 0x0C7C0000) {
-					addr += (laterSdk ? 0x8000 : 0x28000);
-				} else if (addr == 0x0C7D8000 && laterSdk) {
-					addr += 0x28000;
-				} else if (addr == 0x0C7F8000 && !laterSdk) {
-					addr += 0x8000;
-				}
+				romLocationAdjust(ndsHeader, laterSdk, (ce9->valueBits & b_dsiBios), &addr);
 				cacheAddressTable[slot] = addr;
 				addr += cacheBlockSize;
 			}

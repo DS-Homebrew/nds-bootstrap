@@ -175,7 +175,7 @@ u32 oldArm7mbk = 0;
 
 u32 romMapLines = 0;
 // 0: ROM part start, 1: ROM part start in RAM, 2: ROM part end in RAM
-u32 romMap[6][3] = {
+u32 romMap[7][3] = {
 	{0, 0, 0},
 	{0, 0, 0},
 	{0, 0, 0},
@@ -801,14 +801,42 @@ u32 getRomPartLocation(const tNDSHeader* ndsHeader, const bool isESdk2, const bo
 	if (ndsHeader->unitCode > 0 && dsiModeConfirmed) {
 		return ROM_LOCATION_TWLSDK;
 	}
-	return dsiModeConfirmed ? ROM_LOCATION_DSIMODE : (ROM_LOCATION - ((isESdk2 && dsiBios) ? cacheBlockSize : 0));
+	extern bool hasVramWifiBinary;
+	return dsiModeConfirmed ? ROM_LOCATION_DSIMODE : (hasVramWifiBinary ? ROM_LOCATION_ALT : ROM_LOCATION);
 }
 
 u32 getRomLocation(const tNDSHeader* ndsHeader, const bool isESdk2, const bool isSdk5, const bool dsiBios) {
-	if (ndsHeader->unitCode > 0 && dsiModeConfirmed) {
-		return ROM_LOCATION_TWLSDK;
+	return getRomPartLocation(ndsHeader, isESdk2, isSdk5, dsiBios);
+}
+
+bool romLocationAdjust(const tNDSHeader* ndsHeader, const bool laterSdk, const bool dsiBios, u32* romLocation) {
+	const u32 romLocationOld = *romLocation;
+	if (*romLocation == 0x0C3FC000) {
+		*romLocation += 0x4000;
+	} else if (*romLocation == 0x0C7C0000 && ((laterSdk && !dsiBios) || !laterSdk)) {
+		*romLocation += laterSdk ? 0x8000 : 0x28000;
+	} else if (*romLocation == 0x0C7C4000) {
+		*romLocation += 0x4000;
+	} else if (*romLocation == 0x0C7D8000 && laterSdk) {
+		if (ndsHeader->unitCode == 0) {
+			extern bool hasVramWifiBinary;
+			*romLocation += hasVramWifiBinary ? 0x10000 : 0x28000;
+		} else {
+			*romLocation += 0x8000;
+		}
+	} else if (*romLocation == 0x0C7F8000 && (laterSdk || !dsiBios)) {
+		*romLocation += 0x8000;
+	} else if (*romLocation == 0x0C7FC000) {
+		*romLocation += 0x4000;
+	} else if (*romLocation == 0x0CFE0000 && (ndsHeader->unitCode > 0)) {
+		*romLocation += 0x20000;
+	} else if (*romLocation == 0x0CFFC000 && dsiBios) {
+		*romLocation += 0x4000;
 	}
-	return dsiModeConfirmed ? ROM_LOCATION_DSIMODE : (ROM_LOCATION - ((isESdk2 && dsiBios) ? 0x4000 : 0));
+	if (*romLocation == (consoleModel > 0 ? 0x0E000000 : 0x0D000000)) {
+		*romLocation = sharedWramEnabled ? 0x036F8000 : 0x03700000;
+	}
+	return (*romLocation != romLocationOld);
 }
 
 static bool isROMLoadableInRAM(const tDSiHeader* dsiHeader, const tNDSHeader* ndsHeader, const char* romTid, const module_params_t* moduleParams, const bool usesCloneboot) {
@@ -833,7 +861,7 @@ static bool isROMLoadableInRAM(const tDSiHeader* dsiHeader, const tNDSHeader* nd
 			wramSize += 0x8000; // Shared 32KB of WRAM is available for ARM9 to use
 			sharedWramEnabled = true;
 		}
-		u32 romSizeLimit = (dsiModeConfirmed ? 0x00800000 : 0x00BD0000);
+		u32 romSizeLimit = (dsiModeConfirmed ? 0x00800000 : retail_CACHE_ADRESS_SIZE);
 		if (consoleModel > 0) {
 			romSizeLimit += 0x01000000;
 		}
@@ -1138,52 +1166,8 @@ static void buildRomMap(const tNDSHeader* ndsHeader, const module_params_t* modu
 		romLocationChangePrep += 0x4000;
 		romSizeEdit -= 0x4000;
 
-		if (romSizeEdit <= 0) {
-			readRom = true;
-		} else if (isSdk5(moduleParams) || (dsiBios && laterSdk)) {
-			if (romLocationChangePrep == 0x0C7C4000) {
-				romLocationChangePrep += (laterSdk ? 0x4000 : 0x24000);
-				readRom = true;
-			} else if (ndsHeader->unitCode == 0) {
-				if (romLocationChangePrep == 0x0CFFC000) {
-					romLocationChangePrep += 0x4000;
-					readRom = true;
-				} else if (romLocationChangePrep == 0x0C7D8000 && laterSdk) {
-					romLocationChangePrep += 0x28000;
-					readRom = true;
-				} else if (romLocationChangePrep == 0x0C7F8000 && !laterSdk) {
-					romLocationChangePrep += 0x8000;
-					readRom = true;
-				}
-			} else {
-				if (romLocationChangePrep == 0x0C7D8000) {
-					romLocationChangePrep += 0x8000;
-					readRom = true;
-				} else if (romLocationChangePrep == 0x0C7FC000) {
-					romLocationChangePrep += 0x4000;
-					readRom = true;
-				} else if (romLocationChangePrep == 0x0CFE0000) {
-					romLocationChangePrep += 0x20000;
-					readRom = true;
-				}
-			}
-		} else if (romLocationChangePrep == 0x0CFFC000 && dsiBios) {
-			romLocationChangePrep += 0x4000;
-			readRom = true;
-		} else if (romLocationChangePrep == 0x0C7C0000) {
-			romLocationChangePrep += (laterSdk ? 0x8000 : 0x28000);
-			readRom = true;
-		} else if (romLocationChangePrep == 0x0C7D8000 && laterSdk) {
-			romLocationChangePrep += 0x28000;
-			readRom = true;
-		} else if (romLocationChangePrep == 0x0C7F8000 && !laterSdk) {
-			romLocationChangePrep += 0x8000;
-			readRom = true;
-		}
-		if (romLocationChangePrep == (consoleModel > 0 ? 0x0E000000 : 0x0D000000)) {
-			romLocationChangePrep = sharedWramEnabled ? 0x036F8000 : 0x03700000;
-			readRom = true;
-		}
+		readRom = (romSizeEdit <= 0) ? true : romLocationAdjust(ndsHeader, laterSdk, dsiBios, &romLocationChangePrep);
+
 		// dbg_hexa(romLocationChangePrep);
 
 		if (readRom) {
@@ -2122,7 +2106,7 @@ int arm7_main(void) {
 
 		const u16 ce9size = (ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr) && dsiModeConfirmed) ? 0x3800 : 0x2FA0;
 		ce7Location = *(u32*)CARDENGINEI_ARM7_BUFFERED_LOCATION;
-		u32 ce7Size = 0x13400;
+		u32 ce7Size = 0xB400;
 
 		const bool useSdk5ce7 = (isSdk5(moduleParams) && ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr) && dsiModeConfirmed);
 		if (useSdk5ce7) {
