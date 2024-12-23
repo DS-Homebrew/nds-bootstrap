@@ -810,25 +810,26 @@ u32 getRomLocation(const tNDSHeader* ndsHeader, const bool isESdk2, const bool i
 }
 
 bool romLocationAdjust(const tNDSHeader* ndsHeader, const bool laterSdk, const bool dsiBios, u32* romLocation) {
+	const bool ntrType = (ndsHeader->unitCode == 0);
 	const u32 romLocationOld = *romLocation;
 	if (*romLocation == 0x0C3FC000) {
 		*romLocation += 0x4000;
-	} else if (*romLocation == 0x0C7C0000 && ((laterSdk && !dsiBios) || !laterSdk)) {
+	} else if (*romLocation == 0x0C7C0000 && ((laterSdk && !dsiBios) || !laterSdk) && ntrType) {
 		*romLocation += laterSdk ? 0x8000 : 0x28000;
 	} else if (*romLocation == 0x0C7C4000) {
 		*romLocation += 0x4000;
 	} else if (*romLocation == 0x0C7D8000 && laterSdk) {
-		if (ndsHeader->unitCode == 0) {
+		if (ntrType) {
 			extern bool hasVramWifiBinary;
 			*romLocation += hasVramWifiBinary ? 0x10000 : 0x28000;
 		} else {
 			*romLocation += 0x8000;
 		}
-	} else if (*romLocation == 0x0C7F8000 && (laterSdk || !dsiBios)) {
+	} else if (*romLocation == 0x0C7F8000 && (laterSdk || !dsiBios) && ntrType) {
 		*romLocation += 0x8000;
 	} else if (*romLocation == 0x0C7FC000) {
 		*romLocation += 0x4000;
-	} else if (*romLocation == 0x0CFE0000 && (ndsHeader->unitCode > 0)) {
+	} else if (*romLocation == 0x0CFE0000 && !ntrType) {
 		*romLocation += 0x20000;
 	} else if (*romLocation == 0x0CFFC000 && dsiBios) {
 		*romLocation += 0x4000;
