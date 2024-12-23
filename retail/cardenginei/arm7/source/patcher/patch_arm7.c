@@ -207,13 +207,15 @@ static void patchVramWifiBinaryLoad(const tNDSHeader* ndsHeader, const module_pa
 	}
 
 	if (!(valueBits & hasVramWifiBinary)) {
-		bool mapFound = false;
-		bool mapFoundInCache = false;
 		for (int i = 0; i < romMapLines; i++) {
 			if (romMap[i][1] == 0x0C3EC000) {
-				romMap[i][1] = 0x0C7E8000;
-				romMap[i][2] = 0x0C7F8000;
-				mapFound = true;
+				const u32 addrEnd = ((romMap[i][2])/0x4000)*0x4000;
+				for (u8* addr = (u8*)romMap[i][1]; addr < (u8*)addrEnd; addr += 0x4000) {
+					tonccpy(addr+0x3FC000, addr, 0x4000);
+					toncset(addr, 0, 0x4000);
+				}
+				romMap[i][1] += 0x3FC000;
+				romMap[i][2] += 0x3FC000;
 				break;
 			}
 		}
@@ -223,34 +225,31 @@ static void patchVramWifiBinaryLoad(const tNDSHeader* ndsHeader, const module_pa
 			for (int i = 0; i < 0x2000/sizeof(u32); i++) {
 				if (cacheAddressTable[i] == 0 || cacheAddressTable[i] >= 0x0C7FC000) {
 					break;
-				} else if (cacheAddressTable[i] == 0x0C3EC000) {
+				} else if (cacheAddressTable[i] >= 0x0C3EC000 && cacheAddressTable[i] < 0x0C3FC000) {
+					u8* addr = (u8*)cacheAddressTable[i];
+					tonccpy(addr+0x3FC000, addr, 0x4000);
+					toncset(addr, 0, 0x4000);
 					cacheAddressTable[i] += 0x3FC000;
-					cacheAddressTable[i+1] += 0x3FC000;
-					cacheAddressTable[i+2] += 0x3FC000;
-					cacheAddressTable[i+3] += 0x3FC000;
-					mapFoundInCache = true;
 					break;
 				}
 			}
 		}
 
-		if (mapFound || mapFoundInCache) {
-			tonccpy((u32*)0x0C7E8000, (u32*)0x0C3EC000, 0x10000);
-			toncset((u32*)0x0C3EC000, 0, 0x10000);
-		}
 		valueBits |= hasVramWifiBinary;
 	}
 	return;
 
 clearBit:
 	if (valueBits & hasVramWifiBinary) {
-		bool mapFound = false;
-		bool mapFoundInCache = false;
 		for (int i = 0; i < romMapLines; i++) {
 			if (romMap[i][1] == 0x0C7E8000) {
-				romMap[i][1] = 0x0C3EC000;
-				romMap[i][2] = 0x0C3FC000;
-				mapFound = true;
+				const u32 addrEnd = ((romMap[i][2])/0x4000)*0x4000;
+				for (u8* addr = (u8*)romMap[i][1]; addr < (u8*)addrEnd; addr += 0x4000) {
+					tonccpy(addr-0x3FC000, addr, 0x4000);
+					toncset(addr, 0, 0x4000);
+				}
+				romMap[i][1] -= 0x3FC000;
+				romMap[i][2] -= 0x3FC000;
 				break;
 			}
 		}
@@ -260,21 +259,16 @@ clearBit:
 			for (int i = 0; i < 0x2000/sizeof(u32); i++) {
 				if (cacheAddressTable[i] == 0 || cacheAddressTable[i] >= 0x0C7FC000) {
 					break;
-				} else if (cacheAddressTable[i] == 0x0C7E8000) {
+				} else if (cacheAddressTable[i] >= 0x0C7E8000 && cacheAddressTable[i] < 0x0C7F8000) {
+					u8* addr = (u8*)cacheAddressTable[i];
+					tonccpy(addr-0x3FC000, addr, 0x4000);
+					toncset(addr, 0, 0x4000);
 					cacheAddressTable[i] -= 0x3FC000;
-					cacheAddressTable[i+1] -= 0x3FC000;
-					cacheAddressTable[i+2] -= 0x3FC000;
-					cacheAddressTable[i+3] -= 0x3FC000;
-					mapFoundInCache = true;
 					break;
 				}
 			}
 		}
 
-		if (mapFound || mapFoundInCache) {
-			tonccpy((u32*)0x0C3EC000, (u32*)0x0C7E8000, 0x10000);
-			toncset((u32*)0x0C7E8000, 0, 0x10000);
-		}
 		valueBits &= ~hasVramWifiBinary;
 	}
 }
