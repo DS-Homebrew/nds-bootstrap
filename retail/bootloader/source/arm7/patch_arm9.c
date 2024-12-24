@@ -962,25 +962,27 @@ static void patchMpu2(const tNDSHeader* ndsHeader, const module_params_t* module
 	if (!patchOffsetCache.mpuDataOffset2) {
 		mpuDataOffset = findMpuDataOffset(moduleParams, 2, mpuStartOffset);
 	}
-	if (mpuDataOffset && moduleParams->sdk_version < 0x5000000) {
-		// Change the region 2 configuration (Makes loading slow, so new code is used)
+	if (mpuDataOffset) {
+		if (moduleParams->sdk_version < 0x5000000) {
+			// Change the region 2 configuration
 
-		/*u32 mpuInitRegionNewData = PAGE_32M | 0x02000000 | 1;
-		u32 mpuNewDataAccess = 0x15111111;
-		u32 mpuNewInstrAccess = 0x5111111;
-		int mpuAccessOffset = 6;
+			/*u32 mpuInitRegionNewData = PAGE_32M | 0x02000000 | 1;
+			u32 mpuNewDataAccess = 0x15111111;
+			u32 mpuNewInstrAccess = 0x5111111;
+			int mpuAccessOffset = 6;
 
-		*mpuDataOffset = mpuInitRegionNewData;
+			*mpuDataOffset = mpuInitRegionNewData;
 
-		if (mpuNewInstrAccess) {
-			mpuDataOffset[mpuAccessOffset] = mpuNewInstrAccess;
+			if (mpuNewInstrAccess) {
+				mpuDataOffset[mpuAccessOffset] = mpuNewInstrAccess;
+			}
+			if (mpuNewDataAccess) {
+				mpuDataOffset[mpuAccessOffset + 1] = mpuNewDataAccess;
+			}*/
+			unpatchedFuncs->mpuDataOffset2 = mpuDataOffset;
+			unpatchedFuncs->mpuInitRegionOldData2 = *mpuDataOffset;
+			*mpuDataOffset = 0;
 		}
-		if (mpuNewDataAccess) {
-			mpuDataOffset[mpuAccessOffset + 1] = mpuNewDataAccess;
-		}*/
-		unpatchedFuncs->mpuDataOffset2 = mpuDataOffset;
-		unpatchedFuncs->mpuInitRegionOldData2 = *mpuDataOffset;
-		*mpuDataOffset = 0;
 
 		dbg_printf("Mpu data 2: ");
 		dbg_hexa((u32)mpuDataOffset);

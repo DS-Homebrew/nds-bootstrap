@@ -1015,51 +1015,53 @@ void patchMpu2(const tNDSHeader* ndsHeader, const module_params_t* moduleParams,
 	if (!patchOffsetCache.mpuDataOffset2) {
 		mpuDataOffset = findMpuDataOffset((ndsHeader->unitCode > 0), moduleParams, 2, mpuStartOffset);
 	}
-	if (mpuDataOffset && (moduleParams->sdk_version < 0x5000000 || (ndsHeader->unitCode > 0 && dsiModeConfirmed))) {
-		// Change the region 2 configuration
+	if (mpuDataOffset) {
+		if (moduleParams->sdk_version < 0x5000000 || (ndsHeader->unitCode > 0 && dsiModeConfirmed)) {
+			// Change the region 2 configuration
 
-		//force DSi mode settings. THESE TOOK AGES TO FIND. -s2k
-		/*if(ndsHeader->unitCode > 0 && dsiModeConfirmed){
-			u32 mpuNewDataAccess     = 0x15111111;
-			u32 mpuNewInstrAccess    = 0x5111111;
-			u32 mpuInitRegionNewData = PAGE_32M | 0x0C000000 | 1;
-			int mpuAccessOffset      = 3;
+			//force DSi mode settings. THESE TOOK AGES TO FIND. -s2k
+			/*if(ndsHeader->unitCode > 0 && dsiModeConfirmed){
+				u32 mpuNewDataAccess     = 0x15111111;
+				u32 mpuNewInstrAccess    = 0x5111111;
+				u32 mpuInitRegionNewData = PAGE_32M | 0x0C000000 | 1;
+				int mpuAccessOffset      = 3;
 
-			unpatchedFuncs->mpuDataOffset2 = mpuDataOffset;
-			unpatchedFuncs->mpuInitRegionOldData2 = *mpuDataOffset;
+				unpatchedFuncs->mpuDataOffset2 = mpuDataOffset;
+				unpatchedFuncs->mpuInitRegionOldData2 = *mpuDataOffset;
+				*mpuDataOffset = mpuInitRegionNewData;
+
+			//if (mpuAccessOffset) {
+				unpatchedFuncs->mpuAccessOffset = mpuAccessOffset;
+				//if (mpuNewInstrAccess) {
+					unpatchedFuncs->mpuOldInstrAccess = mpuDataOffset[mpuAccessOffset];
+					mpuDataOffset[mpuAccessOffset] = mpuNewInstrAccess;
+				//}
+				//if (mpuNewDataAccess) {
+					unpatchedFuncs->mpuOldDataAccess = mpuDataOffset[mpuAccessOffset + 1];
+					mpuDataOffset[mpuAccessOffset + 1] = mpuNewDataAccess;
+				//}
+			//}
+			} else {*/
+				unpatchedFuncs->mpuDataOffset2 = mpuDataOffset;
+				unpatchedFuncs->mpuInitRegionOldData2 = *mpuDataOffset;
+				// *mpuDataOffset = (ndsHeader->unitCode > 0 && dsiModeConfirmed) ? 0 : (PAGE_128K | 0x027E0000 | 1);
+				*mpuDataOffset = 0;
+			//}
+
+			/*u32 mpuInitRegionNewData = PAGE_32M | 0x02000000 | 1;
+			u32 mpuNewDataAccess = 0x15111111;
+			u32 mpuNewInstrAccess = 0x5111111;
+			int mpuAccessOffset = 6;
+
 			*mpuDataOffset = mpuInitRegionNewData;
 
-		//if (mpuAccessOffset) {
-			unpatchedFuncs->mpuAccessOffset = mpuAccessOffset;
-			//if (mpuNewInstrAccess) {
-				unpatchedFuncs->mpuOldInstrAccess = mpuDataOffset[mpuAccessOffset];
+			if (mpuNewInstrAccess) {
 				mpuDataOffset[mpuAccessOffset] = mpuNewInstrAccess;
-			//}
-			//if (mpuNewDataAccess) {
-				unpatchedFuncs->mpuOldDataAccess = mpuDataOffset[mpuAccessOffset + 1];
+			}
+			if (mpuNewDataAccess) {
 				mpuDataOffset[mpuAccessOffset + 1] = mpuNewDataAccess;
-			//}
-		//}
-		} else {*/
-			unpatchedFuncs->mpuDataOffset2 = mpuDataOffset;
-			unpatchedFuncs->mpuInitRegionOldData2 = *mpuDataOffset;
-			// *mpuDataOffset = (ndsHeader->unitCode > 0 && dsiModeConfirmed) ? 0 : (PAGE_128K | 0x027E0000 | 1);
-			*mpuDataOffset = 0;
-		//}
-
-		/*u32 mpuInitRegionNewData = PAGE_32M | 0x02000000 | 1;
-		u32 mpuNewDataAccess = 0x15111111;
-		u32 mpuNewInstrAccess = 0x5111111;
-		int mpuAccessOffset = 6;
-
-		*mpuDataOffset = mpuInitRegionNewData;
-
-		if (mpuNewInstrAccess) {
-			mpuDataOffset[mpuAccessOffset] = mpuNewInstrAccess;
+			}*/
 		}
-		if (mpuNewDataAccess) {
-			mpuDataOffset[mpuAccessOffset + 1] = mpuNewDataAccess;
-		}*/
 
 		dbg_printf("Mpu data 2: ");
 		dbg_hexa((u32)mpuDataOffset);
