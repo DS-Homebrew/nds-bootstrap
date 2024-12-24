@@ -83,7 +83,7 @@ u16* findGbaSlotInitOffsetThumb(const tNDSHeader* ndsHeader);
 u32* a9FindCardIrqEnableOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool* usesThumb);
 const u32* getMpuInitRegionSignature(u32 patchMpuRegion);
 u32* findMpuStartOffset(const tNDSHeader* ndsHeader, u32 patchMpuRegion);
-u32* findMpuDataOffset(const module_params_t* moduleParams, u32 patchMpuRegion, const u32* mpuStartOffset);
+u32* findMpuDataOffset(const bool twl, const module_params_t* moduleParams, u32 patchMpuRegion, const u32* mpuStartOffset);
 u32* findMpuDataOffsetAlt(const tNDSHeader* ndsHeader);
 u32* findMpuChange(const tNDSHeader* ndsHeader);
 u32* findMpuInitTwlEnd(const u32* heapPointer2Offset);

@@ -942,7 +942,7 @@ static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 }
 
 static void patchMpu2(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, const bool usesCloneboot) {
-	if (((moduleParams->sdk_version < 0x2008000) && !extendedMemory) || moduleParams->sdk_version > 0x5000000) {
+	if ((moduleParams->sdk_version < 0x2008000) && !extendedMemory) {
 		return;
 	}
 
@@ -962,7 +962,7 @@ static void patchMpu2(const tNDSHeader* ndsHeader, const module_params_t* module
 	if (!patchOffsetCache.mpuDataOffset2) {
 		mpuDataOffset = findMpuDataOffset(moduleParams, 2, mpuStartOffset);
 	}
-	if (mpuDataOffset) {
+	if (mpuDataOffset && moduleParams->sdk_version < 0x5000000) {
 		// Change the region 2 configuration (Makes loading slow, so new code is used)
 
 		/*u32 mpuInitRegionNewData = PAGE_32M | 0x02000000 | 1;

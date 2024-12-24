@@ -890,7 +890,7 @@ static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 		dbg_printf("\n\n");
 	}
 	if (!patchOffsetCache.mpuDataOffset) {
-		mpuDataOffset = findMpuDataOffset(moduleParams, patchMpuRegion, mpuStartOffset);
+		mpuDataOffset = findMpuDataOffset(false, moduleParams, patchMpuRegion, mpuStartOffset);
 	}
 	if (mpuDataOffset) {
 		if (!isSdk5(moduleParams)) {
@@ -995,9 +995,9 @@ static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 }
 
 void patchMpu2(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, const bool usesCloneboot) {
-	if (moduleParams->sdk_version > 0x5000000 && (ndsHeader->unitCode == 0 || !dsiModeConfirmed)) {
+	/* if (moduleParams->sdk_version > 0x5000000 && (ndsHeader->unitCode == 0 || !dsiModeConfirmed)) {
 		return;
-	}
+	} */
 
 	unpatchedFunctions* unpatchedFuncs = (unpatchedFunctions*)UNPATCHED_FUNCTION_LOCATION;
 
@@ -1013,9 +1013,9 @@ void patchMpu2(const tNDSHeader* ndsHeader, const module_params_t* moduleParams,
 		dbg_printf("\n\n");
 	}
 	if (!patchOffsetCache.mpuDataOffset2) {
-		mpuDataOffset = findMpuDataOffset(moduleParams, 2, mpuStartOffset);
+		mpuDataOffset = findMpuDataOffset((ndsHeader->unitCode > 0), moduleParams, 2, mpuStartOffset);
 	}
-	if (mpuDataOffset) {
+	if (mpuDataOffset && (moduleParams->sdk_version < 0x5000000 || (ndsHeader->unitCode > 0 && dsiModeConfirmed))) {
 		// Change the region 2 configuration
 
 		//force DSi mode settings. THESE TOOK AGES TO FIND. -s2k
