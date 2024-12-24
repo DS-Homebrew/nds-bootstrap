@@ -581,10 +581,6 @@ static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 }
 
 static void patchMpu2(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
-	if (moduleParams->sdk_version > 0x5000000) {
-		return;
-	}
-
 	unpatchedFunctions* unpatchedFuncs = (unpatchedFunctions*)UNPATCHED_FUNCTION_LOCATION;
 
 	// Find the mpu init
@@ -595,7 +591,7 @@ static void patchMpu2(const tNDSHeader* ndsHeader, const module_params_t* module
 		dbg_printf("\n\n");
 	}*/
 	u32* mpuDataOffset = findMpuDataOffset(moduleParams, 2, mpuStartOffset);
-	if (mpuDataOffset) {
+	if (mpuDataOffset && (moduleParams->sdk_version < 0x5000000)) {
 		// Change the region 2 configuration
 
 		//force DSi mode settings. THESE TOOK AGES TO FIND. -s2k
