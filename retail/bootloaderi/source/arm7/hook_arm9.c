@@ -212,7 +212,7 @@ int hookNdsRetailArm9(
 	extern u32 romPaddingSize;
 	extern u32 dataToPreloadAddr;
 	extern u32 dataToPreloadSize;
-	extern u32 dataToPreloadFrame;
+	// extern u32 dataToPreloadFrame;
 	extern bool romLocationAdjust(const tNDSHeader* ndsHeader, const bool laterSdk, const bool dsiBios, u32* romLocation);
 	extern bool dataToPreloadFound(const tNDSHeader* ndsHeader);
 	const char* romTid = getRomTid(ndsHeader);
@@ -348,9 +348,9 @@ int hookNdsRetailArm9(
 			//ce9->romPartSrc[1] = dataToPreloadAddr[1];
 			ce9->romPartSize = dataToPreloadSize;
 			//ce9->romPartSize[1] = dataToPreloadSize[1];
-			if (dataToPreloadFrame) {
+			/* if (dataToPreloadFrame) {
 				ce9->valueBits |= b_waitForPreloadToFinish;
-			}
+			} */
 		}
 		if (runOverlayCheck && overlaysSize <= 0x700000) {
 			/*extern u8 gameOnFlashcard;

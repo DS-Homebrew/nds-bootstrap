@@ -129,7 +129,7 @@ u16* getOffsetFromBLThumb(const u16* blOffset) {
 
 u32 vAddrOfRelocSrc = 0;
 u32 relocDestAtSharedMem = 0;
-u32 newSwiHaltAddr = 0;
+/* u32 newSwiHaltAddr = 0;
 // bool swiHaltPatched = false;
 
 static void patchSwiHalt(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
@@ -164,7 +164,7 @@ static void patchSwiHalt(const cardengineArm7* ce7, const tNDSHeader* ndsHeader,
     dbg_printf("swiHalt location : ");
     dbg_hexa((u32)swiHaltOffset);
     dbg_printf("\n\n");
-}
+} */
 
 void patchScfgExt(const tNDSHeader* ndsHeader) {
 	if (ndsHeader->unitCode == 0) return;
@@ -796,7 +796,7 @@ u32 patchCardNdsArm7(
 		}*/
 	}
 
-	patchSwiHalt(ce7, ndsHeader, moduleParams);
+	// patchSwiHalt(ce7, ndsHeader, moduleParams);
 
 	if (strcmp(romTid, "UBRP") == 0) {
 		operaRamPatch();

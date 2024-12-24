@@ -1006,10 +1006,10 @@ static void loadROMPartIntoRAM(const tNDSHeader* ndsHeader, aFile* file) {
 		return;
 	}
 
-	if ((dataToPreloadFrame > 0) && !gameOnFlashcard && (!ROMsupportsDsiMode(ndsHeader) || !dsiModeConfirmed)) {
+	/* if ((dataToPreloadFrame > 0) && !gameOnFlashcard && (!ROMsupportsDsiMode(ndsHeader) || !dsiModeConfirmed)) {
 		dbg_printf("Part of ROM will pre-load into RAM\n");
 		return;
-	}
+	} */
 
 	for (int i = 0; i < romMapLines; i++) {
 		fileRead((char*)romMap[i][1], file, romMap[i][0], romMap[i][2]-romMap[i][1]);

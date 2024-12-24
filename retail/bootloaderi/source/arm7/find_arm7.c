@@ -19,12 +19,12 @@ static const u32 relocateStartSignature5Alt2[1] = {0x02FFFFFA};
 static const u32 nextFunctiontSignature[1] = {0xE92D4000};
 static const u32 relocateValidateSignature[1] = {0x400010C};
 
-static const u32 swiHaltSignature1[1] = {0xE59FC004};
+/* static const u32 swiHaltSignature1[1] = {0xE59FC004};
 static const u32 swiHaltSignature2[1] = {0xE59FC000};
 static const u16 swiHaltCmpSignature[1] = {0x2800};
 static const u16 swiHaltMovSignature[1] = {0x200C};
 static const u32 swiHaltConstSignature[1] = {0x4000004};
-static const u32 swiHaltConstSignatureAlt[1] = {0x4000208};
+static const u32 swiHaltConstSignatureAlt[1] = {0x4000208}; */
 
 static const u32 swi12Signature[1] = {0x4770DF12}; // LZ77UnCompReadByCallbackWrite16bit
 static const u16 swi24Signature[2] = {0xDF24,0x4770}; // SHA1_Init
@@ -325,7 +325,7 @@ bool a7GetReloc(const tNDSHeader* ndsHeader, const module_params_t* moduleParams
 	return true;
 }
 
-u32* findSwiHaltOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+/* u32* findSwiHaltOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	dbg_printf("findSwiHaltOffset:\n");
 
 	u32* swiHaltOffset = NULL;
@@ -415,7 +415,7 @@ u16* findSwiHaltThumbOffset(const tNDSHeader* ndsHeader, const module_params_t* 
 
 	dbg_printf("\n");
 	return (u16*)swiHaltOffset;
-}
+} */
 
 u32* a7_findSwi12Offset(const tNDSHeader* ndsHeader) {
 	dbg_printf("findSwi12Offset:\n");

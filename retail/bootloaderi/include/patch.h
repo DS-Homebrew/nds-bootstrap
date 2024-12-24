@@ -125,7 +125,7 @@ typedef struct patchOffsetCacheContents {
 	u32 ramClearChecked;
 	u32* ramClearIOffset;
 	u32* ramClearI2Offset;
-	u32* swiHaltOffset;
+	u32* swiHaltOffset; // Unused, comment out when updating patchOffsetCacheContents
 	u32* a7Swi12Offset;
 	u16* a7Swi24Offset;
 	u16* a7Swi25Offset;

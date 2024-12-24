@@ -95,7 +95,8 @@ void endCardReadDma() {
 		(*cardEndReadDmaRef)();
 	} else if (ce9->thumbPatches->cardEndReadDmaRef) {
 		callEndReadDmaThumb();
-	}    
+	}
+	sharedAddr[5] = 0; // Clear ping flag
 }
 
 extern bool IPC_SYNC_hooked;
@@ -115,12 +116,12 @@ extern vu8* getCacheAddress(int slot);
 extern void updateDescriptor(int slot, u32 sector);
 #endif
 
-static inline bool isPreloadFinished(void) {
+/* static inline bool isPreloadFinished(void) {
 	return (sharedAddr[5] == 0x44454C50); // 'PLED'
-}
+} */
 
 static inline bool checkArm7(void) {
-	// IPC_SendSync(0x4);
+	IPC_SendSync(0x4);
 	return (sharedAddr[3] == (vu32)0);
 }
 
@@ -188,7 +189,7 @@ void continueCardReadDmaArm9() {
 		#endif
 
         if (len > 0) {
-			accessCounter++;  
+			accessCounter++;
 
             // Read via the main RAM cache
         	//int slot = getSlotForSectorManual(currentSlot+1, sector);
@@ -228,7 +229,7 @@ void continueCardReadDmaArm9() {
 
 				dmaReadOnArm7 = true;
 
-				// IPC_SendSync(0x4);
+				IPC_SendSync(0x4);
 
 				updateDescriptor(slot, sector);
 				/*if (readLen >= ce9->cacheBlockSize*2) {
@@ -260,7 +261,7 @@ void continueCardReadDmaArm9() {
 				}
 			}
 			#endif
-        	updateDescriptor(slot, sector);	
+        	updateDescriptor(slot, sector);
 
         	u32 len2 = len;
         	if ((src - sector) + len2 > ce9->cacheBlockSize) {
@@ -392,7 +393,7 @@ void cardSetDma(u32 * params) {
 			}
 		}*/
 		romPart = (ce9->romPartSize > 0 && src >= ce9->romPartSrc && src < ce9->romPartSrc+ce9->romPartSize);
-		#ifndef DLDI
+		/* #ifndef DLDI
 		#ifndef TWLSDK
 		if (romPart && (ce9->valueBits & waitForPreloadToFinish)) {
 			if (isPreloadFinished()) {
@@ -403,7 +404,7 @@ void cardSetDma(u32 * params) {
 			}
 		}
 		#endif
-		#endif
+		#endif */
 	}
 	if ((ce9->valueBits & ROMinRAM) || romPart) {
 		dmaDirectRead = true;
@@ -467,7 +468,7 @@ void cardSetDma(u32 * params) {
 	u32 sector = (src/ce9->cacheBlockSize)*ce9->cacheBlockSize;
 	//u32 page = (src / 512) * 512;
 
-	accessCounter++;  
+	accessCounter++;
 
 	#ifdef ASYNCPF
 	processAsyncCommand();
@@ -491,7 +492,7 @@ void cardSetDma(u32 * params) {
 		u32 nextSector = sector+ce9->cacheBlockSize;
 		#endif
 		// Read max CACHE_READ_SIZE via the main RAM cache
-		if (slot == -1) {    
+		if (slot == -1) {
 			#ifdef ASYNCPF
 			getAsyncSector();
 			#endif
@@ -521,7 +522,7 @@ void cardSetDma(u32 * params) {
 
 			dmaReadOnArm7 = true;
 
-			// IPC_SendSync(0x4);
+			IPC_SendSync(0x4);
 
 			updateDescriptor(slot, sector);
 			/*if (readLen >= ce9->cacheBlockSize*2) {
@@ -535,7 +536,7 @@ void cardSetDma(u32 * params) {
 			}
 			currentSlot = slot;*/
 			return;
-		} 
+		}
 		#ifdef ASYNCPF
 		if(cacheCounter[slot] == 0x0FFFFFFF) {
 			// prefetch successfull
@@ -553,7 +554,7 @@ void cardSetDma(u32 * params) {
 			}
 		}
 		#endif
-		updateDescriptor(slot, sector);	
+		updateDescriptor(slot, sector);
 
 		u32 len2 = len;
 		if ((src - sector) + len2 > ce9->cacheBlockSize) {
@@ -607,8 +608,8 @@ u32 cardReadDma(u32 dma0, u8* dst0, u32 src0, u32 len0) {
 	u32 len = ((ce9->valueBits & isSdk5) ? len0 : cardStruct[2]);
 	u32 dma = ((ce9->valueBits & isSdk5) ? dma0 : cardStruct[3]); // dma channel
 
-    if(dma >= 0 
-        && dma <= 3 
+    if(dma >= 0
+        && dma <= 3
         //&& func != NULL
         && len > 0
 		#ifndef TWLSDK
@@ -617,7 +618,7 @@ u32 cardReadDma(u32 dma0, u8* dst0, u32 src0, u32 len0) {
         && !(((u32)dst) & 31)
 		#endif
         && isNotTcm((u32)dst, len)
-        // check 512 bytes page alignement 
+        // check 512 bytes page alignement
         && !(len & 511)
         && !(src & 511)
 	) {

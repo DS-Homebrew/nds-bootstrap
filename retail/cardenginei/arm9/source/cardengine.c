@@ -361,17 +361,21 @@ void getAsyncSector() {
 
 extern void setExceptionHandler2();
 
-static inline bool isPreloadFinished(void) {
+/* static inline bool isPreloadFinished(void) {
 	return (sharedAddr[5] == 0x44454C50); // 'PLED'
-}
+} */
 
 static inline void waitForArm7(void) {
-	// IPC_SendSync(0x4);
+	IPC_SendSync(0x4);
 	while (sharedAddr[3] != (vu32)0) {
 		#ifdef DLDI
 		swiDelay(50);
 		#else
 		sleepMs(1);
+		if (sharedAddr[5] == 0x474E4950) { // 'PING'
+			sharedAddr[5] = 0;
+			IPC_SendSync(0x4);
+		}
 		#endif
 	}
 }
@@ -433,7 +437,7 @@ static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
 	// while (sharedAddr[3]==0x444D4152);	// Wait during a RAM dump
 	fileRead((char*)dst, ((ce9->valueBits & overlaysCached) && src >= ce9->overlaysSrc && src < ndsHeader->arm7romOffset) ? apFixOverlaysFile : romFile, src, len);
 #else
-	const u32 commandRead = (isDma ? 0x025FFB0A : 0x025FFB08);
+	const u32 commandRead = (isDma ? 0x025FFB09 : 0x025FFB08);
 	u32 sector = (src/ce9->cacheBlockSize)*ce9->cacheBlockSize;
 
 	accessCounter++;
@@ -843,7 +847,7 @@ void cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 			}
 		}*/
 		romPart = (ce9->romPartSize > 0 && src >= ce9->romPartSrc && src < ce9->romPartSrc+ce9->romPartSize);
-		#ifndef DLDI
+		/* #ifndef DLDI
 		#ifndef TWLSDK
 		if (romPart && (ce9->valueBits & waitForPreloadToFinish)) {
 			if (isPreloadFinished()) {
@@ -854,7 +858,7 @@ void cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 			}
 		}
 		#endif
-		#endif
+		#endif */
 	}
 	if ((ce9->valueBits & ROMinRAM) || romPart) {
 		cardReadRAM(dst, src, len/*, romPartNo*/);

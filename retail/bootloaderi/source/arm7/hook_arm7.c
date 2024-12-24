@@ -354,9 +354,9 @@ int hookNdsRetailArm7(
 	} else {*/
 		extern u32 iUncompressedSize;
 		extern bool hasVramWifiBinary;
-		extern u32 dataToPreloadAddr;
-		extern u32 dataToPreloadSize;
-		extern u32 dataToPreloadFrame;
+		// extern u32 dataToPreloadAddr;
+		// extern u32 dataToPreloadSize;
+		// extern u32 dataToPreloadFrame;
 		extern bool dataToPreloadFound(const tNDSHeader* ndsHeader);
 		const bool laterSdk = ((moduleParams->sdk_version >= 0x2008000 && moduleParams->sdk_version != 0x2012774) || moduleParams->sdk_version == 0x20029A8);
 
@@ -457,12 +457,12 @@ int hookNdsRetailArm7(
 			romOffset = ndsHeader->arm9overlaySource;
 		}
 		ce7->romLocation -= romOffset;
-		if (!ROMinRAM && dataToPreloadFound(ndsHeader) && dataToPreloadFrame) {
+		/* if (!ROMinRAM && dataToPreloadFound(ndsHeader) && dataToPreloadFrame) {
 			ce7->romPartLocation = romPartLocation;
 			ce7->romPartSrc = dataToPreloadAddr;
 			ce7->romPartSize = dataToPreloadSize;
 			ce7->romPartFrame = dataToPreloadFrame;
-		}
+		} */
 
 		extern u32 romMapLines;
 		extern u32 romMap[7][3];
