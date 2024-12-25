@@ -942,7 +942,7 @@ static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 }
 
 static void patchMpu2(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, const bool usesCloneboot) {
-	if ((moduleParams->sdk_version < 0x2008000) && !extendedMemory) {
+	if (((moduleParams->sdk_version < 0x2008000) && !extendedMemory) || ndsHeader->unitCode > 0) {
 		return;
 	}
 
