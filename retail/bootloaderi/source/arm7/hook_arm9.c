@@ -321,9 +321,6 @@ int hookNdsRetailArm9(
 				size = retail_CACHE_ADRESS_SIZE_BROWSER;
 			} else {
 				ce9->cacheAddress = (dsiMode ? CACHE_ADRESS_START_DSIMODE : start);
-				if (!dsiMode && (ce9->valueBits & b_dsiBios) && !laterSdk) {
-					ce9->cacheAddress -= cacheBlockSize;
-				}
 				if (dsiMode) {
 					size = (consoleModel > 0 ? dev_CACHE_ADRESS_SIZE_DSIMODE : retail_CACHE_ADRESS_SIZE_DSIMODE);
 				} else {
