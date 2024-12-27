@@ -213,7 +213,7 @@ int hookNdsRetailArm9(
 	extern u32 dataToPreloadAddr;
 	extern u32 dataToPreloadSize;
 	// extern u32 dataToPreloadFrame;
-	extern bool romLocationAdjust(const tNDSHeader* ndsHeader, const bool laterSdk, const bool dsiBios, u32* romLocation);
+	extern bool romLocationAdjust(const tNDSHeader* ndsHeader, const bool laterSdk, const bool isSdk5, const bool dsiBios, u32* romLocation);
 	extern bool dataToPreloadFound(const tNDSHeader* ndsHeader);
 	const char* romTid = getRomTid(ndsHeader);
 	const bool laterSdk = ((moduleParams->sdk_version >= 0x2008000 && moduleParams->sdk_version != 0x2012774) || moduleParams->sdk_version == 0x20029A8);
@@ -340,7 +340,7 @@ int hookNdsRetailArm9(
 			configureRomMap(ce9, ndsHeader, dataToPreloadAddr, dsiMode);
 			for (u32 i = 0; i < dataToPreloadSize/*+dataToPreloadSize[1]*/; i += cacheBlockSize) {
 				ce9->cacheAddress += cacheBlockSize;
-				romLocationAdjust(ndsHeader, laterSdk, (ce9->valueBits & b_dsiBios), &ce9->cacheAddress);
+				romLocationAdjust(ndsHeader, laterSdk, (ce9->valueBits & b_dsiBios), (ce9->valueBits & b_isSdk5), &ce9->cacheAddress);
 				dataToPreloadSizeAligned += cacheBlockSize;
 			}
 			ce9->cacheSlots -= dataToPreloadSizeAligned/cacheBlockSize;
@@ -385,7 +385,7 @@ int hookNdsRetailArm9(
 			u32 addr = ce9->cacheAddress;
 
 			for (int slot = 0; slot < ce9->cacheSlots; slot++) {
-				romLocationAdjust(ndsHeader, laterSdk, (ce9->valueBits & b_dsiBios), &addr);
+				romLocationAdjust(ndsHeader, laterSdk, (ce9->valueBits & b_dsiBios), (ce9->valueBits & b_isSdk5), &addr);
 				cacheAddressTable[slot] = addr;
 				addr += cacheBlockSize;
 			}

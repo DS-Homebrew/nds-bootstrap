@@ -809,12 +809,12 @@ u32 getRomLocation(const tNDSHeader* ndsHeader, const bool isESdk2, const bool i
 	return getRomPartLocation(ndsHeader, isESdk2, isSdk5, dsiBios);
 }
 
-bool romLocationAdjust(const tNDSHeader* ndsHeader, const bool laterSdk, const bool dsiBios, u32* romLocation) {
+bool romLocationAdjust(const tNDSHeader* ndsHeader, const bool laterSdk, const bool isSdk5, const bool dsiBios, u32* romLocation) {
 	const bool ntrType = (ndsHeader->unitCode == 0);
 	const u32 romLocationOld = *romLocation;
 	if (*romLocation == 0x0C3FC000) {
 		*romLocation += 0x4000;
-	} else if (*romLocation == 0x0C7C0000 && ((laterSdk && !dsiBios) || !laterSdk) && ntrType) {
+	} else if (*romLocation == 0x0C7C0000 && ((laterSdk && !dsiBios) || !laterSdk) && !isSdk5) {
 		*romLocation += laterSdk ? 0x8000 : 0x28000;
 	} else if (*romLocation == 0x0C7C4000) {
 		*romLocation += 0x4000;
@@ -1167,7 +1167,7 @@ static void buildRomMap(const tNDSHeader* ndsHeader, const module_params_t* modu
 		romLocationChangePrep += 0x4000;
 		romSizeEdit -= 0x4000;
 
-		readRom = (romSizeEdit <= 0) ? true : romLocationAdjust(ndsHeader, laterSdk, dsiBios, &romLocationChangePrep);
+		readRom = (romSizeEdit <= 0) ? true : romLocationAdjust(ndsHeader, laterSdk, isSdk5(moduleParams), dsiBios, &romLocationChangePrep);
 
 		// dbg_hexa(romLocationChangePrep);
 
