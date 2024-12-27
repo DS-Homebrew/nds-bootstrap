@@ -337,7 +337,7 @@ int hookNdsRetailArm9(
 			configureRomMap(ce9, ndsHeader, dataToPreloadAddr, dsiMode);
 			for (u32 i = 0; i < dataToPreloadSize/*+dataToPreloadSize[1]*/; i += cacheBlockSize) {
 				ce9->cacheAddress += cacheBlockSize;
-				romLocationAdjust(ndsHeader, laterSdk, (ce9->valueBits & b_dsiBios), (ce9->valueBits & b_isSdk5), &ce9->cacheAddress);
+				romLocationAdjust(ndsHeader, laterSdk, (ce9->valueBits & b_isSdk5), (ce9->valueBits & b_dsiBios), &ce9->cacheAddress);
 				dataToPreloadSizeAligned += cacheBlockSize;
 			}
 			ce9->cacheSlots -= dataToPreloadSizeAligned/cacheBlockSize;
@@ -382,7 +382,7 @@ int hookNdsRetailArm9(
 			u32 addr = ce9->cacheAddress;
 
 			for (int slot = 0; slot < ce9->cacheSlots; slot++) {
-				romLocationAdjust(ndsHeader, laterSdk, (ce9->valueBits & b_dsiBios), (ce9->valueBits & b_isSdk5), &addr);
+				romLocationAdjust(ndsHeader, laterSdk, (ce9->valueBits & b_isSdk5), (ce9->valueBits & b_dsiBios), &addr);
 				cacheAddressTable[slot] = addr;
 				addr += cacheBlockSize;
 			}

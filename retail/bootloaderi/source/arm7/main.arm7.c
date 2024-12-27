@@ -831,7 +831,7 @@ bool romLocationAdjust(const tNDSHeader* ndsHeader, const bool laterSdk, const b
 		*romLocation += 0x4000;
 	} else if (*romLocation == 0x0CFE0000 && !ntrType) {
 		*romLocation += 0x20000;
-	} else if (*romLocation == 0x0CFFC000 && dsiBios) {
+	} else if (*romLocation == 0x0CFFC000 && (dsiBios || isSdk5)) {
 		*romLocation += 0x4000;
 	}
 	if (*romLocation == (consoleModel > 0 ? 0x0E000000 : 0x0D000000)) {
