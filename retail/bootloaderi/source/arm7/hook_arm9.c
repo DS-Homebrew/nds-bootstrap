@@ -209,6 +209,9 @@ int hookNdsRetailArm9(
 	extern u32 iUncompressedSize;
 	extern u32 overlaysSize;
 	extern bool overlayPatch;
+	extern u32 baseFntOff;
+	extern u32 baseFatOff;
+	extern u32 baseFatSize;
 	extern u32 romPaddingSize;
 	extern u32 dataToPreloadAddr;
 	extern u32 dataToPreloadSize;
@@ -262,10 +265,10 @@ int hookNdsRetailArm9(
 	if (strncmp(romTid, "AZE", 3) == 0) { // Zelda: Phantom Hourglass
 		ce9->valueBits |= b_bypassExceptionHandler;
 	}
-	if (!ROMinRAM && dsiWramAccess && !dsiWramMirrored && (ndsHeader->unitCode == 0 || !dsiModeConfirmed) && ndsHeader->fatSize != 0) {
-		const u32 fntFatSize = (ndsHeader->fatOffset-ndsHeader->filenameOffset)+ndsHeader->fatSize;
+	if (!ROMinRAM && dsiWramAccess && !dsiWramMirrored && (ndsHeader->unitCode == 0 || !dsiModeConfirmed) && baseFatSize != 0) {
+		const u32 fntFatSize = (baseFatOff-baseFntOff)+baseFatSize;
 		if (fntFatSize <= 0x80000) {
-			ce9->fntSrc = ndsHeader->filenameOffset;
+			ce9->fntSrc = baseFntOff;
 			ce9->fntFatSize = fntFatSize;
 			ce9->valueBits |= b_fntFatCached;
 		}

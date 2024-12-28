@@ -160,9 +160,19 @@ static aFile patchOffsetCacheFile;
 u32 waitSysCyclesOffset = 0;
 static u32 softResetParams[0x50/4] = {0};
 u32 srlAddr = 0;
-u16 baseHeaderCRC = 0;
+u32 baseArm9Off = 0;
+u32 baseArm9Size = 0;
+u32 baseArm7Off = 0;
+u32 baseArm7Size = 0;
+u32 baseFntOff = 0;
+// u32 baseFntSize = 0;
+u32 baseFatOff = 0;
+u32 baseFatSize = 0;
+u32 baseArm9OvlSrc = 0;
+u32 baseArm9OvlSize = 0;
 u16 baseSecureCRC = 0;
 u32 baseRomSize = 0;
+u16 baseHeaderCRC = 0;
 u32 baseChipID = 0;
 u32 romPaddingSize = 0;
 bool pkmnHeader = false;
@@ -766,9 +776,19 @@ static void loadBinary_ARM7(const tDSiHeader* dsiHeaderTemp, aFile* file) {
 		pkmnHeader = true;
 	}
 
-	fileRead((char*)&baseHeaderCRC, file, 0x15E, sizeof(u16));
+	fileRead((char*)&baseArm9Off, file, 0x20, sizeof(u32));
+	fileRead((char*)&baseArm9Size, file, 0x2C, sizeof(u32));
+	fileRead((char*)&baseArm7Off, file, 0x30, sizeof(u32));
+	fileRead((char*)&baseArm7Size, file, 0x3C, sizeof(u32));
+	fileRead((char*)&baseFntOff, file, 0x40, sizeof(u32));
+	// fileRead((char*)&baseFntSize, file, 0x44, sizeof(u32));
+	fileRead((char*)&baseFatOff, file, 0x48, sizeof(u32));
+	fileRead((char*)&baseFatSize, file, 0x4C, sizeof(u32));
+	fileRead((char*)&baseArm9OvlSrc, file, 0x50, sizeof(u32));
+	fileRead((char*)&baseArm9OvlSize, file, 0x54, sizeof(u32));
 	fileRead((char*)&baseSecureCRC, file, 0x6C, sizeof(u16));
 	fileRead((char*)&baseRomSize, file, 0x80, sizeof(u32));
+	fileRead((char*)&baseHeaderCRC, file, 0x15E, sizeof(u16));
 
 	u8 baseDeviceSize = 0;
 	fileRead((char*)&baseDeviceSize, file, 0x14, sizeof(u8));
@@ -1110,12 +1130,12 @@ static void loadROMintoRAM(const tNDSHeader* ndsHeader, const module_params_t* m
 	u32 romOffset = 0;
 	if (usesCloneboot) {
 		romOffset = 0x4000;
-	} else if (ndsHeader->arm9overlaySource == 0 || ndsHeader->arm9overlaySize == 0) {
-		romOffset = (ndsHeader->arm7romOffset + ndsHeader->arm7binarySize);
-	} else if (ndsHeader->arm9overlaySource > ndsHeader->arm7romOffset) {
-		romOffset = (ndsHeader->arm9romOffset + ndsHeader->arm9binarySize);
+	} else if (baseArm9OvlSrc == 0 || baseArm9OvlSize == 0) {
+		romOffset = (baseArm7Off + baseArm7Size);
+	} else if (baseArm9OvlSrc > baseArm7Off) {
+		romOffset = (baseArm9Off + baseArm9Size);
 	} else {
-		romOffset = ndsHeader->arm9overlaySource;
+		romOffset = baseArm9OvlSrc;
 	}
 
 	if (!isSdk5(moduleParams) && *(u32*)((romLocation-romOffset)+0x003128AC) == 0x4B434148) {
@@ -1143,12 +1163,12 @@ static void buildRomMap(const tNDSHeader* ndsHeader, const module_params_t* modu
 			romOffset = 0x4000;
 			romSizeEdit -= 0x4000;
 			romSizeEdit += 0x88;
-		} else if (ndsHeader->arm9overlaySource == 0 || ndsHeader->arm9overlaySize == 0) {
-			romOffset = (ndsHeader->arm7romOffset + ndsHeader->arm7binarySize);
-		} else if (ndsHeader->arm9overlaySource > ndsHeader->arm7romOffset) {
-			romOffset = (ndsHeader->arm9romOffset + ndsHeader->arm9binarySize);
+		} else if (baseArm9OvlSrc == 0 || baseArm9OvlSize == 0) {
+			romOffset = (baseArm7Off + baseArm7Size);
+		} else if (baseArm9OvlSrc > baseArm7Off) {
+			romOffset = (baseArm9Off + baseArm9Size);
 		} else {
-			romOffset = ndsHeader->arm9overlaySource;
+			romOffset = baseArm9OvlSrc;
 		}
 		if (!usesCloneboot) {
 			romSizeEdit -= romOffset;
@@ -1193,13 +1213,13 @@ static void buildRomMap(const tNDSHeader* ndsHeader, const module_params_t* modu
 }
 
 static void loadNitroFileInfoIntoRAM(const tNDSHeader* ndsHeader, aFile* romFile) {
-	if (ndsHeader->fatSize == 0) return;
+	if (baseFatSize == 0) return;
 
-	const u32 size = (ndsHeader->fatOffset-ndsHeader->filenameOffset)+ndsHeader->fatSize;
+	const u32 size = (baseFatOff-baseFntOff)+baseFatSize;
 	if (size > 0x80000) return;
 
 	sdmmc_set_ndma_slot(0);
-	fileRead((char*)0x03700000, romFile, ndsHeader->filenameOffset, size);
+	fileRead((char*)0x03700000, romFile, baseFatOff, size);
 	sdmmc_set_ndma_slot(4);
 
 	dbg_printf("Nitro file info pre-loaded into RAM at ");
