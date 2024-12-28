@@ -185,7 +185,8 @@ u32 oldArm7mbk = 0;
 
 u32 romMapLines = 0;
 // 0: ROM part start, 1: ROM part start in RAM, 2: ROM part end in RAM
-u32 romMap[7][3] = {
+u32 romMap[8][3] = {
+	{0, 0, 0},
 	{0, 0, 0},
 	{0, 0, 0},
 	{0, 0, 0},
@@ -896,15 +897,18 @@ static bool isROMLoadableInRAM(const tDSiHeader* dsiHeader, const tNDSHeader* nd
 			romOffset = 0x4000;
 			romSize -= 0x4000;
 			romSize += 0x88;
-		} else if (ndsHeader->arm9overlaySource == 0 || ndsHeader->arm9overlaySize == 0) {
-			romOffset = (ndsHeader->arm7romOffset + ndsHeader->arm7binarySize);
-		} else if (ndsHeader->arm9overlaySource > ndsHeader->arm7romOffset) {
-			romOffset = (ndsHeader->arm9romOffset + ndsHeader->arm9binarySize);
+		} else if (baseArm9OvlSrc == 0 || baseArm9OvlSize == 0) {
+			romOffset = (baseArm7Off + baseArm7Size);
+		} else if (baseArm9OvlSrc > baseArm7Off) {
+			romOffset = (baseArm9Off + baseArm9Size);
 		} else {
-			romOffset = ndsHeader->arm9overlaySource;
+			romOffset = baseArm9OvlSrc;
 		}
 		if (!usesCloneboot) {
 			romSize -= romOffset;
+			if (baseArm9OvlSize > 0 && baseArm9OvlSrc < baseArm7Off) {
+				romSize -= ((baseArm7Size/0x4000)*0x4000);
+			}
 		}
 		res = ((consoleModel> 0 && twlType && ((u32)dsiHeader->arm9iromOffset - romOffset)+ioverlaysSize <= (cheatsEnabled ? dev_CACHE_ADRESS_SIZE_TWLSDK_CHEAT : dev_CACHE_ADRESS_SIZE_TWLSDK))
 			|| (!twlType && romSize <= romSizeLimit));
@@ -1156,59 +1160,82 @@ static void buildRomMap(const tNDSHeader* ndsHeader, const module_params_t* modu
 	// Load ROM into RAM
 	const u32 romLocation = ROMinRAM ? getRomLocation(ndsHeader, !laterSdk, isSdk5(moduleParams), dsiBios) : getRomPartLocation(ndsHeader, !laterSdk, isSdk5(moduleParams), dsiBios);
 
-	u32 romOffset = ROMinRAM ? 0 : dataToPreloadAddr;
-	s32 romSizeEdit = ROMinRAM ? baseRomSize : dataToPreloadSize;
+	u32 romOffset[2] = {(ROMinRAM ? 0 : dataToPreloadAddr), romOffset[0]};
+	s32 romSizeEdit[2] = {(ROMinRAM ? baseRomSize : dataToPreloadSize), romSizeEdit[0]};
+	bool skipArm7Binary = false;
 	if (ROMinRAM) {
 		if (usesCloneboot) {
-			romOffset = 0x4000;
-			romSizeEdit -= 0x4000;
-			romSizeEdit += 0x88;
+			romOffset[0] = 0x4000;
+			romSizeEdit[0] -= 0x4000;
+			romSizeEdit[0] += 0x88;
 		} else if (baseArm9OvlSrc == 0 || baseArm9OvlSize == 0) {
-			romOffset = (baseArm7Off + baseArm7Size);
+			romOffset[0] = (baseArm7Off + baseArm7Size);
 		} else if (baseArm9OvlSrc > baseArm7Off) {
-			romOffset = (baseArm9Off + baseArm9Size);
+			romOffset[0] = (baseArm9Off + baseArm9Size);
 		} else {
-			romOffset = baseArm9OvlSrc;
+			romOffset[0] = baseArm9OvlSrc;
 		}
 		if (!usesCloneboot) {
-			romSizeEdit -= romOffset;
+			if (baseArm9OvlSize > 0 && baseArm9OvlSrc < baseArm7Off) {
+				romSizeEdit[0] = overlaysSize;
+				romOffset[1] = (baseArm7Off + baseArm7Size);
+				romSizeEdit[1] -= romOffset[1];
+				skipArm7Binary = true;
+			} else {
+				romSizeEdit[0] -= romOffset[0];
+			}
 		}
 	} else if (!dataToPreloadFound(ndsHeader)) {
 		return;
 	}
 
+	/* dbg_printf("romOffset[0]: ");
+	dbg_hexa(romOffset[0]);
+	dbg_printf("\n");
+	dbg_printf("romOffset[1]: ");
+	dbg_hexa(romOffset[1]);
+	dbg_printf("\n");
+	dbg_printf("romSizeEdit[0]: ");
+	dbg_hexa(romSizeEdit[0]);
+	dbg_printf("\n");
+	dbg_printf("romSizeEdit[1]: ");
+	dbg_hexa(romSizeEdit[1]);
+	dbg_printf("\n"); */
+
 	u32 romLocationChange = romLocation;
 	u32 romLocationChangePrep = romLocationChange;
-	u32 romOffsetChange = romOffset;
 	u32 romBlockSize = 0;
-	while (romSizeEdit > 0) {
-		bool readRom = false;
-		romBlockSize += (romSizeEdit > 0x4000) ? 0x4000 : romSizeEdit;
-		romLocationChangePrep += 0x4000;
-		romSizeEdit -= 0x4000;
+	for (int i = 0; i < (skipArm7Binary ? 2 : 1); i++) {
+		u32 romOffsetChange = romOffset[i];
+		while (romSizeEdit[i] > 0) {
+			bool readRom = false;
+			romBlockSize += (romSizeEdit[i] > 0x4000) ? 0x4000 : romSizeEdit[i];
+			romLocationChangePrep += 0x4000;
+			romSizeEdit[i] -= 0x4000;
 
-		readRom = (romSizeEdit <= 0) ? true : romLocationAdjust(ndsHeader, laterSdk, isSdk5(moduleParams), dsiBios, &romLocationChangePrep);
+			readRom = (romSizeEdit[i] <= 0) ? true : romLocationAdjust(ndsHeader, laterSdk, isSdk5(moduleParams), dsiBios, &romLocationChangePrep);
 
-		// dbg_hexa(romLocationChangePrep);
+			// dbg_hexa(romLocationChangePrep);
 
-		if (readRom) {
-			romMap[romMapLines][0] = romOffsetChange;
-			romMap[romMapLines][1] = romLocationChange;
-			romMap[romMapLines][2] = romLocationChange+romBlockSize;
+			if (readRom) {
+				romMap[romMapLines][0] = romOffsetChange;
+				romMap[romMapLines][1] = romLocationChange;
+				romMap[romMapLines][2] = romLocationChange+romBlockSize;
 
-			/* dbg_printf("  ");
-			dbg_hexa(romMap[romMapLines][0]);
-			dbg_printf(" ");
-			dbg_hexa(romMap[romMapLines][1]);
-			dbg_printf(" ");
-			dbg_hexa(romMap[romMapLines][2]); */
-			romMapLines++;
+				/* dbg_printf("  ");
+				dbg_hexa(romMap[romMapLines][0]);
+				dbg_printf(" ");
+				dbg_hexa(romMap[romMapLines][1]);
+				dbg_printf(" ");
+				dbg_hexa(romMap[romMapLines][2]); */
+				romMapLines++;
 
-			romLocationChange = romLocationChangePrep;
-			romOffsetChange += romBlockSize;
-			romBlockSize = 0;
+				romLocationChange = romLocationChangePrep;
+				romOffsetChange += romBlockSize;
+				romBlockSize = 0;
+			}
+			// dbg_printf("\n");
 		}
-		// dbg_printf("\n");
 	}
 }
 
@@ -1754,12 +1781,12 @@ int arm7_main(void) {
 	dbg_printf("\n");
 
 	// Calculate overlay pack size
-	if (ndsHeader->arm9overlaySource > ndsHeader->arm7romOffset) {
-		for (u32 i = ndsHeader->arm9romOffset+ndsHeader->arm9binarySize; i < ndsHeader->arm7romOffset; i++) {
+	if (baseArm9OvlSrc > baseArm7Off) {
+		for (u32 i = baseArm9Off+baseArm9Size; i < baseArm7Off; i++) {
 			overlaysSize++;
 		}
 	} else {
-		for (u32 i = ndsHeader->arm9overlaySource; i < ndsHeader->arm7romOffset; i++) {
+		for (u32 i = baseArm9OvlSrc; i < baseArm7Off; i++) {
 			overlaysSize++;
 		}
 	}

@@ -444,19 +444,6 @@ int hookNdsRetailArm7(
 		ce7->dmaRomRead_LED           = dmaRomRead_LED;
 		ce7->scfgRomBak               = REG_SCFG_ROM;
 
-		extern u32 getRomLocation(const tNDSHeader* ndsHeader, const bool isSdk5);
-		const u32 romLocation = getRomLocation(ndsHeader, (ce7->valueBits & b_isSdk5));
-		ce7->romLocation = romLocation;
-
-		u32 romOffset = 0;
-		if (usesCloneboot) {
-			romOffset = 0x4000;
-		} else if (ndsHeader->arm9overlaySource == 0 || ndsHeader->arm9overlaySize == 0) {
-			romOffset = (ndsHeader->arm7romOffset + ndsHeader->arm7binarySize);
-		} else {
-			romOffset = ndsHeader->arm9overlaySource;
-		}
-		ce7->romLocation -= romOffset;
 		/* if (!ROMinRAM && dataToPreloadFound(ndsHeader) && dataToPreloadFrame) {
 			ce7->romPartLocation = romPartLocation;
 			ce7->romPartSrc = dataToPreloadAddr;
@@ -464,13 +451,37 @@ int hookNdsRetailArm7(
 			ce7->romPartFrame = dataToPreloadFrame;
 		} */
 
-		extern u32 romMapLines;
-		extern u32 romMap[7][3];
+		if (ROMinRAM) {
+			extern u32 getRomLocation(const tNDSHeader* ndsHeader, const bool isSdk5);
+			ce7->romLocation = getRomLocation(ndsHeader, (ce7->valueBits & b_isSdk5));
 
-		ce7->romMapLines = romMapLines;
-		for (int i = 0; i < 7; i++) {
-			for (int i2 = 0; i2 < 3; i2++) {
-				ce7->romMap[i][i2] = romMap[i][i2];
+			extern u32 baseArm9Off;
+			extern u32 baseArm9Size;
+			extern u32 baseArm7Off;
+			extern u32 baseArm7Size;
+			extern u32 baseArm9OvlSrc;
+			extern u32 baseArm9OvlSize;
+
+			u32 romOffset = 0;
+			if (usesCloneboot) {
+				romOffset = 0x4000;
+			} else if (baseArm9OvlSrc == 0 || baseArm9OvlSize == 0) {
+				romOffset = (baseArm7Off + baseArm7Size);
+			} else if (baseArm9OvlSrc > baseArm7Off) {
+				romOffset = (baseArm9Off + baseArm9Size);
+			} else {
+				romOffset = baseArm9OvlSrc;
+			}
+			ce7->romLocation -= romOffset;
+
+			extern u32 romMapLines;
+			extern u32 romMap[][3];
+
+			ce7->romMapLines = romMapLines;
+			for (int i = 0; i < romMapLines; i++) {
+				for (int i2 = 0; i2 < 3; i2++) {
+					ce7->romMap[i][i2] = romMap[i][i2];
+				}
 			}
 		}
 

@@ -219,7 +219,6 @@ static void patchVramWifiBinaryLoad(const tNDSHeader* ndsHeader, const module_pa
 				}
 				romMap[i][1] += 0x3FC000;
 				romMap[i][2] += 0x3FC000;
-				break;
 			}
 		}
 
@@ -233,7 +232,6 @@ static void patchVramWifiBinaryLoad(const tNDSHeader* ndsHeader, const module_pa
 					tonccpy(addr+0x3FC000, addr, 0x4000);
 					toncset(addr, 0, 0x4000);
 					cacheAddressTable[i] += 0x3FC000;
-					break;
 				}
 			}
 		}
@@ -253,7 +251,6 @@ clearBit:
 				}
 				romMap[i][1] -= 0x3FC000;
 				romMap[i][2] -= 0x3FC000;
-				break;
 			}
 		}
 
@@ -267,7 +264,6 @@ clearBit:
 					tonccpy(addr-0x3FC000, addr, 0x4000);
 					toncset(addr, 0, 0x4000);
 					cacheAddressTable[i] -= 0x3FC000;
-					break;
 				}
 			}
 		}

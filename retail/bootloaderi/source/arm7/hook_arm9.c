@@ -176,10 +176,10 @@ void configureRomMap(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const u32
 	}
 
 	extern u32 romMapLines;
-	extern u32 romMap[7][3];
+	extern u32 romMap[][3];
 
 	ce9->romMapLines = romMapLines;
-	for (int i = 0; i < 7; i++) {
+	for (int i = 0; i < romMapLines; i++) {
 		for (int i2 = 0; i2 < 3; i2++) {
 			ce9->romMap[i][i2] = romMap[i][i2];
 		}
@@ -391,15 +391,22 @@ int hookNdsRetailArm9(
 			}
 		}
 	} else {
+		extern u32 baseArm9Off;
+		extern u32 baseArm9Size;
+		extern u32 baseArm7Off;
+		extern u32 baseArm7Size;
+		extern u32 baseArm9OvlSrc;
+		extern u32 baseArm9OvlSize;
+
 		u32 romOffset = 0;
 		if (usesCloneboot) {
 			romOffset = 0x4000;
-		} else if (ndsHeader->arm9overlaySource == 0 || ndsHeader->arm9overlaySize == 0) {
-			romOffset = (ndsHeader->arm7romOffset + ndsHeader->arm7binarySize);
-		} else if (ndsHeader->arm9overlaySource > ndsHeader->arm7romOffset) {
-			romOffset = (ndsHeader->arm9romOffset + ndsHeader->arm9binarySize);
+		} else if (baseArm9OvlSrc == 0 || baseArm9OvlSize == 0) {
+			romOffset = (baseArm7Off + baseArm7Size);
+		} else if (baseArm9OvlSrc > baseArm7Off) {
+			romOffset = (baseArm9Off + baseArm9Size);
 		} else {
-			romOffset = ndsHeader->arm9overlaySource;
+			romOffset = baseArm9OvlSrc;
 		}
 		configureRomMap(ce9, ndsHeader, romOffset, dsiMode);
 	}
