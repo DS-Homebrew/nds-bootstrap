@@ -415,7 +415,11 @@ static module_params_t* getModuleParams(const tNDSHeader* ndsHeader) {
 }
 #endif
 
-static void cardReadRAM(u8* dst, u32 src, u32 len/*, int romPartNo*/) {
+static bool cardReadRAM(u8* dst, u32 src, u32 len/*, int romPartNo*/) {
+	if (!(valueBits & ROMinRAM)) {
+		return false;
+	}
+
 	// Copy directly
 	#ifdef TWLSDK
 	u32 newSrc = romLocation/*[romPartNo]*/+src;
@@ -427,14 +431,22 @@ static void cardReadRAM(u8* dst, u32 src, u32 len/*, int romPartNo*/) {
 	// tonccpy(dst, (u8*)romLocation/*[romPartNo]*/+src, len);
 	u32 newSrc = 0;
 	u32 newLen = 0;
+	bool srcFound = false;
 	int i = 0;
 	for (i = 0; i < romMapLines; i++) {
 		if (src >= romMap[i][0] && (i == romMapLines-1 || src < romMap[i+1][0])) {
+			srcFound = true;
 			break;
 		}
 	}
+	if (!srcFound) {
+		return false;
+	}
 	while (len > 0) {
 		newSrc = (romMap[i][1]-romMap[i][0])+src;
+		if (newSrc >= 0x03000000) {
+			return false; // Unable to read from ARM9-exclusive areas
+		}
 		newLen = len;
 		while (newSrc+newLen > romMap[i][2]) {
 			newLen--;
@@ -446,6 +458,7 @@ static void cardReadRAM(u8* dst, u32 src, u32 len/*, int romPartNo*/) {
 		i++;
 	}
 	#endif
+	return true;
 }
 
 void reset(const bool downloadedSrl) {
@@ -541,14 +554,16 @@ void reset(const bool downloadedSrl) {
 		currentSrlAddr = *(u32*)(resetParam+0xC);
 		if ((valueBits & isDlp) || downloadedSrl) {
 			// ndmaCopyWordsAsynch(1, (u32*)0x022C0000, ndsHeader->arm7destination, ndsHeader->arm7binarySize);
-		} else if (valueBits & ROMinRAM) {
-			cardReadRAM((u8*)ndsHeader, currentSrlAddr, 0x160);
-			cardReadRAM((u8*)ndsHeader->arm9destination, currentSrlAddr+ndsHeader->arm9romOffset, ndsHeader->arm9binarySize);
-			cardReadRAM((u8*)ndsHeader->arm7destination, currentSrlAddr+ndsHeader->arm7romOffset, ndsHeader->arm7binarySize);
 		} else {
-			fileRead((char*)ndsHeader, romFile, currentSrlAddr, 0x160);
-			fileRead((char*)ndsHeader->arm9destination, romFile, currentSrlAddr+ndsHeader->arm9romOffset, ndsHeader->arm9binarySize);
-			fileRead((char*)ndsHeader->arm7destination, romFile, currentSrlAddr+ndsHeader->arm7romOffset, ndsHeader->arm7binarySize);
+			if (!cardReadRAM((u8*)ndsHeader, currentSrlAddr, 0x160)) {
+				fileRead((char*)ndsHeader, romFile, currentSrlAddr, 0x160);
+			}
+			if (!cardReadRAM((u8*)ndsHeader->arm9destination, currentSrlAddr+ndsHeader->arm9romOffset, ndsHeader->arm9binarySize)) {
+				fileRead((char*)ndsHeader->arm9destination, romFile, currentSrlAddr+ndsHeader->arm9romOffset, ndsHeader->arm9binarySize);
+			}
+			if (!cardReadRAM((u8*)ndsHeader->arm7destination, currentSrlAddr+ndsHeader->arm7romOffset, ndsHeader->arm7binarySize)) {
+				fileRead((char*)ndsHeader->arm7destination, romFile, currentSrlAddr+ndsHeader->arm7romOffset, ndsHeader->arm7binarySize);
+			}
 		}
 
 		moduleParams = getModuleParams(ndsHeader);
@@ -2243,9 +2258,7 @@ bool cardRead(u32 dma, u32 src, void *dst, u32 len) {
 	dbg_hexa(len);
 	#endif	
 
-	if (valueBits & ROMinRAM) {
-		cardReadRAM(dst, src, len);
-	} else {
+	if (!cardReadRAM(dst, src, len)) {
 		// while (readOngoing) { swiDelay(100); }
 		//driveInitialize();
 		cardReadLED(true, false);    // When a file is loading, turn on LED for card read indicator
