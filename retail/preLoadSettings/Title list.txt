@@ -45,6 +45,9 @@ MegaMan Battle Network 5: Double Team DS (USA) (A5TE) (DSi)
 MegaMan Battle Network 5: Double Team DS (USA) (Undub) (A5TE-88DC) (DSi)
 MegaMan Battle Network 5: Double Team DS (Europe) (A5TP) (DSi/3DS)
 Rockman EXE 5 DS: Twin Leaders (Japan) (A5TJ) (DSi)
+MegaMan Zero Collection (USA) (B6ZE) (3DS)
+MegaMan Zero Collection (Europe) (B6ZP) (3DS)
+Rockman Zero Collection (Japan) (B6ZJ) (3DS)
 MegaMan ZX (USA) (ARZE) (3DS)
 MegaMan ZX (Europe) (ARZP) (3DS)
 Rockman ZX (Japan) (ARZJ) (3DS)
@@ -148,6 +151,9 @@ Mario Kart DS (DSi):
 
 MegaMan Battle Network 5: Double Team DS (USA) (DSi for all regions, 3DS for Europe version):
 - Sound data and intro graphics
+
+MegaMan Zero Collection (3DS):
+- Everything except sound data for games 1-4, wallpapers, and warning_z#.bin files
 
 MegaMan ZX (3DS):
 - USA/Japan: Everything except for sound data and video cutscenes
