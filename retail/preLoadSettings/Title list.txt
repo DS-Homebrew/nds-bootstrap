@@ -179,6 +179,10 @@ Pokemon Ranger: Guardian Signs (DSi/3DS):
 Power Rangers: Samurai (3DS):
 - Everything except sound data
 
+Rhythm Heaven (DSi/3DS):
+- DSi: Sound data (excluding streamed music)
+- 3DS: Mostly everything except streamed music
+
 SaGa 3: Jikuu no Hasha: Shadow or Light (DSi/3DS):
 - Sound data
 
