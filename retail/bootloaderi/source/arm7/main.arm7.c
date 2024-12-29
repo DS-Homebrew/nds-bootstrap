@@ -1248,7 +1248,7 @@ static void loadNitroFileInfoIntoRAM(const tNDSHeader* ndsHeader, aFile* romFile
 	if (size > 0x80000) return;
 
 	sdmmc_set_ndma_slot(0);
-	fileRead((char*)0x03700000, romFile, baseFatOff, size);
+	fileRead((char*)0x03700000, romFile, baseFntOff, size);
 	sdmmc_set_ndma_slot(4);
 
 	dbg_printf("Nitro file info pre-loaded into RAM at ");
