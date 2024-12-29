@@ -57,6 +57,11 @@ Metroid Prime Hunters (Europe) (Rev 1) (AMHP) (DSi/3DS)
 Metroid Prime Hunters (Korea) (AMHK) (DSi/3DS)
 Nervous Brickdown (USA) (AWVE) (DSi)
 Nervous Brickdown (Europe) (AWVP) (DSi)
+New Super Mario Bros. (USA) (A2DE) (DSi)
+New Super Mario Bros. (Europe) (A2DP) (DSi)
+New Super Mario Bros. (Japan) (A2DJ) (DSi)
+New Super Mario Bros. (Korea) (A2DK) (DSi)
+New Chaoji Maliou Xiongdi (China) (A2DC) (DSi)
 Phantasy Star 0 (USA) (C24E) (3DS)
 Phantasy Star 0 (Europe) (C24P) (3DS)
 Phantasy Star 0 (Japan) (C24J) (3DS)
@@ -120,8 +125,11 @@ MegaMan ZX Advent (3DS):
 - USA/Japan: Everything except for sound data, video cutscenes, and Download Play client
 - Europe: Everything except for sound data, video cutscenes, Download Play client, and language-specific text files
 
+New Super Mario Bros. (DSi):
+- Everything except sound data
+
 Power Rangers: Samurai (3DS):
-- Everything except for sound data
+- Everything except sound data
 
 SaGa 3: Jikuu no Hasha: Shadow or Light (DSi/3DS):
 - Sound data
