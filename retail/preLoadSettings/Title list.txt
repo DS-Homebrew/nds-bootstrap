@@ -63,6 +63,8 @@ Pokemon Trozei! (USA) (APTE) (DSi)
 Pokemon Link! (Europe) (APTP) (DSi)
 Pokemon Torouse (Japan) (APTJ) (DSi)
 Pokemon Toroje (Korea) (APTK) (DSi)
+Power Rangers: Samurai (USA) (B3NE) (3DS)
+Power Rangers: Samurai (Europe) (B3NP) (3DS)
 The Price Is Right (USA) (CRPE) (3DS)
 Puppy Palace (USA) (YPTE) (3DS)
 Rhythm Heaven (USA) (YLZE) (DSi/3DS)
@@ -110,6 +112,9 @@ MegaMan ZX (3DS):
 MegaMan ZX Advent (3DS):
 - USA/Japan: Everything except for sound data, video cutscenes, and Download Play client
 - Europe: Everything except for sound data, video cutscenes, Download Play client, and language-specific text files
+
+Power Rangers: Samurai (3DS):
+- Everything except for sound data
 
 SaGa 3: Jikuu no Hasha: Shadow or Light (DSi/3DS):
 - Sound data
