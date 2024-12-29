@@ -143,6 +143,9 @@ Final Fantasy III (DSi/3DS):
 Kirby: Canvas Curse (3DS):
 - Sound data
 
+Kirby: Squeak Squad (DSi/3DS):
+- Kirby sprites
+
 Mario & Luigi: Partners in Time (DSi/3DS):
 - Sound data
 
