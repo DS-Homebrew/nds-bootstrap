@@ -907,10 +907,9 @@ static bool isROMLoadableInRAM(const tDSiHeader* dsiHeader, const tNDSHeader* nd
 		if (!usesCloneboot) {
 			romSize -= romOffset;
 			if (baseArm9OvlSize > 0 && baseArm9OvlSrc < baseArm7Off) {
-				romSize -= baseArm7Size;
-				while ((romSize % 0x4000) != 0) {
-					romSize++;
-				}
+				romSize = baseRomSize;
+				romSize -= (baseArm7Off + baseArm7Size);
+				romSize += (overlaysSize/0x4000)*0x4000;
 			}
 		}
 		res = ((consoleModel> 0 && twlType && ((u32)dsiHeader->arm9iromOffset - romOffset)+ioverlaysSize <= (cheatsEnabled ? dev_CACHE_ADRESS_SIZE_TWLSDK_CHEAT : dev_CACHE_ADRESS_SIZE_TWLSDK))
