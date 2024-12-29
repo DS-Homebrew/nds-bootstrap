@@ -145,9 +145,9 @@ static void loadPreLoadSettings(configuration* conf, const char* pckPath, const 
 	}
 
 	if (file) {
-		conf->dataToPreloadAddr = offsetOfOpenedNitroFile;
-		conf->dataToPreloadSize = getFileSize(file);
-		conf->dataToPreloadFrame = 0;
+		conf->dataToPreloadAddr[0] = offsetOfOpenedNitroFile;
+		conf->dataToPreloadSize[0] = getFileSize(file);
+		// conf->dataToPreloadFrame = 0;
 		fclose(file);
 		return;
 	}
@@ -196,20 +196,18 @@ static void loadPreLoadSettings(configuration* conf, const char* pckPath, const 
 		}
 
 		if (offset > 0) {
-			if (size > 0xC) {
-				size = 0xC;
+			if (size > 0x10) {
+				size = 0x10;
 			}
 			fseek(file, offset, SEEK_SET);
 			u32 *buffer = new u32[size/4];
 			fread(buffer, 1, size, file);
 
-			/* for (u32 i = 0; i < size/8; i++) {
+			for (u32 i = 0; i < size/8; i++) {
 				conf->dataToPreloadAddr[i] = buffer[0+(i*2)];
 				conf->dataToPreloadSize[i] = buffer[1+(i*2)];
-			} */
-			conf->dataToPreloadAddr = buffer[0];
-			conf->dataToPreloadSize = buffer[1];
-			conf->dataToPreloadFrame = (size == 0xC) ? buffer[2] : 0;
+			}
+			// conf->dataToPreloadFrame = (size == 0xC) ? buffer[2] : 0;
 			delete[] buffer;
 		}
 	}
@@ -1592,11 +1590,11 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			fclose(cebin);
 
 			loadPreLoadSettings(conf, conf->consoleModel > 0 ? "nitro:/preLoadSettings3DS.pck" : "nitro:/preLoadSettingsDSi.pck", romTid, headerCRC);
-			if (conf->dataToPreloadAddr == 0) {
+			if (conf->dataToPreloadAddr[0] == 0) {
 				// Set NitroFS pre-load, in case if full ROM pre-load fails
-				conf->dataToPreloadAddr = ndsArm7BinOffset+ndsArm7Size;
-				conf->dataToPreloadSize = ((internalRomSize == 0 || internalRomSize > conf->romSize) ? conf->romSize : internalRomSize)-conf->dataToPreloadAddr;
-				conf->dataToPreloadFrame = 0;
+				conf->dataToPreloadAddr[0] = ndsArm7BinOffset+ndsArm7Size;
+				conf->dataToPreloadSize[0] = ((internalRomSize == 0 || internalRomSize > conf->romSize) ? conf->romSize : internalRomSize)-conf->dataToPreloadAddr[0];
+				// conf->dataToPreloadFrame = 0;
 			}
 		} else {
 			const bool binary3 = (REG_SCFG_EXT7 == 0 ? !dsiEnhancedMbk : (a7mbk6 != 0x00403000));
@@ -1926,11 +1924,11 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		b4dsDebugRam = (conf->b4dsMode == 2 || (*(vu32*)(0x02800000) == 0x314D454D && *(vu32*)(0x02C00000) == 0x324D454D));
 
 		loadPreLoadSettings(conf, "nitro:/preLoadSettingsMEP.pck", romTid, headerCRC);
-		if (conf->dataToPreloadAddr == 0) {
+		if (conf->dataToPreloadAddr[0] == 0) {
 			// Set NitroFS pre-load, in case if full ROM pre-load fails
-			conf->dataToPreloadAddr = ndsArm7BinOffset+ndsArm7Size;
-			conf->dataToPreloadSize = ((internalRomSize == 0 || internalRomSize > conf->romSize) ? conf->romSize : internalRomSize)-conf->dataToPreloadAddr;
-			conf->dataToPreloadFrame = 0;
+			conf->dataToPreloadAddr[0] = ndsArm7BinOffset+ndsArm7Size;
+			conf->dataToPreloadSize[0] = ((internalRomSize == 0 || internalRomSize > conf->romSize) ? conf->romSize : internalRomSize)-conf->dataToPreloadAddr[0];
+			// conf->dataToPreloadFrame = 0;
 		}
 
 		// Load in-game menu ce9 binary

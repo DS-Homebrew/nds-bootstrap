@@ -94,3 +94,31 @@ Ultimate Mortal Kombat (Europe) (YUTP) (DSi/3DS)
 WarioWare: D.I.Y. (USA) (UORE) (DSi)
 WarioWare: Do It Yourself (Europe) (UORP) (DSi/3DS)
 Made in Ore (Japan) (UORJ) (DSi)
+
+Pre-loaded data:
+
+Base 10 (Art Style) (MEP):
+- Sound data
+
+MegaMan Battle Network 5: Double Team DS (USA) (DSi for all regions, 3DS for Europe version):
+- Sound data and intro graphics
+
+MegaMan ZX (3DS):
+- USA/Japan: Everything except for sound data and video cutscenes
+- Europe: Everything except for sound data, video cutscenes, title_###.bin files, and x##.bin & z##.bin files
+
+MegaMan ZX Advent (3DS):
+- USA/Japan: Everything except for sound data, video cutscenes, and Download Play client
+- Europe: Everything except for sound data, video cutscenes, Download Play client, and language-specific text files
+
+SaGa 3: Jikuu no Hasha: Shadow or Light (DSi/3DS):
+- Sound data
+
+Sonic Rush Adventure (MEP/DSi/3DS):
+- Opening cutscene music
+
+Style Savvy (DSi/3DS):
+- Sound data (minus padding)
+
+Super Mario 64 DS (DSi):
+- Everything except the level data

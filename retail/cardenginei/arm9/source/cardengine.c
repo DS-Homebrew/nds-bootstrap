@@ -836,17 +836,20 @@ void cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	romPart = false;
 	//int romPartNo = 0;
 	if (!(ce9->valueBits & ROMinRAM)) {
-		/*for (int i = 0; i < 2; i++) {
+		#ifndef TWLSDK
+		for (int i = 0; i < 2; i++) {
 			if (ce9->romPartSize[i] == 0) {
 				break;
 			}
 			romPart = (src >= ce9->romPartSrc[i] && src < ce9->romPartSrc[i]+ce9->romPartSize[i]);
 			if (romPart) {
-				romPartNo = i;
+				// romPartNo = i;
 				break;
 			}
-		}*/
-		romPart = (ce9->romPartSize > 0 && src >= ce9->romPartSrc && src < ce9->romPartSrc+ce9->romPartSize);
+		}
+		#else
+		romPart = (ce9->romPartSize[0] > 0 && src >= ce9->romPartSrc[0] && src < ce9->romPartSrc[0]+ce9->romPartSize[0]);
+		#endif
 		/* #ifndef DLDI
 		#ifndef TWLSDK
 		if (romPart && (ce9->valueBits & waitForPreloadToFinish)) {

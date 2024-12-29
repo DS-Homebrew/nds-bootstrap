@@ -213,10 +213,11 @@ int hookNdsRetailArm9(
 	extern u32 baseFatOff;
 	extern u32 baseFatSize;
 	extern u32 romPaddingSize;
-	extern u32 dataToPreloadAddr;
-	extern u32 dataToPreloadSize;
+	extern u32 dataToPreloadAddr[2];
+	extern u32 dataToPreloadSize[2];
 	// extern u32 dataToPreloadFrame;
 	extern bool romLocationAdjust(const tNDSHeader* ndsHeader, const bool laterSdk, const bool isSdk5, const bool dsiBios, u32* romLocation);
+	extern u32 dataToPreloadFullSize(void);
 	extern bool dataToPreloadFound(const tNDSHeader* ndsHeader);
 	const char* romTid = getRomTid(ndsHeader);
 	const bool laterSdk = ((moduleParams->sdk_version >= 0x2008000 && moduleParams->sdk_version != 0x2012774) || moduleParams->sdk_version == 0x20029A8);
@@ -283,7 +284,6 @@ int hookNdsRetailArm9(
 		//extern bool gbaRomFound;
 		extern u8 gameOnFlashcard;
 		bool runOverlayCheck = overlayPatch;
-		u32 dataToPreloadSizeAligned = 0;
 		ce9->cacheBlockSize = cacheBlockSize;
 		if (ce9->overlaysSrc) {
 			ce9->overlaysSrcAlign = (ce9->overlaysSrc/ce9->cacheBlockSize)*ce9->cacheBlockSize;
@@ -337,17 +337,16 @@ int hookNdsRetailArm9(
 			//ce9->romLocation[1] = ce9->romLocation[0]+dataToPreloadSize[0];
 			// ce9->romLocation -= dataToPreloadAddr[0];
 			//ce9->romLocation[1] -= dataToPreloadAddr[1];
-			configureRomMap(ce9, ndsHeader, dataToPreloadAddr, dsiMode);
-			for (u32 i = 0; i < dataToPreloadSize/*+dataToPreloadSize[1]*/; i += cacheBlockSize) {
+			configureRomMap(ce9, ndsHeader, dataToPreloadAddr[0], dsiMode);
+			for (u32 i = 0; i < dataToPreloadFullSize(); i += cacheBlockSize) {
 				ce9->cacheAddress += cacheBlockSize;
 				romLocationAdjust(ndsHeader, laterSdk, (ce9->valueBits & b_isSdk5), (ce9->valueBits & b_dsiBios), &ce9->cacheAddress);
-				dataToPreloadSizeAligned += cacheBlockSize;
+				ce9->cacheSlots--;
 			}
-			ce9->cacheSlots -= dataToPreloadSizeAligned/cacheBlockSize;
-			ce9->romPartSrc = dataToPreloadAddr;
-			//ce9->romPartSrc[1] = dataToPreloadAddr[1];
-			ce9->romPartSize = dataToPreloadSize;
-			//ce9->romPartSize[1] = dataToPreloadSize[1];
+			for (int i = 0; i < 2; i++) {
+				ce9->romPartSrc[i] = dataToPreloadAddr[i];
+				ce9->romPartSize[i] = dataToPreloadSize[i];
+			}
 			/* if (dataToPreloadFrame) {
 				ce9->valueBits |= b_waitForPreloadToFinish;
 			} */

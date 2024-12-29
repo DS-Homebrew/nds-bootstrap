@@ -105,9 +105,9 @@ extern u32 romSize;
 extern u32 saveSize;
 // extern u32 gbaRomSize;
 // extern u32 gbaSaveSize;
-extern u32 dataToPreloadAddr;
-extern u32 dataToPreloadSize;
-extern u32 dataToPreloadFrame;
+extern u32 dataToPreloadAddr[2];
+extern u32 dataToPreloadSize[2];
+// extern u32 dataToPreloadFrame;
 extern u32 wideCheatFileCluster;
 extern u32 wideCheatSize;
 extern u32 apPatchFileCluster;
@@ -1018,13 +1018,25 @@ static void my_readUserSettings(tNDSHeader* ndsHeader) {
 	}
 }
 
+u32 dataToPreloadFullSize(void) {
+	u32 dataToPreloadSizeAlign[2] = {dataToPreloadSize[0], dataToPreloadSize[1]};
+	for (int i = 0; i < 2; i++) {
+		if (!dataToPreloadSize[i]) break;
+		while ((dataToPreloadSizeAlign[i] % 0x4000) != 0) {
+			dataToPreloadSizeAlign[i]++;
+		}
+	}
+
+	return dataToPreloadSizeAlign[0] + dataToPreloadSizeAlign[1];
+}
+
 bool dataToPreloadFound(const tNDSHeader* ndsHeader) {
 	if (strncmp(ndsHeader->gameCode, "UBR", 3) == 0) {
-		return (dataToPreloadSize > 0 && (dataToPreloadSize/*+dataToPreloadSize[1]*/) <= retail_CACHE_ADRESS_SIZE_BROWSER-0x40000);
+		return (dataToPreloadSize[0] > 0 && dataToPreloadFullSize() <= retail_CACHE_ADRESS_SIZE_BROWSER-0x40000);
 	}
 	const bool cheatsEnabled = (cheatSizeTotal > 4 && cheatSizeTotal <= 0x8000);
 
-	return (dataToPreloadSize > 0 && (dataToPreloadSize/*+dataToPreloadSize[1]*/) <= (consoleModel > 0 ? (dsiModeConfirmed ? (ndsHeader->unitCode > 0 ? dev_CACHE_ADRESS_SIZE_TWLSDK : dev_CACHE_ADRESS_SIZE_DSIMODE) : dev_CACHE_ADRESS_SIZE) : (dsiModeConfirmed ? (ndsHeader->unitCode > 0 ? (cheatsEnabled ? retail_CACHE_ADRESS_SIZE_TWLSDK_CHEAT : retail_CACHE_ADRESS_SIZE_TWLSDK) : retail_CACHE_ADRESS_SIZE_DSIMODE) : retail_CACHE_ADRESS_SIZE))-0x40000);
+	return (dataToPreloadSize[0] > 0 && dataToPreloadFullSize() <= (consoleModel > 0 ? (dsiModeConfirmed ? (ndsHeader->unitCode > 0 ? dev_CACHE_ADRESS_SIZE_TWLSDK : dev_CACHE_ADRESS_SIZE_DSIMODE) : dev_CACHE_ADRESS_SIZE) : (dsiModeConfirmed ? (ndsHeader->unitCode > 0 ? (cheatsEnabled ? retail_CACHE_ADRESS_SIZE_TWLSDK_CHEAT : retail_CACHE_ADRESS_SIZE_TWLSDK) : retail_CACHE_ADRESS_SIZE_DSIMODE) : retail_CACHE_ADRESS_SIZE))-0x40000);
 }
 
 static void loadROMPartIntoRAM(const tNDSHeader* ndsHeader, aFile* file) {
@@ -1162,9 +1174,9 @@ static void buildRomMap(const tNDSHeader* ndsHeader, const module_params_t* modu
 	// Load ROM into RAM
 	const u32 romLocation = ROMinRAM ? getRomLocation(ndsHeader, !laterSdk, isSdk5(moduleParams), dsiBios) : getRomPartLocation(ndsHeader, !laterSdk, isSdk5(moduleParams), dsiBios);
 
-	u32 romOffset[2] = {(ROMinRAM ? 0 : dataToPreloadAddr), romOffset[0]};
-	s32 romSizeEdit[2] = {(ROMinRAM ? baseRomSize : dataToPreloadSize), romSizeEdit[0]};
-	bool skipArm7Binary = false;
+	u32 romOffset[2] = {(ROMinRAM ? 0 : dataToPreloadAddr[0]), (ROMinRAM ? 0 : dataToPreloadAddr[1])};
+	s32 romSizeEdit[2] = {(ROMinRAM ? baseRomSize : dataToPreloadSize[0]), (ROMinRAM ? baseRomSize : dataToPreloadSize[1])};
+	int iCount = 1;
 	if (ROMinRAM) {
 		if (usesCloneboot) {
 			romOffset[0] = 0x4000;
@@ -1182,13 +1194,18 @@ static void buildRomMap(const tNDSHeader* ndsHeader, const module_params_t* modu
 				romSizeEdit[0] = overlaysSize;
 				romOffset[1] = (baseArm7Off + baseArm7Size);
 				romSizeEdit[1] -= romOffset[1];
-				skipArm7Binary = true;
+				iCount++;
 			} else {
 				romSizeEdit[0] -= romOffset[0];
 			}
 		}
-	} else if (!dataToPreloadFound(ndsHeader)) {
-		return;
+	} else {
+		if (!dataToPreloadFound(ndsHeader)) {
+			return;
+		}
+		if (dataToPreloadSize[1]) {
+			iCount++;
+		}
 	}
 
 	/* dbg_printf("romOffset[0]: ");
@@ -1207,7 +1224,7 @@ static void buildRomMap(const tNDSHeader* ndsHeader, const module_params_t* modu
 	u32 romLocationChange = romLocation;
 	u32 romLocationChangePrep = romLocationChange;
 	u32 romBlockSize = 0;
-	for (int i = 0; i < (skipArm7Binary ? 2 : 1); i++) {
+	for (int i = 0; i < iCount; i++) {
 		u32 romOffsetChange = romOffset[i];
 		while (romSizeEdit[i] > 0) {
 			bool readRom = false;
