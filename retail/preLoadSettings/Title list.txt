@@ -10,6 +10,9 @@ Decode (Art Style) (Japan) (KADJ) (MEP)
 Decode (Art Style) (Japan) (Rev 1) (KADJ) (MEP)
 Big Bang Mini (USA) (CBBE) (DSi)
 Big Bang Mini (Europe) (CBBP) (DSi)
+Castlevania: Dawn of Sorrow (USA) (ACVE) (3DS)
+Castlevania: Dawn of Sorrow (Europe) (ACVP) (3DS)
+Akumajou Dracula: Sougetsu no Juujika (Japan) (ACVJ) (3DS)
 Dragon Quest IV: Chapters of the Chosen (USA) (YIVE) (DSi/3DS)
 Dragon Quest: The Chapters of the Chosen (Europe) (YIVP) (DSi/3DS)
 Dragon Quest IV: Michibikareshi Mono-tachi (Japan) (YIVJ) (DSi/3DS)
@@ -108,7 +111,36 @@ Made in Ore (Japan) (UORJ) (DSi)
 
 Pre-loaded data:
 
+Animal Crossing: Wild World (3DS):
+- Sound data
+
 Base 10 (Art Style) (MEP):
+- Sound data
+
+Big Bang Mini (DSi):
+- Everything except sound data
+
+Castlevania: Dawn of Sorrow (3DS):
+- Everything except the opening video
+
+Dragon Quest IV: Chapters of the Chosen (DSi/3DS):
+- DSi: Opening music from sound data
+- 3DS: Sound data
+
+Dragon Quest V: Hand of the Heavenly Bride (DSi/3DS):
+- DSi: Opening music from sound data
+- 3DS: Sound data
+
+Dragon Quest VI: Realms of Revelation (DSi/3DS):
+- Sound data
+
+Final Fantasy III (DSi/3DS):
+- Opening video
+
+Kirby: Canvas Curse (3DS):
+- Sound data
+
+Mario & Luigi: Partners in Time (DSi/3DS):
 - Sound data
 
 Mario Kart DS (DSi):
@@ -127,6 +159,13 @@ MegaMan ZX Advent (3DS):
 
 New Super Mario Bros. (DSi):
 - Everything except sound data
+
+Phantasy Star 0 (3DS):
+- Character data
+
+Pokemon Ranger: Guardian Signs (DSi/3DS):
+- DSi: Streamed music from sound data
+- 3DS: Sound data
 
 Power Rangers: Samurai (3DS):
 - Everything except sound data
