@@ -34,6 +34,10 @@ Mario & Luigi: Partners in Time (USA) (Rev 1) (ARME) (DSi/3DS)
 Mario & Luigi: Partners in Time (Europe) (ARMP) (DSi/3DS)
 Mario & Luigi RPG 2x2 (Japan) (ARMJ) (DSi/3DS)
 Mario & Luigi RPG: Siganui Partner (Korea) (ARMK) (DSi/3DS)
+Mario Kart DS (USA) (AMCE) (DSi)
+Mario Kart DS (Europe) (AMCP) (DSi)
+Mario Kart DS (Japan) (AMCJ) (DSi)
+Mario Kart DS (Korea) (AMCK) (DSi)
 MegaMan Battle Network 5: Double Team DS (USA) (A5TE) (DSi)
 MegaMan Battle Network 5: Double Team DS (USA) (Undub) (A5TE-88DC) (DSi)
 MegaMan Battle Network 5: Double Team DS (Europe) (A5TP) (DSi/3DS)
@@ -101,6 +105,9 @@ Pre-loaded data:
 
 Base 10 (Art Style) (MEP):
 - Sound data
+
+Mario Kart DS (DSi):
+- Everything except course data
 
 MegaMan Battle Network 5: Double Team DS (USA) (DSi for all regions, 3DS for Europe version):
 - Sound data and intro graphics
