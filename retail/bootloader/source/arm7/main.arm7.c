@@ -1699,7 +1699,7 @@ int arm7_main(void) {
 		fileWrite((char*)&patchOffsetCache, &patchOffsetCacheFile, 0, sizeof(patchOffsetCacheContents));
 	}
 
-	if (srlAddr == 0 && apPatchFileCluster != 0 && !apPatchIsCheat && apPatchSize > 0 && apPatchSize <= 0x40000) {
+	if (srlAddr == 0 && !srlFromPageFile && apPatchFileCluster != 0 && !apPatchIsCheat && apPatchSize > 0 && apPatchSize <= 0x40000) {
 		aFile apPatchFile;
 		getFileFromCluster(&apPatchFile, apPatchFileCluster);
 		dbg_printf("AP-fix found\n");

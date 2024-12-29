@@ -159,6 +159,7 @@ bool overlaysInRam = false;
 static aFile patchOffsetCacheFile;
 u32 waitSysCyclesOffset = 0;
 static u32 softResetParams[0x50/4] = {0};
+bool srlFromPageFile = false;
 u32 srlAddr = 0;
 u32 baseArm9Off = 0;
 u32 baseArm9Size = 0;
@@ -692,8 +693,7 @@ static void loadBinary_ARM7(const tDSiHeader* dsiHeaderTemp, aFile* file) {
 	// Read DSi header (including NDS header)
 	//fileRead((char*)ndsHeader, file, 0, 0x170, 3);
 	//fileRead((char*)dsiHeader, file, 0, 0x2F0, 2); // SDK 5
-	bool separateSrl = (softResetParams[2] == 0x44414F4C); // 'LOAD'
-	if (separateSrl) {
+	if (srlFromPageFile) {
 		srlAddr = 0xFFFFFFFF;
 		aFile pageFile;
 		getFileFromCluster(&pageFile, pageFileCluster, bootstrapOnFlashcard);
@@ -1591,7 +1591,8 @@ int arm7_main(void) {
 	aFile srParamsFile;
 	getFileFromCluster(&srParamsFile, srParamsFileCluster, gameOnFlashcard);
 	fileRead((char*)&softResetParams, &srParamsFile, 0, 0x50);
-	bool softResetParamsFound = (softResetParams[0] != 0xFFFFFFFF || softResetParams[2] == 0x44414F4C);
+	srlFromPageFile = (softResetParams[2] == 0x44414F4C); // 'LOAD'
+	bool softResetParamsFound = (softResetParams[0] != 0xFFFFFFFF || srlFromPageFile || softResetParams[3] != 0);
 	if (softResetParamsFound) {
 		u32 clearBuffer = 0xFFFFFFFF;
 		fileWrite((char*)&clearBuffer, &srParamsFile, 0, 0x4);
@@ -2168,7 +2169,7 @@ int arm7_main(void) {
 			tonccpy((char*)SAV_FILE_LOCATION_MAINMEM, savFile, sizeof(aFile));
 		}
 
-		const bool useApPatch = (srlAddr == 0 && apPatchFileCluster != 0 && !apPatchIsCheat && apPatchSize > 0 && apPatchSize <= 0x40000);
+		const bool useApPatch = (srlAddr == 0 && !srlFromPageFile && apPatchFileCluster != 0 && !apPatchIsCheat && apPatchSize > 0 && apPatchSize <= 0x40000);
 
 		if (useApPatch) {
 			aFile apPatchFile;
