@@ -111,6 +111,10 @@ Ultimate Mortal Kombat (Europe) (YUTP) (DSi/3DS)
 WarioWare: D.I.Y. (USA) (UORE) (DSi)
 WarioWare: Do It Yourself (Europe) (UORP) (DSi/3DS)
 Made in Ore (Japan) (UORJ) (DSi)
+Yoshi Touch & Go (USA) (AYIE) (DSi)
+Yoshi Touch & Go (Europe) (AYIP) (DSi)
+Catch! Touch! Yoshi! (Japan) (AYIJ) (DSi)
+Catch! Touch! Yoshi! (Japan) (Rev 1) (AYIJ) (DSi)
 
 Pre-loaded data:
 
@@ -194,3 +198,6 @@ Style Savvy (DSi/3DS):
 
 Super Mario 64 DS (DSi):
 - Everything except the level data
+
+Yoshi Touch & Go (DSi):
+- Everything except the `area` folder
