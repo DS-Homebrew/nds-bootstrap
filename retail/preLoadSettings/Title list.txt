@@ -13,6 +13,13 @@ Big Bang Mini (Europe) (CBBP) (DSi)
 Castlevania: Dawn of Sorrow (USA) (ACVE) (3DS)
 Castlevania: Dawn of Sorrow (Europe) (ACVP) (3DS)
 Akumajou Dracula: Sougetsu no Juujika (Japan) (ACVJ) (3DS)
+Castlevania: Portrait of Ruin (USA) (ACBE) (3DS)
+Castlevania: Portrait of Ruin (Europe) (ACBP) (3DS)
+Akumajou Dracula: Gallery of Labyrinth (Japan) (ACBJ) (3DS)
+Castlevania: Order of Ecclesia (USA) (YR9E) (3DS)
+Castlevania: Order of Ecclesia (Europe) (YR9P) (3DS)
+Akumajou Dracula: Ubawareta Kokuin (Japan) (YR9J) (3DS)
+Castlevania: Order of Ecclesia (Korea) (YR9K) (3DS)
 Dragon Quest IV: Chapters of the Chosen (USA) (YIVE) (DSi/3DS)
 Dragon Quest: The Chapters of the Chosen (Europe) (YIVP) (DSi/3DS)
 Dragon Quest IV: Michibikareshi Mono-tachi (Japan) (YIVJ) (DSi/3DS)
@@ -132,6 +139,12 @@ Big Bang Mini (DSi):
 
 Castlevania: Dawn of Sorrow (3DS):
 - Everything except the opening video
+
+Castlevania: Portrait of Ruin (3DS):
+- Everything except sound data
+
+Castlevania: Order of Ecclesia (3DS):
+- Everything except sound data
 
 Dragon Quest IV: Chapters of the Chosen (DSi/3DS):
 - DSi: Opening music from sound data
