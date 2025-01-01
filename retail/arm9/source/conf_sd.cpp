@@ -196,8 +196,8 @@ static void loadPreLoadSettings(configuration* conf, const char* pckPath, const 
 		}
 
 		if (offset > 0) {
-			if (size > 0x10) {
-				size = 0x10;
+			if (size > 0x18) {
+				size = 0x18;
 			}
 			fseek(file, offset, SEEK_SET);
 			u32 *buffer = new u32[size/4];

@@ -37,8 +37,8 @@ typedef struct configuration {
 	u32 apPatchSize;
 	u32 cheatSize;
 	u32 musicsSize;
-	u32 dataToPreloadAddr[2];
-	u32 dataToPreloadSize[2];
+	u32 dataToPreloadAddr[3];
+	u32 dataToPreloadSize[3];
 	// u32 dataToPreloadFrame;
 	u8 language;
 	char* guiLanguage;

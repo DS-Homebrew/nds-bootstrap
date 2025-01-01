@@ -837,7 +837,7 @@ void cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	//int romPartNo = 0;
 	if (!(ce9->valueBits & ROMinRAM)) {
 		#ifndef TWLSDK
-		for (int i = 0; i < 2; i++) {
+		for (int i = 0; i < 3; i++) {
 			if (ce9->romPartSize[i] == 0) {
 				break;
 			}

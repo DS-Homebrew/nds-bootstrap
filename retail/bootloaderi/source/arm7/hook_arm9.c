@@ -213,8 +213,8 @@ int hookNdsRetailArm9(
 	extern u32 baseFatOff;
 	extern u32 baseFatSize;
 	extern u32 romPaddingSize;
-	extern u32 dataToPreloadAddr[2];
-	extern u32 dataToPreloadSize[2];
+	extern u32 dataToPreloadAddr[3];
+	extern u32 dataToPreloadSize[3];
 	// extern u32 dataToPreloadFrame;
 	extern bool romLocationAdjust(const tNDSHeader* ndsHeader, const bool laterSdk, const bool isSdk5, const bool dsiBios, u32* romLocation);
 	extern u32 dataToPreloadFullSize(void);
@@ -343,7 +343,7 @@ int hookNdsRetailArm9(
 				romLocationAdjust(ndsHeader, laterSdk, (ce9->valueBits & b_isSdk5), (ce9->valueBits & b_dsiBios), &ce9->cacheAddress);
 				ce9->cacheSlots--;
 			}
-			for (int i = 0; i < 2; i++) {
+			for (int i = 0; i < 3; i++) {
 				ce9->romPartSrc[i] = dataToPreloadAddr[i];
 				ce9->romPartSize[i] = dataToPreloadSize[i];
 			}

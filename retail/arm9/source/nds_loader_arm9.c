@@ -270,10 +270,10 @@ int runNds(u32 cluster, u32 saveCluster, u32 donorTwlCluster, /* u32 gbaCluster,
 	loader->saveSize                    = conf->saveSize;
 	// loader->gbaRomSize                  = conf->gbaRomSize;
 	// loader->gbaSaveSize                 = conf->gbaSaveSize;
-	loader->dataToPreloadAddr[0]        = conf->dataToPreloadAddr[0];
-	loader->dataToPreloadSize[0]        = conf->dataToPreloadSize[0];
-	loader->dataToPreloadAddr[1]        = conf->dataToPreloadAddr[1];
-	loader->dataToPreloadSize[1]        = conf->dataToPreloadSize[1];
+	for (int i = 0; i < 3; i++) {
+		loader->dataToPreloadAddr[i]    = conf->dataToPreloadAddr[i];
+		loader->dataToPreloadSize[i]    = conf->dataToPreloadSize[i];
+	}
 	loader->wideCheatFileCluster        = wideCheatCluster;
 	loader->wideCheatSize               = conf->wideCheatSize;
 	loader->apPatchFileCluster          = apPatchCluster;
