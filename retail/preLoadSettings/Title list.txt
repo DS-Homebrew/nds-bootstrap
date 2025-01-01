@@ -81,6 +81,11 @@ New Chaoji Maliou Xiongdi (China) (A2DC) (DSi)
 Phantasy Star 0 (USA) (C24E) (3DS)
 Phantasy Star 0 (Europe) (C24P) (3DS)
 Phantasy Star 0 (Japan) (C24J) (3DS)
+Plants vs. Zombies (USA) (BWBE) (DSi/3DS)
+Plants vs. Zombies (Europe) (MSL) (BWBY) (DSi/3DS)
+Plants vs. Zombies (Europe) (Rondomedia) (BWBX) (DSi/3DS)
+Plants vs. Zombies (United Kingdom) (BWBP) (DSi/3DS)
+Plants vs. Zombies (Australia) (BWBU) (DSi/3DS)
 Pokemon Ranger: Guardian Signs (USA) (B3RE) (DSi/3DS)
 Pokemon Ranger: Guardian Signs (Europe) (B3RP) (DSi/3DS)
 Pokemon Ranger: Hikari no Kiseki (Japan) (B3RJ) (DSi/3DS)
@@ -198,6 +203,10 @@ New Super Mario Bros. (DSi):
 
 Phantasy Star 0 (3DS):
 - Character data
+
+Plants vs. Zombies (DSi/3DS):
+- DSi, DSi/3DS for Europe: data_pack.bin
+- 3DS for USA, United Kingdom, and Australia: Everything except closing music video, and unused DSi manual data
 
 Pokemon Ranger: Guardian Signs (DSi/3DS):
 - DSi: Streamed music from sound data
