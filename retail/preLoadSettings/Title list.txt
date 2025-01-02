@@ -32,6 +32,7 @@ Dragon Quest VI: Maboroshi no Daichi (Japan) (YVIJ) (DSi/3DS)
 English Training: Have Fun Improving Your Skills (Europe) (ANGP) (DSi/3DS)
 Eigo ga Nigate na Otona no DS Training: Eigo Zuke (Japan) (ANGJ) (DSi/3DS)
 Eigo ga Nigate na Otona no DS Training: Eigo Zuke (Japan) (Rev 1) (ANGJ) (DSi/3DS)
+FabStyle (Japan) (THMJ) (3DS)
 Final Fantasy III (USA) (AFFE) (DSi/3DS)
 Final Fantasy III (Europe) (AFFP) (DSi/3DS)
 Final Fantasy III (Japan) (AFFJ) (DSi/3DS)
@@ -175,6 +176,9 @@ Dragon Quest VI: Realms of Revelation (DSi/3DS):
 English Training: Have Fun Improving Your Skills (DSi/3DS)
 - DSi: Sound data (excluding voice files)
 - 3DS: Everything except voice files
+
+FabStyle (3DS):
+- Everything except 3D models, streamed sound, and video cutscenes
 
 Final Fantasy III (DSi/3DS):
 - Opening video
