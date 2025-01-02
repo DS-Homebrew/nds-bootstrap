@@ -43,6 +43,10 @@ Kirby: Squeak Squad (USA) (AKWE) (DSi/3DS)
 Kirby: Mouse Attack (Europe) (AKWP) (DSi/3DS)
 Hoshi no Kirby: Sanjou! Dorotche Dan (Japan) (AKWJ) (DSi/3DS)
 Byeorui Kirby: Dopang Ildangui Seupgyeok (Korea) (AKWK) (DSi/3DS)
+Kirby Super Star Ultra (USA) (YKWE) (3DS)
+Kirby Super Star Ultra (Europe) (YKWP) (3DS)
+Hoshi no Kirby Ultra Super Deluxe (Japan) (YKWJ) (3DS)
+Kirby Ultra Super Deluxe (Korea) (YKWK) (3DS)
 Mario & Luigi: Partners in Time (USA) (ARME) (DSi/3DS)
 Mario & Luigi: Partners in Time (USA) (Rev 1) (ARME) (DSi/3DS)
 Mario & Luigi: Partners in Time (Europe) (ARMP) (DSi/3DS)
@@ -188,6 +192,10 @@ Kirby: Canvas Curse (3DS):
 
 Kirby: Squeak Squad (DSi/3DS):
 - Kirby sprites
+
+Kirby Super Star Ultra (3DS):
+- USA/Japan/Korea: Everything except video cutscenes
+- Europe: Everything except video cutscenes, as well as b10, beginner19, c14, pd, r33, and s37 data
 
 Mario & Luigi: Partners in Time (DSi/3DS):
 - Sound data
