@@ -1366,8 +1366,8 @@ void inGameMenu(s32* exRegisters) {
 	#endif
 
 	*(u32*)(INGAME_MENU_LOCATION + IGM_TEXT_SIZE_ALIGNED) = (u32)sharedAddr;
-	volatile void (*inGameMenu)(s32*, u32, s32*) = (volatile void*)INGAME_MENU_LOCATION + IGM_TEXT_SIZE_ALIGNED + 0x10;
-	(*inGameMenu)(&ce9->mainScreen, ce9->consoleModel, exRegisters);
+	volatile u32 (*inGameMenu)(s32*, u32, s32*) = (volatile void*)INGAME_MENU_LOCATION + IGM_TEXT_SIZE_ALIGNED + 0x10;
+	const u32 res = (*inGameMenu)(&ce9->mainScreen, ce9->consoleModel, exRegisters);
 
 	while (sharedAddr[5] != 0x4C4D4749) { // 'IGML'
 		while (REG_VCOUNT != 191) swiDelay(100);
@@ -1379,7 +1379,7 @@ void inGameMenu(s32* exRegisters) {
 	}
 
 	#ifdef TWLSDK
-	if (sharedAddr[3] == 0x54495845) {
+	if (res == 0x54495845) {
 		igmReset = true;
 		if (*(u32*)0x02FFE234 == 0x00030004 || *(u32*)0x02FFE234 == 0x00030005) {
 			reset(0, 0);
@@ -1388,7 +1388,7 @@ void inGameMenu(s32* exRegisters) {
 		}
 	} else
 	#endif
-	if (sharedAddr[3] == 0x52534554) {
+	if (res == 0x52534554) {
 		igmReset = true;
 	#ifdef TWLSDK
 		if (*(u32*)0x02FFE234 == 0x00030004 || *(u32*)0x02FFE234 == 0x00030005) { // If DSiWare...

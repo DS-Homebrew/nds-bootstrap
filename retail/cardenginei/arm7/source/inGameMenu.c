@@ -56,7 +56,6 @@ void inGameMenu(void) {
 	// returnToMenu = false;
 	sharedAddr[4] = 0x554E454D; // 'MENU'
 	const u32 errorBak = sharedAddr[0];
-	const u32 flagBak = sharedAddr[5];
 	IPC_SendSync(0x9);
 	REG_MASTER_VOLUME = 0;
 	int oldIME = enterCriticalSection();
@@ -130,7 +129,6 @@ void inGameMenu(void) {
 					exitMenu = true;
 					timeTillStatusRefresh = 7;
 					unloadInGameMenu();
-					sharedAddr[5] = flagBak;
 					#ifdef TWLSDK
 					i2cWriteRegister(0x4A, 0x12, 0x01);
 					#endif
@@ -153,7 +151,6 @@ void inGameMenu(void) {
 				case 0x444D4152: // RAMD
 					dumpRam();
 					unloadInGameMenu();
-					sharedAddr[5] = flagBak;
 					exitMenu = true;
 					break;
 				/* case 0x50455453: // STEP
@@ -227,7 +224,6 @@ void inGameMenu(void) {
 	timeTillStatusRefresh = 7;
 
 	unloadInGameMenu();
-	sharedAddr[5] = flagBak;
 
 	leaveCriticalSection(oldIME);
 	REG_MASTER_VOLUME = 127;

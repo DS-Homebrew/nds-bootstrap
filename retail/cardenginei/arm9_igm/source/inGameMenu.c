@@ -757,7 +757,7 @@ static void ramViewer(void) {
 	(*revertMpu)();
 }
 
-void inGameMenu(s32 *mainScreen, u32 consoleModel, s32 *exceptionRegisters) {
+u32 inGameMenu(s32 *mainScreen, u32 consoleModel, s32 *exceptionRegisters) {
 	// If we were given exception registers, then we're handling an exception
 	bool exception = (exceptionRegisters != 0);
 
@@ -776,6 +776,8 @@ void inGameMenu(s32 *mainScreen, u32 consoleModel, s32 *exceptionRegisters) {
 	}
 	#endif
 	#endif
+
+	u32 res = 0;
 
 	u32 dispcnt = REG_DISPCNT_SUB;
 	u16 bg0cnt = REG_BG0CNT_SUB;
@@ -900,7 +902,8 @@ void inGameMenu(s32 *mainScreen, u32 consoleModel, s32 *exceptionRegisters) {
 				case MENU_RESET:
 					extern bool exceptionPrinted;
 					exceptionPrinted = false;
-					sharedAddr[3] = 0x52534554; // TESR
+					res = 0x52534554; // TESR
+					sharedAddr[3] = res;
 					sharedAddr[4] = 0x54455352; // RSET
 					break;
 				case MENU_SCREENSHOT:
@@ -918,7 +921,8 @@ void inGameMenu(s32 *mainScreen, u32 consoleModel, s32 *exceptionRegisters) {
 					}
 					#else
 					// sharedAddr[1] = 0;
-					sharedAddr[3] = 0x444D4152; // RAMD
+					res = 0x444D4152; // RAMD
+					sharedAddr[3] = res;
 					sharedAddr[4] = 0x54495845; // EXIT
 					while (sharedAddr[4] != 0) swiDelay(100);
 					#endif
@@ -930,7 +934,8 @@ void inGameMenu(s32 *mainScreen, u32 consoleModel, s32 *exceptionRegisters) {
 					ramViewer();
 					break;
 				case MENU_QUIT:
-					sharedAddr[3] = 0x54495845; // EXIT
+					res = 0x54495845; // EXIT
+					sharedAddr[3] = res;
 					sharedAddr[4] = 0x54495551; // QUIT
 					break;
 				default:
@@ -976,4 +981,6 @@ void inGameMenu(s32 *mainScreen, u32 consoleModel, s32 *exceptionRegisters) {
 		REG_POWERCNT &= ~POWER_SWAP_LCDS;
 	else if(*mainScreen == 2)
 		REG_POWERCNT |= POWER_SWAP_LCDS;
+
+	return res;
 }

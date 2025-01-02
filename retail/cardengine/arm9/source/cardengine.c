@@ -524,8 +524,8 @@ void inGameMenu(s32* exRegisters) {
 	opened = true;
 
 	*(u32*)(igmLocation + IGM_TEXT_SIZE_ALIGNED) = (u32)sharedAddr;
-	volatile void (*inGameMenu)(s32*, u32, s32*) = (volatile void*)igmLocation + IGM_TEXT_SIZE_ALIGNED + 0x10;
-	(*inGameMenu)(&ce9->mainScreen, 0, exRegisters);
+	volatile u32 (*inGameMenu)(s32*, u32, s32*) = (volatile void*)INGAME_MENU_LOCATION + IGM_TEXT_SIZE_ALIGNED + 0x10;
+	const u32 res = (*inGameMenu)(&ce9->mainScreen, 0, exRegisters);
 
 	opened = false;
 
@@ -536,13 +536,13 @@ void inGameMenu(s32* exRegisters) {
 	writeIgm(0);	// Store in-game menu
 	readIgm(0xA000);	// Restore part of game RAM from page file
 
-	if (sharedAddr[3] == 0x54495845) {
+	if (res == 0x54495845) {
 		igmReset = true;
 		reset(0xFFFFFFFF, 0);
-	} else if (sharedAddr[3] == 0x52534554) {
+	} else if (res == 0x52534554) {
 		igmReset = true;
 		reset(0, 0);
-	} else if (sharedAddr[3] == 0x444D4152) { // RAMD
+	} else if (res == 0x444D4152) { // RAMD
 		#ifdef EXTMEM
 		fileWrite((char*)0x02000000, &ramDumpFile, 0, 0x800000);
 		// fileWrite((char*)((ce9->valueBits & isSdk5) ? 0x02FE0000 : 0x027E0000), &ramDumpFile, 0x7E0000, 0x20000);
