@@ -43,7 +43,7 @@
 #define b_dsiSD BIT(5)
 #define b_preciseVolumeControl BIT(6)
 #define b_powerCodeOnVBlank BIT(7)
-#define b_runCardEngineCheck BIT(8)
+#define b_delayWrites BIT(8)
 #define b_igmAccessible BIT(9)
 #define b_hiyaCfwFound BIT(10)
 #define b_slowSoftReset BIT(11)
@@ -390,6 +390,9 @@ int hookNdsRetailArm7(
 		}
 		if (consoleModel < 2 && preciseVolumeControl) {
 			ce7->valueBits |= b_preciseVolumeControl;
+		}
+		if (strncmp(romTid, "YL2", 3) == 0) { // Luminous Arc 2
+			ce7->valueBits |= b_delayWrites; // Delay save writes by 1 frame for the first 2 seconds to fix crash on first boot
 		}
 		if (hiyaCfwFound) {
 			ce7->valueBits |= b_hiyaCfwFound;

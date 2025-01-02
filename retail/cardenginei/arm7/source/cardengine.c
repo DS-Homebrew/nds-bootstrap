@@ -63,7 +63,7 @@
 #define b_dsiSD BIT(5)
 #define preciseVolumeControl BIT(6)
 #define powerCodeOnVBlank BIT(7)
-#define b_runCardEngineCheck BIT(8)
+#define delayWrites BIT(8)
 #define igmAccessible BIT(9)
 #define hiyaCfwFound BIT(10)
 #define slowSoftReset BIT(11)
@@ -2105,6 +2105,13 @@ bool eepromPageWrite(u32 dst, const void *src, u32 len) {
 		/*if (saveInRam) {
 			tonccpy((char*)0x02440000 + dst, src, len);
 		}*/
+		if (valueBits & delayWrites) {
+			if (*(int*)((valueBits & isSdk5) ? 0x02FFFC3C : 0x027FFC3C) >= 60*2) {
+				valueBits &= ~delayWrites;
+			} else {
+				waitFrames(1);
+			}
+		}
 		sdmmc_set_ndma_slot(4);
 		if ((dst % saveSize)+len > saveSize) {
 			u32 len2 = len;

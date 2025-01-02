@@ -38,6 +38,7 @@
 #include "tonccpy.h"
 
 #define a9IrqHooked BIT(7)
+#define delayWrites BIT(8)
 
 #define RUMBLE_PAK			(*(vuint16 *)0x08000000)
 #define WARIOWARE_PAK		(*(vuint16 *)0x080000C4)
@@ -127,6 +128,14 @@ static PERSONAL_DATA* personalData = NULL;
 		*(u16*)(0x0200080E) = swiCRC16(0xFFFF, (void*)0x02000810, 0x3F0);		// Unlaunch CRC16
 	}
 }*/
+
+// Alternative to swiWaitForVBlank()
+static inline void waitFrames(int count) {
+	for (int i = 0; i < count; i++) {
+		while (REG_VCOUNT != 191);
+		while (REG_VCOUNT == 191);
+	}
+}
 
 static void waitForArm9(void) {
     IPC_SendSync(0x4);
@@ -583,6 +592,16 @@ bool eepromPageWrite(u32 dst, const void *src, u32 len) {
 	if (!(valueBits & a9IrqHooked)) {
 		return false;
 	}
+
+#ifndef MUSIC
+	if (valueBits & delayWrites) {
+		if (*(int*)((valueBits & isSdk5Set) ? 0x02FFFC3C : 0x027FFC3C) >= 60*2) {
+			valueBits &= ~delayWrites;
+		} else {
+			waitFrames(1);
+		}
+	}
+#endif
 
 	// Send a command to the ARM9 to write the save
 	const u32 commandSaveWrite = 0x53415657;

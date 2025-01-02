@@ -34,6 +34,7 @@
 #include "nocashMessage.h"
 
 #define b_a9IrqHooked BIT(7)
+#define b_delayWrites BIT(8)
 #define b_sleepMode BIT(17)
 
 extern u32 newArm7binarySize;
@@ -223,6 +224,9 @@ int hookNdsRetailArm7(
 	ce7->moduleParams            = moduleParams;
 	if (patchedCardIrqEnable) {
 		ce7->valueBits |= b_a9IrqHooked;
+	}
+	if (strncmp(romTid, "YL2", 3) == 0) { // Luminous Arc 2
+		ce7->valueBits |= b_delayWrites; // Delay save writes by 1 frame for the first 2 seconds to fix crash on first boot
 	}
 	if (sleepMode) {
 		ce7->valueBits |= b_sleepMode;

@@ -90,7 +90,7 @@ typedef struct cardengineArm7 {
 		5: dsiSD
 		6: preciseVolumeControl
 		7: powerCodeOnVBlank
-		8: runCardEngineCheck
+		8: delayWrites
 		9: igmAccessible
 		10: hiyaCfwFound
 		11: slowSoftReset
@@ -140,6 +140,7 @@ typedef struct cardengineArm7B4DS {
 	u32 valueBits;
 	/*
 		7: a9IrqHooked
+		8: delayWrites
 		17: sleepMode
 	*/
 	s32 mainScreen;
