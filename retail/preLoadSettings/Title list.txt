@@ -96,6 +96,13 @@ Pokemon Toroje (Korea) (APTK) (DSi)
 Power Rangers: Samurai (USA) (B3NE) (3DS)
 Power Rangers: Samurai (Europe) (B3NP) (3DS)
 The Price Is Right (USA) (CRPE) (3DS)
+Professor Layton and the Curious Village (USA) (A5FE) (3DS)
+Layton Kyouju to Fushigi na Machi (Japan) (A5FJ) (3DS)
+Layton Kyouju to Fushigi na Machi (Japan) (Rev 1) (A5FJ) (3DS)
+Layton Kyouju to Fushigi na Machi (Japan) (Rev 2) (A5FJ) (3DS)
+Layton Kyouju to Fushigi na Machi: Friendly Ban (Japan) (C5FJ) (3DS)
+Layton Gyosuwa Isanghan Maeul (Korea) (A5FK) (3DS)
+Layton Gyosuwa Isanghan Maeul (Korea) (Rev 1) (A5FK) (3DS)
 Puppy Palace (USA) (YPTE) (3DS)
 Rhythm Heaven (USA) (YLZE) (DSi/3DS)
 Rhythm Paradise (Europe) (En,Fr,De) (YLZP) (DSi/3DS)
@@ -214,6 +221,9 @@ Pokemon Ranger: Guardian Signs (DSi/3DS):
 
 Power Rangers: Samurai (3DS):
 - Everything except sound data
+
+Professor Layton and the Curious Village (3DS):
+- Everything except sound data, video cutscenes, and WiFi settings menu assets
 
 Rhythm Heaven (DSi/3DS):
 - DSi: Sound data (excluding streamed music)
