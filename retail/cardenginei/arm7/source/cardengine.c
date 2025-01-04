@@ -466,7 +466,7 @@ void reset(const bool downloadedSrl) {
 
 #ifndef TWLSDK
 	u32 resetParam = ((valueBits & isSdk5) ? RESET_PARAM_SDK5 : RESET_PARAM);
-	if (((valueBits & isDlp) && *(u32*)(NDS_HEADER_SDK5+0xC) == 0) || (valueBits & slowSoftReset) || (*(u32*)(resetParam+0xC) > 0 && (*(u32*)CARDENGINEI_ARM9_LOCATION == 0 || (valueBits & isSdk5)))) {
+	if (((valueBits & isDlp) && *(u32*)(NDS_HEADER_SDK5+0xC) == 0) || (valueBits & slowSoftReset) || (*(u32*)(resetParam+0xC) > 0 && (valueBits & isSdk5))) {
 		REG_MASTER_VOLUME = 0;
 		int oldIME = enterCriticalSection();
 		//driveInitialize();
