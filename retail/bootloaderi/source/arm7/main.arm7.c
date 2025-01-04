@@ -830,13 +830,13 @@ u32 getRomLocation(const tNDSHeader* ndsHeader, const bool isESdk2, const bool i
 	return getRomPartLocation(ndsHeader, isESdk2, isSdk5, dsiBios);
 }
 
-bool romLocationAdjust(const tNDSHeader* ndsHeader, const bool laterSdk, const bool isSdk5, const bool dsiBios, u32* romLocation) {
+bool romLocationAdjust(const tNDSHeader* ndsHeader, const bool laterSdk, const bool isSdk5, u32* romLocation) {
 	const bool ntrType = (ndsHeader->unitCode == 0);
 	const u32 romLocationOld = *romLocation;
 	if (*romLocation == 0x0C3FC000) {
 		*romLocation += 0x4000;
-	} else if (*romLocation == 0x0C7C0000 && ((laterSdk && !dsiBios) || !laterSdk) && !isSdk5) {
-		*romLocation += laterSdk ? 0x8000 : 0x28000;
+	} else if (*romLocation == 0x0C7C0000 && !laterSdk) {
+		*romLocation += 0x28000;
 	} else if (*romLocation == 0x0C7C4000) {
 		*romLocation += 0x4000;
 	} else if (*romLocation == 0x0C7D8000 && laterSdk) {
@@ -846,13 +846,13 @@ bool romLocationAdjust(const tNDSHeader* ndsHeader, const bool laterSdk, const b
 		} else {
 			*romLocation += 0x8000;
 		}
-	} else if (*romLocation == 0x0C7F8000 && (laterSdk || !dsiBios) && ntrType) {
+	} else if (*romLocation == 0x0C7F8000 && laterSdk && ntrType) {
 		*romLocation += 0x8000;
 	} else if (*romLocation == 0x0C7FC000) {
 		*romLocation += 0x4000;
 	} else if (*romLocation == 0x0CFE0000 && !ntrType) {
 		*romLocation += 0x20000;
-	} else if (*romLocation == 0x0CFFC000 && (dsiBios || isSdk5)) {
+	} else if (*romLocation == 0x0CFFC000) {
 		*romLocation += 0x4000;
 	}
 	if (*romLocation == (consoleModel > 0 ? 0x0E000000 : 0x0D000000)) {
@@ -1235,7 +1235,7 @@ static void buildRomMap(const tNDSHeader* ndsHeader, const module_params_t* modu
 			romLocationChangePrep += 0x4000;
 			romSizeEdit[i] -= 0x4000;
 
-			readRom = (romSizeEdit[i] <= 0) ? true : romLocationAdjust(ndsHeader, laterSdk, isSdk5(moduleParams), dsiBios, &romLocationChangePrep);
+			readRom = (romSizeEdit[i] <= 0) ? true : romLocationAdjust(ndsHeader, laterSdk, isSdk5(moduleParams), &romLocationChangePrep);
 
 			// dbg_hexa(romLocationChangePrep);
 
@@ -1673,13 +1673,13 @@ int arm7_main(void) {
 	const char* romTid = getRomTid(&dsiHeaderTemp.ndshdr);
 	if (!isDSiWare || !scfgSdmmcEnabled || (REG_SCFG_ROM & BIT(9))) {
 		extern u32 clusterCacheSize;
-		clusterCacheSize = (ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr) && dsiModeConfirmed) ? 0x7B0 : 0x600;
+		clusterCacheSize = (ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr) && dsiModeConfirmed) ? 0x7B0 : 0x3000;
 
 		buildFatTableCacheCompressed(romFile);
 		if (!(romFile->fatTableSettings & fatCached)) {
 			dbg_printf("\n");
 			dbg_printf("Cluster cache is above 0x");
-			dbg_printf((clusterCacheSize == 0x7B0) ? "7B0" : "600");
+			dbg_hexa(clusterCacheSize);
 			dbg_printf(" bytes!\n");
 			dbg_printf("Please back up and restore the SD card contents to defragment it\n");
 			errorOutput();
@@ -1784,13 +1784,13 @@ int arm7_main(void) {
 		if (memcmp(romTid, "HND", 3) == 0) {
 			add = 0x108000; // 0x02808000
 		} */
-		const u32 add = 0xFF200; // 0x027FF200
-		tonccpy((char*)0x02700000+add, (char*)0x02700000, 0x600);	// Move FAT table cache elsewhere
+		const u32 add = 0x8FC000; // 0x02FFC000
+		tonccpy((char*)0x02700000+add, (char*)0x02700000, 0x3000);	// Move FAT table cache elsewhere
 		romFile->fatTableCache = (u32*)((u32)romFile->fatTableCache+add);
 		savFile->fatTableCache = (u32*)((u32)savFile->fatTableCache+add);
 		lastClusterCacheUsed = (u32*)((u32)lastClusterCacheUsed+add);
 		clusterCache += add;
-		toncset((char*)0x02700000, 0, 0x600);
+		toncset((char*)0x02700000, 0, 0x3000);
 	}
 
 	//if (gameOnFlashcard || !isDSiWare || !dsiWramAccess) {
