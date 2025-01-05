@@ -56,6 +56,8 @@ Mario & Luigi: Partners in Time (USA) (Rev 1) (ARME) (DSi/3DS)
 Mario & Luigi: Partners in Time (Europe) (ARMP) (DSi/3DS)
 Mario & Luigi RPG 2x2 (Japan) (ARMJ) (DSi/3DS)
 Mario & Luigi RPG: Siganui Partner (Korea) (ARMK) (DSi/3DS)
+Mario Hoops 3 on 3 (USA) (AB3E) (3DS)
+Mario Basketball: 3 on 3 (Japan) (AB3J) (3DS)
 Mario Kart DS (USA) (AMCE) (DSi)
 Mario Kart DS (Europe) (AMCP) (DSi)
 Mario Kart DS (Japan) (AMCJ) (DSi)
@@ -206,6 +208,9 @@ The Legend of Zelda: Phantom Hourglass (3DS):
 
 Mario & Luigi: Partners in Time (DSi/3DS):
 - Sound data
+
+Mario Hoops 3 on 3 (3DS):
+- Everything except streamed music
 
 Mario Kart DS (DSi):
 - Everything except course data
