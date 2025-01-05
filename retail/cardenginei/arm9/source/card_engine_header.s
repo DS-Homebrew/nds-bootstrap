@@ -66,7 +66,9 @@ romPartSrc:
 	.word	0x00000000
 	.word	0x00000000
 	.word	0x00000000
+	.word	0x00000000
 romPartSize:
+	.word	0x00000000
 	.word	0x00000000
 	.word	0x00000000
 	.word	0x00000000

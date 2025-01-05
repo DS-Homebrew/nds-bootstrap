@@ -47,6 +47,10 @@ Kirby Super Star Ultra (USA) (YKWE) (3DS)
 Kirby Super Star Ultra (Europe) (YKWP) (3DS)
 Hoshi no Kirby Ultra Super Deluxe (Japan) (YKWJ) (3DS)
 Kirby Ultra Super Deluxe (Korea) (YKWK) (3DS)
+The Legend of Zelda: Phantom Hourglass (USA) (AZEE) (3DS)
+The Legend of Zelda: Phantom Hourglass (Europe) (AZEP) (3DS)
+Zelda no Densetsu: Mugen no Sunadokei (Japan) (AZEJ) (3DS)
+Zeldaui Jeonseol: Monghwanui Moraesigye (Korea) (AZEK) (3DS)
 Mario & Luigi: Partners in Time (USA) (ARME) (DSi/3DS)
 Mario & Luigi: Partners in Time (USA) (Rev 1) (ARME) (DSi/3DS)
 Mario & Luigi: Partners in Time (Europe) (ARMP) (DSi/3DS)
@@ -196,6 +200,9 @@ Kirby: Squeak Squad (DSi/3DS):
 Kirby Super Star Ultra (3DS):
 - USA/Japan/Korea: Everything except video cutscenes
 - Europe: Everything except video cutscenes, as well as b10, beginner19, c14, pd, r33, and s37 data
+
+The Legend of Zelda: Phantom Hourglass (3DS):
+- Everything except map data, map object data, streamed music, and WiFi settings menu assets
 
 Mario & Luigi: Partners in Time (DSi/3DS):
 - Sound data

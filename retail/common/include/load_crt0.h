@@ -26,8 +26,8 @@ typedef struct loadCrt0 {
     u32 saveSize;
     // u32 gbaRomSize;
     // u32 gbaSaveSize;
-	u32 dataToPreloadAddr[3];
-	u32 dataToPreloadSize[3];
+	u32 dataToPreloadAddr[4];
+	u32 dataToPreloadSize[4];
 	// u32 dataToPreloadFrame;
     u32 wideCheatFileCluster;
     u32 wideCheatSize;

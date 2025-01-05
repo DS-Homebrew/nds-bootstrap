@@ -270,7 +270,7 @@ int runNds(u32 cluster, u32 saveCluster, u32 donorTwlCluster, /* u32 gbaCluster,
 	loader->saveSize                    = conf->saveSize;
 	// loader->gbaRomSize                  = conf->gbaRomSize;
 	// loader->gbaSaveSize                 = conf->gbaSaveSize;
-	for (int i = 0; i < 3; i++) {
+	for (int i = 0; i < 4; i++) {
 		loader->dataToPreloadAddr[i]    = conf->dataToPreloadAddr[i];
 		loader->dataToPreloadSize[i]    = conf->dataToPreloadSize[i];
 	}

@@ -383,7 +383,7 @@ void cardSetDma(u32 * params) {
 	//int romPartNo = 0;
 	if (!(ce9->valueBits & ROMinRAM)) {
 		#ifndef TWLSDK
-		for (int i = 0; i < 3; i++) {
+		for (int i = 0; i < 4; i++) {
 			if (ce9->romPartSize[i] == 0) {
 				break;
 			}

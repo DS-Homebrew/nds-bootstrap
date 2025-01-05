@@ -121,10 +121,33 @@ void addTwlDevice(const char letter, u8 flags, u8 accessRights, const char* name
 	}
 }
 
+static const char* getLangString(const int language) {
+	switch (language) {
+		case 0:
+			return "ja";
+		case 1:
+		default:
+			return "en";
+		case 2:
+			return "fr";
+		case 3:
+			return "de";
+		case 4:
+			return "it";
+		case 5:
+			return "es";
+		case 6:
+			return "zh";
+		case 7:
+			return "ko";
+	}
+	return "en";
+}
+
 extern std::string ReplaceAll(std::string str, const std::string& from, const std::string& to);
 extern bool extension(const std::string& filename, const char* ext);
 
-static void loadPreLoadSettings(configuration* conf, const char* pckPath, const char* romTid, const u16 headerCRC) {
+static bool loadPreLoadSettings(configuration* conf, const char* pckPath, const char* romTid, const u16 headerCRC) {
 	FILE *file = NULL;
 
 	// Pre-load sound data for mainline Gen 4 Pokemon games
@@ -149,69 +172,75 @@ static void loadPreLoadSettings(configuration* conf, const char* pckPath, const 
 		conf->dataToPreloadSize[0] = getFileSize(file);
 		// conf->dataToPreloadFrame = 0;
 		fclose(file);
-		return;
+		return true;
 	}
 
 	file = fopen(pckPath, "rb");
 	if (!file) {
-		return;
+		return false;
 	}
 
 	char buf[5] = {0};
 		fread(buf, 1, 4, file);
-	if (strcmp(buf, ".PCK") == 0) {
+	if (strcmp(buf, ".PCK") != 0) {
+		return false;
+	}
 
-		u32 fileCount;
-		fread(&fileCount, 1, sizeof(fileCount), file);
+	u32 fileCount;
+	fread(&fileCount, 1, sizeof(fileCount), file);
 
-		u32 offset = 0, size = 0;
+	u32 offset = 0, size = 0;
 
-		// Try binary search for the game
-		int left = 0;
-		int right = fileCount;
+	// Try binary search for the game
+	int left = 0;
+	int right = fileCount;
 
-		while (left <= right) {
-			int mid = left + ((right - left) / 2);
-			fseek(file, 16 + mid * 16, SEEK_SET);
-			fread(buf, 1, 4, file);
-			int cmp = strcmp(buf, romTid);
-			if (cmp == 0) { // TID matches, check CRC
-				u16 crc;
-				fread(&crc, 1, sizeof(crc), file);
+	while (left <= right) {
+		int mid = left + ((right - left) / 2);
+		fseek(file, 16 + mid * 16, SEEK_SET);
+		fread(buf, 1, 4, file);
+		int cmp = strcmp(buf, romTid);
+		if (cmp == 0) { // TID matches, check CRC
+			u16 crc;
+			fread(&crc, 1, sizeof(crc), file);
 
-				if (crc == headerCRC) { // CRC matches
-					fread(&offset, 1, sizeof(offset), file);
-					fread(&size, 1, sizeof(size), file);
-					break;
-				} else if (crc < headerCRC) {
-					left = mid + 1;
-				} else {
-					right = mid - 1;
-				}
-			} else if (cmp < 0) {
+			if (crc == headerCRC) { // CRC matches
+				fread(&offset, 1, sizeof(offset), file);
+				fread(&size, 1, sizeof(size), file);
+				break;
+			} else if (crc < headerCRC) {
 				left = mid + 1;
 			} else {
 				right = mid - 1;
 			}
-		}
-
-		if (offset > 0) {
-			if (size > 0x18) {
-				size = 0x18;
-			}
-			fseek(file, offset, SEEK_SET);
-			u32 *buffer = new u32[size/4];
-			fread(buffer, 1, size, file);
-
-			for (u32 i = 0; i < size/8; i++) {
-				conf->dataToPreloadAddr[i] = buffer[0+(i*2)];
-				conf->dataToPreloadSize[i] = buffer[1+(i*2)];
-			}
-			// conf->dataToPreloadFrame = (size == 0xC) ? buffer[2] : 0;
-			delete[] buffer;
+		} else if (cmp < 0) {
+			left = mid + 1;
+		} else {
+			right = mid - 1;
 		}
 	}
+
+	if (offset > 0) {
+		if (size > 0x20) {
+			size = 0x20;
+		}
+		fseek(file, offset, SEEK_SET);
+		u32 *buffer = new u32[size/4];
+		fread(buffer, 1, size, file);
+
+		for (u32 i = 0; i < size/8; i++) {
+			conf->dataToPreloadAddr[i] = buffer[0+(i*2)];
+			conf->dataToPreloadSize[i] = buffer[1+(i*2)];
+		}
+		// conf->dataToPreloadFrame = (size == 0xC) ? buffer[2] : 0;
+		delete[] buffer;
+	} else {
+		fclose(file);
+		return false;
+	}
+
 	fclose(file);
+	return true;
 }
 
 static void loadApFix(configuration* conf, const char* bootstrapPath, const char* romTid, const u16 headerCRC) {
@@ -1127,7 +1156,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			}
 		} else {
 			// Determine region by language
-			int language = (conf->language >= 0 && conf->language <= 7) ? conf->language : PersonalData->language;
+			const int language = (conf->language >= 0 && conf->language <= 7) ? conf->language : PersonalData->language;
 			if (language == 0) {
 				newRegion = 0;	// Japan
 			} else if (language == 6) {
@@ -1589,8 +1618,20 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			}
 			fclose(cebin);
 
-			loadPreLoadSettings(conf, conf->consoleModel > 0 ? "nitro:/preLoadSettings3DS.pck" : "nitro:/preLoadSettingsDSi.pck", romTid, headerCRC);
-			if (conf->dataToPreloadAddr[0] == 0) {
+			const int language = (conf->language >= 0 && conf->language <= 7) ? conf->language : PersonalData->language;
+			char path[256];
+			sprintf(path, "nitro:/preLoadSettings%s-%s.pck", conf->consoleModel > 0 ? "3DS" : "DSi", getLangString(language));
+
+			bool preLoadRes = loadPreLoadSettings(conf, path, romTid, headerCRC);
+			if (!preLoadRes && language != 1) {
+				sprintf(path, "nitro:/preLoadSettings%s-%s.pck", conf->consoleModel > 0 ? "3DS" : "DSi", getLangString(1));
+				preLoadRes = loadPreLoadSettings(conf, path, romTid, headerCRC);
+			}
+			if (!preLoadRes) {
+				sprintf(path, "nitro:/preLoadSettings%s.pck", conf->consoleModel > 0 ? "3DS" : "DSi");
+				preLoadRes = loadPreLoadSettings(conf, path, romTid, headerCRC);
+			}
+			if (!preLoadRes) {
 				// Set NitroFS pre-load, in case if full ROM pre-load fails
 				conf->dataToPreloadAddr[0] = ndsArm7BinOffset+ndsArm7Size;
 				conf->dataToPreloadSize[0] = ((internalRomSize == 0 || internalRomSize > conf->romSize) ? conf->romSize : internalRomSize)-conf->dataToPreloadAddr[0];

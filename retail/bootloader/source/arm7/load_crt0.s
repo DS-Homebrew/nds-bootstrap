@@ -124,7 +124,9 @@ dataToPreloadAddr:
 	.word	0x00000000
 	.word	0x00000000
 	.word	0x00000000
+	.word	0x00000000
 dataToPreloadSize:
+	.word	0x00000000
 	.word	0x00000000
 	.word	0x00000000
 	.word	0x00000000

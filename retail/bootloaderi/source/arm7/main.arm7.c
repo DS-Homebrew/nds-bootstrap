@@ -105,8 +105,8 @@ extern u32 romSize;
 extern u32 saveSize;
 // extern u32 gbaRomSize;
 // extern u32 gbaSaveSize;
-extern u32 dataToPreloadAddr[3];
-extern u32 dataToPreloadSize[3];
+extern u32 dataToPreloadAddr[4];
+extern u32 dataToPreloadSize[4];
 // extern u32 dataToPreloadFrame;
 extern u32 wideCheatFileCluster;
 extern u32 wideCheatSize;
@@ -1019,15 +1019,15 @@ static void my_readUserSettings(tNDSHeader* ndsHeader) {
 }
 
 u32 dataToPreloadFullSize(void) {
-	u32 dataToPreloadSizeAlign[3] = {dataToPreloadSize[0], dataToPreloadSize[1], dataToPreloadSize[2]};
-	for (int i = 0; i < 3; i++) {
+	u32 dataToPreloadSizeAlign[4] = {dataToPreloadSize[0], dataToPreloadSize[1], dataToPreloadSize[2], dataToPreloadSize[3]};
+	for (int i = 0; i < 4; i++) {
 		if (!dataToPreloadSize[i]) break;
 		while ((dataToPreloadSizeAlign[i] % 0x4000) != 0) {
 			dataToPreloadSizeAlign[i]++;
 		}
 	}
 
-	return dataToPreloadSizeAlign[0] + dataToPreloadSizeAlign[1] + dataToPreloadSizeAlign[2];
+	return dataToPreloadSizeAlign[0] + dataToPreloadSizeAlign[1] + dataToPreloadSizeAlign[2] + dataToPreloadSizeAlign[3];
 }
 
 bool dataToPreloadFound(const tNDSHeader* ndsHeader) {
@@ -1174,8 +1174,8 @@ static void buildRomMap(const tNDSHeader* ndsHeader, const module_params_t* modu
 	// Load ROM into RAM
 	const u32 romLocation = ROMinRAM ? getRomLocation(ndsHeader, !laterSdk, isSdk5(moduleParams), dsiBios) : getRomPartLocation(ndsHeader, !laterSdk, isSdk5(moduleParams), dsiBios);
 
-	u32 romOffset[3] = {(ROMinRAM ? 0 : dataToPreloadAddr[0]), (ROMinRAM ? 0 : dataToPreloadAddr[1]), (ROMinRAM ? 0 : dataToPreloadAddr[2])};
-	s32 romSizeEdit[3] = {(ROMinRAM ? baseRomSize : dataToPreloadSize[0]), (ROMinRAM ? baseRomSize : dataToPreloadSize[1]), (ROMinRAM ? baseRomSize : dataToPreloadSize[2])};
+	u32 romOffset[4] = {(ROMinRAM ? 0 : dataToPreloadAddr[0]), (ROMinRAM ? 0 : dataToPreloadAddr[1]), (ROMinRAM ? 0 : dataToPreloadAddr[2]), (ROMinRAM ? 0 : dataToPreloadAddr[3])};
+	s32 romSizeEdit[4] = {(ROMinRAM ? baseRomSize : dataToPreloadSize[0]), (ROMinRAM ? baseRomSize : dataToPreloadSize[1]), (ROMinRAM ? baseRomSize : dataToPreloadSize[2]), (ROMinRAM ? baseRomSize : dataToPreloadSize[3])};
 	int iCount = 1;
 	if (ROMinRAM) {
 		if (usesCloneboot) {
@@ -1207,6 +1207,9 @@ static void buildRomMap(const tNDSHeader* ndsHeader, const module_params_t* modu
 			iCount++;
 		}
 		if (dataToPreloadSize[2]) {
+			iCount++;
+		}
+		if (dataToPreloadSize[3]) {
 			iCount++;
 		}
 	}
