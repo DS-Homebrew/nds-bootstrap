@@ -47,7 +47,7 @@ $(OUTPUT_DIR)/preLoadSettings3DS-fr.pck: $(FILES3DSFR)
 $(OUTPUT_DIR)/preLoadSettings3DS-de.pck: $(FILES3DSDE)
 	$(PYTHON) pack.py $^ -o $@
 
-$(OUTPUT_DIR)/preLoadSettings3DS-it.pck: $(FILES3DSDE)
+$(OUTPUT_DIR)/preLoadSettings3DS-it.pck: $(FILES3DSIT)
 	$(PYTHON) pack.py $^ -o $@
 
 $(OUTPUT_DIR)/preLoadSettings3DS-es.pck: $(FILES3DSES)
