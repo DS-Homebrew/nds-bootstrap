@@ -372,7 +372,7 @@ static void loadDSi2DSSavePatch(configuration* conf, const char* bootstrapPath, 
 			fread(&size, 1, sizeof(size), file);
 			fread(&ver, 1, sizeof(ver), file);
 
-			if ((crc == 0 || crc == headerCRC) && (ver == 0xFF || ver == romVersion)) {
+			if ((crc == 0xFFFF || crc == headerCRC) && (ver == 0xFF || ver == romVersion)) {
 				break;
 			} else if (crc < headerCRC) {
 				offset = 0;
