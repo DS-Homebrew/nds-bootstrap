@@ -45,11 +45,7 @@ u16 igmPal[6] = {
 static u16* vramBak = (u16*)INGAME_MENU_EXT_LOCATION+(0x18200/sizeof(u16));
 static u16* bmpBuffer = (u16*)INGAME_MENU_EXT_LOCATION;
 #else
-#ifdef EXTMEM
-cardengineArm9* volatile ce9 = (cardengineArm9*)CARDENGINE_ARM9_LOCATION_DLDI_EXTMEM;
-#else
-cardengineArm9* volatile ce9 = (cardengineArm9*)CARDENGINE_ARM9_LOCATION_DLDI_START;
-#endif
+cardengineArm9* volatile ce9 = NULL;
 
 static u16* vramBak = (u16*)INGAME_MENU_EXT_LOCATION_B4DS+(0x18200/sizeof(u16));
 static u16* bmpBuffer = (u16*)INGAME_MENU_EXT_LOCATION_B4DS;
@@ -762,19 +758,11 @@ u32 inGameMenu(s32 *mainScreen, u32 consoleModel, s32 *exceptionRegisters) {
 	bool exception = (exceptionRegisters != 0);
 
 	#ifdef B4DS
-	#ifndef EXTMEM
 	static bool ce9Set = false;
 	if (!ce9Set) {
-		if (*(u32*)CARDENGINE_ARM9_LOCATION_DLDI_ALT == CARDENGINE_ARM9_LOCATION_DLDI_ALT) {
-			ce9 = (cardengineArm9*)CARDENGINE_ARM9_LOCATION_DLDI_ALT;
-		} else if (*(u32*)CARDENGINE_ARM9_LOCATION_DLDI_ALT2 == CARDENGINE_ARM9_LOCATION_DLDI_ALT2) {
-			ce9 = (cardengineArm9*)CARDENGINE_ARM9_LOCATION_DLDI_ALT2;
-		} else if (*(u32*)CARDENGINE_ARM9_LOCATION_DLDI == CARDENGINE_ARM9_LOCATION_DLDI) {
-			ce9 = (cardengineArm9*)CARDENGINE_ARM9_LOCATION_DLDI;
-		}
+		ce9 = (cardengineArm9*)consoleModel;
 		ce9Set = true;
 	}
-	#endif
 	#endif
 
 	u32 res = 0;

@@ -36,6 +36,7 @@ ARCH	:=	-mthumb-interwork -march=armv5te -mtune=arm946e-s
 CFLAGS	:=	-g -Wall -Os\
  			-march=armv5te -mtune=arm946e-s -fomit-frame-pointer\
 			-ffast-math \
+			-flto \
 			$(ARCH)
 
 # ADD -DDEBUG here for logging/debug
