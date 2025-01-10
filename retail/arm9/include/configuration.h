@@ -26,6 +26,7 @@ typedef struct configuration {
 	// char* gbaPath;
 	// char* gbaSavPath;
 	char* apPatchPath;
+	char* dsi2dsSavePatchPath;
 	u32 donorFileSize;
 	u32 donorFileOffset;
 	u32 romSize;
@@ -35,6 +36,8 @@ typedef struct configuration {
 	u32 wideCheatSize;
 	u32 apPatchOffset;
 	u32 apPatchSize;
+	u32 dsi2dsSavePatchOffset;
+	u32 dsi2dsSavePatchSize;
 	u32 cheatSize;
 	u32 musicsSize;
 	u32 dataToPreloadAddr[4];

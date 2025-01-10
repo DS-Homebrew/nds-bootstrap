@@ -338,6 +338,69 @@ static void loadApFix(configuration* conf, const char* bootstrapPath, const char
 	fclose(file);
 }
 
+static void loadDSi2DSSavePatch(configuration* conf, const char* bootstrapPath, const char* romTid, const u8 romVersion, const u16 headerCRC) {
+	FILE *file = fopen("nitro:/dsi2dsSavePatches.pck", "rb");
+	if (!file) {
+		return;
+	}
+
+	char buf[5] = {0};
+		fread(buf, 1, 4, file);
+	if (strcmp(buf, ".PCK") != 0) {
+		return;
+	}
+
+	u32 fileCount;
+	fread(&fileCount, 1, sizeof(fileCount), file);
+
+	u32 offset = 0, size = 0;
+
+	// Try binary search for the game
+	int left = 0;
+	int right = fileCount;
+
+	while (left <= right) {
+		int mid = left + ((right - left) / 2);
+		fseek(file, 16 + mid * 16, SEEK_SET);
+		fread(buf, 1, 4, file);
+		int cmp = strcmp(buf, romTid);
+		if (cmp == 0) { // TID matches, check other info
+			u16 crc;
+			u8 ver;
+			fread(&crc, 1, sizeof(crc), file);
+			fread(&offset, 1, sizeof(offset), file);
+			fread(&size, 1, sizeof(size), file);
+			fread(&ver, 1, sizeof(ver), file);
+
+			if ((crc == 0 || crc == headerCRC) && (ver == 0xFF || ver == romVersion)) {
+				break;
+			} else if (crc < headerCRC) {
+				offset = 0;
+				size = 0;
+
+				left = mid + 1;
+			} else {
+				offset = 0;
+				size = 0;
+
+				right = mid - 1;
+			}
+		} else if (cmp < 0) {
+			left = mid + 1;
+		} else {
+			right = mid - 1;
+		}
+	}
+
+	if (offset > 0) {
+		sprintf(conf->dsi2dsSavePatchPath, bootstrapPath);
+		conf->dsi2dsSavePatchOffset = offsetOfOpenedNitroFile+offset;
+		conf->dsi2dsSavePatchSize = size;
+	}
+
+	fclose(file);
+}
+
 static int loadCardEngineBinary(const char* cardenginePath, u8* location) {
 	FILE* cebin = fopen(cardenginePath, "rb");
 	int size;
@@ -950,6 +1013,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 	char romTid[5] = {0};
 	u8 unitCode = 0;
+	u8 romVersion = 0;
 	u32 ndsArm9BinOffset = 0;
 	u32 ndsArm9Offset = 0;
 	u32 ndsArm7BinOffset = 0;
@@ -977,6 +1041,8 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		fread(&romTid, 1, 4, ndsFile);
 		fseek(ndsFile, 0x12, SEEK_SET);
 		fread(&unitCode, 1, 1, ndsFile);
+		fseek(ndsFile, 0x1E, SEEK_SET);
+		fread(&romVersion, 1, 1, ndsFile);
 		fseek(ndsFile, 0x20, SEEK_SET);
 		fread(&ndsArm9BinOffset, sizeof(u32), 1, ndsFile);
 		fseek(ndsFile, 0x28, SEEK_SET);
@@ -2372,6 +2438,10 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 					break;
 				}
 			}
+		}
+
+		if (!isDSiMode() || !scfgSdmmcEnabled) {
+			loadDSi2DSSavePatch(conf, bootstrapPath, romTid, romVersion, headerCRC);
 		}
 	} else {
 		loadApFix(conf, bootstrapPath, romTid, headerCRC);

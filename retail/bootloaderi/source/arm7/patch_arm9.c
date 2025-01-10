@@ -10,6 +10,7 @@
 #include "unpatched_funcs.h"
 #include "debug_file.h"
 #include "dmaTwl.h"
+#include "my_fat.h"
 #include "tonccpy.h"
 
 #include "igm_text.h"
@@ -2019,6 +2020,83 @@ void patchSharedFontPath(const cardengineArm9* ce9, const tNDSHeader* ndsHeader,
 	}
 }
 
+void patchTwlSaveFuncs(const cardengineArm9* ce9) {
+	extern u16 bootstrapOnFlashcard;
+	extern u32 dsi2dsSavePatchFileCluster;
+	extern u32 dsi2dsSavePatchOffset;
+	extern u32 dsi2dsSavePatchSize;
+	if (dsi2dsSavePatchFileCluster == CLUSTER_FREE || dsi2dsSavePatchOffset == 0 || dsi2dsSavePatchSize == 0) {
+		return;
+	}
+
+	const u32* dsiSaveGetResultCode = ce9->patches->dsiSaveGetResultCode;
+	const u32* dsiSaveCreate = ce9->patches->dsiSaveCreate;
+	const u32* dsiSaveDelete = ce9->patches->dsiSaveDelete;
+	const u32* dsiSaveGetInfo = ce9->patches->dsiSaveGetInfo;
+	const u32* dsiSaveSetLength = ce9->patches->dsiSaveSetLength;
+	const u32* dsiSaveOpen = ce9->patches->dsiSaveOpen;
+	const u32* dsiSaveOpenR = ce9->patches->dsiSaveOpenR;
+	const u32* dsiSaveClose = ce9->patches->dsiSaveClose;
+	const u32* dsiSaveGetLength = ce9->patches->dsiSaveGetLength;
+	const u32* dsiSaveGetPosition = ce9->patches->dsiSaveGetPosition;
+	const u32* dsiSaveSeek = ce9->patches->dsiSaveSeek;
+	const u32* dsiSaveRead = ce9->patches->dsiSaveRead;
+	const u32* dsiSaveWrite = ce9->patches->dsiSaveWrite;
+
+	aFile file;
+	getFileFromCluster(&file, dsi2dsSavePatchFileCluster, bootstrapOnFlashcard);
+
+	for (u32 i = 0; i < dsi2dsSavePatchSize; i += 8) {
+		u32 patchData[2];
+		fileRead((char*)patchData, &file, dsi2dsSavePatchOffset+i, 8);
+
+		switch (patchData[1]) {
+			case 0x52544547: // 'GETR'
+				setBL(patchData[0], (u32)dsiSaveGetResultCode);
+				break;
+			case 0x41455243: // 'CREA'
+				setBL(patchData[0], (u32)dsiSaveCreate);
+				break;
+			case 0x454C4544: // 'DELE'
+				setBL(patchData[0], (u32)dsiSaveDelete);
+				break;
+			case 0x49544547: // 'GETI'
+				setBL(patchData[0], (u32)dsiSaveGetInfo);
+				break;
+			case 0x4C544553: // 'SETL'
+				setBL(patchData[0], (u32)dsiSaveSetLength);
+				break;
+			case 0x4E45504F: // 'OPEN'
+				setBL(patchData[0], (u32)dsiSaveOpen);
+				break;
+			case 0x5245504F: // 'OPER'
+				setBL(patchData[0], (u32)dsiSaveOpenR);
+				break;
+			case 0x534F4C43: // 'CLOS'
+				setBL(patchData[0], (u32)dsiSaveClose);
+				break;
+			case 0x4C544547: // 'GETL'
+				setBL(patchData[0], (u32)dsiSaveGetLength);
+				break;
+			case 0x50544547: // 'GETP'
+				setBL(patchData[0], (u32)dsiSaveGetPosition);
+				break;
+			case 0x4B454553: // 'SEEK'
+				setBL(patchData[0], (u32)dsiSaveSeek);
+				break;
+			case 0x44414552: // 'READ'
+				setBL(patchData[0], (u32)dsiSaveRead);
+				break;
+			case 0x54495257: // 'WRIT'
+				setBL(patchData[0], (u32)dsiSaveWrite);
+				break;
+			default:
+				*(u32*)(patchData[0]) = patchData[1];
+				break;
+		}
+	}
+}
+
 void codeCopy(u32* dst, u32* src, u32 len) {
 	tonccpy(dst, src, len);
 
@@ -2681,6 +2759,8 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 
 		// patchA9Mbk(ndsHeader, moduleParams, false);
 		patchSharedFontPath(ce9, ndsHeader, moduleParams, ltdModuleParams);
+
+		patchTwlSaveFuncs(ce9);
 	}
 
 	if (strncmp(romTid, "V2G", 3) == 0 && !dsiModeConfirmed) {

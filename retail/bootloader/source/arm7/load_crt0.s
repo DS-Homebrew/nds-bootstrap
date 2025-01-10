@@ -49,7 +49,9 @@
 	.global apPatchFileCluster
 	.global apPatchOffset
 	.global apPatchSize
-	.global apPatchIsCheat
+	.global dsi2dsSavePatchFileCluster
+	.global dsi2dsSavePatchOffset
+	.global dsi2dsSavePatchSize
 	.global cheatFileCluster
 	.global cheatSize
 	.global patchOffsetCacheFileCluster
@@ -141,6 +143,12 @@ apPatchFileCluster:
 apPatchOffset:
 	.word	0x00000000
 apPatchSize:
+	.word	0x00000000
+dsi2dsSavePatchFileCluster:
+	.word	0x00000000
+dsi2dsSavePatchOffset:
+	.word	0x00000000
+dsi2dsSavePatchSize:
 	.word	0x00000000
 cheatFileCluster:
 	.word	0x00000000

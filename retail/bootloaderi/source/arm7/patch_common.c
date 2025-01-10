@@ -16191,8 +16191,8 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
 
 #ifdef LOADERTYPE0
 	// 1st Class Poker & BlackJack (USA)
-	else if (strcmp(romTid, "KYPE") == 0 && saveOnFlashcardNtr) {
-		setBL(0x02012E50, (u32)dsiSaveOpen);
+	/* else if (strcmp(romTid, "KYPE") == 0 && saveOnFlashcardNtr) {
+		setBL(0x02012E50, (u32)dsiSaveOpen); // Part of .pck file
 		setBL(0x02012EC4, (u32)dsiSaveGetLength);
 		setBL(0x02012ED8, (u32)dsiSaveClose);
 		setBL(0x02012EF8, (u32)dsiSaveSeek);
@@ -16210,11 +16210,11 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
 		setBL(0x0201319C, (u32)dsiSaveWrite);
 		setBL(0x020131B0, (u32)dsiSaveClose);
 		setBL(0x020131FC, (u32)dsiSaveClose);
-	}
+	} */
 
 	// 1st Class Poker & BlackJack (Europe)
-	else if (strcmp(romTid, "KYPP") == 0 && saveOnFlashcardNtr) {
-		setBL(0x02012E40, (u32)dsiSaveOpen);
+	/* else if (strcmp(romTid, "KYPP") == 0 && saveOnFlashcardNtr) {
+		setBL(0x02012E40, (u32)dsiSaveOpen); // Part of .pck file
 		setBL(0x02012EB4, (u32)dsiSaveGetLength);
 		setBL(0x02012EC8, (u32)dsiSaveClose);
 		setBL(0x02012EE8, (u32)dsiSaveSeek);
@@ -16232,7 +16232,7 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
 		setBL(0x0201318C, (u32)dsiSaveWrite);
 		setBL(0x020131A0, (u32)dsiSaveClose);
 		setBL(0x020131EC, (u32)dsiSaveClose);
-	}
+	} */
 
 	// Art Style: BASE 10 (USA)
 	else if (strcmp(romTid, "KADE") == 0) {
