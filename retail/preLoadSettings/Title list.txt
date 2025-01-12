@@ -38,6 +38,8 @@ FabStyle (Japan) (THMJ) (3DS)
 Final Fantasy III (USA) (AFFE) (DSi/3DS)
 Final Fantasy III (Europe) (AFFP) (DSi/3DS)
 Final Fantasy III (Japan) (AFFJ) (DSi/3DS)
+Geometry Wars: Galaxies (USA) (YGLE) (DSi/3DS)
+Geometry Wars: Galaxies (Europe) (YGLP) (DSi/3DS)
 Kirby: Canvas Curse (USA) (ATKE) (3DS)
 Kirby: Power Paintbrush (Europe) (ATKP) (3DS)
 Touch! Kirby (Japan) (ATKJ) (3DS)
@@ -197,6 +199,9 @@ FabStyle (3DS):
 
 Final Fantasy III (DSi/3DS):
 - Opening video
+
+Geometry Wars: Galaxies (DSi/3DS):
+- Everything except sound data
 
 Kirby: Canvas Curse (3DS):
 - Sound data
