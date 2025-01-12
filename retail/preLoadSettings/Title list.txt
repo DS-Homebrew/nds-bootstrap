@@ -40,6 +40,7 @@ Final Fantasy III (Europe) (AFFP) (DSi/3DS)
 Final Fantasy III (Japan) (AFFJ) (DSi/3DS)
 Geometry Wars: Galaxies (USA) (YGLE) (DSi/3DS)
 Geometry Wars: Galaxies (Europe) (YGLP) (DSi/3DS)
+Houkago Shounen (Japan) (YHGJ) (Japan) (3DS)
 Kirby: Canvas Curse (USA) (ATKE) (3DS)
 Kirby: Power Paintbrush (Europe) (ATKP) (3DS)
 Touch! Kirby (Japan) (ATKJ) (3DS)
@@ -202,6 +203,9 @@ Final Fantasy III (DSi/3DS):
 
 Geometry Wars: Galaxies (DSi/3DS):
 - Everything except sound data
+
+Houkago Shounen (3DS):
+- Everything except sound data and WiFi settings menu assets
 
 Kirby: Canvas Curse (3DS):
 - Sound data
