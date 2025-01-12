@@ -1036,7 +1036,7 @@ bool dataToPreloadFound(const tNDSHeader* ndsHeader) {
 	}
 	const bool cheatsEnabled = (cheatSizeTotal > 4 && cheatSizeTotal <= 0x8000);
 
-	return (dataToPreloadSize[0] > 0 && dataToPreloadFullSize() <= (consoleModel > 0 ? (dsiModeConfirmed ? (ndsHeader->unitCode > 0 ? dev_CACHE_ADRESS_SIZE_TWLSDK : dev_CACHE_ADRESS_SIZE_DSIMODE) : dev_CACHE_ADRESS_SIZE) : (dsiModeConfirmed ? (ndsHeader->unitCode > 0 ? (cheatsEnabled ? retail_CACHE_ADRESS_SIZE_TWLSDK_CHEAT : retail_CACHE_ADRESS_SIZE_TWLSDK) : retail_CACHE_ADRESS_SIZE_DSIMODE) : retail_CACHE_ADRESS_SIZE))-0x40000);
+	return (dataToPreloadSize[0] > 0 && dataToPreloadFullSize() <= (consoleModel > 0 ? (dsiModeConfirmed ? (ndsHeader->unitCode > 0 ? (cheatsEnabled ? dev_CACHE_ADRESS_SIZE_TWLSDK_CHEAT : dev_CACHE_ADRESS_SIZE_TWLSDK) : dev_CACHE_ADRESS_SIZE_DSIMODE) : dev_CACHE_ADRESS_SIZE) : (dsiModeConfirmed ? (ndsHeader->unitCode > 0 ? (cheatsEnabled ? retail_CACHE_ADRESS_SIZE_TWLSDK_CHEAT : retail_CACHE_ADRESS_SIZE_TWLSDK) : retail_CACHE_ADRESS_SIZE_DSIMODE) : retail_CACHE_ADRESS_SIZE))-0x40000);
 }
 
 static void loadROMPartIntoRAM(const tNDSHeader* ndsHeader, aFile* file) {
