@@ -162,7 +162,8 @@ Catch! Touch! Yoshi! (Japan) (Rev 1) (AYIJ) (DSi)
 Pre-loaded data:
 
 Animal Crossing: Wild World (3DS):
-- Sound data
+- USA/Japan/Korea: Everything except title screen music from sound data
+- Europe: Sound data
 
 Base 10 (Art Style) (MEP):
 - Sound data
