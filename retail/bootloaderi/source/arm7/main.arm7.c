@@ -322,6 +322,9 @@ static void resetMemory_ARM7(void) {
 	dma_twlFill32(0, 0, (u32*)0x02FFF000, 0xD60);		// clear part of EWRAM
 	toncset32((u32*)0x02FFFDFC, 0, 1);		// clear TWLCFG address
 	dma_twlFill32(0, 0, (u32*)0x02FFFE00, 0x200);		// clear part of EWRAM: header
+	if (consoleModel > 0) {
+		dma_twlFill32(0, 0, (u32*)0x0D000000, 0x1000000);		// clear extra RAM
+	}
 	REG_IE = 0;
 	REG_IF = ~0;
 	REG_AUXIE = 0;
