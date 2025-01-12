@@ -41,6 +41,8 @@ Final Fantasy III (Japan) (AFFJ) (DSi/3DS)
 Geometry Wars: Galaxies (USA) (YGLE) (DSi/3DS)
 Geometry Wars: Galaxies (Europe) (YGLP) (DSi/3DS)
 Houkago Shounen (Japan) (YHGJ) (Japan) (3DS)
+Juiced 2: Hot Import Nights (USA) (YJ2E) (DSi)
+Juiced 2: Hot Import Nights (Europe) (YJ2P) (DSi)
 Kirby: Canvas Curse (USA) (ATKE) (3DS)
 Kirby: Power Paintbrush (Europe) (ATKP) (3DS)
 Touch! Kirby (Japan) (ATKJ) (3DS)
@@ -206,6 +208,9 @@ Geometry Wars: Galaxies (DSi/3DS):
 
 Houkago Shounen (3DS):
 - Everything except sound data and WiFi settings menu assets
+
+Juiced 2: Hot Import Nights (DSi):
+- Everything except streamed music
 
 Kirby: Canvas Curse (3DS):
 - Sound data
