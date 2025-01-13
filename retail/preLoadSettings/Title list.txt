@@ -84,6 +84,10 @@ Rockman ZX (Japan) (ARZJ) (3DS)
 MegaMan ZX Advent (USA) (YZXE) (3DS)
 MegaMan ZX Advent (Europe) (YZXP) (3DS)
 Rockman ZX Advent (Japan) (YZXJ) (3DS)
+Metal Slug 7 (USA) (YM7E) (DSi/3DS)
+Metal Slug 7 (Europe) (YM7P) (DSi/3DS)
+Metal Slug 7 (Japan) (YM7J) (DSi/3DS)
+Metal Slug 7 (Korea) (YM7K) (DSi/3DS)
 Metroid Prime Hunters (USA) (AMHE) (DSi/3DS)
 Metroid Prime Hunters (USA) (Rev 1) (AMHE) (DSi/3DS)
 Metroid Prime Hunters (Japan) (AMHJ) (DSi/3DS)
@@ -260,6 +264,9 @@ MegaMan ZX (3DS):
 MegaMan ZX Advent (3DS):
 - USA/Japan: Everything except for sound data, video cutscenes, and Download Play client
 - Europe: Everything except for sound data, video cutscenes, Download Play client, and language-specific text files
+
+Metal Slug 7 (DSi/3DS):
+- Most commonly used data (ex. object animations, player sprites, etc.)
 
 New Super Mario Bros. (DSi):
 - Everything except sound data
