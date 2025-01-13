@@ -131,6 +131,9 @@ Rhythm Tengoku Gold (Japan) (YLZJ) (DSi/3DS)
 Rhythm World (Korea) (YLZK) (DSi/3DS)
 SaGa 3: Jikuu no Hasha: Shadow or Light (Japan) (BZ3J) (DSi/3DS)
 SaGa 3: Jikuu no Hasha: Shadow or Light (English translation) (BZ3J-D409) (DSi/3DS)
+Sonic Colors (USA) (BXSE) (3DS)
+Sonic Colours (Europe) (BXSP) (3DS)
+Sonic Colors (Japan) (BXSJ) (3DS)
 Sonic Rush Adventure (USA) (A3YE) (MEP/DSi/3DS)
 Sonic Rush Adventure (Europe) (A3YP) (MEP/DSi/3DS)
 Sonic Rush Adventure (Japan) (A3YJ) (MEP/DSi/3DS)
@@ -280,6 +283,9 @@ Rhythm Heaven (DSi/3DS):
 
 SaGa 3: Jikuu no Hasha: Shadow or Light (DSi/3DS):
 - Sound data
+
+Sonic Colors (3DS):
+- Everything except non-main sound data files, streamed music/voices, and video cutscenes
 
 Sonic Rush Adventure (MEP/DSi/3DS):
 - Opening cutscene music
