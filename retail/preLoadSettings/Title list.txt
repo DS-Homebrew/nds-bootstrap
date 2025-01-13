@@ -134,6 +134,9 @@ SaGa 3: Jikuu no Hasha: Shadow or Light (English translation) (BZ3J-D409) (DSi/3
 Sonic Colors (USA) (BXSE) (3DS)
 Sonic Colours (Europe) (BXSP) (3DS)
 Sonic Colors (Japan) (BXSJ) (3DS)
+Sonic Rush (USA) (ASCE) (3DS)
+Sonic Rush (Europe) (ASCP) (3DS)
+Sonic Rush (Japan) (ASCJ) (3DS)
 Sonic Rush Adventure (USA) (A3YE) (MEP/DSi/3DS)
 Sonic Rush Adventure (Europe) (A3YP) (MEP/DSi/3DS)
 Sonic Rush Adventure (Europe) (Rev 1) (A3YP) (MEP/DSi/3DS)
@@ -287,6 +290,9 @@ SaGa 3: Jikuu no Hasha: Shadow or Light (DSi/3DS):
 
 Sonic Colors (3DS):
 - Everything except non-main sound data files, streamed music/voices, and video cutscenes
+
+Sonic Rush (3DS):
+- Everything except sound data
 
 Sonic Rush Adventure (MEP/DSi/3DS):
 - Opening cutscene music
