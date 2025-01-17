@@ -2073,7 +2073,11 @@ void patchTwlSaveFuncs(const cardengineArm9* ce9) {
 				}
 				break;
 			case 0x41455243: // 'CREA'
-				setBL(patchData[0], (u32)dsiSaveCreate);
+				if (*(u32*)(patchData[0]) >= 0xEB000000 && *(u32*)(patchData[0]) < 0xEC000000) {
+					setBL(patchData[0], (u32)dsiSaveCreate);
+				} else if (*(u32*)(patchData[0]-4) == 0xE12FFF1C || *(u32*)(patchData[0]-8) == 0xE12FFF1C) {
+					*(u32*)(patchData[0]) = (u32)dsiSaveCreate;
+				}
 				break;
 			case 0x454C4544: // 'DELE'
 				setBL(patchData[0], (u32)dsiSaveDelete);
@@ -2087,7 +2091,7 @@ void patchTwlSaveFuncs(const cardengineArm9* ce9) {
 			case 0x4E45504F: // 'OPEN'
 				if (*(u32*)(patchData[0]) >= 0xEB000000 && *(u32*)(patchData[0]) < 0xEC000000) {
 					setBL(patchData[0], (u32)dsiSaveOpen);
-				} else if (*(u32*)(patchData[0]-4) == 0xE12FFF1C) {
+				} else if (*(u32*)(patchData[0]-4) == 0xE12FFF1C || *(u32*)(patchData[0]-8) == 0xE12FFF1C) {
 					*(u32*)(patchData[0]) = (u32)dsiSaveOpen;
 				}
 				break;
@@ -2112,7 +2116,7 @@ void patchTwlSaveFuncs(const cardengineArm9* ce9) {
 			case 0x54495257: // 'WRIT'
 				if (*(u32*)(patchData[0]) >= 0xEB000000 && *(u32*)(patchData[0]) < 0xEC000000) {
 					setBL(patchData[0], (u32)dsiSaveWrite);
-				} else if (*(u32*)(patchData[0]-4) == 0xE12FFF1C) {
+				} else if (*(u32*)(patchData[0]-4) == 0xE12FFF1C || *(u32*)(patchData[0]-8) == 0xE12FFF1C) {
 					*(u32*)(patchData[0]) = (u32)dsiSaveWrite;
 				}
 				break;
