@@ -2020,6 +2020,30 @@ void patchSharedFontPath(const cardengineArm9* ce9, const tNDSHeader* ndsHeader,
 	}
 }
 
+static u32 twlSaveThumbBranchOffset = 0;
+
+static void twlSaveSetTBranch(const u32 patchData0, const u32 patchData1) {
+	static u32 twlSaveThumbBranchOffsetCache[13] = {0};
+	static bool offsetSet[13] = {false};
+
+	int i = 0;
+	for (i = 0; i < 13; i++) {
+		if (!offsetSet[i] || twlSaveThumbBranchOffsetCache[i] == patchData1) {
+			break;
+		}
+	}
+
+	if (!offsetSet[i]) {
+		twlSaveThumbBranchOffsetCache[i] = twlSaveThumbBranchOffset;
+		twlSaveThumbBranchOffset += 4;
+
+		setB(twlSaveThumbBranchOffsetCache[i], (u32)patchData1);
+		offsetSet[i] = true;
+	}
+
+	setBLXThumb(patchData0, twlSaveThumbBranchOffsetCache[i]);
+}
+
 void patchTwlSaveFuncs(const cardengineArm9* ce9) {
 	extern u16 bootstrapOnFlashcard;
 	extern u32 dsi2dsSavePatchFileCluster;
@@ -2049,65 +2073,123 @@ void patchTwlSaveFuncs(const cardengineArm9* ce9) {
 	for (u32 i = 0; i < dsi2dsSavePatchSize; i += 8) {
 		u32 patchData[2];
 		fileRead((char*)patchData, &file, dsi2dsSavePatchOffset+i, 8);
+		const bool patchIsThumb = (patchData[0] >= 0x10000000 && patchData[0] < 0x20000000);
+		if (patchIsThumb) {
+			patchData[0] -= 0x10000000;
+		}
 
 		switch (patchData[1]) {
+			case 0x4E494254: // 'TBIN'
+				twlSaveThumbBranchOffset = patchData[0];
+				break;
 			case 0x52544547: // 'GETR'
-				if (*(u32*)(patchData[0]) >= 0xEB000000 && *(u32*)(patchData[0]) < 0xEC000000) {
+				if (patchIsThumb) {
+					twlSaveSetTBranch(patchData[0], (u32)dsiSaveGetResultCode);
+				} else if (*(u32*)(patchData[0]) >= 0xEB000000 && *(u32*)(patchData[0]) < 0xEC000000) {
 					setBL(patchData[0], (u32)dsiSaveGetResultCode);
 				} else {
 					tonccpy((u32*)(patchData[0]), dsiSaveGetResultCode, 8);
 				}
 				break;
 			case 0x41455243: // 'CREA'
-				if (*(u32*)(patchData[0]) >= 0xEB000000 && *(u32*)(patchData[0]) < 0xEC000000) {
+				if (patchIsThumb) {
+					twlSaveSetTBranch(patchData[0], (u32)dsiSaveCreate);
+				} else if (*(u32*)(patchData[0]) >= 0xEB000000 && *(u32*)(patchData[0]) < 0xEC000000) {
 					setBL(patchData[0], (u32)dsiSaveCreate);
 				} else if (*(u32*)(patchData[0]-4) == 0xE12FFF1C || *(u32*)(patchData[0]-8) == 0xE12FFF1C) {
 					*(u32*)(patchData[0]) = (u32)dsiSaveCreate;
 				}
 				break;
 			case 0x454C4544: // 'DELE'
-				setBL(patchData[0], (u32)dsiSaveDelete);
+				if (patchIsThumb) {
+					twlSaveSetTBranch(patchData[0], (u32)dsiSaveDelete);
+				} else {
+					setBL(patchData[0], (u32)dsiSaveDelete);
+				}
 				break;
 			case 0x49544547: // 'GETI'
-				setBL(patchData[0], (u32)dsiSaveGetInfo);
+				if (patchIsThumb) {
+					twlSaveSetTBranch(patchData[0], (u32)dsiSaveGetInfo);
+				} else {
+					setBL(patchData[0], (u32)dsiSaveGetInfo);
+				}
 				break;
 			case 0x4C544553: // 'SETL'
-				setBL(patchData[0], (u32)dsiSaveSetLength);
+				if (patchIsThumb) {
+					twlSaveSetTBranch(patchData[0], (u32)dsiSaveSetLength);
+				} else {
+					setBL(patchData[0], (u32)dsiSaveSetLength);
+				}
 				break;
 			case 0x4E45504F: // 'OPEN'
-				if (*(u32*)(patchData[0]) >= 0xEB000000 && *(u32*)(patchData[0]) < 0xEC000000) {
+				if (patchIsThumb) {
+					twlSaveSetTBranch(patchData[0], (u32)dsiSaveOpen);
+				} else if (*(u32*)(patchData[0]) >= 0xEB000000 && *(u32*)(patchData[0]) < 0xEC000000) {
 					setBL(patchData[0], (u32)dsiSaveOpen);
 				} else if (*(u32*)(patchData[0]-4) == 0xE12FFF1C || *(u32*)(patchData[0]-8) == 0xE12FFF1C) {
 					*(u32*)(patchData[0]) = (u32)dsiSaveOpen;
 				}
 				break;
 			case 0x5245504F: // 'OPER'
-				setBL(patchData[0], (u32)dsiSaveOpenR);
+				if (patchIsThumb) {
+					twlSaveSetTBranch(patchData[0], (u32)dsiSaveOpenR);
+				} else {
+					setBL(patchData[0], (u32)dsiSaveOpenR);
+				}
 				break;
 			case 0x534F4C43: // 'CLOS'
-				setBL(patchData[0], (u32)dsiSaveClose);
+				if (patchIsThumb) {
+					twlSaveSetTBranch(patchData[0], (u32)dsiSaveClose);
+				} else {
+					setBL(patchData[0], (u32)dsiSaveClose);
+				}
 				break;
 			case 0x4C544547: // 'GETL'
-				setBL(patchData[0], (u32)dsiSaveGetLength);
+				if (patchIsThumb) {
+					twlSaveSetTBranch(patchData[0], (u32)dsiSaveGetLength);
+				} else {
+					setBL(patchData[0], (u32)dsiSaveGetLength);
+				}
 				break;
 			case 0x50544547: // 'GETP'
-				setBL(patchData[0], (u32)dsiSaveGetPosition);
+				if (patchIsThumb) {
+					twlSaveSetTBranch(patchData[0], (u32)dsiSaveGetPosition);
+				} else {
+					setBL(patchData[0], (u32)dsiSaveGetPosition);
+				}
 				break;
 			case 0x4B454553: // 'SEEK'
-				setBL(patchData[0], (u32)dsiSaveSeek);
+				if (patchIsThumb) {
+					twlSaveSetTBranch(patchData[0], (u32)dsiSaveSeek);
+				} else {
+					setBL(patchData[0], (u32)dsiSaveSeek);
+				}
 				break;
 			case 0x44414552: // 'READ'
-				setBL(patchData[0], (u32)dsiSaveRead);
+				if (patchIsThumb) {
+					twlSaveSetTBranch(patchData[0], (u32)dsiSaveRead);
+				} else {
+					setBL(patchData[0], (u32)dsiSaveRead);
+				}
 				break;
 			case 0x54495257: // 'WRIT'
-				if (*(u32*)(patchData[0]) >= 0xEB000000 && *(u32*)(patchData[0]) < 0xEC000000) {
+				if (patchIsThumb) {
+					twlSaveSetTBranch(patchData[0], (u32)dsiSaveWrite);
+				} else if (*(u32*)(patchData[0]) >= 0xEB000000 && *(u32*)(patchData[0]) < 0xEC000000) {
 					setBL(patchData[0], (u32)dsiSaveWrite);
 				} else if (*(u32*)(patchData[0]-4) == 0xE12FFF1C || *(u32*)(patchData[0]-8) == 0xE12FFF1C) {
 					*(u32*)(patchData[0]) = (u32)dsiSaveWrite;
 				}
 				break;
 			default:
-				*(u32*)(patchData[0]) = patchData[1];
+				if (patchIsThumb) {
+					const u32 patchData1 = patchData[1];
+					const u16* patchData1T = (u16*)&patchData1;
+					*(u16*)(patchData[0]) = patchData1T[0];
+					*(u16*)(patchData[0]+2) = patchData1T[1];
+				} else {
+					*(u32*)(patchData[0]) = patchData[1];
+				}
 				break;
 		}
 	}

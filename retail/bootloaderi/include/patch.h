@@ -169,6 +169,7 @@ u32* getOffsetFromBLX(u32* blxOffset);
 const u16* generateA7InstrThumb(int arg1, int arg2);
 u16* getOffsetFromBLThumb(const u16* blOffset);
 void setBLThumb(int arg1, int arg2);
+void setBLXThumb(int arg1, int arg2);
 void codeCopy(u32* dst, u32* src, u32 len);
 void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader);
 void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params_t* moduleParams);
