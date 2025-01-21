@@ -197,7 +197,8 @@ void reset(u32 param, u32 tid2) {
 	#ifdef DLDI
 	sysSetCardOwner(false);	// Give Slot-1 access to arm7
 	#endif
-	if (param == 0xFFFFFFFF || *(u32*)0x02FFE234 == 0x00030004 || *(u32*)0x02FFE234 == 0x00030005) { // If DSiWare...
+	const bool isDSiWare = (*(u32*)0x02FFE234 == 0x00030004 || *(u32*)0x02FFE234 == 0x00030005 || *(u32*)0x02FFE234 == 0x00030015 || *(u32*)0x02FFE234 == 0x00030017);
+	if (param == 0xFFFFFFFF || isDSiWare) { // If DSiWare...
 		if (param == 0xFFFFFFFF || (param != *(u32*)0x02FFE230 && tid2 != *(u32*)0x02FFE234)) {
 			/*if (ce9->consoleModel < 2) {
 				// Make screens white
@@ -230,7 +231,7 @@ void reset(u32 param, u32 tid2) {
 	if (igmReset) {
 		igmReset = false;
 #ifdef TWLSDK
-		if (ce9->intr_vblank_orig_return && (*(u32*)0x02FFE234 == 0x00030004 || *(u32*)0x02FFE234 == 0x00030005)) {
+		if (ce9->intr_vblank_orig_return && isDSiWare) {
 			*(u32*)0x02FFC230 = *(u32*)0x02FFE230;
 			*(u32*)0x02FFC234 = *(u32*)0x02FFE234;
 		}
@@ -238,7 +239,7 @@ void reset(u32 param, u32 tid2) {
 	} else {
 		toncset((u8*)getDtcmBase()+0x3E00, 0, 0x200);
 #ifdef TWLSDK
-		if (ce9->intr_vblank_orig_return && (*(u32*)0x02FFE234 == 0x00030004 || *(u32*)0x02FFE234 == 0x00030005)) {
+		if (ce9->intr_vblank_orig_return && isDSiWare) {
 			*(u32*)0x02FFC230 = 0;
 			*(u32*)0x02FFC234 = 0;
 		}
@@ -267,7 +268,7 @@ void reset(u32 param, u32 tid2) {
 	IPC_SYNC_hooked = false;
 
 #ifdef TWLSDK
-	if (param == 0xFFFFFFFF || *(u32*)0x02FFE234 == 0x00030004 || *(u32*)0x02FFE234 == 0x00030005) { // If DSiWare...
+	if (param == 0xFFFFFFFF || isDSiWare) { // If DSiWare...
 		REG_DISPSTAT = 0;
 		REG_DISPCNT = 0;
 		REG_DISPCNT_SUB = 0;
