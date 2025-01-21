@@ -1330,7 +1330,9 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 			tonccpy((u8*)deviceListAddr+0x3C0, ndsPath, 18);*/
 		}
 
-		tonccpy((u32*)0x02FFC000, (u32*)DSI_HEADER_SDK5, 0x1000);	// Make a duplicate of DSi header
+		if (isDSiWare) {
+			tonccpy((u32*)0x02FFC000, (u32*)DSI_HEADER_SDK5, 0x1000);	// Make a duplicate of DSi header
+		}
 
 		if (*(u32*)(DSI_HEADER_SDK5+0x1A0) != 0x00403000 && *(u8*)(DSI_HEADER_SDK5+0x234) < 4) {
 			*(u8*)(DSI_HEADER_SDK5+0x234) = 6; // Workaround to not overwrite 0x02F80000-0x02F88000
@@ -1668,8 +1670,7 @@ int arm7_main(void) {
 		dbg_printf("ARM7 binary is empty!");
 		errorOutput();
 	}
-	if (isDSiWare)
-	{
+	if (isDSiWare) {
 		dsiModeConfirmed = true;
 	} else if (dsiMode == 2) {
 		dsiModeConfirmed = dsiMode;
@@ -1679,7 +1680,10 @@ int arm7_main(void) {
 	const char* romTid = getRomTid(&dsiHeaderTemp.ndshdr);
 	if (!isDSiWare || !scfgSdmmcEnabled || (REG_SCFG_ROM & BIT(9))) {
 		extern u32 clusterCacheSize;
-		clusterCacheSize = (ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr) && dsiModeConfirmed) ? 0x7B0 : 0x3000;
+		clusterCacheSize = (ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr) && dsiModeConfirmed) ? 0x17B0 : 0x3000;
+		if (isDSiWare) {
+			clusterCacheSize = 0x7B0;
+		}
 
 		buildFatTableCacheCompressed(romFile);
 		if (!(romFile->fatTableSettings & fatCached)) {
@@ -1755,13 +1759,14 @@ int arm7_main(void) {
 				clusterCache += 0xB880000;
 				toncset((char*)0x02700000, 0, 0x80000);
 			} else { */
-				const u32 add = 0x8FD000; // 0x02FFD000
-				tonccpy((char*)0x02700000+add, (char*)0x02700000, 0x7B0);	// Move FAT table cache elsewhere
+				const u32 add = isDSiWare ? 0x8FD000 : 0x8FC000; // 0x02FFD000 : 0x02FFC000
+				const u16 len = isDSiWare ? 0x7B0 : 0x17B0;
+				tonccpy((char*)0x02700000+add, (char*)0x02700000, len);	// Move FAT table cache elsewhere
 				romFile->fatTableCache = (u32*)((u32)romFile->fatTableCache+add);
 				savFile->fatTableCache = (u32*)((u32)savFile->fatTableCache+add);
 				lastClusterCacheUsed = (u32*)((u32)lastClusterCacheUsed+add);
 				clusterCache += add;
-				toncset((char*)0x02700000, 0, 0x7B0);
+				toncset((char*)0x02700000, 0, len);
 			// }
 		}
 
