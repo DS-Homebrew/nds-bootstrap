@@ -177,6 +177,7 @@ u16 baseHeaderCRC = 0;
 u32 baseChipID = 0;
 u32 romPaddingSize = 0;
 bool pkmnHeader = false;
+bool pkmnGen5 = false;
 bool ndmaDisabled = false;
 bool sharedWramEnabled = false;
 
@@ -778,6 +779,8 @@ static void loadBinary_ARM7(const tDSiHeader* dsiHeaderTemp, aFile* file) {
 		tNDSHeader* ndsHeaderPokemon = (tNDSHeader*)NDS_HEADER_POKEMON;
 		fileRead((char*)ndsHeaderPokemon, file, 0, 0x160);
 		pkmnHeader = true;
+	} else {
+		pkmnGen5 = (strncmp(baseTid, "IRB", 3) == 0 || strncmp(baseTid, "IRA", 3) == 0 || strncmp(baseTid, "IRE", 3) == 0 || strncmp(baseTid, "IRD", 3) == 0);
 	}
 
 	fileRead((char*)&baseArm9Off, file, 0x20, sizeof(u32));
@@ -837,11 +840,13 @@ bool romLocationAdjust(const tNDSHeader* ndsHeader, const bool laterSdk, const b
 	const bool ntrType = (ndsHeader->unitCode == 0);
 	const u32 romLocationOld = *romLocation;
 	if (*romLocation == 0x0C3FC000) {
-		*romLocation += 0x4000;
+		*romLocation += pkmnGen5 ? 0x4020 : 0x4000;
 	} else if (*romLocation == 0x0C7C0000 && !laterSdk) {
 		*romLocation += 0x28000;
 	} else if (*romLocation == 0x0C7C4000) {
 		*romLocation += 0x4000;
+	} else if (*romLocation == 0x0C7C4020) {
+		*romLocation += 0x3FE0;
 	} else if (*romLocation == 0x0C7D8000 && laterSdk) {
 		if (ntrType) {
 			extern bool hasVramWifiBinary;
@@ -2226,7 +2231,7 @@ int arm7_main(void) {
 		if (ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed) {
 			cheatEngineOffset = (consoleModel > 0) ? CHEAT_ENGINE_TWLSDK_LOCATION_3DS : CHEAT_ENGINE_TWLSDK_SMALL_LOCATION;
 			if (consoleModel == 0 && !gameOnFlashcard) {
-				if (strncmp(romTid, "IRB", 3) == 0 || strncmp(romTid, "IRA", 3) == 0 || strncmp(romTid, "IRE", 3) == 0 || strncmp(romTid, "IRD", 3) == 0) {
+				if (pkmnGen5) {
 					cheatEngineOffset = CHEAT_ENGINE_TWLSDK_LARGE_LOCATION;
 				} else if (strncmp(romTid, "V2G", 3) != 0 && strncmp(romTid, "DD3", 3) != 0) {
 					cheatEngineOffset = CHEAT_ENGINE_TWLSDK_LOCATION;

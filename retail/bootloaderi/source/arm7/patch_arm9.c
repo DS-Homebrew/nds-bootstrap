@@ -1368,6 +1368,7 @@ void patchHiHeapPointer(const module_params_t* moduleParams, const tNDSHeader* n
 	const bool ROMsupportsDsiMode = (ndsHeader->unitCode > 0 && dsiModeConfirmed);
 	const bool cheatsEnabled = (cheatSizeTotal > 4 && cheatSizeTotal <= 0x8000);
 	const char* romTid = getRomTid(ndsHeader);
+	extern bool pkmnGen5;
 
 	if (moduleParams->sdk_version < 0x2008000 || !dsiModeConfirmed || strncmp(romTid, "UBR", 3) == 0) {
 		return;
@@ -1423,7 +1424,7 @@ void patchHiHeapPointer(const module_params_t* moduleParams, const tNDSHeader* n
 			}
 		} else { */
 			// DSi mode title loaded on DSi from SD card, or DSi/3DS with external DSi BIOS files loaded
-			if (!gameOnFlashcard && (strncmp(romTid, "IRB", 3) == 0 || strncmp(romTid, "IRA", 3) == 0 || strncmp(romTid, "IRE", 3) == 0 || strncmp(romTid, "IRD", 3) == 0)) {
+			if (!gameOnFlashcard && pkmnGen5) {
 				// Pokemon Black & White 1&2
 				switch (*heapPointer) {
 					case 0x13A007BE:
