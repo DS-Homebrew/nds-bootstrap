@@ -125,8 +125,15 @@ bool cardReadInProgress = false;
 // static int cardReadCount = 0;
 
 extern void setExceptionHandler2();
+// fixes mpu protection settings when using a slot2 flashcart
+// to allow running games accessing the slot2 like pokemon
+extern void slot2MpuFixGbaDldi();
 
 void setDeviceOwner(void) {
+	if (__myio_dldi.features & FEATURE_SLOT_GBA) {
+		REG_IE &= ~IRQ_CART;
+		slot2MpuFixGbaDldi();
+	}
 	if ((ce9->valueBits & expansionPakFound) || (__myio_dldi.features & FEATURE_SLOT_GBA)) {
 		sysSetCartOwner(BUS_OWNER_ARM9);
 	}
@@ -188,9 +195,6 @@ void enableIPC_SYNC(void) {
 #endif
 
 extern void slot2MpuFix();
-// fixes mpu protection settings when using a slot2 flashcart
-// to allow running games accessing the slot2 like pokemon
-extern void slot2MpuFixGbaDldi();
 // extern void region0Fix(); // Revert region 0 patch
 extern void sdk5MpuFix();
 extern void resetMpu();
@@ -902,19 +906,8 @@ void cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	const u16 exmemcnt = REG_EXMEMCNT;
 	cardReadInProgress = true;
 
-	if (__myio_dldi.features & FEATURE_SLOT_GBA) {
-		REG_IE &= ~IRQ_CART;
-		slot2MpuFixGbaDldi();
-	}
-
 	setDeviceOwner();
 	initialize();
-
-	/*if (isDSiWare && (__myio_dldi.features & FEATURE_SLOT_NDS) && (ce9->valueBits & expansionPakFound)) {
-		slot2MpuFix();
-		sysSetCartOwner (BUS_OWNER_ARM9);
-		exmemcnt = REG_EXMEMCNT;
-	}*/
 
 	// cardReadCount++;
 
@@ -1618,10 +1611,6 @@ u32 myIrqEnable(u32 irq) {
 	#ifdef DEBUG
 	nocashMessage("myIrqEnable\n");
 	#endif
-
-	if (__myio_dldi.features & FEATURE_SLOT_GBA) {
-		slot2MpuFixGbaDldi();
-	}
 
 	setDeviceOwner();
 	initialize();
