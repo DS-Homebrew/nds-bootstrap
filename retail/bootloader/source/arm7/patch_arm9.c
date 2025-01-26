@@ -714,49 +714,54 @@ static void patchResetTwl(cardengineArm9* ce9, const tNDSHeader* ndsHeader, cons
 	if (!nandTmpJumpFuncOffset) {
 		return;
 	}
-	extern u32 generateA7Instr(int arg1, int arg2);
 
 	// Patch
+	const u32 newReset = (u32)ce9->patches->reset_arm9;
 	if (moduleParams->sdk_version < 0x5008000) {
 		nandTmpJumpFuncOffset[0] = 0xE59F0000; // ldr r0, =0xFFFFFFFF
-		nandTmpJumpFuncOffset[1] = generateA7Instr((int)(((u32)nandTmpJumpFuncOffset) + (1 * sizeof(u32))), (int)ce9->patches->reset_arm9);
+		nandTmpJumpFuncOffset[1] = 0xE59FF000; // ldr pc, =newReset
 		nandTmpJumpFuncOffset[2] = 0xFFFFFFFF;
+		nandTmpJumpFuncOffset[3] = newReset;
 	} else if (nandTmpJumpFuncOffset[-3] == 0xE8BD8008 && nandTmpJumpFuncOffset[-1] == 0x02FFE230) { // DEBUG
-		nandTmpJumpFuncOffset[-15] = 0xE59F0000; // ldr r0, =0
-		nandTmpJumpFuncOffset[-14] = generateA7Instr((int)(((u32)nandTmpJumpFuncOffset) - (14 * sizeof(u32))), (int)ce9->patches->reset_arm9);
-		nandTmpJumpFuncOffset[-13] = 0;
+		nandTmpJumpFuncOffset[-15] = 0xE3A00000; // mov r0, #0
+		nandTmpJumpFuncOffset[-14] = 0xE51FF004; // ldr pc, =newReset
+		nandTmpJumpFuncOffset[-13] = newReset;
 		dbg_printf("Reset (TWL) patched!\n");
 	} else if (nandTmpJumpFuncOffset[-2] == 0xE8BD8008 && nandTmpJumpFuncOffset[-1] == 0x02FFE230) {
-		nandTmpJumpFuncOffset[-11] = 0xE59F0000; // ldr r0, =0
-		nandTmpJumpFuncOffset[-10] = generateA7Instr((int)(((u32)nandTmpJumpFuncOffset) - (10 * sizeof(u32))), (int)ce9->patches->reset_arm9);
-		nandTmpJumpFuncOffset[-9] = 0;
+		nandTmpJumpFuncOffset[-11] = 0xE3A00000; // mov r0, #0
+		nandTmpJumpFuncOffset[-10] = 0xE51FF004; // ldr pc, =newReset
+		nandTmpJumpFuncOffset[-9] = newReset;
 		dbg_printf("Reset (TWL) patched!\n");
 		if (nandTmpJumpFuncOffset[-13] == 0xE12FFF1C) {
 			nandTmpJumpFuncOffset[-17] = 0xE59F0000; // ldr r0, =0xFFFFFFFF
-			nandTmpJumpFuncOffset[-16] = generateA7Instr((int)(((u32)nandTmpJumpFuncOffset) - (16 * sizeof(u32))), (int)ce9->patches->reset_arm9);
+			nandTmpJumpFuncOffset[-16] = 0xE59FF000; // ldr pc, =newReset
 			nandTmpJumpFuncOffset[-15] = 0xFFFFFFFF;
+			nandTmpJumpFuncOffset[-14] = newReset;
 			dbg_printf("Exit-to-menu patched!\n");
 		}
 	} else if (nandTmpJumpFuncOffset[-2] == 0xE12FFF1C) {
 		nandTmpJumpFuncOffset[-6] = 0xE59F0000; // ldr r0, =0xFFFFFFFF
-		nandTmpJumpFuncOffset[-5] = generateA7Instr((int)(((u32)nandTmpJumpFuncOffset) - (5 * sizeof(u32))), (int)ce9->patches->reset_arm9);
+		nandTmpJumpFuncOffset[-5] = 0xE59FF000; // ldr pc, =newReset
 		nandTmpJumpFuncOffset[-4] = 0xFFFFFFFF;
+		nandTmpJumpFuncOffset[-3] = newReset;
 		dbg_printf("Exit-to-menu patched!\n");
 	} else if (nandTmpJumpFuncOffset[-15] == 0xE8BD8008 && nandTmpJumpFuncOffset[-14] == 0x02FFE230) {
-		nandTmpJumpFuncOffset[-24] = 0xE59F0000; // ldr r0, =0
-		nandTmpJumpFuncOffset[-23] = generateA7Instr((int)(((u32)nandTmpJumpFuncOffset) - (23 * sizeof(u32))), (int)ce9->patches->reset_arm9);
-		nandTmpJumpFuncOffset[-22] = 0;
+		nandTmpJumpFuncOffset[-24] = 0xE3A00000; // mov r0, #0
+		nandTmpJumpFuncOffset[-23] = 0xE51FF004; // ldr pc, =newReset
+		nandTmpJumpFuncOffset[-22] = newReset;
 		dbg_printf("Reset (TWL) patched!\n");
 		if (nandTmpJumpFuncOffset[-26] == 0xE12FFF1C) {
 			nandTmpJumpFuncOffset[-20] = 0xE59F0000; // ldr r0, =0xFFFFFFFF
-			nandTmpJumpFuncOffset[-19] = generateA7Instr((int)(((u32)nandTmpJumpFuncOffset) - (19 * sizeof(u32))), (int)ce9->patches->reset_arm9);
+			nandTmpJumpFuncOffset[-19] = 0xE59FF000; // ldr pc, =newReset
 			nandTmpJumpFuncOffset[-18] = 0xFFFFFFFF;
+			nandTmpJumpFuncOffset[-17] = newReset;
 			dbg_printf("Exit-to-menu patched!\n");
 		}
 	} else if (nandTmpJumpFuncOffset[-15] == 0xE12FFF1C) {
 		nandTmpJumpFuncOffset[-19] = 0xE59F0000; // ldr r0, =0xFFFFFFFF
-		nandTmpJumpFuncOffset[-18] = generateA7Instr((int)(((u32)nandTmpJumpFuncOffset) - (5 * sizeof(u32))), (int)ce9->patches->reset_arm9);
+		nandTmpJumpFuncOffset[-18] = 0xE59FF000; // ldr pc, =newReset
 		nandTmpJumpFuncOffset[-17] = 0xFFFFFFFF;
+		nandTmpJumpFuncOffset[-16] = newReset;
 		dbg_printf("Exit-to-menu patched!\n");
 	}
 	dbg_printf("nandTmpJumpFunc location : ");
