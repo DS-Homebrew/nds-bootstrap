@@ -1213,6 +1213,10 @@ u32 dsiSaveGetLength(void* ctx) {
 		return 0;
 	}
 
+	if (dsiSaveExists) {
+		dsiSaveResultCode = 0;
+		toncset32(ctx+0x14, dsiSaveResultCode, 1);
+	}
 	return dsiSaveSize;
 }
 
