@@ -560,6 +560,9 @@ void inGameMenu(s32* exRegisters) {
 void cardSave(u32 src, u32 dst, u32 len, const bool write) {
 	const u16 exmemcnt = REG_EXMEMCNT;
 	// Read/Write save
+	if (__myio_dldi.features & FEATURE_SLOT_GBA) {
+		slot2MpuFixGbaDldi();
+	}
 	setDeviceOwner();
 
 	if ((src % ce9->saveSize)+len > ce9->saveSize) {
@@ -846,6 +849,9 @@ bool cardSave(void) {
 	bool res = false;
 
 	const u16 exmemcnt = REG_EXMEMCNT;
+	if (__myio_dldi.features & FEATURE_SLOT_GBA) {
+		slot2MpuFixGbaDldi();
+	}
 	setDeviceOwner();
 
 	if (cardStruct[7] != 2)
