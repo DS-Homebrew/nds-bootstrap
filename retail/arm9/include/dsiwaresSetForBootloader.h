@@ -160,8 +160,6 @@ static const char dsiWareForBootloader1[][4] = {
 	"K6B", // Deep Sea Creatures
 	"K35", // Defense of the Middle Kingdom
 	"KWT", // GO Series: Defense Wars
-};
-static const char dsiWareForBootloader2[][4] = {
 	"KCP", // Dekisugi Tingle Pack
 	"KN2", // Devil Band: Rock the Underworld
 	"KAV", // Art Style: DIGIDRIVE
@@ -313,6 +311,8 @@ static const char dsiWareForBootloader2[][4] = {
 	"KMN", // Master of Illusion Express: Psychic Camera (bootloaderi-exclusive)
 	"KMS", // Master of Illusion Express: Shuffle Games
 	"KUP", // Match Up!
+};
+static const char dsiWareForBootloader3[][4] = {
 	"KWK", // Mega Words
 	"KMK", // Mehr Kreuzwortratsel: Welt Edition
 	"KD4", // Meikyou Kokugo: Rakubiki Jiten
@@ -356,8 +356,6 @@ static const char dsiWareForBootloader2[][4] = {
 	"KG9", // Noroi no Game: Oku
 	"KSU", // Number Battle
 	"KU9", // G.G Series: Nyokki
-};
-static const char dsiWareForBootloader3[][4] = {
 	"K6T", // Orion's Odyssey
 	"KO4", // Oscar in Movieland
 	"KOT", // Oscar in Toyland

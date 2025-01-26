@@ -4367,15 +4367,16 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Chuugaku Eijukugo: Kiho 150 Go Master (Japan)
-	else if (strcmp(romTid, "KJCJ") == 0) {
+	// Koukou Eitango: Kiho 400 Go Master (Japan)
+	else if (strcmp(romTid, "KJCJ") == 0 || strcmp(romTid, "KEKJ") == 0) {
 		if (!twlFontFound) {
-			const u16 offsetChange2 = 0;
-			const u16 offsetChange3 = 0;
+			const u16 offsetChange2 = (strcmp(romTid, "KJCJ") == 0) ? 0 : 0x114;
+			const u16 offsetChange3 = (strcmp(romTid, "KJCJ") == 0) ? 0 : 0x110;
 			*(u32*)(0x020643A4-offsetChange2) = 0xE3A00002; // mov r0, #2 (Skip Manual screen, Part 1)
 			*(u32*)(0x02064580-offsetChange3) = 0xE3A00000; // mov r0, #0 (Skip Manual screen, Part 2)
 		}
 		/* if (saveOnFlashcardNtr) {
-			const u8 offsetChange1 = 0;
+			const u8 offsetChange1 = (strcmp(romTid, "KJCJ") == 0) ? 0 : 0x48;
 			setBL(0x0202CAB8-offsetChange1, (u32)dsiSaveCreate);
 			setBL(0x02076DD0-offsetChange3, (u32)dsiSaveOpen);
 			setBL(0x02076DEC-offsetChange3, (u32)dsiSaveSeek);
@@ -5268,11 +5269,9 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			tonccpy((u32*)((romTid[3] != 'J') ? 0x0204AAEC : 0x0204A8E8), dsiSaveGetResultCode, 0xC);
 		}
 	}
-#endif
 
-#ifdef LOADERTYPE1
 	// Dekisugi Tingle Pack (Japan)
-	if (strcmp(romTid, "KCPJ") == 0 && saveOnFlashcardNtr) {
+	else if (strcmp(romTid, "KCPJ") == 0 && saveOnFlashcardNtr) {
 		// *(u32*)0x020255F4 = 0xE3A00000; // mov r0, #0
 		// *(u32*)0x020255F8 = 0xE12FFF1E; // bx lr
 		setBL(0x02025604, (u32)dsiSaveCreate);
@@ -8100,42 +8099,6 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
-	// Koukou Eitango: Kiho 400 Go Master (Japan)
-	else if (strcmp(romTid, "KEKJ") == 0) {
-		u16 offsetChange3 = 0x110;
-		if (!twlFontFound) {
-			u16 offsetChange2 = 0x114;
-			*(u32*)(0x020643A4-offsetChange2) = 0xE3A00002; // mov r0, #2 (Skip Manual screen, Part 1)
-			*(u32*)(0x02064580-offsetChange3) = 0xE3A00000; // mov r0, #0 (Skip Manual screen, Part 2)
-		}
-		if (saveOnFlashcardNtr) {
-			u8 offsetChange1 = 0x48;
-			setBL(0x0202CAB8-offsetChange1, (u32)dsiSaveCreate);
-			setBL(0x02076DD0-offsetChange3, (u32)dsiSaveOpen);
-			setBL(0x02076DEC-offsetChange3, (u32)dsiSaveSeek);
-			setBL(0x02076E00-offsetChange3, (u32)dsiSaveClose);
-			setBL(0x02076E18-offsetChange3, (u32)dsiSaveRead);
-			setBL(0x02076E28-offsetChange3, (u32)dsiSaveClose);
-			setBL(0x02076E34-offsetChange3, (u32)dsiSaveClose);
-			setBL(0x02076E68-offsetChange3, (u32)dsiSaveOpen);
-			setBL(0x02076E80-offsetChange3, (u32)dsiSaveSeek);
-			setBL(0x02076E98-offsetChange3, (u32)dsiSaveRead); // dsiSaveReadAsync
-			setBL(0x02076EC8-offsetChange3, (u32)dsiSaveOpen);
-			setBL(0x02076EE0-offsetChange3, (u32)dsiSaveSetLength);
-			setBL(0x02076EF0-offsetChange3, (u32)dsiSaveClose);
-			setBL(0x02076F04-offsetChange3, (u32)dsiSaveSeek);
-			setBL(0x02076F18-offsetChange3, (u32)dsiSaveClose);
-			setBL(0x02076F30-offsetChange3, (u32)dsiSaveWrite);
-			setBL(0x02076F40-offsetChange3, (u32)dsiSaveClose);
-			setBL(0x02076F4C-offsetChange3, (u32)dsiSaveClose);
-			setBL(0x02076F80-offsetChange3, (u32)dsiSaveOpen);
-			setBL(0x02076F94-offsetChange3, (u32)dsiSaveSetLength);
-			setBL(0x02076FAC-offsetChange3, (u32)dsiSaveSeek);
-			setBL(0x02076FC4-offsetChange3, (u32)dsiSaveWrite); // dsiSaveWriteAsync
-			*(u32*)(0x02077124-offsetChange3) = 0xE12FFF1E; // bx lr
-		}
-	}
-
 	// Kuizu Ongaku Nojika (Japan)
 	else if (strcmp(romTid, "KVFJ") == 0 && saveOnFlashcardNtr) {
 		setBL(0x020691F4, (u32)dsiSaveWrite);
@@ -9104,11 +9067,13 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	else if ((strcmp(romTid, "KUPE") == 0 || strcmp(romTid, "KUPP") == 0) && !twlFontFound) {
 		*(u32*)0x02005090 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 	}
+#endif
 
+#ifdef LOADERTYPE2
 	// Mega Words (USA)
 	// Saving not supported due to using more than one file in filesystem
 	// Requires either 8MB of RAM or Memory Expansion Pak
-	else if (strcmp(romTid, "KWKE") == 0 && !twlFontFound) {
+	if (strcmp(romTid, "KWKE") == 0 && !twlFontFound) {
 		*(u32*)0x02005094 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 	}
 
@@ -10434,12 +10399,10 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			*(u32*)0x02021C20 = 0xE1A00000; // nop (Skip Manual screen)
 		}
 	}
-#endif
 
-#ifdef LOADERTYPE2
 	// Orion's Odyssey (USA)
 	// Due to our save implementation, save data is stored in both slots
-	if (strcmp(romTid, "K6TE") == 0 && saveOnFlashcardNtr) {
+	else if (strcmp(romTid, "K6TE") == 0 && saveOnFlashcardNtr) {
 		setBL(0x020284D0, (u32)dsiSaveDelete);
 		setBL(0x020284DC, (u32)dsiSaveCreate);
 		setBL(0x020284EC, (u32)dsiSaveOpen);

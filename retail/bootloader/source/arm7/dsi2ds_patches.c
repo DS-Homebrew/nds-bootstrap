@@ -7292,11 +7292,11 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Chuugaku Eijukugo: Kiho 150 Go Master (Japan)
-	// TODO: Merge with "Koukou Eitango: Kiho 400 Go Master (Japan)"
-	else if (strcmp(romTid, "KJCJ") == 0) {
-		// const u8 offsetChange1 = 0;
-		const u16 offsetChange2 = 0;
-		const u16 offsetChange3 = 0;
+	// Koukou Eitango: Kiho 400 Go Master (Japan)
+	else if (strcmp(romTid, "KJCJ") == 0 || strcmp(romTid, "KEKJ") == 0) {
+		// const u8 offsetChange1 = (strcmp(romTid, "KJCJ") == 0) ? 0 : 0x48;
+		const u16 offsetChange2 = (strcmp(romTid, "KJCJ") == 0) ? 0 : 0x114;
+		const u16 offsetChange3 = (strcmp(romTid, "KJCJ") == 0) ? 0 : 0x110;
 
 		*(u32*)0x02012C6C = 0xE1A00000; // nop
 		*(u32*)0x02016330 = 0xE1A00000; // nop
@@ -8984,11 +8984,9 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			offset[i] = 0xE1A00000; // nop
 		}*/
 	}
-#endif
 
-#ifdef LOADERTYPE1
 	// Dekisugi Tingle Pack (Japan)
-	if (strcmp(romTid, "KCPJ") == 0) {
+	else if (strcmp(romTid, "KCPJ") == 0) {
 		*(u32*)0x0200506C = 0xE1A00000; // nop
 		*(u32*)0x020050C0 = 0xE1A00000; // nop
 		*(u32*)0x020050FC = 0xE1A00000; // nop
@@ -14260,46 +14258,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0207AC30 = 0xE12FFF1E; // bx lr
 	}
 
-	// Koukou Eitango: Kiho 400 Go Master (Japan)
-	else if (strcmp(romTid, "KEKJ") == 0) {
-		u8 offsetChange1 = 0x48;
-		u16 offsetChange2 = 0x114;
-		u16 offsetChange3 = 0x110;
-
-		*(u32*)0x02012C6C = 0xE1A00000; // nop
-		*(u32*)0x02016330 = 0xE1A00000; // nop
-		patchInitDSiWare(0x0201C2DC, heapEnd);
-		// *(u32*)0x0201C64C = *(u32*)0x020013C0;
-		patchUserSettingsReadDSiWare(0x0201DA44);
-		setBL(0x0202CAB8-offsetChange1, (u32)dsiSaveCreate);
-		*(u32*)(0x0204F20C-offsetChange2) = 0xE1A00000; // nop
-		*(u32*)(0x0204F230-offsetChange2) = 0xE1A00000; // nop
-		*(u32*)(0x020643A4-offsetChange2) = 0xE3A00002; // mov r0, #2 (Skip Manual screen, Part 1)
-		*(u32*)(0x02064580-offsetChange3) = 0xE3A00000; // mov r0, #0 (Skip Manual screen, Part 2)
-		setBL(0x02076DD0-offsetChange3, (u32)dsiSaveOpen);
-		setBL(0x02076DEC-offsetChange3, (u32)dsiSaveSeek);
-		setBL(0x02076E00-offsetChange3, (u32)dsiSaveClose);
-		setBL(0x02076E18-offsetChange3, (u32)dsiSaveRead);
-		setBL(0x02076E28-offsetChange3, (u32)dsiSaveClose);
-		setBL(0x02076E34-offsetChange3, (u32)dsiSaveClose);
-		setBL(0x02076E68-offsetChange3, (u32)dsiSaveOpen);
-		setBL(0x02076E80-offsetChange3, (u32)dsiSaveSeek);
-		setBL(0x02076E98-offsetChange3, (u32)dsiSaveRead); // dsiSaveReadAsync
-		setBL(0x02076EC8-offsetChange3, (u32)dsiSaveOpen);
-		setBL(0x02076EE0-offsetChange3, (u32)dsiSaveSetLength);
-		setBL(0x02076EF0-offsetChange3, (u32)dsiSaveClose);
-		setBL(0x02076F04-offsetChange3, (u32)dsiSaveSeek);
-		setBL(0x02076F18-offsetChange3, (u32)dsiSaveClose);
-		setBL(0x02076F30-offsetChange3, (u32)dsiSaveWrite);
-		setBL(0x02076F40-offsetChange3, (u32)dsiSaveClose);
-		setBL(0x02076F4C-offsetChange3, (u32)dsiSaveClose);
-		setBL(0x02076F80-offsetChange3, (u32)dsiSaveOpen);
-		setBL(0x02076F94-offsetChange3, (u32)dsiSaveSetLength);
-		setBL(0x02076FAC-offsetChange3, (u32)dsiSaveSeek);
-		setBL(0x02076FC4-offsetChange3, (u32)dsiSaveWrite); // dsiSaveWriteAsync
-		*(u32*)(0x02077124-offsetChange3) = 0xE12FFF1E; // bx lr
-	}
-
 	// Kuizu Ongaku Nojika (Japan)
 	/* else if (strcmp(romTid, "KVFJ") == 0) {
 		// useSharedFont = twlFontFound;
@@ -16096,11 +16054,13 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchInitDSiWare(0x0202E068+offsetChange, heapEnd);
 		patchUserSettingsReadDSiWare(0x0202F544+offsetChange);
 	}
+#endif
 
+#ifdef LOADERTYPE2
 	// Mega Words (USA)
 	// Saving not supported due to using more than one file in filesystem
 	// Requires either 8MB of RAM or Memory Expansion Pak
-	else if (strcmp(romTid, "KWKE") == 0 && debugOrMep) {
+	if (strcmp(romTid, "KWKE") == 0 && debugOrMep) {
 		const u32 mepAddr = (s2FlashcardId == 0x5A45) ? 0x08800000 : 0x09000000;
 
 		useSharedFont = (twlFontFound && extendedMemory);
@@ -18709,9 +18669,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			*(u32*)0x020612B4 = *(u32*)0x02061228; // Shrink large part of heap from 0xA0000
 		}
 	}
-#endif
 
-#ifdef LOADERTYPE2
 	// Odekake! Earth Seeker (Japan)
 	// Black screens after company logos
 	// Seemingly not possible to fix the cause? (Fails to read or write save)
@@ -18744,7 +18702,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Orion's Odyssey (USA)
 	// Due to our save implementation, save data is stored in both slots
 	// Crashes later on retail consoles
-	if (strcmp(romTid, "K6TE") == 0) {
+	else if (strcmp(romTid, "K6TE") == 0) {
 		*(u32*)0x02011FAC = 0xE1A00000; // nop
 		*(u32*)0x02015790 = 0xE1A00000; // nop
 		patchInitDSiWare(0x0201ABF0, heapEndMaxForRetail32);

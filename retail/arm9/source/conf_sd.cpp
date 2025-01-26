@@ -2420,16 +2420,6 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			}
 		}
 		if (!loaderSet) {
-			for (unsigned int i = 0; i < sizeof(dsiWareForBootloader2)/sizeof(dsiWareForBootloader2[0]); i++) {
-				if (memcmp(romTid, dsiWareForBootloader2[i], 3) == 0) {
-					// Found match
-					conf->loaderType = 1;
-					loaderSet = true;
-					break;
-				}
-			}
-		}
-		if (!loaderSet) {
 			for (unsigned int i = 0; i < sizeof(dsiWareForBootloader3)/sizeof(dsiWareForBootloader3[0]); i++) {
 				if (memcmp(romTid, dsiWareForBootloader3[i], 3) == 0) {
 					// Found match
