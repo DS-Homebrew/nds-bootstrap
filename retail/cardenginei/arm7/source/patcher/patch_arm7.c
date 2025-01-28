@@ -61,7 +61,6 @@ u32 vAddrOfRelocSrc = 0;
 u32 relocDestAtSharedMem = 0;
 bool a7IsThumb = false;
 
-#ifdef UNUSED
 u32 newSwiHaltAddr = 0;
 // bool swiHaltPatched = false;
 
@@ -92,7 +91,6 @@ static void patchSwiHalt(const cardengineArm7* ce7, const tNDSHeader* ndsHeader,
     dbg_hexa((u32)swiHaltOffset);
     dbg_printf("\n\n"); */
 }
-#endif
 
 static void fixForDifferentBios(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	if (scfgRomBak & BIT(9)) {
@@ -395,7 +393,7 @@ u32 patchCardNdsArm7(
 		}
 	}
 
-	// patchSwiHalt(ce7, ndsHeader, moduleParams);
+	patchSwiHalt(ce7, ndsHeader, moduleParams);
 
 	fixForDifferentBios(ce7, ndsHeader, moduleParams);
 

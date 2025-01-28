@@ -41,6 +41,7 @@
 #include "unpatched_funcs.h"
 
 #define ROMinRAM BIT(1)
+#define pingIpc BIT(3)
 #define isSdk5 BIT(5)
 #define overlaysCached BIT(6)
 #define cacheFlushFlag BIT(7)
@@ -121,7 +122,9 @@ extern void updateDescriptor(int slot, u32 sector);
 } */
 
 static inline bool checkArm7(void) {
-	IPC_SendSync(0x4);
+	if (ce9->valueBits & pingIpc) {
+		IPC_SendSync(0x4);
+	}
 	return (sharedAddr[3] == (vu32)0);
 }
 
@@ -229,7 +232,9 @@ void continueCardReadDmaArm9() {
 
 				dmaReadOnArm7 = true;
 
-				IPC_SendSync(0x4);
+				if (ce9->valueBits & pingIpc) {
+					IPC_SendSync(0x4);
+				}
 
 				updateDescriptor(slot, sector);
 				/*if (readLen >= ce9->cacheBlockSize*2) {
@@ -525,7 +530,9 @@ void cardSetDma(u32 * params) {
 
 			dmaReadOnArm7 = true;
 
-			IPC_SendSync(0x4);
+			if (ce9->valueBits & pingIpc) {
+				IPC_SendSync(0x4);
+			}
 
 			updateDescriptor(slot, sector);
 			/*if (readLen >= ce9->cacheBlockSize*2) {

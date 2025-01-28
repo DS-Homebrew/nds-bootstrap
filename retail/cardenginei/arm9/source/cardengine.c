@@ -41,7 +41,7 @@
 
 #define saveOnFlashcard BIT(0)
 #define ROMinRAM BIT(1)
-#define dsiMode BIT(3)
+#define pingIpc BIT(3)
 #define enableExceptionHandler BIT(4)
 #define isSdk5 BIT(5)
 #define overlaysCached BIT(6)
@@ -366,7 +366,9 @@ extern void setExceptionHandler2();
 } */
 
 static inline void waitForArm7(void) {
-	IPC_SendSync(0x4);
+	if (ce9->valueBits & pingIpc) {
+		IPC_SendSync(0x4);
+	}
 	while (sharedAddr[3] != (vu32)0) {
 		#ifdef DLDI
 		swiDelay(50);

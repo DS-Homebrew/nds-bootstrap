@@ -8,7 +8,7 @@
 
 extern u32 vAddrOfRelocSrc;
 extern u32 relocDestAtSharedMem;
-// extern u32 newSwiHaltAddr;
+extern u32 newSwiHaltAddr;
 
 //
 // Subroutine function signatures ARM7
@@ -83,7 +83,7 @@ u32 savePatchV5(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, const u3
 		dbg_hexa((u32)eepromPageWrite);
 		dbg_printf("\n"); */
 		tonccpy(eepromPageWrite, (u16*)ce7->patches->arm7FunctionsThumb->eepromPageWrite, 0x14);
-		// newSwiHaltAddr = (u32)eepromPageWrite+0x14;
+		newSwiHaltAddr = (u32)eepromPageWrite+0x14;
 
 		u16* eepromPageProgBranch = (u16*)(JumpTableFunc + 0x24);
 		/* dbg_printf("Eeprom page prog branch:\t");

@@ -1524,51 +1524,93 @@ void runCardEngineCheck(void) {
 	nocashMessage("runCardEngineCheck");
 	#endif	
 
+  	// if (tryLockMutex(&cardEgnineCommandMutex)) {
+        //if(!readOngoing)
+        //{
+    
+    		//nocashMessage("runCardEngineCheck mutex ok");
+    
+			if (!(valueBits & gameOnFlashcard)) {
+				if (/* sharedAddr[3] == (vu32)0x020FF808 || sharedAddr[3] == (vu32)0x020FF80A || */ sharedAddr[3] >= (vu32)0x025FFB08 && sharedAddr[3] <= (vu32)0x025FFB0A) {	// ARM9 Card Read
+					const bool isDma = (sharedAddr[3] == (vu32)0x025FFB0A);
+					if (!readOngoing ? start_cardRead_arm9() : resume_cardRead_arm9()) {
+						sharedAddr[3] = 0;
+					}
+					if (isDma) {
+						IPC_SendSync(0x3);
+					}
+				}
+			}
+
+			/* #ifdef DEBUG
+    		if (sharedAddr[3] == (vu32)0x026FF800) {
+    			log_arm9();
+    			sharedAddr[3] = 0;
+                //IPC_SendSync(0x8);
+    		} else
+			#endif
+
+			if (sharedAddr[3] == (vu32)0x025FFC01) {
+				//dmaLed = (sharedAddr[3] == (vu32)0x025FFC01);
+				nandRead();
+    			sharedAddr[3] = 0;
+			} else if (sharedAddr[3] == (vu32)0x025FFC02) {
+				//dmaLed = (sharedAddr[3] == (vu32)0x025FFC02);
+				nandWrite();
+    			sharedAddr[3] = 0;
+			} */
+
+            /*if (sharedAddr[3] == (vu32)0x025FBC01) {
+                dmaLed = false;
+    			slot2Read();
+    			sharedAddr[3] = 0;
+    			IPC_SendSync(0x8);
+    		}*/
+        //}
+  		// unlockMutex(&cardEgnineCommandMutex);
+  	// }
+}
+
+void runCardEngineCheckHalt(void) {
+	//dbg_printf("runCardEngineCheckHalt\n");
+	#ifdef DEBUG		
+	nocashMessage("runCardEngineCheckHalt");
+	#endif	
+
   	// if (lockMutex(&cardEgnineCommandMutex)) {
         //if(!readOngoing)
         //{
     
     		//nocashMessage("runCardEngineCheck mutex ok");
     
-  		/*if (sharedAddr[3] == (vu32)0x5245424F) {
-  			i2cWriteRegister(0x4A, 0x70, 0x01);
-  			i2cWriteRegister(0x4A, 0x11, 0x01);
-  		}*/
-
 			if (!(valueBits & gameOnFlashcard)) {
 				/* #ifndef TWLSDK
 				loadROMPartIntoRAM();
 				#endif */
 				if (/* sharedAddr[3] == (vu32)0x020FF808 || sharedAddr[3] == (vu32)0x020FF80A || */ sharedAddr[3] >= (vu32)0x025FFB08 && sharedAddr[3] <= (vu32)0x025FFB0A) {	// ARM9 Card Read
 					const bool isDma = (sharedAddr[3] == (vu32)0x025FFB0A);
-					if (!readOngoing ? start_cardRead_arm9() : resume_cardRead_arm9()) {
-						/* bool useApFixOverlays = false;
-						u32 src = sharedAddr[2];
-						u32 dst = sharedAddr[0];
-						u32 len = sharedAddr[1];
-						if (src >= 0x80000000) {
-							src -= 0x80000000;
-							useApFixOverlays = true;
-						}
-
-						// readOngoing = true;
-						if (lockMutex(&saveMutex)) {
-							cardReadLED(true, isDma);    // When a file is loading, turn on LED for card read indicator
-							fileRead((char*)dst, useApFixOverlays ? apFixOverlaysFile : romFile, src, len);
-							cardReadLED(false, isDma);    // After loading is done, turn off LED for card read indicator
-							unlockMutex(&saveMutex);
-						}
-						// readOngoing = false; */
-						sharedAddr[3] = 0;
+					bool useApFixOverlays = false;
+					u32 src = sharedAddr[2];
+					u32 dst = sharedAddr[0];
+					u32 len = sharedAddr[1];
+					if (src >= 0x80000000) {
+						src -= 0x80000000;
+						useApFixOverlays = true;
 					}
+
+					// readOngoing = true;
+					if (lockMutex(&saveMutex)) {
+						cardReadLED(true, isDma);    // When a file is loading, turn on LED for card read indicator
+						fileRead((char*)dst, useApFixOverlays ? apFixOverlaysFile : romFile, src, len);
+						cardReadLED(false, isDma);    // After loading is done, turn off LED for card read indicator
+						unlockMutex(&saveMutex);
+					}
+					// readOngoing = false;
+					sharedAddr[3] = 0;
 					if (isDma) {
 						IPC_SendSync(0x3);
 					}
-				} /*else if (sharedAddr[3] == (vu32)0x026FFB0A) {	// Card read DMA (Card data cache)
-					ndmaCopyWords(0, (u8*)sharedAddr[2], (u8*)(sharedAddr[0] >= 0x03000000 ? 0 : sharedAddr[0]), sharedAddr[1]);
-					sharedAddr[3] = 0;
-					IPC_SendSync(0x3);
-				}*/
+				}
 			}
 
 			#ifdef DEBUG

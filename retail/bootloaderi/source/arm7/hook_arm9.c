@@ -14,7 +14,7 @@
 #define b_saveOnFlashcard BIT(0)
 #define b_ROMinRAM BIT(1)
 #define b_eSdk2 BIT(2)
-#define b_dsiMode BIT(3)
+#define b_pingIpc BIT(3)
 #define b_enableExceptionHandler BIT(4)
 #define b_isSdk5 BIT(5)
 #define b_overlaysCached BIT(6)
@@ -204,6 +204,7 @@ int hookNdsRetailArm9(
 ) {
 	nocashMessage("hookNdsRetailArm9");
 
+	extern bool pkmnGen5;
 	extern bool sharedWramEnabled;
 	extern bool scfgBios9i(void);
 	extern u32 iUncompressedSize;
@@ -234,8 +235,8 @@ int hookNdsRetailArm9(
 	if (!laterSdk) {
 		ce9->valueBits |= b_eSdk2;
 	}
-	if (dsiMode) {
-		ce9->valueBits |= b_dsiMode; // SDK 5
+	if (pkmnGen5) {
+		ce9->valueBits |= b_pingIpc;
 	}
 	if (enableExceptionHandler) {
 		ce9->valueBits |= b_enableExceptionHandler;
