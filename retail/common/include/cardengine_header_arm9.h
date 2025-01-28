@@ -105,6 +105,7 @@ typedef struct cardengineArm9 {
 		17: fntFatCached
 		18: waitForPreloadToFinish
 		19: resetOnFirstException
+		20: resetOnEveryException
 	*/
 	s32 mainScreen;
 	u32 consoleModel;

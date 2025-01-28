@@ -31,6 +31,7 @@
 #define b_fntFatCached BIT(17)
 #define b_waitForPreloadToFinish BIT(18)
 #define b_resetOnFirstException BIT(19)
+#define b_resetOnEveryException BIT(20)
 
 
 static const int MAX_HANDLER_LEN = 50;
@@ -378,6 +379,8 @@ int hookNdsRetailArm9(
 		}
 		if (!dataToPreloadFound(ndsHeader) && (strncmp(romTid, "YPT", 3) == 0)) { // Puppy Palace
 			ce9->valueBits |= b_resetOnFirstException;
+		} else if (strncmp(romTid, "CLJ", 3) == 0) { // Mario & Luigi: Bowser's Inside Story
+			ce9->valueBits |= b_resetOnEveryException;
 		}
 
 		if (ndsHeader->unitCode == 0 || !dsiMode) {
