@@ -399,7 +399,7 @@ newSwiHalt:
 newSwiHaltThumb:
 @---------------------------------------------------------------------------------
 	push	{r4, lr}
-	ldr	r4, =runCardEngineCheck
+	ldr	r4, =runCardEngineCheckHalt
 	bl	_blx_r4_stub_halt
 	swi	0x06
 	pop             {r4}
