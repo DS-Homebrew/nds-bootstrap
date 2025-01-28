@@ -1589,6 +1589,7 @@ void runCardEngineCheckHalt(void) {
 				#endif */
 				if (/* sharedAddr[3] == (vu32)0x020FF808 || sharedAddr[3] == (vu32)0x020FF80A || */ sharedAddr[3] >= (vu32)0x025FFB08 && sharedAddr[3] <= (vu32)0x025FFB0A) {	// ARM9 Card Read
 					const bool isDma = (sharedAddr[3] == (vu32)0x025FFB0A);
+					const bool dmaLed = (sharedAddr[3] == (vu32)0x025FFB09 || isDma);
 					bool useApFixOverlays = false;
 					u32 src = sharedAddr[2];
 					u32 dst = sharedAddr[0];
@@ -1600,9 +1601,9 @@ void runCardEngineCheckHalt(void) {
 
 					// readOngoing = true;
 					if (lockMutex(&saveMutex)) {
-						cardReadLED(true, isDma);    // When a file is loading, turn on LED for card read indicator
+						cardReadLED(true, dmaLed);    // When a file is loading, turn on LED for card read indicator
 						fileRead((char*)dst, useApFixOverlays ? apFixOverlaysFile : romFile, src, len);
-						cardReadLED(false, isDma);    // After loading is done, turn off LED for card read indicator
+						cardReadLED(false, dmaLed);    // After loading is done, turn off LED for card read indicator
 						unlockMutex(&saveMutex);
 					}
 					// readOngoing = false;
