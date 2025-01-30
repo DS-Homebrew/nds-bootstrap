@@ -302,7 +302,8 @@ Sonic Rush (3DS):
 - Everything except sound data
 
 Sonic Rush Adventure (MEP/DSi/3DS):
-- Opening cutscene music
+- MEP/DSi: Opening cutscene music
+- 3DS: Opening cutscene music + Everything except sound data
 
 Style Savvy (DSi/3DS):
 - Sound data (minus padding)
