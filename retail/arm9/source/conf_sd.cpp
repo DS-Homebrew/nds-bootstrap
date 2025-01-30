@@ -764,7 +764,7 @@ void getIgmStrings(configuration* conf, bool b4ds) {
 	}
 
 	// Set In-Game Menu hotkey
-	// igmText->hotkey = conf->hotkey != 0 ? conf->hotkey : (KEY_L | KEY_DOWN | KEY_SELECT);
+	igmText->hotkey = conf->hotkey;
 
 	if(b4ds) {
 		cardengineArm7B4DS* ce7 = (cardengineArm7B4DS*)CARDENGINE_ARM7_LOCATION_BUFFERED;

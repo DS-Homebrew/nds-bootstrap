@@ -19,7 +19,6 @@
 #include <string.h> // memcpy
 #include <stdio.h>
 #include <nds/system.h>
-#include <nds/input.h>
 #include <nds/arm7/i2c.h>
 
 //#include "my_fat.h"
@@ -447,9 +446,6 @@ int hookNdsRetailArm7(
 		ce7->romRead_LED              = romRead_LED;
 		ce7->dmaRomRead_LED           = dmaRomRead_LED;
 		ce7->scfgRomBak               = REG_SCFG_ROM;
-		if (ce7->igmHotkey == 0) {
-			ce7->igmHotkey = (KEY_L | KEY_DOWN | KEY_SELECT);
-		}
 
 		/* if (!ROMinRAM && dataToPreloadFound(ndsHeader) && dataToPreloadFrame) {
 			ce7->romPartLocation = romPartLocation;
