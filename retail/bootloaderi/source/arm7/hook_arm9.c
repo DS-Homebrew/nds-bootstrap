@@ -383,7 +383,7 @@ int hookNdsRetailArm9(
 			ce9->valueBits |= b_resetOnEveryException;
 		}
 
-		if (ndsHeader->unitCode == 0 || !dsiMode) {
+		if (!gameOnFlashcard && (ndsHeader->unitCode == 0 || !dsiMode)) {
 			u32* cacheAddressTable = (u32*)(!laterSdk ? CACHE_ADDRESS_TABLE_LOCATION2 : CACHE_ADDRESS_TABLE_LOCATION);
 			u32 addr = ce9->cacheAddress;
 
