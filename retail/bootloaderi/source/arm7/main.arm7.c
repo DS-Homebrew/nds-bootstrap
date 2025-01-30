@@ -886,7 +886,7 @@ static bool isROMLoadableInRAM(const tDSiHeader* dsiHeader, const tNDSHeader* nd
 	) {
 		const bool twlType = (ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed);
 		const bool cheatsEnabled = (cheatSizeTotal > 4 && cheatSizeTotal <= 0x8000);
-		u32 wramSize = 0x80000;
+		u32 wramSize = (dsiWramAccess && !dsiWramMirrored) ? 0x80000 : 0;
 		if (ce7Location == CARDENGINEI_ARM7_LOCATION) {
 			wramSize += 0x8000; // Shared 32KB of WRAM is available for ARM9 to use
 			sharedWramEnabled = true;
@@ -895,9 +895,7 @@ static bool isROMLoadableInRAM(const tDSiHeader* dsiHeader, const tNDSHeader* nd
 		if (consoleModel > 0) {
 			romSizeLimit += 0x01000000;
 		}
-		if (dsiWramAccess && !dsiWramMirrored) {
-			romSizeLimit += wramSize;
-		}
+		romSizeLimit += wramSize;
 
 		u32 romOffset = 0;
 		u32 romSize = baseRomSize;
