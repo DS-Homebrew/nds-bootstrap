@@ -1242,9 +1242,10 @@ static void buildRomMap(const tNDSHeader* ndsHeader, const module_params_t* modu
 			bool readRom = false;
 			romBlockSize += (romSizeEdit[i] > 0x4000) ? 0x4000 : romSizeEdit[i];
 			romLocationChangePrep += 0x4000;
+			const bool romLocationChanged = romLocationAdjust(ndsHeader, laterSdk, isSdk5(moduleParams), &romLocationChangePrep);
 			romSizeEdit[i] -= 0x4000;
 
-			readRom = (romSizeEdit[i] <= 0) ? true : romLocationAdjust(ndsHeader, laterSdk, isSdk5(moduleParams), &romLocationChangePrep);
+			readRom = (romSizeEdit[i] <= 0) ? true : romLocationChanged;
 
 			// dbg_hexa(romLocationChangePrep);
 
