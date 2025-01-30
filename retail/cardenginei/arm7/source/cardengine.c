@@ -980,9 +980,9 @@ void dumpRam(void) {
 	//driveInitialize();
 	sharedAddr[3] = 0x444D4152;
 	// Dump RAM
-	#ifdef TWLSDK
+	// #ifdef TWLSDK
 	fileWrite((char*)0x0C000000, &ramDumpFile, 0, (consoleModel==0 ? 0x01000000 : 0x02000000));
-	#else
+	/* #else
 	if (valueBits & dsiMode) {
 		// Dump full RAM
 		fileWrite((char*)0x0C000000, &ramDumpFile, 0, (consoleModel==0 ? 0x01000000 : 0x02000000));
@@ -1000,7 +1000,7 @@ void dumpRam(void) {
 		fileWrite((char*)0x02000000, &ramDumpFile, 0, 0x3C0000);
 		fileWrite((char*)0x027C0000, &ramDumpFile, 0x3C0000, 0x40000);
 	}
-	#endif
+	#endif */
 	sharedAddr[3] = 0;
   	#ifdef TWLSDK
 	//if (doBak) restoreSdBakData();
