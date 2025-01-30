@@ -8809,11 +8809,9 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// A Little Bit of... Magic Made Fun: Funny Face (Europe)
 	else if (strcmp(romTid, "KMFT") == 0 || strcmp(romTid, "KMFP") == 0 || strcmp(romTid, "KMFX") == 0) {
 		u8 offsetChangeM = (romTid[3] == 'T') ? 0 : 0x50;
-		u16 offsetChange = (romTid[3] == 'T') ? 0 : 0x2A0;
 		u16 offsetChangeInit = (romTid[3] == 'T') ? 0 : 0x494;
 		if (romTid[3] == 'X') {
 			offsetChangeM = 0x54;
-			offsetChange = 0x2F0;
 			offsetChangeInit = 0x604;
 		}
 
