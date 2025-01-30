@@ -140,13 +140,13 @@ typedef struct cardengineArm7B4DS {
 	u32 valueBits;
 	/*
 		7: a9IrqHooked
-		8: delayWrites
 		17: sleepMode
 	*/
 	s32 mainScreen;
 	u32 language; //u8
 	u32* languageAddr;
 	u16 igmHotkey;
+	u8 RumblePakType;
 } cardengineArm7B4DS;
 #else
 //

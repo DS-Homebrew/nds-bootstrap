@@ -19,6 +19,7 @@
 #include <string.h> // memcpy
 #include <stdio.h>
 #include <nds/system.h>
+#include <nds/input.h>
 
 //#include "my_fat.h"
 #include "debug_file.h"
@@ -235,6 +236,9 @@ int hookNdsRetailArm7(
 	ce7->language                = language;
 	if (strcmp(romTid, "AKYP") == 0) { // Etrian Odyssey (EUR)
 		ce7->languageAddr = (u32*)0x020DC5DC;
+	}
+	if (ce7->igmHotkey == 0) {
+		ce7->igmHotkey = (KEY_L | KEY_DOWN | KEY_SELECT);
 	}
 	ce7->RumblePakType           = RumblePakType;
 

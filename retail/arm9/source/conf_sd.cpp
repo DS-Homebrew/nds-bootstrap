@@ -700,7 +700,7 @@ static void load_conf(configuration* conf, const char* fn) {
 	conf->guiLanguage = strdup(config_file.fetch("NDS-BOOTSTRAP", "GUI_LANGUAGE").c_str());
 
 	// Hotkey
-	conf->hotkey = strtol(config_file.fetch("NDS-BOOTSTRAP", "HOTKEY").c_str(), NULL, 16);
+	conf->hotkey = strtol(config_file.fetch("NDS-BOOTSTRAP", "HOTKEY", "284").c_str(), NULL, 16);
 
 	// Manual file path
 	conf->manualPath = strdup(config_file.fetch("NDS-BOOTSTRAP", "MANUAL_PATH").c_str());
@@ -764,14 +764,14 @@ void getIgmStrings(configuration* conf, bool b4ds) {
 	}
 
 	// Set In-Game Menu hotkey
-	igmText->hotkey = conf->hotkey != 0 ? conf->hotkey : (KEY_L | KEY_DOWN | KEY_SELECT);
+	// igmText->hotkey = conf->hotkey != 0 ? conf->hotkey : (KEY_L | KEY_DOWN | KEY_SELECT);
 
 	if(b4ds) {
 		cardengineArm7B4DS* ce7 = (cardengineArm7B4DS*)CARDENGINE_ARM7_LOCATION_BUFFERED;
-		ce7->igmHotkey = igmText->hotkey;
+		ce7->igmHotkey = conf->hotkey;
 	} else {
 		cardengineArm7* ce7 = (cardengineArm7*)CARDENGINEI_ARM7_BUFFERED_LOCATION;
-		ce7->igmHotkey = igmText->hotkey;
+		ce7->igmHotkey = conf->hotkey;
 	}
 
 	char path[40];
