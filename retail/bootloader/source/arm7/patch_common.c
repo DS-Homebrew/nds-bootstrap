@@ -49,17 +49,24 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
 		return;
 	}
 
-#ifndef LOADERTWO
 	const char* romTid = getRomTid(ndsHeader);
 
+#ifdef LOADERTYPE0
 	// Animal Crossing: Wild World
 	if ((strncmp(romTid, "ADM", 3) == 0 || strncmp(romTid, "A62", 3) == 0) && !extendedMemory) {
 		int instancesPatched = 0;
 		u32 addrOffset = (u32)ndsHeader->arm9destination;
 		while (instancesPatched < 3) {
-			if(*(u32*)addrOffset >= 0x023FF000 && *(u32*)addrOffset < 0x023FF020) { 
-				//*(u32*)addrOffset -= 0x2000;
-				*(u32*)addrOffset = CARDENGINE_ARM9_LOCATION_DLDI_ALT2;
+			if (*(u32*)addrOffset >= 0x023FF000 && *(u32*)addrOffset < 0x023FF020) {
+				extern u8 _io_dldi_size;
+				if (_io_dldi_size == 0x0E) {
+					*(u32*)addrOffset = 0x023DC000;
+				} else if (_io_dldi_size == 0x0F) {
+					*(u32*)addrOffset = 0x023D8000;
+				} else {
+					//*(u32*)addrOffset -= 0x2000;
+					*(u32*)addrOffset = CARDENGINE_ARM9_LOCATION_DLDI_ALT2;
+				}
 				instancesPatched++;
 			}
 			addrOffset += 4;
@@ -149,11 +156,12 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
 		*(u32*)0x02000bd0 = 0xe3a00000;
 		*(u32*)0x02000bd4 = 0xe8bd8ff8;
 		*(u32*)0x0207af40 = 0xebfe271e;
-	}
+	} else
+#endif
 
 	// Art Style: DIGIDRIVE (USA) (child.srl)
 	// Art Style: INTERSECT (Europe, Australia) (child.srl)
-	else if (strcmp(romTid, "NTRJ") == 0 && ndsHeader->headerCRC16 == 0x53E2 && srlAddr > 0) {
+	if (strcmp(romTid, "NTRJ") == 0 && ndsHeader->headerCRC16 == 0x53E2 && srlAddr > 0) {
 		*(u32*)0x0200118C = 0x021BD754; // Boot to "mode_select" instead of "connection2"
 		for (int i = 0; i < 6; i++) { // Disable bugged description text
 			u32* offset1 = (u32*)0x02019C90;
@@ -204,6 +212,7 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
 		*(u32*)0x02021C50 = 0xE1A00000; // nop
 	}
 
+#ifdef LOADERTYPE0
 	// Ideyou Sukeno: Kenkou Maja DSi (Japan) (main_rom.srl)
 	else if (strcmp(romTid, "NTRJ") == 0 && ndsHeader->headerCRC16 == 0xCD01 && srlAddr > 0) {
 		*(u32*)0x02000BEC = 0xE3A00001; // mov r0, #1 (Do not wait for other consoles to connect)
@@ -240,9 +249,9 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
 		*(u32*)0x0200059c = 0x020f83f4;
 		*(u32*)0x020005a0 = 0x0000b975;
 		*(u32*)0x020005a4 = 0x0000c127;
-		*(u32*)0x020005a8 = 0x02105498; 
+		*(u32*)0x020005a8 = 0x02105498;
 		*(u32*)0x020005ac = 0x02105179;
-		*(u32*)0x020005b0 = 0x0200162d; 
+		*(u32*)0x020005b0 = 0x0200162d;
 		*(u32*)0x020005b4 = 0x0210c030;
 		*(u32*)0x020005b8 = 0x0210bd11;
 		*(u32*)0x020005bc = 0x0200162d;
@@ -276,7 +285,7 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
 		*(u32*)0x023fc028 = 0x6018a355; // andvss r10, r8, r5, asr r3
 		*(u32*)0x023fc02c = 0x609a6059; // addvss r6, r10, r9, asr r0
 		*(u32*)0x023fc030 = 0x60dc2401; // sbcvss r2, r12, r1, lsl #8
-		*(u32*)0x023fc034 = 0x4718bcff; // 
+		*(u32*)0x023fc034 = 0x4718bcff; //
 		*(u32*)0x023fc038 = 0x020c30dc; // andeq r3 ,r12, #dc
 		*(u32*)0x023fc03c = 0xe2810001; // add r0 , r1, #1
 		*(u32*)0x023fc040 = 0xe92d401f; // stmdb sp!, {r0-r4,lr}
@@ -332,14 +341,14 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
 		*(u32*)0x023fc108 = 0x1c283578; // stcne cp5, cr3, [r8], #-1e0
 		*(u32*)0x023fc10c = 0xf41e2100; // ldr r2, [lr], #-100
 		*(u32*)0x023fc110 = 0x6170fa53; // cmnvs r0, r3, asr r10
-		*(u32*)0x023fc114 = 0x006061b4; // 
+		*(u32*)0x023fc114 = 0x006061b4; //
 		*(u32*)0x023fc118 = 0x35786230; // ldrbcc r6, [r8, -#230]!
-		*(u32*)0x023fc11c = 0x21001c28; // 
+		*(u32*)0x023fc11c = 0x21001c28; //
 		*(u32*)0x023fc120 = 0xfa4af41e; // blx 0331d1a0
 		*(u32*)0x023fc124 = 0x62b46270; // adcvss r6, r4, #7
 		*(u32*)0x023fc128 = 0x19000060; // stmdbne r0, {r5-r6}
 		*(u32*)0x023fc12c = 0x35786330; // ldrbcc r6, [r8, -#330]!
-		*(u32*)0x023fc130 = 0x21001c28; // 
+		*(u32*)0x023fc130 = 0x21001c28; //
 		*(u32*)0x023fc134 = 0xfa40f41e; // blx 0309d1b4
 		*(u32*)0x023fc138 = 0x63b46370; // movvss r6, #c0000001
 		*(u32*)0x023fc13c = 0x60f42402; // rscvss r2, r4, r2, lsl #8
@@ -366,7 +375,7 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
 		// *(u32*)0x0206AE70 = 0xE3A00000; //mov r0, #0
         // *(u32*)0x0206D2C4 = 0xE3A00001; //mov r0, #1
 		// *(u32*)0x0206AE74 = 0xe12fff1e; //bx lr
-        
+
         // *(u32*)0x02000B94 = 0xE1A00000; //nop
 
 		// *(u32*)0x020D5010 = 0xe12fff1e; //bx lr
@@ -376,20 +385,20 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
 	//else if (strcmp(romTid, "APDE") == 0 || strcmp(romTid, "APDP") == 0) {
         /*unsigned char pdash_patch_chars[64] =
         {
-          0xFE, 0x40, 0x2D, 0xE9, 
-          0x28, 0x10, 0xA0, 0xE3, 
-          0x00, 0x20, 0xA0, 0xE3, 
-          0x24, 0x30, 0x9F, 0xE5, 
-          0x02, 0x40, 0x90, 0xE7, 
-          0x02, 0x40, 0x83, 0xE7, 
-          0x04, 0x20, 0x82, 0xE2, 
-          0x01, 0x00, 0x52, 0xE1, 
-          0xFA, 0xFF, 0xFF, 0x1A, 
-          0x10, 0x30, 0x9F, 0xE5, 
-          0x33, 0xFF, 0x2F, 0xE1, 
-          0xFE, 0x80, 0xBD, 0xE8, 
-          0x01, 0x00, 0xA0, 0xE3, 
-          0x1E, 0xFF, 0x2F, 0xE1, 
+          0xFE, 0x40, 0x2D, 0xE9,
+          0x28, 0x10, 0xA0, 0xE3,
+          0x00, 0x20, 0xA0, 0xE3,
+          0x24, 0x30, 0x9F, 0xE5,
+          0x02, 0x40, 0x90, 0xE7,
+          0x02, 0x40, 0x83, 0xE7,
+          0x04, 0x20, 0x82, 0xE2,
+          0x01, 0x00, 0x52, 0xE1,
+          0xFA, 0xFF, 0xFF, 0x1A,
+          0x10, 0x30, 0x9F, 0xE5,
+          0x33, 0xFF, 0x2F, 0xE1,
+          0xFE, 0x80, 0xBD, 0xE8,
+          0x01, 0x00, 0xA0, 0xE3,
+          0x1E, 0xFF, 0x2F, 0xE1,
           0x00, 0xA6, 0x0D, 0x02,              d
           0x78, 0x47, 0x0A, 0x02
         };
@@ -404,7 +413,7 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
         PatchMem(KArm9,s32(ii+7),0xe28ff048); //adr pc, xxx  jump+48 (12*4)
         //6D3FC
         PatchMem(KArm9,s32(ii+28),0xe1a00000); //nop
-        
+
         // r0 : ROMCTRL
         // r1 : ROMCTRL
         // r2 : ...
@@ -414,17 +423,17 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
         // r6 : LEN
         // ..
         // r10 : cardstruct
-        
+
         for(int i =0; i<64; i++) {
-            *(((u8*)0x0206D2C4)+i) = pdash_patch_chars[i];    
+            *(((u8*)0x0206D2C4)+i) = pdash_patch_chars[i];
         }*/
-        
-        // *((u32*)0x02000BB0) = 0xE1A00000; //nop 
-    
+
+        // *((u32*)0x02000BB0) = 0xE1A00000; //nop
+
 		// *(u32*)0x0206D2C4 = 0xE3A00000; //mov r0, #0
         // *(u32*)0x0206D2C4 = 0xE3A00001; //mov r0, #1
 		// *(u32*)0x0206D2C8 = 0xe12fff1e; //bx lr
-        
+
 		// *(u32*)0x020D5010 = 0xe12fff1e; //bx lr
 	//}
 
@@ -474,9 +483,7 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
 	// Tropix! Your Island Getaway
     else if (strcmp(romTid, "CTXE") == 0) {
 		extern u32 baseChipID;
-		u32 cardIdFunc[2] = {0, 0};
-		tonccpy(cardIdFunc, ce9->thumbPatches->card_id_arm9, 0x4);
-		cardIdFunc[1] = baseChipID;
+		u32 cardIdFunc[2] = {0x47704800, baseChipID};
 
 		const u16* branchCode1 = generateA7InstrThumb(0x020BA666, 0x020BA670);
 		tonccpy((void*)0x020BA666, branchCode1, 0x4);
@@ -486,7 +493,7 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
 		const u16* branchCode2 = generateA7InstrThumb(0x020BA66A, 0x020BA6C0);
 		tonccpy((void*)0x020BA66A, branchCode2, 0x4);
 
-		tonccpy((void*)0x020BA728, ce9->thumbPatches->card_set_dma_arm9, 0xC);
+		tonccpy((void*)0x020BA728, patchOffsetCache.cardSetDmaOffset, 0xC);
 
 		const u16* branchCode3 = generateA7InstrThumb(0x020BA70C, 0x020BA728);
 		tonccpy((void*)0x020BA70C, branchCode3, 0x4);
@@ -508,6 +515,7 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
 		const u16* branchCode7 = generateA7InstrThumb(0x020BAC60, 0x020BACB6);
 		tonccpy((void*)0x020BAC60, branchCode7, 0x4);
 	}
+#endif
 
 	// Shantae DSi (03/06/09 build)
 	else if (strcmp(romTid, "AIPE") == 0 && ndsHeader->headerCRC16 == 0x700E && !extendedMemory) {
@@ -520,7 +528,6 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
 		*(u32*)0x0203FB20 -= 2;
 		*(u32*)0x0203FD14 -= 2;
 	}
-#endif
 }
 
 void rsetA7Cache(void)
@@ -564,7 +571,7 @@ u32 patchCardNds(
 	}
 
 	u32 errorCodeArm9 = patchCardNdsArm9(ce9, ndsHeader, moduleParams, patchMpuRegion, usesCloneboot);
-	
+
 	//if (cardReadFound || ndsHeader->fatSize == 0) {
 	if (errorCodeArm9 == ERR_NONE || ndsHeader->fatSize == 0) {
 		return patchCardNdsArm7(ce7, ndsHeader, moduleParams, saveFileCluster);

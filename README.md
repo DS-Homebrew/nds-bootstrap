@@ -3,7 +3,7 @@
    <a href="https://gbatemp.net/threads/nds-bootstrap-loader-run-commercial-nds-backups-from-an-sd-card.454323/">
       <img src="https://img.shields.io/badge/GBAtemp-Thread-blue.svg" alt="GBAtemp thread">
    </a>
-   <a href="https://discord.gg/yD3spjv">
+   <a href="https://discord.gg/fCzqcWteC4">
       <img src="https://img.shields.io/badge/Discord%20Server-%23nds--bootstrap-green.svg" alt="Discord server: #nds-bootstrap">
    </a>
    <a href="https://github.com/DS-Homebrew/nds-bootstrap/actions/workflows/build.yml">
@@ -41,7 +41,7 @@ If your goal is to get a build of the latest commit, you can download that from 
 4. Run `make package-nightly` to compile nds-bootstrap
    - The output files will be in the `bin` folder
 
-If you need help compiling, please ask for help in our [Discord server](https://discord.gg/yD3spjv) or a [GitHub Discussion](https://github.com/DS-Homebrew/nds-bootstrap/discussions).
+If you need help compiling, please ask for help in our [Discord server](https://discord.gg/fCzqcWteC4) or a [GitHub Discussion](https://github.com/DS-Homebrew/nds-bootstrap/discussions).
 
 # Frontends
 
@@ -67,7 +67,7 @@ An alternative forwarder generator for 3DS users. YANBF forwarders are 3DS-mode 
 - [shutterbug2000](https://github.com/shutterbug2000): SDK5 support, help with DSi mode support, and some other implemented stuff
 - [ahezard](https://github.com/ahezard): Starting the project, former lead developer
 - [Pk11](https://github.com/Epicpkmn11): In-game menu, screenshot taking, manual loading, and translation management
-- [Gericom](https://github.com/Gericom): Improving B4DS compatibility, parts of libtwl code used
+- [Gericom](https://github.com/Gericom): Improving B4DS compatibility, parts of libtwl code used, Pokémon Wii connection patch, and SD -> flashcard R/W patch for DSiWare
 
 ## Other
 - [devkitPro](https://devkitpro.org): devkitARM and libnds

@@ -8,7 +8,7 @@ endif
 include $(DEVKITARM)/ds_rules
 
 ifeq ($(OS),Windows_NT)
-LZSS			?=	../../../lzss.exe
+LZSS			?=	../../../../lzss.exe
 
 else
 
@@ -108,8 +108,6 @@ export LIBPATHS	:=	$(foreach dir,$(LIBDIRS),-L$(dir)/lib)
 $(BUILD):
 	@[ -d $@ ] || mkdir -p $@
 	@$(MAKE) --no-print-directory -C $(BUILD) -f $(CURDIR)/Makefile
-	@cp $(OUTPUT).bin $(OUTPUT_CMP).lz77
-	@$(LZSS) -ewf $(OUTPUT_CMP).lz77
 
 #---------------------------------------------------------------------------------
 clean:
@@ -123,6 +121,10 @@ else
 #---------------------------------------------------------------------------------
 # main targets
 #---------------------------------------------------------------------------------
+$(OUTPUT_CMP).lz77: $(OUTPUT).bin
+	@cp $< $@
+	@$(LZSS) -ewf $@
+
 $(OUTPUT).bin:	$(DEPSDIR)/$(TARGET).elf
 $(DEPSDIR)/$(TARGET).elf:	cardengine.ld $(OFILES)
 #	@echo linking $(notdir $@)

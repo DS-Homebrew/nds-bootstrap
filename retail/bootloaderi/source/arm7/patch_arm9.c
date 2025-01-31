@@ -10,6 +10,7 @@
 #include "unpatched_funcs.h"
 #include "debug_file.h"
 #include "dmaTwl.h"
+#include "my_fat.h"
 #include "tonccpy.h"
 
 #include "igm_text.h"
@@ -697,23 +698,41 @@ static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, co
 }
 
 static void patchReset(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {    
-	u32* reset = patchOffsetCache.resetOffset;
+	const char* romTid = getRomTid(ndsHeader);
+	if (ndsHeader->unitCode == 0 && (strcmp(romTid, "NTRJ") == 0 || strncmp(romTid, "HND", 3) == 0 || strncmp(romTid, "HNE", 3) == 0)) {
+		u32* offset = patchOffsetCache.srlStartOffset9;
+
+		if (!patchOffsetCache.srlStartOffsetChecked) {
+			offset = findSrlStartOffset9(ndsHeader);
+			if (offset) patchOffsetCache.srlStartOffset9 = offset;
+			patchOffsetCache.srlStartOffsetChecked = true;
+		}
+
+		if (offset) {
+			// Patch
+			tonccpy(offset, ce9->patches->reset_arm9, 0x40);
+			dbg_printf("srlStart location : ");
+			dbg_hexa((u32)offset);
+			dbg_printf("\n\n");
+		}
+	}
+
+	u32* offset = patchOffsetCache.resetOffset;
 
     if (!patchOffsetCache.resetChecked) {
-		reset = findResetOffset(ndsHeader, moduleParams, (bool*)&patchOffsetCache.resetMb);
-		if (reset) patchOffsetCache.resetOffset = reset;
+		offset = findResetOffset(ndsHeader, moduleParams, (bool)patchOffsetCache.srlStartOffset9);
+		if (offset) patchOffsetCache.resetOffset = offset;
 		patchOffsetCache.resetChecked = true;
 	}
 
-	if (!reset) {
+	if (!offset) {
 		return;
 	}
 
 	// Patch
-	u32* resetPatch = ce9->patches->reset_arm9;
-	tonccpy(reset, resetPatch, 0x40);
+	tonccpy(offset, ce9->patches->reset_arm9, 0x40);
 	dbg_printf("reset location : ");
-	dbg_hexa((u32)reset);
+	dbg_hexa((u32)offset);
 	dbg_printf("\n\n");
 }
 
@@ -872,7 +891,7 @@ static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 		dbg_printf("\n\n");
 	}
 	if (!patchOffsetCache.mpuDataOffset) {
-		mpuDataOffset = findMpuDataOffset(moduleParams, patchMpuRegion, mpuStartOffset);
+		mpuDataOffset = findMpuDataOffset(false, moduleParams, patchMpuRegion, mpuStartOffset);
 	}
 	if (mpuDataOffset) {
 		if (!isSdk5(moduleParams)) {
@@ -977,7 +996,7 @@ static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 }
 
 void patchMpu2(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, const bool usesCloneboot) {
-	if (moduleParams->sdk_version > 0x5000000 && (ndsHeader->unitCode == 0 || !dsiModeConfirmed)) {
+	if (ndsHeader->unitCode > 0 && !dsiModeConfirmed) {
 		return;
 	}
 
@@ -995,53 +1014,55 @@ void patchMpu2(const tNDSHeader* ndsHeader, const module_params_t* moduleParams,
 		dbg_printf("\n\n");
 	}
 	if (!patchOffsetCache.mpuDataOffset2) {
-		mpuDataOffset = findMpuDataOffset(moduleParams, 2, mpuStartOffset);
+		mpuDataOffset = findMpuDataOffset((ndsHeader->unitCode > 0), moduleParams, 2, mpuStartOffset);
 	}
 	if (mpuDataOffset) {
-		// Change the region 2 configuration
+		if (moduleParams->sdk_version < 0x5000000 || (ndsHeader->unitCode > 0 && dsiModeConfirmed)) {
+			// Change the region 2 configuration
 
-		//force DSi mode settings. THESE TOOK AGES TO FIND. -s2k
-		/*if(ndsHeader->unitCode > 0 && dsiModeConfirmed){
-			u32 mpuNewDataAccess     = 0x15111111;
-			u32 mpuNewInstrAccess    = 0x5111111;
-			u32 mpuInitRegionNewData = PAGE_32M | 0x0C000000 | 1;
-			int mpuAccessOffset      = 3;
+			//force DSi mode settings. THESE TOOK AGES TO FIND. -s2k
+			/*if(ndsHeader->unitCode > 0 && dsiModeConfirmed){
+				u32 mpuNewDataAccess     = 0x15111111;
+				u32 mpuNewInstrAccess    = 0x5111111;
+				u32 mpuInitRegionNewData = PAGE_32M | 0x0C000000 | 1;
+				int mpuAccessOffset      = 3;
 
-			unpatchedFuncs->mpuDataOffset2 = mpuDataOffset;
-			unpatchedFuncs->mpuInitRegionOldData2 = *mpuDataOffset;
+				unpatchedFuncs->mpuDataOffset2 = mpuDataOffset;
+				unpatchedFuncs->mpuInitRegionOldData2 = *mpuDataOffset;
+				*mpuDataOffset = mpuInitRegionNewData;
+
+			//if (mpuAccessOffset) {
+				unpatchedFuncs->mpuAccessOffset = mpuAccessOffset;
+				//if (mpuNewInstrAccess) {
+					unpatchedFuncs->mpuOldInstrAccess = mpuDataOffset[mpuAccessOffset];
+					mpuDataOffset[mpuAccessOffset] = mpuNewInstrAccess;
+				//}
+				//if (mpuNewDataAccess) {
+					unpatchedFuncs->mpuOldDataAccess = mpuDataOffset[mpuAccessOffset + 1];
+					mpuDataOffset[mpuAccessOffset + 1] = mpuNewDataAccess;
+				//}
+			//}
+			} else {*/
+				unpatchedFuncs->mpuDataOffset2 = mpuDataOffset;
+				unpatchedFuncs->mpuInitRegionOldData2 = *mpuDataOffset;
+				// *mpuDataOffset = (ndsHeader->unitCode > 0 && dsiModeConfirmed) ? 0 : (PAGE_128K | 0x027E0000 | 1);
+				*mpuDataOffset = 0;
+			//}
+
+			/*u32 mpuInitRegionNewData = PAGE_32M | 0x02000000 | 1;
+			u32 mpuNewDataAccess = 0x15111111;
+			u32 mpuNewInstrAccess = 0x5111111;
+			int mpuAccessOffset = 6;
+
 			*mpuDataOffset = mpuInitRegionNewData;
 
-		//if (mpuAccessOffset) {
-			unpatchedFuncs->mpuAccessOffset = mpuAccessOffset;
-			//if (mpuNewInstrAccess) {
-				unpatchedFuncs->mpuOldInstrAccess = mpuDataOffset[mpuAccessOffset];
+			if (mpuNewInstrAccess) {
 				mpuDataOffset[mpuAccessOffset] = mpuNewInstrAccess;
-			//}
-			//if (mpuNewDataAccess) {
-				unpatchedFuncs->mpuOldDataAccess = mpuDataOffset[mpuAccessOffset + 1];
+			}
+			if (mpuNewDataAccess) {
 				mpuDataOffset[mpuAccessOffset + 1] = mpuNewDataAccess;
-			//}
-		//}
-		} else {*/
-			unpatchedFuncs->mpuDataOffset2 = mpuDataOffset;
-			unpatchedFuncs->mpuInitRegionOldData2 = *mpuDataOffset;
-			// *mpuDataOffset = (ndsHeader->unitCode > 0 && dsiModeConfirmed) ? 0 : (PAGE_128K | 0x027E0000 | 1);
-			*mpuDataOffset = 0;
-		//}
-
-		/*u32 mpuInitRegionNewData = PAGE_32M | 0x02000000 | 1;
-		u32 mpuNewDataAccess = 0x15111111;
-		u32 mpuNewInstrAccess = 0x5111111;
-		int mpuAccessOffset = 6;
-
-		*mpuDataOffset = mpuInitRegionNewData;
-
-		if (mpuNewInstrAccess) {
-			mpuDataOffset[mpuAccessOffset] = mpuNewInstrAccess;
+			}*/
 		}
-		if (mpuNewDataAccess) {
-			mpuDataOffset[mpuAccessOffset + 1] = mpuNewDataAccess;
-		}*/
 
 		dbg_printf("Mpu data 2: ");
 		dbg_hexa((u32)mpuDataOffset);
@@ -1234,6 +1255,7 @@ static void patchCartRead(cardengineArm9* ce9, const tNDSHeader* ndsHeader, cons
 }*/
 
 static void patchWaitSysCycles(const cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+	extern u32 waitSysCyclesOffset;
 	u32* offset = patchOffsetCache.waitSysCyclesOffset;
 
 	if (isSdk5(moduleParams)) {
@@ -1270,7 +1292,7 @@ static void patchWaitSysCycles(const cardengineArm9* ce9, const tNDSHeader* ndsH
 			}
 
 			if (dsiModeConfirmed) {	
-				*(u32*)0x027FEFF4 = (u32)offset;
+				waitSysCyclesOffset = (u32)offset;
 			}
 		}
 
@@ -1293,7 +1315,7 @@ static void patchWaitSysCycles(const cardengineArm9* ce9, const tNDSHeader* ndsH
 		offset[2] = (u32)ce9->patches->waitSysCycles;
 
 		if (dsiModeConfirmed) {	
-			*(u32*)((u32)INGAME_MENU_LOCATION + IGM_TEXT_SIZE_ALIGNED + 4) = (u32)ce9->patches->waitSysCycles;
+			waitSysCyclesOffset = (u32)ce9->patches->waitSysCycles;
 		}
 	}
 
@@ -1346,6 +1368,7 @@ void patchHiHeapPointer(const module_params_t* moduleParams, const tNDSHeader* n
 	const bool ROMsupportsDsiMode = (ndsHeader->unitCode > 0 && dsiModeConfirmed);
 	const bool cheatsEnabled = (cheatSizeTotal > 4 && cheatSizeTotal <= 0x8000);
 	const char* romTid = getRomTid(ndsHeader);
+	extern bool pkmnGen5;
 
 	if (moduleParams->sdk_version < 0x2008000 || !dsiModeConfirmed || strncmp(romTid, "UBR", 3) == 0) {
 		return;
@@ -1401,7 +1424,20 @@ void patchHiHeapPointer(const module_params_t* moduleParams, const tNDSHeader* n
 			}
 		} else { */
 			// DSi mode title loaded on DSi from SD card, or DSi/3DS with external DSi BIOS files loaded
-			if (!gameOnFlashcard && strncmp(romTid, "V2G", 3) != 0 && strncmp(romTid, "DD3", 3) != 0) {
+			if (!gameOnFlashcard && pkmnGen5) {
+				// Pokemon Black & White 1&2
+				switch (*heapPointer) {
+					case 0x13A007BE:
+						*heapPointer = (u32)0x13A0062D; // MOVNE R0, #0x2D00000
+						break;
+					case 0xE3A007BE:
+						*heapPointer = (u32)0xE3A0062D; // MOV R0, #0x2D00000
+						break;
+					case 0x048020BE:
+						*heapPointer = (u32)0x048020B4; // MOVS R0, #0x2D00000
+						break;
+				}
+			} else if (!gameOnFlashcard && strncmp(romTid, "V2G", 3) != 0 && strncmp(romTid, "DD3", 3) != 0) {
 				switch (*heapPointer) {
 					case 0x13A007BE:
 						*heapPointer = (u32)0x13A0062F; // MOVNE R0, #0x2F00000
@@ -1625,7 +1661,7 @@ void patchSharedFontPath(const cardengineArm9* ce9, const tNDSHeader* ndsHeader,
 	dbg_hexa((u32)offset);
 	dbg_printf("\n\n");
 
-	if (gameOnFlashcard) {
+	if (REG_SCFG_ROM & BIT(9)) {
 		extern u32 iUncompressedSizei;
 
 		const u32* dsiSaveOpen = ce9->patches->dsiSaveOpen;
@@ -1985,6 +2021,181 @@ void patchSharedFontPath(const cardengineArm9* ce9, const tNDSHeader* ndsHeader,
 	}
 }
 
+static u32 twlSaveThumbBranchOffset = 0;
+
+static void twlSaveSetTBranch(const u32 patchData0, const u32 patchData1) {
+	static u32 twlSaveThumbBranchOffsetCache[13] = {0};
+	static bool offsetSet[13] = {false};
+
+	int i = 0;
+	for (i = 0; i < 13; i++) {
+		if (!offsetSet[i] || twlSaveThumbBranchOffsetCache[i] == patchData1) {
+			break;
+		}
+	}
+
+	if (!offsetSet[i]) {
+		twlSaveThumbBranchOffsetCache[i] = twlSaveThumbBranchOffset;
+		twlSaveThumbBranchOffset += 4;
+
+		setB(twlSaveThumbBranchOffsetCache[i], (u32)patchData1);
+		offsetSet[i] = true;
+	}
+
+	setBLXThumb(patchData0, twlSaveThumbBranchOffsetCache[i]);
+}
+
+void patchTwlSaveFuncs(const cardengineArm9* ce9) {
+	extern u16 bootstrapOnFlashcard;
+	extern u32 dsi2dsSavePatchFileCluster;
+	extern u32 dsi2dsSavePatchOffset;
+	extern u32 dsi2dsSavePatchSize;
+	if (dsi2dsSavePatchFileCluster == CLUSTER_FREE || dsi2dsSavePatchOffset == 0 || dsi2dsSavePatchSize == 0) {
+		return;
+	}
+
+	const u32* dsiSaveGetResultCode = ce9->patches->dsiSaveGetResultCode;
+	const u32* dsiSaveCreate = ce9->patches->dsiSaveCreate;
+	const u32* dsiSaveDelete = ce9->patches->dsiSaveDelete;
+	const u32* dsiSaveGetInfo = ce9->patches->dsiSaveGetInfo;
+	const u32* dsiSaveSetLength = ce9->patches->dsiSaveSetLength;
+	const u32* dsiSaveOpen = ce9->patches->dsiSaveOpen;
+	const u32* dsiSaveOpenR = ce9->patches->dsiSaveOpenR;
+	const u32* dsiSaveClose = ce9->patches->dsiSaveClose;
+	const u32* dsiSaveGetLength = ce9->patches->dsiSaveGetLength;
+	const u32* dsiSaveGetPosition = ce9->patches->dsiSaveGetPosition;
+	const u32* dsiSaveSeek = ce9->patches->dsiSaveSeek;
+	const u32* dsiSaveRead = ce9->patches->dsiSaveRead;
+	const u32* dsiSaveWrite = ce9->patches->dsiSaveWrite;
+
+	aFile file;
+	getFileFromCluster(&file, dsi2dsSavePatchFileCluster, bootstrapOnFlashcard);
+
+	for (u32 i = 0; i < dsi2dsSavePatchSize; i += 8) {
+		u32 patchData[2];
+		fileRead((char*)patchData, &file, dsi2dsSavePatchOffset+i, 8);
+		const bool patchIsThumb = (patchData[0] >= 0x10000000 && patchData[0] < 0x20000000);
+		if (patchIsThumb) {
+			patchData[0] -= 0x10000000;
+		}
+
+		switch (patchData[1]) {
+			case 0x4E494254: // 'TBIN'
+				twlSaveThumbBranchOffset = patchData[0];
+				break;
+			case 0x52544547: // 'GETR'
+				if (patchIsThumb) {
+					twlSaveSetTBranch(patchData[0], (u32)dsiSaveGetResultCode);
+				} else if (*(u32*)(patchData[0]) >= 0xEB000000 && *(u32*)(patchData[0]) < 0xEC000000) {
+					setBL(patchData[0], (u32)dsiSaveGetResultCode);
+				} else {
+					tonccpy((u32*)(patchData[0]), dsiSaveGetResultCode, 8);
+				}
+				break;
+			case 0x41455243: // 'CREA'
+				if (patchIsThumb) {
+					twlSaveSetTBranch(patchData[0], (u32)dsiSaveCreate);
+				} else if (*(u32*)(patchData[0]) >= 0xEB000000 && *(u32*)(patchData[0]) < 0xEC000000) {
+					setBL(patchData[0], (u32)dsiSaveCreate);
+				} else if (*(u32*)(patchData[0]-4) == 0xE12FFF1C || *(u32*)(patchData[0]-8) == 0xE12FFF1C) {
+					*(u32*)(patchData[0]) = (u32)dsiSaveCreate;
+				}
+				break;
+			case 0x454C4544: // 'DELE'
+				if (patchIsThumb) {
+					twlSaveSetTBranch(patchData[0], (u32)dsiSaveDelete);
+				} else {
+					setBL(patchData[0], (u32)dsiSaveDelete);
+				}
+				break;
+			case 0x49544547: // 'GETI'
+				if (patchIsThumb) {
+					twlSaveSetTBranch(patchData[0], (u32)dsiSaveGetInfo);
+				} else {
+					setBL(patchData[0], (u32)dsiSaveGetInfo);
+				}
+				break;
+			case 0x4C544553: // 'SETL'
+				if (patchIsThumb) {
+					twlSaveSetTBranch(patchData[0], (u32)dsiSaveSetLength);
+				} else {
+					setBL(patchData[0], (u32)dsiSaveSetLength);
+				}
+				break;
+			case 0x4E45504F: // 'OPEN'
+				if (patchIsThumb) {
+					twlSaveSetTBranch(patchData[0], (u32)dsiSaveOpen);
+				} else if (*(u32*)(patchData[0]) >= 0xEB000000 && *(u32*)(patchData[0]) < 0xEC000000) {
+					setBL(patchData[0], (u32)dsiSaveOpen);
+				} else if (*(u32*)(patchData[0]-4) == 0xE12FFF1C || *(u32*)(patchData[0]-8) == 0xE12FFF1C) {
+					*(u32*)(patchData[0]) = (u32)dsiSaveOpen;
+				}
+				break;
+			case 0x5245504F: // 'OPER'
+				if (patchIsThumb) {
+					twlSaveSetTBranch(patchData[0], (u32)dsiSaveOpenR);
+				} else {
+					setBL(patchData[0], (u32)dsiSaveOpenR);
+				}
+				break;
+			case 0x534F4C43: // 'CLOS'
+				if (patchIsThumb) {
+					twlSaveSetTBranch(patchData[0], (u32)dsiSaveClose);
+				} else {
+					setBL(patchData[0], (u32)dsiSaveClose);
+				}
+				break;
+			case 0x4C544547: // 'GETL'
+				if (patchIsThumb) {
+					twlSaveSetTBranch(patchData[0], (u32)dsiSaveGetLength);
+				} else {
+					setBL(patchData[0], (u32)dsiSaveGetLength);
+				}
+				break;
+			case 0x50544547: // 'GETP'
+				if (patchIsThumb) {
+					twlSaveSetTBranch(patchData[0], (u32)dsiSaveGetPosition);
+				} else {
+					setBL(patchData[0], (u32)dsiSaveGetPosition);
+				}
+				break;
+			case 0x4B454553: // 'SEEK'
+				if (patchIsThumb) {
+					twlSaveSetTBranch(patchData[0], (u32)dsiSaveSeek);
+				} else {
+					setBL(patchData[0], (u32)dsiSaveSeek);
+				}
+				break;
+			case 0x44414552: // 'READ'
+				if (patchIsThumb) {
+					twlSaveSetTBranch(patchData[0], (u32)dsiSaveRead);
+				} else {
+					setBL(patchData[0], (u32)dsiSaveRead);
+				}
+				break;
+			case 0x54495257: // 'WRIT'
+				if (patchIsThumb) {
+					twlSaveSetTBranch(patchData[0], (u32)dsiSaveWrite);
+				} else if (*(u32*)(patchData[0]) >= 0xEB000000 && *(u32*)(patchData[0]) < 0xEC000000) {
+					setBL(patchData[0], (u32)dsiSaveWrite);
+				} else if (*(u32*)(patchData[0]-4) == 0xE12FFF1C || *(u32*)(patchData[0]-8) == 0xE12FFF1C) {
+					*(u32*)(patchData[0]) = (u32)dsiSaveWrite;
+				}
+				break;
+			default:
+				if (patchIsThumb) {
+					const u32 patchData1 = patchData[1];
+					const u16* patchData1T = (u16*)&patchData1;
+					*(u16*)(patchData[0]) = patchData1T[0];
+					*(u16*)(patchData[0]+2) = patchData1T[1];
+				} else {
+					*(u32*)(patchData[0]) = patchData[1];
+				}
+				break;
+		}
+	}
+}
+
 void codeCopy(u32* dst, u32* src, u32 len) {
 	tonccpy(dst, src, len);
 
@@ -2005,7 +2216,7 @@ void codeCopy(u32* dst, u32* src, u32 len) {
 	}
 }
 
-void relocate_ce9(u32 default_location, u32 current_location, u32 size) {
+/* void relocate_ce9(u32 default_location, u32 current_location, u32 size) {
     dbg_printf("relocate_ce9\n");
 
     u32 location_sig[1] = {default_location};
@@ -2245,7 +2456,7 @@ void relocate_ce9(u32 default_location, u32 current_location, u32 size) {
     ce9->thumbPatches->cardEndReadDmaRef = (u32*)((u32)ce9->thumbPatches->cardEndReadDmaRef - default_location + current_location);
     ce9->thumbPatches->sleepRef = (u32*)((u32)ce9->thumbPatches->sleepRef - default_location + current_location);
     ce9->thumbPatches->reset_arm9 = (u32*)((u32)ce9->thumbPatches->reset_arm9 - default_location + current_location);
-}
+} */
 
 static void randomPatch(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	const char* romTid = getRomTid(ndsHeader);
@@ -2647,6 +2858,8 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 
 		// patchA9Mbk(ndsHeader, moduleParams, false);
 		patchSharedFontPath(ce9, ndsHeader, moduleParams, ltdModuleParams);
+
+		patchTwlSaveFuncs(ce9);
 	}
 
 	if (strncmp(romTid, "V2G", 3) == 0 && !dsiModeConfirmed) {

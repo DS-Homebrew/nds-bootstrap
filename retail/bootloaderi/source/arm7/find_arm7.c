@@ -22,6 +22,7 @@ static const u32 relocateValidateSignature[1] = {0x400010C};
 static const u32 swiHaltSignature1[1] = {0xE59FC004};
 static const u32 swiHaltSignature2[1] = {0xE59FC000};
 static const u16 swiHaltCmpSignature[1] = {0x2800};
+static const u16 swiHaltMovSignature[1] = {0x200C};
 static const u32 swiHaltConstSignature[1] = {0x4000004};
 static const u32 swiHaltConstSignatureAlt[1] = {0x4000208};
 
@@ -118,6 +119,9 @@ static const u16 irqEnableStartSignatureThumb[5]  = {0xB530, 0xB081, 0x4D07, 0x8
 static const u16 irqEnableStartSignatureThumb3[5] = {0xB510, 0x1C04, 0xF7FF, 0xFFF4, 0x4B05}; // SDK 3
 static const u16 irqEnableStartSignatureThumb5[5] = {0xB510, 0x1C04, 0xF7FF, 0xFFE4, 0x4B05}; // SDK 5
 
+// SRL start
+static const u32 srlStartSignature3[4] = {0xE92D4070, 0xE59F0098, 0xE5904004, 0xE3540000}; // eoo.dat (Pokemon)
+
 // ARM7i start (SDK 5)
 //static const u32 a7iStartSignatureConstant[3] = {0x6F696473, 0x616C775F, 0x0000006E}; // 'sdio_wlan'
 //static const u32 a7iStartSignatureType1[5] = {0xE12FFF1E, 0xE92D47F8, 0xE24DD014, 0xE1A07000, 0xE5971000};
@@ -137,6 +141,10 @@ static const u16 sdCardResetSignatureThumbType3[7] = {0xF7FF, 0xFD9C, 0xF7FF, 0x
 static const u16 sdCardResetSignatureThumbType4[7] = {0xF7FF, 0xFDB2, 0xF7FF, 0xFF50, 0xF000, 0xF84A, 0x1C05};
 static const u16 sdCardResetSignatureThumbType5[7] = {0xF7FF, 0xFDC1, 0xF7FF, 0xFF5F, 0xF000, 0xF849, 0x1C05};
 static const u16 sdCardResetSignatureThumbType6[7] = {0xF7FF, 0xFDCE, 0xF7FF, 0xFF68, 0xF000, 0xF85A, 0x1C05};
+
+// SD card functions (SDK 5)
+static const u32 sdCardFuncsSignature[4]      = {0xE92D4018, 0xE24DDF5D, 0xE24DDB01, 0xE59FE050};
+static const u32 sdCardFuncsSignatureThumb[4] = {0xB0FFB518, 0xB0DFB0FF, 0x4A0E490D, 0x64CA4469};
 
 // Auto power-off (SDK 5)
 static const u32 autoPowerOffSignature[4]      = {0xE92D41F0, 0xE59F4070, 0xE1A08000, 0xE1A07001};
@@ -365,6 +373,20 @@ u16* findSwiHaltThumbOffset(const tNDSHeader* ndsHeader, const module_params_t* 
 			(u32)findOffsetThumb((u16*)vAddrOfRelocSrc, 0x200,
 				swiHaltCmpSignature, 1
 		);
+		if (!findOffsetBackwardsThumb((u16*)swiHaltOffset, 0x20, swiHaltMovSignature, 1)) {
+			const u32 oldOffset = swiHaltOffset;
+			const u16 cmpBak = *(u16*)swiHaltOffset;
+			*(u16*)oldOffset = 0; // Avoid re-searching for wrong offset
+
+			swiHaltOffset =
+				(u32)findOffsetThumb((u16*)vAddrOfRelocSrc, 0x200,
+					swiHaltCmpSignature, 1
+			);
+			*(u16*)oldOffset = cmpBak;
+			// if (!findOffsetBackwardsThumb((u16*)swiHaltOffset, 0x20, swiHaltMovSignature, 1)) {
+			// 	swiHaltOffset = 0;
+			// }
+		}
 	}
 	if (!swiHaltOffset) {
 		u32 dispStatAddr = (u32)findOffset(
@@ -1385,6 +1407,24 @@ u32* findCardIrqEnableOffset(const tNDSHeader* ndsHeader, const module_params_t*
 	return cardIrqEnableOffset;
 }
 
+u32* findSrlStartOffset7(const tNDSHeader* ndsHeader) {
+	dbg_printf("findSrlStartOffset7\n");
+
+    u32* offset = findOffset(
+		ndsHeader->arm7destination, newArm7binarySize,
+		srlStartSignature3, 4
+	);
+
+	if (offset) {
+		dbg_printf("SRL start function found\n");
+	} else {
+		dbg_printf("SRL start function not found\n");
+	}
+
+	dbg_printf("\n");
+	return offset;
+}
+
 /*u32* findA7iStartOffset(void) {
 	dbg_printf("findA7iStartOffset:\n");
 
@@ -1526,6 +1566,30 @@ u32* findSdCardResetOffset(const tNDSHeader* ndsHeader, const module_params_t* m
 
 	dbg_printf("\n");
 	return sdCardResetOffset;
+}
+
+u32* findSdCardFuncsOffset(const tNDSHeader* ndsHeader) {
+	dbg_printf("findSdCardFuncsOffset:\n");
+
+	u32* offset = findOffset(
+			__DSiHeader->arm7idestination, newArm7ibinarySize,
+			sdCardFuncsSignature, 4
+		);
+	if (!offset) {
+		offset = (u32*)findOffset(
+			__DSiHeader->arm7idestination, newArm7ibinarySize,
+			sdCardFuncsSignatureThumb, 4
+		);
+	}
+
+	if (offset) {
+		dbg_printf("SD Card functions found\n");
+	} else {
+		dbg_printf("SD Card functions not found\n");
+	}
+
+	dbg_printf("\n");
+	return offset;
 }
 
 u32* findAutoPowerOffOffset(const tNDSHeader* ndsHeader) {

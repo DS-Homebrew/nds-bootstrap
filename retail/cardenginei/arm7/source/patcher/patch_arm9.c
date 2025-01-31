@@ -18,8 +18,6 @@
 extern u32 valueBits;
 extern u16 scfgRomBak;
 
-extern vu32* volatile sharedAddr;
-
 bool isPawsAndClaws(const tNDSHeader* ndsHeader) {
 	const char* romTid = getRomTid(ndsHeader);
 
@@ -393,18 +391,31 @@ static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, co
 bool softResetMb = false;
 static void patchReset(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	softResetMb = false;
-	u32* reset = findResetOffset(ndsHeader, moduleParams, &softResetMb);
+	const char* romTid = getRomTid(ndsHeader);
+	if (strcmp(romTid, "NTRJ") == 0 || strncmp(romTid, "HND", 3) == 0 || strncmp(romTid, "HNE", 3) == 0) {
+		u32* offset = findSrlStartOffset9(ndsHeader);
 
-	if (!reset) {
+		if (offset) {
+			// Patch
+			tonccpy(offset, ce9->patches->reset_arm9, 0x40);
+			/* dbg_printf("srlStart location : ");
+			dbg_hexa((u32)offset);
+			dbg_printf("\n\n"); */
+			softResetMb = true;
+		}
+	}
+
+	u32* offset = findResetOffset(ndsHeader, moduleParams, softResetMb);
+
+	if (!offset) {
 		return;
 	}
 
 	// Patch
-	u32* resetPatch = ce9->patches->reset_arm9;
-	tonccpy(reset, resetPatch, 0x40);
-	/*dbg_printf("reset location : ");
-	dbg_hexa((u32)reset);
-	dbg_printf("\n\n");*/
+	tonccpy(offset, ce9->patches->reset_arm9, 0x40);
+	/* dbg_printf("reset location : ");
+	dbg_hexa((u32)offset);
+	dbg_printf("\n\n"); */
 }
 
 static bool getSleep(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
@@ -570,7 +581,7 @@ static void patchMpu(const tNDSHeader* ndsHeader, const module_params_t* moduleP
 }
 
 static void patchMpu2(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
-	if (moduleParams->sdk_version > 0x5000000) {
+	if (ndsHeader->unitCode > 0) {
 		return;
 	}
 
@@ -584,7 +595,7 @@ static void patchMpu2(const tNDSHeader* ndsHeader, const module_params_t* module
 		dbg_printf("\n\n");
 	}*/
 	u32* mpuDataOffset = findMpuDataOffset(moduleParams, 2, mpuStartOffset);
-	if (mpuDataOffset) {
+	if (mpuDataOffset && (moduleParams->sdk_version < 0x5000000)) {
 		// Change the region 2 configuration
 
 		//force DSi mode settings. THESE TOOK AGES TO FIND. -s2k

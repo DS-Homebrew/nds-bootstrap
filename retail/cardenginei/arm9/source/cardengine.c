@@ -20,6 +20,7 @@
 #include <nds/ndstypes.h>
 #include <nds/arm9/exceptions.h>
 #include <nds/arm9/cache.h>
+#include <nds/arm9/video.h>
 #include <nds/bios.h>
 #include <nds/system.h>
 #include <nds/dma.h>
@@ -40,7 +41,7 @@
 
 #define saveOnFlashcard BIT(0)
 #define ROMinRAM BIT(1)
-#define dsiMode BIT(3)
+#define pingIpc BIT(3)
 #define enableExceptionHandler BIT(4)
 #define isSdk5 BIT(5)
 #define overlaysCached BIT(6)
@@ -50,8 +51,10 @@
 #define slowSoftReset BIT(10)
 #define dsiBios BIT(11)
 #define asyncCardRead BIT(12)
-#define softResetMb BIT(13)
+#define useSharedWram BIT(13)
 #define cloneboot BIT(14)
+#define fntFatCached BIT(17)
+#define waitForPreloadToFinish BIT(18)
 
 //#ifdef DLDI
 #include "my_fat.h"
@@ -123,8 +126,8 @@ u32 cacheDescriptor[dev_CACHE_SLOTS_16KB_TWLSDK];
 int cacheCounter[dev_CACHE_SLOTS_16KB_TWLSDK];
 #else
 u32* cacheAddressTable = (u32*)CACHE_ADDRESS_TABLE_LOCATION;
-u32 cacheDescriptor[dev_CACHE_SLOTS_16KB];
-int cacheCounter[dev_CACHE_SLOTS_16KB];
+u32* cacheDescriptor = (u32*)CACHE_DESCRIPTOR_TABLE_LOCATION;
+int* cacheCounter = (int*)CACHE_COUNTER_TABLE_LOCATION;
 #endif // TWLSDK
 int accessCounter = 0;
 #ifdef ASYNCPF
@@ -136,6 +139,7 @@ static u32 asyncSector = 0;
 #endif // ASYNCPF
 #endif // DLDI
 bool flagsSet = false;
+bool romPart = false;
 #ifdef DLDI
 static bool driveInitialized = false;
 #endif
@@ -194,7 +198,7 @@ void sleepMs(int ms) {
 	}
 }*/
 
-/* #ifdef TWLSDK
+#ifdef TWLSDK
 void resetSlots(void) {
 	for (int i = 0; i < ce9->cacheSlots; i++) {
 		cacheDescriptor[i] = 0;
@@ -202,7 +206,7 @@ void resetSlots(void) {
 	}
 	accessCounter = 0;
 }
-#endif */
+#endif
 
 int allocateCacheSlot(void) {
 	int slot = 0;
@@ -357,13 +361,23 @@ void getAsyncSector() {
 
 extern void setExceptionHandler2();
 
+/* static inline bool isPreloadFinished(void) {
+	return (sharedAddr[5] == 0x44454C50); // 'PLED'
+} */
+
 static inline void waitForArm7(void) {
-	// IPC_SendSync(0x4);
+	if (ce9->valueBits & pingIpc) {
+		IPC_SendSync(0x4);
+	}
 	while (sharedAddr[3] != (vu32)0) {
 		#ifdef DLDI
 		swiDelay(50);
 		#else
 		sleepMs(1);
+		if (sharedAddr[5] == 0x474E4950) { // 'PING'
+			sharedAddr[5] = 0;
+			IPC_SendSync(0x4);
+		}
 		#endif
 	}
 }
@@ -420,24 +434,12 @@ volatile void (*FS_Write)(u32*, u32, u32) = (volatile void*)0x0203C5C8;*/
 #endif
 #endif
 
-#ifndef DLDI
-u32 newOverlayOffset = 0;
-u32 newOverlaysSize = 0;
-#endif
-
 static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
 #ifdef DLDI
 	// while (sharedAddr[3]==0x444D4152);	// Wait during a RAM dump
 	fileRead((char*)dst, ((ce9->valueBits & overlaysCached) && src >= ce9->overlaysSrc && src < ndsHeader->arm7romOffset) ? apFixOverlaysFile : romFile, src, len);
 #else
-	if (newOverlayOffset == 0) {
-		newOverlayOffset = (ce9->overlaysSrc/ce9->cacheBlockSize)*ce9->cacheBlockSize;
-		for (u32 i = newOverlayOffset; i < ndsHeader->arm7romOffset; i+= ce9->cacheBlockSize) {
-			newOverlaysSize += ce9->cacheBlockSize;
-		}
-	}
-
-	const u32 commandRead = (isDma ? 0x025FFB0A : 0x025FFB08);
+	const u32 commandRead = (isDma ? 0x025FFB09 : 0x025FFB08);
 	u32 sector = (src/ce9->cacheBlockSize)*ce9->cacheBlockSize;
 
 	accessCounter++;
@@ -459,10 +461,8 @@ static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
 		sharedAddr[2] = ((ce9->valueBits & overlaysCached) && src >= ce9->overlaysSrc && src < ndsHeader->arm7romOffset) ? src+0x80000000 : src;
 		sharedAddr[3] = commandRead;
 
-		while (sharedAddr[3] == commandRead) {
-			sleepMs(1);
-		}
-		// fileRead((char*)dst, ((ce9->valueBits & overlaysCached) && src >= newOverlayOffset && src < newOverlayOffset+newOverlaysSize) ? apFixOverlaysFile : romFile, src, len);
+		waitForArm7();
+		// fileRead((char*)dst, ((ce9->valueBits & overlaysCached) && src >= ce9->overlaysSrcAlign && src < ce9->overlaysSrcAlign+ce9->overlaysSizeAlign) ? apFixOverlaysFile : romFile, src, len);
 	} else { */
 		// Read via the main RAM cache
 		//bool runSleep = true;
@@ -497,7 +497,7 @@ static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
 				// Write the command
 				sharedAddr[0] = (vu32)buffer;
 				sharedAddr[1] = ce9->cacheBlockSize;
-				sharedAddr[2] = ((ce9->valueBits & overlaysCached) && src >= newOverlayOffset && src < newOverlayOffset+newOverlaysSize) ? sector+0x80000000 : sector;
+				sharedAddr[2] = ((ce9->valueBits & overlaysCached) && src >= ce9->overlaysSrcAlign && src < ce9->overlaysSrcAlign+ce9->overlaysSizeAlign) ? sector+0x80000000 : sector;
 				sharedAddr[3] = commandRead;
 
 				waitForArm7();
@@ -506,7 +506,7 @@ static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
 				updateDescriptor(slot, sector);
 				#endif
 
-				// fileRead((char*)buffer, ((ce9->valueBits & overlaysCached) && src >= newOverlayOffset && src < newOverlayOffset+newOverlaysSize) ? apFixOverlaysFile : romFile, sector, ce9->cacheBlockSize);
+				// fileRead((char*)buffer, ((ce9->valueBits & overlaysCached) && src >= ce9->overlaysSrcAlign && src < ce9->overlaysSrcAlign+ce9->overlaysSizeAlign) ? apFixOverlaysFile : romFile, sector, ce9->cacheBlockSize);
 				/*updateDescriptor(slot, sector);
 				if (readLen >= ce9->cacheBlockSize*2) {
 					updateDescriptor(slot+1, sector+ce9->cacheBlockSize);
@@ -542,9 +542,6 @@ static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
 				updateDescriptor(slot, sector);
 				#endif
 			}
-			#ifndef ASYNCPF
-			updateDescriptor(slot, sector);
-			#endif
 
 			//getSdatAddr(sector, (u32)buffer);
 
@@ -553,19 +550,23 @@ static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
 				len2 = sector - src + ce9->cacheBlockSize;
 			}
 
-    		#ifdef DEBUG
-    		// Send a log command for debug purpose
-    		// -------------------------------------
-   			commandRead = 0x026ff800;
+			#ifndef ASYNCPF
+			updateDescriptor(slot, sector);
+			#endif
 
-    		sharedAddr[0] = dst;
-    		sharedAddr[1] = len2;
-    		sharedAddr[2] = buffer+src-sector;
-    		sharedAddr[3] = commandRead;
+			#ifdef DEBUG
+			// Send a log command for debug purpose
+			// -------------------------------------
+			commandRead = 0x026ff800;
 
-    		waitForArm7();
-    		// -------------------------------------
-    		#endif
+			sharedAddr[0] = dst;
+			sharedAddr[1] = len2;
+			sharedAddr[2] = buffer+src-sector;
+			sharedAddr[3] = commandRead;
+
+			waitForArm7();
+			// -------------------------------------
+			#endif
 
     		// Copy directly
 			/*if (isDma) {
@@ -632,24 +633,34 @@ static inline void cardReadRAM(u8* dst, u32 src, u32 len/*, int romPartNo*/) {
 	tonccpy(dst, (u8*)newSrc, len);
 	#else
 	// tonccpy(dst, (u8*)ce9->romLocation/*[romPartNo]*/+src, len);
-	u32 len2 = 0;
-	for (int i = 0; i < ce9->romMapLines; i++) {
-		if (!(src >= ce9->romMap[i][0] && (i == ce9->romMapLines-1 || src < ce9->romMap[i+1][0])))
-			continue;
-
-		u32 newSrc = (ce9->romMap[i][1]-ce9->romMap[i][0])+src;
-		if (newSrc+len > ce9->romMap[i][2]) {
-			do {
-				len--;
-				len2++;
-			} while (newSrc+len != ce9->romMap[i][2]);
-			tonccpy(dst, (u8*)newSrc, len);
-			src += len;
-			dst += len;
-		} else {
-			tonccpy(dst, (u8*)newSrc, len2==0 ? len : len2);
+	u32 newSrc = 0;
+	u32 newLen = 0;
+	bool srcFound = false;
+	int i = 0;
+	for (i = 0; i < ce9->romMapLines; i++) {
+		if (src >= ce9->romMap[i][0] && (i == ce9->romMapLines-1 || src < ce9->romMap[i+1][0])) {
+			srcFound = true;
 			break;
 		}
+	}
+	if (!srcFound) {
+		toncset(dst, 0, len); // Fill dst with 0 if ROM area is not within the map
+		return;
+	}
+	if (ce9->valueBits & useSharedWram) {
+		WRAM_CR = 0; // Set shared WRAM to ARM9
+	}
+	while (len > 0) {
+		newSrc = (ce9->romMap[i][1]-ce9->romMap[i][0])+src;
+		newLen = len;
+		while (newSrc+newLen > ce9->romMap[i][2]) {
+			newLen--;
+		}
+		tonccpy(dst, (u8*)newSrc, newLen);
+		src += newLen;
+		dst += newLen;
+		len -= newLen;
+		i++;
 	}
 	#endif
 }
@@ -824,23 +835,42 @@ void cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	}
 	#endif
 
-	bool romPart = false;
+	romPart = false;
 	//int romPartNo = 0;
 	if (!(ce9->valueBits & ROMinRAM)) {
-		/*for (int i = 0; i < 2; i++) {
+		#ifndef TWLSDK
+		for (int i = 0; i < 4; i++) {
 			if (ce9->romPartSize[i] == 0) {
 				break;
 			}
 			romPart = (src >= ce9->romPartSrc[i] && src < ce9->romPartSrc[i]+ce9->romPartSize[i]);
 			if (romPart) {
-				romPartNo = i;
+				// romPartNo = i;
 				break;
 			}
-		}*/
-		romPart = (ce9->romPartSize > 0 && src >= ce9->romPartSrc && src < ce9->romPartSrc+ce9->romPartSize);
+		}
+		#else
+		romPart = (ce9->romPartSize[0] > 0 && src >= ce9->romPartSrc[0] && src < ce9->romPartSrc[0]+ce9->romPartSize[0]);
+		#endif
+		/* #ifndef DLDI
+		#ifndef TWLSDK
+		if (romPart && (ce9->valueBits & waitForPreloadToFinish)) {
+			if (isPreloadFinished()) {
+				sharedAddr[5] = 0;
+				ce9->valueBits &= ~waitForPreloadToFinish;
+			} else {
+				romPart = false;
+			}
+		}
+		#endif
+		#endif */
 	}
 	if ((ce9->valueBits & ROMinRAM) || romPart) {
 		cardReadRAM(dst, src, len/*, romPartNo*/);
+	#ifndef TWLSDK
+	} else if ((ce9->valueBits & fntFatCached) && src >= ce9->fntSrc && src < ce9->fntSrc+ce9->fntFatSize) {
+		tonccpy(dst, (u8*)((0x03700000-ce9->fntSrc)+src), len);
+	#endif
 	} else {
 		cardReadNormal(dst, src, len);
 	}
@@ -1160,6 +1190,10 @@ u32 dsiSaveGetLength(void* ctx) {
 		return 0;
 	}
 
+	if (dsiSaveExists) {
+		dsiSaveResultCode = 0;
+		toncset32(ctx+0x14, dsiSaveResultCode, 1);
+	}
 	return dsiSaveSize;
 #else
 	return 0;
@@ -1331,12 +1365,15 @@ void inGameMenu(s32* exRegisters) {
 		while (REG_VCOUNT == 191) swiDelay(100);
 	}
 
-	*(u32*)(INGAME_MENU_LOCATION + IGM_TEXT_SIZE_ALIGNED) = (u32)sharedAddr;
 	#ifndef TWLSDK
-	*(u32*)((u32)INGAME_MENU_LOCATION + IGM_TEXT_SIZE_ALIGNED + 4) = 0x027FEFF4;
+	if (ce9->valueBits & useSharedWram) {
+		WRAM_CR = 0; // Set shared WRAM to ARM9
+	}
 	#endif
-	volatile void (*inGameMenu)(s32*, u32, s32*) = (volatile void*)INGAME_MENU_LOCATION + IGM_TEXT_SIZE_ALIGNED + 0x10;
-	(*inGameMenu)(&ce9->mainScreen, ce9->consoleModel, exRegisters);
+
+	*(u32*)(INGAME_MENU_LOCATION + IGM_TEXT_SIZE_ALIGNED) = (u32)sharedAddr;
+	volatile u32 (*inGameMenu)(s32*, u32, s32*) = (volatile void*)INGAME_MENU_LOCATION + IGM_TEXT_SIZE_ALIGNED + 0x10;
+	const u32 res = (*inGameMenu)(&ce9->mainScreen, ce9->consoleModel, exRegisters);
 
 	while (sharedAddr[5] != 0x4C4D4749) { // 'IGML'
 		while (REG_VCOUNT != 191) swiDelay(100);
@@ -1348,7 +1385,7 @@ void inGameMenu(s32* exRegisters) {
 	}
 
 	#ifdef TWLSDK
-	if (sharedAddr[3] == 0x54495845) {
+	if (res == 0x54495845) {
 		igmReset = true;
 		if (*(u32*)0x02FFE234 == 0x00030004 || *(u32*)0x02FFE234 == 0x00030005) {
 			reset(0, 0);
@@ -1357,7 +1394,7 @@ void inGameMenu(s32* exRegisters) {
 		}
 	} else
 	#endif
-	if (sharedAddr[3] == 0x52534554) {
+	if (res == 0x52534554) {
 		igmReset = true;
 	#ifdef TWLSDK
 		if (*(u32*)0x02FFE234 == 0x00030004 || *(u32*)0x02FFE234 == 0x00030005) { // If DSiWare...

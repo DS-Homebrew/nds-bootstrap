@@ -43,6 +43,7 @@ int hookNdsRetailArm7(
 	u32 cheatFileCluster,
 	u32 cheatSize,
 	u32 apPatchFileCluster,
+	u32 apPatchOffset,
 	u32 apPatchSize,
 	u32 pageFileCluster,
 	u32 manualCluster,
@@ -59,7 +60,8 @@ int hookNdsRetailArm7(
 	u8 dmaRomRead_LED,
 	bool ndmaDisabled,
 	bool twlTouch,
-	bool usesCloneboot
+	bool usesCloneboot,
+	u32 romPartLocation
 );
 int hookNdsRetailArm9(
 	cardengineArm9* ce9,

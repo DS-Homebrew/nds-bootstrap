@@ -35,19 +35,23 @@
 	.global donorFileCluster
 	.global donorFileSize
 	.global donorFileOffset
-	.global gbaFileCluster
-	.global gbaSaveFileCluster
+	@ .global gbaFileCluster
+	@ .global gbaSaveFileCluster
 	.global romSize
 	.global saveSize
-	.global gbaRomSize
-	.global gbaSaveSize
+	@ .global gbaRomSize
+	@ .global gbaSaveSize
 	.global dataToPreloadAddr
 	.global dataToPreloadSize
+	@ .global dataToPreloadFrame
 	.global wideCheatFileCluster
 	.global wideCheatSize
 	.global apPatchFileCluster
+	.global apPatchOffset
 	.global apPatchSize
-	.global apPatchIsCheat
+	.global dsi2dsSavePatchFileCluster
+	.global dsi2dsSavePatchOffset
+	.global dsi2dsSavePatchSize
 	.global cheatFileCluster
 	.global cheatSize
 	.global patchOffsetCacheFileCluster
@@ -106,31 +110,45 @@ donorFileSize:
 	.word	0x00000000		@ SDK5 donor .nds file size
 donorFileOffset:
 	.word	0x00000000		@ SDK5 donor .nds file offset
-gbaFileCluster:
-	.word	0x00000000		@ .gba file
-gbaSaveFileCluster:
-	.word	0x00000000		@ .GBA .sav file
+@gbaFileCluster:
+@	.word	0x00000000		@ .gba file
+@gbaSaveFileCluster:
+@	.word	0x00000000		@ .GBA .sav file
 romSize:
 	.word	0x00000000		@ .nds file size
 saveSize:
 	.word	0x00000000		@ .sav file size
-gbaRomSize:
-	.word	0x00000000		@ .gba file size
-gbaSaveSize:
-	.word	0x00000000		@ GBA .sav file size
+@gbaRomSize:
+@	.word	0x00000000		@ .gba file size
+@gbaSaveSize:
+@	.word	0x00000000		@ GBA .sav file size
 dataToPreloadAddr:
+	.word	0x00000000
+	.word	0x00000000
 	.word	0x00000000
 	.word	0x00000000
 dataToPreloadSize:
 	.word	0x00000000
 	.word	0x00000000
+	.word	0x00000000
+	.word	0x00000000
+@dataToPreloadFrame:
+@	.word	0x00000000
 wideCheatFileCluster:
 	.word	0x00000000
 wideCheatSize:
 	.word	0x00000000
 apPatchFileCluster:
 	.word	0x00000000
+apPatchOffset:
+	.word	0x00000000
 apPatchSize:
+	.word	0x00000000
+dsi2dsSavePatchFileCluster:
+	.word	0x00000000
+dsi2dsSavePatchOffset:
+	.word	0x00000000
+dsi2dsSavePatchSize:
 	.word	0x00000000
 cheatFileCluster:
 	.word	0x00000000

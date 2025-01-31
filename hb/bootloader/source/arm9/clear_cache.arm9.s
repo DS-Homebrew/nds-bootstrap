@@ -17,25 +17,26 @@
 @ Clears ICache and Dcache, and resets the protection units
 @ Originally written by Darkain, modified by Chishm
 
+#include "asminc.h"
+
 .arm
-.global arm9_clearCache
 
-arm9_clearCache:
+BEGIN_ASM_FUNC arm9_clearCache
 	@ Clean and flush cache
-	mov r1, #0                   
-	outer_loop:                  
-		mov r0, #0                  
-		inner_loop:                 
-			orr r2, r1, r0             
-			mcr p15, 0, r2, c7, c14, 2 
-			add r0, r0, #0x20          
-			cmp r0, #0x400             
-		bne inner_loop              
-		add r1, r1, #0x40000000     
-		cmp r1, #0x0                
-	bne outer_loop               
+	mov r1, #0
+	outer_loop:
+		mov r0, #0
+		inner_loop:
+			orr r2, r1, r0
+			mcr p15, 0, r2, c7, c14, 2
+			add r0, r0, #0x20
+			cmp r0, #0x400
+		bne inner_loop
+		add r1, r1, #0x40000000
+		cmp r1, #0x0
+	bne outer_loop
 
-	mov r3, #0                  
+	mov r3, #0
 	mcr p15, 0, r3, c7, c5, 0		@ Flush ICache
 	mcr p15, 0, r3, c7, c6, 0		@ Flush DCache
 	mcr p15, 0, r3, c7, c10, 4		@ empty write buffer
@@ -65,3 +66,17 @@ arm9_clearCache:
 
 	bx lr
 
+BEGIN_ASM_FUNC arm9code
+	mov r1, #0
+	mov r2, #0
+	mov r3, #0
+	mov r4, #0
+	mov r5, #0
+	mov r6, #0
+	mov r7, #0
+	mov r8, #0
+	mov r9, #0
+	mov r10, #0
+	mov r11, #0
+
+	bx	r0

@@ -35,6 +35,10 @@
 .global igmHotkey
 .global ndsCodeStart
 .global romLocation
+.global romPartLocation
+.global romPartSrc
+.global romPartSize
+.global romPartFrame
 .global romMapLines
 .global romMap
 
@@ -93,9 +97,29 @@ igmHotkey:
 	.hword	0
 romLocation:
 	.word	0x00000000
+romPartLocation:
+	.word	0x00000000
+romPartSrc:
+	.word	0x00000000
+romPartSize:
+	.word	0x00000000
+romPartFrame:
+	.word	0x00000000
 romMapLines:
 	.word	0x00000000
 romMap:
+	.word	0x00000000
+	.word	0x00000000
+	.word	0x00000000
+
+	.word	0x00000000
+	.word	0x00000000
+	.word	0x00000000
+
+	.word	0x00000000
+	.word	0x00000000
+	.word	0x00000000
+
 	.word	0x00000000
 	.word	0x00000000
 	.word	0x00000000
@@ -302,6 +326,7 @@ patches:
 .word   0
 .word   0
 #endif
+.word reset
 .pool
 @---------------------------------------------------------------------------------
 
@@ -364,7 +389,7 @@ j_newSwiHalt:
 newSwiHalt:
 @---------------------------------------------------------------------------------
 	push	{lr}
-	bl runCardEngineCheck
+	bl runCardEngineCheckHalt
 	swi	#0x060000
 	pop	{pc}
 @---------------------------------------------------------------------------------
@@ -374,7 +399,7 @@ newSwiHalt:
 newSwiHaltThumb:
 @---------------------------------------------------------------------------------
 	push	{r4, lr}
-	ldr	r4, =runCardEngineCheck
+	ldr	r4, =runCardEngineCheckHalt
 	bl	_blx_r4_stub_halt
 	swi	0x06
 	pop             {r4}

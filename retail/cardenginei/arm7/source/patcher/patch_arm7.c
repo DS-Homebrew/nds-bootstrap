@@ -12,8 +12,10 @@
 //#include "debug_file.h"
 
 #define gameOnFlashcard BIT(0)
+#define eSdk2 BIT(1)
 #define ROMinRAM BIT(3)
 #define dsiMode BIT(4)
+#define hasVramWifiBinary BIT(14)
 #define sleepMode BIT(17)
 
 extern u32 valueBits;
@@ -58,6 +60,7 @@ u16* getOffsetFromBLThumb(u16* blOffset) {
 u32 vAddrOfRelocSrc = 0;
 u32 relocDestAtSharedMem = 0;
 bool a7IsThumb = false;
+
 u32 newSwiHaltAddr = 0;
 // bool swiHaltPatched = false;
 
@@ -160,6 +163,113 @@ static void patchMirrorCheck(const tNDSHeader* ndsHeader, const module_params_t*
 	dbg_printf("\n\n"); */
 }
 
+extern u32 romMapLines;
+extern u32 romMap[7][3];
+
+static void patchVramWifiBinaryLoad(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+	if (ndsHeader->unitCode > 0 || moduleParams->sdk_version < 0x2008000) {
+		goto clearBit;
+	}
+
+	// Relocate VRAM WiFi binary from Main RAM to DSi WRAM
+	extern u32 relocationStart;
+	u32* offset = (u32*)relocationStart;
+	const u32 add =
+	#ifndef ALTERNATIVE
+	0x00FE0000 // 0x037C0000
+	#else
+	0x00820000 // 0x03000000
+	#endif
+	;
+	bool found = false;
+	for (int i = 0; i < 0x100/sizeof(u32); i++) {
+		if (*offset >= 0x027E0000 && *offset < 0x027E0200) {
+			*offset += add;
+			found = true;
+			break;
+		}
+		offset++;
+	}
+	if (!found) {
+		goto clearBit;
+	}
+
+	/* dbg_printf("VRAM WiFi binary load location end : ");
+	dbg_hexa((u32)offset);
+	dbg_printf("\n\n"); */
+
+	offset = (u32*)relocationStart;
+
+	for (int i = 0; i < 0x80/sizeof(u32); i++) {
+		if (offset[i] == 0x0A000000) {
+			offset[i+1] = 0xE1A00000; // nop
+			break;
+		}
+	}
+
+	if (!(valueBits & hasVramWifiBinary)) {
+		for (int i = 0; i < romMapLines; i++) {
+			if (romMap[i][1] == 0x0C3EC000) {
+				const u32 addrEnd = ((romMap[i][2])/0x4000)*0x4000;
+				for (u8* addr = (u8*)romMap[i][1]; addr < (u8*)addrEnd; addr += 0x4000) {
+					tonccpy(addr+0x3FC000, addr, 0x4000);
+					toncset(addr, 0, 0x4000);
+				}
+				romMap[i][1] += 0x3FC000;
+				romMap[i][2] += 0x3FC000;
+			}
+		}
+
+		if (!(valueBits & ROMinRAM) && !(valueBits & gameOnFlashcard)) {
+			u32* cacheAddressTable = (u32*)((valueBits & eSdk2) ? CACHE_ADDRESS_TABLE_LOCATION2 : CACHE_ADDRESS_TABLE_LOCATION);
+			for (int i = 0; i < 0x2000/sizeof(u32); i++) {
+				if (cacheAddressTable[i] == 0 || cacheAddressTable[i] >= 0x0C7FC000) {
+					break;
+				} else if (cacheAddressTable[i] >= 0x0C3EC000 && cacheAddressTable[i] < 0x0C3FC000) {
+					u8* addr = (u8*)cacheAddressTable[i];
+					tonccpy(addr+0x3FC000, addr, 0x4000);
+					toncset(addr, 0, 0x4000);
+					cacheAddressTable[i] += 0x3FC000;
+				}
+			}
+		}
+
+		valueBits |= hasVramWifiBinary;
+	}
+	return;
+
+clearBit:
+	if (valueBits & hasVramWifiBinary) {
+		for (int i = 0; i < romMapLines; i++) {
+			if (romMap[i][1] == 0x0C7E8000) {
+				const u32 addrEnd = ((romMap[i][2])/0x4000)*0x4000;
+				for (u8* addr = (u8*)romMap[i][1]; addr < (u8*)addrEnd; addr += 0x4000) {
+					tonccpy(addr-0x3FC000, addr, 0x4000);
+					toncset(addr, 0, 0x4000);
+				}
+				romMap[i][1] -= 0x3FC000;
+				romMap[i][2] -= 0x3FC000;
+			}
+		}
+
+		if (!(valueBits & ROMinRAM) && !(valueBits & gameOnFlashcard)) {
+			u32* cacheAddressTable = (u32*)((valueBits & eSdk2) ? CACHE_ADDRESS_TABLE_LOCATION2 : CACHE_ADDRESS_TABLE_LOCATION);
+			for (int i = 0; i < 0x2000/sizeof(u32); i++) {
+				if (cacheAddressTable[i] == 0 || cacheAddressTable[i] >= 0x0C7FC000) {
+					break;
+				} else if (cacheAddressTable[i] >= 0x0C7E8000 && cacheAddressTable[i] < 0x0C7F8000) {
+					u8* addr = (u8*)cacheAddressTable[i];
+					tonccpy(addr-0x3FC000, addr, 0x4000);
+					toncset(addr, 0, 0x4000);
+					cacheAddressTable[i] -= 0x3FC000;
+				}
+			}
+		}
+
+		valueBits &= ~hasVramWifiBinary;
+	}
+}
+
 static void patchSleepMode(const tNDSHeader* ndsHeader) {
 	// Sleep
 	u32* sleepPatchOffset = findSleepPatchOffset(ndsHeader);
@@ -229,6 +339,18 @@ static void patchCardCheckPullOut(cardengineArm7* ce7, const tNDSHeader* ndsHead
 	}
 }
 
+static void patchSrlStart(cardengineArm7* ce7, const tNDSHeader* ndsHeader) {
+	u32* offset = findSrlStartOffset7(ndsHeader);
+	if (!offset) {
+		return;
+	}
+
+	offset[0] = 0xE3A00001; // mov r0, #1
+	offset[1] = 0xE59FC000; // ldr r12, =reset
+	offset[2] = 0xE12FFF1C; // bx r12
+	offset[3] = (u32)ce7->patches->reset;
+}
+
 u32 patchCardNdsArm7(
 	cardengineArm7* ce7,
 	tNDSHeader* ndsHeader,
@@ -245,8 +367,14 @@ u32 patchCardNdsArm7(
 		patchCardCheckPullOut(ce7, ndsHeader, moduleParams);
 	}
 
+	extern bool softResetMb;
+	if (softResetMb) {
+		patchSrlStart(ce7, ndsHeader);
+	}
+
 	if (a7GetReloc(ndsHeader, moduleParams)) {
 		patchMirrorCheck(ndsHeader, moduleParams);
+		patchVramWifiBinaryLoad(ndsHeader, moduleParams);
 		u32 saveResult = 0;
 		
 		if (ndsHeader->arm7binarySize==0x2352C || ndsHeader->arm7binarySize==0x235DC || ndsHeader->arm7binarySize==0x23CAC || ndsHeader->arm7binarySize==0x245C0 || ndsHeader->arm7binarySize==0x245C4) {

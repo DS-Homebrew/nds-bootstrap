@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <nds/ndstypes.h>
-#include <nds/debug.h>
 #include <nds/system.h>
 #include "debug_file.h"
 #include "hook.h"
@@ -10,11 +9,12 @@
 #include "nds_header.h"
 #include "cardengine_header_arm9.h"
 #include "value_bits.h"
+#include "nocashMessage.h"
 
 #define b_saveOnFlashcard BIT(0)
 #define b_ROMinRAM BIT(1)
 #define b_eSdk2 BIT(2)
-#define b_dsiMode BIT(3)
+#define b_pingIpc BIT(3)
 #define b_enableExceptionHandler BIT(4)
 #define b_isSdk5 BIT(5)
 #define b_overlaysCached BIT(6)
@@ -24,10 +24,14 @@
 #define b_slowSoftReset BIT(10)
 #define b_dsiBios BIT(11)
 #define b_asyncCardRead BIT(12)
-#define b_softResetMb BIT(13)
+#define b_useSharedRam BIT(13)
 #define b_cloneboot BIT(14)
 #define b_isDlp BIT(15)
 #define b_bypassExceptionHandler BIT(16)
+#define b_fntFatCached BIT(17)
+#define b_waitForPreloadToFinish BIT(18)
+#define b_resetOnFirstException BIT(19)
+#define b_resetOnEveryException BIT(20)
 
 
 static const int MAX_HANDLER_LEN = 50;
@@ -160,10 +164,10 @@ static u32* hookInterruptHandler(const u32* start, size_t size) {
 	// 2     LCD V-Counter Match
 }
 
-void configureRomMap(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const u32 romStart, const u32 cacheBlockSize, const u8 dsiMode, const u8 consoleModel) {
+void configureRomMap(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const u32 romStart, const u8 dsiMode) {
 	extern u32 getRomLocation(const tNDSHeader* ndsHeader, const bool isESdk2, const bool isSdk5, const bool dsiBios);
 
-	u32 romLocation = getRomLocation(ndsHeader, (ce9->valueBits & b_eSdk2), (ce9->valueBits & b_isSdk5), (ce9->valueBits & b_dsiBios));
+	const u32 romLocation = getRomLocation(ndsHeader, (ce9->valueBits & b_eSdk2), (ce9->valueBits & b_isSdk5), (ce9->valueBits & b_dsiBios));
 	ce9->romLocation = romLocation;
 	ce9->romLocation -= romStart;
 
@@ -172,140 +176,11 @@ void configureRomMap(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const u32
 		return;
 	}
 
-	const bool dsiWramUseable = (dsiWramAccess && !dsiWramMirrored);
-
-	// 0: ROM part start, 1: ROM part start in RAM, 2: ROM part end in RAM
 	extern u32 romMapLines;
-	extern u32 romMap[5][3];
-	romMap[0][0] = romStart;
-	romMap[0][1] = romLocation;
-
-	if (dsiMode) {
-		romMapLines = 1;
-
-		romMap[0][2] = romLocation+(0x800000-cacheBlockSize);
-
-		if (consoleModel > 0) {
-			romMap[1][0] = romMap[0][0]+(0x800000-cacheBlockSize);
-			romMap[1][1] = romMap[0][1]+0x800000;
-			romMap[1][2] = romMap[1][1]+0x1000000;
-
-			romMapLines++;
-
-			if (dsiWramUseable) {
-				romMap[2][0] = romMap[1][0]+0x1000000;
-				romMap[2][1] = 0x03708000;
-				romMap[2][2] = 0x03780000;
-
-				romMapLines++;
-			}
-		} else if (dsiWramUseable) {
-			romMap[1][0] = romMap[0][0]+(0x800000-cacheBlockSize);
-			romMap[1][1] = 0x03708000;
-			romMap[1][2] = 0x03780000;
-
-			romMapLines++;
-		}
-	} else {
-		romMapLines = 2;
-
-		if ((ce9->valueBits & b_isSdk5) || ((ce9->valueBits & b_dsiBios) && !(ce9->valueBits & b_eSdk2))) {
-			romMap[0][2] = romLocation+0x3C0000+cacheBlockSize;
-
-			romMap[1][0] = romMap[0][0]+0x3C0000+cacheBlockSize;
-			romMap[1][1] = romLocation+(ndsHeader->unitCode > 0 ? 0x3E0000 : 0x400000);
-			romMap[1][2] = romMap[1][1]+((ndsHeader->unitCode > 0 ? 0x20000 : 0x800000)-cacheBlockSize);
-
-			if (ndsHeader->unitCode > 0) {
-				romMap[2][0] = romMap[1][0]+(0x20000-cacheBlockSize);
-				romMap[2][1] = romMap[1][1]+0x20000;
-				romMap[2][2] = romMap[2][1]+0x7E0000;
-
-				romMapLines++;
-
-				if (consoleModel > 0) {
-					romMap[3][0] = romMap[2][0]+0x7E0000;
-					romMap[3][1] = romMap[2][1]+0x800000;
-					romMap[3][2] = romMap[3][1]+0x1000000;
-
-					romMapLines++;
-
-					if (dsiWramUseable) {
-						romMap[4][0] = romMap[3][0]+0x1000000;
-						romMap[4][1] = 0x03708000;
-						romMap[4][2] = 0x03780000;
-
-						romMapLines++;
-					}
-				}
-			} else if (consoleModel > 0) {
-				romMap[2][0] = romMap[1][0]+(0x800000-cacheBlockSize);
-				romMap[2][1] = romMap[1][1]+0x800000;
-				romMap[2][2] = romMap[2][1]+0x1000000;
-
-				romMapLines++;
-
-				if (dsiWramUseable) {
-					romMap[3][0] = romMap[2][0]+0x1000000;
-					romMap[3][1] = 0x03708000;
-					romMap[3][2] = 0x03780000;
-
-					romMapLines++;
-				}
-			} else if (dsiWramUseable) {
-				romMap[2][0] = romMap[1][0]+(0x800000-cacheBlockSize);
-				romMap[2][1] = 0x03708000;
-				romMap[2][2] = 0x03780000;
-
-				romMapLines++;
-			}
-		} else if (ce9->valueBits & b_dsiBios) {
-			romMap[0][2] = romLocation+0x3C0000+cacheBlockSize;
-
-			romMap[1][0] = romMap[0][0]+0x3C0000+cacheBlockSize;
-			romMap[1][1] = romLocation+0x400000+cacheBlockSize;
-			romMap[1][2] = romMap[1][1]+(0x800000-cacheBlockSize);
-
-			if (consoleModel > 0) {
-				romMap[2][0] = romMap[1][0]+(0x800000-cacheBlockSize);
-				romMap[2][1] = romMap[1][1]+0x800000;
-				romMap[2][2] = romMap[2][1]+0x1000000;
-
-				romMapLines++;
-
-				if (dsiWramUseable) {
-					romMap[3][0] = romMap[2][0]+0x1000000;
-					romMap[3][1] = 0x03708000;
-					romMap[3][2] = 0x03780000;
-
-					romMapLines++;
-				}
-			} else if (dsiWramUseable) {
-				romMap[2][0] = romMap[1][0]+(0x800000-cacheBlockSize);
-				romMap[2][1] = 0x03708000;
-				romMap[2][2] = 0x03780000;
-
-				romMapLines++;
-			}
-		} else {
-			romMap[0][2] = romLocation+0x3C0000;
-
-			romMap[1][0] = romMap[0][0]+0x3C0000;
-			romMap[1][1] = romLocation+0x400000;
-			romMap[1][2] = romMap[1][1]+(consoleModel > 0 ? 0x1800000 : 0x800000);
-
-			if (dsiWramUseable) {
-				romMap[2][0] = romMap[1][0]+(consoleModel > 0 ? 0x1800000 : 0x800000);
-				romMap[2][1] = 0x03708000;
-				romMap[2][2] = 0x03780000;
-
-				romMapLines++;
-			}
-		}
-	}
+	extern u32 romMap[][3];
 
 	ce9->romMapLines = romMapLines;
-	for (int i = 0; i < 4; i++) {
+	for (int i = 0; i < romMapLines; i++) {
 		for (int i2 = 0; i2 < 3; i2++) {
 			ce9->romMap[i][i2] = romMap[i][i2];
 		}
@@ -330,13 +205,21 @@ int hookNdsRetailArm9(
 ) {
 	nocashMessage("hookNdsRetailArm9");
 
+	extern bool pkmnGen5;
+	extern bool sharedWramEnabled;
 	extern bool scfgBios9i(void);
 	extern u32 iUncompressedSize;
 	extern u32 overlaysSize;
 	extern bool overlayPatch;
+	extern u32 baseFntOff;
+	extern u32 baseFatOff;
+	extern u32 baseFatSize;
 	extern u32 romPaddingSize;
-	extern u32 dataToPreloadAddr[2];
-	extern u32 dataToPreloadSize[2];
+	extern u32 dataToPreloadAddr[4];
+	extern u32 dataToPreloadSize[4];
+	// extern u32 dataToPreloadFrame;
+	extern bool romLocationAdjust(const tNDSHeader* ndsHeader, const bool laterSdk, const bool isSdk5, u32* romLocation);
+	extern u32 dataToPreloadFullSize(void);
 	extern bool dataToPreloadFound(const tNDSHeader* ndsHeader);
 	const char* romTid = getRomTid(ndsHeader);
 	const bool laterSdk = ((moduleParams->sdk_version >= 0x2008000 && moduleParams->sdk_version != 0x2012774) || moduleParams->sdk_version == 0x20029A8);
@@ -353,8 +236,8 @@ int hookNdsRetailArm9(
 	if (!laterSdk) {
 		ce9->valueBits |= b_eSdk2;
 	}
-	if (dsiMode) {
-		ce9->valueBits |= b_dsiMode; // SDK 5
+	if (pkmnGen5) {
+		ce9->valueBits |= b_pingIpc;
 	}
 	if (enableExceptionHandler) {
 		ce9->valueBits |= b_enableExceptionHandler;
@@ -373,8 +256,8 @@ int hookNdsRetailArm9(
 	if (asyncCardRead) {
 		ce9->valueBits |= b_asyncCardRead;
 	}
-	if (patchOffsetCache.resetMb) {
-		ce9->valueBits |= b_softResetMb;
+	if (sharedWramEnabled) {
+		ce9->valueBits |= b_useSharedRam;
 	}
 	if (usesCloneboot) {
 		ce9->valueBits |= b_cloneboot;
@@ -385,6 +268,14 @@ int hookNdsRetailArm9(
 	if (strncmp(romTid, "AZE", 3) == 0) { // Zelda: Phantom Hourglass
 		ce9->valueBits |= b_bypassExceptionHandler;
 	}
+	if (!ROMinRAM && dsiWramAccess && !dsiWramMirrored && (ndsHeader->unitCode == 0 || !dsiModeConfirmed) && baseFatSize != 0) {
+		const u32 fntFatSize = (baseFatOff-baseFntOff)+baseFatSize;
+		if (fntFatSize <= 0x80000) {
+			ce9->fntSrc = baseFntOff;
+			ce9->fntFatSize = fntFatSize;
+			ce9->valueBits |= b_fntFatCached;
+		}
+	}
 	ce9->mainScreen             = mainScreen;
 	ce9->overlaysSrc            = (ndsHeader->arm9overlaySource > ndsHeader->arm7romOffset) ? (ndsHeader->arm9romOffset + ndsHeader->arm9binarySize) : ndsHeader->arm9overlaySource;
 	ce9->overlaysSize           = overlaysSize;
@@ -393,76 +284,74 @@ int hookNdsRetailArm9(
 
 	if (!ROMinRAM) {
 		//extern bool gbaRomFound;
+		extern u8 gameOnFlashcard;
 		bool runOverlayCheck = overlayPatch;
-		u32 dataToPreloadSizeAligned = 0;
 		ce9->cacheBlockSize = cacheBlockSize;
+		if (ce9->overlaysSrc) {
+			ce9->overlaysSrcAlign = (ce9->overlaysSrc/ce9->cacheBlockSize)*ce9->cacheBlockSize;
+			for (u32 i = ce9->overlaysSrcAlign; i < ndsHeader->arm7romOffset; i+= ce9->cacheBlockSize) {
+				ce9->overlaysSizeAlign += ce9->cacheBlockSize;
+			}
+		}
 		if (ndsHeader->unitCode > 0 && dsiMode) {
 			extern u32 cheatSizeTotal;
 			const bool cheatsEnabled = (cheatSizeTotal > 4 && cheatSizeTotal <= 0x8000);
 			const bool specialTitle = (strncmp(romTid, "V2G", 3) == 0 || strncmp(romTid, "DD3", 3) == 0);
-			extern u8 gameOnFlashcard;
+			extern bool pkmnGen5;
 
 			ce9->cacheAddress = (consoleModel > 0 ? dev_CACHE_ADRESS_START_TWLSDK : (cheatsEnabled ? retail_CACHE_ADRESS_START_TWLSDK_CHEAT : retail_CACHE_ADRESS_START_TWLSDK));
-			if (consoleModel == 0 && !gameOnFlashcard && specialTitle) {
-				ce9->cacheAddress = (cheatsEnabled ? retail_CACHE_ADRESS_START_TWLSDK_SMALL_CHEAT : retail_CACHE_ADRESS_START_TWLSDK_SMALL);
+			if (consoleModel == 0 && !gameOnFlashcard) {
+				if (pkmnGen5) {
+					ce9->cacheAddress = (cheatsEnabled ? retail_CACHE_ADRESS_START_TWLSDK_LARGE_CHEAT : retail_CACHE_ADRESS_START_TWLSDK_LARGE);
+				} else if (specialTitle) {
+					ce9->cacheAddress = (cheatsEnabled ? retail_CACHE_ADRESS_START_TWLSDK_SMALL_CHEAT : retail_CACHE_ADRESS_START_TWLSDK_SMALL);
+				}
 			}
 			ce9->romLocation = ce9->cacheAddress;
 			ce9->cacheSlots = (consoleModel > 0 ? (cheatsEnabled ? dev_CACHE_ADRESS_SIZE_TWLSDK_CHEAT : dev_CACHE_ADRESS_SIZE_TWLSDK) : (cheatsEnabled ? retail_CACHE_ADRESS_SIZE_TWLSDK_CHEAT : retail_CACHE_ADRESS_SIZE_TWLSDK))/cacheBlockSize;
-			if (consoleModel == 0 && !gameOnFlashcard && specialTitle) {
-				ce9->cacheSlots = (cheatsEnabled ? retail_CACHE_ADRESS_SIZE_TWLSDK_SMALL_CHEAT : retail_CACHE_ADRESS_SIZE_TWLSDK_SMALL)/cacheBlockSize;
+			if (consoleModel == 0 && !gameOnFlashcard) {
+				if (pkmnGen5) {
+					ce9->cacheSlots = (cheatsEnabled ? retail_CACHE_ADRESS_SIZE_TWLSDK_LARGE_CHEAT : retail_CACHE_ADRESS_SIZE_TWLSDK_LARGE)/cacheBlockSize;
+				} else if (specialTitle) {
+					ce9->cacheSlots = (cheatsEnabled ? retail_CACHE_ADRESS_SIZE_TWLSDK_SMALL_CHEAT : retail_CACHE_ADRESS_SIZE_TWLSDK_SMALL)/cacheBlockSize;
+				}
 			}
 		} else {
+			extern bool hasVramWifiBinary;
+			const u32 start = (hasVramWifiBinary ? CACHE_ADRESS_START_ALT : CACHE_ADRESS_START);
+			u32 size = 0;
 			if (strncmp(romTid, "UBR", 3) == 0) {
 				runOverlayCheck = false;
-				ce9->cacheAddress = CACHE_ADRESS_START;
-				ce9->romLocation = ce9->cacheAddress;
-				ce9->cacheSlots = retail_CACHE_ADRESS_SIZE_BROWSER/cacheBlockSize;
+				ce9->cacheAddress = start;
+				size = retail_CACHE_ADRESS_SIZE_BROWSER;
 			} else {
-				ce9->cacheAddress = (dsiMode ? CACHE_ADRESS_START_DSIMODE : CACHE_ADRESS_START);
-				if (!dsiMode && (ce9->valueBits & b_dsiBios) && !laterSdk) {
-					ce9->cacheAddress -= cacheBlockSize;
-				}
-				ce9->romLocation = ce9->cacheAddress;
+				ce9->cacheAddress = (dsiMode ? CACHE_ADRESS_START_DSIMODE : start);
 				if (dsiMode) {
-					ce9->cacheSlots = (consoleModel > 0 ? dev_CACHE_ADRESS_SIZE_DSIMODE : retail_CACHE_ADRESS_SIZE_DSIMODE)/cacheBlockSize;
+					size = (consoleModel > 0 ? dev_CACHE_ADRESS_SIZE_DSIMODE : retail_CACHE_ADRESS_SIZE_DSIMODE);
 				} else {
-					ce9->cacheSlots = (consoleModel > 0 ? dev_CACHE_ADRESS_SIZE : retail_CACHE_ADRESS_SIZE)/cacheBlockSize;
+					size = (consoleModel > 0 ? dev_CACHE_ADRESS_SIZE : retail_CACHE_ADRESS_SIZE);
 				}
 			}
+			ce9->romLocation = ce9->cacheAddress;
+			ce9->cacheSlots = size/cacheBlockSize;
 		}
 		if (dataToPreloadFound(ndsHeader)) {
 			//ce9->romLocation[1] = ce9->romLocation[0]+dataToPreloadSize[0];
 			// ce9->romLocation -= dataToPreloadAddr[0];
 			//ce9->romLocation[1] -= dataToPreloadAddr[1];
-			configureRomMap(ce9, ndsHeader, dataToPreloadAddr[0], cacheBlockSize, dsiMode, consoleModel);
-			for (u32 i = 0; i < dataToPreloadSize[0]/*+dataToPreloadSize[1]*/; i += cacheBlockSize) {
+			configureRomMap(ce9, ndsHeader, dataToPreloadAddr[0], dsiMode);
+			for (u32 i = 0; i < dataToPreloadFullSize(); i += cacheBlockSize) {
 				ce9->cacheAddress += cacheBlockSize;
-				if (isSdk5(moduleParams) || ((ce9->valueBits & b_dsiBios) && laterSdk)) {
-					if (ce9->cacheAddress == 0x0C7C0000+cacheBlockSize) {
-						ce9->cacheAddress += (ndsHeader->unitCode > 0 ? 0x20000 : 0x40000)-cacheBlockSize;
-					} else if (ndsHeader->unitCode == 0) {
-						if (ce9->cacheAddress == 0x0D000000-cacheBlockSize) {
-							ce9->cacheAddress += cacheBlockSize;
-						}
-					} else {
-						if (ce9->cacheAddress == 0x0C800000-cacheBlockSize) {
-							ce9->cacheAddress += cacheBlockSize;
-						} else if (ce9->cacheAddress == 0x0CFE0000) {
-							ce9->cacheAddress += 0x20000;
-						}
-					}
-				} else if ((ce9->cacheAddress == 0x0D000000-cacheBlockSize) && (ce9->valueBits & b_dsiBios)) {
-					ce9->cacheAddress += cacheBlockSize;
-				} else if (ce9->cacheAddress == 0x0C7C0000) {
-					ce9->cacheAddress += 0x40000;
-				}
-				dataToPreloadSizeAligned += cacheBlockSize;
+				romLocationAdjust(ndsHeader, laterSdk, (ce9->valueBits & b_isSdk5), &ce9->cacheAddress);
+				ce9->cacheSlots--;
 			}
-			ce9->cacheSlots -= dataToPreloadSizeAligned/cacheBlockSize;
-			ce9->romPartSrc = dataToPreloadAddr[0];
-			//ce9->romPartSrc[1] = dataToPreloadAddr[1];
-			ce9->romPartSize = dataToPreloadSize[0];
-			//ce9->romPartSize[1] = dataToPreloadSize[1];
+			for (int i = 0; i < 4; i++) {
+				ce9->romPartSrc[i] = dataToPreloadAddr[i];
+				ce9->romPartSize[i] = dataToPreloadSize[i];
+			}
+			/* if (dataToPreloadFrame) {
+				ce9->valueBits |= b_waitForPreloadToFinish;
+			} */
 		}
 		if (runOverlayCheck && overlaysSize <= 0x700000) {
 			/*extern u8 gameOnFlashcard;
@@ -488,47 +377,41 @@ int hookNdsRetailArm9(
 		if (strncmp(romTid, "UBR", 3) == 0 || iUncompressedSize > 0x26C000) {
 			ce9->valueBits |= b_slowSoftReset;
 		}
+		if (!dataToPreloadFound(ndsHeader) && (strncmp(romTid, "YPT", 3) == 0)) { // Puppy Palace
+			ce9->valueBits |= b_resetOnFirstException;
+		} else if (strncmp(romTid, "CLJ", 3) == 0) { // Mario & Luigi: Bowser's Inside Story
+			ce9->valueBits |= b_resetOnEveryException;
+		}
 
-		if (ndsHeader->unitCode == 0 || !dsiMode) {
-			u32* cacheAddressTable = (u32*)(ndsHeader->unitCode > 0 ? CACHE_ADDRESS_TABLE_LOCATION_TWLSDK : CACHE_ADDRESS_TABLE_LOCATION);
+		if (!gameOnFlashcard && (ndsHeader->unitCode == 0 || !dsiMode)) {
+			u32* cacheAddressTable = (u32*)(!laterSdk ? CACHE_ADDRESS_TABLE_LOCATION2 : CACHE_ADDRESS_TABLE_LOCATION);
 			u32 addr = ce9->cacheAddress;
 
 			for (int slot = 0; slot < ce9->cacheSlots; slot++) {
-				if (isSdk5(moduleParams) || ((ce9->valueBits & b_dsiBios) && laterSdk)) {
-					if (addr == 0x0C7C0000+cacheBlockSize) {
-						addr += (ndsHeader->unitCode > 0 ? 0x20000 : 0x40000)-cacheBlockSize;
-					} else if (ndsHeader->unitCode == 0) {
-						if (addr == 0x0D000000-cacheBlockSize) {
-							addr += cacheBlockSize;
-						}
-					} else {
-						if (addr == 0x0C800000-cacheBlockSize) {
-							addr += cacheBlockSize;
-						} else if (addr == 0x0CFE0000) {
-							addr += 0x20000;
-						}
-					}
-				} else if ((addr == 0x0D000000-cacheBlockSize) && (ce9->valueBits & b_dsiBios)) {
-					addr += cacheBlockSize;
-				} else if (addr == 0x0C7C0000) {
-					addr += 0x40000;
-				}
+				romLocationAdjust(ndsHeader, laterSdk, (ce9->valueBits & b_isSdk5), &addr);
 				cacheAddressTable[slot] = addr;
 				addr += cacheBlockSize;
 			}
 		}
 	} else {
+		extern u32 baseArm9Off;
+		extern u32 baseArm9Size;
+		extern u32 baseArm7Off;
+		extern u32 baseArm7Size;
+		extern u32 baseArm9OvlSrc;
+		extern u32 baseArm9OvlSize;
+
 		u32 romOffset = 0;
 		if (usesCloneboot) {
 			romOffset = 0x4000;
-		} else if (ndsHeader->arm9overlaySource == 0 || ndsHeader->arm9overlaySize == 0) {
-			romOffset = (ndsHeader->arm7romOffset + ndsHeader->arm7binarySize);
-		} else if (ndsHeader->arm9overlaySource > ndsHeader->arm7romOffset) {
-			romOffset = (ndsHeader->arm9romOffset + ndsHeader->arm9binarySize);
+		} else if (baseArm9OvlSrc == 0 || baseArm9OvlSize == 0) {
+			romOffset = (baseArm7Off + baseArm7Size);
+		} else if (baseArm9OvlSrc > baseArm7Off) {
+			romOffset = (baseArm9Off + baseArm9Size);
 		} else {
-			romOffset = ndsHeader->arm9overlaySource;
+			romOffset = baseArm9OvlSrc;
 		}
-		configureRomMap(ce9, ndsHeader, romOffset, 0x4000, dsiMode, consoleModel);
+		configureRomMap(ce9, ndsHeader, romOffset, dsiMode);
 	}
 
     u32* tableAddr = patchOffsetCache.a9IrqHookOffset;

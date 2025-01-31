@@ -39,9 +39,17 @@ consoleModel:
 	.word	0x00000000
 irqTable:
 	.word	0x00000000
+fntSrc:
+	.word	0x00000000
+fntFatSize:
+	.word	0x00000000
 overlaysSrc:
 	.word	0x00000000
+overlaysSrcAlign:
+	.word	0x00000000
 overlaysSize:
+	.word	0x00000000
+overlaysSizeAlign:
 	.word	0x00000000
 romPaddingSize:
 	.word	0x00000000
@@ -56,14 +64,30 @@ cacheBlockSize:
 	.hword	0
 romPartSrc:
 	.word	0x00000000
-@	.word	0x00000000
+	.word	0x00000000
+	.word	0x00000000
+	.word	0x00000000
 romPartSize:
 	.word	0x00000000
-@	.word	0x00000000
+	.word	0x00000000
+	.word	0x00000000
+	.word	0x00000000
 #ifndef TWLSDK
 romMapLines:
 	.word	0x00000000
 romMap:
+	.word	0x00000000
+	.word	0x00000000
+	.word	0x00000000
+
+	.word	0x00000000
+	.word	0x00000000
+	.word	0x00000000
+
+	.word	0x00000000
+	.word	0x00000000
+	.word	0x00000000
+
 	.word	0x00000000
 	.word	0x00000000
 	.word	0x00000000
@@ -203,11 +227,11 @@ card_read_arm9:
 	ldr		pc, =cardRead
 .pool
 cardStructArm9:
-.word    0x00000000     
+.word    0x00000000
 cacheFlushRef:
-.word    0x00000000  
+.word    0x00000000
 terminateForPullOutRef:
-.word    0x00000000  
+.word    0x00000000
 cacheRef:
 .word    0x00000000
 	.thumb
@@ -220,7 +244,7 @@ thumb_card_read_arm9:
 	pop	{r6, pc}
 .pool
 .align	4
- 	
+
 	.arm
 @---------------------------------------------------------------------------------
 
@@ -255,7 +279,7 @@ cart_read:
 @	stmfd   sp!, {lr}
 @	sub     sp, sp, #4
 @	ldr		r6, =cardPullOut
-    
+
 @	bl		_blx_r6_stub_card_pull_out
 
 @	add     sp, sp, #4
@@ -344,7 +368,7 @@ nand_write_arm9:
 .pool
 @---------------------------------------------------------------------------------
 
-	.thumb    
+	.thumb
 @---------------------------------------------------------------------------------
 thumb_nand_read_arm9:
 @---------------------------------------------------------------------------------
@@ -353,7 +377,7 @@ thumb_nand_read_arm9:
 	blx r6
 	pop {r6, pc}
 _blx_r6_stub_thumb_nand_read:
-	bx	r6	
+	bx	r6
 .pool
 .align	4
 @---------------------------------------------------------------------------------
@@ -474,15 +498,7 @@ dsiSaveWrite_arm:
 @---------------------------------------------------------------------------------
 card_irq_enable:
 @---------------------------------------------------------------------------------
-	push    {lr}
-	push	{r1-r12}
-
-	ldr		r3, =myIrqEnable
-	blx		r3
-
-	pop   	{r1-r12} 
-	pop  	{lr}
-	bx  lr
+	ldr		pc, =myIrqEnable
 .pool
 @---------------------------------------------------------------------------------
 
@@ -490,12 +506,12 @@ card_irq_enable:
 @---------------------------------------------------------------------------------
 thumb_card_irq_enable:
 @---------------------------------------------------------------------------------
-    push	{r1-r7, lr}
+    push	{r6, lr}
 
-	ldr		r3, =myIrqEnable
-	blx		r3
+	ldr		r6, =myIrqEnable
+	blx		r6
 
-	pop	{r1-r7, pc}
+	pop	{r6, pc}
 .pool
 .align	4
 @---------------------------------------------------------------------------------
@@ -509,7 +525,7 @@ pdash_read:
     @mov     r1, r5 @SRC
     @mov     r2, r6 @LEN
     @mov     r3, r10 @cardStruct
-    add     r0, r0, #0x2C    
+    add     r0, r0, #0x2C
     ldr		r6, =cardReadPDash
 	blx		r6
     pop	    {r1-r11, pc}
@@ -548,17 +564,17 @@ thumb_cart_read:
 
 @	ldr		r6, =cartRead
 
-@	bl		_blx_r6_stub_thumb_slot2_read	
+@	bl		_blx_r6_stub_thumb_slot2_read
 
 @	POP		{r4-r7}
 @	POP		{r3}
 @	bx      r3
 _blx_r6_stub_thumb_slot2_read:
-@	bx	r6	
+@	bx	r6
 @.pool
 @.align	4
 	.arm
-    
+
 vblankHandler:
 @ Hook the return address, then go back to the original function
 	stmdb	sp!, {lr}
@@ -572,14 +588,14 @@ ipcSyncHandler:
 	ldr 	pc,	intr_ipc_orig_return
 
 code_handler_start_vblank:
-	push	{r0-r12} 
+	push	{r0-r12}
 	bl	myIrqHandlerVBlank
-	pop   	{r0-r12,pc} 
+	pop   	{r0-r12,pc}
 
 code_handler_start_ipc:
-	push	{r0-r12} 
+	push	{r0-r12}
 	bl	myIrqHandlerIPC
-	pop   	{r0-r12,pc} 
+	pop   	{r0-r12,pc}
 
 .pool
 
@@ -710,7 +726,7 @@ IC_InvalidateRange:
 	blt	.invalidate
 	bx	lr
 
-@---------------------------------------------------------------------------------        
+@---------------------------------------------------------------------------------
 .global cacheFlush
 .type	cacheFlush STT_FUNC
 /*---------------------------------------------------------------------------------
@@ -753,7 +769,7 @@ inner_loop:
 	bne	outer_loop
 //---------------------------------------------------------------------------------
 //DC_WaitWriteBufferEmpty:
-//---------------------------------------------------------------------------------               
+//---------------------------------------------------------------------------------
 	MCR     p15, 0, R7,c7,c10, 4
 
 	@restore interrupt

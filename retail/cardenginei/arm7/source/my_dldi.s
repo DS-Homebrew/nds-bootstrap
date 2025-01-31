@@ -32,25 +32,28 @@
 
 
 __mydldi_start:
-#ifndef NO_DLDI
 
 @---------------------------------------------------------------------------------
 @ Driver patch file standard header -- 16 bytes
-#ifdef STANDARD_DLDI
 	.word	0xBF8DA5ED		@ Magic number to identify this region
-#else
-	.word	0xBF8DA5EE		@ Magic number to identify this region
-#endif
 	.asciz	" Chishm"		@ Identifying Magic string (8 bytes with null terminator)
 	.byte	0x01			@ Version number
-	.byte	0x0e		@ 16KiB	@ Log [base-2] of the size of this driver in bytes.
+#ifdef TWLSDK
+	.byte	0x0d		@ 8KiB	@ Log [base-2] of the size of this driver in bytes.
+#else
+	.byte	0x0f		@ 32KiB	@ Log [base-2] of the size of this driver in bytes.
+#endif
 	.byte	0x00			@ Sections to fix
-	.byte 	0x0e		@ 16KiB	@ Log [base-2] of the allocated space in bytes.
-	
+#ifdef TWLSDK
+	.byte 	0x0d		@ 8KiB	@ Log [base-2] of the allocated space in bytes.
+#else
+	.byte 	0x0f		@ 32KiB	@ Log [base-2] of the allocated space in bytes.
+#endif
+
 @---------------------------------------------------------------------------------
 @ Text identifier - can be anything up to 47 chars + terminating null -- 16 bytes
 	.align	4
-	.asciz "Loader (No interface)"
+	.asciz "Default (No interface)"
 
 @---------------------------------------------------------------------------------
 @ Offsets to important sections within the data	-- 32 bytes
@@ -90,39 +93,13 @@ _DLDI_shutdown:
 
 
 @---------------------------------------------------------------------------------
+#ifdef TWLSDK
 	.align
 	.pool
 
-#ifdef TWLSDK
 	.space (__mydldi_start + 8192) - .	@ Fill to 8KiB
 #else
-	.space (__mydldi_start + 16384) - .	@ Fill to 16KiB
 #endif
 
 _dldi_end:
 	.end
-@---------------------------------------------------------------------------------
-#else
-@---------------------------------------------------------------------------------
-@ IO_INTERFACE data -- 32 bytes
-__myio_dldi:
-	.ascii	"DLDI"				@ ioType
-	.word	0x00000000			@ Features
-	.word	__mydldi_startup		@
-	.word	_DLDI_isInserted		@
-	.word	_DLDI_readSectors		@   Function pointers to standard device driver functions
-	.word	_DLDI_writeSectors		@
-	.word	_DLDI_clearStatus		@
-	.word	_DLDI_shutdown			@
-
-	__mydldi_startup:
-_DLDI_isInserted:
-_DLDI_readSectors:
-_DLDI_writeSectors:
-_DLDI_clearStatus:
-_DLDI_shutdown:
-	mov		r0, #0x00		@ Return false for every function
-	bx		lr
-
-
-#endif

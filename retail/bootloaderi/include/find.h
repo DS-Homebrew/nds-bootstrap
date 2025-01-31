@@ -16,25 +16,25 @@ u32* memsearch32_3(const u32* start, u32 dataSize, const u32* find, const u32* f
 u16* memsearch16(const u16* start, u32 dataSize, const u16* find, u32 findSize, bool forward);
 u16* memsearch16_4(const u16* start, u32 dataSize, const u16* find, const u16* find2, const u16* find3, const u16* find4, u32 findSize, bool forward);
 
-inline u32* findOffset(const u32* start, u32 dataSize, const u32* find, u32 findLen) {
+static inline u32* findOffset(const u32* start, u32 dataSize, const u32* find, u32 findLen) {
 	return memsearch32(start, dataSize, find, findLen*sizeof(u32), true);
 }
-inline u32* findOffsetBackwards(const u32* start, u32 dataSize, const u32* find, u32 findLen) {
+static inline u32* findOffsetBackwards(const u32* start, u32 dataSize, const u32* find, u32 findLen) {
 	return memsearch32(start, dataSize, find, findLen*sizeof(u32), false);
 }
-inline u32* findOffsetBackwards2(const u32* start, u32 dataSize, const u32* find, const u32* find2, u32 findLen) {
+static inline u32* findOffsetBackwards2(const u32* start, u32 dataSize, const u32* find, const u32* find2, u32 findLen) {
 	return memsearch32_2(start, dataSize, find, find2, findLen*sizeof(u32), false);
 }
-inline u32* findOffsetBackwards3(const u32* start, u32 dataSize, const u32* find, const u32* find2, const u32* find3, u32 findLen) {
+static inline u32* findOffsetBackwards3(const u32* start, u32 dataSize, const u32* find, const u32* find2, const u32* find3, u32 findLen) {
 	return memsearch32_3(start, dataSize, find, find2, find3, findLen*sizeof(u32), false);
 }
-inline u16* findOffsetThumb(const u16* start, u32 dataSize, const u16* find, u32 findLen) {
+static inline u16* findOffsetThumb(const u16* start, u32 dataSize, const u16* find, u32 findLen) {
 	return memsearch16(start, dataSize, find, findLen*sizeof(u16), true);
 }
-inline u16* findOffsetBackwardsThumb(const u16* start, u32 dataSize, const u16* find, u32 findLen) {
+static inline u16* findOffsetBackwardsThumb(const u16* start, u32 dataSize, const u16* find, u32 findLen) {
 	return memsearch16(start, dataSize, find, findLen*sizeof(u16), false);
 }
-inline u16* findOffsetBackwardsThumb4(const u16* start, u32 dataSize, const u16* find, const u16* find2, const u16* find3, const u16* find4, u32 findLen) {
+static inline u16* findOffsetBackwardsThumb4(const u16* start, u32 dataSize, const u16* find, const u16* find2, const u16* find3, const u16* find4, u32 findLen) {
 	return memsearch16_4(start, dataSize, find, find2, find3, find4, findLen*sizeof(u16), false);
 }
 
@@ -83,7 +83,7 @@ u16* findGbaSlotInitOffsetThumb(const tNDSHeader* ndsHeader);
 u32* a9FindCardIrqEnableOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool* usesThumb);
 const u32* getMpuInitRegionSignature(u32 patchMpuRegion);
 u32* findMpuStartOffset(const tNDSHeader* ndsHeader, u32 patchMpuRegion);
-u32* findMpuDataOffset(const module_params_t* moduleParams, u32 patchMpuRegion, const u32* mpuStartOffset);
+u32* findMpuDataOffset(const bool twl, const module_params_t* moduleParams, u32 patchMpuRegion, const u32* mpuStartOffset);
 u32* findMpuDataOffsetAlt(const tNDSHeader* ndsHeader);
 u32* findMpuChange(const tNDSHeader* ndsHeader);
 u32* findMpuInitTwlEnd(const u32* heapPointer2Offset);
@@ -107,7 +107,8 @@ u32* findWaitSysCyclesOffset(const tNDSHeader* ndsHeader);
 u32* findSleepOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb, u32* usesThumbPtr);
 u32* findCardEndReadDma(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb, const u32* cardReadDmaEndOffset, u32* offsetDmaHandler);
 u32* findCardSetDma(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb);
-u32* findResetOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool* softResetMb);
+u32* findSrlStartOffset9(const tNDSHeader* ndsHeader);
+u32* findResetOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, const bool softResetMb);
 u32* findNandTmpJumpFuncOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
 u32* findMbkWramBOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
 u16* findMbkWramBOffsetThumb(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
@@ -136,8 +137,10 @@ u32* findRamClearI2Offset(const u32* ramClearIOffset);
 u32* findPostBootOffset(const tNDSHeader* ndsHeader);
 u32* findCardCheckPullOutOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
 u32* findCardIrqEnableOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
+u32* findSrlStartOffset7(const tNDSHeader* ndsHeader);
 //u32* findA7iStartOffset(void);
 u32* findSdCardResetOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
+u32* findSdCardFuncsOffset(const tNDSHeader* ndsHeader);
 u32* findAutoPowerOffOffset(const tNDSHeader* ndsHeader);
 
 #endif // FIND_H

@@ -12,15 +12,17 @@ typedef enum {
 	MENU_OPTIONS = 5,
 	MENU_RAM_VIEWER = 6,
 	MENU_QUIT = 7
-
 } MenuItem;
 
 typedef enum {
 	OPTIONS_MAIN_SCREEN,
-	OPTIONS_BRIGHTNESS,
+	OPTIONS_BRIGHTNESS
+	#ifndef B4DS
+	,
 	OPTIONS_VOLUME,
 	OPTIONS_CLOCK_SPEED,
 	OPTIONS_VRAM_MODE
+	#endif
 } OptionsItem;
 
 typedef enum {
@@ -34,9 +36,9 @@ typedef enum {
 
 extern struct IgmText igmText;
 
-extern u32* waitSysCyclesLocPtr;
-extern u32* scfgExtBak;
-extern u16* scfgClkBak;
+extern u32* waitSysCyclesLoc;
+extern u32 scfgExtBak;
+extern u16 scfgClkBak;
 extern vu32* volatile sharedAddr;
 extern vu32 *address;
 

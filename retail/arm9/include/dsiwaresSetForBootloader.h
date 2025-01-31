@@ -53,6 +53,8 @@ static const char dsiWareForBootloader1[][4] = {
 	"K2Z", // G.G Series: Altered Weapon
 	"KF2", // Amakuchi! Dairoujou
 	"KAX", // Animal Boxing
+	"KWG", // Animal Crossing Calculator
+	// "KWC", // Animal Crossing Clock
 	"KPC", // Animal Puzzle Adventure
 	"KY8", // Anne's Doll Studio: Antique Collection
 	"K54", // Anne's Doll Studio: Gothic Collection
@@ -252,8 +254,6 @@ static const char dsiWareForBootloader1[][4] = {
 	"KTX", // High Stakes Texas Hold'em
 	"KHI", // Hints Hunter
 	"KT2", // G.G Series: Horizontal Bar
-};
-static const char dsiWareForBootloader2[][4] = {
 	// "KNE", // Ichi Moudaji!: Neko King
 	"KNK", // Ideyou Sukeno: Kenkou Maja DSi
 	"KBT", // Invasion of the Alien Blobs!
@@ -302,6 +302,7 @@ static const char dsiWareForBootloader2[][4] = {
 	"KWM", // Magical Whip
 	"KJO", // Magnetic Joe
 	"KYL", // Make Up & Style
+	"KWF", // Mario Calculator
 	"KDM", // Mario vs. Donkey Kong: Minis March Again! (bootloaderi-exclusive)
 	"KM9", // Master of Illusion Express: Deep Psyche
 	"KMF", // Master of Illusion Express: Funny Face
@@ -310,6 +311,8 @@ static const char dsiWareForBootloader2[][4] = {
 	"KMN", // Master of Illusion Express: Psychic Camera (bootloaderi-exclusive)
 	"KMS", // Master of Illusion Express: Shuffle Games
 	"KUP", // Match Up!
+};
+static const char dsiWareForBootloader3[][4] = {
 	"KWK", // Mega Words
 	"KMK", // Mehr Kreuzwortratsel: Welt Edition
 	"KD4", // Meikyou Kokugo: Rakubiki Jiten

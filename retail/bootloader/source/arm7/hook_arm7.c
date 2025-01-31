@@ -19,7 +19,6 @@
 #include <string.h> // memcpy
 #include <stdio.h>
 #include <nds/system.h>
-#include <nds/debug.h>
 
 //#include "my_fat.h"
 #include "debug_file.h"
@@ -32,8 +31,10 @@
 #include "find.h"
 #include "hook.h"
 #include "tonccpy.h"
+#include "nocashMessage.h"
 
 #define b_a9IrqHooked BIT(7)
+#define b_delayWrites BIT(8)
 #define b_sleepMode BIT(17)
 
 extern u32 newArm7binarySize;
@@ -96,6 +97,7 @@ int hookNdsRetailArm7(
 	u32 cheatFileCluster,
 	u32 cheatSize,
 	u32 apPatchFileCluster,
+	u32 apPatchOffset,
 	u32 apPatchSize,
 	s32 mainScreen,
 	u32 language,
@@ -197,24 +199,34 @@ int hookNdsRetailArm7(
 	u32* vblankHandler = hookLocation;
 	u32* ipcSyncHandler = hookLocation + 16;
 
+	extern u8 _io_dldi_size;
 	const char* romTid = getRomTid(ndsHeader);
+	extern u32 accessControl;
+	const bool nandAccess = (accessControl & BIT(4)); // isDSiWare
 	extern bool maxHeapOpen;
 	extern bool patchedCardIrqEnable;
+
+	const bool laterSdk = ((moduleParams->sdk_version >= 0x2008000 && moduleParams->sdk_version != 0x2012774) || moduleParams->sdk_version == 0x20029A8);
 
 	u32 cheatEngineAddr = CHEAT_ENGINE_LOCATION_B4DS;
 	if (!extendedMemory && strncmp(romTid, "CLJ", 3) == 0) { // Mario & Luigi: Bowser's Inside Story
 		cheatEngineAddr = 0x02002000;
 	} else if ((strncmp(romTid, "YEE", 3) == 0 && romTid[3] != 'J') || strncmp(romTid, "BEB", 3) == 0 || strncmp(romTid, "BEE", 3) == 0) { // Inazuma Eleven: Fix AP-fix causing undefined instruction
 		cheatEngineAddr = (u32)ce7-0x2000;
+	} else if ((extendedMemory || laterSdk) && _io_dldi_size >= 0x0E) {
+		cheatEngineAddr = nandAccess ? CHEAT_ENGINE_LOCATION_B4DS_ALT : CHEAT_ENGINE_LOCATION_B4DS_ALT2;
 	}
 
 	ce7->intr_vblank_orig_return = *vblankHandler;
 	ce7->intr_fifo_orig_return   = *ipcSyncHandler;
 	ce7->cheatEngineAddr         = cheatEngineAddr;
-	ce7->musicBuffer = maxHeapOpen ? 0x027F8000 : 0x027F0000;
+	ce7->musicBuffer = maxHeapOpen ? ((_io_dldi_size == 0x0F) ? 0x027F6000 : (_io_dldi_size == 0x0E) ? 0x027FA000 : 0x027FC000)-0x4000 : 0x027F0000;
 	ce7->moduleParams            = moduleParams;
 	if (patchedCardIrqEnable) {
 		ce7->valueBits |= b_a9IrqHooked;
+	}
+	if (strncmp(romTid, "YL2", 3) == 0) { // Luminous Arc 2
+		ce7->valueBits |= b_delayWrites; // Delay save writes by 1 frame for the first 2 seconds to fix crash on first boot
 	}
 	if (sleepMode) {
 		ce7->valueBits |= b_sleepMode;
@@ -229,22 +241,24 @@ int hookNdsRetailArm7(
 	*vblankHandler = ce7->patches->vblankHandler;
 	*ipcSyncHandler = ce7->patches->fifoHandler;
 
-	aFile cheatFile; getFileFromCluster(&cheatFile, cheatFileCluster);
-	aFile apPatchFile; getFileFromCluster(&apPatchFile, apPatchFileCluster);
-	const u32 cheatSizeTotal = cheatSize+(apPatchIsCheat ? apPatchSize : 0);
-	if (cheatSizeTotal > 4 && cheatSizeTotal <= 0x1C00) {
-		tonccpy((u8*)cheatEngineAddr, (u8*)CHEAT_ENGINE_LOCATION_B4DS_BUFFERED, 0x400);
+	if (!maxHeapOpen) {
+		aFile cheatFile; getFileFromCluster(&cheatFile, cheatFileCluster);
+		aFile apPatchFile; getFileFromCluster(&apPatchFile, apPatchFileCluster);
+		const u32 cheatSizeTotal = cheatSize+(apPatchIsCheat ? apPatchSize : 0);
+		if (cheatSizeTotal > 4 && cheatSizeTotal <= 0x1C00) {
+			tonccpy((u8*)cheatEngineAddr, (u8*)CHEAT_ENGINE_LOCATION_B4DS_BUFFERED, 0x400);
 
-		char* cheatDataOffset = (char*)cheatEngineAddr+0x3E8;
-		if (apPatchFile.firstCluster != CLUSTER_FREE && apPatchIsCheat) {
-			fileRead(cheatDataOffset, &apPatchFile, 0, apPatchSize);
-			cheatDataOffset += apPatchSize;
-			*(cheatDataOffset + 3) = 0xCF;
-			dbg_printf("AP-fix found and applied\n");
-		}
-		if (cheatFile.firstCluster != CLUSTER_FREE) {
-			fileRead(cheatDataOffset, &cheatFile, 0, cheatSize);
-			dbg_printf("Cheats found and applied\n");
+			char* cheatDataOffset = (char*)cheatEngineAddr+0x3E8;
+			if (apPatchFile.firstCluster != CLUSTER_FREE && apPatchIsCheat) {
+				fileRead(cheatDataOffset, &apPatchFile, apPatchOffset, apPatchSize);
+				cheatDataOffset += apPatchSize;
+				*(cheatDataOffset + 3) = 0xCF;
+				dbg_printf("AP-fix found and applied\n");
+			}
+			if (cheatFile.firstCluster != CLUSTER_FREE) {
+				fileRead(cheatDataOffset, &cheatFile, 0, cheatSize);
+				dbg_printf("Cheats found and applied\n");
+			}
 		}
 	}
 	toncset((u8*)CHEAT_ENGINE_LOCATION_B4DS_BUFFERED, 0, 0x400);

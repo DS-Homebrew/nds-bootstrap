@@ -8,7 +8,7 @@ endif
 -include $(DEVKITARM)/ds_rules
 
 ifeq ($(OS),Windows_NT)
-LZSS			?=	../../lzss.exe
+LZSS			?=	../../../lzss.exe
 
 else
 
@@ -22,7 +22,7 @@ endif
 #---------------------------------------------------------------------------------
 TARGET		:=	loadi2
 BUILD		:=	build
-SOURCES		:=	../bootloaderi/source ../bootloaderi/source/arm7 ../bootloaderi/source/arm7/save_patches ../bootloaderi/source/arm9 ../common/source ../common/source_general
+SOURCES		:=	../bootloaderi/source ../bootloaderi/source/arm7 ../bootloaderi/source/arm7/libnds ../bootloaderi/source/arm7/save_patches ../bootloaderi/source/arm9 ../common/source ../common/source_general
 INCLUDES	:=	../bootloaderi/include build ../common/include ../common/include_fat
 DATA		:=	../data
 SPECS		:=  specs
@@ -37,12 +37,12 @@ CFLAGS	:=	-g -Wall -O2\
 			-ffast-math \
 			$(ARCH)
 
-CFLAGS	+=	$(INCLUDE) -DARM7 -std=gnu99 -DTWOCARD -DLOADERTWO
+CFLAGS	+=	$(INCLUDE) -DARM7 -std=gnu99 -DTWOCARD -DLOADERTYPE2
 
 ASFLAGS	:=	-g $(ARCH) $(INCLUDE)
 LDFLAGS	=	-nostartfiles -T $(TOPDIR)/load.ld -g $(ARCH) -Wl,--nmagic -Wl,-Map,$(TARGET).map
 
-LIBS	:= -lnds7
+LIBS	:=
 
 #---------------------------------------------------------------------------------
 # list of directories containing libraries, this must be the top level containing
@@ -91,9 +91,7 @@ export LD	:=	$(CC)
 #---------------------------------------------------------------------------------
 $(BUILD):
 	@[ -d $@ ] || mkdir -p $@
-	@$(MAKE) -C $(BUILD) -f $(CURDIR)/Makefile 
-	@cp $(LOADBIN) $(LOADBIN_CMP)
-	@$(LZSS) -ewn $(LOADBIN_CMP)
+	@$(MAKE) -C $(BUILD) -f $(CURDIR)/Makefile
 
 #---------------------------------------------------------------------------------
 clean:
@@ -109,6 +107,10 @@ DEPENDS	:=	$(OFILES:.o=.d)
 #---------------------------------------------------------------------------------
 # main targets
 #---------------------------------------------------------------------------------
+$(LOADBIN_CMP): $(LOADBIN)
+	@cp $< $@
+	@$(LZSS) -ewn $@
+
 $(LOADBIN)	:	$(LOADELF)
 
 

@@ -20,7 +20,6 @@
 #include <stdio.h>
 #include <nds/system.h>
 #include <nds/arm7/i2c.h>
-#include <nds/debug.h>
 
 //#include "my_fat.h"
 #include "unpatched_funcs.h"
@@ -34,21 +33,23 @@
 #include "find.h"
 #include "hook.h"
 #include "tonccpy.h"
+#include "nocashMessage.h"
 
 #define b_gameOnFlashcard BIT(0)
 #define b_saveOnFlashcard BIT(1)
+#define b_eSdk2 BIT(2)
 #define b_ROMinRAM BIT(3)
 #define b_dsiMode BIT(4)
 #define b_dsiSD BIT(5)
 #define b_preciseVolumeControl BIT(6)
 #define b_powerCodeOnVBlank BIT(7)
-#define b_runCardEngineCheck BIT(8)
+#define b_delayWrites BIT(8)
 #define b_igmAccessible BIT(9)
 #define b_hiyaCfwFound BIT(10)
 #define b_slowSoftReset BIT(11)
 #define b_wideCheatUsed BIT(12)
 #define b_isSdk5 BIT(13)
-#define b_asyncCardRead BIT(14)
+#define b_hasVramWifiBinary BIT(14)
 #define b_twlTouch BIT(15)
 #define b_cloneboot BIT(16)
 #define b_sleepMode BIT(17)
@@ -136,6 +137,7 @@ int hookNdsRetailArm7(
 	u32 cheatFileCluster,
 	u32 cheatSize,
 	u32 apPatchFileCluster,
+	u32 apPatchOffset,
 	u32 apPatchSize,
 	u32 pageFileCluster,
 	u32 manualCluster,
@@ -152,7 +154,8 @@ int hookNdsRetailArm7(
 	u8 dmaRomRead_LED,
 	bool ndmaDisabled,
 	bool twlTouch,
-	bool usesCloneboot
+	bool usesCloneboot,
+	u32 romPartLocation
 ) {
 	dbg_printf("hookNdsRetailArm7\n");
 
@@ -291,8 +294,17 @@ int hookNdsRetailArm7(
 					case 0x6B038:
 						hookLocation = (u32*)0x2F67348;
 						break;
+					case 0x6EAD0:
+						hookLocation = (u32*)0x2F6772C;
+						break;
+					case 0x6EB54:
+						hookLocation = (u32*)0x2F67734;
+						break;
 					case 0x7250C:
 						hookLocation = (u32*)0x2EE5E10;
+						break;
+					case 0x7603C:
+						hookLocation = (u32*)0x2EE61FC;
 						break;
 				}
 			}
@@ -341,6 +353,12 @@ int hookNdsRetailArm7(
 		*vblankHandler = 0x2FFC008;
 	} else {*/
 		extern u32 iUncompressedSize;
+		extern bool hasVramWifiBinary;
+		// extern u32 dataToPreloadAddr;
+		// extern u32 dataToPreloadSize;
+		// extern u32 dataToPreloadFrame;
+		extern bool dataToPreloadFound(const tNDSHeader* ndsHeader);
+		const bool laterSdk = ((moduleParams->sdk_version >= 0x2008000 && moduleParams->sdk_version != 0x2012774) || moduleParams->sdk_version == 0x20029A8);
 
 		ce7->intr_vblank_orig_return  = *vblankHandler;
 		ce7->intr_fifo_orig_return    = *ipcSyncHandler;
@@ -358,6 +376,9 @@ int hookNdsRetailArm7(
 		if (saveOnFlashcard) {
 			ce7->valueBits |= b_saveOnFlashcard;
 		}
+		if (!laterSdk) {
+			ce7->valueBits |= b_eSdk2;
+		}
 		if (ROMinRAM) {
 			ce7->valueBits |= b_ROMinRAM;
 		}
@@ -369,6 +390,9 @@ int hookNdsRetailArm7(
 		}
 		if (consoleModel < 2 && preciseVolumeControl) {
 			ce7->valueBits |= b_preciseVolumeControl;
+		}
+		if (strncmp(romTid, "YL2", 3) == 0) { // Luminous Arc 2
+			ce7->valueBits |= b_delayWrites; // Delay save writes by 1 frame for the first 2 seconds to fix crash on first boot
 		}
 		if (hiyaCfwFound) {
 			ce7->valueBits |= b_hiyaCfwFound;
@@ -382,8 +406,8 @@ int hookNdsRetailArm7(
 		if (isSdk5(moduleParams)) {
 			ce7->valueBits |= b_isSdk5;
 		}
-		if (asyncCardRead) {
-			ce7->valueBits |= b_asyncCardRead;
+		if (hasVramWifiBinary) {
+			ce7->valueBits |= b_hasVramWifiBinary;
 		}
 		if (twlTouch) {
 			ce7->valueBits |= b_twlTouch;
@@ -423,28 +447,44 @@ int hookNdsRetailArm7(
 		ce7->dmaRomRead_LED           = dmaRomRead_LED;
 		ce7->scfgRomBak               = REG_SCFG_ROM;
 
-		extern u32 getRomLocation(const tNDSHeader* ndsHeader, const bool isSdk5);
-		u32 romLocation = getRomLocation(ndsHeader, (ce7->valueBits & b_isSdk5));
-		ce7->romLocation = romLocation;
+		/* if (!ROMinRAM && dataToPreloadFound(ndsHeader) && dataToPreloadFrame) {
+			ce7->romPartLocation = romPartLocation;
+			ce7->romPartSrc = dataToPreloadAddr;
+			ce7->romPartSize = dataToPreloadSize;
+			ce7->romPartFrame = dataToPreloadFrame;
+		} */
 
-		u32 romOffset = 0;
-		if (usesCloneboot) {
-			romOffset = 0x4000;
-		} else if (ndsHeader->arm9overlaySource == 0 || ndsHeader->arm9overlaySize == 0) {
-			romOffset = (ndsHeader->arm7romOffset + ndsHeader->arm7binarySize);
-		} else {
-			romOffset = ndsHeader->arm9overlaySource;
-		}
-		ce7->romLocation -= romOffset;
+		if (ROMinRAM) {
+			extern u32 getRomLocation(const tNDSHeader* ndsHeader, const bool isSdk5);
+			ce7->romLocation = getRomLocation(ndsHeader, (ce7->valueBits & b_isSdk5));
 
-		// 0: ROM part start, 1: ROM part start in RAM, 2: ROM part end in RAM
-		extern u32 romMapLines;
-		extern u32 romMap[5][3];
+			extern u32 baseArm9Off;
+			extern u32 baseArm9Size;
+			extern u32 baseArm7Off;
+			extern u32 baseArm7Size;
+			extern u32 baseArm9OvlSrc;
+			extern u32 baseArm9OvlSize;
 
-		ce7->romMapLines = romMapLines;
-		for (int i = 0; i < 5; i++) {
-			for (int i2 = 0; i2 < 3; i2++) {
-				ce7->romMap[i][i2] = romMap[i][i2];
+			u32 romOffset = 0;
+			if (usesCloneboot) {
+				romOffset = 0x4000;
+			} else if (baseArm9OvlSrc == 0 || baseArm9OvlSize == 0) {
+				romOffset = (baseArm7Off + baseArm7Size);
+			} else if (baseArm9OvlSrc > baseArm7Off) {
+				romOffset = (baseArm9Off + baseArm9Size);
+			} else {
+				romOffset = baseArm9OvlSrc;
+			}
+			ce7->romLocation -= romOffset;
+
+			extern u32 romMapLines;
+			extern u32 romMap[][3];
+
+			ce7->romMapLines = romMapLines;
+			for (int i = 0; i < romMapLines; i++) {
+				for (int i2 = 0; i2 < 3; i2++) {
+					ce7->romMap[i][i2] = romMap[i][i2];
+				}
 			}
 		}
 
@@ -517,12 +557,12 @@ int hookNdsRetailArm7(
 		aFile cheatFile;
 		getFileFromCluster(&cheatFile, cheatFileCluster, gameOnFlashcard);
 		aFile apPatchFile;
-		getFileFromCluster(&apPatchFile, apPatchFileCluster, gameOnFlashcard);
+		getFileFromCluster(&apPatchFile, apPatchFileCluster, bootstrapOnFlashcard);
 
 		tonccpy((u8*)cheatEngineOffset, cheatEngineBuffer, 0x400);
 
 		if (ndsHeader->unitCode < 3 && apPatchFile.firstCluster != CLUSTER_FREE && apPatchIsCheat) {
-			fileRead(cheatDataOffset, &apPatchFile, 0, apPatchSize);
+			fileRead(cheatDataOffset, &apPatchFile, apPatchOffset, apPatchSize);
 			cheatDataOffset += apPatchSize;
 			*(cheatDataOffset + 3) = 0xCF;
 			dbg_printf("AP-fix found and applied\n");

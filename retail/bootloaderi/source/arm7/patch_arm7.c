@@ -119,10 +119,34 @@ void setBLThumb(int arg1, int arg2) {
 	*(u16*)(arg1 + 2) = instrs[1];
 }
 
-u16* getOffsetFromBLThumb(u16* blOffset) {
-	s16 codeOffset = blOffset[1];
+void setBLXThumb(int arg1, int arg2) {
+	u16 instrs[2];
 
-	return (u16*)((u32)blOffset + (codeOffset*2) + 4);
+	// 23 bit offset
+	u32 offset = (u32)(arg2 - arg1 - 4);
+	//dbg_printf("generateA7InstrThumb offset\n");
+	//dbg_hexa(offset);
+
+	// 1st instruction contains the upper 11 bit of the offset
+	instrs[0] = ((offset >> 12) & 0x7FF) | 0xF000;
+
+	// 2nd instruction contains the lower 11 bit of the offset
+	instrs[1] = ((offset >> 1) & 0x7FF) | 0xE800;
+	if ((instrs[1] % 2) != 0) {
+		instrs[1]++;
+	}
+
+	*(u16*)arg1 = instrs[0];
+	*(u16*)(arg1 + 2) = instrs[1];
+}
+
+u16* getOffsetFromBLThumb(const u16* blOffset) {
+	const u32* instructionPointer = (u32*)blOffset;
+	u32 blInstruction1 = ((u16*)instructionPointer)[0];
+	u32 blInstruction2 = ((u16*)instructionPointer)[1];
+	u32 res = (u32)instructionPointer + 5 + ((int)((((blInstruction1 & 0x7FF) << 11) | (blInstruction2 & 0x7FF)) << 10) >> 9);
+	res--;
+	return (u16*)res;
 }
 
 u32 vAddrOfRelocSrc = 0;
@@ -131,6 +155,9 @@ u32 newSwiHaltAddr = 0;
 // bool swiHaltPatched = false;
 
 static void patchSwiHalt(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+	extern bool pkmnGen5;
+	if (pkmnGen5) return;
+
 	u32* swiHaltOffset = patchOffsetCache.swiHaltOffset;
 	if (!patchOffsetCache.swiHaltOffset) {
 		swiHaltOffset = patchOffsetCache.a7IsThumb ? (u32*)findSwiHaltThumbOffset(ndsHeader, moduleParams) : findSwiHaltOffset(ndsHeader, moduleParams);
@@ -363,6 +390,42 @@ static void patchMirrorCheck(const tNDSHeader* ndsHeader, const module_params_t*
 	dbg_printf("\n\n");
 }
 
+bool hasVramWifiBinary = false;
+static void patchVramWifiBinaryLoad(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+	if (ndsHeader->unitCode > 0 || moduleParams->sdk_version < 0x2008000) return;
+
+	// Relocate VRAM WiFi binary from Main RAM to DSi WRAM
+	u32* offset = (u32*)patchOffsetCache.relocateStartOffset;
+	const u32 add = ((u32)ce7 == CARDENGINEI_ARM7_LOCATION) ? 0x00FE0000 : 0x00820000; // 0x037C0000 : 0x03000000
+	bool found = false;
+	for (int i = 0; i < 0x100/sizeof(u32); i++) {
+		if (*offset >= 0x027E0000 && *offset < 0x027E0200) {
+			*offset += add;
+			found = true;
+			break;
+		}
+		offset++;
+	}
+	if (!found) {
+		return;
+	}
+
+	hasVramWifiBinary = true;
+
+	dbg_printf("VRAM WiFi binary load location end : ");
+	dbg_hexa((u32)offset);
+	dbg_printf("\n\n");
+
+	offset = (u32*)patchOffsetCache.relocateStartOffset;
+
+	for (int i = 0; i < 0x80/sizeof(u32); i++) {
+		if (offset[i] == 0x0A000000) {
+			offset[i+1] = 0xE1A00000; // nop
+			break;
+		}
+	}
+}
+
 static void patchSleepMode(const tNDSHeader* ndsHeader) {
 	// Sleep
 	u32* sleepPatchOffset = patchOffsetCache.sleepPatchOffset;
@@ -428,7 +491,7 @@ static void patchRamClear(const tNDSHeader* ndsHeader, const module_params_t* mo
 	}
 	if (ramClearOffset) {
 		*(ramClearOffset) = 0x02FFC000;
-		*(ramClearOffset + 1) = 0x02FFD000;
+		*(ramClearOffset + 1) = 0x02FFC000;
 		dbg_printf("RAM clear location : ");
 		dbg_hexa((u32)ramClearOffset);
 		dbg_printf("\n\n");
@@ -563,6 +626,18 @@ static void patchCardCheckPullOut(cardengineArm7* ce7, const tNDSHeader* ndsHead
 	}
 }
 
+static void patchSrlStart(cardengineArm7* ce7, const tNDSHeader* ndsHeader) {
+	u32* offset = findSrlStartOffset7(ndsHeader);
+	if (!offset) {
+		return;
+	}
+
+	offset[0] = 0xE3A00001; // mov r0, #1
+	offset[1] = 0xE59FC000; // ldr r12, =reset
+	offset[2] = 0xE12FFF1C; // bx r12
+	offset[3] = (u32)ce7->patches->reset;
+}
+
 static void patchSdCardReset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	if (ndsHeader->unitCode == 0 || !dsiModeConfirmed) return;
 
@@ -582,6 +657,37 @@ static void patchSdCardReset(const tNDSHeader* ndsHeader, const module_params_t*
 		dbg_hexa((u32)sdCardResetOffset);
 		dbg_printf("\n\n");
 	}
+}
+
+bool patchSdCardFuncs(cardengineArm7* ce7, const tNDSHeader* ndsHeader) {
+	u32* offset = patchOffsetCache.sdCardFuncsOffset;
+	if (!patchOffsetCache.sdCardFuncsOffset) {
+		offset = findSdCardFuncsOffset(ndsHeader);
+		if (offset) {
+			patchOffsetCache.sdCardFuncsOffset = offset;
+		}
+	}
+
+	if (!offset) {
+		return false;
+	}
+
+	u16* offsetThumb = (u16*)offset;
+	if (*offsetThumb == 0xB518) {
+		ce7->romPartLocation = (u32)getOffsetFromBLThumb((u16*)((u8*)offset - 0x20)); // getDriveStructAddr
+		ce7->romPartLocation++;
+		*(u32*)((u8*)offset + 0x44) = ce7->patches->arm7Functions->eepromProtect; // __patch_dsisdredirect_io
+		*(u32*)((u8*)offset + 0x48) = ce7->patches->arm7Functions->eepromPageErase; // __patch_dsisdredirect_control
+	} else {
+		ce7->romPartLocation = (u32)getOffsetFromBL((u32*)((u8*)offset - 0x20)); // getDriveStructAddr
+		*(u32*)((u8*)offset + 0x64) = ce7->patches->arm7Functions->eepromProtect; // __patch_dsisdredirect_io
+		*(u32*)((u8*)offset + 0x68) = ce7->patches->arm7Functions->eepromPageErase; // __patch_dsisdredirect_control
+	}
+
+	dbg_printf("sdCardFuncs location : ");
+	dbg_hexa((u32)offset);
+	dbg_printf("\n\n");
+	return true;
 }
 
 void patchAutoPowerOff(const tNDSHeader* ndsHeader) {
@@ -676,8 +782,13 @@ u32 patchCardNdsArm7(
 		patchCardCheckPullOut(ce7, ndsHeader, moduleParams);
 	}
 
+	if (patchOffsetCache.srlStartOffset9) {
+		patchSrlStart(ce7, ndsHeader);
+	}
+
 	if (a7GetReloc(ndsHeader, moduleParams)) {
 		patchMirrorCheck(ndsHeader, moduleParams);
+		patchVramWifiBinaryLoad(ce7, ndsHeader, moduleParams);
 		u32 saveResult = 0;
 		// Read header of Cartridge
 		// bool GameCodeMatch: Compare gamecodes between Cartridge and Rom on SD

@@ -77,7 +77,7 @@ static void stop(void) {
 }
 
 static void dopause(void) {
-	printf("Press start...\n");
+	iprintf("Press start...\n");
 	while(1) {
 		scanKeys();
 		if (keysDown() & KEY_START)
@@ -88,15 +88,15 @@ static void dopause(void) {
 }
 
 std::string ReplaceAll(std::string str, const std::string& from, const std::string& to) {
-    size_t start_pos = 0;
-    while((start_pos = str.find(from, start_pos)) != std::string::npos) {
-        str.replace(start_pos, from.length(), to);
-        start_pos += to.length(); // Handles case where 'to' is a substring of 'from'
-    }
-    return str;
+	size_t start_pos = 0;
+	while((start_pos = str.find(from, start_pos)) != std::string::npos) {
+		str.replace(start_pos, from.length(), to);
+		start_pos += to.length(); // Handles case where 'to' is a substring of 'from'
+	}
+	return str;
 }
 
-bool extention(const std::string& filename, const char* ext) {
+bool extension(const std::string& filename, const char* ext) {
 	if(strcasecmp(filename.c_str() + filename.size() - strlen(ext), ext)) {
 		return false;
 	} else {
@@ -105,25 +105,25 @@ bool extention(const std::string& filename, const char* ext) {
 }
 
 static void getSFCG_ARM9(void) {
-	printf("SCFG_ROM ARM9 %X\n", REG_SCFG_ROM); 
-	printf("SCFG_CLK ARM9 %X\n", REG_SCFG_CLK); 
-	//printf("SCFG_EXT ARM9 %X\n", REG_SCFG_EXT); 
+	iprintf("SCFG_ROM ARM9 %X\n", REG_SCFG_ROM); 
+	iprintf("SCFG_CLK ARM9 %X\n", REG_SCFG_CLK); 
+	//iprintf("SCFG_EXT ARM9 %X\n", REG_SCFG_EXT); 
 }
 
 static void getSFCG_ARM7(void) {
-	//printf("SCFG_ROM ARM7\n");
+	//iprintf("SCFG_ROM ARM7\n");
 
 	//nocashMessage("fifoSendValue32(FIFO_USER_01, MSG_SCFG_ROM);\n");
 	//fifoSendValue32(FIFO_USER_01, (u32)&REG_SCFG_ROM);
 
 	//nocashMessage("dbg_printf\n");
 
-	printf("SCFG_CLK ARM7\n");
+	iprintf("SCFG_CLK ARM7\n");
 
 	nocashMessage("fifoSendValue32(FIFO_USER_01, MSG_SCFG_CLK);\n");
 	fifoSendValue32(FIFO_USER_01, (u32)&REG_SCFG_CLK);
 
-	printf("SCFG_EXT ARM7\n");
+	iprintf("SCFG_EXT ARM7\n");
 
 	nocashMessage("fifoSendValue32(FIFO_USER_01, MSG_SCFG_EXT);\n");
 	fifoSendValue32(FIFO_USER_01, (u32)&REG_SCFG_EXT);
@@ -131,7 +131,7 @@ static void getSFCG_ARM7(void) {
 
 static void myFIFOValue32Handler(u32 value, void* userdata) {
 	nocashMessage("myFIFOValue32Handler\n");
-	printf("ARM7 data %lX\n", value);
+	iprintf("ARM7 data %lX\n", value);
 }
 
 static inline void debugConfB4DS(configuration* conf) {
@@ -374,11 +374,11 @@ static int runNdsFile(configuration* conf) {
 	dbg_printf("version: " VER_NUMBER "\n");
 	(dsiFeatures() && !conf->b4dsMode) ? debugConf(conf) : debugConfB4DS(conf);
 
-	if ((!extention(conf->ndsPath, ".nds"))
-	&& (!extention(conf->ndsPath, ".dsi"))
-	&& (!extention(conf->ndsPath, ".ids"))
-	&& (!extention(conf->ndsPath, ".srl"))
-	&& (!extention(conf->ndsPath, ".app"))) {
+	if ((!extension(conf->ndsPath, ".nds"))
+	&& (!extension(conf->ndsPath, ".dsi"))
+	&& (!extension(conf->ndsPath, ".ids"))
+	&& (!extension(conf->ndsPath, ".srl"))
+	&& (!extension(conf->ndsPath, ".app"))) {
 		if (debug) {
 			dbg_printf("No NDS file specified\n");
 			dopause();
@@ -405,10 +405,11 @@ static int runNdsFile(configuration* conf) {
 	struct stat stDonor0;
 	struct stat stDonor5;
 	struct stat stDonor5Alt;
-	struct stat stGba;
-	struct stat stGbaSav;
+	// struct stat stGba;
+	// struct stat stGbaSav;
 	struct stat stWideCheat;
 	struct stat stApPatch;
+	struct stat stDSi2DSSavePatch;
 	struct stat stCheat;
 	struct stat stPatchOffsetCache;
 	struct stat stRamDump;
@@ -421,10 +422,11 @@ static int runNdsFile(configuration* conf) {
 	struct stat stTwlFont;
 	u32 clusterSav = 0;
 	u32 clusterDonor = 0;
-	u32 clusterGba = 0;
-	u32 clusterGbaSav = 0;
+	// u32 clusterGba = 0;
+	// u32 clusterGbaSav = 0;
 	u32 clusterWideCheat = 0;
 	u32 clusterApPatch = 0;
+	u32 clusterDSi2DSSave = 0;
 	u32 clusterCheat = 0;
 	u32 clusterPatchOffsetCache = 0;
 	u32 clusterRamDump = 0;
@@ -478,6 +480,10 @@ static int runNdsFile(configuration* conf) {
 		clusterApPatch = stApPatch.st_ino;
 	}
 
+	if (stat(conf->dsi2dsSavePatchPath, &stDSi2DSSavePatch) >= 0) {
+		clusterDSi2DSSave = stDSi2DSSavePatch.st_ino;
+	}
+
 	if (stat(patchOffsetCacheFilePath, &stPatchOffsetCache) >= 0) {
 		clusterPatchOffsetCache = stPatchOffsetCache.st_ino;
 	}
@@ -491,13 +497,13 @@ static int runNdsFile(configuration* conf) {
 	}
 
 	if (dsiFeatures() && !conf->b4dsMode) {
-		if (stat(conf->gbaPath, &stGba) >= 0) {
+		/* if (stat(conf->gbaPath, &stGba) >= 0) {
 			clusterGba = stGba.st_ino;
 		}
 
 		if (stat(conf->gbaSavPath, &stGbaSav) >= 0) {
 			clusterGbaSav = stGbaSav.st_ino;
-		}
+		} */
 
 		if (stat(wideCheatFilePath.c_str(), &stWideCheat) >= 0) {
 			clusterWideCheat = stWideCheat.st_ino;
@@ -532,7 +538,7 @@ static int runNdsFile(configuration* conf) {
 		clusterTwlFont = stTwlFont.st_ino;
 	}
 
-	return runNds(st.st_ino, clusterSav, clusterDonor, clusterGba, clusterGbaSav, clusterWideCheat, clusterApPatch, clusterCheat, clusterPatchOffsetCache, clusterRamDump, clusterSrParams, clusterScreenshot, apFixOverlaysCluster, musicCluster, clusterPageFile, clusterManual, clusterTwlFont, conf);
+	return runNds(st.st_ino, clusterSav, clusterDonor, /* clusterGba, clusterGbaSav, */ clusterWideCheat, clusterApPatch, clusterDSi2DSSave, clusterCheat, clusterPatchOffsetCache, clusterRamDump, clusterSrParams, clusterScreenshot, apFixOverlaysCluster, musicCluster, clusterPageFile, clusterManual, clusterTwlFont, conf);
 }
 
 int main(int argc, char** argv) {

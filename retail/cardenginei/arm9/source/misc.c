@@ -38,7 +38,6 @@
 #define isSdk5 BIT(5)
 #define overlaysInRam BIT(6)
 #define slowSoftReset BIT(10)
-#define softResetMb BIT(13)
 #define cloneboot BIT(14)
 #define isDlp BIT(15)
 
@@ -53,6 +52,8 @@ extern aFile* romFile;
 extern aFile* savFile;
 extern aFile* apFixOverlaysFile;
 extern u32* cacheAddressTable;
+extern u32* cacheDescriptor;
+extern int* cacheCounter;
 
 extern bool flagsSet;
 extern bool igmReset;
@@ -143,17 +144,16 @@ void initialize(void) {
 	if (ce9->valueBits & isSdk5) {
 		sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS_SDK5;
 		ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
-		if (ndsHeader->unitCode > 0) {
-			romFile = (aFile*)ROM_FILE_LOCATION_MAINMEM5;
-			savFile = (aFile*)SAV_FILE_LOCATION_MAINMEM5;
-			apFixOverlaysFile = (aFile*)OVL_FILE_LOCATION_MAINMEM5;
-			#ifndef DLDI
-			cacheAddressTable = (u32*)CACHE_ADDRESS_TABLE_LOCATION_TWLSDK;
-			#endif
-		}
 	} else {
 		sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS_SDK1;
 		ndsHeader = (tNDSHeader*)NDS_HEADER;
+		#ifndef DLDI
+		if (ce9->valueBits & eSdk2) {
+			cacheAddressTable = (u32*)CACHE_ADDRESS_TABLE_LOCATION2;
+			cacheDescriptor = (u32*)CACHE_DESCRIPTOR_TABLE_LOCATION2;
+			cacheCounter = (int*)CACHE_COUNTER_TABLE_LOCATION2;
+		}
+		#endif
 	}
 	#endif
 	initialized = true;
@@ -185,30 +185,20 @@ void reset(u32 param, u32 tid2) {
 			waitFrames(5);	// Wait for DSi screens to stabilize
 		}
 		enterCriticalSection();
-		if (!igmReset && (ce9->valueBits & softResetMb)) {
-			*(u32*)resetParams = 0;
-			*(u32*)(resetParams+8) = 0x44414F4C; // 'LOAD'
-		}
 		cacheFlush();
 		sharedAddr[3] = 0x52534554;
 		while (1);
 	} else
 	#endif
 	{
-		if (*(u32*)(resetParams+0xC) > 0) {
-			sharedAddr[1] = ce9->valueBits;
-		}
-		if (!igmReset && (ce9->valueBits & softResetMb)) {
-			*(u32*)resetParams = 0;
-			*(u32*)(resetParams+8) = 0x44414F4C; // 'LOAD'
-		}
 		sharedAddr[3] = 0x52534554;
 	}
 #else
 	#ifdef DLDI
 	sysSetCardOwner(false);	// Give Slot-1 access to arm7
 	#endif
-	if (param == 0xFFFFFFFF || *(u32*)0x02FFE234 == 0x00030004 || *(u32*)0x02FFE234 == 0x00030005) { // If DSiWare...
+	const bool isDSiWare = (*(u32*)0x02FFE234 == 0x00030004 || *(u32*)0x02FFE234 == 0x00030005 || *(u32*)0x02FFE234 == 0x00030015 || *(u32*)0x02FFE234 == 0x00030017);
+	if (param == 0xFFFFFFFF || isDSiWare) { // If DSiWare...
 		if (param == 0xFFFFFFFF || (param != *(u32*)0x02FFE230 && tid2 != *(u32*)0x02FFE234)) {
 			/*if (ce9->consoleModel < 2) {
 				// Make screens white
@@ -241,7 +231,7 @@ void reset(u32 param, u32 tid2) {
 	if (igmReset) {
 		igmReset = false;
 #ifdef TWLSDK
-		if (ce9->intr_vblank_orig_return && (*(u32*)0x02FFE234 == 0x00030004 || *(u32*)0x02FFE234 == 0x00030005)) {
+		if (ce9->intr_vblank_orig_return && isDSiWare) {
 			*(u32*)0x02FFC230 = *(u32*)0x02FFE230;
 			*(u32*)0x02FFC234 = *(u32*)0x02FFE234;
 		}
@@ -249,7 +239,7 @@ void reset(u32 param, u32 tid2) {
 	} else {
 		toncset((u8*)getDtcmBase()+0x3E00, 0, 0x200);
 #ifdef TWLSDK
-		if (ce9->intr_vblank_orig_return && (*(u32*)0x02FFE234 == 0x00030004 || *(u32*)0x02FFE234 == 0x00030005)) {
+		if (ce9->intr_vblank_orig_return && isDSiWare) {
 			*(u32*)0x02FFC230 = 0;
 			*(u32*)0x02FFC234 = 0;
 		}
@@ -278,7 +268,7 @@ void reset(u32 param, u32 tid2) {
 	IPC_SYNC_hooked = false;
 
 #ifdef TWLSDK
-	if (param == 0xFFFFFFFF || *(u32*)0x02FFE234 == 0x00030004 || *(u32*)0x02FFE234 == 0x00030005) { // If DSiWare...
+	if (param == 0xFFFFFFFF || isDSiWare) { // If DSiWare...
 		REG_DISPSTAT = 0;
 		REG_DISPCNT = 0;
 		REG_DISPCNT_SUB = 0;
@@ -312,11 +302,11 @@ void reset(u32 param, u32 tid2) {
 		VRAM_I_CR = 0;
 	}
 
-	/* #ifndef DLDI
-	if (ce9->consoleModel == 0) {
+	#ifndef DLDI
+	if (ce9->cacheAddress < 0x02F00000) {
 		resetSlots();
 	}
-	#endif */
+	#endif
 
 	while (sharedAddr[0] != 0x44414F4C) { // 'LOAD'
 		while (REG_VCOUNT != 191);
@@ -341,9 +331,6 @@ void reset(u32 param, u32 tid2) {
 
 	#ifndef GSDD
 	if ((ce9->valueBits & isDlp) || *(u32*)(resetParams+0xC) > 0) {
-		u32 newIrqTable = sharedAddr[2];
-		ce9->valueBits = sharedAddr[1];
-		ce9->irqTable = (u32*)newIrqTable;
 		sharedAddr[4] = 0;
 		initialized = false;
 	}

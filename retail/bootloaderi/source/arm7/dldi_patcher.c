@@ -92,12 +92,12 @@ static addr_t quickFind (const data_t* data, const data_t* search, size_t dataLe
 }
 
 static const data_t dldiMagicString[] = "\xED\xA5\x8D\xBF Chishm";	// Normal DLDI file
-static const data_t dldiMagicLoaderString[] = "\xEE\xA5\x8D\xBF Chishm";	// Different to a normal DLDI file
+// static const data_t dldiMagicLoaderString[] = "\xEE\xA5\x8D\xBF Chishm";	// Different to a normal DLDI file
 #define DEVICE_TYPE_DLDI 0x49444C44
 
 extern const u32 __myio_dldi;
 
-bool dldiPatchBinary (data_t *binData, u32 binSize) {
+bool dldiPatchBinary (data_t *binData, u32 binSize, data_t *binDataWram) {
 
 	addr_t memOffset;			// Offset of DLDI after the file is loaded into memory
 	addr_t patchOffset;			// Position of patch destination in the file
@@ -111,7 +111,7 @@ bool dldiPatchBinary (data_t *binData, u32 binSize) {
 	size_t dldiFileSize = 0;
 
 	// Find the DLDI reserved space in the file
-	patchOffset = quickFind (binData, dldiMagicLoaderString, binSize, sizeof(dldiMagicLoaderString));
+	patchOffset = quickFind (binData, dldiMagicString, binSize, sizeof(dldiMagicString));
 
 	if (patchOffset < 0) {
 		// does not have a DLDI section
@@ -133,9 +133,14 @@ bool dldiPatchBinary (data_t *binData, u32 binSize) {
 	
 	dldiFileSize = 1 << pDH[DO_driverSize];
 
-	memOffset = readAddr (pAH, DO_text_start);
-	if (memOffset == 0) {
-			memOffset = readAddr (pAH, DO_startup) - DO_code;
+	if (binDataWram) {
+		pAH = binDataWram;
+		memOffset = (addr_t)binDataWram;
+	} else {
+		memOffset = readAddr (pAH, DO_text_start);
+		if (memOffset == 0) {
+				memOffset = readAddr (pAH, DO_startup) - DO_code;
+		}
 	}
 	ddmemOffset = readAddr (pDH, DO_text_start);
 	relocationOffset = memOffset - ddmemOffset;
@@ -167,7 +172,7 @@ bool dldiPatchBinary (data_t *binData, u32 binSize) {
 	writeAddr (pAH, DO_shutdown, readAddr (pAH, DO_shutdown) + relocationOffset);
 
 	// Put the correct DLDI magic string back into the DLDI header
-	tonccpy (pAH, dldiMagicString, sizeof (dldiMagicString));
+	// tonccpy (pAH, dldiMagicString, sizeof (dldiMagicString));
 
 	if (pDH[DO_fixSections] & FIX_ALL) { 
 		// Search through and fix pointers within the data section of the file
@@ -200,6 +205,11 @@ bool dldiPatchBinary (data_t *binData, u32 binSize) {
 		// Initialise the BSS to 0
 		toncset (&pAH[readAddr(pDH, DO_bss_start) - ddmemStart] , 0, readAddr(pDH, DO_bss_end) - readAddr(pDH, DO_bss_start));
 	}*/
+
+	if (binDataWram) {
+		data_t* pAH2 = &(binData[patchOffset]);
+		tonccpy (pAH2, pAH, DO_code);
+	}
 
 	return true;
 }

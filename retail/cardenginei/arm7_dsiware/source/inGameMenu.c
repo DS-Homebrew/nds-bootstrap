@@ -55,7 +55,7 @@ volatile int timeTillStatusRefresh = 7;
 void inGameMenu(void) {
 	// returnToMenu = false;
 	sharedAddr[4] = 0x554E454D; // 'MENU'
-	u32 errorBak = sharedAddr[0];
+	const u32 errorBak = sharedAddr[0];
 	IPC_SendSync(0x9);
 	REG_MASTER_VOLUME = 0;
 	int oldIME = enterCriticalSection();
@@ -149,6 +149,7 @@ void inGameMenu(void) {
 					break;
 				case 0x444D4152: // RAMD
 					dumpRam();
+					unloadInGameMenu();
 					exitMenu = true;
 					break;
 				/* case 0x50455453: // STEP

@@ -95,7 +95,10 @@ extern u32 romSize;
 extern u32 initDisc;
 extern u32 saveFileCluster;
 extern u32 saveSize;
+extern u32 dataToPreloadAddr;
+extern u32 dataToPreloadSize;
 extern u32 apPatchFileCluster;
+extern u32 apPatchOffset;
 extern u32 apPatchSize;
 extern u32 cheatFileCluster;
 extern u32 cheatSize;
@@ -116,6 +119,7 @@ extern s8 region;
 extern u8 donorSdkVer;
 extern u8 soundFreq;
 
+extern u8 _io_dldi_size;
 extern u32 _io_dldi_features;
 
 extern u32* lastClusterCacheUsed;
@@ -130,7 +134,7 @@ static u32 ioverlaysSize = 0;
 u32 fatTableAddr = 0;
 
 static aFile srParamsFile;
-static u32 softResetParams[4] = {0};
+static u32 softResetParams[0x50/4] = {0};
 bool srlFromPageFile = false;
 u32 srlAddr = 0;
 u8 baseUnitCode = 0;
@@ -291,11 +295,114 @@ static void resetMemory_ARM7(void) {
 }
 
 static void NDSTouchscreenMode(void) {
+	const bool noSgba = (strncmp((const char*)0x04FFFA00, "no$gba", 6) == 0);
+
+	const u8 i2cVer = i2cReadRegister(0x4A, 0);
+	const bool i2cBricked = (i2cVer == 0 || i2cVer == 0xFF);
+
+	const bool malfunction = (noSgba || i2cBricked);
+
 	// 0xAC: special setting (when found special gamecode)
 	// 0xA7: normal setting (for any other gamecodes)
 	const u8 volLevel = volumeFix ? 0xAC : 0xA7;
 
 	// Touchscreen
+	if (malfunction) {
+		cdcReadReg (0x63, 0x00);
+		cdcWriteReg(CDC_CONTROL, 0x3A, 0x00);
+		cdcReadReg (CDC_CONTROL, 0x51);
+		cdcReadReg (CDC_TOUCHCNT, 0x02);
+		cdcReadReg (CDC_CONTROL, 0x3F);
+		cdcReadReg (CDC_SOUND, 0x28);
+		cdcReadReg (CDC_SOUND, 0x2A);
+		cdcReadReg (CDC_SOUND, 0x2E);
+		cdcWriteReg(CDC_CONTROL, 0x52, 0x80);
+		cdcWriteReg(CDC_CONTROL, 0x40, 0x0C);
+		cdcWriteReg(CDC_SOUND, 0x24, 0xFF);
+		cdcWriteReg(CDC_SOUND, 0x25, 0xFF);
+		cdcWriteReg(CDC_SOUND, 0x26, 0x7F);
+		cdcWriteReg(CDC_SOUND, 0x27, 0x7F);
+		cdcWriteReg(CDC_SOUND, 0x28, 0x4A);
+		cdcWriteReg(CDC_SOUND, 0x29, 0x4A);
+		cdcWriteReg(CDC_SOUND, 0x2A, 0x10);
+		cdcWriteReg(CDC_SOUND, 0x2B, 0x10);
+		cdcWriteReg(CDC_CONTROL, 0x51, 0x00);
+		cdcReadReg (CDC_TOUCHCNT, 0x02);
+		cdcWriteReg(CDC_TOUCHCNT, 0x02, 0x98);
+		cdcWriteReg(CDC_SOUND, 0x23, 0x00);
+		cdcWriteReg(CDC_SOUND, 0x1F, 0x14);
+		cdcWriteReg(CDC_SOUND, 0x20, 0x14);
+		cdcWriteReg(CDC_CONTROL, 0x3F, 0x00);
+		cdcReadReg (CDC_CONTROL, 0x0B);
+		cdcWriteReg(CDC_CONTROL, 0x05, 0x00);
+		cdcWriteReg(CDC_CONTROL, 0x0B, 0x01);
+		cdcWriteReg(CDC_CONTROL, 0x0C, 0x02);
+		cdcWriteReg(CDC_CONTROL, 0x12, 0x01);
+		cdcWriteReg(CDC_CONTROL, 0x13, 0x02);
+		cdcWriteReg(CDC_SOUND, 0x2E, 0x00);
+		cdcWriteReg(CDC_CONTROL, 0x3A, 0x60);
+		cdcWriteReg(CDC_CONTROL, 0x01, 0x01);
+		cdcWriteReg(CDC_CONTROL, 0x39, 0x66);
+		cdcReadReg (CDC_SOUND, 0x20);
+		cdcWriteReg(CDC_SOUND, 0x20, 0x10);
+		cdcWriteReg(CDC_CONTROL, 0x04, 0x00);
+		cdcWriteReg(CDC_CONTROL, 0x12, 0x81);
+		cdcWriteReg(CDC_CONTROL, 0x13, 0x82);
+		cdcWriteReg(CDC_CONTROL, 0x51, 0x82);
+		cdcWriteReg(CDC_CONTROL, 0x51, 0x00);
+		cdcWriteReg(CDC_CONTROL, 0x04, 0x03);
+		cdcWriteReg(CDC_CONTROL, 0x05, 0xA1);
+		cdcWriteReg(CDC_CONTROL, 0x06, 0x15);
+		cdcWriteReg(CDC_CONTROL, 0x0B, 0x87);
+		cdcWriteReg(CDC_CONTROL, 0x0C, 0x83);
+		cdcWriteReg(CDC_CONTROL, 0x12, 0x87);
+		cdcWriteReg(CDC_CONTROL, 0x13, 0x83);
+		cdcReadReg (CDC_TOUCHCNT, 0x10);
+		cdcWriteReg(CDC_TOUCHCNT, 0x10, 0x08);
+		cdcWriteReg(0x04, 0x08, 0x7F);
+		cdcWriteReg(0x04, 0x09, 0xE1);
+		cdcWriteReg(0x04, 0x0A, 0x80);
+		cdcWriteReg(0x04, 0x0B, 0x1F);
+		cdcWriteReg(0x04, 0x0C, 0x7F);
+		cdcWriteReg(0x04, 0x0D, 0xC1);
+		cdcWriteReg(CDC_CONTROL, 0x41, 0x08);
+		cdcWriteReg(CDC_CONTROL, 0x42, 0x08);
+		cdcWriteReg(CDC_CONTROL, 0x3A, 0x00);
+		cdcWriteReg(0x04, 0x08, 0x7F);
+		cdcWriteReg(0x04, 0x09, 0xE1);
+		cdcWriteReg(0x04, 0x0A, 0x80);
+		cdcWriteReg(0x04, 0x0B, 0x1F);
+		cdcWriteReg(0x04, 0x0C, 0x7F);
+		cdcWriteReg(0x04, 0x0D, 0xC1);
+		cdcWriteReg(CDC_SOUND, 0x2F, 0x2B);
+		cdcWriteReg(CDC_SOUND, 0x30, 0x40);
+		cdcWriteReg(CDC_SOUND, 0x31, 0x40);
+		cdcWriteReg(CDC_SOUND, 0x32, 0x60);
+		cdcReadReg (CDC_CONTROL, 0x74);
+		cdcWriteReg(CDC_CONTROL, 0x74, 0x02);
+		cdcReadReg (CDC_CONTROL, 0x74);
+		cdcWriteReg(CDC_CONTROL, 0x74, 0x10);
+		cdcReadReg (CDC_CONTROL, 0x74);
+		cdcWriteReg(CDC_CONTROL, 0x74, 0x40);
+		cdcWriteReg(CDC_SOUND, 0x21, 0x20);
+		cdcWriteReg(CDC_SOUND, 0x22, 0xF0);
+		cdcReadReg (CDC_CONTROL, 0x51);
+		cdcReadReg (CDC_CONTROL, 0x3F);
+		cdcWriteReg(CDC_CONTROL, 0x3F, 0xD4);
+		cdcWriteReg(CDC_SOUND, 0x23, 0x44);
+		cdcWriteReg(CDC_SOUND, 0x1F, 0xD4);
+		cdcWriteReg(CDC_SOUND, 0x28, 0x4E);
+		cdcWriteReg(CDC_SOUND, 0x29, 0x4E);
+		cdcWriteReg(CDC_SOUND, 0x24, 0x9E);
+		cdcWriteReg(CDC_SOUND, 0x25, 0x9E);
+		cdcWriteReg(CDC_SOUND, 0x20, 0xD4);
+		cdcWriteReg(CDC_SOUND, 0x2A, 0x14);
+		cdcWriteReg(CDC_SOUND, 0x2B, 0x14);
+		cdcWriteReg(CDC_SOUND, 0x26, 0xA7);
+		cdcWriteReg(CDC_SOUND, 0x27, 0xA7);
+		cdcWriteReg(CDC_CONTROL, 0x40, 0x00);
+		cdcWriteReg(CDC_CONTROL, 0x3A, 0x60);
+	}
 	cdcWriteReg(CDC_SOUND, 0x26, volLevel);
 	cdcWriteReg(CDC_SOUND, 0x27, volLevel);
 	cdcWriteReg(CDC_SOUND, 0x2E, 0x03);
@@ -306,6 +413,43 @@ static void NDSTouchscreenMode(void) {
 	cdcWriteReg(CDC_CONTROL, 0x52, 0x80);
 	cdcWriteReg(CDC_CONTROL, 0x51, 0x00);
 	
+	if (malfunction) {
+		// Set remaining values
+		cdcWriteReg(CDC_CONTROL, 0x03, 0x44);
+		cdcWriteReg(CDC_CONTROL, 0x0D, 0x00);
+		cdcWriteReg(CDC_CONTROL, 0x0E, 0x80);
+		cdcWriteReg(CDC_CONTROL, 0x0F, 0x80);
+		cdcWriteReg(CDC_CONTROL, 0x10, 0x08);
+		cdcWriteReg(CDC_CONTROL, 0x14, 0x80);
+		cdcWriteReg(CDC_CONTROL, 0x15, 0x80);
+		cdcWriteReg(CDC_CONTROL, 0x16, 0x04);
+		cdcWriteReg(CDC_CONTROL, 0x1A, 0x01);
+		cdcWriteReg(CDC_CONTROL, 0x1E, 0x01);
+		cdcWriteReg(CDC_CONTROL, 0x24, 0x80);
+		cdcWriteReg(CDC_CONTROL, 0x33, 0x34);
+		cdcWriteReg(CDC_CONTROL, 0x34, 0x32);
+		cdcWriteReg(CDC_CONTROL, 0x35, 0x12);
+		cdcWriteReg(CDC_CONTROL, 0x36, 0x03);
+		cdcWriteReg(CDC_CONTROL, 0x37, 0x02);
+		cdcWriteReg(CDC_CONTROL, 0x38, 0x03);
+		cdcWriteReg(CDC_CONTROL, 0x3C, 0x19);
+		cdcWriteReg(CDC_CONTROL, 0x3D, 0x05);
+		cdcWriteReg(CDC_CONTROL, 0x44, 0x0F);
+		cdcWriteReg(CDC_CONTROL, 0x45, 0x38);
+		cdcWriteReg(CDC_CONTROL, 0x49, 0x00);
+		cdcWriteReg(CDC_CONTROL, 0x4A, 0x00);
+		cdcWriteReg(CDC_CONTROL, 0x4B, 0xEE);
+		cdcWriteReg(CDC_CONTROL, 0x4C, 0x10);
+		cdcWriteReg(CDC_CONTROL, 0x4D, 0xD8);
+		cdcWriteReg(CDC_CONTROL, 0x4E, 0x7E);
+		cdcWriteReg(CDC_CONTROL, 0x4F, 0xE3);
+		cdcWriteReg(CDC_CONTROL, 0x58, 0x7F);
+		cdcWriteReg(CDC_CONTROL, 0x74, 0xD2);
+		cdcWriteReg(CDC_CONTROL, 0x75, 0x2C);
+		cdcWriteReg(CDC_SOUND, 0x22, 0x70);
+		cdcWriteReg(CDC_SOUND, 0x2C, 0x20);
+	}
+
 	// Finish up!
 	cdcReadReg (CDC_TOUCHCNT, 0x02);
 	cdcWriteReg(CDC_TOUCHCNT, 0x02, 0x98);
@@ -503,18 +647,21 @@ static bool isROMLoadableInRAM(const tDSiHeader* dsiHeader, const tNDSHeader* nd
 		} /* else if (strncmp(romTid, "KAT", 3) == 0) { // AiRace: Tunnel
 			romSizeLimitChange = 0x80000;
 		} */ else if (strncmp(romTid, "KCT", 3) == 0 // Chess Challenge!
-				 || strncmp(romTid, "KWK", 3) == 0 // Mega Words
-				 || strncmp(romTid, "KSC", 3) == 0 // Sudoku Challenge!
-				 || strncmp(romTid, "KWS", 3) == 0 // Word Searcher
-				 || strncmp(romTid, "KWR", 3) == 0 // Word Searcher II
-				 || strncmp(romTid, "KW6", 3) == 0 // Word Searcher III
-				 || strncmp(romTid, "KW8", 3) == 0) { // Word Searcher IV
+				   || strncmp(romTid, "KWK", 3) == 0 // Mega Words
+				   || strncmp(romTid, "KSC", 3) == 0 // Sudoku Challenge!
+				   || strncmp(romTid, "KWS", 3) == 0 // Word Searcher
+				   || strncmp(romTid, "KWR", 3) == 0 // Word Searcher II
+				   || strncmp(romTid, "KW6", 3) == 0 // Word Searcher III
+				   || strncmp(romTid, "KW8", 3) == 0) { // Word Searcher IV
 			romSizeLimitChange = 0x77C000;
 		} /* else if (strncmp(romTid, "KGU", 3) == 0) { // Flipnote Studio
 			romSizeLimitChange = 0x140000;
 		} */ else if (strncmp(romTid, "KUP", 3) == 0) { // Match Up!
 			romSizeLimitChange = 0x380000;
-		} else if (strncmp(romTid, "KQR", 3) == 0) { // Remote Racers
+		} else if (strncmp(romTid, "KQR", 3) == 0 // Remote Racers
+				|| strncmp(romTid, "KWG", 3) == 0 // Animal Crossing Calculator
+				// || strncmp(romTid, "KWC", 3) == 0 // Animal Crossing Clock
+				|| strncmp(romTid, "KWF", 3) == 0) { // Mario Calculator
 			romSizeLimitChange = 0x280000;
 		}
 		if (romSizeLimitChange) {
@@ -712,6 +859,12 @@ static void loadOverlaysintoFile(const tNDSHeader* ndsHeader, const module_param
 		aFile apFixOverlaysFile;
 		getFileFromCluster(&apFixOverlaysFile, apFixOverlaysCluster);
 
+		/* char overlaysHeader[0x160];
+		fileRead(overlaysHeader, &apFixOverlaysFile, 0, 0x160);
+		if (memcmp(ndsHeader, overlaysHeader, 0x160) == 0) {
+			return;
+		} */
+
 		const u32 buffer = 0x037F8000;
 		const u16 bufferSize = 0x8000;
 		const u32 overlaysOffset = (ndsHeader->arm9overlaySource > ndsHeader->arm7romOffset) ? (ndsHeader->arm9romOffset + ndsHeader->arm9binarySize) : ndsHeader->arm9overlaySource;
@@ -740,6 +893,8 @@ static void loadOverlaysintoFile(const tNDSHeader* ndsHeader, const module_param
 				fileWrite((char*)&word, &apFixOverlaysFile, 0x3128AC, sizeof(u32));
 			}
 		}
+
+		// fileWrite((char*)ndsHeader, &apFixOverlaysFile, 0, 0x160);
 	} else {
 		apFixOverlaysCluster = 0;
 	}
@@ -779,6 +934,30 @@ static void loadIOverlaysintoRAM(const tDSiHeader* dsiHeader, aFile* file, const
 	} else {
 		fileRead((char*)romLocationEdit, file, overlayOffset, ioverlaysSize);
 	}
+}
+
+bool dataToPreloadFound(const tNDSHeader* ndsHeader) {
+	if (!expansionPakFound) {
+		return false;
+	}
+
+	return (dataToPreloadSize > 0 && dataToPreloadSize <= romSizeLimit);
+}
+
+static void loadROMPartintoRAM(const tNDSHeader* ndsHeader, aFile* file) {
+	if (!dataToPreloadFound(ndsHeader)) {
+		return;
+	}
+
+	if ((_io_dldi_features & FEATURE_SLOT_GBA) && s2FlashcardId != 0) {
+		fileReadWithBuffer(romLocation, file, dataToPreloadAddr, dataToPreloadSize);
+	} else {
+		fileRead((char*)romLocation, file, dataToPreloadAddr, dataToPreloadSize);
+	}
+
+	dbg_printf("Part of ROM pre-loaded into RAM at ");
+	dbg_hexa(romLocation);
+	dbg_printf("\n\n");
 }
 
 static void loadROMintoRAM(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, aFile* file, const bool usesCloneboot) {
@@ -943,25 +1122,28 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 
 	*((u16*)(isSdk5(moduleParams) ? 0x02fffc10 : 0x027ffc10)) = 0x5835;
 
+	u16* bootInfo = ((u16*)(isSdk5(moduleParams) ? 0x02fffc40 : 0x027ffc40));
+
 	if (softResetParams[0] != 0xFFFFFFFF) {
 		u32* resetParamLoc = (u32*)(isSdk5(moduleParams) ? RESET_PARAM_SDK5 : RESET_PARAM);
-		resetParamLoc[0] = softResetParams[0];
-		resetParamLoc[1] = softResetParams[1];
-		if (!srlFromPageFile) {
-			resetParamLoc[2] = softResetParams[2];
+		tonccpy(resetParamLoc, softResetParams, 0x10);
+		tonccpy(bootInfo, softResetParams+4, 0x40);
+		if (srlFromPageFile) {
+			resetParamLoc[2] = 0;
 		}
-		resetParamLoc[3] = softResetParams[3];
 	}
 
-	*((u16*)(isSdk5(moduleParams) ? 0x02fffc40 : 0x027ffc40)) = 0x1;						// Boot Indicator (Booted from card for SDK5) -- EXTREMELY IMPORTANT!!! Thanks to cReDiAr
-
 	const char* romTid = getRomTid(ndsHeader);
-	if (strncmp(romTid, "KPP", 3) == 0 	// Pop Island
-	 || (strncmp(romTid, "KPF", 3) == 0 && (ndsHeader->fatSize == 0 || !extendedMemory))		// Pop Island: Paperfield
-	 || (strncmp(romTid, "KGK", 3) == 0 && (ndsHeader->fatSize == 0 || !extendedMemory))		// Glory Days: Tactical Defense
-	 || (strcmp(romTid, "NTRJ") == 0 && (ndsHeader->headerCRC16 == 0x53E2 || ndsHeader->headerCRC16 == 0x681E || ndsHeader->headerCRC16 == 0xCD01)) || srlFromPageFile)
-	{
-		*((u16*)(isSdk5(moduleParams) ? 0x02fffc40 : 0x027ffc40)) = 0x2;					// Boot Indicator (Cloneboot/Multiboot)
+	if (*bootInfo != 1 && *bootInfo != 2) {
+		*bootInfo = 0x1;						// Boot Indicator (Booted from card for SDK5) -- EXTREMELY IMPORTANT!!! Thanks to cReDiAr
+
+		if (strncmp(romTid, "KPP", 3) == 0 	// Pop Island
+		 || (strncmp(romTid, "KPF", 3) == 0 && (ndsHeader->fatSize == 0 || !extendedMemory))		// Pop Island: Paperfield
+		 || (strncmp(romTid, "KGK", 3) == 0 && (ndsHeader->fatSize == 0 || !extendedMemory))		// Glory Days: Tactical Defense
+		 || (strcmp(romTid, "NTRJ") == 0 && (ndsHeader->headerCRC16 == 0x53E2 || ndsHeader->headerCRC16 == 0x681E || ndsHeader->headerCRC16 == 0xCD01)) || srlFromPageFile)
+		{
+			*bootInfo = 0x2;					// Boot Indicator (Cloneboot/Multiboot)
+		}
 	}
 
 	if (memcmp(romTid, "HND", 3) == 0 || memcmp(romTid, "HNE", 3) == 0) {
@@ -1006,16 +1188,16 @@ int arm7_main(void) {
 	*(vu32*)(0x02000000) = 0; // Clear debug RAM check flag
 
 	getFileFromCluster(&srParamsFile, srParamsFileCluster);
-	fileRead((char*)&softResetParams, &srParamsFile, 0, 0x10);
+	fileRead((char*)&softResetParams, &srParamsFile, 0, 0x50);
 	srlFromPageFile = (softResetParams[2] == 0x44414F4C); // 'LOAD'
 	bool softResetParamsFound = (softResetParams[0] != 0xFFFFFFFF || srlFromPageFile || softResetParams[3] != 0);
 	if (softResetParamsFound) {
 		u32 clearBuffer = 0xFFFFFFFF;
 		fileWrite((char*)&clearBuffer, &srParamsFile, 0, 0x4);
 		clearBuffer = 0;
-		fileWrite((char*)&clearBuffer, &srParamsFile, 0x4, 0x4);
-		fileWrite((char*)&clearBuffer, &srParamsFile, 0x8, 0x4);
-		fileWrite((char*)&clearBuffer, &srParamsFile, 0xC, 0x4);
+		for (int i = 0x4; i < 0x50; i += 4) {
+			fileWrite((char*)&clearBuffer, &srParamsFile, i, 0x4);
+		}
 	}
 
 	// BOOT.NDS file
@@ -1080,6 +1262,7 @@ int arm7_main(void) {
     dbg_printf("sdk_version: ");
     dbg_hexa(moduleParams->sdk_version);
     dbg_printf("\n"); 
+	const bool laterSdk = ((moduleParams->sdk_version >= 0x2008000 && moduleParams->sdk_version != 0x2012774) || moduleParams->sdk_version == 0x20029A8);
 
 	ndsHeader = loadHeader(&dsiHeaderTemp, moduleParams);
 	const char* romTid = getRomTid(ndsHeader);
@@ -1100,11 +1283,16 @@ int arm7_main(void) {
 
 	baseChipID = getChipId(pkmnHeader ? (tNDSHeader*)NDS_HEADER_POKEMON : ndsHeader, moduleParams);
 
+	if ((REG_SNDEXTCNT & SNDEXTCNT_ENABLE) && ((!soundFreq && (REG_SNDEXTCNT & BIT(13))) || (soundFreq && !(REG_SNDEXTCNT & BIT(13))))) {
+		if (soundFreq) {
+			*(vu16*)0x04004700 |= BIT(13);	// Set 48khz sound/mic frequency
+		} else {
+			*(vu16*)0x04004700 &= ~BIT(13);	// Set 32khz sound/mic frequency
+		}
+	}
+
 	if (cdcReadReg(CDC_SOUND, 0x22) == 0xF0) {
 		// Switch touch mode to NTR
-		*(vu16*)0x4004700 &= ~BIT(15); // Disable sound output: Runs before sound frequency change
-		*(vu16*)0x4004700 = (soundFreq ? 0xC00F : 0x800F);
-		*(vu16*)0x4004700 |= BIT(15); // Enable sound output
 		NDSTouchscreenMode();
 		*(vu16*)0x4000500 = 0x807F;
 	}
@@ -1174,11 +1362,6 @@ int arm7_main(void) {
 	tonccpy((u8*)CARDENGINE_ARM7_LOCATION, (u8*)CARDENGINE_ARM7_LOCATION_BUFFERED, 0x1000);
 	toncset((u8*)CARDENGINE_ARM7_LOCATION_BUFFERED, 0, 0x1000);
 
-	if (!dldiPatchBinary((data_t*)ce9Location, 0x3800, (data_t*)(extendedMemory ? 0x027FC000 : ((accessControl & BIT(4)) && !ce9Alt) ? 0x023FC000 : 0x023FD000))) {
-		dbg_printf("ce9 DLDI patch failed\n");
-		errorOutput();
-	}
-
 	aFile musicsFile;
 	getFileFromCluster(&musicsFile, musicCluster);
 	if (((accessControl & BIT(4)) || arm7mbk == 0x080037C0) && musicCluster != 0) {
@@ -1189,7 +1372,6 @@ int arm7_main(void) {
 		}
 	}
 
-	const bool laterSdk = ((moduleParams->sdk_version >= 0x2008000 && moduleParams->sdk_version != 0x2012774) || moduleParams->sdk_version == 0x20029A8);
 	bool wramUsed = false;
 	u32 fatTableSize = 0;
 	u32 fatTableSizeNoExp = !laterSdk ? 0x19C00 : 0x1A400;
@@ -1204,8 +1386,17 @@ int arm7_main(void) {
 		fatTableSize = 0x80000;
 	} else if (extendedMemory) {
 		if (ndsHeader->unitCode > 0 && (u32)ndsHeader->arm9destination >= 0x02004000 && ((accessControl & BIT(4)) || arm7mbk == 0x080037C0)) {
-			fatTableAddr = 0x02000000;
-			fatTableSize = 0x4000;
+			// fatTableAddr = 0x02000000;
+			// fatTableSize = 0x4000;
+
+			fatTableAddr = 0x027FF200;
+			fatTableSizeNoExp = 0x600;
+
+			lastClusterCacheUsed = (u32*)0x037F8000;
+			clusterCache = 0x037F8000;
+			clusterCacheSize = 0x16780;
+
+			wramUsed = true;
 		} else {
 			fatTableAddr = 0x02700000;
 			fatTableSize = 0x80000;
@@ -1240,7 +1431,7 @@ int arm7_main(void) {
 
 	if (wramUsed) {
 		buildFatTableCacheCompressed(&romFile);
-		if (romFile.fatTableCached) {
+		if (romFile.fatTableSettings & fatCached) {
 			// const bool startMem = (!ce9NotInHeap && ndsHeader->unitCode > 0 && (u32)ndsHeader->arm9destination >= 0x02004000 && ((accessControl & BIT(4)) || arm7mbk == 0x080037C0) && romFile.fatTableCacheSize <= 0x4000);
 
 			// if (ce9NotInHeap) {
@@ -1248,7 +1439,7 @@ int arm7_main(void) {
 				if (ce9AltLargeTable) {
 					dbg_printf("\n");
 					dbg_printf("Cluster cache is above 0x");
-					dbg_printf(ce9Alt ? "598" : "600");
+					dbg_printf((fatTableSizeNoExp == 0x598) ? "598" : "600");
 					dbg_printf(" bytes!\n");
 					dbg_printf("Consider backing up and restoring the SD card contents to defragment it");
 					if (*(u16*)0x4004700 == 0) {
@@ -1256,8 +1447,8 @@ int arm7_main(void) {
 					} else {
 						dbg_printf("\n");
 					}
-					if (
-						strncmp(romTid, "KII", 3) == 0 // 101 Pinball World
+					if (extendedMemory || _io_dldi_size >= 0x0E
+					||	strncmp(romTid, "KII", 3) == 0 // 101 Pinball World
 					||	strncmp(romTid, "KAT", 3) == 0 // AiRace: Tunnel
 					||	strncmp(romTid, "K2Z", 3) == 0 // G.G Series: Altered Weapon
 					||	strncmp(romTid, "KSR", 3) == 0 // Aura-Aura Climber
@@ -1319,7 +1510,7 @@ int arm7_main(void) {
 
 			// if (!startMem || (startMem && romFile.fatTableCacheSize < 0x4000)) {
 				buildFatTableCacheCompressed(&savFile);
-				if (savFile.fatTableCached) {
+				if (savFile.fatTableSettings & fatCached) {
 					// if (startMem || (ce9NotInHeap && !ce9AltLargeTable)) {
 					if (!ce9AltLargeTable) {
 						fatTableAddr += romFile.fatTableCacheSize;
@@ -1392,6 +1583,36 @@ int arm7_main(void) {
 	patchBinary((cardengineArm9*)ce9Location, ndsHeader, moduleParams);
 	patchCardNdsArm9Cont((cardengineArm9*)ce9Location, ndsHeader, moduleParams);
 
+	extern bool maxHeapOpen;
+	u32 ce9DldiOffset = (extendedMemory ? 0x027FC000 : ((accessControl & BIT(4)) && !ce9Alt) ? 0x023FC000 : 0x023FD000);
+	if (_io_dldi_size == 0x0E) {
+		ce9DldiOffset = (extendedMemory ? 0x027DC000 : maxHeapOpen ? 0x023FA000 : (laterSdk ? 0x023DC000 : 0x023FB000));
+	} else if (_io_dldi_size == 0x0F) {
+		ce9DldiOffset = (extendedMemory ? 0x027D8000 : maxHeapOpen ? 0x023F6000 : (laterSdk ? 0x023D8000 : 0x023F7000));
+	}
+	u32 ce9DldiItcm = 0;
+	if (
+	   strncmp(romTid, "K6T", 3) == 0 // Orion's Odyssey
+	|| strncmp(romTid, "KPS", 3) == 0 // Phantasy Star 0 Mini
+	|| strncmp(romTid, "KHR", 3) == 0 // Picture Perfect: Pocket Stylist
+	|| strncmp(romTid, "KZU", 3) == 0 // Tales to Enjoy!: Little Red Riding Hood
+	|| strncmp(romTid, "KZV", 3) == 0 // Tales to Enjoy!: Puss in Boots
+	|| strncmp(romTid, "KZ7", 3) == 0 // Tales to Enjoy!: The Three Little Pigs
+	|| strncmp(romTid, "KZ8", 3) == 0 // Tales to Enjoy!: The Ugly Duckling
+	) {
+		ce9DldiItcm = 0x01FF8400; // Set <= 32KB DLDI location at ITCM
+	} else if ( _io_dldi_size < 0x0F && (
+	   strncmp(romTid, "KAT", 3) == 0 // AiRace: Tunnel
+	|| strncmp(romTid, "KNP", 3) == 0 // Need for Speed: Nitro-X
+	|| strncmp(romTid, "VSO", 3) == 0 // Sonic Classic Collection
+	)) {
+		ce9DldiItcm = 0x01FFC000; // Set <= 16KB DLDI location at ITCM
+	}
+	if (!dldiPatchBinary((data_t*)ce9Location, 0x3800, (data_t*)ce9DldiOffset, (data_t*)ce9DldiItcm)) {
+		dbg_printf("ce9 DLDI patch failed\n");
+		errorOutput();
+	}
+
 	toncset((u32*)0x0380C000, 0, 0x2780);
 
 	errorCode = hookNdsRetailArm7(
@@ -1401,6 +1622,7 @@ int arm7_main(void) {
 		cheatFileCluster,
 		cheatSize,
 		apPatchFileCluster,
+		apPatchOffset,
 		apPatchSize,
 		mainScreen,
 		language,
@@ -1420,6 +1642,7 @@ int arm7_main(void) {
 		}
 	} else {
 		loadOverlaysintoFile(ndsHeader, moduleParams, &romFile);
+		loadROMPartintoRAM(ndsHeader, &romFile);
 	}
 
 	aFile bootNds;
@@ -1427,6 +1650,7 @@ int arm7_main(void) {
 
 	errorCode = hookNdsRetailArm9(
 		(cardengineArm9*)ce9Location,
+		ce9DldiOffset,
 		ndsHeader,
 		moduleParams,
 		bootNds.firstCluster,
@@ -1435,9 +1659,9 @@ int arm7_main(void) {
 		saveSize,
 		(u32)romFile.fatTableCache,
 		(u32)savFile.fatTableCache,
-		romFile.fatTableCompressed,
-		savFile.fatTableCompressed,
-		musicsFile.fatTableCompressed,
+		romFile.fatTableSettings & fatCompressed,
+		savFile.fatTableSettings & fatCompressed,
+		musicsFile.fatTableSettings & fatCompressed,
 		patchOffsetCacheFileCluster,
 		(u32)musicsFile.fatTableCache,
 		ramDumpCluster,
@@ -1475,7 +1699,7 @@ int arm7_main(void) {
 		fileWrite((char*)&patchOffsetCache, &patchOffsetCacheFile, 0, sizeof(patchOffsetCacheContents));
 	}
 
-	if (srlAddr == 0 && apPatchFileCluster != 0 && !apPatchIsCheat && apPatchSize > 0 && apPatchSize <= 0x40000) {
+	if (srlAddr == 0 && !srlFromPageFile && apPatchFileCluster != 0 && !apPatchIsCheat && apPatchSize > 0 && apPatchSize <= 0x40000) {
 		aFile apPatchFile;
 		getFileFromCluster(&apPatchFile, apPatchFileCluster);
 		dbg_printf("AP-fix found\n");
@@ -1485,7 +1709,7 @@ int arm7_main(void) {
 				while (REG_VCOUNT == 191);
 			}
 		}
-		fileRead((char*)IMAGES_LOCATION, &apPatchFile, 0, apPatchSize);
+		fileRead((char*)IMAGES_LOCATION, &apPatchFile, apPatchOffset, apPatchSize);
 		if (applyIpsPatch(ndsHeader, (u8*)IMAGES_LOCATION, (*(u8*)(IMAGES_LOCATION+apPatchSize-1) == 0xA9), ROMinRAM, usesCloneboot)) {
 			dbg_printf("AP-fix applied\n");
 		} else {
@@ -1544,9 +1768,9 @@ int arm7_main(void) {
 	aFile pageFile;
 	getFileFromCluster(&pageFile, pageFileCluster);
 
-	/* fileWrite((char*)ndsHeader->arm9destination, &pageFile, 0x14000, iUncompressedSize);
+	fileWrite((char*)ndsHeader->arm9destination, &pageFile, 0x14000, iUncompressedSize);
 	fileWrite((char*)ndsHeader->arm7destination, &pageFile, 0x2C0000, newArm7binarySize);
-	fileWrite((char*)CHEAT_ENGINE_LOCATION_B4DS, &pageFile, 0x2FE000, 0x2000); */
+	// fileWrite((char*)CHEAT_ENGINE_LOCATION_B4DS, &pageFile, 0x2FE000, 0x2000);
 	fileWrite((char*)&iUncompressedSize, &pageFile, 0x3FFFF0, sizeof(u32));
 	fileWrite((char*)&newArm7binarySize, &pageFile, 0x3FFFF4, sizeof(u32));
 

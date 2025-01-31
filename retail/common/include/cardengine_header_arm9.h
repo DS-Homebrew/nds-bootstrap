@@ -88,7 +88,7 @@ typedef struct cardengineArm9 {
 		0: saveOnFlashcard
 		1: ROMinRAM
 		2: eSdk2
-		3: dsiMode
+		3: pingIpc
 		4: enableExceptionHandler
 		5: isSdk5
 		6: overlaysCached
@@ -98,26 +98,34 @@ typedef struct cardengineArm9 {
 		10: slowSoftReset
 		11: dsiBios
 		12: asyncCardRead
-		13: softResetMb
+		13: useSharedWram
 		14: cloneboot
 		15: isDlp
 		16: bypassExceptionHandler
+		17: fntFatCached
+		18: waitForPreloadToFinish
+		19: resetOnFirstException
+		20: resetOnEveryException
 	*/
 	s32 mainScreen;
 	u32 consoleModel;
 	u32* irqTable;
 	// Below not used for DSiWare ce9 binary
+	u32 fntSrc;
+	u32 fntFatSize;
 	u32 overlaysSrc;
+	u32 overlaysSrcAlign;
 	u32 overlaysSize;
+	u32 overlaysSizeAlign;
 	u32 romPaddingSize;
 	u32 romLocation;
 	u32 cacheAddress;
 	u16 cacheSlots;
 	u16 cacheBlockSize;
-	u32 romPartSrc;
-	u32 romPartSize;
+	u32 romPartSrc[4];
+	u32 romPartSize[4];
 	u32 romMapLines;
-	u32 romMap[5][3]; // 0: ROM part start, 1: ROM part start in RAM, 2: ROM part end in RAM
+	u32 romMap[8][3]; // 0: ROM part start, 1: ROM part start in RAM, 2: ROM part end in RAM
 } cardengineArm9;
 
 #else
@@ -128,18 +136,14 @@ typedef struct cardengineArm9Patches {
 	u32* card_read_arm9;
 	u32* card_save_arm9;
 	u32* card_irq_enable;
-	u32* card_pull_out_arm9; // Unused
-	u32* card_id_arm9;
 	u32* card_dma_arm9;
 	u32* card_set_dma_arm9;
 	u32* nand_read_arm9;
 	u32* nand_write_arm9;
 	u32* cardStructArm9;
-	u32* card_pull;
 	u32* cacheFlushRef;
 	u32* cardEndReadDmaRef;
 	u32* reset_arm9;
-	u32 needFlushDCCache;
 	u32* pdash_read;
 	u32* gsdd_fix;
 	u32* ipcSyncHandlerRef;
@@ -168,20 +172,11 @@ typedef struct cardengineArm9Patches {
 // ARM9 cardengine thumb patches
 //
 typedef struct cardengineArm9ThumbPatches {
-    u32* card_read_arm9;
 	u32* card_save_arm9;
-    u32* card_irq_enable;
-    u32* card_pull_out_arm9; // Unused
-    u32* card_id_arm9;
-    u32* card_dma_arm9;
-	u32* card_set_dma_arm9;
-    u32* nand_read_arm9;
-    u32* nand_write_arm9;
-    u32* cardStructArm9;
-    u32* card_pull;
-    u32* cacheFlushRef;
+	u32* cardStructArm9;
+	u32* cacheFlushRef;
 	u32* cardEndReadDmaRef;
-    u32* reset_arm9;
+	u32* reset_arm9;
 } cardengineArm9ThumbPatches;
 
 
@@ -190,6 +185,7 @@ typedef struct cardengineArm9ThumbPatches {
 //
 typedef struct cardengineArm9 {
     u32 ce9;
+	u32 dldiOffset;
     cardengineArm9Patches* patches;
     cardengineArm9ThumbPatches* thumbPatches;
     u32 intr_ipc_orig_return;
@@ -229,7 +225,6 @@ typedef struct cardengineArm9 {
 		7: cacheFlushFlag
 		8: cardReadFix
 		9: bypassExceptionHandler
-		13: softResetMb
 	*/
     s32 mainScreen;
 	u32* irqTable;
@@ -242,6 +237,8 @@ typedef struct cardengineArm9 {
 	u32 arm9ibinarySize;
 	u32 romPaddingSize;
 	u32 romLocation;
+	u32 romPartSrc;
+	u32 romPartSize;
 	u32 rumbleFrames[2];
 	u32 rumbleForce[2];
 	u32 prepareScreenshot;

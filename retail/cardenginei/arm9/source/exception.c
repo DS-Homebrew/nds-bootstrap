@@ -6,6 +6,8 @@
 
 #define dsiBios BIT(11)
 #define bypassExceptionHandler BIT(16)
+#define resetOnFirstException BIT(19)
+#define resetOnEveryException BIT(20)
 
 #define EXCEPTION_VECTOR_SDK1	(*(VoidFn *)(0x27FFD9C))
 
@@ -20,6 +22,16 @@ extern vu32* volatile sharedAddr;
 void userException() {
 //---------------------------------------------------------------------------------
 	sharedAddr[0] = 0x524F5245; // 'EROR'
+
+	#ifndef TWLSDK
+	if ((ce9->valueBits & resetOnFirstException) || (ce9->valueBits & resetOnEveryException)) {
+		ce9->valueBits &= ~resetOnFirstException;
+
+		extern void reset(u32 param, u32 tid2);
+		reset(0, 0);
+	}
+	#endif
+
 	sharedAddr[5] = 0x4C4D4749; // 'IGML'
 
 	extern void inGameMenu(s32* exRegisters);

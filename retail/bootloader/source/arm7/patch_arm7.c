@@ -111,10 +111,34 @@ void setBLThumb(int arg1, int arg2) {
 	*(u16*)(arg1 + 2) = instrs[1];
 }
 
-u16* getOffsetFromBLThumb(u16* blOffset) {
-	s16 codeOffset = blOffset[1];
+void setBLXThumb(int arg1, int arg2) {
+	u16 instrs[2];
 
-	return (u16*)((u32)blOffset + (codeOffset*2) + 4);
+	// 23 bit offset
+	u32 offset = (u32)(arg2 - arg1 - 4);
+	//dbg_printf("generateA7InstrThumb offset\n");
+	//dbg_hexa(offset);
+
+	// 1st instruction contains the upper 11 bit of the offset
+	instrs[0] = ((offset >> 12) & 0x7FF) | 0xF000;
+
+	// 2nd instruction contains the lower 11 bit of the offset
+	instrs[1] = ((offset >> 1) & 0x7FF) | 0xE800;
+	if ((instrs[1] % 2) != 0) {
+		instrs[1]++;
+	}
+
+	*(u16*)arg1 = instrs[0];
+	*(u16*)(arg1 + 2) = instrs[1];
+}
+
+u16* getOffsetFromBLThumb(const u16* blOffset) {
+	const u32* instructionPointer = (u32*)blOffset;
+	u32 blInstruction1 = ((u16*)instructionPointer)[0];
+	u32 blInstruction2 = ((u16*)instructionPointer)[1];
+	u32 res = (u32)instructionPointer + 5 + ((int)((((blInstruction1 & 0x7FF) << 11) | (blInstruction2 & 0x7FF)) << 10) >> 9);
+	res--;
+	return (u16*)res;
 }
 
 static bool patchWramClear(const tNDSHeader* ndsHeader) {
@@ -330,8 +354,8 @@ static void patchRamClear(const tNDSHeader* ndsHeader, const module_params_t* mo
 	}
 	if (ramClearOffset) {
 		// if (arm7newUnitCode > 0) {
-			*(ramClearOffset) = 0x02FFF000;
-			*(ramClearOffset + 1) = 0x02FFF000;
+			*(ramClearOffset) = 0x02FFC000;
+			*(ramClearOffset + 1) = 0x02FFC000;
 		// }
 		// ramClearOffset[3] -= 0x1800; // Shrink hi heap
 
@@ -402,6 +426,17 @@ static bool patchCardIrqEnable(cardengineArm7* ce7, const tNDSHeader* ndsHeader,
 		tonccpy(cardCheckPullOutOffset, cardCheckPullOutPatch, 0x4);
 	}
 }*/
+
+static void patchSrlStart(cardengineArm7* ce7, const tNDSHeader* ndsHeader) {
+	u32* offset = findSrlStartOffset7(ndsHeader);
+	if (!offset) {
+		return;
+	}
+
+	offset[0] = 0xE59FC000; // ldr r12, =reset
+	offset[1] = 0xE12FFF1C; // bx r12
+	offset[2] = (u32)ce7->patches->reset;
+}
 
 static void operaRamPatch(void) {
 	// Opera RAM patch (ARM7)
@@ -501,6 +536,11 @@ u32 patchCardNdsArm7(
 	u32* cardIdPatchThumb = (u32*)ce7->patches->arm7FunctionsThumb->cardId;
 	cardIdPatch[2] = cardId;
 	cardIdPatchThumb[1] = cardId;
+
+	if (patchOffsetCache.srlStartOffset9) {
+		patchSrlStart(ce7, ndsHeader);
+	}
+
 	if (a7GetReloc(ndsHeader, moduleParams)) {
 		u32 saveResult = 0;
 		// Read header of Cartridge

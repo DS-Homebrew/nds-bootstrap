@@ -94,6 +94,10 @@ int main(void) {
 
 	*(u32*)0x02FFFDF0 = REG_SCFG_EXT;
 
+	*(vu32*)0x4004820 = 0x8B7F0305;
+	*(u8*)0x02FFFDF4 = (*(vu32*)0x4004820 != 0) ? 1 : 0; // SD/MMC access is enabled in SCFG
+	*(vu32*)0x4004820 = 0;
+
 	// read User Settings from firmware
 	readUserSettings();
 	irqInit();

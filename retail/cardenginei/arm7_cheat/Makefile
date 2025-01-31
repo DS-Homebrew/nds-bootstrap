@@ -9,7 +9,7 @@ endif
 include $(DEVKITARM)/ds_rules
 
 ifeq ($(OS),Windows_NT)
-LZSS			?=	../../../lzss.exe
+LZSS			?=	../../../../lzss.exe
 
 else
 
@@ -49,7 +49,7 @@ LDFLAGS	=	-nostartfiles -T cardengine.ld -g $(ARCH) -Wl,--nmagic -Wl,-Map,$(notd
 #---------------------------------------------------------------------------------
 # any extra libraries we wish to link with the project
 #---------------------------------------------------------------------------------
-LIBS	:= -lnds7
+LIBS	:=
 
 #---------------------------------------------------------------------------------
 # list of directories containing libraries, this must be the top level containing

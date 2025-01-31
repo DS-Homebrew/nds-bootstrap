@@ -38,18 +38,18 @@
 #define	CLUSTER_EOF		0x0FFFFFFF
 #define CLUSTER_FIRST	0x00000002
 
+#define fatCached BIT(0)
+#define fatCompressed BIT(1)
+#define fatCard2 BIT(2)
+
 typedef	struct
 {
 	u32	firstCluster;
 	u32	currentCluster;
 	u32 currentOffset;
-	bool fatTableCached;
-	bool fatTableCompressed;
+	u32 fatTableSettings; // 0: Cached, 1: Compressed, 2: card2
 	u32* fatTableCache;
 	u32 fatTableCacheSize;
-	#ifdef TWOCARD
-	bool card2;
-	#endif
 } aFile;
 
 typedef	struct
@@ -67,9 +67,9 @@ typedef	struct
 } readContext;
 
 #ifdef TWOCARD
-bool FAT_InitFiles(bool initCard, bool card2);
-void getBootFileCluster(aFile* file, const char* bootName, bool card2);
-void getFileFromCluster(aFile* file, u32 cluster, bool card2);
+bool FAT_InitFiles(bool initCard, const bool boolCard2);
+void getBootFileCluster(aFile* file, const char* bootName, const bool boolCard2);
+void getFileFromCluster(aFile* file, u32 cluster, const bool boolCard2);
 #else
 bool FAT_InitFiles(bool initCard);
 void getBootFileCluster(aFile* file, const char* bootName);
@@ -82,7 +82,7 @@ bool fileReadNonBLocking(char* buffer, aFile* file, u32 startOffset, u32 length)
 bool resumeFileRead();
 u32 fileWrite(const char* buffer, aFile* file, u32 startOffset, u32 length);
 #ifdef TWOCARD
-u32 FAT_ClustToSect(u32 cluster, bool card2);
+u32 FAT_ClustToSect(u32 cluster, const bool boolCard2);
 #else
 u32 FAT_ClustToSect(u32 cluster);
 #endif

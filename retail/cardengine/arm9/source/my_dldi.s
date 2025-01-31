@@ -23,6 +23,8 @@
 	.align	4
 	.arm
 	.global __mydldi_start
+	.global dldiDriverSize
+	.global dldiOffsetNew
 	.global __myio_dldi
 @---------------------------------------------------------------------------------
 .equ FEATURE_MEDIUM_CANREAD,		0x00000001
@@ -34,25 +36,23 @@
 __mydldi_start:
 @---------------------------------------------------------------------------------
 @ Driver patch file standard header -- 16 bytes
-#ifdef STANDARD_DLDI
 	.word	0xBF8DA5ED		@ Magic number to identify this region
-#else
-	.word	0xBF8DA5EE		@ Magic number to identify this region
-#endif
 	.asciz	" Chishm"		@ Identifying Magic string (8 bytes with null terminator)
 	.byte	0x01			@ Version number
-	.byte	0x0e		@ 16KiB	@ Log [base-2] of the size of this driver in bytes.
+dldiDriverSize:
+	.byte	0x0f		@ 32KiB	@ Log [base-2] of the size of this driver in bytes.
 	.byte	0x00			@ Sections to fix
-	.byte 	0x0e		@ 16KiB	@ Log [base-2] of the allocated space in bytes.
-	
+	.byte 	0x0f		@ 32KiB	@ Log [base-2] of the allocated space in bytes.
+
 @---------------------------------------------------------------------------------
 @ Text identifier - can be anything up to 47 chars + terminating null -- 16 bytes
 	.align	4
-	.asciz "Loader (No interface)"
+	.asciz "Default (No interface)"
 
 @---------------------------------------------------------------------------------
 @ Offsets to important sections within the data	-- 32 bytes
 	.align	6
+dldiOffsetNew:
 	.word   __mydldi_start		@ data start
 	.word   _dldi_end		@ data end
 	.word	0x00000000		@ Interworking glue start	-- Needs address fixing

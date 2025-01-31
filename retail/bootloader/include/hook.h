@@ -36,6 +36,7 @@ int hookNdsRetailArm7(
 	u32 cheatFileCluster,
 	u32 cheatSize,
 	u32 apPatchFileCluster,
+	u32 apPatchOffset,
 	u32 apPatchSize,
 	s32 mainScreen,
 	u32 language,
@@ -43,6 +44,7 @@ int hookNdsRetailArm7(
 );
 int hookNdsRetailArm9(
 	cardengineArm9* ce9,
+	const u32 dldiOffset,
 	const tNDSHeader* ndsHeader,
 	const module_params_t* moduleParams,
 	u32 bootNdsCluster,

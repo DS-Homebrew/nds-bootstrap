@@ -85,34 +85,22 @@ romRead_LED:
 dmaRomRead_LED:
 	.byte	0
 irqTable_offset:
-	.word	irqTable
+	.word	0
 scfgRomBak:
 	.hword	0
 igmHotkey:
 	.hword	0
 romLocation:
 	.word	0x00000000
+getDriveStructAddr: @ romPartLocation
+	.word	0x00000000
+romPartSrc:
+	.word	0x00000000
+romPartSize:
+	.word	0x00000000
+romPartFrame:
+	.word	0x00000000
 romMapLines:
-	.word	0x00000000
-romMap:
-	.word	0x00000000
-	.word	0x00000000
-	.word	0x00000000
-
-	.word	0x00000000
-	.word	0x00000000
-	.word	0x00000000
-
-	.word	0x00000000
-	.word	0x00000000
-	.word	0x00000000
-
-	.word	0x00000000
-	.word	0x00000000
-	.word	0x00000000
-
-	.word	0x00000000
-	.word	0x00000000
 	.word	0x00000000
 .align	4
 
@@ -128,26 +116,9 @@ vblankHandler:
 	bx  	r0
 
 code_handler_start_vblank:
-	push	{r0-r12} 
-	ldr	r3, =myIrqHandlerVBlank
-	bl	_blx_r3_stub		@ jump to myIrqHandler
-	
-	@ exit after return
-	b	exit
-
-@---------------------------------------------------------------------------------
-_blx_r3_stub:
-@---------------------------------------------------------------------------------
-	bx	r3
-
-@---------------------------------------------------------------------------------
-
-@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-
-exit:
-	pop   	{r0-r12} 
-	pop  	{lr}
-	bx  lr
+	push	{r0-r12}
+	bl	myIrqHandlerVBlank
+	pop   	{r0-r12,pc}
 
 .pool
 
@@ -192,6 +163,7 @@ patches:
 .word   0
 .word   0
 .word   0
+.word   0
 .pool
 @---------------------------------------------------------------------------------
 
@@ -202,7 +174,7 @@ card_irq_enable_arm7:
 	push	{r1-r12}
 	ldr	r3, =myIrqEnable
 	bl	_blx_r3_stub2
-	pop   	{r1-r12} 
+	pop   	{r1-r12}
 	pop  	{lr}
 	bx  lr
 _blx_r3_stub2:
@@ -225,8 +197,65 @@ thumb_card_irq_enable_arm7:
 thumb_blx_r3_stub2:
 	bx	r3
 .pool
-.align	4
 @---------------------------------------------------------------------------------
+
+// r0 = drive number
+// r1 = start sector
+// r2 = source/destination buffer
+// r3 = sector count
+// [sp] = isReading (0 = write, otherwise read)
+__patch_dsisdredirect_io:
+	push {r4,lr}
+	movs r0, r1
+	movs r1, r3
+	ldr r4, [sp, #8] // reading
+	cmp r4, #0
+	bne __patch_dsisdredirect_io_1
+
+	ldr r3, =_DLDI_writeSectors_ptr
+	ldr r3, [r3]
+	bl sd_blx_r3
+	mov r0, #1 // success
+	b sd_return
+
+__patch_dsisdredirect_io_1:
+	ldr r3, =_DLDI_readSectors_ptr
+	ldr r3, [r3]
+	bl sd_blx_r3
+
+	mov r0, #1 // success
+sd_return:
+	pop {r4}
+	pop {r3}
+sd_blx_r3:
+	bx r3
+
+// r0 = drive number
+// r1 = command
+// r2 = argument buffer
+__patch_dsisdredirect_control:
+	push {lr}
+	cmp r1, #1 // startup
+	bne sd_returnZero
+
+	ldr r3, =getDriveStructAddr
+	ldr r3, [r3]
+	bl sd_blx_r3
+	ldr r1,= 0x4B4
+	mov r2, #0
+	str r2, [r0, r1] // partition 0
+	sub r1, r1, #4
+	ldr r2, [r0, r1]
+	mov r3, #0x83 // valid, partitioned, inserted
+	orr r2, r2, r3
+	str r2, [r0, r1]
+
+sd_returnZero:
+	mov r0, #0
+	pop {r3}
+	bx r3
+
+.pool
 
 #ifdef CARDSAVE
 arm7FunctionsDirect:
@@ -333,9 +362,9 @@ eepromProtectThumbStub:
 	push	{r3-r7,lr}
 	ldr	r4, =eepromProtect
 	bl	_blx_r3_stubthumb1
-	pop   	{r3-r7} 
+	pop   	{r3-r7}
 	pop  	{r3}
-	bx  r3    
+	bx  r3
 _blx_r3_stubthumb1:
 	bx	r4
 .pool
@@ -343,9 +372,9 @@ eepromPageEraseThumbStub:
 	push	{r3-r7,lr}
 	ldr	r4, =eepromPageErase
 	bl	_blx_r3_stubthumb2
-	pop   	{r3-r7} 
+	pop   	{r3-r7}
 	pop  	{r3}
-	bx  r3    
+	bx  r3
 _blx_r3_stubthumb2:
 	bx	r4
 .pool
@@ -353,7 +382,7 @@ eepromPageVerifyThumbStub:
 	push	{r3-r7,lr}
 	ldr	r4, =eepromPageVerify
 	bl	_blx_r3_stubthumb3
-	pop   	{r3-r7} 
+	pop   	{r3-r7}
 	pop  	{r3}
 	bx  r3
 _blx_r3_stubthumb3:
@@ -363,7 +392,7 @@ eepromPageWriteThumbStub:
 	push	{r4-r7,lr}
 	ldr	r4, =eepromPageWrite
 	bl	_blx_r3_stubthumb4
-	pop   	{r4-r7} 
+	pop   	{r4-r7}
 	pop  	{r3}
 	bx  r3
 _blx_r3_stubthumb4:
@@ -373,7 +402,7 @@ eepromPageProgThumbStub:
 	push	{r4-r7,lr}
 	ldr	r4, =eepromPageProg
 	bl	_blx_r3_stubthumb5
-	pop   	{r4-r7} 
+	pop   	{r4-r7}
 	pop  	{r3}
 	bx  r3
 _blx_r3_stubthumb5:
@@ -383,7 +412,7 @@ cardReadThumbStub:
 	push	{r4-r6,lr}
 	ldr	r4, =cardRead
 	bl	_blx_r3_stubthumb6
-	pop   	{r4-r6} 
+	pop   	{r4-r6}
 	pop  	{r3}
 	bx  r3
 _blx_r3_stubthumb6:
@@ -393,7 +422,7 @@ eepromReadThumbStub:
 	push	{r4-r6,lr}
 	ldr	r4, =eepromRead
 	bl	_blx_r3_stubthumb7
-	pop   	{r4-r6} 
+	pop   	{r4-r6}
 	pop  	{r3}
 	bx  r3
 _blx_r3_stubthumb7:
@@ -403,7 +432,7 @@ cardIdThumbStub:
 	push	{r4-r6,lr}
 	ldr	r4, =cardId
 	bl	_blx_r3_stubthumb8
-	pop   	{r4-r6} 
+	pop   	{r4-r6}
 	pop  	{r3}
 	bx  r3
 _blx_r3_stubthumb8:
@@ -413,4 +442,6 @@ _blx_r3_stubthumb8:
 arm7FunctionsDirect:
 arm7Functions:
 arm7FunctionsThumb:
+.word __patch_dsisdredirect_io+1
+.word __patch_dsisdredirect_control+1
 #endif

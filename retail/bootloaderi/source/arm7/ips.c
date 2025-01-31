@@ -9,22 +9,22 @@
 #include "locations.h"
 #include "tonccpy.h"
 
+extern u8 gameOnFlashcard;
 extern u8 consoleModel;
+extern u8 _io_dldi_size;
 extern bool dsiModeConfirmed;
-extern bool extendedMemoryConfirmed;
+extern bool sharedWramEnabled;
 extern bool overlaysInRam;
 
 extern bool scfgBios9i(void);
-extern u32 getRomLocation(const tNDSHeader* ndsHeader, const bool isESdk2, const bool isSdk5, const bool dsiBios);
 
-bool applyIpsPatch(const tNDSHeader* ndsHeader, u8* ipsbyte, const bool arm9Only, const bool isESdk2, const bool isSdk5, const bool ROMinRAM, const bool usesCloneboot, const u32 cacheBlockSize) {
+bool applyIpsPatch(const tNDSHeader* ndsHeader, u8* ipsbyte, const bool arm9Only, const bool laterSdk, const bool isSdk5, const bool ROMinRAM, const u32 cacheBlockSize) {
 	if (ipsbyte[0] != 'P' && ipsbyte[1] != 'A' && ipsbyte[2] != 'T' && ipsbyte[3] != 'C' && ipsbyte[4] != 'H' && ipsbyte[5] != 0) {
 		return false;
 	}
 
 	bool armPatched = false;
-	const bool dsiBios = scfgBios9i();
-	const u32 romLocation = getRomLocation(ndsHeader, isESdk2, isSdk5, dsiBios);
+	extern bool romLocationAdjust(const tNDSHeader* ndsHeader, const bool laterSdk, const bool isSdk5, u32* romLocation);
 
 	int ipson = 5;
 	int totalrepeats = 0;
@@ -46,39 +46,15 @@ bool applyIpsPatch(const tNDSHeader* ndsHeader, u8* ipsbyte, const bool arm9Only
 				return armPatched;
 			}
 			if (ROMinRAM) {
-				rombyte = (void*)romLocation;
-				if (usesCloneboot) {
-					rombyte -= 0x4000;
-				} else if (ndsHeader->arm9overlaySource == 0 || ndsHeader->arm9overlaySize == 0) {
-					rombyte -= (ndsHeader->arm7romOffset + ndsHeader->arm7binarySize);
-				} else if (ndsHeader->arm9overlaySource > ndsHeader->arm7romOffset) {
-					rombyte -= (ndsHeader->arm9romOffset + ndsHeader->arm9binarySize);
-				} else {
-					rombyte -= ndsHeader->arm9overlaySource;
-				}
-				if ((u32)rombyte == (consoleModel > 0 ? 0x0E000000 : 0x0D000000)) {
-					rombyte = (void*)0x03708000;
-				} else if (ndsHeader->unitCode == 0 || !dsiModeConfirmed) {
-					if (isSdk5 || (dsiBios && !isESdk2)) {
-						if (romLocation < (ndsHeader->unitCode > 0 ? 0x0C7E0000 : 0x0C800000) && (u32)rombyte >= 0x0C7C4000) {
-							rombyte += (ndsHeader->unitCode > 0 ? 0x1C000 : 0x3C000);
-						} else if (ndsHeader->unitCode == 0) {
-							if (romLocation < 0x0D000000 && (u32)rombyte >= 0x0CFFC000) {
-								rombyte += 0x4000;
-							}
-						} else {
-							if (romLocation < 0x0C800000 && (u32)rombyte >= 0x0C7FC000) {
-								rombyte += 0x4000;
-							} else if (romLocation < 0x0D000000 && (u32)rombyte >= 0x0CFE0000) {
-								rombyte += 0x20000;
-							}
-						}
-					} else if (romLocation < 0x0D000000 && (u32)rombyte >= 0x0CFFC000 && dsiBios) {
-						rombyte += 0x4000;
-					} else if (romLocation < 0x0C800000 && (u32)rombyte >= 0x0C7C0000) {
-						rombyte += 0x40000;
+				extern u32 romMapLines;
+				extern u32 romMap[5][3];
+				int i = 0;
+				for (i = 0; i < romMapLines; i++) {
+					if (offset >= romMap[i][0] && (i == romMapLines-1 || offset < romMap[i+1][0])) {
+						break;
 					}
 				}
+				rombyte = (void*)(romMap[i][1]-romMap[i][0]);
 			} else {
 				rombyte = (void*)CACHE_ADRESS_START_DSIMODE;
 				rombyte -= (ndsHeader->arm9overlaySource/cacheBlockSize)*cacheBlockSize;
@@ -99,27 +75,9 @@ bool applyIpsPatch(const tNDSHeader* ndsHeader, u8* ipsbyte, const bool arm9Only
 				*rombyteOffset = repeatbyte[i];
 				rombyteOffset++;
 				if (ROMinRAM && (ndsHeader->unitCode == 0 || !dsiModeConfirmed)) {
-					if ((u32)rombyteOffset == (consoleModel > 0 ? 0x0E000000 : 0x0D000000)) {
-						rombyteOffset = (u8*)0x03708000;
-					} else if (isSdk5 || (dsiBios && !isESdk2)) {
-						if ((u32)rombyteOffset == 0x0C7C4000) {
-							rombyteOffset += (ndsHeader->unitCode > 0 ? 0x1C000 : 0x3C000);
-						} else if (ndsHeader->unitCode == 0) {
-							if ((u32)rombyteOffset == 0x0CFFC000) {
-								rombyteOffset += 0x4000;
-							}
-						} else {
-							if ((u32)rombyteOffset == 0x0C7FC000) {
-								rombyteOffset += 0x4000;
-							} else if ((u32)rombyteOffset == 0x0CFE0000) {
-								rombyteOffset += 0x20000;
-							}
-						}
-					} else if ((u32)rombyteOffset == 0x0CFFC000 && dsiBios) {
-						rombyteOffset += 0x4000;
-					} else if ((u32)rombyteOffset == 0x0C7C0000) {
-						rombyteOffset += 0x40000;
-					}
+					u32 u32_rombyteOffset = (u32)rombyteOffset;
+					romLocationAdjust(ndsHeader, laterSdk, isSdk5, &u32_rombyteOffset);
+					rombyteOffset = (u8*)u32_rombyteOffset;
 				}
 			}
 			ipson++;
@@ -132,27 +90,9 @@ bool applyIpsPatch(const tNDSHeader* ndsHeader, u8* ipsbyte, const bool arm9Only
 				*rombyteOffset = ipsbyte[ipson+i];
 				rombyteOffset++;
 				if (ROMinRAM && (ndsHeader->unitCode == 0 || !dsiModeConfirmed)) {
-					if ((u32)rombyteOffset == (consoleModel > 0 ? 0x0E000000 : 0x0D000000)) {
-						rombyteOffset = (u8*)0x03708000;
-					} else if (isSdk5 || (dsiBios && !isESdk2)) {
-						if ((u32)rombyteOffset == 0x0C7C4000) {
-							rombyteOffset += (ndsHeader->unitCode > 0 ? 0x1C000 : 0x3C000);
-						} else if (ndsHeader->unitCode == 0) {
-							if ((u32)rombyteOffset == 0x0CFFC000) {
-								rombyteOffset += 0x4000;
-							}
-						} else {
-							if ((u32)rombyteOffset == 0x0C7FC000) {
-								rombyteOffset += 0x4000;
-							} else if ((u32)rombyteOffset == 0x0CFE0000) {
-								rombyteOffset += 0x20000;
-							}
-						}
-					} else if ((u32)rombyteOffset == 0x0CFFC000 && dsiBios) {
-						rombyteOffset += 0x4000;
-					} else if ((u32)rombyteOffset == 0x0C7C0000) {
-						rombyteOffset += 0x40000;
-					}
+					u32 u32_rombyteOffset = (u32)rombyteOffset;
+					romLocationAdjust(ndsHeader, laterSdk, isSdk5, &u32_rombyteOffset);
+					rombyteOffset = (u8*)u32_rombyteOffset;
 				}
 			}
 			ipson += totalrepeats;

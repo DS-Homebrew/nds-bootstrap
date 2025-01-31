@@ -92,12 +92,12 @@ static addr_t quickFind (const data_t* data, const data_t* search, size_t dataLe
 }
 
 static const data_t dldiMagicString[] = "\xED\xA5\x8D\xBF Chishm";	// Normal DLDI file
-static const data_t dldiMagicLoaderString[] = "\xEE\xA5\x8D\xBF Chishm";	// Different to a normal DLDI file
+// static const data_t dldiMagicLoaderString[] = "\xEE\xA5\x8D\xBF Chishm";	// Different to a normal DLDI file
 #define DEVICE_TYPE_DLDI 0x49444C44
 
 extern const u32 __myio_dldi;
 
-bool dldiPatchBinary (data_t *binDataSrc, u32 binSize, data_t *binData) {
+bool dldiPatchBinary (data_t *binDataSrc, u32 binSize, data_t *binData, data_t* binDataItcm) {
 
 	addr_t memOffset;			// Offset of DLDI after the file is loaded into memory
 	addr_t patchOffset;			// Position of patch destination in the file
@@ -118,7 +118,7 @@ bool dldiPatchBinary (data_t *binDataSrc, u32 binSize, data_t *binData) {
 	}*/
 
 	// Find the DLDI reserved space in the file
-	addr_t dldiDataSrc = quickFind (binDataSrc, dldiMagicLoaderString, binSize, sizeof(dldiMagicLoaderString));
+	addr_t dldiDataSrc = quickFind (binDataSrc, dldiMagicString, binSize, sizeof(dldiMagicString));
 	dldiDataSrc += (u32)binDataSrc;
 	//dbg_printf("dldiDataSrc: ");
 	//dbg_hexa((u32)dldiDataSrc);
@@ -155,6 +155,10 @@ bool dldiPatchBinary (data_t *binDataSrc, u32 binSize, data_t *binData) {
 	}
 	ddmemOffset = readAddr (pDH, DO_text_start);
 	relocationOffset = memOffset - ddmemOffset;
+	if (binDataItcm) {
+		relocationOffset -= (u32)binData;
+		relocationOffset += (u32)binDataItcm;
+	}
 
 	ddmemStart = readAddr (pDH, DO_text_start);
 	ddmemSize = (1 << pDH[DO_driverSize]);
@@ -183,7 +187,7 @@ bool dldiPatchBinary (data_t *binDataSrc, u32 binSize, data_t *binData) {
 	writeAddr (pAH, DO_shutdown, readAddr (pAH, DO_shutdown) + relocationOffset);
 
 	// Put the correct DLDI magic string back into the DLDI header
-	tonccpy (pAH, dldiMagicString, sizeof (dldiMagicString));
+	// tonccpy (pAH, dldiMagicString, sizeof (dldiMagicString));
 
 	if (pDH[DO_fixSections] & FIX_ALL) { 
 		// Search through and fix pointers within the data section of the file

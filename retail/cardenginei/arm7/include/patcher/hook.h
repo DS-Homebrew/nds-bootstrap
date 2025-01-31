@@ -34,6 +34,7 @@ int hookNdsRetailArm7(
 	const tNDSHeader* ndsHeader
 );
 int hookNdsRetailArm9(
+	cardengineArm9* ce9,
 	const tNDSHeader* ndsHeader
 );
 

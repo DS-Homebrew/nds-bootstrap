@@ -45,11 +45,7 @@ u16 igmPal[6] = {
 static u16* vramBak = (u16*)INGAME_MENU_EXT_LOCATION+(0x18200/sizeof(u16));
 static u16* bmpBuffer = (u16*)INGAME_MENU_EXT_LOCATION;
 #else
-#ifdef EXTMEM
-cardengineArm9* volatile ce9 = (cardengineArm9*)CARDENGINE_ARM9_LOCATION_DLDI_EXTMEM;
-#else
-cardengineArm9* volatile ce9 = (cardengineArm9*)CARDENGINE_ARM9_LOCATION_DLDI_START;
-#endif
+cardengineArm9* volatile ce9 = NULL;
 
 static u16* vramBak = (u16*)INGAME_MENU_EXT_LOCATION_B4DS+(0x18200/sizeof(u16));
 static u16* bmpBuffer = (u16*)INGAME_MENU_EXT_LOCATION_B4DS;
@@ -425,13 +421,15 @@ static void optionsMenu(s32 *mainScreen, u32 consoleModel) {
 	OptionsItem optionsItems[8];
 	int optionsItemCount = 0;
 	optionsItems[optionsItemCount++] = OPTIONS_MAIN_SCREEN;
+	#ifndef B4DS
 	if(consoleModel < 2) // Not on 3DS
+	#endif
 		optionsItems[optionsItemCount++] = OPTIONS_BRIGHTNESS;
-#ifndef B4DS
+	#ifndef B4DS
 	optionsItems[optionsItemCount++] = OPTIONS_VOLUME;
 	optionsItems[optionsItemCount++] = OPTIONS_CLOCK_SPEED;
 	optionsItems[optionsItemCount++] = OPTIONS_VRAM_MODE;
-#endif
+	#endif
 
 	bool mainScreenChanged = false;
 
@@ -452,16 +450,18 @@ static void optionsMenu(s32 *mainScreen, u32 consoleModel) {
 					optionPercent = (u8)(sharedAddr[6] >> 8) * 100 / MAX_BRIGHTNESS;
 					isString = false;
 					break;
+				#ifndef B4DS
 				case OPTIONS_VOLUME:
 					optionPercent = (u8)(sharedAddr[6] >> 16) * 100 / 31;
 					isString = false;
 					break;
 				case OPTIONS_CLOCK_SPEED:
-					optionValue = igmText.optionsValues[3 + ((REG_SCFG_CLK == 0 ? *scfgClkBak : REG_SCFG_CLK) & 1)];
+					optionValue = igmText.optionsValues[3 + ((REG_SCFG_CLK == 0 ? scfgClkBak : REG_SCFG_CLK) & 1)];
 					break;
 				case OPTIONS_VRAM_MODE:
-					optionValue = igmText.optionsValues[5 + (((REG_SCFG_EXT == 0 ? *scfgExtBak : REG_SCFG_EXT) & BIT(13)) >> 13)];
+					optionValue = igmText.optionsValues[5 + (((REG_SCFG_EXT == 0 ? scfgExtBak : REG_SCFG_EXT) & BIT(13)) >> 13)];
 					break;
+				#endif
 			}
 
 			int digits = optionPercent == 100 ? 3 : (optionPercent >= 10 ? 2 : 1);
@@ -524,6 +524,7 @@ static void optionsMenu(s32 *mainScreen, u32 consoleModel) {
 					}
 					break;
 				}
+				#ifndef B4DS
 				case OPTIONS_VOLUME:
 				{
 					u8 volume = (u8)(sharedAddr[6] >> 16);
@@ -542,7 +543,6 @@ static void optionsMenu(s32 *mainScreen, u32 consoleModel) {
 				}
 				case OPTIONS_CLOCK_SPEED:
 					REG_SCFG_CLK ^= 1;
-					u32* waitSysCyclesLoc = (u32*)(waitSysCyclesLocPtr ? *waitSysCyclesLocPtr : 0);
 					if (waitSysCyclesLoc) {
 						if (waitSysCyclesLoc[0] == 0xE92D4008) {
 							waitSysCyclesLoc[1] = (REG_SCFG_CLK & BIT(1)) ? 0xE1A00100 : 0xE1A00080;
@@ -555,6 +555,7 @@ static void optionsMenu(s32 *mainScreen, u32 consoleModel) {
 				case OPTIONS_VRAM_MODE:
 					REG_SCFG_EXT ^= BIT(13);
 					break;
+				#endif
 				default:
 					break;
 			}
@@ -752,25 +753,19 @@ static void ramViewer(void) {
 	(*revertMpu)();
 }
 
-void inGameMenu(s32 *mainScreen, u32 consoleModel, s32 *exceptionRegisters) {
+u32 inGameMenu(s32 *mainScreen, u32 consoleModel, s32 *exceptionRegisters) {
 	// If we were given exception registers, then we're handling an exception
 	bool exception = (exceptionRegisters != 0);
 
 	#ifdef B4DS
-	#ifndef EXTMEM
 	static bool ce9Set = false;
 	if (!ce9Set) {
-		if (*(u32*)CARDENGINE_ARM9_LOCATION_DLDI_ALT == CARDENGINE_ARM9_LOCATION_DLDI_ALT) {
-			ce9 = (cardengineArm9*)CARDENGINE_ARM9_LOCATION_DLDI_ALT;
-		} else if (*(u32*)CARDENGINE_ARM9_LOCATION_DLDI_ALT2 == CARDENGINE_ARM9_LOCATION_DLDI_ALT2) {
-			ce9 = (cardengineArm9*)CARDENGINE_ARM9_LOCATION_DLDI_ALT2;
-		} else if (*(u32*)CARDENGINE_ARM9_LOCATION_DLDI == CARDENGINE_ARM9_LOCATION_DLDI) {
-			ce9 = (cardengineArm9*)CARDENGINE_ARM9_LOCATION_DLDI;
-		}
+		ce9 = (cardengineArm9*)consoleModel;
 		ce9Set = true;
 	}
 	#endif
-	#endif
+
+	u32 res = 0;
 
 	u32 dispcnt = REG_DISPCNT_SUB;
 	u16 bg0cnt = REG_BG0CNT_SUB;
@@ -895,7 +890,8 @@ void inGameMenu(s32 *mainScreen, u32 consoleModel, s32 *exceptionRegisters) {
 				case MENU_RESET:
 					extern bool exceptionPrinted;
 					exceptionPrinted = false;
-					sharedAddr[3] = 0x52534554; // TESR
+					res = 0x52534554; // TESR
+					sharedAddr[3] = res;
 					sharedAddr[4] = 0x54455352; // RSET
 					break;
 				case MENU_SCREENSHOT:
@@ -913,7 +909,8 @@ void inGameMenu(s32 *mainScreen, u32 consoleModel, s32 *exceptionRegisters) {
 					}
 					#else
 					// sharedAddr[1] = 0;
-					sharedAddr[3] = 0x444D4152; // RAMD
+					res = 0x444D4152; // RAMD
+					sharedAddr[3] = res;
 					sharedAddr[4] = 0x54495845; // EXIT
 					while (sharedAddr[4] != 0) swiDelay(100);
 					#endif
@@ -925,7 +922,8 @@ void inGameMenu(s32 *mainScreen, u32 consoleModel, s32 *exceptionRegisters) {
 					ramViewer();
 					break;
 				case MENU_QUIT:
-					sharedAddr[3] = 0x54495845; // EXIT
+					res = 0x54495845; // EXIT
+					sharedAddr[3] = res;
 					sharedAddr[4] = 0x54495551; // QUIT
 					break;
 				default:
@@ -971,4 +969,6 @@ void inGameMenu(s32 *mainScreen, u32 consoleModel, s32 *exceptionRegisters) {
 		REG_POWERCNT &= ~POWER_SWAP_LCDS;
 	else if(*mainScreen == 2)
 		REG_POWERCNT |= POWER_SWAP_LCDS;
+
+	return res;
 }

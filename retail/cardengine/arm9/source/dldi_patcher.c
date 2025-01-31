@@ -116,13 +116,9 @@ bool dldiPatchBinary (data_t *binData, u32 binSize) {
 		return false;
 	}
 
-	#ifdef EXTMEM
-	const u32 dldiOffset = 0x027BD060;
-	#else
-	const u32 dldiOffset = 0x023FD060;
-	#endif
+	extern u32 dldiOffsetNew;
 
-	data_t *pDH = (data_t*)(((u32*)dldiOffset) - 24);
+	data_t *pDH = (data_t*)dldiOffsetNew;
 	data_t *pAH = &(binData[patchOffset]);
 
 	if (*((u32*)(pDH + DO_ioType)) == DEVICE_TYPE_DLDI) {
@@ -154,21 +150,13 @@ bool dldiPatchBinary (data_t *binData, u32 binSize) {
 	tonccpy (pAH, pDH, dldiFileSize);
 
 	// Fix the section pointers in the header
-	writeAddr (pAH, DO_text_start, readAddr (pAH, DO_text_start) + relocationOffset);
-	writeAddr (pAH, DO_data_end, readAddr (pAH, DO_data_end) + relocationOffset);
-	writeAddr (pAH, DO_glue_start, readAddr (pAH, DO_glue_start) + relocationOffset);
-	writeAddr (pAH, DO_glue_end, readAddr (pAH, DO_glue_end) + relocationOffset);
-	writeAddr (pAH, DO_got_start, readAddr (pAH, DO_got_start) + relocationOffset);
-	writeAddr (pAH, DO_got_end, readAddr (pAH, DO_got_end) + relocationOffset);
-	writeAddr (pAH, DO_bss_start, readAddr (pAH, DO_bss_start) + relocationOffset);
-	writeAddr (pAH, DO_bss_end, readAddr (pAH, DO_bss_end) + relocationOffset);
+	for (int i = DO_text_start; i < DO_ioType; i += 4) {
+		writeAddr (pAH, i, readAddr (pAH, i) + relocationOffset);
+	}
 	// Fix the function pointers in the header
-	writeAddr (pAH, DO_startup, readAddr (pAH, DO_startup) + relocationOffset);
-	writeAddr (pAH, DO_isInserted, readAddr (pAH, DO_isInserted) + relocationOffset);
-	writeAddr (pAH, DO_readSectors, readAddr (pAH, DO_readSectors) + relocationOffset);
-	writeAddr (pAH, DO_writeSectors, readAddr (pAH, DO_writeSectors) + relocationOffset);
-	writeAddr (pAH, DO_clearStatus, readAddr (pAH, DO_clearStatus) + relocationOffset);
-	writeAddr (pAH, DO_shutdown, readAddr (pAH, DO_shutdown) + relocationOffset);
+	for (int i = DO_startup; i < DO_code; i += 4) {
+		writeAddr (pAH, i, readAddr (pAH, i) + relocationOffset);
+	}
 
 	// Put the correct DLDI magic string back into the DLDI header
 	tonccpy (pAH, dldiMagicString, sizeof (dldiMagicString));

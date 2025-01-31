@@ -234,11 +234,13 @@ static bool dldiPatchLoader (data_t *binData, u32 binSize, bool clearBSS)
 	return true;
 }
 
-int runNds(u32 cluster, u32 saveCluster, u32 donorTwlCluster, u32 gbaCluster, u32 gbaSavCluster, u32 wideCheatCluster, u32 apPatchCluster, u32 cheatCluster, u32 patchOffsetCacheCluster, u32 ramDumpCluster, u32 srParamsCluster, u32 screenshotCluster, u32 apFixOverlaysCluster, u32 musicCluster, u32 pageFileCluster, u32 manualCluster, u32 sharedFontCluster, configuration* conf) {
+int runNds(u32 cluster, u32 saveCluster, u32 donorTwlCluster, /* u32 gbaCluster, u32 gbaSavCluster, */ u32 wideCheatCluster, u32 apPatchCluster, u32 dsi2dsSavePatchCluster, u32 cheatCluster, u32 patchOffsetCacheCluster, u32 ramDumpCluster, u32 srParamsCluster, u32 screenshotCluster, u32 apFixOverlaysCluster, u32 musicCluster, u32 pageFileCluster, u32 manualCluster, u32 sharedFontCluster, configuration* conf) {
 	nocashMessage("runNds");
 
 	// Load bootloader binary
-	FILE* bootloaderBin = fopen(dsiFeatures() && !conf->b4dsMode ? (conf->loader2 ? "nitro:/loadi2.lz77" : "nitro:/loadi.lz77") : (conf->loader2 ? "nitro:/load2.lz77" : "nitro:/load.lz77"), "rb");
+	char bootloaderPath[32];
+	sprintf(bootloaderPath, "nitro:/load%s%i.lz77", (dsiFeatures() && !conf->b4dsMode) ? "i" : "", conf->loaderType);
+	FILE* bootloaderBin = fopen(bootloaderPath, "rb");
 	if (bootloaderBin) {
 		fread(lz77ImageBuffer, 1, 0x30000, bootloaderBin);
 		LZ77_Decompress(lz77ImageBuffer, (u8*)loaderBin);
@@ -262,20 +264,24 @@ int runNds(u32 cluster, u32 saveCluster, u32 donorTwlCluster, u32 gbaCluster, u3
 	loader->donorFileCluster            = donorTwlCluster;
 	loader->donorFileSize               = conf->donorFileSize;
 	loader->donorFileOffset             = conf->donorFileOffset;
-	loader->gbaFileCluster              = gbaCluster;
-	loader->gbaSaveFileCluster          = gbaSavCluster;
+	// loader->gbaFileCluster              = gbaCluster;
+	// loader->gbaSaveFileCluster          = gbaSavCluster;
 	loader->romSize                     = conf->romSize;
 	loader->saveSize                    = conf->saveSize;
-	loader->gbaRomSize                  = conf->gbaRomSize;
-	loader->gbaSaveSize                 = conf->gbaSaveSize;
-	loader->dataToPreloadAddr[0]        = conf->dataToPreloadAddr[0];
-	loader->dataToPreloadAddr[1]        = conf->dataToPreloadAddr[1];
-	loader->dataToPreloadSize[0]        = conf->dataToPreloadSize[0];
-	loader->dataToPreloadSize[1]        = conf->dataToPreloadSize[1];
+	// loader->gbaRomSize                  = conf->gbaRomSize;
+	// loader->gbaSaveSize                 = conf->gbaSaveSize;
+	for (int i = 0; i < 4; i++) {
+		loader->dataToPreloadAddr[i]    = conf->dataToPreloadAddr[i];
+		loader->dataToPreloadSize[i]    = conf->dataToPreloadSize[i];
+	}
 	loader->wideCheatFileCluster        = wideCheatCluster;
 	loader->wideCheatSize               = conf->wideCheatSize;
 	loader->apPatchFileCluster          = apPatchCluster;
+	loader->apPatchOffset               = conf->apPatchOffset;
 	loader->apPatchSize                 = conf->apPatchSize;
+    loader->dsi2dsSavePatchFileCluster  = dsi2dsSavePatchCluster;
+    loader->dsi2dsSavePatchOffset       = conf->dsi2dsSavePatchOffset;
+    loader->dsi2dsSavePatchSize         = conf->dsi2dsSavePatchSize;
 	loader->cheatFileCluster            = cheatCluster;
 	loader->cheatSize                   = conf->cheatSize;
 	loader->patchOffsetCacheFileCluster = patchOffsetCacheCluster;

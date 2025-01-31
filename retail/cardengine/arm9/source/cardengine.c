@@ -56,7 +56,6 @@
 #define overlaysCached BIT(6)
 #define cacheFlushFlag BIT(7)
 #define cardReadFix BIT(8)
-#define softResetMb BIT(13)
 
 #define videoFrameDelayMax 10
 #define videoFrameDelayMaxFlaw 1
@@ -123,11 +122,18 @@ static u32 musicFileSize = 0x0;
 #endif // NODSIWARE
 
 bool cardReadInProgress = false;
-static int cardReadCount = 0;
+// static int cardReadCount = 0;
 
 extern void setExceptionHandler2();
+// fixes mpu protection settings when using a slot2 flashcart
+// to allow running games accessing the slot2 like pokemon
+extern void slot2MpuFixGbaDldi();
 
 void setDeviceOwner(void) {
+	if (__myio_dldi.features & FEATURE_SLOT_GBA) {
+		REG_IE &= ~IRQ_CART;
+		slot2MpuFixGbaDldi();
+	}
 	if ((ce9->valueBits & expansionPakFound) || (__myio_dldi.features & FEATURE_SLOT_GBA)) {
 		sysSetCartOwner(BUS_OWNER_ARM9);
 	}
@@ -196,37 +202,48 @@ extern u32 getDtcmBase(void);
 
 extern bool dldiPatchBinary (unsigned char *binData, u32 binSize);
 
-void reset(u32 param) {
+void reset(u32 param, u32 param2) {
 	setDeviceOwner();
-	u32 resetParams = ((ce9->valueBits & isSdk5) ? RESET_PARAM_SDK5 : RESET_PARAM);
+	#ifndef GSDD
+	const u32 resetParams = ((ce9->valueBits & isSdk5) ? RESET_PARAM_SDK5 : RESET_PARAM);
+	#else
+	const u32 resetParams = RESET_PARAM_SDK5;
+	#endif
+	*(u32*)resetParams = param;
+
 	u32 iUncompressedSize = 0;
 	fileRead((char*)&iUncompressedSize, &pageFile, 0x3FFFF0, sizeof(u32));
-
-	*(u32*)resetParams = param;
-	// if (isDSiWare || iUncompressedSize > 0x280000 /*|| param == 0xFFFFFFFF*/ || *(u32*)(resetParams+0xC) > 0) {
+	const bool downloadedSrl = (param2 == 0x4C525344); // 'DSRL'
+	const bool loadNitroSrl = (*(u32*)(resetParams+0xC) > 0);
+	#ifndef GSDD
+	if (isDSiWare || iUncompressedSize > 0x280000 /*|| param == 0xFFFFFFFF*/ || downloadedSrl || loadNitroSrl) {
 		enterCriticalSection();
-		/* if (isDSiWare || iUncompressedSize > 0x280000) {
-			sharedAddr[0] = 0x57495344; // 'DSIW'
-		} else */ if (param != 0xFFFFFFFF && !igmReset && (ce9->valueBits & softResetMb)) {
+		if (isDSiWare || iUncompressedSize > 0x280000) {
+			sharedAddr[1] = 0x57495344; // 'DSIW'
+		}
+		if (param != 0xFFFFFFFF && !igmReset && downloadedSrl) {
 			*(u32*)resetParams = 0;
 			*(u32*)(resetParams+8) = 0x44414F4C; // 'LOAD'
 			fileWrite((char*)ndsHeader, &pageFile, 0x2BFE00, 0x160);
 			fileWrite((char*)ndsHeader->arm9destination, &pageFile, 0x14000, ndsHeader->arm9binarySize);
-			fileWrite((char*)0x022C0000, &pageFile, 0x2C0000, ndsHeader->arm7binarySize);
+			fileWrite((char*)ndsHeader->arm7destination, &pageFile, 0x2C0000, ndsHeader->arm7binarySize);
 		}
 		fileWrite((char*)resetParams, &srParamsFile, 0, 0x10);
-		// if (sharedAddr[0] == 0x57495344 || param == 0xFFFFFFFF) {
-		// 	sharedAddr[3] = 0x52534554;
-			sharedAddr[3] = 0x4E445352; // 'RSDN'
+		fileWrite((char*)resetParams+0x20, &srParamsFile, 0x10, 0x40);
+		if (sharedAddr[1] == 0x57495344 || param == 0xFFFFFFFF) {
+		//	sharedAddr[3] = 0x52534554;
+		 	sharedAddr[3] = 0x4E445352; // 'RSDN'
 			while (1);
-		// }
-	/* }
-	sharedAddr[3] = 0x52534554;
+		}
+	}
+	#endif
+	// sharedAddr[3] = 0x52534554;
+	sharedAddr[3] = 0x4E445352; // 'RSDN'
 
 	//EXCEPTION_VECTOR_SDK1 = 0;
 
 	//volatile u32 arm9_BLANK_RAM = 0;
- 	register int i;
+ 	// register int i;
 
 	REG_IME = 0;
 	REG_IE = 0;
@@ -241,7 +258,7 @@ void reset(u32 param) {
 	}
 
 	// Clear out ARM9 DMA channels
-	vu32* dma = &DMA0_SRC;
+	/* vu32* dma = &DMA0_SRC;
 	vu16* tmr = &TIMER0_DATA;
 	for (i = 0; i < 4; i++) {
 		dma[2] = 0; //CR
@@ -252,7 +269,9 @@ void reset(u32 param) {
 		tmr[1] = 0; //CR
 		tmr[0] = 0; //DATA
 		tmr += 2;
-	}
+	} */
+	toncset16((u32*)0x040000B0, 0, 0x40/2); // Clear DMA channels
+	toncset16((u32*)0x04000100, 0, 0x10/2); // Clear timers
 
 	// Clear out FIFO
 	REG_IPC_SYNC = 0;
@@ -260,12 +279,14 @@ void reset(u32 param) {
 	REG_IPC_FIFO_CR = 0;
 
 	mpuSet = false;
+	#ifndef GSDD
 	IPC_SYNC_hooked = false;
+	#endif
 
 	toncset((char*)((ce9->valueBits & isSdk5) ? 0x02FFFD80 : 0x027FFD80), 0, 0x80);
 	toncset((char*)((ce9->valueBits & isSdk5) ? 0x02FFFF80 : 0x027FFF80), 0, 0x80);
 
-	if (param == 0xFFFFFFFF || *(u32*)(resetParams+0xC) > 0) {
+	if (param == 0xFFFFFFFF || downloadedSrl || loadNitroSrl) {
 		resetMpu();
 
 		REG_DISPSTAT = 0;
@@ -297,17 +318,27 @@ void reset(u32 param) {
 		// 	*(u32*)(0x02000000) |= BIT(2);
 		// }
 		//toncset((u32*)0x02000004, 0, 0x3DA000 - 4);
-		toncset((u32*)0x02000000, 0, 0x3C0000);
 		#ifdef NODSIWARE
+		toncset((u32*)0x02000000, 0, 0x3C0000);
+		#else
+		toncset((u32*)0x02004000, 0, 0x3BC000);
+		#endif
+		/* #ifdef NODSIWARE
 		toncset((u32*)0x023C4000, 0, 0x1C000);
 		toncset((u32*)0x02FE4000, 0, 0x19C00-0x4000);
 		#else
 		toncset((u32*)0x023C4000, 0, 0x16800);
 		toncset((u32*)0x02FE4000, 0, 0x1D000-0x4000);
-		#endif
+		#endif */
 		if (param == 0xFFFFFFFF) {
 			*(u32*)(0x02000000) = BIT(0) | BIT(1) | BIT(2);
 		}
+		#ifndef NODSIWARE
+		else {
+			*(u32*)(0x02000000) = 0;
+		}
+		#endif
+		*(u32*)0x02000004 = 0x54455352; // 'RSET'
 
 		WRAM_CR = 0; // Set shared ram to ARM9
 
@@ -328,11 +359,11 @@ void reset(u32 param) {
 		fileRead((char*)&newArm7binarySize, &pageFile, 0x3FFFF4, sizeof(u32));
 		fileRead((char*)ndsHeader->arm9destination, &pageFile, 0x14000, iUncompressedSize);
 		fileRead((char*)ndsHeader->arm7destination, &pageFile, 0x2C0000, newArm7binarySize);
-		#ifdef EXTMEM
+		/* #ifdef EXTMEM
 		fileRead((char*)CHEAT_ENGINE_LOCATION_B4DS, &pageFile, 0x2FE000, 0x2000);
 		#else
 		fileRead((char*)CHEAT_ENGINE_LOCATION_B4DS-0x400000, &pageFile, 0x2FE000, 0x2000);
-		#endif
+		#endif */
 
 		#ifdef NODSIWARE
 		tonccpy((u32*)0x02370000, ce9, 0x2800);
@@ -347,7 +378,7 @@ void reset(u32 param) {
 	while (REG_VCOUNT == 191);
 
 	// Start ARM9
-	ndsCodeStart(ndsHeader->arm9executeAddress); */
+	ndsCodeStart(ndsHeader->arm9executeAddress);
 }
 
 void prepareScreenshot(void) {
@@ -447,9 +478,9 @@ void saveMainScreenSetting(void) {
 //---------------------------------------------------------------------------------
 /*void myIrqHandlerVBlank(void) {
 //---------------------------------------------------------------------------------
-	#ifdef DEBUG		
+	#ifdef DEBUG
 	nocashMessage("myIrqHandlerVBlank");
-	#endif	
+	#endif
 
 	if (sharedAddr[4] == 0x554E454D) {
 		while (sharedAddr[4] != 0x54495845);
@@ -461,6 +492,14 @@ void saveMainScreenSetting(void) {
 #else
 #define igmLocation INGAME_MENU_LOCATION_B4DS
 #endif
+
+void writeIgm(u32 dst) {
+	fileWrite((char*)igmLocation, &pageFile, dst, 0xA000);
+}
+
+void readIgm(u32 src) {
+	fileRead((char*)igmLocation, &pageFile, src, 0xA000);
+}
 
 void inGameMenu(s32* exRegisters) {
 	#ifdef FOTO
@@ -481,16 +520,16 @@ void inGameMenu(s32* exRegisters) {
 
 	if (!opened) {
 		opening = true;
-		fileWrite((char*)igmLocation, &pageFile, 0xA000, 0xA000);	// Backup part of game RAM to page file
-		fileRead((char*)igmLocation, &pageFile, 0, 0xA000);	// Read in-game menu
+		writeIgm(0xA000);	// Backup part of game RAM to page file
+		readIgm(0);	// Read in-game menu
 	}
 	opening = false;
 
 	opened = true;
 
 	*(u32*)(igmLocation + IGM_TEXT_SIZE_ALIGNED) = (u32)sharedAddr;
-	volatile void (*inGameMenu)(s32*, u32, s32*) = (volatile void*)igmLocation + IGM_TEXT_SIZE_ALIGNED + 0x10;
-	(*inGameMenu)(&ce9->mainScreen, 0, exRegisters);
+	volatile u32 (*inGameMenu)(s32*, u32, s32*) = (volatile void*)igmLocation + IGM_TEXT_SIZE_ALIGNED + 0x10;
+	const u32 res = (*inGameMenu)(&ce9->mainScreen, igmLocation, exRegisters);
 
 	opened = false;
 
@@ -498,19 +537,19 @@ void inGameMenu(s32* exRegisters) {
 		sharedAddr[0] = 0x57495344;
 	} */
 
-	fileWrite((char*)igmLocation, &pageFile, 0, 0xA000);	// Store in-game menu
-	fileRead((char*)igmLocation, &pageFile, 0xA000, 0xA000);	// Restore part of game RAM from page file
+	writeIgm(0);	// Store in-game menu
+	readIgm(0xA000);	// Restore part of game RAM from page file
 
-	if (sharedAddr[3] == 0x54495845) {
+	if (res == 0x54495845) {
 		igmReset = true;
-		reset(0xFFFFFFFF);
-	} else if (sharedAddr[3] == 0x52534554) {
+		reset(0xFFFFFFFF, 0);
+	} else if (res == 0x52534554) {
 		igmReset = true;
-		reset(0);
-	} else if (sharedAddr[3] == 0x444D4152) { // RAMD
+		reset(0, 0);
+	} else if (res == 0x444D4152) { // RAMD
 		#ifdef EXTMEM
-		fileWrite((char*)0x02000000, &ramDumpFile, 0, 0x7E0000);
-		fileWrite((char*)((ce9->valueBits & isSdk5) ? 0x02FE0000 : 0x027E0000), &ramDumpFile, 0x7E0000, 0x20000);
+		fileWrite((char*)0x02000000, &ramDumpFile, 0, 0x800000);
+		// fileWrite((char*)((ce9->valueBits & isSdk5) ? 0x02FE0000 : 0x027E0000), &ramDumpFile, 0x7E0000, 0x20000);
 		#else
 		fileWrite((char*)0x02000000, &ramDumpFile, 0, 0x400000);
 		#endif
@@ -571,7 +610,7 @@ void myIrqHandlerIPC(void) {
 				cardSave(*(vu32*)(sharedAddr), *(vu32*)(sharedAddr+1), *(vu32*)(sharedAddr+2), (sharedAddr[3] == 0x53415657));
 				sharedAddr[3] = 0;
 			} break;
-			case 0x524F4D52: {
+			/* case 0x524F4D52: {
 				u32 src = *(vu32*)(sharedAddr);
 				u32 dst = *(vu32*)(sharedAddr+1);
 				u32 len = *(vu32*)(sharedAddr+2);
@@ -584,7 +623,7 @@ void myIrqHandlerIPC(void) {
 
 				REG_EXMEMCNT = exmemcnt;
 				sharedAddr[3] = 0;
-			} break;
+			} break; */
 		} break;
 		#ifndef NODSIWARE
 		#ifndef FOTO
@@ -622,6 +661,15 @@ static void initialize(void) {
 		return;
 	}
 
+	extern u32 dldiOffsetNew;
+	if (dldiOffsetNew < 0x02000000 || dldiOffsetNew >= 0x03000000) {
+		extern u8 dldiDriverSize;
+		const u16 dldiFileSize = 1 << dldiDriverSize;
+
+		tonccpy((u32*)dldiOffsetNew, (u32*)ce9->dldiOffset, dldiFileSize); // Move to ITCM
+		toncset((u32*)ce9->dldiOffset, 0, dldiFileSize);
+	}
+
 	if (!FAT_InitFiles(true)) {
 		//nocashMessage("!FAT_InitFiles");
 		while (1);
@@ -637,19 +685,25 @@ static void initialize(void) {
 
 	if (ce9->romFatTableCache != 0) {
 		romFile.fatTableCache = (u32*)ce9->romFatTableCache;
-		romFile.fatTableCached = true;
-		romFile.fatTableCompressed = (bool)ce9->romFatTableCompressed;
+		romFile.fatTableSettings |= fatCached;
+		if (ce9->romFatTableCompressed) {
+			romFile.fatTableSettings |= fatCompressed;
+		}
 	}
 	if (ce9->savFatTableCache != 0) {
 		savFile.fatTableCache = (u32*)ce9->savFatTableCache;
-		savFile.fatTableCached = true;
-		savFile.fatTableCompressed = (bool)ce9->savFatTableCompressed;
+		savFile.fatTableSettings |= fatCached;
+		if (ce9->savFatTableCompressed) {
+			savFile.fatTableSettings |= fatCompressed;
+		}
 	}
 	#ifndef NODSIWARE
 	if (ce9->musicFatTableCache != 0) {
 		musicsFile.fatTableCache = (u32*)ce9->musicFatTableCache;
-		musicsFile.fatTableCached = true;
-		musicsFile.fatTableCompressed = (bool)ce9->musicsFatTableCompressed;
+		musicsFile.fatTableSettings |= fatCached;
+		if (ce9->musicsFatTableCompressed) {
+			musicsFile.fatTableSettings |= fatCompressed;
+		}
 	}
 	#endif
 
@@ -852,20 +906,10 @@ void cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	const u16 exmemcnt = REG_EXMEMCNT;
 	cardReadInProgress = true;
 
-	if (__myio_dldi.features & FEATURE_SLOT_GBA) {
-		REG_IE &= ~IRQ_CART;
-	}
-
 	setDeviceOwner();
 	initialize();
 
-	/*if (isDSiWare && (__myio_dldi.features & FEATURE_SLOT_NDS) && (ce9->valueBits & expansionPakFound)) {
-		slot2MpuFix();
-		sysSetCartOwner (BUS_OWNER_ARM9);
-		exmemcnt = REG_EXMEMCNT;
-	}*/
-
-	cardReadCount++;
+	// cardReadCount++;
 
 	#ifdef GSDD
 	u32 src = src0;
@@ -891,7 +935,7 @@ void cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 		src = 0x8000 + (src & 0x1FF);
 	}
 
-	if (ce9->valueBits & ROMinRAM) {
+	if ((ce9->valueBits & ROMinRAM) || (ce9->romPartSize > 0 && src >= ce9->romPartSrc && src < ce9->romPartSrc+ce9->romPartSize)) {
 		cardReadRAM(dst, src, len);
 	} else {
 		cardReadNormal(dst, src, len);
@@ -911,7 +955,7 @@ bool nandRead(void* memory,void* flash,u32 len,u32 dma) {
 	setDeviceOwner();
 	fileRead(memory, &savFile, (u32)flash, len);
 	REG_EXMEMCNT = exmemcnt;
-    return true; 
+    return true;
 }
 
 bool nandWrite(void* memory,void* flash,u32 len,u32 dma) {
@@ -1162,6 +1206,10 @@ u32 dsiSaveGetLength(void* ctx) {
 		return 0;
 	}
 
+	if (dsiSaveExists) {
+		dsiSaveResultCode = 0;
+		toncset32(ctx+0x14, dsiSaveResultCode, 1);
+	}
 	return dsiSaveSize;
 }
 
@@ -1553,7 +1601,7 @@ void rumble2(u32 arg) {
 }
 #endif
 
-u32 myIrqEnable(u32 irq) {	
+u32 myIrqEnable(u32 irq) {
 	#ifdef GSDD
 	return irq;
 	#else
@@ -1587,7 +1635,7 @@ u32 myIrqEnable(u32 irq) {
 
 	REG_EXMEMCNT = exmemcnt;
 
-	u32 irq_before = REG_IE | IRQ_IPC_SYNC;		
+	u32 irq_before = REG_IE | IRQ_IPC_SYNC;
 	irq |= IRQ_IPC_SYNC;
 	REG_IPC_SYNC |= IPC_SYNC_IRQ_ENABLE;
 

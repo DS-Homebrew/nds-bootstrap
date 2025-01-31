@@ -38,6 +38,7 @@
 #include "tonccpy.h"
 
 #define a9IrqHooked BIT(7)
+#define delayWrites BIT(8)
 
 #define RUMBLE_PAK			(*(vuint16 *)0x08000000)
 #define WARIOWARE_PAK		(*(vuint16 *)0x080000C4)
@@ -128,6 +129,14 @@ static PERSONAL_DATA* personalData = NULL;
 	}
 }*/
 
+// Alternative to swiWaitForVBlank()
+static inline void waitFrames(int count) {
+	for (int i = 0; i < count; i++) {
+		while (REG_VCOUNT != 191);
+		while (REG_VCOUNT == 191);
+	}
+}
+
 static void waitForArm9(void) {
     IPC_SendSync(0x4);
 	while (sharedAddr[3] != (vu32)0);
@@ -210,13 +219,10 @@ void rebootConsole(void) {
 void reset(void) {
 	while (sharedAddr[3] != 0x4E445352) swiDelay(100);
 
-	rebootConsole();
+	// rebootConsole();
 	// u32 resetParam = (isSdk5Set ? RESET_PARAM_SDK5 : RESET_PARAM);
-	// if (sharedAddr[0] == 0x57495344 /*|| *(u32*)resetParam == 0xFFFFFFFF*/) {
-	// 	rebootConsole();
-	// }
 
-	/* REG_IME = 0;
+	REG_IME = 0;
 
 	toncset32((u32*)0x04000400, 0, 0x104/4); // Clear sound channel & control registers
 
@@ -262,7 +268,7 @@ void reset(void) {
 	}
 
 	// Start ARM7
-	ndsCodeStart(ndsHeader->arm7executeAddress); */
+	ndsCodeStart(ndsHeader->arm7executeAddress);
 }
 
 //---------------------------------------------------------------------------------
@@ -587,6 +593,16 @@ bool eepromPageWrite(u32 dst, const void *src, u32 len) {
 		return false;
 	}
 
+#ifndef MUSIC
+	if (valueBits & delayWrites) {
+		if (*(int*)((valueBits & isSdk5Set) ? 0x02FFFC3C : 0x027FFC3C) >= 60*2) {
+			valueBits &= ~delayWrites;
+		} else {
+			waitFrames(1);
+		}
+	}
+#endif
+
 	// Send a command to the ARM9 to write the save
 	const u32 commandSaveWrite = 0x53415657;
 
@@ -665,11 +681,11 @@ bool cardRead(u32 dma, u32 src, void *dst, u32 len) {
 	dbg_hexa(len);
 	#endif
 
-	if (!(valueBits & a9IrqHooked)) {
+	// if (!(valueBits & a9IrqHooked)) {
 		return false;
-	}
+	// }
 
-	// Send a command to the ARM9 to read the ROM
+	/* // Send a command to the ARM9 to read the ROM
 	const u32 commandRomRead = 0x524F4D52;
 
 	// Write the command
@@ -680,5 +696,5 @@ bool cardRead(u32 dma, u32 src, void *dst, u32 len) {
 
 	waitForArm9();
 
-	return true;
+	return true; */
 }

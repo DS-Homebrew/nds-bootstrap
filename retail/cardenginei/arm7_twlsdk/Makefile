@@ -9,7 +9,7 @@ endif
 include $(DEVKITARM)/ds_rules
 
 ifeq ($(OS),Windows_NT)
-LZSS			?=	../../../lzss.exe
+LZSS			?=	../../../../lzss.exe
 
 else
 
@@ -24,7 +24,7 @@ endif
 # all directories are relative to this makefile
 #---------------------------------------------------------------------------------
 BUILD			:=	build
-SOURCES			:=	source_ext ../arm7/source ../../common/source ../../common/source_general
+SOURCES			:=	source_ext ../arm7/source ../arm7/source/libnds ../../common/source ../../common/source_general
 INCLUDES		:=	include_ext ../arm7/include ../../common/include ../../common/include_fat
 DATA			:=	data
 
@@ -49,7 +49,7 @@ LDFLAGS	=	-nostartfiles -T cardengine.ld -g $(ARCH) -Wl,--nmagic -Wl,-Map,$(notd
 #---------------------------------------------------------------------------------
 # any extra libraries we wish to link with the project
 #---------------------------------------------------------------------------------
-LIBS	:= -lnds7
+LIBS	:=
 
 #---------------------------------------------------------------------------------
 # list of directories containing libraries, this must be the top level containing
@@ -107,8 +107,6 @@ endif
 $(BUILD):
 	@[ -d $@ ] || mkdir -p $@
 	@$(MAKE) -C $(BUILD) -f $(CURDIR)/Makefile
-	@cp $(OUTPUT).bin $(OUTPUT_CMP).lz77
-	@$(LZSS) -ewf $(OUTPUT_CMP).lz77
 
 #---------------------------------------------------------------------------------
 clean:
@@ -124,6 +122,10 @@ DEPENDS	:=	$(OFILES:.o=.d)
 #---------------------------------------------------------------------------------
 # main targets
 #---------------------------------------------------------------------------------
+$(OUTPUT_CMP).lz77: $(OUTPUT).bin
+	@cp $< $@
+	@$(LZSS) -ewf $@
+
 $(OUTPUT).bin:	$(DEPSDIR)/$(TARGET).elf
 $(DEPSDIR)/$(TARGET).elf:	cardengine.ld $(OFILES)
 #	@echo linking $(notdir $@)

@@ -7,7 +7,7 @@
 	the Free Software Foundation, either version 3 of the License, or
 	(at your option) any later version.
 
-	This program is distributed in the hope that it will be useful, 
+	This program is distributed in the hope that it will be useful,
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
 	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 	GNU General Public License for more details.
@@ -45,11 +45,15 @@
 #include "sr_data_error.h"      // For showing an error screen
 #include "sr_data_srloader.h"   // For rebooting into TWiLight Menu++ or the game
 
+#define gameOnFlashcard BIT(0)
+#define saveOnFlashcard BIT(1)
+#define b_dsiSD BIT(5)
 #define preciseVolumeControl BIT(6)
 #define igmAccessible BIT(9)
 #define hiyaCfwFound BIT(10)
 #define wideCheatUsed BIT(12)
 #define twlTouch BIT(15)
+#define bootstrapOnFlashcard BIT(19)
 #define ndmaDisabled BIT(20)
 #define i2cBricked BIT(30)
 #define scfgLocked BIT(31)
@@ -220,33 +224,38 @@ static void driveInitialize(void) {
 	}
 
 	bakData();
-	if (sdmmc_read16(REG_SDSTATUS0) != 0) {
-		sdmmc_init();
-		SD_Init();
+	if (valueBits & b_dsiSD) {
+		if (sdmmc_read16(REG_SDSTATUS0) != 0) {
+			sdmmc_init();
+			SD_Init();
+		}
+		FAT_InitFiles(false, false);
 	}
-	FAT_InitFiles(false);
+	if ((valueBits & gameOnFlashcard) || (valueBits & saveOnFlashcard)) {
+		FAT_InitFiles(false, true);
+	}
 	restoreBakData();
 
 	#ifdef CARDSAVE
-	getFileFromCluster(&savFile, saveCluster);
+	getFileFromCluster(&savFile, saveCluster, (valueBits & saveOnFlashcard));
 	#endif
-	getFileFromCluster(&patchOffsetCacheFile, patchOffsetCacheFileCluster);
-	getFileFromCluster(&ramDumpFile, ramDumpCluster);
-	getFileFromCluster(&srParamsFile, srParamsCluster);
-	getFileFromCluster(&screenshotFile, screenshotCluster);
-	getFileFromCluster(&pageFile, pageFileCluster);
-	getFileFromCluster(&manualFile, manualCluster);
+	getFileFromCluster(&patchOffsetCacheFile, patchOffsetCacheFileCluster, (valueBits & gameOnFlashcard));
+	getFileFromCluster(&ramDumpFile, ramDumpCluster, (valueBits & bootstrapOnFlashcard));
+	getFileFromCluster(&srParamsFile, srParamsCluster, (valueBits & gameOnFlashcard));
+	getFileFromCluster(&screenshotFile, screenshotCluster, (valueBits & bootstrapOnFlashcard));
+	getFileFromCluster(&pageFile, pageFileCluster, (valueBits & bootstrapOnFlashcard));
+	getFileFromCluster(&manualFile, manualCluster, (valueBits & bootstrapOnFlashcard));
 
-	#ifdef DEBUG		
+	#ifdef DEBUG
 	aFile myDebugFile;
 	getBootFileCluster(&myDebugFile, "NDSBTSRP.LOG");
 	enableDebug(&myDebugFile);
-	dbg_printf("logging initialized\n");		
+	dbg_printf("logging initialized\n");
 	dbg_printf("sdk version :");
-	dbg_hexa(moduleParams->sdk_version);		
+	dbg_hexa(moduleParams->sdk_version);
 	dbg_printf("\n");
 	#endif
-	
+
 	if (valueBits & ndmaDisabled) {
 		sdmmc_lock_ndma_slot();
 	}
@@ -524,7 +533,7 @@ void returnToLoader(bool reboot) {
 	*(vu32*)0x4004820 = 0;
 
 	aFile file;
-	getBootFileCluster(&file, "BOOT.NDS");
+	getBootFileCluster(&file, "BOOT.NDS", !(valueBits & b_dsiSD));
 	if (file.firstCluster == CLUSTER_FREE) {
 		// File not found, so reboot console instead
 		rebootConsole();
@@ -682,9 +691,9 @@ void unloadInGameMenu(void) {
 
 void myIrqHandlerVBlank(void) {
   while (1) {
-	#ifdef DEBUG		
+	#ifdef DEBUG
 	nocashMessage("myIrqHandlerVBlank");
-	#endif	
+	#endif
 
 	if (valueBits & i2cBricked) {
 		REG_MASTER_VOLUME = noI2CVolLevel;
@@ -760,7 +769,7 @@ void myIrqHandlerVBlank(void) {
 	} else {
 		swapTimer = 0;
 	} */
-	
+
 	if (0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_DOWN | KEY_B))) {
 		if (returnTimer == 60 * 2) {
 			IPC_SendSync(0x5);
@@ -879,17 +888,17 @@ void myIrqHandlerVBlank(void) {
   }
 }
 
-u32 myIrqEnable(u32 irq) {	
+u32 myIrqEnable(u32 irq) {
 	int oldIME = enterCriticalSection();
 
-	#ifdef DEBUG		
+	#ifdef DEBUG
 	nocashMessage("myIrqEnable\n");
-	#endif	
+	#endif
 
 	initialize();
 	driveInitialize();
 
-	u32 irq_before = REG_IE;		
+	u32 irq_before = REG_IE;
 	REG_IE |= irq;
 	leaveCriticalSection(oldIME);
 	return irq_before;
@@ -901,24 +910,24 @@ u32 myIrqEnable(u32 irq) {
 //
 
 bool eepromProtect(void) {
-	#ifdef DEBUG		
+	#ifdef DEBUG
 	dbg_printf("\narm7 eepromProtect\n");
-	#endif	
-	
+	#endif
+
 	return true;
 }
 
 bool eepromRead(u32 src, void *dst, u32 len) {
-	#ifdef DEBUG	
-	dbg_printf("\narm7 eepromRead\n");	
-	
+	#ifdef DEBUG
+	dbg_printf("\narm7 eepromRead\n");
+
 	dbg_printf("\nsrc : \n");
-	dbg_hexa(src);		
+	dbg_hexa(src);
 	dbg_printf("\ndst : \n");
 	dbg_hexa((u32)dst);
 	dbg_printf("\nlen : \n");
 	dbg_hexa(len);
-	#endif	
+	#endif
 
 	bakSdData();
 	fileRead(dst, savFile, src, len);
@@ -928,17 +937,17 @@ bool eepromRead(u32 src, void *dst, u32 len) {
 }
 
 bool eepromPageWrite(u32 dst, const void *src, u32 len) {
-	#ifdef DEBUG	
-	dbg_printf("\narm7 eepromPageWrite\n");	
-	
+	#ifdef DEBUG
+	dbg_printf("\narm7 eepromPageWrite\n");
+
 	dbg_printf("\nsrc : \n");
-	dbg_hexa((u32)src);		
+	dbg_hexa((u32)src);
 	dbg_printf("\ndst : \n");
 	dbg_hexa(dst);
 	dbg_printf("\nlen : \n");
 	dbg_hexa(len);
-	#endif	
-	
+	#endif
+
 	bakSdData();
 	fileWrite(src, savFile, dst, len);
 	restoreSdBakData();
@@ -947,16 +956,16 @@ bool eepromPageWrite(u32 dst, const void *src, u32 len) {
 }
 
 bool eepromPageProg(u32 dst, const void *src, u32 len) {
-	#ifdef DEBUG	
-	dbg_printf("\narm7 eepromPageProg\n");	
-	
+	#ifdef DEBUG
+	dbg_printf("\narm7 eepromPageProg\n");
+
 	dbg_printf("\nsrc : \n");
-	dbg_hexa((u32)src);		
+	dbg_hexa((u32)src);
 	dbg_printf("\ndst : \n");
 	dbg_hexa(dst);
 	dbg_printf("\nlen : \n");
 	dbg_hexa(len);
-	#endif	
+	#endif
 
 	bakSdData();
 	fileWrite(src, savFile, dst, len);
@@ -966,16 +975,16 @@ bool eepromPageProg(u32 dst, const void *src, u32 len) {
 }
 
 bool eepromPageVerify(u32 dst, const void *src, u32 len) {
-	#ifdef DEBUG	
-	dbg_printf("\narm7 eepromPageVerify\n");	
-	
+	#ifdef DEBUG
+	dbg_printf("\narm7 eepromPageVerify\n");
+
 	dbg_printf("\nsrc : \n");
-	dbg_hexa((u32)src);		
+	dbg_hexa((u32)src);
 	dbg_printf("\ndst : \n");
 	dbg_hexa(dst);
 	dbg_printf("\nlen : \n");
 	dbg_hexa(len);
-	#endif	
+	#endif
 
 	//i2cWriteRegister(0x4A, 0x12, 0x01);		// When we're saving, power button does nothing, in order to prevent corruption.
 	//fileWrite(src, savFile, dst, len, -1);
@@ -984,9 +993,9 @@ bool eepromPageVerify(u32 dst, const void *src, u32 len) {
 }
 
 bool eepromPageErase (u32 dst) {
-	#ifdef DEBUG	
-	dbg_printf("\narm7 eepromPageErase\n");	
-	#endif	
+	#ifdef DEBUG
+	dbg_printf("\narm7 eepromPageErase\n");
+	#endif
 
 	// TODO: this should be implemented?
 	return true;
@@ -995,7 +1004,7 @@ bool eepromPageErase (u32 dst) {
 /*
 TODO: return the correct ID
 
-From gbatek 
+From gbatek
 Returns RAW unencrypted Chip ID (eg. C2h,0Fh,00h,00h), repeated every 4 bytes.
   1st byte - Manufacturer (eg. C2h=Macronix) (roughly based on JEDEC IDs)
   2nd byte - Chip size (00h..7Fh: (N+1)Mbytes, F0h..FFh: (100h-N)*256Mbytes?)
@@ -1052,10 +1061,10 @@ Existing/known ROM IDs are:
   FFh,FFh,FFh,FFh None (no cartridge inserted)
 */
 u32 cardId(void) {
-	#ifdef DEBUG	
+	#ifdef DEBUG
 	dbg_printf("\ncardId\n");
 	#endif
-    
+
     u32 cardid = getChipId(ndsHeader, moduleParams);
 
     //if (!cardInitialized && strncmp(getRomTid(ndsHeader), "BO5", 3) == 0)  cardid = 0xE080FF80; // golden sun
@@ -1066,24 +1075,24 @@ u32 cardId(void) {
     #ifdef DEBUG
     dbg_hexa(cardid);
     #endif
-    
+
 	return cardid;
 }
 
 bool cardRead(u32 dma, u32 src, void *dst, u32 len) {
-	#ifdef DEBUG	
-	dbg_printf("\narm7 cardRead\n");	
-	
+	#ifdef DEBUG
+	dbg_printf("\narm7 cardRead\n");
+
 	dbg_printf("\ndma : \n");
-	dbg_hexa(dma);		
+	dbg_hexa(dma);
 	dbg_printf("\nsrc : \n");
-	dbg_hexa(src);		
+	dbg_hexa(src);
 	dbg_printf("\ndst : \n");
 	dbg_hexa((u32)dst);
 	dbg_printf("\nlen : \n");
 	dbg_hexa(len);
-	#endif	
-	
+	#endif
+
 	return false;
 }
 #endif
