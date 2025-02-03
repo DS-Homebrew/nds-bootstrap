@@ -567,7 +567,7 @@ u32 patchCardNdsArm7(
 		dbg_printf("\nGameCodeMatch:");
 		dbg_hexa(GameCodeMatch);
 		dbg_printf("\nSaveRelocation:");
-		dbg_printf(saveRelocation);
+		dbg_hexa(saveRelocation);
 		dbg_printf("\n");
 		if (!(saveRelocation == FALSE && GameCodeMatch == TRUE)){
 			if (newArm7binarySize==0x2352C || newArm7binarySize==0x235DC || newArm7binarySize==0x23CAC || newArm7binarySize==0x245C0 || newArm7binarySize==0x245C4) {
