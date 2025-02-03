@@ -14,6 +14,7 @@
 
 extern u8 gameOnFlashcard;
 extern u8 saveOnFlashcard;
+extern u8 saveRelocation;
 extern u16 a9ScfgRom;
 //extern u8 dsiSD;
 
@@ -790,10 +791,15 @@ u32 patchCardNdsArm7(
 		patchMirrorCheck(ndsHeader, moduleParams);
 		patchVramWifiBinaryLoad(ce7, ndsHeader, moduleParams);
 		u32 saveResult = 0;
-		// Read header of Cartridge
-		// bool GameCodeMatch: Compare gamecodes between Cartridge and Rom on SD
-		//  TRUE: save relocation off, save in cartridge
-		//  FALSE: save relocation on, save in sd
+		// Save Relocation Switch
+		// Only when saveRelocation is turning off(FLASE) and GameCodeMatch is matching(TRUE),
+		// will the save file be located into DS Cartridge as original. 
+		// If saveRelocation is turning on(TRUE), 
+		// or saveRelocation is turning off(FLASE) but GameCodeMatch isn't matching(FALSE),
+		// the save file will be relocated into SD card.
+		// saveRelocation: option value write in nds-bootstrap.ini (default value is 1)
+		// GameCodeMatch: Compare gamecodes between DS Cartridge and Rom on SD
+		// This file can active save located into DS Cartridge for dsi/3ds mode.
 		char headerData[0x200] = {0};
 		bool GameCodeMatch = FALSE;
 		cardParamCommand (CARD_CMD_HEADER_READ, 0, 
@@ -807,8 +813,10 @@ u32 patchCardNdsArm7(
 		dbg_printf((headerData+0xC));
 		dbg_printf("\nGameCodeMatch:");
 		dbg_hexa(GameCodeMatch);
+		dbg_printf("\nSaveRelocation:");
+		dbg_printf(saveRelocation);
 		dbg_printf("\n");
-		if (GameCodeMatch == FALSE) {
+		if (!(saveRelocation == FALSE && GameCodeMatch == TRUE))
 		if (newArm7binarySize==0x2352C || newArm7binarySize==0x235DC || newArm7binarySize==0x23CAC || newArm7binarySize==0x245C0 || newArm7binarySize==0x245C4) {
 			saveResult = savePatchInvertedThumb(ce7, ndsHeader, moduleParams, saveFileCluster, saveSize);    
 		} else if (isSdk5(moduleParams)) {

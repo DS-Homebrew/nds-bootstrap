@@ -79,6 +79,7 @@ typedef struct configuration {
 	u16 hotkey;
 	bool specialCard;
 	char* manualPath;
+	bool saveRelocation;
 } configuration;
 
 #endif // CONFIGURATION_H

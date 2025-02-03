@@ -76,6 +76,7 @@
 	.global dmaRomRead_LED
 	.global soundFreq
 	.global valueBits3
+	.global saveRelocation
 @---------------------------------------------------------------------------------
 	.align	4
 	.arm
@@ -197,6 +198,8 @@ dmaRomRead_LED:
 soundFreq:
 	.byte	0
 valueBits3:
+	.byte	0
+saveRelocation:
 	.byte	0
 .align 4
 
