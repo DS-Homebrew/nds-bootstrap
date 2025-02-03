@@ -569,7 +569,7 @@ u32 patchCardNdsArm7(
 		dbg_printf("\nSaveRelocation:");
 		dbg_printf(saveRelocation);
 		dbg_printf("\n");
-		if (!(saveRelocation == FALSE && GameCodeMatch == TRUE))
+		if (!(saveRelocation == FALSE && GameCodeMatch == TRUE)){
 		if (newArm7binarySize==0x2352C || newArm7binarySize==0x235DC || newArm7binarySize==0x23CAC || newArm7binarySize==0x245C0 || newArm7binarySize==0x245C4) {
 			saveResult = savePatchInvertedThumb(ce7, ndsHeader, moduleParams, saveFileCluster);    
 		} else if (isSdk5(moduleParams)) {
