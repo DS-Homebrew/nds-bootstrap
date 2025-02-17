@@ -1450,7 +1450,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		fclose(donorNdsFile);
 
 		if (!conf->gameOnFlashcard && !conf->saveOnFlashcard) {
-			if (romTid[0] != 'I' && memcmp(romTid, "UZP", 3) != 0 && memcmp(romTid, "HND", 3) != 0) {
+			if (romTid[0] != 'I' && memcmp(romTid, "UZP", 3) != 0 && memcmp(romTid, "HND", 3) != 0 && memcmp(romTid, "UEI", 3) != 0) {
 				disableSlot1();
 			} else {
 				// Initialize card and read header, HGSS IR doesn't work if you don't read the full header
@@ -1505,8 +1505,8 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 				sysSetCardOwner(BUS_OWNER_ARM7);
 
-				// Leave Slot-1 enabled for IR cartridges, Battle & Get: Pokémon Typing DS, and DS Download Play
-				conf->specialCard = (headerData[0xC] == 'I' || memcmp(headerData + 0xC, "UZP", 3) == 0 || memcmp(romTid, "HND", 3) == 0);
+				// Leave Slot-1 enabled for IR cartridges, Battle & Get: Pokémon Typing DS, DS Download Play, and Hoshizora Navi (Direction Sensing Card)
+				conf->specialCard = (headerData[0xC] == 'I' || memcmp(headerData + 0xC, "UZP", 3) == 0 || memcmp(romTid, "HND", 3) == 0 || memcmp(romTid, "UEI", 3) == 0);
 				if (conf->specialCard) {
 					conf->valueBits2 |= BIT(4);
 				} else {
