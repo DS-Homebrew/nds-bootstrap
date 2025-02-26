@@ -149,6 +149,7 @@ static inline void debugConfB4DS(configuration* conf) {
 	}
 	dbg_printf("saveSize: %lX\n", conf->saveSize);
 	dbg_printf("language: %hhX\n", conf->language);
+	dbg_printf("region: %hhX\n", conf->region);
 	dbg_printf("donorSdkVer: %lX\n", conf->donorSdkVer);
 	dbg_printf("patchMpuRegion: %lX\n", conf->patchMpuRegion);
 	dbg_printf("patchMpuSize: %lX\n", conf->patchMpuSize);
@@ -160,6 +161,7 @@ static inline void debugConfB4DS(configuration* conf) {
 	dbg_printf("forceSleepPatch: %s\n", btoa(conf->forceSleepPatch));
 	dbg_printf("logging: %s\n", btoa(conf->logging));
 	dbg_printf("initDisc: %s\n", btoa(conf->initDisc));
+	dbg_printf("macroMode: %s\n", btoa(conf->macroMode));
 }
 
 static inline void debugConf(configuration* conf) {
