@@ -171,11 +171,8 @@ code_handler_start_fifo:
 
 .pool
 
-ndsCodeStart:
 	.thumb
-	bx	pc
-.align	4
-	.arm
+ndsCodeStart:
 	mov r1, #0
 	mov r2, #0
 	mov r3, #0
@@ -183,13 +180,13 @@ ndsCodeStart:
 	mov r5, #0
 	mov r6, #0
 	mov r7, #0
-	mov r8, #0
-	mov r9, #0
-	mov r10, #0
-	mov r11, #0
+	mov r8, r1
+	mov r9, r1
+	mov r10, r1
+	mov r11, r1
+	bx r0
 
-	bx	r0
-
+	.arm
 irqHandler:
                 STMFD           SP!, {LR}
                 MOV             R12, #0x4000000
@@ -428,6 +425,7 @@ twlGetPitchTable:
 	lsls	r0, r0, #0x10
 	lsrs	r0, r0, #0x10
 	bx	lr
+.pool
 @---------------------------------------------------------------------------------
 
 	.thumb
@@ -581,11 +579,9 @@ thumb_card_irq_enable_arm7:
 	bl	thumb_blx_r3_stub2
 	pop	{r4}
 	pop	{r3}
-	bx  r3
 thumb_blx_r3_stub2:
-	bx	r3
+	bx  r3
 .pool
-.align	4
 @---------------------------------------------------------------------------------
 
 	.arm

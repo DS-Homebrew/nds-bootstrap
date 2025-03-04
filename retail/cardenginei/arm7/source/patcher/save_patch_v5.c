@@ -55,14 +55,15 @@ u32 savePatchV5(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, const u3
 	u32 srcAddr;
 
 	if (usesThumb) {
-		/* u32* cardId = (u32*) (JumpTableFunc - 0xE);
+		/* u16* cardIdBranch = (u16*)(JumpTableFunc - 0xC);
+		dbg_printf("card id branch:\t");
+		dbg_hexa((u32)cardIdBranch);
+		dbg_printf("\n");
+		u16* cardId = getOffsetFromBLThumb(cardIdBranch);
 		dbg_printf("card id:\t");
 		dbg_hexa((u32)cardId);
 		dbg_printf("\n");
-		srcAddr = JumpTableFunc - 0xE  - vAddrOfRelocSrc + relocDestAtSharedMem ;
-		const u16* patchCardId = generateA7InstrThumb(srcAddr, ce7->patches->arm7FunctionsThumb->cardId);
-		cardId[0] = patchCardId[0];
-        cardId[1] = patchCardId[1]; */
+		tonccpy(cardId, (u16*)ce7->patches->arm7FunctionsThumb->cardId, 0x14); */
 
 		u16* eepromReadBranch = (u16*)(JumpTableFunc + 0x8);
 		/* dbg_printf("Eeprom read branch:\t");
