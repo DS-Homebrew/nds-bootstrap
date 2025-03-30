@@ -448,6 +448,7 @@
 - Pokémon: SoothingSilver Version (v1.2.2) (IPGE)
 - Pokémon: SoothingSilver Version (v1.3.0) (IPGE)
 - Pokémon: SoothingSilver Version (v1.3.2) (IPGE)
+- Pokémon: SoothingSilver Version (v1.4) (IPGE-0293) (Requires the ROM to be saved with TinkeDSi with ARM9 binary recompressed, and without the better compress method)
 - Pokémon: Silver Yellow Version (v1.18) (IPGE)
 - Pokémon: Silver Yellow Version (v2.0) (IPGE-7068)
 - Pokémon: StormSilver Version (v1.10) (IPGE)
