@@ -10,9 +10,11 @@
 #include "tonccpy.h"
 #include "cardengine_header_arm7.h"
 #include "debug_file.h"
+#include <nds/card.h>
 
 extern u32 _io_dldi_features;
 
+extern u8 saveRelocation;
 extern u16 a9ScfgRom;
 
 extern u8 arm7newUnitCode;
@@ -542,7 +544,32 @@ u32 patchCardNdsArm7(
 
 	if (a7GetReloc(ndsHeader, moduleParams)) {
 		u32 saveResult = 0;
-
+		// Save Relocation Switch
+		// Only when saveRelocation is turning off(FLASE) and GameCodeMatch is matching(TRUE),
+		// will the save file be located into DS Cartridge as original. 
+		// If saveRelocation is turning on(TRUE), 
+		// or saveRelocation is turning off(FLASE) but GameCodeMatch isn't matching(FALSE),
+		// the save file will be relocated into SD card.
+		// saveRelocation: option value write in nds-bootstrap.ini (default value is 1)
+		// GameCodeMatch: Compare gamecodes between DS Cartridge and Rom on SD
+		// This file can active save located into DS Cartridge for B4DS mode in slot2 flashcart.
+		char headerData[0x200] = {0};
+		bool GameCodeMatch = FALSE;
+		cardParamCommand (CARD_CMD_HEADER_READ, 0, 
+			CARD_ACTIVATE | CARD_nRESET | CARD_CLK_SLOW | CARD_BLK_SIZE(1) | CARD_DELAY1(0x1FFF) | CARD_DELAY2(0x3F), 
+			(u32 *)headerData , 0x200 / sizeof(u32));
+		if(memcmp((const void*)(headerData + 0xC), ndsHeader->gameCode, 4) == 0)
+			GameCodeMatch = TRUE;
+		dbg_printf("romTid:");
+		dbg_printf(ndsHeader->gameCode);
+		dbg_printf("\nCardTid:");
+		dbg_printf((headerData+0xC));
+		dbg_printf("\nGameCodeMatch:");
+		dbg_hexa(GameCodeMatch);
+		dbg_printf("\nSaveRelocation:");
+		dbg_hexa(saveRelocation);
+		dbg_printf("\n");
+		if (!(saveRelocation == FALSE && GameCodeMatch == TRUE)){
 		if (newArm7binarySize==0x2352C || newArm7binarySize==0x235DC || newArm7binarySize==0x23CAC || newArm7binarySize==0x245C0 || newArm7binarySize==0x245C4) {
 			saveResult = savePatchInvertedThumb(ce7, ndsHeader, moduleParams, saveFileCluster);    
 		} else if (isSdk5(moduleParams)) {
@@ -564,6 +591,7 @@ u32 patchCardNdsArm7(
 			if (!saveResult && patchOffsetCache.savePatchType == 2) {
 				saveResult = savePatchUniversal(ce7, ndsHeader, moduleParams, saveFileCluster);
 			}
+		}
 		}
 		if (!saveResult) {
 			patchOffsetCache.savePatchType = 0;
