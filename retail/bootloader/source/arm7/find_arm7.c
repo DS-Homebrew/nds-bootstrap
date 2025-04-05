@@ -243,7 +243,7 @@ u32* findWramClearOffset(const tNDSHeader* ndsHeader) {
 			wramClearSignature3Alt, 1
 		);
 		if (offset) {
-			dbg_printf("WRAM clear offset (SDK3) alt found\n");
+			dbg_printf("WRAM clear offset (SDK3) alt found\n\n");
 			return offset + 3;
 		} else {
 			dbg_printf("WRAM clear offset (SDK3) alt not found\n");
@@ -254,7 +254,7 @@ u32* findWramClearOffset(const tNDSHeader* ndsHeader) {
 			wramClearSignature4, 1
 		);
 		if (offset) {
-			dbg_printf("WRAM clear offset (SDK4) found\n");
+			dbg_printf("WRAM clear offset (SDK4) found\n\n");
 			return offset + 2;
 		} else {
 			dbg_printf("WRAM clear offset (SDK4) not found\n");
@@ -265,7 +265,7 @@ u32* findWramClearOffset(const tNDSHeader* ndsHeader) {
 			wramClearSignature4Thumb, 1
 		);
 		if (offset) {
-			dbg_printf("WRAM clear offset (SDK4) thumb found\n");
+			dbg_printf("WRAM clear offset (SDK4) thumb found\n\n");
 			return (u32*)((u32)offset + 6);
 		} else {
 			dbg_printf("WRAM clear offset (SDK4) thumb not found\n");
