@@ -309,7 +309,7 @@ static void loadApFix(configuration* conf, const char* bootstrapPath, const char
 				u16 crc;
 				fread(&crc, 1, sizeof(crc), file);
 
-				if (crc == headerCRC) { // CRC matches
+				if (crc == 0xFFFF || crc == headerCRC) { // CRC matches
 					fread(&offset, 1, sizeof(offset), file);
 					fread(&size, 1, sizeof(size), file);
 					cheatVer = fgetc(file) & 1;
