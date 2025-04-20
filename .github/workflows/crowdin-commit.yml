@@ -49,6 +49,7 @@ jobs:
           make nightly
 
       - name: Commit changes
+        continue-on-error: true
         run: |
           git config user.email "twlbot@flashcarts.net"
           git config user.name "TWLBot"
