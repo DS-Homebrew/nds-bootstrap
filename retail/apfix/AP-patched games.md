@@ -82,7 +82,7 @@
 - Chrono Trigger (Spanish translation) (YQUP-EA39)
 - Chrono Trigger (Chinese translation) (YQUJ-FF69)
 - Chuldong! Rescue Force DS (Korea) (C6HK)
-- Cid to Chocobo no Fushigi na Dungeon: Toki Wasure no Meikyuu DS+ (Japan) (CCTJ)
+- Cid to Chocobo no Fushigi na Dungeon: Toki Wasure no Meikyuu DS+ (Japan) (Also applies to modified ROMs) (CCTJ)
 - Club Penguin: EPF: Herbert's Revenge (USA) (CY9E)
 - Club Penguin: EPF: Herbert's Revenge (Europe) (CY9P)
 - Club Penguin: Elite Penguin Force (Germany) (CLPD)
