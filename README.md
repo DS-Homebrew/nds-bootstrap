@@ -51,7 +51,7 @@ A frontend isn't required as nds-bootstrap uses an ini file to load its paramete
 
 TWiLight Menu++ is a frontend for nds-bootstrap, developed by [Rocket Robz](https://github.com/RocketRobz) & co. It has 6 customizable launchers to choose from with the ability to launch emulators and other homebrew.
 
-It also includes a number of Anti-Piracy patches for the games and will automatically configure nds-bootstrap for you, with customizable per game settings.
+It will automatically configure nds-bootstrap for you, with customizable per game settings.
 
 ## [Forwarders](https://wiki.ds-homebrew.com/ds-index/forwarders)
 
