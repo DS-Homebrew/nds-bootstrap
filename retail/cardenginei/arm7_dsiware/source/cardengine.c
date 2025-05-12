@@ -94,7 +94,6 @@ static bool driveInited = false;
 static bool bootloaderCleared = false;
 static bool funcsUnpatched = false;
 bool ipcEveryFrame = false;
-static bool swapScreens = false;
 static bool wifiIrq = false;
 static int wifiIrqTimer = 0;
 
@@ -275,7 +274,6 @@ static void initialize(void) {
 	if (!bootloaderCleared) {
 		toncset((u8*)0x06000000, 0, 0x40000);	// Clear bootloader
 		if (mainScreen) {
-			swapScreens = (mainScreen == 2);
 			ipcEveryFrame = true;
 		}
 
@@ -876,11 +874,10 @@ void myIrqHandlerVBlank(void) {
 		wifiIrqTimer = 0;
 	}
 
-	// Update main screen or swap screens
+	// Swap screens
 	if (ipcEveryFrame) {
-		IPC_SendSync(swapScreens ? 0x7 : 0x6);
+		IPC_SendSync(0x6);
 	}
-	swapScreens = false;
 
 	if (sharedAddr[0] == 0x524F5245) { // 'EROR'
 		REG_MASTER_VOLUME = 0;

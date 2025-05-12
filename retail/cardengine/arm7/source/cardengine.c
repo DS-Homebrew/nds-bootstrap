@@ -85,7 +85,6 @@ static bool volumeAdjustActivated = false;*/
 //static bool ndmaUsed = false;
 
 bool ipcEveryFrame = false;
-static bool swapScreens = false;
 
 int RumbleTimer = 0;
 int RumbleForce = 1;
@@ -162,7 +161,6 @@ static void initialize(void) {
 		toncset((u32*)0x02377000, 0, 0x1000);
 		toncset((u8*)0x06000000, 0, 0x40000);	// Clear bootloader
 		if (mainScreen) {
-			swapScreens = (mainScreen == 2);
 			ipcEveryFrame = true;
 		}
 		bootloaderCleared = true;
@@ -501,11 +499,10 @@ void myIrqHandlerVBlank(void) {
 	}
 #endif
 
-	// Update main screen or swap screens
+	// Swap screens
 	if (ipcEveryFrame) {
-		IPC_SendSync(swapScreens ? 0x7 : 0x6);
+		IPC_SendSync(0x6);
 	}
-	swapScreens = false;
 
 	if (sharedAddr[0] == 0x524F5245) { // 'EROR'
 		REG_MASTER_VOLUME = 0;
