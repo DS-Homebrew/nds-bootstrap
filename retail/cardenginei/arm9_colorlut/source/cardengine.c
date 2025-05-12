@@ -3,7 +3,7 @@
 #include <nds/arm9/video.h>
 #include <nds/system.h>
 
-void applyColorLut(void) {
+void applyColorLut(bool forceUpdate) {
 	u32* storedPals = (u32*)0x03755800;
 	u32* palettes = (u32*)0x05000000;
 	u16* colorTable = (u16*)0x03770000;
@@ -23,10 +23,12 @@ void applyColorLut(void) {
 		palettes++;
 	}
 
-	static int framesPassed = 19;
-	framesPassed++;
-	if (framesPassed != 20) return;
-	framesPassed = 0;
+	if (!forceUpdate) {
+		static int framesPassed = 19;
+		framesPassed++;
+		if (framesPassed != 20) return;
+		framesPassed = 0;
+	}
 
 	u8 vramCr = VRAM_E_CR;
 	while (vramCr >= 0x90) {

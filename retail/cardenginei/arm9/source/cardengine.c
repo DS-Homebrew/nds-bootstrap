@@ -747,9 +747,9 @@ extern void debugRamMpuFix();
 extern void region0Fix();
 
 #ifndef TWLSDK
-static inline void applyColorLut(void) {
-	volatile void (*code)() = (volatile void*)CARDENGINEI_ARM9_CLUT_LOCATION;
-	(*code)();
+static inline void applyColorLut(bool forceUpdate) {
+	volatile void (*code)(bool) = (volatile void*)CARDENGINEI_ARM9_CLUT_LOCATION;
+	(*code)(forceUpdate);
 }
 #endif
 
@@ -1383,7 +1383,7 @@ void inGameMenu(s32* exRegisters) {
 	}
 
 	if (ce9->valueBits & useColorLut) {
-		applyColorLut();
+		applyColorLut(true);
 	}
 	#endif
 
@@ -1476,7 +1476,7 @@ void myIrqHandlerIPC(void) {
 		case 0x6: {
 #ifndef TWLSDK
 			if (ce9->valueBits & useColorLut) {
-				applyColorLut();
+				applyColorLut(false);
 			}
 #endif
 			if (ce9->mainScreen == 1)
