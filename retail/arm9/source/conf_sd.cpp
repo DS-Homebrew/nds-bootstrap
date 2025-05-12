@@ -82,6 +82,10 @@ extern std::string sharedFontPath;
 extern u8* lz77ImageBuffer;
 #define sizeof_lz77ImageBuffer 0x30000
 
+extern bool colorTable;
+
+extern void myConsoleDemoInit(void);
+
 off_t getFileSize(const char* path) {
 	FILE* fp = fopen(path, "rb");
 	off_t fsize = 0;
@@ -441,7 +445,7 @@ static void createRamDumpBin(configuration* conf) {
 	}
 
 	if (getFileSize(ramDumpPath.c_str()) < ramDumpSize) {
-		consoleDemoInit();
+		myConsoleDemoInit();
 		iprintf("Allocating space for\n");
 		iprintf("creating a RAM dump.\n");
 		iprintf("Please wait...");
@@ -476,7 +480,7 @@ static void createApFixOverlayBin(configuration* conf) {
 	}
 
 	if (!conf->isDSiWare && getFileSize(apFixOverlaysPath.c_str()) < 0xA00000) {
-		consoleDemoInit();
+		myConsoleDemoInit();
 		iprintf("Allocating space for\n");
 		iprintf("AP-fixed overlays.\n");
 		iprintf("Please wait...");
@@ -497,6 +501,31 @@ static void createApFixOverlayBin(configuration* conf) {
 			iprintf("Failed to allocate space\n");
 			iprintf("for AP-fixed overlays.");
 			while (1) swiWaitForVBlank();
+		}
+	}
+}
+
+static void loadColorLut(const bool isRunFromFlashcard) {
+	const char* txtPath = isRunFromFlashcard ? "fat:/_nds/colorLut/currentSetting.txt" : "sd:/_nds/colorLut/currentSetting.txt";
+	if (access(txtPath, F_OK) == 0) {
+		// Load color LUT
+		char lutName[128] = {0};
+		FILE* file = fopen(txtPath, "rb");
+		fread(lutName, 1, 128, file);
+		fclose(file);
+
+		char colorLutPath[256];
+		sprintf(colorLutPath, "%s:/_nds/colorLut/%s.lut", isRunFromFlashcard ? "fat" : "sd", lutName);
+
+		if (getFileSize(colorLutPath) == 0x10000) {
+			file = fopen(colorLutPath, "rb");
+			fread(lz77ImageBuffer, 1, 0x10000, file);
+			fclose(file);
+
+			vramSetBankE(VRAM_E_LCD);
+			tonccpy(VRAM_E, lz77ImageBuffer, 0x10000); // Copy LUT to VRAM
+
+			colorTable = true;
 		}
 	}
 }
@@ -840,7 +869,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	const bool scfgSdmmcEnabled = (*(u8*)0x02FFFDF4 == 1);
 
 	if (!conf->sdFound && !flashcardFound) {
-		consoleDemoInit();
+		myConsoleDemoInit();
 		iprintf("FAT init failed!\n");
 		return -1;
 	}
@@ -851,7 +880,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		bootstrapPath = conf->sdFound ? "sd:/_nds/nds-bootstrap-nightly.nds" : "fat:/_nds/nds-bootstrap-nightly.nds";
 	}
 	if (!nitroFSInit(bootstrapPath)) {
-		consoleDemoInit();
+		myConsoleDemoInit();
 		iprintf("nitroFSInit failed!\n");
 		return -1;
 	}
@@ -915,6 +944,8 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	}
 
 	conf->bootstrapOnFlashcard = ((bootstrapPath[0] == 'f' && bootstrapPath[1] == 'a' && bootstrapPath[2] == 't') || !conf->sdFound);
+
+	loadColorLut(conf->bootstrapOnFlashcard);
 
 	load_conf(conf, conf->bootstrapOnFlashcard ? "fat:/_nds/nds-bootstrap.ini" : "sd:/_nds/nds-bootstrap.ini");
 
@@ -1671,7 +1702,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 			bool found = (access(pageFilePath.c_str(), F_OK) == 0);
 			if (!found) {
-				consoleDemoInit();
+				myConsoleDemoInit();
 				iprintf("Creating pagefile.sys\n");
 				iprintf("Please wait...\n");
 			}
@@ -1737,7 +1768,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 			bool found = (access(pageFilePath.c_str(), F_OK) == 0);
 			if (!found) {
-				consoleDemoInit();
+				myConsoleDemoInit();
 				iprintf("Creating pagefile.sys\n");
 				iprintf("Please wait...\n");
 			}
@@ -1766,7 +1797,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			if (getFileSize(screenshotPath.c_str()) < 0x4BCC00) {
 				char buffer[2][0x100] = {{0}};
 
-				consoleDemoInit();
+				myConsoleDemoInit();
 				iprintf("Creating screenshots.tar\n");
 				iprintf("Please wait...");
 
@@ -1886,6 +1917,12 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		if (bootstrapImages) {
 			fread(lz77ImageBuffer, 1, sizeof_lz77ImageBuffer, bootstrapImages);
 			LZ77_Decompress(lz77ImageBuffer, (u8*)IMAGES_LOCATION+0x18000);
+			if (colorTable) {
+				u16* buffer = (u16*)IMAGES_LOCATION+0x18000;
+				for (int i = 0; i < (256*192)*2; i++) {
+					buffer[i] = VRAM_E[buffer[i] % 0x8000];
+				}
+			}
 		}
 		fclose(bootstrapImages);
 
@@ -2017,7 +2054,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 		bool found = (access(pageFilePath.c_str(), F_OK) == 0);
 		if (!found) {
-			consoleDemoInit();
+			myConsoleDemoInit();
 			iprintf("Creating pagefile.sys\n");
 			iprintf("Please wait...\n");
 		}
@@ -2061,7 +2098,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			if (getFileSize(screenshotPath.c_str()) < 0x4BCC00) {
 				char buffer[2][0x100] = {{0}};
 
-				consoleDemoInit();
+				myConsoleDemoInit();
 				iprintf("Creating screenshots.tar\n");
 				iprintf("Please wait...");
 
@@ -2349,6 +2386,12 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		if (bootstrapImages) {
 			fread(lz77ImageBuffer, 1, sizeof_lz77ImageBuffer, bootstrapImages);
 			LZ77_Decompress(lz77ImageBuffer, (u8*)IMAGES_LOCATION+0x18000);
+			if (colorTable) {
+				u16* buffer = (u16*)IMAGES_LOCATION+0x18000;
+				for (int i = 0; i < (256*192)*2; i++) {
+					buffer[i] = VRAM_E[buffer[i] % 0x8000];
+				}
+			}
 		}
 		fclose(bootstrapImages);
 

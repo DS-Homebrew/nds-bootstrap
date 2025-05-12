@@ -46,6 +46,21 @@ typedef struct {
 static bool debug = false;
 static bool sdFound = false;
 static bool bootstrapOnFlashcard = false;
+bool colorTable = false;
+
+void myConsoleDemoInit(void) {
+	static bool inited = false;
+	if (inited) return;
+
+	consoleDemoInit();
+	if (colorTable) {
+		for (int i = 0; i < 256; i++) {
+			BG_PALETTE_SUB[i] = VRAM_E[BG_PALETTE_SUB[i] % 0x8000];
+		}
+	}
+
+	inited = true;
+}
 
 static inline const char* btoa(bool x) {
 	return x ? "true" : "false";
