@@ -4,6 +4,8 @@
 #include <nds/ndstypes.h>
 
 #define IGM_TEXT_SIZE_ALIGNED ((sizeof(struct IgmText) + 0xF) & ~0xF)
+#define IGM_PALS (IGM_TEXT_SIZE_ALIGNED + 0xE)
+#define IGM_ENTRY (IGM_TEXT_SIZE_ALIGNED + 0x20)
 
 struct IgmText {
 	unsigned char version[20];

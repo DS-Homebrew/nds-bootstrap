@@ -1854,6 +1854,13 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			}
 
 			cebin = fopen(pageFilePath.c_str(), "r+");
+			if (colorTable) {
+				u16* igmPals = (u16*)igmText;
+				igmPals += IGM_PALS/2;
+				for (int i = 0; i < 8; i++) {
+					igmPals[i] = VRAM_E[igmPals[i] % 0x8000];
+				}
+			}
 			fwrite((u8*)igmText, 1, 0xA000, cebin);
 			fclose(cebin);
 			toncset((u8*)igmText, 0, 0xA000);
@@ -2160,6 +2167,13 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			}
 
 			cebin = fopen(pageFilePath.c_str(), "r+");
+			if (colorTable) {
+				u16* igmPals = (u16*)igmText;
+				igmPals += IGM_PALS/2;
+				for (int i = 0; i < 8; i++) {
+					igmPals[i] = VRAM_E[igmPals[i] % 0x8000];
+				}
+			}
 			fwrite((u8*)igmText, 1, 0xA000, cebin);
 			fclose(cebin);
 			toncset((u8*)igmText, 0, 0xA000);

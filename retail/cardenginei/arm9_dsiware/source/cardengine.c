@@ -229,7 +229,7 @@ void inGameMenu(s32* exRegisters) {
 	}
 
 	*(u32*)(INGAME_MENU_LOCATION + IGM_TEXT_SIZE_ALIGNED) = (u32)sharedAddr;
-	volatile void (*inGameMenu)(s32*, u32, s32*) = (volatile void*)INGAME_MENU_LOCATION + IGM_TEXT_SIZE_ALIGNED + 0x10;
+	volatile void (*inGameMenu)(s32*, u32, s32*) = (volatile void*)INGAME_MENU_LOCATION + IGM_ENTRY;
 	(*inGameMenu)(&ce9->mainScreen, ce9->consoleModel, exRegisters);
 
 	while (sharedAddr[5] != 0x4C4D4749) { // 'IGML'
