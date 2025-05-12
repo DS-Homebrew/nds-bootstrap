@@ -2261,7 +2261,7 @@ int arm7_main(void) {
 		toncset((u32*)CARDENGINEI_ARM9_BUFFERED_LOCATION, 0, 0x10000);
 		toncset((u32*)CARDENGINEI_ARM7_BUFFERED_LOCATION, 0, 0x13400);
 
-		if (!dsiModeConfirmed && (dsiWramAccess && !dsiWramMirrored) && (*(u32*)(COLOR_LUT_BUFFERED_LOCATION-4) == 0x54554C63)) {
+		if ((!ROMsupportsDsiMode(ndsHeader) || !dsiModeConfirmed) && (dsiWramAccess && !dsiWramMirrored) && (*(u32*)(COLOR_LUT_BUFFERED_LOCATION-4) == 0x54554C63)) {
 			tonccpy((u32*)CARDENGINEI_ARM9_CLUT_LOCATION, (u16*)CARDENGINEI_ARM9_CLUT_BUFFERED_LOCATION, 0x800);
 			tonccpy((u16*)0x03770000, (u16*)COLOR_LUT_BUFFERED_LOCATION, 0x10000);
 			colorLutEnabled = true;
