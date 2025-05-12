@@ -180,6 +180,7 @@ bool pkmnHeader = false;
 bool pkmnGen5 = false;
 bool ndmaDisabled = false;
 bool sharedWramEnabled = false;
+bool colorLutEnabled = false;
 
 u32 newArm7binarySize = 0;
 u32 newArm7ibinarySize = 0;
@@ -886,7 +887,7 @@ static bool isROMLoadableInRAM(const tDSiHeader* dsiHeader, const tNDSHeader* nd
 	) {
 		const bool twlType = (ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed);
 		const bool cheatsEnabled = (cheatSizeTotal > 4 && cheatSizeTotal <= 0x8000);
-		u32 wramSize = (dsiWramAccess && !dsiWramMirrored) ? 0x80000 : 0;
+		u32 wramSize = (dsiWramAccess && !dsiWramMirrored) ? (colorLutEnabled ? 0x55000 : 0x80000) : 0;
 		if (ce7Location == CARDENGINEI_ARM7_LOCATION) {
 			wramSize += 0x8000; // Shared 32KB of WRAM is available for ARM9 to use
 			sharedWramEnabled = true;
@@ -1275,7 +1276,7 @@ static void loadNitroFileInfoIntoRAM(const tNDSHeader* ndsHeader, aFile* romFile
 	if (baseFatSize == 0) return;
 
 	const u32 size = (baseFatOff-baseFntOff)+baseFatSize;
-	if (size > 0x80000) return;
+	if (size > (colorLutEnabled ? 0x55000 : 0x80000)) return;
 
 	sdmmc_set_ndma_slot(0);
 	fileRead((char*)0x03700000, romFile, baseFntOff, size);
@@ -2259,6 +2260,16 @@ int arm7_main(void) {
 
 		toncset((u32*)CARDENGINEI_ARM9_BUFFERED_LOCATION, 0, 0x10000);
 		toncset((u32*)CARDENGINEI_ARM7_BUFFERED_LOCATION, 0, 0x13400);
+
+		if (!dsiModeConfirmed && (dsiWramAccess && !dsiWramMirrored) && (*(u32*)(COLOR_LUT_BUFFERED_LOCATION-4) == 0x54554C63)) {
+			tonccpy((u32*)CARDENGINEI_ARM9_CLUT_LOCATION, (u16*)CARDENGINEI_ARM9_CLUT_BUFFERED_LOCATION, 0x800);
+			tonccpy((u16*)0x03770000, (u16*)COLOR_LUT_BUFFERED_LOCATION, 0x10000);
+			colorLutEnabled = true;
+		}
+
+		toncset((u32*)CARDENGINEI_ARM9_CLUT_BUFFERED_LOCATION, 0, 0x1800);
+		*(u32*)(COLOR_LUT_BUFFERED_LOCATION-4) = 0;
+		toncset((u16*)COLOR_LUT_BUFFERED_LOCATION, 0, 0x10000);
 
 		u32 clonebootFlag = 0;
 		const u32 clonebootOffset = ((romSize-0x88) <= baseRomSize) ? (romSize-0x88) : baseRomSize;

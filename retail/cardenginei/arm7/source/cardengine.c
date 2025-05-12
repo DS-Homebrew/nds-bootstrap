@@ -77,6 +77,7 @@
 #define bootstrapOnFlashcard BIT(19)
 #define ndmaDisabled BIT(20)
 #define isDlp BIT(21)
+#define useColorLut BIT(22)
 #define i2cBricked BIT(30)
 #define scfgLocked BIT(31)
 
@@ -1937,8 +1938,12 @@ void myIrqHandlerVBlank(void) {
 	// calledViaIPC = false;
 	// runCardEngineCheck();
 
-	// Swap screens
-	if (ipcEveryFrame) {
+	// Apply color LUT and/or swap screens
+	if (
+	#ifndef TWLSDK
+	(valueBits & useColorLut) ||
+	#endif
+	ipcEveryFrame) {
 		IPC_SendSync(0x6);
 	}
 

@@ -106,6 +106,7 @@ typedef struct cardengineArm9 {
 		18: waitForPreloadToFinish
 		19: resetOnFirstException
 		20: resetOnEveryException
+		21: useColorLut
 	*/
 	s32 mainScreen;
 	u32 consoleModel;

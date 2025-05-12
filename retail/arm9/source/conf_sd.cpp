@@ -1698,6 +1698,10 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 				?	(gsdd ? "nitro:/cardenginei_arm9_gsdd_dldi.lz77" : "nitro:/cardenginei_arm9_dldi.lz77")
 				:	(gsdd ? "nitro:/cardenginei_arm9_gsdd.lz77" : "nitro:/cardenginei_arm9.lz77")
 				, (u8*)CARDENGINEI_ARM9_BUFFERED_LOCATION);
+
+				if (colorTable) {
+					loadCardEngineBinary("nitro:/cardenginei_arm9_colorlut.bin", (u8*)CARDENGINEI_ARM9_CLUT_BUFFERED_LOCATION);
+				}
 			}
 
 			bool found = (access(pageFilePath.c_str(), F_OK) == 0);
@@ -1971,6 +1975,11 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			fclose(bootstrapImages);
 		} else {
 			toncset16((u16*)IMAGES_LOCATION, 0, 256*192);
+		}
+
+		if (colorTable) {
+			*(u32*)(COLOR_LUT_BUFFERED_LOCATION-4) = 0x54554C63; // 'cLUT'
+			tonccpy((u16*)COLOR_LUT_BUFFERED_LOCATION, VRAM_E, 0x10000);
 		}
 	} else {
 		if (accessControl & BIT(4)) {

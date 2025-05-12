@@ -55,6 +55,7 @@
 #define cloneboot BIT(14)
 #define fntFatCached BIT(17)
 #define waitForPreloadToFinish BIT(18)
+#define useColorLut BIT(21)
 
 //#ifdef DLDI
 #include "my_fat.h"
@@ -745,6 +746,13 @@ extern void debugRamMpuFix();
 // Revert region 0 patch
 extern void region0Fix();
 
+#ifndef TWLSDK
+static inline void applyColorLut(void) {
+	volatile void (*code)() = (volatile void*)CARDENGINEI_ARM9_CLUT_LOCATION;
+	(*code)();
+}
+#endif
+
 void cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	//nocashMessage("\narm9 cardRead\n");
 	#ifdef TWLSDK
@@ -1373,6 +1381,10 @@ void inGameMenu(s32* exRegisters) {
 	if (ce9->valueBits & useSharedWram) {
 		WRAM_CR = 0; // Set shared WRAM to ARM9
 	}
+
+	if (ce9->valueBits & useColorLut) {
+		applyColorLut();
+	}
 	#endif
 
 	*(u32*)(INGAME_MENU_LOCATION + IGM_TEXT_SIZE_ALIGNED) = (u32)sharedAddr;
@@ -1461,12 +1473,17 @@ void myIrqHandlerIPC(void) {
 			reset(0xFFFFFFFF, 0);
 			#endif
 			break;
-		case 0x6:
-			if(ce9->mainScreen == 1)
+		case 0x6: {
+#ifndef TWLSDK
+			if (ce9->valueBits & useColorLut) {
+				applyColorLut();
+			}
+#endif
+			if (ce9->mainScreen == 1)
 				REG_POWERCNT &= ~POWER_SWAP_LCDS;
-			else if(ce9->mainScreen == 2)
+			else if (ce9->mainScreen == 2)
 				REG_POWERCNT |= POWER_SWAP_LCDS;
-			break;
+		}	break;
 		/* case 0x7: {
 			ce9->mainScreen++;
 			if(ce9->mainScreen > 2)
