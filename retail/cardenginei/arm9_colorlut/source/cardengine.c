@@ -23,6 +23,11 @@ void applyColorLut(void) {
 		palettes++;
 	}
 
+	static int framesPassed = 19;
+	framesPassed++;
+	if (framesPassed != 20) return;
+	framesPassed = 0;
+
 	u8 vramCr = VRAM_E_CR;
 	while (vramCr >= 0x90) {
 		vramCr -= 0x10;
