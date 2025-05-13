@@ -229,7 +229,7 @@ static int runNdsFile(configuration* conf) {
 	// Debug
 	debug = conf->debug;
 	if (debug) {
-		consoleDemoInit();
+		myConsoleDemoInit();
 
 		if (dsiFeatures()) {
 			fifoSetValue32Handler(FIFO_USER_02, myFIFOValue32Handler, NULL);
@@ -400,7 +400,7 @@ static int runNdsFile(configuration* conf) {
 			dbg_printf("No NDS file specified\n");
 			dopause();
 		} else {
-			consoleDemoInit();
+			myConsoleDemoInit();
 			iprintf("No NDS file specified\n");
 		}
 		return -1;
@@ -574,7 +574,7 @@ int main(int argc, char** argv) {
 			if (debug) {
 				dbg_printf("Start failed. Error %i\n", status);
 			} else {
-				consoleDemoInit();
+				myConsoleDemoInit();
 				iprintf("Start failed. Error %i\n", status);
 			}
 		}
