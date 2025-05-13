@@ -55,6 +55,7 @@
 #define twlTouch BIT(15)
 #define bootstrapOnFlashcard BIT(19)
 #define ndmaDisabled BIT(20)
+#define useColorLut BIT(22)
 #define i2cBricked BIT(30)
 #define scfgLocked BIT(31)
 
@@ -874,8 +875,8 @@ void myIrqHandlerVBlank(void) {
 		wifiIrqTimer = 0;
 	}
 
-	// Swap screens
-	if (ipcEveryFrame) {
+	// Apply color LUT and/or swap screens
+	if ((valueBits & useColorLut) || ipcEveryFrame) {
 		IPC_SendSync(0x6);
 	}
 

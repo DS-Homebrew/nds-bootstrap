@@ -1698,10 +1698,6 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 				?	(gsdd ? "nitro:/cardenginei_arm9_gsdd_dldi.lz77" : "nitro:/cardenginei_arm9_dldi.lz77")
 				:	(gsdd ? "nitro:/cardenginei_arm9_gsdd.lz77" : "nitro:/cardenginei_arm9.lz77")
 				, (u8*)CARDENGINEI_ARM9_BUFFERED_LOCATION);
-
-				if (colorTable) {
-					loadCardEngineBinary("nitro:/cardenginei_arm9_colorlut.bin", (u8*)CARDENGINEI_ARM9_CLUT_BUFFERED_LOCATION);
-				}
 			}
 
 			bool found = (access(pageFilePath.c_str(), F_OK) == 0);
@@ -1785,7 +1781,10 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			if (!found) {
 				consoleClear();
 			}
+		}
 
+		if (colorTable) {
+			loadCardEngineBinary("nitro:/cardenginei_arm9_colorlut.bin", (u8*)CARDENGINEI_ARM9_CLUT_BUFFERED_LOCATION);
 		}
 
 		// Load in-game menu ce9 binary

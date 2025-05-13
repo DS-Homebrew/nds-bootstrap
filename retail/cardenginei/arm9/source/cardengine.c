@@ -746,12 +746,15 @@ extern void debugRamMpuFix();
 // Revert region 0 patch
 extern void region0Fix();
 
-#ifndef TWLSDK
 static inline void applyColorLut(bool forceUpdate) {
+	#ifdef TWLSDK
+	if (*(u32*)CARDENGINEI_ARM9_CLUT_LOCATION != 0xE92D4030) {
+		return;
+	}
+	#endif
 	volatile void (*code)(bool) = (volatile void*)CARDENGINEI_ARM9_CLUT_LOCATION;
 	(*code)(forceUpdate);
 }
-#endif
 
 void cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	//nocashMessage("\narm9 cardRead\n");
@@ -1381,11 +1384,11 @@ void inGameMenu(s32* exRegisters) {
 	if (ce9->valueBits & useSharedWram) {
 		WRAM_CR = 0; // Set shared WRAM to ARM9
 	}
+	#endif
 
 	if (ce9->valueBits & useColorLut) {
 		applyColorLut(true);
 	}
-	#endif
 
 	*(u32*)(INGAME_MENU_LOCATION + IGM_TEXT_SIZE_ALIGNED) = (u32)sharedAddr;
 	volatile u32 (*inGameMenu)(s32*, u32, s32*) = (volatile void*)INGAME_MENU_LOCATION + IGM_ENTRY;
@@ -1474,11 +1477,9 @@ void myIrqHandlerIPC(void) {
 			#endif
 			break;
 		case 0x6: {
-#ifndef TWLSDK
 			if (ce9->valueBits & useColorLut) {
 				applyColorLut(false);
 			}
-#endif
 			if (ce9->mainScreen == 1)
 				REG_POWERCNT &= ~POWER_SWAP_LCDS;
 			else if (ce9->mainScreen == 2)

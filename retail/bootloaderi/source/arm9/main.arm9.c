@@ -317,6 +317,22 @@ void __attribute__((target("arm"))) arm9_main(void) {
 			initMBKARM9_dsiMode();
 			arm9_stateFlag = ARM9_READY;
 		}
+		if (arm9_stateFlag == ARM9_WRAMONARM7) {
+			if (REG_MBK7 != 0) {
+				for (int i = 0; i < 16; i++) {
+					transferToArm7(i);
+				}
+			}
+			arm9_stateFlag = ARM9_READY;
+		}
+		if (arm9_stateFlag == ARM9_WRAMONARM9) {
+			if (REG_MBK7 != 0) {
+				for (int i = 0; i < 16; i++) {
+					transferToArm9(i);
+				}
+			}
+			arm9_stateFlag = ARM9_READY;
+		}
 		if (arm9_stateFlag == ARM9_SETSCFG) {
 			if (dsiModeConfirmed) {
 				REG_SCFG_EXT = 0x8307F100;

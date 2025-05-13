@@ -452,6 +452,10 @@ int hookNdsRetailArm9Mini(cardengineArm9* ce9, const tNDSHeader* ndsHeader, s32 
 	ce9->mainScreen             = mainScreen;
 	ce9->consoleModel           = consoleModel;
 	ce9->valueBits |= b_enableExceptionHandler;
+	extern bool colorLutEnabled;
+	if (colorLutEnabled) {
+		ce9->valueBits |= b_useColorLut;
+	}
 
 	extern u32 iUncompressedSize;
 

@@ -37,6 +37,7 @@
 #include "cardengine_header_arm9.h"
 
 #define enableExceptionHandler BIT(4)
+#define useColorLut BIT(21)
 
 extern cardengineArm9* volatile ce9;
 
@@ -216,6 +217,15 @@ void reset(u32 tid1, u32 tid2) {
 	ndsCodeStart(ndsHeader->arm9executeAddress);
 }
 
+static inline void applyColorLut(bool forceUpdate) {
+	if (*(u32*)CARDENGINEI_ARM9_CLUT_LOCATION != 0xE92D4030) {
+		return;
+	}
+
+	volatile void (*code)(bool) = (volatile void*)CARDENGINEI_ARM9_CLUT_LOCATION;
+	(*code)(forceUpdate);
+}
+
 void inGameMenu(s32* exRegisters) {
 	int oldIME = enterCriticalSection();
 
@@ -226,6 +236,10 @@ void inGameMenu(s32* exRegisters) {
 	while (sharedAddr[5] == 0x4C4D4749) { // 'IGML'
 		while (REG_VCOUNT != 191) swiDelay(100);
 		while (REG_VCOUNT == 191) swiDelay(100);
+	}
+
+	if (ce9->valueBits & useColorLut) {
+		applyColorLut(true);
 	}
 
 	*(u32*)(INGAME_MENU_LOCATION + IGM_TEXT_SIZE_ALIGNED) = (u32)sharedAddr;
@@ -280,12 +294,15 @@ void myIrqHandlerIPC(void) {
 			sharedAddr[3] = 0x54495845;
 			reset(0, 0);
 			break;
-		case 0x6:
+		case 0x6: {
+			if (ce9->valueBits & useColorLut) {
+				applyColorLut(false);
+			}
 			if(ce9->mainScreen == 1)
 				REG_POWERCNT &= ~POWER_SWAP_LCDS;
 			else if(ce9->mainScreen == 2)
 				REG_POWERCNT |= POWER_SWAP_LCDS;
-			break;
+		}	break;
 		/* case 0x7: {
 			ce9->mainScreen++;
 			if(ce9->mainScreen > 2)

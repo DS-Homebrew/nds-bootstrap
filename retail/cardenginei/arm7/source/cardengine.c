@@ -1939,11 +1939,7 @@ void myIrqHandlerVBlank(void) {
 	// runCardEngineCheck();
 
 	// Apply color LUT and/or swap screens
-	if (
-	#ifndef TWLSDK
-	(valueBits & useColorLut) ||
-	#endif
-	ipcEveryFrame) {
+	if ((valueBits & useColorLut) || ipcEveryFrame) {
 		IPC_SendSync(0x6);
 	}
 
