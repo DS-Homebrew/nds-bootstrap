@@ -3,7 +3,7 @@
 #include <nds/arm9/video.h>
 #include <nds/system.h>
 
-void applyColorLut(bool forceUpdate) {
+void applyColorLut() {
 	u32* storedPals = (u32*)0x0374D800;
 	u32* palettes = (u32*)0x05000000;
 	u16* colorTable = (u16*)0x03770000;
@@ -23,24 +23,18 @@ void applyColorLut(bool forceUpdate) {
 		palettes++;
 	}
 
-	if (!forceUpdate) {
-		static int framesPassed = 19;
-		framesPassed++;
-		if (framesPassed != 20) return;
-		framesPassed = 0;
-	}
-
 	u8 vramCr = VRAM_E_CR;
 	while (vramCr >= 0x90) {
 		vramCr -= 0x10;
 	}
 	if (vramCr == 0x83 || vramCr == 0x84) { // 3dTexPal/BgPalA
 		u8 vramCnt = VRAM_E_CR;
-		storedPals = (u32*)0x0374E000;
-		palettes = (u32*)0x06880000;
+		static int block = 0;
+		storedPals = (u32*)0x0374E000+(block*(0x2000/4));
+		palettes = (u32*)0x06880000+(block*(0x2000/4));
 
 		VRAM_E_CR = 0x80;
-		for (int i = 0; i < 0x10000/4; i++) {
+		for (int i = 0; i < 0x2000/4; i++) {
 			if (*storedPals != *palettes) {
 				u16* storedPals16 = (u16*)storedPals;
 				u16* palettes16 = (u16*)palettes;
@@ -55,6 +49,9 @@ void applyColorLut(bool forceUpdate) {
 			palettes++;
 		}
 		VRAM_E_CR = vramCnt;
+
+		block++;
+		if (block == 8) block = 0;
 	}
 
 	vramCr = VRAM_F_CR;
@@ -63,11 +60,12 @@ void applyColorLut(bool forceUpdate) {
 	}
 	if (vramCr >= 0x83 && vramCr <= 0x85) { // 3dTexPal/BgPalA/ObjPalA
 		u8 vramCnt = VRAM_F_CR;
-		storedPals = (u32*)0x0375E000;
-		palettes = (u32*)0x06890000;
+		static int block = 0;
+		storedPals = (u32*)0x0375E000+(block*(0x2000/4));
+		palettes = (u32*)0x06890000+(block*(0x2000/4));
 
 		VRAM_F_CR = 0x80;
-		for (int i = 0; i < 0x4000/4; i++) {
+		for (int i = 0; i < 0x2000/4; i++) {
 			if (*storedPals != *palettes) {
 				u16* storedPals16 = (u16*)storedPals;
 				u16* palettes16 = (u16*)palettes;
@@ -82,6 +80,9 @@ void applyColorLut(bool forceUpdate) {
 			palettes++;
 		}
 		VRAM_F_CR = vramCnt;
+
+		block++;
+		if (block == 2) block = 0;
 	}
 
 	vramCr = VRAM_G_CR;
@@ -90,11 +91,12 @@ void applyColorLut(bool forceUpdate) {
 	}
 	if (vramCr >= 0x83 && vramCr <= 0x85) { // 3dTexPal/BgPalA/ObjPalA
 		u8 vramCnt = VRAM_G_CR;
-		storedPals = (u32*)0x03762000;
-		palettes = (u32*)0x06894000;
+		static int block = 0;
+		storedPals = (u32*)0x03762000+(block*(0x2000/4));
+		palettes = (u32*)0x06894000+(block*(0x2000/4));
 
 		VRAM_G_CR = 0x80;
-		for (int i = 0; i < 0x4000/4; i++) {
+		for (int i = 0; i < 0x2000/4; i++) {
 			if (*storedPals != *palettes) {
 				u16* storedPals16 = (u16*)storedPals;
 				u16* palettes16 = (u16*)palettes;
@@ -109,6 +111,9 @@ void applyColorLut(bool forceUpdate) {
 			palettes++;
 		}
 		VRAM_G_CR = vramCnt;
+
+		block++;
+		if (block == 2) block = 0;
 	}
 
 	vramCr = VRAM_H_CR;
@@ -117,11 +122,12 @@ void applyColorLut(bool forceUpdate) {
 	}
 	if (vramCr == 0x82) { // BgPalB
 		u8 vramCnt = VRAM_H_CR;
-		storedPals = (u32*)0x03766000;
-		palettes = (u32*)0x06898000;
+		static int block = 0;
+		storedPals = (u32*)0x03766000+(block*(0x2000/4));
+		palettes = (u32*)0x06898000+(block*(0x2000/4));
 
 		VRAM_H_CR = 0x80;
-		for (int i = 0; i < 0x8000/4; i++) {
+		for (int i = 0; i < 0x2000/4; i++) {
 			if (*storedPals != *palettes) {
 				u16* storedPals16 = (u16*)storedPals;
 				u16* palettes16 = (u16*)palettes;
@@ -136,6 +142,9 @@ void applyColorLut(bool forceUpdate) {
 			palettes++;
 		}
 		VRAM_H_CR = vramCnt;
+
+		block++;
+		if (block == 4) block = 0;
 	}
 
 	vramCr = VRAM_I_CR;

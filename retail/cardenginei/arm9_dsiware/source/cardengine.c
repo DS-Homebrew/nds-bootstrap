@@ -217,13 +217,13 @@ void reset(u32 tid1, u32 tid2) {
 	ndsCodeStart(ndsHeader->arm9executeAddress);
 }
 
-static inline void applyColorLut(bool forceUpdate) {
+static inline void applyColorLut() {
 	if (*(u32*)CARDENGINEI_ARM9_CLUT_LOCATION != 0xE92D4030) {
 		return;
 	}
 
-	volatile void (*code)(bool) = (volatile void*)CARDENGINEI_ARM9_CLUT_LOCATION;
-	(*code)(forceUpdate);
+	volatile void (*code)() = (volatile void*)CARDENGINEI_ARM9_CLUT_LOCATION;
+	(*code)();
 }
 
 void inGameMenu(s32* exRegisters) {
@@ -239,7 +239,7 @@ void inGameMenu(s32* exRegisters) {
 	}
 
 	if (ce9->valueBits & useColorLut) {
-		applyColorLut(true);
+		applyColorLut();
 	}
 
 	*(u32*)(INGAME_MENU_LOCATION + IGM_TEXT_SIZE_ALIGNED) = (u32)sharedAddr;
@@ -296,7 +296,7 @@ void myIrqHandlerIPC(void) {
 			break;
 		case 0x6: {
 			if (ce9->valueBits & useColorLut) {
-				applyColorLut(false);
+				applyColorLut();
 			}
 			if(ce9->mainScreen == 1)
 				REG_POWERCNT &= ~POWER_SWAP_LCDS;
