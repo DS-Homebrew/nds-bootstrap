@@ -4,7 +4,7 @@
 #include <nds/system.h>
 
 void applyColorLut(bool forceUpdate) {
-	u32* storedPals = (u32*)0x03755800;
+	u32* storedPals = (u32*)0x0374D800;
 	u32* palettes = (u32*)0x05000000;
 	u16* colorTable = (u16*)0x03770000;
 
@@ -36,11 +36,11 @@ void applyColorLut(bool forceUpdate) {
 	}
 	if (vramCr == 0x83 || vramCr == 0x84) { // 3dTexPal/BgPalA
 		u8 vramCnt = VRAM_E_CR;
-		storedPals = (u32*)0x03756000;
-		palettes = (u32*)0x06888000;
+		storedPals = (u32*)0x0374E000;
+		palettes = (u32*)0x06880000;
 
 		VRAM_E_CR = 0x80;
-		for (int i = 0; i < 0x8000/4; i++) {
+		for (int i = 0; i < 0x10000/4; i++) {
 			if (*storedPals != *palettes) {
 				u16* storedPals16 = (u16*)storedPals;
 				u16* palettes16 = (u16*)palettes;
