@@ -1918,7 +1918,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			fread(lz77ImageBuffer, 1, sizeof_lz77ImageBuffer, bootstrapImages);
 			LZ77_Decompress(lz77ImageBuffer, (u8*)IMAGES_LOCATION+0x18000);
 			if (colorTable) {
-				u16* buffer = (u16*)IMAGES_LOCATION+0x18000;
+				u16* buffer = (u16*)IMAGES_LOCATION+(0x18000/2);
 				for (int i = 0; i < (256*192)*2; i++) {
 					buffer[i] = VRAM_E[buffer[i] % 0x8000];
 				}
@@ -2387,7 +2387,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			fread(lz77ImageBuffer, 1, sizeof_lz77ImageBuffer, bootstrapImages);
 			LZ77_Decompress(lz77ImageBuffer, (u8*)IMAGES_LOCATION+0x18000);
 			if (colorTable) {
-				u16* buffer = (u16*)IMAGES_LOCATION+0x18000;
+				u16* buffer = (u16*)IMAGES_LOCATION+(0x18000/2);
 				for (int i = 0; i < (256*192)*2; i++) {
 					buffer[i] = VRAM_E[buffer[i] % 0x8000];
 				}
