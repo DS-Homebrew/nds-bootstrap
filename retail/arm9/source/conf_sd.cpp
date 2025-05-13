@@ -41,6 +41,7 @@
 #include "asyncReadExcludeMap.h"
 #include "dmaExcludeMap.h"
 #include "twlClockExcludeMap.h"
+#include "colorLutBlacklist.h"
 
 #define REG_SCFG_EXT7 *(u32*)0x02FFFDF0
 
@@ -1984,8 +1985,20 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		}
 
 		if (colorTable) {
-			*(u32*)(COLOR_LUT_BUFFERED_LOCATION-4) = 0x54554C63; // 'cLUT'
-			tonccpy((u16*)COLOR_LUT_BUFFERED_LOCATION, VRAM_E, 0x10000);
+			bool proceed = true;
+			// TODO: If the list gets large enough, switch to bsearch().
+			for (unsigned int i = 0; i < sizeof(colorLutBlacklist)/sizeof(colorLutBlacklist[0]); i++) {
+				if (memcmp(romTid, colorLutBlacklist[i], 3) == 0) {
+					// Found match
+					proceed = false;
+					break;
+				}
+			}
+
+			if (proceed) {
+				*(u32*)(COLOR_LUT_BUFFERED_LOCATION-4) = 0x54554C63; // 'cLUT'
+				tonccpy((u16*)COLOR_LUT_BUFFERED_LOCATION, VRAM_E, 0x10000);
+			}
 		}
 	} else {
 		if (accessControl & BIT(4)) {
