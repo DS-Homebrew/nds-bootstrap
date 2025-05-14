@@ -12,6 +12,7 @@ static const char colorLutBlacklist[][4] = {
 	"AWD", // Diddy Kong Racing DS
 	"BVI", // Dokonjou Shougakusei Bon Biita: Hadaka no Choujou Ketsusen!!: Biita vs Dokuro Dei!
 	"YD8", // Doraemon: Nobita to Midori no Kyojinden DS
+	"ATI", // Electroplankton
 	"BO5", // Golden Sun: Dark Dawn
 	"Y8L", // Golden Sun: Dark Dawn (Demo Version)
 	"AK4", // Kabu Trader Shun
@@ -19,6 +20,7 @@ static const char colorLutBlacklist[][4] = {
 	"B6Z", // MegaMan Zero Collection
 	"ARZ", // MegaMan ZX
 	"YZX", // MegaMan ZX Advent
+	"AMH", // Metroid Prime Hunters
 	"B3N", // Power Rangers: Samurai
 	"B8I", // Spider-Man: Edge of Time
 	"CP3", // Viva Pinata: Pocket Paradise
@@ -52,6 +54,9 @@ Doraemon: Nobita to Midori no Kyojinden DS:
 Golden Sun: Dark Dawn:
 - IRQ is not hooked on arm9
 
+Electroplankton:
+- Color blending effects used everywhere(?)
+
 Kabu Trader Shun,
 Keshikasu-kun: Battle Kasu-tival:
 - Runs very slowly
@@ -62,6 +67,10 @@ MegaMan ZX,
 MegaMan ZX Advent:
 - Runs very slowly
 - Flickers between original and custom colors in some areas
+
+Metroid Prime Hunters:
+- Color blending effects used for many textures and in title screen
+- Black lines appearing in title screen
 
 Power Rangers: Samurai:
 - Runs very slowly
