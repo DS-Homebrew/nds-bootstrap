@@ -22,6 +22,9 @@ static const char colorLutBlacklist[][4] = {
 	"B3N", // Power Rangers: Samurai
 	"B8I", // Spider-Man: Edge of Time
 	"CP3", // Viva Pinata: Pocket Paradise
+	"CY8", // Yu-Gi-Oh! 5D's: Stardust Accelerator: World Championship 2009
+	"BYX", // Yu-Gi-Oh! 5D's: World Championship 2010: Reverse of Arcadia
+	"BYY", // Yu-Gi-Oh! 5D's: World Championship 2011: Over The Nexus
 };
 
 /* Blacklist reasons
@@ -67,6 +70,11 @@ Power Rangers: Samurai:
 Spider-Man: Edge of Time,
 Viva Pinata: Pocket Paradise:
 - IRQ is not hooked on arm9
+
+Yu-Gi-Oh! 5D's: Stardust Accelerator: World Championship 2009,
+Yu-Gi-Oh! 5D's: World Championship 2010: Reverse of Arcadia,
+Yu-Gi-Oh! 5D's: World Championship 2011: Over The Nexus:
+- Runs very slowly in some areas
 
 */
 
