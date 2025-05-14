@@ -9,7 +9,7 @@ void applyColorLut() {
 	u16* colorTable = (u16*)0x03770000;
 
 	static bool processExtPalettes = false;
-	processExtPalettes = (REG_VCOUNT >= 190);
+	processExtPalettes = (REG_VCOUNT >= 192);
 
 	if (!processExtPalettes) {
 		for (int i = 0; i < 0x800/4; i++) {
@@ -26,7 +26,7 @@ void applyColorLut() {
 			storedPals++;
 			palettes++;
 		}
-		SetYtrigger(190);
+		SetYtrigger(192);
 		return;
 	}
 
