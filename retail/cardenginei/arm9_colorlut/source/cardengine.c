@@ -34,6 +34,9 @@ void applyColorLut() {
 	while (vramCr >= 0x90) {
 		vramCr -= 0x10;
 	}
+	if (vramCr >= 0x88) {
+		vramCr -= 8;
+	}
 	if (vramCr == 0x83 || vramCr == 0x84) { // 3dTexPal/BgPalA
 		u8 vramCnt = VRAM_E_CR;
 		static int block = 0;
@@ -64,6 +67,9 @@ void applyColorLut() {
 	vramCr = VRAM_F_CR;
 	while (vramCr >= 0x90) {
 		vramCr -= 0x10;
+	}
+	if (vramCr >= 0x88) {
+		vramCr -= 8;
 	}
 	if (vramCr >= 0x83 && vramCr <= 0x85) { // 3dTexPal/BgPalA/ObjPalA
 		u8 vramCnt = VRAM_F_CR;
@@ -96,6 +102,9 @@ void applyColorLut() {
 	while (vramCr >= 0x90) {
 		vramCr -= 0x10;
 	}
+	if (vramCr >= 0x88) {
+		vramCr -= 8;
+	}
 	if (vramCr >= 0x83 && vramCr <= 0x85) { // 3dTexPal/BgPalA/ObjPalA
 		u8 vramCnt = VRAM_G_CR;
 		static int block = 0;
@@ -127,6 +136,9 @@ void applyColorLut() {
 	while (vramCr >= 0x90) {
 		vramCr -= 0x10;
 	}
+	if (vramCr >= 0x88) {
+		vramCr -= 8;
+	}
 	if (vramCr == 0x82) { // BgPalB
 		u8 vramCnt = VRAM_H_CR;
 		static int block = 0;
@@ -157,6 +169,9 @@ void applyColorLut() {
 	vramCr = VRAM_I_CR;
 	while (vramCr >= 0x90) {
 		vramCr -= 0x10;
+	}
+	if (vramCr >= 0x88) {
+		vramCr -= 8;
 	}
 	if (vramCr == 0x83) { // ObjPalB
 		u8 vramCnt = VRAM_I_CR;
