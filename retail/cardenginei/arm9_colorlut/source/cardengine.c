@@ -4,7 +4,7 @@
 #include <nds/system.h>
 
 void applyColorLut() {
-	u32* storedPals = (u32*)0x0374D800;
+	u32* storedPals = (u32*)0x0374B800;
 	u32* palettes = (u32*)0x05000000;
 	u16* colorTable = (u16*)0x03770000;
 
@@ -37,7 +37,7 @@ void applyColorLut() {
 	if (vramCr == 0x83 || vramCr == 0x84) { // 3dTexPal/BgPalA
 		u8 vramCnt = VRAM_E_CR;
 		static int block = 0;
-		storedPals = (u32*)0x0374E000+(block*(0x2000/4));
+		storedPals = (u32*)0x0374C000+(block*(0x2000/4));
 		palettes = (u32*)0x06880000+(block*(0x2000/4));
 
 		VRAM_E_CR = 0x80;
@@ -68,7 +68,7 @@ void applyColorLut() {
 	if (vramCr >= 0x83 && vramCr <= 0x85) { // 3dTexPal/BgPalA/ObjPalA
 		u8 vramCnt = VRAM_F_CR;
 		static int block = 0;
-		storedPals = (u32*)0x0375E000+(block*(0x2000/4));
+		storedPals = (u32*)0x0375C000+(block*(0x2000/4));
 		palettes = (u32*)0x06890000+(block*(0x2000/4));
 
 		VRAM_F_CR = 0x80;
@@ -99,7 +99,7 @@ void applyColorLut() {
 	if (vramCr >= 0x83 && vramCr <= 0x85) { // 3dTexPal/BgPalA/ObjPalA
 		u8 vramCnt = VRAM_G_CR;
 		static int block = 0;
-		storedPals = (u32*)0x03762000+(block*(0x2000/4));
+		storedPals = (u32*)0x03760000+(block*(0x2000/4));
 		palettes = (u32*)0x06894000+(block*(0x2000/4));
 
 		VRAM_G_CR = 0x80;
@@ -130,7 +130,7 @@ void applyColorLut() {
 	if (vramCr == 0x82) { // BgPalB
 		u8 vramCnt = VRAM_H_CR;
 		static int block = 0;
-		storedPals = (u32*)0x03766000+(block*(0x2000/4));
+		storedPals = (u32*)0x03764000+(block*(0x2000/4));
 		palettes = (u32*)0x06898000+(block*(0x2000/4));
 
 		VRAM_H_CR = 0x80;
@@ -160,8 +160,9 @@ void applyColorLut() {
 	}
 	if (vramCr == 0x83) { // ObjPalB
 		u8 vramCnt = VRAM_I_CR;
-		storedPals = (u32*)0x0376E000;
-		palettes = (u32*)0x068A2000;
+		static int block = 0;
+		storedPals = (u32*)0x0376C000+(block*(0x2000/4));
+		palettes = (u32*)0x068A0000+(block*(0x2000/4));
 
 		VRAM_I_CR = 0x80;
 		for (int i = 0; i < 0x2000/4; i++) {
@@ -179,6 +180,9 @@ void applyColorLut() {
 			palettes++;
 		}
 		VRAM_I_CR = vramCnt;
+
+		block++;
+		if (block == 2) block = 0;
 	}
 
 	SetYtrigger(0);
