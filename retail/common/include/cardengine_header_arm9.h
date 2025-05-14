@@ -42,7 +42,7 @@ typedef struct cardengineArm9Patches {
 	u32 needFlushDCCache;
 	u32* pdash_read;
 	u32* gsdd_fix;
-	u32* vblankHandlerRef;
+	u32* vcountHandlerRef;
 	u32* ipcSyncHandlerRef;
 } cardengineArm9Patches;
 
@@ -76,8 +76,9 @@ typedef struct cardengineArm9 {
 	u32 ce9;
 	cardengineArm9Patches* patches;
 	cardengineArm9ThumbPatches* thumbPatches;
-	u32 intr_vblank_orig_return;
+	u32 intr_vcount_orig_return;
 	u32 intr_ipc_orig_return;
+	u32 nandTmpJumpFuncOffset;
 	u32 fileCluster;
 	u32 saveCluster;
 	u32 saveSize;

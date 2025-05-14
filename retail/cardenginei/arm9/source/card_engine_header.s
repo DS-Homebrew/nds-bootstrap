@@ -17,9 +17,11 @@ patches_offset:
 	.word	patches
 thumbPatches_offset:
 	.word	thumbPatches
-intr_vblank_orig_return:
+intr_vcount_orig_return:
 	.word	0x00000000
 intr_ipc_orig_return:
+	.word	0x00000000
+nandTmpJumpFuncOffset:
 	.word	0x00000000
 fileCluster:
 	.word	0x00000000
@@ -191,7 +193,7 @@ needFlushDCCache:
 .word   0x0
 .word   0x0
 #endif
-.word   vblankHandler
+.word   vcountHandler
 .word   ipcSyncHandler
 thumbPatches:
 .word	thumb_card_read_arm9
@@ -575,11 +577,11 @@ _blx_r6_stub_thumb_slot2_read:
 @.align	4
 	.arm
 
-vblankHandler:
+vcountHandler:
 @ Hook the return address, then go back to the original function
 	stmdb	sp!, {lr}
-	adr 	lr, code_handler_start_vblank
-	ldr 	pc,	intr_vblank_orig_return
+	adr 	lr, code_handler_start_vcount
+	ldr 	pc,	intr_vcount_orig_return
 
 ipcSyncHandler:
 @ Hook the return address, then go back to the original function
@@ -587,9 +589,9 @@ ipcSyncHandler:
 	adr 	lr, code_handler_start_ipc
 	ldr 	pc,	intr_ipc_orig_return
 
-code_handler_start_vblank:
+code_handler_start_vcount:
 	push	{r0-r12}
-	bl	myIrqHandlerVBlank
+	bl	myIrqHandlerVcount
 	pop   	{r0-r12,pc}
 
 code_handler_start_ipc:

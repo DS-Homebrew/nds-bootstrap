@@ -1938,8 +1938,8 @@ void myIrqHandlerVBlank(void) {
 	// calledViaIPC = false;
 	// runCardEngineCheck();
 
-	// Apply color LUT and/or swap screens
-	if ((valueBits & useColorLut) || ipcEveryFrame) {
+	// Swap screens
+	if (ipcEveryFrame) {
 		IPC_SendSync(0x6);
 	}
 

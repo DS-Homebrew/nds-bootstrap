@@ -798,7 +798,7 @@ void patchResetTwl(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const modul
 		dbg_printf("Exit-to-menu patched!\n");
 	}
 	if (nandTmpJumpFuncOffset[-2] >= 0x02000000 && nandTmpJumpFuncOffset[-2] < 0x02400000 && nandTmpJumpFuncOffset[-1] == 0x02FFE230) {
-		ce9->intr_vblank_orig_return = nandTmpJumpFuncOffset[-2];
+		ce9->nandTmpJumpFuncOffset = nandTmpJumpFuncOffset[-2];
 		nandTmpJumpFuncOffset[-1] = 0x02FFC230;
 	}
 	dbg_printf("nandTmpJumpFunc location : ");

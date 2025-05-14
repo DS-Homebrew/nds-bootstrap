@@ -875,8 +875,8 @@ void myIrqHandlerVBlank(void) {
 		wifiIrqTimer = 0;
 	}
 
-	// Apply color LUT and/or swap screens
-	if ((valueBits & useColorLut) || ipcEveryFrame) {
+	// Swap screens
+	if (ipcEveryFrame) {
 		IPC_SendSync(0x6);
 	}
 

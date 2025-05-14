@@ -72,14 +72,14 @@
 #define _768KB_READ_SIZE 0xC0000
 #define _1MB_READ_SIZE   0x100000
 
-#define ICACHE_SIZE      0x2000      
-#define DCACHE_SIZE      0x1000      
+#define ICACHE_SIZE      0x2000
+#define DCACHE_SIZE      0x1000
 #define CACHE_LINE_SIZE  32
 
 #define THRESHOLD_CACHE_FLUSH 0x500
 
 #define END_FLAG   0
-#define BUSY_FLAG   4  
+#define BUSY_FLAG   4
 
 extern cardengineArm9* volatile ce9;
 
@@ -271,18 +271,18 @@ void addToAsyncQueue(u32 sector) {
 	}
 }
 
-u32 popFromAsyncQueueHead() {	
+u32 popFromAsyncQueueHead() {
 	if(aQSize>0) {
-	
+
 		aQHead--;
 		if(aQHead == -1) aQHead = 4;
 		aQSize--;
-		
+
 		return asyncQueue[aQHead];
 	} else return 0;
 }
 
-void triggerAsyncPrefetch(u32 src, u32 sector) {	
+void triggerAsyncPrefetch(u32 src, u32 sector) {
 	if (asyncSector == 0) {
 		return;
 	}
@@ -314,7 +314,7 @@ void triggerAsyncPrefetch(u32 src, u32 sector) {
 
 		// do it asynchronously
 		/*waitForArm7();*/
-	}	
+	}
 }
 
 void processAsyncCommand() {
@@ -327,8 +327,8 @@ void processAsyncCommand() {
 		if(sharedAddr[3] == (vu32)0) {
 			updateDescriptor(slot, asyncSector);
 			asyncSector = 0;
-		}			
-	}	
+		}
+	}
 }
 
 void getAsyncSector() {
@@ -356,7 +356,7 @@ void getAsyncSector() {
         (*sleepRef)(ms);
     } else if(ce9->thumbPatches->sleepRef) {
         callSleepThumb(ms);
-    }    
+    }
 }*/
 
 
@@ -748,7 +748,7 @@ extern void region0Fix();
 
 static inline void applyColorLut() {
 	#ifdef TWLSDK
-	if (*(u32*)CARDENGINEI_ARM9_CLUT_LOCATION != 0xE92D4030) {
+	if (*(u32*)CARDENGINEI_ARM9_CLUT_LOCATION != 0xE3A03301) {
 		return;
 	}
 	#endif
@@ -905,7 +905,7 @@ bool nandRead(void* memory,void* flash,u32 len,u32 dma) {
 #ifdef DLDI
 	if (ce9->valueBits & saveOnFlashcard) {
 		fileRead(memory, savFile, (u32)flash, len);
-		return true; 
+		return true;
 	}
 #endif
 	DC_InvalidateRange(memory, len);
@@ -920,7 +920,7 @@ bool nandRead(void* memory,void* flash,u32 len,u32 dma) {
 	sharedAddr[3] = commandNandRead;
 
 	waitForArm7();
-    return true; 
+    return true;
 }
 
 bool nandWrite(void* memory,void* flash,u32 len,u32 dma) {
@@ -942,7 +942,7 @@ bool nandWrite(void* memory,void* flash,u32 len,u32 dma) {
 	sharedAddr[3] = commandNandWrite;
 
 	waitForArm7();
-    return true; 
+    return true;
 }
 
 #ifdef TWLSDK
@@ -1386,10 +1386,6 @@ void inGameMenu(s32* exRegisters) {
 	}
 	#endif
 
-	if (ce9->valueBits & useColorLut) {
-		applyColorLut();
-	}
-
 	*(u32*)(INGAME_MENU_LOCATION + IGM_TEXT_SIZE_ALIGNED) = (u32)sharedAddr;
 	volatile u32 (*inGameMenu)(s32*, u32, s32*) = (volatile void*)INGAME_MENU_LOCATION + IGM_ENTRY;
 	const u32 res = (*inGameMenu)(&ce9->mainScreen, ce9->consoleModel, exRegisters);
@@ -1430,23 +1426,25 @@ void inGameMenu(s32* exRegisters) {
 }
 
 //---------------------------------------------------------------------------------
-void myIrqHandlerVBlank(void) {
+void myIrqHandlerVcount(void) {
 //---------------------------------------------------------------------------------
-	#ifdef DEBUG		
-	nocashMessage("myIrqHandlerVBlank");
-	#endif	
+	#ifdef DEBUG
+	nocashMessage("myIrqHandlerVcount");
+	#endif
 
-	#ifndef TWLSDK
+	applyColorLut();
+
+	/* #ifndef TWLSDK
 	if (sharedAddr[4] == 0x554E454D) {
 		while (sharedAddr[4] != 0x54495845);
 	}
-	#endif
+	#endif */
 }
 
 //---------------------------------------------------------------------------------
 void myIrqHandlerIPC(void) {
 //---------------------------------------------------------------------------------
-	#ifdef DEBUG		
+	#ifdef DEBUG
 	nocashMessage("myIrqHandlerIPC");
 	#endif
 
@@ -1477,9 +1475,6 @@ void myIrqHandlerIPC(void) {
 			#endif
 			break;
 		case 0x6: {
-			if (ce9->valueBits & useColorLut) {
-				applyColorLut();
-			}
 			if (ce9->mainScreen == 1)
 				REG_POWERCNT &= ~POWER_SWAP_LCDS;
 			else if (ce9->mainScreen == 2)
@@ -1514,7 +1509,7 @@ void myIrqHandlerIPC(void) {
 #endif
 }
 
-u32 myIrqEnable(u32 irq) {	
+u32 myIrqEnable(u32 irq) {
 	#ifdef DEBUG
 	nocashMessage("myIrqEnable\n");
 	#endif
@@ -1556,9 +1551,16 @@ u32 myIrqEnable(u32 irq) {
 
 	hookIPC_SYNC();
 
-	u32 irq_before = REG_IE | IRQ_IPC_SYNC;		
+	u32 irq_before = REG_IE | IRQ_IPC_SYNC;
 	irq |= IRQ_IPC_SYNC;
 	REG_IPC_SYNC |= IPC_SYNC_IRQ_ENABLE;
+
+	if (ce9->valueBits & useColorLut) {
+		irq_before = REG_VCOUNT;
+		irq |= REG_VCOUNT;
+		SetYtrigger(0);
+		REG_DISPSTAT |= DISP_YTRIGGER_IRQ;
+	}
 
 	REG_IE |= irq;
 	leaveCriticalSection(oldIME);

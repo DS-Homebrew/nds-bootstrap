@@ -40,6 +40,7 @@
 #define slowSoftReset BIT(10)
 #define cloneboot BIT(14)
 #define isDlp BIT(15)
+#define useColorLut BIT(21)
 
 #include "my_fat.h"
 
@@ -109,13 +110,11 @@ bool IPC_SYNC_hooked = false;
 void hookIPC_SYNC(void) {
 	#ifndef GSDD
     if (!IPC_SYNC_hooked) {
-		#ifndef TWLSDK
-		if (!(ce9->valueBits & isSdk5)) {
-			u32* vblankHandler = ce9->irqTable;
-			ce9->intr_vblank_orig_return = *vblankHandler;
-			*vblankHandler = (u32)ce9->patches->vblankHandlerRef;
+		if (ce9->valueBits & useColorLut) {
+			u32* vcountHandler = ce9->irqTable + 2;
+			ce9->intr_vcount_orig_return = *vcountHandler;
+			*vcountHandler = (u32)ce9->patches->vcountHandlerRef;
 		}
-		#endif
 		u32* ipcSyncHandler = ce9->irqTable + 16;
 		ce9->intr_ipc_orig_return = *ipcSyncHandler;
 		*ipcSyncHandler = (u32)ce9->patches->ipcSyncHandlerRef;
@@ -126,8 +125,16 @@ void hookIPC_SYNC(void) {
 
 void enableIPC_SYNC(void) {
 	#ifndef GSDD
-	if (IPC_SYNC_hooked && !(REG_IE & IRQ_IPC_SYNC)) {
-		REG_IE |= IRQ_IPC_SYNC;
+	if (!IPC_SYNC_hooked) return;
+	REG_IE |= IRQ_IPC_SYNC;
+	if (ce9->valueBits & useColorLut) {
+		u32* vcountHandler = ce9->irqTable + 2;
+		if (*vcountHandler != (u32)ce9->patches->vcountHandlerRef) {
+			ce9->intr_vcount_orig_return = *vcountHandler;
+			*vcountHandler = (u32)ce9->patches->vcountHandlerRef;
+		}
+
+		REG_IE |= IRQ_VCOUNT;
 	}
 	#endif
 }
@@ -231,7 +238,7 @@ void reset(u32 param, u32 tid2) {
 	if (igmReset) {
 		igmReset = false;
 #ifdef TWLSDK
-		if (ce9->intr_vblank_orig_return && isDSiWare) {
+		if (ce9->nandTmpJumpFuncOffset && isDSiWare) {
 			*(u32*)0x02FFC230 = *(u32*)0x02FFE230;
 			*(u32*)0x02FFC234 = *(u32*)0x02FFE234;
 		}
@@ -239,7 +246,7 @@ void reset(u32 param, u32 tid2) {
 	} else {
 		toncset((u8*)getDtcmBase()+0x3E00, 0, 0x200);
 #ifdef TWLSDK
-		if (ce9->intr_vblank_orig_return && isDSiWare) {
+		if (ce9->nandTmpJumpFuncOffset && isDSiWare) {
 			*(u32*)0x02FFC230 = 0;
 			*(u32*)0x02FFC234 = 0;
 		}

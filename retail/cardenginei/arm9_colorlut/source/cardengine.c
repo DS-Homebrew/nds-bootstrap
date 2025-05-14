@@ -8,19 +8,26 @@ void applyColorLut() {
 	u32* palettes = (u32*)0x05000000;
 	u16* colorTable = (u16*)0x03770000;
 
-	for (int i = 0; i < 0x800/4; i++) {
-		if (*storedPals != *palettes) {
-			u16* storedPals16 = (u16*)storedPals;
-			u16* palettes16 = (u16*)palettes;
-			for (int p = 0; p < 2; p++) {
-				if (storedPals16[p] != palettes16[p]) {
-					palettes16[p] = colorTable[palettes16[p] % 0x8000];
-					storedPals16[p] = palettes16[p];
+	static bool processExtPalettes = false;
+	processExtPalettes = (REG_VCOUNT >= 190);
+
+	if (!processExtPalettes) {
+		for (int i = 0; i < 0x800/4; i++) {
+			if (*storedPals != *palettes) {
+				u16* storedPals16 = (u16*)storedPals;
+				u16* palettes16 = (u16*)palettes;
+				for (int p = 0; p < 2; p++) {
+					if (storedPals16[p] != palettes16[p]) {
+						palettes16[p] = colorTable[palettes16[p] % 0x8000];
+						storedPals16[p] = palettes16[p];
+					}
 				}
 			}
+			storedPals++;
+			palettes++;
 		}
-		storedPals++;
-		palettes++;
+		SetYtrigger(190);
+		return;
 	}
 
 	u8 vramCr = VRAM_E_CR;
@@ -173,4 +180,6 @@ void applyColorLut() {
 		}
 		VRAM_I_CR = vramCnt;
 	}
+
+	SetYtrigger(0);
 }
