@@ -42,7 +42,7 @@ extern u16 scfgClkBak;
 extern vu32* volatile sharedAddr;
 extern vu32 *address;
 
-extern u16 igmPal[6];
+extern u16 igmPal[];
 
 extern bool swiDelayEnabled;
 

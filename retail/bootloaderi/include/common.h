@@ -58,6 +58,8 @@
 #define ARM9_INITMBK 8
 #define ARM9_SETSCFG 9
 #define ARM9_DISPESRB 10
+#define ARM9_WRAMONARM7 11
+#define ARM9_WRAMONARM9 12
 //};
 
 extern tNDSHeader* ndsHeader;

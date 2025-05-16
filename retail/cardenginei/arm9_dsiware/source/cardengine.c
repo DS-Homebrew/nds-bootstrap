@@ -37,6 +37,7 @@
 #include "cardengine_header_arm9.h"
 
 #define enableExceptionHandler BIT(4)
+#define useColorLut BIT(21)
 
 extern cardengineArm9* volatile ce9;
 
@@ -75,6 +76,11 @@ extern void setExceptionHandler2();
 static bool IPC_SYNC_hooked = false;
 static void hookIPC_SYNC(void) {
 	if (!IPC_SYNC_hooked) {
+		if (ce9->valueBits & useColorLut) {
+			u32* vcountHandler = ce9->irqTable + 2;
+			ce9->intr_vcount_orig_return = *vcountHandler;
+			*vcountHandler = (u32)ce9->patches->vcountHandlerRef;
+		}
 		u32* ipcSyncHandler = ce9->irqTable + 16;
 		ce9->intr_ipc_orig_return = *ipcSyncHandler;
 		*ipcSyncHandler = (u32)ce9->patches->ipcSyncHandlerRef;
@@ -130,14 +136,14 @@ void reset(u32 tid1, u32 tid2) {
 	if (igmReset) {
 		igmReset = false;
 
-		if (ce9->intr_vblank_orig_return) {
+		if (ce9->nandTmpJumpFuncOffset) {
 			*(u32*)0x02FFC230 = *(u32*)0x02FFE230;
 			*(u32*)0x02FFC234 = *(u32*)0x02FFE234;
 		}
 	} else {
 		toncset((u8*)getDtcmBase()+0x3E00, 0, 0x200);
 
-		if (ce9->intr_vblank_orig_return) {
+		if (ce9->nandTmpJumpFuncOffset) {
 			*(u32*)0x02FFC230 = 0;
 			*(u32*)0x02FFC234 = 0;
 		}
@@ -216,6 +222,15 @@ void reset(u32 tid1, u32 tid2) {
 	ndsCodeStart(ndsHeader->arm9executeAddress);
 }
 
+static inline void applyColorLut() {
+	if (*(u32*)CARDENGINEI_ARM9_CLUT_LOCATION != 0xEA000000) {
+		return;
+	}
+
+	volatile void (*code)() = (volatile void*)CARDENGINEI_ARM9_CLUT_LOCATION;
+	(*code)();
+}
+
 void inGameMenu(s32* exRegisters) {
 	int oldIME = enterCriticalSection();
 
@@ -229,7 +244,7 @@ void inGameMenu(s32* exRegisters) {
 	}
 
 	*(u32*)(INGAME_MENU_LOCATION + IGM_TEXT_SIZE_ALIGNED) = (u32)sharedAddr;
-	volatile void (*inGameMenu)(s32*, u32, s32*) = (volatile void*)INGAME_MENU_LOCATION + IGM_TEXT_SIZE_ALIGNED + 0x10;
+	volatile void (*inGameMenu)(s32*, u32, s32*) = (volatile void*)INGAME_MENU_LOCATION + IGM_ENTRY;
 	(*inGameMenu)(&ce9->mainScreen, ce9->consoleModel, exRegisters);
 
 	while (sharedAddr[5] != 0x4C4D4749) { // 'IGML'
@@ -254,25 +269,27 @@ void inGameMenu(s32* exRegisters) {
 }
 
 //---------------------------------------------------------------------------------
-void myIrqHandlerVBlank(void) {
+void myIrqHandlerVcount(void) {
 //---------------------------------------------------------------------------------
-	#ifdef DEBUG		
-	nocashMessage("myIrqHandlerVBlank");
-	#endif	
+	#ifdef DEBUG
+	nocashMessage("myIrqHandlerVcount");
+	#endif
 
-//#ifndef TWLSDK
+	applyColorLut();
+
+	/* #ifndef TWLSDK
 	if (sharedAddr[4] == 0x554E454D) {
 		while (sharedAddr[4] != 0x54495845);
 	}
-//#endif
+	#endif */
 }
 
 //---------------------------------------------------------------------------------
 void myIrqHandlerIPC(void) {
 //---------------------------------------------------------------------------------
-	#ifdef DEBUG		
+	#ifdef DEBUG
 	nocashMessage("myIrqHandlerIPC");
-	#endif	
+	#endif
 
 	switch (IPC_GetSync()) {
 		case 0x5:
@@ -280,12 +297,12 @@ void myIrqHandlerIPC(void) {
 			sharedAddr[3] = 0x54495845;
 			reset(0, 0);
 			break;
-		case 0x6:
+		case 0x6: {
 			if(ce9->mainScreen == 1)
 				REG_POWERCNT &= ~POWER_SWAP_LCDS;
 			else if(ce9->mainScreen == 2)
 				REG_POWERCNT |= POWER_SWAP_LCDS;
-			break;
+		}	break;
 		/* case 0x7: {
 			ce9->mainScreen++;
 			if(ce9->mainScreen > 2)
@@ -314,7 +331,7 @@ void myIrqHandlerIPC(void) {
 	}
 }
 
-u32 myIrqEnable(u32 irq) {	
+u32 myIrqEnable(u32 irq) {
 	int oldIME = enterCriticalSection();
 
 	#ifdef DEBUG
@@ -327,9 +344,16 @@ u32 myIrqEnable(u32 irq) {
 
 	hookIPC_SYNC();
 
-	u32 irq_before = REG_IE | IRQ_IPC_SYNC;		
+	u32 irq_before = REG_IE | IRQ_IPC_SYNC;
 	irq |= IRQ_IPC_SYNC;
 	REG_IPC_SYNC |= IPC_SYNC_IRQ_ENABLE;
+
+	if (ce9->valueBits & useColorLut) {
+		irq_before = REG_VCOUNT;
+		irq |= REG_VCOUNT;
+		SetYtrigger(0);
+		REG_DISPSTAT |= DISP_YTRIGGER_IRQ;
+	}
 
 	REG_IE |= irq;
 	leaveCriticalSection(oldIME);

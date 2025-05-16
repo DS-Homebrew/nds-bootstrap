@@ -55,6 +55,7 @@
 #define twlTouch BIT(15)
 #define bootstrapOnFlashcard BIT(19)
 #define ndmaDisabled BIT(20)
+#define useColorLut BIT(22)
 #define i2cBricked BIT(30)
 #define scfgLocked BIT(31)
 

@@ -41,6 +41,7 @@
 #include "asyncReadExcludeMap.h"
 #include "dmaExcludeMap.h"
 #include "twlClockExcludeMap.h"
+#include "colorLutBlacklist.h"
 
 #define REG_SCFG_EXT7 *(u32*)0x02FFFDF0
 
@@ -83,6 +84,8 @@ extern u8* lz77ImageBuffer;
 #define sizeof_lz77ImageBuffer 0x30000
 
 extern bool colorTable;
+extern bool invertedColors;
+extern bool noWhiteFade;
 
 extern void myConsoleDemoInit(void);
 
@@ -526,6 +529,16 @@ static void loadColorLut(const bool isRunFromFlashcard) {
 			tonccpy(VRAM_E, lz77ImageBuffer, 0x10000); // Copy LUT to VRAM
 
 			colorTable = true;
+
+			invertedColors =
+			  (VRAM_E[0] >= 0xF000 && VRAM_E[0] <= 0xFFFF
+			&& VRAM_E[0x7FFF] >= 0x8000 && VRAM_E[0x7FFF] <= 0x8FFF);
+			if (!invertedColors) noWhiteFade = (VRAM_E[0x7FFF] < 0xF000);
+
+			if (invertedColors || noWhiteFade) {
+				powerOff(PM_BACKLIGHT_TOP);
+				powerOff(PM_BACKLIGHT_BOTTOM);
+			}
 		}
 	}
 }
@@ -1781,7 +1794,18 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			if (!found) {
 				consoleClear();
 			}
+		}
 
+		if (colorTable) {
+			loadCardEngineBinary("nitro:/cardenginei_arm9_colorlut.bin", (u8*)CARDENGINEI_ARM9_CLUT_BUFFERED_LOCATION);
+
+			u32 flags = 0;
+			if (invertedColors) {
+				flags |= BIT(0);
+			} else if (noWhiteFade) {
+				flags |= BIT(1);
+			}
+			*(u32*)(CARDENGINEI_ARM9_CLUT_BUFFERED_LOCATION+4) = flags;
 		}
 
 		// Load in-game menu ce9 binary
@@ -1850,6 +1874,13 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			}
 
 			cebin = fopen(pageFilePath.c_str(), "r+");
+			if (colorTable) {
+				u16* igmPals = (u16*)igmText;
+				igmPals += IGM_PALS/2;
+				for (int i = 0; i < 8; i++) {
+					igmPals[i] = VRAM_E[igmPals[i] % 0x8000];
+				}
+			}
 			fwrite((u8*)igmText, 1, 0xA000, cebin);
 			fclose(cebin);
 			toncset((u8*)igmText, 0, 0xA000);
@@ -1971,6 +2002,23 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			fclose(bootstrapImages);
 		} else {
 			toncset16((u16*)IMAGES_LOCATION, 0, 256*192);
+		}
+
+		if (colorTable) {
+			bool proceed = true;
+			// TODO: If the list gets large enough, switch to bsearch().
+			for (unsigned int i = 0; i < sizeof(colorLutBlacklist)/sizeof(colorLutBlacklist[0]); i++) {
+				if (memcmp(romTid, colorLutBlacklist[i], 3) == 0) {
+					// Found match
+					proceed = false;
+					break;
+				}
+			}
+
+			if (proceed) {
+				*(u32*)(COLOR_LUT_BUFFERED_LOCATION-4) = 0x54554C63; // 'cLUT'
+				tonccpy((u16*)COLOR_LUT_BUFFERED_LOCATION, VRAM_E, 0x10000);
+			}
 		}
 	} else {
 		if (accessControl & BIT(4)) {
@@ -2151,6 +2199,13 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			}
 
 			cebin = fopen(pageFilePath.c_str(), "r+");
+			if (colorTable) {
+				u16* igmPals = (u16*)igmText;
+				igmPals += IGM_PALS/2;
+				for (int i = 0; i < 8; i++) {
+					igmPals[i] = VRAM_E[igmPals[i] % 0x8000];
+				}
+			}
 			fwrite((u8*)igmText, 1, 0xA000, cebin);
 			fclose(cebin);
 			toncset((u8*)igmText, 0, 0xA000);

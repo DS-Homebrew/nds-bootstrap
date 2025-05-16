@@ -32,6 +32,7 @@
 #define b_waitForPreloadToFinish BIT(18)
 #define b_resetOnFirstException BIT(19)
 #define b_resetOnEveryException BIT(20)
+#define b_useColorLut BIT(21)
 
 
 static const int MAX_HANDLER_LEN = 50;
@@ -218,6 +219,7 @@ int hookNdsRetailArm9(
 	extern u32 dataToPreloadAddr[4];
 	extern u32 dataToPreloadSize[4];
 	// extern u32 dataToPreloadFrame;
+	extern bool colorLutEnabled;
 	extern bool romLocationAdjust(const tNDSHeader* ndsHeader, const bool laterSdk, const bool isSdk5, u32* romLocation);
 	extern u32 dataToPreloadFullSize(void);
 	extern bool dataToPreloadFound(const tNDSHeader* ndsHeader);
@@ -268,9 +270,12 @@ int hookNdsRetailArm9(
 	if (strncmp(romTid, "AZE", 3) == 0) { // Zelda: Phantom Hourglass
 		ce9->valueBits |= b_bypassExceptionHandler;
 	}
+	if (colorLutEnabled) {
+		ce9->valueBits |= b_useColorLut;
+	}
 	if (!ROMinRAM && dsiWramAccess && !dsiWramMirrored && (ndsHeader->unitCode == 0 || !dsiModeConfirmed) && baseFatSize != 0) {
 		const u32 fntFatSize = (baseFatOff-baseFntOff)+baseFatSize;
-		if (fntFatSize <= 0x80000) {
+		if (fntFatSize <= (colorLutEnabled ? 0x4AC00 : 0x80000)) {
 			ce9->fntSrc = baseFntOff;
 			ce9->fntFatSize = fntFatSize;
 			ce9->valueBits |= b_fntFatCached;
@@ -447,6 +452,10 @@ int hookNdsRetailArm9Mini(cardengineArm9* ce9, const tNDSHeader* ndsHeader, s32 
 	ce9->mainScreen             = mainScreen;
 	ce9->consoleModel           = consoleModel;
 	ce9->valueBits |= b_enableExceptionHandler;
+	extern bool colorLutEnabled;
+	if (colorLutEnabled) {
+		ce9->valueBits |= b_useColorLut;
+	}
 
 	extern u32 iUncompressedSize;
 

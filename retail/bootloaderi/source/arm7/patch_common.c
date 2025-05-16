@@ -42,6 +42,7 @@ extern bool scfgSdmmcEnabled;
 extern u8 dsiSD;
 extern bool i2cBricked;
 extern int sharedFontRegion;
+extern bool colorLutEnabled;
 
 #define nopT 0x46C0
 
@@ -4846,7 +4847,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Cut the Rope (USA)
 	// Cut the Rope (Europe, Australia)
-	else if (strncmp(romTid, "KKT", 3) == 0 && !dsiWramAccess) {
+	else if (strncmp(romTid, "KKT", 3) == 0 && (!dsiWramAccess || colorLutEnabled)) {
 		*(u32*)0x0203BA44 = 0xE3A0162F; // mov r1, #0x02F00000
 	}
 
@@ -6452,7 +6453,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Flipnote Studio (USA)
 	else if (strcmp(romTid, "KGUE") == 0) {
-		if (!dsiWramAccess) {
+		if (!dsiWramAccess || colorLutEnabled) {
 			*(u32*)0x0200521C = 0xE3A007BD; // mov r0, #0x02F40000
 			*(u32*)0x02005234 = 0xE3A0062F; // mov r0, #0x02F00000
 		}
@@ -6465,7 +6466,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Flipnote Studio (Europe, Australia)
 	else if (strcmp(romTid, "KGUV") == 0) {
-		if (!dsiWramAccess) {
+		if (!dsiWramAccess || colorLutEnabled) {
 			*(u32*)0x02005210 = 0xE3A007BD; // mov r0, #0x02F40000
 			*(u32*)0x02005228 = 0xE3A0062F; // mov r0, #0x02F00000
 		}
@@ -6479,7 +6480,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Ugoku Memo Chou (Japan)
 	else if (strcmp(romTid, "KGUJ") == 0) {
 		if (ndsHeader->romversion == 2) {
-			if (!dsiWramAccess) {
+			if (!dsiWramAccess || colorLutEnabled) {
 				*(u32*)0x020051FC = 0xE3A007BD; // mov r0, #0x02F40000
 				*(u32*)0x02005214 = 0xE3A0062F; // mov r0, #0x02F00000
 			}
@@ -6488,7 +6489,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 				*(u32*)0x02006770 = 0xE3A00001; // mov r0, #1
 				*(u32*)0x0201DAC8 = 0xE3A00000; // mov r0, #0
 			}
-		} else if (!dsiWramAccess) {
+		} else if (!dsiWramAccess || colorLutEnabled) {
 			*(u32*)0x020051E0 = 0xE3A007BD; // mov r0, #0x02F40000
 			*(u32*)0x020051F8 = 0xE3A0062F; // mov r0, #0x02F00000
 		}
@@ -6604,12 +6605,12 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Foto Showdown (USA)
-	if (strcmp(romTid, "DMFE") == 0 && !dsiWramAccess) {
+	if (strcmp(romTid, "DMFE") == 0 && (!dsiWramAccess || colorLutEnabled)) {
 		*(u32*)0x0204D3F4 = 0xE3A00001; // mov r0, #1 (Disable shutter sound playback)
 	}
 
 	// Monster Finder (Japan)
-	else if (strcmp(romTid, "DMFJ") == 0 && !dsiWramAccess) {
+	else if (strcmp(romTid, "DMFJ") == 0 && (!dsiWramAccess || colorLutEnabled)) {
 		*(u32*)0x0204D10C = 0xE3A00001; // mov r0, #1 (Disable shutter sound playback)
 	}
 
@@ -7211,19 +7212,19 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Hidden Photo (USA)
-	if (strcmp(romTid, "KHJE") == 0 && !dsiWramAccess) {
+	if (strcmp(romTid, "KHJE") == 0 && (!dsiWramAccess || colorLutEnabled)) {
 		*(u32*)0x020335A0 = 0xE1A00000; // nop (Disable shutter sound loading)
 		*(u32*)0x02033A98 = 0xE3A00001; // mov r0, #1 (Disable shutter sound playback, still softlocks when taking photo)
 	}
 
 	// Hidden Photo (Europe)
-	if (strcmp(romTid, "DD3P") == 0 && !dsiWramAccess) {
+	if (strcmp(romTid, "DD3P") == 0 && (!dsiWramAccess || colorLutEnabled)) {
 		*(u32*)0x0202C8E0 = 0xE1A00000; // nop (Disable shutter sound loading)
 		*(u32*)0x0202CDC8 = 0xE3A00001; // mov r0, #1 (Disable shutter sound playback, still softlocks when taking photo)
 	}
 
 	// Wimmelbild Creator (German)
-	if (strcmp(romTid, "DD3D") == 0 && !dsiWramAccess) {
+	if (strcmp(romTid, "DD3D") == 0 && (!dsiWramAccess || colorLutEnabled)) {
 		*(u32*)0x0202B9E8 = 0xE1A00000; // nop (Disable shutter sound loading)
 		*(u32*)0x0202BED0 = 0xE3A00001; // mov r0, #1 (Disable shutter sound playback, still softlocks when taking photo)
 	}
@@ -13803,12 +13804,12 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Starship Defense (USA)
 	// Starship Patrol (Europe, Australia)
-	else if ((strcmp(romTid, "KDYE") == 0 || strcmp(romTid, "KDYV") == 0) && !dsiWramAccess) {
+	else if ((strcmp(romTid, "KDYE") == 0 || strcmp(romTid, "KDYV") == 0) && (!dsiWramAccess || colorLutEnabled)) {
 		toncset16((u16*)0x020A76C4, nopT, 0x4A/sizeof(u16)); // Do not use DSi WRAM
 	}
 
 	// Starship Defender (Japan)
-	else if (strcmp(romTid, "KDYJ") == 0 && !dsiWramAccess) {
+	else if (strcmp(romTid, "KDYJ") == 0 && (!dsiWramAccess || colorLutEnabled)) {
 		toncset16((u16*)0x020A767C, nopT, 0x4A/sizeof(u16)); // Do not use DSi WRAM
 	}
 
@@ -14727,12 +14728,12 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Trajectile (USA)
 	// Reflect Missile (Europe, Australia)
-	else if ((strcmp(romTid, "KDZE") == 0 || strcmp(romTid, "KDZV") == 0) && !dsiWramAccess) {
+	else if ((strcmp(romTid, "KDZE") == 0 || strcmp(romTid, "KDZV") == 0) && (!dsiWramAccess || colorLutEnabled)) {
 		toncset16((u16*)0x020B9298, nopT, 0x4A/sizeof(u16)); // Do not use DSi WRAM
 	}
 
 	// Reflect Missile (Japan)
-	else if (strcmp(romTid, "KDZJ") == 0 && !dsiWramAccess) {
+	else if (strcmp(romTid, "KDZJ") == 0 && (!dsiWramAccess || colorLutEnabled)) {
 		toncset16((u16*)0x020B8F88, nopT, 0x4A/sizeof(u16)); // Do not use DSi WRAM
 	}
 
@@ -15396,7 +15397,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// X-Scape (USA)
 	// 3D Space Tank (Europe, Australia)
 	// X-Returns (Japan)
-	else if (strncmp(romTid, "KDX", 3) == 0 && !dsiWramAccess) {
+	else if (strncmp(romTid, "KDX", 3) == 0 && (!dsiWramAccess || colorLutEnabled)) {
 		toncset16((u16*)0x020B12A0, nopT, 0x4A/sizeof(u16)); // Do not use DSi WRAM
 
 		// Speed up file loading by 0.5 seconds

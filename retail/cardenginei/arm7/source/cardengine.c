@@ -77,6 +77,7 @@
 #define bootstrapOnFlashcard BIT(19)
 #define ndmaDisabled BIT(20)
 #define isDlp BIT(21)
+#define useColorLut BIT(22)
 #define i2cBricked BIT(30)
 #define scfgLocked BIT(31)
 
