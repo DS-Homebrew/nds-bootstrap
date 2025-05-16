@@ -1938,8 +1938,8 @@ void myIrqHandlerVBlank(void) {
 	// calledViaIPC = false;
 	// runCardEngineCheck();
 
-	// Swap screens
-	if (ipcEveryFrame) {
+	// Fix ARM9 VCount IRQ settings for color LUT and/or swap screens
+	if ((valueBits & useColorLut) || ipcEveryFrame) {
 		IPC_SendSync(0x6);
 	}
 

@@ -127,15 +127,6 @@ void enableIPC_SYNC(void) {
 	#ifndef GSDD
 	if (!IPC_SYNC_hooked) return;
 	REG_IE |= IRQ_IPC_SYNC;
-	if (ce9->valueBits & useColorLut) {
-		u32* vcountHandler = ce9->irqTable + 2;
-		if (*vcountHandler != (u32)ce9->patches->vcountHandlerRef) {
-			ce9->intr_vcount_orig_return = *vcountHandler;
-			*vcountHandler = (u32)ce9->patches->vcountHandlerRef;
-		}
-
-		REG_IE |= IRQ_VCOUNT;
-	}
 	#endif
 }
 

@@ -305,6 +305,11 @@ void myIrqHandlerIPC(void) {
 					*vcountHandler = (u32)ce9->patches->vcountHandlerRef;
 				}
 
+				if (!(REG_DISPSTAT & DISP_YTRIGGER_IRQ)) {
+					SetYtrigger(0);
+					REG_DISPSTAT |= DISP_YTRIGGER_IRQ;
+				}
+
 				REG_IE |= IRQ_VCOUNT;
 			}
 
