@@ -4845,6 +4845,16 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		} */
 	}
 
+	// Curling Super Championship (USA)
+	else if (strcmp(romTid, "KVCE") == 0 && !twlFontFound) {
+		*(u32*)0x0200A554 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+	}
+
+	// Curling Super Championship (Europe)
+	else if (strcmp(romTid, "KVCP") == 0 && !twlFontFound) {
+		*(u32*)0x0200A5EC = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+	}
+
 	// Cut the Rope (USA)
 	// Cut the Rope (Europe, Australia)
 	else if (strncmp(romTid, "KKT", 3) == 0 && (!dsiWramAccess || colorLutEnabled)) {

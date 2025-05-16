@@ -149,6 +149,7 @@ static const char dsiWareForBootloader1[][4] = {
 	"KCR", // Crazy Sudoku
 	"KXD", // Crystal Adventure
 	"KQQ", // Crystal Caverns of Amon-Ra
+	"KVC", // Curling Super Championship
 	"KKT", // Cut the Rope (bootloaderi-exclusive)
 	"K32", // CuteWitch! runner
 	"KTA", // G.G Series: D-Tank

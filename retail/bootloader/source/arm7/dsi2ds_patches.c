@@ -8299,6 +8299,78 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0209F89C+offsetChange, (u32)dsiSaveClose); */
 	}
 
+	// Curling Super Championship (USA)
+	else if (strcmp(romTid, "KVCE") == 0) {
+		*(u32*)0x0200A3C0 = 0xE1A00000; // nop
+		*(u32*)0x0200A554 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		/* setBL(0x0202CA0C, (u32)dsiSaveOpen); // Part of .pck file
+		*(u32*)0x0202CA24 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+		*(u32*)0x0202CA3C = 0xE3A00001; // mov r0, #1 (dsiSaveFreeSpaceAvailable)
+		setBL(0x0202CA64, (u32)dsiSaveCreate);
+		setBL(0x0202CA98, (u32)dsiSaveOpen);
+		setBL(0x0202CAAC, (u32)dsiSaveSetLength);
+		setBL(0x0202CABC, (u32)dsiSaveGetLength);
+		setBL(0x0202CAC4, (u32)dsiSaveClose);
+		setBL(0x0202CAFC, (u32)dsiSaveSetLength);
+		setBL(0x0202CB0C, (u32)dsiSaveGetLength);
+		setBL(0x0202CB14, (u32)dsiSaveClose);
+		*(u32*)0x0202CC44 = 0xE1A00000; // nop
+		setBL(0x0202CD1C, (u32)dsiSaveOpen);
+		setBL(0x0202CD44, (u32)dsiSaveSeek);
+		setBL(0x0202CD58, (u32)dsiSaveRead);
+		setBL(0x0202CD70, (u32)dsiSaveClose);
+		setBL(0x0202CE38, (u32)dsiSaveOpen);
+		setBL(0x0202CE60, (u32)dsiSaveSeek);
+		setBL(0x0202CE74, (u32)dsiSaveWrite);
+		setBL(0x0202CE80, (u32)dsiSaveClose); */
+		*(u32*)0x020574A4 = 0xE1A00000; // nop
+		// tonccpy((u32*)0x02058038, dsiSaveGetResultCode, 0xC); // Part of .pck file
+		*(u32*)0x0205AC68 = 0xE1A00000; // nop
+		patchInitDSiWare(0x02062044, heapEnd);
+		*(u32*)0x020623D0 = *(u32*)0x02004FE8;
+		patchUserSettingsReadDSiWare(0x020637D4);
+		*(u32*)0x020637F0 = wirelessReturnCodeArm;
+		*(u32*)0x020637F4 = 0xE12FFF1E; // bx lr
+		*(u32*)0x020637FC = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02063800 = 0xE12FFF1E; // bx lr
+	}
+
+	// Curling Super Championship (Europe)
+	else if (strcmp(romTid, "KVCP") == 0) {
+		*(u32*)0x0200A3C0 = 0xE1A00000; // nop
+		*(u32*)0x0200A5EC = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		/* setBL(0x0202CAAC, (u32)dsiSaveOpen); // Part of .pck file
+		*(u32*)0x0202CAC4 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+		*(u32*)0x0202CADC = 0xE3A00001; // mov r0, #1 (dsiSaveFreeSpaceAvailable)
+		setBL(0x0202CB04, (u32)dsiSaveCreate);
+		setBL(0x0202CB38, (u32)dsiSaveOpen);
+		setBL(0x0202CB4C, (u32)dsiSaveSetLength);
+		setBL(0x0202CB5C, (u32)dsiSaveGetLength);
+		setBL(0x0202CB64, (u32)dsiSaveClose);
+		setBL(0x0202CB9C, (u32)dsiSaveSetLength);
+		setBL(0x0202CBAC, (u32)dsiSaveGetLength);
+		setBL(0x0202CBB4, (u32)dsiSaveClose);
+		*(u32*)0x0202CCE4 = 0xE1A00000; // nop
+		setBL(0x0202CDBC, (u32)dsiSaveOpen);
+		setBL(0x0202CDE4, (u32)dsiSaveSeek);
+		setBL(0x0202CDF8, (u32)dsiSaveRead);
+		setBL(0x0202CE10, (u32)dsiSaveClose);
+		setBL(0x0202CED8, (u32)dsiSaveOpen);
+		setBL(0x0202CF00, (u32)dsiSaveSeek);
+		setBL(0x0202CF14, (u32)dsiSaveWrite);
+		setBL(0x0202CF20, (u32)dsiSaveClose); */
+		*(u32*)0x02057544 = 0xE1A00000; // nop
+		// tonccpy((u32*)0x020580D8, dsiSaveGetResultCode, 0xC); // Part of .pck file
+		*(u32*)0x0205AD08 = 0xE1A00000; // nop
+		patchInitDSiWare(0x020620E4, heapEnd);
+		*(u32*)0x02062470 = *(u32*)0x02004FE8;
+		patchUserSettingsReadDSiWare(0x02063874);
+		*(u32*)0x02063890 = wirelessReturnCodeArm;
+		*(u32*)0x02063894 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0206389C = 0xE3A00000; // mov r0, #0
+		*(u32*)0x020638A0 = 0xE12FFF1E; // bx lr
+	}
+
 	// CuteWitch! runner (USA)
 	// CuteWitch! runner (Europe)
 	// Stage music doesn't play on retail consoles
