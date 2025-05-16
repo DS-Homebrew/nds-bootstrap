@@ -875,8 +875,8 @@ void myIrqHandlerVBlank(void) {
 		wifiIrqTimer = 0;
 	}
 
-	// Swap screens
-	if (ipcEveryFrame) {
+	// Keep ARM9 VCount IRQ turned on for color LUT and/or swap screens
+	if ((valueBits & useColorLut) || ipcEveryFrame) {
 		IPC_SendSync(0x6);
 	}
 

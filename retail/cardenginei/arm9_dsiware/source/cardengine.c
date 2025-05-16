@@ -298,7 +298,17 @@ void myIrqHandlerIPC(void) {
 			reset(0, 0);
 			break;
 		case 0x6: {
-			if(ce9->mainScreen == 1)
+			if (ce9->valueBits & useColorLut) {
+				u32* vcountHandler = ce9->irqTable + 2;
+				if (*vcountHandler != (u32)ce9->patches->vcountHandlerRef) {
+					ce9->intr_vcount_orig_return = *vcountHandler;
+					*vcountHandler = (u32)ce9->patches->vcountHandlerRef;
+				}
+
+				REG_IE |= IRQ_VCOUNT;
+			}
+
+			if (ce9->mainScreen == 1)
 				REG_POWERCNT &= ~POWER_SWAP_LCDS;
 			else if(ce9->mainScreen == 2)
 				REG_POWERCNT |= POWER_SWAP_LCDS;
