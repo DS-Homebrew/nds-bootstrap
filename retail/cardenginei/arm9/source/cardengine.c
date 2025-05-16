@@ -748,7 +748,7 @@ extern void region0Fix();
 
 static inline void applyColorLut() {
 	#ifdef TWLSDK
-	if (*(u32*)CARDENGINEI_ARM9_CLUT_LOCATION != 0xE3A03301) {
+	if (*(u32*)CARDENGINEI_ARM9_CLUT_LOCATION != 0xEA000000) {
 		return;
 	}
 	#endif

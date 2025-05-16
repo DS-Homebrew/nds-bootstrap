@@ -47,10 +47,16 @@ static bool debug = false;
 static bool sdFound = false;
 static bool bootstrapOnFlashcard = false;
 bool colorTable = false;
+bool invertedColors = false;
+bool noWhiteFade = false;
 
 void myConsoleDemoInit(void) {
 	static bool inited = false;
 	if (inited) return;
+
+	if (invertedColors || noWhiteFade) {
+		powerOff(PM_BACKLIGHT_TOP);
+	}
 
 	consoleDemoInit();
 	if (colorTable) {
@@ -58,6 +64,7 @@ void myConsoleDemoInit(void) {
 			BG_PALETTE_SUB[i] = VRAM_E[BG_PALETTE_SUB[i] % 0x8000];
 		}
 	}
+	powerOn(PM_BACKLIGHT_BOTTOM);
 
 	inited = true;
 }
@@ -413,7 +420,10 @@ static int runNdsFile(configuration* conf) {
 
 	if (conf->macroMode) {
 		powerOff(PM_BACKLIGHT_TOP);
+	} else {
+		powerOn(PM_BACKLIGHT_TOP);
 	}
+	powerOn(PM_BACKLIGHT_BOTTOM);
 
 	struct stat st;
 	struct stat stSav;

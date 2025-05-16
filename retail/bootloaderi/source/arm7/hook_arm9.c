@@ -275,7 +275,7 @@ int hookNdsRetailArm9(
 	}
 	if (!ROMinRAM && dsiWramAccess && !dsiWramMirrored && (ndsHeader->unitCode == 0 || !dsiModeConfirmed) && baseFatSize != 0) {
 		const u32 fntFatSize = (baseFatOff-baseFntOff)+baseFatSize;
-		if (fntFatSize <= (colorLutEnabled ? 0x4B000 : 0x80000)) {
+		if (fntFatSize <= (colorLutEnabled ? 0x4AC00 : 0x80000)) {
 			ce9->fntSrc = baseFntOff;
 			ce9->fntFatSize = fntFatSize;
 			ce9->valueBits |= b_fntFatCached;

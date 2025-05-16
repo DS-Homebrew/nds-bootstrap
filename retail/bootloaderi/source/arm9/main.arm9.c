@@ -54,6 +54,7 @@ u32 arm9_SCFG_EXT = 0;
 u16 arm9_SCFG_CLK = 0;
 volatile bool esrbScreenPrepared = false;
 volatile bool esrbScreenDisplayed = false;
+volatile bool noWhiteFade = false;
 volatile bool screenFadedIn = false;
 volatile bool imageLoaded = false;
 volatile bool esrbImageLoaded = false;
@@ -106,6 +107,10 @@ static bool ROMsupportsDsiMode(const tNDSHeader* ndsHeader) {
 }
 
 void SetBrightness(u8 screen, s8 bright) {
+	if (noWhiteFade && bright > 0) {
+		bright -= bright*2;
+	}
+
 	u16 mode = 1 << 14;
 
 	if (bright < 0) {
@@ -192,6 +197,11 @@ void __attribute__((target("arm"))) arm9_main(void) {
 	REG_IPC_SYNC = 0;
 	REG_IPC_FIFO_CR = IPC_FIFO_ENABLE | IPC_FIFO_SEND_CLEAR;
 	REG_IPC_FIFO_CR = 0;
+
+	if (*(u32*)CARDENGINEI_ARM9_CLUT_BUFFERED_LOCATION == 0xEA000000) {
+		const u32 flags = *(u32*)(CARDENGINEI_ARM9_CLUT_BUFFERED_LOCATION+4);
+		noWhiteFade = ((flags & BIT(0)) || (flags & BIT(1)));
+	}
 
 	VRAM_A_CR = 0x80;
 	VRAM_B_CR = 0x80;

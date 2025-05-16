@@ -84,6 +84,8 @@ extern u8* lz77ImageBuffer;
 #define sizeof_lz77ImageBuffer 0x30000
 
 extern bool colorTable;
+extern bool invertedColors;
+extern bool noWhiteFade;
 
 extern void myConsoleDemoInit(void);
 
@@ -527,6 +529,16 @@ static void loadColorLut(const bool isRunFromFlashcard) {
 			tonccpy(VRAM_E, lz77ImageBuffer, 0x10000); // Copy LUT to VRAM
 
 			colorTable = true;
+
+			invertedColors =
+			  (VRAM_E[0] >= 0xF000 && VRAM_E[0] <= 0xFFFF
+			&& VRAM_E[0x7FFF] >= 0x8000 && VRAM_E[0x7FFF] <= 0x8FFF);
+			if (!invertedColors) noWhiteFade = (VRAM_E[0x7FFF] < 0xF000);
+
+			if (invertedColors || noWhiteFade) {
+				powerOff(PM_BACKLIGHT_TOP);
+				powerOff(PM_BACKLIGHT_BOTTOM);
+			}
 		}
 	}
 }
@@ -1786,6 +1798,14 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 		if (colorTable) {
 			loadCardEngineBinary("nitro:/cardenginei_arm9_colorlut.bin", (u8*)CARDENGINEI_ARM9_CLUT_BUFFERED_LOCATION);
+
+			u32 flags = 0;
+			if (invertedColors) {
+				flags |= BIT(0);
+			} else if (noWhiteFade) {
+				flags |= BIT(1);
+			}
+			*(u32*)(CARDENGINEI_ARM9_CLUT_BUFFERED_LOCATION+4) = flags;
 		}
 
 		// Load in-game menu ce9 binary

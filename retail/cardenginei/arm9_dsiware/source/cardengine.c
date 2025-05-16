@@ -223,7 +223,7 @@ void reset(u32 tid1, u32 tid2) {
 }
 
 static inline void applyColorLut() {
-	if (*(u32*)CARDENGINEI_ARM9_CLUT_LOCATION != 0xE3A03301) {
+	if (*(u32*)CARDENGINEI_ARM9_CLUT_LOCATION != 0xEA000000) {
 		return;
 	}
 
