@@ -1996,6 +1996,12 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 				delete[] bmpImageBuffer;*/
 				fread((u16*)IMAGES_LOCATION, 1, 0x18000, bootstrapImages);
+				if (colorTable) {
+					u16* buffer = (u16*)IMAGES_LOCATION;
+					for (int i = 0; i < 256*192; i++) {
+						buffer[i] = VRAM_E[buffer[i] % 0x8000];
+					}
+				}
 			} else {
 				toncset16((u16*)IMAGES_LOCATION, 0, 256*192);
 			}
