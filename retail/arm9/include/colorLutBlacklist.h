@@ -30,6 +30,8 @@ static const char colorLutBlacklist[][4] = {
 	"AMH", // Metroid Prime Hunters
 	"B3N", // Power Rangers: Samurai
 	"B8I", // Spider-Man: Edge of Time
+	"AGF", // True Swing Golf
+	"K72", // True Swing Golf Express
 	"CP3", // Viva Pinata: Pocket Paradise
 	"CY8", // Yu-Gi-Oh! 5D's: Stardust Accelerator: World Championship 2009
 	"BYX", // Yu-Gi-Oh! 5D's: World Championship 2010: Reverse of Arcadia
@@ -104,6 +106,11 @@ Power Rangers: Samurai:
 Spider-Man: Edge of Time,
 Viva Pinata: Pocket Paradise:
 - IRQ is not hooked on arm9
+
+True Swing Golf,
+True Swing Golf Express:
+- Top screen text is glitched
+- May flicker between original and custom colors at some point
 
 Yu-Gi-Oh! 5D's: Stardust Accelerator: World Championship 2009,
 Yu-Gi-Oh! 5D's: World Championship 2010: Reverse of Arcadia,
