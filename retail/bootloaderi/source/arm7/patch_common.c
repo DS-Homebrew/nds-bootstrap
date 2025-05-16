@@ -3695,6 +3695,16 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		tonccpy((u32*)0x02050F68, dsiSaveGetResultCode, 0xC);
 	} */
 
+	// California Super Sports (USA)
+	else if (strcmp(romTid, "K22E") == 0 && !twlFontFound) {
+		*(u32*)0x020058A4 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+	}
+
+	// California Super Sports (Europe)
+	else if (strcmp(romTid, "K22P") == 0 && !twlFontFound) {
+		*(u32*)0x02005A18 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+	}
+
 	// Candle Route (USA)
 	// Candle Route (Europe)
 	else if (strcmp(romTid, "K9YE") == 0 || strcmp(romTid, "K9YP") == 0) {

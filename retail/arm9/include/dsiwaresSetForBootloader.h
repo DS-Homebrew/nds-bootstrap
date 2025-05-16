@@ -109,6 +109,7 @@ static const char dsiWareForBootloader1[][4] = {
 	"K2N", // Cake Ninja 2
 	"KYN", // Cake Ninja: XMAS
 	"KCY", // Calculator
+	"K22", // California Super Sports
 	"K9Y", // Candle Route (bootloaderi-exclusive)
 	"K3N", // GO Series: Captain Sub
 	"KCN", // Castle Conqueror

@@ -6230,6 +6230,80 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02042B6C = 0xE12FFF1E; // bx lr
 	}
 
+	// California Super Sports (USA)
+	// Crashes on retail consoles when selecting either Dodgeball or Rollerblade
+	else if (strcmp(romTid, "K22E") == 0) {
+		*(u32*)0x0200574C = 0xE1A00000; // nop
+		*(u32*)0x020058A4 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		/* setBL(0x0207AEF0, (u32)dsiSaveOpen); // Part of .pck file
+		*(u32*)0x0207AF08 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+		*(u32*)0x0207AF20 = 0xE3A00001; // mov r0, #1 (dsiSaveFreeSpaceAvailable)
+		setBL(0x0207AF48, (u32)dsiSaveCreate);
+		setBL(0x0207AF7C, (u32)dsiSaveOpen);
+		setBL(0x0207AF90, (u32)dsiSaveSetLength);
+		setBL(0x0207AFA0, (u32)dsiSaveGetLength);
+		setBL(0x0207AFA8, (u32)dsiSaveClose);
+		setBL(0x0207AFE0, (u32)dsiSaveSetLength);
+		setBL(0x0207AFF0, (u32)dsiSaveGetLength);
+		setBL(0x0207AFF8, (u32)dsiSaveClose);
+		*(u32*)0x0207B128 = 0xE1A00000; // nop
+		setBL(0x0207B200, (u32)dsiSaveOpen);
+		setBL(0x0207B228, (u32)dsiSaveSeek);
+		setBL(0x0207B23C, (u32)dsiSaveRead);
+		setBL(0x0207B254, (u32)dsiSaveClose);
+		setBL(0x0207B31C, (u32)dsiSaveOpen);
+		setBL(0x0207B344, (u32)dsiSaveSeek);
+		setBL(0x0207B358, (u32)dsiSaveWrite);
+		setBL(0x0207B364, (u32)dsiSaveClose); */
+		*(u32*)0x020A4854 = 0xE1A00000; // nop
+		// tonccpy((u32*)0x020A53E8, dsiSaveGetResultCode, 0xC); // Part of .pck file
+		*(u32*)0x020A7E08 = 0xE1A00000; // nop
+		patchInitDSiWare(0x020AF4C8, heapEnd);
+		*(u32*)0x020AF854 = *(u32*)0x02004FE8;
+		patchUserSettingsReadDSiWare(0x020B0C58);
+		*(u32*)0x020B0C74 = wirelessReturnCodeArm;
+		*(u32*)0x020B0C78 = 0xE12FFF1E; // bx lr
+		*(u32*)0x020B0C80 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x020B0C84 = 0xE12FFF1E; // bx lr
+	}
+
+	// California Super Sports (Europe)
+	// Crashes on retail consoles when selecting either Dodgeball or Rollerblade
+	else if (strcmp(romTid, "K22P") == 0) {
+		*(u32*)0x02005840 = 0xE1A00000; // nop
+		*(u32*)0x02005A18 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		/* setBL(0x0207B064, (u32)dsiSaveOpen); // Part of .pck file
+		*(u32*)0x0207B07C = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+		*(u32*)0x0207B094 = 0xE3A00001; // mov r0, #1 (dsiSaveFreeSpaceAvailable)
+		setBL(0x0207B0BC, (u32)dsiSaveCreate);
+		setBL(0x0207B0F0, (u32)dsiSaveOpen);
+		setBL(0x0207B104, (u32)dsiSaveSetLength);
+		setBL(0x0207B114, (u32)dsiSaveGetLength);
+		setBL(0x0207B11C, (u32)dsiSaveClose);
+		setBL(0x0207B154, (u32)dsiSaveSetLength);
+		setBL(0x0207B164, (u32)dsiSaveGetLength);
+		setBL(0x0207B16C, (u32)dsiSaveClose);
+		*(u32*)0x0207B29C = 0xE1A00000; // nop
+		setBL(0x0207B374, (u32)dsiSaveOpen);
+		setBL(0x0207B39C, (u32)dsiSaveSeek);
+		setBL(0x0207B3B0, (u32)dsiSaveRead);
+		setBL(0x0207B3C8, (u32)dsiSaveClose);
+		setBL(0x0207B490, (u32)dsiSaveOpen);
+		setBL(0x0207B4B8, (u32)dsiSaveSeek);
+		setBL(0x0207B4CC, (u32)dsiSaveWrite);
+		setBL(0x0207B4D8, (u32)dsiSaveClose); */
+		*(u32*)0x020A49C8 = 0xE1A00000; // nop
+		// tonccpy((u32*)0x020A555C, dsiSaveGetResultCode, 0xC); // Part of .pck file
+		*(u32*)0x020A7F7C = 0xE1A00000; // nop
+		patchInitDSiWare(0x020AF63C, heapEnd);
+		*(u32*)0x020AF9C8 = *(u32*)0x02004FE8;
+		patchUserSettingsReadDSiWare(0x020B0DCC);
+		*(u32*)0x020B0DE8 = wirelessReturnCodeArm;
+		*(u32*)0x020B0DEC = 0xE12FFF1E; // bx lr
+		*(u32*)0x020B0DF4 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x020B0DF8 = 0xE12FFF1E; // bx lr
+	}
+
 	// Candle Route (USA)
 	// Candle Route (Europe)
 	// Requires 8MB of RAM
