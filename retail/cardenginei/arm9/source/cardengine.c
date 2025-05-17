@@ -746,14 +746,14 @@ extern void debugRamMpuFix();
 // Revert region 0 patch
 extern void region0Fix();
 
-static inline void applyColorLut() {
+static inline void applyColorLut(bool processExtPalettes) {
 	#ifdef TWLSDK
 	if (*(u32*)CARDENGINEI_ARM9_CLUT_LOCATION != 0xEA000000) {
 		return;
 	}
 	#endif
-	volatile void (*code)() = (volatile void*)CARDENGINEI_ARM9_CLUT_LOCATION;
-	(*code)();
+	volatile void (*code)(bool) = (volatile void*)CARDENGINEI_ARM9_CLUT_LOCATION;
+	(*code)(processExtPalettes);
 }
 
 void cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
@@ -1432,7 +1432,7 @@ void myIrqHandlerVcount(void) {
 	nocashMessage("myIrqHandlerVcount");
 	#endif
 
-	applyColorLut();
+	applyColorLut(false);
 
 	/* #ifndef TWLSDK
 	if (sharedAddr[4] == 0x554E454D) {
@@ -1473,12 +1473,11 @@ void myIrqHandlerIPC(void) {
 					*vcountHandler = (u32)ce9->patches->vcountHandlerRef;
 				}
 
-				if (!(REG_DISPSTAT & DISP_YTRIGGER_IRQ)) {
-					SetYtrigger(0);
-					REG_DISPSTAT |= DISP_YTRIGGER_IRQ;
-				}
-
+				SetYtrigger(0);
+				REG_DISPSTAT |= DISP_YTRIGGER_IRQ;
 				REG_IE |= IRQ_VCOUNT;
+
+				applyColorLut(true);
 			}
 
 			if (ce9->mainScreen == 1)

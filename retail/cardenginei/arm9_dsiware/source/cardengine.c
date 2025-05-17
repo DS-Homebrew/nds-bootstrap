@@ -222,13 +222,13 @@ void reset(u32 tid1, u32 tid2) {
 	ndsCodeStart(ndsHeader->arm9executeAddress);
 }
 
-static inline void applyColorLut() {
+static inline void applyColorLut(bool processExtPalettes) {
 	if (*(u32*)CARDENGINEI_ARM9_CLUT_LOCATION != 0xEA000000) {
 		return;
 	}
 
-	volatile void (*code)() = (volatile void*)CARDENGINEI_ARM9_CLUT_LOCATION;
-	(*code)();
+	volatile void (*code)(bool) = (volatile void*)CARDENGINEI_ARM9_CLUT_LOCATION;
+	(*code)(processExtPalettes);
 }
 
 void inGameMenu(s32* exRegisters) {
@@ -275,7 +275,7 @@ void myIrqHandlerVcount(void) {
 	nocashMessage("myIrqHandlerVcount");
 	#endif
 
-	applyColorLut();
+	applyColorLut(false);
 
 	/* #ifndef TWLSDK
 	if (sharedAddr[4] == 0x554E454D) {
@@ -305,12 +305,11 @@ void myIrqHandlerIPC(void) {
 					*vcountHandler = (u32)ce9->patches->vcountHandlerRef;
 				}
 
-				if (!(REG_DISPSTAT & DISP_YTRIGGER_IRQ)) {
-					SetYtrigger(0);
-					REG_DISPSTAT |= DISP_YTRIGGER_IRQ;
-				}
-
+				SetYtrigger(0);
+				REG_DISPSTAT |= DISP_YTRIGGER_IRQ;
 				REG_IE |= IRQ_VCOUNT;
+
+				applyColorLut(true);
 			}
 
 			if (ce9->mainScreen == 1)

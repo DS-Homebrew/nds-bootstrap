@@ -110,11 +110,11 @@ bool IPC_SYNC_hooked = false;
 void hookIPC_SYNC(void) {
 	#ifndef GSDD
     if (!IPC_SYNC_hooked) {
-		if (ce9->valueBits & useColorLut) {
+		/* if (ce9->valueBits & useColorLut) {
 			u32* vcountHandler = ce9->irqTable + 2;
 			ce9->intr_vcount_orig_return = *vcountHandler;
 			*vcountHandler = (u32)ce9->patches->vcountHandlerRef;
-		}
+		} */
 		u32* ipcSyncHandler = ce9->irqTable + 16;
 		ce9->intr_ipc_orig_return = *ipcSyncHandler;
 		*ipcSyncHandler = (u32)ce9->patches->ipcSyncHandlerRef;

@@ -7,89 +7,85 @@ extern u32 flags;
 
 #define invertedColors BIT(0)
 #define noWhiteFade BIT(1)
-#define skipLastLineCheck BIT(2)
 
-void applyColorLut() {
+void applyColorLut(bool processExtPalettes) {
 	u32* storedPals = (u32*)0x0374B800;
 	u32* palettes = (u32*)0x05000000;
 	u16* colorTable = (u16*)0x03770000;
 
-	static bool processExtPalettes = false;
-	processExtPalettes = (REG_VCOUNT >= 192);
+	if (processExtPalettes) {
+		goto processExtPalettesFunc;
+	}
 
-	if (!processExtPalettes) {
-		if (flags & invertedColors) {
-			bool masterBrightChanged = false;
-			bool masterBrightSubChanged = false;
-			bool bldCntChanged = false;
-			bool bldCntSubChanged = false;
+	if (flags & invertedColors) {
+		bool masterBrightChanged = false;
+		bool masterBrightSubChanged = false;
+		bool bldCntChanged = false;
+		bool bldCntSubChanged = false;
 
-			// Black -> White fade
-			if (REG_MASTER_BRIGHT >= 0x8000) {
-				REG_MASTER_BRIGHT -= 0x4000;
-				masterBrightChanged = true;
-			}
-			if (REG_MASTER_BRIGHT_SUB >= 0x8000) {
-				REG_MASTER_BRIGHT_SUB -= 0x4000;
-				masterBrightSubChanged = true;
-			}
-			if (REG_BLDCNT == 0xFF) {
-				REG_BLDCNT = 0xBF;
-				bldCntChanged = true;
-			}
-			if (REG_BLDCNT_SUB == 0xFF) {
-				REG_BLDCNT_SUB = 0xBF;
-				bldCntSubChanged = true;
-			}
-
-			// White -> Black fade
-			if (!masterBrightChanged && REG_MASTER_BRIGHT >= 0x4000 && REG_MASTER_BRIGHT < 0x8000) {
-				REG_MASTER_BRIGHT += 0x4000;
-			}
-			if (!masterBrightSubChanged && REG_MASTER_BRIGHT_SUB >= 0x4000 && REG_MASTER_BRIGHT_SUB < 0x8000) {
-				REG_MASTER_BRIGHT_SUB += 0x4000;
-			}
-			if (!bldCntChanged && REG_BLDCNT == 0xBF) {
-				REG_BLDCNT = 0xFF;
-			}
-			if (!bldCntSubChanged && REG_BLDCNT_SUB == 0xBF) {
-				REG_BLDCNT_SUB = 0xFF;
-			}
-		} else if (flags & noWhiteFade) {
-			if (REG_MASTER_BRIGHT >= 0x4000 && REG_MASTER_BRIGHT < 0x8000) {
-				REG_MASTER_BRIGHT += 0x4000;
-			}
-			if (REG_MASTER_BRIGHT_SUB >= 0x4000 && REG_MASTER_BRIGHT_SUB < 0x8000) {
-				REG_MASTER_BRIGHT_SUB += 0x4000;
-			}
-			if (REG_BLDCNT == 0xBF) {
-				REG_BLDCNT = 0xFF;
-			}
-			if (REG_BLDCNT_SUB == 0xBF) {
-				REG_BLDCNT_SUB = 0xFF;
-			}
+		// Black -> White fade
+		if (REG_MASTER_BRIGHT >= 0x8000) {
+			REG_MASTER_BRIGHT -= 0x4000;
+			masterBrightChanged = true;
+		}
+		if (REG_MASTER_BRIGHT_SUB >= 0x8000) {
+			REG_MASTER_BRIGHT_SUB -= 0x4000;
+			masterBrightSubChanged = true;
+		}
+		if (REG_BLDCNT == 0xFF) {
+			REG_BLDCNT = 0xBF;
+			bldCntChanged = true;
+		}
+		if (REG_BLDCNT_SUB == 0xFF) {
+			REG_BLDCNT_SUB = 0xBF;
+			bldCntSubChanged = true;
 		}
 
-		for (int i = 0; i < 0x800/4; i++) {
-			if (*storedPals != *palettes) {
-				u16* storedPals16 = (u16*)storedPals;
-				u16* palettes16 = (u16*)palettes;
-				for (int p = 0; p < 2; p++) {
-					if (storedPals16[p] != palettes16[p]) {
-						palettes16[p] = colorTable[palettes16[p] % 0x8000];
-						storedPals16[p] = palettes16[p];
-					}
-				}
-			}
-			storedPals++;
-			palettes++;
+		// White -> Black fade
+		if (!masterBrightChanged && REG_MASTER_BRIGHT >= 0x4000 && REG_MASTER_BRIGHT < 0x8000) {
+			REG_MASTER_BRIGHT += 0x4000;
 		}
-		if (!(flags & skipLastLineCheck)) {
-			SetYtrigger(192);
-			return;
+		if (!masterBrightSubChanged && REG_MASTER_BRIGHT_SUB >= 0x4000 && REG_MASTER_BRIGHT_SUB < 0x8000) {
+			REG_MASTER_BRIGHT_SUB += 0x4000;
+		}
+		if (!bldCntChanged && REG_BLDCNT == 0xBF) {
+			REG_BLDCNT = 0xFF;
+		}
+		if (!bldCntSubChanged && REG_BLDCNT_SUB == 0xBF) {
+			REG_BLDCNT_SUB = 0xFF;
+		}
+	} else if (flags & noWhiteFade) {
+		if (REG_MASTER_BRIGHT >= 0x4000 && REG_MASTER_BRIGHT < 0x8000) {
+			REG_MASTER_BRIGHT += 0x4000;
+		}
+		if (REG_MASTER_BRIGHT_SUB >= 0x4000 && REG_MASTER_BRIGHT_SUB < 0x8000) {
+			REG_MASTER_BRIGHT_SUB += 0x4000;
+		}
+		if (REG_BLDCNT == 0xBF) {
+			REG_BLDCNT = 0xFF;
+		}
+		if (REG_BLDCNT_SUB == 0xBF) {
+			REG_BLDCNT_SUB = 0xFF;
 		}
 	}
 
+	for (int i = 0; i < 0x800/4; i++) {
+		if (*storedPals != *palettes) {
+			u16* storedPals16 = (u16*)storedPals;
+			u16* palettes16 = (u16*)palettes;
+			for (int p = 0; p < 2; p++) {
+				if (storedPals16[p] != palettes16[p]) {
+					palettes16[p] = colorTable[palettes16[p] % 0x8000];
+					storedPals16[p] = palettes16[p];
+				}
+			}
+		}
+		storedPals++;
+		palettes++;
+	}
+	return;
+
+processExtPalettesFunc:
 	u8 vramCr = VRAM_E_CR;
 	while (vramCr >= 0x90) {
 		vramCr -= 0x10;
@@ -259,6 +255,4 @@ void applyColorLut() {
 		block++;
 		if (block == 2) block = 0;
 	}
-
-	SetYtrigger(0);
 }
