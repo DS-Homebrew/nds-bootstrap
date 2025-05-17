@@ -244,8 +244,8 @@ void inGameMenu(s32* exRegisters) {
 	}
 
 	*(u32*)(INGAME_MENU_LOCATION + IGM_TEXT_SIZE_ALIGNED) = (u32)sharedAddr;
-	volatile void (*inGameMenu)(s32*, u32, s32*) = (volatile void*)INGAME_MENU_LOCATION + IGM_ENTRY;
-	(*inGameMenu)(&ce9->mainScreen, ce9->consoleModel, exRegisters);
+	volatile u32 (*inGameMenu)(s32*, u32, s32*) = (volatile void*)INGAME_MENU_LOCATION + IGM_ENTRY;
+	const u32 res = (*inGameMenu)(&ce9->mainScreen, ce9->consoleModel, exRegisters);
 
 	while (sharedAddr[5] != 0x4C4D4749) { // 'IGML'
 		while (REG_VCOUNT != 191) swiDelay(100);
@@ -256,9 +256,9 @@ void inGameMenu(s32* exRegisters) {
 		while (REG_VCOUNT == 191) swiDelay(100);
 	}
 
-	if (sharedAddr[3] == 0x52534554 || sharedAddr[3] == 0x54495845) {
+	if (res == 0x52534554 || res == 0x54495845) {
 		igmReset = true;
-		if (sharedAddr[3] == 0x52534554) {
+		if (res == 0x52534554) {
 			reset(*(u32*)0x02FFE230, *(u32*)0x02FFE234);
 		} else {
 			reset(0, 0);
