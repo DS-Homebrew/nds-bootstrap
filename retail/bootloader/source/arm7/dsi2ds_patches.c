@@ -5987,7 +5987,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Cake Ninja (USA)
 	else if (strcmp(romTid, "K2JE") == 0) {
 		*(u32*)0x02008C4C = 0xE1A00000; // nop
-		*(u32*)0x02008DE4 = 0xE1A00000; // nop
+		*(u32*)0x02008DE4 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		if (!extendedMemory) {
 			// Make BG static to cut down RAM usage
 			setB(0x02008400, 0x02008664);
@@ -6029,7 +6029,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Cake Ninja (Europe)
 	else if (strcmp(romTid, "K2JP") == 0) {
 		*(u32*)0x02008C4C = 0xE1A00000; // nop
-		*(u32*)0x02008ED4 = 0xE1A00000; // nop
+		*(u32*)0x02008ED4 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		if (!extendedMemory) {
 			// Make BG static to cut down RAM usage
 			setB(0x02008400, 0x02008664);
@@ -6071,7 +6071,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Cake Ninja 2 (USA)
 	else if (strcmp(romTid, "K2NE") == 0) {
 		*(u32*)0x02008880 = 0xE1A00000; // nop
-		*(u32*)0x020089F4 = 0xE1A00000; // nop
+		*(u32*)0x020089F4 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		/* setBL(0x0204C918, (u32)dsiSaveOpen); // Part of .pck file
 		setBL(0x0204C970, (u32)dsiSaveCreate);
 		setBL(0x0204C9A4, (u32)dsiSaveOpen);
@@ -6105,7 +6105,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Cake Ninja 2 (Europe)
 	else if (strcmp(romTid, "K2NP") == 0) {
 		*(u32*)0x02008880 = 0xE1A00000; // nop
-		*(u32*)0x02008A88 = 0xE1A00000; // nop
+		*(u32*)0x02008A88 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		/* setBL(0x0204C974, (u32)dsiSaveOpen); // Part of .pck file
 		setBL(0x0204C9CC, (u32)dsiSaveCreate);
 		setBL(0x0204CA00, (u32)dsiSaveOpen);
@@ -6140,7 +6140,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Requires 8MB of RAM
 	else if (strcmp(romTid, "KYNE") == 0 && extendedMemory) {
 		*(u32*)0x0200846C = 0xE1A00000; // nop
-		*(u32*)0x02008604 = 0xE1A00000; // nop
+		*(u32*)0x02008604 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		/* setBL(0x0202571C, (u32)dsiSaveOpen); // Part of .pck file
 		setBL(0x02025774, (u32)dsiSaveCreate);
 		setBL(0x020257A8, (u32)dsiSaveOpen);
@@ -6175,7 +6175,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Requires 8MB of RAM
 	else if (strcmp(romTid, "KYNP") == 0 && extendedMemory) {
 		*(u32*)0x0200846C = 0xE1A00000; // nop
-		*(u32*)0x020086F4 = 0xE1A00000; // nop
+		*(u32*)0x020086F4 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		/* setBL(0x020257A8, (u32)dsiSaveOpen); // Part of .pck file
 		setBL(0x02025800, (u32)dsiSaveCreate);
 		setBL(0x02025834, (u32)dsiSaveOpen);
@@ -13418,6 +13418,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02065680 = 0xE12FFF1E; // bx lr
 		*(u32*)0x02065688 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x0206568C = 0xE12FFF1E; // bx lr
+		*(u32*)0x0206A550 = 0xE3A00003; // mov r0, #3
 	}
 
 	// Ichi Moudaji!: Neko King (Japan)
