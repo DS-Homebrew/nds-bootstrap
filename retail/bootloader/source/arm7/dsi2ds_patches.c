@@ -13314,6 +13314,48 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// Ice Hockey Slovakia 2011 (Europe)
+	else if (strcmp(romTid, "KISP") == 0) {
+		*(u32*)0x02005CE4 = 0xE1A00000; // nop
+		if (!extendedMemory) {
+			// Disable sound effects
+			*(u32*)0x02005D5C = 0xE1A00000; // nop
+			*(u32*)0x02005D64 = 0xE1A00000; // nop
+			*(u32*)0x020297C8 = 0xE12FFF1E; // bx lr
+		}
+		*(u32*)0x02005F28 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		/* setBL(0x02031758, (u32)dsiSaveOpen); // Part of .pck file
+		*(u32*)0x02031770 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+		*(u32*)0x02031788 = 0xE3A00001; // mov r0, #1 (dsiSaveFreeSpaceAvailable)
+		setBL(0x020317B0, (u32)dsiSaveCreate);
+		setBL(0x020317E4, (u32)dsiSaveOpen);
+		setBL(0x020317F8, (u32)dsiSaveSetLength);
+		setBL(0x02031808, (u32)dsiSaveGetLength);
+		setBL(0x02031810, (u32)dsiSaveClose);
+		setBL(0x02031848, (u32)dsiSaveSetLength);
+		setBL(0x02031858, (u32)dsiSaveGetLength);
+		setBL(0x02031860, (u32)dsiSaveClose);
+		*(u32*)0x02031990 = 0xE1A00000; // nop
+		setBL(0x02031A68, (u32)dsiSaveOpen);
+		setBL(0x02031A90, (u32)dsiSaveSeek);
+		setBL(0x02031AA4, (u32)dsiSaveRead);
+		setBL(0x02031ABC, (u32)dsiSaveClose);
+		setBL(0x02031B84, (u32)dsiSaveOpen);
+		setBL(0x02031BAC, (u32)dsiSaveSeek);
+		setBL(0x02031BC0, (u32)dsiSaveWrite);
+		setBL(0x02031BCC, (u32)dsiSaveClose); */
+		*(u32*)0x0205983C = 0xE1A00000; // nop
+		// tonccpy((u32*)0x0205A3D0, dsiSaveGetResultCode, 0xC); // Part of .pck file
+		*(u32*)0x0205CD68 = 0xE1A00000; // nop
+		patchInitDSiWare(0x02063F40, heapEnd);
+		*(u32*)0x020642CC = *(u32*)0x02004FD0;
+		patchUserSettingsReadDSiWare(0x02065660);
+		*(u32*)0x0206567C = wirelessReturnCodeArm;
+		*(u32*)0x02065680 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02065688 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0206568C = 0xE12FFF1E; // bx lr
+	}
+
 	// Ichi Moudaji!: Neko King (Japan)
 	// Either this uses more than one save file in filesystem, or saving is somehow just bugged
 	/* else if (strcmp(romTid, "KNEJ") == 0) {

@@ -256,6 +256,7 @@ static const char dsiWareForBootloader1[][4] = {
 	"KTX", // High Stakes Texas Hold'em
 	"KHI", // Hints Hunter
 	"KT2", // G.G Series: Horizontal Bar
+	"KIS", // Ice Hockey Slovakia 2011
 	// "KNE", // Ichi Moudaji!: Neko King
 	"KNK", // Ideyou Sukeno: Kenkou Maja DSi
 	"KBT", // Invasion of the Alien Blobs!

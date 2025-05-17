@@ -7382,6 +7382,11 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		tonccpy((u32*)0x020418AC, dsiSaveGetResultCode, 0xC);
 	}
 
+	// Ice Hockey Slovakia 2011 (Europe)
+	else if (strcmp(romTid, "KISP") == 0 && !twlFontFound) {
+		*(u32*)0x02005F28 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+	}
+
 	// Ichi Moudaji!: Neko King (Japan)
 	// Either this uses more than one save file in filesystem, or saving is somehow just bugged
 	else if (strcmp(romTid, "KNEJ") == 0) {
