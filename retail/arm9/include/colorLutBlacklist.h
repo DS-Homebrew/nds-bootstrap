@@ -30,6 +30,7 @@ static const char colorLutBlacklist[][4] = {
 	"AMH", // Metroid Prime Hunters
 	"B3N", // Power Rangers: Samurai
 	"B8I", // Spider-Man: Edge of Time
+	"AZL", // Style Savvy
 	"AGF", // True Swing Golf
 	"K72", // True Swing Golf Express
 	"CP3", // Viva Pinata: Pocket Paradise
@@ -106,6 +107,10 @@ Power Rangers: Samurai:
 Spider-Man: Edge of Time,
 Viva Pinata: Pocket Paradise:
 - IRQ is not hooked on arm9
+
+Style Savvy:
+- Character skin and hair use color blending
+- Crashes when the master brightness register gets changed, and would occur when using a specific LUT which has inverted black/white or a non-white white
 
 True Swing Golf,
 True Swing Golf Express:
