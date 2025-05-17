@@ -18,43 +18,58 @@ void applyColorLut(bool processExtPalettes) {
 	}
 
 	if (flags & invertedColors) {
-		bool masterBrightChanged = false;
-		bool masterBrightSubChanged = false;
-		bool bldCntChanged = false;
-		bool bldCntSubChanged = false;
+		static u16 storedMasterBright = 0;
+		static u16 storedMasterBrightSub = 0;
+		static u8 storedBldCnt = 0;
+		static u8 storedBldCntSub = 0;
 
-		// Black -> White fade
-		if (REG_MASTER_BRIGHT >= 0x8000) {
-			REG_MASTER_BRIGHT -= 0x4000;
-			masterBrightChanged = true;
+		// Invert Black/White fades
+		if (storedMasterBright != REG_MASTER_BRIGHT) {
+			bool masterBrightChanged = false;
+			if (REG_MASTER_BRIGHT >= 0x8000) {
+				REG_MASTER_BRIGHT -= 0x4000;
+				masterBrightChanged = true;
+			}
+			if (!masterBrightChanged && REG_MASTER_BRIGHT >= 0x4000 && REG_MASTER_BRIGHT < 0x8000) {
+				REG_MASTER_BRIGHT += 0x4000;
+			}
+			storedMasterBright = REG_MASTER_BRIGHT;
 		}
-		if (REG_MASTER_BRIGHT_SUB >= 0x8000) {
-			REG_MASTER_BRIGHT_SUB -= 0x4000;
-			masterBrightSubChanged = true;
+		if (storedMasterBrightSub != REG_MASTER_BRIGHT_SUB) {
+			bool masterBrightSubChanged = false;
+			if (REG_MASTER_BRIGHT_SUB >= 0x8000) {
+				REG_MASTER_BRIGHT_SUB -= 0x4000;
+				masterBrightSubChanged = true;
+			}
+			if (!masterBrightSubChanged && REG_MASTER_BRIGHT_SUB >= 0x4000 && REG_MASTER_BRIGHT_SUB < 0x8000) {
+				REG_MASTER_BRIGHT_SUB += 0x4000;
+			}
+			storedMasterBrightSub = REG_MASTER_BRIGHT_SUB;
 		}
-		if (REG_BLDCNT == 0xFF) {
-			REG_BLDCNT = 0xBF;
-			bldCntChanged = true;
+		if (storedBldCnt != REG_BLDCNT) {
+			bool bldCntChanged = false;
+			if (REG_BLDCNT == 0xFF) {
+				REG_BLDCNT = 0xBF;
+				bldCntChanged = true;
+			}
+			if (!bldCntChanged && REG_BLDCNT == 0xBF) {
+				REG_BLDCNT = 0xFF;
+			}
+			storedBldCnt = REG_BLDCNT;
 		}
-		if (REG_BLDCNT_SUB == 0xFF) {
-			REG_BLDCNT_SUB = 0xBF;
-			bldCntSubChanged = true;
-		}
-
-		// White -> Black fade
-		if (!masterBrightChanged && REG_MASTER_BRIGHT >= 0x4000 && REG_MASTER_BRIGHT < 0x8000) {
-			REG_MASTER_BRIGHT += 0x4000;
-		}
-		if (!masterBrightSubChanged && REG_MASTER_BRIGHT_SUB >= 0x4000 && REG_MASTER_BRIGHT_SUB < 0x8000) {
-			REG_MASTER_BRIGHT_SUB += 0x4000;
-		}
-		if (!bldCntChanged && REG_BLDCNT == 0xBF) {
-			REG_BLDCNT = 0xFF;
-		}
-		if (!bldCntSubChanged && REG_BLDCNT_SUB == 0xBF) {
-			REG_BLDCNT_SUB = 0xFF;
+		if (storedBldCntSub != REG_BLDCNT_SUB) {
+			bool bldCntSubChanged = false;
+			if (REG_BLDCNT_SUB == 0xFF) {
+				REG_BLDCNT_SUB = 0xBF;
+				bldCntSubChanged = true;
+			}
+			if (!bldCntSubChanged && REG_BLDCNT_SUB == 0xBF) {
+				REG_BLDCNT_SUB = 0xFF;
+			}
+			storedBldCntSub = REG_BLDCNT_SUB;
 		}
 	} else if (flags & noWhiteFade) {
+		// Invert white to black fades
 		if (REG_MASTER_BRIGHT >= 0x4000 && REG_MASTER_BRIGHT < 0x8000) {
 			REG_MASTER_BRIGHT += 0x4000;
 		}
