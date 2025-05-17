@@ -8169,6 +8169,70 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		doubleNopT(0x0202B2BE);
 	}
 
+	// Crazy Cheebo: Puzzle Party (USA)
+	else if (strcmp(romTid, "KCQE") == 0) {
+		*(u32*)0x02006B80 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		/* setBL(0x0201F040, (u32)dsiSaveOpen); // Part of .pck file
+		setBL(0x0201F054, (u32)dsiSaveCreate);
+		setBL(0x0201F078, (u32)dsiSaveOpen);
+		setBL(0x0201F08C, (u32)dsiSaveSetLength);
+		setBL(0x0201F098, (u32)dsiSaveClose);
+		setBL(0x0201F0B8, (u32)dsiSaveSetLength);
+		setBL(0x0201F0C0, (u32)dsiSaveClose);
+		*(u32*)0x0201F1DC = 0xE1A00000; // nop
+		setBL(0x0201F2B8, (u32)dsiSaveOpen);
+		setBL(0x0201F2E0, (u32)dsiSaveSeek);
+		setBL(0x0201F2F4, (u32)dsiSaveRead);
+		setBL(0x0201F300, (u32)dsiSaveClose);
+		setBL(0x0201F3C8, (u32)dsiSaveOpen);
+		setBL(0x0201F3F0, (u32)dsiSaveSeek);
+		setBL(0x0201F404, (u32)dsiSaveWrite);
+		setBL(0x0201F410, (u32)dsiSaveClose); */
+		*(u32*)0x0203FA18 = 0xE1A00000; // nop
+		// tonccpy((u32*)0x020405A8, dsiSaveGetResultCode, 0xC); // Part of .pck file
+		*(u32*)0x02042DD0 = 0xE1A00000; // nop
+		patchInitDSiWare(0x0204D59C, heapEnd);
+		*(u32*)0x0204D928 = *(u32*)0x02004FD0;
+		patchUserSettingsReadDSiWare(0x0204EC98);
+		*(u32*)0x0204ECB4 = wirelessReturnCodeArm;
+		*(u32*)0x0204ECB8 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0204ECC0 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0204ECC4 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02053B58 = 0xE3A00003; // mov r0, #3
+	}
+
+	// Crazy Cheebo: Puzzle Party (Europe)
+	else if (strcmp(romTid, "KCQP") == 0) {
+		*(u32*)0x02006AAC = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		/* setBL(0x0201F844, (u32)dsiSaveOpen); // Part of .pck file
+		setBL(0x0201F858, (u32)dsiSaveCreate);
+		setBL(0x0201F87C, (u32)dsiSaveOpen);
+		setBL(0x0201F890, (u32)dsiSaveSetLength);
+		setBL(0x0201F89C, (u32)dsiSaveClose);
+		setBL(0x0201F8BC, (u32)dsiSaveSetLength);
+		setBL(0x0201F8C4, (u32)dsiSaveClose);
+		*(u32*)0x0201F9E0 = 0xE1A00000; // nop
+		setBL(0x0201FABC, (u32)dsiSaveOpen);
+		setBL(0x0201FAE4, (u32)dsiSaveSeek);
+		setBL(0x0201FAF8, (u32)dsiSaveRead);
+		setBL(0x0201FB04, (u32)dsiSaveClose);
+		setBL(0x0201FBCC, (u32)dsiSaveOpen);
+		setBL(0x0201FBF4, (u32)dsiSaveSeek);
+		setBL(0x0201FC08, (u32)dsiSaveWrite);
+		setBL(0x0201FC14, (u32)dsiSaveClose); */
+		*(u32*)0x0204021C = 0xE1A00000; // nop
+		// tonccpy((u32*)0x02040DAC, dsiSaveGetResultCode, 0xC); // Part of .pck file
+		*(u32*)0x0204365C = 0xE1A00000; // nop
+		patchInitDSiWare(0x0204DE44, heapEnd);
+		*(u32*)0x0204E1D0 = *(u32*)0x02004FE8;
+		patchUserSettingsReadDSiWare(0x0204F540);
+		*(u32*)0x0204F55C = wirelessReturnCodeArm;
+		*(u32*)0x0204F560 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0204F568 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0204F56C = 0xE12FFF1E; // bx lr
+		*(u32*)0x02054400 = 0xE3A00003; // mov r0, #3
+	}
+
 	// Crazy Golf (USA)
 	// Saving not supported due to using more than one file in filesystem
 	else if (strcmp(romTid, "KZGE") == 0) {

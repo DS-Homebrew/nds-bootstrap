@@ -4708,6 +4708,16 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// Crazy Cheebo: Puzzle Party (USA)
+	else if (strcmp(romTid, "KCQE") == 0 && !twlFontFound) {
+		*(u32*)0x02006B80 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+	}
+
+	// Crazy Cheebo: Puzzle Party (Europe)
+	else if (strcmp(romTid, "KCQP") == 0 && !twlFontFound) {
+		*(u32*)0x02006AAC = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+	}
+
 	// Crazy Chicken: Director's Cut (Europe)
 	/* else if (strcmp(romTid, "KQZP") == 0 && saveOnFlashcardNtr) {
 		*(u32*)0x0207DAC0 = 0xE12FFF1E; // bx lr // Part of .pck file
