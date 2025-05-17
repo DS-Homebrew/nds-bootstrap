@@ -6137,9 +6137,20 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Cake Ninja: XMAS (USA)
-	// Requires 8MB of RAM
-	else if (strcmp(romTid, "KYNE") == 0 && extendedMemory) {
+	else if (strcmp(romTid, "KYNE") == 0) {
 		*(u32*)0x0200846C = 0xE1A00000; // nop
+		if (!extendedMemory) {
+			// Disable sound effects
+			*(u32*)0x020084E4 = 0xE1A00000; // nop
+			*(u32*)0x020084EC = 0xE1A00000; // nop
+
+			// Disable music
+			*(u32*)0x020084F8 = 0xE1A00000; // nop
+			*(u32*)0x02008500 = 0xE1A00000; // nop
+
+			*(u32*)0x02022D10 = 0xE12FFF1E; // bx lr
+			*(u32*)0x02023148 = 0xE12FFF1E; // bx lr
+		}
 		*(u32*)0x02008604 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		/* setBL(0x0202571C, (u32)dsiSaveOpen); // Part of .pck file
 		setBL(0x02025774, (u32)dsiSaveCreate);
@@ -6172,9 +6183,20 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Cake Ninja: XMAS (Europe)
-	// Requires 8MB of RAM
-	else if (strcmp(romTid, "KYNP") == 0 && extendedMemory) {
+	else if (strcmp(romTid, "KYNP") == 0) {
 		*(u32*)0x0200846C = 0xE1A00000; // nop
+		if (!extendedMemory) {
+			// Disable sound effects
+			*(u32*)0x020084E4 = 0xE1A00000; // nop
+			*(u32*)0x020084EC = 0xE1A00000; // nop
+
+			// Disable music
+			*(u32*)0x020084F8 = 0xE1A00000; // nop
+			*(u32*)0x02008500 = 0xE1A00000; // nop
+
+			*(u32*)0x02022D9C = 0xE12FFF1E; // bx lr
+			*(u32*)0x020231D4 = 0xE12FFF1E; // bx lr
+		}
 		*(u32*)0x020086F4 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		/* setBL(0x020257A8, (u32)dsiSaveOpen); // Part of .pck file
 		setBL(0x02025800, (u32)dsiSaveCreate);
