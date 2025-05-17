@@ -86,6 +86,7 @@ void endCardReadDma() {
 	if (dmaDirectRead && ndmaBusy(0))
 	#endif
 	{
+		dmaDirectRead = false;
 		IPC_SendSync(0x3);
 		return;
 	}
@@ -349,7 +350,6 @@ void continueCardReadDmaArm7() {
 
 void cardSetDma(u32 * params) {
 	isDma = true;
-	dmaDirectRead = false;
 
 	#ifdef TWLSDK
 	dmaParams = params;

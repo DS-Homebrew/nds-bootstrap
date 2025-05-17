@@ -1451,15 +1451,6 @@ void myIrqHandlerIPC(void) {
 #ifndef GSDD
 	switch (IPC_GetSync()) {
 		case 0x3:
-			extern bool dmaDirectRead;
-		if (dmaDirectRead) {
-			endCardReadDma();
-		} else { // new dma method
-#ifndef DLDI
-			continueCardReadDmaArm7();
-#endif
-			continueCardReadDmaArm9();
-		}
 			break;
 		case 0x5:
 			igmReset = true;
@@ -1509,6 +1500,16 @@ void myIrqHandlerIPC(void) {
 		case 0x9:
 			inGameMenu((s32*)0);
 			break;
+	}
+
+	extern bool dmaDirectRead;
+	if (dmaDirectRead) {
+		endCardReadDma();
+	} else { // new dma method
+#ifndef DLDI
+		continueCardReadDmaArm7();
+#endif
+		continueCardReadDmaArm9();
 	}
 
 	if (sharedAddr[4] == (vu32)0x57534352) {
