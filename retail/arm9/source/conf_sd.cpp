@@ -1605,8 +1605,16 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			}
 			*(vu32*)0x03700000 = wordBak;
 		}
-		if (access("sd:/hiya.dsi", F_OK) == 0) {
-			conf->valueBits2 |= BIT(6);
+		if (isDSiMode() && conf->consoleModel < 2 && access("sd:/hiya.dsi", F_OK) == 0 && access("sd:/shared1/TWLCFG0.dat", F_OK) == 0 && access("sd:/sys/HWINFO_N.dat", F_OK) == 0 && REG_SCFG_EXT7 != 0) {
+			FILE* twlCfgFile = fopen("sd:/shared1/TWLCFG0.dat", "rb");
+			fseek(twlCfgFile, 0x88, SEEK_SET);
+			fread((void*)0x02000400, 1, 0x128, twlCfgFile);
+			fclose(twlCfgFile);
+
+			u32 srBackendId[2] = {*(u32*)0x02000428, *(u32*)0x0200042C};
+			if (srBackendId[0] != 0x53524C41 || srBackendId[1] != 0x00030004) {
+				conf->valueBits2 |= BIT(6);
+			}
 		}
 
 		if (!conf->isDSiWare || !scfgSdmmcEnabled) {
@@ -1622,7 +1630,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 					(u8*)CARDENGINEI_ARM7_BUFFERED_LOCATION
 				);
 				if (rc == 0) {
-					if (REG_SCFG_EXT7 != 0) {
+					if (REG_SCFG_EXT7 != 0 && !(conf->valueBits2 & BIT(6))) {
 						tonccpy((u8*)LOADER_RETURN_SDK5_LOCATION, twlmenuResetGamePath, 256);
 					}
 					tonccpy((u8*)LOADER_RETURN_SDK5_LOCATION+0x100, &srBackendId, 8);
@@ -1648,7 +1656,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 					(u8*)CARDENGINEI_ARM7_BUFFERED_LOCATION
 				);
 				if (rc == 0) {
-					if (REG_SCFG_EXT7 != 0) {
+					if (REG_SCFG_EXT7 != 0 && !(conf->valueBits2 & BIT(6))) {
 						tonccpy((u8*)LOADER_RETURN_LOCATION, twlmenuResetGamePath, 256);
 					}
 					tonccpy((u8*)LOADER_RETURN_LOCATION+0x100, &srBackendId, 8);
@@ -1715,7 +1723,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 				(u8*)CARDENGINEI_ARM7_BUFFERED_LOCATION
 			);
 			if (rc == 0) {
-				if (REG_SCFG_EXT7 != 0) {
+				if (REG_SCFG_EXT7 != 0 && !(conf->valueBits2 & BIT(6))) {
 					tonccpy((u8*)LOADER_RETURN_DSIWARE_LOCATION, twlmenuResetGamePath, 256);
 				}
 				tonccpy((u8*)LOADER_RETURN_DSIWARE_LOCATION+0x100, &srBackendId, 8);

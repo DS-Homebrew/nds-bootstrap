@@ -233,8 +233,6 @@ static void unlaunchSetFilename(bool boot) {
 }
 
 static void unlaunchSetHiyaFilename(void) {
-	if (!(valueBits & hiyaCfwFound)) return;
-
 	tonccpy((u8*)0x02000800, unlaunchAutoLoadID, 12);
 	*(u16*)(0x0200080C) = 0x3F0;		// Unlaunch Length for CRC16 (fixed, must be 3F0h)
 	*(u16*)(0x0200080E) = 0;			// Unlaunch CRC16 (empty)
@@ -483,7 +481,11 @@ void reset(const bool downloadedSrl) {
 		*(u32*)0x02000000 = BIT(3);
 		*(u32*)0x02000004 = 0x54455352; // 'RSET'
 		if (consoleModel < 2) {
-			(*(u32*)(ce7+0xB500) == 0 && (valueBits & b_dsiSD)) ? unlaunchSetFilename(false) : unlaunchSetHiyaFilename();
+			if (valueBits & hiyaCfwFound) {
+				unlaunchSetHiyaFilename();
+			} else if (*(u32*)(ce7+0xB500) == 0 && (valueBits & b_dsiSD)) {
+				unlaunchSetFilename(false);
+			}
 		}
 		if (*(u32*)(ce7+0xB500) == 0 && (valueBits & b_dsiSD)) {
 			tonccpy((u32*)0x02000300, sr_data_srloader, 0x20);
@@ -778,12 +780,16 @@ void forceGameReboot(void) {
 	sharedAddr[4] = 0x57534352;
 	IPC_SendSync(0x8);
 	if (consoleModel < 2) {
-		if (valueBits & b_dsiSD) {
+		if (valueBits & hiyaCfwFound) {
+			unlaunchSetHiyaFilename();
+		} else if ((valueBits & b_dsiSD) &&
 			#ifdef TWLSDK
-			(*(u32*)(ce7+0x8500) == 0) ? unlaunchSetFilename(false) : unlaunchSetHiyaFilename();
+			(*(u32*)(ce7+0x8500) == 0)
 			#else
-			(*(u32*)(ce7+0xB500) == 0) ? unlaunchSetFilename(false) : unlaunchSetHiyaFilename();
+			(*(u32*)(ce7+0xB500) == 0)
 			#endif
+		) {
+				unlaunchSetFilename(false);
 		}
 		waitFrames(5);							// Wait for DSi screens to stabilize
 	}
@@ -847,7 +853,9 @@ void returnToLoader(bool reboot) {
 			}
 			waitFrames(1);
 		} else {
-			if (*(u32*)(ce7+0x8500) == 0) {
+			if (valueBits & hiyaCfwFound) {
+				unlaunchSetHiyaFilename();
+			} else if (*(u32*)(ce7+0x8500) == 0) {
 				unlaunchSetFilename(true);
 			} else {
 				// Use different SR backend ID
@@ -958,8 +966,9 @@ void returnToLoader(bool reboot) {
 		}
 		waitFrames(1);
 	} else {
-		if (*(u32*)(ce7+0xB500) == 0 && (valueBits & b_dsiSD))
-		{
+		if (valueBits & hiyaCfwFound) {
+			unlaunchSetHiyaFilename();
+		} else if (*(u32*)(ce7+0xB500) == 0 && (valueBits & b_dsiSD)) {
 			unlaunchSetFilename(true);
 		} else {
 			// Use different SR backend ID
