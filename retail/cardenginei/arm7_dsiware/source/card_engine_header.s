@@ -124,11 +124,8 @@ code_handler_start_vblank:
 
 card_engine_end:
 
-ndsCodeStart:
 	.thumb
-	bx	pc
-.align	4
-	.arm
+ndsCodeStart:
 	mov r1, #0
 	mov r2, #0
 	mov r3, #0
@@ -136,12 +133,11 @@ ndsCodeStart:
 	mov r5, #0
 	mov r6, #0
 	mov r7, #0
-	mov r8, #0
-	mov r9, #0
-	mov r10, #0
-	mov r11, #0
-
-	bx	r0
+	mov r8, r1
+	mov r9, r1
+	mov r10, r1
+	mov r11, r1
+	bx r0
 
 patches:
 .word	0
@@ -167,6 +163,7 @@ patches:
 .pool
 @---------------------------------------------------------------------------------
 
+	.arm
 @---------------------------------------------------------------------------------
 card_irq_enable_arm7:
 @---------------------------------------------------------------------------------
