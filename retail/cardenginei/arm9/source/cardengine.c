@@ -1449,7 +1449,22 @@ void myIrqHandlerIPC(void) {
 	#endif
 
 #ifndef GSDD
-	switch (IPC_GetSync()) {
+	const int ipcGetSync = IPC_GetSync();
+
+	if (sharedAddr[4] == 0x39414D44) {
+		sharedAddr[4] = 0;
+		extern bool dmaDirectRead;
+		if (dmaDirectRead) {
+			endCardReadDma();
+		} else { // new dma method
+			#ifndef DLDI
+			continueCardReadDmaArm7();
+			#endif
+			continueCardReadDmaArm9();
+		}
+	}
+
+	switch (ipcGetSync) {
 		case 0x3:
 			break;
 		case 0x5:
@@ -1501,17 +1516,7 @@ void myIrqHandlerIPC(void) {
 			break;
 	}
 
-	extern bool dmaDirectRead;
-	if (dmaDirectRead) {
-		endCardReadDma();
-	} else { // new dma method
-#ifndef DLDI
-		continueCardReadDmaArm7();
-#endif
-		continueCardReadDmaArm9();
-	}
-
-	if (sharedAddr[4] == (vu32)0x57534352) {
+	if (sharedAddr[4] == 0x57534352) {
 		enterCriticalSection();
 		if (ce9->consoleModel < 2) {
 			// Make screens white

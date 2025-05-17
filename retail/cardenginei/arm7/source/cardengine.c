@@ -1544,6 +1544,7 @@ void runCardEngineCheck(void) {
 						sharedAddr[3] = 0;
 					}
 					if (isDma) {
+						sharedAddr[4] = 0x39414D44; // 'DMA9'
 						IPC_SendSync(0x3);
 					}
 				}
@@ -1616,6 +1617,7 @@ void runCardEngineCheckHalt(void) {
 					// readOngoing = false;
 					sharedAddr[3] = 0;
 					if (isDma) {
+						sharedAddr[4] = 0x39414D44; // 'DMA9'
 						IPC_SendSync(0x3);
 					}
 				}
@@ -1666,6 +1668,7 @@ void myIrqHandlerFIFO(void) {
 		}
 		#endif */
 		swiDelay(100);
+		sharedAddr[4] = 0x39414D44; // 'DMA9'
 		IPC_SendSync(0x3);
 		return;
 	}
