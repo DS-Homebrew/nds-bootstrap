@@ -1805,6 +1805,9 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			} else if (noWhiteFade) {
 				flags |= BIT(1);
 			}
+			if (strncmp(romTid, "AMC", 3) == 0) {
+				flags |= BIT(2);
+			}
 			*(u32*)(CARDENGINEI_ARM9_CLUT_BUFFERED_LOCATION+4) = flags;
 		}
 

@@ -7,6 +7,7 @@ extern u32 flags;
 
 #define invertedColors BIT(0)
 #define noWhiteFade BIT(1)
+#define skipLastLineCheck BIT(2)
 
 void applyColorLut() {
 	u32* storedPals = (u32*)0x0374B800;
@@ -83,8 +84,10 @@ void applyColorLut() {
 			storedPals++;
 			palettes++;
 		}
-		SetYtrigger(192);
-		return;
+		if (!(flags & skipLastLineCheck)) {
+			SetYtrigger(192);
+			return;
+		}
 	}
 
 	u8 vramCr = VRAM_E_CR;
