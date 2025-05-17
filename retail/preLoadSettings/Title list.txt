@@ -278,9 +278,9 @@ New Super Mario Bros. (DSi):
 Phantasy Star 0 (3DS):
 - Character data
 
-Plants vs. Zombies (DSi/3DS):
-- DSi, DSi/3DS for Europe: data_pack.bin
-- 3DS for USA, United Kingdom, and Australia: Everything except closing music video, and unused DSi manual data
+Plants vs. Zombies (USA, United Kingdom, and Australia) (DSi/3DS):
+- DSi: data_pack.bin + data_pack_en.bin
+- 3DS: Everything except closing music video, and unused DSi manual data
 
 Pokemon Ranger: Guardian Signs (DSi/3DS):
 - DSi: Streamed music from sound data

@@ -651,12 +651,16 @@ static inline void cardReadRAM(u8* dst, u32 src, u32 len/*, int romPartNo*/) {
 		WRAM_CR = 0; // Set shared WRAM to ARM9
 	}
 	while (len > 0) {
-		newSrc = (ce9->romMap[i][1]-ce9->romMap[i][0])+src;
 		newLen = len;
-		while (newSrc+newLen > ce9->romMap[i][2]) {
-			newLen--;
+		if (i < ce9->romMapLines) {
+			newSrc = (ce9->romMap[i][1]-ce9->romMap[i][0])+src;
+			while (newSrc+newLen > ce9->romMap[i][2]) {
+				newLen--;
+			}
+			tonccpy(dst, (u8*)newSrc, newLen);
+		} else {
+			toncset(dst, 0, newLen); // Fill dst with 0 if ROM area is not within the map
 		}
-		tonccpy(dst, (u8*)newSrc, newLen);
 		src += newLen;
 		dst += newLen;
 		len -= newLen;
