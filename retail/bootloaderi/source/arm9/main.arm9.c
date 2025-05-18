@@ -199,7 +199,7 @@ void __attribute__((target("arm"))) arm9_main(void) {
 	REG_IPC_FIFO_CR = 0;
 
 	if (*(u32*)CARDENGINEI_ARM9_CLUT_BUFFERED_LOCATION == 0xEA000000) {
-		const u16 flags = *(u32*)(CARDENGINEI_ARM9_CLUT_BUFFERED_LOCATION+4);
+		const u32 flags = *(u32*)(CARDENGINEI_ARM9_CLUT_BUFFERED_LOCATION+4);
 		noWhiteFade = ((flags & BIT(0)) || (flags & BIT(1)));
 	}
 

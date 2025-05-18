@@ -1820,16 +1820,13 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		if (colorTable) {
 			loadCardEngineBinary("nitro:/cardenginei_arm9_colorlut.bin", (u8*)CARDENGINEI_ARM9_CLUT_BUFFERED_LOCATION);
 
-			u16 flags = 0;
+			u32 flags = 0;
 			if (invertedColors) {
 				flags |= BIT(0);
 			} else if (noWhiteFade) {
 				flags |= BIT(1);
 			}
-			const u16 bankProcessSize = (conf->boostCpu || (unitCode > 0 && conf->dsiMode) || conf->isDSiWare) ? 0x4000 : 0x2000;
-
-			*(u16*)(CARDENGINEI_ARM9_CLUT_BUFFERED_LOCATION+4) = flags;
-			*(u16*)(CARDENGINEI_ARM9_CLUT_BUFFERED_LOCATION+6) = bankProcessSize;
+			*(u32*)(CARDENGINEI_ARM9_CLUT_BUFFERED_LOCATION+4) = flags;
 		}
 
 		// Load in-game menu ce9 binary
