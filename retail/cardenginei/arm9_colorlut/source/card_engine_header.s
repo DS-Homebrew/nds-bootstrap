@@ -9,7 +9,11 @@ card_engine_start:
 	b applyColorLut
 
 .global flags
+.global bankProcessSize
+
 flags:
-.word 0
+.hword 0
+bankProcessSize:
+.hword 0x2000
 
 card_engine_end:

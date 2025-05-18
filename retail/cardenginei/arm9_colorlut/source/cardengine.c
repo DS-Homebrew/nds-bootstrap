@@ -3,7 +3,8 @@
 #include <nds/arm9/video.h>
 #include <nds/system.h>
 
-extern u32 flags;
+extern u16 flags;
+extern u16 bankProcessSize;
 
 #define invertedColors BIT(0)
 #define noWhiteFade BIT(1)
@@ -111,11 +112,11 @@ processExtPalettesFunc:
 	if (vramCr == 0x83 || vramCr == 0x84) { // 3dTexPal/BgPalA
 		u8 vramCnt = VRAM_E_CR;
 		static int block = 0;
-		storedPals = (u32*)0x0374C000+(block*(0x2000/4));
-		palettes = (u32*)0x06880000+(block*(0x2000/4));
+		storedPals = (u32*)0x0374C000+(block/4);
+		palettes = (u32*)0x06880000+(block/4);
 
 		VRAM_E_CR = 0x80;
-		for (int i = 0; i < 0x2000/4; i++) {
+		for (int i = 0; i < bankProcessSize/4; i++) {
 			if (*storedPals != *palettes) {
 				u16* storedPals16 = (u16*)storedPals;
 				u16* palettes16 = (u16*)palettes;
@@ -131,8 +132,8 @@ processExtPalettesFunc:
 		}
 		VRAM_E_CR = vramCnt;
 
-		block++;
-		if (block == 8) block = 0;
+		block += bankProcessSize;
+		if (block == 0x10000) block = 0;
 	}
 
 	vramCr = VRAM_F_CR;
@@ -145,11 +146,11 @@ processExtPalettesFunc:
 	if (vramCr >= 0x83 && vramCr <= 0x85) { // 3dTexPal/BgPalA/ObjPalA
 		u8 vramCnt = VRAM_F_CR;
 		static int block = 0;
-		storedPals = (u32*)0x0375C000+(block*(0x2000/4));
-		palettes = (u32*)0x06890000+(block*(0x2000/4));
+		storedPals = (u32*)0x0375C000+(block/4);
+		palettes = (u32*)0x06890000+(block/4);
 
 		VRAM_F_CR = 0x80;
-		for (int i = 0; i < 0x2000/4; i++) {
+		for (int i = 0; i < bankProcessSize/4; i++) {
 			if (*storedPals != *palettes) {
 				u16* storedPals16 = (u16*)storedPals;
 				u16* palettes16 = (u16*)palettes;
@@ -165,8 +166,8 @@ processExtPalettesFunc:
 		}
 		VRAM_F_CR = vramCnt;
 
-		block++;
-		if (block == 2) block = 0;
+		block += bankProcessSize;
+		if (block == 0x4000) block = 0;
 	}
 
 	vramCr = VRAM_G_CR;
@@ -179,11 +180,11 @@ processExtPalettesFunc:
 	if (vramCr >= 0x83 && vramCr <= 0x85) { // 3dTexPal/BgPalA/ObjPalA
 		u8 vramCnt = VRAM_G_CR;
 		static int block = 0;
-		storedPals = (u32*)0x03760000+(block*(0x2000/4));
-		palettes = (u32*)0x06894000+(block*(0x2000/4));
+		storedPals = (u32*)0x03760000+(block/4);
+		palettes = (u32*)0x06894000+(block/4);
 
 		VRAM_G_CR = 0x80;
-		for (int i = 0; i < 0x2000/4; i++) {
+		for (int i = 0; i < bankProcessSize/4; i++) {
 			if (*storedPals != *palettes) {
 				u16* storedPals16 = (u16*)storedPals;
 				u16* palettes16 = (u16*)palettes;
@@ -199,8 +200,8 @@ processExtPalettesFunc:
 		}
 		VRAM_G_CR = vramCnt;
 
-		block++;
-		if (block == 2) block = 0;
+		block += bankProcessSize;
+		if (block == 0x4000) block = 0;
 	}
 
 	vramCr = VRAM_H_CR;
@@ -213,11 +214,11 @@ processExtPalettesFunc:
 	if (vramCr == 0x82) { // BgPalB
 		u8 vramCnt = VRAM_H_CR;
 		static int block = 0;
-		storedPals = (u32*)0x03764000+(block*(0x2000/4));
-		palettes = (u32*)0x06898000+(block*(0x2000/4));
+		storedPals = (u32*)0x03764000+(block/4);
+		palettes = (u32*)0x06898000+(block/4);
 
 		VRAM_H_CR = 0x80;
-		for (int i = 0; i < 0x2000/4; i++) {
+		for (int i = 0; i < bankProcessSize/4; i++) {
 			if (*storedPals != *palettes) {
 				u16* storedPals16 = (u16*)storedPals;
 				u16* palettes16 = (u16*)palettes;
@@ -233,8 +234,8 @@ processExtPalettesFunc:
 		}
 		VRAM_H_CR = vramCnt;
 
-		block++;
-		if (block == 4) block = 0;
+		block += bankProcessSize;
+		if (block == 0x8000) block = 0;
 	}
 
 	vramCr = VRAM_I_CR;
@@ -247,11 +248,11 @@ processExtPalettesFunc:
 	if (vramCr == 0x83) { // ObjPalB
 		u8 vramCnt = VRAM_I_CR;
 		static int block = 0;
-		storedPals = (u32*)0x0376C000+(block*(0x2000/4));
-		palettes = (u32*)0x068A0000+(block*(0x2000/4));
+		storedPals = (u32*)0x0376C000+(block/4);
+		palettes = (u32*)0x068A0000+(block/4);
 
 		VRAM_I_CR = 0x80;
-		for (int i = 0; i < 0x2000/4; i++) {
+		for (int i = 0; i < bankProcessSize/4; i++) {
 			if (*storedPals != *palettes) {
 				u16* storedPals16 = (u16*)storedPals;
 				u16* palettes16 = (u16*)palettes;
@@ -267,7 +268,7 @@ processExtPalettesFunc:
 		}
 		VRAM_I_CR = vramCnt;
 
-		block++;
-		if (block == 2) block = 0;
+		block += bankProcessSize;
+		if (block == 0x4000) block = 0;
 	}
 }
