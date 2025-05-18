@@ -75,6 +75,7 @@ An alternative forwarder generator for 3DS users. YANBF forwarders are 3DS-mode 
 - retrogamefan & Rudolph: Included AP-patches
    - [enler](https://github.com/enler): Fixing AP-patch for Pokemon Black 2 (Japan) for DS⁽ⁱ⁾ mode compatibility
    - [Rocket Robz](https://github.com/RocketRobz): Fixing some DS⁽ⁱ⁾-Enhanced game AP-patches for DS⁽ⁱ⁾ mode compatibility
+- [VeaNika](https://github.com/VeaNika): DS Phat (NTR-001) color LUT from [GBARunner3](https://github.com/Gericom/GBARunner3)
 
 ## Translators
 - Catalan: [Juan Adolfo Ortiz De Dompablo](https://crowdin.com/profile/kloido)

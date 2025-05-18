@@ -508,7 +508,18 @@ static void createApFixOverlayBin(configuration* conf) {
 	}
 }
 
-static void loadColorLut(const bool isRunFromFlashcard) {
+static void loadColorLut(const bool isRunFromFlashcard, const bool phatColors) {
+	if (phatColors) {
+		FILE* file = fopen("nitro:/NTR-001.lut", "rb");
+		fread(lz77ImageBuffer, 1, 0x10000, file);
+		fclose(file);
+
+		vramSetBankE(VRAM_E_LCD);
+		tonccpy(VRAM_E, lz77ImageBuffer, 0x10000); // Copy LUT to VRAM
+
+		colorTable = true;
+	}
+
 	const char* txtPath = isRunFromFlashcard ? "fat:/_nds/colorLut/currentSetting.txt" : "sd:/_nds/colorLut/currentSetting.txt";
 	if (access(txtPath, F_OK) == 0) {
 		// Load color LUT
@@ -525,10 +536,17 @@ static void loadColorLut(const bool isRunFromFlashcard) {
 			fread(lz77ImageBuffer, 1, 0x10000, file);
 			fclose(file);
 
-			vramSetBankE(VRAM_E_LCD);
-			tonccpy(VRAM_E, lz77ImageBuffer, 0x10000); // Copy LUT to VRAM
+			if (colorTable) {
+				u16* newColorTable = (u16*)lz77ImageBuffer;
+				for (u16 i = 0; i < 0x8000; i++) {
+					VRAM_E[i] = newColorTable[VRAM_E[i] % 0x8000];
+				}
+			} else {
+				vramSetBankE(VRAM_E_LCD);
+				tonccpy(VRAM_E, lz77ImageBuffer, 0x10000); // Copy LUT to VRAM
 
-			colorTable = true;
+				colorTable = true;
+			}
 
 			invertedColors =
 			  (VRAM_E[0] >= 0xF000 && VRAM_E[0] <= 0xFFFF
@@ -737,6 +755,9 @@ static void load_conf(configuration* conf, const char* fn) {
 
 	// Sound/Mic frequency
 	conf->soundFreq = (bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "SOUND_FREQ", "0").c_str(), NULL, 0);
+
+	// DS Phat colors
+	conf->phatColors = (bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "PHAT_COLORS", "0").c_str(), NULL, 0);
 
 	// GUI Language
 	conf->guiLanguage = strdup(config_file.fetch("NDS-BOOTSTRAP", "GUI_LANGUAGE").c_str());
@@ -958,7 +979,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 	conf->bootstrapOnFlashcard = ((bootstrapPath[0] == 'f' && bootstrapPath[1] == 'a' && bootstrapPath[2] == 't') || !conf->sdFound);
 
-	loadColorLut(conf->bootstrapOnFlashcard);
+	loadColorLut(conf->bootstrapOnFlashcard, conf->phatColors && dsiFeatures());
 
 	load_conf(conf, conf->bootstrapOnFlashcard ? "fat:/_nds/nds-bootstrap.ini" : "sd:/_nds/nds-bootstrap.ini");
 
