@@ -24,6 +24,8 @@ static const char colorLutBlacklist[][4] = {
 	"AK4", // Kabu Trader Shun
 	"BKS", // Keshikasu-kun: Battle Kasu-tival
 	"KYL", // Make Up & Style
+	"ARM", // Mario & Luigi: Partners in Time
+	"CLJ", // Mario & Luigi: Bowser's Inside Story
 	"B6Z", // MegaMan Zero Collection
 	"ARZ", // MegaMan ZX
 	"YZX", // MegaMan ZX Advent
@@ -89,6 +91,12 @@ Keshikasu-kun: Battle Kasu-tival:
 
 Make Up & Style:
 - Crashes after selecting a mode
+
+Mario & Luigi: Partners in Time:
+- Crashes with data abort after pressing START
+
+Mario & Luigi: Bowser's Inside Story:
+- Crashes after Nintendo/AlphaDream screen
 
 MegaMan Zero Collection,
 MegaMan ZX,
