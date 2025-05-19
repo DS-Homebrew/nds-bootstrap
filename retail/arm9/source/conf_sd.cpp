@@ -1829,6 +1829,16 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			} else if (noWhiteFade) {
 				flags |= BIT(1);
 			}
+
+			// TODO: If the list gets large enough, switch to bsearch().
+			for (unsigned int i = 0; i < sizeof(colorLutVCountBlacklist)/sizeof(colorLutVCountBlacklist[0]); i++) {
+				if (memcmp(romTid, colorLutVCountBlacklist[i], 3) == 0) {
+					// Found match
+					flags |= BIT(2);
+					break;
+				}
+			}
+
 			*(u32*)(CARDENGINEI_ARM9_CLUT_BUFFERED_LOCATION+4) = flags;
 		}
 

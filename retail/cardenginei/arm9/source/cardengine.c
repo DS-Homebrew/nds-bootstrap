@@ -56,6 +56,7 @@
 #define fntFatCached BIT(17)
 #define waitForPreloadToFinish BIT(18)
 #define useColorLut BIT(21)
+#define colorLutBlockVCount BIT(22)
 
 //#ifdef DLDI
 #include "my_fat.h"
@@ -1482,16 +1483,17 @@ void myIrqHandlerIPC(void) {
 			break;
 		case 0x6: {
 			if (ce9->valueBits & useColorLut) {
-				u32* vcountHandler = ce9->irqTable + 2;
-				if (*vcountHandler != (u32)ce9->patches->vcountHandlerRef) {
-					ce9->intr_vcount_orig_return = *vcountHandler;
-					*vcountHandler = (u32)ce9->patches->vcountHandlerRef;
+				if (!(ce9->valueBits & colorLutBlockVCount)) {
+					u32* vcountHandler = ce9->irqTable + 2;
+					if (*vcountHandler != (u32)ce9->patches->vcountHandlerRef) {
+						ce9->intr_vcount_orig_return = *vcountHandler;
+						*vcountHandler = (u32)ce9->patches->vcountHandlerRef;
+					}
+
+					SetYtrigger(0);
+					REG_DISPSTAT |= DISP_YTRIGGER_IRQ;
+					REG_IE |= IRQ_VCOUNT;
 				}
-
-				SetYtrigger(0);
-				REG_DISPSTAT |= DISP_YTRIGGER_IRQ;
-				REG_IE |= IRQ_VCOUNT;
-
 				applyColorLut(true);
 			}
 
@@ -1575,7 +1577,7 @@ u32 myIrqEnable(u32 irq) {
 	irq |= IRQ_IPC_SYNC;
 	REG_IPC_SYNC |= IPC_SYNC_IRQ_ENABLE;
 
-	if (ce9->valueBits & useColorLut) {
+	if ((ce9->valueBits & useColorLut) && !(ce9->valueBits & colorLutBlockVCount)) {
 		irq_before = IRQ_VCOUNT;
 		irq |= IRQ_VCOUNT;
 		SetYtrigger(0);

@@ -41,6 +41,7 @@
 #define cloneboot BIT(14)
 #define isDlp BIT(15)
 #define useColorLut BIT(21)
+#define colorLutBlockVCount BIT(22)
 
 #include "my_fat.h"
 
@@ -110,7 +111,7 @@ bool IPC_SYNC_hooked = false;
 void hookIPC_SYNC(void) {
 	#ifndef GSDD
     if (!IPC_SYNC_hooked) {
-		if (ce9->valueBits & useColorLut) {
+		if ((ce9->valueBits & useColorLut) && !(ce9->valueBits & colorLutBlockVCount)) {
 			u32* vcountHandler = ce9->irqTable + 2;
 			ce9->intr_vcount_orig_return = *vcountHandler;
 			*vcountHandler = (u32)ce9->patches->vcountHandlerRef;

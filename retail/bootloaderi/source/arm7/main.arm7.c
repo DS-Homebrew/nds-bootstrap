@@ -181,6 +181,7 @@ bool pkmnGen5 = false;
 bool ndmaDisabled = false;
 bool sharedWramEnabled = false;
 bool colorLutEnabled = false;
+bool colorLutBlockVCount = false;
 
 u32 newArm7binarySize = 0;
 u32 newArm7ibinarySize = 0;
@@ -1937,6 +1938,7 @@ int arm7_main(void) {
 			tonccpy((u32*)CARDENGINEI_ARM9_CLUT_LOCATION, (u16*)CARDENGINEI_ARM9_CLUT_BUFFERED_LOCATION, 0xC00);
 			tonccpy((u16*)0x03770000, (u16*)COLOR_LUT_BUFFERED_LOCATION, 0x10000);
 			colorLutEnabled = (*(u32*)CARDENGINEI_ARM9_CLUT_LOCATION == *(u32*)CARDENGINEI_ARM9_CLUT_BUFFERED_LOCATION);
+			colorLutBlockVCount = colorLutEnabled && (*(u32*)(CARDENGINEI_ARM9_CLUT_LOCATION+4) & BIT(2));
 
 			arm9_stateFlag = ARM9_WRAMONARM9;
 			while (arm9_stateFlag != ARM9_READY);
@@ -2286,6 +2288,7 @@ int arm7_main(void) {
 			tonccpy((u32*)CARDENGINEI_ARM9_CLUT_LOCATION, (u16*)CARDENGINEI_ARM9_CLUT_BUFFERED_LOCATION, 0xC00);
 			tonccpy((u16*)0x03770000, (u16*)COLOR_LUT_BUFFERED_LOCATION, 0x10000);
 			colorLutEnabled = (*(u32*)CARDENGINEI_ARM9_CLUT_LOCATION == *(u32*)CARDENGINEI_ARM9_CLUT_BUFFERED_LOCATION);
+			colorLutBlockVCount = colorLutEnabled && (*(u32*)(CARDENGINEI_ARM9_CLUT_LOCATION+4) & BIT(2));
 
 			if (ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed) {
 				arm9_stateFlag = ARM9_WRAMONARM9;

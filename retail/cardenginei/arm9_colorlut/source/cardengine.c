@@ -7,13 +7,14 @@ extern u32 flags;
 
 #define invertedColors BIT(0)
 #define noWhiteFade BIT(1)
+#define oneIrqOnly BIT(2)
 
 void applyColorLut(bool processExtPalettes) {
 	u32* storedPals = (u32*)0x0374B800;
 	u32* palettes = (u32*)0x05000000;
 	u16* colorTable = (u16*)0x03770000;
 
-	if (processExtPalettes) {
+	if (processExtPalettes && !(flags & oneIrqOnly)) {
 		goto processExtPalettesFunc;
 	}
 
@@ -98,7 +99,7 @@ void applyColorLut(bool processExtPalettes) {
 		storedPals++;
 		palettes++;
 	}
-	return;
+	if (!(flags & oneIrqOnly)) return;
 
 processExtPalettesFunc:
 	u8 vramCr = VRAM_E_CR;
