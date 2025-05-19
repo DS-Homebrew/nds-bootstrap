@@ -6652,6 +6652,12 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0203E034, (u32)dsiSaveClose);
 	}
 
+	// Forgotten Legions (USA)
+	// Forgotten Legions (Europe)
+	else if ((strcmp(romTid, "K5LE") == 0 || strcmp(romTid, "K5LP") == 0) && !twlFontFound) {
+		*(u32*)0x02005634 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+	}
+
 	// Foto Showdown (USA)
 	if (strcmp(romTid, "DMFE") == 0 && (!dsiWramAccess || colorLutEnabled)) {
 		*(u32*)0x0204D3F4 = 0xE3A00001; // mov r0, #1 (Disable shutter sound playback)

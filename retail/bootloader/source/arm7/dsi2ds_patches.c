@@ -12047,6 +12047,53 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0203E034, (u32)dsiSaveClose);
 	}
 
+	// Forgotten Legions (USA)
+	// Forgotten Legions (Europe)
+	// Requires 8MB of RAM
+	else if ((strcmp(romTid, "K5LE") == 0 || strcmp(romTid, "K5LP") == 0) && extendedMemory) {
+		*(u32*)0x02005434 = 0xE1A00000; // nop
+		/* if (!extendedMemory) {
+			// Disable sound effects and music
+			*(u32*)0x02005148 = 0xE1A00000; // nop
+			*(u32*)0x020054AC = 0xE1A00000; // nop
+			*(u32*)0x020054B4 = 0xE1A00000; // nop
+			*(u32*)0x020054C8 = 0xE1A00000; // nop
+			*(u32*)0x020054D0 = 0xE1A00000; // nop
+			*(u32*)0x02023038 = 0xE12FFF1E; // bx lr
+		} */
+		*(u32*)0x02005634 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		/* setBL(0x02025B10, (u32)dsiSaveOpen); // Part of .pck file
+		*(u32*)0x02025B28 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+		*(u32*)0x02025B40 = 0xE3A00001; // mov r0, #1 (dsiSaveFreeSpaceAvailable)
+		setBL(0x02025B68, (u32)dsiSaveCreate);
+		setBL(0x02025B9C, (u32)dsiSaveOpen);
+		setBL(0x02025BB0, (u32)dsiSaveSetLength);
+		setBL(0x02025BC0, (u32)dsiSaveGetLength);
+		setBL(0x02025BC8, (u32)dsiSaveClose);
+		setBL(0x02025C00, (u32)dsiSaveSetLength);
+		setBL(0x02025C10, (u32)dsiSaveGetLength);
+		setBL(0x02025C18, (u32)dsiSaveClose);
+		*(u32*)0x02025D48 = 0xE1A00000; // nop
+		setBL(0x02025E20, (u32)dsiSaveOpen);
+		setBL(0x02025E48, (u32)dsiSaveSeek);
+		setBL(0x02025E5C, (u32)dsiSaveRead);
+		setBL(0x02025E74, (u32)dsiSaveClose);
+		setBL(0x02025F3C, (u32)dsiSaveOpen);
+		setBL(0x02025F64, (u32)dsiSaveSeek);
+		setBL(0x02025F78, (u32)dsiSaveWrite);
+		setBL(0x02025F84, (u32)dsiSaveClose); */
+		*(u32*)0x0204E9FC = 0xE1A00000; // nop
+		// tonccpy((u32*)0x0204F590, dsiSaveGetResultCode, 0xC); // Part of .pck file
+		*(u32*)0x020521C0 = 0xE1A00000; // nop
+		patchInitDSiWare(0x02059F7C, heapEnd);
+		*(u32*)0x0205A308 = *(u32*)0x02004FE8;
+		patchUserSettingsReadDSiWare(0x0205B77C);
+		*(u32*)0x0205B798 = wirelessReturnCodeArm;
+		*(u32*)0x0205B79C = 0xE12FFF1E; // bx lr
+		*(u32*)0x0205B7A4 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0205B7A8 = 0xE12FFF1E; // bx lr
+	}
+
 	// Frenzic (USA)
 	// Frenzic (Europe)
 	// Saving not supported due to using more than one file in filesystem

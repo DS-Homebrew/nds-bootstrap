@@ -220,6 +220,7 @@ static const char dsiWareForBootloader1[][4] = {
 	"KFH", // Flips: More Bloody Horowitz
 	"KF4", // Flips: Silent But Deadly
 	"KF9", // Flips: Terror in Cubicle Four
+	"K5L", // Forgotten Legions
 	"KFO", // Frenzic
 	"KFG", // Frogger Returns
 	"K6J", // Fuuu! Dairoujou Kai
