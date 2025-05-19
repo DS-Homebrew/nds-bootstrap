@@ -111,6 +111,7 @@ static const char colorLutVCountBlacklist[][4] = {
 	"KYN", // Cake Ninja: XMAS
 	"KCQ", // Crazy Cheebo: Puzzle Party
 	"KVC", // Curling Super Championship
+	"K5L", // Forgotten Legions
 	"ATK", // Kirby: Canvas Curse
 	"KYL", // Make Up & Style
 	"AGF", // True Swing Golf
@@ -129,6 +130,9 @@ Crazy Cheebo: Puzzle Party:
 
 Curling Super Championship:
 - Crashes after finishing or skipping the tutorial
+
+Forgotten Legions:
+- Crashes after the bottom screen fades out during the opening video
 
 Kirby: Canvas Curse:
 - Original colors still seen at the top of each screen
