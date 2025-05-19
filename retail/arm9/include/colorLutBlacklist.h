@@ -117,7 +117,7 @@ static const char colorLutVCountBlacklist[][4] = {
 	"K72", // True Swing Golf Express
 };
 
-/* VCount IRQ will not be hooked to the color LUT code for these titles, in order to work around these issues..
+/* VCount IRQ will not be hooked to the color LUT code for these titles, in order to work around these issues...
 
 Cake Ninja,
 Cake Ninja 2,
