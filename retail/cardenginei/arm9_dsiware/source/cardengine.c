@@ -363,8 +363,8 @@ u32 myIrqEnable(u32 irq) {
 	REG_IPC_SYNC |= IPC_SYNC_IRQ_ENABLE;
 
 	if (ce9->valueBits & useColorLut) {
-		irq_before = REG_VCOUNT;
-		irq |= REG_VCOUNT;
+		irq_before = IRQ_VCOUNT;
+		irq |= IRQ_VCOUNT;
 		SetYtrigger(0);
 		REG_DISPSTAT |= DISP_YTRIGGER_IRQ;
 	}
