@@ -548,10 +548,13 @@ static void loadColorLut(const bool isRunFromFlashcard, const bool phatColors) {
 				colorTable = true;
 			}
 
+			const u16 color0 = VRAM_E[0] | BIT(15);
+			const u16 color7FFF = VRAM_E[0x7FFF] | BIT(15);
+
 			invertedColors =
-			  (VRAM_E[0] >= 0xF000 && VRAM_E[0] <= 0xFFFF
-			&& VRAM_E[0x7FFF] >= 0x8000 && VRAM_E[0x7FFF] <= 0x8FFF);
-			if (!invertedColors) noWhiteFade = (VRAM_E[0x7FFF] < 0xF000);
+			  (color0 >= 0xF000 && color0 <= 0xFFFF
+			&& color7FFF >= 0x8000 && color7FFF <= 0x8FFF);
+			if (!invertedColors) noWhiteFade = (color7FFF < 0xF000);
 
 			if (invertedColors || noWhiteFade) {
 				powerOff(PM_BACKLIGHT_TOP);
