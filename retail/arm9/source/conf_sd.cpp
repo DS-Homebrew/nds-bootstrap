@@ -982,8 +982,6 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 	conf->bootstrapOnFlashcard = ((bootstrapPath[0] == 'f' && bootstrapPath[1] == 'a' && bootstrapPath[2] == 't') || !conf->sdFound);
 
-	loadColorLut(conf->bootstrapOnFlashcard, conf->phatColors && dsiFeatures());
-
 	load_conf(conf, conf->bootstrapOnFlashcard ? "fat:/_nds/nds-bootstrap.ini" : "sd:/_nds/nds-bootstrap.ini");
 
 	conf->initDisc = (REG_SCFG_EXT == 0);
@@ -998,6 +996,8 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			conf->initDisc = true;
 		}
 	}
+
+	loadColorLut(conf->bootstrapOnFlashcard, conf->phatColors && dsiFeatures() && !conf->b4dsMode);
 
 	if (conf->boostVram) {
 		conf->valueBits |= BIT(1);
