@@ -20983,6 +20983,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		tonccpy((u32*)0x02065618, dsiSaveGetResultCode, 0xC);
 		*(u32*)0x02068D78 = 0xE1A00000; // nop
 		patchInitDSiWare(0x02070CE4, heapEnd);
+		// *(u32*)0x02071070 = *(u32*)0x02067230;
 		patchUserSettingsReadDSiWare(0x02072394);
 		*(u32*)0x02077C78 = wirelessReturnCodeArm;
 		*(u32*)0x02077C7C = 0xE12FFF1E; // bx lr
