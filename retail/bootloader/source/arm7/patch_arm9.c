@@ -1285,6 +1285,10 @@ u32 relocateBssPart(const tNDSHeader* ndsHeader, u32 bssEnd, u32 bssPartStart, u
 	return subtract;
 }
 
+u32 shrinkBss(const tNDSHeader* ndsHeader, u32 bssEnd, u32 bssPartStart, u32 newPartStart) {
+	return relocateBssPart(ndsHeader, bssEnd, bssPartStart, bssEnd, newPartStart);
+}
+
 void patchHiHeapDSiWare(u32 addr, u32 heapEnd) {
 	//*(u32*)(addr) = opCode; // mov r0, #0x????????
 	if (*(u32*)(addr+4) == 0xEA000043) { // debuggerSdk

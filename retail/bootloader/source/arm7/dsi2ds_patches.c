@@ -49,6 +49,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	const char* dataPrv = "dataPrv:";
 	const char* dsiRequiredMsg = "A Nintendo DSi is required to use this feature.";
 	extern u32 relocateBssPart(const tNDSHeader* ndsHeader, u32 bssEnd, u32 bssPartStart, u32 bssPartEnd, u32 newPartStart);
+	extern u32 shrinkBss(const tNDSHeader* ndsHeader, u32 bssEnd, u32 bssPartStart, u32 newPartStart);
 	extern void patchHiHeapDSiWareThumb(u32 addr, u32 newCodeAddr, u32 heapEnd);
 	extern void patchInitDSiWare(u32 addr, u32 heapEnd);
 	extern void patchVolumeGetDSiWare(u32 addr);
@@ -508,7 +509,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			u32 bssEnd = *(u32*)0x02004FE8;
 			u32 sdatOffset = (romTid[3] == 'E') ? 0x02120780 : 0x0211CF7C;
 
-			*(u32*)0x02004FE8 = bssEnd - relocateBssPart(ndsHeader, bssEnd, sdatOffset+0xE0000, bssEnd, sdatOffset);
+			*(u32*)0x02004FE8 -= shrinkBss(ndsHeader, bssEnd, sdatOffset+0xE0000, sdatOffset);
 		} */
 
 		*(u32*)0x02005090 = 0xE1A00000; // nop
@@ -6552,7 +6553,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			u32 bssEnd = *(u32*)0x02004FE8;
 			u32 sdatOffset = (romTid[3] == 'E') ? 0x020ADE18 : 0x020ADFB8;
 
-			*(u32*)0x02004FE8 = bssEnd - relocateBssPart(ndsHeader, bssEnd, sdatOffset+0xA8000, bssEnd, sdatOffset);
+			*(u32*)0x02004FE8 -= shrinkBss(ndsHeader, bssEnd, sdatOffset+0xA8000, sdatOffset);
 		// }
 
 		const u8 offsetChange = (romTid[3] == 'E') ? 0 : 0x68;
@@ -6616,7 +6617,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			u32 bssEnd = *(u32*)0x02004FE8;
 			u32 sdatOffset = (romTid[3] == 'E') ? 0x020A561C : 0x020BDF60;
 
-			*(u32*)0x02004FE8 = bssEnd - relocateBssPart(ndsHeader, bssEnd, sdatOffset+0xA0000, bssEnd, sdatOffset);
+			*(u32*)0x02004FE8 -= shrinkBss(ndsHeader, bssEnd, sdatOffset+0xA0000, sdatOffset);
 		// }
 
 		*(u32*)0x02017744 = 0xE1A00000; // nop
@@ -6684,7 +6685,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			u32 bssEnd = *(u32*)0x02004FE8;
 			u32 sdatOffset = 0x020A5BDC;
 
-			*(u32*)0x02004FE8 = bssEnd - relocateBssPart(ndsHeader, bssEnd, sdatOffset+0xA0000, bssEnd, sdatOffset);
+			*(u32*)0x02004FE8 -= shrinkBss(ndsHeader, bssEnd, sdatOffset+0xA0000, sdatOffset);
 		// }
 
 		*(u32*)0x02017670 = 0xE1A00000; // nop
@@ -6736,7 +6737,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 				sdatOffset = 0x0209124C;
 			}
 
-			*(u32*)0x02004FE8 = bssEnd - relocateBssPart(ndsHeader, bssEnd, sdatOffset+0x98000, bssEnd, sdatOffset);
+			*(u32*)0x02004FE8 -= shrinkBss(ndsHeader, bssEnd, sdatOffset+0x98000, sdatOffset);
 		// }
 
 		*(u32*)0x02013170 = 0xE1A00000; // nop
@@ -6861,7 +6862,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			u32 bssEnd = *(u32*)0x02004FE8;
 			u32 sdatOffset = (romTid[3] == 'E') ? 0x020BB4A4 : 0x20AE4CC;
 
-			*(u32*)0x02004FE8 = bssEnd - relocateBssPart(ndsHeader, bssEnd, sdatOffset+0xD0000, bssEnd, sdatOffset);
+			*(u32*)0x02004FE8 -= shrinkBss(ndsHeader, bssEnd, sdatOffset+0xD0000, sdatOffset);
 		// }
 
 		// const u16 offsetChange = (romTid[3] == 'E') ? 0 : 0x2A04;
@@ -6904,7 +6905,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			u32 bssEnd = *(u32*)0x02004FE8;
 			u32 sdatOffset = 0x020B52C8;
 
-			*(u32*)0x02004FE8 = bssEnd - relocateBssPart(ndsHeader, bssEnd, sdatOffset+0xD0000, bssEnd, sdatOffset);
+			*(u32*)0x02004FE8 -= shrinkBss(ndsHeader, bssEnd, sdatOffset+0xD0000, sdatOffset);
 		// }
 
 		*(u32*)0x02005104 = 0xE1A00000; // nop
@@ -8363,7 +8364,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			u32 bssEnd = *(u32*)0x02004FE8;
 			u32 sdatOffset = 0x0206D988;
 
-			*(u32*)0x02004FE8 = bssEnd - relocateBssPart(ndsHeader, bssEnd, sdatOffset+0x140000, bssEnd, sdatOffset);
+			*(u32*)0x02004FE8 -= shrinkBss(ndsHeader, bssEnd, sdatOffset+0x140000, sdatOffset);
 		// }
 
 		*(u32*)0x0200C278 = 0xE1A00000; // nop
@@ -15626,7 +15627,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		if (!extendedMemory) {
 			u32 bssEnd = *(u32*)0x02004FD0;
 
-			*(u32*)0x02004FD0 = bssEnd - relocateBssPart(ndsHeader, bssEnd, 0x0213CA60, 0x022F4A60, (s2FlashcardId == 0x5A45) ? 0x08D3CA60 : 0x0913CA60);
+			*(u32*)0x02004FD0 -= relocateBssPart(ndsHeader, bssEnd, 0x0213CA60, 0x022F4A60, (s2FlashcardId == 0x5A45) ? 0x08D3CA60 : 0x0913CA60);
 			setB(0x02020930, 0x02020984); // Skip FMV playback due to a weird bug
 		}
 
@@ -15672,7 +15673,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		if (!extendedMemory) {
 			u32 bssEnd = *(u32*)0x02004FE8;
 
-			*(u32*)0x02004FE8 = bssEnd - relocateBssPart(ndsHeader, bssEnd, 0x0213CC40, 0x022F4C40, (s2FlashcardId == 0x5A45) ? 0x08D3CC40 : 0x0913CC40);
+			*(u32*)0x02004FE8 -= relocateBssPart(ndsHeader, bssEnd, 0x0213CC40, 0x022F4C40, (s2FlashcardId == 0x5A45) ? 0x08D3CC40 : 0x0913CC40);
 			setB(0x02020A68, 0x02020ABC); // Skip FMV playback due to a weird bug
 		}
 
@@ -16461,7 +16462,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			u32 bssEnd = *(u32*)0x0207EB14;
 			u32 sdatOffset = 0x020CB610;
 
-			*(u32*)0x0207EB14 = bssEnd - relocateBssPart(ndsHeader, bssEnd, sdatOffset+0x170000, bssEnd, sdatOffset);
+			*(u32*)0x0207EB14 -= shrinkBss(ndsHeader, bssEnd, sdatOffset+0x170000, sdatOffset);
 		// }
 
 		*(u32*)0x0200EDA4 = 0xE1A00000; // nop
@@ -19135,7 +19136,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			u32 bssEnd = *(u32*)0x02004FE8;
 			u32 sdatOffset = *(u32*)0x020053BC;
 
-			*(u32*)0x02004FE8 = bssEnd - relocateBssPart(ndsHeader, bssEnd, sdatOffset+0x34000, bssEnd, sdatOffset);
+			*(u32*)0x02004FE8 -= shrinkBss(ndsHeader, bssEnd, sdatOffset+0x34000, sdatOffset);
 
 			*(u32*)0x020053C0 = 0xFE000; // Shrink sound heap from 0x133333
 		}
@@ -20342,7 +20343,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			u32 bssEnd = *(u32*)0x02004FE8;
 			u32 sdatOffset = 0x0207B3B8;
 
-			*(u32*)0x02004FE8 = bssEnd - relocateBssPart(ndsHeader, bssEnd, sdatOffset+0xF0000, bssEnd, sdatOffset);
+			*(u32*)0x02004FE8 -= shrinkBss(ndsHeader, bssEnd, sdatOffset+0xF0000, sdatOffset);
 		// }
 
 		*(u32*)0x02005090 = 0xE1A00000; // nop
@@ -20384,7 +20385,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			u32 bssEnd = *(u32*)0x02004FE8;
 			u32 sdatOffset = 0x0207EE9C;
 
-			*(u32*)0x02004FE8 = bssEnd - relocateBssPart(ndsHeader, bssEnd, sdatOffset+0xF0000, bssEnd, sdatOffset);
+			*(u32*)0x02004FE8 -= shrinkBss(ndsHeader, bssEnd, sdatOffset+0xF0000, sdatOffset);
 		// }
 
 		*(u32*)0x02005090 = 0xE1A00000; // nop
@@ -20426,7 +20427,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			u32 bssEnd = *(u32*)0x02004FE8;
 			u32 sdatOffset = 0x0207CFAC;
 
-			*(u32*)0x02004FE8 = bssEnd - relocateBssPart(ndsHeader, bssEnd, sdatOffset+0xF0000, bssEnd, sdatOffset);
+			*(u32*)0x02004FE8 -= shrinkBss(ndsHeader, bssEnd, sdatOffset+0xF0000, sdatOffset);
 		// }
 
 		*(u32*)0x02005090 = 0xE1A00000; // nop
@@ -21065,7 +21066,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 				sdatOffset = 0x02093B7C;
 			}
 
-			*(u32*)0x02004FE8 = bssEnd - relocateBssPart(ndsHeader, bssEnd, sdatOffset+0x200000, bssEnd, sdatOffset);
+			*(u32*)0x02004FE8 -= shrinkBss(ndsHeader, bssEnd, sdatOffset+0x200000, sdatOffset);
 		}
 
 		s16 offsetChange = (romTid[3] == 'E') ? 0 : -0x68;
@@ -25303,7 +25304,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			u32 bssEnd = *(u32*)0x0207EF20;
 			u32 sdatOffset = 0x020CBFB4;
 
-			*(u32*)0x0207EF20 = bssEnd - relocateBssPart(ndsHeader, bssEnd, sdatOffset+0x140000, bssEnd, sdatOffset);
+			*(u32*)0x0207EF20 -= shrinkBss(ndsHeader, bssEnd, sdatOffset+0x140000, sdatOffset);
 		// }
 
 		*(u32*)0x0200EDF0 = 0xE1A00000; // nop
@@ -25565,7 +25566,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			u32 bssEnd = *(u32*)0x020013C0;
 			u32 sdatOffset = 0x0212BE54;
 
-			*(u32*)0x020013C0 = bssEnd - relocateBssPart(ndsHeader, bssEnd, sdatOffset+0x1FC000, bssEnd, sdatOffset);
+			*(u32*)0x020013C0 -= shrinkBss(ndsHeader, bssEnd, sdatOffset+0x1FC000, sdatOffset);
 			*(u32*)0x02082868 = 0xE3A01901; // mov r1, #0x4000
 		}
 
@@ -25607,7 +25608,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			u32 bssEnd = *(u32*)0x02004FD0;
 			u32 sdatOffset = 0x0213F040;
 
-			*(u32*)0x02004FD0 = bssEnd - relocateBssPart(ndsHeader, bssEnd, sdatOffset+0x1FC000, bssEnd, sdatOffset);
+			*(u32*)0x02004FD0 -= shrinkBss(ndsHeader, bssEnd, sdatOffset+0x1FC000, sdatOffset);
 			*(u32*)0x0208C300 = 0xE3A01901; // mov r1, #0x4000
 		}
 
