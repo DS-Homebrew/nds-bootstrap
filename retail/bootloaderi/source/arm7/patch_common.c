@@ -8692,7 +8692,13 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Make Up & Style (USA)
 	else if (strcmp(romTid, "KYLE") == 0) {
 		if (!twlFontFound) {
-			*(u32*)0x02005348 = 0xE1A00000; // nop (Disable NFTR font loading)
+			// Disable NFTR font loading
+			*(u32*)0x020052B8 = 0xE1A00000; // nop
+			*(u32*)0x020052BC = 0xE1A00000; // nop
+			*(u32*)0x020052E0 = 0xE1A00000; // nop
+			*(u32*)0x020052F4 = 0xE1A00000; // nop
+			*(u32*)0x02005324 = 0xE1A00000; // nop
+			*(u32*)0x02005348 = 0xE1A00000; // nop
 			*(u32*)0x0200534C = 0xE1A00000; // nop
 		}
 		if (saveOnFlashcardNtr) {
@@ -8718,7 +8724,13 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Make Up & Style (Europe)
 	else if (strcmp(romTid, "KYLP") == 0) {
 		if (!twlFontFound) {
-			*(u32*)0x02005360 = 0xE1A00000; // nop (Disable NFTR font loading)
+			// Disable NFTR font loading
+			*(u32*)0x020052D0 = 0xE1A00000; // nop
+			*(u32*)0x020052D4 = 0xE1A00000; // nop
+			*(u32*)0x020052F8 = 0xE1A00000; // nop
+			*(u32*)0x0200530C = 0xE1A00000; // nop
+			*(u32*)0x0200533C = 0xE1A00000; // nop
+			*(u32*)0x02005360 = 0xE1A00000; // nop
 			*(u32*)0x02005364 = 0xE1A00000; // nop
 		}
 		if (saveOnFlashcardNtr) {
