@@ -2634,7 +2634,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 				fclose(sdatFile);
 			}
 		} else if (!b4dsDebugRam && (strncmp(romTid, "KEG", 3) == 0)) {
-			// Remove right-channel title intro music from sdat file for Electroplankton: Lumiloop
+			// Convert stereo title intro music to mono in Electroplankton: Lumiloop
 			const u32 sdatSize = getFileSize("rom:/sound_data_hw.sdat");
 			if (sdatSize == 0x183300) {
 				u32 bssEnd = 0;
@@ -2653,12 +2653,14 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 						fseek(sdatFile, 0, SEEK_SET);
 
 						fread((u8*)bssEnd, 1, 0xA80+0x354D4, sdatFile);
+						u8* ssar = (u8*)bssEnd+0x4A0;
+						toncset(ssar+0xA7, 0, 1); // Play left-channel sound on right-side speaker as well
 						u8* swar = (u8*)bssEnd+0xA80;
-						toncset32(swar+0x354D4, 0x56220002, 1);
-						toncset32(swar+0x354D8, 0x000102F7, 1);
-						toncset32(swar+0x354DC, 0x000000E2, 1);
-						toncset32(swar+0x354E0, 0x000F0000, 1);
-						toncset(swar+0x354E4, 0, 0x388);
+						toncset32(swar+0x354D4, 0x56220002, 1); // Replace
+						toncset32(swar+0x354D8, 0x000102F7, 1); // right-channel
+						toncset32(swar+0x354DC, 0x000000E2, 1); // sound with
+						toncset32(swar+0x354E0, 0x000F0000, 1); // blank sound
+						toncset(swar+0x354E4, 0, 0x388);        // to reduce RAM usage
 						fseek(sdatFile, 0xA80+0x609D8, SEEK_SET);
 						fread(swar+0x3586C, 1, 0x121EA8, sdatFile);
 
