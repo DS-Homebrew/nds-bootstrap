@@ -2269,6 +2269,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 				||	strncmp(romTid, "K9G", 3) == 0 // Big Bass Arcade
 				||	strncmp(romTid, "KUG", 3) == 0 // G.G Series: Drift Circuit 2
 				||	strncmp(romTid, "KEI", 3) == 0 // Electroplankton: Beatnes
+				||	strncmp(romTid, "KEG", 3) == 0 // Electroplankton: Lumiloop
 				||	strncmp(romTid, "KEA", 3) == 0 // Electroplankton: Trapy
 				||	strncmp(romTid, "KFO", 3) == 0 // Frenzic
 				||	strncmp(romTid, "K5M", 3) == 0 // G.G Series: The Last Knight
@@ -2631,6 +2632,44 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 					LZX_DecodeFromFile(sdat, sdatFile, sdatSize);
 				}
 				fclose(sdatFile);
+			}
+		} else if (!b4dsDebugRam && (strncmp(romTid, "KEG", 3) == 0)) {
+			// Remove right-channel title intro music from sdat file for Electroplankton: Lumiloop
+			const u32 sdatSize = getFileSize("rom:/sound_data_hw.sdat");
+			if (sdatSize == 0x183300) {
+				u32 bssEnd = 0;
+				ndsFile = fopen(conf->ndsPath, "rb");
+				fseek(ndsFile, ndsArm9BinOffset+((romTid[3] == 'J') ? 0xFC0 : 0xFD0), SEEK_SET);
+				fread(&bssEnd, sizeof(u32), 1, ndsFile);
+				fclose(ndsFile);
+
+				if (bssEnd+sdatSize < 0x02280000) {
+					u32 offset = 0;
+					FILE* sdatFile = fopen("rom:/sound_data_hw.sdat", "rb");
+					fseek(sdatFile, 0xA80+0x58, SEEK_SET);
+					fread(&offset, 1, 4, sdatFile);
+
+					if (offset == 0x609D8) {
+						fseek(sdatFile, 0, SEEK_SET);
+
+						fread((u8*)bssEnd, 1, 0xA80+0x354D4, sdatFile);
+						u8* swar = (u8*)bssEnd+0xA80;
+						toncset32(swar+0x354D4, 0x56220002, 1);
+						toncset32(swar+0x354D8, 0x000102F7, 1);
+						toncset32(swar+0x354DC, 0x000000E2, 1);
+						toncset32(swar+0x354E0, 0x000F0000, 1);
+						toncset(swar+0x354E4, 0, 0x388);
+						fseek(sdatFile, 0xA80+0x609D8, SEEK_SET);
+						fread(swar+0x3586C, 1, 0x121EA8, sdatFile);
+
+						FILE* header = fopen("nitro:/dsi2dsFileMods/lumiloopSwarHeader.bin", "rb");
+						fread(swar, 1, 0xD8, header);
+						fclose(header);
+
+						*(u32*)(bssEnd-4) = 0xA80+0x157714; // New sdat size
+					}
+					fclose(sdatFile);
+				}
 			}
 		} else if (donorInsideNds) {
 			// Set cloneboot/multiboot SRL file either to boot instead, or as Donor ROM

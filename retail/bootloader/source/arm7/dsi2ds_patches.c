@@ -10640,8 +10640,9 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Electroplankton: Lumiloop (USA)
-	// Requires 8MB of RAM
-	else if (strcmp(romTid, "KEGE") == 0 && extendedMemory) {
+	else if (strcmp(romTid, "KEGE") == 0) {
+		const u32 bssEnd = *(u32*)0x02004FD0;
+
 		*(u32*)0x020050C0 = 0xE1A00000; // nop
 		*(u32*)0x020050C8 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x02005244 = 0xE1A00000; // nop
@@ -10651,18 +10652,31 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02012220 = 0xE1A00000; // nop
 		*(u32*)0x0203A034 = 0xE1A00000; // nop
 		*(u32*)0x0203D3DC = 0xE1A00000; // nop
-		patchInitDSiWare(0x02043D80, heapEnd);
-		*(u32*)0x0204410C = *(u32*)0x02004FD0;
+		patchInitDSiWare(0x02043D80, heapEndMaxForRetail);
+		*(u32*)0x0204410C = bssEnd;
 		patchUserSettingsReadDSiWare(0x020451B8);
 		*(u32*)0x020455EC = 0xE1A00000; // nop
 		*(u32*)0x020455F0 = 0xE1A00000; // nop
 		*(u32*)0x020455F4 = 0xE1A00000; // nop
 		*(u32*)0x020455F8 = 0xE1A00000; // nop
+
+		if (!extendedMemory && *(u32*)(bssEnd-4)) {
+			*(u32*)0x0204410C += *(u32*)(bssEnd-4);
+			*(u32*)(bssEnd-4) = 0;
+
+			u32* newCodeAddr = (u32*)0x02041314;
+			newCodeAddr[0] = 0xE59F0000; // ldr r0, =bssEnd
+			newCodeAddr[1] = 0xE12FFF1E; // bx lr
+			newCodeAddr[2] = bssEnd;
+
+			setBL(0x020069F4, (u32)newCodeAddr);
+		}
 	}
 
 	// Electroplankton: Lumiloop (Europe, Australia)
-	// Requires 8MB of RAM
-	else if (strcmp(romTid, "KEGV") == 0 && extendedMemory) {
+	else if (strcmp(romTid, "KEGV") == 0) {
+		const u32 bssEnd = *(u32*)0x02004FD0;
+
 		*(u32*)0x020050BC = 0xE1A00000; // nop
 		*(u32*)0x020050C4 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x02005238 = 0xE1A00000; // nop
@@ -10672,18 +10686,31 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02011D04 = 0xE1A00000; // nop
 		*(u32*)0x02039B34 = 0xE1A00000; // nop
 		*(u32*)0x0203CEDC = 0xE1A00000; // nop
-		patchInitDSiWare(0x02043880, heapEnd);
-		*(u32*)0x02043C0C = *(u32*)0x02004FD0;
+		patchInitDSiWare(0x02043880, heapEndMaxForRetail);
+		*(u32*)0x02043C0C = bssEnd;
 		patchUserSettingsReadDSiWare(0x02044CB8);
 		*(u32*)0x020450EC = 0xE1A00000; // nop
 		*(u32*)0x020450F0 = 0xE1A00000; // nop
 		*(u32*)0x020450F4 = 0xE1A00000; // nop
 		*(u32*)0x020450F8 = 0xE1A00000; // nop
+
+		if (!extendedMemory && *(u32*)(bssEnd-4)) {
+			*(u32*)0x02043C0C += *(u32*)(bssEnd-4);
+			*(u32*)(bssEnd-4) = 0;
+
+			u32* newCodeAddr = (u32*)0x02040E14;
+			newCodeAddr[0] = 0xE59F0000; // ldr r0, =bssEnd
+			newCodeAddr[1] = 0xE12FFF1E; // bx lr
+			newCodeAddr[2] = bssEnd;
+
+			setBL(0x02006A40, (u32)newCodeAddr);
+		}
 	}
 
 	// Electroplankton: Lumiloop (Japan)
-	// Requires 8MB of RAM
-	else if (strcmp(romTid, "KEGJ") == 0 && extendedMemory) {
+	else if (strcmp(romTid, "KEGJ") == 0) {
+		const u32 bssEnd = *(u32*)0x02004FC0;
+
 		*(u32*)0x020050B0 = 0xE1A00000; // nop
 		*(u32*)0x020050B8 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x02005234 = 0xE1A00000; // nop
@@ -10693,13 +10720,25 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02011A14 = 0xE1A00000; // nop
 		*(u32*)0x02039B60 = 0xE1A00000; // nop
 		*(u32*)0x0203CFFC = 0xE1A00000; // nop
-		patchInitDSiWare(0x02043BF4, heapEnd);
-		*(u32*)0x02043F64 = *(u32*)0x02004FC0;
+		patchInitDSiWare(0x02043BF4, heapEndMaxForRetail);
+		*(u32*)0x02043F64 = bssEnd;
 		patchUserSettingsReadDSiWare(0x02045038);
 		*(u32*)0x02045494 = 0xE1A00000; // nop
 		*(u32*)0x02045498 = 0xE1A00000; // nop
 		*(u32*)0x0204549C = 0xE1A00000; // nop
 		*(u32*)0x020454A0 = 0xE1A00000; // nop
+
+		if (!extendedMemory && *(u32*)(bssEnd-4)) {
+			*(u32*)0x02043F64 += *(u32*)(bssEnd-4);
+			*(u32*)(bssEnd-4) = 0;
+
+			u32* newCodeAddr = (u32*)0x020411F0;
+			newCodeAddr[0] = 0xE59F0000; // ldr r0, =bssEnd
+			newCodeAddr[1] = 0xE12FFF1E; // bx lr
+			newCodeAddr[2] = bssEnd;
+
+			setBL(0x02006944, (u32)newCodeAddr);
+		}
 	}
 
 	// Electroplankton: Luminarrow (USA)
