@@ -1,5 +1,6 @@
 #include <string.h>
 #include <nds/ndstypes.h>
+// #include <nds/arm9/background.h>
 #include <nds/arm9/video.h>
 #include <nds/system.h>
 
@@ -271,4 +272,37 @@ processExtPalettesFunc:
 		block++;
 		if (block == 2) block = 0;
 	}
+
+	// Commented due to slow code
+	/* if ((REG_DISPCNT_SUB & DISPLAY_BG3_ACTIVE) && (REG_BG3CNT_SUB & BG_BMP8_256x256)) {
+		const int mapBase = (REG_BG3CNT_SUB >> MAP_BASE_SHIFT) & 31;
+
+		static int block = 0;
+		storedPals = (u32*)0x03733800+(block/4);
+		palettes = (u32*)BG_MAP_RAM_SUB(mapBase)+(block/4);
+
+		for (int i = 0; i < 0x4000/4; i++) {
+			if (*storedPals != *palettes) {
+				u16* storedPals16 = (u16*)storedPals;
+				u16* palettes16 = (u16*)palettes;
+				for (int p = 0; p < 2; p++) {
+					if (storedPals[p] != palettes16[p]) {
+						const bool visibleBit = (palettes16[p] & BIT(15));
+						palettes16[p] = colorTable[palettes16[p] % 0x8000];
+						if (visibleBit) {
+							palettes16[p] |= BIT(15);
+						} else {
+							palettes16[p] &= ~BIT(15);
+						}
+						storedPals16[p] = palettes16[p];
+					}
+				}
+			}
+			storedPals++;
+			palettes++;
+		}
+
+		block += 0x4000;
+		if (block == 0x18000) block = 0;
+	} */
 }
