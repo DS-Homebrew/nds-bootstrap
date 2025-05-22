@@ -797,7 +797,7 @@ u32 inGameMenu(s32 *mainScreen, u32 consoleModel, s32 *exceptionRegisters) {
 	clearScreen(false);
 
 	tonccpy(palBak, BG_PALETTE_SUB, sizeof(palBak));	// Backup the palette
-	toncset16(BG_PALETTE_SUB, igmPal[6], 256);
+	toncset16(BG_PALETTE_SUB, igmPal[exception ? 7 : 6], 256);
 	for(int i = 0; i < 6; i++) {
 		BG_PALETTE_SUB[i * 0x10 + 1] = igmPal[i];
 	}

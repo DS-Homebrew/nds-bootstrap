@@ -186,11 +186,7 @@ u32 getExceptionAddress(u32 opcodeAddress, u32 thumbState) {
 
 
 void showException(s32 *expReg) {
-	u16 bgColor = igmPal[7];
-
 	if (exceptionPrinted) {
-		// Make the background red
-		BG_PALETTE_SUB[0] = bgColor;
 		return;
 	}
 	exceptionPrinted = true;
@@ -217,7 +213,8 @@ void showException(s32 *expReg) {
 
 	clearScreen(true);
 
-	toncset16(BG_PALETTE, 0, 256);
+	// Make the background red
+	toncset16(BG_PALETTE, igmPal[7], 256);
 	for(int i = 0; i < 6; i++) {
 		BG_PALETTE[i * 0x10 + 1] = igmPal[i];
 	}
@@ -228,10 +225,6 @@ void showException(s32 *expReg) {
 		val >>= 4;
 		BG_GFX[i * 2 + 1] = (val & 1) | ((val & 2) << 3) | ((val & 4) << 6) | ((val & 8) << 9);
 	}
-
-	// Make the background red
-	BG_PALETTE[0] = bgColor;
-	BG_PALETTE_SUB[0] = bgColor;
 
 	(*changeMpu)();
 
