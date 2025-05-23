@@ -84,7 +84,7 @@ Mario & Luigi: Partners in Time:
 - Crashes with data abort after pressing START
 
 Mario & Luigi: Bowser's Inside Story:
-- Crashes after Nintendo/AlphaDream screen
+- Crashes on white screens after Nintendo/AlphaDream screen
 
 MegaMan Zero Collection,
 MegaMan ZX,
@@ -124,6 +124,7 @@ static const char colorLutVCountBlacklist[][4] = {
 	"K5L", // Forgotten Legions
 	"ATK", // Kirby: Canvas Curse
 	"KYL", // Make Up & Style
+	"AB3", // Mario Hoops 3-on-3
 	"AGF", // True Swing Golf
 	"K72", // True Swing Golf Express
 };
@@ -149,6 +150,9 @@ Kirby: Canvas Curse:
 
 Make Up & Style:
 - Crashes after selecting a mode
+
+Mario Hoops 3-on-3:
+- Crashes on white screens
 
 True Swing Golf,
 True Swing Golf Express:
