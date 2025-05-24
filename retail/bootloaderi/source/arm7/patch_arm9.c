@@ -714,30 +714,45 @@ static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, co
 }
 
 void patchMobiclipFrameDraw(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
-	u32* offset = patchOffsetCache.mobiclipFrameDrawEndOffset;
+	u32* endOffset = patchOffsetCache.mobiclipFrameDrawEndOffset;
+	u32* offset = patchOffsetCache.mobiclipFrameDrawOffset;
 
-    if (!patchOffsetCache.mobiclipFrameDrawEndChecked) {
-		offset = findMobiclipFrameDrawEndOffset(ndsHeader, moduleParams);
-		if (offset) patchOffsetCache.mobiclipFrameDrawEndOffset = offset;
-		patchOffsetCache.mobiclipFrameDrawEndChecked = true;
+    if (!patchOffsetCache.mobiclipFrameDrawChecked) {
+		endOffset = findMobiclipFrameDrawEndOffset(ndsHeader, moduleParams);
+		if (endOffset) {
+			patchOffsetCache.mobiclipFrameDrawEndOffset = endOffset;
+			offset = findMobiclipFrameDrawStartOffset(endOffset);
+			if (offset) patchOffsetCache.mobiclipFrameDrawOffset = offset;
+		}
+		patchOffsetCache.mobiclipFrameDrawChecked = true;
 	}
 
-	if (!offset) {
+	if (!endOffset || !offset) {
 		return;
 	}
 
 	// Patch
-	const u32 applyColorLutMobiclip = CARDENGINEI_ARM9_CLUT_LOCATION+8;
-	if (offset[3] == 0xE8BD9FF0) {
-		u32 branchOffset = (u32)offset;
+	while (*offset != 0xE5901004) {
+		offset++;
+	}
+
+	u32* ce9clut = (u32*)CARDENGINEI_ARM9_CLUT_LOCATION;
+
+	offset[0] = 0xE1A0E00F; // mov lr, pc
+	offset[1] = 0xE51FF004; // ldr pc, =saveMobiclipFrameDst
+	offset[2] = ce9clut[2];
+
+	const u32 applyColorLutMobiclip = ce9clut[3];
+	if (endOffset[3] == 0xE8BD9FF0) {
+		u32 branchOffset = (u32)endOffset;
 		branchOffset += 0xC;
 		setB(branchOffset, applyColorLutMobiclip);
 	} else {
-		offset[3] = 0xE51FF004; // ldr pc, =applyColorLutMobiclip
-		offset[4] = applyColorLutMobiclip;
+		endOffset[3] = 0xE51FF004; // ldr pc, =applyColorLutMobiclip
+		endOffset[4] = applyColorLutMobiclip;
 	}
-	dbg_printf("Mobiclip frame draw end location : ");
-	dbg_hexa((u32)offset);
+	dbg_printf("Mobiclip frame draw location : ");
+	dbg_hexa((u32)patchOffsetCache.mobiclipFrameDrawOffset);
 	dbg_printf("\n\n");
 }
 

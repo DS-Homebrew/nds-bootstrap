@@ -109,6 +109,7 @@ u32* findCardEndReadDma(const tNDSHeader* ndsHeader, const module_params_t* modu
 u32* findCardSetDma(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb);
 u32* findSrlStartOffset9(const tNDSHeader* ndsHeader);
 u32* findMobiclipFrameDrawEndOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
+u32* findMobiclipFrameDrawStartOffset(const u32* endOffset);
 u32* findResetOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, const bool softResetMb);
 u32* findNandTmpJumpFuncOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
 u32* findMbkWramBOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);

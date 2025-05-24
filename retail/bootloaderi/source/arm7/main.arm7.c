@@ -888,7 +888,7 @@ static bool isROMLoadableInRAM(const tDSiHeader* dsiHeader, const tNDSHeader* nd
 	) {
 		const bool twlType = (ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed);
 		const bool cheatsEnabled = (cheatSizeTotal > 4 && cheatSizeTotal <= 0x8000);
-		u32 wramSize = (dsiWramAccess && !dsiWramMirrored) ? (colorLutEnabled ? 0x4AC00 : 0x80000) : 0;
+		u32 wramSize = (dsiWramAccess && !dsiWramMirrored) ? (colorLutEnabled ? 0x32C00 : 0x80000) : 0;
 		if (ce7Location == CARDENGINEI_ARM7_LOCATION) {
 			wramSize += 0x8000; // Shared 32KB of WRAM is available for ARM9 to use
 			sharedWramEnabled = true;
@@ -1277,7 +1277,7 @@ static void loadNitroFileInfoIntoRAM(const tNDSHeader* ndsHeader, aFile* romFile
 	if (baseFatSize == 0) return;
 
 	const u32 size = (baseFatOff-baseFntOff)+baseFatSize;
-	if (size > (colorLutEnabled ? 0x4AC00 : 0x80000)) return;
+	if (size > (colorLutEnabled ? 0x32C00 : 0x80000)) return;
 
 	sdmmc_set_ndma_slot(0);
 	fileRead((char*)0x03700000, romFile, baseFntOff, size);

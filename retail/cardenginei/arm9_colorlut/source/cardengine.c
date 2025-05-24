@@ -308,14 +308,16 @@ processExtPalettesFunc:
 	} */
 }
 
-void applyColorLutBitmap(u32* frameColors) {
+void applyColorLutBitmap(u32* frameBuffer) {
+	extern u32* mobiclipFrameDst;
 	for (int i = 0; i < 0x18000/4; i++) {
-		u16* palettes16 = (u16*)frameColors;
+		u16* palettes16 = (u16*)frameBuffer;
 		u16 colorSingle = colorTable[palettes16[0] % 0x8000] | BIT(15);
 		// u32 color = colorTable[palettes16[0] % 0x8000] | BIT(15);
 		// color |= (colorTable[palettes16[1] % 0x8000] | BIT(15)) << 16;
 		u32 color = colorSingle; // Cut horizontal resolution in half to speed up process
 		color |= colorSingle << 16;
-		*frameColors++ = color;
+		*mobiclipFrameDst++ = color;
+		frameBuffer++;
 	}
 }
