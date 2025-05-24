@@ -967,6 +967,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 					if(*(vu16*)(0x08000000) == 0x4D54) {
 						*(u16*)(0x020000C0) = 0x4353;
 					}
+					_SC_changeMode(SC_MODE_MEDIA);
 				}
 			}
 		}
