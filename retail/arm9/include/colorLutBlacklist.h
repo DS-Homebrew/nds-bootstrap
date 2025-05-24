@@ -3,6 +3,11 @@
 
 static const char colorLutBlacklist[][4] = {
 	"TAM", // The Amazing Spider-Man
+	"YCO", // Call of Duty 4: Modern Warfare
+	"CAL", // Call of Duty: World at War
+	"C62", // Call of Duty: Modern Warfare: Mobilized
+	"BDY", // Call of Duty: Black Ops
+	"B5B", // Call of Duty: Modern Warfare 3: Defiance
 	"C66", // Chou Gekijouban Keroro Gunsou: Gekishin Dragon Warriors de Arimasu!
 	"AQC", // Crayon Shin-chan DS: Arashi o Yobu Nutte Crayoon Daisakusen!
 	"YRC", // Crayon Shin-chan: Arashi o Yobu Cinemaland Kachinko Gachinko Daikatsugeki!
@@ -24,19 +29,28 @@ static const char colorLutBlacklist[][4] = {
 	"KEA", // Electroplankton: Trapy
 	"KEJ", // Electroplankton: Varvoice
 	"KGU", // Flipnote Studio
+	"AGE", // GoldenEye: Rogue Agent
+	"BJC", // GoldenEye 007
 	"BO5", // Golden Sun: Dark Dawn
 	"Y8L", // Golden Sun: Dark Dawn (Demo Version)
+	"CI7", // Hannah Montana: The Movie
+	"BJB", // James Bond 007: Blood Stone
 	"AK4", // Kabu Trader Shun
 	"BKS", // Keshikasu-kun: Battle Kasu-tival
 	"ARM", // Mario & Luigi: Partners in Time
 	"CLJ", // Mario & Luigi: Bowser's Inside Story
+	"C4M", // Marvel Ultimate Alliance 2
 	"B6Z", // MegaMan Zero Collection
 	"ARZ", // MegaMan ZX
 	"YZX", // MegaMan ZX Advent
 	"AMH", // Metroid Prime Hunters
 	"B3N", // Power Rangers: Samurai
 	"B8I", // Spider-Man: Edge of Time
+	"CSW", // Star Wars: Battlefont: Elite Squadron
+	"YST", // Star Wars: The Force Unleashed
 	"AZL", // Style Savvy
+	"VT3", // Toy Story 3
+	"VTE", // Tron: Evolution
 	"CP3", // Viva Pinata: Pocket Paradise
 	"CY8", // Yu-Gi-Oh! 5D's: Stardust Accelerator: World Championship 2009
 	"BYX", // Yu-Gi-Oh! 5D's: World Championship 2010: Reverse of Arcadia
@@ -47,6 +61,13 @@ static const char colorLutBlacklist[][4] = {
 
 The Amazing Spider-Man:
 - IRQ is not hooked on arm9
+
+Call of Duty 4: Modern Warfare,
+Call of Duty: World at War,
+Call of Duty: Modern Warfare: Mobilized,
+Call of Duty: Black Ops,
+Call of Duty: Modern Warfare 3: Defiance:
+- Crashes on black screens
 
 Chou Gekijouban Keroro Gunsou: Gekishin Dragon Warriors de Arimasu!,
 Crayon Shin-chan DS: Arashi o Yobu Nutte Crayoon Daisakusen!,
@@ -65,15 +86,23 @@ Doraemon: Nobita to Midori no Kyojinden DS:
 - Runs very slowly
 - Flickers between original and custom colors in some areas
 
-Golden Sun: Dark Dawn:
-- IRQ is not hooked on arm9
-
 Electroplankton titles:
 - Color blending effects used everywhere(?)
 
 Flipnote Studio:
 - No effect due to bitmap mode being used
 - Randomly swaps the top and bottom screens for a frame
+
+GoldenEye: Rogue Agent,
+GoldenEye 007:
+- Crashes on black screens
+
+Golden Sun: Dark Dawn:
+- IRQ is not hooked on arm9
+
+Hannah Montana: The Movie,
+James Bond 007: Blood Stone:
+- Crashes on black screens
 
 Kabu Trader Shun,
 Keshikasu-kun: Battle Kasu-tival:
@@ -85,6 +114,9 @@ Mario & Luigi: Partners in Time:
 
 Mario & Luigi: Bowser's Inside Story:
 - Crashes on white screens after Nintendo/AlphaDream screen
+
+Marvel Ultimate Alliance 2:
+- Crashes on black screens
 
 MegaMan Zero Collection,
 MegaMan ZX,
@@ -104,9 +136,17 @@ Spider-Man: Edge of Time,
 Viva Pinata: Pocket Paradise:
 - IRQ is not hooked on arm9
 
+Star Wars: Battlefont: Elite Squadron,
+Star Wars: The Force Unleashed:
+- Crashes on black screens
+
 Style Savvy:
 - Character skin and hair use color blending
 - Crashes when the master brightness register gets changed, and would occur when using a specific LUT which has inverted black/white or a non-white white
+
+Toy Story 3,
+Tron: Evolution:
+- Crashes on black screens
 
 Yu-Gi-Oh! 5D's: Stardust Accelerator: World Championship 2009,
 Yu-Gi-Oh! 5D's: World Championship 2010: Reverse of Arcadia,
