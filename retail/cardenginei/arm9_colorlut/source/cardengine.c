@@ -10,10 +10,11 @@ extern u32 flags;
 #define noWhiteFade BIT(1)
 #define oneIrqOnly BIT(2)
 
+static u16* colorTable = (u16*)0x03770000;
+
 void applyColorLut(bool processExtPalettes) {
 	u32* storedPals = (u32*)0x0374B800;
 	u32* palettes = (u32*)0x05000000;
-	u16* colorTable = (u16*)0x03770000;
 
 	if (processExtPalettes && !(flags & oneIrqOnly)) {
 		goto processExtPalettesFunc;
@@ -305,4 +306,16 @@ processExtPalettesFunc:
 		block += 0x4000;
 		if (block == 0x18000) block = 0;
 	} */
+}
+
+void applyColorLutBitmap(u32* frameColors) {
+	for (int i = 0; i < 0x18000/4; i++) {
+		u16* palettes16 = (u16*)frameColors;
+		u16 colorSingle = colorTable[palettes16[0] % 0x8000] | BIT(15);
+		// u32 color = colorTable[palettes16[0] % 0x8000] | BIT(15);
+		// color |= (colorTable[palettes16[1] % 0x8000] | BIT(15)) << 16;
+		u32 color = colorSingle; // Cut horizontal resolution in half to speed up process
+		color |= colorSingle << 16;
+		*frameColors++ = color;
+	}
 }

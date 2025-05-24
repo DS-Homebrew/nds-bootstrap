@@ -713,6 +713,34 @@ static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, co
     return false;
 }
 
+void patchMobiclipFrameDraw(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+	u32* offset = patchOffsetCache.mobiclipFrameDrawEndOffset;
+
+    if (!patchOffsetCache.mobiclipFrameDrawEndChecked) {
+		offset = findMobiclipFrameDrawEndOffset(ndsHeader, moduleParams);
+		if (offset) patchOffsetCache.mobiclipFrameDrawEndOffset = offset;
+		patchOffsetCache.mobiclipFrameDrawEndChecked = true;
+	}
+
+	if (!offset) {
+		return;
+	}
+
+	// Patch
+	const u32 applyColorLutMobiclip = CARDENGINEI_ARM9_CLUT_LOCATION+8;
+	if (offset[3] == 0xE8BD9FF0) {
+		u32 branchOffset = (u32)offset;
+		branchOffset += 0xC;
+		setB(branchOffset, applyColorLutMobiclip);
+	} else {
+		offset[3] = 0xE51FF004; // ldr pc, =applyColorLutMobiclip
+		offset[4] = applyColorLutMobiclip;
+	}
+	dbg_printf("Mobiclip frame draw end location : ");
+	dbg_hexa((u32)offset);
+	dbg_printf("\n\n");
+}
+
 static void patchReset(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	const char* romTid = getRomTid(ndsHeader);
 	if (ndsHeader->unitCode == 0 && (strcmp(romTid, "NTRJ") == 0 || strncmp(romTid, "HND", 3) == 0 || strncmp(romTid, "HNE", 3) == 0)) {
@@ -2944,6 +2972,11 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 	nandSavePatch(ce9, ndsHeader, moduleParams);
 
 	//setFlushCache(ce9, patchMpuRegion, usesThumb);
+
+	extern bool colorLutEnabled;
+	if (colorLutEnabled) {
+		patchMobiclipFrameDraw(ndsHeader, moduleParams);
+	}
 
 	dbg_printf("ERR_NONE\n\n");
 	return ERR_NONE;

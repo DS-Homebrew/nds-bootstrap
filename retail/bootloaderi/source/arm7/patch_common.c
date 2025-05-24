@@ -10372,6 +10372,24 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// Nintendo DSi + Internet (Japan)
+	// Nintendo DSi + Internet (USA)
+	else if ((strcmp(romTid, "K2DJ") == 0 || strcmp(romTid, "K2DE") == 0) && (!dsiWramAccess || colorLutEnabled)) {
+		*(u32*)0x0200599C = 0xE1A00000; // nop
+		*(u32*)0x020059A8 = 0xE1A00000; // nop
+		*(u32*)0x020059B8 = 0xE1A00000; // nop
+		*(u32*)0x020059C4 = 0xE1A00000; // nop
+	}
+
+	// Nintendo DSi + Internet (Europe)
+	// Nintendo DSi + Internet (Australia)
+	else if ((strcmp(romTid, "K2DP") == 0 || strcmp(romTid, "K2DU") == 0) && (!dsiWramAccess || colorLutEnabled)) {
+		*(u32*)0x020059AC = 0xE1A00000; // nop
+		*(u32*)0x020059B8 = 0xE1A00000; // nop
+		*(u32*)0x020059C8 = 0xE1A00000; // nop
+		*(u32*)0x020059D4 = 0xE1A00000; // nop
+	}
+
 	// Nintendogs (China)
 	else if (strcmp(romTid, "KDOC") == 0 && saveOnFlashcardNtr) {
 		setBL(0x0202A6EC, (u32)dsiSaveSeek);
