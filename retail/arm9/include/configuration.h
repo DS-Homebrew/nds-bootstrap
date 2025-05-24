@@ -80,6 +80,7 @@ typedef struct configuration {
 	bool specialCard;
 	bool phatColors;
 	char* manualPath;
+	bool saveRelocation;
 } configuration;
 
 #endif // CONFIGURATION_H

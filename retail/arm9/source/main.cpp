@@ -230,6 +230,7 @@ static inline void debugConf(configuration* conf) {
 	dbg_printf("gameOnFlashcard: %s\n", btoa(conf->gameOnFlashcard));
 	dbg_printf("saveOnFlashcard: %s\n", btoa(conf->saveOnFlashcard));
 	dbg_printf("macroMode: %s\n", btoa(conf->macroMode));
+	dbg_printf("saveRelocation: %s\n", btoa(conf->saveRelocation));
 }
 
 static int runNdsFile(configuration* conf) {
