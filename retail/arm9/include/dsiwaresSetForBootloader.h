@@ -109,6 +109,7 @@ static const char dsiWareForBootloader1[][4] = {
 	"K2N", // Cake Ninja 2
 	"KYN", // Cake Ninja: XMAS
 	"KCY", // Calculator
+	"K22", // California Super Sports
 	"K9Y", // Candle Route (bootloaderi-exclusive)
 	"K3N", // GO Series: Captain Sub
 	"KCN", // Castle Conqueror
@@ -143,12 +144,14 @@ static const char dsiWareForBootloader1[][4] = {
 	"K5D", // G.G Series: Cosmo Rally!!
 	"KX2", // Cosmos X2
 	"KDC", // Crash-Course Domo
+	"KCQ", // Crazy Cheebo: Puzzle Party
 	"KQZ", // Crazy Chicken: Director's Cut (bootloaderi-exclusive)
 	"KCV", // Crazy Chicken: Pirates (bootloaderi-exclusive)
 	"KZG", // Crazy Golf
 	"KCR", // Crazy Sudoku
 	"KXD", // Crystal Adventure
 	"KQQ", // Crystal Caverns of Amon-Ra
+	"KVC", // Curling Super Championship
 	"KKT", // Cut the Rope (bootloaderi-exclusive)
 	"K32", // CuteWitch! runner
 	"KTA", // G.G Series: D-Tank
@@ -217,6 +220,7 @@ static const char dsiWareForBootloader1[][4] = {
 	"KFH", // Flips: More Bloody Horowitz
 	"KF4", // Flips: Silent But Deadly
 	"KF9", // Flips: Terror in Cubicle Four
+	"K5L", // Forgotten Legions
 	"KFO", // Frenzic
 	"KFG", // Frogger Returns
 	"K6J", // Fuuu! Dairoujou Kai
@@ -254,6 +258,7 @@ static const char dsiWareForBootloader1[][4] = {
 	"KTX", // High Stakes Texas Hold'em
 	"KHI", // Hints Hunter
 	"KT2", // G.G Series: Horizontal Bar
+	"KIS", // Ice Hockey Slovakia 2011
 	// "KNE", // Ichi Moudaji!: Neko King
 	"KNK", // Ideyou Sukeno: Kenkou Maja DSi
 	"KBT", // Invasion of the Alien Blobs!

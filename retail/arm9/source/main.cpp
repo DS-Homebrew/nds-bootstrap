@@ -46,6 +46,28 @@ typedef struct {
 static bool debug = false;
 static bool sdFound = false;
 static bool bootstrapOnFlashcard = false;
+bool colorTable = false;
+bool invertedColors = false;
+bool noWhiteFade = false;
+
+void myConsoleDemoInit(void) {
+	static bool inited = false;
+	if (inited) return;
+
+	if (invertedColors || noWhiteFade) {
+		powerOff(PM_BACKLIGHT_TOP);
+	}
+
+	consoleDemoInit();
+	if (colorTable) {
+		for (int i = 0; i < 256; i++) {
+			BG_PALETTE_SUB[i] = VRAM_E[BG_PALETTE_SUB[i] % 0x8000];
+		}
+	}
+	powerOn(PM_BACKLIGHT_BOTTOM);
+
+	inited = true;
+}
 
 static inline const char* btoa(bool x) {
 	return x ? "true" : "false";
@@ -215,7 +237,7 @@ static int runNdsFile(configuration* conf) {
 	// Debug
 	debug = conf->debug;
 	if (debug) {
-		consoleDemoInit();
+		myConsoleDemoInit();
 
 		if (dsiFeatures()) {
 			fifoSetValue32Handler(FIFO_USER_02, myFIFOValue32Handler, NULL);
@@ -386,7 +408,7 @@ static int runNdsFile(configuration* conf) {
 			dbg_printf("No NDS file specified\n");
 			dopause();
 		} else {
-			consoleDemoInit();
+			myConsoleDemoInit();
 			iprintf("No NDS file specified\n");
 		}
 		return -1;
@@ -399,7 +421,10 @@ static int runNdsFile(configuration* conf) {
 
 	if (conf->macroMode) {
 		powerOff(PM_BACKLIGHT_TOP);
+	} else {
+		powerOn(PM_BACKLIGHT_TOP);
 	}
+	powerOn(PM_BACKLIGHT_BOTTOM);
 
 	struct stat st;
 	struct stat stSav;
@@ -560,7 +585,7 @@ int main(int argc, char** argv) {
 			if (debug) {
 				dbg_printf("Start failed. Error %i\n", status);
 			} else {
-				consoleDemoInit();
+				myConsoleDemoInit();
 				iprintf("Start failed. Error %i\n", status);
 			}
 		}

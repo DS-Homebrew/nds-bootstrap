@@ -41,6 +41,7 @@
 #include "asyncReadExcludeMap.h"
 #include "dmaExcludeMap.h"
 #include "twlClockExcludeMap.h"
+#include "colorLutBlacklist.h"
 
 #define REG_SCFG_EXT7 *(u32*)0x02FFFDF0
 
@@ -81,6 +82,12 @@ extern std::string sharedFontPath;
 
 extern u8* lz77ImageBuffer;
 #define sizeof_lz77ImageBuffer 0x30000
+
+extern bool colorTable;
+extern bool invertedColors;
+extern bool noWhiteFade;
+
+extern void myConsoleDemoInit(void);
 
 off_t getFileSize(const char* path) {
 	FILE* fp = fopen(path, "rb");
@@ -441,7 +448,7 @@ static void createRamDumpBin(configuration* conf) {
 	}
 
 	if (getFileSize(ramDumpPath.c_str()) < ramDumpSize) {
-		consoleDemoInit();
+		myConsoleDemoInit();
 		iprintf("Allocating space for\n");
 		iprintf("creating a RAM dump.\n");
 		iprintf("Please wait...");
@@ -476,7 +483,7 @@ static void createApFixOverlayBin(configuration* conf) {
 	}
 
 	if (!conf->isDSiWare && getFileSize(apFixOverlaysPath.c_str()) < 0xA00000) {
-		consoleDemoInit();
+		myConsoleDemoInit();
 		iprintf("Allocating space for\n");
 		iprintf("AP-fixed overlays.\n");
 		iprintf("Please wait...");
@@ -497,6 +504,62 @@ static void createApFixOverlayBin(configuration* conf) {
 			iprintf("Failed to allocate space\n");
 			iprintf("for AP-fixed overlays.");
 			while (1) swiWaitForVBlank();
+		}
+	}
+}
+
+static void loadColorLut(const bool isRunFromFlashcard, const bool phatColors) {
+	if (phatColors) {
+		FILE* file = fopen("nitro:/NTR-001.lut", "rb");
+		fread(lz77ImageBuffer, 1, 0x10000, file);
+		fclose(file);
+
+		vramSetBankE(VRAM_E_LCD);
+		tonccpy(VRAM_E, lz77ImageBuffer, 0x10000); // Copy LUT to VRAM
+
+		colorTable = true;
+	}
+
+	const char* txtPath = isRunFromFlashcard ? "fat:/_nds/colorLut/currentSetting.txt" : "sd:/_nds/colorLut/currentSetting.txt";
+	if (access(txtPath, F_OK) == 0) {
+		// Load color LUT
+		char lutName[128] = {0};
+		FILE* file = fopen(txtPath, "rb");
+		fread(lutName, 1, 128, file);
+		fclose(file);
+
+		char colorLutPath[256];
+		sprintf(colorLutPath, "%s:/_nds/colorLut/%s.lut", isRunFromFlashcard ? "fat" : "sd", lutName);
+
+		if (getFileSize(colorLutPath) == 0x10000) {
+			file = fopen(colorLutPath, "rb");
+			fread(lz77ImageBuffer, 1, 0x10000, file);
+			fclose(file);
+
+			if (colorTable) {
+				u16* newColorTable = (u16*)lz77ImageBuffer;
+				for (u16 i = 0; i < 0x8000; i++) {
+					VRAM_E[i] = newColorTable[VRAM_E[i] % 0x8000];
+				}
+			} else {
+				vramSetBankE(VRAM_E_LCD);
+				tonccpy(VRAM_E, lz77ImageBuffer, 0x10000); // Copy LUT to VRAM
+
+				colorTable = true;
+			}
+
+			const u16 color0 = VRAM_E[0] | BIT(15);
+			const u16 color7FFF = VRAM_E[0x7FFF] | BIT(15);
+
+			invertedColors =
+			  (color0 >= 0xF000 && color0 <= 0xFFFF
+			&& color7FFF >= 0x8000 && color7FFF <= 0x8FFF);
+			if (!invertedColors) noWhiteFade = (color7FFF < 0xF000);
+
+			if (invertedColors || noWhiteFade) {
+				powerOff(PM_BACKLIGHT_TOP);
+				powerOff(PM_BACKLIGHT_BOTTOM);
+			}
 		}
 	}
 }
@@ -696,6 +759,9 @@ static void load_conf(configuration* conf, const char* fn) {
 	// Sound/Mic frequency
 	conf->soundFreq = (bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "SOUND_FREQ", "0").c_str(), NULL, 0);
 
+	// DS Phat colors
+	conf->phatColors = (bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "PHAT_COLORS", "0").c_str(), NULL, 0);
+
 	// GUI Language
 	conf->guiLanguage = strdup(config_file.fetch("NDS-BOOTSTRAP", "GUI_LANGUAGE").c_str());
 
@@ -843,7 +909,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	const bool scfgSdmmcEnabled = (*(u8*)0x02FFFDF4 == 1);
 
 	if (!conf->sdFound && !flashcardFound) {
-		consoleDemoInit();
+		myConsoleDemoInit();
 		iprintf("FAT init failed!\n");
 		return -1;
 	}
@@ -854,7 +920,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		bootstrapPath = conf->sdFound ? "sd:/_nds/nds-bootstrap-nightly.nds" : "fat:/_nds/nds-bootstrap-nightly.nds";
 	}
 	if (!nitroFSInit(bootstrapPath)) {
-		consoleDemoInit();
+		myConsoleDemoInit();
 		iprintf("nitroFSInit failed!\n");
 		return -1;
 	}
@@ -933,6 +999,8 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			conf->initDisc = true;
 		}
 	}
+
+	loadColorLut(conf->bootstrapOnFlashcard, conf->phatColors && dsiFeatures() && !conf->b4dsMode);
 
 	if (conf->boostVram) {
 		conf->valueBits |= BIT(1);
@@ -1674,7 +1742,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 			bool found = (access(pageFilePath.c_str(), F_OK) == 0);
 			if (!found) {
-				consoleDemoInit();
+				myConsoleDemoInit();
 				iprintf("Creating pagefile.sys\n");
 				iprintf("Please wait...\n");
 			}
@@ -1740,7 +1808,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 			bool found = (access(pageFilePath.c_str(), F_OK) == 0);
 			if (!found) {
-				consoleDemoInit();
+				myConsoleDemoInit();
 				iprintf("Creating pagefile.sys\n");
 				iprintf("Please wait...\n");
 			}
@@ -1753,7 +1821,28 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			if (!found) {
 				consoleClear();
 			}
+		}
 
+		if (colorTable) {
+			loadCardEngineBinary("nitro:/cardenginei_arm9_colorlut.bin", (u8*)CARDENGINEI_ARM9_CLUT_BUFFERED_LOCATION);
+
+			u32 flags = 0;
+			if (invertedColors) {
+				flags |= BIT(0);
+			} else if (noWhiteFade) {
+				flags |= BIT(1);
+			}
+
+			// TODO: If the list gets large enough, switch to bsearch().
+			for (unsigned int i = 0; i < sizeof(colorLutVCountBlacklist)/sizeof(colorLutVCountBlacklist[0]); i++) {
+				if (memcmp(romTid, colorLutVCountBlacklist[i], 3) == 0) {
+					// Found match
+					flags |= BIT(2);
+					break;
+				}
+			}
+
+			*(u32*)(CARDENGINEI_ARM9_CLUT_BUFFERED_LOCATION+4) = flags;
 		}
 
 		// Load in-game menu ce9 binary
@@ -1769,7 +1858,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			if (getFileSize(screenshotPath.c_str()) < 0x4BCC00) {
 				char buffer[2][0x100] = {{0}};
 
-				consoleDemoInit();
+				myConsoleDemoInit();
 				iprintf("Creating screenshots.tar\n");
 				iprintf("Please wait...");
 
@@ -1822,6 +1911,13 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			}
 
 			cebin = fopen(pageFilePath.c_str(), "r+");
+			if (colorTable) {
+				u16* igmPals = (u16*)igmText;
+				igmPals += IGM_PALS/2;
+				for (int i = 0; i < 8; i++) {
+					igmPals[i] = VRAM_E[igmPals[i] % 0x8000];
+				}
+			}
 			fwrite((u8*)igmText, 1, 0xA000, cebin);
 			fclose(cebin);
 			toncset((u8*)igmText, 0, 0xA000);
@@ -1889,6 +1985,12 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		if (bootstrapImages) {
 			fread(lz77ImageBuffer, 1, sizeof_lz77ImageBuffer, bootstrapImages);
 			LZ77_Decompress(lz77ImageBuffer, (u8*)IMAGES_LOCATION+0x18000);
+			if (colorTable) {
+				u16* buffer = (u16*)IMAGES_LOCATION+(0x18000/2);
+				for (int i = 0; i < (256*192)*2; i++) {
+					buffer[i] = VRAM_E[buffer[i] % 0x8000] | BIT(15);
+				}
+			}
 		}
 		fclose(bootstrapImages);
 
@@ -1931,12 +2033,35 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 				delete[] bmpImageBuffer;*/
 				fread((u16*)IMAGES_LOCATION, 1, 0x18000, bootstrapImages);
+				if (colorTable) {
+					u16* buffer = (u16*)IMAGES_LOCATION;
+					for (int i = 0; i < 256*192; i++) {
+						buffer[i] = VRAM_E[buffer[i] % 0x8000] | BIT(15);
+					}
+				}
 			} else {
 				toncset16((u16*)IMAGES_LOCATION, 0, 256*192);
 			}
 			fclose(bootstrapImages);
 		} else {
 			toncset16((u16*)IMAGES_LOCATION, 0, 256*192);
+		}
+
+		if (colorTable) {
+			bool proceed = true;
+			// TODO: If the list gets large enough, switch to bsearch().
+			for (unsigned int i = 0; i < sizeof(colorLutBlacklist)/sizeof(colorLutBlacklist[0]); i++) {
+				if (memcmp(romTid, colorLutBlacklist[i], 3) == 0) {
+					// Found match
+					proceed = false;
+					break;
+				}
+			}
+
+			if (proceed) {
+				*(u32*)(COLOR_LUT_BUFFERED_LOCATION-4) = 0x54554C63; // 'cLUT'
+				tonccpy((u16*)COLOR_LUT_BUFFERED_LOCATION, VRAM_E, 0x10000);
+			}
 		}
 	} else {
 		if (accessControl & BIT(4)) {
@@ -2020,7 +2145,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 		bool found = (access(pageFilePath.c_str(), F_OK) == 0);
 		if (!found) {
-			consoleDemoInit();
+			myConsoleDemoInit();
 			iprintf("Creating pagefile.sys\n");
 			iprintf("Please wait...\n");
 		}
@@ -2064,7 +2189,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			if (getFileSize(screenshotPath.c_str()) < 0x4BCC00) {
 				char buffer[2][0x100] = {{0}};
 
-				consoleDemoInit();
+				myConsoleDemoInit();
 				iprintf("Creating screenshots.tar\n");
 				iprintf("Please wait...");
 
@@ -2117,6 +2242,13 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			}
 
 			cebin = fopen(pageFilePath.c_str(), "r+");
+			if (colorTable) {
+				u16* igmPals = (u16*)igmText;
+				igmPals += IGM_PALS/2;
+				for (int i = 0; i < 8; i++) {
+					igmPals[i] = VRAM_E[igmPals[i] % 0x8000];
+				}
+			}
 			fwrite((u8*)igmText, 1, 0xA000, cebin);
 			fclose(cebin);
 			toncset((u8*)igmText, 0, 0xA000);
@@ -2140,6 +2272,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 				||	strncmp(romTid, "K9G", 3) == 0 // Big Bass Arcade
 				||	strncmp(romTid, "KUG", 3) == 0 // G.G Series: Drift Circuit 2
 				||	strncmp(romTid, "KEI", 3) == 0 // Electroplankton: Beatnes
+				||	strncmp(romTid, "KEG", 3) == 0 // Electroplankton: Lumiloop
 				||	strncmp(romTid, "KEA", 3) == 0 // Electroplankton: Trapy
 				||	strncmp(romTid, "KFO", 3) == 0 // Frenzic
 				||	strncmp(romTid, "K5M", 3) == 0 // G.G Series: The Last Knight
@@ -2352,6 +2485,12 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		if (bootstrapImages) {
 			fread(lz77ImageBuffer, 1, sizeof_lz77ImageBuffer, bootstrapImages);
 			LZ77_Decompress(lz77ImageBuffer, (u8*)IMAGES_LOCATION+0x18000);
+			if (colorTable) {
+				u16* buffer = (u16*)IMAGES_LOCATION+(0x18000/2);
+				for (int i = 0; i < (256*192)*2; i++) {
+					buffer[i] = VRAM_E[buffer[i] % 0x8000] | BIT(15);
+				}
+			}
 		}
 		fclose(bootstrapImages);
 
@@ -2394,6 +2533,12 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 				delete[] bmpImageBuffer;*/
 				fread((u16*)IMAGES_LOCATION, 1, 0x18000, bootstrapImages);
+				if (colorTable) {
+					u16* buffer = (u16*)IMAGES_LOCATION;
+					for (int i = 0; i < 256*192; i++) {
+						buffer[i] = VRAM_E[buffer[i] % 0x8000] | BIT(15);
+					}
+				}
 			} else {
 				toncset16((u16*)IMAGES_LOCATION, 0, 256*192);
 			}
@@ -2490,6 +2635,46 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 					LZX_DecodeFromFile(sdat, sdatFile, sdatSize);
 				}
 				fclose(sdatFile);
+			}
+		} else if (!b4dsDebugRam && (strncmp(romTid, "KEG", 3) == 0)) {
+			// Convert stereo title intro music to mono in Electroplankton: Lumiloop
+			const u32 sdatSize = getFileSize("rom:/sound_data_hw.sdat");
+			if (sdatSize == 0x183300) {
+				u32 bssEnd = 0;
+				ndsFile = fopen(conf->ndsPath, "rb");
+				fseek(ndsFile, ndsArm9BinOffset+((romTid[3] == 'J') ? 0xFC0 : 0xFD0), SEEK_SET);
+				fread(&bssEnd, sizeof(u32), 1, ndsFile);
+				fclose(ndsFile);
+
+				if (bssEnd+sdatSize < 0x02280000) {
+					u32 offset = 0;
+					FILE* sdatFile = fopen("rom:/sound_data_hw.sdat", "rb");
+					fseek(sdatFile, 0xA80+0x58, SEEK_SET);
+					fread(&offset, 1, 4, sdatFile);
+
+					if (offset == 0x609D8) {
+						fseek(sdatFile, 0, SEEK_SET);
+
+						fread((u8*)bssEnd, 1, 0xA80+0x354D4, sdatFile);
+						u8* ssar = (u8*)bssEnd+0x4A0;
+						toncset(ssar+0xA7, 0, 1); // Play left-channel sound on right-side speaker as well
+						u8* swar = (u8*)bssEnd+0xA80;
+						toncset32(swar+0x354D4, 0x56220002, 1); // Replace
+						toncset32(swar+0x354D8, 0x000102F7, 1); // right-channel
+						toncset32(swar+0x354DC, 0x000000E2, 1); // sound with
+						toncset32(swar+0x354E0, 0x000F0000, 1); // blank sound
+						toncset(swar+0x354E4, 0, 0x388);        // to reduce RAM usage
+						fseek(sdatFile, 0xA80+0x609D8, SEEK_SET);
+						fread(swar+0x3586C, 1, 0x121EA8, sdatFile);
+
+						FILE* header = fopen("nitro:/dsi2dsFileMods/lumiloopSwarHeader.bin", "rb");
+						fread(swar, 1, 0xD8, header);
+						fclose(header);
+
+						*(u32*)(bssEnd-4) = 0xA80+0x157714; // New sdat size
+					}
+					fclose(sdatFile);
+				}
 			}
 		} else if (donorInsideNds) {
 			// Set cloneboot/multiboot SRL file either to boot instead, or as Donor ROM

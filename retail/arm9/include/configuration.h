@@ -78,6 +78,7 @@ typedef struct configuration {
 	bool sleepMode;
 	u16 hotkey;
 	bool specialCard;
+	bool phatColors;
 	char* manualPath;
 	bool saveRelocation;
 } configuration;

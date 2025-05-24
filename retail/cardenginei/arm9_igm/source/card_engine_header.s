@@ -7,6 +7,7 @@
 	.global waitSysCyclesLoc
 	.global scfgExtBak
 	.global scfgClkBak
+	.global igmPal
 	.global codeJump
 	.global codeJump1
 	.global codeJumpWord
@@ -34,6 +35,15 @@ scfgExtBak:
 .word 0
 scfgClkBak:
 .hword 0
+igmPal:
+.hword 0xFFFF @ White
+.hword 0xDEF7 @ Light gray
+.hword 0xCE73 @ Darker gray
+.hword 0xF355 @ Light blue
+.hword 0x801B @ Red
+.hword 0x8360 @ Lime
+.hword 0x0000 @ Black (BG)
+.hword 0x0010 @ Red (Exception BG)
 .align 4
 
 card_engine_start:

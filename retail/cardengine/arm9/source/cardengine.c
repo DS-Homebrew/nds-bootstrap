@@ -528,7 +528,7 @@ void inGameMenu(s32* exRegisters) {
 	opened = true;
 
 	*(u32*)(igmLocation + IGM_TEXT_SIZE_ALIGNED) = (u32)sharedAddr;
-	volatile u32 (*inGameMenu)(s32*, u32, s32*) = (volatile void*)igmLocation + IGM_TEXT_SIZE_ALIGNED + 0x10;
+	volatile u32 (*inGameMenu)(s32*, u32, s32*) = (volatile void*)igmLocation + IGM_ENTRY;
 	const u32 res = (*inGameMenu)(&ce9->mainScreen, (u32)ce9, exRegisters);
 
 	opened = false;

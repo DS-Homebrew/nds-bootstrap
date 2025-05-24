@@ -77,6 +77,7 @@
 #define bootstrapOnFlashcard BIT(19)
 #define ndmaDisabled BIT(20)
 #define isDlp BIT(21)
+#define useColorLut BIT(22)
 #define i2cBricked BIT(30)
 #define scfgLocked BIT(31)
 
@@ -137,8 +138,6 @@ bool ipcEveryFrame = false;
 //static bool dmaLed = false;
 static bool powerLedChecked = false;
 static bool powerLedIsPurple = false;
-static bool swapScreens = false;
-static bool dmaSignal = false;
 static bool wifiIrq = false;
 static int wifiIrqTimer = 0;
 //static bool saveInRam = false;
@@ -373,7 +372,6 @@ static void initialize(void) {
 	if (!bootloaderCleared) {
 		toncset((u8*)0x06000000, 0, 0x40000);	// Clear bootloader
 		if (mainScreen) {
-			swapScreens = (mainScreen == 2);
 			ipcEveryFrame = true;
 		}
 		bootloaderCleared = true;
@@ -1546,6 +1544,7 @@ void runCardEngineCheck(void) {
 						sharedAddr[3] = 0;
 					}
 					if (isDma) {
+						sharedAddr[4] = 0x39414D44; // 'DMA9'
 						IPC_SendSync(0x3);
 					}
 				}
@@ -1618,6 +1617,7 @@ void runCardEngineCheckHalt(void) {
 					// readOngoing = false;
 					sharedAddr[3] = 0;
 					if (isDma) {
+						sharedAddr[4] = 0x39414D44; // 'DMA9'
 						IPC_SendSync(0x3);
 					}
 				}
@@ -1668,6 +1668,7 @@ void myIrqHandlerFIFO(void) {
 		}
 		#endif */
 		swiDelay(100);
+		sharedAddr[4] = 0x39414D44; // 'DMA9'
 		IPC_SendSync(0x3);
 		return;
 	}
@@ -1940,16 +1941,10 @@ void myIrqHandlerVBlank(void) {
 	// calledViaIPC = false;
 	// runCardEngineCheck();
 
-	// Update main screen or swap screens
-	if (ipcEveryFrame) {
-		if (dmaSignal) {
-			IPC_SendSync(0x3);
-			dmaSignal = false;
-		} else {
-			IPC_SendSync(swapScreens ? 0x7 : 0x6);
-		}
+	// Fix ARM9 VCount IRQ settings for color LUT and/or swap screens
+	if ((valueBits & useColorLut) || ipcEveryFrame) {
+		IPC_SendSync(0x6);
 	}
-	swapScreens = false;
 
 	if (sharedAddr[0] == 0x524F5245) { // 'EROR'
 		REG_MASTER_VOLUME = 0;

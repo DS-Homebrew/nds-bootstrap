@@ -104,6 +104,7 @@ typedef struct cardengineArm7 {
 		19: bootstrapOnFlashcard
 		20: ndmaDisabled
 		21: isDlp
+		22: useColorLut
 		30: i2cBricked
 		31: scfgLocked
 	*/

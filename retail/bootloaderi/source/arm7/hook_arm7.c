@@ -57,6 +57,7 @@
 #define b_bootstrapOnFlashcard BIT(19)
 #define b_ndmaDisabled BIT(20)
 #define b_isDlp BIT(21)
+#define b_useColorLut BIT(22)
 #define b_i2cBricked BIT(30)
 #define b_scfgLocked BIT(31)
 
@@ -357,6 +358,7 @@ int hookNdsRetailArm7(
 		// extern u32 dataToPreloadAddr;
 		// extern u32 dataToPreloadSize;
 		// extern u32 dataToPreloadFrame;
+		extern bool colorLutEnabled;
 		extern bool dataToPreloadFound(const tNDSHeader* ndsHeader);
 		const bool laterSdk = ((moduleParams->sdk_version >= 0x2008000 && moduleParams->sdk_version != 0x2012774) || moduleParams->sdk_version == 0x20029A8);
 
@@ -433,6 +435,9 @@ int hookNdsRetailArm7(
 		extern bool i2cBricked;
 		if (i2cBricked) {
 			ce7->valueBits |= b_i2cBricked;
+		}
+		if (colorLutEnabled) {
+			ce7->valueBits |= b_useColorLut;
 		}
 		if (REG_SCFG_EXT == 0) {
 			ce7->valueBits |= b_scfgLocked;

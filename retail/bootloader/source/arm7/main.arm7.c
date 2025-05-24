@@ -1456,6 +1456,7 @@ int arm7_main(void) {
 					||	strncmp(romTid, "K9G", 3) == 0 // Big Bass Arcade
 					||	strncmp(romTid, "KUG", 3) == 0 // G.G Series: Drift Circuit 2
 					||	strncmp(romTid, "KEI", 3) == 0 // Electroplankton: Beatnes
+					||	strncmp(romTid, "KEG", 3) == 0 // Electroplankton: Lumiloop
 					||	strncmp(romTid, "KEA", 3) == 0 // Electroplankton: Trapy
 					||	strncmp(romTid, "KFO", 3) == 0 // Frenzic
 					||	strncmp(romTid, "K5M", 3) == 0 // G.G Series: The Last Knight

@@ -32,15 +32,6 @@ vu32 *address = (vu32*)0x02000000;
 static bool arm7Ram = false;
 static u8 arm7RamBak[0xC0];
 
-u16 igmPal[6] = {
-	0xFFFF, // White
-	0xDEF7, // Light gray
-	0xCE73, // Darker gray
-	0xF355, // Light blue
-	0x801B, // Red
-	0x8360, // Lime
-};
-
 #ifndef B4DS
 static u16* vramBak = (u16*)INGAME_MENU_EXT_LOCATION+(0x18200/sizeof(u16));
 static u16* bmpBuffer = (u16*)INGAME_MENU_EXT_LOCATION;
@@ -806,8 +797,8 @@ u32 inGameMenu(s32 *mainScreen, u32 consoleModel, s32 *exceptionRegisters) {
 	clearScreen(false);
 
 	tonccpy(palBak, BG_PALETTE_SUB, sizeof(palBak));	// Backup the palette
-	toncset16(BG_PALETTE_SUB, 0, 256);
-	for(int i = 0; i < sizeof(igmPal) / sizeof(igmPal[0]); i++) {
+	toncset16(BG_PALETTE_SUB, igmPal[exception ? 7 : 6], 256);
+	for(int i = 0; i < 6; i++) {
 		BG_PALETTE_SUB[i * 0x10 + 1] = igmPal[i];
 	}
 
