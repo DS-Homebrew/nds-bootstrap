@@ -36,6 +36,8 @@ typedef struct configuration {
 	u32 wideCheatSize;
 	u32 apPatchOffset;
 	u32 apPatchSize;
+	u32 mobiclipStartOffset;
+	u32 mobiclipEndOffset;
 	u32 dsi2dsSavePatchOffset;
 	u32 dsi2dsSavePatchSize;
 	u32 cheatSize;

@@ -345,6 +345,76 @@ static void loadApFix(configuration* conf, const char* bootstrapPath, const char
 	fclose(file);
 }
 
+static void loadMobiclipOffsets(configuration* conf, const char* bootstrapPath, const char* romTid, const u8 romVersion, const u16 headerCRC) {
+	FILE *file = fopen("nitro:/mobiclipOffsets.pck", "rb");
+	if (!file) {
+		return;
+	}
+
+	char buf[5] = {0};
+		fread(buf, 1, 4, file);
+	if (strcmp(buf, ".PCK") != 0) {
+		return;
+	}
+
+	u32 fileCount;
+	fread(&fileCount, 1, sizeof(fileCount), file);
+
+	u32 offset = 0, size = 0;
+
+	// Try binary search for the game
+	int left = 0;
+	int right = fileCount;
+
+	while (left <= right) {
+		int mid = left + ((right - left) / 2);
+		fseek(file, 16 + mid * 16, SEEK_SET);
+		fread(buf, 1, 4, file);
+		int cmp = strcmp(buf, romTid);
+		if (cmp == 0) { // TID matches, check other info
+			u16 crc;
+			u8 ver;
+			fread(&crc, 1, sizeof(crc), file);
+			fread(&offset, 1, sizeof(offset), file);
+			fread(&size, 1, sizeof(size), file);
+			fread(&ver, 1, sizeof(ver), file);
+
+			if ((crc == 0xFFFF || crc == headerCRC) && (ver == 0xFF || ver == romVersion)) {
+				break;
+			} else if (crc < headerCRC) {
+				offset = 0;
+				size = 0;
+
+				left = mid + 1;
+			} else {
+				offset = 0;
+				size = 0;
+
+				right = mid - 1;
+			}
+		} else if (cmp < 0) {
+			left = mid + 1;
+		} else {
+			right = mid - 1;
+		}
+	}
+
+	if (offset > 0) {
+		if (size > 8) {
+			size = 8;
+		}
+
+		fseek(file, offset, SEEK_SET);
+		u32 buffer[2] = {0};
+		fread(buffer, 1, size, file);
+
+		conf->mobiclipStartOffset = buffer[0];
+		conf->mobiclipEndOffset = buffer[1];
+	}
+
+	fclose(file);
+}
+
 static void loadDSi2DSSavePatch(configuration* conf, const char* bootstrapPath, const char* romTid, const u8 romVersion, const u16 headerCRC) {
 	FILE *file = fopen("nitro:/dsi2dsSavePatches.pck", "rb");
 	if (!file) {
@@ -2063,6 +2133,8 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			if (proceed) {
 				*(u32*)(COLOR_LUT_BUFFERED_LOCATION-4) = 0x54554C63; // 'cLUT'
 				tonccpy((u16*)COLOR_LUT_BUFFERED_LOCATION, VRAM_E, 0x10000);
+
+				loadMobiclipOffsets(conf, bootstrapPath, romTid, romVersion, headerCRC);
 			}
 		}
 	} else {

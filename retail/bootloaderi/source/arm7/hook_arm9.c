@@ -220,6 +220,8 @@ int hookNdsRetailArm9(
 	extern u32 dataToPreloadAddr[4];
 	extern u32 dataToPreloadSize[4];
 	// extern u32 dataToPreloadFrame;
+	extern u32* mobiclipStartOffset;
+	extern u32* mobiclipEndOffset;
 	extern bool colorLutEnabled;
 	extern bool colorLutBlockVCount;
 	extern bool romLocationAdjust(const tNDSHeader* ndsHeader, const bool laterSdk, const bool isSdk5, u32* romLocation);
@@ -291,6 +293,10 @@ int hookNdsRetailArm9(
 	ce9->overlaysSize           = overlaysSize;
 	ce9->romPaddingSize         = romPaddingSize;
 	ce9->consoleModel           = consoleModel;
+	if (colorLutEnabled) {
+		ce9->mobiclipStartOffset = mobiclipStartOffset;
+		ce9->mobiclipEndOffset   = mobiclipEndOffset;
+	}
 
 	if (!ROMinRAM) {
 		//extern bool gbaRomFound;

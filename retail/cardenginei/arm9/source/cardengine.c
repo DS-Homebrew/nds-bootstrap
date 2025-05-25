@@ -739,6 +739,12 @@ void gsddFix2(u32* code) {
 #endif
 #endif
 
+#ifndef GSDD
+void setB(int arg1, int arg2) {
+	*(u32*)arg1 = (((u32)(arg2 - arg1 - 8) >> 2) & 0xFFFFFF) | 0xEA000000;
+}
+#endif
+
 //extern void region2Disable();
 
 // Required for proper access to the extra DSi RAM
@@ -1495,6 +1501,29 @@ void myIrqHandlerIPC(void) {
 					REG_IE |= IRQ_VCOUNT;
 				}
 				applyColorLut(true);
+
+				if (ce9->mobiclipEndOffset) {
+					u32* endOffset = ce9->mobiclipEndOffset;
+					u32* offset = ce9->mobiclipStartOffset;
+					if (
+						endOffset[0] == 0xE25AA002
+					 && endOffset[1] == 0xCAFFFEA1
+					 && endOffset[2] == 0xE28DD018
+					 && endOffset[3] == 0xE8BD9FF0
+					 && offset[0] == 0xE5901004
+					) {
+						// Patch Mobiclip ARM9 overlay code
+						u32* ce9clut = (u32*)CARDENGINEI_ARM9_CLUT_LOCATION;
+
+						offset[0] = 0xE1A0E00F; // mov lr, pc
+						offset[1] = 0xE51FF004; // ldr pc, =saveMobiclipFrameDst
+						offset[2] = ce9clut[2];
+
+						u32 branchOffset = (u32)endOffset;
+						branchOffset += 0xC;
+						setB(branchOffset, ce9clut[3]); // applyColorLutMobiclip
+					}
+				}
 			}
 
 			if (ce9->mainScreen == 1)

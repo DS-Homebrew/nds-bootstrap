@@ -714,6 +714,16 @@ static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, co
 }
 
 void patchMobiclipFrameDraw(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+	extern u32 mobiclipStartOffset;
+	extern u32 mobiclipEndOffset;
+	if (mobiclipStartOffset && mobiclipEndOffset) {
+		// Code is placed within one of the ARM9 overlays, so avoid patching main ARM9 binary
+		dbg_printf("Mobiclip frame draw location (Overlay) : ");
+		dbg_hexa(mobiclipStartOffset-0x2C);
+		dbg_printf("\n\n");
+		return; 
+	}
+
 	u32* endOffset = patchOffsetCache.mobiclipFrameDrawEndOffset;
 	u32* offset = patchOffsetCache.mobiclipFrameDrawOffset;
 
