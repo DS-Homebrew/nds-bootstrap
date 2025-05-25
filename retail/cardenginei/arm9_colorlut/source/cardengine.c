@@ -316,27 +316,19 @@ void applyColorLutBitmap(u32* frameBuffer) {
 	if (flags & twlClock) {
 		for (int i = 0; i < 0x18000/4; i++) {
 			u16* palettes16 = (u16*)frameBuffer;
-			u16 colorSingle = colorTable[palettes16[0] % 0x8000] | BIT(15);
-			// u32 color = colorTable[palettes16[0] % 0x8000] | BIT(15);
-			// color |= (colorTable[palettes16[1] % 0x8000] | BIT(15)) << 16;
-			u32 color = colorSingle; // Cut horizontal resolution in half to speed up process
-			color |= colorSingle << 16;
-			*mobiclipFrameDst++ = color;
+			*mobiclipFrameDst++ = (colorTable[palettes16[0] % 0x8000] | BIT(15)) | (colorTable[palettes16[1] % 0x8000] | BIT(15)) << 16;
 			frameBuffer++;
 		}
 	} else {
+		// Draw frame with halved resolution to slightly speed up process for NTR clock speed
 		int w = 0;
 		for (int i = 0; i < 0xC000/4; i++) {
 			u16* palettes16 = (u16*)frameBuffer;
-			u16 colorSingle = colorTable[palettes16[0] % 0x8000] | BIT(15);
-			// u32 color = colorTable[palettes16[0] % 0x8000] | BIT(15);
-			// color |= (colorTable[palettes16[1] % 0x8000] | BIT(15)) << 16;
-			u32 color = colorSingle; // Cut horizontal resolution in half to speed up process
-			color |= colorSingle << 16;
-			*mobiclipFrameDst++ = color;
+			const u16 colorSingle = colorTable[palettes16[0] % 0x8000] | BIT(15);
+			*mobiclipFrameDst++ = colorSingle | (colorSingle << 16); // Cut horizontal resolution in half
 			frameBuffer++;
 			w++;
-			if (w == 256/2) { // Cut vertical resolution in half for NTR clock speed
+			if (w == 256/2) { // Cut vertical resolution in half
 				dma_twlCopy32Async(3, mobiclipFrameDst-(256/2), mobiclipFrameDst, 256*2);
 				mobiclipFrameDst += w;
 				frameBuffer += w;
