@@ -736,6 +736,11 @@ void patchMobiclipFrameDraw(const tNDSHeader* ndsHeader, const module_params_t* 
 		offset++;
 	}
 
+	if (ndsHeader->unitCode > 0 && dsiModeConfirmed) {
+		arm9_stateFlag = ARM9_WRAMONARM7;
+		while (arm9_stateFlag != ARM9_READY);
+	}
+
 	u32* ce9clut = (u32*)CARDENGINEI_ARM9_CLUT_LOCATION;
 
 	offset[0] = 0xE1A0E00F; // mov lr, pc
@@ -754,6 +759,11 @@ void patchMobiclipFrameDraw(const tNDSHeader* ndsHeader, const module_params_t* 
 	dbg_printf("Mobiclip frame draw location : ");
 	dbg_hexa((u32)patchOffsetCache.mobiclipFrameDrawOffset);
 	dbg_printf("\n\n");
+
+	if (ndsHeader->unitCode > 0 && dsiModeConfirmed) {
+		arm9_stateFlag = ARM9_WRAMONARM9;
+		while (arm9_stateFlag != ARM9_READY);
+	}
 }
 
 static void patchReset(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
