@@ -3,12 +3,14 @@
 // #include <nds/arm9/background.h>
 #include <nds/arm9/video.h>
 #include <nds/system.h>
+#include "dmaTwl.h"
 
 extern u32 flags;
 
 #define invertedColors BIT(0)
 #define noWhiteFade BIT(1)
 #define oneIrqOnly BIT(2)
+#define twlClock BIT(3)
 
 static u16* colorTable = (u16*)0x03770000;
 
@@ -310,14 +312,36 @@ processExtPalettesFunc:
 
 void applyColorLutBitmap(u32* frameBuffer) {
 	extern u32* mobiclipFrameDst;
-	for (int i = 0; i < 0x18000/4; i++) {
-		u16* palettes16 = (u16*)frameBuffer;
-		u16 colorSingle = colorTable[palettes16[0] % 0x8000] | BIT(15);
-		// u32 color = colorTable[palettes16[0] % 0x8000] | BIT(15);
-		// color |= (colorTable[palettes16[1] % 0x8000] | BIT(15)) << 16;
-		u32 color = colorSingle; // Cut horizontal resolution in half to speed up process
-		color |= colorSingle << 16;
-		*mobiclipFrameDst++ = color;
-		frameBuffer++;
+
+	if (flags & twlClock) {
+		for (int i = 0; i < 0x18000/4; i++) {
+			u16* palettes16 = (u16*)frameBuffer;
+			u16 colorSingle = colorTable[palettes16[0] % 0x8000] | BIT(15);
+			// u32 color = colorTable[palettes16[0] % 0x8000] | BIT(15);
+			// color |= (colorTable[palettes16[1] % 0x8000] | BIT(15)) << 16;
+			u32 color = colorSingle; // Cut horizontal resolution in half to speed up process
+			color |= colorSingle << 16;
+			*mobiclipFrameDst++ = color;
+			frameBuffer++;
+		}
+	} else {
+		int w = 0;
+		for (int i = 0; i < 0xC000/4; i++) {
+			u16* palettes16 = (u16*)frameBuffer;
+			u16 colorSingle = colorTable[palettes16[0] % 0x8000] | BIT(15);
+			// u32 color = colorTable[palettes16[0] % 0x8000] | BIT(15);
+			// color |= (colorTable[palettes16[1] % 0x8000] | BIT(15)) << 16;
+			u32 color = colorSingle; // Cut horizontal resolution in half to speed up process
+			color |= colorSingle << 16;
+			*mobiclipFrameDst++ = color;
+			frameBuffer++;
+			w++;
+			if (w == 256/2) { // Cut vertical resolution in half for NTR clock speed
+				dma_twlCopy32Async(3, mobiclipFrameDst-(256/2), mobiclipFrameDst, 256*2);
+				mobiclipFrameDst += w;
+				frameBuffer += w;
+				w = 0;
+			}
+		}
 	}
 }

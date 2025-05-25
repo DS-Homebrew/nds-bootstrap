@@ -1840,6 +1840,10 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 				}
 			}
 
+			if (conf->boostCpu || (unitCode > 0 && conf->dsiMode) || conf->isDSiWare) {
+				flags |= BIT(3);
+			}
+
 			*(u32*)(CARDENGINEI_ARM9_CLUT_BUFFERED_LOCATION+4) = flags;
 		}
 
