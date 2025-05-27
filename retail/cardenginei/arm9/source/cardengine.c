@@ -1510,14 +1510,14 @@ void myIrqHandlerIPC(void) {
 					 && endOffset[1] == 0xCAFFFEA1
 					 && endOffset[2] == 0xE28DD018
 					 && endOffset[3] == 0xE8BD9FF0
-					 && offset[0] == 0xE5901004
+					 && offset[11] == 0xE5901004
 					) {
 						// Patch Mobiclip ARM9 overlay code
 						u32* ce9clut = (u32*)CARDENGINEI_ARM9_CLUT_LOCATION;
 
-						offset[0] = 0xE1A0E00F; // mov lr, pc
-						offset[1] = 0xE51FF004; // ldr pc, =saveMobiclipFrameDst
-						offset[2] = ce9clut[2];
+						offset[11] = 0xE1A0E00F; // mov lr, pc
+						offset[12] = 0xE51FF004; // ldr pc, =saveMobiclipFrameDst
+						offset[13] = ce9clut[2];
 
 						u32 branchOffset = (u32)endOffset;
 						branchOffset += 0xC;
