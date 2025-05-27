@@ -16,6 +16,8 @@ flags:
 .word applyColorLutMobiclip
 
 saveMobiclipFrameDst:
+	adr r11, mobiclipFrameHeight
+	str r10, [r11]
 	ldr r1, [r0,#4]
 	ldr r2, [r0,#8]
 	adr r11, mobiclipFrameDst
@@ -24,6 +26,9 @@ saveMobiclipFrameDst:
 	ldr r0, [r0]
 	add lr, #4
 	bx lr
+.global mobiclipFrameHeight
+mobiclipFrameHeight:
+.word 0
 .global mobiclipFrameDst
 mobiclipFrameDst:
 .word 0
@@ -31,7 +36,6 @@ mobiclipFrameDst:
 
 applyColorLutMobiclip:
 	mov r0, r2
-	sub r0, #0x18000
 	bl applyColorLutBitmap
 	ldmfd sp!, {r4-r12,pc}
 

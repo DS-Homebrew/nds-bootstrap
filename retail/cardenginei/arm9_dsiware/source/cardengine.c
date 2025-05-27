@@ -224,7 +224,7 @@ void reset(u32 tid1, u32 tid2) {
 }
 
 static inline void applyColorLut(bool processExtPalettes) {
-	if (*(u32*)CARDENGINEI_ARM9_CLUT_LOCATION != 0xEA000010) {
+	if (*(u32*)CARDENGINEI_ARM9_CLUT_LOCATION != 0xEA000012) {
 		return;
 	}
 

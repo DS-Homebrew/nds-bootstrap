@@ -311,10 +311,13 @@ processExtPalettesFunc:
 }
 
 void applyColorLutBitmap(u32* frameBuffer) {
+	extern u32 mobiclipFrameHeight;
 	extern u32* mobiclipFrameDst;
 
+	frameBuffer -= (256/2)*mobiclipFrameHeight;
+
 	if (flags & twlClock) {
-		for (int i = 0; i < 0x18000/4; i++) {
+		for (int i = 0; i < (256/2)*mobiclipFrameHeight; i++) {
 			u16* palettes16 = (u16*)frameBuffer;
 			*mobiclipFrameDst++ = (colorTable[palettes16[0] % 0x8000] | BIT(15)) | (colorTable[palettes16[1] % 0x8000] | BIT(15)) << 16;
 			frameBuffer++;
@@ -322,7 +325,7 @@ void applyColorLutBitmap(u32* frameBuffer) {
 	} else {
 		// Draw frame with halved resolution to slightly speed up process for NTR clock speed
 		int w = 0;
-		for (int i = 0; i < 0xC000/4; i++) {
+		for (int i = 0; i < (256/2)*(mobiclipFrameHeight/2); i++) {
 			u16* palettes16 = (u16*)frameBuffer;
 			const u16 colorSingle = colorTable[palettes16[0] % 0x8000] | BIT(15);
 			*mobiclipFrameDst++ = colorSingle | (colorSingle << 16); // Cut horizontal resolution in half
