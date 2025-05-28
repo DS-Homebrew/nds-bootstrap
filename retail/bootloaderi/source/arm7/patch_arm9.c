@@ -758,11 +758,15 @@ void patchMobiclipFrameDraw(const tNDSHeader* ndsHeader, const module_params_t* 
 	offset[2] = ce9clut[2];
 
 	const u32 applyColorLutMobiclip = ce9clut[3];
-	if (endOffset[3] == 0xE8BD9FF0) {
+	if (endOffset[3] == 0xE8BD9FF0) { // Mobiclip
 		u32 branchOffset = (u32)endOffset;
 		branchOffset += 0xC;
 		setB(branchOffset, applyColorLutMobiclip);
-	} else {
+	} else if (endOffset[3] == 0xE12FFF1E) { // Actimagine (Alt)
+		offset[2] -= 4;
+		endOffset[2] = 0xE51FF004; // ldr pc, =applyColorLutMobiclip
+		endOffset[3] = applyColorLutMobiclip;
+	} else { // Actimagine
 		endOffset[3] = 0xE51FF004; // ldr pc, =applyColorLutMobiclip
 		endOffset[4] = applyColorLutMobiclip;
 	}

@@ -24,6 +24,7 @@
 #include "cardengine_header_arm9.h"
 #include "patch.h"
 #include "common.h"
+#include "locations.h"
 #include "tonccpy.h"
 #include "loading_screen.h"
 #include "debug_file.h"
@@ -1115,7 +1116,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02031234, (u32)dsiSaveCreate);
 		setBL(0x02031260, (u32)dsiSaveOpen);
 		setBL(0x0203129C, (u32)dsiSaveWrite);
-		setBL(0x020312AC, (u32)dsiSaveClose); 
+		setBL(0x020312AC, (u32)dsiSaveClose);
 	} */
 
 	// 99Bullets (Japan)
@@ -3536,7 +3537,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			saveFuncOffsets[18] = (u32*)0x0205C954;
 			saveFuncOffsets[19] = (u32*)0x0205C95C;
 			saveFuncOffsets[20] = (u32*)0x0205C9BC;
-			saveFuncOffsets[21] = (u32*)0x0205C9D4; 
+			saveFuncOffsets[21] = (u32*)0x0205C9D4;
 		}
 
 		setBL((u32)saveFuncOffsets[0], (u32)dsiSaveOpen);
@@ -11224,7 +11225,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 			// Disable NFTR loading from TWLNAND
 			*(u32*)0x02045264 = 0xE1A00000; // nop
-			*(u32*)0x02045268 = 0xE1A00000; // nop 
+			*(u32*)0x02045268 = 0xE1A00000; // nop
 			*(u32*)0x02045270 = 0xE1A00000; // nop
 			*(u32*)0x0204527C = 0xE1A00000; // nop
 			*(u32*)0x02045290 = 0xE1A00000; // nop
@@ -15846,7 +15847,20 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
 		// Fix not enough memory error
 		*(u32*)0x0204CDBC = 0xe1a00000; //nop
 	}
-	
+
+	// Castlevania: Dawn of Sorrow (USA)
+	// Akumajou Dracula: Sougetsu no Juujika (Japan)
+	else if ((strcmp(romTid, "ACVE") == 0 || strcmp(romTid, "ACVJ") == 0) && colorLutEnabled) {
+		u32* ce9clut = (u32*)CARDENGINEI_ARM9_CLUT_LOCATION;
+		setBL(0x02001AA8, ce9clut[4]);
+	}
+
+	// Castlevania: Dawn of Sorrow (Europe)
+	else if (strcmp(romTid, "ACVP") == 0 && colorLutEnabled) {
+		u32* ce9clut = (u32*)CARDENGINEI_ARM9_CLUT_LOCATION;
+		setBL(0x02001AFC, ce9clut[4]);
+	}
+
 	// Castlevania - Portrait of Ruin (USA)
 	else if (strcmp(romTid, "ACBE") == 0) {
 		*(u32*)0x02007910 = 0xeb02508e;
@@ -15857,7 +15871,7 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
 		*(u32*)0x02007a10 = 0xe0281097;
 		*(u32*)0x02007a14 = 0xea000003;
 	}
-	
+
 	// Akumajou Dracula - Gallery of Labyrinth (Japan)
 	else if (strcmp(romTid, "ACBJ") == 0) {
 		if (ndsHeader->romversion == 0) {
@@ -15875,7 +15889,7 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
 			*(u32*)0x0200762C += 0xd0000000; // bne -> b
 		}
 	}
-	
+
 	// Castlevania - Portrait of Ruin (Europe) (En,Fr,De,Es,It)
 	else if (strcmp(romTid, "ACBP") == 0) {
 		*(u32*)0x02007b00 = 0xeb025370;
@@ -15908,7 +15922,7 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
 		*(u32*)0x02000bd4 = 0xe8bd8ff8;
 		*(u32*)0x0207af40 = 0xebfe271e;
 	}
-	
+
 	// Power Rangers - Samurai (USA) (En,Fr,Es)
 	else if (strcmp(romTid, "B3NE") == 0) {
 		*(u32*)0x02060608 = 0xe3a00001; //mov r0, #1
@@ -15939,9 +15953,9 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
 		*(u32*)0x0200059c = 0x020f83f4;
 		*(u32*)0x020005a0 = 0x0000b975;
 		*(u32*)0x020005a4 = 0x0000c127;
-		*(u32*)0x020005a8 = 0x02105498; 
+		*(u32*)0x020005a8 = 0x02105498;
 		*(u32*)0x020005ac = 0x02105179;
-		*(u32*)0x020005b0 = 0x0200162d; 
+		*(u32*)0x020005b0 = 0x0200162d;
 		*(u32*)0x020005b4 = 0x0210c030;
 		*(u32*)0x020005b8 = 0x0210bd11;
 		*(u32*)0x020005bc = 0x0200162d;
@@ -15975,7 +15989,7 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
 		*(u32*)0x023fc028 = 0x6018a355; // andvss r10, r8, r5, asr r3
 		*(u32*)0x023fc02c = 0x609a6059; // addvss r6, r10, r9, asr r0
 		*(u32*)0x023fc030 = 0x60dc2401; // sbcvss r2, r12, r1, lsl #8
-		*(u32*)0x023fc034 = 0x4718bcff; // 
+		*(u32*)0x023fc034 = 0x4718bcff; //
 		*(u32*)0x023fc038 = 0x020c30dc; // andeq r3 ,r12, #dc
 		*(u32*)0x023fc03c = 0xe2810001; // add r0 , r1, #1
 		*(u32*)0x023fc040 = 0xe92d401f; // stmdb sp!, {r0-r4,lr}
@@ -16031,14 +16045,14 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
 		*(u32*)0x023fc108 = 0x1c283578; // stcne cp5, cr3, [r8], #-1e0
 		*(u32*)0x023fc10c = 0xf41e2100; // ldr r2, [lr], #-100
 		*(u32*)0x023fc110 = 0x6170fa53; // cmnvs r0, r3, asr r10
-		*(u32*)0x023fc114 = 0x006061b4; // 
+		*(u32*)0x023fc114 = 0x006061b4; //
 		*(u32*)0x023fc118 = 0x35786230; // ldrbcc r6, [r8, -#230]!
-		*(u32*)0x023fc11c = 0x21001c28; // 
+		*(u32*)0x023fc11c = 0x21001c28; //
 		*(u32*)0x023fc120 = 0xfa4af41e; // blx 0331d1a0
 		*(u32*)0x023fc124 = 0x62b46270; // adcvss r6, r4, #7
 		*(u32*)0x023fc128 = 0x19000060; // stmdbne r0, {r5-r6}
 		*(u32*)0x023fc12c = 0x35786330; // ldrbcc r6, [r8, -#330]!
-		*(u32*)0x023fc130 = 0x21001c28; // 
+		*(u32*)0x023fc130 = 0x21001c28; //
 		*(u32*)0x023fc134 = 0xfa40f41e; // blx 0309d1b4
 		*(u32*)0x023fc138 = 0x63b46370; // movvss r6, #c0000001
 		*(u32*)0x023fc13c = 0x60f42402; // rscvss r2, r4, r2, lsl #8
@@ -16075,20 +16089,20 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
 	//else if (strcmp(romTid, "APDE") == 0 || strcmp(romTid, "APDP") == 0) {
         /*unsigned char pdash_patch_chars[64] =
         {
-          0xFE, 0x40, 0x2D, 0xE9, 
-          0x28, 0x10, 0xA0, 0xE3, 
-          0x00, 0x20, 0xA0, 0xE3, 
-          0x24, 0x30, 0x9F, 0xE5, 
-          0x02, 0x40, 0x90, 0xE7, 
-          0x02, 0x40, 0x83, 0xE7, 
-          0x04, 0x20, 0x82, 0xE2, 
-          0x01, 0x00, 0x52, 0xE1, 
-          0xFA, 0xFF, 0xFF, 0x1A, 
-          0x10, 0x30, 0x9F, 0xE5, 
-          0x33, 0xFF, 0x2F, 0xE1, 
-          0xFE, 0x80, 0xBD, 0xE8, 
-          0x01, 0x00, 0xA0, 0xE3, 
-          0x1E, 0xFF, 0x2F, 0xE1, 
+          0xFE, 0x40, 0x2D, 0xE9,
+          0x28, 0x10, 0xA0, 0xE3,
+          0x00, 0x20, 0xA0, 0xE3,
+          0x24, 0x30, 0x9F, 0xE5,
+          0x02, 0x40, 0x90, 0xE7,
+          0x02, 0x40, 0x83, 0xE7,
+          0x04, 0x20, 0x82, 0xE2,
+          0x01, 0x00, 0x52, 0xE1,
+          0xFA, 0xFF, 0xFF, 0x1A,
+          0x10, 0x30, 0x9F, 0xE5,
+          0x33, 0xFF, 0x2F, 0xE1,
+          0xFE, 0x80, 0xBD, 0xE8,
+          0x01, 0x00, 0xA0, 0xE3,
+          0x1E, 0xFF, 0x2F, 0xE1,
           0x00, 0xA6, 0x0D, 0x02,              d
           0x78, 0x47, 0x0A, 0x02
         };
@@ -16115,10 +16129,10 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
         // r10 : cardstruct
 
         for(int i =0; i<64; i++) {
-            *(((u8*)0x0206D2C4)+i) = pdash_patch_chars[i];    
+            *(((u8*)0x0206D2C4)+i) = pdash_patch_chars[i];
         }*/
 
-        // *((u32*)0x02000BB0) = 0xE1A00000; //nop 
+        // *((u32*)0x02000BB0) = 0xE1A00000; //nop
 
 		// *(u32*)0x0206D2C4 = 0xE3A00000; //mov r0, #0
         // *(u32*)0x0206D2C4 = 0xE3A00001; //mov r0, #1
@@ -16962,7 +16976,7 @@ u32 patchCardNds(
 	}
 
 	u32 errorCodeArm9 = patchCardNdsArm9(ce9, ndsHeader, moduleParams, ltdModuleParams, ROMinRAM, patchMpuRegion, usesCloneboot);
-	
+
 	if (errorCodeArm9 == ERR_NONE || ndsHeader->fatSize == 0) {
 		return patchCardNdsArm7(ce7, ndsHeader, moduleParams, ROMinRAM, saveFileCluster, saveSize);
 	}

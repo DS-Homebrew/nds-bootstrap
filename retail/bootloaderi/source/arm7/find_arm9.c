@@ -263,9 +263,11 @@ static const u32 initHeapEndFuncISignatureDebug[2]     = {0xE3A007BE, 0xEA000043
 static const u32 initHeapEndFuncISignatureThumb[1]     = {0x048020BE};
 
 // Actimagine/Mobiclip
-static const u32 actimagineFrameDrawStartSignature[4] = {0xE92D5FF0, 0xE590800C, 0xE5909010, 0xE590A014};
-static const u32 actimagineFrameDrawEndSignature[5]   = {0xE25AA002, 0xCAFFFEB9, 0xE8BD07E0, 0xE8BD5FF0, 0xE12FFF1E};
-static const u32 mobiclipFrameDrawEndSignature[4]     = {0xE25AA002, 0xCAFFFEA1, 0xE28DD018, 0xE8BD9FF0};
+static const u32 actimagineFrameDrawStartSignature[4]    = {0xE92D5FF0, 0xE590800C, 0xE5909010, 0xE590A014};
+static const u32 actimagineFrameDrawStartSignatureAlt[5] = {0xE92D5FF0, 0xE5901004, 0xE5902008, 0xE5900000, 0xE59F3514};
+static const u32 actimagineFrameDrawEndSignature[5]      = {0xE25AA002, 0xCAFFFEB9, 0xE8BD07E0, 0xE8BD5FF0, 0xE12FFF1E};
+static const u32 actimagineFrameDrawEndSignatureAlt[4]   = {0xE25AA002, 0xCAFFFEBD, 0xE8BD5FF0, 0xE12FFF1E};
+static const u32 mobiclipFrameDrawEndSignature[4]        = {0xE25AA002, 0xCAFFFEA1, 0xE28DD018, 0xE8BD9FF0};
 
 // Reset
 static const u32 resetSignature2[4]     = {0xE92D4030, 0xE24DD004, 0xE59F1090, 0xE1A05000}; // sdk2
@@ -2970,6 +2972,12 @@ u32* findMobiclipFrameDrawEndOffset(const tNDSHeader* ndsHeader, const module_pa
 			(u32*)ndsHeader->arm9destination, iUncompressedSize,
 			actimagineFrameDrawEndSignature, 5
 		);
+		if (!offset) {
+			offset = findOffset(
+				(u32*)ndsHeader->arm9destination, iUncompressedSize,
+				actimagineFrameDrawEndSignatureAlt, 4
+			);
+		}
 
 		if (offset) {
 			dbg_printf("Actimagine frame draw end found\n");
@@ -3004,6 +3012,12 @@ u32* findMobiclipFrameDrawStartOffset(const u32* endOffset) {
 		endOffset, 0x600,
 		actimagineFrameDrawStartSignature, 4
 	);
+	if (!offset) {
+		offset = findOffsetBackwards(
+			endOffset, 0x600,
+			actimagineFrameDrawStartSignatureAlt, 5
+		);
+	}
 
 	dbg_printf("Actimagine/Mobiclip frame draw start ");
 	if (offset) {
