@@ -1069,7 +1069,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		}
 	}
 
-	if (!dsiFeatures() || conf->b4dsMode) {
+	if (dsiFeatures() && !conf->b4dsMode) {
 		loadColorLut(conf->bootstrapOnFlashcard, conf->phatColors);
 	}
 
