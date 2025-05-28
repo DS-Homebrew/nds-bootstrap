@@ -586,6 +586,7 @@ static void loadColorLut(const bool isRunFromFlashcard, const bool phatColors) {
 
 		vramSetBankE(VRAM_E_LCD);
 		tonccpy(VRAM_E, lz77ImageBuffer, 0x10000); // Copy LUT to VRAM
+		tonccpy((u16*)COLOR_LUT_BUFFERED_LOCATION, lz77ImageBuffer, 0x10000);
 
 		colorTable = true;
 	}
@@ -1068,7 +1069,8 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		}
 	}
 
-	loadColorLut(conf->bootstrapOnFlashcard, conf->phatColors && dsiFeatures() && !conf->b4dsMode);
+	const bool phatColorsConfirmed = (conf->phatColors && dsiFeatures() && !conf->b4dsMode);
+	loadColorLut(conf->bootstrapOnFlashcard, phatColorsConfirmed);
 
 	if (conf->boostVram) {
 		conf->valueBits |= BIT(1);
@@ -1894,6 +1896,24 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		if (colorTable) {
 			loadCardEngineBinary("nitro:/cardenginei_arm9_colorlut.bin", (u8*)CARDENGINEI_ARM9_CLUT_BUFFERED_LOCATION);
 
+			if (invertedColors || noWhiteFade) {
+				for (unsigned int i = 0; i < sizeof(colorLutMasterBrightBlacklist)/sizeof(colorLutMasterBrightBlacklist[0]); i++) {
+					if (memcmp(romTid, colorLutMasterBrightBlacklist[i], 3) == 0) {
+						// Found match
+						invertedColors = false;
+						noWhiteFade = false;
+
+						if (phatColorsConfirmed) {
+							tonccpy(VRAM_E, (u16*)COLOR_LUT_BUFFERED_LOCATION, 0x10000); // Restore phat colors with no existing LUT applied
+						} else colorTable = false;
+
+						break;
+					}
+				}
+			}
+		}
+
+		if (colorTable) {
 			u32 flags = 0;
 			if (invertedColors) {
 				flags |= BIT(0);
