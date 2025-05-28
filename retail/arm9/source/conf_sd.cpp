@@ -1069,8 +1069,9 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		}
 	}
 
-	const bool phatColorsConfirmed = (conf->phatColors && dsiFeatures() && !conf->b4dsMode);
-	loadColorLut(conf->bootstrapOnFlashcard, phatColorsConfirmed);
+	if (!dsiFeatures() || conf->b4dsMode) {
+		loadColorLut(conf->bootstrapOnFlashcard, conf->phatColors);
+	}
 
 	if (conf->boostVram) {
 		conf->valueBits |= BIT(1);
@@ -1903,12 +1904,23 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 						invertedColors = false;
 						noWhiteFade = false;
 
-						if (phatColorsConfirmed) {
+						if (conf->phatColors) {
 							tonccpy(VRAM_E, (u16*)COLOR_LUT_BUFFERED_LOCATION, 0x10000); // Restore phat colors with no existing LUT applied
 						} else colorTable = false;
 
 						break;
 					}
+				}
+			}
+		}
+
+		if (colorTable) {
+			// TODO: If the list gets large enough, switch to bsearch().
+			for (unsigned int i = 0; i < sizeof(colorLutBlacklist)/sizeof(colorLutBlacklist[0]); i++) {
+				if (memcmp(romTid, colorLutBlacklist[i], 3) == 0) {
+					// Found match
+					colorTable = false;
+					break;
 				}
 			}
 		}
@@ -2140,22 +2152,10 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		}
 
 		if (colorTable) {
-			bool proceed = true;
-			// TODO: If the list gets large enough, switch to bsearch().
-			for (unsigned int i = 0; i < sizeof(colorLutBlacklist)/sizeof(colorLutBlacklist[0]); i++) {
-				if (memcmp(romTid, colorLutBlacklist[i], 3) == 0) {
-					// Found match
-					proceed = false;
-					break;
-				}
-			}
+			*(u32*)(COLOR_LUT_BUFFERED_LOCATION-4) = 0x54554C63; // 'cLUT'
+			tonccpy((u16*)COLOR_LUT_BUFFERED_LOCATION, VRAM_E, 0x10000);
 
-			if (proceed) {
-				*(u32*)(COLOR_LUT_BUFFERED_LOCATION-4) = 0x54554C63; // 'cLUT'
-				tonccpy((u16*)COLOR_LUT_BUFFERED_LOCATION, VRAM_E, 0x10000);
-
-				loadMobiclipOffsets(conf, bootstrapPath, romTid, romVersion, headerCRC);
-			}
+			loadMobiclipOffsets(conf, bootstrapPath, romTid, romVersion, headerCRC);
 		}
 	} else {
 		if (accessControl & BIT(4)) {
@@ -2336,13 +2336,6 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			}
 
 			cebin = fopen(pageFilePath.c_str(), "r+");
-			if (colorTable) {
-				u16* igmPals = (u16*)igmText;
-				igmPals += IGM_PALS/2;
-				for (int i = 0; i < 8; i++) {
-					igmPals[i] = VRAM_E[igmPals[i] % 0x8000];
-				}
-			}
 			fwrite((u8*)igmText, 1, 0xA000, cebin);
 			fclose(cebin);
 			toncset((u8*)igmText, 0, 0xA000);
@@ -2579,12 +2572,6 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		if (bootstrapImages) {
 			fread(lz77ImageBuffer, 1, sizeof_lz77ImageBuffer, bootstrapImages);
 			LZ77_Decompress(lz77ImageBuffer, (u8*)IMAGES_LOCATION+0x18000);
-			if (colorTable) {
-				u16* buffer = (u16*)IMAGES_LOCATION+(0x18000/2);
-				for (int i = 0; i < (256*192)*2; i++) {
-					buffer[i] = VRAM_E[buffer[i] % 0x8000] | BIT(15);
-				}
-			}
 		}
 		fclose(bootstrapImages);
 
@@ -2627,12 +2614,6 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 				delete[] bmpImageBuffer;*/
 				fread((u16*)IMAGES_LOCATION, 1, 0x18000, bootstrapImages);
-				if (colorTable) {
-					u16* buffer = (u16*)IMAGES_LOCATION;
-					for (int i = 0; i < 256*192; i++) {
-						buffer[i] = VRAM_E[buffer[i] % 0x8000] | BIT(15);
-					}
-				}
 			} else {
 				toncset16((u16*)IMAGES_LOCATION, 0, 256*192);
 			}
