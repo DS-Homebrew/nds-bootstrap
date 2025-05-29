@@ -888,7 +888,7 @@ static bool isROMLoadableInRAM(const tDSiHeader* dsiHeader, const tNDSHeader* nd
 	) {
 		const bool twlType = (ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed);
 		const bool cheatsEnabled = (cheatSizeTotal > 4 && cheatSizeTotal <= 0x8000);
-		u32 wramSize = (dsiWramAccess && !dsiWramMirrored) ? (colorLutEnabled ? 0x32C00 : 0x80000) : 0;
+		u32 wramSize = (dsiWramAccess && !dsiWramMirrored) ? (colorLutEnabled ? 0x32800 : 0x80000) : 0;
 		if (ce7Location == CARDENGINEI_ARM7_LOCATION) {
 			wramSize += 0x8000; // Shared 32KB of WRAM is available for ARM9 to use
 			sharedWramEnabled = true;
@@ -1277,7 +1277,7 @@ static void loadNitroFileInfoIntoRAM(const tNDSHeader* ndsHeader, aFile* romFile
 	if (baseFatSize == 0) return;
 
 	const u32 size = (baseFatOff-baseFntOff)+baseFatSize;
-	if (size > (colorLutEnabled ? 0x32C00 : 0x80000)) return;
+	if (size > (colorLutEnabled ? 0x32800 : 0x80000)) return;
 
 	sdmmc_set_ndma_slot(0);
 	fileRead((char*)0x03700000, romFile, baseFntOff, size);
@@ -1935,7 +1935,7 @@ int arm7_main(void) {
 			arm9_stateFlag = ARM9_WRAMONARM7;
 			while (arm9_stateFlag != ARM9_READY);
 
-			tonccpy((u32*)CARDENGINEI_ARM9_CLUT_LOCATION, (u16*)CARDENGINEI_ARM9_CLUT_BUFFERED_LOCATION, 0xC00);
+			tonccpy((u32*)CARDENGINEI_ARM9_CLUT_LOCATION, (u16*)CARDENGINEI_ARM9_CLUT_BUFFERED_LOCATION, 0x1000);
 			tonccpy((u16*)0x03770000, (u16*)COLOR_LUT_BUFFERED_LOCATION, 0x10000);
 			colorLutEnabled = (*(u32*)CARDENGINEI_ARM9_CLUT_LOCATION == *(u32*)CARDENGINEI_ARM9_CLUT_BUFFERED_LOCATION);
 			colorLutBlockVCount = colorLutEnabled && (*(u32*)(CARDENGINEI_ARM9_CLUT_LOCATION+4) & BIT(2));
@@ -2290,7 +2290,7 @@ int arm7_main(void) {
 				while (arm9_stateFlag != ARM9_READY);
 			}
 
-			tonccpy((u32*)CARDENGINEI_ARM9_CLUT_LOCATION, (u16*)CARDENGINEI_ARM9_CLUT_BUFFERED_LOCATION, 0xC00);
+			tonccpy((u32*)CARDENGINEI_ARM9_CLUT_LOCATION, (u16*)CARDENGINEI_ARM9_CLUT_BUFFERED_LOCATION, 0x1000);
 			tonccpy((u16*)0x03770000, (u16*)COLOR_LUT_BUFFERED_LOCATION, 0x10000);
 			colorLutEnabled = (*(u32*)CARDENGINEI_ARM9_CLUT_LOCATION == *(u32*)CARDENGINEI_ARM9_CLUT_BUFFERED_LOCATION);
 			colorLutBlockVCount = colorLutEnabled && (*(u32*)(CARDENGINEI_ARM9_CLUT_LOCATION+4) & BIT(2));

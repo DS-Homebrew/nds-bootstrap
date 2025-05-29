@@ -89,19 +89,30 @@ void applyColorLut(bool processExtPalettes) {
 		}
 	}
 
-	for (int i = 0; i < 0x800/4; i++) {
-		if (*storedPals != *palettes) {
-			u16* storedPals16 = (u16*)storedPals;
-			u16* palettes16 = (u16*)palettes;
-			for (int p = 0; p < 2; p++) {
-				if (storedPals16[p] != palettes16[p]) {
-					palettes16[p] = colorTable[palettes16[p] % 0x8000];
-					storedPals16[p] = palettes16[p];
+	static bool initialized = false;
+	if (!initialized) {
+		u16* storedPals16 = (u16*)storedPals;
+		u16* palettes16 = (u16*)palettes;
+		for (int i = 0; i < 0x800/2; i++) {
+			palettes16[i] = colorTable[palettes16[i] % 0x8000];
+			storedPals16[i] = palettes16[i];
+		}
+		initialized = true;
+	} else {
+		for (int i = 0; i < 0x800/4; i++) {
+			if (*storedPals != *palettes) {
+				u16* storedPals16 = (u16*)storedPals;
+				u16* palettes16 = (u16*)palettes;
+				for (int p = 0; p < 2; p++) {
+					if (storedPals16[p] != palettes16[p]) {
+						palettes16[p] = colorTable[palettes16[p] % 0x8000];
+						storedPals16[p] = palettes16[p];
+					}
 				}
 			}
+			storedPals++;
+			palettes++;
 		}
-		storedPals++;
-		palettes++;
 	}
 	if (!(flags & oneIrqOnly)) return;
 
@@ -115,26 +126,39 @@ processExtPalettesFunc:
 	}
 	if (vramCr == 0x83 || vramCr == 0x84) { // 3dTexPal/BgPalA
 		u8 vramCnt = VRAM_E_CR;
+		static u8 initialized = 0;
 		static int block = 0;
 		storedPals = (u32*)0x0374C000+(block*(0x2000/4));
 		palettes = (u32*)0x06880000+(block*(0x2000/4));
 
-		VRAM_E_CR = 0x80;
-		for (int i = 0; i < 0x2000/4; i++) {
-			if (*storedPals != *palettes) {
-				u16* storedPals16 = (u16*)storedPals;
-				u16* palettes16 = (u16*)palettes;
-				for (int p = 0; p < 2; p++) {
-					if (storedPals[p] != palettes16[p]) {
-						palettes16[p] = colorTable[palettes16[p] % 0x8000];
-						storedPals16[p] = palettes16[p];
+		if (!(initialized & BIT(block))) {
+			VRAM_E_CR = 0x80;
+			u16* storedPals16 = (u16*)storedPals;
+			u16* palettes16 = (u16*)palettes;
+			for (int i = 0; i < 0x2000/2; i++) {
+				palettes16[i] = colorTable[palettes16[i] % 0x8000];
+				storedPals16[i] = palettes16[i];
+			}
+			VRAM_E_CR = vramCnt;
+			initialized |= BIT(block);
+		} else {
+			VRAM_E_CR = 0x80;
+			for (int i = 0; i < 0x2000/4; i++) {
+				if (*storedPals != *palettes) {
+					u16* storedPals16 = (u16*)storedPals;
+					u16* palettes16 = (u16*)palettes;
+					for (int p = 0; p < 2; p++) {
+						if (storedPals[p] != palettes16[p]) {
+							palettes16[p] = colorTable[palettes16[p] % 0x8000];
+							storedPals16[p] = palettes16[p];
+						}
 					}
 				}
+				storedPals++;
+				palettes++;
 			}
-			storedPals++;
-			palettes++;
+			VRAM_E_CR = vramCnt;
 		}
-		VRAM_E_CR = vramCnt;
 
 		block++;
 		if (block == 8) block = 0;
@@ -149,26 +173,39 @@ processExtPalettesFunc:
 	}
 	if (vramCr >= 0x83 && vramCr <= 0x85) { // 3dTexPal/BgPalA/ObjPalA
 		u8 vramCnt = VRAM_F_CR;
+		static u8 initialized = 0;
 		static int block = 0;
 		storedPals = (u32*)0x0375C000+(block*(0x2000/4));
 		palettes = (u32*)0x06890000+(block*(0x2000/4));
 
-		VRAM_F_CR = 0x80;
-		for (int i = 0; i < 0x2000/4; i++) {
-			if (*storedPals != *palettes) {
-				u16* storedPals16 = (u16*)storedPals;
-				u16* palettes16 = (u16*)palettes;
-				for (int p = 0; p < 2; p++) {
-					if (storedPals[p] != palettes16[p]) {
-						palettes16[p] = colorTable[palettes16[p] % 0x8000];
-						storedPals16[p] = palettes16[p];
+		if (!(initialized & BIT(block))) {
+			VRAM_F_CR = 0x80;
+			u16* storedPals16 = (u16*)storedPals;
+			u16* palettes16 = (u16*)palettes;
+			for (int i = 0; i < 0x2000/2; i++) {
+				palettes16[i] = colorTable[palettes16[i] % 0x8000];
+				storedPals16[i] = palettes16[i];
+			}
+			VRAM_F_CR = vramCnt;
+			initialized |= BIT(block);
+		} else {
+			VRAM_F_CR = 0x80;
+			for (int i = 0; i < 0x2000/4; i++) {
+				if (*storedPals != *palettes) {
+					u16* storedPals16 = (u16*)storedPals;
+					u16* palettes16 = (u16*)palettes;
+					for (int p = 0; p < 2; p++) {
+						if (storedPals[p] != palettes16[p]) {
+							palettes16[p] = colorTable[palettes16[p] % 0x8000];
+							storedPals16[p] = palettes16[p];
+						}
 					}
 				}
+				storedPals++;
+				palettes++;
 			}
-			storedPals++;
-			palettes++;
+			VRAM_F_CR = vramCnt;
 		}
-		VRAM_F_CR = vramCnt;
 
 		block++;
 		if (block == 2) block = 0;
@@ -183,26 +220,39 @@ processExtPalettesFunc:
 	}
 	if (vramCr >= 0x83 && vramCr <= 0x85) { // 3dTexPal/BgPalA/ObjPalA
 		u8 vramCnt = VRAM_G_CR;
+		static u8 initialized = 0;
 		static int block = 0;
 		storedPals = (u32*)0x03760000+(block*(0x2000/4));
 		palettes = (u32*)0x06894000+(block*(0x2000/4));
 
-		VRAM_G_CR = 0x80;
-		for (int i = 0; i < 0x2000/4; i++) {
-			if (*storedPals != *palettes) {
-				u16* storedPals16 = (u16*)storedPals;
-				u16* palettes16 = (u16*)palettes;
-				for (int p = 0; p < 2; p++) {
-					if (storedPals[p] != palettes16[p]) {
-						palettes16[p] = colorTable[palettes16[p] % 0x8000];
-						storedPals16[p] = palettes16[p];
+		if (!(initialized & BIT(block))) {
+			VRAM_G_CR = 0x80;
+			u16* storedPals16 = (u16*)storedPals;
+			u16* palettes16 = (u16*)palettes;
+			for (int i = 0; i < 0x2000/2; i++) {
+				palettes16[i] = colorTable[palettes16[i] % 0x8000];
+				storedPals16[i] = palettes16[i];
+			}
+			VRAM_G_CR = vramCnt;
+			initialized |= BIT(block);
+		} else {
+			VRAM_G_CR = 0x80;
+			for (int i = 0; i < 0x2000/4; i++) {
+				if (*storedPals != *palettes) {
+					u16* storedPals16 = (u16*)storedPals;
+					u16* palettes16 = (u16*)palettes;
+					for (int p = 0; p < 2; p++) {
+						if (storedPals[p] != palettes16[p]) {
+							palettes16[p] = colorTable[palettes16[p] % 0x8000];
+							storedPals16[p] = palettes16[p];
+						}
 					}
 				}
+				storedPals++;
+				palettes++;
 			}
-			storedPals++;
-			palettes++;
+			VRAM_G_CR = vramCnt;
 		}
-		VRAM_G_CR = vramCnt;
 
 		block++;
 		if (block == 2) block = 0;
@@ -217,26 +267,39 @@ processExtPalettesFunc:
 	}
 	if (vramCr == 0x82) { // BgPalB
 		u8 vramCnt = VRAM_H_CR;
+		static u8 initialized = 0;
 		static int block = 0;
 		storedPals = (u32*)0x03764000+(block*(0x2000/4));
 		palettes = (u32*)0x06898000+(block*(0x2000/4));
 
-		VRAM_H_CR = 0x80;
-		for (int i = 0; i < 0x2000/4; i++) {
-			if (*storedPals != *palettes) {
-				u16* storedPals16 = (u16*)storedPals;
-				u16* palettes16 = (u16*)palettes;
-				for (int p = 0; p < 2; p++) {
-					if (storedPals[p] != palettes16[p]) {
-						palettes16[p] = colorTable[palettes16[p] % 0x8000];
-						storedPals16[p] = palettes16[p];
+		if (!(initialized & BIT(block))) {
+			VRAM_H_CR = 0x80;
+			u16* storedPals16 = (u16*)storedPals;
+			u16* palettes16 = (u16*)palettes;
+			for (int i = 0; i < 0x2000/2; i++) {
+				palettes16[i] = colorTable[palettes16[i] % 0x8000];
+				storedPals16[i] = palettes16[i];
+			}
+			VRAM_H_CR = vramCnt;
+			initialized |= BIT(block);
+		} else {
+			VRAM_H_CR = 0x80;
+			for (int i = 0; i < 0x2000/4; i++) {
+				if (*storedPals != *palettes) {
+					u16* storedPals16 = (u16*)storedPals;
+					u16* palettes16 = (u16*)palettes;
+					for (int p = 0; p < 2; p++) {
+						if (storedPals[p] != palettes16[p]) {
+							palettes16[p] = colorTable[palettes16[p] % 0x8000];
+							storedPals16[p] = palettes16[p];
+						}
 					}
 				}
+				storedPals++;
+				palettes++;
 			}
-			storedPals++;
-			palettes++;
+			VRAM_H_CR = vramCnt;
 		}
-		VRAM_H_CR = vramCnt;
 
 		block++;
 		if (block == 4) block = 0;
@@ -251,26 +314,39 @@ processExtPalettesFunc:
 	}
 	if (vramCr == 0x83) { // ObjPalB
 		u8 vramCnt = VRAM_I_CR;
+		static u8 initialized = 0;
 		static int block = 0;
 		storedPals = (u32*)0x0376C000+(block*(0x2000/4));
 		palettes = (u32*)0x068A0000+(block*(0x2000/4));
 
-		VRAM_I_CR = 0x80;
-		for (int i = 0; i < 0x2000/4; i++) {
-			if (*storedPals != *palettes) {
-				u16* storedPals16 = (u16*)storedPals;
-				u16* palettes16 = (u16*)palettes;
-				for (int p = 0; p < 2; p++) {
-					if (storedPals[p] != palettes16[p]) {
-						palettes16[p] = colorTable[palettes16[p] % 0x8000];
-						storedPals16[p] = palettes16[p];
+		if (!(initialized & BIT(block))) {
+			VRAM_I_CR = 0x80;
+			u16* storedPals16 = (u16*)storedPals;
+			u16* palettes16 = (u16*)palettes;
+			for (int i = 0; i < 0x2000/2; i++) {
+				palettes16[i] = colorTable[palettes16[i] % 0x8000];
+				storedPals16[i] = palettes16[i];
+			}
+			VRAM_I_CR = vramCnt;
+			initialized |= BIT(block);
+		} else {
+			VRAM_I_CR = 0x80;
+			for (int i = 0; i < 0x2000/4; i++) {
+				if (*storedPals != *palettes) {
+					u16* storedPals16 = (u16*)storedPals;
+					u16* palettes16 = (u16*)palettes;
+					for (int p = 0; p < 2; p++) {
+						if (storedPals[p] != palettes16[p]) {
+							palettes16[p] = colorTable[palettes16[p] % 0x8000];
+							storedPals16[p] = palettes16[p];
+						}
 					}
 				}
+				storedPals++;
+				palettes++;
 			}
-			storedPals++;
-			palettes++;
+			VRAM_I_CR = vramCnt;
 		}
-		VRAM_I_CR = vramCnt;
 
 		block++;
 		if (block == 2) block = 0;
