@@ -400,16 +400,16 @@ static void loadMobiclipOffsets(configuration* conf, const char* bootstrapPath, 
 	}
 
 	if (offset > 0) {
-		if (size > 8) {
-			size = 8;
+		if (size > 4) {
+			size = 4;
 		}
 
 		fseek(file, offset, SEEK_SET);
-		u32 buffer[2] = {0};
-		fread(buffer, 1, size, file);
+		u32 buffer = 0;
+		fread(&buffer, 1, size, file);
 
-		conf->mobiclipStartOffset = buffer[0];
-		conf->mobiclipEndOffset = buffer[1];
+		conf->mobiclipStartOffset = buffer;
+		conf->mobiclipEndOffset = buffer+0x5B0;
 	}
 
 	fclose(file);
