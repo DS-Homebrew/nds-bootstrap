@@ -2989,8 +2989,10 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 			patchCardReadDma(ce9, ndsHeader, moduleParams, usesThumb);
 		}
 		if (!patchCardEndReadDma(ce9, ndsHeader, moduleParams, usesThumb, ROMinRAM)) {
-			randomPatch(ndsHeader, moduleParams);
-			randomPatch5Second(ndsHeader, moduleParams);
+			if (ndsHeader->unitCode == 0 || !dsiModeConfirmed) {
+				randomPatch(ndsHeader, moduleParams);
+				randomPatch5Second(ndsHeader, moduleParams);
+			}
 		}
 	}
 
