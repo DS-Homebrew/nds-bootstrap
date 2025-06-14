@@ -37,12 +37,11 @@ BEGIN_ASM_FUNC getCPSR
 BEGIN_ASM_FUNC enterException
 @---------------------------------------------------------------------------------
 	// store context
-	ldr	r12,=exceptionRegisters
+	adr	r12, exceptionRegisters
 	stmia	r12,{r0-r11}
 	str	r13,[r12,#oldStack - exceptionRegisters]
 	// assign a stack
-	ldr	r13,=exceptionStack
-	ldr	r13,[r13]
+	ldr	r13, exceptionStack
 
 	// renable MPU
 	mrc	p15,0,r0,c1,c0,0
@@ -71,17 +70,16 @@ BEGIN_ASM_FUNC enterException
 
 	orr	r4,r4,r2
 	msr	cpsr,r4
-	ldr	r0,=reg12
+	adr	r0, reg12
 	stmia	r0,{r12-r14}
 	msr	cpsr,r3
 
 	// Get C function & call it
-	ldr	r12,=exceptionC
-	ldr	r12,[r12,#0]
+	ldr	r12, exceptionC
 	blxne	r12
 
 	// restore registers
-	ldr	r12,=exceptionRegisters
+	adr	r12, exceptionRegisters
 	ldmia	r12,{r0-r11}
 	ldr	r13,[r12,#oldStack - exceptionRegisters]
 
