@@ -58,6 +58,7 @@
 #define b_ndmaDisabled BIT(20)
 #define b_isDlp BIT(21)
 #define b_useColorLut BIT(22)
+#define b_clearRamOnReset BIT(23)
 #define b_i2cBricked BIT(30)
 #define b_scfgLocked BIT(31)
 
@@ -438,6 +439,9 @@ int hookNdsRetailArm7(
 		}
 		if (colorLutEnabled) {
 			ce7->valueBits |= b_useColorLut;
+		}
+		if (strncmp(romTid, "A5F", 3) == 0 || strncmp(romTid, "C5F", 3) == 0) { // Professor Layton and the Curious Village
+			ce7->valueBits |= b_clearRamOnReset;
 		}
 		if (REG_SCFG_EXT == 0) {
 			ce7->valueBits |= b_scfgLocked;

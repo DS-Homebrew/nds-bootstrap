@@ -20,6 +20,7 @@
 #define b_cacheFlushFlag BIT(7)
 #define b_cardReadFix BIT(8)
 #define b_bypassExceptionHandler BIT(9)
+#define b_clearRamOnReset BIT(10)
 
 
 static const int MAX_HANDLER_LEN = 50;
@@ -249,6 +250,9 @@ int hookNdsRetailArm9(
 	}
 	if (strncmp(romTid, "AZE", 3) == 0) { // Zelda: Phantom Hourglass
 		ce9->valueBits |= b_bypassExceptionHandler;
+	}
+	if (strncmp(romTid, "A5F", 3) == 0 || strncmp(romTid, "C5F", 3) == 0) { // Professor Layton and the Curious Village
+		ce9->valueBits |= b_clearRamOnReset;
 	}
 	ce9->mainScreen             = mainScreen;
 	ce9->s2FlashcardId          = s2FlashcardId;

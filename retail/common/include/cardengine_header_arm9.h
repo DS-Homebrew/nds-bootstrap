@@ -230,6 +230,7 @@ typedef struct cardengineArm9 {
 		7: cacheFlushFlag
 		8: cardReadFix
 		9: bypassExceptionHandler
+		10: clearRamOnReset
 	*/
     s32 mainScreen;
 	u32* irqTable;
