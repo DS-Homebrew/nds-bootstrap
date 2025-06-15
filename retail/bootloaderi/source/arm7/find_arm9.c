@@ -135,18 +135,19 @@ static const u32 cardEndReadDmaSignature5[4]  = {0xE59F0010, 0xE3A02000, 0xE5901
 static const u16 cardEndReadDmaSignatureThumb5[4]  = {0x4803, 0x2200, 0x6801, 0x600A};
 
 // Card set DMA
-static const u32 cardSetDmaSignatureValue1[1]       = {0x4100010};
-static const u32 cardSetDmaSignatureValue2[1]       = {0x40001A4};
-static const u16 cardSetDmaSignatureStartThumb3[4]  = {0xB510, 0x4C0A, 0x6AA0, 0x490A};
-static const u16 cardSetDmaSignatureStartThumb4[4]  = {0xB538, 0x4D0A, 0x2302, 0x6AA8};
-static const u32 cardSetDmaSignatureStart2Early[4]  = {0xE92D4000, 0xE24DD004, 0xE59FC054, 0xE59F1054};
-static const u32 cardSetDmaSignatureStart2[3]       = {0xE92D4010, 0xE59F403C, 0xE59F103C};
-static const u32 cardSetDmaSignatureStart3[3]       = {0xE92D4010, 0xE59F4038, 0xE59F1038};
-static const u32 cardSetDmaSignatureStart4[3]       = {0xE92D4038, 0xE59F4038, 0xE59F1038};
-static const u32 cardSetDmaSignatureStart4Alt[3]    = {0xE92D4038, 0xE59F5038, 0xE59F1038};
-static const u32 cardSetDmaSignatureStart5[2]       = {0xE92D4070, 0xE1A06000};
-static const u32 cardSetDmaSignatureStart5Alt[2]    = {0xE92D4038, 0xE1A05000};
-static const u16 cardSetDmaSignatureStartThumb5[2]  = {0xB570, 0x1C05};
+static const u32 cardSetDmaSignatureValue1[1]         = {0x4100010};
+static const u32 cardSetDmaSignatureValue2[1]         = {0x40001A4};
+static const u16 cardSetDmaSignatureStartThumb3[4]    = {0xB510, 0x4C0A, 0x6AA0, 0x490A};
+static const u16 cardSetDmaSignatureStartThumb4[4]    = {0xB538, 0x4D0A, 0x2302, 0x6AA8};
+static const u32 cardSetDmaSignatureStart2Early[4]    = {0xE92D4000, 0xE24DD004, 0xE59FC054, 0xE59F1054};
+static const u32 cardSetDmaSignatureStart2[3]         = {0xE92D4010, 0xE59F403C, 0xE59F103C};
+static const u32 cardSetDmaSignatureStart3[3]         = {0xE92D4010, 0xE59F4038, 0xE59F1038};
+static const u32 cardSetDmaSignatureStart4[3]         = {0xE92D4038, 0xE59F4038, 0xE59F1038};
+static const u32 cardSetDmaSignatureStart4Alt[3]      = {0xE92D4038, 0xE59F5038, 0xE59F1038};
+static const u32 cardSetDmaSignatureStart5[2]         = {0xE92D4070, 0xE1A06000};
+static const u32 cardSetDmaSignatureStart5Alt[2]      = {0xE92D4038, 0xE1A05000};
+static const u16 cardSetDmaSignatureStartThumb5[2]    = {0xB570, 0x1C05};
+static const u16 cardSetDmaSignatureStartThumb5Alt[2] = {0xB538, 0x1C05};
 
 // GBA Slot init (SDK 5)
 static const u32 gbaSlotInitSignature[3]         = {0xE92D4038, 0xE59F0094, 0xE5901008};
@@ -2810,7 +2811,7 @@ u32* findCardSetDmaSdk5(const tNDSHeader* ndsHeader, const module_params_t* modu
              if(usesThumb) {
                   dbg_printf("cardSetDmaSignatureStartThumb used: ");
             		startOffset = (u32*)findOffsetBackwardsThumb(
-                		(u16*)cardSetDmaEndOffset, 0x90,
+                		(u16*)cardSetDmaEndOffset, 0x60,
                       cardSetDmaSignatureStartThumb5, 2
                   );
               } else {
@@ -2820,11 +2821,18 @@ u32* findCardSetDmaSdk5(const tNDSHeader* ndsHeader, const module_params_t* modu
                       cardSetDmaSignatureStart5, 2
                   );
               }
-            if (!startOffset && !usesThumb) {
-            	startOffset = findOffsetBackwards(
-            		cardSetDmaEndOffset, 0x90,
-                  cardSetDmaSignatureStart5Alt, 2
-              );
+			if (!startOffset) {
+				if (usesThumb) {
+					startOffset = (u32*)findOffsetBackwardsThumb(
+                		(u16*)cardSetDmaEndOffset, 0x60,
+					  cardSetDmaSignatureStartThumb5Alt, 2
+				  );
+				} else {
+					startOffset = findOffsetBackwards(
+						cardSetDmaEndOffset, 0x90,
+					  cardSetDmaSignatureStart5Alt, 2
+				  );
+				}
 			}
             if (startOffset!=NULL) {
                 dbg_printf("cardSetDmaSignatureStart found\n");
