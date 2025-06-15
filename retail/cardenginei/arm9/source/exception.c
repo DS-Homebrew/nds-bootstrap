@@ -32,10 +32,9 @@ void userException() {
 	}
 	#endif
 
-	sharedAddr[5] = 0x4C4D4749; // 'IGML'
-
 	extern void inGameMenu(s32* exRegisters);
 	while (1) {
+		sharedAddr[5] = 0x4C4D4749; // 'IGML'
 		inGameMenu(exceptionRegisters);
 	}
 }
