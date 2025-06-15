@@ -284,6 +284,9 @@ Nanostray (DSi):
 Nanostray 2 (DSi):
 - Everything except sound data (Fixes data abort error when going into gameplay)
 
+Nervous Brickdown (DSi):
+- Almost all data (data-DataWater, some folders excluded)
+
 New Super Mario Bros. (DSi):
 - Everything except sound data
 
