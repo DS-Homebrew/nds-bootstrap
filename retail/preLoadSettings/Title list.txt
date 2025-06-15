@@ -34,6 +34,9 @@ Dragon Quest V: Tenkuu no Hanayome (Japan) (YV5J) (DSi/3DS)
 Dragon Quest VI: Realms of Revelation (USA) (YVIE) (DSi/3DS)
 Dragon Quest VI: Realms of Reverie (Europe) (YVIP) (DSi/3DS)
 Dragon Quest VI: Maboroshi no Daichi (Japan) (YVIJ) (DSi/3DS)
+Elite Forces: Unit 77 (USA) (CEFE) (DSi)
+Elite Forces: Unit 77 (USA) (Rev 1) (CEFE) (DSi)
+Elite Forces: Unit 77 (Europe) (CEFP) (DSi)
 English Training: Have Fun Improving Your Skills (Europe) (ANGP) (DSi/3DS)
 Eigo ga Nigate na Otona no DS Training: Eigo Zuke (Japan) (ANGJ) (DSi/3DS)
 Eigo ga Nigate na Otona no DS Training: Eigo Zuke (Japan) (Rev 1) (ANGJ) (DSi/3DS)
@@ -215,6 +218,9 @@ Dragon Quest V: Hand of the Heavenly Bride (DSi/3DS):
 
 Dragon Quest VI: Realms of Revelation (DSi/3DS):
 - Sound data
+
+Elite Forces: Unit 77 (DSi):
+- Everything except video cutscenes
 
 English Training: Have Fun Improving Your Skills (DSi/3DS):
 - DSi: Sound data (excluding voice files)
