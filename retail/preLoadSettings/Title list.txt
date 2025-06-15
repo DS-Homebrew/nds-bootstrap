@@ -188,7 +188,7 @@ Base 10 (Art Style) (MEP):
 - Sound data
 
 Big Bang Mini (DSi):
-- Everything except sound data
+- Everything except sound data (Fixes black screen crash when going into gameplay)
 
 Castlevania: Dawn of Sorrow (3DS):
 - Everything except the opening video
@@ -285,7 +285,7 @@ Nanostray 2 (DSi):
 - Everything except sound data (Fixes data abort error when going into gameplay)
 
 Nervous Brickdown (DSi):
-- Almost all data (data-DataWater, some folders excluded)
+- Almost all data (data-DataWater, some folders excluded) (Fixes black screen crash when playing one of the later levels)
 
 New Super Mario Bros. (DSi):
 - Everything except sound data
