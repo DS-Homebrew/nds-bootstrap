@@ -340,5 +340,10 @@ Tomodachi Collection (DSi/3DS):
 - DSi: Most commonly used data: Cmn, Mdl, and Msg data
 - 3DS: All commonly used data: Cmn, Mdl, Msg, Scn, and sound data (latter excluding credits music)
 
+WarioWare: D.I.Y. (DSi/3DS):
+- DSi (USA/Japan): Data from "E/G" folder to "Sound" folder
+- DSi (Europe): Sound data
+- 3DS (Europe): Everything except data not used for the current language
+
 Yoshi Touch & Go (DSi):
 - Everything except the `area` folder
