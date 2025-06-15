@@ -73,7 +73,7 @@ romPartSrc:
 	.word	0x00000000
 	.word	0x00000000
 	.word	0x00000000
-romPartSize:
+romPartSrcEnd:
 	.word	0x00000000
 	.word	0x00000000
 	.word	0x00000000

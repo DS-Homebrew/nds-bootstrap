@@ -94,7 +94,7 @@ romLocation:
 	.word	0x00000000
 romPartSrc:
 	.word	0x00000000
-romPartSize:
+romPartSrcEnd:
 	.word	0x00000000
 rumbleFrames:
 	.word	30

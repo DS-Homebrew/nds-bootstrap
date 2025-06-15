@@ -277,7 +277,7 @@ int hookNdsRetailArm9(
 	} else if (dataToPreloadFound(ndsHeader)) {
 		ce9->romLocation -= dataToPreloadAddr;
 		ce9->romPartSrc = dataToPreloadAddr;
-		ce9->romPartSize = dataToPreloadSize;
+		ce9->romPartSrcEnd = dataToPreloadAddr+dataToPreloadSize;
 	}
 
 	if (strncmp(romTid, "IPK", 3) == 0 || strncmp(romTid, "IPG", 3) == 0) {

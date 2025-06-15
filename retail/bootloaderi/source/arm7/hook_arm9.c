@@ -363,7 +363,7 @@ int hookNdsRetailArm9(
 			}
 			for (int i = 0; i < 4; i++) {
 				ce9->romPartSrc[i] = dataToPreloadAddr[i];
-				ce9->romPartSize[i] = dataToPreloadSize[i];
+				ce9->romPartSrcEnd[i] = dataToPreloadAddr[i]+dataToPreloadSize[i];
 			}
 			/* if (dataToPreloadFrame) {
 				ce9->valueBits |= b_waitForPreloadToFinish;

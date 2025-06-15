@@ -128,7 +128,7 @@ typedef struct cardengineArm9 {
 	u16 cacheSlots;
 	u16 cacheBlockSize;
 	u32 romPartSrc[4];
-	u32 romPartSize[4];
+	u32 romPartSrcEnd[4];
 	u32 romMapLines;
 	u32 romMap[8][3]; // 0: ROM part start, 1: ROM part start in RAM, 2: ROM part end in RAM
 } cardengineArm9;
@@ -244,7 +244,7 @@ typedef struct cardengineArm9 {
 	u32 romPaddingSize;
 	u32 romLocation;
 	u32 romPartSrc;
-	u32 romPartSize;
+	u32 romPartSrcEnd;
 	u32 rumbleFrames[2];
 	u32 rumbleForce[2];
 	u32 prepareScreenshot;
