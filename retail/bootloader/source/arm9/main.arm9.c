@@ -31,6 +31,7 @@
 
 #include <stddef.h> // NULL
 #include <nds/memory.h>
+#include <nds/arm9/background.h>
 #include <nds/arm9/video.h>
 #include <nds/interrupts.h>
 #include <nds/timers.h>
@@ -49,9 +50,10 @@ bool arm9_boostVram = false;
 bool extendedMemory = false;
 bool dsDebugRam = false;
 volatile bool esrbScreenPrepared = false;
-volatile bool esrbScreenDisplayed = false;
-volatile bool screenFadedIn = false;
-volatile bool imageLoaded = false;
+// volatile bool esrbScreenDisplayed = false;
+volatile bool topScreenFadedIn = false;
+volatile bool bottomScreenFadedIn = false;
+// volatile bool imageLoaded = false;
 volatile bool esrbImageLoaded = false;
 volatile int arm9_stateFlag = ARM9_BOOT;
 volatile u32 arm9_BLANK_RAM = 0;
@@ -88,17 +90,27 @@ void SetBrightness(u8 screen, s8 bright) {
 	*(vu16*)(0x0400006C + (0x1000 * screen)) = bright + mode;
 }
 
-void fadeIn(void) {
+void fadeIn(u8 screens) {
 	for (int i = 25; i >= 0; i--) {
-		SetBrightness(0, i);
+		if (screens & BIT(0)) {
+			SetBrightness(0, i);
+		}
+		if (screens & BIT(1)) {
+			SetBrightness(1, i);
+		}
 		while (REG_VCOUNT != 191);
 		while (REG_VCOUNT == 191);
 	}
 }
 
-void fadeOut(void) {
+void fadeOut(u8 screens) {
 	for (int i = 0; i <= 25; i++) {
-		SetBrightness(0, i);
+		if (screens & BIT(0)) {
+			SetBrightness(0, i);
+		}
+		if (screens & BIT(1)) {
+			SetBrightness(1, i);
+		}
 		while (REG_VCOUNT != 191);
 		while (REG_VCOUNT == 191);
 	}
@@ -179,13 +191,12 @@ void __attribute__((target("arm"))) arm9_main(void) {
 	VRAM_G_CR = 0x80;
 	VRAM_H_CR = 0x80;
 	VRAM_I_CR = 0x80;
-	BG_PALETTE[0] = 0xFFFF;
-	dmaFill((u16*)&arm9_BLANK_RAM, BG_PALETTE+1, (2*1024)-2);
-	dmaFill((u16*)&arm9_BLANK_RAM, OAM, 2*1024);
-	dmaFill((u16*)&arm9_BLANK_RAM, (u16*)0x04000000, 0x56);  // Clear main display registers
-	dmaFill((u16*)&arm9_BLANK_RAM, (u16*)0x04001000, 0x56);  // Clear sub display registers
-	dmaFill((u16*)&arm9_BLANK_RAM, VRAM_A, 0x20000*3);		// Banks A, B, C
-	dmaFill((u16*)&arm9_BLANK_RAM, VRAM_D, 272*1024);		// Banks D (excluded), E, F, G, H, I
+	dmaFill9(arm9_BLANK_RAM, BG_PALETTE, 2*1024);
+	dmaFill9(arm9_BLANK_RAM, OAM, 2*1024);
+	dmaFill9(arm9_BLANK_RAM, (u16*)0x04000000, 0x56);  // Clear main display registers
+	dmaFill9(arm9_BLANK_RAM, (u16*)0x04001000, 0x56);  // Clear sub display registers
+	dmaFill9(arm9_BLANK_RAM, VRAM_A, 0x20000*3);		// Banks A, B, C
+	dmaFill9(arm9_BLANK_RAM, VRAM_D, 272*1024);		// Banks D (excluded), E, F, G, H, I
 
 	REG_DISPSTAT = 0;
 	GFX_STATUS = 0;
@@ -198,9 +209,20 @@ void __attribute__((target("arm"))) arm9_main(void) {
 	VRAM_E_CR = 0;
 	VRAM_F_CR = 0;
 	VRAM_G_CR = 0;
-	VRAM_H_CR = 0;
-	VRAM_I_CR = 0;
-	REG_POWERCNT = 0x820F;
+	VRAM_H_CR = VRAM_ENABLE | VRAM_H_SUB_BG;
+	VRAM_I_CR = VRAM_ENABLE | VRAM_I_SUB_BG_0x06208000;
+
+	SetBrightness(0, 31);
+	SetBrightness(1, 31);
+
+	REG_DISPCNT = MODE_FB0;
+	REG_DISPCNT_SUB = MODE_3_2D | DISPLAY_BG3_ACTIVE;
+	REG_BG3CNT_SUB = (u16)BgSize_B8_256x256;
+
+	REG_BG3PA_SUB = 0x0100;
+	REG_BG3PD_SUB = 0x0100;
+
+	REG_POWERCNT = BIT(0) | BIT(9) | BIT(15); // POWER_LCD | POWER_2D_B | POWER_SWAP_LCDS
 
 	// Return to passme loop
 	//*(vu32*)0x02FFFE04 = (u32)0xE59FF018; // ldr pc, 0x02FFFE24
@@ -215,77 +237,79 @@ void __attribute__((target("arm"))) arm9_main(void) {
 	arm9_stateFlag = ARM9_READY;
 	while (arm9_stateFlag != ARM9_BOOTBIN) {
 		if (arm9_stateFlag == ARM9_SCRNCLR) {
-			if (screenFadedIn) {
-				fadeOut();
-				dmaFill((u16*)&arm9_BLANK_RAM, VRAM_A, 0x18000);		// Bank A
-
-				REG_DISPSTAT = 0;
-				VRAM_A_CR = 0;
-				REG_DISPCNT = 0;
-				REG_POWERCNT = 0x820F;
-
-				SetBrightness(0, 0);
+			if (topScreenFadedIn || bottomScreenFadedIn) {
+				u8 screens = 0;
+				if (topScreenFadedIn) {
+					screens |= BIT(0);
+				}
+				if (bottomScreenFadedIn) {
+					screens |= BIT(1);
+				}
+				fadeOut(screens);
+				dmaFill9(arm9_BLANK_RAM, BG_PALETTE, 2*1024);
+				dmaFill9(arm9_BLANK_RAM, VRAM_A, 0x18000);		// Bank A
+				dmaFill9(arm9_BLANK_RAM, BG_GFX_SUB, 0xC000);		// Bank H-I
 			}
+			SetBrightness(0, 0);
+			SetBrightness(1, 0);
+			REG_DISPSTAT = 0;
+			VRAM_A_CR = 0;
+			VRAM_H_CR = 0;
+			VRAM_I_CR = 0;
+			REG_DISPCNT = 0;
+			REG_DISPCNT_SUB = 0;
+			REG_BG3CNT_SUB = 0;
+			REG_BG3PA_SUB = 0;
+			REG_BG3PD_SUB = 0;
+			REG_POWERCNT = 0x820F;
 			arm9_stateFlag = ARM9_READY;
 		}
 		if (arm9_stateFlag == ARM9_DISPESRB) { // Display ESRB rating and descriptor(s) for current title
 			if (*(u32*)IMAGES_LOCATION != 0) {
 				esrbScreenPrepared = true;
-				if (!esrbScreenDisplayed) {
+				/* if (!esrbScreenDisplayed) {
 					fadeOut();
 					screenFadedIn = false;
 					imageLoaded = false;
-				}
-				if (!screenFadedIn) {
-					SetBrightness(0, 31);
-				}
-				if (!imageLoaded) {
+				} */
+				// if (!imageLoaded) {
 					arm9_esrbScreen();
 					esrbImageLoaded = true;
-					imageLoaded = true;
-				}
-				if (!screenFadedIn) {
-					fadeIn();
-					screenFadedIn = true;
+				// 	imageLoaded = true;
+				// }
+				if (!topScreenFadedIn) {
+					fadeIn(BIT(0));
+					topScreenFadedIn = true;
 					waitFrames(60*3); // Wait a minimum of 3 seconds
 				}
-				esrbScreenDisplayed = true;
+				// esrbScreenDisplayed = true;
 			}
 			arm9_stateFlag = ARM9_READY;
 		}
 		if (arm9_stateFlag == ARM9_DISPSCRN) { // Display nds-bootstrap: Please wait
-			if (esrbScreenDisplayed) {
+			/* if (esrbScreenDisplayed) {
 				fadeOut();
 				screenFadedIn = false;
 				imageLoaded = false;
+			} */
+			arm9_pleaseWaitText();
+			if (!bottomScreenFadedIn) {
+				fadeIn(BIT(1));
+				bottomScreenFadedIn = true;
 			}
-			if (!screenFadedIn) {
-				SetBrightness(0, 31);
-			}
-			if (!imageLoaded) {
-				arm9_pleaseWaitText();
-				imageLoaded = true;
-			}
-			if (!screenFadedIn) {
-				fadeIn();
-				screenFadedIn = true;
-			}
-			esrbScreenDisplayed = false;
+			// esrbScreenDisplayed = false;
 			arm9_stateFlag = ARM9_READY;
 		}
 		if (arm9_stateFlag == ARM9_DISPERR) { // Display nds-bootstrap: An error has occurred
-			if (esrbScreenDisplayed) {
+			/* if (esrbScreenDisplayed) {
 				fadeOut();
 				screenFadedIn = false;
 				imageLoaded = false;
-			}
-			if (!screenFadedIn) {
-				SetBrightness(0, 31);
-			}
+			} */
 			arm9_errorText();
-			if (!screenFadedIn) {
-				fadeIn();
-				screenFadedIn = true;
+			if (!bottomScreenFadedIn) {
+				fadeIn(BIT(1));
+				bottomScreenFadedIn = true;
 			}
 			arm9_stateFlag = ARM9_READY;
 		}

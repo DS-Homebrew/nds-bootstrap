@@ -2089,12 +2089,29 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		if (bootstrapImages) {
 			fread(lz77ImageBuffer, 1, sizeof_lz77ImageBuffer, bootstrapImages);
 			LZ77_Decompress(lz77ImageBuffer, (u8*)IMAGES_LOCATION+0x18000);
+			// Convert BMP16 images to BMP8 for bottom screen
+			u16* palLocation = (u16*)lz77ImageBuffer;
+			u8* buffer8 = lz77ImageBuffer+0x200;
+			toncset16(palLocation, 0, 256);
+			u16* buffer = (u16*)IMAGES_LOCATION+(0x18000/2);
+			for (int i = 0; i < (256*192)*2; i++) {
+				int p = 0;
+				for (p = 0; p < 256; p++) {
+					if (palLocation[p] == 0) {
+						palLocation[p] = buffer[i];
+						break;
+					} else if (palLocation[p] == buffer[i]) {
+						break;
+					}
+				}
+				buffer8[i] = p;
+			}
 			if (colorTable) {
-				u16* buffer = (u16*)IMAGES_LOCATION+(0x18000/2);
-				for (int i = 0; i < (256*192)*2; i++) {
-					buffer[i] = VRAM_E[buffer[i] % 0x8000] | BIT(15);
+				for (int i = 0; i < 256; i++) {
+					palLocation[i] = VRAM_E[palLocation[i] % 0x8000] | BIT(15);
 				}
 			}
+			tonccpy((u8*)IMAGES_LOCATION+0x18000, lz77ImageBuffer, 0x18200);
 		}
 		fclose(bootstrapImages);
 
@@ -2572,6 +2589,24 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		if (bootstrapImages) {
 			fread(lz77ImageBuffer, 1, sizeof_lz77ImageBuffer, bootstrapImages);
 			LZ77_Decompress(lz77ImageBuffer, (u8*)IMAGES_LOCATION+0x18000);
+			// Convert BMP16 images to BMP8 for bottom screen
+			u16* palLocation = (u16*)lz77ImageBuffer;
+			u8* buffer8 = lz77ImageBuffer+0x200;
+			toncset16(palLocation, 0, 256);
+			u16* buffer = (u16*)IMAGES_LOCATION+(0x18000/2);
+			for (int i = 0; i < (256*192)*2; i++) {
+				int p = 0;
+				for (p = 0; p < 256; p++) {
+					if (palLocation[p] == 0) {
+						palLocation[p] = buffer[i];
+						break;
+					} else if (palLocation[p] == buffer[i]) {
+						break;
+					}
+				}
+				buffer8[i] = p;
+			}
+			tonccpy((u8*)IMAGES_LOCATION+0x18000, lz77ImageBuffer, 0x18200);
 		}
 		fclose(bootstrapImages);
 
