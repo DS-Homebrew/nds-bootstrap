@@ -2088,13 +2088,22 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		FILE* bootstrapImages = fopen("nitro:/bootloader_images.lz77", "rb");
 		if (bootstrapImages) {
 			fread(lz77ImageBuffer, 1, sizeof_lz77ImageBuffer, bootstrapImages);
-			LZ77_Decompress(lz77ImageBuffer, (u8*)IMAGES_LOCATION+0x18000);
+			fclose(bootstrapImages);
+			LZ77_Decompress(lz77ImageBuffer, (u8*)IMAGES_LOCATION);
+
+			bootstrapImages = fopen("nitro:/esrbOnlineNotice.lz77", "rb");
+			if (bootstrapImages) {
+				fread(lz77ImageBuffer, 1, sizeof_lz77ImageBuffer, bootstrapImages);
+				fclose(bootstrapImages);
+				LZ77_Decompress(lz77ImageBuffer, (u8*)IMAGES_LOCATION+0x30000);
+			}
+
 			// Convert BMP16 images to BMP8 for bottom screen
 			u16* palLocation = (u16*)lz77ImageBuffer;
 			u8* buffer8 = lz77ImageBuffer+0x200;
 			toncset16(palLocation, 0, 256);
-			u16* buffer = (u16*)IMAGES_LOCATION+(0x18000/2);
-			for (int i = 0; i < (256*192)*2; i++) {
+			u16* buffer = (u16*)IMAGES_LOCATION;
+			for (int i = 0; i < ((256*192)*2)+(256*40); i++) {
 				int p = 0;
 				for (p = 0; p < 256; p++) {
 					if (palLocation[p] == 0) {
@@ -2111,7 +2120,8 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 					palLocation[i] = VRAM_E[palLocation[i] % 0x8000] | BIT(15);
 				}
 			}
-			tonccpy((u8*)IMAGES_LOCATION+0x18000, lz77ImageBuffer, 0x18200);
+			toncset16((u8*)IMAGES_LOCATION, 0, ((256*192)*2)+(256*40));
+			tonccpy((u8*)IMAGES_LOCATION+0x18000, lz77ImageBuffer, 0x200+((256*192)*2)+(256*40));
 		}
 		fclose(bootstrapImages);
 
@@ -2156,7 +2166,8 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 				fread((u16*)IMAGES_LOCATION, 1, 0x18000, bootstrapImages);
 				if (colorTable) {
 					u16* buffer = (u16*)IMAGES_LOCATION;
-					for (int i = 0; i < 256*192; i++) {
+					const int start = (*(u32*)IMAGES_LOCATION == 0x494C4E4F) ? 2 : 0; // Skip online notice flag
+					for (int i = start; i < 256*192; i++) {
 						buffer[i] = VRAM_E[buffer[i] % 0x8000] | BIT(15);
 					}
 				}
@@ -2588,13 +2599,22 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		FILE* bootstrapImages = fopen("nitro:/bootloader_images.lz77", "rb");
 		if (bootstrapImages) {
 			fread(lz77ImageBuffer, 1, sizeof_lz77ImageBuffer, bootstrapImages);
-			LZ77_Decompress(lz77ImageBuffer, (u8*)IMAGES_LOCATION+0x18000);
+			fclose(bootstrapImages);
+			LZ77_Decompress(lz77ImageBuffer, (u8*)IMAGES_LOCATION);
+
+			bootstrapImages = fopen("nitro:/esrbOnlineNotice.lz77", "rb");
+			if (bootstrapImages) {
+				fread(lz77ImageBuffer, 1, sizeof_lz77ImageBuffer, bootstrapImages);
+				fclose(bootstrapImages);
+				LZ77_Decompress(lz77ImageBuffer, (u8*)IMAGES_LOCATION+0x30000);
+			}
+
 			// Convert BMP16 images to BMP8 for bottom screen
 			u16* palLocation = (u16*)lz77ImageBuffer;
 			u8* buffer8 = lz77ImageBuffer+0x200;
 			toncset16(palLocation, 0, 256);
-			u16* buffer = (u16*)IMAGES_LOCATION+(0x18000/2);
-			for (int i = 0; i < (256*192)*2; i++) {
+			u16* buffer = (u16*)IMAGES_LOCATION;
+			for (int i = 0; i < ((256*192)*2)+(256*40); i++) {
 				int p = 0;
 				for (p = 0; p < 256; p++) {
 					if (palLocation[p] == 0) {
@@ -2606,9 +2626,9 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 				}
 				buffer8[i] = p;
 			}
-			tonccpy((u8*)IMAGES_LOCATION+0x18000, lz77ImageBuffer, 0x18200);
+			toncset16((u8*)IMAGES_LOCATION, 0, ((256*192)*2)+(256*40));
+			tonccpy((u8*)IMAGES_LOCATION+0x18000, lz77ImageBuffer, 0x200+((256*192)*2)+(256*40));
 		}
-		fclose(bootstrapImages);
 
 		if (displayEsrb) {
 			// Read ESRB rating and descriptor(s) for current title
