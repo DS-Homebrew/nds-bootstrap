@@ -157,7 +157,7 @@ extern bool extension(const std::string& filename, const char* ext);
 static bool loadPreLoadSettings(configuration* conf, const char* pckPath, const char* romTid, const u16 headerCRC) {
 	FILE *file = NULL;
 
-	// Pre-load sound data for mainline Gen 4 Pokemon games
+	// Pre-load sound data for mainline Gen 4 Pokemon games + Stitch Jam 1 & 2
 	if (strncmp(romTid, "ADA", 3) == 0
 	 || strncmp(romTid, "APA", 3) == 0) {
 		if (romFSInit(conf->ndsPath)) {
@@ -171,6 +171,12 @@ static bool loadPreLoadSettings(configuration* conf, const char* pckPath, const 
 			|| strncmp(romTid, "IPG", 3) == 0) {
 		if (romFSInit(conf->ndsPath)) {
 			file = fopen("rom:/data/sound/gs_sound_data.sdat", "rb");
+		}
+	} else if (conf->consoleModel > 0 &&
+			  (strncmp(romTid, "BJM", 3) == 0
+			|| strncmp(romTid, "B3I", 3) == 0)) {
+		if (romFSInit(conf->ndsPath)) {
+			file = fopen("rom:/sound_data.sdat", "rb");
 		}
 	}
 

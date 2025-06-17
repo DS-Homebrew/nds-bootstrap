@@ -155,6 +155,9 @@ Sonic Rush Adventure (Europe) (A3YP) (MEP/DSi/3DS)
 Sonic Rush Adventure (Europe) (Rev 1) (A3YP) (MEP/DSi/3DS)
 Sonic Rush Adventure (Japan) (A3YJ) (MEP/DSi/3DS)
 Sonic Rush Adventure (Korea) (A3YK) (MEP/DSi/3DS)
+Stitch Jam (USA) (BJME) (DSi/3DS)
+Stitch! DS: Ohana to Rhythm de Daibouken (Japan) (BJMJ) (DSi/3DS)
+Motto! Stitch! DS: Rhythm de Rakugaki Daisakusen (Japan) (B3IJ) (DSi/3DS)
 Style Savvy (USA) (AZLE) (DSi/3DS)
 Nintendo Presents: Style Boutique (Europe) (AZLP) (DSi/3DS)
 Wagamama Fashion: Girls Mode (Japan) (AZLJ) (DSi/3DS)
@@ -329,6 +332,14 @@ Sonic Rush (3DS):
 Sonic Rush Adventure (MEP/DSi/3DS):
 - MEP/DSi: Opening cutscene music
 - 3DS: Opening cutscene music + Everything except sound data
+
+Stitch Jam (DSi/3DS):
+- DSi: Streamed music from sound data
+- 3DS: Sound data
+
+Motto! Stitch! DS: Rhythm de Rakugaki Daisakusen (DSi/3DS):
+- DSi: Title music and voices from sound data
+- 3DS: Sound data
 
 Style Savvy (DSi/3DS):
 - Sound data (minus padding)
