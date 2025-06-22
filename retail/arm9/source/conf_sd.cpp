@@ -157,8 +157,13 @@ extern bool extension(const std::string& filename, const char* ext);
 static bool loadPreLoadSettings(configuration* conf, const char* pckPath, const char* romTid, const u16 headerCRC) {
 	FILE *file = NULL;
 
-	// Pre-load sound data for mainline Gen 4 Pokemon games + Stitch Jam 1 & 2
-	if (strncmp(romTid, "ADA", 3) == 0
+	// Pre-load sound data
+	if (strncmp(romTid, "CDZ", 3) == 0 // Dragon Ball: Origins
+	 || strncmp(romTid, "BDB", 3) == 0) { // Dragon Ball: Origins 2
+		if (romFSInit(conf->ndsPath)) {
+			file = fopen("rom:/sound/data.sdat", "rb");
+		}
+	} else if (strncmp(romTid, "ADA", 3) == 0 // Mainline Gen 4 Pokemon games
 	 || strncmp(romTid, "APA", 3) == 0) {
 		if (romFSInit(conf->ndsPath)) {
 			file = fopen("rom:/data/sound/sound_data.sdat", "rb");
@@ -173,8 +178,8 @@ static bool loadPreLoadSettings(configuration* conf, const char* pckPath, const 
 			file = fopen("rom:/data/sound/gs_sound_data.sdat", "rb");
 		}
 	} else if (conf->consoleModel > 0 &&
-			  (strncmp(romTid, "BJM", 3) == 0
-			|| strncmp(romTid, "B3I", 3) == 0)) {
+			  (strncmp(romTid, "BJM", 3) == 0	// Stitch Jam
+			|| strncmp(romTid, "B3I", 3) == 0)) { // Stitch Jam 2
 		if (romFSInit(conf->ndsPath)) {
 			file = fopen("rom:/sound_data.sdat", "rb");
 		}
@@ -185,6 +190,14 @@ static bool loadPreLoadSettings(configuration* conf, const char* pckPath, const 
 		conf->dataToPreloadSize[0] = getFileSize(file);
 		// conf->dataToPreloadFrame = 0;
 		fclose(file);
+		if (strncmp(romTid, "BDB", 3) == 0) {
+			file = fopen("rom:/sound/datastr.sdat", "rb");
+			if (file) {
+				conf->dataToPreloadAddr[1] = offsetOfOpenedNitroFile;
+				conf->dataToPreloadSize[1] = getFileSize(file);
+				fclose(file);
+			}
+		}
 		return true;
 	}
 
