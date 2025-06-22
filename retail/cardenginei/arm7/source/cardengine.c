@@ -199,7 +199,7 @@ extern u32 romLocation;
 
 extern u32 romMapLines;
 // 0: ROM part start, 1: ROM part start in RAM, 2: ROM part end in RAM
-extern u32 romMap[7][3];
+extern u32 romMap[][3];
 
 u32 currentSrlAddr = 0;
 

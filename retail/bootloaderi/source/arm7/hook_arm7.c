@@ -485,7 +485,9 @@ int hookNdsRetailArm7(
 				romOffset = baseArm9OvlSrc;
 			}
 			ce7->romLocation -= romOffset;
+		}
 
+		if ((dataToPreloadFound(ndsHeader) || ROMinRAM) && (ndsHeader->unitCode == 0 || !dsiMode)) {
 			extern u32 romMapLines;
 			extern u32 romMap[][3];
 
