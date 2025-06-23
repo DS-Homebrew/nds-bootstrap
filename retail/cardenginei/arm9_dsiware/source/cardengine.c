@@ -138,15 +138,15 @@ void reset(u32 tid1, u32 tid2) {
 		igmReset = false;
 
 		if (ce9->nandTmpJumpFuncOffset) {
-			*(u32*)0x02FFC230 = *(u32*)0x02FFE230;
-			*(u32*)0x02FFC234 = *(u32*)0x02FFE234;
+			*(u32*)0x02FFD230 = *(u32*)0x02FFE230;
+			*(u32*)0x02FFD234 = *(u32*)0x02FFE234;
 		}
 	} else {
 		toncset((u8*)getDtcmBase()+0x3E00, 0, 0x200);
 
 		if (ce9->nandTmpJumpFuncOffset) {
-			*(u32*)0x02FFC230 = 0;
-			*(u32*)0x02FFC234 = 0;
+			*(u32*)0x02FFD230 = 0;
+			*(u32*)0x02FFD234 = 0;
 		}
 	}
 

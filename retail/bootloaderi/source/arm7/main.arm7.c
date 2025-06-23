@@ -1339,7 +1339,7 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 		}
 
 		if (isDSiWare) {
-			tonccpy((u32*)0x02FFC000, (u32*)DSI_HEADER_SDK5, 0x1000);	// Make a duplicate of DSi header
+			tonccpy((u32*)0x02FFD000, (u32*)DSI_HEADER_SDK5, 0x7B0);	// Make a duplicate of DSi header
 		}
 
 		if (*(u32*)(DSI_HEADER_SDK5+0x1A0) != 0x00403000 && *(u8*)(DSI_HEADER_SDK5+0x234) < 4) {
@@ -1754,7 +1754,7 @@ int arm7_main(void) {
 	if (ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed) {
 		extern u32* lastClusterCacheUsed;
 		extern u32 clusterCache;
-		if (((u32)ndsHeader->arm9destination+ndsHeader->arm9binarySize) < DONOR_ROM_ARM7_LOCATION && REG_SCFG_EXT == 0 && *(u32*)DONOR_ROM_ARM7_SIZE_LOCATION != 0) {
+		if (((u32)ndsHeader->arm9destination+ndsHeader->arm9binarySize) < DONOR_ROM_ARM7_LOCATION && *(u32*)DONOR_ROM_ARM7_SIZE_LOCATION != 0) {
 			*(u32*)0x02FFE1A0 = *(u32*)DONOR_ROM_MBK6_LOCATION;
 			*(u32*)0x02FFE1D4 = *(u32*)DONOR_ROM_DEVICE_LIST_LOCATION;
 		}
@@ -1767,8 +1767,13 @@ int arm7_main(void) {
 				clusterCache += 0xB880000;
 				toncset((char*)0x02700000, 0, 0x80000);
 			} else { */
-				const u32 add = isDSiWare ? 0x8FD000 : 0x8FC000; // 0x02FFD000 : 0x02FFC000
-				const u16 len = isDSiWare ? 0x7B0 : 0x17B0;
+				u32 add = 0x8FC000; // 0x02FFC000
+				u16 len = isDSiWare ? 0x1000 : 0x17B0;
+				if (*(u32*)0x02FFE1A0 != 0x00403000) {
+					const u16 size = 0x1850;
+					add -= size;
+					len += size;
+				}
 				tonccpy((char*)0x02700000+add, (char*)0x02700000, len);	// Move FAT table cache elsewhere
 				romFile->fatTableCache = (u32*)((u32)romFile->fatTableCache+add);
 				savFile->fatTableCache = (u32*)((u32)savFile->fatTableCache+add);

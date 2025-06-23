@@ -443,7 +443,7 @@ static bool patchCardId(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const 
 
 void patchGbaSlotInit_cont(const tNDSHeader* ndsHeader, bool usesThumb, bool searchAgainForThumb) {
 	extern u32 oldArm7mbk;
-	if (REG_SCFG_EXT != 0 || ndsHeader->unitCode == 0 || !dsiModeConfirmed || (oldArm7mbk == 0x080037C0 && *(u32*)0x02FFE1A0 == 0x080037C0) || *(u32*)0x02FFE1A0 == 0x00403000) {
+	if (ndsHeader->unitCode == 0 || !dsiModeConfirmed || (oldArm7mbk == 0x080037C0 && *(u32*)0x02FFE1A0 == 0x080037C0) || *(u32*)0x02FFE1A0 == 0x00403000) {
 		return;
 	}
 

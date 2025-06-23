@@ -1412,7 +1412,8 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		// Load donor ROM's arm7 binary, if needed
 		if (conf->useSdk20Donor) {
 			donorNdsFile = fopen(conf->donor20Path, "rb");
-		} else if (REG_SCFG_EXT7 == 0 && (conf->dsiMode > 0 || conf->isDSiWare) && (a7mbk6 == (dsiEnhancedMbk ? 0x080037C0 : 0x00403000) || (romTid[0] == 'H' && ndsArm7Size < 0xC000 && ndsArm7idst == 0x02E80000 && (REG_MBK9 & 0x00FFFFFF) != 0x00FFFF0F))) {
+		} else if ((REG_SCFG_EXT7 == 0 || (!conf->isDSiWare && a7mbk6 == 0x00403000))
+				&& (conf->dsiMode > 0 || conf->isDSiWare) && (a7mbk6 == (dsiEnhancedMbk ? 0x080037C0 : 0x00403000) || (romTid[0] == 'H' && ndsArm7Size < 0xC000 && ndsArm7idst == 0x02E80000 && (REG_MBK9 & 0x00FFFFFF) != 0x00FFFF0F))) {
 			if (romTid[0] == 'H' && ndsArm7Size < 0xC000 && ndsArm7idst == 0x02E80000) {
 				if (!nandMounted && strncmp((dsiEnhancedMbk ? conf->donorTwl0Path : conf->donorTwlOnly0Path), "nand:", 5) == 0) {
 					fatMountSimple("nand", &io_dsi_nand);
@@ -1780,7 +1781,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			loadCardEngineBinary("nitro:/cardenginei_arm7_cheat.bin", (u8*)CHEAT_ENGINE_BUFFERED_LOCATION);
 
 			if ((unitCode > 0 && conf->dsiMode) || conf->isDSiWare) {
-				const bool binary3 = (REG_SCFG_EXT7 == 0 ? !dsiEnhancedMbk : (a7mbk6 != 0x00403000));
+				const bool binary3 = ((REG_SCFG_EXT7 == 0 || (!conf->isDSiWare && a7mbk6 == 0x00403000)) ? !dsiEnhancedMbk : (a7mbk6 != 0x00403000));
 
 				// Load SDK5 ce7 binary
 				rc = loadCardEngineBinary(
