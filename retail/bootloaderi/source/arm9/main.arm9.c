@@ -98,7 +98,6 @@ void initMBKARM9_dsiMode(void) {
 	REG_MBK6 = *(u32*)0x02FFE194;
 	REG_MBK7 = *(u32*)0x02FFE198;
 	REG_MBK8 = *(u32*)0x02FFE19C;
-	REG_MBK9 = *(u32*)0x02FFE1AC;
 	WRAM_CR = *(u8*)0x02FFE1AF;
 }
 
