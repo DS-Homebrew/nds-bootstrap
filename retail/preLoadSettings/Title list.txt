@@ -59,6 +59,7 @@ Geometry Wars: Galaxies (Europe) (YGLP) (DSi/3DS)
 Houkago Shounen (Japan) (YHGJ) (Japan) (3DS)
 Juiced 2: Hot Import Nights (USA) (YJ2E) (DSi)
 Juiced 2: Hot Import Nights (Europe) (YJ2P) (DSi)
+Kamen Rider: Dragon Knight (USA) (BKRE) (3DS)
 Kirby: Canvas Curse (USA) (ATKE) (3DS)
 Kirby: Power Paintbrush (Europe) (ATKP) (3DS)
 Touch! Kirby (Japan) (ATKJ) (3DS)
@@ -263,6 +264,9 @@ Houkago Shounen (3DS):
 
 Juiced 2: Hot Import Nights (DSi):
 - Everything except streamed music
+
+Kamen Rider: Dragon Knight (3DS):
+- Everything except sound data
 
 Kirby: Canvas Curse (3DS):
 - Sound data
