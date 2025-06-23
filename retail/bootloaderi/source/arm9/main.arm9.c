@@ -363,6 +363,9 @@ void arm9_main(void) {
 		}
 		if (arm9_stateFlag == ARM9_SETSCFG) {
 			if (dsiModeConfirmed) {
+				if (ROMsupportsDsiMode(ndsHeader)) {
+					initMBKARM9_dsiMode(); // This is needed for camera to init properly in some games, even when called with the ARM9_INITMBK flag prior
+				}
 				REG_SCFG_EXT = 0x8307F100;
 				REG_SCFG_CLK = 0x87;
 				REG_SCFG_RST = 1;
