@@ -24,6 +24,16 @@ Classic Word Games (USA) (VCWE) (3DS, DSi mode)
 Classic Word Games (Europe, Australia) (VCWV) (3DS, DSi mode)
 Diddy Kong Racing DS (USA) (AWDE) (DSi)
 Diddy Kong Racing DS (Europe) (AWDP) (DSi)
+Dragon Ball: Origins (USA) (CDZE) (DSi/3DS)
+Dragon Ball: Origins (Europe) (CDZP) (DSi/3DS)
+Dragon Ball DS (Japan) (CDZJ) (DSi/3DS)
+Dragon Ball DS (Korea) (CDZK) (DSi/3DS)
+Dragon Ball: Origins 2 (USA) (BDBE) (DSi/3DS)
+Dragon Ball: Origins 2 (Europe) (BDBP) (DSi/3DS)
+Dragon Ball DS 2: Totsugeki! Red Ribbon Gun (Japan) (BDBJ) (DSi/3DS)
+Dragon Ball Z: Supersonic Warriors 2 (USA) (A2SE) (DSi/3DS)
+Dragon Ball Z: Supersonic Warriors 2 (Europe) (ADBP) (DSi/3DS)
+Dragon Ball Z: Bukuu Ressen (Japan) (ADBJ) (DSi/3DS)
 Dragon Quest IV: Chapters of the Chosen (USA) (YIVE) (DSi/3DS)
 Dragon Quest IV: Chapters of the Chosen (USA) (English Party Chat v1.2) (YIVE-09DA) (DSi/3DS)
 Dragon Quest: The Chapters of the Chosen (Europe) (YIVP) (DSi/3DS)
@@ -210,6 +220,16 @@ Classic Word Games (3DS, DSi mode):
 
 Diddy Kong Racing DS (DSi):
 - Everything except assets.bin
+
+Dragon Ball: Origins (DSi/3DS):
+- Sound data
+
+Dragon Ball: Origins 2 (DSi/3DS):
+- Sound data
+
+Dragon Ball Z: Supersonic Warriors 2 (DSi/3DS):
+- Character sprites
+- 3DS: + Sound data
 
 Dragon Quest IV: Chapters of the Chosen (DSi/3DS):
 - DSi: Opening music from sound data
