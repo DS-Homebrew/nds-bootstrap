@@ -1408,10 +1408,12 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		}
 
 		dsiEnhancedMbk = (isDSiMode() && *(u32*)0x02FFE1A0 == 0x00403000 && ((REG_SCFG_EXT7 == 0) || (strncmp((const char*)0x04FFFA00, "no$gba", 6) == 0)));
+		bool twlDonor = true;
 
 		// Load donor ROM's arm7 binary, if needed
 		if (conf->useSdk20Donor) {
 			donorNdsFile = fopen(conf->donor20Path, "rb");
+			twlDonor = false;
 		} else if ((REG_SCFG_EXT7 == 0 || (!conf->isDSiWare && a7mbk6 == 0x00403000))
 				&& (conf->dsiMode > 0 || conf->isDSiWare) && (a7mbk6 == (dsiEnhancedMbk ? 0x080037C0 : 0x00403000) || (romTid[0] == 'H' && ndsArm7Size < 0xC000 && ndsArm7idst == 0x02E80000 && (REG_MBK9 & 0x00FFFFFF) != 0x00FFFF0F))) {
 			if (romTid[0] == 'H' && ndsArm7Size < 0xC000 && ndsArm7idst == 0x02E80000) {
@@ -1452,7 +1454,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			fread((u32*)DONOR_ROM_ARM7_SIZE_LOCATION, sizeof(u32), 1, donorNdsFile);
 			fseek(donorNdsFile, 0x1A0, SEEK_SET);
 			fread((u32*)DONOR_ROM_MBK6_LOCATION, sizeof(u32), 1, donorNdsFile);
-			if (conf->dsiMode > 0 || conf->isDSiWare) {
+			if (twlDonor) {
 				a7mbk6 = *(u32*)DONOR_ROM_MBK6_LOCATION;
 			}
 			fseek(donorNdsFile, 0x1D0, SEEK_SET);
