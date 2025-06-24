@@ -1436,16 +1436,10 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 				}
 				donorNdsFile = fopen(sdk50 ? (dsiEnhancedMbk ? conf->donorTwl0Path : conf->donorTwlOnly0Path) : (dsiEnhancedMbk ? conf->donorTwlPath : conf->donorTwlOnlyPath), "rb");
 				if (!donorNdsFile) {
-					if (donorNdsFile) {
-						fclose(donorNdsFile);
-					}
 					if (!nandMounted && (strncmp((sdk50 ? (dsiEnhancedMbk ? conf->donorTwlPath : conf->donorTwlOnlyPath) : (dsiEnhancedMbk ? conf->donorTwl0Path : conf->donorTwlOnly0Path)), "nand:", 5) == 0)) {
 						nandMounted = fatMountSimple("nand", &io_dsi_nand);
 					}
-					FILE* donorNdsFile2 = fopen(sdk50 ? (dsiEnhancedMbk ? conf->donorTwlPath : conf->donorTwlOnlyPath) : (dsiEnhancedMbk ? conf->donorTwl0Path : conf->donorTwlOnly0Path), "rb");
-					if (donorNdsFile2) {
-						donorNdsFile = donorNdsFile2;
-					}
+					donorNdsFile = fopen(sdk50 ? (dsiEnhancedMbk ? conf->donorTwlPath : conf->donorTwlOnlyPath) : (dsiEnhancedMbk ? conf->donorTwl0Path : conf->donorTwlOnly0Path), "rb");
 				}
 			}
 		}
@@ -1458,6 +1452,9 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			fread((u32*)DONOR_ROM_ARM7_SIZE_LOCATION, sizeof(u32), 1, donorNdsFile);
 			fseek(donorNdsFile, 0x1A0, SEEK_SET);
 			fread((u32*)DONOR_ROM_MBK6_LOCATION, sizeof(u32), 1, donorNdsFile);
+			if (conf->dsiMode > 0 || conf->isDSiWare) {
+				a7mbk6 = *(u32*)DONOR_ROM_MBK6_LOCATION;
+			}
 			fseek(donorNdsFile, 0x1D0, SEEK_SET);
 			fread(&donorArm7iOffset, sizeof(u32), 1, donorNdsFile);
 			fseek(donorNdsFile, 0x1D4, SEEK_SET);
@@ -1781,7 +1778,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			loadCardEngineBinary("nitro:/cardenginei_arm7_cheat.bin", (u8*)CHEAT_ENGINE_BUFFERED_LOCATION);
 
 			if ((unitCode > 0 && conf->dsiMode) || conf->isDSiWare) {
-				const bool binary3 = ((REG_SCFG_EXT7 == 0 || (!conf->isDSiWare && a7mbk6 == 0x00403000)) ? !dsiEnhancedMbk : (a7mbk6 != 0x00403000));
+				const bool binary3 = (REG_SCFG_EXT7 == 0 ? !dsiEnhancedMbk : (a7mbk6 != 0x00403000));
 
 				// Load SDK5 ce7 binary
 				rc = loadCardEngineBinary(
