@@ -50,6 +50,7 @@ extern void arm9code(u32* addr);
 
 tNDSHeader* ndsHeader = NULL;
 bool dsiModeConfirmed = false;
+static bool colorLutEnabled = false;
 bool arm9_boostVram = false;
 u32 arm9_SCFG_EXT = 0;
 u16 arm9_SCFG_CLK = 0;
@@ -358,12 +359,13 @@ void arm9_main(void) {
 				for (int i = 0; i < 16; i++) {
 					transferToArm9(i);
 				}
+				colorLutEnabled = true;
 			}
 			arm9_stateFlag = ARM9_READY;
 		}
 		if (arm9_stateFlag == ARM9_SETSCFG) {
 			if (dsiModeConfirmed) {
-				if (ROMsupportsDsiMode(ndsHeader)) {
+				if (ROMsupportsDsiMode(ndsHeader) && !colorLutEnabled) {
 					initMBKARM9_dsiMode(); // This is needed for camera to init properly in some games, even when called with the ARM9_INITMBK flag prior
 				}
 				REG_SCFG_EXT = 0x8307F100;
