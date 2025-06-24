@@ -55,7 +55,6 @@
 
 #define WARIOWARE_ENABLE	(*(vuint16 *)0x080000C6)
 
-#define	REG_WIFIIRQ	(*(vuint16*)0x04808012)
 #define REG_GPIO_WIFI *(vu16*)0x4004C04
 
 #include "tonccpy.h"
@@ -290,7 +289,6 @@ static void resetMemory_ARM7(void) {
 
 	REG_IE = 0;
 	REG_IF = ~0;
-	REG_WIFIIRQ = 0;
 	*(vu32*)0x0380FFFC = 0;  // IRQ_HANDLER ARM7 version
 	*(vu32*)0x0380FFF8 = 0; // VBLANK_INTR_WAIT_FLAGS, ARM7 version
 	REG_POWERCNT = 1;  // Turn off power to stuff
