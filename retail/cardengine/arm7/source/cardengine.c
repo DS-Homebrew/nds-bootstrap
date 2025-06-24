@@ -99,8 +99,10 @@ static int volumeLevelTimer = 0;
 static int musicBufferNo = 0;
 static bool customMusic = false;
 #else
+#ifndef ACE3DSP
 static bool wifiIrq = false;
 static int wifiIrqTimer = 0;
+#endif
 #endif
 // bool returnToMenu = false;
 bool isSdk5Set = false;
@@ -356,7 +358,10 @@ void myIrqHandlerVBlank(void) {
 
 	if ((0 == (REG_KEYINPUT & igmHotkey) && 0 == (REG_EXTKEYINPUT & (((igmHotkey >> 10) & 3) | ((igmHotkey >> 6) & 0xC0)))
 #ifndef MUSIC
-		&& (valueBits & a9IrqHooked) && !wifiIrq
+		&& (valueBits & a9IrqHooked)
+#ifndef ACE3DSP
+		&& !wifiIrq
+#endif
 #endif
 	) || sharedAddr[5] == 0x59444552 /* REDY */) {
 		inGameMenu();
@@ -484,6 +489,7 @@ void myIrqHandlerVBlank(void) {
 	}
 
 #ifndef MUSIC
+#ifndef ACE3DSP
 	bool wifiIrqCheck = (REG_WIFIIRQ != 0);
 	if (wifiIrq != wifiIrqCheck) {
 		if (wifiIrq) {
@@ -497,6 +503,7 @@ void myIrqHandlerVBlank(void) {
 	} else {
 		wifiIrqTimer = 0;
 	}
+#endif
 #endif
 
 	// Swap screens

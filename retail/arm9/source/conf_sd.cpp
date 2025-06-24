@@ -2281,7 +2281,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		) {
 			loadCardEngineBinary("nitro:/cardengine_arm7_music.bin", (u8*)CARDENGINE_ARM7_LOCATION_BUFFERED);
 		} else {
-			loadCardEngineBinary("nitro:/cardengine_arm7.bin", (u8*)CARDENGINE_ARM7_LOCATION_BUFFERED);
+			loadCardEngineBinary((strcmp(io_dldi_data->friendlyName, "Ace3DS+") == 0) ? "nitro:/cardengine_arm7_ace3dsp.bin" : "nitro:/cardengine_arm7.bin", (u8*)CARDENGINE_ARM7_LOCATION_BUFFERED);
 		}
 
 		bool found = (access(pageFilePath.c_str(), F_OK) == 0);
