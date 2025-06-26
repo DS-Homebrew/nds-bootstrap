@@ -228,6 +228,12 @@ void patchScfgExt(const tNDSHeader* ndsHeader) {
     dbg_printf("\n\n");
 }
 
+static u16 swi12Patch[2] =
+{
+	0xDF02, // SWI  0x02
+	0x4770, // BX LR
+};
+
 static void fixForDifferentBios(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	u32* swi12Offset = patchOffsetCache.a7Swi12Offset;
 	bool useGetPitchTableBranch = (patchOffsetCache.a7IsThumb && !isSdk5(moduleParams));
@@ -253,7 +259,6 @@ static void fixForDifferentBios(const cardengineArm7* ce7, const tNDSHeader* nds
 	// swi 0x12 call
 	if (swi12Offset && !(REG_SCFG_ROM & BIT(9))) {
 		// Patch to call swi 0x02 instead of 0x12
-		u32* swi12Patch = ce7->patches->swi02;
 		tonccpy(swi12Offset, swi12Patch, 0x4);
 	}
 

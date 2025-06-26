@@ -50,7 +50,6 @@ typedef struct cardengineArm7Patches {
     cardengineArm7PatchesArm7FunctionsThumb* arm7FunctionsDirect;
     cardengineArm7PatchesArm7Functions* arm7Functions;
     cardengineArm7PatchesArm7FunctionsThumb* arm7FunctionsThumb;
-    u32* swi02;
     u32* swi24;
     u32* swi25;
     u32* swi26;
