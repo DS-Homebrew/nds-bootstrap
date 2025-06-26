@@ -220,6 +220,8 @@ int hookNdsRetailArm9(
 	extern u32 dataToPreloadAddr[4];
 	extern u32 dataToPreloadSize[4];
 	// extern u32 dataToPreloadFrame;
+	extern u32* mobiclipStartOffset;
+	extern u32* mobiclipEndOffset;
 	extern bool colorLutEnabled;
 	extern bool colorLutBlockVCount;
 	extern bool romLocationAdjust(const tNDSHeader* ndsHeader, const bool laterSdk, const bool isSdk5, u32* romLocation);
@@ -280,7 +282,7 @@ int hookNdsRetailArm9(
 	}
 	if (!ROMinRAM && dsiWramAccess && !dsiWramMirrored && (ndsHeader->unitCode == 0 || !dsiModeConfirmed) && baseFatSize != 0) {
 		const u32 fntFatSize = (baseFatOff-baseFntOff)+baseFatSize;
-		if (fntFatSize <= (colorLutEnabled ? 0x4AC00 : 0x80000)) {
+		if (fntFatSize <= (colorLutEnabled ? 0x32800 : 0x80000)) {
 			ce9->fntSrc = baseFntOff;
 			ce9->fntFatSize = fntFatSize;
 			ce9->valueBits |= b_fntFatCached;
@@ -291,6 +293,10 @@ int hookNdsRetailArm9(
 	ce9->overlaysSize           = overlaysSize;
 	ce9->romPaddingSize         = romPaddingSize;
 	ce9->consoleModel           = consoleModel;
+	if (colorLutEnabled) {
+		ce9->mobiclipStartOffset = mobiclipStartOffset;
+		ce9->mobiclipEndOffset   = mobiclipEndOffset;
+	}
 
 	if (!ROMinRAM) {
 		//extern bool gbaRomFound;
@@ -357,7 +363,7 @@ int hookNdsRetailArm9(
 			}
 			for (int i = 0; i < 4; i++) {
 				ce9->romPartSrc[i] = dataToPreloadAddr[i];
-				ce9->romPartSize[i] = dataToPreloadSize[i];
+				ce9->romPartSrcEnd[i] = dataToPreloadAddr[i]+dataToPreloadSize[i];
 			}
 			/* if (dataToPreloadFrame) {
 				ce9->valueBits |= b_waitForPreloadToFinish;

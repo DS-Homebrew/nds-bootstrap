@@ -443,7 +443,7 @@ static bool patchCardId(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const 
 
 void patchGbaSlotInit_cont(const tNDSHeader* ndsHeader, bool usesThumb, bool searchAgainForThumb) {
 	extern u32 oldArm7mbk;
-	if (REG_SCFG_EXT != 0 || ndsHeader->unitCode == 0 || !dsiModeConfirmed || (oldArm7mbk == 0x080037C0 && *(u32*)0x02FFE1A0 == 0x080037C0) || *(u32*)0x02FFE1A0 == 0x00403000) {
+	if (ndsHeader->unitCode == 0 || !dsiModeConfirmed || (oldArm7mbk == 0x080037C0 && *(u32*)0x02FFE1A0 == 0x080037C0) || *(u32*)0x02FFE1A0 == 0x00403000) {
 		return;
 	}
 
@@ -711,6 +711,76 @@ static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, co
 	}
 
     return false;
+}
+
+void patchMobiclipFrameDraw(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+	extern u32 mobiclipStartOffset;
+	extern u32 mobiclipEndOffset;
+	if (mobiclipStartOffset && mobiclipEndOffset) {
+		// Code is placed within one of the ARM9 overlays, so avoid patching main ARM9 binary
+		dbg_printf("Mobiclip frame draw location (Overlay) : ");
+		dbg_hexa(mobiclipStartOffset);
+		dbg_printf("\n\n");
+		return; 
+	}
+
+	u32* endOffset = patchOffsetCache.mobiclipFrameDrawEndOffset;
+	u32* offset = patchOffsetCache.mobiclipFrameDrawOffset;
+
+    if (!patchOffsetCache.mobiclipFrameDrawChecked) {
+		endOffset = findMobiclipFrameDrawEndOffset(ndsHeader, moduleParams);
+		if (endOffset) {
+			patchOffsetCache.mobiclipFrameDrawEndOffset = endOffset;
+			offset = findMobiclipFrameDrawStartOffset(endOffset);
+			if (offset) patchOffsetCache.mobiclipFrameDrawOffset = offset;
+		}
+		patchOffsetCache.mobiclipFrameDrawChecked = true;
+	}
+
+	if (!endOffset || !offset) {
+		return;
+	}
+
+	// Patch
+	while (*offset != 0xE5901004) {
+		offset++;
+	}
+
+	if (ndsHeader->unitCode > 0 && dsiModeConfirmed) {
+		arm9_stateFlag = ARM9_WRAMONARM7;
+		while (arm9_stateFlag != ARM9_READY);
+	}
+
+	u32* ce9clut = (u32*)CARDENGINEI_ARM9_CLUT_LOCATION;
+
+	offset[0] = 0xE1A0E00F; // mov lr, pc
+	offset[1] = 0xE51FF004; // ldr pc, =saveMobiclipFrameDst
+	offset[2] = ce9clut[2];
+
+	const u32 applyColorLutMobiclip = ce9clut[3];
+	if (endOffset[3] == 0xE8BD9FF0) { // Mobiclip
+		u32 branchOffset = (u32)endOffset;
+		branchOffset += 0xC;
+		setB(branchOffset, applyColorLutMobiclip);
+		dbg_printf("Mobiclip");
+	} else if (endOffset[3] == 0xE12FFF1E) { // Actimagine (Alt)
+		offset[2] -= 4;
+		endOffset[2] = 0xE51FF004; // ldr pc, =applyColorLutMobiclip
+		endOffset[3] = applyColorLutMobiclip;
+		dbg_printf("Actimagine");
+	} else { // Actimagine
+		endOffset[3] = 0xE51FF004; // ldr pc, =applyColorLutMobiclip
+		endOffset[4] = applyColorLutMobiclip;
+		dbg_printf("Actimagine");
+	}
+	dbg_printf(" frame draw location : ");
+	dbg_hexa((u32)patchOffsetCache.mobiclipFrameDrawOffset);
+	dbg_printf("\n\n");
+
+	if (ndsHeader->unitCode > 0 && dsiModeConfirmed) {
+		arm9_stateFlag = ARM9_WRAMONARM9;
+		while (arm9_stateFlag != ARM9_READY);
+	}
 }
 
 static void patchReset(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
@@ -2919,8 +2989,10 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 			patchCardReadDma(ce9, ndsHeader, moduleParams, usesThumb);
 		}
 		if (!patchCardEndReadDma(ce9, ndsHeader, moduleParams, usesThumb, ROMinRAM)) {
-			randomPatch(ndsHeader, moduleParams);
-			randomPatch5Second(ndsHeader, moduleParams);
+			if (ndsHeader->unitCode == 0 || !dsiModeConfirmed) {
+				randomPatch(ndsHeader, moduleParams);
+				randomPatch5Second(ndsHeader, moduleParams);
+			}
 		}
 	}
 
@@ -2944,6 +3016,11 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 	nandSavePatch(ce9, ndsHeader, moduleParams);
 
 	//setFlushCache(ce9, patchMpuRegion, usesThumb);
+
+	extern bool colorLutEnabled;
+	if (colorLutEnabled) {
+		patchMobiclipFrameDraw(ndsHeader, moduleParams);
+	}
 
 	dbg_printf("ERR_NONE\n\n");
 	return ERR_NONE;

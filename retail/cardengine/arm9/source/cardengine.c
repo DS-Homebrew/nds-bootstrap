@@ -56,6 +56,7 @@
 #define overlaysCached BIT(6)
 #define cacheFlushFlag BIT(7)
 #define cardReadFix BIT(8)
+#define clearRamOnReset BIT(10)
 
 #define videoFrameDelayMax 10
 #define videoFrameDelayMaxFlaw 1
@@ -213,12 +214,15 @@ void reset(u32 param, u32 param2) {
 
 	u32 iUncompressedSize = 0;
 	fileRead((char*)&iUncompressedSize, &pageFile, 0x3FFFF0, sizeof(u32));
+	#ifndef GSDD
+	const bool rebootConsole = (isDSiWare || iUncompressedSize > 0x280000);
+	#endif
 	const bool downloadedSrl = (param2 == 0x4C525344); // 'DSRL'
 	const bool loadNitroSrl = (*(u32*)(resetParams+0xC) > 0);
 	#ifndef GSDD
-	if (isDSiWare || iUncompressedSize > 0x280000 /*|| param == 0xFFFFFFFF*/ || downloadedSrl || loadNitroSrl) {
+	if (rebootConsole /*|| param == 0xFFFFFFFF*/ || downloadedSrl || loadNitroSrl) {
 		enterCriticalSection();
-		if (isDSiWare || iUncompressedSize > 0x280000) {
+		if (rebootConsole) {
 			sharedAddr[1] = 0x57495344; // 'DSIW'
 		}
 		if (param != 0xFFFFFFFF && !igmReset && downloadedSrl) {
@@ -357,6 +361,13 @@ void reset(u32 param, u32 param2) {
 	} else {
 		u32 newArm7binarySize = 0;
 		fileRead((char*)&newArm7binarySize, &pageFile, 0x3FFFF4, sizeof(u32));
+		#ifdef NODSIWARE
+		#ifndef GSDD
+		if (ce9->valueBits & clearRamOnReset) {
+			toncset((u32*)0x02000000, 0, 0x3C0000);
+		}
+		#endif
+		#endif
 		fileRead((char*)ndsHeader->arm9destination, &pageFile, 0x14000, iUncompressedSize);
 		fileRead((char*)ndsHeader->arm7destination, &pageFile, 0x2C0000, newArm7binarySize);
 		/* #ifdef EXTMEM
@@ -935,7 +946,7 @@ void cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 		src = 0x8000 + (src & 0x1FF);
 	}
 
-	if ((ce9->valueBits & ROMinRAM) || (ce9->romPartSize > 0 && src >= ce9->romPartSrc && src < ce9->romPartSrc+ce9->romPartSize)) {
+	if ((ce9->valueBits & ROMinRAM) || (ce9->romPartSrc > 0 && src >= ce9->romPartSrc && src < ce9->romPartSrcEnd)) {
 		cardReadRAM(dst, src, len);
 	} else {
 		cardReadNormal(dst, src, len);

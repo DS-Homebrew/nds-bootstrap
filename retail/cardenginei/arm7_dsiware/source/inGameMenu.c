@@ -149,7 +149,6 @@ void inGameMenu(void) {
 					break;
 				case 0x444D4152: // RAMD
 					dumpRam();
-					unloadInGameMenu();
 					exitMenu = true;
 					break;
 				/* case 0x50455453: // STEP
@@ -219,7 +218,6 @@ void inGameMenu(void) {
 
 	sharedAddr[0] = errorBak;
 	sharedAddr[4] = 0;
-	sharedAddr[5] = 0;
 	sharedAddr[7] -= 0x10000000; // Clear time receive flag
 	timeTillStatusRefresh = 7;
 

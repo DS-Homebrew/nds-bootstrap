@@ -164,7 +164,7 @@ static void patchMirrorCheck(const tNDSHeader* ndsHeader, const module_params_t*
 }
 
 extern u32 romMapLines;
-extern u32 romMap[7][3];
+extern u32 romMap[][3];
 
 static void patchVramWifiBinaryLoad(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	if (ndsHeader->unitCode > 0 || moduleParams->sdk_version < 0x2008000) {

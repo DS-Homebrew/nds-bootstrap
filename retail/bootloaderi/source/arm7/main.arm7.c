@@ -54,6 +54,7 @@
 
 #define BASE_DELAY (100)
 
+#define	REG_WIFIIRQ	(*(vuint16*)0x04808012)
 #define REG_GPIO_WIFI *(vu16*)0x4004C04
 
 #include "tonccpy.h"
@@ -333,6 +334,7 @@ static void resetMemory_ARM7(void) {
 	REG_IF = ~0;
 	REG_AUXIE = 0;
 	REG_AUXIF = ~0;
+	REG_WIFIIRQ = 0;
 	*(vu32*)0x0380FFFC = 0;  // IRQ_HANDLER ARM7 version
 	*(vu32*)0x0380FFF8 = 0; // VBLANK_INTR_WAIT_FLAGS, ARM7 version
 	REG_POWERCNT = 1;  // Turn off power to stuff
@@ -889,7 +891,7 @@ static bool isROMLoadableInRAM(const tDSiHeader* dsiHeader, const tNDSHeader* nd
 	) {
 		const bool twlType = (ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed);
 		const bool cheatsEnabled = (cheatSizeTotal > 4 && cheatSizeTotal <= 0x8000);
-		u32 wramSize = (dsiWramAccess && !dsiWramMirrored) ? (colorLutEnabled ? 0x4AC00 : 0x80000) : 0;
+		u32 wramSize = (dsiWramAccess && !dsiWramMirrored) ? (colorLutEnabled ? 0x32800 : 0x80000) : 0;
 		if (ce7Location == CARDENGINEI_ARM7_LOCATION) {
 			wramSize += 0x8000; // Shared 32KB of WRAM is available for ARM9 to use
 			sharedWramEnabled = true;
@@ -1278,7 +1280,7 @@ static void loadNitroFileInfoIntoRAM(const tNDSHeader* ndsHeader, aFile* romFile
 	if (baseFatSize == 0) return;
 
 	const u32 size = (baseFatOff-baseFntOff)+baseFatSize;
-	if (size > (colorLutEnabled ? 0x4AC00 : 0x80000)) return;
+	if (size > (colorLutEnabled ? 0x32800 : 0x80000)) return;
 
 	sdmmc_set_ndma_slot(0);
 	fileRead((char*)0x03700000, romFile, baseFntOff, size);
@@ -1338,7 +1340,7 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 		}
 
 		if (isDSiWare) {
-			tonccpy((u32*)0x02FFC000, (u32*)DSI_HEADER_SDK5, 0x1000);	// Make a duplicate of DSi header
+			tonccpy((u32*)0x02FFD000, (u32*)DSI_HEADER_SDK5, 0x7B0);	// Make a duplicate of DSi header
 		}
 
 		if (*(u32*)(DSI_HEADER_SDK5+0x1A0) != 0x00403000 && *(u8*)(DSI_HEADER_SDK5+0x234) < 4) {
@@ -1753,7 +1755,7 @@ int arm7_main(void) {
 	if (ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed) {
 		extern u32* lastClusterCacheUsed;
 		extern u32 clusterCache;
-		if (((u32)ndsHeader->arm9destination+ndsHeader->arm9binarySize) < DONOR_ROM_ARM7_LOCATION && REG_SCFG_EXT == 0 && *(u32*)DONOR_ROM_ARM7_SIZE_LOCATION != 0) {
+		if (((u32)ndsHeader->arm9destination+ndsHeader->arm9binarySize) < DONOR_ROM_ARM7_LOCATION && *(u32*)DONOR_ROM_ARM7_SIZE_LOCATION != 0) {
 			*(u32*)0x02FFE1A0 = *(u32*)DONOR_ROM_MBK6_LOCATION;
 			*(u32*)0x02FFE1D4 = *(u32*)DONOR_ROM_DEVICE_LIST_LOCATION;
 		}
@@ -1766,8 +1768,13 @@ int arm7_main(void) {
 				clusterCache += 0xB880000;
 				toncset((char*)0x02700000, 0, 0x80000);
 			} else { */
-				const u32 add = isDSiWare ? 0x8FD000 : 0x8FC000; // 0x02FFD000 : 0x02FFC000
-				const u16 len = isDSiWare ? 0x7B0 : 0x17B0;
+				u32 add = 0x8FC000; // 0x02FFC000
+				u16 len = isDSiWare ? 0x1000 : 0x17B0;
+				if (*(u32*)0x02FFE1A0 != 0x00403000) {
+					const u16 size = 0x1850;
+					add -= size;
+					len += size;
+				}
 				tonccpy((char*)0x02700000+add, (char*)0x02700000, len);	// Move FAT table cache elsewhere
 				romFile->fatTableCache = (u32*)((u32)romFile->fatTableCache+add);
 				savFile->fatTableCache = (u32*)((u32)savFile->fatTableCache+add);
@@ -1917,6 +1924,23 @@ int arm7_main(void) {
 			fileWrite((char*)&patchOffsetCache, &patchOffsetCacheFile, 0, sizeof(patchOffsetCacheContents));
 		}
 	  } else { */
+		if ((dsiWramAccess && !dsiWramMirrored) && (*(u32*)0x02FFE198 != 0) && (*(u32*)(COLOR_LUT_BUFFERED_LOCATION-4) == 0x54554C63)) {
+			arm9_stateFlag = ARM9_WRAMONARM7;
+			while (arm9_stateFlag != ARM9_READY);
+
+			tonccpy((u32*)CARDENGINEI_ARM9_CLUT_LOCATION, (u16*)CARDENGINEI_ARM9_CLUT_BUFFERED_LOCATION, 0x1000);
+			tonccpy((u16*)0x03770000, (u16*)COLOR_LUT_BUFFERED_LOCATION, 0x10000);
+			colorLutEnabled = (*(u32*)CARDENGINEI_ARM9_CLUT_LOCATION == *(u32*)CARDENGINEI_ARM9_CLUT_BUFFERED_LOCATION);
+			colorLutBlockVCount = colorLutEnabled && (*(u32*)(CARDENGINEI_ARM9_CLUT_LOCATION+4) & BIT(2));
+
+			arm9_stateFlag = ARM9_WRAMONARM9;
+			while (arm9_stateFlag != ARM9_READY);
+		}
+
+		toncset((u32*)CARDENGINEI_ARM9_CLUT_BUFFERED_LOCATION, 0, 0x1800);
+		*(u32*)(COLOR_LUT_BUFFERED_LOCATION-4) = 0;
+		toncset((u16*)COLOR_LUT_BUFFERED_LOCATION, 0, 0x10000);
+
 		ce9Location = *(u32*)CARDENGINEI_ARM9_BUFFERED_LOCATION;
 		ce7Location = *(u32*)CARDENGINEI_ARM7_BUFFERED_LOCATION;
 
@@ -1931,23 +1955,6 @@ int arm7_main(void) {
 		}
 		cheatEngineOffset = ((ce7Location == CARDENGINEI_ARM7_DSIWARE_LOCATION3) ? CHEAT_ENGINE_DSIWARE_LOCATION3 : CHEAT_ENGINE_DSIWARE_LOCATION);
 		toncset((u32*)CARDENGINEI_ARM7_BUFFERED_LOCATION, 0, 0x8400);
-
-		if ((dsiWramAccess && !dsiWramMirrored) && (*(u32*)0x02FFE198 != 0) && (*(u32*)(COLOR_LUT_BUFFERED_LOCATION-4) == 0x54554C63)) {
-			arm9_stateFlag = ARM9_WRAMONARM7;
-			while (arm9_stateFlag != ARM9_READY);
-
-			tonccpy((u32*)CARDENGINEI_ARM9_CLUT_LOCATION, (u16*)CARDENGINEI_ARM9_CLUT_BUFFERED_LOCATION, 0xC00);
-			tonccpy((u16*)0x03770000, (u16*)COLOR_LUT_BUFFERED_LOCATION, 0x10000);
-			colorLutEnabled = (*(u32*)CARDENGINEI_ARM9_CLUT_LOCATION == *(u32*)CARDENGINEI_ARM9_CLUT_BUFFERED_LOCATION);
-			colorLutBlockVCount = colorLutEnabled && (*(u32*)(CARDENGINEI_ARM9_CLUT_LOCATION+4) & BIT(2));
-
-			arm9_stateFlag = ARM9_WRAMONARM9;
-			while (arm9_stateFlag != ARM9_READY);
-		}
-
-		toncset((u32*)CARDENGINEI_ARM9_CLUT_BUFFERED_LOCATION, 0, 0x1800);
-		*(u32*)(COLOR_LUT_BUFFERED_LOCATION-4) = 0;
-		toncset((u16*)COLOR_LUT_BUFFERED_LOCATION, 0, 0x10000);
 
 		//ensureBinaryDecompressed(&dsiHeaderTemp.ndshdr, moduleParams, false);
 
@@ -1977,6 +1984,11 @@ int arm7_main(void) {
 
 		extern bool a9PatchCardIrqEnable(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
 		a9PatchCardIrqEnable((cardengineArm9*)ce9Location, ndsHeader, moduleParams);
+
+		if (colorLutEnabled) {
+			extern void patchMobiclipFrameDraw(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
+			patchMobiclipFrameDraw(ndsHeader, moduleParams);
+		}
 
 		extern void patchResetTwl(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
 		patchResetTwl((cardengineArm9*)ce9Location, ndsHeader, moduleParams);
@@ -2260,6 +2272,27 @@ int arm7_main(void) {
 			cheatEngineOffset = (ce7Location == CARDENGINEI_ARM7_LOCATION_ALT) ? CHEAT_ENGINE_LOCATION_ALT : CHEAT_ENGINE_LOCATION;
 		}
 
+		if ((dsiWramAccess && !dsiWramMirrored) && ((ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed && *(u32*)0x02FFE198 != 0) || !ROMsupportsDsiMode(ndsHeader) || !dsiModeConfirmed) && (*(u32*)(COLOR_LUT_BUFFERED_LOCATION-4) == 0x54554C63)) {
+			if (ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed) {
+				arm9_stateFlag = ARM9_WRAMONARM7;
+				while (arm9_stateFlag != ARM9_READY);
+			}
+
+			tonccpy((u32*)CARDENGINEI_ARM9_CLUT_LOCATION, (u16*)CARDENGINEI_ARM9_CLUT_BUFFERED_LOCATION, 0x1000);
+			tonccpy((u16*)0x03770000, (u16*)COLOR_LUT_BUFFERED_LOCATION, 0x10000);
+			colorLutEnabled = (*(u32*)CARDENGINEI_ARM9_CLUT_LOCATION == *(u32*)CARDENGINEI_ARM9_CLUT_BUFFERED_LOCATION);
+			colorLutBlockVCount = colorLutEnabled && (*(u32*)(CARDENGINEI_ARM9_CLUT_LOCATION+4) & BIT(2));
+
+			if (ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed) {
+				arm9_stateFlag = ARM9_WRAMONARM9;
+				while (arm9_stateFlag != ARM9_READY);
+			}
+		}
+
+		toncset((u32*)CARDENGINEI_ARM9_CLUT_BUFFERED_LOCATION, 0, 0x1800);
+		*(u32*)(COLOR_LUT_BUFFERED_LOCATION-4) = 0;
+		toncset((u16*)COLOR_LUT_BUFFERED_LOCATION, 0, 0x10000);
+
 		if (ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed) {
 			ce9Location = *(u32*)CARDENGINEI_ARM9_SDK5_BUFFERED_LOCATION;
 			tonccpy((u32*)ce9Location, (u32*)CARDENGINEI_ARM9_SDK5_BUFFERED_LOCATION, ce9size);
@@ -2279,27 +2312,6 @@ int arm7_main(void) {
 
 		toncset((u32*)CARDENGINEI_ARM9_BUFFERED_LOCATION, 0, 0x10000);
 		toncset((u32*)CARDENGINEI_ARM7_BUFFERED_LOCATION, 0, 0x13400);
-
-		if ((dsiWramAccess && !dsiWramMirrored) && ((ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed && *(u32*)0x02FFE198 != 0) || !ROMsupportsDsiMode(ndsHeader) || !dsiModeConfirmed) && (*(u32*)(COLOR_LUT_BUFFERED_LOCATION-4) == 0x54554C63)) {
-			if (ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed) {
-				arm9_stateFlag = ARM9_WRAMONARM7;
-				while (arm9_stateFlag != ARM9_READY);
-			}
-
-			tonccpy((u32*)CARDENGINEI_ARM9_CLUT_LOCATION, (u16*)CARDENGINEI_ARM9_CLUT_BUFFERED_LOCATION, 0xC00);
-			tonccpy((u16*)0x03770000, (u16*)COLOR_LUT_BUFFERED_LOCATION, 0x10000);
-			colorLutEnabled = (*(u32*)CARDENGINEI_ARM9_CLUT_LOCATION == *(u32*)CARDENGINEI_ARM9_CLUT_BUFFERED_LOCATION);
-			colorLutBlockVCount = colorLutEnabled && (*(u32*)(CARDENGINEI_ARM9_CLUT_LOCATION+4) & BIT(2));
-
-			if (ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed) {
-				arm9_stateFlag = ARM9_WRAMONARM9;
-				while (arm9_stateFlag != ARM9_READY);
-			}
-		}
-
-		toncset((u32*)CARDENGINEI_ARM9_CLUT_BUFFERED_LOCATION, 0, 0x1800);
-		*(u32*)(COLOR_LUT_BUFFERED_LOCATION-4) = 0;
-		toncset((u16*)COLOR_LUT_BUFFERED_LOCATION, 0, 0x10000);
 
 		u32 clonebootFlag = 0;
 		const u32 clonebootOffset = ((romSize-0x88) <= baseRomSize) ? (romSize-0x88) : baseRomSize;

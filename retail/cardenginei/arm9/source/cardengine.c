@@ -739,6 +739,12 @@ void gsddFix2(u32* code) {
 #endif
 #endif
 
+#ifndef GSDD
+void setB(int arg1, int arg2) {
+	*(u32*)arg1 = (((u32)(arg2 - arg1 - 8) >> 2) & 0xFFFFFF) | 0xEA000000;
+}
+#endif
+
 //extern void region2Disable();
 
 // Required for proper access to the extra DSi RAM
@@ -749,7 +755,7 @@ extern void region0Fix();
 
 static inline void applyColorLut(bool processExtPalettes) {
 	#ifdef TWLSDK
-	if (*(u32*)CARDENGINEI_ARM9_CLUT_LOCATION != 0xEA000000) {
+	if (*(u16*)(CARDENGINEI_ARM9_CLUT_LOCATION+2) != 0xEA00) {
 		return;
 	}
 	#endif
@@ -856,17 +862,17 @@ void cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	if (!(ce9->valueBits & ROMinRAM)) {
 		#ifndef TWLSDK
 		for (int i = 0; i < 4; i++) {
-			if (ce9->romPartSize[i] == 0) {
+			if (ce9->romPartSrc[i] == 0) {
 				break;
 			}
-			romPart = (src >= ce9->romPartSrc[i] && src < ce9->romPartSrc[i]+ce9->romPartSize[i]);
+			romPart = (src >= ce9->romPartSrc[i] && src < ce9->romPartSrcEnd[i]);
 			if (romPart) {
 				// romPartNo = i;
 				break;
 			}
 		}
 		#else
-		romPart = (ce9->romPartSize[0] > 0 && src >= ce9->romPartSrc[0] && src < ce9->romPartSrc[0]+ce9->romPartSize[0]);
+		romPart = (ce9->romPartSrc[0] > 0 && src >= ce9->romPartSrc[0] && src < ce9->romPartSrcEnd[0]);
 		#endif
 		/* #ifndef DLDI
 		#ifndef TWLSDK
@@ -1495,6 +1501,29 @@ void myIrqHandlerIPC(void) {
 					REG_IE |= IRQ_VCOUNT;
 				}
 				applyColorLut(true);
+
+				if (ce9->mobiclipEndOffset) {
+					u32* endOffset = ce9->mobiclipEndOffset;
+					u32* offset = ce9->mobiclipStartOffset;
+					if (
+						endOffset[0] == 0xE25AA002
+					 && endOffset[1] == 0xCAFFFEA1
+					 && endOffset[2] == 0xE28DD018
+					 && endOffset[3] == 0xE8BD9FF0
+					 && offset[11] == 0xE5901004
+					) {
+						// Patch Mobiclip ARM9 overlay code
+						u32* ce9clut = (u32*)CARDENGINEI_ARM9_CLUT_LOCATION;
+
+						offset[11] = 0xE1A0E00F; // mov lr, pc
+						offset[12] = 0xE51FF004; // ldr pc, =saveMobiclipFrameDst
+						offset[13] = ce9clut[2];
+
+						u32 branchOffset = (u32)endOffset;
+						branchOffset += 0xC;
+						setB(branchOffset, ce9clut[3]); // applyColorLutMobiclip
+					}
+				}
 			}
 
 			if (ce9->mainScreen == 1)

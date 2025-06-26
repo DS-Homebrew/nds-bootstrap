@@ -23,6 +23,8 @@
 #include <nds/dma.h>
 #include <nds/memory.h> // tNDSHeader
 
+#define DMA_FILL(n)    (*(vuint32*)(0x040000E0+(n*4)))
+
 /*#define resetCpu() \
 		__asm volatile("swi 0x000000")*/
 
@@ -78,6 +80,14 @@ static inline void dmaFill(const void* src, void* dest, u32 size) {
 	DMA_SRC(3)  = (u32)src;
 	DMA_DEST(3) = (u32)dest;
 	DMA_CR(3)   = DMA_COPY_WORDS | DMA_SRC_FIX | (size>>2);
+	while (DMA_CR(3) & DMA_BUSY);
+}
+
+static inline void dmaFill9(u32 value, void* dest, u32 size) {
+	DMA_FILL(3) = (u32)value;
+	DMA_SRC(3)  = (u32)&DMA_FILL(3);
+	DMA_DEST(3) = (u32)dest;
+	DMA_CR(3)   = DMA_SRC_FIX | DMA_COPY_WORDS | (size>>2);
 	while (DMA_CR(3) & DMA_BUSY);
 }
 

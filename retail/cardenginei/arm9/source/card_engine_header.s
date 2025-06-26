@@ -53,6 +53,10 @@ overlaysSize:
 	.word	0x00000000
 overlaysSizeAlign:
 	.word	0x00000000
+mobiclipStartOffset:
+	.word	0x00000000
+mobiclipEndOffset:
+	.word	0x00000000
 romPaddingSize:
 	.word	0x00000000
 romLocation:
@@ -69,7 +73,7 @@ romPartSrc:
 	.word	0x00000000
 	.word	0x00000000
 	.word	0x00000000
-romPartSize:
+romPartSrcEnd:
 	.word	0x00000000
 	.word	0x00000000
 	.word	0x00000000

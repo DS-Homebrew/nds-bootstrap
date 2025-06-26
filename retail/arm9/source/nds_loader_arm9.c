@@ -279,6 +279,8 @@ int runNds(u32 cluster, u32 saveCluster, u32 donorTwlCluster, /* u32 gbaCluster,
 	loader->apPatchFileCluster          = apPatchCluster;
 	loader->apPatchOffset               = conf->apPatchOffset;
 	loader->apPatchSize                 = conf->apPatchSize;
+    loader->mobiclipStartOffset         = conf->mobiclipStartOffset;
+    loader->mobiclipEndOffset           = conf->mobiclipEndOffset;
     loader->dsi2dsSavePatchFileCluster  = dsi2dsSavePatchCluster;
     loader->dsi2dsSavePatchOffset       = conf->dsi2dsSavePatchOffset;
     loader->dsi2dsSavePatchSize         = conf->dsi2dsSavePatchSize;

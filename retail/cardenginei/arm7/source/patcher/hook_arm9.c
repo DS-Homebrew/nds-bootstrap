@@ -133,10 +133,10 @@ int hookNdsRetailArm9(
 	ce9->valueBits &= ~b_isDlp;
 
 	extern u32 romMapLines;
-	extern u32 romMap[7][3];
+	extern u32 romMap[][3];
 
 	ce9->romMapLines = romMapLines;
-	for (int i = 0; i < 7; i++) {
+	for (int i = 0; i < romMapLines; i++) {
 		for (int i2 = 0; i2 < 3; i2++) {
 			ce9->romMap[i][i2] = romMap[i][i2];
 		}

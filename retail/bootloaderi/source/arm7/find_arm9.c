@@ -135,18 +135,19 @@ static const u32 cardEndReadDmaSignature5[4]  = {0xE59F0010, 0xE3A02000, 0xE5901
 static const u16 cardEndReadDmaSignatureThumb5[4]  = {0x4803, 0x2200, 0x6801, 0x600A};
 
 // Card set DMA
-static const u32 cardSetDmaSignatureValue1[1]       = {0x4100010};
-static const u32 cardSetDmaSignatureValue2[1]       = {0x40001A4};
-static const u16 cardSetDmaSignatureStartThumb3[4]  = {0xB510, 0x4C0A, 0x6AA0, 0x490A};
-static const u16 cardSetDmaSignatureStartThumb4[4]  = {0xB538, 0x4D0A, 0x2302, 0x6AA8};
-static const u32 cardSetDmaSignatureStart2Early[4]  = {0xE92D4000, 0xE24DD004, 0xE59FC054, 0xE59F1054};
-static const u32 cardSetDmaSignatureStart2[3]       = {0xE92D4010, 0xE59F403C, 0xE59F103C};
-static const u32 cardSetDmaSignatureStart3[3]       = {0xE92D4010, 0xE59F4038, 0xE59F1038};
-static const u32 cardSetDmaSignatureStart4[3]       = {0xE92D4038, 0xE59F4038, 0xE59F1038};
-static const u32 cardSetDmaSignatureStart4Alt[3]    = {0xE92D4038, 0xE59F5038, 0xE59F1038};
-static const u32 cardSetDmaSignatureStart5[2]       = {0xE92D4070, 0xE1A06000};
-static const u32 cardSetDmaSignatureStart5Alt[2]    = {0xE92D4038, 0xE1A05000};
-static const u16 cardSetDmaSignatureStartThumb5[2]  = {0xB570, 0x1C05};
+static const u32 cardSetDmaSignatureValue1[1]         = {0x4100010};
+static const u32 cardSetDmaSignatureValue2[1]         = {0x40001A4};
+static const u16 cardSetDmaSignatureStartThumb3[4]    = {0xB510, 0x4C0A, 0x6AA0, 0x490A};
+static const u16 cardSetDmaSignatureStartThumb4[4]    = {0xB538, 0x4D0A, 0x2302, 0x6AA8};
+static const u32 cardSetDmaSignatureStart2Early[4]    = {0xE92D4000, 0xE24DD004, 0xE59FC054, 0xE59F1054};
+static const u32 cardSetDmaSignatureStart2[3]         = {0xE92D4010, 0xE59F403C, 0xE59F103C};
+static const u32 cardSetDmaSignatureStart3[3]         = {0xE92D4010, 0xE59F4038, 0xE59F1038};
+static const u32 cardSetDmaSignatureStart4[3]         = {0xE92D4038, 0xE59F4038, 0xE59F1038};
+static const u32 cardSetDmaSignatureStart4Alt[3]      = {0xE92D4038, 0xE59F5038, 0xE59F1038};
+static const u32 cardSetDmaSignatureStart5[2]         = {0xE92D4070, 0xE1A06000};
+static const u32 cardSetDmaSignatureStart5Alt[2]      = {0xE92D4038, 0xE1A05000};
+static const u16 cardSetDmaSignatureStartThumb5[2]    = {0xB570, 0x1C05};
+static const u16 cardSetDmaSignatureStartThumb5Alt[2] = {0xB538, 0x1C05};
 
 // GBA Slot init (SDK 5)
 static const u32 gbaSlotInitSignature[3]         = {0xE92D4038, 0xE59F0094, 0xE5901008};
@@ -205,7 +206,7 @@ static const u32 mpuInitRegion3TwlEndSignatureThumb[3] = {0x48010081, 0x47705808
 
 //static const u32 operaRamSignature[2]        = {0x097FFFFE, 0x09000000};
 
-// GBA Cart info init
+/* // GBA Cart info init
 static const u32 cartInfoInitSignatureType1[4] = {0xE92D40F0, 0xE24DD014, 0xE59F0194, 0xE5901000};
 static const u32 cartInfoInitSignatureType2[4] = {0xE92D40F0, 0xE24DD014, 0xE59F01D8, 0xE5901000};
 static const u16 cartInfoInitSignatureThumb[4] = {0xB5F0, 0xB085, 0x483D, 0x6801};
@@ -220,7 +221,7 @@ static const u16 cartExistSignatureThumb[4] = {0xB510, 0xB084, 0x2401, 0x4A27};
 static const u32 cartReadSignatureStart[1]      = {0xE92D40F0};
 static const u32 cartReadSignatureMid[4]        = {0xE3500011, 0x8A000009, 0xE3500010, 0x3A000004};
 static const u16 cartReadSignatureStartThumb[1] = {0xB5F0};
-static const u16 cartReadSignatureMidThumb[4]   = {0x2811, 0xD809, 0x2810, 0xD304};
+static const u16 cartReadSignatureMidThumb[4]   = {0x2811, 0xD809, 0x2810, 0xD304}; */
 
 // Wait CPU cycles (SDK 1-4)
 static const u32 waitCpuCyclesSignature[3] = {0xE2500004, 0x2AFFFFFD, 0xE12FFF1E};
@@ -261,6 +262,13 @@ static const u32 initHeapEndFuncISignatureEnhanced[2]  = {0xE3500000, 0x13A007BE
 static const u32 initHeapEndFuncISignature[2]          = {0xE3A007BE, 0xE8BD8008};
 static const u32 initHeapEndFuncISignatureDebug[2]     = {0xE3A007BE, 0xEA000043};
 static const u32 initHeapEndFuncISignatureThumb[1]     = {0x048020BE};
+
+// Actimagine/Mobiclip
+static const u32 actimagineFrameDrawStartSignature[4]    = {0xE92D5FF0, 0xE590800C, 0xE5909010, 0xE590A014};
+static const u32 actimagineFrameDrawStartSignatureAlt[5] = {0xE92D5FF0, 0xE5901004, 0xE5902008, 0xE5900000, 0xE59F3514};
+static const u32 actimagineFrameDrawEndSignature[5]      = {0xE25AA002, 0xCAFFFEB9, 0xE8BD07E0, 0xE8BD5FF0, 0xE12FFF1E};
+static const u32 actimagineFrameDrawEndSignatureAlt[4]   = {0xE25AA002, 0xCAFFFEBD, 0xE8BD5FF0, 0xE12FFF1E};
+static const u32 mobiclipFrameDrawEndSignature[4]        = {0xE25AA002, 0xCAFFFEA1, 0xE28DD018, 0xE8BD9FF0};
 
 // Reset
 static const u32 resetSignature2[4]     = {0xE92D4030, 0xE24DD004, 0xE59F1090, 0xE1A05000}; // sdk2
@@ -2398,7 +2406,7 @@ u16* findFileIoReadOffsetThumb(const u16* fileIoSeekOffset, const module_params_
 	return offset;
 }
 
-u32* findCartInfoInitConstantOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
+/* u32* findCartInfoInitConstantOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
 	dbg_printf("findCartInfoInitConstantOffset:\n");
 
 	u32* offset = NULL;
@@ -2499,7 +2507,7 @@ u32* findCartReadOffset(const tNDSHeader* ndsHeader, bool usesThumb) {
 
 	dbg_printf("\n");
 	return startOffset;
-}
+} */
 
 u32* findWaitCpuCyclesOffset(const tNDSHeader* ndsHeader) {
 	dbg_printf("findWaitCpuCyclesOffset:\n");
@@ -2803,7 +2811,7 @@ u32* findCardSetDmaSdk5(const tNDSHeader* ndsHeader, const module_params_t* modu
              if(usesThumb) {
                   dbg_printf("cardSetDmaSignatureStartThumb used: ");
             		startOffset = (u32*)findOffsetBackwardsThumb(
-                		(u16*)cardSetDmaEndOffset, 0x90,
+                		(u16*)cardSetDmaEndOffset, 0x60,
                       cardSetDmaSignatureStartThumb5, 2
                   );
               } else {
@@ -2813,11 +2821,18 @@ u32* findCardSetDmaSdk5(const tNDSHeader* ndsHeader, const module_params_t* modu
                       cardSetDmaSignatureStart5, 2
                   );
               }
-            if (!startOffset && !usesThumb) {
-            	startOffset = findOffsetBackwards(
-            		cardSetDmaEndOffset, 0x90,
-                  cardSetDmaSignatureStart5Alt, 2
-              );
+			if (!startOffset) {
+				if (usesThumb) {
+					startOffset = (u32*)findOffsetBackwardsThumb(
+                		(u16*)cardSetDmaEndOffset, 0x60,
+					  cardSetDmaSignatureStartThumb5Alt, 2
+				  );
+				} else {
+					startOffset = findOffsetBackwards(
+						cardSetDmaEndOffset, 0x90,
+					  cardSetDmaSignatureStart5Alt, 2
+				  );
+				}
 			}
             if (startOffset!=NULL) {
                 dbg_printf("cardSetDmaSignatureStart found\n");
@@ -2953,6 +2968,73 @@ u32* findSrlStartOffset9(const tNDSHeader* ndsHeader) {
 	}
 
 	dbg_printf("\n");
+	return offset;
+}
+
+u32* findMobiclipFrameDrawEndOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+	dbg_printf("findMobiclipFrameDrawEndOffset:\n");
+
+	u32* offset = NULL;
+	if (moduleParams->sdk_version < 0x5000000) {
+		offset = findOffset(
+			(u32*)ndsHeader->arm9destination, iUncompressedSize,
+			actimagineFrameDrawEndSignature, 5
+		);
+		if (!offset) {
+			offset = findOffset(
+				(u32*)ndsHeader->arm9destination, iUncompressedSize,
+				actimagineFrameDrawEndSignatureAlt, 4
+			);
+		}
+
+		if (offset) {
+			dbg_printf("Actimagine frame draw end found\n");
+			goto findMobiclipFrameDrawEndOffset_return;
+		} else {
+			dbg_printf("Actimagine frame draw end not found\n");
+		}
+	}
+
+	if (moduleParams->sdk_version > 0x4008000) {
+		offset = findOffset(
+			(u32*)ndsHeader->arm9destination, iUncompressedSize,
+			mobiclipFrameDrawEndSignature, 4
+		);
+
+		if (offset) {
+			dbg_printf("Mobiclip frame draw end found\n");
+		} else {
+			dbg_printf("Mobiclip frame draw end not found\n");
+		}
+	}
+
+findMobiclipFrameDrawEndOffset_return:
+	dbg_printf("\n");
+	return offset;
+}
+
+u32* findMobiclipFrameDrawStartOffset(const u32* endOffset) {
+	dbg_printf("findMobiclipFrameDrawStartOffset:\n");
+
+	u32* offset = findOffsetBackwards(
+		endOffset, 0x600,
+		actimagineFrameDrawStartSignature, 4
+	);
+	if (!offset) {
+		offset = findOffsetBackwards(
+			endOffset, 0x600,
+			actimagineFrameDrawStartSignatureAlt, 5
+		);
+	}
+
+	dbg_printf("Actimagine/Mobiclip frame draw start ");
+	if (offset) {
+		dbg_printf("found");
+	} else {
+		dbg_printf("not found");
+	}
+
+	dbg_printf("\n\n");
 	return offset;
 }
 

@@ -119,6 +119,7 @@ retail/nitrofiles/cardenginei_arm7*.bin
 retail/nitrofiles/cardenginei_arm9*.bin
 retail/nitrofiles/preLoadSettings*.pck
 retail/nitrofiles/apfix.pck
+retail/nitrofiles/mobiclipOffsets.pck
 retail/nitrofiles/dsi2dsSavePatches.pck
 retail/nitrofiles_dec/cardengine_arm7*.bin
 retail/nitrofiles_dec/cardengine_arm9*.bin
@@ -132,3 +133,5 @@ retail/arm9/include/version.h
 *.exe
 *.lz77
 !retail/nitrofiles/fonts/*.lz77
+!retail/nitrofiles/bootloader_images.lz77
+!retail/nitrofiles/esrbOnlineNotice.lz77

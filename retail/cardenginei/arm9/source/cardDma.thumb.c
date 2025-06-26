@@ -389,17 +389,17 @@ void cardSetDma(u32 * params) {
 	if (!(ce9->valueBits & ROMinRAM)) {
 		#ifndef TWLSDK
 		for (int i = 0; i < 4; i++) {
-			if (ce9->romPartSize[i] == 0) {
+			if (ce9->romPartSrc[i] == 0) {
 				break;
 			}
-			romPart = (src >= ce9->romPartSrc[i] && src < ce9->romPartSrc[i]+ce9->romPartSize[i]);
+			romPart = (src >= ce9->romPartSrc[i] && src < ce9->romPartSrcEnd[i]);
 			if (romPart) {
 				// romPartNo = i;
 				break;
 			}
 		}
 		#else
-		romPart = (ce9->romPartSize[0] > 0 && src >= ce9->romPartSrc[0] && src < ce9->romPartSrc[0]+ce9->romPartSize[0]);
+		romPart = (ce9->romPartSrc[0] > 0 && src >= ce9->romPartSrc[0] && src < ce9->romPartSrcEnd[0]);
 		#endif
 		/* #ifndef DLDI
 		#ifndef TWLSDK

@@ -66,7 +66,6 @@ static const char colorLutBlacklist[][4] = {
 	"B8I", // Spider-Man: Edge of Time
 	"CSW", // Star Wars: Battlefont: Elite Squadron
 	"YST", // Star Wars: The Force Unleashed
-	"AZL", // Style Savvy
 	"VT3", // Toy Story 3
 	"VTE", // Tron: Evolution
 	"CP3", // Viva Pinata: Pocket Paradise
@@ -199,10 +198,6 @@ Star Wars: Battlefont: Elite Squadron,
 Star Wars: The Force Unleashed:
 - Crashes on black screens
 
-Style Savvy:
-- Character skin and hair use color blending
-- Crashes when the master brightness register gets changed, and would occur when using a specific LUT which has inverted black/white or a non-white white
-
 Toy Story 3,
 Tron: Evolution:
 - Crashes on black screens
@@ -221,7 +216,27 @@ Yu-Gi-Oh! 5D's: World Championship 2011: Over The Nexus:
 
 */
 
+static const char colorLutMasterBrightBlacklist[][4] = {
+	"ABM", // Bomberman
+	"C24", // Phantasy Star 0
+	"AZL", // Style Savvy
+};
+
+/* Blacklist reasons (would occur when using a specific LUT which has inverted black/white or a non-white white)
+
+Bomberman:
+- Master brightness is not changed due to blacklisting VCount IRQ
+
+Phantasy Star 0:
+- Loops between black and white screens
+
+Style Savvy:
+- Crashes on company logo screens when the master brightness register gets changed
+
+*/
+
 static const char colorLutVCountBlacklist[][4] = {
+	"ABM", // Bomberman
 	"K2J", // Cake Ninja
 	"K2N", // Cake Ninja 2
 	"KYN", // Cake Ninja: XMAS
@@ -236,6 +251,9 @@ static const char colorLutVCountBlacklist[][4] = {
 };
 
 /* VCount IRQ will not be hooked to the color LUT code for these titles, in order to work around these issues...
+
+Bomberman:
+- Crashes when opening a stage
 
 Cake Ninja,
 Cake Ninja 2,

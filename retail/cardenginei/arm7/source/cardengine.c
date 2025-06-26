@@ -31,6 +31,7 @@
 #include <nds/debug.h>
 
 #include "ndma.h"
+#include "dmaTwl.h"
 #include "tonccpy.h"
 #include "my_sdmmc.h"
 #include "my_fat.h"
@@ -78,6 +79,7 @@
 #define ndmaDisabled BIT(20)
 #define isDlp BIT(21)
 #define useColorLut BIT(22)
+#define clearRamOnReset BIT(23)
 #define i2cBricked BIT(30)
 #define scfgLocked BIT(31)
 
@@ -197,7 +199,7 @@ extern u32 romLocation;
 
 extern u32 romMapLines;
 // 0: ROM part start, 1: ROM part start in RAM, 2: ROM part end in RAM
-extern u32 romMap[7][3];
+extern u32 romMap[][3];
 
 u32 currentSrlAddr = 0;
 
@@ -627,7 +629,13 @@ void reset(const bool downloadedSrl) {
 		u32 newArm7binarySize = 0;
 		fileRead((char*)&iUncompressedSize, &pageFile, 0x5FFFF0, sizeof(u32));
 		fileRead((char*)&newArm7binarySize, &pageFile, 0x5FFFF4, sizeof(u32));
+		if (valueBits & clearRamOnReset) {
+			dma_twlFill32Async(1, 0, (void*)0x02000000+iUncompressedSize, 0x3E0000-iUncompressedSize);
+		}
 		fileRead((char*)ndsHeader->arm9destination, &pageFile, 0x14000, iUncompressedSize);
+		if (valueBits & clearRamOnReset) {
+			while (ndmaBusy(1));
+		}
 		fileRead((char*)ndsHeader->arm7destination, &pageFile, 0x2C0000, newArm7binarySize);
 	} /* else {
 		ndmaCopyWordsAsynch(0, (char*)ndsHeader->arm9destination+0x400000, ndsHeader->arm9destination, *(u32*)ARM9_DEC_SIZE_LOCATION);

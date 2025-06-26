@@ -58,6 +58,7 @@
 #define b_ndmaDisabled BIT(20)
 #define b_isDlp BIT(21)
 #define b_useColorLut BIT(22)
+#define b_clearRamOnReset BIT(23)
 #define b_i2cBricked BIT(30)
 #define b_scfgLocked BIT(31)
 
@@ -160,14 +161,14 @@ int hookNdsRetailArm7(
 ) {
 	dbg_printf("hookNdsRetailArm7\n");
 
-	bool ce7NotFound = (ce7 == NULL);
+	// bool ce7NotFound = (ce7 == NULL);
 
 	/*if (newArm7binarySize < 0x1000) {
 		return ERR_NONE;
 	}*/
 
 	u32* handlerLocation = patchOffsetCache.a7IrqHandlerOffset;
-	if (!handlerLocation && !ce7NotFound) {
+	if (!handlerLocation /* && !ce7NotFound */) {
 		handlerLocation = findIrqHandlerOffset((u32*)ndsHeader->arm7destination, newArm7binarySize);
 		if (!handlerLocation && ndsHeader->unitCode == 0x03) {
 			handlerLocation = findIrqHandlerOffset((u32*)__DSiHeader->arm7idestination, newArm7ibinarySize);
@@ -179,7 +180,7 @@ int hookNdsRetailArm7(
 
 	const char* romTid = getRomTid(ndsHeader);
 
-	if (!handlerLocation && !ce7NotFound) {
+	if (!handlerLocation /* && !ce7NotFound */) {
 	/*	if (strncmp(romTid, "YGX", 3) == 0) {
 			ce7->valueBits |= b_powerCodeOnVBlank;
 		} else {
@@ -198,7 +199,7 @@ int hookNdsRetailArm7(
 	}*/
 
 	u32* wordsLocation = patchOffsetCache.a7IrqHandlerWordsOffset;
-	if (!wordsLocation && !ce7NotFound) {
+	if (!wordsLocation /* && !ce7NotFound */) {
 		wordsLocation = findIrqHandlerWordsOffset(handlerLocation, (u32*)ndsHeader->arm7destination, newArm7binarySize);
 		if (wordsLocation) {
 			patchOffsetCache.a7IrqHandlerWordsOffset = wordsLocation;
@@ -346,185 +347,190 @@ int hookNdsRetailArm7(
 
 	extern u32 cheatEngineOffset;
 
-	if (!ce7NotFound) {
+	// if (!ce7NotFound) {
 	/*	u32 intr_vblank_orig_return = *(u32*)0x2FFC004;
 		intr_vblank_orig_return += 0x2FFC008;
 
 		*(u32*)intr_vblank_orig_return = *vblankHandler;
 		*vblankHandler = 0x2FFC008;
 	} else {*/
-		extern u32 iUncompressedSize;
-		extern bool hasVramWifiBinary;
-		// extern u32 dataToPreloadAddr;
-		// extern u32 dataToPreloadSize;
-		// extern u32 dataToPreloadFrame;
-		extern bool colorLutEnabled;
-		extern bool dataToPreloadFound(const tNDSHeader* ndsHeader);
-		const bool laterSdk = ((moduleParams->sdk_version >= 0x2008000 && moduleParams->sdk_version != 0x2012774) || moduleParams->sdk_version == 0x20029A8);
+	extern u32 iUncompressedSize;
+	extern bool hasVramWifiBinary;
+	// extern u32 dataToPreloadAddr;
+	// extern u32 dataToPreloadSize;
+	// extern u32 dataToPreloadFrame;
+	extern bool colorLutEnabled;
+	extern bool dataToPreloadFound(const tNDSHeader* ndsHeader);
+	const bool laterSdk = ((moduleParams->sdk_version >= 0x2008000 && moduleParams->sdk_version != 0x2012774) || moduleParams->sdk_version == 0x20029A8);
 
-		ce7->intr_vblank_orig_return  = *vblankHandler;
-		ce7->intr_fifo_orig_return    = *ipcSyncHandler;
-		ce7->cheatEngineAddr          = cheatEngineOffset;
-		ce7->fileCluster              = fileCluster;
-		ce7->patchOffsetCacheFileCluster = patchOffsetCacheFileCluster;
-		ce7->srParamsCluster          = srParamsFileCluster;
-		ce7->ramDumpCluster           = ramDumpCluster;
-		ce7->screenshotCluster        = screenshotCluster;
-		ce7->pageFileCluster          = pageFileCluster;
-		ce7->manualCluster            = manualCluster;
-		if (gameOnFlashcard) {
-			ce7->valueBits |= b_gameOnFlashcard;
-		}
-		if (saveOnFlashcard) {
-			ce7->valueBits |= b_saveOnFlashcard;
-		}
-		if (!laterSdk) {
-			ce7->valueBits |= b_eSdk2;
-		}
-		if (ROMinRAM) {
-			ce7->valueBits |= b_ROMinRAM;
-		}
-		if (dsiMode) {
-			ce7->valueBits |= b_dsiMode; // SDK 5
-		}
-		if (dsiSD) {
-			ce7->valueBits |= b_dsiSD;
-		}
-		if (consoleModel < 2 && preciseVolumeControl) {
-			ce7->valueBits |= b_preciseVolumeControl;
-		}
-		if (strncmp(romTid, "YL2", 3) == 0) { // Luminous Arc 2
-			ce7->valueBits |= b_delayWrites; // Delay save writes by 1 frame for the first 2 seconds to fix crash on first boot
-		}
-		if (hiyaCfwFound) {
-			ce7->valueBits |= b_hiyaCfwFound;
-		}
-		if (strncmp(romTid, "UBR", 3) == 0 || iUncompressedSize > 0x26C000) {
-			ce7->valueBits |= b_slowSoftReset;
-		}
-		if (igmAccessible) {
-			ce7->valueBits |= b_igmAccessible;
-		}
-		if (isSdk5(moduleParams)) {
-			ce7->valueBits |= b_isSdk5;
-		}
-		if (hasVramWifiBinary) {
-			ce7->valueBits |= b_hasVramWifiBinary;
-		}
-		if (twlTouch) {
-			ce7->valueBits |= b_twlTouch;
-		}
-		if (usesCloneboot) {
-			ce7->valueBits |= b_cloneboot;
-		}
-		if (sleepMode) {
-			ce7->valueBits |= b_sleepMode;
-		}
-		if (!(REG_SCFG_ROM & BIT(9))) {
-			ce7->valueBits |= b_dsiBios;
-		}
-		if (bootstrapOnFlashcard) {
-			ce7->valueBits |= b_bootstrapOnFlashcard;
-		}
-		if (ndmaDisabled) {
-			ce7->valueBits |= b_ndmaDisabled;
-		}
-		if (strncmp(romTid, "HND", 3) == 0) {
-			ce7->valueBits |= b_isDlp;
-		}
-		extern bool i2cBricked;
-		if (i2cBricked) {
-			ce7->valueBits |= b_i2cBricked;
-		}
-		if (colorLutEnabled) {
-			ce7->valueBits |= b_useColorLut;
-		}
-		if (REG_SCFG_EXT == 0) {
-			ce7->valueBits |= b_scfgLocked;
-		}
-		ce7->mainScreen               = mainScreen;
-		ce7->language                 = language;
-		if (strcmp(romTid, "AKYP") == 0) { // Etrian Odyssey (EUR)
-			ce7->languageAddr = (u32*)0x020DC5DC;
-		}
-		ce7->consoleModel             = consoleModel;
-		ce7->romRead_LED              = romRead_LED;
-		ce7->dmaRomRead_LED           = dmaRomRead_LED;
-		ce7->scfgRomBak               = REG_SCFG_ROM;
-
-		/* if (!ROMinRAM && dataToPreloadFound(ndsHeader) && dataToPreloadFrame) {
-			ce7->romPartLocation = romPartLocation;
-			ce7->romPartSrc = dataToPreloadAddr;
-			ce7->romPartSize = dataToPreloadSize;
-			ce7->romPartFrame = dataToPreloadFrame;
-		} */
-
-		if (ROMinRAM) {
-			extern u32 getRomLocation(const tNDSHeader* ndsHeader, const bool isSdk5);
-			ce7->romLocation = getRomLocation(ndsHeader, (ce7->valueBits & b_isSdk5));
-
-			extern u32 baseArm9Off;
-			extern u32 baseArm9Size;
-			extern u32 baseArm7Off;
-			extern u32 baseArm7Size;
-			extern u32 baseArm9OvlSrc;
-			extern u32 baseArm9OvlSize;
-
-			u32 romOffset = 0;
-			if (usesCloneboot) {
-				romOffset = 0x4000;
-			} else if (baseArm9OvlSrc == 0 || baseArm9OvlSize == 0) {
-				romOffset = (baseArm7Off + baseArm7Size);
-			} else if (baseArm9OvlSrc > baseArm7Off) {
-				romOffset = (baseArm9Off + baseArm9Size);
-			} else {
-				romOffset = baseArm9OvlSrc;
-			}
-			ce7->romLocation -= romOffset;
-
-			extern u32 romMapLines;
-			extern u32 romMap[][3];
-
-			ce7->romMapLines = romMapLines;
-			for (int i = 0; i < romMapLines; i++) {
-				for (int i2 = 0; i2 < 3; i2++) {
-					ce7->romMap[i][i2] = romMap[i][i2];
-				}
-			}
-		}
-
-		*vblankHandler = ce7->patches->vblankHandler;
-		if (ce7->patches->fifoHandler) {
-		*ipcSyncHandler = ce7->patches->fifoHandler;
-		/*if ((strncmp(romTid, "UOR", 3) == 0)
-		 || (strncmp(romTid, "UXB", 3) == 0)
-		 || (strncmp(romTid, "USK", 3) == 0)
-		|| (!gameOnFlashcard && !ROMinRAM)) {
-			if (!ROMinRAM) {
-				ce7->valueBits |= b_runCardEngineCheck;
-			}
-		}*/
-		}
-
-		/*extern bool setDmaPatched;
-
-		if (!setDmaPatched
-		// && strncmp(romTid, "ALK", 3) != 0
-		 && strncmp(romTid, "VDE", 3) != 0) {
-			ce7->valueBits |= b_ipcEveryFrame;
-		}*/
+	ce7->intr_vblank_orig_return  = *vblankHandler;
+	ce7->intr_fifo_orig_return    = *ipcSyncHandler;
+	ce7->cheatEngineAddr          = cheatEngineOffset;
+	ce7->fileCluster              = fileCluster;
+	ce7->patchOffsetCacheFileCluster = patchOffsetCacheFileCluster;
+	ce7->srParamsCluster          = srParamsFileCluster;
+	ce7->ramDumpCluster           = ramDumpCluster;
+	ce7->screenshotCluster        = screenshotCluster;
+	ce7->pageFileCluster          = pageFileCluster;
+	ce7->manualCluster            = manualCluster;
+	if (gameOnFlashcard) {
+		ce7->valueBits |= b_gameOnFlashcard;
 	}
+	if (saveOnFlashcard) {
+		ce7->valueBits |= b_saveOnFlashcard;
+	}
+	if (!laterSdk) {
+		ce7->valueBits |= b_eSdk2;
+	}
+	if (ROMinRAM) {
+		ce7->valueBits |= b_ROMinRAM;
+	}
+	if (dsiMode) {
+		ce7->valueBits |= b_dsiMode; // SDK 5
+	}
+	if (dsiSD) {
+		ce7->valueBits |= b_dsiSD;
+	}
+	if (consoleModel < 2 && preciseVolumeControl) {
+		ce7->valueBits |= b_preciseVolumeControl;
+	}
+	if (strncmp(romTid, "YL2", 3) == 0) { // Luminous Arc 2
+		ce7->valueBits |= b_delayWrites; // Delay save writes by 1 frame for the first 2 seconds to fix crash on first boot
+	}
+	if (hiyaCfwFound) {
+		ce7->valueBits |= b_hiyaCfwFound;
+	}
+	if (strncmp(romTid, "UBR", 3) == 0 || iUncompressedSize > 0x26C000) {
+		ce7->valueBits |= b_slowSoftReset;
+	}
+	if (igmAccessible) {
+		ce7->valueBits |= b_igmAccessible;
+	}
+	if (isSdk5(moduleParams)) {
+		ce7->valueBits |= b_isSdk5;
+	}
+	if (hasVramWifiBinary) {
+		ce7->valueBits |= b_hasVramWifiBinary;
+	}
+	if (twlTouch) {
+		ce7->valueBits |= b_twlTouch;
+	}
+	if (usesCloneboot) {
+		ce7->valueBits |= b_cloneboot;
+	}
+	if (sleepMode) {
+		ce7->valueBits |= b_sleepMode;
+	}
+	if (!(REG_SCFG_ROM & BIT(9))) {
+		ce7->valueBits |= b_dsiBios;
+	}
+	if (bootstrapOnFlashcard) {
+		ce7->valueBits |= b_bootstrapOnFlashcard;
+	}
+	if (ndmaDisabled) {
+		ce7->valueBits |= b_ndmaDisabled;
+	}
+	if (strncmp(romTid, "HND", 3) == 0) {
+		ce7->valueBits |= b_isDlp;
+	}
+	extern bool i2cBricked;
+	if (i2cBricked) {
+		ce7->valueBits |= b_i2cBricked;
+	}
+	if (colorLutEnabled) {
+		ce7->valueBits |= b_useColorLut;
+	}
+	if (strncmp(romTid, "A5F", 3) == 0 || strncmp(romTid, "C5F", 3) == 0) { // Professor Layton and the Curious Village
+		ce7->valueBits |= b_clearRamOnReset;
+	}
+	if (REG_SCFG_EXT == 0) {
+		ce7->valueBits |= b_scfgLocked;
+	}
+	ce7->mainScreen               = mainScreen;
+	ce7->language                 = language;
+	if (strcmp(romTid, "AKYP") == 0) { // Etrian Odyssey (EUR)
+		ce7->languageAddr = (u32*)0x020DC5DC;
+	}
+	ce7->consoleModel             = consoleModel;
+	ce7->romRead_LED              = romRead_LED;
+	ce7->dmaRomRead_LED           = dmaRomRead_LED;
+	ce7->scfgRomBak               = REG_SCFG_ROM;
+
+	/* if (!ROMinRAM && dataToPreloadFound(ndsHeader) && dataToPreloadFrame) {
+		ce7->romPartLocation = romPartLocation;
+		ce7->romPartSrc = dataToPreloadAddr;
+		ce7->romPartSize = dataToPreloadSize;
+		ce7->romPartFrame = dataToPreloadFrame;
+	} */
+
+	if (ROMinRAM) {
+		extern u32 getRomLocation(const tNDSHeader* ndsHeader, const bool isSdk5);
+		ce7->romLocation = getRomLocation(ndsHeader, (ce7->valueBits & b_isSdk5));
+
+		extern u32 baseArm9Off;
+		extern u32 baseArm9Size;
+		extern u32 baseArm7Off;
+		extern u32 baseArm7Size;
+		extern u32 baseArm9OvlSrc;
+		extern u32 baseArm9OvlSize;
+
+		u32 romOffset = 0;
+		if (usesCloneboot) {
+			romOffset = 0x4000;
+		} else if (baseArm9OvlSrc == 0 || baseArm9OvlSize == 0) {
+			romOffset = (baseArm7Off + baseArm7Size);
+		} else if (baseArm9OvlSrc > baseArm7Off) {
+			romOffset = (baseArm9Off + baseArm9Size);
+		} else {
+			romOffset = baseArm9OvlSrc;
+		}
+		ce7->romLocation -= romOffset;
+	}
+
+	if ((dataToPreloadFound(ndsHeader) || ROMinRAM) && (ndsHeader->unitCode == 0 || !dsiMode)) {
+		extern u32 romMapLines;
+		extern u32 romMap[][3];
+
+		ce7->romMapLines = romMapLines;
+		for (int i = 0; i < romMapLines; i++) {
+			for (int i2 = 0; i2 < 3; i2++) {
+				ce7->romMap[i][i2] = romMap[i][i2];
+			}
+		}
+	}
+
+	*vblankHandler = ce7->patches->vblankHandler;
+	if (ce7->patches->fifoHandler) {
+	*ipcSyncHandler = ce7->patches->fifoHandler;
+	/*if ((strncmp(romTid, "UOR", 3) == 0)
+	 || (strncmp(romTid, "UXB", 3) == 0)
+	 || (strncmp(romTid, "USK", 3) == 0)
+	|| (!gameOnFlashcard && !ROMinRAM)) {
+		if (!ROMinRAM) {
+			ce7->valueBits |= b_runCardEngineCheck;
+		}
+	}*/
+	}
+
+	/*extern bool setDmaPatched;
+
+	if (!setDmaPatched
+	// && strncmp(romTid, "ALK", 3) != 0
+	 && strncmp(romTid, "VDE", 3) != 0) {
+		ce7->valueBits |= b_ipcEveryFrame;
+	}*/
+	// }
 
 	extern u32 cheatSizeTotal;
 	extern char cheatEngineBuffer[0x400];
-	u16 cheatSizeLimit = (ce7NotFound ? 0x1C00 : 0x8000);
-	if (!ce7NotFound) {
+	u16 cheatSizeLimit = (/* ce7NotFound ? 0x1C00 : */ 0x8000);
+	// if (!ce7NotFound) {
 		if (cheatEngineOffset == CHEAT_ENGINE_DSIWARE_LOCATION) {
 			cheatSizeLimit -= 0x1800;
 		} else if (cheatEngineOffset == CHEAT_ENGINE_DSIWARE_LOCATION3) {
 			cheatSizeLimit -= 0x1000;
 		}
-	}
+	// }
 	char* cheatDataOffset = (char*)cheatEngineOffset+0x3E8;
 	/*if (ce7NotFound) {
 		cheatEngineOffset = 0x2FFC000;
