@@ -267,6 +267,8 @@ static void fixForDSiBios(const cardengineArm7* ce7, const tNDSHeader* ndsHeader
 			if (isSdk5(moduleParams)) {
 				toncset16(swiGetPitchTableOffset, 0x46C0, 6);
 			} else if (patchOffsetCache.a7IsThumb) {
+				if (newSwiGetPitchTableAddr == 0) return;
+
 				tonccpy((u16*)newSwiGetPitchTableAddr, swiGetPitchTablePatch, 0x10);
 				u32 srcAddr = (u32)swiGetPitchTableOffset - vAddrOfRelocSrc + 0x37F8000;
 				u32 dstAddr = (u32)newSwiGetPitchTableAddr - vAddrOfRelocSrc + 0x37F8000;
