@@ -860,6 +860,9 @@ static void load_conf(configuration* conf, const char* fn) {
 
 	// Manual file path
 	conf->manualPath = strdup(config_file.fetch("NDS-BOOTSTRAP", "MANUAL_PATH").c_str());
+
+	// Save Relocation
+	conf->saveRelocation = (bool)strtol(config_file.fetch("NDS-BOOTSTRAP", "SAVE_RELOCATION", "1").c_str(), NULL, 0);
 }
 
 /*static void load_game_conf(configuration* conf, const char* fn, char* romTid) {

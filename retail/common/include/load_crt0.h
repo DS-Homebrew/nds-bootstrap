@@ -63,6 +63,7 @@ typedef struct loadCrt0 {
     u8 dmaRomRead_LED;
     u8 soundFreq;
     u8 valueBits3;
+    u8 saveRelocation;
 } loadCrt0;
 
 #endif // LOAD_CRT0_H

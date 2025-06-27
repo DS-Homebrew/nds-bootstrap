@@ -96,6 +96,7 @@ extern u32 initDisc;
 extern u16 bootstrapOnFlashcard;
 extern u8 gameOnFlashcard;
 extern u8 saveOnFlashcard;
+extern u8 saveRelocation;
 extern u16 a9ScfgRom;
 extern u8 dsiSD;
 extern u32 saveFileCluster;
@@ -2169,7 +2170,7 @@ int arm7_main(void) {
 		}*/
 
 		if (!gameOnFlashcard && REG_SCFG_EXT != 0 && !(REG_SCFG_MC & BIT(0))) {
-			if (specialCard) {
+			if (specialCard || saveRelocation == FALSE) {
 				// Enable Slot-1 for games that use IR
 				my_enableSlot1();
 			} else {
