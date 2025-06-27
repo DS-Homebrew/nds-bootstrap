@@ -224,6 +224,7 @@ int hookNdsRetailArm9(
 	extern u32* mobiclipEndOffset;
 	extern bool colorLutEnabled;
 	extern bool colorLutBlockVCount;
+	extern u32 newSwiHaltAddr;
 	extern bool romLocationAdjust(const tNDSHeader* ndsHeader, const bool laterSdk, const bool isSdk5, u32* romLocation);
 	extern u32 dataToPreloadFullSize(void);
 	extern bool dataToPreloadFound(const tNDSHeader* ndsHeader);
@@ -242,7 +243,7 @@ int hookNdsRetailArm9(
 	if (!laterSdk) {
 		ce9->valueBits |= b_eSdk2;
 	}
-	if (pkmnGen5) {
+	if (newSwiHaltAddr == 0) {
 		ce9->valueBits |= b_pingIpc;
 	}
 	if (enableExceptionHandler) {

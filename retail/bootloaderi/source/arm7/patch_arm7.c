@@ -168,6 +168,8 @@ static void patchSwiHalt(const cardengineArm7* ce7, const tNDSHeader* ndsHeader,
 	if (swiHaltOffset) {
 		// Patch
 		if (patchOffsetCache.a7IsThumb) {
+			if (newSwiHaltAddr == 0) return;
+
 			tonccpy((u16*)newSwiHaltAddr, ce7->patches->newSwiHaltThumb, 0x18);
 			u32 srcAddr = (u32)swiHaltOffset - vAddrOfRelocSrc + (*(u32*)0x02FFE1A0==0x080037C0 ? 0x37C0000 : 0x37F8000);
 			u32 dstAddr = (u32)newSwiHaltAddr - vAddrOfRelocSrc + (*(u32*)0x02FFE1A0==0x080037C0 ? 0x37C0000 : 0x37F8000);
