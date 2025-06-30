@@ -12,6 +12,9 @@
 #include "debug_file.h"
 #include <nds/card.h>
 
+#define FEATURE_SLOT_GBA			0x00000010
+#define FEATURE_SLOT_NDS			0x00000020
+
 extern u32 _io_dldi_features;
 
 extern u8 saveRelocation;
@@ -303,7 +306,7 @@ static void patchSleepMode(const tNDSHeader* ndsHeader) {
 		}
 		patchOffsetCache.sleepPatchOffset = sleepPatchOffset;
 	}
-	if ((_io_dldi_features & 0x00000010) || forceSleepPatch) {
+	if ((_io_dldi_features & FEATURE_SLOT_GBA) || forceSleepPatch) {
 		if (sleepPatchOffset) {
 			// Patch
 			*((u16*)sleepPatchOffset + 2) = 0;
@@ -555,45 +558,47 @@ u32 patchCardNdsArm7(
 		// saveRelocation: option value write in nds-bootstrap.ini (default value is 1)
 		// GameCodeMatch: Compare gamecodes between DS Cartridge and Rom on SD
 		// This file can active save located into DS Cartridge for B4DS mode in slot2 flashcart.
-		char headerData[0x200] = {0};
-		bool GameCodeMatch = FALSE;
-		cardParamCommand (CARD_CMD_HEADER_READ, 0, 
-			CARD_ACTIVATE | CARD_nRESET | CARD_CLK_SLOW | CARD_BLK_SIZE(1) | CARD_DELAY1(0x1FFF) | CARD_DELAY2(0x3F), 
-			(u32 *)headerData , 0x200 / sizeof(u32));
-		if(memcmp((const void*)(headerData + 0xC), ndsHeader->gameCode, 4) == 0)
-			GameCodeMatch = TRUE;
-		dbg_printf("romTid:");
-		dbg_printf(ndsHeader->gameCode);
-		dbg_printf("\nCardTid:");
-		dbg_printf((headerData+0xC));
-		dbg_printf("\nGameCodeMatch:");
-		dbg_hexa(GameCodeMatch);
-		dbg_printf("\nSaveRelocation:");
-		dbg_hexa(saveRelocation);
-		dbg_printf("\n");
-		if (!(saveRelocation == FALSE && GameCodeMatch == TRUE)){
-		if (newArm7binarySize==0x2352C || newArm7binarySize==0x235DC || newArm7binarySize==0x23CAC || newArm7binarySize==0x245C0 || newArm7binarySize==0x245C4) {
-			saveResult = savePatchInvertedThumb(ce7, ndsHeader, moduleParams, saveFileCluster);    
-		} else if (isSdk5(moduleParams)) {
-			// SDK 5
-			saveResult = savePatchV5(ce7, ndsHeader, saveFileCluster);
-		} else {
-			if (patchOffsetCache.savePatchType == 0) {
-				saveResult = savePatchV1(ce7, ndsHeader, moduleParams, saveFileCluster);
-				if (!saveResult) {
-					patchOffsetCache.savePatchType = 1;
-				}
-			}
-			if (!saveResult && patchOffsetCache.savePatchType == 1) {
-				saveResult = savePatchV2(ce7, ndsHeader, moduleParams, saveFileCluster);
-				if (!saveResult) {
-					patchOffsetCache.savePatchType = 2;
-				}
-			}
-			if (!saveResult && patchOffsetCache.savePatchType == 2) {
-				saveResult = savePatchUniversal(ce7, ndsHeader, moduleParams, saveFileCluster);
-			}
+		bool GameCodeMatch = false;
+		if (_io_dldi_features & FEATURE_SLOT_GBA) {
+			char headerData[0x200] = {0};
+			cardParamCommand (CARD_CMD_HEADER_READ, 0, 
+				CARD_ACTIVATE | CARD_nRESET | CARD_CLK_SLOW | CARD_BLK_SIZE(1) | CARD_DELAY1(0x1FFF) | CARD_DELAY2(0x3F), 
+				(u32 *)headerData , 0x200 / sizeof(u32));
+			if(memcmp((const void*)(headerData + 0xC), ndsHeader->gameCode, 4) == 0)
+				GameCodeMatch = TRUE;
+			dbg_printf("romTid:");
+			dbg_printf(ndsHeader->gameCode);
+			dbg_printf("\nCardTid:");
+			dbg_printf((headerData+0xC));
+			dbg_printf("\nGameCodeMatch:");
+			dbg_hexa(GameCodeMatch);
+			dbg_printf("\nSaveRelocation:");
+			dbg_hexa(saveRelocation);
+			dbg_printf("\n");
 		}
+		if (saveRelocation || !GameCodeMatch) {
+			if (newArm7binarySize==0x2352C || newArm7binarySize==0x235DC || newArm7binarySize==0x23CAC || newArm7binarySize==0x245C0 || newArm7binarySize==0x245C4) {
+				saveResult = savePatchInvertedThumb(ce7, ndsHeader, moduleParams, saveFileCluster);    
+			} else if (isSdk5(moduleParams)) {
+				// SDK 5
+				saveResult = savePatchV5(ce7, ndsHeader, saveFileCluster);
+			} else {
+				if (patchOffsetCache.savePatchType == 0) {
+					saveResult = savePatchV1(ce7, ndsHeader, moduleParams, saveFileCluster);
+					if (!saveResult) {
+						patchOffsetCache.savePatchType = 1;
+					}
+				}
+				if (!saveResult && patchOffsetCache.savePatchType == 1) {
+					saveResult = savePatchV2(ce7, ndsHeader, moduleParams, saveFileCluster);
+					if (!saveResult) {
+						patchOffsetCache.savePatchType = 2;
+					}
+				}
+				if (!saveResult && patchOffsetCache.savePatchType == 2) {
+					saveResult = savePatchUniversal(ce7, ndsHeader, moduleParams, saveFileCluster);
+				}
+			}
 		}
 		if (!saveResult) {
 			patchOffsetCache.savePatchType = 0;
