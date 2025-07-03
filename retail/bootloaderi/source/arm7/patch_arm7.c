@@ -812,7 +812,7 @@ u32 patchCardNdsArm7(
 		// GameCodeMatch: Compare gamecodes between DS Cartridge and Rom on SD
 		// This file can active save located into DS Cartridge for dsi/3ds mode.
 		bool GameCodeMatch = false;
-		if (!gameOnFlashcard && !saveOnFlashcard) {
+		if (!gameOnFlashcard && !saveOnFlashcard && REG_SCFG_EXT != 0 && !(REG_SCFG_MC & BIT(0))) {
 			char headerData[0x200] = {0};
 			cardParamCommand (CARD_CMD_HEADER_READ, 0, 
 				CARD_ACTIVATE | CARD_nRESET | CARD_CLK_SLOW | CARD_BLK_SIZE(1) | CARD_DELAY1(0x1FFF) | CARD_DELAY2(0x3F), 
