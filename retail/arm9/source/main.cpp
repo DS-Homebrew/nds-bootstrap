@@ -184,6 +184,7 @@ static inline void debugConfB4DS(configuration* conf) {
 	dbg_printf("logging: %s\n", btoa(conf->logging));
 	dbg_printf("initDisc: %s\n", btoa(conf->initDisc));
 	dbg_printf("macroMode: %s\n", btoa(conf->macroMode));
+	dbg_printf("saveRelocation: %s\n", btoa(conf->saveRelocation));
 }
 
 static inline void debugConf(configuration* conf) {
