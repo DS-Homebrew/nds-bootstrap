@@ -2534,7 +2534,10 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			} else {
 				loadCardEngineBinary("nitro:/cardengine_arm9_extmem.lz77", (u8*)CARDENGINE_ARM9_LOCATION_BUFFERED);
 			}
-		} else if (!startMultibootSrl && ((accessControl & BIT(4)) || (a7mbk6 == 0x080037C0 && ndsArm9Offset >= 0x02004000) || strncmp(romTid, "AP2", 3) == 0 || strncmp(romTid, "VSO", 3) == 0)) {
+		} else if (!startMultibootSrl && ((accessControl & BIT(4)) || (a7mbk6 == 0x080037C0 && ndsArm9Offset >= 0x02004000)
+				 || strncmp(romTid, "AP2", 3) == 0 // Metroid Prime Pinball
+				 || strncmp(romTid, "VSO", 3) == 0 // Sonic Classic Collection
+		)) {
 			if (foto) {
 				loadCardEngineBinary("nitro:/cardengine_arm9_start_foto.lz77", (u8*)CARDENGINE_ARM9_LOCATION_BUFFERED);
 			} else {
