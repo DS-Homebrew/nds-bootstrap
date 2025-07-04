@@ -184,6 +184,7 @@ static void patchSwiHalt(const cardengineArm7* ce7, const tNDSHeader* ndsHeader,
 		} else {
 			u32* swiHaltPatch = ce7->patches->j_newSwiHalt;
 			tonccpy(swiHaltOffset, swiHaltPatch, 0xC);
+			newSwiHaltAddr = 1; // Let ce9 know not to ping arm7 IPC
 		}
 		// swiHaltPatched = true;
 		dbg_printf("swiHalt hooked\n");
