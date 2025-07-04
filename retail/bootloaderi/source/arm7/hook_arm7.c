@@ -59,6 +59,7 @@
 #define b_isDlp BIT(21)
 #define b_useColorLut BIT(22)
 #define b_clearRamOnReset BIT(23)
+#define b_saveRelocation BIT(24)
 #define b_i2cBricked BIT(30)
 #define b_scfgLocked BIT(31)
 
@@ -442,6 +443,10 @@ int hookNdsRetailArm7(
 	}
 	if (strncmp(romTid, "A5F", 3) == 0 || strncmp(romTid, "C5F", 3) == 0) { // Professor Layton and the Curious Village
 		ce7->valueBits |= b_clearRamOnReset;
+	}
+	extern bool saveRelocationApplied;
+	if (saveRelocationApplied) {
+		ce7->valueBits |= b_saveRelocation;
 	}
 	if (REG_SCFG_EXT == 0) {
 		ce7->valueBits |= b_scfgLocked;

@@ -154,6 +154,7 @@ u32 vAddrOfRelocSrc = 0;
 u32 relocDestAtSharedMem = 0;
 u32 newSwiHaltAddr = 0;
 // bool swiHaltPatched = false;
+bool saveRelocationApplied = false;
 
 static void patchSwiHalt(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	extern bool pkmnGen5;
@@ -854,7 +855,9 @@ u32 patchCardNdsArm7(
 				}
 			}
 		}
-		if (!saveResult) {
+		if (saveResult) {
+			saveRelocationApplied = true;
+		} else {
 			patchOffsetCache.savePatchType = 0;
 		} /*else if (strncmp(romTid, "AMH", 3) == 0) {
 			aFile* savFile = (aFile*)(dsiSD ? SAV_FILE_LOCATION : SAV_FILE_LOCATION_ALT);

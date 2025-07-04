@@ -9,6 +9,7 @@
 #include "nds_header.h"
 #include "cardengine_header_arm9.h"
 
+#define pingIpc BIT(3)
 #define isSdk5_9 BIT(5)
 #define isSdk5_7 BIT(13)
 #define b_isDlp BIT(15)
@@ -124,7 +125,13 @@ int hookNdsRetailArm9(
 	//nocashMessage("hookNdsRetailArm9");
 
 	extern u32 iUncompressedSize;
+	extern u32 newSwiHaltAddr;
 
+	if (newSwiHaltAddr == 0) {
+		ce9->valueBits |= pingIpc;
+	} else {
+		ce9->valueBits &= ~pingIpc;
+	}
 	if (valueBits & isSdk5_7) {
 		ce9->valueBits |= isSdk5_9;
 	} else {

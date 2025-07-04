@@ -105,6 +105,7 @@ typedef struct cardengineArm7 {
 		21: isDlp
 		22: useColorLut
 		23: clearRamOnReset
+		24: saveRelocation
 		30: i2cBricked
 		31: scfgLocked
 	*/

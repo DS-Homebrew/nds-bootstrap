@@ -17,6 +17,7 @@
 #define dsiMode BIT(4)
 #define hasVramWifiBinary BIT(14)
 #define sleepMode BIT(17)
+#define saveRelocation BIT(24)
 
 extern u32 valueBits;
 extern u16 scfgRomBak;
@@ -41,7 +42,7 @@ const u16* generateA7InstrThumb(int arg1, int arg2) {
 	u32 offset = (u32)(arg2 - arg1 - 4);
 	//dbg_printf("generateA7InstrThumb offset\n");
 	//dbg_hexa(offset);
-	
+
 	// 1st instruction contains the upper 11 bit of the offset
 	instrs[0] = ((offset >> 12) & 0x7FF) | 0xF000;
 
@@ -70,6 +71,8 @@ static void patchSwiHalt(const cardengineArm7* ce7, const tNDSHeader* ndsHeader,
 	if (swiHaltOffset) {
 		// Patch
 		if (a7IsThumb) {
+			if (newSwiHaltAddr == 0) return;
+
 			tonccpy((u16*)newSwiHaltAddr, ce7->patches->newSwiHaltThumb, 0x18);
 			u32 srcAddr = (u32)swiHaltOffset - vAddrOfRelocSrc + 0x37F8000;
 			u32 dstAddr = (u32)newSwiHaltAddr - vAddrOfRelocSrc + 0x37F8000;
@@ -82,6 +85,7 @@ static void patchSwiHalt(const cardengineArm7* ce7, const tNDSHeader* ndsHeader,
 		} else {
 			u32* swiHaltPatch = ce7->patches->j_newSwiHalt;
 			tonccpy(swiHaltOffset, swiHaltPatch, 0xC);
+			newSwiHaltAddr = 1; // Let ce9 know not to ping arm7 IPC
 		}
 		// swiHaltPatched = true;
 		// dbg_printf("swiHalt hooked\n");
@@ -381,19 +385,21 @@ u32 patchCardNdsArm7(
 		patchMirrorCheck(ndsHeader, moduleParams);
 		patchVramWifiBinaryLoad(ndsHeader, moduleParams);
 		u32 saveResult = 0;
-		
-		if (ndsHeader->arm7binarySize==0x2352C || ndsHeader->arm7binarySize==0x235DC || ndsHeader->arm7binarySize==0x23CAC || ndsHeader->arm7binarySize==0x245C0 || ndsHeader->arm7binarySize==0x245C4) {
-			saveResult = savePatchInvertedThumb(ce7, ndsHeader, moduleParams);    
-		} else if (moduleParams->sdk_version > 0x5000000) {
-			// SDK 5
-			saveResult = savePatchV5(ce7, ndsHeader);
-		} else {
-			saveResult = savePatchV1(ce7, ndsHeader, moduleParams);
-			if (!saveResult) {
-				saveResult = savePatchV2(ce7, ndsHeader, moduleParams);
-			}
-			if (!saveResult) {
-				saveResult = savePatchUniversal(ce7, ndsHeader, moduleParams);
+
+		if (valueBits & saveRelocation) {
+			if (ndsHeader->arm7binarySize==0x2352C || ndsHeader->arm7binarySize==0x235DC || ndsHeader->arm7binarySize==0x23CAC || ndsHeader->arm7binarySize==0x245C0 || ndsHeader->arm7binarySize==0x245C4) {
+				saveResult = savePatchInvertedThumb(ce7, ndsHeader, moduleParams);
+			} else if (moduleParams->sdk_version > 0x5000000) {
+				// SDK 5
+				saveResult = savePatchV5(ce7, ndsHeader);
+			} else {
+				saveResult = savePatchV1(ce7, ndsHeader, moduleParams);
+				if (!saveResult) {
+					saveResult = savePatchV2(ce7, ndsHeader, moduleParams);
+				}
+				if (!saveResult) {
+					saveResult = savePatchUniversal(ce7, ndsHeader, moduleParams);
+				}
 			}
 		}
 	}
