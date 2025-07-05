@@ -207,7 +207,6 @@ int hookNdsRetailArm9(
 ) {
 	nocashMessage("hookNdsRetailArm9");
 
-	extern bool pkmnGen5;
 	extern bool sharedWramEnabled;
 	extern bool scfgBios9i(void);
 	extern u32 iUncompressedSize;
