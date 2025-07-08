@@ -126,8 +126,9 @@ void hookIPC_SYNC(void) {
 
 void enableIPC_SYNC(void) {
 	#ifndef GSDD
-	if (!IPC_SYNC_hooked) return;
-	REG_IE |= IRQ_IPC_SYNC;
+	if (IPC_SYNC_hooked && !(REG_IE & IRQ_IPC_SYNC)) {
+		REG_IE |= IRQ_IPC_SYNC;
+	}
 	#endif
 }
 
