@@ -78,6 +78,12 @@ romPartSrcEnd:
 	.word	0x00000000
 	.word	0x00000000
 	.word	0x00000000
+asyncDataSrc:
+	.word	0x00000000
+	.word	0x00000000
+asyncDataSrcEnd:
+	.word	0x00000000
+	.word	0x00000000
 #ifndef TWLSDK
 romMapLines:
 	.word	0x00000000

@@ -274,6 +274,10 @@ int runNds(u32 cluster, u32 saveCluster, u32 donorTwlCluster, /* u32 gbaCluster,
 		loader->dataToPreloadAddr[i]    = conf->dataToPreloadAddr[i];
 		loader->dataToPreloadSize[i]    = conf->dataToPreloadSize[i];
 	}
+	for (int i = 0; i < 2; i++) {
+		loader->asyncDataAddr[i]        = conf->asyncDataAddr[i];
+		loader->asyncDataSize[i]        = conf->asyncDataSize[i];
+	}
 	loader->wideCheatFileCluster        = wideCheatCluster;
 	loader->wideCheatSize               = conf->wideCheatSize;
 	loader->apPatchFileCluster          = apPatchCluster;

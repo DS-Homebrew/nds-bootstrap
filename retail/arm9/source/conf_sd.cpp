@@ -269,6 +269,157 @@ static bool loadPreLoadSettings(configuration* conf, const char* pckPath, const 
 	return true;
 }
 
+static void loadAsyncLoadSettings(configuration* conf, const char* romTid, const u16 headerCRC) {
+	// Set data to be asynchrously loadable
+	FILE *file = NULL;
+	u32 sizeOverride = 0;
+	bool readStrmFile = false;
+
+	if (strncmp(romTid, "IRE", 3) == 0 // Pokemon Black Version 2
+	 || strncmp(romTid, "IRD", 3) == 0) { // Pokemon White Version 2
+		if (romFSInit(conf->ndsPath)) {
+			file = fopen("rom:/swan_sound_data.sdat", "rb");
+			readStrmFile = true;
+		}
+	} else if (strncmp(romTid, "DSY", 3) == 0) { // System Flaw
+		if (romFSInit(conf->ndsPath)) {
+			file = fopen("rom:/data/mobiclip/intro.avi.mods", "rb");
+		}
+	}
+
+	if (file && readStrmFile) {
+		u32 sdatFatOffset = 0;
+		u32 sdatFatString = 0;
+		u32 sdatFatSize = 0;
+		u32 sdatFatFiles = 0;
+
+		fseek(file, 0x20, SEEK_SET);
+		fread(&sdatFatOffset, 1, sizeof(u32), file);
+		fseek(file, sdatFatOffset, SEEK_SET);
+		fread(&sdatFatString, 1, sizeof(u32), file);
+		if (sdatFatString == 0x20544146) { // 'FAT '
+			fread(&sdatFatSize, 1, sizeof(u32), file);
+			fread(&sdatFatFiles, 1, sizeof(u32), file);
+			sdatFatOffset += 0xC;
+			sdatFatSize -= 0xC;
+
+			// Fast method (single STRM file, for PKMN B&W 2)
+			sdatFatSize -= 0x10;
+			sdatFatOffset += sdatFatSize;
+
+			fseek(file, sdatFatOffset, SEEK_SET);
+			u32 info[4];
+			fread(info, 4, sizeof(u32), file);
+			fseek(file, info[0], SEEK_SET);
+			u32 string = 0;
+			fread(&string, 1, sizeof(u32), file);
+			if (string == 0x4D525453) { // 'STRM'
+				offsetOfOpenedNitroFile += info[0];
+				sizeOverride = info[1];
+			}
+
+			// Slow method
+			/* for (u32 i = 0; i < sdatFatFiles; i++) {
+				fseek(file, sdatFatOffset, SEEK_SET);
+				u32 info[4];
+				fread(info, 4, sizeof(u32), file);
+				fseek(file, info[0], SEEK_SET);
+				u32 string = 0;
+				fread(&string, 1, sizeof(u32), file);
+				if (string == 0x4D525453) { // 'STRM'
+					offsetOfOpenedNitroFile += info[0];
+					sizeOverride = info[1];
+					break;
+				}
+				sdatFatOffset += 0x10;
+			} */
+
+			if (sizeOverride == 0) {
+				fclose(file);
+			}
+		} else {
+			fclose(file);
+		}
+	}
+
+	if (file) {
+		conf->asyncDataAddr[0] = offsetOfOpenedNitroFile;
+		conf->asyncDataSize[0] = sizeOverride ? sizeOverride : getFileSize(file);
+		fclose(file);
+		if (strncmp(romTid, "DSY", 3) == 0) {
+			file = fopen("rom:/data/mobiclip/outro.avi.mods", "rb");
+			if (file) {
+				conf->asyncDataAddr[1] = offsetOfOpenedNitroFile;
+				conf->asyncDataSize[1] = getFileSize(file);
+				fclose(file);
+			}
+		}
+		return;
+	}
+
+	file = fopen("nitro:/asyncLoadSettings.pck", "rb");
+	if (!file) {
+		return;
+	}
+
+	char buf[5] = {0};
+		fread(buf, 1, 4, file);
+	if (strcmp(buf, ".PCK") != 0) {
+		return;
+	}
+
+	u32 fileCount;
+	fread(&fileCount, 1, sizeof(fileCount), file);
+
+	u32 offset = 0, size = 0;
+
+	// Try binary search for the game
+	int left = 0;
+	int right = fileCount;
+
+	while (left <= right) {
+		int mid = left + ((right - left) / 2);
+		fseek(file, 16 + mid * 16, SEEK_SET);
+		fread(buf, 1, 4, file);
+		int cmp = strcmp(buf, romTid);
+		if (cmp == 0) { // TID matches, check CRC
+			u16 crc;
+			fread(&crc, 1, sizeof(crc), file);
+
+			if (crc == headerCRC) { // CRC matches
+				fread(&offset, 1, sizeof(offset), file);
+				fread(&size, 1, sizeof(size), file);
+				break;
+			} else if (crc < headerCRC) {
+				left = mid + 1;
+			} else {
+				right = mid - 1;
+			}
+		} else if (cmp < 0) {
+			left = mid + 1;
+		} else {
+			right = mid - 1;
+		}
+	}
+
+	if (offset > 0) {
+		if (size > 0x10) {
+			size = 0x10;
+		}
+		fseek(file, offset, SEEK_SET);
+		u32 *buffer = new u32[size/4];
+		fread(buffer, 1, size, file);
+
+		for (u32 i = 0; i < size/8; i++) {
+			conf->asyncDataAddr[i] = buffer[0+(i*2)];
+			conf->asyncDataSize[i] = buffer[1+(i*2)];
+		}
+		delete[] buffer;
+	}
+
+	fclose(file);
+}
+
 static void loadApFix(configuration* conf, const char* bootstrapPath, const char* romTid, const u16 headerCRC) {
 	{
 		std::string romFilename = conf->ndsPath;
@@ -1874,6 +2025,9 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 				conf->dataToPreloadAddr[0] = ndsArm7BinOffset+ndsArm7Size;
 				conf->dataToPreloadSize[0] = ((internalRomSize == 0 || internalRomSize > conf->romSize) ? conf->romSize : internalRomSize)-conf->dataToPreloadAddr[0];
 				// conf->dataToPreloadFrame = 0;
+			}
+			if (!conf->gameOnFlashcard) {
+				loadAsyncLoadSettings(conf, romTid, headerCRC);
 			}
 		} else {
 			const bool binary3 = (REG_SCFG_EXT7 == 0 ? !dsiEnhancedMbk : (a7mbk6 != 0x00403000));

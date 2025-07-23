@@ -2985,7 +2985,10 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 	if (getSleep(ce9, ndsHeader, moduleParams, usesThumb, ROMinRAM)) {
 		patchCardReadDma(ce9, ndsHeader, moduleParams, usesThumb);
 	} else {
-		if (!patchCardSetDma(ce9, ndsHeader, moduleParams, usesThumb, ROMinRAM)) {
+		const bool cardSetDmaPatched = patchCardSetDma(ce9, ndsHeader, moduleParams, usesThumb, ROMinRAM);
+		extern u32 asyncDataAddr[2];
+
+		if (!cardSetDmaPatched || (!gameOnFlashcard && !ROMinRAM && asyncDataAddr[0])) {
 			patchCardReadDma(ce9, ndsHeader, moduleParams, usesThumb);
 		}
 		if (!patchCardEndReadDma(ce9, ndsHeader, moduleParams, usesThumb, ROMinRAM)) {

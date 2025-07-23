@@ -129,6 +129,8 @@ typedef struct cardengineArm9 {
 	u16 cacheBlockSize;
 	u32 romPartSrc[4];
 	u32 romPartSrcEnd[4];
+	u32 asyncDataSrc[2];
+	u32 asyncDataSrcEnd[2];
 	u32 romMapLines;
 	u32 romMap[8][3]; // 0: ROM part start, 1: ROM part start in RAM, 2: ROM part end in RAM
 } cardengineArm9;

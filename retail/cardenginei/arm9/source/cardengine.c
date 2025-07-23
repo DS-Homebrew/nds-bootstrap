@@ -468,7 +468,7 @@ static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
 	} else { */
 		// Read via the main RAM cache
 		//bool runSleep = true;
-		while(len > 0) {
+		while (len > 0) {
 			int slot = getSlotForSector(sector);
 			vu8* buffer = getCacheAddress(slot);
 			#ifdef ASYNCPF

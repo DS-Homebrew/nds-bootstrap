@@ -44,6 +44,8 @@
 	.global dataToPreloadAddr
 	.global dataToPreloadSize
 	@ .global dataToPreloadFrame
+	.global asyncDataAddr
+	.global asyncDataSize
 	.global wideCheatFileCluster
 	.global wideCheatSize
 	.global apPatchFileCluster
@@ -137,6 +139,12 @@ dataToPreloadSize:
 	.word	0x00000000
 @dataToPreloadFrame:
 @	.word	0x00000000
+asyncDataAddr:
+	.word	0x00000000
+	.word	0x00000000
+asyncDataSize:
+	.word	0x00000000
+	.word	0x00000000
 wideCheatFileCluster:
 	.word	0x00000000
 wideCheatSize:

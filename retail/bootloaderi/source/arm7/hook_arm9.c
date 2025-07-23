@@ -219,6 +219,8 @@ int hookNdsRetailArm9(
 	extern u32 dataToPreloadAddr[4];
 	extern u32 dataToPreloadSize[4];
 	// extern u32 dataToPreloadFrame;
+	extern u32 asyncDataAddr[2];
+	extern u32 asyncDataSize[2];
 	extern u32* mobiclipStartOffset;
 	extern u32* mobiclipEndOffset;
 	extern bool colorLutEnabled;
@@ -368,6 +370,12 @@ int hookNdsRetailArm9(
 			/* if (dataToPreloadFrame) {
 				ce9->valueBits |= b_waitForPreloadToFinish;
 			} */
+		}
+		if (!gameOnFlashcard) {
+			for (int i = 0; i < 2; i++) {
+				ce9->asyncDataSrc[i] = asyncDataAddr[i];
+				ce9->asyncDataSrcEnd[i] = asyncDataAddr[i]+asyncDataSize[i];
+			}
 		}
 		if (runOverlayCheck && overlaysSize <= 0x700000) {
 			/*extern u8 gameOnFlashcard;

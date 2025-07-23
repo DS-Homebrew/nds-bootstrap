@@ -45,6 +45,8 @@ typedef struct configuration {
 	u32 dataToPreloadAddr[4];
 	u32 dataToPreloadSize[4];
 	// u32 dataToPreloadFrame;
+	u32 asyncDataAddr[2];
+	u32 asyncDataSize[2];
 	u8 language;
 	char* guiLanguage;
 	s8 region; // SDK 5
