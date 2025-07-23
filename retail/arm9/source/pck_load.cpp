@@ -318,7 +318,7 @@ void loadApFix(configuration* conf, const char* bootstrapPath, const char* romTi
 	}
 
 	char buf[5] = {0};
-		fread(buf, 1, 4, file);
+	fread(buf, 1, 4, file);
 	if (strcmp(buf, ".PCK") == 0) {
 
 		u32 fileCount;
@@ -326,6 +326,9 @@ void loadApFix(configuration* conf, const char* bootstrapPath, const char* romTi
 
 		u32 offset = 0, size = 0;
 		bool cheatVer = false;
+
+		u32 offsetAlt = 0, sizeAlt = 0;
+		bool cheatVerAlt = false;
 
 		// Try binary search for the game
 		int left = 0;
@@ -340,12 +343,18 @@ void loadApFix(configuration* conf, const char* bootstrapPath, const char* romTi
 				u16 crc;
 				fread(&crc, 1, sizeof(crc), file);
 
-				if (crc == 0xFFFF || crc == headerCRC) { // CRC matches
+				if (crc == headerCRC) { // CRC matches
 					fread(&offset, 1, sizeof(offset), file);
 					fread(&size, 1, sizeof(size), file);
 					cheatVer = fgetc(file) & 1;
 					break;
-				} else if (crc < headerCRC) {
+				} else if (crc == 0xFFFF) { 
+					fread(&offsetAlt, 1, sizeof(offsetAlt), file);
+					fread(&sizeAlt, 1, sizeof(sizeAlt), file);
+					cheatVerAlt = fgetc(file) & 1;
+				}
+
+				if (crc < headerCRC) {
 					left = mid + 1;
 				} else {
 					right = mid - 1;
@@ -355,6 +364,13 @@ void loadApFix(configuration* conf, const char* bootstrapPath, const char* romTi
 			} else {
 				right = mid - 1;
 			}
+		}
+
+		if (offset == 0 && size == 0 && offsetAlt != 0 && sizeAlt != 0)
+		{
+			offset = offsetAlt;
+			size = sizeAlt;
+			cheatVer = cheatVerAlt;
 		}
 
 		if (offset > 0 && size > 0) {
