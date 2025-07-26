@@ -442,7 +442,6 @@ static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
 	fileRead((char*)dst, ((ce9->valueBits & overlaysCached) && src >= ce9->overlaysSrc && src < ndsHeader->arm7romOffset) ? apFixOverlaysFile : romFile, src, len);
 #else
 	const u32 commandRead = (isDma ? 0x025FFB09 : 0x025FFB08);
-	u32 sector = (src/ce9->cacheBlockSize)*ce9->cacheBlockSize;
 
 	accessCounter++;
 
@@ -469,6 +468,7 @@ static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
 		// Read via the main RAM cache
 		//bool runSleep = true;
 		while (len > 0) {
+			u32 sector = (src/ce9->cacheBlockSize)*ce9->cacheBlockSize;
 			int slot = getSlotForSector(sector);
 			vu8* buffer = getCacheAddress(slot);
 			#ifdef ASYNCPF
@@ -584,9 +584,8 @@ static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
 
 			len -= len2;
 			if (len > 0) {
-				src = src + len2;
-				dst = (u8*)(dst + len2);
-				sector = (src/ce9->cacheBlockSize)*ce9->cacheBlockSize;
+				src += len2;
+				dst += len2;
 				accessCounter++;
 				//slot = getSlotForSectorManual(slot+1, sector);
 			}
