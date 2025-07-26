@@ -1,3 +1,6 @@
+Elite Beat Agents (AOSE)
+Moero! Nekketsu Rhythm Damashii: Osu! Tatakae! Ouendan 2 (AO2J)
+Osu! Tatakae! Ouendan (AOSJ)
 Pokemon Black Version 2 (All Regions & Languages) (IRE)
 Pokemon White Version 2 (All Regions & Languages) (IRD)
 Sonic Colors (USA) (BXSE)
@@ -6,13 +9,4 @@ Sonic Colors (Japan) (BXSJ)
 System Flaw (USA) (DSi Exclusive) (DSYE)
 System Flaw (Europe) (DSi Exclusive) (DSYP)
 
-Data set to be asynchrously loadable (only applies to DSi/3DS SD Card users):
-
-Pokemon Black & White Version 2:
-- Title screen music
-
-Sonic Colors:
-- Streamed music/voices, and video cutscenes
-
-System Flaw:
-- Video cutscenes
+Above games will have data (such as streamable music and/or video) set to be asynchrously loadable (only applies to DSi/3DS SD Card users).

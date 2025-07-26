@@ -8,34 +8,62 @@
 extern off_t getFileSize(const char* path);
 extern off_t getFileSize(FILE* fp);
 
+static const char* getSdatPath(const char* romTid) {
+	if (strncmp(romTid, "CDZ", 3) == 0 // Dragon Ball: Origins
+	 || strncmp(romTid, "BDB", 3) == 0) { // Dragon Ball: Origins 2
+		return "rom:/sound/data.sdat";
+	} else if (strncmp(romTid, "AOS", 3) == 0 // Elite Beat Agents & Osu! Tatakae! Ouendan
+			|| strncmp(romTid, "AO2", 3) == 0) { // Moero! Nekketsu Rhythm Damashii: Osu! Tatakae! Ouendan 2
+		return "rom:/data/sound_data.sdat";
+	} else if (strncmp(romTid, "ADA", 3) == 0 // Mainline Gen 4 Pokemon games
+			|| strncmp(romTid, "APA", 3) == 0) {
+		return "rom:/data/sound/sound_data.sdat";
+	} else if (strncmp(romTid, "CPU", 3) == 0) {
+		return "rom:/data/sound/pl_sound_data.sdat";
+	} else if (strncmp(romTid, "IPK", 3) == 0
+			|| strncmp(romTid, "IPG", 3) == 0) {
+		return "rom:/data/sound/gs_sound_data.sdat";
+	} else if (strncmp(romTid, "IRE", 3) == 0 // Pokemon Black Version 2
+			|| strncmp(romTid, "IRD", 3) == 0) { // Pokemon White Version 2
+		return "rom:/swan_sound_data.sdat";
+	} else if (strncmp(romTid, "BJM", 3) == 0	// Stitch Jam
+			|| strncmp(romTid, "B3I", 3) == 0) { // Stitch Jam 2
+		return "rom:/sound_data.sdat";
+	}
+	return "rom:/NULL.sdat";
+}
+
+static u32 getSdatStrmId(const char* romTid) {
+	if (strncmp(romTid, "AOS", 3) == 0) { // Elite Beat Agents & Osu! Tatakae! Ouendan
+		return (romTid[3] == 'E') ? 0x17C : 0x102;
+	} else if (strncmp(romTid, "AO2", 3) == 0) { // Moero! Nekketsu Rhythm Damashii: Osu! Tatakae! Ouendan 2
+		return 0x135;
+	}
+	return 0xFFFFFFFF;
+}
+
 bool loadPreLoadSettings(configuration* conf, const char* pckPath, const char* romTid, const u16 headerCRC) {
 	FILE *file = NULL;
+	bool openSdat = false;
 
 	// Pre-load sound data
 	if (strncmp(romTid, "CDZ", 3) == 0 // Dragon Ball: Origins
-	 || strncmp(romTid, "BDB", 3) == 0) { // Dragon Ball: Origins 2
-		if (romFSInit(conf->ndsPath)) {
-			file = fopen("rom:/sound/data.sdat", "rb");
-		}
-	} else if (strncmp(romTid, "ADA", 3) == 0 // Mainline Gen 4 Pokemon games
-	 || strncmp(romTid, "APA", 3) == 0) {
-		if (romFSInit(conf->ndsPath)) {
-			file = fopen("rom:/data/sound/sound_data.sdat", "rb");
-		}
-	} else if (strncmp(romTid, "CPU", 3) == 0) {
-		if (romFSInit(conf->ndsPath)) {
-			file = fopen("rom:/data/sound/pl_sound_data.sdat", "rb");
-		}
-	} else if (strncmp(romTid, "IPK", 3) == 0
-			|| strncmp(romTid, "IPG", 3) == 0) {
-		if (romFSInit(conf->ndsPath)) {
-			file = fopen("rom:/data/sound/gs_sound_data.sdat", "rb");
-		}
+	 || strncmp(romTid, "BDB", 3) == 0 // Dragon Ball: Origins 2
+	 || strncmp(romTid, "ADA", 3) == 0 // Mainline Gen 4 Pokemon games
+	 || strncmp(romTid, "APA", 3) == 0
+	 || strncmp(romTid, "CPU", 3) == 0
+	 || strncmp(romTid, "IPK", 3) == 0
+	 || strncmp(romTid, "IPG", 3) == 0) {
+		openSdat = true;
 	} else if (conf->consoleModel > 0 &&
 			  (strncmp(romTid, "BJM", 3) == 0	// Stitch Jam
 			|| strncmp(romTid, "B3I", 3) == 0)) { // Stitch Jam 2
+		openSdat = true;
+	}
+
+	if (openSdat) {
 		if (romFSInit(conf->ndsPath)) {
-			file = fopen("rom:/sound_data.sdat", "rb");
+			file = fopen(getSdatPath(romTid), "rb");
 		}
 	}
 
@@ -127,12 +155,20 @@ void loadAsyncLoadSettings(configuration* conf, const char* romTid, const u16 he
 	// Set data to be asynchrously loadable
 	FILE *file = NULL;
 	u32 sizeOverride = 0;
+	u32 sdatFileId = 0xFFFFFFFF;
 	bool readStrmFile = false;
 
-	if (strncmp(romTid, "IRE", 3) == 0 // Pokemon Black Version 2
+	if (strncmp(romTid, "AOS", 3) == 0 // Elite Beat Agents & Osu! Tatakae! Ouendan
+	 || strncmp(romTid, "AO2", 3) == 0) { // Moero! Nekketsu Rhythm Damashii: Osu! Tatakae! Ouendan 2
+		if (romFSInit(conf->ndsPath)) {
+			file = fopen(getSdatPath(romTid), "rb");
+			sdatFileId = getSdatStrmId(romTid);
+			readStrmFile = true;
+		}
+	} else if (strncmp(romTid, "IRE", 3) == 0 // Pokemon Black Version 2
 	 || strncmp(romTid, "IRD", 3) == 0) { // Pokemon White Version 2
 		if (romFSInit(conf->ndsPath)) {
-			file = fopen("rom:/swan_sound_data.sdat", "rb");
+			file = fopen(getSdatPath(romTid), "rb");
 			readStrmFile = true;
 		}
 	} else if (strncmp(romTid, "DSY", 3) == 0) { // System Flaw
@@ -142,6 +178,7 @@ void loadAsyncLoadSettings(configuration* conf, const char* romTid, const u16 he
 	}
 
 	if (file && readStrmFile) {
+		const u32 sdatSize = getFileSize(file);
 		u32 sdatFatOffset = 0;
 		u32 sdatFatString = 0;
 		u32 sdatFatSize = 0;
@@ -157,9 +194,13 @@ void loadAsyncLoadSettings(configuration* conf, const char* romTid, const u16 he
 			sdatFatOffset += 0xC;
 			sdatFatSize -= 0xC;
 
-			// Fast method (single STRM file, for PKMN B&W 2)
-			sdatFatSize -= 0x10;
-			sdatFatOffset += sdatFatSize;
+			// Fast method
+			if (sdatFileId == 0xFFFFFFFF) {
+				sdatFatSize -= 0x10;
+				sdatFatOffset += sdatFatSize;
+			} else {
+				sdatFatOffset += 0x10*sdatFileId;
+			}
 
 			fseek(file, sdatFatOffset, SEEK_SET);
 			u32 info[4];
@@ -169,7 +210,7 @@ void loadAsyncLoadSettings(configuration* conf, const char* romTid, const u16 he
 			fread(&string, 1, sizeof(u32), file);
 			if (string == 0x4D525453) { // 'STRM'
 				offsetOfOpenedNitroFile += info[0];
-				sizeOverride = info[1];
+				sizeOverride = (sdatFileId == 0xFFFFFFFF) ? info[1] : (sdatSize-info[0]);
 			}
 
 			// Slow method
