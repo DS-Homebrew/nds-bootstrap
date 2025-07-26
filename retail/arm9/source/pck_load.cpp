@@ -16,7 +16,8 @@ static const char* getSdatPath(const char* romTid) {
 			|| strncmp(romTid, "AO2", 3) == 0) { // Moero! Nekketsu Rhythm Damashii: Osu! Tatakae! Ouendan 2
 		return "rom:/data/sound_data.sdat";
 	} else if (strncmp(romTid, "ADA", 3) == 0 // Mainline Gen 4 Pokemon games
-			|| strncmp(romTid, "APA", 3) == 0) {
+			|| strncmp(romTid, "APA", 3) == 0
+			|| strncmp(romTid, "B3R", 3) == 0) { // Pokemon Ranger: Guardian Signs
 		return "rom:/data/sound/sound_data.sdat";
 	} else if (strncmp(romTid, "CPU", 3) == 0) {
 		return "rom:/data/sound/pl_sound_data.sdat";
@@ -38,6 +39,8 @@ static u32 getSdatStrmId(const char* romTid) {
 		return (romTid[3] == 'E') ? 0x17C : 0x102;
 	} else if (strncmp(romTid, "AO2", 3) == 0) { // Moero! Nekketsu Rhythm Damashii: Osu! Tatakae! Ouendan 2
 		return 0x135;
+	} else if (strncmp(romTid, "B3R", 3) == 0) { // Pokemon Ranger: Guardian Signs
+		return 0x322;
 	}
 	return 0xFFFFFFFF;
 }
@@ -59,6 +62,10 @@ bool loadPreLoadSettings(configuration* conf, const char* pckPath, const char* r
 			  (strncmp(romTid, "BJM", 3) == 0	// Stitch Jam
 			|| strncmp(romTid, "B3I", 3) == 0)) { // Stitch Jam 2
 		openSdat = true;
+	} else if (conf->consoleModel > 0 && strncmp(romTid, "B3R", 3) == 0) { // Pokemon Ranger: Guardian Signs
+		if (romFSInit(conf->ndsPath)) {
+			file = fopen((romTid[3] == 'J') ? "rom:/data/data_game.acf": "rom:/data/data_game_us.acf", "rb");
+		}
 	}
 
 	if (openSdat) {
@@ -159,16 +166,13 @@ void loadAsyncLoadSettings(configuration* conf, const char* romTid, const u16 he
 	bool readStrmFile = false;
 
 	if (strncmp(romTid, "AOS", 3) == 0 // Elite Beat Agents & Osu! Tatakae! Ouendan
-	 || strncmp(romTid, "AO2", 3) == 0) { // Moero! Nekketsu Rhythm Damashii: Osu! Tatakae! Ouendan 2
+	 || strncmp(romTid, "AO2", 3) == 0 // Moero! Nekketsu Rhythm Damashii: Osu! Tatakae! Ouendan 2
+	 || strncmp(romTid, "IRE", 3) == 0 // Pokemon Black Version 2
+	 || strncmp(romTid, "IRD", 3) == 0 // Pokemon White Version 2
+	 || strncmp(romTid, "B3R", 3) == 0) { // Pokemon Ranger: Guardian Signs
 		if (romFSInit(conf->ndsPath)) {
 			file = fopen(getSdatPath(romTid), "rb");
 			sdatFileId = getSdatStrmId(romTid);
-			readStrmFile = true;
-		}
-	} else if (strncmp(romTid, "IRE", 3) == 0 // Pokemon Black Version 2
-	 || strncmp(romTid, "IRD", 3) == 0) { // Pokemon White Version 2
-		if (romFSInit(conf->ndsPath)) {
-			file = fopen(getSdatPath(romTid), "rb");
 			readStrmFile = true;
 		}
 	} else if (strncmp(romTid, "DSY", 3) == 0) { // System Flaw

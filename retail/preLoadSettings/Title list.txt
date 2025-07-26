@@ -130,9 +130,9 @@ Plants vs. Zombies (Europe) (MSL) (BWBY) (DSi/3DS)
 Plants vs. Zombies (Europe) (Rondomedia) (BWBX) (DSi/3DS)
 Plants vs. Zombies (United Kingdom) (BWBP) (DSi/3DS)
 Plants vs. Zombies (Australia) (BWBU) (DSi/3DS)
-Pokemon Ranger: Guardian Signs (USA) (B3RE) (DSi/3DS)
-Pokemon Ranger: Guardian Signs (Europe) (B3RP) (DSi/3DS)
-Pokemon Ranger: Hikari no Kiseki (Japan) (B3RJ) (DSi/3DS)
+Pokemon Ranger: Guardian Signs (USA) (B3RE) (3DS)
+Pokemon Ranger: Guardian Signs (Europe) (B3RP) (3DS)
+Pokemon Ranger: Hikari no Kiseki (Japan) (B3RJ) (3DS)
 Pokemon Trozei! (USA) (APTE) (DSi)
 Pokemon Link! (Europe) (APTP) (DSi)
 Pokemon Torouse (Japan) (APTJ) (DSi)
@@ -330,9 +330,8 @@ Plants vs. Zombies (USA, United Kingdom, and Australia) (DSi/3DS):
 - DSi: data_pack.bin + data_pack_en.bin
 - 3DS: Everything except closing music video, and unused DSi manual data
 
-Pokemon Ranger: Guardian Signs (DSi/3DS):
-- DSi: Streamed music from sound data
-- 3DS: Sound data
+Pokemon Ranger: Guardian Signs (3DS):
+- Mostly everything except map files, localized files, and WiFi settings menu assets
 
 Power Rangers: Samurai (3DS):
 - Everything except sound data
