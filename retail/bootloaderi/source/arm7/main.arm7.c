@@ -1976,7 +1976,13 @@ int arm7_main(void) {
 		newArm7binarySize = ndsHeader->arm7binarySize;
 		newArm7ibinarySize = __DSiHeader->arm7ibinarySize;
 
-		if ((!dsiWramAccess || colorLutEnabled) && (memcmp(romTid, "KKT", 3) == 0 || memcmp(romTid, "KGU", 3) == 0)) {
+		if ((!dsiWramAccess || colorLutEnabled) && (
+			memcmp(romTid, "KKT", 3) == 0 // Cut the Rope
+		 || memcmp(romTid, "KGU", 3) == 0 // Flipnote Studio
+		 || memcmp(romTid, "KNL", 3) == 0 // myNotebook Red
+		 || memcmp(romTid, "KNG", 3) == 0 // myNotebook Green
+		 || memcmp(romTid, "KNB", 3) == 0 // myNotebook Blue
+		)) {
 			patchHiHeapPointerDSiWare(moduleParams, ndsHeader);
 		}
 

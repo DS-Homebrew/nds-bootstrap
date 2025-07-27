@@ -340,11 +340,14 @@ static const char dsiWareForBootloader3[][4] = {
 	"KIC", // Music on: Playing Piano
 	"KRH", // Music on: Retro Keyboard
 	"K7Z", "K9R", // My Aquarium: Seven Oceans
+	"KMR", // My Farm
 	"KL3", // My Asian Farm
 	"KL4", // My Australian Farm
 	"KMV", // My Exotic Farm
 	"KLT", // My Little Restaurant
-	"KMR", // My Farm
+	"KNL", // myNotebook Red (bootloaderi-exclusive)
+	"KNG", // myNotebook Green (bootloaderi-exclusive)
+	"KNB", // myNotebook Blue (bootloaderi-exclusive)
 	"KJW", // Nandoku 500 Kanji: Wado Pazuru
 	"KN3", // Nazo no Mini Game
 	"KNP", // Need for Speed: Nitro-X
