@@ -76,7 +76,7 @@ body:
     id: log
     attributes:
       label: Logs
-      description: To enable logging, set `LOGGING` to `1` in `sd:/_nds/nds-bootstrap.ini`. It will be found at `sd:/NDSBTSTRP.log`. Upload it by dragging and dropping into the GitHub text box. Using TWiLight Menu++? Toggle it via the 'nds-bootstrap' page instead
+      description: To enable logging, set `LOGGING` to `1` in `sd:/_nds/nds-bootstrap.ini`. It will be found at `sd:/NDSBTSTRP.LOG`. Upload it by dragging and dropping into the GitHub text box. Using TWiLight Menu++? Toggle it via the 'nds-bootstrap' page instead
     validations:
       required: true
   - type: textarea
