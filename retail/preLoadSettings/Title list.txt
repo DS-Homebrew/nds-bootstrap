@@ -169,6 +169,7 @@ Sonic Rush Adventure (Korea) (A3YK) (MEP/DSi/3DS)
 Stitch Jam (USA) (BJME) (DSi/3DS)
 Stitch! DS: Ohana to Rhythm de Daibouken (Japan) (BJMJ) (DSi/3DS)
 Motto! Stitch! DS: Rhythm de Rakugaki Daisakusen (Japan) (B3IJ) (DSi/3DS)
+Stratego: Next Edition (Europe) (YSOP) (DSi)
 Style Savvy (USA) (AZLE) (DSi/3DS)
 Nintendo Presents: Style Boutique (Europe) (AZLP) (DSi/3DS)
 Wagamama Fashion: Girls Mode (Japan) (AZLJ) (DSi/3DS)
@@ -363,6 +364,9 @@ Stitch Jam (DSi/3DS):
 Motto! Stitch! DS: Rhythm de Rakugaki Daisakusen (DSi/3DS):
 - DSi: Title music and voices from sound data
 - 3DS: Sound data
+
+Stratego: Next Edition (DSi):
+- Everything except streamed music
 
 Style Savvy (DSi/3DS):
 - Sound data (minus padding)
