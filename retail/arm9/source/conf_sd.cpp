@@ -727,6 +727,14 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 				}
 			}
 		}
+	} else if (!conf->forceSleepPatch) {
+		conf->forceSleepPatch = (
+		   (memcmp(io_dldi_data->friendlyName, "Ace3DS+", 7) == 0)
+		|| (memcmp(io_dldi_data->friendlyName, "DEMON", 5) == 0)
+		|| (memcmp(io_dldi_data->friendlyName, "DSTT", 4) == 0)
+		|| (memcmp(io_dldi_data->friendlyName, "R4iDSN", 6) == 0)
+		|| (memcmp(io_dldi_data->friendlyName, "TTCARD", 6) == 0)
+		);
 	}
 
 	// Fix DLDI driver size
