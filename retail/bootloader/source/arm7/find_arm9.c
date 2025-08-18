@@ -1501,6 +1501,18 @@ u32* a9FindCardIrqEnableOffset(const tNDSHeader* ndsHeader, const module_params_
 		}
 	}
 
+	if (!cardIrqEnableOffset && moduleParams->sdk_version > 0x4008000 && moduleParams->sdk_version < 0x5000000) {
+		cardIrqEnableOffset = findOffset(
+			(u32*)ndsHeader->arm9destination, iUncompressedSize,//, ndsHeader->arm9binarySize,
+            irqEnableStartSignature1, 4
+		);
+		if (cardIrqEnableOffset) {
+			dbg_printf("irq enable SDK 1-3 found: ");
+		} else {
+			dbg_printf("irq enable SDK 1-3 not found\n");
+		}
+	}
+
 	if (!cardIrqEnableOffset && moduleParams->sdk_version < 0x4008000) {
 		cardIrqEnableOffset = findOffset(
 			(u32*)ndsHeader->arm9destination, iUncompressedSize,//, ndsHeader->arm9binarySize,
