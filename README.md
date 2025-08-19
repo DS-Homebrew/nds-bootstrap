@@ -28,7 +28,7 @@ B4DS mode (a result of running nds-bootstrap on DS-mode flashcards with locked S
 
 # Compiling
 
-If your goal is to get a build of the latest commit, you can download that from our [TWLBot Builds repository](https://github.com/TWLBot/Builds). Also, if you push your commits to a GitHub fork, you can have GitHub Actions run on every commit that way. If, however, you'd like to compile locally, you will need to install devkitARM with the necessary Nintendo DS development libraries.
+If your goal is to get a build of the latest commit, you will need to install devkitARM with the necessary Nintendo DS development libraries. Also, if you push your commits to a GitHub fork, you can have GitHub Actions run on every commit that way.
 
 1. Install devkitPro's `pacman` package manager as described on the [devkitPro wiki](https://devkitpro.org/wiki/Getting_Started), then run the following command to install the needed libraries:
    ```
