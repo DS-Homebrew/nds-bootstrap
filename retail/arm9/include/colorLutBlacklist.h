@@ -40,6 +40,7 @@ static const char colorLutBlacklist[][4] = {
 	"KEJ", // Electroplankton: Varvoice
 	"CER", // Ener-G: Gym Rockets
 	"KGU", // Flipnote Studio
+	"YHN", // Flower, Sun and Rain: Murder and Mystery in Paradise
 	"CF3", // Freddi Fish: ABC's Under the Sea
 	"TFB", // Frozen: Olaf's Quest
 	"AGE", // GoldenEye: Rogue Agent
@@ -132,6 +133,9 @@ Ener-G: Gym Rockets:
 Flipnote Studio:
 - No effect due to bitmap mode being used
 - Randomly swaps the top and bottom screens for a frame
+
+Flower, Sun and Rain: Murder and Mystery in Paradise:
+- Completing a puzzle causes a crash (https://github.com/DS-Homebrew/nds-bootstrap/issues/1856)
 
 Freddi Fish: ABC's Under the Sea,
 Frozen: Olaf's Quest:
