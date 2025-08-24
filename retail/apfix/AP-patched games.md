@@ -413,7 +413,7 @@
 - Pokémon: SoothingSilver Version (v1.2.2) (IPGE)
 - Pokémon: SoothingSilver Version (v1.3.0) (IPGE)
 - Pokémon: SoothingSilver Version (v1.3.2) (IPGE)
-- Pokémon: SoothingSilver Version (v1.4.2) (IPGE-6047)
+- Pokémon: SoothingSilver Version (v1.4.3) (IPGE-C50C)
 - Pokémon: Silver Yellow Version (v1.18) (IPGE)
 - Pokémon: Silver Yellow Version (v2.0) (IPGE-7068)
 - Pokémon: Storm Silver Version (v1.10) (IPGE)
