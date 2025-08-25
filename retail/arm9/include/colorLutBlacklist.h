@@ -223,6 +223,9 @@ Yu-Gi-Oh! 5D's: World Championship 2011: Over The Nexus:
 static const char colorLutMasterBrightBlacklist[][4] = {
 	"ABM", // Bomberman
 	"ATD", // Clubhouse Games
+	"KTR", // Clubhouse Games Express: Card Classics
+	"KTC", "KTP", // Clubhouse Games Express: Family Favorites
+	"KTD", "KTB", // Clubhouse Games Express: Strategy Pack
 	"C24", // Phantasy Star 0
 	"AZL", // Style Savvy
 };
@@ -230,7 +233,7 @@ static const char colorLutMasterBrightBlacklist[][4] = {
 /* Blacklist reasons (would occur when using a specific LUT which has inverted black/white or a non-white white)
 
 Bomberman,
-Clubhouse Games:
+Clubhouse Games & Clubhouse Games Express:
 - Master brightness is not changed due to blacklisting VCount IRQ
 
 Phantasy Star 0:
@@ -247,6 +250,9 @@ static const char colorLutVCountBlacklist[][4] = {
 	"K2N", // Cake Ninja 2
 	"KYN", // Cake Ninja: XMAS
 	"ATD", // Clubhouse Games
+	"KTR", // Clubhouse Games Express: Card Classics
+	"KTC", "KTP", // Clubhouse Games Express: Family Favorites
+	"KTD", "KTB", // Clubhouse Games Express: Strategy Pack
 	"KCQ", // Crazy Cheebo: Puzzle Party
 	"KVC", // Curling Super Championship
 	"K5L", // Forgotten Legions
@@ -267,7 +273,7 @@ Cake Ninja 2,
 Cake Ninja: XMAS:
 - Crashes with black top screen after logos
 
-Clubhouse Games:
+Clubhouse Games & Clubhouse Games Express:
 - Crashes on white screens
 
 Crazy Cheebo: Puzzle Party:
