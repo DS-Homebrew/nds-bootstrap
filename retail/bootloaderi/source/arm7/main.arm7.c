@@ -389,7 +389,7 @@ void my_disableSlot1() {
 
 static void NDSTouchscreenMode(void) {
 	const bool noSgba = (strncmp((const char*)0x04FFFA00, "no$gba", 6) == 0);
-	const bool malfunction = (noSgba || i2cBricked);
+	const bool malfunction = noSgba;
 
 	// 0xAC: special setting (when found special gamecode)
 	// 0xA7: normal setting (for any other gamecodes)
@@ -552,7 +552,7 @@ static void NDSTouchscreenMode(void) {
 static void DSiTouchscreenMode(void) {
 	const bool noSgba = (strncmp((const char*)0x04FFFA00, "no$gba", 6) == 0);
 
-	if (!noSgba && !i2cBricked) {
+	if (!noSgba) {
 		return;
 	}
 
@@ -1857,7 +1857,7 @@ int arm7_main(void) {
 	if (isDSiWare && scfgSdmmcEnabled && !(REG_SCFG_ROM & BIT(9))) {
 		extern void patchSharedFontPath(const cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, const ltd_module_params_t* ltdModuleParams);
 
-		const bool twlTouch = (cdcReadReg(CDC_SOUND, 0x22) == 0xF0 || i2cBricked);
+		const bool twlTouch = (cdcReadReg(CDC_SOUND, 0x22) == 0xF0);
 
 		if ((REG_SNDEXTCNT & SNDEXTCNT_ENABLE) && ((!soundFreq && (REG_SNDEXTCNT & BIT(13))) || (soundFreq && !(REG_SNDEXTCNT & BIT(13))))) {
 			if (soundFreq) {
@@ -2192,7 +2192,7 @@ int arm7_main(void) {
 			}
 		}
 
-		const bool twlTouch = (cdcReadReg(CDC_SOUND, 0x22) == 0xF0 || i2cBricked);
+		const bool twlTouch = (cdcReadReg(CDC_SOUND, 0x22) == 0xF0);
 
 		if (!twlTouch || !dsiModeConfirmed || !ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr) || (ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr) && !(*(u8*)0x02FFE1BF & BIT(0)))) {
 			NDSTouchscreenMode();

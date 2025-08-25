@@ -297,10 +297,10 @@ static void resetMemory_ARM7(void) {
 static void NDSTouchscreenMode(void) {
 	const bool noSgba = (strncmp((const char*)0x04FFFA00, "no$gba", 6) == 0);
 
-	const u8 i2cVer = i2cReadRegister(0x4A, 0);
-	const bool i2cBricked = (i2cVer == 0 || i2cVer == 0xFF);
+	// const u8 i2cVer = i2cReadRegister(0x4A, 0);
+	// const bool i2cBricked = (i2cVer == 0 || i2cVer == 0xFF);
 
-	const bool malfunction = (noSgba || i2cBricked);
+	const bool malfunction = noSgba;
 
 	// 0xAC: special setting (when found special gamecode)
 	// 0xA7: normal setting (for any other gamecodes)
