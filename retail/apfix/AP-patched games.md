@@ -218,6 +218,7 @@
 - Inazuma Eleven 3: Sekai e no Chousen!! Bomber (Japan) (BEZJ)
 - Inazuma Eleven 3: Sekai e no Chousen!! Spark (Japan) (BE8J)
 - Inazuma Eleven 3: Sekai e no Chousen!! The Ogre (Japan) (Also applies to modified ROMs) (BOEJ)
+- Inazuma Eleven 3: The Ogre (Full English Translation) (Patch required from [nds-bootstrap-extras](https://github.com/DS-Homebrew/nds-bootstrap-extras)) (BOEJ-72E7)
 - Ippan Zaidan Houjin Nihon Kanji Shuujukudo Kentei Kikou Kounin: Kanjukuken DS (Japan) (BJKJ)
 - Iron Master: The Legendary Blacksmith (Japan) (BIMJ)
 - Iron Master: Wanggugui Yusangwa Segaeui Yeolsoe (Korea) (CDOK)
