@@ -63,6 +63,8 @@
 - Captain America: Super Soldier (Europe) (BQNP)
 - Captain Tsubasa: Gekitou no Kiseki (Japan) (B2BJ)
 - Captain Tsubasa: New Kick Off (Europe) (B2BX)
+- Captain Tsubasa: New Kick Off (English translation v0.5) (B2BX-EE54)
+- Captain Tsubasa: New Kick Off (Repacked v1.8) (Patch required from [nds-bootstrap-extras](https://github.com/DS-Homebrew/nds-bootstrap-extras)) (B2BX-06D5)
 - Cars 2 (USA) (VCAE)
 - Cars 2 (Japan) (VCAJ)
 - Cars 2 (Europe) (VCAP)
