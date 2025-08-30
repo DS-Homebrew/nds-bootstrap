@@ -1923,6 +1923,8 @@ int arm7_main(void) {
 		}
 	  } else { */
 		if ((dsiWramAccess && !dsiWramMirrored) && (*(u32*)0x02FFE198 != 0) && (*(u32*)(COLOR_LUT_BUFFERED_LOCATION-4) == 0x54554C63)) {
+			dbg_printf("Screen color filter enabled\n");
+
 			arm9_stateFlag = ARM9_WRAMONARM7;
 			while (arm9_stateFlag != ARM9_READY);
 
@@ -2277,6 +2279,8 @@ int arm7_main(void) {
 		}
 
 		if ((dsiWramAccess && !dsiWramMirrored) && ((ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed && *(u32*)0x02FFE198 != 0) || !ROMsupportsDsiMode(ndsHeader) || !dsiModeConfirmed) && (*(u32*)(COLOR_LUT_BUFFERED_LOCATION-4) == 0x54554C63)) {
+			dbg_printf("Screen color filter enabled\n");
+
 			if (ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed) {
 				arm9_stateFlag = ARM9_WRAMONARM7;
 				while (arm9_stateFlag != ARM9_READY);
