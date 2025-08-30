@@ -16107,19 +16107,6 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
 		*(u32*)0x023fc148 = 0x020c30dc; // andeq r3, r12, #dc
 	}
 
-	// WarioWare: DIY (USA)
-	else if (strcmp(romTid, "UORE") == 0) {
-		*(u32*)0x02003114 = 0xE12FFF1E; //bx lr
-	}
-	// WarioWare: Do It Yourself (Europe)
-	else if (strcmp(romTid, "UORP") == 0) {
-		*(u32*)0x020031B4 = 0xE12FFF1E; //bx lr
-	}
-	// Made in Ore (Japan)
-	else if (strcmp(romTid, "UORJ") == 0) {
-		*(u32*)0x020030F4 = 0xE12FFF1E; //bx lr
-	}
-
     // Pokemon Dash (Japan)
 	//else if (strcmp(romTid, "APDJ") == 0) {
 		// *(u32*)0x0206AE70 = 0xE3A00000; //mov r0, #0
