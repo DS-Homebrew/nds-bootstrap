@@ -118,6 +118,7 @@ extern u8 language;
 extern s8 region;
 extern u8 donorSdkVer;
 extern u8 soundFreq;
+extern char version[20];
 
 extern u8 _io_dldi_size;
 extern u32 _io_dldi_features;
@@ -1184,6 +1185,10 @@ int arm7_main(void) {
 		getBootFileCluster(&logFile, "NDSBTSRP.LOG");
 		enableDebug(&logFile);
 	}
+
+	dbg_printf("nds-bootstrap ");
+	dbg_printf(version);
+	dbg_printf("\n\n");
 
 	*(vu32*)(0x02000000) = 0; // Clear debug RAM check flag
 

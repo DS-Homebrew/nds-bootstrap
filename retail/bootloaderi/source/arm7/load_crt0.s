@@ -81,6 +81,7 @@
 	.global soundFreq
 	.global valueBits3
 	.global saveRelocation
+	.global version
 @---------------------------------------------------------------------------------
 	.align	4
 	.arm
@@ -215,6 +216,8 @@ valueBits3:
 	.byte	0
 saveRelocation:
 	.byte	0
+version:
+	.space	20
 .align 4
 
 startUp:

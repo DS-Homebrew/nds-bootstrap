@@ -40,6 +40,7 @@
 #include "locations.h"
 #include "load_crt0.h"
 #include "cardengine_header_arm7.h"
+#include "version.h"
 
 //#define memcpy __builtin_memcpy
 
@@ -312,6 +313,7 @@ int runNds(u32 cluster, u32 saveCluster, u32 donorTwlCluster, /* u32 gbaCluster,
 	loader->dmaRomRead_LED              = conf->dmaRomRead_LED;
 	loader->valueBits3                  = conf->valueBits3;
 	loader->saveRelocation              = conf->saveRelocation;
+	tonccpy(loader->version, VER_NUMBER, sizeof(VER_NUMBER));
 
 	nocashMessage("irqDisable(IRQ_ALL);");
 	irqDisable(IRQ_ALL);

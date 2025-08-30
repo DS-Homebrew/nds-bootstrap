@@ -134,6 +134,7 @@ extern u8 consoleModel;
 extern u8 romRead_LED;
 extern u8 dmaRomRead_LED;
 extern u8 soundFreq;
+extern char version[20];
 
 extern u8 _io_dldi_size;
 bool scfgSdmmcEnabled = false;
@@ -1616,6 +1617,10 @@ int arm7_main(void) {
 		getBootFileCluster(&logFile, "NDSBTSRP.LOG", bootstrapOnFlashcard);
 		enableDebug(&logFile);
 	}
+
+	dbg_printf("nds-bootstrap ");
+	dbg_printf(version);
+	dbg_printf("\n\n");
 
 	{
 		const u8 i2cVer = i2cReadRegister(0x4A, 0);
