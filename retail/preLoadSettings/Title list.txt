@@ -22,6 +22,10 @@ Akumajou Dracula: Ubawareta Kokuin (Japan) (YR9J) (3DS)
 Castlevania: Order of Ecclesia (Korea) (YR9K) (3DS)
 Classic Word Games (USA) (VCWE) (3DS, DSi mode)
 Classic Word Games (Europe, Australia) (VCWV) (3DS, DSi mode)
+Code Lyoko (USA) (AL5E) (3DS)
+Code Lyoko (Europe) (AL5P) (3DS)
+Code Lyoko: Fall of X.A.N.A. (USA) (CLFE) (MEP/DSi)
+Code Lyoko: Fall of X.A.N.A. (Europe) (CLFP) (MEP/DSi)
 Diddy Kong Racing DS (USA) (AWDE) (DSi)
 Diddy Kong Racing DS (Europe) (AWDP) (DSi)
 Dragon Ball: Origins (USA) (CDZE) (DSi/3DS)
@@ -219,6 +223,12 @@ Castlevania: Order of Ecclesia (3DS):
 
 Classic Word Games (3DS, DSi mode):
 - Everything except Single-Card mode SRLs
+
+Code Lyoko (3DS):
+- Everything except level-specific sound effects and video cutscenes
+
+Code Lyoko: Fall of X.A.N.A. (MEP/DSi):
+- Everything except sound data and video cutscenes
 
 Diddy Kong Racing DS (DSi):
 - Everything except assets.bin

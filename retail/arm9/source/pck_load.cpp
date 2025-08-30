@@ -49,6 +49,11 @@ bool loadPreLoadSettings(configuration* conf, const char* pckPath, const char* r
 	FILE *file = NULL;
 	bool openSdat = false;
 
+	if (strncmp(romTid, "CLF", 3) == 0) { // Code Lyoko: Fall of X.A.N.A.
+		if (romFSInit(conf->ndsPath)) {
+			file = fopen("rom:/data.bf", "rb");
+		}
+	} else
 	// Pre-load sound data
 	if (strncmp(romTid, "CDZ", 3) == 0 // Dragon Ball: Origins
 	 || strncmp(romTid, "BDB", 3) == 0 // Dragon Ball: Origins 2
