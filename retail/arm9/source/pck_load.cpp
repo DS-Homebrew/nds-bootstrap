@@ -101,7 +101,7 @@ bool loadPreLoadSettings(configuration* conf, const char* pckPath, const char* r
 	}
 
 	char buf[5] = {0};
-		fread(buf, 1, 4, file);
+	fread(buf, 1, 4, file);
 	if (strcmp(buf, ".PCK") != 0) {
 		return false;
 	}
@@ -267,7 +267,7 @@ void loadAsyncLoadSettings(configuration* conf, const char* romTid, const u16 he
 	}
 
 	char buf[5] = {0};
-		fread(buf, 1, 4, file);
+	fread(buf, 1, 4, file);
 	if (strcmp(buf, ".PCK") != 0) {
 		return;
 	}
@@ -369,69 +369,55 @@ void loadApFix(configuration* conf, const char* bootstrapPath, const char* romTi
 
 	char buf[5] = {0};
 	fread(buf, 1, 4, file);
-	if (strcmp(buf, ".PCK") == 0) {
+	if (strcmp(buf, ".PCK") != 0) {
+		return;
+	}
 
-		u32 fileCount;
-		fread(&fileCount, 1, sizeof(fileCount), file);
+	u32 fileCount;
+	fread(&fileCount, 1, sizeof(fileCount), file);
 
-		u32 offset = 0, size = 0;
-		bool cheatVer = false;
+	u32 offset = 0, size = 0;
+	bool cheatVer = false;
 
-		u32 offsetAlt = 0, sizeAlt = 0;
-		bool cheatVerAlt = false;
+	// Try binary search for the game
+	int left = 0;
+	int right = fileCount;
+	bool tidFound = false;
 
-		// Try binary search for the game
-		int left = 0;
-		int right = fileCount;
+	while (left <= right) {
+		fseek(file, 16 + left * 16, SEEK_SET);
+		fread(buf, 1, 4, file);
+		int cmp = strcmp(buf, romTid);
+		if (cmp == 0) { // TID matches, check other info
+			tidFound = true;
+			u16 crc;
+			fread(&crc, 1, sizeof(crc), file);
+			fread(&offset, 1, sizeof(offset), file);
+			fread(&size, 1, sizeof(size), file);
+			cheatVer = fgetc(file) & 1;
 
-		while (left <= right) {
-			int mid = left + ((right - left) / 2);
-			fseek(file, 16 + mid * 16, SEEK_SET);
-			fread(buf, 1, 4, file);
-			int cmp = strcmp(buf, romTid);
-			if (cmp == 0) { // TID matches, check CRC
-				u16 crc;
-				fread(&crc, 1, sizeof(crc), file);
-
-				if (crc == headerCRC) { // CRC matches
-					fread(&offset, 1, sizeof(offset), file);
-					fread(&size, 1, sizeof(size), file);
-					cheatVer = fgetc(file) & 1;
-					break;
-				} else if (crc == 0xFFFF) { 
-					fread(&offsetAlt, 1, sizeof(offsetAlt), file);
-					fread(&sizeAlt, 1, sizeof(sizeAlt), file);
-					cheatVerAlt = fgetc(file) & 1;
-				}
-
-				if (crc < headerCRC) {
-					left = mid + 1;
-				} else {
-					right = mid - 1;
-				}
-			} else if (cmp < 0) {
-				left = mid + 1;
+			if (crc == 0xFFFF || crc == headerCRC) {
+				break;
 			} else {
-				right = mid - 1;
+				offset = 0, size = 0;
+				left++;
 			}
-		}
-
-		if (offset == 0 && size == 0 && offsetAlt != 0 && sizeAlt != 0)
-		{
-			offset = offsetAlt;
-			size = sizeAlt;
-			cheatVer = cheatVerAlt;
-		}
-
-		if (offset > 0 && size > 0) {
-			sprintf(conf->apPatchPath, bootstrapPath);
-			conf->apPatchOffset = offsetOfOpenedNitroFile+offset;
-			conf->apPatchSize = size;
-			if (cheatVer) {
-				conf->valueBits |= BIT(5);
-			}
+		} else if (tidFound) {
+			break;
+		} else {
+			left++;
 		}
 	}
+
+	if (offset > 0 && size > 0) {
+		sprintf(conf->apPatchPath, bootstrapPath);
+		conf->apPatchOffset = offsetOfOpenedNitroFile+offset;
+		conf->apPatchSize = size;
+		if (cheatVer) {
+			conf->valueBits |= BIT(5);
+		}
+	}
+
 	fclose(file);
 }
 
@@ -442,7 +428,7 @@ void loadMobiclipOffsets(configuration* conf, const char* bootstrapPath, const c
 	}
 
 	char buf[5] = {0};
-		fread(buf, 1, 4, file);
+	fread(buf, 1, 4, file);
 	if (strcmp(buf, ".PCK") != 0) {
 		return;
 	}
@@ -512,7 +498,7 @@ void loadDSi2DSSavePatch(configuration* conf, const char* bootstrapPath, const c
 	}
 
 	char buf[5] = {0};
-		fread(buf, 1, 4, file);
+	fread(buf, 1, 4, file);
 	if (strcmp(buf, ".PCK") != 0) {
 		return;
 	}
