@@ -441,13 +441,14 @@ void loadMobiclipOffsets(configuration* conf, const char* bootstrapPath, const c
 	// Try binary search for the game
 	int left = 0;
 	int right = fileCount;
+	bool tidFound = false;
 
 	while (left <= right) {
-		int mid = left + ((right - left) / 2);
-		fseek(file, 16 + mid * 16, SEEK_SET);
+		fseek(file, 16 + left * 16, SEEK_SET);
 		fread(buf, 1, 4, file);
 		int cmp = strcmp(buf, romTid);
 		if (cmp == 0) { // TID matches, check other info
+			tidFound = true;
 			u16 crc;
 			u8 ver;
 			fread(&crc, 1, sizeof(crc), file);
@@ -457,21 +458,14 @@ void loadMobiclipOffsets(configuration* conf, const char* bootstrapPath, const c
 
 			if ((crc == 0xFFFF || crc == headerCRC) && (ver == 0xFF || ver == romVersion)) {
 				break;
-			} else if (crc < headerCRC) {
-				offset = 0;
-				size = 0;
-
-				left = mid + 1;
 			} else {
-				offset = 0;
-				size = 0;
-
-				right = mid - 1;
+				offset = 0, size = 0;
+				left++;
 			}
-		} else if (cmp < 0) {
-			left = mid + 1;
+		} else if (tidFound) {
+			break;
 		} else {
-			right = mid - 1;
+			left++;
 		}
 	}
 
@@ -511,13 +505,14 @@ void loadDSi2DSSavePatch(configuration* conf, const char* bootstrapPath, const c
 	// Try binary search for the game
 	int left = 0;
 	int right = fileCount;
+	bool tidFound = false;
 
 	while (left <= right) {
-		int mid = left + ((right - left) / 2);
-		fseek(file, 16 + mid * 16, SEEK_SET);
+		fseek(file, 16 + left * 16, SEEK_SET);
 		fread(buf, 1, 4, file);
 		int cmp = strcmp(buf, romTid);
 		if (cmp == 0) { // TID matches, check other info
+			tidFound = true;
 			u16 crc;
 			u8 ver;
 			fread(&crc, 1, sizeof(crc), file);
@@ -527,21 +522,14 @@ void loadDSi2DSSavePatch(configuration* conf, const char* bootstrapPath, const c
 
 			if ((crc == 0xFFFF || crc == headerCRC) && (ver == 0xFF || ver == romVersion)) {
 				break;
-			} else if (crc < headerCRC) {
-				offset = 0;
-				size = 0;
-
-				left = mid + 1;
 			} else {
-				offset = 0;
-				size = 0;
-
-				right = mid - 1;
+				offset = 0, size = 0;
+				left++;
 			}
-		} else if (cmp < 0) {
-			left = mid + 1;
+		} else if (tidFound) {
+			break;
 		} else {
-			right = mid - 1;
+			left++;
 		}
 	}
 
