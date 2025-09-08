@@ -302,6 +302,11 @@ static bool patchCardRead(cardengineArm9* ce9, const tNDSHeader* ndsHeader, cons
 		postCardReadCodeOffset = (u32)cardReadStartOffset;
 		postCardReadCodeOffset += usesThumb ? 0xC : 8;
 		tonccpy((u32*)postCardReadCodeOffset, hgssEngOverlayApFix, 13*4);
+	} else if (strcmp(romTid, "CSGJ") == 0) {
+		extern u32 saga2OverlayApFix[];
+		postCardReadCodeOffset = (u32)cardReadStartOffset;
+		postCardReadCodeOffset += usesThumb ? 0xC : 8;
+		tonccpy((u32*)postCardReadCodeOffset, saga2OverlayApFix, 15*4);
 	}
 
 	/*if (ndsHeader->unitCode > 0 && dsiModeConfirmed) {

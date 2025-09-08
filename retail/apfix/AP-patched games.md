@@ -507,7 +507,6 @@
 - RPG Tsukuru DS+: Create The New World (Japan) (VEBJ)
 - Rune Factory: Sinmokjjangiyagi (Korea) (ARFK)
 - SaGa 2: Hihou Densetsu: Goddess of Destiny (Japan) (Also applies to modified ROMs) (CSGJ)
-- SaGa 2: Hihou Densetsu: Goddess of Destiny (English translation) (Patch required from [nds-bootstrap-extras](https://github.com/DS-Homebrew/nds-bootstrap-extras)) (CSGJ)
 - SaGa 3: Jikuu no Hasha: Shadow or Light (Japan) (Also applies to modified ROMs) (BZ3J)
 - Saibanin Suiri Game: Yuuzai x Muzai (Japan) (Also applies to modified ROMs) (CBEJ)
 - Saka Tsuku DS: World Challenge 2010 (Japan) (BSWJ)
