@@ -158,11 +158,15 @@ static bool patchCardRead(cardengineArm9* ce9, const tNDSHeader* ndsHeader, cons
 
 	const char* romTid = getRomTid(ndsHeader);
 
-	if (strcmp(romTid, "BOEJ") == 0) {
+	if (strcmp(romTid, "BOEJ") == 0 || strncmp(romTid, "BRJ", 3) == 0) {
 		extern u32 ie3OgreOverlayApFix[];
 		postCardReadCodeOffset = (u32)cardReadStartOffset;
 		postCardReadCodeOffset += usesThumb ? 0xC : 8;
-		tonccpy((u32*)postCardReadCodeOffset, ie3OgreOverlayApFix, 51*4);
+		u32* postCardReadCode = (u32*)postCardReadCodeOffset;
+		tonccpy(postCardReadCode, ie3OgreOverlayApFix, 51*4);
+		if (strncmp(romTid, "BRJ", 3) == 0) {
+			postCardReadCode[50] = (romTid[3] == 'J') ? 0x02176E00 : 0x02176A00; // Radiant Historia: overlay9_0
+		}
 	} else if (strcmp(romTid, "IPKE") == 0 || strcmp(romTid, "IPGE") == 0) {
 		extern u32 hgssEngOverlayApFix[];
 		postCardReadCodeOffset = (u32)cardReadStartOffset;
