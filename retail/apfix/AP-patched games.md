@@ -142,7 +142,7 @@
 - Elminage II: Sousei no Megami to Unmei no Daichi: DS Remix (Japan) (VL3J)
 - Etrian Odyssey III: The Drowned City (USA) (BJ3E)
 - Sekaiju no Meikyuu III: Seikai no Raihousha (Japan) (BJ3J)
-- FabStyle (Japan) (THMJ)
+- FabStyle (Japan) (Also applies to modified ROMs) (THMJ)
 - Figure Princess: Dugeundugeun Skating: Geum-medaleul Noryeora! (Korea) (BQPK)
 - Final Fantasy Crystal Chronicles: Ring of Fates (Europe) (AFXP)
 - Final Fantasy Crystal Chronicles: Ring of Fates (USA) (AFXE)
