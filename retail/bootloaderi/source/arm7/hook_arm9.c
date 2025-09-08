@@ -221,6 +221,7 @@ int hookNdsRetailArm9(
 	// extern u32 dataToPreloadFrame;
 	extern u32 asyncDataAddr[2];
 	extern u32 asyncDataSize[2];
+	extern u32 postCardReadCodeOffset;
 	extern u32* mobiclipStartOffset;
 	extern u32* mobiclipEndOffset;
 	extern bool colorLutEnabled;
@@ -295,6 +296,7 @@ int hookNdsRetailArm9(
 	ce9->overlaysSize           = overlaysSize;
 	ce9->romPaddingSize         = romPaddingSize;
 	ce9->consoleModel           = consoleModel;
+	ce9->postCardReadCodeOffset = postCardReadCodeOffset;
 	if (colorLutEnabled) {
 		ce9->mobiclipStartOffset = mobiclipStartOffset;
 		ce9->mobiclipEndOffset   = mobiclipEndOffset;

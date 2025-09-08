@@ -959,6 +959,13 @@ void cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 
 	cardReadInProgress = false;
 	REG_EXMEMCNT = exmemcnt;
+
+	#ifndef GSDD
+	if (ce9->postCardReadCodeOffset) {
+		volatile void (*code)() = (volatile void*)ce9->postCardReadCodeOffset;
+		(*code)();
+	}
+	#endif
 }
 
 bool nandRead(void* memory,void* flash,u32 len,u32 dma) {

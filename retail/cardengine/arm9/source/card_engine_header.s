@@ -88,6 +88,8 @@ arm9iromOffset:
 	.word	0x00000000
 arm9ibinarySize:
 	.word	0x00000000
+postCardReadCodeOffset:
+	.word	0x00000000
 romPaddingSize:
 	.word	0x00000000
 romLocation:

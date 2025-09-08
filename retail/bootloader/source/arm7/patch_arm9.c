@@ -28,6 +28,8 @@ bool isPawsAndClaws(const tNDSHeader* ndsHeader) {
 	return false;
 }
 
+u32 postCardReadCodeOffset = 0;
+
 static bool patchCardRead(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool* usesThumbPtr, int* readTypePtr, int* sdk5ReadTypePtr, u32** cardReadEndOffsetPtr, u32 startOffset) {
 	bool usesThumb = patchOffsetCache.a9IsThumb;
 	int readType = 0;
@@ -153,6 +155,16 @@ static bool patchCardRead(cardengineArm9* ce9, const tNDSHeader* ndsHeader, cons
     dbg_printf("\n");
     dbg_hexa((u32)ce9);
     dbg_printf("\n\n");
+
+	const char* romTid = getRomTid(ndsHeader);
+
+	if (strcmp(romTid, "IPKE") == 0 || strcmp(romTid, "IPGE") == 0) {
+		extern u32 hgssEngOverlayApFix[];
+		postCardReadCodeOffset = (u32)cardReadStartOffset;
+		postCardReadCodeOffset += usesThumb ? 0xC : 8;
+		tonccpy((u32*)postCardReadCodeOffset, hgssEngOverlayApFix, 13*4);
+	}
+
 	return true;
 }
 

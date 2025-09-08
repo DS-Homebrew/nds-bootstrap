@@ -120,6 +120,7 @@ typedef struct cardengineArm9 {
 	u32 overlaysSrcAlign;
 	u32 overlaysSize;
 	u32 overlaysSizeAlign;
+	u32 postCardReadCodeOffset;
 	u32* mobiclipStartOffset;
 	u32* mobiclipEndOffset;
 	u32 romPaddingSize;
@@ -243,6 +244,7 @@ typedef struct cardengineArm9 {
 	u32 ioverlaysSize;
 	u32 arm9iromOffset;
 	u32 arm9ibinarySize;
+	u32 postCardReadCodeOffset;
 	u32 romPaddingSize;
 	u32 romLocation;
 	u32 romPartSrc;

@@ -201,6 +201,7 @@ int hookNdsRetailArm9(
 	extern u32 dataToPreloadAddr;
 	extern u32 dataToPreloadSize;
 	extern bool dataToPreloadFound(const tNDSHeader* ndsHeader);
+	extern u32 postCardReadCodeOffset;
 	extern u32 romLocation;
 	extern u16 s2FlashcardId;
 	extern bool maxHeapOpen;
@@ -261,6 +262,7 @@ int hookNdsRetailArm9(
 	ce9->ioverlaysSize          = ioverlaysSize;
 	ce9->arm9iromOffset         = arm9iromOffset;
 	ce9->arm9ibinarySize        = arm9ibinarySize;
+	ce9->postCardReadCodeOffset = postCardReadCodeOffset;
 	ce9->romPaddingSize         = romPaddingSize;
 	ce9->romLocation            = romLocation;
 

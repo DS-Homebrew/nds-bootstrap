@@ -178,6 +178,8 @@ static bool patchCardHashInit(const tNDSHeader* ndsHeader, const module_params_t
     dbg_printf("\n\n");
 } */
 
+u32 postCardReadCodeOffset = 0;
+
 static bool patchCardRead(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool* usesThumbPtr, int* readTypePtr, int* sdk5ReadTypePtr, u32** cardReadEndOffsetPtr, u32 startOffset) {
 	bool usesThumb = patchOffsetCache.a9IsThumb;
 	int readType = 0;
@@ -286,12 +288,21 @@ static bool patchCardRead(cardengineArm9* ce9, const tNDSHeader* ndsHeader, cons
 
 	// Patch
 	u32* cardReadPatch = (usesThumb ? ce9->thumbPatches->card_read_arm9 : ce9->patches->card_read_arm9);
-	tonccpy(cardReadStartOffset, cardReadPatch, usesThumb ? (isSdk5(moduleParams) ? 0xB0 : 0xA0) : 0xE0); // 0xE0 = 0xF0 - 0x08
+	tonccpy(cardReadStartOffset, cardReadPatch, usesThumb ? 0xC : 8);
     dbg_printf("cardRead location : ");
     dbg_hexa((u32)cardReadStartOffset);
     dbg_printf("\n");
     dbg_hexa((u32)ce9);
     dbg_printf("\n\n");
+
+	const char* romTid = getRomTid(ndsHeader);
+
+	if (strcmp(romTid, "IPKE") == 0 || strcmp(romTid, "IPGE") == 0) {
+		extern u32 hgssEngOverlayApFix[];
+		postCardReadCodeOffset = (u32)cardReadStartOffset;
+		postCardReadCodeOffset += usesThumb ? 0xC : 8;
+		tonccpy((u32*)postCardReadCodeOffset, hgssEngOverlayApFix, 13*4);
+	}
 
 	/*if (ndsHeader->unitCode > 0 && dsiModeConfirmed) {
 		cardReadStartOffset = patchOffsetCache.cardReadHashOffset;

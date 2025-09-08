@@ -53,6 +53,8 @@ overlaysSize:
 	.word	0x00000000
 overlaysSizeAlign:
 	.word	0x00000000
+postCardReadCodeOffset:
+	.word	0x00000000
 mobiclipStartOffset:
 	.word	0x00000000
 mobiclipEndOffset:

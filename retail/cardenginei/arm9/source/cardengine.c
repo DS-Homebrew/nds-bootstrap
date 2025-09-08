@@ -895,6 +895,12 @@ void cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	} else {
 		cardReadNormal(dst, src, len);
 	}
+	#ifndef GSDD
+	if (ce9->postCardReadCodeOffset) {
+		volatile void (*code)() = (volatile void*)ce9->postCardReadCodeOffset;
+		(*code)();
+	}
+	#endif
     isDma=false;
 }
 
