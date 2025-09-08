@@ -158,7 +158,12 @@ static bool patchCardRead(cardengineArm9* ce9, const tNDSHeader* ndsHeader, cons
 
 	const char* romTid = getRomTid(ndsHeader);
 
-	if (strcmp(romTid, "IPKE") == 0 || strcmp(romTid, "IPGE") == 0) {
+	if (strcmp(romTid, "BOEJ") == 0) {
+		extern u32 ie3OgreOverlayApFix[];
+		postCardReadCodeOffset = (u32)cardReadStartOffset;
+		postCardReadCodeOffset += usesThumb ? 0xC : 8;
+		tonccpy((u32*)postCardReadCodeOffset, ie3OgreOverlayApFix, 51*4);
+	} else if (strcmp(romTid, "IPKE") == 0 || strcmp(romTid, "IPGE") == 0) {
 		extern u32 hgssEngOverlayApFix[];
 		postCardReadCodeOffset = (u32)cardReadStartOffset;
 		postCardReadCodeOffset += usesThumb ? 0xC : 8;
