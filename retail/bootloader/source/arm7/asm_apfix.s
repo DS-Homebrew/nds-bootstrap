@@ -2,7 +2,11 @@
 	.align	4
 	.arm
 	.global ie3OgreOverlayApFix
+	.global hgssJpnOverlayApFix
 	.global hgssEngOverlayApFix
+	.global hgFreOverlayApFix
+	.global ssFreOverlayApFix
+	.global hgssKorOverlayApFix
 	.global saga2OverlayApFix
 @---------------------------------------------------------------------------------
 ie3OgreOverlayApFix: @ overlay9_129
@@ -58,6 +62,35 @@ ie3OgreOverlayApFix: @ overlay9_129
 	bx lr
 .pool
 @---------------------------------------------------------------------------------
+hgssJpnOverlayApFix: @ overlay9_1 + overlay9_122
+	ldr r0, =0x021E4E40+0x21A
+	ldrb r1, [r0]
+	mov r2, #0x53
+	cmp r2, r1
+	bne hgssJpnOverlayApFix_check122
+	ldrb r1, [r0, #3]
+	mov r2, #0xD1
+	cmp r2, r1
+	bne hgssJpnOverlayApFix_check122
+	mov r2, #0xE0
+	strb r2, [r0, #3]
+hgssJpnOverlayApFix_check122:
+	ldr r0, =0x0225E3C0
+	ldr r1, [r0, #0x584]
+	ldr r2, =0x510CE58D
+	cmp r2, r1
+	bxne lr
+	mov r2, #0x36
+	strb r2, [r0, #0x586]
+	ldr r1, [r0, #0x6DC]
+	ldr r2, =0x427AE112
+	cmp r2, r1
+	bxne lr
+	mov r2, #0x7B
+	strb r2, [r0, #0x6DE]
+	bx lr
+.pool
+@---------------------------------------------------------------------------------
 hgssEngOverlayApFix: @ overlay9_1
 	ldr r0, =0x021E5900+0x219
 	ldrb r1, [r0]
@@ -70,6 +103,51 @@ hgssEngOverlayApFix: @ overlay9_1
 	bxne lr
 	mov r2, #0xE0
 	strb r2, [r0, #2]
+	bx lr
+.pool
+@---------------------------------------------------------------------------------
+hgFreOverlayApFix: @ overlay9_1
+	ldr r0, =0x021E5920+0x217
+	ldrb r1, [r0]
+	mov r2, #0x28
+	cmp r2, r1
+	bxne lr
+	ldrb r1, [r0, #3]
+	mov r2, #0xD1
+	cmp r2, r1
+	bxne lr
+	mov r2, #0xE0
+	strb r2, [r0, #3]
+	bx lr
+.pool
+@---------------------------------------------------------------------------------
+ssFreOverlayApFix: @ overlay9_1
+	ldr r0, =0x021E5920+0x218
+	ldrb r1, [r0]
+	mov r2, #0x28
+	cmp r2, r1
+	bxne lr
+	ldrb r1, [r0, #2]
+	mov r2, #0xD1
+	cmp r2, r1
+	bxne lr
+	mov r2, #0xE0
+	strb r2, [r0, #2]
+	bx lr
+.pool
+@---------------------------------------------------------------------------------
+hgssKorOverlayApFix: @ overlay9_1
+	ldr r0, =0x021E6300+0x213 @ add 3 for SS
+	ldrb r1, [r0]
+	mov r2, #0x5B
+	cmp r2, r1
+	bxne lr
+	ldrb r1, [r0, #3]
+	mov r2, #0xD1
+	cmp r2, r1
+	bxne lr
+	mov r2, #0xE0
+	strb r2, [r0, #3]
 	bx lr
 .pool
 @---------------------------------------------------------------------------------

@@ -167,11 +167,52 @@ static bool patchCardRead(cardengineArm9* ce9, const tNDSHeader* ndsHeader, cons
 		if (strncmp(romTid, "BRJ", 3) == 0) {
 			postCardReadCode[50] = (romTid[3] == 'J') ? 0x02176E00 : 0x02176A00; // Radiant Historia: overlay9_0
 		}
-	} else if (strcmp(romTid, "IPKE") == 0 || strcmp(romTid, "IPGE") == 0) {
-		extern u32 hgssEngOverlayApFix[];
+	} else if (strncmp(romTid, "IPK", 3) == 0 || strncmp(romTid, "IPG", 3) == 0) {
 		postCardReadCodeOffset = (u32)cardReadStartOffset;
 		postCardReadCodeOffset += usesThumb ? 0xC : 8;
-		tonccpy((u32*)postCardReadCodeOffset, hgssEngOverlayApFix, 13*4);
+		u32* postCardReadCode = (u32*)postCardReadCodeOffset;
+
+		if (romTid[3] == 'J') {
+			extern u32 hgssJpnOverlayApFix[];
+			tonccpy(postCardReadCode, hgssJpnOverlayApFix, 29*4);
+		} else if (romTid[3] == 'E') {
+			extern u32 hgssEngOverlayApFix[];
+			tonccpy(postCardReadCode, hgssEngOverlayApFix, 13*4);
+		} else if (romTid[3] == 'F') {
+			if (romTid[2] == 'K') {
+				extern u32 hgFreOverlayApFix[];
+				tonccpy(postCardReadCode, hgFreOverlayApFix, 13*4);
+			} else {
+				extern u32 ssFreOverlayApFix[];
+				tonccpy(postCardReadCode, ssFreOverlayApFix, 13*4);
+			}
+		} else if (romTid[3] == 'D') {
+			extern u32 ssFreOverlayApFix[];
+			tonccpy(postCardReadCode, ssFreOverlayApFix, 13*4);
+			postCardReadCode[12] -= 0x40;
+		} else if (romTid[3] == 'I') {
+			extern u32 ssFreOverlayApFix[];
+			tonccpy(postCardReadCode, ssFreOverlayApFix, 13*4);
+			postCardReadCode[12] -= 0x80;
+		} else if (romTid[3] == 'S') {
+			if (romTid[2] == 'K') {
+				extern u32 hgFreOverlayApFix[];
+				tonccpy(postCardReadCode, hgFreOverlayApFix, 13*4);
+				postCardReadCode[12]++;
+			} else {
+				extern u32 ssFreOverlayApFix[];
+				tonccpy(postCardReadCode, ssFreOverlayApFix, 13*4);
+				postCardReadCode[12] += 0x20;
+			}
+		} else if (romTid[3] == 'K') {
+			extern u32 hgssKorOverlayApFix[];
+			tonccpy(postCardReadCode, hgssKorOverlayApFix, 13*4);
+			if (romTid[2] == 'G') {
+				postCardReadCode[12] += 3;
+			}
+		} else {
+			postCardReadCodeOffset = 0;
+		}
 	} else if (strcmp(romTid, "CSGJ") == 0) {
 		extern u32 saga2OverlayApFix[];
 		postCardReadCodeOffset = (u32)cardReadStartOffset;
