@@ -209,9 +209,11 @@ static bool patchCardRead(cardengineArm9* ce9, const tNDSHeader* ndsHeader, cons
 		}
 	} else if (strcmp(romTid, "CSGJ") == 0) {
 		extern u32 saga2OverlayApFix[];
+		extern u32 saga2OverlayApFix_size;
+
 		postCardReadCodeOffset = (u32)cardReadStartOffset;
 		postCardReadCodeOffset += usesThumb ? 0xC : 8;
-		tonccpy((u32*)postCardReadCodeOffset, saga2OverlayApFix, 15*4);
+		tonccpy((u32*)postCardReadCodeOffset, saga2OverlayApFix, saga2OverlayApFix_size);
 	}
 
 	return true;
