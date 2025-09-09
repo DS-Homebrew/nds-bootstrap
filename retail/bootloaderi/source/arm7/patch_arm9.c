@@ -299,12 +299,14 @@ static bool patchCardRead(cardengineArm9* ce9, const tNDSHeader* ndsHeader, cons
 
 	if (strcmp(romTid, "BOEJ") == 0 || strncmp(romTid, "BRJ", 3) == 0) {
 		extern u32 ie3OgreOverlayApFix[];
+		extern u32 ie3OgreOverlayApFix_size;
+
 		postCardReadCodeOffset = (u32)cardReadStartOffset;
 		postCardReadCodeOffset += usesThumb ? 0xC : 8;
 		u32* postCardReadCode = (u32*)postCardReadCodeOffset;
-		tonccpy(postCardReadCode, ie3OgreOverlayApFix, 51*4);
+		tonccpy(postCardReadCode, ie3OgreOverlayApFix, ie3OgreOverlayApFix_size);
 		if (strncmp(romTid, "BRJ", 3) == 0) {
-			postCardReadCode[50] = (romTid[3] == 'J') ? 0x02176E00 : 0x02176A00; // Radiant Historia: overlay9_0
+			postCardReadCode[(ie3OgreOverlayApFix_size/4)-1] = (romTid[3] == 'J') ? 0x02176E00 : 0x02176A00; // Radiant Historia: overlay9_0
 		}
 	} else if (strncmp(romTid, "IPK", 3) == 0 || strncmp(romTid, "IPG", 3) == 0) {
 		postCardReadCodeOffset = (u32)cardReadStartOffset;
@@ -313,38 +315,44 @@ static bool patchCardRead(cardengineArm9* ce9, const tNDSHeader* ndsHeader, cons
 
 		if (romTid[3] == 'J') {
 			extern u32 hgssJpnOverlayApFix[];
-			tonccpy(postCardReadCode, hgssJpnOverlayApFix, 35*4);
+			extern u32 hgssJpnOverlayApFix_size;
+			tonccpy(postCardReadCode, hgssJpnOverlayApFix, hgssJpnOverlayApFix_size);
 		} else if (romTid[3] == 'K') {
 			extern u32 hgssKorOverlayApFix[];
-			tonccpy(postCardReadCode, hgssKorOverlayApFix, 19*4);
+			extern u32 hgssKorOverlayApFix_size;
+			tonccpy(postCardReadCode, hgssKorOverlayApFix, hgssKorOverlayApFix_size);
 			if (romTid[2] == 'G') {
-				postCardReadCode[18] += 3;
+				postCardReadCode[(hgssKorOverlayApFix_size/4)-1] += 3;
 			}
 		} else {
 			extern u32 hgssIntOverlayApFix[];
-			tonccpy(postCardReadCode, hgssIntOverlayApFix, 19*4);
+			extern u32 hgssIntOverlayApFix_size;
+			const int overlayOffset = (hgssIntOverlayApFix_size/4)-1;
+			tonccpy(postCardReadCode, hgssIntOverlayApFix, hgssIntOverlayApFix_size);
 			if (romTid[3] == 'F') {
-				postCardReadCode[18] = 0x021E5920+0x217;
+				postCardReadCode[overlayOffset] = 0x021E5920+0x217;
 				if (romTid[2] == 'G') {
-					postCardReadCode[18]++;
+					postCardReadCode[overlayOffset]++;
 				}
 			} else if (romTid[3] == 'D') {
-				postCardReadCode[18] = 0x021E58E0+0x218;
+				postCardReadCode[overlayOffset] = 0x021E58E0+0x218;
 			} else if (romTid[3] == 'I') {
-				postCardReadCode[18] = 0x021E58A0+0x219;
+				postCardReadCode[overlayOffset] = 0x021E58A0+0x219;
 			} else if (romTid[3] == 'S') {
 				if (romTid[2] == 'K') {
-					postCardReadCode[18] = 0x021E5920+0x218;
+					postCardReadCode[overlayOffset] = 0x021E5920+0x218;
 				} else {
-					postCardReadCode[18] = 0x021E5940+0x218;
+					postCardReadCode[overlayOffset] = 0x021E5940+0x218;
 				}
 			}
 		}
 	} else if (strcmp(romTid, "CSGJ") == 0) {
 		extern u32 saga2OverlayApFix[];
+		extern u32 saga2OverlayApFix_size;
+
 		postCardReadCodeOffset = (u32)cardReadStartOffset;
 		postCardReadCodeOffset += usesThumb ? 0xC : 8;
-		tonccpy((u32*)postCardReadCodeOffset, saga2OverlayApFix, 15*4);
+		tonccpy((u32*)postCardReadCodeOffset, saga2OverlayApFix, saga2OverlayApFix_size);
 	}
 
 	/*if (ndsHeader->unitCode > 0 && dsiModeConfirmed) {

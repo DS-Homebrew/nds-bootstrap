@@ -7,6 +7,17 @@
 	.global hgssKorOverlayApFix
 	.global saga2OverlayApFix
 @---------------------------------------------------------------------------------
+.global ie3OgreOverlayApFix_size
+ie3OgreOverlayApFix_size: .word ie3OgreOverlayApFix_end-ie3OgreOverlayApFix
+.global hgssJpnOverlayApFix_size
+hgssJpnOverlayApFix_size: .word hgssJpnOverlayApFix_end-hgssJpnOverlayApFix
+.global hgssIntOverlayApFix_size
+hgssIntOverlayApFix_size: .word hgssIntOverlayApFix_end-hgssIntOverlayApFix
+.global hgssKorOverlayApFix_size
+hgssKorOverlayApFix_size: .word hgssKorOverlayApFix_end-hgssKorOverlayApFix
+.global saga2OverlayApFix_size
+saga2OverlayApFix_size: .word saga2OverlayApFix_end-saga2OverlayApFix
+@---------------------------------------------------------------------------------
 ie3OgreOverlayApFix: @ overlay9_129
 	ldr r0, =0x0212A9C0
 	ldrb r1, [r0, #0x6D]
@@ -59,6 +70,7 @@ ie3OgreOverlayApFix: @ overlay9_129
 	strb r2, [r0, #0x24F]
 	bx lr
 .pool
+ie3OgreOverlayApFix_end:
 @---------------------------------------------------------------------------------
 hgssJpnOverlayApFix: @ overlay9_1 + overlay9_122
 	ldr r0, =0x021E4E40+0x21A
@@ -95,6 +107,7 @@ hgssJpnOverlayApFix_check122:
 	strb r2, [r0, #0x6DE]
 	bx lr
 .pool
+hgssJpnOverlayApFix_end:
 @---------------------------------------------------------------------------------
 hgssIntOverlayApFix: @ overlay9_1
 	ldr r0, =0x021E5900+0x219 @ Offset varies by language
@@ -117,6 +130,7 @@ hgssIntOverlayApFix_check3:
 	strb r2, [r0, #3]
 	bx lr
 .pool
+hgssIntOverlayApFix_end:
 @---------------------------------------------------------------------------------
 hgssKorOverlayApFix: @ overlay9_1
 	ldr r0, =0x021E6300+0x213 @ add 3 for SS
@@ -139,6 +153,7 @@ hgssKorOverlayApFix_check3:
 	strb r2, [r0, #3]
 	bx lr
 .pool
+hgssKorOverlayApFix_end:
 @---------------------------------------------------------------------------------
 saga2OverlayApFix: @ overlay9_2
 	ldr r0, =0x0213C9C0+0x22790
@@ -154,3 +169,4 @@ saga2OverlayApFix: @ overlay9_2
 	strb r2, [r0, #4]
 	bx lr
 .pool
+saga2OverlayApFix_end:
