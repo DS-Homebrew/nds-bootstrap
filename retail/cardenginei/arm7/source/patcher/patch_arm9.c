@@ -141,7 +141,7 @@ static bool patchCardRead(cardengineArm9* ce9, const tNDSHeader* ndsHeader, cons
 
 	// Patch
 	u32* cardReadPatch = (usesThumb ? ce9->thumbPatches->card_read_arm9 : ce9->patches->card_read_arm9);
-	tonccpy(cardReadStartOffset, cardReadPatch, usesThumb ? ((moduleParams->sdk_version > 0x5000000) ? 0xB0 : 0xA0) : 0xE0); // 0xE0 = 0xF0 - 0x08
+	tonccpy(cardReadStartOffset, cardReadPatch, usesThumb ? 0xC : 8);
     /* dbg_printf("cardRead location : ");
     dbg_hexa((u32)cardReadStartOffset);
     dbg_printf("\n");
