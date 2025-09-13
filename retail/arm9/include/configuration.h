@@ -26,6 +26,7 @@ typedef struct configuration {
 	// char* gbaPath;
 	// char* gbaSavPath;
 	char* apPatchPath;
+	char* apPatchPostCardReadPath;
 	char* dsi2dsSavePatchPath;
 	u32 donorFileSize;
 	u32 donorFileOffset;
@@ -36,6 +37,8 @@ typedef struct configuration {
 	u32 wideCheatSize;
 	u32 apPatchOffset;
 	u32 apPatchSize;
+	u32 apPatchPostCardReadOffset;
+	u32 apPatchPostCardReadSize;
 	u32 mobiclipStartOffset;
 	u32 mobiclipEndOffset;
 	u32 dsi2dsSavePatchOffset;

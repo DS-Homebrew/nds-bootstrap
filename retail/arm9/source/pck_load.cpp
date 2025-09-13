@@ -421,6 +421,58 @@ void loadApFix(configuration* conf, const char* bootstrapPath, const char* romTi
 	fclose(file);
 }
 
+void loadApFixPostCardRead(configuration* conf, const char* bootstrapPath, const char* romTid, const u16 headerCRC) {
+	FILE *file = fopen("nitro:/apfixPostCardRead.pck", "rb");
+	if (!file) {
+		return;
+	}
+
+	char buf[5] = {0};
+	fread(buf, 1, 4, file);
+	if (strcmp(buf, ".PCK") != 0) {
+		return;
+	}
+
+	u32 offset = 0, size = 0;
+
+	// Try binary search for the game
+	int left = 0;
+	bool tidFound = false;
+
+	while (1) {
+		fseek(file, 16 + left * 16, SEEK_SET);
+		if (fread(buf, 1, 4, file) == 0) {
+			break;
+		}
+		if (strcmp(buf, romTid) == 0) { // TID matches, check other info
+			tidFound = true;
+			u16 crc;
+			fread(&crc, 1, sizeof(crc), file);
+			fread(&offset, 1, sizeof(offset), file);
+			fread(&size, 1, sizeof(size), file);
+
+			if (crc == 0xFFFF || crc == headerCRC) {
+				break;
+			} else {
+				offset = 0, size = 0;
+				left++;
+			}
+		} else if ((strcmp(buf, "END") == 0) || tidFound) {
+			break;
+		} else {
+			left++;
+		}
+	}
+
+	if (offset > 0 && size > 0) {
+		sprintf(conf->apPatchPostCardReadPath, bootstrapPath);
+		conf->apPatchPostCardReadOffset = offsetOfOpenedNitroFile+offset;
+		conf->apPatchPostCardReadSize = size;
+	}
+
+	fclose(file);
+}
+
 void loadMobiclipOffsets(configuration* conf, const char* bootstrapPath, const char* romTid, const u8 romVersion, const u16 headerCRC) {
 	FILE *file = fopen("nitro:/mobiclipOffsets.pck", "rb");
 	if (!file) {

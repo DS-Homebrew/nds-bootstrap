@@ -36,6 +36,9 @@ typedef struct loadCrt0 {
     u32 apPatchFileCluster;
     u32 apPatchOffset;
     u32 apPatchSize;
+    u32 apPatchPostCardReadFileCluster;
+    u32 apPatchPostCardReadOffset;
+    u32 apPatchPostCardReadSize;
 	u32 mobiclipStartOffset;
 	u32 mobiclipEndOffset;
     u32 dsi2dsSavePatchFileCluster;

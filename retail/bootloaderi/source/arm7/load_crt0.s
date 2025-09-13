@@ -51,6 +51,9 @@
 	.global apPatchFileCluster
 	.global apPatchOffset
 	.global apPatchSize
+	.global apPatchPostCardReadFileCluster
+	.global apPatchPostCardReadOffset
+	.global apPatchPostCardReadSize
 	.global mobiclipStartOffset
 	.global mobiclipEndOffset
 	.global dsi2dsSavePatchFileCluster
@@ -155,6 +158,12 @@ apPatchFileCluster:
 apPatchOffset:
 	.word	0x00000000
 apPatchSize:
+	.word	0x00000000
+apPatchPostCardReadFileCluster:
+	.word	0x00000000
+apPatchPostCardReadOffset:
+	.word	0x00000000
+apPatchPostCardReadSize:
 	.word	0x00000000
 mobiclipStartOffset:
 	.word	0x00000000

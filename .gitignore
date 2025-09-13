@@ -120,6 +120,7 @@ retail/nitrofiles/cardenginei_arm9*.bin
 retail/nitrofiles/asyncLoadSettings.pck
 retail/nitrofiles/preLoadSettings*.pck
 retail/nitrofiles/apfix.pck
+retail/nitrofiles/apfixPostCardRead.pck
 retail/nitrofiles/mobiclipOffsets.pck
 retail/nitrofiles/dsi2dsSavePatches.pck
 retail/nitrofiles_dec/cardengine_arm7*.bin

@@ -157,6 +157,7 @@ extern bool extension(const std::string& filename, const char* ext);
 extern bool loadPreLoadSettings(configuration* conf, const char* pckPath, const char* romTid, const u16 headerCRC);
 extern void loadAsyncLoadSettings(configuration* conf, const char* romTid, const u16 headerCRC);
 extern void loadApFix(configuration* conf, const char* bootstrapPath, const char* romTid, const u16 headerCRC);
+extern void loadApFixPostCardRead(configuration* conf, const char* bootstrapPath, const char* romTid, const u16 headerCRC);
 extern void loadMobiclipOffsets(configuration* conf, const char* bootstrapPath, const char* romTid, const u8 romVersion, const u16 headerCRC);
 extern void loadDSi2DSSavePatch(configuration* conf, const char* bootstrapPath, const char* romTid, const u8 romVersion, const u16 headerCRC);
 
@@ -2420,6 +2421,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		}
 	} else {
 		loadApFix(conf, bootstrapPath, romTid, headerCRC);
+		loadApFixPostCardRead(conf, bootstrapPath, romTid, headerCRC);
 	}
 
 	if (conf->loaderType < 2 && (strcmp(romTid, "NTRJ") == 0) && (headerCRC == 0x9B41 || headerCRC == 0x69D6)) { // Use bootloader2 for Shantae: Risky's Revenge (USA) (Review Build)
