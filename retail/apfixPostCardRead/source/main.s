@@ -3,9 +3,45 @@
 	.arm
 @---------------------------------------------------------------------------------
 .ascii ".PCK"
-.word 0 @ This is where the amount would be entered, but is unused due to having to change it manually, so a "END" string is placed at the end of the list
+.word 0 @ This is where the amount would be entered, but is unused due to having to change it manually, so a "END" string is placed at the end of the list to determine the amount
 .space 0x8
 @---------------------------------------------------------------------------------
+.ascii "AZLE"
+.hword 0xFFFF
+.word stylSavUsaOverlayApFix
+.word stylSavUsaOverlayApFix_end-stylSavUsaOverlayApFix
+.hword 0
+
+.ascii "AZLK"
+.hword 0xFFFF
+.word stylSavKorOverlayApFix
+.word stylSavKorOverlayApFix_end-stylSavKorOverlayApFix
+.hword 0
+
+.ascii "AZLP"
+.hword 0xFFFF
+.word stylSavEurOverlayApFix
+.word stylSavEurOverlayApFix_end-stylSavEurOverlayApFix
+.hword 0
+
+.ascii "B6ZE"
+.hword 0xFFFF
+.word mmzcOverlayApFix
+.word mmzcOverlayApFix_end-mmzcOverlayApFix
+.hword 0
+
+.ascii "B6ZJ"
+.hword 0xFFFF
+.word mmzcOverlayApFix
+.word mmzcOverlayApFix_end-mmzcOverlayApFix
+.hword 0
+
+.ascii "B6ZP"
+.hword 0xFFFF
+.word mmzcOverlayApFix
+.word mmzcOverlayApFix_end-mmzcOverlayApFix
+.hword 0
+
 .ascii "BOEJ"
 .hword 0xFFFF
 .word ie3OgreOverlayApFix
@@ -116,6 +152,90 @@
 
 .ascii "END"
 .byte 0
+@---------------------------------------------------------------------------------
+stylSavUsaOverlayApFix: @ overlay9_156
+	ldr r0, =0x02160F80
+	ldrb r1, [r0, #0x59C]
+	mov r2, #0x0C
+	cmp r2, r1
+	bxne lr
+	ldrb r1, [r0, #0x6F7]
+	mov r2, #0x10
+	cmp r2, r1
+	bxne lr
+	mov r2, #0x36
+	strb r2, [r0, #0x59C]
+	mov r2, #0x11
+	strb r2, [r0, #0x6F7]
+	bx lr
+.pool
+stylSavUsaOverlayApFix_end:
+@---------------------------------------------------------------------------------
+stylSavKorOverlayApFix: @ overlay9_155
+	ldr r0, =0x0216EF00
+	ldrh r1, [r0, #0x9E]
+	ldr r2, =0xE0AA
+	cmp r2, r1
+	bxne lr
+	ldrb r1, [r0, #0x149]
+	mov r2, #0xBF
+	cmp r2, r1
+	bxne lr
+	ldrb r1, [r0, #0x14B]
+	mov r2, #0xE0
+	cmp r2, r1
+	bxne lr
+	ldr r2, =0x39A9
+	strh r2, [r0, #0x9E]
+	mov r2, #0xBE
+	strb r2, [r0, #0x149]
+	mov r2, #0x36
+	strb r2, [r0, #0x14B]
+	bx lr
+.pool
+stylSavKorOverlayApFix_end:
+@---------------------------------------------------------------------------------
+stylSavEurOverlayApFix: @ overlay9_156
+	ldr r0, =0x02161100
+	ldrb r1, [r0, #0x599]
+	mov r2, #0x0C
+	cmp r2, r1
+	bxne lr
+	ldrb r1, [r0, #0x6F4]
+	mov r2, #0x10
+	cmp r2, r1
+	bxne lr
+	mov r2, #0x36
+	strb r2, [r0, #0x599]
+	mov r2, #0x11
+	strb r2, [r0, #0x6F4]
+	bx lr
+.pool
+stylSavEurOverlayApFix_end:
+@---------------------------------------------------------------------------------
+mmzcOverlayApFix: @ overlay9_8
+	ldr r0, =0x0215A100
+	ldrh r1, [r0, #0x9E]
+	ldr r2, =0xE0AA
+	cmp r2, r1
+	bxne lr
+	ldrb r1, [r0, #0x148]
+	mov r2, #0xBF
+	cmp r2, r1
+	bxne lr
+	ldrb r1, [r0, #0x14A]
+	mov r2, #0xE0
+	cmp r2, r1
+	bxne lr
+	ldr r2, =0x39A9
+	strh r2, [r0, #0x9E]
+	mov r2, #0xBE
+	strb r2, [r0, #0x148]
+	mov r2, #0x36
+	strb r2, [r0, #0x14A]
+	bx lr
+.pool
+mmzcOverlayApFix_end:
 @---------------------------------------------------------------------------------
 ie3OgreOverlayApFix: @ overlay9_129
 	ldr r0, =0x0212A9C0
