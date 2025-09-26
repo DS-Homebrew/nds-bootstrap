@@ -48,7 +48,6 @@ bool nandio_startup() {
 
 	nand_ReadSectors(0, 1, sector_buf);
 	bool isDSi = parse_ncsd(sector_buf, 0) != 0;
-	if (!isDSi) return false;
 
 	if (*(u32*)(0x2FFD7BC) == 0) {
 		// Get eMMC CID
