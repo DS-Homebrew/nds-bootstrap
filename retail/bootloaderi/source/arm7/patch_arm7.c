@@ -158,7 +158,10 @@ bool saveRelocationApplied = false;
 
 static void patchSwiHalt(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	extern bool pkmnGen5;
-	if (pkmnGen5) return;
+	if (pkmnGen5) {
+		newSwiHaltAddr = 0; // Ensure this is set to 0 in case a THUMB ROM is used as a donor ROM
+		return;
+	}
 
 	u32* swiHaltOffset = patchOffsetCache.swiHaltOffset;
 	if (!patchOffsetCache.swiHaltOffset) {
