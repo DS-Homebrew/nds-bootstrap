@@ -138,6 +138,7 @@ int hookNdsRetailArm9(
 		ce9->valueBits &= ~isSdk5_9;
 	}
 	ce9->valueBits &= ~b_isDlp;
+	ce9->postCardReadCodeOffset = 0;
 
 	extern u32 romMapLines;
 	extern u32 romMap[][3];
