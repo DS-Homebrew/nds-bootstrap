@@ -226,6 +226,25 @@ int allocateCacheSlot(void) {
 }
 
 int getSlotForSector(u32 sector) {
+	static int savedSector = 0;
+	static int savedSlot = 0;
+
+	if (savedSector == sector) {
+		return savedSlot;
+	}
+	savedSector = sector;
+
+	for (int i = 0; i < ce9->cacheSlots; i++) {
+		if (cacheDescriptor[i] == sector) {
+			savedSlot = i;
+			return i;
+		}
+	}
+	savedSlot = -1;
+	return savedSlot;
+}
+
+int getSlotForSectorTemp(u32 sector) {
 	for (int i = 0; i < ce9->cacheSlots; i++) {
 		if (cacheDescriptor[i] == sector) {
 			return i;
