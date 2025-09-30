@@ -77,6 +77,7 @@ u32* findHeapPointerOffset(const module_params_t* moduleParams, const tNDSHeader
 u32* findHeapPointer2Offset(const module_params_t* moduleParams, const tNDSHeader* ndsHeader);
 u32* findRandomPatchOffset(const tNDSHeader* ndsHeader);
 u32* findRandomPatchOffset5Second(const tNDSHeader* ndsHeader); // SDK 5
+u32* findStrmPageLoadOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
 u32* findSleepOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb, bool* usesThumbPtr);
 u32* findCardEndReadDma(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb, const u32* cardReadDmaEndOffset, u32* offsetDmaHandler);
 u32* findCardSetDma(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb);

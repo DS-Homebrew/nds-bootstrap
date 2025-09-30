@@ -49,7 +49,9 @@
 #define PAGE_4G		(0b11111 << 1)
 
 u32 generateA7Instr(int arg1, int arg2);
+void setBL(int arg1, int arg2);
 const u16* generateA7InstrThumb(int arg1, int arg2);
+void setBLThumb(int arg1, int arg2);
 u16* getOffsetFromBLThumb(u16* blOffset);
 u32 patchCardNdsArm9(
 	cardengineArm9* ce9,

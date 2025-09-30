@@ -1293,6 +1293,10 @@ void patchMpuInitTwl(const tNDSHeader* ndsHeader) {
 }
 
 bool patchStrmPageLoad(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+	if (moduleParams->sdk_version < 0x3000000) {
+		return false;
+	}
+
 	u32* offset = patchOffsetCache.strmPageLoadOffset;
 	if (!patchOffsetCache.strmPageLoadOffsetChecked) {
 		offset = findStrmPageLoadOffset(ndsHeader, moduleParams);
