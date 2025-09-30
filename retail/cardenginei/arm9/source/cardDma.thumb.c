@@ -602,28 +602,27 @@ u32 cardReadDma(u32 dma0, u8* dst0, u32 src0, u32 len0) {
 
 	#ifndef DLDI
 	bool forceDma = false;
-	if (!dmaCheckValid && cardEndReadDmaFound && !(ce9->valueBits & ROMinRAM) && len > 0) {
-		if ((ce9->forceDmaFlag || asyncDataAvailable(src)) && !romPartAvailable(src)) {
-			while (!forceDma && len > 0) {
-				u32 sector = (src/ce9->cacheBlockSize)*ce9->cacheBlockSize;
-				int slot = getSlotForSector(sector);
-				if (slot == -1) {
-					forceDma = true;
-				} else {
-					u32 len2 = len;
-					if ((src - sector) + len2 > ce9->cacheBlockSize) {
-						len2 = sector - src + ce9->cacheBlockSize;
-					}
+	if (!dmaCheckValid && cardEndReadDmaFound && !(ce9->valueBits & ROMinRAM) && len > 0
+	&& (ce9->forceDmaFlag || asyncDataAvailable(src)) && !romPartAvailable(src)) {
+		while (!forceDma && len > 0) {
+			u32 sector = (src/ce9->cacheBlockSize)*ce9->cacheBlockSize;
+			int slot = getSlotForSector(sector);
+			if (slot == -1) {
+				forceDma = true;
+			} else {
+				u32 len2 = len;
+				if ((src - sector) + len2 > ce9->cacheBlockSize) {
+					len2 = sector - src + ce9->cacheBlockSize;
+				}
 
-					len -= len2;
-					if (len > 0) {
-						src += len2;
-					}
+				len -= len2;
+				if (len > 0) {
+					src += len2;
 				}
 			}
 		}
-		ce9->forceDmaFlag = 0;
 	}
+	ce9->forceDmaFlag = 0;
 	#endif
 
     if (dmaCheckValid
