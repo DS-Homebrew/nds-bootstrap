@@ -1123,26 +1123,32 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 		if (donorNdsFile) {
 			u32 donorArm7Offset = 0;
+			u32 donorArm7Size = 0;
 			fseek(donorNdsFile, 0x30, SEEK_SET);
 			fread(&donorArm7Offset, sizeof(u32), 1, donorNdsFile);
 			fseek(donorNdsFile, 0x3C, SEEK_SET);
-			fread((u32*)DONOR_ROM_ARM7_SIZE_LOCATION, sizeof(u32), 1, donorNdsFile);
-			fseek(donorNdsFile, 0x1A0, SEEK_SET);
-			fread((u32*)DONOR_ROM_MBK6_LOCATION, sizeof(u32), 1, donorNdsFile);
-			if (twlDonor) {
-				a7mbk6 = *(u32*)DONOR_ROM_MBK6_LOCATION;
+			fread(&donorArm7Size, sizeof(u32), 1, donorNdsFile);
+			if (conf->gameOnFlashcard || conf->saveRelocation || !twlDonor || (twlDonor && donorArm7Size != 0x28E54)) {
+				*(u32*)DONOR_ROM_ARM7_SIZE_LOCATION = donorArm7Size;
+				fseek(donorNdsFile, 0x1A0, SEEK_SET);
+				fread((u32*)DONOR_ROM_MBK6_LOCATION, sizeof(u32), 1, donorNdsFile);
+				if (twlDonor) {
+					a7mbk6 = *(u32*)DONOR_ROM_MBK6_LOCATION;
+				}
+				fseek(donorNdsFile, 0x1D0, SEEK_SET);
+				fread(&donorArm7iOffset, sizeof(u32), 1, donorNdsFile);
+				fseek(donorNdsFile, 0x1D4, SEEK_SET);
+				fread((u32*)DONOR_ROM_DEVICE_LIST_LOCATION, sizeof(u32), 1, donorNdsFile);
+				fseek(donorNdsFile, 0x1DC, SEEK_SET);
+				fread((u32*)DONOR_ROM_ARM7I_SIZE_LOCATION, sizeof(u32), 1, donorNdsFile);
+				fseek(donorNdsFile, 0x22C, SEEK_SET);
+				fread(&donorModcrypt2len, sizeof(u32), 1, donorNdsFile);
+				fseek(donorNdsFile, donorArm7Offset, SEEK_SET);
+				fread((u8*)DONOR_ROM_ARM7_LOCATION, 1, *(u32*)DONOR_ROM_ARM7_SIZE_LOCATION, donorNdsFile);
+				donorLoaded = true;
+			} else {
+				fclose(donorNdsFile);
 			}
-			fseek(donorNdsFile, 0x1D0, SEEK_SET);
-			fread(&donorArm7iOffset, sizeof(u32), 1, donorNdsFile);
-			fseek(donorNdsFile, 0x1D4, SEEK_SET);
-			fread((u32*)DONOR_ROM_DEVICE_LIST_LOCATION, sizeof(u32), 1, donorNdsFile);
-			fseek(donorNdsFile, 0x1DC, SEEK_SET);
-			fread((u32*)DONOR_ROM_ARM7I_SIZE_LOCATION, sizeof(u32), 1, donorNdsFile);
-			fseek(donorNdsFile, 0x22C, SEEK_SET);
-			fread(&donorModcrypt2len, sizeof(u32), 1, donorNdsFile);
-			fseek(donorNdsFile, donorArm7Offset, SEEK_SET);
-			fread((u8*)DONOR_ROM_ARM7_LOCATION, 1, *(u32*)DONOR_ROM_ARM7_SIZE_LOCATION, donorNdsFile);
-			donorLoaded = true;
 		}
 	}
 
