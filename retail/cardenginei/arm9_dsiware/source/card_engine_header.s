@@ -92,6 +92,7 @@ patches:
 .word   0x0
 .word   0x0
 .word   0x0
+.word   0x0
 .word   reset_arm9
 needFlushDCCache:
 .word   0x0
@@ -102,6 +103,7 @@ needFlushDCCache:
 thumbPatches:
 .word   0x0
 .word	thumb_card_irq_enable
+.word   0x0
 .word   0x0
 .word   0x0
 .word   0x0

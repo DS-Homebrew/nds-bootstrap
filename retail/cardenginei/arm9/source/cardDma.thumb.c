@@ -534,6 +534,36 @@ void cardSetDma(u32 * params) {
 	// }
 }
 
+#ifndef DLDI
+static bool inline asyncDataAvailable(u32 src) {
+	for (int i = 0; i < 2; i++) {
+		if (ce9->asyncDataSrc[i] == 0) {
+			return false;
+		}
+		if (src >= ce9->asyncDataSrc[i] && src < ce9->asyncDataSrcEnd[i]) {
+			return true;
+		}
+	}
+	return false;
+}
+
+static bool inline romPartAvailable(u32 src) {
+	#ifndef TWLSDK
+	for (int i = 0; i < 4; i++) {
+		if (ce9->romPartSrc[i] == 0) {
+			return false;
+		}
+		if (src >= ce9->romPartSrc[i] && src < ce9->romPartSrcEnd[i]) {
+			return true;
+		}
+	}
+	return false;
+	#else
+	return (ce9->romPartSrc[0] > 0 && src >= ce9->romPartSrc[0] && src < ce9->romPartSrcEnd[0]);
+	#endif
+}
+#endif
+
 extern bool isNotTcm(u32 address, u32 len);
 
 u32 cardReadDma(u32 dma0, u8* dst0, u32 src0, u32 len0) {
@@ -572,24 +602,27 @@ u32 cardReadDma(u32 dma0, u8* dst0, u32 src0, u32 len0) {
 
 	#ifndef DLDI
 	bool forceDma = false;
-	if (!dmaCheckValid && cardEndReadDmaFound && len > 0 && ((src >= ce9->asyncDataSrc[0] && src < ce9->asyncDataSrcEnd[0]) || (src >= ce9->asyncDataSrc[1] && src < ce9->asyncDataSrcEnd[1]))) {
-		while (!forceDma && len > 0) {
-			u32 sector = (src/ce9->cacheBlockSize)*ce9->cacheBlockSize;
-			int slot = getSlotForSector(sector);
-			if (slot == -1) {
-				forceDma = true;
-			} else {
-				u32 len2 = len;
-				if ((src - sector) + len2 > ce9->cacheBlockSize) {
-					len2 = sector - src + ce9->cacheBlockSize;
-				}
+	if (!dmaCheckValid && cardEndReadDmaFound && !(ce9->valueBits & ROMinRAM) && len > 0) {
+		if ((ce9->forceDmaFlag || asyncDataAvailable(src)) && !romPartAvailable(src)) {
+			while (!forceDma && len > 0) {
+				u32 sector = (src/ce9->cacheBlockSize)*ce9->cacheBlockSize;
+				int slot = getSlotForSector(sector);
+				if (slot == -1) {
+					forceDma = true;
+				} else {
+					u32 len2 = len;
+					if ((src - sector) + len2 > ce9->cacheBlockSize) {
+						len2 = sector - src + ce9->cacheBlockSize;
+					}
 
-				len -= len2;
-				if (len > 0) {
-					src += len2;
+					len -= len2;
+					if (len > 0) {
+						src += len2;
+					}
 				}
 			}
 		}
+		ce9->forceDmaFlag = 0;
 	}
 	#endif
 
@@ -603,7 +636,8 @@ u32 cardReadDma(u32 dma0, u8* dst0, u32 src0, u32 len0) {
 			// new dma method
 			#ifndef TWLSDK
 			if (!(ce9->valueBits & isSdk5)) {
-				cacheFlush();
+				IC_InvalidateRange(dst, len);
+				DC_InvalidateRange(dst, len);
 				cardSetDma(NULL);
 			}
 			#endif

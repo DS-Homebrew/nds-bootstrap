@@ -86,6 +86,8 @@ asyncDataSrc:
 asyncDataSrcEnd:
 	.word	0x00000000
 	.word	0x00000000
+forceDmaFlag:
+	.word	0x00000000
 #ifndef TWLSDK
 romMapLines:
 	.word	0x00000000
@@ -146,6 +148,7 @@ ndsCodeStart:
 patches:
 .word	card_read_arm9
 .word	card_irq_enable
+.word	forceDmaFlagEnable_jmp
 .word	card_pull_out_arm9
 .word	card_id_arm9
 .word	card_dma_arm9
@@ -210,6 +213,7 @@ needFlushDCCache:
 thumbPatches:
 .word	thumb_card_read_arm9
 .word	thumb_card_irq_enable
+.word	thumb_forceDmaFlagEnable_jmp
 .word	thumb_card_pull_out_arm9
 .word	thumb_card_id_arm9
 .word	thumb_card_dma_arm9
@@ -529,6 +533,37 @@ thumb_card_irq_enable:
 .pool
 .align	4
 @---------------------------------------------------------------------------------
+
+	.arm
+@---------------------------------------------------------------------------------
+forceDmaFlagEnable_jmp:
+@---------------------------------------------------------------------------------
+	ldr		pc, =forceDmaFlagEnable
+.pool
+@---------------------------------------------------------------------------------
+forceDmaFlagEnable:
+	mov r0, #1
+	adr r1, forceDmaFlag
+	str r0, [r1]
+	mov r1, r5
+	bx lr
+
+	.thumb
+@---------------------------------------------------------------------------------
+thumb_forceDmaFlagEnable_jmp:
+@---------------------------------------------------------------------------------
+	ldr		r0, =thumb_forceDmaFlagEnable+1
+	bx		r0
+.pool
+@---------------------------------------------------------------------------------
+thumb_forceDmaFlagEnable:
+	mov r0, #1
+	ldr r1, =forceDmaFlag
+	str r0, [r1]
+	mov r0, r5
+	mov r1, r4
+	bx lr
+.pool
 
 #ifndef TWLSDK
 	.arm

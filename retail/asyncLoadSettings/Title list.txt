@@ -1,15 +1,8 @@
-Elite Beat Agents (AOSE)
-Moero! Nekketsu Rhythm Damashii: Osu! Tatakae! Ouendan 2 (AO2J)
 Osu! Tatakae! Ouendan (AOSJ)
-Pokemon Black Version 2 (All Regions & Languages) (IRE)
-Pokemon White Version 2 (All Regions & Languages) (IRD)
-Pokemon Ranger: Guardian Signs (USA) (B3RE)
-Pokemon Ranger: Guardian Signs (Europe) (B3RP)
-Pokemon Ranger: Hikari no Kiseki (Japan) (B3RJ)
-Sonic Colors (USA) (BXSE)
-Sonic Colours (Europe) (BXSP)
-Sonic Colors (Japan) (BXSJ)
-System Flaw (USA) (DSi Exclusive) (DSYE)
-System Flaw (Europe) (DSi Exclusive) (DSYP)
+Sonic Rush (All Regions) (ASC)
+Sonic Colors (All Regions) (BXS)
+System Flaw (All Regions) (DSi Exclusive) (DSY)
+Yu-Gi-Oh!: Nightmare Troubadour (All Regions) (AYG)
 
 Above games will have data (such as streamable music and/or video) set to be asynchrously loadable (only applies to DSi/3DS SD Card users).
+Games that are not listed will apply automatically if they have streamable music (contained in .sdat files) and if the function which reads them is found within the ROM.

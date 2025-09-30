@@ -12,35 +12,34 @@ static const char* getSdatPath(const char* romTid) {
 	if (strncmp(romTid, "CDZ", 3) == 0 // Dragon Ball: Origins
 	 || strncmp(romTid, "BDB", 3) == 0) { // Dragon Ball: Origins 2
 		return "rom:/sound/data.sdat";
-	} else if (strncmp(romTid, "AOS", 3) == 0 // Elite Beat Agents & Osu! Tatakae! Ouendan
-			|| strncmp(romTid, "AO2", 3) == 0) { // Moero! Nekketsu Rhythm Damashii: Osu! Tatakae! Ouendan 2
+	} else if (strncmp(romTid, "AOS", 3) == 0) { // Elite Beat Agents & Osu! Tatakae! Ouendan
 		return "rom:/data/sound_data.sdat";
 	} else if (strncmp(romTid, "ADA", 3) == 0 // Mainline Gen 4 Pokemon games
-			|| strncmp(romTid, "APA", 3) == 0
-			|| strncmp(romTid, "B3R", 3) == 0) { // Pokemon Ranger: Guardian Signs
+			|| strncmp(romTid, "APA", 3) == 0) {
 		return "rom:/data/sound/sound_data.sdat";
 	} else if (strncmp(romTid, "CPU", 3) == 0) {
 		return "rom:/data/sound/pl_sound_data.sdat";
 	} else if (strncmp(romTid, "IPK", 3) == 0
 			|| strncmp(romTid, "IPG", 3) == 0) {
 		return "rom:/data/sound/gs_sound_data.sdat";
-	} else if (strncmp(romTid, "IRE", 3) == 0 // Pokemon Black Version 2
-			|| strncmp(romTid, "IRD", 3) == 0) { // Pokemon White Version 2
-		return "rom:/swan_sound_data.sdat";
+	} else if (strncmp(romTid, "ASC", 3) == 0) { // Sonic Rush
+		return "rom:/snd/sys/sound_data.sdat";
 	} else if (strncmp(romTid, "BJM", 3) == 0	// Stitch Jam
 			|| strncmp(romTid, "B3I", 3) == 0) { // Stitch Jam 2
 		return "rom:/sound_data.sdat";
+	} else if (strncmp(romTid, "AYG", 3) == 0) { // Yu-Gi-Oh!: Nightmare Troubadour
+		return "rom:/sound/sound_data.sdat";
 	}
 	return "rom:/NULL.sdat";
 }
 
 static u32 getSdatStrmId(const char* romTid) {
-	if (strncmp(romTid, "AOS", 3) == 0) { // Elite Beat Agents & Osu! Tatakae! Ouendan
-		return (romTid[3] == 'E') ? 0x17C : 0x102;
-	} else if (strncmp(romTid, "AO2", 3) == 0) { // Moero! Nekketsu Rhythm Damashii: Osu! Tatakae! Ouendan 2
-		return 0x135;
-	} else if (strncmp(romTid, "B3R", 3) == 0) { // Pokemon Ranger: Guardian Signs
-		return 0x322;
+	if (strncmp(romTid, "ASC", 3) == 0) { // Sonic Rush
+		return 0x69;
+	} else if (strcmp(romTid, "AOSJ") == 0) { // Osu! Tatakae! Ouendan
+		return 0x102;
+	} else if (strncmp(romTid, "AYG", 3) == 0) { // Yu-Gi-Oh!: Nightmare Troubadour
+		return (romTid[3] == 'P') ? 0x102 : 0x107;
 	}
 	return 0xFFFFFFFF;
 }
@@ -170,11 +169,9 @@ void loadAsyncLoadSettings(configuration* conf, const char* romTid, const u16 he
 	u32 sdatFileId = 0xFFFFFFFF;
 	bool readStrmFile = false;
 
-	if (strncmp(romTid, "AOS", 3) == 0 // Elite Beat Agents & Osu! Tatakae! Ouendan
-	 || strncmp(romTid, "AO2", 3) == 0 // Moero! Nekketsu Rhythm Damashii: Osu! Tatakae! Ouendan 2
-	 || strncmp(romTid, "IRE", 3) == 0 // Pokemon Black Version 2
-	 || strncmp(romTid, "IRD", 3) == 0 // Pokemon White Version 2
-	 || strncmp(romTid, "B3R", 3) == 0) { // Pokemon Ranger: Guardian Signs
+	if (strncmp(romTid, "ASC", 3) == 0 // Sonic Rush
+	 || strcmp(romTid, "AOSJ") == 0 // Osu! Tatakae! Ouendan
+	 || strncmp(romTid, "AYG", 3) == 0) { // Yu-Gi-Oh!: Nightmare Troubadour
 		if (romFSInit(conf->ndsPath)) {
 			file = fopen(getSdatPath(romTid), "rb");
 			sdatFileId = getSdatStrmId(romTid);

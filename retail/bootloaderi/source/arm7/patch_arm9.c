@@ -936,6 +936,8 @@ static bool getSleep(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 	return true;
 }
 
+u32 forceDmaFlagEnableOffset = 0;
+
 bool a9PatchCardIrqEnable(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	const char* romTid = getRomTid(ndsHeader);
 
@@ -965,8 +967,10 @@ bool a9PatchCardIrqEnable(cardengineArm9* ce9, const tNDSHeader* ndsHeader, cons
 	if (!cardIrqEnableOffset) {
 		return false;
 	}
+	forceDmaFlagEnableOffset = (u32)cardIrqEnableOffset;
+	forceDmaFlagEnableOffset += usesThumb ? 0xC : 8;
 	u32* cardIrqEnablePatch = (usesThumb ? ce9->thumbPatches->card_irq_enable : ce9->patches->card_irq_enable);
-	tonccpy(cardIrqEnableOffset, cardIrqEnablePatch, usesThumb ? 0x18 : 0x30);
+	tonccpy(cardIrqEnableOffset, cardIrqEnablePatch, usesThumb ? 0xC : 8);
     dbg_printf("cardIrqEnable location : ");
     dbg_hexa((u32)cardIrqEnableOffset);
     dbg_printf("\n\n");
@@ -1286,6 +1290,35 @@ void patchMpuInitTwl(const tNDSHeader* ndsHeader) {
 	dbg_printf("Mpu init end TWL: ");
 	dbg_hexa((u32)offset);
 	dbg_printf("\n\n");
+}
+
+bool patchStrmPageLoad(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+	u32* offset = patchOffsetCache.strmPageLoadOffset;
+	if (!patchOffsetCache.strmPageLoadOffsetChecked) {
+		offset = findStrmPageLoadOffset(ndsHeader, moduleParams);
+		if (offset) {
+			patchOffsetCache.strmPageLoadOffset = offset;
+		}
+		patchOffsetCache.strmPageLoadOffsetChecked = true;
+	}
+
+	if (!offset || forceDmaFlagEnableOffset == 0) {
+		return false;
+	}
+	u32 offset32 = (u32)offset;
+	u16* thumbOffset = (u16*)offset;
+
+	if (thumbOffset[0] == 0xB570) {
+		setBLThumb(offset32+(13*2), forceDmaFlagEnableOffset);
+		tonccpy((u32*)forceDmaFlagEnableOffset, ce9->thumbPatches->forceDmaFlagEnable, 8);
+	} else {
+		setBL(offset32+(9*4), forceDmaFlagEnableOffset);
+		tonccpy((u32*)forceDmaFlagEnableOffset, ce9->patches->forceDmaFlagEnable, 8);
+	}
+    dbg_printf("strmPageLoad location : ");
+    dbg_hexa((u32)offset);
+    dbg_printf("\n\n");
+	return true;
 }
 
 /*static bool patchCartExist(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
@@ -3008,7 +3041,7 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 		const bool cardSetDmaPatched = patchCardSetDma(ce9, ndsHeader, moduleParams, usesThumb, ROMinRAM);
 		extern u32 asyncDataAddr[2];
 
-		if (!cardSetDmaPatched || (!gameOnFlashcard && !ROMinRAM && asyncDataAddr[0])) {
+		if (!cardSetDmaPatched || (!gameOnFlashcard && !ROMinRAM && (patchStrmPageLoad(ce9, ndsHeader, moduleParams) || asyncDataAddr[0]))) {
 			patchCardReadDma(ce9, ndsHeader, moduleParams, usesThumb);
 		}
 		if (!patchCardEndReadDma(ce9, ndsHeader, moduleParams, usesThumb, ROMinRAM)) {
