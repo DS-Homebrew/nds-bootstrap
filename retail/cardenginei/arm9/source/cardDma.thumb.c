@@ -135,14 +135,10 @@ static inline bool checkArm7(void) {
 static u32 * dmaParams = NULL;
 static int currentLen = 0;
 #ifndef DLDI
-static int currentSlot = 0;
+static u32 currentSlot = 0xFFFFFFFF;
 #endif
 
-static void cardReadDmaNormal(u8* dst, u32 src, u32 len
-#ifndef DLDI
-, bool useCurrentSlot
-#endif
-) {
+static void cardReadDmaNormal(u8* dst, u32 src, u32 len) {
 	#ifndef DLDI
 	const u32 commandRead=0x025FFB0A;
 	//u32 page = (src / 512) * 512;
@@ -156,8 +152,8 @@ static void cardReadDmaNormal(u8* dst, u32 src, u32 len
     while (len > 0) {
 		// Read via the main RAM cache
 		u32 sector = (src/ce9->cacheBlockSize)*ce9->cacheBlockSize;
-		int slot = useCurrentSlot ? currentSlot : getSlotForSector(sector);
-		useCurrentSlot = false;
+		int slot = (currentSlot != 0xFFFFFFFF) ? currentSlot : getSlotForSector(sector);
+		currentSlot = 0xFFFFFFFF;
 		vu8* buffer = getCacheAddress(slot);
 		#ifdef ASYNCPF
 		u32 nextSector = sector+ce9->cacheBlockSize;
@@ -342,11 +338,7 @@ void continueCardReadDmaArm9() {
 	len = dmaParams[5];
 	#endif
 
-	cardReadDmaNormal(dst, src, len
-	#ifndef DLDI
-	, true
-	#endif
-	);
+	cardReadDmaNormal(dst, src, len);
 }
 
 #ifndef DLDI
@@ -379,19 +371,21 @@ void continueCardReadDmaArm7() {
 
 		vu8* buffer = getCacheAddress(currentSlot);
 
-		// TODO Copy via dma
+		currentLen = len2;
 		#ifndef DLDI
 		if (!dmaCheckValid) {
 			tonccpy(dst, (u8*)buffer+(src-sector), len2);
+			dmaReadOnArm9 = true;
+
+			continueCardReadDmaArm9();
 		} else
 		#endif
 		{
 			ndmaCopyWordsAsynch(0, (u8*)buffer+(src-sector), dst, len2);
-		}
-		dmaReadOnArm9 = true;
-		currentLen = len2;
+			dmaReadOnArm9 = true;
 
-		IPC_SendSync(0x3);
+			IPC_SendSync(0x3);
+		}
 	// }
 }
 #endif
@@ -540,11 +534,7 @@ void cardSetDma(u32 * params) {
 
 		// IPC_SendSync(0x4);
 	} else { */
-		cardReadDmaNormal(dst, src, len
-		#ifndef DLDI
-		, false
-		#endif
-		);
+		cardReadDmaNormal(dst, src, len);
 	// }
 }
 
