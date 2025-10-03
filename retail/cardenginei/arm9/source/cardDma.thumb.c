@@ -134,9 +134,9 @@ static inline bool checkArm7(void) {
 
 static u32 * dmaParams = NULL;
 static int currentLen = 0;
-#ifndef DLDI
-static u32 currentSlot = 0xFFFFFFFF;
-#endif
+// #ifndef DLDI
+// static int currentSlot = 0;
+// #endif
 
 static void cardReadDmaNormal(u8* dst, u32 src, u32 len) {
 	#ifndef DLDI
@@ -152,8 +152,7 @@ static void cardReadDmaNormal(u8* dst, u32 src, u32 len) {
     while (len > 0) {
 		// Read via the main RAM cache
 		u32 sector = (src/ce9->cacheBlockSize)*ce9->cacheBlockSize;
-		int slot = (currentSlot != 0xFFFFFFFF) ? currentSlot : getSlotForSector(sector);
-		currentSlot = 0xFFFFFFFF;
+		int slot = getSlotForSector(sector);
 		vu8* buffer = getCacheAddress(slot);
 		#ifdef ASYNCPF
 		u32 nextSector = sector+ce9->cacheBlockSize;
@@ -203,7 +202,7 @@ static void cardReadDmaNormal(u8* dst, u32 src, u32 len) {
 			if (readLen >= ce9->cacheBlockSize*4) {
 				updateDescriptor(slot+3, sector+(ce9->cacheBlockSize*3));
 			}*/
-			currentSlot = slot;
+			// currentSlot = slot;
 			return;
 		}
 		#ifdef ASYNCPF
@@ -253,7 +252,7 @@ static void cardReadDmaNormal(u8* dst, u32 src, u32 len) {
 			ndmaCopyWordsAsynch(0, (u8*)buffer+(src-sector), dst, len2);
 			dmaReadOnArm9 = true;
 			currentLen = len2;
-			currentSlot = slot;
+			// currentSlot = slot;
 
 			IPC_SendSync(0x3);
 			return;
@@ -369,7 +368,7 @@ void continueCardReadDmaArm7() {
 			len2 -= len2 % 32;
 		}*/
 
-		vu8* buffer = getCacheAddress(currentSlot);
+		vu8* buffer = getCacheAddress(getSlotForSector(sector));
 
 		currentLen = len2;
 		#ifndef DLDI
