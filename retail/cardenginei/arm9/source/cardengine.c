@@ -172,15 +172,15 @@ extern void waitFrames(int count);
 
 #ifndef DLDI
 void sleepMs(int ms) {
-	if (!(ce9->valueBits & asyncCardRead) || REG_IME == 0 || REG_IF == 0) {
+	if ((!(ce9->valueBits & asyncCardRead) && !ce9->strmLoadFlag) || REG_IME == 0 || REG_IF == 0) {
 		swiDelay(50);
 		return;
 	}
 
-	if(ce9->patches->sleepRef) {
+	if (ce9->patches->sleepRef) {
 		volatile void (*sleepRef)(int ms) = (volatile void*)ce9->patches->sleepRef;
 		(*sleepRef)(ms);
-	} else if(ce9->thumbPatches->sleepRef) {
+	} else if (ce9->thumbPatches->sleepRef) {
 		extern void callSleepThumb(int ms);
 		callSleepThumb(ms);
 	} else {
@@ -441,7 +441,7 @@ static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
 	// while (sharedAddr[3]==0x444D4152);	// Wait during a RAM dump
 	fileRead((char*)dst, ((ce9->valueBits & overlaysCached) && src >= ce9->overlaysSrc && src < ndsHeader->arm7romOffset) ? apFixOverlaysFile : romFile, src, len);
 #else
-	const u32 commandRead = (isDma ? 0x025FFB09 : 0x025FFB08);
+	const u32 commandRead = ((isDma || ce9->strmLoadFlag) ? 0x025FFB09 : 0x025FFB08);
 
 	accessCounter++;
 
@@ -591,6 +591,7 @@ static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
 			}
 		}
 	// }
+	ce9->strmLoadFlag = 0;
 #endif
 
 	//sleepMsEnabled = false;

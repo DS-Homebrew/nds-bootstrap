@@ -897,23 +897,10 @@ void patchResetTwl(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const modul
 }
 
 static bool getSleep(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb, u32 ROMinRAM) {
-	/*bool ROMsupportsDsiMode = (ndsHeader->unitCode > 0 && dsiModeConfirmed);
-	const char* romTid = getRomTid(ndsHeader);
-
-	if (strncmp(romTid, "AH9", 3) == 0 // Tony Hawk's American Sk8land
-	) {
+	if (gameOnFlashcard || ROMinRAM) {
 		return false;
-	} else {*/
-		if (gameOnFlashcard && !ROMinRAM) {
-			return false;
-		} else if (ROMinRAM) {
-			/*if (!cardReadDMA || extendedMemoryConfirmed || ROMsupportsDsiMode)*/ return false;
-		} else {
-			if (/* !cardDmaImprove &&*/ !asyncCardRead) return false;
-		}
-	//}
+	}
 
-	// Work-around for minorly unstable card read DMA inplementation
 	u32* offset = patchOffsetCache.sleepFuncOffset;
 	if (!patchOffsetCache.sleepChecked) {
 		offset = findSleepOffset(ndsHeader, moduleParams, usesThumb, &patchOffsetCache.sleepFuncIsThumb);
@@ -936,7 +923,7 @@ static bool getSleep(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 	return true;
 }
 
-u32 forceDmaFlagEnableOffset = 0;
+u32 strmLoadFlagEnableOffset = 0;
 
 bool a9PatchCardIrqEnable(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	const char* romTid = getRomTid(ndsHeader);
@@ -967,8 +954,8 @@ bool a9PatchCardIrqEnable(cardengineArm9* ce9, const tNDSHeader* ndsHeader, cons
 	if (!cardIrqEnableOffset) {
 		return false;
 	}
-	forceDmaFlagEnableOffset = (u32)cardIrqEnableOffset;
-	forceDmaFlagEnableOffset += usesThumb ? 0xC : 8;
+	strmLoadFlagEnableOffset = (u32)cardIrqEnableOffset;
+	strmLoadFlagEnableOffset += usesThumb ? 0xC : 8;
 	u32* cardIrqEnablePatch = (usesThumb ? ce9->thumbPatches->card_irq_enable : ce9->patches->card_irq_enable);
 	tonccpy(cardIrqEnableOffset, cardIrqEnablePatch, usesThumb ? 0xC : 8);
     dbg_printf("cardIrqEnable location : ");
@@ -1306,18 +1293,18 @@ bool patchStrmPageLoad(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const m
 		patchOffsetCache.strmPageLoadOffsetChecked = true;
 	}
 
-	if (!offset || forceDmaFlagEnableOffset == 0) {
+	if (!offset || strmLoadFlagEnableOffset == 0) {
 		return false;
 	}
 	u32 offset32 = (u32)offset;
 	u16* thumbOffset = (u16*)offset;
 
 	if (thumbOffset[0] == 0xB570) {
-		setBLThumb(offset32+(13*2), forceDmaFlagEnableOffset);
-		tonccpy((u32*)forceDmaFlagEnableOffset, ce9->thumbPatches->forceDmaFlagEnable, 8);
+		setBLThumb(offset32+(13*2), strmLoadFlagEnableOffset);
+		tonccpy((u32*)strmLoadFlagEnableOffset, ce9->thumbPatches->strmLoadFlagEnable, 8);
 	} else {
-		setBL(offset32+(9*4), forceDmaFlagEnableOffset);
-		tonccpy((u32*)forceDmaFlagEnableOffset, ce9->patches->forceDmaFlagEnable, 8);
+		setBL(offset32+(9*4), strmLoadFlagEnableOffset);
+		tonccpy((u32*)strmLoadFlagEnableOffset, ce9->patches->strmLoadFlagEnable, 8);
 	}
     dbg_printf("strmPageLoad location : ");
     dbg_hexa((u32)offset);
@@ -3039,7 +3026,9 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 
 	//patchCardRefresh(ndsHeader, moduleParams, usesThumb);
 
-	if (getSleep(ce9, ndsHeader, moduleParams, usesThumb, ROMinRAM)) {
+	const bool sleepFound = getSleep(ce9, ndsHeader, moduleParams, usesThumb, ROMinRAM);
+
+	if (asyncCardRead && sleepFound) {
 		patchCardReadDma(ce9, ndsHeader, moduleParams, usesThumb);
 	} else {
 		const bool cardSetDmaPatched = patchCardSetDma(ce9, ndsHeader, moduleParams, usesThumb, ROMinRAM);

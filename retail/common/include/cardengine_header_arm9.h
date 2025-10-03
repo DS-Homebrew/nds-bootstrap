@@ -11,7 +11,7 @@
 typedef struct cardengineArm9Patches {
 	u32* card_read_arm9;
 	u32* card_irq_enable;
-	u32* forceDmaFlagEnable;
+	u32* strmLoadFlagEnable;
 	u32* card_pull_out_arm9;
 	u32* card_id_arm9;
 	u32* card_dma_arm9;
@@ -54,7 +54,7 @@ typedef struct cardengineArm9Patches {
 typedef struct cardengineArm9ThumbPatches {
     u32* card_read_arm9;
     u32* card_irq_enable;
-	u32* forceDmaFlagEnable;
+	u32* strmLoadFlagEnable;
     u32* card_pull_out_arm9;
     u32* card_id_arm9;
     u32* card_dma_arm9;
@@ -134,7 +134,7 @@ typedef struct cardengineArm9 {
 	u32 romPartSrcEnd[4];
 	u32 asyncDataSrc[2];
 	u32 asyncDataSrcEnd[2];
-	u32 forceDmaFlag;
+	u32 strmLoadFlag;
 	u32 romMapLines;
 	u32 romMap[8][3]; // 0: ROM part start, 1: ROM part start in RAM, 2: ROM part end in RAM
 } cardengineArm9;

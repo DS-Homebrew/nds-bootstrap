@@ -604,9 +604,10 @@ u32 cardReadDma(u32 dma0, u8* dst0, u32 src0, u32 len0) {
 	const bool cardEndReadDmaFound = (ce9->patches->cardEndReadDmaRef || ce9->thumbPatches->cardEndReadDmaRef);
 
 	#ifndef DLDI
+	const bool sleepFound = (ce9->patches->sleepRef || ce9->thumbPatches->sleepRef);
 	bool forceDma = false;
 	if (!dmaCheckValid && cardEndReadDmaFound && !(ce9->valueBits & ROMinRAM) && len > 0
-	&& (ce9->forceDmaFlag || asyncDataAvailable(src)) && !romPartAvailable(src)) {
+	&& ((ce9->strmLoadFlag && !sleepFound) || asyncDataAvailable(src)) && !romPartAvailable(src)) {
 		while (!forceDma && len > 0) {
 			u32 sector = (src/ce9->cacheBlockSize)*ce9->cacheBlockSize;
 			int slot = getSlotForSector(sector);
@@ -625,7 +626,9 @@ u32 cardReadDma(u32 dma0, u8* dst0, u32 src0, u32 len0) {
 			}
 		}
 	}
-	ce9->forceDmaFlag = 0;
+	if (!sleepFound) {
+		ce9->strmLoadFlag = 0;
+	}
 	#endif
 
     if (dmaCheckValid
