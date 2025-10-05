@@ -94,6 +94,7 @@ void endCardReadDma() {
 		return;
 	}
 
+	ce9->strmLoadFlag = 0;
 	isDma = false;
 	if (ce9->patches->cardEndReadDmaRef) {
 		VoidFn cardEndReadDmaRef = (VoidFn)ce9->patches->cardEndReadDmaRef;
@@ -625,9 +626,6 @@ u32 cardReadDma(u32 dma0, u8* dst0, u32 src0, u32 len0) {
 				}
 			}
 		}
-	}
-	if (!sleepFound) {
-		ce9->strmLoadFlag = 0;
 	}
 	#endif
 
