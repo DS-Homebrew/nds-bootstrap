@@ -49,7 +49,7 @@
 #define cardReadFix BIT(8)
 #define cacheDisabled BIT(9)
 #define useSharedWram BIT(13)
-#define waitForPreloadToFinish BIT(18)
+// #define waitForPreloadToFinish BIT(18)
 
 //#ifdef DLDI
 #include "my_fat.h"

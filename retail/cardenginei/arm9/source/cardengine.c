@@ -54,7 +54,8 @@
 #define useSharedWram BIT(13)
 #define cloneboot BIT(14)
 #define fntFatCached BIT(17)
-#define waitForPreloadToFinish BIT(18)
+// #define waitForPreloadToFinish BIT(18)
+#define tFormersFix BIT(18)
 #define useColorLut BIT(21)
 #define colorLutBlockVCount BIT(22)
 
@@ -449,6 +450,29 @@ volatile void (*FS_Write)(u32*, u32, u32) = (volatile void*)0x0203C5C8;*/
 #endif
 #endif
 
+#ifndef DLDI
+#ifndef TWLSDK
+static bool vramAccess = false;
+
+static void vramToWram(u32 dst) {
+	// Reduce black screen flashes
+	if (dst >= 0x06800000 && dst < 0x06894000 && VRAM_CR == 0x80808080) {
+		VRAM_CR = 0x9B938B83;
+		VRAM_F_CR = 0x83;
+		vramAccess = true;
+	}
+}
+
+static void wramToVram(void) {
+	if (!vramAccess) return;
+	while (REG_VCOUNT < 191);
+	VRAM_CR = 0x80808080;
+	VRAM_F_CR = 0x80;
+	vramAccess = false;
+}
+#endif
+#endif
+
 static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
 #ifdef DLDI
 	// while (sharedAddr[3]==0x444D4152);	// Wait during a RAM dump
@@ -486,6 +510,10 @@ static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
 			#endif
 			// Read max CACHE_READ_SIZE via the main RAM cache
 			if (slot == -1) {
+				#ifndef TWLSDK
+				if (ce9->valueBits & tFormersFix) vramToWram((u32)dst);
+				#endif
+
 				#ifdef ASYNCPF
 				getAsyncSector();
 				#endif
@@ -533,7 +561,10 @@ static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
 				#ifdef ASYNCPF
 				triggerAsyncPrefetch(src + ce9->cacheBlockSize, nextSector);
 				#endif
-				//runSleep = false;
+
+				#ifndef TWLSDK
+				if (ce9->valueBits & tFormersFix) wramToVram();
+				#endif
 			} else {
 				#ifdef ASYNCPF
 				if(cacheCounter[slot] == 0x0FFFFFFF) {

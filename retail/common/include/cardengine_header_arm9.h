@@ -107,7 +107,7 @@ typedef struct cardengineArm9 {
 		15: isDlp
 		16: bypassExceptionHandler
 		17: fntFatCached
-		18: waitForPreloadToFinish
+		18: tFormersFix
 		19: resetOnFirstException
 		20: resetOnEveryException
 		21: useColorLut

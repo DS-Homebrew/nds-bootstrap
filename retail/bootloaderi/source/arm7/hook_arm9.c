@@ -29,7 +29,8 @@
 #define b_isDlp BIT(15)
 #define b_bypassExceptionHandler BIT(16)
 #define b_fntFatCached BIT(17)
-#define b_waitForPreloadToFinish BIT(18)
+// #define b_waitForPreloadToFinish BIT(18)
+#define b_tFormersFix BIT(18)
 #define b_resetOnFirstException BIT(19)
 #define b_resetOnEveryException BIT(20)
 #define b_useColorLut BIT(21)
@@ -276,6 +277,15 @@ int hookNdsRetailArm9(
 	}
 	if (strncmp(romTid, "AZE", 3) == 0) { // Zelda: Phantom Hourglass
 		ce9->valueBits |= b_bypassExceptionHandler;
+	}
+	if (strncmp(romTid, "AFZ", 3) == 0 // Transformers: Autobots
+	 || strncmp(romTid, "AFY", 3) == 0 // Transformers: Decepticons
+	 || strncmp(romTid, "CXR", 3) == 0 // Transformers: Revenge of the Fallen: Autobots Version
+	 || strncmp(romTid, "CXO", 3) == 0 // Transformers: Revenge of the Fallen: Decepticons Version
+	 || strncmp(romTid, "BAO", 3) == 0 // Transformers: War for Cybertron: Autobots
+	 || strncmp(romTid, "BDI", 3) == 0 // Transformers: War for Cybertron: Decepticons
+	) {
+		ce9->valueBits |= b_tFormersFix;
 	}
 	if (colorLutEnabled) {
 		ce9->valueBits |= b_useColorLut;
