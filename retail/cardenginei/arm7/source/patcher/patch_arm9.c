@@ -423,6 +423,9 @@ static bool getSleep(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 		return false;
 	}
 
+	ce9->patches->sleepRef = 0;
+	ce9->thumbPatches->sleepRef = 0;
+
 	bool sleepFuncIsThumb = false;
 	u32* offset = findSleepOffset(ndsHeader, moduleParams, usesThumb, &sleepFuncIsThumb);
 	if (offset) {
@@ -434,9 +437,6 @@ static bool getSleep(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 		/*dbg_printf("sleep location : ");
 		dbg_hexa((u32)offset);
 		dbg_printf("\n\n");*/
-	} else {
-		ce9->patches->sleepRef = 0;
-		ce9->thumbPatches->sleepRef = 0;
 	}
 	return offset ? true : false;
 }
