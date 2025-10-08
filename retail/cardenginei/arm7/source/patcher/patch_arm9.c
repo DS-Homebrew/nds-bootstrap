@@ -833,7 +833,7 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 		patchCardReadDma(ce9, ndsHeader, moduleParams, usesThumb);
 	} else {
 		const bool cardSetDmaPatched = patchCardSetDma(ce9, ndsHeader, moduleParams, usesThumb);
-		if (!cardSetDmaPatched || (!(valueBits & gameOnFlashcard) && !(valueBits & ROMinRAM) && patchStrmPageLoad(ce9, ndsHeader, moduleParams))) {
+		if (!cardSetDmaPatched || (!(valueBits & gameOnFlashcard) && !(valueBits & ROMinRAM) && patchStrmPageLoad(ce9, ndsHeader, moduleParams) && !sleepFound)) {
 			patchCardReadDma(ce9, ndsHeader, moduleParams, usesThumb);
 		}
 		if (!patchCardEndReadDma(ce9, ndsHeader, moduleParams, usesThumb)) {

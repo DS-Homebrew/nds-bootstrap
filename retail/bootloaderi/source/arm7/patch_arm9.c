@@ -733,6 +733,74 @@ static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, co
     return false;
 }
 
+void patchMobiclipFrameLoad(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+	extern u32 mobiclipStartOffset;
+	extern u32 mobiclipEndOffset;
+	if (mobiclipStartOffset && mobiclipEndOffset) {
+		// Code is placed within one of the ARM9 overlays, so avoid patching main ARM9 binary
+		dbg_printf("Mobiclip frame load location (Overlay) : Unknown\n\n");
+		return; 
+	}
+
+	u32* endOffset = patchOffsetCache.mobiclipFrameDrawEndOffset;
+	u32* offset = patchOffsetCache.mobiclipFrameDrawOffset;
+
+	if (!patchOffsetCache.mobiclipFrameDrawChecked) {
+		endOffset = findMobiclipFrameDrawEndOffset(ndsHeader, moduleParams);
+		if (endOffset) {
+			patchOffsetCache.mobiclipFrameDrawEndOffset = endOffset;
+			offset = findMobiclipFrameDrawStartOffset(endOffset);
+			if (offset) patchOffsetCache.mobiclipFrameDrawOffset = offset;
+		}
+		patchOffsetCache.mobiclipFrameDrawChecked = true;
+	}
+
+	if (!endOffset || endOffset[3] != 0xE8BD9FF0 || !offset) {
+		return;
+	}
+
+	const u32 offsetLog = (u32)offset;
+	bool found = false;
+	int add = 16;
+
+	offset -= 0xBC/4;
+	found = (offset[16] == 0xE597000C);
+
+	if (!found) {
+		offset = (u32*)offsetLog;
+		offset += 0x1864/4;
+		add++;
+
+		found = (offset[17] == 0xE597000C);
+	}
+
+	if (!found) {
+		offset = (u32*)offsetLog;
+		offset += 0x1A64/4;
+
+		found = (offset[17] == 0xE597000C);
+	}
+
+	if (!found) {
+		offset = (u32*)offsetLog;
+		offset += 0x1A88/4;
+
+		found = (offset[17] == 0xE597000C);
+	}
+
+	if (!found) {
+		return;
+	}
+
+	// Patch
+	offset += add;
+	setBL((u32)offset, (u32)ce9->patches->strmLoadFlagEnable_mobiclip);
+
+	dbg_printf("Mobiclip frame load location : ");
+	dbg_hexa((u32)offsetLog);
+	dbg_printf("\n\n");
+}
+
 void patchMobiclipFrameDraw(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	extern u32 mobiclipStartOffset;
 	extern u32 mobiclipEndOffset;
@@ -747,7 +815,7 @@ void patchMobiclipFrameDraw(const tNDSHeader* ndsHeader, const module_params_t* 
 	u32* endOffset = patchOffsetCache.mobiclipFrameDrawEndOffset;
 	u32* offset = patchOffsetCache.mobiclipFrameDrawOffset;
 
-    if (!patchOffsetCache.mobiclipFrameDrawChecked) {
+	if (!patchOffsetCache.mobiclipFrameDrawChecked) {
 		endOffset = findMobiclipFrameDrawEndOffset(ndsHeader, moduleParams);
 		if (endOffset) {
 			patchOffsetCache.mobiclipFrameDrawEndOffset = endOffset;
@@ -3034,7 +3102,7 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 		const bool cardSetDmaPatched = patchCardSetDma(ce9, ndsHeader, moduleParams, usesThumb, ROMinRAM);
 		extern u32 asyncDataAddr[2];
 
-		if (!cardSetDmaPatched || (!gameOnFlashcard && !ROMinRAM && (patchStrmPageLoad(ce9, ndsHeader, moduleParams) || asyncDataAddr[0]))) {
+		if (!cardSetDmaPatched || (!gameOnFlashcard && !ROMinRAM && (patchStrmPageLoad(ce9, ndsHeader, moduleParams) || asyncDataAddr[0]) && !sleepFound)) {
 			patchCardReadDma(ce9, ndsHeader, moduleParams, usesThumb);
 		}
 		if (!patchCardEndReadDma(ce9, ndsHeader, moduleParams, usesThumb, ROMinRAM)) {
@@ -3065,6 +3133,8 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 	nandSavePatch(ce9, ndsHeader, moduleParams);
 
 	//setFlushCache(ce9, patchMpuRegion, usesThumb);
+
+	patchMobiclipFrameLoad(ce9, ndsHeader, moduleParams);
 
 	extern bool colorLutEnabled;
 	if (colorLutEnabled) {

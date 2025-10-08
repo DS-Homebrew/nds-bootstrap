@@ -149,6 +149,7 @@ patches:
 .word	card_read_arm9
 .word	card_irq_enable
 .word	strmLoadFlagEnable_jmp
+.word	strmLoadFlagEnable_mobiclip
 .word	card_pull_out_arm9
 .word	card_id_arm9
 .word	card_dma_arm9
@@ -546,6 +547,13 @@ strmLoadFlagEnable:
 	adr r1, strmLoadFlag
 	str r0, [r1]
 	mov r1, r5
+	bx lr
+
+strmLoadFlagEnable_mobiclip:
+	mov r0, #1
+	adr r1, strmLoadFlag
+	str r0, [r1]
+	ldr r0, [r7, #0xC]
 	bx lr
 
 	.thumb

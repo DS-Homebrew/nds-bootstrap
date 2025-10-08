@@ -297,10 +297,8 @@ int hookNdsRetailArm9(
 	ce9->romPaddingSize         = romPaddingSize;
 	ce9->consoleModel           = consoleModel;
 	ce9->postCardReadCodeOffset = postCardReadCodeOffset;
-	if (colorLutEnabled) {
-		ce9->mobiclipStartOffset = mobiclipStartOffset;
-		ce9->mobiclipEndOffset   = mobiclipEndOffset;
-	}
+	ce9->mobiclipStartOffset    = mobiclipStartOffset;
+	ce9->mobiclipEndOffset      = mobiclipEndOffset;
 
 	if (!ROMinRAM) {
 		//extern bool gbaRomFound;

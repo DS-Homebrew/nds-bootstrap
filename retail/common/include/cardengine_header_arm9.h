@@ -12,6 +12,7 @@ typedef struct cardengineArm9Patches {
 	u32* card_read_arm9;
 	u32* card_irq_enable;
 	u32* strmLoadFlagEnable;
+	u32* strmLoadFlagEnable_mobiclip;
 	u32* card_pull_out_arm9;
 	u32* card_id_arm9;
 	u32* card_dma_arm9;

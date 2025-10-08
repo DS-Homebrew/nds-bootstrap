@@ -171,8 +171,21 @@ extern void waitFrames(int count);
 }*/
 
 #ifndef DLDI
+static bool inline asyncDataAvailable(u32 src) {
+	for (int i = 0; i < 2; i++) {
+		if (ce9->asyncDataSrc[i] == 0) {
+			return false;
+		}
+		if (src >= ce9->asyncDataSrc[i] && src < ce9->asyncDataSrcEnd[i]) {
+			return true;
+		}
+	}
+	return false;
+}
+
+bool runSleepMs = false;
 void sleepMs(int ms) {
-	if ((!(ce9->valueBits & asyncCardRead) && !ce9->strmLoadFlag) || REG_IME == 0 || REG_IF == 0) {
+	if (!runSleepMs) {
 		swiDelay(50);
 		return;
 	}
@@ -441,17 +454,14 @@ static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
 	// while (sharedAddr[3]==0x444D4152);	// Wait during a RAM dump
 	fileRead((char*)dst, ((ce9->valueBits & overlaysCached) && src >= ce9->overlaysSrc && src < ndsHeader->arm7romOffset) ? apFixOverlaysFile : romFile, src, len);
 #else
-	const u32 commandRead = ((isDma || ce9->strmLoadFlag) ? 0x025FFB09 : 0x025FFB08);
+	runSleepMs = (((ce9->valueBits & asyncCardRead) || ce9->strmLoadFlag) && REG_IME != 0 && REG_IF != 0);
+	const u32 commandRead = ((isDma || ce9->strmLoadFlag || asyncDataAvailable(src)) ? 0x025FFB09 : 0x025FFB08);
 
 	accessCounter++;
 
 	#ifdef ASYNCPF
 	processAsyncCommand();
 	#endif
-
-	//if (src >= sdatAddr && src < sdatAddr+sdatSize) {
-	//	sleepMsEnabled = true;
-	//}
 
 	/* if ((ce9->valueBits & cacheDisabled) && (u32)dst >= 0x02000000 && (u32)dst < 0x03000000) {
 		DC_InvalidateRange((u32*)dst, len);
@@ -591,10 +601,8 @@ static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
 			}
 		}
 	// }
-	ce9->strmLoadFlag = 0;
+	runSleepMs = false;
 #endif
-
-	//sleepMsEnabled = false;
 
 	#ifndef GSDD
 	#ifndef TWLSDK
@@ -680,6 +688,10 @@ bool isNotTcm(u32 address, u32 len) {
     && (address+len < base || address+len> base+0x4000);
 }
 
+void setBL(int arg1, int arg2) {
+	*(u32*)arg1 = (((u32)(arg2 - arg1 - 8) >> 2) & 0xFFFFFF) | 0xEB000000;
+}
+
 #ifndef TWLSDK
 #ifndef GSDD
 static int counter=0;
@@ -696,10 +708,6 @@ int cardReadPDash(u32* cacheStruct, u32 src, u8* dst, u32 len) {
 	return counter;
 }
 #else
-void setBL(int arg1, int arg2) {
-	*(u32*)arg1 = (((u32)(arg2 - arg1 - 8) >> 2) & 0xFFFFFF) | 0xEB000000;
-}
-
 void gsddFix(void) {
 	const u32 gsddOverlayOffset = *(u32*)0x02FFF000;
 	extern u32 gsdd_fix2;
@@ -899,6 +907,60 @@ void cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	ce9->strmLoadFlag = 0;
 	isDma = false;
 	#ifndef GSDD
+	if (ce9->mobiclipEndOffset) {
+		static bool patched = false;
+		u32* endOffset = ce9->mobiclipEndOffset;
+		if (
+			endOffset[0] == 0xE25AA002
+		 && endOffset[1] == 0xCAFFFEA1
+		 && endOffset[2] == 0xE28DD018
+		 && endOffset[3] == 0xE8BD9FF0
+		) {
+			if (!patched) {
+				u32* offset = ce9->mobiclipStartOffset;
+				bool found = false;
+				int add = 16;
+
+				offset -= 0xBC/4;
+				found = (offset[16] == 0xE597000C);
+
+				if (!found) {
+					offset = ce9->mobiclipStartOffset;
+					offset += 0x1864/4;
+					add++;
+
+					found = (offset[17] == 0xE597000C);
+				}
+
+				if (!found) {
+					offset = ce9->mobiclipStartOffset;
+					offset += 0x1A64/4;
+
+					found = (offset[17] == 0xE597000C);
+				}
+
+				if (!found) {
+					offset = ce9->mobiclipStartOffset;
+					offset += 0x1A88/4;
+
+					found = (offset[17] == 0xE597000C);
+				}
+
+				if (!found) {
+					return;
+				}
+
+				if (found) {
+					offset += add;
+					setBL((u32)offset, (u32)ce9->patches->strmLoadFlagEnable_mobiclip);
+				}
+
+				patched = true;
+			}
+		} else {
+			patched = false;
+		}
+	}
 	if (ce9->postCardReadCodeOffset) {
 		volatile void (*code)() = (volatile void*)ce9->postCardReadCodeOffset;
 		(*code)();

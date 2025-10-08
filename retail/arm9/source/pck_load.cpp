@@ -177,11 +177,11 @@ void loadAsyncLoadSettings(configuration* conf, const char* romTid, const u16 he
 			sdatFileId = getSdatStrmId(romTid);
 			readStrmFile = true;
 		}
-	} else if (strncmp(romTid, "DSY", 3) == 0) { // System Flaw
+	} /* else if (strncmp(romTid, "DSY", 3) == 0) { // System Flaw
 		if (romFSInit(conf->ndsPath)) {
 			file = fopen("rom:/data/mobiclip/intro.avi.mods", "rb");
 		}
-	}
+	} */
 
 	if (file && readStrmFile) {
 		const u32 sdatSize = getFileSize(file);
@@ -247,18 +247,18 @@ void loadAsyncLoadSettings(configuration* conf, const char* romTid, const u16 he
 		conf->asyncDataAddr[0] = offsetOfOpenedNitroFile;
 		conf->asyncDataSize[0] = sizeOverride ? sizeOverride : getFileSize(file);
 		fclose(file);
-		if (strncmp(romTid, "DSY", 3) == 0) {
+		/* if (strncmp(romTid, "DSY", 3) == 0) {
 			file = fopen("rom:/data/mobiclip/outro.avi.mods", "rb");
 			if (file) {
 				conf->asyncDataAddr[1] = offsetOfOpenedNitroFile;
 				conf->asyncDataSize[1] = getFileSize(file);
 				fclose(file);
 			}
-		}
+		} */
 		return;
 	}
 
-	file = fopen("nitro:/asyncLoadSettings.pck", "rb");
+	/* file = fopen("nitro:/asyncLoadSettings.pck", "rb");
 	if (!file) {
 		return;
 	}
@@ -318,7 +318,7 @@ void loadAsyncLoadSettings(configuration* conf, const char* romTid, const u16 he
 		delete[] buffer;
 	}
 
-	fclose(file);
+	fclose(file); */
 }
 
 void loadApFix(configuration* conf, const char* bootstrapPath, const char* romTid, const u16 headerCRC) {

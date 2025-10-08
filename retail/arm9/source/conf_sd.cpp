@@ -1885,8 +1885,6 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		if (colorTable) {
 			*(u32*)(COLOR_LUT_BUFFERED_LOCATION-4) = 0x54554C63; // 'cLUT'
 			tonccpy((u16*)COLOR_LUT_BUFFERED_LOCATION, VRAM_E, 0x10000);
-
-			loadMobiclipOffsets(conf, bootstrapPath, romTid, romVersion, headerCRC);
 		}
 	} else {
 		if (accessControl & BIT(4)) {
@@ -2429,6 +2427,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		loadApFix(conf, bootstrapPath, romTid, headerCRC);
 		loadApFixPostCardRead(conf, bootstrapPath, romTid, headerCRC);
 	}
+	loadMobiclipOffsets(conf, bootstrapPath, romTid, romVersion, headerCRC);
 
 	if (conf->loaderType < 2 && (strcmp(romTid, "NTRJ") == 0) && (headerCRC == 0x9B41 || headerCRC == 0x69D6)) { // Use bootloader2 for Shantae: Risky's Revenge (USA) (Review Build)
 		conf->loaderType = 2;
