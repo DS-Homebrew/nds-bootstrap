@@ -76,7 +76,7 @@
 #include "unpatched_funcs.h"
 #include "nocashMessage.h"
 
-#define cacheBlockSize 0x4000
+#define cacheBlockSize 0x8000
 
 //#define memcpy __builtin_memcpy
 
@@ -840,17 +840,18 @@ u32 getRomLocation(const tNDSHeader* ndsHeader, const bool isESdk2, const bool i
 	return getRomPartLocation(ndsHeader, isESdk2, isSdk5, dsiBios);
 }
 
-bool romLocationAdjust(const tNDSHeader* ndsHeader, const bool laterSdk, const bool isSdk5, u32* romLocation) {
+bool romLocationAdjust(const tNDSHeader* ndsHeader, const bool laterSdk, const bool isSdk5, u32* romLocation, const u16 blockSize) {
 	const bool ntrType = (ndsHeader->unitCode == 0);
+	const bool cluster32KB = (blockSize == 0x8000);
 	const u32 romLocationOld = *romLocation;
 	if (*romLocation == 0x0C3FC000) {
 		*romLocation += pkmnGen5 ? 0x4020 : 0x4000;
 	} else if (*romLocation == 0x0C7C0000 && !laterSdk) {
 		*romLocation += 0x28000;
-	} else if (*romLocation == 0x0C7C4000) {
-		*romLocation += 0x4000;
-	} else if (*romLocation == 0x0C7C4020) {
-		*romLocation += 0x3FE0;
+	} else if (*romLocation == 0x0C7C8000-blockSize) {
+		*romLocation += blockSize;
+	} else if (*romLocation == 0x0C7C8020-blockSize) {
+		*romLocation += blockSize-0x20;
 	} else if (*romLocation == 0x0C7D8000 && laterSdk) {
 		if (ntrType) {
 			extern bool hasVramWifiBinary;
@@ -858,14 +859,14 @@ bool romLocationAdjust(const tNDSHeader* ndsHeader, const bool laterSdk, const b
 		} else {
 			*romLocation += 0x8000;
 		}
-	} else if (*romLocation == 0x0C7F8000 && laterSdk && ntrType) {
+	} else if (*romLocation == 0x0C7F8000 && ((laterSdk && ntrType) || cluster32KB)) {
 		*romLocation += 0x8000;
 	} else if (*romLocation == 0x0C7FC000) {
 		*romLocation += 0x4000;
 	} else if (*romLocation == 0x0CFE0000 && !ntrType) {
 		*romLocation += 0x20000;
-	} else if (*romLocation == 0x0CFFC000) {
-		*romLocation += 0x4000;
+	} else if (*romLocation == 0x0D000000-blockSize) {
+		*romLocation += blockSize;
 	}
 	if (*romLocation == (consoleModel > 0 ? 0x0E000000 : 0x0D000000)) {
 		*romLocation = sharedWramEnabled ? 0x036F8000 : 0x03700000;
@@ -1246,7 +1247,7 @@ static void buildRomMap(const tNDSHeader* ndsHeader, const module_params_t* modu
 			bool readRom = false;
 			romBlockSize += (romSizeEdit[i] > 0x4000) ? 0x4000 : romSizeEdit[i];
 			romLocationChangePrep += 0x4000;
-			const bool romLocationChanged = romLocationAdjust(ndsHeader, laterSdk, isSdk5(moduleParams), &romLocationChangePrep);
+			const bool romLocationChanged = romLocationAdjust(ndsHeader, laterSdk, isSdk5(moduleParams), &romLocationChangePrep, 0x4000);
 			romSizeEdit[i] -= 0x4000;
 
 			readRom = (romSizeEdit[i] <= 0) ? true : romLocationChanged;

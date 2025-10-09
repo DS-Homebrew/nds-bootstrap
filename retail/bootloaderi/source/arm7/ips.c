@@ -24,7 +24,7 @@ bool applyIpsPatch(const tNDSHeader* ndsHeader, u8* ipsbyte, const bool arm9Only
 	}
 
 	bool armPatched = false;
-	extern bool romLocationAdjust(const tNDSHeader* ndsHeader, const bool laterSdk, const bool isSdk5, u32* romLocation);
+	extern bool romLocationAdjust(const tNDSHeader* ndsHeader, const bool laterSdk, const bool isSdk5, u32* romLocation, const u16 blockSize);
 
 	int ipson = 5;
 	int totalrepeats = 0;
@@ -76,7 +76,7 @@ bool applyIpsPatch(const tNDSHeader* ndsHeader, u8* ipsbyte, const bool arm9Only
 				rombyteOffset++;
 				if (ROMinRAM && (ndsHeader->unitCode == 0 || !dsiModeConfirmed)) {
 					u32 u32_rombyteOffset = (u32)rombyteOffset;
-					romLocationAdjust(ndsHeader, laterSdk, isSdk5, &u32_rombyteOffset);
+					romLocationAdjust(ndsHeader, laterSdk, isSdk5, &u32_rombyteOffset, 0x4000);
 					rombyteOffset = (u8*)u32_rombyteOffset;
 				}
 			}
@@ -91,7 +91,7 @@ bool applyIpsPatch(const tNDSHeader* ndsHeader, u8* ipsbyte, const bool arm9Only
 				rombyteOffset++;
 				if (ROMinRAM && (ndsHeader->unitCode == 0 || !dsiModeConfirmed)) {
 					u32 u32_rombyteOffset = (u32)rombyteOffset;
-					romLocationAdjust(ndsHeader, laterSdk, isSdk5, &u32_rombyteOffset);
+					romLocationAdjust(ndsHeader, laterSdk, isSdk5, &u32_rombyteOffset, 0x4000);
 					rombyteOffset = (u8*)u32_rombyteOffset;
 				}
 			}

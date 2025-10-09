@@ -248,16 +248,6 @@ int getSlotForSector(u32 sector) {
 	return -1;
 }
 
-/*int getSlotForSectorManual(int i, u32 sector) {
-	if (i >= ce9->cacheSlots) {
-		i -= ce9->cacheSlots;
-	}
-	if (cacheDescriptor[i] == sector) {
-		return i;
-	}
-	return -1;
-}*/
-
 vu8* getCacheAddress(int slot) {
 	#ifdef TWLSDK
 	return (vu8*)(ce9->cacheAddress + slot*ce9->cacheBlockSize);
@@ -522,16 +512,6 @@ static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
 
 				buffer = getCacheAddress(slot);
 
-				/*u32 len2 = (src - sector) + len;
-				u16 readLen = ce9->cacheBlockSize;
-				if (len2 > ce9->cacheBlockSize*3 && slot+3 < ce9->cacheSlots) {
-					readLen = ce9->cacheBlockSize*4;
-				} else if (len2 > ce9->cacheBlockSize*2 && slot+2 < ce9->cacheSlots) {
-					readLen = ce9->cacheBlockSize*3;
-				} else if (len2 > ce9->cacheBlockSize && slot+1 < ce9->cacheSlots) {
-					readLen = ce9->cacheBlockSize*2;
-				}*/
-
 				DC_InvalidateRange((u32*)buffer, ce9->cacheBlockSize);
 
 				// Write the command
@@ -542,23 +522,11 @@ static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
 
 				waitForArm7();
 
+				// fileRead((char*)buffer, ((ce9->valueBits & overlaysCached) && src >= ce9->overlaysSrcAlign && src < ce9->overlaysSrcAlign+ce9->overlaysSizeAlign) ? apFixOverlaysFile : romFile, sector, ce9->cacheBlockSize);
+
 				#ifdef ASYNCPF
 				updateDescriptor(slot, sector);
-				#endif
 
-				// fileRead((char*)buffer, ((ce9->valueBits & overlaysCached) && src >= ce9->overlaysSrcAlign && src < ce9->overlaysSrcAlign+ce9->overlaysSizeAlign) ? apFixOverlaysFile : romFile, sector, ce9->cacheBlockSize);
-				/*updateDescriptor(slot, sector);
-				if (readLen >= ce9->cacheBlockSize*2) {
-					updateDescriptor(slot+1, sector+ce9->cacheBlockSize);
-				}
-				if (readLen >= ce9->cacheBlockSize*3) {
-					updateDescriptor(slot+2, sector+(ce9->cacheBlockSize*2));
-				}
-				if (readLen >= ce9->cacheBlockSize*4) {
-					updateDescriptor(slot+3, sector+(ce9->cacheBlockSize*3));
-				}*/
-
-				#ifdef ASYNCPF
 				triggerAsyncPrefetch(src + ce9->cacheBlockSize, nextSector);
 				#endif
 
@@ -628,7 +596,6 @@ static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
 				src += len2;
 				dst += len2;
 				accessCounter++;
-				//slot = getSlotForSectorManual(slot+1, sector);
 			}
 		}
 	// }

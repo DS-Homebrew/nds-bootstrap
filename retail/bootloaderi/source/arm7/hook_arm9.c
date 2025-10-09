@@ -228,7 +228,7 @@ int hookNdsRetailArm9(
 	extern bool colorLutEnabled;
 	extern bool colorLutBlockVCount;
 	extern u32 newSwiHaltAddr;
-	extern bool romLocationAdjust(const tNDSHeader* ndsHeader, const bool laterSdk, const bool isSdk5, u32* romLocation);
+	extern bool romLocationAdjust(const tNDSHeader* ndsHeader, const bool laterSdk, const bool isSdk5, u32* romLocation, const u16 blockSize);
 	extern u32 dataToPreloadFullSize(void);
 	extern bool dataToPreloadFound(const tNDSHeader* ndsHeader);
 	const char* romTid = getRomTid(ndsHeader);
@@ -370,7 +370,7 @@ int hookNdsRetailArm9(
 			configureRomMap(ce9, ndsHeader, dataToPreloadAddr[0], dsiMode);
 			for (u32 i = 0; i < dataToPreloadFullSize(); i += cacheBlockSize) {
 				ce9->cacheAddress += cacheBlockSize;
-				romLocationAdjust(ndsHeader, laterSdk, (ce9->valueBits & b_isSdk5), &ce9->cacheAddress);
+				romLocationAdjust(ndsHeader, laterSdk, (ce9->valueBits & b_isSdk5), &ce9->cacheAddress, cacheBlockSize);
 				ce9->cacheSlots--;
 			}
 			for (int i = 0; i < 4; i++) {
@@ -421,10 +421,15 @@ int hookNdsRetailArm9(
 			u32* cacheAddressTable = (u32*)(!laterSdk ? CACHE_ADDRESS_TABLE_LOCATION2 : CACHE_ADDRESS_TABLE_LOCATION);
 			u32 addr = ce9->cacheAddress;
 
-			for (int slot = 0; slot < ce9->cacheSlots; slot++) {
-				romLocationAdjust(ndsHeader, laterSdk, (ce9->valueBits & b_isSdk5), &addr);
-				cacheAddressTable[slot] = addr;
-				addr += cacheBlockSize;
+			const u16 cacheSlotsUnchanged = ce9->cacheSlots;
+			for (int slot = 0; slot < cacheSlotsUnchanged; slot++) {
+				romLocationAdjust(ndsHeader, laterSdk, (ce9->valueBits & b_isSdk5), &addr, cacheBlockSize);
+				if (addr >= 0x0C000000 && addr < (consoleModel > 0 ? 0x0E000000 : 0x0D000000)-cacheBlockSize) {
+					cacheAddressTable[slot] = addr;
+					addr += cacheBlockSize;
+				} else {
+					ce9->cacheSlots--;
+				}
 			}
 		}
 	} else {

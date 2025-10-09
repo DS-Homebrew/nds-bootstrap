@@ -117,7 +117,6 @@ bool dmaReadOnArm9 = false;
 #ifndef DLDI
 extern int allocateCacheSlot(void);
 extern int getSlotForSector(u32 sector);
-//extern int getSlotForSectorManual(int i, u32 sector);
 extern vu8* getCacheAddress(int slot);
 extern void updateDescriptor(int slot, u32 sector);
 #endif
@@ -171,16 +170,6 @@ static void cardReadDmaNormal(u8* dst, u32 src, u32 len) {
 
 			//fileRead((char*)buffer, *romFile, sector, ce9->cacheBlockSize);
 
-			/*u32 len2 = (src - sector) + len;
-			u16 readLen = ce9->cacheBlockSize;
-			if (len2 > ce9->cacheBlockSize*3 && slot+3 < ce9->cacheSlots) {
-				readLen = ce9->cacheBlockSize*4;
-			} else if (len2 > ce9->cacheBlockSize*2 && slot+2 < ce9->cacheSlots) {
-				readLen = ce9->cacheBlockSize*3;
-			} else if (len2 > ce9->cacheBlockSize && slot+1 < ce9->cacheSlots) {
-				readLen = ce9->cacheBlockSize*2;
-			}*/
-
 			// Write the command
 			sharedAddr[0] = (vu32)buffer;
 			sharedAddr[1] = ce9->cacheBlockSize;
@@ -194,15 +183,6 @@ static void cardReadDmaNormal(u8* dst, u32 src, u32 len) {
 			}
 
 			updateDescriptor(slot, sector);
-			/*if (readLen >= ce9->cacheBlockSize*2) {
-				updateDescriptor(slot+1, sector+ce9->cacheBlockSize);
-			}
-			if (readLen >= ce9->cacheBlockSize*3) {
-				updateDescriptor(slot+2, sector+(ce9->cacheBlockSize*2));
-			}
-			if (readLen >= ce9->cacheBlockSize*4) {
-				updateDescriptor(slot+3, sector+(ce9->cacheBlockSize*3));
-			}*/
 			// currentSlot = slot;
 			return;
 		}
@@ -244,7 +224,6 @@ static void cardReadDmaNormal(u8* dst, u32 src, u32 len) {
 				src += len2;
 				dst += len2;
 				accessCounter++;
-				//slot = getSlotForSectorManual(slot+1, sector);
 			}
 		} else
 		#endif
