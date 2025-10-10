@@ -1859,7 +1859,9 @@ void patchSharedFontPath(const cardengineArm9* ce9, const tNDSHeader* ndsHeader,
 	dbg_hexa((u32)offset);
 	dbg_printf("\n\n");
 
-	if (REG_SCFG_ROM & BIT(9)) {
+	extern bool scfgSdmmcEnabled;
+
+	if (!scfgSdmmcEnabled || (REG_SCFG_ROM & BIT(9))) {
 		extern u32 iUncompressedSizei;
 
 		const u32* dsiSaveOpen = ce9->patches->dsiSaveOpen;
