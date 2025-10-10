@@ -953,8 +953,8 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 	if (conf->isDSiWare) {
 		conf->valueBits2 |= BIT(0);
-
 	}
+
 	if (conf->gameOnFlashcard && (conf->isDSiWare || (accessControl & BIT(4)))) {
 		if (romTid[3] == 'K') {
 			sharedFontPath = "fat:/_nds/nds-bootstrap/KORFontTable.dat";
@@ -1740,9 +1740,15 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		if (!isDSiMode() && unitCode>0 && (conf->dsiMode || conf->isDSiWare)) {
 			// Load DSi ARM9 BIOS
 			const u32 relocAddr9 = 0x02F70000;
-			cebin = fopen("sd:/_nds/bios9i.bin", "rb");
+			cebin = fopen(conf->bootstrapOnFlashcard ? "fat:/_nds/bios9i.bin" : "sd:/_nds/bios9i.bin", "rb");
 			if (!cebin) {
-				cebin = fopen("sd:/_nds/bios9i_part1.bin", "rb");
+				cebin = fopen(conf->bootstrapOnFlashcard ? "fat:/_nds/bios9i_part1.bin" : "sd:/_nds/bios9i_part1.bin", "rb");
+			}
+			if (!cebin) {
+				cebin = fopen(conf->bootstrapOnFlashcard ? "sd:/_nds/bios9i.bin" : "fat:/_nds/bios9i.bin", "rb");
+			}
+			if (!cebin) {
+				cebin = fopen(conf->bootstrapOnFlashcard ? "sd:/_nds/bios9i_part1.bin" : "fat:/_nds/bios9i_part1.bin", "rb");
 			}
 			if (cebin) {
 				fread((u32*)relocAddr9, 1, 0x8000, cebin);
@@ -1758,9 +1764,15 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 			// Load DSi ARM7 BIOS
 			const u32 relocAddr7 = relocAddr9+0x8000;
-			cebin = fopen("sd:/_nds/bios7i.bin", "rb");
+			cebin = fopen(conf->bootstrapOnFlashcard ? "fat:/_nds/bios7i.bin" : "sd:/_nds/bios7i.bin", "rb");
 			if (!cebin) {
-				cebin = fopen("sd:/_nds/bios7i_part1.bin", "rb");
+				cebin = fopen(conf->bootstrapOnFlashcard ? "fat:/_nds/bios7i_part1.bin" : "sd:/_nds/bios7i_part1.bin", "rb");
+			}
+			if (!cebin) {
+				cebin = fopen(conf->bootstrapOnFlashcard ? "sd:/_nds/bios7i.bin" : "fat:/_nds/bios7i.bin", "rb");
+			}
+			if (!cebin) {
+				cebin = fopen(conf->bootstrapOnFlashcard ? "sd:/_nds/bios7i_part1.bin" : "fat:/_nds/bios7i_part1.bin", "rb");
 			}
 			if (cebin) {
 				fread((u8*)relocAddr7, 1, 0x8000, cebin);
