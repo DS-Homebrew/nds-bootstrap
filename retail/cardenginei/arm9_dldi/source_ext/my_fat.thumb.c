@@ -870,7 +870,6 @@ u32 fileRead (char* buffer, aFile* file, u32 startOffset, u32 length)
 	int curSect;
 
 	int dataPos = 0;
-	int chunks;
 	int beginBytes;
     
     u32 clusterIndex = 0;
@@ -899,13 +898,12 @@ u32 fileRead (char* buffer, aFile* file, u32 startOffset, u32 length)
 	beginBytes = (BYTES_PER_SECTOR < length + curByte ? (BYTES_PER_SECTOR - curByte) : length);
 
 	// Read first part from buffer, to align with sector boundary
-    dataPos=0;
     tonccpy(buffer,globalBuffer+curByte,beginBytes);
     curByte+=beginBytes;
-    dataPos+=beginBytes;
+    dataPos=beginBytes;
 
 	// Read in all the 512 byte chunks of the file directly, saving time
-	for ( chunks = ((int)length - beginBytes) / BYTES_PER_SECTOR; chunks > 0;)
+	for (int chunks = ((int)length - beginBytes) / BYTES_PER_SECTOR; chunks > 0;)
 	{
 		int sectorsToRead=0;
 
@@ -1046,7 +1044,6 @@ u32 fileWrite (const char* buffer, aFile* file, u32 startOffset, u32 length)
 	int curSect;
 
 	int dataPos = 0;
-	int chunks;
 	int beginBytes;
     u32 clusterIndex = 0;
 
@@ -1076,17 +1073,16 @@ u32 fileWrite (const char* buffer, aFile* file, u32 startOffset, u32 length)
 	beginBytes = (BYTES_PER_SECTOR < length + curByte ? (BYTES_PER_SECTOR - curByte) : length);
 
 	// Read first part from buffer, to align with sector boundary
-    dataPos=0;
     tonccpy(globalBuffer+curByte,buffer,beginBytes);
     curByte+=beginBytes;
-    dataPos+=beginBytes;
+    dataPos=beginBytes;
 
 	CARD_WriteSector(curSect + FAT_ClustToSect(file->currentCluster), globalBuffer);
 
 	curSect++;
 
 	// Read in all the 512 byte chunks of the file directly, saving time
-	for ( chunks = ((int)length - beginBytes) / BYTES_PER_SECTOR; chunks > 0;)
+	for (int chunks = ((int)length - beginBytes) / BYTES_PER_SECTOR; chunks > 0;)
 	{
 		int sectorsToWrite;
 
