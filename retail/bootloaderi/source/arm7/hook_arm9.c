@@ -431,7 +431,7 @@ int hookNdsRetailArm9(
 			const u16 cacheSlotsUnchanged = ce9->cacheSlots;
 			for (int slot = 0; slot < cacheSlotsUnchanged; slot++) {
 				romLocationAdjust(ndsHeader, laterSdk, (ce9->valueBits & b_isSdk5), &addr, cacheBlockSize);
-				if (addr >= 0x0C000000 && addr < (consoleModel > 0 ? 0x0E000000 : 0x0D000000)-cacheBlockSize) {
+				if (addr >= 0x0C000000 && addr < (consoleModel > 0 ? 0x0E000000 : 0x0D000000-cacheBlockSize)) {
 					cacheAddressTable[slot] = addr;
 					addr += cacheBlockSize;
 				} else {
