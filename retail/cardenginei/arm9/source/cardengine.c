@@ -477,6 +477,8 @@ static inline void cardReadNormal(u8* dst, u32 src, u32 len) {
 	processAsyncCommand();
 	#endif
 
+	sysSetCardOwner(BUS_OWNER_ARM7);
+
 	/* if ((ce9->valueBits & cacheDisabled) && (u32)dst >= 0x02000000 && (u32)dst < 0x03000000) {
 		DC_InvalidateRange((u32*)dst, len);
 
@@ -975,52 +977,217 @@ void cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	}
 }*/
 
-bool nandRead(void* memory,void* flash,u32 len,u32 dma) {
+bool nandRead(void* dst, u32 src, u32 len /* , u32 dma */) {
 #ifdef DLDI
 	if (ce9->valueBits & saveOnFlashcard) {
-		fileRead(memory, savFile, (u32)flash, len);
-		return true;
+		sysSetCardOwner(BUS_OWNER_ARM9);
+		bool res = fileRead(dst, savFile, src, len);
+		sysSetCardOwner(BUS_OWNER_ARM7);
+		return res;
 	}
 #endif
-	DC_InvalidateRange(memory, len);
-
 	// Send a command to the ARM7 to read the nand save
-	const u32 commandNandRead = 0x025FFC01;
+	const u32 commandRead = 0x025FFC01;
+
+	#ifndef DLDI
+	accessCounter++;
+
+	while (len > 0) {
+		u32 sector = (src/ce9->cacheBlockSize)*ce9->cacheBlockSize;
+		int slot = getSlotForSector(sector+1);
+		vu8* buffer = getCacheAddress(slot);
+		// Read max CACHE_READ_SIZE via the main RAM cache
+		if (slot == -1) {
+			slot = allocateCacheSlot();
+
+			buffer = getCacheAddress(slot);
+
+			DC_InvalidateRange((u32*)buffer, ce9->cacheBlockSize);
+
+			// Write the command
+			sharedAddr[0] = (vu32)buffer;
+			sharedAddr[1] = ce9->cacheBlockSize;
+			sharedAddr[2] = sector;
+			sharedAddr[3] = commandRead;
+
+			waitForArm7();
+		}
+
+		updateDescriptor(slot, sector+1);
+
+		u32 len2 = len;
+		if ((src - sector) + len2 > ce9->cacheBlockSize) {
+			len2 = sector - src + ce9->cacheBlockSize;
+		}
+
+		tonccpy(dst, (u8*)buffer+(src-sector), len2);
+
+		len -= len2;
+		if (len > 0) {
+			src += len2;
+			dst += len2;
+			accessCounter++;
+		}
+	}
+	#else
+	DC_InvalidateRange(dst, len);
 
 	// Write the command
-	sharedAddr[0] = (u32)memory;
+	sharedAddr[0] = (u32)dst;
 	sharedAddr[1] = len;
-	sharedAddr[2] = (u32)flash;
-	sharedAddr[3] = commandNandRead;
+	sharedAddr[2] = src;
+	sharedAddr[3] = commandRead;
 
 	waitForArm7();
+	#endif
     return true;
 }
 
-bool nandWrite(void* memory,void* flash,u32 len,u32 dma) {
+bool nandWrite(void* src, u32 dst, u32 len /* , u32 dma */) {
 #ifdef DLDI
 	if (ce9->valueBits & saveOnFlashcard) {
-		fileWrite(memory, savFile, (u32)flash, len);
-		return true;
+		sysSetCardOwner(BUS_OWNER_ARM9);
+		bool res = fileWrite(src, savFile, dst, len);
+		sysSetCardOwner(BUS_OWNER_ARM7);
+		return res;
 	}
 #endif
-	DC_FlushRange(memory, len);
-
 	// Send a command to the ARM7 to write the nand save
-	const u32 commandNandWrite = 0x025FFC02;
+	const u32 commandWrite = 0x025FFC02;
+
+	#ifndef DLDI
+	const u32 commandRead = 0x025FFC01;
+
+	accessCounter++;
+
+	while (len > 0) {
+		u32 sector = (dst/ce9->cacheBlockSize)*ce9->cacheBlockSize;
+		int slot = getSlotForSector(sector+1);
+		vu8* buffer = getCacheAddress(slot);
+		// Read max CACHE_READ_SIZE via the main RAM cache
+		if (slot == -1) {
+			slot = allocateCacheSlot();
+
+			buffer = getCacheAddress(slot);
+
+			DC_InvalidateRange((u32*)buffer, ce9->cacheBlockSize);
+
+			// Write the command
+			sharedAddr[0] = (vu32)buffer;
+			sharedAddr[1] = ce9->cacheBlockSize;
+			sharedAddr[2] = sector;
+			sharedAddr[3] = commandRead;
+
+			waitForArm7();
+		}
+
+		updateDescriptor(slot, sector+1);
+
+		u32 len2 = len;
+		if ((dst - sector) + len2 > ce9->cacheBlockSize) {
+			len2 = sector - dst + ce9->cacheBlockSize;
+		}
+
+		tonccpy((u8*)buffer+(dst-sector), src, len2);
+
+		DC_FlushRange((u32*)buffer, ce9->cacheBlockSize);
+
+		// Write the command
+		sharedAddr[0] = (vu32)buffer;
+		sharedAddr[1] = ce9->cacheBlockSize;
+		sharedAddr[2] = sector;
+		sharedAddr[3] = commandWrite;
+
+		waitForArm7();
+
+		len -= len2;
+		if (len > 0) {
+			dst += len2;
+			src += len2;
+			accessCounter++;
+		}
+	}
+	#else
+	DC_FlushRange(src, len);
 
 	// Write the command
-	sharedAddr[0] = (u32)memory;
+	sharedAddr[0] = (u32)src;
 	sharedAddr[1] = len;
-	sharedAddr[2] = (u32)flash;
-	sharedAddr[3] = commandNandWrite;
+	sharedAddr[2] = dst;
+	sharedAddr[3] = commandWrite;
 
 	waitForArm7();
-    return true;
+ 	#endif
+	return true;
 }
 
 #ifdef TWLSDK
+bool sharedFontRead(void* dst, u32 src, u32 len /* , u32 dma */) {
 #ifdef DLDI
+	// if (ce9->valueBits & saveOnFlashcard) {
+		sysSetCardOwner(BUS_OWNER_ARM9);
+		bool res = fileRead(dst, sharedFontFile, src, len);
+		sysSetCardOwner(BUS_OWNER_ARM7);
+		return res;
+	// }
+#endif
+	// Send a command to the ARM7 to read the shared font
+	const u32 commandRead = 0x025FFC03;
+
+	#ifndef DLDI
+	accessCounter++;
+
+	while (len > 0) {
+		u32 sector = (src/ce9->cacheBlockSize)*ce9->cacheBlockSize;
+		int slot = getSlotForSector(sector+2);
+		vu8* buffer = getCacheAddress(slot);
+		// Read max CACHE_READ_SIZE via the main RAM cache
+		if (slot == -1) {
+			slot = allocateCacheSlot();
+
+			buffer = getCacheAddress(slot);
+
+			DC_InvalidateRange((u32*)buffer, ce9->cacheBlockSize);
+
+			// Write the command
+			sharedAddr[0] = (vu32)buffer;
+			sharedAddr[1] = ce9->cacheBlockSize;
+			sharedAddr[2] = sector;
+			sharedAddr[3] = commandRead;
+
+			waitForArm7();
+		}
+
+		updateDescriptor(slot, sector+2);
+
+		u32 len2 = len;
+		if ((src - sector) + len2 > ce9->cacheBlockSize) {
+			len2 = sector - src + ce9->cacheBlockSize;
+		}
+
+		tonccpy(dst, (u8*)buffer+(src-sector), len2);
+
+		len -= len2;
+		if (len > 0) {
+			src += len2;
+			dst += len2;
+			accessCounter++;
+		}
+	}
+	#else
+	DC_InvalidateRange(dst, len);
+
+	// Write the command
+	sharedAddr[0] = (u32)dst;
+	sharedAddr[1] = len;
+	sharedAddr[2] = src;
+	sharedAddr[3] = commandRead;
+
+	waitForArm7();
+	#endif
+    return true;
+}
+
 static bool sharedFontOpened = false;
 static bool dsiSaveInited = false;
 static bool dsiSaveExists = false;
@@ -1047,20 +1214,15 @@ static void dsiSaveInit(void) {
 	u32 existByte = 0;
 
 	int oldIME = enterCriticalSection();
-	const u16 exmemcnt = REG_EXMEMCNT;
-	sysSetCardOwner(true);	// Give Slot-1 access to arm9
-	fileRead((char*)&dsiSaveSize, savFile, ce9->saveSize-4, 4);
-	fileRead((char*)&existByte, savFile, ce9->saveSize-8, 4);
-	REG_EXMEMCNT = exmemcnt;
+	nandRead((char*)&dsiSaveSize, ce9->saveSize-4, 4);
+	nandRead((char*)&existByte, ce9->saveSize-8, 4);
 	leaveCriticalSection(oldIME);
 
 	dsiSaveExists = (existByte != 0);
 	dsiSaveInited = true;
 }
-#endif
 
 u32 dsiSaveCheckExists(void) {
-#ifdef DLDI
 	if (savFile->firstCluster == CLUSTER_FREE || savFile->firstCluster == CLUSTER_EOF) {
 		return 1;
 	}
@@ -1068,13 +1230,9 @@ u32 dsiSaveCheckExists(void) {
 	dsiSaveInit();
 
 	return dsiSaveExists ? 0 : 1;
-#else
-	return 1;
-#endif
 }
 
 u32 dsiSaveGetResultCode(const char* path) {
-#ifdef DLDI
 	if (savFile->firstCluster == CLUSTER_FREE || savFile->firstCluster == CLUSTER_EOF) {
 		return 0xE;
 	}
@@ -1086,13 +1244,9 @@ u32 dsiSaveGetResultCode(const char* path) {
 		return dsiSaveExists ? 8 : 0xE;
 	}
 	return dsiSaveResultCode;
-#else
-	return 0xB;
-#endif
 }
 
 bool dsiSaveCreate(const char* path, u32 permit) {
-#ifdef DLDI
 	dsiSaveSeekPos = 0;
 	if (savFile->firstCluster == CLUSTER_FREE || savFile->firstCluster == CLUSTER_EOF) {
 		dsiSaveResultCode = 0xE;
@@ -1112,10 +1266,7 @@ bool dsiSaveCreate(const char* path, u32 permit) {
 		u32 existByte = 1;
 
 		int oldIME = enterCriticalSection();
-		const u16 exmemcnt = REG_EXMEMCNT;
-		sysSetCardOwner(true);	// Give Slot-1 access to arm9
-		fileWrite((char*)&existByte, savFile, ce9->saveSize-8, 4);
-		REG_EXMEMCNT = exmemcnt;
+		nandWrite((char*)&existByte, ce9->saveSize-8, 4);
 		leaveCriticalSection(oldIME);
 
 		dsiSaveExists = true;
@@ -1123,12 +1274,10 @@ bool dsiSaveCreate(const char* path, u32 permit) {
 		return true;
 	}
 	dsiSaveResultCode = 8;
-#endif
 	return false;
 }
 
 bool dsiSaveDelete(const char* path) {
-#ifdef DLDI
 	dsiSaveSeekPos = 0;
 	if (savFile->firstCluster == CLUSTER_FREE || savFile->firstCluster == CLUSTER_EOF) {
 		dsiSaveResultCode = 0xE;
@@ -1139,11 +1288,8 @@ bool dsiSaveDelete(const char* path) {
 		dsiSaveSize = 0;
 
 		int oldIME = enterCriticalSection();
-		const u16 exmemcnt = REG_EXMEMCNT;
-		sysSetCardOwner(true);	// Give Slot-1 access to arm9
-		fileWrite((char*)&dsiSaveSize, savFile, ce9->saveSize-4, 4);
-		fileWrite((char*)&dsiSaveSize, savFile, ce9->saveSize-8, 4);
-		REG_EXMEMCNT = exmemcnt;
+		nandWrite((char*)&dsiSaveSize, ce9->saveSize-4, 4);
+		nandWrite((char*)&dsiSaveSize, ce9->saveSize-8, 4);
 		leaveCriticalSection(oldIME);
 
 		dsiSaveExists = false;
@@ -1151,11 +1297,9 @@ bool dsiSaveDelete(const char* path) {
 		return true;
 	}
 	dsiSaveResultCode = 8;
-#endif
 	return false;
 }
 
-#ifdef DLDI
 bool dsiSaveGetInfo(const char* path, dsiSaveInfo* info) {
 	toncset(info, 0, sizeof(dsiSaveInfo));
 	if (savFile->firstCluster == CLUSTER_FREE || savFile->firstCluster == CLUSTER_EOF) {
@@ -1178,14 +1322,8 @@ bool dsiSaveGetInfo(const char* path, dsiSaveInfo* info) {
 	info->filesize = dsiSaveSize;
 	return true;
 }
-#else
-bool dsiSaveGetInfo(const char* path, u32* info) {
-	return false;
-}
-#endif
 
 u32 dsiSaveSetLength(void* ctx, s32 len) {
-#ifdef DLDI
 	dsiSaveSeekPos = 0;
 	if (savFile->firstCluster == CLUSTER_FREE || savFile->firstCluster == CLUSTER_EOF) {
 		dsiSaveResultCode = 1;
@@ -1199,22 +1337,15 @@ u32 dsiSaveSetLength(void* ctx, s32 len) {
 	dsiSaveSize = len;
 
 	int oldIME = enterCriticalSection();
-	const u16 exmemcnt = REG_EXMEMCNT;
-	sysSetCardOwner(true);	// Give Slot-1 access to arm9
-	bool res = fileWrite((char*)&dsiSaveSize, savFile, ce9->saveSize-4, 4);
+	bool res = nandWrite((char*)&dsiSaveSize, ce9->saveSize-4, 4);
 	dsiSaveResultCode = res ? 0 : 1;
 	toncset32(ctx+0x14, dsiSaveResultCode, 1);
-	REG_EXMEMCNT = exmemcnt;
 	leaveCriticalSection(oldIME);
 
 	return dsiSaveResultCode;
-#else
-	return 1;
-#endif
 }
 
 bool dsiSaveOpen(void* ctx, const char* path, u32 mode) {
-#ifdef DLDI
 	dsiSaveSeekPos = 0;
 	if (strcmp(path, "nand:/<sharedFont>") == 0) {
 		if (sharedFontFile->firstCluster == CLUSTER_FREE || sharedFontFile->firstCluster == CLUSTER_EOF) {
@@ -1239,13 +1370,9 @@ bool dsiSaveOpen(void* ctx, const char* path, u32 mode) {
 
 	dsiSavePerms = mode;
 	return dsiSaveExists;
-#else
-	return false;
-#endif
 }
 
 bool dsiSaveClose(void* ctx) {
-#ifdef DLDI
 	dsiSaveSeekPos = 0;
 	if (sharedFontOpened) {
 		sharedFontOpened = false;
@@ -1267,13 +1394,9 @@ bool dsiSaveClose(void* ctx) {
 	dsiSaveResultCode = dsiSaveExists ? 0 : 0xB;
 	toncset32(ctx+0x14, dsiSaveResultCode, 1);
 	return dsiSaveExists;
-#else
-	return false;
-#endif
 }
 
 u32 dsiSaveGetLength(void* ctx) {
-#ifdef DLDI
 	dsiSaveSeekPos = 0;
 	if (savFile->firstCluster == CLUSTER_FREE || savFile->firstCluster == CLUSTER_EOF) {
 		return 0;
@@ -1284,25 +1407,17 @@ u32 dsiSaveGetLength(void* ctx) {
 		toncset32(ctx+0x14, dsiSaveResultCode, 1);
 	}
 	return dsiSaveSize;
-#else
-	return 0;
-#endif
 }
 
 u32 dsiSaveGetPosition(void* ctx) {
-#ifdef DLDI
 	if (savFile->firstCluster == CLUSTER_FREE || savFile->firstCluster == CLUSTER_EOF) {
 		return 0;
 	}
 
 	return dsiSaveSeekPos;
-#else
-	return 0;
-#endif
 }
 
 bool dsiSaveSeek(void* ctx, s32 pos, u32 mode) {
-#ifdef DLDI
 	if (sharedFontOpened) {
 		if (sharedFontFile->firstCluster == CLUSTER_FREE || sharedFontFile->firstCluster == CLUSTER_EOF) {
 			dsiSaveResultCode = 0xE;
@@ -1327,13 +1442,9 @@ bool dsiSaveSeek(void* ctx, s32 pos, u32 mode) {
 	dsiSaveResultCode = 0;
 	toncset32(ctx+0x14, dsiSaveResultCode, 1);
 	return true;
-#else
-	return false;
-#endif
 }
 
 s32 dsiSaveRead(void* ctx, void* dst, u32 len) {
-#ifdef DLDI
 	if (!sharedFontOpened) {
 		if (dsiSavePerms == 2 || !dsiSaveExists) {
 			dsiSaveResultCode = 1;
@@ -1359,23 +1470,18 @@ s32 dsiSaveRead(void* ctx, void* dst, u32 len) {
 	}
 
 	int oldIME = enterCriticalSection();
-	const u16 exmemcnt = REG_EXMEMCNT;
-	sysSetCardOwner(true);	// Give Slot-1 access to arm9
-	bool res = fileRead(dst, sharedFontOpened ? sharedFontFile : savFile, dsiSaveSeekPos, len);
+	bool res = sharedFontOpened ? sharedFontRead(dst, dsiSaveSeekPos, len) : nandRead(dst, dsiSaveSeekPos, len);
 	dsiSaveResultCode = res ? 0 : 1;
 	toncset32(ctx+0x14, dsiSaveResultCode, 1);
-	REG_EXMEMCNT = exmemcnt;
 	leaveCriticalSection(oldIME);
 	if (res) {
 		dsiSaveSeekPos += len;
 		return len;
 	}
-#endif
 	return -1;
 }
 
 s32 dsiSaveWrite(void* ctx, void* src, s32 len) {
-#ifdef DLDI
 	if (dsiSavePerms == 1 || !dsiSaveExists) {
 		dsiSaveResultCode = 1;
 		toncset32(ctx+0x14, dsiSaveResultCode, 1);
@@ -1392,28 +1498,21 @@ s32 dsiSaveWrite(void* ctx, void* src, s32 len) {
 	}
 
 	int oldIME = enterCriticalSection();
-	const u16 exmemcnt = REG_EXMEMCNT;
-	sysSetCardOwner(true);	// Give Slot-1 access to arm9
-	bool res = fileWrite(src, savFile, dsiSaveSeekPos, len);
+	bool res = nandWrite(src, dsiSaveSeekPos, len);
 	dsiSaveResultCode = res ? 0 : 1;
 	toncset32(ctx+0x14, dsiSaveResultCode, 1);
-	REG_EXMEMCNT = exmemcnt;
 	leaveCriticalSection(oldIME);
 	if (res) {
 		if (dsiSaveSize < dsiSaveSeekPos+len) {
 			dsiSaveSize = dsiSaveSeekPos+len;
 
 			int oldIME = enterCriticalSection();
-			const u16 exmemcnt = REG_EXMEMCNT;
-			sysSetCardOwner(true);	// Give Slot-1 access to arm9
-			fileWrite((char*)&dsiSaveSize, savFile, ce9->saveSize-4, 4);
-			REG_EXMEMCNT = exmemcnt;
+			nandWrite((char*)&dsiSaveSize, ce9->saveSize-4, 4);
 			leaveCriticalSection(oldIME);
 		}
 		dsiSaveSeekPos += len;
 		return len;
 	}
-#endif
 	return -1;
 }
 
@@ -1639,7 +1738,6 @@ u32 myIrqEnable(u32 irq) {
 	int oldIME = enterCriticalSection();
 
 	#ifdef TWLSDK
-	#ifdef DLDI
 	if (!(ce9->valueBits & dsiBios) && *(u32*)0x02F70000 == 0xEA00002E) {
 		extern void setLowVectors();
 
@@ -1652,7 +1750,6 @@ u32 myIrqEnable(u32 irq) {
 
 		setLowVectors();
 	}
-	#endif
 	#else
 	initialize();
 	#endif

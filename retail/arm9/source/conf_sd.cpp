@@ -1475,7 +1475,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 					tonccpy((u8*)LOADER_RETURN_SDK5_LOCATION+0x100, &srBackendId, 8);
 				}
 
-				if (conf->gameOnFlashcard) {
+				if (conf->gameOnFlashcard && (strncmp(romTid, "IRB", 3) == 0 || strncmp(romTid, "IRA", 3) == 0 || strncmp(romTid, "IRE", 3) == 0 || strncmp(romTid, "IRD", 3) == 0 || strncmp(romTid, "KAD", 3) == 0)) {
 					// Load SDK5 DLDI ce9 binary
 					loadCardEngineBinary(
 						binary3 ? "nitro:/cardenginei_arm9_twlsdk3_dldi.lz77" : "nitro:/cardenginei_arm9_twlsdk_dldi.lz77",
@@ -1505,7 +1505,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 				// Load DLDI ce9 binary
 				loadCardEngineBinary(
-					conf->gameOnFlashcard
+					(conf->gameOnFlashcard && (strncmp(romTid, "IRB", 3) == 0 || strncmp(romTid, "IRA", 3) == 0 || strncmp(romTid, "IRE", 3) == 0 || strncmp(romTid, "IRD", 3) == 0))
 				?	(gsdd ? "nitro:/cardenginei_arm9_gsdd_dldi.lz77" : "nitro:/cardenginei_arm9_dldi.lz77")
 				:	(gsdd ? "nitro:/cardenginei_arm9_gsdd.lz77" : "nitro:/cardenginei_arm9.lz77")
 				, (u8*)CARDENGINEI_ARM9_BUFFERED_LOCATION);
@@ -1553,9 +1553,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 				conf->dataToPreloadSize[0] = ((internalRomSize == 0 || internalRomSize > conf->romSize) ? conf->romSize : internalRomSize)-conf->dataToPreloadAddr[0];
 				// conf->dataToPreloadFrame = 0;
 			}
-			if (!conf->gameOnFlashcard) {
-				loadAsyncLoadSettings(conf, romTid, headerCRC);
-			}
+			loadAsyncLoadSettings(conf, romTid, headerCRC);
 		} else {
 			const bool binary3 = (REG_SCFG_EXT7 == 0 ? !dsiEnhancedMbk : (a7mbk6 != 0x00403000));
 

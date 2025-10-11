@@ -17,11 +17,11 @@
 #include "locations.h"
 
 extern u8 gameOnFlashcard;
-extern u8 saveOnFlashcard;
 extern u16 a9ScfgRom;
 
 extern bool gbaRomFound;
 extern bool dsiModeConfirmed;
+extern bool pkmnGen5;
 
 bool isPawsAndClaws(const tNDSHeader* ndsHeader) {
 	const char* romTid = getRomTid(ndsHeader);
@@ -581,14 +581,6 @@ static bool patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader
 	 || (strncmp(romTid, "V2G", 3) == 0 && !dsiModeConfirmed) // Mario vs. Donkey Kong: Mini-Land Mayhem (DS mode)
 	 || !cardReadDMA) return false;
 
-	if (gameOnFlashcard && !ROMinRAM
-	 && strncmp(romTid, "CAY", 3) != 0 // Army Men: Soldiers of Misfortune
-	 && strncmp(romTid, "B5B", 3) != 0 // Call of Duty: Modern Warfare 3: Defiance
-	 && strncmp(romTid, "B7F", 3) != 0 // The Magic School Bus: Oceans
-	 && strncmp(romTid, "AH9", 3) != 0 // Tony Hawk's American Sk8land
-	 && strncmp(romTid, "YUT", 3) != 0 // Ultimate Mortal Kombat
-	) return false;
-
 	u32* offset = patchOffsetCache.cardEndReadDmaOffset;
 	u32 offsetDmaHandler = patchOffsetCache.dmaHandlerOffset;
 	  if (!patchOffsetCache.cardEndReadDmaChecked) {
@@ -699,14 +691,6 @@ static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, co
 	 || strncmp(romTid, "TAM", 3) == 0 // The Amazing Spider-Man
 	 || (strncmp(romTid, "V2G", 3) == 0 && !dsiModeConfirmed) // Mario vs. Donkey Kong: Mini-Land Mayhem (DS mode)
 	 || !cardReadDMA) return false;
-
-	if (gameOnFlashcard && !ROMinRAM
-	 && strncmp(romTid, "CAY", 3) != 0 // Army Men: Soldiers of Misfortune
-	 && strncmp(romTid, "B5B", 3) != 0 // Call of Duty: Modern Warfare 3: Defiance
-	 && strncmp(romTid, "B7F", 3) != 0 // The Magic School Bus: Oceans
-	 && strncmp(romTid, "AH9", 3) != 0 // Tony Hawk's American Sk8land
-	 && strncmp(romTid, "YUT", 3) != 0 // Ultimate Mortal Kombat
-	) return false;
 
 	dbg_printf("\npatchCardSetDma\n");
 
@@ -965,7 +949,7 @@ void patchResetTwl(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const modul
 }
 
 static bool getSleep(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb, u32 ROMinRAM) {
-	if (gameOnFlashcard || ROMinRAM) {
+	if (ROMinRAM) {
 		return false;
 	}
 
@@ -1566,7 +1550,6 @@ void patchHiHeapPointer(const module_params_t* moduleParams, const tNDSHeader* n
 	const bool ROMsupportsDsiMode = (ndsHeader->unitCode > 0 && dsiModeConfirmed);
 	const bool cheatsEnabled = (cheatSizeTotal > 4 && cheatSizeTotal <= 0x8000);
 	const char* romTid = getRomTid(ndsHeader);
-	extern bool pkmnGen5;
 
 	if (moduleParams->sdk_version < 0x2008000 || !dsiModeConfirmed || strncmp(romTid, "UBR", 3) == 0) {
 		return;
@@ -1592,7 +1575,7 @@ void patchHiHeapPointer(const module_params_t* moduleParams, const tNDSHeader* n
 	dbg_hexa((u32)heapPointer);
     dbg_printf("\n\n");
 
-	if (ROMsupportsDsiMode && ((gameOnFlashcard && consoleModel == 0 && !cheatsEnabled) || consoleModel > 0) && (u8)a9ScfgRom == 1) {
+	if (ROMsupportsDsiMode && ((gameOnFlashcard && pkmnGen5 && consoleModel == 0 && !cheatsEnabled) || consoleModel > 0) && (u8)a9ScfgRom == 1) {
 		return;
 	}
 
@@ -1602,7 +1585,7 @@ void patchHiHeapPointer(const module_params_t* moduleParams, const tNDSHeader* n
 	dbg_hexa((u32)oldheapPointer);
 	dbg_printf("\n\n");
 
-	const u32 dsiHiHeap = ((gameOnFlashcard && consoleModel == 0 && !cheatsEnabled) || consoleModel > 0) ? 0x02F70000 : retail_CACHE_ADRESS_START_TWLSDK_SMALL;
+	const u32 dsiHiHeap = ((gameOnFlashcard && pkmnGen5 && consoleModel == 0 && !cheatsEnabled) || consoleModel > 0) ? 0x02F70000 : retail_CACHE_ADRESS_START_TWLSDK_SMALL;
 	bool newHiHeapReported = false;
 
 	if (ROMsupportsDsiMode) {
@@ -1635,7 +1618,7 @@ void patchHiHeapPointer(const module_params_t* moduleParams, const tNDSHeader* n
 						*heapPointer = (u32)0x048020B4; // MOVS R0, #0x2D00000
 						break;
 				}
-			} else if (!gameOnFlashcard && strncmp(romTid, "V2G", 3) != 0 && strncmp(romTid, "DD3", 3) != 0) {
+			} else if (strncmp(romTid, "V2G", 3) != 0 && strncmp(romTid, "DD3", 3) != 0) {
 				switch (*heapPointer) {
 					case 0x13A007BE:
 						*heapPointer = (u32)0x13A0062F; // MOVNE R0, #0x2F00000
@@ -3103,8 +3086,9 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 	} else {
 		const bool cardSetDmaPatched = patchCardSetDma(ce9, ndsHeader, moduleParams, usesThumb, ROMinRAM);
 		extern u32 asyncDataAddr[2];
+		extern bool ce9DldiBinary;
 
-		if (!cardSetDmaPatched || (!gameOnFlashcard && !ROMinRAM && (patchStrmPageLoad(ce9, ndsHeader, moduleParams) || asyncDataAddr[0]) && !sleepFound)) {
+		if (!cardSetDmaPatched || (!ce9DldiBinary && !ROMinRAM && (patchStrmPageLoad(ce9, ndsHeader, moduleParams) || asyncDataAddr[0]) && !sleepFound)) {
 			patchCardReadDma(ce9, ndsHeader, moduleParams, usesThumb);
 		}
 		if (!patchCardEndReadDma(ce9, ndsHeader, moduleParams, usesThumb, ROMinRAM)) {

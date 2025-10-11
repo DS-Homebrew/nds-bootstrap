@@ -312,7 +312,7 @@ int hookNdsRetailArm9(
 
 	if (!ROMinRAM) {
 		//extern bool gbaRomFound;
-		extern u8 gameOnFlashcard;
+		extern bool ce9DldiBinary;
 		bool runOverlayCheck = overlayPatch;
 		ce9->cacheBlockSize = cacheBlockSize;
 		if (ce9->overlaysSrc) {
@@ -326,22 +326,29 @@ int hookNdsRetailArm9(
 			const bool cheatsEnabled = (cheatSizeTotal > 4 && cheatSizeTotal <= 0x8000);
 			const bool specialTitle = (strncmp(romTid, "V2G", 3) == 0 || strncmp(romTid, "DD3", 3) == 0);
 			extern bool pkmnGen5;
+			u32 size = 0;
 
-			ce9->cacheAddress = (consoleModel > 0 ? dev_CACHE_ADRESS_START_TWLSDK : (cheatsEnabled ? retail_CACHE_ADRESS_START_TWLSDK_CHEAT : retail_CACHE_ADRESS_START_TWLSDK));
-			if (consoleModel == 0 && !gameOnFlashcard) {
+			if (consoleModel == 0) {
 				if (pkmnGen5) {
-					ce9->cacheAddress = (cheatsEnabled ? retail_CACHE_ADRESS_START_TWLSDK_LARGE_CHEAT : retail_CACHE_ADRESS_START_TWLSDK_LARGE);
+					ce9->cacheAddress = retail_CACHE_ADRESS_START_TWLSDK_LARGE;
+					size = (cheatsEnabled ? retail_CACHE_ADRESS_SIZE_TWLSDK_LARGE_CHEAT : retail_CACHE_ADRESS_SIZE_TWLSDK_LARGE);
 				} else if (specialTitle) {
-					ce9->cacheAddress = (cheatsEnabled ? retail_CACHE_ADRESS_START_TWLSDK_SMALL_CHEAT : retail_CACHE_ADRESS_START_TWLSDK_SMALL);
+					ce9->cacheAddress = retail_CACHE_ADRESS_START_TWLSDK_SMALL;
+					size = (cheatsEnabled ? retail_CACHE_ADRESS_SIZE_TWLSDK_SMALL_CHEAT : retail_CACHE_ADRESS_SIZE_TWLSDK_SMALL);
+				} else {
+					ce9->cacheAddress = retail_CACHE_ADRESS_START_TWLSDK;
+					size = (cheatsEnabled ? retail_CACHE_ADRESS_SIZE_TWLSDK_CHEAT : retail_CACHE_ADRESS_SIZE_TWLSDK);
 				}
+			} else {
+				ce9->cacheAddress = dev_CACHE_ADRESS_START_TWLSDK;
+				size = (cheatsEnabled ? dev_CACHE_ADRESS_SIZE_TWLSDK_CHEAT : dev_CACHE_ADRESS_SIZE_TWLSDK);
 			}
 			ce9->romLocation = ce9->cacheAddress;
-			ce9->cacheSlots = (consoleModel > 0 ? (cheatsEnabled ? dev_CACHE_ADRESS_SIZE_TWLSDK_CHEAT : dev_CACHE_ADRESS_SIZE_TWLSDK) : (cheatsEnabled ? retail_CACHE_ADRESS_SIZE_TWLSDK_CHEAT : retail_CACHE_ADRESS_SIZE_TWLSDK))/cacheBlockSize;
-			if (consoleModel == 0 && !gameOnFlashcard) {
-				if (pkmnGen5) {
-					ce9->cacheSlots = (cheatsEnabled ? retail_CACHE_ADRESS_SIZE_TWLSDK_LARGE_CHEAT : retail_CACHE_ADRESS_SIZE_TWLSDK_LARGE)/cacheBlockSize;
-				} else if (specialTitle) {
-					ce9->cacheSlots = (cheatsEnabled ? retail_CACHE_ADRESS_SIZE_TWLSDK_SMALL_CHEAT : retail_CACHE_ADRESS_SIZE_TWLSDK_SMALL)/cacheBlockSize;
+			ce9->cacheSlots = size/cacheBlockSize;
+			if (consoleModel == 0 && ((!(ce9->valueBits & b_dsiBios) && *(u32*)0x02F70000 == 0xEA00002E) || ((REG_SCFG_ROM & BIT(9)) && *(u32*)0x02F78020 == 0xEA001FF6))) {
+				// Reduce LRU cache size to not overwrite externally loaded DSi BIOS dumps
+				while (ce9->cacheAddress+(ce9->cacheSlots*cacheBlockSize) > 0x02F70000) {
+					ce9->cacheSlots--;
 				}
 			}
 		} else {
@@ -381,7 +388,7 @@ int hookNdsRetailArm9(
 				ce9->valueBits |= b_waitForPreloadToFinish;
 			} */
 		}
-		if (!gameOnFlashcard) {
+		if (!ce9DldiBinary) {
 			for (int i = 0; i < 2; i++) {
 				ce9->asyncDataSrc[i] = asyncDataAddr[i];
 				ce9->asyncDataSrcEnd[i] = asyncDataAddr[i]+asyncDataSize[i];
@@ -417,7 +424,7 @@ int hookNdsRetailArm9(
 			ce9->valueBits |= b_resetOnEveryException;
 		}
 
-		if (!gameOnFlashcard && (ndsHeader->unitCode == 0 || !dsiMode)) {
+		if ((ndsHeader->unitCode == 0 || !dsiMode) && !ce9DldiBinary) {
 			u32* cacheAddressTable = (u32*)(!laterSdk ? CACHE_ADDRESS_TABLE_LOCATION2 : CACHE_ADDRESS_TABLE_LOCATION);
 			u32 addr = ce9->cacheAddress;
 
@@ -433,6 +440,15 @@ int hookNdsRetailArm9(
 			}
 		}
 	} else {
+		if (consoleModel > 0 && ndsHeader->unitCode > 0 && dsiMode) {
+			extern u32 cheatSizeTotal;
+			const bool cheatsEnabled = (cheatSizeTotal > 4 && cheatSizeTotal <= 0x8000);
+
+			ce9->cacheBlockSize = cacheBlockSize;
+			ce9->cacheAddress = dev_CACHE_ADRESS_START_TWLSDK_SMALL;
+			ce9->cacheSlots = (cheatsEnabled ? retail_CACHE_ADRESS_SIZE_TWLSDK_SMALL_CHEAT : retail_CACHE_ADRESS_SIZE_TWLSDK_SMALL)/cacheBlockSize;
+		}
+
 		extern u32 baseArm9Off;
 		extern u32 baseArm9Size;
 		extern u32 baseArm7Off;

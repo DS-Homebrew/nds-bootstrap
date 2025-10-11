@@ -150,6 +150,7 @@ bool i2cBricked = false;
 
 u32 ce7Location = CARDENGINEI_ARM7_LOCATION;
 u32 ce9Location = CARDENGINEI_ARM9_LOCATION;
+bool ce9DldiBinary = false;
 u32 cheatSizeTotal = 0;
 u32 cheatEngineOffset = 0;
 char cheatEngineBuffer[0x400];
@@ -890,7 +891,6 @@ static bool isROMLoadableInRAM(const tDSiHeader* dsiHeader, const tNDSHeader* nd
 	 && strncmp(romTid, "KPF", 3) != 0)
 	) {
 		const bool twlType = (ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed);
-		const bool cheatsEnabled = (cheatSizeTotal > 4 && cheatSizeTotal <= 0x8000);
 		u32 wramSize = (dsiWramAccess && !dsiWramMirrored) ? (colorLutEnabled ? 0x32800 : 0x80000) : 0;
 		if (ce7Location == CARDENGINEI_ARM7_LOCATION) {
 			wramSize += 0x8000; // Shared 32KB of WRAM is available for ARM9 to use
@@ -923,7 +923,7 @@ static bool isROMLoadableInRAM(const tDSiHeader* dsiHeader, const tNDSHeader* nd
 				romSize += (overlaysSize/0x4000)*0x4000;
 			}
 		}
-		res = ((consoleModel> 0 && twlType && ((u32)dsiHeader->arm9iromOffset - romOffset)+ioverlaysSize <= (cheatsEnabled ? dev_CACHE_ADRESS_SIZE_TWLSDK_CHEAT : dev_CACHE_ADRESS_SIZE_TWLSDK))
+		res = ((consoleModel> 0 && twlType && ((u32)dsiHeader->arm9iromOffset - romOffset)+ioverlaysSize <= dev_CACHE_ADRESS_SIZE_TWLSDK_ROMinRAM)
 			|| (!twlType && romSize <= romSizeLimit));
 	}
 	if (res) {
@@ -2272,13 +2272,11 @@ int arm7_main(void) {
 			}
 		}
 		if (ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed) {
-			cheatEngineOffset = (consoleModel > 0) ? CHEAT_ENGINE_TWLSDK_LOCATION_3DS : CHEAT_ENGINE_TWLSDK_SMALL_LOCATION;
-			if (consoleModel == 0 && !gameOnFlashcard) {
-				if (pkmnGen5) {
-					cheatEngineOffset = CHEAT_ENGINE_TWLSDK_LARGE_LOCATION;
-				} else if (strncmp(romTid, "V2G", 3) != 0 && strncmp(romTid, "DD3", 3) != 0) {
-					cheatEngineOffset = CHEAT_ENGINE_TWLSDK_LOCATION;
-				}
+			cheatEngineOffset = (consoleModel > 0) ? CHEAT_ENGINE_TWLSDK_LOCATION_3DS : CHEAT_ENGINE_TWLSDK_LOCATION;
+			if (consoleModel == 0 && ((!scfgBios9i() && *(u32*)0x02F70000 == 0xEA00002E) || ((REG_SCFG_ROM & BIT(9)) && *(u32*)0x02F78020 == 0xEA001FF6))) {
+				// There is no room to place cheats if external DSi BIOS dumps are loaded on (retail) DSi consoles
+				cheatSizeTotal = 0;
+				cheatEngineOffset = 0;
 			}
 		} else {
 			cheatEngineOffset = (ce7Location == CARDENGINEI_ARM7_LOCATION_ALT) ? CHEAT_ENGINE_LOCATION_ALT : CHEAT_ENGINE_LOCATION;
@@ -2315,7 +2313,8 @@ int arm7_main(void) {
 			ce9Location = *ce9Src;
 			tonccpy((u32*)ce9Location, ce9Src, ce9size);
 		}
-		if (gameOnFlashcard) {
+		ce9DldiBinary = gameOnFlashcard && (pkmnGen5 || strncmp(romTid, "KAD", 3) == 0);
+		if (ce9DldiBinary) {
 			const u32 ce9DldiOffset = !laterSdk ? CARDENGINEI_ARM9_LOCATION2_DLDI_DRIVER : CARDENGINEI_ARM9_LOCATION_DLDI_DRIVER;
 			if (!dldiPatchBinary((data_t*)ce9Location, ce9size, (data_t*)((ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed && _io_dldi_size < 0xF) ? ce9Location+0x3800 : ce9DldiOffset))) {
 				dbg_printf("ce9 DLDI patch failed\n");
@@ -2517,7 +2516,7 @@ int arm7_main(void) {
 			tonccpy((char*)DONOR_ROM_ARM7_LOCATION, ndsHeader->arm7destination, ndsHeader->arm7binarySize);
 		} */
 
-		if (!gameOnFlashcard && !ROMinRAM && (romRead_LED==1 || dmaRomRead_LED==1)) {
+		if (!ce9DldiBinary && !ROMinRAM && (romRead_LED==1 || dmaRomRead_LED==1)) {
 			// Turn WiFi LED off
 			i2cWriteRegister(0x4A, 0x30, 0x12);
 		}

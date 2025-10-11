@@ -526,6 +526,8 @@ int hookNdsRetailArm7(
 	}*/
 	// }
 
+	if (cheatEngineOffset == 0) goto hookNdsRetailArm7Done;
+
 	extern u32 cheatSizeTotal;
 	extern char cheatEngineBuffer[0x400];
 	u16 cheatSizeLimit = (/* ce7NotFound ? 0x1C00 : */ 0x8000);
@@ -596,6 +598,7 @@ int hookNdsRetailArm7(
 		}
 	}
 
+hookNdsRetailArm7Done:
 	dbg_printf("ERR_NONE\n");
 	return ERR_NONE;
 }

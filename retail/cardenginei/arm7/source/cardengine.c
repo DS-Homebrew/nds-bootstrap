@@ -149,6 +149,7 @@ static aFile* romFile = (aFile*)ROM_FILE_LOCATION_TWLSDK;
 static aFile* savFile = (aFile*)SAV_FILE_LOCATION_TWLSDK;
 //static aFile* gbaFile = (aFile*)GBA_FILE_LOCATION_TWLSDK;
 static aFile* apFixOverlaysFile = (aFile*)OVL_FILE_LOCATION_TWLSDK;
+static aFile* sharedFontFile = (aFile*)FONT_FILE_LOCATION_TWLSDK;
 #else
 #ifdef ALTERNATIVE
 static aFile* romFile = (aFile*)ROM_FILE_LOCATION_ALT;
@@ -1258,6 +1259,38 @@ static void nandWrite(void) {
 	//cardReadLED(false, true);
 }
 
+#ifdef TWLSDK
+static void sharedFontRead(void) {
+	u32 flash = *(vu32*)(sharedAddr+2);
+	u32 memory = *(vu32*)(sharedAddr);
+	u32 len = *(vu32*)(sharedAddr+1);
+	#ifdef DEBUG
+	u32 marker = *(vu32*)(sharedAddr+3);
+
+	dbg_printf("\nshared font read received\n");
+
+	if (calledViaIPC) {
+		dbg_printf("\ntriggered via IPC\n");
+	}
+	dbg_printf("\nflash : \n");
+	dbg_hexa(flash);
+	dbg_printf("\nmemory : \n");
+	dbg_hexa(memory);
+	dbg_printf("\nlen : \n");
+	dbg_hexa(len);
+	dbg_printf("\nmarker : \n");
+	dbg_hexa(marker);
+	#endif
+
+	//driveInitialize();
+	//cardReadLED(true, false);    // When a file is loading, turn on LED for card read indicator
+	sdmmc_set_ndma_slot(4);
+	fileRead((char *)memory, sharedFontFile, flash, len);
+	sdmmc_set_ndma_slot(0);
+	//cardReadLED(false, false);
+}
+#endif
+
 /*static void slot2Read(void) {
 	u32 src = *(vu32*)(sharedAddr+2);
 	u32 dst = *(vu32*)(sharedAddr);
@@ -1598,36 +1631,34 @@ void runCardEngineCheckHalt(void) {
         //{
     
     		//nocashMessage("runCardEngineCheck mutex ok");
-    
-			if (!(valueBits & gameOnFlashcard)) {
-				/* #ifndef TWLSDK
-				loadROMPartIntoRAM();
-				#endif */
-				if (/* sharedAddr[3] == (vu32)0x020FF808 || sharedAddr[3] == (vu32)0x020FF80A || */ sharedAddr[3] >= (vu32)0x025FFB08 && sharedAddr[3] <= (vu32)0x025FFB0A) {	// ARM9 Card Read
-					const bool isDma = (sharedAddr[3] == (vu32)0x025FFB0A);
-					const bool dmaLed = (sharedAddr[3] == (vu32)0x025FFB09 || isDma);
-					bool useApFixOverlays = false;
-					u32 src = sharedAddr[2];
-					u32 dst = sharedAddr[0];
-					u32 len = sharedAddr[1];
-					if (src >= 0x80000000) {
-						src -= 0x80000000;
-						useApFixOverlays = true;
-					}
 
-					// readOngoing = true;
-					if (lockMutex(&saveMutex)) {
-						cardReadLED(true, dmaLed);    // When a file is loading, turn on LED for card read indicator
-						fileRead((char*)dst, useApFixOverlays ? apFixOverlaysFile : romFile, src, len);
-						cardReadLED(false, dmaLed);    // After loading is done, turn off LED for card read indicator
-						unlockMutex(&saveMutex);
-					}
-					// readOngoing = false;
-					sharedAddr[3] = 0;
-					if (isDma) {
-						sharedAddr[4] = 0x39414D44; // 'DMA9'
-						IPC_SendSync(0x3);
-					}
+			/* #ifndef TWLSDK
+			loadROMPartIntoRAM();
+			#endif */
+			if (/* sharedAddr[3] == (vu32)0x020FF808 || sharedAddr[3] == (vu32)0x020FF80A || */ sharedAddr[3] >= (vu32)0x025FFB08 && sharedAddr[3] <= (vu32)0x025FFB0A) {	// ARM9 Card Read
+				const bool isDma = (sharedAddr[3] == (vu32)0x025FFB0A);
+				const bool dmaLed = (sharedAddr[3] == (vu32)0x025FFB09 || isDma);
+				bool useApFixOverlays = false;
+				u32 src = sharedAddr[2];
+				u32 dst = sharedAddr[0];
+				u32 len = sharedAddr[1];
+				if (src >= 0x80000000) {
+					src -= 0x80000000;
+					useApFixOverlays = true;
+				}
+
+				// readOngoing = true;
+				if (lockMutex(&saveMutex)) {
+					cardReadLED(true, dmaLed);    // When a file is loading, turn on LED for card read indicator
+					fileRead((char*)dst, useApFixOverlays ? apFixOverlaysFile : romFile, src, len);
+					cardReadLED(false, dmaLed);    // After loading is done, turn off LED for card read indicator
+					unlockMutex(&saveMutex);
+				}
+				// readOngoing = false;
+				sharedAddr[3] = 0;
+				if (isDma) {
+					sharedAddr[4] = 0x39414D44; // 'DMA9'
+					IPC_SendSync(0x3);
 				}
 			}
 
@@ -1648,6 +1679,13 @@ void runCardEngineCheckHalt(void) {
 				nandWrite();
     			sharedAddr[3] = 0;
 			}
+			#ifdef TWLSDK
+			else if (sharedAddr[3] == (vu32)0x025FFC03) {
+				//dmaLed = (sharedAddr[3] == (vu32)0x025FFC03);
+				sharedFontRead();
+    			sharedAddr[3] = 0;
+			}
+			#endif
 
             /*if (sharedAddr[3] == (vu32)0x025FBC01) {
                 dmaLed = false;

@@ -11,7 +11,7 @@
 //#include "debug_file.h"
 #include "tonccpy.h"
 
-#define gameOnFlashcard BIT(0)
+// #define gameOnFlashcard BIT(0)
 #define ROMinRAM BIT(3)
 #define asyncCardRead BIT(14)
 
@@ -419,7 +419,7 @@ static void patchReset(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const m
 }
 
 static bool getSleep(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
-	if ((valueBits & gameOnFlashcard) || (valueBits & ROMinRAM)) {
+	if (valueBits & ROMinRAM) {
 		return false;
 	}
 
@@ -833,7 +833,7 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 		patchCardReadDma(ce9, ndsHeader, moduleParams, usesThumb);
 	} else {
 		const bool cardSetDmaPatched = patchCardSetDma(ce9, ndsHeader, moduleParams, usesThumb);
-		if (!cardSetDmaPatched || (!(valueBits & gameOnFlashcard) && !(valueBits & ROMinRAM) && patchStrmPageLoad(ce9, ndsHeader, moduleParams) && !sleepFound)) {
+		if (!cardSetDmaPatched || (!(valueBits & ROMinRAM) && patchStrmPageLoad(ce9, ndsHeader, moduleParams) && !sleepFound)) {
 			patchCardReadDma(ce9, ndsHeader, moduleParams, usesThumb);
 		}
 		if (!patchCardEndReadDma(ce9, ndsHeader, moduleParams, usesThumb)) {

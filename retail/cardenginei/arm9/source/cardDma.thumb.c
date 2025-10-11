@@ -149,7 +149,9 @@ static void cardReadDmaNormal(u8* dst, u32 src, u32 len) {
 	processAsyncCommand();
 	#endif
 
-    while (len > 0) {
+	sysSetCardOwner(BUS_OWNER_ARM7);
+
+	while (len > 0) {
 		// Read via the main RAM cache
 		u32 sector = (src/ce9->cacheBlockSize)*ce9->cacheBlockSize;
 		int slot = getSlotForSector(sector);
