@@ -362,7 +362,7 @@ static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, co
 	if (strncmp(romTid, "AJS", 3) == 0 // Jump Super Stars
 	 || strncmp(romTid, "AJU", 3) == 0 // Jump Ultimate Stars
 	 || strncmp(romTid, "AWD", 3) == 0 // Diddy Kong Racing
-	 || strncmp(romTid, "CP3", 3) == 0	// Viva Pinata
+	 || strncmp(romTid, "CP3", 3) == 0 // Viva Pinata
 	 || strncmp(romTid, "BO5", 3) == 0 // Golden Sun: Dark Dawn
 	 || strncmp(romTid, "Y8L", 3) == 0 // Golden Sun: Dark Dawn (Demo Version)
 	 || strncmp(romTid, "B8I", 3) == 0 // Spider-Man: Edge of Time
@@ -448,8 +448,8 @@ bool a9PatchCardIrqEnable(cardengineArm9* ce9, const tNDSHeader* ndsHeader, cons
 
 	if (strncmp(romTid, "AJS", 3) == 0 // Jump Super Stars - Fix white screen on boot
 	 || strncmp(romTid, "AJU", 3) == 0 // Jump Ultimate Stars - Fix white screen on boot
-	 || strncmp(romTid, "AWD", 3) == 0	// Diddy Kong Racing - Fix corrupted 3D model bug
-	 || strncmp(romTid, "CP3", 3) == 0	// Viva Pinata - Fix touch and model rendering bug
+	 || strncmp(romTid, "AWD", 3) == 0 // Diddy Kong Racing - Fix corrupted 3D model bug
+	 || strncmp(romTid, "CP3", 3) == 0 // Viva Pinata - Fix touch and model rendering bug
 	 || strncmp(romTid, "BO5", 3) == 0 // Golden Sun: Dark Dawn - Fix black screen on boot
 	 || strncmp(romTid, "Y8L", 3) == 0 // Golden Sun: Dark Dawn (Demo Version) - Fix black screen on boot
 	 || strncmp(romTid, "B8I", 3) == 0 // Spider-Man: Edge of Time - Fix white screen on boot
