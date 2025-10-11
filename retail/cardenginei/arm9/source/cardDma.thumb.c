@@ -469,14 +469,6 @@ void cardSetDma(u32 * params) {
 
 		IPC_SendSync(0x3);
 		return;
-	} else
-	#ifndef DLDI
-	if (ce9->patches->sleepRef || ce9->thumbPatches->sleepRef)
-	#endif
-	{
-		cardRead(NULL, dst, src, len);
-		endCardReadDma();
-		return;
 	}
 
 	#ifndef DLDI
@@ -502,6 +494,9 @@ void cardSetDma(u32 * params) {
 	} else { */
 		cardReadDmaNormal(dst, src, len);
 	// }
+	#else
+	cardRead(NULL, dst, src, len);
+	endCardReadDma();
 	#endif
 }
 
