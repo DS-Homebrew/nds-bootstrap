@@ -1629,12 +1629,13 @@ void myIrqHandlerIPC(void) {
 		extern bool dmaDirectRead;
 		if (dmaDirectRead) {
 			endCardReadDma();
-		} else { // new dma method
-			#ifndef DLDI
+		}
+		#ifndef DLDI
+		else { // new dma method
 			continueCardReadDmaArm7();
-			#endif
 			continueCardReadDmaArm9();
 		}
+		#endif
 	}
 
 	switch (ipcGetSync) {

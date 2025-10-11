@@ -950,7 +950,7 @@ void patchResetTwl(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const modul
 }
 
 static bool getSleep(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb, u32 ROMinRAM) {
-	if (ROMinRAM) {
+	if (ce9DldiBinary || ROMinRAM) {
 		return false;
 	}
 

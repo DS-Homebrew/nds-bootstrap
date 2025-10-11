@@ -133,13 +133,12 @@ static inline bool checkArm7(void) {
 }
 
 static u32 * dmaParams = NULL;
+#ifndef DLDI
 static int currentLen = 0;
-// #ifndef DLDI
 // static int currentSlot = 0;
-// #endif
 
 static void cardReadDmaNormal(u8* dst, u32 src, u32 len) {
-	#ifndef DLDI
+	// #ifndef DLDI
 	const u32 commandRead=0x025FFB0A;
 	//u32 page = (src / 512) * 512;
 
@@ -217,7 +216,6 @@ static void cardReadDmaNormal(u8* dst, u32 src, u32 len) {
 			len2 -= len2 % 32;
 		}*/
 
-		#ifndef DLDI
 		if (!dmaCheckValid) {
 			tonccpy(dst, (u8*)buffer+(src-sector), len2);
 
@@ -227,9 +225,7 @@ static void cardReadDmaNormal(u8* dst, u32 src, u32 len) {
 				dst += len2;
 				accessCounter++;
 			}
-		} else
-		#endif
-		{
+		} else {
 			// Copy via dma
 			ndmaCopyWordsAsynch(0, (u8*)buffer+(src-sector), dst, len2);
 			dmaReadOnArm9 = true;
@@ -244,18 +240,8 @@ static void cardReadDmaNormal(u8* dst, u32 src, u32 len) {
     //resetRequestIrqMask(IRQ_DMA0 << dma);
     //disableDMA(dma);
     endCardReadDma();
-	#else
-	/* sysSetCardOwner(false);	// Give Slot-1 access to arm7
-
-	// Write the command
-	sharedAddr[0] = (vu32)dst;
-	sharedAddr[1] = len;
-	sharedAddr[2] = src;
-	sharedAddr[3] = commandRead;
-
-	dmaReadOnArm7 = true; */
-
-	if (len > 0) {
+	// #else
+	/* if (len > 0) {
 		currentLen = (len > dmaReadLen) ? dmaReadLen : len;
 
 		fileRead((char*)dst, ((ce9->valueBits & overlaysCached) && src >= ce9->overlaysSrc && src < ndsHeader->arm7romOffset) ? apFixOverlaysFile : romFile, src, currentLen);
@@ -264,8 +250,8 @@ static void cardReadDmaNormal(u8* dst, u32 src, u32 len) {
 		IPC_SendSync(0x3);
 	} else {
 		endCardReadDma();
-	}
-	#endif
+	} */
+	// #endif
 }
 
 void continueCardReadDmaArm9() {
@@ -322,7 +308,6 @@ void continueCardReadDmaArm9() {
 	cardReadDmaNormal(dst, src, len);
 }
 
-#ifndef DLDI
 void continueCardReadDmaArm7() {
     if (!dmaReadOnArm7 || !checkArm7()) {
 		return;
@@ -408,6 +393,11 @@ void cardSetDma(u32 * params) {
 	}
 	#endif
 
+	disableIrqMask(IRQ_CARD);
+	disableIrqMask(IRQ_CARD_LINE);
+
+	enableIPC_SYNC();
+
 	romPart = false;
 	//int romPartNo = 0;
 	if (!(ce9->valueBits & ROMinRAM)) {
@@ -440,11 +430,6 @@ void cardSetDma(u32 * params) {
 	}
 	if ((ce9->valueBits & ROMinRAM) || romPart) {
 		dmaDirectRead = true;
-
-		disableIrqMask(IRQ_CARD);
-		disableIrqMask(IRQ_CARD_LINE);
-
-		enableIPC_SYNC();
 
 		// Copy via dma
 		// ndmaCopyWordsAsynch(0, (u8*)ce9->romLocation/*[romPartNo]*/+src, dst, len);
@@ -484,17 +469,17 @@ void cardSetDma(u32 * params) {
 
 		IPC_SendSync(0x3);
 		return;
-	} else if (ce9->patches->sleepRef || ce9->thumbPatches->sleepRef) {
+	} else
+	#ifndef DLDI
+	if (ce9->patches->sleepRef || ce9->thumbPatches->sleepRef)
+	#endif
+	{
 		cardRead(NULL, dst, src, len);
 		endCardReadDma();
 		return;
 	}
 
-	disableIrqMask(IRQ_CARD);
-	disableIrqMask(IRQ_CARD_LINE);
-
-	enableIPC_SYNC();
-
+	#ifndef DLDI
 	/* static bool disabled = false;
 	if ((REG_KEYINPUT & KEY_SELECT) == 0) {
 		disabled = true;
@@ -517,6 +502,7 @@ void cardSetDma(u32 * params) {
 	} else { */
 		cardReadDmaNormal(dst, src, len);
 	// }
+	#endif
 }
 
 #ifndef DLDI
