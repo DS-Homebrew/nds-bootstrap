@@ -316,6 +316,7 @@ int runNds(u32 cluster, u32 saveCluster, u32 donorTwlCluster, /* u32 gbaCluster,
 	loader->dmaRomRead_LED              = conf->dmaRomRead_LED;
 	loader->valueBits3                  = conf->valueBits3;
 	loader->saveRelocation              = conf->saveRelocation;
+	loader->cacheBlockSize              = conf->cacheBlockSize;
 	tonccpy(loader->version, VER_NUMBER, sizeof(VER_NUMBER));
 
 	nocashMessage("irqDisable(IRQ_ALL);");

@@ -69,6 +69,7 @@ typedef struct loadCrt0 {
     u8 soundFreq;
     u8 valueBits3;
     u8 saveRelocation;
+	u16 cacheBlockSize;
 	unsigned char version[20];
 } loadCrt0;
 

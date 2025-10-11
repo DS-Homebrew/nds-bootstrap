@@ -84,6 +84,7 @@
 	.global soundFreq
 	.global valueBits3
 	.global saveRelocation
+	.global cacheBlockSize
 	.global version
 @---------------------------------------------------------------------------------
 	.align	4
@@ -225,6 +226,8 @@ valueBits3:
 	.byte	0
 saveRelocation:
 	.byte	0
+cacheBlockSize:
+	.hword	0
 version:
 	.space	20
 .align 4

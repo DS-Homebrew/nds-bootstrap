@@ -76,8 +76,6 @@
 #include "unpatched_funcs.h"
 #include "nocashMessage.h"
 
-#define cacheBlockSize 0x8000
-
 //#define memcpy __builtin_memcpy
 
 //#define resetCpu() __asm volatile("\tswi 0x000000\n");
@@ -134,6 +132,7 @@ extern u8 consoleModel;
 extern u8 romRead_LED;
 extern u8 dmaRomRead_LED;
 extern u8 soundFreq;
+extern u16 cacheBlockSize;
 extern char version[20];
 
 extern u8 _io_dldi_size;

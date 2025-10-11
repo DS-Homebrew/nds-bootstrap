@@ -88,6 +88,7 @@ typedef struct configuration {
 	bool phatColors;
 	char* manualPath;
 	bool saveRelocation;
+	u16 cacheBlockSize;
 } configuration;
 
 #endif // CONFIGURATION_H
