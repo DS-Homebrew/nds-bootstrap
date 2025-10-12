@@ -150,6 +150,12 @@
 .word hgSpaOverlayApFix_end-hgSpaOverlayApFix
 .hword 0
 
+.ascii "VCDJ"
+.hword 0xFFFF
+.word solatoroboJpnOverlayApFix
+.word solatoroboJpnOverlayApFix_end-solatoroboJpnOverlayApFix
+.hword 0
+
 .ascii "END"
 .byte 0
 @---------------------------------------------------------------------------------
@@ -658,3 +664,33 @@ hgKorOverlayApFix_check3:
 	bx lr
 .pool
 hgKorOverlayApFix_end:
+@---------------------------------------------------------------------------------
+solatoroboJpnOverlayApFix: @ overlay9_4
+	ldr r0, =0x021E39E0
+	ldrb r1, [r0, #0x27A]
+	mov r2, #0xB4
+	cmp r2, r1
+	bxne lr
+	ldrb r1, [r0, #0x27C]
+	mov r2, #0xE0
+	cmp r2, r1
+	bxne lr
+	ldrb r1, [r0, #0x319]
+	mov r2, #0xE1
+	cmp r2, r1
+	bxne lr
+	ldrb r1, [r0, #0x31B]
+	mov r2, #0xE0
+	cmp r2, r1
+	bxne lr
+	mov r2, #0xB3
+	strb r2, [r0, #0x27A]
+	mov r2, #0x36
+	strb r2, [r0, #0x27C]
+	mov r2, #0xE0
+	strb r2, [r0, #0x319]
+	mov r2, #0x36
+	strb r2, [r0, #0x31B]
+	bx lr
+.pool
+solatoroboJpnOverlayApFix_end:
