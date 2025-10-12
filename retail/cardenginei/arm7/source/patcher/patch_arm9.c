@@ -704,7 +704,7 @@ void patchMpuChange(const tNDSHeader* ndsHeader, const module_params_t* modulePa
 }
 
 bool patchStrmPageLoad(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
-	if (moduleParams->sdk_version < 0x3000000 || strmLoadFlagEnableOffset == 0) {
+	if (moduleParams->sdk_version < 0x3000000) {
 		return false;
 	}
 	u32* offset = findStrmPageLoadOffset(ndsHeader, moduleParams);
@@ -712,15 +712,22 @@ bool patchStrmPageLoad(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const m
 	if (!offset) {
 		return false;
 	}
-	u32 offset32 = (u32)offset;
 	u16* thumbOffset = (u16*)offset;
 
 	if (thumbOffset[0] == 0xB570) {
+		if (strmLoadFlagEnableOffset == 0) {
+			return false;
+		}
+		u32 offset32 = (u32)offset;
 		setBLThumb(offset32+(13*2), strmLoadFlagEnableOffset);
 		tonccpy((u32*)strmLoadFlagEnableOffset, ce9->thumbPatches->strmLoadFlagEnable, 8);
 	} else {
-		setBL(offset32+(9*4), strmLoadFlagEnableOffset);
-		tonccpy((u32*)strmLoadFlagEnableOffset, ce9->patches->strmLoadFlagEnable, 8);
+		ce9->patches->strmLoadFlagEnable[4] = offset[9];
+		ce9->patches->strmLoadFlagEnable[5] = offset[10];
+		ce9->patches->strmLoadFlagEnable[6] = offset[11];
+		offset[9] = 0xE1A0E00F; // mov lr, pc
+		offset[10] = 0xE51FF004; // ldr pc, =strmLoadFlagEnable
+		offset[11] = (u32)ce9->patches->strmLoadFlagEnable;
 	}
     /* dbg_printf("strmPageLoad location : ");
     dbg_hexa((u32)offset);

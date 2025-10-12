@@ -148,7 +148,7 @@ ndsCodeStart:
 patches:
 .word	card_read_arm9
 .word	card_irq_enable
-.word	strmLoadFlagEnable_jmp
+.word	strmLoadFlagEnable
 .word	strmLoadFlagEnable_mobiclip
 .word	card_pull_out_arm9
 .word	card_id_arm9
@@ -537,16 +537,15 @@ thumb_card_irq_enable:
 
 	.arm
 @---------------------------------------------------------------------------------
-strmLoadFlagEnable_jmp:
-@---------------------------------------------------------------------------------
-	ldr		pc, =strmLoadFlagEnable
-.pool
-@---------------------------------------------------------------------------------
 strmLoadFlagEnable:
+@---------------------------------------------------------------------------------
+	add lr, #4
 	mov r0, #1
 	adr r1, strmLoadFlag
 	str r0, [r1]
-	mov r1, r5
+	nop @ nops are replaced with part of the original strmPageLoad code after boot
+	nop
+	nop
 	bx lr
 
 strmLoadFlagEnable_mobiclip:
