@@ -2359,6 +2359,12 @@ u32* findCardSetDma(const tNDSHeader* ndsHeader, const module_params_t* modulePa
 				cardSetDmaEndOffset, 0x60,
 				cardSetDmaSignatureStart3, 3
 			);
+			if (!offset) {
+				offset = findOffsetBackwards(
+					cardSetDmaEndOffset, 0x60,
+					cardSetDmaSignatureStart4, 3
+				);
+			}
 		} else if (moduleParams->sdk_version > 0x4000000) {
 			offset = findOffsetBackwards(
 				cardSetDmaEndOffset, 0x60,
