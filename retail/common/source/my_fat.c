@@ -1439,6 +1439,9 @@ u32 fileRead (char* buffer, aFile* file, u32 startOffset, u32 length)
               curSect &= (discSecPerClus - 1);
               #endif
 				file->currentCluster = getCachedCluster(file, clusterIndex);
+				if (file->currentCluster == CLUSTER_EOF) {
+					return 0;
+				}
           } else {
               // Move to the next cluster if necessary
 			#ifdef TWOCARD

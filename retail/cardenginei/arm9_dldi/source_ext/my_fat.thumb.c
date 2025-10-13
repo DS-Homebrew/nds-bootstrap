@@ -969,6 +969,9 @@ u32 fileRead (char* buffer, aFile* file, u32 startOffset, u32 length)
               clusterIndex+= curSect >> discSecPerClusShift;
               curSect &= (discSecPerClus - 1);
 				file->currentCluster = getCachedCluster(file, clusterIndex);
+				if (file->currentCluster == CLUSTER_EOF) {
+					return 0;
+				}
           } else {
               // Move to the next cluster if necessary
   			if (curSect >= discSecPerClus)
