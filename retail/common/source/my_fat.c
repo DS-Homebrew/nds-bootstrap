@@ -1352,9 +1352,11 @@ u32 fileRead (char* buffer, aFile* file, u32 startOffset, u32 length)
                   curSect &= (discSecPerClus[fileCard2] - 1);
   				file->currentOffset+=discBytePerClus[fileCard2];
 				file->currentCluster = getCachedCluster(file, clusterIndex);
+				#ifndef SKIPCLUSTERFAILSAFE
 				if (file->currentCluster == CLUSTER_EOF) {
 					return dataPos;
 				}
+				#endif
 			}
 				#else
               if (curSect >= discSecPerClus)
@@ -1363,9 +1365,11 @@ u32 fileRead (char* buffer, aFile* file, u32 startOffset, u32 length)
                   curSect &= (discSecPerClus - 1);
   				file->currentOffset+=discBytePerClus;
 				file->currentCluster = getCachedCluster(file, clusterIndex);
+				#ifndef SKIPCLUSTERFAILSAFE
 				if (file->currentCluster == CLUSTER_EOF) {
 					return dataPos;
 				}
+				#endif
   			}
 			  #endif
 
@@ -1439,9 +1443,11 @@ u32 fileRead (char* buffer, aFile* file, u32 startOffset, u32 length)
               curSect &= (discSecPerClus - 1);
               #endif
 				file->currentCluster = getCachedCluster(file, clusterIndex);
+				#ifndef SKIPCLUSTERFAILSAFE
 				if (file->currentCluster == CLUSTER_EOF) {
 					return dataPos;
 				}
+				#endif
           } else {
               // Move to the next cluster if necessary
 			#ifdef TWOCARD
@@ -1449,9 +1455,11 @@ u32 fileRead (char* buffer, aFile* file, u32 startOffset, u32 length)
   			{
   				curSect = 0;
                   file->currentCluster = FAT_NextCluster (file->currentCluster, fileCard2);
+				#ifndef SKIPCLUSTERFAILSAFE
 				if (file->currentCluster == CLUSTER_EOF) {
 					return dataPos;
 				}
+				#endif
   				file->currentOffset+=discBytePerClus[fileCard2];
   			}
 			#else
@@ -1459,9 +1467,11 @@ u32 fileRead (char* buffer, aFile* file, u32 startOffset, u32 length)
   			{
   				curSect = 0;
                   file->currentCluster = FAT_NextCluster (file->currentCluster);
+				#ifndef SKIPCLUSTERFAILSAFE
 				if (file->currentCluster == CLUSTER_EOF) {
 					return dataPos;
 				}
+				#endif
   				file->currentOffset+=discBytePerClus;
   			}
 			#endif
@@ -1510,9 +1520,11 @@ u32 fileRead (char* buffer, aFile* file, u32 startOffset, u32 length)
                   curSect = 0;
                   file->currentCluster = FAT_NextCluster (file->currentCluster, fileCard2);
               }
+			#ifndef SKIPCLUSTERFAILSAFE
 			if (file->currentCluster == CLUSTER_EOF) {
 				return dataPos;
 			}
+			#endif
 			file->currentOffset+=discBytePerClus[fileCard2];
 		}
 		#else
@@ -1526,9 +1538,11 @@ u32 fileRead (char* buffer, aFile* file, u32 startOffset, u32 length)
                   curSect = 0;
                   file->currentCluster = FAT_NextCluster (file->currentCluster);
               }
+			#ifndef SKIPCLUSTERFAILSAFE
 			if (file->currentCluster == CLUSTER_EOF) {
 				return dataPos;
 			}
+			#endif
 			file->currentOffset+=discBytePerClus;
 		}
 		#endif
@@ -1645,9 +1659,11 @@ u32 fileWrite (const char* buffer, aFile* file, u32 startOffset, u32 length)
             } else {
                 file->currentCluster = FAT_NextCluster (file->currentCluster, fileCard2);
             }
+			#ifndef SKIPCLUSTERFAILSAFE
 			if (file->currentCluster == CLUSTER_EOF) {
 				return dataPos;
 			}
+			#endif
             file->currentOffset+=discBytePerClus[fileCard2];
 			curSect = 0;
 		}
@@ -1660,9 +1676,11 @@ u32 fileWrite (const char* buffer, aFile* file, u32 startOffset, u32 length)
             } else {
                 file->currentCluster = FAT_NextCluster (file->currentCluster);
             }
+			#ifndef SKIPCLUSTERFAILSAFE
 			if (file->currentCluster == CLUSTER_EOF) {
 				return dataPos;
 			}
+			#endif
             file->currentOffset+=discBytePerClus;
 			curSect = 0;
 		}
@@ -1703,9 +1721,11 @@ u32 fileWrite (const char* buffer, aFile* file, u32 startOffset, u32 length)
             } else {
                 file->currentCluster = FAT_NextCluster (file->currentCluster, fileCard2);
             }
+			#ifndef SKIPCLUSTERFAILSAFE
 			if (file->currentCluster == CLUSTER_EOF) {
 				return dataPos;
 			}
+			#endif
 			curSect = 0;
 			file->currentOffset+=discBytePerClus[fileCard2];
 		}
@@ -1718,9 +1738,11 @@ u32 fileWrite (const char* buffer, aFile* file, u32 startOffset, u32 length)
             } else {
                 file->currentCluster = FAT_NextCluster (file->currentCluster);
             }
+			#ifndef SKIPCLUSTERFAILSAFE
 			if (file->currentCluster == CLUSTER_EOF) {
 				return dataPos;
 			}
+			#endif
 			curSect = 0;
 			file->currentOffset+=discBytePerClus;
 		}
