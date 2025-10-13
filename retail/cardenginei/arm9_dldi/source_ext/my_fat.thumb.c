@@ -921,7 +921,7 @@ u32 fileRead (char* buffer, aFile* file, u32 startOffset, u32 length)
   				file->currentOffset+=discBytePerClus;
 				file->currentCluster = getCachedCluster(file, clusterIndex);
 				if (file->currentCluster == CLUSTER_EOF) {
-					return 0;
+					return dataPos;
 				}
   			}
 
@@ -970,7 +970,7 @@ u32 fileRead (char* buffer, aFile* file, u32 startOffset, u32 length)
               curSect &= (discSecPerClus - 1);
 				file->currentCluster = getCachedCluster(file, clusterIndex);
 				if (file->currentCluster == CLUSTER_EOF) {
-					return 0;
+					return dataPos;
 				}
           } else {
               // Move to the next cluster if necessary
@@ -979,7 +979,7 @@ u32 fileRead (char* buffer, aFile* file, u32 startOffset, u32 length)
   				curSect = 0;
                   file->currentCluster = FAT_NextCluster (file->currentCluster);
 				if (file->currentCluster == CLUSTER_EOF) {
-					return 0;
+					return dataPos;
 				}
   				file->currentOffset+=discBytePerClus;
   			}
@@ -1019,7 +1019,7 @@ u32 fileRead (char* buffer, aFile* file, u32 startOffset, u32 length)
                   file->currentCluster = FAT_NextCluster (file->currentCluster);
               }
 			if (file->currentCluster == CLUSTER_EOF) {
-				return 0;
+				return dataPos;
 			}
 			file->currentOffset+=discBytePerClus;
 		}
@@ -1115,7 +1115,7 @@ u32 fileWrite (const char* buffer, aFile* file, u32 startOffset, u32 length)
                 file->currentCluster = FAT_NextCluster (file->currentCluster);
             }
 			if (file->currentCluster == CLUSTER_EOF) {
-				return 0;
+				return dataPos;
 			}
             file->currentOffset+=discBytePerClus;
 			curSect = 0;
@@ -1148,7 +1148,7 @@ u32 fileWrite (const char* buffer, aFile* file, u32 startOffset, u32 length)
                 file->currentCluster = FAT_NextCluster (file->currentCluster);
             }
 			if (file->currentCluster == CLUSTER_EOF) {
-				return 0;
+				return dataPos;
 			}
 			curSect = 0;
 			file->currentOffset+=discBytePerClus;
