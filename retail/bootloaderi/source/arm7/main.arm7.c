@@ -890,6 +890,7 @@ static bool isROMLoadableInRAM(const tDSiHeader* dsiHeader, const tNDSHeader* nd
 	 && strncmp(romTid, "KPF", 3) != 0)
 	) {
 		const bool twlType = (ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed);
+		const bool cheatsEnabled = (cheatSizeTotal > 4 && cheatSizeTotal <= 0x8000);
 		u32 wramSize = (dsiWramAccess && !dsiWramMirrored) ? (colorLutEnabled ? 0x32800 : 0x80000) : 0;
 		if (ce7Location == CARDENGINEI_ARM7_LOCATION) {
 			wramSize += 0x8000; // Shared 32KB of WRAM is available for ARM9 to use
@@ -922,7 +923,7 @@ static bool isROMLoadableInRAM(const tDSiHeader* dsiHeader, const tNDSHeader* nd
 				romSize += (overlaysSize/0x4000)*0x4000;
 			}
 		}
-		res = ((consoleModel> 0 && twlType && ((u32)dsiHeader->arm9iromOffset - romOffset)+ioverlaysSize <= dev_CACHE_ADRESS_SIZE_TWLSDK_ROMinRAM)
+		res = ((consoleModel> 0 && twlType && ((u32)dsiHeader->arm9iromOffset - romOffset)+ioverlaysSize <= (isDSiWare ? dev_CACHE_ADRESS_SIZE_TWLSDK_ROMinRAM : (cheatsEnabled ? dev_CACHE_ADRESS_SIZE_TWLSDK_CHEAT : dev_CACHE_ADRESS_SIZE_TWLSDK)))
 			|| (!twlType && romSize <= romSizeLimit));
 	}
 	if (res) {
