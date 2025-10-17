@@ -45,7 +45,7 @@
 #include <nds/arm9/dldi.h>
 #include "my_sdmmc.h"
 #include "locations.h"
-#include "aeabi.h"
+#include "tonccpy.h"
 
 void unlockDSiWram(void);
 
@@ -126,7 +126,7 @@ static inline void sendValue32(u32 value32) {
 static inline void sendMsg(int size, u8* msg) {
 	//nocashMessage("sendMsg");
 	*(vu32*)(word_command_offset+4) = (vu32)size;
-	__aeabi_memcpy((u8*)word_command_offset+8, msg, size);
+	tonccpy((u8*)word_command_offset+8, msg, size);
 	*(vu32*)word_command_offset = (vu32)0x027FEE05;
 	IPC_SendSync(0xEE24);
 }
@@ -225,7 +225,7 @@ bool sd_ReadSectors(sec_t sector, sec_t numSectors,void* buffer) {
 				len2 = alignedSector - sector + cacheBlockSectors;
 			}
 
-			__aeabi_memcpy(buffer, (u8*)cacheBuffer+((sector-alignedSector)*BYTES_PER_READ), len2*BYTES_PER_READ);
+			tonccpy(buffer, (u8*)cacheBuffer+((sector-alignedSector)*BYTES_PER_READ), len2*BYTES_PER_READ);
 
 			for (u32 i = 0; i < len2; i++) {
 				numSectors--;
@@ -258,7 +258,7 @@ bool sd_ReadSectors(sec_t sector, sec_t numSectors,void* buffer) {
 
 			result = getValue32();
 
-			__aeabi_memcpy(buffer+numreads*512, tmp_buf_addr, readsectors*512);
+			tonccpy(buffer+numreads*512, tmp_buf_addr, readsectors*512);
 		}
 	}
 
@@ -307,7 +307,7 @@ bool sd_WriteSectors(sec_t sector, sec_t numSectors,void* buffer) {
 				len2 = alignedSector - sector + cacheBlockSectors;
 			}
 
-			__aeabi_memcpy((u8*)cacheBuffer+((sector-alignedSector)*BYTES_PER_READ), buffer, len2*BYTES_PER_READ);
+			tonccpy((u8*)cacheBuffer+((sector-alignedSector)*BYTES_PER_READ), buffer, len2*BYTES_PER_READ);
 
 			for (u32 i = 0; i < len2; i++) {
 				numSectors--;
@@ -337,7 +337,7 @@ bool sd_WriteSectors(sec_t sector, sec_t numSectors,void* buffer) {
 		msg.sdParams.numsectors = readsectors;
 		msg.sdParams.buffer = tmp_buf_addr;
 
-		__aeabi_memcpy(tmp_buf_addr, buffer+numreads*512, readsectors*512);
+		tonccpy(tmp_buf_addr, buffer+numreads*512, readsectors*512);
 		sendMsg(sizeof(msg), (u8*)&msg);
 
 		waitValue32();
@@ -356,7 +356,7 @@ bool ramDisk = false;
 bool ramd_ReadSectors(u32 sector, u32 numSectors, void* buffer) {
 //---------------------------------------------------------------------------------
 	if (dsiMode) {
-		__aeabi_memcpy(buffer, (void*)RAM_DISK_LOCATION_DSIMODE+(sector << 9), numSectors << 9);
+		tonccpy(buffer, (void*)RAM_DISK_LOCATION_DSIMODE+(sector << 9), numSectors << 9);
 	} else {
 		if (buffer >= (void*)0x02C00000 && buffer < (void*)0x03000000) {
 			buffer -= 0xC00000;		// Move out of RAM disk location
@@ -367,7 +367,7 @@ bool ramd_ReadSectors(u32 sector, u32 numSectors, void* buffer) {
 		}
 
 		if (!isArm7) extendedMemory(true);		// Enable extended memory mode to access RAM drive
-		__aeabi_memcpy(buffer, (void*)RAM_DISK_LOCATION+(sector << 9), numSectors << 9);
+		tonccpy(buffer, (void*)RAM_DISK_LOCATION+(sector << 9), numSectors << 9);
 		if (!isArm7) extendedMemory(false);	// Disable extended memory mode
 	}
 	return true;
@@ -377,7 +377,7 @@ bool ramd_ReadSectors(u32 sector, u32 numSectors, void* buffer) {
 bool ramd_WriteSectors(u32 sector, u32 numSectors, void* buffer) {
 //---------------------------------------------------------------------------------
 	if (dsiMode) {
-		__aeabi_memcpy((void*)RAM_DISK_LOCATION_DSIMODE+(sector << 9), buffer, numSectors << 9);
+		tonccpy((void*)RAM_DISK_LOCATION_DSIMODE+(sector << 9), buffer, numSectors << 9);
 	} else {
 		if (buffer >= (void*)0x02C00000 && buffer < (void*)0x03000000) {
 			buffer -= 0xC00000;		// Move out of RAM disk location
@@ -388,7 +388,7 @@ bool ramd_WriteSectors(u32 sector, u32 numSectors, void* buffer) {
 		}
 
 		if (!isArm7) extendedMemory(true);		// Enable extended memory mode to access RAM drive
-		__aeabi_memcpy((void*)RAM_DISK_LOCATION+(sector << 9), buffer, numSectors << 9);
+		tonccpy((void*)RAM_DISK_LOCATION+(sector << 9), buffer, numSectors << 9);
 		if (!isArm7) extendedMemory(false);	// Disable extended memory mode
 	}
 	return true;
