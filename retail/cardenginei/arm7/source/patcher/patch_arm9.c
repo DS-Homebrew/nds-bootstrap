@@ -715,7 +715,7 @@ bool patchStrmPageLoad(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const m
 	u16* thumbOffset = (u16*)offset;
 
 	if (thumbOffset[0] == 0xB570) {
-		if (strmLoadFlagEnableOffset == 0) {
+		if (offset >= moduleParams->static_bss_start || strmLoadFlagEnableOffset == 0) {
 			return false;
 		}
 		u32 offset32 = (u32)offset;
