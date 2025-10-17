@@ -1056,6 +1056,7 @@ bool nandWrite(void* src, u32 dst, u32 len /* , u32 dma */) {
 	const u32 commandWrite = 0x025FFC02;
 
 	#ifndef DLDI
+	const u32 savedLen = len;
 	const u32 commandRead = 0x025FFC01;
 
 	accessCounter++;
@@ -1090,15 +1091,17 @@ bool nandWrite(void* src, u32 dst, u32 len /* , u32 dma */) {
 
 		tonccpy((u8*)buffer+(dst-sector), src, len2);
 
-		DC_FlushRange((u32*)buffer, ce9->cacheBlockSize);
+		if (savedLen < 512) {
+			DC_FlushRange((u32*)buffer, ce9->cacheBlockSize);
 
-		// Write the command
-		sharedAddr[0] = (vu32)buffer;
-		sharedAddr[1] = ce9->cacheBlockSize;
-		sharedAddr[2] = sector;
-		sharedAddr[3] = commandWrite;
+			// Write the command
+			sharedAddr[0] = (vu32)buffer;
+			sharedAddr[1] = ce9->cacheBlockSize;
+			sharedAddr[2] = sector;
+			sharedAddr[3] = commandWrite;
 
-		waitForArm7();
+			waitForArm7();
+		}
 
 		len -= len2;
 		if (len > 0) {
@@ -1106,6 +1109,18 @@ bool nandWrite(void* src, u32 dst, u32 len /* , u32 dma */) {
 			src += len2;
 			accessCounter++;
 		}
+	}
+
+	if (savedLen >= 512) {
+		DC_FlushRange(src, savedLen);
+
+		// Write the command
+		sharedAddr[0] = (u32)src;
+		sharedAddr[1] = savedLen;
+		sharedAddr[2] = dst;
+		sharedAddr[3] = commandWrite;
+
+		waitForArm7();
 	}
 	#else
 	DC_FlushRange(src, len);
