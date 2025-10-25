@@ -451,6 +451,20 @@ int hookNdsRetailArm9(
 			ce9->cacheBlockSize = cacheBlockSize;
 			ce9->cacheAddress = (consoleModel > 0) ? dev_CACHE_ADRESS_START_TWLSDK_SMALL : retail_CACHE_ADRESS_START_SMALL;
 			ce9->cacheSlots = retail_CACHE_ADRESS_SIZE_TWLSDK_SMALL/cacheBlockSize;
+
+			u32* cacheAddressTable = (u32*)(!laterSdk ? CACHE_ADDRESS_TABLE_LOCATION2 : CACHE_ADDRESS_TABLE_LOCATION);
+			u32 addr = ce9->cacheAddress;
+
+			const u16 cacheSlotsUnchanged = ce9->cacheSlots;
+			for (int slot = 0; slot < cacheSlotsUnchanged; slot++) {
+				romLocationAdjust(ndsHeader, laterSdk, (ce9->valueBits & b_isSdk5), &addr, cacheBlockSize);
+				if (addr >= 0x0C000000 && addr < (consoleModel > 0 ? 0x0E000000 : 0x0D000000-cacheBlockSize)) {
+					cacheAddressTable[slot] = addr;
+					addr += cacheBlockSize;
+				} else {
+					ce9->cacheSlots--;
+				}
+			}
 		}
 
 		extern u32 baseArm9Off;
