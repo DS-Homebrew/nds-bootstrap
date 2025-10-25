@@ -900,7 +900,8 @@ static bool isROMLoadableInRAM(const tDSiHeader* dsiHeader, const tNDSHeader* nd
 		if (consoleModel > 0) {
 			romSizeLimit += 0x01000000;
 		}
-		if (romTid[0] == 'U') {
+		const bool nandSave = (romTid[0] == 'U');
+		if (nandSave) {
 			romSizeLimit -= retail_CACHE_ADRESS_SIZE_TWLSDK_SMALL;
 			if (consoleModel == 0) {
 				romSizeLimit -= 0x8000;
@@ -930,7 +931,7 @@ static bool isROMLoadableInRAM(const tDSiHeader* dsiHeader, const tNDSHeader* nd
 				romSize += (overlaysSize/0x4000)*0x4000;
 			}
 		}
-		res = ((consoleModel> 0 && twlType && ((u32)dsiHeader->arm9iromOffset - romOffset)+ioverlaysSize <= (isDSiWare ? dev_CACHE_ADRESS_SIZE_TWLSDK_ROMinRAM : (cheatsEnabled ? dev_CACHE_ADRESS_SIZE_TWLSDK_CHEAT : dev_CACHE_ADRESS_SIZE_TWLSDK)))
+		res = ((consoleModel> 0 && twlType && ((u32)dsiHeader->arm9iromOffset - romOffset)+ioverlaysSize <= ((isDSiWare || nandSave) ? dev_CACHE_ADRESS_SIZE_TWLSDK_ROMinRAM : (cheatsEnabled ? dev_CACHE_ADRESS_SIZE_TWLSDK_CHEAT : dev_CACHE_ADRESS_SIZE_TWLSDK)))
 			|| (!twlType && romSize <= romSizeLimit));
 	}
 	if (res) {
