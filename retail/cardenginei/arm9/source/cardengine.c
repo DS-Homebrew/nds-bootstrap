@@ -795,7 +795,7 @@ void cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	#else
 	initialize();
 
-	if (!(ce9->valueBits & isSdk5) && !(ce9->valueBits & ROMinRAM)) {
+	if (!(ce9->valueBits & isSdk5)) {
 		debugRamMpuFix();
 	}
 
@@ -1091,17 +1091,15 @@ bool nandWrite(void* src, u32 dst, u32 len /* , u32 dma */) {
 
 		tonccpy((u8*)buffer+(dst-sector), src, len2);
 
-		if (savedLen < 512) {
-			DC_FlushRange((u32*)buffer, ce9->cacheBlockSize);
+		DC_FlushRange((u32*)buffer, ce9->cacheBlockSize);
 
-			// Write the command
-			sharedAddr[0] = (vu32)buffer;
-			sharedAddr[1] = ce9->cacheBlockSize;
-			sharedAddr[2] = sector;
-			sharedAddr[3] = commandWrite;
+		// Write the command
+		sharedAddr[0] = (vu32)buffer;
+		sharedAddr[1] = ce9->cacheBlockSize;
+		sharedAddr[2] = sector;
+		sharedAddr[3] = commandWrite;
 
-			waitForArm7();
-		}
+		waitForArm7();
 
 		len -= len2;
 		if (len > 0) {
@@ -1109,18 +1107,6 @@ bool nandWrite(void* src, u32 dst, u32 len /* , u32 dma */) {
 			src += len2;
 			accessCounter++;
 		}
-	}
-
-	if (savedLen >= 512) {
-		DC_FlushRange(src, savedLen);
-
-		// Write the command
-		sharedAddr[0] = (u32)src;
-		sharedAddr[1] = savedLen;
-		sharedAddr[2] = dst;
-		sharedAddr[3] = commandWrite;
-
-		waitForArm7();
 	}
 	#else
 	DC_FlushRange(src, len);
