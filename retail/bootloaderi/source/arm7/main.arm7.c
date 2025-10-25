@@ -903,9 +903,6 @@ static bool isROMLoadableInRAM(const tDSiHeader* dsiHeader, const tNDSHeader* nd
 		const bool nandSave = (romTid[0] == 'U');
 		if (nandSave) {
 			romSizeLimit -= retail_CACHE_ADRESS_SIZE_TWLSDK_SMALL;
-			if (consoleModel == 0) {
-				romSizeLimit -= 0x8000;
-			}
 		} else {
 			romSizeLimit += wramSize;
 		}
