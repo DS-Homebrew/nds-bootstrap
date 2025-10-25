@@ -447,6 +447,10 @@ int hookNdsRetailArm9(
 			ce9->cacheBlockSize = cacheBlockSize;
 			ce9->cacheAddress = dev_CACHE_ADRESS_START_TWLSDK_SMALL;
 			ce9->cacheSlots = (cheatsEnabled ? retail_CACHE_ADRESS_SIZE_TWLSDK_SMALL_CHEAT : retail_CACHE_ADRESS_SIZE_TWLSDK_SMALL)/cacheBlockSize;
+		} else if (romTid[0] == 'U') {
+			ce9->cacheBlockSize = cacheBlockSize;
+			ce9->cacheAddress = (consoleModel > 0) ? dev_CACHE_ADRESS_START_TWLSDK_SMALL : retail_CACHE_ADRESS_START_SMALL;
+			ce9->cacheSlots = retail_CACHE_ADRESS_SIZE_TWLSDK_SMALL/cacheBlockSize;
 		}
 
 		extern u32 baseArm9Off;

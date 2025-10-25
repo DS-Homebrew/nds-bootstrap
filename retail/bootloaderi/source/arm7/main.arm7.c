@@ -900,7 +900,14 @@ static bool isROMLoadableInRAM(const tDSiHeader* dsiHeader, const tNDSHeader* nd
 		if (consoleModel > 0) {
 			romSizeLimit += 0x01000000;
 		}
-		romSizeLimit += wramSize;
+		if (romTid[0] == 'U') {
+			romSizeLimit -= retail_CACHE_ADRESS_SIZE_TWLSDK_SMALL;
+			if (consoleModel == 0) {
+				romSizeLimit -= 0x8000;
+			}
+		} else {
+			romSizeLimit += wramSize;
+		}
 
 		u32 romOffset = 0;
 		u32 romSize = baseRomSize;
