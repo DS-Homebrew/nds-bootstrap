@@ -233,6 +233,7 @@ Yu-Gi-Oh! 5D's: World Championship 2011: Over The Nexus:
 */
 
 static const char colorLutMasterBrightBlacklist[][4] = {
+	"CBX", // Black Sigil: Blade of the Exiled
 	"ABM", // Bomberman
 	"ATD", // Clubhouse Games
 	"KTR", // Clubhouse Games Express: Card Classics
@@ -244,6 +245,7 @@ static const char colorLutMasterBrightBlacklist[][4] = {
 
 /* Blacklist reasons (would occur when using a specific LUT which has inverted black/white or a non-white white)
 
+Black Sigil: Blade of the Exiled,
 Bomberman,
 Clubhouse Games & Clubhouse Games Express:
 - Master brightness is not changed due to blacklisting VCount IRQ
@@ -257,6 +259,7 @@ Style Savvy:
 */
 
 static const char colorLutVCountBlacklist[][4] = {
+	"CBX", // Black Sigil: Blade of the Exiled
 	"ABM", // Bomberman
 	"K2J", // Cake Ninja
 	"K2N", // Cake Ninja 2
@@ -276,6 +279,9 @@ static const char colorLutVCountBlacklist[][4] = {
 };
 
 /* VCount IRQ will not be hooked to the color LUT code for these titles, in order to work around these issues...
+
+Black Sigil: Blade of the Exiled:
+- Crashes after splash screens
 
 Bomberman:
 - Crashes when opening a stage
