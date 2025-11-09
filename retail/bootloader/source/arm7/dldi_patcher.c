@@ -124,15 +124,19 @@ bool dldiPatchBinary (data_t *binDataSrc, u32 binSize, data_t *binData, data_t* 
 	//dbg_hexa((u32)dldiDataSrc);
 	//dbg_printf("\n");
 
-	for (int i = 0x40/4; i < 0x80/4; i++) {
-		u32* addr = (u32*)dldiDataSrc;
-		if (i != 24 && i != 25) {
-			addr[i] -= dldiDataSrc;
-			addr[i] += (addr_t)binData;
+	if (binData == NULL) {
+		binData = (data_t*)dldiDataSrc;
+	} else {
+		for (int i = 0x40/4; i < 0x80/4; i++) {
+			u32* addr = (u32*)dldiDataSrc;
+			if (i != 24 && i != 25) {
+				addr[i] -= dldiDataSrc;
+				addr[i] += (addr_t)binData;
+			}
 		}
-	}
 
-	tonccpy (binData, (u32*)dldiDataSrc, 0x80);
+		tonccpy (binData, (u32*)dldiDataSrc, 0x80);
+	}
 
 	data_t *pDH = (data_t*)(((u32*)(&__myio_dldi)) - 24);
 	data_t *pAH = &(binData[patchOffset]);
@@ -221,7 +225,9 @@ bool dldiPatchBinary (data_t *binDataSrc, u32 binSize, data_t *binData, data_t* 
 		toncset (&pAH[readAddr(pDH, DO_bss_start) - ddmemStart] , 0, readAddr(pDH, DO_bss_end) - readAddr(pDH, DO_bss_start));
 	}*/
 
-	tonccpy ((u32*)dldiDataSrc, binData, 0x80);
+	if (binData != (data_t*)dldiDataSrc) {
+		tonccpy ((u32*)dldiDataSrc, binData, 0x80);
+	}
 	return true;
 }
 #endif

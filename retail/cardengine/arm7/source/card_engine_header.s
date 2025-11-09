@@ -24,6 +24,13 @@
 .global igmHotkey
 .global RumblePakType
 .global ndsCodeStart
+.global s2FlashcardId
+.global romFatTableCompressed
+.global savFatTableCompressed
+.global fileCluster
+.global saveSize
+.global romFatTableCache
+.global savFatTableCache
 
 #define ICACHE_SIZE	0x2000
 #define DCACHE_SIZE	0x1000
@@ -58,6 +65,23 @@ igmHotkey:
 	.hword	0
 RumblePakType:
 	.byte	0
+	.byte	0 @ padding
+#ifdef FAT
+s2FlashcardId:
+	.hword	0x0000
+romFatTableCompressed:
+	.byte	0x00
+savFatTableCompressed:
+	.byte	0x00
+fileCluster:
+	.word	0x00000000
+saveSize:
+	.word	0x00000000
+romFatTableCache:
+	.word	0x00000000
+savFatTableCache:
+	.word	0x00000000
+#endif
 .align	4
 
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@

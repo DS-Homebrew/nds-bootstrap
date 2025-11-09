@@ -101,7 +101,13 @@ int hookNdsRetailArm7(
 	u32 apPatchSize,
 	s32 mainScreen,
 	u32 language,
-	u8 RumblePakType
+	u8 RumblePakType,
+	u32 fileCluster,
+	u32 saveSize,
+	u32 romFatTableCache,
+	u32 savFatTableCache,
+	bool romFatTableCompressed,
+	bool savFatTableCompressed
 ) {
 
 	nocashMessage("hookNdsRetailArm7");
@@ -200,9 +206,11 @@ int hookNdsRetailArm7(
 	u32* ipcSyncHandler = hookLocation + 16;
 
 	extern u8 _io_dldi_size;
+	extern bool ce7UsesFat();
 	const char* romTid = getRomTid(ndsHeader);
 	extern u32 accessControl;
 	const bool nandAccess = (accessControl & BIT(4)); // isDSiWare
+	extern u16 s2FlashcardId;
 	extern bool maxHeapOpen;
 	extern bool patchedCardIrqEnable;
 
@@ -211,7 +219,7 @@ int hookNdsRetailArm7(
 	u32 cheatEngineAddr = CHEAT_ENGINE_LOCATION_B4DS;
 	if (!extendedMemory && strncmp(romTid, "CLJ", 3) == 0) { // Mario & Luigi: Bowser's Inside Story
 		cheatEngineAddr = 0x02002000;
-	} else if ((strncmp(romTid, "YEE", 3) == 0 && romTid[3] != 'J') || strncmp(romTid, "BEB", 3) == 0 || strncmp(romTid, "BEE", 3) == 0) { // Inazuma Eleven: Fix AP-fix causing undefined instruction
+	} else if (((strncmp(romTid, "YEE", 3) == 0 && romTid[3] != 'J') || strncmp(romTid, "BEB", 3) == 0 || strncmp(romTid, "BEE", 3) == 0) && !ce7UsesFat()) { // Inazuma Eleven: Fix AP-fix causing undefined instruction
 		cheatEngineAddr = (u32)ce7-0x2000;
 	} else if ((extendedMemory || laterSdk) && _io_dldi_size >= 0x0E) {
 		cheatEngineAddr = nandAccess ? CHEAT_ENGINE_LOCATION_B4DS_ALT : CHEAT_ENGINE_LOCATION_B4DS_ALT2;
@@ -240,6 +248,16 @@ int hookNdsRetailArm7(
 
 	*vblankHandler = ce7->patches->vblankHandler;
 	*ipcSyncHandler = ce7->patches->fifoHandler;
+
+	if (ce7UsesFat()) {
+		ce7->s2FlashcardId          = s2FlashcardId;
+		ce7->romFatTableCompressed  = (u8)romFatTableCompressed;
+		ce7->savFatTableCompressed  = (u8)savFatTableCompressed;
+		ce7->fileCluster            = fileCluster;
+		ce7->saveSize               = saveSize;
+		ce7->romFatTableCache       = romFatTableCache;
+		ce7->savFatTableCache       = savFatTableCache;
+	}
 
 	if (!maxHeapOpen) {
 		aFile cheatFile; getFileFromCluster(&cheatFile, cheatFileCluster);

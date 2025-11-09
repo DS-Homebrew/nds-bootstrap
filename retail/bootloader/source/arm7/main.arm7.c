@@ -129,6 +129,7 @@ extern u32 clusterCacheSize;
 
 bool ce9Alt = false;
 bool ce9AltLargeTable = false;
+static u32 ce7Location = 0;
 static u32 ce9Location = 0;
 static u32 overlaysSize = 0;
 static u32 ioverlaysSize = 0;
@@ -157,6 +158,10 @@ u8 arm7newUnitCode = 0;
 u32 newArm7binarySize = 0;
 u32 arm7mbk = 0;
 u32 accessControl = 0;
+
+bool ce7UsesFat(void) {
+	return ce7Location == CARDENGINE_ARM7_LOCATION_FAT;
+}
 
 void s2RamAccess(bool open) {
 	if (_io_dldi_features & FEATURE_SLOT_NDS) return;
@@ -1359,13 +1364,18 @@ int arm7_main(void) {
 	// dbg_printf("Trying to patch the card...\n");
 
 	ce9Location = *(u32*)CARDENGINE_ARM9_LOCATION_BUFFERED;
+	ce7Location = *(u32*)CARDENGINE_ARM7_LOCATION_BUFFERED;
 	ce9Alt = (ce9Location == CARDENGINE_ARM9_LOCATION_DLDI_ALT || ce9Location == CARDENGINE_ARM9_LOCATION_DLDI_ALT2);
 	// const bool ce9NotInHeap = (ce9Alt || ce9Location == CARDENGINE_ARM9_LOCATION_DLDI_START);
 	tonccpy((u32*)ce9Location, (u32*)CARDENGINE_ARM9_LOCATION_BUFFERED, ce9Alt ? 0x2800 : 0x3800);
+	tonccpy((u32*)ce7Location, (u32*)CARDENGINE_ARM7_LOCATION_BUFFERED, ce7UsesFat() ? 0x4000 : 0x1000);
 	toncset((u32*)0x023E0000, 0, 0x10000);
-
-	tonccpy((u8*)CARDENGINE_ARM7_LOCATION, (u8*)CARDENGINE_ARM7_LOCATION_BUFFERED, 0x1000);
-	toncset((u8*)CARDENGINE_ARM7_LOCATION_BUFFERED, 0, 0x1000);
+	if (ce7UsesFat()) {
+		if (!dldiPatchBinary((data_t*)ce7Location, 0x4000, (data_t*)NULL, (data_t*)NULL)) {
+			dbg_printf("ce7 DLDI patch failed\n");
+			errorOutput();
+		}
+	}
 
 	aFile musicsFile;
 	getFileFromCluster(&musicsFile, musicCluster);
@@ -1399,7 +1409,7 @@ int arm7_main(void) {
 
 			lastClusterCacheUsed = (u32*)0x037F8000;
 			clusterCache = 0x037F8000;
-			clusterCacheSize = 0x16780;
+			clusterCacheSize = 0x13780;
 
 			wramUsed = true;
 		} else {
@@ -1413,7 +1423,7 @@ int arm7_main(void) {
 
 			lastClusterCacheUsed = (u32*)0x037F8000;
 			clusterCache = 0x037F8000;
-			clusterCacheSize = 0x16780;
+			clusterCacheSize = 0x13780;
 
 			wramUsed = true;
 		} else {
@@ -1571,7 +1581,7 @@ int arm7_main(void) {
 
 	ROMinRAM = isROMLoadableInRAM(&dsiHeaderTemp, &dsiHeaderTemp.ndshdr, romTid, moduleParams, usesCloneboot); // If possible, set to load ROM into RAM
 	errorCode = patchCardNds(
-		(cardengineArm7*)CARDENGINE_ARM7_LOCATION,
+		(cardengineArm7*)ce7Location,
 		(cardengineArm9*)ce9Location,
 		ndsHeader,
 		moduleParams,
@@ -1619,10 +1629,12 @@ int arm7_main(void) {
 		errorOutput();
 	}
 
-	toncset((u32*)0x0380C000, 0, 0x2780);
+	if (!ce7UsesFat()) {
+		toncset((u32*)0x0380C000, 0, 0x2780);
+	}
 
 	errorCode = hookNdsRetailArm7(
-		(cardengineArm7*)CARDENGINE_ARM7_LOCATION,
+		(cardengineArm7*)ce7Location,
 		ndsHeader,
 		moduleParams,
 		cheatFileCluster,
@@ -1632,7 +1644,13 @@ int arm7_main(void) {
 		apPatchSize,
 		mainScreen,
 		language,
-		getRumblePakType()
+		getRumblePakType(),
+		romFile.firstCluster,
+		saveSize,
+		(u32)romFile.fatTableCache,
+		(u32)savFile.fatTableCache,
+		romFile.fatTableSettings & fatCompressed,
+		savFile.fatTableSettings & fatCompressed
 	);
 	if (errorCode == ERR_NONE) {
 		// dbg_printf("Card hook 7 successful\n\n");

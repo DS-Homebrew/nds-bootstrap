@@ -1970,18 +1970,6 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 		conf->donorFileSize = getFileSize("fat:/_nds/nds-bootstrap/b4dsTwlDonor.bin");
 
-		// Load external cheat engine binary
-		loadCardEngineBinary("nitro:/cardenginei_arm7_cheat.bin", (u8*)CHEAT_ENGINE_LOCATION_B4DS_BUFFERED);
-
-		// Load ce7 binary
-		if (strncmp(romTid, "KWY", 3) == 0 // Mighty Milky Way
-		||	strncmp(romTid, "KS3", 3) == 0 // Shantae: Risky's Revenge
-		) {
-			loadCardEngineBinary("nitro:/cardengine_arm7_music.bin", (u8*)CARDENGINE_ARM7_LOCATION_BUFFERED);
-		} else {
-			loadCardEngineBinary((strcmp(io_dldi_data->friendlyName, "Ace3DS+") == 0) ? "nitro:/cardengine_arm7_ace3dsp.bin" : "nitro:/cardengine_arm7.bin", (u8*)CARDENGINE_ARM7_LOCATION_BUFFERED);
-		}
-
 		bool found = (access(pageFilePath.c_str(), F_OK) == 0);
 		if (!found) {
 			myConsoleDemoInit();
@@ -2301,6 +2289,69 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 				fclose(ndsFile);
 			}
 			loadCardEngineBinary(ce9path, (u8*)CARDENGINE_ARM9_LOCATION_BUFFERED);
+		}
+
+		// Load external cheat engine binary
+		loadCardEngineBinary("nitro:/cardenginei_arm7_cheat.bin", (u8*)CHEAT_ENGINE_LOCATION_B4DS_BUFFERED);
+
+		// Load ce7 binary
+		if (strncmp(romTid, "KWY", 3) == 0 // Mighty Milky Way
+		||	strncmp(romTid, "KS3", 3) == 0 // Shantae: Risky's Revenge
+		) {
+			loadCardEngineBinary("nitro:/cardengine_arm7_music.bin", (u8*)CARDENGINE_ARM7_LOCATION_BUFFERED);
+		} else if (io_dldi_data->driverSize < 0x0E) {
+			const char* ce7path = (strcmp(io_dldi_data->friendlyName, "Ace3DS+") == 0) ? "nitro:/cardengine_arm7_ace3dsp.bin" : "nitro:/cardengine_arm7.bin";
+			if (romFSInited && donorInsideNds) {
+				donorNdsPath = multibootSrl;
+			}
+			FILE* ndsFile = (strlen(donorNdsPath) > 5) ? fopen(donorNdsPath, "rb") : fopen(conf->ndsPath, "rb");
+			if (ndsFile) {
+				u32 ndsArm7Offset = 0;
+				u32 ndsArm7Size = 0;
+
+				if (standaloneDonor) {
+					ndsArm7Size = conf->donorFileSize;
+				} else {
+					fseek(ndsFile, 0x30, SEEK_SET);
+					fread(&ndsArm7Offset, sizeof(u32), 1, ndsFile);
+					fseek(ndsFile, 0x3C, SEEK_SET);
+					fread(&ndsArm7Size, sizeof(u32), 1, ndsFile);
+				}
+
+				if ((memcmp(romTid, "ADM", 3) == 0) && ndsArm7Size == 0x28ADC) {
+					ndsArm7Size -= 0xE4; // Fix for AC:WW - Singleplayer Nookingtons
+				}
+
+				u32 arm7allocOffset = 0;
+				fseek(ndsFile, ndsArm7Offset+(ndsArm7Size-0x80), SEEK_SET);
+
+				for (int i = 0; i < 0x80; i += 4) {
+					fread(&arm7allocOffset, sizeof(u32), 1, ndsFile);
+					if (arm7allocOffset == 0x037F8000) {
+						break;
+					}
+				}
+
+				if (arm7allocOffset == 0x037F8000) {
+					u32 arm7alloc1 = 0;
+					u32 arm7alloc2 = 0;
+
+					fread(&arm7alloc1, sizeof(u32), 1, ndsFile);
+					fread(&arm7alloc2, sizeof(u32), 1, ndsFile);
+					if (arm7alloc2 >= 0x037F8000 && arm7alloc2 < 0x03810000) {
+						fread(&arm7alloc2, sizeof(u32), 1, ndsFile);
+					}
+
+					if ((arm7alloc1+arm7alloc2) <= 0x13780) {
+						ce7path = "nitro:/cardengine_arm7_fat.lz77";
+					}
+				}
+
+				fclose(ndsFile);
+			}
+			loadCardEngineBinary(ce7path, (u8*)CARDENGINE_ARM7_LOCATION_BUFFERED);
+		} else {
+			loadCardEngineBinary((strcmp(io_dldi_data->friendlyName, "Ace3DS+") == 0) ? "nitro:/cardengine_arm7_ace3dsp.bin" : "nitro:/cardengine_arm7.bin", (u8*)CARDENGINE_ARM7_LOCATION_BUFFERED);
 		}
 
 		// Load DS blowfish

@@ -150,6 +150,14 @@ typedef struct cardengineArm7B4DS {
 	u32* languageAddr;
 	u16 igmHotkey;
 	u8 RumblePakType;
+	u8 RumblePakTypePadding;
+	u16 s2FlashcardId;
+    u8 romFatTableCompressed;
+    u8 savFatTableCompressed;
+    u32 fileCluster;
+    u32 saveSize;
+    u32 romFatTableCache;
+    u32 savFatTableCache;
 } cardengineArm7B4DS;
 #else
 //
@@ -191,6 +199,14 @@ typedef struct cardengineArm7 {
 	u32* languageAddr;
 	u16 igmHotkey;
 	u8 RumblePakType;
+	u8 RumblePakTypePadding;
+	u16 s2FlashcardId;
+    u8 romFatTableCompressed;
+    u8 savFatTableCompressed;
+    u32 fileCluster;
+    u32 saveSize;
+    u32 romFatTableCache;
+    u32 savFatTableCache;
 } cardengineArm7;
 #endif
 

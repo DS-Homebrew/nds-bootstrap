@@ -40,7 +40,13 @@ int hookNdsRetailArm7(
 	u32 apPatchSize,
 	s32 mainScreen,
 	u32 language,
-	u8 RumblePakType
+	u8 RumblePakType,
+	u32 fileCluster,
+	u32 saveSize,
+	u32 romFatTableCache,
+	u32 savFatTableCache,
+	bool romFatTableCompressed,
+	bool savFatTableCompressed
 );
 int hookNdsRetailArm9(
 	cardengineArm9* ce9,

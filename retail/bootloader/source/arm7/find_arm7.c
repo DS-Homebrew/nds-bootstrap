@@ -93,7 +93,7 @@ static const u32 sleepInputWriteSignatureAlt[1]      = {0x11A05004};
 static const u16 sleepInputWriteBeqSignatureThumb[1] = {0xD000};
 
 // RAM clear
-// static const u32 ramClearSignature[2]    = {0xE12FFF1E, 0x027FF000};
+static const u32 ramClearSignature[2]    = {0xE12FFF1E, 0x027FF000};
 static const u32 ramClearSignatureTwl[2] = {0x02FFC000, 0x02FFF000};
 
 // Post-boot code
@@ -1041,7 +1041,7 @@ u32* findRamClearOffset(const tNDSHeader* ndsHeader) {
 
 	u32* ramClearOffset = findOffset(
 		(u32*)ndsHeader->arm7destination, newArm7binarySize,
-		/* (arm7newUnitCode > 0) ? */ ramClearSignatureTwl /* : ramClearSignature */, 2
+		(arm7newUnitCode > 0) ? ramClearSignatureTwl : ramClearSignature, 2
 	);
 	if (ramClearOffset) {
 		dbg_printf("RAM clear found\n");

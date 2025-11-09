@@ -192,14 +192,17 @@ static bool patchCardReadMvDK4(u32 startOffset) {
 }
 
 static void patchCardSaveCmd(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+	extern bool ce7UsesFat();
+
 	const char* romTid = getRomTid(ndsHeader);
-	if (strncmp(romTid, "TAM", 3) != 0 // The Amazing Spider-Man
+	if (ce7UsesFat()
+	|| (strncmp(romTid, "TAM", 3) != 0 // The Amazing Spider-Man
 	 && strncmp(romTid, "AWD", 3) != 0 // Diddy Kong Racing
 	 && strncmp(romTid, "BO5", 3) != 0 // Golden Sun: Dark Dawn
 	 && strncmp(romTid, "AMM", 3) != 0 // Minna no Mahjong DS
 	 && strncmp(romTid, "B8I", 3) != 0 // Spider-Man: Edge of Time
 	// && strncmp(romTid, "CP3", 3) != 0 // Viva Pinata: Pocket Paradise
-	) return;
+	)) return;
 
 	// Card save command
 	u32* offset = patchOffsetCache.cardSaveCmdOffset;

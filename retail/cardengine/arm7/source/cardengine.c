@@ -30,12 +30,26 @@
 #include <nds/memory.h> // tNDSHeader
 #include <nds/debug.h>
 
+#ifdef FAT
+#include "card.h"
+#include "my_fat.h"
+#endif
 #include "locations.h"
 #include "module_params.h"
 #include "unpatched_funcs.h"
 #include "cardengine.h"
 #include "nds_header.h"
 #include "tonccpy.h"
+
+#ifdef FAT
+#include "io_m3_common.h"
+#include "io_g6_common.h"
+#include "io_sc_common.h"
+
+#define FEATURE_SLOT_GBA			0x00000010
+#define FEATURE_SLOT_NDS			0x00000020
+
+#endif
 
 #define a9IrqHooked BIT(7)
 #define delayWrites BIT(8)
@@ -72,6 +86,19 @@ static bool initialized = false;
 static bool bootloaderCleared = false;
 #ifndef MUSIC
 static bool funcsUnpatched = false;
+#endif
+
+#ifdef FAT
+extern u8 romFatTableCompressed;
+extern u8 savFatTableCompressed;
+extern u32 fileCluster;
+extern u32 saveCluster;
+extern u32 saveSize;
+extern u32 romFatTableCache;
+extern u32 savFatTableCache;
+
+static aFile romFile;
+static aFile savFile;
 #endif
 
 //static int saveReadTimeOut = 0;
@@ -138,11 +165,66 @@ static inline void waitFrames(int count) {
 	}
 }
 
+#ifdef FAT
+void s2RamAccess(bool open) {
+	if (__myio_dldi.features & FEATURE_SLOT_NDS) return;
+
+	extern u16 s2FlashcardId;
+	if (open) {
+		if (s2FlashcardId == 0x334D) {
+			_M3_changeMode(M3_MODE_RAM);
+		} else if (s2FlashcardId == 0x3647) {
+			_G6_SelectOperation(G6_MODE_RAM);
+		} else if (s2FlashcardId == 0x4353) {
+			_SC_changeMode(SC_MODE_RAM);
+		}
+	} else {
+		if (s2FlashcardId == 0x334D) {
+			_M3_changeMode(M3_MODE_MEDIA);
+		} else if (s2FlashcardId == 0x3647) {
+			_G6_SelectOperation(G6_MODE_MEDIA);
+		} else if (s2FlashcardId == 0x4353) {
+			_SC_changeMode(SC_MODE_MEDIA);
+		}
+	}
+}
+
+static bool driveInited = false;
+
+static void driveInitialize(void) {
+	if (driveInited) {
+		return;
+	}
+
+	FAT_InitFiles(false);
+
+	getFileFromCluster(&romFile, fileCluster);
+	getFileFromCluster(&savFile, saveCluster);
+
+	if (romFatTableCache != 0) {
+		romFile.fatTableCache = (u32*)romFatTableCache;
+		romFile.fatTableSettings |= fatCached;
+		if (romFatTableCompressed) {
+			romFile.fatTableSettings |= fatCompressed;
+		}
+	}
+	if (savFatTableCache != 0) {
+		savFile.fatTableCache = (u32*)savFatTableCache;
+		savFile.fatTableSettings |= fatCached;
+		if (savFatTableCompressed) {
+			savFile.fatTableSettings |= fatCompressed;
+		}
+	}
+
+	driveInited = true;
+}
+#else
 static void waitForArm9(void) {
     IPC_SendSync(0x4);
 	while (sharedAddr[3] != (vu32)0);
 	//saveReadTimeOut = 0;
 }
+#endif
 
 static void initialize(void) {
 	if (initialized) {
@@ -529,6 +611,9 @@ u32 myIrqEnable(u32 irq) {
 	#endif
 
 	initialize();
+	#ifdef FAT
+	driveInitialize();
+	#endif
 
 	u32 irq_before = REG_IE | IRQ_IPC_SYNC;
 	irq |= IRQ_IPC_SYNC;
@@ -563,6 +648,20 @@ bool eepromRead(u32 src, void *dst, u32 len) {
 	dbg_hexa(len);
 	#endif
 
+#ifdef FAT
+	if ((u32)(src % saveSize)+len > saveSize) {
+		u32 len2 = len;
+		u32 len3 = 0;
+		while ((u32)(src % saveSize)+len2 > saveSize) {
+			len2--;
+			len3++;
+		}
+		fileRead(dst, &savFile, (src % saveSize), len2);
+		fileRead(dst+len2, &savFile, ((src+len2) % saveSize), len3);
+	} else {
+		fileRead(dst, &savFile, (src % saveSize), len);
+	}
+#else
 	if (!(valueBits & a9IrqHooked)) {
 		return false;
 	}
@@ -577,7 +676,7 @@ bool eepromRead(u32 src, void *dst, u32 len) {
 	sharedAddr[3] = commandSaveRead;
 
 	waitForArm9();
-
+#endif
 	return true;
 }
 
@@ -593,11 +692,25 @@ bool eepromPageWrite(u32 dst, const void *src, u32 len) {
 	dbg_hexa(len);
 	#endif
 
+#ifdef FAT
+	if ((dst % saveSize)+len > saveSize) {
+		u32 len2 = len;
+		u32 len3 = 0;
+		while ((u32)(dst % saveSize)+len2 > saveSize) {
+			len2--;
+			len3++;
+		}
+		fileWrite(src, &savFile, (dst % saveSize), len2);
+		fileWrite(src+len2, &savFile, ((dst+len2) % saveSize), len3);
+	} else {
+		fileWrite(src, &savFile, (dst % saveSize), len);
+	}
+#else
 	if (!(valueBits & a9IrqHooked)) {
 		return false;
 	}
 
-#ifndef MUSIC
+	#ifndef MUSIC
 	if (valueBits & delayWrites) {
 		if (*(int*)((valueBits & isSdk5Set) ? 0x02FFFC3C : 0x027FFC3C) >= 60*2) {
 			valueBits &= ~delayWrites;
@@ -605,7 +718,7 @@ bool eepromPageWrite(u32 dst, const void *src, u32 len) {
 			waitFrames(1);
 		}
 	}
-#endif
+	#endif
 
 	// Send a command to the ARM9 to write the save
 	const u32 commandSaveWrite = 0x53415657;
@@ -617,7 +730,7 @@ bool eepromPageWrite(u32 dst, const void *src, u32 len) {
 	sharedAddr[3] = commandSaveWrite;
 
 	waitForArm9();
-
+#endif
 	return true;
 }
 
@@ -663,9 +776,11 @@ bool eepromPageErase (u32 dst) {
 	dbg_printf("\narm7 eepromPageErase\n");
 	#endif
 
+	#ifndef FAT
 	if (!(valueBits & a9IrqHooked)) {
 		return false;
 	}
+	#endif
 
 	// TODO: this should be implemented?
 	return true;
@@ -685,6 +800,10 @@ bool cardRead(u32 dma, u32 src, void *dst, u32 len) {
 	dbg_hexa(len);
 	#endif
 
+	#ifdef FAT
+	fileRead(dst, &romFile, src, len);
+	return true;
+	#else
 	// if (!(valueBits & a9IrqHooked)) {
 		return false;
 	// }
@@ -701,4 +820,5 @@ bool cardRead(u32 dma, u32 src, void *dst, u32 len) {
 	waitForArm9();
 
 	return true; */
+	#endif
 }

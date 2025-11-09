@@ -145,7 +145,7 @@ u16* getOffsetFromBLThumb(const u16* blOffset) {
 	return (u16*)res;
 }
 
-static bool patchWramClear(const tNDSHeader* ndsHeader) {
+static bool patchWramClear(const u32 ce7, const tNDSHeader* ndsHeader) {
 	if (arm7newUnitCode == 0) {
 		u32* offset = patchOffsetCache.wramEndAddrOffset;
 		if (!patchOffsetCache.wramEndAddrOffset) {
@@ -155,7 +155,7 @@ static bool patchWramClear(const tNDSHeader* ndsHeader) {
 			}
 		}
 		if (offset) {
-			*offset = CARDENGINE_ARM7_LOCATION;
+			*offset = ce7;
 			dbg_printf("WRAM end addr location : ");
 			dbg_hexa((u32)offset);
 			dbg_printf("\n\n");
@@ -346,10 +346,10 @@ static void patchSleepInputWrite(const tNDSHeader* ndsHeader, const module_param
 	dbg_printf("\n\n");
 }
 
-static void patchRamClear(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
-	if (moduleParams->sdk_version < 0x5000000 || arm7newUnitCode == 0) {
+static void patchRamClear(const u32 ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+	/* if (moduleParams->sdk_version < 0x5000000) {
 		return;
-	}
+	} */
 
 	u32* ramClearOffset = patchOffsetCache.ramClearOffset;
 	if (!patchOffsetCache.ramClearOffset && !patchOffsetCache.ramClearChecked) {
@@ -359,11 +359,11 @@ static void patchRamClear(const tNDSHeader* ndsHeader, const module_params_t* mo
 		}
 	}
 	if (ramClearOffset) {
-		// if (arm7newUnitCode > 0) {
+		if (arm7newUnitCode > 0) {
 			*(ramClearOffset) = 0x02FFC000;
 			*(ramClearOffset + 1) = 0x02FFC000;
-		// }
-		// ramClearOffset[3] -= 0x1800; // Shrink hi heap
+		}
+		ramClearOffset[3] = ce7; // Shrink hi heap
 
 		dbg_printf("RAM clear location : ");
 		dbg_hexa((u32)ramClearOffset);
@@ -516,7 +516,7 @@ u32 patchCardNdsArm7(
 		patchOffsetCache.a7BinSize = newArm7binarySize;
 	}
 
-	if (!patchWramClear(ndsHeader)) {
+	if (!patchWramClear((u32)ce7, ndsHeader)) {
 		dbg_printf("ERR_LOAD_OTHR");
 		return ERR_LOAD_OTHR;
 	}
@@ -526,7 +526,7 @@ u32 patchCardNdsArm7(
 	patchSleepMode(ndsHeader);
 	patchSleepInputWrite(ndsHeader, moduleParams);
 
-	patchRamClear(ndsHeader, moduleParams);
+	patchRamClear((u32)ce7, ndsHeader, moduleParams);
 
 	const char* romTid = getRomTid(ndsHeader);
 
