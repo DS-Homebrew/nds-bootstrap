@@ -1056,7 +1056,6 @@ bool nandWrite(void* src, u32 dst, u32 len /* , u32 dma */) {
 	const u32 commandWrite = 0x025FFC02;
 
 	#ifndef DLDI
-	const u32 savedLen = len;
 	const u32 commandRead = 0x025FFC01;
 
 	accessCounter++;
