@@ -18420,9 +18420,23 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0200B75C = 0xE1A00000; // nop
 		*(u32*)0x0200EB6C = 0xE1A00000; // nop
 		patchInitDSiWare(0x020139E0, heapEnd);
+		*(u32*)0x02013D6C = *(u32*)0x02004FE8;
 		patchUserSettingsReadDSiWare(0x02014EBC);
 		if (!extendedMemory) {
-			*(u32*)0x0201A89C = 0xE3A00B65; // mov r0, #0x19400 (Do not pre-load streamed music files, disable them instead)
+			// Stream each STRM page file from ROM instead of pre-loading the STRM files to RAM
+			extern u32* neko2BakerySetFileCtx;
+			extern u32* neko2BakeryGetSdatPath;
+			const u32 newCodeAddr = 0x0200CCBC;
+			const u32 newCodeAddr2 = newCodeAddr+0xC;
+			tonccpy((u32*)newCodeAddr, neko2BakerySetFileCtx, 0xC);
+			tonccpy((u32*)newCodeAddr2, neko2BakeryGetSdatPath, 0xC);
+
+			setBL(0x0201A868, newCodeAddr);
+			*(u32*)0x0201A89C = 0xE3A00B65; // mov r0, #0x19400 (Only load sound effects)
+			*(u32*)0x0201A8E8 = 0xE1A00000; // nop (Do not close sdat file)
+			*(u32*)0x02052668 = 0xE3A00003; // mov r0, #3 (Do not set RAM pointers to pre-loaded STRM files)
+			setBL(0x02054EC8, newCodeAddr2);
+			setBL(0x02054ECC, 0x0200CFDC);
 		}
 		setBL(0x0203E844, (u32)dsiSaveOpen);
 		setBL(0x0203E858, (u32)dsiSaveGetLength);

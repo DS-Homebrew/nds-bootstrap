@@ -18,6 +18,8 @@
 	@.global mvdk3HeapAlloc
 @	.global myLtlRestHeapAlloc
 @	.global myLtlRestHeapAddrPtr
+	.global neko2BakerySetFileCtx
+	.global neko2BakeryGetSdatPath
 	.global nintCdwnCalHeapAlloc
 	.global nintCdwnCalHeapAddrPtr
 	.global nintendojiHeapAlloc
@@ -73,6 +75,10 @@ metalTorrentSndLoad:
 @	.word myLtlRestHeapAllocFunc
 @myLtlRestHeapAddrPtr:
 @	.word myLtlRestHeapAddr
+neko2BakerySetFileCtx:
+	.word neko2BakerySetFileCtxFunc
+neko2BakeryGetSdatPath:
+	.word neko2BakeryGetSdatPathFunc
 nintCdwnCalHeapAlloc:
 	.word nintCdwnCalHeapAllocFunc
 @nintCdwnCalHeapAddrPtr:
@@ -582,6 +588,20 @@ _blx_metalTorrentSndLoadOrgFunc:
 @.pool
 @---------------------------------------------------------------------------------
 @	.arm
+@---------------------------------------------------------------------------------
+neko2BakerySetFileCtxFunc:
+@---------------------------------------------------------------------------------
+	ldr r6, =0x02097E90
+	bx lr
+.pool
+@---------------------------------------------------------------------------------
+neko2BakeryGetSdatPathFunc:
+@---------------------------------------------------------------------------------
+	ldr r1, =0x02071DEC
+	bx lr
+.pool
+@---------------------------------------------------------------------------------
+
 @---------------------------------------------------------------------------------
 nintCdwnCalOrgFunction: .word 0
 nintCdwnCalHeapAllocFunc:
