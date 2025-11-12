@@ -2,6 +2,7 @@
 #include "../mbedtls/mbedtls_aes.h"
 #include "crypto.h"
 //#include "ticket0.h"
+#include "tonccpy.h"
 #include "utils.h"
 
 // more info:
@@ -11,6 +12,9 @@
 
 static const uint32_t DSi_NAND_KEY_Y[4] =
 	{0x0ab9dc76u, 0xbd4dc4d3u, 0x202ddd1du, 0xe1a00005u};
+
+static const uint32_t DSi_DEV_3DS_NAND_KEY_Y[4] =
+	{0xf176bfaau, 0x66e8b87au, 0x266a6497u, 0xe1a00005u};
 
 static const uint32_t DSi_ES_KEY_Y[4] =
 	{0x8b5acce5u, 0x72c9d056u, 0xdce8179cu, 0xa9361239u};
@@ -77,33 +81,56 @@ static inline void rol42_128(uint32_t *a){
 	a[0] = (t3 << 10) | (t2 >> 22);
 }
 
+void populate_dsi_nand_key_y(uint8_t *out, bool is_dev_3DS) {
+	if(out == NULL)
+		return;
+
+	const uint32_t* nand_key_y = DSi_NAND_KEY_Y;
+	if(is_dev_3DS)
+		nand_key_y = DSi_DEV_3DS_NAND_KEY_Y;
+
+	// This would not work in a Big Endian platform...
+	tonccpy(out, nand_key_y, 16);
+}
+
 static void dsi_aes_set_key(uint32_t *rk, const uint32_t *console_id, key_mode_t mode) {
 	uint32_t key[4];
+	const uint32_t* dsi_key_y = NULL;
 	switch (mode) {
 	case NAND:
 		key[0] = console_id[0];
 		key[1] = console_id[0] ^ 0x24ee6906;
 		key[2] = console_id[1] ^ 0xe65b601d;
 		key[3] = console_id[1];
+		dsi_key_y = DSi_NAND_KEY_Y;
 		break;
 	case NAND_3DS:
 		key[0] = console_id[0];
 		key[1] = 0x544e494e;
 		key[2] = 0x4f444e45;
 		key[3] = console_id[1];
+		dsi_key_y = DSi_NAND_KEY_Y;
+		break;
+	case NAND_DEV_3DS:
+		key[0] = console_id[0];
+		key[1] = 0xee7a4b1e;
+		key[2] = 0xaf42c08b;
+		key[3] = console_id[1];
+		dsi_key_y = DSi_DEV_3DS_NAND_KEY_Y;
 		break;
 	case ES:
 		key[0] = 0x4e00004a;
 		key[1] = 0x4a00004e;
 		key[2] = console_id[1] ^ 0xc80c4b72;
 		key[3] = console_id[0];
+		dsi_key_y = DSi_ES_KEY_Y;
 		break;
 	default:
 		break;
 	}
 	// Key = ((Key_X XOR Key_Y) + FFFEFB4E295902582A680F5F1A4F3E79h) ROL 42
 	// equivalent to F_XY in twltool/f_xy.c
-	xor_128(key, key, mode == ES ? DSi_ES_KEY_Y : DSi_NAND_KEY_Y);
+	xor_128(key, key, dsi_key_y);
 	// iprintf("AES KEY: XOR KEY_Y:\n");
 	// print_bytes(key, 16);
 	add_128(key, DSi_KEY_MAGIC);
@@ -137,7 +164,7 @@ static uint32_t boot2_rk[RK_LEN];
 
 static int tables_generated = 0;
 
-void dsi_crypt_init(const uint8_t *console_id_be, const uint8_t *emmc_cid, int is3DS) {
+void dsi_crypt_init(const uint8_t *console_id_be, const uint8_t *emmc_cid, int is3DS, bool is_dev_3DS) {
 	if (tables_generated == 0) {
 		aes_gen_tables();
 		tables_generated = 1;
@@ -147,7 +174,7 @@ void dsi_crypt_init(const uint8_t *console_id_be, const uint8_t *emmc_cid, int i
 	GET_UINT32_BE(console_id[0], console_id_be, 4);
 	GET_UINT32_BE(console_id[1], console_id_be, 0);
 
-	dsi_aes_set_key(nand_rk, console_id, is3DS ? NAND_3DS : NAND);
+	dsi_aes_set_key(nand_rk, console_id, is_dev_3DS ? NAND_DEV_3DS : (is3DS ? NAND_3DS : NAND));
 	dsi_aes_set_key(es_rk, console_id, ES);
 
 	aes_set_key_enc_128_be(boot2_rk, (uint8_t*)DSi_BOOT2_KEY);

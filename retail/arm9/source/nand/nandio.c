@@ -24,16 +24,27 @@ void nandio_set_fat_sig_fix(u32 offset) {
 	fat_sig_fix_offset = offset;
 }
 
-void getConsoleID(u8 *consoleID){
+void getConsoleID(u8 *consoleID, bool is_dev_3DS){
 	u8 *fifo=(u8*)0x02074000; //shared mem address that has our computed key3 stuff
 	u8 key[16]; //key3 normalkey - keyslot 3 is used for DSi/twln NAND crypto
 	u8 key_xy[16]; //key3_y ^ key3_x
 	u8 key_x[16];////key3_x - contains a DSi console id (which just happens to be the LFCS on 3ds)
-	u8 key_y[16] = {0x76, 0xDC, 0xB9, 0x0A, 0xD3, 0xC4, 0x4D, 0xBD, 0x1D, 0xDD, 0x2D, 0x20, 0x05, 0x00, 0xA0, 0xE1}; //key3_y NAND constant
+	u8 key_y[16]; //key3_y NAND constant
 	
+	u8 empty_buff[8] = {0};
+
 	tonccpy(key, fifo, 16);  //receive the goods from arm7
 
+	if(memcmp(key + 8, empty_buff, 8) == 0)
+	{
+		//we got the consoleid directly or nothing at all, don't treat this as key3 output
+		tonccpy(consoleID, key, 8);
+		return;
+	}
+
 	F_XY_reverse(key, key_xy); //work backwards from the normalkey to get key_x that has the consoleID
+
+	populate_dsi_nand_key_y(key_y, is_dev_3DS);
 
 	for(int i=0;i<16;i++){
 		key_x[i] = key_xy[i] ^ key_y[i];             //''
@@ -47,7 +58,9 @@ bool nandio_startup() {
 	if (!nand_Startup()) return false;
 
 	nand_ReadSectors(0, 1, sector_buf);
+	uint8_t* fifo_is_dev = (uint8_t*)(0x02074000 + 16);
 	bool isDSi = parse_ncsd(sector_buf, 0) != 0;
+	bool is_dev_3DS = (!isDSi) && *fifo_is_dev;
 
 	if (*(u32*)(0x2FFD7BC) == 0) {
 		// Get eMMC CID
@@ -61,13 +74,13 @@ bool nandio_startup() {
 	u8 consoleIDfixed[8];
 
 	// Get ConsoleID
-	getConsoleID(consoleID);
+	getConsoleID(consoleID, is_dev_3DS);
 	for (int i = 0; i < 8; i++) {
 		consoleIDfixed[i] = consoleID[7-i];
 	}
 
 	// iprintf("sector 0 is %s\n", is3DS ? "3DS" : "DSi");
-	dsi_crypt_init((const u8*)consoleIDfixed, (const u8*)0x2FFD7BC, !isDSi);
+	dsi_crypt_init((const u8*)consoleIDfixed, (const u8*)0x2FFD7BC, !isDSi, is_dev_3DS);
 	dsi_nand_crypt(sector_buf, sector_buf, 0, SECTOR_SIZE / AES_BLOCK_SIZE);
 	parse_mbr(sector_buf, !isDSi, 0);
 

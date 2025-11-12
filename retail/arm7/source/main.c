@@ -130,6 +130,13 @@ int main(void) {
 	}
 
 	if (isDSiMode()) {
+		u8 *out=(u8*)0x02074000;
+		memset(out, 0, 17);
+
+		// Save whether this is a dev unit or not. For 3DS NAND reading...
+		// This does not imply 32 MBs of RAM!
+		out[16] = (*((uint16_t*)0x04004024)) & 0x13; // Is this a dev unit?
+
 		/*for (int i = 0; i < 8; i++) {
 			*(u8*)(0x2FFFD00+i) = *(u8*)(0x4004D07-i);	// Get ConsoleID
 		}*/
@@ -140,7 +147,6 @@ int main(void) {
 		u8 in[16]={0};
 		u8 iv[16]={0};
 		u8 *scratch=(u8*)0x02074200; 
-		u8 *out=(u8*)0x02074000;
 		u8 *key3=(u8*)0x40044D0;
 		
 		aes(in, base, iv, 2);
