@@ -1771,9 +1771,12 @@ int arm7_main(void) {
 	aFile pageFile;
 	getFileFromCluster(&pageFile, pageFileCluster);
 
-	fileWrite((char*)ndsHeader->arm9destination, &pageFile, 0x14000, iUncompressedSize);
-	fileWrite((char*)ndsHeader->arm7destination, &pageFile, 0x2C0000, newArm7binarySize);
-	// fileWrite((char*)CHEAT_ENGINE_LOCATION_B4DS, &pageFile, 0x2FE000, 0x2000);
+	if (!(accessControl & BIT(4))) {
+		// If not a DSiWare title, write patches ARM binaries to page file for use with soft-resets
+		fileWrite((char*)ndsHeader->arm9destination, &pageFile, 0x14000, iUncompressedSize);
+		fileWrite((char*)ndsHeader->arm7destination, &pageFile, 0x2C0000, newArm7binarySize);
+		// fileWrite((char*)CHEAT_ENGINE_LOCATION_B4DS, &pageFile, 0x2FE000, 0x2000);
+	}
 	fileWrite((char*)&iUncompressedSize, &pageFile, 0x3FFFF0, sizeof(u32));
 	fileWrite((char*)&newArm7binarySize, &pageFile, 0x3FFFF4, sizeof(u32));
 
