@@ -4307,7 +4307,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Chronos Twins: One Hero in Two Times (USA)
-	// Due to our save implementation, save data is stored in all 3 slots
+	// Due to the B4DS DSiWare save implementation, save data is stored in all 3 slots
 	/* else if (strcmp(romTid, "K9TE") == 0 && saveOnFlashcardNtr) {
 		*(u32*)0x020051DC = 0xE1A00000; // nop // Part of .pck file
 		setBL(0x02056998, (u32)dsiSaveOpen);
@@ -4331,7 +4331,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	} */
 
 	// Chronos Twins: One Hero in Two Times (Europe)
-	// Due to our save implementation, save data is stored in all 3 slots
+	// Due to the B4DS DSiWare save implementation, save data is stored in all 3 slots
 	/* else if (strcmp(romTid, "K9TP") == 0 && saveOnFlashcardNtr) {
 		*(u32*)0x020107EC = 0xE1A00000; // nop // Part of .pck file
 		setBL(0x0204529C, (u32)dsiSaveOpen);
@@ -7248,7 +7248,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Hellokids: Vol. 1: Coloring and Painting! (USA)
 	// Hellokids: Vol. 1: Coloring and Painting! (Europe)
-	// Due to our save implementation, save data is stored in all 4 slots
+	// Due to the B4DS DSiWare save implementation, save data is stored in all 4 slots
 	else if (strncmp(romTid, "KKI", 3) == 0 && saveOnFlashcardNtr) {
 		u8 offsetChange2 = (romTid[3] == 'E') ? 0 : 0x2C;
 		*(u32*)0x02005134 = 0xE1A00000; // nop (Disable photo functions)
@@ -10465,7 +10465,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Nintendoji (Japan)
-	// Due to our save implementation, save data is stored in both slots
+	// Due to the B4DS DSiWare save implementation, save data is stored in both slots
 	else if (strcmp(romTid, "K9KJ") == 0 && saveOnFlashcardNtr) {
 		//setBL(0x0209F040, (u32)dsiSaveClose);
 		setBL(0x0209F3A8, (u32)dsiSaveOpen);
@@ -10536,7 +10536,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Orion's Odyssey (USA)
-	// Due to our save implementation, save data is stored in both slots
+	// Due to the B4DS DSiWare save implementation, save data is stored in both slots
 	else if (strcmp(romTid, "K6TE") == 0 && saveOnFlashcardNtr) {
 		setBL(0x020284D0, (u32)dsiSaveDelete);
 		setBL(0x020284DC, (u32)dsiSaveCreate);
@@ -10573,7 +10573,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Oscar in Movieland (USA)
 	// Oscar in Movieland (Europe, Australia)
-	// Due to our save implementation, save data is stored in all 3 slots
+	// Due to the B4DS DSiWare save implementation, save data is stored in all 3 slots
 	else if ((strcmp(romTid, "KO4E") == 0 || strcmp(romTid, "KO4V") == 0) && saveOnFlashcardNtr) {
 		u16 offsetChange2 = (romTid[3] == 'E') ? 0 : 0x154;
 		u16 offsetChange = (romTid[3] == 'E') ? 0 : 0x1A8;
@@ -10595,7 +10595,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Oscar in Toyland (USA)
 	// Oscar in Toyland (Europe)
-	// Due to our save implementation, save data is stored in all 3 slots
+	// Due to the B4DS DSiWare save implementation, save data is stored in all 3 slots
 	else if ((strcmp(romTid, "KOTE") == 0 || strcmp(romTid, "KOTP") == 0) && saveOnFlashcardNtr) {
 		setBL(0x020599A8, (u32)dsiSaveOpen);
 		setBL(0x020599CC, (u32)dsiSaveGetLength);
@@ -10610,7 +10610,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Oscar in Toyland 2 (USA)
 	// Oscar in Toyland 2 (Europe)
-	// Due to our save implementation, save data is stored in all 3 slots
+	// Due to the B4DS DSiWare save implementation, save data is stored in all 3 slots
 	else if ((strcmp(romTid, "KOYE") == 0 || strcmp(romTid, "KOYP") == 0) && saveOnFlashcardNtr) {
 		u16 offsetChange = (romTid[3] == 'E') ? 0 : 0x120;
 		u16 offsetChange2 = (romTid[3] == 'E') ? 0 : 0x16C;
@@ -10632,7 +10632,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Oscar's World Tour (USA)
 	// Oscar's World Tour (Europe)
-	// Due to our save implementation, save data is stored in all 3 slots
+	// Due to the B4DS DSiWare save implementation, save data is stored in all 3 slots
 	else if ((strcmp(romTid, "KO9E") == 0 || strcmp(romTid, "KO9P") == 0) && saveOnFlashcardNtr) {
 		u8 offsetChange = (romTid[3] == 'E') ? 0 : 0x4C;
 		setBL(0x020275C4, (u32)dsiSaveOpen);
@@ -11844,7 +11844,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Puffins: Let's Fish! (USA)
 	// Puffins: Let's Fish! (Europe)
-	// Due to our save implementation, save data is stored in all 3 slots
+	// Due to the B4DS DSiWare save implementation, save data is stored in all 3 slots
 	else if ((strcmp(romTid, "KLFE") == 0 || strcmp(romTid, "KLFP") == 0) && saveOnFlashcardNtr) {
 		u32 offsetChange = (romTid[3] == 'P') ? 8 : 0;
 
@@ -11859,7 +11859,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Puffins: Let's Race! (USA)
 	// Puffins: Let's Race! (Europe)
-	// Due to our save implementation, save data is stored in all 3 slots
+	// Due to the B4DS DSiWare save implementation, save data is stored in all 3 slots
 	else if ((strcmp(romTid, "KLRE") == 0 || strcmp(romTid, "KLRP") == 0) && saveOnFlashcardNtr) {
 		setBL(0x020289D0, (u32)dsiSaveGetLength);
 		setBL(0x02028AC8, (u32)dsiSaveRead);
@@ -11872,7 +11872,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Puffins: Let's Roll! (USA)
 	// Puffins: Let's Roll! (Europe)
-	// Due to our save implementation, save data is stored in all 3 slots
+	// Due to the B4DS DSiWare save implementation, save data is stored in all 3 slots
 	else if ((strcmp(romTid, "KL2E") == 0 || strcmp(romTid, "KL2P") == 0) && saveOnFlashcardNtr) {
 		u16 offsetChange2 = (romTid[3] == 'E') ? 0 : 0x5B8;
 
@@ -12861,7 +12861,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Save the Turtles (USA)
 	// Save the Turtles (Europe, Australia)
-	// Due to our save implementation, save data is stored in all 3 slots
+	// Due to the B4DS DSiWare save implementation, save data is stored in all 3 slots
 	else if (strcmp(romTid, "K7TE") == 0 || strcmp(romTid, "K7TV") == 0) {
 		if (!twlFontFound) {
 			u8 offsetChange = (romTid[3] == 'E') ? 0 : 0x60;
@@ -14329,7 +14329,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Super Yum Yum: Puzzle Adventures (USA)
 	// Super Yum Yum: Puzzle Adventures (Europe, Australia)
-	// Due to our save implementation, save data is stored in all 4 slots
+	// Due to the B4DS DSiWare save implementation, save data is stored in all 4 slots
 	else if ((strcmp(romTid, "K4PE") == 0 || strcmp(romTid, "K4PV") == 0) && saveOnFlashcardNtr) {
 		u16 offsetChange = (romTid[3] == 'E') ? 0 : 0x228;
 		const u32 newCode = 0x02018518;
@@ -15779,7 +15779,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Zoonies: Escape from Makatu (USA)
-	// Due to our save implementation, save data is stored in all 3 slots
+	// Due to the B4DS DSiWare save implementation, save data is stored in all 3 slots
 	else if (strcmp(romTid, "KZSE") == 0) {
 		if (!twlFontFound) {
 			*(u32*)0x02012794 = 0xE1A00000; // nop (Skip Manual screen)
@@ -15803,7 +15803,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Zoonies: Escape from Makatu (Europe, Australia)
-	// Due to our save implementation, save data is stored in all 3 slots
+	// Due to the B4DS DSiWare save implementation, save data is stored in all 3 slots
 	else if (strcmp(romTid, "KZSV") == 0) {
 		if (!twlFontFound) {
 			*(u32*)0x02012778 = 0xE1A00000; // nop (Skip Manual screen)

@@ -7360,7 +7360,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Chronos Twins: One Hero in Two Times (USA)
-	// Due to our save implementation, save data is stored in all 3 slots
+	// Due to the B4DS DSiWare save implementation, save data is stored in all 3 slots
 	else if (strcmp(romTid, "K9TE") == 0) {
 		// *(u32*)0x020051DC = 0xE1A00000; // nop // Part of .pck file
 		*(u32*)0x0200B7AC = 0xE1A00000; // nop
@@ -7390,7 +7390,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Chronos Twins: One Hero in Two Times (Europe)
-	// Due to our save implementation, save data is stored in all 3 slots
+	// Due to the B4DS DSiWare save implementation, save data is stored in all 3 slots
 	else if (strcmp(romTid, "K9TP") == 0) {
 		*(u32*)0x02004A48 = 0xE1A00000; // nop
 		// *(u32*)0x020107EC = 0xE1A00000; // nop // Part of .pck file
@@ -13302,7 +13302,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Hellokids: Vol. 1: Coloring and Painting! (USA)
 	// Hellokids: Vol. 1: Coloring and Painting! (Europe)
-	// Due to our save implementation, save data is stored in all 4 slots
+	// Due to the B4DS DSiWare save implementation, save data is stored in all 4 slots
 	else if (strncmp(romTid, "KKI", 3) == 0) {
 		u8 offsetChange = (romTid[3] == 'E') ? 0 : 0x28;
 		u8 offsetChange2 = (romTid[3] == 'E') ? 0 : 0x2C;
@@ -18960,7 +18960,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}*/
 
 	// Nintendoji (Japan)
-	// Due to our save implementation, save data is stored in both slots
+	// Due to the B4DS DSiWare save implementation, save data is stored in both slots
 	// Audio does not play
 	// Crashes when going downstairs (confirmed on retail consoles)
 	else if (strcmp(romTid, "K9KJ") == 0 && debugOrMep) {
@@ -19196,7 +19196,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}*/
 
 	// Orion's Odyssey (USA)
-	// Due to our save implementation, save data is stored in both slots
+	// Due to the B4DS DSiWare save implementation, save data is stored in both slots
 	// Crashes later on retail consoles
 	else if (strcmp(romTid, "K6TE") == 0) {
 		*(u32*)0x02011FAC = 0xE1A00000; // nop
@@ -19242,7 +19242,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Oscar in Movieland (USA)
 	// Oscar in Movieland (Europe, Australia)
-	// Due to our save implementation, save data is stored in all 3 slots
+	// Due to the B4DS DSiWare save implementation, save data is stored in all 3 slots
 	else if (strcmp(romTid, "KO4E") == 0 || strcmp(romTid, "KO4V") == 0) {
 		useSharedFont = (twlFontFound && extendedMemory);
 		u16 offsetChange2 = (romTid[3] == 'E') ? 0 : 0x154;
@@ -19275,7 +19275,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Oscar in Toyland (USA)
 	// Oscar in Toyland (Europe)
-	// Due to our save implementation, save data is stored in all 3 slots
+	// Due to the B4DS DSiWare save implementation, save data is stored in all 3 slots
 	else if (strcmp(romTid, "KOTE") == 0 || strcmp(romTid, "KOTP") == 0) {
 		useSharedFont = twlFontFound;
 		*(u32*)0x0200D550 = 0xE1A00000; // nop
@@ -19298,7 +19298,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Oscar in Toyland 2 (USA)
 	// Oscar in Toyland 2 (Europe)
-	// Due to our save implementation, save data is stored in all 3 slots
+	// Due to the B4DS DSiWare save implementation, save data is stored in all 3 slots
 	else if (strcmp(romTid, "KOYE") == 0 || strcmp(romTid, "KOYP") == 0) {
 		useSharedFont = (twlFontFound && extendedMemory);
 		u8 offsetChangeN = (romTid[3] == 'E') ? 0 : 4;
@@ -19345,7 +19345,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Oscar's World Tour (USA)
 	// Oscar's World Tour (Europe)
-	// Due to our save implementation, save data is stored in all 3 slots
+	// Due to the B4DS DSiWare save implementation, save data is stored in all 3 slots
 	// Requires 8MB of RAM
 	else if ((strcmp(romTid, "KO9E") == 0 || strcmp(romTid, "KO9P") == 0) && extendedMemory) {
 		useSharedFont = twlFontFound;
@@ -21356,7 +21356,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Puffins: Let's Fish! (USA)
 	// Puffins: Let's Fish! (Europe)
-	// Due to our save implementation, save data is stored in all 3 slots
+	// Due to the B4DS DSiWare save implementation, save data is stored in all 3 slots
 	else if (strcmp(romTid, "KLFE") == 0 || strcmp(romTid, "KLFP") == 0) {
 		u8 offsetChange = (romTid[3] == 'P') ? 8 : 0;
 
@@ -21381,7 +21381,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Puffins: Let's Race! (USA)
 	// Puffins: Let's Race! (Europe)
-	// Due to our save implementation, save data is stored in all 3 slots
+	// Due to the B4DS DSiWare save implementation, save data is stored in all 3 slots
 	else if (strcmp(romTid, "KLRE") == 0 || strcmp(romTid, "KLRP") == 0) {
 		*(u32*)0x02014E54 = 0xE2404901; // sub r4, r0, #0x4000
 		setBL(0x020289D0, (u32)dsiSaveGetLength);
@@ -21404,7 +21404,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Puffins: Let's Roll! (USA)
 	// Puffins: Let's Roll! (Europe)
-	// Due to our save implementation, save data is stored in all 3 slots
+	// Due to the B4DS DSiWare save implementation, save data is stored in all 3 slots
 	else if (strcmp(romTid, "KL2E") == 0 || strcmp(romTid, "KL2P") == 0) {
 		u16 offsetChange = (romTid[3] == 'E') ? 0 : 0x100;
 		u16 offsetChange2 = (romTid[3] == 'E') ? 0 : 0x5B8;
@@ -22759,7 +22759,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Save the Turtles (USA)
 	// Save the Turtles (Europe, Australia)
-	// Due to our save implementation, save data is stored in all 3 slots
+	// Due to the B4DS DSiWare save implementation, save data is stored in all 3 slots
 	// Requires 8MB of RAM
 	else if ((strcmp(romTid, "K7TE") == 0 || strcmp(romTid, "K7TV") == 0) && extendedMemory) {
 		useSharedFont = twlFontFound;
@@ -25125,7 +25125,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Super Yum Yum: Puzzle Adventures (USA)
 	// Super Yum Yum: Puzzle Adventures (Europe, Australia)
-	// Due to our save implementation, save data is stored in all 4 slots
+	// Due to the B4DS DSiWare save implementation, save data is stored in all 4 slots
 	// Requires 8MB of RAM
  	else if ((strcmp(romTid, "K4PE") == 0 || strcmp(romTid, "K4PV") == 0) && extendedMemory) {
 		u16 offsetChange = (romTid[3] == 'E') ? 0 : 0x228;
@@ -27740,7 +27740,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Zoonies: Escape from Makatu (USA)
-	// Due to our save implementation, save data is stored in all 3 slots
+	// Due to the B4DS DSiWare save implementation, save data is stored in all 3 slots
 	else if (strcmp(romTid, "KZSE") == 0) {
 		*(u32*)0x0200C674 = 0xE1A00000; // nop
 		*(u32*)0x0200C688 = 0xE1A00000; // nop
@@ -27766,7 +27766,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Zoonies: Escape from Makatu (Europe, Australia)
-	// Due to our save implementation, save data is stored in all 3 slots
+	// Due to the B4DS DSiWare save implementation, save data is stored in all 3 slots
 	else if (strcmp(romTid, "KZSV") == 0) {
 		*(u32*)0x0200C658 = 0xE1A00000; // nop
 		*(u32*)0x0200C66C = 0xE1A00000; // nop
