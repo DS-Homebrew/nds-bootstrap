@@ -1749,9 +1749,11 @@ int arm7_main(void) {
 
 		toncset(ce9, 0, 0x2800);
 
-		u32 blFrom = (u32)ndsHeader->arm9executeAddress;
+		const u32 arm9exe = (strncmp(romTid, "BIG", 3) == 0) ? 0x02000800 : (u32)ndsHeader->arm9executeAddress;
+		// "Battle/Combat of Giants: Mutant Insects" (TID: BIG) has code that is run before the actual SDK boot code
+		u32 blFrom = arm9exe;
 		for (int i = 0; i < 0x200/4; i++) {
-			u32* addr = ndsHeader->arm9executeAddress;
+			u32* addr = (u32*)arm9exe;
 			if (addr[i] == 0xE5810000) {
 				unpatchedFuncs->exeCode = addr[i];
 				break;
