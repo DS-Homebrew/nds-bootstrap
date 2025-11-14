@@ -641,8 +641,6 @@ static bool isROMLoadableInRAM(const tDSiHeader* dsiHeader, const tNDSHeader* nd
 		 || strncmp(romTid, "KD5", 3) == 0 // Jinia Supasonaru: Waei Rakubiki Jiten
 		 || strncmp(romTid, "KD4", 3) == 0) { // Meikyou Kokugo: Rakubiki Jiten
 			return false;
-		} else if (strncmp(romTid, "KBJ", 3) == 0) { // 21 Blackjack
-			romSizeLimitChange = 0x410000;
 		} else if (strncmp(romTid, "K5I", 3) == 0) { // 5 in 1 Solitaire
 			romSizeLimitChange = 0x1F0000;
 		} /* else if (strncmp(romTid, "KAT", 3) == 0) { // AiRace: Tunnel
@@ -654,9 +652,7 @@ static bool isROMLoadableInRAM(const tDSiHeader* dsiHeader, const tNDSHeader* nd
 			romSizeLimitChange = 0x77C000;
 		} /* else if (strncmp(romTid, "KGU", 3) == 0) { // Flipnote Studio
 			romSizeLimitChange = 0x140000;
-		} */ else if (strncmp(romTid, "KUP", 3) == 0) { // Match Up!
-			romSizeLimitChange = 0x380000;
-		} else if (strncmp(romTid, "KQR", 3) == 0 // Remote Racers
+		} */ else if (strncmp(romTid, "KQR", 3) == 0 // Remote Racers
 				|| strncmp(romTid, "KWG", 3) == 0 // Animal Crossing Calculator
 				// || strncmp(romTid, "KWC", 3) == 0 // Animal Crossing Clock
 				|| strncmp(romTid, "KWF", 3) == 0) { // Mario Calculator
