@@ -9498,6 +9498,42 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0260EB98 = 0xE12FFF1E; // bx lr
 	}
 
+	// Discolight (USA)
+	else if (strcmp(romTid, "KDKE") == 0) {
+		useSharedFont = (twlFontFound && debugOrMep);
+		*(u32*)0x020050E4 = 0xE1A00000; // nop
+		*(u32*)0x020050F8 = 0xE1A00000; // nop
+		if (useSharedFont) {
+			if (!extendedMemory) {
+				patchTwlFontLoad(0x02009008, 0x02026520);
+			}
+		} else {
+			*(u32*)0x02005148 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		}
+		*(u32*)0x02009174 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x020091EC = 0xE1A00000; // nop
+		*(u32*)0x0201CD84 = 0xE1A00000; // nop
+		*(u32*)0x0201FEA0 = 0xE1A00000; // nop
+		patchInitDSiWare(0x02024BA0, heapEnd);
+		patchUserSettingsReadDSiWare(0x020260A8);
+	}
+
+	// Discolight (Europe)
+	else if (strcmp(romTid, "KDKP") == 0) {
+		useSharedFont = (twlFontFound && debugOrMep);
+		*(u32*)0x020050E4 = 0xE1A00000; // nop
+		*(u32*)0x020050F8 = 0xE1A00000; // nop
+		if (useSharedFont && !extendedMemory) {
+			patchTwlFontLoad(0x02008FEC, 0x02026504);
+		}
+		*(u32*)0x02009158 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x020091D0 = 0xE1A00000; // nop
+		*(u32*)0x0201CD68 = 0xE1A00000; // nop
+		*(u32*)0x0201FE84 = 0xE1A00000; // nop
+		patchInitDSiWare(0x02024B84, heapEnd);
+		patchUserSettingsReadDSiWare(0x0202608C);
+	}
+
 	// Disney Fireworks (USA)
 	// Locks up on ESRB screen
 	// Requires 8MB of RAM

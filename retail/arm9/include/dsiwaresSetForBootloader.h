@@ -166,6 +166,7 @@ static const char dsiWareForBootloader1[][4] = {
 	"KCP", // Dekisugi Tingle Pack
 	"KN2", // Devil Band: Rock the Underworld
 	"KAV", // Art Style: DIGIDRIVE
+	"KDK", // Discolight
 	"KRF", // Divergent Shift
 	"KHE", // DotMan
 	"KD9", // Dr. Mario Express

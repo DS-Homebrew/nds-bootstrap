@@ -5410,6 +5410,11 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02005088 = 0xE1A00000; // nop (Disable reading save data)
 	}
 
+	// Discolight (USA)
+	else if (strcmp(romTid, "KDKE") == 0 && !twlFontFound) {
+		*(u32*)0x02005148 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+	}
+
 	// Divergent Shift (USA)
 	// Divergent Shift (Europe, Australia)
 	else if (strcmp(romTid, "KRFE") == 0 || strcmp(romTid, "KRFV") == 0) {
