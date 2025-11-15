@@ -27692,7 +27692,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
-	// Za Curosu (Japan)
+	// Zacross (Japan)
 	else if (strcmp(romTid, "KZXJ") == 0) {
 		// useSharedFont = (twlFontFound && debugOrMep);
 		*(u32*)0x0200E1F4 = 0xE1A00000; // nop

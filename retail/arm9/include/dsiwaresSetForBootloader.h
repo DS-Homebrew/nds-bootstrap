@@ -562,7 +562,7 @@ static const char dsiWareForBootloader3[][4] = {
 	"KYU", // Yummy Yummy Cooking Jam
 	"KNZ", "KZN", // G.G Series: Z-One
 	"KZ2", // G.G Series: Z-One 2
-	"KZX", // Za Curosu
+	"KZX", // Zacross
 	"KAS", // Art Style: ZENGAGE
 	"KKH", // Zimo: Mahjong Fanatic
 	"K7K", // Zombie Blaster

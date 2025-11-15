@@ -15726,7 +15726,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		tonccpy((u32*)0x02042888, dsiSaveGetResultCode, 0xC);
 	}
 
-	// Za Curosu (Japan)
+	// Zacross (Japan)
 	else if (strcmp(romTid, "KZXJ") == 0 && !twlFontFound) {
 		*(u32*)0x02022634 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		*(u32*)0x02045754 = 0xE12FFF1E; // bx lr (Show white screens instead of Manual screen)
