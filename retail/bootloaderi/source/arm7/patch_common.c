@@ -12993,6 +12993,33 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// Sengoku Tactics (Japan)
+	else if (strcmp(romTid, "K5TJ") == 0 && saveOnFlashcardNtr) {
+		const u32 newCodeAddr = 0x02024440;
+		const u32 newCodeAddr2 = newCodeAddr+0xA0;
+		const u32 newCodeAddr3 = newCodeAddr2+0x1C;
+		const u32 newCodeAddr4 = newCodeAddr3+0x20;
+		codeCopy((u32*)newCodeAddr, (u32*)0x0201C8EC, 0xA0);
+		codeCopy((u32*)newCodeAddr2, (u32*)0x0201C98C, 0x1C);
+		codeCopy((u32*)newCodeAddr3, (u32*)0x0201C9A8, 0x20);
+		codeCopy((u32*)newCodeAddr4, (u32*)0x0201C9C8, 0x40);
+
+		setBL(0x0201C8B8, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+		setBL(0x0201C8D8, (u32)dsiSaveGetResultCode);
+		setBL(newCodeAddr+0x60, (u32)dsiSaveOpen);
+		setBL(newCodeAddr+0x88, (u32)dsiSaveClose);
+		setBL(newCodeAddr2+0xC, (u32)dsiSaveClose);
+		setBL(newCodeAddr3+0x4, (u32)dsiSaveRead);
+		setBL(newCodeAddr4+0x24, (u32)dsiSaveRead); // dsiSaveReadAsync
+		setBL(0x0201CA0C, (u32)dsiSaveWrite);
+		setBL(0x0201CA40, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+		setBL(0x0201CABC, (u32)dsiSaveGetInfo);
+		setBL(0x020682F0, newCodeAddr2);
+		setBL(0x02068418, newCodeAddr);
+		setBL(0x02068694, newCodeAddr4);
+		setBL(0x020686B4, newCodeAddr3);
+	}
+
 	// Shantae: Risky's Revenge (USA) (Review Build)
 	else if ((strcmp(romTid, "NTRJ") == 0) && (ndsHeader->headerCRC16 == 0x9B41)) {
 		if (!twlFontFound) {

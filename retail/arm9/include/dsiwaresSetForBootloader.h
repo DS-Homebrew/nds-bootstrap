@@ -446,6 +446,7 @@ static const char dsiWareForBootloader3[][4] = {
 	"K5G", // G.G Series: Score Attacker
 	"KRW", // Sea Battle
 	"KLL", // The Seller
+	"K5T", // Sengoku Tactics
 	"KZJ", // G.G Series: Shadow Army
 	"KS3", // Shantae: Risky's Revenge
 	"KC4", // Shapo (bootloaderi-exclusive)

@@ -37,6 +37,7 @@
 #include "nds_header.h"
 #include "tonccpy.h"
 
+#define reducedVolume BIT(6)
 #define a9IrqHooked BIT(7)
 #define delayWrites BIT(8)
 
@@ -446,7 +447,7 @@ void myIrqHandlerVBlank(void) {
 			if (0 == (REG_KEYINPUT & KEY_UP)) {
 				volumeLevel++;
 				if (volumeLevel > 3) volumeLevel = 3;
-				if (volumeLevel == 3) {
+				if (volumeLevel == 3 && !(valueBits & reducedVolume)) {
 					REG_MASTER_VOLUME = 127;
 				}
 			} else if (0 == (REG_KEYINPUT & KEY_DOWN)) {
@@ -461,17 +462,34 @@ void myIrqHandlerVBlank(void) {
 		volumeLevelTimer = 0;
 	}
 	
-	if (volumeLevel < 3 && sharedAddr[0] != 0x524F5245) {
-		switch (volumeLevel) {
-			case 0:
-				REG_MASTER_VOLUME = 0;
-				break;
-			case 1:
-				REG_MASTER_VOLUME = 31;
-				break;
-			case 2:
-				REG_MASTER_VOLUME = 63;
-				break;
+	if (sharedAddr[0] != 0x524F5245) {
+		if (valueBits & reducedVolume) {
+			switch (volumeLevel) {
+				case 0:
+					REG_MASTER_VOLUME = 0;
+					break;
+				case 1:
+					REG_MASTER_VOLUME = 15;
+					break;
+				case 2:
+					REG_MASTER_VOLUME = 23;
+					break;
+				case 3:
+					REG_MASTER_VOLUME = 31;
+					break;
+			}
+		} else if (volumeLevel < 3) {
+			switch (volumeLevel) {
+				case 0:
+					REG_MASTER_VOLUME = 0;
+					break;
+				case 1:
+					REG_MASTER_VOLUME = 31;
+					break;
+				case 2:
+					REG_MASTER_VOLUME = 63;
+					break;
+			}
 		}
 	}
 

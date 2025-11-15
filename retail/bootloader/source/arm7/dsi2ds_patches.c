@@ -23008,6 +23008,45 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)((romTid[3] == 'P') ? 0x02031428 : 0x020315C0) = 0xE1A00000; // nop (Skip Manual screen)
 	}
 
+	// Sengoku Tactics (Japan)
+	else if (strcmp(romTid, "K5TJ") == 0) {
+		*(u32*)0x0201AB34 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02021100 = 0xE3A00602; // mov r0, #0x200000 (Shrink general(?) heap from 0x800000)
+		*(u32*)0x02021314 = 0xE3A01811; // mov r1, #0x110000 (Shrink sound heap from 0x300000)
+		*(u32*)0x02021880 = 0xE1A00000; // nop
+		*(u32*)0x0202189C = 0xE1A00000; // nop
+		*(u32*)0x02022E24 = 0xE1A00000; // nop
+		*(u32*)0x020269C4 = 0xE1A00000; // nop
+		patchInitDSiWare(0x0202E228, heapEnd);
+		*(u32*)0x0202E5B4 = *(u32*)0x02004FE8;
+		patchUserSettingsReadDSiWare(0x0202F964);
+
+		const u32 newCodeAddr = 0x02024440;
+		const u32 newCodeAddr2 = newCodeAddr+0xA0;
+		const u32 newCodeAddr3 = newCodeAddr2+0x1C;
+		const u32 newCodeAddr4 = newCodeAddr3+0x20;
+		codeCopy((u32*)newCodeAddr, (u32*)0x0201C8EC, 0xA0);
+		codeCopy((u32*)newCodeAddr2, (u32*)0x0201C98C, 0x1C);
+		codeCopy((u32*)newCodeAddr3, (u32*)0x0201C9A8, 0x20);
+		codeCopy((u32*)newCodeAddr4, (u32*)0x0201C9C8, 0x40);
+
+		setBL(0x0201C8B8, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+		setBL(0x0201C8D8, (u32)dsiSaveGetResultCode);
+		setBL(newCodeAddr+0x60, (u32)dsiSaveOpen);
+		setBL(newCodeAddr+0x88, (u32)dsiSaveClose);
+		setBL(newCodeAddr2+0xC, (u32)dsiSaveClose);
+		setBL(newCodeAddr3+0x4, (u32)dsiSaveRead);
+		setBL(newCodeAddr4+0x24, (u32)dsiSaveRead); // dsiSaveReadAsync
+		setBL(0x0201CA0C, (u32)dsiSaveWrite);
+		setBL(0x0201CA40, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+		setBL(0x0201CABC, (u32)dsiSaveGetInfo);
+		setBL(0x020682F0, newCodeAddr2);
+		setBL(0x02068418, newCodeAddr);
+		*(u32*)0x02068564 = 0xE12FFF1E; // bx lr
+		setBL(0x02068694, newCodeAddr4);
+		setBL(0x020686B4, newCodeAddr3);
+	}
+
 	// G.G Series: Shadow Army (USA)
 	// G.G Series: Shadow Army (Japan)
 	// Saving not supported due to possible bug

@@ -141,6 +141,7 @@ typedef struct cardengineArm7B4DS {
 	u32 cardStruct;
 	u32 valueBits;
 	/*
+		6: reducedVolume
 		7: a9IrqHooked
 		8: delayWrites
 		17: sleepMode
@@ -182,6 +183,7 @@ typedef struct cardengineArm7 {
 	u32 cardStruct;
 	u32 valueBits;
 	/*
+		6: reducedVolume
 		7: a9IrqHooked
 		8: delayWrites
 		17: sleepMode
