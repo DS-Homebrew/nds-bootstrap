@@ -1786,8 +1786,11 @@ void buildFatTableCache (aFile * file)
 	// Follow cluster list until desired one is found
 	while (file->firstCluster != CLUSTER_FREE && (u32)lastClusterCacheUsed<clusterCache+clusterCacheSize)
 	{
+		bool exit = false;
 		*lastClusterCacheUsed = file->currentCluster;
-		if (file->currentCluster != CLUSTER_EOF) {
+		if (file->currentCluster == CLUSTER_EOF) {
+			exit = true;
+		} else {
 #ifdef TWOCARD
 			const bool fileCard2 = file->fatTableSettings & fatCard2;
 			file->currentOffset+=discBytePerClus[fileCard2];
@@ -1802,6 +1805,9 @@ void buildFatTableCache (aFile * file)
 		currentClusterCacheSize += 4;
 #endif
 		file->fatTableCacheSize += 4;
+		if (exit) {
+			break;
+		}
 	}
 
 	if(file->currentCluster == CLUSTER_EOF) {
