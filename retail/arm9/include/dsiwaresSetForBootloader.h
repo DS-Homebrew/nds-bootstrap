@@ -435,6 +435,7 @@ static const char dsiWareForBootloader3[][4] = {
 	"KJ5", // Renjuku Kanji: Shougaku 5 Nensei
 	"KJ6", // Renjuku Kanji: Shougaku 6 Nensei
 	"KJ8", // Renjuku Kanji: Chuugakusei
+	"KXR", // Retro Pocket
 	"KRT", // Robot Rescue
 	"KRR", // Robot Rescue 2
 	"KD6", // Rock-n-Roll Domo

@@ -12575,6 +12575,31 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// Retro Pocket (USA)
+	else if (strcmp(romTid, "KXRE") == 0) {
+		if (!twlFontFound) {
+			*(u32*)0x02034E4C = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+
+			// Skip Manual screen
+			for (int i = 0; i < 4; i++) {
+				u32* offset = (u32*)0x0202B1E4;
+				offset[i] = 0xE1A00000; // nop
+			}
+		}
+		if (saveOnFlashcardNtr) {
+			setBL(0x0203500C, (u32)dsiSaveCreate);
+			setBL(0x0203501C, (u32)dsiSaveOpen);
+			setBL(0x02035038, (u32)dsiSaveSeek);
+			setBL(0x02035048, (u32)dsiSaveWrite);
+			setBL(0x02035050, (u32)dsiSaveClose);
+			setBL(0x02035178, (u32)dsiSaveOpenR);
+			setBL(0x02035190, (u32)dsiSaveSeek);
+			setBL(0x020351A0, (u32)dsiSaveRead);
+			setBL(0x020351A8, (u32)dsiSaveClose);
+			*(u32*)0x020351C8 = 0xE1A00000; // nop
+		}
+	}
+
 	// Robot Rescue (USA)
 	else if (strcmp(romTid, "KRTE") == 0) {
 		if (saveOnFlashcardNtr) {
