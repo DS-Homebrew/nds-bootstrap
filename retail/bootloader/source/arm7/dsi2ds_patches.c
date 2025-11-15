@@ -16541,10 +16541,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 #ifdef LOADERTYPE2
 	// Mega Words (USA)
 	// Saving not supported due to using more than one file in filesystem
-	// Requires either 8MB of RAM or Memory Expansion Pak
-	if (strcmp(romTid, "KWKE") == 0 && debugOrMep) {
-		const u32 mepAddr = (s2FlashcardId == 0x5A45) ? 0x08800000 : 0x09000000;
-
+	if (strcmp(romTid, "KWKE") == 0) {
 		useSharedFont = (twlFontFound && extendedMemory);
 		if (useSharedFont) {
 			/* if (!extendedMemory) {
@@ -16560,15 +16557,41 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020058F0 = 0xE1A00000; // nop
 		*(u32*)0x02005928 = 0xE1A00000; // nop
 		*(u32*)0x02005934 = 0xE1A00000; // nop
-		if (!extendedMemory) {
-			// *(u32*)0x0201D0C0 = (s2FlashcardId == 0x5A45) ? 0xE3A00522 : 0xE3A00409; // mov r0, (s2FlashcardId == 0x5A45) ? #0x08800000 : #0x09000000
-			*(u32*)0x0201D108 = 0xE3A00622; // mov r0, #0x02200000
+		// if (!extendedMemory)
+		{
+			// Stream each STRM page file from ROM instead of pre-loading the STRM files to RAM
+			extern u32 sdatFilePtrStoreRestoreCode[];
+			extern u32 megaWordsUSASetFileCtx[];
+			extern u32 megaWordsUSAGetSdatPath[];
+			const u32 newCodeAddr = 0x0203AFF0;
+			const u32 newCodeAddr2 = newCodeAddr+0xC;
+			const u32 newCodeAddr3 = newCodeAddr2+0xC;
+			tonccpy((u32*)newCodeAddr, megaWordsUSASetFileCtx, 0xC);
+			tonccpy((u32*)newCodeAddr2, megaWordsUSAGetSdatPath, 0xC);
+			tonccpy((u32*)newCodeAddr3, sdatFilePtrStoreRestoreCode, 0x1C);
+
+			setBL(0x0201D07C, newCodeAddr);
+			*(u32*)0x0201D080 = 0xE1A00005; // mov r0, r5
+			*(u32*)0x0201D08C = 0xE1A00005; // mov r0, r5
+			// *(u32*)0x0201D0A4 = 0xE1A00005; // mov r0, r5
+			*(u32*)0x0201D0A8 = 0xE3A00C06; // mov r0, #0x600 (Only load SDAT header)
+			*(u32*)0x0201D0D8 = 0xE1A00000; // nop
+			*(u32*)0x0201D0F0 = 0xE1A00000; // nop (Do not close SDAT file)
+			if (!extendedMemory) {
+				*(u32*)0x0201D104 = 0xE3A02801; // mov r2, #0x10000 (Shrink STRM heap from 0x80000)
+				*(u32*)0x0201D134 = 0xE3A01801; // mov r1, #0x10000
+			}
+			*(u32*)0x0202D46C = 0xE1A00000; // nop (Do not set RAM pointers to pre-loaded STRM files)
+			setBL(0x0202D488, newCodeAddr3);
+
+			setBL(0x0202FBAC, newCodeAddr2);
+			setBL(0x0202FBB0, 0x02032554);
 		}
 		*(u32*)0x02030D44 = 0xE1A00000; // nop
 		*(u32*)0x02033E9C = 0xE1A00000; // nop
-		patchInitDSiWare(0x02038B04, extendedMemory ? heapEnd : mepAddr+0x77C000);
+		patchInitDSiWare(0x02038B04, heapEnd);
 		if (!extendedMemory) {
-			*(u32*)0x02038E90 = mepAddr;
+			*(u32*)0x02038E90 = *(u32*)0x02004FD0;
 		}
 		patchUserSettingsReadDSiWare(0x0203A0DC);
 		*(u32*)0x0203A4E4 = 0xE1A00000; // nop
@@ -16579,10 +16602,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Mega Words (Europe)
 	// Saving not supported due to using more than one file in filesystem
-	// Requires either 8MB of RAM or Memory Expansion Pak
-	else if (strcmp(romTid, "KWKP") == 0 && debugOrMep) {
-		const u32 mepAddr = (s2FlashcardId == 0x5A45) ? 0x08800000 : 0x09000000;
-
+	else if (strcmp(romTid, "KWKP") == 0) {
 		useSharedFont = (twlFontFound && extendedMemory);
 		if (useSharedFont) {
 			/* if (!extendedMemory) {
@@ -16598,15 +16618,41 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02005B00 = 0xE1A00000; // nop
 		*(u32*)0x02005B3C = 0xE1A00000; // nop
 		*(u32*)0x02005B48 = 0xE1A00000; // nop
-		if (!extendedMemory) {
-			// *(u32*)0x02028150 = (s2FlashcardId == 0x5A45) ? 0xE3A00522 : 0xE3A00409; // mov r0, (s2FlashcardId == 0x5A45) ? #0x08800000 : #0x09000000
-			*(u32*)0x02028198 = 0xE3A00622; // mov r0, #0x02200000
+		// if (!extendedMemory)
+		{
+			// Stream each STRM page file from ROM instead of pre-loading the STRM files to RAM
+			extern u32 sdatFilePtrStoreRestoreCode[];
+			extern u32 megaWordsEURSetFileCtx[];
+			extern u32 megaWordsEURGetSdatPath[];
+			const u32 newCodeAddr = 0x020460B8;
+			const u32 newCodeAddr2 = newCodeAddr+0xC;
+			const u32 newCodeAddr3 = newCodeAddr2+0xC;
+			tonccpy((u32*)newCodeAddr, megaWordsEURSetFileCtx, 0xC);
+			tonccpy((u32*)newCodeAddr2, megaWordsEURGetSdatPath, 0xC);
+			tonccpy((u32*)newCodeAddr3, sdatFilePtrStoreRestoreCode, 0x1C);
+
+			setBL(0x0202810C, newCodeAddr);
+			*(u32*)0x02028110 = 0xE1A00005; // mov r0, r5
+			*(u32*)0x0202811C = 0xE1A00005; // mov r0, r5
+			// *(u32*)0x02028134 = 0xE1A00005; // mov r0, r5
+			*(u32*)0x02028138 = 0xE3A00C06; // mov r0, #0x600 (Only load SDAT header)
+			*(u32*)0x02028168 = 0xE1A00000; // nop
+			*(u32*)0x02028180 = 0xE1A00000; // nop (Do not close SDAT file)
+			if (!extendedMemory) {
+				*(u32*)0x02028194 = 0xE3A02801; // mov r2, #0x10000 (Shrink STRM heap from 0x80000)
+				*(u32*)0x020281C4 = 0xE3A01801; // mov r1, #0x10000
+			}
+			*(u32*)0x020384FC = 0xE1A00000; // nop (Do not set RAM pointers to pre-loaded STRM files)
+			setBL(0x02038518, newCodeAddr3);
+
+			setBL(0x0203AC3C, newCodeAddr2);
+			setBL(0x0203AC40, 0x0203D5F0);
 		}
 		*(u32*)0x0203BDD4 = 0xE1A00000; // nop
 		*(u32*)0x0203EF38 = 0xE1A00000; // nop
-		patchInitDSiWare(0x02043BBC, extendedMemory ? heapEnd : mepAddr+0x77C000);
+		patchInitDSiWare(0x02043BBC, heapEnd);
 		if (!extendedMemory) {
-			*(u32*)0x02043F48 = mepAddr;
+			*(u32*)0x02043F48 = *(u32*)0x02004FD0;
 		}
 		patchUserSettingsReadDSiWare(0x020451A4);
 		*(u32*)0x020455AC = 0xE1A00000; // nop

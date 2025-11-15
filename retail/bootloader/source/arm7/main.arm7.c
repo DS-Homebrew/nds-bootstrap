@@ -646,7 +646,6 @@ static bool isROMLoadableInRAM(const tDSiHeader* dsiHeader, const tNDSHeader* nd
 		} /* else if (strncmp(romTid, "KAT", 3) == 0) { // AiRace: Tunnel
 			romSizeLimitChange = 0x80000;
 		} */ else if (strncmp(romTid, "KCT", 3) == 0 // Chess Challenge!
-				   || strncmp(romTid, "KWK", 3) == 0 // Mega Words
 				   || strncmp(romTid, "KSC", 3) == 0 // Sudoku Challenge!
 				   || strcmp(romTid, "KWSE") == 0) { // Word Searcher (USA)
 			romSizeLimitChange = 0x77C000;
