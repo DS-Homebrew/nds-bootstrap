@@ -13174,6 +13174,23 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// Shapo (USA)
+	// Shapo (Europe, Australia)
+	// Saving not supported due to using more than one file in filesystem
+	else if (strncmp(romTid, "KC4", 3) == 0) {
+		if (!twlFontFound) {
+			*(u32*)0x020208EC = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+			*(u32*)0x020506B0 = 0xE12FFF1E; // bx lr (Skip Manual screen)
+		}
+		if (saveOnFlashcardNtr) {
+			// Skip save R/W
+			*(u32*)0x02024BF4 = 0xE3A00000; // mov r0, #0
+			*(u32*)0x02024BF8 = 0xE12FFF1E; // bx lr
+			*(u32*)0x02024DF4 = 0xE3A00000; // mov r0, #0
+			*(u32*)0x02024DF8 = 0xE12FFF1E; // bx lr
+		}
+	}
+
 	// Shawn Johnson Gymnastics (USA)
 	else if (strcmp(romTid, "KSJE") == 0) {
 		if (!twlFontFound) {

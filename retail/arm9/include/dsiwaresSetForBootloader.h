@@ -448,6 +448,7 @@ static const char dsiWareForBootloader3[][4] = {
 	"KLL", // The Seller
 	"KZJ", // G.G Series: Shadow Army
 	"KS3", // Shantae: Risky's Revenge
+	"KC4", // Shapo (bootloaderi-exclusive)
 	"KSJ", // Shawn Johnson Gymnastics
 	"KK5", // Kakitori Rekishi: Shouga Kusei (01)
 	"KZ9", // Chiri Kuizu: Shouga Kusei (02)

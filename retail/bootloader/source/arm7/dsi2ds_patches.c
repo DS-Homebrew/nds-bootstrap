@@ -23440,6 +23440,33 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020E9C30 = 0xE1A00000; // nop (Enable error exception screen)
 	}
 
+	// Shapo (USA)
+	// Shapo (Europe, Australia)
+	// Saving not supported due to using more than one file in filesystem
+	// Requires more than 8MB of RAM
+	/* else if (strncmp(romTid, "KC4", 3) == 0 && extendedMemory) {
+		*(u32*)0x02011654 = 0xE1A00000; // nop
+		*(u32*)0x02014B10 = 0xE1A00000; // nop
+		patchInitDSiWare(0x0201A414, heapEnd);
+		// *(u32*)0x0201A7A0 = *(u32*)0x02004FD0;
+		patchUserSettingsReadDSiWare(0x0201BAB0);
+		*(u32*)0x020205D0 = 0xE2411601; // sub r1, r1, #0x100000
+		*(u32*)0x020208EC = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		*(u32*)0x020506B0 = 0xE12FFF1E; // bx lr (Skip Manual screen)
+
+		// Skip save R/W
+		*(u32*)0x02024BF4 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02024BF8 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02024DF4 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02024DF8 = 0xE12FFF1E; // bx lr
+
+		if (romTid[3] == 'E') {
+			*(u32*)0x0229B550 = 0xE12FFF1E; // bx lr
+			*(u32*)0x0229B670 = 0xE12FFF1E; // bx lr
+			*(u32*)0x0229CDA8 = 0xE12FFF1E; // bx lr
+		}
+	} */
+
 	// Shawn Johnson Gymnastics (USA)
 	// Requires 8MB of RAM
 	else if (strcmp(romTid, "KSJE") == 0 && extendedMemory) {
