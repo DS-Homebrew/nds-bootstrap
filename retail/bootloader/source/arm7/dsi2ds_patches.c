@@ -22871,6 +22871,67 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		} */
 	}
 
+	// Sagittarius-A-Star (Japan)
+	// Only the options are saved
+	else if (strcmp(romTid, "K8XJ") == 0) {
+		*(u32*)0x0200FF28 = 0xE1A00000; // nop
+		tonccpy((u32*)0x02010ABC, dsiSaveGetResultCode, 0xC);
+		*(u32*)0x0201356C = 0xE1A00000; // nop
+		patchInitDSiWare(0x0201B4F0, heapEnd);
+		*(u32*)0x0201B87C = *(u32*)0x02004FE8;
+		patchUserSettingsReadDSiWare(0x0201CB44);
+		if (!extendedMemory) {
+			*(u32*)0x020225B8 = 0xED060; // Shrink unknown heap from 0x2ED060 by 2MB
+		}
+		setBL(0x02021644, (u32)dsiSaveOpen);
+		setBL(0x02021670, (u32)dsiSaveSeek);
+		setBL(0x02021680, (u32)dsiSaveClose);
+		setBL(0x020216A4, (u32)dsiSaveRead);
+		setBL(0x020216B4, (u32)dsiSaveClose);
+		setBL(0x020216FC, (u32)dsiSaveClose);
+		setBL(0x0202171C, (u32)dsiSaveClose);
+		setBL(0x02021734, (u32)dsiSaveRead); // dsiSaveReadAsync
+		setBL(0x0202174C, (u32)dsiSaveClose);
+		setBL(0x0202178C, (u32)dsiSaveClose);
+		setBL(0x020217FC, (u32)dsiSaveOpen);
+		setBL(0x02021828, (u32)dsiSaveSeek);
+		setBL(0x02021838, (u32)dsiSaveClose);
+		setBL(0x02021850, (u32)dsiSaveGetLength);
+		setBL(0x02021860, (u32)dsiSaveClose);
+		setBL(0x02021878, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+		setBL(0x0202188C, (u32)dsiSaveClose);
+		setBL(0x020218C8, (u32)dsiSaveClose);
+		setBL(0x020218E0, (u32)dsiSaveDelete);
+		setBL(0x02021954, (u32)dsiSaveOpen);
+		setBL(0x02021964, (u32)dsiSaveGetLength);
+		setBL(0x02021974, (u32)dsiSaveClose);
+		setBL(0x02021984, (u32)dsiSaveClose);
+		setBL(0x020219D0, (u32)dsiSaveCreate);
+		setBL(0x02021A00, (u32)dsiSaveOpen);
+		setBL(0x02021A2C, (u32)dsiSaveSetLength);
+		setBL(0x02021A48, (u32)dsiSaveClose);
+		setBL(0x02021A5C, (u32)dsiSaveClose);
+		*(u32*)0x02053148 = 0xE1A00000; // nop
+		*(u32*)0x0205317C = 0xE1A00000; // nop
+		*(u32*)0x02053198 = 0xE1A00000; // nop
+		*(u32*)0x02054BD4 = 0xE3A00000; // mov r0, #0 (Prevent checking "replay")
+		*(u32*)0x02054C28 = 0xE3A00000; // mov r0, #0 (Prevent writing "replay")
+		*(u32*)0x02054C64 = 0xE3A00000; // mov r0, #0 (Return closed for "replay")
+		*(u32*)0x02054C84 = 0xE3A00000; // mov r0, #0 (Prevent writing "replay")
+		*(u32*)0x02054CC8 = 0xE3A00000; // mov r0, #0 (Return closed for "replay")
+		*(u32*)0x02054CF0 = 0xE1A00000; // nop
+		*(u32*)0x02054D98 = 0xE1A00000; // nop
+		*(u32*)0x02054DAC = 0xE1A00000; // nop
+		*(u32*)0x02054DCC = 0xE1A00000; // nop
+		*(u32*)0x02054DFC = 0xE1A00000; // nop
+		*(u32*)0x02054E2C = 0xE3A00001; // mov r0, #1 (Return deleted for "replay")
+		*(u32*)0x02054E80 = 0xE1A00000; // nop
+		*(u32*)0x02054E94 = 0xE1A00000; // nop
+		*(u32*)0x02054EA4 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02054EC4 = 0xE1A00000; // nop
+		*(u32*)0x02054EF0 = 0xE1A00000; // nop
+	}
+
 	// Save the Turtles (USA)
 	// Save the Turtles (Europe, Australia)
 	// Due to the B4DS DSiWare save implementation, save data is stored in all 3 slots
