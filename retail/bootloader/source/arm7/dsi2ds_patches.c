@@ -54,7 +54,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	extern void patchInitDSiWare(u32 addr, u32 heapEnd);
 	extern void patchVolumeGetDSiWare(u32 addr);
 	extern void patchUserSettingsReadDSiWare(u32 addr);
-	extern void patchTwlFontLoad(u32 heapAllocAddr, u32 newCodeAddr);
+	extern void patchTwlFontLoad(bool late, u32 heapAllocAddr, u32 newCodeAddr);
 
 	extern u32 cheatSize;
 	extern u32 apPatchSize;
@@ -723,7 +723,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		useSharedFont = (twlFontFound && debugOrMep);
 		if (useSharedFont) {
 			if (!extendedMemory) {
-				patchTwlFontLoad(0x020053C4, 0x02034634);
+				patchTwlFontLoad(true, 0x020053C4, 0x02034634);
 			}
 		} else {
 			*(u32*)0x02005104 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
@@ -771,7 +771,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		useSharedFont = (twlFontFound && debugOrMep);
 		if (useSharedFont) {
 			if (!extendedMemory) {
-				patchTwlFontLoad(0x020053C4, 0x02034934);
+				patchTwlFontLoad(true, 0x020053C4, 0x02034934);
 			}
 		} else {
 			*(u32*)0x0200511C = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
@@ -985,7 +985,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0203DC14 = 0xE1A00000; // nop
 		*(u32*)0x0203FE8C = 0xE1A00000; // nop
 		if (useSharedFont && !extendedMemory) {
-			patchTwlFontLoad(0x0203FEE8, 0x0201BCE8);
+			patchTwlFontLoad(true, 0x0203FEE8, 0x0201BCE8);
 		}
 		*(u32*)0x0203FF70 = 0xE1A00000; // nop
 		*(u32*)0x02040014 = 0xE1A00000; // nop
@@ -1006,7 +1006,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0203DC10 = 0xE1A00000; // nop
 		*(u32*)0x0203FE18 = 0xE1A00000; // nop
 		if (useSharedFont && !extendedMemory) {
-			patchTwlFontLoad(0x0203FE74, 0x0201BCE4);
+			patchTwlFontLoad(true, 0x0203FE74, 0x0201BCE4);
 		}
 		*(u32*)0x0203FEFC = 0xE1A00000; // nop
 		*(u32*)0x0203FFA0 = 0xE1A00000; // nop
@@ -1177,7 +1177,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchInitDSiWare(0x0201C190, heapEnd);
 		patchUserSettingsReadDSiWare(0x0201D868);
 		if (useSharedFont && !extendedMemory) {
-			patchTwlFontLoad(0x0203CD28, 0x0201DDE8);
+			patchTwlFontLoad(true, 0x0203CD28, 0x0201DDE8);
 		}
 		/* setBL(0x02041D54, (u32)dsiSaveOpen); // Part of .pck file
 		setBL(0x02041D6C, (u32)dsiSaveGetLength);
@@ -1624,7 +1624,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		useSharedFont = (twlFontFound && extendedMemory);
 		if (useSharedFont) {
 			/* if (!extendedMemory) {
-				patchTwlFontLoad((romTid[3] == 'E') ? 0x020056DC : 0x02005658, 0x020455D0+offsetChange);
+				patchTwlFontLoad(true, (romTid[3] == 'E') ? 0x020056DC : 0x02005658, 0x020455D0+offsetChange);
 			} */
 		} else {
 			*(u32*)0x02005098 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
@@ -1660,7 +1660,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		// useSharedFont = (twlFontFound && debugOrMep);
 		/*if (useSharedFont) {
 			if (!extendedMemory && expansionPakFound) {
-				patchTwlFontLoad(0x0200E860, 0x02067044);
+				patchTwlFontLoad(true, 0x0200E860, 0x02067044);
 			}
 		} else {*/
 			*(u32*)0x0200E8C4 = 0xE12FFF1E; // bx lr (Skip Manual screen)
@@ -1696,7 +1696,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		// useSharedFont = (twlFontFound && debugOrMep);
 		/*if (useSharedFont) {
 			if (!extendedMemory && expansionPakFound) {
-				patchTwlFontLoad(0x0200E674, 0x02066BAC);
+				patchTwlFontLoad(true, 0x0200E674, 0x02066BAC);
 			}
 		} else {*/
 			*(u32*)0x0200E6DC = 0xE12FFF1E; // bx lr (Skip Manual screen)
@@ -1732,7 +1732,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		// useSharedFont = (twlFontFound && debugOrMep);
 		/*if (useSharedFont) {
 			if (!extendedMemory && expansionPakFound) {
-				patchTwlFontLoad(0x0200E000, 0x020665AC);
+				patchTwlFontLoad(true, 0x0200E000, 0x020665AC);
 			}
 		} else {*/
 			*(u32*)0x0200E064 = 0xE12FFF1E; // bx lr (Skip Manual screen)
@@ -1810,7 +1810,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02057EF8, (u32)dsiSaveClose); */
 		if (useSharedFont) {
 			if (!extendedMemory) {
-				patchTwlFontLoad(0x0205D80C, 0x020A1B54);
+				patchTwlFontLoad(true, 0x0205D80C, 0x020A1B54);
 			}
 		} else {
 			*(u32*)0x0205DA34 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
@@ -2405,7 +2405,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0201E588, (u32)dsiSaveSeek); */
 		if (useSharedFont) {
 			if (!extendedMemory && expansionPakFound) {
-				patchTwlFontLoad(0x0201DDC8, 0x02019A7C);
+				patchTwlFontLoad(true, 0x0201DDC8, 0x02019A7C);
 			}
 		} else {
 			*(u32*)0x0201FD04 = 0xE1A00000; // nop (Skip Manual screen)
@@ -2558,7 +2558,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			if (useSharedFont) {
 				*(u32*)0x02025338 = 0xE3A05703; // mov r5, 0xC0000
 				if (!extendedMemory) {
-					patchTwlFontLoad(0x02025448, 0x02049D80);
+					patchTwlFontLoad(true, 0x02025448, 0x02049D80);
 				}
 			} else {
 				*(u32*)0x02017864 = 0xE1A00000; // nop (Skip Manual screen)
@@ -2572,7 +2572,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			if (useSharedFont) {
 				*(u32*)0x0202526C = 0xE3A05703; // mov r5, 0xC0000
 				if (!extendedMemory) {
-					patchTwlFontLoad(0x0202537C, 0x02049CD4);
+					patchTwlFontLoad(true, 0x0202537C, 0x02049CD4);
 				}
 			} else {
 				*(u32*)0x020177AC = 0xE1A00000; // nop (Skip Manual screen)
@@ -2725,7 +2725,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0203C33C, (u32)dsiSaveClose);
 		setBL(0x0203C358, (u32)dsiSaveClose); */
 		if (useSharedFont && !extendedMemory) {
-			patchTwlFontLoad(0x0203E620, 0x02019458);
+			patchTwlFontLoad(true, 0x0203E620, 0x02019458);
 			*(u32*)0x0203E6E0 = 0xE1A00000; // nop
 		}
 	}
@@ -2927,7 +2927,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	else if (strcmp(romTid, "KPCE") == 0) {
 		useSharedFont = (twlFontFound && debugOrMep);
 		if (useSharedFont && !extendedMemory) {
-			patchTwlFontLoad(0x0201A54C, 0x02038CB4);
+			patchTwlFontLoad(true, 0x0201A54C, 0x02038CB4);
 		}
 		/* setBL(0x020265B0, (u32)dsiSaveOpen); // Part of .pck file
 		setBL(0x020265C4, (u32)dsiSaveGetLength);
@@ -2959,7 +2959,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	else if (strcmp(romTid, "KPCV") == 0) {
 		useSharedFont = (twlFontFound && debugOrMep);
 		if (useSharedFont && !extendedMemory) {
-			patchTwlFontLoad(0x02019610, 0x020379A4);
+			patchTwlFontLoad(true, 0x02019610, 0x020379A4);
 		}
 		/* setBL(0x02025674, (u32)dsiSaveOpen); // Part of .pck file
 		setBL(0x02025688, (u32)dsiSaveGetLength);
@@ -2996,7 +2996,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchInitDSiWare(0x02018024, heapEnd);
 		patchUserSettingsReadDSiWare(0x020194B0);
 		if (useSharedFont && !extendedMemory) {
-			patchTwlFontLoad(0x02026FB8, 0x02019D64);
+			patchTwlFontLoad(true, 0x02026FB8, 0x02019D64);
 		}
 		/* setBL(0x02032EA4, (u32)dsiSaveOpen);
 		setBL(0x02032EB8, (u32)dsiSaveGetLength);
@@ -3320,7 +3320,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 				*(u32*)0x020CFB78 = 0xE1A00000; // nop
 				if (useSharedFont) {
 					if (!extendedMemory && expansionPakFound) {
-						patchTwlFontLoad(0x020D02A0, newCodeAddr);
+						patchTwlFontLoad(true, 0x020D02A0, newCodeAddr);
 					}
 				} else {
 					*(u32*)0x020CFCD0 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
@@ -3332,7 +3332,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 				*(u32*)0x020CF988 = 0xE1A00000; // nop
 				if (useSharedFont) {
 					if (!extendedMemory && expansionPakFound) {
-						patchTwlFontLoad(0x020D00F4, newCodeAddr);
+						patchTwlFontLoad(true, 0x020D00F4, newCodeAddr);
 					}
 				} else {
 					*(u32*)0x020CFAE0 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
@@ -3346,7 +3346,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 				*(u32*)0x020D071C = 0xE1A00000; // nop
 				if (useSharedFont) {
 					if (!extendedMemory && expansionPakFound) {
-						patchTwlFontLoad(0x020D0E44, newCodeAddr);
+						patchTwlFontLoad(true, 0x020D0E44, newCodeAddr);
 					}
 				} else {
 					*(u32*)0x020D0874 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
@@ -3358,7 +3358,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 				*(u32*)0x020D0508 = 0xE1A00000; // nop
 				if (useSharedFont) {
 					if (!extendedMemory && expansionPakFound) {
-						patchTwlFontLoad(0x020D0C74, newCodeAddr);
+						patchTwlFontLoad(true, 0x020D0C74, newCodeAddr);
 					}
 				} else {
 					*(u32*)0x020D0660 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
@@ -3408,7 +3408,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			*(u32*)0x0209E0CC = 0xE1A00000; // nop
 			if (useSharedFont) {
 				if (!extendedMemory && expansionPakFound) {
-					patchTwlFontLoad(0x020CFCF0, newCodeAddr);
+					patchTwlFontLoad(true, 0x020CFCF0, newCodeAddr);
 				}
 			} else {
 				*(u32*)0x020CF970 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
@@ -3419,7 +3419,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			*(u32*)0x0209E0F8 = 0xE1A00000; // nop
 			if (useSharedFont) {
 				if (!extendedMemory && expansionPakFound) {
-					patchTwlFontLoad(0x020D0930, newCodeAddr);
+					patchTwlFontLoad(true, 0x020D0930, newCodeAddr);
 				}
 			} else {
 				*(u32*)0x020D050C = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
@@ -3473,7 +3473,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 				*(u32*)0x0209E278 = 0xE1A00000; // nop
 				if (useSharedFont) {
 					if (!extendedMemory && expansionPakFound) {
-						patchTwlFontLoad(0x020D06F0, newCodeAddr);
+						patchTwlFontLoad(true, 0x020D06F0, newCodeAddr);
 					}
 				} else {
 					*(u32*)0x020D0120 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
@@ -3509,7 +3509,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 				*(u32*)0x0209DB40 = 0xE1A00000; // nop
 				if (useSharedFont) {
 					if (!extendedMemory && expansionPakFound) {
-						patchTwlFontLoad(0x020CFC2C, newCodeAddr);
+						patchTwlFontLoad(true, 0x020CFC2C, newCodeAddr);
 					}
 				} else {
 					*(u32*)0x020CF8AC = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
@@ -3547,7 +3547,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 				*(u32*)0x0209F754 = 0xE1A00000; // nop
 				if (useSharedFont) {
 					if (!extendedMemory && expansionPakFound) {
-						patchTwlFontLoad(0x020D1594, newCodeAddr);
+						patchTwlFontLoad(true, 0x020D1594, newCodeAddr);
 					}
 				} else {
 					*(u32*)0x020D0FFC = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
@@ -3583,7 +3583,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 				*(u32*)0x0209EE14 = 0xE1A00000; // nop
 				if (useSharedFont) {
 					if (!extendedMemory && expansionPakFound) {
-						patchTwlFontLoad(0x020D0930, newCodeAddr);
+						patchTwlFontLoad(true, 0x020D0930, newCodeAddr);
 					}
 				} else {
 					*(u32*)0x020D0590 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
@@ -3705,7 +3705,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x020246C0, (u32)dsiSaveGetResultCode); */
 		/* if (useSharedFont) {
 			if (!extendedMemory) {
-				patchTwlFontLoad(0x02023BE8, 0x02016DAC);
+				patchTwlFontLoad(true, 0x02023BE8, 0x02016DAC);
 			}
 		} else { */
 			*(u32*)0x020321BC = 0xE3A00002; // mov r0, #2 (Skip Manual screen, Part 1)
@@ -3885,7 +3885,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		useSharedFont = (twlFontFound && debugOrMep);
 		if (useSharedFont) {
 			if (!extendedMemory && expansionPakFound) {
-				patchTwlFontLoad(0x0205864C, 0x0207C314);
+				patchTwlFontLoad(true, 0x0205864C, 0x0207C314);
 			}
 		} else {
 			*(u32*)0x020050A4 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
@@ -3921,7 +3921,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		useSharedFont = (twlFontFound && debugOrMep);
 		if (useSharedFont) {
 			if (!extendedMemory && expansionPakFound) {
-				patchTwlFontLoad(0x02058720, 0x0207C3E8);
+				patchTwlFontLoad(true, 0x02058720, 0x0207C3E8);
 			}
 		} else {
 			*(u32*)0x020050A4 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
@@ -3957,7 +3957,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		useSharedFont = (twlFontFound && debugOrMep);
 		if (useSharedFont) {
 			if (!extendedMemory && expansionPakFound) {
-				patchTwlFontLoad(0x02058658, 0x0207C2C8);
+				patchTwlFontLoad(true, 0x02058658, 0x0207C2C8);
 			}
 		} else {
 			*(u32*)0x020050A4 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
@@ -4075,7 +4075,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		useSharedFont = twlFontFound;
 		*(u32*)0x0200523C = 0xE1A00000; // nop
 		if (useSharedFont && !extendedMemory) {
-			patchTwlFontLoad(0x0201FDD8, 0x0204F5DC);
+			patchTwlFontLoad(true, 0x0201FDD8, 0x0204F5DC);
 		}
 		/* setBL(0x02020A28, (u32)dsiSaveCreate); // Part of .pck file
 		setBL(0x02020A38, (u32)dsiSaveOpen);
@@ -4405,7 +4405,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02088A64, (u32)dsiSaveGetResultCode);
 		*(u32*)0x02088A74 = 0xE1A00000; // nop */
 		if (useSharedFont && !extendedMemory) {
-			patchTwlFontLoad(0x02095E54, 0x020227F0);
+			patchTwlFontLoad(true, 0x02095E54, 0x020227F0);
 		}
 	}
 
@@ -6021,7 +6021,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL((u32)saveFuncOffsets[21], (u32)dsiSaveClose); */
 
 		if (useSharedFont && !extendedMemory) {
-			patchTwlFontLoad((romTid[3] == 'E') ? 0x0209695C : 0x020994D8, 0x020268D0);
+			patchTwlFontLoad(true, (romTid[3] == 'E') ? 0x0209695C : 0x020994D8, 0x020268D0);
 		}
 	}
 
@@ -7079,7 +7079,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02005C64 = 0xE1A00000; // nop */
 		/* if (useSharedFont) {
 			if (expansionPakFound) {
-				patchTwlFontLoad(0x020616F0, 0x0207DCAC);
+				patchTwlFontLoad(true, 0x020616F0, 0x0207DCAC);
 			}
 		} else { */
 			*(u32*)0x0200A12C = 0xE1A00000; // nop (Skip Manual screen)
@@ -7100,7 +7100,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		useSharedFont = (twlFontFound && extendedMemory);
 		if (useSharedFont) {
 			/* if (!extendedMemory) {
-				patchTwlFontLoad(0x02022594, 0x02067BDC);
+				patchTwlFontLoad(true, 0x02022594, 0x02067BDC);
 			} */
 		} else {
 			*(u32*)0x02005104 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
@@ -7166,7 +7166,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		useSharedFont = (twlFontFound && extendedMemory);
 		if (useSharedFont) {
 			/* if (!extendedMemory) {
-				patchTwlFontLoad(0x02022430, 0x02067BF0);
+				patchTwlFontLoad(true, 0x02022430, 0x02067BF0);
 			} */
 		} else {
 			*(u32*)0x02005104 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
@@ -7430,7 +7430,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchUserSettingsReadDSiWare(0x02015504);
 		if (useSharedFont) {
 			if (!extendedMemory) {
-				patchTwlFontLoad(0x0201B808, 0x02015A84);
+				patchTwlFontLoad(true, 0x0201B808, 0x02015A84);
 			}
 		} else {
 			*(u32*)0x0201B9E4 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
@@ -7462,7 +7462,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchUserSettingsReadDSiWare(0x0201D460);
 		if (useSharedFont) {
 			if (!extendedMemory) {
-				patchTwlFontLoad(0x02045814, 0x0201D9E0);
+				patchTwlFontLoad(true, 0x02045814, 0x0201D9E0);
 			}
 		} else {
 			*(u32*)0x02032550 = 0xE1A00000; // nop (Skip Manual screen)
@@ -7659,7 +7659,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02044858, (u32)dsiSaveClose);
 		setBL(0x02044874, (u32)dsiSaveClose); */
 		if (useSharedFont && !extendedMemory) {
-			patchTwlFontLoad(0x02047734, 0x0201F574);
+			patchTwlFontLoad(true, 0x02047734, 0x0201F574);
 			*(u32*)0x020477F4 = 0xE1A00000; // nop
 		}
 	}
@@ -8760,7 +8760,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL((u32)saveFuncOffsets[21], (u32)dsiSaveClose); */
 
 		/* if (useSharedFont && !extendedMemory) {
-			patchTwlFontLoad((romTid[3] == 'E') ? 0x02076B5C : 0x0203C09C, 0x02026ECC);
+			patchTwlFontLoad(true, (romTid[3] == 'E') ? 0x02076B5C : 0x0203C09C, 0x02026ECC);
 		} */
 	}
 
@@ -8905,7 +8905,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02044CB0, (u32)dsiSaveClose);
 		setBL(0x02044CCC, (u32)dsiSaveClose);
 		if (useSharedFont && !extendedMemory) {
-			patchTwlFontLoad(0x02047AB4, 0x0201F52C);
+			patchTwlFontLoad(true, 0x02047AB4, 0x0201F52C);
 			*(u32*)0x02047B74 = 0xE1A00000; // nop
 		}
 	}
@@ -8935,7 +8935,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x020447F4, (u32)dsiSaveClose);
 		setBL(0x02044810, (u32)dsiSaveClose);
 		if (useSharedFont && !extendedMemory) {
-			patchTwlFontLoad(0x02047418, 0x0201F438);
+			patchTwlFontLoad(true, 0x02047418, 0x0201F438);
 			*(u32*)0x020474D8 = 0xE1A00000; // nop
 		}
 	}
@@ -9084,7 +9084,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02058A24 = 0xE1A00000; // nop
 		*(u32*)0x02059C44 = 0xE1A00000; // nop
 		/* if (useSharedFont && !extendedMemory && expansionPakFound) {
-			patchTwlFontLoad(0x0206D254, 0x02050B78);
+			patchTwlFontLoad(true, 0x0206D254, 0x02050B78);
 			*(u32*)0x0206D258 = 0xE1A00000; // nop
 			*(u32*)0x0206D25C = 0xE1A00000; // nop
 			*(u32*)0x0206D260 = 0xE1A00000; // nop
@@ -9137,7 +9137,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchInitDSiWare(0x020263EC, heapEnd);
 		patchUserSettingsReadDSiWare(0x020279D0);
 		if (useSharedFont && !extendedMemory) {
-			patchTwlFontLoad(0x0204FCA4, 0x02027F14);
+			patchTwlFontLoad(true, 0x0204FCA4, 0x02027F14);
 			*(u32*)0x0204FCF0 = 0xE1A00000; // nop
 		}
 		setBL(0x02057B48, (u32)dsiSaveCreate);
@@ -9168,7 +9168,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchInitDSiWare(0x0201BD90, heapEnd);
 		patchUserSettingsReadDSiWare(0x0201D374);
 		if (useSharedFont && !extendedMemory) {
-			patchTwlFontLoad(0x02045648, 0x0201D8B8);
+			patchTwlFontLoad(true, 0x02045648, 0x0201D8B8);
 			*(u32*)0x02045694 = 0xE1A00000; // nop
 		}
 		setBL(0x0204D4EC, (u32)dsiSaveCreate);
@@ -9403,7 +9403,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0202D770 = 0x14E000; // Shrink sound heap from 0x2EE000
 		if (useSharedFont) {
 			if (!extendedMemory) {
-				patchTwlFontLoad(0x0202EB0C, 0x0201B43C);
+				patchTwlFontLoad(true, 0x0202EB0C, 0x0201B43C);
 			}
 		} else {
 			*(u32*)0x02005124 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
@@ -9505,7 +9505,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020050F8 = 0xE1A00000; // nop
 		if (useSharedFont) {
 			if (!extendedMemory) {
-				patchTwlFontLoad(0x02009008, 0x02026520);
+				patchTwlFontLoad(true, 0x02009008, 0x02026520);
 			}
 		} else {
 			*(u32*)0x02005148 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
@@ -9524,7 +9524,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020050E4 = 0xE1A00000; // nop
 		*(u32*)0x020050F8 = 0xE1A00000; // nop
 		if (useSharedFont && !extendedMemory) {
-			patchTwlFontLoad(0x02008FEC, 0x02026504);
+			patchTwlFontLoad(true, 0x02008FEC, 0x02026504);
 		}
 		*(u32*)0x02009158 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x020091D0 = 0xE1A00000; // nop
@@ -9590,7 +9590,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		useSharedFont = (twlFontFound && debugOrMep);
 		if (useSharedFont) {
 			if (!extendedMemory) {
-				patchTwlFontLoad(0x020226E4, 0x020186A0);
+				patchTwlFontLoad(true, 0x020226E4, 0x020186A0);
 			}
 		} else {
 			*(u32*)0x02005358 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
@@ -9613,7 +9613,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		useSharedFont = (twlFontFound && debugOrMep);
 		if (useSharedFont) {
 			if (!extendedMemory) {
-				patchTwlFontLoad(0x020227CC, 0x02018780);
+				patchTwlFontLoad(true, 0x020227CC, 0x02018780);
 			}
 		} else {
 			*(u32*)0x02005370 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
@@ -9636,7 +9636,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		useSharedFont = (twlFontFound && debugOrMep);
 		if (useSharedFont) {
 			if (!extendedMemory) {
-				patchTwlFontLoad(0x02022570, 0x0201867C);
+				patchTwlFontLoad(true, 0x02022570, 0x0201867C);
 			}
 		} else {
 			*(u32*)0x02005358 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
@@ -9699,7 +9699,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			*(u32*)0x0206F430 = 0xE3A00000; // mov r0, #0
 			/* if (useSharedFont) {
 				if (!extendedMemory && expansionPakFound) {
-					patchTwlFontLoad(0x020741C8, 0x02018590);
+					patchTwlFontLoad(true, 0x020741C8, 0x02018590);
 				}
 			} else { */
 				*(u32*)0x0207347C = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
@@ -11762,7 +11762,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)(0x02052BC8-offsetChangeS) = 0xE1A00000; // nop
 		if (useSharedFont) {
 			if (!extendedMemory) {
-				patchTwlFontLoad(0x02067754-offsetChangeS, 0x0201E290-offsetChange);
+				patchTwlFontLoad(true, 0x02067754-offsetChangeS, 0x0201E290-offsetChange);
 				*(u32*)(0x020678C4-offsetChangeS) = 0xE1A00000; // nop
 			}
 		} else {
@@ -12334,7 +12334,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0201F03C = 0xE3A00000; // mov r0, #0
 		*(u32*)0x0201F040 = 0xE12FFF1E; // bx lr
 		if (useSharedFont && !extendedMemory) {
-			patchTwlFontLoad(0x0203A2DC, 0x0201F580);
+			patchTwlFontLoad(true, 0x0203A2DC, 0x0201F580);
 			*(u32*)0x0203A39C = 0xE1A00000; // nop
 		}
 		setBL(0x02045468, (u32)dsiSaveOpen);
@@ -12814,7 +12814,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 				*(u32*)(0x0206A870+offsetChange2) = 0xE3A05603; // mov r5, #0x300000
 			} else {
 				*(u32*)(0x0206A870+offsetChange2) = 0xE3A05601; // mov r5, #0x100000
-				patchTwlFontLoad(0x0206A980+offsetChange2, 0x0201F534-offsetChange);
+				patchTwlFontLoad(true, 0x0206A980+offsetChange2, 0x0201F534-offsetChange);
 			}
 		} else {
 			*(u32*)(0x0205BA38+offsetChange2) = 0xE3A00000; // mov r0, #0 (Skip Manual screen, and instead display the unused help menu)
@@ -14431,22 +14431,24 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	} */
 
 	// Katamukusho (Japan)
-	// Crashes after title screen fades in
-	/* else if (strcmp(romTid, "K69J") == 0) {
+	// Requires the camera for gameplay, but does not exist on DS consoles
+	/* else if (strcmp(romTid, "K69J") == 0 && twlFontFound && debugOrMep) {
+		useSharedFont = true;
 		*(u32*)0x02011138 = 0xE1A00000; // nop
 		tonccpy((u32*)0x02011DCC, dsiSaveGetResultCode, 0xC);
 		*(u32*)0x020147D8 = 0xE1A00000; // nop
 		patchInitDSiWare(0x0201CA60, heapEnd);
-		*(u32*)0x0201CDD0 = *(u32*)0x02004FC0;
+		// *(u32*)0x0201CDD0 = *(u32*)0x02004FC0;
 		patchUserSettingsReadDSiWare(0x0201DF58);
-		*(u32*)0x0201E370 = 0x77777777;
 		*(u32*)0x0202345C = wirelessReturnCodeArm;
 		*(u32*)0x02023460 = 0xE12FFF1E; // bx lr
 		*(u32*)0x02051B08 = 0xE1A00000; // nop
-		*(u32*)0x02051B58 = 0xE1A00000; // nop
+		*(u32*)0x02051B58 = 0xE1A00000; // nop (Skip camera init(?))
 		*(u32*)0x02051B64 = 0xE1A00000; // nop
 		*(u32*)0x02051B98 = 0xE1A00000; // nop
-		*(u32*)0x02053F8C = 0xE3A00000; // mov r0, #0
+		if (!extendedMemory) {
+			patchTwlFontLoad(false, 0x02054198, 0x0201F130);
+		}
 		setBL(0x0206AED8, (u32)dsiSaveOpen);
 		setBL(0x0206AEF0, (u32)dsiSaveGetLength);
 		setBL(0x0206AF18, (u32)dsiSaveRead);
@@ -14583,7 +14585,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0201B8B4, (u32)dsiSaveClose);
 		*(u32*)0x0201BC40 = 0xE1A00000; // nop
 		/* if (useSharedFont && !extendedMemory) {
-			patchTwlFontLoad(0x0202EF60, 0x02016058);
+			patchTwlFontLoad(true, 0x0202EF60, 0x02016058);
 		} */
 	}
 
@@ -14807,7 +14809,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020051D4 = 0xE1A00000; // nop
 		if (useSharedFont) {
 			if (!extendedMemory) {
-				patchTwlFontLoad(0x0201F3E4, 0x02018F3C);
+				patchTwlFontLoad(true, 0x0201F3E4, 0x02018F3C);
 			}
 		} else {
 			*(u32*)0x02005310 = 0xE1A00000; // nop (Skip Manual screen)
@@ -14837,7 +14839,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020051D8 = 0xE1A00000; // nop
 		if (useSharedFont) {
 			if (!extendedMemory) {
-				patchTwlFontLoad(0x0201F3B8, 0x02018F10);
+				patchTwlFontLoad(true, 0x0201F3B8, 0x02018F10);
 			}
 		} else {
 			*(u32*)0x020052F0 = 0xE1A00000; // nop (Skip Manual screen)
@@ -15275,7 +15277,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 		if (useSharedFont) {
 			if (!extendedMemory && !maxHeapOpen && romTid[3] == 'V') {
-				patchTwlFontLoad(0x0201778C+offsetChange2, 0x02070EC4-offsetChange6);
+				patchTwlFontLoad(true, 0x0201778C+offsetChange2, 0x02070EC4-offsetChange6);
 			}
 		} else {
 			*(u32*)(0x02017674+offsetChange2) = 0xE3A00000; // mov r0, #0
@@ -15396,7 +15398,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02005088 = 0xE1A00000; // nop
 		if (useSharedFont) {
 			if (!extendedMemory) {
-				patchTwlFontLoad(0x0205F024, 0x02022C58);
+				patchTwlFontLoad(true, 0x0205F024, 0x02022C58);
 			}
 		} else {
 			*(u32*)0x0200509C = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
@@ -15510,7 +15512,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBL(0x020BC9BC, (u32)dsiSaveClose); */
 
 			if (useSharedFont && !extendedMemory) {
-				patchTwlFontLoad(0x020C3230, 0x02020064);
+				patchTwlFontLoad(true, 0x020C3230, 0x02020064);
 				if (expansionPakFound) {
 					*(u32*)0x020C3298 = 0xE1A00000; // nop
 				}
@@ -15539,7 +15541,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBL(0x020BCE94, (u32)dsiSaveClose); */
 
 			if (useSharedFont && !extendedMemory) {
-				patchTwlFontLoad(0x020C3708, 0x02020064);
+				patchTwlFontLoad(true, 0x020C3708, 0x02020064);
 				if (expansionPakFound) {
 					*(u32*)0x020C3770 = 0xE1A00000; // nop
 				}
@@ -15712,7 +15714,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchUserSettingsReadDSiWare(0x02018758);
 		if (useSharedFont) {
 			if (!extendedMemory) {
-				patchTwlFontLoad(0x02030914, 0x02018CD8);
+				patchTwlFontLoad(true, 0x02030914, 0x02018CD8);
 			}
 		} else {
 			*(u32*)0x0201D4F8 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
@@ -15742,7 +15744,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchUserSettingsReadDSiWare(0x02018838);
 		if (useSharedFont) {
 			if (!extendedMemory) {
-				patchTwlFontLoad(0x020309F4, 0x02018DB8);
+				patchTwlFontLoad(true, 0x020309F4, 0x02018DB8);
 			}
 		} else {
 			*(u32*)0x0201D5D8 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
@@ -16528,7 +16530,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		useSharedFont = (twlFontFound && debugOrMep);
 		if (useSharedFont) {
 			if (!extendedMemory) {
-				patchTwlFontLoad((romTid[3] == 'E') ? 0x02005350 : 0x02005338, 0x0202FA88+offsetChange);
+				patchTwlFontLoad(true, (romTid[3] == 'E') ? 0x02005350 : 0x02005338, 0x0202FA88+offsetChange);
 			}
 		} else {
 			*(u32*)0x02005090 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
@@ -16581,7 +16583,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		useSharedFont = (twlFontFound && extendedMemory);
 		if (useSharedFont) {
 			/* if (!extendedMemory) {
-				patchTwlFontLoad(0x020053A0, 0x0203A620);
+				patchTwlFontLoad(true, 0x020053A0, 0x0203A620);
 			} */
 		} else {
 			*(u32*)0x02005094 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
@@ -16642,7 +16644,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		useSharedFont = (twlFontFound && extendedMemory);
 		if (useSharedFont) {
 			/* if (!extendedMemory) {
-				patchTwlFontLoad(0x0200551C, 0x020456E8);
+				patchTwlFontLoad(true, 0x0200551C, 0x020456E8);
 			} */
 		} else {
 			*(u32*)0x02005104 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
@@ -16945,7 +16947,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 				*(u32*)0x0200FC5C = 0xE3A02703; // mov r2, #0xC0000
 				*(u32*)0x0200FC68 = 0xE3A01703; // mov r1, #0xC0000
 
-				patchTwlFontLoad(0x0200FD00, 0x0205A324);
+				patchTwlFontLoad(true, 0x0200FD00, 0x0205A324);
 			}
 		} else {
 			// Skip Manual screen
@@ -17001,7 +17003,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 				*(u32*)0x02010158 = 0xE3A02703; // mov r2, #0xC0000
 				*(u32*)0x02010164 = 0xE3A01703; // mov r1, #0xC0000
 
-				patchTwlFontLoad(0x020101FC, 0x02059D68);
+				patchTwlFontLoad(true, 0x020101FC, 0x02059D68);
 			}
 		} else {
 			// Skip Manual screen
@@ -17056,7 +17058,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			if (!extendedMemory && expansionPakFound) {
 				*(u32*)0x0200FAA4 = 0xE3A06703; // mov r6, #0xC0000
 
-				patchTwlFontLoad(0x0200FB68, 0x02057688);
+				patchTwlFontLoad(true, 0x0200FB68, 0x02057688);
 			}
 		} else {
 			// Skip Manual screen
@@ -17364,7 +17366,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 				if (expansionPakFound) {
 					*(u32*)0x02049B6C = 0xE1A00000; // nop
 				}
-				patchTwlFontLoad(0x02049C38, 0x02018858);
+				patchTwlFontLoad(true, 0x02049C38, 0x02018858);
 			}
 		} else {
 			*(u32*)0x0203F378 = 0xE1A00000; // nop (Skip Manual screen)
@@ -18831,7 +18833,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			tonccpy((u32*)0x020917DC, nintCdwnCalHeapAlloc, 0xBC);
 			setBL(0x0205AB70, 0x020917DC);
 			/* if (twlFontFound) {
-				patchTwlFontLoad(0x0205AC48, 0x02092324);
+				patchTwlFontLoad(true, 0x0205AC48, 0x02092324);
 			} */
 		}
 		// if (!twlFontFound) {
@@ -19365,7 +19367,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchInitDSiWare(0x02016510, heapEnd);
 		patchUserSettingsReadDSiWare(0x02017B20);
 		if (useSharedFont && !extendedMemory) {
-			patchTwlFontLoad(0x02055A38, 0x02018334);
+			patchTwlFontLoad(true, 0x02055A38, 0x02018334);
 		}
 		setBL(0x020599A8, (u32)dsiSaveOpen);
 		setBL(0x020599CC, (u32)dsiSaveGetLength);
@@ -19474,7 +19476,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchInitDSiWare(0x02017548, heapEnd);
 		if (useSharedFont) {
 			if (!extendedMemory) {
-				patchTwlFontLoad(0x0201CF74, 0x02018EB8);
+				patchTwlFontLoad(true, 0x0201CF74, 0x02018EB8);
 			}
 		} else {
 			*(u32*)0x0202E35C = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
@@ -19508,7 +19510,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0200E7AC = 0xE1A00000; // nop
 		patchInitDSiWare(0x02013F6C, heapEnd);
 		if (useSharedFont && !extendedMemory) {
-			patchTwlFontLoad(0x0202A6EC, 0x02015D14);
+			patchTwlFontLoad(true, 0x0202A6EC, 0x02015D14);
 		}
 		setBL(0x02038B98, (u32)dsiSaveGetInfo);
 		setBL(0x02038C0C, (u32)dsiSaveGetInfo);
@@ -20892,7 +20894,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0202B0EC = 0xE1A00000; // nop
 		/* if (useSharedFont) {
 			if (!extendedMemory) {
-				patchTwlFontLoad(0x0202B238, 0x02020948);
+				patchTwlFontLoad(true, 0x0202B238, 0x02020948);
 			}
 		} else { */
 			*(u32*)0x0202B118 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
@@ -21038,7 +21040,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 		if (romTid[3] == 'E') {
 			/* if (useSharedFont && !extendedMemory && expansionPakFound) {
-				patchTwlFontLoad(0x02017E9C, 0x02049F70);
+				patchTwlFontLoad(true, 0x02017E9C, 0x02049F70);
 				setBL(0x02017EAC, 0x02049F74);
 				setBL(0x02017EC0, 0x02049F74);
 			} */
@@ -21187,7 +21189,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02005410 = 0xE1A00000; // nop
 		if (useSharedFont) {
 			if (!extendedMemory) {
-				patchTwlFontLoad(0x02011980, 0x0204099C+offsetChange);
+				patchTwlFontLoad(true, 0x02011980, 0x0204099C+offsetChange);
 			}
 		} else {
 			*(u32*)0x020118CC = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
@@ -21615,7 +21617,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchInitDSiWare(0x02021BDC, heapEnd);
 		patchUserSettingsReadDSiWare(0x020231C0);
 		if (useSharedFont && !extendedMemory) {
-			patchTwlFontLoad(0x02042A20, 0x02023704);
+			patchTwlFontLoad(true, 0x02042A20, 0x02023704);
 			*(u32*)0x02042A6C = 0xE1A00000; // nop
 		}
 		setBL(0x02047E20, (u32)dsiSaveCreate);
@@ -21648,7 +21650,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchInitDSiWare(0x02017580, heapEnd);
 		patchUserSettingsReadDSiWare(0x02018B64);
 		if (useSharedFont && !extendedMemory) {
-			patchTwlFontLoad(0x020383C4, 0x020190A8);
+			patchTwlFontLoad(true, 0x020383C4, 0x020190A8);
 			*(u32*)0x02038410 = 0xE1A00000; // nop
 		}
 		setBL(0x0203D7C4, (u32)dsiSaveCreate);
@@ -21863,7 +21865,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		// *(u32*)0x0203EA70 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
 		if (useSharedFont) {
 			if (!extendedMemory) {
-				patchTwlFontLoad(0x020330EC, 0x0201ACB0);
+				patchTwlFontLoad(true, 0x020330EC, 0x0201ACB0);
 			}
 		} else {
 			*(u32*)0x02040240 = 0xE1A00000; // nop (Skip Manual screen)
@@ -21880,7 +21882,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchUserSettingsReadDSiWare(0x0201A71C);
 		if (useSharedFont) {
 			if (!extendedMemory) {
-				patchTwlFontLoad(0x020330C8, 0x0201AC8C);
+				patchTwlFontLoad(true, 0x020330C8, 0x0201AC8C);
 			}
 		} else {
 			*(u32*)0x02040460 = 0xE1A00000; // nop (Skip Manual screen)
@@ -21922,7 +21924,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		useSharedFont = (twlFontFound && debugOrMep);
 		if (useSharedFont) {
 			if (!extendedMemory) {
-				patchTwlFontLoad(0x0201DDF0, 0x02018120);
+				patchTwlFontLoad(true, 0x0201DDF0, 0x02018120);
 			}
 		} else {
 			*(u32*)0x020051C8 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
@@ -21957,7 +21959,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		useSharedFont = (twlFontFound && debugOrMep);
 		if (useSharedFont) {
 			if (!extendedMemory) {
-				patchTwlFontLoad(0x0201DC78, 0x02017FF0);
+				patchTwlFontLoad(true, 0x0201DC78, 0x02017FF0);
 			}
 		} else {
 			*(u32*)0x02005190 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
@@ -21991,7 +21993,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		useSharedFont = (twlFontFound && debugOrMep);
 		if (useSharedFont) {
 			if (!extendedMemory) {
-				patchTwlFontLoad(0x02035658, 0x02017FCC);
+				patchTwlFontLoad(true, 0x02035658, 0x02017FCC);
 			}
 		} else {
 			*(u32*)0x020051E8 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
@@ -22194,7 +22196,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		useSharedFont = (twlFontFound && debugOrMep);
 		if (useSharedFont) {
 			if (!extendedMemory) {
-				patchTwlFontLoad(0x020336CC, 0x0201AE24);
+				patchTwlFontLoad(true, 0x020336CC, 0x0201AE24);
 			}
 		} else {
 			*(u32*)0x02005254 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
@@ -22437,7 +22439,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchUserSettingsReadDSiWare(0x02015DF8);
 		if (useSharedFont) {
 			if (!extendedMemory) {
-				patchTwlFontLoad(0x02034C70, 0x02016378);
+				patchTwlFontLoad(true, 0x02034C70, 0x02016378);
 			}
 		} else {
 			*(u32*)0x02034E4C = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
@@ -22902,7 +22904,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020210DC = 0xE12FFF1E; // bx lr
 		if (useSharedFont) {
 			/* if (!extendedMemory) {
-				patchTwlFontLoad(0x02037E44, 0x020212C0);
+				patchTwlFontLoad(true, 0x02037E44, 0x020212C0);
 			} */
 		} else {
 			*(u32*)0x020455E0 = 0xE1A00000; // nop (Skip Manual screen)
@@ -22928,7 +22930,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0202259C, (u32)dsiSaveRead);
 		setBL(0x020225D4, (u32)dsiSaveClose);
 		/* if (useSharedFont && !extendedMemory) {
-			patchTwlFontLoad(0x0201CAA4, 0x02016F14);
+			patchTwlFontLoad(true, 0x0201CAA4, 0x02016F14);
 		} */
 	}
 
@@ -22952,7 +22954,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x020272C0-offsetChangeN, newLoadCode);
 		if (useSharedFont) {
 			if (!extendedMemory) {
-				patchTwlFontLoad(0x0201E474-offsetChange, 0x0205819C-offsetChange2);
+				patchTwlFontLoad(true, 0x0201E474-offsetChange, 0x0205819C-offsetChange2);
 			}
 		} else {
 			*(u32*)(0x0201E3E4-offsetChange) = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
@@ -23026,7 +23028,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02031040+offsetChange, (u32)dsiSaveClose);
 		setBL(0x0203105C+offsetChange, (u32)dsiSaveClose);
 		if (useSharedFont && !extendedMemory) {
-			patchTwlFontLoad(0x02031158+offsetChange, 0x02019548);
+			patchTwlFontLoad(true, 0x02031158+offsetChange, 0x02019548);
 		}
 	}
 
@@ -23065,7 +23067,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0203798C, (u32)dsiSaveClose);
 		setBL(0x020379A8, (u32)dsiSaveClose);
 		if (useSharedFont && !extendedMemory) {
-			patchTwlFontLoad(0x02037AA4, 0x0201C49C);
+			patchTwlFontLoad(true, 0x02037AA4, 0x0201C49C);
 		}
 	}
 
@@ -23695,7 +23697,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchUserSettingsReadDSiWare(0x02018A98+offsetChange);
 		/* if (useSharedFont) {
 			if (!extendedMemory) {
-				patchTwlFontLoad(0x020371A0+offsetChange2, 0x02019008+offsetChange);
+				patchTwlFontLoad(true, 0x020371A0+offsetChange2, 0x02019008+offsetChange);
 			}
 		} else { */
 			*(u32*)(0x0201DD98+offsetChange) = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
@@ -24014,7 +24016,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchInitDSiWare(0x02022454, heapEnd);
 		patchUserSettingsReadDSiWare(0x02023C10);
 		if (useSharedFont && !extendedMemory) {
-			patchTwlFontLoad(0x0203FBCC, 0x02024154);
+			patchTwlFontLoad(true, 0x0203FBCC, 0x02024154);
 			*(u32*)0x0203FC18 = 0xE1A00000; // nop
 		}
 		setBL(0x0204D990, (u32)dsiSaveCreate);
@@ -24046,7 +24048,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchInitDSiWare(0x02017CA4, heapEnd);
 		patchUserSettingsReadDSiWare(0x02019450);
 		if (useSharedFont && !extendedMemory) {
-			patchTwlFontLoad(0x02033608, 0x02019C10);
+			patchTwlFontLoad(true, 0x02033608, 0x02019C10);
 			*(u32*)0x02033654 = 0xE1A00000; // nop
 		}
 		setBL(0x02040644, (u32)dsiSaveCreate);
@@ -24292,7 +24294,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 
 		/* if (useSharedFont && !extendedMemory) {
-			patchTwlFontLoad(0x0204F2C0, 0x02021954);
+			patchTwlFontLoad(true, 0x0204F2C0, 0x02021954);
 			*(u32*)0x0204F31C = 0xE1A00000; // nop
 		} */
 
@@ -24528,7 +24530,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0201317C = 0xE1A00000; // nop
 		/* if (useSharedFont) {
 			if (!extendedMemory && expansionPakFound) {
-				patchTwlFontLoad(0x02012F14, 0x02073BAC);
+				patchTwlFontLoad(true, 0x02012F14, 0x02073BAC);
 			}
 		} else { */
 			*(u32*)0x02013184 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
@@ -24585,7 +24587,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02013758 = 0xE1A00000; // nop
 		/* if (useSharedFont) {
 			if (!extendedMemory && expansionPakFound) {
-				patchTwlFontLoad(0x020134FC, 0x02076F4C);
+				patchTwlFontLoad(true, 0x020134FC, 0x02076F4C);
 			}
 		} else { */
 			*(u32*)0x02013760 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
@@ -24616,7 +24618,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		useSharedFont = (twlFontFound && debugOrMep);
 		if (useSharedFont) {
 			if (!extendedMemory) {
-				patchTwlFontLoad(0x02039254, 0x02019DE4);
+				patchTwlFontLoad(true, 0x02039254, 0x02019DE4);
 			}
 		} else {
 			*(u32*)0x020050F4 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
@@ -24648,7 +24650,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020050CC = 0xE1A00000; // nop
 		if (useSharedFont) {
 			if (!extendedMemory) {
-				patchTwlFontLoad(0x0203A290, 0x0201A460);
+				patchTwlFontLoad(true, 0x0203A290, 0x0201A460);
 			}
 		} else {
 			*(u32*)0x02005110 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
@@ -24953,7 +24955,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		if (ndsHeader->romversion == 1) {
 			if (useSharedFont) {
 				if (!extendedMemory && expansionPakFound) {
-					patchTwlFontLoad(0x02020200, 0x020C5348);
+					patchTwlFontLoad(true, 0x02020200, 0x020C5348);
 				}
 			} else {
 				*(u32*)0x0200698C = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
@@ -24985,7 +24987,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		} else {
 			if (useSharedFont) {
 				if (!extendedMemory && expansionPakFound) {
-					patchTwlFontLoad(0x020208D0, 0x020ADBA4);
+					patchTwlFontLoad(true, 0x020208D0, 0x020ADBA4);
 				}
 			} else {
 				*(u32*)0x0200695C = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
@@ -25022,7 +25024,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		useSharedFont = (twlFontFound && debugOrMep);
 		if (useSharedFont) {
 			if (!extendedMemory && expansionPakFound) {
-				patchTwlFontLoad(0x0202024C, 0x020C5394);
+				patchTwlFontLoad(true, 0x0202024C, 0x020C5394);
 			}
 		} else {
 			*(u32*)0x0200698C = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
@@ -25100,7 +25102,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		useSharedFont = (twlFontFound && extendedMemory);
 		if (useSharedFont) {
 			/* if (!extendedMemory) {
-				patchTwlFontLoad(0x02005458, 0x020391EC);
+				patchTwlFontLoad(true, 0x02005458, 0x020391EC);
 			} */
 		} else {
 			*(u32*)0x0200509C = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
@@ -25132,7 +25134,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		useSharedFont = (twlFontFound && extendedMemory);
 		if (useSharedFont) {
 			/* if (!extendedMemory) {
-				patchTwlFontLoad(0x0200541C, 0x020425B8);
+				patchTwlFontLoad(true, 0x0200541C, 0x020425B8);
 			} */
 		} else {
 			*(u32*)0x0200510C = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
@@ -25607,7 +25609,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02014720 = 0xE1A00000; // nop
 		patchInitDSiWare(0x0201A04C, heapEnd);
 		if (useSharedFont && !extendedMemory) {
-			patchTwlFontLoad(0x0201FE10, 0x0201BB4C);
+			patchTwlFontLoad(true, 0x0201FE10, 0x0201BB4C);
 		}
 		*(u32*)0x0201FF54 = 0xE1A00000; // nop
 		*(u32*)0x0201FF6C = 0xE1A00000; // nop
@@ -25896,7 +25898,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		// }
 		if (romTid[3] == 'E') {
 			/* if (useSharedFont && !extendedMemory && expansionPakFound) {
-				patchTwlFontLoad(0x02059574, 0x0201FDD0);
+				patchTwlFontLoad(true, 0x02059574, 0x0201FDD0);
 			} */
 			setBL(0x0205A768, (u32)dsiSaveOpenR);
 			setBL(0x0205A778, (u32)dsiSaveGetLength);
@@ -25920,7 +25922,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			*(u32*)0x0205B39C = 0xE3A00000; // mov r0, #0
 		} else {
 			/* if (useSharedFont && !extendedMemory && expansionPakFound) {
-				patchTwlFontLoad(0x02059560, 0x0201FDD0);
+				patchTwlFontLoad(true, 0x02059560, 0x0201FDD0);
 			} */
 			setBL(0x0205A754, (u32)dsiSaveOpenR);
 			setBL(0x0205A764, (u32)dsiSaveGetLength);
@@ -26381,7 +26383,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			*(u32*)((romTid[3] == 'E') ? 0x02029070 : 0x02029090) = 0xE1A00000; // nop (Disable audio)
 		}
 		if (useSharedFont && !extendedMemory) {
-			patchTwlFontLoad((romTid[3] == 'E') ? 0x02046994 : 0x020469B0, 0x0201AC1C);
+			patchTwlFontLoad(true, (romTid[3] == 'E') ? 0x02046994 : 0x020469B0, 0x0201AC1C);
 		}
 	}
 
@@ -26467,7 +26469,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0202BE5C = 0xE1A00000; // nop
 		*(u32*)0x0202BE64 = 0xE1A00000; // nop
 		if (useSharedFont && !extendedMemory) {
-			patchTwlFontLoad(0x02049E68, 0x0201DCC0);
+			patchTwlFontLoad(true, 0x02049E68, 0x0201DCC0);
 			*(u32*)0x02049EB0 = 0xE3A04601; // mov r4, #0x100000
 		}
 	}
@@ -26574,7 +26576,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchInitDSiWare(0x0201A410, heapEnd);
 		patchUserSettingsReadDSiWare(0x0201BAE8);
 		if (useSharedFont && !extendedMemory) {
-			patchTwlFontLoad(0x0203AAD0, 0x0201C068);
+			patchTwlFontLoad(true, 0x0203AAD0, 0x0201C068);
 		}
 		setBL(0x0203FB98, (u32)dsiSaveOpen);
 		setBL(0x0203FBB0, (u32)dsiSaveGetLength);
@@ -26761,7 +26763,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchUserSettingsReadDSiWare(0x02027A48);
 		if (useSharedFont) {
 			if (!extendedMemory) {
-				patchTwlFontLoad(0x0209AB60, 0x02027F8C);
+				patchTwlFontLoad(true, 0x0209AB60, 0x02027F8C);
 				if (expansionPakFound) {
 					*(u32*)0x0209ABAC = 0xE1A00000; // nop
 				}
@@ -26792,7 +26794,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchUserSettingsReadDSiWare(0x02027114);
 		if (useSharedFont) {
 			if (!extendedMemory) {
-				patchTwlFontLoad(0x0209AB60, 0x02027F8C);
+				patchTwlFontLoad(true, 0x0209AB60, 0x02027F8C);
 				if (expansionPakFound) {
 					*(u32*)0x02099B1C = 0xE1A00000; // nop
 				}
@@ -26819,7 +26821,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0204F240 = 0xE3A00000; // mov r0, #0
 		/* if (useSharedFont) {
 			if (!extendedMemory && expansionPakFound) {
-				patchTwlFontLoad(0x02050020, 0x02072F28);
+				patchTwlFontLoad(true, 0x02050020, 0x02072F28);
 			}
 		} else { */
 			*(u32*)0x02050114 = 0xE12FFF1E; // bx lr (Skip Manual screen)
@@ -27203,7 +27205,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 		if (useSharedFont) {
 			if (!extendedMemory && expansionPakFound) {
-				patchTwlFontLoad(0x02028610, 0x02018FC8);
+				patchTwlFontLoad(true, 0x02028610, 0x02018FC8);
 			}
 		} else {
 			*(u32*)0x02005084 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
@@ -27513,7 +27515,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02032054, (u32)dsiSaveClose);
 		if (useSharedFont) {
 			if (!extendedMemory) {
-				patchTwlFontLoad(0x02032D6C, 0x02019190);
+				patchTwlFontLoad(true, 0x02032D6C, 0x02019190);
 			}
 		} else {
 			*(u32*)0x02032BE8 = 0xE12FFF1E; // bx lr (Disable NFTR loading from TWLNAND)
@@ -27525,7 +27527,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		useSharedFont = (twlFontFound && debugOrMep);
 		if (useSharedFont) {
 			if (!extendedMemory) {
-				patchTwlFontLoad(0x02033018, 0x020194B0);
+				patchTwlFontLoad(true, 0x02033018, 0x020194B0);
 			}
 		} else {
 			*(u32*)0x020055A0 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
@@ -27577,7 +27579,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02069BE8, (u32)dsiSaveClose);
 		*(u32*)0x02069F94 = 0xE1A00000; // nop
 		if (useSharedFont && !extendedMemory) {
-			patchTwlFontLoad(0x020829B4, 0x02029298);
+			patchTwlFontLoad(true, 0x020829B4, 0x02029298);
 			if (expansionPakFound) {
 				*(u32*)0x02082A00 = 0xE1A00000; // nop
 			}
@@ -27610,7 +27612,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02065F8C, (u32)dsiSaveClose);
 		*(u32*)0x02066338 = 0xE1A00000; // nop
 		if (useSharedFont && !extendedMemory) {
-			patchTwlFontLoad(0x0207ED58, 0x0202566C);
+			patchTwlFontLoad(true, 0x0207ED58, 0x0202566C);
 			if (expansionPakFound) {
 				*(u32*)0x0207EDA4 = 0xE1A00000; // nop
 			}
@@ -27764,7 +27766,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02022630 = 0xE1A00000; // nop
 		/* if (useSharedFont) {
 			if (!extendedMemory) {
-				patchTwlFontLoad(0x02045544, 0x020188F8);
+				patchTwlFontLoad(true, 0x02045544, 0x020188F8);
 			}
 		} else { */
 			*(u32*)0x02022634 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
@@ -27928,7 +27930,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0206710C, (u32)dsiSaveRead);
 		setBL(0x02067118, (u32)dsiSaveClose);
 		if (useSharedFont && !extendedMemory) {
-			patchTwlFontLoad(0x02090D50, 0x02028244);
+			patchTwlFontLoad(true, 0x02090D50, 0x02028244);
 		}
 	}
 

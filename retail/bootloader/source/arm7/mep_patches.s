@@ -1,6 +1,8 @@
 @---------------------------------------------------------------------------------
 	@.global lrStoreTestCode
 	.global mepHeapSetPatch
+	.global earlyTwlFontHeapAlloc
+	.global earlyTwlFontHeapAllocSize
 	.global twlFontHeapAlloc
 	.global twlFontHeapAllocSize
 	.global twlFontHeapAllocNoMep
@@ -37,6 +39,10 @@
 @	.word lrStoreTest
 mepHeapSetPatch:
 	.word mepHeapSetPatchFunc
+earlyTwlFontHeapAlloc:
+	.word earlyTwlFontHeapPtr
+earlyTwlFontHeapAllocSize:
+	.word earlyTwlFontHeapAllocFunc_end-earlyTwlFontHeapPtr
 twlFontHeapAlloc:
 	.word twlFontHeapPtr
 twlFontHeapAllocSize:
@@ -120,6 +126,56 @@ mepHeapSetPatchFunc:
 _blx_mepHeapSetOrgFunc:
 	bx	r6
 @---------------------------------------------------------------------------------
+
+@---------------------------------------------------------------------------------
+earlyTwlFontHeapPtr: .word 0x09000000
+earlyTwlFontHeapAllocFunc:
+@---------------------------------------------------------------------------------
+	stmfd   sp!, {r3-r6,lr}
+
+	mov r6, #0
+	cmp r2, #0x1000
+	movlt r2, r0
+	blt earlyTwlFontFilenameCheck
+	cmp r2, #0x02000000
+	blt earlyTwlFontFilenameCheck
+	cmpge r2, #0x02800000
+	movlt r2, r0
+earlyTwlFontFilenameCheck:
+	ldr r3, =0x02FFF100 @ filesize pointer list
+	ldr r5, [r3, r6]
+	cmp r5, r2
+	beq earlyTwlFontUseOldHeapPtr
+	cmp r5, #0
+	streq r2, [r3, r6]
+	beq earlyTwlFontLastHeapPtrUpdate
+	add r6, #4
+	b earlyTwlFontFilenameCheck
+
+earlyTwlFontLastHeapPtrUpdate:
+	ldr r3, =0x02FFF1FC @ last heap pointer
+	ldr r4, [r3]
+	cmp r4, #0
+	ldreq r4, earlyTwlFontHeapPtr
+	beq earlyTwlFontLastHeapPtrStr
+	add r4, r2
+	add r4, #0x40000
+earlyTwlFontLastHeapPtrStr:
+	str r4, [r3]
+
+@ save heap ponter
+	ldr r3, =0x02FFF180 @ heap pointers
+	str r4, [r3, r6]
+	mov r0, r4
+	ldmfd   sp!, {r3-r6,pc}
+
+earlyTwlFontUseOldHeapPtr:
+	ldr r3, =0x02FFF180 @ heap pointers
+	ldr r0, [r3, r6]
+	ldmfd   sp!, {r3-r6,pc}
+.pool
+@---------------------------------------------------------------------------------
+earlyTwlFontHeapAllocFunc_end:
 
 @---------------------------------------------------------------------------------
 twlFontHeapPtr: .word 0x09000000
