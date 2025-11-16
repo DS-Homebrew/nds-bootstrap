@@ -12868,27 +12868,6 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		tonccpy((u32*)0x0203D050, dsiSaveGetResultCode, 0xC);
 	}
 
-	// Saikyou Ginsei Shougi (Japan)
-	// Saving not supported due to using more than one file in filesystem
-	else if (strcmp(romTid, "KG4J") == 0 && !twlFontFound) {
-		*(u32*)0x020455E0 = 0xE1A00000; // nop (Skip Manual screen)
-	}
-
-	// Sakurai Miho No Kouno: Megami Serapi Uranai (Japan)
-	else if (strcmp(romTid, "K3PJ") == 0 && saveOnFlashcardNtr) {
-		if (!twlFontFound) {
-			*(u32*)0x020050B8 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
-		}
-		setBL(0x020224A0, (u32)dsiSaveCreate);
-		setBL(0x020224B0, (u32)dsiSaveOpen);
-		setBL(0x020224E0, (u32)dsiSaveWrite);
-		setBL(0x020224F8, (u32)dsiSaveClose);
-		setBL(0x02022570, (u32)dsiSaveOpen);
-		setBL(0x02022580, (u32)dsiSaveGetLength);
-		setBL(0x0202259C, (u32)dsiSaveRead);
-		setBL(0x020225D4, (u32)dsiSaveClose);
-	}
-
 	// Sagittarius-A-Star (Japan)
 	// Only the options are saved
 	else if (strcmp(romTid, "K8XJ") == 0 && saveOnFlashcardNtr) {
@@ -12937,6 +12916,27 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02054EA4 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x02054EC4 = 0xE1A00000; // nop
 		*(u32*)0x02054EF0 = 0xE1A00000; // nop
+	}
+
+	// Saikyou Ginsei Shougi (Japan)
+	// Saving not supported due to using more than one file in filesystem
+	else if (strcmp(romTid, "KG4J") == 0 && !twlFontFound) {
+		*(u32*)0x020455E0 = 0xE1A00000; // nop (Skip Manual screen)
+	}
+
+	// Sakurai Miho No Kouno: Megami Serapi Uranai (Japan)
+	else if (strcmp(romTid, "K3PJ") == 0 && saveOnFlashcardNtr) {
+		if (!twlFontFound) {
+			*(u32*)0x020050B8 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		}
+		setBL(0x020224A0, (u32)dsiSaveCreate);
+		setBL(0x020224B0, (u32)dsiSaveOpen);
+		setBL(0x020224E0, (u32)dsiSaveWrite);
+		setBL(0x020224F8, (u32)dsiSaveClose);
+		setBL(0x02022570, (u32)dsiSaveOpen);
+		setBL(0x02022580, (u32)dsiSaveGetLength);
+		setBL(0x0202259C, (u32)dsiSaveRead);
+		setBL(0x020225D4, (u32)dsiSaveClose);
 	}
 
 	// Save the Turtles (USA)

@@ -22824,53 +22824,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
-	// Saikyou Ginsei Shougi (Japan)
-	// Saving not supported due to using more than one file in filesystem
-	else if (strcmp(romTid, "KG4J") == 0) {
-		useSharedFont = (twlFontFound && extendedMemory);
-		*(u32*)0x0201125C = 0xE1A00000; // nop
-		*(u32*)0x02014F20 = 0xE1A00000; // nop
-		patchInitDSiWare(0x0201FAB4, heapEnd);
-		if (!extendedMemory) {
-			*(u32*)0x0201FE24 = *(u32*)0x02004FC0;
-		}
-		patchUserSettingsReadDSiWare(0x020210A4);
-		*(u32*)0x020210CC = wirelessReturnCodeArm;
-		*(u32*)0x020210D0 = 0xE12FFF1E; // bx lr
-		*(u32*)0x020210D8 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x020210DC = 0xE12FFF1E; // bx lr
-		if (useSharedFont) {
-			/* if (!extendedMemory) {
-				patchTwlFontLoad(0x02037E44, 0x020212C0);
-			} */
-		} else {
-			*(u32*)0x020455E0 = 0xE1A00000; // nop (Skip Manual screen)
-		}
-	}
-
-	// Sakurai Miho No Kouno: Megami Serapi Uranai (Japan)
-	else if (strcmp(romTid, "K3PJ") == 0) {
-		// useSharedFont = (twlFontFound && debugOrMep);
-		// if (!useSharedFont) {
-			*(u32*)0x020050B8 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
-		// }
-		*(u32*)0x0200B434 = 0xE1A00000; // nop
-		*(u32*)0x0200E6AC = 0xE1A00000; // nop
-		patchInitDSiWare(0x020153BC, heapEnd);
-		patchUserSettingsReadDSiWare(0x020169A4);
-		setBL(0x020224A0, (u32)dsiSaveCreate);
-		setBL(0x020224B0, (u32)dsiSaveOpen);
-		setBL(0x020224E0, (u32)dsiSaveWrite);
-		setBL(0x020224F8, (u32)dsiSaveClose);
-		setBL(0x02022570, (u32)dsiSaveOpen);
-		setBL(0x02022580, (u32)dsiSaveGetLength);
-		setBL(0x0202259C, (u32)dsiSaveRead);
-		setBL(0x020225D4, (u32)dsiSaveClose);
-		/* if (useSharedFont && !extendedMemory) {
-			patchTwlFontLoad(0x0201CAA4, 0x02016F14);
-		} */
-	}
-
 	// Sagittarius-A-Star (Japan)
 	// Only the options are saved
 	else if (strcmp(romTid, "K8XJ") == 0) {
@@ -22930,6 +22883,53 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02054EA4 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x02054EC4 = 0xE1A00000; // nop
 		*(u32*)0x02054EF0 = 0xE1A00000; // nop
+	}
+
+	// Saikyou Ginsei Shougi (Japan)
+	// Saving not supported due to using more than one file in filesystem
+	else if (strcmp(romTid, "KG4J") == 0) {
+		useSharedFont = (twlFontFound && extendedMemory);
+		*(u32*)0x0201125C = 0xE1A00000; // nop
+		*(u32*)0x02014F20 = 0xE1A00000; // nop
+		patchInitDSiWare(0x0201FAB4, heapEnd);
+		if (!extendedMemory) {
+			*(u32*)0x0201FE24 = *(u32*)0x02004FC0;
+		}
+		patchUserSettingsReadDSiWare(0x020210A4);
+		*(u32*)0x020210CC = wirelessReturnCodeArm;
+		*(u32*)0x020210D0 = 0xE12FFF1E; // bx lr
+		*(u32*)0x020210D8 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x020210DC = 0xE12FFF1E; // bx lr
+		if (useSharedFont) {
+			/* if (!extendedMemory) {
+				patchTwlFontLoad(0x02037E44, 0x020212C0);
+			} */
+		} else {
+			*(u32*)0x020455E0 = 0xE1A00000; // nop (Skip Manual screen)
+		}
+	}
+
+	// Sakurai Miho No Kouno: Megami Serapi Uranai (Japan)
+	else if (strcmp(romTid, "K3PJ") == 0) {
+		// useSharedFont = (twlFontFound && debugOrMep);
+		// if (!useSharedFont) {
+			*(u32*)0x020050B8 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		// }
+		*(u32*)0x0200B434 = 0xE1A00000; // nop
+		*(u32*)0x0200E6AC = 0xE1A00000; // nop
+		patchInitDSiWare(0x020153BC, heapEnd);
+		patchUserSettingsReadDSiWare(0x020169A4);
+		setBL(0x020224A0, (u32)dsiSaveCreate);
+		setBL(0x020224B0, (u32)dsiSaveOpen);
+		setBL(0x020224E0, (u32)dsiSaveWrite);
+		setBL(0x020224F8, (u32)dsiSaveClose);
+		setBL(0x02022570, (u32)dsiSaveOpen);
+		setBL(0x02022580, (u32)dsiSaveGetLength);
+		setBL(0x0202259C, (u32)dsiSaveRead);
+		setBL(0x020225D4, (u32)dsiSaveClose);
+		/* if (useSharedFont && !extendedMemory) {
+			patchTwlFontLoad(0x0201CAA4, 0x02016F14);
+		} */
 	}
 
 	// Save the Turtles (USA)
