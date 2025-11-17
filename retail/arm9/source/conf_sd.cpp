@@ -847,11 +847,11 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 	conf->romSize = getFileSize(conf->ndsPath);
 
-	{
+	/* {
 		struct statvfs st;
 		statvfs(conf->gameOnFlashcard ? "fat:/" : "sd:/", &st);
 		conf->cacheBlockSize = (st.f_bsize < (32 << 10)) ? 0x4000 : 0x8000;
-	}
+	} */
 
 	char romTid[5] = {0};
 	u8 unitCode = 0;
@@ -1080,6 +1080,8 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	} else {
 		newRegion = conf->region;
 	}
+
+	conf->cacheBlockSize = (memcmp(romTid, "B3R", 3) == 0) ? 0x8000 : 0x4000;
 
 	const bool displayEsrb = (newRegion == 1 && memcmp(romTid, "UBR", 3) != 0 && memcmp(romTid, "HND", 3) != 0 && memcmp(romTid, "HNE", 3) != 0);
 
