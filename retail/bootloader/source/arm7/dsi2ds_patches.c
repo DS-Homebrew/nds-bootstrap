@@ -21607,6 +21607,66 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchUserSettingsReadDSiWare(0x020C4030);
 	}
 
+	// Puzzle Fever (USA)
+	else if (strcmp(romTid, "KKEE") == 0) {
+		*(u32*)0x020050A8 = 0xE1A00000; // nop
+		*(u32*)0x0203B110 = 0xE1A00000; // nop
+		*(u32*)0x0203EE98 = 0xE1A00000; // nop
+		patchInitDSiWare(0x02057D58, heapEnd);
+		*(u32*)0x02059228 = wirelessReturnCodeArm;
+		*(u32*)0x0205922C = 0xE12FFF1E; // bx lr
+		*(u32*)0x02059234 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02059238 = 0xE12FFF1E; // bx lr
+		for (u32 i = 0x021C1438; i < 0x021F7440; i += 4) {
+			*(u32*)i = 0xE12FFF1E; // bx lr
+		}
+
+		// Overlay code patch (Part of .pck file)
+		/* if (*(u32*)0x020ED1DC == 0xEBFD3E95) {
+			setBL(0x020ED1DC, (u32)dsiSaveOpenR);
+			setBL(0x020ED1EC, (u32)dsiSaveGetLength);
+			setBL(0x020ED25C, (u32)dsiSaveRead);
+			setBL(0x020ED264, (u32)dsiSaveClose);
+			setBL(0x020ED334, (u32)dsiSaveOpen);
+			setBL(0x020ED364, (u32)dsiSaveWrite);
+			setBL(0x020ED36C, (u32)dsiSaveClose);
+			setBL(0x020F37DC, (u32)dsiSaveCreate);
+			setBL(0x020F37F8, (u32)dsiSaveGetResultCode);
+			*(u32*)0x020F381C = 0xE1A00000; // nop
+			setBL(0x020F3828, (u32)dsiSaveCreate);
+		} */
+	}
+
+	// Puzzle Fever (Europe)
+	else if (strcmp(romTid, "K5VP") == 0) {
+		*(u32*)0x020050A8 = 0xE1A00000; // nop
+		*(u32*)0x0203B15C = 0xE1A00000; // nop
+		*(u32*)0x0203EEE4 = 0xE1A00000; // nop
+		patchInitDSiWare(0x02057DA4, heapEnd);
+		*(u32*)0x02059274 = wirelessReturnCodeArm;
+		*(u32*)0x02059278 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02059280 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02059284 = 0xE12FFF1E; // bx lr
+		for (u32 i = 0x021C1518; i < 0x021F7520; i += 4) {
+			*(u32*)i = 0xE12FFF1E; // bx lr
+		}
+
+		// Overlay code patch (Part of .pck file)
+		/* if (*(u32*)0x020ED2BC == 0xEBFD3E70) {
+			setBL(0x020ED2BC, (u32)dsiSaveOpenR);
+			setBL(0x020ED2CC, (u32)dsiSaveGetLength);
+			setBL(0x020ED33C, (u32)dsiSaveRead);
+			setBL(0x020ED344, (u32)dsiSaveClose);
+			setBL(0x020ED414, (u32)dsiSaveOpen);
+			setBL(0x020ED444, (u32)dsiSaveWrite);
+			setBL(0x020ED44C, (u32)dsiSaveClose);
+			setBL(0x020F38BC, (u32)dsiSaveCreate);
+			setBL(0x020F38D8, (u32)dsiSaveGetResultCode);
+			*(u32*)0x020F38FC = 0xE1A00000; // nop
+			setBL(0x020F3908, (u32)dsiSaveCreate);
+		} */
+	}
+
 	// Puzzle Rocks (USA)
 	// Audio does not play
 	else if (strcmp(romTid, "KPLE") == 0) {
