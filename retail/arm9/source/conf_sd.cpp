@@ -2175,6 +2175,8 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 					&&	strncmp(romTid, "KE3", 3) != 0 // PictureBook Games: The Royal Bluff
 					&&	strncmp(romTid, "KPM", 3) != 0 // Pomjong
 					&&	strncmp(romTid, "KLR", 3) != 0 // Puffins: Let's Race!
+					&&	strncmp(romTid, "KKE", 3) != 0 // Puzzle Fever (USA)
+					&&	strncmp(romTid, "K5V", 3) != 0 // Puzzle Fever (Europe)
 					&&	strncmp(romTid, "KLX", 3) != 0 // Redau Shirizu: Gunjin Shougi
 					&&	strncmp(romTid, "KG4", 3) != 0 // Saikyou Ginsei Shougi
 					&&	strncmp(romTid, "KRW", 3) != 0 // Sea Battle
