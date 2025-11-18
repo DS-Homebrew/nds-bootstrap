@@ -9910,7 +9910,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Dragon's Lair II: Time Warp (Europe, Australia)
-	// Crashes on company logos (Loads large garbage data?)
 	else if (strcmp(romTid, "KLYV") == 0) {
 		*(u32*)0x020050EC = 0xE1A00000; // nop
 		*(u32*)0x020051E0 = 0xE1A00000; // nop (Skip Manual screen)
@@ -9946,7 +9945,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02020438 = 0xE1A00000; // nop
 		*(u32*)0x02020444 = 0xE1A00000; // nop
 		*(u32*)0x02033F64 = 0xE1A00000; // nop
-		*(u32*)0x02036AE8 = 0xE1A00000; // nop
 		*(u32*)0x0203740C = 0xE1A00000; // nop
 		patchInitDSiWare(0x0203C95C, heapEnd);
 		*(u32*)0x0203CCE8 = 0x020894E0;
