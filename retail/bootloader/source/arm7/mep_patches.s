@@ -478,68 +478,31 @@ marioCalcStrbForSlot2Func:
 	ldr r4, =0x01FF8000
 
 	mov r2, r5
-	ldr r3, =0x01000000
+	mov r3, #0xF
+	and r2, r3
 marioCalcStrbForSlot2_loop:
-	cmp r2, r3
-	blt marioCalcStrbForSlot2_2
-	sub r2, r2, r3
-	b marioCalcStrbForSlot2_loop
-
-marioCalcStrbForSlot2_2:
-	ldr r3, =0x00100000
-marioCalcStrbForSlot2_loop2:
-	cmp r2, r3
-	blt marioCalcStrbForSlot2_3
-	sub r2, r2, r3
-	b marioCalcStrbForSlot2_loop2
-
-marioCalcStrbForSlot2_3:
-	ldr r3, =0x00010000
-marioCalcStrbForSlot2_loop3:
-	cmp r2, r3
-	blt marioCalcStrbForSlot2_4
-	sub r2, r2, r3
-	b marioCalcStrbForSlot2_loop3
-
-marioCalcStrbForSlot2_4:
-	ldr r3, =0x00001000
-marioCalcStrbForSlot2_loop4:
-	cmp r2, r3
-	blt marioCalcStrbForSlot2_5
-	sub r2, r2, r3
-	b marioCalcStrbForSlot2_loop4
-
-marioCalcStrbForSlot2_5:
-	ldr r3, =0x00000100
-marioCalcStrbForSlot2_loop5:
-	cmp r2, r3
-	blt marioCalcStrbForSlot2_loop6
-	sub r2, r2, r3
-	b marioCalcStrbForSlot2_loop5
-
-marioCalcStrbForSlot2_loop6:
 	cmp r2, #0
 	beq marioCalcStrbForSlot2_writeByte0
 	cmp r2, #1
 	beq marioCalcStrbForSlot2_writeByte1
-	sub r2, r2, #2
-	b marioCalcStrbForSlot2_loop6
+	sub r2, #2
+	b marioCalcStrbForSlot2_loop
 
 marioCalcStrbForSlot2_writeByte0:
 	strb r0, [r4]
 	ldrh r0, [r4]
 
 	strh r0, [r5]
-	add r5, r5, #1
+	add r5, #1
 	pop {r2-r4, pc}
 
 marioCalcStrbForSlot2_writeByte1:
 	strb r0, [r4, #1]
 	ldrh r0, [r4]
 
-	sub r5, r5, #1
+	sub r5, #1
 	strh r0, [r5]
-	add r5, r5, #2
+	add r5, #2
 
 	mov r0, #0
 	strh r0, [r4]
