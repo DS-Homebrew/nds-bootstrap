@@ -13867,23 +13867,48 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Jazzy Billiards (USA)
-	// Saving not supported due to code taking place in the overlays
+	// Saving seems difficult to get working
 	else if (strcmp(romTid, "K9BE") == 0) {
 		if (!extendedMemory) {
 			*(u32*)0x020070CC = 0xE3A06816; // mov r6, #0x160000
 		}
 		*(u32*)0x020326A8 = 0xE1A00000; // nop
+		// tonccpy((u32*)0x0203333C, dsiSaveGetResultCode, 0xC); // Part of .pck file
 		*(u32*)0x020364BC = 0xE1A00000; // nop
 		patchInitDSiWare(0x0203F588, heapEnd);
 		*(u32*)0x0203F8F8 -= 0x30000;
 		patchUserSettingsReadDSiWare(0x02040AC8);
 		*(u32*)0x02046694 = wirelessReturnCodeArm;
 		*(u32*)0x02046698 = 0xE12FFF1E; // bx lr
+
+		// Overlay code patch (Part of .pck file)
+		/* if (*(u32*)0x0213B2A8 == 0xEBFBE2F4) {
+			setBL(0x0213B2A8, (u32)dsiSaveGetInfo);
+			setBL(0x0213B314, (u32)dsiSaveGetInfo);
+			*(u32*)0x0213B360 = 0xE1A00000; // nop
+			setBL(0x0213B370, (u32)dsiSaveCreate);
+			setBL(0x0213B380, (u32)dsiSaveOpen);
+			setBL(0x0213B3AC, (u32)dsiSaveSetLength);
+			setBL(0x0213B404, (u32)dsiSaveWrite);
+			setBL(0x0213B40C, (u32)dsiSaveClose);
+			*(u32*)0x0213B474 = 0xE3A00001; // mov r0, #1 (dsiSaveOpenDir)
+			*(u32*)0x0213B4B8 = 0xE1A00000; // nop (dsiSaveCloseDir)
+			setBL(0x0213B500, (u32)dsiSaveOpen);
+			setBL(0x0213B520, (u32)dsiSaveGetLength);
+			setBL(0x0213B530, (u32)dsiSaveRead);
+			setBL(0x0213B538, (u32)dsiSaveClose);
+			setBL(0x0213B5FC, (u32)dsiSaveGetInfo);
+			setBL(0x0213B608, (u32)dsiSaveCreate);
+			setBL(0x0213B618, (u32)dsiSaveOpen);
+			setBL(0x0213B648, (u32)dsiSaveSetLength);
+			setBL(0x0213B674, (u32)dsiSaveWrite);
+			setBL(0x0213B67C, (u32)dsiSaveClose);
+		} */
 	}
 
 	// Jazzy Billiards (Europe, Australia)
 	// Jazzy Billiards (Korea)
-	// Saving not supported due to code taking place in the overlays
+	// Saving seems difficult to get working
 	else if (strcmp(romTid, "K9BV") == 0 || strcmp(romTid, "K9BK") == 0) {
 		if (!extendedMemory) {
 			*(u32*)0x020070DC = 0xE3A06816; // mov r6, #0x160000
@@ -13898,7 +13923,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Jazzy Billiards (Japan)
-	// Saving not supported due to code taking place in the overlays
+	// Saving seems difficult to get working
 	else if (strcmp(romTid, "K9BJ") == 0) {
 		if (!extendedMemory) {
 			*(u32*)0x020070C8 = 0xE3A06816; // mov r6, #0x160000

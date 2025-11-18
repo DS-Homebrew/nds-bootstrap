@@ -7571,6 +7571,36 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020B9B94 = 0xE1A00000; // nop
 	}
 
+	/* // Jazzy Billiards (USA)
+	// Saving seems difficult to get working
+	else if (strcmp(romTid, "K9BE") == 0 && saveOnFlashcardNtr) {
+		tonccpy((u32*)0x0203333C, dsiSaveGetResultCode, 0xC); // Part of .pck file
+
+		// Overlay code patch (Part of .pck file)
+		if (*(u32*)0x0213B2A8 == 0xEBFBE2F4) {
+			setBL(0x0213B2A8, (u32)dsiSaveGetInfo);
+			setBL(0x0213B314, (u32)dsiSaveGetInfo);
+			*(u32*)0x0213B360 = 0xE1A00000; // nop
+			setBL(0x0213B370, (u32)dsiSaveCreate);
+			setBL(0x0213B380, (u32)dsiSaveOpen);
+			setBL(0x0213B3AC, (u32)dsiSaveSetLength);
+			setBL(0x0213B404, (u32)dsiSaveWrite);
+			setBL(0x0213B40C, (u32)dsiSaveClose);
+			*(u32*)0x0213B474 = 0xE3A00001; // mov r0, #1 (dsiSaveOpenDir)
+			*(u32*)0x0213B4B8 = 0xE1A00000; // nop (dsiSaveCloseDir)
+			setBL(0x0213B500, (u32)dsiSaveOpen);
+			setBL(0x0213B520, (u32)dsiSaveGetLength);
+			setBL(0x0213B530, (u32)dsiSaveRead);
+			setBL(0x0213B538, (u32)dsiSaveClose);
+			setBL(0x0213B5FC, (u32)dsiSaveGetInfo);
+			setBL(0x0213B608, (u32)dsiSaveCreate);
+			setBL(0x0213B618, (u32)dsiSaveOpen);
+			setBL(0x0213B648, (u32)dsiSaveSetLength);
+			setBL(0x0213B674, (u32)dsiSaveWrite);
+			setBL(0x0213B67C, (u32)dsiSaveClose);
+		}
+	} */
+
 	// JellyCar 2 (USA)
 	else if (strcmp(romTid, "KJYE") == 0) {
 		if (saveOnFlashcardNtr) {
