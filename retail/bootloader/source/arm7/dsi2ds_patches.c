@@ -18605,7 +18605,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0201F744 = 0xE1A00000; // nop
 		patchInitDSiWare(0x0202EC54, heapEndMaxForRetail2);
 		if (!extendedMemory) {
-			*(u32*)0x0202EFE0 -= 0x3A000;
+			*(u32*)0x0202EFE0 = *(u32*)0x0201DBC0;
 		}
 		patchUserSettingsReadDSiWare(0x02030430);
 		*(u32*)0x0203044C = wirelessReturnCodeArm;
