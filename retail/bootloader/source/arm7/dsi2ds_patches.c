@@ -19016,8 +19016,13 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}*/
 
 	// Nintendogs (China)
-	// Requires more than 8MB of RAM?
-	/*else if (strcmp(romTid, "KDOC") == 0 && extendedMemory) {
+	else if (strcmp(romTid, "KDOC") == 0) {
+		*(u32*)0x0201F808 = 0xE2441901; // sub r1, r4, #0x4000
+		*(u32*)0x0201F820 = 0xE2441901; // sub r1, r4, #0x4000
+		*(u32*)0x0201F828 = 0xE3A01901; // mov r1, #0x4000
+		*(u32*)0x0201F840 = 0xE2441901; // sub r1, r4, #0x4000
+		*(u32*)0x0201F848 = 0xE2800A02; // add r0, r0, #0x2000
+		*(u32*)0x0201F84C = 0xE3A01A02; // mov r1, #0x2000
 		*(u32*)0x0202A4FC = 0xE1A00000; // nop
 		*(u32*)0x0202A524 = 0xE1A00000; // nop
 		setBL(0x0202A6EC, (u32)dsiSaveSeek);
@@ -19053,18 +19058,14 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0202C408 = 0xE1A00000; // nop
 		*(u32*)0x020FD6AC = 0xE1A00000; // nop
 		*(u32*)0x021024D8 = 0xE1A00000; // nop
-		*(u32*)0x0210A34C = 0xE1A00000; // nop
-		*(u32*)0x0210C1D0 = 0xE1A00000; // nop
-		*(u32*)0x0210C1D4 = 0xE1A00000; // nop
-		*(u32*)0x0210C1E0 = 0xE1A00000; // nop
-		*(u32*)0x0210C324 = 0xE1A00000; // nop
-		patchHiHeapDSiWare(0x0210C380, heapEnd); // mov r0, #0x23E0000
+		patchInitDSiWare(0x0210C144, heapEnd);
+		*(u32*)0x0210C4B4 = *(u32*)0x021008A4;
 		*(u32*)0x0210D590 = wirelessReturnCodeArm;
 		*(u32*)0x0210D594 = 0xE12FFF1E; // bx lr
 		*(u32*)0x0210D59C = 0xE3A00000; // mov r0, #0
 		*(u32*)0x0210D5A0 = 0xE12FFF1E; // bx lr
 		*(u32*)0x0210D824 = 0xE3A00001; // mov r0, #1
-	}*/
+	}
 
 	// Nintendoji (Japan)
 	// Due to the B4DS DSiWare save implementation, save data is stored in both slots

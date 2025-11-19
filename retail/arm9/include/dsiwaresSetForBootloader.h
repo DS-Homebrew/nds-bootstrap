@@ -359,7 +359,7 @@ static const char dsiWareForBootloader3[][4] = {
 	"KAU", // Nintendo Countdown Calendar
 	"K2D", // Nintendo DSi + Internet
 	"HNI", // Nintendo DSi Camera (bootloaderi-exclusive)
-	"KDO", // Nintendogs (bootloaderi-exclusive)
+	"KDO", // Nintendogs
 	"K9K", // Nintendoji
 	"KJI", // Noroi no Game: Chi
 	"KG9", // Noroi no Game: Oku
