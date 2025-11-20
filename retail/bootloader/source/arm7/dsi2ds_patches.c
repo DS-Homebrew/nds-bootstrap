@@ -15394,24 +15394,35 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u16*)0x0204E796 = 0x2602; // movs r6, #2
 	}
 
+	// Libera Wing (USA)
 	// Libera Wing (Europe)
-	// Black screens
-	/*else if (strcmp(romTid, "KLWP") == 0) {
+	else if (strcmp(romTid, "KLIE") == 0 || strcmp(romTid, "KLWP") == 0) {
 		*(u32*)0x02016138 = 0xE1A00000; // nop
 		*(u32*)0x020195A8 = 0xE1A00000; // nop
-		*(u32*)0x0201ED70 = 0xE1A00000; // nop
-		*(u32*)0x02020B90 = 0xE1A00000; // nop
-		*(u32*)0x02020B94 = 0xE1A00000; // nop
-		*(u32*)0x02020BA0 = 0xE1A00000; // nop
-		*(u32*)0x02020D00 = 0xE1A00000; // nop
-		patchHiHeapDSiWare(0x02020D5C, heapEndExceed);
-		*(u32*)0x02020E90 = 0x020D7F40;
+		patchInitDSiWare(0x02020B04, heapEnd);
+		*(u32*)0x02020E90 = *(u32*)0x02004FD0;
 		patchUserSettingsReadDSiWare(0x020221CC);
 		*(u32*)0x02044668 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
-		*(u32*)0x0204585C = 0xE3A00001; // mov r0, #1
-		*(u32*)0x02045860 = 0xE12FFF1E; // bx lr
+		// *(u32*)0x0204585C = 0xE3A00001; // mov r0, #1
+		// *(u32*)0x02045860 = 0xE12FFF1E; // bx lr
+		setBL(0x02044834, (u32)dsiSaveOpen);
+		setBL(0x0204484C, (u32)dsiSaveRead);
+		setBL(0x02044860, (u32)dsiSaveClose);
+		setBL(0x020448B4, (u32)dsiSaveOpen);
+		setBL(0x020448CC, (u32)dsiSaveWrite);
+		setBL(0x020448E0, (u32)dsiSaveClose);
+		setBL(0x0204589C, (u32)dsiSaveCreate);
+		setBL(0x020458A4, (u32)dsiSaveGetResultCode);
+		*(u32*)0x020458FC = 0xE1A00000; // nop
+		*(u32*)0x02045960 = 0xE1A00000; // nop
+		*(u32*)0x02045974 = 0xE1A00000; // nop
+		*(u32*)0x020459A0 = 0xE1A00000; // nop
+		*(u32*)0x020459A8 = 0xE1A00000; // nop
+		*(u32*)0x020459B0 = 0xE1A00000; // nop
+		*(u32*)0x020464D4 = 0xE3A06601; // mov r6, #0x100000 (Shrink unknown heap from 0x500000)
+		*(u32*)0x020464F0 = 0xE2812601; // add r2, r1, #0x100000 (Shrink unknown heap from 0x500000)
 		*(u32*)0x020563F8 = 0xE1A00000; // nop
-	}*/
+	}
 
 	// Link 'n' Launch (USA)
 	// Link 'n' Launch (Europe, Australia)

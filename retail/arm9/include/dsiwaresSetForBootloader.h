@@ -298,7 +298,7 @@ static const char dsiWareForBootloader1[][4] = {
 	"KQ9", // The Legend of Zelda: Four Swords: Anniversary Edition
 	"KLD", // Legendary Wars: T-Rex Rumble
 	"K5C", // Letter Challenge
-	"KLW", // Libera Wing (bootloaderi-exclusive)
+	"KLI", "KLW", // Libera Wing
 	"KPT", // Link 'n' Launch
 	"KZB", // Little Red Riding Hood's Zombie BBQ
 	"KQ3", // Little Twin Stars (bootloaderi-exclusive)

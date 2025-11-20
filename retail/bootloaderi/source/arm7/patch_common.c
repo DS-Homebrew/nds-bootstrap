@@ -8455,14 +8455,29 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02027664, (u32)dsiSaveClose);
 	}
 
+	// Libera Wing (USA)
 	// Libera Wing (Europe)
-	else if (strcmp(romTid, "KLWP") == 0) {
+	else if (strcmp(romTid, "KLIE") == 0 || strcmp(romTid, "KLWP") == 0) {
 		if (!twlFontFound) {
 			*(u32*)0x02044668 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		}
 		if (saveOnFlashcardNtr) {
-			*(u32*)0x0204585C = 0xE3A00001; // mov r0, #1
-			*(u32*)0x02045860 = 0xE12FFF1E; // bx lr
+			// *(u32*)0x0204585C = 0xE3A00001; // mov r0, #1
+			// *(u32*)0x02045860 = 0xE12FFF1E; // bx lr
+			setBL(0x02044834, (u32)dsiSaveOpen);
+			setBL(0x0204484C, (u32)dsiSaveRead);
+			setBL(0x02044860, (u32)dsiSaveClose);
+			setBL(0x020448B4, (u32)dsiSaveOpen);
+			setBL(0x020448CC, (u32)dsiSaveWrite);
+			setBL(0x020448E0, (u32)dsiSaveClose);
+			setBL(0x0204589C, (u32)dsiSaveCreate);
+			setBL(0x020458A4, (u32)dsiSaveGetResultCode);
+			*(u32*)0x020458FC = 0xE1A00000; // nop
+			*(u32*)0x02045960 = 0xE1A00000; // nop
+			*(u32*)0x02045974 = 0xE1A00000; // nop
+			*(u32*)0x020459A0 = 0xE1A00000; // nop
+			*(u32*)0x020459A8 = 0xE1A00000; // nop
+			*(u32*)0x020459B0 = 0xE1A00000; // nop
 		}
 	}
 
