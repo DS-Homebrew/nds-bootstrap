@@ -13691,6 +13691,49 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	} */
 
+	// Ikibago (USA)
+	// Crashes after title screen (More than 8MB required?)
+	/* else if (strcmp(romTid, "KIBE") == 0) {
+		*(u32*)0x020052D4 = 0xE1A00000; // nop
+		*(u32*)0x020052EC = 0xE1A00000; // nop
+		*(u32*)0x02019DE8 = 0xE3A00000; // mov r0, #0
+		setBL(0x02040284, (u32)ndmaCopy);
+		setBL(0x02040548, (u32)ndmaCopy);
+		setBL(0x0206487C, (u32)ndmaCopy);
+		setBL(0x020648BC, (u32)ndmaCopy);
+		setBL(0x020648E8, (u32)ndmaCopy);
+		setBL(0x0206492C, (u32)ndmaCopy);
+		setBL(0x02065548, (u32)dsiSaveOpenR);
+		setBL(0x02065558, (u32)dsiSaveClose);
+		setBL(0x020655A0, (u32)dsiSaveCreate);
+		setBL(0x020655C4, (u32)dsiSaveOpen);
+		setBL(0x020655EC, (u32)dsiSaveWrite);
+		setBL(0x02065614, (u32)dsiSaveClose);
+		setBL(0x02065640, (u32)dsiSaveOpenR);
+		setBL(0x02065668, (u32)dsiSaveRead);
+		*(u32*)0x02065A3C = 0xE1A00000; // nop
+		setBL(0x02067F44, (u32)ndmaCopy);
+		setBL(0x0206D0B4, (u32)ndmaCopy);
+		setBL(0x0206D0E8, (u32)ndmaCopy);
+		setBL(0x0206D940, (u32)ndmaCopy);
+		setBL(0x0206EE44, (u32)ndmaCopy);
+		setBL(0x0206EE80, (u32)ndmaCopy);
+		*(u32*)0x02070CD4 = 0xE2822877; // add r2, r2, #0x770000
+		*(u32*)0x02070CFC = (s2FlashcardId == 0x5A45) ? 0xE3A00522 : 0xE3A00409; // mov r0, (s2FlashcardId == 0x5A45) ? #0x08800000 : #0x09000000
+		*(u32*)0x02070D08 = 0xE2811806; // add r1, r1, #0x60000
+		*(u32*)0x02070D2C = 0x141200; // Shrink unknown heap from 0x7A1200
+		*(u32*)0x02070E4C = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02078CC4 = 0xE1A00000; // nop
+		patchInitDSiWare(0x0207EE18, heapEnd);
+		*(u32*)0x0207F1A4 = *(u32*)0x02004FE8;
+		patchUserSettingsReadDSiWare(0x02080468);
+		*(u32*)0x02080484 = wirelessReturnCodeArm;
+		*(u32*)0x02080488 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02080490 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02080494 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0208A568 = 0xE1A00000; // nop
+	} */
+
 	// Invasion of the Alien Blobs! (USA)
 	else if (strcmp(romTid, "KBTE") == 0) {
 		*(u32*)0x0201BF94 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)

@@ -262,6 +262,7 @@ static const char dsiWareForBootloader1[][4] = {
 	"KIS", // Ice Hockey Slovakia 2011
 	// "KNE", // Ichi Moudaji!: Neko King
 	"KNK", // Ideyou Sukeno: Kenkou Maja DSi
+	"KIB", // Ikibago (bootloaderi-exclusive)
 	"KBT", // Invasion of the Alien Blobs!
 	"K3J", // iSpot Japan
 	"KIK", // Ivy the Kiwi? mini

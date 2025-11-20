@@ -7461,6 +7461,20 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		} */
 	}
 
+	// Ikibago (USA)
+	// Ikibago (Europe, Australia)
+	else if (strncmp(romTid, "KIB", 3) == 0 && saveOnFlashcardNtr) {
+		const u16 offsetChangeS = (romTid[3] == 'E') ? 0 : 0x124;
+		setBL(0x02065548-offsetChangeS, (u32)dsiSaveOpenR);
+		setBL(0x02065558-offsetChangeS, (u32)dsiSaveClose);
+		setBL(0x020655A0-offsetChangeS, (u32)dsiSaveCreate);
+		setBL(0x020655C4-offsetChangeS, (u32)dsiSaveOpen);
+		setBL(0x020655EC-offsetChangeS, (u32)dsiSaveWrite);
+		setBL(0x02065614-offsetChangeS, (u32)dsiSaveClose);
+		setBL(0x02065640-offsetChangeS, (u32)dsiSaveOpenR);
+		setBL(0x02065668-offsetChangeS, (u32)dsiSaveRead);
+	}
+
 	// Invasion of the Alien Blobs! (USA)
 	else if (strcmp(romTid, "KBTE") == 0) {
 		if (!twlFontFound) {
