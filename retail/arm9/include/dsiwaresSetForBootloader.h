@@ -265,6 +265,7 @@ static const char dsiWareForBootloader1[][4] = {
 	"KBT", // Invasion of the Alien Blobs!
 	"K3J", // iSpot Japan
 	"KIK", // Ivy the Kiwi? mini
+	"KJG", // Jagged Alliance
 	"K9B", // Jazzy Billiards
 	"KJY", // JellyCar 2
 	"KYJ", // Jewel Adventures

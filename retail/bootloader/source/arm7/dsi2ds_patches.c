@@ -13864,6 +13864,36 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020B9B94 = 0xE1A00000; // nop
 	}
 
+	// Jagged Alliance (Europe)
+	else if (strcmp(romTid, "KJGP") == 0) {
+		*(u32*)0x020050C0 = 0xE1A00000; // nop
+		*(u32*)0x02005608 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		setBL(0x02043A94, (u32)dsiSaveOpen);
+		setBL(0x02043AEC, (u32)dsiSaveCreate);
+		setBL(0x02043B20, (u32)dsiSaveOpen);
+		setBL(0x02043B34, (u32)dsiSaveSetLength);
+		setBL(0x02043B44, (u32)dsiSaveGetLength);
+		setBL(0x02043B4C, (u32)dsiSaveClose);
+		setBL(0x02043B84, (u32)dsiSaveSetLength);
+		setBL(0x02043B94, (u32)dsiSaveGetLength);
+		setBL(0x02043B9C, (u32)dsiSaveClose);
+		*(u32*)0x02043CCC = 0xE1A00000; // nop
+		setBL(0x02043DA4, (u32)dsiSaveOpen);
+		setBL(0x02043DCC, (u32)dsiSaveSeek);
+		setBL(0x02043DE0, (u32)dsiSaveRead);
+		setBL(0x02043E00, (u32)dsiSaveClose);
+		setBL(0x02043EC8, (u32)dsiSaveOpen);
+		setBL(0x02043EF0, (u32)dsiSaveSeek);
+		setBL(0x02043F04, (u32)dsiSaveWrite);
+		setBL(0x02043F10, (u32)dsiSaveClose);
+		*(u32*)0x0206BC60 = 0xE1A00000; // nop
+		tonccpy((u32*)0x0206C7F4, dsiSaveGetResultCode, 0xC);
+		*(u32*)0x0206F424 = 0xE1A00000; // nop
+		patchInitDSiWare(0x02074C8C, heapEnd);
+		*(u32*)0x02075018 = *(u32*)0x02004FE8;
+		patchUserSettingsReadDSiWare(0x02076424);
+	}
+
 	// Jazzy Billiards (USA)
 	// Saving seems difficult to get working
 	else if (strcmp(romTid, "K9BE") == 0) {
