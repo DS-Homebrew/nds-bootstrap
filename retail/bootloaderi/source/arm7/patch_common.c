@@ -7126,6 +7126,54 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02043198 = 0xE1A00000; // nop (Skip Manual screen)
 	}
 
+	// Hakokoro (Japan)
+	else if (strcmp(romTid, "KK6J") == 0) {
+		if (!twlFontFound) {
+			extern u32 hakokoroUnusedFontLoad[];
+			tonccpy((u32*)0x020212D8, hakokoroUnusedFontLoad, 0x4C);
+
+			*(u32*)0x020215C4 = 0xE1A00000; // nop
+			*(u32*)0x020215C8 = 0xE1A00000; // nop
+			*(u32*)0x020215CC = 0xE1A00000; // nop
+
+			*(u32*)0x0207A170 = 0x020C9528;
+			*(u32*)0x02089B04 = 0x020C9528;
+			*(u32*)0x02094DA4 = 0x020C9528;
+
+			const char* largeFontPath = "font/tbf_ww_l.NFTR";
+			const char* mediumFontPath = "font/tbf_ww_m.NFTR";
+			const char* smallFontPath = "font/tbf_ww_s.NFTR";
+			tonccpy((char*)0x020C96B0, largeFontPath, strlen(largeFontPath)+1);
+			tonccpy((char*)0x020CC5CC, mediumFontPath, strlen(mediumFontPath)+1);
+			tonccpy((char*)0x020CCE98, smallFontPath, strlen(smallFontPath)+1);
+		}
+		if (saveOnFlashcardNtr) {
+			const u32 newCodeAddr = 0x020464FC;
+			const u32 newCodeAddr2 = newCodeAddr+0xA0;
+			const u32 newCodeAddr3 = newCodeAddr2+0x1C;
+			const u32 newCodeAddr4 = newCodeAddr3+0x20;
+			codeCopy((u32*)newCodeAddr, (u32*)0x02023CDC, 0xA0);
+			codeCopy((u32*)newCodeAddr2, (u32*)0x02023D7C, 0x1C);
+			codeCopy((u32*)newCodeAddr3, (u32*)0x02023D98, 0x20);
+			codeCopy((u32*)newCodeAddr4, (u32*)0x02023DB8, 0x40);
+
+			setBL(0x02023CA8, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+			setBL(0x02023CC8, (u32)dsiSaveGetResultCode);
+			setBL(newCodeAddr+0x60, (u32)dsiSaveOpen);
+			setBL(newCodeAddr+0x88, (u32)dsiSaveClose);
+			setBL(newCodeAddr2+0xC, (u32)dsiSaveClose);
+			setBL(newCodeAddr3+0x4, (u32)dsiSaveRead);
+			setBL(newCodeAddr4+0x24, (u32)dsiSaveRead); // dsiSaveReadAsync
+			setBL(0x02023DFC, (u32)dsiSaveWrite);
+			setBL(0x02023E30, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+			setBL(0x02023EAC, (u32)dsiSaveGetInfo);
+			setBL(0x02039788, newCodeAddr2);
+			setBL(0x020398B0, newCodeAddr);
+			setBL(0x02039B2C, newCodeAddr4);
+			setBL(0x02039B4C, newCodeAddr3);
+		}
+	}
+
 	// Halloween Trick or Treat (USA)
 	else if (strcmp(romTid, "KZHE") == 0 && saveOnFlashcardNtr) {
 		setBL(0x0203D11C, (u32)dsiSaveOpen);

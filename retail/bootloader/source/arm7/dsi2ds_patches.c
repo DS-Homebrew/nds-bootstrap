@@ -13085,6 +13085,72 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 	}
 
+	// Hakokoro (Japan)
+	// Audio does not play on retail consoles
+	else if (strcmp(romTid, "KK6J") == 0) {
+		// useSharedFont = twlFontFound;
+		extern u32 hakokoroUnusedFontLoad[];
+		tonccpy((u32*)0x020212D8, hakokoroUnusedFontLoad, 0x4C);
+
+		*(u32*)0x020214F8 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x020215C4 = 0xE1A00000; // nop
+		*(u32*)0x020215C8 = 0xE1A00000; // nop
+		*(u32*)0x020215CC = 0xE1A00000; // nop
+		if (extendedMemory) {
+			*(u32*)0x02028B34 = 0xE3A00719; // mov r0, #0x640000 (Shrink general(?) heap from 0x800000)
+			*(u32*)0x02028CC4 = 0xE3A0182A; // mov r1, #0x2A0000 (Shrink sound heap from 0x300000)
+		} else {
+			*(u32*)0x02028B34 = 0xE3A0070A; // mov r0, #0x280000 (Shrink general(?) heap from 0x800000)
+			*(u32*)0x02028CC4 = 0xE3A01901; // mov r1, #0x4000 (Shrink sound heap from 0x300000: Disables audio)
+		}
+		*(u32*)0x020293E0 = 0xE1A00000; // nop
+		*(u32*)0x020293FC = 0xE1A00000; // nop
+		*(u32*)0x02044EE0 = 0xE1A00000; // nop
+		*(u32*)0x02048A80 = 0xE1A00000; // nop
+		patchInitDSiWare(0x020514F0, heapEnd);
+		*(u32*)0x0205187C = *(u32*)0x02004FE8;
+		patchUserSettingsReadDSiWare(0x02052C2C);
+
+		const u32 newCodeAddr = 0x020464FC;
+		const u32 newCodeAddr2 = newCodeAddr+0xA0;
+		const u32 newCodeAddr3 = newCodeAddr2+0x1C;
+		const u32 newCodeAddr4 = newCodeAddr3+0x20;
+		codeCopy((u32*)newCodeAddr, (u32*)0x02023CDC, 0xA0);
+		codeCopy((u32*)newCodeAddr2, (u32*)0x02023D7C, 0x1C);
+		codeCopy((u32*)newCodeAddr3, (u32*)0x02023D98, 0x20);
+		codeCopy((u32*)newCodeAddr4, (u32*)0x02023DB8, 0x40);
+
+		setBL(0x02023CA8, (u32)dsiSaveCreate); // dsiSaveCreateAuto
+		setBL(0x02023CC8, (u32)dsiSaveGetResultCode);
+		setBL(newCodeAddr+0x60, (u32)dsiSaveOpen);
+		setBL(newCodeAddr+0x88, (u32)dsiSaveClose);
+		setBL(newCodeAddr2+0xC, (u32)dsiSaveClose);
+		setBL(newCodeAddr3+0x4, (u32)dsiSaveRead);
+		setBL(newCodeAddr4+0x24, (u32)dsiSaveRead); // dsiSaveReadAsync
+		setBL(0x02023DFC, (u32)dsiSaveWrite);
+		setBL(0x02023E30, (u32)dsiSaveWrite); // dsiSaveWriteAsync
+		setBL(0x02023EAC, (u32)dsiSaveGetInfo);
+		setBL(0x02039788, newCodeAddr2);
+		setBL(0x020398B0, newCodeAddr);
+		*(u32*)0x02039A0C = 0xE12FFF1E; // bx lr
+		setBL(0x02039B2C, newCodeAddr4);
+		setBL(0x02039B4C, newCodeAddr3);
+
+		*(u32*)0x02096844 = 0xE1A00000; // nop
+		*(u32*)0x02096878 = 0xE1A00000; // nop
+
+		/* *(u32*)0x0207A170 = 0x020C9528;
+		*(u32*)0x02089B04 = 0x020C9528;
+		*(u32*)0x02094DA4 = 0x020C9528;
+
+		const char* largeFontPath = "font/tbf_ww_l.NFTR";
+		const char* mediumFontPath = "font/tbf_ww_m.NFTR";
+		const char* smallFontPath = "font/tbf_ww_s.NFTR";
+		tonccpy((char*)0x020C96B0, largeFontPath, strlen(largeFontPath)+1);
+		tonccpy((char*)0x020CC5CC, mediumFontPath, strlen(mediumFontPath)+1);
+		tonccpy((char*)0x020CCE98, smallFontPath, strlen(smallFontPath)+1); */
+	}
+
 	// Halloween Trick or Treat (USA)
 	else if (strcmp(romTid, "KZHE") == 0) {
 		*(u32*)0x0200E0D0 = 0xE1A00000; // nop
