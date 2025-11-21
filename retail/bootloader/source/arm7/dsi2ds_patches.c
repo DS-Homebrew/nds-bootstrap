@@ -20795,36 +20795,20 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Pinball Pulse: The Ancients Beckon (USA)
-	// Incomplete/broken patch
-	/*else if (strcmp(romTid, "KZPE") == 0) {
-		*(u32*)0x02004988 = 0xE1A00000; // nop
-		*(u32*)0x020050B4 = 0xE1A00000; // nop
-		*(u32*)0x02008240 = 0xE12FFF1E; // bx lr
-		for (int i = 0; i < 19; i++) {
-			u32* offset1 = (u16*)0x02013614;
-			u32* offset2 = (u16*)0x020136C4;
-			offset1[i] = 0xE1A00000; // nop
-			offset2[i] = 0xE1A00000; // nop
-		}
-		*(u32*)0x02013D2C = 0xE1A00000; // nop
-		*(u32*)0x0202C6E0 = 0xE1A00000; // nop
+	// Requires more than 8MB of RAM: Crashes after proceeding to gameplay (with audio disabled)
+	/* else if (strcmp(romTid, "KZPE") == 0) {
 		*(u32*)0x02049058 = 0xE1A00000; // nop
-		*(u32*)0x020655AC = 0xE1A00000; // nop
-		*(u32*)0x02067530 = 0xE1A00000; // nop
-		*(u32*)0x0206ABA4 = 0xE12FFF1E; // bx lr
+		*(u32*)0x020491D4 = 0xA800; // Shrink sound heap from 0x25A800: Disables audio
 		*(u32*)0x02087214 = 0xE1A00000; // nop
 		*(u32*)0x0208A6E8 = 0xE1A00000; // nop
-		*(u32*)0x0208DFCC = 0xE1A00000; // nop
-		*(u32*)0x0208FE18 = 0xE1A00000; // nop
-		*(u32*)0x0208FE1C = 0xE1A00000; // nop
-		*(u32*)0x0208FE28 = 0xE1A00000; // nop
-		*(u32*)0x0208FF6C = 0xE1A00000; // nop
-		patchHiHeapDSiWare(0x0208FFC8, heapEnd); // mov r0, #0x23E0000
+		patchInitDSiWare(0x0208FD8C, heapEnd);
+		*(u32*)0x020900FC = *(u32*)0x02004FC0;
+		patchUserSettingsReadDSiWare(0x02091020);
 		*(u32*)0x0209147C = 0xE1A00000; // nop
 		*(u32*)0x02091480 = 0xE1A00000; // nop
 		*(u32*)0x02091484 = 0xE1A00000; // nop
 		*(u32*)0x02091488 = 0xE1A00000; // nop
-	}*/
+	} */
 
 	// Pirates Assault (USA)
 	else if (strcmp(romTid, "KXAE") == 0) {
