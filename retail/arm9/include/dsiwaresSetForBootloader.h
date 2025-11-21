@@ -249,6 +249,7 @@ static const char dsiWareForBootloader1[][4] = {
 	"KZH", // Halloween Trick or Treat
 	"KHO", // Handy Hockey
 	"KHM", // Handy Mahjong
+	"KHB", // Happy Birthday Mart (bootloaderi-exclusive)
 	"KDH", // Hard-Hat Domo
 	"KHQ", // Hearts Spades Euchre
 	"K6S", // Heathcliff: Spot On

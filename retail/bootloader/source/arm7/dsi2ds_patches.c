@@ -65,7 +65,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	if (wirelessCodeInVram) {
 		*(u32*)(((u32)ndsHeader->arm7destination) + newArm7binarySize - 0xC) = 0; // Disable loading VRAM wireless code to RAM
 	}
-	maxHeapOpen = (!extendedMemory && ce9NotInHeap && wirelessCodeInVram);
+	maxHeapOpen = (ce9NotInHeap && wirelessCodeInVram);
 	u32 heapEndRetail = (ce9NotInHeap && !ce9AltLargeTable) ? ((cheatSizeTotal <= 4 || _io_dldi_size >= 0x0E) ? 0x023E0000 : CHEAT_ENGINE_LOCATION_B4DS-0x400000) : ((fatTableAddr < 0x023C0000 || fatTableAddr >= (u32)ce9) ? (u32)ce9 : fatTableAddr);
 	if (!extendedMemory && !maxHeapOpen && !wirelessCodeInVram && _io_dldi_size >= 0x0E) {
 		const u32 ce9DldiOffset = (_io_dldi_size == 0x0F) ? 0x023D8000 : 0x023DC000;
@@ -78,6 +78,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	const u32 heapEndMaxForRetail2 = maxHeapOpen ? ((_io_dldi_size == 0x0F) ? heapEndMaxForRetail : 0x023FF000) : heapEnd;
 	const u32 heapEndMaxForRetail32 = maxHeapOpen ? 0x023FF000 : heapEnd;
 	const u32 heapEndMaxForRetailMus = maxHeapOpen ? heapEndMaxForRetail-0x4000 : heapEnd;
+	// const u32 heapEndMaxForDebug = maxHeapOpen ? ((_io_dldi_size == 0x0F) ? 0x027F6000 : (_io_dldi_size == 0x0E) ? 0x027FA000 : 0x027FC000) : heapEnd;
 	const u32 heapEnd_512KBFreeForDebug = extendedMemory ? 0x02740000 : heapEnd;
 	// const u32 heapEnd_512KBFreeForDebugAlt = extendedMemory ? 0x02700000 : heapEnd;
 	const u32 heapEndMaxForRetail_512KBFreeForDebugAlt = extendedMemory ? 0x02700000 : heapEndMaxForRetail;
@@ -13242,6 +13243,36 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0201F458 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x0201F45C = 0xE12FFF1E; // bx lr
 	}
+
+	// Happy Birthday Mart (USA)
+	// May require more than 8MB of RAM
+	/* else if (strcmp(romTid, "KHBE") == 0 && extendedMemory) {
+		*(u32*)0x02015D98 = 0xE1A00000; // nop
+		*(u32*)0x02019214 = 0xE1A00000; // nop
+		patchInitDSiWare(0x02020440, heapEndMaxForDebug);
+		*(u32*)0x020207CC = *(u32*)0x02004FD0;
+		patchUserSettingsReadDSiWare(0x02021B18);
+		*(u32*)0x020380A0 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		// *(u32*)0x020380A4 = 0xE1A00000; // nop (Disable loading sound data)
+		setBL(0x02038744, (u32)dsiSaveOpen);
+		setBL(0x0203875C, (u32)dsiSaveRead);
+		setBL(0x02038770, (u32)dsiSaveClose);
+		setBL(0x020387C4, (u32)dsiSaveOpen);
+		setBL(0x020387DC, (u32)dsiSaveWrite);
+		setBL(0x020387F0, (u32)dsiSaveClose);
+		setBL(0x02038C44, (u32)dsiSaveCreate);
+		setBL(0x02038C4C, (u32)dsiSaveGetResultCode);
+		*(u32*)0x02038CA4 = 0xE1A00000; // nop
+		*(u32*)0x02038CF4 = 0xE1A00000; // nop
+		*(u32*)0x02038D08 = 0xE1A00000; // nop
+		*(u32*)0x02038D34 = 0xE1A00000; // nop
+		*(u32*)0x02038D3C = 0xE1A00000; // nop
+		*(u32*)0x02038D44 = 0xE1A00000; // nop
+		*(u32*)0x02039E74 = 0xE3A01B2A; // mov r1, #0xA800 (Shrink sound heap from 0xA2800: Disables music)
+		*(u32*)0x02039FC0 = *(u32*)0x02039E74;
+		setB(0x02039E80, 0x02039EC8);
+		*(u32*)0x0204F7D4 = 0xE1A00000; // nop
+	} */
 
 	// Hard-Hat Domo (USA)
 	else if (strcmp(romTid, "KDHE") == 0) {

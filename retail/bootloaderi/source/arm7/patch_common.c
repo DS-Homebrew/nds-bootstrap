@@ -7219,6 +7219,29 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x020316B8, (u32)dsiSaveClose);
 	}
 
+	// Happy Birthday Mart (USA)
+	else if (strcmp(romTid, "KHBE") == 0) {
+		if (!twlFontFound) {
+			*(u32*)0x020380A0 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		}
+		if (saveOnFlashcardNtr) {
+			setBL(0x02038744, (u32)dsiSaveOpen);
+			setBL(0x0203875C, (u32)dsiSaveRead);
+			setBL(0x02038770, (u32)dsiSaveClose);
+			setBL(0x020387C4, (u32)dsiSaveOpen);
+			setBL(0x020387DC, (u32)dsiSaveWrite);
+			setBL(0x020387F0, (u32)dsiSaveClose);
+			setBL(0x02038C44, (u32)dsiSaveCreate);
+			setBL(0x02038C4C, (u32)dsiSaveGetResultCode);
+			*(u32*)0x02038CA4 = 0xE1A00000; // nop
+			*(u32*)0x02038CF4 = 0xE1A00000; // nop
+			*(u32*)0x02038D08 = 0xE1A00000; // nop
+			*(u32*)0x02038D34 = 0xE1A00000; // nop
+			*(u32*)0x02038D3C = 0xE1A00000; // nop
+			*(u32*)0x02038D44 = 0xE1A00000; // nop
+		}
+	}
+
 	// Hard-Hat Domo (USA)
 	else if (strcmp(romTid, "KDHE") == 0) {
 		if (saveOnFlashcardNtr) {

@@ -1456,6 +1456,7 @@ int arm7_main(void) {
 					||	strncmp(romTid, "KEG", 3) == 0 // Electroplankton: Lumiloop
 					||	strncmp(romTid, "KEA", 3) == 0 // Electroplankton: Trapy
 					||	strncmp(romTid, "KFO", 3) == 0 // Frenzic
+					// ||	strncmp(romTid, "KHB", 3) == 0 // Happy Birthday Mart
 					||	strncmp(romTid, "K5M", 3) == 0 // G.G Series: The Last Knight
 					||	strncmp(romTid, "KPT", 3) == 0 // Link 'n' Launch
 					||	strncmp(romTid, "CLJ", 3) == 0 // Mario & Luigi: Bowser's Inside Story
@@ -1584,9 +1585,9 @@ int arm7_main(void) {
 	extern bool maxHeapOpen;
 	u32 ce9DldiOffset = (extendedMemory ? 0x027FC000 : ((accessControl & BIT(4)) && !ce9Alt) ? 0x023FC000 : 0x023FD000);
 	if (_io_dldi_size == 0x0E) {
-		ce9DldiOffset = (extendedMemory ? 0x027DC000 : maxHeapOpen ? 0x023FA000 : (laterSdk ? 0x023DC000 : 0x023FB000));
+		ce9DldiOffset = (extendedMemory ? (maxHeapOpen ? 0x027FA000 : 0x027DC000) : maxHeapOpen ? 0x023FA000 : (laterSdk ? 0x023DC000 : 0x023FB000));
 	} else if (_io_dldi_size == 0x0F) {
-		ce9DldiOffset = (extendedMemory ? 0x027D8000 : maxHeapOpen ? 0x023F6000 : (laterSdk ? 0x023D8000 : 0x023F7000));
+		ce9DldiOffset = (extendedMemory ? (maxHeapOpen ? 0x027F6000 : 0x027D8000) : maxHeapOpen ? 0x023F6000 : (laterSdk ? 0x023D8000 : 0x023F7000));
 	}
 	u32 ce9DldiItcm = 0;
 	if (
