@@ -74,11 +74,11 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	const u32 heapEnd = extendedMemory ? (((u32)ndsHeader->arm9destination >= 0x02004000) ? 0x027D8000 : 0x02700000) : heapEndRetail;
 	const u32 heapEnd8MBHack = extendedMemory ? heapEnd : heapEndRetail+0x400000; // extendedMemory ? #0x27B0000 : #0x27E0000 (mirrors to 0x23E0000 on retail DS units)
 	const u32 heapEndExceed = extendedMemory ? heapEnd+0x800000 : heapEndRetail+0xC00000; // extendedMemory ? #0x2FB0000 (mirrors to 0x27B0000 on debug DS units) : #0x2FE0000 (mirrors to 0x23E0000 on retail DS units)
-	const u32 heapEndMaxForRetail = maxHeapOpen ? ((_io_dldi_size == 0x0F) ? 0x023F6000 : (_io_dldi_size == 0x0E) ? 0x023FA000 : 0x023FC000) : heapEnd;
-	const u32 heapEndMaxForRetail2 = maxHeapOpen ? ((_io_dldi_size == 0x0F) ? heapEndMaxForRetail : 0x023FF000) : heapEnd;
-	const u32 heapEndMaxForRetail32 = maxHeapOpen ? 0x023FF000 : heapEnd;
-	const u32 heapEndMaxForRetailMus = maxHeapOpen ? heapEndMaxForRetail-0x4000 : heapEnd;
-	// const u32 heapEndMaxForDebug = maxHeapOpen ? ((_io_dldi_size == 0x0F) ? 0x027F6000 : (_io_dldi_size == 0x0E) ? 0x027FA000 : 0x027FC000) : heapEnd;
+	const u32 heapEndMaxForRetail = (maxHeapOpen && !extendedMemory) ? ((_io_dldi_size == 0x0F) ? 0x023F6000 : (_io_dldi_size == 0x0E) ? 0x023FA000 : 0x023FC000) : heapEnd;
+	const u32 heapEndMaxForRetail2 = (maxHeapOpen && !extendedMemory) ? ((_io_dldi_size == 0x0F) ? heapEndMaxForRetail : 0x023FF000) : heapEnd;
+	const u32 heapEndMaxForRetail32 = (maxHeapOpen && !extendedMemory) ? 0x023FF000 : heapEnd;
+	const u32 heapEndMaxForRetailMus = (maxHeapOpen && !extendedMemory) ? heapEndMaxForRetail-0x4000 : heapEnd;
+	// const u32 heapEndMaxForDebug = (maxHeapOpen && extendedMemory) ? ((_io_dldi_size == 0x0F) ? 0x027F6000 : (_io_dldi_size == 0x0E) ? 0x027FA000 : 0x027FC000) : heapEnd;
 	const u32 heapEnd_512KBFreeForDebug = extendedMemory ? 0x02740000 : heapEnd;
 	// const u32 heapEnd_512KBFreeForDebugAlt = extendedMemory ? 0x02700000 : heapEnd;
 	const u32 heapEndMaxForRetail_512KBFreeForDebugAlt = extendedMemory ? 0x02700000 : heapEndMaxForRetail;
@@ -15053,6 +15053,33 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x020248C8, (u32)dsiSaveCreate);
 		*(u32*)0x02024974 = 0xE1A00000; // nop
 		setBL(0x02024980, (u32)dsiSaveCreate);
+	}
+
+	// Kuniya Burete Sanga Ari: Hills and Rivers Remain (Japan)
+	// Saving not supported due to using more than one file in filesystem
+	// Requires either 8MB of RAM or Memory Expansion Pak
+	else if (strcmp(romTid, "KY3J") == 0 && twlFontFound && debugOrMep) {
+		useSharedFont = true;
+		if (!extendedMemory) {
+			const u32 newCodeAddr = 0x02019224;
+			codeCopy((u32*)newCodeAddr, (u32*)0x0201F874, 0x28);
+			setBL(0x0202A74C, newCodeAddr);
+			patchTwlFontLoad(false, newCodeAddr+0x10, 0x02018590);
+		}
+
+		*(u32*)0x02004AA0 = 0xE1A00000; // nop
+		*(u32*)0x0200E4E8 = 0xE1A00000; // nop
+		*(u32*)0x02011A24 = 0xE1A00000; // nop
+		*(u32*)0x02016AC8 = 0xE3A00001; // mov r0, #1
+		patchInitDSiWare(0x02016AE0, heapEndMaxForRetail2);
+		patchUserSettingsReadDSiWare(0x02017FD8);
+		*(u32*)0x02018000 = wirelessReturnCodeArm;
+		*(u32*)0x02018004 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0201800C = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02018010 = 0xE12FFF1E; // bx lr
+		if (!extendedMemory) {
+			*(u32*)0x0202B328 = 0xE3A01901; // mov r1, #0x4000 (Shrink SDAT heap from 0x80000)
+		}
 	}
 
 	// Kyara Pasha!: Hello Kitty (Japan)

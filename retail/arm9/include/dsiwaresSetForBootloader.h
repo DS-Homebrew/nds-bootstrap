@@ -294,6 +294,7 @@ static const char dsiWareForBootloader1[][4] = {
 	"KEK", // Koukou Eitango: Kiho 400 Go Master
 	"KVF", // Kuizu Ongaku Nojika (bootloaderi-exclusive)
 	"KT9", // Kung Fu Dragon
+	"KY3", // Kuniya Burete Sanga Ari: Hills and Rivers Remain
 	"K47", // Kyou Hanan no hi Hyakka: Hyakkajiten Maipedea Yori (bootloaderi-exclusive)
 	"K5M", // G.G Series: The Last Knight
 	"KQ9", // The Legend of Zelda: Four Swords: Anniversary Edition

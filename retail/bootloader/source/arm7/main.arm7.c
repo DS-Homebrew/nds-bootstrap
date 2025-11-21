@@ -1457,6 +1457,7 @@ int arm7_main(void) {
 					||	strncmp(romTid, "KEA", 3) == 0 // Electroplankton: Trapy
 					||	strncmp(romTid, "KFO", 3) == 0 // Frenzic
 					// ||	strncmp(romTid, "KHB", 3) == 0 // Happy Birthday Mart
+					||	strncmp(romTid, "KY3", 3) == 0 // Kuniya Burete Sanga Ari: Hills and Rivers Remain
 					||	strncmp(romTid, "K5M", 3) == 0 // G.G Series: The Last Knight
 					||	strncmp(romTid, "KPT", 3) == 0 // Link 'n' Launch
 					||	strncmp(romTid, "CLJ", 3) == 0 // Mario & Luigi: Bowser's Inside Story
@@ -1591,7 +1592,8 @@ int arm7_main(void) {
 	}
 	u32 ce9DldiItcm = 0;
 	if (
-	   strncmp(romTid, "K6T", 3) == 0 // Orion's Odyssey
+	   strncmp(romTid, "KY3", 3) == 0 // Kuniya Burete Sanga Ari: Hills and Rivers Remain
+	|| strncmp(romTid, "K6T", 3) == 0 // Orion's Odyssey
 	|| strncmp(romTid, "KPS", 3) == 0 // Phantasy Star 0 Mini
 	|| strncmp(romTid, "KHR", 3) == 0 // Picture Perfect: Pocket Stylist
 	|| strncmp(romTid, "KZU", 3) == 0 // Tales to Enjoy!: Little Red Riding Hood

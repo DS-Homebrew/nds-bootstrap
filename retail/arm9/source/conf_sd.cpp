@@ -2110,6 +2110,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 					||	strncmp(romTid, "KEG", 3) == 0 // Electroplankton: Lumiloop
 					||	strncmp(romTid, "KEA", 3) == 0 // Electroplankton: Trapy
 					||	strncmp(romTid, "KFO", 3) == 0 // Frenzic
+					||	strncmp(romTid, "KY3", 3) == 0 // Kuniya Burete Sanga Ari: Hills and Rivers Remain
 					||	strncmp(romTid, "K5M", 3) == 0 // G.G Series: The Last Knight
 					||	strncmp(romTid, "KPT", 3) == 0 // Link 'n' Launch
 					||	strncmp(romTid, "KNP", 3) == 0 // Need for Speed: Nitro-X
