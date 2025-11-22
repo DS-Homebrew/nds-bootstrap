@@ -45,7 +45,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	extern u32 fatTableAddr;
 	extern u32 newArm7binarySize;
 	const char* romTid = getRomTid(ndsHeader);
-	// const char* dataPub = "dataPub:";
+	const char* dataPub = "dataPub:";
 	const char* dataPrv = "dataPrv:";
 	const char* dsiRequiredMsg = "A Nintendo DSi is required to use this feature.";
 	extern u32 relocateBssPart(const tNDSHeader* ndsHeader, u32 bssEnd, u32 bssPartStart, u32 bssPartEnd, u32 newPartStart);
@@ -698,7 +698,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02075FFC = 0xE3A00001; // mov r0, #1 (dsiSaveOpenDir)
 		*(u32*)0x02076018 = 0xE3A00001; // mov r0, #1 (dsiSaveReadDir)
 		*(u32*)0x02076244 = 0xE3A00000; // mov r0, #0 (dsiSaveReadDir)
-		*(u32*)0x02076254 = 0xE3A00001; // mov r0, #1 (dsiSaveCloseDir)
+		*(u32*)0x02076254 = 0xE1A00000; // nop (dsiSaveCloseDir)
 		*(u32*)0x02076280 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x02076284 = 0xE12FFF1E; // bx lr
 		setBL(0x020762FC, (u32)dsiSaveOpen);
@@ -712,10 +712,8 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x020764A4, (u32)dsiSaveWrite);
 		setBL(0x020764AC, (u32)dsiSaveClose); */
 
-		toncset((char*)0x020A05F4, 0, 9); // Redirect otherPrv to dataPrv
-		tonccpy((char*)0x020A05F4, dataPrv, strlen(dataPrv));
-		toncset((char*)0x020A0608, 0, 9);
-		tonccpy((char*)0x020A0608, dataPrv, strlen(dataPrv));
+		tonccpy((char*)0x020A05F4, dataPrv, strlen(dataPrv)+1); // Redirect otherPrv to dataPrv
+		tonccpy((char*)0x020A0608, dataPrv, strlen(dataPrv)+1);
 	}
 
 	// 21 Blackjack (USA)
@@ -2176,23 +2174,88 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}*/
 
 	// Absolute BrickBuster (USA)
-	// Crashes after starting a game mode
-	// Requires 8MB of RAM
-	/* else if (strcmp(romTid, "K6QE") == 0) {
+	// Crashes after selecting or starting Free Play mode
+	// Saving seems difficult to get working
+	else if (strcmp(romTid, "K6QE") == 0) {
 		*(u32*)0x020053E4 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
-		/ *(u32*)0x02055B74 = 0xE3A00000; // mov r0, #0 // Part of .pck file
+		/* *(u32*)0x02055B74 = 0xE3A00000; // mov r0, #0 // Part of .pck file
 		*(u32*)0x02055B78 = 0xE12FFF1E; // bx lr
 		*(u32*)0x02055C48 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x02055C4C = 0xE12FFF1E; // bx lr /
+		*(u32*)0x02055C4C = 0xE12FFF1E; // bx lr */
+
+		/* *(u32*)0x02056230 = 0xE3A00001; // mov r0, #1 (dsiSaveOpenDir)
+		*(u32*)0x0205624C = 0xE3A00001; // mov r0, #1 (dsiSaveReadDir)
+		*(u32*)0x02056274 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02056288 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02056488 = 0xE3A00000; // mov r0, #0 (dsiSaveReadDir)
+		*(u32*)0x02056498 = 0xE1A00000; // nop (dsiSaveCloseDir)
+		*(u32*)0x020564C4 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x020564C8 = 0xE12FFF1E; // bx lr
+		setBL(0x02056540, (u32)dsiSaveOpen);
+		setBL(0x02056558, (u32)dsiSaveGetLength);
+		setBL(0x02056584, (u32)dsiSaveRead);
+		setBL(0x0205658C, (u32)dsiSaveClose);
+		setBL(0x02056664, (u32)dsiSaveCreate);
+		setBL(0x02056674, (u32)dsiSaveOpen);
+		setBL(0x02056684, (u32)dsiSaveGetResultCode);
+		setBL(0x020566B8, (u32)dsiSaveSetLength);
+		setBL(0x020566E8, (u32)dsiSaveWrite);
+		setBL(0x020566F0, (u32)dsiSaveClose); */
+
 		*(u32*)0x0205C8DC = 0xE1A00000; // nop
 		*(u32*)0x02060D94 = 0xE1A00000; // nop
 		patchInitDSiWare(0x0206D9CC, heapEnd);
+		*(u32*)0x0206DD3C = *(u32*)0x0205F0D8;
 		patchUserSettingsReadDSiWare(0x0206EE64);
-		*(u32*)0x0206EEEC = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0206EEEC = wirelessReturnCodeArm;
 		*(u32*)0x0206EEF0 = 0xE12FFF1E; // bx lr
 		*(u32*)0x0206EEF8 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x0206EEFC = 0xE12FFF1E; // bx lr
-	} */
+
+		tonccpy((char*)0x02095CD4, dataPub, strlen(dataPub)+1); // Redirect otherPub to dataPub
+		tonccpy((char*)0x02095CE8, dataPub, strlen(dataPub)+1);
+	}
+
+	// At Enta!: Burokku Kuzushi (Japan)
+	// Crashes after selecting or starting Free Play mode
+	// Saving seems difficult to get working
+	else if (strcmp(romTid, "K6QJ") == 0) {
+		*(u32*)0x020053E4 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		/* *(u32*)0x02055980 = 0xE3A00000; // mov r0, #0 // Part of .pck file
+		*(u32*)0x02055984 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02055A54 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02055A58 = 0xE12FFF1E; // bx lr */
+
+		/* *(u32*)0x0205603C = 0xE3A00001; // mov r0, #1 (dsiSaveOpenDir) // Part of .pck file
+		*(u32*)0x02056058 = 0xE3A00001; // mov r0, #1 (dsiSaveReadDir)
+		*(u32*)0x02056284 = 0xE3A00000; // mov r0, #0 (dsiSaveReadDir)
+		*(u32*)0x02056294 = 0xE1A00000; // nop (dsiSaveCloseDir)
+		*(u32*)0x020562C0 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x020562C4 = 0xE12FFF1E; // bx lr
+		setBL(0x0205633C, (u32)dsiSaveOpen);
+		setBL(0x02056354, (u32)dsiSaveGetLength);
+		setBL(0x02056380, (u32)dsiSaveRead);
+		setBL(0x02056388, (u32)dsiSaveClose);
+		setBL(0x02056460, (u32)dsiSaveCreate);
+		setBL(0x02056470, (u32)dsiSaveOpen);
+		setBL(0x02056480, (u32)dsiSaveGetResultCode);
+		setBL(0x020564B4, (u32)dsiSaveSetLength);
+		setBL(0x020564E4, (u32)dsiSaveWrite);
+		setBL(0x020564EC, (u32)dsiSaveClose); */
+
+		*(u32*)0x0205C810 = 0xE1A00000; // nop
+		*(u32*)0x02060CC8 = 0xE1A00000; // nop
+		patchInitDSiWare(0x0206D900, heapEnd);
+		*(u32*)0x0206DC70 = *(u32*)0x0205F00C;
+		patchUserSettingsReadDSiWare(0x0206ED98);
+		*(u32*)0x0206EE20 = wirelessReturnCodeArm;
+		*(u32*)0x0206EE24 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0206EE2C = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0206EE30 = 0xE12FFF1E; // bx lr
+
+		tonccpy((char*)0x020943B0, dataPub, strlen(dataPub)+1); // Redirect otherPub to dataPub
+		tonccpy((char*)0x020943C4, dataPub, strlen(dataPub)+1);
+	}
 
 	// Abyss (USA)
 	// Abyss (Europe)

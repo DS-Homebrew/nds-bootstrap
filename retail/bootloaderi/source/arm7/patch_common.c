@@ -328,7 +328,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			*(u32*)0x02075FFC = 0xE3A00001; // mov r0, #1 (dsiSaveOpenDir)
 			*(u32*)0x02076018 = 0xE3A00001; // mov r0, #1 (dsiSaveReadDir)
 			*(u32*)0x02076244 = 0xE3A00000; // mov r0, #0 (dsiSaveReadDir)
-			*(u32*)0x02076254 = 0xE3A00001; // mov r0, #1 (dsiSaveCloseDir)
+			*(u32*)0x02076254 = 0xE1A00000; // nop (dsiSaveCloseDir)
 			*(u32*)0x02076280 = 0xE3A00000; // mov r0, #0
 			*(u32*)0x02076284 = 0xE12FFF1E; // bx lr
 			setBL(0x020762FC, (u32)dsiSaveOpen);
@@ -342,10 +342,8 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBL(0x020764A4, (u32)dsiSaveWrite);
 			setBL(0x020764AC, (u32)dsiSaveClose);
 		} */
-		toncset((char*)0x020A05F4, 0, 9); // Redirect otherPrv to dataPrv
-		tonccpy((char*)0x020A05F4, dataPrv, strlen(dataPrv));
-		toncset((char*)0x020A0608, 0, 9);
-		tonccpy((char*)0x020A0608, dataPrv, strlen(dataPrv));
+		tonccpy((char*)0x020A05F4, dataPrv, strlen(dataPrv)+1); // Redirect otherPrv to dataPrv
+		tonccpy((char*)0x020A0608, dataPrv, strlen(dataPrv)+1);
 	}
 
 	// 21 Blackjack (USA)
@@ -1249,6 +1247,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	} */
 
 	// Absolute BrickBuster (USA)
+	// Saving seems difficult to get working
 	else if (strcmp(romTid, "K6QE") == 0) {
 		if (!twlFontFound) {
 			*(u32*)0x020053E4 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
@@ -1259,21 +1258,62 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			*(u32*)0x02055C48 = 0xE3A00000; // mov r0, #0
 			*(u32*)0x02055C4C = 0xE12FFF1E; // bx lr
 		} */
-		toncset((char*)0x02095CD4, 0, 9); // Redirect otherPub to dataPub
-		tonccpy((char*)0x02095CD4, dataPub, strlen(dataPub));
-		toncset((char*)0x02095CE8, 0, 9);
-		tonccpy((char*)0x02095CE8, dataPub, strlen(dataPub));
+		/* if (saveOnFlashcardNtr) {
+			*(u32*)0x02056230 = 0xE3A00001; // mov r0, #1 (dsiSaveOpenDir)
+			*(u32*)0x0205624C = 0xE3A00001; // mov r0, #1 (dsiSaveReadDir)
+			*(u32*)0x02056274 = 0xE3A00001; // mov r0, #1
+			*(u32*)0x02056288 = 0xE3A00001; // mov r0, #1
+			*(u32*)0x02056488 = 0xE3A00000; // mov r0, #0 (dsiSaveReadDir)
+			*(u32*)0x02056498 = 0xE1A00000; // nop (dsiSaveCloseDir)
+			*(u32*)0x020564C4 = 0xE3A00000; // mov r0, #0
+			*(u32*)0x020564C8 = 0xE12FFF1E; // bx lr
+			setBL(0x02056540, (u32)dsiSaveOpen);
+			setBL(0x02056558, (u32)dsiSaveGetLength);
+			setBL(0x02056584, (u32)dsiSaveRead);
+			setBL(0x0205658C, (u32)dsiSaveClose);
+			setBL(0x02056664, (u32)dsiSaveCreate);
+			setBL(0x02056674, (u32)dsiSaveOpen);
+			setBL(0x02056684, (u32)dsiSaveGetResultCode);
+			setBL(0x020566B8, (u32)dsiSaveSetLength);
+			setBL(0x020566E8, (u32)dsiSaveWrite);
+			setBL(0x020566F0, (u32)dsiSaveClose);
+		} */
+		tonccpy((char*)0x02095CD4, dataPub, strlen(dataPub)+1); // Redirect otherPub to dataPub
+		tonccpy((char*)0x02095CE8, dataPub, strlen(dataPub)+1);
 	}
 
 	// At Enta!: Burokku Kuzushi (Japan)
+	// Saving seems difficult to get working
 	else if (strcmp(romTid, "K6QJ") == 0) {
 		if (!twlFontFound) {
 			*(u32*)0x020053E4 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		}
-		toncset((char*)0x020943B0, 0, 9);
-		tonccpy((char*)0x020943B0, dataPub, strlen(dataPub));
-		toncset((char*)0x020943C4, 0, 9);
-		tonccpy((char*)0x020943C4, dataPub, strlen(dataPub));
+		/* if (saveOnFlashcardNtr) { // Part of .pck file
+			*(u32*)0x02055980 = 0xE3A00000; // mov r0, #0
+			*(u32*)0x02055984 = 0xE12FFF1E; // bx lr
+			*(u32*)0x02055A54 = 0xE3A00000; // mov r0, #0
+			*(u32*)0x02055A58 = 0xE12FFF1E; // bx lr
+		} */
+		/* if (saveOnFlashcardNtr) {
+			*(u32*)0x0205603C = 0xE3A00001; // mov r0, #1 (dsiSaveOpenDir)
+			*(u32*)0x02056058 = 0xE3A00001; // mov r0, #1 (dsiSaveReadDir)
+			*(u32*)0x02056284 = 0xE3A00000; // mov r0, #0 (dsiSaveReadDir)
+			*(u32*)0x02056294 = 0xE1A00000; // nop (dsiSaveCloseDir)
+			*(u32*)0x020562C0 = 0xE3A00000; // mov r0, #0
+			*(u32*)0x020562C4 = 0xE12FFF1E; // bx lr
+			setBL(0x0205633C, (u32)dsiSaveOpen);
+			setBL(0x02056354, (u32)dsiSaveGetLength);
+			setBL(0x02056380, (u32)dsiSaveRead);
+			setBL(0x02056388, (u32)dsiSaveClose);
+			setBL(0x02056460, (u32)dsiSaveCreate);
+			setBL(0x02056470, (u32)dsiSaveOpen);
+			setBL(0x02056480, (u32)dsiSaveGetResultCode);
+			setBL(0x020564B4, (u32)dsiSaveSetLength);
+			setBL(0x020564E4, (u32)dsiSaveWrite);
+			setBL(0x020564EC, (u32)dsiSaveClose);
+		} */
+		tonccpy((char*)0x020943B0, dataPub, strlen(dataPub)+1); // Redirect otherPub to dataPub
+		tonccpy((char*)0x020943C4, dataPub, strlen(dataPub)+1);
 	}
 
 	// Absolute Chess (USA)
@@ -1281,10 +1321,8 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		if (!twlFontFound) {
 			*(u32*)0x020053E4 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		}
-		toncset((char*)0x0209E9C8, 0, 9); // Redirect otherPub to dataPub
-		tonccpy((char*)0x0209E9C8, dataPub, strlen(dataPub));
-		toncset((char*)0x0209E9DC, 0, 9);
-		tonccpy((char*)0x0209E9DC, dataPub, strlen(dataPub));
+		tonccpy((char*)0x0209E9C8, dataPub, strlen(dataPub)+1); // Redirect otherPub to dataPub
+		tonccpy((char*)0x0209E9DC, dataPub, strlen(dataPub)+1);
 	}
 
 	// At Chisu: Charenji Supirittsu (Japan)
@@ -1292,10 +1330,8 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		if (!twlFontFound) {
 			*(u32*)0x020053E4 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		}
-		toncset((char*)0x0209CCDC, 0, 9); // Redirect otherPub to dataPub
-		tonccpy((char*)0x0209CCDC, dataPrv, strlen(dataPrv));
-		toncset((char*)0x0209CCF0, 0, 9);
-		tonccpy((char*)0x0209CCF0, dataPrv, strlen(dataPrv));
+		tonccpy((char*)0x0209CCDC, dataPrv, strlen(dataPrv)+1); // Redirect otherPrv to dataPrv
+		tonccpy((char*)0x0209CCF0, dataPrv, strlen(dataPrv)+1);
 	}
 
 	// Absolute Reversi (USA)
@@ -1303,10 +1339,8 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		if (!twlFontFound) {
 			*(u32*)0x020053E4 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		}
-		toncset((char*)0x0209D220, 0, 9); // Redirect otherPub to dataPub
-		tonccpy((char*)0x0209D220, dataPub, strlen(dataPub));
-		toncset((char*)0x0209D234, 0, 9);
-		tonccpy((char*)0x0209D234, dataPub, strlen(dataPub));
+		tonccpy((char*)0x0209D220, dataPub, strlen(dataPub)+1); // Redirect otherPub to dataPub
+		tonccpy((char*)0x0209D234, dataPub, strlen(dataPub)+1);
 	}
 
 	// At Enta!: Taisen Ribashi (Japan)
@@ -1314,10 +1348,8 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		if (!twlFontFound) {
 			*(u32*)0x020053E4 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		}
-		toncset((char*)0x0209C1C0, 0, 9); // Redirect otherPub to dataPub
-		tonccpy((char*)0x0209C1C0, dataPub, strlen(dataPub));
-		toncset((char*)0x0209C1D4, 0, 9);
-		tonccpy((char*)0x0209C1D4, dataPub, strlen(dataPub));
+		tonccpy((char*)0x0209C1C0, dataPub, strlen(dataPub)+1); // Redirect otherPub to dataPub
+		tonccpy((char*)0x0209C1D4, dataPub, strlen(dataPub)+1);
 	}
 
 	// Abyss (USA)

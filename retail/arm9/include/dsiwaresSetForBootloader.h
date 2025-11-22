@@ -34,7 +34,7 @@ static const char dsiWareForBootloader1[][4] = {
 	"KXT", // 99Seconds
 	"K2K", // Aa! Nikaku Dori
 	"KE9", // Absolute Baseball (bootloaderi-exclusive)
-	"K6Q", // Absolute BrickBuster (bootloaderi-exclusive)
+	"K6Q", // Absolute BrickBuster
 	"KCZ", // Absolute Chess (bootloaderi-exclusive)
 	"KA8", // Absolute Reversi (bootloaderi-exclusive)
 	"KXG", // Abyss
