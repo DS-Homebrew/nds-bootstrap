@@ -24625,7 +24625,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0200E148 = 0xE1A00000; // nop
 		*(u32*)0x02011A7C = 0xE1A00000; // nop
 		patchInitDSiWare(0x0201796C, heapEnd);
-		*(u32*)0x02017CF8 -= 0x30000;
+		*(u32*)0x02017CF8 = *(u32*)0x02004FD0;
 		patchUserSettingsReadDSiWare(0x02018E48);
 		if (strncmp(romTid, "KL9", 3) == 0 || strncmp(romTid, "KH2", 3) == 0) {
 			*(u32*)0x0201FAE4 = 0xE1A00000; // nop
