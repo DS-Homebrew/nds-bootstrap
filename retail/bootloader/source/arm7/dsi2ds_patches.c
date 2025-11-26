@@ -25117,6 +25117,54 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0205BD64, (u32)dsiSaveClose);
 	} */
 
+	// Star Novels: Kono Haretasora no Shitade (Japan)
+	// Star Novels: Shirogane no Torikago (Japan)
+	// Requires either 8MB of RAM or Memory Expansion Pak
+	// K97J: Music does not play on retail consoles
+	else if ((strcmp(romTid, "K97J") == 0 || strcmp(romTid, "K98J") == 0) && debugOrMep) {
+		const u32 mepAddr = (s2FlashcardId == 0x5A45) ? 0x08000000 : 0x09000000;
+
+		*(u32*)0x020050C8 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		*(u32*)0x02005110 = 0xE1A00000; // nop (Show white screen instead of manual screen)
+		*(u32*)0x0200C184 = 0xE1A00000; // nop
+		*(u32*)0x0200F86C = 0xE1A00000; // nop
+		patchInitDSiWare(0x02015BC4, extendedMemory ? heapEnd : mepAddr+0x77C000);
+		*(u32*)0x02015F50 = extendedMemory ? *(u32*)0x02004FE8 : mepAddr;
+		patchUserSettingsReadDSiWare(0x0201730C);
+		setBL(0x02024EC0, (u32)dsiSaveGetResultCode);
+		*(u32*)0x02024FA8 = 0xE1A00000; // nop
+		*(u32*)0x02024FCC = 0xE1A00000; // nop
+		setBL(0x02024FEC, (u32)dsiSaveOpen);
+		*(u32*)0x02025008 = 0xE1A00000; // nop
+		setBL(0x0202502C, (u32)dsiSaveRead);
+		*(u32*)0x02025048 = 0xE1A00000; // nop
+		setBL(0x0202505C, (u32)dsiSaveClose);
+		*(u32*)0x02025078 = 0xE1A00000; // nop
+		*(u32*)0x02025088 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x020250A0 = 0xE1A00000; // nop
+		*(u32*)0x020250C8 = 0xE1A00000; // nop
+		*(u32*)0x020250E8 = 0xE1A00000; // nop
+		setBL(0x02025104, (u32)dsiSaveOpen);
+		*(u32*)0x02025130 = 0xE1A00000; // nop
+		setBL(0x02025158, (u32)dsiSaveWrite);
+		setBL(0x02025178, (u32)dsiSaveClose);
+		*(u32*)0x02025198 = 0xE1A00000; // nop
+		*(u32*)0x020251A8 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x020251C0 = 0xE1A00000; // nop
+		setBL(0x020251E8, (u32)dsiSaveCreate);
+		setBL(0x02025244, (u32)dsiSaveDelete);
+		if (!extendedMemory) {
+			if (romTid[2] == '7') {
+				*(u32*)0x0202B7DC = 0xE3A00000; // mov r0, #0 (Disable MobiClip playback)
+				*(u32*)0x0202E56C = 0xE3A00622; // mov r0, #0x02200000
+			} else {
+				*(u32*)0x0202B7AC = 0xE3A00000; // mov r0, #0 (Disable MobiClip playback)
+				*(u32*)0x0202E2CC = 0xE3A00622; // mov r0, #0x02200000
+				*(u32*)0x0202E2DC = 0xE3A00623; // mov r0, #0x02300000
+			}
+		}
+	}
+
 	// Starship Defense (USA)
 	// Starship Patrol (Europe, Australia)
 	// Requires more than 8MB of RAM
@@ -25810,54 +25858,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		doubleNopT(0x0201942C);
 		doubleNopT(0x0201C616);
 		doubleNopT(0x0201EA66);
-	}
-
-	// Sutanoberuzu: Kono Hareta Sora no Shita de (Japan)
-	// Sutanoberuzu: Shirogane no Torikago (Japan)
-	// Requires either 8MB of RAM or Memory Expansion Pak
-	// K97J: Music does not play on retail consoles
-	else if ((strcmp(romTid, "K97J") == 0 || strcmp(romTid, "K98J") == 0) && debugOrMep) {
-		const u32 mepAddr = (s2FlashcardId == 0x5A45) ? 0x08000000 : 0x09000000;
-
-		*(u32*)0x020050C8 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
-		*(u32*)0x02005110 = 0xE1A00000; // nop (Show white screen instead of manual screen)
-		*(u32*)0x0200C184 = 0xE1A00000; // nop
-		*(u32*)0x0200F86C = 0xE1A00000; // nop
-		patchInitDSiWare(0x02015BC4, extendedMemory ? heapEnd : mepAddr+0x77C000);
-		*(u32*)0x02015F50 = extendedMemory ? *(u32*)0x02004FE8 : mepAddr;
-		patchUserSettingsReadDSiWare(0x0201730C);
-		setBL(0x02024EC0, (u32)dsiSaveGetResultCode);
-		*(u32*)0x02024FA8 = 0xE1A00000; // nop
-		*(u32*)0x02024FCC = 0xE1A00000; // nop
-		setBL(0x02024FEC, (u32)dsiSaveOpen);
-		*(u32*)0x02025008 = 0xE1A00000; // nop
-		setBL(0x0202502C, (u32)dsiSaveRead);
-		*(u32*)0x02025048 = 0xE1A00000; // nop
-		setBL(0x0202505C, (u32)dsiSaveClose);
-		*(u32*)0x02025078 = 0xE1A00000; // nop
-		*(u32*)0x02025088 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x020250A0 = 0xE1A00000; // nop
-		*(u32*)0x020250C8 = 0xE1A00000; // nop
-		*(u32*)0x020250E8 = 0xE1A00000; // nop
-		setBL(0x02025104, (u32)dsiSaveOpen);
-		*(u32*)0x02025130 = 0xE1A00000; // nop
-		setBL(0x02025158, (u32)dsiSaveWrite);
-		setBL(0x02025178, (u32)dsiSaveClose);
-		*(u32*)0x02025198 = 0xE1A00000; // nop
-		*(u32*)0x020251A8 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x020251C0 = 0xE1A00000; // nop
-		setBL(0x020251E8, (u32)dsiSaveCreate);
-		setBL(0x02025244, (u32)dsiSaveDelete);
-		if (!extendedMemory) {
-			if (romTid[2] == '7') {
-				*(u32*)0x0202B7DC = 0xE3A00000; // mov r0, #0 (Disable MobiClip playback)
-				*(u32*)0x0202E56C = 0xE3A00622; // mov r0, #0x02200000
-			} else {
-				*(u32*)0x0202B7AC = 0xE3A00000; // mov r0, #0 (Disable MobiClip playback)
-				*(u32*)0x0202E2CC = 0xE3A00622; // mov r0, #0x02200000
-				*(u32*)0x0202E2DC = 0xE3A00623; // mov r0, #0x02300000
-			}
-		}
 	}
 
 	// System Flaw: Recruit (USA)

@@ -495,6 +495,8 @@ static const char dsiWareForBootloader3[][4] = {
 	"K2U", // Spot It! Challenge: Mean Machines
 	"KYS", // Spot the Difference
 	"KSP", // Spotto! (bootloaderi-exclusive)
+	"K97", // Star Novels: Kono Haretasora no Shitade
+	"K98", // Star Novels: Shirogane no Torikago
 	"KDY", // Starship Defense (bootloaderi-exclusive)
 	// "KSW", // SteamWorld Tower Defense
 	"KEU", // Successfully Learning: English, Year 2
@@ -518,8 +520,6 @@ static const char dsiWareForBootloader3[][4] = {
 	"K4W", // Super Swap
 	"K4P", // Super Yum Yum: Puzzle Adventures
 	"KOW", // Surfacer+
-	"K97", // Sutanoberuzu: Kono Hareta Sora no Shita de
-	"K98", // Sutanoberuzu: Shirogane no Torikago
 	"KSY", // System Flaw: Recruit
 	"KZU", // Tales to Enjoy!: Little Red Riding Hood
 	"KZV", // Tales to Enjoy!: Puss in Boots
