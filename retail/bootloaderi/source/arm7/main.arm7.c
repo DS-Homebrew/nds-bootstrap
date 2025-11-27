@@ -2269,19 +2269,6 @@ int arm7_main(void) {
 			overlayPatch = true; // Allow overlay patching for SM64DS ROM hacks (ex. Mario's Holiday)
 		}
 
-		{
-			const u32 offset = dsiEnhancedMbk ? 0x03000000 : 0x037C0000;
-			const u32 offsetMirror = offset+0x8000;
-			const u32 wordBak = *(vu32*)offset;
-			*(vu32*)offset = 0x414C5253;
-			const bool mirrored = *(vu32*)offsetMirror == 0x414C5253;
-			*(vu32*)offset = wordBak;
-
-			if (mirrored) {
-				dbg_printf("DSi ARM7 WRAM is mirrored\n");
-				errorOutput();
-			}
-		}
 		tonccpy((u32*)ce7Location, (u32*)CARDENGINEI_ARM7_BUFFERED_LOCATION, ce7Size);
 		if (gameOnFlashcard || saveOnFlashcard) {
 			if (!dldiPatchBinary((data_t*)ce7Location, ce7Size-0x400, (data_t*)((ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed) ? 0 : (dsiEnhancedMbk ? CARDENGINEI_ARM7_LOCATION_ALT_DLDI : CARDENGINEI_ARM7_LOCATION_DLDI)))) {
