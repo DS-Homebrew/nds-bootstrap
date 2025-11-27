@@ -523,7 +523,7 @@ void myIrqHandlerVBlank(void) {
 #endif
 
 	// Swap screens
-	if (mainScreen > 0) {
+	if (mainScreen > 0 || screenIpc == 0x7) {
 		IPC_SendSync(screenIpc);
 	}
 

@@ -887,7 +887,7 @@ void myIrqHandlerVBlank(void) {
 	}
 
 	// Fix ARM9 VCount IRQ settings for color LUT and/or swap screens
-	if ((valueBits & useColorLut) || (mainScreen > 0)) {
+	if ((valueBits & useColorLut) || (mainScreen > 0) || (screenIpc == 0x7)) {
 		IPC_SendSync(screenIpc);
 	}
 
