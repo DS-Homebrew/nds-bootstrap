@@ -64,6 +64,7 @@ extern u32 valueBits;
 extern s32 mainScreen;
 extern u32 language;
 extern u32* languageAddr;
+extern u8 volumeLevels[4];
 extern u16 igmHotkey;
 extern u16 screenSwapHotkey;
 extern u8 RumblePakType;
@@ -450,7 +451,7 @@ void myIrqHandlerVBlank(void) {
 			if (0 == (REG_KEYINPUT & KEY_UP)) {
 				volumeLevel++;
 				if (volumeLevel > 3) volumeLevel = 3;
-				if (volumeLevel == 3 && !(valueBits & reducedVolume)) {
+				if (volumeLevel == 3 && volumeLevels[volumeLevel] == 127) {
 					REG_MASTER_VOLUME = 127;
 				}
 			} else if (0 == (REG_KEYINPUT & KEY_DOWN)) {
@@ -464,36 +465,9 @@ void myIrqHandlerVBlank(void) {
 	} else {
 		volumeLevelTimer = 0;
 	}
-	
-	if (sharedAddr[0] != 0x524F5245) {
-		if (valueBits & reducedVolume) {
-			switch (volumeLevel) {
-				case 0:
-					REG_MASTER_VOLUME = 0;
-					break;
-				case 1:
-					REG_MASTER_VOLUME = 15;
-					break;
-				case 2:
-					REG_MASTER_VOLUME = 23;
-					break;
-				case 3:
-					REG_MASTER_VOLUME = 31;
-					break;
-			}
-		} else if (volumeLevel < 3) {
-			switch (volumeLevel) {
-				case 0:
-					REG_MASTER_VOLUME = 0;
-					break;
-				case 1:
-					REG_MASTER_VOLUME = 31;
-					break;
-				case 2:
-					REG_MASTER_VOLUME = 63;
-					break;
-			}
-		}
+
+	if (sharedAddr[0] != 0x524F5245 && volumeLevels[volumeLevel] != 127) {
+		REG_MASTER_VOLUME = volumeLevels[volumeLevel];
 	}
 
 	if (ndsHeader->unitCode == 3) {

@@ -21,6 +21,7 @@
 .global mainScreen
 .global language
 .global languageAddr
+.global volumeLevels
 .global igmHotkey
 .global screenSwapHotkey
 .global RumblePakType
@@ -55,6 +56,11 @@ language:
 	.word	0x00000000
 languageAddr:
 	.word	0x00000000
+volumeLevels:
+	.byte 0
+	.byte 31
+	.byte 63
+	.byte 127
 igmHotkey:
 	.hword	0
 screenSwapHotkey:
