@@ -22,6 +22,7 @@
 .global language
 .global languageAddr
 .global igmHotkey
+.global screenSwapHotkey
 .global RumblePakType
 .global ndsCodeStart
 
@@ -55,6 +56,8 @@ language:
 languageAddr:
 	.word	0x00000000
 igmHotkey:
+	.hword	0
+screenSwapHotkey:
 	.hword	0
 RumblePakType:
 	.byte	0

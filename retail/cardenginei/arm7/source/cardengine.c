@@ -117,6 +117,7 @@ extern u8 consoleModel;
 extern u8 romRead_LED;
 extern u8 dmaRomRead_LED;
 extern u16 igmHotkey;
+extern u16 screenSwapHotkey;
 
 #ifdef TWLSDK
 vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS_SDK5;
@@ -1841,7 +1842,7 @@ void myIrqHandlerVBlank(void) {
 		}
 	}
 
-	if (0==(REG_KEYINPUT & (KEY_L | KEY_R | KEY_UP)) && !(REG_EXTKEYINPUT & KEY_A /*KEY_X*/)) {
+	if (0 == (REG_KEYINPUT & screenSwapHotkey) && 0 == (REG_EXTKEYINPUT & (((screenSwapHotkey >> 10) & 3) | ((screenSwapHotkey >> 6) & 0xC0)))) {
 		if (swapTimer == 60){
 			swapTimer = 0;
 			IPC_SendSync(0x7);

@@ -522,6 +522,9 @@ static void load_conf(configuration* conf, const char* fn) {
 	// Hotkey
 	conf->hotkey = strtol(config_file.fetch("NDS-BOOTSTRAP", "HOTKEY", "284").c_str(), NULL, 16);
 
+	// Screen Swap Hotkey
+	conf->screenSwapHotkey = strtol(config_file.fetch("NDS-BOOTSTRAP", "SCREEN_SWAP_HOTKEY", "740").c_str(), NULL, 16);
+
 	// Manual file path
 	conf->manualPath = strdup(config_file.fetch("NDS-BOOTSTRAP", "MANUAL_PATH").c_str());
 
@@ -589,12 +592,14 @@ void getIgmStrings(configuration* conf, bool b4ds) {
 	// Set In-Game Menu hotkey
 	igmText->hotkey = conf->hotkey;
 
-	if(b4ds) {
+	if (b4ds) {
 		cardengineArm7B4DS* ce7 = (cardengineArm7B4DS*)CARDENGINE_ARM7_LOCATION_BUFFERED;
 		ce7->igmHotkey = conf->hotkey;
+		ce7->screenSwapHotkey = conf->screenSwapHotkey;
 	} else {
 		cardengineArm7* ce7 = (cardengineArm7*)CARDENGINEI_ARM7_BUFFERED_LOCATION;
 		ce7->igmHotkey = conf->hotkey;
+		ce7->screenSwapHotkey = conf->screenSwapHotkey;
 	}
 
 	char path[40];
