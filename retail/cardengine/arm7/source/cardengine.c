@@ -415,10 +415,12 @@ void myIrqHandlerVBlank(void) {
 		reset();
 	}
 
+	u8 screenIpc = 0x6;
+
 	if (0 == (REG_KEYINPUT & screenSwapHotkey) && 0 == (REG_EXTKEYINPUT & (((screenSwapHotkey >> 10) & 3) | ((screenSwapHotkey >> 6) & 0xC0)))) {
 		if (swapTimer == 60){
 			swapTimer = 0;
-			IPC_SendSync(0x7);
+			screenIpc = 0x7;
 			mainScreen++;
 			if (mainScreen > 2) {
 				mainScreen = 0;
@@ -522,7 +524,7 @@ void myIrqHandlerVBlank(void) {
 
 	// Swap screens
 	if (mainScreen > 0) {
-		IPC_SendSync(0x6);
+		IPC_SendSync(screenIpc);
 	}
 
 	if (sharedAddr[0] == 0x524F5245) { // 'EROR'
