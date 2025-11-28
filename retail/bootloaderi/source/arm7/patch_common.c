@@ -5084,8 +5084,8 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Dairojo! Samurai Defenders (USA)
-	else if (strcmp(romTid, "KF3E") == 0 && saveOnFlashcardNtr) {
-		setBL(0x02044B3C, (u32)dsiSaveOpen);
+	/* else if (strcmp(romTid, "KF3E") == 0 && saveOnFlashcardNtr) {
+		setBL(0x02044B3C, (u32)dsiSaveOpen); // Part of .pck file
 		setBL(0x02044B68, (u32)dsiSaveRead);
 		setBL(0x02044B78, (u32)dsiSaveClose);
 		setBL(0x02044B94, (u32)dsiSaveClose);
@@ -5102,7 +5102,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Karakuchi! Dairoujou (Japan)
 	else if (strcmp(romTid, "KF3J") == 0 && saveOnFlashcardNtr) {
-		setBL(0x02044680, (u32)dsiSaveOpen);
+		setBL(0x02044680, (u32)dsiSaveOpen); // Part of .pck file
 		setBL(0x020446AC, (u32)dsiSaveRead);
 		setBL(0x020446BC, (u32)dsiSaveClose);
 		setBL(0x020446D8, (u32)dsiSaveClose);
@@ -5115,7 +5115,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x020447E4, (u32)dsiSaveWrite);
 		setBL(0x020447F4, (u32)dsiSaveClose);
 		setBL(0x02044810, (u32)dsiSaveClose);
-	}
+	} */
 
 	// Dancing Academy (Europe)
 	else if (strcmp(romTid, "KINP") == 0) {
@@ -5126,7 +5126,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			*(u32*)0x0208D074 = 0xE1A00000; // nop
 			*(u32*)0x0208D080 = 0xE1A00000; // nop
 		}
-		if (saveOnFlashcardNtr) {
+		/* if (saveOnFlashcardNtr) { // Part of .pck file
 			setBL(0x0208D228, (u32)dsiSaveCreate);
 			setBL(0x0208D238, (u32)dsiSaveOpen);
 			setBL(0x0208D248, (u32)dsiSaveGetResultCode);
@@ -5141,7 +5141,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBL(0x0208D350, (u32)dsiSaveOpen);
 			setBL(0x0208D360, (u32)dsiSaveGetResultCode);
 			setBL(0x0208D378, (u32)dsiSaveClose);
-		}
+		} */
 	}
 
 	// G.G Series: Dark Spirits (USA)
@@ -5201,8 +5201,8 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Dark Void Zero (USA)
 	// Dark Void Zero (Europe, Australia)
-	else if ((strcmp(romTid, "KDVE") == 0 || strcmp(romTid, "KDVV") == 0) && saveOnFlashcardNtr) {
-		tonccpy((u32*)0x02043DDC, dsiSaveGetResultCode, 0xC);
+	/* else if ((strcmp(romTid, "KDVE") == 0 || strcmp(romTid, "KDVV") == 0) && saveOnFlashcardNtr) {
+		tonccpy((u32*)0x02043DDC, dsiSaveGetResultCode, 0xC); // Part of .pck file
 		setBL(0x0208AE90, (u32)dsiSaveOpen);
 		setBL(0x0208AEA4, (u32)dsiSaveCreate);
 		setBL(0x0208AEC4, (u32)dsiSaveOpen);
@@ -5231,7 +5231,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0208B488, (u32)dsiSaveClose);
 		setBL(0x0208B4C8, (u32)dsiSaveDelete);
 		setBL(0x0208B50C, (u32)dsiSaveClose);
-	}
+	} */
 
 	// Decathlon 2012 (USA)
 	else if (strcmp(romTid, "KUIE") == 0 && saveOnFlashcardNtr) {
@@ -5273,7 +5273,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Deep Sea Creatures (USA)
 	else if (strcmp(romTid, "K6BE") == 0) {
-		if (saveOnFlashcardNtr) {
+		/* if (saveOnFlashcardNtr) { // Part of .pck file
 			setBL(0x020514B8, (u32)dsiSaveOpen);
 			setBL(0x020514D8, (u32)dsiSaveCreate);
 			setBL(0x020514E8, (u32)dsiSaveOpen);
@@ -5290,7 +5290,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBL(0x020518D0, (u32)dsiSaveRead);
 			setBL(0x02051904, (u32)dsiSaveSeek);
 			setBL(0x02051914, (u32)dsiSaveWrite);
-		}
+		} */
 		if (!twlFontFound) {
 			*(u32*)0x02072778 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 			*(u32*)0x02072780 = 0xE1A00000; // nop (Skip Manual screen)
@@ -5331,9 +5331,9 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 				offset[i] = 0xE1A00000; // nop
 			}
 		}
-		if (saveOnFlashcardNtr) {
+		/* if (saveOnFlashcardNtr) {
 			// *(u32*)0x0200C584 = 0xE1A00000; // nop
-			setBL(0x0200C5C0, (u32)dsiSaveCreate);
+			setBL(0x0200C5C0, (u32)dsiSaveCreate); // Part of .pck file
 			setBL(0x0200C5FC, (u32)dsiSaveOpen);
 			setBL(0x0200C634, (u32)dsiSaveSetLength);
 			setBL(0x0200C644, (u32)dsiSaveWrite);
@@ -5350,7 +5350,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			*(u32*)0x0200C910 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc & dsiSaveFreeSpaceAvailable)
 			*(u32*)0x0200C914 = 0xE12FFF1E; // bx lr
 			tonccpy((u32*)((romTid[3] != 'J') ? 0x0204AAEC : 0x0204A8E8), dsiSaveGetResultCode, 0xC);
-		}
+		} */
 	}
 
 	// Dekisugi Tingle Pack (Japan)
@@ -5453,7 +5453,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		if (!twlFontFound) {
 			*(u32*)0x02049808 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		}
-		if (saveOnFlashcardNtr) {
+		/* if (saveOnFlashcardNtr) { // Part of .pck file
 			setBL(0x0204B7CC, (u32)dsiSaveOpen);
 			*(u32*)0x0204B81C = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
 			*(u32*)0x0204B844 = 0xE3A00001; // mov r0, #1 (dsiSaveFreeSpaceAvailable)
@@ -5465,7 +5465,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBL(0x0204B914, (u32)dsiSaveOpen);
 			setBL(0x0204B970, (u32)dsiSaveRead);
 			setBL(0x0204B97C, (u32)dsiSaveClose);
-		}
+		} */
 	}
 
 	// DotMan (USA)
@@ -5673,8 +5673,8 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Dreamwalker (USA)
-	else if (strcmp(romTid, "K9EE") == 0 && saveOnFlashcardNtr) {
-		setBL(0x0202963C, (u32)dsiSaveOpen);
+	/* else if (strcmp(romTid, "K9EE") == 0 && saveOnFlashcardNtr) {
+		setBL(0x0202963C, (u32)dsiSaveOpen); // Part of .pck file
 		setBL(0x02029654, (u32)dsiSaveRead);
 		setBL(0x0202967C, (u32)dsiSaveClose);
 		setBL(0x020296F4, (u32)dsiSaveCreate);
@@ -5690,7 +5690,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02029984, (u32)dsiSaveClose);
 		setBL(0x020299DC, (u32)dsiSaveSeek);
 		setBL(0x020299F0, (u32)dsiSaveWrite);
-	}
+	} */
 
 	// G.G Series: Drift Circuit (USA)
 	// G.G Series: Drift Circuit (Korea)
@@ -13096,8 +13096,8 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Sagittarius-A-Star (Japan)
 	// Only the options are saved
-	else if (strcmp(romTid, "K8XJ") == 0 && saveOnFlashcardNtr) {
-		tonccpy((u32*)0x02010ABC, dsiSaveGetResultCode, 0xC);
+	/* else if (strcmp(romTid, "K8XJ") == 0 && saveOnFlashcardNtr) {
+		tonccpy((u32*)0x02010ABC, dsiSaveGetResultCode, 0xC); // Part of .pck file
 		setBL(0x02021644, (u32)dsiSaveOpen);
 		setBL(0x02021670, (u32)dsiSaveSeek);
 		setBL(0x02021680, (u32)dsiSaveClose);
@@ -13142,7 +13142,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02054EA4 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x02054EC4 = 0xE1A00000; // nop
 		*(u32*)0x02054EF0 = 0xE1A00000; // nop
-	}
+	} */
 
 	// Saikyou Ginsei Shougi (Japan)
 	// Saving not supported due to using more than one file in filesystem
