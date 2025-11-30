@@ -1909,16 +1909,19 @@ void myIrqHandlerVBlank(void) {
 	}
 
 	if ( 0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_START | KEY_SELECT))) {
-		if (lockMutex(&saveMutex)) {
-			if ((softResetTimer == 60 * 2) && (saveTimer == 0)) {
-				REG_MASTER_VOLUME = 0;
-				int oldIME = enterCriticalSection();
-				forceGameReboot();
-				leaveCriticalSection(oldIME);
+		if (softResetTimer == 60 * 2) {
+			if (saveTimer == 0) {
+				if (lockMutex(&saveMutex)) {
+					REG_MASTER_VOLUME = 0;
+					int oldIME = enterCriticalSection();
+					forceGameReboot();
+					leaveCriticalSection(oldIME);
+				}
+				unlockMutex(&saveMutex);
 			}
-			unlockMutex(&saveMutex);
+		} else {
+			softResetTimer++;
 		}
-		softResetTimer++;
 	} else {
 		softResetTimer = 0;
 	}
