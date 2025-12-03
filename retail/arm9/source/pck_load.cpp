@@ -349,7 +349,20 @@ void loadApFix(configuration* conf, const char* bootstrapPath, const char* romTi
 			return;
 		}
 
+		sprintf(conf->apPatchPath, "%s:/_nds/nds-bootstrap/apFix/%s-%04X.ips", conf->bootstrapOnFlashcard ? "fat" : "sd", romTid, 0xFFFF);
+		if (access(conf->apPatchPath, F_OK) == 0) {
+			conf->apPatchSize = getFileSize(conf->apPatchPath);
+			return;
+		}
+
 		sprintf(conf->apPatchPath, "%s:/_nds/nds-bootstrap/apFix/%s-%04X.bin", conf->bootstrapOnFlashcard ? "fat" : "sd", romTid, headerCRC);
+		if (access(conf->apPatchPath, F_OK) == 0) {
+			conf->apPatchSize = getFileSize(conf->apPatchPath);
+			conf->valueBits |= BIT(5);
+			return;
+		}
+
+		sprintf(conf->apPatchPath, "%s:/_nds/nds-bootstrap/apFix/%s-%04X.bin", conf->bootstrapOnFlashcard ? "fat" : "sd", romTid, 0xFFFF);
 		if (access(conf->apPatchPath, F_OK) == 0) {
 			conf->apPatchSize = getFileSize(conf->apPatchPath);
 			conf->valueBits |= BIT(5);
