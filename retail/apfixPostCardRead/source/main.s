@@ -72,12 +72,6 @@
 .word hgssGerOverlayApFix_end-hgssGerOverlayApFix
 .hword 0
 
-.ascii "IPGE"
-.hword 0xFFFF
-.word hgssEngOverlayApFix
-.word hgssEngOverlayApFix_end-hgssEngOverlayApFix
-.hword 0
-
 .ascii "IPGF"
 .hword 0xFFFF
 .word ssFreOverlayApFix
@@ -112,12 +106,6 @@
 .hword 0xFFFF
 .word hgssGerOverlayApFix
 .word hgssGerOverlayApFix_end-hgssGerOverlayApFix
-.hword 0
-
-.ascii "IPKE"
-.hword 0xFFFF
-.word hgssEngOverlayApFix
-.word hgssEngOverlayApFix_end-hgssEngOverlayApFix
 .hword 0
 
 .ascii "IPKF"
@@ -443,29 +431,6 @@ hgssGerOverlayApFix_check3:
 	bx lr
 .pool
 hgssGerOverlayApFix_end:
-@---------------------------------------------------------------------------------
-hgssEngOverlayApFix: @ overlay9_1
-	ldr r0, =0x021E5900+0x219
-	ldrb r1, [r0]
-	mov r2, #0x28
-	cmp r2, r1
-	bxne lr
-	ldrb r1, [r0, #2]
-	mov r2, #0xD1
-	cmp r2, r1
-	bne hgssEngOverlayApFix_check3
-	mov r2, #0xE0
-	strb r2, [r0, #2]
-	bx lr
-hgssEngOverlayApFix_check3:
-	ldrb r1, [r0, #3]
-	cmp r2, r1
-	bxne lr
-	mov r2, #0xE0
-	strb r2, [r0, #3]
-	bx lr
-.pool
-hgssEngOverlayApFix_end:
 @---------------------------------------------------------------------------------
 ssFreOverlayApFix: @ overlay9_1
 	ldr r0, =0x021E5920+0x218
