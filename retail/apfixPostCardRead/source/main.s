@@ -54,12 +54,6 @@
 .word rdntHistJpnOverlayApFix_end-rdntHistJpnOverlayApFix
 .hword 0
 
-.ascii "CSGJ"
-.hword 0xFFFF
-.word saga2OverlayApFix
-.word saga2OverlayApFix_end-saga2OverlayApFix
-.hword 0
-
 .ascii "VCDJ"
 .hword 0xFFFF
 .word solatoroboJpnOverlayApFix
@@ -260,22 +254,6 @@ rdntHistJpnOverlayApFix: @ overlay9_0
 	bx lr
 .pool
 rdntHistJpnOverlayApFix_end:
-@---------------------------------------------------------------------------------
-saga2OverlayApFix: @ overlay9_2
-	ldr r0, =0x0213C9C0+0x22790
-	ldr r1, [r0]
-	ldr r2, =0xE28DB020
-	cmp r2, r1
-	bxne lr
-	ldr r1, [r0, #4]
-	ldr r2, =0xEA00000C
-	cmp r2, r1
-	bxne lr
-	mov r2, #0x37
-	strb r2, [r0, #4]
-	bx lr
-.pool
-saga2OverlayApFix_end:
 @---------------------------------------------------------------------------------
 solatoroboJpnOverlayApFix: @ overlay9_4
 	ldr r0, =0x021E39E0
