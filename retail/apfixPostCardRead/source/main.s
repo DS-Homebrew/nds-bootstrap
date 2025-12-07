@@ -42,12 +42,6 @@
 .word mmzcOverlayApFix_end-mmzcOverlayApFix
 .hword 0
 
-.ascii "BOEJ"
-.hword 0xFFFF
-.word ie3OgreOverlayApFix
-.word ie3OgreOverlayApFix_end-ie3OgreOverlayApFix
-.hword 0
-
 .ascii "BRJE"
 .hword 0xFFFF
 .word rdntHistEngOverlayApFix
@@ -158,60 +152,6 @@ mmzcOverlayApFix: @ overlay9_8
 	bx lr
 .pool
 mmzcOverlayApFix_end:
-@---------------------------------------------------------------------------------
-ie3OgreOverlayApFix: @ overlay9_129
-	ldr r0, =0x0212A9C0
-	ldrb r1, [r0, #0x6D]
-	mov r2, #0x8F
-	cmp r2, r1
-	bxne lr
-	ldrb r1, [r0, #0x6F]
-	mov r2, #0xE0
-	cmp r2, r1
-	bxne lr
-	ldrb r1, [r0, #0x10D]
-	mov r2, #0x45
-	cmp r2, r1
-	bxne lr
-	ldrb r1, [r0, #0x10F]
-	mov r2, #0xE0
-	cmp r2, r1
-	bxne lr
-	ldrb r1, [r0, #0x1AD]
-	mov r2, #0x1A
-	cmp r2, r1
-	bxne lr
-	ldrb r1, [r0, #0x1AF]
-	mov r2, #0xE0
-	cmp r2, r1
-	bxne lr
-	ldrb r1, [r0, #0x24D]
-	mov r2, #0x9C
-	cmp r2, r1
-	bxne lr
-	ldrb r1, [r0, #0x24F]
-	mov r2, #0xE0
-	cmp r2, r1
-	bxne lr
-	mov r2, #0x8E
-	strb r2, [r0, #0x6D]
-	mov r2, #0x36
-	strb r2, [r0, #0x6F]
-	mov r2, #0x44
-	strb r2, [r0, #0x10D]
-	mov r2, #0x36
-	strb r2, [r0, #0x10F]
-	mov r2, #0x19
-	strb r2, [r0, #0x1AD]
-	mov r2, #0x36
-	strb r2, [r0, #0x1AF]
-	mov r2, #0x9B
-	strb r2, [r0, #0x24D]
-	mov r2, #0x36
-	strb r2, [r0, #0x24F]
-	bx lr
-.pool
-ie3OgreOverlayApFix_end:
 @---------------------------------------------------------------------------------
 rdntHistEngOverlayApFix: @ overlay9_0
 	ldr r0, =0x02176A00
