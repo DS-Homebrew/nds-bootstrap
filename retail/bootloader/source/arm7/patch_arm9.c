@@ -156,7 +156,7 @@ static bool patchCardRead(cardengineArm9* ce9, const tNDSHeader* ndsHeader, cons
     dbg_hexa((u32)ce9);
     dbg_printf("\n");
 
-	extern u32 apPatchPostCardReadFileCluster;
+	/* extern u32 apPatchPostCardReadFileCluster;
 	extern u32 apPatchPostCardReadOffset;
 	extern u32 apPatchPostCardReadSize;
 	if (apPatchPostCardReadFileCluster == CLUSTER_FREE || apPatchPostCardReadOffset == 0 || apPatchPostCardReadSize == 0) {
@@ -171,7 +171,7 @@ static bool patchCardRead(cardengineArm9* ce9, const tNDSHeader* ndsHeader, cons
 	getFileFromCluster(&file, apPatchPostCardReadFileCluster);
 	fileRead((char*)postCardReadCodeOffset, &file, apPatchPostCardReadOffset, apPatchPostCardReadSize);
 
-	dbg_printf("Loaded post card read AP-fix\n\n");
+	dbg_printf("Loaded post card read AP-fix\n\n"); */
 	return true;
 }
 
