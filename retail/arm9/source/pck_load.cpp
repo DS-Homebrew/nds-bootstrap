@@ -431,7 +431,7 @@ void loadApFix(configuration* conf, const char* bootstrapPath, const char* romTi
 	fclose(file);
 }
 
-void loadApFixPostCardRead(configuration* conf, const char* bootstrapPath, const char* romTid, const u16 headerCRC) {
+/* void loadApFixPostCardRead(configuration* conf, const char* bootstrapPath, const char* romTid, const u16 headerCRC) {
 	FILE *file = fopen("nitro:/apfixPostCardRead.pck", "rb");
 	if (!file) {
 		return;
@@ -481,7 +481,7 @@ void loadApFixPostCardRead(configuration* conf, const char* bootstrapPath, const
 	}
 
 	fclose(file);
-}
+} */
 
 void loadMobiclipOffsets(configuration* conf, const char* bootstrapPath, const char* romTid, const u8 romVersion, const u16 headerCRC) {
 	FILE *file = fopen("nitro:/mobiclipOffsets.pck", "rb");
