@@ -646,25 +646,17 @@ static bool isROMLoadableInRAM(const tDSiHeader* dsiHeader, const tNDSHeader* nd
 		 || strncmp(romTid, "KD5", 3) == 0 // Jinia Supasonaru: Waei Rakubiki Jiten
 		 || strncmp(romTid, "KD4", 3) == 0) { // Meikyou Kokugo: Rakubiki Jiten
 			return false;
-		} else if (strncmp(romTid, "KBJ", 3) == 0) { // 21 Blackjack
-			romSizeLimitChange = 0x410000;
 		} else if (strncmp(romTid, "K5I", 3) == 0) { // 5 in 1 Solitaire
 			romSizeLimitChange = 0x1F0000;
 		} /* else if (strncmp(romTid, "KAT", 3) == 0) { // AiRace: Tunnel
 			romSizeLimitChange = 0x80000;
 		} */ else if (strncmp(romTid, "KCT", 3) == 0 // Chess Challenge!
-				   || strncmp(romTid, "KWK", 3) == 0 // Mega Words
 				   || strncmp(romTid, "KSC", 3) == 0 // Sudoku Challenge!
-				   || strncmp(romTid, "KWS", 3) == 0 // Word Searcher
-				   || strncmp(romTid, "KWR", 3) == 0 // Word Searcher II
-				   || strncmp(romTid, "KW6", 3) == 0 // Word Searcher III
-				   || strncmp(romTid, "KW8", 3) == 0) { // Word Searcher IV
+				   || strcmp(romTid, "KWSE") == 0) { // Word Searcher (USA)
 			romSizeLimitChange = 0x77C000;
 		} /* else if (strncmp(romTid, "KGU", 3) == 0) { // Flipnote Studio
 			romSizeLimitChange = 0x140000;
-		} */ else if (strncmp(romTid, "KUP", 3) == 0) { // Match Up!
-			romSizeLimitChange = 0x380000;
-		} else if (strncmp(romTid, "KQR", 3) == 0 // Remote Racers
+		} */ else if (strncmp(romTid, "KQR", 3) == 0 // Remote Racers
 				|| strncmp(romTid, "KWG", 3) == 0 // Animal Crossing Calculator
 				// || strncmp(romTid, "KWC", 3) == 0 // Animal Crossing Clock
 				|| strncmp(romTid, "KWF", 3) == 0) { // Mario Calculator
@@ -1474,6 +1466,8 @@ int arm7_main(void) {
 					||	strncmp(romTid, "KEG", 3) == 0 // Electroplankton: Lumiloop
 					||	strncmp(romTid, "KEA", 3) == 0 // Electroplankton: Trapy
 					||	strncmp(romTid, "KFO", 3) == 0 // Frenzic
+					// ||	strncmp(romTid, "KHB", 3) == 0 // Happy Birthday Mart
+					||	strncmp(romTid, "KY3", 3) == 0 // Kuniya Burete Sanga Ari: Hills and Rivers Remain
 					||	strncmp(romTid, "K5M", 3) == 0 // G.G Series: The Last Knight
 					||	strncmp(romTid, "KPT", 3) == 0 // Link 'n' Launch
 					||	strncmp(romTid, "CLJ", 3) == 0 // Mario & Luigi: Bowser's Inside Story
@@ -1602,13 +1596,14 @@ int arm7_main(void) {
 	extern bool maxHeapOpen;
 	u32 ce9DldiOffset = (extendedMemory ? 0x027FC000 : ((accessControl & BIT(4)) && !ce9Alt) ? 0x023FC000 : 0x023FD000);
 	if (_io_dldi_size == 0x0E) {
-		ce9DldiOffset = (extendedMemory ? 0x027DC000 : maxHeapOpen ? 0x023FA000 : (laterSdk ? 0x023DC000 : 0x023FB000));
+		ce9DldiOffset = (extendedMemory ? (maxHeapOpen ? 0x027FA000 : 0x027DC000) : maxHeapOpen ? 0x023FA000 : (laterSdk ? 0x023DC000 : 0x023FB000));
 	} else if (_io_dldi_size == 0x0F) {
-		ce9DldiOffset = (extendedMemory ? 0x027D8000 : maxHeapOpen ? 0x023F6000 : (laterSdk ? 0x023D8000 : 0x023F7000));
+		ce9DldiOffset = (extendedMemory ? (maxHeapOpen ? 0x027F6000 : 0x027D8000) : maxHeapOpen ? 0x023F6000 : (laterSdk ? 0x023D8000 : 0x023F7000));
 	}
 	u32 ce9DldiItcm = 0;
 	if (
-	   strncmp(romTid, "K6T", 3) == 0 // Orion's Odyssey
+	   strncmp(romTid, "KY3", 3) == 0 // Kuniya Burete Sanga Ari: Hills and Rivers Remain
+	|| strncmp(romTid, "K6T", 3) == 0 // Orion's Odyssey
 	|| strncmp(romTid, "KPS", 3) == 0 // Phantasy Star 0 Mini
 	|| strncmp(romTid, "KHR", 3) == 0 // Picture Perfect: Pocket Stylist
 	|| strncmp(romTid, "KZU", 3) == 0 // Tales to Enjoy!: Little Red Riding Hood
@@ -1774,9 +1769,11 @@ int arm7_main(void) {
 
 		toncset(ce9, 0, 0x2800);
 
-		u32 blFrom = (u32)ndsHeader->arm9executeAddress;
+		const u32 arm9exe = (strncmp(romTid, "BIG", 3) == 0) ? 0x02000800 : (u32)ndsHeader->arm9executeAddress;
+		// "Battle/Combat of Giants: Mutant Insects" (TID: BIG) has code that is run before the actual SDK boot code
+		u32 blFrom = arm9exe;
 		for (int i = 0; i < 0x200/4; i++) {
-			u32* addr = ndsHeader->arm9executeAddress;
+			u32* addr = (u32*)arm9exe;
 			if (addr[i] == 0xE5810000) {
 				unpatchedFuncs->exeCode = addr[i];
 				break;
@@ -1792,9 +1789,12 @@ int arm7_main(void) {
 	aFile pageFile;
 	getFileFromCluster(&pageFile, pageFileCluster);
 
-	fileWrite((char*)ndsHeader->arm9destination, &pageFile, 0x14000, iUncompressedSize);
-	fileWrite((char*)ndsHeader->arm7destination, &pageFile, 0x2C0000, newArm7binarySize);
-	// fileWrite((char*)CHEAT_ENGINE_LOCATION_B4DS, &pageFile, 0x2FE000, 0x2000);
+	if (!(accessControl & BIT(4))) {
+		// If not a DSiWare title, write patches ARM binaries to page file for use with soft-resets
+		fileWrite((char*)ndsHeader->arm9destination, &pageFile, 0x14000, iUncompressedSize);
+		fileWrite((char*)ndsHeader->arm7destination, &pageFile, 0x2C0000, newArm7binarySize);
+		// fileWrite((char*)CHEAT_ENGINE_LOCATION_B4DS, &pageFile, 0x2FE000, 0x2000);
+	}
 	fileWrite((char*)&iUncompressedSize, &pageFile, 0x3FFFF0, sizeof(u32));
 	fileWrite((char*)&newArm7binarySize, &pageFile, 0x3FFFF4, sizeof(u32));
 

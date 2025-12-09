@@ -14,15 +14,18 @@ typedef enum {
 typedef enum {
 	NAND,
 	NAND_3DS,
+	NAND_DEV_3DS,
 	ES
 } key_mode_t;
 
 // don't want to include nds.h just for this
 void swiSHA1Calc(void *digest, const void *buf, size_t len);
 
+void populate_dsi_nand_key_y(uint8_t *out, bool is_dev_3DS);
+
 int dsi_sha1_verify(const void *digest_verify, const void *data, unsigned len);
 
-void dsi_crypt_init(const uint8_t *console_id_be, const uint8_t *emmc_cid, int is3DS);
+void dsi_crypt_init(const uint8_t *console_id_be, const uint8_t *emmc_cid, int is3DS, bool is_dev_3DS);
 
 void dsi_nand_crypt_1(uint8_t *out, const uint8_t* in, u32 offset);
 

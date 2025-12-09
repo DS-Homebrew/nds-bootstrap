@@ -1,6 +1,8 @@
 @---------------------------------------------------------------------------------
 	@.global lrStoreTestCode
 	.global mepHeapSetPatch
+	.global earlyTwlFontHeapAlloc
+	.global earlyTwlFontHeapAllocSize
 	.global twlFontHeapAlloc
 	.global twlFontHeapAllocSize
 	.global twlFontHeapAllocNoMep
@@ -12,6 +14,7 @@
 	@.global gate18HeapAddrPtr
 	.global goGoKokopoloHeapAlloc
 	@.global goGoKokopoloHeapAddrPtr
+	.global hakokoroUnusedFontLoad
 	.global marioCalcStrbForSlot2
 	@.global marioClockHeapAlloc
 	.global metalTorrentSndLoad
@@ -37,6 +40,10 @@
 @	.word lrStoreTest
 mepHeapSetPatch:
 	.word mepHeapSetPatchFunc
+earlyTwlFontHeapAlloc:
+	.word earlyTwlFontHeapPtr
+earlyTwlFontHeapAllocSize:
+	.word earlyTwlFontHeapAllocFunc_end-earlyTwlFontHeapPtr
 twlFontHeapAlloc:
 	.word twlFontHeapPtr
 twlFontHeapAllocSize:
@@ -120,6 +127,56 @@ mepHeapSetPatchFunc:
 _blx_mepHeapSetOrgFunc:
 	bx	r6
 @---------------------------------------------------------------------------------
+
+@---------------------------------------------------------------------------------
+earlyTwlFontHeapPtr: .word 0x09000000
+earlyTwlFontHeapAllocFunc:
+@---------------------------------------------------------------------------------
+	stmfd   sp!, {r3-r6,lr}
+
+	mov r6, #0
+	cmp r2, #0x1000
+	movlt r2, r0
+	blt earlyTwlFontFilenameCheck
+	cmp r2, #0x02000000
+	blt earlyTwlFontFilenameCheck
+	cmpge r2, #0x02800000
+	movlt r2, r0
+earlyTwlFontFilenameCheck:
+	ldr r3, =0x02FFF100 @ filesize pointer list
+	ldr r5, [r3, r6]
+	cmp r5, r2
+	beq earlyTwlFontUseOldHeapPtr
+	cmp r5, #0
+	streq r2, [r3, r6]
+	beq earlyTwlFontLastHeapPtrUpdate
+	add r6, #4
+	b earlyTwlFontFilenameCheck
+
+earlyTwlFontLastHeapPtrUpdate:
+	ldr r3, =0x02FFF1FC @ last heap pointer
+	ldr r4, [r3]
+	cmp r4, #0
+	ldreq r4, earlyTwlFontHeapPtr
+	beq earlyTwlFontLastHeapPtrStr
+	add r4, r2
+	add r4, #0x40000
+earlyTwlFontLastHeapPtrStr:
+	str r4, [r3]
+
+@ save heap ponter
+	ldr r3, =0x02FFF180 @ heap pointers
+	str r4, [r3, r6]
+	mov r0, r4
+	ldmfd   sp!, {r3-r6,pc}
+
+earlyTwlFontUseOldHeapPtr:
+	ldr r3, =0x02FFF180 @ heap pointers
+	ldr r0, [r3, r6]
+	ldmfd   sp!, {r3-r6,pc}
+.pool
+@---------------------------------------------------------------------------------
+earlyTwlFontHeapAllocFunc_end:
 
 @---------------------------------------------------------------------------------
 twlFontHeapPtr: .word 0x09000000
@@ -410,6 +467,29 @@ goGoKokopoloHeapAllocFunc:
 @goGoKokopoloHeapAddr:
 @.word	0x09000000
 @---------------------------------------------------------------------------------
+
+@---------------------------------------------------------------------------------
+hakokoroUnusedFontLoad:
+@---------------------------------------------------------------------------------
+	cmp r1, #0
+	ldreq r2, hakokoroUnusedFont0
+	beq hakokoroRunFontLoad
+	cmp r1, #1
+	ldreq r2, hakokoroUnusedFont1
+	beq hakokoroRunFontLoad
+	cmp r1, #2
+	ldreq r2, hakokoroUnusedFont2
+hakokoroRunFontLoad:
+	ldr pc, hakokoroFontLoad
+hakokoroUnusedFont0:
+.word 0x020C96B0
+hakokoroUnusedFont1:
+.word 0x020CC5CC
+hakokoroUnusedFont2:
+.word 0x020CCE98
+hakokoroFontLoad:
+.word 0x02021550
+@---------------------------------------------------------------------------------
 	.thumb
 @---------------------------------------------------------------------------------
 marioCalcStrbForSlot2Func:
@@ -422,68 +502,31 @@ marioCalcStrbForSlot2Func:
 	ldr r4, =0x01FF8000
 
 	mov r2, r5
-	ldr r3, =0x01000000
+	mov r3, #0xF
+	and r2, r3
 marioCalcStrbForSlot2_loop:
-	cmp r2, r3
-	blt marioCalcStrbForSlot2_2
-	sub r2, r2, r3
-	b marioCalcStrbForSlot2_loop
-
-marioCalcStrbForSlot2_2:
-	ldr r3, =0x00100000
-marioCalcStrbForSlot2_loop2:
-	cmp r2, r3
-	blt marioCalcStrbForSlot2_3
-	sub r2, r2, r3
-	b marioCalcStrbForSlot2_loop2
-
-marioCalcStrbForSlot2_3:
-	ldr r3, =0x00010000
-marioCalcStrbForSlot2_loop3:
-	cmp r2, r3
-	blt marioCalcStrbForSlot2_4
-	sub r2, r2, r3
-	b marioCalcStrbForSlot2_loop3
-
-marioCalcStrbForSlot2_4:
-	ldr r3, =0x00001000
-marioCalcStrbForSlot2_loop4:
-	cmp r2, r3
-	blt marioCalcStrbForSlot2_5
-	sub r2, r2, r3
-	b marioCalcStrbForSlot2_loop4
-
-marioCalcStrbForSlot2_5:
-	ldr r3, =0x00000100
-marioCalcStrbForSlot2_loop5:
-	cmp r2, r3
-	blt marioCalcStrbForSlot2_loop6
-	sub r2, r2, r3
-	b marioCalcStrbForSlot2_loop5
-
-marioCalcStrbForSlot2_loop6:
 	cmp r2, #0
 	beq marioCalcStrbForSlot2_writeByte0
 	cmp r2, #1
 	beq marioCalcStrbForSlot2_writeByte1
-	sub r2, r2, #2
-	b marioCalcStrbForSlot2_loop6
+	sub r2, #2
+	b marioCalcStrbForSlot2_loop
 
 marioCalcStrbForSlot2_writeByte0:
 	strb r0, [r4]
 	ldrh r0, [r4]
 
 	strh r0, [r5]
-	add r5, r5, #1
+	add r5, #1
 	pop {r2-r4, pc}
 
 marioCalcStrbForSlot2_writeByte1:
 	strb r0, [r4, #1]
 	ldrh r0, [r4]
 
-	sub r5, r5, #1
+	sub r5, #1
 	strh r0, [r5]
-	add r5, r5, #2
+	add r5, #2
 
 	mov r0, #0
 	strh r0, [r4]

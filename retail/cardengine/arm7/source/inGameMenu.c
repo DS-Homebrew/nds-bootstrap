@@ -16,9 +16,9 @@
 #define	REG_EXTKEYINPUT	(*(vuint16*)0x04000136)
 
 extern u32 valueBits;
+extern s32 mainScreen;
 
 extern vu32* volatile sharedAddr;
-extern bool ipcEveryFrame;
 // extern bool returnToMenu;
 
 extern void rebootConsole(void);
@@ -114,11 +114,8 @@ void inGameMenu(void) {
 					//rebootConsole();
 					//exitMenu = true;
 					//break;
-				case 0x59435049: // IPCY
-					ipcEveryFrame = true;
-					break;
-				case 0x4E435049: // IPCN
-					ipcEveryFrame = false;
+				case 0x53435049: // IPCS
+					mainScreen = sharedAddr[0];
 					break;
 				case 0x524D4152: // RAMR
 					u32* dst = (u32*)((u32)sharedAddr[0]);

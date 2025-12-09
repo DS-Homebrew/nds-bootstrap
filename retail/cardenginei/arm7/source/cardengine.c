@@ -117,6 +117,7 @@ extern u8 consoleModel;
 extern u8 romRead_LED;
 extern u8 dmaRomRead_LED;
 extern u16 igmHotkey;
+extern u16 screenSwapHotkey;
 
 #ifdef TWLSDK
 vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS_SDK5;
@@ -136,7 +137,6 @@ static bool funcsUnpatched = false;
 //static bool initializedIRQ = false;
 //static bool calledViaIPC = false;
 //static bool ipcSyncHooked = false;
-bool ipcEveryFrame = false;
 //static bool dmaLed = false;
 static bool powerLedChecked = false;
 static bool powerLedIsPurple = false;
@@ -173,7 +173,8 @@ static aFile manualFile;
 static int saveTimer = 0;
 
 static int languageTimer = 0;
-// static int swapTimer = 0;
+static int swapTimer = 0;
+int afterSwapTimer = 0;
 static int returnTimer = 0;
 static int softResetTimer = 0;
 // static int ramDumpTimer = 0;
@@ -374,9 +375,6 @@ static void initialize(void) {
 
 	if (!bootloaderCleared) {
 		toncset((u8*)0x06000000, 0, 0x40000);	// Clear bootloader
-		if (mainScreen) {
-			ipcEveryFrame = true;
-		}
 		bootloaderCleared = true;
 	}
 
@@ -1146,6 +1144,10 @@ void restorePreManual(void) {
 }
 
 void saveMainScreenSetting(void) {
+	fileWrite((char*)&mainScreen, &patchOffsetCacheFile, 0x1FC, sizeof(u32));
+}
+
+void saveMainScreenSettingIgm(void) {
 	fileWrite((char*)sharedAddr, &patchOffsetCacheFile, 0x1FC, sizeof(u32));
 }
 
@@ -1840,22 +1842,32 @@ void myIrqHandlerVBlank(void) {
 		}
 	}
 
-/*KEY_X*/
-	/* if (0==(REG_KEYINPUT & (KEY_L | KEY_R | KEY_UP)) && !(REG_EXTKEYINPUT & KEY_A)) {
-		if (lockMutex(&saveMutex)) {
-			if (swapTimer == 60){
-				swapTimer = 0;
-				if (!ipcEveryFrame) {
-					IPC_SendSync(0x7);
-				}
-				swapScreens = true;
+	if (afterSwapTimer > 0) {
+		if (afterSwapTimer == 60*3) {
+			if (lockMutex(&saveMutex)) {
+				saveMainScreenSetting();
 			}
+			unlockMutex(&saveMutex);
+			afterSwapTimer = 0;
+		} else afterSwapTimer++;
+	}
+
+	u8 screenIpc = 0x6;
+
+	if (0 == (REG_KEYINPUT & screenSwapHotkey) && 0 == (REG_EXTKEYINPUT & (((screenSwapHotkey >> 10) & 3) | ((screenSwapHotkey >> 6) & 0xC0)))) {
+		if (swapTimer == 60){
+			swapTimer = 0;
+			screenIpc = 0x7;
+			mainScreen++;
+			if (mainScreen > 2) {
+				mainScreen = 0;
+			}
+			afterSwapTimer = 1;
 		}
-		unlockMutex(&saveMutex);
 		swapTimer++;
 	} else {
 		swapTimer = 0;
-	} */
+	}
 
 #ifdef TWLSDK
 	if (sharedAddr[3] == (vu32)0x54495845) {
@@ -1897,16 +1909,19 @@ void myIrqHandlerVBlank(void) {
 	}
 
 	if ( 0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_START | KEY_SELECT))) {
-		if (lockMutex(&saveMutex)) {
-			if ((softResetTimer == 60 * 2) && (saveTimer == 0)) {
-				REG_MASTER_VOLUME = 0;
-				int oldIME = enterCriticalSection();
-				forceGameReboot();
-				leaveCriticalSection(oldIME);
+		if (softResetTimer == 60 * 2) {
+			if (saveTimer == 0) {
+				if (lockMutex(&saveMutex)) {
+					REG_MASTER_VOLUME = 0;
+					int oldIME = enterCriticalSection();
+					forceGameReboot();
+					leaveCriticalSection(oldIME);
+				}
+				unlockMutex(&saveMutex);
 			}
-			unlockMutex(&saveMutex);
+		} else {
+			softResetTimer++;
 		}
-		softResetTimer++;
 	} else {
 		softResetTimer = 0;
 	}
@@ -1988,8 +2003,8 @@ void myIrqHandlerVBlank(void) {
 	// runCardEngineCheck();
 
 	// Fix ARM9 VCount IRQ settings for color LUT and/or swap screens
-	if ((valueBits & useColorLut) || ipcEveryFrame) {
-		IPC_SendSync(0x6);
+	if ((valueBits & useColorLut) || (mainScreen > 0) || (screenIpc == 0x7)) {
+		IPC_SendSync(screenIpc);
 	}
 
 	if (sharedAddr[0] == 0x524F5245) { // 'EROR'

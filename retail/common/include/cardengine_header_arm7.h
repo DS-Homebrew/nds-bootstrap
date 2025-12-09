@@ -118,6 +118,8 @@ typedef struct cardengineArm7 {
     u32* irqTable_offset;
     u16 scfgRomBak;
     u16 igmHotkey;
+	u16 screenSwapHotkey;
+	u16 screenSwapHotkeyPad;
 	u32 romLocation;
 	u32 romPartLocation;
 	u32 romPartSrc;
@@ -148,7 +150,9 @@ typedef struct cardengineArm7B4DS {
 	s32 mainScreen;
 	u32 language; //u8
 	u32* languageAddr;
+	u8 volumeLevels[4];
 	u16 igmHotkey;
+	u16 screenSwapHotkey;
 	u8 RumblePakType;
 	u8 RumblePakTypePadding;
 	u16 s2FlashcardId;
@@ -197,7 +201,9 @@ typedef struct cardengineArm7 {
 	s32 mainScreen;
 	u32 language; //u8
 	u32* languageAddr;
+	u8 volumeLevels[4];
 	u16 igmHotkey;
+	u16 screenSwapHotkey;
 	u8 RumblePakType;
 	u8 RumblePakTypePadding;
 	u16 s2FlashcardId;

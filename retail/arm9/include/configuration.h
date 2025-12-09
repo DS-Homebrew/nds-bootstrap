@@ -84,6 +84,7 @@ typedef struct configuration {
 	bool macroMode;
 	bool sleepMode;
 	u16 hotkey;
+	u16 screenSwapHotkey;
 	bool specialCard;
 	bool phatColors;
 	char* manualPath;

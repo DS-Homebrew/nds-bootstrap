@@ -61,6 +61,7 @@ static const char colorLutBlacklist[][4] = {
 	"ARZ", // MegaMan ZX
 	"YZX", // MegaMan ZX Advent
 	"AMH", // Metroid Prime Hunters
+	"YNP", // Need for Speed: ProStreet
 	"B3N", // Power Rangers: Samurai
 	"AQW", // Puzzle Quest: Challenge of the Warlords (DS version)
 	"BSY", // The Secret Saturdays: Beasts of the 5th Sun
@@ -189,6 +190,10 @@ MegaMan ZX Advent:
 Metroid Prime Hunters:
 - Color blending effects used for many textures and in title screen
 - Black lines appearing in title screen
+
+Need for Speed: ProStreet:
+- Bitmap images used
+- Crashes after pressing A in title screen
 
 Power Rangers: Samurai:
 - Runs very slowly

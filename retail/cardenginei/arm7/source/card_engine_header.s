@@ -33,6 +33,7 @@
 .global dmaRomRead_LED
 .global scfgRomBak
 .global igmHotkey
+.global screenSwapHotkey
 .global ndsCodeStart
 .global romLocation
 .global romPartLocation
@@ -95,6 +96,9 @@ scfgRomBak:
 	.hword	0
 igmHotkey:
 	.hword	0
+screenSwapHotkey:
+	.hword	0
+	.hword	0 @ padding
 romLocation:
 	.word	0x00000000
 romPartLocation:

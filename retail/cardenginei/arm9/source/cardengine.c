@@ -1056,7 +1056,6 @@ bool nandWrite(void* src, u32 dst, u32 len /* , u32 dma */) {
 	const u32 commandWrite = 0x025FFC02;
 
 	#ifndef DLDI
-	const u32 savedLen = len;
 	const u32 commandRead = 0x025FFC01;
 
 	accessCounter++;
@@ -1655,6 +1654,10 @@ void myIrqHandlerIPC(void) {
 			reset(0xFFFFFFFF, 0);
 			#endif
 			break;
+		case 0x7:
+			ce9->mainScreen++;
+			if(ce9->mainScreen > 2)
+				ce9->mainScreen = 0;
 		case 0x6: {
 			if (ce9->valueBits & useColorLut) {
 				if (!(ce9->valueBits & colorLutBlockVCount)) {
@@ -1699,17 +1702,6 @@ void myIrqHandlerIPC(void) {
 			else if (ce9->mainScreen == 2)
 				REG_POWERCNT |= POWER_SWAP_LCDS;
 		}	break;
-		/* case 0x7: {
-			ce9->mainScreen++;
-			if(ce9->mainScreen > 2)
-				ce9->mainScreen = 0;
-
-			if(ce9->mainScreen == 1)
-				REG_POWERCNT &= ~POWER_SWAP_LCDS;
-			else if(ce9->mainScreen == 2)
-				REG_POWERCNT |= POWER_SWAP_LCDS;
-		}
-			break; */
 		case 0x9:
 			inGameMenu((s32*)0);
 			break;

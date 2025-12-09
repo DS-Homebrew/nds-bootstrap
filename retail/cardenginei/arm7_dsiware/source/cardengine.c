@@ -85,6 +85,7 @@ extern u32* languageAddr;
 extern u8 language;
 extern u8 consoleModel;
 extern u16 igmHotkey;
+extern u16 screenSwapHotkey;
 
 vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS_SDK5;
 
@@ -94,7 +95,6 @@ static bool initialized = false;
 static bool driveInited = false;
 static bool bootloaderCleared = false;
 static bool funcsUnpatched = false;
-bool ipcEveryFrame = false;
 static bool wifiIrq = false;
 static int wifiIrqTimer = 0;
 
@@ -110,7 +110,8 @@ static aFile manualFile;
 
 static int sdRightsTimer = 0;
 static int languageTimer = 0;
-// static int swapTimer = 0;
+static int swapTimer = 0;
+int afterSwapTimer = 0;
 static int returnTimer = 0;
 static int softResetTimer = 0;
 static int ramDumpTimer = 0;
@@ -274,9 +275,6 @@ static void initialize(void) {
 
 	if (!bootloaderCleared) {
 		toncset((u8*)0x06000000, 0, 0x40000);	// Clear bootloader
-		if (mainScreen) {
-			ipcEveryFrame = true;
-		}
 
 		u8* deviceListAddr = (u8*)(*(u32*)0x02FFE1D4);
 		if (deviceListAddr[0x3C0] == 's' && deviceListAddr[0x3C1] == 'd') {
@@ -668,7 +666,7 @@ void restorePreManual(void) {
 }
 
 void saveMainScreenSetting(void) {
-	fileWrite((char*)sharedAddr, &patchOffsetCacheFile, 0x1FC, sizeof(u32));
+	fileWrite((char*)&mainScreen, &patchOffsetCacheFile, 0x1FC, sizeof(u32));
 }
 
 void loadInGameMenu(void) {
@@ -759,19 +757,32 @@ void myIrqHandlerVBlank(void) {
 		restoreBakData();
 	}
 
-/*KEY_X*/
-	/* if (0==(REG_KEYINPUT & (KEY_L | KEY_R | KEY_UP)) && !(REG_EXTKEYINPUT & KEY_A)) {
+	if (afterSwapTimer > 0) {
+		if (afterSwapTimer == 60*3) {
+			bakData();
+			saveMainScreenSetting();
+			restoreBakData();
+
+			afterSwapTimer = 0;
+		} else afterSwapTimer++;
+	}
+
+	u8 screenIpc = 0x6;
+
+	if (0 == (REG_KEYINPUT & screenSwapHotkey) && 0 == (REG_EXTKEYINPUT & (((screenSwapHotkey >> 10) & 3) | ((screenSwapHotkey >> 6) & 0xC0)))) {
 		if (swapTimer == 60){
 			swapTimer = 0;
-			if (!ipcEveryFrame) {
-				IPC_SendSync(0x7);
+			screenIpc = 0x7;
+			mainScreen++;
+			if (mainScreen > 2) {
+				mainScreen = 0;
 			}
-			swapScreens = true;
+			afterSwapTimer = 1;
 		}
 		swapTimer++;
 	} else {
 		swapTimer = 0;
-	} */
+	}
 
 	if (0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_DOWN | KEY_B))) {
 		if (returnTimer == 60 * 2) {
@@ -876,8 +887,8 @@ void myIrqHandlerVBlank(void) {
 	}
 
 	// Fix ARM9 VCount IRQ settings for color LUT and/or swap screens
-	if ((valueBits & useColorLut) || ipcEveryFrame) {
-		IPC_SendSync(0x6);
+	if ((valueBits & useColorLut) || (mainScreen > 0) || (screenIpc == 0x7)) {
+		IPC_SendSync(screenIpc);
 	}
 
 	if (sharedAddr[0] == 0x524F5245) { // 'EROR'

@@ -298,6 +298,10 @@ void myIrqHandlerIPC(void) {
 			sharedAddr[3] = 0x54495845;
 			reset(0, 0);
 			break;
+		case 0x7:
+			ce9->mainScreen++;
+			if(ce9->mainScreen > 2)
+				ce9->mainScreen = 0;
 		case 0x6: {
 			if (ce9->valueBits & useColorLut) {
 				if (!(ce9->valueBits & colorLutBlockVCount)) {
@@ -319,17 +323,6 @@ void myIrqHandlerIPC(void) {
 			else if(ce9->mainScreen == 2)
 				REG_POWERCNT |= POWER_SWAP_LCDS;
 		}	break;
-		/* case 0x7: {
-			ce9->mainScreen++;
-			if(ce9->mainScreen > 2)
-				ce9->mainScreen = 0;
-
-			if(ce9->mainScreen == 1)
-				REG_POWERCNT &= ~POWER_SWAP_LCDS;
-			else if(ce9->mainScreen == 2)
-				REG_POWERCNT |= POWER_SWAP_LCDS;
-		}
-			break; */
 		case 0x9:
 			inGameMenu((s32*)0);
 			break;

@@ -156,7 +156,7 @@ static bool patchCardRead(cardengineArm9* ce9, const tNDSHeader* ndsHeader, cons
     dbg_hexa((u32)ce9);
     dbg_printf("\n");
 
-	extern u32 apPatchPostCardReadFileCluster;
+	/* extern u32 apPatchPostCardReadFileCluster;
 	extern u32 apPatchPostCardReadOffset;
 	extern u32 apPatchPostCardReadSize;
 	if (apPatchPostCardReadFileCluster == CLUSTER_FREE || apPatchPostCardReadOffset == 0 || apPatchPostCardReadSize == 0) {
@@ -171,7 +171,7 @@ static bool patchCardRead(cardengineArm9* ce9, const tNDSHeader* ndsHeader, cons
 	getFileFromCluster(&file, apPatchPostCardReadFileCluster);
 	fileRead((char*)postCardReadCodeOffset, &file, apPatchPostCardReadOffset, apPatchPostCardReadSize);
 
-	dbg_printf("Loaded post card read AP-fix\n\n");
+	dbg_printf("Loaded post card read AP-fix\n\n"); */
 	return true;
 }
 
@@ -2058,15 +2058,21 @@ void patchSharedFontPath(const cardengineArm9* ce9, const tNDSHeader* ndsHeader,
 	}
 }
 
-void patchTwlFontLoad(u32 heapAllocAddr, u32 newCodeAddr) {
+void patchTwlFontLoad(bool late, u32 heapAllocAddr, u32 newCodeAddr) {
 	extern bool expansionPakFound;
 	extern bool sharedFontInMep;
 	if (expansionPakFound) {
 		extern u32 clusterCache;
+		extern u32* earlyTwlFontHeapAlloc;
+		extern u32 earlyTwlFontHeapAllocSize;
 		extern u32* twlFontHeapAlloc;
 		extern u32 twlFontHeapAllocSize;
 
-		tonccpy((u32*)newCodeAddr, twlFontHeapAlloc, twlFontHeapAllocSize);
+		if (late) {
+			tonccpy((u32*)newCodeAddr, twlFontHeapAlloc, twlFontHeapAllocSize);
+		} else {
+			tonccpy((u32*)newCodeAddr, earlyTwlFontHeapAlloc, earlyTwlFontHeapAllocSize);
+		}
 		*(u32*)newCodeAddr = clusterCache-0x200000;
 		setBL(heapAllocAddr, newCodeAddr+4);
 
@@ -2126,25 +2132,45 @@ void patchTwlSaveFuncs(const cardengineArm9* ce9) {
 	const u32* dsiSaveRead = ce9->patches->dsiSaveRead;
 	const u32* dsiSaveWrite = ce9->patches->dsiSaveWrite;
 
+	u32* ovlPatcher = NULL;
+	u16 ovlPatchOffset = 0x54;
+
 	aFile file;
 	getFileFromCluster(&file, dsi2dsSavePatchFileCluster);
 
 	for (u32 i = 0; i < dsi2dsSavePatchSize; i += 8) {
 		u32 patchData[2];
 		fileRead((char*)patchData, &file, dsi2dsSavePatchOffset+i, 8);
+		const bool ovlPatcherAvailable = ovlPatcher;
 		const bool patchIsThumb = (patchData[0] >= 0x10000000 && patchData[0] < 0x20000000);
 		if (patchIsThumb) {
 			patchData[0] -= 0x10000000;
 		}
 
 		switch (patchData[1]) {
+			case 0x394C564F: { // 'OVL9'
+				postCardReadCodeOffset = (u32)patchOffsetCache.cardReadStartOffset;
+				postCardReadCodeOffset += patchOffsetCache.a9IsThumb ? 0xC : 8;
+				ovlPatcher = (u32*)postCardReadCodeOffset;
+
+				extern u32 applyDSi2DSSaveCodeToOverlay[];
+				tonccpy(ovlPatcher, applyDSi2DSSaveCodeToOverlay, 0x48);
+
+				const u32 ovlOffset = patchData[0];
+				i += 8;
+				fileRead((char*)patchData, &file, dsi2dsSavePatchOffset+i, 8);
+
+				ovlPatcher[0x48/4] = ovlOffset; // dsi2dsSaveOverlayOffset
+				ovlPatcher[0x4C/4] = patchData[0]; // dsi2dsSaveOverlayCode
+				ovlPatcher[0x50/4] = 0; // dsi2dsSaveOverlayPatchLines
+			}	break;
 			case 0x4E494254: // 'TBIN'
 				twlSaveThumbBranchOffset = patchData[0];
 				break;
 			case 0x52544547: // 'GETR'
 				if (patchIsThumb) {
 					twlSaveSetTBranch(patchData[0], (u32)dsiSaveGetResultCode);
-				} else if (*(u32*)(patchData[0]) >= 0xEB000000 && *(u32*)(patchData[0]) < 0xEC000000) {
+				} else if (ovlPatcherAvailable || (*(u32*)(patchData[0]) >= 0xEB000000 && *(u32*)(patchData[0]) < 0xEC000000)) {
 					setBL(patchData[0], (u32)dsiSaveGetResultCode);
 				} else {
 					tonccpy((u32*)(patchData[0]), dsiSaveGetResultCode, 8);
@@ -2153,7 +2179,7 @@ void patchTwlSaveFuncs(const cardengineArm9* ce9) {
 			case 0x41455243: // 'CREA'
 				if (patchIsThumb) {
 					twlSaveSetTBranch(patchData[0], (u32)dsiSaveCreate);
-				} else if (*(u32*)(patchData[0]) >= 0xEB000000 && *(u32*)(patchData[0]) < 0xEC000000) {
+				} else if (ovlPatcherAvailable || (*(u32*)(patchData[0]) >= 0xEB000000 && *(u32*)(patchData[0]) < 0xEC000000)) {
 					setBL(patchData[0], (u32)dsiSaveCreate);
 				} else if (*(u32*)(patchData[0]-4) == 0xE12FFF1C || *(u32*)(patchData[0]-8) == 0xE12FFF1C) {
 					*(u32*)(patchData[0]) = (u32)dsiSaveCreate;
@@ -2183,7 +2209,7 @@ void patchTwlSaveFuncs(const cardengineArm9* ce9) {
 			case 0x4E45504F: // 'OPEN'
 				if (patchIsThumb) {
 					twlSaveSetTBranch(patchData[0], (u32)dsiSaveOpen);
-				} else if (*(u32*)(patchData[0]) >= 0xEB000000 && *(u32*)(patchData[0]) < 0xEC000000) {
+				} else if (ovlPatcherAvailable || (*(u32*)(patchData[0]) >= 0xEB000000 && *(u32*)(patchData[0]) < 0xEC000000)) {
 					setBL(patchData[0], (u32)dsiSaveOpen);
 				} else if (*(u32*)(patchData[0]-4) == 0xE12FFF1C || *(u32*)(patchData[0]-8) == 0xE12FFF1C) {
 					*(u32*)(patchData[0]) = (u32)dsiSaveOpen;
@@ -2234,7 +2260,7 @@ void patchTwlSaveFuncs(const cardengineArm9* ce9) {
 			case 0x54495257: // 'WRIT'
 				if (patchIsThumb) {
 					twlSaveSetTBranch(patchData[0], (u32)dsiSaveWrite);
-				} else if (*(u32*)(patchData[0]) >= 0xEB000000 && *(u32*)(patchData[0]) < 0xEC000000) {
+				} else if (ovlPatcherAvailable || (*(u32*)(patchData[0]) >= 0xEB000000 && *(u32*)(patchData[0]) < 0xEC000000)) {
 					setBL(patchData[0], (u32)dsiSaveWrite);
 				} else if (*(u32*)(patchData[0]-4) == 0xE12FFF1C || *(u32*)(patchData[0]-8) == 0xE12FFF1C) {
 					*(u32*)(patchData[0]) = (u32)dsiSaveWrite;
@@ -2250,6 +2276,13 @@ void patchTwlSaveFuncs(const cardengineArm9* ce9) {
 					*(u32*)(patchData[0]) = patchData[1];
 				}
 				break;
+		}
+		if (ovlPatcherAvailable) {
+			ovlPatcher[0x50/4]++;
+			ovlPatcher[ovlPatchOffset/4] = patchData[0];
+			ovlPatchOffset += 4;
+			ovlPatcher[ovlPatchOffset/4] = *(u32*)(patchData[0]);
+			ovlPatchOffset += 4;
 		}
 	}
 }

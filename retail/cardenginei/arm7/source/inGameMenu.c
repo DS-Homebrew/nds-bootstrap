@@ -18,11 +18,12 @@
 #define REG_EXTKEYINPUT (*(vuint16*)0x04000136)
 
 extern u32 valueBits;
+extern s32 mainScreen;
 extern u8 consoleModel;
 
 extern vu32* volatile sharedAddr;
-extern bool ipcEveryFrame;
 // extern bool returnToMenu;
+extern int afterSwapTimer;
 
 extern struct IgmText *igmText;
 
@@ -139,14 +140,10 @@ void inGameMenu(void) {
 					returnToLoader(false);
 					exitMenu = true;
 					break;
-				case 0x59435049: // IPCY
-					ipcEveryFrame = true;
-					break;
-				case 0x4E435049: // IPCN
-					ipcEveryFrame = false;
-					break;
 				case 0x53435049: // IPCS
+					mainScreen = sharedAddr[0];
 					saveMainScreenSetting();
+					afterSwapTimer = 0;
 					break;
 				case 0x444D4152: // RAMD
 					dumpRam();

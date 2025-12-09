@@ -496,7 +496,6 @@ static void optionsMenu(s32 *mainScreen, u32 consoleModel) {
 						*mainScreen = 0;
 					else if(*mainScreen < 0)
 						*mainScreen = 2;
-					sharedAddr[4] = (*mainScreen == 0) ? 0x4E435049 : 0x59435049;
 					mainScreenChanged = true;
 					break;
 				case OPTIONS_BRIGHTNESS:
@@ -552,14 +551,13 @@ static void optionsMenu(s32 *mainScreen, u32 consoleModel) {
 			}
 		} else if (KEYS & KEY_B) {
 			if (mainScreenChanged) {
-				#ifndef B4DS
 				sharedAddr[0] = *mainScreen;
 				sharedAddr[4] = 0x53435049; // IPCS
 				while(sharedAddr[4] == 0x53435049) {
 					while (REG_VCOUNT != 191) mySwiDelay(100);
 					while (REG_VCOUNT == 191) mySwiDelay(100);
 				}
-				#else
+				#ifdef B4DS
 				codeJumpWord = ce9->saveMainScreenSetting;
 				(*codeJump)();
 				#endif

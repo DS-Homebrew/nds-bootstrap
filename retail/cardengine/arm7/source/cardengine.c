@@ -77,7 +77,9 @@ extern u32 valueBits;
 extern s32 mainScreen;
 extern u32 language;
 extern u32* languageAddr;
+extern u8 volumeLevels[4];
 extern u16 igmHotkey;
+extern u16 screenSwapHotkey;
 extern u8 RumblePakType;
 
 vu32* volatile sharedAddr = (vu32*)CARDENGINE_SHARED_ADDRESS_SDK1;
@@ -111,14 +113,12 @@ static bool volumeAdjustActivated = false;*/
 
 //static bool ndmaUsed = false;
 
-bool ipcEveryFrame = false;
-
 int RumbleTimer = 0;
 int RumbleForce = 1;
 
 //static int cardEgnineCommandMutex = 0;
 //static int saveMutex = 0;
-// static int swapTimer = 0;
+static int swapTimer = 0;
 static int languageTimer = 0;
 static int volumeLevel = 3; // 0 = Off, 1 = Low, 2 = Medium, 3 = High/Max
 static int volumeLevelTimer = 0;
@@ -244,9 +244,6 @@ static void initialize(void) {
 	if (!bootloaderCleared) {
 		toncset((u32*)0x02377000, 0, 0x1000);
 		toncset((u8*)0x06000000, 0, 0x40000);	// Clear bootloader
-		if (mainScreen) {
-			ipcEveryFrame = true;
-		}
 		bootloaderCleared = true;
 	}
 
@@ -500,20 +497,22 @@ void myIrqHandlerVBlank(void) {
 		reset();
 	}
 
-	/*KEY_X*/
-	/* if (0==(REG_KEYINPUT & (KEY_L | KEY_R | KEY_UP)) && !(REG_EXTKEYINPUT & KEY_A)) {
+	u8 screenIpc = 0x6;
+
+	if (0 == (REG_KEYINPUT & screenSwapHotkey) && 0 == (REG_EXTKEYINPUT & (((screenSwapHotkey >> 10) & 3) | ((screenSwapHotkey >> 6) & 0xC0)))) {
 		if (swapTimer == 60){
 			swapTimer = 0;
-			if (!ipcEveryFrame) {
-				IPC_SendSync(0x7);
+			screenIpc = 0x7;
+			mainScreen++;
+			if (mainScreen > 2) {
+				mainScreen = 0;
 			}
-			swapScreens = true;
 		}
 		swapTimer++;
 	} else {
 		swapTimer = 0;
-	} */
-	
+	}
+
 	/*if ( 0 == (REG_KEYINPUT & (KEY_L | KEY_R | KEY_DOWN | KEY_B))) {
 		if ((softResetTimer == 60 * 2) && (saveTimer == 0)) {
 			if (consoleModel < 2) {
@@ -533,7 +532,7 @@ void myIrqHandlerVBlank(void) {
 			if (0 == (REG_KEYINPUT & KEY_UP)) {
 				volumeLevel++;
 				if (volumeLevel > 3) volumeLevel = 3;
-				if (volumeLevel == 3) {
+				if (volumeLevel == 3 && volumeLevels[volumeLevel] == 127) {
 					REG_MASTER_VOLUME = 127;
 				}
 			} else if (0 == (REG_KEYINPUT & KEY_DOWN)) {
@@ -547,19 +546,9 @@ void myIrqHandlerVBlank(void) {
 	} else {
 		volumeLevelTimer = 0;
 	}
-	
-	if (volumeLevel < 3 && sharedAddr[0] != 0x524F5245) {
-		switch (volumeLevel) {
-			case 0:
-				REG_MASTER_VOLUME = 0;
-				break;
-			case 1:
-				REG_MASTER_VOLUME = 31;
-				break;
-			case 2:
-				REG_MASTER_VOLUME = 63;
-				break;
-		}
+
+	if (sharedAddr[0] != 0x524F5245 && volumeLevels[volumeLevel] != 127) {
+		REG_MASTER_VOLUME = volumeLevels[volumeLevel];
 	}
 
 	if (ndsHeader->unitCode == 3) {
@@ -589,8 +578,8 @@ void myIrqHandlerVBlank(void) {
 #endif
 
 	// Swap screens
-	if (ipcEveryFrame) {
-		IPC_SendSync(0x6);
+	if (mainScreen > 0 || screenIpc == 0x7) {
+		IPC_SendSync(screenIpc);
 	}
 
 	if (sharedAddr[0] == 0x524F5245) { // 'EROR'

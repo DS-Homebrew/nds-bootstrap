@@ -157,7 +157,7 @@ extern bool extension(const std::string& filename, const char* ext);
 extern bool loadPreLoadSettings(configuration* conf, const char* pckPath, const char* romTid, const u16 headerCRC);
 extern void loadAsyncLoadSettings(configuration* conf, const char* romTid, const u16 headerCRC);
 extern void loadApFix(configuration* conf, const char* bootstrapPath, const char* romTid, const u16 headerCRC);
-extern void loadApFixPostCardRead(configuration* conf, const char* bootstrapPath, const char* romTid, const u16 headerCRC);
+// extern void loadApFixPostCardRead(configuration* conf, const char* bootstrapPath, const char* romTid, const u16 headerCRC);
 extern void loadMobiclipOffsets(configuration* conf, const char* bootstrapPath, const char* romTid, const u8 romVersion, const u16 headerCRC);
 extern void loadDSi2DSSavePatch(configuration* conf, const char* bootstrapPath, const char* romTid, const u8 romVersion, const u16 headerCRC);
 
@@ -522,6 +522,9 @@ static void load_conf(configuration* conf, const char* fn) {
 	// Hotkey
 	conf->hotkey = strtol(config_file.fetch("NDS-BOOTSTRAP", "HOTKEY", "284").c_str(), NULL, 16);
 
+	// Screen Swap Hotkey
+	conf->screenSwapHotkey = strtol(config_file.fetch("NDS-BOOTSTRAP", "SCREEN_SWAP_HOTKEY", "740").c_str(), NULL, 16);
+
 	// Manual file path
 	conf->manualPath = strdup(config_file.fetch("NDS-BOOTSTRAP", "MANUAL_PATH").c_str());
 
@@ -589,12 +592,14 @@ void getIgmStrings(configuration* conf, bool b4ds) {
 	// Set In-Game Menu hotkey
 	igmText->hotkey = conf->hotkey;
 
-	if(b4ds) {
+	if (b4ds) {
 		cardengineArm7B4DS* ce7 = (cardengineArm7B4DS*)CARDENGINE_ARM7_LOCATION_BUFFERED;
 		ce7->igmHotkey = conf->hotkey;
+		ce7->screenSwapHotkey = conf->screenSwapHotkey;
 	} else {
 		cardengineArm7* ce7 = (cardengineArm7*)CARDENGINEI_ARM7_BUFFERED_LOCATION;
 		ce7->igmHotkey = conf->hotkey;
+		ce7->screenSwapHotkey = conf->screenSwapHotkey;
 	}
 
 	char path[40];
@@ -847,11 +852,11 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 	conf->romSize = getFileSize(conf->ndsPath);
 
-	{
+	/* {
 		struct statvfs st;
 		statvfs(conf->gameOnFlashcard ? "fat:/" : "sd:/", &st);
 		conf->cacheBlockSize = (st.f_bsize < (32 << 10)) ? 0x4000 : 0x8000;
-	}
+	} */
 
 	char romTid[5] = {0};
 	u8 unitCode = 0;
@@ -1080,6 +1085,8 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	} else {
 		newRegion = conf->region;
 	}
+
+	conf->cacheBlockSize = (memcmp(romTid, "B3R", 3) == 0) ? 0x8000 : 0x4000;
 
 	const bool displayEsrb = (newRegion == 1 && memcmp(romTid, "UBR", 3) != 0 && memcmp(romTid, "HND", 3) != 0 && memcmp(romTid, "HNE", 3) != 0);
 
@@ -2081,33 +2088,40 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 		const char* donorNdsPath = "";
 		bool standaloneDonor = false;
-		if (!b4dsDebugRam && !donorInsideNds) {
+		if (!donorInsideNds) {
 			if (a7mbk6 == 0x080037C0) {
-				conf->useSdk5DonorAlt = ( // Use alternate ARM7 donor in order for below games to use more of the main RAM
-					strncmp(romTid, "KII", 3) == 0 // 101 Pinball World
-				||	strncmp(romTid, "KAT", 3) == 0 // AiRace: Tunnel
-				||	strncmp(romTid, "K2Z", 3) == 0 // G.G Series: Altered Weapon
-				||	strncmp(romTid, "KSR", 3) == 0 // Aura-Aura Climber
-				||	strcmp(romTid, "KBEV") == 0 // Bejeweled Twist (Europe, Australia)
-				||	strncmp(romTid, "K9G", 3) == 0 // Big Bass Arcade
-				||	strncmp(romTid, "KUG", 3) == 0 // G.G Series: Drift Circuit 2
-				||	strncmp(romTid, "KEI", 3) == 0 // Electroplankton: Beatnes
-				||	strncmp(romTid, "KEG", 3) == 0 // Electroplankton: Lumiloop
-				||	strncmp(romTid, "KEA", 3) == 0 // Electroplankton: Trapy
-				||	strncmp(romTid, "KFO", 3) == 0 // Frenzic
-				||	strncmp(romTid, "K5M", 3) == 0 // G.G Series: The Last Knight
-				||	strncmp(romTid, "KPT", 3) == 0 // Link 'n' Launch
-				||	strncmp(romTid, "KNP", 3) == 0 // Need for Speed: Nitro-X
-				||	strncmp(romTid, "K9K", 3) == 0 // Nintendoji
-				||	strncmp(romTid, "K6T", 3) == 0 // Orion's Odyssey
-				||	strncmp(romTid, "KPS", 3) == 0 // Phantasy Star 0 Mini
-				||	strncmp(romTid, "KHR", 3) == 0 // Picture Perfect: Pocket Stylist
-				|| ((strncmp(romTid, "KS3", 3) == 0) && (headerCRC == 0x57FE || headerCRC == 0x2BFA)) // Shantae: Risky's Revenge (Non-proto builds and clean ROMs)
-				||	strncmp(romTid, "KZU", 3) == 0 // Tales to Enjoy!: Little Red Riding Hood
-				||	strncmp(romTid, "KZV", 3) == 0 // Tales to Enjoy!: Puss in Boots
-				||	strncmp(romTid, "KZ7", 3) == 0 // Tales to Enjoy!: The Three Little Pigs
-				||	strncmp(romTid, "KZ8", 3) == 0 // Tales to Enjoy!: The Ugly Duckling
-				);
+				if (!b4dsDebugRam) {
+					conf->useSdk5DonorAlt = ( // Use alternate ARM7 donor in order for below games to use more of the main RAM
+						strncmp(romTid, "KII", 3) == 0 // 101 Pinball World
+					||	strncmp(romTid, "KAT", 3) == 0 // AiRace: Tunnel
+					||	strncmp(romTid, "K2Z", 3) == 0 // G.G Series: Altered Weapon
+					||	strncmp(romTid, "KSR", 3) == 0 // Aura-Aura Climber
+					||	strcmp(romTid, "KBEV") == 0 // Bejeweled Twist (Europe, Australia)
+					||	strncmp(romTid, "K9G", 3) == 0 // Big Bass Arcade
+					||	strncmp(romTid, "KUG", 3) == 0 // G.G Series: Drift Circuit 2
+					||	strncmp(romTid, "KEI", 3) == 0 // Electroplankton: Beatnes
+					||	strncmp(romTid, "KEG", 3) == 0 // Electroplankton: Lumiloop
+					||	strncmp(romTid, "KEA", 3) == 0 // Electroplankton: Trapy
+					||	strncmp(romTid, "KFO", 3) == 0 // Frenzic
+					||	strncmp(romTid, "KY3", 3) == 0 // Kuniya Burete Sanga Ari: Hills and Rivers Remain
+					||	strncmp(romTid, "K5M", 3) == 0 // G.G Series: The Last Knight
+					||	strncmp(romTid, "KPT", 3) == 0 // Link 'n' Launch
+					||	strncmp(romTid, "KNP", 3) == 0 // Need for Speed: Nitro-X
+					||	strncmp(romTid, "K9K", 3) == 0 // Nintendoji
+					||	strncmp(romTid, "K6T", 3) == 0 // Orion's Odyssey
+					||	strncmp(romTid, "KPS", 3) == 0 // Phantasy Star 0 Mini
+					||	strncmp(romTid, "KHR", 3) == 0 // Picture Perfect: Pocket Stylist
+					|| ((strncmp(romTid, "KS3", 3) == 0) && (headerCRC == 0x57FE || headerCRC == 0x2BFA)) // Shantae: Risky's Revenge (Non-proto builds and clean ROMs)
+					||	strncmp(romTid, "KZU", 3) == 0 // Tales to Enjoy!: Little Red Riding Hood
+					||	strncmp(romTid, "KZV", 3) == 0 // Tales to Enjoy!: Puss in Boots
+					||	strncmp(romTid, "KZ7", 3) == 0 // Tales to Enjoy!: The Three Little Pigs
+					||	strncmp(romTid, "KZ8", 3) == 0 // Tales to Enjoy!: The Ugly Duckling
+					);
+				} /* else {
+					conf->useSdk5DonorAlt = ( // Use alternate ARM7 donor in order for below games to use more of the main RAM
+						strncmp(romTid, "KHB", 3) == 0 // Happy Birthday Mart
+					);
+				} */
 				if (!conf->useSdk5DonorAlt && io_dldi_data->driverSize >= 0x0E) {
 					conf->useSdk5DonorAlt = ( // Do not use alternate ARM7 donor for games with wireless features and/or made with debugger SDK
 						strncmp(romTid, "K7A", 3) != 0 // 4 Elements
@@ -2161,6 +2175,8 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 					&&	strncmp(romTid, "KE3", 3) != 0 // PictureBook Games: The Royal Bluff
 					&&	strncmp(romTid, "KPM", 3) != 0 // Pomjong
 					&&	strncmp(romTid, "KLR", 3) != 0 // Puffins: Let's Race!
+					&&	strncmp(romTid, "KKE", 3) != 0 // Puzzle Fever (USA)
+					&&	strncmp(romTid, "K5V", 3) != 0 // Puzzle Fever (Europe)
 					&&	strncmp(romTid, "KLX", 3) != 0 // Redau Shirizu: Gunjin Shougi
 					&&	strncmp(romTid, "KG4", 3) != 0 // Saikyou Ginsei Shougi
 					&&	strncmp(romTid, "KRW", 3) != 0 // Sea Battle
@@ -2492,7 +2508,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		}
 	} else {
 		loadApFix(conf, bootstrapPath, romTid, headerCRC);
-		loadApFixPostCardRead(conf, bootstrapPath, romTid, headerCRC);
+		// loadApFixPostCardRead(conf, bootstrapPath, romTid, headerCRC);
 	}
 	loadMobiclipOffsets(conf, bootstrapPath, romTid, romVersion, headerCRC);
 

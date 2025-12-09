@@ -230,6 +230,11 @@ int hookNdsRetailArm7(
 	ce7->cheatEngineAddr         = cheatEngineAddr;
 	ce7->musicBuffer = maxHeapOpen ? ((_io_dldi_size == 0x0F) ? 0x027F6000 : (_io_dldi_size == 0x0E) ? 0x027FA000 : 0x027FC000)-0x4000 : 0x027F0000;
 	ce7->moduleParams            = moduleParams;
+	if (strncmp(romTid, "K5T", 3) == 0) { // Sengoku Tactics
+		ce7->volumeLevels[1] = 15;
+		ce7->volumeLevels[2] = 23;
+		ce7->volumeLevels[3] = 31;
+	}
 	if (patchedCardIrqEnable) {
 		ce7->valueBits |= b_a9IrqHooked;
 	}

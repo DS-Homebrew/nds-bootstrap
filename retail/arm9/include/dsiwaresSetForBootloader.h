@@ -34,7 +34,7 @@ static const char dsiWareForBootloader1[][4] = {
 	"KXT", // 99Seconds
 	"K2K", // Aa! Nikaku Dori
 	"KE9", // Absolute Baseball (bootloaderi-exclusive)
-	"K6Q", // Absolute BrickBuster (bootloaderi-exclusive)
+	"K6Q", // Absolute BrickBuster
 	"KCZ", // Absolute Chess (bootloaderi-exclusive)
 	"KA8", // Absolute Reversi (bootloaderi-exclusive)
 	"KXG", // Abyss
@@ -166,6 +166,7 @@ static const char dsiWareForBootloader1[][4] = {
 	"KCP", // Dekisugi Tingle Pack
 	"KN2", // Devil Band: Rock the Underworld
 	"KAV", // Art Style: DIGIDRIVE
+	"KDK", // Discolight
 	"KRF", // Divergent Shift
 	"KHE", // DotMan
 	"KD9", // Dr. Mario Express
@@ -244,9 +245,11 @@ static const char dsiWareForBootloader1[][4] = {
 	"K9A", // Goooooal America
 	"KVQ", // G.G Series: Great Whip Adventure
 	"K83", // Hachiwandaiba DS: Naru Zouku Ha Samishougi
+	"KK6", // Hakokoro
 	"KZH", // Halloween Trick or Treat
 	"KHO", // Handy Hockey
 	"KHM", // Handy Mahjong
+	"KHB", // Happy Birthday Mart (bootloaderi-exclusive)
 	"KDH", // Hard-Hat Domo
 	"KHQ", // Hearts Spades Euchre
 	"K6S", // Heathcliff: Spot On
@@ -261,9 +264,11 @@ static const char dsiWareForBootloader1[][4] = {
 	"KIS", // Ice Hockey Slovakia 2011
 	// "KNE", // Ichi Moudaji!: Neko King
 	"KNK", // Ideyou Sukeno: Kenkou Maja DSi
+	"KIB", // Ikibago (bootloaderi-exclusive)
 	"KBT", // Invasion of the Alien Blobs!
 	"K3J", // iSpot Japan
 	"KIK", // Ivy the Kiwi? mini
+	"KJG", // Jagged Alliance
 	"K9B", // Jazzy Billiards
 	"KJY", // JellyCar 2
 	"KYJ", // Jewel Adventures
@@ -289,12 +294,13 @@ static const char dsiWareForBootloader1[][4] = {
 	"KEK", // Koukou Eitango: Kiho 400 Go Master
 	"KVF", // Kuizu Ongaku Nojika (bootloaderi-exclusive)
 	"KT9", // Kung Fu Dragon
+	"KY3", // Kuniya Burete Sanga Ari: Hills and Rivers Remain
 	"K47", // Kyou Hanan no hi Hyakka: Hyakkajiten Maipedea Yori (bootloaderi-exclusive)
 	"K5M", // G.G Series: The Last Knight
 	"KQ9", // The Legend of Zelda: Four Swords: Anniversary Edition
 	"KLD", // Legendary Wars: T-Rex Rumble
 	"K5C", // Letter Challenge
-	"KLW", // Libera Wing (bootloaderi-exclusive)
+	"KLI", "KLW", // Libera Wing
 	"KPT", // Link 'n' Launch
 	"KZB", // Little Red Riding Hood's Zombie BBQ
 	"KQ3", // Little Twin Stars (bootloaderi-exclusive)
@@ -358,7 +364,7 @@ static const char dsiWareForBootloader3[][4] = {
 	"KAU", // Nintendo Countdown Calendar
 	"K2D", // Nintendo DSi + Internet
 	"HNI", // Nintendo DSi Camera (bootloaderi-exclusive)
-	"KDO", // Nintendogs (bootloaderi-exclusive)
+	"KDO", // Nintendogs
 	"K9K", // Nintendoji
 	"KJI", // Noroi no Game: Chi
 	"KG9", // Noroi no Game: Oku
@@ -410,6 +416,7 @@ static const char dsiWareForBootloader3[][4] = {
 	"KLF", // Puffins: Let's Fish!
 	"KLR", // Puffins: Let's Race!
 	"KL2", // Puffins: Let's Roll!
+	"KKE", "K5V", // Puzzle Fever
 	"KPN", // Puzzle League: Express
 	"KPL", // Puzzle Rocks
 	"KYE", // Puzzler Brain Games
@@ -434,20 +441,24 @@ static const char dsiWareForBootloader3[][4] = {
 	"KJ5", // Renjuku Kanji: Shougaku 5 Nensei
 	"KJ6", // Renjuku Kanji: Shougaku 6 Nensei
 	"KJ8", // Renjuku Kanji: Chuugakusei
+	"KXR", // Retro Pocket
 	"KRT", // Robot Rescue
 	"KRR", // Robot Rescue 2
 	"KD6", // Rock-n-Roll Domo
 	"KRL", // Roller Angels
 	"KRP", // RPG Dashutsu Game
 	"K5F", // G.G Series: Run & Strike
+	"K8X", // Sagittarius-A-Star
 	"KG4", // Saikyou Ginsei Shougi
 	"K3P", // Sakurai Miho No Kouno: Megami Serapi Uranai
 	"K7T", // Save the Turtles
 	"K5G", // G.G Series: Score Attacker
 	"KRW", // Sea Battle
 	"KLL", // The Seller
+	"K5T", // Sengoku Tactics
 	"KZJ", // G.G Series: Shadow Army
 	"KS3", // Shantae: Risky's Revenge
+	"KC4", // Shapo (bootloaderi-exclusive)
 	"KSJ", // Shawn Johnson Gymnastics
 	"KK5", // Kakitori Rekishi: Shouga Kusei (01)
 	"KZ9", // Chiri Kuizu: Shouga Kusei (02)
@@ -484,6 +495,8 @@ static const char dsiWareForBootloader3[][4] = {
 	"K2U", // Spot It! Challenge: Mean Machines
 	"KYS", // Spot the Difference
 	"KSP", // Spotto! (bootloaderi-exclusive)
+	"K97", // Star Novels: Kono Haretasora no Shitade
+	"K98", // Star Novels: Shirogane no Torikago
 	"KDY", // Starship Defense (bootloaderi-exclusive)
 	// "KSW", // SteamWorld Tower Defense
 	"KEU", // Successfully Learning: English, Year 2
@@ -507,8 +520,6 @@ static const char dsiWareForBootloader3[][4] = {
 	"K4W", // Super Swap
 	"K4P", // Super Yum Yum: Puzzle Adventures
 	"KOW", // Surfacer+
-	"K97", // Sutanoberuzu: Kono Hareta Sora no Shita de
-	"K98", // Sutanoberuzu: Shirogane no Torikago
 	"KSY", // System Flaw: Recruit
 	"KZU", // Tales to Enjoy!: Little Red Riding Hood
 	"KZV", // Tales to Enjoy!: Puss in Boots
@@ -558,7 +569,7 @@ static const char dsiWareForBootloader3[][4] = {
 	"KYU", // Yummy Yummy Cooking Jam
 	"KNZ", "KZN", // G.G Series: Z-One
 	"KZ2", // G.G Series: Z-One 2
-	"KZX", // Za Curosu
+	"KZX", // Zacross
 	"KAS", // Art Style: ZENGAGE
 	"KKH", // Zimo: Mahjong Fanatic
 	"K7K", // Zombie Blaster
