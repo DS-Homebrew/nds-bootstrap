@@ -151,7 +151,7 @@
 - Hikari no 4 Senshi: Final Fantasy Gaiden (Japan) (BFXJ)
 - Final Fantasy: The 4 Heroes of Light (Europe) (Also applies to modified ROMs) (BFXP)
 - Fire Emblem: Shin Monshou no Nazo Hikari to Kage no Eiyuu (Japan) (Also applies to modified ROMs) (VI2J)
-- Fossil Fighters: Champions (USA) (VDEE)
+- Fossil Fighters: Champions (USA) (Also applies to modified ROMs) (VDEE)
 - Super Kaseki Horider (Japan) (Also applies to Rev1 and/or modified ROMs) (VDEJ)
 - Fresh PreCure!: Asobi Collection (Japan) (BFPJ)
 - Fushigi no Dungeon: Fuurai no Shiren 4: Kami no Hitomi to Akuma no Heso (Japan) (B4FJ)
