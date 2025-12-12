@@ -1748,7 +1748,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		}
 		fclose(cebin);
 
-		if (!isDSiMode() && unitCode>0 && (conf->dsiMode || conf->isDSiWare)) {
+		if (!isDSiMode() && unitCode>0 && (conf->dsiMode || conf->isDSiWare) && strncmp(romTid, "V2G", 3) != 0) {
 			// Load DSi ARM9 BIOS
 			const u32 relocAddr9 = 0x02F70000;
 			cebin = fopen(conf->bootstrapOnFlashcard ? "fat:/_nds/bios9i.bin" : "sd:/_nds/bios9i.bin", "rb");
