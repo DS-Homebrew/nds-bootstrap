@@ -132,6 +132,7 @@ bool ce9AltLargeTable = false;
 static u32 ce9Location = 0;
 static u32 overlaysSize = 0;
 static u32 ioverlaysSize = 0;
+bool overlayPatch = false;
 u32 fatTableAddr = 0;
 
 static aFile srParamsFile;
@@ -846,51 +847,56 @@ static void startBinary_ARM7(void) {
 }
 
 static void loadOverlaysintoFile(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, aFile* file) {
-	// Load overlays into RAM
-	if (overlaysSize <= 0x700000)
-	{
-		aFile apFixOverlaysFile;
-		getFileFromCluster(&apFixOverlaysFile, apFixOverlaysCluster);
-
-		/* char overlaysHeader[0x160];
-		fileRead(overlaysHeader, &apFixOverlaysFile, 0, 0x160);
-		if (memcmp(ndsHeader, overlaysHeader, 0x160) == 0) {
-			return;
-		} */
-
-		const u32 buffer = 0x037F8000;
-		const u16 bufferSize = 0x8000;
-		const u32 overlaysOffset = (ndsHeader->arm9overlaySource > ndsHeader->arm7romOffset) ? (ndsHeader->arm9romOffset + ndsHeader->arm9binarySize) : ndsHeader->arm9overlaySource;
-		s32 len = (s32)overlaysSize;
-		u32 dst = 0;
-		while (1) {
-			u32 readLen = (len > bufferSize) ? bufferSize : len;
-
-			fileRead((char*)buffer, file, overlaysOffset+dst, readLen);
-			fileWrite((char*)buffer, &apFixOverlaysFile, overlaysOffset+dst, readLen);
-
-			len -= bufferSize;
-			dst += bufferSize;
-
-			if (len <= 0) {
-				break;
-			}
-		}
-		toncset((char*)buffer, 0, bufferSize);
-
-		if (!isSdk5(moduleParams)) {
-			u32 word = 0;
-			fileRead((char*)&word, &apFixOverlaysFile, 0x3128AC, sizeof(u32));
-			if (word == 0x4B434148) {
-				word = 0xA00;	// Primary fix for Mario's Holiday
-				fileWrite((char*)&word, &apFixOverlaysFile, 0x3128AC, sizeof(u32));
-			}
-		}
-
-		// fileWrite((char*)ndsHeader, &apFixOverlaysFile, 0, 0x160);
-	} else {
-		apFixOverlaysCluster = 0;
+	if (!overlayPatch) {
+		return;
 	}
+
+	// Load overlays into "apFixOverlays.bin"
+	if (overlaysSize > 0x700000) {
+		return;
+	}
+
+	aFile apFixOverlaysFile;
+	getFileFromCluster(&apFixOverlaysFile, apFixOverlaysCluster);
+
+	/* char overlaysHeader[0x160];
+	fileRead(overlaysHeader, &apFixOverlaysFile, 0, 0x160);
+	if (memcmp(ndsHeader, overlaysHeader, 0x160) == 0) {
+		return;
+	} */
+
+	const u32 buffer = 0x037F8000;
+	const u16 bufferSize = 0x8000;
+	const u32 overlaysOffset = (ndsHeader->arm9overlaySource > ndsHeader->arm7romOffset) ? (ndsHeader->arm9romOffset + ndsHeader->arm9binarySize) : ndsHeader->arm9overlaySource;
+	s32 len = (s32)overlaysSize;
+	u32 dst = 0;
+	while (1) {
+		u32 readLen = (len > bufferSize) ? bufferSize : len;
+
+		fileRead((char*)buffer, file, overlaysOffset+dst, readLen);
+		fileWrite((char*)buffer, &apFixOverlaysFile, overlaysOffset+dst, readLen);
+
+		len -= bufferSize;
+		dst += bufferSize;
+
+		if (len <= 0) {
+			break;
+		}
+	}
+	toncset((char*)buffer, 0, bufferSize);
+
+	if (!isSdk5(moduleParams)) {
+		u32 word = 0;
+		fileRead((char*)&word, &apFixOverlaysFile, 0x3128AC, sizeof(u32));
+		if (word == 0x4B434148) {
+			word = 0xA00;	// Primary fix for Mario's Holiday
+			fileWrite((char*)&word, &apFixOverlaysFile, 0x3128AC, sizeof(u32));
+		}
+	}
+
+	// fileWrite((char*)ndsHeader, &apFixOverlaysFile, 0, 0x160);
+
+	dbg_printf("Overlays cached to a file\n");
 }
 
 static void fileReadWithBuffer(const u32 memDst, aFile* file, const u32 src, u32 readLen) {
@@ -1350,6 +1356,22 @@ int arm7_main(void) {
 
 	// dbg_printf("Trying to patch the card...\n");
 
+	const bool useApPatch = (srlAddr == 0 && !srlFromPageFile && apPatchFileCluster != 0 && !apPatchIsCheat && apPatchSize > 0 && apPatchSize <= 0x1000);
+
+	if (useApPatch) {
+		aFile apPatchFile;
+		getFileFromCluster(&apPatchFile, apPatchFileCluster);
+		dbg_printf("AP-fix found\n");
+		fileRead((char*)IPS_LOCATION, &apPatchFile, apPatchOffset, apPatchSize);
+		if (*(u8*)(IPS_LOCATION+apPatchSize-1) != 0xA9) {
+			overlayPatch = ipsHasOverlayPatch(ndsHeader, (u8*)IPS_LOCATION);
+		}
+	}
+
+	if (strncmp(romTid, "ASM", 3) == 0) {
+		overlayPatch = true; // Allow overlay patching for SM64DS ROM hacks (ex. Mario's Holiday)
+	}
+
 	ce9Location = *(u32*)CARDENGINE_ARM9_LOCATION_BUFFERED;
 	ce9Alt = (ce9Location == CARDENGINE_ARM9_LOCATION_DLDI_ALT || ce9Location == CARDENGINE_ARM9_LOCATION_DLDI_ALT2);
 	// const bool ce9NotInHeap = (ce9Alt || ce9Location == CARDENGINE_ARM9_LOCATION_DLDI_START);
@@ -1700,22 +1722,13 @@ int arm7_main(void) {
 		fileWrite((char*)&patchOffsetCache, &patchOffsetCacheFile, 0, sizeof(patchOffsetCacheContents));
 	}
 
-	if (srlAddr == 0 && !srlFromPageFile && apPatchFileCluster != 0 && !apPatchIsCheat && apPatchSize > 0 && apPatchSize <= 0x40000) {
-		aFile apPatchFile;
-		getFileFromCluster(&apPatchFile, apPatchFileCluster);
-		dbg_printf("AP-fix found\n");
-		if (esrbScreenPrepared) {
-			while (!esrbImageLoaded) {
-				while (REG_VCOUNT != 191);
-				while (REG_VCOUNT == 191);
-			}
-		}
-		fileRead((char*)IMAGES_LOCATION, &apPatchFile, apPatchOffset, apPatchSize);
-		if (applyIpsPatch(ndsHeader, (u8*)IMAGES_LOCATION, (*(u8*)(IMAGES_LOCATION+apPatchSize-1) == 0xA9), ROMinRAM, usesCloneboot)) {
+	if (useApPatch) {
+		if (applyIpsPatch(ndsHeader, (u8*)IPS_LOCATION, (*(u8*)(IPS_LOCATION+apPatchSize-1) == 0xA9), ROMinRAM, usesCloneboot)) {
 			dbg_printf("AP-fix applied\n");
 		} else {
 			dbg_printf("Failed to apply AP-fix\n");
 		}
+		toncset((u32*)IPS_LOCATION, 0, apPatchSize);	// Clear IPS patch
 	}
 
 	arm9_boostVram = boostVram;
@@ -1727,7 +1740,7 @@ int arm7_main(void) {
 		}
 	}
 
-	toncset16((u32*)IMAGES_LOCATION, 0, (256*192)*3);	// Clear nds-bootstrap images and IPS patch
+	toncset16((u32*)IMAGES_LOCATION, 0, (256*192)*3);	// Clear nds-bootstrap images
 
 	if (ce9Alt) {
 		unpatchedFunctions* unpatchedFuncs = (unpatchedFunctions*)UNPATCHED_FUNCTION_LOCATION;

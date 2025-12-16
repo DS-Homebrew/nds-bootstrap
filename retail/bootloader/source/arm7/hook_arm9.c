@@ -197,6 +197,7 @@ int hookNdsRetailArm9(
 
 	extern u8 _io_dldi_size;
 	const char* romTid = getRomTid(ndsHeader);
+	extern bool overlayPatch;
 	extern u32 romPaddingSize;
 	extern u32 dataToPreloadAddr;
 	extern u32 dataToPreloadSize;
@@ -221,7 +222,9 @@ int hookNdsRetailArm9(
 	ce9->ramDumpCluster         = ramDumpCluster;
 	ce9->srParamsCluster        = srParamsFileCluster;
 	ce9->screenshotCluster      = screenshotCluster;
-	ce9->apFixOverlaysCluster   = apFixOverlaysCluster;
+	if (overlayPatch && overlaysSize <= 0x700000) {
+		ce9->apFixOverlaysCluster   = apFixOverlaysCluster;
+	}
 	ce9->musicCluster           = musicCluster;
 	ce9->musicsSize             = musicsSize;
 	ce9->musicBuffer = maxHeapOpen ? ((_io_dldi_size == 0x0F) ? 0x027F6000 : (_io_dldi_size == 0x0E) ? 0x027FA000 : 0x027FC000)-0x4000 : 0x027F0000;

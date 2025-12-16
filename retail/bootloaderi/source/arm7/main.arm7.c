@@ -2253,7 +2253,7 @@ int arm7_main(void) {
 			tonccpy((char*)SAV_FILE_LOCATION_MAINMEM, savFile, sizeof(aFile));
 		}
 
-		const bool useApPatch = (srlAddr == 0 && !srlFromPageFile && apPatchFileCluster != 0 && !apPatchIsCheat && apPatchSize > 0 && apPatchSize <= 0x40000);
+		const bool useApPatch = (srlAddr == 0 && !srlFromPageFile && apPatchFileCluster != 0 && !apPatchIsCheat && apPatchSize > 0 && apPatchSize <= 0x1000);
 
 		if (useApPatch) {
 			aFile apPatchFile;

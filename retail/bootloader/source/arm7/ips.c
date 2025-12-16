@@ -86,3 +86,34 @@ bool applyIpsPatch(const tNDSHeader* ndsHeader, u8* ipsbyte, bool arm9Only, bool
 	}
 	return true;
 }
+
+bool ipsHasOverlayPatch(const tNDSHeader* ndsHeader, u8* ipsbyte) {
+	if (ipsbyte[0] != 'P' && ipsbyte[1] != 'A' && ipsbyte[2] != 'T' && ipsbyte[3] != 'C' && ipsbyte[4] != 'H' && ipsbyte[5] != 0) {
+		return false;
+	}
+
+	int ipson = 5;
+	int totalrepeats = 0;
+	u32 offset = 0;
+	while (1) {
+		offset = ipsbyte[ipson] * 0x10000 + ipsbyte[ipson + 1] * 0x100 + ipsbyte[ipson + 2];
+		if (offset >= ndsHeader->arm9romOffset+ndsHeader->arm9binarySize && offset < ndsHeader->arm7romOffset) {
+			return true;
+		}
+		ipson += 3;
+		if (ipsbyte[ipson] * 256 + ipsbyte[ipson + 1] == 0) {
+			ipson += 2;
+			totalrepeats = ipsbyte[ipson] * 256 + ipsbyte[ipson + 1];
+			ipson += 2;
+			ipson++;
+		} else {
+			totalrepeats = ipsbyte[ipson] * 256 + ipsbyte[ipson + 1];
+			ipson += 2;
+			ipson += totalrepeats;
+		}
+		if (ipsbyte[ipson] == 69 && ipsbyte[ipson + 1] == 79 && ipsbyte[ipson + 2] == 70) {
+			break;
+		}
+	}
+	return false;
+}
