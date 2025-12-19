@@ -72,6 +72,7 @@ An alternative forwarder generator for 3DS users. YANBF forwarders are 3DS-mode 
 ## Other
 - [devkitPro](https://devkitpro.org): devkitARM and libnds
 - [Arisotura](https://github.com/Arisotura): BIOS reader from [dsibiosdumper](https://github.com/Arisotura/dsibiosdumper) used in the in-game menu
+- [Mow](https://github.com/taxicat1): Proper fix for *Puppy Palace* crash on boot
 - retrogamefan, Rudolph, and [Mow](https://github.com/taxicat1): Included AP-patches
    - [enler](https://github.com/enler): Fixing AP-patch for Pokemon Black 2 (Japan) for DS⁽ⁱ⁾ mode compatibility
    - [Rocket Robz](https://github.com/RocketRobz): Fixing some DS⁽ⁱ⁾-Enhanced game AP-patches for DS⁽ⁱ⁾ mode compatibility
