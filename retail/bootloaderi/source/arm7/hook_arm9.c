@@ -418,9 +418,7 @@ int hookNdsRetailArm9(
 		if (strncmp(romTid, "UBR", 3) == 0 || iUncompressedSize > 0x26C000) {
 			ce9->valueBits |= b_slowSoftReset;
 		}
-		if (!dataToPreloadFound(ndsHeader) && (strncmp(romTid, "YPT", 3) == 0)) { // Puppy Palace
-			ce9->valueBits |= b_resetOnFirstException;
-		} else if (strncmp(romTid, "CLJ", 3) == 0) { // Mario & Luigi: Bowser's Inside Story
+		if (strncmp(romTid, "CLJ", 3) == 0) { // Mario & Luigi: Bowser's Inside Story
 			ce9->valueBits |= b_resetOnEveryException;
 		}
 

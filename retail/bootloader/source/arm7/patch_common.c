@@ -434,6 +434,21 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
         *(u32*)0x02000C14 = 0xE1A00000; //nop
 	}*/
 
+	// Puppy Palace (USA)
+	else if (strcmp(romTid, "YPTE") == 0) {
+		*(u32*)0x020131E8 = 0xE320F000; // nop
+	}
+
+	// My Puppy Shop (Europe)
+	else if (strcmp(romTid, "YPTP") == 0) {
+		*(u32*)0x020131C4 = 0xE320F000; // nop
+	}
+
+	// Machi no Pet-ya-san DS: 200 Piki Wan-chan Daishuugou (Japan)
+	else if (strcmp(romTid, "YPTJ") == 0) {
+		*(u32*)0x0201DBF8 = 0xE320F000; // nop
+	}
+
 	// Golden Sun: Dark Dawn (USA, Australia)
 	else if (strcmp(romTid, "BO5E") == 0) {
 		// setBEQ(0x02003CA0, 0x02003C30); // Skip a block of DSProtect code branches
