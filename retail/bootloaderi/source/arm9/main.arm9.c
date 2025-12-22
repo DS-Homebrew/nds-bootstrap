@@ -229,8 +229,18 @@ void arm9_main(void) {
 	VRAM_I_CR = 0x80;
 	dmaFill9(0, BG_PALETTE, 2*1024);
 	dmaFill9(0, OAM, 2*1024);
-	dmaFill9(0, (u16*)0x04000000, 0x56);  // Clear main display registers
-	dmaFill9(0, (u16*)0x04001000, 0x56);  // Clear sub display registers
+	for (vu16 *p = (vu16*)&REG_DISPCNT; p <= (vu16*)&REG_MASTER_BRIGHT; p++)
+	{
+		// Skip VCOUNT. Writing to it was setting it to 0 causing a frame to be
+		// misrendered. This can also have side effects on 3DS, even though the
+		// official TWL_FIRM can recover from it.
+		if (p != (vu16*)&REG_VCOUNT)
+			*p = 0;
+	}
+	for (vu16 *p = (vu16*)&REG_DISPCNT_SUB; p <= (vu16*)&REG_MASTER_BRIGHT_SUB; p++)
+	{
+		*p = 0;
+	}
 	dmaFill9(0, VRAM_A, 0x20000*3);		// Banks A, B, C
 	dmaFill9(0, VRAM_D, 272*1024);		// Banks D (excluded), E, F, G, H, I
 
