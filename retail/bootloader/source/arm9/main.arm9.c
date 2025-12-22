@@ -180,9 +180,6 @@ void arm9_main(void) {
 	REG_IPC_FIFO_CR = IPC_FIFO_ENABLE | IPC_FIFO_SEND_CLEAR;
 	REG_IPC_FIFO_CR = 0;
 
-	SetBrightness(0, 31);
-	SetBrightness(1, 31);
-
 	VRAM_A_CR = 0x80;
 	VRAM_B_CR = 0x80;
 	// Don't mess with the VRAM used for execution
@@ -207,6 +204,8 @@ void arm9_main(void) {
 	{
 		*p = 0;
 	}
+	SetBrightness(0, 31);
+	SetBrightness(1, 31);
 	dmaFill9(0, VRAM_A, 0x20000*3);		// Banks A, B, C
 	dmaFill9(0, VRAM_D, 272*1024);		// Banks D (excluded), E, F, G, H, I
 

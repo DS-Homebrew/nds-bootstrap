@@ -214,9 +214,6 @@ void arm9_main(void) {
 		noWhiteFade = ((flags & BIT(0)) || (flags & BIT(1)));
 	}
 
-	SetBrightness(0, 31);
-	SetBrightness(1, 31);
-
 	VRAM_A_CR = 0x80;
 	VRAM_B_CR = 0x80;
 	// Don't mess with the VRAM used for execution
@@ -241,6 +238,8 @@ void arm9_main(void) {
 	{
 		*p = 0;
 	}
+	SetBrightness(0, 31);
+	SetBrightness(1, 31);
 	dmaFill9(0, VRAM_A, 0x20000*3);		// Banks A, B, C
 	dmaFill9(0, VRAM_D, 272*1024);		// Banks D (excluded), E, F, G, H, I
 
