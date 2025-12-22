@@ -2262,10 +2262,7 @@ bool eepromPageVerify(u32 dst, const void *src, u32 len) {
 	dbg_hexa(len);
 	#endif
 
-	//i2cWriteRegister(0x4A, 0x12, 0x01);		// When we're saving, power button does nothing, in order to prevent corruption.
-	//fileWrite(src, savFile, dst, len, -1);
-	//i2cWriteRegister(0x4A, 0x12, 0x00);		// If saved, power button works again.
-	return true;
+	return eepromPageWrite(dst, src, len);
 }
 
 bool eepromPageErase (u32 dst) {

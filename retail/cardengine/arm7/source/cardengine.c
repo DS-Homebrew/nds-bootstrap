@@ -631,21 +631,7 @@ bool eepromPageVerify(u32 dst, const void *src, u32 len) {
 	dbg_hexa(len);
 	#endif
 
-  	/*if (lockMutex(&saveMutex)) {
-		// Send a command to the ARM9 to write the save
-		const u32 commandSaveWrite = 0x53415657;
-
-		// Write the command
-		sharedAddr[0] = dst;
-		sharedAddr[1] = len;
-		sharedAddr[2] = src;
-		sharedAddr[3] = commandSaveWrite;
-
-		waitForArm9();
-
-  		unlockMutex(&saveMutex);
-	}*/
-	return true;
+	return eepromPageWrite(dst, src, len);
 }
 
 bool eepromPageErase (u32 dst) {
