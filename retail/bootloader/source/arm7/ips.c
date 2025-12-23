@@ -26,6 +26,8 @@ bool applyIpsPatch(const tNDSHeader* ndsHeader, u8* ipsbyte, bool arm9Only, bool
 		getFileFromCluster(&apFixOverlaysFile, apFixOverlaysCluster);
 	}
 
+	const u32 arm9romOffset = arm9Only ? 0x4000 : ndsHeader->arm9romOffset;
+
 	int ipson = 5;
 	int totalrepeats = 0;
 	u32 offset = 0;
@@ -33,9 +35,9 @@ bool applyIpsPatch(const tNDSHeader* ndsHeader, u8* ipsbyte, bool arm9Only, bool
 	while (1) {
 		bool overlays = false;
 		offset = ipsbyte[ipson] * 0x10000 + ipsbyte[ipson + 1] * 0x100 + ipsbyte[ipson + 2];
-		if (offset >= ndsHeader->arm9romOffset && ((offset < ndsHeader->arm9romOffset+ndsHeader->arm9binarySize) || arm9Only)) {
+		if ((offset >= ndsHeader->arm9romOffset && offset < ndsHeader->arm9romOffset+ndsHeader->arm9binarySize) || arm9Only) {
 			// ARM9 binary
-			rombyte = ndsHeader->arm9destination - ndsHeader->arm9romOffset;
+			rombyte = ndsHeader->arm9destination - arm9romOffset;
 		} else if (offset >= ndsHeader->arm7romOffset && offset < ndsHeader->arm7romOffset+ndsHeader->arm7binarySize) {
 			// ARM7 binary
 			rombyte = ndsHeader->arm7destination - ndsHeader->arm7romOffset;
