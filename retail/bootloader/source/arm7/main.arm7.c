@@ -278,8 +278,8 @@ static void resetMemory_ARM7(void) {
 
 	memset_addrs_arm7(0x03800000 - 0x8000, 0x03800000 + 0x10000);
 	memset_addrs_arm7(0x02000620, 0x02084000);	// clear part of EWRAM
-	memset_addrs_arm7(0x02280000, IMAGES_LOCATION-0x1000);	// clear part of EWRAM - except before nds-bootstrap images
-	toncset((u32*)0x02380000, 0, 0x38000);		// clear part of EWRAM - except before 0x023DA000, which has the arm9 code
+	memset_addrs_arm7(0x02280000, IMAGES_LOCATION);	// clear part of EWRAM - except before nds-bootstrap images
+	toncset((u32*)0x02380000, 0, 0x3F000);		// clear part of EWRAM - except before 0x023BF000, which has the arm9 code
 	toncset((u32*)0x023C0000, 0, 0x20000);
 	toncset((u32*)0x023F0000, 0, 0xD000);
 	toncset((u32*)0x023FE000, 0, 0x400);

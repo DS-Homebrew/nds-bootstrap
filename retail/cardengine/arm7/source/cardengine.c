@@ -161,7 +161,6 @@ static void initialize(void) {
 	}
 
 	if (!bootloaderCleared) {
-		toncset((u32*)0x02377000, 0, 0x1000);
 		toncset((u8*)0x06000000, 0, 0x40000);	// Clear bootloader
 		bootloaderCleared = true;
 	}
