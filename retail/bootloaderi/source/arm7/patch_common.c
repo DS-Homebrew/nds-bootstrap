@@ -1349,19 +1349,33 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Absolute Reversi (USA)
+	// Saving seems difficult to get working
 	else if (strcmp(romTid, "KA8E") == 0) {
 		if (!twlFontFound) {
 			*(u32*)0x020053E4 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		}
+		/* if (saveOnFlashcardNtr) { // Part of .pck file
+			*(u32*)0x020560F4 = 0xE3A00000; // mov r0, #0 // Part of .pck file
+			*(u32*)0x020560F8 = 0xE12FFF1E; // bx lr
+			*(u32*)0x020561C8 = 0xE3A00000; // mov r0, #0
+			*(u32*)0x020561CC = 0xE12FFF1E; // bx lr
+		} */
 		tonccpy((char*)0x0209D220, dataPub, strlen(dataPub)+1); // Redirect otherPub to dataPub
 		tonccpy((char*)0x0209D234, dataPub, strlen(dataPub)+1);
 	}
 
-	// At Enta!: Taisen Ribashi (Japan)
+	// At Enta!: Taisen Reversi (Japan)
+	// Saving seems difficult to get working
 	else if (strcmp(romTid, "KA8J") == 0) {
 		if (!twlFontFound) {
 			*(u32*)0x020053E4 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		}
+		/* if (saveOnFlashcardNtr) { // Part of .pck file
+			*(u32*)0x02055ED8 = 0xE3A00000; // mov r0, #0 // Part of .pck file
+			*(u32*)0x02055EDC = 0xE12FFF1E; // bx lr
+			*(u32*)0x02055FAC = 0xE3A00000; // mov r0, #0
+			*(u32*)0x02055FB0 = 0xE12FFF1E; // bx lr
+		} */
 		tonccpy((char*)0x0209C1C0, dataPub, strlen(dataPub)+1); // Redirect otherPub to dataPub
 		tonccpy((char*)0x0209C1D4, dataPub, strlen(dataPub)+1);
 	}
