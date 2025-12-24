@@ -1317,19 +1317,33 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Absolute Chess (USA)
+	// Saving seems difficult to get working
 	else if (strcmp(romTid, "KCZE") == 0) {
 		if (!twlFontFound) {
 			*(u32*)0x020053E4 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		}
+		/* if (saveOnFlashcardNtr) { // Part of .pck file
+			*(u32*)0x02056D5C = 0xE3A00000; // mov r0, #0 // Part of .pck file
+			*(u32*)0x02056D60 = 0xE12FFF1E; // bx lr
+			*(u32*)0x02056E30 = 0xE3A00000; // mov r0, #0
+			*(u32*)0x02056E34 = 0xE12FFF1E; // bx lr
+		} */
 		tonccpy((char*)0x0209E9C8, dataPub, strlen(dataPub)+1); // Redirect otherPub to dataPub
 		tonccpy((char*)0x0209E9DC, dataPub, strlen(dataPub)+1);
 	}
 
 	// At Chisu: Charenji Supirittsu (Japan)
+	// Saving seems difficult to get working
 	else if (strcmp(romTid, "KCZJ") == 0) {
 		if (!twlFontFound) {
 			*(u32*)0x020053E4 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		}
+		/* if (saveOnFlashcardNtr) { // Part of .pck file
+			*(u32*)0x02056B20 = 0xE3A00000; // mov r0, #0 // Part of .pck file
+			*(u32*)0x02056B24 = 0xE12FFF1E; // bx lr
+			*(u32*)0x02056BF4 = 0xE3A00000; // mov r0, #0
+			*(u32*)0x02056BF8 = 0xE12FFF1E; // bx lr
+		} */
 		tonccpy((char*)0x0209CCDC, dataPrv, strlen(dataPrv)+1); // Redirect otherPrv to dataPrv
 		tonccpy((char*)0x0209CCF0, dataPrv, strlen(dataPrv)+1);
 	}
