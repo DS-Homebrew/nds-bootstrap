@@ -6318,12 +6318,6 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		// *(u32*)0x0203C9E4 = 0xE12FFF1E; // bx lr
 	}
 
-	// Fall in the Dark (Japan)
-	// A bit hard/confusing to add save support
-	else if (strcmp(romTid, "K4EJ") == 0 && !twlFontFound) {
-		*(u32*)0x0203EE0C = 0xE1A00000; // nop (Skip Manual screen)
-	}
-
 	// Farm Frenzy (USA)
 	else if (strcmp(romTid, "KFKE") == 0 && saveOnFlashcardNtr) {
 		tonccpy((u32*)0x0200F4CC, dsiSaveGetResultCode, 0xC);
@@ -15221,6 +15215,24 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Reflect Missile (Japan)
 	else if (strcmp(romTid, "KDZJ") == 0 && dsiWramBlocked) {
 		toncset16((u16*)0x020B8F88, nopT, 0x4A/sizeof(u16)); // Do not use DSi WRAM
+	}
+
+	// Treasure Hunter X (USA)
+	// A bit hard/confusing to add save support
+	else if (strcmp(romTid, "K4EE") == 0 && !twlFontFound) {
+		*(u32*)0x0203EE90 = 0xE1A00000; // nop (Skip Manual screen)
+	}
+
+	// Treasure Hunter X (Europe)
+	// A bit hard/confusing to add save support
+	else if (strcmp(romTid, "K4EP") == 0 && !twlFontFound) {
+		*(u32*)0x0203EF6C = 0xE1A00000; // nop (Skip Manual screen)
+	}
+
+	// Fall in the Dark (Japan)
+	// A bit hard/confusing to add save support
+	else if (strcmp(romTid, "K4EJ") == 0 && !twlFontFound) {
+		*(u32*)0x0203EE0C = 0xE1A00000; // nop (Skip Manual screen)
 	}
 
 	// Trollboarder (USA)

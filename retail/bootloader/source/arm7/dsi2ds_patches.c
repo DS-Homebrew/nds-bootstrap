@@ -11588,20 +11588,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		} */
 	}
 
-	// Fall in the Dark (Japan)
-	// A bit hard/confusing to add save support
-	else if (strcmp(romTid, "K4EJ") == 0) {
-		useSharedFont = twlFontFound;
-		*(u32*)0x02010284 = 0xE1A00000; // nop
-		*(u32*)0x02013894 = 0xE1A00000; // nop
-		patchInitDSiWare(0x02019000, heapEnd);
-		patchUserSettingsReadDSiWare(0x0201A5C0);
-		*(u32*)0x02022CA0 = 0xE12FFF1E; // bx lr
-		if (!twlFontFound) {
-			*(u32*)0x0203EE0C = 0xE1A00000; // nop (Skip Manual screen)
-		}
-	}
-
 	// Famicom Wars DS: Ushinawareta Hikari (Japan)
 	// DSi save function patching not needed
 	else if (strcmp(romTid, "Z2EJ") == 0) {
@@ -26691,6 +26677,48 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		doubleNopT(0x020D9EE6);
 		doubleNopT(0x020D9F0E);
 		*(u32*)0x02103DF8 = 0x1E0000; // Shrink sound heap from 0x300000
+	}
+
+	// Treasure Hunter X (USA)
+	// A bit hard/confusing to add save support
+	else if (strcmp(romTid, "K4EE") == 0) {
+		useSharedFont = twlFontFound;
+		*(u32*)0x02010290 = 0xE1A00000; // nop
+		*(u32*)0x020138AC = 0xE1A00000; // nop
+		patchInitDSiWare(0x02019034, heapEnd);
+		patchUserSettingsReadDSiWare(0x0201A604);
+		*(u32*)0x02022CBC = 0xE12FFF1E; // bx lr
+		if (!twlFontFound) {
+			*(u32*)0x0203EE90 = 0xE1A00000; // nop (Skip Manual screen)
+		}
+	}
+
+	// Treasure Hunter X (Europe)
+	// A bit hard/confusing to add save support
+	else if (strcmp(romTid, "K4EP") == 0) {
+		useSharedFont = twlFontFound;
+		*(u32*)0x020102CC = 0xE1A00000; // nop
+		*(u32*)0x02013970 = 0xE1A00000; // nop
+		patchInitDSiWare(0x02019114, heapEnd);
+		patchUserSettingsReadDSiWare(0x0201A6E4);
+		*(u32*)0x02022DB0 = 0xE12FFF1E; // bx lr
+		if (!twlFontFound) {
+			*(u32*)0x0203EF6C = 0xE1A00000; // nop (Skip Manual screen)
+		}
+	}
+
+	// Fall in the Dark (Japan)
+	// A bit hard/confusing to add save support
+	else if (strcmp(romTid, "K4EJ") == 0) {
+		useSharedFont = twlFontFound;
+		*(u32*)0x02010284 = 0xE1A00000; // nop
+		*(u32*)0x02013894 = 0xE1A00000; // nop
+		patchInitDSiWare(0x02019000, heapEnd);
+		patchUserSettingsReadDSiWare(0x0201A5C0);
+		*(u32*)0x02022CA0 = 0xE12FFF1E; // bx lr
+		if (!twlFontFound) {
+			*(u32*)0x0203EE0C = 0xE1A00000; // nop (Skip Manual screen)
+		}
 	}
 
 	// Trollboarder (USA)

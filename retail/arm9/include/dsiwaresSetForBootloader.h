@@ -200,7 +200,6 @@ static const char dsiWareForBootloader1[][4] = {
 	"K5K", // Escape Trick: Convenience Store (bootloaderi-exclusive)
 	"KER", // G.G Series: Exciting River
 	"KYB", // Face Pilot: Fly With Your Nintendo DSi Camera! (bootloaderi-exclusive)
-	"K4E", // Fall in the Dark
 	"Z2E", // Famicom Wars DS: Ushinawareta Hikari
 	"KFK", // Farm Frenzy
 	"KU7", // Fashion Tycoon
@@ -542,6 +541,7 @@ static const char dsiWareForBootloader3[][4] = {
 	"KWV", // The Tower DS: Hotel
 	"KW4", // The Tower DS: Shopping Santa
 	"KDZ", // Trajectile
+	"K4E", // Treasure Hunter X
 	"KB7", // Trollboarder
 	"K72", // True Swing Golf Express
 	"KTI", // Turn: The Lost Artifact
