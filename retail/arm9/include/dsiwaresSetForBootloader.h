@@ -168,6 +168,7 @@ static const char dsiWareForBootloader1[][4] = {
 	"KAV", // Art Style: DIGIDRIVE
 	"KDK", // Discolight
 	"KRF", // Divergent Shift
+	"KML", // Don't Cross the Line
 	"KHE", // DotMan
 	"KD9", // Dr. Mario Express
 	"KDQ", // Dragon Quest Wars

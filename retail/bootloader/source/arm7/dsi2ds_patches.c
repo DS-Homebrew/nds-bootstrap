@@ -9735,15 +9735,36 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Don't Cross the Line (USA)
-	/* else if (strcmp(romTid, "KMLE") == 0) {
+	// Saving seems difficult to get working
+	else if (strcmp(romTid, "KMLE") == 0) {
 		*(u32*)0x0200B438 = 0xE1A00000; // nop
 		*(u32*)0x0200F5B4 = 0xE1A00000; // nop
 		patchInitDSiWare(0x02015AF8, heapEnd);
-		// *(u32*)0x02015E84 -= 0x39000;
+		*(u32*)0x02015E84 = *(u32*)0x0200DA6C;
 		patchUserSettingsReadDSiWare(0x020171D0);
 		*(u32*)0x0201A934 = 0xE1A00000; // nop
-		// *(u32*)0x0201C5BC = extendedMemory ? 0x500000 : 0x2C0000;
-	} */
+		*(u32*)0x0201C414 = extendedMemory ? 0xE350071D : 0xE350070D; // cmp r0, extendedMemory ? #0x740000 : #0x340000 (Shrink heap from 0xA00000)
+		*(u32*)0x0201C424 = extendedMemory ? 0xE3A0571D : 0xE3A0570D; // mov r5, extendedMemory ? #0x740000 : #0x340000 (Shrink heap from 0xA00000)
+		*(u32*)0x0201C444 = extendedMemory ? 0xE281271D : 0xE281270D; // add r2, r1, extendedMemory ? #0x740000 : #0x340000 (Shrink heap from 0xA00000)
+		*(u32*)0x0201C5BC = extendedMemory ? 0x73C000 : 0x33C000; // (Shrink heap from 0x9FC000)
+		*(u32*)0x0202C978 = 0xE12FFF1E; // bx lr
+	}
+
+	// Kyoudaisei Higashida Taishi ga Kangaeta Puzzle: Hirameki Emusubi (Japan)
+	// Saving seems difficult to get working
+	else if (strcmp(romTid, "KMLJ") == 0) {
+		*(u32*)0x0200B3F0 = 0xE1A00000; // nop
+		*(u32*)0x0200F6C4 = 0xE1A00000; // nop
+		patchInitDSiWare(0x02015ECC, heapEnd);
+		*(u32*)0x0201623C = *(u32*)0x0200DB30;
+		patchUserSettingsReadDSiWare(0x020175AC);
+		*(u32*)0x0201AE08 = 0xE1A00000; // nop
+		*(u32*)0x0201C9F8 = extendedMemory ? 0xE350071D : 0xE350070D; // cmp r0, extendedMemory ? #0x740000 : #0x340000 (Shrink heap from 0xA00000)
+		*(u32*)0x0201CA08 = extendedMemory ? 0xE3A0571D : 0xE3A0570D; // mov r5, extendedMemory ? #0x740000 : #0x340000 (Shrink heap from 0xA00000)
+		*(u32*)0x0201CA28 = extendedMemory ? 0xE281271D : 0xE281270D; // add r2, r1, extendedMemory ? #0x740000 : #0x340000 (Shrink heap from 0xA00000)
+		*(u32*)0x0201CBA0 = extendedMemory ? 0x73C000 : 0x33C000; // (Shrink heap from 0x9FC000)
+		*(u32*)0x0202D03C = 0xE12FFF1E; // bx lr
+	}
 
 	// DotMan (USA)
 	else if (strcmp(romTid, "KHEE") == 0) {
