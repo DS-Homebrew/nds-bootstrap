@@ -5496,6 +5496,46 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		} */
 	}
 
+	// Don't Cross the Line (USA)
+	/* else if (strcmp(romTid, "KMLE") == 0 && saveOnFlashcardNtr) {
+		*(u32*)0x0202C978 = 0xE12FFF1E; // bx lr // Part of .pck file
+		setBL(0x0202CB7C, (u32)dsiSaveCreate);
+		setBL(0x0202CB8C, (u32)dsiSaveOpen);
+		setBL(0x0202CBAC, (u32)dsiSaveSetLength);
+		setBL(0x0202CBCC, (u32)dsiSaveWrite);
+		setBL(0x0202CBE4, (u32)dsiSaveClose);
+		*(u32*)0x0202CC2C = 0xE3A00001; // mov r0, #1 (dsiSaveOpenDir)
+		*(u32*)0x0202CC68 = 0xE3A00001; // mov r0, #1 (dsiSaveReadDir)
+		*(u32*)0x0202CC90 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0202CCA4 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0202CCF4 = 0xE3A00000; // mov r0, #0 (dsiSaveReadDir)
+		*(u32*)0x0202CD38 = 0xE3A00001; // mov r0, #1 (dsiSaveCloseDir)
+		setBL(0x0202CE38, (u32)dsiSaveOpen);
+		setBL(0x0202CE54, (u32)dsiSaveGetLength);
+		setBL(0x0202CE8C, (u32)dsiSaveRead);
+		setBL(0x0202CEA4, (u32)dsiSaveClose);
+	} */
+
+	// Kyoudaisei Higashida Taishi ga Kangaeta Puzzle: Hirameki Emusubi (Japan)
+	/* else if (strcmp(romTid, "KMLJ") == 0 && saveOnFlashcardNtr) {
+		*(u32*)0x0202D03C = 0xE12FFF1E; // bx lr // Part of .pck file
+		setBL(0x0202D238, (u32)dsiSaveCreate);
+		setBL(0x0202D248, (u32)dsiSaveOpen);
+		setBL(0x0202D268, (u32)dsiSaveSetLength);
+		setBL(0x0202D288, (u32)dsiSaveWrite);
+		setBL(0x0202D2A0, (u32)dsiSaveClose);
+		*(u32*)0x0202D2E8 = 0xE3A00001; // mov r0, #1 (dsiSaveOpenDir)
+		*(u32*)0x0202D324 = 0xE3A00001; // mov r0, #1 (dsiSaveReadDir)
+		*(u32*)0x0202D34C = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0202D360 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x0202D3B0 = 0xE3A00000; // mov r0, #0 (dsiSaveReadDir)
+		*(u32*)0x0202D3F4 = 0xE3A00001; // mov r0, #1 (dsiSaveCloseDir)
+		setBL(0x0202D4EC, (u32)dsiSaveOpen);
+		setBL(0x0202D508, (u32)dsiSaveGetLength);
+		setBL(0x0202D540, (u32)dsiSaveRead);
+		setBL(0x0202D558, (u32)dsiSaveClose);
+	} */
+
 	// DotMan (USA)
 	else if (strcmp(romTid, "KHEE") == 0 && !twlFontFound) {
 		// Skip Manual screen
