@@ -6070,7 +6070,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		if (!twlFontFound) {
 			*(u32*)0x02020FBC = 0xE12FFF1E; // bx lr (Skip Manual screen)
 		}
-		if (saveOnFlashcardNtr) {
+		/* if (saveOnFlashcardNtr) { // Part of .pck file
 			*(u32*)0x020243F8 = 0xE1A00000; // nop
 			setBL(0x0202442C, (u32)dsiSaveCreate); // dsiSaveCreateAuto
 			*(u32*)0x02024488 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
@@ -6092,12 +6092,12 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBL(0x0202493C, (u32)dsiSaveRead);
 			setBL(0x02024978, (u32)dsiSaveClose);
 			setBL(0x020249A4, (u32)dsiSaveClose);
-		}
+		} */
 	}
 
 	// Elite Forces: Unit 77 (USA)
-	else if (strcmp(romTid, "K42E") == 0 && saveOnFlashcardNtr) {
-		*(u32*)0x020340E4 = 0xE1A00000; // nop
+	/* else if (strcmp(romTid, "K42E") == 0 && saveOnFlashcardNtr) {
+		*(u32*)0x020340E4 = 0xE1A00000; // nop // Part of .pck file
 		*(u32*)0x020340F8 = 0xE3A00001; // mov r0, #1
 		*(u32*)0x02034104 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x02034134 = 0xE1A00000; // nop
@@ -6125,11 +6125,11 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02042560, (u32)dsiSaveSeek);
 		setBL(0x0204257C, (u32)dsiSaveRead);
 		setBL(0x02042594, (u32)dsiSaveClose);
-	}
+	} */
 
 	// Elite Forces: Unit 77 (Europe)
-	else if (strcmp(romTid, "K42P") == 0 && saveOnFlashcardNtr) {
-		*(u32*)0x02033F4C = 0xE1A00000; // nop
+	/* else if (strcmp(romTid, "K42P") == 0 && saveOnFlashcardNtr) {
+		*(u32*)0x02033F4C = 0xE1A00000; // nop // Part of .pck file
 		*(u32*)0x02033F60 = 0xE3A00001; // mov r0, #1
 		*(u32*)0x02033F6C = 0xE3A00000; // mov r0, #0
 		*(u32*)0x02033F9C = 0xE1A00000; // nop
@@ -6157,7 +6157,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02042370, (u32)dsiSaveSeek);
 		setBL(0x0204238C, (u32)dsiSaveRead);
 		setBL(0x020423A4, (u32)dsiSaveClose);
-	}
+	} */
 
 	// Escape Trick: The Secret of Rock City Prison (USA)
 	else if (strcmp(romTid, "K5QE") == 0) {
@@ -10330,7 +10330,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Nandoku 500 Kanji: Wado Pazuru (Japan)
 	else if (strcmp(romTid, "KJWJ") == 0) {
-		if (saveOnFlashcardNtr) {
+		/* if (saveOnFlashcardNtr) { // Part of .pck file
 			setBL(0x0201200C, (u32)dsiSaveClose);
 			setBL(0x02012150, (u32)dsiSaveClose);
 			setBL(0x020122EC, (u32)dsiSaveOpen);
@@ -10356,7 +10356,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBL(0x02012548, (u32)dsiSaveWrite); // dsiSaveWriteAsync
 			setBL(0x0201259C, (u32)dsiSaveCreate);
 			setBL(0x020125A4, (u32)dsiSaveGetResultCode);
-		}
+		} */
 		if (!twlFontFound) {
 			*(u32*)0x02021FDC = 0xE3A00000; // mov r0, #0 (Skip Manual screen, Part 2)
 			*(u32*)0x020299C8 = 0xE3A00002; // mov r0, #2 (Skip Manual screen, Part 1)
@@ -10365,7 +10365,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Jeulgeoun Ilboneo Wodeupeojeul (Korea)
 	else if (strcmp(romTid, "KJWK") == 0) {
-		if (saveOnFlashcardNtr) {
+		/* if (saveOnFlashcardNtr) { // Part of .pck file
 			setBL(0x02024130, (u32)dsiSaveClose);
 			setBL(0x02024274, (u32)dsiSaveClose);
 			setBL(0x02024410, (u32)dsiSaveOpen);
@@ -10391,7 +10391,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBL(0x0202466C, (u32)dsiSaveWrite); // dsiSaveWriteAsync
 			setBL(0x020246C0, (u32)dsiSaveCreate);
 			setBL(0x020246C8, (u32)dsiSaveGetResultCode);
-		}
+		} */
 		if (!twlFontFound) {
 			*(u32*)0x020321C4 = 0xE3A00002; // mov r0, #2 (Skip Manual screen, Part 1)
 			*(u32*)0x020398EC = 0xE3A00000; // mov r0, #0 (Skip Manual screen, Part 2)
@@ -10489,8 +10489,8 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Neko Neko Bakery: Pan de Pazurunya! (Japan)
-	else if (strcmp(romTid, "K9NJ") == 0 && saveOnFlashcardNtr) {
-		setBL(0x0203E844, (u32)dsiSaveOpen);
+	/* else if (strcmp(romTid, "K9NJ") == 0 && saveOnFlashcardNtr) {
+		setBL(0x0203E844, (u32)dsiSaveOpen); // Part of .pck file
 		setBL(0x0203E858, (u32)dsiSaveGetLength);
 		setBL(0x0203E880, (u32)dsiSaveSeek);
 		setBL(0x0203E890, (u32)dsiSaveRead);
@@ -10500,7 +10500,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0203E988, (u32)dsiSaveSeek);
 		setBL(0x0203E998, (u32)dsiSaveWrite);
 		setBL(0x0203E9A4, (u32)dsiSaveClose);
-	}
+	} */
 
 	// Neko no Iru Tangram: Neko to Iyashi no Silhouette Puzzle (Japan)
 	/* else if (strcmp(romTid, "KTGJ") == 0 && saveOnFlashcardNtr) {

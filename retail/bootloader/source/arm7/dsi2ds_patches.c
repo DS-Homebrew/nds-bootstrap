@@ -10815,7 +10815,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// EJ Puzzles: Hooked (USA)
 	// Music does not play
 	else if (strcmp(romTid, "KHWE") == 0) {
-		*(u32*)0x020243F8 = 0xE1A00000; // nop
+		/* *(u32*)0x020243F8 = 0xE1A00000; // nop // Part of .pck file
 		setBL(0x0202442C, (u32)dsiSaveCreate); // dsiSaveCreateAuto
 		*(u32*)0x02024488 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
 		*(u32*)0x020244A0 = 0xE3A00001; // mov r0, #1 (dsiSaveFreeSpaceAvailable)
@@ -10835,7 +10835,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0202492C, (u32)dsiSaveSeek);
 		setBL(0x0202493C, (u32)dsiSaveRead);
 		setBL(0x02024978, (u32)dsiSaveClose);
-		setBL(0x020249A4, (u32)dsiSaveClose);
+		setBL(0x020249A4, (u32)dsiSaveClose); */
 		*(u32*)0x02020FBC = 0xE12FFF1E; // bx lr (Skip Manual screen)
 		*(u32*)0x02024858 = 0xE1A00000; // nop
 		*(u32*)0x02024864 = 0xE3A00000; // mov r0, #0
@@ -11511,7 +11511,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Elite Forces: Unit 77 (USA)
 	else if (strcmp(romTid, "K42E") == 0) {
-		*(u32*)0x020340E4 = 0xE1A00000; // nop
+		/* *(u32*)0x020340E4 = 0xE1A00000; // nop // Part of .pck file
 		*(u32*)0x020340F8 = 0xE3A00001; // mov r0, #1
 		*(u32*)0x02034104 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x02034134 = 0xE1A00000; // nop
@@ -11539,7 +11539,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02042560, (u32)dsiSaveSeek);
 		setBL(0x0204257C, (u32)dsiSaveRead);
 		setBL(0x02042594, (u32)dsiSaveClose);
-		*(u32*)0x020426B8 = 0xE1A00000; // nop
+		*(u32*)0x020426B8 = 0xE1A00000; // nop */
 		*(u32*)0x0209D7E4 = 0xE1A00000; // nop
 		*(u32*)0x020A0E60 = 0xE1A00000; // nop
 		patchInitDSiWare(0x020A9498, heapEnd);
@@ -11553,7 +11553,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Elite Forces: Unit 77 (Europe)
 	else if (strcmp(romTid, "K42P") == 0) {
-		*(u32*)0x02033F4C = 0xE1A00000; // nop
+		/* *(u32*)0x02033F4C = 0xE1A00000; // nop // Part of .pck file
 		*(u32*)0x02033F60 = 0xE3A00001; // mov r0, #1
 		*(u32*)0x02033F6C = 0xE3A00000; // mov r0, #0
 		*(u32*)0x02033F9C = 0xE1A00000; // nop
@@ -11581,7 +11581,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02042370, (u32)dsiSaveSeek);
 		setBL(0x0204238C, (u32)dsiSaveRead);
 		setBL(0x020423A4, (u32)dsiSaveClose);
-		*(u32*)0x020424C8 = 0xE1A00000; // nop
+		*(u32*)0x020424C8 = 0xE1A00000; // nop */
 		*(u32*)0x0209D4F0 = 0xE1A00000; // nop
 		*(u32*)0x020A0B6C = 0xE1A00000; // nop
 		patchInitDSiWare(0x020A91A4, heapEnd);
@@ -18849,7 +18849,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Nandoku 500 Kanji: Wado Pazuru (Japan)
 	else if (strcmp(romTid, "KJWJ") == 0) {
-		*(u32*)0x02011E00 = 0xE1A00000; // nop
+		/* *(u32*)0x02011E00 = 0xE1A00000; // nop // Part of .pck file
 		setBL(0x0201200C, (u32)dsiSaveClose);
 		*(u32*)0x02012070 = 0xE1A00000; // nop
 		setBL(0x02012150, (u32)dsiSaveClose);
@@ -18875,7 +18875,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02012530, (u32)dsiSaveSeek);
 		setBL(0x02012548, (u32)dsiSaveWrite); // dsiSaveWriteAsync
 		setBL(0x0201259C, (u32)dsiSaveCreate);
-		setBL(0x020125A4, (u32)dsiSaveGetResultCode);
+		setBL(0x020125A4, (u32)dsiSaveGetResultCode); */
 		*(u32*)0x02021FDC = 0xE3A00000; // mov r0, #0 (Skip Manual screen, Part 2)
 		*(u32*)0x020299C8 = 0xE3A00002; // mov r0, #2 (Skip Manual screen, Part 1)
 		*(u32*)0x02033EE0 = 0xE3A00000; // mov r0, #0
@@ -18891,7 +18891,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0200F4E0 = 0xE1A00000; // nop
 		patchInitDSiWare(0x02015108, heapEnd);
 		patchUserSettingsReadDSiWare(0x02016868);
-		*(u32*)0x02023B84 = 0xE3A00000; // mov r0, #0
+		/* *(u32*)0x02023B84 = 0xE3A00000; // mov r0, #0 // Part of .pck file
 		*(u32*)0x02023F24 = 0xE1A00000; // nop
 		setBL(0x02024130, (u32)dsiSaveClose);
 		*(u32*)0x02024194 = 0xE1A00000; // nop
@@ -18918,7 +18918,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02024654, (u32)dsiSaveSeek);
 		setBL(0x0202466C, (u32)dsiSaveWrite); // dsiSaveWriteAsync
 		setBL(0x020246C0, (u32)dsiSaveCreate);
-		setBL(0x020246C8, (u32)dsiSaveGetResultCode);
+		setBL(0x020246C8, (u32)dsiSaveGetResultCode); */
 		*(u32*)0x020321C4 = 0xE3A00002; // mov r0, #2 (Skip Manual screen, Part 1)
 		*(u32*)0x020398EC = 0xE3A00000; // mov r0, #0 (Skip Manual screen, Part 2)
 	}
@@ -19067,7 +19067,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBL(0x02054EC8, newCodeAddr2);
 			setBL(0x02054ECC, 0x0200CFDC);
 		}
-		setBL(0x0203E844, (u32)dsiSaveOpen);
+		/* setBL(0x0203E844, (u32)dsiSaveOpen); // Part of .pck file
 		setBL(0x0203E858, (u32)dsiSaveGetLength);
 		setBL(0x0203E880, (u32)dsiSaveSeek);
 		setBL(0x0203E890, (u32)dsiSaveRead);
@@ -19076,7 +19076,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0203E970, (u32)dsiSaveOpen);
 		setBL(0x0203E988, (u32)dsiSaveSeek);
 		setBL(0x0203E998, (u32)dsiSaveWrite);
-		setBL(0x0203E9A4, (u32)dsiSaveClose);
+		setBL(0x0203E9A4, (u32)dsiSaveClose); */
 	}
 
 	// Neko no Iru Tangram: Neko to Iyashi no Silhouette Puzzle (Japan)
