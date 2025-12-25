@@ -20090,7 +20090,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Panewa! (Japan)
-	// Crashes after saving data
 	else if (strcmp(romTid, "KPWJ") == 0) {
 		*(u32*)0x0200E2C0 = 0xE1A00000; // nop
 		*(u32*)0x02012594 = 0xE1A00000; // nop
@@ -20106,7 +20105,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x020351FC, (u32)dsiSaveOpen);
 		setBL(0x0203521C, (u32)dsiSaveSetLength);
 		setBL(0x0203523C, (u32)dsiSaveWrite);
-		setBL(0x0203525C, (u32)dsiSaveClose);
+		setBL(0x02035254, (u32)dsiSaveClose);
 		*(u32*)0x0203529C = 0xE3A00001; // mov r0, #1 (dsiSaveOpenDir)
 		*(u32*)0x020352D8 = 0xE3A00001; // mov r0, #1 (dsiSaveReadDir)
 		*(u32*)0x02035300 = 0xE3A00001; // mov r0, #1
