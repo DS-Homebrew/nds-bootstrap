@@ -11062,7 +11062,8 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Panewa! (Japan)
-	else if (strcmp(romTid, "KPWJ") == 0 && saveOnFlashcardNtr) {
+	/* else if (strcmp(romTid, "KPWJ") == 0 && saveOnFlashcardNtr) {
+		*(u32*)0x02034FE4 = 0xE12FFF1E; // bx lr // Part of .pck file
 		setBL(0x020351EC, (u32)dsiSaveCreate);
 		setBL(0x020351FC, (u32)dsiSaveOpen);
 		setBL(0x0203521C, (u32)dsiSaveSetLength);
@@ -11078,7 +11079,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x020354C4, (u32)dsiSaveGetLength);
 		setBL(0x020354FC, (u32)dsiSaveRead);
 		setBL(0x02035514, (u32)dsiSaveClose);
-	}
+	} */
 
 	// Kami Hikouki (Japan)
 	// Saving not supported due to using more than one file

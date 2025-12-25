@@ -20090,17 +20090,18 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Panewa! (Japan)
-	// Requires more than 16MB of RAM
-	/* else if (strcmp(romTid, "KPWJ") == 0) {
+	// Crashes after saving data
+	else if (strcmp(romTid, "KPWJ") == 0) {
 		*(u32*)0x0200E2C0 = 0xE1A00000; // nop
 		*(u32*)0x02012594 = 0xE1A00000; // nop
 		patchInitDSiWare(0x0201A5EC, heapEnd);
-		*(u32*)0x0201A95C -= 0x30000;
+		*(u32*)0x0201A95C = *(u32*)0x02010A00;
 		patchUserSettingsReadDSiWare(0x0201BCCC);
-		*(u32*)0x02021118 -= 0x2F;
-		*(u32*)0x02021128 -= 0x2F;
-		*(u32*)0x02021148 -= 0x2F;
-		*(u32*)0x02021184 += 0xE0000000; // beq -> b
+		*(u32*)0x02021118 = extendedMemory ? 0xE350071D : 0xE350070D; // cmp r0, extendedMemory ? #0x740000 : #0x340000 (Shrink heap from 0xE80000)
+		*(u32*)0x02021128 = extendedMemory ? 0xE3A0571D : 0xE3A0570D; // mov r5, extendedMemory ? #0x740000 : #0x340000 (Shrink heap from 0xE80000)
+		*(u32*)0x02021148 = extendedMemory ? 0xE281271D : 0xE281270D; // add r2, r1, extendedMemory ? #0x740000 : #0x340000 (Shrink heap from 0xE80000)
+		*(u32*)0x020212C0 = extendedMemory ? 0x73C000 : 0x33C000; // (Shrink heap from 0xE7C000)
+		/* *(u32*)0x02034FE4 = 0xE12FFF1E; // bx lr // Part of .pck file
 		setBL(0x020351EC, (u32)dsiSaveCreate);
 		setBL(0x020351FC, (u32)dsiSaveOpen);
 		setBL(0x0203521C, (u32)dsiSaveSetLength);
@@ -20115,8 +20116,8 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x020354A8, (u32)dsiSaveOpen);
 		setBL(0x020354C4, (u32)dsiSaveGetLength);
 		setBL(0x020354FC, (u32)dsiSaveRead);
-		setBL(0x02035514, (u32)dsiSaveClose);
-	} */
+		setBL(0x02035514, (u32)dsiSaveClose); */
+	}
 
 	// Kami Hikouki (Japan)
 	// Saving not supported due to using more than one file
