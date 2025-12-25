@@ -10502,6 +10502,26 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0203E9A4, (u32)dsiSaveClose);
 	}
 
+	// Neko no Iru Tangram: Neko to Iyashi no Silhouette Puzzle (Japan)
+	/* else if (strcmp(romTid, "KTGJ") == 0 && saveOnFlashcardNtr) {
+		*(u32*)0x02040328 = 0xE12FFF1E; // bx lr // Part of .pck file
+		setBL(0x0204052C, (u32)dsiSaveCreate);
+		setBL(0x0204053C, (u32)dsiSaveOpen);
+		setBL(0x0204055C, (u32)dsiSaveSetLength);
+		setBL(0x0204057C, (u32)dsiSaveWrite);
+		setBL(0x02040594, (u32)dsiSaveClose);
+		*(u32*)0x020405DC = 0xE3A00001; // mov r0, #1 (dsiSaveOpenDir)
+		*(u32*)0x02040618 = 0xE3A00001; // mov r0, #1 (dsiSaveReadDir)
+		*(u32*)0x02040640 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x02040654 = 0xE3A00001; // mov r0, #1
+		*(u32*)0x020406A4 = 0xE3A00000; // mov r0, #0 (dsiSaveReadDir)
+		*(u32*)0x020406E8 = 0xE3A00001; // mov r0, #1 (dsiSaveCloseDir)
+		setBL(0x020407E8, (u32)dsiSaveOpen);
+		setBL(0x02040804, (u32)dsiSaveGetLength);
+		setBL(0x0204083C, (u32)dsiSaveRead);
+		setBL(0x02040854, (u32)dsiSaveClose);
+	} */
+
 	// Neko Reversi (Japan)
 	else if (strcmp(romTid, "KNVJ") == 0 && !twlFontFound) {
 		*(u32*)0x0203FCA4 = 0xE1A00000; // nop (Skip Manual screen)

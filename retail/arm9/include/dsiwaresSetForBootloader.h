@@ -358,6 +358,7 @@ static const char dsiWareForBootloader3[][4] = {
 	"KN3", // Nazo no Mini Game
 	"KNP", // Need for Speed: Nitro-X
 	"K9N", // Neko Neko Bakery: Pan de Pazurunya!
+	"KTG", // Neko no Iru Tangram: Neko to Iyashi no Silhouette Puzzle
 	"KNV", // Neko Reversi
 	"KAQ", // G.G Series: Ninja Karakuri Den
 	"KQ2", // G.G Series: Ninja Karakuri Den 2
