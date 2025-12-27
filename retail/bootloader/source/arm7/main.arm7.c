@@ -1335,27 +1335,27 @@ int arm7_main(void) {
 
 	const bool dsBrowser = (strcmp(romTid, "UBRP") == 0);
 
-	if (dsBrowser && extendedMemory && !dsDebugRam) {
-		toncset((char*)0x0C400000, 0xFF, 0xC0);
-		toncset((u8*)0x0C4000B2, 0, 3);
-		toncset((u8*)0x0C4000B5, 0x24, 3);
-		*(u16*)0x0C4000BE = 0x7FFF;
-		toncset((char*)0x0C4000C0, 0, 0xE);
-		*(u16*)0x0C4000CE = 0x7FFF;
-		toncset((char*)0x0C4000D0, 0, 0x130);
-	}
-
 	*(vu16*)0x08240000 = 1;
 	expansionPakFound = ((*(vu16*)0x08240000 == 1) && (s2FlashcardId != 0 || !dsBrowser));
 
-	if (dsBrowser && s2FlashcardId != 0 && s2FlashcardId != 0x5A45) {
-		toncset((char*)0x08000000, 0xFF, 0xC0);
-		toncset((u8*)0x080000B2, 0, 3);
-		toncset((u8*)0x080000B5, 0x24, 3);
-		*(u16*)0x080000BE = 0x7FFF;
-		toncset((char*)0x080000C0, 0, 0xE);
-		*(u16*)0x080000CE = 0x7FFF;
-		toncset((char*)0x080000D0, 0, 0x130);
+	if (dsBrowser) {
+		if (extendedMemory && !dsDebugRam) {
+			toncset((char*)0x0C400000, 0xFF, 0xC0);
+			toncset((u8*)0x0C4000B2, 0, 3);
+			toncset((u8*)0x0C4000B5, 0x24, 3);
+			*(u16*)0x0C4000BE = 0x7FFF;
+			toncset((char*)0x0C4000C0, 0, 0xE);
+			*(u16*)0x0C4000CE = 0x7FFF;
+			toncset((char*)0x0C4000D0, 0, 0x130);
+		} else if (s2FlashcardId != 0 && s2FlashcardId != 0x5A45) {
+			toncset((char*)0x08000000, 0xFF, 0xC0);
+			toncset((u8*)0x080000B2, 0, 3);
+			toncset((u8*)0x080000B5, 0x24, 3);
+			*(u16*)0x080000BE = 0x7FFF;
+			toncset((char*)0x080000C0, 0, 0xE);
+			*(u16*)0x080000CE = 0x7FFF;
+			toncset((char*)0x080000D0, 0, 0x130);
+		}
 	}
 
 	// dbg_printf("Trying to patch the card...\n");
