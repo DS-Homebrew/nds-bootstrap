@@ -1915,12 +1915,12 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			fseek(ndsFile, 0, SEEK_SET);
 			fread(target, 1, 0x1000, ndsFile);
 
-			if (ndsArm9ilen && ndsArm9ilen <= 0x8000) {
+			if (ndsArm9ilen && ndsArm9ilen <= 0x7000) {
 				fseek(ndsFile, ndsArm9isrc, SEEK_SET);
 				fread((u32*)0x023B8000, 1, ndsArm9ilen, ndsFile);
 			}
 
-			if ((target[0x1C] & 2) && ndsArm9ilen <= 0x8000)
+			if ((target[0x1C] & 2) && ndsArm9ilen <= 0x7000)
 			{
 				u8 key[16] = {0} ;
 				u8 keyp[16] = {0} ;

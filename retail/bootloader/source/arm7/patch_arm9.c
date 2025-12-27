@@ -1679,7 +1679,7 @@ void patchSharedFontPath(const cardengineArm9* ce9, const tNDSHeader* ndsHeader,
 	//extern u32 accessControl;
 	extern u32 arm9ibinarySize;
 	if (/* !(accessControl & BIT(4)) || *(u32*)0x023B8000 != 0 */ !useSharedFont) {
-		toncset((u32*)0x023B8000, 0, arm9ibinarySize > 0x8000 ? 0x8000 : arm9ibinarySize);
+		toncset((u32*)0x023B8000, 0, arm9ibinarySize > 0x7000 ? 0x7000 : arm9ibinarySize);
 		return;
 	}
 
@@ -1935,7 +1935,7 @@ void patchSharedFontPath(const cardengineArm9* ce9, const tNDSHeader* ndsHeader,
 			}
 		}*/
 	} else { // THUMB
-		toncset((u32*)0x023B8000, 0, 0x8000);
+		toncset((u32*)0x023B8000, 0, 0x7000);
 
 		u16* fileIoClose = (u16*)patchOffsetCache.fileIoCloseOffset;
 		if (!patchOffsetCache.fileIoCloseOffset) {
@@ -1984,8 +1984,8 @@ void patchSharedFontPath(const cardengineArm9* ce9, const tNDSHeader* ndsHeader,
 
 		return; // getOffsetFromBLThumb currently doesn't get backward offsets correctly
 
-		tonccpy(moduleParams->static_bss_end, (u32*)0x023B8004, 0x7FFC);
-		toncset((u32*)0x023B8000, 0, 0x8000);
+		tonccpy(moduleParams->static_bss_end, (u32*)0x023B8004, 0x6FFC);
+		toncset((u32*)0x023B8000, 0, 0x7000);
 
 		const u32 dsiSaveOpenT = 0x02000200;
 		const u32 dsiSaveCloseT = 0x02000210;
