@@ -48,7 +48,8 @@
 extern void arm9_clearCache(void);
 extern void arm9code(u32* addr);
 
-tNDSHeader* ndsHeader = NULL;
+u32* arm9executeAddress = NULL;
+bool arm9_supportsDSiMode = false;
 bool dsiModeConfirmed = false;
 static bool colorLutEnabled = false;
 bool arm9_boostVram = false;
@@ -100,11 +101,6 @@ void initMBKARM9_dsiMode(void) {
 	REG_MBK7 = *(u32*)0x02FFE198;
 	REG_MBK8 = *(u32*)0x02FFE19C;
 	WRAM_CR = *(u8*)0x02FFE1AF;
-}
-
-// SDK 5
-static bool ROMsupportsDsiMode(const tNDSHeader* ndsHeader) {
-	return (ndsHeader->unitCode > 0);
 }
 
 void SetBrightness(u8 screen, s8 bright) {
@@ -374,13 +370,13 @@ void arm9_main(void) {
 		}
 		if (arm9_stateFlag == ARM9_SETSCFG) {
 			if (dsiModeConfirmed) {
-				if (ROMsupportsDsiMode(ndsHeader) && !colorLutEnabled) {
+				if (arm9_supportsDSiMode && !colorLutEnabled) {
 					initMBKARM9_dsiMode(); // This is needed for camera to init properly in some games, even when called with the ARM9_INITMBK flag prior
 				}
 				REG_SCFG_EXT = 0x8307F100;
 				REG_SCFG_CLK = 0x87;
 				REG_SCFG_RST = 1;
-				if (!ROMsupportsDsiMode(ndsHeader)) {
+				if (!arm9_supportsDSiMode) {
 					if (!arm9_boostVram) {
 						REG_SCFG_EXT &= ~BIT(13);
 					}
@@ -412,5 +408,5 @@ void arm9_main(void) {
 	while (REG_VCOUNT == 191);
 
 	// Start ARM9
-	arm9code(ndsHeader->arm9executeAddress);
+	arm9code(arm9executeAddress);
 }

@@ -61,7 +61,7 @@
 #define ARM9_DISPESRB 9
 //};
 
-extern tNDSHeader* ndsHeader;
+extern u32* arm9executeAddress;
 extern bool arm9_boostVram;
 extern bool extendedMemory;
 extern bool dsDebugRam;

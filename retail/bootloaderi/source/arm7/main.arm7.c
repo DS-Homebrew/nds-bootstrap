@@ -163,6 +163,7 @@ u32 waitSysCyclesOffset = 0;
 static u32 softResetParams[0x50/4] = {0};
 bool srlFromPageFile = false;
 u32 srlAddr = 0;
+tNDSHeader* ndsHeader = NULL;
 u32 baseArm9Off = 0;
 u32 baseArm9Size = 0;
 u32 baseArm7Off = 0;
@@ -1318,6 +1319,7 @@ Modified by Chishm:
 --------------------------------------------------------------------------*/
 static void startBinary_ARM7(void) {
 	// Get the ARM9 to boot
+	arm9executeAddress = (u32*)ndsHeader->arm9executeAddress;
 	arm9_stateFlag = ARM9_BOOTBIN;
 
 	while (REG_VCOUNT != 191);
@@ -1688,6 +1690,7 @@ int arm7_main(void) {
 		dbg_printf("ARM7 binary is empty!");
 		errorOutput();
 	}
+	arm9_supportsDSiMode = ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr);
 	if (isDSiWare) {
 		dsiModeConfirmed = true;
 	} else if (dsiMode == 2) {

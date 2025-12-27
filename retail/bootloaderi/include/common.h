@@ -64,7 +64,8 @@
 #define ARM9_WRAMONARM9 12
 //};
 
-extern tNDSHeader* ndsHeader;
+extern u32* arm9executeAddress;
+extern bool arm9_supportsDSiMode;
 extern bool dsiModeConfirmed;
 extern bool arm9_boostVram;
 extern u32 arm9_SCFG_EXT;

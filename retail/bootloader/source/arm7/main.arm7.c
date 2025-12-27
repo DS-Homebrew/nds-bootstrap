@@ -142,6 +142,7 @@ static aFile srParamsFile;
 static u32 softResetParams[0x50/4] = {0};
 bool srlFromPageFile = false;
 u32 srlAddr = 0;
+tNDSHeader* ndsHeader = NULL;
 u8 baseUnitCode = 0;
 u16 baseHeaderCRC = 0;
 u16 baseSecureCRC = 0;
@@ -836,6 +837,7 @@ Modified by Chishm:
 --------------------------------------------------------------------------*/
 static void startBinary_ARM7(void) {
 	// Get the ARM9 to boot
+	arm9executeAddress = (u32*)ndsHeader->arm9executeAddress;
 	arm9_stateFlag = ARM9_BOOTBIN;
 
 	while (REG_VCOUNT != 191);

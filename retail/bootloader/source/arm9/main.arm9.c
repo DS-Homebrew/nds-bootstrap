@@ -45,7 +45,7 @@
 extern void arm9_clearCache(void);
 extern void arm9code(u32* addr);
 
-tNDSHeader* ndsHeader = NULL;
+u32* arm9executeAddress = NULL;
 bool arm9_boostVram = false;
 bool extendedMemory = false;
 bool dsDebugRam = false;
@@ -349,5 +349,5 @@ void arm9_main(void) {
 	while (REG_VCOUNT == 191);
 
 	// Start ARM9
-	arm9code(ndsHeader->arm9executeAddress);
+	arm9code(arm9executeAddress);
 }
