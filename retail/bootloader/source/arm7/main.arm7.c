@@ -283,7 +283,7 @@ static void resetMemory_ARM7(void) {
 	REG_IPC_FIFO_CR = 0;
 
 	memset_addrs_arm7(0x03800000 - 0x8000, 0x03800000 + 0x10000);
-	toncset((u32*)0x02380000, 0, 0x3F000);		// clear part of EWRAM - except before 0x023BF000, which has the arm9 code
+	toncset((u32*)0x02380000, 0, 0x38000);		// clear part of EWRAM - except before 0x023B8000, which has the DSiWare ROM's arm9i code, and 0x023BF000, which has the bootloader arm9 code
 	toncset((u32*)0x023C0000, 0, 0x20000);
 	toncset((u32*)0x023F0000, 0, 0xD000);
 	toncset((u32*)0x023FE000, 0, 0x400);
