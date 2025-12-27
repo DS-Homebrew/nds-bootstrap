@@ -135,6 +135,9 @@ static u32 ioverlaysSize = 0;
 bool overlayPatch = false;
 u32 fatTableAddr = 0;
 
+static aFile romFile;
+static aFile savFile;
+
 static aFile srParamsFile;
 static u32 softResetParams[0x50/4] = {0};
 bool srlFromPageFile = false;
@@ -158,6 +161,8 @@ u8 arm7newUnitCode = 0;
 u32 newArm7binarySize = 0;
 u32 arm7mbk = 0;
 u32 accessControl = 0;
+
+static aFile patchOffsetCacheFile;
 
 void s2RamAccess(bool open) {
 	if (_io_dldi_features & FEATURE_SLOT_NDS) return;
@@ -1207,7 +1212,6 @@ int arm7_main(void) {
 	//aFile bootNdsFile = getBootFileCluster(bootName, 0);
 
 	// ROM file
-	aFile romFile;
 	getFileFromCluster(&romFile, storedFileCluster);
 
 	// Invalid file cluster specified
@@ -1222,7 +1226,6 @@ int arm7_main(void) {
 	}*/
 
 	// Sav file
-	aFile savFile;
 	getFileFromCluster(&savFile, saveFileCluster);
 	
 	int errorCode;
@@ -1243,7 +1246,6 @@ int arm7_main(void) {
 	}
 
 	// File containing cached patch offsets
-	aFile patchOffsetCacheFile;
 	getFileFromCluster(&patchOffsetCacheFile, patchOffsetCacheFileCluster);
 	fileRead((char*)&patchOffsetCache, &patchOffsetCacheFile, 0, 4);
 	if (patchOffsetCache.ver == patchOffsetCacheFileVersion
