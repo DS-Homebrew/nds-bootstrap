@@ -122,6 +122,11 @@ void waitFrames(int frames) {
 	}
 }
 
+void memset_addrs_arm9(u32 start, u32 end)
+{
+	dmaFill9(0, (u32*)start, ((int)end - (int)start));
+}
+
 /*-------------------------------------------------------------------------
 arm9_main
 
@@ -208,6 +213,13 @@ void arm9_main(void) {
 	SetBrightness(1, 31);
 	dmaFill9(0, VRAM_A, 0x20000*3);		// Banks A, B, C
 	dmaFill9(0, VRAM_D, 272*1024);		// Banks D (excluded), E, F, G, H, I
+
+	memset_addrs_arm9(0x02000620, 0x02084000);	// clear part of EWRAM
+	memset_addrs_arm9(0x02280000, IMAGES_LOCATION);	// clear part of EWRAM - except before nds-bootstrap images
+	if (extendedMemory) {
+		dmaFill9(0, (u32*)0x02400000, 0x3FC000);
+		dmaFill9(0, (u32*)0x027FF000, dsDebugRam ? 0x1000 : 0x801000);
+	}
 
 	REG_DISPSTAT = 0;
 	GFX_STATUS = 0;
