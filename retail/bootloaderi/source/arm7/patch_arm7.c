@@ -157,8 +157,10 @@ u32 newSwiHaltAddr = 0;
 bool saveRelocationApplied = false;
 
 static void patchSwiHalt(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+	const char* romTid = getRomTid(ndsHeader);
+
 	extern bool pkmnGen5;
-	if (pkmnGen5) {
+	if (pkmnGen5 || strncmp(romTid, "ASC", 3) == 0) {
 		newSwiHaltAddr = 0; // Ensure this is set to 0 in case a THUMB ROM is used as a donor ROM
 		return;
 	}

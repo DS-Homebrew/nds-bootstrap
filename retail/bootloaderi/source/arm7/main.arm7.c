@@ -2322,7 +2322,7 @@ int arm7_main(void) {
 			ce9Location = *ce9Src;
 			tonccpy((u32*)ce9Location, ce9Src, ce9size);
 		}
-		ce9DldiBinary = gameOnFlashcard && (pkmnGen5 || strncmp(romTid, "KAD", 3) == 0);
+		ce9DldiBinary = gameOnFlashcard && (strncmp(romTid, "ASC", 3) == 0 || pkmnGen5 || strncmp(romTid, "KAD", 3) == 0);
 		if (ce9DldiBinary) {
 			const u32 ce9DldiOffset = !laterSdk ? CARDENGINEI_ARM9_LOCATION2_DLDI_DRIVER : CARDENGINEI_ARM9_LOCATION_DLDI_DRIVER;
 			if (!dldiPatchBinary((data_t*)ce9Location, ce9size, (data_t*)((ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed && _io_dldi_size < 0xF) ? ce9Location+0x3800 : ce9DldiOffset))) {

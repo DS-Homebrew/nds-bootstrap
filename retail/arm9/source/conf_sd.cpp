@@ -1518,7 +1518,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 				// Load DLDI ce9 binary
 				loadCardEngineBinary(
-					(conf->gameOnFlashcard && (strncmp(romTid, "IRB", 3) == 0 || strncmp(romTid, "IRA", 3) == 0 || strncmp(romTid, "IRE", 3) == 0 || strncmp(romTid, "IRD", 3) == 0))
+					(conf->gameOnFlashcard && (strncmp(romTid, "ASC", 3) == 0 || strncmp(romTid, "IRB", 3) == 0 || strncmp(romTid, "IRA", 3) == 0 || strncmp(romTid, "IRE", 3) == 0 || strncmp(romTid, "IRD", 3) == 0))
 				?	(gsdd ? "nitro:/cardenginei_arm9_gsdd_dldi.lz77" : "nitro:/cardenginei_arm9_dldi.lz77")
 				:	(gsdd ? "nitro:/cardenginei_arm9_gsdd.lz77" : "nitro:/cardenginei_arm9.lz77")
 				, (u8*)CARDENGINEI_ARM9_BUFFERED_LOCATION);
