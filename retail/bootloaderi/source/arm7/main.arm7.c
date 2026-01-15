@@ -2245,7 +2245,7 @@ int arm7_main(void) {
 
 		const u16 ce9size = (ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr) && dsiModeConfirmed) ? 0x3800 : 0x2FA0;
 		ce7Location = *(u32*)CARDENGINEI_ARM7_BUFFERED_LOCATION;
-		u32 ce7Size = 0xB800;
+		u32 ce7Size = 0xF800;
 
 		const bool useSdk5ce7 = (isSdk5(moduleParams) && ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr) && dsiModeConfirmed);
 		if (useSdk5ce7) {

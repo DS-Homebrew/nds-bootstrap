@@ -144,6 +144,9 @@ void inGameMenu(void) {
 					saveMainScreenSetting();
 					afterSwapTimer = 0;
 					break;
+				case 0x41535046: // FPSA
+					sharedAddr[0] = 0xFFFFFFFF;
+					break;
 				case 0x444D4152: // RAMD
 					dumpRam();
 					exitMenu = true;

@@ -10,6 +10,7 @@
 #include "igm_text.h"
 #include "locations.h"
 #include "cardengine.h"
+#include "fpsAdjust.h"
 #include "nds_header.h"
 #include "tonccpy.h"
 
@@ -144,6 +145,22 @@ void inGameMenu(void) {
 					mainScreen = sharedAddr[0];
 					saveMainScreenSetting();
 					afterSwapTimer = 0;
+					break;
+				case 0x41535046: // FPSA
+					#ifndef TWLSDK
+					extern fpsa_t sActiveFpsa;
+
+					const u32 num = sharedAddr[0];
+					if (num == 60000) {
+						fpsa_stop(&sActiveFpsa);
+					} else {
+						fpsa_init(&sActiveFpsa);
+						fpsa_setTargetFpsFraction(&sActiveFpsa, num, num >= 1000 ? 1001 : 1);
+						fpsa_start(&sActiveFpsa);
+					}
+					#else
+					sharedAddr[0] = 0xFFFFFFFF;
+					#endif
 					break;
 				case 0x444D4152: // RAMD
 					dumpRam();

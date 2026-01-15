@@ -530,7 +530,7 @@ int hookNdsRetailArm7(
 
 	extern u32 cheatSizeTotal;
 	extern char cheatEngineBuffer[0x400];
-	u16 cheatSizeLimit = (/* ce7NotFound ? 0x1C00 : */ 0x8000);
+	u16 cheatSizeLimit = (/* ce7NotFound ? 0x1C00 : */ 0x4000);
 	// if (!ce7NotFound) {
 		if (cheatEngineOffset == CHEAT_ENGINE_DSIWARE_LOCATION) {
 			cheatSizeLimit -= 0x1800;

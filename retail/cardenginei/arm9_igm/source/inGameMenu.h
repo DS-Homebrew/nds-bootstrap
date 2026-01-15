@@ -20,6 +20,7 @@ typedef enum {
 	#ifndef B4DS
 	,
 	OPTIONS_VOLUME,
+	OPTIONS_GAME_SPEED,
 	OPTIONS_CLOCK_SPEED,
 	OPTIONS_VRAM_MODE
 	#endif

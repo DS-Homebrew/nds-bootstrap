@@ -624,8 +624,9 @@ void getIgmStrings(configuration* conf, bool b4ds) {
 	setIgmString(lang.fetch("OPTIONS", "MAIN_SCREEN", "Main Screen").c_str(), igmText->optionsLabels[0]);
 	setIgmString(lang.fetch("OPTIONS", "BRIGHTNESS", "Brightness").c_str(), igmText->optionsLabels[1]);
 	setIgmString(lang.fetch("OPTIONS", "VOLUME", "Volume").c_str(), igmText->optionsLabels[2]);
-	setIgmString(lang.fetch("OPTIONS", "CLOCK_SPEED", "Clock Speed").c_str(), igmText->optionsLabels[3]);
-	setIgmString(lang.fetch("OPTIONS", "VRAM_MODE", "VRAM Mode").c_str(), igmText->optionsLabels[4]);
+	setIgmString(lang.fetch("OPTIONS", "GAME_SPEED", "Game Speed").c_str(), igmText->optionsLabels[3]);
+	setIgmString(lang.fetch("OPTIONS", "CLOCK_SPEED", "Clock Speed").c_str(), igmText->optionsLabels[4]);
+	setIgmString(lang.fetch("OPTIONS", "VRAM_MODE", "VRAM Mode").c_str(), igmText->optionsLabels[5]);
 	setIgmString(lang.fetch("OPTIONS", "AUTO", "Auto").c_str(), igmText->optionsValues[0]);
 	setIgmString(lang.fetch("OPTIONS", "BOTTOM", "Bottom").c_str(), igmText->optionsValues[1]);
 	setIgmString(lang.fetch("OPTIONS", "TOP", "Top").c_str(), igmText->optionsValues[2]);

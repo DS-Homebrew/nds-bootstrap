@@ -67,7 +67,12 @@ An alternative forwarder generator for 3DS users. YANBF forwarders are 3DS-mode 
 - [shutterbug2000](https://github.com/shutterbug2000): SDK5 support, help with DSi mode support, and some other implemented stuff
 - [ahezard](https://github.com/ahezard): Starting the project, former lead developer
 - [Pk11](https://github.com/Epicpkmn11): In-game menu, screenshot taking, manual loading, and translation management
-- [Gericom](https://github.com/Gericom): Improving B4DS compatibility, parts of libtwl code used, Pokémon Wii connection patch, and SD -> flashcard R/W patch for DSiWare
+- [Gericom](https://github.com/Gericom):
+   - Improving B4DS compatibility
+   - Parts of libtwl code used
+   - Pokémon Wii connection patch from Pico Loader
+   - SD -> flashcard R/W patch for DSiWare
+   - Frame rate adjustment code from [FastVideoDSPlayer](https://github.com/Gericom/FastVideoDSPlayer) used for game speed adjustment
 
 ## Other
 - [devkitPro](https://devkitpro.org): devkitARM and libnds
