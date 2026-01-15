@@ -37,7 +37,7 @@ static u16* vramBak = (u16*)INGAME_MENU_EXT_LOCATION+(0x18200/sizeof(u16));
 static u16* bmpBuffer = (u16*)INGAME_MENU_EXT_LOCATION;
 
 #define refreshRateCount 5
-static const char* refreshRateText[refreshRateCount] = {"29.9hz", "44.9hz", "50hz", "59.9hz", "74.9hz no3D"};
+static const char* refreshRateText[refreshRateCount] = {"29.9 Hz", "44.9 Hz", "50 Hz", "59.9 Hz", "74.9 Hz, no3D"};
 static int refreshRates[refreshRateCount] = {30000, 45000, 50, 60000, 75000};
 static int refreshRate = 3;
 #else
