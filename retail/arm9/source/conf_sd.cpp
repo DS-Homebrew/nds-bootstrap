@@ -634,6 +634,12 @@ void getIgmStrings(configuration* conf, bool b4ds) {
 	setIgmString(lang.fetch("OPTIONS", "133_MHZ", "133 MHz").c_str(), igmText->optionsValues[4]);
 	setIgmString(lang.fetch("OPTIONS", "DS_MODE", "DS mode").c_str(), igmText->optionsValues[5]);
 	setIgmString(lang.fetch("OPTIONS", "DSI_MODE", "DSi mode").c_str(), igmText->optionsValues[6]);
+	setIgmString(lang.fetch("OPTIONS", "MAIN_SCREEN_DESC", "Set whether to show the main screen on the top or bottom. Does not change which screen gets a screenshot.").c_str(), igmText->optionsDescriptions[0]);
+	setIgmString(lang.fetch("OPTIONS", "BRIGHTNESS_DESC", "Change the screen brightness level.").c_str(), igmText->optionsDescriptions[1]);
+	setIgmString(lang.fetch("OPTIONS", "VOLUME_DESC", "Change the sound volume.").c_str(), igmText->optionsDescriptions[2]);
+	setIgmString(lang.fetch("OPTIONS", "REFRESH_RATE_DESC", "Can be used to adjust the game speed. Some games may run slower than expected.").c_str(), igmText->optionsDescriptions[3]);
+	setIgmString(lang.fetch("OPTIONS", "CLOCK_SPEED_DESC", "Change the ARM9 clock speed to either 67 MHz (NTR) or 133 MHz (TWL).").c_str(), igmText->optionsDescriptions[4]);
+	setIgmString(lang.fetch("OPTIONS", "VRAM_MODE_DESC", "Change the VRAM mode to either DS or DSi mode. DSi mode may cause graphical glitches in some games.").c_str(), igmText->optionsDescriptions[5]);
 
 	// Get manual line count if there's a manual
 	FILE *manualFile = fopen(conf->manualPath, "r");

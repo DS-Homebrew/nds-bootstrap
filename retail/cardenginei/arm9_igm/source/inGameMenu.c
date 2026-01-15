@@ -106,6 +106,44 @@ void printRight(int x, int y, const unsigned char *str, FontPalette palette, boo
 		*(dst--) = *(--str) | palette << 12;
 }
 
+void printMsg(int y, const unsigned char *str, FontPalette palette, bool main) {
+	u16 *dst = main ? BG_MAP_RAM(15) : BG_MAP_RAM_SUB(15);
+	int x = 0;
+	while(1) {
+		bool spaceFound = false;
+		bool endFound = false;
+		int wordLen = 0;
+		for (int i = 0; i < 0x20; i++) {
+			spaceFound = str[i] == 0x20;
+			endFound = str[i] == 0;
+			if (spaceFound || endFound) {
+				break;
+			} else {
+				wordLen++;
+			}
+			if (x > 0 && ((x + wordLen) % 0x20) == 0) {
+				x = 0;
+				y++;
+			}
+		}
+		for (int i = 0; i < wordLen; i++) {
+			dst[(y * 0x20) + x + i] = *(str++) | palette << 12;
+		}
+		if (spaceFound) {
+			str++;
+			wordLen++;
+		}
+		x += wordLen;
+		if (x >= 0x20) {
+			x = 0;
+			y++;
+		}
+		if (endFound) {
+			break;
+		}
+	}
+}
+
 void printChar(int x, int y, unsigned char c, FontPalette palette, bool main) {
 	(main ? BG_MAP_RAM(15) : BG_MAP_RAM_SUB(15))[y * 0x20 + x] = c | palette << 12;
 }
@@ -484,6 +522,7 @@ static void optionsMenu(s32 *mainScreen, u32 consoleModel) {
 			}
 		}
 		drawCursor(cursorPosition);
+		printMsg(17, igmText.optionsDescriptions[cursorPosition], FONT_WHITE, false);
 
 		waitKeys(KEY_UP | KEY_DOWN | KEY_LEFT | KEY_RIGHT | KEY_B | KEY_SELECT);
 
