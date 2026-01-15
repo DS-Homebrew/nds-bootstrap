@@ -116,17 +116,18 @@ void printMsg(int y, const unsigned char *str, FontPalette palette, bool main) {
 		for (int i = 0; i < 0x20; i++) {
 			spaceFound = str[i] == 0x20;
 			endFound = str[i] == 0;
-			if (spaceFound || endFound) {
+			if ((spaceFound && (x + i) > 0) || endFound) {
 				break;
-			} else {
+			} else if (!spaceFound) {
 				wordLen++;
-			}
-			if (x > 0 && ((x + wordLen) % 0x20) == 0) {
-				x = 0;
-				y++;
-				if (y == 0x18) return;
+				if (x > 0 && ((x + i) % 0x20) == 0) {
+					x = 0;
+					y++;
+					if (y == 0x18) return;
+				}
 			}
 		}
+		if (wordLen == 0 && endFound) break;
 		for (int i = 0; i < wordLen; i++) {
 			dst[(y * 0x20) + x + i] = *(str++) | palette << 12;
 		}
@@ -139,9 +140,7 @@ void printMsg(int y, const unsigned char *str, FontPalette palette, bool main) {
 			x = 0;
 			y++;
 		}
-		if (y == 0x18 || endFound) {
-			break;
-		}
+		if (y == 0x18 || endFound) break;
 	}
 }
 
