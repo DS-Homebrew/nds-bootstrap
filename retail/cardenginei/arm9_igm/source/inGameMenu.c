@@ -243,11 +243,11 @@ bool boolQuestion(const unsigned char *str) {
 
 	const int y = printMsg(0, str, FONT_WHITE, false) + 1;
 	if (igmText.rtl) {
-		printRight(0x20, y, igmText.aYes, FONT_WHITE, false);
-		printRight(0x20, y+1, igmText.bNo, FONT_WHITE, false);
+		printRight(0x20 - 1, y, igmText.aYes, FONT_WHITE, false);
+		printRight(0x20 - 1, y + 1, igmText.bNo, FONT_WHITE, false);
 	} else {
 		print(0, y, igmText.aYes, FONT_WHITE, false);
-		print(0, y+1, igmText.bNo, FONT_WHITE, false);
+		print(0, y +1 , igmText.bNo, FONT_WHITE, false);
 	}
 
 	do {
