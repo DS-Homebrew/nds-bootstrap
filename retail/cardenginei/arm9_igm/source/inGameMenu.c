@@ -247,7 +247,7 @@ bool boolQuestion(const unsigned char *str) {
 		printRight(0x20 - 1, y + 1, igmText.bNo, FONT_WHITE, false);
 	} else {
 		print(0, y, igmText.aYes, FONT_WHITE, false);
-		print(0, y +1 , igmText.bNo, FONT_WHITE, false);
+		print(0, y + 1, igmText.bNo, FONT_WHITE, false);
 	}
 
 	do {
