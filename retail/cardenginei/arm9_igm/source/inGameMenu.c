@@ -37,7 +37,7 @@ static u16* vramBak = (u16*)INGAME_MENU_EXT_LOCATION+(0x18200/sizeof(u16));
 static u16* bmpBuffer = (u16*)INGAME_MENU_EXT_LOCATION;
 
 #define refreshRateCount 5
-static const char* refreshRateText[refreshRateCount] = {"29.9 Hz", "44.9 Hz", "50 Hz", "59.9 Hz", "74.9 Hz, no3D"};
+static const char* refreshRateText[refreshRateCount] = {"29.9 Hz", "44.9 Hz", "50 Hz", "59.9 Hz", "74.9 Hz"};
 static int refreshRates[refreshRateCount] = {30000, 45000, 50, 60000, 75000};
 static int refreshRate = 3;
 #else
@@ -124,6 +124,7 @@ void printMsg(int y, const unsigned char *str, FontPalette palette, bool main) {
 			if (x > 0 && ((x + wordLen) % 0x20) == 0) {
 				x = 0;
 				y++;
+				if (y == 0x18) return;
 			}
 		}
 		for (int i = 0; i < wordLen; i++) {
@@ -138,7 +139,7 @@ void printMsg(int y, const unsigned char *str, FontPalette palette, bool main) {
 			x = 0;
 			y++;
 		}
-		if (endFound) {
+		if (y == 0x18 || endFound) {
 			break;
 		}
 	}
