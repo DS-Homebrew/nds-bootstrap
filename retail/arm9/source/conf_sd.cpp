@@ -610,6 +610,11 @@ void getIgmStrings(configuration* conf, bool b4ds) {
 	setIgmString(lang.fetch("TITLES", "JUMP_ADDRESS", "Jump to Address").c_str(), igmText->jumpAddress);
 	setIgmString(lang.fetch("TITLES", "SELECT_BANK", "Select VRAM Bank").c_str(), igmText->selectBank);
 	setIgmString(lang.fetch("TITLES", "COUNT", "Count:").c_str(), igmText->count);
+	setIgmString(lang.fetch("TITLES", "A_YES", "A: Yes").c_str(), igmText->aYes);
+	setIgmString(lang.fetch("TITLES", "B_NO", "B: No").c_str(), igmText->bNo);
+
+	setIgmString(lang.fetch("MESSAGES", "RESET_GAME", "Are you sure you want to reset the game?").c_str(), igmText->resetGameMessage);
+	setIgmString(lang.fetch("MESSAGES", "QUIT_GAME", "Are you sure you want to quit the game?").c_str(), igmText->quitGameMessage);
 
 	setIgmString(lang.fetch("MENU", "RETURN_TO_GAME", "Return to Game").c_str(), igmText->menu[0]);
 	setIgmString(lang.fetch("MENU", "RESET_GAME", "Reset Game").c_str(), igmText->menu[1]);

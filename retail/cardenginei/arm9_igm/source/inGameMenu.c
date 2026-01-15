@@ -106,7 +106,7 @@ void printRight(int x, int y, const unsigned char *str, FontPalette palette, boo
 		*(dst--) = *(--str) | palette << 12;
 }
 
-void printMsg(int y, const unsigned char *str, FontPalette palette, bool main) {
+int printMsg(int y, const unsigned char *str, FontPalette palette, bool main) {
 	u16 *dst = main ? BG_MAP_RAM(15) : BG_MAP_RAM_SUB(15);
 	while(*str) {
 		bool endFound = false;
@@ -143,6 +143,7 @@ void printMsg(int y, const unsigned char *str, FontPalette palette, bool main) {
 		}
 		if (y == 0x18) break;
 	}
+	return y;
 }
 
 void printChar(int x, int y, unsigned char c, FontPalette palette, bool main) {
@@ -235,6 +236,40 @@ static void waitKeys(u16 keys) {
 
 void clearScreen(bool main) {
 	toncset16(main ? BG_MAP_RAM(15) : BG_MAP_RAM_SUB(15), 0, 0x300);
+}
+
+bool boolQuestion(const unsigned char *str) {
+	clearScreen(false);
+
+	const int y = printMsg(0, str, FONT_WHITE, false) + 1;
+	if (igmText.rtl) {
+		printRight(0x20, y, igmText.aYes, FONT_WHITE, false);
+		printRight(0x20, y+1, igmText.bNo, FONT_WHITE, false);
+	} else {
+		print(0, y, igmText.aYes, FONT_WHITE, false);
+		print(0, y+1, igmText.bNo, FONT_WHITE, false);
+	}
+
+	do {
+		while (REG_VCOUNT != 191) mySwiDelay(100);
+		while (REG_VCOUNT == 191) mySwiDelay(100);
+	} while(KEYS & KEY_A);
+
+	waitKeys(KEY_A | KEY_B);
+
+	if (KEYS & KEY_A) {
+		do {
+			while (REG_VCOUNT != 191) mySwiDelay(100);
+			while (REG_VCOUNT == 191) mySwiDelay(100);
+		} while(KEYS & KEY_A);
+		return true;
+	} else {
+		do {
+			while (REG_VCOUNT != 191) mySwiDelay(100);
+			while (REG_VCOUNT == 191) mySwiDelay(100);
+		} while(KEYS & KEY_B);
+	}
+	return false;
 }
 
 #define VRAM_x(bank) ((u16*)(0x6800000 + (0x0020000 * (bank))))
@@ -949,11 +984,13 @@ u32 inGameMenu(s32 *mainScreen, u32 consoleModel, s32 *exceptionRegisters) {
 					while (sharedAddr[4] != 0) swiDelay(100);
 					break;
 				case MENU_RESET:
-					extern bool exceptionPrinted;
-					exceptionPrinted = false;
-					res = 0x52534554; // TESR
-					sharedAddr[3] = res;
-					sharedAddr[4] = 0x54455352; // RSET
+					if (boolQuestion(igmText.resetGameMessage)) {
+						extern bool exceptionPrinted;
+						exceptionPrinted = false;
+						res = 0x52534554; // TESR
+						sharedAddr[3] = res;
+						sharedAddr[4] = 0x54455352; // RSET
+					}
 					break;
 				case MENU_SCREENSHOT:
 					screenshot();
@@ -983,9 +1020,11 @@ u32 inGameMenu(s32 *mainScreen, u32 consoleModel, s32 *exceptionRegisters) {
 					ramViewer();
 					break;
 				case MENU_QUIT:
-					res = 0x54495845; // EXIT
-					sharedAddr[3] = res;
-					sharedAddr[4] = 0x54495551; // QUIT
+					if (boolQuestion(igmText.quitGameMessage)) {
+						res = 0x54495845; // EXIT
+						sharedAddr[3] = res;
+						sharedAddr[4] = 0x54495551; // QUIT
+					}
 					break;
 				default:
 					break;
