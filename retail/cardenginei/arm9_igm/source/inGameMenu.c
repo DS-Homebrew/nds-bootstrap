@@ -108,39 +108,40 @@ void printRight(int x, int y, const unsigned char *str, FontPalette palette, boo
 
 void printMsg(int y, const unsigned char *str, FontPalette palette, bool main) {
 	u16 *dst = main ? BG_MAP_RAM(15) : BG_MAP_RAM_SUB(15);
-	int x = 0;
-	while(1) {
-		bool spaceFound = false;
+	while(*str) {
 		bool endFound = false;
-		int wordLen = 0;
+		int lineLen = 0;
+		if (str[0] == 0x20) {
+			str++;
+		}
 		for (int i = 0; i < 0x20; i++) {
-			spaceFound = str[i] == 0x20;
 			endFound = str[i] == 0;
-			if ((spaceFound && (x + i) > 0) || endFound) {
+			if (endFound) {
 				break;
-			} else if (!spaceFound) {
-				wordLen++;
-				if (x > 0 && ((x + i) % 0x20) == 0) {
-					x = 0;
-					y++;
-					if (y == 0x18) return;
+			}
+			lineLen++;
+		}
+		if (!endFound) {
+			for (int i = 0x20; i >= 0; i--) {
+				if (str[i] == 0x20) {
+					lineLen = i;
+					break;
 				}
 			}
 		}
-		if (wordLen == 0 && endFound) break;
-		for (int i = 0; i < wordLen; i++) {
-			dst[(y * 0x20) + x + i] = *(str++) | palette << 12;
-		}
-		if (spaceFound) {
-			str++;
-			wordLen++;
-		}
-		x += wordLen;
-		if (x >= 0x20) {
-			x = 0;
+		if (lineLen > 0) {
+			if (igmText.rtl) {
+				for (int i = 0; i < lineLen; i++) {
+					dst[(y * 0x20) + (0x20 - lineLen) + i] = *(str++) | palette << 12;
+				}
+			} else {
+				for (int i = 0; i < lineLen; i++) {
+					dst[(y * 0x20) + i] = *(str++) | palette << 12;
+				}
+			}
 			y++;
 		}
-		if (y == 0x18 || endFound) break;
+		if (y == 0x18) break;
 	}
 }
 
