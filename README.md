@@ -72,7 +72,7 @@ An alternative forwarder generator for 3DS users. YANBF forwarders are 3DS-mode 
    - Parts of libtwl code used
    - Pokémon Wii connection patch from Pico Loader
    - SD -> flashcard R/W patch for DSiWare
-   - Frame rate adjustment code from [FastVideoDSPlayer](https://github.com/Gericom/FastVideoDSPlayer) used for game speed adjustment
+   - Frame/Refresh rate adjustment code from [FastVideoDSPlayer](https://github.com/Gericom/FastVideoDSPlayer)
 
 ## Other
 - [devkitPro](https://devkitpro.org): devkitARM and libnds

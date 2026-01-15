@@ -36,10 +36,10 @@ static u8 arm7RamBak[0xC0];
 static u16* vramBak = (u16*)INGAME_MENU_EXT_LOCATION+(0x18200/sizeof(u16));
 static u16* bmpBuffer = (u16*)INGAME_MENU_EXT_LOCATION;
 
-#define gameSpeedCount 5
-static const char* gameSpeedText[gameSpeedCount] = {"0.50x", "0.75x", "0.9x", "1x", "1.2x (no 3D)"};
-static int gameSpeeds[gameSpeedCount] = {30000, 45000, 50, 60000, 75000};
-static int gameSpeed = 3;
+#define refreshRateCount 5
+static const char* refreshRateText[refreshRateCount] = {"29.9hz", "44.9hz", "50hz", "59.9hz", "74.9hz no3D"};
+static int refreshRates[refreshRateCount] = {30000, 45000, 50, 60000, 75000};
+static int refreshRate = 3;
 #else
 cardengineArm9* volatile ce9 = NULL;
 
@@ -423,7 +423,7 @@ static void optionsMenu(s32 *mainScreen, u32 consoleModel) {
 		optionsItems[optionsItemCount++] = OPTIONS_BRIGHTNESS;
 	#ifndef B4DS
 	optionsItems[optionsItemCount++] = OPTIONS_VOLUME;
-	optionsItems[optionsItemCount++] = OPTIONS_GAME_SPEED;
+	optionsItems[optionsItemCount++] = OPTIONS_REFRESH_RATE;
 	optionsItems[optionsItemCount++] = OPTIONS_CLOCK_SPEED;
 	optionsItems[optionsItemCount++] = OPTIONS_VRAM_MODE;
 	#endif
@@ -452,8 +452,8 @@ static void optionsMenu(s32 *mainScreen, u32 consoleModel) {
 					optionPercent = (u8)(sharedAddr[6] >> 16) * 100 / 31;
 					isString = false;
 					break;
-				case OPTIONS_GAME_SPEED:
-					optionValue = (unsigned char*)gameSpeedText[gameSpeed];
+				case OPTIONS_REFRESH_RATE:
+					optionValue = (unsigned char*)refreshRateText[refreshRate];
 					break;
 				case OPTIONS_CLOCK_SPEED:
 					optionValue = igmText.optionsValues[3 + ((REG_SCFG_CLK == 0 ? scfgClkBak : REG_SCFG_CLK) & 1)];
@@ -540,26 +540,26 @@ static void optionsMenu(s32 *mainScreen, u32 consoleModel) {
 					}
 					break;
 				}
-				case OPTIONS_GAME_SPEED:
-					const int prevGameSpeed = gameSpeed;
+				case OPTIONS_REFRESH_RATE:
+					const int prevRefreshRate = refreshRate;
 					if (KEYS & KEY_LEFT) {
-						gameSpeed--;
-						if (gameSpeed < 0) gameSpeed = 0;
+						refreshRate--;
+						if (refreshRate < 0) refreshRate = 0;
 					} else {
-						gameSpeed++;
-						if (gameSpeed == gameSpeedCount) gameSpeed = gameSpeedCount-1;
+						refreshRate++;
+						if (refreshRate == refreshRateCount) refreshRate = refreshRateCount-1;
 					}
-					if (gameSpeed != prevGameSpeed) {
-						sharedAddr[0] = gameSpeeds[gameSpeed];
+					if (refreshRate != prevRefreshRate) {
+						sharedAddr[0] = refreshRates[refreshRate];
 						sharedAddr[4] = 0x41535046; // FPSA
 						while(sharedAddr[4] == 0x41535046) {
 							while (REG_VCOUNT != 191) mySwiDelay(100);
 							while (REG_VCOUNT == 191) mySwiDelay(100);
 						}
 						if (sharedAddr[0] == 0xFFFFFFFF) {
-							gameSpeed = prevGameSpeed;
+							refreshRate = prevRefreshRate;
 						} else {
-							DC_FlushRange(&gameSpeed, 4);
+							DC_FlushRange(&refreshRate, 4);
 						}
 					}
 					break;
