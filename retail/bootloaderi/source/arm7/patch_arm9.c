@@ -1782,7 +1782,7 @@ void patchKeyInputs(const tNDSHeader* ndsHeader, const module_params_t* modulePa
 	const u32 newOffset = isSdk5(moduleParams) ? 0x02FFFF78 : 0x027FFF78;
 
 	u32* offset = ndsHeader->arm9destination;
-	for (int i = 0; i < ndsHeader->arm9binarySize/4; i++) {
+	for (int i = 0; i < iUncompressedSize/4; i++) {
 		if (*offset == signature) {
 			if (offset[-2] == signatureHeader || offset[-1] == signatureHeader || offset[1] == signatureHeader || offset[2] == signatureHeader) {
 				*offset = newOffset;
