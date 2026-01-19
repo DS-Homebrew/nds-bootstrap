@@ -37,7 +37,7 @@ CFLAGS	:=	-g -Wall -O2\
 			-ffast-math \
 			$(ARCH)
 
-CFLAGS	+=	$(INCLUDE) -DARM7 -std=gnu99 -DTWOCARD -DLOADERTYPE0
+CFLAGS	+=	$(INCLUDE) -DARM7 -std=gnu99 -DTWOCARD -DBUILDFATTABLE -DLOADERTYPE0
 
 ASFLAGS	:=	-g $(ARCH) $(INCLUDE)
 LDFLAGS	=	-nostartfiles -T $(TOPDIR)/load.ld -g $(ARCH) -Wl,--nmagic -Wl,-Map,$(TARGET).map

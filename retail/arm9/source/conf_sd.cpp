@@ -409,6 +409,16 @@ static void load_conf(configuration* conf, const char* fn) {
 	// DMA ROM read LED
 	conf->dmaRomRead_LED = strtol(config_file.fetch("NDS-BOOTSTRAP", "DMA_ROMREAD_LED", "0").c_str(), NULL, 0);
 
+	// Remapped buttons
+	conf->remappedKeyA = strtol(config_file.fetch("NDS-BOOTSTRAP", "REMAPPED_KEY_A", "0").c_str(), NULL, 0);
+	conf->remappedKeyB = strtol(config_file.fetch("NDS-BOOTSTRAP", "REMAPPED_KEY_B", "1").c_str(), NULL, 0);
+	conf->remappedKeySELECT = strtol(config_file.fetch("NDS-BOOTSTRAP", "REMAPPED_KEY_SELECT", "2").c_str(), NULL, 0);
+	conf->remappedKeySTART = strtol(config_file.fetch("NDS-BOOTSTRAP", "REMAPPED_KEY_START", "3").c_str(), NULL, 0);
+	conf->remappedKeyR = strtol(config_file.fetch("NDS-BOOTSTRAP", "REMAPPED_KEY_R", "8").c_str(), NULL, 0);
+	conf->remappedKeyL = strtol(config_file.fetch("NDS-BOOTSTRAP", "REMAPPED_KEY_L", "9").c_str(), NULL, 0);
+	conf->remappedKeyX = strtol(config_file.fetch("NDS-BOOTSTRAP", "REMAPPED_KEY_X", "10").c_str(), NULL, 0);
+	conf->remappedKeyY = strtol(config_file.fetch("NDS-BOOTSTRAP", "REMAPPED_KEY_Y", "11").c_str(), NULL, 0);
+
 	// get the gamecode
 	FILE* romFile = fopen(conf->ndsPath, "rb");
 	char gameTid[5];

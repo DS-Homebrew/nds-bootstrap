@@ -76,6 +76,14 @@
 	.global language
 	.global region
 	.global dsiMode
+	.global remappedKeyA
+	.global remappedKeyB
+	.global remappedKeySELECT
+	.global remappedKeySTART
+	.global remappedKeyR
+	.global remappedKeyL
+	.global remappedKeyX
+	.global remappedKeyY
 	.global valueBits2
 	.global donorSdkVer
 	.global consoleModel
@@ -210,6 +218,22 @@ region:
 	.byte	0
 dsiMode:
 	.byte	0
+remappedKeyA:
+	.byte	0
+remappedKeyB:
+	.byte	1
+remappedKeySELECT:
+	.byte	2
+remappedKeySTART:
+	.byte	3
+remappedKeyR:
+	.byte	8
+remappedKeyL:
+	.byte	9
+remappedKeyX:
+	.byte	10
+remappedKeyY:
+	.byte	11
 valueBits2:
 	.byte	0
 donorSdkVer:

@@ -47,6 +47,8 @@ typedef struct cardengineArm7Patches {
     u32 vblankHandler;
     u32 fifoHandler;
     u32 card_pull;
+    u32* patchKeyInputs;
+    u16* patchKeyInputsThumb;
     cardengineArm7PatchesArm7FunctionsThumb* arm7FunctionsDirect;
     cardengineArm7PatchesArm7Functions* arm7Functions;
     cardengineArm7PatchesArm7FunctionsThumb* arm7FunctionsThumb;
@@ -65,20 +67,20 @@ typedef struct cardengineArm7Patches {
 // ARM7 cardengine
 //
 typedef struct cardengineArm7 {
-    u32 ce7;
-    cardengineArm7Patches* patches;
-    u32 intr_vblank_orig_return;
-    u32 intr_fifo_orig_return;
+	u32 ce7;
+	cardengineArm7Patches* patches;
+	u32 intr_vblank_orig_return;
+	u32 intr_fifo_orig_return;
 	u32 cheatEngineAddr;
-    const module_params_t* moduleParams;
-    u32 fileCluster;
-    u32 patchOffsetCacheFileCluster;
+	const module_params_t* moduleParams;
+	u32 fileCluster;
+	u32 patchOffsetCacheFileCluster;
 	u32 srParamsCluster;
 	u32 ramDumpCluster;
 	u32 screenshotCluster;
 	u32 pageFileCluster;
 	u32 manualCluster;
-    u32 cardStruct;
+	u32 cardStruct;
 	u32 valueBits;
 	/*
 		0: gameOnFlashcard
@@ -109,15 +111,23 @@ typedef struct cardengineArm7 {
 		30: i2cBricked
 		31: scfgLocked
 	*/
-    s32 mainScreen;
-    u32* languageAddr;
-    u8 language;
-    u8 consoleModel;
-    u8 romRead_LED;
-    u8 dmaRomRead_LED;
-    u32* irqTable_offset;
-    u16 scfgRomBak;
-    u16 igmHotkey;
+	s32 mainScreen;
+	u32* languageAddr;
+	u8 language;
+	u8 consoleModel;
+	u8 romRead_LED;
+	u8 dmaRomRead_LED;
+	u8 remappedKeyA;
+	u8 remappedKeyB;
+	u8 remappedKeySELECT;
+	u8 remappedKeySTART;
+	u8 remappedKeyR;
+	u8 remappedKeyL;
+	u8 remappedKeyX;
+	u8 remappedKeyY;
+	u32* irqTable_offset;
+	u16 scfgRomBak;
+	u16 igmHotkey;
 	u16 screenSwapHotkey;
 	u16 screenSwapHotkeyPad;
 	u32 romLocation;
@@ -151,6 +161,14 @@ typedef struct cardengineArm7B4DS {
 	u32 language; //u8
 	u32* languageAddr;
 	u8 volumeLevels[4];
+	u8 remappedKeyA;
+	u8 remappedKeyB;
+	u8 remappedKeySELECT;
+	u8 remappedKeySTART;
+	u8 remappedKeyR;
+	u8 remappedKeyL;
+	u8 remappedKeyX;
+	u8 remappedKeyY;
 	u16 igmHotkey;
 	u16 screenSwapHotkey;
 	u8 RumblePakType;
@@ -166,6 +184,8 @@ typedef struct cardengineArm7Patches {
     u32 vblankHandler;
     u32 fifoHandler;
     u32* j_twlGetPitchTable;
+    u32* patchKeyInputs;
+    u16* patchKeyInputsThumb;
     cardengineArm7PatchesArm7FunctionsThumb* arm7FunctionsDirect;
     cardengineArm7PatchesArm7Functions* arm7Functions;
     cardengineArm7PatchesArm7FunctionsThumb* arm7FunctionsThumb;
@@ -194,6 +214,14 @@ typedef struct cardengineArm7 {
 	u32 language; //u8
 	u32* languageAddr;
 	u8 volumeLevels[4];
+	u8 remappedKeyA;
+	u8 remappedKeyB;
+	u8 remappedKeySELECT;
+	u8 remappedKeySTART;
+	u8 remappedKeyR;
+	u8 remappedKeyL;
+	u8 remappedKeyX;
+	u8 remappedKeyY;
 	u16 igmHotkey;
 	u16 screenSwapHotkey;
 	u8 RumblePakType;

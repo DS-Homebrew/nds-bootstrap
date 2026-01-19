@@ -208,6 +208,15 @@ int hookNdsRetailArm7(
 
 	const bool laterSdk = ((moduleParams->sdk_version >= 0x2008000 && moduleParams->sdk_version != 0x2012774) || moduleParams->sdk_version == 0x20029A8);
 
+	extern u8 remappedKeyA;
+	extern u8 remappedKeyB;
+	extern u8 remappedKeySELECT;
+	extern u8 remappedKeySTART;
+	extern u8 remappedKeyR;
+	extern u8 remappedKeyL;
+	extern u8 remappedKeyX;
+	extern u8 remappedKeyY;
+
 	u32 cheatEngineAddr = CHEAT_ENGINE_LOCATION_B4DS;
 	if (!extendedMemory && strncmp(romTid, "CLJ", 3) == 0) { // Mario & Luigi: Bowser's Inside Story
 		cheatEngineAddr = 0x02002000;
@@ -241,6 +250,14 @@ int hookNdsRetailArm7(
 	if (strcmp(romTid, "AKYP") == 0) { // Etrian Odyssey (EUR)
 		ce7->languageAddr = (u32*)0x020DC5DC;
 	}
+	ce7->remappedKeyA            = remappedKeyA;
+	ce7->remappedKeyB            = remappedKeyB;
+	ce7->remappedKeySELECT       = remappedKeySELECT;
+	ce7->remappedKeySTART        = remappedKeySTART;
+	ce7->remappedKeyR            = remappedKeyR;
+	ce7->remappedKeyL            = remappedKeyL;
+	ce7->remappedKeyX            = remappedKeyX;
+	ce7->remappedKeyY            = remappedKeyY;
 	ce7->RumblePakType           = RumblePakType;
 
 	*vblankHandler = ce7->patches->vblankHandler;

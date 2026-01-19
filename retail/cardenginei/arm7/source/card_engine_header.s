@@ -31,6 +31,14 @@
 .global consoleModel
 .global romRead_LED
 .global dmaRomRead_LED
+.global remappedKeyA
+.global remappedKeyB
+.global remappedKeySELECT
+.global remappedKeySTART
+.global remappedKeyR
+.global remappedKeyL
+.global remappedKeyX
+.global remappedKeyY
 .global scfgRomBak
 .global igmHotkey
 .global screenSwapHotkey
@@ -90,6 +98,22 @@ romRead_LED:
 	.byte	0
 dmaRomRead_LED:
 	.byte	0
+remappedKeyA:
+	.byte	0
+remappedKeyB:
+	.byte	1
+remappedKeySELECT:
+	.byte	2
+remappedKeySTART:
+	.byte	3
+remappedKeyR:
+	.byte	8
+remappedKeyL:
+	.byte	9
+remappedKeyX:
+	.byte	10
+remappedKeyY:
+	.byte	11
 irqTable_offset:
 	.word	irqTable
 scfgRomBak:
@@ -304,6 +328,8 @@ patches:
 .word	vblankHandler
 .word	fifoHandler
 .word   card_pull
+.word   j_patchKeyInputs
+.word   j_patchKeyInputsThumb
 .word   arm7FunctionsDirect
 .word   arm7Functions
 .word   arm7FunctionsThumb
@@ -330,7 +356,27 @@ patches:
 .pool
 @---------------------------------------------------------------------------------
 
+@---------------------------------------------------------------------------------
+j_patchKeyInputs:
+@---------------------------------------------------------------------------------
+	ldr	r12, =patchKeyInputs
+	bx r12
+.pool
+@---------------------------------------------------------------------------------
+
 	.thumb
+@---------------------------------------------------------------------------------
+j_patchKeyInputsThumb:
+@---------------------------------------------------------------------------------
+	ldr	r3, =patchKeyInputs
+	bl j_patchKeyInputsThumb_blx_r3
+	pop             {r3-r5} @ Varies by SDK version
+	pop             {r3}
+j_patchKeyInputsThumb_blx_r3:
+	bx  r3
+.pool
+@---------------------------------------------------------------------------------
+
 #ifdef TWLSDK
 @---------------------------------------------------------------------------------
 swi24:

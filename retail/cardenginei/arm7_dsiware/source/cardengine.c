@@ -917,6 +917,77 @@ u32 myIrqEnable(u32 irq) {
 	return irq_before;
 }
 
+static inline void applyKeyRemap(u16* keyInput, u16* keyExtInput, const u8 remappedKey) {
+	if (remappedKey >= 10) {
+		*keyExtInput &= ~BIT(remappedKey-10);
+	} else {
+		*keyInput &= ~BIT(remappedKey);
+	}
+}
+
+void patchKeyInputs(u16* keyExtInputDst, u16 keyExtInput) {
+	extern u8 remappedKeyA;
+	extern u8 remappedKeyB;
+	extern u8 remappedKeySELECT;
+	extern u8 remappedKeySTART;
+	extern u8 remappedKeyR;
+	extern u8 remappedKeyL;
+	extern u8 remappedKeyX;
+	extern u8 remappedKeyY;
+
+	u16 keyInput = *(u16*)0x04000130;
+	bool keyA_pressed = (!(keyInput & KEY_A));
+	bool keyB_pressed = (!(keyInput & KEY_B));
+	bool keySELECT_pressed = (!(keyInput & KEY_SELECT));
+	bool keySTART_pressed = (!(keyInput & KEY_START));
+	for (int i = 0; i <= 3; i++) {
+		keyInput |= BIT(i);
+	}
+	bool keyR_pressed = (!(keyInput & KEY_R));
+	bool keyL_pressed = (!(keyInput & KEY_L));
+	for (int i = 8; i <= 9; i++) {
+		keyInput |= BIT(i);
+	}
+	bool keyX_pressed = (!(keyExtInput & KEY_A));
+	bool keyY_pressed = (!(keyExtInput & KEY_B));
+	for (int i = 0; i <= 1; i++) {
+		keyExtInput |= BIT(i);
+	}
+
+	if (keyA_pressed) {
+		applyKeyRemap(&keyInput, &keyExtInput, remappedKeyA);
+	}
+	if (keyB_pressed) {
+		applyKeyRemap(&keyInput, &keyExtInput, remappedKeyB);
+	}
+	if (keySELECT_pressed) {
+		applyKeyRemap(&keyInput, &keyExtInput, remappedKeySELECT);
+	}
+	if (keySTART_pressed) {
+		applyKeyRemap(&keyInput, &keyExtInput, remappedKeySTART);
+	}
+
+	if (keyR_pressed) {
+		applyKeyRemap(&keyInput, &keyExtInput, remappedKeyR);
+	}
+	if (keyL_pressed) {
+		applyKeyRemap(&keyInput, &keyExtInput, remappedKeyL);
+	}
+
+	if (keyX_pressed) {
+		applyKeyRemap(&keyInput, &keyExtInput, remappedKeyX);
+	}
+	if (keyY_pressed) {
+		applyKeyRemap(&keyInput, &keyExtInput, remappedKeyY);
+	}
+
+	u32 dst = (u32)keyExtInputDst;
+	dst -= 0x30;
+	*(u16*)dst = keyInput;
+
+	*keyExtInputDst = keyExtInput;
+}
+
 #ifdef CARDSAVE
 //
 // ARM7 Redirected functions

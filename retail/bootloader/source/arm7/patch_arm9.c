@@ -1283,6 +1283,29 @@ void patchHiHeapPointer(cardengineArm9* ce9, const module_params_t* moduleParams
     dbg_printf(!(nandAccess && extendedMemory) ? "Hi Heap Shrink Successful\n\n" : "Hi Heap Grow Successful\n\n");
 }
 
+void patchKeyInputs(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+	const u32 signature = 0x04000130;
+	const u32 signatureHeader = isSdk5(moduleParams) ? 0x02FFFFA8 : 0x027FFFA8;
+	const u32 newOffset = isSdk5(moduleParams) ? 0x02FFFF78 : 0x027FFF78;
+
+	u32* offset = ndsHeader->arm9destination;
+	for (int i = 0; i < ndsHeader->arm9binarySize/4; i++) {
+		if (*offset == signature) {
+			if (offset[-2] == signatureHeader || offset[-1] == signatureHeader || offset[1] == signatureHeader || offset[2] == signatureHeader) {
+				*offset = newOffset;
+
+				dbg_printf("KEYINPUT found: ");
+				dbg_hexa((u32)offset);
+				dbg_printf("\n");
+			}
+		}
+		offset++;
+	}
+	dbg_printf("\n");
+
+	*(u16*)newOffset = 0x3FF;
+}
+
 u32 relocateBssPart(const tNDSHeader* ndsHeader, u32 bssEnd, u32 bssPartStart, u32 bssPartEnd, u32 newPartStart) {
 	extern u32 iUncompressedSize;
 
@@ -2705,7 +2728,7 @@ static void operaRamPatch(void) {
 	}
 }
 
-u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 patchMpuRegion, const bool usesCloneboot) {
+u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 patchMpuRegion, const bool usesCloneboot, const bool buttonsRemapped) {
 	bool usesThumb;
 	int readType;
 	int sdk5ReadType; // SDK 5
@@ -2774,6 +2797,10 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 	patchMpuChange(ndsHeader, moduleParams);
 
 	patchHiHeapPointer(ce9, moduleParams, ndsHeader);
+
+	if (buttonsRemapped) {
+		patchKeyInputs(ndsHeader, moduleParams);
+	}
 
 	if (isPawsAndClaws(ndsHeader)) {
 		patchCardId(ce9, ndsHeader, moduleParams, false, NULL); // Patch card ID first

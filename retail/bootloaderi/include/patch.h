@@ -187,7 +187,8 @@ u32 patchCardNdsArm9(
 	const ltd_module_params_t* ltdModuleParams,
 	u32 ROMinRAM,
 	u32 patchMpuRegion,
-	const bool usesCloneboot
+	const bool usesCloneboot,
+	const bool buttonsRemapped
 );
 u32 patchCardNdsArm7(
 	cardengineArm7* ce7,
@@ -195,7 +196,8 @@ u32 patchCardNdsArm7(
 	const module_params_t* moduleParams,
 	u32 ROMinRAM,
 	u32 saveFileCluster,
-	u32 saveSize
+	u32 saveSize,
+	const bool buttonsRemapped
 );
 u32 patchCardNds(
 	cardengineArm7* ce7,
@@ -205,6 +207,7 @@ u32 patchCardNds(
 	const ltd_module_params_t* ltdModuleParams,
 	u32 patchMpuRegion,
 	const bool usesCloneboot,
+	const bool buttonsRemapped,
 	u32 ROMinRAM,
 	u32 saveFileCluster,
 	u32 saveSize

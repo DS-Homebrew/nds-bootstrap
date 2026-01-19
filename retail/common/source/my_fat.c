@@ -1828,6 +1828,7 @@ void buildFatTableCache (aFile * file)
 	file->currentCluster = file->firstCluster;
 }
 
+#ifdef BUILDFATTABLE
 void buildFatTableCacheCompressed (aFile * file)
 {
 	if (file->fatTableSettings & fatCached) return;
@@ -1899,3 +1900,4 @@ void buildFatTableCacheCompressed (aFile * file)
 	file->currentOffset=0;
 	file->currentCluster = file->firstCluster;
 }
+#endif

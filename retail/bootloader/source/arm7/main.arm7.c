@@ -116,6 +116,14 @@ extern u32 patchMpuSize;
 extern u8 patchMpuRegion;
 extern u8 language;
 extern s8 region;
+extern u8 remappedKeyA;
+extern u8 remappedKeyB;
+extern u8 remappedKeySELECT;
+extern u8 remappedKeySTART;
+extern u8 remappedKeyR;
+extern u8 remappedKeyL;
+extern u8 remappedKeyX;
+extern u8 remappedKeyY;
 extern u8 donorSdkVer;
 extern u8 soundFreq;
 extern char version[20];
@@ -285,7 +293,7 @@ static void resetMemory_ARM7(void) {
 	memset_addrs_arm7(0x03800000 - 0x8000, 0x03800000 + 0x10000);
 	toncset((u32*)0x02380000, 0, 0x38000);		// clear part of EWRAM - except before 0x023B8000, which has the DSiWare ROM's arm9i code, and 0x023BF000, which has the bootloader arm9 code
 	toncset((u32*)0x023C0000, 0, 0x20000);
-	toncset((u32*)0x023F0000, 0, 0xD000);
+	toncset((u32*)0x023F0000, 0, 0xCE00);
 	toncset((u32*)0x023FE000, 0, 0x400);
 	toncset((u32*)0x023FF000, 0, 0x1000);
 
@@ -1376,14 +1384,14 @@ int arm7_main(void) {
 		overlayPatch = true; // Allow overlay patching for SM64DS ROM hacks (ex. Mario's Holiday)
 	}
 
+	tonccpy((u8*)CARDENGINE_ARM7_LOCATION, (u8*)CARDENGINE_ARM7_LOCATION_BUFFERED, 0x1200);
+	toncset((u8*)CARDENGINE_ARM7_LOCATION_BUFFERED, 0, 0x1200);
+
 	ce9Location = *(u32*)CARDENGINE_ARM9_LOCATION_BUFFERED;
 	ce9Alt = (ce9Location == CARDENGINE_ARM9_LOCATION_DLDI_ALT || ce9Location == CARDENGINE_ARM9_LOCATION_DLDI_ALT2);
 	// const bool ce9NotInHeap = (ce9Alt || ce9Location == CARDENGINE_ARM9_LOCATION_DLDI_START);
 	tonccpy((u32*)ce9Location, (u32*)CARDENGINE_ARM9_LOCATION_BUFFERED, ce9Alt ? 0x2800 : 0x3800);
 	toncset((u32*)0x023E0000, 0, 0x10000);
-
-	tonccpy((u8*)CARDENGINE_ARM7_LOCATION, (u8*)CARDENGINE_ARM7_LOCATION_BUFFERED, 0x1000);
-	toncset((u8*)CARDENGINE_ARM7_LOCATION_BUFFERED, 0, 0x1000);
 
 	aFile musicsFile;
 	getFileFromCluster(&musicsFile, musicCluster);
@@ -1597,6 +1605,7 @@ int arm7_main(void) {
 		moduleParams,
 		1,
 		usesCloneboot,
+		(remappedKeyA != 0) || (remappedKeyB != 1) || (remappedKeySELECT != 2) || (remappedKeySTART != 3) || (remappedKeyR != 8) || (remappedKeyL != 9) || (remappedKeyX != 10) || (remappedKeyY != 11),
 		saveFileCluster,
 		saveSize
 	);
@@ -1640,7 +1649,7 @@ int arm7_main(void) {
 		errorOutput();
 	}
 
-	toncset((u32*)0x0380C000, 0, 0x2780);
+	toncset((u32*)0x0380C000, 0, 0x2380);
 
 	errorCode = hookNdsRetailArm7(
 		(cardengineArm7*)CARDENGINE_ARM7_LOCATION,

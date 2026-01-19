@@ -466,7 +466,7 @@ static void patchSleepMode(const tNDSHeader* ndsHeader) {
 	}
 }
 
-void patchSleepInputWrite(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+void patchSleepInputWrite(cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, const bool useRelocSrc) {
 	u32* offset = patchOffsetCache.sleepInputWriteOffset;
 	if (!patchOffsetCache.sleepInputWriteOffset) {
 		offset = findSleepInputWriteOffset(ndsHeader, moduleParams);
@@ -478,12 +478,51 @@ void patchSleepInputWrite(const tNDSHeader* ndsHeader, const module_params_t* mo
 		return;
 	}
 
+	const bool isArm = (*offset == 0x13A04902 || *offset == 0x11A05004);
+
 	if (!sleepMode) {
-		if (*offset == 0x13A04902 || *offset == 0x11A05004) {
+		if (isArm) {
 			*offset = 0xE1A00000; // nop
 		} else {
 			u16* offsetThumb = (u16*)offset;
 			*offsetThumb = 0x46C0; // nop
+		}
+	}
+
+	if (useRelocSrc) {
+		bool found = false;
+		u32 offsetAdjust = (u32)offset;
+		if (isArm) {
+			for (int i = 0; i < 6; i++) {
+				offsetAdjust += 4;
+				if (*(u32*)offsetAdjust == 0xE1C010B0) {
+					found = true;
+					break;
+				}
+			}
+
+			if (found) {
+				const u32 srcAddr = (u32)offsetAdjust - vAddrOfRelocSrc + (*(u32*)0x02FFE1A0==0x080037C0 ? 0x37C0000 : 0x37F8000);
+				*(u32*)offsetAdjust = generateA7Instr(srcAddr, (u32)ce7->patches->patchKeyInputs);
+			}
+		} else {
+			for (int i = 0; i < 10; i++) {
+				offsetAdjust += 2;
+				if (*(u16*)offsetAdjust == 0x8001) {
+					found = true;
+					break;
+				}
+			}
+
+			if (found) {
+				*(u16*)offsetAdjust = 0x46C0; // nop
+				offsetAdjust += 2;
+				ce7->patches->patchKeyInputsThumb[3] = *(u16*)offsetAdjust;
+				*(u16*)offsetAdjust = 0x4B00; // ldr r3, =patchKeyInputsThumb
+				*(u16*)(offsetAdjust + 2) = 0x4718; // bx r3
+				*(u32*)(offsetAdjust + 4) = (u32)ce7->patches->patchKeyInputsThumb;
+				*(u32*)(offsetAdjust + 4) += 1;
+			}
 		}
 	}
 
@@ -754,7 +793,8 @@ u32 patchCardNdsArm7(
 	const module_params_t* moduleParams,
 	u32 ROMinRAM,
 	u32 saveFileCluster,
-	u32 saveSize
+	u32 saveSize,
+	const bool buttonsRemapped
 ) {
 	newArm7binarySize = ndsHeader->arm7binarySize;
 	newArm7ibinarySize = __DSiHeader->arm7ibinarySize;
@@ -775,7 +815,6 @@ u32 patchCardNdsArm7(
 	patchPostBoot(ndsHeader);
 	patchScfgExt(ndsHeader);
 	patchSleepMode(ndsHeader);
-	patchSleepInputWrite(ndsHeader, moduleParams);
 
 	patchRamClear(ndsHeader, moduleParams);
 	patchRamClearI(ndsHeader, moduleParams, false);
@@ -806,6 +845,7 @@ u32 patchCardNdsArm7(
 	}
 
 	if (a7GetReloc(ndsHeader, moduleParams)) {
+		patchSleepInputWrite(ce7, ndsHeader, moduleParams, buttonsRemapped);
 		patchMirrorCheck(ndsHeader, moduleParams);
 		patchVramWifiBinaryLoad(ce7, ndsHeader, moduleParams);
 		u32 saveResult = 0;
@@ -868,6 +908,8 @@ u32 patchCardNdsArm7(
 			aFile* savFile = (aFile*)(dsiSD ? SAV_FILE_LOCATION : SAV_FILE_LOCATION_ALT);
 			fileRead((char*)0x02440000, *savFile, 0, 0x40000, 0);
 		}*/
+	} else {
+		patchSleepInputWrite(ce7, ndsHeader, moduleParams, false);
 	}
 
 	patchSwiHalt(ce7, ndsHeader, moduleParams);
