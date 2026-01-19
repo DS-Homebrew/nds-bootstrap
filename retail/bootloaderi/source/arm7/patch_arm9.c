@@ -1780,6 +1780,7 @@ void patchKeyInputs(const tNDSHeader* ndsHeader, const module_params_t* modulePa
 	const u32 signature = 0x04000130;
 	const u32 signatureHeader = isSdk5(moduleParams) ? 0x02FFFFA8 : 0x027FFFA8;
 	const u32 newOffset = isSdk5(moduleParams) ? 0x02FFFF78 : 0x027FFF78;
+	extern u32 iUncompressedSize;
 
 	u32* offset = ndsHeader->arm9destination;
 	for (int i = 0; i < iUncompressedSize/4; i++) {
