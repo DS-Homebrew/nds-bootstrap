@@ -286,7 +286,7 @@ static void resetMemory_ARM7(void) {
 	memset_addrs_arm7(0x03800000 - 0x8000, 0x03800000 + 0x10000);
 	toncset((u32*)0x02380000, 0, 0x38000);		// clear part of EWRAM - except before 0x023B8000, which has the DSiWare ROM's arm9i code, and 0x023BF000, which has the bootloader arm9 code
 	toncset((u32*)0x023C0000, 0, 0x20000);
-	toncset((u32*)0x023F0000, 0, 0xCE00);
+	toncset((u32*)0x023F0000, 0, 0xCF80);
 	toncset((u32*)0x023FE000, 0, 0x400);
 	toncset((u32*)0x023FF000, 0, 0x1000);
 
@@ -1386,8 +1386,8 @@ int arm7_main(void) {
 		overlayPatch = true; // Allow overlay patching for SM64DS ROM hacks (ex. Mario's Holiday)
 	}
 
-	tonccpy((u8*)CARDENGINE_ARM7_LOCATION, (u8*)CARDENGINE_ARM7_LOCATION_BUFFERED, 0x1200);
-	toncset((u8*)CARDENGINE_ARM7_LOCATION_BUFFERED, 0, 0x1200);
+	tonccpy((u8*)CARDENGINE_ARM7_LOCATION, (u8*)CARDENGINE_ARM7_LOCATION_BUFFERED, 0x1080);
+	toncset((u8*)CARDENGINE_ARM7_LOCATION_BUFFERED, 0, 0x1080);
 
 	ce9Location = *(u32*)CARDENGINE_ARM9_LOCATION_BUFFERED;
 	ce9Alt = (ce9Location == CARDENGINE_ARM9_LOCATION_DLDI_ALT || ce9Location == CARDENGINE_ARM9_LOCATION_DLDI_ALT2);
@@ -1651,7 +1651,7 @@ int arm7_main(void) {
 		errorOutput();
 	}
 
-	toncset((u32*)0x0380C000, 0, 0x2380);
+	toncset((u32*)0x0380C000, 0, 0x2700);
 
 	errorCode = hookNdsRetailArm7(
 		(cardengineArm7*)CARDENGINE_ARM7_LOCATION,
