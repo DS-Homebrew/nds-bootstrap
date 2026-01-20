@@ -117,14 +117,7 @@ typedef struct cardengineArm7 {
 	u8 consoleModel;
 	u8 romRead_LED;
 	u8 dmaRomRead_LED;
-	u8 remappedKeyA;
-	u8 remappedKeyB;
-	u8 remappedKeySELECT;
-	u8 remappedKeySTART;
-	u8 remappedKeyR;
-	u8 remappedKeyL;
-	u8 remappedKeyX;
-	u8 remappedKeyY;
+	u8 remappedKeys[12];
 	u32* irqTable_offset;
 	u16 scfgRomBak;
 	u16 igmHotkey;
@@ -161,14 +154,7 @@ typedef struct cardengineArm7B4DS {
 	u32 language; //u8
 	u32* languageAddr;
 	u8 volumeLevels[4];
-	u8 remappedKeyA;
-	u8 remappedKeyB;
-	u8 remappedKeySELECT;
-	u8 remappedKeySTART;
-	u8 remappedKeyR;
-	u8 remappedKeyL;
-	u8 remappedKeyX;
-	u8 remappedKeyY;
+	u8 remappedKeys[12];
 	u16 igmHotkey;
 	u16 screenSwapHotkey;
 	u8 RumblePakType;
@@ -214,14 +200,7 @@ typedef struct cardengineArm7 {
 	u32 language; //u8
 	u32* languageAddr;
 	u8 volumeLevels[4];
-	u8 remappedKeyA;
-	u8 remappedKeyB;
-	u8 remappedKeySELECT;
-	u8 remappedKeySTART;
-	u8 remappedKeyR;
-	u8 remappedKeyL;
-	u8 remappedKeyX;
-	u8 remappedKeyY;
+	u8 remappedKeys[12];
 	u16 igmHotkey;
 	u16 screenSwapHotkey;
 	u8 RumblePakType;

@@ -410,14 +410,18 @@ static void load_conf(configuration* conf, const char* fn) {
 	conf->dmaRomRead_LED = strtol(config_file.fetch("NDS-BOOTSTRAP", "DMA_ROMREAD_LED", "0").c_str(), NULL, 0);
 
 	// Remapped buttons
-	conf->remappedKeyA = strtol(config_file.fetch("NDS-BOOTSTRAP", "REMAPPED_KEY_A", "0").c_str(), NULL, 0);
-	conf->remappedKeyB = strtol(config_file.fetch("NDS-BOOTSTRAP", "REMAPPED_KEY_B", "1").c_str(), NULL, 0);
-	conf->remappedKeySELECT = strtol(config_file.fetch("NDS-BOOTSTRAP", "REMAPPED_KEY_SELECT", "2").c_str(), NULL, 0);
-	conf->remappedKeySTART = strtol(config_file.fetch("NDS-BOOTSTRAP", "REMAPPED_KEY_START", "3").c_str(), NULL, 0);
-	conf->remappedKeyR = strtol(config_file.fetch("NDS-BOOTSTRAP", "REMAPPED_KEY_R", "8").c_str(), NULL, 0);
-	conf->remappedKeyL = strtol(config_file.fetch("NDS-BOOTSTRAP", "REMAPPED_KEY_L", "9").c_str(), NULL, 0);
-	conf->remappedKeyX = strtol(config_file.fetch("NDS-BOOTSTRAP", "REMAPPED_KEY_X", "10").c_str(), NULL, 0);
-	conf->remappedKeyY = strtol(config_file.fetch("NDS-BOOTSTRAP", "REMAPPED_KEY_Y", "11").c_str(), NULL, 0);
+	conf->remappedKeys[0] = strtol(config_file.fetch("NDS-BOOTSTRAP", "REMAPPED_KEY_A", "0").c_str(), NULL, 0);
+	conf->remappedKeys[1] = strtol(config_file.fetch("NDS-BOOTSTRAP", "REMAPPED_KEY_B", "1").c_str(), NULL, 0);
+	conf->remappedKeys[2] = strtol(config_file.fetch("NDS-BOOTSTRAP", "REMAPPED_KEY_SELECT", "2").c_str(), NULL, 0);
+	conf->remappedKeys[3] = strtol(config_file.fetch("NDS-BOOTSTRAP", "REMAPPED_KEY_START", "3").c_str(), NULL, 0);
+	conf->remappedKeys[4] = strtol(config_file.fetch("NDS-BOOTSTRAP", "REMAPPED_KEY_RIGHT", "4").c_str(), NULL, 0);
+	conf->remappedKeys[5] = strtol(config_file.fetch("NDS-BOOTSTRAP", "REMAPPED_KEY_LEFT", "5").c_str(), NULL, 0);
+	conf->remappedKeys[6] = strtol(config_file.fetch("NDS-BOOTSTRAP", "REMAPPED_KEY_UP", "6").c_str(), NULL, 0);
+	conf->remappedKeys[7] = strtol(config_file.fetch("NDS-BOOTSTRAP", "REMAPPED_KEY_DOWN", "7").c_str(), NULL, 0);
+	conf->remappedKeys[8] = strtol(config_file.fetch("NDS-BOOTSTRAP", "REMAPPED_KEY_R", "8").c_str(), NULL, 0);
+	conf->remappedKeys[9] = strtol(config_file.fetch("NDS-BOOTSTRAP", "REMAPPED_KEY_L", "9").c_str(), NULL, 0);
+	conf->remappedKeys[10] = strtol(config_file.fetch("NDS-BOOTSTRAP", "REMAPPED_KEY_X", "10").c_str(), NULL, 0);
+	conf->remappedKeys[11] = strtol(config_file.fetch("NDS-BOOTSTRAP", "REMAPPED_KEY_Y", "11").c_str(), NULL, 0);
 
 	// get the gamecode
 	FILE* romFile = fopen(conf->ndsPath, "rb");

@@ -67,14 +67,7 @@ typedef struct configuration {
 	// int colorMode;
 	u8 romRead_LED;
 	u8 dmaRomRead_LED;
-	u8 remappedKeyA;
-	u8 remappedKeyB;
-	u8 remappedKeySELECT;
-	u8 remappedKeySTART;
-	u8 remappedKeyR;
-	u8 remappedKeyL;
-	u8 remappedKeyX;
-	u8 remappedKeyY;
+	u8 remappedKeys[12];
 	bool asyncCardRead;
 	int cardReadDMA;
 	bool boostCpu;

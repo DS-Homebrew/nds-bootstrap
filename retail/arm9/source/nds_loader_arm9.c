@@ -307,14 +307,9 @@ int runNds(u32 cluster, u32 saveCluster, u32 donorTwlCluster, /* u32 gbaCluster,
 	loader->language                    = conf->language;
 	loader->region                      = conf->region;
 	loader->dsiMode                     = conf->dsiMode; // SDK 5
-	loader->remappedKeyA                = conf->remappedKeyA;
-	loader->remappedKeyB                = conf->remappedKeyB;
-	loader->remappedKeySELECT           = conf->remappedKeySELECT;
-	loader->remappedKeySTART            = conf->remappedKeySTART;
-	loader->remappedKeyR                = conf->remappedKeyR;
-	loader->remappedKeyL                = conf->remappedKeyL;
-	loader->remappedKeyX                = conf->remappedKeyX;
-	loader->remappedKeyY                = conf->remappedKeyY;
+	for (int i = 0; i < 12; i++) {
+		loader->remappedKeys[i]         = conf->remappedKeys[i];
+	}
 	loader->valueBits2                  = conf->valueBits2;
 	loader->donorSdkVer                 = conf->donorSdkVer;
 	loader->patchMpuRegion              = conf->patchMpuRegion;

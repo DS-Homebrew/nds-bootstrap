@@ -127,14 +127,7 @@ extern u8 patchMpuRegion;
 extern u8 language;
 extern s8 region;
 extern u8 dsiMode; // SDK 5
-extern u8 remappedKeyA;
-extern u8 remappedKeyB;
-extern u8 remappedKeySELECT;
-extern u8 remappedKeySTART;
-extern u8 remappedKeyR;
-extern u8 remappedKeyL;
-extern u8 remappedKeyX;
-extern u8 remappedKeyY;
+extern u8 remappedKeys[12];
 extern u8 donorSdkVer;
 extern u8 consoleModel;
 extern u8 romRead_LED;
@@ -1596,6 +1589,15 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 	}
 }
 
+bool buttonsRemapped(void) {
+	for (int i = 0; i < 12; i++) {
+		if (remappedKeys[i] != i) {
+			return true;
+		}
+	}
+	return false;
+}
+
 int arm7_main(void) {
 	nocashMessage("bootloader");
 
@@ -1991,9 +1993,7 @@ int arm7_main(void) {
 		extern void patchMpu2(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, const bool usesCloneboot);
 		patchMpu2(ndsHeader, moduleParams, usesCloneboot);
 
-		const bool buttonsRemapped = (remappedKeyA != 0) || (remappedKeyB != 1) || (remappedKeySELECT != 2) || (remappedKeySTART != 3) || (remappedKeyR != 8) || (remappedKeyL != 9) || (remappedKeyX != 10) || (remappedKeyY != 11);
-
-		if (buttonsRemapped) {
+		if (buttonsRemapped()) {
 			extern void patchKeyInputs(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
 			patchKeyInputs(ndsHeader, moduleParams);
 		}
@@ -2063,7 +2063,7 @@ int arm7_main(void) {
 		patchScfgExt(ndsHeader);
 
 		extern void patchSleepInputWrite(cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, const bool useRelocSrc);
-		patchSleepInputWrite((cardengineArm7*)ce7Location, ndsHeader, moduleParams, a7GetReloc(ndsHeader, moduleParams) && buttonsRemapped);
+		patchSleepInputWrite((cardengineArm7*)ce7Location, ndsHeader, moduleParams, a7GetReloc(ndsHeader, moduleParams) && buttonsRemapped());
 
 		extern void patchRamClearI(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, const bool _isDSiWare);
 		patchRamClearI(ndsHeader, moduleParams, true);
@@ -2369,7 +2369,7 @@ int arm7_main(void) {
 			ltdModuleParams,
 			1,
 			usesCloneboot,
-			(remappedKeyA != 0) || (remappedKeyB != 1) || (remappedKeySELECT != 2) || (remappedKeySTART != 3) || (remappedKeyR != 8) || (remappedKeyL != 9) || (remappedKeyX != 10) || (remappedKeyY != 11),
+			buttonsRemapped(),
 			ROMinRAM,
 			saveFileCluster,
 			saveSize

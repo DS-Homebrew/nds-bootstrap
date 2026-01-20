@@ -116,14 +116,7 @@ extern u32 patchMpuSize;
 extern u8 patchMpuRegion;
 extern u8 language;
 extern s8 region;
-extern u8 remappedKeyA;
-extern u8 remappedKeyB;
-extern u8 remappedKeySELECT;
-extern u8 remappedKeySTART;
-extern u8 remappedKeyR;
-extern u8 remappedKeyL;
-extern u8 remappedKeyX;
-extern u8 remappedKeyY;
+extern u8 remappedKeys[12];
 extern u8 donorSdkVer;
 extern u8 soundFreq;
 extern char version[20];
@@ -1162,6 +1155,15 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 	}
 }
 
+bool buttonsRemapped(void) {
+	for (int i = 0; i < 12; i++) {
+		if (remappedKeys[i] != i) {
+			return true;
+		}
+	}
+	return false;
+}
+
 int arm7_main(void) {
 	// nocashMessage("bootloader");
 
@@ -1605,7 +1607,7 @@ int arm7_main(void) {
 		moduleParams,
 		1,
 		usesCloneboot,
-		(remappedKeyA != 0) || (remappedKeyB != 1) || (remappedKeySELECT != 2) || (remappedKeySTART != 3) || (remappedKeyR != 8) || (remappedKeyL != 9) || (remappedKeyX != 10) || (remappedKeyY != 11),
+		buttonsRemapped(),
 		saveFileCluster,
 		saveSize
 	);
