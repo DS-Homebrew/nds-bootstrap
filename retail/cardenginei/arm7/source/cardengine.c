@@ -2269,15 +2269,15 @@ u32 myIrqEnable(u32 irq) {
 	}
 }*/
 
-static inline void applyKeyRemap(u16* keyInput, u16* keyExtInput, const u8 remappedKey) {
+static inline void applyKeyRemap(u16* keyInput, u16* extKeyInput, const u8 remappedKey) {
 	if (remappedKey >= 10) {
-		*keyExtInput &= ~BIT(remappedKey-10);
+		*extKeyInput &= ~BIT(remappedKey);
 	} else {
 		*keyInput &= ~BIT(remappedKey);
 	}
 }
 
-void patchKeyInputs(u16* keyExtInputDst, u16 keyExtInput) {
+void patchKeyInputs(u16* extKeyInputDst, u16 extKeyInput) {
 	extern u8 remappedKeyA;
 	extern u8 remappedKeyB;
 	extern u8 remappedKeySELECT;
@@ -2300,44 +2300,44 @@ void patchKeyInputs(u16* keyExtInputDst, u16 keyExtInput) {
 	for (int i = 8; i <= 9; i++) {
 		keyInput |= BIT(i);
 	}
-	bool keyX_pressed = (!(keyExtInput & KEY_A));
-	bool keyY_pressed = (!(keyExtInput & KEY_B));
-	for (int i = 0; i <= 1; i++) {
-		keyExtInput |= BIT(i);
+	bool keyX_pressed = (!(extKeyInput & KEY_X));
+	bool keyY_pressed = (!(extKeyInput & KEY_Y));
+	for (int i = 10; i <= 11; i++) {
+		extKeyInput |= BIT(i);
 	}
 
 	if (keyA_pressed) {
-		applyKeyRemap(&keyInput, &keyExtInput, remappedKeyA);
+		applyKeyRemap(&keyInput, &extKeyInput, remappedKeyA);
 	}
 	if (keyB_pressed) {
-		applyKeyRemap(&keyInput, &keyExtInput, remappedKeyB);
+		applyKeyRemap(&keyInput, &extKeyInput, remappedKeyB);
 	}
 	if (keySELECT_pressed) {
-		applyKeyRemap(&keyInput, &keyExtInput, remappedKeySELECT);
+		applyKeyRemap(&keyInput, &extKeyInput, remappedKeySELECT);
 	}
 	if (keySTART_pressed) {
-		applyKeyRemap(&keyInput, &keyExtInput, remappedKeySTART);
+		applyKeyRemap(&keyInput, &extKeyInput, remappedKeySTART);
 	}
 
 	if (keyR_pressed) {
-		applyKeyRemap(&keyInput, &keyExtInput, remappedKeyR);
+		applyKeyRemap(&keyInput, &extKeyInput, remappedKeyR);
 	}
 	if (keyL_pressed) {
-		applyKeyRemap(&keyInput, &keyExtInput, remappedKeyL);
+		applyKeyRemap(&keyInput, &extKeyInput, remappedKeyL);
 	}
 
 	if (keyX_pressed) {
-		applyKeyRemap(&keyInput, &keyExtInput, remappedKeyX);
+		applyKeyRemap(&keyInput, &extKeyInput, remappedKeyX);
 	}
 	if (keyY_pressed) {
-		applyKeyRemap(&keyInput, &keyExtInput, remappedKeyY);
+		applyKeyRemap(&keyInput, &extKeyInput, remappedKeyY);
 	}
 
-	u32 dst = (u32)keyExtInputDst;
+	u32 dst = (u32)extKeyInputDst;
 	dst -= 0x30;
 	*(u16*)dst = keyInput;
 
-	*keyExtInputDst = keyExtInput;
+	*extKeyInputDst = extKeyInput;
 }
 
 //
