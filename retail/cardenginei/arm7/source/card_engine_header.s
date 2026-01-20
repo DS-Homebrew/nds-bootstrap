@@ -115,7 +115,11 @@ remappedKeyX:
 remappedKeyY:
 	.byte	11
 irqTable_offset:
+#ifndef TWLSDK
 	.word	irqTable
+#else
+	.word	0
+#endif
 scfgRomBak:
 	.hword	0
 igmHotkey:
@@ -215,6 +219,7 @@ ndsCodeStart:
 	bx r0
 
 	.arm
+#ifndef TWLSDK
 irqHandler:
                 STMFD           SP!, {LR}
                 MOV             R12, #0x4000000
@@ -317,6 +322,7 @@ extraIrqRet:
 
 extraIrq_ret:
 	bx  lr
+#endif
 
 card_engine_end:
 
@@ -324,7 +330,11 @@ patches:
 .word	card_pull_out_arm9
 .word	card_irq_enable_arm7
 .word	thumb_card_irq_enable_arm7
+#ifndef TWLSDK
 .word	j_irqHandler
+#else
+.word   0
+#endif
 .word	vblankHandler
 .word	fifoHandler
 .word   card_pull
@@ -411,12 +421,14 @@ swi27:
 @---------------------------------------------------------------------------------
 #endif
 	.arm
+#ifndef TWLSDK
 @---------------------------------------------------------------------------------
 j_irqHandler:
 @---------------------------------------------------------------------------------
 	ldr	pc, =irqHandler
 .pool
 @---------------------------------------------------------------------------------
+#endif
 
 @---------------------------------------------------------------------------------
 j_newSwiHalt:
