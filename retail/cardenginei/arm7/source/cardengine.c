@@ -232,7 +232,7 @@ static void unlaunchSetFilename(bool boot) {
 			#ifdef TWLSDK
 			*(u8*)(0x02000838+i2) = *(u8*)(ce7+0x8400+i);		// Unlaunch Device:/Path/Filename.ext (16bit Unicode,end by 0000h)
 			#else
-			*(u8*)(0x02000838+i2) = *(u8*)(ce7+0xB400+i);	// Unlaunch Device:/Path/Filename.ext (16bit Unicode,end by 0000h)
+			*(u8*)(0x02000838+i2) = *(u8*)(ce7+0xF400+i);	// Unlaunch Device:/Path/Filename.ext (16bit Unicode,end by 0000h)
 			#endif
 			i2 += 2;
 		}
@@ -268,9 +268,9 @@ static void readSrBackendId(void) {
 	*(u32*)(0x02000314) = *(u32*)(ce7+0x8504);
 	*(u32*)(0x02000318) = /* *(u32*)(ce7+0x8504) == 0x00030000 ? 0x13 : */ 0x17;
 	#else
-	*(u32*)(0x02000310) = *(u32*)(ce7+0xB500);
-	*(u32*)(0x02000314) = *(u32*)(ce7+0xB504);
-	*(u32*)(0x02000318) = /* *(u32*)(ce7+0xB504) == 0x00030000 ? 0x13 : */ 0x17;
+	*(u32*)(0x02000310) = *(u32*)(ce7+0xF500);
+	*(u32*)(0x02000314) = *(u32*)(ce7+0xF504);
+	*(u32*)(0x02000318) = /* *(u32*)(ce7+0xF504) == 0x00030000 ? 0x13 : */ 0x17;
 	#endif
 	*(u32*)(0x0200031C) = 0;
 	*(u16*)(0x02000306) = swiCRC16(0xFFFF, (void*)0x02000308, 0x18);
@@ -487,11 +487,11 @@ void reset(const bool downloadedSrl) {
 		if (consoleModel < 2) {
 			if (valueBits & hiyaCfwFound) {
 				unlaunchSetHiyaFilename();
-			} else if (*(u32*)(ce7+0xB500) == 0 && (valueBits & b_dsiSD)) {
+			} else if (*(u32*)(ce7+0xF500) == 0 && (valueBits & b_dsiSD)) {
 				unlaunchSetFilename(false);
 			}
 		}
-		if (*(u32*)(ce7+0xB500) == 0 && (valueBits & b_dsiSD)) {
+		if (*(u32*)(ce7+0xF500) == 0 && (valueBits & b_dsiSD)) {
 			tonccpy((u32*)0x02000300, sr_data_srloader, 0x20);
 		} else {
 			// Use different SR backend ID
@@ -796,7 +796,7 @@ void forceGameReboot(void) {
 			#ifdef TWLSDK
 			(*(u32*)(ce7+0x8500) == 0)
 			#else
-			(*(u32*)(ce7+0xB500) == 0)
+			(*(u32*)(ce7+0xF500) == 0)
 			#endif
 		) {
 				unlaunchSetFilename(false);
@@ -814,7 +814,7 @@ void forceGameReboot(void) {
 	//if (doBak) restoreSdBakData();
 	if (*(u32*)(ce7+0x8500) == 0 && (valueBits & b_dsiSD))
 	#else
-	if (*(u32*)(ce7+0xB500) == 0 && (valueBits & b_dsiSD))
+	if (*(u32*)(ce7+0xF500) == 0 && (valueBits & b_dsiSD))
 	#endif
 	{
 		tonccpy((u32*)0x02000300, sr_data_srloader, 0x20);
@@ -965,11 +965,11 @@ void returnToLoader(bool reboot) {
 #else
 	IPC_SendSync(0x8);
 	if (consoleModel >= 2) {
-		if (*(u32*)(ce7+0xB500) == 0 && (valueBits & b_dsiSD))
+		if (*(u32*)(ce7+0xF500) == 0 && (valueBits & b_dsiSD))
 		{
 			tonccpy((u32*)0x02000300, sr_data_srloader, 0x020);
 		}
-		else if (*(char*)(ce7+0xB503) == 'H' || *(char*)(ce7+0xB503) == 'K')
+		else if (*(char*)(ce7+0xF503) == 'H' || *(char*)(ce7+0xF503) == 'K')
 		{
 			// Use different SR backend ID
 			readSrBackendId();
@@ -978,7 +978,7 @@ void returnToLoader(bool reboot) {
 	} else {
 		if (valueBits & hiyaCfwFound) {
 			unlaunchSetHiyaFilename();
-		} else if (*(u32*)(ce7+0xB500) == 0 && (valueBits & b_dsiSD)) {
+		} else if (*(u32*)(ce7+0xF500) == 0 && (valueBits & b_dsiSD)) {
 			unlaunchSetFilename(true);
 		} else {
 			// Use different SR backend ID
