@@ -1683,56 +1683,50 @@ int arm7_main(void) {
 		loadROMPartintoRAM(ndsHeader, &romFile);
 	}
 
-	{
-		aFile bootNds;
-		getBootFileCluster(&bootNds, "BOOT.NDS");
-
-		errorCode = hookNdsRetailArm9(
-			(cardengineArm9*)ce9Location,
-			ce9DldiOffset,
-			ndsHeader,
-			moduleParams,
-			bootNds.firstCluster,
-			romFile.firstCluster,
-			savFile.firstCluster,
-			saveSize,
-			(u32)romFile.fatTableCache,
-			(u32)savFile.fatTableCache,
-			romFile.fatTableSettings & fatCompressed,
-			savFile.fatTableSettings & fatCompressed,
-			musicsFile.fatTableSettings & fatCompressed,
-			patchOffsetCacheFileCluster,
-			(u32)musicsFile.fatTableCache,
-			ramDumpCluster,
-			srParamsFileCluster,
-			screenshotCluster,
-			apFixOverlaysCluster,
-			musicCluster,
-			musicsSize,
-			pageFileCluster,
-			manualCluster,
-			sharedFontCluster,
-			expansionPakFound,
-			extendedMemory,
-			ROMinRAM,
-			dsDebugRam,
-			supportsExceptionHandler(romTid),
-			mainScreen,
-			usesCloneboot,
-			overlaysSize,
-			ioverlaysSize,
-			arm9iromOffset,
-			arm9ibinarySize,
-			fatTableSize,
-			fatTableAddr
-		);
-		/* if (errorCode == ERR_NONE) {
-			dbg_printf("Card hook 9 successful\n\n");
-		} else {
-			dbg_printf("Card hook 9 failed");
-			errorOutput();
-		} */
-	}
+	errorCode = hookNdsRetailArm9(
+		(cardengineArm9*)ce9Location,
+		ce9DldiOffset,
+		ndsHeader,
+		moduleParams,
+		romFile.firstCluster,
+		savFile.firstCluster,
+		saveSize,
+		(u32)romFile.fatTableCache,
+		(u32)savFile.fatTableCache,
+		romFile.fatTableSettings & fatCompressed,
+		savFile.fatTableSettings & fatCompressed,
+		musicsFile.fatTableSettings & fatCompressed,
+		patchOffsetCacheFileCluster,
+		(u32)musicsFile.fatTableCache,
+		ramDumpCluster,
+		srParamsFileCluster,
+		screenshotCluster,
+		apFixOverlaysCluster,
+		musicCluster,
+		musicsSize,
+		pageFileCluster,
+		manualCluster,
+		sharedFontCluster,
+		expansionPakFound,
+		extendedMemory,
+		ROMinRAM,
+		dsDebugRam,
+		supportsExceptionHandler(romTid),
+		mainScreen,
+		usesCloneboot,
+		overlaysSize,
+		ioverlaysSize,
+		arm9iromOffset,
+		arm9ibinarySize,
+		fatTableSize,
+		fatTableAddr
+	);
+	/* if (errorCode == ERR_NONE) {
+		dbg_printf("Card hook 9 successful\n\n");
+	} else {
+		dbg_printf("Card hook 9 failed");
+		errorOutput();
+	} */
 
 	patchOffsetCacheFileNewCrc = swiCRC16(0xFFFF, &patchOffsetCache, sizeof(patchOffsetCacheContents));
 	if (patchOffsetCacheFileNewCrc != patchOffsetCacheFilePrevCrc) {

@@ -201,7 +201,7 @@ typedef struct cardengineArm9 {
     cardengineArm9Patches* patches;
     cardengineArm9ThumbPatches* thumbPatches;
     u32 intr_ipc_orig_return;
-    u32 bootNdsCluster;
+    u32 quitFileCluster;
     u32 fileCluster;
     u32 saveCluster;
     u32 saveSize;

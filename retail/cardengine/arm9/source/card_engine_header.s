@@ -21,7 +21,7 @@ thumbPatches_offset:
 	.word	thumbPatches
 intr_ipc_orig_return:
 	.word	0x00000000
-bootNdsCluster:
+quitFileCluster:
 	.word	0x00000000
 fileCluster:
 	.word	0x00000000

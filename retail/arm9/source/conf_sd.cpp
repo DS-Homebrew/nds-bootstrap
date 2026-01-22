@@ -65,8 +65,6 @@ void decrypt_modcrypt_area(dsi_context* ctx, u8 *buffer, unsigned int size)
 	}
 }
 
-static const char* twlmenuResetGamePath = "sdmc:/_nds/TWiLightMenu/main.srldr";
-
 extern const DISC_INTERFACE __my_io_dsisd;
 
 extern char patchOffsetCacheFilePath[64];
@@ -108,6 +106,8 @@ off_t getFileSize(FILE* fp) {
 
 	return fsize;
 }
+
+char sdmcText[4] = {'s','d','m','c'};
 
 void addTwlDevice(const char letter, u8 flags, u8 accessRights, const char* name, const char* path) {
 	static char currentLetter = 'A';
@@ -359,6 +359,9 @@ static void load_conf(configuration* conf, const char* fn) {
 
 	// SDK5.x (TWL) DSi-Exclusive Donor NDS path
 	conf->donorTwlOnlyPath = strdup(config_file.fetch("NDS-BOOTSTRAP", "DONORTWLONLY_NDS_PATH").c_str());
+
+	// NDS path used when quitting game
+	conf->quitPath = strdup(config_file.fetch("NDS-BOOTSTRAP", "QUIT_PATH").c_str());
 
 	// GBA path
 	// conf->gbaPath = strdup(config_file.fetch("NDS-BOOTSTRAP", "GBA_PATH").c_str());
@@ -786,6 +789,10 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 	conf->gameOnFlashcard = (conf->ndsPath[0] == 'f' && conf->ndsPath[1] == 'a' && conf->ndsPath[2] == 't');
 	conf->saveOnFlashcard = (conf->savPath[0] == 'f' && conf->savPath[1] == 'a' && conf->savPath[2] == 't');
+
+	if (conf->quitPath[0] == 'f' && conf->quitPath[1] == 'a' && conf->quitPath[2] == 't') {
+		conf->valueBits2 |= BIT(6);
+	}
 
 	if (conf->b4dsMode) {
 		if (!dsiFeatures() || !conf->gameOnFlashcard || !conf->saveOnFlashcard) {
@@ -1457,7 +1464,6 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 				}
 			}
 
-			char sdmcText[4] = {'s','d','m','c'};
 			tonccpy((char*)(conf->gameOnFlashcard ? 0x02EFF3C1 : 0x02EFF3C2), conf->appPath, strlen(conf->appPath));
 			tonccpy((char*)0x02EFF3C0, sdmcText, 4);
 		}
@@ -1489,11 +1495,6 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			fseek(twlCfgFile, 0x88, SEEK_SET);
 			fread((void*)0x02000400, 1, 0x128, twlCfgFile);
 			fclose(twlCfgFile);
-
-			u32 srBackendId[2] = {*(u32*)0x02000428, *(u32*)0x0200042C};
-			if (srBackendId[0] != 0x53524C41 || srBackendId[1] != 0x00030004) {
-				conf->valueBits2 |= BIT(6);
-			}
 		}
 
 		if (!conf->isDSiWare || !scfgSdmmcEnabled) {
@@ -1509,10 +1510,12 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 					(u8*)CARDENGINEI_ARM7_BUFFERED_LOCATION
 				);
 				if (rc == 0) {
+					u8* returnLoc = (u8*)LOADER_RETURN_SDK5_LOCATION;
 					if (REG_SCFG_EXT7 != 0 && !(conf->valueBits2 & BIT(6))) {
-						tonccpy((u8*)LOADER_RETURN_SDK5_LOCATION, twlmenuResetGamePath, 256);
+						tonccpy(returnLoc+2, conf->quitPath, strlen(conf->quitPath));
+						tonccpy(returnLoc, sdmcText, 4);
 					}
-					tonccpy((u8*)LOADER_RETURN_SDK5_LOCATION+0x100, &srBackendId, 8);
+					tonccpy(returnLoc+0x100, &srBackendId, 8);
 				}
 
 				if (conf->gameOnFlashcard && (strncmp(romTid, "IRB", 3) == 0 || strncmp(romTid, "IRA", 3) == 0 || strncmp(romTid, "IRE", 3) == 0 || strncmp(romTid, "IRD", 3) == 0 || strncmp(romTid, "KAD", 3) == 0)) {
@@ -1535,10 +1538,12 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 					(u8*)CARDENGINEI_ARM7_BUFFERED_LOCATION
 				);
 				if (rc == 0) {
+					u8* returnLoc = (u8*)LOADER_RETURN_LOCATION;
 					if (REG_SCFG_EXT7 != 0 && !(conf->valueBits2 & BIT(6))) {
-						tonccpy((u8*)LOADER_RETURN_LOCATION, twlmenuResetGamePath, 256);
+						tonccpy(returnLoc+2, conf->quitPath, strlen(conf->quitPath));
+						tonccpy(returnLoc, sdmcText, 4);
 					}
-					tonccpy((u8*)LOADER_RETURN_LOCATION+0x100, &srBackendId, 8);
+					tonccpy(returnLoc+0x100, &srBackendId, 8);
 				}
 
 				const bool gsdd = (memcmp(romTid, "BO5", 3) == 0);
@@ -1603,10 +1608,12 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 				(u8*)CARDENGINEI_ARM7_BUFFERED_LOCATION
 			);
 			if (rc == 0) {
+				u8* returnLoc = (u8*)LOADER_RETURN_DSIWARE_LOCATION;
 				if (REG_SCFG_EXT7 != 0 && !(conf->valueBits2 & BIT(6))) {
-					tonccpy((u8*)LOADER_RETURN_DSIWARE_LOCATION, twlmenuResetGamePath, 256);
+					tonccpy(returnLoc+2, conf->quitPath, strlen(conf->quitPath));
+					tonccpy(returnLoc, sdmcText, 4);
 				}
-				tonccpy((u8*)LOADER_RETURN_DSIWARE_LOCATION+0x100, &srBackendId, 8);
+				tonccpy(returnLoc+0x100, &srBackendId, 8);
 			}
 
 			// Load external cheat engine binary

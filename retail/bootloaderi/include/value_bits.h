@@ -20,7 +20,7 @@ extern u8 valueBits3;
 #define cardReadDMA (valueBits2 & BIT(2))
 #define specialCard (valueBits2 & BIT(4))
 #define dsiWramAccess (valueBits2 & BIT(5))
-#define hiyaCfwFound (valueBits2 & BIT(6))
+#define quitOnFlashcard (valueBits2 & BIT(6))
 #define useRomRegion (valueBits2 & BIT(7))
 #define boostCpu (valueBits3 & BIT(0))
 #define memoryPit (valueBits3 & BIT(1))

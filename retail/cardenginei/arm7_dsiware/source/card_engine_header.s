@@ -15,6 +15,7 @@
 .global patches_offset
 .global cheatEngineAddr
 .global moduleParams
+.global quitFileCluster
 .global fileCluster
 .global saveCluster
 .global patchOffsetCacheFileCluster
@@ -55,6 +56,8 @@ intr_fifo_orig_return:
 cheatEngineAddr:
 	.word	0x00000000
 moduleParams:
+	.word	0x00000000
+quitFileCluster:
 	.word	0x00000000
 fileCluster:
 	.word	0x00000000

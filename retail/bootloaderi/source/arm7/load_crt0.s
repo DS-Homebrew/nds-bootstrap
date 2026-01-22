@@ -41,6 +41,7 @@
 	.global saveSize
 	@ .global gbaRomSize
 	@ .global gbaSaveSize
+	.global quitFileCluster
 	.global dataToPreloadAddr
 	.global dataToPreloadSize
 	@ .global dataToPreloadFrame
@@ -133,6 +134,8 @@ saveSize:
 @	.word	0x00000000		@ .gba file size
 @gbaSaveSize:
 @	.word	0x00000000		@ GBA .sav file size
+quitFileCluster:
+	.word	0x00000000
 dataToPreloadAddr:
 	.word	0x00000000
 	.word	0x00000000

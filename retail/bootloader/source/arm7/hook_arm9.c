@@ -159,7 +159,6 @@ int hookNdsRetailArm9(
 	const u32 dldiOffset,
 	const tNDSHeader* ndsHeader,
 	const module_params_t* moduleParams,
-	u32 bootNdsCluster,
 	u32 fileCluster,
 	u32 saveCluster,
 	u32 saveSize,
@@ -196,6 +195,7 @@ int hookNdsRetailArm9(
 	nocashMessage("hookNdsRetailArm9");
 
 	extern u8 _io_dldi_size;
+	extern u32 quitFileCluster;
 	const char* romTid = getRomTid(ndsHeader);
 	extern bool overlayPatch;
 	extern u32 romPaddingSize;
@@ -208,7 +208,7 @@ int hookNdsRetailArm9(
 	extern bool maxHeapOpen;
 
 	ce9->dldiOffset             = dldiOffset;
-	ce9->bootNdsCluster         = bootNdsCluster;
+	ce9->quitFileCluster        = quitFileCluster;
 	ce9->fileCluster            = fileCluster;
 	ce9->saveCluster            = saveCluster;
 	ce9->saveSize               = saveSize;

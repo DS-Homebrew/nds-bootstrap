@@ -73,6 +73,7 @@ typedef struct cardengineArm7 {
 	u32 intr_fifo_orig_return;
 	u32 cheatEngineAddr;
 	const module_params_t* moduleParams;
+	u32 quitFileCluster;
 	u32 fileCluster;
 	u32 patchOffsetCacheFileCluster;
 	u32 srParamsCluster;
@@ -93,7 +94,7 @@ typedef struct cardengineArm7 {
 		7: powerCodeOnVBlank
 		8: delayWrites
 		9: igmAccessible
-		10: hiyaCfwFound
+		10: quitOnFlashcard
 		11: slowSoftReset
 		12: wideCheatUsed
 		13: isSdk5

@@ -679,7 +679,7 @@ static void initialize(void) {
 		while (1);
 	}
 
-	getFileFromCluster(&bootNds, ce9->bootNdsCluster);
+	getFileFromCluster(&bootNds, ce9->quitFileCluster);
 	getFileFromCluster(&romFile, ce9->fileCluster);
 	getFileFromCluster(&savFile, ce9->saveCluster);
 	getFileFromCluster(&patchOffsetCacheFile, ce9->patchOffsetCacheFileCluster);

@@ -50,7 +50,7 @@
 #define b_dsiSD BIT(5)
 #define preciseVolumeControl BIT(6)
 #define igmAccessible BIT(9)
-#define hiyaCfwFound BIT(10)
+#define quitOnFlashcard BIT(10)
 #define wideCheatUsed BIT(12)
 #define twlTouch BIT(15)
 #define bootstrapOnFlashcard BIT(19)
@@ -65,12 +65,11 @@
 extern u32 ce7;
 
 static const char *unlaunchAutoLoadID = "AutoLoadInfo";
-static char bootNdsPath[14] = {'s','d','m','c',':','/','b','o','o','t','.','n','d','s'};
-static char hiyaDSiPath[14] = {'s','d','m','c',':','/','h','i','y','a','.','d','s','i'};
 
 extern void ndsCodeStart(u32* addr);
 
 extern u32 cheatEngineAddr;
+extern u32 quitFileCluster;
 extern u32 saveCluster;
 extern u32 patchOffsetCacheFileCluster;
 extern u32 srParamsCluster;
@@ -126,7 +125,7 @@ static PERSONAL_DATA* personalData = (PERSONAL_DATA*)((u8*)NDS_HEADER_SDK5-0x180
 
 static u16 sdmcPos = 0;
 
-static void unlaunchSetFilename(bool boot) {
+static void unlaunchSetFilename(void) {
 	tonccpy((u8*)0x02000800, unlaunchAutoLoadID, 12);
 	*(u16*)(0x0200080C) = 0x3F0;		// Unlaunch Length for CRC16 (fixed, must be 3F0h)
 	*(u16*)(0x0200080E) = 0;			// Unlaunch CRC16 (empty)
@@ -136,32 +135,8 @@ static void unlaunchSetFilename(bool boot) {
 	*(u16*)(0x02000816) = 0x7FFF;		// Unlaunch Lower screen BG color (0..7FFFh)
 	toncset((u8*)0x02000818, 0, 0x20+0x208+0x1C0);		// Unlaunch Reserved (zero)
 	int i2 = 0;
-	if (boot) {
-		for (int i = 0; i < (int)sizeof(bootNdsPath); i++) {
-			*(u8*)(0x02000838+i2) = bootNdsPath[i];				// Unlaunch Device:/Path/Filename.ext (16bit Unicode,end by 0000h)
-			i2 += 2;
-		}
-	} else {
-		for (int i = 0; i < 256; i++) {
-			*(u8*)(0x02000838+i2) = *(u8*)(ce7+0x8000+i);		// Unlaunch Device:/Path/Filename.ext (16bit Unicode,end by 0000h)
-			i2 += 2;
-		}
-	}
-	*(u16*)(0x0200080E) = swiCRC16(0xFFFF, (void*)0x02000810, 0x3F0);		// Unlaunch CRC16
-}
-
-static void unlaunchSetHiyaFilename(void) {
-	tonccpy((u8*)0x02000800, unlaunchAutoLoadID, 12);
-	*(u16*)(0x0200080C) = 0x3F0;		// Unlaunch Length for CRC16 (fixed, must be 3F0h)
-	*(u16*)(0x0200080E) = 0;			// Unlaunch CRC16 (empty)
-	*(u32*)(0x02000810) = (BIT(0) | BIT(1));		// Load the title at 2000838h
-													// Use colors 2000814h
-	*(u16*)(0x02000814) = 0x7FFF;		// Unlaunch Upper screen BG color (0..7FFFh)
-	*(u16*)(0x02000816) = 0x7FFF;		// Unlaunch Lower screen BG color (0..7FFFh)
-	toncset((u8*)0x02000818, 0, 0x20+0x208+0x1C0);		// Unlaunch Reserved (zero)
-	int i2 = 0;
-	for (int i = 0; i < (int)sizeof(hiyaDSiPath); i++) {
-		*(u8*)(0x02000838+i2) = hiyaDSiPath[i];				// Unlaunch Device:/Path/Filename.ext (16bit Unicode,end by 0000h)
+	for (int i = 0; i < 256; i++) {
+		*(u8*)(0x02000838+i2) = *(u8*)(ce7+0x8000+i);		// Unlaunch Device:/Path/Filename.ext (16bit Unicode,end by 0000h)
 		i2 += 2;
 	}
 	*(u16*)(0x0200080E) = swiCRC16(0xFFFF, (void*)0x02000810, 0x3F0);		// Unlaunch CRC16
@@ -421,10 +396,8 @@ void forceGameReboot(void) {
 	sharedAddr[4] = 0x57534352;
 	IPC_SendSync(0x8);
 	if (consoleModel < 2) {
-		if (valueBits & hiyaCfwFound) {
-			unlaunchSetHiyaFilename();
-		} else if (*(u32*)(ce7+0x8100) == 0) {
-			unlaunchSetFilename(false);
+		if (*(u32*)(ce7+0x8100) == 0) {
+			unlaunchSetFilename();
 		}
 		waitFrames(5);							// Wait for DSi screens to stabilize
 	}
@@ -474,10 +447,8 @@ void returnToLoader(bool reboot) {
 			}
 			//waitFrames(1);
 		} else {
-			if (valueBits & hiyaCfwFound) {
-				unlaunchSetHiyaFilename();
-			} else if (*(u32*)(ce7+0x8100) == 0) {
-				unlaunchSetFilename(true);
+			if (*(u32*)(ce7+0x8100) == 0) {
+				unlaunchSetFilename();
 			} else {
 				// Use different SR backend ID
 				readSrBackendId();
@@ -534,7 +505,7 @@ void returnToLoader(bool reboot) {
 	*(vu32*)0x4004820 = 0;
 
 	aFile file;
-	getBootFileCluster(&file, "BOOT.NDS", !(valueBits & b_dsiSD));
+	getFileFromCluster(&file, quitFileCluster, (valueBits & quitOnFlashcard));
 	if (file.firstCluster == CLUSTER_FREE) {
 		// File not found, so reboot console instead
 		rebootConsole();

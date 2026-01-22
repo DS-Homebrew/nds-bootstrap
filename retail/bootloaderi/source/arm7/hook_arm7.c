@@ -45,7 +45,7 @@
 #define b_powerCodeOnVBlank BIT(7)
 #define b_delayWrites BIT(8)
 #define b_igmAccessible BIT(9)
-#define b_hiyaCfwFound BIT(10)
+#define b_quitOnFlashcard BIT(10)
 #define b_slowSoftReset BIT(11)
 #define b_wideCheatUsed BIT(12)
 #define b_isSdk5 BIT(13)
@@ -347,6 +347,7 @@ int hookNdsRetailArm7(
 	u32* ipcSyncHandler = hookLocation + 16;
 
 	extern u32 cheatEngineOffset;
+	extern u32 quitFileCluster;
 
 	// if (!ce7NotFound) {
 	/*	u32 intr_vblank_orig_return = *(u32*)0x2FFC004;
@@ -367,6 +368,7 @@ int hookNdsRetailArm7(
 	ce7->intr_vblank_orig_return  = *vblankHandler;
 	ce7->intr_fifo_orig_return    = *ipcSyncHandler;
 	ce7->cheatEngineAddr          = cheatEngineOffset;
+	ce7->quitFileCluster          = quitFileCluster;
 	ce7->fileCluster              = fileCluster;
 	ce7->patchOffsetCacheFileCluster = patchOffsetCacheFileCluster;
 	ce7->srParamsCluster          = srParamsFileCluster;
@@ -398,8 +400,8 @@ int hookNdsRetailArm7(
 	if (strncmp(romTid, "YL2", 3) == 0) { // Luminous Arc 2
 		ce7->valueBits |= b_delayWrites; // Delay save writes by 1 frame for the first 2 seconds to fix crash on first boot
 	}
-	if (hiyaCfwFound) {
-		ce7->valueBits |= b_hiyaCfwFound;
+	if (quitOnFlashcard) {
+		ce7->valueBits |= b_quitOnFlashcard;
 	}
 	if (strncmp(romTid, "UBR", 3) == 0 || iUncompressedSize > 0x26C000) {
 		ce7->valueBits |= b_slowSoftReset;

@@ -22,6 +22,7 @@ typedef struct configuration {
 	char* donorTwlPath;
 	char* donorTwlOnly0Path;
 	char* donorTwlOnlyPath;
+	char* quitPath;
 	// char* cleanDonorPath;
 	// char* gbaPath;
 	// char* gbaSavPath;
