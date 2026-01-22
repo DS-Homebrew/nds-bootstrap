@@ -318,8 +318,8 @@ static void patchSleepMode(const tNDSHeader* ndsHeader) {
 	//}
 }
 
-static void patchSleepInputWrite(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
-	if (valueBits & sleepMode) {
+static void patchSleepInputWrite(cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, const bool buttonsRemapped) {
+	if ((valueBits & sleepMode) && !buttonsRemapped) {
 		return;
 	}
 
@@ -328,11 +328,52 @@ static void patchSleepInputWrite(const tNDSHeader* ndsHeader, const module_param
 		return;
 	}
 
-	if (*offset == 0x13A04902 || *offset == 0x11A05004) {
-		*offset = 0xE1A00000; // nop
-	} else {
-		u16* offsetThumb = (u16*)offset;
-		*offsetThumb = 0x46C0; // nop
+	const bool isArm = (*offset == 0x13A04902 || *offset == 0x11A05004);
+
+	if (!(valueBits & sleepMode)) {
+		if (isArm) {
+			*offset = 0xE1A00000; // nop
+		} else {
+			u16* offsetThumb = (u16*)offset;
+			*offsetThumb = 0x46C0; // nop
+		}
+	}
+
+	if (buttonsRemapped) {
+		bool found = false;
+		u32 offsetAdjust = (u32)offset;
+		if (isArm) {
+			for (int i = 0; i < 6; i++) {
+				offsetAdjust += 4;
+				if (*(u32*)offsetAdjust == 0xE1C010B0) {
+					found = true;
+					break;
+				}
+			}
+
+			if (found) {
+				const u32 srcAddr = (u32)offsetAdjust - vAddrOfRelocSrc + (*(u32*)0x02FFE1A0==0x080037C0 ? 0x37C0000 : 0x37F8000);
+				*(u32*)offsetAdjust = generateA7Instr(srcAddr, (u32)ce7->patches->patchKeyInputs);
+			}
+		} else {
+			for (int i = 0; i < 10; i++) {
+				offsetAdjust += 2;
+				if (*(u16*)offsetAdjust == 0x8001) {
+					found = true;
+					break;
+				}
+			}
+
+			if (found) {
+				*(u16*)offsetAdjust = 0x46C0; // nop
+				offsetAdjust += 2;
+				ce7->patches->patchKeyInputsThumb[3] = *(u16*)offsetAdjust;
+				*(u16*)offsetAdjust = 0x4B00; // ldr r3, =patchKeyInputsThumb
+				*(u16*)(offsetAdjust + 2) = 0x4718; // bx r3
+				*(u32*)(offsetAdjust + 4) = (u32)ce7->patches->patchKeyInputsThumb;
+				*(u32*)(offsetAdjust + 4) += 1;
+			}
+		}
 	}
 
 	/* dbg_printf("Sleep input write location : ");
@@ -385,10 +426,10 @@ static void patchSrlStart(cardengineArm7* ce7, const tNDSHeader* ndsHeader) {
 u32 patchCardNdsArm7(
 	cardengineArm7* ce7,
 	tNDSHeader* ndsHeader,
-	const module_params_t* moduleParams
+	const module_params_t* moduleParams,
+	const bool buttonsRemapped
 ) {
 	patchSleepMode(ndsHeader);
-	patchSleepInputWrite(ndsHeader, moduleParams);
 
 	if (!a7PatchCardIrqEnable(ce7, ndsHeader, moduleParams)) {
 		return ERR_LOAD_OTHR;
@@ -404,6 +445,7 @@ u32 patchCardNdsArm7(
 	}
 
 	if (a7GetReloc(ndsHeader, moduleParams)) {
+		patchSleepInputWrite(ce7, ndsHeader, moduleParams, buttonsRemapped);
 		patchMirrorCheck(ndsHeader, moduleParams);
 		patchVramWifiBinaryLoad(ndsHeader, moduleParams);
 		u32 saveResult = 0;
@@ -424,6 +466,8 @@ u32 patchCardNdsArm7(
 				}
 			}
 		}
+	} else {
+		patchSleepInputWrite(ce7, ndsHeader, moduleParams, false);
 	}
 
 	patchSwiHalt(ce7, ndsHeader, moduleParams);

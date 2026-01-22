@@ -466,7 +466,7 @@ static void patchSleepMode(const tNDSHeader* ndsHeader) {
 	}
 }
 
-void patchSleepInputWrite(cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, const bool useRelocSrc) {
+void patchSleepInputWrite(cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, const bool buttonsRemapped) {
 	u32* offset = patchOffsetCache.sleepInputWriteOffset;
 	if (!patchOffsetCache.sleepInputWriteOffset) {
 		offset = findSleepInputWriteOffset(ndsHeader, moduleParams);
@@ -489,7 +489,7 @@ void patchSleepInputWrite(cardengineArm7* ce7, const tNDSHeader* ndsHeader, cons
 		}
 	}
 
-	if (useRelocSrc) {
+	if (buttonsRemapped) {
 		bool found = false;
 		u32 offsetAdjust = (u32)offset;
 		if (isArm) {

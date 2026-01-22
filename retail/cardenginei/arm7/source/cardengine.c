@@ -116,6 +116,7 @@ extern u8 language;
 extern u8 consoleModel;
 extern u8 romRead_LED;
 extern u8 dmaRomRead_LED;
+extern u8 remappedKeys[12];
 extern u16 igmHotkey;
 extern u16 screenSwapHotkey;
 
@@ -382,6 +383,15 @@ void restoreSdBakData(void) {
 	*(vu32*)0x4004820 = sdMaskBak;
 }*/
 #else
+bool buttonsRemapped(void) {
+	for (int i = 0; i < 12; i++) {
+		if (remappedKeys[i] != i) {
+			return true;
+		}
+	}
+	return false;
+}
+
 static module_params_t* getModuleParams(const tNDSHeader* ndsHeader) {
 	//nocashMessage("Looking for moduleparams...\n");
 
@@ -560,16 +570,20 @@ void reset(const bool downloadedSrl) {
 
 		ensureBinaryDecompressed(ndsHeader, moduleParams);
 
+		const bool buttonsRemappedBool = buttonsRemapped();
+
 		patchCardNdsArm9(
 			(cardengineArm9*)CARDENGINEI_ARM9_LOCATION,
 			ndsHeader,
 			moduleParams,
-			1
+			1,
+			buttonsRemappedBool
 		);
 		patchCardNdsArm7(
 			(cardengineArm7*)ce7,
 			ndsHeader,
-			moduleParams
+			moduleParams,
+			buttonsRemappedBool
 		);
 
 		hookNdsRetailArm7(
@@ -2243,8 +2257,6 @@ static inline void applyKeyRemap(u16* keyInput, u16* extKeyInput, const u8 remap
 }
 
 void patchKeyInputs(u16* extKeyInputDst, u16 extKeyInput) {
-	extern u8 remappedKeys[12];
-
 	u16 keyInput = *(u16*)0x04000130;
 	const u16 keyInputBak = keyInput;
 	const u16 extKeyInputBak = extKeyInput;

@@ -735,6 +735,30 @@ bool patchStrmPageLoad(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const m
 	return true;
 }
 
+static void patchKeyInputs(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
+	const u32 signature = 0x04000130;
+	const u32 signatureHeader = (moduleParams->sdk_version > 0x5000000) ? 0x02FFFFA8 : 0x027FFFA8;
+	const u32 newOffset = (moduleParams->sdk_version > 0x5000000) ? 0x02FFFF78 : 0x027FFF78;
+	extern u32 iUncompressedSize;
+
+	u32* offset = ndsHeader->arm9destination;
+	for (int i = 0; i < iUncompressedSize/4; i++) {
+		if (*offset == signature) {
+			if (offset[-2] == signatureHeader || offset[-1] == signatureHeader || offset[1] == signatureHeader || offset[2] == signatureHeader) {
+				*offset = newOffset;
+
+				// dbg_printf("KEYINPUT found: ");
+				// dbg_hexa((u32)offset);
+				// dbg_printf("\n");
+			}
+		}
+		offset++;
+	}
+	// dbg_printf("\n");
+
+	*(u16*)newOffset = 0x3FF;
+}
+
 static void randomPatch(const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	const char* romTid = getRomTid(ndsHeader);
 
@@ -775,7 +799,7 @@ static void randomPatch5Second(const tNDSHeader* ndsHeader, const module_params_
 	ce9->patches->needFlushDCCache = (patchMpuRegion == 1);
 }*/
 
-u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 patchMpuRegion) {
+u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 patchMpuRegion, const bool buttonsRemapped) {
 
 	bool usesThumb;
 	//bool slot2usesThumb = false;
@@ -804,6 +828,10 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 	patchMpu(ndsHeader, moduleParams, patchMpuRegion);
 	patchMpu2(ndsHeader, moduleParams);
 	patchMpuChange(ndsHeader, moduleParams);
+
+	if (buttonsRemapped) {
+		patchKeyInputs(ndsHeader, moduleParams);
+	}
 
 	if (isPawsAndClaws(ndsHeader)) {
 		patchCardId(ce9, ndsHeader, moduleParams, false, NULL); // Patch card ID first

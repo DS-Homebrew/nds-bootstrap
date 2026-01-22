@@ -2062,7 +2062,7 @@ int arm7_main(void) {
 		extern void patchScfgExt(const tNDSHeader* ndsHeader);
 		patchScfgExt(ndsHeader);
 
-		extern void patchSleepInputWrite(cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, const bool useRelocSrc);
+		extern void patchSleepInputWrite(cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, const bool buttonsRemapped);
 		patchSleepInputWrite((cardengineArm7*)ce7Location, ndsHeader, moduleParams, a7GetReloc(ndsHeader, moduleParams) && buttonsRemapped());
 
 		extern void patchRamClearI(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, const bool _isDSiWare);
