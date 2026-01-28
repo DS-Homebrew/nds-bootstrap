@@ -192,6 +192,8 @@
 - Hudson x GReeeeN: Live! DeeeeS! (Japan) (BRYJ)
 - Hwansangsuhojeon: Tierkreis (Korea) (YG4K)
 - The Idolm@ster: Dearly Stars (Japan) (VIMJ)
+- Imagine: Resort Owner (USA) (VIDE)
+- Imagine: Dream Resort (Europe) (VIDV)
 - Imasugu Tsukaeru Mamechishiki: Quiz Zatsugaku-ou DS (Japan) (BZ2J)
 - Inazuma Eleven (Germany) (Also applies to modified ROMs) (YEED)
 - Inazuma Eleven (France) (Also applies to modified ROMs) (YEEF)
