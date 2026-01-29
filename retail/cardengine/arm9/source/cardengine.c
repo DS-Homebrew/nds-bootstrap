@@ -907,14 +907,6 @@ void cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 		mpuSet = true;
 	}
 
-	const u16 exmemcnt = REG_EXMEMCNT;
-	cardReadInProgress = true;
-
-	setDeviceOwner();
-	initialize();
-
-	// cardReadCount++;
-
 	#ifdef GSDD
 	u32 src = src0;
 	u8* dst = dst0;
@@ -927,7 +919,17 @@ void cardRead(u32* cacheStruct, u8* dst0, u32 src0, u32 len0) {
 	u32 src = ((ce9->valueBits & isSdk5) ? src0 : cardStruct[0]);
 	u8* dst = ((ce9->valueBits & isSdk5) ? dst0 : (u8*)(cardStruct[1]));
 	u32 len = ((ce9->valueBits & isSdk5) ? len0 : cardStruct[2]);
+
+	if ((u32)dst < 0x01000000) return;
 	#endif
+
+	const u16 exmemcnt = REG_EXMEMCNT;
+	cardReadInProgress = true;
+
+	setDeviceOwner();
+	initialize();
+
+	// cardReadCount++;
 
 	// Simulate ROM mirroring
 	while (src >= ce9->romPaddingSize) {
