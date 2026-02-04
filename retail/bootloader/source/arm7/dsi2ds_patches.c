@@ -15328,20 +15328,21 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		if (romTid[3] == 'E') {
 			*(u32*)0x02082A58 = 0xE1A00000; // nop
 			if (!extendedMemory) {
-				*(u32*)0x0208CDC0 = 0xE3A00000; // mov r0, #0 (Skip .wave file loading)
-				*(u32*)0x0208CDC4 = 0xE1A00000; // nop
-				*(u32*)0x0208CDCC = 0xE1A00000; // nop
-				*(u32*)0x0208CDD8 = 0xE1A00000; // nop
-				*(u32*)0x0208CDE0 = 0xE1A00000; // nop
-				*(u32*)0x0208CDEC = 0xE1A00000; // nop
-				*(u32*)0x0208CDFC = 0xE3A00000; // mov r0, #0
 				*(u32*)(newCodeAddr-4) = (u32)getOffsetFromBL((u32*)0x0208D9D8);
 				setBL(0x0208D9D8, newCodeAddr);
 
-				*(u32*)0x0208CF38 = 0xE1A00000; // nop
-				*(u32*)0x0208D038 = 0xE1A00000; // nop
 				/* if (!maxHeapOpen) {
 					// Disable sound
+					*(u32*)0x0208CDC0 = 0xE3A00000; // mov r0, #0 (Skip .wave file loading)
+					*(u32*)0x0208CDC4 = 0xE1A00000; // nop
+					*(u32*)0x0208CDCC = 0xE1A00000; // nop
+					*(u32*)0x0208CDD8 = 0xE1A00000; // nop
+					*(u32*)0x0208CDE0 = 0xE1A00000; // nop
+					*(u32*)0x0208CDEC = 0xE1A00000; // nop
+					*(u32*)0x0208CDFC = 0xE3A00000; // mov r0, #0
+					*(u32*)0x0208CF38 = 0xE1A00000; // nop
+					*(u32*)0x0208D038 = 0xE1A00000; // nop
+
 					*(u32*)0x020C04EC = 0xE12FFF1E; // bx lr
 					*(u32*)0x020C05CC = 0xE3A00000; // mov r0, #0
 					*(u32*)0x020C05D0 = 0xE12FFF1E; // bx lr
@@ -15375,20 +15376,21 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		} else if (romTid[3] == 'V') {
 			*(u32*)0x02082A78 = 0xE1A00000; // nop
 			if (!extendedMemory) {
-				*(u32*)0x0208CDE0 = 0xE3A00000; // mov r0, #0 (Skip .wave file loading)
-				*(u32*)0x0208CDE4 = 0xE1A00000; // nop
-				*(u32*)0x0208CDEC = 0xE1A00000; // nop
-				*(u32*)0x0208CDF8 = 0xE1A00000; // nop
-				*(u32*)0x0208CE00 = 0xE1A00000; // nop
-				*(u32*)0x0208CE0C = 0xE1A00000; // nop
-				*(u32*)0x0208CE1C = 0xE3A00000; // mov r0, #0
 				*(u32*)(newCodeAddr-4) = (u32)getOffsetFromBL((u32*)0x0208D9F8);
 				setBL(0x0208D9F8, newCodeAddr);
 
-				*(u32*)0x0208CF58 = 0xE1A00000; // nop
-				*(u32*)0x0208D058 = 0xE1A00000; // nop
 				/* if (!maxHeapOpen) {
 					// Disable sound
+					*(u32*)0x0208CDE0 = 0xE3A00000; // mov r0, #0 (Skip .wave file loading)
+					*(u32*)0x0208CDE4 = 0xE1A00000; // nop
+					*(u32*)0x0208CDEC = 0xE1A00000; // nop
+					*(u32*)0x0208CDF8 = 0xE1A00000; // nop
+					*(u32*)0x0208CE00 = 0xE1A00000; // nop
+					*(u32*)0x0208CE0C = 0xE1A00000; // nop
+					*(u32*)0x0208CE1C = 0xE3A00000; // mov r0, #0
+					*(u32*)0x0208CF58 = 0xE1A00000; // nop
+					*(u32*)0x0208D058 = 0xE1A00000; // nop
+
 					*(u32*)0x020C050C = 0xE12FFF1E; // bx lr
 					*(u32*)0x020C05EC = 0xE3A00000; // mov r0, #0
 					*(u32*)0x020C05F0 = 0xE12FFF1E; // bx lr
@@ -15422,20 +15424,21 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		} else {
 			*(u32*)0x02082A14 = 0xE1A00000; // nop
 			if (!extendedMemory) {
-				*(u32*)0x0208CD7C = 0xE3A00000; // mov r0, #0 (Skip .wave file loading)
-				*(u32*)0x0208CD80 = 0xE1A00000; // nop
-				*(u32*)0x0208CD88 = 0xE1A00000; // nop
-				*(u32*)0x0208CD94 = 0xE1A00000; // nop
-				*(u32*)0x0208CD9C = 0xE1A00000; // nop
-				*(u32*)0x0208CDA8 = 0xE1A00000; // nop
-				*(u32*)0x0208CDB8 = 0xE3A00000; // mov r0, #0
 				*(u32*)(newCodeAddr-4) = (u32)getOffsetFromBL((u32*)0x0208D994);
 				setBL(0x0208D994, newCodeAddr);
 
-				*(u32*)0x0208CEF4 = 0xE1A00000; // nop
-				*(u32*)0x0208CFF4 = 0xE1A00000; // nop
 				/* if (!maxHeapOpen) {
 					// Disable sound
+					*(u32*)0x0208CD7C = 0xE3A00000; // mov r0, #0 (Skip .wave file loading)
+					*(u32*)0x0208CD80 = 0xE1A00000; // nop
+					*(u32*)0x0208CD88 = 0xE1A00000; // nop
+					*(u32*)0x0208CD94 = 0xE1A00000; // nop
+					*(u32*)0x0208CD9C = 0xE1A00000; // nop
+					*(u32*)0x0208CDA8 = 0xE1A00000; // nop
+					*(u32*)0x0208CDB8 = 0xE3A00000; // mov r0, #0
+					*(u32*)0x0208CEF4 = 0xE1A00000; // nop
+					*(u32*)0x0208CFF4 = 0xE1A00000; // nop
+
 					*(u32*)0x020C0528 = 0xE12FFF1E; // bx lr
 					*(u32*)0x020C0608 = 0xE3A00000; // mov r0, #0
 					*(u32*)0x020C060C = 0xE12FFF1E; // bx lr
