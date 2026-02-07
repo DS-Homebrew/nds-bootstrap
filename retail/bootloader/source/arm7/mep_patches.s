@@ -8,8 +8,6 @@
 	.global twlFontHeapAllocNoMep
 	.global cch2HeapAlloc
 	.global cch2HeapAddrPtr
-	.global fourSwHeapAlloc
-	.global fourSwHeapAddrPtr
 	@.global gate18HeapAlloc
 	@.global gate18HeapAddrPtr
 	.global goGoKokopoloHeapAlloc
@@ -56,10 +54,6 @@ cch2HeapAddrPtr:
 	.word cch2HeapAddr
 @elementalistsHeapAlloc:
 @	.word elementalistsHeapAllocFunc
-fourSwHeapAlloc:
-	.word fourSwHeapAllocFunc
-fourSwHeapAddrPtr:
-	.word fourSwHeapAddr
 @gate18HeapAlloc:
 @	.word gate18HeapAllocFunc
 @gate18HeapAddrPtr:
@@ -260,162 +254,6 @@ _blx_cch2OrgFunction:
 	bx	r6
 cch2HeapAddr:
 .word	0x09000000 @ Offset of fontGBK.bin
-.pool
-@---------------------------------------------------------------------------------
-
-@---------------------------------------------------------------------------------
-fourSwOrgFunction: .word 0
-fourSwHeapAllocFunc:
-@---------------------------------------------------------------------------------
-	stmfd   sp!, {r6,lr}
-
-	@ldr r6, =0x45720 @ Size of subtask.cmp
-	@cmp r0, r6
-	@ldreq r0, fourSwHeapAddr_subtask
-	@ldmeqfd   sp!, {r6,pc}
-
-	@ldr r6, =0x6C24 @ Size of subtask_us_en.cmp
-	@cmp r0, r6
-	@ldreq r0, fourSwHeapAddr_subtask_lang
-	@ldmeqfd   sp!, {r6,pc}
-
-	@ldr r6, =0x7090 @ Size of subtask_us_fr.cmp & subtask_eu_fr.cmp
-	@cmp r0, r6
-	@ldreq r0, fourSwHeapAddr_subtask_lang
-	@ldmeqfd   sp!, {r6,pc}
-
-	@ldr r6, =0x71F4 @ Size of subtask_us_sp.cmp
-	@cmp r0, r6
-	@ldreq r0, fourSwHeapAddr_subtask_lang
-	@ldmeqfd   sp!, {r6,pc}
-
-	@ldr r6, =0x6C70 @ Size of subtask_eu_en.cmp
-	@cmp r0, r6
-	@ldreq r0, fourSwHeapAddr_subtask_lang
-	@ldmeqfd   sp!, {r6,pc}
-
-	@ldr r6, =0x6E40 @ Size of subtask_eu_gr.cmp
-	@cmp r0, r6
-	@ldreq r0, fourSwHeapAddr_subtask_lang
-	@ldmeqfd   sp!, {r6,pc}
-
-	@ldr r6, =0x6E20 @ Size of subtask_eu_it.cmp
-	@cmp r0, r6
-	@ldreq r0, fourSwHeapAddr_subtask_lang
-	@ldmeqfd   sp!, {r6,pc}
-
-	@ldr r6, =0x7260 @ Size of subtask_eu_sp.cmp
-	@cmp r0, r6
-	@ldreq r0, fourSwHeapAddr_subtask_lang
-	@ldmeqfd   sp!, {r6,pc}
-
-	@ldr r6, =0x7468 @ Size of subtask_jp.cmp
-	@cmp r0, r6
-	@ldreq r0, fourSwHeapAddr_subtask_lang
-	@ldmeqfd   sp!, {r6,pc}
-
-	@ldr r6, =0x128F8 @ Size of pat.bin
-	@cmp r0, r6
-	@ldreq r0, fourSwHeapAddr_pat
-	@ldmeqfd   sp!, {r6,pc}
-
-	ldr r6, =0x1AFC7C @ Size of zeldat.bin
-	cmp r0, r6
-	ldreq r0, fourSwHeapAddr_zeldat
-	ldmeqfd   sp!, {r6,pc}
-
-	ldr r6, =0xFA30 @ Size of zeldat_us_en.bin / zeldat_eu_en.bin
-	cmp r0, r6
-	ldreq r0, fourSwHeapAddr_zeldat_lang
-	ldmeqfd   sp!, {r6,pc}
-
-	ldr r6, =0xF89C @ Size of zeldat_us_fr.bin
-	cmp r0, r6
-	ldreq r0, fourSwHeapAddr_zeldat_lang
-	ldmeqfd   sp!, {r6,pc}
-
-	ldr r6, =0xF898 @ Size of zeldat_us_sp.bin
-	cmp r0, r6
-	ldreq r0, fourSwHeapAddr_zeldat_lang
-	ldmeqfd   sp!, {r6,pc}
-
-	ldr r6, =0xF8AC @ Size of zeldat_eu_fr.bin
-	cmp r0, r6
-	ldreq r0, fourSwHeapAddr_zeldat_lang
-	ldmeqfd   sp!, {r6,pc}
-
-	ldr r6, =0xF788 @ Size of zeldat_eu_gr.bin
-	cmp r0, r6
-	ldreq r0, fourSwHeapAddr_zeldat_lang
-	ldmeqfd   sp!, {r6,pc}
-
-	ldr r6, =0xF9F8 @ Size of zeldat_eu_it.bin
-	cmp r0, r6
-	ldreq r0, fourSwHeapAddr_zeldat_lang
-	ldmeqfd   sp!, {r6,pc}
-
-	ldr r6, =0xF888 @ Size of zeldat_eu_sp.bin
-	cmp r0, r6
-	ldreq r0, fourSwHeapAddr_zeldat_lang
-	ldmeqfd   sp!, {r6,pc}
-
-	ldr r6, =0xFDC0 @ Size of zeldat_jp.bin
-	cmp r0, r6
-	ldreq r0, fourSwHeapAddr_zeldat_lang
-	ldmeqfd   sp!, {r6,pc}
-
-	ldr r6, =0x1086DC @ Size of zelmap.bin
-	cmp r0, r6
-	ldreq r0, fourSwHeapAddr_zelmap
-	ldmeqfd   sp!, {r6,pc}
-
-	ldr r6, =0x20208 @ Size of us.kmsg
-	cmp r0, r6
-	ldreq r0, fourSwHeapAddr_kmsg
-	ldmeqfd   sp!, {r6,pc}
-
-	ldr r6, =0x33310 @ Size of eu.kmsg
-	cmp r0, r6
-	ldreq r0, fourSwHeapAddr_kmsg
-	ldmeqfd   sp!, {r6,pc}
-
-	ldr r6, =0xF638 @ Size of jp.kmsg
-	cmp r0, r6
-	ldreq r0, fourSwHeapAddr_kmsg
-	ldmeqfd   sp!, {r6,pc}
-
-	ldr r6, =0x1008 @ Size of font_ltn.nftr
-	cmp r0, r6
-	ldreq r0, fourSwHeapAddr_font
-	ldmeqfd   sp!, {r6,pc}
-
-	ldr r6, =0x15100 @ Size of font_jp.nftr
-	cmp r0, r6
-	ldreq r0, fourSwHeapAddr_font
-	ldmeqfd   sp!, {r6,pc}
-
-	ldr	r6, fourSwOrgFunction
-	bl	_blx_fourSwOrgFunction
-	ldmfd   sp!, {r6,pc}
-_blx_fourSwOrgFunction:
-	bx	r6
-fourSwHeapAddr:
-fourSwHeapAddr_subtask:
-@.word	0x09320000 @ Offset of subtask.cmp
-fourSwHeapAddr_subtask_lang:
-@.word	0x09370000 @ Offset of subtask_??_??.cmp
-fourSwHeapAddr_pat:
-@.word	0x092C0000 @ Offset of pat.bin
-fourSwHeapAddr_zeldat:
-.word	0x09000000 @ Offset of zeldat.bin
-fourSwHeapAddr_zeldat_lang:
-.word	0x091B0000 @ Offset of zeldat_??_??.bin
-fourSwHeapAddr_zelmap:
-.word	0x091C0000 @ Offset of zelmap.bin
-fourSwHeapAddr_kmsg:
-.word	0x092D0000 @ Offset of us/eu/jp.kmsg
-fourSwHeapAddr_font:
-.word	0x09308000 @ Offset of font_??.nftr
 .pool
 @---------------------------------------------------------------------------------
 
