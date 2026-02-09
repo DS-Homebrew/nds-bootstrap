@@ -516,10 +516,23 @@ static void patchCardReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, c
     dbg_printf("\n\n");
 }
 
-static bool patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
+static bool dmaRequired(const tNDSHeader* ndsHeader) {
 	const char* romTid = getRomTid(ndsHeader);
 
-	/* if (strncmp(romTid, "AWD", 3) == 0 // Diddy Kong Racing
+	return
+	   (strncmp(romTid, "CAY", 3) == 0 // Army Men: Soldiers of Misfortune
+	 || strncmp(romTid, "B5B", 3) == 0 // Call of Duty: Modern Warfare 3: Defiance
+	 || strncmp(romTid, "B7F", 3) == 0 // The Magic School Bus: Oceans
+	 || strncmp(romTid, "AYT", 3) == 0 // Tales of Innocence
+	 || strncmp(romTid, "AH9", 3) == 0 // Tony Hawk's American Sk8land
+	 || strncmp(romTid, "YUT", 3) == 0 // Ultimate Mortal Kombat
+	);
+}
+
+static bool patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
+	/* const char* romTid = getRomTid(ndsHeader);
+
+	if (strncmp(romTid, "AWD", 3) == 0 // Diddy Kong Racing
 	 || strncmp(romTid, "CP3", 3) == 0 // Viva Pinata
 	 || strncmp(romTid, "BO5", 3) == 0 // Golden Sun: Dark Dawn
 	 || strncmp(romTid, "Y8L", 3) == 0 // Golden Sun: Dark Dawn (Demo Version)
@@ -528,12 +541,9 @@ static bool patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader
 	 || strncmp(romTid, "V2G", 3) == 0 // Mario vs. Donkey Kong: Mini-Land Mayhem
 	 || !cardReadDMA) return false; */
 
-	if (strncmp(romTid, "CAY", 3) != 0 // Army Men: Soldiers of Misfortune
-	 && strncmp(romTid, "B5B", 3) != 0 // Call of Duty: Modern Warfare 3: Defiance
-	 && strncmp(romTid, "B7F", 3) != 0 // The Magic School Bus: Oceans
-	 && strncmp(romTid, "AH9", 3) != 0 // Tony Hawk's American Sk8land
-	 && strncmp(romTid, "YUT", 3) != 0 // Ultimate Mortal Kombat
-	) return false;
+	if (!dmaRequired(ndsHeader)) {
+		return false;
+	}
 
 	u32* offset = patchOffsetCache.cardEndReadDmaOffset;
 	u32 offsetDmaHandler = patchOffsetCache.dmaHandlerOffset;
@@ -634,9 +644,9 @@ static bool patchCardEndReadDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader
 }
 
 static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb) {
-	const char* romTid = getRomTid(ndsHeader);
+	/* const char* romTid = getRomTid(ndsHeader);
 
-	/* if (strncmp(romTid, "AWD", 3) == 0 // Diddy Kong Racing
+	if (strncmp(romTid, "AWD", 3) == 0 // Diddy Kong Racing
 	 || strncmp(romTid, "CP3", 3) == 0 // Viva Pinata
 	 || strncmp(romTid, "BO5", 3) == 0 // Golden Sun: Dark Dawn
 	 || strncmp(romTid, "Y8L", 3) == 0 // Golden Sun: Dark Dawn (Demo Version)
@@ -645,12 +655,9 @@ static bool patchCardSetDma(cardengineArm9* ce9, const tNDSHeader* ndsHeader, co
 	 || strncmp(romTid, "V2G", 3) == 0 // Mario vs. Donkey Kong: Mini-Land Mayhem
 	 || !cardReadDMA) return false; */
 
-	if (strncmp(romTid, "CAY", 3) != 0 // Army Men: Soldiers of Misfortune
-	 && strncmp(romTid, "B5B", 3) != 0 // Call of Duty: Modern Warfare 3: Defiance
-	 && strncmp(romTid, "B7F", 3) != 0 // The Magic School Bus: Oceans
-	 && strncmp(romTid, "AH9", 3) != 0 // Tony Hawk's American Sk8land
-	 && strncmp(romTid, "YUT", 3) != 0 // Ultimate Mortal Kombat
-	) return false;
+	if (!dmaRequired(ndsHeader)) {
+		return false;
+	}
 
 	dbg_printf("\npatchCardSetDma\n");
 
