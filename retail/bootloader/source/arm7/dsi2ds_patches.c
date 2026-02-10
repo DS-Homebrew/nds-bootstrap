@@ -22160,15 +22160,14 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Puzzler World XL (USA)
-	// Requires 8MB of RAM
-	else if (strcmp(romTid, "KUOE") == 0 && extendedMemory) {
+	else if (strcmp(romTid, "KUOE") == 0) {
 		*(u32*)0x02005088 = 0xE1A00000; // nop
 		*(u32*)0x020050F8 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		*(u32*)0x020051BC = 0xE1A00000; // nop (Skip Manual screen)
 		*(u32*)0x02014F4C = 0xE1A00000; // nop
 		tonccpy((u32*)0x02015AD0, dsiSaveGetResultCode, 0xC);
 		*(u32*)0x02018130 = 0xE1A00000; // nop
-		patchInitDSiWare(0x0201D258, heapEndMaxForRetail);
+		patchInitDSiWare(0x0201D258, heapEndMaxForRetail32);
 		*(u32*)0x0201D5E4 = *(u32*)0x02004FE8;
 		patchUserSettingsReadDSiWare(0x0201E374);
 		setBL(0x0202693C, (u32)dsiSaveOpen);
@@ -22181,9 +22180,9 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02026B38, (u32)dsiSaveSetLength);
 		setBL(0x02026B4C, (u32)dsiSaveWrite);
 		setBL(0x02026B60, (u32)dsiSaveClose);
-		/* if (!extendedMemory) {
-			*(u32*)0x02054270 = 0xE3A019B6; // mov r1, #0x2D8000
-		} */
+		if (!extendedMemory) {
+			*(u32*)0x02054270 = 0xE3A019B5; // mov r1, #0x2D4000
+		}
 	}
 
 	// Puzzle to Go: Baby Animals (Europe)

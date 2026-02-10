@@ -1502,6 +1502,7 @@ int arm7_main(void) {
 					||	strncmp(romTid, "K6T", 3) == 0 // Orion's Odyssey
 					||	strncmp(romTid, "KPS", 3) == 0 // Phantasy Star 0 Mini
 					||	strncmp(romTid, "KHR", 3) == 0 // Picture Perfect: Pocket Stylist
+					||	strncmp(romTid, "KUO", 3) == 0 // Puzzler World XL
 					||	strncmp(romTid, "KS3", 3) == 0 // Shantae: Risky's Revenge
 					||	strncmp(romTid, "VSO", 3) == 0 // Sonic Classic Collection
 					||	strncmp(romTid, "KZU", 3) == 0 // Tales to Enjoy!: Little Red Riding Hood
@@ -1633,6 +1634,7 @@ int arm7_main(void) {
 	|| strncmp(romTid, "K6T", 3) == 0 // Orion's Odyssey
 	|| strncmp(romTid, "KPS", 3) == 0 // Phantasy Star 0 Mini
 	|| strncmp(romTid, "KHR", 3) == 0 // Picture Perfect: Pocket Stylist
+	|| strncmp(romTid, "KUO", 3) == 0 // Puzzler World XL
 	|| strncmp(romTid, "KZU", 3) == 0 // Tales to Enjoy!: Little Red Riding Hood
 	|| strncmp(romTid, "KZV", 3) == 0 // Tales to Enjoy!: Puss in Boots
 	|| strncmp(romTid, "KZ7", 3) == 0 // Tales to Enjoy!: The Three Little Pigs
