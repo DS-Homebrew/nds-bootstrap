@@ -11,6 +11,8 @@
 #include "loading_screen.h"
 #include "debug_file.h"
 
+#define ezFlash 0x5A45
+
 extern bool useSharedFont;
 extern u8 valueBits;
 extern u8 valueBits3;
