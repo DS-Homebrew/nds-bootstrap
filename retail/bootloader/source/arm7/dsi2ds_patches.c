@@ -15286,7 +15286,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// The Legend of Zelda: Four Swords: Anniversary Edition (USA)
 	// The Legend of Zelda: Four Swords: Anniversary Edition (Europe, Australia)
 	// Zelda no Densetsu: 4-tsu no Tsurugi: 25th Kinen Edition (Japan)
-	// Requires either 8MB of RAM or Memory Expansion Pak
+	// Requires either 8MB of RAM or Memory Expansion Pak for audio playback
 	else if (strncmp(romTid, "KQ9", 3) == 0) {
 		const u32 bssEnd = *(u32*)0x02004FF4;
 		const u32 newCodeAddr = 0x023FF004;
