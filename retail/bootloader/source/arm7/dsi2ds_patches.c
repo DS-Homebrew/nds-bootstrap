@@ -24911,7 +24911,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 		*(u32*)0x0201B794 = 0xE1A00000; // nop
 		patchInitDSiWare(0x0202254C, heapEnd);
-		*(u32*)0x020228D8 = 0x0213CC60;
+		*(u32*)0x020228D8 = *(u32*)0x02004FD0;
 		patchUserSettingsReadDSiWare(0x02023A9C);
 		if (!extendedMemory) {
 			if (expansionPakFound) {
