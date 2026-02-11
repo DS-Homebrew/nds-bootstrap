@@ -4001,18 +4001,23 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// ARC Style: Everyday Football (Europe, Australia)
 	// ARC Style: Soccer! (Japan)
 	// ARC Style: Soccer! (Korea)
-	// DS Download Play requires 8MB of RAM
 	else if (strncmp(romTid, "KAZ", 3) == 0) {
-		useSharedFont = ((isKor ? korFontFound : twlFontFound) && debugOrMep);
+		useSharedFont = ((isKor ? korFontFound : twlFontFound) && extendedMemory);
 		if (!useSharedFont) {
 			*(u32*)0x020050A4 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		}
 		*(u32*)0x020050A8 = 0xE1A00000; // nop
 		if (isUsa) {
-			if (useSharedFont && !extendedMemory && expansionPakFound) {
+			/* if (useSharedFont && !extendedMemory && expansionPakFound) {
 				patchTwlFontLoad(true, 0x0205864C, 0x0207C314);
-			}
+			} */
 			// *(u32*)0x0200DC9C = 0xE1A00000; // nop
+			if (!extendedMemory) {
+				*(u32*)0x02058D74 = 0xE2842812; // add r2, r4, #0x120000
+				*(u32*)0x02058D78 = 0xE1A00000; // nop
+				*(u32*)0x02058DC8 = 0x120000; // Shrink heap from 0x45B000
+				*(u32*)0x020737BC += 0xB0000000; // movcc -> mov r6, #0x10000 (Allows DLP to work within 4MB of RAM)
+			}
 			/* *(u32*)0x02059E0C = 0xE1A00000; // nop // Part of .pck file
 			*(u32*)0x02059E14 = 0xE1A00000; // nop
 			setBL(0x02059E20, (u32)dsiSaveCreate);
@@ -4027,18 +4032,26 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBL(0x02059FA8, (u32)dsiSaveClose); */
 			*(u32*)0x02068414 = 0xE1A00000; // nop
 			*(u32*)0x0206CA14 = 0xE1A00000; // nop
-			patchInitDSiWare(0x0207A3E4, heapEnd8MBHack);
-			*(u32*)0x0207A770 = 0x02299500;
+			patchInitDSiWare(0x0207A3E4, heapEnd);
+			if (!extendedMemory) {
+				*(u32*)0x0207A770 = *(u32*)0x02004FD0;
+			}
 			patchUserSettingsReadDSiWare(0x0207BC98);
 			*(u32*)0x0207BCB4 = wirelessReturnCodeArm;
 			*(u32*)0x0207BCB8 = 0xE12FFF1E; // bx lr
 			*(u32*)0x0207BCC0 = 0xE3A00000; // mov r0, #0
 			*(u32*)0x0207BCC4 = 0xE12FFF1E; // bx lr
 		} else if (isEurAus) {
-			if (useSharedFont && !extendedMemory && expansionPakFound) {
+			/* if (useSharedFont && !extendedMemory && expansionPakFound) {
 				patchTwlFontLoad(true, 0x02058720, 0x0207C3E8);
-			}
+			} */
 			// *(u32*)0x0200DD70 = 0xE1A00000; // nop
+			if (!extendedMemory) {
+				*(u32*)0x02058E48 = 0xE2842812; // add r2, r4, #0x120000
+				*(u32*)0x02058E4C = 0xE1A00000; // nop
+				*(u32*)0x02058E9C = 0x120000; // Shrink heap from 0x45B000
+				*(u32*)0x02073890 += 0xB0000000; // movcc -> mov r6, #0x10000 (Allows DLP to work within 4MB of RAM)
+			}
 			/* *(u32*)0x02059EE0 = 0xE1A00000; // nop // Part of .pck file
 			*(u32*)0x02059EE8 = 0xE1A00000; // nop
 			setBL(0x02059EF4, (u32)dsiSaveCreate);
@@ -4053,18 +4066,26 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBL(0x0205A07C, (u32)dsiSaveClose); */
 			*(u32*)0x020684E8 = 0xE1A00000; // nop
 			*(u32*)0x0206CAE8 = 0xE1A00000; // nop
-			patchInitDSiWare(0x0207A4B8, heapEnd8MBHack);
-			*(u32*)0x0207A844 = 0x02299500;
+			patchInitDSiWare(0x0207A4B8, heapEnd);
+			if (!extendedMemory) {
+				*(u32*)0x0207A844 = *(u32*)0x02004FD0;
+			}
 			patchUserSettingsReadDSiWare(0x0207BD6C);
 			*(u32*)0x0207BD88 = wirelessReturnCodeArm;
 			*(u32*)0x0207BD8C = 0xE12FFF1E; // bx lr
 			*(u32*)0x0207BD94 = 0xE3A00000; // mov r0, #0
 			*(u32*)0x0207BD98 = 0xE12FFF1E; // bx lr
 		} else if (isJpnOrKor) {
-			if (useSharedFont && !extendedMemory && expansionPakFound) {
+			/* if (useSharedFont && !extendedMemory && expansionPakFound) {
 				patchTwlFontLoad(true, 0x02058658, 0x0207C2C8);
-			}
+			} */
 			// *(u32*)0x0200DD70 = 0xE1A00000; // nop
+			if (!extendedMemory) {
+				*(u32*)0x02058D80 = 0xE2842812; // add r2, r4, #0x120000
+				*(u32*)0x02058D84 = 0xE1A00000; // nop
+				*(u32*)0x02058DD4 = 0x120000; // Shrink heap from 0x45B000
+				*(u32*)0x02073770 += 0xB0000000; // movcc -> mov r6, #0x10000 (Allows DLP to work within 4MB of RAM)
+			}
 			/* *(u32*)0x02059DF0 = 0xE1A00000; // nop // Part of .pck file
 			*(u32*)0x02059DF8 = 0xE1A00000; // nop
 			setBL(0x02059E04, (u32)dsiSaveCreate);
@@ -4079,8 +4100,10 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBL(0x02059F80, (u32)dsiSaveClose); */
 			*(u32*)0x020683C8 = 0xE1A00000; // nop
 			*(u32*)0x0206C9C8 = 0xE1A00000; // nop
-			patchInitDSiWare(0x0207A398, heapEnd8MBHack);
-			*(u32*)0x0207A724 = 0x022993E0;
+			patchInitDSiWare(0x0207A398, heapEnd);
+			if (!extendedMemory) {
+				*(u32*)0x0207A724 = *(u32*)0x02004FD0;
+			}
 			patchUserSettingsReadDSiWare(0x0207BC4C);
 			*(u32*)0x0207BC68 = wirelessReturnCodeArm;
 			*(u32*)0x0207BC6C = 0xE12FFF1E; // bx lr
