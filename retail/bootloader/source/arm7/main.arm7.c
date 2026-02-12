@@ -670,8 +670,10 @@ static bool isROMLoadableInRAM(const tDSiHeader* dsiHeader, const tNDSHeader* nd
 	if ((strncmp(romTid, "KD3", 3) == 0 || strncmp(romTid, "KD4", 3) == 0 || strncmp(romTid, "KD5", 3) == 0) && s2FlashcardId == 0x5A45) {
 		return false;
 	}
-	if ((strncmp(romTid, "KVL", 3) == 0) // Clash of Elementalists
-	&& ((s2FlashcardId != 0x334D && s2FlashcardId != 0x3647 && s2FlashcardId != 0x4353) || (s2FlashcardId == 0x5A45 && baseRomSize > 0x800000))) {
+	if ((
+		strncmp(romTid, "KVL", 3) == 0 // Clash of Elementalists
+	||	strncmp(romTid, "KDQ", 3) == 0 // Dragon Quest Wars
+	) && ((s2FlashcardId != 0x334D && s2FlashcardId != 0x3647 && s2FlashcardId != 0x4353) || (s2FlashcardId == 0x5A45 && baseRomSize > 0x800000))) {
 		return false;
 	}
 	if (extendedMemory && !dsDebugRam) {
@@ -1162,6 +1164,20 @@ bool buttonsRemapped(void) {
 		}
 	}
 	return false;
+}
+
+u32 loadCe9Slot2Heap(u32* dst) {
+	const u16 len = 0x800;
+	tonccpy(dst, (u32*)CARDENGINE_ARM9_SLOT2HEAP_LOCATION_BUFFERED, len);
+	for (int i = 0; i < len/4; i++) {
+		if (dst[i] >= 0xBF800000 && dst[i] < 0xBF800000+len) {
+			dst[i] -= 0xBF800000;
+			dst[i] += (u32)dst;
+		}
+	}
+	toncset((u32*)CARDENGINE_ARM9_SLOT2HEAP_LOCATION_BUFFERED, 0, len);
+
+	return len;
 }
 
 int arm7_main(void) {

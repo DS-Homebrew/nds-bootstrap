@@ -46,6 +46,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	extern u32 donorFileCluster;	// SDK5
 	extern u32 fatTableAddr;
 	extern u32 newArm7binarySize;
+	extern u32 loadCe9Slot2Heap(u32* dst);
 	const char* romTid = getRomTid(ndsHeader);
 	const char* dataPub = "dataPub:";
 	const char* dataPrv = "dataPrv:";
@@ -10119,8 +10120,8 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Dragon Quest Wars (USA)
 	// DSi save function patching not needed
-	// Requires 8MB of RAM
-	else if (strcmp(romTid, "KDQE") == 0 && extendedMemory) {
+	// Requires either 8MB of RAM or Memory Expansion Pak
+	else if (strcmp(romTid, "KDQE") == 0 && debugOrMep) {
 		*(u32*)0x0201F208 = 0xE12FFF1E; // bx lr (Skip Manual screen)
 
 		// WiFi code patch
@@ -10156,7 +10157,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020A82EC = 0xE1A00000; // nop
 		*(u32*)0x020AC120 = 0xE1A00000; // nop
 		patchInitDSiWare(0x020B6640, heapEnd);
-		// *(u32*)0x020B69B0 = 0x022A83C0;
+		*(u32*)0x020B69B0 = *(u32*)0x020AA57C;
 		patchUserSettingsReadDSiWare(0x020B7BF0);
 		*(u32*)0x020B7C18 = wirelessReturnCodeArm;
 		*(u32*)0x020B7C1C = 0xE12FFF1E; // bx lr
@@ -10168,12 +10169,37 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020B7C60 = 0xE12FFF1E; // bx lr
 		*(u32*)0x020B7C6C = 0xE3A00000; // mov r0, #0
 		*(u32*)0x020B7C70 = 0xE12FFF1E; // bx lr
+		*(u32*)0x020BD840 = 0xE3A00003; // mov r0, #3
+
+		if (!extendedMemory) {
+			const u32 heapStart = *(u32*)0x020B69B0;
+			extern u32 dqWarsHeapAlloc[];
+			extern u32 dqWarsHeapAllocLen;
+			extern u32 dqWarsHeapFree[];
+			extern u32 dqWarsHeapFreeLen;
+			extern u32 dqWarsSlot2HeapAlloc;
+			extern u32 dqWarsSlot2HeapFree;
+			const u32 newCodeAddr = 0x020B9090;
+			const u32 newCodeAddr2 = newCodeAddr+dqWarsHeapAllocLen;
+			dqWarsSlot2HeapAlloc = heapStart;
+			dqWarsSlot2HeapFree = heapStart+4;
+			tonccpy((u32*)newCodeAddr, dqWarsHeapAlloc, dqWarsHeapAllocLen);
+			tonccpy((u32*)newCodeAddr2, dqWarsHeapFree, dqWarsHeapFreeLen);
+			*(u32*)0x020B69B0 += loadCe9Slot2Heap((u32*)heapStart);
+
+			*(u32*)0x020F4A84 = 0xE51FF004; // ldr pc, =newCodeAddr
+			*(u32*)0x020F4A88 = newCodeAddr;
+			*(u32*)0x020F4B08 = 0xE51FF004; // ldr pc, =newCodeAddr
+			*(u32*)0x020F4B0C = newCodeAddr;
+			*(u32*)0x020F4C64 = 0xE51FF004; // ldr pc, =newCodeAddr2
+			*(u32*)0x020F4C68 = newCodeAddr2;
+		}
 	}
 
 	// Dragon Quest Wars (Europe, Australia)
 	// DSi save function patching not needed
-	// Requires 8MB of RAM
-	else if (strcmp(romTid, "KDQV") == 0 && extendedMemory) {
+	// Requires either 8MB of RAM or Memory Expansion Pak
+	else if (strcmp(romTid, "KDQV") == 0 && debugOrMep) {
 		*(u32*)0x0201F250 = 0xE12FFF1E; // bx lr (Skip Manual screen)
 
 		// WiFi code patch
@@ -10209,6 +10235,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020A8334 = 0xE1A00000; // nop
 		*(u32*)0x020AC168 = 0xE1A00000; // nop
 		patchInitDSiWare(0x020B6688, heapEnd);
+		*(u32*)0x020B69F8 = *(u32*)0x020AA5C4;
 		patchUserSettingsReadDSiWare(0x020B7C38);
 		*(u32*)0x020B7C60 = wirelessReturnCodeArm;
 		*(u32*)0x020B7C64 = 0xE12FFF1E; // bx lr
@@ -10220,12 +10247,37 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020B7CA8 = 0xE12FFF1E; // bx lr
 		*(u32*)0x020B7CB4 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x020B7CB8 = 0xE12FFF1E; // bx lr
+		*(u32*)0x020BD888 = 0xE3A00003; // mov r0, #3
+
+		if (!extendedMemory) {
+			const u32 heapStart = *(u32*)0x020B69F8;
+			extern u32 dqWarsHeapAlloc[];
+			extern u32 dqWarsHeapAllocLen;
+			extern u32 dqWarsHeapFree[];
+			extern u32 dqWarsHeapFreeLen;
+			extern u32 dqWarsSlot2HeapAlloc;
+			extern u32 dqWarsSlot2HeapFree;
+			const u32 newCodeAddr = 0x020B90D8;
+			const u32 newCodeAddr2 = newCodeAddr+dqWarsHeapAllocLen;
+			dqWarsSlot2HeapAlloc = heapStart;
+			dqWarsSlot2HeapFree = heapStart+4;
+			tonccpy((u32*)newCodeAddr, dqWarsHeapAlloc, dqWarsHeapAllocLen);
+			tonccpy((u32*)newCodeAddr2, dqWarsHeapFree, dqWarsHeapFreeLen);
+			*(u32*)0x020B69F8 += loadCe9Slot2Heap((u32*)heapStart);
+
+			*(u32*)0x020F4B04 = 0xE51FF004; // ldr pc, =newCodeAddr
+			*(u32*)0x020F4B08 = newCodeAddr;
+			*(u32*)0x020F4B88 = 0xE51FF004; // ldr pc, =newCodeAddr
+			*(u32*)0x020F4B8C = newCodeAddr;
+			*(u32*)0x020F4CE4 = 0xE51FF004; // ldr pc, =newCodeAddr2
+			*(u32*)0x020F4CE8 = newCodeAddr2;
+		}
 	}
 
 	// Dragon Quest Wars (Japan)
 	// DSi save function patching not needed
-	// Requires 8MB of RAM
-	else if (strcmp(romTid, "KDQJ") == 0 && extendedMemory) {
+	// Requires either 8MB of RAM or Memory Expansion Pak
+	else if (strcmp(romTid, "KDQJ") == 0 && debugOrMep) {
 		*(u32*)0x0201EF84 = 0xE12FFF1E; // bx lr (Skip Manual screen)
 
 		// WiFi code patch
@@ -10261,6 +10313,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020A7CAC = 0xE1A00000; // nop
 		*(u32*)0x020ABAE0 = 0xE1A00000; // nop
 		patchInitDSiWare(0x020B6000, heapEnd);
+		*(u32*)0x020B6370 = *(u32*)0x020A9F3C;
 		patchUserSettingsReadDSiWare(0x020B75B0);
 		*(u32*)0x020B75D8 = wirelessReturnCodeArm;
 		*(u32*)0x020B75DC = 0xE12FFF1E; // bx lr
@@ -10272,6 +10325,31 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020B7620 = 0xE12FFF1E; // bx lr
 		*(u32*)0x020B762C = 0xE3A00000; // mov r0, #0
 		*(u32*)0x020B7630 = 0xE12FFF1E; // bx lr
+		*(u32*)0x020BD200 = 0xE3A00003; // mov r0, #3
+
+		if (!extendedMemory) {
+			const u32 heapStart = *(u32*)0x020B6370;
+			extern u32 dqWarsHeapAlloc[];
+			extern u32 dqWarsHeapAllocLen;
+			extern u32 dqWarsHeapFree[];
+			extern u32 dqWarsHeapFreeLen;
+			extern u32 dqWarsSlot2HeapAlloc;
+			extern u32 dqWarsSlot2HeapFree;
+			const u32 newCodeAddr = 0x020B8A50;
+			const u32 newCodeAddr2 = newCodeAddr+dqWarsHeapAllocLen;
+			dqWarsSlot2HeapAlloc = heapStart;
+			dqWarsSlot2HeapFree = heapStart+4;
+			tonccpy((u32*)newCodeAddr, dqWarsHeapAlloc, dqWarsHeapAllocLen);
+			tonccpy((u32*)newCodeAddr2, dqWarsHeapFree, dqWarsHeapFreeLen);
+			*(u32*)0x020B6370 += loadCe9Slot2Heap((u32*)heapStart);
+
+			*(u32*)0x020F43A4 = 0xE51FF004; // ldr pc, =newCodeAddr
+			*(u32*)0x020F43A8 = newCodeAddr;
+			*(u32*)0x020F4428 = 0xE51FF004; // ldr pc, =newCodeAddr
+			*(u32*)0x020F442C = newCodeAddr;
+			*(u32*)0x020F4584 = 0xE51FF004; // ldr pc, =newCodeAddr2
+			*(u32*)0x020F4588 = newCodeAddr2;
+		}
 	}
 
 	// Dreamwalker (USA)
