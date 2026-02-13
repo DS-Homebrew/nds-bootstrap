@@ -26827,8 +26827,8 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Trajectile (USA)
 	// Reflect Missile (Europe, Australia)
-	// Requires 8MB of RAM
-	else if ((strcmp(romTid, "KDZE") == 0 || strcmp(romTid, "KDZV") == 0) && extendedMemory) {
+	// Audio does not play on retail consoles
+	else if (strcmp(romTid, "KDZE") == 0 || strcmp(romTid, "KDZV") == 0) {
 		*(u32*)0x0204086C = 0xE1A00000; // nop
 		*(u32*)0x020408B8 = 0xE1A00000; // nop
 		*(u32*)0x020408BC = 0xE1A00000; // nop
@@ -26837,8 +26837,8 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		doubleNopT(0x020B9216);
 		toncset16((u16*)0x020B9298, nopT, 0x4A/sizeof(u16)); // Do not use DSi WRAM
 		*(u32*)0x020C7510 = 0xE3A00001; // mov r0, #1
-		patchInitDSiWare(0x020C7528, heapEnd);
-		*(u32*)0x020C7898 -= 0x30000;
+		patchInitDSiWare(0x020C7528, extendedMemory ? heapEnd : 0x02297B40);
+		*(u32*)0x020C7898 = extendedMemory ? *(u32*)0x020D3FF8 : 0x02191740;
 		patchUserSettingsReadDSiWare(0x020C8DDC);
 		*(u32*)0x020CC3DC = wirelessReturnCodeArm;
 		*(u32*)0x020CC3E0 = 0xE12FFF1E; // bx lr
@@ -26855,12 +26855,22 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		doubleNopT(0x020DA1DA);
 		doubleNopT(0x020DA1F6);
 		doubleNopT(0x020DA21E);
-		*(u32*)0x02104154 = 0x1E0000; // Shrink sound heap from 0x300000
+		*(u32*)0x02104154 = extendedMemory ? 0x1E0000 : 0; // Shrink sound heap from 0x300000 (0 for disabled)
+
+		if (!extendedMemory) {
+			doubleNopT(0x020B70D0); // Skip unneeded allocation code
+			setBLXThumb(0x020B9352, 0x020C463C);
+			doubleNopT(0x020B9396); // Prevent changing heap end pointer to close to the end of RAM
+			*(u32*)0x020C463C = 0xE59F0000; // ldr r0, *0x020D3FF8
+			*(u32*)0x020C4640 = 0xE12FFF1E; // bx lr
+			*(u32*)0x020C4644 = *(u32*)0x020D3FF8;
+			*(u16*)0x020D3CE8 = 0x4770; // bx lr (Prevent clearing unused RAM space at 0x02191740-0x02297B40)
+		}
 	}
 
 	// Reflect Missile (Japan)
-	// Requires 8MB of RAM
-	else if (strcmp(romTid, "KDZJ") == 0 && extendedMemory) {
+	// Audio does not play on retail consoles
+	else if (strcmp(romTid, "KDZJ") == 0) {
 		*(u32*)0x0204055C = 0xE1A00000; // nop
 		*(u32*)0x020405A8 = 0xE1A00000; // nop
 		*(u32*)0x020405AC = 0xE1A00000; // nop
@@ -26869,8 +26879,8 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		doubleNopT(0x020B8F06);
 		toncset16((u16*)0x020B8F88, nopT, 0x4A/sizeof(u16)); // Do not use DSi WRAM
 		*(u32*)0x020C7200 = 0xE3A00001; // mov r0, #1
-		patchInitDSiWare(0x020C7218, heapEnd);
-		*(u32*)0x020C7588 -= 0x30000;
+		patchInitDSiWare(0x020C7218, extendedMemory ? heapEnd : 0x022977E0);
+		*(u32*)0x020C7588 = extendedMemory ? *(u32*)0x020D3CE8 : 0x021913E0;
 		patchUserSettingsReadDSiWare(0x020C8ACC);
 		*(u32*)0x020CC0CC = wirelessReturnCodeArm;
 		*(u32*)0x020CC0D0 = 0xE12FFF1E; // bx lr
@@ -26887,7 +26897,17 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		doubleNopT(0x020D9ECA);
 		doubleNopT(0x020D9EE6);
 		doubleNopT(0x020D9F0E);
-		*(u32*)0x02103DF8 = 0x1E0000; // Shrink sound heap from 0x300000
+		*(u32*)0x02103DF8 = extendedMemory ? 0x1E0000 : 0; // Shrink sound heap from 0x300000 (0 for disabled)
+
+		if (!extendedMemory) {
+			doubleNopT(0x020B6DC0); // Skip unneeded allocation code
+			setBLXThumb(0x020B9042, 0x020C432C);
+			doubleNopT(0x020B9086); // Prevent changing heap end pointer to close to the end of RAM
+			*(u32*)0x020C432C = 0xE59F0000; // ldr r0, *0x020D3CE8
+			*(u32*)0x020C4330 = 0xE12FFF1E; // bx lr
+			*(u32*)0x020C4334 = *(u32*)0x020D3CE8;
+			*(u16*)0x020D39D8 = 0x4770; // bx lr (Prevent clearing unused RAM space at 0x021913E0-0x022977E0)
+		}
 	}
 
 	// Treasure Hunter X (USA)
