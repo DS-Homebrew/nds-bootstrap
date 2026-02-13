@@ -2046,8 +2046,12 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 		b4dsDebugRam = (conf->b4dsMode == 2 || (*(vu32*)(0x02800000) == 0x314D454D && *(vu32*)(0x02C00000) == 0x324D454D));
 
+		const bool allocSlot2Ram = (
+			strncmp(romTid, "KDQ", 3) == 0 // Dragon Quest Wars
+		);
+
 		loadPreLoadSettings(conf, "nitro:/preLoadSettingsMEP.pck", romTid, headerCRC);
-		if (conf->dataToPreloadAddr[0] == 0 && strncmp(romTid, "KDQ", 3) != 0) {
+		if (conf->dataToPreloadAddr[0] == 0 && !allocSlot2Ram) {
 			// Set NitroFS pre-load, in case if full ROM pre-load fails
 			conf->dataToPreloadAddr[0] = ndsArm7BinOffset+ndsArm7Size;
 			conf->dataToPreloadSize[0] = ((internalRomSize == 0 || internalRomSize > conf->romSize) ? conf->romSize : internalRomSize)-conf->dataToPreloadAddr[0];
@@ -2292,9 +2296,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 					(u8*)CARDENGINE_ARM9_LOCATION_BUFFERED
 				);
 
-				if (
-					strncmp(romTid, "KDQ", 3) == 0 // Dragon Quest Wars
-				) {
+				if (allocSlot2Ram) {
 					loadCardEngineBinary("nitro:/cardengine_arm9_slot2heap.bin", (u8*)CARDENGINE_ARM9_SLOT2HEAP_LOCATION_BUFFERED);
 					if (*(u16*)0x020000C0 == 0x5A45) {
 						*(u32*)(CARDENGINE_ARM9_SLOT2HEAP_LOCATION_BUFFERED+0x8) = 0x08800000;
