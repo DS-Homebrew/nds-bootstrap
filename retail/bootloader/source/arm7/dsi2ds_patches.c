@@ -25390,48 +25390,52 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Starship Defense (USA)
 	// Starship Patrol (Europe, Australia)
+	// Starship Defender (Japan)
 	// Requires more than 8MB of RAM
-	/* else if ((strcmp(romTid, "KDYE") == 0 || strcmp(romTid, "KDYV") == 0) && extendedMemory) {
-		*(u32*)0x0201A5B4 = 0xE1A00000; // nop
-		*(u32*)0x0201A650 = 0xE1A00000; // nop
-		*(u32*)0x0201A660 = 0xE1A00000; // nop
-		*(u32*)0x0201A7B4 = 0xE1A00000; // nop
-		*(u32*)0x0201A7C0 = 0xE1A00000; // nop
-		*(u32*)0x0201A998 = 0xE1A00000; // nop
-		*(u32*)0x0201A9F8 = 0xE1A00000; // nop
-		*(u32*)0x0201AACC = 0xE1A00000; // nop
-		*(u32*)0x0201AB04 = 0xE1A00000; // nop
-		*(u32*)0x0201AD3C = 0xE1A00000; // nop
-		*(u32*)0x0201AFF4 = 0xE12FFF1E; // bx lr
-		doubleNopT(0x020A7642);
-		toncset16((u16*)0x020A76C4, nopT, 0x4A/sizeof(u16)); // Do not use DSi WRAM
-		*(u32*)0x020BA68C = 0xE3A00001; // mov r0, #1
-		patchInitDSiWare(0x020BA6A4, heapEnd);
-		*(u32*)0x020BAA14 -= 0x30000;
-		patchUserSettingsReadDSiWare(0x020BBFA4);
-		*(u32*)0x020BF4DC = wirelessReturnCodeArm;
-		*(u32*)0x020BF4E0 = 0xE12FFF1E; // bx lr
-		doubleNopT(0x020C257A);
-		doubleNopT(0x020C821E);
-		doubleNopT(0x020CCD9A);
-		doubleNopT(0x020CCDBE);
-		doubleNopT(0x020CCDD6);
-		doubleNopT(0x020CCDF6);
-		doubleNopT(0x020CCE12);
-		doubleNopT(0x020CCE32);
-		doubleNopT(0x020CCE4E);
-		doubleNopT(0x020CCE6E);
-		doubleNopT(0x020CCE8E);
-		doubleNopT(0x020CCEAA);
-		doubleNopT(0x020CCED2);
+	/* else if (strncmp(romTid, "KDY", 3) == 0 && extendedMemory) {
+		const u8 offsetChange = isJpn ? 8 : 0;
+		const u8 offsetChange2 = isJpn ? 0x30 : 0;
+		const u8 offsetChange3 = isJpn ? 0x48 : 0;
+		const u8 offsetChange4 = isJpn ? 0x40 : 0;
 
-		// Redirect SDAT offset
-		const u32 newCodeAddr = 0x020B7774;
-		*(u16*)(newCodeAddr) = 0x4800; // movs r0, #0x????????
-		*(u16*)(newCodeAddr+2) = 0x4770; // bx lr
-		*(u32*)(newCodeAddr+4) = 0x02900000;
-
-		setBLThumb(0x020A54D2, newCodeAddr);
+		*(u32*)(0x0201A5B4-offsetChange) = 0xE1A00000; // nop
+		*(u32*)(0x0201A650-offsetChange) = 0xE1A00000; // nop
+		*(u32*)(0x0201A660-offsetChange) = 0xE1A00000; // nop
+		*(u32*)(0x0201A7B4-offsetChange) = 0xE1A00000; // nop
+		*(u32*)(0x0201A7C0-offsetChange) = 0xE1A00000; // nop
+		*(u32*)(0x0201A998-offsetChange) = 0xE1A00000; // nop
+		*(u32*)(0x0201A9F8-offsetChange) = 0xE1A00000; // nop
+		*(u32*)(0x0201AACC-offsetChange) = 0xE1A00000; // nop
+		*(u32*)(0x0201AB04-offsetChange) = 0xE1A00000; // nop
+		*(u32*)(0x0201AD3C-offsetChange) = 0xE1A00000; // nop
+		*(u32*)(0x0201AFF4-offsetChange) = 0xE12FFF1E; // bx lr
+		*(u32*)(0x0202DFBC-offsetChange2) = 0xE3A00000; // mov r0, #0
+		doubleNopT(0x020A3064-offsetChange3);
+		doubleNopT(0x020A3094-offsetChange3);
+		doubleNopT(0x020A30B2-offsetChange3);
+		doubleNopT(0x020A54FC-offsetChange3); // Skip unneeded allocation code
+		doubleNopT(0x020A7642-offsetChange3);
+		toncset16((u16*)(0x020A76C4-offsetChange3), nopT, 0x4A/sizeof(u16)); // Do not use DSi WRAM
+		*(u32*)(0x020BA68C-offsetChange3) = 0xE3A00001; // mov r0, #1
+		patchInitDSiWare(0x020BA6A4-offsetChange3, heapEnd);
+		patchUserSettingsReadDSiWare(0x020BBFA4-offsetChange3);
+		*(u32*)(0x020BF4DC-offsetChange3) = wirelessReturnCodeArm;
+		*(u32*)(0x020BF4E0-offsetChange3) = 0xE12FFF1E; // bx lr
+		doubleNopT(0x020C257A-offsetChange3);
+		// *(u16*)(0x020C6DA8-offsetChange3) = 0x4770; // bx lr (Prevent clearing unused RAM space at 0x022273C8-0x0232D7C8)
+		doubleNopT(0x020C821E -offsetChange3);
+		doubleNopT(0x020CCD9A-offsetChange3);
+		doubleNopT(0x020CCDBE -offsetChange3);
+		doubleNopT(0x020CCDD6-offsetChange3);
+		doubleNopT(0x020CCDF6-offsetChange3);
+		doubleNopT(0x020CCE12-offsetChange3);
+		doubleNopT(0x020CCE32-offsetChange3);
+		doubleNopT(0x020CCE4E -offsetChange3);
+		doubleNopT(0x020CCE6E -offsetChange3);
+		doubleNopT(0x020CCE8E -offsetChange3);
+		doubleNopT(0x020CCEAA-offsetChange3);
+		doubleNopT(0x020CCED2-offsetChange3);
+		// *(u32*)(0x020F7C18-offsetChange4) = 0xF6000; // Shrink sound heap from 0x396000
 	} */
 
 	// SteamWorld Tower Defense (USA)

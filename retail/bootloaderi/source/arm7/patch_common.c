@@ -14372,13 +14372,9 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Starship Defense (USA)
 	// Starship Patrol (Europe, Australia)
-	else if ((strcmp(romTid, "KDYE") == 0 || strcmp(romTid, "KDYV") == 0) && dsiWramBlocked) {
-		toncset16((u16*)0x020A76C4, nopT, 0x4A/sizeof(u16)); // Do not use DSi WRAM
-	}
-
 	// Starship Defender (Japan)
-	else if (strcmp(romTid, "KDYJ") == 0 && dsiWramBlocked) {
-		toncset16((u16*)0x020A767C, nopT, 0x4A/sizeof(u16)); // Do not use DSi WRAM
+	else if (strncmp(romTid, "KDY", 3) == 0 && dsiWramBlocked) {
+		toncset16((u16*)(isJpn ? 0x020A767C : 0x020A76C4), nopT, 0x4A/sizeof(u16)); // Do not use DSi WRAM
 	}
 
 	// SteamWorld Tower Defense (USA)
