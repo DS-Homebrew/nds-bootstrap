@@ -19846,14 +19846,14 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Due to the B4DS DSiWare save implementation, save data is stored in all 3 slots
 	else if (strcmp(romTid, "KO4E") == 0 || strcmp(romTid, "KO4V") == 0) {
 		useSharedFont = (twlFontFound && extendedMemory);
-		u16 offsetChange2 = (romTid[3] == 'E') ? 0 : 0x154;
-		u16 offsetChange = (romTid[3] == 'E') ? 0 : 0x1A8;
+		const u16 offsetChange2 = isUsa ? 0 : 0x154;
+		const u16 offsetChange = isUsa ? 0 : 0x1A8;
 
-		// *(u32*)0x020053A4 = 0xF5000; // Shrink sound heap from 0x133333
 		*(u32*)0x0200F70C = 0xE1A00000; // nop
 		*(u32*)0x02012B44 = 0xE1A00000; // nop
 		patchInitDSiWare(0x02018644, heapEnd);
 		if (!extendedMemory) {
+			// *(u32*)0x020053A4 = 0xF5000; // Shrink sound heap from 0x133333
 			*(u32*)0x020189D0 = *(u32*)0x02004FD0;
 		}
 		patchUserSettingsReadDSiWare(0x02019AE4);
@@ -19902,23 +19902,19 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Due to the B4DS DSiWare save implementation, save data is stored in all 3 slots
 	else if (strcmp(romTid, "KOYE") == 0 || strcmp(romTid, "KOYP") == 0) {
 		useSharedFont = (twlFontFound && extendedMemory);
-		u8 offsetChangeN = (romTid[3] == 'E') ? 0 : 4;
-		u16 offsetChange = (romTid[3] == 'E') ? 0 : 0x120;
-		u16 offsetChange2 = (romTid[3] == 'E') ? 0 : 0x16C;
-
-		if (!extendedMemory) {
-			u32 bssEnd = *(u32*)0x02004FE8;
-			u32 sdatOffset = *(u32*)0x020053BC;
-
-			*(u32*)0x02004FE8 -= shrinkBss(ndsHeader, bssEnd, sdatOffset+0x34000, sdatOffset);
-
-			*(u32*)0x020053C0 = 0xFE000; // Shrink sound heap from 0x133333
-		}
+		const u8 offsetChangeN = isUsa ? 0 : 4;
+		const u16 offsetChange = isUsa ? 0 : 0x120;
+		const u16 offsetChange2 = isUsa ? 0 : 0x16C;
 
 		*(u32*)0x0200F728 = 0xE1A00000; // nop
 		*(u32*)0x02012BF4 = 0xE1A00000; // nop
 		patchInitDSiWare(0x0201872C, heapEnd);
 		if (!extendedMemory) {
+			const u32 bssEnd = *(u32*)0x02004FE8;
+			const u32 sdatOffset = *(u32*)0x020053BC;
+			*(u32*)0x020053C0 = 0xFE000; // Shrink sound heap from 0x133333
+
+			*(u32*)0x02004FE8 -= shrinkBss(ndsHeader, bssEnd, sdatOffset+0x34000, sdatOffset);
 			*(u32*)0x02018AB8 = *(u32*)0x02004FE8;
 		}
 		patchUserSettingsReadDSiWare(0x02019BDC);
@@ -19948,16 +19944,22 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Oscar's World Tour (Europe)
 	// Due to the B4DS DSiWare save implementation, save data is stored in all 3 slots
 	// Requires 8MB of RAM
-	else if ((strcmp(romTid, "KO9E") == 0 || strcmp(romTid, "KO9P") == 0) && extendedMemory) {
-		useSharedFont = twlFontFound;
-		u8 offsetChange = (romTid[3] == 'E') ? 0 : 0x4C;
-		u8 offsetChange2 = (romTid[3] == 'E') ? 0 : 0x70;
+	else if (strcmp(romTid, "KO9E") == 0 || strcmp(romTid, "KO9P") == 0) {
+		useSharedFont = (twlFontFound && extendedMemory);
+		const u8 offsetChange = isUsa ? 0 : 0x4C;
+		const u8 offsetChange2 = isUsa ? 0 : 0x70;
 
-		// *(u32*)0x020053C0 = 0x1E4000; // Shrink sound heap from 0x1EEEEE
 		*(u32*)0x0200F728 = 0xE1A00000; // nop
 		*(u32*)0x02012BF4 = 0xE1A00000; // nop
 		patchInitDSiWare(0x0201872C, heapEnd);
-		// *(u32*)0x02018AB8 = *(u32*)0x02004FE8;
+		if (!extendedMemory) {
+			const u32 bssEnd = *(u32*)0x02004FE8;
+			const u32 sdatOffset = *(u32*)0x020053BC;
+			*(u32*)0x020053C0 = 0x14EEEE; // Shrink sound heap from 0x1EEEEE
+
+			*(u32*)0x02004FE8 -= shrinkBss(ndsHeader, bssEnd, sdatOffset+0xA0000, sdatOffset);
+			*(u32*)0x02018AB8 = *(u32*)0x02004FE8;
+		}
 		patchUserSettingsReadDSiWare(0x02019BDC);
 		*(u32*)0x0202751C = 0xE1A00000; // nop
 		setBL(0x020275C4, (u32)dsiSaveOpen);
