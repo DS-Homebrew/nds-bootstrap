@@ -10175,24 +10175,32 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			const u32 heapStart = *(u32*)0x020B69B0;
 			extern u32 dqWarsHeapAlloc[];
 			extern u32 dqWarsHeapAllocLen;
+			extern u32 dqWarsHeapAlloc2[];
+			extern u32 dqWarsHeapAlloc2Len;
 			extern u32 dqWarsHeapFree[];
 			extern u32 dqWarsHeapFreeLen;
 			extern u32 dqWarsSlot2HeapAlloc;
 			extern u32 dqWarsSlot2HeapFree;
+			extern u32 dqWarsRestoreCpsrStateFunc;
 			const u32 newCodeAddr = 0x020B9090;
 			const u32 newCodeAddr2 = newCodeAddr+dqWarsHeapAllocLen;
+			const u32 newCodeAddr3 = newCodeAddr2+dqWarsHeapAlloc2Len;
 			dqWarsSlot2HeapAlloc = heapStart;
 			dqWarsSlot2HeapFree = heapStart+4;
+			dqWarsRestoreCpsrStateFunc = 0x020B7940;
 			tonccpy((u32*)newCodeAddr, dqWarsHeapAlloc, dqWarsHeapAllocLen);
-			tonccpy((u32*)newCodeAddr2, dqWarsHeapFree, dqWarsHeapFreeLen);
+			tonccpy((u32*)newCodeAddr2, dqWarsHeapAlloc2, dqWarsHeapAlloc2Len);
+			tonccpy((u32*)newCodeAddr3, dqWarsHeapFree, dqWarsHeapFreeLen);
 			*(u32*)0x020B69B0 += loadCe9Slot2Heap((u32*)heapStart);
 
-			*(u32*)0x020F4A84 = 0xE51FF004; // ldr pc, =newCodeAddr
-			*(u32*)0x020F4A88 = newCodeAddr;
-			*(u32*)0x020F4B08 = 0xE51FF004; // ldr pc, =newCodeAddr
-			*(u32*)0x020F4B0C = newCodeAddr;
-			*(u32*)0x020F4C64 = 0xE51FF004; // ldr pc, =newCodeAddr2
-			*(u32*)0x020F4C68 = newCodeAddr2;
+			*(u32*)0x020F4A7C = 0xE51FF004; // ldr pc, =newCodeAddr
+			*(u32*)0x020F4A80 = newCodeAddr;
+			*(u32*)0x020F4B00 = 0xE51FF004; // ldr pc, =newCodeAddr
+			*(u32*)0x020F4B04 = newCodeAddr;
+			*(u32*)0x020F4BAC = 0xE51FF004; // ldr pc, =newCodeAddr2
+			*(u32*)0x020F4BB0 = newCodeAddr2;
+			*(u32*)0x020F4C64 = 0xE51FF004; // ldr pc, =newCodeAddr3
+			*(u32*)0x020F4C68 = newCodeAddr3;
 		}
 	}
 
@@ -10253,24 +10261,32 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			const u32 heapStart = *(u32*)0x020B69F8;
 			extern u32 dqWarsHeapAlloc[];
 			extern u32 dqWarsHeapAllocLen;
+			extern u32 dqWarsHeapAlloc2[];
+			extern u32 dqWarsHeapAlloc2Len;
 			extern u32 dqWarsHeapFree[];
 			extern u32 dqWarsHeapFreeLen;
 			extern u32 dqWarsSlot2HeapAlloc;
 			extern u32 dqWarsSlot2HeapFree;
+			extern u32 dqWarsRestoreCpsrStateFunc;
 			const u32 newCodeAddr = 0x020B90D8;
 			const u32 newCodeAddr2 = newCodeAddr+dqWarsHeapAllocLen;
+			const u32 newCodeAddr3 = newCodeAddr2+dqWarsHeapAlloc2Len;
 			dqWarsSlot2HeapAlloc = heapStart;
 			dqWarsSlot2HeapFree = heapStart+4;
+			dqWarsRestoreCpsrStateFunc = 0x020B7988;
 			tonccpy((u32*)newCodeAddr, dqWarsHeapAlloc, dqWarsHeapAllocLen);
-			tonccpy((u32*)newCodeAddr2, dqWarsHeapFree, dqWarsHeapFreeLen);
+			tonccpy((u32*)newCodeAddr2, dqWarsHeapAlloc2, dqWarsHeapAlloc2Len);
+			tonccpy((u32*)newCodeAddr3, dqWarsHeapFree, dqWarsHeapFreeLen);
 			*(u32*)0x020B69F8 += loadCe9Slot2Heap((u32*)heapStart);
 
-			*(u32*)0x020F4B04 = 0xE51FF004; // ldr pc, =newCodeAddr
-			*(u32*)0x020F4B08 = newCodeAddr;
-			*(u32*)0x020F4B88 = 0xE51FF004; // ldr pc, =newCodeAddr
-			*(u32*)0x020F4B8C = newCodeAddr;
-			*(u32*)0x020F4CE4 = 0xE51FF004; // ldr pc, =newCodeAddr2
-			*(u32*)0x020F4CE8 = newCodeAddr2;
+			*(u32*)0x020F4AFC = 0xE51FF004; // ldr pc, =newCodeAddr
+			*(u32*)0x020F4B00 = newCodeAddr;
+			*(u32*)0x020F4B80 = 0xE51FF004; // ldr pc, =newCodeAddr
+			*(u32*)0x020F4B84 = newCodeAddr;
+			*(u32*)0x020F4C2C = 0xE51FF004; // ldr pc, =newCodeAddr2
+			*(u32*)0x020F4C30 = newCodeAddr2;
+			*(u32*)0x020F4CE4 = 0xE51FF004; // ldr pc, =newCodeAddr3
+			*(u32*)0x020F4CE8 = newCodeAddr3;
 		}
 	}
 
@@ -10331,24 +10347,32 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			const u32 heapStart = *(u32*)0x020B6370;
 			extern u32 dqWarsHeapAlloc[];
 			extern u32 dqWarsHeapAllocLen;
+			extern u32 dqWarsHeapAlloc2[];
+			extern u32 dqWarsHeapAlloc2Len;
 			extern u32 dqWarsHeapFree[];
 			extern u32 dqWarsHeapFreeLen;
 			extern u32 dqWarsSlot2HeapAlloc;
 			extern u32 dqWarsSlot2HeapFree;
+			extern u32 dqWarsRestoreCpsrStateFunc;
 			const u32 newCodeAddr = 0x020B8A50;
 			const u32 newCodeAddr2 = newCodeAddr+dqWarsHeapAllocLen;
+			const u32 newCodeAddr3 = newCodeAddr2+dqWarsHeapAlloc2Len;
 			dqWarsSlot2HeapAlloc = heapStart;
 			dqWarsSlot2HeapFree = heapStart+4;
+			dqWarsRestoreCpsrStateFunc = 0x020B7300;
 			tonccpy((u32*)newCodeAddr, dqWarsHeapAlloc, dqWarsHeapAllocLen);
-			tonccpy((u32*)newCodeAddr2, dqWarsHeapFree, dqWarsHeapFreeLen);
+			tonccpy((u32*)newCodeAddr2, dqWarsHeapAlloc2, dqWarsHeapAlloc2Len);
+			tonccpy((u32*)newCodeAddr3, dqWarsHeapFree, dqWarsHeapFreeLen);
 			*(u32*)0x020B6370 += loadCe9Slot2Heap((u32*)heapStart);
 
-			*(u32*)0x020F43A4 = 0xE51FF004; // ldr pc, =newCodeAddr
-			*(u32*)0x020F43A8 = newCodeAddr;
-			*(u32*)0x020F4428 = 0xE51FF004; // ldr pc, =newCodeAddr
-			*(u32*)0x020F442C = newCodeAddr;
-			*(u32*)0x020F4584 = 0xE51FF004; // ldr pc, =newCodeAddr2
-			*(u32*)0x020F4588 = newCodeAddr2;
+			*(u32*)0x020F439C = 0xE51FF004; // ldr pc, =newCodeAddr
+			*(u32*)0x020F43A0 = newCodeAddr;
+			*(u32*)0x020F4420 = 0xE51FF004; // ldr pc, =newCodeAddr
+			*(u32*)0x020F4424 = newCodeAddr;
+			*(u32*)0x020F44CC = 0xE51FF004; // ldr pc, =newCodeAddr2
+			*(u32*)0x020F44D0 = newCodeAddr2;
+			*(u32*)0x020F4584 = 0xE51FF004; // ldr pc, =newCodeAddr3
+			*(u32*)0x020F4588 = newCodeAddr3;
 		}
 	}
 
