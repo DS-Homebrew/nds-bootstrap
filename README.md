@@ -81,7 +81,7 @@ An alternative forwarder generator for 3DS users. YANBF forwarders are 3DS-mode 
 - retrogamefan, Rudolph, and [Mow](https://github.com/taxicat1): Included AP-patches
    - [enler](https://github.com/enler): Fixing AP-patch for Pokemon Black 2 (Japan) for DS⁽ⁱ⁾ mode compatibility
    - [Rocket Robz](https://github.com/RocketRobz): Fixing some DS⁽ⁱ⁾-Enhanced game AP-patches for DS⁽ⁱ⁾ mode compatibility
-- Tharika Madurapperuma: [malloc code](https://tharikasblogs.blogspot.com/p/how-to-write-your-own-malloc-and-free.html) used to allocate Slot-2 RAM in some DSiWare titles
+- Tharika Madurapperuma: [malloc code](https://tharikasblogs.blogspot.com/p/how-to-write-your-own-malloc-and-free.html) used to allocate Slot-2 RAM in *Dragon Quest Wars*
 - [VeaNika](https://github.com/VeaNika): DS Phat (NTR-001) color LUT from [GBARunner3](https://github.com/Gericom/GBARunner3)
 
 ## Translators
