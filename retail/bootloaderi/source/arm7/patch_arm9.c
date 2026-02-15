@@ -2284,7 +2284,8 @@ void patchTwlSaveFuncs(const cardengineArm9* ce9) {
 	const u32* dsiSaveWrite = ce9->patches->dsiSaveWrite;
 
 	u32* ovlPatcher = NULL;
-	u16 ovlPatchOffset = 0x54;
+	const u8 codeLen = patchOffsetCache.a9IsThumb ? 0x54 : 0x44;
+	u32* ovlPatch = NULL;
 
 	aFile file;
 	getFileFromCluster(&file, dsi2dsSavePatchFileCluster, bootstrapOnFlashcard);
@@ -2305,15 +2306,18 @@ void patchTwlSaveFuncs(const cardengineArm9* ce9) {
 				ovlPatcher = (u32*)postCardReadCodeOffset;
 
 				extern u32 applyDSi2DSSaveCodeToOverlay[];
-				tonccpy(ovlPatcher, applyDSi2DSSaveCodeToOverlay, 0x48);
+				extern u32 applyDSi2DSThumbSaveCodeToOverlay[];
+				tonccpy(ovlPatcher, patchOffsetCache.a9IsThumb ? applyDSi2DSThumbSaveCodeToOverlay : applyDSi2DSSaveCodeToOverlay, codeLen);
 
 				const u32 ovlOffset = patchData[0];
 				i += 8;
 				fileRead((char*)patchData, &file, dsi2dsSavePatchOffset+i, 8);
 
-				ovlPatcher[0x48/4] = ovlOffset; // dsi2dsSaveOverlayOffset
-				ovlPatcher[0x4C/4] = patchData[0]; // dsi2dsSaveOverlayCode
-				ovlPatcher[0x50/4] = 0; // dsi2dsSaveOverlayPatchLines
+				ovlPatcher[codeLen/4] = ovlOffset; // dsi2dsSaveOverlayOffset
+				ovlPatcher[(codeLen+4)/4] = patchData[0]; // dsi2dsSaveOverlayCode
+				ovlPatcher[(codeLen+8)/4] = 0; // dsi2dsSaveOverlayPatchLines
+				ovlPatcher[(codeLen+0xC)/4] = patchData[1] ? patchData[1] : postCardReadCodeOffset+codeLen+0x10; // dsi2dsSaveOverlayPatch
+				ovlPatch = (u32*)(ovlPatcher[(codeLen+0xC)/4]);
 			}	break;
 			case 0x4E494254: // 'TBIN'
 				twlSaveThumbBranchOffset = patchData[0];
@@ -2429,11 +2433,9 @@ void patchTwlSaveFuncs(const cardengineArm9* ce9) {
 				break;
 		}
 		if (ovlPatcherAvailable) {
-			ovlPatcher[0x50/4]++;
-			ovlPatcher[ovlPatchOffset/4] = patchData[0];
-			ovlPatchOffset += 4;
-			ovlPatcher[ovlPatchOffset/4] = *(u32*)(patchData[0]);
-			ovlPatchOffset += 4;
+			ovlPatcher[(codeLen+8)/4]++;
+			*ovlPatch++ = patchData[0];
+			tonccpy(ovlPatch++, (void*)(patchData[0]), 4);
 		}
 	}
 }

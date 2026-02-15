@@ -26887,6 +26887,24 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		doubleNopT(0x020DA21E);
 		*(u32*)0x02104154 = extendedMemory ? 0x1E0000 : 0; // Shrink sound heap from 0x300000 (0 for disabled)
 
+		// Overlay code patch (Part of .pck file)
+		/* if (*(u32*)0x0217902C == 0xF75A9300) {
+			*(u16*)0x0217902E = 0x2001; // movs r0, #1 (dsiSaveGetArcSrc)
+			*(u16*)0x02179030 = nopT; // nop
+			setBLXThumb(0x0217904A, (u32)dsiSaveOpen);
+			setBLXThumb(0x02179056, (u32)dsiSaveCreate);
+			setBLXThumb(0x02179060, (u32)dsiSaveOpen);
+			setBLXThumb(0x02179074, (u32)dsiSaveClose);
+			setBLXThumb(0x0217908C, (u32)dsiSaveWrite);
+			setBLXThumb(0x0217909A, (u32)dsiSaveClose);
+			doubleNopT(0x021790A6); // dsiSaveFlush
+			setBLXThumb(0x021790AC, (u32)dsiSaveClose);
+			setBLXThumb(0x021790D2, (u32)dsiSaveOpen);
+			setBLXThumb(0x021790EC, (u32)dsiSaveRead);
+			setBLXThumb(0x021790FC, (u32)dsiSaveClose);
+			setBLXThumb(0x02179108, (u32)dsiSaveClose);
+		} */
+
 		if (!extendedMemory) {
 			doubleNopT(0x020B70D0); // Skip unneeded allocation code
 			setBLXThumb(0x020B9352, 0x020C463C);
@@ -26928,6 +26946,24 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		doubleNopT(0x020D9EE6);
 		doubleNopT(0x020D9F0E);
 		*(u32*)0x02103DF8 = extendedMemory ? 0x1E0000 : 0; // Shrink sound heap from 0x300000 (0 for disabled)
+
+		// Overlay code patch (Part of .pck file)
+		/* if (*(u32*)0x02178CCC == 0xF75A9300) {
+			*(u16*)0x02178CCE = 0x2001; // movs r0, #1 (dsiSaveGetArcSrc)
+			*(u16*)0x02178CD0 = nopT; // nop
+			setBLXThumb(0x02178CEA, (u32)dsiSaveOpen);
+			setBLXThumb(0x02178CF6, (u32)dsiSaveCreate);
+			setBLXThumb(0x02178D00, (u32)dsiSaveOpen);
+			setBLXThumb(0x02178D14, (u32)dsiSaveClose);
+			setBLXThumb(0x02178D2C, (u32)dsiSaveWrite);
+			setBLXThumb(0x02178D3A, (u32)dsiSaveClose);
+			doubleNopT(0x02178D46); // dsiSaveFlush
+			setBLXThumb(0x02178D4C, (u32)dsiSaveClose);
+			setBLXThumb(0x02178D72, (u32)dsiSaveOpen);
+			setBLXThumb(0x02178D8C, (u32)dsiSaveRead);
+			setBLXThumb(0x02178D9C, (u32)dsiSaveClose);
+			setBLXThumb(0x02178DA8, (u32)dsiSaveClose);
+		} */
 
 		if (!extendedMemory) {
 			doubleNopT(0x020B6DC0); // Skip unneeded allocation code
