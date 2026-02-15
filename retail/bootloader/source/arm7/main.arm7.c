@@ -1,10 +1,10 @@
 /*-----------------------------------------------------------------
  boot.c
- 
+
  BootLoader
  Loads a file into memory and runs it
 
- All resetMemory and startBinary functions are based 
+ All resetMemory and startBinary functions are based
  on the MultiNDS loader by Darkain.
  Original source available at:
  http://cvs.sourceforge.net/viewcvs.py/ndslib/ndslib/examples/loader/boot/main.cpp
@@ -28,7 +28,7 @@
 
 	If you use this code, please give due credit and email me about your
 	project at chishm@hotmail.com
- 
+
 	Helpful information:
 	This code runs from VRAM bank C on ARM7
 ------------------------------------------------------------------*/
@@ -225,7 +225,7 @@ static void initMBK(void) {
 	*((vu32*)REG_MBK4)=0x8C888480;
 	*((vu32*)REG_MBK5)=0x9C989490;
 
-	// WRAM mapped to the 0x3700000 - 0x37FFFFF area 
+	// WRAM mapped to the 0x3700000 - 0x37FFFFF area
 	// WRAM-A mapped to the 0x3000000 - 0x303FFFF area : 256k
 	REG_MBK6=0x00403000;
 	// WRAM-B mapped to the 0x3740000 - 0x37BFFFF area : 512k // why? only 256k real memory is there
@@ -248,7 +248,7 @@ Modified by Chishm:
 --------------------------------------------------------------------------*/
 static void resetMemory_ARM7(void) {
 	register int i;
-	
+
 	REG_IME = 0;
 
 	for (i = 0; i < 16; i++) {
@@ -415,7 +415,7 @@ static void NDSTouchscreenMode(void) {
 	cdcWriteReg(CDC_SOUND, 0x22, 0x70);
 	cdcWriteReg(CDC_CONTROL, 0x52, 0x80);
 	cdcWriteReg(CDC_CONTROL, 0x51, 0x00);
-	
+
 	if (malfunction) {
 		// Set remaining values
 		cdcWriteReg(CDC_CONTROL, 0x03, 0x44);
@@ -773,7 +773,7 @@ static void my_readUserSettings(tNDSHeader* ndsHeader) {
 	}
 
 	// If both slots are valid pick the most recent
-	if (calc1CRC == slot1CRC && calc2CRC == slot2CRC) { 
+	if (calc1CRC == slot1CRC && calc2CRC == slot2CRC) {
 		currentSettings = (slot2count == ((slot1count + 1) & 0x7f) ? &slot2 : &slot1); //if ((slot1count & 0x7F) == ((slot2count + 1) & 0x7F)) {
 	} else {
 		if (calc2CRC == slot2CRC) {
@@ -1095,7 +1095,7 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 
     dbg_printf("chipID: ");
     dbg_hexa(baseChipID);
-    dbg_printf("\n"); 
+    dbg_printf("\n");
 
     // TODO
     // figure out what is 0x027ffc10, somehow related to cardId check
@@ -1184,7 +1184,7 @@ int arm7_main(void) {
 	// nocashMessage("bootloader");
 
 	initMBK();
-	
+
 	// Wait for ARM9 to at least start
 	while (arm9_stateFlag < ARM9_START);
 
@@ -1252,7 +1252,7 @@ int arm7_main(void) {
 
 	// Sav file
 	getFileFromCluster(&savFile, saveFileCluster);
-	
+
 	int errorCode;
 
 	tDSiHeader dsiHeaderTemp;
@@ -1294,7 +1294,7 @@ int arm7_main(void) {
 	module_params_t* moduleParams = loadModuleParams(&dsiHeaderTemp.ndshdr, &foundModuleParams);
     dbg_printf("sdk_version: ");
     dbg_hexa(moduleParams->sdk_version);
-    dbg_printf("\n"); 
+    dbg_printf("\n");
 	const bool laterSdk = ((moduleParams->sdk_version >= 0x2008000 && moduleParams->sdk_version != 0x2012774) || moduleParams->sdk_version == 0x20029A8);
 
 	ndsHeader = loadHeader(&dsiHeaderTemp, moduleParams);
