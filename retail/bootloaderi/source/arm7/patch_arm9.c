@@ -950,7 +950,11 @@ void patchResetTwl(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const modul
 }
 
 static bool getSleep(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb, u32 ROMinRAM) {
-	if (ce9DldiBinary || ROMinRAM) {
+	const char* romTid = getRomTid(ndsHeader);
+
+	if (ce9DldiBinary || ROMinRAM
+	 || strncmp(romTid, "YDQ", 3) == 0 // Dragon Quest XI: Sentinels of the Starry Skies
+	) {
 		return false;
 	}
 
