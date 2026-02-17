@@ -1337,7 +1337,11 @@ void patchMpuInitTwl(const tNDSHeader* ndsHeader) {
 }
 
 bool patchStrmPageLoad(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
-	if (moduleParams->sdk_version < 0x3000000) {
+	const char* romTid = getRomTid(ndsHeader);
+
+	if (moduleParams->sdk_version < 0x3000000
+	 || strncmp(romTid, "YDQ", 3) == 0 // Dragon Quest XI: Sentinels of the Starry Skies
+	) {
 		return false;
 	}
 
