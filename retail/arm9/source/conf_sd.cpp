@@ -18,6 +18,7 @@
 #include <fat.h>
 #include <easysave/ini.hpp>
 #include "myDSiMode.h"
+#include "blz.h"
 #include "lzss.h"
 #include "lzx.h"
 #include "text.h"
@@ -105,6 +106,30 @@ off_t getFileSize(FILE* fp) {
 	if (!fsize) fsize = 0;
 
 	return fsize;
+}
+
+void s2RamAccess(bool open) {
+	if (io_dldi_data->ioInterface.features & FEATURE_SLOT_NDS) return;
+
+	const u16 s2FlashcardId = *(u16*)0x020000C0;
+
+	if (open) {
+		if (s2FlashcardId == 0x334D) {
+			_M3_changeMode(M3_MODE_RAM);
+		} else if (s2FlashcardId == 0x3647) {
+			_G6_SelectOperation(G6_MODE_RAM);
+		} else if (s2FlashcardId == 0x4353) {
+			_SC_changeMode(SC_MODE_RAM);
+		}
+	} else {
+		if (s2FlashcardId == 0x334D) {
+			_M3_changeMode(M3_MODE_MEDIA);
+		} else if (s2FlashcardId == 0x3647) {
+			_G6_SelectOperation(G6_MODE_MEDIA);
+		} else if (s2FlashcardId == 0x4353) {
+			_SC_changeMode(SC_MODE_MEDIA);
+		}
+	}
 }
 
 char sdmcText[4] = {'s','d','m','c'};
@@ -713,6 +738,8 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		return -1;
 	}
 	
+	bool expansionPakFound = false;
+
 	if (*(u16*)0x02FFFC30 == 0) {
 		sysSetCartOwner(BUS_OWNER_ARM9); // Allow arm9 to access GBA ROM
 		if (*(u16*)(0x020000C0) != 0x334D && *(u16*)(0x020000C0) != 0x3647 && *(u16*)(0x020000C0) != 0x4353 && *(u16*)(0x020000C0) != 0x5A45) {
@@ -747,6 +774,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 				if (*(vu16*)(0x08000000) != 0x4D54) {
 					*(u16*)(0x020000C0) = 0;
 				}
+				sysSetCartOwner(BUS_OWNER_ARM7);
 			} else if (io_dldi_data->ioInterface.features & FEATURE_SLOT_GBA) {
 				if (memcmp(io_dldi_data->friendlyName, "M3 Adapter", 10) == 0) {
 					*(u16*)(0x020000C0) = 0x334D;
@@ -761,6 +789,15 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 					_SC_changeMode(SC_MODE_MEDIA);
 				}
 			}
+		}
+		expansionPakFound = (*(u16*)(0x020000C0) != 0);
+		if (!expansionPakFound) {
+			sysSetCartOwner(BUS_OWNER_ARM9);
+
+			*(vu16*)0x08240000 = 1;
+			expansionPakFound = (*(vu16*)0x08240000 == 1);
+
+			sysSetCartOwner(BUS_OWNER_ARM7);
 		}
 	} else if (!conf->forceSleepPatch) {
 		conf->forceSleepPatch = (
@@ -2133,7 +2170,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 		if (accessControl & BIT(4)) {
 			romFSInited = (romFSInit(conf->ndsPath));
-			startMultibootSrl = (strncmp(romTid, "KCX", 3) == 0 || (!b4dsDebugRam && strncmp(romTid, "KAV", 3) == 0) || strncmp(romTid, "KNK", 3) == 0);
+			startMultibootSrl = (strncmp(romTid, "KCX", 3) == 0 || strncmp(romTid, "KNK", 3) == 0);
 		}
 
 		const char* donorNdsPath = "";
@@ -2550,6 +2587,105 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 				}
 				fclose(sdatFile);
 			}
+		} else if (!b4dsDebugRam && expansionPakFound && (strncmp(romTid, "KAV", 3) == 0)) {
+			// Load overlay 1 for DIGIDRIVE + Sound data from multiboot SRL
+			sysSetCartOwner(BUS_OWNER_ARM9); // Allow arm9 to access GBA ROM
+
+			const u32 mepAddr = (*(u16*)0x020000C0 == 0x5A45) ? 0x08000000 : 0x09000000;
+
+			u32 overlayOffset = 0x021BC7A0;
+			u32 sdatOffsetMB = 0x11D040;
+			u32 sdatSizeMB = 0x87540;
+			u32 sdatSize = 0x44C2C0;
+			switch (romTid[3]) {
+				case 'V':
+					sdatSize = 0x44CD80;
+					break;
+				case 'J':
+					overlayOffset = 0x021BBB20;
+					sdatOffsetMB = 0x11CCC0;
+					sdatSizeMB = 0x7C2C0;
+					sdatSize = 0x44F880;
+					break;
+			}
+			u32 ndsArm9Size = 0;
+			u32 overlayStart = 0;
+			u32 overlayEnd = 0;
+
+			// Load ARM9 binary from multiboot SRL
+			FILE* ndsFile = fopen(multibootSrl, "rb");
+
+			fseek(ndsFile, 0x20, SEEK_SET);
+			fread(&ndsArm9BinOffset, sizeof(u32), 1, ndsFile);
+			fseek(ndsFile, 0x2C, SEEK_SET);
+			fread(&ndsArm9Size, sizeof(u32), 1, ndsFile);
+
+			fseek(ndsFile, ndsArm9BinOffset, SEEK_SET);
+			if (io_dldi_data->ioInterface.features & FEATURE_SLOT_GBA) {
+				u32 pos = 0;
+				u32 currentLen = ndsArm9Size;
+				while (currentLen > 0) {
+					const u16 readLen = currentLen > sizeof_lz77ImageBuffer ? sizeof_lz77ImageBuffer : currentLen;
+					s2RamAccess(false);
+					fread(lz77ImageBuffer, 1, readLen, ndsFile);
+					s2RamAccess(true);
+					tonccpy((u8*)mepAddr+pos, lz77ImageBuffer, readLen);
+					pos += readLen;
+					currentLen -= readLen;
+				}
+				s2RamAccess(false);
+			} else {
+				fread((void*)mepAddr, 1, ndsArm9Size, ndsFile);
+			}
+
+			fclose(ndsFile);
+
+			s2RamAccess(true);
+			decompressLZ77Backwards((u8*)mepAddr+0x4000, ndsArm9Size-0x4000);
+			tonccpy((u8*)overlayOffset+0x18E0, (u8*)mepAddr+sdatOffsetMB, sdatSizeMB); // Grab sound data from ARM9 binary
+			s2RamAccess(false);
+
+			// Load overlay
+			ndsFile = fopen(conf->ndsPath, "rb");
+
+			fseek(ndsFile, 0x48, SEEK_SET);
+			fread(&fatAddr, sizeof(u32), 1, ndsFile);
+			fseek(ndsFile, fatAddr+8, SEEK_SET);
+			fread(&overlayStart, sizeof(u32), 1, ndsFile);
+			fread(&overlayEnd, sizeof(u32), 1, ndsFile);
+			const u32 overlaySize = overlayEnd - overlayStart;
+
+			fseek(ndsFile, overlayStart, SEEK_SET);
+			if (io_dldi_data->ioInterface.features & FEATURE_SLOT_GBA) {
+				u32 pos = 0;
+				u32 currentLen = overlaySize;
+				while (currentLen > 0) {
+					const u16 readLen = currentLen > sizeof_lz77ImageBuffer ? sizeof_lz77ImageBuffer : currentLen;
+					s2RamAccess(false);
+					fread(lz77ImageBuffer, 1, readLen, ndsFile);
+					s2RamAccess(true);
+					tonccpy((u8*)mepAddr+pos, lz77ImageBuffer, readLen);
+					pos += readLen;
+					currentLen -= readLen;
+				}
+				s2RamAccess(false);
+			} else {
+				fread((void*)mepAddr, 1, overlaySize, ndsFile);
+			}
+
+			fclose(ndsFile);
+
+			s2RamAccess(true);
+			const u32 len = decompressLZ77Backwards((u8*)mepAddr, overlaySize);
+			tonccpy((u8*)overlayOffset, (u8*)mepAddr, 0x18E0); // Load the overlay, but skip it's sound data
+			tonccpy((u8*)overlayOffset+0x18E0+sdatSize, (u8*)mepAddr+0x18E0+sdatSize, len-(0x18E0+sdatSize)); // Overwrites a sample used in music (which will be disabled anyway)
+			s2RamAccess(false);
+
+			if (io_dldi_data->ioInterface.features & FEATURE_SLOT_NDS) {
+				sysSetCartOwner(BUS_OWNER_ARM7);
+			}
+
+			*(u32*)((romTid[3] == 'J') ? 0x021BBFD4 : 0x021BCC54) = 0xE8BD80F8; // ldmfd sp!, {r3-r7,pc} (Disable music)
 		} else if (!b4dsDebugRam && (strncmp(romTid, "KEG", 3) == 0)) {
 			// Convert stereo title intro music to mono in Electroplankton: Lumiloop
 			const u32 sdatSize = getFileSize("rom:/sound_data_hw.sdat");

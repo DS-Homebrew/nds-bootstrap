@@ -49,9 +49,9 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
 		return;
 	}
 
+#ifdef LOADERTYPE0
 	const char* romTid = getRomTid(ndsHeader);
 
-#ifdef LOADERTYPE0
 	// Animal Crossing: Wild World
 	if ((strncmp(romTid, "ADM", 3) == 0 || strncmp(romTid, "A62", 3) == 0) && !extendedMemory) {
 		int instancesPatched = 0;
@@ -156,12 +156,12 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
 		*(u32*)0x02000bd0 = 0xe3a00000;
 		*(u32*)0x02000bd4 = 0xe8bd8ff8;
 		*(u32*)0x0207af40 = 0xebfe271e;
-	} else
+	}
 #endif
 
 	// Art Style: DIGIDRIVE (USA) (child.srl)
 	// Art Style: INTERSECT (Europe, Australia) (child.srl)
-	if (strcmp(romTid, "NTRJ") == 0 && ndsHeader->headerCRC16 == 0x53E2 && srlAddr > 0) {
+	/* if (strcmp(romTid, "NTRJ") == 0 && ndsHeader->headerCRC16 == 0x53E2 && srlAddr > 0) {
 		*(u32*)0x0200118C = 0x021BD754; // Boot to "mode_select" instead of "connection2"
 		for (int i = 0; i < 6; i++) { // Disable bugged description text
 			u32* offset1 = (u32*)0x02019C90;
@@ -169,12 +169,12 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
 			offset1[i] = 0xE1A00000; // nop
 			offset2[i] = 0xE1A00000; // nop
 		}
-		/* for (int i = 0; i < 4; i++) { // Disable bugged title description text
-			u32* offset1 = (u32*)0x02019D1C;
-			u32* offset2 = (u32*)0x02019D68;
-			offset1[i] = 0xE1A00000; // nop
-			offset2[i] = 0xE1A00000; // nop
-		} */
+		// for (int i = 0; i < 4; i++) { // Disable bugged title description text
+		// 	u32* offset1 = (u32*)0x02019D1C;
+		// 	u32* offset2 = (u32*)0x02019D68;
+		// 	offset1[i] = 0xE1A00000; // nop
+		// 	offset2[i] = 0xE1A00000; // nop
+		// }
 		// *(u32*)0x0201CB80 = 0xE1A00000; // nop
 		*(u32*)0x0201EFBC = 0xE3A00000; // mov r0, #0
 		for (int i = 0; i < 11; i++) { // Disable bugged ranking code
@@ -210,7 +210,7 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
 		*(u32*)0x020219D8 += 0x30000000; // blt -> b
 		*(u32*)0x02021AF0 = 0xE1A00000; // nop
 		*(u32*)0x02021C50 = 0xE1A00000; // nop
-	}
+	} */
 
 #ifdef LOADERTYPE0
 	// Ideyou Sukeno: Kenkou Maja DSi (Japan) (main_rom.srl)
@@ -502,7 +502,6 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
 		const u16* branchCode7 = generateA7InstrThumb(0x020BAC60, 0x020BACB6);
 		tonccpy((void*)0x020BAC60, branchCode7, 0x4);
 	}
-#endif
 
 	// Shantae DSi (03/06/09 build)
 	else if (strcmp(romTid, "AIPE") == 0 && ndsHeader->headerCRC16 == 0x700E && !extendedMemory) {
@@ -515,6 +514,7 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
 		*(u32*)0x0203FB20 -= 2;
 		*(u32*)0x0203FD14 -= 2;
 	}
+#endif
 }
 
 void rsetA7Cache(void)

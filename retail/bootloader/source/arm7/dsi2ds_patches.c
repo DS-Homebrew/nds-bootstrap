@@ -9572,48 +9572,91 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Art Style: DIGIDRIVE (USA)
 	// Art Style: INTERSECT (Europe, Australia)
-	// Saving not supported due to code taking place in overlays
-	// Requires 8MB of RAM
-	else if ((strcmp(romTid, "KAVE") == 0 || strcmp(romTid, "KAVV") == 0) && extendedMemory) {
-		doubleNopT(0x020931C0);
-		doubleNopT(0x020A8ECA);
-		doubleNopT(0x020AEAFA);
-		patchInitDSiWare(0x020A1018, heapEnd);
-		patchUserSettingsReadDSiWare(0x020A2810);
-		*(u32*)0x020A2838 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x020A283C = 0xE12FFF1E; // bx lr
-		*(u32*)0x020A2844 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x020A2848 = 0xE12FFF1E; // bx lr
-
-		*(u32*)0x020A4930 = 0xE12FFF1E; // bx lr
-		*(u32*)0x020A493C = 0xE12FFF1E; // bx lr
-		if (romTid[3] == 'E') {
-			*(u32*)0x0260C1F4 = 0xE12FFF1E; // bx lr
-			*(u32*)0x0260C258 = 0xE12FFF1E; // bx lr
-		} else {
-			*(u32*)0x0260CCB4 = 0xE12FFF1E; // bx lr
-			*(u32*)0x0260CD18 = 0xE12FFF1E; // bx lr
-		}
-	}
-
 	// Art Style: DIGIDRIVE (Japan)
-	// Saving not supported due to code taking place in overlays
 	// Requires 8MB of RAM
-	else if (strcmp(romTid, "KAVJ") == 0 && extendedMemory) {
-		doubleNopT(0x02092EA0);
-		doubleNopT(0x020A8A76);
-		doubleNopT(0x020AE672);
-		patchInitDSiWare(0x020A0BE4, heapEnd);
-		patchUserSettingsReadDSiWare(0x020A23DC);
-		*(u32*)0x020A2404 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x020A2408 = 0xE12FFF1E; // bx lr
-		*(u32*)0x020A2410 = 0xE3A00000; // mov r0, #0
-		*(u32*)0x020A2414 = 0xE12FFF1E; // bx lr
+	else if (strncmp(romTid, "KAV", 3) == 0) {
+		if (!isJpn) {
+			// Part of .pck file
+			/* *(u16*)0x02019662 = 0x2001; // movs r0, #1 (dsiSaveGetArcSrc)
+			*(u16*)0x02019664 = nopT; // nop
+			setBLXThumb(0x0201967C, (u32)dsiSaveOpen);
+			setBLXThumb(0x02019688, (u32)dsiSaveCreate);
+			setBLXThumb(0x02019692, (u32)dsiSaveOpen);
+			setBLXThumb(0x020196A6, (u32)dsiSaveClose);
+			setBLXThumb(0x020196BC, (u32)dsiSaveWrite);
+			setBLXThumb(0x020196CA, (u32)dsiSaveClose);
+			doubleNopT(0x020196D4); // dsiSaveFlush
+			setBLXThumb(0x020196DA, (u32)dsiSaveClose);
+			setBLXThumb(0x020196FC, (u32)dsiSaveOpen);
+			setBLXThumb(0x02019716, (u32)dsiSaveRead);
+			setBLXThumb(0x02019724, (u32)dsiSaveClose);
+			setBLXThumb(0x0201972E, (u32)dsiSaveClose); */
 
-		*(u32*)0x020A44EC = 0xE12FFF1E; // bx lr
-		*(u32*)0x020A44F8 = 0xE12FFF1E; // bx lr
-		*(u32*)0x0260EB34 = 0xE12FFF1E; // bx lr
-		*(u32*)0x0260EB98 = 0xE12FFF1E; // bx lr
+			doubleNopT(0x020931C0);
+			if (!extendedMemory) {
+				*(u16*)0x020947F4 = 0x4770; // bx lr (Overlay is already loaded before boot)
+			}
+			doubleNopT(0x020A8ECA);
+			doubleNopT(0x020AEAFA);
+			patchInitDSiWare(0x020A1018, heapEnd);
+			// *(u32*)0x020A1388 = *(u32*)0x020AD998;
+			if (!extendedMemory) {
+				*(u32*)0x020A1388 -= 0x400000;
+			}
+			patchUserSettingsReadDSiWare(0x020A2810);
+			*(u32*)0x020A2838 = 0xE3A00000; // mov r0, #0
+			*(u32*)0x020A283C = 0xE12FFF1E; // bx lr
+			*(u32*)0x020A2844 = 0xE3A00000; // mov r0, #0
+			*(u32*)0x020A2848 = 0xE12FFF1E; // bx lr
+
+			*(u32*)0x020A4930 = 0xE12FFF1E; // bx lr
+			*(u32*)0x020A493C = 0xE12FFF1E; // bx lr
+			if (isUsa) {
+				*(u32*)0x0260C1F4 = 0xE12FFF1E; // bx lr
+				*(u32*)0x0260C258 = 0xE12FFF1E; // bx lr
+			} else {
+				*(u32*)0x0260CCB4 = 0xE12FFF1E; // bx lr
+				*(u32*)0x0260CD18 = 0xE12FFF1E; // bx lr
+			}
+		} else {
+			// Part of .pck file
+			/* *(u16*)0x0201965E = 0x2001; // movs r0, #1 (dsiSaveGetArcSrc)
+			*(u16*)0x02019660 = nopT; // nop
+			setBLXThumb(0x02019678, (u32)dsiSaveOpen);
+			setBLXThumb(0x02019684, (u32)dsiSaveCreate);
+			setBLXThumb(0x0201968E, (u32)dsiSaveOpen);
+			setBLXThumb(0x020196A2, (u32)dsiSaveClose);
+			setBLXThumb(0x020196B8, (u32)dsiSaveWrite);
+			setBLXThumb(0x020196C6, (u32)dsiSaveClose);
+			doubleNopT(0x020196D0); // dsiSaveFlush
+			setBLXThumb(0x020196D6, (u32)dsiSaveClose);
+			setBLXThumb(0x020196F8, (u32)dsiSaveOpen);
+			setBLXThumb(0x02019712, (u32)dsiSaveRead);
+			setBLXThumb(0x02019720, (u32)dsiSaveClose);
+			setBLXThumb(0x0201972A, (u32)dsiSaveClose); */
+
+			doubleNopT(0x02092EA0);
+			if (!extendedMemory) {
+				*(u16*)0x020944A4 = 0x4770; // bx lr (Overlay is already loaded before boot)
+			}
+			doubleNopT(0x020A8A76);
+			doubleNopT(0x020AE672);
+			patchInitDSiWare(0x020A0BE4, heapEnd);
+			// *(u32*)0x020A0F54 = *(u32*)0x020AD544;
+			if (!extendedMemory) {
+				*(u32*)0x020A0F54 -= 0x400000;
+			}
+			patchUserSettingsReadDSiWare(0x020A23DC);
+			*(u32*)0x020A2404 = 0xE3A00000; // mov r0, #0
+			*(u32*)0x020A2408 = 0xE12FFF1E; // bx lr
+			*(u32*)0x020A2410 = 0xE3A00000; // mov r0, #0
+			*(u32*)0x020A2414 = 0xE12FFF1E; // bx lr
+
+			*(u32*)0x020A44EC = 0xE12FFF1E; // bx lr
+			*(u32*)0x020A44F8 = 0xE12FFF1E; // bx lr
+			*(u32*)0x0260EB34 = 0xE12FFF1E; // bx lr
+			*(u32*)0x0260EB98 = 0xE12FFF1E; // bx lr
+		}
 	}
 
 	// Discolight (USA)
