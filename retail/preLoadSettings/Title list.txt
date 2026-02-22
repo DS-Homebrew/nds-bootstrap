@@ -187,6 +187,9 @@ Super Mario 64 DS (Europe) (ASMP) (DSi)
 Super Mario 64 DS (Japan) (ASMJ) (DSi)
 Super Mario 64 DS (Korea) (ASMK) (DSi)
 Shenyou Maliou DS (China) (ASMC) (DSi)
+Tak: The Great Juju Challenge (USA) (A3TE) (DSi)
+Tak: The Great Juju Challenge (Europe) (A3TP) (DSi)
+Tak: The Great Juju Challenge (Europe) (En,Fr,De,Nl) (A3TX) (DSi/3DS)
 Tomodachi Collection (Japan) (CCUJ) (DSi/3DS)
 Tomodachi Collection (Japan) (Rev 1) (CCUJ) (DSi/3DS)
 Tomodachi Collection (English translation) (CCUJ-8554) (DSi/3DS)
@@ -392,6 +395,11 @@ Style Savvy (DSi/3DS):
 
 Super Mario 64 DS (DSi):
 - Everything except the level data
+
+Tak: The Great Juju Challenge (DSi/3DS):
+- DSi: 3D models from "model" and "model_sEchigo" folders
+- 3DS, Europe (En,Fr,De,Nl): Almost all files
+- Fixes no sound effects playing, and crash after tutorial
 
 Tomodachi Collection (DSi/3DS):
 - DSi: Most commonly used data: Cmn, Mdl, and Msg data
