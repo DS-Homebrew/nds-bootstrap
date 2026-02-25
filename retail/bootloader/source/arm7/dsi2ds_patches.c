@@ -75,7 +75,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		heapEndRetail = ((u32)ndsHeader->arm9destination >= 0x02004000) ? ce9DldiOffset : CARDENGINE_ARM9_LOCATION_DLDI_32;
 	}
 	const u32 heapEnd = extendedMemory ? (((u32)ndsHeader->arm9destination >= 0x02004000) ? 0x027D8000 : 0x02700000) : heapEndRetail;
-	const u32 heapEnd8MBHack = extendedMemory ? heapEnd : heapEndRetail+0x400000; // extendedMemory ? #0x27B0000 : #0x27E0000 (mirrors to 0x23E0000 on retail DS units)
+	// const u32 heapEnd8MBHack = extendedMemory ? heapEnd : heapEndRetail+0x400000; // extendedMemory ? #0x27B0000 : #0x27E0000 (mirrors to 0x23E0000 on retail DS units)
 	const u32 heapEndExceed = extendedMemory ? heapEnd+0x800000 : heapEndRetail+0xC00000; // extendedMemory ? #0x2FB0000 (mirrors to 0x27B0000 on debug DS units) : #0x2FE0000 (mirrors to 0x23E0000 on retail DS units)
 	const u32 heapEndMaxForRetail = (maxHeapOpen && !extendedMemory) ? ((_io_dldi_size == 0x0F) ? 0x023F6000 : (_io_dldi_size == 0x0E) ? 0x023FA000 : 0x023FC000) : heapEnd;
 	const u32 heapEndMaxForRetail2 = (maxHeapOpen && !extendedMemory) ? ((_io_dldi_size == 0x0F) ? heapEndMaxForRetail : 0x023FF000) : heapEnd;
@@ -12066,14 +12066,15 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Fizz (USA)
-	else if (strcmp(romTid, "KZZE") == 0) {
+	// Requires 8MB of RAM (Only the tutorial works within 4MB of RAM)
+	else if (strcmp(romTid, "KZZE") == 0 && extendedMemory) {
 		*(u32*)0x020106E8 = 0xE1A00000; // nop
-		tonccpy((u32*)0x02011260, dsiSaveGetResultCode, 0xC);
+		// tonccpy((u32*)0x02011260, dsiSaveGetResultCode, 0xC); // Part of .pck file
 		*(u32*)0x0201391C = 0xE1A00000; // nop
-		patchInitDSiWare(0x02018BD8, heapEnd8MBHack);
-		*(u32*)0x02018F64 = 0x0213B440;
+		patchInitDSiWare(0x02018BD8, heapEnd);
+		*(u32*)0x02018F64 = *(u32*)0x02004FD0;
 		patchUserSettingsReadDSiWare(0x0201A174);
-		setBL(0x02029FE0, (u32)dsiSaveOpen);
+		/* setBL(0x02029FE0, (u32)dsiSaveOpen); // Part of .pck file
 		setBL(0x0202A030, (u32)dsiSaveGetLength);
 		setBL(0x0202A044, (u32)dsiSaveRead);
 		setBL(0x0202A05C, (u32)dsiSaveClose);
@@ -12082,7 +12083,10 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0202A3F4, (u32)dsiSaveOpen);
 		setBL(0x0202A414, (u32)dsiSaveSetLength);
 		setBL(0x0202A434, (u32)dsiSaveWrite);
-		setBL(0x0202A44C, (u32)dsiSaveClose);
+		setBL(0x0202A44C, (u32)dsiSaveClose); */
+		/* if (!extendedMemory) {
+			*(u32*)0x0202D0E4 = 0x22E000; // Shrink heap from 0x2EE000
+		} */
 	}
 
 	// Flametail (USA)

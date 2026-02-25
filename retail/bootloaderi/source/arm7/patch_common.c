@@ -6516,8 +6516,8 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Fizz (USA)
-	else if (strcmp(romTid, "KZZE") == 0 && saveOnFlashcardNtr) {
-		tonccpy((u32*)0x02011260, dsiSaveGetResultCode, 0xC);
+	/* else if (strcmp(romTid, "KZZE") == 0 && saveOnFlashcardNtr) {
+		tonccpy((u32*)0x02011260, dsiSaveGetResultCode, 0xC); // Part of .pck file
 		setBL(0x02029FE0, (u32)dsiSaveOpen);
 		setBL(0x0202A030, (u32)dsiSaveGetLength);
 		setBL(0x0202A044, (u32)dsiSaveRead);
@@ -6528,7 +6528,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0202A414, (u32)dsiSaveSetLength);
 		setBL(0x0202A434, (u32)dsiSaveWrite);
 		setBL(0x0202A44C, (u32)dsiSaveClose);
-	}
+	} */
 
 	// Flashlight (USA)
 	else if (strcmp(romTid, "KFSE") == 0 && !twlFontFound) {
