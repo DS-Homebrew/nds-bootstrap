@@ -115,8 +115,7 @@ bool loadPreLoadSettings(configuration* conf, const char* pckPath, const char* r
 	int right = fileCount;
 
 	while (left <= right) {
-		int mid = left + ((right - left) / 2);
-		fseek(file, 16 + mid * 16, SEEK_SET);
+		fseek(file, 16 + left * 16, SEEK_SET);
 		fread(buf, 1, 4, file);
 		int cmp = strcmp(buf, romTid);
 		if (cmp == 0) { // TID matches, check CRC
@@ -127,15 +126,11 @@ bool loadPreLoadSettings(configuration* conf, const char* pckPath, const char* r
 				fread(&offset, 1, sizeof(offset), file);
 				fread(&size, 1, sizeof(size), file);
 				break;
-			} else if (crc < headerCRC) {
-				left = mid + 1;
 			} else {
-				right = mid - 1;
+				left++;
 			}
-		} else if (cmp < 0) {
-			left = mid + 1;
 		} else {
-			right = mid - 1;
+			left++;
 		}
 	}
 
@@ -279,8 +274,7 @@ void loadAsyncLoadSettings(configuration* conf, const char* romTid, const u16 he
 	int right = fileCount;
 
 	while (left <= right) {
-		int mid = left + ((right - left) / 2);
-		fseek(file, 16 + mid * 16, SEEK_SET);
+		fseek(file, 16 + left * 16, SEEK_SET);
 		fread(buf, 1, 4, file);
 		int cmp = strcmp(buf, romTid);
 		if (cmp == 0) { // TID matches, check CRC
@@ -291,15 +285,11 @@ void loadAsyncLoadSettings(configuration* conf, const char* romTid, const u16 he
 				fread(&offset, 1, sizeof(offset), file);
 				fread(&size, 1, sizeof(size), file);
 				break;
-			} else if (crc < headerCRC) {
-				left = mid + 1;
 			} else {
-				right = mid - 1;
+				left++;
 			}
-		} else if (cmp < 0) {
-			left = mid + 1;
 		} else {
-			right = mid - 1;
+			left++;
 		}
 	}
 
