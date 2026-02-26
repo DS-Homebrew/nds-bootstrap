@@ -1888,6 +1888,7 @@ void patchBannerPath(const tNDSHeader* ndsHeader) {
 	extern u32 iUncompressedSize;
 	extern u32 iUncompressedSizei;
 	u32* arm9idst = (u32*)*(u32*)0x02FFE1C8;
+	u32* arm9dst = (u32*)ndsHeader->arm9destination;
 	for (u32 i = 0; i < iUncompressedSizei/4; i++) {
 		if (arm9idst[i] == (u32)offset) {
 			arm9idst[i] = newPathOffset;
@@ -1930,7 +1931,6 @@ void patchBannerPath(const tNDSHeader* ndsHeader) {
 	dbg_printf("\n\n");
 
 	found = false;
-	arm9idst = (u32*)*(u32*)0x02FFE1C8;
 	for (u32 i = 0; i < iUncompressedSizei/4; i++) {
 		if (arm9idst[i] == (u32)offset) {
 			arm9idst[i] = newPathOffset;
@@ -1939,7 +1939,6 @@ void patchBannerPath(const tNDSHeader* ndsHeader) {
 	}
 
 	if (!found) {
-		u32* arm9dst = (u32*)ndsHeader->arm9destination;
 		for (u32 i = 0; i < iUncompressedSize/4; i++) {
 			if (arm9dst[i] == (u32)offset) {
 				arm9dst[i] = newPathOffset;
