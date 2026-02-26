@@ -50,35 +50,52 @@
 
 //extern bool cardReadFound; // patch_arm9.c
 
-#define patchOffsetCacheFileVersion 118	// Change when new functions are being patched, some offsets removed,
+#define patchOffsetCacheFileVersion 119	// Change when new functions are being patched, some offsets removed,
 										// the offset order changed, and/or the function signatures changed (not added)
 
 typedef struct patchOffsetCacheContents {
     u16 ver;
     u16 type;
+	u8 dsiModeCheck2Checked;
+    u8 cardIdChecked;
+    u8 gbaSlotInitChecked;
+    u8 cardReadDmaChecked;
+	u8 a9IsThumb;
+    u8 cardSetDmaChecked;
+    u8 cardEndReadDmaChecked;
+	u8 strmPageLoadOffsetChecked;
+	u8 a9CardIrqIsThumb;
+	u8 mobiclipFrameDrawChecked;
+	u8 srlStartOffsetChecked;
+	u8 resetChecked;
+	u8 nandTmpJumpFuncChecked;
+	u8 sharedFontPathChecked;
+	u8 sleepFuncIsThumb;
+	u8 sleepChecked;
+	u8 randomPatchChecked;
+	u8 randomPatch5SecondChecked;
+	u8 a7IsThumb;
+	u8 ramClearChecked;
+	u8 swiGetPitchTableChecked;
+	u8 cardCheckPullOutChecked;
+	u8 savePatchType;
+	u8 a7JumpTableType;
 	u32* a9Swi12Offset;
 	u32* moduleParamsOffset;
 	u32* ltdModuleParamsOffset;
 	u32* dsiModeCheckOffset;
 	u32* dsiModeCheck2Offset;
-	u32 dsiModeCheck2Checked;
     u32* heapPointerOffset;
-	u32 a9IsThumb;
     u32* cardHashInitOffset;
     u32* cardReadStartOffset;
     u32* cardReadEndOffset;
     u32* cardPullOutOffset;
     u32* cardIdOffset;
-    u32 cardIdChecked;
     u32* gbaSlotInitOffset;
-    u32 gbaSlotInitChecked;
     u32* cardReadDmaOffset;
     u32* cardReadDmaEndOffset;
-    u32 cardReadDmaChecked;
     u32* cardSetDmaOffset;
-    u32 cardSetDmaChecked;
     u32* cardEndReadDmaOffset;
-    u32 cardEndReadDmaChecked;
     u32 dmaHandlerOffset;
     /*u32* cartExistOffset;
     u32 cartExistOffsetChecked;
@@ -91,24 +108,16 @@ typedef struct patchOffsetCacheContents {
 	u32* fileIoSeekOffset;
 	u32* fileIoReadOffset;
 	u32* strmPageLoadOffset;
-	u32 strmPageLoadOffsetChecked;
 	u32* a9CardIrqEnableOffset;
-	u32 a9CardIrqIsThumb;
 	u32* mobiclipFrameDrawOffset;
 	u32* mobiclipFrameDrawEndOffset;
-	u32 mobiclipFrameDrawChecked;
 	u32* srlStartOffset9;
-	u32 srlStartOffsetChecked;
 	u32* resetOffset;
-	u32 resetChecked;
 	u32* nandTmpJumpFuncOffset;
-	u32 nandTmpJumpFuncChecked;
 	// u32* mbkWramBOffset;
+	u32* bannerPathOffset;
 	u32* sharedFontPathOffset;
-	u32 sharedFontPathChecked;
 	u32* sleepFuncOffset;
-	u32 sleepFuncIsThumb;
-	u32 sleepChecked;
     u32 patchMpuRegion;
     u32* mpuStartOffset;
     u32* mpuDataOffset;
@@ -120,14 +129,10 @@ typedef struct patchOffsetCacheContents {
     u32* mpuChangeOffset;
     u32* mpuInitEndTwl;
 	u32* randomPatchOffset;
-	u32 randomPatchChecked;
 	u32* randomPatch5SecondOffset;
-	u32 randomPatch5SecondChecked;
     u32* a9IrqHookOffset;
 	u32 a7BinSize;
-	u32 a7IsThumb;
 	u32* ramClearOffset;
-	u32 ramClearChecked;
 	u32* ramClearIOffset;
 	u32* ramClearI2Offset;
 	u32* swiHaltOffset;
@@ -138,25 +143,21 @@ typedef struct patchOffsetCacheContents {
 	u16* a7Swi27Offset;
 	u32* a7ScfgExtOffset;
 	u32* swiGetPitchTableOffset;
-	u32 swiGetPitchTableChecked;
 	u32* sleepPatchOffset;
 	u32* sleepInputWriteOffset;
 	u32* postBootOffset;
 	u32* a7CardIrqEnableOffset;
 	u32* cardCheckPullOutOffset;
-	u32 cardCheckPullOutChecked;
 	u32* sdCardResetOffset;
 	u32* sdCardFuncsOffset;
 	u32* autoPowerOffOffset;
 	u32* a7IrqHandlerOffset;
 	u32* a7IrqHandlerWordsOffset;
 	u32* a7IrqHookOffset;
-	u32 savePatchType;
 	u32 relocateStartOffset;
 	u32 relocateValidateOffset;		// aka nextFunctionOffset
 	u32 a7CardReadEndOffset;
 	u32 a7JumpTableFuncOffset;
-	u32 a7JumpTableType;
 } patchOffsetCacheContents;
 
 extern u16 patchOffsetCacheFilePrevCrc;
@@ -178,8 +179,8 @@ void setBLXThumb(int arg1, int arg2);
 void codeCopy(u32* dst, u32* src, u32 len);
 void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader);
 void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params_t* moduleParams);
-void bannerSavPatch(const tNDSHeader* ndsHeader);
-void patchSlot2Addr(const tNDSHeader* ndsHeader);
+// void bannerSavPatch(const tNDSHeader* ndsHeader);
+// void patchSlot2Addr(const tNDSHeader* ndsHeader);
 u32 patchCardNdsArm9(
 	cardengineArm9* ce9,
 	const tNDSHeader* ndsHeader,

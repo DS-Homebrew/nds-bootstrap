@@ -17297,7 +17297,7 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
 #endif
 }
 
-void bannerSavPatch(const tNDSHeader* ndsHeader) {
+/* void bannerSavPatch(const tNDSHeader* ndsHeader) {
 	// Patch out banner.sav check
 	//const char* newBannerPath = "dataPrv:";
 	const char* romTid = getRomTid(ndsHeader);
@@ -17324,7 +17324,7 @@ void bannerSavPatch(const tNDSHeader* ndsHeader) {
 	else if (strcmp(romTid, "KN9H") == 0) {
 		*(u32*)0x02011718 = 0xE3A00001; // mov r0, #1
 	}
-}
+} */
 
 /*void patchSlot2Addr(const tNDSHeader* ndsHeader) {
 	extern u32 gbaAddrToDsi[];

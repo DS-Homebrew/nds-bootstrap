@@ -1860,6 +1860,58 @@ void patchKeyInputs(const tNDSHeader* ndsHeader, const module_params_t* modulePa
 	dbg_printf("\n\n");
 } */
 
+void patchBannerPath(const tNDSHeader* ndsHeader) {
+	if (!(*(u8*)0x02FFE1BF & BIT(2))) {
+		return;
+	}
+
+	u32* offset = patchOffsetCache.bannerPathOffset;
+	if (!patchOffsetCache.bannerPathOffset) {
+		offset = findBannerPathOffset(ndsHeader);
+		if (offset) {
+			patchOffsetCache.bannerPathOffset = offset;
+		}
+	}
+
+	if (!offset) {
+		return;
+	}
+
+	dbg_printf("bannerPath location : ");
+	dbg_hexa((u32)offset);
+	dbg_printf("\n\n");
+
+	extern char bannerSavPath[64];
+	const u32 newPathOffset = 0x02FFDC00+42;
+
+	bool found = false;
+	extern u32 iUncompressedSize;
+	/* extern u32 iUncompressedSizei;
+	u32* arm9idst = (u32*)*(u32*)0x02FFE1C8;
+	for (u32 i = 0; i < iUncompressedSizei/4; i++) {
+		if (arm9idst[i] == (u32)offset) {
+			arm9idst[i] = newPathOffset;
+			found = true;
+		}
+	}
+
+	if (!found) { */
+		u32* arm9dst = (u32*)ndsHeader->arm9destination;
+		for (u32 i = 0; i < iUncompressedSize/4; i++) {
+			if (arm9dst[i] == (u32)offset) {
+				arm9dst[i] = newPathOffset;
+				found = true;
+			}
+		}
+	// }
+
+	if (!found) {
+		return;
+	}
+
+	tonccpy((u32*)newPathOffset, bannerSavPath, strlen(bannerSavPath));
+}
+
 void patchSharedFontPath(const cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, const ltd_module_params_t* ltdModuleParams) {
 	if (!isDSiWare) {
 		return;

@@ -72,6 +72,7 @@ typedef struct loadCrt0 {
 	u8 valueBits3;
 	u8 saveRelocation;
 	u16 cacheBlockSize;
+	char bannerSavPath[64];
 	unsigned char version[20];
 } loadCrt0;
 

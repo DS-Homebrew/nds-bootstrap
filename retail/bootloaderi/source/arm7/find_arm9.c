@@ -310,6 +310,9 @@ static const u16 mbkWramBCGetSignatureThumb[1] = {0x4804};
 static const u32 mbkWramBConstant[1]           = {0x4004058};
 //static const u32 mbkWramCConstant[1]           = {0x400405C};
 
+// TWL Banner
+static const char* nandBannerSignature = "nand:/<banner>";
+
 // TWL Shared Font
 static const char* nandSharedFontSignature = "nand:/<sharedFont>";
 
@@ -2628,7 +2631,7 @@ u32* findWaitSysCyclesOffset(const tNDSHeader* ndsHeader) {
 	return operaRamOffset;
 }*/
 
-u32* findSleepOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb, u32* usesThumbPtr) {
+u32* findSleepOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb, u8* usesThumbPtr) {
 	dbg_printf("findSleepOffset\n");
     const u32* sleepSignature = sleepSignature2;
     const u16* sleepSignatureThumb = sleepSignatureThumb2;
@@ -3386,6 +3389,29 @@ u32* findMbkWramBOffsetBoth(const tNDSHeader* ndsHeader, const module_params_t* 
 
 	dbg_printf("\n");
 	return offset;
+}
+
+u32* findBannerPathOffset(const tNDSHeader* ndsHeader) {
+	dbg_printf("findBannerPathOffset\n");
+
+	char* offset = NULL;
+
+	char* arm9dst = (char*)ndsHeader->arm9destination;
+	for (u32 i = 0; i < iUncompressedSize; i++) {
+		if (strcmp(arm9dst+i, nandBannerSignature) == 0) {
+			offset = arm9dst+i;
+			break;
+		}
+	}
+
+	if (offset) {
+		dbg_printf("Banner path offset found\n");
+	} else {
+		dbg_printf("Banner path offset not found\n");
+	}
+
+	dbg_printf("\n");
+	return (u32*)offset;
 }
 
 u32* findSharedFontPathOffset(const tNDSHeader* ndsHeader) {

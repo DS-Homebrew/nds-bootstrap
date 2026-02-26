@@ -364,6 +364,9 @@ static void load_conf(configuration* conf, const char* fn) {
 	// PRV path
 	conf->prvPath = strdup(config_file.fetch("NDS-BOOTSTRAP", "PRV_PATH").c_str());
 
+	// Banner SAV path
+	conf->bnrPath = strdup(config_file.fetch("NDS-BOOTSTRAP", "BNR_PATH").c_str());
+
 	// SDK2.0 Donor NDS path
 	conf->donor20Path = strdup(config_file.fetch("NDS-BOOTSTRAP", "DONOR20_NDS_PATH").c_str());
 
@@ -941,6 +944,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	u16 headerCRC = 0;
 	u32 a7mbk6 = 0;
 	u32 accessControl = 0;
+	u8 dsiFlags = 0;
 	u32 ndsArm9isrc = 0;
 	u32 ndsArm9idst = 0;
 	u32 ndsArm9ilen = 0;
@@ -979,7 +983,9 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		fread(&a7mbk6, sizeof(u32), 1, ndsFile);
 		fseek(ndsFile, 0x1B4, SEEK_SET);
 		fread(&accessControl, sizeof(u32), 1, ndsFile);
-		fseek(ndsFile, 0x1C0, SEEK_SET);
+		fseek(ndsFile, 0x1BF, SEEK_SET);
+		fread(&dsiFlags, sizeof(u8), 1, ndsFile);
+		// fseek(ndsFile, 0x1C0, SEEK_SET);
 		fread(&ndsArm9isrc, sizeof(u32), 1, ndsFile);
 		fseek(ndsFile, 0x1C8, SEEK_SET);
 		fread(&ndsArm9idst, sizeof(u32), 1, ndsFile);
@@ -1498,6 +1504,10 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 						addTwlDevice(0, 0x08, 0x06, "dataPub", twlPath);
 					}
+				}
+				const int bnrPathLen = strlen(conf->bnrPath);
+				if (bnrPathLen > 0 && bnrPathLen < 62 && (dsiFlags & BIT(2))) {
+					sprintf(conf->bannerSavPath, "sdmc%s", conf->bnrPath+(conf->saveOnFlashcard ? 3 : 2));
 				}
 			}
 

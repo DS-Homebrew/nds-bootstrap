@@ -87,6 +87,7 @@
 	.global valueBits3
 	.global saveRelocation
 	.global cacheBlockSize
+	.global bannerSavPath
 	.global version
 @---------------------------------------------------------------------------------
 	.align	4
@@ -97,7 +98,7 @@ _start:
 	b	startUp
 
 storedFileCluster:
-	.word	0x0FFFFFFF		@ default BOOT.NDS
+	.word	0x0FFFFFFF
 initDisc:
 	.word	0x00000001		@ init the disc by default
 bootstrapOnFlashcard:
@@ -245,6 +246,8 @@ saveRelocation:
 	.byte	0
 cacheBlockSize:
 	.hword	0
+bannerSavPath:
+	.space	64
 version:
 	.space	20
 .align 4

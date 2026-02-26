@@ -1879,8 +1879,6 @@ int arm7_main(void) {
 	toncset((char*)CHEAT_ENGINE_BUFFERED_LOCATION, 0, 0x400);
 
 	if (isDSiWare && scfgSdmmcEnabled && !(REG_SCFG_ROM & BIT(9))) {
-		extern void patchSharedFontPath(const cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, const ltd_module_params_t* ltdModuleParams);
-
 		const bool twlTouch = (cdcReadReg(CDC_SOUND, 0x22) == 0xF0);
 
 		if ((REG_SNDEXTCNT & SNDEXTCNT_ENABLE) && ((!soundFreq && (REG_SNDEXTCNT & BIT(13))) || (soundFreq && !(REG_SNDEXTCNT & BIT(13))))) {
@@ -1998,12 +1996,12 @@ int arm7_main(void) {
 			patchKeyInputs(ndsHeader, moduleParams);
 		}
 
+		extern void patchBannerPath(const tNDSHeader* ndsHeader);
+		patchBannerPath(ndsHeader);
+
+		extern void patchSharedFontPath(const cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, const ltd_module_params_t* ltdModuleParams);
 		patchSharedFontPath((cardengineArm9*)ce9Location, ndsHeader, moduleParams, ltdModuleParams);
 		dsiWarePatch((cardengineArm9*)ce9Location, ndsHeader);
-
-		if (*(u8*)0x02FFE1BF & BIT(2)) {
-			bannerSavPatch(ndsHeader);
-		}
 
 		newArm7binarySize = ndsHeader->arm7binarySize;
 		newArm7ibinarySize = __DSiHeader->arm7ibinarySize;

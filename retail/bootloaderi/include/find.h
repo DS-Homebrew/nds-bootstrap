@@ -105,7 +105,7 @@ u32* findCartExistOffset(const tNDSHeader* ndsHeader, bool usesThumb);
 u32* findCartReadOffset(const tNDSHeader* ndsHeader, bool usesThumb);
 u32* findWaitCpuCyclesOffset(const tNDSHeader* ndsHeader);
 u32* findWaitSysCyclesOffset(const tNDSHeader* ndsHeader);
-u32* findSleepOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb, u32* usesThumbPtr);
+u32* findSleepOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb, u8* usesThumbPtr);
 u32* findCardEndReadDma(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb, const u32* cardReadDmaEndOffset, u32* offsetDmaHandler);
 u32* findCardSetDma(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool usesThumb);
 u32* findSrlStartOffset9(const tNDSHeader* ndsHeader);
@@ -116,6 +116,7 @@ u32* findNandTmpJumpFuncOffset(const tNDSHeader* ndsHeader, const module_params_
 u32* findMbkWramBOffset(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
 u16* findMbkWramBOffsetThumb(const tNDSHeader* ndsHeader, const module_params_t* moduleParams);
 u32* findMbkWramBOffsetBoth(const tNDSHeader* ndsHeader, const module_params_t* moduleParams, bool* usesThumb);
+u32* findBannerPathOffset(const tNDSHeader* ndsHeader);
 u32* findSharedFontPathOffset(const tNDSHeader* ndsHeader);
 
 // ARM7
