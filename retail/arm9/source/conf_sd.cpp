@@ -1381,7 +1381,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		fclose(ndsFile);
 		fclose(donorNdsFile);
 
-		if (!conf->gameOnFlashcard && !conf->saveOnFlashcard) {
+		if (!conf->bootstrapOnFlashcard && !conf->gameOnFlashcard && !conf->saveOnFlashcard) {
 			if (romTid[0] != 'I' && memcmp(romTid, "UZP", 3) != 0 && memcmp(romTid, "HND", 3) != 0 && memcmp(romTid, "UEI", 3) != 0) {
 				disableSlot1();
 			} else {
