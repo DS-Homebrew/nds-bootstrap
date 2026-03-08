@@ -19218,12 +19218,16 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Neko Reversi (Japan)
-	// Requires 8MB of RAM
-	else if (strcmp(romTid, "KNVJ") == 0 && extendedMemory) {
+	// Audio does not play on retail consoles
+	else if (strcmp(romTid, "KNVJ") == 0) {
 		*(u32*)0x02010A04 = 0xE1A00000; // nop
 		*(u32*)0x020140A8 = 0xE1A00000; // nop
 		patchInitDSiWare(0x02019874, heapEnd);
+		*(u32*)0x02019C00 = *(u32*)0x02004FE8;
 		patchUserSettingsReadDSiWare(0x0201AE44);
+		if (!extendedMemory) {
+			*(u32*)0x020338D8 = 0xE3A04901; // mov r4, #0x4000 (Shrink sound heap from 0x1C0000: Disables sound)
+		}
 		*(u32*)0x0203FCA4 = 0xE1A00000; // nop (Skip Manual screen)
 	}
 
