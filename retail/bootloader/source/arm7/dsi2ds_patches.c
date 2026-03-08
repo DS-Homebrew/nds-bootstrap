@@ -19227,6 +19227,44 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x0203FCA4 = 0xE1A00000; // nop (Skip Manual screen)
 	}
 
+	// New Ace Touch!: English - Korean Dictionary (Korea)
+	// Requires more than 8MB of RAM
+	/* else if (strcmp(romTid, "KZIK") == 0 && korFontFound) {
+		useSharedFont = true;
+		*(u32*)0x02011B44 = 0xE1A00000; // nop
+		*(u32*)0x020151A0 = 0xE1A00000; // nop
+		patchInitDSiWare(0x0201A614, heapEnd);
+		patchUserSettingsReadDSiWare(0x0201BE44);
+		*(u32*)0x0201F858 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0201F85C = 0xE12FFF1E; // bx lr
+		*(u32*)0x0201F864 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0201F868 = 0xE12FFF1E; // bx lr
+		// *(u32*)0x0202222C = 0xE12FFF1E; // bx lr
+		// *(u32*)0x02028678 = 0xE1A00000; // nop
+		// *(u32*)0x02028684 = 0xE1A00000; // nop
+		// *(u32*)0x02028690 = 0xE1A00000; // nop
+		*(u32*)0x02060C64 = 0xE1A00000; // nop
+		*(u32*)0x02089038 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02089858 = 0xE12FFF1E; // bx lr
+	}
+
+	// New Ace Touch!: Korean - English Dictionary (Korea)
+	// Requires more than 8MB of RAM
+	else if (strcmp(romTid, "KZKK") == 0 && korFontFound) {
+		useSharedFont = true;
+		*(u32*)0x02011224 = 0xE1A00000; // nop
+		*(u32*)0x02014880 = 0xE1A00000; // nop
+		patchInitDSiWare(0x02019CF4, heapEnd);
+		patchUserSettingsReadDSiWare(0x0201B3A0);
+		*(u32*)0x0201EDB4 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0201EDB8 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0201EDC0 = 0xE3A00000; // mov r0, #0
+		*(u32*)0x0201EDC4 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02060780 = 0xE1A00000; // nop
+		*(u32*)0x02086AA8 = 0xE12FFF1E; // bx lr
+		*(u32*)0x020872C8 = 0xE12FFF1E; // bx lr
+	} */
+
 	// G.G Series: Ninja Karakuri Den (USA)
 	// G.G Series: Ninja Karakuri Den (Korea)
 	else if (strcmp(romTid, "KAQE") == 0 || strcmp(romTid, "KAQK") == 0) {

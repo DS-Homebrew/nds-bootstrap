@@ -360,6 +360,8 @@ static const char dsiWareForBootloader3[][4] = {
 	"K9N", // Neko Neko Bakery: Pan de Pazurunya!
 	"KTG", // Neko no Iru Tangram: Neko to Iyashi no Silhouette Puzzle
 	"KNV", // Neko Reversi
+	// "KZI", // New Ace Touch!: English - Korean Dictionary
+	// "KZK", // New Ace Touch!: Korean - English Dictionary
 	"KAQ", // G.G Series: Ninja Karakuri Den
 	"KQ2", // G.G Series: Ninja Karakuri Den 2
 	"KAU", // Nintendo Countdown Calendar
