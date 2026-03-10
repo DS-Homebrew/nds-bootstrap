@@ -815,6 +815,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	} else if (!conf->forceSleepPatch) {
 		conf->forceSleepPatch = (
 		   (memcmp(io_dldi_data->friendlyName, "Ace3DS+", 7) == 0)
+		|| (memcmp(io_dldi_data->friendlyName, "Acekard AK2", 11) == 0)
 		|| (memcmp(io_dldi_data->friendlyName, "DEMON", 5) == 0)
 		|| (memcmp(io_dldi_data->friendlyName, "DSTT", 4) == 0)
 		|| (memcmp(io_dldi_data->friendlyName, "EZ-Flash Parallel", 17) == 0)
