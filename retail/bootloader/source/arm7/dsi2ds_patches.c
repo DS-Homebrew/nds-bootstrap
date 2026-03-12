@@ -25800,8 +25800,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Saving not supported due to using more than one file in filesystem
 	// Requires either 8MB of RAM or Memory Expansion Pak
 	else if (strcmp(romTid, "KSCE") == 0 && debugOrMep) {
-		const u32 mepAddr = (s2FlashcardId == ezFlash) ? 0x08800000 : 0x09000000;
-
 		useSharedFont = (twlFontFound && extendedMemory);
 		if (useSharedFont) {
 			/* if (!extendedMemory) {
@@ -25812,12 +25810,19 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 		*(u32*)0x02005248 = 0xE1A00000; // nop
 		*(u32*)0x02005260 = 0xE1A00000; // nop
+		if (!extendedMemory) {
+			*(u32*)0x0200C2AC = (s2FlashcardId == ezFlash) ? 0xE3A00683 : 0xE3A00693; // mov r0, (s2FlashcardId == ezFlash) ? #0x08300000 : #0x09300000
+			*(u32*)0x0201C3B0 = (s2FlashcardId == ezFlash) ? 0xE3A00408 : 0xE3A00409; // mov r0, (s2FlashcardId == ezFlash) ? #0x08000000 : #0x09000000
+			*(u32*)0x0201C3D8 = (s2FlashcardId == ezFlash) ? 0xE3A00681 : 0xE3A00691; // mov r0, (s2FlashcardId == ezFlash) ? #0x08100000 : #0x09100000
+
+			const u32 mepAddr = (s2FlashcardId == ezFlash) ? 0x08000000 : 0x09000000;
+			toncset((u32*)mepAddr, 0, 0x44AC90);
+		}
 		*(u32*)0x0202F298 = 0xE1A00000; // nop
 		*(u32*)0x0203255C = 0xE1A00000; // nop
-		patchInitDSiWare(0x020376D8, extendedMemory ? heapEnd : mepAddr+0x77C000);
+		patchInitDSiWare(0x020376D8, heapEnd);
 		if (!extendedMemory) {
-			*(u32*)0x02037A48 = mepAddr;
-			toncset((u32*)mepAddr, 0, 0x77C000);
+			*(u32*)0x02037A48 = *(u32*)0x02004FD0;
 		}
 		patchUserSettingsReadDSiWare(0x02038C78);
 		*(u32*)0x020390A8 = 0xE1A00000; // nop
@@ -25830,8 +25835,6 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Saving not supported due to using more than one file in filesystem
 	// Requires either 8MB of RAM or Memory Expansion Pak
 	else if (strcmp(romTid, "KSCP") == 0 && debugOrMep) {
-		const u32 mepAddr = (s2FlashcardId == ezFlash) ? 0x08800000 : 0x09000000;
-
 		useSharedFont = (twlFontFound && extendedMemory);
 		if (useSharedFont) {
 			/* if (!extendedMemory) {
@@ -25847,12 +25850,19 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020054E0 = 0xE1A00000; // nop
 		*(u32*)0x02005524 = 0xE1A00000; // nop
 		*(u32*)0x02005530 = 0xE1A00000; // nop
+		if (!extendedMemory) {
+			*(u32*)0x0200E5D0 = (s2FlashcardId == ezFlash) ? 0xE3A00683 : 0xE3A00693; // mov r0, (s2FlashcardId == ezFlash) ? #0x08300000 : #0x09300000
+			*(u32*)0x02025D24 = (s2FlashcardId == ezFlash) ? 0xE3A00408 : 0xE3A00409; // mov r0, (s2FlashcardId == ezFlash) ? #0x08000000 : #0x09000000
+			*(u32*)0x02025D50 = (s2FlashcardId == ezFlash) ? 0xE3A00681 : 0xE3A00691; // mov r0, (s2FlashcardId == ezFlash) ? #0x08100000 : #0x09100000
+
+			const u32 mepAddr = (s2FlashcardId == ezFlash) ? 0x08000000 : 0x09000000;
+			toncset((u32*)mepAddr, 0, 0x44AC90);
+		}
 		*(u32*)0x02038AD8 = 0xE1A00000; // nop
 		*(u32*)0x0203BC34 = 0xE1A00000; // nop
-		patchInitDSiWare(0x02040AD8, extendedMemory ? heapEnd : mepAddr+0x77C000);
+		patchInitDSiWare(0x02040AD8, heapEnd);
 		if (!extendedMemory) {
-			*(u32*)0x02040E64 = mepAddr;
-			toncset((u32*)mepAddr, 0, 0x77C000);
+			*(u32*)0x02040E64 = *(u32*)0x02004FD0;
 		}
 		patchUserSettingsReadDSiWare(0x02042074);
 		*(u32*)0x0204247C = 0xE1A00000; // nop
