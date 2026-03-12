@@ -1626,8 +1626,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// 5 in 1 Solitaire (USA)
 	// 5 in 1 Solitaire (Europe)
 	// Saving not supported due to using more than one file in filesystem
-	// Requires either 8MB of RAM or Memory Expansion Pak
-	else if ((strcmp(romTid, "K5IE") == 0 || strcmp(romTid, "K5IP") == 0) && debugOrMep) {
+	else if (strcmp(romTid, "K5IE") == 0 || strcmp(romTid, "K5IP") == 0) {
 		const u16 offsetChange = isUsa ? 0 : 0x170;
 
 		useSharedFont = (twlFontFound && extendedMemory);
@@ -1653,7 +1652,23 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			*(u32*)0x02005AF0 = 0xE1A00000; // nop
 		}
 		if (!extendedMemory) {
-			*(u32*)(0x0202914C+offsetChange) = (s2FlashcardId == ezFlash) ? 0xE3A00522 : 0xE3A00409; // mov r0, (s2FlashcardId == ezFlash) ? #0x08800000 : #0x09000000
+			// Stream SolitaireMusic.wav file instead of pre-loading it
+			*(u32*)(0x0202914C+offsetChange) = 0xE1A00000; // nop
+			*(u32*)(0x02029154+offsetChange) += 1; // cmp r0, #0 -> #1
+			*(u32*)(0x020292AC+offsetChange) = 0xE1A00000; // nop (Skip loading data of SolitaireMusic.wav file)
+			*(u32*)(0x020292B4+offsetChange) = 0xE1A00000; // nop
+
+			const u32 newCodeAddr = isUsa ? 0x02005690 : 0x0200560C;
+			extern u32 wordSrchStreamWavFile[];
+			extern u32 wordSrchStreamWavFileLen;
+			tonccpy((u32*)newCodeAddr, wordSrchStreamWavFile, wordSrchStreamWavFileLen);
+
+			setBL(0x02029E2C+offsetChange, newCodeAddr);
+			setBL(0x02029E38+offsetChange, newCodeAddr);
+			setBL(0x02029E4C+offsetChange, newCodeAddr);
+			setBL(0x02029EC0+offsetChange, newCodeAddr);
+			setBL(0x02029ECC+offsetChange, newCodeAddr);
+			setBL(0x02029EE0+offsetChange, newCodeAddr);
 		}
 		*(u32*)(0x0203BD2C+offsetChange) = 0xE1A00000; // nop
 		*(u32*)(0x0203EE88+offsetChange) = 0xE1A00000; // nop

@@ -643,8 +643,6 @@ static bool isROMLoadableInRAM(const tDSiHeader* dsiHeader, const tNDSHeader* nd
 		 || strncmp(romTid, "KD5", 3) == 0 // Jinia Supasonaru: Waei Rakubiki Jiten
 		 || strncmp(romTid, "KD4", 3) == 0) { // Meikyou Kokugo: Rakubiki Jiten
 			return false;
-		} else if (strncmp(romTid, "K5I", 3) == 0) { // 5 in 1 Solitaire
-			romSizeLimitChange = 0x1F0000;
 		} /* else if (strncmp(romTid, "KAT", 3) == 0) { // AiRace: Tunnel
 			romSizeLimitChange = 0x80000;
 		} */ else if (strncmp(romTid, "KCT", 3) == 0) { // Chess Challenge!
