@@ -22,7 +22,7 @@ endif
 #---------------------------------------------------------------------------------
 TARGET		:=	load2
 BUILD		:=	build
-SOURCES		:=	../bootloader/source ../bootloader/source/arm7 ../bootloader/source/arm7/libnds ../bootloader/source/arm7/save_patches ../bootloader/source/arm9 ../common/source ../common/source_general
+SOURCES		:=	../bootloader/source ../bootloader/source/arm7 ../bootloader/source/arm7/libnds ../bootloader/source/arm7/dsi2ds_patches2 ../bootloader/source/arm7/save_patches ../bootloader/source/arm9 ../common/source ../common/source_general
 INCLUDES	:=	../bootloader/include build ../common/include ../common/include_fat
 DATA		:=	../data
 SPECS		:=  specs

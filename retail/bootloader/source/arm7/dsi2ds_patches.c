@@ -27974,13 +27974,26 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Word Searcher (USA)
-	// Requires either 8MB of RAM or Memory Expansion Pak
-	else if (strcmp(romTid, "KWSE") == 0 && debugOrMep) {
-		const u32 mepAddr = (s2FlashcardId == ezFlash) ? 0x08800000 : 0x09000000;
-
+	else if (strcmp(romTid, "KWSE") == 0) {
 		useSharedFont = (twlFontFound && extendedMemory);
 		if (!useSharedFont) {
 			*(u32*)0x020050D4 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
+		}
+		if (!extendedMemory) {
+			// Stream BGMusic.wav file instead of pre-loading it
+			*(u32*)0x02005478 = 0xE1A00000; // nop
+			*(u32*)0x02005480 += 1; // cmp r0, #0 -> #1
+			*(u32*)0x020055C4 = 0xE1A00000; // nop (Skip loading data of BGMusic.wav file)
+			*(u32*)0x020055CC = 0xE1A00000; // nop
+
+			const u32 newCodeAddr = 0x0200602C;
+			extern u32 wordSrchStreamWavFile[];
+			extern u32 wordSrchStreamWavFileLen;
+			tonccpy((u32*)newCodeAddr, wordSrchStreamWavFile, wordSrchStreamWavFileLen);
+
+			setBL(0x02005EB8, newCodeAddr);
+			setBL(0x02005EC4, newCodeAddr);
+			setBL(0x02005ED8, newCodeAddr);
 		}
 		setBL(0x020060FC, (u32)dsiSaveOpen);
 		setBL(0x0200610C, (u32)dsiSaveClose);
@@ -28008,9 +28021,9 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0200B980, (u32)dsiSaveDelete);
 		*(u32*)0x02023070 = 0xE1A00000; // nop
 		*(u32*)0x02026400 = 0xE1A00000; // nop
-		patchInitDSiWare(0x0202B1F4, extendedMemory ? heapEnd : mepAddr+0x77C000);
+		patchInitDSiWare(0x0202B1F4, heapEnd);
 		if (!extendedMemory) {
-			*(u32*)0x0202B564 = mepAddr;
+			*(u32*)0x0202B564 = *(u32*)0x02004FD0;
 		}
 		patchUserSettingsReadDSiWare(0x0202C698);
 		*(u32*)0x0202CAC8 = 0xE1A00000; // nop
