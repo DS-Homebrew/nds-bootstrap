@@ -25812,14 +25812,12 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		}
 		*(u32*)0x02005248 = 0xE1A00000; // nop
 		*(u32*)0x02005260 = 0xE1A00000; // nop
-		if (!extendedMemory) {
-			*(u32*)0x0201C3B0 = 0xE3A00623; // mov r0, #0x02300000
-		}
 		*(u32*)0x0202F298 = 0xE1A00000; // nop
 		*(u32*)0x0203255C = 0xE1A00000; // nop
 		patchInitDSiWare(0x020376D8, extendedMemory ? heapEnd : mepAddr+0x77C000);
 		if (!extendedMemory) {
 			*(u32*)0x02037A48 = mepAddr;
+			toncset((u32*)mepAddr, 0, 0x77C000);
 		}
 		patchUserSettingsReadDSiWare(0x02038C78);
 		*(u32*)0x020390A8 = 0xE1A00000; // nop
@@ -25849,14 +25847,12 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020054E0 = 0xE1A00000; // nop
 		*(u32*)0x02005524 = 0xE1A00000; // nop
 		*(u32*)0x02005530 = 0xE1A00000; // nop
-		if (!extendedMemory) {
-			*(u32*)0x02025D24 = 0xE3A00623; // mov r0, #0x02300000
-		}
 		*(u32*)0x02038AD8 = 0xE1A00000; // nop
 		*(u32*)0x0203BC34 = 0xE1A00000; // nop
 		patchInitDSiWare(0x02040AD8, extendedMemory ? heapEnd : mepAddr+0x77C000);
 		if (!extendedMemory) {
 			*(u32*)0x02040E64 = mepAddr;
+			toncset((u32*)mepAddr, 0, 0x77C000);
 		}
 		patchUserSettingsReadDSiWare(0x02042074);
 		*(u32*)0x0204247C = 0xE1A00000; // nop
