@@ -702,8 +702,9 @@ static bool isROMLoadableInRAM(const tDSiHeader* dsiHeader, const tNDSHeader* nd
 	 || (strncmp(romTid, "KXC", 3) == 0 && s2FlashcardId != 0x5A45) // Castle Conqueror: Heroes 2
 	 || (strncmp(romTid, "KQ9", 3) == 0 && s2FlashcardId != 0x5A45) // The Legend of Zelda: Four Swords: Anniversary Edition
 	 || (strncmp(romTid, "KEV", 3) == 0 && s2FlashcardId != 0x5A45) // Space Invaders Extreme Z
-	 || (strncmp(romTid, "K97", 3) == 0 && s2FlashcardId != 0x5A45) // Sutanoberuzu: Kono Hareta Sora no Shita de
-	 || (strncmp(romTid, "K98", 3) == 0 && s2FlashcardId != 0x5A45) // Sutanoberuzu: Shirogane no Torikago
+	 || (strncmp(romTid, "K97", 3) == 0 && s2FlashcardId != 0x5A45) // Star Novels: Kono Haretasora no Shitade
+	 || (strncmp(romTid, "K98", 3) == 0 && s2FlashcardId != 0x5A45) // Star Novels: Shirogane no Torikago
+	 || (strncmp(romTid, "KYU", 3) == 0 && s2FlashcardId != 0x5A45) // Yummy Yummy Cooking Jam
 	 || (strncmp(romTid, "UOR", 3) != 0
 	 && strncmp(romTid, "KPP", 3) != 0 // Pop Island
 	 && strncmp(romTid, "KPF", 3) != 0) // Pop Island: Paperfield

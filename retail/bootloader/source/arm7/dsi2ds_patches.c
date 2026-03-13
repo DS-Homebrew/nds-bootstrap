@@ -28383,7 +28383,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Yummy Yummy Cooking Jam (USA)
-	// Music is disabled
+	// Requires Slot-2 RAM expansion up to 16MB or more (Standard Memory Expansion Pak is not enough) for music playback
 	else if (strcmp(romTid, "KYUE") == 0) {
 		useSharedFont = twlFontFound;
 		*(u32*)0x0200508C = 0xE1A00000; // nop
@@ -28395,7 +28395,11 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			*(u32*)0x020271F4 = *(u32*)0x02004FC0;
 		}
 		patchUserSettingsReadDSiWare(0x02028360);
-		*(u32*)0x020639A4 = 0xE12FFF1E; // bx lr
+		if (largeS2RAM) {
+			*(u32*)0x0205E524 = (s2FlashcardId == ezFlash) ? 0xE3A00408 : 0xE3A00409; // mov r0, (s2FlashcardId == ezFlash) ? #0x08000000 : #0x09000000
+		} else {
+			*(u32*)0x020639A4 = 0xE12FFF1E; // bx lr (Disable music)
+		}
 		setBL(0x02069A78, (u32)dsiSaveOpen);
 		setBL(0x02069AB4, (u32)dsiSaveRead);
 		setBL(0x02069ACC, (u32)dsiSaveRead);
@@ -28416,7 +28420,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Yummy Yummy Cooking Jam (Europe, Australia)
-	// Music is disabled
+	// Requires Slot-2 RAM expansion up to 16MB or more (Standard Memory Expansion Pak is not enough) for music playback
 	else if (strcmp(romTid, "KYUV") == 0) {
 		useSharedFont = twlFontFound;
 		*(u32*)0x0200148C = 0xE1A00000; // nop
@@ -28428,7 +28432,11 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			*(u32*)0x020235C8 = *(u32*)0x020013C0;
 		}
 		patchUserSettingsReadDSiWare(0x02024734);
-		*(u32*)0x0205FD48 = 0xE12FFF1E; // bx lr
+		if (largeS2RAM) {
+			*(u32*)0x0205A8C8 = (s2FlashcardId == ezFlash) ? 0xE3A00408 : 0xE3A00409; // mov r0, (s2FlashcardId == ezFlash) ? #0x08000000 : #0x09000000
+		} else {
+			*(u32*)0x0205FD48 = 0xE12FFF1E; // bx lr (Disable music)
+		}
 		setBL(0x02065E1C, (u32)dsiSaveOpen);
 		setBL(0x02065E58, (u32)dsiSaveRead);
 		setBL(0x02065E70, (u32)dsiSaveRead);
