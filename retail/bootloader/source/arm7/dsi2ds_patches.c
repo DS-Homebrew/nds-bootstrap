@@ -28391,9 +28391,9 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		tonccpy((u32*)0x0201DA10, dsiSaveGetResultCode, 0xC);
 		*(u32*)0x02020374 = 0xE1A00000; // nop
 		patchInitDSiWare(0x02026E84, heapEnd);
-		if (!extendedMemory) {
+		/* if (!extendedMemory) {
 			*(u32*)0x020271F4 = *(u32*)0x02004FC0;
-		}
+		} */
 		patchUserSettingsReadDSiWare(0x02028360);
 		if (largeS2RAM) {
 			*(u32*)0x0205E524 = (s2FlashcardId == ezFlash) ? 0xE3A00408 : 0xE3A00409; // mov r0, (s2FlashcardId == ezFlash) ? #0x08000000 : #0x09000000
@@ -28428,9 +28428,9 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		tonccpy((u32*)0x02019DE4, dsiSaveGetResultCode, 0xC);
 		*(u32*)0x0201C748 = 0xE1A00000; // nop
 		patchInitDSiWare(0x02023258, heapEnd);
-		if (!extendedMemory) {
+		/* if (!extendedMemory) {
 			*(u32*)0x020235C8 = *(u32*)0x020013C0;
-		}
+		} */
 		patchUserSettingsReadDSiWare(0x02024734);
 		if (largeS2RAM) {
 			*(u32*)0x0205A8C8 = (s2FlashcardId == ezFlash) ? 0xE3A00408 : 0xE3A00409; // mov r0, (s2FlashcardId == ezFlash) ? #0x08000000 : #0x09000000
