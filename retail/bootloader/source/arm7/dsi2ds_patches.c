@@ -24308,8 +24308,8 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	} */
 
 	// Shawn Johnson Gymnastics (USA)
-	// Requires 8MB of RAM
-	else if (strcmp(romTid, "KSJE") == 0 && extendedMemory) {
+	// Music does not play on retail consoles
+	else if (strcmp(romTid, "KSJE") == 0) {
 		*(u32*)0x0200507C = 0xE1A00000; // nop
 		*(u32*)0x02005090 = 0xE1A00000; // nop
 		setB(0x02005380, 0x020053D4); // Disable NFTR loading from TWLNAND
@@ -24321,13 +24321,16 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		patchInitDSiWare(0x02023C6C, heapEnd);
 		*(u32*)0x02023FDC = *(u32*)0x02004FD0;
 		patchUserSettingsReadDSiWare(0x02025274);
-		*(u32*)0x02090C7C = 0xE3A00003; // mov r0, #3
+		if (!extendedMemory) {
+			*(u32*)0x0208E030 = 0xE1A00000; // nop (Disable music)
+		}
+		/* *(u32*0x02090C7C = 0xE3A00003; // mov r0, #3 (Part of .pck file)
 		setBL(0x02090D84, (u32)dsiSaveCreate);
-		*(u32*)0x02090D98 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+		*(u32*0x02090D98 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
 		setBL(0x02090DC4, (u32)dsiSaveGetResultCode);
 		setBL(0x02090DE4, (u32)dsiSaveOpen);
 		setBL(0x02090E14, (u32)dsiSaveSetLength);
-		*(u32*)0x02090E24 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
+		*(u32*0x02090E24 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
 		setBL(0x02090E68, (u32)dsiSaveWrite);
 		setBL(0x02090E70, (u32)dsiSaveClose);
 		setBL(0x02090F54, (u32)dsiSaveOpen);
@@ -24338,7 +24341,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02091020, (u32)dsiSaveClose);
 		setBL(0x02091084, (u32)dsiSaveDelete);
 		setBL(0x02091150, (u32)dsiSaveOpen);
-		setBL(0x02091160, (u32)dsiSaveClose);
+		setBL(0x02091160, (u32)dsiSaveClose); */
 		*(u32*)0x02091A28 = 0xE3A00000; // mov r0, #0
 	}
 

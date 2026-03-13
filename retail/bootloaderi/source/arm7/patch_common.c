@@ -13590,7 +13590,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		if (!twlFontFound) {
 			setB(0x02005384, 0x020053C0); // Disable NFTR loading from TWLNAND
 		}
-		if (saveOnFlashcardNtr) {
+		/* if (saveOnFlashcardNtr) { // Part of .pck file
 			*(u32*)0x02090C7C = 0xE3A00003; // mov r0, #3
 			setBL(0x02090D84, (u32)dsiSaveCreate);
 			*(u32*)0x02090D98 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
@@ -13609,7 +13609,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBL(0x02091084, (u32)dsiSaveDelete);
 			setBL(0x02091150, (u32)dsiSaveOpen);
 			setBL(0x02091160, (u32)dsiSaveClose);
-		}
+		} */
 	}
 
 	// Kakitori Rekishi: Shouga Kusei (01) (Japan)
