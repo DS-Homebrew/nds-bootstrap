@@ -28,8 +28,10 @@ wordSrchStreamWavFile:
 
 	ldmfd   sp!, {r4-r5,pc}
 @---------------------------------------------------------------------------------
+.global wordSrch_fileSeek
 wordSrch_fileSeek:
 .word 0x0203D420
+.global wordSrch_fileRead
 wordSrch_fileRead:
 .word 0x0203D44C
 @---------------------------------------------------------------------------------

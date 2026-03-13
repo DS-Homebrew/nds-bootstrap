@@ -1661,6 +1661,10 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			const u32 newCodeAddr = isUsa ? 0x02005690 : 0x0200560C;
 			extern u32 wordSrchStreamWavFile[];
 			extern u32 wordSrchStreamWavFileLen;
+			extern u32 wordSrch_fileRead;
+			extern u32 wordSrch_fileSeek;
+			wordSrch_fileRead += offsetChange;
+			wordSrch_fileSeek += offsetChange;
 			tonccpy((u32*)newCodeAddr, wordSrchStreamWavFile, wordSrchStreamWavFileLen);
 
 			setBL(0x02029E2C+offsetChange, newCodeAddr);
