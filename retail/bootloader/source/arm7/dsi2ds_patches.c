@@ -23572,6 +23572,9 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x020210D0 = 0xE12FFF1E; // bx lr
 		*(u32*)0x020210D8 = 0xE3A00000; // mov r0, #0
 		*(u32*)0x020210DC = 0xE12FFF1E; // bx lr
+		if (!extendedMemory) {
+			*(u32*)0x0203D688 = 0xE3A04702; // mov r4, #0x80000 (Shrink sound heap from 0x100000)
+		}
 		if (useSharedFont) {
 			/* if (!extendedMemory) {
 				patchTwlFontLoad(true, 0x02037E44, 0x020212C0);
