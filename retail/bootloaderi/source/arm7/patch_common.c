@@ -13205,6 +13205,12 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02054EF0 = 0xE1A00000; // nop
 	} */
 
+	// Saikyou Ginsei Igo (Japan)
+	// Saving not supported due to using more than one file in filesystem
+	else if (strcmp(romTid, "KGEJ") == 0 && !twlFontFound) {
+		*(u32*)0x0218E65C = 0xE1A00000; // nop (Skip Manual screen)
+	}
+
 	// Saikyou Ginsei Shougi (Japan)
 	// Saving not supported due to using more than one file in filesystem
 	else if (strcmp(romTid, "KG4J") == 0 && !twlFontFound) {

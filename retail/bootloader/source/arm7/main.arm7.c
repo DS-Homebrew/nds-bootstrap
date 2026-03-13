@@ -654,6 +654,8 @@ static bool isROMLoadableInRAM(const tDSiHeader* dsiHeader, const tNDSHeader* nd
 				// || strncmp(romTid, "KWC", 3) == 0 // Animal Crossing Clock
 				|| strncmp(romTid, "KWF", 3) == 0) { // Mario Calculator
 			romSizeLimitChange = 0x280000;
+		} else if (strncmp(romTid, "KGE", 3) == 0) { // Saikyou Ginsei Igo
+			romSizeLimitChange = 0x180000;
 		} else if (strncmp(romTid, "KSC", 3) == 0) { // Sudoku Challenge!
 			romSizeLimitChange = 0x44AC90;
 		}

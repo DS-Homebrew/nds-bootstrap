@@ -23557,6 +23557,35 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		*(u32*)0x02054EF0 = 0xE1A00000; // nop */
 	}
 
+	// Saikyou Ginsei Igo (Japan)
+	// Saving not supported due to using more than one file in filesystem
+	// Requires either 8MB of RAM or Memory Expansion Pak
+	// Audio does not play on retail consoles
+	else if (strcmp(romTid, "KGEJ") == 0 && debugOrMep) {
+		useSharedFont = (twlFontFound && extendedMemory);
+		*(u32*)0x02011754 = 0xE1A00000; // nop
+		*(u32*)0x0201540C = 0xE1A00000; // nop
+		*(u32*)0x02020450 = 0xE3A00001; // mov r0, #1
+		patchInitDSiWare(0x02020468, heapEnd);
+		if (!extendedMemory) {
+			*(u32*)0x020207D8 = *(u32*)0x02193E80;
+		}
+		patchUserSettingsReadDSiWare(0x02021A98);
+		*(u32*)0x02021AC0 = wirelessReturnCodeArm;
+		*(u32*)0x02021AC4 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02021ACC = 0xE3A00000; // mov r0, #0
+		*(u32*)0x02021AD0 = 0xE12FFF1E; // bx lr
+		if (!extendedMemory) {
+			// *(u32*)0x0203FEDC = 0xE3A04702; // mov r4, #0x80000 (Shrink sound heap from 0x100000)
+			*(u32*)0x0203FEDC = 0xE3A04901; // mov r4, #0x4000 (Shrink sound heap from 0x100000: Disables sound and fixes multiplayer crashing)
+			*(u32*)0x0205DE58 = 0xE12FFF1E; // bx lr
+			*(u32*)0x0205F438 = (s2FlashcardId == ezFlash) ? 0xE3A00408 : 0xE3A00409; // mov r0, (s2FlashcardId == ezFlash) ? #0x08000000 : #0x09000000
+		}
+		if (!useSharedFont) {
+			*(u32*)0x0218E65C = 0xE1A00000; // nop (Skip Manual screen)
+		}
+	}
+
 	// Saikyou Ginsei Shougi (Japan)
 	// Saving not supported due to using more than one file in filesystem
 	else if (strcmp(romTid, "KG4J") == 0) {
