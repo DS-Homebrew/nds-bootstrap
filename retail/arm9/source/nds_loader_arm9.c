@@ -151,7 +151,19 @@ static bool dldiPatchLoader (data_t *binData, u32 binSize, bool clearBSS)
 		return false;
 	}
 
-	pDH = (data_t*)(io_dldi_data);
+	if (strcmp(io_dldi_data->friendlyName, "DSTWO(Slot-1)") == 0) {
+		pDH = (data_t*)lz77ImageBuffer;
+
+		FILE* dldiFile = fopen("nitro:/dstwo.dldi", "rb"); // Use alternate DLDI driver to work around red error screen
+		if (dldiFile) {
+			fread(lz77ImageBuffer, 1, 0x800, dldiFile);
+			fclose(dldiFile);
+		} else {
+			return false;
+		}
+	} else {
+		pDH = (data_t*)(io_dldi_data);
+	}
 	
 	pAH = &(binData[patchOffset]);
 
