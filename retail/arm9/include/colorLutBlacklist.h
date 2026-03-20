@@ -244,6 +244,7 @@ static const char colorLutMasterBrightBlacklist[][4] = {
 	"KTR", // Clubhouse Games Express: Card Classics
 	"KTC", "KTP", // Clubhouse Games Express: Family Favorites
 	"KTD", "KTB", // Clubhouse Games Express: Strategy Pack
+	"CDG", // Disgaea DS
 	"C24", // Phantasy Star 0
 	"AZL", // Style Savvy
 };
@@ -252,7 +253,8 @@ static const char colorLutMasterBrightBlacklist[][4] = {
 
 Black Sigil: Blade of the Exiled,
 Bomberman,
-Clubhouse Games & Clubhouse Games Express:
+Clubhouse Games & Clubhouse Games Express,
+Disgaea DS:
 - Master brightness is not changed due to blacklisting VCount IRQ
 
 Phantasy Star 0:
@@ -275,6 +277,7 @@ static const char colorLutVCountBlacklist[][4] = {
 	"KTD", "KTB", // Clubhouse Games Express: Strategy Pack
 	"KCQ", // Crazy Cheebo: Puzzle Party
 	"KVC", // Curling Super Championship
+	"CDG", // Disgaea DS
 	"K5L", // Forgotten Legions
 	"ATK", // Kirby: Canvas Curse
 	"KYL", // Make Up & Style
@@ -304,6 +307,10 @@ Crazy Cheebo: Puzzle Party:
 
 Curling Super Championship:
 - Crashes after finishing or skipping the tutorial
+
+Disgaea DS:
+- Top screen does not refresh
+- Bottom screen displays nothing
 
 Forgotten Legions:
 - Crashes after the bottom screen fades out during the opening video
