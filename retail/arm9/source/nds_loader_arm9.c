@@ -82,9 +82,9 @@ enum DldiOffsets {
 	// IO_INTERFACE data
 	DO_ioType       = 0x60,
 	DO_features     = 0x64,
-	DO_startup      = 0x68,	
-	DO_isInserted   = 0x6C,	
-	DO_readSectors  = 0x70,	
+	DO_startup      = 0x68,
+	DO_isInserted   = 0x6C,
+	DO_readSectors  = 0x70,
 	DO_writeSectors = 0x74,
 	DO_clearStatus  = 0x78,
 	DO_shutdown     = 0x7C,
@@ -126,7 +126,7 @@ static const data_t dldiMagicLoaderString[] = "\xEE\xA5\x8D\xBF Chishm";	// Diff
 
 #define DEVICE_TYPE_DLDI 0x49444C44
 
-static bool dldiPatchLoader (data_t *binData, u32 binSize, bool clearBSS)
+static bool dldiPatchLoader (data_t *binData, u32 binSize, bool clearBSS, bool altDldi)
 {
 	addr_t memOffset;			// Offset of DLDI after the file is loaded into memory
 	addr_t patchOffset;			// Position of patch destination in the file
@@ -142,7 +142,7 @@ static bool dldiPatchLoader (data_t *binData, u32 binSize, bool clearBSS)
 	data_t *pAH;
 
 	size_t dldiFileSize = 0;
-	
+
 	// Find the DLDI reserved space in the file
 	patchOffset = quickFind (binData, dldiMagicLoaderString, binSize, sizeof(dldiMagicLoaderString));
 
@@ -151,20 +151,8 @@ static bool dldiPatchLoader (data_t *binData, u32 binSize, bool clearBSS)
 		return false;
 	}
 
-	if (strcmp(io_dldi_data->friendlyName, "DSTWO(Slot-1)") == 0) {
-		pDH = (data_t*)lz77ImageBuffer;
+	pDH = altDldi ? (data_t*)lz77ImageBuffer : (data_t*)(io_dldi_data);
 
-		FILE* dldiFile = fopen("nitro:/dstwo.dldi", "rb"); // Use alternate DLDI driver to work around red error screen
-		if (dldiFile) {
-			fread(lz77ImageBuffer, 1, 0x800, dldiFile);
-			fclose(dldiFile);
-		} else {
-			return false;
-		}
-	} else {
-		pDH = (data_t*)(io_dldi_data);
-	}
-	
 	pAH = &(binData[patchOffset]);
 
 	if (*((u32*)(pDH + DO_ioType)) == DEVICE_TYPE_DLDI) {
@@ -176,7 +164,7 @@ static bool dldiPatchLoader (data_t *binData, u32 binSize, bool clearBSS)
 		// Not enough space for patch
 		return false;
 	}
-	
+
 	dldiFileSize = 1 << pDH[DO_driverSize];
 
 	memOffset = readAddr (pAH, DO_text_start);
@@ -212,7 +200,7 @@ static bool dldiPatchLoader (data_t *binData, u32 binSize, bool clearBSS)
 	writeAddr (pAH, DO_clearStatus, readAddr (pAH, DO_clearStatus) + relocationOffset);
 	writeAddr (pAH, DO_shutdown, readAddr (pAH, DO_shutdown) + relocationOffset);
 
-	if (pDH[DO_fixSections] & FIX_ALL) { 
+	if (pDH[DO_fixSections] & FIX_ALL) {
 		// Search through and fix pointers within the data section of the file
 		for (addrIter = (readAddr(pDH, DO_text_start) - ddmemStart); addrIter < (readAddr(pDH, DO_data_end) - ddmemStart); addrIter++) {
 			if ((ddmemStart <= readAddr(pAH, addrIter)) && (readAddr(pAH, addrIter) < ddmemEnd)) {
@@ -221,7 +209,7 @@ static bool dldiPatchLoader (data_t *binData, u32 binSize, bool clearBSS)
 		}
 	}
 
-	if (pDH[DO_fixSections] & FIX_GLUE) { 
+	if (pDH[DO_fixSections] & FIX_GLUE) {
 		// Search through and fix pointers within the glue section of the file
 		for (addrIter = (readAddr(pDH, DO_glue_start) - ddmemStart); addrIter < (readAddr(pDH, DO_glue_end) - ddmemStart); addrIter++) {
 			if ((ddmemStart <= readAddr(pAH, addrIter)) && (readAddr(pAH, addrIter) < ddmemEnd)) {
@@ -230,7 +218,7 @@ static bool dldiPatchLoader (data_t *binData, u32 binSize, bool clearBSS)
 		}
 	}
 
-	if (pDH[DO_fixSections] & FIX_GOT) { 
+	if (pDH[DO_fixSections] & FIX_GOT) {
 		// Search through and fix pointers within the Global Offset Table section of the file
 		for (addrIter = (readAddr(pDH, DO_got_start) - ddmemStart); addrIter < (readAddr(pDH, DO_got_end) - ddmemStart); addrIter++) {
 			if ((ddmemStart <= readAddr(pAH, addrIter)) && (readAddr(pAH, addrIter) < ddmemEnd)) {
@@ -239,7 +227,7 @@ static bool dldiPatchLoader (data_t *binData, u32 binSize, bool clearBSS)
 		}
 	}
 
-	if (clearBSS && (pDH[DO_fixSections] & FIX_BSS)) { 
+	if (clearBSS && (pDH[DO_fixSections] & FIX_BSS)) {
 		// Initialise the BSS to 0, only if the disc is being re-inited
 		toncset (&pAH[readAddr(pDH, DO_bss_start) - ddmemStart] , 0, readAddr(pDH, DO_bss_end) - readAddr(pDH, DO_bss_start));
 	}
@@ -260,6 +248,18 @@ int runNds(u32 cluster, u32 saveCluster, u32 donorTwlCluster, /* u32 gbaCluster,
 		fclose(bootloaderBin);
 	} else {
 		return 2;
+	}
+
+	bool altDldi = false;
+
+	if (strcmp(io_dldi_data->friendlyName, "DSTWO(Slot-1)") == 0) {
+		// Use alternate DLDI driver for SuperCard DSTWO to work around red error screen
+		FILE* dldiFile = fopen("nitro:/dstwo.dldi", "rb");
+		if (dldiFile) {
+			fread(lz77ImageBuffer, 1, 0x800, dldiFile);
+			fclose(dldiFile);
+			altDldi = true;
+		}
 	}
 
 	loadCrt0* loader = (loadCrt0*)loaderBin;
@@ -350,7 +350,7 @@ int runNds(u32 cluster, u32 saveCluster, u32 donorTwlCluster, /* u32 gbaCluster,
 
 	if(conf->gameOnFlashcard || conf->saveOnFlashcard) {
 		// Patch the loader with a DLDI for the card
-		if (!dldiPatchLoader ((data_t*)lc0, 0x40000, conf->initDisc)) {
+		if (!dldiPatchLoader ((data_t*)lc0, 0x40000, conf->initDisc, altDldi)) {
 			return 3;
 		}
 	}
@@ -367,16 +367,16 @@ int runNds(u32 cluster, u32 saveCluster, u32 donorTwlCluster, /* u32 gbaCluster,
 	// Reset into a passme loop
 	nocashMessage("Reset into a passme loop");
 	REG_EXMEMCNT |= ARM7_OWNS_ROM | ARM7_OWNS_CARD;
-	
+
 	*(vu32*)0x02FFFFFC = 0;
 
 	// Return to passme loop
 	*(vu32*)0x02FFFE04 = (u32)0xE59FF018; // ldr pc, 0x02FFFE24
 	*(vu32*)0x02FFFE24 = (u32)0x02FFFE04;  // Set ARM9 Loop address --> resetARM9(0x02FFFE04);
-	
+
 	// Reset ARM7
 	nocashMessage("resetARM7");
-	resetARM7(0x06000000);	
+	resetARM7(0x06000000);
 
 	// swi soft reset
 	nocashMessage("swiSoftReset");
