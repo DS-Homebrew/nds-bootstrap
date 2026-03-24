@@ -264,14 +264,15 @@ int runNds(u32 cluster, u32 saveCluster, u32 donorTwlCluster, /* u32 gbaCluster,
 
 	loadCrt0* loader = (loadCrt0*)loaderBin;
 
-	loader->storedFileCluster = cluster;
-	loader->initDisc          = conf->initDisc;
+	loader->ndsBootstrapCluster  = conf->ndsBootstrapCluster;
+	loader->storedFileCluster    = cluster;
+	loader->initDisc             = conf->initDisc;
 	loader->bootstrapOnFlashcard = conf->bootstrapOnFlashcard;
-	loader->gameOnFlashcard   = conf->gameOnFlashcard;
-	loader->saveOnFlashcard   = conf->saveOnFlashcard;
-	loader->a9ScfgRom         = REG_SCFG_ROM;
-	loader->dsiSD             = conf->sdFound;
-	loader->valueBits         = conf->valueBits;
+	loader->gameOnFlashcard      = conf->gameOnFlashcard;
+	loader->saveOnFlashcard      = conf->saveOnFlashcard;
+	loader->a9ScfgRom            = REG_SCFG_ROM;
+	loader->dsiSD                = conf->sdFound;
+	loader->valueBits            = conf->valueBits;
 
 	loader->saveFileCluster             = saveCluster;
 	loader->donorFileCluster            = donorTwlCluster;
@@ -317,6 +318,7 @@ int runNds(u32 cluster, u32 saveCluster, u32 donorTwlCluster, /* u32 gbaCluster,
 	loader->pageFileCluster             = pageFileCluster;
 	loader->manualCluster               = manualCluster;
 	loader->sharedFontCluster           = sharedFontCluster;
+	loader->dldiPatchBinaryOffset       = conf->dldiPatchBinaryOffset;
 	loader->language                    = conf->language;
 	loader->region                      = conf->region;
 	loader->dsiMode                     = conf->dsiMode; // SDK 5

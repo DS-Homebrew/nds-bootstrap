@@ -7,6 +7,7 @@
 
 typedef struct loadCrt0 {
 	u32 _start;
+	u32 ndsBootstrapCluster;
 	u32 storedFileCluster;
 	u32 initDisc;
 	u16 bootstrapOnFlashcard;
@@ -57,6 +58,7 @@ typedef struct loadCrt0 {
 	u32 pageFileCluster;
 	u32 manualCluster;
 	u32 sharedFontCluster;
+	u32 dldiPatchBinaryOffset;
 	u32 patchMpuSize;
 	u8 patchMpuRegion;
 	u8 language;

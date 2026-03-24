@@ -19,11 +19,12 @@
  If you use this code, please give due credit and email me about your
  project at chishm@hotmail.com
 ------------------------------------------------------------------*/
-#ifndef NO_DLDI
 #include <string.h>
 #include <nds.h>
-#include "dldi_patcher.h"
 #include "tonccpy.h"
+
+typedef signed int addr_t;
+typedef unsigned char data_t;
 
 #define FIX_ALL	0x01
 #define FIX_GLUE	0x02
@@ -95,7 +96,7 @@ static const data_t dldiMagicString[] = "\xED\xA5\x8D\xBF Chishm";	// Normal DLD
 //static const data_t dldiMagicLoaderString[] = "\xEE\xA5\x8D\xBF Chishm";	// Different to a normal DLDI file
 #define DEVICE_TYPE_DLDI 0x49444C44
 
-bool dldiPatchBinary (data_t *binData, u32 binSize) {
+bool dldiPatchBinary (const u32 dldiOffsetNew, data_t *binData, u32 binSize) {
 
 	addr_t memOffset;			// Offset of DLDI after the file is loaded into memory
 	addr_t patchOffset;			// Position of patch destination in the file
@@ -115,8 +116,6 @@ bool dldiPatchBinary (data_t *binData, u32 binSize) {
 		// does not have a DLDI section
 		return false;
 	}
-
-	extern u32 dldiOffsetNew;
 
 	data_t *pDH = (data_t*)dldiOffsetNew;
 	data_t *pAH = &(binData[patchOffset]);
@@ -195,4 +194,3 @@ bool dldiPatchBinary (data_t *binData, u32 binSize) {
 
 	return true;
 }
-#endif

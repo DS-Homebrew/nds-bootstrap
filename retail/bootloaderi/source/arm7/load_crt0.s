@@ -23,6 +23,7 @@
 @---------------------------------------------------------------------------------
 	.section ".init"
 	.global _start
+	.global ndsBootstrapCluster
 	.global storedFileCluster
 	.global initDisc
 	.global bootstrapOnFlashcard
@@ -72,6 +73,7 @@
 	.global pageFileCluster
 	.global manualCluster
 	.global sharedFontCluster
+	.global dldiPatchBinaryOffset
 	.global patchMpuSize
 	.global patchMpuRegion
 	.global language
@@ -97,6 +99,8 @@ _start:
 @---------------------------------------------------------------------------------
 	b	startUp
 
+ndsBootstrapCluster:
+	.word	0x0FFFFFFF
 storedFileCluster:
 	.word	0x0FFFFFFF
 initDisc:
@@ -204,6 +208,8 @@ pageFileCluster:
 manualCluster:
 	.word	0x00000000
 sharedFontCluster:
+	.word	0x00000000
+dldiPatchBinaryOffset:
 	.word	0x00000000
 patchMpuSize:
 	.word	0x00000000

@@ -31,6 +31,7 @@ typedef struct configuration {
 	char* apPatchPath;
 	char* apPatchPostCardReadPath;
 	char* dsi2dsSavePatchPath;
+	u32 ndsBootstrapCluster;
 	u32 donorFileSize;
 	u32 donorFileOffset;
 	u32 romSize;
@@ -66,6 +67,7 @@ typedef struct configuration {
 	u8 donorSdkVer;
 	u8 patchMpuRegion;
 	u32 patchMpuSize;
+	u32 dldiPatchBinaryOffset;
 	u8 consoleModel;
 	// int colorMode;
 	u8 romRead_LED;

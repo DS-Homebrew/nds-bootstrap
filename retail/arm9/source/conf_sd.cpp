@@ -751,6 +751,18 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		return -1;
 	}
 	
+	{
+		struct stat st;
+
+		if (stat(bootstrapPath, &st) < 0) {
+			myConsoleDemoInit();
+			iprintf("Failed to get cluster of\nnds-bootstrap!\n");
+			return -1;
+		}
+
+		conf->ndsBootstrapCluster = st.st_ino;
+	}
+
 	bool expansionPakFound = false;
 
 	if (*(u16*)0x02FFFC30 == 0) {
@@ -2422,6 +2434,10 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			}
 			loadCardEngineBinary(ce9path, (u8*)CARDENGINE_ARM9_LOCATION_BUFFERED);
 		}
+
+		cebin = fopen("nitro:/cardengine_arm9_dldipatcher.bin", "rb");
+		conf->dldiPatchBinaryOffset = offsetOfOpenedNitroFile;
+		fclose(cebin);
 
 		// Load DS blowfish
 		cebin = fopen("nitro:/encr_data.bin", "rb");

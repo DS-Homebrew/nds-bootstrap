@@ -194,6 +194,7 @@ int hookNdsRetailArm9(
 ) {
 	nocashMessage("hookNdsRetailArm9");
 
+	extern u32 ndsBootstrapCluster;
 	extern u8 _io_dldi_size;
 	extern u32 quitFileCluster;
 	const char* romTid = getRomTid(ndsHeader);
@@ -207,6 +208,7 @@ int hookNdsRetailArm9(
 	extern u16 s2FlashcardId;
 	extern bool maxHeapOpen;
 
+	ce9->ndsBootstrapCluster    = ndsBootstrapCluster;
 	ce9->dldiOffset             = dldiOffset;
 	ce9->quitFileCluster        = quitFileCluster;
 	ce9->fileCluster            = fileCluster;
@@ -289,6 +291,9 @@ int hookNdsRetailArm9(
 		ce9->valueBits |= b_cardReadFix;
 	}
 
+	extern u32 dldiPatchBinaryOffset;
+	ce9->dldiPatchBinaryOffset = dldiPatchBinaryOffset;
+
 	extern u32 iUncompressedSize;
 
     u32* tableAddr = patchOffsetCache.a9IrqHandlerOffset;
@@ -314,7 +319,7 @@ int hookNdsRetailArm9(
     u32* ipcSyncHandler = hookLocation + 16;
     u32* cardCompletionIrq = hookLocation + 19;*/
     
-    ce9->irqTable = tableAddr;
+	ce9->irqTable = tableAddr;
 
 	nocashMessage("ERR_NONE");
 	return ERR_NONE;

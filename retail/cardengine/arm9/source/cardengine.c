@@ -33,6 +33,7 @@
 #include "igm_text.h"
 #include "nds_header.h"
 #include "module_params.h"
+#include "dldi_patcher.h"
 #include "cardengine.h"
 #include "locations.h"
 #include "cardengine_header_arm9.h"
@@ -46,6 +47,8 @@
 
 #define FEATURE_SLOT_GBA			0x00000010
 #define FEATURE_SLOT_NDS			0x00000020
+
+extern u32 dldiOffsetNew;
 
 #define expansionPakFound BIT(0)
 #define extendedMemory BIT(1)
@@ -83,6 +86,7 @@ tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER_SDK5;
 tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER;
 #endif
 
+static aFile ndsBootstrap;
 static aFile bootNds;
 static aFile romFile;
 static aFile savFile;
@@ -200,8 +204,6 @@ extern void slot2MpuFix();
 extern void sdk5MpuFix();
 extern void resetMpu();
 extern u32 getDtcmBase(void);
-
-extern bool dldiPatchBinary (unsigned char *binData, u32 binSize);
 
 void reset(u32 param, u32 param2) {
 	setDeviceOwner();
@@ -353,7 +355,8 @@ void reset(u32 param, u32 param2) {
 		WRAM_CR = 0x03; // Set shared ram to ARM7
 		sharedAddr[1] = 0x48495344; // 'DSIH'
 
-		if (!dldiPatchBinary(ndsHeader->arm9destination, ndsHeader->arm9binarySize)) {
+		fileRead((char*)0x02370000, &ndsBootstrap, ce9->dldiPatchBinaryOffset, 0x400);
+		if (!dldiPatchBinary(dldiOffsetNew, ndsHeader->arm9destination, ndsHeader->arm9binarySize)) {
 			sharedAddr[1] = 0x57495344;
 		}
 
@@ -665,7 +668,6 @@ static void initialize(void) {
 		return;
 	}
 
-	extern u32 dldiOffsetNew;
 	if (dldiOffsetNew < 0x02000000 || dldiOffsetNew >= 0x03000000) {
 		extern u8 dldiDriverSize;
 		const u16 dldiFileSize = 1 << dldiDriverSize;
@@ -679,6 +681,7 @@ static void initialize(void) {
 		while (1);
 	}
 
+	getFileFromCluster(&ndsBootstrap, ce9->ndsBootstrapCluster);
 	getFileFromCluster(&bootNds, ce9->quitFileCluster);
 	getFileFromCluster(&romFile, ce9->fileCluster);
 	getFileFromCluster(&savFile, ce9->saveCluster);

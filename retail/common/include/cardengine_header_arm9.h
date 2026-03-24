@@ -201,6 +201,7 @@ typedef struct cardengineArm9 {
     cardengineArm9Patches* patches;
     cardengineArm9ThumbPatches* thumbPatches;
     u32 intr_ipc_orig_return;
+    u32 ndsBootstrapCluster;
     u32 quitFileCluster;
     u32 fileCluster;
     u32 saveCluster;
@@ -261,6 +262,7 @@ typedef struct cardengineArm9 {
 	u32 readManual;
 	u32 restorePreManual;
 	u32 saveMainScreenSetting;
+	u32 dldiPatchBinaryOffset;
 } cardengineArm9;
 #endif
 

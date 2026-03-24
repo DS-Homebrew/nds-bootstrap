@@ -21,6 +21,8 @@ thumbPatches_offset:
 	.word	thumbPatches
 intr_ipc_orig_return:
 	.word	0x00000000
+ndsBootstrapCluster:
+	.word	0x00000000
 quitFileCluster:
 	.word	0x00000000
 fileCluster:
@@ -116,6 +118,8 @@ restorePreManualPtr:
 	.word restorePreManual
 saveMainScreenSettingPtr:
 	.word saveMainScreenSetting
+dldiPatchBinaryOffset:
+	.word	0
 
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
@@ -520,5 +524,9 @@ DC_WaitWriteBufferEmpty:
 	ldmfd   sp!, {r0-r11,pc}
 	.pool
 
+.global dldiPatchBinary
+.type	dldiPatchBinary STT_FUNC
+dldiPatchBinary:
+	b 0x02370000
 
 card_engine_end:
