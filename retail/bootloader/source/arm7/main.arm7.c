@@ -1657,7 +1657,7 @@ int arm7_main(void) {
 	|| strncmp(romTid, "KZ7", 3) == 0 // Tales to Enjoy!: The Three Little Pigs
 	|| strncmp(romTid, "KZ8", 3) == 0 // Tales to Enjoy!: The Ugly Duckling
 	) {
-		ce9DldiItcm = 0x01FF8400; // Set <= 32KB DLDI location at ITCM
+		ce9DldiItcm = 0x01FF8500; // Set <= 32KB DLDI location at ITCM
 	} else if ( _io_dldi_size < 0x0F && (
 	   strncmp(romTid, "KAT", 3) == 0 // AiRace: Tunnel
 	|| strncmp(romTid, "KNP", 3) == 0 // Need for Speed: Nitro-X
