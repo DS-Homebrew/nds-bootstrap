@@ -1790,8 +1790,8 @@ int arm7_main(void) {
 				clusterCache += 0xB880000;
 				toncset((char*)0x02700000, 0, 0x80000);
 			} else { */
-				u32 add = 0x8FC000; // 0x02FFC000
-				u16 len = isDSiWare ? 0x1000 : 0x17B0;
+				u32 add = isDSiWare ? 0x8FD000 : 0x8FC000; // isDSiWare ? 0x02FFD000 : 0x02FFC000
+				u16 len = isDSiWare ? 0x7B0 : 0x17B0;
 				tonccpy((char*)0x02700000+add, (char*)0x02700000, len);	// Move FAT table cache elsewhere
 				romFile->fatTableCache = (u32*)((u32)romFile->fatTableCache+add);
 				savFile->fatTableCache = (u32*)((u32)savFile->fatTableCache+add);
