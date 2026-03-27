@@ -214,7 +214,6 @@ void arm9_main(void) {
 	dmaFill9(0, VRAM_A, 0x20000*3);		// Banks A, B, C
 	dmaFill9(0, VRAM_D, 272*1024);		// Banks D (excluded), E, F, G, H, I
 
-	*(vu32*)(0x02000000) = 0;
 	memset_addrs_arm9(0x02000620, 0x02084000);	// clear part of EWRAM
 	memset_addrs_arm9(0x02280000, IMAGES_LOCATION);	// clear part of EWRAM - except before nds-bootstrap images
 	if (extendedMemory) {
