@@ -1202,7 +1202,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		if (conf->useSdk20Donor) {
 			donorNdsFile = fopen(conf->donor20Path, "rb");
 			twlDonor = false;
-		} else if ((REG_SCFG_EXT7 == 0 || (!conf->isDSiWare && a7mbk6 == 0x00403000))
+		} else if (REG_SCFG_EXT7 == 0
 				&& (conf->dsiMode > 0 || conf->isDSiWare) && (a7mbk6 == (dsiEnhancedMbk ? 0x080037C0 : 0x00403000) || (romTid[0] == 'H' && ndsArm7Size < 0xC000 && ndsArm7idst == 0x02E80000 && (REG_MBK9 & 0x00FFFFFF) != 0x00FFFF0F))) {
 			if (romTid[0] == 'H' && ndsArm7Size < 0xC000 && ndsArm7idst == 0x02E80000) {
 				if (!nandMounted && strncmp((dsiEnhancedMbk ? conf->donorTwl0Path : conf->donorTwlOnly0Path), "nand:", 5) == 0) {

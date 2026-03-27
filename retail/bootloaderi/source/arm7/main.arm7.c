@@ -1792,11 +1792,6 @@ int arm7_main(void) {
 			} else { */
 				u32 add = 0x8FC000; // 0x02FFC000
 				u16 len = isDSiWare ? 0x1000 : 0x17B0;
-				if (*(u32*)0x02FFE1A0 != 0x00403000) {
-					const u16 size = 0x1850;
-					add -= size;
-					len += size;
-				}
 				tonccpy((char*)0x02700000+add, (char*)0x02700000, len);	// Move FAT table cache elsewhere
 				romFile->fatTableCache = (u32*)((u32)romFile->fatTableCache+add);
 				savFile->fatTableCache = (u32*)((u32)savFile->fatTableCache+add);
