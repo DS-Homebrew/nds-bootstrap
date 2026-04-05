@@ -5273,11 +5273,14 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}*/
 
 	// Bloons (USA)
-	/*else if (strcmp(romTid, "KBLE") == 0) {
+	// Saving not supported due to using more than one file in filesystem
+	else if (strcmp(romTid, "KBLE") == 0) {
+		*(u32*)0x0203E020 = 0xE12FFF1E; // bx lr (Disable save writing)
 		*(u32*)0x0206A808 = 0xE1A00000; // nop
 		*(u32*)0x0206A810 = 0xE1A00000; // nop
 		*(u32*)0x0206A860 = 0xE12FFF1E; // bx lr
-		setBL(0x0206AC38, (u32)dsiSaveOpenR);
+		*(u32*)0x0206AD10 = 0xE1A00000; // nop (Disable save reading)
+		/* setBL(0x0206AC38, (u32)dsiSaveOpenR);
 		setBL(0x0206ACFC, (u32)dsiSaveGetLength);
 		setBL(0x0206AD68, (u32)dsiSaveClose);
 		setBL(0x0206B040, (u32)dsiSaveSeek);
@@ -5301,15 +5304,31 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0206B930, (u32)dsiSaveGetLength);
 		setBL(0x0206BF34, (u32)dsiSaveDelete);
 		*(u32*)0x0206C060 = 0xE3A00001; // mov r0, #1 (dsiSaveGetArcSrc)
-		*(u32*)0x0206C078 = 0xE3A00001; // mov r0, #1 (dsiSaveFreeSpaceAvailable)
+		*(u32*)0x0206C078 = 0xE3A00001; // mov r0, #1 (dsiSaveFreeSpaceAvailable) */
 		*(u32*)0x0206C09C = 0xE12FFF1E; // bx lr
 		*(u32*)0x0207569C = 0xE1A00000; // nop
-		tonccpy((u32*)0x020771C0, dsiSaveGetResultCode, 0xC);
+		// tonccpy((u32*)0x020771C0, dsiSaveGetResultCode, 0xC);
 		*(u32*)0x02079EB0 = 0xE1A00000; // nop
 		patchInitDSiWare(0x02080EC0, heapEnd);
-		*(u32*)0x0208124C = 0x020E0380;
+		*(u32*)0x0208124C = *(u32*)0x02004FD0;
 		patchUserSettingsReadDSiWare(0x020820F4);
-	}*/
+	}
+
+	// Bloons (Europe)
+	// Saving not supported due to using more than one file in filesystem
+	else if (strcmp(romTid, "KBLP") == 0) {
+		*(u32*)0x0203E044 = 0xE12FFF1E; // bx lr (Disable save writing)
+		*(u32*)0x0206A82C = 0xE1A00000; // nop
+		*(u32*)0x0206A834 = 0xE1A00000; // nop
+		*(u32*)0x0206A904 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0206ADB4 = 0xE1A00000; // nop (Disable save reading)
+		*(u32*)0x0206C140 = 0xE12FFF1E; // bx lr
+		*(u32*)0x02075740 = 0xE1A00000; // nop
+		*(u32*)0x02079F54 = 0xE1A00000; // nop
+		patchInitDSiWare(0x02080F64, heapEnd);
+		*(u32*)0x020812F0 = *(u32*)0x02004FD0;
+		patchUserSettingsReadDSiWare(0x02082198);
+	}
 
 	// Bloons TD (USA)
 	// Bloons TD (Europe)

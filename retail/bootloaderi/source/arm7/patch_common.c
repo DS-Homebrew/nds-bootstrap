@@ -3123,6 +3123,24 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		} */
 	}
 
+	// Bloons (USA)
+	// Saving not supported due to using more than one file in filesystem
+	else if (strcmp(romTid, "KBLE") == 0 && saveOnFlashcardNtr) {
+		*(u32*)0x0203E020 = 0xE12FFF1E; // bx lr (Disable save writing)
+		*(u32*)0x0206A860 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0206AD10 = 0xE1A00000; // nop (Disable save reading)
+		*(u32*)0x0206C09C = 0xE12FFF1E; // bx lr
+	}
+
+	// Bloons (Europe)
+	// Saving not supported due to using more than one file in filesystem
+	else if (strcmp(romTid, "KBLP") == 0 && saveOnFlashcardNtr) {
+		*(u32*)0x0203E044 = 0xE12FFF1E; // bx lr (Disable save writing)
+		*(u32*)0x0206A904 = 0xE12FFF1E; // bx lr
+		*(u32*)0x0206ADB4 = 0xE1A00000; // nop (Disable save reading)
+		*(u32*)0x0206C140 = 0xE12FFF1E; // bx lr
+	}
+
 	// Bloons TD (USA)
 	// Bloons TD (Europe)
 	// A weird bug is preventing save support

@@ -93,6 +93,7 @@ static const char dsiWareForBootloader1[][4] = {
 	"K96", // G.G Series: Black x Block
 	"KBZ", // BlayzBloo: Super Melee Brawlers Battle Royale
 	"KZ4", // Blockado: Puzzle Island (bootloaderi-exclusive)
+	"KBL", // Bloons
 	"KLN", // Bloons TD
 	"KUV", // Bloons TD 4
 	"KA5", // Boardwalk Ball Toss
