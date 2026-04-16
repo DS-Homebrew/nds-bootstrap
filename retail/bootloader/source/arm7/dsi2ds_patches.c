@@ -9296,7 +9296,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			patchTwlFontLoad(true, 0x0204FCA4, 0x02027F14);
 			*(u32*)0x0204FCF0 = 0xE1A00000; // nop
 		}
-		setBL(0x02057B48, (u32)dsiSaveCreate);
+		/* setBL(0x02057B48, (u32)dsiSaveCreate); // Part of .pck file
 		setBL(0x02057B58, (u32)dsiSaveOpen);
 		setBL(0x02057B74, (u32)dsiSaveGetResultCode);
 		setBL(0x02057B98, (u32)dsiSaveSeek);
@@ -9310,7 +9310,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02057C98, (u32)dsiSaveRead);
 		setBL(0x02057CB0, (u32)dsiSaveClose);
 		setBL(0x02057CBC, (u32)dsiSaveGetResultCode);
-		setBL(0x0205C47C, 0x02057D18);
+		setBL(0x0205C47C, 0x02057D18); */
 		*(u32*)0x020626F8 = 0xE12FFF1E; // bx lr
 	}
 
@@ -9327,7 +9327,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			patchTwlFontLoad(true, 0x02045648, 0x0201D8B8);
 			*(u32*)0x02045694 = 0xE1A00000; // nop
 		}
-		setBL(0x0204D4EC, (u32)dsiSaveCreate);
+		/* setBL(0x0204D4EC, (u32)dsiSaveCreate); // Part of .pck file
 		setBL(0x0204D4FC, (u32)dsiSaveOpen);
 		setBL(0x0204D518, (u32)dsiSaveGetResultCode);
 		setBL(0x0204D53C, (u32)dsiSaveSeek);
@@ -9341,7 +9341,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0204D63C, (u32)dsiSaveRead);
 		setBL(0x0204D654, (u32)dsiSaveClose);
 		setBL(0x0204D660, (u32)dsiSaveGetResultCode);
-		setBL(0x02051E20, 0x0204D6BC);
+		setBL(0x02051E20, 0x0204D6BC); */
 		*(u32*)0x0205809C = 0xE12FFF1E; // bx lr
 	}
 
@@ -10043,7 +10043,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			offset4[i] = 0xE1A00000; // nop
 			offset5[i] = 0xE1A00000; // nop
 		}*/
-		*(u32*)0x0201B894 = 0xE1A00000; // nop
+		/* *(u32*)0x0201B894 = 0xE1A00000; // nop // Part of .pck file
 		setBL(0x0201B8E8, (u32)dsiSaveOpen);
 		setBL(0x0201B900, (u32)dsiSaveRead);
 		setBL(0x0201B928, (u32)dsiSaveClose);
@@ -10058,7 +10058,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0201BBAC, (u32)dsiSaveGetResultCode);
 		setBL(0x0201BBE8, (u32)dsiSaveClose);
 		setBL(0x0201BC00, (u32)dsiSaveClose);
-		*(u32*)0x0201BC18 = 0xE1A00000; // nop
+		*(u32*)0x0201BC18 = 0xE1A00000; // nop */
 		*(u32*)0x0202FACC = 0xE1A00000; // nop
 		*(u32*)0x0202FC00 = 0xE1A00000; // nop
 		*(u32*)0x0202FC14 = 0xE1A00000; // nop
@@ -10091,7 +10091,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			offset4[i] = 0xE1A00000; // nop
 			offset5[i] = 0xE1A00000; // nop
 		}*/
-		*(u32*)0x0201B888 = 0xE1A00000; // nop
+		/* *(u32*)0x0201B888 = 0xE1A00000; // nop // Part of .pck file
 		setBL(0x0201B8DC, (u32)dsiSaveOpen);
 		setBL(0x0201B8F4, (u32)dsiSaveRead);
 		setBL(0x0201B91C, (u32)dsiSaveClose);
@@ -10106,7 +10106,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0201BBA0, (u32)dsiSaveGetResultCode);
 		setBL(0x0201BBDC, (u32)dsiSaveClose);
 		setBL(0x0201BBF4, (u32)dsiSaveClose);
-		*(u32*)0x0201BC0C = 0xE1A00000; // nop
+		*(u32*)0x0201BC0C = 0xE1A00000; // nop */
 		*(u32*)0x0202FAC0 = 0xE1A00000; // nop
 		*(u32*)0x0202FBF4 = 0xE1A00000; // nop
 		*(u32*)0x0202FC08 = 0xE1A00000; // nop
@@ -10795,7 +10795,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			}
 		//}
 		// *(u32*)0x0200A898 = 0xE12FFF1E; // bx lr
-		setBL(0x0200AC14, (u32)dsiSaveOpen);
+		/* setBL(0x0200AC14, (u32)dsiSaveOpen); // Part of .pck file
 		setBL(0x0200AC50, (u32)dsiSaveRead);
 		setBL(0x0200AC70, (u32)dsiSaveClose);
 		setBL(0x0200AD0C, (u32)dsiSaveCreate);
@@ -10803,10 +10803,10 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0200AD84, (u32)dsiSaveSetLength);
 		setBL(0x0200ADA0, (u32)dsiSaveWrite);
 		setBL(0x0200ADC4, (u32)dsiSaveClose);
-		setBL(0x0200AE58, (u32)dsiSaveGetInfo);
+		setBL(0x0200AE58, (u32)dsiSaveGetInfo); */
 		*(u32*)0x02036398 = 0xE1A00000; // nop
 		*(u32*)0x0204BFE8 = 0xE1A00000; // nop
-		tonccpy((u32*)0x0204CB6C, dsiSaveGetResultCode, 0xC);
+		// tonccpy((u32*)0x0204CB6C, dsiSaveGetResultCode, 0xC); // Part of .pck file
 		*(u32*)0x0204F548 = 0xE1A00000; // nop
 		patchInitDSiWare(0x0205619C, heapEnd);
 		patchUserSettingsReadDSiWare(0x02057678);
@@ -10828,7 +10828,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	else if (strcmp(romTid, "KB8P") == 0) {
 		*(u32*)0x02005234 = 0xE1A00000; // nop
 		*(u32*)0x0200A310 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
-		setBL(0x0200AB24, (u32)dsiSaveOpen);
+		/* setBL(0x0200AB24, (u32)dsiSaveOpen); // Part of .pck file
 		setBL(0x0200AB60, (u32)dsiSaveRead);
 		setBL(0x0200AB80, (u32)dsiSaveClose);
 		setBL(0x0200AC1C, (u32)dsiSaveCreate);
@@ -10836,13 +10836,13 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0200AC94, (u32)dsiSaveSetLength);
 		setBL(0x0200ACB0, (u32)dsiSaveWrite);
 		setBL(0x0200ACD4, (u32)dsiSaveClose);
-		setBL(0x0200AD68, (u32)dsiSaveGetInfo);
+		setBL(0x0200AD68, (u32)dsiSaveGetInfo); */
 		*(u32*)0x0200B710 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
 		*(u32*)0x020149B4 = 0xE12FFF1E; // bx lr (Skip Manual screen, Part 1)
 		*(u32*)0x02036394 = 0xE1A00000; // nop
 		*(u32*)0x02047D50 = 0xE12FFF1E; // bx lr
 		*(u32*)0x0204BEEC = 0xE1A00000; // nop
-		tonccpy((u32*)0x0204CA70, dsiSaveGetResultCode, 0xC);
+		// tonccpy((u32*)0x0204CA70, dsiSaveGetResultCode, 0xC); // Part of .pck file
 		*(u32*)0x0204F44C = 0xE1A00000; // nop
 		patchInitDSiWare(0x020560A0, heapEnd);
 		patchUserSettingsReadDSiWare(0x0205757C);
@@ -10861,7 +10861,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Earth Saver: Inseki Bakuha Dai Sakuse (Japan)
 	else if (strcmp(romTid, "KB9J") == 0) {
 		*(u32*)0x0200521C = 0xE1A00000; // nop
-		setBL(0x02009CF4, (u32)dsiSaveOpen);
+		/* setBL(0x02009CF4, (u32)dsiSaveOpen); // Part of .pck file
 		setBL(0x02009D2C, (u32)dsiSaveRead);
 		setBL(0x02009D4C, (u32)dsiSaveClose);
 		setBL(0x02009DE4, (u32)dsiSaveCreate);
@@ -10869,13 +10869,13 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02009E5C, (u32)dsiSaveSetLength);
 		setBL(0x02009E74, (u32)dsiSaveWrite);
 		setBL(0x02009E98, (u32)dsiSaveClose);
-		setBL(0x02009F28, (u32)dsiSaveGetInfo);
+		setBL(0x02009F28, (u32)dsiSaveGetInfo); */
 		*(u32*)0x0200B9C4 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		*(u32*)0x0200A7CC = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
 		*(u32*)0x0200FF44 = 0xE12FFF1E; // bx lr (Skip Manual screen, Part 1)
 		*(u32*)0x0203092C = 0xE12FFF1E; // bx lr
 		*(u32*)0x02034AD4 = 0xE1A00000; // nop
-		tonccpy((u32*)0x0203564C, dsiSaveGetResultCode, 0xC);
+		// tonccpy((u32*)0x0203564C, dsiSaveGetResultCode, 0xC); // Part of .pck file
 		*(u32*)0x02037FA0 = 0xE1A00000; // nop
 		patchInitDSiWare(0x0203EBBC, heapEnd);
 		patchUserSettingsReadDSiWare(0x02040088);
@@ -10895,7 +10895,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	else if (strcmp(romTid, "KB8J") == 0) {
 		*(u32*)0x0200521C = 0xE1A00000; // nop
 		*(u32*)0x0200A038 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
-		setBL(0x0200A84C, (u32)dsiSaveOpen);
+		/* setBL(0x0200A84C, (u32)dsiSaveOpen); // Part of .pck file
 		setBL(0x0200A888, (u32)dsiSaveRead);
 		setBL(0x0200A8A8, (u32)dsiSaveClose);
 		setBL(0x0200A944, (u32)dsiSaveCreate);
@@ -10903,13 +10903,13 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0200A9BC, (u32)dsiSaveSetLength);
 		setBL(0x0200A9D8, (u32)dsiSaveWrite);
 		setBL(0x0200A9FC, (u32)dsiSaveClose);
-		setBL(0x0200AA90, (u32)dsiSaveGetInfo);
+		setBL(0x0200AA90, (u32)dsiSaveGetInfo); */
 		*(u32*)0x0200B438 = 0xE12FFF1E; // bx lr (Skip NFTR font rendering)
 		*(u32*)0x02014708 = 0xE12FFF1E; // bx lr (Skip Manual screen, Part 1)
 		*(u32*)0x020360E8 = 0xE1A00000; // nop
 		*(u32*)0x02047A88 = 0xE12FFF1E; // bx lr
 		*(u32*)0x0204BC24 = 0xE1A00000; // nop
-		tonccpy((u32*)0x0204C79C, dsiSaveGetResultCode, 0xC);
+		// tonccpy((u32*)0x0204C79C, dsiSaveGetResultCode, 0xC); // Part of .pck file
 		*(u32*)0x0204F0F0 = 0xE1A00000; // nop
 		patchInitDSiWare(0x02055D0C, heapEnd);
 		patchUserSettingsReadDSiWare(0x020571D8);
@@ -12630,7 +12630,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	// Frogger Returns (USA)
 	else if (strcmp(romTid, "KFGE") == 0) {
 		*(u32*)0x020117D4 = 0xE1A00000; // nop
-		tonccpy((u32*)0x0201234C, dsiSaveGetResultCode, 0xC);
+		// tonccpy((u32*)0x0201234C, dsiSaveGetResultCode, 0xC); // Part of .pck file
 		*(u32*)0x020152F0 = 0xE1A00000; // nop
 		patchInitDSiWare(0x0201BFB4, heapEnd);
 		*(u32*)0x0201C340 = *(u32*)0x02004FD0;
@@ -12639,7 +12639,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			*(u32*)0x020250B4 = 0xE2822602; // add r2, r2, 0x200000
 			*(u32*)0x020250EC = 0x20E000;
 		}
-		*(u32*)0x020381BC = 0xE1A00000; // nop
+		/* *(u32*)0x020381BC = 0xE1A00000; // nop // Part of .pck file
 		setBL(0x02038250, (u32)dsiSaveGetInfo);
 		setBL(0x02038294, (u32)dsiSaveOpen);
 		setBL(0x020382B0, (u32)dsiSaveRead);
@@ -12649,7 +12649,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02038424, (u32)dsiSaveCreate); // dsiSaveCreateAuto
 		setBL(0x02038454, (u32)dsiSaveOpen);
 		setBL(0x02038470, (u32)dsiSaveWrite);
-		setBL(0x02038478, (u32)dsiSaveClose);
+		setBL(0x02038478, (u32)dsiSaveClose); */
 
 		// Skip Manual screen
 		*(u32*)0x0204B968 = 0xE1A00000; // nop
@@ -12674,7 +12674,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			patchTwlFontLoad(true, 0x0203A2DC, 0x0201F580);
 			*(u32*)0x0203A39C = 0xE1A00000; // nop
 		}
-		setBL(0x02045468, (u32)dsiSaveOpen);
+		/* setBL(0x02045468, (u32)dsiSaveOpen); // Part of .pck file
 		setBL(0x02045498, (u32)dsiSaveRead);
 		setBL(0x020454A8, (u32)dsiSaveClose);
 		setBL(0x020454C4, (u32)dsiSaveClose);
@@ -12686,7 +12686,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x020455B0, (u32)dsiSaveClose);
 		setBL(0x020455DC, (u32)dsiSaveWrite);
 		setBL(0x020455EC, (u32)dsiSaveClose);
-		setBL(0x02045608, (u32)dsiSaveClose);
+		setBL(0x02045608, (u32)dsiSaveClose); */
 	}
 
 	// Gaia's Moon (USA)
@@ -25259,7 +25259,7 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		} else { */
 			*(u32*)0x02013184 = 0xE1A00000; // nop (Disable NFTR loading from TWLNAND)
 		// }
-		if (romTid[3] == 'E') {
+		if (isUsa) {
 			setBL(0x020137B8, (u32)dsiSaveOpen);
 			*(u32*)0x02013804 = 0xE1A00000; // nop
 			*(u32*)0x02013818 = 0xE1A00000; // nop

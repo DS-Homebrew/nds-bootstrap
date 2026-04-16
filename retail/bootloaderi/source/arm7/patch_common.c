@@ -5267,8 +5267,8 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	} */
 
 	// Decathlon 2012 (USA)
-	else if (strcmp(romTid, "KUIE") == 0 && saveOnFlashcardNtr) {
-		setBL(0x02057B48, (u32)dsiSaveCreate);
+	/* else if (strcmp(romTid, "KUIE") == 0 && saveOnFlashcardNtr) {
+		setBL(0x02057B48, (u32)dsiSaveCreate); // Part of .pck file
 		setBL(0x02057B58, (u32)dsiSaveOpen);
 		setBL(0x02057B74, (u32)dsiSaveGetResultCode);
 		setBL(0x02057B98, (u32)dsiSaveSeek);
@@ -5283,11 +5283,11 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x02057CB0, (u32)dsiSaveClose);
 		setBL(0x02057CBC, (u32)dsiSaveGetResultCode);
 		setBL(0x0205C47C, 0x02057D18);
-	}
+	} */
 
 	// Decathlon 2012 (Europe)
-	else if (strcmp(romTid, "KUIP") == 0 && saveOnFlashcardNtr) {
-		setBL(0x0204D4EC, (u32)dsiSaveCreate);
+	/* else if (strcmp(romTid, "KUIP") == 0 && saveOnFlashcardNtr) {
+		setBL(0x0204D4EC, (u32)dsiSaveCreate); // Part of .pck file
 		setBL(0x0204D4FC, (u32)dsiSaveOpen);
 		setBL(0x0204D518, (u32)dsiSaveGetResultCode);
 		setBL(0x0204D53C, (u32)dsiSaveSeek);
@@ -5302,7 +5302,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0204D654, (u32)dsiSaveClose);
 		setBL(0x0204D660, (u32)dsiSaveGetResultCode);
 		setBL(0x02051E20, 0x0204D6BC);
-	}
+	} */
 
 	// Deep Sea Creatures (USA)
 	else if (strcmp(romTid, "K6BE") == 0) {
@@ -5651,28 +5651,32 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Dragon's Lair (USA)
-	else if (strcmp(romTid, "KDLE") == 0 && saveOnFlashcardNtr) {
-		*(u32*)0x020051E4 = 0xE1A00000; // nop (Skip Manual screen)
-		setBL(0x0201B8E8, (u32)dsiSaveOpen);
-		setBL(0x0201B900, (u32)dsiSaveRead);
-		setBL(0x0201B928, (u32)dsiSaveClose);
-		setBL(0x0201B98C, (u32)dsiSaveCreate);
-		setBL(0x0201B9BC, (u32)dsiSaveOpen);
-		setBL(0x0201B9EC, (u32)dsiSaveWrite);
-		setBL(0x0201BA14, (u32)dsiSaveClose);
-		setBL(0x0201BAB4, (u32)dsiSaveOpen);
-		setBL(0x0201BAFC, (u32)dsiSaveSeek);
-		setBL(0x0201BB2C, (u32)dsiSaveWrite);
-		setBL(0x0201BB54, (u32)dsiSaveClose);
-		setBL(0x0201BBAC, (u32)dsiSaveGetResultCode);
-		setBL(0x0201BBE8, (u32)dsiSaveClose);
-		setBL(0x0201BC00, (u32)dsiSaveClose);
+	// Dragon's Lair (Europe, Australia)
+	else if (strcmp(romTid, "KDLE") == 0 || strcmp(romTid, "KDLV") == 0) {
+		if (!twlFontFound) {
+			*(u32*)0x020051E4 = 0xE1A00000; // nop (Skip Manual screen)
+		}
+		/* if (saveOnFlashcardNtr) { // Part of .pck file
+			setBL(0x0201B8E8, (u32)dsiSaveOpen);
+			setBL(0x0201B900, (u32)dsiSaveRead);
+			setBL(0x0201B928, (u32)dsiSaveClose);
+			setBL(0x0201B98C, (u32)dsiSaveCreate);
+			setBL(0x0201B9BC, (u32)dsiSaveOpen);
+			setBL(0x0201B9EC, (u32)dsiSaveWrite);
+			setBL(0x0201BA14, (u32)dsiSaveClose);
+			setBL(0x0201BAB4, (u32)dsiSaveOpen);
+			setBL(0x0201BAFC, (u32)dsiSaveSeek);
+			setBL(0x0201BB2C, (u32)dsiSaveWrite);
+			setBL(0x0201BB54, (u32)dsiSaveClose);
+			setBL(0x0201BBAC, (u32)dsiSaveGetResultCode);
+			setBL(0x0201BBE8, (u32)dsiSaveClose);
+			setBL(0x0201BC00, (u32)dsiSaveClose);
+		} */
 	}
 
 	// Dragon's Lair (Europe, Australia)
-	else if (strcmp(romTid, "KDLV") == 0 && saveOnFlashcardNtr) {
-		*(u32*)0x020051E4 = 0xE1A00000; // nop (Skip Manual screen)
-		setBL(0x0201B8DC, (u32)dsiSaveOpen);
+	/* else if (strcmp(romTid, "KDLV") == 0 && saveOnFlashcardNtr) {
+		setBL(0x0201B8DC, (u32)dsiSaveOpen); // Part of .pck file
 		setBL(0x0201B8F4, (u32)dsiSaveRead);
 		setBL(0x0201B91C, (u32)dsiSaveClose);
 		setBL(0x0201B980, (u32)dsiSaveCreate);
@@ -5686,45 +5690,53 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x0201BBA0, (u32)dsiSaveGetResultCode);
 		setBL(0x0201BBDC, (u32)dsiSaveClose);
 		setBL(0x0201BBF4, (u32)dsiSaveClose);
-	}
+	} */
 
 	// Dragon's Lair II: Time Warp (USA)
-	else if (strcmp(romTid, "KLYE") == 0 && saveOnFlashcardNtr) {
-		*(u32*)0x020051C8 = 0xE1A00000; // nop (Skip Manual screen)
-		setBL(0x02020034, (u32)dsiSaveOpen);
-		setBL(0x0202004C, (u32)dsiSaveRead);
-		setBL(0x02020074, (u32)dsiSaveClose);
-		setBL(0x02020110, (u32)dsiSaveCreate);
-		setBL(0x02020140, (u32)dsiSaveOpen);
-		setBL(0x02020170, (u32)dsiSaveWrite);
-		setBL(0x02020198, (u32)dsiSaveClose);
-		setBL(0x02020274, (u32)dsiSaveOpen);
-		setBL(0x020202B0, (u32)dsiSaveSeek);
-		setBL(0x020202E0, (u32)dsiSaveWrite);
-		setBL(0x02020308, (u32)dsiSaveClose);
-		setBL(0x02020374, (u32)dsiSaveGetResultCode);
-		setBL(0x020203A4, (u32)dsiSaveClose);
-		setBL(0x020203BC, (u32)dsiSaveClose);
+	else if (strcmp(romTid, "KLYE") == 0) {
+		if (!twlFontFound) {
+			*(u32*)0x020051C8 = 0xE1A00000; // nop (Skip Manual screen)
+		}
+		if (saveOnFlashcardNtr) {
+			setBL(0x02020034, (u32)dsiSaveOpen);
+			setBL(0x0202004C, (u32)dsiSaveRead);
+			setBL(0x02020074, (u32)dsiSaveClose);
+			setBL(0x02020110, (u32)dsiSaveCreate);
+			setBL(0x02020140, (u32)dsiSaveOpen);
+			setBL(0x02020170, (u32)dsiSaveWrite);
+			setBL(0x02020198, (u32)dsiSaveClose);
+			setBL(0x02020274, (u32)dsiSaveOpen);
+			setBL(0x020202B0, (u32)dsiSaveSeek);
+			setBL(0x020202E0, (u32)dsiSaveWrite);
+			setBL(0x02020308, (u32)dsiSaveClose);
+			setBL(0x02020374, (u32)dsiSaveGetResultCode);
+			setBL(0x020203A4, (u32)dsiSaveClose);
+			setBL(0x020203BC, (u32)dsiSaveClose);
+		}
 	}
 
 	// Dragon's Lair II: Time Warp (Europe, Australia)
-	else if (strcmp(romTid, "KLYV") == 0 && saveOnFlashcardNtr) {
-		*(u32*)0x020051E0 = 0xE1A00000; // nop (Skip Manual screen)
-		setBL(0x0202004C, (u32)dsiSaveOpen);
-		setBL(0x02020064, (u32)dsiSaveRead);
-		setBL(0x0202008C, (u32)dsiSaveClose);
-		setBL(0x02020128, (u32)dsiSaveCreate);
-		setBL(0x02020158, (u32)dsiSaveOpen);
-		setBL(0x02020188, (u32)dsiSaveWrite);
-		setBL(0x020201B0, (u32)dsiSaveClose);
-		setBL(0x0202028C, (u32)dsiSaveOpen);
-		setBL(0x020202C8, (u32)dsiSaveSeek);
-		setBL(0x020202F8, (u32)dsiSaveWrite);
-		setBL(0x02020320, (u32)dsiSaveClose);
-		setBL(0x0202038C, (u32)dsiSaveGetResultCode);
-		setBL(0x020203BC, (u32)dsiSaveClose);
-		setBL(0x020203D4, (u32)dsiSaveClose);
-		setBL(0x02020424, (u32)dsiSaveCreate);
+	else if (strcmp(romTid, "KLYV") == 0) {
+		if (!twlFontFound) {
+			*(u32*)0x020051E0 = 0xE1A00000; // nop (Skip Manual screen)
+		}
+		if (saveOnFlashcardNtr) {
+			setBL(0x0202004C, (u32)dsiSaveOpen);
+			setBL(0x02020064, (u32)dsiSaveRead);
+			setBL(0x0202008C, (u32)dsiSaveClose);
+			setBL(0x02020128, (u32)dsiSaveCreate);
+			setBL(0x02020158, (u32)dsiSaveOpen);
+			setBL(0x02020188, (u32)dsiSaveWrite);
+			setBL(0x020201B0, (u32)dsiSaveClose);
+			setBL(0x0202028C, (u32)dsiSaveOpen);
+			setBL(0x020202C8, (u32)dsiSaveSeek);
+			setBL(0x020202F8, (u32)dsiSaveWrite);
+			setBL(0x02020320, (u32)dsiSaveClose);
+			setBL(0x0202038C, (u32)dsiSaveGetResultCode);
+			setBL(0x020203BC, (u32)dsiSaveClose);
+			setBL(0x020203D4, (u32)dsiSaveClose);
+			setBL(0x02020424, (u32)dsiSaveCreate);
+		}
 	}
 
 	// Dragon Quest Wars (USA)
@@ -5955,9 +5967,9 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 				offset[i] = 0xE1A00000; // nop
 			}
 		}
-		if (saveOnFlashcardNtr) {
+		/* if (saveOnFlashcardNtr) {
 			// *(u32*)0x0200A898 = 0xE12FFF1E; // bx lr
-			setBL(0x0200AC14, (u32)dsiSaveOpen);
+			setBL(0x0200AC14, (u32)dsiSaveOpen); // Part of .pck file
 			setBL(0x0200AC50, (u32)dsiSaveRead);
 			setBL(0x0200AC70, (u32)dsiSaveClose);
 			setBL(0x0200AD0C, (u32)dsiSaveCreate);
@@ -5967,7 +5979,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBL(0x0200ADC4, (u32)dsiSaveClose);
 			setBL(0x0200AE58, (u32)dsiSaveGetInfo);
 			tonccpy((u32*)0x0204CB6C, dsiSaveGetResultCode, 0xC);
-		}
+		} */
 	}
 
 	// GO Series: Earth Saver (Europe)
@@ -5984,7 +5996,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 				offset[i] = 0xE1A00000; // nop
 			}
 		}
-		if (saveOnFlashcardNtr) {
+		/* if (saveOnFlashcardNtr) { // Part of .pck file
 			setBL(0x0200AB24, (u32)dsiSaveOpen);
 			setBL(0x0200AB60, (u32)dsiSaveRead);
 			setBL(0x0200AB80, (u32)dsiSaveClose);
@@ -5995,7 +6007,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBL(0x0200ACD4, (u32)dsiSaveClose);
 			setBL(0x0200AD68, (u32)dsiSaveGetInfo);
 			tonccpy((u32*)0x0204CA70, dsiSaveGetResultCode, 0xC);
-		}
+		} */
 	}
 
 	// Earth Saver: Inseki Bakuha Dai Sakuse (Japan)
@@ -6012,7 +6024,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 				offset[i] = 0xE1A00000; // nop
 			}
 		}
-		if (saveOnFlashcardNtr) {
+		/* if (saveOnFlashcardNtr) { // Part of .pck file
 			setBL(0x02009CF4, (u32)dsiSaveOpen);
 			setBL(0x02009D2C, (u32)dsiSaveRead);
 			setBL(0x02009D4C, (u32)dsiSaveClose);
@@ -6023,7 +6035,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBL(0x02009E98, (u32)dsiSaveClose);
 			setBL(0x02009F28, (u32)dsiSaveGetInfo);
 			tonccpy((u32*)0x0203564C, dsiSaveGetResultCode, 0xC);
-		}
+		} */
 	}
 
 	// Earth Saver Plus: Inseki Bakuha Dai Sakuse (Japan)
@@ -6040,7 +6052,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 				offset[i] = 0xE1A00000; // nop
 			}
 		}
-		if (saveOnFlashcardNtr) {
+		/* if (saveOnFlashcardNtr) { // Part of .pck file
 			setBL(0x0200A84C, (u32)dsiSaveOpen);
 			setBL(0x0200A888, (u32)dsiSaveRead);
 			setBL(0x0200A8A8, (u32)dsiSaveClose);
@@ -6051,7 +6063,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBL(0x0200A9FC, (u32)dsiSaveClose);
 			setBL(0x0200AA90, (u32)dsiSaveGetInfo);
 			tonccpy((u32*)0x0204C79C, dsiSaveGetResultCode, 0xC);
-		}
+		} */
 	}
 
 	// Easter Eggztravaganza (USA)
@@ -6776,7 +6788,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 
 	// Frogger Returns (USA)
 	else if (strcmp(romTid, "KFGE") == 0) {
-		if (saveOnFlashcardNtr) {
+		/* if (saveOnFlashcardNtr) { // Part of .pck file
 			tonccpy((u32*)0x0201234C, dsiSaveGetResultCode, 0xC);
 			setBL(0x02038250, (u32)dsiSaveGetInfo);
 			setBL(0x02038294, (u32)dsiSaveOpen);
@@ -6788,7 +6800,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 			setBL(0x02038454, (u32)dsiSaveOpen);
 			setBL(0x02038470, (u32)dsiSaveWrite);
 			setBL(0x02038478, (u32)dsiSaveClose);
-		}
+		} */
 		if (!twlFontFound) {
 			// Skip Manual screen
 			*(u32*)0x0204B968 = 0xE1A00000; // nop
@@ -6800,8 +6812,8 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	}
 
 	// Fuuu! Dairoujou Kai (Japan)
-	else if (strcmp(romTid, "K6JJ") == 0 && saveOnFlashcardNtr) {
-		setBL(0x02045468, (u32)dsiSaveOpen);
+	/* else if (strcmp(romTid, "K6JJ") == 0 && saveOnFlashcardNtr) {
+		setBL(0x02045468, (u32)dsiSaveOpen); // Part of .pck file
 		setBL(0x02045498, (u32)dsiSaveRead);
 		setBL(0x020454A8, (u32)dsiSaveClose);
 		setBL(0x020454C4, (u32)dsiSaveClose);
@@ -6814,7 +6826,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		setBL(0x020455DC, (u32)dsiSaveWrite);
 		setBL(0x020455EC, (u32)dsiSaveClose);
 		setBL(0x02045608, (u32)dsiSaveClose);
-	}
+	} */
 
 	// Gaia's Moon (USA)
 	// Gaia's Moon (Europe)
