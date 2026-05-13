@@ -1486,46 +1486,41 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			const bool sdPhotoFound = conf->sdNand && (access(conf->gameOnFlashcard ? "fat:/photo" : "sd:/photo", F_OK) == 0);
 
 			// Load device list
-			addTwlDevice(0, (u8)(sdNandFound ? 0 : 0x81), 0x06, "nand", "/");
-			if (!sdNandFound) {
-				addTwlDevice(0, 0xA1, 0x06, "nand2", "/");
+			addTwlDevice('A', (u8)(sdNandFound ? 0 : 0x81), 0x06, "nand", "/");
+			if (!sdNandFound && !sdPhotoFound) {
+				addTwlDevice('B', 0xA1, 0x06, "nand2", "/");
 			} else {
-				addTwlDevice(0, 0, 0x06, "sdmc", "/");
+				addTwlDevice('I', 0, 0x06, "sdmc", "/");
 			}
-			if (shared2len > 0) {
-				addTwlDevice(0, (u8)(sdNandFound ? 0x08 : 0x09), 0x06, "share", "nand:/shared2/0000");
+			addTwlDevice('D', (u8)(sdNandFound ? 0x10 : 0x11), 0x04, "shared1", "nand:/shared1");
+			addTwlDevice('E', (u8)(sdNandFound ? 0x10 : 0x11), 0x06, "shared2", "nand:/shared2");
+			addTwlDevice('F', (u8)((sdNandFound || sdPhotoFound) ? 0x10 : 0x31), 0x06, "photo", ((sdNandFound || sdPhotoFound) ? "sdmc:/photo" : "nand2:/photo"));
+			if (!sdNandFound && !sdPhotoFound) {
+				addTwlDevice('I', 0, 0x06, "sdmc", "/");
 			}
-			if (!sdNandFound) {
-				addTwlDevice(0, 0, 0x06, "sdmc", "/");
-			}
-			if (romTid[0] == 'H') {
-				addTwlDevice(0, (u8)(sdNandFound ? 0x10 : 0x11), 0x06, "shared1", "nand:/shared1");
-				if (shared2len == 0) {
-					addTwlDevice(0, (u8)(sdNandFound ? 0x10 : 0x11), 0x06, "shared2", "nand:/shared2");
-				}
-			}
-			addTwlDevice(0, (u8)((sdNandFound || sdPhotoFound) ? 0x10 : 0x31), 0x06, "photo", ((sdNandFound || sdPhotoFound) ? "sdmc:/photo" : "nand2:/photo"));
 			if (conf->saveOnFlashcard == conf->gameOnFlashcard) {
 				if (strlen(conf->prvPath) < 62 && prvSize > 0) {
+					const char driveLetter = 'G';
 					if (strncasecmp(conf->prvPath, "sd:", 3) != 0 && strncasecmp(conf->prvPath, "fat:", 4) != 0) {
 						const bool isSdmc = (strncasecmp(conf->prvPath, "sdmc:", 5) == 0);
-						addTwlDevice(0, (u8)((sdNandFound || isSdmc) ? 0x08 : 0x09), 0x06, "dataPrv", conf->prvPath);
+						addTwlDevice(driveLetter, (u8)((sdNandFound || isSdmc) ? 0x08 : 0x09), 0x06, "dataPrv", conf->prvPath);
 					} else {
 						char twlPath[64];
 						sprintf(twlPath, "sdmc%s", conf->prvPath+(conf->saveOnFlashcard ? 3 : 2));
 
-						addTwlDevice(0, 0x08, 0x06, "dataPrv", twlPath);
+						addTwlDevice(driveLetter, 0x08, 0x06, "dataPrv", twlPath);
 					}
 				}
 				if (strlen(conf->savPath) < 62 && pubSize > 0) {
+					const char driveLetter = 'H';
 					if (strncasecmp(conf->savPath, "sd:", 3) != 0 && strncasecmp(conf->savPath, "fat:", 4) != 0) {
 						const bool isSdmc = (strncasecmp(conf->savPath, "sdmc:", 5) == 0);
-						addTwlDevice(0, (u8)((sdNandFound || isSdmc) ? 0x08 : 0x09), 0x06, "dataPub", conf->savPath);
+						addTwlDevice(driveLetter, (u8)((sdNandFound || isSdmc) ? 0x08 : 0x09), 0x06, "dataPub", conf->savPath);
 					} else {
 						char twlPath[64];
 						sprintf(twlPath, "sdmc%s", conf->savPath+(conf->saveOnFlashcard ? 3 : 2));
 
-						addTwlDevice(0, 0x08, 0x06, "dataPub", twlPath);
+						addTwlDevice(driveLetter, 0x08, 0x06, "dataPub", twlPath);
 					}
 				}
 				const int bnrPathLen = strlen(conf->bnrPath);
