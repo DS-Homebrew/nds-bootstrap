@@ -445,7 +445,7 @@ void myIrqHandlerVBlank(void) {
 		softResetTimer = 0;
 	}*/
 
-	if ((0 == (REG_KEYINPUT & KEY_SELECT)) && ((0 == (REG_KEYINPUT & KEY_UP)) || (0 == (REG_KEYINPUT & KEY_DOWN)))) {
+	if ((0 == (REG_KEYINPUT & KEY_SELECT)) && ((0 == (REG_KEYINPUT & KEY_UP)) || (0 == (REG_KEYINPUT & KEY_DOWN)) || (0 == (REG_KEYINPUT & KEY_LEFT)) || (0 == (REG_KEYINPUT & KEY_RIGHT)))) {
 		if (volumeLevelTimer == 30) {
 			if (0 == (REG_KEYINPUT & KEY_UP)) {
 				volumeLevel++;
@@ -456,6 +456,16 @@ void myIrqHandlerVBlank(void) {
 			} else if (0 == (REG_KEYINPUT & KEY_DOWN)) {
 				volumeLevel--;
 				if (volumeLevel < 0) volumeLevel = 0;
+			} else {
+				u32 pmBacklight = readPowerManagement(PM_BACKLIGHT_LEVEL);
+				if (pmBacklight & 0xF0) { // DS Lite only
+					u32 bright = pmBacklight & 3;
+					if ((0 == (REG_KEYINPUT & KEY_RIGHT)) && bright < 3) {
+						writePowerManagement(PM_BACKLIGHT_LEVEL, (pmBacklight & ~3) | (bright + 1));
+					} else if ((0 == (REG_KEYINPUT & KEY_LEFT)) && bright > 0) {
+						writePowerManagement(PM_BACKLIGHT_LEVEL, (pmBacklight & ~3) | (bright - 1));
+					}
+				}
 			}
 			volumeLevelTimer = 0;
 		} else {
