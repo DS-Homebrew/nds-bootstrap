@@ -51,6 +51,8 @@
 #include "patch.h"
 #include "find.h"
 #include "hook.h"
+
+#include "codec.h"
 #endif
 
 // TWL soft-reset
@@ -821,9 +823,9 @@ void forceGameReboot(void) {
 	REG_MBK8 = *(u32*)0x02FFE1A8;
 	REG_MBK9 = *(u32*)0x02FFE1AC;
 } */
+#endif
 
 extern bool dldiPatchBinary (unsigned char *binData, u32 binSize);
-#endif
 
 void returnToLoader(bool reboot) {
 	toncset((u32*)0x02000000, 0, 0x400);
@@ -856,6 +858,32 @@ void returnToLoader(bool reboot) {
 		}
 		rebootConsole();
 	}
+#else
+	// IPC_SendSync(0x8);
+	if (reboot || !(valueBits & b_dsiBios) || ((valueBits & b_dsiSD) && (valueBits & wideCheatUsed))) {
+		if (consoleModel >= 2) {
+			if (*(u32*)(ce7+0xF500) == 0 && (valueBits & b_dsiSD))
+			{
+				tonccpy((u32*)0x02000300, sr_data_srloader, 0x020);
+			}
+			else if (*(char*)(ce7+0xF503) == 'H' || *(char*)(ce7+0xF503) == 'K')
+			{
+				// Use different SR backend ID
+				readSrBackendId();
+			}
+			waitFrames(1);
+		} else {
+			if (*(u32*)(ce7+0xF500) == 0 && (valueBits & b_dsiSD)) {
+				unlaunchSetFilename();
+			} else {
+				// Use different SR backend ID
+				readSrBackendId();
+			}
+			waitFrames(5);							// Wait for DSi screens to stabilize
+		}
+		rebootConsole();
+	}
+#endif
 
 	register int i, reg;
 
@@ -932,6 +960,13 @@ void returnToLoader(bool reboot) {
 
 	sharedAddr[0] = 0x44414F4C; // 'LOAD'
 
+#ifndef TWLSDK
+	if (ndsHeader->unitCode > 0) {
+		REG_SCFG_EXT = 0x93FFFB06;
+		REG_SCFG_CLK = 0x187;
+	}
+#endif
+
 	for (i = 0; i < 4; i++) {
 		for(reg=0; reg<0x1c; reg+=4)*((vu32*)(0x04004104 + ((i*0x1c)+reg))) = 0;//Reset NDMA.
 	}
@@ -943,31 +978,6 @@ void returnToLoader(bool reboot) {
 
 	// Start ARM7
 	ndsCodeStart(ndsHeader->arm7executeAddress);
-#else
-	IPC_SendSync(0x8);
-	if (consoleModel >= 2) {
-		if (*(u32*)(ce7+0xF500) == 0 && (valueBits & b_dsiSD))
-		{
-			tonccpy((u32*)0x02000300, sr_data_srloader, 0x020);
-		}
-		else if (*(char*)(ce7+0xF503) == 'H' || *(char*)(ce7+0xF503) == 'K')
-		{
-			// Use different SR backend ID
-			readSrBackendId();
-		}
-		waitFrames(1);
-	} else {
-		if (*(u32*)(ce7+0xF500) == 0 && (valueBits & b_dsiSD)) {
-			unlaunchSetFilename();
-		} else {
-			// Use different SR backend ID
-			readSrBackendId();
-		}
-		waitFrames(5);							// Wait for DSi screens to stabilize
-	}
-
-	rebootConsole();		// Reboot into TWiLight Menu++
-#endif
 }
 
 void dumpRam(void) {

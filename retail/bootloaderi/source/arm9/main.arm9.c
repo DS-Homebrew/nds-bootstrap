@@ -393,7 +393,7 @@ void arm9_main(void) {
 					transferToArm9(i);
 				}
 				// lock SCFG
-				REG_SCFG_EXT &= ~(1UL << 31);
+				// REG_SCFG_EXT &= ~(1UL << 31);
 			}
 			arm9_stateFlag = ARM9_READY;
 		}

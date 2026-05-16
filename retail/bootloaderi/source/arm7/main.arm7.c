@@ -2245,9 +2245,9 @@ int arm7_main(void) {
 			}
 		}
 
-		if (!dsiModeConfirmed) {
+		/* if (!dsiModeConfirmed) {
 			NTR_BIOS();
-		}
+		} */
 
 		// dbg_printf("Trying to patch the card...\n");
 
@@ -2592,9 +2592,9 @@ int arm7_main(void) {
 			//*(vu32*)0x4004820 = (BIT(0) | BIT(2) | BIT(3) | BIT(24) | BIT(25) | BIT(29) | BIT(30));	// Set SD IRQ mask register
 			//*(vu32*)0x4004820 = 0x8B7F0305;	// Set SD IRQ mask register
 
-	if (!dsiModeConfirmed /*|| (ROMsupportsDsiMode(ndsHeader) && !isDSiWare)*/) {
+	/* if (!dsiModeConfirmed) {
 		REG_SCFG_EXT &= ~(1UL << 31); // Lock SCFG
-	}
+	} */
 
 	startBinary_ARM7();
 

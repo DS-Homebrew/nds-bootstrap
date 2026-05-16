@@ -173,30 +173,8 @@ void initialize(void) {
 extern void resetMpu(void);
 
 void reset(u32 param, u32 tid2) {
-#ifndef TWLSDK
-	u32 resetParams = ((ce9->valueBits & isSdk5) ? RESET_PARAM_SDK5 : RESET_PARAM);
-	*(u32*)resetParams = param;
-	#ifndef GSDD
-	if (ce9->valueBits & slowSoftReset) {
-		if (ce9->consoleModel < 2) {
-			// Make screens white
-			SetBrightness(0, 31);
-			SetBrightness(1, 31);
-			waitFrames(5);	// Wait for DSi screens to stabilize
-		}
-		enterCriticalSection();
-		cacheFlush();
-		sharedAddr[3] = 0x52534554;
-		while (1);
-	} else
-	#endif
-	{
-		sharedAddr[3] = 0x52534554;
-	}
-#else
-	#ifdef DLDI
 	sysSetCardOwner(false);	// Give Slot-1 access to arm7
-	#endif
+#ifdef TWLSDK
 	const bool isDSiWare = (*(u32*)0x02FFE234 == 0x00030004 || *(u32*)0x02FFE234 == 0x00030005 || *(u32*)0x02FFE234 == 0x00030015 || *(u32*)0x02FFE234 == 0x00030017);
 	if (param == 0xFFFFFFFF || isDSiWare) { // If DSiWare...
 		if (param == 0xFFFFFFFF || (param != *(u32*)0x02FFE230 && tid2 != *(u32*)0x02FFE234)) {
@@ -215,6 +193,30 @@ void reset(u32 param, u32 tid2) {
 		}
 	} else {
 		*(u32*)RESET_PARAM_SDK5 = param;
+		sharedAddr[3] = 0x52534554;
+	}
+#else
+	const u32 resetParams = ((ce9->valueBits & isSdk5) ? RESET_PARAM_SDK5 : RESET_PARAM);
+	if (param == 0xFFFFFFFF) {
+		sharedAddr[3] = 0x54495845;
+	} else 
+	#ifndef GSDD
+	if (ce9->valueBits & slowSoftReset) {
+		if (ce9->consoleModel < 2) {
+			// Make screens white
+			SetBrightness(0, 31);
+			SetBrightness(1, 31);
+			waitFrames(5);	// Wait for DSi screens to stabilize
+		}
+		enterCriticalSection();
+		cacheFlush();
+		*(u32*)resetParams = param;
+		sharedAddr[3] = 0x52534554;
+		while (1);
+	} else
+	#endif
+	{
+		*(u32*)resetParams = param;
 		sharedAddr[3] = 0x52534554;
 	}
 #endif
@@ -267,8 +269,11 @@ void reset(u32 param, u32 tid2) {
 	flagsSet = false;
 	IPC_SYNC_hooked = false;
 
+	if (param == 0xFFFFFFFF
 #ifdef TWLSDK
-	if (param == 0xFFFFFFFF || isDSiWare) { // If DSiWare...
+	|| isDSiWare // If DSiWare...
+#endif
+	) {
 		REG_DISPSTAT = 0;
 		REG_DISPCNT = 0;
 		REG_DISPCNT_SUB = 0;
@@ -302,11 +307,13 @@ void reset(u32 param, u32 tid2) {
 		VRAM_I_CR = 0;
 	}
 
+#ifdef TWLSDK
 	#ifndef DLDI
 	if (ce9->cacheAddress < 0x02F00000) {
 		resetSlots();
 	}
 	#endif
+#endif
 
 	while (sharedAddr[0] != 0x44414F4C) { // 'LOAD'
 		while (REG_VCOUNT != 191);
@@ -320,15 +327,9 @@ void reset(u32 param, u32 tid2) {
 		REG_SCFG_RST = 1;
 	}
 
-	#ifdef DLDI
 	sysSetCardOwner(true);	// Give Slot-1 access back to arm9
-	#endif
-#else
-	while (sharedAddr[0] != 0x44414F4C) { // 'LOAD'
-		while (REG_VCOUNT != 191);
-		while (REG_VCOUNT == 191);
-	}
 
+#ifndef TWLSDK
 	#ifndef GSDD
 	if ((ce9->valueBits & isDlp) || *(u32*)(resetParams+0xC) > 0) {
 		sharedAddr[4] = 0;

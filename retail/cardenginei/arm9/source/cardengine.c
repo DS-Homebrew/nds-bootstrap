@@ -1515,6 +1515,7 @@ s32 dsiSaveWrite(void* ctx, void* src, s32 len) {
 	}
 	return -1;
 }
+#endif
 
 void initMBKARM9_dsiMode(void) {
 	*(vu32*)REG_MBK1 = *(u32*)0x02FFE180;
@@ -1527,7 +1528,6 @@ void initMBKARM9_dsiMode(void) {
 	REG_MBK8 = *(u32*)0x02FFE19C;
 	REG_MBK9 = *(u32*)0x02FFE1AC;
 }
-#endif
 
 /*u32 cartRead(u32 dma, u32 src, u8* dst, u32 len, u32 type) {
 	if (src >= 0x02000000 ? (gbaSavFile->firstCluster == CLUSTER_FREE) : (gbaFile->firstCluster == CLUSTER_FREE)) {
@@ -1572,16 +1572,18 @@ void inGameMenu(s32* exRegisters) {
 		while (REG_VCOUNT == 191) swiDelay(100);
 	}
 
-	#ifdef TWLSDK
 	if (res == 0x54495845) {
 		igmReset = true;
+	#ifdef TWLSDK
 		if (*(u32*)0x02FFE234 == 0x00030004 || *(u32*)0x02FFE234 == 0x00030005) {
 			reset(0, 0);
 		} else {
 			reset(0xFFFFFFFF, 0);
 		}
-	} else
+	#else
+		reset(0xFFFFFFFF, 0);
 	#endif
+	} else
 	if (res == 0x52534554) {
 		igmReset = true;
 	#ifdef TWLSDK
