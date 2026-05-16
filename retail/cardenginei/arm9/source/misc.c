@@ -173,8 +173,9 @@ void initialize(void) {
 extern void resetMpu(void);
 
 void reset(u32 param, u32 tid2) {
+	sysSetCardOwner(false);	// Give Slot-1 access to arm7
 #ifndef TWLSDK
-	u32 resetParams = ((ce9->valueBits & isSdk5) ? RESET_PARAM_SDK5 : RESET_PARAM);
+	const u32 resetParams = ((ce9->valueBits & isSdk5) ? RESET_PARAM_SDK5 : RESET_PARAM);
 	*(u32*)resetParams = param;
 	#ifndef GSDD
 	if (ce9->valueBits & slowSoftReset) {
@@ -194,9 +195,6 @@ void reset(u32 param, u32 tid2) {
 		sharedAddr[3] = 0x52534554;
 	}
 #else
-	#ifdef DLDI
-	sysSetCardOwner(false);	// Give Slot-1 access to arm7
-	#endif
 	const bool isDSiWare = (*(u32*)0x02FFE234 == 0x00030004 || *(u32*)0x02FFE234 == 0x00030005 || *(u32*)0x02FFE234 == 0x00030015 || *(u32*)0x02FFE234 == 0x00030017);
 	if (param == 0xFFFFFFFF || isDSiWare) { // If DSiWare...
 		if (param == 0xFFFFFFFF || (param != *(u32*)0x02FFE230 && tid2 != *(u32*)0x02FFE234)) {
@@ -320,14 +318,14 @@ void reset(u32 param, u32 tid2) {
 		REG_SCFG_RST = 1;
 	}
 
-	#ifdef DLDI
 	sysSetCardOwner(true);	// Give Slot-1 access back to arm9
-	#endif
 #else
 	while (sharedAddr[0] != 0x44414F4C) { // 'LOAD'
 		while (REG_VCOUNT != 191);
 		while (REG_VCOUNT == 191);
 	}
+
+	sysSetCardOwner(true);	// Give Slot-1 access back to arm9
 
 	#ifndef GSDD
 	if ((ce9->valueBits & isDlp) || *(u32*)(resetParams+0xC) > 0) {
