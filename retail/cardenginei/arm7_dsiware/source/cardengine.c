@@ -150,7 +150,7 @@ static void readSrBackendId(void) {
 	*(u32*)(0x0200030C) = 0;
 	*(u32*)(0x02000310) = *(u32*)(ce7+0x8100);
 	*(u32*)(0x02000314) = *(u32*)(ce7+0x8104);
-	*(u32*)(0x02000318) = 0x17;
+	*(u32*)(0x02000318) = *(u32*)(0x02000314) == 0x00030000 ? 0x13 : 0x17;
 	*(u32*)(0x0200031C) = 0;
 	*(u16*)(0x02000306) = swiCRC16(0xFFFF, (void*)0x02000308, 0x18);
 }
@@ -396,14 +396,17 @@ void forceGameReboot(void) {
 	sharedAddr[4] = 0x57534352;
 	IPC_SendSync(0x8);
 	if (consoleModel < 2) {
-		if (*(u32*)(ce7+0x8100) == 0) {
+		if (*(u64*)(ce7+0x8100) == 0) {
 			unlaunchSetFilename();
+		} else {
+			// Use different SR backend ID
+			readSrBackendId();
 		}
 		waitFrames(5);							// Wait for DSi screens to stabilize
 	}
 	u32 clearBuffer = 0;
 	fileWrite((char*)&clearBuffer, &srParamsFile, 0, 0x4);
-	if (*(u32*)(ce7+0x8100) == 0) {
+	if (*(u64*)(ce7+0x8100) == 0) {
 		tonccpy((u32*)0x02000300, sr_data_srloader, 0x20);
 	} else {
 		// Use different SR backend ID
@@ -439,15 +442,15 @@ void returnToLoader(bool reboot) {
 
 	if (reboot || ((valueBits & twlTouch) && !(*(u8*)0x02FFE1BF & BIT(0))) || (valueBits & wideCheatUsed)) {
 		if (consoleModel >= 2) {
-			if (*(u32*)(ce7+0x8100) == 0) {
+			if (*(u64*)(ce7+0x8100) == 0) {
 				tonccpy((u32*)0x02000300, sr_data_srloader, 0x020);
-			} else if (*(char*)(ce7+0x8103) == 'H' || *(char*)(ce7+0x8103) == 'K') {
+			} else if (*(char*)(ce7+0x8103) == 'H' || *(char*)(ce7+0x8103) == 'K' || *(u32*)(ce7+0x8104) == 0x00030000) {
 				// Use different SR backend ID
 				readSrBackendId();
 			}
 			//waitFrames(1);
 		} else {
-			if (*(u32*)(ce7+0x8100) == 0) {
+			if (*(u64*)(ce7+0x8100) == 0) {
 				unlaunchSetFilename();
 			} else {
 				// Use different SR backend ID
