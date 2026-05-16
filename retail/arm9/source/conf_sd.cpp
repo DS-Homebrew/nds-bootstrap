@@ -1472,9 +1472,9 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 		u32 srBackendId[2] = {0};
 		// Load srBackendId
-		if (REG_SCFG_EXT7 == 0 && conf->bootstrapOnFlashcard) {
-			/*srBackendId[0] = 0x464B4356; // "VCKF" (My Cooking Coach)
-			srBackendId[1] = 0x00030000;*/
+		if (conf->bootstrapOnFlashcard) {
+			srBackendId[0] = 0;
+			srBackendId[1] = 0x00030000;
 		} else {
 			cebin = fopen("sd:/_nds/nds-bootstrap/srBackendId.bin", "rb");
 			fread(&srBackendId, sizeof(u32), 2, cebin);

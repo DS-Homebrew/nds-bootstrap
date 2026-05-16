@@ -242,12 +242,11 @@ static void readSrBackendId(void) {
 	#ifdef TWLSDK
 	*(u32*)(0x02000310) = *(u32*)(ce7+0x8500);
 	*(u32*)(0x02000314) = *(u32*)(ce7+0x8504);
-	*(u32*)(0x02000318) = /* *(u32*)(ce7+0x8504) == 0x00030000 ? 0x13 : */ 0x17;
 	#else
 	*(u32*)(0x02000310) = *(u32*)(ce7+0xF500);
 	*(u32*)(0x02000314) = *(u32*)(ce7+0xF504);
-	*(u32*)(0x02000318) = /* *(u32*)(ce7+0xF504) == 0x00030000 ? 0x13 : */ 0x17;
 	#endif
+	*(u32*)(0x02000318) = *(u32*)(0x02000314) == 0x00030000 ? 0x13 : 0x17;
 	*(u32*)(0x0200031C) = 0;
 	*(u16*)(0x02000306) = swiCRC16(0xFFFF, (void*)0x02000308, 0x18);
 }
@@ -472,7 +471,7 @@ void reset(const bool downloadedSrl) {
 		if (consoleModel < 2 && *(u32*)(ce7+0xF500) == 0 && (valueBits & b_dsiSD)) {
 			unlaunchSetFilename();
 		}
-		if (*(u32*)(ce7+0xF500) == 0 && (valueBits & b_dsiSD)) {
+		if (*(u64*)(ce7+0xF500) == 0) {
 			tonccpy((u32*)0x02000300, sr_data_srloader, 0x20);
 		} else {
 			// Use different SR backend ID
@@ -795,9 +794,9 @@ void forceGameReboot(void) {
 	fileWrite((char*)&clearBuffer, &srParamsFile, 0, 0x4);
   	#ifdef TWLSDK
 	//if (doBak) restoreSdBakData();
-	if (*(u32*)(ce7+0x8500) == 0 && (valueBits & b_dsiSD))
+	if (*(u64*)(ce7+0x8500) == 0)
 	#else
-	if (*(u32*)(ce7+0xF500) == 0 && (valueBits & b_dsiSD))
+	if (*(u64*)(ce7+0xF500) == 0)
 	#endif
 	{
 		tonccpy((u32*)0x02000300, sr_data_srloader, 0x20);
@@ -838,15 +837,15 @@ void returnToLoader(bool reboot) {
 
 	if (reboot || !(valueBits & b_dsiBios) || ((valueBits & twlTouch) && !(*(u8*)0x02FFE1BF & BIT(0))) || ((valueBits & b_dsiSD) && (valueBits & wideCheatUsed))) {
 		if (consoleModel >= 2) {
-			if (*(u32*)(ce7+0x8500) == 0) {
+			if (*(u64*)(ce7+0x8500) == 0) {
 				tonccpy((u32*)0x02000300, sr_data_srloader, 0x020);
-			} else if (*(char*)(ce7+0x8503) == 'H' || *(char*)(ce7+0x8503) == 'K') {
+			} else if (*(char*)(ce7+0x8503) == 'H' || *(char*)(ce7+0x8503) == 'K' || *(u32*)(ce7+0x8504) == 0x00030000) {
 				// Use different SR backend ID
 				readSrBackendId();
 			}
 			waitFrames(1);
 		} else {
-			if (*(u32*)(ce7+0x8500) == 0) {
+			if (*(u64*)(ce7+0x8500) == 0) {
 				unlaunchSetFilename();
 			} else {
 				// Use different SR backend ID
@@ -946,18 +945,18 @@ void returnToLoader(bool reboot) {
 #else
 	IPC_SendSync(0x8);
 	if (consoleModel >= 2) {
-		if (*(u32*)(ce7+0xF500) == 0 && (valueBits & b_dsiSD))
+		if (*(u64*)(ce7+0xF500) == 0)
 		{
 			tonccpy((u32*)0x02000300, sr_data_srloader, 0x020);
 		}
-		else if (*(char*)(ce7+0xF503) == 'H' || *(char*)(ce7+0xF503) == 'K')
+		else if (*(char*)(ce7+0xF503) == 'H' || *(char*)(ce7+0xF503) == 'K' || *(u32*)(ce7+0xF504) == 0x00030000)
 		{
 			// Use different SR backend ID
 			readSrBackendId();
 		}
 		waitFrames(1);
 	} else {
-		if (*(u32*)(ce7+0xF500) == 0 && (valueBits & b_dsiSD)) {
+		if (*(u64*)(ce7+0xF500) == 0) {
 			unlaunchSetFilename();
 		} else {
 			// Use different SR backend ID
