@@ -241,7 +241,13 @@ static void unlaunchSetFilename(void) {
 }
 
 static void readSoftResetId(const bool front) {
-	// Use SR backend ID
+	if (front) {
+		if (srFrontendId[0] == 0 && srFrontendId[1] == 0) return;
+	} else {
+		if (srBackendId[0] == 0 && srBackendId[1] == 0) return;
+	}
+
+	// Use soft-reset ID
 	*(u32*)(0x02000300) = 0x434E4C54;	// 'CNLT'
 	*(u16*)(0x02000304) = 0x1801;
 	*(u32*)(0x02000308) = 0;
