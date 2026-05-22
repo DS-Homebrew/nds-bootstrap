@@ -128,6 +128,10 @@ static PERSONAL_DATA* personalData = (PERSONAL_DATA*)((u8*)NDS_HEADER_SDK5-0x180
 static u16 sdmcPos = 0;
 
 static void unlaunchSetFilename(void) {
+	const u8* filename = (u8*)(ce7+0x8000);
+
+	if (filename[0] == 0) return;
+
 	tonccpy((u8*)0x02000800, unlaunchAutoLoadID, 12);
 	*(u16*)(0x0200080C) = 0x3F0;		// Unlaunch Length for CRC16 (fixed, must be 3F0h)
 	*(u16*)(0x0200080E) = 0;			// Unlaunch CRC16 (empty)
@@ -138,7 +142,7 @@ static void unlaunchSetFilename(void) {
 	toncset((u8*)0x02000818, 0, 0x20+0x208+0x1C0);		// Unlaunch Reserved (zero)
 	int i2 = 0;
 	for (int i = 0; i < 256; i++) {
-		*(u8*)(0x02000838+i2) = *(u8*)(ce7+0x8000+i);		// Unlaunch Device:/Path/Filename.ext (16bit Unicode,end by 0000h)
+		*(u8*)(0x02000838+i2) = filename[i];		// Unlaunch Device:/Path/Filename.ext (16bit Unicode,end by 0000h)
 		i2 += 2;
 	}
 	*(u16*)(0x0200080E) = swiCRC16(0xFFFF, (void*)0x02000810, 0x3F0);		// Unlaunch CRC16
