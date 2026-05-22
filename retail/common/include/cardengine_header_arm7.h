@@ -68,6 +68,8 @@ typedef struct cardengineArm7Patches {
 //
 typedef struct cardengineArm7 {
 	u32 ce7;
+	u32 srBackendId[2];
+	u32 srFrontendId[2];
 	cardengineArm7Patches* patches;
 	u32 intr_vblank_orig_return;
 	u32 intr_fifo_orig_return;

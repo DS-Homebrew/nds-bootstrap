@@ -55,7 +55,6 @@
 
 // TWL soft-reset
 #include "sr_data_error.h"      // For showing an error screen
-#include "sr_data_srloader.h"   // For rebooting into TWiLight Menu++ or the game
 
 #define gameOnFlashcard BIT(0)
 #define saveOnFlashcard BIT(1)
@@ -90,6 +89,9 @@
 extern u32 ce7;
 
 static const char *unlaunchAutoLoadID = "AutoLoadInfo";
+
+extern u32 srBackendId[2];
+extern u32 srFrontendId[2];
 
 extern void ndsCodeStart(u32* addr);
 extern int tryLockMutex(int* addr);
@@ -233,19 +235,14 @@ static void unlaunchSetFilename(void) {
 	*(u16*)(0x0200080E) = swiCRC16(0xFFFF, (void*)0x02000810, 0x3F0);		// Unlaunch CRC16
 }
 
-static void readSrBackendId(void) {
+static void readSoftResetId(const bool front) {
 	// Use SR backend ID
 	*(u32*)(0x02000300) = 0x434E4C54;	// 'CNLT'
 	*(u16*)(0x02000304) = 0x1801;
 	*(u32*)(0x02000308) = 0;
 	*(u32*)(0x0200030C) = 0;
-	#ifdef TWLSDK
-	*(u32*)(0x02000310) = *(u32*)(ce7+0x8500);
-	*(u32*)(0x02000314) = *(u32*)(ce7+0x8504);
-	#else
-	*(u32*)(0x02000310) = *(u32*)(ce7+0xF500);
-	*(u32*)(0x02000314) = *(u32*)(ce7+0xF504);
-	#endif
+	*(u32*)(0x02000310) = front ? srFrontendId[0] : srBackendId[0];
+	*(u32*)(0x02000314) = front ? srFrontendId[1] : srBackendId[1];
 	*(u32*)(0x02000318) = *(u32*)(0x02000314) == 0x00030000 ? 0x13 : 0x17;
 	*(u32*)(0x0200031C) = 0;
 	*(u16*)(0x02000306) = swiCRC16(0xFFFF, (void*)0x02000308, 0x18);
@@ -468,15 +465,8 @@ void reset(const bool downloadedSrl) {
 		toncset((u32*)0x02000000, 0, 0x400);
 		*(u32*)0x02000000 = BIT(3);
 		*(u32*)0x02000004 = 0x54455352; // 'RSET'
-		if (consoleModel < 2 && *(u32*)(ce7+0xF500) == 0 && (valueBits & b_dsiSD)) {
-			unlaunchSetFilename();
-		}
-		if (*(u64*)(ce7+0xF500) == 0) {
-			tonccpy((u32*)0x02000300, sr_data_srloader, 0x20);
-		} else {
-			// Use different SR backend ID
-			readSrBackendId();
-		}
+		unlaunchSetFilename();
+		readSoftResetId(false);
 		i2cWriteRegister(0x4A, 0x70, 0x01);
 		i2cWriteRegister(0x4A, 0x11, 0x01);			// Reboot game
 		leaveCriticalSection(oldIME);
@@ -773,18 +763,6 @@ void forceGameReboot(void) {
 	*(u32*)0x02000004 = 0x54455352; // 'RSET'
 	sharedAddr[4] = 0x57534352;
 	IPC_SendSync(0x8);
-	if (consoleModel < 2) {
-		if ((valueBits & b_dsiSD) &&
-			#ifdef TWLSDK
-			(*(u32*)(ce7+0x8500) == 0)
-			#else
-			(*(u32*)(ce7+0xF500) == 0)
-			#endif
-		) {
-				unlaunchSetFilename();
-		}
-		waitFrames(5);							// Wait for DSi screens to stabilize
-	}
 	u32 clearBuffer = 0;
 	#ifdef TWLSDK
 	//bool doBak = ((valueBits & gameOnFlashcard) && (valueBits & b_dsiSD));
@@ -794,15 +772,14 @@ void forceGameReboot(void) {
 	fileWrite((char*)&clearBuffer, &srParamsFile, 0, 0x4);
   	#ifdef TWLSDK
 	//if (doBak) restoreSdBakData();
-	if (*(u64*)(ce7+0x8500) == 0)
-	#else
-	if (*(u64*)(ce7+0xF500) == 0)
 	#endif
-	{
-		tonccpy((u32*)0x02000300, sr_data_srloader, 0x20);
+	if (consoleModel < 2) {
+		unlaunchSetFilename();
+		readSoftResetId(false);
+		waitFrames(5);							// Wait for DSi screens to stabilize
 	} else {
-		// Use different SR backend ID
-		readSrBackendId();
+		readSoftResetId(false);
+		waitFrames(1);
 	}
 	rebootConsole();		// Force-reboot game
 }
@@ -836,22 +813,13 @@ void returnToLoader(bool reboot) {
 	}
 
 	if (reboot || !(valueBits & b_dsiBios) || ((valueBits & twlTouch) && !(*(u8*)0x02FFE1BF & BIT(0))) || ((valueBits & b_dsiSD) && (valueBits & wideCheatUsed))) {
-		if (consoleModel >= 2) {
-			if (*(u64*)(ce7+0x8500) == 0) {
-				tonccpy((u32*)0x02000300, sr_data_srloader, 0x020);
-			} else if (*(char*)(ce7+0x8503) == 'H' || *(char*)(ce7+0x8503) == 'K' || *(u32*)(ce7+0x8504) == 0x00030000) {
-				// Use different SR backend ID
-				readSrBackendId();
-			}
-			waitFrames(1);
-		} else {
-			if (*(u64*)(ce7+0x8500) == 0) {
-				unlaunchSetFilename();
-			} else {
-				// Use different SR backend ID
-				readSrBackendId();
-			}
+		if (consoleModel < 2) {
+			unlaunchSetFilename();
+			readSoftResetId(true);
 			waitFrames(5);							// Wait for DSi screens to stabilize
+		} else {
+			readSoftResetId(true);
+			waitFrames(1);
 		}
 		rebootConsole();
 	}
@@ -944,25 +912,13 @@ void returnToLoader(bool reboot) {
 	ndsCodeStart(ndsHeader->arm7executeAddress);
 #else
 	IPC_SendSync(0x8);
-	if (consoleModel >= 2) {
-		if (*(u64*)(ce7+0xF500) == 0)
-		{
-			tonccpy((u32*)0x02000300, sr_data_srloader, 0x020);
-		}
-		else if (*(char*)(ce7+0xF503) == 'H' || *(char*)(ce7+0xF503) == 'K' || *(u32*)(ce7+0xF504) == 0x00030000)
-		{
-			// Use different SR backend ID
-			readSrBackendId();
-		}
-		waitFrames(1);
-	} else {
-		if (*(u64*)(ce7+0xF500) == 0) {
-			unlaunchSetFilename();
-		} else {
-			// Use different SR backend ID
-			readSrBackendId();
-		}
+	if (consoleModel < 2) {
+		unlaunchSetFilename();
+		readSoftResetId(true);
 		waitFrames(5);							// Wait for DSi screens to stabilize
+	} else {
+		readSoftResetId(true);
+		waitFrames(1);
 	}
 
 	rebootConsole();		// Reboot into TWiLight Menu++

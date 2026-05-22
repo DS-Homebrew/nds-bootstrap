@@ -1087,6 +1087,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 	bool useTwlCfg = (dsiFeatures() && (*(u8*)0x02000400 != 0) && (*(u8*)0x02000401 == 0) && (*(u8*)0x02000402 == 0) && (*(u8*)0x02000404 == 0) && (*(u8*)0x02000448 != 0));
 	bool nandMounted = false;
+	bool softResetIdFromTwlCfg = false;
 	if (!useTwlCfg && !conf->b4dsMode && isDSiMode() && conf->sdFound && conf->consoleModel < 2) {
 		bool sdNandFound = (conf->sdNand && access("sd:/shared1/TWLCFG0.dat", F_OK) == 0 && access("sd:/sys/HWINFO_N.dat", F_OK) == 0 && REG_SCFG_EXT7 == 0);
 		if (!sdNandFound) {
@@ -1099,8 +1100,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			fread((void*)0x02000400, 1, 0x128, twlCfgFile);
 			fclose(twlCfgFile);
 
-			u32 srBackendId[2] = {*(u32*)0x02000428, *(u32*)0x0200042C};
-			if ((srBackendId[0] != 0x53524C41 || srBackendId[1] != 0x00030004) && isDSiMode() && !nandMounted) {
+			if (isDSiMode() && !nandMounted) {
 				nandMounted = fatMountSimple("nand", &io_dsi_nand);
 				if (nandMounted) {
 					twlCfgFile = fopen("nand:/shared1/TWLCFG0.dat", "rb");
@@ -1131,6 +1131,9 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 			useTwlCfg = true;
 		}
+	}
+	if (REG_SCFG_EXT7 == 0 && useTwlCfg && !conf->b4dsMode && isDSiMode() && conf->sdFound && conf->consoleModel < 2) {
+		softResetIdFromTwlCfg = true;
 	}
 
 	// Get region
@@ -1471,14 +1474,25 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		}
 
 		u32 srBackendId[2] = {0};
+		u32 srFrontendId[2] = {0};
 		// Load srBackendId
 		if (conf->bootstrapOnFlashcard) {
-			srBackendId[0] = 0;
-			srBackendId[1] = 0x00030000;
+			srBackendId[0] = srFrontendId[0] = 0;
+			srBackendId[1] = srFrontendId[1] = 0x00030000;
+		} else if (softResetIdFromTwlCfg) {
+			srBackendId[0] = srFrontendId[0] = *(u32*)0x02000428;
+			srBackendId[1] = srFrontendId[1] = *(u32*)0x0200042C;
 		} else {
 			cebin = fopen("sd:/_nds/nds-bootstrap/srBackendId.bin", "rb");
-			fread(&srBackendId, sizeof(u32), 2, cebin);
-			fclose(cebin);
+			if (cebin) {
+				fread(&srBackendId, sizeof(u32), 2, cebin);
+				fclose(cebin);
+			}
+			cebin = fopen("sd:/_nds/nds-bootstrap/srFrontendId.bin", "rb");
+			if (cebin) {
+				fread(&srFrontendId, sizeof(u32), 2, cebin);
+				fclose(cebin);
+			}
 		}
 
 		if (isDSiMode() && unitCode > 0 && scfgSdmmcEnabled) {
@@ -1566,21 +1580,27 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			// Load external cheat engine binary
 			loadCardEngineBinary("nitro:/cardenginei_arm7_cheat.bin", (u8*)CHEAT_ENGINE_BUFFERED_LOCATION);
 
+			cardengineArm7* ce7 = (cardengineArm7*)CARDENGINEI_ARM7_BUFFERED_LOCATION;
+
 			if ((unitCode > 0 && conf->dsiMode) || conf->isDSiWare) {
 				const bool binary3 = (REG_SCFG_EXT7 == 0 ? !dsiEnhancedMbk : (a7mbk6 != 0x00403000));
 
 				// Load SDK5 ce7 binary
 				rc = loadCardEngineBinary(
 					binary3 ? "nitro:/cardenginei_arm7_twlsdk3.lz77" : "nitro:/cardenginei_arm7_twlsdk.lz77",
-					(u8*)CARDENGINEI_ARM7_BUFFERED_LOCATION
+					(u8*)ce7
 				);
 				if (rc == 0) {
+					for (int i = 0; i < 2; i++) {
+						ce7->srBackendId[i] = srBackendId[i];
+						ce7->srFrontendId[i] = srFrontendId[i];
+					}
+
 					u8* returnLoc = (u8*)LOADER_RETURN_SDK5_LOCATION;
 					if (REG_SCFG_EXT7 != 0 && !(conf->valueBits2 & BIT(6))) {
 						tonccpy(returnLoc+2, conf->quitPath, strlen(conf->quitPath));
 						tonccpy(returnLoc, sdmcText, 4);
 					}
-					tonccpy(returnLoc+0x100, &srBackendId, 8);
 				}
 
 				if (conf->gameOnFlashcard && (strncmp(romTid, "IRB", 3) == 0 || strncmp(romTid, "IRA", 3) == 0 || strncmp(romTid, "IRE", 3) == 0 || strncmp(romTid, "IRD", 3) == 0 || strncmp(romTid, "KAD", 3) == 0)) {
@@ -1600,15 +1620,19 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 				// Load ce7 binary
 				rc = loadCardEngineBinary(
 					dsiEnhancedMbk ? "nitro:/cardenginei_arm7_alt.lz77" : "nitro:/cardenginei_arm7.lz77",
-					(u8*)CARDENGINEI_ARM7_BUFFERED_LOCATION
+					(u8*)ce7
 				);
 				if (rc == 0) {
+					for (int i = 0; i < 2; i++) {
+						ce7->srBackendId[i] = srBackendId[i];
+						ce7->srFrontendId[i] = srFrontendId[i];
+					}
+
 					u8* returnLoc = (u8*)LOADER_RETURN_LOCATION;
 					if (REG_SCFG_EXT7 != 0 && !(conf->valueBits2 & BIT(6))) {
 						tonccpy(returnLoc+2, conf->quitPath, strlen(conf->quitPath));
 						tonccpy(returnLoc, sdmcText, 4);
 					}
-					tonccpy(returnLoc+0x100, &srBackendId, 8);
 				}
 
 				const bool gsdd = (memcmp(romTid, "BO5", 3) == 0);
@@ -1667,18 +1691,24 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		} else {
 			const bool binary3 = (REG_SCFG_EXT7 == 0 ? !dsiEnhancedMbk : (a7mbk6 != 0x00403000));
 
+			cardengineArm7* ce7 = (cardengineArm7*)CARDENGINEI_ARM7_BUFFERED_LOCATION;
+
 			// Load ce7 binary
 			rc = loadCardEngineBinary(
 				binary3 ? "nitro:/cardenginei_arm7_dsiware3.lz77" : "nitro:/cardenginei_arm7_dsiware.lz77",
-				(u8*)CARDENGINEI_ARM7_BUFFERED_LOCATION
+				(u8*)ce7
 			);
 			if (rc == 0) {
+				for (int i = 0; i < 2; i++) {
+					ce7->srBackendId[i] = srBackendId[i];
+					ce7->srFrontendId[i] = srFrontendId[i];
+				}
+
 				u8* returnLoc = (u8*)LOADER_RETURN_DSIWARE_LOCATION;
 				if (REG_SCFG_EXT7 != 0 && !(conf->valueBits2 & BIT(6))) {
 					tonccpy(returnLoc+2, conf->quitPath, strlen(conf->quitPath));
 					tonccpy(returnLoc, sdmcText, 4);
 				}
-				tonccpy(returnLoc+0x100, &srBackendId, 8);
 			}
 
 			// Load external cheat engine binary

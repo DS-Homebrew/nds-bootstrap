@@ -12,6 +12,8 @@
 .global card_engine_start_sync
 .global card_engine_end
 .global cardStruct
+.global srBackendId
+.global srFrontendId
 .global patches_offset
 .global cheatEngineAddr
 .global moduleParams
@@ -47,6 +49,12 @@
 
 ce7 :
 	.word	ce7
+srBackendId:
+	.word	0
+	.word	0
+srFrontendId:
+	.word	0
+	.word	0
 patches_offset:
 	.word	patches
 intr_vblank_orig_return:
