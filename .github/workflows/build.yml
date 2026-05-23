@@ -10,7 +10,7 @@ on:
     paths-ignore:
       - 'README.md'
   release:
-    types: [created, published, released]
+    types: [created]
 
 jobs:
   build:
