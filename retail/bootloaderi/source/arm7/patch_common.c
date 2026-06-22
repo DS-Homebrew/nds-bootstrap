@@ -16429,7 +16429,7 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
 			*(u32*)0x0200753C = 0xeb023286; // OS_JoinThread()
 			*(u32*)0x02007540 = 0xe1500000; // cmp r0, r0
 			*(u32*)0x02007624 = 0xeb02324c; // OS_JoinThread()
-			*(u32*)0x0200762C = 0xe35f0000; // cmp pc, #0
+			*(u32*)0x02007628 = 0xe35f0000; // cmp pc, #0
 		}
 	}
 
