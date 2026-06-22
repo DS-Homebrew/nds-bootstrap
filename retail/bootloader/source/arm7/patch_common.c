@@ -118,10 +118,10 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
 			*(u32*)0x02007a10 += 0xe0000000; // mlaeq -> mla
 			*(u32*)0x02007a14 += 0xe0000000; // beq -> b
 		} else {
-			*(u32*)0x0200753C += 5;
-			*(u32*)0x02007544 += 0xd0000000; // bne -> b
-			*(u32*)0x02007624 += 5;
-			*(u32*)0x0200762C += 0xd0000000; // bne -> b
+			*(u32*)0x0200753C = 0xeb023286; // OS_JoinThread()
+			*(u32*)0x02007540 = 0xe1500000; // cmp r0, r0
+			*(u32*)0x02007624 = 0xeb02324c; // OS_JoinThread()
+			*(u32*)0x0200762C = 0xe35f0000; // cmp pc, #0
 		}
 	}
 
