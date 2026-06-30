@@ -173,8 +173,8 @@ static void cardReadDmaNormal(u8* dst, u32 src, u32 len) {
 
 			// Write the command
 			sharedAddr[0] = (vu32)buffer;
-			sharedAddr[1] = ce9->cacheBlockSize;
-			sharedAddr[2] = ((ce9->valueBits & overlaysCached) && src >= ce9->overlaysSrcAlign && src < ce9->overlaysSrcAlign+ce9->overlaysSizeAlign) ? sector+0x80000000 : sector;
+			sharedAddr[1] = ((ce9->valueBits & overlaysCached) && src >= ce9->overlaysSrcAlign && src < ce9->overlaysSrcAlign+ce9->overlaysSizeAlign) ? ce9->cacheBlockSize+0x80000000 : ce9->cacheBlockSize;
+			sharedAddr[2] = sector;
 			sharedAddr[3] = commandRead;
 
 			dmaReadOnArm7 = true;

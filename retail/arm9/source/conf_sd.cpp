@@ -975,6 +975,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	u32 ndsArm7idst = 0;
 	u32 ndsArm7ilen = 0;
 	u8 shared2len = 0;
+	u32 totalRomSize = 0;
 	u32 modcrypt1off = 0;
 	u32 modcrypt1len = 0;
 	u32 modcrypt2len = 0;
@@ -1022,6 +1023,8 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		fread(&ndsArm7ilen, sizeof(u32), 1, ndsFile);
 		fseek(ndsFile, 0x20C, SEEK_SET);
 		fread(&shared2len, sizeof(u8), 1, ndsFile);
+		fseek(ndsFile, 0x210, SEEK_SET);
+		fread(&totalRomSize, sizeof(u32), 1, ndsFile);
 		fseek(ndsFile, 0x220, SEEK_SET);
 		fread(&modcrypt1off, sizeof(u32), 1, ndsFile);
 		fseek(ndsFile, 0x224, SEEK_SET);
@@ -1044,6 +1047,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	bool donorLoaded = false;
 	conf->isDSiWare = (dsiFeatures() && !conf->b4dsMode && ((unitCode == 3 && (accessControl & BIT(4)))
 					|| (unitCode == 2 && conf->dsiMode && romTid[0] == 'K')));
+	const bool dsiWareAsSlot1 = (conf->isDSiWare && (totalRomSize >= 0x04000000 || !scfgSdmmcEnabled || !isDSiMode()));
 	bool dsiEnhancedMbk = false;
 	bool b4dsDebugRam = false;
 	bool romFSInited = false;
@@ -1495,7 +1499,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			}
 		}
 
-		if (isDSiMode() && unitCode > 0 && scfgSdmmcEnabled) {
+		if (isDSiMode() && unitCode > 0 && !dsiWareAsSlot1) {
 			const bool sdNandFound = conf->sdNand && (access(conf->gameOnFlashcard ? "fat:/shared1" : "sd:/shared1", F_OK) == 0);
 			const bool sdPhotoFound = conf->sdNand && (access(conf->gameOnFlashcard ? "fat:/photo" : "sd:/photo", F_OK) == 0);
 
@@ -1576,7 +1580,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			fclose(twlCfgFile);
 		}
 
-		if (!conf->isDSiWare || !scfgSdmmcEnabled) {
+		if (!conf->isDSiWare || dsiWareAsSlot1) {
 			// Load external cheat engine binary
 			loadCardEngineBinary("nitro:/cardenginei_arm7_cheat.bin", (u8*)CHEAT_ENGINE_BUFFERED_LOCATION);
 
@@ -2597,7 +2601,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			}
 		}
 
-		if (!isDSiMode() || !scfgSdmmcEnabled) {
+		if (!isDSiMode() || dsiWareAsSlot1) {
 			loadDSi2DSSavePatch(conf, bootstrapPath, romTid, romVersion, headerCRC);
 		}
 	} else {
@@ -2853,7 +2857,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	// Create AP-fixed overlay binary
 	createApFixOverlayBin(conf);
 
-	if ((!dsiFeatures() || conf->b4dsMode) || !scfgSdmmcEnabled || !conf->isDSiWare) {
+	if ((!dsiFeatures() || conf->b4dsMode) || dsiWareAsSlot1 || !conf->isDSiWare) {
 		// Update modified date
 		FILE *savFile = fopen(conf->savPath, "r+");
 		if (savFile) {

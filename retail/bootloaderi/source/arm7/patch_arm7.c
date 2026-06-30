@@ -571,13 +571,13 @@ void patchRamClearI(const tNDSHeader* ndsHeader, const module_params_t* modulePa
 
 	if (*(u32*)0x02FFE1A0 != 0x00403000) {
 		// extern u8 consoleModel;
-		extern bool scfgSdmmcEnabled;
+		extern bool dsiWareAsSlot1;
 		extern u32 ce7Location;
 		// extern u32 cheatSizeTotal;
 		// const bool cheatsEnabled = (cheatSizeTotal > 4 && cheatSizeTotal <= 0x8000);
 
 		// ramClearOffset[0] = (consoleModel == 0 && _isDSiWare && cheatsEnabled && newArm7binarySize != 0x28E54) ? CHEAT_ENGINE_DSIWARE_LOCATION3 : 0x02FFC000;
-		if (!_isDSiWare || !scfgSdmmcEnabled || (REG_SCFG_ROM & BIT(9))) {
+		if (!_isDSiWare || dsiWareAsSlot1) {
 			ramClearOffset[0] -= 0x1850;
 		}
 		ramClearOffset[2] = ce7Location;

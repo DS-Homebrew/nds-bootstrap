@@ -949,7 +949,7 @@ void patchResetTwl(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const modul
 	}
 	if (nandTmpJumpFuncOffset[-2] >= 0x02000000 && nandTmpJumpFuncOffset[-2] < 0x02400000 && nandTmpJumpFuncOffset[-1] == 0x02FFE230) {
 		ce9->nandTmpJumpFuncOffset = nandTmpJumpFuncOffset[-2];
-		nandTmpJumpFuncOffset[-1] = 0x02FFC230;
+		nandTmpJumpFuncOffset[-1] = 0x02FFD230;
 	}
 	dbg_printf("nandTmpJumpFunc location : ");
 	dbg_hexa((u32)nandTmpJumpFuncOffset);
@@ -1977,9 +1977,9 @@ void patchSharedFontPath(const cardengineArm9* ce9, const tNDSHeader* ndsHeader,
 	dbg_hexa((u32)offset);
 	dbg_printf("\n\n");
 
-	extern bool scfgSdmmcEnabled;
+	extern bool dsiWareAsSlot1;
 
-	if (!scfgSdmmcEnabled || (REG_SCFG_ROM & BIT(9))) {
+	if (dsiWareAsSlot1) {
 		extern u32 iUncompressedSizei;
 
 		const u32* dsiSaveOpen = ce9->patches->dsiSaveOpen;

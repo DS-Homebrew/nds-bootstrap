@@ -1417,8 +1417,8 @@ static bool start_cardRead_arm9(void) {
 	u32 src = sharedAddr[2];
 	u32 dst = sharedAddr[0];
 	u32 len = sharedAddr[1];
-	if (src >= 0x80000000) {
-		src -= 0x80000000;
+	if (len >= 0x80000000) {
+		len -= 0x80000000;
 		useApFixOverlays = true;
 	}
 	#ifdef DEBUG
@@ -1730,8 +1730,8 @@ void runCardEngineCheckHalt(void) {
 				u32 src = sharedAddr[2];
 				u32 dst = sharedAddr[0];
 				u32 len = sharedAddr[1];
-				if (src >= 0x80000000) {
-					src -= 0x80000000;
+				if (len >= 0x80000000) {
+					len -= 0x80000000;
 					useApFixOverlays = true;
 				}
 
