@@ -727,6 +727,13 @@ void patchMobiclipFrameLoad(cardengineArm9* ce9, const tNDSHeader* ndsHeader, co
 		return; 
 	}
 
+	const char* romTid = getRomTid(ndsHeader);
+	if (
+		strncmp(romTid, "A3I", 3) == 0 // Lux-Pain
+	) {
+		return;
+	}
+
 	u32* endOffset = patchOffsetCache.mobiclipFrameDrawEndOffset;
 	u32* offset = patchOffsetCache.mobiclipFrameDrawOffset;
 
