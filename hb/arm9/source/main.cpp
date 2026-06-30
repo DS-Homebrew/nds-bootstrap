@@ -170,7 +170,7 @@ void runFile(string filename, string fullPath, string homebrewArg, string ramDis
 		dbg_printf("no nds file specified\n");
 	} else {
 		char *name = argarray.at(0);
-		strcpy (filePath + pathLen, name);
+		strncat (filePath, name, sizeof(filePath) - pathLen - 1);
 		free(argarray.at(0));
 		argarray.at(0) = filePath;
 		dbg_printf("Running %s with %d parameters\n", argarray[0], argarray.size());
@@ -414,7 +414,7 @@ int main( int argc, char **argv) {
 		}
 
 		char patchOffsetCacheFilePath[64];
-		sprintf(patchOffsetCacheFilePath, "fat:/_nds/nds-bootstrap/patchOffsetCache/%s-%04X.bin", romTid, headerCRC);
+		snprintf(patchOffsetCacheFilePath, sizeof(patchOffsetCacheFilePath), "fat:/_nds/nds-bootstrap/patchOffsetCache/%s-%04X.bin", romTid, headerCRC);
 		if (access(patchOffsetCacheFilePath, F_OK) != 0) {
 			char buffer[0x200] = {0};
 
