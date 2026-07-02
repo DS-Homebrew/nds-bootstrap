@@ -159,8 +159,12 @@ bool saveRelocationApplied = false;
 static void patchSwiHalt(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
 	const char* romTid = getRomTid(ndsHeader);
 
+	// Disable patching for these games
 	extern bool pkmnGen5;
-	if (pkmnGen5 || strncmp(romTid, "ASC", 3) == 0) {
+	if (pkmnGen5 // (Fixes random freezing)
+	|| strncmp(romTid, "YBS", 3) == 0 // Soma Bringer (Fixes timing issues related to card read DMA)
+	|| strncmp(romTid, "ASC", 3) == 0 // Sonic Rush (Fixes slowdown in some areas)
+	) {
 		newSwiHaltAddr = 0; // Ensure this is set to 0 in case a THUMB ROM is used as a donor ROM
 		return;
 	}
