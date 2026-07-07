@@ -245,6 +245,7 @@ static const char colorLutMasterBrightBlacklist[][4] = {
 	"KTC", "KTP", // Clubhouse Games Express: Family Favorites
 	"KTD", "KTB", // Clubhouse Games Express: Strategy Pack
 	"CDG", // Disgaea DS
+	"AFO", // Front Mission
 	"C24", // Phantasy Star 0
 	"AZL", // Style Savvy
 };
@@ -254,7 +255,8 @@ static const char colorLutMasterBrightBlacklist[][4] = {
 Black Sigil: Blade of the Exiled,
 Bomberman,
 Clubhouse Games & Clubhouse Games Express,
-Disgaea DS:
+Disgaea DS,
+Front Mission:
 - Master brightness is not changed due to blacklisting VCount IRQ
 
 Phantasy Star 0:
@@ -279,6 +281,7 @@ static const char colorLutVCountBlacklist[][4] = {
 	"KVC", // Curling Super Championship
 	"CDG", // Disgaea DS
 	"K5L", // Forgotten Legions
+	"AFO", // Front Mission
 	"ATK", // Kirby: Canvas Curse
 	"KYL", // Make Up & Style
 	"AB3", // Mario Hoops 3-on-3
@@ -314,6 +317,9 @@ Disgaea DS:
 
 Forgotten Legions:
 - Crashes after the bottom screen fades out during the opening video
+
+Front Mission:
+- Freezes on second title screen after pressing START on the first title screen
 
 Kirby: Canvas Curse:
 - Original colors still seen at the top of each screen
