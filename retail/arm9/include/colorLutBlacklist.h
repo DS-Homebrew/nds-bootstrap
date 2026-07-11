@@ -246,6 +246,7 @@ static const char colorLutMasterBrightBlacklist[][4] = {
 	"KTD", "KTB", // Clubhouse Games Express: Strategy Pack
 	"CDG", // Disgaea DS
 	"AFO", // Front Mission
+	"AN7", // Need for Speed Carbon: Own the City
 	"C24", // Phantasy Star 0
 	"AZL", // Style Savvy
 };
@@ -256,7 +257,8 @@ Black Sigil: Blade of the Exiled,
 Bomberman,
 Clubhouse Games & Clubhouse Games Express,
 Disgaea DS,
-Front Mission:
+Front Mission,
+Need for Speed Carbon: Own the City:
 - Master brightness is not changed due to blacklisting VCount IRQ
 
 Phantasy Star 0:
@@ -285,6 +287,7 @@ static const char colorLutVCountBlacklist[][4] = {
 	"ATK", // Kirby: Canvas Curse
 	"KYL", // Make Up & Style
 	"AB3", // Mario Hoops 3-on-3
+	"AN7", // Need for Speed Carbon: Own the City
 	"AGF", // True Swing Golf
 	"K72", // True Swing Golf Express
 };
@@ -329,6 +332,9 @@ Make Up & Style:
 
 Mario Hoops 3-on-3:
 - Crashes on white screens
+
+Need for Speed Carbon: Own the City:
+- Freezes on loading screen
 
 True Swing Golf,
 True Swing Golf Express:
