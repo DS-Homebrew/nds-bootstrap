@@ -29,5 +29,6 @@ extern u8 valueBits3;
 #define chnSharedFont (valueBits3 & BIT(4))
 #define korSharedFont (valueBits3 & BIT(5))
 #define dsiWramMirrored (valueBits3 & BIT(6))
+#define altReadMethod (valueBits3 & BIT(7))
 
 #endif

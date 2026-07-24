@@ -1586,6 +1586,20 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 			cardengineArm7* ce7 = (cardengineArm7*)CARDENGINEI_ARM7_BUFFERED_LOCATION;
 
+			const bool altReadMethod =
+			(conf->gameOnFlashcard && (
+				(strncmp(romTid, "KAD", 3) == 0 && conf->saveOnFlashcard) // Art Style: BASE 10 (Fixes soft-lock when saving)
+			 || strncmp(romTid, "IRB", 3) == 0 // Pokémon Gen 5 (Fixes random freezing)
+			 || strncmp(romTid, "IRA", 3) == 0
+			 || strncmp(romTid, "IRE", 3) == 0
+			 || strncmp(romTid, "IRD", 3) == 0
+			 || strncmp(romTid, "YBS", 3) == 0 // Soma Bringer (Fixes timing issues related to card read DMA)
+			 || strncmp(romTid, "ASC", 3) == 0 // Sonic Rush (Fixes slowdown in some areas)
+			));
+			if (altReadMethod) {
+				conf->valueBits3 |= BIT(7);
+			}
+
 			if ((unitCode > 0 && conf->dsiMode) || conf->isDSiWare) {
 				const bool binary3 = (REG_SCFG_EXT7 == 0 ? !dsiEnhancedMbk : (a7mbk6 != 0x00403000));
 
@@ -1607,7 +1621,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 					}
 				}
 
-				if (conf->gameOnFlashcard && (strncmp(romTid, "IRB", 3) == 0 || strncmp(romTid, "IRA", 3) == 0 || strncmp(romTid, "IRE", 3) == 0 || strncmp(romTid, "IRD", 3) == 0 || strncmp(romTid, "KAD", 3) == 0)) {
+				if (altReadMethod) {
 					// Load SDK5 DLDI ce9 binary
 					loadCardEngineBinary(
 						binary3 ? "nitro:/cardenginei_arm9_twlsdk3_dldi.lz77" : "nitro:/cardenginei_arm9_twlsdk_dldi.lz77",
@@ -1643,14 +1657,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 
 				// Load DLDI ce9 binary
 				loadCardEngineBinary(
-					(conf->gameOnFlashcard && (
-					strncmp(romTid, "IRB", 3) == 0 // Pokémon Gen 5
-				 || strncmp(romTid, "IRA", 3) == 0
-				 || strncmp(romTid, "IRE", 3) == 0
-				 || strncmp(romTid, "IRD", 3) == 0
-				 ||	strncmp(romTid, "YBS", 3) == 0 // Soma Bringer
-				 || strncmp(romTid, "ASC", 3) == 0 // Sonic Rush
-				))
+					altReadMethod
 				?	(gsdd ? "nitro:/cardenginei_arm9_gsdd_dldi.lz77" : "nitro:/cardenginei_arm9_dldi.lz77")
 				:	(gsdd ? "nitro:/cardenginei_arm9_gsdd.lz77" : "nitro:/cardenginei_arm9.lz77")
 				, (u8*)CARDENGINEI_ARM9_BUFFERED_LOCATION);
