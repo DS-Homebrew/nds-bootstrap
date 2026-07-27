@@ -163,7 +163,6 @@ static inline void debugConfB4DS(configuration* conf) {
 	if (debug) {
 		dopause();
 	}
-	dbg_printf("donor20Path: \"%s\"\n", conf->donor20Path);
 	dbg_printf("donor5Path: \"%s\"\n", conf->donor5Path);
 	dbg_printf("donorTwlPath: \"%s\"\n", conf->donorTwlPath);
 	if (debug) {
@@ -482,10 +481,6 @@ static int runNdsFile(configuration* conf) {
 	if (!dsiFeatures() || conf->b4dsMode) {
 		if (conf->donorFileOffset) {
 			clusterDonor = st.st_ino;
-		} else if (conf->useSdk20Donor) {
-			if (stat(conf->donor20Path, &stDonor) >= 0) {
-				clusterDonor = stDonor.st_ino;
-			}
 		} else if (stat("fat:/_nds/nds-bootstrap/b4dsTwlDonor.bin", &stDonorStandalone) >= 0) {
 			clusterDonor = stDonorStandalone.st_ino;
 		} else if (conf->useSdk5DonorAlt) {
