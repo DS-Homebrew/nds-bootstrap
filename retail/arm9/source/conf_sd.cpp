@@ -1037,8 +1037,6 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		fread(&prvSize, sizeof(u32), 1, ndsFile);
 	}
 
-	conf->useSdk20Donor = (memcmp(romTid, "AYI", 3) == 0 && unitCode == 0 && ndsArm7Size == 0x25F70);
-
 	u32 donorArm7iOffset = 0;
 	u32 donorModcrypt2len = 0;
 
@@ -1206,10 +1204,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		bool twlDonor = true;
 
 		// Load donor ROM's arm7 binary, if needed
-		if (conf->useSdk20Donor) {
-			donorNdsFile = fopen(conf->donor20Path, "rb");
-			twlDonor = false;
-		} else if (REG_SCFG_EXT7 == 0
+		if (REG_SCFG_EXT7 == 0
 				&& (conf->dsiMode > 0 || conf->isDSiWare) && (a7mbk6 == (dsiEnhancedMbk ? 0x080037C0 : 0x00403000) || (romTid[0] == 'H' && ndsArm7Size < 0xC000 && ndsArm7idst == 0x02E80000 && (REG_MBK9 & 0x00FFFFFF) != 0x00FFFF0F))) {
 			if (romTid[0] == 'H' && ndsArm7Size < 0xC000 && ndsArm7idst == 0x02E80000) {
 				if (!nandMounted && strncmp((dsiEnhancedMbk ? conf->donorTwl0Path : conf->donorTwlOnly0Path), "nand:", 5) == 0) {
@@ -2371,10 +2366,6 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 					} else if (!conf->donor5PathAlt && access(conf->donor5PathAlt, F_OK) == 0) {
 						donorNdsPath = conf->donor5PathAlt;
 					}
-				}
-			} else if (conf->useSdk20Donor) {
-				if (access(conf->donor20Path, F_OK) == 0) {
-					donorNdsPath = conf->donor20Path;
 				}
 			}
 		}

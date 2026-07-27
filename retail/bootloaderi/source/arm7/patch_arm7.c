@@ -157,8 +157,6 @@ u32 newSwiHaltAddr = 0;
 bool saveRelocationApplied = false;
 
 static void patchSwiHalt(const cardengineArm7* ce7, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
-	const char* romTid = getRomTid(ndsHeader);
-
 	if (altReadMethod) {
 		newSwiHaltAddr = 0; // Ensure this is set to 0 in case a THUMB ROM is used as a donor ROM
 		return;
@@ -798,7 +796,7 @@ u32 patchCardNdsArm7(
 	newArm7binarySize = ndsHeader->arm7binarySize;
 	newArm7ibinarySize = __DSiHeader->arm7ibinarySize;
 
-	if ((ndsHeader->unitCode > 0 || (memcmp(ndsHeader->gameCode, "AYI", 3) == 0 && ndsHeader->arm7binarySize == 0x25F70)) && ((u32)ndsHeader->arm9destination+ndsHeader->arm9binarySize) < DONOR_ROM_ARM7_LOCATION && *(u32*)DONOR_ROM_ARM7_SIZE_LOCATION != 0) {
+	if (ndsHeader->unitCode > 0 && ((u32)ndsHeader->arm9destination+ndsHeader->arm9binarySize) < DONOR_ROM_ARM7_LOCATION && *(u32*)DONOR_ROM_ARM7_SIZE_LOCATION != 0) {
 		// Replace incompatible ARM7 binary
 		newArm7binarySize = *(u32*)DONOR_ROM_ARM7_SIZE_LOCATION;
 		newArm7ibinarySize = *(u32*)DONOR_ROM_ARM7I_SIZE_LOCATION;
