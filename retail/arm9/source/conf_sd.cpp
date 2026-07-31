@@ -1590,6 +1590,11 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			const bool altReadMethod =
 			(
 				(strncmp(romTid, "KAD", 3) == 0 && conf->saveOnFlashcard) // Art Style: BASE 10 (Fixes soft-lock when saving)
+			 || strncmp(romTid, "ADA", 3) == 0 // Pokémon Gen 4 (Fixes random freezing)
+			 || strncmp(romTid, "APA", 3) == 0
+			 || strncmp(romTid, "CPU", 3) == 0
+			 || strncmp(romTid, "IPK", 3) == 0
+			 || strncmp(romTid, "IPG", 3) == 0
 			 || strncmp(romTid, "IRB", 3) == 0 // Pokémon Gen 5 (Fixes random freezing)
 			 || strncmp(romTid, "IRA", 3) == 0
 			 || strncmp(romTid, "IRE", 3) == 0
