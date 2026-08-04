@@ -221,7 +221,6 @@ void arm9_main(void) {
 		dmaFill9(0, (u32*)0x027FF000, dsDebugRam ? 0x1000 : 0x801000);
 	}
 
-	REG_DISPSTAT = 0;
 	GFX_STATUS = 0;
 
 	//VRAM_A_CR = 0;

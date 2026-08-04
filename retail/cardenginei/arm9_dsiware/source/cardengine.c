@@ -170,13 +170,20 @@ void reset(u32 tid1, u32 tid2) {
 
 	IPC_SYNC_hooked = false;
 
-	REG_DISPSTAT = 0;
-	REG_DISPCNT = 0;
-	REG_DISPCNT_SUB = 0;
-	GFX_STATUS = 0;
+	for (vu16 *p = (vu16*)&REG_DISPCNT; p <= (vu16*)&REG_MASTER_BRIGHT; p++)
+	{
+		// Skip VCOUNT. Writing to it was setting it to 0 causing a frame to be
+		// misrendered. This can also have side effects on 3DS, even though the
+		// official TWL_FIRM can recover from it.
+		if (p != (vu16*)&REG_VCOUNT)
+			*p = 0;
+	}
+	for (vu16 *p = (vu16*)&REG_DISPCNT_SUB; p <= (vu16*)&REG_MASTER_BRIGHT_SUB; p++)
+	{
+		*p = 0;
+	}
 
-	toncset((u16*)0x04000000, 0, 0x56);
-	toncset((u16*)0x04001000, 0, 0x56);
+	GFX_STATUS = 0;
 
 	VRAM_A_CR = 0x80;
 	VRAM_B_CR = 0x80;

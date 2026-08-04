@@ -239,7 +239,6 @@ void arm9_main(void) {
 	dmaFill9(0, VRAM_A, 0x20000*3);		// Banks A, B, C
 	dmaFill9(0, VRAM_D, 272*1024);		// Banks D (excluded), E, F, G, H, I
 
-	REG_DISPSTAT = 0;
 	GFX_STATUS = 0;
 
 	//VRAM_A_CR = 0;
