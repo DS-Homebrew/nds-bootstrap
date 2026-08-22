@@ -414,6 +414,9 @@ static void load_conf(configuration* conf, const char* fn) {
 	// SDNAND
 	conf->sdNand = strtol(config_file.fetch("NDS-BOOTSTRAP", "SDNAND", "0").c_str(), NULL, 0);
 
+	// Slot-1 mode for DSiWare
+	conf->dsiWareSlot1Mode = strtol(config_file.fetch("NDS-BOOTSTRAP", "DSIWARE_SLOT1_MODE", "0").c_str(), NULL, 0);
+
 	if (dsiFeatures()) {
 		// DSi mode
 		conf->dsiMode = strtol(config_file.fetch("NDS-BOOTSTRAP", "DSI_MODE", "1").c_str(), NULL, 0);
@@ -1047,7 +1050,9 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	bool donorLoaded = false;
 	conf->isDSiWare = (dsiFeatures() && !conf->b4dsMode && ((unitCode == 3 && (accessControl & BIT(4)))
 					|| (unitCode == 2 && conf->dsiMode && romTid[0] == 'K')));
-	const bool dsiWareAsSlot1 = (conf->isDSiWare && (totalRomSize >= 0x04000000 || !scfgSdmmcEnabled || !isDSiMode()));
+	if (conf->isDSiWare && (totalRomSize >= 0x04000000 || conf->dsiWareSlot1Mode || !scfgSdmmcEnabled || !isDSiMode())) {
+		conf->valueBits4 |= BIT(0);
+	}
 	bool dsiEnhancedMbk = false;
 	bool b4dsDebugRam = false;
 	bool romFSInited = false;
@@ -1499,7 +1504,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			}
 		}
 
-		if (isDSiMode() && unitCode > 0 && !dsiWareAsSlot1) {
+		if (isDSiMode() && unitCode > 0 && !(conf->valueBits4 & BIT(0))) {
 			const bool sdNandFound = conf->sdNand && (access(conf->gameOnFlashcard ? "fat:/shared1" : "sd:/shared1", F_OK) == 0);
 			const bool sdPhotoFound = conf->sdNand && (access(conf->gameOnFlashcard ? "fat:/photo" : "sd:/photo", F_OK) == 0);
 
@@ -1580,7 +1585,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			fclose(twlCfgFile);
 		}
 
-		if (!conf->isDSiWare || dsiWareAsSlot1) {
+		if (!conf->isDSiWare || (conf->valueBits4 & BIT(0))) {
 			// Load external cheat engine binary
 			loadCardEngineBinary("nitro:/cardenginei_arm7_cheat.bin", (u8*)CHEAT_ENGINE_BUFFERED_LOCATION);
 
@@ -2621,7 +2626,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			}
 		}
 
-		if (!isDSiMode() || dsiWareAsSlot1) {
+		if (!isDSiMode() || (conf->valueBits4 & BIT(0))) {
 			loadDSi2DSSavePatch(conf, bootstrapPath, romTid, romVersion, headerCRC);
 		}
 	} else {
@@ -2877,7 +2882,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	// Create AP-fixed overlay binary
 	createApFixOverlayBin(conf);
 
-	if ((!dsiFeatures() || conf->b4dsMode) || dsiWareAsSlot1 || !conf->isDSiWare) {
+	if ((!dsiFeatures() || conf->b4dsMode) || (conf->valueBits4 & BIT(0)) || !conf->isDSiWare) {
 		// Update modified date
 		FILE *savFile = fopen(conf->savPath, "r+");
 		if (savFile) {

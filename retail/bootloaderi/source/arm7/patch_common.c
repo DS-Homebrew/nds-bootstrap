@@ -43,7 +43,6 @@ extern bool scfgSdmmcEnabled;
 extern u8 dsiSD;
 extern bool i2cBricked;
 extern int sharedFontRegion;
-extern bool dsiWareAsSlot1;
 extern bool colorLutEnabled;
 
 #define nopT 0x46C0
@@ -58,7 +57,7 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	const char* dataPub = "dataPub:";
 	const char* dataPrv = "dataPrv:";
 
-	const bool sdmmcMode = (scfgSdmmcEnabled && !(REG_SCFG_ROM & BIT(9)));
+	const bool sdmmcMode = (scfgSdmmcEnabled && !dsiWareAsSlot1 && !(REG_SCFG_ROM & BIT(9)));
 	const bool dsiWramBlocked = (!dsiWramAccess || colorLutEnabled);
 
 	const bool isUsa = (romTid[3] == 'E');
@@ -88,9 +87,9 @@ void dsiWarePatch(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 	const u32* dsiSaveRead = ce9->patches->dsiSaveRead;
 	const u32* dsiSaveWrite = ce9->patches->dsiSaveWrite;
 
-	const bool twlFontFound = ((sharedFontRegion == 0 && !gameOnFlashcard && !i2cBricked) || twlSharedFont);
-	//const bool chnFontFound = ((sharedFontRegion == 1 && !gameOnFlashcard && !i2cBricked) || chnSharedFont);
-	const bool korFontFound = ((sharedFontRegion == 2 && !gameOnFlashcard && !i2cBricked) || korSharedFont);
+	const bool twlFontFound = ((sharedFontRegion == 0 && !dsiWareAsSlot1 && !gameOnFlashcard && !i2cBricked) || twlSharedFont);
+	//const bool chnFontFound = ((sharedFontRegion == 1 && !dsiWareAsSlot1 && !gameOnFlashcard && !i2cBricked) || chnSharedFont);
+	const bool korFontFound = ((sharedFontRegion == 2 && !dsiWareAsSlot1 && !gameOnFlashcard && !i2cBricked) || korSharedFont);
 
 #ifdef LOADERTYPE0
 	// GO Series: 10 Second Run (USA)
@@ -16363,9 +16362,9 @@ void patchBinary(cardengineArm9* ce9, const tNDSHeader* ndsHeader, module_params
 	const u32* dsiSaveRead = ce9->patches->dsiSaveRead;
 	const u32* dsiSaveWrite = ce9->patches->dsiSaveWrite;
 
-	const bool twlFontFound = ((sharedFontRegion == 0 && !gameOnFlashcard) || twlSharedFont);
-	//const bool chnFontFound = ((sharedFontRegion == 1 && !gameOnFlashcard) || chnSharedFont);
-	//const bool korFontFound = ((sharedFontRegion == 2 && !gameOnFlashcard) || korSharedFont);
+	const bool twlFontFound = ((sharedFontRegion == 0 && !dsiWareAsSlot1 && !gameOnFlashcard && !i2cBricked) || twlSharedFont);
+	//const bool chnFontFound = ((sharedFontRegion == 1 && !dsiWareAsSlot1 && !gameOnFlashcard && !i2cBricked) || chnSharedFont);
+	//const bool korFontFound = ((sharedFontRegion == 2 && !dsiWareAsSlot1 && !gameOnFlashcard && !i2cBricked) || korSharedFont);
 
 	// The World Ends With You (USA/Europe)
 	if (strcmp(romTid, "AWLE") == 0 || strcmp(romTid, "AWLP") == 0) {

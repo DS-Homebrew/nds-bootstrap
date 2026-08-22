@@ -91,7 +91,7 @@ extern bool moreMemory;
 //extern u32 _start;
 extern u32 storedFileCluster;
 extern u32 initDisc;
-extern u16 bootstrapOnFlashcard;
+extern u8 bootstrapOnFlashcard;
 extern u8 gameOnFlashcard;
 extern u8 saveOnFlashcard;
 extern u8 saveRelocation;
@@ -182,7 +182,6 @@ u32 baseChipID = 0;
 u32 romPaddingSize = 0;
 bool pkmnHeader = false;
 bool pkmnGen5 = false;
-bool dsiWareAsSlot1 = false;
 bool ndmaDisabled = false;
 bool sharedWramEnabled = false;
 bool colorLutEnabled = false;
@@ -1710,7 +1709,6 @@ int arm7_main(void) {
 		dsiModeConfirmed = dsiMode && ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr);
 	}
 	const char* romTid = getRomTid(&dsiHeaderTemp.ndshdr);
-	dsiWareAsSlot1 = (isDSiWare && (dsiHeaderTemp.total_rom_size >= 0x04000000 || !scfgSdmmcEnabled || (REG_SCFG_ROM & BIT(9))));
 	if (!isDSiWare || dsiWareAsSlot1) {
 		extern u32 clusterCacheSize;
 		clusterCacheSize = (ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr) && dsiModeConfirmed) ? 0x17B0 : 0x3000;

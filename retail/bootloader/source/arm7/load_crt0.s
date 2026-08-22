@@ -29,9 +29,10 @@
 	.global bootstrapOnFlashcard
 	.global gameOnFlashcard
 	.global saveOnFlashcard
+	.global consoleModel
 	.global a9ScfgRom
+	.global dsiMode
 	.global dsiSD
-	.global valueBits
 	.global saveFileCluster
 	.global donorFileCluster
 	.global donorFileSize
@@ -78,16 +79,16 @@
 	.global patchMpuRegion
 	.global language
 	.global region
-	.global dsiMode
+	.global saveRelocation
 	.global remappedKeys
+	.global valueBits
 	.global valueBits2
+	.global valueBits3
+	.global valueBits4
 	.global donorSdkVer
-	.global consoleModel
 	.global romRead_LED
 	.global dmaRomRead_LED
 	.global soundFreq
-	.global valueBits3
-	.global saveRelocation
 	.global cacheBlockSize
 	.global bannerSavPath
 	.global version
@@ -106,18 +107,20 @@ storedFileCluster:
 initDisc:
 	.word	0x00000001		@ init the disc by default
 bootstrapOnFlashcard:
-	.hword	0x0000
+	.byte	0
 gameOnFlashcard:
 	.byte	0
 saveOnFlashcard:
+	.byte	0
+consoleModel:
 	.byte	0
 dldiOffset:
 	.word	0x00000000
 a9ScfgRom:
 	.hword	0
-dsiSD:
+dsiMode:
 	.byte	0
-valueBits:
+dsiSD:
 	.byte	0
 saveFileCluster:
 	.word	0x00000000		@ .sav file
@@ -219,7 +222,7 @@ language:
 	.byte	0
 region:
 	.byte	0
-dsiMode:
+saveRelocation:
 	.byte	0
 remappedKeys:
 	.byte	0
@@ -234,21 +237,21 @@ remappedKeys:
 	.byte	9
 	.byte	10
 	.byte	11
+valueBits:
+	.byte	0
 valueBits2:
+	.byte	0
+valueBits3:
+	.byte	0
+valueBits4:
 	.byte	0
 donorSdkVer:
 	.byte	0		@ donor SDK version
-consoleModel:
-	.byte	0
 romRead_LED:
 	.byte	0
 dmaRomRead_LED:
 	.byte	0
 soundFreq:
-	.byte	0
-valueBits3:
-	.byte	0
-saveRelocation:
 	.byte	0
 cacheBlockSize:
 	.hword	0

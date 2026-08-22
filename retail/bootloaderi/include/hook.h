@@ -47,7 +47,7 @@ int hookNdsRetailArm7(
 	u32 apPatchSize,
 	u32 pageFileCluster,
 	u32 manualCluster,
-    u16 bootstrapOnFlashcard,
+    u8 bootstrapOnFlashcard,
     u8 gameOnFlashcard,
     u8 saveOnFlashcard,
 	s32 mainScreen,

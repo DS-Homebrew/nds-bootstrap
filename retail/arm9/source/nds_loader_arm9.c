@@ -270,9 +270,10 @@ int runNds(u32 cluster, u32 saveCluster, u32 donorTwlCluster, /* u32 gbaCluster,
 	loader->bootstrapOnFlashcard = conf->bootstrapOnFlashcard;
 	loader->gameOnFlashcard      = conf->gameOnFlashcard;
 	loader->saveOnFlashcard      = conf->saveOnFlashcard;
+	loader->consoleModel         = conf->consoleModel;
 	loader->a9ScfgRom            = REG_SCFG_ROM;
+	loader->dsiMode              = conf->dsiMode; // SDK 5
 	loader->dsiSD                = conf->sdFound;
-	loader->valueBits            = conf->valueBits;
 
 	loader->saveFileCluster             = saveCluster;
 	loader->donorFileCluster            = donorTwlCluster;
@@ -321,19 +322,19 @@ int runNds(u32 cluster, u32 saveCluster, u32 donorTwlCluster, /* u32 gbaCluster,
 	loader->dldiPatchBinaryOffset       = conf->dldiPatchBinaryOffset;
 	loader->language                    = conf->language;
 	loader->region                      = conf->region;
-	loader->dsiMode                     = conf->dsiMode; // SDK 5
+	loader->saveRelocation              = conf->saveRelocation;
 	for (int i = 0; i < 12; i++) {
 		loader->remappedKeys[i]         = conf->remappedKeys[i];
 	}
+	loader->valueBits            = conf->valueBits;
 	loader->valueBits2                  = conf->valueBits2;
+	loader->valueBits3                  = conf->valueBits3;
+	loader->valueBits4                  = conf->valueBits4;
 	loader->donorSdkVer                 = conf->donorSdkVer;
 	loader->patchMpuRegion              = conf->patchMpuRegion;
 	loader->patchMpuSize                = conf->patchMpuSize;
-	loader->consoleModel                = conf->consoleModel;
 	loader->romRead_LED                 = conf->romRead_LED;
 	loader->dmaRomRead_LED              = conf->dmaRomRead_LED;
-	loader->valueBits3                  = conf->valueBits3;
-	loader->saveRelocation              = conf->saveRelocation;
 	loader->cacheBlockSize              = conf->cacheBlockSize;
 	tonccpy(loader->bannerSavPath, conf->bannerSavPath, strlen(conf->bannerSavPath));
 	tonccpy(loader->version, VER_NUMBER, sizeof(VER_NUMBER));

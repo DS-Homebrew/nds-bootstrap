@@ -6,6 +6,7 @@
 extern u8 valueBits;
 extern u8 valueBits2;
 extern u8 valueBits3;
+extern u8 valueBits4;
 
 #define cacheFatTable (valueBits & BIT(0))
 #define boostVram (valueBits & BIT(1))
@@ -30,5 +31,6 @@ extern u8 valueBits3;
 #define korSharedFont (valueBits3 & BIT(5))
 #define dsiWramMirrored (valueBits3 & BIT(6))
 #define altReadMethod (valueBits3 & BIT(7))
+#define dsiWareAsSlot1 (valueBits4 & BIT(0))
 
 #endif

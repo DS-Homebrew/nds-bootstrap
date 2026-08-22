@@ -296,7 +296,7 @@ static bool patchCardRead(cardengineArm9* ce9, const tNDSHeader* ndsHeader, cons
     dbg_hexa((u32)ce9);
     dbg_printf("\n");
 
-	/* extern u16 bootstrapOnFlashcard;
+	/* extern u8 bootstrapOnFlashcard;
 	extern u32 apPatchPostCardReadFileCluster;
 	extern u32 apPatchPostCardReadOffset;
 	extern u32 apPatchPostCardReadSize;
@@ -1977,8 +1977,6 @@ void patchSharedFontPath(const cardengineArm9* ce9, const tNDSHeader* ndsHeader,
 	dbg_hexa((u32)offset);
 	dbg_printf("\n\n");
 
-	extern bool dsiWareAsSlot1;
-
 	if (dsiWareAsSlot1) {
 		extern u32 iUncompressedSizei;
 
@@ -2364,7 +2362,7 @@ static void twlSaveSetTBranch(const u32 patchData0, const u32 patchData1) {
 }
 
 void patchTwlSaveFuncs(const cardengineArm9* ce9) {
-	extern u16 bootstrapOnFlashcard;
+	extern u8 bootstrapOnFlashcard;
 	extern u32 dsi2dsSavePatchFileCluster;
 	extern u32 dsi2dsSavePatchOffset;
 	extern u32 dsi2dsSavePatchSize;

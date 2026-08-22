@@ -10,13 +10,14 @@ typedef struct loadCrt0 {
 	u32 ndsBootstrapCluster;
 	u32 storedFileCluster;
 	u32 initDisc;
-	u16 bootstrapOnFlashcard;
+	u8 bootstrapOnFlashcard;
 	u8 gameOnFlashcard;
 	u8 saveOnFlashcard;
+	u8 consoleModel;
 	u32 dldiOffset;
 	u16 a9ScfgRom;
+	u8 dsiMode; // SDK 5
 	u8 dsiSD;
-	u8 valueBits;
 	u32 saveFileCluster;
 	u32 donorFileCluster;
 	u32 donorFileSize;
@@ -63,16 +64,16 @@ typedef struct loadCrt0 {
 	u8 patchMpuRegion;
 	u8 language;
 	s8 region; // SDK 5
-	u8 dsiMode; // SDK 5
+	u8 saveRelocation;
 	u8 remappedKeys[12];
+	u8 valueBits;
 	u8 valueBits2;
+	u8 valueBits3;
+	u8 valueBits4;
 	u8 donorSdkVer;
-	u8 consoleModel;
 	u8 romRead_LED;
 	u8 dmaRomRead_LED;
 	u8 soundFreq;
-	u8 valueBits3;
-	u8 saveRelocation;
 	u16 cacheBlockSize;
 	char bannerSavPath[64];
 	unsigned char version[20];

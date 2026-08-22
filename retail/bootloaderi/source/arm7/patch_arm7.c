@@ -568,7 +568,6 @@ void patchRamClearI(const tNDSHeader* ndsHeader, const module_params_t* modulePa
 
 	if (*(u32*)0x02FFE1A0 != 0x00403000) {
 		// extern u8 consoleModel;
-		extern bool dsiWareAsSlot1;
 		extern u32 ce7Location;
 		// extern u32 cheatSizeTotal;
 		// const bool cheatsEnabled = (cheatSizeTotal > 4 && cheatSizeTotal <= 0x8000);
