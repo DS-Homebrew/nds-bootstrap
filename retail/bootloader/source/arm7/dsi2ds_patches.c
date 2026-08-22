@@ -25597,8 +25597,45 @@ void patchDSiModeToDSMode(cardengineArm9* ce9, const tNDSHeader* ndsHeader) {
 		doubleNopT(0x020CCE8E -offsetChange3);
 		doubleNopT(0x020CCEAA-offsetChange3);
 		doubleNopT(0x020CCED2-offsetChange3);
-		// *(u32*)(0x020F7C18-offsetChange4) = 0xF6000; // Shrink sound heap from 0x396000
-	} */
+		// *(u32*)(0x020F7C18-offsetChange4) = 0xF6000; // Shrink sound heap from 0x396000 */
+
+		// Overlay code patch (Part of .pck file)
+		/* if (!isJpn) {
+			if (*(u32*)0x0220ED88 == 0xF6B79300) {
+				*(u16*)0x0220ED8A = 0x2001; // movs r0, #1 (dsiSaveGetArcSrc)
+				*(u16*)0x0220ED8C = nopT; // nop
+				setBLXThumb(0x0220EDA6, (u32)dsiSaveOpen);
+				setBLXThumb(0x0220EDB2, (u32)dsiSaveCreate);
+				setBLXThumb(0x0220EDBC, (u32)dsiSaveOpen);
+				setBLXThumb(0x0220EDD0, (u32)dsiSaveClose);
+				setBLXThumb(0x0220EDE8, (u32)dsiSaveWrite);
+				setBLXThumb(0x0220EDF6, (u32)dsiSaveClose);
+				doubleNopT(0x0220EE02); // dsiSaveFlush
+				setBLXThumb(0x0220EE08, (u32)dsiSaveClose);
+				setBLXThumb(0x0220EE2E, (u32)dsiSaveOpen);
+				setBLXThumb(0x0220EE48, (u32)dsiSaveRead);
+				setBLXThumb(0x0220EE58, (u32)dsiSaveClose);
+				setBLXThumb(0x0220EE64, (u32)dsiSaveClose);
+			}
+		} else {
+			if (*(u32*)0x0220ED48 == 0xF6B79300) {
+				*(u16*)0x0220ED4A = 0x2001; // movs r0, #1 (dsiSaveGetArcSrc)
+				*(u16*)0x0220ED4C = nopT; // nop
+				setBLXThumb(0x0220ED66, (u32)dsiSaveOpen);
+				setBLXThumb(0x0220ED72, (u32)dsiSaveCreate);
+				setBLXThumb(0x0220ED7C, (u32)dsiSaveOpen);
+				setBLXThumb(0x0220ED90, (u32)dsiSaveClose);
+				setBLXThumb(0x0220EDA8, (u32)dsiSaveWrite);
+				setBLXThumb(0x0220EDB6, (u32)dsiSaveClose);
+				doubleNopT(0x0220EDC2); // dsiSaveFlush
+				setBLXThumb(0x0220EDC8, (u32)dsiSaveClose);
+				setBLXThumb(0x0220EDEE, (u32)dsiSaveOpen);
+				setBLXThumb(0x0220EE08, (u32)dsiSaveRead);
+				setBLXThumb(0x0220EE18, (u32)dsiSaveClose);
+				setBLXThumb(0x0220EE24, (u32)dsiSaveClose);
+			}
+		} */
+	// }
 
 	// SteamWorld Tower Defense (USA)
 	// SteamWorld Tower Defense (Europe, Australia)
