@@ -397,6 +397,7 @@ static inline void rebootConsole(void) {
 		writePowerManagement(0x10, readCommand); // Reboot console
 		return;
 	}
+	i2cWriteRegister(0x4A, 0x12, i2cReadRegister(0x4A, 0x12) | 1); // 3DS - is_twl - Do not trust gbatek for this register - Thanks TuxSH!
 	i2cWriteRegister(0x4A, 0x70, 0x01);
 	i2cWriteRegister(0x4A, 0x11, 0x01);
 }
@@ -717,6 +718,7 @@ void myIrqHandlerVBlank(void) {
 
 	/* if (isSdEjected()) {
 		tonccpy((u32*)0x02000300, sr_data_error, 0x020);
+		i2cWriteRegister(0x4A, 0x12, i2cReadRegister(0x4A, 0x12) | 1); // 3DS - is_twl - Do not trust gbatek for this register - Thanks TuxSH!
 		i2cWriteRegister(0x4A, 0x70, 0x01);
 		i2cWriteRegister(0x4A, 0x11, 0x01);		// Reboot into error screen if SD card is removed
 	} */
