@@ -2504,9 +2504,9 @@ int arm7_main(void) {
 			loadNitroFileInfoIntoRAM(ndsHeader, romFile);
 		}
 
-		if (gameOnFlashcard && isDSiWare) {
+		if (isDSiWare && dsiWareAsSlot1) {
 			aFile* sharedFontFile = (aFile*)FONT_FILE_LOCATION_TWLSDK;
-			getFileFromCluster(sharedFontFile, sharedFontCluster, true);
+			getFileFromCluster(sharedFontFile, sharedFontCluster, bootstrapOnFlashcard);
 			buildFatTableCacheCompressed(sharedFontFile);
 		}
 

@@ -922,18 +922,6 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		}
 	}
 
-	if (!conf->gameOnFlashcard) {
-		if (access("sd:/_nds/nds-bootstrap/TWLFontTable.dat", F_OK) == 0) {
-			conf->valueBits3 |= BIT(3);
-		}
-		if (access("sd:/_nds/nds-bootstrap/CHNFontTable.dat", F_OK) == 0) {
-			conf->valueBits3 |= BIT(4);
-		}
-		if (access("sd:/_nds/nds-bootstrap/KORFontTable.dat", F_OK) == 0) {
-			conf->valueBits3 |= BIT(5);
-		}
-	}
-
 	if (conf->sdFound) {
 		mkdir("sd:/_nds", 0777);
 		mkdir("sd:/_nds/nds-bootstrap", 0777);
@@ -1075,19 +1063,19 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 		conf->valueBits2 |= BIT(0);
 	}
 
-	if (conf->gameOnFlashcard && (conf->isDSiWare || (accessControl & BIT(4)))) {
+	if (conf->isDSiWare || (accessControl & BIT(4))) {
 		if (romTid[3] == 'K') {
-			sharedFontPath = "fat:/_nds/nds-bootstrap/KORFontTable.dat";
+			sharedFontPath = (conf->bootstrapOnFlashcard || conf->b4dsMode) ? "fat:/_nds/nds-bootstrap/KORFontTable.dat" : "sd:/_nds/nds-bootstrap/KORFontTable.dat";
 			if (access(sharedFontPath.c_str(), F_OK) == 0) {
 				conf->valueBits3 |= BIT(5);
 			}
 		} else if (romTid[3] == 'C') {
-			sharedFontPath = "fat:/_nds/nds-bootstrap/CHNFontTable.dat";
+			sharedFontPath = (conf->bootstrapOnFlashcard || conf->b4dsMode) ? "fat:/_nds/nds-bootstrap/CHNFontTable.dat" : "sd:/_nds/nds-bootstrap/CHNFontTable.dat";
 			if (access(sharedFontPath.c_str(), F_OK) == 0) {
 				conf->valueBits3 |= BIT(4);
 			}
 		} else {
-			sharedFontPath = "fat:/_nds/nds-bootstrap/TWLFontTable.dat";
+			sharedFontPath = (conf->bootstrapOnFlashcard || conf->b4dsMode) ? "fat:/_nds/nds-bootstrap/TWLFontTable.dat" : "sd:/_nds/nds-bootstrap/TWLFontTable.dat";
 			if (access(sharedFontPath.c_str(), F_OK) == 0) {
 				conf->valueBits3 |= BIT(3);
 			}
