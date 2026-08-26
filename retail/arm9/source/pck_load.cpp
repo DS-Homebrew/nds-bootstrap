@@ -158,6 +158,10 @@ bool loadPreLoadSettings(configuration* conf, const char* pckPath, const char* r
 }
 
 void loadAsyncLoadSettings(configuration* conf, const char* romTid, const u16 headerCRC) {
+	if (conf->asyncCardRead == 0) {
+		return;
+	}
+
 	// Set data to be asynchrously loadable
 	FILE *file = NULL;
 	u32 sizeOverride = 0;

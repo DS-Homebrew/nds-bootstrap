@@ -14,6 +14,7 @@
 // #define gameOnFlashcard BIT(0)
 #define ROMinRAM BIT(3)
 #define asyncCardRead BIT(14)
+#define asyncCardReadMinimal BIT(25)
 
 extern u32 valueBits;
 extern u16 scfgRomBak;
@@ -704,7 +705,9 @@ void patchMpuChange(const tNDSHeader* ndsHeader, const module_params_t* modulePa
 }
 
 bool patchStrmPageLoad(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams) {
-	if (moduleParams->sdk_version < 0x3000000) {
+	if ((!asyncCardRead && !asyncCardReadMinimal)
+	 || (valueBits & ROMinRAM)
+	 || moduleParams->sdk_version < 0x3000000) {
 		return false;
 	}
 	u32* offset = findStrmPageLoadOffset(ndsHeader, moduleParams);
@@ -868,7 +871,9 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 		patchCardReadDma(ce9, ndsHeader, moduleParams, usesThumb);
 	} else {
 		const bool cardSetDmaPatched = patchCardSetDma(ce9, ndsHeader, moduleParams, usesThumb);
-		if (!cardSetDmaPatched || (!(valueBits & ROMinRAM) && patchStrmPageLoad(ce9, ndsHeader, moduleParams) && !sleepFound)) {
+		const bool strmPageLoadPatched = patchStrmPageLoad(ce9, ndsHeader, moduleParams);
+		
+		if (!cardSetDmaPatched || (!strmPageLoadPatched && !sleepFound)) {
 			patchCardReadDma(ce9, ndsHeader, moduleParams, usesThumb);
 		}
 		if (!patchCardEndReadDma(ce9, ndsHeader, moduleParams, usesThumb)) {

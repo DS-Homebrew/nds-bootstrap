@@ -32,5 +32,6 @@ extern u8 valueBits4;
 #define dsiWramMirrored (valueBits3 & BIT(6))
 #define altReadMethod (valueBits3 & BIT(7))
 #define dsiWareAsSlot1 (valueBits4 & BIT(0))
+#define asyncCardReadMinimal (valueBits4 & BIT(1))
 
 #endif

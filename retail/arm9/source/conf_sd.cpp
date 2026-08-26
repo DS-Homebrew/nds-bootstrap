@@ -465,28 +465,20 @@ static void load_conf(configuration* conf, const char* fn) {
 	fclose(romFile);
 
 	// Async card read
-	switch(strtol(config_file.fetch("NDS-BOOTSTRAP", "ASYNC_CARD_READ", "-1").c_str(), NULL, 0)) {
-		case 0:
-			conf->asyncCardRead = false;
-			break;
-		case 1:
-			conf->asyncCardRead = true;
-			break;
-		default:
+	conf->asyncCardRead = strtol(config_file.fetch("NDS-BOOTSTRAP", "ASYNC_CARD_READ", "-1").c_str(), NULL, 0);
+	if (conf->asyncCardRead == -1) {
 #ifdef DEFAULT_ASYNC_CARD_READ
 			// TODO: If the list gets large enough, switch to bsearch().
 			for (unsigned int i = 0; i < sizeof(asyncReadExcludeList)/sizeof(asyncReadExcludeList[0]); i++) {
 				if (memcmp(gameTid, asyncReadExcludeList[i], 3) == 0) {
 					// Found match
-					conf->asyncCardRead = false;
+					conf->asyncCardRead = 0;
 					break;
 				}
 			}
-			conf->asyncCardRead = true;
-#else
-			conf->asyncCardRead = false;
+			conf->asyncCardRead = 1;
 #endif
-			break;
+			conf->asyncCardRead = 1;
 	}
 
 	// Card read DMA
@@ -890,8 +882,11 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	if (conf->logging) {
 		conf->valueBits |= BIT(7);
 	}
-	if (conf->asyncCardRead) {
-		conf->valueBits2 |= BIT(1);
+	if (conf->asyncCardRead == 1) {
+		conf->valueBits4 |= BIT(1); // asyncCardReadMinimal
+	}
+	if (conf->asyncCardRead == 2) {
+		conf->valueBits2 |= BIT(1); // asyncCardRead
 	}
 	if (conf->cardReadDMA) {
 		conf->valueBits2 |= BIT(2);
@@ -902,9 +897,6 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	if (conf->boostCpu) {
 		conf->valueBits3 |= BIT(0);
 	}
-	/*if (conf->cardReadDMA == 2) {
-		conf->valueBits3 |= BIT(1);
-	}*/
 	if (conf->sleepMode) {
 		conf->valueBits3 |= BIT(2);
 	}

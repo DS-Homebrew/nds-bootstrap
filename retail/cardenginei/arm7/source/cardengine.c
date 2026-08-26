@@ -70,7 +70,7 @@
 #define slowSoftReset BIT(11)
 #define wideCheatUsed BIT(12)
 #define isSdk5 BIT(13)
-#define hasVramWifiBinary BIT(14)
+// #define hasVramWifiBinary BIT(14)
 #define twlTouch BIT(15)
 #define cloneboot BIT(16)
 #define sleepMode BIT(17)
