@@ -8,4 +8,4 @@ System Flaw (All Regions) (DSi Exclusive) (DSY)
 Yu-Gi-Oh!: Nightmare Troubadour (All Regions) (AYG)
 
 Above games will have data (such as streamable music and/or video) set to be asynchrously loadable (only applies to DSi/3DS SD Card users).
-Games that are not listed will apply automatically if they have streamable music (contained in .sdat files) and if the function which reads them is found within the ROM.
+Games that are not listed will apply automatically if they have streamable music (contained in .sdat files) and/or video and if the function(s) which reads them is found within the ROM.
