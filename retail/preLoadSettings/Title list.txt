@@ -96,13 +96,13 @@ MegaMan Battle Network 5: Double Team DS (Europe) (A5TP) (DSi/3DS)
 Rockman EXE 5 DS: Twin Leaders (Japan) (A5TJ) (DSi)
 MegaMan Star Force: Dragon (USA) (A6CE) (DSi)
 MegaMan Star Force: Dragon (Europe) (A6CP) (DSi/3DS)
-Ryuusei no Rockman: Green Dragon (Japan) (A6CJ) (3DS)
+Ryuusei no Rockman: Green Dragon (Japan) (A6CJ) (DSi/3DS)
 MegaMan Star Force: Leo (USA) (A6BE) (DSi)
 MegaMan Star Force: Leo (Europe) (A6BP) (DSi/3DS)
-Ryuusei no Rockman: Fire Leo (Japan) (A6BJ) (3DS)
+Ryuusei no Rockman: Fire Leo (Japan) (A6BJ) (DSi/3DS)
 MegaMan Star Force: Pegasus (USA) (A6AE) (DSi)
 MegaMan Star Force: Pegasus (Europe) (A6AP) (DSi/3DS)
-Ryuusei no Rockman: Ice Pegasus (Japan) (A6AJ) (3DS)
+Ryuusei no Rockman: Ice Pegasus (Japan) (A6AJ) (DSi/3DS)
 MegaMan Zero Collection (USA) (B6ZE) (3DS)
 MegaMan Zero Collection (Europe) (B6ZP) (3DS)
 Rockman Zero Collection (Japan) (B6ZJ) (3DS)
@@ -322,9 +322,10 @@ MegaMan Battle Network 5: Double Team DS (USA) (DSi for all regions, 3DS for Eur
 - Sound data and intro graphics
 
 MegaMan Star Force (DSi/3DS):
-- DSi, USA/Europe: Everything except sound data and WiFi settings menu assets
-- 3DS, Europe: Everything except unused language-specific data
-- 3DS, Japan: Everything except streamed music
+- DSi, USA/Europe: Everything except first 7 field.bin files, sound data, and WiFi settings menu assets
+- DSi, Japan: Everything except first 7 field.bin files, capcomlogo.bin, sound data, and WiFi settings menu assets
+- 3DS, Europe: Overlays + Everything except unused language-specific data
+- 3DS, Japan: Overlays + Everything except streamed music
 
 MegaMan Zero Collection (3DS):
 - Everything except sound data for games 1-4, wallpapers, and warning_z#.bin files
