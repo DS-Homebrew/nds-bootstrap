@@ -103,6 +103,12 @@ Ryuusei no Rockman: Fire Leo (Japan) (A6BJ) (DSi/3DS)
 MegaMan Star Force: Pegasus (USA) (A6AE) (DSi)
 MegaMan Star Force: Pegasus (Europe) (A6AP) (DSi/3DS)
 Ryuusei no Rockman: Ice Pegasus (Japan) (A6AJ) (DSi/3DS)
+MegaMan Star Force 2: Zerker x Ninja (USA) (YRVE) (DSi)
+MegaMan Star Force 2: Zerker x Ninja (Europe) (YRVP) (DSi/3DS)
+Ryuusei no Rockman 2: Berserk x Shinobi (Japan) (YRVJ) (DSi)
+MegaMan Star Force 2: Zerker x Saurian (USA) (YRWE) (DSi)
+MegaMan Star Force 2: Zerker x Saurian (Europe) (YRWP) (DSi/3DS)
+Ryuusei no Rockman 2: Berserk x Dinosaur (Japan) (YRWJ) (DSi)
 MegaMan Zero Collection (USA) (B6ZE) (3DS)
 MegaMan Zero Collection (Europe) (B6ZP) (3DS)
 Rockman Zero Collection (Japan) (B6ZJ) (3DS)
@@ -326,6 +332,10 @@ MegaMan Star Force (DSi/3DS):
 - DSi, Japan: Everything except first 7 field.bin files, capcomlogo.bin, sound data, and WiFi settings menu assets
 - 3DS, Europe: Overlays + Everything except unused language-specific data
 - 3DS, Japan: Overlays + Everything except streamed music
+
+MegaMan Star Force 2 (DSi/3DS):
+- DSi: fieldobj.bin, models.bin, and motion.bin
+- 3DS, Europe: Overlays + Everything except unused language-specific data
 
 MegaMan Zero Collection (3DS):
 - Everything except sound data for games 1-4, wallpapers, and warning_z#.bin files

@@ -24,7 +24,9 @@ static const char* getSdatPath(const char* romTid) {
 		return "rom:/data/sound/gs_sound_data.sdat";
 	} else if (strncmp(romTid, "A6C", 3) == 0 // MegaMan Star Force
 			|| strncmp(romTid, "A6B", 3) == 0 
-			|| strncmp(romTid, "A6A", 3) == 0) {
+			|| strncmp(romTid, "A6A", 3) == 0
+			|| strncmp(romTid, "YRV", 3) == 0 // MegaMan Star Force 2
+			|| strncmp(romTid, "YRW", 3) == 0) {
 		return "rom:/datbin/com/sound_data.sdat";
 	} else if (strncmp(romTid, "ASC", 3) == 0) { // Sonic Rush
 		return "rom:/snd/sys/sound_data.sdat";
@@ -42,6 +44,9 @@ static u32 getSdatStrmId(const char* romTid) {
 			|| strncmp(romTid, "A6B", 3) == 0 
 			|| strncmp(romTid, "A6A", 3) == 0) {
 		return 0x77;
+	} else if (strncmp(romTid, "YRV", 3) == 0 // MegaMan Star Force 2
+			|| strncmp(romTid, "YRW", 3) == 0) {
+		return 0xA6;
 	} else if (strncmp(romTid, "ASC", 3) == 0) { // Sonic Rush
 		return 0x69;
 	} else if (strcmp(romTid, "AOSJ") == 0) { // Osu! Tatakae! Ouendan
