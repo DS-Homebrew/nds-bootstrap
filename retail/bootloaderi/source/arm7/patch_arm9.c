@@ -960,6 +960,7 @@ static bool getSleep(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 	const char* romTid = getRomTid(ndsHeader);
 
 	if (ce9DldiBinary || ROMinRAM
+	 || strncmp(romTid, "VC6", 3) == 0 // CSI: Unsolved!
 	 || strncmp(romTid, "YDQ", 3) == 0 // Dragon Quest XI: Sentinels of the Starry Skies
 	) {
 		return false;
