@@ -146,6 +146,9 @@ int sharedFontRegion = 0;
 u8 wifiLedState = 0;
 bool i2cBricked = false;
 
+u32 aesKey1[4] = {0};
+u32 aesKey2[4] = {0};
+
 //bool gbaRomFound = false;
 
 u32 ce7Location = CARDENGINEI_ARM7_LOCATION;
@@ -309,6 +312,13 @@ static void resetMemory_ARM7(void) {
 	REG_IPC_SYNC = 0;
 	REG_IPC_FIFO_CR = IPC_FIFO_ENABLE | IPC_FIFO_SEND_CLEAR;
 	REG_IPC_FIFO_CR = 0;
+
+	if (swiCRC16(0xFFFF, (u32*)0x03FFC5C0, 0x10) == 0xF44E) {
+		tonccpy(aesKey1, (u32*)0x03FFC5C0, 0x10); // Back up AES KEY1
+	}
+	if (swiCRC16(0xFFFF, (u32*)0x03FFC5B0, 0x10) == 0x17BE) {
+		tonccpy(aesKey2, (u32*)0x03FFC5B0, 0x10); // Back up AES KEY2
+	}
 
 	//if(dsiMode) {
 		memset_addrs_arm7(0x03000000, 0x03800000 + 0x10000);
@@ -1345,6 +1355,13 @@ static void setMemoryAddress(const tNDSHeader* ndsHeader, const module_params_t*
 			const char *pubPath = "sdmc:/DSIWARE.PUB";
 			tonccpy((u8*)deviceListAddr+0x1B8, pubPath, 18);
 			tonccpy((u8*)deviceListAddr+0x3C0, ndsPath, 18);*/
+		}
+
+		if (aesKey1[0] != 0) {
+			tonccpy((u32*)0x04004470, aesKey1, 0x10); // Set AES KEY1
+		}
+		if (aesKey2[0] != 0) {
+			tonccpy((u32*)0x040044A0, aesKey2, 0x10); // Set AES KEY2
 		}
 
 		if (isDSiWare) {
