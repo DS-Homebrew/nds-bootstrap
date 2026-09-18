@@ -19,11 +19,12 @@ jobs:
     name: Build with Docker using devkitARM
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           submodules: recursive
       - name: Install tools
         run: |
+          sudo sed -i "/bullseye-security/d" /etc/apt/sources.list
           sudo apt-get update
           sudo apt-get install p7zip-full gcc -y
 
@@ -59,7 +60,7 @@ jobs:
           7z a nds-bootstrap.zip .
           cp nds-bootstrap.zip ~/artifacts
       - name: Publish build to GH Actions
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           path: ~/artifacts/*
           name: build
@@ -72,7 +73,7 @@ jobs:
     needs: build
     steps:
       - name: Download artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: build
           path: build
