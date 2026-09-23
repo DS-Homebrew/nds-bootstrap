@@ -1575,6 +1575,7 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			const bool altReadMethod =
 			(
 				(strncmp(romTid, "KAD", 3) == 0 && conf->saveOnFlashcard) // Art Style: BASE 10 (Fixes soft-lock when saving)
+			 || strncmp(romTid, "AMC", 3) == 0 // Mario Kart DS (Fixes slowdown in some areas)
 			 || strncmp(romTid, "ADA", 3) == 0 // Pokémon Gen 4 (Fixes random freezing)
 			 || strncmp(romTid, "APA", 3) == 0
 			 || strncmp(romTid, "CPU", 3) == 0
