@@ -30,10 +30,8 @@
 	.global argSize
 	.global dsiSD
 	.global dsiMode
-	.global consoleModel
-	.global srParamsFileCluster
-	.global srTid1
-	.global srTid2
+	.global sdEngineLocation
+	.global bootInjectLocation
 @---------------------------------------------------------------------------------
 	.align	4
 	.arm
@@ -59,13 +57,9 @@ dsiSD:
 	.word	0
 dsiMode:
 	.word	0
-consoleModel:
+sdEngineLocation:
 	.word	0x00000000
-srParamsFileCluster:
-	.word	0x00000000
-srTid1:
-	.word	0x00000000
-srTid2:
+bootInjectLocation:
 	.word	0x00000000
 
 startUp:

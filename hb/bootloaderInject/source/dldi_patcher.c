@@ -91,13 +91,24 @@ static addr_t quickFind (const data_t* data, const data_t* search, size_t dataLe
 	return -1;
 }
 
-data_t dldiMagicString[] = "\xED\xA5\x8D\xBF cHISHM";	// Normal DLDI file
-static const data_t dldiMagicLoaderString[] = "\xEE\xA5\x8D\xBF Chishm";	// Different to a normal DLDI file
+static u32 heapEndSubtractSignature = 0xE2488903; // sub r8, r8, #0xC000
+static u32 heapEndSignature = 0x023FF000;
+static u32 heapEndSignatureMoonshell[2] = {0x023F0000, 0x803E00};
+
+//static const data_t dldiMagicString[] = "\xED\xA5\x8D\xBF Chishm";	// Normal DLDI file
+/*static const*/ data_t dldiMagicLoaderString[] = "\xEE\xA5\x8D\xBF Chishm";	// Different to a normal DLDI file
+// static const data_t ramdFriendlyNameString[] = "RAM disk\x00\x00\xA0\xE1\x00\x00\xA0\xE1";
+// static const data_t ramdIoTypeString[] = "RAMD";
 
 #define DEVICE_TYPE_DLDI 0x49444C44
 
 extern const u32 _io_dldi;
-extern u32 word_command;
+
+/*bool checkArm7DLDI (data_t *binData, u32 binSize) {
+	// Find the DLDI reserved space in the file
+	addr_t patchOffset = quickFind (binData, dldiMagicString, binSize, sizeof(dldiMagicLoaderString));
+	return (patchOffset > 0x02380000);
+}*/
 
 bool dldiPatchBinary (data_t *binData, u32 binSize) {
 
@@ -112,24 +123,13 @@ bool dldiPatchBinary (data_t *binData, u32 binSize) {
 
 	size_t dldiFileSize = 0;
 
-	// Demangle DLDI string
-	dldiMagicString[5] -= 0x20;
-	dldiMagicString[6] += 0x20;
-	dldiMagicString[7] += 0x20;
-	dldiMagicString[8] += 0x20;
-	dldiMagicString[9] += 0x20;
-	dldiMagicString[10] += 0x20;
-	dldiMagicString[11] += 0x20;
-
 	// Find the DLDI reserved space in the file
-	patchOffset = quickFind (binData, dldiMagicString, binSize, sizeof(dldiMagicLoaderString));
+	patchOffset = quickFind (binData, dldiMagicLoaderString, binSize, sizeof(dldiMagicLoaderString));
 
 	if (patchOffset < 0) {
 		// does not have a DLDI section
 		return false;
 	}
-
-	toncset32((u32*)&word_command, 0, 6);
 
 	data_t *pDH = (data_t*)(((u32*)(&_io_dldi)) - 24);
 	data_t *pAH = &(binData[patchOffset]);
@@ -160,8 +160,7 @@ bool dldiPatchBinary (data_t *binData, u32 binSize) {
 	// Remember how much space is actually reserved
 	pDH[DO_allocatedSpace] = pAH[DO_allocatedSpace];
 	// Copy the DLDI patch into the application
-        for (size_t i = 0; i < dldiFileSize; i++)
-        	pAH[i] = pDH[i];
+	tonccpy (pAH, pDH, dldiFileSize);
 
 	// Fix the section pointers in the header
 	writeAddr (pAH, DO_text_start, readAddr (pAH, DO_text_start) + relocationOffset);
@@ -179,9 +178,57 @@ bool dldiPatchBinary (data_t *binData, u32 binSize) {
 	writeAddr (pAH, DO_writeSectors, readAddr (pAH, DO_writeSectors) + relocationOffset);
 	writeAddr (pAH, DO_clearStatus, readAddr (pAH, DO_clearStatus) + relocationOffset);
 	writeAddr (pAH, DO_shutdown, readAddr (pAH, DO_shutdown) + relocationOffset);
+	/* if (ramDisk) {
+		tonccpy (pAH+DO_friendlyName, ramdFriendlyNameString, sizeof (ramdFriendlyNameString));
+		tonccpy (pAH+DO_ioType, ramdIoTypeString, 4);
+	} else { */
+		bool dsiWramAccess = false;
+		*(vu32*)0x03700000 = 0x4253444E; // 'NDSB'
+		if (*(vu32*)0x03700000 == 0x4253444E) {
+			*(vu32*)0x03708000 = 0x77777777;
+			dsiWramAccess = (*(vu32*)0x03700000 == 0x4253444E);
+		}
+		*(vu32*)0x03700000 = 0;
+		*(vu32*)0x03708000 = 0;
+
+		if (!dsiWramAccess) {
+			bool found = false;
+			u32* arm9bin = (u32*)binData;
+			u32* heapEndOffset = NULL;
+			int i = 0;
+			for (i = 0; i < 0x200/sizeof(u32); i++) {
+				if (arm9bin[i] == heapEndSubtractSignature) {
+					found = true;
+					break;
+				}
+			}
+			if (!found) {
+				for (i = 0; i < 0x400/sizeof(u32); i++) {
+					if (arm9bin[i] == heapEndSignature) {
+						found = true;
+						break;
+					}
+				}
+			}
+			if (!found) {
+				for (i = 1; i < binSize/sizeof(u32); i++) {
+					if ((arm9bin[i-1] >= ((u32)binData)+binSize) && (arm9bin[i-1] < heapEndSignatureMoonshell[0]) && (arm9bin[i] == heapEndSignatureMoonshell[0]) && (arm9bin[i+1] == heapEndSignatureMoonshell[1])) {
+						found = true;
+						break;
+					}
+				}
+			}
+			if (found) {
+				heapEndOffset = arm9bin + i;
+
+				*heapEndOffset = (*heapEndOffset == heapEndSubtractSignature) ? 0xE2488907 : 0x023E3F00; // Shrink heap to make room for LRU SD cache
+				toncset32 (pAH+DO_code, 1, 1); // Heap shrunk flag
+			}
+		}
+	// }
 
 	// Put the correct DLDI magic string back into the DLDI header
-	tonccpy (pAH, dldiMagicString, sizeof (dldiMagicString));
+	tonccpy (pAH, dldiMagicLoaderString, sizeof (dldiMagicLoaderString));
 
 	if (pDH[DO_fixSections] & FIX_ALL) {
 		// Search through and fix pointers within the data section of the file

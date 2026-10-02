@@ -286,7 +286,7 @@ char load_bin[0x10000];
 char loadInject_bin[0x8000];
 char imgTemplateBuffer[0xEA00];
 
-int runNds (const void* loader, u32 loaderSize, u32 cluster, u32 ramDiskCluster, u32 ramDiskSize, u32 srParamsCluster, u32 patchOffsetCacheCluster, u32 cfgCluster, u32 cfgSize, int romToRamDisk, bool romIsCompressed, bool initDisc, bool dldiPatchNds, int argc, const char** argv, int language, int dsiMode, bool boostVram, int consoleModel, bool soundFreq, u32 srTid1, u32 srTid2)
+int runNds (const void* loader, u32 loaderSize, u32 cluster, u32 ramDiskCluster, u32 ramDiskSize, u32 srParamsCluster, u32 patchOffsetCacheCluster, u32 cfgCluster, u32 cfgSize, int romToRamDisk, bool romIsCompressed, bool initDisc, bool dldiPatchNds, int argc, const char** argv, int language, int dsiMode, bool boostVram, int consoleModel, bool soundFreq)
 {
 	char* argStart;
 	u16* argData;
@@ -353,11 +353,6 @@ int runNds (const void* loader, u32 loaderSize, u32 cluster, u32 ramDiskCluster,
 	}
 	*argData = argTempVal;
 
-	writeAddr ((data_t*) LCDC_BANK_C, 0x24, consoleModel);
-	writeAddr ((data_t*) LCDC_BANK_C, 0x28, srParamsCluster);
-	writeAddr ((data_t*) LCDC_BANK_C, 0x2C, srTid1);
-	writeAddr ((data_t*) LCDC_BANK_C, 0x30, srTid2);
-
 	writeAddr ((data_t*) LCDC_BANK_D, ARG_START_OFFSET, (addr_t)argStart - (addr_t)LCDC_BANK_D);
 	writeAddr ((data_t*) LCDC_BANK_D, ARG_SIZE_OFFSET, argSize);
 	writeAddr ((data_t*) LCDC_BANK_D, LANGUAGE_OFFSET, language);
@@ -410,7 +405,7 @@ int runNds (const void* loader, u32 loaderSize, u32 cluster, u32 ramDiskCluster,
 	return true;
 }
 
-int runNdsFile (const char* filename, const char* ramDiskFilename, const char* cfgFilename, u32 ramDiskSize, const char* srParamsFilename, const char* patchOffsetCacheFilename, u32 cfgSize, int romToRamDisk, bool romIsCompressed, int argc, const char** argv, int language, int dsiMode, bool boostVram, int consoleModel, bool soundFreq, u32 srTid1, u32 srTid2) {
+int runNdsFile (const char* filename, const char* ramDiskFilename, const char* cfgFilename, u32 ramDiskSize, const char* srParamsFilename, const char* patchOffsetCacheFilename, u32 cfgSize, int romToRamDisk, bool romIsCompressed, int argc, const char** argv, int language, int dsiMode, bool boostVram, int consoleModel, bool soundFreq) {
 	struct stat st;
 	struct stat stRam;
 	struct stat stCfg;
@@ -511,7 +506,7 @@ int runNdsFile (const char* filename, const char* ramDiskFilename, const char* c
 	
 	//installBootStub(havedsiSD);
 
-	return runNds (load_bin, 0x10000, st.st_ino, clusterRam, ramDiskSize, clusterSr, clusterPatchCache, clusterCfg, cfgSize, romToRamDisk, romIsCompressed, true, true, argc, argv, language, dsiMode, boostVram, consoleModel, soundFreq, srTid1, srTid2);
+	return runNds (load_bin, 0x10000, st.st_ino, clusterRam, ramDiskSize, clusterSr, clusterPatchCache, clusterCfg, cfgSize, romToRamDisk, romIsCompressed, true, true, argc, argv, language, dsiMode, boostVram, consoleModel, soundFreq);
 }
 
 /*

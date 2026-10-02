@@ -57,12 +57,11 @@ Helpful information:
 #include "boot.h"
 #include "my_fat.h"
 #include "dldi_patcher.h"
+#include "patch.h"
 #include "hook.h"
 #include "common.h"
 #include "locations.h"
 #include "i2c.h"
-
-#include "sr_data_srloader.h"   // For rebooting the game
 
 void arm7clearRAM();
 
@@ -75,51 +74,15 @@ extern unsigned long wantToPatchDLDI;
 extern unsigned long argStart;
 extern unsigned long argSize;
 extern unsigned long dsiSD;
-extern u32 consoleModel;
-extern u32 srParamsFileCluster;
-extern u32 srTid1;
-extern u32 srTid2;
-
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-static const char *unlaunchAutoLoadID = "AutoLoadInfo";
-static const char *resetgameSrldrPath = "sdmc:/_nds/TWiLightMenu/main.srldr";
-
-static void unlaunchSetFilename(void) {
-	tonccpy((u8*)0x02000800, unlaunchAutoLoadID, 12);
-	*(u16*)(0x0200080C) = 0x3F0;		// Unlaunch Length for CRC16 (fixed, must be 3F0h)
-	*(u16*)(0x0200080E) = 0;			// Unlaunch CRC16 (empty)
-	*(u32*)(0x02000810) = (BIT(0) | BIT(1));		// Load the title at 2000838h
-													// Use colors 2000814h
-	*(u16*)(0x02000814) = 0x7FFF;		// Unlaunch Upper screen BG color (0..7FFFh)
-	*(u16*)(0x02000816) = 0x7FFF;		// Unlaunch Lower screen BG color (0..7FFFh)
-	toncset((u8*)0x02000818, 0, 0x20+0x208+0x1C0);		// Unlaunch Reserved (zero)
-	int i2 = 0;
-	for (int i = 0; i < strlen(resetgameSrldrPath); i++) {
-		*(u8*)(0x02000838+i2) = resetgameSrldrPath[i];		// Unlaunch Device:/Path/Filename.ext (16bit Unicode,end by 0000h)
-		i2 += 2;
-	}
-	*(u16*)(0x0200080E) = swiCRC16(0xFFFF, (void*)0x02000810, 0x3F0);		// Unlaunch CRC16
-}
-
-static void readSrBackendId(void) {
-	// Use SR backend ID
-	*(u32*)(0x02000300) = 0x434E4C54;	// 'CNLT'
-	*(u16*)(0x02000304) = 0x1801;
-	*(u32*)(0x02000308) = 0;
-	*(u32*)(0x0200030C) = 0;
-	*(u32*)(0x02000310) = srTid1;
-	*(u32*)(0x02000314) = srTid2;
-	*(u32*)(0x02000318) = /* srTid2 == 0x00030000 ? 0x13 : */ 0x17;
-	*(u32*)(0x0200031C) = 0;
-	*(u16*)(0x02000306) = swiCRC16(0xFFFF, (void*)0x02000308, 0x18);
-}
+extern u32 sdEngineLocation;
+extern u32 bootInjectLocation;
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // Firmware stuff
 
 #define FW_READ        0x03
 
-/*static void boot_readFirmware (uint32 address, uint8 * buffer, uint32 size) {
+static void boot_readFirmware (uint32 address, uint8 * buffer, uint32 size) {
   uint32 index;
 
   // Read command
@@ -150,7 +113,7 @@ static inline void copyLoop (u32* dest, const u32* src, u32 size) {
 	do {
 		*dest++ = *src++;
 	} while (size -= 4);
-}*/
+}
 
 //#define resetCpu() __asm volatile("\tswi 0x000000\n");
 
@@ -159,7 +122,7 @@ passArgs_ARM7
 Copies the command line arguments to the end of the ARM9 binary,
 then sets a flag in memory for the loaded NDS to use
 --------------------------------------------------------------------------*/
-/*static void passArgs_ARM7 (void) {
+static void passArgs_ARM7 (void) {
 	u32 ARM9_DST = *((u32*)(NDS_HEADER + 0x028));
 	u32 ARM9_LEN = *((u32*)(NDS_HEADER + 0x02C));
 	u32* argSrc;
@@ -176,7 +139,7 @@ then sets a flag in memory for the loaded NDS to use
 	__system_argv->argvMagic = ARGV_MAGIC;
 	__system_argv->commandLine = (char*)argDst;
 	__system_argv->length = argSize;
-}*/
+}
 
 
 
@@ -188,7 +151,7 @@ Written by Darkain.
 Modified by Chishm:
  * Added STMIA clear mem loop
 --------------------------------------------------------------------------*/
-/*static void resetMemory_ARM7 (void)
+static void resetMemory_ARM7 (void)
 {
 	int i, reg;
 	u8 settings1, settings2;
@@ -254,7 +217,7 @@ void loadBinary_ARM7 (aFile file)
 	u32 ndsHeader[0x170>>2];
 
 	// read NDS header
-	fileRead ((char*)ndsHeader, file, 0, 0x170, 0);
+	fileRead ((char*)ndsHeader, file, 0, 0x170);
 	// read ARM9 info from NDS header
 	u32 ARM9_SRC = ndsHeader[0x020>>2];
 	char* ARM9_DST = (char*)ndsHeader[0x028>>2];
@@ -265,15 +228,15 @@ void loadBinary_ARM7 (aFile file)
 	u32 ARM7_LEN = ndsHeader[0x03C>>2];
 
 	// Load binaries into memory
-	fileRead(ARM9_DST, file, ARM9_SRC, ARM9_LEN, 0);
-	fileRead(ARM7_DST, file, ARM7_SRC, ARM7_LEN, 0);
+	fileRead(ARM9_DST, file, ARM9_SRC, ARM9_LEN);
+	fileRead(ARM7_DST, file, ARM7_SRC, ARM7_LEN);
 
 	// first copy the header to its proper location, excluding
 	// the ARM9 start address, so as not to start it
 	TEMP_ARM9_START_ADDRESS = ndsHeader[0x024>>2];		// Store for later
 	ndsHeader[0x024>>2] = 0;
 	dmaCopyWords(3, (void*)ndsHeader, (void*)NDS_HEADER, 0x170);
-}*/
+}
 
 /*-------------------------------------------------------------------------
 startBinary_ARM7
@@ -282,7 +245,7 @@ Written by Darkain.
 Modified by Chishm:
  * Removed MultiNDS specific stuff
 --------------------------------------------------------------------------*/
-/*void startBinary_ARM7 (void) {
+void startBinary_ARM7 (void) {
 	REG_IME=0;
 	while(REG_VCOUNT!=191);
 	while(REG_VCOUNT==191);
@@ -292,12 +255,12 @@ Modified by Chishm:
 	// Start ARM7
 	VoidFn arm7code = *(VoidFn*)(0x2FFFE34);
 	arm7code();
-}*/
+}
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // Main function
 
-/*static u32 quickFind (const unsigned char* data, const unsigned char* search, u32 dataLen, u32 searchLen) {
+/* static u32 quickFind (const unsigned char* data, const unsigned char* search, u32 dataLen, u32 searchLen) {
 	const int* dataChunk = (const int*) data;
 	int searchChunk = ((const int*)search)[0];
 	u32 i;
@@ -315,15 +278,15 @@ Modified by Chishm:
 	}
 
 	return -1;
-}
-
-extern unsigned char dldiMagicString[12];
+} */
 
 void mpu_reset();
-void mpu_reset_end();*/
+void mpu_reset_end();
+
+extern unsigned char dldiMagicLoaderString[0xC];
 
 int main (void) {
-	//nocashMessage("bootloader");
+	nocashMessage("bootloader");
 
 	extern void *_io_dldi;
 	//const char* bootName = "BOOT.NDS";
@@ -354,30 +317,6 @@ int main (void) {
 		return -1;
 	}
 
-	u8 tidCrc[6] = {0};
-	fileRead((char*)tidCrc, file, 0xC, 4);
-	fileRead((char*)tidCrc+4, file, 0x15E, 2);
-
-	aFile srParamsFile = getFileFromCluster(srParamsFileCluster);
-	fileWrite((char*)&storedFileCluster, srParamsFile, 0, 4);	// Write file cluster to soft-reset params file for nds-bootstrap to read after rebooting the console
-	fileWrite((char*)tidCrc, srParamsFile, 4, 6);
-
-	if (srTid1 != 0) {
-		readSrBackendId();
-	} else if (consoleModel >= 2) {
-		tonccpy((u32*)0x02000300, sr_data_srloader, 0x20);
-	} else {
-		unlaunchSetFilename();
-	}
-	toncset((u32*)0x02000000, 0, 0x400);
-	*(u32*)0x02000000 = BIT(3);
-	*(u32*)0x02000004 = 0x54455352; // 'RSET'
-
-	i2cWriteRegister(0x4A, 0x70, 0x01);
-	i2cWriteRegister(0x4A, 0x11, 0x01);			// Reboot game
-
-	while (1);
-/*
 	// ARM9 clears its memory part 2
 	// copy ARM9 function to RAM, and make the ARM9 jump to it
 	copyLoop((void*)TEMP_MEM, (void*)resetMemory2_ARM9, resetMemory2_ARM9_size);
@@ -403,6 +342,8 @@ int main (void) {
 	// Load the NDS file
 	loadBinary_ARM7(file);
 
+	dldiMagicLoaderString[0]--;
+
 	// Patch with DLDI if desired
 	//if (wantToPatchDLDI) {
 		//nocashMessage("wantToPatchDLDI");
@@ -412,12 +353,9 @@ int main (void) {
 	// Pass command line arguments to loaded program
 	passArgs_ARM7();
 
-	// Find the DLDI reserved space in the file
-	u32 patchOffset = quickFind ((u8*)((u32*)NDS_HEADER)[0x0A], dldiMagicString, ((u32*)NDS_HEADER)[0x0B], sizeof(dldiMagicString));
-	u32* wordCommandAddr = (u32 *) (((u32)((u32*)NDS_HEADER)[0x0A])+patchOffset+0x80);
-
 	tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER;
-	hookNds(ndsHeader, (u32*)SDENGINE_LOCATION, wordCommandAddr);
+	patchBinary(ndsHeader);
+	hookNds(ndsHeader, (u32*)sdEngineLocation);
 
 	u32 bootloaderSignature[4] = {0xEA000002, 0x00000000, 0x00000001, 0x00000000};
 
@@ -429,14 +367,14 @@ int main (void) {
 		 && addr[i+2] == bootloaderSignature[2]
 		 && addr[i+3] == bootloaderSignature[3])
 		{
-			toncset(addr + i, 0, 0x9C98);
-			tonccpy(addr + i, (char*)BOOT_INJECT_LOCATION, 0x8000);
+			// toncset(addr + i, 0, 0x9C98);
+			tonccpy(addr + i, (char*)bootInjectLocation, 0x8000);
 			break;
 		}
 	}
-*/
+
 	//if (!dsiMode && ramDiskSize == 0) {
-	/*	u32* a9exe = (u32*)ndsHeader->arm9executeAddress;
+		u32* a9exe = (u32*)ndsHeader->arm9executeAddress;
 		bool recentLibnds =
 			  (a9exe[0] == 0xE3A00301
 			&& a9exe[1] == 0xE5800208
@@ -446,7 +384,7 @@ int main (void) {
 			copyLoop((void*)TEMP_MEM, (void*)lockSCFG_ARM9, lockSCFG_ARM9_size);
 			(*(vu32*)0x02FFFE24) = (u32)TEMP_MEM;	// Make ARM9 jump to the function
 			while ((*(vu32*)0x02FFFE24) == (u32)TEMP_MEM);
-		}*/
+		}
 	//}
 
 	/*sdmmc_init(true);
@@ -454,7 +392,7 @@ int main (void) {
 	*(vu16*)(SDMMC_BASE + REG_DATACTL) &= 0xFFDDu;
 	*(vu16*)(SDMMC_BASE + REG_SDBLKLEN32) = 0;*/
 
-	/*startBinary_ARM7();
+	startBinary_ARM7();
 
-	return 0;*/
+	return 0;
 }

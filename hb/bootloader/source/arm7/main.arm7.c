@@ -766,9 +766,13 @@ int arm7_main (void) {
 			patchOffsetCache.bootloaderChecked = true;
 		}
 		if (patchOffsetCache.bootloaderOffset) {
+			const u32 bootInjectLocation = (sdEngineLocation == SDENGINE_LOCATION_ALT) ? BOOT_INJECT_LOCATION_ALT : BOOT_INJECT_LOCATION;
+			*(u32*)0x06000024 = sdEngineLocation;
+			*(u32*)0x06000028 = bootInjectLocation;
+
 			//toncset(patchOffsetCache.bootloaderOffset, 0, 0x9C98);
 			tonccpy(patchOffsetCache.bootloaderOffset, (char*)0x06000000, 0x8000);
-			//tonccpy((char*)BOOT_INJECT_LOCATION, (char*)0x06000000, 0x8000);
+			tonccpy((char*)bootInjectLocation, (char*)0x06000000, 0x8000);
 		}
 	} else if (!isGbaR2 && (!recentLibnds || !dsiModeConfirmed)) {
 		hookNds(ndsHeader, NULL); // Only patch SWI functions

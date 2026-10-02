@@ -92,7 +92,7 @@ static std::string ramDrivePath;
 
 static u32 ramDiskSize = 0;
 
-void runFile(string filename, string fullPath, string homebrewArg, string ramDiskFilename, u32 ramDiskSize, string srParamsFilePath, const char* patchOffsetCacheFilePath, u32 cfgSize, int language, int dsiMode, bool boostVram, int consoleModel, bool soundFreq, u32 srTid1, u32 srTid2) {
+void runFile(string filename, string fullPath, string homebrewArg, string ramDiskFilename, u32 ramDiskSize, string srParamsFilePath, const char* patchOffsetCacheFilePath, u32 cfgSize, int language, int dsiMode, bool boostVram, int consoleModel, bool soundFreq) {
 	char filePath[256];
 
 	getcwd (filePath, 256);
@@ -174,7 +174,7 @@ void runFile(string filename, string fullPath, string homebrewArg, string ramDis
 		free(argarray.at(0));
 		argarray.at(0) = filePath;
 		dbg_printf("Running %s with %d parameters\n", argarray[0], argarray.size());
-		int err = runNdsFile (fullPath.c_str(), ramDiskFilename.c_str(), "fat:/snemul.cfg", ramDiskSize, srParamsFilePath.c_str(), patchOffsetCacheFilePath, cfgSize, romFileType, romIsCompressed, argarray.size(), (const char **)&argarray[0], language, dsiMode, boostVram, consoleModel, soundFreq, srTid1, srTid2);
+		int err = runNdsFile (fullPath.c_str(), ramDiskFilename.c_str(), "fat:/snemul.cfg", ramDiskSize, srParamsFilePath.c_str(), patchOffsetCacheFilePath, cfgSize, romFileType, romIsCompressed, argarray.size(), (const char **)&argarray[0], language, dsiMode, boostVram, consoleModel, soundFreq);
 		dbg_printf("Start failed. Error %i\n", err);
 
 	}
@@ -423,12 +423,7 @@ int main( int argc, char **argv) {
 			fclose(patchOffsetCacheFile);
 		}
 
-		u32 srBackendId[2] = {0};
-		FILE* srBackendBin = fopen("fat:/_nds/nds-bootstrap/srBackendId.bin", "rb");
-		fread(&srBackendId, sizeof(u32), 2, srBackendBin);
-		fclose(srBackendBin);
-
-		runFile(filename, ndsPath, homebrewArg, ramDrivePath, ramDiskSize, srParamsFilePath, patchOffsetCacheFilePath, cfgSize, language, dsiMode, boostVram, consoleModel, soundFreq, srBackendId[0], srBackendId[1]);
+		runFile(filename, ndsPath, homebrewArg, ramDrivePath, ramDiskSize, srParamsFilePath, patchOffsetCacheFilePath, cfgSize, language, dsiMode, boostVram, consoleModel, soundFreq);
 	} else {
 		consoleDemoInit();
 		iprintf("SD init failed!\n");
