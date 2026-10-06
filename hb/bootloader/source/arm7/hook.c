@@ -280,6 +280,10 @@ const u16* generateA7InstrThumb(int arg1, int arg2) {
 	return instrs;
 }
 
+void setBL(int arg1, int arg2) {
+	*(u32*)arg1 = (((u32)(arg2 - arg1 - 8) >> 2) & 0xFFFFFF) | 0xEB000000;
+}
+
 /*static u32* hookSwi05(u32* addr, size_t size, u32* hookAccel, u32* sdEngineLocation) {
 	u32* end = addr + size/sizeof(u32);
 
@@ -345,6 +349,15 @@ int hookNds (const tNDSHeader* ndsHeader, u32* sdEngineLocation) {
 	}
 
 	if (!sdEngineLocation) {
+		return ERR_NONE;
+	}
+
+	if (ndsHeader->arm9binarySize == 0x48950 && ndsHeader->arm7binarySize == 0x74C4) {			// SNEmulDS06-WIP2
+		tonccpy (sdEngineLocation, (sdEngineLocation == (u32*)SDENGINE_LOCATION_ALT) ? sdengine_alt_bin : sdengine_bin, (sdEngineLocation == (u32*)SDENGINE_LOCATION_ALT) ? sdengine_alt_bin_size : sdengine_bin_size);
+
+		setBL(0x037F93F0, sdEngineLocation[1]);
+
+		nocashMessage("ERR_NONE");
 		return ERR_NONE;
 	}
 

@@ -221,11 +221,22 @@ static u32* hookAccelIPCHomebrew2007ARM(u32* addr, size_t size) {
 	return addr;
 }
 
+void setBL(int arg1, int arg2) {
+	*(u32*)arg1 = (((u32)(arg2 - arg1 - 8) >> 2) & 0xFFFFFF) | 0xEB000000;
+}
+
 int hookNds (const tNDSHeader* ndsHeader, u32* sdEngineLocation) {
 	u32* hookLocation = NULL;
 	u32* hookAccel = NULL;
 
 	nocashMessage("hookNds");
+
+	if (ndsHeader->arm9binarySize == 0x48950 && ndsHeader->arm7binarySize == 0x74C4) {			// SNEmulDS06-WIP2
+		setBL(0x037F93F0, sdEngineLocation[1]);
+
+		nocashMessage("ERR_NONE");
+		return ERR_NONE;
+	}
 
 	hookLocation = hookInterruptHandlerHomebrew((u32*)ndsHeader->arm7destination, ndsHeader->arm7binarySize);
 

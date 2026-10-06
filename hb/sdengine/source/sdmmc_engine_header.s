@@ -11,13 +11,13 @@
 .global irqHandler
 .global irqSig
 .global sdmmc_engine_size
-@.global commandAddr
+@.global hooks
 
 
 sdmmc_engine_size:
 	.word	sdmmc_engine_end - sdmmc_engine_start
-@commandAddr:
-	.word	0x00000000
+@hooks:
+	.word	snemulDSHook
 irqHandler:
 	.word	0x00000000
 irqSig:
@@ -54,37 +54,38 @@ code_handler_start:
 	ldr	r3, =myIrqHandler
 	bl	_blx_r3_stub		@ jump to myIrqHandler
 
-  @ exit after return
-	b	exit
+	@ exit after return
+	pop   	{r0-r12}
+	pop  	{lr}
+	bx  lr
 
 @---------------------------------------------------------------------------------
 _blx_r3_stub:
 @---------------------------------------------------------------------------------
 	bx	r3
+.pool
 
 @---------------------------------------------------------------------------------
 @ my patch
 @---------------------------------------------------------------------------------
-myPatch:
-	ldr    r1, =sdmmc_engine_start        @ my custom handler
-	str    r2, [r1, #-8]		@ irqhandler
-	str    pc, [r1, #-4]		@ irqsig
-	b      got_handler
-.pool
-got_handler:
-	str	r0, [r12, #4]	@ IF Clear
+@myPatch:
+@	ldr    r1, =sdmmc_engine_start        @ my custom handler
+@	str    r2, [r1, #-8]		@ irqhandler
+@	str    pc, [r1, #-4]		@ irqsig
+@	b      got_handler
+@.pool
+@got_handler:
+@	str	r0, [r12, #4]	@ IF Clear
 @---------------------------------------------------------------------------------
 
-@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+snemulDSHook:
+	push {r3-r7, lr}
+	bl runSdMmcEngineCheck
+	pop {r3-r7, lr}
+	ldrb r6, [r3]
+	bx lr
 
-exit:
-	pop   	{r0-r12}
-	pop  	{lr}
-	bx  lr
-
-.pool
-
-	.thumb
+@	.thumb
 vBlankIntrWaitHook:
 @	ldr	r3, =runSdMmcEngineCheck2
 @	bl	_blx_r3_stub_thumb
@@ -98,7 +99,7 @@ vBlankIntrWaitHook:
 
 @.pool
 
-	.arm
+@	.arm
 .global tryLockMutex
 .type	tryLockMutex STT_FUNC
 @ r0 : mutex adr
