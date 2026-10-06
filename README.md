@@ -1,5 +1,5 @@
 <p align="center">
-   <img src="https://github.com/DS-Homebrew/nds-bootstrap/blob/master/logo.png"><br>
+   <img src="https://github.com/DS-Homebrew/nds-bootstrap/blob/master/images/Anniversaries/10th/Logo.png"><br>
    <a href="https://gbatemp.net/threads/nds-bootstrap-loader-run-commercial-nds-backups-from-an-sd-card.454323/">
       <img src="https://img.shields.io/badge/GBAtemp-Thread-blue.svg" alt="GBAtemp thread">
    </a>

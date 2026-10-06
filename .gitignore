@@ -136,5 +136,6 @@ retail/arm9/include/version.h
 *.lz77
 !retail/nitrofiles/fonts/*.lz77
 !retail/nitrofiles/bootloader_images.lz77
+!retail/nitrofiles_bak/bootloader_images.lz77
 !retail/nitrofiles/dstwo.dldi
 !retail/nitrofiles/esrbOnlineNotice.lz77
