@@ -405,7 +405,7 @@ bool startup(void) {
 	isArm7 = sdmmc_read16(REG_SDSTATUS0)!=0;
 	ramDisk = (ioType[0] == 'R' && ioType[1] == 'A' && ioType[2] == 'M' && ioType[3] == 'D');
 	if (REG_SCFG_EXT == 0x8307F100) {
-		dsiMode = *(vu32*)((u32)NDS_HEADER_16MB+0xC) == *(vu32*)((u32)NDS_HEADER_16MB+0x0A00000C);
+		dsiMode = *(vu32*)((u32)NDS_HEADER+0xC) == *(vu32*)((u32)NDS_HEADER+0x0A00000C);
 		//dsiMode = *(u16*)((u32)RAM_DISK_LOCATION_DSIMODE+0x1FE) == 0xAA55;
 	}
 

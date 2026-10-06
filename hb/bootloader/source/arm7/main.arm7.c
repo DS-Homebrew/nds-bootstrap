@@ -90,7 +90,7 @@ extern u32 srParamsFileCluster;
 //extern u32 ndsPreloaded;
 extern u32 soundFreq;
 
-u8 TWL_HEAD[0x1000] = {0};
+#define TWL_HEAD 0x02FFE000
 static u32 sdEngineLocation = 0;
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -146,7 +146,7 @@ static void passArgs_ARM7 (void) {
 
 	if (!argStart || !argSize) return;
 
-	if ( ARM9_DST == 0 && ARM9_LEN == 0) {
+	if (ARM9_DST == 0 && ARM9_LEN == 0) {
 		ARM9_DST = *((u32*)(NDS_HEADER + 0x038));
 		ARM9_LEN = *((u32*)(NDS_HEADER + 0x03C));
 	}
@@ -785,13 +785,14 @@ int arm7_main (void) {
 	}
 
 	if (dsiModeConfirmed) {
-		tonccpy ((char*)NDS_HEADER_16MB, (char*)NDS_HEADER, 0x1000);	// Copy user data and header to last MB of main memory
-		tonccpy ((char*)0x02FFE000, (char*)TWL_HEAD, 0x1000);
 		if (recentLibnds) {
 			REG_MBK6=0x00403000;
 		} else {
-			tonccpy ((char*)NDS_HEADER_8MB, (char*)NDS_HEADER, 0x1000);
+			tonccpy ((char*)NDS_HEADER_8MB, (char*)NDS_HEADER, 0x1000);	// Copy user data and header to 8th MB of main memory
+			tonccpy ((char*)NDS_HEADER_4MB, (char*)NDS_HEADER, 0x1000);	// Copy user data and header to 4th MB of main memory
 		}
+	} else {
+		tonccpy ((char*)NDS_HEADER_4MB, (char*)NDS_HEADER, 0x1000);	// Copy user data and header to 4th MB of main memory
 	}
 
 	arm9_boostVram = boostVram;
