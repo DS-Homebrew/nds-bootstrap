@@ -354,6 +354,9 @@ int main (void) {
 	// Load the NDS file
 	loadBinary_ARM7(file);
 
+	// Pass command line arguments to loaded program
+	passArgs_ARM7();
+
 	tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER;
 
 	{
@@ -372,9 +375,6 @@ int main (void) {
 		//nocashMessage("wantToPatchDLDI");
 		dldiPatchBinary ((u8*)((u32*)NDS_HEADER)[0x0A], ((u32*)NDS_HEADER)[0x0B]);
 	//}
-
-	// Pass command line arguments to loaded program
-	passArgs_ARM7();
 
 	patchBinary(ndsHeader);
 

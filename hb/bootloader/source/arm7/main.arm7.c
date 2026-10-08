@@ -126,13 +126,6 @@ static void boot_readFirmware (uint32 address, uint8 * buffer, uint32 size) {
 }
 
 
-static inline void copyLoop (u32* dest, const u32* src, u32 size) {
-	size = (size +3) & ~3;
-	do {
-		*dest++ = *src++;
-	} while (size -= 4);
-}
-
 //#define resetCpu() __asm volatile("\tswi 0x000000\n");
 
 /*-------------------------------------------------------------------------
@@ -158,7 +151,7 @@ static void passArgs_ARM7 (void) {
 	argDst = (u32*)((ARM9_DST + ARM9_LEN + 3) & ~3);		// Word aligned
 
 	if (ARM9_LEN > 0x380000) {
-		argDst = (u32*)0x02FFA000;
+		argDst = (u32*)(dsiModeConfirmed ? 0x02FFA000 : 0x023FA000);
 	} else
 	if (dsiModeConfirmed && (*(u8*)(NDS_HEADER + 0x012) & BIT(1)))
 	{
@@ -172,7 +165,7 @@ static void passArgs_ARM7 (void) {
 		}
 	}
 
-	copyLoop(argDst, argSrc, argSize);
+	tonccpy(argDst, argSrc, argSize);
 
 	__system_argv->argvMagic = ARGV_MAGIC;
 	__system_argv->commandLine = (char*)argDst;
@@ -628,6 +621,67 @@ int arm7_main (void) {
 		return -1;
 	}
 
+	bool isGbaR2 = false;
+	{
+		u32 bannerOffset = 0;
+		char gbaR2Text[0x20];
+		fileRead((char*)&bannerOffset, romFile, 0x48, 4);
+		fileRead(gbaR2Text, romFile, bannerOffset+0x240, 0x20);
+		isGbaR2 = (gbaR2Text[0] == 'G' && gbaR2Text[2] == 'B' && gbaR2Text[4] == 'A' && gbaR2Text[6] == 'R' && gbaR2Text[8] == 'u' && gbaR2Text[0xA] == 'n' && gbaR2Text[0xC] == 'n' && gbaR2Text[0xE] == 'e' && gbaR2Text[0x10] == 'r');
+	}
+
+	if ((REG_SNDEXTCNT & SNDEXTCNT_ENABLE) && ((!soundFreq && (REG_SNDEXTCNT & BIT(13))) || (soundFreq && !(REG_SNDEXTCNT & BIT(13))))) {
+		if (soundFreq) {
+			*(vu16*)0x04004700 |= BIT(13);	// Set 48khz sound/mic frequency
+		} else {
+			*(vu16*)0x04004700 &= ~BIT(13);	// Set 32khz sound/mic frequency
+		}
+	}
+
+	if ((ndsHeader->arm9romOffset==0x4000 && dsiFlags==0) || !dsiMode) {
+		NDSTouchscreenMode();
+		*(vu16*)0x4000500 = 0x807F;
+	}
+
+	if (dsiMode) {
+		dsiModeConfirmed = true;
+	} else {
+		NTR_BIOS();
+		REG_GPIO_WIFI |= BIT(8);	// Old NDS-Wifi mode
+
+		i2cWriteRegister(0x4A, 0x12, 0x00);		// Press power-button for auto-reset
+		i2cWriteRegister(0x4A, 0x70, 0x01);		// Bootflag = Warmboot/SkipHealthSafety
+	}
+
+	// Load the NDS file
+	nocashMessage("Load the NDS file");
+	loadBinary_ARM7(romFile);
+
+	// Pass command line arguments to loaded program
+	passArgs_ARM7();
+
+	{
+		const u32* a9exe = (u32*)ndsHeader->arm9executeAddress;
+		recentLibnds =
+			  (a9exe[0] == 0xE3A00301
+			&& a9exe[1] == 0xE5800208
+			&& a9exe[2] == 0xE3A00013
+			&& a9exe[3] == 0xE129F000);
+	}
+
+	if (dsiModeConfirmed) {
+		if (recentLibnds) {
+			REG_MBK6=0x00403000;
+		} else {
+			tonccpy ((char*)NDS_SHARED_8MB, (char*)NDS_SHARED, 0x1000);	// Copy user data and header to 8th MB of main memory
+			tonccpy ((char*)NDS_SHARED_4MB, (char*)NDS_SHARED, 0x1000);	// Copy user data and header to 4th MB of main memory
+			ndsHeader = (tNDSHeader*)NDS_HEADER_4MB;
+		}
+	} else {
+		tonccpy ((char*)NDS_SHARED_4MB, (char*)NDS_SHARED, 0x1000);	// Copy user data and header to 4th MB of main memory
+		ndsHeader = (tNDSHeader*)NDS_HEADER_4MB;
+	}
+
 	if (ramDiskFound) {
 		void* ramDiskLocation = (void*)(dsiMode ? RAM_DISK_LOCATION_DSIMODE : RAM_DISK_LOCATION);
 		arm9_ramDiskCluster = ramDiskCluster;
@@ -667,51 +721,6 @@ int arm7_main (void) {
 		}
 	}
 
-	bool isGbaR2 = false;
-	{
-		u32 bannerOffset = 0;
-		char gbaR2Text[0x20];
-		fileRead((char*)&bannerOffset, romFile, 0x48, 4);
-		fileRead(gbaR2Text, romFile, bannerOffset+0x240, 0x20);
-		isGbaR2 = (gbaR2Text[0] == 'G' && gbaR2Text[2] == 'B' && gbaR2Text[4] == 'A' && gbaR2Text[6] == 'R' && gbaR2Text[8] == 'u' && gbaR2Text[0xA] == 'n' && gbaR2Text[0xC] == 'n' && gbaR2Text[0xE] == 'e' && gbaR2Text[0x10] == 'r');
-	}
-
-	if ((REG_SNDEXTCNT & SNDEXTCNT_ENABLE) && ((!soundFreq && (REG_SNDEXTCNT & BIT(13))) || (soundFreq && !(REG_SNDEXTCNT & BIT(13))))) {
-		if (soundFreq) {
-			*(vu16*)0x04004700 |= BIT(13);	// Set 48khz sound/mic frequency
-		} else {
-			*(vu16*)0x04004700 &= ~BIT(13);	// Set 32khz sound/mic frequency
-		}
-	}
-
-	if ((ndsHeader->arm9romOffset==0x4000 && dsiFlags==0) || !dsiMode) {
-		NDSTouchscreenMode();
-		*(vu16*)0x4000500 = 0x807F;
-	}
-
-	if (dsiMode) {
-		dsiModeConfirmed = true;
-	} else {
-		NTR_BIOS();
-		REG_GPIO_WIFI |= BIT(8);	// Old NDS-Wifi mode
-
-		i2cWriteRegister(0x4A, 0x12, 0x00);		// Press power-button for auto-reset
-		i2cWriteRegister(0x4A, 0x70, 0x01);		// Bootflag = Warmboot/SkipHealthSafety
-	}
-
-	// Load the NDS file
-	nocashMessage("Load the NDS file");
-	loadBinary_ARM7(romFile);
-
-	{
-		const u32* a9exe = (u32*)ndsHeader->arm9executeAddress;
-		recentLibnds =
-			  (a9exe[0] == 0xE3A00301
-			&& a9exe[1] == 0xE5800208
-			&& a9exe[2] == 0xE3A00013
-			&& a9exe[3] == 0xE129F000);
-	}
-
 	// File containing cached patch offsets
 	aFile patchOffsetCacheFile = getFileFromCluster(patchOffsetCacheFileCluster);
 	fileRead((char*)&patchOffsetCache, patchOffsetCacheFile, 0, 4);
@@ -733,9 +742,6 @@ int arm7_main (void) {
 		dldiPatchBinary ((u8*)((u32*)NDS_HEADER)[0x0A], ((u32*)NDS_HEADER)[0x0B], (ramDiskCluster != 0));
 		patchOffsetCache.dldiChecked = true;
 	}
-
-	// Pass command line arguments to loaded program
-	passArgs_ARM7();
 
 	patchBinary(ndsHeader);
 
@@ -786,17 +792,6 @@ int arm7_main (void) {
 	patchOffsetCacheFileNewCrc = swiCRC16(0xFFFF, &patchOffsetCache, sizeof(patchOffsetCacheContents));
 	if (patchOffsetCacheFileNewCrc != patchOffsetCacheFilePrevCrc) {
 		fileWrite((char*)&patchOffsetCache, patchOffsetCacheFile, 0, sizeof(patchOffsetCacheContents));
-	}
-
-	if (dsiModeConfirmed) {
-		if (recentLibnds) {
-			REG_MBK6=0x00403000;
-		} else {
-			tonccpy ((char*)NDS_SHARED_8MB, (char*)NDS_SHARED, 0x1000);	// Copy user data and header to 8th MB of main memory
-			tonccpy ((char*)NDS_SHARED_4MB, (char*)NDS_SHARED, 0x1000);	// Copy user data and header to 4th MB of main memory
-		}
-	} else {
-		tonccpy ((char*)NDS_SHARED_4MB, (char*)NDS_SHARED, 0x1000);	// Copy user data and header to 4th MB of main memory
 	}
 
 	arm9_boostVram = boostVram;
