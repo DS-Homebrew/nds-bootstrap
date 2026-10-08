@@ -648,9 +648,6 @@ int arm7_main (void) {
 	} else {
 		NTR_BIOS();
 		REG_GPIO_WIFI |= BIT(8);	// Old NDS-Wifi mode
-
-		i2cWriteRegister(0x4A, 0x12, 0x00);		// Press power-button for auto-reset
-		i2cWriteRegister(0x4A, 0x70, 0x01);		// Bootflag = Warmboot/SkipHealthSafety
 	}
 
 	// Load the NDS file
@@ -673,11 +670,17 @@ int arm7_main (void) {
 		if (recentLibnds) {
 			REG_MBK6=0x00403000;
 		} else {
+			i2cWriteRegister(0x4A, 0x12, 0x00);		// Press power-button for auto-reset
+			i2cWriteRegister(0x4A, 0x70, 0x01);		// Bootflag = Warmboot/SkipHealthSafety
+
 			tonccpy ((char*)NDS_SHARED_8MB, (char*)NDS_SHARED, 0x1000);	// Copy user data and header to 8th MB of main memory
 			tonccpy ((char*)NDS_SHARED_4MB, (char*)NDS_SHARED, 0x1000);	// Copy user data and header to 4th MB of main memory
 			ndsHeader = (tNDSHeader*)NDS_HEADER_4MB;
 		}
 	} else {
+		i2cWriteRegister(0x4A, 0x12, 0x00);		// Press power-button for auto-reset
+		i2cWriteRegister(0x4A, 0x70, 0x01);		// Bootflag = Warmboot/SkipHealthSafety
+
 		tonccpy ((char*)NDS_SHARED_4MB, (char*)NDS_SHARED, 0x1000);	// Copy user data and header to 4th MB of main memory
 		ndsHeader = (tNDSHeader*)NDS_HEADER_4MB;
 	}
