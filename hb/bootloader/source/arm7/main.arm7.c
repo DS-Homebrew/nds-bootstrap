@@ -788,11 +788,11 @@ int arm7_main (void) {
 		if (recentLibnds) {
 			REG_MBK6=0x00403000;
 		} else {
-			tonccpy ((char*)NDS_HEADER_8MB, (char*)NDS_HEADER, 0x1000);	// Copy user data and header to 8th MB of main memory
-			tonccpy ((char*)NDS_HEADER_4MB, (char*)NDS_HEADER, 0x1000);	// Copy user data and header to 4th MB of main memory
+			tonccpy ((char*)NDS_SHARED_8MB, (char*)NDS_SHARED, 0x1000);	// Copy user data and header to 8th MB of main memory
+			tonccpy ((char*)NDS_SHARED_4MB, (char*)NDS_SHARED, 0x1000);	// Copy user data and header to 4th MB of main memory
 		}
 	} else {
-		tonccpy ((char*)NDS_HEADER_4MB, (char*)NDS_HEADER, 0x1000);	// Copy user data and header to 4th MB of main memory
+		tonccpy ((char*)NDS_SHARED_4MB, (char*)NDS_SHARED, 0x1000);	// Copy user data and header to 4th MB of main memory
 	}
 
 	arm9_boostVram = boostVram;
