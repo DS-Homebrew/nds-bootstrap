@@ -54,7 +54,6 @@ static const u32 homebrewEndSig2007[2] = {
 };*/
 
 // interruptDispatcher.s jump_intr:
-// interruptDispatcher.s jump_intr:
 static const u32 homebrewSig[5] = {
 	0xE5921000, // ldr    r1, [r2]        @ user IRQ handler address
 	0xE3510000, // cmp    r1, #0
@@ -351,7 +350,7 @@ const u16* generateA7InstrThumb(int arg1, int arg2) {
 	u32 offset = (u32)(arg2 - arg1 - 4);
 	//dbg_printf("generateA7InstrThumb offset\n");
 	//dbg_hexa(offset);
-	
+
 	// 1st instruction contains the upper 11 bit of the offset
 	instrs[0] = ((offset >> 12) & 0x7FF) | 0xF000;
 

@@ -779,6 +779,7 @@ int arm7_main (void) {
 			const u32 bootInjectLocation = (sdEngineLocation == SDENGINE_LOCATION_ALT) ? BOOT_INJECT_LOCATION_ALT : BOOT_INJECT_LOCATION;
 			*(u32*)0x06000024 = sdEngineLocation;
 			*(u32*)0x06000028 = bootInjectLocation;
+			*(u16*)0x0600002C = REG_SCFG_ROM;
 
 			//toncset(patchOffsetCache.bootloaderOffset, 0, 0x9C98);
 			tonccpy(patchOffsetCache.bootloaderOffset, (char*)0x06000000, 0x8000);

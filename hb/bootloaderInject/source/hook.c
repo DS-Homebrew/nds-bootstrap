@@ -22,7 +22,10 @@
 
 #include "hook.h"
 #include "common.h"
+#include "tonccpy.h"
 #include "locations.h"
+
+extern u16 scfgRomBak;
 
 extern bool recentLibnds;
 
@@ -51,7 +54,6 @@ static const u32 homebrewEndSig2007[2] = {
 	0x04000180		// DCD 0x4000180
 };*/
 
-// interruptDispatcher.s jump_intr:
 // interruptDispatcher.s jump_intr:
 static const u32 homebrewSig[5] = {
 	0xE5921000, // ldr    r1, [r2]        @ user IRQ handler address
@@ -117,6 +119,25 @@ static const u16 swi00Sig[2] = {
 	0x4770
 };
 
+static const u32 swi0FSigARM = 0xEF0F0000; // SWI 0X0F (Used during MPU init)
+
+static const u16 swi0FSig[2] = {
+	0xDF0F   , // SWI 0X0F
+	0x4770
+};
+
+static const u16 swi12Sig[2] = {
+	0xDF12   , // SWI 0X12
+	0x4770
+};
+
+static const u32 swi00Patched[3] = {
+	0x68004801   , // LDR     R0, =0x02FFFE34
+	               // LDR     R0, [R0]
+	0x00004700   , // BX      R0
+	0x02FFFE34
+};
+
 //static const int MAX_HANDLER_SIZE = 50;
 
 static u32* hookInterruptHandlerHomebrew (u32* addr, size_t size) {
@@ -138,13 +159,6 @@ static u32* hookInterruptHandlerHomebrew (u32* addr, size_t size) {
 	if (addr >= end) {
 		return NULL;
 	}
-
-	// patch the program
-	addr[0] = homebrewSigPatched[0];
-	addr[1] = homebrewSigPatched[1];
-	addr[2] = homebrewSigPatched[2];
-	addr[3] = homebrewSigPatched[3];
-	addr[4] = homebrewSigPatched[4];
 
 	// The first entry in the table is for the Vblank handler, which is what we want
 	return addr;
@@ -169,10 +183,6 @@ static u32* hookAccelIPCHomebrew2007(u32* addr, size_t size) {
 		return NULL;
 	}
 
-	// patch the program
-	addr[0] = homebrewAccelSigPatched[0];
-	addr[1] = homebrewAccelSigPatched[1];
-
 	return addr;
 }
 
@@ -194,10 +204,6 @@ static u32* hookAccelIPCHomebrew2010(u32* addr, size_t size) {
 	if (addr >= end) {
 		return NULL;
 	}
-
-	// patch the program
-	addr[0] = homebrewAccelSigPatched[0];
-	addr[1] = homebrewAccelSigPatched[1];
 
 	return addr;
 }
@@ -282,6 +288,79 @@ static void patchIntrWaits(const tNDSHeader* ndsHeader, u32* sdEngineLocation, c
 	}
 }
 
+static u32* hookSwi0FARM(u32* addr, size_t size) {
+	u32* end = addr + size/sizeof(u32);
+
+	while (addr < end) {
+		if (*addr == swi0FSigARM)
+		{
+			break;
+		}
+		addr++;
+	}
+
+	if (addr >= end) {
+		return NULL;
+	}
+
+	return addr;
+}
+
+static u16* hookSwi0F(u16* addr, size_t size) {
+	u16* end = addr + size/sizeof(u16);
+
+	while (addr < end) {
+		if (addr[0] == swi0FSig[0] &&
+			(addr[1] == swi0FSig[1]))
+		{
+			break;
+		}
+		addr++;
+	}
+
+	if (addr >= end) {
+		return NULL;
+	}
+
+	return addr;
+}
+
+static u16* hookSwi12(u16* addr, size_t size) {
+	u16* end = addr + size/sizeof(u16);
+
+	while (addr < end) {
+		if (addr[0] == swi12Sig[0] &&
+			(addr[1] == swi12Sig[1]))
+		{
+			break;
+		}
+		addr++;
+	}
+
+	if (addr >= end) {
+		return NULL;
+	}
+
+	return addr;
+}
+
+const u16* generateA7InstrThumb(int arg1, int arg2) {
+	static u16 instrs[2];
+
+	// 23 bit offset
+	u32 offset = (u32)(arg2 - arg1 - 4);
+	//dbg_printf("generateA7InstrThumb offset\n");
+	//dbg_hexa(offset);
+
+	// 1st instruction contains the upper 11 bit of the offset
+	instrs[0] = ((offset >> 12) & 0x7FF) | 0xF000;
+
+	// 2nd instruction contains the lower 11 bit of the offset
+	instrs[1] = ((offset >> 1) & 0x7FF) | 0xF800;
+
+	return instrs;
+}
+
 void setBL(int arg1, int arg2) {
 	*(u32*)arg1 = (((u32)(arg2 - arg1 - 8) >> 2) & 0xFFFFFF) | 0xEB000000;
 }
@@ -289,19 +368,40 @@ void setBL(int arg1, int arg2) {
 int hookNds (const tNDSHeader* ndsHeader, u32* sdEngineLocation) {
 	u32* hookLocation = NULL;
 	u32* hookAccel = NULL;
+	u16* swi00Location = NULL;
 	u32 swi04Location = 0;
 	u32 swi05Location = 0;
 
 	nocashMessage("hookNds");
 
+	if (!(scfgRomBak & BIT(1))) {
+		u32* a9Swi0FARMLocation = hookSwi0FARM(ndsHeader->arm9destination, ndsHeader->arm9binarySize);
+		if (a9Swi0FARMLocation) {
+			// Stub out SWI 0x0F for DSi BIOS
+			*a9Swi0FARMLocation = 0xE3A00000; // mov r0, #0
+		}
+
+		u16* a9Swi0FLocation = hookSwi0F((u16*)ndsHeader->arm9destination, ndsHeader->arm9binarySize);
+		if (a9Swi0FLocation) {
+			// Stub out SWI 0x0F for DSi BIOS
+			*a9Swi0FLocation = 0x2000; // movs r0, #0
+		}
+
+		u16* a9Swi12Location = hookSwi12((u16*)ndsHeader->arm9destination, ndsHeader->arm9binarySize);
+		if (a9Swi12Location) {
+			// Patch SWI 0x12 to 0x02 for DSi BIOS
+			*a9Swi12Location = 0xDF02;
+		}
+	}
+
 	if (!recentLibnds) {
-		u16* swi00Location = hookSwi00((u16*)ndsHeader->arm7destination, ndsHeader->arm7binarySize);
+		swi00Location = hookSwi00((u16*)ndsHeader->arm7destination, ndsHeader->arm7binarySize);
 		if (swi00Location) {
 			for (u8 i = 0; i < 0x80/2; i++) {
-				/* if (swi00Location[i] == 0xDF12 && !(REG_SCFG_ROM & BIT(9))) {
+				if (swi00Location[i] == 0xDF12 && !(scfgRomBak & BIT(9))) {
 					// Patch SWI 0x12 to 0x02 for DSi BIOS
 					swi00Location[i] = 0xDF02;
-				} */
+				}
 				if (swi00Location[i] == 0xDF04) {
 					swi04Location = (u32)swi00Location;
 					swi04Location += i*2;
@@ -357,6 +457,16 @@ int hookNds (const tNDSHeader* ndsHeader, u32* sdEngineLocation) {
 		hookAccel[1] = ((u32)sdEngineLocation)+homebrewAccelSigPatched[1];
 
 		nocashMessage("ACCEL_IPC_OK");
+	}
+
+	if (swi00Location && hookAccel) {
+		u32 dstAddr = (u32)hookAccel+8;
+		const u16* branchCode = generateA7InstrThumb((int)swi00Location, dstAddr);
+
+		// patch the program
+		tonccpy(swi00Location, branchCode, 4);
+
+		tonccpy((u32*)dstAddr, swi00Patched, 0xC);
 	}
 
 	patchIntrWaits(ndsHeader, sdEngineLocation, swi04Location, swi05Location);

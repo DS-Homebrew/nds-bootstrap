@@ -32,6 +32,7 @@
 	.global dsiMode
 	.global sdEngineLocation
 	.global bootInjectLocation
+	.global scfgRomBak
 @---------------------------------------------------------------------------------
 	.align	4
 	.arm
@@ -60,6 +61,8 @@ dsiMode:
 sdEngineLocation:
 	.word	0x00000000
 bootInjectLocation:
+	.word	0x00000000
+scfgRomBak:
 	.word	0x00000000
 
 startUp:
