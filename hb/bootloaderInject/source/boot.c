@@ -342,11 +342,21 @@ int main (void) {
 	copyLoop((void*)TEMP_MEM, (void*)startBinary_ARM9, startBinary_ARM9_size);
 	(*(vu32*)0x02FFFE24) = (u32)TEMP_MEM;	// Make ARM9 jump to the function
 
+	bool isGbaR2 = false;
+	{
+		u32 bannerOffset = 0;
+		char gbaR2Text[0x20];
+		fileRead((char*)&bannerOffset, file, 0x48, 4);
+		fileRead(gbaR2Text, file, bannerOffset+0x240, 0x20);
+		isGbaR2 = (gbaR2Text[0] == 'G' && gbaR2Text[2] == 'B' && gbaR2Text[4] == 'A' && gbaR2Text[6] == 'R' && gbaR2Text[8] == 'u' && gbaR2Text[0xA] == 'n' && gbaR2Text[0xC] == 'n' && gbaR2Text[0xE] == 'e' && gbaR2Text[0x10] == 'r');
+	}
+
 	// Load the NDS file
 	loadBinary_ARM7(file);
 
+	tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER;
+
 	{
-		const tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER;
 		const u32* a9exe = (u32*)ndsHeader->arm9executeAddress;
 		recentLibnds =
 			  (a9exe[0] == 0xE3A00301
@@ -366,9 +376,11 @@ int main (void) {
 	// Pass command line arguments to loaded program
 	passArgs_ARM7();
 
-	tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER;
 	patchBinary(ndsHeader);
-	hookNds(ndsHeader, (u32*)sdEngineLocation);
+
+	if (!isGbaR2) {
+		hookNds(ndsHeader, (u32*)sdEngineLocation);
+	}
 
 	u32 bootloaderSignature[4] = {0xEA000002, 0x00000000, 0x00000001, 0x00000000};
 
