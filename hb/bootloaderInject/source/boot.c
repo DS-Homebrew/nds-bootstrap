@@ -380,37 +380,30 @@ int main (void) {
 
 	if (!isGbaR2) {
 		hookNds(ndsHeader, (u32*)sdEngineLocation);
-	}
 
-	u32 bootloaderSignature[4] = {0xEA000002, 0x00000000, 0x00000001, 0x00000000};
+		u32 bootloaderSignature[4] = {0xEA000002, 0x00000000, 0x00000001, 0x00000000};
 
-	// Find and inject bootloader
-	u32* addr = (u32*)ndsHeader->arm9destination;
-	for (u32 i = 0; i < ndsHeader->arm9binarySize/4; i++) {
-		if (addr[i]   == bootloaderSignature[0]	
-		 && addr[i+1] == bootloaderSignature[1]
-		 && addr[i+2] == bootloaderSignature[2]
-		 && addr[i+3] == bootloaderSignature[3])
-		{
-			// toncset(addr + i, 0, 0x9C98);
-			tonccpy(addr + i, (char*)bootInjectLocation, 0x8000);
-			break;
+		// Find and inject bootloader
+		u32* addr = (u32*)ndsHeader->arm9destination;
+		for (u32 i = 0; i < ndsHeader->arm9binarySize/4; i++) {
+			if (addr[i]   == bootloaderSignature[0]	
+			 && addr[i+1] == bootloaderSignature[1]
+			 && addr[i+2] == bootloaderSignature[2]
+			 && addr[i+3] == bootloaderSignature[3])
+			{
+				// toncset(addr + i, 0, 0x9C98);
+				tonccpy(addr + i, (char*)bootInjectLocation, 0x8000);
+				break;
+			}
 		}
 	}
 
-	//if (!dsiMode && ramDiskSize == 0) {
-		u32* a9exe = (u32*)ndsHeader->arm9executeAddress;
-		bool recentLibnds =
-			  (a9exe[0] == 0xE3A00301
-			&& a9exe[1] == 0xE5800208
-			&& a9exe[2] == 0xE3A00013
-			&& a9exe[3] == 0xE129F000);
-		if (recentLibnds) {
-			copyLoop((void*)TEMP_MEM, (void*)lockSCFG_ARM9, lockSCFG_ARM9_size);
-			(*(vu32*)0x02FFFE24) = (u32)TEMP_MEM;	// Make ARM9 jump to the function
-			while ((*(vu32*)0x02FFFE24) == (u32)TEMP_MEM);
-		}
-	//}
+	//if (!dsiMode && ramDiskSize == 0 && recentLibnds) {
+	if (recentLibnds) {
+		copyLoop((void*)TEMP_MEM, (void*)lockSCFG_ARM9, lockSCFG_ARM9_size);
+		(*(vu32*)0x02FFFE24) = (u32)TEMP_MEM;	// Make ARM9 jump to the function
+		while ((*(vu32*)0x02FFFE24) == (u32)TEMP_MEM);
+	}
 
 	/*sdmmc_init(true);
 	*(vu16*)(SDMMC_BASE + REG_DATACTL32) &= 0xFFFDu;
