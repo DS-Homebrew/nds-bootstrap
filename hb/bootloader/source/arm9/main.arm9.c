@@ -189,6 +189,7 @@ void arm9_main(void) {
 	arm9_stateFlag = ARM9_READY;
 	while (arm9_stateFlag != ARM9_BOOTBIN) {
 		if (arm9_stateFlag == ARM9_SETSCFG) {
+			VRAM_C_CR = 0;
 			if (dsiModeConfirmed) {
 				REG_SCFG_EXT = 0x8307F100;
 			} else {
