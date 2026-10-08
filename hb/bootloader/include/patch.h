@@ -4,7 +4,7 @@
 #include <nds/ndstypes.h>
 #include <nds/memory.h> // tNDSHeader
 
-#define patchOffsetCacheFileVersion 5	// Change when new functions are being patched, some offsets removed
+#define patchOffsetCacheFileVersion 6	// Change when new functions are being patched, some offsets removed
 										// the offset order changed, and/or the function signatures changed
 typedef struct patchOffsetCacheContents {
     u16 ver;
@@ -15,6 +15,10 @@ typedef struct patchOffsetCacheContents {
 	u32 heapEndChecked;
 	u32* bootloaderOffset;
 	u32 bootloaderChecked;
+	u32* a9Swi0FARMOffset;
+	u32 a9Swi0FARMChecked;
+	u16* a9Swi0FOffset;
+	u32 a9Swi0FChecked;
 	u16* a9Swi12Offset;
 	u32 a9Swi12Checked;
 	u32* a7IrqHookOffset;

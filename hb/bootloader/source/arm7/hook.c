@@ -119,6 +119,13 @@ static const u16 swi00Sig[2] = {
 	0x4770
 };
 
+static const u32 swi0FSigARM = 0xEF0F0000; // SWI 0X0F (Used during MPU init)
+
+static const u16 swi0FSig[2] = {
+	0xDF0F   , // SWI 0X0F
+	0x4770
+};
+
 static const u16 swi12Sig[2] = {
 	0xDF12   , // SWI 0X12
 	0x4770
@@ -281,6 +288,43 @@ static void patchIntrWaits(const tNDSHeader* ndsHeader, u32* sdEngineLocation, c
 	}
 }
 
+static u32* hookSwi0FARM(u32* addr, size_t size) {
+	u32* end = addr + size/sizeof(u32);
+
+	while (addr < end) {
+		if (*addr == swi0FSigARM)
+		{
+			break;
+		}
+		addr++;
+	}
+
+	if (addr >= end) {
+		return NULL;
+	}
+
+	return addr;
+}
+
+static u16* hookSwi0F(u16* addr, size_t size) {
+	u16* end = addr + size/sizeof(u16);
+
+	while (addr < end) {
+		if (addr[0] == swi0FSig[0] &&
+			(addr[1] == swi0FSig[1]))
+		{
+			break;
+		}
+		addr++;
+	}
+
+	if (addr >= end) {
+		return NULL;
+	}
+
+	return addr;
+}
+
 static u16* hookSwi12(u16* addr, size_t size) {
 	u16* end = addr + size/sizeof(u16);
 
@@ -324,12 +368,38 @@ void setBL(int arg1, int arg2) {
 int hookNds (const tNDSHeader* ndsHeader, u32* sdEngineLocation) {
 	u32* hookLocation = patchOffsetCache.a7IrqHookOffset;
 	u32* hookAccel = patchOffsetCache.a7IrqHookAccelOffset;
+	u32* a9Swi0FARMLocation = patchOffsetCache.a9Swi0FARMOffset;
+	u16* a9Swi0FLocation = patchOffsetCache.a9Swi0FOffset;
 	u16* a9Swi12Location = patchOffsetCache.a9Swi12Offset;
 	u16* swi00Location = patchOffsetCache.swi00Offset;
 	u32 swi04Location = 0;
 	u32 swi05Location = 0;
 
 	nocashMessage("hookNds");
+
+	if (!patchOffsetCache.a9Swi0FARMChecked) {
+		a9Swi0FARMLocation = hookSwi0FARM(ndsHeader->arm9destination, ndsHeader->arm9binarySize);
+		if (a9Swi0FARMLocation) {
+			patchOffsetCache.a9Swi0FARMOffset = a9Swi0FARMLocation;
+		}
+		patchOffsetCache.a9Swi0FARMChecked = true;
+	}
+	if (a9Swi0FARMLocation && !(REG_SCFG_ROM & BIT(1))) {
+		// Stub out SWI 0x0F for DSi BIOS
+		*a9Swi0FARMLocation = 0xE3A00000; // mov r0, #0
+	}
+
+	if (!patchOffsetCache.a9Swi0FChecked) {
+		a9Swi0FLocation = hookSwi0F((u16*)ndsHeader->arm9destination, ndsHeader->arm9binarySize);
+		if (a9Swi0FLocation) {
+			patchOffsetCache.a9Swi0FOffset = a9Swi0FLocation;
+		}
+		patchOffsetCache.a9Swi0FChecked = true;
+	}
+	if (a9Swi0FLocation && !(REG_SCFG_ROM & BIT(1))) {
+		// Stub out SWI 0x0F for DSi BIOS
+		*a9Swi0FLocation = 0x2000; // movs r0, #0
+	}
 
 	if (!patchOffsetCache.a9Swi12Checked) {
 		a9Swi12Location = hookSwi12((u16*)ndsHeader->arm9destination, ndsHeader->arm9binarySize);
