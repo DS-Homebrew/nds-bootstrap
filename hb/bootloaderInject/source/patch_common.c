@@ -22,16 +22,19 @@
 #include "common.h"
 #include "tonccpy.h"
 
+extern u16 scfgRomBak;
+
 void patchBinary(const tNDSHeader* ndsHeader) {
 	const char* romTid = getRomTid(ndsHeader);
 
-	// if (!(REG_SCFG_ROM & BIT(9))) {
+	if (!(scfgRomBak & BIT(9))) {
 		// Moonshell Ver 1.71
 		if (strcmp(romTid, "####") == 0 && ndsHeader->headerCRC16 == 0xD151) {
 			// Fix ARM7 "farmware" error
 			*(u32*)0x037F93C4 = 0x178;
-		} else
-	// }
+			return;
+		}
+	}
 
 	// Moonshell Ver 2 Beta 8.1/beta.9 & Ver 2.01+1
 	/* if (strcmp(romTid, "####") == 0 && (ndsHeader->headerCRC16 == 0xD75F || ndsHeader->headerCRC16 == 0x999C)) {

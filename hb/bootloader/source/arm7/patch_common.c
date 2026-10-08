@@ -36,6 +36,7 @@ void patchBinary(const tNDSHeader* ndsHeader) {
 		if (strcmp(romTid, "####") == 0 && ndsHeader->headerCRC16 == 0xD151) {
 			// Fix ARM7 "farmware" error
 			*(u32*)0x037F93C4 = 0x178;
+			return;
 		}
 	}
 
