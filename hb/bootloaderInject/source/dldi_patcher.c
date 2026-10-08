@@ -103,6 +103,7 @@ static addr_t quickFind (const data_t* data, const data_t* search, size_t dataLe
 #define DEVICE_TYPE_DLDI 0x49444C44
 
 extern const u32 _io_dldi;
+u32 dldiOffset = 0;
 
 /*bool checkArm7DLDI (data_t *binData, u32 binSize) {
 	// Find the DLDI reserved space in the file
@@ -129,6 +130,8 @@ bool dldiPatchBinary (data_t *binData, u32 binSize) {
 	if (patchOffset < 0) {
 		// does not have a DLDI section
 		return false;
+	} else {
+		dldiOffset = (u32)patchOffset;
 	}
 
 	data_t *pDH = (data_t*)(((u32*)(&_io_dldi)) - 24);

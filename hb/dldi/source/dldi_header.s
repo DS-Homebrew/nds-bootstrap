@@ -21,12 +21,12 @@
 	.byte	FIX_GOT | FIX_GLUE | FIX_BSS	@ Sections to fix
 	allocated_space:
 	.byte 	0x00			@ Space allocated in the application, not important here.
-	
+
 @---------------------------------------------------------------------------------
 @ Text identifier - can be anything up to 47 chars + terminating null -- 48 bytes
 	.align	4
 	.asciz "DSI 3DS sd card"
-	
+
 @---------------------------------------------------------------------------------
 @ Offsets to important sections within the data	-- 32 bytes
 	.align	6
@@ -46,15 +46,21 @@
 	ioType:
 	.ascii	"DSID"			@ ioType
 	.word	FEATURE_MEDIUM_CANREAD | FEATURE_MEDIUM_CANWRITE | FEATURE_SLOT_GBA
-	.word	startup			@ 
-	.word	isInserted		@ 
+	.word	startup			@
+	.word	isInserted		@
 	.word	readSectors		@   Function pointers to standard device driver functions
-	.word	writeSectors	@ 
-	.word	clearStatus		@ 
-	.word	shutdown		@ 
-	
+	.word	writeSectors	@
+	.word	clearStatus		@
+	.word	shutdown		@
+
 	@heapShrunk:
 	@.word	0x00000000
+
+	.thumb
+	@swiSoftReset:
+	ldr     r0, =0x02FFFE24
+	ldr     r0, [r0]
+	bx      r0
 
 @---------------------------------------------------------------------------------
 _start:

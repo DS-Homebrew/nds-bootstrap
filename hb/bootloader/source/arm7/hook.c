@@ -367,10 +367,11 @@ void setBL(int arg1, int arg2) {
 int hookNds (const tNDSHeader* ndsHeader, u32* sdEngineLocation) {
 	u32* hookLocation = patchOffsetCache.a7IrqHookOffset;
 	u32* hookAccel = patchOffsetCache.a7IrqHookAccelOffset;
+	u16* a9Swi00Location = patchOffsetCache.a9Swi00Offset;
 	u32* a9Swi0FARMLocation = patchOffsetCache.a9Swi0FARMOffset;
 	u16* a9Swi0FLocation = patchOffsetCache.a9Swi0FOffset;
 	u16* a9Swi12Location = patchOffsetCache.a9Swi12Offset;
-	u16* swi00Location = patchOffsetCache.swi00Offset;
+	u16* a7Swi00Location = patchOffsetCache.a7Swi00Offset;
 	u32 swi04Location = 0;
 	u32 swi05Location = 0;
 
@@ -413,26 +414,33 @@ int hookNds (const tNDSHeader* ndsHeader, u32* sdEngineLocation) {
 	}
 
 	if (!recentLibnds) {
-		if (!patchOffsetCache.swi00Checked) {
-			swi00Location = hookSwi00((u16*)ndsHeader->arm7destination, ndsHeader->arm7binarySize);
-			if (swi00Location) {
-				patchOffsetCache.swi00Offset = swi00Location;
+		if (!patchOffsetCache.a9Swi00Checked) {
+			a9Swi00Location = hookSwi00(ndsHeader->arm9destination, ndsHeader->arm9binarySize);
+			if (a9Swi00Location) {
+				patchOffsetCache.a9Swi00Offset = a9Swi00Location;
 			}
-			patchOffsetCache.swi00Checked = true;
+			patchOffsetCache.a9Swi00Checked = true;
 		}
-		if (swi00Location) {
+		if (!patchOffsetCache.a7Swi00Checked) {
+			a7Swi00Location = hookSwi00((u16*)ndsHeader->arm7destination, ndsHeader->arm7binarySize);
+			if (a7Swi00Location) {
+				patchOffsetCache.a7Swi00Offset = a7Swi00Location;
+			}
+			patchOffsetCache.a7Swi00Checked = true;
+		}
+		if (a7Swi00Location) {
 			for (u8 i = 0; i < 0x80/2; i++) {
-				if (swi00Location[i] == 0xDF12 && !(REG_SCFG_ROM & BIT(9))) {
+				if (a7Swi00Location[i] == 0xDF12 && !(REG_SCFG_ROM & BIT(9))) {
 					// Patch SWI 0x12 to 0x02 for DSi BIOS
-					swi00Location[i] = 0xDF02;
+					a7Swi00Location[i] = 0xDF02;
 				}
-				if (swi00Location[i] == 0xDF04) {
-					swi04Location = (u32)swi00Location;
+				if (a7Swi00Location[i] == 0xDF04) {
+					swi04Location = (u32)a7Swi00Location;
 					swi04Location += i*2;
 					swi04Location++;
 				}
-				if (swi00Location[i] == 0xDF05) {
-					swi05Location = (u32)swi00Location;
+				if (a7Swi00Location[i] == 0xDF05) {
+					swi05Location = (u32)a7Swi00Location;
 					swi05Location += i*2;
 					swi05Location++;
 				}
@@ -497,14 +505,24 @@ int hookNds (const tNDSHeader* ndsHeader, u32* sdEngineLocation) {
 		nocashMessage("ACCEL_IPC_OK");
 	}
 
-	if (swi00Location && hookAccel) {
-		u32 dstAddr = (u32)hookAccel+8;
-		const u16* branchCode = generateA7InstrThumb((int)swi00Location, dstAddr);
+	if (patchOffsetCache.dldiOffset && hookAccel) {
+		if (a9Swi00Location) {
+			u32 dstAddr = patchOffsetCache.dldiOffset+0x80;
+			const u16* branchCode = generateA7InstrThumb((int)a9Swi00Location, dstAddr);
 
-		// patch the program
-		tonccpy(swi00Location, branchCode, 4);
+			// patch the program
+			tonccpy(a9Swi00Location, branchCode, 4);
+		}
 
-		tonccpy((u32*)dstAddr, swi00Patched, 0xC);
+		if (a7Swi00Location) {
+			u32 dstAddr = (u32)hookAccel+8;
+			const u16* branchCode = generateA7InstrThumb((int)a7Swi00Location, dstAddr);
+
+			// patch the program
+			tonccpy(a7Swi00Location, branchCode, 4);
+
+			tonccpy((u32*)dstAddr, swi00Patched, 0xC);
+		}
 	}
 
 	/*if (hookAccel && (u32)ndsHeader->arm7destination >= 0x037F8000) {
