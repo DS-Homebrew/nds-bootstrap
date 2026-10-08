@@ -8,16 +8,18 @@
 .global sdmmc_engine_start
 .global sdmmc_engine_start_sync
 .global sdmmc_engine_end
-.global irqHandler
-.global irqSig
 .global sdmmc_engine_size
 @.global hooks
+.global irqHandler
+.global irqSig
 
 
 sdmmc_engine_size:
 	.word	sdmmc_engine_end - sdmmc_engine_start
 @hooks:
 	.word	snemulDSHook
+	.word	swiIntrWait
+	.word	swiWaitForVBlank
 irqHandler:
 	.word	0x00000000
 irqSig:

@@ -28,6 +28,8 @@
 #include "tonccpy.h"
 #include "locations.h"
 
+extern bool recentLibnds;
+
 extern unsigned long cheat_engine_size;
 extern unsigned long intr_orig_return_offset;
 
@@ -64,11 +66,11 @@ static const u32 homebrewSig[5] = {
 // interruptDispatcher.s jump_intr:
 // Patch
 static const u32 homebrewSigPatched[5] = {
-	0xE59F1008, // ldr    r1, =0x3000010   @ my custom handler
+	0xE59F1008, // ldr    r1, =0x3000018   @ my custom handler
 	0xE5012008, // str    r2, [r1,#-8]     @ irqhandler
 	0xE501F004, // str    r0, [r1,#-4]     @ irqsig
 	0xEA000000, // b      got_handler
-	0x00000010  // DCD 	  0x03000010
+	0x00000018  // DCD 	  0x03000018
 };
 
 // Accelerator patch for IPC_SYNC v2007
@@ -107,9 +109,9 @@ static const u32 homebrewAccelSig2010[4] = {
 };
 
 static const u32 homebrewAccelSigPatched[2] = {
-	0x47104A00   , // LDR     R2, =0x03000020
+	0x47104A00   , // LDR     R2, =0x03000028
 	               // BX      R2
-	0x00000020
+	0x00000028
 };
 
 static const u16 swi00Sig[2] = {
@@ -128,10 +130,6 @@ static const u32 swi00Patched[3] = {
 	0x00004700   , // BX      R0
 	0x02FFFE34
 };
-
-/*static const u32 swi05Sig[1] = {
-	0x4770DF05   , // SWI 0X05
-};*/
 
 //static const int MAX_HANDLER_SIZE = 50;
 
@@ -244,6 +242,45 @@ static u16* hookSwi00(u16* addr, size_t size) {
 	return addr;
 }
 
+static u32* hookCodeJmp(u32* addr, size_t size, const u32 jmpOffset) {
+	u32* end = addr + size/sizeof(u32);
+
+	while (addr < end) {
+		if (addr[0] == 0xE59FC000 // ldr r12, =jmpOffset
+		 && addr[1] == 0xE12FFF1C // bx r12
+		 && addr[2] == jmpOffset)
+		{
+			break;
+		}
+		addr++;
+	}
+
+	if (addr >= end) {
+		return NULL;
+	}
+
+	return addr;
+}
+
+static void patchIntrWaits(const tNDSHeader* ndsHeader, u32* sdEngineLocation, const u32 swi04Location, const u32 swi05Location) {
+	if (recentLibnds) return;
+
+	// Replace SWI IntrWait calls with code used in later libnds versions, as (with DSi BIOS) the SWI code is stuck in a loop
+	if (swi04Location) {
+		u32* codeJmp = hookCodeJmp(ndsHeader->arm7destination, ndsHeader->arm7binarySize, swi04Location);
+		if (codeJmp) {
+			codeJmp[2] = sdEngineLocation[2];
+		}
+	}
+
+	if (swi05Location) {
+		u32* codeJmp = hookCodeJmp(ndsHeader->arm7destination, ndsHeader->arm7binarySize, swi05Location);
+		if (codeJmp) {
+			codeJmp[2] = sdEngineLocation[3];
+		}
+	}
+}
+
 static u16* hookSwi12(u16* addr, size_t size) {
 	u16* end = addr + size/sizeof(u16);
 
@@ -284,38 +321,13 @@ void setBL(int arg1, int arg2) {
 	*(u32*)arg1 = (((u32)(arg2 - arg1 - 8) >> 2) & 0xFFFFFF) | 0xEB000000;
 }
 
-/*static u32* hookSwi05(u32* addr, size_t size, u32* hookAccel, u32* sdEngineLocation) {
-	u32* end = addr + size/sizeof(u32);
-
-	// Find the start of the handler
-	while (addr < end) {
-		if (addr[0] == swi05Sig[0])
-		{
-			break;
-		}
-		addr++;
-	}
-
-	if (addr >= end) {
-		return NULL;
-	}
-
-	u32 dstAddr = (u32)hookAccel+8;
-	const u16* branchCode = generateA7InstrThumb((int)addr, dstAddr);
-
-	// patch the program
-	tonccpy(addr, branchCode, 4);
-
-	tonccpy((u32*)dstAddr, (u32**)((u32)SDENGINE_BUFFER_LOCATION+4), 0x10);
-
-	return addr;
-}*/
-
 int hookNds (const tNDSHeader* ndsHeader, u32* sdEngineLocation) {
 	u32* hookLocation = patchOffsetCache.a7IrqHookOffset;
 	u32* hookAccel = patchOffsetCache.a7IrqHookAccelOffset;
 	u16* a9Swi12Location = patchOffsetCache.a9Swi12Offset;
 	u16* swi00Location = patchOffsetCache.swi00Offset;
+	u32 swi04Location = 0;
+	u32 swi05Location = 0;
 
 	nocashMessage("hookNds");
 
@@ -331,19 +343,30 @@ int hookNds (const tNDSHeader* ndsHeader, u32* sdEngineLocation) {
 		*a9Swi12Location = 0xDF02;
 	}
 
-	if (!patchOffsetCache.swi00Checked) {
-		swi00Location = hookSwi00((u16*)ndsHeader->arm7destination, ndsHeader->arm7binarySize);
-		if (swi00Location) {
-			patchOffsetCache.swi00Offset = swi00Location;
+	if (!recentLibnds) {
+		if (!patchOffsetCache.swi00Checked) {
+			swi00Location = hookSwi00((u16*)ndsHeader->arm7destination, ndsHeader->arm7binarySize);
+			if (swi00Location) {
+				patchOffsetCache.swi00Offset = swi00Location;
+			}
+			patchOffsetCache.swi00Checked = true;
 		}
-		patchOffsetCache.swi00Checked = true;
-	}
-	if (swi00Location && !(REG_SCFG_ROM & BIT(9))) {
-		// Patch SWI 0x12 to 0x02 for DSi BIOS
-		for (u8 i = 0; i < 0x80/2; i++) {
-			if (swi00Location[i] == 0xDF12) {
-				swi00Location[i] = 0xDF02;
-				break;
+		if (swi00Location) {
+			for (u8 i = 0; i < 0x80/2; i++) {
+				if (swi00Location[i] == 0xDF12 && !(REG_SCFG_ROM & BIT(9))) {
+					// Patch SWI 0x12 to 0x02 for DSi BIOS
+					swi00Location[i] = 0xDF02;
+				}
+				if (swi00Location[i] == 0xDF04) {
+					swi04Location = (u32)swi00Location;
+					swi04Location += i*2;
+					swi04Location++;
+				}
+				if (swi00Location[i] == 0xDF05) {
+					swi05Location = (u32)swi00Location;
+					swi05Location += i*2;
+					swi05Location++;
+				}
 			}
 		}
 	}
@@ -356,6 +379,8 @@ int hookNds (const tNDSHeader* ndsHeader, u32* sdEngineLocation) {
 		tonccpy (sdEngineLocation, (sdEngineLocation == (u32*)SDENGINE_LOCATION_ALT) ? sdengine_alt_bin : sdengine_bin, (sdEngineLocation == (u32*)SDENGINE_LOCATION_ALT) ? sdengine_alt_bin_size : sdengine_bin_size);
 
 		setBL(0x037F93F0, sdEngineLocation[1]);
+
+		patchIntrWaits(ndsHeader, sdEngineLocation, swi04Location, swi05Location);
 
 		nocashMessage("ERR_NONE");
 		return ERR_NONE;
@@ -418,6 +443,8 @@ int hookNds (const tNDSHeader* ndsHeader, u32* sdEngineLocation) {
 	}*/
 
 	tonccpy (sdEngineLocation, (sdEngineLocation == (u32*)SDENGINE_LOCATION_ALT) ? sdengine_alt_bin : sdengine_bin, (sdEngineLocation == (u32*)SDENGINE_LOCATION_ALT) ? sdengine_alt_bin_size : sdengine_bin_size);
+
+	patchIntrWaits(ndsHeader, sdEngineLocation, swi04Location, swi05Location);
 
 	nocashMessage("ERR_NONE");
 	return ERR_NONE;

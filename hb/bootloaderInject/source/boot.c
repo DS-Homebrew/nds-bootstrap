@@ -77,6 +77,8 @@ extern unsigned long dsiSD;
 extern u32 sdEngineLocation;
 extern u32 bootInjectLocation;
 
+bool recentLibnds = false;
+
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // Firmware stuff
 
@@ -314,6 +316,7 @@ int main (void) {
 	}
 	if (file.firstCluster == CLUSTER_FREE)
 	{
+		nocashMessage("fileCluster == CLUSTER_FREE");
 		return -1;
 	}
 
@@ -341,6 +344,16 @@ int main (void) {
 
 	// Load the NDS file
 	loadBinary_ARM7(file);
+
+	{
+		const tNDSHeader* ndsHeader = (tNDSHeader*)NDS_HEADER;
+		const u32* a9exe = (u32*)ndsHeader->arm9executeAddress;
+		recentLibnds =
+			  (a9exe[0] == 0xE3A00301
+			&& a9exe[1] == 0xE5800208
+			&& a9exe[2] == 0xE3A00013
+			&& a9exe[3] == 0xE129F000);
+	}
 
 	dldiMagicLoaderString[0]--;
 

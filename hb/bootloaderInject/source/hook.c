@@ -24,6 +24,8 @@
 #include "common.h"
 #include "locations.h"
 
+extern bool recentLibnds;
+
 extern unsigned long cheat_engine_size;
 extern unsigned long intr_orig_return_offset;
 
@@ -62,11 +64,11 @@ static const u32 homebrewSig[5] = {
 // interruptDispatcher.s jump_intr:
 // Patch
 static const u32 homebrewSigPatched[5] = {
-	0xE59F1008, // ldr    r1, =0x3000010   @ my custom handler
+	0xE59F1008, // ldr    r1, =0x3000018   @ my custom handler
 	0xE5012008, // str    r2, [r1,#-8]     @ irqhandler
 	0xE501F004, // str    r0, [r1,#-4]     @ irqsig
 	0xEA000000, // b      got_handler
-	0x00000010  // DCD 	  0x03000010
+	0x00000018  // DCD 	  0x03000018
 };
 
 // Accelerator patch for IPC_SYNC v2007
@@ -105,14 +107,15 @@ static const u32 homebrewAccelSig2010[4] = {
 };
 
 static const u32 homebrewAccelSigPatched[2] = {
-	0x47104A00   , // LDR     R2, =0x03000020
+	0x47104A00   , // LDR     R2, =0x03000028
 	               // BX      R2
-	0x00000020
+	0x00000028
 };
 
-/*static const u32 swi05Sig[1] = {
-	0x4770DF05   , // SWI 0X05
-};*/
+static const u16 swi00Sig[2] = {
+	0xDF00   , // SWI 0X00
+	0x4770
+};
 
 //static const int MAX_HANDLER_SIZE = 50;
 
@@ -221,6 +224,64 @@ static u32* hookAccelIPCHomebrew2007ARM(u32* addr, size_t size) {
 	return addr;
 }
 
+static u16* hookSwi00(u16* addr, size_t size) {
+	u16* end = addr + size/sizeof(u16);
+
+	while (addr < end) {
+		if (addr[0] == swi00Sig[0] &&
+			(addr[1] == swi00Sig[1]))
+		{
+			break;
+		}
+		addr++;
+	}
+
+	if (addr >= end) {
+		return NULL;
+	}
+
+	return addr;
+}
+
+static u32* hookCodeJmp(u32* addr, size_t size, const u32 jmpOffset) {
+	u32* end = addr + size/sizeof(u32);
+
+	while (addr < end) {
+		if (addr[0] == 0xE59FC000 // ldr r12, =jmpOffset
+		 && addr[1] == 0xE12FFF1C // bx r12
+		 && addr[2] == jmpOffset)
+		{
+			break;
+		}
+		addr++;
+	}
+
+	if (addr >= end) {
+		return NULL;
+	}
+
+	return addr;
+}
+
+static void patchIntrWaits(const tNDSHeader* ndsHeader, u32* sdEngineLocation, const u32 swi04Location, const u32 swi05Location) {
+	if (recentLibnds) return;
+
+	// Replace SWI IntrWait calls with code used in later libnds versions, as (with DSi BIOS) the SWI code is stuck in a loop
+	if (swi04Location) {
+		u32* codeJmp = hookCodeJmp(ndsHeader->arm7destination, ndsHeader->arm7binarySize, swi04Location);
+		if (codeJmp) {
+			codeJmp[2] = sdEngineLocation[2];
+		}
+	}
+
+	if (swi05Location) {
+		u32* codeJmp = hookCodeJmp(ndsHeader->arm7destination, ndsHeader->arm7binarySize, swi05Location);
+		if (codeJmp) {
+			codeJmp[2] = sdEngineLocation[3];
+		}
+	}
+}
+
 void setBL(int arg1, int arg2) {
 	*(u32*)arg1 = (((u32)(arg2 - arg1 - 8) >> 2) & 0xFFFFFF) | 0xEB000000;
 }
@@ -228,11 +289,37 @@ void setBL(int arg1, int arg2) {
 int hookNds (const tNDSHeader* ndsHeader, u32* sdEngineLocation) {
 	u32* hookLocation = NULL;
 	u32* hookAccel = NULL;
+	u32 swi04Location = 0;
+	u32 swi05Location = 0;
 
 	nocashMessage("hookNds");
 
+	if (!recentLibnds) {
+		u16* swi00Location = hookSwi00((u16*)ndsHeader->arm7destination, ndsHeader->arm7binarySize);
+		if (swi00Location) {
+			for (u8 i = 0; i < 0x80/2; i++) {
+				/* if (swi00Location[i] == 0xDF12 && !(REG_SCFG_ROM & BIT(9))) {
+					// Patch SWI 0x12 to 0x02 for DSi BIOS
+					swi00Location[i] = 0xDF02;
+				} */
+				if (swi00Location[i] == 0xDF04) {
+					swi04Location = (u32)swi00Location;
+					swi04Location += i*2;
+					swi04Location++;
+				}
+				if (swi00Location[i] == 0xDF05) {
+					swi05Location = (u32)swi00Location;
+					swi05Location += i*2;
+					swi05Location++;
+				}
+			}
+		}
+	}
+
 	if (ndsHeader->arm9binarySize == 0x48950 && ndsHeader->arm7binarySize == 0x74C4) {			// SNEmulDS06-WIP2
 		setBL(0x037F93F0, sdEngineLocation[1]);
+
+		patchIntrWaits(ndsHeader, sdEngineLocation, swi04Location, swi05Location);
 
 		nocashMessage("ERR_NONE");
 		return ERR_NONE;
@@ -271,6 +358,8 @@ int hookNds (const tNDSHeader* ndsHeader, u32* sdEngineLocation) {
 
 		nocashMessage("ACCEL_IPC_OK");
 	}
+
+	patchIntrWaits(ndsHeader, sdEngineLocation, swi04Location, swi05Location);
 
 	nocashMessage("ERR_NONE");
 	return ERR_NONE;

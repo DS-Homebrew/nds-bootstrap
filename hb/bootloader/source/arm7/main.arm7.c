@@ -93,6 +93,8 @@ extern u32 soundFreq;
 #define TWL_HEAD 0x02FFE000
 static u32 sdEngineLocation = 0;
 
+bool recentLibnds = false;
+
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // Firmware stuff
 
@@ -701,12 +703,14 @@ int arm7_main (void) {
 	nocashMessage("Load the NDS file");
 	loadBinary_ARM7(romFile);
 
-	u32* a9exe = (u32*)ndsHeader->arm9executeAddress;
-	bool recentLibnds =
-		  (a9exe[0] == 0xE3A00301
-		&& a9exe[1] == 0xE5800208
-		&& a9exe[2] == 0xE3A00013
-		&& a9exe[3] == 0xE129F000);
+	{
+		const u32* a9exe = (u32*)ndsHeader->arm9executeAddress;
+		recentLibnds =
+			  (a9exe[0] == 0xE3A00301
+			&& a9exe[1] == 0xE5800208
+			&& a9exe[2] == 0xE3A00013
+			&& a9exe[3] == 0xE129F000);
+	}
 
 	// File containing cached patch offsets
 	aFile patchOffsetCacheFile = getFileFromCluster(patchOffsetCacheFileCluster);
