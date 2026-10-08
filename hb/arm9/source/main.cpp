@@ -97,6 +97,10 @@ void runFile(string filename, string fullPath, string homebrewArg, string ramDis
 
 	getcwd (filePath, 256);
 	int pathLen = strlen (filePath);
+	if (filePath[pathLen] != '/') {
+		filePath[pathLen] = '/';
+		pathLen++;
+	}
 	vector<char*> argarray;
 	
 	if(debug) dopause();
