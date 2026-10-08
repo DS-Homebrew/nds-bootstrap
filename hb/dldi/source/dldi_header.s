@@ -8,7 +8,7 @@
 	.global ioType
 	.global dldi_bss_end
 	.global allocated_space
-	.global heapShrunk
+	@.global heapShrunk
 	.align	4
 	.arm
 
@@ -53,8 +53,8 @@
 	.word	clearStatus		@ 
 	.word	shutdown		@ 
 	
-	heapShrunk:
-	.word	0x00000000
+	@heapShrunk:
+	@.word	0x00000000
 
 @---------------------------------------------------------------------------------
 _start:

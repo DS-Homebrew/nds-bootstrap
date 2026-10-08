@@ -424,12 +424,12 @@ bool startup(void) {
 			*(vu32*)0x03708000 = 0x77777777;
 			cacheEnabled = (*(vu32*)0x03700000 == 0x4253444E); // DSi WRAM found, enable LRU cache
 		}
-		if (!cacheEnabled && heapShrunk) {
+		/* if (!cacheEnabled && heapShrunk) {
 			cacheAddress = CACHE_ADDRESS_START_ALT;
 			cacheSlots = 3;
 			cacheEnabled = true; // Enable LRU cache in Main RAM
 			heapShrunk = 0;
-		}
+		} */
 
 		const u32 mirrorOffset = (REG_SCFG_EXT == 0x8307F100) ? 0x0A000000 : 0xC00000;
 		tmp_buf_addr = (u32*)(dldi_bss_end + mirrorOffset);

@@ -91,9 +91,9 @@ static addr_t quickFind (const data_t* data, const data_t* search, size_t dataLe
 	return -1;
 }
 
-static u32 heapEndSubtractSignature = 0xE2488903; // sub r8, r8, #0xC000
-static u32 heapEndSignature = 0x023FF000;
-static u32 heapEndSignatureMoonshell[2] = {0x023F0000, 0x803E00};
+// static u32 heapEndSubtractSignature = 0xE2488903; // sub r8, r8, #0xC000
+// static u32 heapEndSignature = 0x023FF000;
+// static u32 heapEndSignatureMoonshell[2] = {0x023F0000, 0x803E00};
 
 //static const data_t dldiMagicString[] = "\xED\xA5\x8D\xBF Chishm";	// Normal DLDI file
 /*static const*/ data_t dldiMagicLoaderString[] = "\xEE\xA5\x8D\xBF Chishm";	// Different to a normal DLDI file
@@ -181,7 +181,7 @@ bool dldiPatchBinary (data_t *binData, u32 binSize) {
 	/* if (ramDisk) {
 		tonccpy (pAH+DO_friendlyName, ramdFriendlyNameString, sizeof (ramdFriendlyNameString));
 		tonccpy (pAH+DO_ioType, ramdIoTypeString, 4);
-	} else { */
+	} else {
 		bool dsiWramAccess = false;
 		*(vu32*)0x03700000 = 0x4253444E; // 'NDSB'
 		if (*(vu32*)0x03700000 == 0x4253444E) {
@@ -225,7 +225,7 @@ bool dldiPatchBinary (data_t *binData, u32 binSize) {
 				toncset32 (pAH+DO_code, 1, 1); // Heap shrunk flag
 			}
 		}
-	// }
+	} */
 
 	// Put the correct DLDI magic string back into the DLDI header
 	tonccpy (pAH, dldiMagicLoaderString, sizeof (dldiMagicLoaderString));
