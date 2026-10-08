@@ -638,11 +638,6 @@ int arm7_main (void) {
 		}
 	}
 
-	if ((ndsHeader->arm9romOffset==0x4000 && dsiFlags==0) || !dsiMode) {
-		NDSTouchscreenMode();
-		*(vu16*)0x4000500 = 0x807F;
-	}
-
 	if (dsiMode) {
 		dsiModeConfirmed = true;
 	} else {
@@ -664,6 +659,11 @@ int arm7_main (void) {
 			&& a9exe[1] == 0xE5800208
 			&& a9exe[2] == 0xE3A00013
 			&& a9exe[3] == 0xE129F000);
+	}
+
+	if ((ndsHeader->arm9romOffset==0x4000 && dsiFlags==0) || !recentLibnds || !dsiModeConfirmed) {
+		NDSTouchscreenMode();
+		*(vu16*)0x4000500 = 0x807F;
 	}
 
 	if (dsiModeConfirmed) {
