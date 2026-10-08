@@ -40,7 +40,31 @@ void patchBinary(const tNDSHeader* ndsHeader) {
 		}
 	}
 
-	// Moonshell Ver 2 Beta 8.1/beta.9 & Ver 2.01+1
+	// jEnesisDS v0.7
+	if (strcmp(romTid, "####") == 0 && ndsHeader->headerCRC16 == 0xBBDF) {
+		if (dsiModeConfirmed) {
+			*(u32*)0x020001B8 = 0x0200002D;
+			*(u32*)0x020001CC = 0x027FF017;
+
+			const u32 newRomSpace = 0x023FF000;
+
+			*(u32*)0x02001634 = newRomSpace;
+			*(u32*)0x020016CC = newRomSpace;
+			*(u32*)0x02001AFC = newRomSpace;
+			*(u32*)0x02002058 = 0x400000; // Increase ROM size limit from 0x306800
+			*(u32*)0x02002060 = newRomSpace;
+			*(u32*)0x02003B2C = newRomSpace;
+			*(u32*)0x02003C0C = newRomSpace;
+			*(u32*)0x02003C50 = newRomSpace;
+			*(u32*)0x02003C84 = newRomSpace;
+			*(u32*)0x02003CAC = newRomSpace;
+			*(u32*)0x02003CF4 = newRomSpace;
+			*(u32*)0x02003E1C = newRomSpace;
+			*(u32*)0x02003EB0 = newRomSpace;
+			*(u32*)0x02003F2C = newRomSpace;
+			*(u32*)0x02004480 = newRomSpace;
+		}
+	} else // Moonshell Ver 2 Beta 8.1/beta.9 & Ver 2.01+1
 	/* if (strcmp(romTid, "####") == 0 && (ndsHeader->headerCRC16 == 0xD75F || ndsHeader->headerCRC16 == 0x999C)) {
 		// Bypass ARM9 binary check
 		*(u32*)0x0200015C = 0xE1A00000; // nop
