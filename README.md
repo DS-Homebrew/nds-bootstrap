@@ -68,6 +68,7 @@ An alternative forwarder generator for 3DS users. YANBF forwarders are 3DS-mode 
 - [ahezard](https://github.com/ahezard): Starting the project, former lead developer
 - [Pk11](https://github.com/Epicpkmn11): In-game menu, screenshot taking, manual loading, and translation management
 - [Gericom](https://github.com/Gericom):
+   - Some early fixes/improvements
    - Improving B4DS compatibility
    - Parts of libtwl code used
    - Pokémon Wii connection patch from Pico Loader
@@ -76,7 +77,9 @@ An alternative forwarder generator for 3DS users. YANBF forwarders are 3DS-mode 
 
 ## Other
 - [devkitPro](https://devkitpro.org): devkitARM and libnds
+- [ApacheThunder](https://github.com/ApacheThunder): Some early fixes/improvements
 - [Arisotura](https://github.com/Arisotura): BIOS reader from [dsibiosdumper](https://github.com/Arisotura/dsibiosdumper) used in the in-game menu
+- _catcatcat
 - [Mow](https://github.com/taxicat1): Proper fix for *Puppy Palace* crash on boot
 - retrogamefan, Rudolph, and [Mow](https://github.com/taxicat1): Included AP-patches
    - [enler](https://github.com/enler): Fixing AP-patch for Pokemon Black 2 (Japan) for DS⁽ⁱ⁾ mode compatibility
