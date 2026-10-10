@@ -65,7 +65,7 @@ An alternative forwarder generator for 3DS users. YANBF forwarders are 3DS-mode 
 ## Developers
 - [Rocket Robz](https://github.com/RocketRobz): Lead developer, DSi mode and DSiWare support, B4DS mode, general maintenance and updates
 - [shutterbug2000](https://github.com/shutterbug2000): SDK5 support, help with DSi mode support, and some other implemented stuff
-- [ahezard](https://github.com/ahezard): Starting the project, former lead developer
+- [ahezard](https://github.com/ahezard): Starting this project, former lead developer
 - [Pk11](https://github.com/Epicpkmn11): In-game menu, screenshot taking, manual loading, and translation management
 - [Gericom](https://github.com/Gericom):
    - Some early fixes/improvements
@@ -74,12 +74,14 @@ An alternative forwarder generator for 3DS users. YANBF forwarders are 3DS-mode 
    - Pokémon Wii connection patch from Pico Loader
    - SD -> flashcard R/W patch for DSiWare
    - Frame/Refresh rate adjustment code from [FastVideoDSPlayer](https://github.com/Gericom/FastVideoDSPlayer)
+- [ApacheThunder](https://github.com/ApacheThunder): Some early fixes/improvements
 
 ## Other
 - [devkitPro](https://devkitpro.org): devkitARM and libnds
-- [ApacheThunder](https://github.com/ApacheThunder): Some early fixes/improvements
 - [Arisotura](https://github.com/Arisotura): BIOS reader from [dsibiosdumper](https://github.com/Arisotura/dsibiosdumper) used in the in-game menu
+- arraystock
 - _catcatcat
+- [damianoamatruda](https://github.com/damianoamatruda)
 - [Mow](https://github.com/taxicat1): Proper fix for *Puppy Palace* crash on boot
 - retrogamefan, Rudolph, and [Mow](https://github.com/taxicat1): Included AP-patches
    - [enler](https://github.com/enler): Fixing AP-patch for Pokemon Black 2 (Japan) for DS⁽ⁱ⁾ mode compatibility
