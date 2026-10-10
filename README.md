@@ -75,13 +75,13 @@ An alternative forwarder generator for 3DS users. YANBF forwarders are 3DS-mode 
    - SD -> flashcard R/W patch for DSiWare
    - Frame/Refresh rate adjustment code from [FastVideoDSPlayer](https://github.com/Gericom/FastVideoDSPlayer)
 - [ApacheThunder](https://github.com/ApacheThunder): Some early fixes/improvements
+- [damianoamatruda](https://github.com/damianoamatruda)
+- arraystock
 
 ## Other
 - [devkitPro](https://devkitpro.org): devkitARM and libnds
 - [Arisotura](https://github.com/Arisotura): BIOS reader from [dsibiosdumper](https://github.com/Arisotura/dsibiosdumper) used in the in-game menu
-- arraystock
 - _catcatcat
-- [damianoamatruda](https://github.com/damianoamatruda)
 - [Mow](https://github.com/taxicat1): Proper fix for *Puppy Palace* crash on boot
 - retrogamefan, Rudolph, and [Mow](https://github.com/taxicat1): Included AP-patches
    - [enler](https://github.com/enler): Fixing AP-patch for Pokemon Black 2 (Japan) for DS⁽ⁱ⁾ mode compatibility
