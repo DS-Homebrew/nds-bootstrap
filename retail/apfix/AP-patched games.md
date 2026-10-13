@@ -270,7 +270,7 @@
 - Korg DS-10+ Synthesizer Limited Edition (Japan) (VKPJ)
 - Korg M01 Music Workstation (Japan)
 - KuruKuru Princess: Tokimeki Figure: Mezase! Vancouver (Japan) (BQPJ)
-- Last Window: Mayonaka no Yakusoku (Japan) (YLUJ)
+- Last Window: Mayonaka no Yakusoku (Japan) (Also applies to modified ROMs) (YLUJ)
 - Last Window: The Secret of Cape West (Europe) (YLUP)
 - The Legend of Zelda: Spirit Tracks (USA) (Also applies to modified ROMs) (BKIE)
 - The Legend of Zelda: Spirit Tracks (USA) (Rev 1) (BKIE)
