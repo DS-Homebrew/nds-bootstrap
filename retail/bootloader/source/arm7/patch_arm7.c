@@ -647,7 +647,7 @@ u32 patchCardNdsArm7(
 		patchSleepInputWrite(ce7, ndsHeader, moduleParams, false);
 	}
 
-	if (strcmp(romTid, "UBRP") == 0) {
+	if (strncmp(romTid, "UBR", 3) == 0) {
 		operaRamPatch();
 	}
 

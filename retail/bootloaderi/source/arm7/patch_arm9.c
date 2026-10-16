@@ -3145,6 +3145,39 @@ static void operaRamPatch(void) {
 	}
 }
 
+static void operaRamPatchJpn(void) {
+	extern u8 consoleModel;
+
+	// Opera RAM patch (ARM9)
+	*(u32*)0x02003D70 = 0xC3E0000;
+	*(u32*)0x02003D78 = 0xC3E0004;
+
+	*(u32*)0x02011018 = 0xC3E0000;
+	*(u32*)0x0201101C = 0xC3E00CE;
+
+	*(u32*)0x020112D4 = 0xC3E0080;
+
+	*(u32*)0x0203FF74 = 0xC3E00C2;
+	*(u32*)0x0203FF78 = 0xC3E00C0;
+	if (consoleModel > 0) {
+		*(u32*)0x0203FF84 = 0xD7FFFFE;
+		*(u32*)0x0203FF88 = 0xD000000;
+		*(u32*)0x0203FF8C = 0xD1FFFFF;
+		*(u32*)0x0203FF90 = 0xD3FFFFF;
+		*(u32*)0x0203FF94 = 0xD7FFFFF;
+		*(u32*)0x0203FF98 = 0xDFFFFFF;	// ???
+		dma_twlFill32(0, 0xFFFFFFFF, (u32*)0xD000000, 0x800000);		// Fill fake MEP with FFs
+	} else {
+		*(u32*)0x0203FF84 = 0xCFFFFFE;
+		*(u32*)0x0203FF88 = 0xC800000;
+		*(u32*)0x0203FF8C = 0xC9FFFFF;
+		*(u32*)0x0203FF90 = 0xCBFFFFF;
+		*(u32*)0x0203FF94 = 0xCFFFFFF;
+		*(u32*)0x0203FF98 = 0xD7FFFFF;	// ???
+		dma_twlFill32(0, 0xFFFFFFFF, (u32*)0xC800000, 0x800000);		// Fill fake MEP with FFs
+	}
+}
+
 /*static void setFlushCache(cardengineArm9* ce9, u32 patchMpuRegion, bool usesThumb) {
 	//if (!usesThumb) {
 	ce9->patches->needFlushDCCache = (patchMpuRegion == 1);
@@ -3275,8 +3308,12 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 	patchReset(ce9, ndsHeader, moduleParams);
 	patchResetTwl(ce9, ndsHeader, moduleParams);
 
-	if (strcmp(romTid, "UBRP") == 0) {
-		operaRamPatch();
+	if (strncmp(romTid, "UBR", 3) == 0) {
+		if (romTid[3] == 'J') {
+			if (ndsHeader->romversion == 0) operaRamPatchJpn();
+		} else {
+			operaRamPatch();
+		}
 	} /*else if (gbaRomFound) {
 		if (patchCartExist(ndsHeader, moduleParams, usesThumb)) {
 			patchCartInfoInitConstant(ndsHeader, moduleParams, usesThumb);
