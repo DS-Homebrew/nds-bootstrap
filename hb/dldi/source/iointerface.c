@@ -290,8 +290,9 @@ bool sd_WriteSectors(sec_t sector, sec_t numSectors,void* buffer) {
 	if (cacheEnabled) {
 		accessCounter++;
 
-		void* bufferBak = buffer;
+		sec_t sectorBak = sector;
 		sec_t numSectorsBak = numSectors;
+		void* bufferBak = buffer;
 
 		while(numSectors > 0) {
 			const sec_t alignedSector = (sector/cacheBlockSectors)*cacheBlockSectors;
@@ -336,8 +337,9 @@ bool sd_WriteSectors(sec_t sector, sec_t numSectors,void* buffer) {
 			}
 		}
 
-		buffer = bufferBak;
+		sector = sectorBak;
 		numSectors = numSectorsBak;
+		buffer = bufferBak;
 	}
 
 	if (((u32)buffer % 4) == 0 && (u32)buffer >= 0x02000000 && (u32)buffer < 0x03000000) {
