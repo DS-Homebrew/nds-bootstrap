@@ -42,6 +42,7 @@
 #include <nds/fifomessages.h>
 #include <nds/dma.h>
 #include <nds/ipc.h>
+#include <nds/arm9/cache.h>
 #include <nds/arm9/dldi.h>
 #include "my_sdmmc.h"
 #include "locations.h"
@@ -110,8 +111,7 @@ void transferToArm9(int slot) {
 }
 
 // Use the dldi remaining space as temporary buffer : 28k usually available
-u32* tmp_buf_addr = 0;
-extern u32 dldi_bss_end;
+extern u32* dldi_bss_end;
 extern vu8 allocated_space;
 
 bool dsiMode = false;
@@ -237,6 +237,19 @@ bool sd_ReadSectors(sec_t sector, sec_t numSectors,void* buffer) {
 				accessCounter++;
 			}
 		}
+	} else if (((u32)buffer % 4) == 0 && (u32)buffer >= 0x02000000 && (u32)buffer < 0x03000000) {
+		DC_FlushRange(buffer, numSectors*512);
+
+		msg.type = SDMMC_SD_READ_SECTORS;
+		msg.sdParams.startsector = sector;
+		msg.sdParams.numsectors = numSectors;
+		msg.sdParams.buffer = buffer;
+
+		sendMsg(sizeof(msg), (u8*)&msg);
+
+		waitValue32();
+
+		result = getValue32();
 	} else {
 		sec_t startsector, readsectors;
 
@@ -247,10 +260,12 @@ bool sd_ReadSectors(sec_t sector, sec_t numSectors,void* buffer) {
 			if(numSectors - numreads < max_reads) readsectors = numSectors - numreads ;
 			else readsectors = max_reads;
 
+			DC_FlushRange(dldi_bss_end, readsectors*512);
+
 			msg.type = SDMMC_SD_READ_SECTORS;
 			msg.sdParams.startsector = startsector;
 			msg.sdParams.numsectors = readsectors;
-			msg.sdParams.buffer = tmp_buf_addr;
+			msg.sdParams.buffer = dldi_bss_end;
 
 			sendMsg(sizeof(msg), (u8*)&msg);
 
@@ -258,7 +273,7 @@ bool sd_ReadSectors(sec_t sector, sec_t numSectors,void* buffer) {
 
 			result = getValue32();
 
-			tonccpy(buffer+numreads*512, tmp_buf_addr, readsectors*512);
+			tonccpy(buffer+numreads*512, dldi_bss_end, readsectors*512);
 		}
 	}
 
@@ -275,6 +290,7 @@ bool sd_WriteSectors(sec_t sector, sec_t numSectors,void* buffer) {
 	if (cacheEnabled) {
 		accessCounter++;
 
+		void* bufferBak = buffer;
 		sec_t numSectorsBak = numSectors;
 
 		while(numSectors > 0) {
@@ -320,29 +336,46 @@ bool sd_WriteSectors(sec_t sector, sec_t numSectors,void* buffer) {
 			}
 		}
 
+		buffer = bufferBak;
 		numSectors = numSectorsBak;
 	}
 
-	sec_t startsector, readsectors;
-
-	int max_reads = ((1 << allocated_space) / 512) - 11;
-
-	for(int numreads =0; numreads<numSectors; numreads+=max_reads) {
-		startsector = sector+numreads;
-		if(numSectors - numreads < max_reads) readsectors = numSectors - numreads ;
-		else readsectors = max_reads;
+	if (((u32)buffer % 4) == 0 && (u32)buffer >= 0x02000000 && (u32)buffer < 0x03000000) {
+		DC_FlushRange(buffer, numSectors*512);
 
 		msg.type = SDMMC_SD_WRITE_SECTORS;
-		msg.sdParams.startsector = startsector;
-		msg.sdParams.numsectors = readsectors;
-		msg.sdParams.buffer = tmp_buf_addr;
+		msg.sdParams.startsector = sector;
+		msg.sdParams.numsectors = numSectors;
+		msg.sdParams.buffer = buffer;
 
-		tonccpy(tmp_buf_addr, buffer+numreads*512, readsectors*512);
 		sendMsg(sizeof(msg), (u8*)&msg);
 
 		waitValue32();
 
 		result = getValue32();
+	} else {
+		sec_t startsector, readsectors;
+
+		int max_reads = ((1 << allocated_space) / 512) - 11;
+
+		for(int numreads =0; numreads<numSectors; numreads+=max_reads) {
+			startsector = sector+numreads;
+			if(numSectors - numreads < max_reads) readsectors = numSectors - numreads ;
+			else readsectors = max_reads;
+
+			msg.type = SDMMC_SD_WRITE_SECTORS;
+			msg.sdParams.startsector = startsector;
+			msg.sdParams.numsectors = readsectors;
+			msg.sdParams.buffer = dldi_bss_end;
+
+			tonccpy(dldi_bss_end, buffer+numreads*512, readsectors*512);
+			DC_FlushRange(dldi_bss_end, readsectors*512);
+			sendMsg(sizeof(msg), (u8*)&msg);
+
+			waitValue32();
+
+			result = getValue32();
+		}
 	}
 
 	return result == 0;
@@ -430,8 +463,6 @@ bool startup(void) {
 			heapShrunk = 0;
 		} */
 
-		const u32 mirrorOffset = (REG_SCFG_EXT == 0x8307F100) ? 0x0A000000 : 0xC00000;
-		tmp_buf_addr = (u32*)(dldi_bss_end + mirrorOffset);
 		return sd_Startup();
 	}
 }
