@@ -48,7 +48,6 @@ bool dsiModeConfirmed = false;
 bool arm9_boostVram = false;
 volatile bool ram32MB = false;
 volatile int arm9_stateFlag = ARM9_BOOT;
-volatile u32 arm9_BLANK_RAM = 0;
 volatile u32 arm9_ramDiskCluster = 0;
 
 void initMBKARM9(void) {
@@ -155,11 +154,10 @@ void arm9_main(void) {
 	VRAM_G_CR = 0x80;
 	VRAM_H_CR = 0x80;
 	VRAM_I_CR = 0x80;
-	BG_PALETTE[0] = 0xFFFF;
-	dmaFill((u16*)&arm9_BLANK_RAM, BG_PALETTE+1, (2*1024)-2);
-	dmaFill((u16*)&arm9_BLANK_RAM, OAM, 2*1024);
-	dmaFill((u16*)&arm9_BLANK_RAM, VRAM_A, 0x20000*3);		// Banks A, B, C
-	dmaFill((u16*)&arm9_BLANK_RAM, VRAM_D, 272*1024);		// Banks D (excluded), E, F, G, H, I
+	dmaFill9(0, BG_PALETTE, 2*1024);
+	dmaFill9(0, OAM, 2*1024);
+	dmaFill9(0, VRAM_A, 0x20000*3);		// Banks A, B, C
+	dmaFill9(0, VRAM_D, 272*1024);		// Banks D (excluded), E, F, G, H, I
 
 	REG_DISPSTAT = 0;
 	GFX_STATUS = 0;
