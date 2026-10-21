@@ -798,7 +798,7 @@ int arm7_main (void) {
 	} else {
 		hookNds(ndsHeader, NULL, hasSdAccess); // Only patch SWI functions
 	}
-	toncset((char*)0x06000000, 0, 0x8000);
+	dma_twlFill32(0, 0, (u32*)0x06000000, 0x20000); // Clear VRAM bank C
 
 	patchOffsetCacheFileNewCrc = swiCRC16(0xFFFF, &patchOffsetCache, sizeof(patchOffsetCacheContents));
 	if (patchOffsetCacheFileNewCrc != patchOffsetCacheFilePrevCrc) {
