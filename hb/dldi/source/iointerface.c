@@ -440,7 +440,7 @@ bool startup(void) {
 	ramDisk = (ioType[0] == 'R' && ioType[1] == 'A' && ioType[2] == 'M' && ioType[3] == 'D');
 
 	if (ramDisk) {
-		if (REG_SCFG_EXT == 0x8307F100) {
+		if (REG_SCFG_EXT & (BIT(14) | BIT(15))) {
 			dsiMode = *(u16*)((u32)RAM_DISK_LOCATION_DSIMODE+0x1FE) == 0xAA55;
 		}
 		return true;
