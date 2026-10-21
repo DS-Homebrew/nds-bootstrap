@@ -23,7 +23,7 @@
 arm7_hookGame
 Adds a hook in the game's ARM7 binary to our own code
 -------------------------------------------------------------------------*/
-int hookNds (const tNDSHeader* ndsHeader, u32* sdEngineLocation);
+int hookNds (const tNDSHeader* ndsHeader, u32* sdEngineLocation, const bool hasSdAccess);
 
 void patchMemoryAddresses(const tNDSHeader* ndsHeader);
 

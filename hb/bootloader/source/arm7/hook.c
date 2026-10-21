@@ -65,11 +65,11 @@ static const u32 homebrewSig[5] = {
 // interruptDispatcher.s jump_intr:
 // Patch
 static const u32 homebrewSigPatched[5] = {
-	0xE59F1008, // ldr    r1, =0x3000018   @ my custom handler
+	0xE59F1008, // ldr    r1, =0x300001C   @ my custom handler
 	0xE5012008, // str    r2, [r1,#-8]     @ irqhandler
 	0xE501F004, // str    r0, [r1,#-4]     @ irqsig
 	0xEA000000, // b      got_handler
-	0x00000018  // DCD 	  0x03000018
+	0x0000001C  // DCD 	  0x0300001C
 };
 
 // Accelerator patch for IPC_SYNC v2007
@@ -108,9 +108,9 @@ static const u32 homebrewAccelSig2010[4] = {
 };
 
 static const u32 homebrewAccelSigPatched[2] = {
-	0x47104A00   , // LDR     R2, =0x03000028
+	0x47104A00   , // LDR     R2, =0x0300002C
 	               // BX      R2
-	0x00000028
+	0x0000002C
 };
 
 static const u16 swi00Sig[2] = {
@@ -275,14 +275,14 @@ static void patchIntrWaits(const tNDSHeader* ndsHeader, u32* sdEngineLocation, c
 	if (swi04Location) {
 		u32* codeJmp = hookCodeJmp(ndsHeader->arm7destination, ndsHeader->arm7binarySize, swi04Location);
 		if (codeJmp) {
-			codeJmp[2] = sdEngineLocation[2];
+			codeJmp[2] = sdEngineLocation[3];
 		}
 	}
 
 	if (swi05Location) {
 		u32* codeJmp = hookCodeJmp(ndsHeader->arm7destination, ndsHeader->arm7binarySize, swi05Location);
 		if (codeJmp) {
-			codeJmp[2] = sdEngineLocation[3];
+			codeJmp[2] = sdEngineLocation[4];
 		}
 	}
 }
@@ -364,7 +364,7 @@ void setBL(int arg1, int arg2) {
 	*(u32*)arg1 = (((u32)(arg2 - arg1 - 8) >> 2) & 0xFFFFFF) | 0xEB000000;
 }
 
-int hookNds (const tNDSHeader* ndsHeader, u32* sdEngineLocation) {
+int hookNds (const tNDSHeader* ndsHeader, u32* sdEngineLocation, const bool hasSdAccess) {
 	u32* hookLocation = patchOffsetCache.a7IrqHookOffset;
 	u32* hookAccel = patchOffsetCache.a7IrqHookAccelOffset;
 	u16* a9Swi00Location = patchOffsetCache.a9Swi00Offset;
@@ -384,9 +384,14 @@ int hookNds (const tNDSHeader* ndsHeader, u32* sdEngineLocation) {
 		}
 		patchOffsetCache.a9Swi0FARMChecked = true;
 	}
-	if (a9Swi0FARMLocation && !(REG_SCFG_ROM & BIT(1))) {
-		// Stub out SWI 0x0F for DSi BIOS
-		*a9Swi0FARMLocation = 0xE3A00000; // mov r0, #0
+	if (a9Swi0FARMLocation) {
+		if (!(REG_SCFG_ROM & BIT(1))) {
+			// Stub out SWI 0x0F for DSi BIOS
+			*a9Swi0FARMLocation = 0xE3A00000; // mov r0, #0
+		}
+		if (recentLibnds && !hasSdAccess && a9Swi0FARMLocation[0x120/4] == 0xC00002F) {
+			a9Swi0FARMLocation[0x120/4] = 0x8000035; // Early post-DSi homebrew (such as Colors!) will attempt to check the GBA slot for NitroFS, even in DSi mode, so allow MPU access to the GBA ROM map to avoid crashing
+		}
 	}
 
 	if (!patchOffsetCache.a9Swi0FChecked) {
@@ -452,10 +457,17 @@ int hookNds (const tNDSHeader* ndsHeader, u32* sdEngineLocation) {
 		return ERR_NONE;
 	}
 
+	const u32 sharedAddr = (recentLibnds && dsiModeConfirmed) ? CARDENGINE_SHARED_ADDRESS_DSIMODE : CARDENGINE_SHARED_ADDRESS;
+
+	if (patchOffsetCache.dldiOffset) {
+		*(u32*)(((u32)ndsHeader->arm9destination)+patchOffsetCache.dldiOffset+0x80) = sharedAddr;
+	}
+
 	if (ndsHeader->arm9binarySize == 0x48950 && ndsHeader->arm7binarySize == 0x74C4) {			// SNEmulDS06-WIP2
 		tonccpy (sdEngineLocation, (sdEngineLocation == (u32*)SDENGINE_LOCATION_ALT) ? sdengine_alt_bin : sdengine_bin, (sdEngineLocation == (u32*)SDENGINE_LOCATION_ALT) ? sdengine_alt_bin_size : sdengine_bin_size);
+		sdEngineLocation[1] = sharedAddr;
 
-		setBL(0x037F93F0, sdEngineLocation[1]);
+		setBL(0x037F93F0, sdEngineLocation[2]);
 
 		patchIntrWaits(ndsHeader, sdEngineLocation, swi04Location, swi05Location);
 
@@ -507,7 +519,7 @@ int hookNds (const tNDSHeader* ndsHeader, u32* sdEngineLocation) {
 
 	if (patchOffsetCache.dldiOffset && hookAccel) {
 		if (a9Swi00Location) {
-			u32 dstAddr = patchOffsetCache.dldiOffset+0x80;
+			u32 dstAddr = ((u32)ndsHeader->arm9destination)+patchOffsetCache.dldiOffset+0x84;
 			const u16* branchCode = generateA7InstrThumb((int)a9Swi00Location, dstAddr);
 
 			// patch the program
@@ -530,6 +542,7 @@ int hookNds (const tNDSHeader* ndsHeader, u32* sdEngineLocation) {
 	}*/
 
 	tonccpy (sdEngineLocation, (sdEngineLocation == (u32*)SDENGINE_LOCATION_ALT) ? sdengine_alt_bin : sdengine_bin, (sdEngineLocation == (u32*)SDENGINE_LOCATION_ALT) ? sdengine_alt_bin_size : sdengine_bin_size);
+	sdEngineLocation[1] = sharedAddr;
 
 	patchIntrWaits(ndsHeader, sdEngineLocation, swi04Location, swi05Location);
 

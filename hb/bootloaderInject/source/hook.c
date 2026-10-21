@@ -66,11 +66,11 @@ static const u32 homebrewSig[5] = {
 // interruptDispatcher.s jump_intr:
 // Patch
 static const u32 homebrewSigPatched[5] = {
-	0xE59F1008, // ldr    r1, =0x3000018   @ my custom handler
+	0xE59F1008, // ldr    r1, =0x300001C   @ my custom handler
 	0xE5012008, // str    r2, [r1,#-8]     @ irqhandler
 	0xE501F004, // str    r0, [r1,#-4]     @ irqsig
 	0xEA000000, // b      got_handler
-	0x00000018  // DCD 	  0x03000018
+	0x0000001C  // DCD 	  0x0300001C
 };
 
 // Accelerator patch for IPC_SYNC v2007
@@ -109,9 +109,9 @@ static const u32 homebrewAccelSig2010[4] = {
 };
 
 static const u32 homebrewAccelSigPatched[2] = {
-	0x47104A00   , // LDR     R2, =0x03000028
+	0x47104A00   , // LDR     R2, =0x0300002C
 	               // BX      R2
-	0x00000028
+	0x0000002C
 };
 
 static const u16 swi00Sig[2] = {
@@ -276,14 +276,14 @@ static void patchIntrWaits(const tNDSHeader* ndsHeader, u32* sdEngineLocation, c
 	if (swi04Location) {
 		u32* codeJmp = hookCodeJmp(ndsHeader->arm7destination, ndsHeader->arm7binarySize, swi04Location);
 		if (codeJmp) {
-			codeJmp[2] = sdEngineLocation[2];
+			codeJmp[2] = sdEngineLocation[3];
 		}
 	}
 
 	if (swi05Location) {
 		u32* codeJmp = hookCodeJmp(ndsHeader->arm7destination, ndsHeader->arm7binarySize, swi05Location);
 		if (codeJmp) {
-			codeJmp[2] = sdEngineLocation[3];
+			codeJmp[2] = sdEngineLocation[4];
 		}
 	}
 }
@@ -375,8 +375,12 @@ int hookNds (const tNDSHeader* ndsHeader, u32* sdEngineLocation) {
 
 	nocashMessage("hookNds");
 
+	u32* a9Swi0FARMLocation = hookSwi0FARM(ndsHeader->arm9destination, ndsHeader->arm9binarySize);
+	if (a9Swi0FARMLocation && recentLibnds && a9Swi0FARMLocation[0x120/4] == 0xC00002F) {
+		a9Swi0FARMLocation[0x120/4] = 0x8000035; // Early post-DSi homebrew (such as Colors!) will attempt to check the GBA slot for NitroFS, even in DSi mode, so allow MPU access to the GBA ROM map to avoid crashing
+	}
+
 	if (!(scfgRomBak & BIT(1))) {
-		u32* a9Swi0FARMLocation = hookSwi0FARM(ndsHeader->arm9destination, ndsHeader->arm9binarySize);
 		if (a9Swi0FARMLocation) {
 			// Stub out SWI 0x0F for DSi BIOS
 			*a9Swi0FARMLocation = 0xE3A00000; // mov r0, #0
@@ -419,7 +423,7 @@ int hookNds (const tNDSHeader* ndsHeader, u32* sdEngineLocation) {
 	}
 
 	if (ndsHeader->arm9binarySize == 0x48950 && ndsHeader->arm7binarySize == 0x74C4) {			// SNEmulDS06-WIP2
-		setBL(0x037F93F0, sdEngineLocation[1]);
+		setBL(0x037F93F0, sdEngineLocation[2]);
 
 		patchIntrWaits(ndsHeader, sdEngineLocation, swi04Location, swi05Location);
 
@@ -464,7 +468,7 @@ int hookNds (const tNDSHeader* ndsHeader, u32* sdEngineLocation) {
 	extern u32 dldiOffset;
 	if (dldiOffset && hookAccel) {
 		if (a9Swi00Location) {
-			u32 dstAddr = dldiOffset+0x80;
+			u32 dstAddr = ((u32)ndsHeader->arm9destination)+dldiOffset+0x84;
 			const u16* branchCode = generateA7InstrThumb((int)a9Swi00Location, dstAddr);
 
 			// patch the program

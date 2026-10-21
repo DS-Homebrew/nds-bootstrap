@@ -547,7 +547,7 @@ static void startBinary_ARM7 (void) {
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // Main function
 
-static u32 quickFind (const unsigned char* data, const unsigned char* search, u32 dataLen, u32 searchLen) {
+/* static u32 quickFind (const unsigned char* data, const unsigned char* search, u32 dataLen, u32 searchLen) {
 	const int* dataChunk = (const int*) data;
 	int searchChunk = ((const int*)search)[0];
 	u32 i;
@@ -565,7 +565,7 @@ static u32 quickFind (const unsigned char* data, const unsigned char* search, u3
 	}
 
 	return -1;
-}
+} */
 
 extern unsigned char dldiMagicLoaderString[0xC];
 
@@ -670,17 +670,11 @@ int arm7_main (void) {
 		if (recentLibnds) {
 			REG_MBK6=0x00403000;
 		} else {
-			i2cWriteRegister(0x4A, 0x12, 0x00);		// Press power-button for auto-reset
-			i2cWriteRegister(0x4A, 0x70, 0x01);		// Bootflag = Warmboot/SkipHealthSafety
-
 			tonccpy ((char*)NDS_SHARED_8MB, (char*)NDS_SHARED, 0x1000);	// Copy user data and header to 8th MB of main memory
 			tonccpy ((char*)NDS_SHARED_4MB, (char*)NDS_SHARED, 0x1000);	// Copy user data and header to 4th MB of main memory
 			ndsHeader = (tNDSHeader*)NDS_HEADER_4MB;
 		}
 	} else {
-		i2cWriteRegister(0x4A, 0x12, 0x00);		// Press power-button for auto-reset
-		i2cWriteRegister(0x4A, 0x70, 0x01);		// Bootflag = Warmboot/SkipHealthSafety
-
 		tonccpy ((char*)NDS_SHARED_4MB, (char*)NDS_SHARED, 0x1000);	// Copy user data and header to 4th MB of main memory
 		ndsHeader = (tNDSHeader*)NDS_HEADER_4MB;
 	}
@@ -737,59 +731,72 @@ int arm7_main (void) {
 
 	patchOffsetCacheFilePrevCrc = swiCRC16(0xFFFF, &patchOffsetCache, sizeof(patchOffsetCacheContents));
 
-	dldiMagicLoaderString[0]--;
+	bool hasSdAccess = false;
+	if (!isGbaR2 && recentLibnds && dsiModeConfirmed) {
+		if (!patchOffsetCache.sdRegChecked) {
+			u32* addr = (u32*)ndsHeader->arm7destination;
+			for (u32 i = 0; i < ndsHeader->arm7binarySize/4; i++) {
+				if (addr[i] == 0x04004800)
+				{
+					patchOffsetCache.sdRegOffset = addr + i;
+					break;
+				}
+			}
+			patchOffsetCache.sdRegChecked = true;
+		}
 
-	// Patch with DLDI if desired
-	if (!recentLibnds || (recentLibnds && !dsiModeConfirmed) || ramDiskFound) {
-		nocashMessage("wantToPatchDLDI");
-		dldiPatchBinary ((u8*)((u32*)NDS_HEADER)[0x0A], ((u32*)NDS_HEADER)[0x0B], (ramDiskCluster != 0));
-		patchOffsetCache.dldiChecked = true;
+		hasSdAccess = (*patchOffsetCache.sdRegOffset == 0x04004800);
+	}
+
+	if (!dsiModeConfirmed || !recentLibnds || !hasSdAccess) {
+		i2cWriteRegister(0x4A, 0x12, 0x00);		// Press power-button for auto-reset
+		i2cWriteRegister(0x4A, 0x70, 0x01);		// Bootflag = Warmboot/SkipHealthSafety
 	}
 
 	patchBinary(ndsHeader);
 
-	if (!isGbaR2 && !ramDiskFound && (!recentLibnds || !dsiModeConfirmed)) {
-		// Find the DLDI reserved space in the file
-		u32 patchOffset = patchOffsetCache.dldiOffset;
-		if (!patchOffsetCache.dldiChecked) {
-			patchOffset = quickFind ((u8*)((u32*)NDS_HEADER)[0x0A], dldiMagicLoaderString, ((u32*)NDS_HEADER)[0x0B], sizeof(dldiMagicLoaderString));
-			if (patchOffset) {
-				patchOffsetCache.dldiOffset = patchOffset;
-			}
-			patchOffsetCache.dldiChecked = true;
-		}
+	dldiMagicLoaderString[0]--;
 
-		hookNds(ndsHeader, (u32*)sdEngineLocation);
+	// Patch with DLDI if desired
+	if (!dsiModeConfirmed || !recentLibnds || !hasSdAccess || ramDiskFound) {
+		nocashMessage("wantToPatchDLDI");
+		dldiPatchBinary ((u8*)((u32*)NDS_HEADER)[0x0A], ((u32*)NDS_HEADER)[0x0B], ramDiskFound && (ramDiskCluster != 0));
+		patchOffsetCache.dldiChecked = true;
 
-		if (!patchOffsetCache.bootloaderChecked) {
-			u32 bootloaderSignature[4] = {0xEA000002, 0x00000000, 0x00000001, 0x00000000};
+		if (!isGbaR2) {
+			// Find the DLDI reserved space in the file
+			hookNds(ndsHeader, (u32*)sdEngineLocation, hasSdAccess);
 
-			// Find and inject bootloader
-			u32* addr = (u32*)ndsHeader->arm9destination;
-			for (u32 i = 0; i < ndsHeader->arm9binarySize/4; i++) {
-				if (addr[i]   == bootloaderSignature[0]
-				 && addr[i+1] == bootloaderSignature[1]
-				 && addr[i+2] == bootloaderSignature[2]
-				 && addr[i+3] == bootloaderSignature[3])
-				{
-					patchOffsetCache.bootloaderOffset = addr + i;
-					break;
+			if (!patchOffsetCache.bootloaderChecked) {
+				u32 bootloaderSignature[4] = {0xEA000002, 0x00000000, 0x00000001, 0x00000000};
+
+				// Find and inject bootloader
+				u32* addr = (u32*)ndsHeader->arm9destination;
+				for (u32 i = 0; i < ndsHeader->arm9binarySize/4; i++) {
+					if (addr[i]   == bootloaderSignature[0]
+					 && addr[i+1] == bootloaderSignature[1]
+					 && addr[i+2] == bootloaderSignature[2]
+					 && addr[i+3] == bootloaderSignature[3])
+					{
+						patchOffsetCache.bootloaderOffset = addr + i;
+						break;
+					}
 				}
+				patchOffsetCache.bootloaderChecked = true;
 			}
-			patchOffsetCache.bootloaderChecked = true;
-		}
-		if (patchOffsetCache.bootloaderOffset) {
-			const u32 bootInjectLocation = (sdEngineLocation == SDENGINE_LOCATION_ALT) ? BOOT_INJECT_LOCATION_ALT : BOOT_INJECT_LOCATION;
-			*(u32*)0x06000024 = sdEngineLocation;
-			*(u32*)0x06000028 = bootInjectLocation;
-			*(u16*)0x0600002C = REG_SCFG_ROM;
+			if (patchOffsetCache.bootloaderOffset) {
+				const u32 bootInjectLocation = (sdEngineLocation == SDENGINE_LOCATION_ALT) ? BOOT_INJECT_LOCATION_ALT : BOOT_INJECT_LOCATION;
+				*(u32*)0x06000024 = sdEngineLocation;
+				*(u32*)0x06000028 = bootInjectLocation;
+				*(u16*)0x0600002C = REG_SCFG_ROM;
 
-			//toncset(patchOffsetCache.bootloaderOffset, 0, 0x9C98);
-			tonccpy(patchOffsetCache.bootloaderOffset, (char*)0x06000000, 0x8000);
-			tonccpy((char*)bootInjectLocation, (char*)0x06000000, 0x8000);
+				//toncset(patchOffsetCache.bootloaderOffset, 0, 0x9C98);
+				tonccpy(patchOffsetCache.bootloaderOffset, (char*)0x06000000, 0x8000);
+				tonccpy((char*)bootInjectLocation, (char*)0x06000000, 0x8000);
+			}
 		}
-	} else if (!isGbaR2 && (!recentLibnds || !dsiModeConfirmed)) {
-		hookNds(ndsHeader, NULL); // Only patch SWI functions
+	} else {
+		hookNds(ndsHeader, NULL, hasSdAccess); // Only patch SWI functions
 	}
 	toncset((char*)0x06000000, 0, 0x8000);
 

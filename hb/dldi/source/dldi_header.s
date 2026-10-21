@@ -4,11 +4,11 @@
 	.section ".crt0","ax"
 @---------------------------------------------------------------------------------
 	.global _start
-	.global dataStartOffset
 	.global ioType
 	.global dldi_bss_end
 	.global allocated_space
 	@.global heapShrunk
+	.global word_command_offset
 	.align	4
 	.arm
 
@@ -30,7 +30,6 @@
 @---------------------------------------------------------------------------------
 @ Offsets to important sections within the data	-- 32 bytes
 	.align	6
-	dataStartOffset:
 	.word   __text_start	@ data start
 	.word   __data_end		@ data end
 	.word	__glue_start	@ Interworking glue start	-- Needs address fixing
@@ -54,7 +53,8 @@
 	.word	shutdown		@
 
 	@heapShrunk:
-	@.word	0x00000000
+	word_command_offset:
+	.word	0x00000000
 
 	.thumb
 	@swiSoftReset:

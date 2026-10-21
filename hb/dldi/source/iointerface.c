@@ -51,13 +51,12 @@
 void unlockDSiWram(void);
 
 extern char ioType[4];
-extern u32 dataStartOffset;
 //extern vu32 word_command; // word_command_offset
 //extern vu32 word_params; // word_command_offset+4
 //extern u32* words_msg; // word_command_offset+8
-u32 word_command_offset = CARDENGINE_SHARED_ADDRESS;
+extern u32 word_command_offset;
 
-extern u32 heapShrunk;
+// extern u32 heapShrunk;
 u32 cacheAddress = CACHE_ADDRESS_START;
 int cacheSlots = 16;
 bool cacheEnabled = false;

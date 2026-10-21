@@ -375,6 +375,8 @@ int main (void) {
 			&& a9exe[3] == 0xE129F000);
 	}
 
+	patchBinary(ndsHeader);
+
 	dldiMagicLoaderString[0]--;
 
 	// Patch with DLDI if desired
@@ -382,8 +384,6 @@ int main (void) {
 		//nocashMessage("wantToPatchDLDI");
 		dldiPatchBinary ((u8*)((u32*)NDS_HEADER)[0x0A], ((u32*)NDS_HEADER)[0x0B]);
 	//}
-
-	patchBinary(ndsHeader);
 
 	if (!isGbaR2) {
 		hookNds(ndsHeader, (u32*)sdEngineLocation);
