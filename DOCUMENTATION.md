@@ -1,0 +1,181 @@
+# Documentation
+
+## `nds-bootstrap.ini`
+
+- `DEBUG`: Prints out SCFG registers and some settings on the bottom screen before the ROM boots (default: `0` for off)
+- `B4DS_MODE`: Activates B4DS mode, which makes nds-bootstrap run only with 4MB of RAM (default: `0` for off)
+    - Does not work from DSi/3DS SD card
+	- Automatically activates when running from flashcards in DS mode
+	- Has lessened compatibility when compared to running from the DSi/3DS SD card
+- `NDS_PATH`: The path of the DS(i) ROM which nds-bootstrap will boot
+- `APP_PATH`: The short (8.3) version of the DS(i) ROM path used by DSiWare (Unused in B4DS mode)
+- `SAV_PATH`: The path of the file containing save data. Also used for the public save data for DSiWare
+- `PRV_PATH`: Used for the private save data for DSiWare (Unused in B4DS mode)
+- `BNR_PATH`: The path of the banner file created by a DSiWare title (Unused in B4DS mode)
+- `DONOR20_NDS_PATH`: The path of the donor ROM which uses SDK 2.0. Only used by the European version of *Yoshi Touch & Go*
+- `DONOR5_NDS_PATH`: The path of the donor ROM which uses SDK 5.x. Used for running DSiWare in B4DS mode
+- `DONOR5_NDS_PATH_ALT`: The path of the donor ROM which uses SDK 5.x and contains an ARM7 binary where the wireless code runs from VRAM
+    - *Lufia: Curse of the Sinistrals* is the only known SDK 5.x ROM to contain this kind of ARM7 binary
+    - Used for running DSiWare (which require a little more RAM) in B4DS mode
+- `DONORTWL0_NDS_PATH`: The path of the DSi-Enhanced donor ROM which uses SDK 5.0. Used for running DSiWare in B4DS mode
+- `DONORTWL_NDS_PATH`: The path of the DSi-Enhanced donor ROM which uses SDK 5.x. Used for running DSiWare in B4DS mode
+- `DONORTWLONLY0_NDS_PATH`: The path of the DSi-Exclusive donor ROM which uses SDK 5.0. Used for running SDK 5.0 DSi-Enhanced games via DSiWare exploits
+- `DONORTWLONLY_NDS_PATH`: The path of the DSi-Exclusive donor ROM which uses SDK 5.x. Used for running SDK 5.x DSi-Enhanced games via DSiWare exploits
+- `QUIT_PATH`: The path of the `.nds` which boots when quitting a game
+- `LANGUAGE`: Language used when running a game (default: `-1`)
+- `REGION`: The set region for DSiWare titles (default: `-1`)
+- `USE_ROM_REGION`: Automatically sets the required region for a DSiWare title (default: `1` for onn)
+- `SDNAND`: Reads TWLNAND files from the SD card instead of SysNAND (default: `0` for off) (Unused in B4DS mode)
+- `DSIWARE_SLOT1_MODE`: Runs DSiWare titles as if they we're running from the DS(i) card slot, and also patches most of them to use a custom save implementation (default: `0` for off)
+    - Automatically activates in B4DS mode and/or if the DSiWare ROM is larger than 64MB
+- `DSI_MODE`: Runs a game in DSi mode (`0`: Off, `1`: On for DSi-Enhanced/Exclusive, DSiWare, or homebrew games, `2`: On for all games)
+    - For DSi-Enhanced/Exclusive and DSiWare games, this allows them to use the doubled ARM9 CPU speed, along with the expanded RAM, Camera, and/or WPA 1/2 WiFi
+	- Unused in B4DS mode
+- `DONOR_SDK_VER`: Used if nds-bootstrap fails to detect the SDK version in the ROM (default: `0`)
+- `PATCH_MPU_REGION`: The number of which MPU region gets patched. Should not need to be changed in most cases (default: `0`)
+- `PATCH_MPU_SIZE`: Unused (default: `0`)
+- `CONSOLE_MODEL`: Indicates which console is used to run nds-bootstrap on (`0`: Nintendo DSi (Retail), `1`: Nintendo DSi (Debug), `2`: Nintendo 3DS/2DS) (Unused in B4DS mode)
+- `ROMREAD_LED`: The LED used for CPU ROM reads (Unused in B4DS mode)
+- `DMA_ROMREAD_LED`: The LED used for DMA and/or asynchronous ROM reads (Unused in B4DS mode)
+- `REMAPPED_KEY_A`: Makes the `A` button act as a different button (default: `0`)
+- `REMAPPED_KEY_B`: Makes the `B` button act as a different button (default: `1`)
+- `REMAPPED_KEY_SELECT`: Makes the `SELECT` button act as a different button (default: `2`)
+- `REMAPPED_KEY_START`: Makes the `START` button act as a different button (default: `3`)
+- `REMAPPED_KEY_RIGHT`: Makes D-Pad `RIGHT` act as a different button (default: `4`)
+- `REMAPPED_KEY_LEFT`: Makes D-Pad `LEFT` act as a different button (default: `5`)
+- `REMAPPED_KEY_UP`: Makes D-Pad `UP` act as a different button (default: `6`)
+- `REMAPPED_KEY_DOWN`: Makes D-Pad `DOWN` act as a different button (default: `7`)
+- `REMAPPED_KEY_R`: Makes the `R` button act as a different button (default: `8`)
+- `REMAPPED_KEY_L`: Makes the `L` button act as a different button (default: `9`)
+- `REMAPPED_KEY_X`: Makes the `X` button act as a different button (default: `10`)
+- `REMAPPED_KEY_Y`: Makes the `Y` button act as a different button (default: `11`)
+- `ASYNC_CARD_READ`: Allows more ROM data to be read asynchronously that card read DMA can't, but will cause issues in some games due to how they're developed (default: `-1`)
+    - `0`: Off
+	- `1`: Minimal (where it's only used for STRM and Mobiclip files, the latter for some games)
+	- `2`: Full (used for all files)
+- `CARD_READ_DMA`: Enables the uses of Direct Memory Access (DMA) for card reads. Having this setting on will allow some ROM data to be read asynchronously, but may cause issues with a few games due to timing differences from the original DS game cards (default: `-1`)
+    - More technical info can be found on the [DS Index](https://wiki.ds-homebrew.com/ds-index/retail-roms#card-read-dma)
+- `FORCE_SLEEP_PATCH`: Forces a sleep mode patch which disables checking Slot-1. Automatically activated for certain flashcards or if the game is running from the DSi/3DS SD card (default: `0` for off)
+- `PRECISE_VOLUME_CONTROL`: Enables precisely controlling the volume level by pressing `SELECT` + `Up`/`Down` on DSi consoles (default: `0` for off) (Unused in B4DS mode)
+- `LOGGING`: Logs information about the patching process in `sd:/NDSBTSRP.LOG` (default: `0` for off)
+- `MACRO_MODE`: Turns off the top screen (default: `0` for no macro mode)
+- `SLEEP_MODE`: Enables games to turn off the screens to save on power when the screen lid is closed (default: `1` for on)
+- `BOOST_CPU`: Doubles the ARM9 CPU speed from 66mhz to 133mhz (default: `-1`) (Unused in B4DS mode)
+- `BOOST_VRAM`: Enables 8-bit writes to VRAM (default: `0`) (Unused in B4DS mode)
+- `SOUND_FREQ`: Changes the audio/mic frequency (`0`: 33khz, `1`: 48khz) (Does not work on DS & DS Lite consoles)
+- `PHAT_COLORS`: Changes the on-screen colors to appear as if they we're displayed on a DS Phat console (Unused in B4DS mode)
+- `GUI_LANGUAGE`: The language used in the in-game menu
+- `HOTKEY`: The hotkey used for opening the in-game menu (default: `284` for `L`+`Down`+`Select`)
+- `SCREEN_SWAP_HOTKEY`: The hotkey used for swapping the screens (default: `740` for `L`+`R`+`Up`+`X`)
+- `MANUAL_PATH`: The path of the game manual `.txt` file, which can be viewed in the in-game menu
+- `SAVE_RELOCATION`: Allows the game to save to the SD card instead of the original game card (default: `1` for on)
+- `RESETSLOT1`: You'll be asked to insert a game card before the homebrew boots (default: `0` for off) (Exclusive to nds-bootstrap-hb)
+- `HOMEBREW_ARG`: An argument to pass to the homebrew as `argv[1]` (Exclusive to nds-bootstrap-hb)
+- `RAM_DRIVE_PATH`: The path of the RAM drive for the homebrew to use (Exclusive to nds-bootstrap-hb)
+    - Can be used if the homebrew fails to read from the DSi/3DS SD card
+
+## `retail`: The build which handles running official/commercial games
+
+- `apfix`: Includes AP-patches for games that have AP measures which can cause issues during gameplay
+- `arm7`: The ARM7 code which runs after nds-bootstrap boots
+- `arm9`: The ARM9 code which runs after nds-bootstrap boots
+- `assets`: Contains the icon used when `nds-bootstrap.nds` displays in the ROM list
+- `asyncLoadSettings`: Settings for some data to be asynchronously loaded
+- `bin`: The built nds-bootstrap `.nds` file will be located there
+- `bootloader`: Used only in B4DS mode, includes code for patching DS(i) ROMs on the fly to read from the flashcard instead of the original game card
+    - `bootloader` also contains the first half of patches to allow DSiWare to run in B4DS mode, along with some save patches not yet included in `dsi2dsSavePatches`
+    - `bootloader2` contains the second half of patches to allow DSiWare to run in B4DS mode, along with some save patches not yet included in `dsi2dsSavePatches`
+- `bootloaderi`: Used only for DSi/3DS SD card, includes code for patching DS(i) ROMs on the fly to read from the flashcard instead of the original game card
+    - `bootloaderi` also contains the first half of some DSiWare save patches not yet included in `dsi2dsSavePatches`
+    - `bootloaderi2` contains the second half of some DSiWare save patches not yet included in `dsi2dsSavePatches`
+- `cardengine`: The code which handles R/W ROM and save data in B4DS mode
+    - `arm7`: Includes code which handles:
+        - Notifying ARM9 to read or write saves
+        - Software-side volume control
+        - Rumble for the few supported DSiWare titles (such as *Mighty Flip Champs!*, *Mighty Milky Way*, and *Shantae: Risky's Revenge*)
+        - Notifying ARM9 to swap screens
+        - In-game menu inputs
+        - Time display for the in-game menu
+        - Passing ARM7 RAM data to ARM9 for the RAM viewer/editor
+    - `arm7_ace3dsp`: Same as `arm7`, but disables wireless checking in order for the in-game menu to open on Ace3DS+ and it's clones
+    - `arm7_music`: Same as `arm7`, but includes custom music playback code for *Mighty Milky Way* and *Shantae: Risky's Revenge*
+    - `arm9`: Includes code which handles:
+        - Reading the ROM file from a flashcard or from pre-loaded ROM data
+        - Reading and writing the save file on a flashcard
+		- Bypassing AP checks for *Golden Sun: Dark Dawn*
+        - Swaping screens after being notified by ARM7
+        - Loading custom music for *Mighty Milky Way* and *Shantae: Risky's Revenge*
+        - Soft-resetting or quitting the game
+    - `arm9_32`: Same as `arm9`, but has support for 32KB DLDI drivers
+    - `arm9_alt`, `arm9_alt_gsdd`, `arm9_alt2`, `arm9_alt3`: Same as `arm9`, but removes some code in order to fit within a specific RAM area
+    - `arm9_dldipatcher`: An overlay which contains code to DLDI-patch the loaded file from `QUIT_PATH`
+    - `arm9_extmem`: Same as `arm9`, but with adjustments for DS debug consoles
+    - `arm9_extmem_foto`: Same as `arm9_extmem`, but is placed near the start of main RAM, and contains extra code for *Foto Showdown*, *System Flaw*, and *System Flaw: Recruit*
+    - `arm9_extmem_gsdd`: Same as `arm9_extmem`, but includes bypassing AP checks for *Golden Sun: Dark Dawn*
+    - `arm9_extmem_start`: Same as `arm9_extmem`, but is placed near the start of main RAM
+    - `arm9_igm`: In-game menu code
+    - `arm9_igm_extmem`: In-game menu code, but adjusted for DS debug consoles
+    - `arm9_slot2heap`: Code which handles Slot-2 memory allocation for *Dragon Quest Wars*
+    - `arm9_start`: Same as `arm9`, but is placed near the start of main RAM
+    - `arm9_start_foto`: Same as `arm9`, but is placed near the start of main RAM, and contains extra code for *Foto Showdown*, *System Flaw*, and *System Flaw: Recruit*
+- `cardenginei`: The code which handles R/W ROM and save data
+    - `arm7`: Includes code which handles:
+        - Reading the ROM file from the SD card after being notified by ARM9
+        - Reading or writing the save file on the SD card
+		- Precise volume control for DSi
+        - Notifying ARM9 to swap screens
+        - In-game menu inputs
+        - Time and battery display for the in-game menu
+        - Passing ARM7 RAM data to ARM9 for the RAM viewer/editor
+		- Reading either the ROM or the loaded file from `QUIT_PATH` when either soft-resetting or quitting the game
+    - `arm7_alt`: Same as `arm7`, but is placed in a different memory address
+    - `arm7_cheat`: Code which runs the loaded cheat data
+    - `arm7_cheatonly`: Same as `arm7_cheat`, but runs independently from `arm7`
+    - `arm7_dsiware`: Same as `arm7`, but strips out the code used for reading and writing the DS(i) card game and save data
+    - `arm7_dsiware3`: Same as `arm7_dsiware`, but is placed in a different memory address
+    - `arm7_twlsdk`: Same as `arm7`, but adjusts the code for DSi-Enhanced/Exclusive games
+    - `arm7_twlsdk3`: Same as `arm7_twlsdk`, but is placed in a different memory address
+    - `arm9`: Includes code which handles:
+        - Notifying ARM7 to read ROM data from the SD card into the LRU cache
+        - Loading ROM data from the LRU cache
+        - Reading pre-loaded ROM data
+        - Swaping screens after being notified by ARM7
+        - Soft-resetting or quitting the game (involves notifying ARM7 to read either the ROM or the loaded file from `QUIT_PATH`)
+    - `arm9_colorlut`: Handles applying the loaded color filter onto the on-screen colors
+    - `arm9_dldi`: Same as `arm9`, but has ARM9 read the ROM file from a flashcard, causing asynchronous reads to not work
+    - `arm9_dsiware`: Has very little code compared to `arm9`, and only has:
+        - Swaping screens after being notified by ARM7
+        - Soft-resetting or quitting the game (involves notifying ARM7 to read either the ROM or the loaded file from `QUIT_PATH`)
+    - `arm9_dsiware3`: Same as `arm9_dsiware`, but is placed in a different memory address
+    - `arm9_gsdd`: Same as `arm9`, but includes bypassing AP checks for *Golden Sun: Dark Dawn*
+    - `arm9_gsdd_dldi`: Same as `arm9_dldi`, but includes bypassing AP checks for *Golden Sun: Dark Dawn*
+    - `arm9_igm`: In-game menu code
+    - `arm9_twlsdk`: Same as `arm9`, but adjusts the code for DSi-Enhanced/Exclusive games
+    - `arm9_twlsdk_dldi`: Same as `arm9_twlsdk`, but has ARM9 read the ROM file from a flashcard, causing asynchronous reads to not work
+    - `arm9_twlsdk3`: Same as `arm9_twlsdk`, but is placed in a different memory address
+    - `arm9_twlsdk3_dldi`: Same as `arm9_twlsdk_dldi`, but is placed in a different memory address
+- `common`: General usage code such as SD code, FAT code, and `tonccpy` (a type of `memcpy` code), along with memory addresses inside `locations.h`
+- `conf`: Contains an example `nds-bootstrap.ini` file
+- `dsi2dsSavePatches`: Includes save patches for DSiWare titles in order for them to not use the SDMMC filesystem functions, as they are unavailable for Slot-1 or B4DS mode
+- `mobiclipOffsets`: Includes offsets for the code which draws the Mobiclip video to the screen
+- `nitrofiles`: Files which will be included in `nds-bootstrap.nds`
+- `preLoadSettings`: Settings to pre-load specific data for some games into RAM
+- `unused`: Code which is not used in nds-bootstrap
+
+## `hb`: The build which handles running old homebrew
+
+- `arm7`: The ARM7 code which runs after nds-bootstrap boots
+- `arm9`: The ARM9 code which runs after nds-bootstrap boots
+- `assets`: Contains the icon used when `nds-bootstrap-hb.nds` displays in the ROM list
+- `bin`: The built nds-bootstrap `.nds` file will be located there
+- `bootloader`: Includes code for patching the homebrew to read from the DSi/3DS SD card
+- `bootloaderInject`: Almost the same as `bootloader`, and is used if a homebrew boots into another homebrew via `nds_loader_arm9`
+- `bootstub`: Unused
+- `common`: General usage code such as SD code, FAT code, and `tonccpy` (a type of `memcpy` code), along with memory addresses inside `locations.h`
+- `conf`: Contains example files
+- `data`: Contains `bootstub.bin` after building
+- `dldi`: The DLDI driver which notifies ARM7 to read or write the SD card. The driver can also read the loaded RAM disk from RAM
+    - If the driver runs from ARM7 instead of ARM9, it'll simply R/W the SD card by itself
+- `nitrofiles`: Files which will be included in `nds-bootstrap-hb.nds`
+- `sdengine`: The code which reads or writes the SD card on ARM7 after being notified by ARM9
+- `sdengine_alt`: Same as `sdengine`, but is placed in a different memory address
