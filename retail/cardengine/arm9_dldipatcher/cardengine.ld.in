@@ -6,7 +6,7 @@ OUTPUT_ARCH(arm)
 
 MEMORY {
 
-	vram	: ORIGIN = 0x02370000, LENGTH = 1K /* Main RAM */
+	vram	: ORIGIN = 0x02370000, LENGTH = CARDENGINE_ARM9_DLDIPATCHER_SIZE /* Main RAM */
 }
 
 __vram_start	=	ORIGIN(vram);

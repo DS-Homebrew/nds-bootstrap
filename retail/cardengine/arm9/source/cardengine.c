@@ -362,7 +362,7 @@ void reset(u32 param, u32 param2) {
 		WRAM_CR = 0x03; // Set shared ram to ARM7
 		sharedAddr[1] = 0x48495344; // 'DSIH'
 
-		fileRead((char*)0x02370000, &ndsBootstrap, ce9->dldiPatchBinaryOffset, 0x400);
+		fileRead((char*)0x02370000, &ndsBootstrap, ce9->dldiPatchBinaryOffset, CARDENGINE_ARM9_DLDIPATCHER_SIZE);
 		if (!dldiPatchBinary(dldiOffsetNew, ndsHeader->arm9destination, ndsHeader->arm9binarySize)) {
 			sharedAddr[1] = 0x57495344;
 		}
@@ -387,7 +387,7 @@ void reset(u32 param, u32 param2) {
 		#endif */
 
 		#ifdef NODSIWARE
-		tonccpy((u32*)0x02370000, ce9, 0x2800);
+		tonccpy((u32*)0x02370000, ce9, CARDENGINE_ARM9_ALT_SIZE);
 		#endif
 
 		resetMpu();
@@ -515,11 +515,11 @@ void saveMainScreenSetting(void) {
 #endif
 
 void writeIgm(u32 dst) {
-	fileWrite((char*)igmLocation, &pageFile, dst, 0xA000);
+	fileWrite((char*)igmLocation, &pageFile, dst, INGAME_MENU_BUFFER_SIZE);
 }
 
 void readIgm(u32 src) {
-	fileRead((char*)igmLocation, &pageFile, src, 0xA000);
+	fileRead((char*)igmLocation, &pageFile, src, INGAME_MENU_BUFFER_SIZE);
 }
 
 void inGameMenu(s32* exRegisters) {
@@ -541,7 +541,7 @@ void inGameMenu(s32* exRegisters) {
 
 	if (!opened) {
 		opening = true;
-		writeIgm(0xA000);	// Backup part of game RAM to page file
+		writeIgm(INGAME_MENU_BUFFER_SIZE);	// Backup part of game RAM to page file
 		readIgm(0);	// Read in-game menu
 	}
 	opening = false;
@@ -559,7 +559,7 @@ void inGameMenu(s32* exRegisters) {
 	} */
 
 	writeIgm(0);	// Store in-game menu
-	readIgm(0xA000);	// Restore part of game RAM from page file
+	readIgm(INGAME_MENU_BUFFER_SIZE);	// Restore part of game RAM from page file
 
 	if (res == 0x54495845) {
 		igmReset = true;

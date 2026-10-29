@@ -285,9 +285,9 @@ static void resetMemory_ARM7(void) {
 
 	memset_addrs_arm7(0x03800000 - 0x8000, 0x03800000 + 0x10000);
 	toncset((u32*)0x02380000, 0, 0x38000);		// clear part of EWRAM - except before 0x023B8000, which has the DSiWare ROM's arm9i code, and 0x023BF000, which has the bootloader arm9 code
-	toncset((u32*)0x023C0000, 0, 0x20000);
-	toncset((u32*)0x023F0000, 0, 0xCF80);
-	toncset((u32*)0x023FE000, 0, 0x400);
+	toncset((u32*)0x023C0000, 0, CARDENGINE_ARM9_LOCATION_BUFFERED - 0x023C0000);
+	toncset((u32*)0x023F0000, 0, CARDENGINE_ARM7_LOCATION_BUFFERED - 0x023F0000);
+	toncset((u32*)0x023FE000, 0, CHEAT_ENGINE_LOCATION_B4DS_BUFFERED - 0x023FE000);
 	toncset((u32*)0x023FF000, 0, 0x1000);
 
 	REG_IE = 0;
@@ -1168,7 +1168,7 @@ bool buttonsRemapped(void) {
 }
 
 u32 loadCe9Slot2Heap(u32* dst) {
-	const u16 len = 0x800;
+	const u16 len = CARDENGINE_ARM9_SLOT2HEAP_SIZE;
 	tonccpy(dst, (u32*)CARDENGINE_ARM9_SLOT2HEAP_LOCATION_BUFFERED, len);
 	for (int i = 0; i < len/4; i++) {
 		if (dst[i] >= 0xBF800000 && dst[i] < 0xBF800000+len) {
@@ -1403,14 +1403,14 @@ int arm7_main(void) {
 		overlayPatch = true; // Allow overlay patching for SM64DS ROM hacks (ex. Mario's Holiday)
 	}
 
-	tonccpy((u8*)CARDENGINE_ARM7_LOCATION, (u8*)CARDENGINE_ARM7_LOCATION_BUFFERED, 0x1080);
-	toncset((u8*)CARDENGINE_ARM7_LOCATION_BUFFERED, 0, 0x1080);
+	tonccpy((u8*)CARDENGINE_ARM7_LOCATION, (u8*)CARDENGINE_ARM7_LOCATION_BUFFERED, CARDENGINE_ARM7_SIZE);
+	toncset((u8*)CARDENGINE_ARM7_LOCATION_BUFFERED, 0, CARDENGINE_ARM7_SIZE);
 
 	ce9Location = *(u32*)CARDENGINE_ARM9_LOCATION_BUFFERED;
-	ce9Alt = (ce9Location == CARDENGINE_ARM9_LOCATION_DLDI_ALT || ce9Location == CARDENGINE_ARM9_LOCATION_DLDI_ALT2);
+	ce9Alt = (ce9Location == CARDENGINE_ARM9_LOCATION_DLDI_ALT || ce9Location == CARDENGINE_ARM9_LOCATION_DLDI_ALT2 || ce9Location == CARDENGINE_ARM9_LOCATION_DLDI_ALT3);
 	// const bool ce9NotInHeap = (ce9Alt || ce9Location == CARDENGINE_ARM9_LOCATION_DLDI_START);
-	tonccpy((u32*)ce9Location, (u32*)CARDENGINE_ARM9_LOCATION_BUFFERED, ce9Alt ? 0x2800 : 0x3800);
-	toncset((u32*)0x023E0000, 0, 0x10000);
+	tonccpy((u32*)ce9Location, (u32*)CARDENGINE_ARM9_LOCATION_BUFFERED, ce9Alt ? CARDENGINE_ARM9_ALT_SIZE : (CARDENGINE_ARM9_SIZE - 0x400));
+	toncset((u32*)CARDENGINE_ARM9_LOCATION_BUFFERED, 0, CARDENGINE_ARM9_BUFFER_CLEAR_SIZE);
 
 	aFile musicsFile;
 	getFileFromCluster(&musicsFile, musicCluster);
@@ -1537,7 +1537,7 @@ int arm7_main(void) {
 					fatTableSizeNoExp = 0x20000;
 					if (((u32)ndsHeader->arm9destination < 0x02004000) && ((accessControl & BIT(4)) || arm7mbk == 0x080037C0)) {
 						fatTableAddr = CARDENGINE_ARM9_LOCATION_DLDI;
-						fatTableSizeNoExp = 0x1A400;
+						fatTableSizeNoExp = fatTableAddr - 0x023C0000;
 					}
 
 					const u32 cheatSizeTotal = cheatSize+(apPatchIsCheat ? apPatchSize : 0);
@@ -1665,12 +1665,12 @@ int arm7_main(void) {
 	)) {
 		ce9DldiItcm = 0x01FFC000; // Set <= 16KB DLDI location at ITCM
 	}
-	if (!dldiPatchBinary((data_t*)ce9Location, 0x3800, (data_t*)ce9DldiOffset, (data_t*)ce9DldiItcm)) {
+	if (!dldiPatchBinary((data_t*)ce9Location, (CARDENGINE_ARM9_SIZE - 0x400), (data_t*)ce9DldiOffset, (data_t*)ce9DldiItcm)) {
 		dbg_printf("ce9 DLDI patch failed\n");
 		errorOutput();
 	}
 
-	toncset((u32*)0x0380C000, 0, 0x2700);
+	toncset((u32*)0x0380C000, 0, CARDENGINE_ARM7_LOCATION - 0x0380C000);
 
 	errorCode = hookNdsRetailArm7(
 		(cardengineArm7*)CARDENGINE_ARM7_LOCATION,
@@ -1782,7 +1782,7 @@ int arm7_main(void) {
 		//codeBranch += 0x30;
 		const u32 codeBranch = 0x023FF200;
 
-		tonccpy((u32*)0x02370000, ce9, 0x2800);
+		tonccpy((u32*)0x02370000, ce9, CARDENGINE_ARM9_ALT_SIZE);
 		tonccpy((u32*)codeBranch, copyBackCe9, copyBackCe9Len);
 		for (int i = 0; i < copyBackCe9Len/4; i++) {
 			u32* addr = (u32*)codeBranch;
@@ -1792,7 +1792,7 @@ int arm7_main(void) {
 			}
 		}
 
-		toncset(ce9, 0, 0x2800);
+		toncset(ce9, 0, CARDENGINE_ARM9_ALT_SIZE);
 
 		const u32 arm9exe = (strncmp(romTid, "BIG", 3) == 0) ? 0x02000800 : (u32)ndsHeader->arm9executeAddress;
 		// "Battle/Combat of Giants: Mutant Insects" (TID: BIG) has code that is run before the actual SDK boot code
