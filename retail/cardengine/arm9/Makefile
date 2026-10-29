@@ -129,7 +129,7 @@ $(DEPSDIR)/$(TARGET).elf:	cardengine.ld $(OFILES)
 #	@echo linking $(notdir $@)
 #	@$(LD)  $(LDFLAGS) $(OFILES) $(LIBPATHS) $(LIBS) -o $@
 
-cardengine.ld:	$(CURDIR)/../cardengine.ld.in
+cardengine.ld:	$(CURDIR)/../cardengine.ld.in $(CURDIR)/../../../common/include/locations.h
 	$(CPP) -P $(INCLUDE) $< $@
 
 

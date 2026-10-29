@@ -6,7 +6,7 @@ OUTPUT_ARCH(arm)
 
 MEMORY {
 
-	vram	: ORIGIN = INGAME_MENU_LOCATION, LENGTH = 39K /* Main RAM */
+	vram	: ORIGIN = INGAME_MENU_LOCATION, LENGTH = CARDENGINEI_ARM9_IGM_SIZE /* Main RAM */
 }
 
 __vram_start	=	ORIGIN(vram);

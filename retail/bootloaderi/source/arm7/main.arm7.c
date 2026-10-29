@@ -1962,7 +1962,7 @@ int arm7_main(void) {
 			arm9_stateFlag = ARM9_WRAMONARM7;
 			while (arm9_stateFlag != ARM9_READY);
 
-			tonccpy((u32*)CARDENGINEI_ARM9_CLUT_LOCATION, (u16*)CARDENGINEI_ARM9_CLUT_BUFFERED_LOCATION, 0x1000);
+			tonccpy((u32*)CARDENGINEI_ARM9_CLUT_LOCATION, (u16*)CARDENGINEI_ARM9_CLUT_BUFFERED_LOCATION, CARDENGINEI_ARM9_CLUT_SIZE);
 			tonccpy((u16*)0x03770000, (u16*)COLOR_LUT_BUFFERED_LOCATION, 0x10000);
 			colorLutEnabled = (*(u32*)CARDENGINEI_ARM9_CLUT_LOCATION == *(u32*)CARDENGINEI_ARM9_CLUT_BUFFERED_LOCATION);
 			colorLutBlockVCount = colorLutEnabled && (*(u32*)(CARDENGINEI_ARM9_CLUT_LOCATION+4) & BIT(2));
@@ -1971,24 +1971,24 @@ int arm7_main(void) {
 			while (arm9_stateFlag != ARM9_READY);
 		}
 
-		toncset((u32*)CARDENGINEI_ARM9_CLUT_BUFFERED_LOCATION, 0, 0x1800);
+		toncset((u32*)CARDENGINEI_ARM9_CLUT_BUFFERED_LOCATION, 0, CARDENGINEI_ARM9_CLUT_BUFFER_CLEAR_SIZE);
 		*(u32*)(COLOR_LUT_BUFFERED_LOCATION-4) = 0;
 		toncset((u16*)COLOR_LUT_BUFFERED_LOCATION, 0, 0x10000);
 
 		ce9Location = *(u32*)CARDENGINEI_ARM9_BUFFERED_LOCATION;
 		ce7Location = *(u32*)CARDENGINEI_ARM7_BUFFERED_LOCATION;
 
-		tonccpy((u32*)ce9Location, (u32*)CARDENGINEI_ARM9_BUFFERED_LOCATION, 0xC00);
+		tonccpy((u32*)ce9Location, (u32*)CARDENGINEI_ARM9_BUFFERED_LOCATION, CARDENGINEI_ARM9_DSIWARE_SIZE);
 
-		tonccpy((u32*)ce7Location, (u32*)CARDENGINEI_ARM7_BUFFERED_LOCATION, 0x8400);
+		tonccpy((u32*)ce7Location, (u32*)CARDENGINEI_ARM7_BUFFERED_LOCATION, (CARDENGINEI_ARM7_DSIWARE_SIZE + LOADER_RETURN_SIZE));
 		if (gameOnFlashcard) {
-			if (!dldiPatchBinary((data_t*)ce7Location, 0x8000, NULL)) {
+			if (!dldiPatchBinary((data_t*)ce7Location, CARDENGINEI_ARM7_DSIWARE_SIZE, NULL)) {
 				dbg_printf("ce7 DLDI patch failed\n");
 				errorOutput();
 			}
 		}
 		cheatEngineOffset = ((ce7Location == CARDENGINEI_ARM7_DSIWARE_LOCATION3) ? CHEAT_ENGINE_DSIWARE_LOCATION3 : CHEAT_ENGINE_DSIWARE_LOCATION);
-		toncset((u32*)CARDENGINEI_ARM7_BUFFERED_LOCATION, 0, 0x8400);
+		toncset((u32*)CARDENGINEI_ARM7_BUFFERED_LOCATION, 0, (CARDENGINEI_ARM7_DSIWARE_SIZE + LOADER_RETURN_SIZE));
 
 		//ensureBinaryDecompressed(&dsiHeaderTemp.ndshdr, moduleParams, false);
 
@@ -2268,13 +2268,14 @@ int arm7_main(void) {
 
 		// dbg_printf("Trying to patch the card...\n");
 
-		const u16 ce9size = (ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr) && dsiModeConfirmed) ? 0x3800 : 0x2FA0;
+		const u16 ce9size = (ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr) && dsiModeConfirmed)
+			? CARDENGINEI_ARM9_TWLSDK_COPY_SIZE : CARDENGINEI_ARM9_SIZE;
 		ce7Location = *(u32*)CARDENGINEI_ARM7_BUFFERED_LOCATION;
-		u32 ce7Size = 0xF800;
+		u32 ce7Size = (CARDENGINEI_ARM7_SIZE + LOADER_RETURN_SIZE);
 
 		const bool useSdk5ce7 = (isSdk5(moduleParams) && ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr) && dsiModeConfirmed);
 		if (useSdk5ce7) {
-			ce7Size = 0x8600;
+			ce7Size = (CARDENGINEI_ARM7_TWLSDK_SIZE + LOADER_RETURN_SDK5_SIZE);
 		}
 
 		if (!ROMsupportsDsiMode(&dsiHeaderTemp.ndshdr) || !dsiModeConfirmed) {
@@ -2324,7 +2325,7 @@ int arm7_main(void) {
 				while (arm9_stateFlag != ARM9_READY);
 			}
 
-			tonccpy((u32*)CARDENGINEI_ARM9_CLUT_LOCATION, (u16*)CARDENGINEI_ARM9_CLUT_BUFFERED_LOCATION, 0x1000);
+			tonccpy((u32*)CARDENGINEI_ARM9_CLUT_LOCATION, (u16*)CARDENGINEI_ARM9_CLUT_BUFFERED_LOCATION, CARDENGINEI_ARM9_CLUT_SIZE);
 			tonccpy((u16*)0x03770000, (u16*)COLOR_LUT_BUFFERED_LOCATION, 0x10000);
 			colorLutEnabled = (*(u32*)CARDENGINEI_ARM9_CLUT_LOCATION == *(u32*)CARDENGINEI_ARM9_CLUT_BUFFERED_LOCATION);
 			colorLutBlockVCount = colorLutEnabled && (*(u32*)(CARDENGINEI_ARM9_CLUT_LOCATION+4) & BIT(2));
@@ -2335,7 +2336,7 @@ int arm7_main(void) {
 			}
 		}
 
-		toncset((u32*)CARDENGINEI_ARM9_CLUT_BUFFERED_LOCATION, 0, 0x1800);
+		toncset((u32*)CARDENGINEI_ARM9_CLUT_BUFFERED_LOCATION, 0, CARDENGINEI_ARM9_CLUT_BUFFER_CLEAR_SIZE);
 		*(u32*)(COLOR_LUT_BUFFERED_LOCATION-4) = 0;
 		toncset((u16*)COLOR_LUT_BUFFERED_LOCATION, 0, 0x10000);
 
@@ -2350,15 +2351,15 @@ int arm7_main(void) {
 		ce9DldiBinary = gameOnFlashcard && altReadMethod;
 		if (ce9DldiBinary) {
 			const u32 ce9DldiOffset = !laterSdk ? CARDENGINEI_ARM9_LOCATION2_DLDI_DRIVER : CARDENGINEI_ARM9_LOCATION_DLDI_DRIVER;
-			if (!dldiPatchBinary((data_t*)ce9Location, ce9size, (data_t*)((ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed && _io_dldi_size < 0xF) ? ce9Location+0x3800 : ce9DldiOffset))) {
+			if (!dldiPatchBinary((data_t*)ce9Location, ce9size, (data_t*)((ROMsupportsDsiMode(ndsHeader) && dsiModeConfirmed && _io_dldi_size < 0xF) ? ce9Location+CARDENGINEI_ARM9_TWLSDK_DLDI_SIZE : ce9DldiOffset))) {
 				dbg_printf("ce9 DLDI patch failed\n");
 				errorOutput();
 			}
 		}
 		patchHiHeapPointer(moduleParams, ndsHeader);
 
-		toncset((u32*)CARDENGINEI_ARM9_BUFFERED_LOCATION, 0, 0x10000);
-		toncset((u32*)CARDENGINEI_ARM7_BUFFERED_LOCATION, 0, 0x13400);
+		toncset((u32*)CARDENGINEI_ARM9_BUFFERED_LOCATION, 0, CARDENGINEI_ARM9_BUFFER_CLEAR_SIZE);
+		toncset((u32*)CARDENGINEI_ARM7_BUFFERED_LOCATION, 0, CARDENGINEI_ARM7_BUFFER_CLEAR_SIZE);
 
 		u32 clonebootFlag = 0;
 		const u32 clonebootOffset = ((romSize-0x88) <= baseRomSize) ? (romSize-0x88) : baseRomSize;

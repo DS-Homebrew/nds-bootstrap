@@ -1,3 +1,5 @@
+#include "locations.h"
+
 @---------------------------------------------------------------------------------
 	.global copyBackCe9
 	.global copyBackCe9Len
@@ -18,7 +20,7 @@ copyBackCe9Func:
 
 	ldr r0, =0x02370000 @ src
 	ldr r1, =0x77777777 @ dst
-	mov r2, #0x2800 @ len
+	mov r2, #CARDENGINE_ARM9_ALT_SIZE @ len
 	mov r3, r0
 	mov r4, r2
 	bl cpuCopy32

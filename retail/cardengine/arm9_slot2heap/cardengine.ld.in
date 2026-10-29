@@ -6,7 +6,7 @@ OUTPUT_ARCH(arm)
 
 MEMORY {
 
-	vram	: ORIGIN = 0xBF800000, LENGTH = 2K
+	vram	: ORIGIN = 0xBF800000, LENGTH = CARDENGINE_ARM9_SLOT2HEAP_SIZE
 }
 
 __vram_start	=	ORIGIN(vram);

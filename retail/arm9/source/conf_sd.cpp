@@ -1875,9 +1875,9 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 					igmPals[i] = VRAM_E[igmPals[i] % 0x8000];
 				}
 			}
-			fwrite((u8*)igmText, 1, 0xA000, cebin);
+			fwrite((u8*)igmText, 1, INGAME_MENU_BUFFER_SIZE, cebin);
 			fclose(cebin);
-			toncset((u8*)igmText, 0, 0xA000);
+			toncset((u8*)igmText, 0, INGAME_MENU_BUFFER_SIZE);
 		}
 
 		// Load DS blowfish
@@ -2231,9 +2231,9 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 			}
 
 			cebin = fopen(pageFilePath.c_str(), "r+");
-			fwrite((u8*)igmText, 1, 0xA000, cebin);
+			fwrite((u8*)igmText, 1, INGAME_MENU_BUFFER_SIZE, cebin);
 			fclose(cebin);
-			toncset((u8*)igmText, 0, 0xA000);
+			toncset((u8*)igmText, 0, INGAME_MENU_BUFFER_SIZE);
 		}
 
 		if (accessControl & BIT(4)) {
