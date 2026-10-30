@@ -103,7 +103,7 @@
         - Reading the ROM file from a flashcard or from pre-loaded ROM data
         - Reading and writing the save file on a flashcard
 		- Bypassing AP checks for *Golden Sun: Dark Dawn*
-        - Swaping screens after being notified by ARM7
+        - Swapping screens after being notified by ARM7
         - Loading custom music for *Mighty Milky Way* and *Shantae: Risky's Revenge*
         - Soft-resetting or quitting the game
     - `arm9_32`: Same as `arm9`, but has support for 32KB DLDI drivers
@@ -139,12 +139,12 @@
         - Notifying ARM7 to read ROM data from the SD card into the LRU cache
         - Loading ROM data from the LRU cache
         - Reading pre-loaded ROM data
-        - Swaping screens after being notified by ARM7
+        - Swapping screens after being notified by ARM7
         - Soft-resetting or quitting the game (involves notifying ARM7 to read either the ROM or the loaded file from `QUIT_PATH`)
     - `arm9_colorlut`: Handles applying the loaded color filter onto the on-screen colors
     - `arm9_dldi`: Same as `arm9`, but has ARM9 read the ROM file from a flashcard, causing asynchronous reads to not work
     - `arm9_dsiware`: Has very little code compared to `arm9`, and only has:
-        - Swaping screens after being notified by ARM7
+        - Swapping screens after being notified by ARM7
         - Soft-resetting or quitting the game (involves notifying ARM7 to read either the ROM or the loaded file from `QUIT_PATH`)
     - `arm9_dsiware3`: Same as `arm9_dsiware`, but is placed in a different memory address
     - `arm9_gsdd`: Same as `arm9`, but includes bypassing AP checks for *Golden Sun: Dark Dawn*
