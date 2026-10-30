@@ -24,7 +24,7 @@
 - `QUIT_PATH`: The path of the `.nds` which boots when quitting a game
 - `LANGUAGE`: Language used when running a game (default: `-1`)
 - `REGION`: The set region for DSiWare titles (default: `-1`)
-- `USE_ROM_REGION`: Automatically sets the required region for a DSiWare title (default: `1` for onn)
+- `USE_ROM_REGION`: Automatically sets the required region for a DSiWare title (default: `1` for on)
 - `SDNAND`: Reads TWLNAND files from the SD card instead of SysNAND (default: `0` for off) (Unused in B4DS mode)
 - `DSIWARE_SLOT1_MODE`: Runs DSiWare titles as if they we're running from the DS(i) card slot, and also patches most of them to use a custom save implementation (default: `0` for off)
     - Automatically activates in B4DS mode and/or if the DSiWare ROM is larger than 64MB
