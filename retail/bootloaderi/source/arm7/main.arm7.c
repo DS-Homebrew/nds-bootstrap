@@ -2264,6 +2264,14 @@ int arm7_main(void) {
 
 		if (!dsiModeConfirmed) {
 			NTR_BIOS();
+		} else if (ndsHeader->unitCode == 0 && memcmp(romTid, "HND", 3) == 0) {
+			// DS Download Play in forced DSi mode:
+			// dlplay boots the downloaded child natively (its reset isn't hooked),
+			// so the child inherits the BIOS. NTR SDK children need the NTR BIOS, and
+			// BlocksDS/libnds children take their DSi path when SCFG_A9ROM&3 == 1,
+			// then load arm9i/arm7i from a TWL header Download Play never provides.
+			// Switch to NTR BIOS, but keep SCFG unlocked, 133MHz, NDMA and 16MB RAM.
+			REG_SCFG_ROM = (REG_SCFG_ROM & 0x03) | 0x700;
 		}
 
 		// dbg_printf("Trying to patch the card...\n");
