@@ -365,7 +365,7 @@
 - One Piece: Gigant Battle! (France) (BOJF)
 - One Piece: Gigant Battle! (Japan) (BOJJ)
 - One Piece: Gigant Battle! (Europe) (BOJP)
-- One Piece Gigant Battle 2: Shin Sekai (Japan) (TGBJ)
+- One Piece Gigant Battle 2: Shin Sekai (Japan) (Also applies to modified ROMs) (TGBJ)
 - Ookami to Koushinryou: Umi o Wataru Kaze (Japan) (BOKJ)
 - Ore-Sama Kingdom: Koi mo Manga mo Debut o Mezase! Doki Doki Love Lesson (Japan) (TKDJ)
 - Original Story from Fairy Tail: Gekitotsu! Kardia Daiseidou (Japan) (TFTJ)
