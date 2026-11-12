@@ -2775,6 +2775,53 @@ static void operaRamPatchJpn(void) {
 	}
 }
 
+static void operaRamPatchJpnRev1(void) {
+	if (dsDebugRam || !extendedMemory) {
+		return;
+	}
+
+	extern u32 ROMinRAM;
+
+	// Opera RAM patch (ARM9)
+	*(u32*)0x02003D24 = 0xC400000;
+	*(u32*)0x02003D2C = 0xC400004;
+
+	*(u32*)0x02010FCC = 0xC400000;
+	*(u32*)0x02010FD0 = 0xC4000CE;
+
+	*(u32*)0x02011288 = 0xC400080;
+
+	*(u32*)0x02038834 = 0xC4000C2;
+	*(u32*)0x02038838 = 0xC4000C0;
+	if (ROMinRAM) {
+		*(u16*)0x020387E6 = 0x200D; // mov r0, #0x0D
+		*(u16*)0x020387F2 = 0x200D; // mov r0, #0x0D
+		*(u16*)0x020387FE = 0x200D; // mov r0, #0x0D
+		*(u16*)0x0203880A = 0x200D; // mov r0, #0x0D
+		*(u32*)0x02038844 = 0xD7FFFFE;
+		*(u32*)0x02038848 = 0xD1FFFFF;
+		*(u32*)0x0203884C = 0xD3FFFFF;
+		*(u32*)0x02038850 = 0xD7FFFFF;
+		*(u32*)0x02038854 = 0xDFFFFFF;	// ???
+		toncset((char*)0xD000000, 0xFF, 0x800000);		// Fill fake MEP with FFs
+	} else {
+		*(u16*)0x020387E6 = 0x20C8; // mov r0, #0xC8
+		*(u16*)0x020387E8 = 0x0500; // lsls r0, r0, #0x14
+		*(u16*)0x020387F2 = 0x20C8; // mov r0, #0xC8
+		*(u16*)0x020387F4 = 0x0500; // lsls r0, r0, #0x14
+		*(u16*)0x020387FE = 0x20C8; // mov r0, #0xC8
+		*(u16*)0x02038800 = 0x0500; // lsls r0, r0, #0x14
+		*(u16*)0x0203880A = 0x20C8; // mov r0, #0xC8
+		*(u16*)0x0203880C = 0x0500; // lsls r0, r0, #0x14
+		*(u32*)0x02038844 = 0xCFFFFFE;
+		*(u32*)0x02038848 = 0xC9FFFFF;
+		*(u32*)0x0203884C = 0xCBFFFFF;
+		*(u32*)0x02038850 = 0xCFFFFFF;
+		*(u32*)0x02038854 = 0xD7FFFFF;	// ???
+		toncset((char*)0xC800000, 0xFF, 0x800000);		// Fill fake MEP with FFs
+	}
+}
+
 u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const module_params_t* moduleParams, u32 patchMpuRegion, const bool usesCloneboot, const bool buttonsRemapped) {
 	bool usesThumb;
 	int readType;
@@ -2901,6 +2948,7 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 	if (strncmp(romTid, "UBR", 3) == 0) {
 		if (romTid[3] == 'J') {
 			if (ndsHeader->romversion == 0) operaRamPatchJpn();
+			else operaRamPatchJpnRev1();
 		} else {
 			operaRamPatch();
 		}

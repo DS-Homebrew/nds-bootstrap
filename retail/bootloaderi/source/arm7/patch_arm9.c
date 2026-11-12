@@ -3178,6 +3178,49 @@ static void operaRamPatchJpn(void) {
 	}
 }
 
+static void operaRamPatchJpnRev1(void) {
+	extern u8 consoleModel;
+
+	// Opera RAM patch (ARM9)
+	*(u32*)0x02003D24 = 0xC3E0000;
+	*(u32*)0x02003D2C = 0xC3E0004;
+
+	*(u32*)0x02010FCC = 0xC3E0000;
+	*(u32*)0x02010FD0 = 0xC3E00CE;
+
+	*(u32*)0x02011288 = 0xC3E0080;
+
+	*(u32*)0x02038834 = 0xC3E00C2;
+	*(u32*)0x02038838 = 0xC3E00C0;
+	if (consoleModel > 0) {
+		*(u16*)0x020387E6 = 0x200D; // mov r0, #0x0D
+		*(u16*)0x020387F2 = 0x200D; // mov r0, #0x0D
+		*(u16*)0x020387FE = 0x200D; // mov r0, #0x0D
+		*(u16*)0x0203880A = 0x200D; // mov r0, #0x0D
+		*(u32*)0x02038844 = 0xD7FFFFE;
+		*(u32*)0x02038848 = 0xD1FFFFF;
+		*(u32*)0x0203884C = 0xD3FFFFF;
+		*(u32*)0x02038850 = 0xD7FFFFF;
+		*(u32*)0x02038854 = 0xDFFFFFF;	// ???
+		dma_twlFill32(0, 0xFFFFFFFF, (u32*)0xD000000, 0x800000);		// Fill fake MEP with FFs
+	} else {
+		*(u16*)0x020387E6 = 0x20C8; // mov r0, #0xC8
+		*(u16*)0x020387E8 = 0x0500; // lsls r0, r0, #0x14
+		*(u16*)0x020387F2 = 0x20C8; // mov r0, #0xC8
+		*(u16*)0x020387F4 = 0x0500; // lsls r0, r0, #0x14
+		*(u16*)0x020387FE = 0x20C8; // mov r0, #0xC8
+		*(u16*)0x02038800 = 0x0500; // lsls r0, r0, #0x14
+		*(u16*)0x0203880A = 0x20C8; // mov r0, #0xC8
+		*(u16*)0x0203880C = 0x0500; // lsls r0, r0, #0x14
+		*(u32*)0x02038844 = 0xCFFFFFE;
+		*(u32*)0x02038848 = 0xC9FFFFF;
+		*(u32*)0x0203884C = 0xCBFFFFF;
+		*(u32*)0x02038850 = 0xCFFFFFF;
+		*(u32*)0x02038854 = 0xD7FFFFF;	// ???
+		dma_twlFill32(0, 0xFFFFFFFF, (u32*)0xC800000, 0x800000);		// Fill fake MEP with FFs
+	}
+}
+
 /*static void setFlushCache(cardengineArm9* ce9, u32 patchMpuRegion, bool usesThumb) {
 	//if (!usesThumb) {
 	ce9->patches->needFlushDCCache = (patchMpuRegion == 1);
@@ -3311,6 +3354,7 @@ u32 patchCardNdsArm9(cardengineArm9* ce9, const tNDSHeader* ndsHeader, const mod
 	if (strncmp(romTid, "UBR", 3) == 0) {
 		if (romTid[3] == 'J') {
 			if (ndsHeader->romversion == 0) operaRamPatchJpn();
+			else operaRamPatchJpnRev1();
 		} else {
 			operaRamPatch();
 		}
