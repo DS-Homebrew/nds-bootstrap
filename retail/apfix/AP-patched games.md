@@ -414,6 +414,7 @@
 - Pokémon: Version Noire (France) (Also applies to modified ROMs) (IRBF)
 - Pokémon: Versione Nera (Italy) (Also applies to modified ROMs) (IRBI)
 - Pocket Monsters: Black (Japan) (Also applies to modified ROMs) (IRBJ)
+- Pocket Monsters: Black (Japan) (Bad dump: Corrupted data at 0xC4800-0xC6BFF area) (IRBJ-7D1E)
 - Pocket Monsters: Black (Korea) (Also applies to modified ROMs) (IRBK)
 - Pokémon: Black Version (USA/Europe) (Also applies to modified ROMs) (IRBO)
 - Pokémon: Edición Negra (Spain) (Also applies to modified ROMs) (IRBS)
