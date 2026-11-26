@@ -516,7 +516,7 @@
 - Sengoku Spirits: Gunshi Den (Japan) (CQ2J)
 - Sengoku Spirits: Moushou Den (Japan) (CQ3J)
 - Sengoku Spirits: Shukun Den (Japan) (YR4J)
-- Shin Megami Tensei: Strange Journey (USA) (BMTE)
+- Shin Megami Tensei: Strange Journey (USA) (Also applies to modified ROMs) (BMTE)
 - Shin Megami Tensei: Strange Journey (Japan) (BMTJ)
 - Shin Megami Tensei: Devil Survivor 2 (USA) (TDVE)
 - Shin Megami Tensei: Devil Survivor 2 (Japan) (TDVJ)
