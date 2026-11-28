@@ -61,6 +61,15 @@ Allows you to run games directly from the DSi Menu or 3DS HOME Menu. Some compat
 
 An alternative forwarder generator for 3DS users. YANBF forwarders are 3DS-mode applications so they count towards the normal 300 title limit insted of the smaller 40 title limit on DSi-mode applications, however they cannot have animated icons and take slightly longer to load.
 
+# AI Disclosure
+
+As of October 29th, 2026, some contributors have implemented new improvements and bug fixes with AI assistance.     
+Code has been reviewed and tested by the contributors before merging the PRs into this project.
+
+A majority of nds-bootstrap will remain human-made, as we have [AI usage guidelines](https://github.com/DS-Homebrew/nds-bootstrap/blob/master/AI-GUIDELINES.md) in place to make sure of this.
+
+The last known AI-free version is [v2.17.0: 10th Anniversary Release](https://github.com/DS-Homebrew/nds-bootstrap/releases/tag/v2.17.0)
+
 # Credits
 ## Developers
 - [Rocket Robz](https://github.com/RocketRobz): Lead developer, DSi mode and DSiWare support, B4DS mode, general maintenance and updates
