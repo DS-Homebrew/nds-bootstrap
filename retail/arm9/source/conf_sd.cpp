@@ -848,6 +848,11 @@ int loadFromSD(configuration* conf, const char *bootstrapPath) {
 	conf->gameOnFlashcard = (conf->ndsPath[0] == 'f' && conf->ndsPath[1] == 'a' && conf->ndsPath[2] == 't');
 	conf->saveOnFlashcard = (conf->savPath[0] == 'f' && conf->savPath[1] == 'a' && conf->savPath[2] == 't');
 
+	if ((conf->gameOnFlashcard || conf->saveOnFlashcard) && strcmp(io_dldi_data->friendlyName, "DSTWO(Slot-1)") == 0) {
+		// The DSTWO driver keeps state in its BSS and must always be started (startup() + BSS clear)
+		conf->initDisc = true;
+	}
+
 	if (conf->quitPath[0] == 'f' && conf->quitPath[1] == 'a' && conf->quitPath[2] == 't') {
 		conf->valueBits2 |= BIT(6);
 	}
